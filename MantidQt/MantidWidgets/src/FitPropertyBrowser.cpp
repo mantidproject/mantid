@@ -1435,14 +1435,14 @@ void FitPropertyBrowser::setCurrentFunction(
  * Creates an instance of Fit algorithm, sets its properties and launches it.
  */
 void FitPropertyBrowser::doFit(int maxIterations) {
-  std::string wsName = workspaceName();
+  const std::string wsName = workspaceName();
 
   if (wsName.empty()) {
     QMessageBox::critical(this, "Mantid - Error", "Workspace name is not set");
     return;
   }
 
-  auto ws = getWorkspace();
+  const auto ws = getWorkspace();
   if (!ws) {
     return;
   }
@@ -1454,13 +1454,13 @@ void FitPropertyBrowser::doFit(int maxIterations) {
     }
     m_fitActionUndoFit->setEnabled(true);
 
-    std::string funStr = getFittingFunction()->asString();
+    const std::string funStr = getFittingFunction()->asString();
 
     Mantid::API::IAlgorithm_sptr alg =
         Mantid::API::AlgorithmManager::Instance().create("Fit");
     alg->initialize();
     alg->setPropertyValue("Function", funStr);
-    alg->setPropertyValue("InputWorkspace", wsName);
+    alg->setProperty("InputWorkspace", ws);
     alg->setProperty("WorkspaceIndex", workspaceIndex());
     alg->setProperty("StartX", startX());
     alg->setProperty("EndX", endX());
@@ -1478,7 +1478,7 @@ void FitPropertyBrowser::doFit(int maxIterations) {
     observeFinish(alg);
     alg->executeAsync();
 
-  } catch (std::exception &e) {
+  } catch (const std::exception &e) {
     QString msg = "Fit algorithm failed.\n\n" + QString(e.what()) + "\n";
     QMessageBox::critical(this, "Mantid - Error", msg);
   }

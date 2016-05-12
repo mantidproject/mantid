@@ -52,9 +52,8 @@ StructuredDetector::StructuredDetector(const StructuredDetector *base,
 }
 
 bool StructuredDetector::compareName(const std::string &proposedMatch) {
-  boost::regex exp(
-      "(StructuredDetector)|(structuredDetector)|(structureddetector)|"
-      "(structured_detector)");
+  static const boost::regex exp("StructuredDetector|structuredDetector|"
+                                "structureddetector|structured_detector");
 
   return boost::regex_match(proposedMatch, exp);
 }

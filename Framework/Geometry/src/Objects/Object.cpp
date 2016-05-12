@@ -1,23 +1,23 @@
 #include "MantidGeometry/Objects/Object.h"
-#include "MantidKernel/Strings.h"
-#include "MantidKernel/Exception.h"
-#include "MantidKernel/MultiThreaded.h"
 #include "MantidGeometry/Objects/Rules.h"
 #include "MantidGeometry/Objects/Track.h"
+#include "MantidKernel/Exception.h"
+#include "MantidKernel/MultiThreaded.h"
+#include "MantidKernel/Strings.h"
 
-#include "MantidGeometry/Surfaces/Surface.h"
-#include "MantidGeometry/Surfaces/LineIntersectVisit.h"
-#include "MantidGeometry/Surfaces/Cylinder.h"
 #include "MantidGeometry/Surfaces/Cone.h"
+#include "MantidGeometry/Surfaces/Cylinder.h"
+#include "MantidGeometry/Surfaces/LineIntersectVisit.h"
+#include "MantidGeometry/Surfaces/Surface.h"
 
-#include "MantidGeometry/Rendering/GeometryHandler.h"
 #include "MantidGeometry/Rendering/CacheGeometryHandler.h"
+#include "MantidGeometry/Rendering/GeometryHandler.h"
 #include "MantidGeometry/Rendering/vtkGeometryCacheReader.h"
 #include "MantidGeometry/Rendering/vtkGeometryCacheWriter.h"
-#include "MantidKernel/make_unique.h"
 #include "MantidKernel/Quat.h"
 #include "MantidKernel/RegexStrings.h"
 #include "MantidKernel/Tolerance.h"
+#include "MantidKernel/make_unique.h"
 
 #include <boost/make_shared.hpp>
 
@@ -1021,14 +1021,14 @@ double Object::triangleSolidAngle(const V3D &observer) const {
   this->GetObjectGeom(type, geometry_vectors, radius, height);
   int nTri = this->NumberOfTriangles();
   // Cylinders are by far the most frequently used
-  if (type == 3)
+  if (type == 4)
     return CylinderSolidAngle(observer, geometry_vectors[0],
                               geometry_vectors[1], radius, height);
   else if (type == 1)
     return CuboidSolidAngle(observer, geometry_vectors);
-  else if (type == 2)
+  else if (type == 3)
     return SphereSolidAngle(observer, geometry_vectors, radius);
-  else if (type == 4)
+  else if (type == 5)
     return ConeSolidAngle(observer, geometry_vectors[0], geometry_vectors[1],
                           radius, height);
   else if (nTri == 0) // Fall back to raytracing if there are no triangles
@@ -1103,7 +1103,7 @@ double Object::triangleSolidAngle(const V3D &observer,
       for (auto &vector : vectors)
         vector *= scaleFactor;
       return CuboidSolidAngle(observer, vectors);
-    } else if (type == 2) // this is wrong for scaled objects
+    } else if (type == 3) // this is wrong for scaled objects
       return SphereSolidAngle(observer, vectors, radius);
     //
     // No special case, do the ray trace.
@@ -1645,8 +1645,8 @@ void Object::calcBoundingBoxByGeometry() {
     }
   } break;
 
-  case 3: // CYLINDER
-  case 5: // SEGMENTED_CYLINDER
+  case 4: // CYLINDER
+  case 6: // SEGMENTED_CYLINDER
   {
     // Center-point of base and normalized axis based on IDF XML
     auto &base = vectors[0];
@@ -1670,7 +1670,7 @@ void Object::calcBoundingBoxByGeometry() {
     maxZ = std::max(base.Z(), top.Z()) + rz;
   } break;
 
-  case 4: // CONE
+  case 5: // CONE
   {
     auto &tip = vectors[0];            // Tip-point of cone
     auto &axis = vectors[1];           // Normalized axis
