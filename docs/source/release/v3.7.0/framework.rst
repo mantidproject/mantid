@@ -117,12 +117,13 @@ MD Algorithms (VATES CLI)
 -  The box structure of workspaces created with CutMD using NoPix=false now matches that specified by the PnBins properties. Additional box splitting is only allowed if MaxRecursionDepth is set to higher than its default of 1.
 -  XorMD, OrMD and AndMD treat masked bins as zero.
 -  A Gaussian smoothing option has been added to SmoothMD. Note, this currently only supports specifying widths for the smoothing function in units of pixels along the dimensions of the workspace.
--  LoadMD has an option to skip loading workspace history. This is useful for workspaces created form large number of files, treated separately. 
+-  LoadMD has an option to skip loading workspace history. This is useful for workspaces created form large number of files, treated separately.
 
 Geometry
 --------
 
-The Instrument Definition File syntax has been extended to provide support for a new type of topologically regular, but geometrically irregular form of 2D detectors. This new type of detector available in the IDF is known as a Structured Detector. Information on how to use this new detector type can be found in the :ref:`IDF <InstrumentDefinitionFile>` documentation.
+- The Instrument Definition File syntax has been extended to provide support for a new type of topologically regular, but geometrically irregular form of 2D detectors. This new type of detector available in the IDF is known as a Structured Detector. Information on how to use this new detector type can be found in the :ref:`IDF <InstrumentDefinitionFile>` documentation.
+- The XML shape definitions have been updated to understand a hollow cylinder as a primitive shape. See :ref:`HowToDefineGeometricShape` for more details.
 
 Performance
 -----------
