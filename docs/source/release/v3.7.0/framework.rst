@@ -36,6 +36,9 @@ New
 - :ref:`ImggAggregateWavelengths <algm-ImggAggregateWavelengths>`
    aggregates stacks of images from wavelength dependent imaging
    into one or more output bands.
+- :ref:`ImggTomographicReconstruction
+  <algm-ImggTomographicReconstruction>` implements a method for 3D
+  tomographic reconstruction from projection images.
 
 Renamed
 #######

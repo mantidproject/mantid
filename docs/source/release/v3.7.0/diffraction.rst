@@ -58,6 +58,13 @@ Imaging
 - The new algorithm :ref:`ImggAggregateWavelengths <algm-ImggAggregateWavelengths>`
   aggregates stacks of images from wavelength dependent data.
 
+- The algorithm `ImggTomographicReconstruction
+  <algm-ImggTomographicReconstruction>` has been introduced. This is a
+  first experimental version that implements the Filtered
+  Back-Projection (FBP) reconstruction method using the FBP
+  implementation of the `TomoPy package
+  <http://www.aps.anl.gov/tomopy/>`_.
+
 Improvements in the tomographic reconstruction graphical user interface:
 
 - New capabilities added when visualizing stacks of images:
