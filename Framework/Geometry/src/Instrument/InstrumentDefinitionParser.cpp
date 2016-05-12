@@ -615,9 +615,8 @@ void InstrumentDefinitionParser::setLocation(Geometry::IComponent *comp,
 
     if (rElem) {
       double rotAngle =
-          angleConvertConst *
-          atof(
-              (rElem->getAttribute("val")).c_str()); // assumed to be in degrees
+          angleConvertConst * atof((rElem->getAttribute("val"))
+                                       .c_str()); // assumed to be in degrees
 
       double axis_x = 0.0;
       double axis_y = 0.0;
@@ -2303,8 +2302,7 @@ void InstrumentDefinitionParser::setComponentLinks(
         // user, and throw an exception.
         if (!detector) {
           g_log.error() << "Error whilst loading parameters. No detector "
-                           "found with id '"
-                        << detid << "'" << std::endl;
+                           "found with id '" << detid << "'" << std::endl;
           g_log.error() << "Please check that your detectors' ids are correct."
                         << std::endl;
           throw Kernel::Exception::InstrumentDefinitionError(
