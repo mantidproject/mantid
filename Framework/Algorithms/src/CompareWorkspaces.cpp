@@ -441,8 +441,8 @@ bool CompareWorkspaces::compareEventWorkspaces(
   size_t numUnequalBothEvents = 0;
 
   std::vector<int> vec_mismatchedwsindex;
-  PARALLEL_FOR_IF(m_ParallelComparison && ews1->threadSafe() &&
-                  ews2->threadSafe())
+  PARALLEL_FOR_IF(m_ParallelComparison && ews1.threadSafe() &&
+                  ews2.threadSafe())
   for (int i = 0; i < static_cast<int>(ews1.getNumberHistograms()); ++i) {
     PARALLEL_START_INTERUPT_REGION
     m_Prog->report("EventLists");
