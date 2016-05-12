@@ -73,6 +73,7 @@ set ( SRC_FILES
 	src/LoadMuonNexus1.cpp
 	src/LoadMuonNexus2.cpp
 	src/LoadNXSPE.cpp
+	src/LoadNXcanSAS.cpp
 	src/LoadNexus.cpp
 	src/LoadNexusLogs.cpp
 	src/LoadNexusMonitors.cpp
@@ -145,6 +146,7 @@ set ( SRC_FILES
 	src/SaveNISTDAT.cpp
 	src/SaveNXSPE.cpp
 	src/SaveNXTomo.cpp
+	src/SaveNXcanSAS.cpp
 	src/SaveNexus.cpp
 	src/SaveNexusProcessed.cpp
 	src/SaveOpenGenieAscii.cpp
@@ -243,6 +245,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadMuonNexus1.h
 	inc/MantidDataHandling/LoadMuonNexus2.h
 	inc/MantidDataHandling/LoadNXSPE.h
+	inc/MantidDataHandling/LoadNXcanSAS.h
 	inc/MantidDataHandling/LoadNexus.h
 	inc/MantidDataHandling/LoadNexusLogs.h
 	inc/MantidDataHandling/LoadNexusMonitors.h
@@ -277,6 +280,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/MergeLogs.h
 	inc/MantidDataHandling/ModifyDetectorDotDatFile.h
 	inc/MantidDataHandling/MoveInstrumentComponent.h
+	inc/MantidDataHandling/NXcanSASDefinitions.h
 	inc/MantidDataHandling/NexusTester.h
 	inc/MantidDataHandling/PDLoadCharacterizations.h
 	inc/MantidDataHandling/PatchBBY.h
@@ -310,6 +314,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/SaveNISTDAT.h
 	inc/MantidDataHandling/SaveNXSPE.h
 	inc/MantidDataHandling/SaveNXTomo.h
+	inc/MantidDataHandling/SaveNXcanSAS.h
 	inc/MantidDataHandling/SaveNexus.h
 	inc/MantidDataHandling/SaveNexusProcessed.h
 	inc/MantidDataHandling/SaveOpenGenieAscii.h
@@ -405,6 +410,7 @@ set ( TEST_FILES
 	LoadMuonNexus1Test.h
 	LoadMuonNexus2Test.h
 	LoadNXSPETest.h
+	LoadNXcanSASTest.h
 	LoadNexusLogsTest.h
 	LoadNexusMonitorsTest.h
 	LoadNexusProcessedTest.h
@@ -469,6 +475,7 @@ set ( TEST_FILES
 	SaveNISTDATTest.h
 	SaveNXSPETest.h
 	SaveNXTomoTest.h
+	SaveNXcanSASTest.h
 	SaveNexusProcessedTest.h
 	SaveNexusTest.h
 	SavePARTest.h

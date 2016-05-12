@@ -157,14 +157,14 @@ RrAadIitddddddddddddddddAatdddddddFfttttttttddddddddddddddddddddddddddIitdd etc.
 #include "MantidMDAlgorithms/LoadILLAsciiHelper.h"
 #include "MantidMDAlgorithms/DllConfig.h"
 
-#include <iostream>
+#include <cstdlib>
 #include <fstream>
-#include <stdexcept>
-#include <vector>
-#include <string>
-#include <map>
-#include <stdlib.h>
+#include <iostream>
 #include <limits>
+#include <map>
+#include <stdexcept>
+#include <string>
+#include <vector>
 
 #include <boost/lexical_cast.hpp>
 #include <boost/algorithm/string/erase.hpp>

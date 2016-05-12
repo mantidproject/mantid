@@ -223,7 +223,7 @@ private:
       double center = useQ ? (2.0 * M_PI) / d : d;
       double fwhmAbs = row.Double(2) * center;
       fn << "name=Gaussian,PeakCentre=" << center
-         << ",Sigma=" << fwhmAbs / (2.0 * sqrt(2.0 * log(2.0)))
+         << ",Sigma=" << fwhmAbs / (2.0 * sqrt(2.0 * M_LN2))
          << ",Height=" << row.String(3);
 
       functionStrings.push_back(fn.str());

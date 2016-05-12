@@ -7,6 +7,8 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidCurveFitting/Functions/Convolution.h"
 #include "MantidCurveFitting/Algorithms/Fit.h"
+#include "MantidCurveFitting/Functions/DeltaFunction.h"
+
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidAPI/IPeakFunction.h"
@@ -313,9 +315,9 @@ public:
     Convolution conv;
 
     double pi = acos(0.) * 2;
-    double c1 = 0.;
-    double h1 = 3;
-    double s1 = pi / 2;
+    double c1 = 0.;     // center of the gaussian
+    double h1 = 3;      // intensity
+    double s1 = pi / 2; // standard deviation
     boost::shared_ptr<ConvolutionTest_Gauss> res =
         boost::make_shared<ConvolutionTest_Gauss>();
     res->setParameter("c", c1);
@@ -361,6 +363,50 @@ public:
       // double  f = i*df;
       // fconv<<f<<' '<<h1*h2*pi/sqrt(s1*s2)*exp(-pi*pi*f*f*(1./s1+1./s2))<<"
       // 0"<<'\n';
+    }
+  }
+
+  /*
+   * Convolve a Gausian (resolution) with a Delta-Dirac
+   */
+  void testConvolvingWithDeltaDirac() {
+    Convolution conv;
+    // Add resolution function
+    double c1 = 0.0; // center of the gaussian
+    double h1 = 1.0; // intensity
+    double s1 = 1.0; // rate
+    auto res = boost::make_shared<ConvolutionTest_Gauss>();
+    res->setParameter("c", c1);
+    res->setParameter("h", h1);
+    res->setParameter("s", s1);
+    conv.addFunction(res);
+    // Add Delta Dirac function
+    double h2 = 1.0;
+    auto fun = boost::make_shared<DeltaFunction>();
+    fun->setParameter("Height", h2);
+    conv.addFunction(fun);
+    // Define domains
+    const int N = 116;
+    double xs[N]; // symmetric range
+    double xa[N]; // asymmetric range
+    double xm{-4.0}, xMs{4.0}, xMa{8.0};
+    double dxs{(xMs - xm) / (N - 1)}, dxa{(xMa - xm) / (N - 1)};
+    for (int i = 0; i < N; i++) {
+      xs[i] = xm + i * dxs;
+      xa[i] = xm + i * dxa;
+    }
+    // Carry out the convolution
+    FunctionDomain1DView ds(&xs[0], N); // symmetric domain
+    FunctionDomain1DView da(&xa[0], N); // asymmetric domain
+    FunctionValues outs(ds), outa(da);
+    conv.function(ds, outs);
+    conv.function(da, outa);
+    // Check output is the original resolution function
+    for (int i = 0; i < N; i++) {
+      TS_ASSERT_DELTA(outs.getCalculated(i), h1 * h2 * exp(-s1 * xs[i] * xs[i]),
+                      1e-10);
+      TS_ASSERT_DELTA(outa.getCalculated(i), h1 * h2 * exp(-s1 * xa[i] * xa[i]),
+                      1e-10);
     }
   }
 

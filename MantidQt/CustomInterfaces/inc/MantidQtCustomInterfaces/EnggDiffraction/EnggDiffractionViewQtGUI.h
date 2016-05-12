@@ -149,27 +149,43 @@ public:
 
   double rebinningPulsesTime() const override;
 
-  void setfittingRunNo(QString path);
+  void setFittingRunNo(QString path) override;
 
-  std::string fittingRunNo() const override;
+  std::string getFittingRunNo() const override;
 
   std::string fittingPeaksData() const override;
+
+  std::vector<std::string>
+  splitFittingDirectory(std::string &selectedfPath) override;
+
+  void setBankEmit() override;
+
+  std::string getFocusDir() override;
 
   void setDataVector(std::vector<boost::shared_ptr<QwtData>> &data,
                      bool focused) override;
 
-  std::vector<std::string> splitFittingDirectory(std::string &selectedfPath);
-
   void addBankItems(std::vector<std::string> splittedBaseName,
-                    QString selectedFile);
+                    QString selectedFile) override;
+
+  void addRunNoItem(std::vector<std::string> runNumVector,
+                    bool multiRun) override;
+
+  std::vector<std::string> getFittingRunNumVec() override;
+
+  void setFittingRunNumVec(std::vector<std::string> assignVec) override;
+
+  bool getFittingMultiRunMode() override;
+
+  void setFittingMultiRunMode(bool mode) override;
+
+  bool isDigit(std::string text) override;
 
   void setDefaultBank(std::vector<std::string> splittedBaseName,
                       QString selectedFile);
 
   std::string fittingRunNoFactory(std::string bank, std::string fileName,
                                   std::string &bankDir, std::string fileDir);
-
-  void updateFittingDirVec(std::string &bankDir, std::string &focusedFile);
 
   std::string readPeaksFile(std::string fileDir);
 
@@ -208,6 +224,7 @@ public:
 
 signals:
   void getBanks();
+  void setBank();
 
 private slots:
   /// for buttons, do calibrate, focus, event->histo rebin, and similar
@@ -220,9 +237,6 @@ private slots:
   void focusStopClicked();
   void rebinTimeClicked();
   void rebinMultiperiodClicked();
-  void fitClicked();
-  void fittingRunNoChanged();
-  void setBankDir(int idx);
 
   // slots of the settings tab/section of the interface
   void browseInputDirCalib();
@@ -254,22 +268,21 @@ private slots:
   // slots of plot spectrum check box status
   void plotFocusStatus();
 
-  // updates the cropped calib run number with new ceria
-  void updateCroppedCalibRun();
-
   // enables the text field when appropriate bank name is selected
   void enableSpecNos();
 
   // slot of the fitting peaks per part of the interface
   void browseFitFocusedRun();
-  void fittingBankIdChanged(int idx);
+  void resetFittingMultiMode();
   void setBankIdComboBox(int idx);
   void browsePeaksToFit();
-  void fittingListWidgetBank(int idx);
-  void setListWidgetBank(int idx);
   void setPeakPick();
   void addPeakToList();
   void savePeakList();
+  void fitClicked();
+  void FittingRunNo();
+  void setBankDir(int idx);
+  void listViewFittingRun();
 
   // show the standard Mantid help window with this interface's help
   void openHelpWin();
@@ -334,8 +347,8 @@ private:
   // multi-run focus mode type selected
   int static m_currentRunMode;
 
-  // fitting bankID
-  int static m_fitting_bank_Id;
+  /// indentifier for fitting multi-run or single run input
+  bool static m_fittingMutliRunMode;
 
   // vector holding directory of focused bank file
   std::vector<std::string> static m_fitting_runno_dir_vec;

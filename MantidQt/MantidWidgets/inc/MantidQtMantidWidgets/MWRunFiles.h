@@ -21,7 +21,7 @@ class IAlgorithm;
 namespace MantidQt {
 namespace MantidWidgets {
 /**
- * A class to allow the asyncronous finding of files.
+ * A class to allow the asynchronous finding of files.
  */
 class FindFilesThread : public QThread {
   Q_OBJECT
@@ -240,6 +240,8 @@ signals:
   void liveButtonPressed(bool);
   /// Signal emitted after asynchronous checking of live stream availability
   void liveButtonSetEnabledSignal(bool);
+  /// Emitted when inspection of any found files is completed
+  void fileInspectionFinished();
 
 public slots:
   /// Set the file text and try and find it

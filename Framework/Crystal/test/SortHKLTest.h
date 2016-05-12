@@ -144,8 +144,6 @@ public:
     TS_ASSERT_EQUALS(statistics.m_rMerge, 0.0);
     TS_ASSERT_EQUALS(statistics.m_rPim, 0.0);
     TS_ASSERT_EQUALS(statistics.m_meanIOverSigma, 0.0);
-    TS_ASSERT_EQUALS(statistics.m_lambdaMin, 0.0);
-    TS_ASSERT_EQUALS(statistics.m_lambdaMax, 0.0);
   }
 
   void test_PeaksStatisticsOneObservation() {
@@ -160,8 +158,6 @@ public:
     TS_ASSERT_EQUALS(statistics.m_rMerge, 0.0);
     TS_ASSERT_EQUALS(statistics.m_rPim, 0.0);
     TS_ASSERT_EQUALS(statistics.m_meanIOverSigma, 56.0 / 4.5);
-    TS_ASSERT_EQUALS(statistics.m_lambdaMin, 1.0);
-    TS_ASSERT_EQUALS(statistics.m_lambdaMax, 1.0);
   }
 
   void test_PeaksStatisticsOneObservationTwoUnique() {
@@ -177,8 +173,6 @@ public:
     TS_ASSERT_EQUALS(statistics.m_rMerge, 0.0);
     TS_ASSERT_EQUALS(statistics.m_rPim, 0.0);
     TS_ASSERT_EQUALS(statistics.m_meanIOverSigma, 56.0 / 4.5);
-    TS_ASSERT_EQUALS(statistics.m_lambdaMin, 1.0);
-    TS_ASSERT_EQUALS(statistics.m_lambdaMax, 1.0);
   }
 
   void test_PeaksStatisticsTwoObservationTwoUnique() {
@@ -195,8 +189,6 @@ public:
     TS_ASSERT_EQUALS(statistics.m_rMerge, 0.0);
     TS_ASSERT_EQUALS(statistics.m_rPim, 0.0);
     TS_ASSERT_EQUALS(statistics.m_meanIOverSigma, 15.0);
-    TS_ASSERT_EQUALS(statistics.m_lambdaMin, 1.0);
-    TS_ASSERT_EQUALS(statistics.m_lambdaMax, 2.0);
   }
 
   void test_PeaksStatisticsTwoObservationOneUnique() {
@@ -213,8 +205,6 @@ public:
     // For 2 observations this is the same since sqrt(1 / (2 - 1)) = 1
     TS_ASSERT_EQUALS(statistics.m_rPim, 1.0 / 3.0);
     TS_ASSERT_EQUALS(statistics.m_meanIOverSigma, 150.0);
-    TS_ASSERT_EQUALS(statistics.m_lambdaMin, 1.0);
-    TS_ASSERT_EQUALS(statistics.m_lambdaMax, 1.0);
   }
 
   void test_PeaksStatisticsThreeObservationOneUnique() {
@@ -232,8 +222,6 @@ public:
     // For rpim the factor is  sqrt(1 / (3 - 1)) = sqrt(0.5)
     TS_ASSERT_EQUALS(statistics.m_rPim, sqrt(0.5) / 4.5);
     TS_ASSERT_EQUALS(statistics.m_meanIOverSigma, 150.0);
-    TS_ASSERT_EQUALS(statistics.m_lambdaMin, 1.0);
-    TS_ASSERT_EQUALS(statistics.m_lambdaMax, 1.0);
   }
 
   void test_Init() {
