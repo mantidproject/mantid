@@ -100,7 +100,7 @@ namespace Mantid
       /*extractMetaData needs to be re-run here because the first execution of this from ::executeLoadMetadata will not have ensured that all dimensions
         have proper range extents set.
       */
-      this->extractMetadata(eventWs);
+      this->extractMetadata(*eventWs);
 
       this->appendMetadata(visualDataSet, eventWs->getName());
       return visualDataSet;
@@ -127,7 +127,7 @@ namespace Mantid
       IMDEventWorkspace_sptr eventWs = boost::dynamic_pointer_cast<Mantid::API::IMDEventWorkspace>(result);
       m_wsTypeName = eventWs->id();
       //Call base-class extraction method.
-      this->extractMetadata(eventWs);
+      this->extractMetadata(*eventWs);
 
       AnalysisDataService::Instance().remove("MD_EVENT_WS_ID");
     }

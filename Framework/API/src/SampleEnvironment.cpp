@@ -63,12 +63,14 @@ bool SampleEnvironment::isValid(const V3D &point) const {
  * Update the given track with intersections within the environment
  * @param track :: The track is updated with an intersection with the
  *        environment
+ * @return The total number of segments added to the track
  */
-void SampleEnvironment::interceptSurfaces(Track &track) const {
-  auto itrEnd = m_elements.end();
-  for (auto itr = m_elements.begin(); itr != itrEnd; ++itr) {
-    itr->interceptSurface(track);
+int SampleEnvironment::interceptSurfaces(Track &track) const {
+  int nsegments(0);
+  for (const auto &element : m_elements) {
+    nsegments += element.interceptSurface(track);
   }
+  return nsegments;
 }
 }
 }

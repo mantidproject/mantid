@@ -62,7 +62,7 @@ Improvements
    I(Q,t) Fit tab, but it does now have a dialogue box interface from the algorithm list.
    This also allows for better testing, progress tracking and documentation of the algorithm.
 
-- :ref:`BASISReduction <algm-BASISReduction>` now accepts Vanadium runs for normalization.
+- :ref:`BASISReduction <algm-BASISReduction>` now accepts Vanadium runs for normalization, and one option to normalize by the maximum of the first spectrum.
 
 - :ref:`QECoverage <Interfaces>` planning tool has now been updated, There is now an Emin option included for direct tab,
     If Emin or Emax are left empty; appropriate values are set automatically, the negative values of Ei are treated as
@@ -73,6 +73,7 @@ Improvements
 
 - :ref:`OSIRISDiffractionReduction <algm-OSIRISDiffractionReduction>` has an additional DRange added for conversion from time regime.
 
+- Updated the :ref:`SimulatedDensityOfStates <algm-SimulatedDensityOfStates>` workflow diagram to show an overview of the algorithm.
 
 Bugfixes
 --------
@@ -81,6 +82,8 @@ Bugfixes
 - :ref:`ISISIndirectEnergyTransfer <algm-ISISIndirectEnergyTransfer>` only corrects for detailed balance when one is actually specified as input.
 - :ref:`SimulatedDensityOfStates <algm-SimulatedDensityOfStates>` should no longer manipulate the actual data values and only rebins the data to the desired bin width.
 - :ref:`VesuvioCorrections <algm-VesuvioCorrections>` no longer always fits using only the first spectrum in the input workspace.
+- Fix bug with *BayesQuasi* docs not displaying online
 - The mini plot range bars in *BayesQuasi* now automatically update on sample loading.
+
 
 `Full list of changes on GitHub <http://github.com/mantidproject/mantid/pulls?q=is%3Apr+milestone%3A%22Release+3.7%22+is%3Amerged+label%3A%22Component%3A+Indirect+Inelastic%22>`_

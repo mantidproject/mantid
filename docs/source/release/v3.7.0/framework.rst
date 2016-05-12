@@ -16,6 +16,7 @@ New
    :ref:`GetDetOffsetsMultiPeaks <algm-GetDetOffsetsMultiPeaks>`, :ref:`CalibrateRectangularDetectors <algm-CalibrateRectangularDetectors>`, *et al* and
    minimizes the difference between the *DIFC* of the instrument and
    calibration by moving and rotating instrument components.
+- :ref:`CorrectTOF <algm-CorrectTOF>` applies to the time-of-flight correction which considers the specified elastic peak position.
 
 Improved
 ########
@@ -56,7 +57,6 @@ Improved
   properties (``LoadEventMonitor`` and ``LoadHistogramMonitor``).
   `#15667 <https://github.com/mantidproject/mantid/pull/15667>`_
 - :ref:`CreateSimulationWorkspace <algm-CreateSimulationWorkspace>` now matches the IDF of the simulation workspace to the IDF of a reference workspace (either Nexus or Raw).
-- :ref:`LoadNexusLogs <algm-LoadNexusLogs>` allows now to load logs from an entry other than the first. :ref:`LoadEventNexus <algm-LoadEventNexus>` now loads the correct logs when an *NXentry* is given 
 
 Deprecated
 ##########
@@ -73,6 +73,7 @@ MD Algorithms (VATES CLI)
 -  PlotMD now plots points at bin centres for MDEventWorkspaces as well as MDHistoWorkspaces.
 -  SliceMD now reports the correct number of events in the output workspace.
 -  The size of densely populated, multidimensional MDEventWorkspace slices produced by SliceMD has been greatly reduced by using more sensible box splitting parameters.
+-  LoadMD has an option to skip loading workspace history. This is useful for workspaces created form large number of files, treated separately.
 
 Performance
 -----------
@@ -86,6 +87,9 @@ Performance
   
 CurveFitting
 ------------
+
+- Concept page for :ref:`Mantid Fitting <Fitting>` has been added.
+- In order to guarantee a complete overlap between resolution and signal in the region of interest, Function :ref:`Convolution <func-Convolution>` can switch between a fast FFT mode for data defined over a symmetric domain, and slower direct calculations for data defined over an asymmetric domain .
 
 Improved
 ########

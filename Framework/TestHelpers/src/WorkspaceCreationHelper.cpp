@@ -253,14 +253,14 @@ WorkspaceGroup_sptr CreateWorkspaceGroup(int nEntries, int nHist, int nBins,
 }
 
 /** Create a 2D workspace with this many histograms and bins.
- * Filled with Y = 2.0 and E = sqrt(2.0)w
+ * Filled with Y = 2.0 and E = M_SQRT2w
  */
 Workspace2D_sptr Create2DWorkspaceBinned(int nhist, int nbins, double x0,
                                          double deltax) {
   MantidVecPtr x, y, e;
   x.access().resize(nbins + 1);
   y.access().resize(nbins, 2);
-  e.access().resize(nbins, sqrt(2.0));
+  e.access().resize(nbins, M_SQRT2);
   for (int i = 0; i < nbins + 1; ++i) {
     x.access()[i] = x0 + i * deltax;
   }
@@ -275,7 +275,7 @@ Workspace2D_sptr Create2DWorkspaceBinned(int nhist, int nbins, double x0,
 
 /** Create a 2D workspace with this many histograms and bins. The bins are
  * assumed to be non-uniform and given by the input array
- * Filled with Y = 2.0 and E = sqrt(2.0)w
+ * Filled with Y = 2.0 and E = M_SQRT2w
  */
 Workspace2D_sptr Create2DWorkspaceBinned(int nhist, const int numBoundaries,
                                          const double xBoundaries[]) {
@@ -283,7 +283,7 @@ Workspace2D_sptr Create2DWorkspaceBinned(int nhist, const int numBoundaries,
   const int numBins = numBoundaries - 1;
   x.access().resize(numBoundaries);
   y.access().resize(numBins, 2);
-  e.access().resize(numBins, sqrt(2.0));
+  e.access().resize(numBins, M_SQRT2);
   for (int i = 0; i < numBoundaries; ++i) {
     x.access()[i] = xBoundaries[i];
   }
@@ -323,7 +323,7 @@ void addNoise(Mantid::API::MatrixWorkspace_sptr ws, double noise,
  * Each spectra will have a cylindrical detector defined 2*cylinder_radius away
  * from the centre of the
  * previous.
- * Data filled with: Y: 2.0, E: sqrt(2.0), X: nbins of width 1 starting at 0
+ * Data filled with: Y: 2.0, E: M_SQRT2, X: nbins of width 1 starting at 0
  */
 Workspace2D_sptr
 create2DWorkspaceWithFullInstrument(int nhist, int nbins, bool includeMonitors,
@@ -354,7 +354,7 @@ create2DWorkspaceWithFullInstrument(int nhist, int nbins, bool includeMonitors,
 //================================================================================================================
 /** Create an Workspace2D with an instrument that contains
  *RectangularDetector's.
- * Bins will be 0.0, 1.0, to numBins, filled with signal=2.0, sqrt(2.0)
+ * Bins will be 0.0, 1.0, to numBins, filled with signal=2.0, M_SQRT2
  *
  * @param numBanks :: number of rectangular banks
  * @param numPixels :: each bank will be numPixels*numPixels

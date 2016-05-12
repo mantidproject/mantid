@@ -54,8 +54,9 @@ Logger g_log("ShapeFactory");
  *  @return A shared pointer to a geometric shape (defaults to an 'empty' shape
  *if XML tags contain no geo. info.)
  */
-boost::shared_ptr<Object> ShapeFactory::createShape(std::string shapeXML,
-                                                    bool addTypeTag) {
+template <typename ObjectType>
+boost::shared_ptr<ObjectType> ShapeFactory::createShape(std::string shapeXML,
+                                                        bool addTypeTag) {
   // wrap in a type tag
   if (addTypeTag)
     shapeXML = "<type name=\"userShape\"> " + shapeXML + " </type>";
@@ -69,51 +70,35 @@ boost::shared_ptr<Object> ShapeFactory::createShape(std::string shapeXML,
     g_log.warning("Unable to parse XML string " + shapeXML +
                   " . Empty geometry Object is returned.");
 
-    return boost::make_shared<Object>();
+    return boost::make_shared<ObjectType>();
   }
   // Get pointer to root element
   Element *pRootElem = pDoc->documentElement();
 
   // convert into a Geometry object
-  boost::shared_ptr<Object> retVal = createShape(pRootElem);
-
-  return retVal;
+  return createShape<ObjectType>(pRootElem);
 }
 
-/** Creates a geometric object from a DOM-element-node pointing to a \<type>
- *element
- *  containing shape information. If no shape information an empty Object is
- *returned
+/** Creates a geometric object from a DOM-element-node pointing to an element
+ * whose child nodes contain the shape information. If no shape information
+ * an empty Object is returned.
  *
- *  @param pElem :: XML element from instrument def. file which may specify a
- *geometric shape
- *  @return A shared pointer to a geometric shape (defaults to an 'empty' shape
- *if XML tags contain no geo. info.)
- *
- *  @throw logic_error Thrown if argument is not a pointer to a 'type' XML
- *element
+ * @param pElem A pointer to an Element node whose children fully define the
+ * object. The name of this element is unimportant.
+ * @return A shared pointer to a geometric shape
  */
-boost::shared_ptr<Object> ShapeFactory::createShape(Poco::XML::Element *pElem) {
-  // check if pElem is an element with tag name 'type'
-
-  if ((pElem->tagName()).compare("type")) {
-    g_log.error("Argument to function createShape must be a pointer to an XML "
-                "element with tag name type.");
-    throw std::logic_error("Argument to function createShape must be a pointer "
-                           "to an XML element with tag name type.");
-  }
-
+template <typename ObjectType>
+boost::shared_ptr<ObjectType>
+ShapeFactory::createShape(Poco::XML::Element *pElem) {
+  // Write the definition to a string to store in the final object
   std::stringstream xmlstream;
   DOMWriter writer;
   writer.writeNode(xmlstream, pElem);
-
   std::string shapeXML = xmlstream.str();
+  auto retVal = boost::make_shared<ObjectType>(shapeXML);
 
-  boost::shared_ptr<Object> retVal = boost::make_shared<Object>(shapeXML);
-
-  bool defaultAlgebra =
-      false; // if no <algebra> element then use default algebra
-
+  // if no <algebra> element then use default algebra
+  bool defaultAlgebra(false);
   // get algebra string
   Poco::AutoPtr<NodeList> pNL_algebra = pElem->getElementsByTagName("algebra");
   std::string algebraFromUser;
@@ -129,25 +114,22 @@ boost::shared_ptr<Object> ShapeFactory::createShape(Poco::XML::Element *pElem) {
     return retVal;
   }
 
-  std::map<std::string, std::string>
-      idMatching; // match id given to a shape by the user to
-                  // id understandable by Mantid code
+  // match id given to a shape by the user to
+  // id understandable by Mantid code
+  std::map<std::string, std::string> idMatching;
 
   // loop over all the sub-elements of pElem
-
   Poco::AutoPtr<NodeList> pNL = pElem->childNodes(); // get all child nodes
   unsigned long pNL_length = pNL->length();
-  int numPrimitives =
-      0; // used for counting number of primitives in this 'type' XML element
-  std::map<int, boost::shared_ptr<Surface>>
-      primitives; // stores the primitives that will be
-                  // used to build final shape
-  int l_id = 1; // used to build up unique id's for each shape added. Must start
-                // from int > zero.
-
-  Element *lastElement = nullptr; // This is to store element for the fixed
-  // complete objects such as sphere,cone,cylinder
-  // and cuboid
+  int numPrimitives = 0;
+  // stores the primitives that will be
+  // used to build final shape
+  std::map<int, boost::shared_ptr<Surface>> primitives;
+  // used to build up unique id's for each shape added. Must start
+  // from int > zero.
+  int l_id = 1;
+  // Element of fixed complete object
+  Element *lastElement = nullptr;
   for (unsigned int i = 0; i < pNL_length; i++) {
     if ((pNL->item(i))->nodeType() == Node::ELEMENT_NODE) {
       Element *pE = static_cast<Element *>(pNL->item(i));
@@ -185,6 +167,9 @@ boost::shared_ptr<Object> ShapeFactory::createShape(Poco::XML::Element *pElem) {
             idMatching[idFromUser] =
                 parseSegmentedCylinder(pE, primitives, l_id);
             numPrimitives++;
+          } else if (!primitiveName.compare("hollow-cylinder")) {
+            idMatching[idFromUser] = parseHollowCylinder(pE, primitives, l_id);
+            numPrimitives++;
           } else if (!primitiveName.compare("cuboid")) {
             lastElement = pE;
             idMatching[idFromUser] = parseCuboid(pE, primitives, l_id);
@@ -216,6 +201,9 @@ boost::shared_ptr<Object> ShapeFactory::createShape(Poco::XML::Element *pElem) {
                 " not a recognised geometric shape. This shape is ignored.");
           }
         } catch (std::invalid_argument &e) {
+          g_log.warning() << e.what() << " <" << primitiveName
+                          << "> shape is ignored.";
+        } catch (std::runtime_error &e) {
           g_log.warning() << e.what() << " <" << primitiveName
                           << "> shape is ignored.";
         } catch (...) {
@@ -501,6 +489,89 @@ std::string ShapeFactory::parseSegmentedCylinder(
 
   std::stringstream retAlgebraMatch;
   retAlgebraMatch << "(-" << l_id << " ";
+  l_id++;
+
+  // add top plane
+  auto pPlaneTop = boost::make_shared<Plane>();
+  // to get point in top plane
+  V3D pointInPlane = centreOfBottomBase + (normVec * height);
+  pPlaneTop->setPlane(pointInPlane, normVec);
+  prim[l_id] = pPlaneTop;
+  retAlgebraMatch << "-" << l_id << " ";
+  l_id++;
+
+  // add bottom plane
+  auto pPlaneBottom = boost::make_shared<Plane>();
+  pPlaneBottom->setPlane(centreOfBottomBase, normVec);
+  prim[l_id] = pPlaneBottom;
+  retAlgebraMatch << "" << l_id << ")";
+  l_id++;
+
+  return retAlgebraMatch.str();
+}
+
+/** Parse XML 'hollow-cylinder' element
+ *
+ *  @param pElem :: XML 'hollow-cylinder' element from instrument def. file
+ *  @param prim :: To add shapes to
+ *  @param l_id :: When shapes added to the map prim l_id is the continuous
+ *incremented index
+ *  @return A Mantid algebra string for this shape
+ *
+ *  @throw InstrumentDefinitionError Thrown if issues with the content of XML
+ *instrument file
+ */
+
+std::string ShapeFactory::parseHollowCylinder(
+    Poco::XML::Element *pElem, std::map<int, boost::shared_ptr<Surface>> &prim,
+    int &l_id) {
+  Element *pElemBase = getShapeElement(pElem, "centre-of-bottom-base");
+  Element *pElemAxis = getShapeElement(pElem, "axis");
+  Element *pElemInnerRadius = getShapeElement(pElem, "inner-radius");
+  Element *pElemOuterRadius = getShapeElement(pElem, "outer-radius");
+  Element *pElemHeight = getShapeElement(pElem, "height");
+
+  V3D normVec = parsePosition(pElemAxis);
+  normVec.normalize();
+  const double innerRadius = getDoubleAttribute(pElemInnerRadius, "val");
+  if (innerRadius <= 0.0) {
+    throw std::runtime_error(
+        "ShapeFactory::parseHollowCylinder(): inner-radius < 0.0");
+  }
+  const double outerRadius = getDoubleAttribute(pElemOuterRadius, "val");
+  if (outerRadius <= 0.0) {
+    throw std::runtime_error(
+        "ShapeFactory::parseHollowCylinder(): outer-radius < 0.0");
+  }
+  if (innerRadius > outerRadius) {
+    throw std::runtime_error(
+        "ShapeFactory::parseHollowCylinder(): inner-radius > outer-radius.");
+  }
+  const double height = getDoubleAttribute(pElemHeight, "val");
+  if (height <= 0.0) {
+    throw std::runtime_error(
+        "ShapeFactory::parseHollowCylinder(): height < 0.0");
+  }
+  V3D centreOfBottomBase = parsePosition(pElemBase);
+
+  // add outer infinite cylinder surface
+  auto outerCylinder = boost::make_shared<Cylinder>();
+  outerCylinder->setCentre(centreOfBottomBase + normVec * (0.5 * height));
+  outerCylinder->setNorm(normVec);
+  outerCylinder->setRadius(outerRadius);
+  prim[l_id] = outerCylinder;
+
+  std::stringstream retAlgebraMatch;
+  retAlgebraMatch << "(-" << l_id << " ";
+  l_id++;
+
+  // add inner infinite cylinder surface
+  auto innerCylinder = boost::make_shared<Cylinder>();
+  innerCylinder->setCentre(centreOfBottomBase + normVec * (0.5 * height));
+  innerCylinder->setNorm(normVec);
+  innerCylinder->setRadius(innerRadius);
+  prim[l_id] = innerCylinder;
+  retAlgebraMatch << l_id << " ";
   l_id++;
 
   // add top plane
@@ -1414,6 +1485,15 @@ void ShapeFactory::createGeometryHandler(Poco::XML::Element *pElem,
     geomHandler->setCone(parsePosition(pElemTipPoint), normVec, radius, height);
   }
 }
+
+///@cond
+// Template instantations
+template MANTID_GEOMETRY_DLL boost::shared_ptr<Object>
+ShapeFactory::createShape(std::string shapeXML, bool addTypeTag);
+
+template MANTID_GEOMETRY_DLL boost::shared_ptr<Object>
+ShapeFactory::createShape(Poco::XML::Element *pElem);
+///@endcond
 
 } // namespace Geometry
 } // namespace Mantid

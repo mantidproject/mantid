@@ -1566,7 +1566,7 @@ void InstrumentDefinitionParser::appendLeaf(Geometry::ICompAssembly *parent,
   if (pType->hasAttribute("is"))
     category = pType->getAttribute("is");
 
-  boost::regex exp("(Detector)|(detector)|(Monitor)|(monitor)");
+  static const boost::regex exp("Detector|detector|Monitor|monitor");
 
   // do stuff a bit differently depending on which category the type belong to
   if (RectangularDetector::compareName(category)) {

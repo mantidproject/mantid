@@ -59,7 +59,7 @@ public:
     double radius(-1.0), height(-1.0);
     std::vector<V3D> pts;
     original->GetObjectGeom(objType, pts, radius, height);
-    TS_ASSERT_EQUALS(2, objType);
+    TS_ASSERT_EQUALS(3, objType);
     TS_ASSERT(boost::dynamic_pointer_cast<GluGeometryHandler>(
         original->getGeometryHandler()));
 
@@ -68,7 +68,7 @@ public:
     objType = -1;
     copy.GetObjectGeom(objType, pts, radius, height);
 
-    TS_ASSERT_EQUALS(2, objType);
+    TS_ASSERT_EQUALS(3, objType);
     TS_ASSERT(boost::dynamic_pointer_cast<GluGeometryHandler>(
         copy.getGeometryHandler()));
     TS_ASSERT_EQUALS(copy.getName(), original->getName());
@@ -84,7 +84,7 @@ public:
     double radius(-1.0), height(-1.0);
     std::vector<V3D> pts;
     original->GetObjectGeom(objType, pts, radius, height);
-    TS_ASSERT_EQUALS(2, objType);
+    TS_ASSERT_EQUALS(3, objType);
     TS_ASSERT(boost::dynamic_pointer_cast<GluGeometryHandler>(
         original->getGeometryHandler()));
 
@@ -94,7 +94,7 @@ public:
     objType = -1;
     lhs.GetObjectGeom(objType, pts, radius, height);
 
-    TS_ASSERT_EQUALS(2, objType);
+    TS_ASSERT_EQUALS(3, objType);
     TS_ASSERT(boost::dynamic_pointer_cast<GluGeometryHandler>(
         lhs.getGeometryHandler()));
   }
@@ -653,9 +653,9 @@ public:
     TS_ASSERT_EQUALS(F->getPointInObject(pt), 1); // This now succeeds
     // Test use of defineBoundingBox to explictly set the bounding box, when the
     // automatic method fails
-    F->defineBoundingBox(0.5, -1 / (2.0 * sqrt(2.0)), -1.0 / (2.0 * sqrt(2.0)),
-                         -0.5, -sqrt(2.0) - 1.0 / (2.0 * sqrt(2.0)),
-                         -sqrt(2.0) - 1.0 / (2.0 * sqrt(2.0)));
+    F->defineBoundingBox(0.5, -0.5 * M_SQRT1_2, -0.5 * M_SQRT1_2, -0.5,
+                         -M_SQRT2 - 0.5 * M_SQRT1_2,
+                         -M_SQRT2 - 0.5 * M_SQRT1_2);
     TS_ASSERT_EQUALS(F->getPointInObject(pt), 1);
     Object_sptr S = createSphere();
     TS_ASSERT_EQUALS(S->getPointInObject(pt), 1);

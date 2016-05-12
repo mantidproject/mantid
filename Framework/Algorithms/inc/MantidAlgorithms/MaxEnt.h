@@ -75,10 +75,14 @@ private:
                                            const QuadraticCoefficients &coeffs,
                                            const std::vector<double> &image,
                                            double background, double distEps);
-  /// Populates the output workspaces
-  void populateOutputWS(const API::MatrixWorkspace_sptr &inWS, size_t spec,
-                        size_t nspec, const std::vector<double> &result,
-                        API::MatrixWorkspace_sptr &outWS, bool isImage);
+  /// Populates the output workspace containing the reconstructed data
+  void populateDataWS(const API::MatrixWorkspace_sptr &inWS, size_t spec,
+                      size_t nspec, const std::vector<double> &result,
+                      API::MatrixWorkspace_sptr &outWS);
+  /// Populates the output workspace containing the reconstructed image
+  void populateImageWS(const API::MatrixWorkspace_sptr &inWS, size_t spec,
+                       size_t nspec, const std::vector<double> &result,
+                       API::MatrixWorkspace_sptr &outWS, bool autoShift);
 };
 
 } // namespace Algorithms
