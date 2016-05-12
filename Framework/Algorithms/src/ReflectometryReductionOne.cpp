@@ -703,7 +703,6 @@ void ReflectometryReductionOne::exec() {
   setProperty("MomentumTransferMinimum", momentumTransferMinimum);
   setProperty("MomentumTransferStep", momentumTransferStep);
   setProperty("MomentumTransferMaximum", momentumTransferMaximum);
-  setProperty("ThetaIn", theta.get());
 }
 
 /**

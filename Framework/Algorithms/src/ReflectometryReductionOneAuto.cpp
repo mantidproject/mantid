@@ -837,8 +837,6 @@ bool ReflectometryReductionOneAuto::processGroups() {
   // We finished successfully
   // set the values of these properties so they can be retrieved by the
   // Interface.
-  this->setProperty(
-      "ThetaIn", boost::lexical_cast<double>(alg->getPropertyValue("ThetaIn")));
   this->setProperty("MomentumTransferMinimum",
                     boost::lexical_cast<double>(
                         alg->getPropertyValue("MomentumTransferMinimum")));

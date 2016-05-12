@@ -159,7 +159,7 @@ Output:
 .. testoutput:: ExReflRedOneSimple
 
    The first four IvsLam Y values are: [ 0.0000e+00, 0.0000e+00, 4.9588e-07, 1.2769e-06 ]
-   The first four IvsQ Y values are: [ 2.1435e-05, 5.0384e-05, 5.2332e-05, 5.2042e-05 ]
+   The first four IvsQ Y values are: [ 6.2230e-04, 7.7924e-04, 9.1581e-04, 1.0967e-03 ]
    Theta out is the same as theta in: 0.7
 
 
