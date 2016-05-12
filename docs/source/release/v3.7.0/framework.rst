@@ -82,6 +82,7 @@ Performance
 - This release saw the introduction of the StructuredDetector. This change has reduced load times via LoadInstrument from ~10minutes down to ~0.5seconds for the prospective ESS LOKI instrument. 
   For more information on how to generate a StructuredDetector based instrument follow 
   this `link <http://docs.mantidproject.org/nightly/concepts/InstrumentDefinitionFile.html#creating-structured-irregular-geometry-detectors>`_ 
+- The destructors for ConvexPolygon and Quadrilateral objects are now faster, especially on Linux.
   
 CurveFitting
 ------------
