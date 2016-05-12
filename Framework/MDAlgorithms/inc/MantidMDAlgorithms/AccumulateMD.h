@@ -102,7 +102,8 @@ private:
   Mantid::API::IMDEventWorkspace_sptr createMDWorkspace(
       const std::vector<std::string> &data_sources,
       const std::vector<double> &psi, const std::vector<double> &gl,
-      const std::vector<double> &gs, const std::vector<double> &efix);
+      const std::vector<double> &gs, const std::vector<double> &efix,
+      const std::string &filename, const bool filebackend);
 
   std::map<std::string, std::string> validateInputs() override;
 };

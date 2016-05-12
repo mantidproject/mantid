@@ -34,20 +34,14 @@ using Mantid::Geometry::IMDDimension_sptr;
 using Mantid::API::Workspace_sptr;
 using Mantid::API::AnalysisDataService;
 
-vtkNexusPeaksReader::vtkNexusPeaksReader() :
-  m_isSetup(false), m_wsTypeName(""),
-  m_uintPeakMarkerSize(0.3), m_dimensions(1)
-{
-  this->FileName = NULL;
+vtkNexusPeaksReader::vtkNexusPeaksReader()
+    : FileName{nullptr}, m_isSetup{false}, m_uintPeakMarkerSize{0.3},
+      m_dimensions{1} {
   this->SetNumberOfInputPorts(0);
   this->SetNumberOfOutputPorts(1);
 }
 
-vtkNexusPeaksReader::~vtkNexusPeaksReader()
-{
-  this->SetFileName(0);
-}
-
+vtkNexusPeaksReader::~vtkNexusPeaksReader() { this->SetFileName(nullptr); }
 
 void vtkNexusPeaksReader::SetDimensions(int dimensions)
 {
@@ -184,8 +178,7 @@ int vtkNexusPeaksReader::CanReadFile(const char* fname)
     return 0; 
   }
 
-  ::NeXus::File * file = NULL;
-  file = new ::NeXus::File(fileString);
+  auto file = Mantid::Kernel::make_unique<::NeXus::File>(fileString);
   try
   {
     try
@@ -240,7 +233,7 @@ void vtkNexusPeaksReader::updateAlgorithmProgress(double progress, const std::st
 /*
 Getter for the workspace type name.
 */
-const char *vtkNexusPeaksReader::GetWorkspaceTypeName() {
+const std::string &vtkNexusPeaksReader::GetWorkspaceTypeName() {
   //Preload the Workspace and then cache it to avoid reloading later.
-  return m_wsTypeName.c_str();
+  return m_wsTypeName;
 }

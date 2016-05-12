@@ -137,7 +137,7 @@ namespace Mantid
           eventWs, drawingProgressUpdate); // HACK: progressUpdate should be
                                            // argument for drawing!
 
-      this->extractMetadata(eventWs);
+      this->extractMetadata(*eventWs);
       this->appendMetadata(visualDataSet, eventWs->getName());
 
       return visualDataSet;
