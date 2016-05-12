@@ -1662,6 +1662,22 @@ void Object::calcBoundingBoxByGeometry() {
       maxZ = std::max(maxZ, vector.Z());
     }
   } break;
+  case GluGeometryHandler::GeometryType::HEXAHEDRON: {
+    // Vectors are in the same order as the following webpage:
+    // http://docs.mantidproject.org/nightly/concepts/HowToDefineGeometricShape.html#hexahedron
+    auto &lf = vectors[1];
+    auto &lb = vectors[0];
+    auto &rb = vectors[3];
+    auto &rf = vectors[2];
+    auto dz = vectors[4] - lf;
+
+    minX = std::min(lf.X(), lb.X());
+    maxX = std::max(rb.X(), rf.X());
+    minY = lb.Y();
+    maxY = rf.Y();
+    minZ = 0;
+    maxZ = dz.Z();
+  } break;
   case GluGeometryHandler::GeometryType::CYLINDER:
   case GluGeometryHandler::GeometryType::SEGMENTED_CYLINDER: {
     // Center-point of base and normalized axis based on IDF XML
