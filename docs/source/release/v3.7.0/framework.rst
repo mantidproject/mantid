@@ -101,7 +101,7 @@ Documentation
   :ref:`LoadEventNexus <algm-LoadEventNexus>`,
   :ref:`LoadISISNexus <algm-LoadISISNexus>`,
   :ref:`LoadMcStas <algm-LoadMcStas>`,
-  :ref:`LoadMuonNexus <algm-LoadMuonNexus>` version 2 and
+  :ref:`LoadMuonNexus <algm-LoadMuonNexus>` (both versions) and
   :ref:`LoadNexusLogs <algm-LoadNexusLogs>`.
   Also :ref:`LoadNexus <algm-LoadNexus>` documentation now explains how it determines which load algorithm to run.
 
