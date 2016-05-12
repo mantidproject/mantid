@@ -215,8 +215,6 @@ template <typename T> T extractToValueVector(const std::string &strvalue) {
   return valueVec;
 }
 
-
-
 //------------------------------------------------------------------------------------------------
 // Templated += operator functions for specific types
 template <typename T> inline void addingOperator(T &lhs, const T &rhs) {
