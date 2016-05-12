@@ -2450,14 +2450,14 @@ void FilterEventsByLogValuePreNexus::readPulseidFile(
       DateAndTime pulseDateTime(static_cast<int64_t>(pulse.seconds),
                                 static_cast<int64_t>(pulse.nanoseconds));
       this->pulsetimes.push_back(pulseDateTime);
-      this->m_vecEventIndex.push_back(it.event_index);
+      this->m_vecEventIndex.push_back(pulse.event_index);
 
       if (pulseDateTime < lastPulseDateTime)
         this->m_pulseTimesIncreasing = false;
       else
         lastPulseDateTime = pulseDateTime;
 
-      temp = it.pCurrent;
+      temp = pulse.pCurrent;
       this->m_protonCharge.push_back(temp);
       if (temp < 0.)
         this->g_log.warning("Individual proton charge < 0 being ignored");
