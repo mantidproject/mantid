@@ -152,6 +152,10 @@ Tells the view how to create the HintingLineEdits for pre-, post- and processing
 */
 void GenericDataProcessorPresenter::createProcessLayout() {
 
+  std::vector<std::string> stages;
+  std::vector<std::string> algNames;
+  std::vector<std::map<std::string, std::string>> hints;
+
   // Pre-process
   // The number of items depends on the number of algorithms needed for
   // pre-processing the data
@@ -160,12 +164,9 @@ void GenericDataProcessorPresenter::createProcessLayout() {
     IAlgorithm_sptr alg =
         AlgorithmManager::Instance().create(it->second.name());
     AlgorithmHintStrategy strategy(alg, it->second.blacklist());
-    if (it == m_preprocessMap.begin()) {
-      m_view->addHintingLineEdit("<b>Pre-process:</b>", alg->name(),
-                                 strategy.createHints());
-    } else {
-      m_view->addHintingLineEdit("", alg->name(), strategy.createHints());
-    }
+    stages.push_back("Pre-process");
+    algNames.push_back(alg->name());
+    hints.push_back(strategy.createHints());
   }
 
   // Process
@@ -174,8 +175,9 @@ void GenericDataProcessorPresenter::createProcessLayout() {
     IAlgorithm_sptr alg =
         AlgorithmManager::Instance().create(m_processor.name());
     AlgorithmHintStrategy strategy(alg, m_processor.blacklist());
-    m_view->addHintingLineEdit("<b>Process:</b>", alg->name(),
-                               strategy.createHints());
+    stages.push_back("Process");
+    algNames.push_back(alg->name());
+    hints.push_back(strategy.createHints());
   }
 
   // Post-process
@@ -184,9 +186,12 @@ void GenericDataProcessorPresenter::createProcessLayout() {
     IAlgorithm_sptr alg =
         AlgorithmManager::Instance().create(m_postprocessor.name());
     AlgorithmHintStrategy strategy(alg, m_postprocessor.blacklist());
-    m_view->addHintingLineEdit("<b>Post-process:</b>", alg->name(),
-                               strategy.createHints());
+    stages.push_back("Post-process");
+    algNames.push_back(alg->name());
+    hints.push_back(strategy.createHints());
   }
+
+  m_view->setGlobalOptions(stages, algNames, hints);
 }
 
 /**

@@ -229,18 +229,14 @@ public:
     EXPECT_CALL(mockDataProcessorView, setTableList(_)).Times(Exactly(1));
     // Expect that the layout containing pre-processing, processing and
     // post-processing options is created
+    std::vector<std::string> stages = {"Pre-process", "Pre-process", "Process",
+                                       "Post-process"};
+    std::vector<std::string> algorithms = {
+        "Plus", "CreateTransmissionWorkspaceAuto",
+        "ReflectometryReductionOneAuto", "Stitch1DMany"};
+
     EXPECT_CALL(mockDataProcessorView,
-                addHintingLineEdit("<b>Pre-process:</b>", "Plus", _))
-        .Times(Exactly(1));
-    EXPECT_CALL(mockDataProcessorView,
-                addHintingLineEdit("", "CreateTransmissionWorkspaceAuto", _))
-        .Times(Exactly(1));
-    EXPECT_CALL(mockDataProcessorView,
-                addHintingLineEdit("<b>Process:</b>",
-                                   "ReflectometryReductionOneAuto", _))
-        .Times(Exactly(1));
-    EXPECT_CALL(mockDataProcessorView,
-                addHintingLineEdit("<b>Post-process:</b>", "Stitch1DMany", _))
+                setGlobalOptions(stages, algorithms, _))
         .Times(Exactly(1));
     // Expect that the autocompletion hints are populated
     EXPECT_CALL(mockDataProcessorView, setOptionsHintStrategy(_, 8))

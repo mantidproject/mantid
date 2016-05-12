@@ -552,27 +552,44 @@ void QDataProcessorWidget::setOptionsHintStrategy(HintStrategy *hintStrategy,
 }
 
 /**
-* Adds a HintingLineEdit to this view. The hinting line edit comes with a label
-* and an algorithm's name
-* @param title : The label
-* @param name : The name of the algorithm
-* @param hints : The hints for the algorithm
+* Adds the specified HintingLineEdit widgets to this view. A hinting line edit
+* comes with a label and an algorithm's name. Headings are also shown.
+* @param stages : The stages, pre-process, process or post-process, as a vector
+* @param algNames : The algorithm names as a vector
+* @param hints : The hints for each algorithm as a vector
 */
-void QDataProcessorWidget::addHintingLineEdit(
-    const std::string &title, const std::string &name,
-    const std::map<std::string, std::string> &hints) {
+void QDataProcessorWidget::setGlobalOptions(
+    const std::vector<std::string> &stages,
+    const std::vector<std::string> &algNames,
+    const std::vector<std::map<std::string, std::string>> &hints) {
+  // Headers
+  QLabel *stageHeader = new QLabel(QString::fromStdString("<b>Stage</b>"));
+  QLabel *algorithmHeader =
+      new QLabel(QString::fromStdString("<b>Algorithm</b>"));
+  QLabel *optionsHeader =
+      new QLabel(QString::fromStdString("<b>Global Options</b>"));
+  stageHeader->setMinimumHeight(30);
+  ui.processLayout->addWidget(stageHeader, 0, 0);
+  ui.processLayout->addWidget(algorithmHeader, 0, 1);
+  ui.processLayout->addWidget(optionsHeader, 0, 2);
 
-  int lastRow = ui.processLayout->rowCount();
+  int rows = static_cast<int>(stages.size());
 
-  // The title
-  QLabel *titleLabel = new QLabel(QString::fromStdString(title), this);
-  titleLabel->setMinimumSize(100, 10);
-  ui.processLayout->addWidget(titleLabel, lastRow, 0);
-  // The name
-  ui.processLayout->addWidget(new QLabel(QString::fromStdString(name), this),
-                              lastRow, 1);
-  // The content
-  ui.processLayout->addWidget(new HintingLineEdit(this, hints), lastRow, 2);
+  for (int row = 0; row < rows; row++) {
+
+    // The title
+    QLabel *stageLabel =
+        new QLabel(QString::fromStdString(stages.at(row)), this);
+    stageLabel->setMinimumSize(100, 10);
+    ui.processLayout->addWidget(stageLabel, row + 1, 0);
+    // The name
+    QLabel *nameLabel =
+        new QLabel(QString::fromStdString(algNames.at(row)), this);
+    ui.processLayout->addWidget(new HintingLineEdit(this, hints.at(row)),
+                                row + 1, 2);
+    // The content
+    ui.processLayout->addWidget(nameLabel, row + 1, 1);
+  }
 }
 
 /**

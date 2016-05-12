@@ -54,10 +54,11 @@ public:
                void(const std::vector<std::string> &, const std::string &));
   MOCK_METHOD2(setOptionsHintStrategy,
                void(MantidQt::MantidWidgets::HintStrategy *, int));
-
-  MOCK_METHOD3(addHintingLineEdit,
-               void(const std::string &, const std::string &,
-                    const std::map<std::string, std::string> &));
+  MOCK_METHOD3(
+      setGlobalOptions,
+      void(const std::vector<std::string> &stages,
+           const std::vector<std::string> &algNames,
+           const std::vector<std::map<std::string, std::string>> &hints));
 
   // Settings
   MOCK_METHOD1(loadSettings, void(std::map<std::string, QVariant> &));

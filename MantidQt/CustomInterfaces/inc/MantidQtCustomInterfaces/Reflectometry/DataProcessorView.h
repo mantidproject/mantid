@@ -78,11 +78,12 @@ public:
   virtual void
   setOptionsHintStrategy(MantidQt::MantidWidgets::HintStrategy *hintStrategy,
                          int column) = 0;
+  virtual void setGlobalOptions(
+      const std::vector<std::string> &stages,
+      const std::vector<std::string> &algNames,
+      const std::vector<std::map<std::string, std::string>> &hints) = 0;
   virtual void setClipboard(const std::string &text) = 0;
   virtual void setModel(const std::string &name) = 0;
-  virtual void
-  addHintingLineEdit(const std::string &title, const std::string &name,
-                     const std::map<std::string, std::string> &hints) = 0;
 
   // Accessor methods
   virtual std::set<int> getSelectedRows() const = 0;

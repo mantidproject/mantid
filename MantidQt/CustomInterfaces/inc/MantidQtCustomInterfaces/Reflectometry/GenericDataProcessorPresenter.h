@@ -63,7 +63,7 @@ public:
                          const std::string &defaultInstrument) override;
   std::vector<DataProcessorCommand_uptr> publishCommands() override;
   void acceptViews(DataProcessorView *tableView,
-                  ProgressableView *progressView) override;
+                   ProgressableView *progressView) override;
   void setModel(std::string name) override;
 
   // Only for testing purposes

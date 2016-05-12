@@ -85,9 +85,10 @@ public:
   setOptionsHintStrategy(MantidQt::MantidWidgets::HintStrategy *hintStrategy,
                          int column) override;
   void setClipboard(const std::string &text) override;
-  void
-  addHintingLineEdit(const std::string &title, const std::string &name,
-                     const std::map<std::string, std::string> &hints) override;
+  void setGlobalOptions(
+      const std::vector<std::string> &stages,
+      const std::vector<std::string> &algNames,
+      const std::vector<std::map<std::string, std::string>> &hints) override;
 
   // Accessor methods
   std::set<int> getSelectedRows() const override;
