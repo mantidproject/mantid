@@ -166,13 +166,9 @@ with the along beam vector.
 bool ReferenceFrame::isVectorPointingAlongBeam(const V3D &v) const {
   V3D vec = v;
   vec.normalize();
-  bool isPointing = false;
 
   // Normalized (unit) parallel vectors should produce a scalar product of 1
-  if (m_vecPointingAlongBeam.scalar_prod(vec) == 1)
-    isPointing = true;
-
-  return isPointing;
+  return m_vecPointingAlongBeam.scalar_prod(vec) == 1;
 }
 
 } // namespace Mantid
