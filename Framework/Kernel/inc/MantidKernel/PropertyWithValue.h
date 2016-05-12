@@ -148,8 +148,23 @@ void toValue(const std::string &, boost::shared_ptr<T> &) {
   throw boost::bad_lexical_cast();
 }
 
+// vector<int> specializations
 template <typename T>
-void toValue(const std::string &strvalue, std::vector<T> &value) {
+void toValue(const std::string &strvalue, std::vector<T> &value,
+             std::true_type) {
+  typedef Mantid::Kernel::StringTokenizer tokenizer;
+  tokenizer values(strvalue, ",",
+                   tokenizer::TOK_IGNORE_EMPTY | tokenizer::TOK_TRIM);
+  value.clear();
+  value.reserve(values.count());
+  for (const auto &token : values) {
+    appendValue(token, value);
+  }
+}
+
+template <typename T>
+void toValue(const std::string &strvalue, std::vector<T> &value,
+             std::false_type) {
   // Split up comma-separated properties
   typedef Mantid::Kernel::StringTokenizer tokenizer;
   tokenizer values(strvalue, ",",
@@ -160,6 +175,11 @@ void toValue(const std::string &strvalue, std::vector<T> &value) {
   std::transform(
       values.cbegin(), values.cend(), std::back_inserter(value),
       [](const std::string &str) { return boost::lexical_cast<T>(str); });
+}
+
+template <typename T>
+void toValue(const std::string &strvalue, std::vector<T> &value) {
+  toValue(strvalue, value, std::is_integral<T>());
 }
 
 template <typename T>
@@ -195,31 +215,7 @@ template <typename T> T extractToValueVector(const std::string &strvalue) {
   return valueVec;
 }
 
-/// Macro for the vector<int> specializations
-#define PROPERTYWITHVALUE_TOVALUE(type)                                        \
-  template <>                                                                  \
-  inline void toValue<type>(const std::string &strvalue,                       \
-                            std::vector<type> &value) {                        \
-    typedef Mantid::Kernel::StringTokenizer tokenizer;                         \
-    tokenizer values(strvalue, ",",                                            \
-                     tokenizer::TOK_IGNORE_EMPTY | tokenizer::TOK_TRIM);       \
-    value.clear();                                                             \
-    value.reserve(values.count());                                             \
-    for (tokenizer::Iterator it = values.begin(); it != values.end(); ++it) {  \
-      appendValue(*it, value);                                                 \
-    }                                                                          \
-  }
 
-PROPERTYWITHVALUE_TOVALUE(int)
-PROPERTYWITHVALUE_TOVALUE(long)
-PROPERTYWITHVALUE_TOVALUE(uint32_t)
-PROPERTYWITHVALUE_TOVALUE(uint64_t)
-#if defined(__APPLE__)
-PROPERTYWITHVALUE_TOVALUE(unsigned long);
-#endif
-
-// Clear up the namespace
-#undef PROPERTYWITHVALUE_TOVALUE
 
 //------------------------------------------------------------------------------------------------
 // Templated += operator functions for specific types
