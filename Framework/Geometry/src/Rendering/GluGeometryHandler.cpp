@@ -1,7 +1,7 @@
+#include "MantidGeometry/Rendering/GluGeometryHandler.h"
 #include "MantidGeometry/Instrument/ObjComponent.h"
 #include "MantidGeometry/Objects/Object.h"
 #include "MantidGeometry/Rendering/GeometryHandler.h"
-#include "MantidGeometry/Rendering/GluGeometryHandler.h"
 #include "MantidGeometry/Rendering/GluGeometryRenderer.h"
 
 #include <boost/make_shared.hpp>
@@ -13,17 +13,17 @@ using Kernel::V3D;
 GluGeometryHandler::GluGeometryHandler(IObjComponent *comp)
     : GeometryHandler(comp),
       Renderer(Kernel::make_unique<GluGeometryRenderer>()), radius(0.0),
-      height(0.0), type(CUBOID) {}
+      height(0.0), type(NOSHAPE) {}
 
 GluGeometryHandler::GluGeometryHandler(boost::shared_ptr<Object> obj)
     : GeometryHandler(std::move(obj)),
       Renderer(Kernel::make_unique<GluGeometryRenderer>()), radius(0.0),
-      height(0.0), type(CUBOID) {}
+      height(0.0), type(NOSHAPE) {}
 
 GluGeometryHandler::GluGeometryHandler(Object *obj)
     : GeometryHandler(obj),
       Renderer(Kernel::make_unique<GluGeometryRenderer>()), radius(0.0),
-      height(0.0), type(CUBOID) {}
+      height(0.0), type(NOSHAPE) {}
 
 GluGeometryHandler::GluGeometryHandler(const GluGeometryHandler &other)
     : GeometryHandler(other), m_points(other.m_points), radius(other.radius),
@@ -80,6 +80,8 @@ void GluGeometryHandler::Render() {
       Renderer->RenderSegmentedCylinder(m_points[0], m_points[1], radius,
                                         height);
       break;
+    case NOSHAPE:
+      break;
     }
   } else if (ObjComp != nullptr) {
     Renderer->Render(ObjComp);
@@ -95,7 +97,6 @@ void GluGeometryHandler::GetObjectGeom(int &mytype,
     vectors = m_points;
     switch (type) {
     case CUBOID:
-      mytype = 1;
       break;
     case HEXAHEDRON:
       break;

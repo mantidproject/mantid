@@ -48,6 +48,7 @@ class Object;
 class MANTID_GEOMETRY_DLL GluGeometryHandler : public GeometryHandler {
   /// the type of the geometry eg CUBOID,CYLINDER,CONE,SPHERE
   enum GEOMETRY_TYPE {
+    NOSHAPE = 0,
     CUBOID,            ///< CUBOID
     HEXAHEDRON,        ///< HEXAHEDRON
     SPHERE,            ///< SPHERE

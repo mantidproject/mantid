@@ -25,6 +25,7 @@ Crystal Improvements
 - :ref:`SaveIsawPeaks <algm-SaveIsawPeaks>` has DetCal information sorted by detector numbers
 - :ref:`StatisticsOfPeaksWorkspace <algm-StatisticsOfPeaksWorkspace>` has resolution shells in units of d-Spacing.
 
+
 Engineering Diffraction
 -----------------------
 
@@ -69,15 +70,17 @@ Graphical user interface:
   now view the plot in `dSpacing` instead `ToF`, which enables you to
   rerun the fitting process after selecting peaks from the interface.
 
+
 - The output calibration files will be written with the extension
   ".prm" by default. Together with an "all-banks" calibration (GSAS
   instrument parameters) file, an individual file for every focused
   bank will be written.
 
-Powder Diffraction
-------------------
+- Improvements to Fitting tab, Single peak fitting for consecutive run
+  number's focused files has now been enabled. The tab will automatically load
+  the consecutive run numbers to the list widget from the range provided by the
+  user, bank combo-box will update upon selection of run number.
 
-- :ref:`PDFFourierTransform <algm-PDFFourierTransform>` has been corrected in its calculation of errors.
 
 Imaging
 -------
@@ -106,6 +109,12 @@ Improvements in the tomographic reconstruction graphical user interface:
   pass, and supports different aggregation methods via the new
   algorithm :ref:`ImggAggregateWavelengths
   <algm-ImggAggregateWavelengths>`.
+
+
+Powder Diffraction
+------------------
+
+- :ref:`PDFFourierTransform <algm-PDFFourierTransform>` has been corrected in its calculation of errors.
 
 
 Powder Diffraction Scripts

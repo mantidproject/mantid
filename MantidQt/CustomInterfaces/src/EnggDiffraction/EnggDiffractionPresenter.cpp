@@ -11,6 +11,7 @@
 
 #include <boost/lexical_cast.hpp>
 
+#include "Poco/DirectoryIterator.h"
 #include <Poco/File.h>
 
 #include <QThread>
@@ -73,7 +74,8 @@ void EnggDiffractionPresenter::cleanup() {
   if (m_workerThread) {
     if (m_workerThread->isRunning()) {
       g_log.notice() << "A calibration process is currently running, shutting "
-                        "it down immediately..." << std::endl;
+                        "it down immediately..."
+                     << std::endl;
       m_workerThread->wait(10);
     }
     delete m_workerThread;
@@ -124,6 +126,10 @@ void EnggDiffractionPresenter::notify(
 
   case IEnggDiffractionPresenter::RebinMultiperiod:
     processRebinMultiperiod();
+    break;
+
+  case IEnggDiffractionPresenter::FittingRunNo:
+    fittingRunNoChanged();
     break;
 
   case IEnggDiffractionPresenter::FitPeaks:
@@ -187,7 +193,8 @@ void EnggDiffractionPresenter::processCalcCalib() {
     return;
   }
   g_log.notice() << "EnggDiffraction GUI: starting new calibration. This may "
-                    "take a few seconds... " << std::endl;
+                    "take a few seconds... "
+                 << std::endl;
 
   const std::string outFilename = outputCalibFilename(vanNo, ceriaNo);
 
@@ -220,7 +227,8 @@ void EnggDiffractionPresenter::ProcessCropCalib() {
 
   g_log.notice()
       << "EnggDiffraction GUI: starting cropped calibration. This may "
-         "take a few seconds... " << std::endl;
+         "take a few seconds... "
+      << std::endl;
 
   const std::string outFilename = outputCalibFilename(vanNo, ceriaNo);
 
@@ -417,7 +425,8 @@ void EnggDiffractionPresenter::processRebinTime() {
   g_log.notice() << "EnggDiffraction GUI: starting new pre-processing "
                     "(re-binning) with a TOF bin into workspace '" +
                         outWSName + "'. This "
-                                    "may take some seconds... " << std::endl;
+                                    "may take some seconds... "
+                 << std::endl;
 
   m_view->enableCalibrateAndFocusActions(false);
   // GUI-blocking alternative:
@@ -443,7 +452,8 @@ void EnggDiffractionPresenter::processRebinMultiperiod() {
   g_log.notice() << "EnggDiffraction GUI: starting new pre-processing "
                     "(re-binning) by pulse times into workspace '" +
                         outWSName + "'. This "
-                                    "may take some seconds... " << std::endl;
+                                    "may take some seconds... "
+                 << std::endl;
 
   m_view->enableCalibrateAndFocusActions(false);
   // GUI-blocking alternative:
@@ -452,8 +462,219 @@ void EnggDiffractionPresenter::processRebinMultiperiod() {
   startAsyncRebinningPulsesWorker(runNo, nperiods, timeStep, outWSName);
 }
 
+// Fitting Tab Run Number & Bank handling here
+void MantidQt::CustomInterfaces::EnggDiffractionPresenter::
+    fittingRunNoChanged() {
+
+  try {
+    std::string strFocusedFile = m_view->getFittingRunNo();
+    QString focusedFile = QString::fromStdString(strFocusedFile);
+    // file name
+    Poco::Path selectedfPath(strFocusedFile);
+    Poco::Path bankDir;
+
+    // handling of vectors
+    auto runnoDirVector = m_view->getFittingRunNumVec();
+    runnoDirVector.clear();
+
+    std::string strFPath = selectedfPath.toString();
+    // returns empty if no directory is found
+    std::vector<std::string> splitBaseName =
+        m_view->splitFittingDirectory(strFPath);
+    // runNo when single focused file selected
+    std::vector<std::string> runNoVec;
+
+    if (selectedfPath.isFile() && !splitBaseName.empty()) {
+
+#ifdef __unix__
+      bankDir = selectedfPath.parent();
+#else
+      bankDir = (bankDir).expand(selectedfPath.parent().toString());
+#endif
+      if (!splitBaseName.empty() && splitBaseName.size() > 3) {
+        std::string foc_file = splitBaseName[0] + "_" + splitBaseName[1] + "_" +
+                               splitBaseName[2] + "_" + splitBaseName[3];
+        std::string strBankDir = bankDir.toString();
+
+        if (strBankDir.empty()) {
+          m_view->userWarning(
+              "Invalid Input",
+              "Please check that a valid directory is "
+              "set for Output Folder under Focusing Settings on the "
+              "settings tab. "
+              "Please try again");
+        } else {
+
+          updateFittingDirVec(strBankDir, foc_file, false, runnoDirVector);
+          m_view->setFittingRunNumVec(runnoDirVector);
+
+          // add bank to the combo-box and list view
+          m_view->addBankItems(splitBaseName, focusedFile);
+          runNoVec.clear();
+          runNoVec.push_back(splitBaseName[1]);
+          auto fittingMultiRunMode = m_view->getFittingMultiRunMode();
+          if (!fittingMultiRunMode)
+            m_view->addRunNoItem(runNoVec, false);
+        }
+      }
+      // assuming that no directory is found so look for number
+      // if run number length greater
+    } else if (focusedFile.count() > 4) {
+      if (strFocusedFile.find("-") != std::string::npos) {
+        std::vector<std::string> firstLastRunNoVec;
+        boost::split(firstLastRunNoVec, strFocusedFile, boost::is_any_of("-"));
+        std::string firstRun;
+        std::string lastRun;
+        if (!firstLastRunNoVec.empty()) {
+          firstRun = firstLastRunNoVec[0];
+          lastRun = firstLastRunNoVec[1];
+
+          m_view->setFittingMultiRunMode(true);
+          enableMultiRun(firstRun, lastRun, runnoDirVector);
+        }
+
+      } else {
+        // if given a single run number instead
+        auto focusDir = m_view->getFocusDir();
+
+        if (focusDir.empty()) {
+          m_view->userWarning(
+              "Invalid Input",
+              "Please check that a valid directory is "
+              "set for Output Folder under Focusing Settings on the "
+              "settings tab. "
+              "Please try again");
+        } else {
+
+          updateFittingDirVec(focusDir, strFocusedFile, false, runnoDirVector);
+          m_view->setFittingRunNumVec(runnoDirVector);
+
+          // add bank to the combo-box and list view
+          m_view->addBankItems(splitBaseName, focusedFile);
+          runNoVec.clear();
+          runNoVec.push_back(strFocusedFile);
+
+          auto fittingMultiRunMode = m_view->getFittingMultiRunMode();
+          if (!fittingMultiRunMode)
+            m_view->addRunNoItem(runNoVec, false);
+        }
+      }
+    }
+    // set the directory here to the first in the vector if its not empty
+    if (!runnoDirVector.empty()) {
+      QString firstDir = QString::fromStdString(runnoDirVector[0]);
+      m_view->setFittingRunNo(firstDir);
+
+    } else if (m_view->getFittingRunNo().empty()) {
+      m_view->userWarning("Invalid Input",
+                          "Invalid directory or run number given. "
+                          "Please try again");
+    }
+
+  } catch (std::runtime_error &re) {
+    m_view->userWarning("Invalid file",
+                        "Unable to select the file; " +
+                            static_cast<std::string>(re.what()));
+    return;
+  }
+}
+
+void EnggDiffractionPresenter::updateFittingDirVec(
+    const std::string &bankDir, const std::string &focusedFile, bool multi_run,
+    std::vector<std::string> &fittingRunNoDirVec) {
+
+  try {
+    std::string cwd(bankDir);
+    Poco::DirectoryIterator it(cwd);
+    Poco::DirectoryIterator end;
+    while (it != end) {
+      if (it->isFile()) {
+        std::string itFilePath = it->path();
+        Poco::Path itBankfPath(itFilePath);
+
+        std::string itbankFileName = itBankfPath.getBaseName();
+        // check if it not any other file.. e.g: texture
+        if (itbankFileName.find(focusedFile) != std::string::npos) {
+          fittingRunNoDirVec.push_back(itFilePath);
+          if (multi_run)
+            return;
+        }
+      }
+      ++it;
+    }
+  } catch (std::runtime_error &re) {
+    m_view->userWarning("Invalid file",
+                        "File not found in the following directory; " +
+                            bankDir + ". " +
+                            static_cast<std::string>(re.what()));
+  }
+}
+
+void EnggDiffractionPresenter::enableMultiRun(
+    std::string firstRun, std::string lastRun,
+    std::vector<std::string> &fittingRunNoDirVec) {
+
+  bool firstDig = m_view->isDigit(firstRun);
+  bool lastDig = m_view->isDigit(lastRun);
+
+  std::vector<std::string> RunNumberVec;
+  if (firstDig && lastDig) {
+    int firstNum = std::stoi(firstRun);
+    int lastNum = std::stoi(lastRun);
+
+    if ((lastNum - firstNum) > 200) {
+      m_view->userWarning(
+          "Please try again",
+          "The specified run number range is "
+          "far to big, please try a smaller range of consecutive run numbers.");
+    }
+
+    else if (firstNum <= lastNum) {
+
+      for (int i = firstNum; i <= lastNum; i++) {
+        RunNumberVec.push_back(std::to_string(i));
+      }
+
+      auto focusDir = m_view->getFocusDir();
+      if (focusDir.empty()) {
+        m_view->userWarning(
+            "Invalid Input",
+            "Please check that a valid directory is "
+            "set for Output Folder under Focusing Settings on the "
+            "settings tab. "
+            "Please try again");
+      } else {
+        // if given a single run number instead
+        for (size_t i = 0; i < RunNumberVec.size(); i++) {
+          updateFittingDirVec(focusDir, RunNumberVec[i], true,
+                              fittingRunNoDirVec);
+        }
+        int diff = (lastNum - firstNum) + 1;
+        auto global_vec_size = fittingRunNoDirVec.size();
+        if (size_t(diff) == global_vec_size) {
+
+          m_view->addRunNoItem(RunNumberVec, true);
+
+          m_view->setBankEmit();
+        }
+      }
+    } else {
+      m_view->userWarning("Invalid Run Number",
+                          "One or more run file not found "
+                          "from the specified range of runs."
+                          "Please try again");
+    }
+  } else {
+    m_view->userWarning("Invalid Run Number",
+                        "The specfied range of run number "
+                        "entered is invalid. Please try again");
+  }
+}
+
+// Process Fitting Peaks begins here
+
 void EnggDiffractionPresenter::processFitPeaks() {
-  const std::string focusedRunNo = m_view->fittingRunNo();
+  const std::string focusedRunNo = m_view->getFittingRunNo();
   const std::string fitPeaksData = m_view->fittingPeaksData();
 
   g_log.debug() << "the expected peaks are: " << fitPeaksData << std::endl;
@@ -469,7 +690,8 @@ void EnggDiffractionPresenter::processFitPeaks() {
   g_log.notice() << "EnggDiffraction GUI: starting new "
                     "single peak fits into workspace '" +
                         outWSName + "'. This "
-                                    "may take some seconds... " << std::endl;
+                                    "may take some seconds... "
+                 << std::endl;
 
   // startAsyncFittingWorker
   // doFitting()
@@ -494,7 +716,8 @@ void EnggDiffractionPresenter::inputChecksBeforeFitting(
   if (ExpectedPeaks.empty()) {
     g_log.warning() << "Expected peaks were not passed, via fitting interface,"
                        "the default list of"
-                       "expected peaks will be utlised instead." << std::endl;
+                       "expected peaks will be utlised instead."
+                    << std::endl;
   }
   bool contains_non_digits =
       ExpectedPeaks.find_first_not_of("0123456789,. ") != std::string::npos;
@@ -528,7 +751,8 @@ void EnggDiffractionPresenter::doFitting(const std::string &focusedRunNo,
   // disable GUI to avoid any double threads
   m_view->enableCalibrateAndFocusActions(false);
   g_log.notice() << "EnggDiffraction GUI: starting new fitting. This may "
-                    "take a few seconds... " << std::endl;
+                    "take a few seconds... "
+                 << std::endl;
 
   MatrixWorkspace_sptr focusedWS;
   const std::string FocusedWSName = "engggui_fitting_focused_ws";
@@ -594,7 +818,8 @@ void EnggDiffractionPresenter::doFitting(const std::string &focusedRunNo,
 
   } catch (std::invalid_argument &ia) {
     g_log.error() << "Error, Fitting could not finish off correctly, " +
-                         std::string(ia.what()) << std::endl;
+                         std::string(ia.what())
+                  << std::endl;
     return;
   }
 }
@@ -614,7 +839,7 @@ void EnggDiffractionPresenter::runFittingAlgs(
       ADS.retrieveWS<ITableWorkspace>(FocusedFitPeaksTableName);
 
   size_t rowCount = table->rowCount();
-  std::string single_peak_out_WS = "engggui_fitting_single_peaks";
+  const std::string single_peak_out_WS = "engggui_fitting_single_peaks";
   std::string current_peak_out_WS;
 
   std::string Bk2BkExpFunctionStr;
@@ -698,7 +923,7 @@ std::string EnggDiffractionPresenter::functionStrFactory(
   double S = paramTableWS->cell<double>(row, size_t(11));
 
   startX = boost::lexical_cast<std::string>(X0 - (3 * S));
-  endX = boost::lexical_cast<std::string>(X0 + (3 * S));
+  endX = boost::lexical_cast<std::string>(X0 + (5 * S));
 
   std::string functionStr =
       "name=LinearBackground,A0=" + boost::lexical_cast<std::string>(A0) +
@@ -730,7 +955,8 @@ void EnggDiffractionPresenter::runEvaluateFunctionAlg(
   } catch (std::runtime_error &re) {
     g_log.error() << "Could not run the algorithm EvaluateFunction, "
                      "Error description: " +
-                         static_cast<std::string>(re.what()) << std::endl;
+                         static_cast<std::string>(re.what())
+                  << std::endl;
   }
 }
 
@@ -747,7 +973,8 @@ void EnggDiffractionPresenter::runCropWorkspaceAlg(std::string workspaceName) {
   } catch (std::runtime_error &re) {
     g_log.error() << "Could not run the algorithm CropWorkspace, "
                      "Error description: " +
-                         static_cast<std::string>(re.what()) << std::endl;
+                         static_cast<std::string>(re.what())
+                  << std::endl;
   }
 }
 
@@ -764,7 +991,8 @@ void EnggDiffractionPresenter::runAppendSpectraAlg(std::string workspace1Name,
   } catch (std::runtime_error &re) {
     g_log.error() << "Could not run the algorithm AppendWorkspace, "
                      "Error description: " +
-                         static_cast<std::string>(re.what()) << std::endl;
+                         static_cast<std::string>(re.what())
+                  << std::endl;
   }
 }
 
@@ -781,7 +1009,8 @@ void EnggDiffractionPresenter::runRebinToWorkspaceAlg(
   } catch (std::runtime_error &re) {
     g_log.error() << "Could not run the algorithm RebinToWorkspace, "
                      "Error description: " +
-                         static_cast<std::string>(re.what()) << std::endl;
+                         static_cast<std::string>(re.what())
+                  << std::endl;
   }
 }
 
@@ -800,12 +1029,13 @@ void EnggDiffractionPresenter::runConvetUnitsAlg(std::string workspaceName) {
   } catch (std::runtime_error &re) {
     g_log.error() << "Could not run the algorithm ConvertUnits, "
                      "Error description: " +
-                         static_cast<std::string>(re.what()) << std::endl;
+                         static_cast<std::string>(re.what())
+                  << std::endl;
   }
 }
 
 void EnggDiffractionPresenter::runCloneWorkspaceAlg(
-    std::string inputWorkspace, std::string outputWorkspace) {
+    std::string inputWorkspace, const std::string &outputWorkspace) {
 
   auto cloneWorkspace =
       Mantid::API::AlgorithmManager::Instance().createUnmanaged(
@@ -818,12 +1048,13 @@ void EnggDiffractionPresenter::runCloneWorkspaceAlg(
   } catch (std::runtime_error &re) {
     g_log.error() << "Could not run the algorithm CreateWorkspace, "
                      "Error description: " +
-                         static_cast<std::string>(re.what()) << std::endl;
+                         static_cast<std::string>(re.what())
+                  << std::endl;
   }
 }
 
-void EnggDiffractionPresenter::setDataToClonedWS(std::string current_WS,
-                                                 std::string cloned_WS) {
+void EnggDiffractionPresenter::setDataToClonedWS(std::string &current_WS,
+                                                 const std::string &cloned_WS) {
   AnalysisDataServiceImpl &ADS = Mantid::API::AnalysisDataService::Instance();
   auto currentPeakWS = ADS.retrieveWS<MatrixWorkspace>(current_WS);
   auto currentClonedWS = ADS.retrieveWS<MatrixWorkspace>(cloned_WS);
@@ -855,7 +1086,8 @@ void EnggDiffractionPresenter::plotFitPeaksCurves() {
   } else {
     g_log.error() << "Fitting could not be plotted as there is no " +
                          singlePeaksWs + " or " + focusedPeaksWs +
-                         " workspace found." << std::endl;
+                         " workspace found."
+                  << std::endl;
   }
 }
 
@@ -873,7 +1105,8 @@ void EnggDiffractionPresenter::fittingFinished() {
 
   } else {
     g_log.notice() << "The single peak fitting finished - the output "
-                      "workspace is ready." << std::endl;
+                      "workspace is ready."
+                   << std::endl;
 
     if (m_workerThread) {
       delete m_workerThread;
@@ -882,7 +1115,8 @@ void EnggDiffractionPresenter::fittingFinished() {
 
     g_log.notice()
         << "EnggDiffraction GUI: plotting peaks for single peak fits "
-           "has started... " << std::endl;
+           "has started... "
+        << std::endl;
     try {
       plotFitPeaksCurves();
 
@@ -895,7 +1129,8 @@ void EnggDiffractionPresenter::fittingFinished() {
       throw;
     }
     g_log.notice() << "EnggDiffraction GUI: plotting of peaks for single peak "
-                      "fits has completed. " << std::endl;
+                      "fits has completed. "
+                   << std::endl;
   }
   // enable the GUI
   m_view->enableCalibrateAndFocusActions(true);
@@ -928,7 +1163,8 @@ void EnggDiffractionPresenter::processStopFocus() {
   if (m_workerThread) {
     if (m_workerThread->isRunning()) {
       g_log.notice() << "A focus process is currently running, shutting "
-                        "it down as soon as possible..." << std::endl;
+                        "it down as soon as possible..."
+                     << std::endl;
 
       g_abortThread = true;
       g_log.warning() << "Focus Stop has been clicked, please wait until "
@@ -1277,7 +1513,8 @@ void EnggDiffractionPresenter::doNewCalibration(const std::string &outFilename,
   } catch (std::invalid_argument &) {
     g_log.error()
         << "The calibration calculations failed. Some input properties "
-           "were not valid. See log messages for details. " << std::endl;
+           "were not valid. See log messages for details. "
+        << std::endl;
   }
   // restore normal data search paths
   conf.setDataSearchDirs(tmpDirs);
@@ -1753,7 +1990,8 @@ void EnggDiffractionPresenter::doFocusRun(const std::string &dir,
   g_lastValidRun = runNo;
 
   g_log.notice() << "Generating new focusing workspace(s) and file(s) into "
-                    "this directory: " << dir << std::endl;
+                    "this directory: "
+                 << dir << std::endl;
 
   // TODO: this is almost 100% common with doNewCalibrate() - refactor
   EnggDiffCalibSettings cs = m_view->currentCalibSettings();
@@ -1798,7 +2036,8 @@ void EnggDiffractionPresenter::doFocusRun(const std::string &dir,
         loadDetectorGroupingCSV(dgFile, bankIDs, specs);
       } catch (std::runtime_error &re) {
         g_log.error() << "Error loading detector grouping file: " + dgFile +
-                             ". Detailed error: " + re.what() << std::endl;
+                             ". Detailed error: " + re.what()
+                      << std::endl;
         bankIDs.clear();
         specs.clear();
       }
@@ -1814,8 +2053,8 @@ void EnggDiffractionPresenter::doFocusRun(const std::string &dir,
         fpath.append(effectiveFilenames[idx]).toString();
     g_log.notice() << "Generating new focused file (bank " +
                           boost::lexical_cast<std::string>(bankIDs[idx]) +
-                          ") for run " + runNo +
-                          " into: " << effectiveFilenames[idx] << std::endl;
+                          ") for run " + runNo + " into: "
+                   << effectiveFilenames[idx] << std::endl;
     try {
       m_focusFinishedOK = false;
       doFocusing(cs, fullFilename, runNo, bankIDs[idx], specs[idx], dgFile);
@@ -1828,8 +2067,8 @@ void EnggDiffractionPresenter::doFocusRun(const std::string &dir,
     } catch (std::invalid_argument &ia) {
       g_log.error() << "The focusing failed. Some input properties "
                        "were not valid. "
-                       "See log messages for details. Error: " << ia.what()
-                    << std::endl;
+                       "See log messages for details. Error: "
+                    << ia.what() << std::endl;
     }
   }
 
@@ -1924,7 +2163,8 @@ void EnggDiffractionPresenter::focusingFinished() {
     if (lastRun != lastValid) {
       g_log.warning()
           << "Focussing process has been stopped, last successful "
-             "run number: " << g_lastValidRun
+             "run number: "
+          << g_lastValidRun
           << " , total number of focus run that could not be processed: "
           << (lastRun - lastValid) << std::endl;
     }
@@ -2003,7 +2243,8 @@ void EnggDiffractionPresenter::doFocusing(const EnggDiffCalibSettings &cs,
 
     if (multi_RunNo.size() == 1) {
       g_log.notice() << "Only single file has been listed, the Sum Of Files"
-                        "cannot not be processed" << std::endl;
+                        "cannot not be processed"
+                     << std::endl;
     } else {
       g_log.notice()
           << "Load alogirthm has successfully merged the files provided"
@@ -2173,7 +2414,8 @@ void EnggDiffractionPresenter::loadOrCalcVanadiumWorkspaces(
                        "This is possibly because some of the settings are not "
                        "consistent. Please check the log messages for "
                        "details. Details: " +
-                           std::string(ia.what()) << std::endl;
+                           std::string(ia.what())
+                    << std::endl;
       throw;
     } catch (std::runtime_error &re) {
       g_log.error() << "Failed to calculate Vanadium corrections. "
@@ -2182,14 +2424,15 @@ void EnggDiffractionPresenter::loadOrCalcVanadiumWorkspaces(
                        "There was no obvious error in the input properties "
                        "but the algorithm failed. Please check the log "
                        "messages for details." +
-                           std::string(re.what()) << std::endl;
+                           std::string(re.what())
+                    << std::endl;
       throw;
     }
   } else {
     g_log.notice() << "Found precalculated Vanadium correction features for "
-                      "Vanadium run " << vanNo
-                   << ". Re-using these files: " << preIntegFilename << ", and "
-                   << preCurvesFilename << std::endl;
+                      "Vanadium run "
+                   << vanNo << ". Re-using these files: " << preIntegFilename
+                   << ", and " << preCurvesFilename << std::endl;
     try {
       loadVanadiumPrecalcWorkspaces(preIntegFilename, preCurvesFilename,
                                     vanIntegWS, vanCurvesWS, vanNo, specNos);
@@ -2452,14 +2695,15 @@ void EnggDiffractionPresenter::doRebinningTime(const std::string &runNo,
   } catch (std::invalid_argument &ia) {
     g_log.error() << "Error when rebinning with a regular bin width in time. "
                      "There was an error in the inputs to the algorithm " +
-                         rebinName + ". Error description: " + ia.what() +
-                         "." << std::endl;
+                         rebinName + ". Error description: " + ia.what() + "."
+                  << std::endl;
     return;
   } catch (std::runtime_error &re) {
     g_log.error() << "Error when rebinning with a regular bin width in time. "
                      "Coult not run the algorithm " +
                          rebinName + " successfully. Error description: " +
-                         re.what() + "." << std::endl;
+                         re.what() + "."
+                  << std::endl;
     return;
   }
 
@@ -2555,14 +2799,15 @@ void EnggDiffractionPresenter::doRebinningPulses(const std::string &runNo,
   } catch (std::invalid_argument &ia) {
     g_log.error() << "Error when rebinning by pulse times. "
                      "There was an error in the inputs to the algorithm " +
-                         rebinName + ". Error description: " + ia.what() +
-                         "." << std::endl;
+                         rebinName + ". Error description: " + ia.what() + "."
+                  << std::endl;
     return;
   } catch (std::runtime_error &re) {
     g_log.error() << "Error when rebinning by pulse times. "
                      "Coult not run the algorithm " +
                          rebinName + " successfully. Error description: " +
-                         re.what() + "." << std::endl;
+                         re.what() + "."
+                  << std::endl;
     return;
   }
 
@@ -2616,7 +2861,8 @@ void EnggDiffractionPresenter::rebinningFinished() {
         << std::endl;
   } else {
     g_log.notice() << "Pre-processing (re-binning) finished - the output "
-                      "workspace is ready." << std::endl;
+                      "workspace is ready."
+                   << std::endl;
   }
   if (m_workerThread) {
     delete m_workerThread;

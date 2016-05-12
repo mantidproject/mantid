@@ -116,10 +116,9 @@ public:
   void runConvetUnitsAlg(std::string workspaceName);
 
   void runCloneWorkspaceAlg(std::string inputWorkspace,
-                            std::string outputWorkspace);
+                            const std::string &outputWorkspace);
 
-  void setDataToClonedWS(std::string inputWorkspace,
-                         std::string outputWorkspace);
+  void setDataToClonedWS(std::string &current_WS, const std::string &cloned_WS);
 
 protected:
   void initialize();
@@ -149,6 +148,7 @@ protected slots:
   void focusingFinished();
   void rebinningFinished();
   void fittingFinished();
+  void fittingRunNoChanged();
 
 private:
   bool validateRBNumber(const std::string &rbn) const;
@@ -277,6 +277,13 @@ private:
 
   void inputChecksBeforeFitting(const std::string &focusedRunNo,
                                 const std::string &ExpectedPeaks);
+
+  void updateFittingDirVec(const std::string &bankDir,
+                           const std::string &focusedFile, const bool multi_run,
+                           std::vector<std::string> &fittingRunNoDirVec);
+
+  void enableMultiRun(std::string firstRun, std::string lastRun,
+                      std::vector<std::string> &fittingRunNoDirVec);
 
   // plots workspace according to the user selection
   void plotFocusedWorkspace(std::string outWSName);

@@ -706,13 +706,13 @@ void LoadMuonNexus1::runLoadLog(DataObjects::Workspace2D_sptr localWorkspace) {
   try {
     loadLog->execute();
   } catch (std::runtime_error &) {
-    g_log.error("Unable to successfully run LoadLog Child Algorithm");
+    g_log.error("Unable to successfully run LoadMuonLog Child Algorithm");
   } catch (std::logic_error &) {
-    g_log.error("Unable to successfully run LoadLog Child Algorithm");
+    g_log.error("Unable to successfully run LoadMuonLog Child Algorithm");
   }
 
   if (!loadLog->isExecuted())
-    g_log.error("Unable to successfully run LoadLog Child Algorithm");
+    g_log.error("Unable to successfully run LoadMuonLog Child Algorithm");
 
   NXRoot root(m_filename);
 
