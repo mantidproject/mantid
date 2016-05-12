@@ -66,12 +66,16 @@ public:
   XMode xMode() const noexcept { return m_xMode; }
 
   BinEdges binEdges() const;
+  BinEdgeVariances binEdgeVariances() const;
   BinEdgeStandardDeviations binEdgeStandardDeviations() const;
   Points points() const;
+  PointVariances pointVariances() const;
   PointStandardDeviations pointStandardDeviations() const;
   template <typename... T> void setBinEdges(T &&... data) & ;
+  template <typename... T> void setBinEdgeVariances(T &&... data) & ;
   template <typename... T> void setBinEdgeStandardDeviations(T &&... data) & ;
   template <typename... T> void setPoints(T &&... data) & ;
+  template <typename... T> void setPointVariances(T &&... data) & ;
   template <typename... T> void setPointStandardDeviations(T &&... data) & ;
 
   const HistogramX &x() const { return *m_x; }
@@ -137,17 +141,34 @@ template <typename... T> void Histogram::setBinEdges(T &&... data) & {
   m_x = edges.cowData();
 }
 
+/// Sets the Histogram's bin edge variances.
+template <typename... T> void Histogram::setBinEdgeVariances(T &&... data) & {
+  if(m_xMode != XMode::BinEdges)
+    throw std::logic_error("Histogram::setBinEdgeVariances: XMode is not "
+                           "BinEdges, cannot set bin-edge variances.");
+  BinEdgeVariances edges(std::forward<T>(data)...);
+  if(edges.size() != m_x->size())
+    throw std::logic_error("Histogram::setBinEdgeVariances: size mismatch.");
+  // No sensible self assignment is possible, we do not store variances, so if
+  // anyone tries to set our current data as variances it must be an error.
+  if (selfAssignmentDx(data...))
+    throw std::logic_error("Histogram::setBinEdgeVariances: Attempt to "
+                           "self-assign standard deviations as variance.");
+  // Convert variances to standard deviations before storing it.
+  m_dx = BinEdgeStandardDeviations(std::move(edges)).cowData();
+}
+
 /// Sets the Histogram's bin edge standard deviations.
 template <typename... T>
 void Histogram::setBinEdgeStandardDeviations(T &&... data) & {
   if(m_xMode != XMode::BinEdges)
-    throw std::logic_error("Histogram::setBinEdgeStandardDeviations: XMode is "
-                           "not BinEdges, cannot set bin-edge standard "
-                           "deviations.\n");
+    throw std::logic_error(
+        "Histogram::setBinEdgeStandardDeviations: XMode is "
+        "not BinEdges, cannot set bin-edge standard deviations.");
   BinEdgeStandardDeviations edges(std::forward<T>(data)...);
   if(edges.size() != m_x->size())
     throw std::logic_error(
-        "Histogram::setBinEdgeStandardDeviations: size mismatch.\n");
+        "Histogram::setBinEdgeStandardDeviations: size mismatch.");
   if (selfAssignmentDx(data...))
     return;
   m_dx = edges.cowData();
@@ -170,17 +191,33 @@ template <typename... T> void Histogram::setPoints(T &&... data) & {
   m_x = points.cowData();
 }
 
+/// Sets the Histogram's point variances.
+template <typename... T> void Histogram::setPointVariances(T &&... data) & {
+  if (m_xMode != XMode::Points)
+    throw std::logic_error("Histogram::setPointVariances: XMode is not Points, "
+                           "cannot set bin-edge variances.");
+  PointVariances points(std::forward<T>(data)...);
+  if (points.size() != m_x->size())
+    throw std::logic_error("Histogram::setPointVariances: size mismatch.");
+  // No sensible self assignment is possible, we do not store variances, so if
+  // anyone tries to set our current data as variances it must be an error.
+  if (selfAssignmentDx(data...))
+    throw std::logic_error("Histogram::setPointVariances: Attempt to "
+                           "self-assign standard deviations as variance.");
+  // Convert variances to standard deviations before storing it.
+  m_dx = PointStandardDeviations(std::move(points)).cowData();
+}
+
 /// Sets the Histogram's point standard deviations.
 template <typename... T>
 void Histogram::setPointStandardDeviations(T &&... data) & {
   if(m_xMode != XMode::Points)
     throw std::logic_error("Histogram::setPointStandardDeviations: XMode is "
-                           "not Points, cannot set point standard "
-                           "deviations.\n");
+                           "not Points, cannot set point standard deviations.");
   PointStandardDeviations points(std::forward<T>(data)...);
   if(points.size() != m_x->size())
     throw std::logic_error(
-        "Histogram::setPointStandardDeviations: size mismatch.\n");
+        "Histogram::setPointStandardDeviations: size mismatch.");
   if (selfAssignmentDx(data...))
     return;
   m_dx = points.cowData();

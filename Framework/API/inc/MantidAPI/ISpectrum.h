@@ -122,12 +122,18 @@ public:
   template <typename... T> void setBinEdges(T &&... data) {
     mutableHistogramRef().setBinEdges(std::forward<T>(data)...);
   }
+  template <typename... T> void setBinEdgeVariances(T &&... data) {
+    mutableHistogramRef().setBinEdgeVariances(std::forward<T>(data)...);
+  }
   template <typename... T> void setBinEdgeStandardDeviations(T &&... data) {
     mutableHistogramRef().setBinEdgeStandardDeviations(
         std::forward<T>(data)...);
   }
   template <typename... T> void setPoints(T &&... data) {
     mutableHistogramRef().setPoints(std::forward<T>(data)...);
+  }
+  template <typename... T> void setPointVariances(T &&... data) {
+    mutableHistogramRef().setPointVariances(std::forward<T>(data)...);
   }
   template <typename... T> void setPointStandardDeviations(T &&... data) {
     mutableHistogramRef().setPointStandardDeviations(std::forward<T>(data)...);

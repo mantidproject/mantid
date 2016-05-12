@@ -28,6 +28,16 @@ BinEdges Histogram::binEdges() const {
     return BinEdges(Points(m_x));
 }
 
+/// Returns the variances of the bin edges of the Histogram.
+BinEdgeVariances Histogram::binEdgeVariances() const {
+  // Currently data is always stored as standard deviations, need to convert.
+  // TODO Figure out and define right conversion order.
+  if (xMode() == XMode::BinEdges)
+    return BinEdgeVariances(BinEdgeStandardDeviations(m_dx));
+  else
+    return BinEdgeVariances(PointVariances(PointStandardDeviations(m_dx)));
+}
+
 /// Returns the standard deviations of the bin edges of the Histogram.
 BinEdgeStandardDeviations Histogram::binEdgeStandardDeviations() const {
   if (xMode() == XMode::BinEdges)
@@ -46,6 +56,16 @@ Points Histogram::points() const {
     return Points(BinEdges(m_x));
   else
     return Points(m_x);
+}
+
+/// Returns the variances of the points (or bin centers) of the Histogram.
+PointVariances Histogram::pointVariances() const {
+  // Currently data is always stored as standard deviations, need to convert.
+  // TODO Figure out and define right conversion order.
+  if (xMode() == XMode::BinEdges)
+    return PointVariances(BinEdgeVariances(BinEdgeStandardDeviations(m_dx)));
+  else
+    return PointVariances(PointStandardDeviations(m_dx));
 }
 
 /// Returns the standard deviations of the points (or bin centers) of the Histogram.
