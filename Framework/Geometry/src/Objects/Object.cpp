@@ -1511,8 +1511,8 @@ const BoundingBox &Object::getBoundingBox() const {
   // Set to a large box so that a) we don't keep trying to calculate a box
   // every time this is called and b) to serve as a visual indicator that
   // something went wrong.
-  const_cast<Object *>(this)
-      ->defineBoundingBox(100, 100, 100, -100, -100, -100);
+  const_cast<Object *>(this)->defineBoundingBox(100, 100, 100, -100, -100,
+                                                -100);
   return m_boundingBox;
 }
 
@@ -1645,6 +1645,7 @@ void Object::calcBoundingBoxByGeometry() {
     }
   } break;
   case 2: // HEXAHEDRON
+  {
     // Vectors are in the same order as the following webpage:
     // http://docs.mantidproject.org/nightly/concepts/HowToDefineGeometricShape.html#hexahedron
     auto &lf = vectors[1];
@@ -1659,7 +1660,7 @@ void Object::calcBoundingBoxByGeometry() {
     maxY = rf.Y();
     minZ = 0;
     maxZ = dz.Z();
-    break;
+  } break;
   case 4: // CYLINDER
   case 6: // SEGMENTED_CYLINDER
   {
