@@ -5,17 +5,26 @@ Diffraction Changes
 .. contents:: Table of Contents
    :local:
 
+Documentation
+-------------
+
+- The documentation for all calibration approaches, including Powder diffrction, single crystal and engineering calibrations has been pulled together, and expanded :ref:`here<Calibration>`.
+
 Crystal Improvements
 --------------------
 
-- :ref:`SCDCalibratePanels <algm-SCDCalibratePanels>` has parameter errors reduced, option for simplex minimization,
-  and 3 new workspaces which can plot calculated vs theoretical columns, rows, and TOF for each bank.
+- :ref:`SCDCalibratePanels <algm-SCDCalibratePanels>` has parameter errors reduced,
+   option for simplex minimization, and 3 new workspaces which can plot calculated 
+   vs theoretical columns, rows, and TOF for each bank. Calibration is now as good 
+   as ISAW's for Mandi data.
 - 5 detectors added to the MANDI instrument geometry
 - :ref:`LoadCIF <algm-LoadCIF>` can now also load structures where only anisotropic displacement parameters are given,
   which are converted to equivalent isotropic parameters.
 - :ref:`SaveHKL <algm-SaveHKL>` has option to write the same output as anvred3.py including direction cosines.
 - :ref:`LoadHKL <algm-LoadHKL>` reads hkl output that includes direction cosines.
 - :ref:`SaveIsawPeaks <algm-SaveIsawPeaks>` has DetCal information sorted by detector numbers
+- :ref:`StatisticsOfPeaksWorkspace <algm-StatisticsOfPeaksWorkspace>` has resolution shells in units of d-Spacing.
+
 
 Engineering Diffraction
 -----------------------
@@ -47,10 +56,11 @@ Graphical user interface:
   now view the plot in `dSpacing` instead `ToF`, which enables you to
   rerun the fitting process after selecting peaks from the interface.
 
-Powder Diffraction
-------------------
+- Improvements to Fitting tab, Single peak fitting for consecutive run
+  number's focused files has now been enabled. The tab will automatically load
+  the consecutive run numbers to the list widget from the range provided by the
+  user, bank combo-box will update upon selection of run number.
 
-- :ref:`PDFFourierTransform <algm-PDFFourierTransform>` has been corrected in its calculation of errors.
 
 Imaging
 -------
@@ -82,6 +92,12 @@ Improvements in the tomographic reconstruction graphical user interface:
   pass, and supports different aggregation methods via the new
   algorithm :ref:`ImggAggregateWavelengths
   <algm-ImggAggregateWavelengths>`.
+
+
+Powder Diffraction
+------------------
+
+- :ref:`PDFFourierTransform <algm-PDFFourierTransform>` has been corrected in its calculation of errors.
 
 
 Powder Diffraction Scripts
