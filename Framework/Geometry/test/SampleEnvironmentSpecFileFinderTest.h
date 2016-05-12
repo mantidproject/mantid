@@ -8,6 +8,7 @@
 #include <Poco/Path.h>
 
 #include <fstream>
+#include <vector>
 
 using Mantid::Geometry::SampleEnvironmentSpecFileFinder;
 using Mantid::Geometry::SampleEnvironmentSpec_uptr;
@@ -95,9 +96,9 @@ public:
   // Failure tests
   //---------------------------------------------------------------------------
   void test_Finder_Throws_If_Empty_Directory_List_Given() {
-    TS_ASSERT_THROWS(
-        SampleEnvironmentSpecFileFinder(std::vector<std::string>()),
-        std::invalid_argument);
+    std::vector<std::string> empty;
+    TS_ASSERT_THROWS(SampleEnvironmentSpecFileFinder finder(empty),
+                     std::invalid_argument);
   }
 
   void test_Finder_Throws_If_Facility_Correct_Instrument_Incorrect() {

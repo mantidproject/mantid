@@ -103,9 +103,6 @@ private:
       spec->addCan(large);
       return std::move(spec);
     }
-
-  private:
-    mutable size_t m_callCount;
   };
 };
 

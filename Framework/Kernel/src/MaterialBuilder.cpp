@@ -51,9 +51,10 @@ MaterialBuilder &MaterialBuilder::setFormula(const std::string &formula) {
   try {
     m_formula = Mantid::Kernel::make_unique<ChemicalFormula>(
         ChemicalFormula(Material::parseChemicalFormula(formula)));
-  } catch (std::runtime_error &ex) {
+  } catch (std::runtime_error & exc) {
     throw std::invalid_argument(
-        "MaterialBuilder::setFormula() - Unable to parse chemical formula.");
+        "MaterialBuilder::setFormula() - Unable to parse chemical formula: " +
+        std::string(exc.what()));
   }
   return *this;
 }
