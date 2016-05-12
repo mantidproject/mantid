@@ -846,7 +846,6 @@ set ( TEST_FILES
 	TimeAtSampleStrategyElasticTest.h
 	TimeAtSampleStrategyIndirectTest.h
 	Tomography/FBPTomopyTest.h
-	Tomography/TomopyUtilsTest.h
 	TransposeTest.h
 	UnGroupWorkspaceTest.h
 	UnaryOperationTest.h

@@ -132,7 +132,7 @@ ImggTomographicReconstruction::validateInputs() {
         result[PROP_COR] =
             "The center of rotation must be between 0 and the "
             "number of columns in the input projection images (0 to " +
-            std::to_string(bsize-1) + ")";
+            std::to_string(bsize - 1) + ")";
       }
     }
     // Not validating requirements on all input workspaces here (there could be
@@ -164,7 +164,6 @@ bool ImggTomographicReconstruction::processGroups() {
   API::WorkspaceGroup_const_sptr wks =
       boost::dynamic_pointer_cast<const API::WorkspaceGroup>(inWks);
 
-  // API::WorkspaceGroup_sptr wks = getProperty(PROP_INPUT_WS);
   if (!wks) {
     g_log.error(
         "Could not retrieve the input workspace as a workspace group: ");
@@ -172,11 +171,26 @@ bool ImggTomographicReconstruction::processGroups() {
   }
 
   // TODO: apply validators here on every input image/workspace
-  // auto wsValidator = boost::make_shared<Kernel::CompositeValidator>();
-  // wsValidator->add<API::CommonBinsValidator>();
-  // wsValidator->add<API::HistogramValidator>();
-  // wsValidator->add<API::WorkspaceUnitValidator>("Label");
-  // if (isValid(ws) != "") { throw; }
+  for (size_t idx = 0; idx < wks->size(); idx++) {
+    auto item = wks->getItem(0);
+    auto mWS = boost::dynamic_pointer_cast<API::MatrixWorkspace>(item);
+    if (!mWS) {
+      throw std::runtime_error("Unable to get a matrix workspace from the "
+                               "element of te workspace group with title " +
+                               item->getTitle());
+    }
+
+    auto wsValidator = boost::make_shared<Kernel::CompositeValidator>();
+    wsValidator->add<API::CommonBinsValidator>();
+    wsValidator->add<API::HistogramValidator>();
+    // Probably we won't need this:
+    // wsValidator->add<API::WorkspaceUnitValidator>("Label");
+    const std::string validation = wsValidator->isValid(mWS);
+    if (validation != "") {
+      throw std::runtime_error(
+          "Validation of input image / matrix workspace failed: " + validation);
+    }
+  }
 
   double minAngle = getProperty(PROP_MIN_PROJ_ANGLE);
   double maxAngle = getProperty(PROP_MAX_PROJ_ANGLE);
@@ -198,8 +212,8 @@ bool ImggTomographicReconstruction::processGroups() {
   auto centers = prepareCenters(cor, ysize);
 
   Mantid::Algorithms::Tomography::FBPTomopy(
-      &inVol->front(), ysize, projSize, xsize, &centers->front(),
-      &angles->front(), &reconVol->front(), xsize, ysize);
+      inVol->data(), ysize, projSize, xsize, centers->data(), angles->data(),
+      reconVol->data(), xsize, ysize);
 
   size_t expectedVox = ysize * ysize * xsize;
   if (reconVol->size() != expectedVox) {
@@ -359,7 +373,6 @@ ImggTomographicReconstruction::buildOutputWks(const std::vector<float> &dataVol,
   // auto wsGroup = boost::make_shared<API::WorkspaceGroup>();
   auto wsGroup = API::WorkspaceGroup_sptr(new API::WorkspaceGroup());
   wsGroup->setTitle("Reconstructed volume from imaging projection data");
-
 
   const size_t oneSliceSize = xsize * ysize;
   PARALLEL_FOR_NO_WSP_CHECK()
