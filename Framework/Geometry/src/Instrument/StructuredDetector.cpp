@@ -276,8 +276,7 @@ std::vector<double> const &StructuredDetector::getYValues() const {
 * @param yPixels :: number of pixels in Y
 * @param x :: X vertices
 * @param y :: Y vertices
-* @param beamDirection :: Shows axis alignment of the beam. Only z aligned beams
-*are allowed.
+* @param isZBeam :: Whether or not the alongBeam axis is z
 * @param idStart :: detector ID of the first pixel
 * @param idFillByFirstY :: set to true if ID numbers increase with Y indices
 *first. That is: (0,0)=0; (0,1)=1, (0,2)=2 and so on.
@@ -292,8 +291,7 @@ std::vector<double> const &StructuredDetector::getYValues() const {
 */
 void StructuredDetector::initialize(size_t xPixels, size_t yPixels,
                                     const std::vector<double> &x,
-                                    const std::vector<double> &y,
-                                    const std::string &beamDirection,
+                                    const std::vector<double> &y, bool isZBeam,
                                     detid_t idStart, bool idFillByFirstY,
                                     int idStepByRow, int idStep) {
   if (m_map)
@@ -325,9 +323,10 @@ void StructuredDetector::initialize(size_t xPixels, size_t yPixels,
   if (x.size() != (size_t)((m_xPixels + 1) * (m_yPixels + 1)))
     throw std::invalid_argument("StructuredDetector::initialize(): x.size() "
                                 "should be = (xPixels+1)*(yPixels+1)");
-  if (!(beamDirection.compare("z") == 0))
-    throw std::invalid_argument(
-        "Expecting reference_frame to provide z as beam axis.");
+  if (!isZBeam) // StructuredDetector only allows z-axis aligned beams.
+    throw std::invalid_argument("Expecting reference_frame to provide z as "
+                                "beam axis. StructuredDetecor only allows "
+                                "z-axis aligned beams.");
 
   // Store vertices
   m_xvalues = x;

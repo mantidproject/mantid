@@ -126,7 +126,7 @@ public:
     std::vector<double> y{0, 0, 0, 1, 1, 1, 2, 2, 2};
 
     // Initialize with these parameters
-    det->initialize(2, 2, x, y, "z", 0, true, 2, 1);
+    det->initialize(2, 2, x, y, true, 0, true, 2, 1);
 
     do_test_on(det);
 
@@ -146,8 +146,10 @@ public:
     std::vector<double> x{0, 1, 2, 0, 1, 2, 0, 1, 2};
     std::vector<double> y{0, 0, 0, 1, 1, 1, 2, 2, 2};
 
-    TS_ASSERT_THROWS(det->initialize(2, 2, x, y, "x", 0, true, 2, 1),
-                     std::invalid_argument);
+    TSM_ASSERT_THROWS("StructuredDetectors created with beams not aligned "
+                      "along the z-axis should fail.",
+                      det->initialize(2, 2, x, y, false, 0, true, 2, 1),
+                      std::invalid_argument);
 
     delete det;
   }
@@ -163,18 +165,18 @@ public:
     std::vector<double> y{0, 0, 0, 1, 1, 1};
 
     // Initialize with these parameters
-    TS_ASSERT_THROWS(det->initialize(2, 2, x, y, "z", 0, true, 2, 1),
+    TS_ASSERT_THROWS(det->initialize(2, 2, x, y, true, 0, true, 2, 1),
                      std::invalid_argument);
 
     x.resize(3);
 
-    TS_ASSERT_THROWS(det->initialize(2, 2, x, y, "z", 0, true, 2, 1),
+    TS_ASSERT_THROWS(det->initialize(2, 2, x, y, true, 0, true, 2, 1),
                      std::invalid_argument);
 
     x.resize(0);
     y.resize(0);
 
-    TS_ASSERT_THROWS(det->initialize(2, 2, x, y, "z", 0, true, 2, 1),
+    TS_ASSERT_THROWS(det->initialize(2, 2, x, y, true, 0, true, 2, 1),
                      std::invalid_argument);
 
     delete det;

@@ -1344,7 +1344,7 @@ ShapeFactory::createHexahedralShape(double xlb, double xlf, double xrf,
   handler->setHexahedron(hex.lbb, hex.lfb, hex.rfb, hex.rbb, hex.lbt, hex.lft,
                          hex.rft, hex.rbt);
 
-  shape->defineBoundingBox(std::max(xrb, xrf), yrf, 0.001, std::min(xlf, xlb),
+  shape->defineBoundingBox(std::max(xrb, xrf), yrf, ZDEPTH, std::min(xlf, xlb),
                            ylb, 0);
 
   return shape;
