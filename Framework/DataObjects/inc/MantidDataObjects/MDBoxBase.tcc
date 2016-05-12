@@ -273,8 +273,6 @@ TMDE(size_t MDBoxBase)::addEvents(const std::vector<MDE> &events) {
 TMDE(size_t MDBoxBase)::addEventsUnsafe(const std::vector<MDE> &events) {
   // --- Go event by event and add them ----
   for (const auto &evnt : events) {
-    // Check out-of-bounds-ness
-    // Event was in bounds; add it
     addEventUnsafe(evnt);
   }
 

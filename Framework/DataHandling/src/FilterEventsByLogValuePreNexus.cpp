@@ -2446,10 +2446,9 @@ void FilterEventsByLogValuePreNexus::readPulseidFile(
   if (m_numPulses > 0) {
     DateAndTime lastPulseDateTime(0, 0);
     this->pulsetimes.reserve(m_numPulses);
-    for (size_t i = 0; i < m_numPulses; i++) {
-      Pulse &it = pulses[i];
-      DateAndTime pulseDateTime(static_cast<int64_t>(it.seconds),
-                                static_cast<int64_t>(it.nanoseconds));
+    for (const auto &pulse : pulses) {
+      DateAndTime pulseDateTime(static_cast<int64_t>(pulse.seconds),
+                                static_cast<int64_t>(pulse.nanoseconds));
       this->pulsetimes.push_back(pulseDateTime);
       this->m_vecEventIndex.push_back(it.event_index);
 

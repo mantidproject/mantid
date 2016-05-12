@@ -202,8 +202,7 @@ TMDE(MDGridBox)::MDGridBox(const MDGridBox<MDE, nd> &other,
       newBox->setParent(this);
       m_Children.push_back(newBox);
     } else if (otherMDGridBox) {
-      auto newBox =
-          new MDGridBox<MDE, nd>(*otherMDGridBox, otherBC);
+      auto newBox = new MDGridBox<MDE, nd>(*otherMDGridBox, otherBC);
       newBox->setParent(this);
       m_Children.push_back(newBox);
     } else {

@@ -392,14 +392,14 @@ TMDE(bool MDBox)::isDataAdded() const {
  * @param centroid [out] :: nd-sized array that will be set to the centroid.
  */
 TMDE(void MDBox)::calculateCentroid(coord_t *centroid) const {
-  std::fill_n(centroid,nd,0.0f);
+  std::fill_n(centroid, nd, 0.0f);
 
   // Signal was calculated before (when adding)
   // Keep 0.0 if the signal is null. This avoids dividing by 0.0
   if (this->m_signal == 0)
     return;
 
-for (const MDE &Evnt :data) {
+  for (const MDE &Evnt :data) {
     double signal = Evnt.getSignal();
     for (size_t d = 0; d < nd; d++) {
       // Total up the coordinate weighted by the signal.
@@ -528,7 +528,7 @@ TMDE(void MDBox)::generalBin(
   UNUSED_ARG(bin);
 
   // For each MDLeanEvent
-  for (const auto & event :data) {
+  for (const auto &event : data) {
     if (function.isPointContained(event.getCenter())) // HACK
     {
       // Accumulate error and signal

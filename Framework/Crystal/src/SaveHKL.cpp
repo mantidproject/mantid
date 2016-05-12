@@ -619,7 +619,7 @@ void SaveHKL::exec() {
   out.flush();
   out.close();
   // delete banned peaks
-  for (auto it = banned.rbegin(); it != banned.rend(); ++it) {
+  for (auto it = banned.crbegin(); it != banned.crend(); ++it) {
     peaksW->removePeak(static_cast<int>(*it));
   }
   setProperty("OutputWorkspace", peaksW);

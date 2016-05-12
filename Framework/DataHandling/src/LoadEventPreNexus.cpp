@@ -953,14 +953,13 @@ void LoadEventPreNexus::readPulseidFile(const std::string &filename,
 
   if (num_pulses > 0) {
     this->pulsetimes.reserve(num_pulses);
-    for (size_t i = 0; i < num_pulses; i++) {
-      Pulse &it = pulses[i];
+    for (const auto &pulse : pulses) {
       this->pulsetimes.push_back(
-          DateAndTime(static_cast<int64_t>(it.seconds),
-                      static_cast<int64_t>(it.nanoseconds)));
-      this->event_indices.push_back(it.event_index);
+          DateAndTime(static_cast<int64_t>(pulse.seconds),
+                      static_cast<int64_t>(pulse.nanoseconds)));
+      this->event_indices.push_back(pulse.event_index);
 
-      temp = it.pCurrent;
+      temp = pulse.pCurrent;
       this->proton_charge.push_back(temp);
       if (temp < 0.)
         this->g_log.warning("Individual proton charge < 0 being ignored");
