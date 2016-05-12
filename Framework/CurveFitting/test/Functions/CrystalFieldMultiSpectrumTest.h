@@ -6,12 +6,14 @@
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FunctionDomain1D.h"
-#include "MantidAPI/FunctionValues.h"
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/FunctionValues.h"
 #include "MantidAPI/IConstraint.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/ParameterTie.h"
-#include "MantidCurveFitting/Functions/CrystalFieldMultiSpectrum.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidCurveFitting/Algorithms/Fit.h"
+#include "MantidCurveFitting/Functions/CrystalFieldMultiSpectrum.h"
 
 using namespace Mantid;
 using namespace Mantid::API;
@@ -82,6 +84,37 @@ public:
     TS_ASSERT_DELTA(fun.getParameter("f0.f3.FWHM"), 1.5, 1e-3);
   }
 
+  void test_evaluate() {
+    auto funStr = "name=CrystalFieldMultiSpectrum,Ion=Ce,Temperatures=(44, "
+                  "50),ToleranceIntensity=0.001,B20=0.37737,B22=3.9770,"
+                  "B40=-0.031787,B42=-0.11611,B44=-0.12544,"
+                  "f0.f1.FWHM=1.6,f0.f2.FWHM=2.0,f0.f3.FWHM=2.3,f1.f1.FWHM=1.6,"
+                  "f1.f2.FWHM=2.0,f1.f3.FWHM=2.3";
+    auto ws = createWorkspace();
+    auto alg = AlgorithmFactory::Instance().create("EvaluateFunction", -1);
+    alg->initialize();
+    alg->setPropertyValue("Function", funStr);
+    alg->setProperty("InputWorkspace", ws);
+    alg->setProperty("InputWorkspace_1", ws);
+    alg->setProperty("OutputWorkspace", "out");
+    alg->execute();
+
+    IFunction_sptr fun = alg->getProperty("Function");
+    for (size_t i = 0; i < fun->nParams(); ++i) {
+      std::cerr << "Param " << i << ' ' << fun->parameterName(i) << " = "
+                << fun->getParameter(i) << std::endl;
+    }
+  }
+
+private:
+  Workspace_sptr createWorkspace() {
+    auto ws = WorkspaceFactory::Instance().create("Workspace2D", 1, 100, 100);
+    double dx = 55.0 / 99;
+    for (size_t i = 0; i < 100; ++i) {
+      ws->dataX(0)[i] = dx * static_cast<double>(i);
+    }
+    return ws;
+  }
 };
 
 #endif /*CRYSTALFIELDMULTISPECTRUMTEST_H_*/

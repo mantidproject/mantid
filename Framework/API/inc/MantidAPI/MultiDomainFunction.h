@@ -60,8 +60,6 @@ public:
   void iterationStarting() override;
   /// Called at the end of an iteration
   void iterationFinished() override;
-  /// Create a list of equivalent functions
-  virtual std::vector<IFunction_sptr> createEquivalentFunctions() const;
 
   /// Associate a function and a domain
   void setDomainIndex(size_t funIndex, size_t domainIndex);
@@ -75,6 +73,10 @@ public:
   /// Get domain indices for a member function
   void getDomainIndices(size_t i, size_t nDomains,
                         std::vector<size_t> &domains) const;
+  /// Get number of domains required by this function
+  size_t getNumberDomains() const override;
+  /// Create a list of equivalent functions
+  std::vector<IFunction_sptr> createEquivalentFunctions() const override;
 
   /// Returns the number of "local" attributes associated with the function.
   /// Local attributes are attributes of MultiDomainFunction but describe

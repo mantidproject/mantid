@@ -55,6 +55,26 @@ CrystalFieldMultiSpectrum::CrystalFieldMultiSpectrum()
   declareAttribute("FWHM", Attribute(0.0));
 }
 
+size_t CrystalFieldMultiSpectrum::getNumberDomains() const {
+  if (!m_target) {
+    buildTargetFunction();
+  }
+  if (!m_target) {
+    throw std::runtime_error("Failed to build target function.");
+  }
+  return m_target->getNumberDomains();
+}
+
+std::vector<IFunction_sptr> CrystalFieldMultiSpectrum::createEquivalentFunctions() const {
+  std::vector<IFunction_sptr> funs;
+  auto &composite = dynamic_cast<CompositeFunction &>(*m_target);
+  for(size_t i = 0; i < composite.nFunctions(); ++i) {
+    funs.push_back(composite.getFunction(i));
+  }
+  return funs;
+}
+
+
 /// Uses source to calculate peak centres and intensities
 /// then populates m_spectrum with peaks of type given in PeakShape attribute.
 void CrystalFieldMultiSpectrum::buildTargetFunction() const {

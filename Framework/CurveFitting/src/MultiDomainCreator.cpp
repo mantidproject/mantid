@@ -117,16 +117,9 @@ boost::shared_ptr<API::Workspace> MultiDomainCreator::createOutputWorkspace(
   UNUSED_ARG(domain);
   UNUSED_ARG(values);
 
-  auto mdFunction =
-      boost::dynamic_pointer_cast<API::MultiDomainFunction>(function);
-  if (!mdFunction) {
-    throw std::runtime_error("A MultiDomainFunction is expected to be used "
-                             "with MultiDomainCreator.");
-  }
-
   // split the function into independent parts
   std::vector<API::IFunction_sptr> functions =
-      mdFunction->createEquivalentFunctions();
+      function->createEquivalentFunctions();
   // there must be as many parts as there are domains
   if (functions.size() != m_creators.size()) {
     throw std::runtime_error("Number of functions and domains don't match");
