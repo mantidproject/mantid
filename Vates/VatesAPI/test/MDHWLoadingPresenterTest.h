@@ -38,7 +38,8 @@ private:
     ConcreteMDHWLoadingPresenter(std::unique_ptr<MDLoadingView> view)
         : MDHWLoadingPresenter(std::move(view)) {}
 
-    void extractMetadata(Mantid::API::IMDHistoWorkspace_sptr histoWs) override {
+    void
+    extractMetadata(const Mantid::API::IMDHistoWorkspace &histoWs) override {
       MDHWLoadingPresenter::extractMetadata(histoWs);
     }
 
@@ -130,7 +131,8 @@ void testhasTDimensionWhenIntegrated()
 
   //Test that it does work when setup.
   Mantid::API::Workspace_sptr ws = get3DWorkspace(true, false); //Integrated T Dimension
-  presenter.extractMetadata(boost::dynamic_pointer_cast<Mantid::API::IMDHistoWorkspace>(ws));
+  presenter.extractMetadata(
+      *boost::dynamic_pointer_cast<Mantid::API::IMDHistoWorkspace>(ws));
 
   TSM_ASSERT("This is a 4D workspace with an integrated T dimension", !presenter.hasTDimensionAvailable());
 }
@@ -142,7 +144,8 @@ void testHasTDimensionWhenNotIntegrated()
 
   //Test that it does work when setup. 
   Mantid::API::Workspace_sptr ws = get3DWorkspace(false, false); //Non-integrated T Dimension
-  presenter.extractMetadata(boost::dynamic_pointer_cast<Mantid::API::IMDHistoWorkspace>(ws));
+  presenter.extractMetadata(
+      *boost::dynamic_pointer_cast<Mantid::API::IMDHistoWorkspace>(ws));
 
   TSM_ASSERT("This is a 4D workspace with an integrated T dimension", presenter.hasTDimensionAvailable());
 }
@@ -154,7 +157,8 @@ void testHasTimeLabelWithTDimension()
 
   //Test that it does work when setup.
   Mantid::API::Workspace_sptr ws = get3DWorkspace(false, false); //Non-integrated T Dimension
-  presenter.extractMetadata(boost::dynamic_pointer_cast<Mantid::API::IMDHistoWorkspace>(ws));
+  presenter.extractMetadata(
+      *boost::dynamic_pointer_cast<Mantid::API::IMDHistoWorkspace>(ws));
 
   TSM_ASSERT_EQUALS("This is a 4D workspace with a T dimension", "D (A)", presenter.getTimeStepLabel());
 }
@@ -166,7 +170,8 @@ void testCanSetAxisLabelsFrom3DData()
 
   //Test that it does work when setup.
   Mantid::API::Workspace_sptr ws = get3DWorkspace(true, false);
-  presenter.extractMetadata(boost::dynamic_pointer_cast<Mantid::API::IMDHistoWorkspace>(ws));
+  presenter.extractMetadata(
+      *boost::dynamic_pointer_cast<Mantid::API::IMDHistoWorkspace>(ws));
   vtkDataSet *ds = vtkUnstructuredGrid::New();
   TSM_ASSERT_THROWS_NOTHING("Should pass", presenter.setAxisLabels(ds));
   TSM_ASSERT_EQUALS("X Label should match exactly",
@@ -184,7 +189,8 @@ void testCanSetAxisLabelsFrom4DData()
 
   //Test that it does work when setup.
   Mantid::API::Workspace_sptr ws = get3DWorkspace(false, false);
-  presenter.extractMetadata(boost::dynamic_pointer_cast<Mantid::API::IMDHistoWorkspace>(ws));
+  presenter.extractMetadata(
+      *boost::dynamic_pointer_cast<Mantid::API::IMDHistoWorkspace>(ws));
   vtkDataSet *ds = vtkUnstructuredGrid::New();
   TSM_ASSERT_THROWS_NOTHING("Should pass", presenter.setAxisLabels(ds));
   TSM_ASSERT_EQUALS("X Label should match exactly",

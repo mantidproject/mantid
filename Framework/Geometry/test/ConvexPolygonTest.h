@@ -158,17 +158,29 @@ private:
 //------------------------------------------------------------------------------
 class ConvexPolygonTestPerformance : public CxxTest::TestSuite {
 public:
-  void test_Area_Calls() {
-    const size_t ntests(50000000);
-
-    double totalArea(0.0);
+  // FractionalRebinning constructs ConvexPolygon once, then updates its values.
+  void test_update_values() {
+    const size_t ntests{1000000};
+    ConvexPolygon test;
     for (size_t i = 0; i < ntests; ++i) {
-      ConvexPolygon test;
+      test.clear();
       test.insert(0.0, 0.0);
       test.insert(0.0, 1.0);
       test.insert(2.0, 1.0);
       test.insert(2.0, 0.0);
+    }
+  }
 
+  void test_Area_Calls() {
+    ConvexPolygon test;
+    test.insert(0.0, 0.0);
+    test.insert(0.0, 1.0);
+    test.insert(2.0, 1.0);
+    test.insert(2.0, 0.0);
+
+    const size_t ntests{10000000};
+    double totalArea{0.0};
+    for (size_t i = 0; i < ntests; ++i) {
       totalArea += test.area();
     }
   }
