@@ -47,7 +47,8 @@ std::string createCacheKey(const std::string &facility,
 //------------------------------------------------------------------------------
 /**
  * Constructor accepting a pointer to a finder object
- * @param specFinder
+ * @param specFinder A reference to an object used to retrieve find a given
+ * specification.
  */
 SampleEnvironmentFactory::SampleEnvironmentFactory(
     ISampleEnvironmentSpecFinder_uptr specFinder)
@@ -55,7 +56,6 @@ SampleEnvironmentFactory::SampleEnvironmentFactory(
 
 /**
  * Create a new SampleEnvironment instance from the given specification and can.
- * @param specFinder A reference to an object used to retrieve a
  * SampleEnvironmentSpec
  * @param facility Name of facility
  * @param instrument Full name of the instrument

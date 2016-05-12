@@ -35,7 +35,7 @@ MaterialBuilder &MaterialBuilder::setName(const std::string &name) {
 
 /**
  * Set the checmical formula of the material
- * @param name Human-readable name of the material
+ * @param formula Human-readable name of the material
  * @return A reference to the this object to allow chaining
  */
 MaterialBuilder &MaterialBuilder::setFormula(const std::string &formula) {
@@ -84,7 +84,7 @@ MaterialBuilder &MaterialBuilder::setMassNumber(int massNumber) {
 
 /**
  * Set the number density of the sample
- * @param Number density of the sample
+ * @param rho density of the sample
  * @return A reference to the this object to allow chaining
  */
 MaterialBuilder &MaterialBuilder::setNumberDensity(double rho) {

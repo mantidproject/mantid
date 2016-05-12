@@ -133,7 +133,7 @@ void SampleEnvironmentSpecParser::parseMaterials(Poco::XML::Element *element) {
 }
 
 /**
- * Take a <components> tag, parse the definitions and add them to the spec.
+ * Take a \<components\> tag, parse the definitions and add them to the spec.
  * It requires the materials to have been parsed
  * @param spec A pointer to a SampleEnvironmentSpec to update
  * @param element A pointer to a components element
@@ -164,7 +164,7 @@ void SampleEnvironmentSpecParser::parseAndAddComponents(
 }
 
 /**
- * Take a <cans> tag, parse the definitions and add them to the spec.
+ * Take a \<cans\> tag, parse the definitions and add them to the spec.
  * It requires the materials to have been parsed.
  * @param spec A pointer to a SampleEnvironmentSpec to update
  * @param element A pointer to a cans element
@@ -185,7 +185,7 @@ void SampleEnvironmentSpecParser::parseAndAddCans(SampleEnvironmentSpec *spec,
 
 /**
  * Parse a single definition of a Can
- * @param element A pointer to an XML <can> element
+ * @param element A pointer to an XML \<can\> element
  * @return A new Can instance
  */
 Can_const_sptr SampleEnvironmentSpecParser::parseCan(Element *element) const {
@@ -204,7 +204,7 @@ Can_const_sptr SampleEnvironmentSpecParser::parseCan(Element *element) const {
 /**
  * Parse a single definition of a component. If the component is a can the
  * sample geometry, if available, is also parsed.
- * @param element A pointer to an XML <can> element
+ * @param element A pointer to an XML \<can\> element
  * @return A new Object instance of the given type
  */
 template <typename ObjectType>
@@ -235,12 +235,12 @@ Mantid::Geometry::SampleEnvironmentSpecParser::parseComponent(
 //------------------------------------------------------------------------------
 // Concrete instantions
 //------------------------------------------------------------------------------
-///@comp
+///@cond
 template boost::shared_ptr<Object>
 Mantid::Geometry::SampleEnvironmentSpecParser::parseComponent(Element *) const;
 template boost::shared_ptr<Can>
 Mantid::Geometry::SampleEnvironmentSpecParser::parseComponent(Element *) const;
-///@endcomp
+///@endcond
 
 } // namespace Geometry
 } // namespace Mantid
