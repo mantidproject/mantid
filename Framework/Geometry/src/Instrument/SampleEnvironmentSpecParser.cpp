@@ -121,9 +121,9 @@ void SampleEnvironmentSpecParser::parseMaterials(Poco::XML::Element *element) {
   m_materials.clear();
   NodeIterator nodeIter(element, NodeFilter::SHOW_ELEMENT);
   // Points at <materials>
-  Node *node = nodeIter.nextNode();
+  nodeIter.nextNode();
   // Points at first <material>
-  node = nodeIter.nextNode();
+  Node *node = nodeIter.nextNode();
   MaterialXMLParser parser;
   while (node) {
     auto material = parser.parse(static_cast<Poco::XML::Element *>(node));
@@ -148,9 +148,9 @@ void SampleEnvironmentSpecParser::parseAndAddComponents(
   }
   NodeIterator nodeIter(element, NodeFilter::SHOW_ELEMENT);
   // Points at <components>
-  Node *node = nodeIter.nextNode();
+  nodeIter.nextNode();
   // Points at first <child>
-  node = nodeIter.nextNode();
+  Node *node = nodeIter.nextNode();
   while (node) {
     Element *childElement = static_cast<Element *>(node);
     const auto &nodeName = childElement->nodeName();
@@ -172,8 +172,8 @@ void SampleEnvironmentSpecParser::parseAndAddComponents(
 void SampleEnvironmentSpecParser::parseAndAddCans(SampleEnvironmentSpec *spec,
                                                   Element *element) const {
   NodeIterator nodeIter(element, NodeFilter::SHOW_ELEMENT);
+  nodeIter.nextNode();
   Node *node = nodeIter.nextNode();
-  node = nodeIter.nextNode();
   while (node) {
     Element *childElement = static_cast<Element *>(node);
     if (childElement->nodeName() == CAN_TAG) {
