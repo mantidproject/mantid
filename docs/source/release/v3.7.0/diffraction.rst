@@ -62,6 +62,8 @@ Graphical user interface:
   user, bank combo-box will update upon selection of run number.
 
 
+- New algorithm :ref:`SaveNexusPD <algm-SaveNexusPD>` which creates a nexus file for use in GUDRUN and will hopefully be supported by Rietveld packages in the future.
+
 Imaging
 -------
 
