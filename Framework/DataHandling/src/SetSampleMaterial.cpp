@@ -239,7 +239,7 @@ void SetSampleMaterial::exec() {
           << std::endl;
       throw std::runtime_error(msg.str());
     }
-    g_log.notice() << "Found " << CF.atoms.size() << " types of atoms in \""
+    g_log.information() << "Found " << CF.atoms.size() << " types of atoms in \""
                    << chemicalSymbol << "\"\n";
 
     NeutronAtom neutron(0, 0., 0., 0., 0., 0.,
@@ -281,7 +281,7 @@ void SetSampleMaterial::exec() {
         // get the unit cell volume from the workspace if it isn't set
         if (isEmpty(unitCellVolume) && expInfo->sample().hasOrientedLattice()) {
           unitCellVolume = expInfo->sample().getOrientedLattice().volume();
-          g_log.notice() << "found unit cell volume " << unitCellVolume
+          g_log.information() << "found unit cell volume " << unitCellVolume
                          << " Angstrom^-3\n";
         }
         // density is just number of atoms in the unit cell
@@ -316,7 +316,7 @@ void SetSampleMaterial::exec() {
       // get the unit cell volume from the workspace if it isn't set
       if (isEmpty(unitCellVolume) && expInfo->sample().hasOrientedLattice()) {
         unitCellVolume = expInfo->sample().getOrientedLattice().volume();
-        g_log.notice() << "found unit cell volume " << unitCellVolume
+        g_log.information() << "found unit cell volume " << unitCellVolume
                        << " Angstrom^-3\n";
       }
       // density is just number of atoms in the unit cell
@@ -341,15 +341,15 @@ void SetSampleMaterial::exec() {
   auto shapeObject = expInfo->sample().getShape(); // copy
   shapeObject.setMaterial(*mat);
   expInfo->mutableSample().setShape(shapeObject);
-  g_log.notice() << "Sample number density ";
+  g_log.information() << "Sample number density ";
   if (isEmpty(mat->numberDensity())) {
-    g_log.notice() << "was not specified\n";
+    g_log.information() << "was not specified\n";
   } else {
-    g_log.notice() << "= " << mat->numberDensity() << " atoms/Angstrom^3\n";
+    g_log.information() << "= " << mat->numberDensity() << " atoms/Angstrom^3\n";
     setProperty("SampleNumberDensityResult",
                 mat->numberDensity()); // in atoms/Angstrom^3
   }
-  g_log.notice() << "Cross sections for wavelength = "
+  g_log.information() << "Cross sections for wavelength = "
                  << NeutronAtom::ReferenceLambda << " Angstroms\n"
                  << "    Coherent " << mat->cohScatterXSection() << " barns\n"
                  << "    Incoherent " << mat->incohScatterXSection()
@@ -372,11 +372,11 @@ void SetSampleMaterial::exec() {
   setProperty("NormalizedLaue", normalizedLaue);
 
   if (isEmpty(rho)) {
-    g_log.notice("Unknown value for number density");
+    g_log.information("Unknown value for number density");
   } else {
     double smu = mat->totalScatterXSection(NeutronAtom::ReferenceLambda) * rho;
     double amu = mat->absorbXSection(NeutronAtom::ReferenceLambda) * rho;
-    g_log.notice() << "Anvred LinearScatteringCoef = " << smu << " 1/cm\n"
+    g_log.information() << "Anvred LinearScatteringCoef = " << smu << " 1/cm\n"
                    << "Anvred LinearAbsorptionCoef = " << amu << " 1/cm\n";
   }
   // Done!
