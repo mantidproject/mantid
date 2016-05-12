@@ -24,7 +24,7 @@ Kernel::Logger g_log("WorkspaceHistory");
 }
 
 /// Default Constructor
-WorkspaceHistory::WorkspaceHistory() : m_environment(){}
+WorkspaceHistory::WorkspaceHistory() : m_environment() {}
 
 /// Destructor
 WorkspaceHistory::~WorkspaceHistory() = default;
