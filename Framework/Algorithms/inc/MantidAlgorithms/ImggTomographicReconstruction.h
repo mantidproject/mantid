@@ -49,6 +49,8 @@ private:
 
   void exec() override final;
 
+  bool processGroups() override final;
+
   std::map<std::string, std::string> validateInputs() override;
 
   std::unique_ptr<std::vector<float>>
@@ -56,7 +58,7 @@ private:
                           double maxAngle) const;
 
   std::unique_ptr<std::vector<float>>
-  prepareInputData(size_t totalSize, API::WorkspaceGroup_sptr wsg);
+  prepareInputData(size_t totalSize, API::WorkspaceGroup_const_sptr wsg);
 
   std::unique_ptr<std::vector<float>> prepareDataVol(size_t totalSize);
 
@@ -69,7 +71,8 @@ private:
   size_t ySizeProjections(API::WorkspaceGroup_const_sptr wks) const;
 
   API::WorkspaceGroup_sptr buildOutputWks(const std::vector<float> &dataVol,
-                                          size_t xsize, size_t ysize);
+                                          size_t xsize, size_t ysize,
+                                          size_t sliceSize);
 };
 
 } // namespace Algorithms

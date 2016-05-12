@@ -1,11 +1,16 @@
 #include "MantidAlgorithms/ImggTomographicReconstruction.h"
 #include "MantidAlgorithms/Tomography/FBPTomopy.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/CommonBinsValidator.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/make_unique.h"
 
@@ -50,11 +55,11 @@ const std::string PROP_MAX_PROJ_ANGLE = "MaxProjectionAngle";
 /** Initialize the algorithm's properties.
  */
 void ImggTomographicReconstruction::init() {
+
   declareProperty(
-      Kernel::make_unique<API::WorkspaceProperty<>>(
-          PROP_INPUT_WS, "", Kernel::Direction::Input,
-          boost::make_shared<API::WorkspaceUnitValidator>("Label")),
-      "Workspace holding an image (with one spectrum per pixel row).");
+      Kernel::make_unique<API::WorkspaceProperty<API::Workspace>>(
+          PROP_INPUT_WS, "", Kernel::Direction::Input),
+      "Group of workspace holding images (with one spectrum per pixel row).");
 
   std::vector<std::string> methods{"FBP (tomopy)"};
   declareProperty(
@@ -62,8 +67,11 @@ void ImggTomographicReconstruction::init() {
       boost::make_shared<Kernel::ListValidator<std::string>>(methods),
       "Reconstruction method", Kernel::Direction::Input);
 
-  declareProperty(Kernel::make_unique<API::WorkspaceProperty<API::Workspace>>(
-      PROP_OUTPUT_WS, "", Kernel::Direction::Output));
+  declareProperty(
+      Kernel::make_unique<API::WorkspaceProperty<API::WorkspaceGroup>>(
+          PROP_OUTPUT_WS, "", Kernel::Direction::Output),
+      "Output reconstructed volume, as a group of workspaces where "
+      "each workspace holds one slice of the volume.");
 
   auto zeroOrPosInt = boost::make_shared<Kernel::BoundedValidator<int>>();
   zeroOrPosInt->setLower(-1);
@@ -75,15 +83,15 @@ void ImggTomographicReconstruction::init() {
   declareProperty(PROP_RELAXATION_PARAM, 0.5, zeroOrPosDbl,
                   "Relaxation parameter for the reconstruction method.");
 
-  zeroOrPosDbl->setLower(0);
+  zeroOrPosInt->setLower(0);
   declareProperty(PROP_MAX_CORES, 0, zeroOrPosInt,
                   "Maximum number of cores to use for parallel runs. Leave "
                   "empty to use all available cores.");
 
-  declareProperty(PROP_MIN_PROJ_ANGLE, 0, zeroOrPosDbl,
+  declareProperty(PROP_MIN_PROJ_ANGLE, 0.0, zeroOrPosDbl,
                   "Minimum projection angle.");
 
-  declareProperty(PROP_MAX_PROJ_ANGLE, 180, zeroOrPosDbl,
+  declareProperty(PROP_MAX_PROJ_ANGLE, 180.0, zeroOrPosDbl,
                   "Maximum projection angle (assuming a uniform angle increase "
                   "from first to last projection.");
 }
@@ -92,16 +100,43 @@ std::map<std::string, std::string>
 ImggTomographicReconstruction::validateInputs() {
   std::map<std::string, std::string> result;
 
-  API::Workspace_sptr inWks = getProperty(PROP_INPUT_WS);
-  API::WorkspaceGroup_sptr inGrp =
-      boost::dynamic_pointer_cast<API::WorkspaceGroup>(inWks);
+  API::Workspace_const_sptr inWks = getProperty(PROP_INPUT_WS);
+  API::WorkspaceGroup_const_sptr inGrp =
+      boost::dynamic_pointer_cast<const API::WorkspaceGroup>(inWks);
   if (!inGrp) {
-    result[PROP_INPUT_WS] = "The input workspace must be a group";
+    result[PROP_INPUT_WS] = "The current version of this algorithm only "
+                            "supports input workspaces of type WorkspaceGroup";
   } else {
-    if (inGrp->size() < 2) {
-      result[PROP_INPUT_WS] = "The input workspace must have at least two "
-                              "workspaces (projection images)";
+
+    if (!inGrp) {
+      result[PROP_INPUT_WS] = "The input workspace must be a group";
+    } else {
+      if (inGrp->size() < 2) {
+        result[PROP_INPUT_WS] = "The input workspace must have at least two "
+                                "workspaces (projection images)";
+      }
     }
+
+    auto first = inGrp->getItem(0);
+    auto fwks = boost::dynamic_pointer_cast<API::MatrixWorkspace>(first);
+    if (!fwks) {
+      result[PROP_INPUT_WS] =
+          "Unable to get a matrix workspace from the first "
+          "item of the input workspace group " +
+          first->getTitle() +
+          ". It must contain workspaces of type MatrixWorkspace";
+    } else {
+      int cor = getProperty(PROP_COR);
+      size_t bsize = fwks->blocksize();
+      if (cor < 0 || cor >= static_cast<int>(bsize)) {
+        result[PROP_COR] =
+            "The center of rotation must be between 0 and the "
+            "number of columns in the input projection images (0 to " +
+            std::to_string(bsize-1) + ")";
+      }
+    }
+    // Not validating requirements on all input workspaces here (there could be
+    // many)
   }
 
   double minAngle = getProperty(PROP_MIN_PROJ_ANGLE);
@@ -112,7 +147,6 @@ ImggTomographicReconstruction::validateInputs() {
                                   " cannot be equal to or lower than " +
                                   PROP_MAX_PROJ_ANGLE;
   }
-
   return result;
 }
 
@@ -120,24 +154,49 @@ ImggTomographicReconstruction::validateInputs() {
 /** Execute the algorithm.
  */
 void ImggTomographicReconstruction::exec() {
-  API::WorkspaceGroup_sptr wks = getProperty(PROP_INPUT_WS);
+  throw std::runtime_error(
+      "This algorithm cannot be executed with a single workspace as input");
+}
+
+bool ImggTomographicReconstruction::processGroups() {
+  API::Workspace_const_sptr inWks = getProperty("InputWorkspace");
+
+  API::WorkspaceGroup_const_sptr wks =
+      boost::dynamic_pointer_cast<const API::WorkspaceGroup>(inWks);
+
+  // API::WorkspaceGroup_sptr wks = getProperty(PROP_INPUT_WS);
+  if (!wks) {
+    g_log.error(
+        "Could not retrieve the input workspace as a workspace group: ");
+    return false;
+  }
+
+  // TODO: apply validators here on every input image/workspace
+  // auto wsValidator = boost::make_shared<Kernel::CompositeValidator>();
+  // wsValidator->add<API::CommonBinsValidator>();
+  // wsValidator->add<API::HistogramValidator>();
+  // wsValidator->add<API::WorkspaceUnitValidator>("Label");
+  // if (isValid(ws) != "") { throw; }
 
   double minAngle = getProperty(PROP_MIN_PROJ_ANGLE);
   double maxAngle = getProperty(PROP_MAX_PROJ_ANGLE);
-
   auto angles = prepareProjectionAngles(wks, minAngle, maxAngle);
 
-  int ysize = static_cast<int>(ySizeProjections(wks));
-  int projSize = static_cast<int>(angles->size());
-  int xsize = static_cast<int>(xSizeProjections(wks));
+  // these values are expected as 'int' by the tompy routines
+  const int ysize = static_cast<int>(ySizeProjections(wks));
+  const int projSize = static_cast<int>(angles->size());
+  const int xsize = static_cast<int>(xSizeProjections(wks));
   // total size of input data in voxels
-  size_t totalSize = ysize * projSize * xsize;
+  size_t totalInSize = ysize * projSize * xsize;
+  // total size of the reconstructed volume
+  size_t totalReconSize = ysize * ysize * xsize;
 
-  auto inVol = prepareInputData(totalSize, wks);
-  auto reconVol = prepareDataVol(totalSize);
-  auto centers = prepareCenters(getProperty(PROP_COR), ysize);
+  auto inVol = prepareInputData(totalInSize, wks);
+  auto reconVol = prepareDataVol(totalReconSize);
 
-  // TODO: check consistency of center of rotation with input image size
+  int cor = getProperty(PROP_COR);
+  auto centers = prepareCenters(cor, ysize);
+
   Mantid::Algorithms::Tomography::FBPTomopy(
       &inVol->front(), ysize, projSize, xsize, &centers->front(),
       &angles->front(), &reconVol->front(), xsize, ysize);
@@ -147,25 +206,39 @@ void ImggTomographicReconstruction::exec() {
     std::stringstream stream;
     stream << std::string("The reconstructed volume data block does not "
                           "have the expected dimensions. It has ")
-           << reconVol->size() << "voxels, but was expecting: " << ysize
-           << " x " << ysize << " x " << xsize << " = " << expectedVox
-           << " voxels in total";
+           << reconVol->size() << " voxels, whereas I was expecting: " << ysize
+           << " slices by " << ysize << " rows by " << xsize
+           << " columns = " << expectedVox << " voxels in total";
     throw std::runtime_error(stream.str());
   }
 
-  auto outputGrp = buildOutputWks(*reconVol, xsize, ysize);
+  const auto outputGrp = buildOutputWks(*reconVol, xsize, ysize, ysize);
   setProperty(PROP_OUTPUT_WS, outputGrp);
 
-  g_log.notice() << "Reconstructe volume from workspace " << wks->getTitle()
-                 << " with " << projSize << " input projections "
-                 << ", " << ysize << " rows by " << xsize << "columns."
-                 << std::endl;
+  g_log.notice() << "Finished reconstruction of volume from workspace "
+                 << wks->getTitle() << " with " << projSize
+                 << " input projections, " << ysize << " rows by " << xsize
+                 << " columns." << std::endl;
+
+  // This is an ugly workaround for the issue that processGroups()
+  // does not fully finish the algorithm:
+  // https://github.com/mantidproject/mantid/issues/11361
+  // A similar workaround is used in CompareWorkspaces and others
+  // Store output workspace in AnalysisDataService and finish execution
+  if (!isChild())
+    this->store();
+  setExecuted(true);
+  notificationCenter().postNotification(
+      new FinishedNotification(this, this->isExecuted()));
+
+  return true;
 }
 
 std::unique_ptr<std::vector<float>>
 ImggTomographicReconstruction::prepareProjectionAngles(
     API::WorkspaceGroup_const_sptr wks, double minAngle,
     double maxAngle) const {
+
   auto angles = Kernel::make_unique<std::vector<float>>(wks->size());
 
   auto vec = *angles;
@@ -180,12 +253,37 @@ ImggTomographicReconstruction::prepareProjectionAngles(
 }
 
 std::unique_ptr<std::vector<float>>
-ImggTomographicReconstruction::prepareInputData(size_t totalSize,
-                                                API::WorkspaceGroup_sptr wsg) {
+ImggTomographicReconstruction::prepareInputData(
+    size_t totalSize, API::WorkspaceGroup_const_sptr wksg) {
   auto data = prepareDataVol(totalSize);
 
-  // TODO: fill in
-  UNUSED_ARG(wsg);
+  if (!wksg || 0 == wksg->size())
+    return data;
+
+  auto first = wksg->getItem(0);
+  auto fwks = boost::dynamic_pointer_cast<API::MatrixWorkspace>(first);
+  if (!fwks) {
+    throw std::runtime_error(
+        "Unable to get a matrix workspace from the first "
+        "item of the input workspace group " +
+        first->getTitle() +
+        ". It must contain workspaces of type MatrixWorkspace");
+  }
+
+  size_t ysize = fwks->getNumberHistograms();
+  size_t xsize = fwks->blocksize();
+  const size_t oneSliceSize = xsize * ysize;
+
+  PARALLEL_FOR_NO_WSP_CHECK()
+  for (int slice = 0; slice < static_cast<int>(wksg->size()); ++slice) {
+    size_t startSlice = slice * oneSliceSize;
+    for (size_t row = 0; row < ysize; ++row) {
+      const Mantid::API::ISpectrum *specRow = fwks->getSpectrum(row);
+      const auto &dataY = specRow->readY();
+      size_t startRow = startSlice + row * ysize;
+      std::copy(dataY.begin(), dataY.end(), data->begin() + startRow);
+    }
+  }
 
   return data;
 }
@@ -240,22 +338,51 @@ size_t ImggTomographicReconstruction::ySizeProjections(
 }
 
 /**
+ * Transfer data from a numpy/tomopy style data volume to a workspace
+ * group of MatrixWorkspaces. This will typically have ysize slices
+ * (images) of dimensions ysize rows by xsize columns.
+
  *
- * Output will produce ysize slices (images) of dimensions ysize rows by xsize
- *columns
+ * @param dataVol a 3D data volume that may have been generated as
+ * output from a reconstruction
+ * @param xsize image x dimension or number of columns (bins)
+ * @param ysize image y dimension or number of rows (spectra)
+ * @param projSize number of projections or slices
  *
+ * @return a workspace group with reconstruction slices
  */
 API::WorkspaceGroup_sptr
 ImggTomographicReconstruction::buildOutputWks(const std::vector<float> &dataVol,
-                                              size_t xsize, size_t ysize) {
+                                              size_t xsize, size_t ysize,
+                                              size_t sliceSize) {
 
-  auto wsGroup = boost::make_shared<API::WorkspaceGroup>();
+  // auto wsGroup = boost::make_shared<API::WorkspaceGroup>();
+  auto wsGroup = API::WorkspaceGroup_sptr(new API::WorkspaceGroup());
   wsGroup->setTitle("Reconstructed volume from imaging projection data");
 
-  // TODO: fill in
-  UNUSED_ARG(dataVol);
-  UNUSED_ARG(xsize);
-  UNUSED_ARG(ysize);
+
+  const size_t oneSliceSize = xsize * ysize;
+  PARALLEL_FOR_NO_WSP_CHECK()
+  for (int slice = 0; slice < static_cast<int>(sliceSize); ++slice) {
+    // individual slices as Workspace2D/MatrixWorkspace
+    DataObjects::Workspace2D_sptr sliceWS =
+        boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
+            API::WorkspaceFactory::Instance().create("Workspace2D", ysize,
+                                                     xsize + 1, xsize));
+    size_t startSlice = slice * oneSliceSize;
+    for (size_t row = 0; row < ysize; ++row) {
+      Mantid::API::ISpectrum *specRow = sliceWS->getSpectrum(row);
+      auto &dataX = specRow->dataX();
+      std::fill(dataX.begin(), dataX.end(), static_cast<double>(row));
+
+      size_t startRow = startSlice + row * ysize;
+      size_t endRow = startRow + xsize;
+      auto &dataY = specRow->dataY();
+      std::copy(dataVol.begin() + startRow, dataVol.begin() + endRow,
+                dataY.begin());
+    }
+    wsGroup->addWorkspace(sliceWS);
+  }
 
   return wsGroup;
 }
