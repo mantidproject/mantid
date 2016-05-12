@@ -22,9 +22,11 @@ Examples:
 If **DoIndividual** is checked, then each run number is reduced separately
 from the rest. The semicolon symbol is ignored.
 
-**Y-axis rescaling**: Since the Y-scale has arbitrary units, a
+**Rescaling to first spectrum**: Since the Y-scale has arbitrary units, a
 rescaling convention is taken whereby the maximum of the
-first spectrum (lowest Q-value) is rescaled to 1.0.
+first spectrum (lowest Q-value) is rescaled to 1.0. This rescaling may not
+be employed when the intent is to compare to other runs, like can substraction
+of comparison between deuterated and hydrogenated samples.
 
 Vanadium Normalization
 ======================

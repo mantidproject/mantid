@@ -61,8 +61,8 @@ Output:
 
     HKL of first peak in table -10 5.0 42.0
     Multiplicity = 1.21
-    Resolution Min = 0.30
-    Resolution Max = 3.17
+    Resolution Min = 0.21
+    Resolution Max = 2.08
     No. of Unique Reflections = 337
     Mean ((I)/sd(I)) = 27.51
     Rmerge = 10.08

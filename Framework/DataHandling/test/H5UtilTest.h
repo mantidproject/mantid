@@ -16,7 +16,8 @@ using namespace Mantid::DataHandling;
 
 class H5UtilTest : public CxxTest::TestSuite {
 public:
-  // This pair of boilerplate methods prevent the suite being created statically
+  // This pair of boilerplate methods prevent the suite being created
+  // statically
   // This means the constructor isn't called when running other tests
   static H5UtilTest *createSuite() { return new H5UtilTest(); }
   static void destroySuite(H5UtilTest *suite) { delete suite; }
@@ -43,24 +44,42 @@ public:
     }
 
     TS_ASSERT(Poco::File(FILENAME).exists());
+    do_assert_simple_string_data_set(FILENAME, GRP_NAME, DATA_NAME, DATA_VALUE);
 
-    { // read tests
-      H5File file(FILENAME, H5F_ACC_RDONLY);
+    // cleanup
+    removeFile(FILENAME);
+  }
 
-      auto fullCheck =
-          H5Util::readString(file, "/" + GRP_NAME + "/" + DATA_NAME);
-      TS_ASSERT_EQUALS(fullCheck, DATA_VALUE);
+  void test_string_data_sets_with_attributes() {
+    // Arrange
+    const std::string FILENAME("H5UtilTest_strings.h5");
+    const std::string GRP_NAME("strings");
+    const std::string DATA_NAME("simple");
+    const std::string DATA_VALUE("H5Util");
 
-      auto group = file.openGroup(GRP_NAME);
-      auto groupCheck = H5Util::readString(group, DATA_NAME);
-      TS_ASSERT_EQUALS(groupCheck, DATA_VALUE);
+    const std::string ATTR_NAME_1("attributeName1");
+    const std::string ATTR_VALUE_1("attriuteValue1");
+    const std::string ATTR_NAME_2("attributeName2");
+    const std::string ATTR_VALUE_2("attriuteValue2");
 
-      auto data = group.openDataSet(DATA_NAME);
-      auto dataCheck = H5Util::readString(data);
-      TS_ASSERT_EQUALS(dataCheck, DATA_VALUE);
+    std::map<std::string, std::string> attributesScalar{
+        {ATTR_NAME_1, ATTR_VALUE_1}, {ATTR_NAME_2, ATTR_VALUE_2}};
 
+    removeFile(FILENAME);
+
+    // Act
+    { // write tests
+      H5File file(FILENAME, H5F_ACC_EXCL);
+      auto group = H5Util::createGroupNXS(file, GRP_NAME, "NXentry");
+      H5Util::writeWithStrAttributes(group, DATA_NAME, DATA_VALUE,
+                                     attributesScalar);
       file.close();
     }
+
+    // Assert
+    TS_ASSERT(Poco::File(FILENAME).exists());
+    do_assert_simple_string_data_set(FILENAME, GRP_NAME, DATA_NAME, DATA_VALUE,
+                                     attributesScalar);
 
     // cleanup
     removeFile(FILENAME);
@@ -123,6 +142,48 @@ public:
 
     // cleanup
     removeFile(FILENAME);
+  }
+
+private:
+  void do_assert_simple_string_data_set(
+      const std::string &filename, const std::string &groupName,
+      const std::string &dataName, const std::string &dataValue,
+      const std::map<std::string, std::string> &attributes =
+          std::map<std::string, std::string>()) {
+    TS_ASSERT(Poco::File(filename).exists());
+
+    // read tests
+    H5File file(filename, H5F_ACC_RDONLY);
+
+    auto fullCheck = H5Util::readString(file, "/" + groupName + "/" + dataName);
+    TS_ASSERT_EQUALS(fullCheck, dataValue);
+
+    auto group = file.openGroup(groupName);
+    auto groupCheck = H5Util::readString(group, dataName);
+    TS_ASSERT_EQUALS(groupCheck, dataValue);
+
+    auto data = group.openDataSet(dataName);
+    auto dataCheck = H5Util::readString(data);
+    TS_ASSERT_EQUALS(dataCheck, dataValue);
+
+    // Check the attributes
+    do_test_attributes_on_data_set(data, attributes);
+
+    file.close();
+  }
+
+  void do_test_attributes_on_data_set(
+      H5::DataSet &data, std::map<std::string, std::string> attributes) {
+    auto numAttributes = data.getNumAttrs();
+    auto expectedNumAttributes = static_cast<int>(attributes.size());
+    TSM_ASSERT_EQUALS("There should be two attributes present.",
+                      expectedNumAttributes, numAttributes);
+
+    for (auto &attribute : attributes) {
+      auto value = H5Util::readAttributeAsString(data, attribute.first);
+      TSM_ASSERT_EQUALS("Should retrieve the correct attribute value",
+                        attribute.second, value);
+    }
   }
 };
 

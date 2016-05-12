@@ -36,6 +36,7 @@ New
 - :ref:`ImggAggregateWavelengths <algm-ImggAggregateWavelengths>`
    aggregates stacks of images from wavelength dependent imaging
    into one or more output bands.
+- :ref:`CorrectTOF <algm-CorrectTOF>` applies to the time-of-flight correction which considers the specified elastic peak position.
 
 Renamed
 #######
@@ -111,16 +112,18 @@ MD Algorithms (VATES CLI)
 -  MD slicing algorithms now correctly detect units in input workspace and set units in output workspace as directed with the BasisVector properties.
 -  Slicing algorithms (SliceMD and BinMD) do not add masked data to their output workspaces.
 -  MergeMD now does not add masked events to its output workspace.
+-  ConvertToMD, CreateMD and AccumulateMD now have the option to produce workspaces with a file-backend.
 -  Dimension labelling in MD slicing algorithms is consistent with ConvertToMD.
 -  The box structure of workspaces created with CutMD using NoPix=false now matches that specified by the PnBins properties. Additional box splitting is only allowed if MaxRecursionDepth is set to higher than its default of 1.
 -  XorMD, OrMD and AndMD treat masked bins as zero.
 -  A Gaussian smoothing option has been added to SmoothMD. Note, this currently only supports specifying widths for the smoothing function in units of pixels along the dimensions of the workspace.
--  LoadMD has an option to skip loading workspace history. This is useful for workspaces created form large number of files, treated separately. 
+-  LoadMD has an option to skip loading workspace history. This is useful for workspaces created form large number of files, treated separately.
 
 Geometry
 --------
 
-The Instrument Definition File syntax has been extended to provide support for a new type of topologically regular, but geometrically irregular form of 2D detectors. This new type of detector available in the IDF is known as a Structured Detector. Information on how to use this new detector type can be found in the :ref:`IDF <InstrumentDefinitionFile>` documentation.
+- The Instrument Definition File syntax has been extended to provide support for a new type of topologically regular, but geometrically irregular form of 2D detectors. This new type of detector available in the IDF is known as a Structured Detector. Information on how to use this new detector type can be found in the :ref:`IDF <InstrumentDefinitionFile>` documentation.
+- The XML shape definitions have been updated to understand a hollow cylinder as a primitive shape. See :ref:`HowToDefineGeometricShape` for more details.
 
 Performance
 -----------
@@ -128,11 +131,13 @@ Performance
 - :ref:`ChangeBinOffset <algm-ChangeBinOffset>` should now run faster for a :ref:`MatrixWorkspace <MatrixWorkspace>` (not EventWorkspaces).
 - Applying ParameterMaps to Detectors now about 30% faster. Algorithms that involve applying ParameterMaps will see performance improvements.
 - This release saw the introduction of the StructuredDetector. This change has reduced load times via :ref:`LoadInstrument <algm-LoadInstrument>` from ~10minutes down to ~1second for the prospective ESS LOKI instrument.
+- The destructors for ConvexPolygon and Quadrilateral objects are now faster, especially on Linux. 
 
 CurveFitting
 ------------
 
 - Concept page for :ref:`Mantid Fitting <Fitting>` has been added.
+- In order to guarantee a complete overlap between resolution and signal in the region of interest, Function :ref:`Convolution <func-Convolution>` can switch between a fast FFT mode for data defined over a symmetric domain, and slower direct calculations for data defined over an asymmetric domain .
 
 Improved
 ########
