@@ -251,7 +251,7 @@ void TOFSANSResolution::exec() {
       if (i == 0) {
         DxOut[i] = _dx_total[i];
       } else {
-        DxOut[i] = 2.0 * _dx_total[i-1] - DxOut[i-1];
+        DxOut[i] = 2.0 * _dx_total[i - 1] - DxOut[i - 1];
       }
      }
   }
