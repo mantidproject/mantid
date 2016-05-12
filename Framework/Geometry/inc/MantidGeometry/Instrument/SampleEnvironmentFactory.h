@@ -34,17 +34,13 @@ namespace Geometry {
  */
 class MANTID_GEOMETRY_DLL ISampleEnvironmentSpecFinder {
 public:
-  virtual SampleEnvironmentSpec_uptr find(const std::string &name) const = 0;
+  virtual SampleEnvironmentSpec_uptr find(const std::string &facility,
+                                          const std::string &instrument,
+                                          const std::string &name) const = 0;
 };
-
-/**
- * Class responsible for finding a specifications on disk.
- */
-class MANTID_GEOMETRY_DLL DiskSampleEnvironmentSpecFinder final
-    : public ISampleEnvironmentSpecFinder {
-public:
-  virtual SampleEnvironmentSpec_uptr find(const std::string &name) const;
-};
+// Typedef for a unique_ptr
+using ISampleEnvironmentSpecFinder_uptr =
+    std::unique_ptr<ISampleEnvironmentSpecFinder>;
 
 /**
   Create a single instance of a SampleEnvironment. It requires the name
@@ -55,16 +51,42 @@ public:
 */
 class MANTID_GEOMETRY_DLL SampleEnvironmentFactory {
 public:
-  template <typename FinderType = DiskSampleEnvironmentSpecFinder>
-  SampleEnvironment_uptr create(const std::string &specName,
-                                const std::string &canName) {
-    // Defer to the non-template method to do the work
-    return create(FinderType(), specName, canName);
-  }
+  SampleEnvironmentFactory() = default;
+  SampleEnvironmentFactory(ISampleEnvironmentSpecFinder_uptr specFinder);
 
-  SampleEnvironment_uptr create(const ISampleEnvironmentSpecFinder &specFinder,
+  SampleEnvironment_uptr create(const std::string &facility,
+                                const std::string &instrument,
                                 const std::string &specName,
                                 const std::string &canName);
+
+  size_t cacheSize() const;
+  void clearCache();
+
+private:
+  ISampleEnvironmentSpecFinder_uptr m_finder;
+};
+
+//------------------------------------------------------------------------------
+// SampleEnvironmentSpecFileFinder
+//------------------------------------------------------------------------------
+/**
+ * Class responsible for finding a specifications on disk.
+ */
+class MANTID_GEOMETRY_DLL SampleEnvironmentSpecFileFinder final
+    : public ISampleEnvironmentSpecFinder {
+public:
+  SampleEnvironmentSpecFileFinder(const std::vector<std::string> &directories);
+
+  SampleEnvironmentSpec_uptr find(const std::string &facility,
+                                  const std::string &instrument,
+                                  const std::string &name) const override;
+
+private:
+  SampleEnvironmentSpec_uptr parseSpec(const std::string &name,
+                                       const std::string &filename) const;
+
+  const std::string m_fileext = ".xml";
+  const std::vector<std::string> m_rootDirs;
 };
 
 } // namespace Geometry

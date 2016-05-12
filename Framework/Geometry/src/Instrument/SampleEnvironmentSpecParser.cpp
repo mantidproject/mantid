@@ -57,9 +57,9 @@ SampleEnvironmentSpecParser::parse(const std::string &name,
     doc = parser.parse(&src);
   } catch (SAXParseException &exc) {
     std::ostringstream msg;
-    msg << "SampleEnvironmentSpecParser::parse() - Error parsing stream as "
-           "XML: " << exc.what();
-    throw std::invalid_argument(msg.str());
+    msg << "SampleEnvironmentSpecParser::parse() - Error parsing content "
+           "as valid XML: " << exc.what();
+    throw std::runtime_error(msg.str());
   }
   return parse(name, doc->documentElement());
 }

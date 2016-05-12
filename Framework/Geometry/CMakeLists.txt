@@ -398,6 +398,7 @@ set ( TEST_FILES
 	RulesTest.h
 	RulesUnionTest.h
 	SampleEnvironmentFactoryTest.h
+	SampleEnvironmentSpecFileFinderTest.h
 	SampleEnvironmentSpecParserTest.h
 	SampleEnvironmentSpecTest.h
 	SampleEnvironmentTest.h

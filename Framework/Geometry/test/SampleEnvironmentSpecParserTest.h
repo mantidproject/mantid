@@ -239,7 +239,7 @@ public:
     std::string xml;
     std::istringstream instream(xml);
     SampleEnvironmentSpecParser parser;
-    TS_ASSERT_THROWS(parser.parse("name", instream), std::invalid_argument);
+    TS_ASSERT_THROWS(parser.parse("name", instream), std::runtime_error);
   }
 
   void test_Root_Tag_Must_Be_EnvironmentSpec() {
