@@ -5,8 +5,10 @@
 #include "MantidKernel/cow_ptr.h"
 #include "MantidHistogramData/BinEdges.h"
 #include "MantidHistogramData/BinEdgeStandardDeviations.h"
+#include "MantidHistogramData/BinEdgeVariances.h"
 #include "MantidHistogramData/Points.h"
 #include "MantidHistogramData/PointStandardDeviations.h"
+#include "MantidHistogramData/PointVariances.h"
 
 #include <vector>
 

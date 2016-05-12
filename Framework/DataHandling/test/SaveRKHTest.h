@@ -6,8 +6,11 @@
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 #include <fstream>
+#include <numeric>
 #include <Poco/File.h>
 using namespace Mantid::API;
+using Mantid::HistogramData::BinEdges;
+using Mantid::HistogramData::BinEdgeVariances;
 
 class SaveRKHTest : public CxxTest::TestSuite {
 public:
@@ -258,11 +261,13 @@ private:
     const size_t y_length = x_length - 1;
     MatrixWorkspace_sptr ws = WorkspaceFactory::Instance().create(
         "Workspace2D", nSpec, x_length, y_length);
+    BinEdges x(x_length);
+    std::iota(x.begin(), x.end(), 0.0);
+    BinEdgeVariances dx(x_length);
+    std::iota(dx.begin(), dx.end(), 0.0);
     for (size_t j = 0; j < nSpec; ++j) {
-      for (size_t k = 0; k < x_length; ++k) {
-        ws->dataX(j)[k] = double(k);
-        ws->dataDx(j)[k] = sqrt(double(k));
-      }
+      ws->setBinEdges(j, x);
+      ws->setBinEdgeStandardDeviations(j, dx);
       ws->dataY(j).assign(y_length, double(1));
       ws->dataE(j).assign(y_length, double(1));
     }
