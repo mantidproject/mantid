@@ -1045,8 +1045,7 @@ void FilterEvents::splitLog(EventWorkspace_sptr eventws, std::string logname,
     throw std::runtime_error(errmsg.str());
   } else {
     for (const auto &split : splitters) {
-      g_log.debug() << "Workspace "
-                    << eventws->name() << ": "
+      g_log.debug() << "Workspace " << eventws->name() << ": "
                     << "log name = " << logname
                     << ", duration = " << split.duration() << " from "
                     << split.start() << " to " << split.stop() << ".\n";
