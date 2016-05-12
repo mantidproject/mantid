@@ -69,7 +69,7 @@ typedef std::set<AlgorithmHistory_sptr,
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
 
-class MANTID_API_DLL AlgorithmHistory final {
+class MANTID_API_DLL AlgorithmHistory {
 
 public:
   /// History container
@@ -79,7 +79,7 @@ public:
       const Algorithm *const alg,
       const Kernel::DateAndTime &start = Kernel::DateAndTime::defaultTime(),
       const double &duration = -1.0, std::size_t uexeccount = 0);
-  virtual ~AlgorithmHistory();
+  ~AlgorithmHistory();
   AlgorithmHistory &operator=(const AlgorithmHistory &);
   AlgorithmHistory(const AlgorithmHistory &);
   AlgorithmHistory(
