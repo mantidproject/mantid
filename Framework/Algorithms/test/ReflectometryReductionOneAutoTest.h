@@ -144,6 +144,7 @@ public:
     alg->setProperty("MonitorBackgroundWavelengthMax", 1.0);
     alg->setProperty("MonitorIntegrationWavelengthMin", 0.0);
     alg->setProperty("MonitorIntegrationWavelengthMax", 1.0);
+    alg->setProperty("MomentumTransferStep", 0.1);
     alg->setPropertyValue("ProcessingInstructions", "0");
     alg->setPropertyValue("OutputWorkspace", outWSQName);
     alg->setPropertyValue("OutputWorkspaceWavelength", outWSLamName);
@@ -199,6 +200,7 @@ public:
     alg->setProperty("InputWorkspace", m_TOF);
     alg->setProperty("FirstTransmissionRun", m_TOF);
     alg->setProperty("SecondTransmissionRun", m_TOF);
+    alg->setProperty("MomentumTransferStep", 0.1);
     alg->setProperty("WavelengthMax", 1.0);
     alg->setPropertyValue("OutputWorkspace", "out_ws_Q");
     alg->setPropertyValue("OutputWorkspaceWavelength", "out_ws_Lam");
@@ -208,6 +210,7 @@ public:
     alg->setProperty("InputWorkspace", m_TOF);
     alg->setProperty("FirstTransmissionRun", m_TOF);
     alg->setProperty("SecondTransmissionRun", m_TOF);
+    alg->setProperty("MomentumTransferStep", 0.1);
     alg->setProperty("WavelengthMin", 1.0);
     alg->setPropertyValue("OutputWorkspace", "out_ws_Q");
     alg->setPropertyValue("OutputWorkspaceWavelength", "out_ws_Lam");
@@ -281,7 +284,6 @@ public:
     alg->setProperty("SampleComponentName", "made-up");
     TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
   }
-
   void test_exec() {
     IAlgorithm_sptr alg =
         AlgorithmManager::Instance().create("ReflectometryReductionOneAuto");
@@ -295,6 +297,7 @@ public:
         alg->setPropertyValue("OutputWorkspace", outWSQName));
     TS_ASSERT_THROWS_NOTHING(
         alg->setPropertyValue("OutputWorkspaceWavelength", outWSLamName));
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty("MomentumTransferStep", 0.1));
     alg->execute();
     TS_ASSERT(alg->isExecuted());
 
@@ -368,6 +371,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("InputWorkspace", tinyWS));
     TS_ASSERT_THROWS_NOTHING(
         alg->setPropertyValue("OutputWorkspace", outWSQName));
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty("MomentumTransferStep", 0.1));
     TS_ASSERT_THROWS_NOTHING(
         alg->setPropertyValue("OutputWorkspaceWavelength", outWSLamName));
     TS_ASSERT_THROWS_ANYTHING(alg->execute());
@@ -382,10 +386,10 @@ public:
     //-----------------
     MantidVecPtr x, e, detData, monData;
 
-    // Single bin from 0->1
+    // Single bin from 1->2
     x.access().resize(2);
-    x.access()[0] = 0;
-    x.access()[1] = 1;
+    x.access()[0] = 1;
+    x.access()[1] = 2;
     // No error at all
     e.access().resize(1, 0.0);
 
@@ -473,6 +477,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         alg->setProperty("NormalizeByIntegratedMonitors", false));
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("WavelengthStep", 1.0));
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty("MomentumTransferStep", 0.1));
     TS_ASSERT_THROWS_NOTHING(
         alg->setPropertyValue("OutputWorkspace", outWSQName));
     TS_ASSERT_THROWS_NOTHING(
@@ -487,8 +492,8 @@ public:
 
     // Check results (10 / 5 = 2)
     TS_ASSERT_DELTA(outWSLam->readY(0)[0], 2, 1e-5);
-    TS_ASSERT_DELTA(outWSLam->readX(0)[0], 0, 1e-5);
-    TS_ASSERT_DELTA(outWSLam->readX(0)[1], 1, 1e-5);
+    TS_ASSERT_DELTA(outWSLam->readX(0)[0], 1, 1e-5);
+    TS_ASSERT_DELTA(outWSLam->readX(0)[1], 2, 1e-5);
 
     // Remove workspace from the data service.
     AnalysisDataService::Instance().remove(inWSName);

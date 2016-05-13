@@ -880,84 +880,77 @@ void ReflTableViewPresenter::reduceRow(int rowNo) {
                                kvp->first);
     }
   }
-
-  algReflOne->execute();
-
-  if (!algReflOne->isExecuted())
-    throw std::runtime_error("Failed to run ReflectometryReductionOneAuto.");
-
   const double scale =
       m_model->data(m_model->index(rowNo, ReflTableSchema::COL_SCALE))
           .toDouble();
-  if (scale != 1.0) {
-    IAlgorithm_sptr algScale = AlgorithmManager::Instance().create("Scale");
-    algScale->initialize();
-    algScale->setProperty("InputWorkspace", "IvsQ_" + runNo);
-    algScale->setProperty("OutputWorkspace", "IvsQ_" + runNo);
-    algScale->setProperty("Factor", 1.0 / scale);
-    algScale->execute();
-
-    if (!algScale->isExecuted())
-      throw std::runtime_error("Failed to run Scale algorithm");
+  // set scale factor for RROA here
+  algReflOne->setProperty("ScaleFactor", scale);
+  if (!m_model->data(m_model->index(rowNo, ReflTableSchema::COL_QMIN))
+           .toString()
+           .isEmpty() &&
+      !m_model->data(m_model->index(rowNo, ReflTableSchema::COL_QMAX))
+           .toString()
+           .isEmpty()) {
+    // get QMin and QMax from the table if possible.
+    const double qmin =
+        m_model->data(m_model->index(rowNo, ReflTableSchema::COL_QMIN))
+            .toDouble();
+    const double qmax =
+        m_model->data(m_model->index(rowNo, ReflTableSchema::COL_QMAX))
+            .toDouble();
+    // set MomentumTransfer Min and Max for RROA here
+    algReflOne->setProperty("MomentumTransferMinimum", qmin);
+    algReflOne->setProperty("MomentumTransferMaximum", qmax);
   }
-
+  if (!m_model->data(m_model->index(rowNo, ReflTableSchema::COL_DQQ))
+           .toString()
+           .isEmpty()) {
+    // get DQ/Q from the table if possible.
+    const double dqq =
+        m_model->data(m_model->index(rowNo, ReflTableSchema::COL_DQQ))
+            .toDouble();
+    algReflOne->setProperty("MomentumTransferStep", dqq);
+  }
+  // execute RROA.
+  algReflOne->execute();
+  if (!algReflOne->isExecuted())
+    throw std::runtime_error("Failed to run ReflectometryReductionOneAuto.");
+  // We need to retrieve these values from the algorithm so they can populate
+  // the table.
+  std::string momentumMinEntry =
+      algReflOne->getPropertyValue("MomentumTransferMinimum");
+  std::string momentumStepEntry =
+      algReflOne->getPropertyValue("MomentumTransferStep");
+  std::string momentumMaxEntry =
+      algReflOne->getPropertyValue("MomentumTransferMaximum");
+  std::string thetaEntry = algReflOne->getPropertyValue("ThetaOut");
   // Reduction has completed. Put Qmin and Qmax into the table if needed, for
   // stitching.
   if (m_model->data(m_model->index(rowNo, ReflTableSchema::COL_QMIN))
           .toString()
-          .isEmpty() ||
-      m_model->data(m_model->index(rowNo, ReflTableSchema::COL_QMAX))
+          .isEmpty())
+    m_model->setData(m_model->index(rowNo, ReflTableSchema::COL_QMIN),
+                     boost::lexical_cast<double>(momentumMinEntry));
+
+  if (m_model->data(m_model->index(rowNo, ReflTableSchema::COL_QMAX))
           .toString()
-          .isEmpty()) {
-    Workspace_sptr ws =
-        AnalysisDataService::Instance().retrieveWS<Workspace>("IvsQ_" + runNo);
-    std::vector<double> qrange = calcQRange(ws, theta);
+          .isEmpty())
+    m_model->setData(m_model->index(rowNo, ReflTableSchema::COL_QMAX),
+                     boost::lexical_cast<double>(momentumMaxEntry));
 
-    if (m_model->data(m_model->index(rowNo, ReflTableSchema::COL_QMIN))
-            .toString()
-            .isEmpty())
-      m_model->setData(m_model->index(rowNo, ReflTableSchema::COL_QMIN),
-                       qrange[0]);
+  if (m_model->data(m_model->index(rowNo, ReflTableSchema::COL_DQQ))
+          .toString()
+          .isEmpty())
+    m_model->setData(m_model->index(rowNo, ReflTableSchema::COL_DQQ),
+                     boost::lexical_cast<double>(momentumStepEntry));
 
-    if (m_model->data(m_model->index(rowNo, ReflTableSchema::COL_QMAX))
-            .toString()
-            .isEmpty())
-      m_model->setData(m_model->index(rowNo, ReflTableSchema::COL_QMAX),
-                       qrange[1]);
-
-    m_tableDirty = true;
-  }
-
-  // We need to make sure that qmin and qmax are respected, so we rebin to
-  // those limits here.
-  IAlgorithm_sptr algCrop = AlgorithmManager::Instance().create("Rebin");
-  algCrop->initialize();
-  algCrop->setProperty("InputWorkspace", "IvsQ_" + runNo);
-  algCrop->setProperty("OutputWorkspace", "IvsQ_" + runNo);
-  const double qmin =
-      m_model->data(m_model->index(rowNo, ReflTableSchema::COL_QMIN))
-          .toDouble();
-  const double qmax =
-      m_model->data(m_model->index(rowNo, ReflTableSchema::COL_QMAX))
-          .toDouble();
-  const double dqq =
-      m_model->data(m_model->index(rowNo, ReflTableSchema::COL_DQQ)).toDouble();
-  std::vector<double> params;
-  params.push_back(qmin);
-  params.push_back(-dqq);
-  params.push_back(qmax);
-  algCrop->setProperty("Params", params);
-  algCrop->execute();
-
-  if (!algCrop->isExecuted())
-    throw std::runtime_error("Failed to run Rebin algorithm");
-
+  m_tableDirty = true;
   // Also fill in theta if needed
   if (m_model->data(m_model->index(rowNo, ReflTableSchema::COL_ANGLE))
           .toString()
-          .isEmpty() &&
-      thetaGiven)
-    m_model->setData(m_model->index(rowNo, ReflTableSchema::COL_ANGLE), theta);
+          .isEmpty())
+    m_model->setData(m_model->index(rowNo, ReflTableSchema::COL_ANGLE),
+                     boost::lexical_cast<double>(thetaEntry));
 }
 
 /**
