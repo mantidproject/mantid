@@ -83,6 +83,9 @@ private:
                        const std::string &inFormat,
                        const std::string &outputName) const;
 
+  Mantid::API::MatrixWorkspace_sptr loadImg(const std::string &inputName,
+                                            const std::string inFormat) const;
+
   Mantid::API::MatrixWorkspace_sptr
   loadFITS(const std::string &inputName) const;
 

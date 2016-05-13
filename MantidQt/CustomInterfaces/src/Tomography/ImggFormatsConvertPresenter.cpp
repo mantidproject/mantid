@@ -108,14 +108,20 @@ void ImggFormatsConvertPresenter::processConvert() {
   try {
     size_t count = goThroughDirRecur(inPS, inFormat, outPS, outFormat, depth);
     if (count > 0) {
-      g_log.notice() << "Finished converstion of images from path: " << inPS
-                     << " into " << outPS << ", with depth " << depth
-                     << ". Converted " << count << " images from format "
-                     << inFormat << " to format " << outFormat << std::endl;
+      std::stringstream msg;
+      msg << "Finished converstion of images from path: " << inPS << " into "
+          << outPS << ", with depth " << depth << ". Converted " << count
+          << " images from format " << inFormat << " to format " << outFormat
+          << std::endl;
+      g_log.notice() << msg.str();
+      m_view->userWarning("Conversion finished successfully", msg.str());
     } else {
-      g_log.notice() << "No images could be found in input path: " << inPS
-                     << " with format " << inFormat << ". 0 images converted."
-                     << std::endl;
+      std::stringstream msg;
+      msg << "No images could be found in input path: " << inPS
+          << " with format " << inFormat << ". 0 images converted."
+          << std::endl;
+      g_log.notice() << msg.str();
+      m_view->userWarning("No images could be found", msg.str());
     }
   } catch (std::runtime_error &rexc) {
     m_view->userError("Error while converting files",
@@ -207,7 +213,16 @@ void ImggFormatsConvertPresenter::convert(const std::string &inputName,
       m_view->writeImg(inWks, outputName, outFormat);
     } else {
       // other image formats
-      m_view->convert(inputName, inFormat, outputName, outFormat);
+      try {
+        m_view->convert(inputName, inFormat, outputName, outFormat);
+      } catch (std::runtime_error &rexc) {
+        m_view->userError("Error in conversion",
+                          "There was an error when converting the image " +
+                              inputName + " from format " + inFormat +
+                              " to format " + outFormat +
+                              " into the output file " + outputName +
+                              ". Details: " + rexc.what());
+      }
     }
   }
 }
@@ -216,23 +231,49 @@ void ImggFormatsConvertPresenter::convertToFITS(
     const std::string &inputName, const std::string &inFormat,
     const std::string &outputName) const {
 
-  Mantid::API::MatrixWorkspace_sptr inWks;
-  if ("FITS" == inFormat) {
-    inWks = loadFITS(inputName);
-  } else {
-    inWks = m_view->loadImg(inputName, inFormat);
+  auto inWks = loadImg(inputName, inFormat);
+  try {
+    saveFITS(inWks, outputName);
+  } catch (std::runtime_error &rexc) {
+    m_view->userError(
+        "Error in conversion",
+        "There was an error when converting the image " + inputName +
+            " (format " + inFormat +
+            "), trying to write it into FITS format in the output file " +
+            outputName + ". Details: " + rexc.what());
   }
-
-  saveFITS(inWks, outputName);
 }
 
 void ImggFormatsConvertPresenter::convertToNXTomo(
     const std::string &inputName, const std::string &inFormat,
     const std::string &outputName) const {
-  // loadNXTomo is not enabled (and there is no LoadNXTomo algorithm for now)
 
-  auto inWks = m_view->loadImg(inputName, inFormat);
-  saveNXTomo(inWks, outputName);
+  // loadNXTomo is not enabled (and there is no LoadNXTomo algorithm for now)
+  auto inWks = loadImg(inputName, inFormat);
+  try {
+    saveNXTomo(inWks, outputName);
+  } catch (std::runtime_error &rexc) {
+    m_view->userError(
+        "Error in conversion",
+        "There was an error when converting the image " + inputName +
+            " (format " + inFormat +
+            "), trying to write it into NXTomo format in the output file " +
+            outputName + ". Details: " + rexc.what());
+  }
+}
+
+Mantid::API::MatrixWorkspace_sptr
+ImggFormatsConvertPresenter::loadImg(const std::string &inputName,
+                                     const std::string inFormat) const {
+  Mantid::API::MatrixWorkspace_sptr wks;
+  // TODO: This should become the algorithm LoadImage:
+  // https://github.com/mantidproject/mantid/issues/6843
+  if ("FITS" == inFormat) {
+    wks = loadFITS(inputName);
+  } else {
+    wks = m_view->loadImg(inputName, inFormat);
+  }
+  return wks;
 }
 
 Mantid::API::MatrixWorkspace_sptr
@@ -295,10 +336,11 @@ void ImggFormatsConvertPresenter::saveFITS(
 void ImggFormatsConvertPresenter::saveNXTomo(
     Mantid::API::MatrixWorkspace_sptr image,
     const std::string &outputName) const {
+
   // Run the algorithm SaveNXTomo
   auto alg = Mantid::API::AlgorithmManager::Instance().create("SaveNXTomo");
   alg->initialize();
-  alg->setProperty("InputWorkspace", image);
+  alg->setProperty("InputWorkspaces", image);
   alg->setProperty("Filename", outputName);
   alg->setProperty("OverwriteFile", false);
   alg->execute();
