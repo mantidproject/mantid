@@ -839,7 +839,7 @@ class DirectEnergyConversion(object):
 
         # Calculate the incident energy
         #Returns: ei,mon1_peak,mon1_index,tzero
-        ei,mon1_peak,mon1_index,_ = \
+        ei,mon1_peak,_,_ = \
             GetEi(InputWorkspace=monitor_ws, Monitor1Spec=ei_mon_spectra[0],
                   Monitor2Spec=ei_mon_spectra[1],
                   EnergyEstimate=ei_guess,FixEi=fix_ei)
@@ -1148,8 +1148,8 @@ class DirectEnergyConversion(object):
                 # Calculate the incident energy and TOF when the particles access Monitor1
                 try:
                     ei,mon1_peak,mon1_index,_ = \
-                    GetEi(InputWorkspace=monitor_ws, Monitor1Spec=mon_1_spec_ID,
-                        Monitor2Spec=mon_2_spec_ID,
+                    GetEi(InputWorkspace=monitor_ws, Monitor1Spec=mon_1_spec_ID,\
+                        Monitor2Spec=mon_2_spec_ID,\
                         EnergyEstimate=ei_guess,FixEi=fix_ei)
                     mon1_det = monitor_ws.getDetector(mon1_index)
                     mon1_pos = mon1_det.getPos()
@@ -1495,7 +1495,7 @@ class DirectEnergyConversion(object):
 --------> Abs norm factors: Sigma^2: {9}
 --------> Abs norm factors: Poisson: {10}
 --------> Abs norm factors: TGP    : {11}\n"""\
-                .format(ws_name,minmax[0],minmax[1],nhist,sum(signal),sum(error),izerc,scale_factor,
+                .format(ws_name,minmax[0],minmax[1],nhist,sum(signal),sum(error),izerc,scale_factor,\
                           norm_factor['LibISIS'],norm_factor['SigSq'],norm_factor['Poisson'],norm_factor['TGP'])
             log_value = log_value + log1_value
             propman.log(log_value,'error')

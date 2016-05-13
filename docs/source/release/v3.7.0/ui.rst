@@ -33,6 +33,10 @@ Line plots
 .. figure::  ../../images/R37PlotAllErrorsOption.png
    :align: center
 
+3D plots from group workspaces
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+- For single-spectrum data, the choice of spectrum number to plot has been disabled because it has only one possible answer.
+
 Instrument View
 ###############
 
@@ -109,6 +113,19 @@ Documentation
   and also concrete equations that describe them
   `#15064 <https://github.com/mantidproject/mantid/pull/15064>`_
 
+- The documentation of several Nexus loading algorithms has been improved with the addition of a table that shows how various
+  items of data move from the Nexus file to the workspace. These algorithms are
+  :ref:`LoadEventNexus <algm-LoadEventNexus>`,
+  :ref:`LoadISISNexus <algm-LoadISISNexus>`,
+  :ref:`LoadMcStas <algm-LoadMcStas>`,
+  :ref:`LoadMuonNexus <algm-LoadMuonNexus>` (both versions) and
+  :ref:`LoadNexusLogs <algm-LoadNexusLogs>`.
+  Also :ref:`LoadNexus <algm-LoadNexus>` documentation now explains how it determines which load algorithm to run.
+
+- The documentation for all calibration approaches has been pulled together, improved and expanded :ref:`here<Calibration>`.
+
+
+
 Bugs Resolved
 -------------
 
@@ -124,6 +141,8 @@ Bugs Resolved
 -  Plots from tables: the title of the plot is the title of the TableWorkspace rather than the default "Table" (this is useful when several tables and plots are open)
 
 -  Plots from tables auto-update when the TableWorkspace is replaced in the ADS. If extra rows are added then the new points are added to the graph.
+
+- The Fit property browser (Fit Function window) in MantidPlot now supports fitting data plotted from a TableWorkspace.
 
 SliceViewer Improvements
 ------------------------

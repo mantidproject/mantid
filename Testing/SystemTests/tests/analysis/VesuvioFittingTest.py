@@ -60,9 +60,9 @@ def tolerance():
     # The results however are still acceptable
     system = platform.system()
     if system == "Windows" or system == "Darwin":
-        return 1e-2
+        return 1.0e-2
     else:
-        return 1e-6
+        return 1.1e-6
 
 #------------------------------------------------------------------------------------------------------------------
 

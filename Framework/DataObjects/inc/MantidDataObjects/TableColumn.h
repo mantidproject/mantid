@@ -145,12 +145,7 @@ public:
     return static_cast<long int>(m_data.size() * sizeof(Type));
   }
   /// Clone
-  TableColumn *clone() const override {
-    auto temp = new TableColumn();
-    temp->m_data = this->m_data;
-    temp->setName(this->m_name);
-    return temp;
-  }
+  TableColumn *clone() const override { return new TableColumn(*this); }
 
   /**
    * Cast an element to double if possible. If it's impossible
@@ -237,6 +232,17 @@ private:
   std::vector<Type> m_data;
   friend class TableWorkspace;
 };
+
+/// Template specialization for strings so they can contain spaces
+template <>
+inline void TableColumn<std::string>::read(size_t index,
+                                           const std::string &text) {
+  /* As opposed to other types, assigning strings via a stream does not work if
+   * it contains a whitespace character, so instead the assignment operator is
+   * used.
+   */
+  m_data[index] = text;
+}
 
 /// Read in a string and set the value at the given index
 template <typename Type>

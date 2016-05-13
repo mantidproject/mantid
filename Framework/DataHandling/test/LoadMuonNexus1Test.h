@@ -829,6 +829,105 @@ public:
     checkProperty(run, "sample_magn_field", 20.0);
   }
 
+  /**
+   * CHRONUS0003422.nxs has no grouping entry in the file
+   * Test loading grouping from this file
+   */
+  void test_loadingDetectorGrouping_missingGrouping() {
+    LoadMuonNexus1 alg;
+    try {
+      alg.initialize();
+      alg.setChild(true);
+      alg.setPropertyValue("Filename", "CHRONUS00003422.nxs");
+      alg.setPropertyValue("OutputWorkspace", "__NotUsed");
+      alg.setPropertyValue("DetectorGroupingTable", "__Grouping");
+      alg.execute();
+    } catch (const std::exception &error) {
+      TS_FAIL(error.what());
+    }
+
+    Workspace_sptr grouping;
+    TS_ASSERT_THROWS_NOTHING(grouping =
+                                 alg.getProperty("DetectorGroupingTable"));
+    const auto detectorGrouping =
+        boost::dynamic_pointer_cast<TableWorkspace>(grouping);
+
+    if (detectorGrouping) {
+      TS_ASSERT_EQUALS(detectorGrouping->columnCount(), 1);
+      TS_ASSERT_EQUALS(detectorGrouping->rowCount(), 2);
+
+      TS_ASSERT_EQUALS(detectorGrouping->getColumn(0)->type(), "vector_int");
+      TS_ASSERT_EQUALS(detectorGrouping->getColumn(0)->name(), "Detectors");
+
+      std::vector<int> fwd, bwd;
+      TS_ASSERT_THROWS_NOTHING(
+          fwd = detectorGrouping->cell<std::vector<int>>(0, 0));
+      TS_ASSERT_THROWS_NOTHING(
+          bwd = detectorGrouping->cell<std::vector<int>>(1, 0));
+
+      TS_ASSERT_EQUALS(fwd.size(), 304);
+      TS_ASSERT_EQUALS(bwd.size(), 302);
+
+      for (const int det : fwd) {
+        TS_ASSERT_EQUALS(det % 2, 1);
+      }
+      for (const int det : bwd) {
+        TS_ASSERT_EQUALS(det % 2, 0);
+      }
+    } else {
+      TS_FAIL("Loaded grouping was null");
+    }
+  }
+
+  /**
+    * EMU00019489.nxs has a grouping entry in the file, but it is
+    * filled with zeros.
+    * Test loading grouping from this file
+    */
+  void test_loadingDetectorGrouping_zeroGrouping() {
+    LoadMuonNexus1 alg;
+    try {
+      alg.initialize();
+      alg.setChild(true);
+      alg.setPropertyValue("Filename", "EMU00019489.nxs");
+      alg.setPropertyValue("OutputWorkspace", "__NotUsed");
+      alg.setPropertyValue("DetectorGroupingTable", "__Grouping");
+      alg.execute();
+    } catch (const std::exception &error) {
+      TS_FAIL(error.what());
+    }
+
+    Workspace_sptr grouping;
+    TS_ASSERT_THROWS_NOTHING(grouping =
+                                 alg.getProperty("DetectorGroupingTable"));
+    const auto detectorGrouping =
+        boost::dynamic_pointer_cast<TableWorkspace>(grouping);
+
+    if (detectorGrouping) {
+      TS_ASSERT_EQUALS(detectorGrouping->columnCount(), 1);
+      TS_ASSERT_EQUALS(detectorGrouping->rowCount(), 2);
+
+      TS_ASSERT_EQUALS(detectorGrouping->getColumn(0)->type(), "vector_int");
+      TS_ASSERT_EQUALS(detectorGrouping->getColumn(0)->name(), "Detectors");
+
+      std::vector<int> fwd, bwd;
+      TS_ASSERT_THROWS_NOTHING(
+          fwd = detectorGrouping->cell<std::vector<int>>(0, 0));
+      TS_ASSERT_THROWS_NOTHING(
+          bwd = detectorGrouping->cell<std::vector<int>>(1, 0));
+
+      TS_ASSERT_EQUALS(fwd.size(), 48);
+      TS_ASSERT_EQUALS(bwd.size(), 48);
+
+      for (int i = 0; i < 48; i++) {
+        TS_ASSERT_EQUALS(fwd[i], i + 1);
+        TS_ASSERT_EQUALS(bwd[i], i + 49);
+      }
+    } else {
+      TS_FAIL("Loaded grouping was null");
+    }
+  }
+
 private:
   LoadMuonNexus1 nxLoad, nxload2, nxload3;
   std::string outputSpace;

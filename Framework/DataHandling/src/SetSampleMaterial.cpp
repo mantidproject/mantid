@@ -15,7 +15,7 @@
 
 #include <boost/scoped_ptr.hpp>
 
-#include <math.h>
+#include <cmath>
 
 using namespace Mantid::PhysicalConstants;
 
