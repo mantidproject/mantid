@@ -67,6 +67,7 @@ class VesuvioTOFFit(VesuvioBase):
         tof_data = self.getProperty("InputWorkspace").value
 
         reduced_chi_square, fit_params, fit_data = self._fit_tof(tof_data)
+
         self.setProperty("OutputWorkspace", fit_data)
         self.setProperty("FitParameters", fit_params)
         self.setProperty("Chi2", reduced_chi_square)
@@ -111,22 +112,17 @@ class VesuvioTOFFit(VesuvioBase):
             function_str = fit_options.create_function_str()
             constraints = fit_options.create_constraints_str()
             ties = fit_options.create_ties_str()
-
-            _, params, fitted_data = self._do_fit(function_str, data_ws, workspace_index,
-                                                  constraints, ties,
-                                                  max_iter=self.getProperty("MaxIterations").value)
+            results = self._do_fit(function_str, data_ws, workspace_index, constraints, ties,
+                                   max_iter=self.getProperty("MaxIterations").value)
 
             # Run second time using standard CompositeFunction & no constraints matrix to
             # calculate correct reduced chisq
-            param_values = TableWorkspaceDictionaryFacade(params)
+            param_values = TableWorkspaceDictionaryFacade(results[1])
 
         function_str = fit_options.create_function_str(param_values)
         max_iter = 0 if simulation else 1
-        reduced_chi_square, _, _= self._do_fit(function_str, data_ws,
-                                               workspace_index, constraints,
-                                               ties, max_iter=max_iter)
-
-        return reduced_chi_square, params, fitted_data
+        return self._do_fit(function_str, data_ws, workspace_index, constraints,
+                            ties, max_iter=max_iter)
 
     # ----------------------------------------------------------------------------------------
 
@@ -153,8 +149,7 @@ class VesuvioTOFFit(VesuvioBase):
                                           MaxIterations=max_iter,
                                           Minimizer=self.getPropertyValue("Minimizer"))
 
-        result, reduced_chi_squared = outputs[0], outputs[1]
-        params, fitted_data = outputs[3], outputs[4]
+        result, reduced_chi_square, params, fitted_data = outputs[0], outputs[1], outputs[3], outputs[4]
 
         # Output result of fiting to log
         result_log_str = 'Fit result: {0}'.format(result)
@@ -169,7 +164,7 @@ class VesuvioTOFFit(VesuvioBase):
         data_ws = self._execute_child_alg("ScaleX", InputWorkspace=data_ws, OutputWorkspace=data_ws,
                                           Operation='Multiply', Factor=1e06)
 
-        return reduced_chi_squared, params, fitted_data
+        return reduced_chi_square, params, fitted_data
 
 # -----------------------------------------------------------------------------------------
 AlgorithmFactory.subscribe(VesuvioTOFFit)
