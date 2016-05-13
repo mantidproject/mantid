@@ -43,7 +43,11 @@ public:
   /// @return The name of kit
   inline const std::string name() const { return m_name; }
   /// @return The name of can
-  inline const std::string canID() const { return m_components.front()->id(); }
+  inline const std::string canID() const { return can()->id(); }
+  /// @return A const ptr to the can instance
+  inline Can_const_sptr can() const {
+    return boost::static_pointer_cast<const Can>(m_components.front());
+  }
   /// @return The number of elements the environment is composed of
   inline size_t nelements() const { return m_components.size(); }
 

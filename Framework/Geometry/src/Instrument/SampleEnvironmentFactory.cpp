@@ -130,8 +130,11 @@ SampleEnvironmentSpecFileFinder::find(const std::string &facility,
   using Poco::Path;
   Path relpath(facility);
   relpath.append(instrument).append(name + m_fileext);
-  for (const auto &prefix : m_rootDirs) {
-    File fullpath(Path(prefix, relpath));
+  for (const auto &prefixStr : m_rootDirs) {
+    Path prefix(prefixStr);
+    // Ensure the path is a directory (note that this does not create it!)
+    prefix.makeDirectory();
+    File fullpath(Poco::Path(prefix, relpath));
     if (fullpath.exists()) {
       return parseSpec(name, fullpath.path());
     }

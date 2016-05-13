@@ -28,6 +28,7 @@ public:
     SampleEnvironment kit("TestKit", can);
     TS_ASSERT_EQUALS(kit.name(), "TestKit");
     TS_ASSERT_EQUALS(kit.canID(), "8mm");
+    TS_ASSERT_EQUALS(kit.can(), can);
     TS_ASSERT_EQUALS(1, kit.nelements());
   }
 

@@ -70,10 +70,10 @@ public:
   }
 
   ~SampleEnvironmentSpecFileFinderTest() {
-    //    try {
-    //      Poco::File(m_testRoot).remove(true);
-    //    } catch (...) {
-    //    }
+    try {
+      Poco::File(m_testRoot).remove(true);
+    } catch (...) {
+    }
   }
 
   //----------------------------------------------------------------------------
