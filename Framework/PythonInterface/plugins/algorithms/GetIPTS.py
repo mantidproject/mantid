@@ -9,39 +9,71 @@ import os
 
 
 class GetIPTS(PythonAlgorithm):
+    def getValidInstruments(self):
+        instruments = ['']
 
-    def get_IPTS_Local(self, run):
-        runs = range(run-5, run+1)
-        file_Str = ''
+        for name in ['SNS', 'HFIR']:
+            facility = ConfigService.getFacility(name)
+            facility = [item.shortName() for item in facility.instruments()]
+            facility = [item for item in facility if item != 'DAS']
+            facility.sort()
+            instruments.extend(facility)
 
-        while len(runs) > 0:
+        return instruments
+
+    def findFile(self, instrument, runnumber):
+        # start with run and check the five before it
+        runIds = range(runnumber, runnumber-6, -1)
+        # check for one after as well
+        runIds.append(runnumber + 1)
+
+        runIds = [str(id) for id in runIds if id > 0]
+
+        # prepend non-empty instrument name
+        if len(instrument) > 0:
+            runIds = ['%s_%s' % (instrument, id) for id in runIds]
+
+        # look for a file
+        for runId in runIds:
+            self.log().information("Looking for '%s'" % runId)
             try:
-                r = runs.pop()
-                self.log().notice('Checking IPTS from run: is : %s' % r)
-                file_Str = FileFinder.findRuns('SNAP_' + str(r))[0]
-                break
+                return FileFinder.findRuns(runId)[0]
             except RuntimeError:
-                pass
+                pass  # just keep looking
 
-        if file_Str == '':
-            self.log().error('The SNAP run %s is not found in the server - cannot find current IPTS, Choose another run' % run)
-            return False
-        else:
-            start = file_Str.find('IPTS')
-            temp = file_Str.find('/', start)
-            root = file_Str[0:temp+1]
-            return root
+        # failed to find any is an error
+        raise RuntimeError("Cannot find IPTS directory for '%s'"
+                           % runnumber)
+
+    def getIPTSLocal(self, instrument, runnumber):
+        filename = self.findFile(instrument, runnumber)
+
+        # convert to the path to the proposal
+        location = filename.find('IPTS')
+        location = filename.find('/', location)
+        direc = filename[0:location+1]
+        return direc
 
     def PyInit(self):
-        valid = IntBoundedValidator(lower=0)
-        self.declareProperty(name="Run Number", defaultValue=0,
+        self.declareProperty('RunNumber', defaultValue=0,
                              direction=Direction.Input,
-                             validator=valid,
+                             validator=IntBoundedValidator(lower=0),
                              doc="Extracts the IPTS number for a run")
 
+        instruments = self.getValidInstruments()
+        self.declareProperty('Instrument', '',
+                             StringListValidator(instruments),
+                             "Empty uses default instrument")
+
+        self.declareProperty('Directory', '',
+                             direction=Direction.Output)
+
     def PyExec(self):
-        run = self.getProperty("Run Number").value
-        folder = self.get_IPTS_Local(run)
-        self.log().notice('Folder is: %s' % folder)
+        instrument = self.getProperty('Instrument').value
+        runnumber = self.getProperty('RunNumber').value
+
+        direc = self.getIPTSLocal(instrument, runnumber)
+        self.setPropertyValue('Directory', direc)
+        self.log().notice('IPTS directory is: %s' % direc)
 
 AlgorithmFactory.subscribe(GetIPTS)
