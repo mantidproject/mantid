@@ -2,6 +2,7 @@
 #define MANTID_CUSTOMINTERFACES_DATAPREPROCESSORALGORITHM_H
 
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidQtCustomInterfaces/DllConfig.h"
 
 #include <set>
 #include <string>
@@ -34,86 +35,31 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DataPreprocessorAlgorithm {
+class MANTIDQT_CUSTOMINTERFACES_DLL DataPreprocessorAlgorithm {
 public:
-  /** Constructor
-  * @param name : The name of the pre-processing algorithm
-  * @param prefix : The prefix that will be added to the output workspace name
-  * in the ADS
-  * @param blacklist : The list of properties we don't want to show
-  * @param show : Whether or not to show the information associated with
-  * this pre-processor in the processed workspace's name
-  */
+  // Constructor
   DataPreprocessorAlgorithm(
       const std::string &name, const std::string &prefix = "",
       const std::set<std::string> &blacklist = std::set<std::string>(),
-      bool show = true)
-      : m_name(name), m_prefix(prefix), m_blacklist(blacklist), m_show(show) {
-
-    Mantid::API::IAlgorithm_sptr alg =
-        Mantid::API::AlgorithmManager::Instance().create(m_name);
-
-    int countInputWS = 0;
-    int countOutputWS = 0;
-
-    auto properties = alg->getProperties();
-    for (auto &prop : properties) {
-
-      if (prop->direction() == Mantid::Kernel::Direction::Input &&
-          (prop->type() == "MatrixWorkspace" || prop->type() == "Workspace")) {
-        // For now, we restrict the workspaces to either MatrixWorkspace
-        // or Workspace, this condition can be relaxed if necessary
-
-        if (countInputWS == 0) {
-          m_lhs = prop->name();
-        } else {
-          m_rhs = prop->name();
-        }
-        countInputWS++;
-      }
-
-      if (prop->direction() == Mantid::Kernel::Direction::Output &&
-          (prop->type() == "MatrixWorkspace" || prop->type() == "Workspace")) {
-
-        m_outProperty = prop->name();
-				countOutputWS++;
-      }
-    }
-
-    if (countInputWS != 2) {
-      throw std::invalid_argument("Invalid Pre-processing algorithm. A "
-                                  "valid algorithm must have two input "
-                                  "workspace properties.");
-    }
-    if (countOutputWS != 1) {
-      throw std::invalid_argument("Invalid Pre-processing algorithm. A "
-                                  "valid algorithm must have one "
-                                  "output workspace property.");
-    }
-  };
-  /** Default constructor: use 'Plus' as the default pre-processor algorithm
-  */
-  DataPreprocessorAlgorithm()
-      : DataPreprocessorAlgorithm("Plus", "TOF_",
-                                  std::set<std::string>{"LHSWorkspace",
-                                                        "RHSWorkspace",
-                                                        "OutputWorkspace"}){};
+      bool show = true);
+  // Default constructor
+  DataPreprocessorAlgorithm();
   // Destructor
-  virtual ~DataPreprocessorAlgorithm(){};
+  virtual ~DataPreprocessorAlgorithm();
   // The name of this algorithm
-  std::string name() const { return m_name; };
+  std::string name() const;
   // The name of the lhs input property
-  std::string lhsProperty() const { return m_lhs; };
+  std::string lhsProperty() const;
   // The name of the rhs input property
-  std::string rhsProperty() const { return m_rhs; };
+  std::string rhsProperty() const;
   // The name of the output property
-  std::string outputProperty() const { return m_outProperty; };
+  std::string outputProperty() const;
   // The prefix to add to the output property
-  std::string prefix() const { return m_prefix; };
+  std::string prefix() const;
   // If we want to show the info associated with this pre-processor
-  bool show() const { return m_show; };
+  bool show() const;
   // The blacklist
-  std::set<std::string> blacklist() const { return m_blacklist; };
+  std::set<std::string> blacklist() const;
 
 private:
   // The name of this algorithm

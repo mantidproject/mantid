@@ -1,6 +1,8 @@
 #ifndef MANTID_CUSTOMINTERFACES_DATAPROCESSORWHITELIST_H
 #define MANTID_CUSTOMINTERFACES_DATAPROCESSORWHITELIST_H
 
+#include "MantidQtCustomInterfaces/DllConfig.h"
+
 #include <map>
 #include <string>
 
@@ -31,36 +33,18 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DataProcessorWhiteList {
+class MANTIDQT_CUSTOMINTERFACES_DLL DataProcessorWhiteList {
 public:
   DataProcessorWhiteList() : m_lastIndex(0){};
   virtual ~DataProcessorWhiteList(){};
 
-  /** Adds an element to the whitelist
-  @param colName : the name of the column to be added
-  @param algProperty : the name of the property linked to this column
-  @param description : a description of this column
-  */
   void addElement(const std::string &colName, const std::string &algProperty,
-                  const std::string &description = "") {
-    m_colIndexToColName[m_lastIndex] = colName;
-    m_colIndexToAlgProp[m_lastIndex] = algProperty;
-    m_description[m_lastIndex] = description;
-    m_colNameToColIndex[colName] = m_lastIndex++;
-  };
-
-  int colIndexFromColName(const std::string &colName) const {
-    return m_colNameToColIndex.at(colName);
-  }
-  std::string colNameFromColIndex(int index) const {
-    return m_colIndexToColName.at(index);
-  }
-  std::string algPropFromColIndex(int index) const {
-    return m_colIndexToAlgProp.at(index);
-  }
-  std::string description(int index) const { return m_description.at(index); }
-
-  size_t size() const { return m_colNameToColIndex.size(); }
+                  const std::string &description = "");
+  int colIndexFromColName(const std::string &colName) const;
+  std::string colNameFromColIndex(int index) const;
+  std::string algPropFromColIndex(int index) const;
+  std::string description(int index) const;
+  size_t size() const;
 
 private:
   int m_lastIndex;

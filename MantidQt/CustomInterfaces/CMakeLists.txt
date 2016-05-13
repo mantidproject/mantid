@@ -82,6 +82,11 @@ set ( SRC_FILES
 	src/Muon/MuonAnalysisOptionTab.cpp
 	src/Muon/MuonAnalysisResultTableTab.cpp
 	src/ParseKeyValueString.cpp
+	src/Reflectometry/DataPostprocessorAlgorithm.cpp
+	src/Reflectometry/DataPreprocessorAlgorithm.cpp
+	src/Reflectometry/DataProcessorAlgorithm.cpp
+	src/Reflectometry/DataProcessorGenerateNotebook.cpp
+	src/Reflectometry/DataProcessorWhiteList.cpp
 	src/Reflectometry/GenericDataProcessorPresenter.cpp
 	src/Reflectometry/MeasurementItem.cpp
 	src/Reflectometry/QDataProcessorTableModel.cpp
@@ -89,7 +94,7 @@ set ( SRC_FILES
 	src/Reflectometry/QtReflMainView.cpp
 	src/Reflectometry/QtDataProcessorOptionsDialog.cpp
 	src/Reflectometry/ReflCatalogSearcher.cpp
-	src/Reflectometry/DataProcessorGenerateNotebook.cpp
+	src/Reflectometry/ReflGenericDataProcessorPresenterFactory.cpp
 	src/Reflectometry/ReflLegacyTransferStrategy.cpp
 	src/Reflectometry/ReflMainViewPresenter.cpp
 	src/Reflectometry/ReflMeasureTransferStrategy.cpp

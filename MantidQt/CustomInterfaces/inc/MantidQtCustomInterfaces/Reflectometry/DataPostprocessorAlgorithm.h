@@ -2,6 +2,7 @@
 #define MANTID_CUSTOMINTERFACES_DATAPOSTPROCESSORALGORITHM_H
 
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidQtCustomInterfaces/DllConfig.h"
 
 #include <set>
 #include <string>
@@ -34,75 +35,28 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DataPostprocessorAlgorithm {
+class MANTIDQT_CUSTOMINTERFACES_DLL DataPostprocessorAlgorithm {
 public:
-  /** Constructor
-  * @param name : The name of the post-processing algorithm
-  * @param prefix : The prefix that will be added to the output workspace name
-  * @param blacklist : The list of properties we don't want to show
-  */
+  // Constructor
   DataPostprocessorAlgorithm(
       const std::string &name, const std::string &prefix = "",
-      const std::set<std::string> &blacklist = std::set<std::string>())
-      : m_name(name), m_prefix(prefix), m_blacklist(blacklist) {
-
-    Mantid::API::IAlgorithm_sptr alg =
-        Mantid::API::AlgorithmManager::Instance().create(m_name);
-
-    int countInputWS = 0;
-    int countOutputWS = 0;
-
-    auto properties = alg->getProperties();
-    for (auto &prop : properties) {
-
-      if (prop->direction() == Mantid::Kernel::Direction::Input &&
-          prop->type() == "str list") {
-        // For now, we assume we receive the list of workspace to post-process
-        // as
-        // a 'str list'
-        m_inputProp = prop->name();
-
-        countInputWS++;
-      }
-      if (prop->direction() == Mantid::Kernel::Direction::Output &&
-          (prop->type() == "MatrixWorkspace" || prop->type() == "Workspace")) {
-        // For now, we restrict the output workspaces to either MatrixWorkspace
-        // or Worksace
-        m_outputProp = prop->name();
-
-        countOutputWS++;
-      }
-    }
-
-    if (countInputWS != 1)
-      throw std::invalid_argument("Invalid post-processing algorithm. A "
-                                  "valid algorithm must have one input "
-                                  "'str list' property");
-    if (countOutputWS != 1)
-      throw std::invalid_argument("Invalid post-processing algorithm. A "
-                                  "valid algorithm must have one output "
-                                  "workspace property");
-  };
-  /** Default constructor: use 'Stitch1DMany' as the default post-processor
-   * algorithm */
-  DataPostprocessorAlgorithm()
-      : DataPostprocessorAlgorithm(
-            "Stitch1DMany", "IvsQ_",
-            std::set<std::string>{"InputWorkspaces", "OutputWorkspace"}){};
+      const std::set<std::string> &blacklist = std::set<std::string>());
+  // Default constructor
+  DataPostprocessorAlgorithm();
   // Destructor
-  virtual ~DataPostprocessorAlgorithm(){};
+  virtual ~DataPostprocessorAlgorithm();
   // The name of this algorithm
-  std::string name() const { return m_name; };
+  std::string name() const;
   // The name of the input workspace property
-  std::string inputProperty() const { return m_inputProp; };
+  std::string inputProperty() const;
   // The name of the output workspace property
-  std::string outputProperty() const { return m_outputProp; };
+  std::string outputProperty() const;
   // The number of output workspace properties (currently only 1)
-  size_t numberOfOutputProperties() const { return 1; };
+  size_t numberOfOutputProperties() const;
   // The prefix of the output property
-  std::string prefix() const { return m_prefix; };
+  std::string prefix() const;
   // The blacklist
-  std::set<std::string> blacklist() const { return m_blacklist; };
+  std::set<std::string> blacklist() const;
 
 private:
   // The name of this algorithm
