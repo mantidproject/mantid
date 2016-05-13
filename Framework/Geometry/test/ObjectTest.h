@@ -59,7 +59,7 @@ public:
     double radius(-1.0), height(-1.0);
     std::vector<V3D> pts;
     original->GetObjectGeom(objType, pts, radius, height);
-    TS_ASSERT_EQUALS(2, objType);
+    TS_ASSERT_EQUALS(3, objType);
     TS_ASSERT(boost::dynamic_pointer_cast<GluGeometryHandler>(
         original->getGeometryHandler()));
 
@@ -68,7 +68,7 @@ public:
     objType = -1;
     copy.GetObjectGeom(objType, pts, radius, height);
 
-    TS_ASSERT_EQUALS(2, objType);
+    TS_ASSERT_EQUALS(3, objType);
     TS_ASSERT(boost::dynamic_pointer_cast<GluGeometryHandler>(
         copy.getGeometryHandler()));
     TS_ASSERT_EQUALS(copy.getName(), original->getName());
@@ -84,7 +84,7 @@ public:
     double radius(-1.0), height(-1.0);
     std::vector<V3D> pts;
     original->GetObjectGeom(objType, pts, radius, height);
-    TS_ASSERT_EQUALS(2, objType);
+    TS_ASSERT_EQUALS(3, objType);
     TS_ASSERT(boost::dynamic_pointer_cast<GluGeometryHandler>(
         original->getGeometryHandler()));
 
@@ -94,7 +94,7 @@ public:
     objType = -1;
     lhs.GetObjectGeom(objType, pts, radius, height);
 
-    TS_ASSERT_EQUALS(2, objType);
+    TS_ASSERT_EQUALS(3, objType);
     TS_ASSERT(boost::dynamic_pointer_cast<GluGeometryHandler>(
         lhs.getGeometryHandler()));
   }

@@ -46,7 +46,8 @@ def add_runs(runs, inst='sans2d', defType='.nxs', rawTypes=('.raw', '.s*', 'add'
             if isFirstDataSetEvent:
                 period = _NO_INDIVIDUAL_PERIODS
 
-            if inst.upper() != 'SANS2D' and isFirstDataSetEvent:
+            is_not_allowed_instrument = inst.upper() != 'SANS2D' and inst.upper() != 'LARMOR'
+            if is_not_allowed_instrument and isFirstDataSetEvent:
                 error = 'Adding event data not supported for ' + inst + ' for now'
                 print error
                 logger.notice(error)

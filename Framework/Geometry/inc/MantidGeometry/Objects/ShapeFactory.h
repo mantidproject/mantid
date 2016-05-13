@@ -108,6 +108,10 @@ private:
   parseSegmentedCylinder(Poco::XML::Element *pElem,
                          std::map<int, boost::shared_ptr<Surface>> &prim,
                          int &l_id);
+  std::string
+  parseHollowCylinder(Poco::XML::Element *pElem,
+                      std::map<int, boost::shared_ptr<Surface>> &prim,
+                      int &l_id);
 
   CuboidCorners parseCuboid(Poco::XML::Element *pElem);
   std::string parseCuboid(Poco::XML::Element *pElem,

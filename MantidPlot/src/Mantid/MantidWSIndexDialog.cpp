@@ -179,12 +179,16 @@ void MantidWSIndexWidget::init() {
  */
 void MantidWSIndexWidget::initWorkspaceBox() {
   m_wsBox = new QVBoxLayout;
-  m_wsMessage = new QLabel(
-      tr("Enter Workspace Indices: " + m_wsIndexIntervals.toQString()));
+  const QString wsIndices = m_wsIndexIntervals.toQString();
+  m_wsMessage = new QLabel(tr("Enter Workspace Indices: " + wsIndices));
   m_wsField = new QLineEditWithErrorMark();
 
   m_wsField->lineEdit()->setValidator(
       new IntervalListValidator(this, m_wsIndexIntervals));
+  if (wsIndices == "0") { // single spectrum
+    m_wsField->lineEdit()->setEnabled(false);
+    m_wsField->lineEdit()->setText("0");
+  }
   m_wsBox->add(m_wsMessage);
   m_wsBox->add(m_wsField);
   m_outer->addItem(m_wsBox);
@@ -198,13 +202,17 @@ void MantidWSIndexWidget::initWorkspaceBox() {
  */
 void MantidWSIndexWidget::initSpectraBox() {
   m_spectraBox = new QVBoxLayout;
-  m_spectraMessage =
-      new QLabel(tr("Enter Spectra Numbers: " + m_spectraNumIntervals.toQString()));
+  const QString spectraNumbers = m_spectraNumIntervals.toQString();
+  m_spectraMessage = new QLabel(tr("Enter Spectra Numbers: " + spectraNumbers));
   m_spectraField = new QLineEditWithErrorMark();
   m_orMessage = new QLabel(tr("<br>Or"));
 
   m_spectraField->lineEdit()->setValidator(
       new IntervalListValidator(this, m_spectraNumIntervals));
+  if (spectraNumbers == "1") { // single spectrum
+    m_spectraField->lineEdit()->setEnabled(false);
+    m_spectraField->lineEdit()->setText("1");
+  }
   m_spectraBox->add(m_spectraMessage);
   m_spectraBox->add(m_spectraField);
   m_spectraBox->add(m_orMessage);

@@ -73,6 +73,7 @@ Improvements
 
 - :ref:`OSIRISDiffractionReduction <algm-OSIRISDiffractionReduction>` has an additional DRange added for conversion from time regime.
 
+- Updated the :ref:`SimulatedDensityOfStates <algm-SimulatedDensityOfStates>` workflow diagram to show an overview of the algorithm.
 
 Bugfixes
 --------
