@@ -803,28 +803,29 @@ public:
   }
 
   void testGetBoundingBoxForHexahedron() {
-	  //For information on how the hexahedron is constructed
-	  //See http://docs.mantidproject.org/nightly/concepts/HowToDefineGeometricShape.html#hexahedron
-	  Hexahedron hex;
-	  hex.lbb = V3D(0, 0, 0);
-	  hex.lfb = V3D(1, 0, 0);
-	  hex.rfb = V3D(1, 1, 0);
-	  hex.rbb = V3D(0, 1, 0);
-	  hex.lbt = V3D(0, 0, 2);
-	  hex.lft = V3D(0.5, 0, 2);
-	  hex.rft = V3D(0.5, 0.5, 2);
-	  hex.rbt = V3D(0, 0.5, 2);
+    // For information on how the hexahedron is constructed
+    // See
+    // http://docs.mantidproject.org/nightly/concepts/HowToDefineGeometricShape.html#hexahedron
+    Hexahedron hex;
+    hex.lbb = V3D(0, 0, 0);
+    hex.lfb = V3D(1, 0, 0);
+    hex.rfb = V3D(1, 1, 0);
+    hex.rbb = V3D(0, 1, 0);
+    hex.lbt = V3D(0, 0, 2);
+    hex.lft = V3D(0.5, 0, 2);
+    hex.rft = V3D(0.5, 0.5, 2);
+    hex.rbt = V3D(0, 0.5, 2);
 
-	  Object_sptr hexahedron = createHexahedron(hex);
+    Object_sptr hexahedron = createHexahedron(hex);
 
-	  auto bb = hexahedron->getBoundingBox();
+    auto bb = hexahedron->getBoundingBox();
 
-	  TS_ASSERT_DELTA(bb.xMax(), 1, 0.0001);
-	  TS_ASSERT_DELTA(bb.yMax(), 1, 0.0001);
-	  TS_ASSERT_DELTA(bb.zMax(), 2, 0.0001);
-	  TS_ASSERT_DELTA(bb.xMin(), 0, 0.0001);
-	  TS_ASSERT_DELTA(bb.yMin(), 0, 0.0001);
-	  TS_ASSERT_DELTA(bb.zMin(), 0, 0.0001);
+    TS_ASSERT_DELTA(bb.xMax(), 1, 0.0001);
+    TS_ASSERT_DELTA(bb.yMax(), 1, 0.0001);
+    TS_ASSERT_DELTA(bb.zMax(), 2, 0.0001);
+    TS_ASSERT_DELTA(bb.xMin(), 0, 0.0001);
+    TS_ASSERT_DELTA(bb.yMin(), 0, 0.0001);
+    TS_ASSERT_DELTA(bb.zMin(), 0, 0.0001);
   }
 
   void testdefineBoundingBox()
@@ -1267,7 +1268,7 @@ private:
     pPlaneBottomCutoff->setPlane(hex.lfb, normal);
     HexSurMap[6] = pPlaneBottomCutoff;
 
-	// using surface ids:  1-6
+    // using surface ids:  1-6
     HexSurMap[1]->setName(1);
     HexSurMap[2]->setName(2);
     HexSurMap[3]->setName(3);
@@ -1275,18 +1276,18 @@ private:
     HexSurMap[5]->setName(5);
     HexSurMap[6]->setName(6);
 
-	std::string ObjHex = "-1 2 3 -4 -5 6";
+    std::string ObjHex = "-1 2 3 -4 -5 6";
 
     Object_sptr retVal = Object_sptr(new Object);
 
-	//Explicitly setting the GluGeometryHanler hexahedron allows
-	//for the correct bounding box calculation.
+    // Explicitly setting the GluGeometryHanler hexahedron allows
+    // for the correct bounding box calculation.
     auto handler = boost::make_shared<GluGeometryHandler>(retVal);
     handler->setHexahedron(hex.lbb, hex.lfb, hex.rfb, hex.rbb, hex.lbt, hex.lft,
                            hex.rft, hex.rbt);
-	retVal->setGeometryHandler(handler);
-    
-	retVal->setObject(68, ObjHex);
+    retVal->setGeometryHandler(handler);
+
+    retVal->setObject(68, ObjHex);
     retVal->populate(HexSurMap);
     return retVal;
   }
