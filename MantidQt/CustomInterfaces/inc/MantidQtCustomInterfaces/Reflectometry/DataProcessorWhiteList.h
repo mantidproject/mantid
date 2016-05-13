@@ -31,7 +31,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DataProcessorWhiteList final {
+class DataProcessorWhiteList {
 public:
   DataProcessorWhiteList() : m_lastIndex(0){};
   virtual ~DataProcessorWhiteList(){};

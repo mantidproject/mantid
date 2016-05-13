@@ -38,7 +38,8 @@ class DataPreprocessorAlgorithm {
 public:
   /** Constructor
   * @param name : The name of the pre-processing algorithm
-  * @param prefix : The prefix that will added to the output workspace name
+  * @param prefix : The prefix that will be added to the output workspace name
+  * in the ADS
   * @param blacklist : The list of properties we don't want to show
   * @param show : Whether or not to show the information associated with
   * this pre-processor in the processed workspace's name
