@@ -126,7 +126,7 @@ public:
     TS_ASSERT_DELTA(2.6989, material.numberDensity(), 1e-04);
   }
 
-  void test_Setting_Environment() {
+  void test_Setting_Environment_No_Geometry_Overrides() {
     using Mantid::Kernel::ConfigService;
     using Mantid::Geometry::SampleEnvironment;
 
@@ -156,6 +156,43 @@ public:
     TS_ASSERT_EQUALS("10mm", env->canID());
     const auto &sampleShape = sample.getShape();
     TS_ASSERT(sampleShape.hasValidShape());
+  }
+
+  void test_Setting_Environment_With_Geometry_Overrides() {
+    using Mantid::Kernel::ConfigService;
+    using Mantid::Geometry::SampleEnvironment;
+
+    auto inputWS = WorkspaceCreationHelper::Create2DWorkspaceBinned(1, 1);
+    auto testInst = ComponentCreationHelper::createTestInstrumentCylindrical(1);
+    testInst->setName(m_instName);
+    inputWS->setInstrument(testInst);
+
+    // Algorithm uses instrument directories as a search location, alter this
+    // for the test
+    auto &config = ConfigService::Instance();
+    const auto defaultDirs = config.getString("instrumentDefinition.directory");
+    config.setString("instrumentDefinition.directory", m_testRoot);
+    auto alg = createAlgorithm();
+    alg->setProperty("InputWorkspace", inputWS);
+    alg->setProperty("Environment", createEnvironmentProps());
+    alg->setProperty("Geometry", createOverrideGeometryProps());
+    TS_ASSERT_THROWS_NOTHING(alg->execute());
+    TS_ASSERT(alg->isExecuted());
+    config.setString("instrumentDefinition.directory", defaultDirs);
+
+    // checks
+    const auto &sample = inputWS->sample();
+    const SampleEnvironment *env(nullptr);
+    TS_ASSERT_THROWS_NOTHING(env = &(sample.getEnvironment()));
+    TS_ASSERT_EQUALS(m_envName, env->name());
+    TS_ASSERT_EQUALS(1, env->nelements());
+    TS_ASSERT_EQUALS("10mm", env->canID());
+    const auto &sampleShape = sample.getShape();
+    TS_ASSERT(sampleShape.hasValidShape());
+    // New shape
+    // radius was 0.1 in <samplegeometry> set in constructor now 0.4
+    // from createOverrideGeometryProps
+    TS_ASSERT_DELTA(0.4, getSphereRadius(sampleShape), 1e-08);
   }
 
   //----------------------------------------------------------------------------
@@ -259,6 +296,16 @@ private:
         Mantid::Kernel::make_unique<StringProperty>("Name", m_envName), "");
     props->declareProperty(
         Mantid::Kernel::make_unique<StringProperty>("Can", "10mm"), "");
+    return props;
+  }
+
+  Mantid::Kernel::PropertyManager_sptr createOverrideGeometryProps() {
+    using Mantid::Kernel::PropertyManager;
+    using DoubleProperty = Mantid::Kernel::PropertyWithValue<double>;
+
+    auto props = boost::make_shared<PropertyManager>();
+    props->declareProperty(
+        Mantid::Kernel::make_unique<DoubleProperty>("radius", 0.4), "");
     return props;
   }
 
