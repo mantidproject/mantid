@@ -8,6 +8,7 @@
 #include "MantidKernel/InstrumentInfo.h"
 #include "MantidKernel/PropertyManagerProperty.h"
 
+#include <boost/algorithm/string/case_conv.hpp>
 #include <Poco/Path.h>
 
 namespace Mantid {
@@ -187,8 +188,10 @@ void SetSample::setSampleShape(API::MatrixWorkspace_sptr &workspace,
       if (args) {
         const auto &props = args->getProperties();
         for (const auto &prop : props) {
+          // assume in cm
           const double val = args->getProperty(prop->name());
-          shapeArgs.insert(std::make_pair(prop->name(), val));
+          shapeArgs.insert(std::make_pair(
+              boost::algorithm::to_lower_copy(prop->name()), val * 0.01));
         }
       }
       auto shapeObject = can->createSampleShape(shapeArgs);
@@ -246,7 +249,39 @@ SetSample::tryCreateXMLFromArgsOnly(const Kernel::PropertyManager_sptr args) {
  */
 std::string
 SetSample::createFlatPlateXML(const Kernel::PropertyManager &args) const {
-  throw std::runtime_error("Not implemented");
+  // X
+  double widthInCM = args.getProperty("Width");
+  // Y
+  double heightInCM = args.getProperty("Height");
+  // Z
+  double thickInCM = args.getProperty("Thick");
+  std::vector<double> center = args.getProperty("Center");
+  // convert to metres
+  std::transform(center.begin(), center.end(), center.begin(),
+                 [](double val) { return val *= 0.01; });
+
+  // Half lengths in metres (*0.01*0.5)
+  const double szX = (widthInCM * 5e-3);
+  const double szY = (heightInCM * 5e-3);
+  const double szZ = (thickInCM * 5e-3);
+
+  std::ostringstream xmlShapeStream;
+  xmlShapeStream << " <cuboid id=\"sample-shape\"> "
+                 << "<left-front-bottom-point x=\"" << szX + center[0]
+                 << "\" y=\"" << -szY + center[1] << "\" z=\""
+                 << -szZ + center[2] << "\"  /> "
+                 << "<left-front-top-point  x=\"" << szX + center[0]
+                 << "\" y=\"" << szY + center[1] << "\" z=\""
+                 << -szZ + center[2] << "\"  /> "
+                 << "<left-back-bottom-point  x=\"" << szX + center[0]
+                 << "\" y=\"" << -szY + center[1] << "\" z=\""
+                 << szZ + center[2] << "\"  /> "
+                 << "<right-front-bottom-point  x=\"" << -szX + center[0]
+                 << "\" y=\"" << -szY + center[1] << "\" z=\""
+                 << -szZ + center[2] << "\"  /> "
+                 << "</cuboid>";
+
+  return xmlShapeStream.str();
 }
 
 /**

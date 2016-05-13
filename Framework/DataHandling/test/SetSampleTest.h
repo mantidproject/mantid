@@ -8,6 +8,7 @@
 #include "MantidGeometry/Objects/Object.h"
 #include "MantidGeometry/Objects/Rules.h"
 #include "MantidGeometry/Surfaces/Sphere.h"
+#include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/PropertyManager.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
@@ -195,6 +196,54 @@ public:
     TS_ASSERT_DELTA(0.4, getSphereRadius(sampleShape), 1e-08);
   }
 
+  void test_Setting_Geometry_As_FlatPlate() {
+    using Mantid::Kernel::V3D;
+    auto inputWS = WorkspaceCreationHelper::Create2DWorkspaceBinned(1, 1);
+
+    auto alg = createAlgorithm();
+    alg->setProperty("InputWorkspace", inputWS);
+    alg->setProperty("Geometry", createFlatPlateGeometryProps());
+    TS_ASSERT_THROWS_NOTHING(alg->execute());
+    TS_ASSERT(alg->isExecuted());
+
+    // New shape
+    const auto &sampleShape = inputWS->sample().getShape();
+    TS_ASSERT(sampleShape.hasValidShape());
+    auto tag = sampleShape.getShapeXML().find("cuboid");
+    TS_ASSERT(tag != std::string::npos);
+
+    TS_ASSERT_EQUALS(true, sampleShape.isValid(V3D(0, 0, 0.01)));
+    TS_ASSERT_EQUALS(false, sampleShape.isValid(V3D(0, 0, 0.0)));
+  }
+
+  void test_Setting_Geometry_As_Cylinder() {
+    auto inputWS = WorkspaceCreationHelper::Create2DWorkspaceBinned(1, 1);
+
+    auto alg = createAlgorithm();
+    alg->setProperty("InputWorkspace", inputWS);
+    alg->setProperty("Geometry", createCylinderGeometryProps());
+    TS_ASSERT_THROWS_NOTHING(alg->execute());
+    TS_ASSERT(alg->isExecuted());
+
+    // New shape
+    const auto &sampleShape = inputWS->sample().getShape();
+    TS_ASSERT(sampleShape.hasValidShape());
+  }
+
+  void test_Setting_Geometry_As_Annulus() {
+    auto inputWS = WorkspaceCreationHelper::Create2DWorkspaceBinned(1, 1);
+
+    auto alg = createAlgorithm();
+    alg->setProperty("InputWorkspace", inputWS);
+    alg->setProperty("Geometry", createAnnulusGeometryProps());
+    TS_ASSERT_THROWS_NOTHING(alg->execute());
+    TS_ASSERT(alg->isExecuted());
+
+    // New shape
+    const auto &sampleShape = inputWS->sample().getShape();
+    TS_ASSERT(sampleShape.hasValidShape());
+  }
+
   //----------------------------------------------------------------------------
   // Failure tests
   //----------------------------------------------------------------------------
@@ -305,7 +354,55 @@ private:
 
     auto props = boost::make_shared<PropertyManager>();
     props->declareProperty(
-        Mantid::Kernel::make_unique<DoubleProperty>("radius", 0.4), "");
+        Mantid::Kernel::make_unique<DoubleProperty>("Radius", 40), "");
+    return props;
+  }
+
+  Mantid::Kernel::PropertyManager_sptr createFlatPlateGeometryProps() {
+    using namespace Mantid::Kernel;
+    using DoubleArrayProperty = ArrayProperty<double>;
+    using DoubleProperty = PropertyWithValue<double>;
+    using StringProperty = PropertyWithValue<std::string>;
+
+    auto props = boost::make_shared<PropertyManager>();
+    props->declareProperty(
+        Mantid::Kernel::make_unique<StringProperty>("Shape", "FlatPlate"), "");
+    props->declareProperty(
+        Mantid::Kernel::make_unique<DoubleProperty>("Width", 5), "");
+    props->declareProperty(
+        Mantid::Kernel::make_unique<DoubleProperty>("Height", 4), "");
+    props->declareProperty(
+        Mantid::Kernel::make_unique<DoubleProperty>("Thick", 0.1), "");
+    std::vector<double> center{0, 0, 1};
+    props->declareProperty(
+        Mantid::Kernel::make_unique<DoubleArrayProperty>("Center", center), "");
+
+    return props;
+  }
+
+  Mantid::Kernel::PropertyManager_sptr createCylinderGeometryProps() {
+    using namespace Mantid::Kernel;
+    using DoubleArrayProperty = ArrayProperty<double>;
+    using DoubleProperty = PropertyWithValue<double>;
+    using StringProperty = PropertyWithValue<std::string>;
+
+    auto props = boost::make_shared<PropertyManager>();
+    props->declareProperty(
+        Mantid::Kernel::make_unique<StringProperty>("Shape", "Cylinder"), "");
+
+    return props;
+  }
+
+  Mantid::Kernel::PropertyManager_sptr createAnnulusGeometryProps() {
+    using namespace Mantid::Kernel;
+    using DoubleArrayProperty = ArrayProperty<double>;
+    using DoubleProperty = PropertyWithValue<double>;
+    using StringProperty = PropertyWithValue<std::string>;
+
+    auto props = boost::make_shared<PropertyManager>();
+    props->declareProperty(
+        Mantid::Kernel::make_unique<StringProperty>("Shape", "Annulus"), "");
+
     return props;
   }
 
