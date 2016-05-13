@@ -94,6 +94,7 @@ Improved
   does not perform fit of data by itself, but requires an additional argument: ``EPPTable``. This should accelerate the data reduction workflow, because fitting results can be reused. Table with elastic peak positions can be created using the new :ref:`FindEPP <algm-FindEPP>` algorithm.
 - :ref:`MonteCarloAbsorption <algm-MonteCarloAbsorption>` now supports inelastic instruments. It relies on :ref:`ConvertUnits <algm-ConvertUnits>` having set the correct EMode. `#15923 <https://github.com/mantidproject/mantid/pull/15923>`_
 
+
 Deprecated
 ##########
 
