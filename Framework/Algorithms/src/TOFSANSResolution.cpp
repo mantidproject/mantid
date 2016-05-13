@@ -126,9 +126,7 @@ void TOFSANSResolution::exec() {
   MantidVec &TOFY = tofWS->dataY(0);
 
   // Initialize Dq
-  MantidVec &DxOut = iqWS->dataDx(0);
-  for (int i = 0; i < xLength; i++)
-    DxOut[i] = 0.0;
+  HistogramData::HistogramX DxOut(xLength - 1, 0.0);
 
   const V3D samplePos = reducedWS->getInstrument()->getSample()->getPos();
   const V3D sourcePos = reducedWS->getInstrument()->getSource()->getPos();
@@ -250,6 +248,7 @@ void TOFSANSResolution::exec() {
     TOFY[i] /= XNorm[i];
     ThetaY[i] /= XNorm[i];
   }
+  iqWS->histogram(0).setPointStandardDeviations(std::move(DxOut));
 }
 } // namespace Algorithms
 } // namespace Mantid

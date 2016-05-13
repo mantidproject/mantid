@@ -419,7 +419,7 @@ class SANSStitchTest(unittest.TestCase):
 class TestQErrorCorrectionForMergedWorkspaces(unittest.TestCase):
     def _provide_workspace_with_x_errors(self, workspace_name, use_xerror = True, nspec = 1,
                                          x_in = [1,2,3,4,5,6,7,8,9,10], y_in = [2,2,2,2,2,2,2,2,2],
-                                         e_in = [1,1,1,1,1,1,1,1,1],  x_error = [1.1,2.2,3.3,4.4,5.5,6.6,7.7,8.8,9.9, 10.1]):
+                                         e_in = [1,1,1,1,1,1,1,1,1],  x_error = [1.1,2.2,3.3,4.4,5.5,6.6,7.7,8.8,9.9]):
         x = []
         y = []
         e = []
