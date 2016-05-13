@@ -109,11 +109,12 @@ public:
 
   // using image workspaces with one spectrum per row (as opposed to
   // one spectrum per pixel)
-  void testWriteGroupCreatingFromRectImage(bool deleteWhenComplete = true) {
+  void testWriteGroupCreatingFromRectImage() {
     std::vector<Workspace2D_sptr> wspaces(2);
+    const std::string wsgName = "dummy_test_rect_images";
     WorkspaceGroup_sptr input =
-        makeWorkspacesInGroup(m_inputWS, wspaces, 0, true);
-    AnalysisDataService::Instance().add(m_inputWS + "0", input);
+        makeWorkspacesInGroup(wsgName, wspaces, 0, true);
+    AnalysisDataService::Instance().add(wsgName + "0", input);
 
     TS_ASSERT_THROWS_NOTHING(
         m_saver->setPropertyValue("InputWorkspaces", input->name()));
@@ -143,6 +144,9 @@ public:
   }
 
   void testWriteGroupAppending() {
+    // this needs to be called, cxxtest won't run it when it has an argument
+    testWriteSingleCreating(true);
+
     // Run the single workspace test again, without deleting the file at the end
     // (to test append)
     testWriteSingleCreating(false);
