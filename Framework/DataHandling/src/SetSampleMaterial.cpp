@@ -239,8 +239,8 @@ void SetSampleMaterial::exec() {
           << std::endl;
       throw std::runtime_error(msg.str());
     }
-    g_log.information() << "Found " << CF.atoms.size() << " types of atoms in \""
-                   << chemicalSymbol << "\"\n";
+    g_log.information() << "Found " << CF.atoms.size()
+                        << " types of atoms in \"" << chemicalSymbol << "\"\n";
 
     NeutronAtom neutron(0, 0., 0., 0., 0., 0.,
                         0.); // starting thing for neutronic information
@@ -282,7 +282,7 @@ void SetSampleMaterial::exec() {
         if (isEmpty(unitCellVolume) && expInfo->sample().hasOrientedLattice()) {
           unitCellVolume = expInfo->sample().getOrientedLattice().volume();
           g_log.information() << "found unit cell volume " << unitCellVolume
-                         << " Angstrom^-3\n";
+                              << " Angstrom^-3\n";
         }
         // density is just number of atoms in the unit cell
         // ...but only calculate it if you have both numbers
@@ -317,7 +317,7 @@ void SetSampleMaterial::exec() {
       if (isEmpty(unitCellVolume) && expInfo->sample().hasOrientedLattice()) {
         unitCellVolume = expInfo->sample().getOrientedLattice().volume();
         g_log.information() << "found unit cell volume " << unitCellVolume
-                       << " Angstrom^-3\n";
+                            << " Angstrom^-3\n";
       }
       // density is just number of atoms in the unit cell
       // ...but only calculate it if you have both numbers
@@ -345,21 +345,25 @@ void SetSampleMaterial::exec() {
   if (isEmpty(mat->numberDensity())) {
     g_log.information() << "was not specified\n";
   } else {
-    g_log.information() << "= " << mat->numberDensity() << " atoms/Angstrom^3\n";
+    g_log.information() << "= " << mat->numberDensity()
+                        << " atoms/Angstrom^3\n";
     setProperty("SampleNumberDensityResult",
                 mat->numberDensity()); // in atoms/Angstrom^3
   }
   g_log.information() << "Cross sections for wavelength = "
-                 << NeutronAtom::ReferenceLambda << " Angstroms\n"
-                 << "    Coherent " << mat->cohScatterXSection() << " barns\n"
-                 << "    Incoherent " << mat->incohScatterXSection()
-                 << " barns\n"
-                 << "    Total " << mat->totalScatterXSection() << " barns\n"
-                 << "    Absorption " << mat->absorbXSection() << " barns\n"
-                 << "PDF terms\n"
-                 << "    <b>^2 = " << (b_avg * b_avg) << "\n"
-                 << "    <b^2> = " << b_sq_avg << "\n"
-                 << "    L     = " << normalizedLaue << "\n";
+                      << NeutronAtom::ReferenceLambda << " Angstroms\n"
+                      << "    Coherent " << mat->cohScatterXSection()
+                      << " barns\n"
+                      << "    Incoherent " << mat->incohScatterXSection()
+                      << " barns\n"
+                      << "    Total " << mat->totalScatterXSection()
+                      << " barns\n"
+                      << "    Absorption " << mat->absorbXSection()
+                      << " barns\n"
+                      << "PDF terms\n"
+                      << "    <b>^2 = " << (b_avg * b_avg) << "\n"
+                      << "    <b^2> = " << b_sq_avg << "\n"
+                      << "    L     = " << normalizedLaue << "\n";
   setProperty("CoherentXSectionResult", mat->cohScatterXSection()); // in barns
   setProperty("IncoherentXSectionResult",
               mat->incohScatterXSection());                        // in barns
@@ -377,7 +381,7 @@ void SetSampleMaterial::exec() {
     double smu = mat->totalScatterXSection(NeutronAtom::ReferenceLambda) * rho;
     double amu = mat->absorbXSection(NeutronAtom::ReferenceLambda) * rho;
     g_log.information() << "Anvred LinearScatteringCoef = " << smu << " 1/cm\n"
-                   << "Anvred LinearAbsorptionCoef = " << amu << " 1/cm\n";
+                        << "Anvred LinearAbsorptionCoef = " << amu << " 1/cm\n";
   }
   // Done!
   progress(1);

@@ -43,7 +43,7 @@ void CreateSampleShape::exec() {
   // Check it's valid and attach it to the workspace sample but preserve any
   // material
   if (shape->hasValidShape()) {
-    const auto & mat = workspace->sample().getMaterial();
+    const auto &mat = workspace->sample().getMaterial();
     shape->setMaterial(mat);
     workspace->mutableSample().setShape(*shape);
   } else {
