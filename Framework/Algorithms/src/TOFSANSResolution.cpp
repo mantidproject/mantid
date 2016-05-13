@@ -253,7 +253,7 @@ void TOFSANSResolution::exec() {
       } else {
         DxOut[i] = 2.0 * _dx_total[i - 1] - DxOut[i - 1];
       }
-     }
+    }
   }
 }
 } // namespace Algorithms
