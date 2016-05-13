@@ -28,6 +28,9 @@ New
    :ref:`GetDetOffsetsMultiPeaks <algm-GetDetOffsetsMultiPeaks>`, :ref:`CalibrateRectangularDetectors <algm-CalibrateRectangularDetectors>`, *et al* and
    minimizes the difference between the *DIFC* of the instrument and
    calibration by moving and rotating instrument components.
+
+- :ref:`CorrectTOF <algm-CorrectTOF>` applies to the time-of-flight correction which considers the specified elastic peak position.
+
 - :ref:`EnggFitDIFCFromPeaks <algm-AlignComponents>` fits GSAS calibration
   parameters (DIFA, DIFC, TZERO) from peaks fitted using
   :ref:`EnggFitPeaks <algm-EnggFitPeaks>`.
@@ -37,6 +40,7 @@ New
    aggregates stacks of images from wavelength dependent imaging
    into one or more output bands.
 - :ref:`CorrectTOF <algm-CorrectTOF>` applies to the time-of-flight correction which considers the specified elastic peak position.
+- :ref:`SaveFITS <algm-SaveFITS>` saves images in FITS format.
 - :ref:`GetIPTS <algm-GetIPTS>` Returns the IPTS directory of the specified ORNL run.
 
 Renamed
