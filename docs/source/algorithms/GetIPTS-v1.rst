@@ -10,9 +10,8 @@
 Description
 -----------
 
-Extracts the IPTS number from a run using FileFinde,findRuns. It
-returns a string the full path to the IPTS shared folder to allow for
-saving of files in accessible user folders
+This returns a string the full path to the IPTS shared folder to allow
+for saving of files in accessible user folders (e.g. ``shared``).
 
 .. warning::
 

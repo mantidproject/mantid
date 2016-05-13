@@ -32,11 +32,11 @@ class GetIPTS(PythonAlgorithm):
         # check for one after as well
         runIds.append(runnumber + 1)
 
-        runIds = [str(id) for id in runIds if id > 0]
+        runIds = [str(runId) for runId in runIds if runId > 0]
 
         # prepend non-empty instrument name for FileFinder
         if len(instrument) > 0:
-            runIds = ['%s_%s' % (instrument, id) for id in runIds]
+            runIds = ['%s_%s' % (instrument, runId) for runId in runIds]
 
         # look for a file
         for runId in runIds:
