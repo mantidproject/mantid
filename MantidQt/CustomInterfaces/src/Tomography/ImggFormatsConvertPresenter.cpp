@@ -249,6 +249,7 @@ ImggFormatsConvertPresenter::loadFITS(const std::string &inputName) const {
   // Just run LoadFITS
   auto alg = Mantid::API::AlgorithmManager::Instance().create("LoadFITS");
   alg->initialize();
+  alg->setChild(true);
   alg->setProperty("Filename", inputName);
   alg->setProperty("OutputWorkspace", wksGrpName);
   alg->setProperty("LoadAsRectImg", true);
@@ -260,13 +261,16 @@ ImggFormatsConvertPresenter::loadFITS(const std::string &inputName) const {
                              inputName + "' in FITS format.");
   }
 
-  // What should be alg->getProperty("OutputWorkspace"); but this is a group
-  Mantid::API::WorkspaceGroup_sptr grp =
-      Mantid::API::AnalysisDataService::Instance()
-          .retrieveWS<Mantid::API::WorkspaceGroup>(wksGrpName);
-  Mantid::API::MatrixWorkspace_sptr imgWorkspace =
-      boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-          grp->getItem(grp->size() - 1));
+  Mantid::API::Workspace_sptr wks = alg->getProperty("OutputWorkspace");
+  auto grp = boost::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(wks);
+  if (!grp) {
+    throw std::runtime_error(
+        "When loading a FITS image: " + inputName +
+        ", failed to retrieve the output workspace (group) after "
+        "executing the algorithm LoadFITS.");
+  }
+  auto imgWorkspace = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+      grp->getItem(grp->size() - 1));
 
   return imgWorkspace;
 }

@@ -211,10 +211,10 @@ void ImggFormatsConvertViewQtWidget::writeImg(
     const std::string &outFormat) const {
   if (!inWks)
     return;
-  size_t width = inWks->getNumberHistograms();
+  auto width = inWks->getNumberHistograms();
   if (0 == width)
     return;
-  size_t height = inWks->blocksize();
+  auto height = inWks->blocksize();
 
   QImage img(QSize(static_cast<int>(width), static_cast<int>(height)),
              QImage::Format_Indexed8);
