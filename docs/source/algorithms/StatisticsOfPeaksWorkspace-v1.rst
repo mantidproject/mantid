@@ -12,7 +12,7 @@ Description
 Statistics of the Peaks Workspaces are calculated for all peaks and by
 default for resolution shell(d-Spacing).  There is a SortBy option to change this
 to by orientation (RunNumber) or by Anger camera (bank) or only do all peaks.
-This algorithm call SortHKL, so more details are in the documentation for that algorithm.
+This algorithm calls :ref:`algm-SortHKL`, so more details are in the documentation for that algorithm.
 
 After removing invalid peaks with :math:`I \leq 0`, :math:`\sigma \leq 0` and :math:`h=k=l=0`,
 the peaks are assigned to their respective unique reflection so that each theoretically present
