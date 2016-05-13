@@ -39,16 +39,16 @@ public:
   * @param max_event_id :: maximum detector ID to load
   * @return
   */
-  ProcessBankData( // Mantid::DataHandling::LoadEventNexus *alg,
-      std::string entry_name, const std::vector<size_t> &pixelid_2_wi,
-      detid_t pixel2d_2_offset, // pixelID_to_wi_offset
-      Mantid::API::Progress *prog, boost::shared_array<uint32_t> event_id,
-      boost::shared_array<float> event_time_of_flight, size_t numEvents,
-      size_t startAt, boost::shared_ptr<std::vector<uint64_t>> event_index,
-      boost::shared_ptr<Mantid::DataHandling::BankPulseTimes>
-          thisBankPulseTimes,
-      bool have_weight, boost::shared_array<float> event_weight,
-      detid_t min_event_id, detid_t max_event_id);
+  ProcessBankData(Mantid::DataHandling::LoadEventNexus *alg,
+                  std::string entry_name, Mantid::API::Progress *prog,
+                  boost::shared_array<uint32_t> event_id,
+                  boost::shared_array<float> event_time_of_flight,
+                  size_t numEvents, size_t startAt,
+                  boost::shared_ptr<std::vector<uint64_t>> event_index,
+                  boost::shared_ptr<Mantid::DataHandling::BankPulseTimes>
+                      thisBankPulseTimes,
+                  bool have_weight, boost::shared_array<float> event_weight,
+                  detid_t min_event_id, detid_t max_event_id);
 
   void run();
 
