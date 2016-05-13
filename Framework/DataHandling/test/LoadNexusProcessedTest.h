@@ -1200,10 +1200,10 @@ private:
 
     // Create histogram workspace with two spectra and 4 points
     std::vector<double> x1{1, 2, 3};
-    std::vector<double> dx1{3, 2, 1};
+    std::vector<double> dx1{3, 2};
     std::vector<double> y1{1, 2};
     std::vector<double> x2{1, 2, 3};
-    std::vector<double> dx2{3, 2, 1};
+    std::vector<double> dx2{3, 2};
     std::vector<double> y2{1, 2};
     MatrixWorkspace_sptr inputWs = WorkspaceFactory::Instance().create(
         "Workspace2D", 2, x1.size(), y1.size());
@@ -1212,8 +1212,10 @@ private:
     inputWs->dataY(0) = y1;
     inputWs->dataY(1) = y2;
     if (useXErrors) {
-      inputWs->setBinEdgeStandardDeviations(0, dx1);
-      inputWs->setBinEdgeStandardDeviations(1, dx2);
+      // TODO how do we test loading legacy files with dx.size == x.size?
+      // Use legacy interface to create "broken" histograms. Duplicate test.
+      inputWs->setPointStandardDeviations(0, dx1);
+      inputWs->setPointStandardDeviations(1, dx2);
     }
     if (numericAxis) {
       auto numericAxis = new NumericAxis(2);

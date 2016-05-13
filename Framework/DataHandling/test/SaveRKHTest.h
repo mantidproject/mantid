@@ -262,11 +262,11 @@ private:
         "Workspace2D", nSpec, x_length, y_length);
     BinEdges x(x_length);
     std::iota(x.begin(), x.end(), 0.0);
-    BinEdgeVariances dx(x_length);
+    BinEdgeVariances dx(y_length);
     std::iota(dx.begin(), dx.end(), 0.0);
     for (size_t j = 0; j < nSpec; ++j) {
       ws->setBinEdges(j, x);
-      ws->setBinEdgeStandardDeviations(j, dx);
+      ws->setPointStandardDeviations(j, dx);
       ws->dataY(j).assign(y_length, double(1));
       ws->dataE(j).assign(y_length, double(1));
     }
