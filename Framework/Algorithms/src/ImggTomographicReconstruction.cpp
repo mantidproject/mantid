@@ -14,16 +14,20 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/make_unique.h"
 
-#ifdef _MSC_VER
-// Disable double to float warnings in MSVC xutility, for std::copy
-#pragma warning(disable : 4244)
-#endif
-
 namespace Mantid {
 namespace Algorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ImggTomographicReconstruction)
+
+namespace {
+// Just to have explicit double => float casts in std::copy/transform
+struct DoubleToFloatStd {
+  float operator()(const double &dblValue) const {
+    return static_cast<float>(dblValue);
+  }
+};
+}
 
 //----------------------------------------------------------------------------------------------
 
@@ -295,7 +299,11 @@ ImggTomographicReconstruction::prepareInputData(
       const Mantid::API::ISpectrum *specRow = fwks->getSpectrum(row);
       const auto &dataY = specRow->readY();
       size_t startRow = startSlice + row * ysize;
-      std::copy(dataY.begin(), dataY.end(), data->begin() + startRow);
+      // MSVC will produce C4244 warnings in <xutility> (double=>float
+      // converstion)
+      // std::copy(dataY.begin(), dataY.end(), data->begin() + startRow);
+      std::transform(dataY.begin(), dataY.end(), data->begin() + startRow,
+                     DoubleToFloatStd());
     }
   }
 
@@ -391,8 +399,8 @@ ImggTomographicReconstruction::buildOutputWks(const std::vector<float> &dataVol,
       size_t startRow = startSlice + row * ysize;
       size_t endRow = startRow + xsize;
       auto &dataY = specRow->dataY();
-      std::copy(dataVol.begin() + startRow, dataVol.begin() + endRow,
-                dataY.begin());
+      std::transform(dataVol.begin() + startRow, dataVol.begin() + endRow,
+                     dataY.begin(), DoubleToFloatStd());
     }
     wsGroup->addWorkspace(sliceWS);
   }
