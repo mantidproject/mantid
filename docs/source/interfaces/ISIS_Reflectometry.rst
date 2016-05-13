@@ -449,12 +449,26 @@ If the run still isn't loading check Mantid's user directories are set
 correctly, and that the desired run is in one of the given directories. To
 manage the user directories, open **File -> Manage User Directories**.
 
+When I try to process I get an error: "Error encountered while stitching group ..."
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This occurs when Mantid is unable to stitch a group. Please check that at you have
+specified at least the bin width in the *Stitch1DMany* text box. To specify the bin width please
+use the *Params* input property like this: ``Params="-0.03"``  (you may want to replace
+``0.03`` with a bin size suitable for your reduction). Note that the "-" sign will produce
+a logarithmic binning in the stitched workspace. For linear binning, use ``Params="0.03"``.
+
 When I try to process I get an error: "Invalid key value pair, '...'"
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This occurs when the contents of the options column are invalid.
 Key value pairs must be given in the form ``key = value``, and if the value
 contains commas it **must** be quoted, like so: ``key = "v,a,l,u,e"``.
+
+When I try to process I get an error: "Invalid value for property ... Can not convert "False/True" to boolean"
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This occurs when a boolean property is set to "True" or "False". Please, use ``1`` or ``0`` instead.
 
 The *Open Table* menu doesn't do anything
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

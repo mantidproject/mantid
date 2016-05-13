@@ -35,7 +35,6 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 class MANTIDQT_CUSTOMINTERFACES_DLL DataProcessorAlgorithm
     : public DataProcessorAlgorithmBase {
 public:
-  DataProcessorAlgorithm() = delete;
   // Constructor
   DataProcessorAlgorithm(
       const std::string &name, const std::vector<std::string> &prefix,

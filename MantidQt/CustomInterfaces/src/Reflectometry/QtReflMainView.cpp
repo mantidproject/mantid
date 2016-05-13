@@ -65,6 +65,12 @@ void QtReflMainView::initLayout() {
   connect(qDataProcessorWidget,
           SIGNAL(comboProcessInstrument_currentIndexChanged(int)),
           ui.comboSearchInstrument, SLOT(setCurrentIndex(int)));
+  // Synchronize the slit calculator
+  connect(ui.comboSearchInstrument, SIGNAL(currentIndexChanged(int)), this,
+          SLOT(instrumentChanged(int)));
+  connect(qDataProcessorWidget,
+          SIGNAL(comboProcessInstrument_currentIndexChanged(int)), this,
+          SLOT(instrumentChanged(int)));
   // Needed to Import/Export TBL, plot row and plot group
   connect(qDataProcessorWidget,
           SIGNAL(runAsPythonScript(const QString &, bool)), this,
@@ -243,6 +249,16 @@ void QtReflMainView::showSearchContextMenu(const QPoint &pos) {
   QMenu *menu = new QMenu(this);
   menu->addAction(ui.actionTransfer);
   menu->popup(ui.tableSearchResults->viewport()->mapToGlobal(pos));
+}
+
+/** This is slot is triggered when any of the instrument combo boxes changes. It
+ * is used to update the Slit Calculator
+ * @param index : The index of the combo box
+ */
+void QtReflMainView::instrumentChanged(int index) {
+  m_calculator->setCurrentInstrumentName(
+      ui.comboSearchInstrument->currentText().toStdString());
+  m_calculator->processInstrumentHasBeenChanged();
 }
 
 /**
