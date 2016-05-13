@@ -350,8 +350,7 @@ void SaveNXTomo::writeSingleWorkspace(const Workspace2D_sptr workspace,
         dataArr[i * m_dimensions[1] + j] =
             workspace->dataY(i * m_dimensions[1] + j)[0];
       } else {
-        dataArr[i * m_dimensions[1] + j] =
-            workspace->dataY(i)[j];
+        dataArr[i * m_dimensions[1] + j] = workspace->dataY(i)[j];
       }
     }
   }
