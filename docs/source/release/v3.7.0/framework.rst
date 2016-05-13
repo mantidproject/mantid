@@ -75,6 +75,8 @@ MD Algorithms (VATES CLI)
 -  The size of densely populated, multidimensional MDEventWorkspace slices produced by SliceMD has been greatly reduced by using more sensible box splitting parameters.
 -  LoadMD has an option to skip loading workspace history. This is useful for workspaces created form large number of files, treated separately.
 
+Refactored `PeakShape` to better support arbitrary shapes.
+
 Performance
 -----------
 
