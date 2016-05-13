@@ -1,5 +1,5 @@
-#ifndef MANTID_DATAHANDLING_SAVEREFLTBL_H_
-#define MANTID_DATAHANDLING_SAVEREFLTBL_H_
+#ifndef MANTID_DATAHANDLING_SAVETBL_H_
+#define MANTID_DATAHANDLING_SAVETBL_H_
 
 //----------------------------------------------------------------------
 // Includes
@@ -9,7 +9,7 @@
 
 namespace Mantid {
 namespace DataHandling {
-/** @class SaveReflTBL SaveReflTBL.h DataHandling/SaveReflTBL.h
+/** @class SaveTBL SaveTBL.h DataHandling/SaveTBL.h
 
 Saves a table workspace to a reflectometry tbl format ascii file.
 Rows are 17 cells long and this save algorithm will throw if the workspace has
@@ -36,14 +36,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport SaveReflTBL : public API::Algorithm {
+class DLLExport SaveTBL : public API::Algorithm {
 public:
   /// Default constructor
-  SaveReflTBL();
+  SaveTBL();
   /// Destructor
-  ~SaveReflTBL() override {}
+  ~SaveTBL() override {}
   /// Algorithm's name for identification overriding a virtual method
-  const std::string name() const override { return "SaveReflTBL"; }
+  const std::string name() const override { return "SaveTBL"; }
   /// Summary of algorithms purpose
   const std::string summary() const override {
     return "Saves a table workspace to a reflectometry tbl format ascii file.";
@@ -60,7 +60,8 @@ private:
   /// Overwrites Algorithm method
   void exec() override;
   /// Writes a value to the file
-  void writeVal(std::string &val, std::ofstream &file, bool endsep = true,
+  template <class T>
+  void writeVal(T &val, std::ofstream &file, bool endsep = true,
                 bool endline = false);
   /// the separator
   const char m_sep;
@@ -73,4 +74,4 @@ private:
 } // namespace DataHandling
 } // namespace Mantid
 
-#endif /*  MANTID_DATAHANDLING_SAVEREFLTBL_H_  */
+#endif /*  MANTID_DATAHANDLING_SAVETBL_H_  */

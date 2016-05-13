@@ -1,5 +1,5 @@
-#ifndef MANTID_DATAHANDLING_LOADREFLTBL_H_
-#define MANTID_DATAHANDLING_LOADREFLTBL_H_
+#ifndef MANTID_DATAHANDLING_LOADTBL_H_
+#define MANTID_DATAHANDLING_LOADTBL_H_
 
 //----------------------------------------------------------------------
 // Includes
@@ -34,12 +34,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport LoadReflTBL : public API::IFileLoader<Kernel::FileDescriptor> {
+class DLLExport LoadTBL : public API::IFileLoader<Kernel::FileDescriptor> {
 public:
   /// Default constructor
-  LoadReflTBL();
+  LoadTBL();
   /// The name of the algorithm
-  const std::string name() const override { return "LoadReflTBL"; }
+  const std::string name() const override { return "LoadTBL"; }
   /// Summary of algorithms purpose
   const std::string summary() const override {
     return "Loads data from a reflectometry table file and stores it in a "
@@ -58,8 +58,11 @@ private:
   void init() override;
   /// Execute the algorithm
   void exec() override;
+  /// Split into Column headings with respect to comma delimiters
+  bool getColumnHeadings(std::string line, std::vector<std::string> &cols);
   /// Split into columns with respect to the comma delimiters
-  size_t getCells(std::string line, std::vector<std::string> &cols) const;
+  size_t getCells(std::string line, std::vector<std::string> &cols,
+                  size_t expectedCommas, bool isOldTBL) const;
   /// count the number of commas in the line
   size_t countCommas(std::string line) const;
   /// find all pairs of quotes in the line
@@ -68,13 +71,11 @@ private:
   /// Parse more complex CSV, used when the data involves commas in the data and
   /// quoted values
   void csvParse(std::string line, std::vector<std::string> &cols,
-                std::vector<std::vector<size_t>> &quoteBounds) const;
-  /// the perfect number of commas expected in a single line. more is fine, less
-  /// is not (set to 16)
-  const size_t m_expectedCommas;
+                std::vector<std::vector<size_t>> &quoteBounds,
+                size_t expectedCommas) const;
 };
 
 } // namespace DataHandling
 } // namespace Mantid
 
-#endif /*  MANTID_DATAHANDLING_LOADREFLTBL_H_  */
+#endif /*  MANTID_DATAHANDLING_LOADTBL_H_  */

@@ -94,7 +94,7 @@ set ( SRC_FILES
 	src/LoadRawBin0.cpp
 	src/LoadRawHelper.cpp
 	src/LoadRawSpectrum0.cpp
-	src/LoadReflTBL.cpp
+	src/LoadTBL.cpp
 	src/LoadSINQFocus.cpp
 	src/LoadSNSspec.cpp
 	src/LoadSPE.cpp
@@ -155,7 +155,7 @@ set ( SRC_FILES
 	src/SaveParameterFile.cpp
 	src/SaveRKH.cpp
 	src/SaveReflCustomAscii.cpp
-	src/SaveReflTBL.cpp
+	src/SaveTBL.cpp
 	src/SaveReflThreeColumnAscii.cpp
 	src/SaveSPE.cpp
 	src/SaveSavuTomoConfig.cpp
@@ -260,7 +260,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadRawBin0.h
 	inc/MantidDataHandling/LoadRawHelper.h
 	inc/MantidDataHandling/LoadRawSpectrum0.h
-	inc/MantidDataHandling/LoadReflTBL.h
+	inc/MantidDataHandling/LoadTBL.h
 	inc/MantidDataHandling/LoadSINQFocus.h
 	inc/MantidDataHandling/LoadSNSspec.h
 	inc/MantidDataHandling/LoadSPE.h
@@ -322,7 +322,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/SaveParameterFile.h
 	inc/MantidDataHandling/SaveRKH.h
 	inc/MantidDataHandling/SaveReflCustomAscii.h
-	inc/MantidDataHandling/SaveReflTBL.h
+	inc/MantidDataHandling/SaveTBL.h
 	inc/MantidDataHandling/SaveReflThreeColumnAscii.h
 	inc/MantidDataHandling/SaveSPE.h
 	inc/MantidDataHandling/SaveSavuTomoConfig.h
@@ -423,7 +423,7 @@ set ( TEST_FILES
 	LoadRawBin0Test.h
 	LoadRawSaveNxsLoadNxsTest.h
 	LoadRawSpectrum0Test.h
-	LoadReflTBLTest.h
+	LoadTBLTest.h
 	LoadSINQFocusTest.h
 	LoadSNSspecTest.h
 	LoadSPETest.h
@@ -481,7 +481,7 @@ set ( TEST_FILES
 	SaveParameterFileTest.h
 	SaveRKHTest.h
 	SaveReflCustomAsciiTest.h
-	SaveReflTBLTest.h
+	SaveTBLTest.h
 	SaveReflThreeColumnAsciiTest.h
 	SaveSPETest.h
 	SaveSavuTomoConfigTest.h

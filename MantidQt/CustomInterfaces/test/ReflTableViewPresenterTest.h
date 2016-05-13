@@ -1570,7 +1570,7 @@ public:
     NiceMock<MockTableView> mockTableView;
     MockProgressableView mockProgress;
     ReflTableViewPresenter presenter(&mockTableView, &mockProgress);
-    EXPECT_CALL(mockTableView, showAlgorithmDialog("SaveReflTBL"));
+    EXPECT_CALL(mockTableView, showAlgorithmDialog("SaveTBL"));
     presenter.notify(IReflTablePresenter::ExportTableFlag);
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockTableView));

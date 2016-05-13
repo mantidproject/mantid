@@ -1,8 +1,8 @@
-#ifndef LOADREFLTBLTEST_H_
-#define LOADREFLTBLTEST_H_
+#ifndef LOADTBLTEST_H_
+#define LOADTBLTEST_H_
 
 #include "cxxtest/TestSuite.h"
-#include "MantidDataHandling/LoadReflTBL.h"
+#include "MantidDataHandling/LoadTBL.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/TableRow.h"
@@ -14,16 +14,15 @@ using namespace Mantid::DataHandling;
 using namespace Mantid::Kernel;
 using namespace Mantid::DataObjects;
 
-class LoadReflTBLTest : public CxxTest::TestSuite {
+class LoadTBLTest : public CxxTest::TestSuite {
 public:
-  static LoadReflTBLTest *createSuite() { return new LoadReflTBLTest(); }
-  static void destroySuite(LoadReflTBLTest *suite) { delete suite; }
+  static LoadTBLTest *createSuite() { return new LoadTBLTest(); }
+  static void destroySuite(LoadTBLTest *suite) { delete suite; }
 
-  LoadReflTBLTest()
-      : m_filename("LoadReflTBLTest.tbl"), m_wsName("LoadReflTBLTestWS"),
-        m_abspath() {}
+  LoadTBLTest()
+      : m_filename("LoadTBLTest.tbl"), m_wsName("LoadTBLTestWS"), m_abspath() {}
 
-  ~LoadReflTBLTest() override {}
+  ~LoadTBLTest() override {}
 
   void testFileNoQuotes() {
     // create a file with each line containing different but valid data format
@@ -40,7 +39,7 @@ public:
     file.close();
 
     Mantid::API::IAlgorithm_sptr alg =
-        Mantid::API::AlgorithmManager::Instance().create("LoadReflTBL");
+        Mantid::API::AlgorithmManager::Instance().create("LoadTBL");
     alg->setRethrows(true);
     TS_ASSERT(alg->isInitialized());
     TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("Filename", m_filename));
@@ -121,7 +120,7 @@ public:
     file.close();
 
     Mantid::API::IAlgorithm_sptr alg =
-        Mantid::API::AlgorithmManager::Instance().create("LoadReflTBL");
+        Mantid::API::AlgorithmManager::Instance().create("LoadTBL");
     alg->setRethrows(true);
     TS_ASSERT(alg->isInitialized());
     TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("Filename", m_filename));
@@ -202,7 +201,7 @@ public:
     file.close();
 
     Mantid::API::IAlgorithm_sptr alg =
-        Mantid::API::AlgorithmManager::Instance().create("LoadReflTBL");
+        Mantid::API::AlgorithmManager::Instance().create("LoadTBL");
     alg->setRethrows(true);
     TS_ASSERT(alg->isInitialized());
     TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("Filename", m_filename));
@@ -229,7 +228,7 @@ public:
     file.close();
 
     Mantid::API::IAlgorithm_sptr alg =
-        Mantid::API::AlgorithmManager::Instance().create("LoadReflTBL");
+        Mantid::API::AlgorithmManager::Instance().create("LoadTBL");
     alg->setRethrows(true);
     TS_ASSERT(alg->isInitialized());
     TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("Filename", m_filename));
@@ -259,7 +258,7 @@ public:
     file.close();
 
     Mantid::API::IAlgorithm_sptr alg =
-        Mantid::API::AlgorithmManager::Instance().create("LoadReflTBL");
+        Mantid::API::AlgorithmManager::Instance().create("LoadTBL");
     alg->setRethrows(true);
     TS_ASSERT(alg->isInitialized());
     TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("Filename", m_filename));
@@ -271,12 +270,15 @@ public:
     TS_ASSERT_THROWS_NOTHING(Poco::File(m_abspath).remove());
   }
 
-  void testBlankFile() {
+  void testTBLWithColumnHeadingsRowAndData() {
     std::ofstream file(m_filename.c_str());
+    file << "Runs,Angle,QMin,QMax,Group,Options" << std::endl
+         << "14456,0.7,1.443,8.992,1," << std::endl
+         << "18553,0.3,1.233,4.388,3,ProcessingInstructions=\"1:2\""
+         << ", Rebin=\"1.5,0.25,5.6\"" << std::endl;
     file.close();
-
     Mantid::API::IAlgorithm_sptr alg =
-        Mantid::API::AlgorithmManager::Instance().create("LoadReflTBL");
+        Mantid::API::AlgorithmManager::Instance().create("LoadTBL");
     alg->setRethrows(true);
     TS_ASSERT(alg->isInitialized());
     TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("Filename", m_filename));
@@ -284,19 +286,75 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         alg->setPropertyValue("OutputWorkspace", m_wsName));
     TS_ASSERT_THROWS_NOTHING(alg->execute());
-
-    TS_ASSERT(alg->isExecuted());
-
     TS_ASSERT_EQUALS(AnalysisDataService::Instance().doesExist(m_wsName), true);
     Workspace_sptr output;
     TS_ASSERT_THROWS_NOTHING(
         output = AnalysisDataService::Instance().retrieve(m_wsName));
     TableWorkspace_sptr outputWS =
         boost::dynamic_pointer_cast<TableWorkspace>(output);
+    std::vector<std::string> cols{"Runs", "Angle", "QMin",
+                                  "QMax", "Group", "Options"};
+    TS_ASSERT_EQUALS(outputWS->getColumnNames(), cols);
+    TableRow firstRow = outputWS->getRow(0);
+    TS_ASSERT_EQUALS(firstRow.cell<std::string>(0), "14456");
+    TS_ASSERT_EQUALS(firstRow.cell<std::string>(1), "0.7");
+    TS_ASSERT_EQUALS(firstRow.cell<std::string>(3), "8.992");
+    TS_ASSERT_EQUALS(firstRow.cell<std::string>(5), "");
+    TableRow secondRow = outputWS->getRow(1);
+    std::string entryOne = secondRow.cell<std::string>(0);
+    std::string entryTwo = secondRow.cell<std::string>(1);
+    std::string entryFour = secondRow.cell<std::string>(3);
+    std::string entrySix = secondRow.cell<std::string>(5);
+    TS_ASSERT_EQUALS(secondRow.cell<std::string>(0), "18553");
+    TS_ASSERT_EQUALS(secondRow.cell<std::string>(1), "0.3");
+    TS_ASSERT_EQUALS(secondRow.cell<std::string>(3), "4.388");
+    TS_ASSERT_EQUALS(secondRow.cell<std::string>(5),
+                     "ProcessingInstructions=\"1:2\", Rebin=\"1.5,0.25,5.6\"");
 
-    // the columns should be there, but no rows
-    TS_ASSERT_EQUALS(outputWS->columnCount(), 9);
-    TS_ASSERT_EQUALS(outputWS->rowCount(), 0);
+    TS_ASSERT_THROWS_NOTHING(Poco::File(m_abspath).remove());
+  }
+
+  void testTBLWithColumnHeadingsRowOnly() {
+    std::ofstream file(m_filename.c_str());
+    file << "Runs,Angle,Transmission,Energy,Spin,Group,Options" << std::endl;
+    file.close();
+    Mantid::API::IAlgorithm_sptr alg =
+        Mantid::API::AlgorithmManager::Instance().create("LoadTBL");
+    alg->setRethrows(true);
+    TS_ASSERT(alg->isInitialized());
+    TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("Filename", m_filename));
+    m_abspath = alg->getPropertyValue("Filename"); // Get absolute path
+    TS_ASSERT_THROWS_NOTHING(
+        alg->setPropertyValue("OutputWorkspace", m_wsName));
+    TS_ASSERT_THROWS_NOTHING(alg->execute());
+    TS_ASSERT_EQUALS(AnalysisDataService::Instance().doesExist(m_wsName), true);
+    Workspace_sptr output;
+    TS_ASSERT_THROWS_NOTHING(
+        output = AnalysisDataService::Instance().retrieve(m_wsName));
+    TableWorkspace_sptr outputWS =
+        boost::dynamic_pointer_cast<TableWorkspace>(output);
+    std::vector<std::string> cols{"Runs", "Angle", "Transmission", "Energy",
+                                  "Spin", "Group", "Options"};
+    TS_ASSERT_EQUALS(outputWS->getColumnNames(), cols);
+    TableRow row = outputWS->getRow(0);
+    // we added no rows so we should get runtime error when we try to acheive a
+    // cell from a row that doesn't exist
+    TS_ASSERT_THROWS_ANYTHING(row.cell<std::string>(0));
+  }
+
+  void testBlankFile() {
+    std::ofstream file(m_filename.c_str());
+    file.close();
+
+    Mantid::API::IAlgorithm_sptr alg =
+        Mantid::API::AlgorithmManager::Instance().create("LoadTBL");
+    alg->setRethrows(true);
+    TS_ASSERT(alg->isInitialized());
+    TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("Filename", m_filename));
+    m_abspath = alg->getPropertyValue("Filename"); // Get absolute path
+    TS_ASSERT_THROWS_NOTHING(
+        alg->setPropertyValue("OutputWorkspace", m_wsName));
+    TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
 
     cleanupafterwards();
   }
@@ -315,28 +373,14 @@ public:
     file.close();
 
     Mantid::API::IAlgorithm_sptr alg =
-        Mantid::API::AlgorithmManager::Instance().create("LoadReflTBL");
+        Mantid::API::AlgorithmManager::Instance().create("LoadTBL");
     alg->setRethrows(true);
     TS_ASSERT(alg->isInitialized());
     TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("Filename", m_filename));
     m_abspath = alg->getPropertyValue("Filename"); // Get absolute path
     TS_ASSERT_THROWS_NOTHING(
         alg->setPropertyValue("OutputWorkspace", m_wsName));
-    TS_ASSERT_THROWS_NOTHING(alg->execute());
-
-    TS_ASSERT(alg->isExecuted());
-
-    TS_ASSERT_EQUALS(AnalysisDataService::Instance().doesExist(m_wsName), true);
-    Workspace_sptr output;
-    TS_ASSERT_THROWS_NOTHING(
-        output = AnalysisDataService::Instance().retrieve(m_wsName));
-    TableWorkspace_sptr outputWS =
-        boost::dynamic_pointer_cast<TableWorkspace>(output);
-
-    // the columns should be there, but no rows
-    TS_ASSERT_EQUALS(outputWS->columnCount(), 9);
-    TS_ASSERT_EQUALS(outputWS->rowCount(), 0);
-
+    TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
     cleanupafterwards();
   }
 
@@ -350,4 +394,4 @@ private:
   }
 };
 
-#endif // LOADREFLTBLTEST_H_
+#endif // LOADTBLTEST_H_

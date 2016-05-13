@@ -1219,7 +1219,7 @@ void ReflTableViewPresenter::importTable() { m_tableView->showImportDialog(); }
 Export a table to TBL file
 */
 void ReflTableViewPresenter::exportTable() {
-  m_tableView->showAlgorithmDialog("SaveReflTBL");
+  m_tableView->showAlgorithmDialog("SaveTBL");
 }
 
 /**
