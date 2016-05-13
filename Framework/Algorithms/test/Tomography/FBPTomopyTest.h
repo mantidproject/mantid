@@ -9,6 +9,8 @@
 
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
+#include <numeric>
+
 using namespace Mantid::Algorithms::Tomography;
 
 class FBPTomopyTest : public CxxTest::TestSuite {
