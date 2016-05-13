@@ -1,14 +1,18 @@
-"""*WIKI*
-Extracts the IPTS number from a run using FileFinde,findRuns. It returns a string the full path to the IPTS shared folder to allow for saving of files in accessible user folders
-*WIKI*"""
-
-from mantid.kernel import *
-from mantid.api import *
-from mantid.simpleapi import *
-import os
+from mantid.api import AlgorithmFactory, FileFinder, PythonAlgorithm
+from mantid.kernel import ConfigService, Direction, IntBoundedValidator, \
+    StringListValidator
 
 
 class GetIPTS(PythonAlgorithm):
+    def category(self):
+        return "PythonAlgorithms;Utility"
+
+    def name(self):
+        return "GetIPTS"
+
+    def summary(self):
+        return "Extracts the IPTS number from a run using FileFinder"
+
     def getValidInstruments(self):
         instruments = ['']
 
@@ -29,7 +33,7 @@ class GetIPTS(PythonAlgorithm):
 
         runIds = [str(id) for id in runIds if id > 0]
 
-        # prepend non-empty instrument name
+        # prepend non-empty instrument name for FileFinder
         if len(instrument) > 0:
             runIds = ['%s_%s' % (instrument, id) for id in runIds]
 
