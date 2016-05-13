@@ -15,10 +15,6 @@
 #include "MantidKernel/Task.h"
 #include "MantidKernel/ThreadScheduler.h"
 
-#include <boost/lexical_cast.hpp>
-#include <boost/shared_array.hpp>
-#include <boost/shared_ptr.hpp>
-
 using namespace Mantid;
 using namespace Mantid::DataObjects;
 
@@ -63,7 +59,7 @@ ProcessBankData::ProcessBankData(
 //----------------------------------------------------------------------------------------------
 /** Run the data processing
 */
-void ProcessBankData::run() { // override {
+void ProcessBankData::run() {
   // Local tof limits
   double my_shortest_tof =
       static_cast<double>(std::numeric_limits<uint32_t>::max()) * 0.1;
@@ -264,7 +260,6 @@ void ProcessBankData::run() { // override {
   // Join back up the tof limits to the global ones
   // This is not thread safe, so only one thread at a time runs this.
   {
-    std::lock_guard<std::mutex> _lock(alg->m_tofMutex);
     if (my_shortest_tof < alg->shortest_tof) {
       alg->shortest_tof = my_shortest_tof;
     }
@@ -288,9 +283,6 @@ void ProcessBankData::run() { // override {
 
 //---------------------------------------------------------------------------------------------------
 /** Constructor
-* deleted parameters:
-*   - ioMutex : a mutex shared for all Disk I-O tasks
-*   - scheduler : the ThreadScheduler that runs this task.
 *
 * @param input_alg :: Handle to the main algorithm
 * @param entry_name :: The pathname of the bank to load
@@ -304,21 +296,13 @@ LoadBankFromDiskTask::LoadBankFromDiskTask(
     Mantid::DataHandling::LoadEventNexus *input_alg,
     const std::string &entry_name, const std::string &entry_type,
     const bool oldNeXusFileNames, Mantid::API::Progress *prog,
-    // boost::shared_ptr<std::mutex> ioMutex,
-    // Mantid::Kernel::ThreadScheduler *scheduler,
-    const std::vector<int> &framePeriodNumbers,
-    Mantid::Kernel::Logger &logger)
-    : // Task(),
-      alg(input_alg),
-      entry_name(entry_name), entry_type(entry_type),
-      // prog(prog), scheduler(scheduler), thisBankPulseTimes(NULL),
-      // m_loadError(false),
-      prog(prog), // scheduler(scheduler),
-      m_loadError(false), m_oldNexusFileNames(oldNeXusFileNames), m_loadStart(),
-      m_loadSize(), m_event_id(nullptr), m_event_time_of_flight(nullptr),
-      m_have_weight(false), m_event_weight(nullptr),
-      m_framePeriodNumbers(framePeriodNumbers), alg_Logger(logger) {
-  // setMutex(ioMutex);
+    const std::vector<int> &framePeriodNumbers, Mantid::Kernel::Logger &logger)
+    : alg(input_alg), entry_name(entry_name), entry_type(entry_type),
+      prog(prog), m_loadError(false), m_oldNexusFileNames(oldNeXusFileNames),
+      m_loadStart(), m_loadSize(), m_event_id(nullptr),
+      m_event_time_of_flight(nullptr), m_have_weight(false),
+      m_event_weight(nullptr), m_framePeriodNumbers(framePeriodNumbers),
+      alg_Logger(logger) {
   m_min_id = std::numeric_limits<uint32_t>::max();
   m_max_id = 0;
 }
@@ -358,7 +342,6 @@ void LoadBankFromDiskTask::loadPulseTimes(::NeXus::File &file) {
   thisBankPulseTimes = boost::make_shared<Mantid::DataHandling::BankPulseTimes>(
       boost::ref(file), m_framePeriodNumbers);
   alg->m_bankPulseTimes.push_back(thisBankPulseTimes);
-  // alg->bankPulsetimes.push_back(thisBankPulseTimes);
 }
 
 //---------------------------------------------------------------------------------------------------
@@ -805,7 +788,6 @@ void LoadBankFromDiskTask::run() {
         alg, entry_name, prog, event_id_shrd, event_time_of_flight_shrd,
         numEvents, startAt, event_index_shrd, thisBankPulseTimes, m_have_weight,
         event_weight_shrd, (mid_id + 1), m_max_id);
-    // scheduler->push(newTask2);
     newTask2.run();
   }
 }
