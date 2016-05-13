@@ -39,10 +39,10 @@ public:
     std::fill(reconVol.begin(), reconVol.end(), 0.0f);
 
     const size_t numAngles = numProj;
-    std::array<float, numAngles> angles{0.0, 90.0, 180.0};
+    std::array<float, numAngles> angles{{0.0, 90.0, 180.0}};
 
     const size_t numCenters = ysize;
-    std::array<float, numCenters> centers = {4, 3, 3, 4, 4, 4, 4, 3};
+    std::array<float, numCenters> centers{{4, 3, 3, 4, 4, 4, 4, 3}};
 
     FBPTomopy(projImages.data(), ysize, numProj, xsize, centers.data(),
               angles.data(), reconVol.data(), xsize, ysize);
@@ -83,8 +83,8 @@ public:
     std::fill(reconVol.begin(), reconVol.end(), 0.0f);
 
     const size_t numAngles = numProj;
-    std::array<float, numAngles> angles{0.0,   45.0,  90.0,  135.0,
-                                        180.0, 225.0, 270.0, 315.0};
+    std::array<float, numAngles> angles{
+        {0.0, 45.0, 90.0, 135.0, 180.0, 225.0, 270.0, 315.0}};
 
     const size_t numCenters = ysize;
     std::array<float, numCenters> centers;
