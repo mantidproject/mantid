@@ -33,6 +33,10 @@ Line plots
 .. figure::  ../../images/R37PlotAllErrorsOption.png
    :align: center
 
+3D plots from group workspaces
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+- For single-spectrum data, the choice of spectrum number to plot has been disabled because it has only one possible answer.
+
 Instrument View
 ###############
 
