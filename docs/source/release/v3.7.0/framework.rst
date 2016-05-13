@@ -93,17 +93,6 @@ Improved
   does not perform fit of data by itself, but requires an additional argument: ``EPPTable``. This should accelerate the data reduction workflow, because fitting results can be reused. Table with elastic peak positions can be created using the new :ref:`FindEPP <algm-FindEPP>` algorithm.
 - :ref:`MonteCarloAbsorption <algm-MonteCarloAbsorption>` now supports inelastic instruments. It relies on :ref:`ConvertUnits <algm-ConvertUnits>` having set the correct EMode. `#15923 <https://github.com/mantidproject/mantid/pull/15923>`_
 
-Documentation
-#############
-
-- The documentation of several Nexus loading algorithms has been improved with the addition of a table that shows how various
-  items of data move from the Nexus file to the workspace. These algorithms are
-  :ref:`LoadEventNexus <algm-LoadEventNexus>`,
-  :ref:`LoadISISNexus <algm-LoadISISNexus>`,
-  :ref:`LoadMcStas <algm-LoadMcStas>`,
-  :ref:`LoadMuonNexus <algm-LoadMuonNexus>` (both versions) and
-  :ref:`LoadNexusLogs <algm-LoadNexusLogs>`.
-  Also :ref:`LoadNexus <algm-LoadNexus>` documentation now explains how it determines which load algorithm to run.
 
 Deprecated
 ##########
