@@ -291,7 +291,46 @@ SetSample::createFlatPlateXML(const Kernel::PropertyManager &args) const {
  */
 std::string
 SetSample::createCylinderXML(const Kernel::PropertyManager &args) const {
-  throw std::runtime_error("Not implemented");
+  // Y
+  double height = args.getProperty("Height");
+  double radius = args.getProperty("Radius");
+  std::vector<double> center = args.getProperty("Center");
+  double axisDbl(1.0); // Default Axis is Y
+  if (args.existsProperty("Axis")) {
+    axisDbl = args.getProperty("Axis");
+    if (axisDbl < 0 || axisDbl > 2)
+      throw std::invalid_argument(
+          "Geometry.Axis value must be either 0,1,2 (X,Y,Z)");
+  }
+  size_t axisIdx = static_cast<size_t>(axisDbl);
+  // convert to metres
+  height *= 0.01;
+  radius *= 0.01;
+  std::transform(center.begin(), center.end(), center.begin(),
+                 [](double val) { return val *= 0.01; });
+
+  // Shift so that cylinder is centered at center position
+  const double cylinderBase = (-1e-03 * height) + center[axisIdx];
+
+  std::ostringstream xmlShapeStream;
+  xmlShapeStream << "<cylinder id=\"sample-shape\"> "
+                 << "<centre-of-bottom-base x=\"" << center[axisIdx]
+                 << "\" y=\"" << cylinderBase << "\" z=\"" << center[axisIdx]
+                 << "\" /> "
+                 << "<axis ";
+
+  if (axisIdx == 0)
+    xmlShapeStream << "x=\"1\" y=\"0\" z=\"0\" /> ";
+  else if (axisIdx == 1)
+    xmlShapeStream << "x=\"0\" y=\"1\" z=\"0\" /> ";
+  else
+    xmlShapeStream << "x=\"0\" y=\"0\" z=\"1\" /> ";
+
+  xmlShapeStream << "<radius val=\"" << radius << "\" /> "
+                 << "<height val=\"" << height << "\" /> "
+                 << "</cylinder>";
+
+  return xmlShapeStream.str();
 }
 
 /**
@@ -301,6 +340,7 @@ SetSample::createCylinderXML(const Kernel::PropertyManager &args) const {
  */
 std::string
 SetSample::createAnnulusXML(const Kernel::PropertyManager &args) const {
+  UNUSED_ARG(args);
   throw std::runtime_error("Not implemented");
 }
 
