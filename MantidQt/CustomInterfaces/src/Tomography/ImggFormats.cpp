@@ -16,14 +16,14 @@ const static std::map<std::string, std::vector<std::string>> extensions{
     {"FITS", {"fits", "fit"}},
     {"TIFF", {"tiff", "tif"}},
     {"PNG", {"png"}},
-    {"JPG", {"jpg", "jpeg"}},
+    {"JPEG", {"jpg", "jpeg"}},
     {"NXTomo", {"nxs"}}};
 
 const static std::vector<std::string> descriptions{
     "FITS: Flexible Image Transport System.",
     "TIFF: - Tagged Image File Format", "PNG: Portable Network Graphics",
     "JPEG: Joint Photographic Experts Group",
-    "NXTomo NeXus application definition"};
+    "NXTomo: NXTomo NeXus application definition"};
 
 /**
  * Possible common/accepted file extensions for a format
