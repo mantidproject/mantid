@@ -18,10 +18,11 @@ class GetIPTS(PythonAlgorithm):
 
         for name in ['SNS', 'HFIR']:
             facility = ConfigService.getFacility(name)
-            facility = [item.shortName() for item in facility.instruments()]
-            facility = [item for item in facility if item != 'DAS']
-            facility.sort()
-            instruments.extend(facility)
+            facilityInstruments = [item.shortName()
+                                   for item in facility.instruments()
+                                   if item != 'DAS']
+            facilityInstruments.sort()
+            instruments.extend(facilityInstruments)
 
         return instruments
 
@@ -61,7 +62,7 @@ class GetIPTS(PythonAlgorithm):
     def PyInit(self):
         self.declareProperty('RunNumber', defaultValue=0,
                              direction=Direction.Input,
-                             validator=IntBoundedValidator(lower=0),
+                             validator=IntBoundedValidator(lower=1),
                              doc="Extracts the IPTS number for a run")
 
         instruments = self.getValidInstruments()
