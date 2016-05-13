@@ -134,6 +134,7 @@ set ( SRC_FILES
 	src/SaveDetectorsGrouping.cpp
 	src/SaveDiffCal.cpp
 	src/SaveDspacemap.cpp
+	src/SaveFITS.cpp
 	src/SaveFocusedXYE.cpp
 	src/SaveFullprofResolution.cpp
 	src/SaveGSASInstrumentFile.cpp
@@ -301,6 +302,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/SaveDetectorsGrouping.h
 	inc/MantidDataHandling/SaveDiffCal.h
 	inc/MantidDataHandling/SaveDspacemap.h
+	inc/MantidDataHandling/SaveFITS.h
 	inc/MantidDataHandling/SaveFocusedXYE.h
 	inc/MantidDataHandling/SaveFullprofResolution.h
 	inc/MantidDataHandling/SaveGSASInstrumentFile.h
@@ -462,6 +464,7 @@ set ( TEST_FILES
 	SaveDetectorsGroupingTest.h
 	SaveDiffCalTest.h
 	SaveDspacemapTest.h
+	SaveFITSTest.h
 	SaveFocussedXYETest.h
 	SaveFullprofResolutionTest.h
 	SaveGSASInstrumentFileTest.h

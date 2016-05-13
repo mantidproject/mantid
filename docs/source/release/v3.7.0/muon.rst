@@ -13,6 +13,11 @@ Muon ALC
 
 - The default directory for the last run is now set to the same directory selected for the first run `#15524 <https://github.com/mantidproject/mantid/pull/15524>`_
 - Fixed an occasional crash seen when "Auto" was selected `#15673 <https://github.com/mantidproject/mantid/pull/15673>`_
+- Several usability fixes were made to the interface: `#16161 <https://github.com/mantidproject/mantid/pull/16161>`_
+
+  - The "Function" box was renamed "Take log value at" and moved next to the log to which it applies
+  - The integration start time is initialised to the first good data rather than the first time bin
+  - The choice of periods is no longer reset when a new first run is loaded
 
 Muon Analysis
 #############

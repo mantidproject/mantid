@@ -76,6 +76,9 @@ Imaging
   Back-Projection (FBP) reconstruction method using the FBP
   implementation of the `TomoPy package
   <http://www.aps.anl.gov/tomopy/>`_.
+- Images loaded as Mantid workspaces can now be saved into FITS files
+  using the algorithm :ref:`SaveFITS <algm-SaveFITS>`.
+
 
 Improvements in the tomographic reconstruction graphical user interface:
 
