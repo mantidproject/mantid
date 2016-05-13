@@ -1,11 +1,8 @@
-# #pylint: disable=no-init
-# from mantid.simpleapi import *
-# from mantid.kernel import *
 # from mantid.api import *
+# from SANSFileInformation import (SANSInstrument, SANSFileInformation, SANSFileInformationFactory)
 #
 #
-# class SANSLoadData(DataProcessorAlgorithm):
-#
+# class SANSLoad(DataProcessorAlgorithm):
 #     def category(self):
 #         return 'SANS\\Load'
 #
@@ -49,21 +46,46 @@
 #         # Can Direct Workspace
 #
 #     def PyExec(self):
-#         # Read the file names
-#
-#         # Get the correct SANSLoader from the SANSLoaderFactory
-#
-#         # Run the appropriate SANSLoader for scatter files
-#
-#         # Run the appropriate SANSLoader for the transmission/direct files
-#
-#         # Set output
 #         pass
 #
-#     def validateInputs(self):
-#         issues = dict()
-#         return issues
+#
+# class SANSLoadISIS(SANSLoad):
+#     def category(self):
+#         return 'SANS\\Load'
+#
+#     def summary(self):
+#         return 'Load ISIS SANS data'
+#
+#     def PyInit(self):
+#         super(SANSLoadISIS, self).PyInit()
+#
+#     def PyExec(self):
+#         # Do loading work here
+#         pass
 #
 #
 # # Register algorithm with Mantid
 # AlgorithmFactory.subscribe(SANSLoad)
+# AlgorithmFactory.subscribe(SANSLoadISIS)
+#
+#
+# class SANSLoadFactory(object):
+#     def __init__(self):
+#         super(SANSLoadFactory, self).__init__()
+#         self._file_information_factory = SANSFileInformationFactory()
+#
+#     def create_loader(self, file_name):
+#         # Get the instrument from the file_name
+#         file_information = self._file_information_factory.create_sans_file_information(file_name)
+#         instrument_type = file_information.get_instrument(file_name)
+#
+#         if instrument_type == SANSInstrument.LARMOR or instrument_type == SANSInstrument.LOQ or\
+#            instrument_type == SANSInstrument.SANS2D:
+#             loader = AlgorithmManager.createUnmanaged("SANSLoadISIS")
+#         else:
+#             NotImplementedError("SANSLoaderFactory: Other instruments are not implemented yet.")
+#         loader.setChild(True)
+#         loader.initialize()
+#         return loader
+#
+#

@@ -87,6 +87,7 @@ set ( TEST_PY_FILES
   SymmetriseTest.py
   UpdatePeakParameterTableValueTest.py
   SANSDarkRunBackgroundCorrectionTest.py
+  SANSStateDataTest.py
   SANSSubtractTest.py
   TimeSliceTest.py
   TOFTOFConvertTofToDeltaETest.py
