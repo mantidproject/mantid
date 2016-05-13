@@ -1138,7 +1138,7 @@ public:
     testing::NiceMock<MockEnggDiffractionView> mockView;
     MantidQt::CustomInterfaces::EnggDiffractionPresenter pres(&mockView);
 
-    EXPECT_CALL(mockView, fittingRunNo()).Times(1).WillOnce(Return(""));
+    EXPECT_CALL(mockView, getFittingRunNo()).Times(1).WillOnce(Return(""));
     EXPECT_CALL(mockView, fittingPeaksData()).Times(1).WillOnce(Return(""));
 
     // No errors/1 warnings. There will be an error log from the algorithms
@@ -1156,7 +1156,9 @@ public:
 
     // inputs from user
     const std::string mockFname = "";
-    EXPECT_CALL(mockView, fittingRunNo()).Times(1).WillOnce(Return(mockFname));
+    EXPECT_CALL(mockView, getFittingRunNo())
+        .Times(1)
+        .WillOnce(Return(mockFname));
     EXPECT_CALL(mockView, fittingPeaksData())
         .Times(1)
         .WillOnce(Return("2.57,4.88,5.78"));
@@ -1173,10 +1175,9 @@ public:
   void test_fitting_with_invalid_expected_peaks() {
     testing::NiceMock<MockEnggDiffractionView> mockView;
     EnggDiffPresenterNoThread pres(&mockView);
-    EnggDiffCalibSettings calibSettings;
 
     // inputs from user
-    EXPECT_CALL(mockView, fittingRunNo())
+    EXPECT_CALL(mockView, getFittingRunNo())
         .Times(1)
         .WillOnce(Return(g_focusedRun));
     EXPECT_CALL(mockView, fittingPeaksData())
@@ -1188,6 +1189,182 @@ public:
     EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(1);
 
     pres.notify(IEnggDiffractionPresenter::FitPeaks);
+  }
+
+  // shahroz Fitting test begin here
+  void test_fitting_runno_valid_single_run() {
+    testing::NiceMock<MockEnggDiffractionView> mockView;
+    EnggDiffPresenterNoThread pres(&mockView);
+
+    // inputs from user
+    EXPECT_CALL(mockView, getFittingRunNo())
+        .Times(2)
+        .WillRepeatedly(Return(std::string(g_focusedBankFile)));
+
+    EXPECT_CALL(mockView, getFittingRunNumVec())
+        .Times(1)
+        .WillOnce(Return(m_ex_run_number));
+
+    EXPECT_CALL(mockView, splitFittingDirectory(testing::_))
+        .Times(1)
+        .WillOnce(Return(m_ex_run_number));
+
+    // No errors/0 warnings. There will be no errors or warnings
+    EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
+    EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(1);
+
+    pres.notify(IEnggDiffractionPresenter::FittingRunNo);
+  }
+
+  void test_fitting_runno_invalid_run() {
+    testing::NiceMock<MockEnggDiffractionView> mockView;
+    EnggDiffPresenterNoThread pres(&mockView);
+
+    // inputs from user - empty run number given
+    EXPECT_CALL(mockView, getFittingRunNo())
+        .Times(2)
+        .WillRepeatedly(Return(std::string("")));
+
+    EXPECT_CALL(mockView, getFittingRunNumVec())
+        .Times(1)
+        .WillOnce(Return(m_ex_run_number));
+
+    EXPECT_CALL(mockView, splitFittingDirectory(testing::_))
+        .Times(1)
+        .WillOnce(Return(m_ex_run_number));
+
+    // No errors/1 warnings. There will be an warning for invalid run number
+    EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
+    EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(1);
+
+    pres.notify(IEnggDiffractionPresenter::FittingRunNo);
+  }
+
+  void test_fitting_runno_multiple_run() {
+    testing::NiceMock<MockEnggDiffractionView> mockView;
+    EnggDiffPresenterNoThread pres(&mockView);
+    // 23931-23934
+    std::vector<std::string> RunNumDir;
+    RunNumDir.emplace_back("241391");
+    RunNumDir.emplace_back("241392");
+    RunNumDir.emplace_back("241393");
+    RunNumDir.emplace_back("241394");
+
+    // empty vector
+    std::vector<std::string> splittedFileVec;
+
+    // inputs from user - given multiple run
+    EXPECT_CALL(mockView, getFittingRunNo())
+        .Times(2)
+        .WillRepeatedly(Return(g_focusedFittingRunNo));
+
+    EXPECT_CALL(mockView, getFittingRunNumVec())
+        .Times(1)
+        .WillOnce(Return(RunNumDir));
+
+    EXPECT_CALL(mockView, splitFittingDirectory(testing::_))
+        .Times(1)
+        .WillOnce(Return(splittedFileVec));
+
+    EXPECT_CALL(mockView, isDigit(testing::_))
+        .Times(2)
+        .WillRepeatedly(Return(true));
+
+    // could possibly feature to create unique path
+
+    EXPECT_CALL(mockView, getFocusDir()).Times(1);
+
+    // No errors/1 warnings. The warning will be produced because there
+    // is no focus output directory within the settings tab
+    EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
+    EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(1);
+
+    pres.notify(IEnggDiffractionPresenter::FittingRunNo);
+  }
+
+  void disable_test_fitting_runno_single_run() {
+    testing::NiceMock<MockEnggDiffractionView> mockView;
+    EnggDiffPresenterNoThread pres(&mockView);
+
+    // focus directory need to be set for this in the settings
+
+    // 23931-23934
+    std::vector<std::string> RunNumDir;
+    RunNumDir.emplace_back("241391");
+
+    // empty vector
+    std::vector<std::string> splittedFileVec;
+
+    // inputs from user - given multiple run
+    EXPECT_CALL(mockView, getFittingRunNo())
+        .Times(2)
+        .WillRepeatedly(Return("241391"));
+
+    EXPECT_CALL(mockView, getFittingRunNumVec())
+        .Times(1)
+        .WillOnce(Return(RunNumDir));
+
+    EXPECT_CALL(mockView, splitFittingDirectory(testing::_))
+        .Times(1)
+        .WillOnce(Return(splittedFileVec));
+
+    EXPECT_CALL(mockView, getFittingMultiRunMode())
+        .Times(1)
+        .WillOnce(Return(false));
+
+    EXPECT_CALL(mockView, setFittingRunNumVec(testing::_)).Times(1);
+
+    EXPECT_CALL(mockView, addRunNoItem(testing::_, testing::_)).Times(1);
+
+    EXPECT_CALL(mockView, addBankItems(testing::_, testing::_)).Times(1);
+
+    // No errors/0 warnings.
+    EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
+    EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(0);
+
+    pres.notify(IEnggDiffractionPresenter::FittingRunNo);
+  }
+
+  void test_fitting_runno_browsed_run_add_run_item() {
+    testing::NiceMock<MockEnggDiffractionView> mockView;
+    EnggDiffPresenterNoThread pres(&mockView);
+    // Tests the browse directory file
+    std::vector<std::string> RunNumDir;
+    RunNumDir.emplace_back("241395");
+
+    std::vector<std::string> splittedFileVec;
+    splittedFileVec.emplace_back("ENGINX");
+    splittedFileVec.emplace_back("241395");
+    splittedFileVec.emplace_back("focused");
+    splittedFileVec.emplace_back("bank");
+    splittedFileVec.emplace_back("1");
+
+    // inputs from user - given multiple run
+    EXPECT_CALL(mockView, getFittingRunNo())
+        .Times(2)
+        .WillRepeatedly(Return(g_focusedBankFile));
+
+    EXPECT_CALL(mockView, getFittingRunNumVec())
+        .Times(1)
+        .WillOnce(Return(RunNumDir));
+
+    EXPECT_CALL(mockView, splitFittingDirectory(testing::_))
+        .Times(1)
+        .WillOnce(Return(splittedFileVec));
+
+    EXPECT_CALL(mockView, getFittingMultiRunMode()).Times(0);
+
+    EXPECT_CALL(mockView, setFittingRunNumVec(testing::_)).Times(0);
+
+    EXPECT_CALL(mockView, addRunNoItem(testing::_, testing::_)).Times(0);
+
+    EXPECT_CALL(mockView, addBankItems(testing::_, testing::_)).Times(0);
+
+    // No errors/0 warnings. File entered is not found
+    EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
+    EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(1);
+
+    pres.notify(IEnggDiffractionPresenter::FittingRunNo);
   }
 
   void test_logMsg() {
@@ -1267,6 +1444,8 @@ private:
   const static std::string g_eventModeRunNo;
   const static std::string g_validRunNo;
   const static std::string g_focusedRun;
+  const static std::string g_focusedBankFile;
+  const static std::string g_focusedFittingRunNo;
   EnggDiffCalibSettings m_basicCalibSettings;
 
   std::vector<std::string> m_ex_empty_run_num;
@@ -1288,5 +1467,11 @@ const std::string EnggDiffractionPresenterTest::g_focusedRun =
     "focused_texture_bank_1";
 
 const std::string EnggDiffractionPresenterTest::g_validRunNo = "228061";
+
+const std::string EnggDiffractionPresenterTest::g_focusedBankFile =
+    "ENGINX_241395_focused_texture_bank_1";
+
+const std::string EnggDiffractionPresenterTest::g_focusedFittingRunNo =
+    "241391-241394";
 
 #endif // MANTID_CUSTOMINTERFACES_ENGGDIFFRACTIONPRESENTERTEST_H

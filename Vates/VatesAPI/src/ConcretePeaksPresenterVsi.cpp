@@ -137,26 +137,11 @@ void ConcretePeaksPresenterVsi::getPeaksInfo(
 double ConcretePeaksPresenterVsi::getMaxRadius (
     Mantid::Geometry::PeakShape_sptr shape) const{
   const double defaultRadius = 1.0;
-  boost::shared_ptr<Mantid::DataObjects::NoShape> nullShape =
-      boost::dynamic_pointer_cast<Mantid::DataObjects::NoShape>(shape);
-  boost::shared_ptr<Mantid::DataObjects::PeakShapeEllipsoid> ellipsoidShape =
-      boost::dynamic_pointer_cast<Mantid::DataObjects::PeakShapeEllipsoid>(
-          shape);
-  boost::shared_ptr<Mantid::DataObjects::PeakShapeSpherical> sphericalShape =
-      boost::dynamic_pointer_cast<Mantid::DataObjects::PeakShapeSpherical>(
-          shape);
 
-  if (nullShape) {
-    return defaultRadius;
-  } else if (ellipsoidShape) {
-    std::vector<double> radius = ellipsoidShape->abcRadii();
-    return *(std::max_element(radius.begin(), radius.end()));
-  } else if (sphericalShape) {
-    if (double radius = sphericalShape->radius()) {
-      return radius;
-    } else {
-      return defaultRadius;
-    }
+  boost::optional<double> radius =
+      shape->radius(Mantid::Geometry::PeakShape::Radius);
+  if (radius) {
+    return radius.get();
   } else {
     return defaultRadius;
   }
