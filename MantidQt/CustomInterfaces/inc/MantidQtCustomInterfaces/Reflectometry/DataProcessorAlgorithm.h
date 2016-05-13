@@ -1,12 +1,8 @@
 #ifndef MANTID_CUSTOMINTERFACES_DATAPROCESSORALGORITHM_H
 #define MANTID_CUSTOMINTERFACES_DATAPROCESSORALGORITHM_H
 
-#include "MantidAPI/AlgorithmManager.h"
 #include "MantidQtCustomInterfaces/DllConfig.h"
-
-#include <set>
-#include <string>
-#include <vector>
+#include "MantidQtCustomInterfaces/Reflectometry/DataProcessorAlgorithmBase.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -36,7 +32,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTIDQT_CUSTOMINTERFACES_DLL DataProcessorAlgorithm {
+class MANTIDQT_CUSTOMINTERFACES_DLL DataProcessorAlgorithm
+    : public DataProcessorAlgorithmBase {
 public:
   DataProcessorAlgorithm() = delete;
   // Constructor
@@ -45,8 +42,6 @@ public:
       const std::set<std::string> &blacklist = std::set<std::string>());
   // Destructor
   virtual ~DataProcessorAlgorithm();
-  // The name of this algorithm
-  std::string name() const;
   // The number of output properties
   size_t numberOfOutputProperties() const;
   // The prefix for this output property
@@ -55,20 +50,14 @@ public:
   std::string inputPropertyName(size_t index) const;
   // The name of this output property
   std::string outputPropertyName(size_t index) const;
-  // The blacklist
-  std::set<std::string> blacklist() const;
 
 private:
-  // The name of this algorithm
-  std::string m_name;
   // The prefix of the output workspace(s)
   std::vector<std::string> m_prefix;
   // The names of the input workspace properties
   std::vector<std::string> m_inputProperties;
   // The names of the output workspace properties
   std::vector<std::string> m_outputProperties;
-  // The blacklist
-  std::set<std::string> m_blacklist;
 };
 }
 }

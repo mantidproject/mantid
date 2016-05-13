@@ -1,11 +1,8 @@
 #ifndef MANTID_CUSTOMINTERFACES_DATAPREPROCESSORALGORITHM_H
 #define MANTID_CUSTOMINTERFACES_DATAPREPROCESSORALGORITHM_H
 
-#include "MantidAPI/AlgorithmManager.h"
 #include "MantidQtCustomInterfaces/DllConfig.h"
-
-#include <set>
-#include <string>
+#include "MantidQtCustomInterfaces/Reflectometry/DataProcessorAlgorithmBase.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -35,7 +32,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTIDQT_CUSTOMINTERFACES_DLL DataPreprocessorAlgorithm {
+class MANTIDQT_CUSTOMINTERFACES_DLL DataPreprocessorAlgorithm
+    : public DataProcessorAlgorithmBase {
 public:
   // Constructor
   DataPreprocessorAlgorithm(
@@ -46,8 +44,7 @@ public:
   DataPreprocessorAlgorithm();
   // Destructor
   virtual ~DataPreprocessorAlgorithm();
-  // The name of this algorithm
-  std::string name() const;
+
   // The name of the lhs input property
   std::string lhsProperty() const;
   // The name of the rhs input property
@@ -58,12 +55,8 @@ public:
   std::string prefix() const;
   // If we want to show the info associated with this pre-processor
   bool show() const;
-  // The blacklist
-  std::set<std::string> blacklist() const;
 
 private:
-  // The name of this algorithm
-  std::string m_name;
   // The prefix of the output workspace
   std::string m_prefix;
   // The name of the LHS input property
@@ -72,8 +65,6 @@ private:
   std::string m_rhs;
   // The name of the output proerty
   std::string m_outProperty;
-  // The blacklist
-  std::set<std::string> m_blacklist;
   // Indicates wheter or not the information will appear in the output ws name
   bool m_show;
 };
