@@ -89,6 +89,7 @@ set ( TEST_PY_FILES
   UpdatePeakParameterTableValueTest.py
   SANSDarkRunBackgroundCorrectionTest.py
   SANSSubtractTest.py
+  TabulateStretchedExFTTest.py
   TimeSliceTest.py
   TOFTOFConvertTofToDeltaETest.py
   TOFTOFCropWorkspaceTest.py
