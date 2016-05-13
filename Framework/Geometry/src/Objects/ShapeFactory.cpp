@@ -3,24 +3,24 @@
 //----------------------------------------------------------------------
 #include "MantidKernel/Quat.h"
 
-#include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidGeometry/Objects/Object.h"
-#include "MantidGeometry/Surfaces/Quadratic.h"
-#include "MantidGeometry/Surfaces/Surface.h"
-#include "MantidGeometry/Surfaces/Sphere.h"
-#include "MantidGeometry/Surfaces/Plane.h"
-#include "MantidGeometry/Surfaces/Cylinder.h"
-#include "MantidGeometry/Surfaces/Cone.h"
-#include "MantidGeometry/Surfaces/Torus.h"
+#include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidGeometry/Rendering/GluGeometryHandler.h"
+#include "MantidGeometry/Surfaces/Cone.h"
+#include "MantidGeometry/Surfaces/Cylinder.h"
+#include "MantidGeometry/Surfaces/Plane.h"
+#include "MantidGeometry/Surfaces/Quadratic.h"
+#include "MantidGeometry/Surfaces/Sphere.h"
+#include "MantidGeometry/Surfaces/Surface.h"
+#include "MantidGeometry/Surfaces/Torus.h"
 
-#include "MantidKernel/Quat.h"
 #include "MantidKernel/Logger.h"
+#include "MantidKernel/Quat.h"
 
 #include <Poco/AutoPtr.h>
-#include <Poco/DOM/Document.h>
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/DOMWriter.h>
+#include <Poco/DOM/Document.h>
 #include <Poco/DOM/Element.h>
 #include <Poco/DOM/NodeList.h>
 
@@ -884,19 +884,18 @@ ShapeFactory::parseCone(Poco::XML::Element *pElem,
   return retAlgebraMatch.str();
 }
 
-namespace // anonymous
-    {
-
 /**
  * The "tapered-guide" shape is actually a special case of hexahedron; once we
  * have
  * the 8 points that make up either shape, the process of parsing them can be
  * exactly the same in both cases.
  */
-std::string
-parseHexahedronFromStruct(Hexahedron &hex,
-                          std::map<int, boost::shared_ptr<Surface>> &prim,
-                          int &l_id) {
+std::string ShapeFactory::parseHexahedronFromStruct(
+    Hexahedron &hex, std::map<int, boost::shared_ptr<Surface>> &prim,
+    int &l_id) {
+  V3D pointTowardBack = hex.lbb - hex.lfb;
+  pointTowardBack.normalize();
+
   V3D normal;
 
   // add front face
@@ -964,7 +963,6 @@ parseHexahedronFromStruct(Hexahedron &hex,
 
   return retAlgebraMatch.str();
 }
-} // anonymous namespace
 
 /**
 * Get all corners of a hexahedron from an XML element.
@@ -1373,6 +1371,54 @@ V3D ShapeFactory::parsePosition(Poco::XML::Element *pElem) {
   }
 
   return retVal;
+}
+
+/** Create a hexahedral shape object
+@param xlb :: Left-back x point or hexahedron
+@param xlf :: Left-front x point of hexahedron
+@param xrf :: Right-front x point of hexahedron
+@param xrb :: Right-back x point of hexahedron
+@param ylb :: Left-back y point or hexahedron
+@param ylf :: Left-front y point of hexahedron
+@param yrf :: Right-front y point of hexahedron
+@param yrb :: Right-back y point of hexahedron
+
+@returns the newly created hexahedral shape object
+*/
+boost::shared_ptr<Object>
+ShapeFactory::createHexahedralShape(double xlb, double xlf, double xrf,
+                                    double xrb, double ylb, double ylf,
+                                    double yrf, double yrb) {
+  Hexahedron hex;
+  static const double ZDEPTH = 0.001;
+  hex.lbb = V3D(xlb, ylb, 0);
+  hex.lbt = V3D(xlb, ylb, ZDEPTH);
+  hex.lfb = V3D(xlf, ylf, 0);
+  hex.lft = V3D(xlf, ylf, ZDEPTH);
+  hex.rbb = V3D(xrb, yrb, 0);
+  hex.rbt = V3D(xrb, yrb, ZDEPTH);
+  hex.rfb = V3D(xrf, yrf, 0);
+  hex.rft = V3D(xrf, yrf, ZDEPTH);
+
+  std::map<int, boost::shared_ptr<Surface>> prim;
+  int l_id = 1;
+  auto algebra = parseHexahedronFromStruct(hex, prim, l_id);
+
+  auto shape = boost::make_shared<Object>();
+  shape->setObject(21, algebra);
+  shape->populate(prim);
+
+  auto handler = boost::make_shared<GluGeometryHandler>(shape);
+
+  shape->setGeometryHandler(handler);
+
+  handler->setHexahedron(hex.lbb, hex.lfb, hex.rfb, hex.rbb, hex.lbt, hex.lft,
+                         hex.rft, hex.rbt);
+
+  shape->defineBoundingBox(std::max(xrb, xrf), yrf, ZDEPTH, std::min(xlf, xlb),
+                           ylb, 0);
+
+  return shape;
 }
 
 /// create a special geometry handler for the known finite primitives

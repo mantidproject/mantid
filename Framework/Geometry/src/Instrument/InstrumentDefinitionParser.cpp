@@ -1,33 +1,33 @@
 #include <fstream>
 #include <sstream>
 
-#include "MantidGeometry/Instrument/InstrumentDefinitionParser.h"
 #include "MantidGeometry/Instrument/Detector.h"
+#include "MantidGeometry/Instrument/InstrumentDefinitionParser.h"
 #include "MantidGeometry/Instrument/ObjCompAssembly.h"
-#include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
+#include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Instrument/StructuredDetector.h"
 #include "MantidGeometry/Instrument/XMLInstrumentParameter.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidGeometry/Rendering/vtkGeometryCacheReader.h"
 #include "MantidGeometry/Rendering/vtkGeometryCacheWriter.h"
-#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/ChecksumHelper.h"
+#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/ProgressBase.h"
-#include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/Strings.h"
+#include "MantidKernel/UnitFactory.h"
 
-#include <Poco/Path.h>
-#include <Poco/String.h>
-#include <Poco/DOM/Document.h>
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/DOMWriter.h>
+#include <Poco/DOM/Document.h>
 #include <Poco/DOM/Element.h>
 #include <Poco/DOM/NodeFilter.h>
 #include <Poco/DOM/NodeIterator.h>
 #include <Poco/DOM/NodeList.h>
+#include <Poco/Path.h>
 #include <Poco/SAX/AttributesImpl.h>
+#include <Poco/String.h>
 
 #include <boost/make_shared.hpp>
 #include <boost/regex.hpp>
@@ -1471,9 +1471,12 @@ void InstrumentDefinitionParser::createStructuredDetector(
     pNode = it.nextNode();
   }
 
+  V3D zVector(0, 0, 1); // Z aligned beam
+  bool isZBeam =
+      m_instrument->getReferenceFrame()->isVectorPointingAlongBeam(zVector);
   // Now, initialize all the pixels in the bank
-  bank->initialize(xpixels, ypixels, xValues, yValues, idstart, idfillbyfirst_y,
-                   idstepbyrow, idstep);
+  bank->initialize(xpixels, ypixels, xValues, yValues, isZBeam, idstart,
+                   idfillbyfirst_y, idstepbyrow, idstep);
 
   // Loop through all detectors in the newly created bank and mark those in
   // the instrument.

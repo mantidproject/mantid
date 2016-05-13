@@ -107,22 +107,9 @@
              </widget>
             </item>
             <item>
-             <spacer name="logSpacer">
-              <property name="orientation">
-               <enum>Qt::Horizontal</enum>
-              </property>
-              <property name="sizeHint" stdset="0">
-               <size>
-                <width>40</width>
-                <height>20</height>
-               </size>
-              </property>
-             </spacer>
-            </item>
-            <item>
              <widget class="QLabel" name="functionLabel">
               <property name="text">
-               <string>Function</string>
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Take log value at&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
               </property>
              </widget>
             </item>
@@ -138,7 +125,7 @@
                <bool>false</bool>
               </property>
               <property name="currentIndex">
-               <number>4</number>
+               <number>0</number>
               </property>
               <item>
                <property name="text">
@@ -166,6 +153,19 @@
                </property>
               </item>
              </widget>
+            </item>
+            <item>
+             <spacer name="logSpacer">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
             </item>
            </layout>
           </item>
