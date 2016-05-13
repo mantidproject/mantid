@@ -897,9 +897,6 @@ std::string
 parseHexahedronFromStruct(Hexahedron &hex,
                           std::map<int, boost::shared_ptr<Surface>> &prim,
                           int &l_id) {
-  V3D pointTowardBack = hex.lbb - hex.lfb;
-  pointTowardBack.normalize();
-
   V3D normal;
 
   // add front face
