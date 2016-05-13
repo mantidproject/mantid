@@ -14,6 +14,11 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/make_unique.h"
 
+#ifdef _MSC_VER
+// Disable double to float warnings in MSVC xutility, for std::copy
+#pragma warning(disable : 2266)
+#endif
+
 namespace Mantid {
 namespace Algorithms {
 
@@ -356,7 +361,7 @@ size_t ImggTomographicReconstruction::ySizeProjections(
  * output from a reconstruction
  * @param xsize image x dimension or number of columns (bins)
  * @param ysize image y dimension or number of rows (spectra)
- * @param projSize number of projections or slices
+ * @param sliceSize number of slices
  *
  * @return a workspace group with reconstruction slices
  */

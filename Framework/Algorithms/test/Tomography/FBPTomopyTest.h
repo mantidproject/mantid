@@ -32,11 +32,11 @@ public:
     const size_t xsize = 8;
     const size_t projSize = numProj * ysize * xsize;
     std::array<float, projSize> projImages;
-    std::fill(projImages.begin(), projImages.end(), 33.0);
+    std::fill(projImages.begin(), projImages.end(), 33.0f);
 
     const size_t reconSize = ysize * ysize * xsize;
     std::array<float, reconSize> reconVol;
-    std::fill(reconVol.begin(), reconVol.end(), 0.0);
+    std::fill(reconVol.begin(), reconVol.end(), 0.0f);
 
     const size_t numAngles = numProj;
     std::array<float, numAngles> angles{0.0, 90.0, 180.0};
@@ -69,18 +69,18 @@ public:
     const size_t xsize = 16;
     const size_t projSize = numProj * ysize * xsize;
     std::array<float, projSize> projImages;
-    std::iota(projImages.begin(), projImages.end(), 0.0);
+    std::iota(projImages.begin(), projImages.end(), 0.0f);
 
     // inconsistent/stressing values
-    std::fill(projImages.begin() + 300, projImages.begin() + 400, 333.0);
-    std::fill(projImages.begin() + 600, projImages.begin() + 850, 999.0);
-    std::fill(projImages.begin() + 990, projImages.begin() + 1100, 1000.0);
-    std::fill(projImages.begin() + 1500, projImages.begin() + 1700, -444.0);
-    std::fill(projImages.begin() + 1900, projImages.begin() + 2000, 765.0);
+    std::fill(projImages.begin() + 300, projImages.begin() + 400, 333.0f);
+    std::fill(projImages.begin() + 600, projImages.begin() + 850, 999.0f);
+    std::fill(projImages.begin() + 990, projImages.begin() + 1100, 1000.0f);
+    std::fill(projImages.begin() + 1500, projImages.begin() + 1700, -444.0f);
+    std::fill(projImages.begin() + 1900, projImages.begin() + 2000, 765.0f);
 
     const size_t reconSize = ysize * ysize * xsize;
     std::array<float, reconSize> reconVol;
-    std::fill(reconVol.begin(), reconVol.end(), 0.0);
+    std::fill(reconVol.begin(), reconVol.end(), 0.0f);
 
     const size_t numAngles = numProj;
     std::array<float, numAngles> angles{0.0,   45.0,  90.0,  135.0,
@@ -88,7 +88,7 @@ public:
 
     const size_t numCenters = ysize;
     std::array<float, numCenters> centers;
-    std::fill(centers.begin(), centers.end(), 7.5);
+    std::fill(centers.begin(), centers.end(), 7.5f);
 
     FBPTomopy(projImages.data(), ysize, numProj, xsize, centers.data(),
               angles.data(), reconVol.data(), xsize, ysize);
