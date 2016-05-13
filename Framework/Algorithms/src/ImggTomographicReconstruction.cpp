@@ -16,7 +16,7 @@
 
 #ifdef _MSC_VER
 // Disable double to float warnings in MSVC xutility, for std::copy
-#pragma warning(disable : 2266)
+#pragma warning(disable : 4244)
 #endif
 
 namespace Mantid {
