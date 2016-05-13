@@ -48,7 +48,7 @@ Open MantidPlot, and open the ISIS Reflectometry (Polref) interface.
 **Interfaces -> Reflectometry -> ISIS Reflectometry (Polref)**
 
 Within the interface, we first want to import the tbl file as a TableWorkspace.
-To do this, click on **Reflectometry -> Import .TBL**. A :ref:`LoadReflTBL <algm-LoadReflTBL>`
+To do this, click on **Reflectometry -> Import .TBL**. A :ref:`LoadReflTBL <algm-LoadTBL>`
 dialog will open. Select ``INTER_NR_test2.tbl`` as the file, and enter ``MyTable``
 as the output workspace.
 
@@ -56,12 +56,14 @@ A table workspace called ``MyTable`` should now exist in the ADS (:ref:`Analysis
 To open the table workspace go to **Reflectometry -> Open Table -> MyTable**.
 The processing table (shown below) should now contain four rows (13460, 13462, 13469, 13470).
 
-.. interface:: ISIS Reflectometry (Polref)
-  :widget: viewTable
+.. figure:: /images/ISISReflectometryPolref_INTER_table.JPG
+  :align: center
 
 Let's process the first group, which consists of the first two rows of the
 table (13460 and 13462). The simplest way to do this is simply to select the
-two rows we want to process, and then click on **Process**.
+two rows we want to process, and then click on **Process**. Note that for the reduction
+to be successful, at least the bin size must be specified to :ref:`Stitch1DMany <algm-Stitch1DMany>`,
+as shown above.
 
 .. tip::
   If you receive an error, consult the `Troubleshooting`_ section of this document for guidance on fixing it.
@@ -118,11 +120,11 @@ The **Reflectometry** menu provides access to the following functionality:
 | Save Table As    | Saves the current contents of the `Processing Table`_ to |
 |                  | a new *TableWorkspace*.                                  |
 +------------------+----------------------------------------------------------+
-| Import .TBL      | Opens a :ref:`LoadReflTBL <algm-LoadReflTBL>` dialog,    |
+| Import .TBL      | Opens a :ref:`LoadReflTBL <algm-LoadTBL>` dialog,        |
 |                  | enabling you to load a ``.tbl`` file into a              |
 |                  | *TableWorkspace*.                                        |
 +------------------+----------------------------------------------------------+
-| Export .TBL      | Opens a :ref:`SaveReflTBL <algm-SaveReflTBL>` dialog,    |
+| Export .TBL      | Opens a :ref:`SaveTBL <algm-SaveTBL>` dialog,            |
 |                  | enabling you to save a *TableWorkspace* to a ``.tbl``    |
 |                  | file.                                                    |
 +------------------+----------------------------------------------------------+
@@ -151,10 +153,28 @@ Each row represents a single reduction (i.e. execution of
 :ref:`ReflectometryReductionOne <algm-ReflectometryReductionOne>`).
 Rows may be grouped together by setting their **Group** column to the same
 value. Rows that are grouped together will have their output stitched
-together using :ref:`Stitch1D <algm-Stitch1D>`.
+together using :ref:`Stitch1DMany <algm-Stitch1DMany>`.
 
 Above the processing table is a tool bar containing various actions for
 manipulating the processing table.
+
+Below the table is a section showing the algorithms used by the interface to reduce the data. For
+each of them, there is a text box allowing the specification of pre-processing,
+processing and post-processing options. Pre-processing options refer to the algorithms :ref:`Plus <algm-Plus>` (applied
+to the **Run(s)** column when multiple runs are specified) and :ref:`CreateTransmissionWorkspaceAuto <algm-CreateTransmissionWorkspaceAuto>`
+(applied to **Transmission Run(s)**). Options to the main reduction algorithm,
+:ref:`ReflectometryReductionOne <algm-ReflectometryReductionOne>`, can also be
+supplied using the corresponding text box. Note that when conflicting options are specified
+for the reduction, i.e. different values for the same property are specified via this
+text box and the **Options** column (see description below), the latter will prevail. Therefore,
+the **ReflectometryReductionOneAuto** text box should be used to specify global options that will be
+applied to all the rows in the table, whereas the **Options** column will only be applicable
+to the specific row for which those options are defined. Finally, post-processing instructions,
+i.e. instructions to :ref:`Stitch1DMany <algm-Stitch1DMany>`, can also be supplied similarly (note
+that at least a bin width must be specified for this algorithm to run successfully, for instance *Params="-0.03"*). Pre-processing,
+processing and post-processing options are specified in ``key=value`` pairs separated by commas.
+Values containing commas must be quoted.
+
 
 Below the table is a progress bar, which shows the current progress of any
 processing that is in progress. And at the bottom, near the **Process**
@@ -166,25 +186,6 @@ disabling output to an ipython notebook. If the checkbox is enabled, a dialog
 window will ask for a save location for the notebook after processing is 
 complete. A generated notebook contains python code to repeat the processing 
 steps and output relevant plots.
-
-Processing Options
-~~~~~~~~~~~~~~~~~~
-
-This section allows the specification of pre-processing, processing and post-processing
-options. Pre-processing options refer to the algorithms :ref:`Plus <algm-Plus>` (applied
-to the **Run(s)** column) and :ref:`CreateTransmissionWorkspaceAuto <algm-CreateTransmissionWorkspaceAuto>`
-(applied to **Transmission Run(s)**). Options to the reduction algorithm,
-:ref:`ReflectometryReductionOne <algm-ReflectometryReductionOne>`, can also be
-supplied using the corresponding text box. Note that when conflicting options are specified
-for the reduction, i.e. different values for the same property are specified via this
-text box and the **Options** column (see description below), the latter will prevail. Therefore,
-the **ReflectometryReductionOneAuto** text box should be used to specify global options that will be
-applied to all the rows in the table, whereas the **Options** column will only be applicable
-to the specific row for which those options are defined. Finally, post-processing instructions,
-i.e. instructions to :ref:`Stitch1DMany <algm-Stitch1DMany>`, can also be supplied similarly.
-
-Pre-processing, processing and post-processing options are specified in ``key=value``
-pairs separated by commas. Values containing commas must be quoted.
 
 Tool Bar
 ~~~~~~~~
