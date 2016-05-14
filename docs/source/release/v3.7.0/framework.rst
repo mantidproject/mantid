@@ -162,6 +162,8 @@ Python
 
 - The plot() function of mantidplot.pyplot now supports empty marker (marker=None).
 
+- V3D is now iterable in Python, which makes it possible to easily construct numpy arrays like this ``np.array(V3D(1,2, 3))``.
+
 Python Algorithms
 #################
 
