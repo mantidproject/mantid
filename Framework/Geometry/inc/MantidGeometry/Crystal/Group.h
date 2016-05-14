@@ -169,6 +169,9 @@ public:
 
   std::vector<Kernel::V3D> operator*(const Kernel::V3D &vector) const;
 
+  bool isInvariant(const Kernel::DblMatrix &tensor,
+                   double tolerance = 1e-8) const;
+
   bool operator==(const Group &other) const;
   bool operator!=(const Group &other) const;
 
@@ -212,8 +215,8 @@ create(const std::vector<SymmetryOperation> &symmetryOperations) {
 }
 }
 
-MANTID_GEOMETRY_DLL Group_const_sptr
-operator*(const Group_const_sptr &lhs, const Group_const_sptr &rhs);
+MANTID_GEOMETRY_DLL Group_const_sptr operator*(const Group_const_sptr &lhs,
+                                               const Group_const_sptr &rhs);
 MANTID_GEOMETRY_DLL std::vector<Kernel::V3D>
 operator*(const Group_const_sptr &lhs, const Kernel::V3D &rhs);
 MANTID_GEOMETRY_DLL bool operator==(const Group_const_sptr &lhs,
