@@ -36,24 +36,24 @@ private:
     whitelist.addElement("Options", "Options");
     return whitelist;
   }
-  std::map<std::string, DataPreprocessorAlgorithm>
+  std::map<std::string, DataProcessorPreprocessingAlgorithm>
   createReflectometryPreprocessMap(const std::string &plusPrefix = "") {
 
     // Reflectometry pre-process map
-    return std::map<std::string, DataPreprocessorAlgorithm>{
-        {"Run(s)", DataPreprocessorAlgorithm("Plus", plusPrefix,
-                                             std::set<std::string>())},
+    return std::map<std::string, DataProcessorPreprocessingAlgorithm>{
+        {"Run(s)", DataProcessorPreprocessingAlgorithm(
+                       "Plus", plusPrefix, std::set<std::string>())},
         {"Transmission Run(s)",
-         DataPreprocessorAlgorithm(
+         DataProcessorPreprocessingAlgorithm(
              "CreateTransmissionWorkspaceAuto", "TRANS_",
              std::set<std::string>{"FirstTransmissionRun",
                                    "SecondTransmissionRun", "OutputWorkspace"},
              false)}};
   }
 
-  DataProcessorAlgorithm createReflectometryProcessor() {
+  DataProcessorProcessingAlgorithm createReflectometryProcessor() {
 
-    return DataProcessorAlgorithm(
+    return DataProcessorProcessingAlgorithm(
         "ReflectometryReductionOneAuto",
         std::vector<std::string>{"IvsQ_", "IvsLam_"},
         std::set<std::string>{"ThetaIn", "ThetaOut", "InputWorkspace",
@@ -172,8 +172,8 @@ public:
 
     auto notebook = Mantid::Kernel::make_unique<DataProcessorGenerateNotebook>(
         m_wsName, m_model, m_instrument, createReflectometryWhiteList(),
-        std::map<std::string, DataPreprocessorAlgorithm>(),
-        createReflectometryProcessor(), DataPostprocessorAlgorithm(),
+        std::map<std::string, DataProcessorPreprocessingAlgorithm>(),
+        createReflectometryProcessor(), DataProcessorPostprocessingAlgorithm(),
         std::map<std::string, std::string>(), "", "");
 
     std::string generatedNotebook =
@@ -300,7 +300,7 @@ public:
     boost::tuple<std::string, std::string> output = postprocessGroupString(
         m_rows, m_model, createReflectometryWhiteList(),
         createReflectometryPreprocessMap(), createReflectometryProcessor(),
-        DataPostprocessorAlgorithm(), userOptions);
+        DataProcessorPostprocessingAlgorithm(), userOptions);
 
     const std::string result[] = {
         "#Post-process workspaces",

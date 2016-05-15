@@ -1,7 +1,7 @@
 #include "MantidQtCustomInterfaces/Reflectometry/ReflGenericDataProcessorPresenterFactory.h"
-#include "MantidQtCustomInterfaces/Reflectometry/DataPostprocessorAlgorithm.h"
-#include "MantidQtCustomInterfaces/Reflectometry/DataPreprocessorAlgorithm.h"
-#include "MantidQtCustomInterfaces/Reflectometry/DataProcessorAlgorithm.h"
+#include "MantidQtCustomInterfaces/Reflectometry/DataProcessorPostprocessingAlgorithm.h"
+#include "MantidQtCustomInterfaces/Reflectometry/DataProcessorPreprocessingAlgorithm.h"
+#include "MantidQtCustomInterfaces/Reflectometry/DataProcessorProcessingAlgorithm.h"
 #include "MantidQtCustomInterfaces/Reflectometry/DataProcessorWhiteList.h"
 
 namespace MantidQt {
@@ -66,7 +66,7 @@ namespace CustomInterfaces {
         "the value of this column. <br /><br /><b>Example:</b> <samp>1</samp>");
 
     // The data processor algorithm
-    DataProcessorAlgorithm processor(
+    DataProcessorProcessingAlgorithm processor(
         /*The name of the algorithm */
         "ReflectometryReductionOneAuto",
         /*Prefixes to the output workspaces*/
@@ -81,14 +81,14 @@ namespace CustomInterfaces {
     // Pre-processing instructions as a map:
     // Keys are the column names
     // Values are the associated pre-processing algorithms
-    std::map<std::string, DataPreprocessorAlgorithm> preprocessMap = {
+    std::map<std::string, DataProcessorPreprocessingAlgorithm> preprocessMap = {
         /*This pre-processor will be applied to column 'Run(s)'*/
         {/*The name of the column*/ "Run(s)",
-         /*The pre-processor algorithm, 'Plus' by default*/ DataPreprocessorAlgorithm()},
+         /*The pre-processor algorithm, 'Plus' by default*/ DataProcessorPreprocessingAlgorithm()},
         /*This pre-processor will be applied to column 'Transmission Run(s)'*/
         {/*The name of the column*/ "Transmission Run(s)",
          /*The pre-processor algorithm: CreateTransmissionWorkspaceAuto*/
-         DataPreprocessorAlgorithm(
+         DataProcessorPreprocessingAlgorithm(
              "CreateTransmissionWorkspaceAuto",
              /*Prefix for the output workspace*/
              "TRANS_",
@@ -100,7 +100,7 @@ namespace CustomInterfaces {
              false)}};
 
     // The post-processor algorithm's name, 'Stitch1DMany' by default
-    DataPostprocessorAlgorithm postprocessor;
+    DataProcessorPostprocessingAlgorithm postprocessor;
 
     return boost::make_shared<GenericDataProcessorPresenter>(
         whitelist, preprocessMap, processor, postprocessor);

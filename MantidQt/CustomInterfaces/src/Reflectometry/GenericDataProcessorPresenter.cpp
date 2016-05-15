@@ -58,15 +58,16 @@ namespace CustomInterfaces {
 * Constructor
 * @param whitelist : The set of properties we want to show as columns
 * @param preprocessMap : A map containing instructions for pre-processing
-* @param processor : A DataProcessorAlgorithm
-* @param postprocessor : A DataPostprocessorAlgorithm
+* @param processor : A DataProcessorProcessingAlgorithm
+* @param postprocessor : A DataProcessorPostprocessingAlgorithm
 * workspaces
 */
 GenericDataProcessorPresenter::GenericDataProcessorPresenter(
     const DataProcessorWhiteList &whitelist,
-    const std::map<std::string, DataPreprocessorAlgorithm> &preprocessMap,
-    const DataProcessorAlgorithm &processor,
-    const DataPostprocessorAlgorithm &postprocessor)
+    const std::map<std::string, DataProcessorPreprocessingAlgorithm> &
+        preprocessMap,
+    const DataProcessorProcessingAlgorithm &processor,
+    const DataProcessorPostprocessingAlgorithm &postprocessor)
     : WorkspaceObserver(), m_whitelist(whitelist),
       m_preprocessMap(preprocessMap), m_processor(processor),
       m_postprocessor(postprocessor), m_tableDirty(false) {
@@ -547,7 +548,8 @@ desired workspace
 @returns a shared pointer to the workspace
 */
 Workspace_sptr GenericDataProcessorPresenter::prepareRunWorkspace(
-    const std::string &runStr, const DataPreprocessorAlgorithm &preprocessor,
+    const std::string &runStr,
+    const DataProcessorPreprocessingAlgorithm &preprocessor,
     const std::map<std::string, std::string> &optionsMap) {
   const std::string instrument = m_view->getProcessInstrument();
 

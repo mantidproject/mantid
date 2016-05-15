@@ -257,7 +257,7 @@ void QtReflMainView::showSearchContextMenu(const QPoint &pos) {
  */
 void QtReflMainView::instrumentChanged(int index) {
   m_calculator->setCurrentInstrumentName(
-      ui.comboSearchInstrument->currentText().toStdString());
+      ui.comboSearchInstrument->itemText(index).toStdString());
   m_calculator->processInstrumentHasBeenChanged();
 }
 

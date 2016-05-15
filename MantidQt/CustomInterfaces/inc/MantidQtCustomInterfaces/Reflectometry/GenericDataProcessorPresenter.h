@@ -4,9 +4,9 @@
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidQtAPI/WorkspaceObserver.h"
 #include "MantidQtCustomInterfaces/DllConfig.h"
-#include "MantidQtCustomInterfaces/Reflectometry/DataPostprocessorAlgorithm.h"
-#include "MantidQtCustomInterfaces/Reflectometry/DataPreprocessorAlgorithm.h"
-#include "MantidQtCustomInterfaces/Reflectometry/DataProcessorAlgorithm.h"
+#include "MantidQtCustomInterfaces/Reflectometry/DataProcessorPostprocessingAlgorithm.h"
+#include "MantidQtCustomInterfaces/Reflectometry/DataProcessorPreprocessingAlgorithm.h"
+#include "MantidQtCustomInterfaces/Reflectometry/DataProcessorProcessingAlgorithm.h"
 #include "MantidQtCustomInterfaces/Reflectometry/DataProcessorPresenter.h"
 #include "MantidQtCustomInterfaces/Reflectometry/DataProcessorView.h"
 #include "MantidQtCustomInterfaces/Reflectometry/DataProcessorWhiteList.h"
@@ -50,9 +50,10 @@ class MANTIDQT_CUSTOMINTERFACES_DLL GenericDataProcessorPresenter
 public:
   GenericDataProcessorPresenter(
       const DataProcessorWhiteList &whitelist,
-      const std::map<std::string, DataPreprocessorAlgorithm> &preprocessMap,
-      const DataProcessorAlgorithm &processor,
-      const DataPostprocessorAlgorithm &postprocessor);
+      const std::map<std::string, DataProcessorPreprocessingAlgorithm> &
+          preprocessMap,
+      const DataProcessorProcessingAlgorithm &processor,
+      const DataProcessorPostprocessingAlgorithm &postprocessor);
   ~GenericDataProcessorPresenter() override;
   void notify(DataProcessorPresenter::Flag flag) override;
   const std::map<std::string, QVariant> &options() const override;
@@ -83,11 +84,11 @@ protected:
   // The whitelist
   DataProcessorWhiteList m_whitelist;
   // The pre-processing instructions
-  std::map<std::string, DataPreprocessorAlgorithm> m_preprocessMap;
+  std::map<std::string, DataProcessorPreprocessingAlgorithm> m_preprocessMap;
   // The data processor algorithm
-  DataProcessorAlgorithm m_processor;
+  DataProcessorProcessingAlgorithm m_processor;
   // Post-processing algorithm
-  DataPostprocessorAlgorithm m_postprocessor;
+  DataProcessorPostprocessingAlgorithm m_postprocessor;
   // The number of columns
   int m_columns;
   // A workspace receiver we want to notify
@@ -107,7 +108,7 @@ protected:
   // prepare a run or list of runs for processing
   Mantid::API::Workspace_sptr
   prepareRunWorkspace(const std::string &run,
-                      const DataPreprocessorAlgorithm &alg,
+                      const DataProcessorPreprocessingAlgorithm &alg,
                       const std::map<std::string, std::string> &optionsMap);
   // Get the workspace name for a given row
   std::string getWorkspaceName(int row, bool prefix = true);

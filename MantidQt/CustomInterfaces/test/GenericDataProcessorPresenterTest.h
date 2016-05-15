@@ -58,23 +58,22 @@ private:
     return whitelist;
   }
 
-  std::map<std::string, DataPreprocessorAlgorithm>
+  std::map<std::string, DataProcessorPreprocessingAlgorithm>
   createReflectometryPreprocessMap() {
 
-    return std::map<std::string, DataPreprocessorAlgorithm>{
-        {"Run(s)", DataPreprocessorAlgorithm()},
+    return std::map<std::string, DataProcessorPreprocessingAlgorithm>{
+        {"Run(s)", DataProcessorPreprocessingAlgorithm()},
         {"Transmission Run(s)",
-         DataPreprocessorAlgorithm(
-             "CreateTransmissionWorkspaceAuto",
-             "TRANS_",
+         DataProcessorPreprocessingAlgorithm(
+             "CreateTransmissionWorkspaceAuto", "TRANS_",
              std::set<std::string>{"FirstTransmissionRun",
                                    "SecondTransmissionRun", "OutputWorkspace"},
              false)}};
   }
 
-  DataProcessorAlgorithm createReflectometryProcessor() {
+  DataProcessorProcessingAlgorithm createReflectometryProcessor() {
 
-    return DataProcessorAlgorithm(
+    return DataProcessorProcessingAlgorithm(
         "ReflectometryReductionOneAuto",
         std::vector<std::string>{"IvsQ_", "IvsLam_"},
         std::set<std::string>{"ThetaIn", "ThetaOut", "InputWorkspace",
@@ -82,9 +81,9 @@ private:
                               "FirstTransmissionRun", "SecondTransmissionRun"});
   }
 
-  DataPostprocessorAlgorithm createReflectometryPostprocessor() {
+  DataProcessorPostprocessingAlgorithm createReflectometryPostprocessor() {
 
-    return DataPostprocessorAlgorithm();
+    return DataProcessorPostprocessingAlgorithm();
   }
 
   ITableWorkspace_sptr

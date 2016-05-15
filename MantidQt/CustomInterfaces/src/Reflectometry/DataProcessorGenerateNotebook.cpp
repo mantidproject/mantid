@@ -52,9 +52,10 @@ specified via the corresponding hinting line edit in the view
 DataProcessorGenerateNotebook::DataProcessorGenerateNotebook(
     std::string name, QDataProcessorTableModel_sptr model,
     const std::string instrument, const DataProcessorWhiteList &whitelist,
-    const std::map<std::string, DataPreprocessorAlgorithm> &preprocessMap,
-    const DataProcessorAlgorithm &processor,
-    const DataPostprocessorAlgorithm &postprocessor,
+    const std::map<std::string, DataProcessorPreprocessingAlgorithm> &
+        preprocessMap,
+    const DataProcessorProcessingAlgorithm &processor,
+    const DataProcessorPostprocessingAlgorithm &postprocessor,
     const std::map<std::string, std::string> preprocessingOptionsMap,
     const std::string processingOptions,
     const std::string postprocessingOptions)
@@ -165,7 +166,7 @@ std::string titleString(const std::string &wsName) {
   */
 std::string plotsString(const std::vector<std::string> &output_ws,
                         const std::string &stitched_wsStr,
-                        const DataProcessorAlgorithm &processor) {
+                        const DataProcessorProcessingAlgorithm &processor) {
 
   std::ostringstream plot_string;
 
@@ -289,9 +290,10 @@ std::string tableString(QDataProcessorTableModel_sptr model,
 boost::tuple<std::string, std::string> postprocessGroupString(
     const std::set<int> &rows, QDataProcessorTableModel_sptr model,
     const DataProcessorWhiteList &whitelist,
-    const std::map<std::string, DataPreprocessorAlgorithm> &preprocessMap,
-    const DataProcessorAlgorithm &processor,
-    const DataPostprocessorAlgorithm &postprocessor,
+    const std::map<std::string, DataProcessorPreprocessingAlgorithm> &
+        preprocessMap,
+    const DataProcessorProcessingAlgorithm &processor,
+    const DataProcessorPostprocessingAlgorithm &postprocessor,
     const std::string &postprocessingOptions) {
   std::ostringstream stitch_string;
 
@@ -367,8 +369,9 @@ std::string plot1DString(const std::vector<std::string> &ws_names) {
 std::string getWorkspaceName(
     int rowNo, QDataProcessorTableModel_sptr model,
     const DataProcessorWhiteList &whitelist,
-    const std::map<std::string, DataPreprocessorAlgorithm> &preprocessMap,
-    const DataProcessorAlgorithm &processor, bool prefix) {
+    const std::map<std::string, DataProcessorPreprocessingAlgorithm> &
+        preprocessMap,
+    const DataProcessorProcessingAlgorithm &processor, bool prefix) {
 
   // The name of the output workspaces, e.g. 'TOF_13462', 'TRANS_13463', etc
   std::vector<std::string> workspaceNames;
@@ -428,8 +431,9 @@ boost::tuple<std::string, std::string> reduceRowString(
     const int rowNo, const std::string &instrument,
     QDataProcessorTableModel_sptr model,
     const DataProcessorWhiteList &whitelist,
-    const std::map<std::string, DataPreprocessorAlgorithm> &preprocessMap,
-    const DataProcessorAlgorithm &processor,
+    const std::map<std::string, DataProcessorPreprocessingAlgorithm> &
+        preprocessMap,
+    const DataProcessorProcessingAlgorithm &processor,
     const std::map<std::string, std::string> &preprocessingOptionsMap,
     const std::string &processingOptions) {
 
@@ -464,7 +468,7 @@ boost::tuple<std::string, std::string> reduceRowString(
         // Some runs were given for pre-processing
 
         // The pre-processing alg
-        const DataPreprocessorAlgorithm preprocessor =
+        const DataProcessorPreprocessingAlgorithm preprocessor =
             preprocessMap.at(colName);
         // The pre-processing options
         const std::string options = preprocessingOptionsMap.at(colName);
@@ -552,7 +556,7 @@ boost::tuple<std::string, std::string> reduceRowString(
 */
 boost::tuple<std::string, std::string>
 loadWorkspaceString(const std::string &runStr, const std::string &instrument,
-                    const DataPreprocessorAlgorithm &preprocessor,
+                    const DataProcessorPreprocessingAlgorithm &preprocessor,
                     const std::string &options) {
 
   std::vector<std::string> runs;
@@ -599,7 +603,7 @@ loadWorkspaceString(const std::string &runStr, const std::string &instrument,
 */
 std::string plusString(const std::string &input_name,
                        const std::string &output_name,
-                       const DataPreprocessorAlgorithm &preprocessor,
+                       const DataProcessorPreprocessingAlgorithm &preprocessor,
                        const std::string &options) {
   std::ostringstream plus_string;
 

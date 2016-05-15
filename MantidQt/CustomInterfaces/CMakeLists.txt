@@ -82,10 +82,10 @@ set ( SRC_FILES
 	src/Muon/MuonAnalysisOptionTab.cpp
 	src/Muon/MuonAnalysisResultTableTab.cpp
 	src/ParseKeyValueString.cpp
-	src/Reflectometry/DataPostprocessorAlgorithm.cpp
-	src/Reflectometry/DataPreprocessorAlgorithm.cpp
-	src/Reflectometry/DataProcessorAlgorithm.cpp
-	src/Reflectometry/DataProcessorAlgorithmBase.cpp
+	src/Reflectometry/DataProcessorPostprocessingAlgorithm.cpp
+	src/Reflectometry/DataProcessorPreprocessingAlgorithm.cpp
+	src/Reflectometry/DataProcessorProcessingAlgorithm.cpp
+	src/Reflectometry/DataProcessorProcessingAlgorithmBase.cpp
 	src/Reflectometry/DataProcessorGenerateNotebook.cpp
 	src/Reflectometry/DataProcessorWhiteList.cpp
 	src/Reflectometry/GenericDataProcessorPresenter.cpp
@@ -233,10 +233,10 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/Muon/MuonAnalysisResultTableTab.h
 	inc/MantidQtCustomInterfaces/ParseKeyValueString.h
 	inc/MantidQtCustomInterfaces/ProgressableView.h
-	inc/MantidQtCustomInterfaces/Reflectometry/DataPostprocessorAlgorithm.h
-	inc/MantidQtCustomInterfaces/Reflectometry/DataPreprocessorAlgorithm.h
-	inc/MantidQtCustomInterfaces/Reflectometry/DataProcessorAlgorithm.h
-	inc/MantidQtCustomInterfaces/Reflectometry/DataProcessorAlgorithmBase.h
+	inc/MantidQtCustomInterfaces/Reflectometry/DataProcessorPostprocessingAlgorithm.h
+	inc/MantidQtCustomInterfaces/Reflectometry/DataProcessorPreprocessingAlgorithm.h
+	inc/MantidQtCustomInterfaces/Reflectometry/DataProcessorProcessingAlgorithm.h
+	inc/MantidQtCustomInterfaces/Reflectometry/DataProcessorProcessingAlgorithmBase.h
 	inc/MantidQtCustomInterfaces/Reflectometry/DataProcessorAppendRowCommand.h
 	inc/MantidQtCustomInterfaces/Reflectometry/DataProcessorClearSelectedCommand.h
 	inc/MantidQtCustomInterfaces/Reflectometry/DataProcessorCommand.h
@@ -516,10 +516,10 @@ set ( TEST_FILES
 	ALCLatestFileFinderTest.h
 	ALCPeakFittingModelTest.h
 	ALCPeakFittingPresenterTest.h
-	DataPostprocessorAlgorithmTest.h
-	DataPreprocessorAlgorithmTest.h
-	DataProcessorAlgorithmBaseTest.h
-	DataProcessorAlgorithmTest.h
+	DataProcessorPostprocessingAlgorithmTest.h
+	DataProcessorPreprocessingAlgorithmTest.h
+	DataProcessorProcessingAlgorithmBaseTest.h
+	DataProcessorProcessingAlgorithmTest.h
 	DataProcessorCommandsTest.h
 	DataProcessorGenerateNotebookTest.h
 	DataProcessorWhiteListTest.h

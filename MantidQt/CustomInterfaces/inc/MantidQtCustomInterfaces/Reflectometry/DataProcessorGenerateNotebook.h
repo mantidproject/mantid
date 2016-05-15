@@ -29,9 +29,9 @@
     */
 
 #include "MantidKernel/System.h"
-#include "MantidQtCustomInterfaces/Reflectometry/DataPostprocessorAlgorithm.h"
-#include "MantidQtCustomInterfaces/Reflectometry/DataPreprocessorAlgorithm.h"
-#include "MantidQtCustomInterfaces/Reflectometry/DataProcessorAlgorithm.h"
+#include "MantidQtCustomInterfaces/Reflectometry/DataProcessorPostprocessingAlgorithm.h"
+#include "MantidQtCustomInterfaces/Reflectometry/DataProcessorPreprocessingAlgorithm.h"
+#include "MantidQtCustomInterfaces/Reflectometry/DataProcessorProcessingAlgorithm.h"
 #include "MantidQtCustomInterfaces/Reflectometry/DataProcessorWhiteList.h"
 #include "MantidQtCustomInterfaces/Reflectometry/QDataProcessorTableModel.h"
 
@@ -56,42 +56,45 @@ std::string DLLExport tableString(QDataProcessorTableModel_sptr model,
 std::string DLLExport titleString(const std::string &wsName);
 
 boost::tuple<std::string, std::string> DLLExport postprocessGroupString(
-    const std::set<int> &rows,
-    QDataProcessorTableModel_sptr model,
+    const std::set<int> &rows, QDataProcessorTableModel_sptr model,
     const DataProcessorWhiteList &whitelist,
-    const std::map<std::string, DataPreprocessorAlgorithm> &preprocessMap,
-    const DataProcessorAlgorithm &processor,
-    const DataPostprocessorAlgorithm &postprocessor,
+    const std::map<std::string, DataProcessorPreprocessingAlgorithm> &
+        preprocessMap,
+    const DataProcessorProcessingAlgorithm &processor,
+    const DataProcessorPostprocessingAlgorithm &postprocessor,
     const std::string &postprocessingOptions);
 
-std::string DLLExport plotsString(const std::vector<std::string> &output_ws,
-                                  const std::string &stitched_wsStr,
-                                  const DataProcessorAlgorithm &processor);
+std::string DLLExport
+plotsString(const std::vector<std::string> &output_ws,
+            const std::string &stitched_wsStr,
+            const DataProcessorProcessingAlgorithm &processor);
 
 std::string DLLExport getWorkspaceName(
     int rowNo, QDataProcessorTableModel_sptr model,
     const DataProcessorWhiteList &whitelist,
-    const std::map<std::string, DataPreprocessorAlgorithm> &preprocessMap,
-    const DataProcessorAlgorithm &processor, bool prefix);
+    const std::map<std::string, DataProcessorPreprocessingAlgorithm> &
+        preprocessMap,
+    const DataProcessorProcessingAlgorithm &processor, bool prefix);
 
 boost::tuple<std::string, std::string> DLLExport reduceRowString(
     const int rowNo, const std::string &instrument,
     QDataProcessorTableModel_sptr model,
     const DataProcessorWhiteList &whitelist,
-    const std::map<std::string, DataPreprocessorAlgorithm> &preprocessMap,
-    const DataProcessorAlgorithm &processor,
+    const std::map<std::string, DataProcessorPreprocessingAlgorithm> &
+        preprocessMap,
+    const DataProcessorProcessingAlgorithm &processor,
     const std::map<std::string, std::string> &preprocessOoptionsMap,
     const std::string &processingOptions);
 
 boost::tuple<std::string, std::string>
 loadWorkspaceString(const std::string &runStr, const std::string &instrument,
-                    const DataPreprocessorAlgorithm &preprocessor,
+                    const DataProcessorPreprocessingAlgorithm &preprocessor,
                     const std::string &options);
 
-std::string DLLExport plusString(const std::string &input_name,
-                                 const std::string &output_name,
-                                 const DataPreprocessorAlgorithm &preprocessor,
-                                 const std::string &options);
+std::string DLLExport
+plusString(const std::string &input_name, const std::string &output_name,
+           const DataProcessorPreprocessingAlgorithm &preprocessor,
+           const std::string &options);
 
 boost::tuple<std::string, std::string>
     DLLExport loadRunString(const std::string &run,
@@ -107,9 +110,10 @@ public:
   DataProcessorGenerateNotebook(
       std::string name, QDataProcessorTableModel_sptr model,
       const std::string instrument, const DataProcessorWhiteList &whitelist,
-      const std::map<std::string, DataPreprocessorAlgorithm> &preprocessMap,
-      const DataProcessorAlgorithm &processor,
-      const DataPostprocessorAlgorithm &postprocessor,
+      const std::map<std::string, DataProcessorPreprocessingAlgorithm> &
+          preprocessMap,
+      const DataProcessorProcessingAlgorithm &processor,
+      const DataProcessorPostprocessingAlgorithm &postprocessor,
       const std::map<std::string, std::string> preprocessingInstructionsMap,
       const std::string processingInstructions,
       const std::string postprocessingInstructions);
@@ -130,11 +134,11 @@ private:
   DataProcessorWhiteList m_whitelist;
   // The map indicating the columns that were pre-processed and their
   // corresponding pre-processing algorithms
-  std::map<std::string, DataPreprocessorAlgorithm> m_preprocessMap;
+  std::map<std::string, DataProcessorPreprocessingAlgorithm> m_preprocessMap;
   // The processing (reduction) algorithm
-  DataProcessorAlgorithm m_processor;
+  DataProcessorProcessingAlgorithm m_processor;
   // The post-processing algorithm
-  DataPostprocessorAlgorithm m_postprocessor;
+  DataProcessorPostprocessingAlgorithm m_postprocessor;
   // A map containing pre-processing instructions displayed in the view via
   // hinting line edits
   std::map<std::string, std::string> m_preprocessingOptionsMap;
