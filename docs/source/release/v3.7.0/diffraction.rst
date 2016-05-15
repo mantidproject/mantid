@@ -24,6 +24,7 @@ Crystal Improvements
 - :ref:`LoadHKL <algm-LoadHKL>` reads hkl output that includes direction cosines.
 - :ref:`SaveIsawPeaks <algm-SaveIsawPeaks>` has DetCal information sorted by detector numbers
 - :ref:`StatisticsOfPeaksWorkspace <algm-StatisticsOfPeaksWorkspace>` has resolution shells in units of d-Spacing.
+- SpaceGroup now has a method to check whether a specified unit cell is compatible with the symmetry operations of the group.
 
 
 Engineering Diffraction
