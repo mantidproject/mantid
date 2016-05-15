@@ -8,7 +8,7 @@ Diffraction Changes
 Documentation
 -------------
 
-- The documentation for all calibration approaches, including Powder diffrction, single crystal and engineering calibrations has been pulled together, and expanded :ref:`here<Calibration>`.
+- The documentation for all calibration approaches, including Powder diffraction, single crystal and engineering calibrations has been pulled together, and expanded :ref:`here<Calibration>`.
 
 Crystal Improvements
 --------------------
