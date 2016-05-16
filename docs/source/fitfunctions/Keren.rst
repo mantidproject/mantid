@@ -18,7 +18,7 @@ The function is derived in `*Phys Rev B, vol. 50, 14, 10039-42 (1994)* <http://d
 
 where the relaxation rate :math:`\Gamma(t)` is
 
-.. math:: \Gamma(t)t = 2\Delta^2 \frac{\left\{\left(\omega_L^2 + \nu^2\right)\nu x + \left(\omega_L^2-\nu^2\right)\left(1-e^{-\nu x}\cos(\omega_L x)\right) - 2\nu\omega_L e^{-\nu x}\sin(\omega_L x)\right\}}{\left(\omega_L^2 + \nu^2\right)^2
+.. math:: \Gamma(t)t = 2\Delta^2 \frac{\left\{\left(\omega_L^2 + \nu^2\right)\nu x + \left(\omega_L^2-\nu^2\right)\left(1-e^{-\nu x}\cos(\omega_L x)\right) - 2\nu\omega_L e^{-\nu x}\sin(\omega_L x)\right\}}{\left(\omega_L^2 + \nu^2\right)^2}
 
 :math:`A = P_z(0)` is the polarization at time zero, :math:`\nu` is the fluctuation rate
 (inverse correlation time), :math:`Delta` is the distribution width of the local fields 
