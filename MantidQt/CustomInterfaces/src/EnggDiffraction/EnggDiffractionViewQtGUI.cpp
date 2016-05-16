@@ -978,44 +978,12 @@ void EnggDiffractionViewQtGUI::resetFocus() {
   m_uiTabFocus.lineEdit_texture_grouping_file->setText("");
 }
 
-void EnggDiffractionViewQtGUI::writeOutCalibFile(
-    const std::string &outFilename, const std::vector<double> &difc,
-    const std::vector<double> &tzero) {
-  // TODO: this is horrible and should not last much here.
-  // Avoid running Python code
-  // Update this as soon as we have a more stable way of generating IPARM
-  // files
-  // Writes a file doing this:
-  // write_ENGINX_GSAS_iparam_file(output_file, difc, zero, ceria_run=241391,
-  // vanadium_run=236516, template_file=None):
-
-  // this replace is to prevent issues with network drives on windows:
-  const std::string safeOutFname =
-      boost::replace_all_copy(outFilename, "\\", "/");
-  std::string pyCode = "import EnggUtils\n";
-  pyCode += "import os\n";
-  // normalize apparently not needed after the replace, but to be double-safe:
-  pyCode += "GSAS_iparm_fname= os.path.normpath('" + safeOutFname + "')\n";
-  pyCode += "Difcs = []\n";
-  pyCode += "Zeros = []\n";
-  for (size_t i = 0; i < difc.size(); i++) {
-    pyCode +=
-        "Difcs.append(" + boost::lexical_cast<std::string>(difc[i]) + ")\n";
-    pyCode +=
-        "Zeros.append(" + boost::lexical_cast<std::string>(tzero[i]) + ")\n";
-  }
-  pyCode += "EnggUtils.write_ENGINX_GSAS_iparam_file(GSAS_iparm_fname, Difcs, "
-            "Zeros) \n";
-
+std::string
+EnggDiffractionViewQtGUI::enggRunPythonCode(const std::string &pyCode) {
   std::string status =
       runPythonCode(QString::fromStdString(pyCode), false).toStdString();
 
-  // g_log.information()
-  //     << "Saved output calibration file through Python. Status: " << status
-  //     << std::endl;
-  m_logMsgs.push_back(
-      "Run Python code to save output file, with status string: " + status);
-  m_presenter->notify(IEnggDiffractionPresenter::LogMsg);
+  return status;
 }
 
 std::string EnggDiffractionViewQtGUI::askExistingCalibFilename() {
@@ -1579,19 +1547,23 @@ void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::addPeakToList() {
     auto strPeakCentre = stream.str();
 
     auto curExpPeaksList = m_uiTabFitting.lineEdit_fitting_peaks->text();
+    QString comma = ",";
 
     if (!curExpPeaksList.isEmpty()) {
-
+      // when further peak added to list
       std::string expPeakStr = curExpPeaksList.toStdString();
       std::string lastTwoChr = expPeakStr.substr(expPeakStr.size() - 2);
       auto lastChr = expPeakStr.back();
-      char comma = ',';
-      if (lastChr == comma || lastTwoChr == ", ") {
-        curExpPeaksList.append(QString::fromStdString(" " + strPeakCentre));
+      if (lastChr == ',' || lastTwoChr == ", ") {
+        curExpPeaksList.append(QString::fromStdString(strPeakCentre));
       } else {
-        QString comma = ", ";
         curExpPeaksList.append(comma + QString::fromStdString(strPeakCentre));
       }
+      m_uiTabFitting.lineEdit_fitting_peaks->setText(curExpPeaksList);
+    } else {
+      // when new peak given when list is empty
+      curExpPeaksList.append(QString::fromStdString(strPeakCentre));
+      curExpPeaksList.append(comma);
       m_uiTabFitting.lineEdit_fitting_peaks->setText(curExpPeaksList);
     }
   }

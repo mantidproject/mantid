@@ -6,6 +6,9 @@ import mantid.simpleapi as sapi
 
 ENGINX_BANKS = ['', 'North', 'South', 'Both: North, South', '1', '2']
 
+ENGINX_MASK_BIN_MINS = [0, 19930, 39960, 59850, 79930]
+ENGINX_MASK_BIN_MAXS = [5300, 20400, 40450, 62000, 82670]
+
 def default_ceria_expected_peaks():
     """
     Get the list of expected Ceria peaks, which can be a good default for the expected peaks
@@ -65,7 +68,7 @@ def read_in_expected_peaks(filename, expectedGiven):
             expectedPeaksD = sorted(exPeakArray)
 
     else:
-        if 0 == expectedGiven.size:
+        if 0 == len(expectedGiven):
             raise ValueError("No expected peaks were given in the property 'ExpectedPeaks', "
                              "could not get default expected peaks, and 'ExpectedPeaksFromFile' "
                              "was not given either. Cannot continout without a list of expected peaks.")
@@ -326,14 +329,15 @@ def sumSpectra(parent, ws):
 
     return alg.getProperty('OutputWorkspace').value
 
-def write_ENGINX_GSAS_iparam_file(output_file, difc, zero, ceria_run=241391,
-                                  vanadium_run=236516, template_file=None):
+def write_ENGINX_GSAS_iparam_file(output_file, difc, tzero, bank_names=None,
+                                  ceria_run=241391, vanadium_run=236516,
+                                  template_file=None):
     """
     Produces and writes an ENGIN-X instrument parameter file for GSAS
     (in the GSAS iparam format, as partially described in the GSAS
     manual). It simply uses a template (found in template_path) where
-    some values are replaced with the values (difc, zero) passed to
-    this function.
+    some values are replaced with the values (difc, tzero) passed to
+    this function. DIFA is fixed to 0.
 
     Possible extensions for the file are .par (used here as default),
     .prm, .ipar, etc.
@@ -341,8 +345,8 @@ def write_ENGINX_GSAS_iparam_file(output_file, difc, zero, ceria_run=241391,
     @param output_file :: name of the file where to write the output
     @param difc :: list of DIFC values, one per bank, to pass on to GSAS
                    (as produced by EnggCalibrate)
-    @param zero :: list of TZERO values, one per bank, to pass on to GSAS
-                   (also from EnggCalibrate)
+    @param tzero :: list of TZERO values, one per bank, to pass on to GSAS
+                    (also from EnggCalibrate)
     @param ceria_run :: number of the ceria (CeO2) run used for this calibration.
                         this number goes in the file and should also be used to
                         name the file
@@ -354,17 +358,20 @@ def write_ENGINX_GSAS_iparam_file(output_file, difc, zero, ceria_run=241391,
     @returns
 
     """
-    if not isinstance(difc, list) or not isinstance(zero, list):
-        raise ValueError("The parameters difc and zero must be lists, with as many elements as "
+    if not isinstance(difc, list) or not isinstance(tzero, list):
+        raise ValueError("The parameters difc and tzero must be lists, with as many elements as "
                          "banks")
 
-    if len(difc) != len(zero):
-        raise ValueError("The lengths of the difc and zero lists must be the same")
+    if len(difc) != len(tzero):
+        raise ValueError("The lengths of the difc and tzero lists must be the same")
 
+    # Defaults for a "both banks" file
     if not template_file:
-        import os
-        template_file = os.path.join(os.path.dirname(__file__),
-                                     'template_ENGINX_241391_236516_North_and_South_banks.par')
+        template_file = 'template_ENGINX_241391_236516_North_and_South_banks.prm'
+    import os
+    template_file = os.path.join(os.path.dirname(__file__), template_file)
+    if not bank_names:
+        bank_names = ["North", "South"]
 
     temp_lines = []
     with open(template_file) as tf:
@@ -386,13 +393,13 @@ def write_ENGINX_GSAS_iparam_file(output_file, difc, zero, ceria_run=241391,
     # - instrument constants/parameters (ICONS)
     # - instrument calibration comment with run numbers (CALIB)
     output_lines = []
-    for bank_idx in range(0, len(difc)):
-        patterns = ["INS  %d ICONS"%bank_idx,
+    for b_idx, bank_name in enumerate(bank_names):
+        patterns = ["INS  %d ICONS"%(b_idx + 1),
                     "INS    CALIB"]
         difa = 0.0
-        # the ljust(80) ensure a length of 80 characters for the lines (GSAS rules...)
+        # the ljust(80) ensures a length of 80 characters for the lines (GSAS rules...)
         replacements = [ ("INS  %d ICONS  %.2f    %.2f    %.2f" %
-                          (bank_idx, difc[bank_idx], difa, zero[bank_idx])).ljust(80) + '\r\n',
+                          (b_idx + 1, difc[b_idx], difa, tzero[b_idx])).ljust(80) + '\r\n',
                          ("INS    CALIB   %d   %d ceo2" %
                           (ceria_run, vanadium_run)).ljust(80) + '\r\n']
 

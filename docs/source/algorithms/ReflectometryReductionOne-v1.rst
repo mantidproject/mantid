@@ -75,6 +75,36 @@ is not aligned with the reflected beamline. The correction algorithm used is
 :ref:`algm-SpecularReflectionPositionCorrect-v1` which is a purely vertical
 position correction.
 
+Post-Processing Options
+#######################
+
+ReflectometryReductionOne contains 2 post-processing options that will be applied to the IvsQ workspace. These two options are `Scale` and `Rebin`.
+
+Rebinning
+=========
+To Rebin your IvsQ workspace you will have to provide values for the following properties: `MomentumTransferMinimum`, `MomentumTransferStep` and `MomentumTransferMaximum`.
+These values will be appended to each other to form your :ref:`algm-Rebin` Params. These values correspond to your `MinimumExtent`, `BinWidth` and `MaximumExtent` respectively.
+
+If you provide a positive `MomentumTransferStep` value then the algorithm will automatically negate this value which will allow for Logarithmic Rebinning. Alternatively,
+a negative `MomentumTransferStep` will result in Linear Rebinning. More details about the Rebinning process can be found in the documentation for :ref:`algm-Rebin`.
+
+If no values are provided for `MomentumTransferMinimum` and `MomentumTransferMaximum` then the algorithm will attempt to calculate these values
+by using the equations below:
+
+    :math:`Q_{min} = 2 \, k \, sin \, \theta = \frac{4 \pi sin \theta}{\lambda_{max}}`  
+    
+    :math:`Q_{max} = 2 \, k \, sin \, \theta = \frac{4 \pi sin \theta}{\lambda_{min}}`  
+    
+Where :math:`\lambda_{min}` is the minimum extent of the `IvsLambda` Workspace and :math:`\lambda_{max}` is the maximum extent of the `IvsLambda` Workspace.
+
+If you have not provided a value for `MomentumTransferStep` then the algorithm will use :ref:`algm-CalculateResolution` to calculate this value for you.
+
+Scaling
+=======
+To apply a scaling to the IvsQ workspace that has been produced by the reduction, you will need to provide a value for the `ScaleFactor` property in the algorithm.
+The default for this value is 1.0 and thus no scaling is applied to the workspace. The scaling of the IvsQ workspace is performed in-place by the :ref:`algm-Scale` algorithm
+and your IvsQ workspace will be set to the product of this algorithm.
+
 Workflow
 ########
 
@@ -91,7 +121,7 @@ and this instrument setup will be attached to any workspaces associated with tha
 When we pass the IvsLambda workspace to :ref:`algm-ConvertUnits` to produce an IvsQ workspace, :ref:`algm-ConvertUnits` will assume that :math:`2\theta` is the angle between the Beam vector and 
 the sample-to-detector vector. When we have the typical setup seen below, :math:`2\theta` will be exactly half the value we wish it to be.
 
-.. figure:: /images/CurrentExperimentSetupForReflectometry.PNG
+.. figure:: /images/CurrentExperimentSetupForReflectometry.png
     :width: 650px
     :height: 250px
     :align: center
@@ -101,7 +131,7 @@ until the condition :math:`\theta_i = \theta_f` is satisfied. This will achieve 
 After :ref:`algm-ConvertUnits` has produced our IvsQ workspace, we will rotate the position of the source back to its original position so that the experimental setup remains unchanged for other
 algorithms that may need to manipulate/use it.
 
-.. figure:: /images/RotatedExperimentSetupForReflectometry.PNG
+.. figure:: /images/RotatedExperimentSetupForReflectometry.png
     :width: 650px
     :height: 250px
     :align: center
@@ -129,7 +159,7 @@ Output:
 .. testoutput:: ExReflRedOneSimple
 
    The first four IvsLam Y values are: [ 0.0000e+00, 0.0000e+00, 4.9588e-07, 1.2769e-06 ]
-   The first four IvsQ Y values are: [ 2.1435e-05, 5.0384e-05, 5.2332e-05, 5.2042e-05 ]
+   The first four IvsQ Y values are: [ 6.2230e-04, 7.7924e-04, 9.1581e-04, 1.0967e-03 ]
    Theta out is the same as theta in: 0.7
 
 

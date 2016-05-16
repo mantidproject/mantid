@@ -111,9 +111,8 @@ public:
   /// Destroys the DynamicFactory and deletes the instantiators for
   /// all registered classes.
   virtual ~DynamicFactory() {
-    for (typename FactoryMap::iterator it = _map.begin(); it != _map.end();
-         ++it) {
-      delete it->second;
+    for (const auto &item : _map) {
+      delete item.second;
     }
   }
 
@@ -124,7 +123,7 @@ public:
   /// @param className :: the name of the class you wish to create
   /// @return a shared pointer ot the base class
   virtual boost::shared_ptr<Base> create(const std::string &className) const {
-    typename FactoryMap::const_iterator it = _map.find(className);
+    auto it = _map.find(className);
     if (it != _map.end())
       return it->second->createInstance();
     else
@@ -142,7 +141,7 @@ public:
   /// @param className :: the name of the class you wish to create
   /// @return a pointer to the base class
   virtual Base *createUnwrapped(const std::string &className) const {
-    typename FactoryMap::const_iterator it = _map.find(className);
+    auto it = _map.find(className);
     if (it != _map.end())
       return it->second->createUnwrappedInstance();
     else
@@ -179,7 +178,7 @@ public:
       throw std::invalid_argument("Cannot register empty class name");
     }
 
-    typename FactoryMap::iterator it = _map.find(className);
+    auto it = _map.find(className);
     if (it == _map.end() || replace == OverwriteCurrent) {
       if (it != _map.end() && it->second)
         delete it->second;
@@ -196,7 +195,7 @@ public:
   /// Throws a NotFoundException if the class has not been registered.
   /// @param className :: the name of the class you wish to unsubscribe
   void unsubscribe(const std::string &className) {
-    typename FactoryMap::iterator it = _map.find(className);
+    auto it = _map.find(className);
     if (!className.empty() && it != _map.end()) {
       delete it->second;
       _map.erase(it);

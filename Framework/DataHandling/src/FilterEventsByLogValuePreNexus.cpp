@@ -2416,7 +2416,7 @@ void FilterEventsByLogValuePreNexus::readPulseidFile(
     return;
   }
 
-  std::vector<Pulse> *pulses;
+  std::vector<Pulse> pulses;
 
   // set up for reading
   // Open the file; will throw if there is any problem
@@ -2446,19 +2446,18 @@ void FilterEventsByLogValuePreNexus::readPulseidFile(
   if (m_numPulses > 0) {
     DateAndTime lastPulseDateTime(0, 0);
     this->pulsetimes.reserve(m_numPulses);
-    for (size_t i = 0; i < m_numPulses; i++) {
-      Pulse &it = (*pulses)[i];
-      DateAndTime pulseDateTime(static_cast<int64_t>(it.seconds),
-                                static_cast<int64_t>(it.nanoseconds));
+    for (const auto &pulse : pulses) {
+      DateAndTime pulseDateTime(static_cast<int64_t>(pulse.seconds),
+                                static_cast<int64_t>(pulse.nanoseconds));
       this->pulsetimes.push_back(pulseDateTime);
-      this->m_vecEventIndex.push_back(it.event_index);
+      this->m_vecEventIndex.push_back(pulse.event_index);
 
       if (pulseDateTime < lastPulseDateTime)
         this->m_pulseTimesIncreasing = false;
       else
         lastPulseDateTime = pulseDateTime;
 
-      temp = it.pCurrent;
+      temp = pulse.pCurrent;
       this->m_protonCharge.push_back(temp);
       if (temp < 0.)
         this->g_log.warning("Individual proton charge < 0 being ignored");
@@ -2468,9 +2467,6 @@ void FilterEventsByLogValuePreNexus::readPulseidFile(
   }
 
   this->m_protonChargeTot = this->m_protonChargeTot * CURRENT_CONVERSION;
-
-  // Clear the vector
-  delete pulses;
 }
 
 } // namespace DataHandling

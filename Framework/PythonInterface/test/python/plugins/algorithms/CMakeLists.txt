@@ -46,6 +46,7 @@ set ( TEST_PY_FILES
   IndirectTransmissionMonitorTest.py
   ILLIN16BCalibrationTest.py
   IqtFitMultipleTest.py
+  IqtFitSequentialTest.py
   ISISIndirectDiffractionReductionTest.py
   ISISIndirectEnergyTransferTest.py
   LoadDNSLegacyTest.py

@@ -220,7 +220,7 @@ void EnggDiffractionPresenter::ProcessCropCalib() {
           "valid range or a Bank Name can be selected instead");
     }
   } catch (std::invalid_argument &ia) {
-    m_view->userWarning("Error in the inputs required for calibrate",
+    m_view->userWarning("Error in the inputs required for cropped calibration",
                         ia.what());
     return;
   }
@@ -1332,19 +1332,23 @@ void EnggDiffractionPresenter::inputChecksBeforeCalibrate(
 }
 
 /**
-* What should be the name of the output GSAS calibration file, given
-* the Vanadium and Ceria runs
-*
-* @param vanNo number of the Vanadium run, which is normally part of the name
-* @param ceriaNo number of the Ceria run, which is normally part of the name
-*
-* @return filename (without the full path)
-*/
+ * What should be the name of the output GSAS calibration file, given
+ * the Vanadium and Ceria runs
+ *
+ * @param vanNo number of the Vanadium run, which is normally part of the name
+ * @param ceriaNo number of the Ceria run, which is normally part of the name
+ * @param bankName bank name when generating a file for an individual
+ * bank. Leave empty to use a generic name for all banks
+ *
+ * @return filename (without the full path)
+ */
 std::string
 EnggDiffractionPresenter::outputCalibFilename(const std::string &vanNo,
-                                              const std::string &ceriaNo) {
+                                              const std::string &ceriaNo,
+                                              const std::string &bankName) {
   std::string outFilename = "";
-  const std::string sugg = buildCalibrateSuggestedFilename(vanNo, ceriaNo);
+  const std::string sugg =
+      buildCalibrateSuggestedFilename(vanNo, ceriaNo, bankName);
   if (!g_askUserCalibFilename) {
     outFilename = sugg;
   } else {
@@ -1500,11 +1504,12 @@ void EnggDiffractionPresenter::doNewCalibration(const std::string &outFilename,
     m_calibFinishedOK = false;
     doCalib(cs, vanNo, ceriaNo, outFilename, specNos);
     m_calibFinishedOK = true;
-  } catch (std::runtime_error &) {
-    g_log.error() << "The calibration calculations failed. One of the "
-                     "algorithms did not execute correctly. See log messages "
-                     "for details. "
-                  << std::endl;
+  } catch (std::runtime_error &rexc) {
+    g_log.error()
+        << "The calibration calculations failed. One of the "
+           "algorithms did not execute correctly. See log messages for "
+           "further details. Error: " +
+               std::string(rexc.what()) << std::endl;
   } catch (std::invalid_argument &) {
     g_log.error()
         << "The calibration calculations failed. Some input properties "
@@ -1531,34 +1536,38 @@ void EnggDiffractionPresenter::calibrationFinished() {
     const std::string vanNo = isValidRunNumber(m_view->newVanadiumNo());
 
     const std::string ceriaNo = isValidRunNumber(m_view->newCeriaNo());
-    const std::string outFilename =
-        buildCalibrateSuggestedFilename(vanNo, ceriaNo);
-    m_view->newCalibLoaded(vanNo, ceriaNo, outFilename);
+    m_view->newCalibLoaded(vanNo, ceriaNo, m_calibFullPath);
     g_log.notice()
         << "Cablibration finished and ready as 'current calibration'."
         << std::endl;
   }
   if (m_workerThread) {
     delete m_workerThread;
-    m_workerThread = NULL;
+    m_workerThread = nullptr;
   }
 }
 
 /**
-* Build a suggested name for a new calibration, by appending instrument name,
-* relevant run numbers, etc., like: ENGINX_241391_236516_both_banks.par
-*
-* @param vanNo number of the Vanadium run
-* @param ceriaNo number of the Ceria run
-*
-* @return Suggested name for a new calibration file, following
-* ENGIN-X practices
-*/
+ * Build a suggested name for a new calibration, by appending instrument name,
+ * relevant run numbers, etc., like: ENGINX_241391_236516_all_banks.par
+ *
+ * @param vanNo number of the Vanadium run
+ * @param ceriaNo number of the Ceria run
+ * @param bankName bank name when generating a file for an individual
+ * bank. Leave empty to use a generic name for all banks
+ *
+ * @return Suggested name for a new calibration file, following
+ * ENGIN-X practices
+ */
 std::string EnggDiffractionPresenter::buildCalibrateSuggestedFilename(
-    const std::string &vanNo, const std::string &ceriaNo) const {
-  // default and only one supported
+    const std::string &vanNo, const std::string &ceriaNo,
+    const std::string &bankName) const {
+  // default and only one supported instrument for now
   std::string instStr = g_enginxStr;
-  std::string nameAppendix = "_both_banks";
+  std::string nameAppendix = "_all_banks";
+  if (!bankName.empty()) {
+    nameAppendix = "_" + bankName;
+  }
   std::string curInst = m_view->currentInstrument();
   if ("ENGIN-X" != curInst && "ENGINX" != curInst) {
     instStr = "UNKNOWNINST";
@@ -1623,17 +1632,37 @@ void EnggDiffractionPresenter::doCalib(const EnggDiffCalibSettings &cs,
   // Bank 1 and 2 - ENGIN-X
   // bank 1 - loops once & used for cropped calibration
   // bank 2 - loops twice, one with each bank & used for new calibration
-  const size_t bankNo1 = 1;
-  const size_t bankNo2 = 2;
   std::vector<double> difc, tzero;
+  // for the names of the output files
+  std::vector<std::string> bankNames;
 
   bool specNumUsed = specNos != "";
+  // TODO: this needs sanitizing, it should be simpler
   if (specNumUsed) {
+    constexpr size_t bankNo1 = 1;
+
     difc.resize(bankNo1);
     tzero.resize(bankNo1);
+    int selection = m_view->currentCropCalibBankName();
+    if (0 == selection) {
+      // user selected "custom" name
+      const std::string customName = m_view->currentCalibCustomisedBankName();
+      if (customName.empty()) {
+        bankNames.emplace_back("cropped");
+      } else {
+        bankNames.push_back(customName);
+      }
+    } else if (1 == selection) {
+      bankNames.push_back("North");
+    } else {
+      bankNames.push_back("South");
+    }
   } else {
+    constexpr size_t bankNo2 = 2;
+
     difc.resize(bankNo2);
     tzero.resize(bankNo2);
+    bankNames = {"North", "South"};
   }
 
   for (size_t i = 0; i < difc.size(); i++) {
@@ -1682,15 +1711,36 @@ void EnggDiffractionPresenter::doCalib(const EnggDiffCalibSettings &cs,
 
   // Creates appropriate output directory
   Poco::Path saveDir = outFilesDir("Calibration");
+  Poco::Path outFullPath(saveDir);
+  outFullPath.append(outFilename);
 
   // Double horror: 1st use a python script
   // 2nd: because runPythonCode does this by emitting a signal that goes to
   // MantidPlot, it has to be done in the view (which is a UserSubWindow).
-  Poco::Path outFullPath(saveDir);
-  outFullPath.append(outFilename);
+  // First write the all banks parameters file
+  m_calibFullPath = outFullPath.toString();
+  writeOutCalibFile(m_calibFullPath, difc, tzero, bankNames);
+  // Then write one individual file per bank, using different templates and the
+  // specific bank name as suffix
+  for (size_t bankIdx = 0; bankIdx < difc.size(); ++bankIdx) {
+    Poco::Path bankOutputFullPath(saveDir);
+    const std::string bankFilename = buildCalibrateSuggestedFilename(
+        vanNo, ceriaNo, "bank_" + bankNames[bankIdx]);
+    bankOutputFullPath.append(bankFilename);
+    std::string templateFile = "template_ENGINX_241391_236516_North_bank.prm";
+    if (1 == bankIdx) {
+      templateFile = "template_ENGINX_241391_236516_South_bank.prm";
+    }
 
-  m_view->writeOutCalibFile(outFullPath.toString(), difc, tzero);
-  g_log.notice() << "Calibration file written as " << outFullPath.toString()
+    const std::string outPathName = bankOutputFullPath.toString();
+    writeOutCalibFile(outPathName, {difc[bankIdx]}, {tzero[bankIdx]},
+                      {bankNames[bankIdx]}, templateFile);
+    if (1 == difc.size()) {
+      // it is a  single bank or cropped calibration, so take its specific name
+      m_calibFullPath = outPathName;
+    }
+  }
+  g_log.notice() << "Calibration file written as " << m_calibFullPath
                  << std::endl;
 
   // plots the calibrated workspaces.
@@ -2009,11 +2059,11 @@ void EnggDiffractionPresenter::doFocusRun(const std::string &dir,
       m_focusFinishedOK = false;
       doFocusing(cs, fullFilename, runNo, bankIDs[idx], specs[idx], dgFile);
       m_focusFinishedOK = true;
-    } catch (std::runtime_error &) {
-      g_log.error()
-          << "The focusing calculations failed. One of the algorithms"
-             "did not execute correctly. See log messages for details."
-          << std::endl;
+    } catch (std::runtime_error &rexc) {
+      g_log.error() << "The focusing calculations failed. One of the algorithms"
+                       "did not execute correctly. See log messages for "
+                       "further details. Error: " +
+                           std::string(rexc.what()) << std::endl;
     } catch (std::invalid_argument &ia) {
       g_log.error() << "The focusing failed. Some input properties "
                        "were not valid. "
@@ -3257,6 +3307,60 @@ Poco::Path EnggDiffractionPresenter::outFilesDir(std::string addToDir) {
     g_log.error() << "Error while find/creating a path: " << re.what();
   }
   return saveDir;
+}
+
+/**
+ * To write the calibration/instrument parameter for GSAS.
+ *
+ * @param outFilename name of the output .par/.prm/.iparm file for GSAS
+ * @param difc list of GSAS DIFC values to include in the file
+ * @param tzero list of GSAS TZERO values to include in the file
+ * @param bankNames list of bank names corresponding the the difc/tzero
+ * @param templateFile a template file where to replace the difc/zero
+ * values. An empty default implies using an "all-banks" template.
+ */
+void EnggDiffractionPresenter::writeOutCalibFile(
+    const std::string &outFilename, const std::vector<double> &difc,
+    const std::vector<double> &tzero, const std::vector<std::string> &bankNames,
+    const std::string &templateFile) {
+  // TODO: this is horrible and should be changed to avoid running
+  // Python code. Update this as soon as we have a more stable way of
+  // generating IPARM/PRM files.
+
+  // Writes a file doing this:
+  // write_ENGINX_GSAS_iparam_file(output_file, difc, zero, ceria_run=241391,
+  // vanadium_run=236516, template_file=None):
+
+  // this replace is to prevent issues with network drives on windows:
+  const std::string safeOutFname =
+      boost::replace_all_copy(outFilename, "\\", "/");
+  std::string pyCode = "import EnggUtils\n";
+  pyCode += "import os\n";
+  // normalize apparently not needed after the replace, but to be double-safe:
+  pyCode += "GSAS_iparm_fname = os.path.normpath('" + safeOutFname + "')\n";
+  pyCode += "bank_names = []\n";
+  pyCode += "Difcs = []\n";
+  pyCode += "Zeros = []\n";
+  std::string templateFileVal = "None";
+  if (!templateFile.empty()) {
+    templateFileVal = "'" + templateFile + "'";
+  }
+  pyCode += "template_file = " + templateFileVal + "\n";
+  for (size_t i = 0; i < difc.size(); i++) {
+    pyCode += "bank_names.append('" + bankNames[i] + "')\n";
+    pyCode +=
+        "Difcs.append(" + boost::lexical_cast<std::string>(difc[i]) + ")\n";
+    pyCode +=
+        "Zeros.append(" + boost::lexical_cast<std::string>(tzero[i]) + ")\n";
+  }
+  pyCode +=
+      "EnggUtils.write_ENGINX_GSAS_iparam_file(output_file=GSAS_iparm_fname, "
+      "bank_names=bank_names, difc=Difcs, tzero=Zeros, "
+      "template_file=template_file) \n";
+
+  const auto status = m_view->enggRunPythonCode(pyCode);
+  g_log.information() << "Saved output calibration file via Python. Status: "
+                      << status << std::endl;
 }
 
 /**
