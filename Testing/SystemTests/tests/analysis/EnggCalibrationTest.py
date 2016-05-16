@@ -270,14 +270,14 @@ class EnginXCalibrateFullThenCalibrateTest(stresstesting.MantidStressTest):
         self.assertTrue(rel_err_less_delta(self.difc, 18403.4516907, exdelta_special),
                         "difc parameter for bank 1 is not what was expected, got: %f" % self.difc)
         if "darwin" != sys.platform:
-            self.assertTrue(rel_err_less_delta(self.zero, 5.23928765686, exdelta_tzero),
+            self.assertTrue(rel_err_less_delta(self.zero, 5.246633173, exdelta_tzero),
                             "zero parameter for bank 1 is not what was expected, got: %f" % self.zero)
 
         # Bank 2
         self.assertTrue(rel_err_less_delta(self.difc_b2, 18388.8780161, exdelta_special),
                         "difc parameter for bank 2 is not what was expected, got: %f" % self.difc_b2)
         if "darwin" != sys.platform:
-            self.assertTrue(rel_err_less_delta(self.zero_b2, -4.35573786169, exdelta_tzero),
+            self.assertTrue(rel_err_less_delta(self.zero_b2, -4.35630914816, exdelta_tzero),
                             "zero parameter for bank 2 is not what was expected, got: %f" % self.zero_b2)
 
         # === peaks used to fit the difc and zero parameters ===

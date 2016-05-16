@@ -1,14 +1,14 @@
 set ( SRC_FILES
 	src/DataComparison.cpp
 	src/DirectConvertToEnergy.cpp
-	src/DynamicPDF/DisplayCurveFitTest.cpp
-	src/DynamicPDF/SliceSelector.cpp
-        src/DynamicPDF/DPDFBackgroundRemover.cpp
+	src/DynamicPDF/DPDFBackgroundRemover.cpp
 	src/DynamicPDF/DPDFDisplayControl.cpp
 	src/DynamicPDF/DPDFFitControl.cpp
 	src/DynamicPDF/DPDFFitOptionsBrowser.cpp
 	src/DynamicPDF/DPDFFourierTransform.cpp
 	src/DynamicPDF/DPDFInputDataControl.cpp
+	src/DynamicPDF/DisplayCurveFitTest.cpp
+	src/DynamicPDF/SliceSelector.cpp
 	src/EnggDiffraction/EnggDiffractionPresenter.cpp
 	src/EnggDiffraction/EnggDiffractionViewQtGUI.cpp
 	src/Homer.cpp
@@ -82,20 +82,26 @@ set ( SRC_FILES
 	src/Muon/MuonAnalysisOptionTab.cpp
 	src/Muon/MuonAnalysisResultTableTab.cpp
 	src/ParseKeyValueString.cpp
+	src/Reflectometry/DataProcessorPostprocessingAlgorithm.cpp
+	src/Reflectometry/DataProcessorPreprocessingAlgorithm.cpp
+	src/Reflectometry/DataProcessorProcessingAlgorithm.cpp
+	src/Reflectometry/DataProcessorProcessingAlgorithmBase.cpp
+	src/Reflectometry/DataProcessorGenerateNotebook.cpp
+	src/Reflectometry/DataProcessorWhiteList.cpp
+	src/Reflectometry/GenericDataProcessorPresenter.cpp
 	src/Reflectometry/MeasurementItem.cpp
-	src/Reflectometry/QReflTableModel.cpp
-	src/Reflectometry/QReflTableView.cpp
+	src/Reflectometry/QDataProcessorTableModel.cpp
+	src/Reflectometry/QDataProcessorWidget.cpp
+	src/Reflectometry/QtDataProcessorOptionsDialog.cpp
 	src/Reflectometry/QtReflMainView.cpp
-	src/Reflectometry/QtReflOptionsDialog.cpp
 	src/Reflectometry/ReflCatalogSearcher.cpp
-	src/Reflectometry/ReflGenerateNotebook.cpp
+	src/Reflectometry/ReflGenericDataProcessorPresenterFactory.cpp
 	src/Reflectometry/ReflLegacyTransferStrategy.cpp
 	src/Reflectometry/ReflMainViewPresenter.cpp
 	src/Reflectometry/ReflMeasureTransferStrategy.cpp
 	src/Reflectometry/ReflNexusMeasurementItemSource.cpp
 	src/Reflectometry/ReflSearchModel.cpp
 	src/Reflectometry/ReflTableSchema.cpp
-	src/Reflectometry/ReflTableViewPresenter.cpp
 	src/Reflectometry/TransferResults.cpp
 	src/SANSAddFiles.cpp
 	src/SANSBackgroundCorrectionSettings.cpp
@@ -138,16 +144,15 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/Background.h
 	inc/MantidQtCustomInterfaces/DataComparison.h
 	inc/MantidQtCustomInterfaces/DirectConvertToEnergy.h
-
 	inc/MantidQtCustomInterfaces/DllConfig.h
-	inc/MantidQtCustomInterfaces/DynamicPDF/DisplayCurveFitTest.h
-	inc/MantidQtCustomInterfaces/DynamicPDF/SliceSelector.h
-        inc/MantidQtCustomInterfaces/DynamicPDF/DPDFBackgroundRemover.h
+	inc/MantidQtCustomInterfaces/DynamicPDF/DPDFBackgroundRemover.h
 	inc/MantidQtCustomInterfaces/DynamicPDF/DPDFDisplayControl.h
 	inc/MantidQtCustomInterfaces/DynamicPDF/DPDFFitControl.h
 	inc/MantidQtCustomInterfaces/DynamicPDF/DPDFFitOptionsBrowser.h
 	inc/MantidQtCustomInterfaces/DynamicPDF/DPDFFourierTransform.h
 	inc/MantidQtCustomInterfaces/DynamicPDF/DPDFInputDataControl.h
+	inc/MantidQtCustomInterfaces/DynamicPDF/DisplayCurveFitTest.h
+	inc/MantidQtCustomInterfaces/DynamicPDF/SliceSelector.h
 	inc/MantidQtCustomInterfaces/EnggDiffraction/EnggDiffCalibSettings.h
 	inc/MantidQtCustomInterfaces/EnggDiffraction/EnggDiffractionPresWorker.h
 	inc/MantidQtCustomInterfaces/EnggDiffraction/EnggDiffractionPresenter.h
@@ -231,53 +236,59 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/Muon/MuonAnalysisResultTableTab.h
 	inc/MantidQtCustomInterfaces/ParseKeyValueString.h
 	inc/MantidQtCustomInterfaces/ProgressableView.h
+	inc/MantidQtCustomInterfaces/Reflectometry/DataProcessorPostprocessingAlgorithm.h
+	inc/MantidQtCustomInterfaces/Reflectometry/DataProcessorPreprocessingAlgorithm.h
+	inc/MantidQtCustomInterfaces/Reflectometry/DataProcessorProcessingAlgorithm.h
+	inc/MantidQtCustomInterfaces/Reflectometry/DataProcessorProcessingAlgorithmBase.h
+	inc/MantidQtCustomInterfaces/Reflectometry/DataProcessorAppendRowCommand.h
+	inc/MantidQtCustomInterfaces/Reflectometry/DataProcessorClearSelectedCommand.h
+	inc/MantidQtCustomInterfaces/Reflectometry/DataProcessorCommand.h
+	inc/MantidQtCustomInterfaces/Reflectometry/DataProcessorCommandAdapter.h
+	inc/MantidQtCustomInterfaces/Reflectometry/DataProcessorCommandBase.h
+	inc/MantidQtCustomInterfaces/Reflectometry/DataProcessorCopySelectedCommand.h
+	inc/MantidQtCustomInterfaces/Reflectometry/DataProcessorCutSelectedCommand.h
+	inc/MantidQtCustomInterfaces/Reflectometry/DataProcessorDeleteRowCommand.h
+	inc/MantidQtCustomInterfaces/Reflectometry/DataProcessorExpandCommand.h
+	inc/MantidQtCustomInterfaces/Reflectometry/DataProcessorExportTableCommand.h
+	inc/MantidQtCustomInterfaces/Reflectometry/DataProcessorGenerateNotebook.h
+	inc/MantidQtCustomInterfaces/Reflectometry/DataProcessorGroupRowsCommand.h
+	inc/MantidQtCustomInterfaces/Reflectometry/DataProcessorImportTableCommand.h
+	inc/MantidQtCustomInterfaces/Reflectometry/DataProcessorNewTableCommand.h
+	inc/MantidQtCustomInterfaces/Reflectometry/DataProcessorOpenTableCommand.h
+	inc/MantidQtCustomInterfaces/Reflectometry/DataProcessorOptionsCommand.h
+	inc/MantidQtCustomInterfaces/Reflectometry/DataProcessorPasteSelectedCommand.h
+	inc/MantidQtCustomInterfaces/Reflectometry/DataProcessorPlotGroupCommand.h
+	inc/MantidQtCustomInterfaces/Reflectometry/DataProcessorPlotRowCommand.h
+	inc/MantidQtCustomInterfaces/Reflectometry/DataProcessorPrependRowCommand.h
+	inc/MantidQtCustomInterfaces/Reflectometry/DataProcessorPresenter.h
+	inc/MantidQtCustomInterfaces/Reflectometry/DataProcessorProcessCommand.h
+	inc/MantidQtCustomInterfaces/Reflectometry/DataProcessorSaveTableAsCommand.h
+	inc/MantidQtCustomInterfaces/Reflectometry/DataProcessorSaveTableCommand.h
+	inc/MantidQtCustomInterfaces/Reflectometry/DataProcessorVectorString.h
+	inc/MantidQtCustomInterfaces/Reflectometry/DataProcessorView.h
+	inc/MantidQtCustomInterfaces/Reflectometry/DataProcessorWhiteList.h
+	inc/MantidQtCustomInterfaces/Reflectometry/DataProcessorWorkspaceCommand.h
+	inc/MantidQtCustomInterfaces/Reflectometry/GenericDataProcessorPresenter.h
+	inc/MantidQtCustomInterfaces/Reflectometry/GenericDataProcessorPresenterFactory.h
 	inc/MantidQtCustomInterfaces/Reflectometry/IReflPresenter.h
 	inc/MantidQtCustomInterfaces/Reflectometry/IReflSearcher.h
-	inc/MantidQtCustomInterfaces/Reflectometry/IReflTablePresenter.h
 	inc/MantidQtCustomInterfaces/Reflectometry/MeasurementItem.h
 	inc/MantidQtCustomInterfaces/Reflectometry/ProgressPresenter.h
-	inc/MantidQtCustomInterfaces/Reflectometry/QReflTableModel.h
-	inc/MantidQtCustomInterfaces/Reflectometry/QReflTableView.h
+	inc/MantidQtCustomInterfaces/Reflectometry/QDataProcessorTableModel.h
+	inc/MantidQtCustomInterfaces/Reflectometry/QDataProcessorWidget.h
+	inc/MantidQtCustomInterfaces/Reflectometry/QtDataProcessorOptionsDialog.h
 	inc/MantidQtCustomInterfaces/Reflectometry/QtReflMainView.h
-	inc/MantidQtCustomInterfaces/Reflectometry/QtReflOptionsDialog.h
-	inc/MantidQtCustomInterfaces/Reflectometry/ReflAppendRowCommand.h
 	inc/MantidQtCustomInterfaces/Reflectometry/ReflCatalogSearcher.h
-	inc/MantidQtCustomInterfaces/Reflectometry/ReflClearSelectedCommand.h
-	inc/MantidQtCustomInterfaces/Reflectometry/ReflCommand.h
-	inc/MantidQtCustomInterfaces/Reflectometry/ReflCommandAdapter.h
-	inc/MantidQtCustomInterfaces/Reflectometry/ReflCopySelectedCommand.h
-	inc/MantidQtCustomInterfaces/Reflectometry/ReflCutSelectedCommand.h
-	inc/MantidQtCustomInterfaces/Reflectometry/ReflDeleteRowCommand.h
-	inc/MantidQtCustomInterfaces/Reflectometry/ReflCommand.h
-	inc/MantidQtCustomInterfaces/Reflectometry/ReflCommandBase.h
-	inc/MantidQtCustomInterfaces/Reflectometry/ReflExpandCommand.h
-	inc/MantidQtCustomInterfaces/Reflectometry/ReflGenerateNotebook.h
-	inc/MantidQtCustomInterfaces/Reflectometry/ReflGroupRowsCommand.h
-	inc/MantidQtCustomInterfaces/Reflectometry/ReflExportTableCommand.h
-	inc/MantidQtCustomInterfaces/Reflectometry/ReflImportTableCommand.h
+	inc/MantidQtCustomInterfaces/Reflectometry/ReflGenericDataProcessorPresenterFactory.h
 	inc/MantidQtCustomInterfaces/Reflectometry/ReflLegacyTransferStrategy.h
 	inc/MantidQtCustomInterfaces/Reflectometry/ReflMainView.h
 	inc/MantidQtCustomInterfaces/Reflectometry/ReflMainViewPresenter.h
 	inc/MantidQtCustomInterfaces/Reflectometry/ReflMeasureTransferStrategy.h
 	inc/MantidQtCustomInterfaces/Reflectometry/ReflMeasurementItemSource.h
 	inc/MantidQtCustomInterfaces/Reflectometry/ReflNexusMeasurementItemSource.h
-	inc/MantidQtCustomInterfaces/Reflectometry/ReflNewTableCommand.h
-	inc/MantidQtCustomInterfaces/Reflectometry/ReflOptionsCommand.h
-	inc/MantidQtCustomInterfaces/Reflectometry/ReflOpenTableCommand.h
-	inc/MantidQtCustomInterfaces/Reflectometry/ReflPasteSelectedCommand.h
-	inc/MantidQtCustomInterfaces/Reflectometry/ReflPlotGroupCommand.h
-	inc/MantidQtCustomInterfaces/Reflectometry/ReflPlotRowCommand.h
-	inc/MantidQtCustomInterfaces/Reflectometry/ReflPrependRowCommand.h
-	inc/MantidQtCustomInterfaces/Reflectometry/ReflProcessCommand.h
-	inc/MantidQtCustomInterfaces/Reflectometry/ReflSaveTableAsCommand.h
-	inc/MantidQtCustomInterfaces/Reflectometry/ReflSaveTableCommand.h
 	inc/MantidQtCustomInterfaces/Reflectometry/ReflSearchModel.h
 	inc/MantidQtCustomInterfaces/Reflectometry/ReflTableSchema.h
-	inc/MantidQtCustomInterfaces/Reflectometry/ReflTableView.h
-	inc/MantidQtCustomInterfaces/Reflectometry/ReflTableViewPresenter.h
 	inc/MantidQtCustomInterfaces/Reflectometry/ReflTransferStrategy.h
-	inc/MantidQtCustomInterfaces/Reflectometry/ReflVectorString.h
-	inc/MantidQtCustomInterfaces/Reflectometry/ReflWorkspaceCommand.h
 	inc/MantidQtCustomInterfaces/Reflectometry/TransferResults.h
 	inc/MantidQtCustomInterfaces/Reflectometry/WorkspaceReceiver.h
 	inc/MantidQtCustomInterfaces/SANSAddFiles.h
@@ -404,12 +415,12 @@ set ( MOC_FILES inc/MantidQtCustomInterfaces/Background.h
                 inc/MantidQtCustomInterfaces/Muon/MuonAnalysisHelper.h
                 inc/MantidQtCustomInterfaces/Muon/MuonAnalysisOptionTab.h
                 inc/MantidQtCustomInterfaces/Muon/MuonAnalysisResultTableTab.h
-		inc/MantidQtCustomInterfaces/Reflectometry/ReflCommandAdapter.h
+                inc/MantidQtCustomInterfaces/Reflectometry/DataProcessorCommandAdapter.h
                 inc/MantidQtCustomInterfaces/Reflectometry/ReflSearchModel.h
-                inc/MantidQtCustomInterfaces/Reflectometry/QReflTableModel.h
-                inc/MantidQtCustomInterfaces/Reflectometry/QReflTableView.h
+                inc/MantidQtCustomInterfaces/Reflectometry/QDataProcessorTableModel.h
+                inc/MantidQtCustomInterfaces/Reflectometry/QDataProcessorWidget.h
                 inc/MantidQtCustomInterfaces/Reflectometry/QtReflMainView.h
-                inc/MantidQtCustomInterfaces/Reflectometry/QtReflOptionsDialog.h
+                inc/MantidQtCustomInterfaces/Reflectometry/QtDataProcessorOptionsDialog.h
                 inc/MantidQtCustomInterfaces/SampleTransmission.h
                 inc/MantidQtCustomInterfaces/SANSBackgroundCorrectionWidget.h
                 inc/MantidQtCustomInterfaces/SANSAddFiles.h
@@ -482,9 +493,9 @@ set ( UI_FILES inc/MantidQtCustomInterfaces/DataComparison.ui
                inc/MantidQtCustomInterfaces/Muon/ALCInterface.ui
                inc/MantidQtCustomInterfaces/Muon/ALCPeakFittingView.ui
                inc/MantidQtCustomInterfaces/Muon/MuonAnalysis.ui
-               inc/MantidQtCustomInterfaces/Reflectometry/QReflTableView.ui
+               inc/MantidQtCustomInterfaces/Reflectometry/DataProcessorOptionsDialog.ui
+               inc/MantidQtCustomInterfaces/Reflectometry/DataProcessorWidget.ui
                inc/MantidQtCustomInterfaces/Reflectometry/ReflMainWidget.ui
-               inc/MantidQtCustomInterfaces/Reflectometry/ReflOptionsDialog.ui
                inc/MantidQtCustomInterfaces/Reflectometry/ReflWindow.ui
                inc/MantidQtCustomInterfaces/SampleTransmission.ui
                inc/MantidQtCustomInterfaces/SANSBackgroundCorrectionWidget.ui
@@ -514,20 +525,25 @@ set ( TEST_FILES
 	ALCLatestFileFinderTest.h
 	ALCPeakFittingModelTest.h
 	ALCPeakFittingPresenterTest.h
+	DataProcessorPostprocessingAlgorithmTest.h
+	DataProcessorPreprocessingAlgorithmTest.h
+	DataProcessorProcessingAlgorithmBaseTest.h
+	DataProcessorProcessingAlgorithmTest.h
+	DataProcessorCommandsTest.h
+	DataProcessorGenerateNotebookTest.h
+	DataProcessorWhiteListTest.h
 	EnggDiffractionPresenterTest.h
+	GenericDataProcessorPresenterTest.h
 	IO_MuonGroupingTest.h
 	ImageROIPresenterTest.h
 	ImggFormatsConvertPresenterTest.h
 	MeasurementItemTest.h
 	MuonAnalysisHelperTest.h
 	ParseKeyValueStringTest.h
-	ReflCommandsTest.h
-	ReflGenerateNotebookTest.h
 	ReflLegacyTransferStrategyTest.h
 	ReflMainViewPresenterTest.h
 	ReflMeasureTransferStrategyTest.h
 	ReflNexusMeasurementItemSourceTest.h
-	ReflTableViewPresenterTest.h
 	StackOfImagesDirsTest.h
 	TomographyIfacePresenterTest.h
 	UserInputValidatorTest.h

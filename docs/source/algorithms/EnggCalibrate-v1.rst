@@ -62,7 +62,7 @@ Usage
 .. testcode:: ExampleCalib
 
    out_tbl_name = 'out_params'
-   ws_name = 'test'
+   ws_name = 'test_engg_data'
    Load('ENGINX00213855.nxs', OutputWorkspace=ws_name)
 
    # Using precalculated Vanadium corrections. To calculate from scrach see EnggVanadiumCorrections
@@ -72,29 +72,35 @@ Usage
    difa1, Difc1, Zero1, peaks1 = EnggCalibrate(InputWorkspace=ws_name,
                                                VanIntegrationWorkspace=van_integ_ws,
                                                VanCurvesWorkspace=van_curves_ws,
-                                               ExpectedPeaks=[1.097, 2.1], Bank='1',
+                                               ExpectedPeaks=[1.28, 2.1], Bank='1',
                                                OutputParametersTableName=out_tbl_name)
 
    Difa1, Difc2, Zero2, peaks2 = EnggCalibrate(InputWorkspace=ws_name,
                                                VanIntegrationWorkspace=van_integ_ws,
                                                VanCurvesWorkspace=van_curves_ws,
-                                               ExpectedPeaks=[1.097, 2.1], Bank='2')
+                                               ExpectedPeaks=[1.28, 2.1], Bank='2')
 
    # You can produce an instrument parameters (iparam) file for GSAS.
    # Note that this is very specific to ENGIN-X
-   GSAS_iparm_fname = 'ENGIN_X_bank1'
+   GSAS_iparm_fname = 'ENGIN_X_banks.prm'
    import EnggUtils
-   EnggUtils.write_ENGINX_GSAS_iparam_file(GSAS_iparm_fname, [Difc1, Difc2], [Zero1, Zero2])
+   EnggUtils.write_ENGINX_GSAS_iparam_file(GSAS_iparm_fname, bank_names=['North', 'South'],
+                                           difc=[Difc1, Difc2], tzero=[Zero1, Zero2])
 
-   print "DIFA1: %.2f" % (Difa1)
-   print "DIFC1: %.1f" % (Difc1)
-   print "TZERO1: %.2f" % (Zero1)
+   import math
+   Difa1 = int(math.floor(Difa1))
+   Difc1 = int(math.floor(Difc1))
+   Zero1 = int(math.floor(Zero1))
+   print "DIFA1: {0}".format(Difa1)
+   print "DIFC1: {0}".format(Difc1)
+   print "TZERO1: {0}".format(Zero1)
    tbl = mtd[out_tbl_name]
-   print "The output table has %d row(s)" % tbl.rowCount()
-   print "Parameters from the table, DIFC1: %.1f, ZERO1: %.2f" % (tbl.cell(0,1), tbl.cell(0,2))
+   print "The output table has {0} row(s)".format(tbl.rowCount())
+   print ("Parameters from the table, DIFC1: {0}, ZERO1: {1}".
+          format(int(math.floor(tbl.cell(0,1))), int(math.floor(tbl.cell(0,2)))))
    import os
-   print "Output GSAS iparam file was written?", os.path.exists(GSAS_iparm_fname)
-   print "Number of lines of the GSAS iparam file:", sum(1 for line in open(GSAS_iparm_fname))
+   print "Output GSAS iparam file was written? {0}".format(os.path.exists(GSAS_iparm_fname))
+   print "Number of lines of the GSAS iparam file: {0}".format(sum(1 for line in open(GSAS_iparm_fname)))
 
 .. testcleanup:: ExampleCalib
 
@@ -109,10 +115,10 @@ Output:
 
 .. testoutput:: ExampleCalib
 
-   DIFA1: 0.00
-   DIFC1: 18400.2
-   TZERO1: -2.06
+   DIFA1: 0
+   DIFC1: 18267
+   TZERO1: 277
    The output table has 1 row(s)
-   Parameters from the table, DIFC1: 18400.2, ZERO1: -2.06
+   Parameters from the table, DIFC1: 18267, ZERO1: 277
    Output GSAS iparam file was written? True
-   Number of lines of the GSAS iparam file: 35
+   Number of lines of the GSAS iparam file: 36

@@ -1331,7 +1331,7 @@ void LoadEventPreNexus2::readPulseidFile(const std::string &filename,
     return;
   }
 
-  std::vector<Pulse> *pulses;
+  std::vector<Pulse> pulses;
 
   // set up for reading
   // Open the file; will throw if there is any problem
@@ -1360,19 +1360,18 @@ void LoadEventPreNexus2::readPulseidFile(const std::string &filename,
     double temp;
     DateAndTime lastPulseDateTime(0, 0);
     this->pulsetimes.reserve(num_pulses);
-    for (size_t i = 0; i < num_pulses; i++) {
-      Pulse &it = (*pulses)[i];
-      DateAndTime pulseDateTime(static_cast<int64_t>(it.seconds),
-                                static_cast<int64_t>(it.nanoseconds));
+    for (const auto &pulse : pulses) {
+      DateAndTime pulseDateTime(static_cast<int64_t>(pulse.seconds),
+                                static_cast<int64_t>(pulse.nanoseconds));
       this->pulsetimes.push_back(pulseDateTime);
-      this->event_indices.push_back(it.event_index);
+      this->event_indices.push_back(pulse.event_index);
 
       if (pulseDateTime < lastPulseDateTime)
         this->pulsetimesincreasing = false;
       else
         lastPulseDateTime = pulseDateTime;
 
-      temp = it.pCurrent;
+      temp = pulse.pCurrent;
       this->proton_charge.push_back(temp);
       if (temp < 0.)
         this->g_log.warning("Individual proton charge < 0 being ignored");
@@ -1387,12 +1386,9 @@ void LoadEventPreNexus2::readPulseidFile(const std::string &filename,
     std::stringstream dbss;
     for (size_t i = 0; i < m_dbOpNumPulses; ++i)
       dbss << "[Pulse] " << i << "\t " << event_indices[i] << "\t "
-           << pulsetimes[i].totalNanoseconds() << "\n";
+           << pulsetimes[i].totalNanoseconds() << '\n';
     g_log.information(dbss.str());
   }
-
-  // Clear the vector
-  delete pulses;
 }
 
 //----------------------------------------------------------------------------------------------

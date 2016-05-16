@@ -499,7 +499,7 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
         if not cells:
             print 'nothing to copy'
             return
-        #first discover the size of the selection and initialise a list
+        # first discover the size of the selection and initialise a list
         mincol = cells[0].column()
         if mincol > self.scale_col:
             logger.error("Cannot copy, all cells out of range")
@@ -793,10 +793,6 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
                                 overlapHigh.append(qmax)
                             if wksp[i].find(',') > 0 or wksp[i].find(':') > 0:
                                 wksp[i] = first_wq.name()
-
-                            #Scale each run
-                            if self.tableMain.item(row, self.scale_col).text():
-                                Scale(InputWorkspace=wksp[i], OutputWorkspace=wksp[i], Factor=1 / float(self.tableMain.item(row, self.scale_col).text()))
                             if self.__checked_row_stiched(row):
                                 if len(runno) == 1:
                                     logger.notice("Nothing to combine for processing row : " + str(row))
@@ -873,7 +869,6 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
             self.__reset_plot_button(plotbutton)
             return
         for i in range(len(runno)):
-            ws_name_binned = wksp[i] + '_binned'
             _ws = getWorkspace(wksp[i])
             if len(overlapLow):
                 Qmin = overlapLow[0]
@@ -883,15 +878,15 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
                 Qmax = overlapHigh[len(overlapHigh) - 1]
             else:
                 Qmax = max(w2.readX(0))
-            Rebin(InputWorkspace=str(wksp[i]), Params=str(overlapLow[i]) + ',' + str(-dqq) + ',' + str(overlapHigh[i]), OutputWorkspace=ws_name_binned)
+            ws_name_binned = wksp[i]
             wkspBinned.append(ws_name_binned)
             wsb = getWorkspace(ws_name_binned)
-            Imin = min(wsb.readY(0))
-            Imax = max(wsb.readY(0))
+            _Imin = min(wsb.readY(0))
+            _Imax = max(wsb.readY(0))
 
             if canMantidPlot:
                 # Get the existing graph if it exists
-                base_graph = self.__graphs.get(wksp[0], None)
+                base_graph = self.__graphs.get(wksp[i], None)
 
                 # Clear the window if we're the first of a new set of curves
                 clearWindow = (i == 0)
@@ -905,7 +900,7 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
                 titl = groupGet(ws_name_binned, 'samp', 'run_title')
                 if type(titl) == str:
                     base_graph.activeLayer().setTitle(titl)
-                base_graph.activeLayer().setAxisScale(Layer.Left, Imin * 0.1, Imax * 10, Layer.Log10)
+                base_graph.activeLayer().setAxisScale(Layer.Left, 1e-8, 100.0, Layer.Log10)
                 base_graph.activeLayer().setAxisScale(Layer.Bottom, Qmin * 0.9, Qmax * 1.1, Layer.Log10)
                 base_graph.activeLayer().setAutoScale()
 
@@ -919,7 +914,7 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
             if not getWorkspace(outputwksp, report_error=False):
                 # Stitching has not been done as part of processing, so we need to do it here.
                 _wcomb = combineDataMulti(wkspBinned, outputwksp, overlapLow, overlapHigh, Qmin, Qmax, -dqq, 1,
-                                         keep=True, scale_right=self.__scale_right)
+                                          keep=True, scale_right=self.__scale_right)
 
             Qmin = min(getWorkspace(outputwksp).readX(0))
             Qmax = max(getWorkspace(outputwksp).readX(0))
@@ -1006,19 +1001,36 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
         ws = ConvertToWavelength.to_workspace(loadedRun, ws_prefix="")
 
         if self.__alg_use:
+            if self.tableMain.item(row, self.scale_col).text():
+                factor=float(self.tableMain.item(row, self.scale_col).text())
+            else:
+                factor=1.0
+            if self.tableMain.item(row, 15).text():
+                Qstep=float(self.tableMain.item(row, 15).text())
+            else:
+                Qstep = None
+            if len(self.tableMain.item(row, which * 5 + 3).text()) > 0:
+                Qmin = float(self.tableMain.item(row, which * 5 + 3).text())
+            else:
+                Qmin = None
+            if len(self.tableMain.item(row, which * 5 + 4).text()) > 0:
+                Qmax = float(self.tableMain.item(row, which * 5 + 4).text())
+            else:
+                Qmax = None
             # If we're dealing with a workspace group, we'll manually map execution over each group member
             # We do this so we can get ThetaOut correctly (see ticket #10597 for why we can't at the moment)
             if isinstance(ws, WorkspaceGroup):
                 wqGroup = []
                 wlamGroup = []
                 thetaGroup = []
-
                 group_trans_ws = transmission_ws
                 for i in range(0, ws.size()):
                     #If the transmission workspace is a group, we'll use it pair-wise with the tof workspace group
                     if isinstance(transmission_ws, WorkspaceGroup):
                         group_trans_ws = transmission_ws[i]
-                    wq, wlam, th = ReflectometryReductionOneAuto(InputWorkspace=ws[i], FirstTransmissionRun=group_trans_ws, thetaIn=angle, OutputWorkspace=runno+'_IvsQ_'+str(i+1), OutputWorkspaceWavelength=runno+'_IvsLam_'+str(i+1),)
+                    wq, wlam, th = ReflectometryReductionOneAuto(InputWorkspace=ws[i], FirstTransmissionRun=group_trans_ws, thetaIn=angle, OutputWorkspace=runno+'_IvsQ_'+str(i+1),
+                                                                 OutputWorkspaceWavelength=runno+'_IvsLam_'+str(i+1),ScaleFactor=factor,MomentumTransferStep=Qstep,
+                                                                 MomentumTransferMinimum=Qmin, MomentumTransferMaximum=Qmax)
                     wqGroup.append(wq)
                     wlamGroup.append(wlam)
                     thetaGroup.append(th)
@@ -1027,7 +1039,9 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
                 wlam = GroupWorkspaces(InputWorkspaces=wlamGroup, OutputWorkspace=runno+'_IvsLam')
                 th = thetaGroup[0]
             else:
-                wq, wlam, th = ReflectometryReductionOneAuto(InputWorkspace=ws, FirstTransmissionRun=transmission_ws, thetaIn=angle, OutputWorkspace=runno+'_IvsQ', OutputWorkspaceWavelength=runno+'_IvsLam',)
+                wq, wlam, th = ReflectometryReductionOneAuto(InputWorkspace=ws, FirstTransmissionRun=transmission_ws, thetaIn=angle, OutputWorkspace=runno+'_IvsQ',
+                                                             OutputWorkspaceWavelength=runno+'_IvsLam', ScaleFactor=factor,MomentumTransferStep=Qstep,
+                                                             MomentumTransferMinimum=Qmin, MomentumTransferMaximum=Qmax)
 
             cleanup()
         else:
