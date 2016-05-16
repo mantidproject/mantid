@@ -103,11 +103,9 @@ void MuonAnalysisOptionTab::initLayout()
   connect(m_uiForm.connectPlotType, SIGNAL(currentIndexChanged(int)), this, SIGNAL(plotStyleChanged()));
   connect(m_uiForm.showErrorBars, SIGNAL(clicked()), this, SIGNAL(plotStyleChanged()));
   connect(m_uiForm.yAxisAutoscale, SIGNAL(clicked()), this, SIGNAL(plotStyleChanged()));
-  connect(m_uiForm.yAxisMinimumInput, SIGNAL(editingFinished()), this,
-          SIGNAL(plotStyleChanged()));
-  connect(m_uiForm.yAxisMaximumInput, SIGNAL(editingFinished()), this,
-          SIGNAL(plotStyleChanged()));
-
+  connect(m_uiForm.yAxisMinimumInput, SIGNAL(returnPressed ()), this, SIGNAL(plotStyleChanged()));
+  connect(m_uiForm.yAxisMaximumInput, SIGNAL(returnPressed ()), this, SIGNAL(plotStyleChanged()));
+  
   // Connect auto updates of plot data
   connect(m_uiForm.timeComboBox, SIGNAL(currentIndexChanged(int)), this, SIGNAL(settingsTabUpdatePlot()));
   connect(m_uiForm.timeAxisStartAtInput, SIGNAL(returnPressed ()), this, SIGNAL(settingsTabUpdatePlot()));
