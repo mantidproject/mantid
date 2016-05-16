@@ -938,10 +938,7 @@ void EnggDiffractionViewQtGUI::plotReplacingWindow(const std::string &wsName,
   m_presenter->notify(IEnggDiffractionPresenter::LogMsg);
 }
 
-void EnggDiffractionViewQtGUI::plotVanCurvesCalibOutput() {
-  std::string pyCode =
-      "van_curves_ws = workspace(\"engggui_vanadium_curves_ws\")\n"
-      "win = plotSpectrum(van_curves_ws, [0, 1, 2])";
+void EnggDiffractionViewQtGUI::plotVanCurvesCalibOutput(std::string &pyCode) {
 
   std::string status =
       runPythonCode(QString::fromStdString(pyCode), false).toStdString();

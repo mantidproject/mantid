@@ -481,8 +481,9 @@ public:
   * Produces vanadium curves graph with three spectrum for calib
   * output.
   *
+  * @param pyCode string which is passed to Mantid via pyScript
   */
-  virtual void plotVanCurvesCalibOutput() = 0;
+  virtual void plotVanCurvesCalibOutput(std::string &pyCode) = 0;
 
   /**
   * Produces ceria peaks graph with two spectrum for calib

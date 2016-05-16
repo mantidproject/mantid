@@ -2866,7 +2866,8 @@ void EnggDiffractionPresenter::plotCalibWorkspace(std::vector<double> difc,
   const bool plotCalibWS = m_view->plotCalibWorkspace();
   if (plotCalibWS) {
     if (g_plottingCounter == 1) {
-      m_view->plotVanCurvesCalibOutput();
+      std::string pyCode = vanadiumCurvesPlotFactory();
+      m_view->plotVanCurvesCalibOutput(pyCode);
     } else {
       m_view->plotReplacingWindow(g_vanCurvesWSName, "[0, 1, 2]", "2");
     }
@@ -3055,6 +3056,13 @@ std::string EnggDiffractionPresenter::outFileNameFactory(
     fullFilename = "ENGINX_" + runNo + "_bank_" + bank + format;
   }
   return fullFilename;
+}
+
+std::string EnggDiffractionPresenter::vanadiumCurvesPlotFactory() {
+  std::string pyCode =
+      "van_curves_ws = workspace(\"engggui_vanadium_curves_ws\")\n"
+      "win = plotSpectrum(van_curves_ws, [0, 1, 2])";
+  return pyCode;
 }
 
 /**

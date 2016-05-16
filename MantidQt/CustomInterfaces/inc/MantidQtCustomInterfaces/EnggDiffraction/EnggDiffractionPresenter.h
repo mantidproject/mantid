@@ -306,6 +306,9 @@ private:
   std::string outFitParamsTblNameGenerator(const std::string specNos,
                                            size_t bank_i) const;
 
+  // generates the pycode string which can be passed to view
+  std::string vanadiumCurvesPlotFactory();
+
   std::string DifcZeroWorkspaceFactory(
       const std::vector<double> &difc, const std::vector<double> &tzero,
       const std::string &specNo, const std::string &customisedBankName) const;
