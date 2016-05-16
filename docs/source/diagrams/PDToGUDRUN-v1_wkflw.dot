@@ -1,0 +1,37 @@
+digraph PDToGUDRUN {
+  label="PDToGUDRUN Flowchart"
+  $global_style
+
+  subgraph params {
+    $param_style
+    InputWorkspace
+  }
+
+  subgraph algoritms {
+    $algorithm_style
+    loadChar          [label="PDLoadCharacterizations v1"]
+    loadEvent         [label="LoadEventAndCompress v1"]
+    determineChar     [label="PDDetermineCharacterizations v1"]
+    alignAndFocus     [label="AlignAndFocusPowder v1"]
+    norm              [label="NormaliseByCurrent v1"]
+    setUncert         [label="SetUncertainties v1"]
+    saveNexusPD       [label="SaveNexusPD v1"]
+  }
+
+  subgraph decisions {
+    $decision_style
+    ifSetUncert       [label="If SetUncertainties"]
+  }
+
+
+  loadChar         -> determineChar
+  loadEvent        -> InputWorkspace
+  InputWorkspace   -> determineChar
+  InputWorkspace   -> alignAndFocus
+  determineChar    -> alignAndFocus
+  alignAndFocus    -> norm
+  norm             -> ifSetUncert
+  ifSetUncert      -> setUncert    [label="Yes"]
+  ifSetUncert      -> saveNexusPD  [label="No"]
+  setUncert        -> saveNexusPD
+}
