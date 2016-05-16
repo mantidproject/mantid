@@ -48,7 +48,7 @@ Open MantidPlot, and open the ISIS Reflectometry (Polref) interface.
 **Interfaces -> Reflectometry -> ISIS Reflectometry (Polref)**
 
 Within the interface, we first want to import the tbl file as a TableWorkspace.
-To do this, click on **Reflectometry -> Import .TBL**. A :ref:`LoadReflTBL <algm-LoadTBL>`
+To do this, click on **Reflectometry -> Import .TBL**. A :ref:`LoadTBL <algm-LoadTBL>`
 dialog will open. Select ``INTER_NR_test2.tbl`` as the file, and enter ``MyTable``
 as the output workspace.
 
@@ -120,7 +120,7 @@ The **Reflectometry** menu provides access to the following functionality:
 | Save Table As    | Saves the current contents of the `Processing Table`_ to |
 |                  | a new *TableWorkspace*.                                  |
 +------------------+----------------------------------------------------------+
-| Import .TBL      | Opens a :ref:`LoadReflTBL <algm-LoadTBL>` dialog,        |
+| Import .TBL      | Opens a :ref:`LoadTBL <algm-LoadTBL>` dialog,            |
 |                  | enabling you to load a ``.tbl`` file into a              |
 |                  | *TableWorkspace*.                                        |
 +------------------+----------------------------------------------------------+
@@ -245,89 +245,89 @@ Columns
 
 .. WARNING If you're updating this documentation, you probably also want to update the "What's This" tips for the columns in QReflTableModel.cpp
 
-+---------------------+-----------+-----------------------------------------------+
-| Column Title        | Required? |  Description                                  |
-+=====================+===========+===============================================+
-| Run(s)              | **Yes**   | Contains the sample runs to be processed.     |
-|                     |           | Runs may be given as run numbers or workspace |
-|                     |           | names. Multiple runs may be added together by |
-|                     |           | separating them with a '+'.                   |
-|                     |           |                                               |
-|                     |           | Example: ``1234+1235+1236``                   |
-+---------------------+-----------+-----------------------------------------------+
-| Angle               | No        | Contains the angle used during the run, in    |
-|                     |           | degrees. If left blank, this is set to the    |
-|                     |           | last value for ``THETA`` in the run's sample  |
-|                     |           | log. If multiple runs were given in the Run(s)|
-|                     |           | column, the first listed run's sample log will|
-|                     |           | be used.                                      |
-|                     |           |                                               |
-|                     |           | Example: ``0.7``                              |
-+---------------------+-----------+-----------------------------------------------+
-| Transmission Run(s) | No        | Contains the transmission run(s) used to      |
-|                     |           | normalise the sample runs. To specify two     |
-|                     |           | transmission runs, separate them with a comma.|
-|                     |           | If left blank, the sample runs will be        |
-|                     |           | normalised by monitor only.                   |
-|                     |           |                                               |
-|                     |           | Example: ``1234,1235``                        |
-+---------------------+-----------+-----------------------------------------------+
-| Q min               | No        | Contains the minimum value of Q to be used in |
-|                     |           | Å\ :sup:`−1`\ . Data with a value of Q lower  |
-|                     |           | than this will be discarded. If left blank,   |
-|                     |           | this is set to the lowest Q value found. This |
-|                     |           | is useful for discarding noisy data.          |
-|                     |           |                                               |
-|                     |           | Example: ``0.1``                              |
-+---------------------+-----------+-----------------------------------------------+
-| Q max               | No        | Contains the maximum value of Q to be used in |
-|                     |           | Å\ :sup:`−1`\ . Data with a value of Q higher |
-|                     |           | than this will be discarded. If left blank,   |
-|                     |           | this is set to the highest Q value found. This|
-|                     |           | is useful for discarding noisy data.          |
-|                     |           |                                               |
-|                     |           | Example: ``0.9``                              |
-+---------------------+-----------+-----------------------------------------------+
-| dQ/Q                | No        | Contains the resolution used when rebinning   |
-|                     |           | output workspaces. If left blank, this is     |
-|                     |           | calculated for you using the                  |
-|                     |           | CalculateResolution algorithm. This value is  |
-|                     |           | negated so that Logarithmic binning can be    |
-|                     |           | applied for the IvsQ workspace.               |
-|                     |           | If you desire linear binning then you         |
-|                     |           | may negate the value in the processing table  |
-|                     |           | and a linear binning will be applied.         |
-|                     |           |                                               |
-|                     |           | Example: ``0.9``                              |
-+---------------------+-----------+-----------------------------------------------+
-| Scale               | No        | Contains the factor used to scale output      |
-|                     |           | IvsQ workspaces. The IvsQ workspaces are      |
-|                     |           | scaled by ``1/i`` where i is the value of     |
-|                     |           | this column.                                  |
-|                     |           |                                               |
-|                     |           | Example: ``1.0``                              |
-+---------------------+-----------+-----------------------------------------------+
-| Group               | **Yes**   | Contains the group number used for stitching  |
-|                     |           | output workspaces. The value of this column   |
-|                     |           | determines which other rows this row's output |
-|                     |           | will be stitched with. All rows with the same |
-|                     |           | group number are stitched together.           |
-+---------------------+-----------+-----------------------------------------------+
-| Options             | No        | Contains options that allow you to override   |
-|                     |           | ReflectometryReductionOne's properties. To    |
-|                     |           | override a property, just use the property's  |
-|                     |           | name as a key, and the desired value as the   |
-|                     |           | value.                                        |
-|                     |           | Options are specified in ``key=value`` pairs, |
-|                     |           | separated by commas. Values containing commas |
-|                     |           | must be quoted. Options specified via this    |
-|                     |           | column will prevail over global options       |
-|                     |           | specified in the                              |
-|                     |           | **ReflectometryReductionOneAuto** text box.   |
-|                     |           |                                               |
-|                     |           | Example: ``StrictSpectrumChecking=0,``        |
-|                     |           | ``RegionOfDirectBeam="0,2", Params="1,2,3"``  |
-+---------------------+-----------+-----------------------------------------------+
++---------------------+-----------+---------------------------------------------------------------------------------+
+| Column Title        | Required? |  Description                                                                    |
++=====================+===========+=================================================================================+
+| Run(s)              | **Yes**   | Contains the sample runs to be processed.                                       |
+|                     |           | Runs may be given as run numbers or workspace                                   |
+|                     |           | names. Multiple runs may be added together by                                   |
+|                     |           | separating them with a '+'.                                                     |
+|                     |           |                                                                                 |
+|                     |           | Example: ``1234+1235+1236``                                                     |
++---------------------+-----------+---------------------------------------------------------------------------------+
+| Angle               | No        | Contains the angle used during the run, in                                      |
+|                     |           | degrees. If left blank,                                                         |
+|                     |           | :ref:`ReflectometryReductionOne <algm-ReflectometryReductionOne>`               |
+|                     |           | will calculate theta using                                                      |
+|                     |           | :ref:`SpecularReflectionCalculateTheta <algm-SpecularReflectionCalculateTheta>`.|
+|                     |           |                                                                                 |
+|                     |           |                                                                                 |
+|                     |           | Example: ``0.7``                                                                |
++---------------------+-----------+---------------------------------------------------------------------------------+
+| Transmission Run(s) | No        | Contains the transmission run(s) used to                                        |
+|                     |           | normalise the sample runs. To specify two                                       |
+|                     |           | transmission runs, separate them with a comma.                                  |
+|                     |           | If left blank, the sample runs will be                                          |
+|                     |           | normalised by monitor only.                                                     |
+|                     |           |                                                                                 |
+|                     |           | Example: ``1234,1235``                                                          |
++---------------------+-----------+---------------------------------------------------------------------------------+
+| Q min               | No        | Contains the minimum value of Q to be used in                                   |
+|                     |           | Å\ :sup:`−1`\ . Data with a value of Q lower                                    |
+|                     |           | than this will be discarded. If left blank,                                     |
+|                     |           | this is set to the lowest Q value found. This                                   |
+|                     |           | is useful for discarding noisy data.                                            |
+|                     |           |                                                                                 |
+|                     |           | Example: ``0.1``                                                                |
++---------------------+-----------+---------------------------------------------------------------------------------+
+| Q max               | No        | Contains the maximum value of Q to be used in                                   |
+|                     |           | Å\ :sup:`−1`\ . Data with a value of Q higher                                   |
+|                     |           | than this will be discarded. If left blank,                                     |
+|                     |           | this is set to the highest Q value found. This                                  |
+|                     |           | is useful for discarding noisy data.                                            |
+|                     |           |                                                                                 |
+|                     |           | Example: ``0.9``                                                                |
++---------------------+-----------+---------------------------------------------------------------------------------+
+| dQ/Q                | No        | Contains the resolution used when rebinning                                     |
+|                     |           | output workspaces. If left blank, this is                                       |
+|                     |           | calculated for you using the                                                    |
+|                     |           | CalculateResolution algorithm. This value is                                    |
+|                     |           | negated so that Logarithmic binning can be                                      |
+|                     |           | applied for the IvsQ workspace.                                                 |
+|                     |           | If you desire linear binning then you                                           |
+|                     |           | may negate the value in the processing table                                    |
+|                     |           | and a linear binning will be applied.                                           |
+|                     |           |                                                                                 |
+|                     |           | Example: ``0.9``                                                                |
++---------------------+-----------+---------------------------------------------------------------------------------+
+| Scale               | No        | Contains the factor used to scale output                                        |
+|                     |           | IvsQ workspaces. The IvsQ workspaces are                                        |
+|                     |           | scaled by ``1/i`` where i is the value of                                       |
+|                     |           | this column.                                                                    |
+|                     |           |                                                                                 |
+|                     |           | Example: ``1.0``                                                                |
++---------------------+-----------+---------------------------------------------------------------------------------+
+| Group               | **Yes**   | Contains the group number used for stitching                                    |
+|                     |           | output workspaces. The value of this column                                     |
+|                     |           | determines which other rows this row's output                                   |
+|                     |           | will be stitched with. All rows with the same                                   |
+|                     |           | group number are stitched together.                                             |
++---------------------+-----------+---------------------------------------------------------------------------------+
+| Options             | No        | Contains options that allow you to override                                     |
+|                     |           | ReflectometryReductionOne's properties. To                                      |
+|                     |           | override a property, just use the property's                                    |
+|                     |           | name as a key, and the desired value as the                                     |
+|                     |           | value.                                                                          |
+|                     |           | Options are specified in ``key=value`` pairs,                                   |
+|                     |           | separated by commas. Values containing commas                                   |
+|                     |           | must be quoted. Options specified via this                                      |
+|                     |           | column will prevail over global options                                         |
+|                     |           | specified in the                                                                |
+|                     |           | **ReflectometryReductionOneAuto** text box.                                     |
+|                     |           |                                                                                 |
+|                     |           | Example: ``StrictSpectrumChecking=0,``                                          |
+|                     |           | ``RegionOfDirectBeam="0,2", Params="1,2,3"``                                    |
++---------------------+-----------+---------------------------------------------------------------------------------+
 
 Search Interface
 ~~~~~~~~~~~~~~~~

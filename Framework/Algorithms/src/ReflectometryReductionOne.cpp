@@ -664,7 +664,7 @@ void ReflectometryReductionOne::exec() {
     calcResAlg->execute();
     if (!calcResAlg->isExecuted())
       throw std::runtime_error("CalculateResolution failed. Please manually "
-                               "enter a value in the dQ/Q column.");
+                               "enter a value for MomentumTransferStep.");
     momentumTransferStep = calcResAlg->getProperty("Resolution");
   }
   if (momentumTransferMinimum > momentumTransferMaximum)
