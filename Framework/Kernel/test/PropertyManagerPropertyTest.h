@@ -123,6 +123,13 @@ public:
     TS_ASSERT_EQUALS(globalMgr->asString(true), prop.value());
   }
 
+  void test_Empty_Property_Value_Returns_Empty_String_As_Value() {
+    using Mantid::Kernel::PropertyManager;
+
+    PropertyManagerProperty pmap("Test");
+    TS_ASSERT_EQUALS("", pmap.value());
+  }
+
   //----------------------------------------------------------------------------
   // Failure tests
   //----------------------------------------------------------------------------
