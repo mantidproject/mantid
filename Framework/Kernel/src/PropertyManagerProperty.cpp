@@ -39,8 +39,7 @@ std::string PropertyManagerProperty::value() const {
   if (m_dataServiceKey.empty()) {
     auto mgr = (*this)();
     return (mgr ? mgr->asString(true) : "");
-  }
-  else
+  } else
     return m_dataServiceKey;
 }
 
