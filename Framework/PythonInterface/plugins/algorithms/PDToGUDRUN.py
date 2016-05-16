@@ -95,7 +95,11 @@ class PDToGUDRUN(DataProcessorAlgorithm):
 
         if self.getProperty("ResampleX").value == 0:
             binning = self.getProperty('Binning').value
-            if binning[1] == 0.:   # has to be non-zero delta
+            if len(binning) == 1:
+                binning = binning[0]
+            else:
+                binning = binning[1]
+            if binning == 0.:   # has to be non-zero delta
                 msg = 'Must supply a Binning or ResampleX'
                 issues['Binning'] = msg
                 issues['ResampleX'] = msg
