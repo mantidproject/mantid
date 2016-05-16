@@ -73,8 +73,7 @@ public:
 
   /// Subscribes a scatterer class into the factory.
   template <class C> void subscribeScatterer() {
-    Kernel::Instantiator<C, BraggScatterer> *instantiator =
-        new Kernel::Instantiator<C, BraggScatterer>;
+    auto instantiator = new Kernel::Instantiator<C, BraggScatterer>;
     BraggScatterer_sptr scatterer = instantiator->createInstance();
 
     subscribe(scatterer->name(), instantiator);
