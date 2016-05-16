@@ -1882,7 +1882,10 @@ void MuonAnalysis::plotSpectrum(const QString &wsName, bool logScale) {
   s << "  if y_auto:";
   s << "    layer.setAutoScale()";
   s << "  else:";
-  s << "    layer.setAxisScale(Layer.Left, y_min, y_max)";
+  s << "    try:";
+  s << "      layer.setAxisScale(Layer.Left, float(y_min), float(y_max))";
+  s << "    except ValueError:";
+  s << "      layer.setAutoScale()";
   s << "";
 
   // Plot the data!

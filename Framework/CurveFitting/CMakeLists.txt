@@ -72,6 +72,7 @@ set ( SRC_FILES
 	src/Functions/GaussianComptonProfile.cpp
 	src/Functions/GramCharlierComptonProfile.cpp
 	src/Functions/IkedaCarpenterPV.cpp
+    src/Functions/Keren.cpp
 	src/Functions/LinearBackground.cpp
 	src/Functions/LogNormal.cpp
 	src/Functions/Lorentzian.cpp
@@ -203,6 +204,7 @@ set ( INC_FILES
 	inc/MantidCurveFitting/Functions/GaussianComptonProfile.h
 	inc/MantidCurveFitting/Functions/GramCharlierComptonProfile.h
 	inc/MantidCurveFitting/Functions/IkedaCarpenterPV.h
+    inc/MantidCurveFitting/Functions/Keren.h
 	inc/MantidCurveFitting/Functions/LinearBackground.h
 	inc/MantidCurveFitting/Functions/LogNormal.h
 	inc/MantidCurveFitting/Functions/Lorentzian.h
@@ -334,6 +336,7 @@ set ( TEST_FILES
 	Functions/GaussianTest.h
 	Functions/GramCharlierComptonProfileTest.h
 	Functions/IkedaCarpenterPVTest.h
+    Functions/KerenTest.h
 	Functions/LinearBackgroundTest.h
 	Functions/LogNormalTest.h
 	Functions/Lorentzian1DTest.h

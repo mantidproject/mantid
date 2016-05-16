@@ -70,8 +70,7 @@ public:
   /// algorithm factory specific function to subscribe algorithms, calls the
   /// dynamic factory subscribe function internally
   template <class C> std::pair<std::string, int> subscribe() {
-    Kernel::Instantiator<C, Algorithm> *newI =
-        new Kernel::Instantiator<C, Algorithm>;
+    auto newI = new Kernel::Instantiator<C, Algorithm>;
     return this->subscribe(newI);
   }
 

@@ -329,7 +329,9 @@ unsigned char MantidColorMap::colorIndex (const QwtDoubleInterval &interval, dou
 //-------------------------------------------------------------------------------------------------
 /**
  * Compute a lookup table
- * @param interval :: The interval for the table to cover
+ *
+ * @param interval :: The interval of values of the RGB component for
+ * the table to cover
  */
 QVector<QRgb> MantidColorMap::colorTable(const QwtDoubleInterval & interval) const
 {

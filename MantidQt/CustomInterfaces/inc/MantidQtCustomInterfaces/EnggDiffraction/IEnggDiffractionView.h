@@ -122,7 +122,7 @@ public:
   * selected spec will be passed as a bank for the calibrartion
   * process to be carried out
   *
-  * @return which format should to applied for plotting data
+  * @return Bank selection index: spectrum-numbers / north / south
   */
   virtual int currentCropCalibBankName() const = 0;
 
@@ -213,16 +213,17 @@ public:
                               const std::string &fname) = 0;
 
   /**
-   * Write a GSAS file. Temporarily here until we have a more final
-   * way of generating these files.
+   * Run Python code received as a script string. This is used for
+   * example to write GSAS instrument parameters file, or other code
+   * included with the Engg scripts. Temporarily here until we have a
+   * more final way of generating these files. A SaveGSAS algorithm
+   * that can handle ENGIN-X files would be ideal.
    *
-   * @param outFilename output file name
-   * @param difc difc values (one per bank)
-   * @param tzero tzero values (one per bank)
+   * @param pyCode Python script as a string
+   *
+   * @return status string from running the code
    */
-  virtual void writeOutCalibFile(const std::string &outFilename,
-                                 const std::vector<double> &difc,
-                                 const std::vector<double> &tzero) = 0;
+  virtual std::string enggRunPythonCode(const std::string &pyCode) = 0;
 
   /**
    * Enable/disable all the sections or tabs of the interface. To be
@@ -352,7 +353,7 @@ public:
   *
   * @return directory as std::string
   */
-  virtual std::string fittingRunNo() const = 0;
+  virtual std::string getFittingRunNo() const = 0;
 
   /**
   * A list of dSpacing values to be translated into TOF
@@ -361,6 +362,96 @@ public:
   * @return list of dSpacing values as std::string
   */
   virtual std::string fittingPeaksData() const = 0;
+
+  /**
+  * Splits the file name in to sections of '_' and 'ENGINX' text
+  * within the filename
+  *
+  * @param selectedfPath is the selected file's path
+  *
+  * @return std::vector<std::string> of splitted file name with run
+  * number & bank
+  */
+  virtual std::vector<std::string>
+  splitFittingDirectory(std::string &selectedfPath) = 0;
+
+  /**
+  * adds the number of banks to the combo-box widget on the interface
+  *
+  * @param splittedBaseName contains the bank number and run number
+  * @param selectedFile path of the selected file
+  */
+  virtual void addBankItems(std::vector<std::string> splittedBaseName,
+                            QString selectedFile) = 0;
+
+  /**
+  * adds the run number to the list view widget on the interface
+  *
+  * @param runNumVector run number vector which have been inputted and
+  * found within focus dir
+  * @param multiRun to avoid recreating the list view widget
+  */
+  virtual void addRunNoItem(std::vector<std::string> runNumVector,
+                            bool multiRun) = 0;
+
+  /**
+  * checks if the text-inputted is a valid run
+  *
+  * @param text the run number as text
+  *
+  * @return bool if each char in string is a digit/int
+  */
+  virtual bool isDigit(std::string text) = 0;
+
+  /**
+  * emits the signal within view when run number/bank changed
+  */
+  virtual void setBankEmit() = 0;
+
+  /**
+  * gets the set focus directory within the setting tab
+  *
+  * @return std::string of focus directory
+  */
+  virtual std::string getFocusDir() = 0;
+
+  /**
+  * sets the fitting run number according to path
+  *
+  * @param path of the selected focused run file
+  */
+  virtual void setFittingRunNo(QString path) = 0;
+
+  /**
+  * gets the global vector in view containing focused file directory
+  *
+  * @return std::vector<std::string> containing the focused bank files
+  */
+  virtual std::vector<std::string> getFittingRunNumVec() = 0;
+
+  /**
+  * sets the global vector in view containing focused file directory
+  *
+  * @param assignVec of the all the focused bank files
+  *  per run number
+  */
+  virtual void setFittingRunNumVec(std::vector<std::string> assignVec) = 0;
+
+  /**
+  * to determine whether the current loop is multi-run or single to avoid
+  * regenerating the list-view widget when not required
+  *
+  * @return bool whether given multi-run or singular file
+  */
+  virtual bool getFittingMultiRunMode() = 0;
+
+  /**
+  *  sets the fitting mode to multi-run or single to avoid
+  * regenerating the list-view widget when not required
+  *
+  * @param mode true if its multi-run
+  */
+  virtual void setFittingMultiRunMode(bool mode) = 0;
 
   /**
   * generates and sets the curves on the fitting tab
@@ -426,10 +517,6 @@ public:
   virtual void plotReplacingWindow(const std::string &wsName,
                                    const std::string &spectrum,
                                    const std::string &type) = 0;
-
-
-
-
 };
 
 } // namespace CustomInterfaces

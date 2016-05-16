@@ -87,6 +87,7 @@ set ( INC_FILES
 	inc/MantidDataObjects/MDBoxIterator.tcc
 	inc/MantidDataObjects/MDBoxSaveable.h
 	inc/MantidDataObjects/MDDimensionStats.h
+	inc/MantidDataObjects/MDEvent.h
 	inc/MantidDataObjects/MDEventFactory.h
 	inc/MantidDataObjects/MDEventInserter.h
 	inc/MantidDataObjects/MDEventWorkspace.h
