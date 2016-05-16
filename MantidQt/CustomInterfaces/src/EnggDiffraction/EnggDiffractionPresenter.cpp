@@ -3058,22 +3058,31 @@ std::string EnggDiffractionPresenter::outFileNameFactory(
   return fullFilename;
 }
 
-std::string EnggDiffractionPresenter::vanadiumCurvesPlotFactory() {
-  std::string pyCode =
-      "van_curves_ws = workspace(\"engggui_vanadium_curves_ws\")\n"
+std::string EnggDiffractionPresenter::vanadiumCurvesPlotFactory()
+{
+	std::string pyCode =
 
-      "for i in range(1, 3):\n"
-      " if (i == 1):\n"
-      "  curve_plot_bank_1 = plotSpectrum(van_curves_ws, [0, 1, "
-      "2]).activeLayer()\n"
-      "  curve_plot_bank_1.setTitle(\"Engg GUI Vanadium Curves Bank 1\")\n"
+		"van_curve_twin_ws = \"__engggui_vanadium_curves_twin_ws\"\n"
 
-      " if (i == 2):\n"
-      "  curve_plot_bank_2 = plotSpectrum(van_curves_ws, [3, 4, "
-      "5]).activeLayer()\n"
-      "  curve_plot_bank_2.setTitle(\"Engg GUI Vanadium Curves Bank 2\")\n";
+		"if(mtd.doesExist(van_curve_twin_ws)):\n"
+		" DeleteWorkspace(van_curve_twin_ws)\n"
 
-  return pyCode;
+		"CloneWorkspace(InputWorkspace = \"engggui_vanadium_curves_ws\", OutputWorkspace = van_curve_twin_ws)\n"
+
+
+		"van_curves_ws = workspace(van_curve_twin_ws)\n"
+		"for i in range(1, 3):\n"
+		" if (i == 1):\n"
+		"  curve_plot_bank_1 = plotSpectrum(van_curves_ws, [0, 1, "
+		"2]).activeLayer()\n"
+		"  curve_plot_bank_1.setTitle(\"Engg GUI Vanadium Curves Bank 1\")\n"
+
+		" if (i == 2):\n"
+		"  curve_plot_bank_2 = plotSpectrum(van_curves_ws, [3, 4, "
+		"5]).activeLayer()\n"
+		"  curve_plot_bank_2.setTitle(\"Engg GUI Vanadium Curves Bank 2\")\n";
+
+	return pyCode;
 }
 
 /**
