@@ -478,20 +478,12 @@ public:
   virtual bool saveFocusedOutputFiles() const = 0;
 
   /**
-  * Produces vanadium curves graph with three spectrum for calib
-  * output.
+  * Produces vanadium curves graph with three spectrum and
+  * ceria peaks graph with two spectrum for calib output.
   *
   * @param pyCode string which is passed to Mantid via pyScript
   */
-  virtual void plotVanCurvesCalibOutput(std::string &pyCode) = 0;
-
-  /**
-  * Produces ceria peaks graph with two spectrum for calib
-  * output.
-  *
-  * @param pyCode string which is passed to Mantid via pyScript
-  */
-  virtual void plotDifcZeroCalibOutput(const std::string &pyCode) = 0;
+  virtual void plotCalibOutput(const std::string &pyCode) = 0;
 
   /**
   * Produces a single spectrum graph for focused output.

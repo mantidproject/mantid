@@ -2865,8 +2865,8 @@ void EnggDiffractionPresenter::plotCalibWorkspace(std::vector<double> difc,
                                                   std::string specNos) {
   const bool plotCalibWS = m_view->plotCalibWorkspace();
   if (plotCalibWS) {
-	  std::string pyCode = vanadiumCurvesPlotFactory();
-	  m_view->plotVanCurvesCalibOutput(pyCode);
+    std::string pyCode = vanadiumCurvesPlotFactory();
+    m_view->plotCalibOutput(pyCode);
 
     // Get the Customised Bank Name text-ield string from qt
     std::string CustomisedBankName = m_view->currentCalibCustomisedBankName();
@@ -2875,7 +2875,7 @@ void EnggDiffractionPresenter::plotCalibWorkspace(std::vector<double> difc,
     const std::string pythonCode =
         DifcZeroWorkspaceFactory(difc, tzero, specNos, CustomisedBankName) +
         plotDifcZeroWorkspace(CustomisedBankName);
-    m_view->plotDifcZeroCalibOutput(pythonCode);
+    m_view->plotCalibOutput(pythonCode);
   }
 }
 

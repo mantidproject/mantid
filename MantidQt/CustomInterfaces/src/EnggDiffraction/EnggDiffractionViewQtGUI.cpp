@@ -938,7 +938,7 @@ void EnggDiffractionViewQtGUI::plotReplacingWindow(const std::string &wsName,
   m_presenter->notify(IEnggDiffractionPresenter::LogMsg);
 }
 
-void EnggDiffractionViewQtGUI::plotVanCurvesCalibOutput(std::string &pyCode) {
+void EnggDiffractionViewQtGUI::plotCalibOutput(const std::string &pyCode) {
 
   std::string status =
       runPythonCode(QString::fromStdString(pyCode), false).toStdString();
@@ -946,17 +946,6 @@ void EnggDiffractionViewQtGUI::plotVanCurvesCalibOutput(std::string &pyCode) {
   m_logMsgs.push_back(
       "Plotted output calibration vanadium curves, with status string " +
       status);
-  m_presenter->notify(IEnggDiffractionPresenter::LogMsg);
-}
-
-void EnggDiffractionViewQtGUI::plotDifcZeroCalibOutput(
-    const std::string &pyCode) {
-
-  std::string status =
-      runPythonCode(QString::fromStdString(pyCode), false).toStdString();
-
-  m_logMsgs.push_back(
-      "Plotted output calibration ceria peaks, with status string " + status);
   m_presenter->notify(IEnggDiffractionPresenter::LogMsg);
 }
 

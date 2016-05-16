@@ -212,9 +212,7 @@ public:
                            const std::string &spectrum,
                            const std::string &type) override;
 
-  void plotVanCurvesCalibOutput(std::string &pyCode) override;
-
-  void plotDifcZeroCalibOutput(const std::string &pyCode) override;
+  void plotCalibOutput(const std::string &pyCode) override;
 
   bool saveFocusedOutputFiles() const override;
 
