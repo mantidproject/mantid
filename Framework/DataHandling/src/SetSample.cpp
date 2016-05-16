@@ -134,12 +134,21 @@ SetSample::setSampleEnvironment(API::MatrixWorkspace_sptr &workspace,
   const std::string envName = args.getPropertyValue("Name");
   const std::string canName = args.getPropertyValue("Can");
   // The specifications need to be qualified by the facility and instrument.
-  //  - check instrument for name and then lookup facility
+  // Check instrument for name and then lookup facility if facility
+  // is unknown then set to default facility & instrument.
   auto instrument = workspace->getInstrument();
-  const auto &instName = instrument->getName();
+  const auto &instOnWS = instrument->getName();
   const auto &config = ConfigService::Instance();
-  const auto &instInfo = config.getInstrument(instName);
-  const auto &facilityInfo = instInfo.facility();
+  std::string facilityName, instrumentName;
+  try {
+    const auto &instInfo = config.getInstrument(instOnWS);
+    instrumentName = instInfo.name();
+    facilityName = instInfo.facility().name();
+  } catch (std::runtime_error &) {
+    // use default facility/instrument
+    facilityName = config.getFacility().name();
+    instrumentName = config.getInstrument().name();
+  }
 
   const auto &instDirs = config.getInstrumentDirectories();
   std::vector<std::string> environDirs(instDirs);
@@ -150,7 +159,7 @@ SetSample::setSampleEnvironment(API::MatrixWorkspace_sptr &workspace,
       Kernel::make_unique<SampleEnvironmentSpecFileFinder>(environDirs);
   SampleEnvironmentFactory factory(std::move(finder));
   auto sampleEnviron =
-      factory.create(facilityInfo.name(), instInfo.name(), envName, canName);
+      factory.create(facilityName, instrumentName, envName, canName);
   workspace->mutableSample().setEnvironment(sampleEnviron.release());
 
   return &(workspace->sample().getEnvironment());
