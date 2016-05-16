@@ -1547,19 +1547,23 @@ void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::addPeakToList() {
     auto strPeakCentre = stream.str();
 
     auto curExpPeaksList = m_uiTabFitting.lineEdit_fitting_peaks->text();
+    QString comma = ",";
 
     if (!curExpPeaksList.isEmpty()) {
-
+      // when further peak added to list
       std::string expPeakStr = curExpPeaksList.toStdString();
       std::string lastTwoChr = expPeakStr.substr(expPeakStr.size() - 2);
       auto lastChr = expPeakStr.back();
-      char comma = ',';
-      if (lastChr == comma || lastTwoChr == ", ") {
-        curExpPeaksList.append(QString::fromStdString(" " + strPeakCentre));
+      if (lastChr == ',' || lastTwoChr == ", ") {
+        curExpPeaksList.append(QString::fromStdString(strPeakCentre));
       } else {
-        QString comma = ", ";
         curExpPeaksList.append(comma + QString::fromStdString(strPeakCentre));
       }
+      m_uiTabFitting.lineEdit_fitting_peaks->setText(curExpPeaksList);
+    } else {
+      // when new peak given when list is empty
+      curExpPeaksList.append(QString::fromStdString(strPeakCentre));
+      curExpPeaksList.append(comma);
       m_uiTabFitting.lineEdit_fitting_peaks->setText(curExpPeaksList);
     }
   }
