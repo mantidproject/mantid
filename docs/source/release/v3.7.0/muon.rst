@@ -64,6 +64,10 @@ Algorithms
 Fit Functions
 -------------
 
+- :ref:`Keren <func-Keren>` has been added as a new fit function - Amit Keren's 
+generalisation of the Abragam relaxation function to a longitudinal field,
+for fitting the time-dependent muon polarisation.
+
 |
 
 `Full list of changes <http://github.com/mantidproject/mantid/pulls?q=is%3Apr+milestone%3A%22Release+3.7%22+is%3Amerged+label%3A%22Component%3A+Muon%22>`_
