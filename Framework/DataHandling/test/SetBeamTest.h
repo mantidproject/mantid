@@ -108,8 +108,7 @@ private:
 
     auto props = boost::make_shared<PropertyManager>();
     props->declareProperty(
-        Mantid::Kernel::make_unique<StringProperty>("Shape", "Slit"),
-        "");
+        Mantid::Kernel::make_unique<StringProperty>("Shape", "Slit"), "");
     props->declareProperty(
         Mantid::Kernel::make_unique<DoubleProperty>("Width", 1.0), "");
     props->declareProperty(
