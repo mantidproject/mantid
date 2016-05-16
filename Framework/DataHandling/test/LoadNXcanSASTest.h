@@ -429,21 +429,18 @@ private:
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(transName);
 
     // Ensure that both have the same Y data
-    auto readDataY = [](MatrixWorkspace_sptr ws, size_t index) {
-      return ws->dataY(index);
-    };
+    auto readDataY =
+        [](MatrixWorkspace_sptr ws, size_t index) { return ws->dataY(index); };
     do_assert_data(transIn, transOut, readDataY);
 
     // Ensure that both have the same E data
-    auto readDataE = [](MatrixWorkspace_sptr ws, size_t index) {
-      return ws->dataE(index);
-    };
+    auto readDataE =
+        [](MatrixWorkspace_sptr ws, size_t index) { return ws->dataE(index); };
     do_assert_data(transIn, transOut, readDataE);
 
     // Ensure that both have the same X data
-    auto readDataX = [](MatrixWorkspace_sptr ws, size_t index) {
-      return ws->dataX(index);
-    };
+    auto readDataX =
+        [](MatrixWorkspace_sptr ws, size_t index) { return ws->dataX(index); };
     do_assert_data(transIn, transOut, readDataX);
   }
 
@@ -462,21 +459,18 @@ private:
     TSM_ASSERT("Should be a point workspace", !wsOut->isHistogramData());
 
     // Ensure that both have the same Y data
-    auto readDataY = [](MatrixWorkspace_sptr ws, size_t index) {
-      return ws->dataY(index);
-    };
+    auto readDataY =
+        [](MatrixWorkspace_sptr ws, size_t index) { return ws->dataY(index); };
     do_assert_data(wsIn, wsOut, readDataY);
 
     // Ensure that both have the same E data
-    auto readDataE = [](MatrixWorkspace_sptr ws, size_t index) {
-      return ws->dataE(index);
-    };
+    auto readDataE =
+        [](MatrixWorkspace_sptr ws, size_t index) { return ws->dataE(index); };
     do_assert_data(wsIn, wsOut, readDataE);
 
     // Ensure that both have the same X data
-    auto readDataX = [](MatrixWorkspace_sptr ws, size_t index) {
-      return ws->dataX(index);
-    };
+    auto readDataX =
+        [](MatrixWorkspace_sptr ws, size_t index) { return ws->dataX(index); };
     do_assert_data(wsIn, wsOut, readDataX);
 
     // If applicable, ensure that both have the same Xdev data
