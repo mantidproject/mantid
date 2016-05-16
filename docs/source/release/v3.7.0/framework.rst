@@ -53,10 +53,13 @@ Renamed
 Improved
 ########
 
--  :ref:`EnggCalibrate <algm-EnggCalibrate>`
-   has a new output property with the fitted parameters of the
-   calibration sample peaks. It also logs more details about the peaks
-   fitted.
+- :ref:`EnggCalibrate <algm-EnggCalibrate>` has a new output property
+  with the fitted parameters of the calibration sample peaks. It also
+  logs more details about the peaks fitted.
+- :ref:`EnggFocus<algm-EnggFocus>`: added an option to mask out
+  several ranges in ToF (instrument pulses), with default values set
+  for ENGIN-X, and an option to normalize by proton charge (enabled by
+  default).
 -  :ref:`Integration <algm-Integration>`
    now correctly works for event data that has not been binned.
 -  :ref:`FFT <algm-FFT>`

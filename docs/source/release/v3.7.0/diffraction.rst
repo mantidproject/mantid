@@ -29,8 +29,22 @@ Crystal Improvements
 Engineering Diffraction
 -----------------------
 
-- New algorithm added: EnggFitDIFCFromPeaks, which forks from the old EnggFitPeaks.
-  EnggFitPeaks modified to fit peaks but not calibration parameters.
+- New algorithm added:
+  :ref:`EnggFitDIFCFromPeaks<algm-EnggFitDIFCFromPeaks>`, which forks
+  from the old
+  :ref:`EnggFitPeaks<algm-EnggFitPeaks>`. :ref:`EnggFitPeaks<algm-EnggFitPeaks>`
+  modified to fit peaks but not calibration parameters.
+
+- An option to set the initial rebin width has been added to
+  :ref:`EnggCalibrateFull<algm-EnggCalibrateFull>`
+
+- :ref:`EnggFocus<algm-EnggFocus>` now has an option to mask out
+  several ranges in ToF (instrument pulses), with default values set
+  for ENGIN-X, and an option to normalize by proton charge (enabled by
+  default).
+
+- Phase information files for ENGIN-X are now distributed together
+  with the ENGIN-X scripts.
 
 Graphical user interface:
 
@@ -55,6 +69,12 @@ Graphical user interface:
 - :ref:`Preview-Engineering_Diffraction-ref` under Fitting tab, you can
   now view the plot in `dSpacing` instead `ToF`, which enables you to
   rerun the fitting process after selecting peaks from the interface.
+
+
+- The output calibration files will be written with the extension
+  ".prm" by default. Together with an "all-banks" calibration (GSAS
+  instrument parameters) file, an individual file for every focused
+  bank will be written.
 
 - Improvements to Fitting tab, Single peak fitting for consecutive run
   number's focused files has now been enabled. The tab will automatically load
