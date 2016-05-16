@@ -236,18 +236,21 @@ public:
     TS_ASSERT_EQUALS(false, sampleShape.isValid(V3D(0, 0.02, 0)));
   }
 
-  void xtest_Setting_Geometry_As_Annulus() {
+  void test_Setting_Geometry_As_HollowCylinder() {
+    using Mantid::Kernel::V3D;
     auto inputWS = WorkspaceCreationHelper::Create2DWorkspaceBinned(1, 1);
 
     auto alg = createAlgorithm();
     alg->setProperty("InputWorkspace", inputWS);
-    alg->setProperty("Geometry", createAnnulusGeometryProps());
+    alg->setProperty("Geometry", createHollowCylinderGeometryProps());
     TS_ASSERT_THROWS_NOTHING(alg->execute());
     TS_ASSERT(alg->isExecuted());
 
     // New shape
     const auto &sampleShape = inputWS->sample().getShape();
     TS_ASSERT(sampleShape.hasValidShape());
+    TS_ASSERT_EQUALS(true, sampleShape.isValid(V3D(0, 0.01, 0.035)));
+    TS_ASSERT_EQUALS(false, sampleShape.isValid(V3D(0, 0.02, 0)));
   }
 
   //----------------------------------------------------------------------------
@@ -408,13 +411,27 @@ private:
     return props;
   }
 
-  Mantid::Kernel::PropertyManager_sptr createAnnulusGeometryProps() {
+  Mantid::Kernel::PropertyManager_sptr createHollowCylinderGeometryProps() {
     using namespace Mantid::Kernel;
+    using DoubleArrayProperty = ArrayProperty<double>;
+    using DoubleProperty = PropertyWithValue<double>;
     using StringProperty = PropertyWithValue<std::string>;
 
     auto props = boost::make_shared<PropertyManager>();
     props->declareProperty(
-        Mantid::Kernel::make_unique<StringProperty>("Shape", "Annulus"), "");
+        Mantid::Kernel::make_unique<StringProperty>("Shape", "HollowCylinder"),
+        "");
+    props->declareProperty(
+        Mantid::Kernel::make_unique<DoubleProperty>("Height", 2), "");
+    props->declareProperty(
+        Mantid::Kernel::make_unique<DoubleProperty>("InnerRadius", 3), "");
+    props->declareProperty(
+        Mantid::Kernel::make_unique<DoubleProperty>("OuterRadius", 4), "");
+    std::vector<double> center{0, 0, 1};
+    props->declareProperty(
+        Mantid::Kernel::make_unique<DoubleArrayProperty>("Center", center), "");
+    props->declareProperty(
+        Mantid::Kernel::make_unique<DoubleProperty>("Axis", 1), "");
 
     return props;
   }

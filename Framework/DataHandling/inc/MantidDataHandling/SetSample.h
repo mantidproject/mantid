@@ -56,7 +56,8 @@ private:
   std::string tryCreateXMLFromArgsOnly(const Kernel::PropertyManager_sptr args);
   std::string createFlatPlateXML(const Kernel::PropertyManager &args) const;
   std::string createCylinderXML(const Kernel::PropertyManager &args) const;
-  std::string createAnnulusXML(const Kernel::PropertyManager &args) const;
+  std::string
+  createHollowCylinderXML(const Kernel::PropertyManager &args) const;
 
   void runSetSampleShape(API::MatrixWorkspace_sptr &workspace,
                          const std::string &xml);

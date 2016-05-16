@@ -232,12 +232,13 @@ SetSample::tryCreateXMLFromArgsOnly(const Kernel::PropertyManager_sptr args) {
     result = createFlatPlateXML(*args);
   } else if (shape == "Cylinder") {
     result = createCylinderXML(*args);
-  } else if (shape == "Annulus") {
-    result = createAnnulusXML(*args);
+  } else if (shape == "HollowCylinder") {
+    result = createHollowCylinderXML(*args);
   } else {
-    throw std::invalid_argument("Unknown 'Shape' argument provided in "
-                                "'Geometry'. Allowed "
-                                "values=FlatPlate,CSG,Cylinder,Annulus.");
+    throw std::invalid_argument(
+        "Unknown 'Shape' argument provided in "
+        "'Geometry'. Allowed "
+        "values=FlatPlate,CSG,Cylinder,HollowCylinder.");
   }
   return result;
 }
@@ -291,7 +292,6 @@ SetSample::createFlatPlateXML(const Kernel::PropertyManager &args) const {
  */
 std::string
 SetSample::createCylinderXML(const Kernel::PropertyManager &args) const {
-  // Y
   double height = args.getProperty("Height");
   double radius = args.getProperty("Radius");
   std::vector<double> center = args.getProperty("Center");
@@ -339,9 +339,48 @@ SetSample::createCylinderXML(const Kernel::PropertyManager &args) const {
  * @return The XML definition string
  */
 std::string
-SetSample::createAnnulusXML(const Kernel::PropertyManager &args) const {
-  UNUSED_ARG(args);
-  throw std::runtime_error("Not implemented");
+SetSample::createHollowCylinderXML(const Kernel::PropertyManager &args) const {
+  double height = args.getProperty("Height");
+  double innerRadius = args.getProperty("InnerRadius");
+  double outerRadius = args.getProperty("OuterRadius");
+  std::vector<double> center = args.getProperty("Center");
+  double axisDbl(1.0); // Default Axis is Y
+  if (args.existsProperty("Axis")) {
+    axisDbl = args.getProperty("Axis");
+    if (axisDbl < 0 || axisDbl > 2)
+      throw std::invalid_argument(
+          "Geometry.Axis value must be either 0,1,2 (X,Y,Z)");
+  }
+  size_t axisIdx = static_cast<size_t>(axisDbl);
+  // convert to metres
+  height *= 0.01;
+  innerRadius *= 0.01;
+  outerRadius *= 0.01;
+  std::transform(center.begin(), center.end(), center.begin(),
+                 [](double val) { return val *= 0.01; });
+  // Shift so that cylinder is centered at center position
+  const double cylinderBase = (-1e-03 * height) + center[axisIdx];
+
+  std::ostringstream xmlShapeStream;
+  xmlShapeStream << "<hollow-cylinder id=\"sample-shape\"> "
+                 << "<centre-of-bottom-base x=\"" << center[axisIdx]
+                 << "\" y=\"" << cylinderBase << "\" z=\"" << center[axisIdx]
+                 << "\" /> "
+                 << "<axis ";
+
+  if (axisIdx == 0)
+    xmlShapeStream << "x=\"1\" y=\"0\" z=\"0\" /> ";
+  else if (axisIdx == 1)
+    xmlShapeStream << "x=\"0\" y=\"1\" z=\"0\" /> ";
+  else
+    xmlShapeStream << "x=\"0\" y=\"0\" z=\"1\" /> ";
+
+  xmlShapeStream << "<inner-radius val=\"" << innerRadius << "\" /> "
+                 << "<outer-radius val=\"" << outerRadius << "\" /> "
+                 << "<height val=\"" << height << "\" /> "
+                 << "</hollow-cylinder>";
+
+  return xmlShapeStream.str();
 }
 
 /**
