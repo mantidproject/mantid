@@ -409,7 +409,7 @@ public:
 
   Mantid::MantidVec::value_type *operator()(Mantid::API::MatrixWorkspace_sptr,
                                             int index) {
-    auto isPointData = m_workspace->blocksize() == m_spectrumAxisValues.size();
+    auto isPointData = m_workspace->getNumberHistograms() == m_spectrumAxisValues.size();
     double value = 0;
     if (isPointData) {
       value = m_spectrumAxisValues[index];

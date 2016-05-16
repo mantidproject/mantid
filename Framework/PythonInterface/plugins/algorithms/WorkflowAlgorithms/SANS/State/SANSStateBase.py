@@ -14,11 +14,10 @@ class TypedParameter(object):
         self.validator = validator
 
     def __get__(self, instance, owner):
-        _owner = owner
         if instance is None:
             return self
         else:
-            return getattr(instance, self.name, self.value)
+            return getattr(instance, self.name)
 
     def __set__(self, instance, value):
         if not isinstance(value, self.parameter_type):
@@ -72,7 +71,25 @@ class PropertyManagerConverter(object):
 
     @staticmethod
     def convert_state_to_property_manager(instance):
-        # Get all descriptors of a class
+        descriptor_values = PropertyManagerConverter.get_descriptor_values(instance)
+
+        # Add the descriptors to a PropertyManager object
+        property_manager = PropertyManager()
+        for key in descriptor_values:
+            value = descriptor_values[key]
+            if value is not None:
+                property_manager.declareProperty(key, value)
+        return property_manager
+
+    @staticmethod
+    def convert_state_to_dict(instance):
+        descriptor_values = PropertyManagerConverter.get_descriptor_values(instance)
+        # Add the descriptors to a dict
+        return {key: value for key, value in descriptor_values.iteritems() if value is not None}
+
+    @staticmethod
+    def get_descriptor_values(instance):
+        # Get all descriptor names which are TypedParameter of instance's type
         descriptor_names = []
         for descriptor_name, descriptor_object in inspect.getmembers(type(instance)):
             if inspect.isdatadescriptor(descriptor_object) and isinstance(descriptor_object, TypedParameter):
@@ -83,12 +100,11 @@ class PropertyManagerConverter(object):
         for key in descriptor_names:
             value = getattr(instance, key)
             descriptor_values.update({key: value})
+        return descriptor_values
 
-        # Add the descriptors to a PropertyManager object
-        property_manager = PropertyManager()
-        for key in descriptor_values:
-            value = descriptor_values[key]
-            if value is not None:
-                property_manager.declareProperty(key, value)
-        return property_manager
-
+    @staticmethod
+    def set_state_from_property_manager(instance, property_manager):
+        keys = property_manager.keys()
+        for key in keys:
+            value = property_manager.getProperty(key).value
+            setattr(instance, key, value)

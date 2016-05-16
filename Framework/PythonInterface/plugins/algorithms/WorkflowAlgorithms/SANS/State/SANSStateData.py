@@ -36,7 +36,7 @@ class SANSStateDataISIS(SANSStateBase, SANSStateData):
 
     @property_manager.setter
     def property_manager(self, value):
-        pass
+        self.converter.set_state_from_property_manager(self, value)
 
     def validate(self):
         is_valid = dict()

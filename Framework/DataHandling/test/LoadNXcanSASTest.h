@@ -3,14 +3,14 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidDataHandling/LoadNXcanSAS.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Axis.h"
-#include "MantidAPI/Run.h"
-#include "MantidDataHandling/NXcanSASDefinitions.h"
-#include "NXcanSASTestHelper.h"
-#include "MantidKernel/Unit.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Run.h"
+#include "MantidDataHandling/LoadNXcanSAS.h"
+#include "MantidDataHandling/NXcanSASDefinitions.h"
+#include "MantidKernel/Unit.h"
+#include "NXcanSASTestHelper.h"
 
 using Mantid::DataHandling::LoadNXcanSAS;
 using namespace NXcanSASTestHelper;
@@ -366,12 +366,22 @@ private:
 
     auto length = axis1In->length();
 
-    // The numeric axis of wsIn is histo, while axisIn is point data
-    for (size_t index = 0; index < length - 1; ++index) {
-      TSM_ASSERT_DELTA(
-          "Axis 1 should have the same value",
-          (axis1In->getValue(index + 1) + axis1In->getValue(index)) / 2.0,
-          axis1Out->getValue(index), eps);
+    // The numeric axis of wsIn is histo or point data, while axisIn is point
+    // data
+    auto is_axis1_point_data = length == wsIn->getNumberHistograms();
+    if (is_axis1_point_data) {
+      for (size_t index = 0; index < length; ++index) {
+        TSM_ASSERT_DELTA("Axis 1 should have the same value",
+                         axis1In->getValue(index), axis1Out->getValue(index),
+                         eps);
+      }
+    } else {
+      for (size_t index = 0; index < length; ++index) {
+        TSM_ASSERT_DELTA(
+            "Axis 1 should have the same value",
+            (axis1In->getValue(index + 1) + axis1In->getValue(index)) / 2.0,
+            axis1Out->getValue(index), eps);
+      }
     }
   }
 
@@ -419,18 +429,21 @@ private:
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(transName);
 
     // Ensure that both have the same Y data
-    auto readDataY =
-        [](MatrixWorkspace_sptr ws, size_t index) { return ws->dataY(index); };
+    auto readDataY = [](MatrixWorkspace_sptr ws, size_t index) {
+      return ws->dataY(index);
+    };
     do_assert_data(transIn, transOut, readDataY);
 
     // Ensure that both have the same E data
-    auto readDataE =
-        [](MatrixWorkspace_sptr ws, size_t index) { return ws->dataE(index); };
+    auto readDataE = [](MatrixWorkspace_sptr ws, size_t index) {
+      return ws->dataE(index);
+    };
     do_assert_data(transIn, transOut, readDataE);
 
     // Ensure that both have the same X data
-    auto readDataX =
-        [](MatrixWorkspace_sptr ws, size_t index) { return ws->dataX(index); };
+    auto readDataX = [](MatrixWorkspace_sptr ws, size_t index) {
+      return ws->dataX(index);
+    };
     do_assert_data(transIn, transOut, readDataX);
   }
 
@@ -449,18 +462,21 @@ private:
     TSM_ASSERT("Should be a point workspace", !wsOut->isHistogramData());
 
     // Ensure that both have the same Y data
-    auto readDataY =
-        [](MatrixWorkspace_sptr ws, size_t index) { return ws->dataY(index); };
+    auto readDataY = [](MatrixWorkspace_sptr ws, size_t index) {
+      return ws->dataY(index);
+    };
     do_assert_data(wsIn, wsOut, readDataY);
 
     // Ensure that both have the same E data
-    auto readDataE =
-        [](MatrixWorkspace_sptr ws, size_t index) { return ws->dataE(index); };
+    auto readDataE = [](MatrixWorkspace_sptr ws, size_t index) {
+      return ws->dataE(index);
+    };
     do_assert_data(wsIn, wsOut, readDataE);
 
     // Ensure that both have the same X data
-    auto readDataX =
-        [](MatrixWorkspace_sptr ws, size_t index) { return ws->dataX(index); };
+    auto readDataX = [](MatrixWorkspace_sptr ws, size_t index) {
+      return ws->dataX(index);
+    };
     do_assert_data(wsIn, wsOut, readDataX);
 
     // If applicable, ensure that both have the same Xdev data

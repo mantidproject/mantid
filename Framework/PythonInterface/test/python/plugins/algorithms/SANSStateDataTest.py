@@ -65,19 +65,15 @@ class SANSStateDataTest(unittest.TestCase):
 
         state.sample_scatter = ws_name_sample
         state.sample_scatter_period = period
-        state.sample_can = ws_name_can
-        state.sample_can_period = period
+        state.can_scatter = ws_name_can
+        state.can_scatter_period = period
 
         # Act
         property_manager = state.property_manager
-        
+
         # Assert
-        print property_manager.propertyCount()
-        print property_manager.keys()
-        # print property_manager.getProperty("sample_scatter").value
-        # print property_manager.getProperty("sample_scatter_period").value
-        # print property_manager.getProperty("can_scatter").value
-        # print property_manager.getProperty("can_scatter_period").value
+        state_2 = SANSStateDataISIS()
+        state_2.property_manager = property_manager
         
 
 if __name__ == '__main__':
