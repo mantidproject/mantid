@@ -15,10 +15,13 @@
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/Strings.h"
 #include "MantidGeometry/Instrument/ComponentHelper.h"
+#include "MantidKernel/TimeSeriesProperty.h"
 
 #include <boost/regex.hpp>
 #include <boost/shared_array.hpp>
 #include <boost/lexical_cast.hpp>
+#include <boost/make_shared.hpp>
+#include <boost/shared_ptr.hpp>
 
 #include <Poco/Path.h>
 #include <MantidKernel/StringTokenizer.h>
@@ -196,21 +199,22 @@ void LoadSpice2D::exec() {
   std::string instrument = metadata["Header/Instrument"];
   runLoadInstrument(instrument, m_workspace);
 
+  // ugly hack for Biosans wing detector:
+  // it tests if there is metadata tagged with the wing detector
+  // if so, puts the detector in the right angle
+  if (metadata.find("Motor_Positions/det_west_wing_rot") != metadata.end()) {
+    double angle = boost::lexical_cast<double>(
+        metadata["Motor_Positions/det_west_wing_rot"]);
+    rotateDetector(-angle);
+    // To make the property is set and the detector rotates!
+    runLoadInstrument(instrument, m_workspace);
+  }
+
   // sample_detector_distances
   double detector_distance = detectorDistance(metadata);
   moveDetector(detector_distance);
 
-  // ugly hack for Biosans wing detector:
-  // it tests if there is metadata tagged with the wing detector
-  // if so, puts the detector in the right angle
-  if (metadata.find("Header/west_wing_det_dist") != metadata.end()) {
-    // found
-    double distance =
-        boost::lexical_cast<double>(metadata["Header/west_wing_det_dist"]);
-    double angle = boost::lexical_cast<double>(
-        metadata["Motor_Positions/det_west_wing_rot"]);
-    rotateDetector("wing_detector", distance, -angle);
-  }
+  setProperty("OutputWorkspace", m_workspace);
 }
 
 /**
@@ -353,7 +357,7 @@ void LoadSpice2D::createWorkspace(const std::vector<int> &data,
   m_workspace->setYUnit("");
   API::Workspace_sptr workspace =
       boost::static_pointer_cast<API::Workspace>(m_workspace);
-  setProperty("OutputWorkspace", workspace);
+  // setProperty("OutputWorkspace", workspace);
 
   int specID = 0;
   // Store monitor counts in the beggining
@@ -577,32 +581,18 @@ void LoadSpice2D::throwException(Poco::XML::Element *elem,
  *
  * @param angle in degrees
  */
-void LoadSpice2D::rotateDetector(const std::string &componentName,
-                                 const double &radius, const double &angle) {
+void LoadSpice2D::rotateDetector(const double &angle) {
 
-  const double distance = radius;
-  constexpr double deg2rad = M_PI / 180.0;
-  Geometry::Instrument_const_sptr instrument = m_workspace->getInstrument();
+  g_log.notice() << "Rotating Wing Detector " << angle << " degrees."
+                 << std::endl;
 
-  // detector position
-  Geometry::IComponent_const_sptr component =
-      instrument->getComponentByName(componentName);
-  V3D pos = component->getPos();
+  API::Run &runDetails = m_workspace->mutableRun();
+  auto *p = new Mantid::Kernel::TimeSeriesProperty<double>("rotangle");
+  //	auto p = boost::make_shared <Mantid::Kernel::TimeSeriesProperty<double>
+  //>("rotangle");
 
-  g_log.debug() << "Moving " << componentName << "; Pos = " << pos
-                << "; distance = " << distance << "." << std::endl;
-
-  double angle_rad = angle * deg2rad;
-  V3D newPos(distance * sin(angle_rad), pos.Y(), distance * cos(angle_rad));
-  Geometry::ParameterMap &pmap = m_workspace->instrumentParameters();
-  Geometry::ComponentHelper::moveComponent(*component, pmap, newPos,
-                                           Geometry::ComponentHelper::Relative);
-
-  // Apply a local rotation to stay perpendicular to the beam
-  const V3D axis(0.0, 1.0, 0.0);
-  Quat rotation(angle, axis);
-  Geometry::ComponentHelper::rotateComponent(
-      *component, pmap, rotation, Geometry::ComponentHelper::Relative);
+  p->addValue(DateAndTime::getCurrentTime(), angle);
+  runDetails.addLogData(p);
 }
 }
 }

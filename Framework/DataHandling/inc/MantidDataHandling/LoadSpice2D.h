@@ -114,7 +114,7 @@ private:
   void moveDetector(double sample_detector_distance);
   double detectorDistance(std::map<std::string, std::string> &metadata);
   void setMetadataAsRunProperties(std::map<std::string, std::string> &metadata);
-  void rotateDetector(const std::string &, const double &, const double &);
+  void rotateDetector(const double &);
 
   // Member variables:
   DataObjects::Workspace2D_sptr m_workspace;
