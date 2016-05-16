@@ -55,6 +55,9 @@ class GetIPTS(PythonAlgorithm):
 
         # convert to the path to the proposal
         location = filename.find('IPTS')
+        if location <= 0:
+            raise RuntimeError("Failed to determine IPTS directory "
+                               + "from path '%s'" % filename)
         location = filename.find('/', location)
         direc = filename[0:location+1]
         return direc
