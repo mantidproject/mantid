@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='ASCII'?>
-<instrument last-modified="2016-05-11 08:32:47.262521"
+<instrument last-modified="2016-05-16 16:43:36.344312"
 	name="BIOSANS"
 	valid-from="2016-04-22 00:00:00"
 	valid-to="2100-01-31 23:59:59"
@@ -72,6 +72,7 @@
 	
 	
 	<!-- ***************************************************************** -->
+	<!-- Wing Detector -->
 	
 	<!-- Detector list def -->
 	<idlist idname="wing_detector_ids">
@@ -91,7 +92,6 @@
 				</parameter>
 				<parameter name="t-position">
 					<logfile id="rotangle"  eq="0.0+value"/>
-<!--					<value val="-45"/-->
 				</parameter>
 				<parameter name="p-position">
 					<value val="0"/>
@@ -101,7 +101,6 @@
 				</parameter>
 				<parameter name="roty">
 					<logfile id="rotangle"  eq="0.0+value"/>
-<!--					<value val="-45"/-->
 				</parameter>
 				<parameter name="rotz">
 					<value val="0"/>
@@ -112,166 +111,167 @@
 	
 	<type name="wing_detector">
 		<component type="wing_tube">
+			
 			<location r="1.13" t="-0.0" name="wing_tube_0" />
-			<location r="1.13" t="-0.139436769195" name="wing_tube_1" />
-			<location r="1.13" t="-0.278873538391" name="wing_tube_2" />
-			<location r="1.13" t="-0.418310307586" name="wing_tube_3" />
-			<location r="1.13" t="-0.557747076782" name="wing_tube_4" />
-			<location r="1.13" t="-0.697183845977" name="wing_tube_5" />
-			<location r="1.13" t="-0.836620615172" name="wing_tube_6" />
-			<location r="1.13" t="-0.976057384368" name="wing_tube_7" />
-			<location r="1.13" t="-1.11549415356" name="wing_tube_8" />
-			<location r="1.13" t="-1.25493092276" name="wing_tube_9" />
-			<location r="1.13" t="-1.39436769195" name="wing_tube_10" />
-			<location r="1.13" t="-1.53380446115" name="wing_tube_11" />
-			<location r="1.13" t="-1.67324123034" name="wing_tube_12" />
-			<location r="1.13" t="-1.81267799954" name="wing_tube_13" />
-			<location r="1.13" t="-1.95211476874" name="wing_tube_14" />
-			<location r="1.13" t="-2.09155153793" name="wing_tube_15" />
-			<location r="1.13" t="-2.23098830713" name="wing_tube_16" />
-			<location r="1.13" t="-2.37042507632" name="wing_tube_17" />
-			<location r="1.13" t="-2.50986184552" name="wing_tube_18" />
-			<location r="1.13" t="-2.64929861471" name="wing_tube_19" />
-			<location r="1.13" t="-2.78873538391" name="wing_tube_20" />
-			<location r="1.13" t="-2.9281721531" name="wing_tube_21" />
-			<location r="1.13" t="-3.0676089223" name="wing_tube_22" />
-			<location r="1.13" t="-3.20704569149" name="wing_tube_23" />
-			<location r="1.13" t="-3.34648246069" name="wing_tube_24" />
-			<location r="1.13" t="-3.48591922989" name="wing_tube_25" />
-			<location r="1.13" t="-3.62535599908" name="wing_tube_26" />
-			<location r="1.13" t="-3.76479276828" name="wing_tube_27" />
-			<location r="1.13" t="-3.90422953747" name="wing_tube_28" />
-			<location r="1.13" t="-4.04366630667" name="wing_tube_29" />
-			<location r="1.13" t="-4.18310307586" name="wing_tube_30" />
-			<location r="1.13" t="-4.32253984506" name="wing_tube_31" />
-			<location r="1.13" t="-4.46197661425" name="wing_tube_32" />
-			<location r="1.13" t="-4.60141338345" name="wing_tube_33" />
-			<location r="1.13" t="-4.74085015264" name="wing_tube_34" />
-			<location r="1.13" t="-4.88028692184" name="wing_tube_35" />
-			<location r="1.13" t="-5.01972369103" name="wing_tube_36" />
-			<location r="1.13" t="-5.15916046023" name="wing_tube_37" />
-			<location r="1.13" t="-5.29859722943" name="wing_tube_38" />
-			<location r="1.13" t="-5.43803399862" name="wing_tube_39" />
-			<location r="1.13" t="-5.57747076782" name="wing_tube_40" />
-			<location r="1.13" t="-5.71690753701" name="wing_tube_41" />
-			<location r="1.13" t="-5.85634430621" name="wing_tube_42" />
-			<location r="1.13" t="-5.9957810754" name="wing_tube_43" />
-			<location r="1.13" t="-6.1352178446" name="wing_tube_44" />
-			<location r="1.13" t="-6.27465461379" name="wing_tube_45" />
-			<location r="1.13" t="-6.41409138299" name="wing_tube_46" />
-			<location r="1.13" t="-6.55352815218" name="wing_tube_47" />
-			<location r="1.13" t="-6.69296492138" name="wing_tube_48" />
-			<location r="1.13" t="-6.83240169058" name="wing_tube_49" />
-			<location r="1.13" t="-6.97183845977" name="wing_tube_50" />
-			<location r="1.13" t="-7.11127522897" name="wing_tube_51" />
-			<location r="1.13" t="-7.25071199816" name="wing_tube_52" />
-			<location r="1.13" t="-7.39014876736" name="wing_tube_53" />
-			<location r="1.13" t="-7.52958553655" name="wing_tube_54" />
-			<location r="1.13" t="-7.66902230575" name="wing_tube_55" />
-			<location r="1.13" t="-7.80845907494" name="wing_tube_56" />
-			<location r="1.13" t="-7.94789584414" name="wing_tube_57" />
-			<location r="1.13" t="-8.08733261333" name="wing_tube_58" />
-			<location r="1.13" t="-8.22676938253" name="wing_tube_59" />
-			<location r="1.13" t="-8.36620615172" name="wing_tube_60" />
-			<location r="1.13" t="-8.50564292092" name="wing_tube_61" />
-			<location r="1.13" t="-8.64507969012" name="wing_tube_62" />
-			<location r="1.13" t="-8.78451645931" name="wing_tube_63" />
-			<location r="1.13" t="-8.92395322851" name="wing_tube_64" />
-			<location r="1.13" t="-9.0633899977" name="wing_tube_65" />
-			<location r="1.13" t="-9.2028267669" name="wing_tube_66" />
-			<location r="1.13" t="-9.34226353609" name="wing_tube_67" />
-			<location r="1.13" t="-9.48170030529" name="wing_tube_68" />
-			<location r="1.13" t="-9.62113707448" name="wing_tube_69" />
-			<location r="1.13" t="-9.76057384368" name="wing_tube_70" />
-			<location r="1.13" t="-9.90001061287" name="wing_tube_71" />
-			<location r="1.13" t="-10.0394473821" name="wing_tube_72" />
-			<location r="1.13" t="-10.1788841513" name="wing_tube_73" />
-			<location r="1.13" t="-10.3183209205" name="wing_tube_74" />
-			<location r="1.13" t="-10.4577576897" name="wing_tube_75" />
-			<location r="1.13" t="-10.5971944589" name="wing_tube_76" />
-			<location r="1.13" t="-10.736631228" name="wing_tube_77" />
-			<location r="1.13" t="-10.8760679972" name="wing_tube_78" />
-			<location r="1.13" t="-11.0155047664" name="wing_tube_79" />
-			<location r="1.13" t="-11.1549415356" name="wing_tube_80" />
-			<location r="1.13" t="-11.2943783048" name="wing_tube_81" />
-			<location r="1.13" t="-11.433815074" name="wing_tube_82" />
-			<location r="1.13" t="-11.5732518432" name="wing_tube_83" />
-			<location r="1.13" t="-11.7126886124" name="wing_tube_84" />
-			<location r="1.13" t="-11.8521253816" name="wing_tube_85" />
-			<location r="1.13" t="-11.9915621508" name="wing_tube_86" />
-			<location r="1.13" t="-12.13099892" name="wing_tube_87" />
-			<location r="1.13" t="-12.2704356892" name="wing_tube_88" />
-			<location r="1.13" t="-12.4098724584" name="wing_tube_89" />
-			<location r="1.13" t="-12.5493092276" name="wing_tube_90" />
-			<location r="1.13" t="-12.6887459968" name="wing_tube_91" />
-			<location r="1.13" t="-12.828182766" name="wing_tube_92" />
-			<location r="1.13" t="-12.9676195352" name="wing_tube_93" />
-			<location r="1.13" t="-13.1070563044" name="wing_tube_94" />
-			<location r="1.13" t="-13.2464930736" name="wing_tube_95" />
-			<location r="1.13" t="-13.3859298428" name="wing_tube_96" />
-			<location r="1.13" t="-13.525366612" name="wing_tube_97" />
-			<location r="1.13" t="-13.6648033812" name="wing_tube_98" />
-			<location r="1.13" t="-13.8042401503" name="wing_tube_99" />
-			<location r="1.13" t="-13.9436769195" name="wing_tube_100" />
-			<location r="1.13" t="-14.0831136887" name="wing_tube_101" />
-			<location r="1.13" t="-14.2225504579" name="wing_tube_102" />
-			<location r="1.13" t="-14.3619872271" name="wing_tube_103" />
-			<location r="1.13" t="-14.5014239963" name="wing_tube_104" />
-			<location r="1.13" t="-14.6408607655" name="wing_tube_105" />
-			<location r="1.13" t="-14.7802975347" name="wing_tube_106" />
-			<location r="1.13" t="-14.9197343039" name="wing_tube_107" />
-			<location r="1.13" t="-15.0591710731" name="wing_tube_108" />
-			<location r="1.13" t="-15.1986078423" name="wing_tube_109" />
-			<location r="1.13" t="-15.3380446115" name="wing_tube_110" />
-			<location r="1.13" t="-15.4774813807" name="wing_tube_111" />
-			<location r="1.13" t="-15.6169181499" name="wing_tube_112" />
-			<location r="1.13" t="-15.7563549191" name="wing_tube_113" />
-			<location r="1.13" t="-15.8957916883" name="wing_tube_114" />
-			<location r="1.13" t="-16.0352284575" name="wing_tube_115" />
-			<location r="1.13" t="-16.1746652267" name="wing_tube_116" />
-			<location r="1.13" t="-16.3141019959" name="wing_tube_117" />
-			<location r="1.13" t="-16.4535387651" name="wing_tube_118" />
-			<location r="1.13" t="-16.5929755343" name="wing_tube_119" />
-			<location r="1.13" t="-16.7324123034" name="wing_tube_120" />
-			<location r="1.13" t="-16.8718490726" name="wing_tube_121" />
-			<location r="1.13" t="-17.0112858418" name="wing_tube_122" />
-			<location r="1.13" t="-17.150722611" name="wing_tube_123" />
-			<location r="1.13" t="-17.2901593802" name="wing_tube_124" />
-			<location r="1.13" t="-17.4295961494" name="wing_tube_125" />
-			<location r="1.13" t="-17.5690329186" name="wing_tube_126" />
-			<location r="1.13" t="-17.7084696878" name="wing_tube_127" />
-			<location r="1.13" t="-17.847906457" name="wing_tube_128" />
-			<location r="1.13" t="-17.9873432262" name="wing_tube_129" />
-			<location r="1.13" t="-18.1267799954" name="wing_tube_130" />
-			<location r="1.13" t="-18.2662167646" name="wing_tube_131" />
-			<location r="1.13" t="-18.4056535338" name="wing_tube_132" />
-			<location r="1.13" t="-18.545090303" name="wing_tube_133" />
-			<location r="1.13" t="-18.6845270722" name="wing_tube_134" />
-			<location r="1.13" t="-18.8239638414" name="wing_tube_135" />
-			<location r="1.13" t="-18.9634006106" name="wing_tube_136" />
-			<location r="1.13" t="-19.1028373798" name="wing_tube_137" />
-			<location r="1.13" t="-19.242274149" name="wing_tube_138" />
-			<location r="1.13" t="-19.3817109182" name="wing_tube_139" />
-			<location r="1.13" t="-19.5211476874" name="wing_tube_140" />
-			<location r="1.13" t="-19.6605844566" name="wing_tube_141" />
-			<location r="1.13" t="-19.8000212257" name="wing_tube_142" />
-			<location r="1.13" t="-19.9394579949" name="wing_tube_143" />
-			<location r="1.13" t="-20.0788947641" name="wing_tube_144" />
-			<location r="1.13" t="-20.2183315333" name="wing_tube_145" />
-			<location r="1.13" t="-20.3577683025" name="wing_tube_146" />
-			<location r="1.13" t="-20.4972050717" name="wing_tube_147" />
-			<location r="1.13" t="-20.6366418409" name="wing_tube_148" />
-			<location r="1.13" t="-20.7760786101" name="wing_tube_149" />
-			<location r="1.13" t="-20.9155153793" name="wing_tube_150" />
-			<location r="1.13" t="-21.0549521485" name="wing_tube_151" />
-			<location r="1.13" t="-21.1943889177" name="wing_tube_152" />
-			<location r="1.13" t="-21.3338256869" name="wing_tube_153" />
-			<location r="1.13" t="-21.4732624561" name="wing_tube_154" />
-			<location r="1.13" t="-21.6126992253" name="wing_tube_155" />
-			<location r="1.13" t="-21.7521359945" name="wing_tube_156" />
-			<location r="1.13" t="-21.8915727637" name="wing_tube_157" />
-			<location r="1.13" t="-22.0310095329" name="wing_tube_158" />
-			<location r="1.13" t="-22.1704463021" name="wing_tube_159" />
+			<location r="1.13" t="-0.278873538391" name="wing_tube_1" />
+			<location r="1.13" t="-0.557747076782" name="wing_tube_2" />
+			<location r="1.13" t="-0.836620615172" name="wing_tube_3" />
+			<location r="1.13" t="-1.11549415356" name="wing_tube_4" />
+			<location r="1.13" t="-1.39436769195" name="wing_tube_5" />
+			<location r="1.13" t="-1.67324123034" name="wing_tube_6" />
+			<location r="1.13" t="-1.95211476874" name="wing_tube_7" />
+			<location r="1.13" t="-2.23098830713" name="wing_tube_8" />
+			<location r="1.13" t="-2.50986184552" name="wing_tube_9" />
+			<location r="1.13" t="-2.78873538391" name="wing_tube_10" />
+			<location r="1.13" t="-3.0676089223" name="wing_tube_11" />
+			<location r="1.13" t="-3.34648246069" name="wing_tube_12" />
+			<location r="1.13" t="-3.62535599908" name="wing_tube_13" />
+			<location r="1.13" t="-3.90422953747" name="wing_tube_14" />
+			<location r="1.13" t="-4.18310307586" name="wing_tube_15" />
+			<location r="1.13" t="-4.46197661425" name="wing_tube_16" />
+			<location r="1.13" t="-4.74085015264" name="wing_tube_17" />
+			<location r="1.13" t="-5.01972369103" name="wing_tube_18" />
+			<location r="1.13" t="-5.29859722943" name="wing_tube_19" />
+			<location r="1.13" t="-5.57747076782" name="wing_tube_20" />
+			<location r="1.13" t="-5.85634430621" name="wing_tube_21" />
+			<location r="1.13" t="-6.1352178446" name="wing_tube_22" />
+			<location r="1.13" t="-6.41409138299" name="wing_tube_23" />
+			<location r="1.13" t="-6.69296492138" name="wing_tube_24" />
+			<location r="1.13" t="-6.97183845977" name="wing_tube_25" />
+			<location r="1.13" t="-7.25071199816" name="wing_tube_26" />
+			<location r="1.13" t="-7.52958553655" name="wing_tube_27" />
+			<location r="1.13" t="-7.80845907494" name="wing_tube_28" />
+			<location r="1.13" t="-8.08733261333" name="wing_tube_29" />
+			<location r="1.13" t="-8.36620615172" name="wing_tube_30" />
+			<location r="1.13" t="-8.64507969012" name="wing_tube_31" />
+			<location r="1.13" t="-8.92395322851" name="wing_tube_32" />
+			<location r="1.13" t="-9.2028267669" name="wing_tube_33" />
+			<location r="1.13" t="-9.48170030529" name="wing_tube_34" />
+			<location r="1.13" t="-9.76057384368" name="wing_tube_35" />
+			<location r="1.13" t="-10.0394473821" name="wing_tube_36" />
+			<location r="1.13" t="-10.3183209205" name="wing_tube_37" />
+			<location r="1.13" t="-10.5971944589" name="wing_tube_38" />
+			<location r="1.13" t="-10.8760679972" name="wing_tube_39" />
+			<location r="1.13" t="-11.1549415356" name="wing_tube_40" />
+			<location r="1.13" t="-11.433815074" name="wing_tube_41" />
+			<location r="1.13" t="-11.7126886124" name="wing_tube_42" />
+			<location r="1.13" t="-11.9915621508" name="wing_tube_43" />
+			<location r="1.13" t="-12.2704356892" name="wing_tube_44" />
+			<location r="1.13" t="-12.5493092276" name="wing_tube_45" />
+			<location r="1.13" t="-12.828182766" name="wing_tube_46" />
+			<location r="1.13" t="-13.1070563044" name="wing_tube_47" />
+			<location r="1.13" t="-13.3859298428" name="wing_tube_48" />
+			<location r="1.13" t="-13.6648033812" name="wing_tube_49" />
+			<location r="1.13" t="-13.9436769195" name="wing_tube_50" />
+			<location r="1.13" t="-14.2225504579" name="wing_tube_51" />
+			<location r="1.13" t="-14.5014239963" name="wing_tube_52" />
+			<location r="1.13" t="-14.7802975347" name="wing_tube_53" />
+			<location r="1.13" t="-15.0591710731" name="wing_tube_54" />
+			<location r="1.13" t="-15.3380446115" name="wing_tube_55" />
+			<location r="1.13" t="-15.6169181499" name="wing_tube_56" />
+			<location r="1.13" t="-15.8957916883" name="wing_tube_57" />
+			<location r="1.13" t="-16.1746652267" name="wing_tube_58" />
+			<location r="1.13" t="-16.4535387651" name="wing_tube_59" />
+			<location r="1.13" t="-16.7324123034" name="wing_tube_60" />
+			<location r="1.13" t="-17.0112858418" name="wing_tube_61" />
+			<location r="1.13" t="-17.2901593802" name="wing_tube_62" />
+			<location r="1.13" t="-17.5690329186" name="wing_tube_63" />
+			<location r="1.13" t="-17.847906457" name="wing_tube_64" />
+			<location r="1.13" t="-18.1267799954" name="wing_tube_65" />
+			<location r="1.13" t="-18.4056535338" name="wing_tube_66" />
+			<location r="1.13" t="-18.6845270722" name="wing_tube_67" />
+			<location r="1.13" t="-18.9634006106" name="wing_tube_68" />
+			<location r="1.13" t="-19.242274149" name="wing_tube_69" />
+			<location r="1.13" t="-19.5211476874" name="wing_tube_70" />
+			<location r="1.13" t="-19.8000212257" name="wing_tube_71" />
+			<location r="1.13" t="-20.0788947641" name="wing_tube_72" />
+			<location r="1.13" t="-20.3577683025" name="wing_tube_73" />
+			<location r="1.13" t="-20.6366418409" name="wing_tube_74" />
+			<location r="1.13" t="-20.9155153793" name="wing_tube_75" />
+			<location r="1.13" t="-21.1943889177" name="wing_tube_76" />
+			<location r="1.13" t="-21.4732624561" name="wing_tube_77" />
+			<location r="1.13" t="-21.7521359945" name="wing_tube_78" />
+			<location r="1.13" t="-22.0310095329" name="wing_tube_79" />
+			<location r="1.13" t="-22.3098830713" name="wing_tube_80" />
+			<location r="1.13" t="-22.5887566097" name="wing_tube_81" />
+			<location r="1.13" t="-22.867630148" name="wing_tube_82" />
+			<location r="1.13" t="-23.1465036864" name="wing_tube_83" />
+			<location r="1.13" t="-23.4253772248" name="wing_tube_84" />
+			<location r="1.13" t="-23.7042507632" name="wing_tube_85" />
+			<location r="1.13" t="-23.9831243016" name="wing_tube_86" />
+			<location r="1.13" t="-24.26199784" name="wing_tube_87" />
+			<location r="1.13" t="-24.5408713784" name="wing_tube_88" />
+			<location r="1.13" t="-24.8197449168" name="wing_tube_89" />
+			<location r="1.13" t="-25.0986184552" name="wing_tube_90" />
+			<location r="1.13" t="-25.3774919936" name="wing_tube_91" />
+			<location r="1.13" t="-25.656365532" name="wing_tube_92" />
+			<location r="1.13" t="-25.9352390703" name="wing_tube_93" />
+			<location r="1.13" t="-26.2141126087" name="wing_tube_94" />
+			<location r="1.13" t="-26.4929861471" name="wing_tube_95" />
+			<location r="1.13" t="-26.7718596855" name="wing_tube_96" />
+			<location r="1.13" t="-27.0507332239" name="wing_tube_97" />
+			<location r="1.13" t="-27.3296067623" name="wing_tube_98" />
+			<location r="1.13" t="-27.6084803007" name="wing_tube_99" />
+			<location r="1.13" t="-27.8873538391" name="wing_tube_100" />
+			<location r="1.13" t="-28.1662273775" name="wing_tube_101" />
+			<location r="1.13" t="-28.4451009159" name="wing_tube_102" />
+			<location r="1.13" t="-28.7239744543" name="wing_tube_103" />
+			<location r="1.13" t="-29.0028479926" name="wing_tube_104" />
+			<location r="1.13" t="-29.281721531" name="wing_tube_105" />
+			<location r="1.13" t="-29.5605950694" name="wing_tube_106" />
+			<location r="1.13" t="-29.8394686078" name="wing_tube_107" />
+			<location r="1.13" t="-30.1183421462" name="wing_tube_108" />
+			<location r="1.13" t="-30.3972156846" name="wing_tube_109" />
+			<location r="1.13" t="-30.676089223" name="wing_tube_110" />
+			<location r="1.13" t="-30.9549627614" name="wing_tube_111" />
+			<location r="1.13" t="-31.2338362998" name="wing_tube_112" />
+			<location r="1.13" t="-31.5127098382" name="wing_tube_113" />
+			<location r="1.13" t="-31.7915833766" name="wing_tube_114" />
+			<location r="1.13" t="-32.0704569149" name="wing_tube_115" />
+			<location r="1.13" t="-32.3493304533" name="wing_tube_116" />
+			<location r="1.13" t="-32.6282039917" name="wing_tube_117" />
+			<location r="1.13" t="-32.9070775301" name="wing_tube_118" />
+			<location r="1.13" t="-33.1859510685" name="wing_tube_119" />
+			<location r="1.13" t="-33.4648246069" name="wing_tube_120" />
+			<location r="1.13" t="-33.7436981453" name="wing_tube_121" />
+			<location r="1.13" t="-34.0225716837" name="wing_tube_122" />
+			<location r="1.13" t="-34.3014452221" name="wing_tube_123" />
+			<location r="1.13" t="-34.5803187605" name="wing_tube_124" />
+			<location r="1.13" t="-34.8591922989" name="wing_tube_125" />
+			<location r="1.13" t="-35.1380658372" name="wing_tube_126" />
+			<location r="1.13" t="-35.4169393756" name="wing_tube_127" />
+			<location r="1.13" t="-35.695812914" name="wing_tube_128" />
+			<location r="1.13" t="-35.9746864524" name="wing_tube_129" />
+			<location r="1.13" t="-36.2535599908" name="wing_tube_130" />
+			<location r="1.13" t="-36.5324335292" name="wing_tube_131" />
+			<location r="1.13" t="-36.8113070676" name="wing_tube_132" />
+			<location r="1.13" t="-37.090180606" name="wing_tube_133" />
+			<location r="1.13" t="-37.3690541444" name="wing_tube_134" />
+			<location r="1.13" t="-37.6479276828" name="wing_tube_135" />
+			<location r="1.13" t="-37.9268012212" name="wing_tube_136" />
+			<location r="1.13" t="-38.2056747595" name="wing_tube_137" />
+			<location r="1.13" t="-38.4845482979" name="wing_tube_138" />
+			<location r="1.13" t="-38.7634218363" name="wing_tube_139" />
+			<location r="1.13" t="-39.0422953747" name="wing_tube_140" />
+			<location r="1.13" t="-39.3211689131" name="wing_tube_141" />
+			<location r="1.13" t="-39.6000424515" name="wing_tube_142" />
+			<location r="1.13" t="-39.8789159899" name="wing_tube_143" />
+			<location r="1.13" t="-40.1577895283" name="wing_tube_144" />
+			<location r="1.13" t="-40.4366630667" name="wing_tube_145" />
+			<location r="1.13" t="-40.7155366051" name="wing_tube_146" />
+			<location r="1.13" t="-40.9944101435" name="wing_tube_147" />
+			<location r="1.13" t="-41.2732836818" name="wing_tube_148" />
+			<location r="1.13" t="-41.5521572202" name="wing_tube_149" />
+			<location r="1.13" t="-41.8310307586" name="wing_tube_150" />
+			<location r="1.13" t="-42.109904297" name="wing_tube_151" />
+			<location r="1.13" t="-42.3887778354" name="wing_tube_152" />
+			<location r="1.13" t="-42.6676513738" name="wing_tube_153" />
+			<location r="1.13" t="-42.9465249122" name="wing_tube_154" />
+			<location r="1.13" t="-43.2253984506" name="wing_tube_155" />
+			<location r="1.13" t="-43.504271989" name="wing_tube_156" />
+			<location r="1.13" t="-43.7831455274" name="wing_tube_157" />
+			<location r="1.13" t="-44.0620190658" name="wing_tube_158" />
+			<location r="1.13" t="-44.3408926041" name="wing_tube_159" />
 		</component>
 	</type>
 	
