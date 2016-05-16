@@ -1188,7 +1188,6 @@ void LoadEventNexus::init() {
                   "then it is in the auto mode such that any existing monitor "
                   "will be loaded.");
 
-
   declareProperty(make_unique<PropertyWithValue<double>>(
                       "FilterMonByTofMin", EMPTY_DBL(), Direction::Input),
                   "Optional: To exclude events from monitors that do not fall "
