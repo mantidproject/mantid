@@ -50,7 +50,21 @@ public:
                   bool have_weight, boost::shared_array<float> event_weight,
                   detid_t min_event_id, detid_t max_event_id);
 
+  void compressEvents(bool compress, bool pulsetimesincreasing,
+                      const std::vector<bool> &usedDetIds);
+
+  // bool findPulseTime(int &pulse_i, int numPulses);
+
   void run();
+
+  // Pre-counting events per pixel ID
+  void precountEvents();
+
+  void processEvents(int numPulses, int pulse_i, bool compress,
+                     bool &pulsetimesincreasing, double &my_shortest_tof,
+                     double &my_longest_tof, size_t &badTofs,
+                     size_t &my_discarded_events,
+                     std::vector<bool> &usedDetIds);
 
 private:
   /// Algorithm being run
