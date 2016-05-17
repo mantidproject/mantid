@@ -875,6 +875,9 @@ def PEARL_createvan(van, empty, ext="raw", fmode="all", ttmode="TT88",
     mode = fmode
     tt_mode = ttmode
 
+    # tt_mode set here will not be used within the function but instead when the PEARL_calibfiles()
+    # is called it will return the correct tt_mode files.
+
     PEARL_getcycle(van)
     PEARL_getcalibfiles()
     wvan = "wvan"
@@ -1164,7 +1167,8 @@ def PEARL_createvan(van, empty, ext="raw", fmode="all", ttmode="TT88",
     return
 
 
-def PEARL_createcal(calruns, noffsetfile="C:\PEARL\\pearl_offset_11_2.cal"):
+def PEARL_createcal(calruns, noffsetfile="C:\PEARL\\pearl_offset_11_2.cal",
+                    groupfile="P:\Mantid\\Calibration\\pearl_group_11_2_TT88.cal"):
     PEARL_getcycle(calruns)
 
     print "Instrument version is ", instver
@@ -1254,6 +1258,8 @@ def PEARL_createcal_Si(calruns, noffsetfile="C:\PEARL\\pearl_offset_11_2.cal"):
 
 
 def PEARL_creategroup(calruns, ngroupfile="C:\PEARL\\test_cal_group_11_1.cal", ngroup="bank1,bank2,bank3,bank4"):
+    PEARL_getcycle(calruns)
+
     wcal = "cal_raw"
     PEARL_read(calruns, "raw", wcal)
     ConvertUnits(InputWorkspace=wcal, OutputWorkspace="cal_inD", Target="dSpacing")

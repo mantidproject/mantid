@@ -145,7 +145,8 @@ ConfigServiceImpl::ConfigServiceImpl()
       m_user_properties_file_name("Mantid.user.properties"),
 #endif
       m_DataSearchDirs(), m_UserSearchDirs(), m_InstrumentDirs(),
-      m_instr_prefixes(), m_proxyInfo(), m_isProxySet(false) {
+      m_instr_prefixes(), m_proxyInfo(), m_isProxySet(false),
+      m_filterChannels() {
   // getting at system details
   m_pSysConfig = new WrappedObject<Poco::Util::SystemConfiguration>;
   m_pConf = nullptr;
@@ -362,6 +363,21 @@ bool ConfigServiceImpl::readFile(const std::string &filename,
   return good;
 }
 
+/** Registers additional logging filter channels
+* @param filterChannelName The name to refer to the filter channel, this should
+* be unique
+* @param pChannel a pointer to the channel to be registered, if blank, then the
+* channel must already be registered with the logging registry in Poco
+*/
+void ConfigServiceImpl::registerLoggingFilterChannel(
+    const std::string &filterChannelName, Poco::Channel *pChannel) {
+  m_filterChannels.push_back(filterChannelName);
+  if (pChannel) {
+    Poco::LoggingRegistry::defaultRegistry().registerChannel(filterChannelName,
+                                                             pChannel);
+  }
+}
+
 /** Configures the Poco logging and starts it up
  *
  */
@@ -457,6 +473,10 @@ void ConfigServiceImpl::configureLogging() {
     std::cerr << "Trouble configuring the logging framework " << e.what()
               << std::endl;
   }
+
+  // register the filter channels - the order here is important
+  registerLoggingFilterChannel("fileFilterChannel", nullptr);
+  registerLoggingFilterChannel("consoleFilterChannel", nullptr);
 }
 
 /**
@@ -1952,13 +1972,13 @@ Kernel::ProxyInfo &ConfigServiceImpl::getProxy(const std::string &url) {
 * @param logLevel the integer value of the log level to set, 1=Critical, 7=Debug
 */
 void ConfigServiceImpl::setFileLogLevel(int logLevel) {
-  setFilterChannelLogLevel("fileFilterChannel", logLevel);
+  setFilterChannelLogLevel(m_filterChannels[0], logLevel);
 }
 /** Sets the log level priority for the Console log channel
 * @param logLevel the integer value of the log level to set, 1=Critical, 7=Debug
 */
 void ConfigServiceImpl::setConsoleLogLevel(int logLevel) {
-  setFilterChannelLogLevel("consoleFilterChannel", logLevel);
+  setFilterChannelLogLevel(m_filterChannels[1], logLevel);
 }
 
 /** Sets the Log level for a filter channel
@@ -1981,10 +2001,11 @@ void ConfigServiceImpl::setFilterChannelLogLevel(
   auto *filterChannel = dynamic_cast<Poco::FilterChannel *>(channel);
   if (filterChannel) {
     filterChannel->setPriority(logLevel);
+    int lowestLogLevel = FindLowestFilterLevel();
     // set root level if required
     int rootLevel = Poco::Logger::root().getLevel();
-    if (rootLevel < logLevel) {
-      Mantid::Kernel::Logger::setLevelForAll(logLevel);
+    if (rootLevel != lowestLogLevel) {
+      Mantid::Kernel::Logger::setLevelForAll(lowestLogLevel);
     }
     g_log.log(filterChannelName + " log channel set to " +
                   Logger::PriorityNames[logLevel] + " priority",
@@ -1995,6 +2016,30 @@ void ConfigServiceImpl::setFilterChannelLogLevel(
   }
 }
 
+/** Finds the lowest Log level for all registered filter channels
+*/
+int ConfigServiceImpl::FindLowestFilterLevel() const {
+  int lowestPriority = Logger::Priority::PRIO_FATAL;
+  // Find the lowest level of all of the filter channels
+  for (const auto filterChannelName : m_filterChannels) {
+    try {
+      auto *channel = Poco::LoggingRegistry::defaultRegistry().channelForName(
+          filterChannelName);
+      auto *filterChannel = dynamic_cast<Poco::FilterChannel *>(channel);
+      if (filterChannel) {
+        int filterPriority = filterChannel->getPriority();
+        if (filterPriority > lowestPriority) {
+          lowestPriority = filterPriority;
+        }
+      }
+    } catch (Poco::NotFoundException &) {
+      g_log.warning(filterChannelName +
+                    " registered log filter channel not found");
+    }
+  }
+
+  return lowestPriority;
+}
 /// \cond TEMPLATE
 template DLLExport int ConfigServiceImpl::getValue(const std::string &,
                                                    double &);

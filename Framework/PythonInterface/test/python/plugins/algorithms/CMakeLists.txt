@@ -46,6 +46,7 @@ set ( TEST_PY_FILES
   IndirectTransmissionMonitorTest.py
   ILLIN16BCalibrationTest.py
   IqtFitMultipleTest.py
+  IqtFitSequentialTest.py
   ISISIndirectDiffractionReductionTest.py
   ISISIndirectEnergyTransferTest.py
   LoadDNSLegacyTest.py
@@ -70,6 +71,7 @@ set ( TEST_PY_FILES
   RetrieveRunInfoTest.py
   SANSFitShiftScaleTest.py
   SANSWideAngleCorrectionTest.py
+  SaveNexusPDTest.py
   SavePlot1DTest.py
   SavePlot1DAsJsonTest.py
   SaveVulcanGSSTest.py

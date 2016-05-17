@@ -1,12 +1,14 @@
-#include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/StructuredDetector.h"
+#include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidGeometry/Objects/Object.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
+#include "MantidGeometry/Rendering/GluGeometryHandler.h"
 #include "MantidGeometry/Rendering/StructuredGeometryHandler.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Matrix.h"
 #include <algorithm>
+#include <boost/make_shared.hpp>
 #include <boost/regex.hpp>
 #include <ostream>
 #include <stdexcept>
@@ -273,6 +275,7 @@ std::vector<double> const &StructuredDetector::getYValues() const {
 * @param yPixels :: number of pixels in Y
 * @param x :: X vertices
 * @param y :: Y vertices
+* @param isZBeam :: Whether or not the alongBeam axis is z
 * @param idStart :: detector ID of the first pixel
 * @param idFillByFirstY :: set to true if ID numbers increase with Y indices
 *first. That is: (0,0)=0; (0,1)=1, (0,2)=2 and so on.
@@ -287,7 +290,7 @@ std::vector<double> const &StructuredDetector::getYValues() const {
 */
 void StructuredDetector::initialize(size_t xPixels, size_t yPixels,
                                     const std::vector<double> &x,
-                                    const std::vector<double> &y,
+                                    const std::vector<double> &y, bool isZBeam,
                                     detid_t idStart, bool idFillByFirstY,
                                     int idStepByRow, int idStep) {
   if (m_map)
@@ -319,6 +322,10 @@ void StructuredDetector::initialize(size_t xPixels, size_t yPixels,
   if (x.size() != (size_t)((m_xPixels + 1) * (m_yPixels + 1)))
     throw std::invalid_argument("StructuredDetector::initialize(): x.size() "
                                 "should be = (xPixels+1)*(yPixels+1)");
+  if (!isZBeam) // StructuredDetector only allows z-axis aligned beams.
+    throw std::invalid_argument("Expecting reference_frame to provide z as "
+                                "beam axis. StructuredDetecor only allows "
+                                "z-axis aligned beams.");
 
   // Store vertices
   m_xvalues = x;
@@ -366,56 +373,6 @@ void StructuredDetector::createDetectors() {
   m_maxDetId = maxDetId;
 }
 
-boost::shared_ptr<Mantid::Geometry::Object>
-streamShape(const std::string &name, double xlb, double xlf, double xrf,
-            double xrb, double ylb, double ylf, double yrf, double yrb) {
-
-  std::ostringstream shapestr;
-
-  // Create XML shape used to describe detector pixel
-  shapestr << "<type name=\"userShape\" >";
-  shapestr << "<hexahedron id=\"" << name << "\" >";
-  shapestr << "<left-back-bottom-point x=\"" << xlb << "\""
-           << " y=\"" << ylb << "\""
-           << " z=\"0\" />";
-  shapestr << "<left-front-bottom-point x=\"" << xlf << "\""
-           << " y=\"" << ylf << "\""
-           << " z=\"0\" />";
-  shapestr << "<right-front-bottom-point x=\"" << xrf << "\""
-           << " y=\"" << yrf << "\""
-           << " z=\"0\" />";
-  shapestr << "<right-back-bottom-point x=\"" << xrb << "\""
-           << " y=\"" << yrb << "\""
-           << " z=\"0\" />";
-  shapestr << "<left-back-top-point x=\"" << xlb << "\""
-           << " y=\"" << ylb << "\""
-           << " z=\"0.001\" />";
-  shapestr << "<left-front-top-point x=\"" << xlf << "\""
-           << " y=\"" << ylf << "\""
-           << " z=\"0.001\" />";
-  shapestr << "<right-front-top-point x=\"" << xrf << "\""
-           << " y=\"" << yrf << "\""
-           << " z=\"0.001\" />";
-  shapestr << "<right-back-top-point x=\"" << xrb << "\""
-           << " y=\"" << yrb << "\""
-           << " z=\"0.001\" />";
-  shapestr << "</hexahedron>";
-  shapestr << "<bounding-box>";
-  shapestr << "<x-min val=\"" << std::min(xlf, xlb) << "\" />";
-  shapestr << "<x-max val=\"" << std::max(xrb, xrf) << "\" />";
-  shapestr << "<y-min val=\"" << ylb << "\" />";
-  shapestr << "<y-max val=\"" << yrf << "\" />";
-  shapestr << "<z-min val=\"0\" />";
-  shapestr << "<z-max val=\"0.001\" />";
-  shapestr << "</bounding-box>";
-  shapestr << "<algebra val=\"" << name << "\" />";
-  shapestr << "</type>";
-
-  Mantid::Geometry::ShapeFactory shapeCreator;
-
-  return shapeCreator.createShape(shapestr.str(), false);
-}
-
 /** Creates new hexahedral detector pixel at row x column y using the
 *   detector vertex values.
 * @param parent :: The parent component assembly
@@ -461,8 +418,9 @@ Detector *StructuredDetector::addDetector(CompAssembly *parent,
   yrb -= ypos;
   ylb -= ypos;
 
+  ShapeFactory factory;
   boost::shared_ptr<Mantid::Geometry::Object> shape =
-      streamShape(name, xlb, xlf, xrf, xrb, ylb, ylf, yrf, yrb);
+      factory.createHexahedralShape(xlb, xlf, xrf, xrb, ylb, ylf, yrf, yrb);
 
   // Create detector
   auto detector = new Detector(name, id, shape, parent);

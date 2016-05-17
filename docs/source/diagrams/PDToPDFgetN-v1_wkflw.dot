@@ -1,5 +1,5 @@
-digraph AlignAndFocusPowder {
-  label="AlignAndFocusPowder Flowchart"
+digraph PDToPDFgetN {
+  label="PDToPDFgetN Flowchart"
   $global_style
 
   subgraph params {

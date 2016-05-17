@@ -197,7 +197,16 @@ public:
     TS_ASSERT_EQUALS(data2[8], "one");
     TS_ASSERT_EQUALS(data2[9], "zero");
   }
-
+  void test_clone_table_column() {
+    const size_t n = 2;
+    TableWorkspace ws(n);
+    ws.addColumn("int", "col1");
+    ws.addColumn("str", "col2");
+    auto clonedColInt = ws.getColumn("col1")->clone();
+    auto clonedColStr = ws.getColumn("col2")->clone();
+    TS_ASSERT_EQUALS(clonedColInt->type(), "int");
+    TS_ASSERT_EQUALS(clonedColStr->type(), "str");
+  }
   void test_sortValues_by_two_keys() {
     const size_t n = 10;
     TableWorkspace ws(n);

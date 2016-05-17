@@ -116,10 +116,9 @@ public:
   void runConvetUnitsAlg(std::string workspaceName);
 
   void runCloneWorkspaceAlg(std::string inputWorkspace,
-                            std::string outputWorkspace);
+                            const std::string &outputWorkspace);
 
-  void setDataToClonedWS(std::string inputWorkspace,
-                         std::string outputWorkspace);
+  void setDataToClonedWS(std::string &current_WS, const std::string &cloned_WS);
 
 protected:
   void initialize();
@@ -149,6 +148,7 @@ protected slots:
   void focusingFinished();
   void rebinningFinished();
   void fittingFinished();
+  void fittingRunNoChanged();
 
 private:
   bool validateRBNumber(const std::string &rbn) const;
@@ -159,7 +159,8 @@ private:
                                   const std::string &newCeriaNo);
 
   std::string outputCalibFilename(const std::string &vanNo,
-                                  const std::string &ceriaNo);
+                                  const std::string &ceriaNo,
+                                  const std::string &bankName = "");
 
   void parseCalibrateFilename(const std::string &path, std::string &instName,
                               std::string &vanNo, std::string &ceriaNo);
@@ -174,8 +175,10 @@ private:
                const std::string &ceriaNo, const std::string &outFilename,
                const std::string &specNos);
 
-  std::string buildCalibrateSuggestedFilename(const std::string &vanNo,
-                                              const std::string &ceriaNo) const;
+  std::string
+  buildCalibrateSuggestedFilename(const std::string &vanNo,
+                                  const std::string &ceriaNo,
+                                  const std::string &bankName = "") const;
 
   //@}
 
@@ -275,6 +278,13 @@ private:
   void inputChecksBeforeFitting(const std::string &focusedRunNo,
                                 const std::string &ExpectedPeaks);
 
+  void updateFittingDirVec(const std::string &bankDir,
+                           const std::string &focusedFile, const bool multi_run,
+                           std::vector<std::string> &fittingRunNoDirVec);
+
+  void enableMultiRun(std::string firstRun, std::string lastRun,
+                      std::vector<std::string> &fittingRunNoDirVec);
+
   // plots workspace according to the user selection
   void plotFocusedWorkspace(std::string outWSName);
 
@@ -305,6 +315,12 @@ private:
 
   std::string
   plotDifcZeroWorkspace(const std::string &customisedBankName) const;
+
+  void writeOutCalibFile(const std::string &outFilename,
+                         const std::vector<double> &difc,
+                         const std::vector<double> &tzero,
+                         const std::vector<std::string> &bankNames,
+                         const std::string &templateFile = "");
 
   /// keep track of the paths the user "browses to", to add them in
   /// the file search path
@@ -344,6 +360,9 @@ private:
 
   /// true if the last calibration completed successfully
   bool m_calibFinishedOK;
+  /// path where the calibration has been produced (par/prm file)
+  std::string m_calibFullPath;
+
   /// true if the last focusing completed successfully
   bool m_focusFinishedOK;
   /// true if the last pre-processing/re-binning completed successfully

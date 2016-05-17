@@ -28,15 +28,19 @@ New
    :ref:`GetDetOffsetsMultiPeaks <algm-GetDetOffsetsMultiPeaks>`, :ref:`CalibrateRectangularDetectors <algm-CalibrateRectangularDetectors>`, *et al* and
    minimizes the difference between the *DIFC* of the instrument and
    calibration by moving and rotating instrument components.
+
+- :ref:`CorrectTOF <algm-CorrectTOF>` applies to the time-of-flight correction which considers the specified elastic peak position.
+
 - :ref:`EnggFitDIFCFromPeaks <algm-AlignComponents>` fits GSAS calibration
   parameters (DIFA, DIFC, TZERO) from peaks fitted using
   :ref:`EnggFitPeaks <algm-EnggFitPeaks>`.
 - :ref:`FindEPP <algm-FindEPP>` This algorithm performs Gaussian fit to find the elastic peak position.
   As a result, `TableWorkspace <http://www.mantidproject.org/TableWorkspace>`_ with parameters of the fitted peaks is created.
+- :ref:`GetIPTS <algm-GetIPTS>` Returns the IPTS directory of the specified ORNL run.
 - :ref:`ImggAggregateWavelengths <algm-ImggAggregateWavelengths>`
    aggregates stacks of images from wavelength dependent imaging
    into one or more output bands.
-- :ref:`CorrectTOF <algm-CorrectTOF>` applies to the time-of-flight correction which considers the specified elastic peak position.
+- :ref:`SaveFITS <algm-SaveFITS>` saves images in FITS format.
 
 Renamed
 #######
@@ -49,10 +53,13 @@ Renamed
 Improved
 ########
 
--  :ref:`EnggCalibrate <algm-EnggCalibrate>`
-   has a new output property with the fitted parameters of the
-   calibration sample peaks. It also logs more details about the peaks
-   fitted.
+- :ref:`EnggCalibrate <algm-EnggCalibrate>` has a new output property
+  with the fitted parameters of the calibration sample peaks. It also
+  logs more details about the peaks fitted.
+- :ref:`EnggFocus<algm-EnggFocus>`: added an option to mask out
+  several ranges in ToF (instrument pulses), with default values set
+  for ENGIN-X, and an option to normalize by proton charge (enabled by
+  default).
 -  :ref:`Integration <algm-Integration>`
    now correctly works for event data that has not been binned.
 -  :ref:`FFT <algm-FFT>`
@@ -94,6 +101,7 @@ Improved
   does not perform fit of data by itself, but requires an additional argument: ``EPPTable``. This should accelerate the data reduction workflow, because fitting results can be reused. Table with elastic peak positions can be created using the new :ref:`FindEPP <algm-FindEPP>` algorithm.
 - :ref:`MonteCarloAbsorption <algm-MonteCarloAbsorption>` now supports inelastic instruments. It relies on :ref:`ConvertUnits <algm-ConvertUnits>` having set the correct EMode. `#15923 <https://github.com/mantidproject/mantid/pull/15923>`_
 
+
 Deprecated
 ##########
 
@@ -125,13 +133,17 @@ Geometry
 - The Instrument Definition File syntax has been extended to provide support for a new type of topologically regular, but geometrically irregular form of 2D detectors. This new type of detector available in the IDF is known as a Structured Detector. Information on how to use this new detector type can be found in the :ref:`IDF <InstrumentDefinitionFile>` documentation.
 - The XML shape definitions have been updated to understand a hollow cylinder as a primitive shape. See :ref:`HowToDefineGeometricShape` for more details.
 
+Refactored `PeakShape` to better support arbitrary shapes.
+
 Performance
 -----------
 
 - :ref:`ChangeBinOffset <algm-ChangeBinOffset>` should now run faster for a :ref:`MatrixWorkspace <MatrixWorkspace>` (not EventWorkspaces).
 - Applying ParameterMaps to Detectors now about 30% faster. Algorithms that involve applying ParameterMaps will see performance improvements.
-- This release saw the introduction of the StructuredDetector. This change has reduced load times via :ref:`LoadInstrument <algm-LoadInstrument>` from ~10minutes down to ~1second for the prospective ESS LOKI instrument.
-- The destructors for ConvexPolygon and Quadrilateral objects are now faster, especially on Linux. 
+- This release saw the introduction of the StructuredDetector. This change has reduced load times via LoadInstrument from ~10minutes down to ~0.5seconds for the prospective ESS LOKI instrument.
+  For more information on how to generate a StructuredDetector based instrument follow
+  this `link <http://docs.mantidproject.org/nightly/concepts/InstrumentDefinitionFile.html#creating-structured-irregular-geometry-detectors>`_
+- The destructors for ConvexPolygon and Quadrilateral objects are now faster, especially on Linux.
 
 CurveFitting
 ------------
@@ -152,6 +164,8 @@ Python
 - The Material class has two new Python methods: ``chemicalFormula`` returns a tuple of Atom objects corresponding to the atoms in the compound, and their abundances; ``relativeMolecularMass`` returns the relative formular unit mass in atomic mass units.
 
 - The plot() function of mantidplot.pyplot now supports empty marker (marker=None).
+
+- V3D is now iterable in Python, which makes it possible to easily construct numpy arrays like this ``np.array(V3D(1,2, 3))``.
 
 Python Algorithms
 #################

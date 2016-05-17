@@ -73,6 +73,16 @@ public:
   Iterator end() { return m_tokens.end(); }
 
   /** Const iterator referring to first element in the container.
+   * @return a const iterator referring to the first element in the container.
+   */
+  ConstIterator begin() const { return m_tokens.cbegin(); }
+  /** Const iterator referring to the past-the-end element in the container.
+   * @return a const iterator referring to the past-the-end element in the
+   * container.
+   */
+  ConstIterator end() const { return m_tokens.cend(); }
+
+  /** Const iterator referring to first element in the container.
   * @return a const iterator referring to the first element in the container.
   */
   ConstIterator cbegin() const { return m_tokens.cbegin(); }
