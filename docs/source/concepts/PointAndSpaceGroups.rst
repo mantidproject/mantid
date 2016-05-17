@@ -174,6 +174,29 @@ This example code produces the output below upon execution:
     Number of independent reflections: 3
     Reflections: [[1,1,1], [1,0,0], [3,1,1]]
 
+Symmetry imposes restrictions on the metric of the unit cell. Cubic symmetry for example implies that all cell edges have the same length and all angles are 90 degrees. The ``Group``-class (and thus, by inheritance also ``PointGroup``) provides a method that checks is a metric tensor is compatible with the symmetry operations of the group:
+
+.. testcode:: ExPointGroupIsInvariant
+
+    from mantid.geometry import PointGroupFactory, UnitCell
+
+    cell = UnitCell(3, 3, 5)
+
+    pgCubic = PointGroupFactory.createPointGroup("m-3m")
+    print "Is the cell compatible with cubic symmetry?", pgCubic.isInvariant(cell.getG())
+
+    pgTetragonal = PointGroupFactory.createPointGroup("4/mmm")
+    print "Is the cell compatible with tetragonal symmetry?", pgTetragonal.isInvariant(cell.getG())
+
+Executing the code above will produce the following output that reveals that the cell is only compatible with tetragonal, but not with cubic symmetry:
+
+.. testoutput:: ExPointGroupIsInvariant
+
+    Is the cell compatible with cubic symmetry? False
+    Is the cell compatible with tetragonal symmetry? True
+
+The ``SpaceGroup`` class described below provides a convenience method that takes a unit cell object directly.
+
 This is all that's covered by the Python interface regarding point groups in Mantid at the time of this writing. The use in C++ is very similar and described in detail in the API documentation.
     
 Using space groups in Mantid
@@ -350,7 +373,31 @@ Because space group :math:`Fddd` contains diamond glide planes, only :math:`00l`
     [0,0,8] is allowed: True
 
 :ref:`Below <SpaceGroupCheck>` is a more elaborate example which shows one possibility to find a likely candidate space group for a list of reflections. Please note that these reflection conditions only covers the ones listed for the "general position" in ITA. When atoms are located on special positions, there may be additional conditions that need to be fulfilled. A notable example is the :math:`222`-reflection in Silicon. It is forbidden because the silicon atom is located on the :math:`8a` position, which introduces additional reflection conditions.
-    
+
+As mentioned above, ``SpaceGroup`` provides a function that verifies whether the metric of a unit cell is compatible with the space group's symmetry:
+
+.. testcode:: ExSpaceGroupIsAllowedUnitCell
+
+    from mantid.geometry import SpaceGroupFactory, UnitCell
+
+    # An arbitrary cell with hexagonal metric
+    cell = UnitCell(4.402, 4.402, 10.0, 90, 90, 120)
+
+    sgR3mRh = SpaceGroupFactory.createSpaceGroup("R -3 m :r")
+    print "Is the cell allowed in R-3m (rhombohedral setting)?", sgR3mRh.isAllowedUnitCell(cell)
+
+    sgR3mHex = SpaceGroupFactory.createSpaceGroup("R -3 m")
+    print "Is the cell allowed in R-3m (hexagonal setting)?", sgR3mHex.isAllowedUnitCell(cell)
+
+The code above shows that the defined cell is only compatible with space group :math:`R\bar{3}m` in hexagonal setting:
+
+.. testoutput:: ExSpaceGroupIsAllowedUnitCell
+
+    Is the cell allowed in R-3m (rhombohedral setting)? False
+    Is the cell allowed in R-3m (hexagonal setting)? True
+
+The method uses a tolerance of :math:`10^{-8}` for comparison of the metric tensor and its transform. For more fine-grained control of the tolerance it is possible to use the ``isInvariant``-method and supply the metric tensor along with the desired tolerance as a second parameter.
+
 Very similar constructions are available in C++ as well, as shown in the API documentation.
     
 Other ways of using groups in Mantid

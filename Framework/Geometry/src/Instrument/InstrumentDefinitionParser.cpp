@@ -1401,6 +1401,7 @@ void InstrumentDefinitionParser::createStructuredDetector(
   const std::string shapeType = pType->getAttribute("type");
   boost::shared_ptr<Geometry::Object> shape = mapTypeNameToShape[shapeType];
 
+  std::string typeName = pType->getAttribute("name");
   // These parameters are in the TYPE defining StructuredDetector
   if (pType->hasAttribute("xpixels"))
     xpixels = atoi((pType->getAttribute("xpixels")).c_str());
@@ -1434,7 +1435,8 @@ void InstrumentDefinitionParser::createStructuredDetector(
     Element *check = static_cast<Element *>(pNode);
     if (pNode->nodeName().compare("type") == 0 && check->hasAttribute("is")) {
       std::string is = check->getAttribute("is").c_str();
-      if (StructuredDetector::compareName(is)) {
+      if (StructuredDetector::compareName(is) &&
+          typeName.compare(check->getAttribute("name")) == 0) {
         pElem = check;
         break;
       }
@@ -1449,7 +1451,6 @@ void InstrumentDefinitionParser::createStructuredDetector(
 
   // Ensure vertices are present within the IDF
   Poco::AutoPtr<NodeList> pNL = pElem->getElementsByTagName("vertex");
-
   if (pNL->length() == 0)
     throw Kernel::Exception::InstrumentDefinitionError(
         "StructuredDetector must contain vertices.", filename);

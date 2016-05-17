@@ -938,10 +938,7 @@ void EnggDiffractionViewQtGUI::plotReplacingWindow(const std::string &wsName,
   m_presenter->notify(IEnggDiffractionPresenter::LogMsg);
 }
 
-void EnggDiffractionViewQtGUI::plotVanCurvesCalibOutput() {
-  std::string pyCode =
-      "van_curves_ws = workspace(\"engggui_vanadium_curves_ws\")\n"
-      "win = plotSpectrum(van_curves_ws, [0, 1, 2])";
+void EnggDiffractionViewQtGUI::plotCalibOutput(const std::string &pyCode) {
 
   std::string status =
       runPythonCode(QString::fromStdString(pyCode), false).toStdString();
@@ -949,17 +946,6 @@ void EnggDiffractionViewQtGUI::plotVanCurvesCalibOutput() {
   m_logMsgs.push_back(
       "Plotted output calibration vanadium curves, with status string " +
       status);
-  m_presenter->notify(IEnggDiffractionPresenter::LogMsg);
-}
-
-void EnggDiffractionViewQtGUI::plotDifcZeroCalibOutput(
-    const std::string &pyCode) {
-
-  std::string status =
-      runPythonCode(QString::fromStdString(pyCode), false).toStdString();
-
-  m_logMsgs.push_back(
-      "Plotted output calibration ceria peaks, with status string " + status);
   m_presenter->notify(IEnggDiffractionPresenter::LogMsg);
 }
 
@@ -1547,19 +1533,23 @@ void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::addPeakToList() {
     auto strPeakCentre = stream.str();
 
     auto curExpPeaksList = m_uiTabFitting.lineEdit_fitting_peaks->text();
+    QString comma = ",";
 
     if (!curExpPeaksList.isEmpty()) {
-
+      // when further peak added to list
       std::string expPeakStr = curExpPeaksList.toStdString();
       std::string lastTwoChr = expPeakStr.substr(expPeakStr.size() - 2);
       auto lastChr = expPeakStr.back();
-      char comma = ',';
-      if (lastChr == comma || lastTwoChr == ", ") {
-        curExpPeaksList.append(QString::fromStdString(" " + strPeakCentre));
+      if (lastChr == ',' || lastTwoChr == ", ") {
+        curExpPeaksList.append(QString::fromStdString(strPeakCentre));
       } else {
-        QString comma = ", ";
         curExpPeaksList.append(comma + QString::fromStdString(strPeakCentre));
       }
+      m_uiTabFitting.lineEdit_fitting_peaks->setText(curExpPeaksList);
+    } else {
+      // when new peak given when list is empty
+      curExpPeaksList.append(QString::fromStdString(strPeakCentre));
+      curExpPeaksList.append(comma);
       m_uiTabFitting.lineEdit_fitting_peaks->setText(curExpPeaksList);
     }
   }
