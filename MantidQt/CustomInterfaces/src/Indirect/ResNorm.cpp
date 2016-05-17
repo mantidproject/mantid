@@ -213,6 +213,7 @@ void ResNorm::handleVanadiumInputReady(const QString &filename) {
   auto eRangeSelector = m_uiForm.ppPlot->getRangeSelector("ResNormERange");
 
   // Use the values from the instrument parameter file if we can
+  // The the maximum and minimum value of the plot
   if (getResolutionRangeFromWs(filename, res)) {
     // ResNorm resolution should be +/- 10 * the IPF resolution
     res.first = res.first * 10;
@@ -227,6 +228,10 @@ void ResNorm::handleVanadiumInputReady(const QString &filename) {
 
   setPlotPropertyRange(eRangeSelector, m_properties["EMin"],
                        m_properties["EMax"], range);
+
+  // Set the current values of the range bars
+  eRangeSelector->setMinimum(range.first);
+  eRangeSelector->setMaximum(range.second);
 }
 
 /**
