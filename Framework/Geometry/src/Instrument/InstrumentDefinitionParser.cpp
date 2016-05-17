@@ -615,8 +615,9 @@ void InstrumentDefinitionParser::setLocation(Geometry::IComponent *comp,
 
     if (rElem) {
       double rotAngle =
-          angleConvertConst * atof((rElem->getAttribute("val"))
-                                       .c_str()); // assumed to be in degrees
+          angleConvertConst *
+          atof(
+              (rElem->getAttribute("val")).c_str()); // assumed to be in degrees
 
       double axis_x = 0.0;
       double axis_y = 0.0;
@@ -1401,6 +1402,7 @@ void InstrumentDefinitionParser::createStructuredDetector(
   const std::string shapeType = pType->getAttribute("type");
   boost::shared_ptr<Geometry::Object> shape = mapTypeNameToShape[shapeType];
 
+  std::string typeName = pType->getAttribute("name");
   // These parameters are in the TYPE defining StructuredDetector
   if (pType->hasAttribute("xpixels"))
     xpixels = atoi((pType->getAttribute("xpixels")).c_str());
@@ -1434,7 +1436,8 @@ void InstrumentDefinitionParser::createStructuredDetector(
     Element *check = static_cast<Element *>(pNode);
     if (pNode->nodeName().compare("type") == 0 && check->hasAttribute("is")) {
       std::string is = check->getAttribute("is").c_str();
-      if (StructuredDetector::compareName(is)) {
+      if (StructuredDetector::compareName(is) &&
+          typeName.compare(check->getAttribute("name")) == 0) {
         pElem = check;
         break;
       }
@@ -1449,7 +1452,6 @@ void InstrumentDefinitionParser::createStructuredDetector(
 
   // Ensure vertices are present within the IDF
   Poco::AutoPtr<NodeList> pNL = pElem->getElementsByTagName("vertex");
-
   if (pNL->length() == 0)
     throw Kernel::Exception::InstrumentDefinitionError(
         "StructuredDetector must contain vertices.", filename);
@@ -2302,7 +2304,8 @@ void InstrumentDefinitionParser::setComponentLinks(
         // user, and throw an exception.
         if (!detector) {
           g_log.error() << "Error whilst loading parameters. No detector "
-                           "found with id '" << detid << "'" << std::endl;
+                           "found with id '"
+                        << detid << "'" << std::endl;
           g_log.error() << "Please check that your detectors' ids are correct."
                         << std::endl;
           throw Kernel::Exception::InstrumentDefinitionError(
