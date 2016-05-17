@@ -7,6 +7,8 @@
 #include "MantidKernel/PropertyManager.h"
 #include "MantidKernel/PropertyManagerDataService.h"
 
+#include <boost/scoped_ptr.hpp>
+
 using Mantid::Kernel::PropertyManagerProperty;
 
 class PropertyManagerPropertyTest : public CxxTest::TestSuite {
@@ -49,6 +51,20 @@ public:
                      pmap.direction());
     TS_ASSERT_EQUALS(testMgr, pmap());
     TS_ASSERT(pmap.isDefault());
+  }
+
+  void test_Clone_Gives_PropertyManagerProperty_Copy() {
+    using Mantid::Kernel::Direction;
+    using Mantid::Kernel::Property;
+
+    auto testMgr = createPropMgrWithInt();
+    PropertyManagerProperty pmap("Test", testMgr, Direction::Output);
+    boost::scoped_ptr<PropertyManagerProperty> copy(pmap.clone());
+    TS_ASSERT_EQUALS("Test", copy->name());
+    TS_ASSERT_EQUALS(static_cast<unsigned int>(Direction::Output),
+                     copy->direction());
+    TS_ASSERT_EQUALS(testMgr, (*copy)());
+    TS_ASSERT(copy->isDefault());
   }
 
   void test_Assignment_Updates_Stored_Value() {
@@ -121,6 +137,17 @@ public:
 
     TS_ASSERT_EQUALS("", prop.setValue(globalMgr->asString(true)));
     TS_ASSERT_EQUALS(globalMgr->asString(true), prop.value());
+  }
+
+  void test_getDefault_Returns_Empty_String_For_Empty_Default() {
+    PropertyManagerProperty prop("PMDSTest");
+    TS_ASSERT_EQUALS("", prop.getDefault());
+  }
+
+  void test_getDefault_Returns_Correct_JSON_String_For_Given_Default() {
+    auto mgr = createPropMgrWithInt();
+    PropertyManagerProperty prop("PMDSTest", mgr);
+    TS_ASSERT_EQUALS(mgr->asString(true), prop.getDefault());
   }
 
   //----------------------------------------------------------------------------
