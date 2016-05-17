@@ -818,11 +818,11 @@ void EnggDiffractionViewQtGUI::dataCurvesFactory(
     dataVector.clear();
   resetView();
 
-  // dark colours could be removed so the colored peaks stand out more
+  // dark colours could be removed so that the coloured peaks stand out more
   const std::array<QColor, 16> QPenList{
       {Qt::white, Qt::red, Qt::darkRed, Qt::green, Qt::darkGreen, Qt::blue,
        Qt::darkBlue, Qt::cyan, Qt::darkCyan, Qt::magenta, Qt::darkMagenta,
-       Qt::yellow, Qt::darkYellow, Qt::gray, Qt::darkGray, Qt::lightGray}};
+       Qt::yellow, Qt::darkYellow, Qt::gray, Qt::lightGray, Qt::black}};
 
   std::mt19937 gen;
   std::uniform_int_distribution<std::size_t> dis(0, QPenList.size() - 1);
@@ -831,10 +831,15 @@ void EnggDiffractionViewQtGUI::dataCurvesFactory(
     auto *peak = data[i].get();
 
     QwtPlotCurve *dataCurve = new QwtPlotCurve();
-    dataCurve->setStyle(QwtPlotCurve::Lines);
     if (!focused) {
+      dataCurve->setStyle(QwtPlotCurve::Lines);
       auto randIndex = dis(gen);
-      dataCurve->setPen(QPen(QPenList[randIndex], 1));
+      dataCurve->setPen(QPen(QPenList[randIndex], 2));
+    } else {
+      dataCurve->setStyle(QwtPlotCurve::NoCurve);
+	  // focused workspace in bg set as darkGrey crosses insted of line
+      dataCurve->setSymbol(QwtSymbol(QwtSymbol::XCross, QBrush(),
+                                     QPen(Qt::darkGray, 1), QSize(3, 3)));
     }
     dataCurve->setRenderHint(QwtPlotItem::RenderAntialiased, true);
 
