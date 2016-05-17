@@ -1,4 +1,4 @@
-# pylint: disable = too-many-lines, invalid-name, line-too-long, too-many-instance-attributes, too-many-branches,too-many-locals, too-many-nested-blocks
+﻿# pylint: disable = too-many-lines, invalid-name, line-too-long, too-many-instance-attributes, too-many-branches,too-many-locals, too-many-nested-blocks
 
 try:
     from mantidplot import *
@@ -438,7 +438,7 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
 
                 if bool(re.search('(raw)$', file_name, re.IGNORECASE)): # Filter to only display and map raw files.
                     title = (run_number + ': ' + description).strip()
-                    self.SampleText.__icat_file_map[title] = (file_id, run_number, file_name)
+                    self.__icat_file_map[title] = (file_id, run_number, file_name)
                     self.listMain.addItem(title)
             self.listMain.sortItems()
             del search_results
@@ -886,7 +886,7 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
 
             if canMantidPlot:
                 # Get the existing graph if it exists
-                base_graph = self.__graphs.get(wksp[i], None)
+                base_graph = self.__graphs.get(wksp[0], None)
 
                 # Clear the window if we're the first of a new set of curves
                 clearWindow = (i == 0)
@@ -900,7 +900,7 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
                 titl = groupGet(ws_name_binned, 'samp', 'run_title')
                 if type(titl) == str:
                     base_graph.activeLayer().setTitle(titl)
-                base_graph.activeLayer().setAxisScale(Layer.Left, 1e-8, 100.0, Layer.Log10)
+                base_graph.activeLayer().setAxisScale(Layer.Left, _Imin * 0.1, _Imax * 10, Layer.Log10)
                 base_graph.activeLayer().setAxisScale(Layer.Bottom, Qmin * 0.9, Qmax * 1.1, Layer.Log10)
                 base_graph.activeLayer().setAutoScale()
 
