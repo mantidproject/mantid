@@ -26,24 +26,24 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#include "PlotCurve.h"
-#include "Grid.h"
-#include "ScaleDraw.h"
-#include "SymbolBox.h"
 #include "Graph.h"
-#include "PatternBox.h"
-#include "MantidQtAPI/ScaleEngine.h"
+#include "Grid.h"
 #include "Mantid/ErrorBarSettings.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidQtAPI/QwtWorkspaceSpectrumData.h"
 #include "MantidQtAPI/QwtWorkspaceBinData.h"
+#include "MantidQtAPI/QwtWorkspaceSpectrumData.h"
+#include "MantidQtAPI/ScaleEngine.h"
+#include "PatternBox.h"
+#include "PlotCurve.h"
+#include "ScaleDraw.h"
+#include "SymbolBox.h"
 #include <QDateTime>
 #include <QMessageBox>
 #include <QPainter>
-#include <qwt_symbol.h>
-#include <qwt_plot_canvas.h>
 #include <qwt_painter.h>
+#include <qwt_plot_canvas.h>
+#include <qwt_symbol.h>
 
 using namespace Mantid;
 using namespace Mantid::API;
@@ -279,11 +279,18 @@ void PlotCurve::drawSideLines(QPainter *p, const QwtScaleMap &xMap,
   p->restore();
 }
 
-void PlotCurve::computeWaterfallOffsets() {
+/// Compute curve offsets for a curve in a waterfall plot.
+/// @param xDataOffset :: Output value of an x-offset that should be applied to
+///   the data's bounding rect to fit to a waterfall plot.
+/// @param yDataOffset :: Output value of an y-offset that should be applied to
+///   the data's bounding rect to fit to a waterfall plot.
+void PlotCurve::computeWaterfallOffsets(double &xDataOffset,
+                                        double &yDataOffset) {
   Plot *plot = static_cast<Plot *>(this->plot());
   Graph *g = static_cast<Graph *>(plot->parent());
 
-  // reset the offsets
+  // Reset the offsets
+  // These are offsets of the curve in pixels on the screen.
   d_x_offset = 0.0;
   d_y_offset = 0.0;
 
@@ -296,18 +303,55 @@ void PlotCurve::computeWaterfallOffsets() {
     PlotCurve *c = dynamic_cast<PlotCurve *>(g->curve(0));
     if (index > 0 && c) {
       // Compute offsets based on the maximum value for the curve
-      d_x_offset = index * g->waterfallXOffset() * 0.01 *
-                   g->curve(0)->maxXValue() / (double)(curves - 1);
-      d_y_offset = index * g->waterfallYOffset() * 0.01 *
-                   g->curve(0)->maxYValue() / (double)(curves - 1);
 
+      // First compute offsets in a linear scale
+      xDataOffset = index * g->waterfallXOffset() * 0.01 *
+                    plot->axisScaleDiv(Plot::xBottom)->range() /
+                    (double)(curves - 1);
+      yDataOffset = index * g->waterfallYOffset() * 0.01 *
+                    plot->axisScaleDiv(Plot::yLeft)->range() /
+                    (double)(curves - 1);
+
+      // Corresponding offset on the screen in pixels
+      d_x_offset = plot->canvas()->width() * xDataOffset /
+                   plot->axisScaleDiv(Plot::xBottom)->range();
+      d_y_offset = plot->canvas()->height() * yDataOffset /
+                   plot->axisScaleDiv(Plot::yLeft)->range();
+
+      // Correct the data offsets using actual axis scales. If the scales are
+      // non-linear the offsets will change.
+      { // x-offset
+        auto trans = plot->axisScaleEngine(Plot::xBottom)->transformation();
+        auto a =
+            trans->xForm(g->curve(0)->maxXValue(),
+                         plot->axisScaleDiv(Plot::xBottom)->lowerBound(),
+                         g->curve(0)->maxXValue(), 0, plot->canvas()->width());
+        auto b = trans->invXForm(a + d_x_offset, 0, plot->canvas()->width(), 1,
+                                 g->curve(0)->maxXValue());
+        xDataOffset = b - g->curve(0)->maxXValue();
+      }
+
+      { // y-offset
+        auto trans = plot->axisScaleEngine(Plot::yLeft)->transformation();
+        auto a =
+            trans->xForm(g->curve(0)->maxYValue(),
+                         plot->axisScaleDiv(Plot::yLeft)->lowerBound(),
+                         g->curve(0)->maxYValue(), 0, plot->canvas()->height());
+        auto b = trans->invXForm(a + d_y_offset, 0, plot->canvas()->height(), 1,
+                                 g->curve(0)->maxYValue());
+        yDataOffset = b - g->curve(0)->maxYValue();
+      }
+      // Set the z-order of the curves such that the first curve is on top.
       setZ(-index);
-      setBaseline(ymin -
-                  d_y_offset); // Fill down to minimum value of first curve
+      // Fill down to minimum value of first curve
+      setBaseline(ymin - yDataOffset);
 
     } else {
+      // First curve - no offset.
       setZ(0);
       setBaseline(ymin); // This is for when 'fill under curve' is turn on
+      xDataOffset = 0.0;
+      yDataOffset = 0.0;
     }
     if (g->grid())
       g->grid()->setZ(-g->curves() /*Count()*/ - 1);
@@ -496,7 +540,8 @@ void DataCurve::loadData() {
   // PlotCurve so that MantidCurve can access it as well.
   if (g->isWaterfallPlot()) {
     // Calculate the offsets
-    computeWaterfallOffsets();
+    double a, b;
+    computeWaterfallOffsets(a, b);
   }
   // End re-jigged waterfall offset code
 
