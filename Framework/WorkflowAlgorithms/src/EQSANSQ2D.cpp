@@ -87,6 +87,7 @@ void EQSANSQ2D::exec() {
   double qmax = 0;
   if (inputWS->run().hasProperty("qmax")) {
     qmax = getRunProperty(inputWS, "qmax");
+    g_log.debug() << "Using Qmax from run properties = " << qmax << std::endl;
   } else {
     const double sample_detector_distance =
         getRunProperty(inputWS, "sample_detector_distance");
@@ -109,6 +110,7 @@ void EQSANSQ2D::exec() {
 
     qmax = 4 * M_PI / wavelength_min *
            std::sin(0.5 * std::atan(maxdist / sample_detector_distance));
+    g_log.debug() << "Using calculated Qmax = " << qmax << std::endl;
   };
 
   if (frame_skipping) {
