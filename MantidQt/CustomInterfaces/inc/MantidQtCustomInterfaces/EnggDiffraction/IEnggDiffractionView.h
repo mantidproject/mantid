@@ -122,7 +122,7 @@ public:
   * selected spec will be passed as a bank for the calibrartion
   * process to be carried out
   *
-  * @return which format should to applied for plotting data
+  * @return Bank selection index: spectrum-numbers / north / south
   */
   virtual int currentCropCalibBankName() const = 0;
 
@@ -213,16 +213,17 @@ public:
                               const std::string &fname) = 0;
 
   /**
-   * Write a GSAS file. Temporarily here until we have a more final
-   * way of generating these files.
+   * Run Python code received as a script string. This is used for
+   * example to write GSAS instrument parameters file, or other code
+   * included with the Engg scripts. Temporarily here until we have a
+   * more final way of generating these files. A SaveGSAS algorithm
+   * that can handle ENGIN-X files would be ideal.
    *
-   * @param outFilename output file name
-   * @param difc difc values (one per bank)
-   * @param tzero tzero values (one per bank)
+   * @param pyCode Python script as a string
+   *
+   * @return status string from running the code
    */
-  virtual void writeOutCalibFile(const std::string &outFilename,
-                                 const std::vector<double> &difc,
-                                 const std::vector<double> &tzero) = 0;
+  virtual std::string enggRunPythonCode(const std::string &pyCode) = 0;
 
   /**
    * Enable/disable all the sections or tabs of the interface. To be

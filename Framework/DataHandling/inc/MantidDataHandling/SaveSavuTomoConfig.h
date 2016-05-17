@@ -60,7 +60,7 @@ public:
 
   /// Algorithm's category for identification
   const std::string category() const override {
-    return "DataHandling\\Tomography;";
+    return "DataHandling\\Imaging;";
   }
 
 private:

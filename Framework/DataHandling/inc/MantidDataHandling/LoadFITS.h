@@ -172,8 +172,13 @@ private:
   /// multiples of this block.
   static const int g_BASE_HEADER_SIZE = 2880;
 
-  // names for several options that can be given in a "FITS" header
+  // TODO: in the next round of refactoring of LoadFITS, this should
+  // become common between LoadFITS and the new SaveFITS
+  // Names for several options that can be given in a "FITS" header
   // setup file
+  static const std::string g_END_KEYNAME;
+  static const std::string g_COMMENT_KEYNAME;
+  static const std::string g_XTENSION_KEYNAME;
   static const std::string g_BIT_DEPTH_NAME;
   static const std::string g_AXIS_NAMES_NAME;
   static const std::string g_ROTATION_NAME;
