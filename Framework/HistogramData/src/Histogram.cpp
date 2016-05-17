@@ -43,20 +43,13 @@ Points Histogram::points() const {
 /// Returns the variances of the points (or bin centers) of the Histogram.
 PointVariances Histogram::pointVariances() const {
   // Currently data is always stored as standard deviations, need to convert.
-  // TODO Figure out and define right conversion order.
-  if (xMode() == XMode::BinEdges)
-    return PointVariances(BinEdgeVariances(BinEdgeStandardDeviations(m_dx)));
-  else
-    return PointVariances(PointStandardDeviations(m_dx));
+  return PointVariances(PointStandardDeviations(m_dx));
 }
 
 /// Returns the standard deviations of the points (or bin centers) of the
 /// Histogram.
 PointStandardDeviations Histogram::pointStandardDeviations() const {
-  if (xMode() == XMode::BinEdges)
-    return PointStandardDeviations(BinEdgeStandardDeviations(m_dx));
-  else
-    return PointStandardDeviations(m_dx);
+  return PointStandardDeviations(m_dx);
 }
 
 /** Returns the counts of the Histogram.
