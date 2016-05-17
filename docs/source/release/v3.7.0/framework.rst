@@ -37,6 +37,8 @@ New
 - :ref:`FindEPP <algm-FindEPP>` This algorithm performs Gaussian fit to find the elastic peak position.
   As a result, `TableWorkspace <http://www.mantidproject.org/TableWorkspace>`_ with parameters of the fitted peaks is created.
 - :ref:`GetIPTS <algm-GetIPTS>` Returns the IPTS directory of the specified ORNL run.
+- :ref:`GSASIIRefineFitPeaks <algm-GSASIIRefineFitPeaks>` uses the GSAS-II
+  software to refine lattice parameters (whole pattern refinement) and fit
 - :ref:`ImggAggregateWavelengths <algm-ImggAggregateWavelengths>`
    aggregates stacks of images from wavelength dependent imaging
    into one or more output bands.

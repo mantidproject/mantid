@@ -5,7 +5,7 @@ from mantid.api import *
 class EnggFitDIFCFromPeaks(PythonAlgorithm):
 
     def category(self):
-        return "Diffraction\\Engineering"
+        return "Diffraction\\Engineering;Diffraction\\Fitting"
 
     def name(self):
         return "EnggFitPeaks"
