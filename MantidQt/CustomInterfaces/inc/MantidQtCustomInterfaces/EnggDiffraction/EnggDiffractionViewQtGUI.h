@@ -277,6 +277,7 @@ private slots:
   void setPeakPick();
   void addPeakToList();
   void savePeakList();
+  void clearPeakList();
   void fitClicked();
   void FittingRunNo();
   void setBankDir(int idx);

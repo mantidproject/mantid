@@ -256,6 +256,9 @@ void EnggDiffractionViewQtGUI::doSetupTabFitting() {
   connect(m_uiTabFitting.pushButton_save_peak_list, SIGNAL(released()),
           SLOT(savePeakList()));
 
+  connect(m_uiTabFitting.pushButton_clear_peak_list, SIGNAL(released()),
+          SLOT(clearPeakList()));
+
   m_uiTabFitting.dataPlot->setCanvasBackground(Qt::white);
   m_uiTabFitting.dataPlot->setAxisTitle(QwtPlot::xBottom, "d-Spacing (A)");
   m_uiTabFitting.dataPlot->setAxisTitle(QwtPlot::yLeft, "Counts (us)^-1");
@@ -837,7 +840,7 @@ void EnggDiffractionViewQtGUI::dataCurvesFactory(
       dataCurve->setPen(QPen(QPenList[randIndex], 2));
     } else {
       dataCurve->setStyle(QwtPlotCurve::NoCurve);
-	  // focused workspace in bg set as darkGrey crosses insted of line
+      // focused workspace in bg set as darkGrey crosses insted of line
       dataCurve->setSymbol(QwtSymbol(QwtSymbol::XCross, QBrush(),
                                      QPen(Qt::darkGray, 1), QSize(3, 3)));
     }
@@ -1598,6 +1601,11 @@ void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::savePeakList() {
                 "Invalid file path or or could not be saved. Please try again");
     return;
   }
+}
+
+void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::clearPeakList() {
+  QString emptyStr = "";
+  m_uiTabFitting.lineEdit_fitting_peaks->setText(emptyStr);
 }
 
 void EnggDiffractionViewQtGUI::instrumentChanged(int /*idx*/) {
