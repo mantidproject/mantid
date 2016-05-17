@@ -83,6 +83,23 @@ bool Stretch::validate() {
 void Stretch::run() {
   using namespace Mantid::API;
 
+  auto saveDirectory = Mantid::Kernel::ConfigService::Instance().getString(
+      "defaultsave.directory");
+  if (saveDirectory.compare("") == 0) {
+    const char *textMessage =
+        "BayesStretch requires a default save directory and "
+        "one is not currently set."
+        " If run, the algorithm will default to saving files "
+        "to the current working directory."
+        " Would you still like to run the algorithm?";
+    int result = QMessageBox::question(NULL, tr("Save Directory"),
+                                       tr(textMessage), QMessageBox::Yes,
+                                       QMessageBox::No, QMessageBox::NoButton);
+    if (result == QMessageBox::No) {
+      return;
+    }
+  }
+
   QString save("False");
 
   QString elasticPeak("False");
