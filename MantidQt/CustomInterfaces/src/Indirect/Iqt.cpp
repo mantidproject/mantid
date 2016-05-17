@@ -205,6 +205,11 @@ bool Iqt::validate() {
   uiv.checkDataSelectorIsValid("Sample", m_uiForm.dsInput);
   uiv.checkDataSelectorIsValid("Resolution", m_uiForm.dsResolution);
 
+  const auto eMin = m_dblManager->value(m_properties["ELow"]);
+  const auto eMax = m_dblManager->value(m_properties["EHigh"]);
+  if (eMin >= eMax)
+    uiv.addErrorMessage("EMin must be strictly less than EMax.\n");
+
   QString message = uiv.generateErrorMessage();
   showMessageBox(message);
 
