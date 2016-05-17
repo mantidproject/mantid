@@ -87,6 +87,7 @@ Bugfixes
 - :ref:`VesuvioCorrections <algm-VesuvioCorrections>` no longer always fits using only the first spectrum in the input workspace.
 - Fix bug with *BayesQuasi* docs not displaying online
 - The mini plot range bars in *BayesQuasi* now automatically update on sample loading.
+- *BayesStretched* interface now gives the option of using the current working directory if no default save path is provided.
 
 
 `Full list of changes on GitHub <http://github.com/mantidproject/mantid/pulls?q=is%3Apr+milestone%3A%22Release+3.7%22+is%3Amerged+label%3A%22Component%3A+Indirect+Inelastic%22>`_
