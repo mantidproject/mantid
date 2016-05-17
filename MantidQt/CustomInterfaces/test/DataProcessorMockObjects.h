@@ -85,8 +85,10 @@ public:
 
 private:
   // Calls we don't care about
-  const std::map<std::string, QVariant> &options() const { return m_options; };
-  std::vector<DataProcessorCommand_uptr> publishCommands() {
+  const std::map<std::string, QVariant> &options() const override {
+    return m_options;
+  };
+  std::vector<DataProcessorCommand_uptr> publishCommands() override {
     std::vector<DataProcessorCommand_uptr> commands;
     for (size_t i = 0; i < 26; i++)
       commands.push_back(
@@ -97,12 +99,13 @@ private:
     return std::set<std::string>();
   };
   // Calls we don't care about
-  void setOptions(const std::map<std::string, QVariant> &){};
-  void transfer(const std::vector<std::map<std::string, std::string>> &){};
+  void setOptions(const std::map<std::string, QVariant> &) override{};
+  void
+  transfer(const std::vector<std::map<std::string, std::string>> &) override{};
   void setInstrumentList(const std::vector<std::string> &,
-                         const std::string &){};
+                         const std::string &) override{};
   // void accept(WorkspaceReceiver *) {};
-  void acceptViews(DataProcessorView *, ProgressableView *){};
+  void acceptViews(DataProcessorView *, ProgressableView *) override{};
 
   std::map<std::string, QVariant> m_options;
 };
