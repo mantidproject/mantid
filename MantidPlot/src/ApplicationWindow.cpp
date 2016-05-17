@@ -13289,153 +13289,153 @@ void ApplicationWindow::translateActionsStrings() {
   actionPlotHorizontalBars->setMenuText(tr("&Rows"));
   actionPlotHorizontalBars->setToolTip(tr("Plot with horizontal bars"));
 
-  actionPlotArea->setMenuText(tr("&Area"));
+  actionPlotArea->setText(tr("&Area"));
   actionPlotArea->setToolTip(tr("Plot area"));
 
-  actionPlotPie->setMenuText(tr("&Pie"));
+  actionPlotPie->setText(tr("&Pie"));
   actionPlotPie->setToolTip(tr("Plot pie"));
 
-  actionPlotVectXYXY->setMenuText(tr("&Vectors XYXY"));
+  actionPlotVectXYXY->setText(tr("&Vectors XYXY"));
   actionPlotVectXYXY->setToolTip(tr("Vectors XYXY"));
 
-  actionPlotVectXYAM->setMenuText(tr("Vectors XY&AM"));
+  actionPlotVectXYAM->setText(tr("Vectors XY&AM"));
   actionPlotVectXYAM->setToolTip(tr("Vectors XYAM"));
 
-  actionPlotHistogram->setMenuText(tr("&Histogram"));
-  actionPlotStackedHistograms->setMenuText(tr("&Stacked Histogram"));
-  actionPlot2VerticalLayers->setMenuText(tr("&Vertical 2 Layers"));
-  actionPlot2HorizontalLayers->setMenuText(tr("&Horizontal 2 Layers"));
-  actionPlot4Layers->setMenuText(tr("&4 Layers"));
-  actionPlotStackedLayers->setMenuText(tr("&Stacked Layers"));
+  actionPlotHistogram->setText(tr("&Histogram"));
+  actionPlotStackedHistograms->setText(tr("&Stacked Histogram"));
+  actionPlot2VerticalLayers->setText(tr("&Vertical 2 Layers"));
+  actionPlot2HorizontalLayers->setText(tr("&Horizontal 2 Layers"));
+  actionPlot4Layers->setText(tr("&4 Layers"));
+  actionPlotStackedLayers->setText(tr("&Stacked Layers"));
 
-  actionStemPlot->setMenuText(tr("Stem-and-&Leaf Plot"));
+  actionStemPlot->setText(tr("Stem-and-&Leaf Plot"));
   actionStemPlot->setToolTip(tr("Stem-and-Leaf Plot"));
 
-  actionPlot3DRibbon->setMenuText(tr("&Ribbon"));
+  actionPlot3DRibbon->setText(tr("&Ribbon"));
   actionPlot3DRibbon->setToolTip(tr("Plot 3D ribbon"));
 
-  actionPlot3DBars->setMenuText(tr("&Bars"));
+  actionPlot3DBars->setText(tr("&Bars"));
   actionPlot3DBars->setToolTip(tr("Plot 3D bars"));
 
-  actionPlot3DScatter->setMenuText(tr("&Scatter"));
+  actionPlot3DScatter->setText(tr("&Scatter"));
   actionPlot3DScatter->setToolTip(tr("Plot 3D scatter"));
 
-  actionPlot3DTrajectory->setMenuText(tr("&Trajectory"));
+  actionPlot3DTrajectory->setText(tr("&Trajectory"));
   actionPlot3DTrajectory->setToolTip(tr("Plot 3D trajectory"));
 
-  actionColorMap->setMenuText(tr("Contour + &Color Fill"));
+  actionColorMap->setText(tr("Contour + &Color Fill"));
   actionColorMap->setToolTip(tr("Contour Lines + Color Fill"));
 
-  actionNoContourColorMap->setMenuText(tr("Color &Fill"));
+  actionNoContourColorMap->setText(tr("Color &Fill"));
   actionNoContourColorMap->setToolTip(tr("Color Fill (No contours)"));
 
-  actionContourMap->setMenuText(tr("Contour &Lines"));
+  actionContourMap->setText(tr("Contour &Lines"));
   actionContourMap->setToolTip(tr("Contour Lines"));
 
-  actionGrayMap->setMenuText(tr("&Gray Scale Map"));
+  actionGrayMap->setText(tr("&Gray Scale Map"));
   actionGrayMap->setToolTip(tr("Gray Scale Map"));
 
-  actionShowColStatistics->setMenuText(tr("Statistics on &Columns"));
+  actionShowColStatistics->setText(tr("Statistics on &Columns"));
   actionShowColStatistics->setToolTip(tr("Selected columns statistics"));
 
-  actionShowRowStatistics->setMenuText(tr("Statistics on &Rows"));
+  actionShowRowStatistics->setText(tr("Statistics on &Rows"));
   actionShowRowStatistics->setToolTip(tr("Selected rows statistics"));
-  actionShowIntDialog->setMenuText(tr("Integr&ate Function..."));
-  actionIntegrate->setMenuText(tr("&Integrate"));
-  actionInterpolate->setMenuText(tr("Inte&rpolate ..."));
-  actionLowPassFilter->setMenuText(tr("&Low Pass..."));
-  actionHighPassFilter->setMenuText(tr("&High Pass..."));
-  actionBandPassFilter->setMenuText(tr("&Band Pass..."));
-  actionBandBlockFilter->setMenuText(tr("&Band Block..."));
-  actionFFT->setMenuText(tr("&FFT..."));
-  actionSmoothSavGol->setMenuText(tr("&Savitzky-Golay..."));
-  actionSmoothFFT->setMenuText(tr("&FFT Filter..."));
-  actionSmoothAverage->setMenuText(tr("Moving Window &Average..."));
-  actionDifferentiate->setMenuText(tr("&Differentiate"));
-  actionFitLinear->setMenuText(tr("Fit &Linear"));
-  actionShowFitPolynomDialog->setMenuText(tr("Fit &Polynomial ..."));
-  actionShowExpDecayDialog->setMenuText(tr("&First Order ..."));
-  actionShowTwoExpDecayDialog->setMenuText(tr("&Second Order ..."));
-  actionShowExpDecay3Dialog->setMenuText(tr("&Third Order ..."));
-  actionFitExpGrowth->setMenuText(tr("Fit Exponential Gro&wth ..."));
-  actionFitSigmoidal->setMenuText(tr("Fit &Boltzmann (Sigmoidal)"));
-  actionFitGauss->setMenuText(tr("Fit &Gaussian"));
-  actionFitLorentz->setMenuText(tr("Fit Lorent&zian"));
+  actionShowIntDialog->setText(tr("Integr&ate Function..."));
+  actionIntegrate->setText(tr("&Integrate"));
+  actionInterpolate->setText(tr("Inte&rpolate ..."));
+  actionLowPassFilter->setText(tr("&Low Pass..."));
+  actionHighPassFilter->setText(tr("&High Pass..."));
+  actionBandPassFilter->setText(tr("&Band Pass..."));
+  actionBandBlockFilter->setText(tr("&Band Block..."));
+  actionFFT->setText(tr("&FFT..."));
+  actionSmoothSavGol->setText(tr("&Savitzky-Golay..."));
+  actionSmoothFFT->setText(tr("&FFT Filter..."));
+  actionSmoothAverage->setText(tr("Moving Window &Average..."));
+  actionDifferentiate->setText(tr("&Differentiate"));
+  actionFitLinear->setText(tr("Fit &Linear"));
+  actionShowFitPolynomDialog->setText(tr("Fit &Polynomial ..."));
+  actionShowExpDecayDialog->setText(tr("&First Order ..."));
+  actionShowTwoExpDecayDialog->setText(tr("&Second Order ..."));
+  actionShowExpDecay3Dialog->setText(tr("&Third Order ..."));
+  actionFitExpGrowth->setText(tr("Fit Exponential Gro&wth ..."));
+  actionFitSigmoidal->setText(tr("Fit &Boltzmann (Sigmoidal)"));
+  actionFitGauss->setText(tr("Fit &Gaussian"));
+  actionFitLorentz->setText(tr("Fit Lorent&zian"));
 
-  actionShowFitDialog->setMenuText(tr("Fit &Wizard..."));
+  actionShowFitDialog->setText(tr("Fit &Wizard..."));
   actionShowFitDialog->setShortcut(tr("Ctrl+Y"));
 
-  actionShowPlotDialog->setMenuText(tr("&Plot ..."));
-  actionShowScaleDialog->setMenuText(tr("&Scales..."));
-  actionShowAxisDialog->setMenuText(tr("&Axes..."));
-  actionShowGridDialog->setMenuText(tr("&Grid ..."));
-  actionShowTitleDialog->setMenuText(tr("&Title ..."));
-  actionShowColumnOptionsDialog->setMenuText(tr("Column &Options ..."));
+  actionShowPlotDialog->setText(tr("&Plot ..."));
+  actionShowScaleDialog->setText(tr("&Scales..."));
+  actionShowAxisDialog->setText(tr("&Axes..."));
+  actionShowGridDialog->setText(tr("&Grid ..."));
+  actionShowTitleDialog->setText(tr("&Title ..."));
+  actionShowColumnOptionsDialog->setText(tr("Column &Options ..."));
   actionShowColumnOptionsDialog->setShortcut(tr("Ctrl+Alt+O"));
-  actionShowColumnValuesDialog->setMenuText(
+  actionShowColumnValuesDialog->setText(
       tr("Set Column &Values ...")); // Removed JZ May 3, 2011
   actionShowColumnValuesDialog->setShortcut(tr("Alt+Q"));
-  actionTableRecalculate->setMenuText(tr("Recalculate"));
+  actionTableRecalculate->setText(tr("Recalculate"));
   actionTableRecalculate->setShortcut(tr("Ctrl+Return"));
-  actionHideSelectedColumns->setMenuText(tr("&Hide Selected"));
+  actionHideSelectedColumns->setText(tr("&Hide Selected"));
   actionHideSelectedColumns->setToolTip(tr("Hide selected columns"));
-  actionShowAllColumns->setMenuText(tr("Sho&w All Columns"));
+  actionShowAllColumns->setText(tr("Sho&w All Columns"));
   actionHideSelectedColumns->setToolTip(tr("Show all table columns"));
-  actionSwapColumns->setMenuText(tr("&Swap columns"));
+  actionSwapColumns->setText(tr("&Swap columns"));
   actionSwapColumns->setToolTip(tr("Swap selected columns"));
-  actionMoveColRight->setMenuText(tr("Move &Right"));
+  actionMoveColRight->setText(tr("Move &Right"));
   actionMoveColRight->setToolTip(tr("Move Right"));
-  actionMoveColLeft->setMenuText(tr("Move &Left"));
+  actionMoveColLeft->setText(tr("Move &Left"));
   actionMoveColLeft->setToolTip(tr("Move Left"));
-  actionMoveColFirst->setMenuText(tr("Move to F&irst"));
+  actionMoveColFirst->setText(tr("Move to F&irst"));
   actionMoveColFirst->setToolTip(tr("Move to First"));
-  actionMoveColLast->setMenuText(tr("Move to Las&t"));
+  actionMoveColLast->setText(tr("Move to Las&t"));
   actionMoveColLast->setToolTip(tr("Move to Last"));
-  actionShowColsDialog->setMenuText(tr("&Columns..."));
-  actionShowRowsDialog->setMenuText(tr("&Rows..."));
-  actionDeleteRows->setMenuText(tr("&Delete Rows Interval..."));
+  actionShowColsDialog->setText(tr("&Columns..."));
+  actionShowRowsDialog->setText(tr("&Rows..."));
+  actionDeleteRows->setText(tr("&Delete Rows Interval..."));
 
-  actionAbout->setMenuText(tr("&About MantidPlot")); // Mantid
+  actionAbout->setText(tr("&About MantidPlot")); // Mantid
   actionAbout->setShortcut(tr("F1"));
 
   // actionShowHelp->setMenuText(tr("&Help"));
   // actionShowHelp->setShortcut(tr("Ctrl+H"));
 
-  actionMantidConcepts->setMenuText(tr("&Mantid Concepts"));
+  actionMantidConcepts->setText(tr("&Mantid Concepts"));
 
-  actionMantidAlgorithms->setMenuText("&Algorithm Descriptions");
+  actionMantidAlgorithms->setText("&Algorithm Descriptions");
 
-  actionmantidplotHelp->setMenuText("&MantidPlot Help");
+  actionmantidplotHelp->setText("&MantidPlot Help");
 
   // actionChooseHelpFolder->setMenuText(tr("&Choose Help Folder..."));
   // actionRename->setMenuText(tr("&Rename Window"));
 
-  actionCloseWindow->setMenuText(tr("Close &Window"));
+  actionCloseWindow->setText(tr("Close &Window"));
   actionCloseWindow->setShortcut(tr("Ctrl+W"));
 
-  actionAddColToTable->setMenuText(tr("Add Column"));
+  actionAddColToTable->setText(tr("Add Column"));
   actionAddColToTable->setToolTip(tr("Add Column"));
 
-  actionClearTable->setMenuText(tr("Clear"));
+  actionClearTable->setText(tr("Clear"));
   actionGoToRow->setMenuText(tr("&Go to Row..."));
   actionGoToRow->setShortcut(tr("Ctrl+Alt+G"));
 
-  actionGoToColumn->setMenuText(tr("Go to Colum&n..."));
+  actionGoToColumn->setText(tr("Go to Colum&n..."));
   actionGoToColumn->setShortcut(tr("Ctrl+Alt+C"));
 
-  actionDeleteLayer->setMenuText(tr("&Remove Layer"));
+  actionDeleteLayer->setText(tr("&Remove Layer"));
   actionDeleteLayer->setShortcut(tr("Alt+R"));
 
-  actionResizeActiveWindow->setMenuText(tr("Window &Geometry..."));
-  actionHideActiveWindow->setMenuText(tr("&Hide Window"));
-  actionShowMoreWindows->setMenuText(tr("More Windows..."));
-  actionPixelLineProfile->setMenuText(tr("&View Pixel Line Profile"));
-  actionIntensityTable->setMenuText(tr("&Intensity Table"));
-  actionShowLineDialog->setMenuText(tr("&Properties"));
-  actionShowImageDialog->setMenuText(tr("&Properties"));
-  actionShowTextDialog->setMenuText(tr("&Properties"));
-  actionActivateWindow->setMenuText(tr("&Activate Window"));
-  actionMinimizeWindow->setMenuText(tr("Mi&nimize Window"));
+  actionResizeActiveWindow->setText(tr("Window &Geometry..."));
+  actionHideActiveWindow->setText(tr("&Hide Window"));
+  actionShowMoreWindows->setText(tr("More Windows..."));
+  actionPixelLineProfile->setText(tr("&View Pixel Line Profile"));
+  actionIntensityTable->setText(tr("&Intensity Table"));
+  actionShowLineDialog->setText(tr("&Properties"));
+  actionShowImageDialog->setText(tr("&Properties"));
+  actionShowTextDialog->setText(tr("&Properties"));
+  actionActivateWindow->setText(tr("&Activate Window"));
+  actionMinimizeWindow->setText(tr("Mi&nimize Window"));
   actionMaximizeWindow->setMenuText(tr("Ma&ximize Window"));
   actionHideWindow->setMenuText(tr("&Hide Window"));
   actionResizeWindow->setMenuText(tr("Re&size Window..."));
