@@ -36,12 +36,11 @@ New
   :ref:`EnggFitPeaks <algm-EnggFitPeaks>`.
 - :ref:`FindEPP <algm-FindEPP>` This algorithm performs Gaussian fit to find the elastic peak position.
   As a result, `TableWorkspace <http://www.mantidproject.org/TableWorkspace>`_ with parameters of the fitted peaks is created.
+- :ref:`GetIPTS <algm-GetIPTS>` Returns the IPTS directory of the specified ORNL run.
 - :ref:`ImggAggregateWavelengths <algm-ImggAggregateWavelengths>`
    aggregates stacks of images from wavelength dependent imaging
    into one or more output bands.
-- :ref:`CorrectTOF <algm-CorrectTOF>` applies to the time-of-flight correction which considers the specified elastic peak position.
 - :ref:`SaveFITS <algm-SaveFITS>` saves images in FITS format.
-- :ref:`GetIPTS <algm-GetIPTS>` Returns the IPTS directory of the specified ORNL run.
 
 Renamed
 #######
