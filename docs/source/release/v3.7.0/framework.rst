@@ -36,10 +36,10 @@ New
   :ref:`EnggFitPeaks <algm-EnggFitPeaks>`.
 - :ref:`FindEPP <algm-FindEPP>` This algorithm performs Gaussian fit to find the elastic peak position.
   As a result, `TableWorkspace <http://www.mantidproject.org/TableWorkspace>`_ with parameters of the fitted peaks is created.
+- :ref:`GetIPTS <algm-GetIPTS>` Returns the IPTS directory of the specified ORNL run.
 - :ref:`ImggAggregateWavelengths <algm-ImggAggregateWavelengths>`
    aggregates stacks of images from wavelength dependent imaging
    into one or more output bands.
-
 - :ref:`SaveFITS <algm-SaveFITS>` saves images in FITS format.
 
 Renamed
@@ -53,10 +53,13 @@ Renamed
 Improved
 ########
 
--  :ref:`EnggCalibrate <algm-EnggCalibrate>`
-   has a new output property with the fitted parameters of the
-   calibration sample peaks. It also logs more details about the peaks
-   fitted.
+- :ref:`EnggCalibrate <algm-EnggCalibrate>` has a new output property
+  with the fitted parameters of the calibration sample peaks. It also
+  logs more details about the peaks fitted.
+- :ref:`EnggFocus<algm-EnggFocus>`: added an option to mask out
+  several ranges in ToF (instrument pulses), with default values set
+  for ENGIN-X, and an option to normalize by proton charge (enabled by
+  default).
 -  :ref:`Integration <algm-Integration>`
    now correctly works for event data that has not been binned.
 -  :ref:`FFT <algm-FFT>`
@@ -137,10 +140,10 @@ Performance
 
 - :ref:`ChangeBinOffset <algm-ChangeBinOffset>` should now run faster for a :ref:`MatrixWorkspace <MatrixWorkspace>` (not EventWorkspaces).
 - Applying ParameterMaps to Detectors now about 30% faster. Algorithms that involve applying ParameterMaps will see performance improvements.
-- This release saw the introduction of the StructuredDetector. This change has reduced load times via LoadInstrument from ~10minutes down to ~0.5seconds for the prospective ESS LOKI instrument. 
-  For more information on how to generate a StructuredDetector based instrument follow 
-  this `link <http://docs.mantidproject.org/nightly/concepts/InstrumentDefinitionFile.html#creating-structured-irregular-geometry-detectors>`_ 
-- The destructors for ConvexPolygon and Quadrilateral objects are now faster, especially on Linux. 
+- This release saw the introduction of the StructuredDetector. This change has reduced load times via LoadInstrument from ~10minutes down to ~0.5seconds for the prospective ESS LOKI instrument.
+  For more information on how to generate a StructuredDetector based instrument follow
+  this `link <http://docs.mantidproject.org/nightly/concepts/InstrumentDefinitionFile.html#creating-structured-irregular-geometry-detectors>`_
+- The destructors for ConvexPolygon and Quadrilateral objects are now faster, especially on Linux.
 
 CurveFitting
 ------------

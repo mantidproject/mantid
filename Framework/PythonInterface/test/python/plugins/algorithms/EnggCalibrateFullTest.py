@@ -51,6 +51,13 @@ class EnggCalibrateFullTest(unittest.TestCase):
                           InputWorkspace=self.__class__._data_ws, DetectorPositions=[0.6, 0.9],
                           Bank=2)
 
+        # all fine, except for the wrong rebin bin width
+        self.assertRaises(RuntimeError,
+                          EnggCalibrateFull,
+                          InputWorkspace=self.__class__._data_ws, DetectorPositions=[0.6, 0.9],
+                          RebinBinWidth=[0, 2, 3],
+                          Bank=2)
+
     def test_wrong_fit_fails_gracefully(self):
         """
         Checks a bad run fails reasonably.

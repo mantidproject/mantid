@@ -113,9 +113,7 @@ public:
   void newCalibLoaded(const std::string &vanadiumNo, const std::string &ceriaNo,
                       const std::string &fname) override;
 
-  void writeOutCalibFile(const std::string &outFilename,
-                         const std::vector<double> &difc,
-                         const std::vector<double> &tzero) override;
+  std::string enggRunPythonCode(const std::string &pyCode) override;
 
   void enableTabs(bool enable) override;
 

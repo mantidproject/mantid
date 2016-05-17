@@ -1873,7 +1873,10 @@ void MuonAnalysis::plotSpectrum(const QString &wsName, bool logScale) {
   s << "  if y_auto:";
   s << "    layer.setAutoScale()";
   s << "  else:";
-  s << "    layer.setAxisScale(Layer.Left, y_min, y_max)";
+  s << "    try:";
+  s << "      layer.setAxisScale(Layer.Left, float(y_min), float(y_max))";
+  s << "    except ValueError:";
+  s << "      layer.setAutoScale()";
   s << "";
 
   // Plot the data!
@@ -3158,7 +3161,7 @@ void MuonAnalysis::fillGroupingTable(const Grouping &grouping) {
  */
 std::string MuonAnalysis::getSummedPeriods() const {
   auto summed = m_uiForm.homePeriodBox1->text().toStdString();
-  summed.erase(std::remove(summed.begin(), summed.end(), ' '));
+  summed.erase(std::remove(summed.begin(), summed.end(), ' '), summed.end());
   return summed;
 }
 
@@ -3168,7 +3171,8 @@ std::string MuonAnalysis::getSummedPeriods() const {
  */
 std::string MuonAnalysis::getSubtractedPeriods() const {
   auto subtracted = m_uiForm.homePeriodBox2->text().toStdString();
-  subtracted.erase(std::remove(subtracted.begin(), subtracted.end(), ' '));
+  subtracted.erase(std::remove(subtracted.begin(), subtracted.end(), ' '),
+                   subtracted.end());
   return subtracted;
 }
 
