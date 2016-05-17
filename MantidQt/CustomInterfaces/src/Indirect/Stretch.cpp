@@ -151,12 +151,16 @@ void Stretch::loadSettings(const QSettings &settings) {
  */
 void Stretch::handleSampleInputReady(const QString &filename) {
   m_uiForm.ppPlot->addSpectrum("Sample", filename, 0);
+  // update the maximum and minimum range bar positions
   QPair<double, double> range = m_uiForm.ppPlot->getCurveRange("Sample");
   auto eRangeSelector = m_uiForm.ppPlot->getRangeSelector("StretchERange");
   setRangeSelector(eRangeSelector, m_properties["EMin"], m_properties["EMax"],
                    range);
   setPlotPropertyRange(eRangeSelector, m_properties["EMin"],
                        m_properties["EMax"], range);
+  //update the current positions of the range bars
+  eRangeSelector->setMinimum(range.first);
+  eRangeSelector->setMaximum(range.second);
 }
 
 /**
