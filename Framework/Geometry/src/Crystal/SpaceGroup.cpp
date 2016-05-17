@@ -64,6 +64,12 @@ bool SpaceGroup::isAllowedReflection(const Kernel::V3D &hkl) const {
   return true;
 }
 
+/// Convenience function for checking compatibility of a cell metric with the
+/// space group, see Group::isInvariant.
+bool SpaceGroup::isAllowedUnitCell(const UnitCell &cell) const {
+  return isInvariant(cell.getG());
+}
+
 /**
  * Returns the point group of the space group
  *

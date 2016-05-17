@@ -16,6 +16,7 @@ set ( TEST_PY_FILES
   CreateLeBailFitInputTest.py
   DetectorFloodWeightingTest.py
   IndirectCalibrationTest.py
+  CorrectTOFTest.py
   CreateWorkspaceTest.py
   CylinderPaalmanPingsCorrectionTest.py
   CylinderPaalmanPingsCorrection2Test.py
@@ -33,6 +34,7 @@ set ( TEST_PY_FILES
   FilterLogByTimeTest.py
   FindEPPTest.py
   FindReflectometryLinesTest.py
+  FitGaussianTest.py
   FlatPlatePaalmanPingsCorrectionTest.py
   GetEiT0atSNSTest.py
   GetNegMuMuonicXRDTest.py
@@ -44,6 +46,7 @@ set ( TEST_PY_FILES
   IndirectTransmissionMonitorTest.py
   ILLIN16BCalibrationTest.py
   IqtFitMultipleTest.py
+  IqtFitSequentialTest.py
   ISISIndirectDiffractionReductionTest.py
   ISISIndirectEnergyTransferTest.py
   LoadDNSLegacyTest.py
@@ -68,6 +71,7 @@ set ( TEST_PY_FILES
   RetrieveRunInfoTest.py
   SANSFitShiftScaleTest.py
   SANSWideAngleCorrectionTest.py
+  SaveNexusPDTest.py
   SavePlot1DTest.py
   SavePlot1DAsJsonTest.py
   SaveVulcanGSSTest.py

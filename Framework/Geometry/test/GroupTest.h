@@ -6,6 +6,7 @@
 #include "MantidKernel/V3D.h"
 #include "MantidGeometry/Crystal/Group.h"
 #include "MantidGeometry/Crystal/SymmetryOperationFactory.h"
+#include "MantidGeometry/Crystal/UnitCell.h"
 #include <boost/make_shared.hpp>
 
 using namespace Mantid::Geometry;
@@ -315,6 +316,21 @@ public:
 
     Group noIdentity("-x,-y,-z; x,y,-z; -x,-y,z");
     TS_ASSERT(!noIdentity.isGroup());
+  }
+
+  void test_isInvariant_triclinic_monoclinic() {
+    UnitCell triclinic(3, 4, 5, 91, 92, 93);
+    UnitCell monoclinic(3, 5, 6, 90, 100, 90);
+
+    // Both cells are compatible with triclinic symmetry
+    Group p1bar("x,y,z; -x,-y,-z");
+    TS_ASSERT(p1bar.isInvariant(triclinic.getG()));
+    TS_ASSERT(p1bar.isInvariant(monoclinic.getG()));
+
+    // But not with monoclinic
+    Group p2overm("x,y,z; -x,-y,-z; -x,y,-z; x,-y,z");
+    TS_ASSERT(p2overm.isInvariant(monoclinic.getG()));
+    TS_ASSERT(!p2overm.isInvariant(triclinic.getG()));
   }
 
   void testSmartPointerOperators() {

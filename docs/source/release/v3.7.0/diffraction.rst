@@ -5,6 +5,11 @@ Diffraction Changes
 .. contents:: Table of Contents
    :local:
 
+Documentation
+-------------
+
+- The documentation for all calibration approaches, including Powder diffraction, single crystal and engineering calibrations has been pulled together, and expanded :ref:`here<Calibration>`.
+
 Crystal Improvements
 --------------------
 
@@ -19,12 +24,28 @@ Crystal Improvements
 - :ref:`LoadHKL <algm-LoadHKL>` reads hkl output that includes direction cosines.
 - :ref:`SaveIsawPeaks <algm-SaveIsawPeaks>` has DetCal information sorted by detector numbers
 - :ref:`StatisticsOfPeaksWorkspace <algm-StatisticsOfPeaksWorkspace>` has resolution shells in units of d-Spacing.
+- SpaceGroup now has a method to check whether a specified unit cell is compatible with the symmetry operations of the group.
+
 
 Engineering Diffraction
 -----------------------
 
-- New algorithm added: EnggFitDIFCFromPeaks, which forks from the old EnggFitPeaks.
-  EnggFitPeaks modified to fit peaks but not calibration parameters.
+- New algorithm added:
+  :ref:`EnggFitDIFCFromPeaks<algm-EnggFitDIFCFromPeaks>`, which forks
+  from the old
+  :ref:`EnggFitPeaks<algm-EnggFitPeaks>`. :ref:`EnggFitPeaks<algm-EnggFitPeaks>`
+  modified to fit peaks but not calibration parameters.
+
+- An option to set the initial rebin width has been added to
+  :ref:`EnggCalibrateFull<algm-EnggCalibrateFull>`
+
+- :ref:`EnggFocus<algm-EnggFocus>` now has an option to mask out
+  several ranges in ToF (instrument pulses), with default values set
+  for ENGIN-X, and an option to normalize by proton charge (enabled by
+  default).
+
+- Phase information files for ENGIN-X are now distributed together
+  with the ENGIN-X scripts.
 
 Graphical user interface:
 
@@ -50,16 +71,28 @@ Graphical user interface:
   now view the plot in `dSpacing` instead `ToF`, which enables you to
   rerun the fitting process after selecting peaks from the interface.
 
-Powder Diffraction
-------------------
 
-- :ref:`PDFFourierTransform <algm-PDFFourierTransform>` has been corrected in its calculation of errors.
+- The output calibration files will be written with the extension
+  ".prm" by default. Together with an "all-banks" calibration (GSAS
+  instrument parameters) file, an individual file for every focused
+  bank will be written.
+
+- Improvements to Fitting tab, Single peak fitting for consecutive run
+  number's focused files has now been enabled. The tab will automatically load
+  the consecutive run numbers to the list widget from the range provided by the
+  user, bank combo-box will update upon selection of run number.
+
+
+- New algorithm :ref:`SaveNexusPD <algm-SaveNexusPD>` which creates a nexus file for use in GUDRUN and will hopefully be supported by Rietveld packages in the future.
 
 Imaging
 -------
 
 - The new algorithm :ref:`ImggAggregateWavelengths <algm-ImggAggregateWavelengths>`
   aggregates stacks of images from wavelength dependent data.
+
+- Images loaded as Mantid workspaces can now be saved into FITS files
+  using the algorithm :ref:`SaveFITS <algm-SaveFITS>`.
 
 Improvements in the tomographic reconstruction graphical user interface:
 
@@ -68,6 +101,7 @@ Improvements in the tomographic reconstruction graphical user interface:
   - Handle the rotation of all the images in the stack
   - "Play" the stack or sequence of images as a movie
   - Visualize sample, flat, and dark images separately
+  - Multiple color map alternatives and control of the color bar
 
 - Previously existing parameters to set up local and remote paths have
   been moved into a new section of the interface. New options have
@@ -82,6 +116,12 @@ Improvements in the tomographic reconstruction graphical user interface:
   pass, and supports different aggregation methods via the new
   algorithm :ref:`ImggAggregateWavelengths
   <algm-ImggAggregateWavelengths>`.
+
+
+Powder Diffraction
+------------------
+
+- :ref:`PDFFourierTransform <algm-PDFFourierTransform>` has been corrected in its calculation of errors.
 
 
 Powder Diffraction Scripts

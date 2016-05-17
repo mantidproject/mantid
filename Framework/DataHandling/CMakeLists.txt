@@ -73,6 +73,7 @@ set ( SRC_FILES
 	src/LoadMuonNexus1.cpp
 	src/LoadMuonNexus2.cpp
 	src/LoadNXSPE.cpp
+	src/LoadNXcanSAS.cpp
 	src/LoadNexus.cpp
 	src/LoadNexusLogs.cpp
 	src/LoadNexusMonitors.cpp
@@ -93,7 +94,7 @@ set ( SRC_FILES
 	src/LoadRawBin0.cpp
 	src/LoadRawHelper.cpp
 	src/LoadRawSpectrum0.cpp
-	src/LoadReflTBL.cpp
+	src/LoadTBL.cpp
 	src/LoadSINQFocus.cpp
 	src/LoadSNSspec.cpp
 	src/LoadSPE.cpp
@@ -133,6 +134,7 @@ set ( SRC_FILES
 	src/SaveDetectorsGrouping.cpp
 	src/SaveDiffCal.cpp
 	src/SaveDspacemap.cpp
+	src/SaveFITS.cpp
 	src/SaveFocusedXYE.cpp
 	src/SaveFullprofResolution.cpp
 	src/SaveGSASInstrumentFile.cpp
@@ -144,6 +146,7 @@ set ( SRC_FILES
 	src/SaveNISTDAT.cpp
 	src/SaveNXSPE.cpp
 	src/SaveNXTomo.cpp
+	src/SaveNXcanSAS.cpp
 	src/SaveNexus.cpp
 	src/SaveNexusProcessed.cpp
 	src/SaveOpenGenieAscii.cpp
@@ -153,7 +156,7 @@ set ( SRC_FILES
 	src/SaveParameterFile.cpp
 	src/SaveRKH.cpp
 	src/SaveReflCustomAscii.cpp
-	src/SaveReflTBL.cpp
+	src/SaveTBL.cpp
 	src/SaveReflThreeColumnAscii.cpp
 	src/SaveSPE.cpp
 	src/SaveSavuTomoConfig.cpp
@@ -242,6 +245,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadMuonNexus1.h
 	inc/MantidDataHandling/LoadMuonNexus2.h
 	inc/MantidDataHandling/LoadNXSPE.h
+	inc/MantidDataHandling/LoadNXcanSAS.h
 	inc/MantidDataHandling/LoadNexus.h
 	inc/MantidDataHandling/LoadNexusLogs.h
 	inc/MantidDataHandling/LoadNexusMonitors.h
@@ -257,7 +261,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadRawBin0.h
 	inc/MantidDataHandling/LoadRawHelper.h
 	inc/MantidDataHandling/LoadRawSpectrum0.h
-	inc/MantidDataHandling/LoadReflTBL.h
+	inc/MantidDataHandling/LoadTBL.h
 	inc/MantidDataHandling/LoadSINQFocus.h
 	inc/MantidDataHandling/LoadSNSspec.h
 	inc/MantidDataHandling/LoadSPE.h
@@ -276,6 +280,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/MergeLogs.h
 	inc/MantidDataHandling/ModifyDetectorDotDatFile.h
 	inc/MantidDataHandling/MoveInstrumentComponent.h
+	inc/MantidDataHandling/NXcanSASDefinitions.h
 	inc/MantidDataHandling/NexusTester.h
 	inc/MantidDataHandling/PDLoadCharacterizations.h
 	inc/MantidDataHandling/PatchBBY.h
@@ -297,6 +302,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/SaveDetectorsGrouping.h
 	inc/MantidDataHandling/SaveDiffCal.h
 	inc/MantidDataHandling/SaveDspacemap.h
+	inc/MantidDataHandling/SaveFITS.h
 	inc/MantidDataHandling/SaveFocusedXYE.h
 	inc/MantidDataHandling/SaveFullprofResolution.h
 	inc/MantidDataHandling/SaveGSASInstrumentFile.h
@@ -308,6 +314,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/SaveNISTDAT.h
 	inc/MantidDataHandling/SaveNXSPE.h
 	inc/MantidDataHandling/SaveNXTomo.h
+	inc/MantidDataHandling/SaveNXcanSAS.h
 	inc/MantidDataHandling/SaveNexus.h
 	inc/MantidDataHandling/SaveNexusProcessed.h
 	inc/MantidDataHandling/SaveOpenGenieAscii.h
@@ -317,7 +324,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/SaveParameterFile.h
 	inc/MantidDataHandling/SaveRKH.h
 	inc/MantidDataHandling/SaveReflCustomAscii.h
-	inc/MantidDataHandling/SaveReflTBL.h
+	inc/MantidDataHandling/SaveTBL.h
 	inc/MantidDataHandling/SaveReflThreeColumnAscii.h
 	inc/MantidDataHandling/SaveSPE.h
 	inc/MantidDataHandling/SaveSavuTomoConfig.h
@@ -403,6 +410,7 @@ set ( TEST_FILES
 	LoadMuonNexus1Test.h
 	LoadMuonNexus2Test.h
 	LoadNXSPETest.h
+	LoadNXcanSASTest.h
 	LoadNexusLogsTest.h
 	LoadNexusMonitorsTest.h
 	LoadNexusProcessedTest.h
@@ -417,7 +425,7 @@ set ( TEST_FILES
 	LoadRawBin0Test.h
 	LoadRawSaveNxsLoadNxsTest.h
 	LoadRawSpectrum0Test.h
-	LoadReflTBLTest.h
+	LoadTBLTest.h
 	LoadSINQFocusTest.h
 	LoadSNSspecTest.h
 	LoadSPETest.h
@@ -456,6 +464,7 @@ set ( TEST_FILES
 	SaveDetectorsGroupingTest.h
 	SaveDiffCalTest.h
 	SaveDspacemapTest.h
+	SaveFITSTest.h
 	SaveFocussedXYETest.h
 	SaveFullprofResolutionTest.h
 	SaveGSASInstrumentFileTest.h
@@ -466,6 +475,7 @@ set ( TEST_FILES
 	SaveNISTDATTest.h
 	SaveNXSPETest.h
 	SaveNXTomoTest.h
+	SaveNXcanSASTest.h
 	SaveNexusProcessedTest.h
 	SaveNexusTest.h
 	SavePARTest.h
@@ -474,7 +484,7 @@ set ( TEST_FILES
 	SaveParameterFileTest.h
 	SaveRKHTest.h
 	SaveReflCustomAsciiTest.h
-	SaveReflTBLTest.h
+	SaveTBLTest.h
 	SaveReflThreeColumnAsciiTest.h
 	SaveSPETest.h
 	SaveSavuTomoConfigTest.h

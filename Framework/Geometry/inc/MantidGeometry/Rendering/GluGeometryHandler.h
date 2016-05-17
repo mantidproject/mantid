@@ -46,8 +46,10 @@ class Object;
    File change history is stored at: <https://github.com/mantidproject/mantid>
 */
 class MANTID_GEOMETRY_DLL GluGeometryHandler : public GeometryHandler {
+public:
   /// the type of the geometry eg CUBOID,CYLINDER,CONE,SPHERE
-  enum GEOMETRY_TYPE {
+  enum class GeometryType {
+    NOSHAPE = 0,
     CUBOID,            ///< CUBOID
     HEXAHEDRON,        ///< HEXAHEDRON
     SPHERE,            ///< SPHERE
@@ -65,8 +67,8 @@ private:
   std::vector<Kernel::V3D> m_points;
   double radius; ///<Radius for the sphere, cone and cylinder
   double height; ///<height for cone and cylinder;
-  GEOMETRY_TYPE
-  type; ///< the type of the geometry eg CUBOID,CYLINDER,CONE,SPHERE
+  GeometryType
+      type; ///< the type of the geometry eg CUBOID,CYLINDER,CONE,SPHERE
 public:
   GluGeometryHandler(const GluGeometryHandler &other);
   GluGeometryHandler(IObjComponent *comp);           ///< Constructor

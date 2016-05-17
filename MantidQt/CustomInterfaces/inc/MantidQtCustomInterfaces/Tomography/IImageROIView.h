@@ -153,15 +153,6 @@ public:
                            const std::string &description) = 0;
 
   /**
-   * To enable/disable all actions in the view. Useful when it is
-   * necessary to prevent the user from requesting actions. For
-   * example, during a lenghty execution of a process, drawing, etc.
-   *
-   * @param enable whether to enable or disable actions.
-   */
-  virtual void enableActions(bool enable) = 0;
-
-  /**
    * Display an error message (for example as a pop-up window).
    *
    * @param err Error title, should be short and would normally be
@@ -171,6 +162,15 @@ public:
    */
   virtual void userError(const std::string &err,
                          const std::string &description) = 0;
+
+  /**
+   * To enable/disable all actions in the view. Useful when it is
+   * necessary to prevent the user from requesting actions. For
+   * example, during a lenghty execution of a process, drawing, etc.
+   *
+   * @param enable whether to enable or disable actions.
+   */
+  virtual void enableActions(bool enable) = 0;
 
   /**
    * The images of the type selected by the user (samples/flats/darks).
@@ -230,6 +230,13 @@ public:
   virtual void updateRotationAngle(float angle) = 0;
 
   /**
+   * Get the path/location of a single image file.
+   *
+   * @return location as a string
+   */
+  virtual std::string askSingleImagePath() = 0;
+
+  /**
    * Get the path/location of a stack of images (or single image as a
    * particular case) that the user is requesting to display.  The
    * path would be expected to point to a recognized directory
@@ -237,9 +244,24 @@ public:
    * case).
    *
    * @return location (can be a directory, file, etc.) that needs to
-   * be figured out elsewhere.
+   * be figured out elsewhere
    */
   virtual std::string askImgOrStackPath() = 0;
+
+  /**
+   * Get the path of a color map file from the user.
+   *
+   * @return path as a string (empty if the selection is canceled or
+   * fails otherwise)
+   */
+  virtual std::string askColorMapFile() = 0;
+
+  /**
+   * Update the current color map (and refresh the image with it).
+   *
+   * @param filename name of a color map file
+   */
+  virtual void updateColorMap(const std::string &filename) = 0;
 
   /**
    * Save settings (normally when closing this widget).

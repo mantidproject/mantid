@@ -89,6 +89,11 @@ public:
   boost::shared_ptr<ObjectType> createShape(std::string shapeXML,
                                             bool addTypeTag = true);
 
+  boost::shared_ptr<Object> createHexahedralShape(double xlb, double xlf,
+                                                  double xrf, double xrb,
+                                                  double ylb, double ylf,
+                                                  double yrf, double yrb);
+
 private:
   std::string parseSphere(Poco::XML::Element *pElem,
                           std::map<int, boost::shared_ptr<Surface>> &prim,
@@ -108,6 +113,10 @@ private:
   parseSegmentedCylinder(Poco::XML::Element *pElem,
                          std::map<int, boost::shared_ptr<Surface>> &prim,
                          int &l_id);
+  std::string
+  parseHollowCylinder(Poco::XML::Element *pElem,
+                      std::map<int, boost::shared_ptr<Surface>> &prim,
+                      int &l_id);
 
   CuboidCorners parseCuboid(Poco::XML::Element *pElem);
   std::string parseCuboid(Poco::XML::Element *pElem,
@@ -120,6 +129,10 @@ private:
                         std::map<int, boost::shared_ptr<Surface>> &prim,
                         int &l_id);
 
+  static std::string
+  parseHexahedronFromStruct(Hexahedron &hex,
+                            std::map<int, boost::shared_ptr<Surface>> &prim,
+                            int &l_id);
   Hexahedron parseHexahedron(Poco::XML::Element *pElem);
   std::string parseHexahedron(Poco::XML::Element *pElem,
                               std::map<int, boost::shared_ptr<Surface>> &prim,

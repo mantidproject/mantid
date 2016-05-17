@@ -224,6 +224,9 @@ public:
   /// Set the default facility
   void setFacility(const std::string &facilityName);
 
+  /// registers additional logging filter channels
+  void registerLoggingFilterChannel(const std::string &filterChannelName,
+                                    Poco::Channel *pChannel);
   /// Sets the log level priority for the File log channel
   void setFileLogLevel(int logLevel);
   /// Sets the log level priority for the Console log channel
@@ -270,6 +273,7 @@ private:
   void loadConfig(const std::string &filename, const bool append = false);
   /// Read a file and place its contents into the given string
   bool readFile(const std::string &filename, std::string &contents) const;
+
   /// Provides a string of a default configuration
   std::string defaultConfig() const;
   /// Writes out a fresh user properties file
@@ -298,6 +302,8 @@ private:
   /// Returns a list of all keys under a given root key
   void getKeysRecursive(const std::string &root,
                         std::vector<std::string> &allKeys) const;
+  /// Finds the lowest registered logging filter level
+  int FindLowestFilterLevel() const;
 
   // Forward declaration of inner class
   template <class T> class WrappedObject;
@@ -341,6 +347,9 @@ private:
   Kernel::ProxyInfo m_proxyInfo;
   /// whether the proxy has been populated yet
   bool m_isProxySet;
+
+  /// store a list of logging FilterChannels
+  std::vector<std::string> m_filterChannels;
 };
 
 /// Forward declaration of a specialisation of SingletonHolder for
