@@ -386,7 +386,11 @@ void ReflectometryReductionOneAuto::exec() {
     refRedOne->setProperty("NormalizeByIntegratedMonitors", norm_by_int_mons);
 
     if (i0_monitor_index.is_initialized()) {
-      refRedOne->setProperty("I0MonitorIndex", i0_monitor_index.get());
+      if (i0_monitor_index.get() >= 0)
+        refRedOne->setProperty("I0MonitorIndex", i0_monitor_index.get());
+      else
+        throw std::invalid_argument(
+            "I0MonitorIndex must be an integer greater than or equal to 0");
     }
     refRedOne->setProperty("ProcessingInstructions", processing_commands);
     refRedOne->setProperty("WavelengthMin", wavelength_min);
