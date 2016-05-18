@@ -8,6 +8,8 @@
 namespace Mantid {
 namespace HistogramData {
 
+class BinEdges;
+class CountVariances;
 class FrequencyStandardDeviations;
 
 /** FrequencyVariances : TODO: DESCRIPTION
@@ -49,6 +51,13 @@ public:
   FrequencyVariances(FrequencyVariances &&) = default;
   FrequencyVariances &operator=(const FrequencyVariances &)& = default;
   FrequencyVariances &operator=(FrequencyVariances &&)& = default;
+
+  /// Constructs FrequencVariances from CountVariances and bin width based on
+  /// BinEdges.
+  FrequencyVariances(const CountVariances &counts, const BinEdges &edges);
+  /// Move-constructs FrequencyVariances from CountVariances and bin width based
+  /// on BinEdges.
+  FrequencyVariances(CountVariances &&counts, const BinEdges &edges);
 };
 
 } // namespace HistogramData

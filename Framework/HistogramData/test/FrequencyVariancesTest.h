@@ -3,9 +3,15 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidHistogramData/BinEdges.h"
+#include "MantidHistogramData/CountStandardDeviations.h"
+#include "MantidHistogramData/CountVariances.h"
 #include "MantidHistogramData/FrequencyStandardDeviations.h"
 #include "MantidHistogramData/FrequencyVariances.h"
 
+using Mantid::HistogramData::BinEdges;
+using Mantid::HistogramData::CountStandardDeviations;
+using Mantid::HistogramData::CountVariances;
 using Mantid::HistogramData::FrequencyStandardDeviations;
 using Mantid::HistogramData::FrequencyVariances;
 
@@ -30,6 +36,99 @@ public:
     TS_ASSERT_EQUALS(result[0], variances[0]);
     TS_ASSERT_EQUALS(result[1], variances[1]);
     TS_ASSERT_EQUALS(result[2], variances[2]);
+  }
+
+  void test_construct_from_null_CountVariances() {
+    const CountVariances counts{};
+    const BinEdges edges{};
+    const FrequencyVariances frequencies(counts, edges);
+    TS_ASSERT(!frequencies);
+  }
+
+  void test_construct_from_empty_CountVariances() {
+    const CountVariances counts(0);
+    const BinEdges edges{0};
+    const FrequencyVariances frequencies(counts, edges);
+    TS_ASSERT_EQUALS(frequencies.size(), 0);
+  }
+
+  void test_construct_from_empty_CountVariances_null_BinEdges() {
+    const CountVariances counts(0);
+    const BinEdges edges{};
+    TS_ASSERT_THROWS(const FrequencyVariances frequencies(counts, edges),
+                     std::logic_error);
+  }
+
+  void test_construct_from_empty_CountVariances_size_mismatch() {
+    const CountVariances counts(0);
+    const BinEdges edges(2);
+    TS_ASSERT_THROWS(const FrequencyVariances frequencies(counts, edges),
+                     std::logic_error);
+  }
+
+  void test_construct_from_CountVariances_null_BinEdges() {
+    const CountVariances counts(1);
+    const BinEdges edges{};
+    TS_ASSERT_THROWS(const FrequencyVariances frequencies(counts, edges),
+                     std::logic_error);
+  }
+
+  void test_construct_from_CountVariances_size_mismatch() {
+    const CountVariances counts(2);
+    const BinEdges edges(2);
+    TS_ASSERT_THROWS(const FrequencyVariances frequencies(counts, edges),
+                     std::logic_error);
+  }
+
+  void test_construct_from_CountVariances() {
+    const CountVariances counts{1.0, 2.0};
+    const BinEdges edges{0.1, 0.2, 0.4};
+    const FrequencyVariances frequencies(counts, edges);
+    TS_ASSERT_EQUALS(frequencies.size(), 2);
+    TS_ASSERT_DELTA(frequencies[0], 100.0, 1e-14);
+    TS_ASSERT_DELTA(frequencies[1], 50.0, 1e-14);
+  }
+
+  void test_move_construct_from_CountVariances() {
+    CountVariances counts(1);
+    const BinEdges edges(2);
+    auto old_ptr = &counts[0];
+    const FrequencyVariances frequencies(std::move(counts), edges);
+    TS_ASSERT(!counts);
+    TS_ASSERT_EQUALS(&frequencies[0], old_ptr);
+  }
+
+  void test_move_construct_from_CountVariances_and_cow() {
+    CountVariances counts(1);
+    const CountVariances copy(counts);
+    const BinEdges edges(2);
+    auto old_ptr = &counts[0];
+    const FrequencyVariances frequencies(std::move(counts), edges);
+    // Moved from counts...
+    TS_ASSERT(!counts);
+    // ... but made a copy of data, since "copy" also held a reference.
+    TS_ASSERT_DIFFERS(&frequencies[0], old_ptr);
+  }
+
+  void test_construct_from_CountStandardDeviations() {
+    const CountStandardDeviations counts{1.0, M_SQRT2};
+    const BinEdges edges{0.1, 0.2, 0.4};
+    // This implicitly constructs CountVariances first.
+    const FrequencyVariances frequencies(counts, edges);
+    TS_ASSERT_EQUALS(frequencies.size(), 2);
+    TS_ASSERT_DELTA(frequencies[0], 100.0, 1e-14);
+    TS_ASSERT_DELTA(frequencies[1], 50.0, 1e-14);
+  }
+
+  void test_move_construct_from_CountStandardDeviations() {
+    CountStandardDeviations counts(1);
+    const BinEdges edges(2);
+    auto old_ptr = &counts[0];
+    // This implicitly constructs CountVariances first, so there is a
+    // two-step move going on!
+    const FrequencyVariances frequencies(std::move(counts), edges);
+    TS_ASSERT(!counts);
+    TS_ASSERT_EQUALS(&frequencies[0], old_ptr);
   }
 };
 
