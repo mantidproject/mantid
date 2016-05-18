@@ -321,7 +321,7 @@ void Qxy::exec() {
 
   // Divide the output data by the solid angles
   outputWorkspace /= weights;
-  outputWorkspace->isDistribution(true);
+  outputWorkspace->setDistribution(true);
 
   // Count of the number of empty cells
   const size_t nhist = outputWorkspace->getNumberHistograms();

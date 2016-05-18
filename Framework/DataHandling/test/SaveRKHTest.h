@@ -46,7 +46,7 @@ public:
     // Need a test workspace to use as input
     MatrixWorkspace_sptr inputWS1 =
         WorkspaceCreationHelper::Create2DWorkspaceBinned(1, 10, 1.0);
-    inputWS1->isDistribution(true);
+    inputWS1->setDistribution(true);
 
     // Register workspace
     AnalysisDataService::Instance().add("testInputOne", inputWS1);
@@ -115,7 +115,7 @@ public:
     using namespace Mantid::API;
     MatrixWorkspace_sptr inputWS2 =
         WorkspaceCreationHelper::Create2DWorkspaceBinned(10, 1, 0.0);
-    inputWS2->isDistribution(true);
+    inputWS2->setDistribution(true);
     // Register workspace
     AnalysisDataService::Instance().add("testInputTwo", inputWS2);
 
@@ -184,7 +184,7 @@ public:
     TS_ASSERT_THROWS(testAlgorithm3.execute(), std::runtime_error);
     // Need a test workspace to use as input
     auto inputWS3 = createInputWorkspaceHistoWithXerror();
-    inputWS3->isDistribution(false);
+    inputWS3->setDistribution(false);
 
     // Register workspace
     AnalysisDataService::Instance().add("testInputThree", inputWS3);

@@ -270,7 +270,7 @@ void Rebin::exec() {
       PARALLEL_END_INTERUPT_REGION
     }
     PARALLEL_CHECK_INTERUPT_REGION
-    outputWS->isDistribution(dist);
+    outputWS->setDistribution(dist);
 
     // Now propagate any masking correctly to the output workspace
     // More efficient to have this in a separate loop because

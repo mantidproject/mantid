@@ -305,9 +305,10 @@ public:
 
     const std::string filename =
         "UNKNOWNINST_" + vanNo + "_" + ceriaNo + "_" + "foo.prm";
-    EXPECT_CALL(mockView, askNewCalibrationFilename(
-                              "UNKNOWNINST_" + vanNo + "_" + ceriaNo +
-                              "_both_banks.prm")).Times(0);
+    EXPECT_CALL(mockView,
+                askNewCalibrationFilename("UNKNOWNINST_" + vanNo + "_" +
+                                          ceriaNo + "_both_banks.prm"))
+        .Times(0);
     //  .WillOnce(Return(filename)); // if enabled ask user output filename
 
     // Should not try to use options for focusing
@@ -329,8 +330,7 @@ public:
     // plots peaks and curves
     // the test doesnt get to here as it finishes at EnggCalibrate algo
     EXPECT_CALL(mockView, plotCalibWorkspace()).Times(0);
-    EXPECT_CALL(mockView, plotVanCurvesCalibOutput()).Times(0);
-    EXPECT_CALL(mockView, plotDifcZeroCalibOutput(testing::_)).Times(0);
+    EXPECT_CALL(mockView, plotCalibOutput(testing::_)).Times(0);
 
     // A warning about the vanadium number, and what it should look like
     EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(1);
@@ -366,8 +366,7 @@ public:
     // plots peaks and curves
     // the test doesnt get to here as it finishes at EnggCalibrate algo
     EXPECT_CALL(mockView, plotCalibWorkspace()).Times(0);
-    EXPECT_CALL(mockView, plotVanCurvesCalibOutput()).Times(0);
-    EXPECT_CALL(mockView, plotDifcZeroCalibOutput(testing::_)).Times(0);
+    EXPECT_CALL(mockView, plotCalibOutput(testing::_)).Times(0);
 
     // No errors/warnings
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
@@ -526,9 +525,10 @@ public:
 
     const std::string filename =
         "UNKNOWNINST_" + vanNo + "_" + ceriaNo + "_" + "foo.prm";
-    EXPECT_CALL(mockView, askNewCalibrationFilename(
-                              "UNKNOWNINST_" + vanNo + "_" + ceriaNo +
-                              "_both_banks.prm")).Times(0);
+    EXPECT_CALL(mockView,
+                askNewCalibrationFilename("UNKNOWNINST_" + vanNo + "_" +
+                                          ceriaNo + "_both_banks.prm"))
+        .Times(0);
     //  .WillOnce(Return(filename)); // if enabled ask user output filename
 
     // with the normal thread should disable actions at the beginning
@@ -541,8 +541,7 @@ public:
 
     // tests whether the plot functions have been called
     EXPECT_CALL(mockView, plotCalibWorkspace()).Times(0);
-    EXPECT_CALL(mockView, plotVanCurvesCalibOutput()).Times(0);
-    EXPECT_CALL(mockView, plotDifcZeroCalibOutput(testing::_)).Times(0);
+    EXPECT_CALL(mockView, plotCalibOutput(testing::_)).Times(0);
 
     // A warning about the vanadium run number
     EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(1);
@@ -596,9 +595,10 @@ public:
 
     const std::string filename =
         "UNKNOWNINST_" + vanNo + "_" + ceriaNo + "_" + "foo.prm";
-    EXPECT_CALL(mockView, askNewCalibrationFilename(
-                              "UNKNOWNINST_" + vanNo + "_" + ceriaNo +
-                              "_both_banks.prm")).Times(0);
+    EXPECT_CALL(mockView,
+                askNewCalibrationFilename("UNKNOWNINST_" + vanNo + "_" +
+                                          ceriaNo + "_both_banks.prm"))
+        .Times(0);
     //  .WillOnce(Return(filename)); // if enabled ask user output filename
 
     // Should not try to use options for focusing

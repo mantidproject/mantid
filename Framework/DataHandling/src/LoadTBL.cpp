@@ -4,13 +4,13 @@
 #include "MantidDataHandling/LoadTBL.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/RegisterFileLoader.h"
+#include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/Strings.h"
-#include "MantidAPI/TableRow.h"
 #include <fstream>
 
-#include <boost/tokenizer.hpp>
 #include <MantidKernel/StringTokenizer.h>
+#include <boost/tokenizer.hpp>
 // String utilities
 #include <boost/algorithm/string.hpp>
 
@@ -234,7 +234,9 @@ size_t LoadTBL::getCells(std::string line, std::vector<std::string> &cols,
       csvParse(line, cols, quoteBounds, expectedCommas);
     }
   } else {
-    boost::split(cols, line, boost::is_any_of(","), boost::token_compress_off);
+    std::vector<std::vector<size_t>> quoteBounds;
+    findQuotePairs(line, quoteBounds);
+    csvParse(line, cols, quoteBounds, expectedCommas);
     if (cols.size() > expectedCommas) {
       for (size_t i = expectedCommas + 1; i < cols.size(); i++) {
         cols[expectedCommas].append(

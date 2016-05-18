@@ -202,11 +202,8 @@ public:
                void(std::vector<boost::shared_ptr<QwtData>> &data,
                     bool focused, bool plotSinglePeaks));
 
-  // virtual void plotVanCurvesCalibOutput();
-  MOCK_METHOD0(plotVanCurvesCalibOutput, void());
-
-  // virtual void plotDifcZeroCalibOutput();
-  MOCK_METHOD1(plotDifcZeroCalibOutput, void(const std::string &pyCode));
+  // virtual void plotCalibOutput();
+  MOCK_METHOD1(plotCalibOutput, void(const std::string &pyCode));
 };
 
 #endif // MANTID_CUSTOMINTERFACES_ENGGDIFFRACTIONVIEWMOCK_H

@@ -2940,11 +2940,8 @@ void EnggDiffractionPresenter::plotCalibWorkspace(std::vector<double> difc,
                                                   std::string specNos) {
   const bool plotCalibWS = m_view->plotCalibWorkspace();
   if (plotCalibWS) {
-    if (g_plottingCounter == 1) {
-      m_view->plotVanCurvesCalibOutput();
-    } else {
-      m_view->plotReplacingWindow(g_vanCurvesWSName, "[0, 1, 2]", "2");
-    }
+    std::string pyCode = vanadiumCurvesPlotFactory();
+    m_view->plotCalibOutput(pyCode);
 
     // Get the Customised Bank Name text-ield string from qt
     std::string CustomisedBankName = m_view->currentCalibCustomisedBankName();
@@ -2953,7 +2950,7 @@ void EnggDiffractionPresenter::plotCalibWorkspace(std::vector<double> difc,
     const std::string pythonCode =
         DifcZeroWorkspaceFactory(difc, tzero, specNos, CustomisedBankName) +
         plotDifcZeroWorkspace(CustomisedBankName);
-    m_view->plotDifcZeroCalibOutput(pythonCode);
+    m_view->plotCalibOutput(pythonCode);
   }
 }
 
@@ -3130,6 +3127,32 @@ std::string EnggDiffractionPresenter::outFileNameFactory(
     fullFilename = "ENGINX_" + runNo + "_bank_" + bank + format;
   }
   return fullFilename;
+}
+
+std::string EnggDiffractionPresenter::vanadiumCurvesPlotFactory() {
+  std::string pyCode =
+
+      "van_curve_twin_ws = \"__engggui_vanadium_curves_twin_ws\"\n"
+
+      "if(mtd.doesExist(van_curve_twin_ws)):\n"
+      " DeleteWorkspace(van_curve_twin_ws)\n"
+
+      "CloneWorkspace(InputWorkspace = \"engggui_vanadium_curves_ws\", "
+      "OutputWorkspace = van_curve_twin_ws)\n"
+
+      "van_curves_ws = workspace(van_curve_twin_ws)\n"
+      "for i in range(1, 3):\n"
+      " if (i == 1):\n"
+      "  curve_plot_bank_1 = plotSpectrum(van_curves_ws, [0, 1, "
+      "2]).activeLayer()\n"
+      "  curve_plot_bank_1.setTitle(\"Engg GUI Vanadium Curves Bank 1\")\n"
+
+      " if (i == 2):\n"
+      "  curve_plot_bank_2 = plotSpectrum(van_curves_ws, [3, 4, "
+      "5]).activeLayer()\n"
+      "  curve_plot_bank_2.setTitle(\"Engg GUI Vanadium Curves Bank 2\")\n";
+
+  return pyCode;
 }
 
 /**
