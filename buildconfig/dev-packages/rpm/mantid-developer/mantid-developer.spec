@@ -1,5 +1,5 @@
 Name:           mantid-developer
-Version:        1.15
+Version:        1.16
 Release:        1%{?dist}
 Summary:        Meta Package to install dependencies for Mantid Development
 
@@ -25,7 +25,7 @@ Requires: git-all
 Requires: gsl-devel
 Requires: hdf-devel
 Requires: hdf5-devel
-Requires: h5py
+Requires: h5py >= 2.3.1
 Requires: jsoncpp-devel >= 0.7.0
 Requires: muParser-devel
 Requires: mxml-devel
@@ -97,6 +97,9 @@ required for Mantid development.
 %files
 
 %changelog
+* Wed May 18 2016 Martyn Gigg <martyn.gigg@stfc.ac.uk>
+- Require h5py >= 2.3.1
+
 * Tue May 03 2016 Pete Peterson <petersonpf@ornl.gov>
 - Require python-matplotlib-qt4 and h5py
 
