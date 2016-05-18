@@ -29,7 +29,7 @@ public:
 
   void checkHistogramData(QwtWorkspaceSpectrumData & data, double offset)
   {
-    TS_ASSERT_EQUALS( data.size(), 5);
+    TS_ASSERT_EQUALS( data.size(), 4);
     for (size_t i=0; i<4; i++)
     {
       TS_ASSERT_DELTA( data.x(i), offset + double(i), 1e-5);
