@@ -28,7 +28,8 @@ AlgorithmHistory::AlgorithmHistory(const Algorithm *const alg,
                                    const double &duration,
                                    std::size_t uexeccount)
     : m_name(alg->name()), m_version(alg->version()), m_executionDate(start),
-      m_executionDuration(duration), m_execCount(uexeccount) {
+      m_executionDuration(duration), m_execCount(uexeccount),
+      m_childHistories() {
   // Now go through the algorithm's properties and create the PropertyHistory
   // objects.
   setProperties(alg);
@@ -52,7 +53,8 @@ AlgorithmHistory::AlgorithmHistory(const std::string &name, int vers,
                                    const double &duration,
                                    std::size_t uexeccount)
     : m_name(name), m_version(vers), m_executionDate(start),
-      m_executionDuration(duration), m_execCount(uexeccount) {}
+      m_executionDuration(duration), m_execCount(uexeccount),
+      m_childHistories() {}
 
 /**
  *  Set the history properties for an algorithm pointer
