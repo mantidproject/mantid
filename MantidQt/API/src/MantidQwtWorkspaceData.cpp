@@ -100,10 +100,7 @@ double MantidQwtWorkspaceData::getYMin() const {
   if (m_minPositive == 0.0) {
     calculateYMinAndMax();
   }
-  if (m_logScaleY)
-    return m_isWaterfall ? m_minPositive + m_offsetY : m_minPositive;
-  else
-    return m_isWaterfall ? m_minY + m_offsetY : m_minY;
+  return m_logScaleY ? m_minPositive : m_minY;
 }
 
 /**

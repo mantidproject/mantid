@@ -242,10 +242,6 @@ void MantidMatrixCurve::draw(QPainter *p, const QwtScaleMap &xMap,
       throw std::runtime_error(
           "Only MantidQwtWorkspaceData can be set to a MantidMatrixCurve");
     }
-    p->translate(d_x_offset,
-                 -d_y_offset); // For waterfall plots (will be zero otherwise)
-    // Don't really know why you'd want errors on a waterfall plot, but just in
-    // case...
     doDraw(p, xMap, yMap, rect, d);
   }
 }

@@ -96,7 +96,6 @@ QwtDoubleRect MantidCurve::boundingRect() const
 /// Invalidates the bounding rect forcing it to be recalculated
 void MantidCurve::invalidateBoundingRect() {
   m_boundingRect = QwtDoubleRect();
-  auto data = mantidData();
 }
 
 /**
@@ -112,7 +111,6 @@ void MantidCurve::axisScaleChanged(int axis, bool toLog)
     // force boundingRect calculation at this moment
     invalidateBoundingRect();
     boundingRect();
-    mantidData()->saveLowestPositiveValue(m_boundingRect.y());
   }
 }
 
@@ -179,7 +177,11 @@ void MantidCurve::doDraw(QPainter *p,
       const double Y = y(i);
       const double E = d->e(i);
       const int yi = yMap.transform(Y);
-      const int ei1 = yMap.transform(Y - E);
+      double YminusE = Y - E;
+      if (d->logScaleY() && YminusE <= 0) {
+        YminusE = d->getYMin();
+      }
+      const int ei1 = yMap.transform(YminusE);
       const int ei2 = yMap.transform(Y + E);
       const int yhl = yi - sh;
       const int ylh = yi + sh;

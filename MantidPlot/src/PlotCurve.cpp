@@ -50,7 +50,8 @@ using namespace Mantid::API;
 
 PlotCurve::PlotCurve(const QString &name)
     : QwtPlotCurve(name), d_type(0), d_x_offset(0.0), d_y_offset(0.0),
-      d_side_lines(false), d_skip_symbols(1), m_isDistribution(false) {}
+      d_side_lines(false),
+      d_skip_symbols(1), m_isDistribution(false) {}
 
 PlotCurve::PlotCurve(const PlotCurve &c)
     : QObject(), QwtPlotCurve(c.title().text()), d_type(c.d_type),
@@ -303,20 +304,18 @@ void PlotCurve::computeWaterfallOffsets(double &xDataOffset,
     PlotCurve *c = dynamic_cast<PlotCurve *>(g->curve(0));
     if (index > 0 && c) {
       // Compute offsets based on the maximum value for the curve
+      double xRange = plot->axisScaleDiv(Plot::xBottom)->range();
+      double yRange = plot->axisScaleDiv(Plot::yLeft)->range();
 
       // First compute offsets in a linear scale
       xDataOffset = index * g->waterfallXOffset() * 0.01 *
-                    plot->axisScaleDiv(Plot::xBottom)->range() /
-                    (double)(curves - 1);
+                    xRange / (double)(curves - 1);
       yDataOffset = index * g->waterfallYOffset() * 0.01 *
-                    plot->axisScaleDiv(Plot::yLeft)->range() /
-                    (double)(curves - 1);
+                    yRange / (double)(curves - 1);
 
       // Corresponding offset on the screen in pixels
-      d_x_offset = plot->canvas()->width() * xDataOffset /
-                   plot->axisScaleDiv(Plot::xBottom)->range();
-      d_y_offset = plot->canvas()->height() * yDataOffset /
-                   plot->axisScaleDiv(Plot::yLeft)->range();
+      d_x_offset = plot->canvas()->width() * xDataOffset / xRange;
+      d_y_offset = plot->canvas()->height() * yDataOffset / yRange;
 
       // Correct the data offsets using actual axis scales. If the scales are
       // non-linear the offsets will change.
