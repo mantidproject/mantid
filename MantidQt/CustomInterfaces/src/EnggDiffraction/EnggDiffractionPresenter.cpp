@@ -561,7 +561,7 @@ void MantidQt::CustomInterfaces::EnggDiffractionPresenter::
       }
     }
     // set the directory here to the first in the vector if its not empty
-    if (!runnoDirVector.empty()) {
+    if (!runnoDirVector.empty() && !selectedfPath.isFile()) {
       QString firstDir = QString::fromStdString(runnoDirVector[0]);
       m_view->setFittingRunNo(firstDir);
 
@@ -1075,8 +1075,7 @@ void EnggDiffractionPresenter::plotFitPeaksCurves() {
       m_view->setDataVector(focusedData, true, m_fittingFinishedOK);
 
       if (m_fittingFinishedOK) {
-        g_log.debug() << "single peaks fitting being plotted now."
-                            << std::endl;
+        g_log.debug() << "single peaks fitting being plotted now." << std::endl;
         auto singlePeaksWS = ADS.retrieveWS<MatrixWorkspace>(singlePeaksWs);
         auto singlePeaksData = ALCHelper::curveDataFromWs(singlePeaksWS);
         m_view->setDataVector(singlePeaksData, false, true);
