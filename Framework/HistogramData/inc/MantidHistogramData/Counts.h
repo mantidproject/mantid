@@ -56,6 +56,7 @@ public:
 
   /// Constructs Counts from Frequencies and bin width based on BinEdges.
   Counts(const Frequencies &frequencies, const BinEdges &edges);
+  /// Move-constructs Counts from Frequencies and bin width based on BinEdges.
   Counts(Frequencies &&frequencies, const BinEdges &edges);
 };
 
