@@ -68,8 +68,8 @@ public:
     // Modify EventList such that is does not contain default values.
     el.setSpectrumNo(42);
     MantidVec x{0.1, 0.2, 0.3};
-    el.setX(make_cow<HistogramX>(x));
-    el.setSharedDx(Kernel::make_cow<HistogramData::HistogramDx>(x));
+    el.histogram() = Histogram(BinEdges(x));
+    el.histogram().setPointVariances(2);
 
     EventList other;
     other = el;
