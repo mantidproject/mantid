@@ -163,7 +163,7 @@ void CalculateTransmissionBeamSpreader::exec() {
   MatrixWorkspace_sptr spreader_trans =
       WorkspaceFactory::Instance().create("WorkspaceSingleValue", 1, 1, 1);
   spreader_trans->setYUnit("");
-  spreader_trans->isDistribution(true);
+  spreader_trans->setDistribution(true);
   spreader_trans->dataX(0)[0] = 0.0;
   spreader_trans->dataY(0)[0] = getProperty("SpreaderTransmissionValue");
   spreader_trans->dataE(0)[0] = getProperty("SpreaderTransmissionError");

@@ -577,7 +577,7 @@ public:
 
     Mantid::API::MatrixWorkspace_sptr ws2 =
         WorkspaceCreationHelper::Create2DWorkspace123(2, 2);
-    ws2->isDistribution(true);
+    ws2->setDistribution(true);
 
     TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace1", ws1));
     TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace2", ws2));

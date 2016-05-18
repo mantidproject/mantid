@@ -344,7 +344,7 @@ FitMW::createOutputWorkspace(const std::string &baseName,
   if (!boost::dynamic_pointer_cast<Mantid::API::IEventWorkspace>(
           m_matrixWorkspace)) {
     if (m_matrixWorkspace->isDistribution()) {
-      ws->isDistribution(true);
+      ws->setDistribution(true);
     }
   }
 

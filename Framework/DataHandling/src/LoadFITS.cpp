@@ -796,7 +796,7 @@ void LoadFITS::addAxesInfoAndLogs(Workspace2D_sptr ws, bool loadAsRectImg,
     unitLbl->setLabel("height", "cm");
     ws->getAxis(1)->unit() = unitLbl;
 
-    ws->isDistribution(true);
+    ws->setDistribution(true);
   } else {
     // TODO: what to do when loading 1pixel - 1 spectrum?
   }
