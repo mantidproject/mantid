@@ -1,4 +1,4 @@
-# pylint: disable=invalid-name, bad-builtin
+# pylint: disable=invalid-name, bad-builtin, W0613, R0913, W0122
 """
     Reduction scripter used to take reduction parameters
     end produce a Mantid reduction script
@@ -188,8 +188,8 @@ class BaseScriptElement(object):
         """
         element_list = dom.getElementsByTagName("mantid_version")
         if len(element_list) > 0:
-            version_str = BaseScriptElement.getText(element_list[0].childNodes)
-            version_list = version_str.split('.')
+            version_txt = BaseScriptElement.getText(element_list[0].childNodes)
+            version_list = version_txt.split('.')
             if len(version_list) == 3:
                 change_set = int(version_list[2])
                 return change_set
@@ -202,7 +202,7 @@ class BaseScriptElement(object):
         """
         from mantid.api import Algorithm
 
-        dom = xml.dom.minidom.parseString(xml_str)        
+        dom = xml.dom.minidom.parseString(xml_str)
         def _process_setup_info(process_dom_):
             setup_alg_str = BaseScriptElement.getStringElement(process_dom_, 'SetupInfo', '')
             if len(setup_alg_str) == 0:
@@ -211,7 +211,7 @@ class BaseScriptElement(object):
             return Algorithm.fromString(str(setup_alg_str)), filename
 
         def _process_list(dom_list):
-            algs = [_process_setup_info(d) for d in process_dom]
+            algs = [_process_setup_info(d) for d in dom_list]
             algs_with_data = [d for d in algs if d is not None]
             if len(algs_with_data) > 0:
                 return algs_with_data[0]
@@ -224,10 +224,10 @@ class BaseScriptElement(object):
         # [backward compatibility] If we can't find it, look in the old location
         if output is None:
             process_dom = dom.getElementsByTagName("SASProcess")
-            output = _process_list(process_dom)        
+            output = _process_list(process_dom)
 
         if output is None:
-            raise RuntimeError, "Could not find reduction information in file"
+            raise RuntimeError("Could not find reduction information in file")
         return output
 
     @classmethod
@@ -318,8 +318,8 @@ class BaseReductionScripter(object):
 
             # check that the object class is consistent with what was initially stored
             elif not self._state.__class__ == self._state_cls:
-                raise RuntimeError, "State class changed at runtime, was %s, now %s" % (
-                    self._state_cls, self._state.__class__)
+                raise RuntimeError("State class changed at runtime, was %s, now %s" % (
+                    self._state_cls, self._state.__class__))
 
         def push(self):
             """
@@ -334,7 +334,7 @@ class BaseReductionScripter(object):
             if self._state == NotImplemented:
                 return None
             elif self._state is None:
-                raise RuntimeError, "Error with %s widget: state not initialized" % self._subject.__class__
+                raise RuntimeError("Error with %s widget: state not initialized" % self._subject.__class__)
             return self._state
 
         def reset(self):
@@ -344,7 +344,7 @@ class BaseReductionScripter(object):
             if self._state is not None and self._state is not NotImplemented:
                 self._state.reset()
             else:
-                raise RuntimeError, "State reset called without a valid initialized state"
+                raise RuntimeError("State reset called without a valid initialized state")
 
     def __init__(self, name="", facility=""):
         self.instrument_name = name
@@ -412,7 +412,7 @@ class BaseReductionScripter(object):
                     return None
             return found_name
         else:
-            raise RuntimeError, "The format of the provided file is not recognized"
+            raise RuntimeError("The format of the provided file is not recognized")
 
     def check_xml_compatibility(self, file_name, id_element=None):
         """
@@ -526,9 +526,9 @@ class BaseReductionScripter(object):
                             item.state().update()
                         except (StopIteration, StandardError, Warning):
                             pass
-                raise RuntimeError, sys.exc_value
+                raise RuntimeError(str(sys.exc_value))
         else:
-            raise RuntimeError, "Reduction could not be executed: Mantid could not be imported"
+            raise RuntimeError("Reduction could not be executed: Mantid could not be imported")
 
     def apply_live(self):
         """
