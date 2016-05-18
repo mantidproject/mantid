@@ -10522,17 +10522,17 @@ void ApplicationWindow::showHelp() {
             "<p><a href = "
             "http://www.mantidproject.org/MantidPlot:_Help>http://"
             "www.mantidproject.org/MantidPlot:_Help</a></p>");
-    QString fn =
-        QFileDialog::getOpenFileName(QDir::currentDirPath(), "*.html", this);
+    QString fn = QFileDialog::getOpenFileName(this, "Open help file",
+                                              QDir::currentPath(), "*.html");
     if (!fn.isEmpty()) {
       QFileInfo fi(fn);
-      helpFilePath = fi.absFilePath();
+      helpFilePath = fi.absoluteFilePath();
       saveSettings();
     }
   }
 
   QFileInfo fi(helpFilePath);
-  QString profilePath = QString(fi.dirPath(true) + "/qtiplot.adp");
+  QString profilePath = QString(fi.absolutePath() + "/qtiplot.adp");
   if (!QFile(profilePath).exists()) {
     QMessageBox::critical(
         this, tr("MantidPlot - Help Profile Not Found!"), // Mantid
@@ -10668,10 +10668,10 @@ void ApplicationWindow::addFunctionCurve() {
 void ApplicationWindow::updateFunctionLists(int type, QStringList &formulas) {
   int maxListSize = 10;
   if (type == 2) {
-    rFunctions.remove(formulas[0]);
+    rFunctions.removeAll(formulas[0]);
     rFunctions.push_front(formulas[0]);
 
-    thetaFunctions.remove(formulas[1]);
+    thetaFunctions.removeAll(formulas[1]);
     thetaFunctions.push_front(formulas[1]);
 
     while ((int)rFunctions.size() > maxListSize)
@@ -10679,10 +10679,10 @@ void ApplicationWindow::updateFunctionLists(int type, QStringList &formulas) {
     while ((int)thetaFunctions.size() > maxListSize)
       thetaFunctions.pop_back();
   } else if (type == 1) {
-    xFunctions.remove(formulas[0]);
+    xFunctions.removeAll(formulas[0]);
     xFunctions.push_front(formulas[0]);
 
-    yFunctions.remove(formulas[1]);
+    yFunctions.removeAll(formulas[1]);
     yFunctions.push_front(formulas[1]);
 
     while ((int)xFunctions.size() > maxListSize)
@@ -10936,12 +10936,12 @@ void ApplicationWindow::pickFloorStyle(QAction *action) {
 }
 
 void ApplicationWindow::custom3DActions(MdiSubWindow *w) {
-  if (w && w->isA("Graph3D")) {
+  if (w && std::string(w->metaObject()->className()) == "Graph3D") {
     Graph3D *plot = dynamic_cast<Graph3D *>(w);
     if (!plot)
       return;
-    actionAnimate->setOn(plot->isAnimated());
-    actionPerspective->setOn(!plot->isOrthogonal());
+    actionAnimate->setChecked(plot->isAnimated());
+    actionPerspective->setChecked(!plot->isOrthogonal());
     switch (plot->plotStyle()) {
     case FILLEDMESH:
       wireframe->setChecked(false);
@@ -11120,34 +11120,34 @@ void ApplicationWindow::initPlot3DToolBar() {
   grids->setEnabled(true);
   grids->setExclusive(false);
   front = new QAction(grids);
-  front->setMenuText(tr("Front"));
+  front->setText(tr("Front"));
   front->setCheckable(true);
   front->setIcon(QIcon(getQPixmap("frontGrid_xpm")));
   back = new QAction(grids);
-  back->setMenuText(tr("Back"));
+  back->setText(tr("Back"));
   back->setCheckable(true);
   back->setIcon(QIcon(getQPixmap("backGrid_xpm")));
   right = new QAction(grids);
-  right->setMenuText(tr("Right"));
+  right->setText(tr("Right"));
   right->setCheckable(true);
   right->setIcon(QIcon(getQPixmap("leftGrid_xpm")));
   left = new QAction(grids);
-  left->setMenuText(tr("Left"));
+  left->setText(tr("Left"));
   left->setCheckable(true);
   left->setIcon(QIcon(getQPixmap("rightGrid_xpm")));
   ceil = new QAction(grids);
-  ceil->setMenuText(tr("Ceiling"));
+  ceil->setText(tr("Ceiling"));
   ceil->setCheckable(true);
   ceil->setIcon(QIcon(getQPixmap("ceilGrid_xpm")));
   floor = new QAction(grids);
-  floor->setMenuText(tr("Floor"));
+  floor->setText(tr("Floor"));
   floor->setCheckable(true);
   floor->setIcon(QIcon(getQPixmap("floorGrid_xpm")));
 
   actionPerspective = new QAction(this);
-  actionPerspective->setToggleAction(TRUE);
-  actionPerspective->setIconSet(getQPixmap("perspective_xpm"));
-  actionPerspective->setOn(!orthogonal3DPlots);
+  actionPerspective->setCheckable(true);
+  actionPerspective->setIcon(getQPixmap("perspective_xpm"));
+  actionPerspective->setChecked(!orthogonal3DPlots);
   connect(actionPerspective, SIGNAL(toggled(bool)), this,
           SLOT(togglePerspective(bool)));
 
