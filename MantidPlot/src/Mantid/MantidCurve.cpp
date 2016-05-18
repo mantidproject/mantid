@@ -4,6 +4,7 @@
 #include <qwt_symbol.h>
 
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidQtAPI/MantidQwtWorkspaceData.h"
 
 #include "../Graph.h"
 #include "../ApplicationWindow.h"
@@ -81,26 +82,20 @@ QwtDoubleRect MantidCurve::boundingRect() const
 {
   if (m_boundingRect.isNull())
   {
-    const QwtData* data = mantidData();
+    const auto data = mantidData();
     if (data->size() == 0) return QwtDoubleRect(0,0,1,1);
-    double y_min = std::numeric_limits<double>::infinity();
-    double y_max = -y_min;
-    for(size_t i=0;i<data->size();++i)
-    {
-      double y = data->y(i);
-      if (y == std::numeric_limits<double>::infinity() || y != y) continue;
-      if (y < y_min && (!mantidData()->logScale() || y > 0.)) y_min = y;
-      if (y > y_max) y_max = y;
-    }
+    double y_min = data->getYMin();
+    double y_max = data->getYMax();
     double x_min = data->x(0);
     double x_max = data->x(data->size()-1);
-    if (x_min > x_max)
-    {
-      std::swap(x_min, x_max);
-    }
     m_boundingRect = QwtDoubleRect(x_min,y_min,x_max-x_min,y_max-y_min);
   }
   return m_boundingRect;
+}
+
+/// Invalidates the bounding rect forcing it to be recalculated
+void MantidCurve::invalidateBoundingRect() {
+  m_boundingRect = QwtDoubleRect();
 }
 
 /**
@@ -112,11 +107,10 @@ void MantidCurve::axisScaleChanged(int axis, bool toLog)
 {
   if (axis == QwtPlot::yLeft || axis == QwtPlot::yRight)
   {
-    mantidData()->setLogScale(toLog);
+    mantidData()->setLogScaleY(toLog);
     // force boundingRect calculation at this moment
     invalidateBoundingRect();
     boundingRect();
-    mantidData()->saveLowestPositiveValue(m_boundingRect.y());
   }
 }
 
@@ -183,7 +177,11 @@ void MantidCurve::doDraw(QPainter *p,
       const double Y = y(i);
       const double E = d->e(i);
       const int yi = yMap.transform(Y);
-      const int ei1 = yMap.transform(Y - E);
+      double YminusE = Y - E;
+      if (d->logScaleY() && YminusE <= 0) {
+        YminusE = d->getYMin();
+      }
+      const int ei1 = yMap.transform(YminusE);
       const int ei2 = yMap.transform(Y + E);
       const int yhl = yi - sh;
       const int ylh = yi + sh;
