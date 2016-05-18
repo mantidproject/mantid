@@ -430,7 +430,7 @@ private:
     // Add the delta x values
     for (size_t j = 0; j < nSpec; ++j) {
       ws->setPointStandardDeviations(j, nBins);
-      for (size_t k = 0; k <= nBins; ++k) {
+      for (size_t k = 0; k < nBins; ++k) {
         // Add a constant error to all spectra
         ws->mutableDx(j)[k] = sqrt(double(k));
       }
@@ -636,11 +636,8 @@ private:
         TS_ASSERT_EQUALS(ws.dx(0)[1], 1.0);
         TS_ASSERT_EQUALS(ws.dx(0)[2], M_SQRT2);
         TS_ASSERT_EQUALS(ws.dx(0)[3], sqrt(3.0));
-        // Check that the length of x and dx is the same
-        auto &x = ws.x(0);
-        auto dX = ws.dx(0);
-        TS_ASSERT_EQUALS(x.size(), dX.size());
-
+        // Check that the length of x and dx differs by 1
+        TS_ASSERT_EQUALS(ws.x(0).size() - 1, ws.dx(0).size());
       } else if (wsType == "event-dx") {
         TS_ASSERT(ws.hasDx(0));
         TS_ASSERT_EQUALS(ws.dx(0)[0], 0.0 + 1.0);

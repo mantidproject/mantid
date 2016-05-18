@@ -126,7 +126,7 @@ void TOFSANSResolution::exec() {
   MantidVec &TOFY = tofWS->dataY(0);
 
   // Initialize Dq
-  HistogramData::HistogramX DxOut(xLength - 1, 0.0);
+  HistogramData::HistogramDx DxOut(xLength - 1, 0.0);
 
   const V3D samplePos = reducedWS->getInstrument()->getSample()->getPos();
   const V3D sourcePos = reducedWS->getInstrument()->getSource()->getPos();
