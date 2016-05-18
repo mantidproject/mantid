@@ -1,4 +1,4 @@
-#pylint: disable=invalid-name
+# pylint: disable=invalid-name, W0633, W0611, R0902, R0904, W0702, R0912, C0301
 """
     Classes for each reduction step. Those are kept separately
     from the the interface class so that the HFIRReduction class could
