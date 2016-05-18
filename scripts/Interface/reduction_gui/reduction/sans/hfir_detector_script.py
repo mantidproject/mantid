@@ -302,7 +302,7 @@ class Detector(BaseScriptElement):
             Update data members according to reduction results
         """
         if IS_IN_MANTIDPLOT:
-            from mantid.api import PropertyManagerDataService
+            from mantid import PropertyManagerDataService
             from reduction_workflow.command_interface import ReductionSingleton
             property_manager_name = ReductionSingleton().get_reduction_table_name()
             property_manager = PropertyManagerDataService.retrieve(property_manager_name)
