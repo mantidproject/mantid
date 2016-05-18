@@ -39,6 +39,10 @@ void SetupHFIRReduction::init() {
   declareProperty(
       "DetectorTubes", false,
       "If true, the solid angle correction for tube detectors will be applied");
+  declareProperty("DetectorWing", false,
+                  "If true, the solid angle "
+                  "correction for the Wing Detector (curved detector) "
+                  "will be applied");
 
   // Optionally, we can specify the wavelength and wavelength spread and
   // overwrite
@@ -56,6 +60,7 @@ void SetupHFIRReduction::init() {
   setPropertyGroup("SampleDetectorDistanceOffset", load_grp);
   setPropertyGroup("SolidAngleCorrection", load_grp);
   setPropertyGroup("DetectorTubes", load_grp);
+  setPropertyGroup("DetectorWing", load_grp);
   setPropertyGroup("Wavelength", load_grp);
   setPropertyGroup("WavelengthSpread", load_grp);
 
@@ -504,7 +509,9 @@ void SetupHFIRReduction::init() {
   declareProperty(
       make_unique<ArrayProperty<int>>("MaskedEdges"),
       "Number of pixels to mask on the edges: X-low, X-high, Y-low, Y-high");
-  declareProperty("MaskedComponent", "", "Component Name to mask the edges according to the IDF file.");
+  declareProperty(
+      "MaskedComponent", "",
+      "Component Name to mask the edges according to the IDF file.");
   std::vector<std::string> maskOptions;
   maskOptions.emplace_back("None");
   maskOptions.emplace_back("Front");
@@ -512,14 +519,15 @@ void SetupHFIRReduction::init() {
   declareProperty("MaskedSide", "None",
                   boost::make_shared<StringListValidator>(maskOptions),
                   "Mask one side of the detector");
-  declareProperty("MaskedFullComponent", "", "Component Name to mask the edges according to the IDF file.");
+  declareProperty(
+      "MaskedFullComponent", "",
+      "Component Name to mask the edges according to the IDF file.");
 
   setPropertyGroup("MaskedDetectorList", mask_grp);
   setPropertyGroup("MaskedEdges", mask_grp);
   setPropertyGroup("MaskedComponent", mask_grp);
   setPropertyGroup("MaskedSide", mask_grp);
   setPropertyGroup("MaskedFullComponent", mask_grp);
-
 
   // Absolute scale
   std::string abs_scale_grp = "Absolute Scale";
@@ -733,9 +741,11 @@ void SetupHFIRReduction::exec() {
   // Solid angle correction
   const bool solidAngleCorrection = getProperty("SolidAngleCorrection");
   const bool isTubeDetector = getProperty("DetectorTubes");
+  const bool isCurvedDetector = getProperty("DetectorWing");
   if (solidAngleCorrection) {
     IAlgorithm_sptr solidAlg = createChildAlgorithm("SANSSolidAngleCorrection");
     solidAlg->setProperty("DetectorTubes", isTubeDetector);
+    solidAlg->setProperty("DetectorWing", isCurvedDetector);
     auto ssaAlgProp =
         make_unique<AlgorithmProperty>("SANSSolidAngleCorrection");
     ssaAlgProp->setValue(solidAlg->toString());

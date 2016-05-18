@@ -245,7 +245,7 @@ Sensitivity correction
 Solid angle correction
 ^^^^^^^^^^^^^^^^^^^^^^
 
-``SolidAngle(detector_tubes=False)``
+``SolidAngle(detector_tubes=False, detector_wing=False)``
     Tells the reducer to apply the solid angle correction. The solid angle correction is applied as follows:
 
         :math:`I'(x,y) = \frac{I(x,y)}{\cos^3(2\theta)}`
@@ -257,6 +257,8 @@ Solid angle correction
         :math:`\cos^3(2\theta) \rightarrow \cos^2(2\theta) \cos(\alpha)`
 
     where :math:`\alpha`: is the angle between the sample-to-pixel vector and its projection on the X-Z plane.
+
+    ``detector_wing=True`` is used only for BioSANS wing detector.
     
 .. figure:: /images/sans_solid_angle_correction.png
    :figwidth: 10 cm

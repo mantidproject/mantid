@@ -103,9 +103,10 @@ def NoDarkCurrent():
     if ReductionSingleton().reduction_properties.has_key("DarkCurrentFile"):
         del ReductionSingleton().reduction_properties["DarkCurrentFile"]
 
-def SolidAngle(detector_tubes=False):
+def SolidAngle(detector_tubes=False, detector_wing=False):
     ReductionSingleton().reduction_properties["SolidAngleCorrection"]=True
     ReductionSingleton().reduction_properties["DetectorTubes"]=detector_tubes
+    ReductionSingleton().reduction_properties["DetectorWing"]=detector_wing
 
 def NoSolidAngle():
     ReductionSingleton().reduction_properties["SolidAngleCorrection"]=False
