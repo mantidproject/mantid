@@ -146,9 +146,9 @@ void SaveCanSAS1D2::exec() {
   // Reduction process, if available
   const std::string process_xml = getProperty("Process");
   if (process_xml.size() > 0) {
-    m_outFile << "\n\t\t<SASProcess>\n";
+    m_outFile << "\n\t\t<SASprocess>\n";
     m_outFile << process_xml;
-    m_outFile << "\n\t\t</SASProcess>\n";
+    m_outFile << "\n\t\t</SASprocess>\n";
   }
 
   std::string sasNote = "\n\t\t<SASnote>";

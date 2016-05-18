@@ -71,12 +71,7 @@ class SampleData(BaseScriptElement):
                 @param xml_str: text to read the data from
             """
             self.reset()
-            from mantid.api import Algorithm
-            dom = xml.dom.minidom.parseString(xml_str)
-
-            process_dom = dom.getElementsByTagName("SASProcess")[0]
-            setup_alg_str = BaseScriptElement.getStringElement(process_dom, 'SetupInfo')
-            alg=Algorithm.fromString(str(setup_alg_str))
+            alg, _ = BaseScriptElement.getAlgorithmFromXML(xml_str)
 
             self.sample_file = BaseScriptElement.getPropertyValue(alg, "TransmissionSampleDataFile", default='')
             self.direct_beam = BaseScriptElement.getPropertyValue(alg, "TransmissionEmptyDataFile", default='')
@@ -158,12 +153,7 @@ class SampleData(BaseScriptElement):
                 @param xml_str: text to read the data from
             """
             self.reset()
-            from mantid.api import Algorithm
-            dom = xml.dom.minidom.parseString(xml_str)
-
-            process_dom = dom.getElementsByTagName("SASProcess")[0]
-            setup_alg_str = BaseScriptElement.getStringElement(process_dom, 'SetupInfo')
-            alg=Algorithm.fromString(str(setup_alg_str))
+            alg, _ = BaseScriptElement.getAlgorithmFromXML(xml_str)
 
             self.sample_scatt = BaseScriptElement.getPropertyValue(alg, "TransSampleScatteringFilename", default='')
             self.sample_spreader = BaseScriptElement.getPropertyValue(alg, "TransSampleSpreaderFilename", default='')
@@ -337,12 +327,7 @@ class SampleData(BaseScriptElement):
             @param xml_str: text to read the data from
         """
         self.reset()
-        from mantid.api import Algorithm
-        dom = xml.dom.minidom.parseString(xml_str)
-
-        process_dom = dom.getElementsByTagName("SASProcess")[0]
-        setup_alg_str = BaseScriptElement.getStringElement(process_dom, 'SetupInfo')
-        alg=Algorithm.fromString(str(setup_alg_str))
+        alg, filename = BaseScriptElement.getAlgorithmFromXML(xml_str)
 
         # Transmission
         self.transmission = BaseScriptElement.getPropertyValue(alg, "TransmissionValue", default=SampleData.transmission)
@@ -364,7 +349,7 @@ class SampleData(BaseScriptElement):
             self.calculation_method.from_setup_info(xml_str)
 
         # Data file section
-        self.data_files = [BaseScriptElement.getStringElement(process_dom, 'Filename', '')]
+        self.data_files = [filename]
 
     def reset(self):
         """

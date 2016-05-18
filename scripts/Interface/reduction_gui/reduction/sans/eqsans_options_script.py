@@ -237,12 +237,7 @@ class ReductionOptions(BaseOptions):
         self.reset()
         super(ReductionOptions, self).from_setup_info(xml_str)
 
-        from mantid.api import Algorithm
-        dom = xml.dom.minidom.parseString(xml_str)
-
-        process_dom = dom.getElementsByTagName("SASProcess")[0]
-        setup_alg_str = BaseScriptElement.getStringElement(process_dom, 'SetupInfo')
-        alg=Algorithm.fromString(str(setup_alg_str))
+        alg, _ = BaseScriptElement.getAlgorithmFromXML(xml_str)
         self.use_config_cutoff = BaseScriptElement.getPropertyValue(alg, "UseConfigTOFCuts",
                                                                     default=ReductionOptions.use_config_cutoff)
         self.correct_for_flight_path = BaseScriptElement.getPropertyValue(alg, "CorrectForFlightPath",

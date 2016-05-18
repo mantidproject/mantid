@@ -1,4 +1,3 @@
-# pylint: disable=bare-except,invalid-name
 """
     Classes for each reduction step. Those are kept separately
     from the the interface class so that the HFIRReduction class could
@@ -407,18 +406,12 @@ class ReductionOptions(BaseScriptElement):
             @param xml_str: text to read the data from
         """
         self.reset()
-        from mantid.api import Algorithm
-
-        dom = xml.dom.minidom.parseString(xml_str)
-        process_dom = dom.getElementsByTagName("SASProcess")[0]
-        setup_alg_str = BaseScriptElement.getStringElement(
-            process_dom, 'SetupInfo')
-        alg = Algorithm.fromString(str(setup_alg_str))
+        alg, _ = BaseScriptElement.getAlgorithmFromXML(xml_str)
 
         self.sample_detector_distance = BaseScriptElement.getPropertyValue(
             alg, "SampleDetectorDistance", default=ReductionOptions.sample_detector_distance)
         self.detector_offset = BaseScriptElement.getPropertyValue(
-            alg, "SampleDetectorDistanceOffset", default=self.detector_offset)
+            alg, "SampleDetectorDistanceOffset", default=ReductionOptions.detector_offset)
         self.wavelength = BaseScriptElement.getPropertyValue(
             alg, "Wavelength", default=ReductionOptions.wavelength)
         self.wavelength_spread = BaseScriptElement.getPropertyValue(

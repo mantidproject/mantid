@@ -227,12 +227,7 @@ class Detector(BaseScriptElement):
             @param xml_str: text to read the data from
         """
         self.reset()
-        from mantid.api import Algorithm
-        dom = xml.dom.minidom.parseString(xml_str)
-
-        process_dom = dom.getElementsByTagName("SASProcess")[0]
-        setup_alg_str = BaseScriptElement.getStringElement(process_dom, 'SetupInfo')
-        alg=Algorithm.fromString(str(setup_alg_str))
+        alg, _ = BaseScriptElement.getAlgorithmFromXML(xml_str)
 
         # Sensitivity correction
         self.sensitivity_data = BaseScriptElement.getPropertyValue(alg, "SensitivityFile", default='')

@@ -45,12 +45,7 @@ class Background(BaseScriptElement):
                 @param xml_str: text to read the data from
             """
             self.reset()
-            from mantid.api import Algorithm
-            dom = xml.dom.minidom.parseString(xml_str)
-
-            process_dom = dom.getElementsByTagName("SASProcess")[0]
-            setup_alg_str = BaseScriptElement.getStringElement(process_dom, 'SetupInfo')
-            alg=Algorithm.fromString(str(setup_alg_str))
+            alg, _ = BaseScriptElement.getAlgorithmFromXML(xml_str)
 
             self.sample_file = BaseScriptElement.getPropertyValue(alg, "BckTransmissionSampleDataFile", default='')
             self.direct_beam = BaseScriptElement.getPropertyValue(alg, "BckTransmissionEmptyDataFile", default='')
@@ -91,12 +86,7 @@ class Background(BaseScriptElement):
                 @param xml_str: text to read the data from
             """
             self.reset()
-            from mantid.api import Algorithm
-            dom = xml.dom.minidom.parseString(xml_str)
-
-            process_dom = dom.getElementsByTagName("SASProcess")[0]
-            setup_alg_str = BaseScriptElement.getStringElement(process_dom, 'SetupInfo')
-            alg=Algorithm.fromString(str(setup_alg_str))
+            alg, _ = BaseScriptElement.getAlgorithmFromXML(xml_str)
 
             self.sample_scatt = BaseScriptElement.getPropertyValue(alg, "BckTransSampleScatteringFilename", default='')
             self.sample_spreader = BaseScriptElement.getPropertyValue(alg, "BckTransSampleSpreaderFilename", default='')
@@ -235,12 +225,7 @@ class Background(BaseScriptElement):
             @param xml_str: text to read the data from
         """
         self.reset()
-        from mantid.api import Algorithm
-        dom = xml.dom.minidom.parseString(xml_str)
-
-        process_dom = dom.getElementsByTagName("SASProcess")[0]
-        setup_alg_str = BaseScriptElement.getStringElement(process_dom, 'SetupInfo')
-        alg=Algorithm.fromString(str(setup_alg_str))
+        alg, _ = BaseScriptElement.getAlgorithmFromXML(xml_str)
 
         self.background_file = BaseScriptElement.getPropertyValue(alg, "BackgroundFiles", default='')
         self.background_corr = len(self.background_file)>0

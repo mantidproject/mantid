@@ -196,6 +196,41 @@ class BaseScriptElement(object):
         return -1
 
     @classmethod
+    def getAlgorithmFromXML(cls, xml_str):
+        """
+            Return an Algorithm object from an XML snippet
+        """
+        from mantid.api import Algorithm
+
+        dom = xml.dom.minidom.parseString(xml_str)        
+        def _process_setup_info(process_dom_):
+            setup_alg_str = BaseScriptElement.getStringElement(process_dom_, 'SetupInfo', '')
+            if len(setup_alg_str) == 0:
+                return None
+            filename = BaseScriptElement.getStringElement(process_dom_, 'Filename', '')
+            return Algorithm.fromString(str(setup_alg_str)), filename
+
+        def _process_list(dom_list):
+            algs = [_process_setup_info(d) for d in process_dom]
+            algs_with_data = [d for d in algs if d is not None]
+            if len(algs_with_data) > 0:
+                return algs_with_data[0]
+            return None
+
+        # The process information is on SASprocess/SASprocessnote
+        process_dom = dom.getElementsByTagName("SASprocessnote")
+        output = _process_list(process_dom)
+
+        # [backward compatibility] If we can't find it, look in the old location
+        if output is None:
+            process_dom = dom.getElementsByTagName("SASProcess")
+            output = _process_list(process_dom)        
+
+        if output is None:
+            raise RuntimeError, "Could not find reduction information in file"
+        return output
+
+    @classmethod
     def getPropertyValue(cls, algorithm, property_name, default=None):
         """
             Look up the property of a Mantid algorithm object and return
