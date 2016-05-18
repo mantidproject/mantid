@@ -30,6 +30,10 @@ Crystal Improvements
 Engineering Diffraction
 -----------------------
 
+- The new algorithm :ref:`GSASIIRefineFitPeaks <algm-GSASIIRefineFitPeaks>`
+  can be used to call the GSAS-II software repeatedly to refine lattice
+  parameters (whole pattern refinement) and/or fit peaks.
+
 - New algorithm added:
   :ref:`EnggFitDIFCFromPeaks<algm-EnggFitDIFCFromPeaks>`, which forks
   from the old
@@ -46,6 +50,9 @@ Engineering Diffraction
 
 - Phase information files for ENGIN-X are now distributed together
   with the ENGIN-X scripts.
+
+- New algorithm :ref:`SaveNexusPD <algm-SaveNexusPD>` which creates a nexus file for use in GUDRUN and will hopefully be supported by Rietveld packages in the future.
+
 
 Graphical user interface:
 
@@ -83,7 +90,6 @@ Graphical user interface:
   user, bank combo-box will update upon selection of run number.
 
 
-- New algorithm :ref:`SaveNexusPD <algm-SaveNexusPD>` which creates a nexus file for use in GUDRUN and will hopefully be supported by Rietveld packages in the future.
 
 Imaging
 -------

@@ -240,18 +240,19 @@ class EnginXCalibrateFullThenCalibrateTest(stresstesting.MantidStressTest):
 
         # this will be used as a comparison delta in relative terms (percentage)
         exdelta = exdelta_special = exdelta_tzero = 1e-5
-        # Mac fitting tests produce differences for some reason.
+        # Mac fitting tests produce large differences for some reason.
+        # Windows results are different but within reasonable bounds
         import sys
         if "darwin" == sys.platform:
             exdelta = 1e-2
             # Some tests need a bigger delta
             exdelta_tzero = exdelta_special = 1e-1
         if "win32" == sys.platform:
-            exdelta = 5e-4 # this is needed especially for the zero parameter (error >=1e-4)
+            exdelta = 5e-4
             exdelta_special = exdelta
-            # tzero is particularly sensitive on windows, but 2% looks acceptable considering we're
+            # tzero is particularly sensitive on windows, but 2 or 5% looks acceptable considering we're
             # not using all the peaks (for speed), and that the important parameter, DIFC, is ok.
-            exdelta_tzero = 2e-2
+            exdelta_tzero = 2.5e-2
 
         # Note that the reference values are given with 12 digits more for reference than
         # for assert-comparison purposes (comparisons are not that picky, by far)

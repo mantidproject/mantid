@@ -348,8 +348,8 @@ public:
     // Out of range
     TS_ASSERT_THROWS(ew->dataX(-123), std::range_error);
     TS_ASSERT_THROWS(ew->dataX(5123), std::range_error);
-    TS_ASSERT_THROWS(ew->dataE(5123), std::range_error);
-    TS_ASSERT_THROWS(ew->dataY(5123), std::range_error);
+    TS_ASSERT_THROWS(ew->dataE(5123), NotImplementedError);
+    TS_ASSERT_THROWS(ew->dataY(5123), NotImplementedError);
 
     // Can't try the const access; copy constructors are not allowed.
   }
@@ -885,6 +885,25 @@ public:
     TS_ASSERT_THROWS_NOTHING(wsCastNonConst = (IEventWorkspace_sptr)val);
     TS_ASSERT(wsCastNonConst != NULL);
     TS_ASSERT_EQUALS(wsCastConst, wsCastNonConst);
+  }
+
+  void test_writeAccessInvalidatesCommonBinsFlagIsSet() {
+    int numEvents = 2;
+    int numHistograms = 2;
+    EventWorkspace_sptr ws =
+        WorkspaceCreationHelper::CreateRandomEventWorkspace(numEvents,
+                                                            numHistograms);
+    // Calling isCommonBins() sets the flag m_isCommonBinsFlagSet
+    TS_ASSERT(ws->isCommonBins());
+    // Calling dataX should unset the flag m_isCommonBinsFlagSet
+    ws->dataX(0)[0] += 0.0;
+    // m_isCommonBinsFlagSet is false, so this will re-validate and notice that
+    // dataX is still identical.
+    TS_ASSERT(ws->isCommonBins());
+    ws->dataX(0)[0] += 0.1;
+    // m_isCommonBinsFlagSet is false, so this will re-validate and notice that
+    // dataX(0) is now different from dataX(1).
+    TS_ASSERT(!ws->isCommonBins());
   }
 };
 
