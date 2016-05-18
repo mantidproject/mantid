@@ -1,3 +1,4 @@
+# pylint: disable=invalid-name, W0633, W0611, R0902, R0904, W0702, R0912, C0301
 """
     General options for EQSANS reduction
 """
