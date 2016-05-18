@@ -457,10 +457,11 @@ public:
   * generates and sets the curves on the fitting tab
   * @param data of the workspace to be passed as QwtData
   * @param focused to check whether focused workspace
+  * @param whether to plot single peak fitting ws
   *
   */
   virtual void setDataVector(std::vector<boost::shared_ptr<QwtData>> &data,
-                             bool focused) = 0;
+                             bool focused, bool plotSinglePeaks) = 0;
   //@}
 
   /**

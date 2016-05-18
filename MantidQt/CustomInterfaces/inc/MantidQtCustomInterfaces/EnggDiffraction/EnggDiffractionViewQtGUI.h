@@ -161,7 +161,7 @@ public:
   std::string getFocusDir() override;
 
   void setDataVector(std::vector<boost::shared_ptr<QwtData>> &data,
-                     bool focused) override;
+                     bool focused, bool plotSinglePeaks) override;
 
   void addBankItems(std::vector<std::string> splittedBaseName,
                     QString selectedFile) override;

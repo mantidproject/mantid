@@ -1072,14 +1072,15 @@ void EnggDiffractionPresenter::plotFitPeaksCurves() {
     try {
       auto focusedPeaksWS = ADS.retrieveWS<MatrixWorkspace>(focusedPeaksWs);
       auto focusedData = ALCHelper::curveDataFromWs(focusedPeaksWS);
-      m_view->setDataVector(focusedData, true);
+      m_view->setDataVector(focusedData, true, m_fittingFinishedOK);
 
-      g_log.error() << " m_fittingFinishedOK? " << m_fittingFinishedOK
-                    << std::endl;
       if (m_fittingFinishedOK) {
+        g_log.debug() << "single peaks fitting being plotted now."
+                            << std::endl;
         auto singlePeaksWS = ADS.retrieveWS<MatrixWorkspace>(singlePeaksWs);
         auto singlePeaksData = ALCHelper::curveDataFromWs(singlePeaksWS);
-        m_view->setDataVector(singlePeaksData, false);
+        m_view->setDataVector(singlePeaksData, false, true);
+
       } else {
         g_log.notice() << "Focused workspace has been plotted to the "
                           "graph; further peaks can be adding using Peak Tools."
