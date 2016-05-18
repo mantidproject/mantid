@@ -1,4 +1,4 @@
-#pylint: disable=invalid-name
+# pylint: disable=invalid-name, W0633, W0611, R0902, R0904, W0702, R0912, C0301
 """
     Classes for each reduction step. Those are kept separately
     from the the interface class so that the HFIRReduction class could
@@ -33,7 +33,9 @@ class Background(BaseScriptElement):
                 @param execute: if true, the script will be executed
             """
             if len(str(self.sample_file).strip())==0 or len(str(self.direct_beam).strip())==0:
-                raise RuntimeError, "Direct beam method for background transmission was selected but was selected but all the appropriate data files were not entered."
+                error_str = "Direct beam method for background transmission was selected but was "
+                error_str += "selected but all the appropriate data files were not entered."
+                raise RuntimeError(error_str)
 
             return "BckDirectBeamTransmission(\"%s\", \"%s\", beam_radius=%g)\n" % \
             (self.sample_file, self.direct_beam, self.beam_radius)
@@ -72,7 +74,9 @@ class Background(BaseScriptElement):
                 or len(str(self.sample_spreader).strip())==0\
                 or len(str(self.direct_scatt).strip())==0\
                 or len(str(self.direct_spreader).strip())==0:
-                raise RuntimeError, "Beam spreader method for background transmission was selected but all the appropriate data files were not entered."
+                error_str = "Beam spreader method for background transmission was selected but "
+                error_str += "all the appropriate data files were not entered."
+                raise RuntimeError(error_str)
 
             return "BckBeamSpreaderTransmission(\"%s\",\n \"%s\",\n \"%s\",\n \"%s\", %g, %g)\n" % \
             (self.sample_spreader, self.direct_spreader,
@@ -121,13 +125,13 @@ class Background(BaseScriptElement):
         # Dark current
         if self.dark_current_corr:
             if len(str(self.dark_current_file).strip())==0:
-                raise RuntimeError, "Dark current subtraction was selected but no dark current data file was entered."
+                raise RuntimeError("Dark current subtraction was selected but no dark current data file was entered.")
             script += "DarkCurrent(\"%s\")\n" % self.dark_current_file
 
         # Background
         if self.background_corr:
             if len(str(self.background_file).strip())==0:
-                raise RuntimeError, "Background subtraction was selected but no background data file was entered."
+                raise RuntimeError("Background subtraction was selected but no background data file was entered.")
             script += "Background(\"%s\")\n" % self.background_file
 
             # Background transmission
@@ -161,21 +165,21 @@ class Background(BaseScriptElement):
         """
             Create XML from the current data.
         """
-        xml  = "<Background>\n"
-        xml += "  <dark_current_corr>%s</dark_current_corr>\n" % str(self.dark_current_corr)
-        xml += "  <dark_current_file>%s</dark_current_file>\n" % self.dark_current_file
+        xml_out  = "<Background>\n"
+        xml_out += "  <dark_current_corr>%s</dark_current_corr>\n" % str(self.dark_current_corr)
+        xml_out += "  <dark_current_file>%s</dark_current_file>\n" % self.dark_current_file
 
-        xml += "  <background_corr>%s</background_corr>\n" % str(self.background_corr)
-        xml += "  <background_file>%s</background_file>\n" % self.background_file
-        xml += "  <bck_trans_enabled>%s</bck_trans_enabled>\n" % str(self.bck_transmission_enabled)
-        xml += "  <bck_trans>%g</bck_trans>\n" % self.bck_transmission
-        xml += "  <bck_trans_spread>%g</bck_trans_spread>\n" % self.bck_transmission_spread
-        xml += "  <calculate_trans>%s</calculate_trans>\n" % str(self.calculate_transmission)
-        xml += "  <theta_dependent>%s</theta_dependent>\n" % str(self.theta_dependent)
-        xml += "  <trans_dark_current>%s</trans_dark_current>\n" % str(self.trans_dark_current)
-        xml += self.trans_calculation_method.to_xml()
-        xml += "</Background>\n"
-        return xml
+        xml_out += "  <background_corr>%s</background_corr>\n" % str(self.background_corr)
+        xml_out += "  <background_file>%s</background_file>\n" % self.background_file
+        xml_out += "  <bck_trans_enabled>%s</bck_trans_enabled>\n" % str(self.bck_transmission_enabled)
+        xml_out += "  <bck_trans>%g</bck_trans>\n" % self.bck_transmission
+        xml_out += "  <bck_trans_spread>%g</bck_trans_spread>\n" % self.bck_transmission_spread
+        xml_out += "  <calculate_trans>%s</calculate_trans>\n" % str(self.calculate_transmission)
+        xml_out += "  <theta_dependent>%s</theta_dependent>\n" % str(self.theta_dependent)
+        xml_out += "  <trans_dark_current>%s</trans_dark_current>\n" % str(self.trans_dark_current)
+        xml_out += self.trans_calculation_method.to_xml()
+        xml_out += "</Background>\n"
+        return xml_out
 
     def from_xml(self, xml_str):
         """
@@ -234,7 +238,8 @@ class Background(BaseScriptElement):
 
         # Transmission
         self.bck_transmission = BaseScriptElement.getPropertyValue(alg, "BckTransmissionValue", default=SampleData.transmission)
-        self.bck_transmission_spread = BaseScriptElement.getPropertyValue(alg, "BckTransmissionError", default=SampleData.transmission_spread)
+        self.bck_transmission_spread = BaseScriptElement.getPropertyValue(alg, "BckTransmissionError",
+                                                                          default=SampleData.transmission_spread)
 
         self.trans_dark_current = BaseScriptElement.getPropertyValue(alg, "BckTransmissionDarkCurrentFile", default='')
         self.theta_dependent = BaseScriptElement.getPropertyValue(alg, "BckThetaDependentTransmission",
