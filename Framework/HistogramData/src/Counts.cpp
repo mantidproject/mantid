@@ -12,7 +12,8 @@ Counts::Counts(Frequencies &&frequencies, const BinEdges &edges) {
   if (!frequencies)
     return;
   if (!edges)
-    throw std::logic_error("Counts: Cannot construct from Frequencies -- BinEdges are NULL.");
+    throw std::logic_error(
+        "Counts: Cannot construct from Frequencies -- BinEdges are NULL.");
   if ((frequencies.size() + 1) != edges.size())
     if (frequencies.size() != 0 || edges.size() != 0)
       throw std::logic_error("Counts: Cannot construct from Frequencies -- "

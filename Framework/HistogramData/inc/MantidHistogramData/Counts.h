@@ -59,7 +59,6 @@ public:
   Counts(Frequencies &&frequencies, const BinEdges &edges);
 };
 
-
 } // namespace HistogramData
 } // namespace Mantid
 

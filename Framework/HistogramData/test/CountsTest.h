@@ -16,7 +16,7 @@ public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
   static CountsTest *createSuite() { return new CountsTest(); }
-  static void destroySuite( CountsTest *suite ) { delete suite; }
+  static void destroySuite(CountsTest *suite) { delete suite; }
 
   void test_construct_default() {
     const Counts counts{};
@@ -91,6 +91,5 @@ public:
     TS_ASSERT_DIFFERS(&counts[0], old_ptr);
   }
 };
-
 
 #endif /* MANTID_HISTOGRAMDATA_COUNTSTEST_H_ */
