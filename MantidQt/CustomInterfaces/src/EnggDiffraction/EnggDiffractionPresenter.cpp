@@ -1067,14 +1067,27 @@ void EnggDiffractionPresenter::plotFitPeaksCurves() {
   std::string singlePeaksWs = "engggui_fitting_single_peaks";
   std::string focusedPeaksWs = "engggui_fitting_focused_ws";
 
-  if (ADS.doesExist(singlePeaksWs) && ADS.doesExist(focusedPeaksWs)) {
-    auto focusedPeaksWS = ADS.retrieveWS<MatrixWorkspace>(focusedPeaksWs);
-    auto singlePeaksWS = ADS.retrieveWS<MatrixWorkspace>(singlePeaksWs);
+  if (ADS.doesExist(singlePeaksWs) || ADS.doesExist(focusedPeaksWs)) {
+
     try {
+      auto focusedPeaksWS = ADS.retrieveWS<MatrixWorkspace>(focusedPeaksWs);
       auto focusedData = ALCHelper::curveDataFromWs(focusedPeaksWS);
       m_view->setDataVector(focusedData, true);
-      auto singlePeaksData = ALCHelper::curveDataFromWs(singlePeaksWS);
-      m_view->setDataVector(singlePeaksData, false);
+
+      g_log.error() << " m_fittingFinishedOK? " << m_fittingFinishedOK
+                    << std::endl;
+      if (m_fittingFinishedOK) {
+        auto singlePeaksWS = ADS.retrieveWS<MatrixWorkspace>(singlePeaksWs);
+        auto singlePeaksData = ALCHelper::curveDataFromWs(singlePeaksWS);
+        m_view->setDataVector(singlePeaksData, false);
+      } else {
+        g_log.notice() << "Focused workspace has been plotted to the "
+                          "graph; further peaks can be adding using Peak Tools."
+                       << std::endl;
+        g_log.warning() << "Peaks could not be plotted as the fitting process "
+                           "did not finish correctly."
+                        << std::endl;
+      }
 
     } catch (std::runtime_error) {
       g_log.error()
@@ -1117,21 +1130,24 @@ void EnggDiffractionPresenter::fittingFinished() {
         << "EnggDiffraction GUI: plotting peaks for single peak fits "
            "has started... "
         << std::endl;
-    try {
-      plotFitPeaksCurves();
-
-    } catch (std::runtime_error &re) {
-      g_log.error() << "Unable to finish of the plotting of the graph for "
-                       "engggui_fitting_focused_fitpeaks workspace. Error "
-                       "description : " +
-                           static_cast<std::string>(re.what()) +
-                           " Please check also the log message for detail.";
-      throw;
-    }
-    g_log.notice() << "EnggDiffraction GUI: plotting of peaks for single peak "
-                      "fits has completed. "
-                   << std::endl;
   }
+  try {
+    // should now plot the focused workspace when single peak fitting
+    // process fails
+    plotFitPeaksCurves();
+
+  } catch (std::runtime_error &re) {
+    g_log.error() << "Unable to finish of the plotting of the graph for "
+                     "engggui_fitting_focused_fitpeaks workspace. Error "
+                     "description : " +
+                         static_cast<std::string>(re.what()) +
+                         " Please check also the log message for detail.";
+    throw;
+  }
+  g_log.notice() << "EnggDiffraction GUI: plotting of peaks for single peak "
+                    "fits has completed. "
+                 << std::endl;
+
   // enable the GUI
   m_view->enableCalibrateAndFocusActions(true);
 }
@@ -1509,7 +1525,8 @@ void EnggDiffractionPresenter::doNewCalibration(const std::string &outFilename,
         << "The calibration calculations failed. One of the "
            "algorithms did not execute correctly. See log messages for "
            "further details. Error: " +
-               std::string(rexc.what()) << std::endl;
+               std::string(rexc.what())
+        << std::endl;
   } catch (std::invalid_argument &) {
     g_log.error()
         << "The calibration calculations failed. Some input properties "
@@ -2063,7 +2080,8 @@ void EnggDiffractionPresenter::doFocusRun(const std::string &dir,
       g_log.error() << "The focusing calculations failed. One of the algorithms"
                        "did not execute correctly. See log messages for "
                        "further details. Error: " +
-                           std::string(rexc.what()) << std::endl;
+                           std::string(rexc.what())
+                    << std::endl;
     } catch (std::invalid_argument &ia) {
       g_log.error() << "The focusing failed. Some input properties "
                        "were not valid. "
