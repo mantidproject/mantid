@@ -370,13 +370,17 @@ namespace IDA
     m_uiForm.ppPlot->clear();
     m_uiForm.ppPlot->addSpectrum("Sample", ws, specNo);
 
-    try
-    {
+    try {
       QPair<double, double> range = m_uiForm.ppPlot->getCurveRange("Sample");
-      m_uiForm.ppPlot->getRangeSelector("ElwinIntegrationRange")->setRange(range.first, range.second);
-    }
-    catch(std::invalid_argument & exc)
-    {
+      // Set maximum range of Integration
+      m_uiForm.ppPlot->getRangeSelector("ElwinIntegrationRange")
+          ->setRange(range.first, range.second);
+      // Set initial values
+      m_uiForm.ppPlot->getRangeSelector("ElwinIntegrationRange")
+          ->setMinimum(range.first);
+      m_uiForm.ppPlot->getRangeSelector("ElwinIntegrationRange")
+          ->setMaximum(range.second);
+    } catch (std::invalid_argument &exc) {
       showMessageBox(exc.what());
     }
   }
