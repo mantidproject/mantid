@@ -41,10 +41,10 @@ from ui_MainWindow import Ui_MainWindow
 class MainWindow(QtGui.QMainWindow):
     """ Class of Main Window (top)
     """
-    TabPage = {'View Raw Data': 1,
-               'Calculate UB': 2,
-               'UB Matrix': 3,
-               'Peak Integration': 5}
+    TabPage = {'View Raw Data': 2,
+               'Calculate UB': 3,
+               'UB Matrix': 4,
+               'Peak Integration': 6}
 
     def __init__(self, parent=None):
         """ Initialization and set up

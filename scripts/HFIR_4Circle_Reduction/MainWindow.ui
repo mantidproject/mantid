@@ -2701,6 +2701,16 @@ p, li { white-space: pre-wrap; }
            <layout class="QGridLayout" name="gridLayout_4">
             <item row="4" column="0">
              <layout class="QGridLayout" name="gridLayout_22">
+              <item row="0" column="8">
+               <widget class="QPushButton" name="pushButton_setupPeakIntegration">
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Switch to tab 'Peak Integrate' to set up options for peak integration&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+                <property name="text">
+                 <string>Single Pt. Set up</string>
+                </property>
+               </widget>
+              </item>
               <item row="2" column="3">
                <spacer name="horizontalSpacer_19">
                 <property name="orientation">
@@ -2788,19 +2798,6 @@ p, li { white-space: pre-wrap; }
                 </property>
                </spacer>
               </item>
-              <item row="2" column="7">
-               <spacer name="horizontalSpacer_22">
-                <property name="orientation">
-                 <enum>Qt::Horizontal</enum>
-                </property>
-                <property name="sizeHint" stdset="0">
-                 <size>
-                  <width>40</width>
-                  <height>20</height>
-                 </size>
-                </property>
-               </spacer>
-              </item>
               <item row="2" column="6">
                <widget class="QLineEdit" name="lineEdit_numPt4BackgroundRight">
                 <property name="toolTip">
@@ -2819,6 +2816,19 @@ p, li { white-space: pre-wrap; }
                  <string>Lorentz Correction</string>
                 </property>
                </widget>
+              </item>
+              <item row="0" column="7">
+               <spacer name="horizontalSpacer_22">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>40</width>
+                  <height>20</height>
+                 </size>
+                </property>
+               </spacer>
               </item>
              </layout>
             </item>
@@ -3143,17 +3153,7 @@ p, li { white-space: pre-wrap; }
             </item>
             <item row="4" column="1">
              <layout class="QGridLayout" name="gridLayout_23">
-              <item row="1" column="0">
-               <widget class="QPushButton" name="pushButton_setupPeakIntegration">
-                <property name="toolTip">
-                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Switch to tab 'Peak Integrate' to set up options for peak integration&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                </property>
-                <property name="text">
-                 <string>Single Pt. Set up</string>
-                </property>
-               </widget>
-              </item>
-              <item row="2" column="0">
+              <item row="0" column="0">
                <widget class="QPushButton" name="pushButton_integratePeaks">
                 <property name="maximumSize">
                  <size>
@@ -3166,6 +3166,13 @@ p, li { white-space: pre-wrap; }
                 </property>
                 <property name="text">
                  <string>Integrate</string>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="0">
+               <widget class="QPushButton" name="pushButton_exportPeaks">
+                <property name="text">
+                 <string>Export</string>
                 </property>
                </widget>
               </item>
@@ -3457,6 +3464,8 @@ p, li { white-space: pre-wrap; }
     <addaction name="actionOpen_Project"/>
     <addaction name="actionSave_Project"/>
     <addaction name="separator"/>
+    <addaction name="actionExport_Peaks"/>
+    <addaction name="separator"/>
     <addaction name="actionExit"/>
    </widget>
    <widget class="QMenu" name="menuTools">
@@ -3563,6 +3572,11 @@ p, li { white-space: pre-wrap; }
    </property>
    <property name="shortcut">
     <string>Ctrl+S</string>
+   </property>
+  </action>
+  <action name="actionExport_Peaks">
+   <property name="text">
+    <string>Export Peaks</string>
    </property>
   </action>
  </widget>
