@@ -326,7 +326,7 @@ MatrixWorkspace_sptr Integration::getInputWorkspace() {
     alg->setProperty("OutputWorkspace", outName);
     alg->executeAsChildAlg();
     temp = alg->getProperty("OutputWorkspace");
-    temp->isDistribution(true);
+    temp->setDistribution(true);
   }
 
   return temp;

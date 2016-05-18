@@ -156,7 +156,7 @@ void RefRoi::extract2D() {
     outputWS->getAxis(0)->unit() =
         UnitFactory::Instance().create("MomentumTransfer");
     outputWS->setYUnitLabel("Reflectivity");
-    outputWS->isDistribution(true);
+    outputWS->setDistribution(true);
   } else {
     XOut0 = inputWS->readX(0);
   }

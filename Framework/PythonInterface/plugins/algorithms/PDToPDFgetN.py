@@ -87,6 +87,17 @@ class PDToPDFgetN(DataProcessorAlgorithm):
                 if self.getProperty("InputWorkspace").value.getNumberEvents() <= 0:
                     issues["InputWorkspace"] = "Workspace contains no events"
 
+        if self.getProperty("ResampleX").value == 0:
+            binning = self.getProperty('Binning').value
+            if len(binning) == 1:
+                binning = binning[0]
+            else:
+                binning = binning[1]
+            if binning == 0.:   # has to be non-zero delta
+                msg = 'Must supply a Binning or ResampleX'
+                issues['Binning'] = msg
+                issues['ResampleX'] = msg
+
         return issues
 
     def _loadCharacterizations(self):

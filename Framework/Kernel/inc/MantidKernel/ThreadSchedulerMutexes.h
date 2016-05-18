@@ -64,8 +64,8 @@ public:
 
           if (!map.empty()) {
             // Look for the largest cost item in it.
-            auto it2 = mutexedMap.second.end();
-            it2--;
+            auto it2 = map.end();
+            --it2;
             // Great, we found something.
             temp = it2->second;
             // Take it out of the map (popped)

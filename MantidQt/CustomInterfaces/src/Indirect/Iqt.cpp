@@ -205,6 +205,11 @@ bool Iqt::validate() {
   uiv.checkDataSelectorIsValid("Sample", m_uiForm.dsInput);
   uiv.checkDataSelectorIsValid("Resolution", m_uiForm.dsResolution);
 
+  const auto eLow = m_dblManager->value(m_properties["ELow"]);
+  const auto eHigh = m_dblManager->value(m_properties["EHigh"]);
+  if (eLow >= eHigh)
+    uiv.addErrorMessage("ELow must be strictly less than EHigh.\n");
+
   QString message = uiv.generateErrorMessage();
   showMessageBox(message);
 
@@ -252,9 +257,6 @@ void Iqt::updatePropertyValues(QtProperty *prop, double val) {
 void Iqt::calculateBinning() {
   using namespace Mantid::API;
 
-  disconnect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
-             SLOT(updatePropertyValues(QtProperty *, double)));
-
   QString wsName = m_uiForm.dsInput->getCurrentDataName();
   QString resName = m_uiForm.dsResolution->getCurrentDataName();
   if (wsName.isEmpty() || resName.isEmpty())
@@ -263,7 +265,10 @@ void Iqt::calculateBinning() {
   double energyMin = m_dblManager->value(m_properties["ELow"]);
   double energyMax = m_dblManager->value(m_properties["EHigh"]);
   double numBins = m_dblManager->value(m_properties["SampleBinning"]);
+
   if (numBins == 0)
+    return;
+  if (energyMin == 0 && energyMax == 0)
     return;
 
   IAlgorithm_sptr furyAlg =
@@ -291,6 +296,9 @@ void Iqt::calculateBinning() {
   double energyWidth = propsTable->getColumn("EnergyWidth")->cell<float>(0);
   int sampleBins = propsTable->getColumn("SampleOutputBins")->cell<int>(0);
   int resolutionBins = propsTable->getColumn("ResolutionBins")->cell<int>(0);
+
+  disconnect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
+	  SLOT(updatePropertyValues(QtProperty *, double)));
 
   // Update data in property editor
   m_dblManager->setValue(m_properties["EWidth"], energyWidth);
