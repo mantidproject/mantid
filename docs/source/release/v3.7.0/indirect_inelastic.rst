@@ -78,6 +78,9 @@ Improvements
 
 - Updated the :ref:`SimulatedDensityOfStates <algm-SimulatedDensityOfStates>` workflow diagram to show an overview of the algorithm.
 
+- the *Iqt* interface now validates that EMin is strictly less than EMax and that they are both not equal to 0
+
+
 Bugfixes
 --------
 
