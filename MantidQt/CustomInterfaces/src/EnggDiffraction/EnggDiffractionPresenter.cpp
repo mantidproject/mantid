@@ -829,11 +829,16 @@ void EnggDiffractionPresenter::runFittingAlgs(
   // retrieve the table with parameters
   AnalysisDataServiceImpl &ADS = Mantid::API::AnalysisDataService::Instance();
   if (!ADS.doesExist(FocusedFitPeaksTableName)) {
+
+    // convert units so valid dSpacing peaks can still be added to gui
+    if (ADS.doesExist(FocusedWSName))
+      runConvetUnitsAlg(FocusedWSName);
+
     throw std::invalid_argument(
         FocusedFitPeaksTableName +
         " workspace could not be found. "
         "Please check the log messages for more details.");
-  };
+  }
 
   ITableWorkspace_sptr table =
       ADS.retrieveWS<ITableWorkspace>(FocusedFitPeaksTableName);
@@ -846,64 +851,66 @@ void EnggDiffractionPresenter::runFittingAlgs(
   std::string startX = "";
   std::string endX = "";
 
-  if (rowCount > size_t(0)) {
+  for (size_t i = 0; i < rowCount; i++) {
 
-    for (size_t i = 0; i < rowCount; i++) {
+    // get the functionStrFactory to generate the string for function
+    // property, returns the string with i row from table workspace
+    // table is just passed so it works?
+    Bk2BkExpFunctionStr =
+        functionStrFactory(table, FocusedFitPeaksTableName, i, startX, endX);
 
-      // get the functionStrFactory to generate the string for function
-      // property
-      // return the string with i row from table workspace
-      // table is just passed so it works?
-      Bk2BkExpFunctionStr =
-          functionStrFactory(table, FocusedFitPeaksTableName, i, startX, endX);
+    g_log.debug() << "startX: " + startX + " . endX: " + endX << std::endl;
 
-      g_log.debug() << "startX: " + startX + " . endX: " + endX << std::endl;
+    current_peak_out_WS = "__engggui_fitting_single_peaks" + std::to_string(i);
+    std::string current_peak_cloned_WS;
 
-      current_peak_out_WS =
-          "__engggui_fitting_single_peaks" + std::to_string(i);
-      std::string current_peak_cloned_WS;
+    // run EvaluateFunction algorithm with focused workspace to produce
+    // the correct fit function
+    // FocusedWSName is not going to change as its always going to be from
+    // single workspace
+    runEvaluateFunctionAlg(Bk2BkExpFunctionStr, FocusedWSName,
+                           current_peak_out_WS, startX, endX);
 
-      // run EvaluateFunction algorithm with focused workspace to produce
-      // the correct fit function
-      // FocusedWSName is not going to change as its always going to be from
-      // single workspace
-      runEvaluateFunctionAlg(Bk2BkExpFunctionStr, FocusedWSName,
-                             current_peak_out_WS, startX, endX);
+    // crop workspace so only the correct workspace index is plotted
+    runCropWorkspaceAlg(current_peak_out_WS);
 
-      // crop workspace so only the correct workspace index is plotted
-      runCropWorkspaceAlg(current_peak_out_WS);
+    // apply the same binning as a focused workspace
+    runRebinToWorkspaceAlg(current_peak_out_WS);
 
-      // apply the same binning as a focused workspace
-      runRebinToWorkspaceAlg(current_peak_out_WS);
+    // if the first peak
+    if (i == size_t(0)) {
 
-      // if the first peak
-      if (i == size_t(0)) {
+      // create a workspace clone of bank focus file
+      // this will import all information of the previous file
+      runCloneWorkspaceAlg(FocusedWSName, single_peak_out_WS);
 
-        // create a workspace clone of bank focus file
-        // this will import all information of the previous file
-        runCloneWorkspaceAlg(FocusedWSName, single_peak_out_WS);
+      setDataToClonedWS(current_peak_out_WS, single_peak_out_WS);
 
-        setDataToClonedWS(current_peak_out_WS, single_peak_out_WS);
+    } else {
+      current_peak_cloned_WS =
+          "__engggui_fitting_cloned_peaks" + std::to_string(i);
 
-      } else {
-        current_peak_cloned_WS =
-            "__engggui_fitting_cloned_peaks" + std::to_string(i);
+      runCloneWorkspaceAlg(FocusedWSName, current_peak_cloned_WS);
 
-        runCloneWorkspaceAlg(FocusedWSName, current_peak_cloned_WS);
+      setDataToClonedWS(current_peak_out_WS, current_peak_cloned_WS);
 
-        setDataToClonedWS(current_peak_out_WS, current_peak_cloned_WS);
-
-        // append all peaks in to single workspace & remove
-        runAppendSpectraAlg(single_peak_out_WS, current_peak_cloned_WS);
-        ADS.remove(current_peak_out_WS);
-        ADS.remove(current_peak_cloned_WS);
-      }
+      // append all peaks in to single workspace & remove
+      runAppendSpectraAlg(single_peak_out_WS, current_peak_cloned_WS);
+      ADS.remove(current_peak_out_WS);
+      ADS.remove(current_peak_cloned_WS);
     }
-
-    // convert units for both workspaces to dSpacing from ToF
-    runConvetUnitsAlg(single_peak_out_WS);
-    runConvetUnitsAlg(FocusedWSName);
   }
+
+  // convert units for both workspaces to dSpacing from ToF
+  if (rowCount > size_t(0)) {
+    runConvetUnitsAlg(single_peak_out_WS);
+  } else {
+    g_log.error() << "The engggui_fitting_fitpeaks_params table produced is"
+                     "empty. Please try again!"
+                  << std::endl;
+  }
+
+  runConvetUnitsAlg(FocusedWSName);
 
   m_fittingFinishedOK = true;
 }
