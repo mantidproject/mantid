@@ -412,7 +412,7 @@ class HFIRSANSReduction(PythonAlgorithm):
                         Logger("HFIRSANSReduction").error("Could not read %s\n" % process_file)
                 if property_manager.existsProperty("SetupAlgorithm"):
                     setup_info = property_manager.getProperty("SetupAlgorithm").value
-                    proc_xml += "\n<Reduction>\n<SASprocessnote>\n"
+                    proc_xml += "\n<SASprocessnote>\n<Reduction>\n"
                         # The instrument name refers to the UI, which is named BIOSANS for all HFIR SANS
                     proc_xml += "  <instrument_name>BIOSANS</instrument_name>\n"
                     proc_xml += "  <SetupInfo>%s</SetupInfo>\n" % setup_info
