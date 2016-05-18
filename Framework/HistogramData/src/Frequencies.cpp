@@ -18,7 +18,9 @@ Frequencies::Frequencies(Counts &&counts, const BinEdges &edges) {
     if (counts.size() != 0 || edges.size() != 0)
       throw std::logic_error("Frequencies: Cannot construct from Counts -- "
                              "BinEdges size does not match.");
-  m_data = std::move(counts.m_data);
+  // Cannot move counts private data since it is of different type.
+  m_data = counts.cowData();
+  counts = Kernel::cow_ptr<HistogramY>(nullptr);
   auto &data = m_data.access();
   for (size_t i = 0; i < data.size(); ++i) {
     data[i] /= (edges[i + 1] - edges[i]);

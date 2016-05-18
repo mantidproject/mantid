@@ -57,8 +57,6 @@ public:
   /// Constructs Frequencies from Counts and bin width based on BinEdges.
   Frequencies(const Counts &counts, const BinEdges &edges);
   Frequencies(Counts &&counts, const BinEdges &edges);
-
-  friend class Counts;
 };
 
 } // namespace HistogramData
