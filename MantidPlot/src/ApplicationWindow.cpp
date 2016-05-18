@@ -10478,12 +10478,12 @@ void ApplicationWindow::showStandAloneHelp() {
   QFile helpFile(helpPath);
   if (!helpPath.isEmpty() && !helpFile.exists()) {
     QMessageBox::critical(0, tr("MantidPlot - Help Files Not Found!"), // Mantid
-                          tr("The manual can be downloaded from the following "
+                          tr("The manual can be found at the following "
                              "internet address:") +
                               "<p><a href = "
-                              "http://soft.proindependent.com/"
-                              "manuals.html>http://soft.proindependent.com/"
-                              "manuals.html</a></p>");
+                              "http://www.mantidproject.org/"
+                              "MantidPlot:_Help>http://www.mantidproject.org/"
+                              "MantidPlot::_Help</a></p>");
     exit(0);
   }
 
@@ -10499,8 +10499,8 @@ void ApplicationWindow::showStandAloneHelp() {
             tr("This file is provided with the MantidPlot manual which can be "
                "downloaded from the following internet address:") +
             "<p><a href = "
-            "http://soft.proindependent.com/manuals.html>http://"
-            "soft.proindependent.com/manuals.html</a></p>");
+            "http://www.mantidproject.org/MantidPlot:_Help>http://"
+            "www.mantidproject.org/MantidPlot:_Help</a></p>");
     exit(0);
   }
 
@@ -10517,11 +10517,11 @@ void ApplicationWindow::showHelp() {
     QMessageBox::critical(
         this, tr("MantidPlot - Help Files Not Found!"), // Mantid
         tr("Please indicate the location of the help file!") + "<br>" +
-            tr("The manual can be downloaded from the following internet "
+            tr("The manual can be found at the following internet "
                "address:") +
             "<p><a href = "
-            "http://soft.proindependent.com/manuals.html>http://"
-            "soft.proindependent.com/manuals.html</a></p>");
+            "http://www.mantidproject.org/MantidPlot:_Help>http://"
+            "www.mantidproject.org/MantidPlot:_Help</a></p>");
     QString fn =
         QFileDialog::getOpenFileName(QDir::currentDirPath(), "*.html", this);
     if (!fn.isEmpty()) {
@@ -10543,8 +10543,8 @@ void ApplicationWindow::showHelp() {
             tr("This file is provided with the MantidPlot manual which can be "
                "downloaded from the following internet address:") +
             "<p><a href = "
-            "http://soft.proindependent.com/manuals.html>http://"
-            "soft.proindependent.com/manuals.html</a></p>");
+            "http://www.mantidproject.org/MantidPlot:_Help>http://"
+            "www.mantidproject.org/MantidPlot:_Help</a></p>");
     return;
   }
 
