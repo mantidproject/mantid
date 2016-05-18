@@ -20,7 +20,7 @@ using Mantid::coord_t;
 /** Constructor
  *
  * @param workspace :: IMDWorkspace to plot
- * @param logScale :: true to plot Y in log scale
+ * @param logScaleY :: true to plot Y in log scale
  * @param start :: start point in N-dimensions of the line
  * @param end :: end point in N-dimensions of the line
  * @param normalize :: method for normalizing the line

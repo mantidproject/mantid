@@ -9,7 +9,7 @@
  * Construct a QwtWorkspaceSpectrumData object with a source workspace
  * @param workspace The workspace containing the data
  * @param wsIndex Index of the spectrum to plot
- * @param logScale If true, plot a log scale
+ * @param logScaleY If true, plot a log scale
  * @param plotAsDistribution If true and the data is histogram and not already a
  * distribution then plot the Y values/X bin-width
  */

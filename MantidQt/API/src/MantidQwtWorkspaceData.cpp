@@ -25,14 +25,8 @@ operator=(const MantidQwtWorkspaceData &data) {
 }
 
 /// Calculate absolute minimum and maximum values in a vector. Also find the
-/// smallest
-/// positive value.
-/// @param yvalues :: A vector to use.
-/// @param yMin    :: Output minimum value.
-/// @param yMax    :: Output maximum value.
-/// @param yMinPositive :: Output minimum positive value.
-void MantidQwtWorkspaceData::calculateYMinAndMax(
-    /*const std::vector<double> &yvalues*/) const {
+/// smallest positive value.
+void MantidQwtWorkspaceData::calculateYMinAndMax() const {
 
   const double maxDouble = std::numeric_limits<double>::max();
   double curMin = maxDouble;
