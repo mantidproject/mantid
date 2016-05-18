@@ -1,0 +1,25 @@
+INS   BANK     1                                                                
+INS   FPATH1     50                                                             
+INS   HTYPE   PNTR                                                              
+INS     NAME  North_bank                                                        
+INS     NDET 1200    5  240    1                                                
+INS     TYPE    1                                                               
+INS   TOFLIM     12.00     80.00    0.0004                                      
+INS   MONITR 2402   16.0000   43.0000                                           
+INS   DEADTI 0.00                                                               
+INS    OGPK1   0.183305E+05  -0.387262E+02                                      
+INS    OGPK2   0.839000E+00   0.700000E+00   0.320000E+02   0.149000E+01        
+INS    OGPK3  -0.686285E+01   0.220000E+01   0.108719E+01                       
+INS    CALIB   241391   236516 ceo2                                                   
+INS    INCBM  ob+mon_236516_North_bank.his                                      
+INS   FCSTBL  det_pars_93875_93874_North_bank.hdf                               
+INS  1I ITYP    0    1.0000   80.0000         0                                 
+INS  1BNKPAR     1.502    89.341     0.720     0.000     0.000    0    0        
+INS  1 ICONS  18306.98      2.99     14.44                                      
+INS  1PRCF1     3   21   0.00050                                                
+INS  1PRCF11   0.274872E+00   0.179289E-01   0.379667E-01   0.388241E+03        
+INS  1PRCF12   0.768656E+02   0.432991E+02   0.000000E+00   0.514723E+01        
+INS  1PRCF13   0.000000E+00   0.000000E+00   0.000000E+00   0.000000E+00        
+INS  1PRCF14   0.000000E+00   0.000000E+00   0.000000E+00   0.000000E+00        
+INS  1PRCF15   0.000000E+00   0.000000E+00   0.000000E+00   0.000000E+00        
+INS  1PRCF16   0.000000E+00                                                     

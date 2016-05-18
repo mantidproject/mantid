@@ -1,0 +1,441 @@
+data_AL2O3_ALPHA_publ
+
+_pd_block_id
+  2016-03-31T12:59|AL2O3_ALPHA|skabra|y
+
+_audit_creation_method  "from EXP file using GSAS2CIF"
+_audit_creation_date                   2016-03-31T12:59
+_audit_author_name                     skabra
+_audit_update_record
+; 2016-03-31T12:59  Initial CIF as created by GSAS2CIF
+;
+
+#=============================================================================
+# this information describes the project, paper etc. for the CIF             #
+# Acta Cryst. Section C papers and editorial correspondence is generated     #
+# from the information in this section                                       #
+#                                                                            #
+#   (from)   CIF submission form for Rietveld refinements (Acta Cryst. C)    #
+#                                                 Version 14 December 1998   #
+#=============================================================================
+# 1. SUBMISSION DETAILS
+
+_publ_contact_author_name            ?   # Name of author for correspondence
+_publ_contact_author_address             # Address of author for correspondence
+; ?
+;
+_publ_contact_author_email           ?
+_publ_contact_author_fax             ?
+_publ_contact_author_phone           ?
+
+_publ_contact_letter
+; ?
+;
+
+_publ_requested_journal              ?
+_publ_requested_coeditor_name        ?
+_publ_requested_category             ?   # Acta C: one of CI/CM/CO/FI/FM/FO
+
+#==============================================================================
+
+# 2. PROCESSING SUMMARY (IUCr Office Use Only)
+
+_journal_data_validation_number      ?
+
+_journal_date_recd_electronic        ?
+_journal_date_to_coeditor            ?
+_journal_date_from_coeditor          ?
+_journal_date_accepted               ?
+_journal_date_printers_first         ?
+_journal_date_printers_final         ?
+_journal_date_proofs_out             ?
+_journal_date_proofs_in              ?
+_journal_coeditor_name               ?
+_journal_coeditor_code               ?
+_journal_coeditor_notes
+; ?
+;
+_journal_techeditor_code             ?
+_journal_techeditor_notes
+; ?
+;
+_journal_coden_ASTM                  ?
+_journal_name_full                   ?
+_journal_year                        ?
+_journal_volume                      ?
+_journal_issue                       ?
+_journal_page_first                  ?
+_journal_page_last                   ?
+_journal_paper_category              ?
+_journal_suppl_publ_number           ?
+_journal_suppl_publ_pages            ?
+
+#==============================================================================
+
+# 3. TITLE AND AUTHOR LIST
+
+_publ_section_title
+; ?
+;
+_publ_section_title_footnote
+; ?
+;
+
+# The loop structure below should contain the names and addresses of all
+# authors, in the required order of publication. Repeat as necessary.
+
+loop_
+	_publ_author_name
+        _publ_author_footnote
+	_publ_author_address
+ ?                                   #<--'Last name, first name'
+; ?
+;
+; ?
+;
+
+#==============================================================================
+
+# 4. TEXT
+
+_publ_section_synopsis
+;  ?
+;
+_publ_section_abstract
+; ?
+;
+_publ_section_comment
+; ?
+;
+_publ_section_exptl_prep      # Details of the preparation of the sample(s)
+                              # should be given here.
+; ?
+;
+_publ_section_exptl_refinement
+; ?
+;
+_publ_section_references
+; ?
+;
+_publ_section_figure_captions
+; ?
+;
+_publ_section_acknowledgements
+; ?
+;
+
+#=============================================================================
+# 5. OVERALL REFINEMENT & COMPUTING DETAILS
+
+_refine_special_details
+; ?
+;
+_pd_proc_ls_special_details
+; ?
+;
+
+# The following items are used to identify the programs used.
+_computing_molecular_graphics     ?
+_computing_publication_material   ?
+
+_refine_ls_weighting_scheme       ?
+_refine_ls_weighting_details      ?
+_refine_ls_hydrogen_treatment     ?
+_refine_ls_extinction_method      ?
+_refine_ls_extinction_coef        ?
+_refine_ls_number_constraints     ?
+
+_refine_ls_restrained_S_all       ?
+_refine_ls_restrained_S_obs       ?
+
+#==============================================================================
+# 6. SAMPLE PREPARATION DATA
+
+# (In the unusual case where multiple samples are used in a single
+#  Rietveld study, this information should be moved into the phase
+#  blocks)
+
+# The following three fields describe the preparation of the material.
+# The cooling rate is in K/min.  The pressure at which the sample was
+# prepared is in kPa.  The temperature of preparation is in K.
+
+_pd_prep_cool_rate                ?
+_pd_prep_pressure                 ?
+_pd_prep_temperature              ?
+
+_pd_char_colour                   ?       # use ICDD colour descriptions
+_refine_ls_shift/su_max                .
+_refine_ls_shift/su_mean               .
+_computing_structure_refinement        GSAS
+_refine_ls_number_parameters           .
+_refine_ls_goodness_of_fit_all         .
+_refine_ls_number_restraints           0
+_refine_ls_matrix_type                 full
+#==============================================================================
+# 7. CHEMICAL, STRUCTURAL AND CRYSTAL DATA
+
+_pd_char_particle_morphology      ?
+
+_chemical_name_systematic
+; ?
+;
+_chemical_name_common             ?
+_chemical_formula_moiety          ?
+_chemical_formula_structural      ?
+_chemical_formula_analytical      ?
+_chemical_melting_point           ?
+_chemical_compound_source         ?       # for minerals and
+                                          # natural products
+_symmetry_space_group_name_Hall   ?
+
+_exptl_crystal_F_000               ?
+_exptl_crystal_density_diffrn      ?
+_exptl_crystal_density_meas        ?
+_exptl_crystal_density_method      ?
+
+_cell_measurement_temperature     ?
+
+_cell_special_details
+; ?
+;
+
+_geom_special_details             ?
+
+# The following item identifies the program(s) used (if appropriate).
+_computing_structure_solution     ?
+
+#==============================================================================
+
+# 8. Phase information from GSAS
+
+_pd_phase_name                         "Alumina (Al2O3)"
+_cell_length_a                         4.7618
+_cell_length_b                         4.7618
+_cell_length_c                         13.0055
+_cell_angle_alpha                      90.0
+_cell_angle_beta                       90.0
+_cell_angle_gamma                      120.0
+_cell_volume                           255.38771
+_symmetry_cell_setting                 trigonal
+_symmetry_space_group_name_H-M         "R -3 c"
+loop_ _symmetry_equiv_pos_site_id _symmetry_equiv_pos_as_xyz
+       1 +x,+y,+z 
+       2 -y,x-y,+z 
+       3 y-x,-x,+z 
+       4 y-x,+y,+z+1/2 
+       5 -y,-x,+z+1/2 
+       6 +x,x-y,+z+1/2 
+      -1 -x,-y,-z 
+      -2 +y,y-x,-z 
+      -3 x-y,+x,-z 
+      -4 x-y,-y,-z+1/2 
+      -5 +y,+x,-z+1/2 
+      -6 -x,y-x,-z+1/2 
+     101 +x+1/3,+y+2/3,+z+2/3 
+     102 -y+1/3,x-y+2/3,+z+2/3 
+     103 y-x+1/3,-x+2/3,+z+2/3 
+     104 y-x+1/3,+y+2/3,+z+1/6 
+     105 -y+1/3,-x+2/3,+z+1/6 
+     106 +x+1/3,x-y+2/3,+z+1/6 
+    -101 -x+2/3,-y+1/3,-z+1/3 
+    -102 +y+2/3,y-x+1/3,-z+1/3 
+    -103 x-y+2/3,+x+1/3,-z+1/3 
+    -104 x-y+2/3,-y+1/3,-z+5/6 
+    -105 +y+2/3,+x+1/3,-z+5/6 
+    -106 -x+2/3,y-x+1/3,-z+5/6 
+     201 +x+2/3,+y+1/3,+z+1/3 
+     202 -y+2/3,x-y+1/3,+z+1/3 
+     203 y-x+2/3,-x+1/3,+z+1/3 
+     204 y-x+2/3,+y+1/3,+z+5/6 
+     205 -y+2/3,-x+1/3,+z+5/6 
+     206 +x+2/3,x-y+1/3,+z+5/6 
+    -201 -x+1/3,-y+2/3,-z+2/3 
+    -202 +y+1/3,y-x+2/3,-z+2/3 
+    -203 x-y+1/3,+x+2/3,-z+2/3 
+    -204 x-y+1/3,-y+2/3,-z+1/6 
+    -205 +y+1/3,+x+2/3,-z+1/6 
+    -206 -x+1/3,y-x+2/3,-z+1/6 
+
+# ATOMIC COORDINATES AND DISPLACEMENT PARAMETERS
+
+
+loop_
+      _atom_site_type_symbol
+      _atom_site_label
+      _atom_site_fract_x
+      _atom_site_fract_y
+      _atom_site_fract_z
+      _atom_site_occupancy
+      _atom_site_thermal_displace_type
+      _atom_site_U_iso_or_equiv
+      _atom_site_symmetry_multiplicity
+Al
+        0.0          0.0          0.3523       1.0        Uiso   0.025        12
+O 
+O2      0.3064       0.0          0.25         1.0        Uiso   0.025        18
+ 
+# If you change Z, be sure to change all 3 of the following
+_chemical_formula_sum                  "Al2 O3"
+_chemical_formula_weight               101.96
+_cell_formula_units_Z                  6
+
+# MOLECULAR GEOMETRY
+
+loop_
+      _geom_bond_atom_site_label_1
+      _geom_bond_atom_site_label_2
+      _geom_bond_distance
+      _geom_bond_site_symmetry_1
+      _geom_bond_site_symmetry_2
+      _geom_bond_publ_flag
+   ?   ?   ?   ?   ?   ?
+
+loop_
+      _geom_angle_atom_site_label_1
+      _geom_angle_atom_site_label_2
+      _geom_angle_atom_site_label_3
+      _geom_angle
+      _geom_angle_site_symmetry_1
+      _geom_angle_site_symmetry_2
+      _geom_angle_site_symmetry_3
+      _geom_angle_publ_flag
+   ?   ?   ?   ?   ?   ?   ?   ?
+
+# Powder diffraction data for histogram  1
+#==============================================================================
+# 9. INSTRUMENT CHARACTERIZATION
+
+_exptl_special_details
+; ?
+;
+
+# if regions of the data are excluded, the reason(s) are supplied here:
+_pd_proc_info_excluded_regions
+; ?
+;
+
+# The following item is used to identify the equipment used to record
+# the powder pattern when the diffractogram was measured at a laboratory
+# other than the authors' home institution, e.g. when neutron or synchrotron
+# radiation is used.
+
+_pd_instr_location
+; ?
+;
+_pd_calibration_special_details           # description of the method used
+                                          # to calibrate the instrument
+; ?
+;
+
+_diffrn_ambient_temperature       ?
+_diffrn_source                    ?
+_diffrn_source_target             ?
+_diffrn_source_type               ?
+_diffrn_measurement_device_type   ?
+_diffrn_detector                  ?
+_diffrn_detector_type             ?       # make or model of detector
+
+_pd_meas_scan_method              ?       # options are 'step', 'cont',
+                                          # 'tof', 'fixed' or
+                                          # 'disp' (= dispersive)
+_pd_meas_special_details
+;  ?
+;
+
+# The following two items identify the program(s) used (if appropriate).
+_computing_data_collection        ?
+_computing_data_reduction         ?
+
+# Describe any processing performed on the data, prior to refinement.
+# For example: a manual Lp correction or a precomputed absorption correction
+_pd_proc_info_data_reduction      ?
+
+# The following item is used for angular dispersive measurements only.
+
+_diffrn_radiation_monochromator   ?
+
+# The following items are used to define the size of the instrument.
+# Not all distances are appropriate for all instrument types.
+
+_pd_instr_dist_src/mono           ?
+_pd_instr_dist_mono/spec          ?
+_pd_instr_dist_src/spec           ?
+_pd_instr_dist_spec/anal          ?
+_pd_instr_dist_anal/detc          ?
+_pd_instr_dist_spec/detc          ?
+
+# 10. Specimen size and mounting information
+
+# The next three fields give the specimen dimensions in mm.  The equatorial
+# plane contains the incident and diffracted beam.
+
+_pd_spec_size_axial               ?       # perpendicular to
+                                          # equatorial plane
+
+_pd_spec_size_equat               ?       # parallel to
+                                          # scattering vector
+                                          # in transmission
+
+_pd_spec_size_thick               ?       # parallel to
+                                          # scattering vector
+                                          # in reflection
+
+_pd_spec_mounting                         # This field should be
+                                          # used to give details of the
+                                          # container.
+; ?
+;
+
+_pd_spec_mount_mode               ?       # options are 'reflection'
+                                          # or 'transmission'
+
+_pd_spec_shape                    ?       # options are 'cylinder'
+                                          # 'flat_sheet' or 'irregular'
+
+
+loop_ _atom_type_symbol
+      _atom_type_number_in_cell
+      _atom_type_scat_length_neutron
+      _atom_type_scat_source
+  Al        12.0   0.3449
+  International_Tables_Vol_C
+  O         18.0   0.5803
+  International_Tables_Vol_C
+_diffrn_radiation_probe                neutron
+_pd_proc_ls_prof_R_factor              ""
+_pd_proc_ls_prof_wR_factor             ""
+_pd_proc_ls_prof_wR_expected           ""
+_refine_ls_R_Fsqd_factor               ""
+
+_pd_proc_ls_background_function
+;   GSAS Background function number 4 with  4 terms.
+ Power series in Q**2n/n!
+      1:    1.00000     2:    0.00000     3:    0.00000     4:    0.00000    
+;
+
+_exptl_absorpt_process_details
+;   GSAS Absorption/surface roughness correction: function number 0
+ No correction is applied.
+;
+_exptl_absorpt_correction_T_min        ?
+_exptl_absorpt_correction_T_max        ?
+
+_pd_proc_ls_profile_function
+;
+ TOF Profile function number 3 with  21 terms
+ Profile coefficients for exponential pseudovoigt
+  convolution Von Dreele, 1990 (unpublished)
+ #1 (alp  ) =   0.4256 #2 (bet-0) = 0.026329 #3 (bet-1) = 0.029691
+ #4 (sig-0) =     40.5 #5 (sig-1) =     40.5 #6 (sig-2) =      0.0
+ #7 (gam-0) =     0.00 #8 (gam-1) =     5.29 #9 (gam-2) =     0.00
+ #10(gsf  ) =     0.00 #11(g1ec ) =     0.00 #12(g2ec ) =     0.00
+ #13(rstr ) =    0.000 #14(rsta ) =    0.000 #15(rsca ) =    0.000
+ #16(L11)   =    0.000 #17(L22)   =    0.000 #18(L33)   =    0.000
+ #19(L12)   =    0.000 #20(L13)   =    0.000 #21(L23)   =    0.000
+ Peak tails are ignored  where the intensity is below 0.0050 times the peak
+   Aniso. broadening axis   0.0   0.0   1.0
+;
+_pd_proc_ls_peak_cutoff 0.00500
+_pd_proc_info_datetime                 2016-03-31T12:59:00
+_pd_calc_method                        "Rietveld Refinement"
+_pd_meas_2theta_fixed                  90.000

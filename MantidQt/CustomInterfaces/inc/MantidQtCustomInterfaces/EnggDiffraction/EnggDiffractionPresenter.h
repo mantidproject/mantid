@@ -159,7 +159,8 @@ private:
                                   const std::string &newCeriaNo);
 
   std::string outputCalibFilename(const std::string &vanNo,
-                                  const std::string &ceriaNo);
+                                  const std::string &ceriaNo,
+                                  const std::string &bankName = "");
 
   void parseCalibrateFilename(const std::string &path, std::string &instName,
                               std::string &vanNo, std::string &ceriaNo);
@@ -174,8 +175,10 @@ private:
                const std::string &ceriaNo, const std::string &outFilename,
                const std::string &specNos);
 
-  std::string buildCalibrateSuggestedFilename(const std::string &vanNo,
-                                              const std::string &ceriaNo) const;
+  std::string
+  buildCalibrateSuggestedFilename(const std::string &vanNo,
+                                  const std::string &ceriaNo,
+                                  const std::string &bankName = "") const;
 
   //@}
 
@@ -306,12 +309,21 @@ private:
   std::string outFitParamsTblNameGenerator(const std::string specNos,
                                            size_t bank_i) const;
 
+  // generates the pycode string which can be passed to view
+  std::string vanadiumCurvesPlotFactory();
+
   std::string DifcZeroWorkspaceFactory(
       const std::vector<double> &difc, const std::vector<double> &tzero,
       const std::string &specNo, const std::string &customisedBankName) const;
 
   std::string
   plotDifcZeroWorkspace(const std::string &customisedBankName) const;
+
+  void writeOutCalibFile(const std::string &outFilename,
+                         const std::vector<double> &difc,
+                         const std::vector<double> &tzero,
+                         const std::vector<std::string> &bankNames,
+                         const std::string &templateFile = "");
 
   /// keep track of the paths the user "browses to", to add them in
   /// the file search path
@@ -351,6 +363,9 @@ private:
 
   /// true if the last calibration completed successfully
   bool m_calibFinishedOK;
+  /// path where the calibration has been produced (par/prm file)
+  std::string m_calibFullPath;
+
   /// true if the last focusing completed successfully
   bool m_focusFinishedOK;
   /// true if the last pre-processing/re-binning completed successfully

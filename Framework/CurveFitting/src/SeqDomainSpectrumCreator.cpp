@@ -167,7 +167,7 @@ Workspace_sptr SeqDomainSpectrumCreator::createOutputWorkspace(
   if (!boost::dynamic_pointer_cast<Mantid::API::IEventWorkspace>(
           m_matrixWorkspace)) {
     if (m_matrixWorkspace->isDistribution()) {
-      outputWs->isDistribution(true);
+      outputWs->setDistribution(true);
     }
   }
 

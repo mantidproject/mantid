@@ -169,6 +169,9 @@ public:
 
   std::vector<Kernel::V3D> operator*(const Kernel::V3D &vector) const;
 
+  bool isInvariant(const Kernel::DblMatrix &tensor,
+                   double tolerance = 1e-8) const;
+
   bool operator==(const Group &other) const;
   bool operator!=(const Group &other) const;
 

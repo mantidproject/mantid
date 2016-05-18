@@ -233,7 +233,7 @@ MatrixWorkspace_sptr MonteCarloAbsorption::createOutputWorkspace(
   MatrixWorkspace_sptr outputWS = inputWS.clone();
   // The algorithm computes the signal values at bin centres so they should
   // be treated as a distribution
-  outputWS->isDistribution(true);
+  outputWS->setDistribution(true);
   outputWS->setYUnit("");
   outputWS->setYUnitLabel("Attenuation factor");
   return outputWS;

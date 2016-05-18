@@ -1,33 +1,33 @@
 #include <fstream>
 #include <sstream>
 
-#include "MantidGeometry/Instrument/InstrumentDefinitionParser.h"
 #include "MantidGeometry/Instrument/Detector.h"
+#include "MantidGeometry/Instrument/InstrumentDefinitionParser.h"
 #include "MantidGeometry/Instrument/ObjCompAssembly.h"
-#include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
+#include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Instrument/StructuredDetector.h"
 #include "MantidGeometry/Instrument/XMLInstrumentParameter.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidGeometry/Rendering/vtkGeometryCacheReader.h"
 #include "MantidGeometry/Rendering/vtkGeometryCacheWriter.h"
-#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/ChecksumHelper.h"
+#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/ProgressBase.h"
-#include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/Strings.h"
+#include "MantidKernel/UnitFactory.h"
 
-#include <Poco/Path.h>
-#include <Poco/String.h>
-#include <Poco/DOM/Document.h>
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/DOMWriter.h>
+#include <Poco/DOM/Document.h>
 #include <Poco/DOM/Element.h>
 #include <Poco/DOM/NodeFilter.h>
 #include <Poco/DOM/NodeIterator.h>
 #include <Poco/DOM/NodeList.h>
+#include <Poco/Path.h>
 #include <Poco/SAX/AttributesImpl.h>
+#include <Poco/String.h>
 
 #include <boost/make_shared.hpp>
 #include <boost/regex.hpp>
@@ -1401,6 +1401,7 @@ void InstrumentDefinitionParser::createStructuredDetector(
   const std::string shapeType = pType->getAttribute("type");
   boost::shared_ptr<Geometry::Object> shape = mapTypeNameToShape[shapeType];
 
+  std::string typeName = pType->getAttribute("name");
   // These parameters are in the TYPE defining StructuredDetector
   if (pType->hasAttribute("xpixels"))
     xpixels = atoi((pType->getAttribute("xpixels")).c_str());
@@ -1434,7 +1435,8 @@ void InstrumentDefinitionParser::createStructuredDetector(
     Element *check = static_cast<Element *>(pNode);
     if (pNode->nodeName().compare("type") == 0 && check->hasAttribute("is")) {
       std::string is = check->getAttribute("is").c_str();
-      if (StructuredDetector::compareName(is)) {
+      if (StructuredDetector::compareName(is) &&
+          typeName.compare(check->getAttribute("name")) == 0) {
         pElem = check;
         break;
       }
@@ -1449,7 +1451,6 @@ void InstrumentDefinitionParser::createStructuredDetector(
 
   // Ensure vertices are present within the IDF
   Poco::AutoPtr<NodeList> pNL = pElem->getElementsByTagName("vertex");
-
   if (pNL->length() == 0)
     throw Kernel::Exception::InstrumentDefinitionError(
         "StructuredDetector must contain vertices.", filename);
@@ -1471,9 +1472,12 @@ void InstrumentDefinitionParser::createStructuredDetector(
     pNode = it.nextNode();
   }
 
+  V3D zVector(0, 0, 1); // Z aligned beam
+  bool isZBeam =
+      m_instrument->getReferenceFrame()->isVectorPointingAlongBeam(zVector);
   // Now, initialize all the pixels in the bank
-  bank->initialize(xpixels, ypixels, xValues, yValues, idstart, idfillbyfirst_y,
-                   idstepbyrow, idstep);
+  bank->initialize(xpixels, ypixels, xValues, yValues, isZBeam, idstart,
+                   idfillbyfirst_y, idstepbyrow, idstep);
 
   // Loop through all detectors in the newly created bank and mark those in
   // the instrument.
@@ -2637,9 +2641,8 @@ void InstrumentDefinitionParser::adjust(
   }
 
   // delete all <component> found in pElem
-  for (auto it = allComponentInType.begin(); it != allComponentInType.end();
-       ++it)
-    pElem->removeChild(*it);
+  for (const auto &component : allComponentInType)
+    pElem->removeChild(component);
 }
 
 /// Returns a translated and rotated \<cuboid\> element with "id" attribute

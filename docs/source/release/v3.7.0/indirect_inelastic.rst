@@ -12,7 +12,10 @@ Algorithms
 ##########
 
 - *IndirectNormSpectra* algorithm is designed to normalise all spectra in a
-  MatrixWorkspace so that the maximum value for any spectra is 1
+  MatrixWorkspace so that the maximum value for any spectra is 1.
+
+- :ref:`IqtFitSequential <algm-IqtFitSequential>` algorithm has been added to sequential Iqt Fit data.
+  This algorithm will be mainly used in the IqtFit interface.
 
 Data Analysis
 #############
@@ -83,7 +86,7 @@ Bugfixes
 - :ref:`SimulatedDensityOfStates <algm-SimulatedDensityOfStates>` should no longer manipulate the actual data values and only rebins the data to the desired bin width.
 - :ref:`VesuvioCorrections <algm-VesuvioCorrections>` no longer always fits using only the first spectrum in the input workspace.
 - Fix bug with *BayesQuasi* docs not displaying online
-- The mini plot range bars in *BayesQuasi* now automatically update on sample loading.
+- The mini plot range bars in all interfaces now automatically update when a file is loaded.
 
 
 `Full list of changes on GitHub <http://github.com/mantidproject/mantid/pulls?q=is%3Apr+milestone%3A%22Release+3.7%22+is%3Amerged+label%3A%22Component%3A+Indirect+Inelastic%22>`_

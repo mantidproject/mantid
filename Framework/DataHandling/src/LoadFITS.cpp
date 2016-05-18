@@ -32,10 +32,33 @@ template <typename InterpretType> double toDouble(uint8_t *src) {
 
 namespace Mantid {
 namespace DataHandling {
+
 // Register the algorithm into the AlgorithmFactory
 DECLARE_FILELOADER_ALGORITHM(LoadFITS)
 
+struct FITSInfo {
+  std::vector<std::string> headerItems;
+  std::map<std::string, std::string> headerKeys;
+  int bitsPerPixel;
+  int numberOfAxis;
+  int offset;
+  int headerSizeMultiplier;
+  std::vector<size_t> axisPixelLengths;
+  double tof;
+  double timeBin;
+  double scale;
+  std::string imageKey;
+  long int countsInImage;
+  long int numberOfTriggers;
+  std::string extension;
+  std::string filePath;
+  bool isFloat;
+};
+
 // Static class constants
+const std::string LoadFITS::g_END_KEYNAME = "END";
+const std::string LoadFITS::g_COMMENT_KEYNAME = "COMMENT";
+const std::string LoadFITS::g_XTENSION_KEYNAME = "XTENSION";
 const std::string LoadFITS::g_BIT_DEPTH_NAME = "BitDepthName";
 const std::string LoadFITS::g_ROTATION_NAME = "RotationName";
 const std::string LoadFITS::g_AXIS_NAMES_NAME = "AxisNames";
@@ -150,170 +173,175 @@ void LoadFITS::exec() {
  * Load header(s) from FITS file(s) into FITSInfo header
  * struct(s). This is usually the first step when loading FITS files
  * into workspaces or anything else. In the simplest case, paths has
- * only one string and only one header struct is added in headers.
+ * only one string and only one header struct is added in
+ * headers. When loading multiple files, the parameters firstIndex and
+ * lastIndex make it possible to load the headers individually or by
+ * groups.
  *
  * @param paths File name(s)
  * @param headers Vector where to store the header struct(s)
  *
+ * @param firstIndex index of the first header to read, set to 0 to
+ * start reading headers from the first file.
+ *
+ * @param lastIndex index of the last header to read
+ *
  * @throws std::runtime_error if issues are found in the headers
  */
 void LoadFITS::doLoadHeaders(const std::vector<std::string> &paths,
-                             std::vector<FITSInfo> &headers) {
-  headers.resize(paths.size());
+                             std::vector<FITSInfo> &headers, size_t firstIndex,
+                             size_t lastIndex) {
+  for (size_t i = firstIndex; i <= lastIndex && i <= headers.size(); ++i) {
+    loadHeader(paths[i], headers[i]);
+  }
+}
 
-  for (size_t i = 0; i < paths.size(); ++i) {
-    headers[i].extension = "";
-    headers[i].filePath = paths[i];
+void LoadFITS::loadHeader(const std::string &filePath, FITSInfo &header) {
+  header.extension = "";
+  header.filePath = filePath;
 
-    // Get various pieces of information from the file header which are used
-    // to
-    // create the workspace
-    try {
-      parseHeader(headers[i]);
-    } catch (std::exception &e) {
-      // Unable to parse the header, throw.
-      throw std::runtime_error(
-          "Severe problem found while parsing the header of "
-          "this FITS file (" +
-          paths[i] +
-          "). This file may not be standard FITS. Error description: " +
-          e.what());
-    }
+  // Get various pieces of information from the file header which are used
+  // to
+  // create the workspace
+  try {
+    parseHeader(header);
+  } catch (std::exception &e) {
+    // Unable to parse the header, throw.
+    throw std::runtime_error(
+        "Severe problem found while parsing the header of "
+        "this FITS file (" +
+        filePath +
+        "). This file may not be standard FITS. Error description: " +
+        e.what());
+  }
 
-    // Get and convert specific MANDATORY standard header values which
-    // will are needed to know how to load the data: BITPIX, NAXIS,
-    // NAXISi (where i = 1..NAXIS, e.g. NAXIS2 for two axis).
-    try {
-      std::string tmpBitPix = headers[i].headerKeys[m_headerBitDepthKey];
-      if (boost::contains(tmpBitPix, "-")) {
-        boost::erase_all(tmpBitPix, "-");
-        headers[i].isFloat = true;
-      } else {
-        headers[i].isFloat = false;
-      }
-
-      try {
-        headers[i].bitsPerPixel = boost::lexical_cast<int>(tmpBitPix);
-      } catch (std::exception &e) {
-        throw std::runtime_error(
-            "Coult not interpret the entry number of bits per pixel (" +
-            m_headerBitDepthKey + ") as an integer. Error: " + e.what());
-      }
-      // Check that the files use valid BITPIX values
-      // http://archive.stsci.edu/fits/fits_standard/node39.html#SECTION00941000000000000000
-      if (headers[i].bitsPerPixel != 8 && headers[i].bitsPerPixel != 16 &&
-          headers[i].bitsPerPixel != 32 && headers[i].bitsPerPixel != 64)
-        // this implicitly includes when 'headers[i].bitsPerPixel >
-        // g_maxBitDepth'
-        throw std::runtime_error(
-            "This algorithm only supports 8, 16, 32 or 64 "
-            "bits per pixel as allowed in the FITS standard. The header of "
-            "file '" +
-            paths[i] + "' says that its bit depth is: " +
-            boost::lexical_cast<std::string>(headers[i].bitsPerPixel));
-    } catch (std::exception &e) {
-      throw std::runtime_error(
-          "Failed to process the '" + m_headerBitDepthKey +
-          "' entry (bits per pixel) in the header of this file: " + paths[i] +
-          ". Error description: " + e.what());
-    }
-
-    try {
-      // Add the image key, use the value in the FITS header if found,
-      // otherwise default (to SAMPLE).
-      auto it = headers[i].headerKeys.find(m_headerImageKeyKey);
-      if (headers[i].headerKeys.end() != it) {
-        headers[i].imageKey = it->second;
-      } else {
-        headers[i].imageKey = g_defaultImgType;
-      }
-    } catch (std::exception &e) {
-      throw std::runtime_error("Failed to process the '" + m_headerImageKeyKey +
-                               "' entry (type of image: sample, dark, open) in "
-                               "the header of this file: " +
-                               paths[i] + ". Error description: " + e.what());
-    }
-
-    try {
-      headers[i].numberOfAxis = static_cast<int>(m_headerAxisNameKeys.size());
-
-      for (int j = 0; headers.size() > i && j < headers[i].numberOfAxis; ++j) {
-        headers[i].axisPixelLengths.push_back(boost::lexical_cast<size_t>(
-            headers[i].headerKeys[m_headerAxisNameKeys[j]]));
-        // only debug level, when loading multiple files this is very verbose
-        g_log.debug() << "Found axis length header entry: "
-                      << m_headerAxisNameKeys[j] << " = "
-                      << headers[i].axisPixelLengths.back() << std::endl;
-      }
-
-      // Various extensions to the FITS format are used elsewhere, and
-      // must be parsed differently if used. This loader Loader
-      // doesn't support this.
-      headers[i].extension = headers[i].headerKeys["XTENSION"];
-    } catch (std::exception &e) {
-      throw std::runtime_error(
-          "Failed to process the '" + m_headerNAxisNameKey +
-          "' entries (dimensions) in the header of this file: " + paths[i] +
-          ". Error description: " + e.what());
-    }
-
-    // scale parameter, header BSCALE in the fits standard
-    if ("" == headers[i].headerKeys[m_headerScaleKey]) {
-      headers[i].scale = 1;
+  // Get and convert specific MANDATORY standard header values which
+  // will are needed to know how to load the data: BITPIX, NAXIS,
+  // NAXISi (where i = 1..NAXIS, e.g. NAXIS2 for two axis).
+  try {
+    std::string tmpBitPix = header.headerKeys[m_headerBitDepthKey];
+    if (boost::contains(tmpBitPix, "-")) {
+      boost::erase_all(tmpBitPix, "-");
+      header.isFloat = true;
     } else {
-      try {
-        headers[i].scale = boost::lexical_cast<double>(
-            headers[i].headerKeys[m_headerScaleKey]);
-      } catch (std::exception &e) {
-        throw std::runtime_error(
-            "Coult not interpret the entry number of bits per pixel (" +
-            m_headerBitDepthKey + " = " +
-            headers[i].headerKeys[m_headerScaleKey] +
-            ") as a floating point number (double). Error: " + e.what());
-      }
+      header.isFloat = false;
     }
 
-    // data offsset parameter, header BZERO in the fits standard
-    if ("" == headers[i].headerKeys[m_headerOffsetKey]) {
-      headers[i].offset = 0;
+    try {
+      header.bitsPerPixel = boost::lexical_cast<int>(tmpBitPix);
+    } catch (std::exception &e) {
+      throw std::runtime_error(
+          "Coult not interpret the entry number of bits per pixel (" +
+          m_headerBitDepthKey + ") as an integer. Error: " + e.what());
+    }
+    // Check that the files use valid BITPIX values
+    // http://archive.stsci.edu/fits/fits_standard/node39.html#SECTION00941000000000000000
+    if (header.bitsPerPixel != 8 && header.bitsPerPixel != 16 &&
+        header.bitsPerPixel != 32 && header.bitsPerPixel != 64)
+      // this implicitly includes when 'header.bitsPerPixel >
+      // g_maxBitDepth'
+      throw std::runtime_error(
+          "This algorithm only supports 8, 16, 32 or 64 "
+          "bits per pixel as allowed in the FITS standard. The header of "
+          "file '" +
+          filePath + "' says that its bit depth is: " +
+          boost::lexical_cast<std::string>(header.bitsPerPixel));
+  } catch (std::exception &e) {
+    throw std::runtime_error(
+        "Failed to process the '" + m_headerBitDepthKey +
+        "' entry (bits per pixel) in the header of this file: " + filePath +
+        ". Error description: " + e.what());
+  }
+
+  try {
+    // Add the image key, use the value in the FITS header if found,
+    // otherwise default (to SAMPLE).
+    auto it = header.headerKeys.find(m_headerImageKeyKey);
+    if (header.headerKeys.end() != it) {
+      header.imageKey = it->second;
     } else {
+      header.imageKey = g_defaultImgType;
+    }
+  } catch (std::exception &e) {
+    throw std::runtime_error("Failed to process the '" + m_headerImageKeyKey +
+                             "' entry (type of image: sample, dark, open) in "
+                             "the header of this file: " +
+                             filePath + ". Error description: " + e.what());
+  }
+
+  try {
+    header.numberOfAxis = static_cast<int>(m_headerAxisNameKeys.size());
+
+    for (int j = 0; j < header.numberOfAxis; ++j) {
+      header.axisPixelLengths.push_back(boost::lexical_cast<size_t>(
+          header.headerKeys[m_headerAxisNameKeys[j]]));
+      // only debug level, when loading multiple files this is very verbose
+      g_log.debug() << "Found axis length header entry: "
+                    << m_headerAxisNameKeys[j] << " = "
+                    << header.axisPixelLengths.back() << std::endl;
+    }
+
+    // Various extensions to the FITS format are used elsewhere, and
+    // must be parsed differently if used. This loader Loader
+    // doesn't support this.
+    header.extension = header.headerKeys[g_XTENSION_KEYNAME];
+  } catch (std::exception &e) {
+    throw std::runtime_error(
+        "Failed to process the '" + m_headerNAxisNameKey +
+        "' entries (dimensions) in the header of this file: " + filePath +
+        ". Error description: " + e.what());
+  }
+
+  // scale parameter, header BSCALE in the fits standard
+  if ("" == header.headerKeys[m_headerScaleKey]) {
+    header.scale = 1;
+  } else {
+    try {
+      header.scale =
+          boost::lexical_cast<double>(header.headerKeys[m_headerScaleKey]);
+    } catch (std::exception &e) {
+      throw std::runtime_error(
+          "Coult not interpret the entry number of bits per pixel (" +
+          m_headerBitDepthKey + " = " + header.headerKeys[m_headerScaleKey] +
+          ") as a floating point number (double). Error: " + e.what());
+    }
+  }
+
+  // data offsset parameter, header BZERO in the fits standard
+  if ("" == header.headerKeys[m_headerOffsetKey]) {
+    header.offset = 0;
+  } else {
+    try {
+      header.offset =
+          boost::lexical_cast<int>(header.headerKeys[m_headerOffsetKey]);
+    } catch (std::exception & /*e*/) {
+      // still, second try with floating point format (as used for example
+      // by
+      // Starlight XPRESS cameras)
       try {
-        headers[i].offset =
-            boost::lexical_cast<int>(headers[i].headerKeys[m_headerOffsetKey]);
-      } catch (std::exception & /*e*/) {
-        // still, second try with floating point format (as used for example
-        // by
-        // Starlight XPRESS cameras)
-        try {
-          double doff = boost::lexical_cast<double>(
-              headers[i].headerKeys[m_headerOffsetKey]);
-          double intPart;
-          if (0 != modf(doff, &intPart)) {
-            // anyway we'll do a cast, but warn if there was a fraction
-            g_log.warning()
-                << "The value given in the FITS header entry for the data "
-                   "offset (" +
-                       m_headerOffsetKey + " = " +
-                       headers[i].headerKeys[m_headerOffsetKey] +
-                       ") has a fractional part, and it will be ignored!"
-                << std::endl;
-          }
-          headers[i].offset = static_cast<int>(doff);
-        } catch (std::exception &e) {
-          throw std::runtime_error(
-              "Coult not interpret the entry number of data offset (" +
-              m_headerOffsetKey + " = " +
-              headers[i].headerKeys[m_headerOffsetKey] +
-              ") as an integer number nor a floating point "
-              "number (double). Error: " +
-              e.what());
+        auto doff =
+            boost::lexical_cast<double>(header.headerKeys[m_headerOffsetKey]);
+        double intPart;
+        if (0 != modf(doff, &intPart)) {
+          // anyway we'll do a cast, but warn if there was a fraction
+          g_log.warning()
+              << "The value given in the FITS header entry for the data "
+                 "offset (" +
+                     m_headerOffsetKey + " = " +
+                     header.headerKeys[m_headerOffsetKey] +
+                     ") has a fractional part, and it will be ignored!"
+              << std::endl;
         }
+        header.offset = static_cast<int>(doff);
+      } catch (std::exception &e) {
+        throw std::runtime_error(
+            "Coult not interpret the entry number of data offset (" +
+            m_headerOffsetKey + " = " + header.headerKeys[m_headerOffsetKey] +
+            ") as an integer number nor a floating point "
+            "number (double). Error: " +
+            e.what());
       }
     }
-
-    // Check each header is valid/supported: standard (no extension to
-    // FITS), and has two axis
-    headerSanityCheck(headers[i], headers[0]);
   }
 }
 
@@ -400,8 +428,9 @@ void LoadFITS::doLoadFiles(const std::vector<std::string> &paths,
                            const std::string &outWSName, bool loadAsRectImg,
                            int binSize, double noiseThresh) {
   std::vector<FITSInfo> headers;
+  headers.resize(paths.size());
 
-  doLoadHeaders(paths, headers);
+  loadHeader(paths[0], headers[0]);
 
   // No extension is set -> it's the standard format which we can parse.
   if (headers[0].numberOfAxis > 0)
@@ -500,6 +529,11 @@ void LoadFITS::doLoadFiles(const std::vector<std::string> &paths,
   // don't feel tempted to parallelize this loop as it is - it uses the same
   // imageY and imageE buffers for all the workspaces
   for (int64_t i = 1; i < static_cast<int64_t>(totalWS); ++i) {
+    loadHeader(paths[i], headers[i]);
+    // Check each header is valid/supported: standard (no extension to
+    // FITS), has two axis, and it is consistent with the first header
+    headerSanityCheck(headers[i], headers[0]);
+
     imgWS = makeWorkspace(headers[i], fileNumberInGroup, buffer, imageY, imageE,
                           imgWS, loadAsRectImg, binSize, noiseThresh);
     progress.report("Loaded file " + boost::lexical_cast<std::string>(i + 1) +
@@ -540,7 +574,8 @@ void LoadFITS::parseHeader(FITSInfo &headerInfo) {
   headerInfo.headerSizeMultiplier = 0;
   std::ifstream istr(headerInfo.filePath.c_str(), std::ios::binary);
   istr.seekg(0, istr.end);
-  if (!(istr.tellg() > 0)) {
+  const std::streampos fileSize = istr.tellg();
+  if (fileSize <= 0) {
     throw std::runtime_error(
         "Found a file that is readable but empty (0 bytes size): " +
         headerInfo.filePath);
@@ -552,11 +587,14 @@ void LoadFITS::parseHeader(FITSInfo &headerInfo) {
   // Iterate 80 bytes at a time until header is parsed | 2880 bytes is the
   // fixed header length of FITS
   // 2880/80 = 36 iterations required
-  const std::string commentKW = "COMMENT";
+  const std::string commentKW = g_COMMENT_KEYNAME;
   bool endFound = false;
-  while (!endFound) {
+
+  while (!endFound &&
+         (g_BASE_HEADER_SIZE * headerInfo.headerSizeMultiplier < fileSize)) {
     headerInfo.headerSizeMultiplier++;
     const int entriesPerHDU = 36;
+
     for (int i = 0; i < entriesPerHDU; ++i) {
       // Keep vect of each header item, including comments, and also keep a
       // map of individual keys.
@@ -588,13 +626,23 @@ void LoadFITS::parseHeader(FITSInfo &headerInfo) {
         boost::trim(key);
         boost::trim(value);
 
-        if (key == "END")
+        if (key == g_END_KEYNAME)
           endFound = true;
 
         if (key != "")
           headerInfo.headerKeys[key] = value;
       }
     }
+  }
+
+  if (!endFound) {
+    throw std::runtime_error(
+        "Could not find any valid END entry in the headers of this file after "
+        "scanning the file (" +
+        std::to_string(fileSize) +
+        " bytes). This does not look like a valid FITS file and "
+        "it is not possible to read it correctly as the boundary between "
+        "the headers and the data is undefined.");
   }
 
   istr.close();
@@ -748,7 +796,7 @@ void LoadFITS::addAxesInfoAndLogs(Workspace2D_sptr ws, bool loadAsRectImg,
     unitLbl->setLabel("height", "cm");
     ws->getAxis(1)->unit() = unitLbl;
 
-    ws->isDistribution(true);
+    ws->setDistribution(true);
   } else {
     // TODO: what to do when loading 1pixel - 1 spectrum?
   }
@@ -808,7 +856,7 @@ void LoadFITS::readDataToWorkspace(const FITSInfo &fileInfo, double cmpp,
   const size_t nrows(fileInfo.axisPixelLengths[1]),
       ncols(fileInfo.axisPixelLengths[0]);
   // Treat buffer as a series of bytes
-  uint8_t *buffer8 = reinterpret_cast<uint8_t *>(&buffer.front());
+  uint8_t *buffer8 = reinterpret_cast<uint8_t *>(buffer.data());
 
   PARALLEL_FOR_NO_WSP_CHECK()
   for (int i = 0; i < static_cast<int>(nrows); ++i) {
@@ -870,7 +918,7 @@ void LoadFITS::readDataToImgs(const FITSInfo &fileInfo, MantidImage &imageY,
   // create pointer of correct data type to void pointer of the buffer:
   uint8_t *buffer8 = reinterpret_cast<uint8_t *>(&buffer[0]);
   std::vector<char> buf(bytespp);
-  char *tmp = &buf.front();
+  char *tmp = buf.data();
   size_t start = 0;
 
   for (size_t i = 0; i < fileInfo.axisPixelLengths[1]; ++i) {   // width
@@ -1047,7 +1095,7 @@ void LoadFITS::doRebin(size_t rebin, MantidImage &imageY, MantidImage &imageE,
  * @return whether this file seems to come from 'another' camera such
  * as Starlight Xpress, etc.
  */
-bool LoadFITS::isInstrOtherThanIMAT(FITSInfo &hdr) {
+bool LoadFITS::isInstrOtherThanIMAT(const FITSInfo &hdr) {
   bool res = false;
 
   // Images taken with Starlight camera contain this header entry:

@@ -79,12 +79,8 @@ public:
   MOCK_METHOD3(newCalibLoaded, void(const std::string &, const std::string &,
                                     const std::string &));
 
-  // virtual void writeOutCalibFile(const std::string &outFilename,
-  //                                const std::vector<double> &difc,
-  //                                const std::vector<double> &tzero)
-  MOCK_METHOD3(writeOutCalibFile,
-               void(const std::string &, const std::vector<double> &,
-                    const std::vector<double> &));
+  // virtual std::string enggRunPythonCode(const std::string &pyCode)
+  MOCK_METHOD1(enggRunPythonCode, std::string(const std::string &));
 
   // virtual void enableTabs(bool enable);
   MOCK_METHOD1(enableTabs, void(bool));
@@ -206,11 +202,8 @@ public:
                void(std::vector<boost::shared_ptr<QwtData>> &data,
                     bool focused));
 
-  // virtual void plotVanCurvesCalibOutput();
-  MOCK_METHOD0(plotVanCurvesCalibOutput, void());
-
-  // virtual void plotDifcZeroCalibOutput();
-  MOCK_METHOD1(plotDifcZeroCalibOutput, void(const std::string &pyCode));
+  // virtual void plotCalibOutput();
+  MOCK_METHOD1(plotCalibOutput, void(const std::string &pyCode));
 };
 
 #endif // MANTID_CUSTOMINTERFACES_ENGGDIFFRACTIONVIEWMOCK_H

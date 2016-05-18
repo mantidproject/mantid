@@ -207,6 +207,7 @@ void ALCDataLoadingPresenter::load(const std::string &lastFile) {
 
 void ALCDataLoadingPresenter::updateAvailableInfo() {
   Workspace_sptr loadedWs;
+  double firstGoodData = 0, timeZero = 0;
 
   try //... to load the first run
   {
@@ -222,6 +223,8 @@ void ALCDataLoadingPresenter::updateAvailableInfo() {
     load->execute();
 
     loadedWs = load->getProperty("OutputWorkspace");
+    firstGoodData = load->getProperty("FirstGoodData");
+    timeZero = load->getProperty("TimeZero");
   } catch (...) {
     m_view->setAvailableLogs(std::vector<std::string>()); // Empty logs list
     m_view->setAvailablePeriods(
@@ -251,7 +254,7 @@ void ALCDataLoadingPresenter::updateAvailableInfo() {
   m_view->setAvailablePeriods(periods);
 
   // Set time limits
-  m_view->setTimeLimits(ws->readX(0).front(), ws->readX(0).back());
+  m_view->setTimeLimits(firstGoodData - timeZero, ws->readX(0).back());
   // Set allowed time range
   m_view->setTimeRange(ws->readX(0).front(), ws->readX(0).back());
 }

@@ -5,7 +5,7 @@ from mantid.api import *
 class EnggFitDIFCFromPeaks(PythonAlgorithm):
 
     def category(self):
-        return "Diffraction\\Engineering"
+        return "Diffraction\\Engineering;Diffraction\\Fitting"
 
     def name(self):
         return "EnggFitPeaks"
@@ -60,7 +60,7 @@ class EnggFitDIFCFromPeaks(PythonAlgorithm):
         out_tbl_name = self.getPropertyValue('OutParametersTable')
         self._produce_outputs(difa, difc, tzero, out_tbl_name)
 
-        self.log().information("Fitted {0} peaks in total. DIFA: {1}, DIFC: {2}, TZERP: {3}".
+        self.log().information("Fitted {0} peaks in total. DIFA: {1}, DIFC: {2}, TZERO: {3}".
                                format(peaks.rowCount(), difa, difc, tzero))
 
     def _fit_difc_tzero(self, fitted_peaks_table):

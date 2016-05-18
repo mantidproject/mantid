@@ -59,6 +59,7 @@ private:
   void constrainIntensities(Mantid::API::CompositeFunction_sptr func);
   QString minimizerString(QString outputName) const;
   std::string constructBaseName(const std::string &inputName,
+                                const std::string &fitType, const bool &multi,
                                 const long &specMin, const long &specMax);
   void plotWorkspace();
   void saveResult();
