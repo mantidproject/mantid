@@ -11837,9 +11837,9 @@ void ApplicationWindow::integrate() {
   if (!w)
     return;
 
-  if (strcmp(w->className(), "MultiLayer") == 0)
+  if (strcmp(w->metaObject()->className(), "MultiLayer") == 0)
     analysis(Integrate);
-  else if (strcmp(w->className(), "Matrix") == 0) {
+  else if (strcmp(w->metaObject()->className(), "Matrix") == 0) {
     auto matrix = dynamic_cast<Matrix *>(w);
     if (!matrix)
       return;
@@ -12024,7 +12024,7 @@ void ApplicationWindow::setAppColors(const QColor &wc, const QColor &pc,
 void ApplicationWindow::setPlot3DOptions() {
   QList<MdiSubWindow *> windows = windowsList();
   foreach (MdiSubWindow *w, windows) {
-    if (strcmp(w->className(), "Graph3D") == 0) {
+    if (strcmp(w->metaObject()->className(), "Graph3D") == 0) {
       Graph3D *g = dynamic_cast<Graph3D *>(w);
       if (!g)
         continue;
