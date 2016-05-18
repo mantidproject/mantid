@@ -11152,14 +11152,14 @@ void ApplicationWindow::initPlot3DToolBar() {
           SLOT(togglePerspective(bool)));
 
   actionResetRotation = new QAction(this);
-  actionResetRotation->setToggleAction(false);
-  actionResetRotation->setIconSet(getQPixmap("reset_rotation_xpm"));
+  actionResetRotation->setCheckable(false);
+  actionResetRotation->setIcon(getQPixmap("reset_rotation_xpm"));
   connect(actionResetRotation, SIGNAL(activated()), this,
           SLOT(resetRotation()));
 
   actionFitFrame = new QAction(this);
-  actionFitFrame->setToggleAction(false);
-  actionFitFrame->setIconSet(getQPixmap("fit_frame_xpm"));
+  actionFitFrame->setCheckable(false);
+  actionFitFrame->setIcon(getQPixmap("fit_frame_xpm"));
   connect(actionFitFrame, SIGNAL(activated()), this, SLOT(fitFrameToLayer()));
 
   // plot style actions
@@ -11215,8 +11215,8 @@ void ApplicationWindow::initPlot3DToolBar() {
   floornone->setChecked(true);
 
   actionAnimate = new QAction(this);
-  actionAnimate->setToggleAction(true);
-  actionAnimate->setIconSet(getQPixmap("movie_xpm"));
+  actionAnimate->setCheckable(true);
+  actionAnimate->setIcon(getQPixmap("movie_xpm"));
 
   connect(actionAnimate, SIGNAL(toggled(bool)), this,
           SLOT(toggle3DAnimation(bool)));
@@ -11245,10 +11245,11 @@ void ApplicationWindow::pixelLineProfile() {
     return;
 
   bool ok;
-  int res = QInputDialog::getInteger(
-      tr("MantidPlot - Set the number of pixels to average"),
-      tr("Number of averaged pixels"), 1, 1, 2000, 2, // Mantid
-      &ok, this);
+  auto res = QInputDialog::getInt(this,
+                                 tr("MantidPlot - Set the number of pixels to average"),
+                                 tr("Number of averaged pixels"),
+                                 1, 1, 2000, 2,
+                                 &ok);
   if (!ok)
     return;
 
@@ -11648,16 +11649,16 @@ void ApplicationWindow::openSurfacePlot(const std::string &lines,
 
     const QString funcQStr = QString::fromStdString(funcStr);
 
-    if (funcQStr.endsWith("(Y)", true)) {
+    if (funcQStr.endsWith("(Y)", Qt::CaseSensitive)) {
       plot = dataPlot3D(QString::fromStdString(caption),
                         QString::fromStdString(funcStr), val2, val3, val4, val5,
                         val6, val7);
-    } else if (funcQStr.contains("(Z)", true) > 0) {
+    } else if (funcQStr.contains("(Z)", Qt::CaseSensitive) > 0) {
       plot = openPlotXYZ(QString::fromStdString(caption),
                          QString::fromStdString(funcStr), val2, val3, val4,
                          val5, val6, val7);
-    } else if (funcQStr.startsWith("matrix<", true) &&
-               funcQStr.endsWith(">", false)) {
+    } else if (funcQStr.startsWith("matrix<", Qt::CaseSensitive) &&
+               funcQStr.endsWith(">", Qt::CaseInsensitive)) {
       plot = openMatrixPlot3D(QString::fromStdString(caption),
                               QString::fromStdString(funcStr), val2, val3, val4,
                               val5, val6, val7);
@@ -11836,9 +11837,9 @@ void ApplicationWindow::integrate() {
   if (!w)
     return;
 
-  if (w->isA("MultiLayer"))
+  if (strcmp(w->className(), "MultiLayer") == 0)
     analysis(Integrate);
-  else if (w->isA("Matrix")) {
+  else if (strcmp(w->className(), "Matrix") == 0) {
     auto matrix = dynamic_cast<Matrix *>(w);
     if (!matrix)
       return;
@@ -12023,7 +12024,7 @@ void ApplicationWindow::setAppColors(const QColor &wc, const QColor &pc,
 void ApplicationWindow::setPlot3DOptions() {
   QList<MdiSubWindow *> windows = windowsList();
   foreach (MdiSubWindow *w, windows) {
-    if (w->isA("Graph3D")) {
+    if (strcmp(w->className(), "Graph3D") == 0) {
       Graph3D *g = dynamic_cast<Graph3D *>(w);
       if (!g)
         continue;
@@ -12175,7 +12176,7 @@ void ApplicationWindow::createActions() {
 #else
   actionShowScriptWindow->setShortcut(tr("F3"));
 #endif
-  actionShowScriptWindow->setToggleAction(true);
+  actionShowScriptWindow->setCheckable(true);
   connect(actionShowScriptWindow, SIGNAL(activated()), this,
           SLOT(showScriptWindow()));
 
@@ -12187,7 +12188,7 @@ void ApplicationWindow::createActions() {
 #else
   actionShowScriptInterpreter->setShortcut(tr("F4"));
 #endif
-  actionShowScriptInterpreter->setToggleAction(true);
+  actionShowScriptInterpreter->setCheckable(true);
   connect(actionShowScriptInterpreter, SIGNAL(activated()), this,
           SLOT(showScriptInterpreter()));
 #endif
@@ -13094,199 +13095,199 @@ void ApplicationWindow::translateActionsStrings() {
   actionGreekMajSymbol->setToolTip(tr("Greek"));
   actionMathSymbol->setToolTip(tr("Mathematical Symbols"));
 
-  actionShowCurvePlotDialog->setMenuText(tr("&Plot details..."));
-  actionShowCurveWorksheet->setMenuText(tr("&Worksheet"));
-  actionRemoveCurve->setMenuText(tr("&Delete"));
-  actionEditFunction->setMenuText(tr("&Edit Function..."));
+  actionShowCurvePlotDialog->setText(tr("&Plot details..."));
+  actionShowCurveWorksheet->setText(tr("&Worksheet"));
+  actionRemoveCurve->setText(tr("&Delete"));
+  actionEditFunction->setText(tr("&Edit Function..."));
 
-  actionCurveFullRange->setMenuText(tr("&Reset to Full Range"));
-  actionEditCurveRange->setMenuText(tr("Edit &Range..."));
-  actionHideCurve->setMenuText(tr("&Hide"));
-  actionHideOtherCurves->setMenuText(tr("Hide &Other Curves"));
-  actionShowAllCurves->setMenuText(tr("&Show All Curves"));
+  actionCurveFullRange->setText(tr("&Reset to Full Range"));
+  actionEditCurveRange->setText(tr("Edit &Range..."));
+  actionHideCurve->setText(tr("&Hide"));
+  actionHideOtherCurves->setText(tr("Hide &Other Curves"));
+  actionShowAllCurves->setText(tr("&Show All Curves"));
 
-  actionNewProject->setMenuText(tr("New &Project"));
+  actionNewProject->setText(tr("New &Project"));
   actionNewProject->setToolTip(tr("Open a New Project"));
   actionNewProject->setShortcut(tr("Ctrl+N"));
 
-  actionNewGraph->setMenuText(tr("New &Graph"));
+  actionNewGraph->setText(tr("New &Graph"));
   actionNewGraph->setToolTip(tr("Create an empty 2D plot"));
   actionNewGraph->setShortcut(tr("Ctrl+G"));
 
-  actionNewNote->setMenuText(tr("New &Note"));
+  actionNewNote->setText(tr("New &Note"));
   actionNewNote->setToolTip(tr("Create an empty note window"));
 
-  actionNewTable->setMenuText(tr("New &Table"));
+  actionNewTable->setText(tr("New &Table"));
   actionNewTable->setShortcut(tr("Ctrl+T"));
   actionNewTable->setToolTip(tr("New table"));
 
-  actionNewTiledWindow->setMenuText(tr("New Tiled &Window"));
+  actionNewTiledWindow->setText(tr("New Tiled &Window"));
   actionNewTiledWindow->setShortcut(tr("Ctrl+Shift+T"));
   actionNewTiledWindow->setToolTip(tr("New tiled window"));
 
-  actionNewMatrix->setMenuText(tr("New &Matrix"));
+  actionNewMatrix->setText(tr("New &Matrix"));
   actionNewMatrix->setShortcut(tr("Ctrl+M"));
   actionNewMatrix->setToolTip(tr("New matrix"));
 
-  actionNewFunctionPlot->setMenuText(tr("New &Function Plot"));
+  actionNewFunctionPlot->setText(tr("New &Function Plot"));
   actionNewFunctionPlot->setToolTip(tr("Create a new 2D function plot"));
 
-  actionNewSurfacePlot->setMenuText(tr("New 3D &Surface Plot"));
+  actionNewSurfacePlot->setText(tr("New 3D &Surface Plot"));
   actionNewSurfacePlot->setToolTip(tr("Create a new 3D surface plot"));
   actionNewSurfacePlot->setShortcut(tr("Ctrl+ALT+Z"));
 
-  actionOpenProj->setMenuText(tr("&Project"));
+  actionOpenProj->setText(tr("&Project"));
   actionOpenProj->setShortcut(tr("Ctrl+Shift+O"));
   actionOpenProj->setToolTip(tr("Load Mantid Project"));
 
-  actionLoadFile->setMenuText(tr("&File"));
+  actionLoadFile->setText(tr("&File"));
   actionLoadFile->setShortcut(tr("Ctrl+Shift+F"));
   actionLoadFile->setToolTip(tr("Load Data File"));
 
-  actionLoadImage->setMenuText(tr("Open Image &File"));
+  actionLoadImage->setText(tr("Open Image &File"));
   actionLoadImage->setShortcut(tr("Ctrl+I"));
 
-  actionImportImage->setMenuText(tr("Import I&mage..."));
+  actionImportImage->setText(tr("Import I&mage..."));
 
-  actionSaveFile->setMenuText(tr("&Nexus"));
+  actionSaveFile->setText(tr("&Nexus"));
   actionSaveFile->setToolTip(tr("Save as NeXus file"));
   actionSaveFile->setShortcut(tr("Ctrl+S"));
 
-  actionSaveProject->setMenuText(tr("&Project"));
+  actionSaveProject->setText(tr("&Project"));
   actionSaveProject->setToolTip(tr("Save Mantid Project"));
   actionSaveProject->setShortcut(tr("Ctrl+Shift+S"));
 
-  actionSaveProjectAs->setMenuText(tr("Save Project &As..."));
+  actionSaveProjectAs->setText(tr("Save Project &As..."));
   actionSaveProjectAs->setToolTip(
       tr("Save Mantid Project using a different name or path"));
 
-  actionLoad->setMenuText(tr("&Import ASCII..."));
+  actionLoad->setText(tr("&Import ASCII..."));
   actionLoad->setToolTip(tr("Import data file(s)"));
   actionLoad->setShortcut(tr("Ctrl+K"));
 
-  actionCopyWindow->setMenuText(tr("&Duplicate"));
+  actionCopyWindow->setText(tr("&Duplicate"));
   actionCopyWindow->setToolTip(tr("Duplicate window"));
 
-  actionCutSelection->setMenuText(tr("Cu&t Selection"));
+  actionCutSelection->setText(tr("Cu&t Selection"));
   actionCutSelection->setToolTip(tr("Cut selection"));
   actionCutSelection->setShortcut(tr("Ctrl+X"));
 
-  actionCopySelection->setMenuText(tr("&Copy Selection"));
+  actionCopySelection->setText(tr("&Copy Selection"));
   actionCopySelection->setToolTip(tr("Copy Selection"));
   actionCopySelection->setShortcut(tr("Ctrl+C"));
 
-  actionPasteSelection->setMenuText(tr("&Paste Selection"));
+  actionPasteSelection->setText(tr("&Paste Selection"));
   actionPasteSelection->setToolTip(tr("Paste Selection"));
   actionPasteSelection->setShortcut(tr("Ctrl+V"));
 
-  actionClearSelection->setMenuText(tr("&Delete Selection"));
+  actionClearSelection->setText(tr("&Delete Selection"));
   actionClearSelection->setToolTip(tr("Delete selection"));
   actionClearSelection->setShortcut(tr("Del", "delete key"));
 
-  actionShowExplorer->setMenuText(tr("Project &Explorer"));
+  actionShowExplorer->setText(tr("Project &Explorer"));
   actionShowExplorer->setShortcut(tr("Ctrl+E"));
   actionShowExplorer->setToolTip(tr("Show project explorer"));
 
-  actionShowLog->setMenuText(tr("Results &Log"));
+  actionShowLog->setText(tr("Results &Log"));
   actionShowLog->setToolTip(tr("Results Log"));
 
 #ifdef SCRIPTING_PYTHON
-  actionShowScriptWindow->setMenuText(tr("&Script Window"));
+  actionShowScriptWindow->setText(tr("&Script Window"));
   actionShowScriptWindow->setToolTip(tr("Script Window"));
 #endif
 
-  actionCustomActionDialog->setMenuText(tr("Manage Custom Menus..."));
+  actionCustomActionDialog->setText(tr("Manage Custom Menus..."));
 
-  actionAddLayer->setMenuText(tr("Add La&yer"));
+  actionAddLayer->setText(tr("Add La&yer"));
   actionAddLayer->setToolTip(tr("Add Layer"));
   actionAddLayer->setShortcut(tr("Alt+L"));
 
-  actionShowLayerDialog->setMenuText(tr("Arran&ge Layers"));
+  actionShowLayerDialog->setText(tr("Arran&ge Layers"));
   actionShowLayerDialog->setToolTip(tr("Arrange Layers"));
   actionShowLayerDialog->setShortcut(tr("Alt+A"));
 
-  actionAutomaticLayout->setMenuText(tr("Automatic Layout"));
+  actionAutomaticLayout->setText(tr("Automatic Layout"));
   actionAutomaticLayout->setToolTip(tr("Automatic Layout"));
 
-  actionExportGraph->setMenuText(tr("&Current"));
+  actionExportGraph->setText(tr("&Current"));
   actionExportGraph->setShortcut(tr("Alt+G"));
   actionExportGraph->setToolTip(tr("Export current graph"));
 
-  actionExportAllGraphs->setMenuText(tr("&All"));
+  actionExportAllGraphs->setText(tr("&All"));
   actionExportAllGraphs->setShortcut(tr("Alt+X"));
   actionExportAllGraphs->setToolTip(tr("Export all graphs"));
 
-  actionExportPDF->setMenuText(tr("&Export PDF"));
+  actionExportPDF->setText(tr("&Export PDF"));
   actionExportPDF->setShortcut(tr("Ctrl+Alt+P"));
   actionExportPDF->setToolTip(tr("Export to PDF"));
 
-  actionPrint->setMenuText(tr("&Print"));
+  actionPrint->setText(tr("&Print"));
   actionPrint->setShortcut(tr("Ctrl+P"));
   actionPrint->setToolTip(tr("Print window"));
 
-  actionPrintAllPlots->setMenuText(tr("Print All Plo&ts"));
-  actionShowExportASCIIDialog->setMenuText(tr("E&xport ASCII"));
+  actionPrintAllPlots->setText(tr("Print All Plo&ts"));
+  actionShowExportASCIIDialog->setText(tr("E&xport ASCII"));
 
-  actionCloseAllWindows->setMenuText(tr("&Quit"));
+  actionCloseAllWindows->setText(tr("&Quit"));
   actionCloseAllWindows->setShortcut(tr("Ctrl+Q"));
 
-  actionDeleteFitTables->setMenuText(tr("Delete &Fit Tables"));
-  actionShowPlotWizard->setMenuText(tr("Plot &Wizard"));
+  actionDeleteFitTables->setText(tr("Delete &Fit Tables"));
+  actionShowPlotWizard->setText(tr("Plot &Wizard"));
   actionShowPlotWizard->setShortcut(tr("Ctrl+Alt+W"));
 
-  actionShowConfigureDialog->setMenuText(tr("&Preferences..."));
+  actionShowConfigureDialog->setText(tr("&Preferences..."));
 
-  actionShowCurvesDialog->setMenuText(tr("Add/Remove &Curve..."));
+  actionShowCurvesDialog->setText(tr("Add/Remove &Curve..."));
   actionShowCurvesDialog->setShortcut(tr("Ctrl+Alt+C"));
   actionShowCurvesDialog->setToolTip(tr("Add curve to graph"));
 
-  actionAddErrorBars->setMenuText(tr("Add &Error Bars..."));
+  actionAddErrorBars->setText(tr("Add &Error Bars..."));
   actionAddErrorBars->setToolTip(tr("Add Error Bars..."));
   actionAddErrorBars->setShortcut(tr("Ctrl+Alt+E"));
 
-  actionRemoveErrorBars->setMenuText(tr("&Remove Error Bars..."));
+  actionRemoveErrorBars->setText(tr("&Remove Error Bars..."));
   actionRemoveErrorBars->setToolTip(tr("Remove Error Bars..."));
   actionRemoveErrorBars->setShortcut(tr("Ctrl+Alt+R"));
 
-  actionAddFunctionCurve->setMenuText(tr("Add &Function..."));
+  actionAddFunctionCurve->setText(tr("Add &Function..."));
   actionAddFunctionCurve->setToolTip(tr("Add Function..."));
   actionAddFunctionCurve->setShortcut(tr("Ctrl+Alt+F"));
 
-  actionUnzoom->setMenuText(tr("&Rescale to Show All"));
+  actionUnzoom->setText(tr("&Rescale to Show All"));
   actionUnzoom->setShortcut(tr("Ctrl+Shift+R"));
   actionUnzoom->setToolTip(tr("Rescale to Show All"));
 
-  actionNewLegend->setMenuText(tr("Add New &Legend"));
+  actionNewLegend->setText(tr("Add New &Legend"));
   actionNewLegend->setShortcut(tr("Ctrl+Alt+L"));
   actionNewLegend->setToolTip(tr("Add New Legend"));
 
-  actionTimeStamp->setMenuText(tr("Add Time &Stamp"));
+  actionTimeStamp->setText(tr("Add Time &Stamp"));
   actionTimeStamp->setShortcut(tr("Ctrl+Alt+S"));
   actionTimeStamp->setToolTip(tr("Date & time "));
 
-  actionAddImage->setMenuText(tr("Add &Image"));
+  actionAddImage->setText(tr("Add &Image"));
   actionAddImage->setToolTip(tr("Add Image"));
   actionAddImage->setShortcut(tr("Ctrl+Alt+I"));
 
-  actionPlotL->setMenuText(tr("&Line"));
+  actionPlotL->setText(tr("&Line"));
   actionPlotL->setToolTip(tr("Plot as line"));
 
-  actionPlotP->setMenuText(tr("&Scatter"));
+  actionPlotP->setText(tr("&Scatter"));
   actionPlotP->setToolTip(tr("Plot as symbols"));
 
-  actionPlotLP->setMenuText(tr("Line + S&ymbol"));
+  actionPlotLP->setText(tr("Line + S&ymbol"));
   actionPlotLP->setToolTip(tr("Plot as line + symbols"));
 
-  actionPlotVerticalDropLines->setMenuText(tr("Vertical &Drop Lines"));
+  actionPlotVerticalDropLines->setText(tr("Vertical &Drop Lines"));
 
-  actionPlotSpline->setMenuText(tr("&Spline"));
-  actionPlotVertSteps->setMenuText(tr("&Vertical Steps"));
-  actionPlotHorSteps->setMenuText(tr("&Horizontal Steps"));
+  actionPlotSpline->setText(tr("&Spline"));
+  actionPlotVertSteps->setText(tr("&Vertical Steps"));
+  actionPlotHorSteps->setText(tr("&Horizontal Steps"));
 
-  actionPlotVerticalBars->setMenuText(tr("&Columns"));
+  actionPlotVerticalBars->setText(tr("&Columns"));
   actionPlotVerticalBars->setToolTip(tr("Plot with vertical bars"));
 
-  actionPlotHorizontalBars->setMenuText(tr("&Rows"));
+  actionPlotHorizontalBars->setText(tr("&Rows"));
   actionPlotHorizontalBars->setToolTip(tr("Plot with horizontal bars"));
 
   actionPlotArea->setMenuText(tr("&Area"));
