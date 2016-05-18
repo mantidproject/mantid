@@ -1,5 +1,6 @@
+# pylint: disable=invalid-name, W0633, W0611, R0902, R0904, W0702, R0912, C0301
 """
-
+    Detector options for reduction
 """
 import xml.dom.minidom
 from reduction_gui.reduction.scripter import BaseScriptElement
@@ -52,7 +53,7 @@ class Detector(BaseScriptElement):
             script += "SetBeamCenter(%g, %g)\n" % (self.x_position, self.y_position)
         else:
             if len(str(self.beam_file).strip())==0:
-                raise RuntimeError, "Beam finder was selected but no data file was entered."
+                raise RuntimeError("Beam finder was selected but no data file was entered.")
 
             if self.use_direct_beam:
                 script += "DirectBeamCenter(\"%s\")\n" % self.beam_file
@@ -61,7 +62,7 @@ class Detector(BaseScriptElement):
 
         if self.sensitivity_corr:
             if len(str(self.sensitivity_data).strip())==0:
-                raise RuntimeError, "Sensitivity correction was selected but no sensitivity data file was entered."
+                raise RuntimeError("Sensitivity correction was selected but no sensitivity data file was entered.")
 
             if len(str(self.sensitivity_dark).strip())>0:
                 script += "SensitivityCorrection(\"%s\", min_sensitivity=%g, max_sensitivity=%g, dark_current=\"%s\", use_sample_dc=%s)\n" % \
@@ -76,7 +77,7 @@ class Detector(BaseScriptElement):
                     script += "SetSensitivityBeamCenter(%g, %g)\n" % (self.flood_x_position, self.flood_y_position)
                 else:
                     if len(str(self.flood_beam_file).strip())==0:
-                        raise RuntimeError, "Sensitivity beam finder was selected but no data file was entered."
+                        raise RuntimeError("Sensitivity beam finder was selected but no data file was entered.")
 
                     if self.flood_use_direct_beam:
                         script += "SensitivityDirectBeamCenter(\"%s\")\n" % self.flood_beam_file
@@ -123,7 +124,7 @@ class Detector(BaseScriptElement):
                 script += "  SensitivityBeamCenterX=%g,\n" % self.flood_x_position
                 script += "  SensitivityBeamCenterY=%g,\n" % self.flood_y_position
             else:
-                raise RuntimeError, "The beam finder is not yet supported for the sensitivity correction"
+                raise RuntimeError("The beam finder is not yet supported for the sensitivity correction")
 
         return script
 
@@ -131,39 +132,37 @@ class Detector(BaseScriptElement):
         """
             Create XML from the current data.
         """
-        xml  = "<Sensitivity>\n"
-        xml += "  <sensitivity_corr>%s</sensitivity_corr>\n" % str(self.sensitivity_corr)
-        xml += "  <sensitivity_data>%s</sensitivity_data>\n" % self.sensitivity_data
-        xml += "  <sensitivity_dark>%s</sensitivity_dark>\n" % self.sensitivity_dark
-        xml += "  <use_sample_dark>%s</use_sample_dark>\n" % str(self.use_sample_dark)
-        xml += "  <sensitivity_min>%s</sensitivity_min>\n" % self.min_sensitivity
-        xml += "  <sensitivity_max>%s</sensitivity_max>\n" % self.max_sensitivity
-        xml += "  <use_sample_beam_center>%s</use_sample_beam_center>\n" % str(self.use_sample_beam_center)
-        xml += "  <FloodBeamFinder>\n"
-        xml += "    <position>\n"
-        xml += "      <x>%g</x>\n" % self.flood_x_position
-        xml += "      <y>%g</y>\n" % self.flood_y_position
-        xml += "    </position>\n"
-        xml += "    <use_finder>%s</use_finder>\n" % str(self.flood_use_finder)
-        xml += "    <beam_file>%s</beam_file>\n" % self.flood_beam_file
-        xml += "    <use_direct_beam>%s</use_direct_beam>\n" % str(self.flood_use_direct_beam)
-        xml += "    <beam_radius>%g</beam_radius>\n" % self.flood_beam_radius
-        xml += "  </FloodBeamFinder>\n"
-        xml += "</Sensitivity>\n"
+        xml_out  = "<Sensitivity>\n"
+        xml_out += "  <sensitivity_corr>%s</sensitivity_corr>\n" % str(self.sensitivity_corr)
+        xml_out += "  <sensitivity_data>%s</sensitivity_data>\n" % self.sensitivity_data
+        xml_out += "  <sensitivity_dark>%s</sensitivity_dark>\n" % self.sensitivity_dark
+        xml_out += "  <use_sample_dark>%s</use_sample_dark>\n" % str(self.use_sample_dark)
+        xml_out += "  <sensitivity_min>%s</sensitivity_min>\n" % self.min_sensitivity
+        xml_out += "  <sensitivity_max>%s</sensitivity_max>\n" % self.max_sensitivity
+        xml_out += "  <use_sample_beam_center>%s</use_sample_beam_center>\n" % str(self.use_sample_beam_center)
+        xml_out += "  <FloodBeamFinder>\n"
+        xml_out += "    <position>\n"
+        xml_out += "      <x>%g</x>\n" % self.flood_x_position
+        xml_out += "      <y>%g</y>\n" % self.flood_y_position
+        xml_out += "    </position>\n"
+        xml_out += "    <use_finder>%s</use_finder>\n" % str(self.flood_use_finder)
+        xml_out += "    <beam_file>%s</beam_file>\n" % self.flood_beam_file
+        xml_out += "    <use_direct_beam>%s</use_direct_beam>\n" % str(self.flood_use_direct_beam)
+        xml_out += "    <beam_radius>%g</beam_radius>\n" % self.flood_beam_radius
+        xml_out += "  </FloodBeamFinder>\n"
+        xml_out += "</Sensitivity>\n"
 
-        xml += "<BeamFinder>\n"
-        xml += "  <position>\n"
-        xml += "    <x>%g</x>\n" % self.x_position
-        xml += "    <y>%g</y>\n" % self.y_position
-        xml += "  </position>\n"
-        xml += "  <use_finder>%s</use_finder>\n" % str(self.use_finder)
-        xml += "  <beam_file>%s</beam_file>\n" % self.beam_file
-        xml += "  <use_direct_beam>%s</use_direct_beam>\n" % str(self.use_direct_beam)
-        xml += "  <beam_radius>%g</beam_radius>\n" % self.beam_radius
-        xml += "</BeamFinder>\n"
-
-
-        return xml
+        xml_out += "<BeamFinder>\n"
+        xml_out += "  <position>\n"
+        xml_out += "    <x>%g</x>\n" % self.x_position
+        xml_out += "    <y>%g</y>\n" % self.y_position
+        xml_out += "  </position>\n"
+        xml_out += "  <use_finder>%s</use_finder>\n" % str(self.use_finder)
+        xml_out += "  <beam_file>%s</beam_file>\n" % self.beam_file
+        xml_out += "  <use_direct_beam>%s</use_direct_beam>\n" % str(self.use_direct_beam)
+        xml_out += "  <beam_radius>%g</beam_radius>\n" % self.beam_radius
+        xml_out += "</BeamFinder>\n"
+        return xml_out
 
     def from_xml(self, xml_str):
         """
