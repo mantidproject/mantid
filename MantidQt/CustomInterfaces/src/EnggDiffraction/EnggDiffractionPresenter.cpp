@@ -29,6 +29,15 @@ Mantid::Kernel::Logger g_log("EngineeringDiffractionGUI");
 
 const std::string EnggDiffractionPresenter::g_enginxStr = "ENGINX";
 
+const std::string EnggDiffractionPresenter::g_shortMsgRBNumberRequired =
+    "A valid RB Number is required";
+const std::string EnggDiffractionPresenter::g_msgRBNumberRequired =
+    std::string("An experiment reference number (or so called \"RB "
+                "number\" at ISIS) is "
+                "required to effectively use this interface. \n") +
+    "The output calibration, focusing and fitting results will be "
+    "saved in directories named using the RB number entered.";
+
 const std::string EnggDiffractionPresenter::g_runNumberErrorStr =
     " cannot be empty, must be an integer number, valid ENGINX run number/s "
     "or "
@@ -1153,7 +1162,10 @@ void EnggDiffractionPresenter::processInstChange() {
 
 void EnggDiffractionPresenter::processRBNumberChange() {
   const std::string rbn = m_view->getRBNumber();
-  m_view->enableTabs(validateRBNumber(rbn));
+  auto valid = validateRBNumber(rbn);
+  m_view->enableTabs(valid);
+  m_view->splashMessage(!valid, g_shortMsgRBNumberRequired,
+                        g_msgRBNumberRequired);
 }
 
 void EnggDiffractionPresenter::processShutDown() {
@@ -1177,7 +1189,9 @@ void EnggDiffractionPresenter::processStopFocus() {
 
 /**
 * Check if an RB number is valid to work with it (retrieve data,
-* calibrate, focus, etc.).
+* calibrate, focus, etc.). For now this will accept any non-empty
+* string. Later on we might be more strict about valid RB numbers /
+* experiment IDs.
 *
 * @param rbn RB number as given by the user
 */

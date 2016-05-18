@@ -19,6 +19,7 @@
 #include <qwt_plot_zoomer.h>
 
 // Qt classes forward declarations
+class QMessageBox;
 class QMutex;
 
 namespace MantidQt {
@@ -68,6 +69,9 @@ public:
   static std::string name() { return "Engineering Diffraction"; }
   /// This interface's categories.
   static QString categoryInfo() { return "Diffraction"; }
+
+  void splashMessage(bool visible, const std::string &shortMsg,
+                     const std::string &description) override;
 
   void userWarning(const std::string &warn,
                    const std::string &description) override;
@@ -289,6 +293,7 @@ private:
   /// Setup the interface (tab UI)
   void initLayout() override;
   void doSetupGeneralWidgets();
+  void doSetupSplashMsg();
   void doSetupTabCalib();
   void doSetupTabFocus();
   void doSetupTabPreproc();
@@ -356,6 +361,9 @@ private:
   /// calibration settings - from/to the 'settings' tab
   EnggDiffCalibSettings m_calibSettings;
   std::string m_outCalibFilename;
+
+  /// To show important non-modal messages
+  QMessageBox *m_splashMsg;
 
   /// This is in principle the only settings for 'focus'
   std::string m_focusDir;

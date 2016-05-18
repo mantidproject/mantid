@@ -47,8 +47,23 @@ public:
   IEnggDiffractionView(){};
   virtual ~IEnggDiffractionView(){};
 
-  /// @name Direct (and usually modal) user interaction
+  /// @name Direct (and usually modal, or at least top/pop-up level) user
+  /// interaction
   //@{
+  /**
+   * To display important messages that need maximum visibility
+   * (normally a dialog on top of the interface). This can be used to
+   * control the visibility and content of the message. An example use
+   * case is to inform the user that certain inputs are absolutely
+   * needed to use the interface functionality.
+   *
+   * @param visible whether the "splash"/important message should be visible
+   * @param shortMsg short/one line message summary
+   * @param description message with full details
+   */
+  virtual void splashMessage(bool visible, const std::string &shortMsg,
+                             const std::string &description) = 0;
+
   /**
    * Display a warning to the user (for example as a pop-up window).
    *

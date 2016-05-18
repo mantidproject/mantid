@@ -30,9 +30,10 @@ Close
   Close the interface
 
 RB Number
-  To enable the GUI specify a RB Number, the RB number will be used for the
-  output paths, so that files from different users and/or experiments can
-  be kept separate.
+  To enable the GUI specify a RB Number (where "RB Number" usually
+  denotes the experiment reference number at ISIS). This reference
+  will be used for the output paths, so that files from different
+  users and/or experiments can be kept separate.
 
 * Red Star Sign
   If a red star sign is displayed next to the Browse Button, it is mostly

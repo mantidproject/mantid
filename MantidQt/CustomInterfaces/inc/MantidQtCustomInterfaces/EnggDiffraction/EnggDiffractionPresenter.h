@@ -336,6 +336,10 @@ private:
   /// string to use for ENGINX file names (as a prefix, etc.)
   const static std::string g_enginxStr;
 
+  /// The message to tell the user that an RB number is needed
+  const static std::string g_shortMsgRBNumberRequired;
+  const static std::string g_msgRBNumberRequired;
+
   /// string to use for invalid run number error message
   const static std::string g_runNumberErrorStr;
 

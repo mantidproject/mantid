@@ -69,8 +69,9 @@ const std::string EnggDiffractionViewQtGUI::m_settingsGroup =
 */
 EnggDiffractionViewQtGUI::EnggDiffractionViewQtGUI(QWidget *parent)
     : UserSubWindow(parent), IEnggDiffractionView(), m_currentInst("ENGINX"),
-      m_currentCalibFilename(""), m_focusedDataVector(), m_fittedDataVector(),
-      m_peakPicker(NULL), m_zoomTool(NULL), m_presenter(NULL) {}
+      m_currentCalibFilename(""), m_splashMsg(nullptr), m_focusedDataVector(),
+      m_fittedDataVector(), m_peakPicker(nullptr), m_zoomTool(nullptr),
+      m_presenter(nullptr) {}
 
 EnggDiffractionViewQtGUI::~EnggDiffractionViewQtGUI() {
   for (auto curves : m_focusedDataVector) {
@@ -319,6 +320,8 @@ void EnggDiffractionViewQtGUI::doSetupTabSettings() {
 }
 
 void EnggDiffractionViewQtGUI::doSetupGeneralWidgets() {
+  doSetupSplashMsg();
+
   // change instrument
   connect(m_ui.comboBox_instrument, SIGNAL(currentIndexChanged(int)), this,
           SLOT(instrumentChanged(int)));
@@ -330,6 +333,21 @@ void EnggDiffractionViewQtGUI::doSetupGeneralWidgets() {
 
   connect(m_ui.lineEdit_RBNumber, SIGNAL(editingFinished()), this,
           SLOT(RBNumberChanged()));
+}
+
+void EnggDiffractionViewQtGUI::doSetupSplashMsg() {
+  if (m_splashMsg)
+    delete m_splashMsg;
+
+  m_splashMsg = new QMessageBox(this);
+  m_splashMsg->setIcon(QMessageBox::Information);
+  m_splashMsg->setStandardButtons(QMessageBox::NoButton);
+  m_splashMsg->setWindowTitle("Setting up");
+  m_splashMsg->setText("Setting up the interface!");
+  m_splashMsg->setWindowFlags(Qt::SplashScreen | Qt::FramelessWindowHint |
+                              Qt::X11BypassWindowManagerHint);
+  m_splashMsg->setWindowModality(Qt::NonModal);
+  // we don't want to show now: m_splashMsg->show();
 }
 
 void EnggDiffractionViewQtGUI::readSettings() {
@@ -599,6 +617,21 @@ std::string EnggDiffractionViewQtGUI::guessDefaultFullCalibrationPath() const {
   templ.append("ENGINX_full_pixel_calibration_vana194547_ceria193749.csv");
   return templ.toString();
 }
+
+void EnggDiffractionViewQtGUI::splashMessage(bool visible,
+                                             const std::string &shortMsg,
+                                             const std::string &description) {
+  m_splashMsg->setWindowTitle(QString::fromStdString(shortMsg));
+  m_splashMsg->setText(QString::fromStdString(description));
+  // when showing the message, force it to show up centered
+  if (visible) {
+    const auto pos = this->mapToGlobal(rect().center());
+    m_splashMsg->move(pos.x() - m_splashMsg->width() / 2,
+                      pos.y() - m_splashMsg->height() / 2);
+  }
+  m_splashMsg->setVisible(visible);
+}
+
 void EnggDiffractionViewQtGUI::userWarning(const std::string &err,
                                            const std::string &description) {
   QMessageBox::warning(this, QString::fromStdString(err),
@@ -1703,6 +1736,7 @@ void EnggDiffractionViewQtGUI::closeEvent(QCloseEvent *event) {
 
   if (answer == QMessageBox::AcceptRole && m_ui.pushButton_close->isEnabled()) {
     m_presenter->notify(IEnggDiffractionPresenter::ShutDown);
+    delete m_splashMsg;
     event->accept();
   } else {
     event->ignore();

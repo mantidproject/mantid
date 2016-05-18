@@ -10,6 +10,11 @@ class MockEnggDiffractionView
     : public MantidQt::CustomInterfaces::IEnggDiffractionView {
 
 public:
+  // virtual void splashMessage(bool visible, const std::string &shortMsg,
+  // const std::string &description);
+  MOCK_METHOD3(splashMessage, void(bool visible, const std::string &shortMsg,
+                                   const std::string &description));
+
   // virtual void userWarning(const std::string &warn, const std::string
   // &description);
   MOCK_METHOD2(userWarning,
