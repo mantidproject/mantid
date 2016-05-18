@@ -701,6 +701,8 @@ void EnggDiffractionViewQtGUI::enableCalibrateAndFocusActions(bool enable) {
   m_uiTabFitting.pushButton_fitting_browse_peaks->setEnabled(enable);
   m_uiTabFitting.lineEdit_fitting_peaks->setEnabled(enable);
   m_uiTabFitting.pushButton_fit->setEnabled(enable);
+  m_uiTabFitting.pushButton_clear_peak_list->setEnabled(enable);
+  m_uiTabFitting.pushButton_save_peak_list->setEnabled(enable);
   m_uiTabFitting.comboBox_bank->setEnabled(enable);
   m_uiTabFitting.groupBox_fititng_preview->setEnabled(enable);
 }
@@ -812,6 +814,9 @@ void EnggDiffractionViewQtGUI::setDataVector(
 
     if (m_fittedDataVector.size() > 0)
       m_fittedDataVector.clear();
+
+    // set it as false as there will be no valid workspace to plot
+    m_uiTabFitting.pushButton_plot_separate_window->setEnabled(false);
   }
 
   if (focused) {
@@ -854,6 +859,9 @@ void EnggDiffractionViewQtGUI::dataCurvesFactory(
       dataCurve->setStyle(QwtPlotCurve::Lines);
       auto randIndex = dis(gen);
       dataCurve->setPen(QPen(QPenList[randIndex], 2));
+
+      // only set enabled when single peak workspace plotted
+      m_uiTabFitting.pushButton_plot_separate_window->setEnabled(true);
     } else {
       dataCurve->setStyle(QwtPlotCurve::NoCurve);
       // focused workspace in bg set as darkGrey crosses insted of line
