@@ -1,4 +1,4 @@
-﻿# pylint: disable = too-many-lines, invalid-name, line-too-long, too-many-instance-attributes, too-many-branches,too-many-locals, too-many-nested-blocks
+﻿# pylint: disable = too-many-lines, invalid-name, line-too-long, too-many-instance-attributes, too-many-branches,too-many-locals, R0101
 
 try:
     from mantidplot import *
@@ -417,7 +417,8 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
                 active_session_id = session_object.getPropertyValue("Session")
 
             # Fetch out an existing session id
-            active_session_id = CatalogManager.getActiveSessions()[-1].getSessionId() # TODO. This might be another catalog session, but at present there is no way to tell.
+            active_session_id = CatalogManager.getActiveSessions()[-1].getSessionId()
+            # This might be another catalog session, but at present there is no way to tell.
 
             search_alg = AlgorithmManager.create('CatalogGetDataFiles')
             search_alg.initialize()
@@ -650,7 +651,8 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
 
             contents = str(idx.text()).strip()
             file_id, _runnumber, file_name = self.icat_file_map[contents]
-            active_session_id = CatalogManager.getActiveSessions()[-1].getSessionId() # TODO. This might be another catalog session, but at present there is no way to tell.
+            active_session_id = CatalogManager.getActiveSessions()[-1].getSessionId()
+            # This might be another catalog session, but at present there is no way to tell.
 
             save_location = config['defaultsave.directory']
 
