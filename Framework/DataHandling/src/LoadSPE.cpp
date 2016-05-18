@@ -155,7 +155,7 @@ void LoadSPE::exec() {
   MatrixWorkspace_sptr workspace = WorkspaceFactory::Instance().create(
       "Workspace2D", nhist, nbins + 1, nbins);
   workspace->getAxis(0)->unit() = UnitFactory::Instance().create("DeltaE");
-  workspace->isDistribution(true); // It should be a distribution
+  workspace->setDistribution(true); // It should be a distribution
   workspace->setYUnitLabel("S(Phi,Energy)");
   // Replace the default spectrum axis with the phi values one
   workspace->replaceAxis(1, phiAxis);

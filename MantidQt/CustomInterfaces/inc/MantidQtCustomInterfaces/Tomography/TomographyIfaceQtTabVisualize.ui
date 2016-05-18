@@ -19,7 +19,7 @@
      <property name="orientation">
       <enum>Qt::Vertical</enum>
      </property>
-     <widget class="QWidget" name="">
+     <widget class="QWidget" name="layoutWidget">
       <layout class="QHBoxLayout" name="horizontalLayout_4">
        <item>
         <layout class="QVBoxLayout" name="verticalLayout" stretch="0,1">
@@ -190,7 +190,7 @@
           </widget>
          </item>
          <item>
-          <widget class="QLineEdit" name="lineEdit">
+          <widget class="QLineEdit" name="lineEdit_octopus_vis_location">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
              <horstretch>1</horstretch>
@@ -203,7 +203,7 @@
           </widget>
          </item>
          <item>
-          <widget class="QPushButton" name="pushButton">
+          <widget class="QPushButton" name="pushButton_browse_octopus">
            <property name="text">
             <string>Browse</string>
            </property>
@@ -228,8 +228,8 @@
   <tabstop>groupBox</tabstop>
   <tabstop>lineEdit_paraview_location</tabstop>
   <tabstop>pushButton_browse_paraview</tabstop>
-  <tabstop>lineEdit</tabstop>
-  <tabstop>pushButton</tabstop>
+  <tabstop>lineEdit_octopus_vis_location</tabstop>
+  <tabstop>pushButton_browse_octopus</tabstop>
  </tabstops>
  <resources/>
  <connections/>

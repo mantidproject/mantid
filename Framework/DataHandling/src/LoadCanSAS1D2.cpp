@@ -179,7 +179,7 @@ LoadCanSAS1D2::loadEntry(Poco::XML::Node *const workspaceData,
     title += ":trans";
     title += sasTrasElem->getAttribute("name");
     dataWS->setTitle(title);
-    dataWS->isDistribution(true);
+    dataWS->setDistribution(true);
     dataWS->setYUnit("");
 
     // load workspace data

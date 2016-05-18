@@ -41,6 +41,8 @@ Muon Analysis
 - When the window is resized, all widgets within the window should now resize with it. This enables the interface to be used on smaller screens. `#15382 <https://github.com/mantidproject/mantid/pull/15832>`_
 - "Plot/Remove guess" now deals correctly with the case when a new run is loaded. `#15872 <https://github.com/mantidproject/mantid/pull/15872>`_
 - When plotting data from a new run in the same window as the previous plot, previous fits now remain on the graph, to enable easy comparison between datasets. They can be removed with the "Clear fit curves" option. `#16018 <https://github.com/mantidproject/mantid/pull/16018>`_
+- A crash was fixed when loading data on Linux. `#16234 <https://github.com/mantidproject/mantid/pull/16234>`_
+- When loading a new run with a different main field direction, the correct grouping for the new field direction is now always loaded. `#16230 <https://github.com/mantidproject/mantid/pull/16230>`_
 
 Algorithms
 ----------
@@ -63,6 +65,10 @@ Algorithms
 
 Fit Functions
 -------------
+
+- :ref:`Keren <func-Keren>` has been added as a new fit function - Amit Keren's 
+generalisation of the Abragam relaxation function to a longitudinal field,
+for fitting the time-dependent muon polarisation.
 
 |
 

@@ -26,10 +26,13 @@ PropertyManagerProperty::PropertyManagerProperty(const std::string &name,
 PropertyManagerProperty::PropertyManagerProperty(const std::string &name,
                                                  const ValueType &defaultValue,
                                                  unsigned int direction)
-    : BaseClass(name, defaultValue, direction), m_dataServiceKey() {
+    : BaseClass(name, defaultValue, direction), m_dataServiceKey(),
+      m_defaultAsStr() {
   if (name.empty()) {
     throw std::invalid_argument("PropertyManagerProperty() requires a name");
   }
+  if (defaultValue)
+    m_defaultAsStr = defaultValue->asString(true);
 }
 
 /**
@@ -41,6 +44,14 @@ std::string PropertyManagerProperty::value() const {
     return (mgr ? mgr->asString(true) : "");
   } else
     return m_dataServiceKey;
+}
+
+/**
+ *
+ * @return The string representation of the default value
+ */
+std::string PropertyManagerProperty::getDefault() const {
+  return m_defaultAsStr;
 }
 
 /**
@@ -76,7 +87,7 @@ std::string PropertyManagerProperty::setValue(const std::string &strValue) {
            "String is expected to contain either the name of a global "
            "PropertyManager or a json-formatted object.\n"
            "Parser error: " << exc.what();
-  } catch (std::runtime_error &exc) {
+  } catch (std::exception &exc) {
     msg << "Error setting value from string.\n" << exc.what();
   }
   return msg.str();
@@ -85,7 +96,6 @@ std::string PropertyManagerProperty::setValue(const std::string &strValue) {
 // -----------------------------------------------------------------------------
 // IPropertyManager::getValue instantiations
 // -----------------------------------------------------------------------------
-
 template <>
 MANTID_KERNEL_DLL PropertyManager_sptr
 IPropertyManager::getValue<PropertyManager_sptr>(

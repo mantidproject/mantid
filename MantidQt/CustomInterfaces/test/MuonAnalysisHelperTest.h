@@ -297,14 +297,84 @@ public:
     doTestRunNumberString("15189-90, 15192", true);
   }
 
+  void test_isReloadGroupingNecessary_No() {
+    const auto currentWs = createWs("MUSR", 15189);
+    const auto loadedWs = createWs("MUSR", 15190);
+    addLog(currentWs, "main_field_direction", "Longitudinal");
+    addLog(loadedWs, "main_field_direction", "Longitudinal");
+    bool result = true;
+    TS_ASSERT_THROWS_NOTHING(
+        result = isReloadGroupingNecessary(currentWs, loadedWs));
+    TS_ASSERT_EQUALS(result, false);
+  }
+
+  void test_isReloadGroupingNecessary_nullCurrent() {
+    const auto currentWs = nullptr;
+    const auto loadedWs = createWs("MUSR", 15190);
+    bool result = false;
+    TS_ASSERT_THROWS_NOTHING(
+        result = isReloadGroupingNecessary(currentWs, loadedWs));
+    TS_ASSERT_EQUALS(result, true);
+  }
+
+  void test_isReloadGroupingNecessary_nullLoaded() {
+    const auto currentWs = createWs("MUSR", 15189);
+    const auto loadedWs = nullptr;
+    TS_ASSERT_THROWS(isReloadGroupingNecessary(currentWs, loadedWs),
+                     std::invalid_argument);
+  }
+
+  void test_isReloadGroupingNecessary_noLogs() {
+    const auto currentWs = createWs("MUSR", 15189);
+    const auto loadedWs = createWs("MUSR", 15190);
+    bool result = true;
+    TS_ASSERT_THROWS_NOTHING(
+        result = isReloadGroupingNecessary(currentWs, loadedWs));
+    TS_ASSERT_EQUALS(result, false);
+  }
+
+  void test_isReloadGroupingNecessary_differentInstrument() {
+    const auto currentWs = createWs("MUSR", 15189);
+    const auto loadedWs = createWs("EMU", 15190);
+    addLog(currentWs, "main_field_direction", "Longitudinal");
+    addLog(loadedWs, "main_field_direction", "Longitudinal");
+    bool result = false;
+    TS_ASSERT_THROWS_NOTHING(
+        result = isReloadGroupingNecessary(currentWs, loadedWs));
+    TS_ASSERT_EQUALS(result, true);
+  }
+
+  void test_isReloadGroupingNecessary_differentFieldDirection() {
+    const auto currentWs = createWs("MUSR", 15189);
+    const auto loadedWs = createWs("MUSR", 22725);
+    addLog(currentWs, "main_field_direction", "Longitudinal");
+    addLog(loadedWs, "main_field_direction", "Transverse");
+    bool result = false;
+    TS_ASSERT_THROWS_NOTHING(
+        result = isReloadGroupingNecessary(currentWs, loadedWs));
+    TS_ASSERT_EQUALS(result, true);
+  }
+
+  void test_isReloadGroupingNecessary_differentNumberSpectra() {
+    const auto currentWs = createWs("MUSR", 15189);
+    const auto loadedWs = createWs("MUSR", 15190, 2);
+    addLog(currentWs, "main_field_direction", "Longitudinal");
+    addLog(loadedWs, "main_field_direction", "Longitudinal");
+    bool result = false;
+    TS_ASSERT_THROWS_NOTHING(
+        result = isReloadGroupingNecessary(currentWs, loadedWs));
+    TS_ASSERT_EQUALS(result, true);
+  }
+
 private:
   // Creates a single-point workspace with instrument and runNumber set
-  Workspace_sptr createWs(const std::string &instrName, int runNumber) {
+  Workspace_sptr createWs(const std::string &instrName, int runNumber,
+                          size_t nSpectra = 1) {
     Geometry::Instrument_const_sptr instr =
         boost::make_shared<Geometry::Instrument>(instrName);
 
     MatrixWorkspace_sptr ws =
-        WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1);
+        WorkspaceFactory::Instance().create("Workspace2D", nSpectra, 1, 1);
     ws->setInstrument(instr);
 
     ws->mutableRun().addProperty("run_number", runNumber);

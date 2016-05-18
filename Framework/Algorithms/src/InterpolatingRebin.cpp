@@ -73,7 +73,7 @@ void InterpolatingRebin::exec() {
   // Copy over the 'vertical' axis
   if (inputW->axes() > 1)
     outputW->replaceAxis(1, inputW->getAxis(1)->clone(outputW.get()));
-  outputW->isDistribution(true);
+  outputW->setDistribution(true);
 
   // this calculation requires a distribution workspace but deal with the
   // situation when we don't get this
@@ -105,7 +105,7 @@ void InterpolatingRebin::exec() {
     // non-distribution workspace they maybe not expect it, so convert back to
     // the same form that was given
     WorkspaceHelpers::makeDistribution(outputW, false);
-    outputW->isDistribution(false);
+    outputW->setDistribution(false);
   }
 
   // Now propagate any masking correctly to the output workspace
