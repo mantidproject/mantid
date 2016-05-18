@@ -32,15 +32,16 @@ Description          : QtiPlot's main window
 #ifndef APPLICATION_H
 #define APPLICATION_H
 
-#include <QMainWindow>
-#include <QFile>
-#include <QSplitter>
-#include <QDesktopServices>
 #include <QBuffer>
+#include <QDesktopServices>
+#include <QFile>
 #include <QLocale>
+#include <QMainWindow>
+#include <QPointer>
+#include <QScopedPointer>
 #include <QSet>
 #include <QSettings>
-#include <QPointer>
+#include <QSplitter>
 
 #include "MantidQtAPI/HelpWindow.h"
 #include "Table.h"
@@ -431,6 +432,8 @@ public slots:
   void customizeTables(const QColor& bgColor,const QColor& textColor,
     const QColor& headerColor,const QFont& textFont,
     const QFont& headerFont, bool showComments);
+  /// Turn on/off auto-update of curves from table
+  void setUpdateCurvesFromTable(Table *table, bool on);
 
   void importASCII();
   void importASCII(const QStringList& files, int import_mode, const QString& local_column_separator, int local_ignored_lines, bool local_rename_columns,
@@ -1363,7 +1366,7 @@ private:
   QWidgetList *hiddenWindows;
   QLineEdit *info;
 
-  QWidget* catalogSearch;
+  QScopedPointer<QWidget> catalogSearch;
 
   QMenu *windowsMenu, *view, *graph, *fileMenu, *format, *edit;
   QMenu *recentProjectsMenu, *recentFilesMenu, *interfaceMenu;

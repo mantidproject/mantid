@@ -33,20 +33,14 @@ using Mantid::Geometry::IMDDimension_sptr;
 using Mantid::API::Workspace_sptr;
 using Mantid::API::AnalysisDataService;
 
-vtkPeaksReader::vtkPeaksReader() :
-  m_isSetup(false), m_wsTypeName(""),
-  m_uintPeakMarkerSize(0.3), m_dimensions(1)
-{
-  this->FileName = NULL;
+vtkPeaksReader::vtkPeaksReader()
+    : FileName{NULL}, m_isSetup{false}, m_uintPeakMarkerSize{0.3},
+      m_dimensions{1} {
   this->SetNumberOfInputPorts(0);
   this->SetNumberOfOutputPorts(1);
 }
 
-vtkPeaksReader::~vtkPeaksReader()
-{
-  this->SetFileName(0);
-}
-
+vtkPeaksReader::~vtkPeaksReader() { this->SetFileName(nullptr); }
 
 void vtkPeaksReader::SetDimensions(int dimensions)
 {
@@ -208,8 +202,7 @@ void vtkPeaksReader::updateAlgorithmProgress(double progress, const std::string&
 /*
 Getter for the workspace type name.
 */
-char* vtkPeaksReader::GetWorkspaceTypeName()
-{
+const std::string &vtkPeaksReader::GetWorkspaceTypeName() {
   //Preload the Workspace and then cache it to avoid reloading later.
-  return const_cast<char*>(m_wsTypeName.c_str());
+  return m_wsTypeName;
 }

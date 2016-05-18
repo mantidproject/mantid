@@ -60,7 +60,8 @@ namespace MantidQt
       bool m_dontComplete;
       QLabel* m_hintLabel;
     protected slots:
-      void updateHints(const QString& text);
+      void updateHints(const QString &text);
+      void hideHints();
     };
   } //namespace MantidWidgets
 } //namepsace MantidQt

@@ -102,7 +102,7 @@ public:
       TS_ASSERT_EQUALS(tmp2, value)
       getline(file, tmp);
 
-      double error = i + 1 != THEMASKED ? std::sqrt(2.0) : MASK_ERROR;
+      double error = i + 1 != THEMASKED ? M_SQRT2 : MASK_ERROR;
       getline(file, tmp);
       TS_ASSERT_EQUALS(tmp, "### Errors")
       file >> tmp2;

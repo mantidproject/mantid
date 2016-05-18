@@ -2,8 +2,8 @@
 #include "MantidDataObjects/MDEvent.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/VMD.h"
-#include <limits>
 #include <boost/make_shared.hpp>
+#include <limits>
 
 //using NeXus::File;
 
@@ -112,7 +112,7 @@ TMDE(std::vector<Mantid::Kernel::VMD> MDBoxBase)::getVertexes() const {
     for (size_t d = 0; d < nd; d++) {
       // Use a bit mask to look at each bit of the integer we are iterating
       // through.
-      size_t mask = 1 << d;
+      size_t mask = size_t{1} << d;
       if ((i & mask) > 0) {
         // Bit is 1, use the max of the dimension
         coords[d] = extents[d].getMax();
@@ -142,7 +142,7 @@ TMDE(coord_t *MDBoxBase)::getVertexesArray(size_t &numVertices) const {
   numVertices = 1 << nd;
 
   // Allocate the array of the right size
-  coord_t *out = new coord_t[nd * numVertices];
+  auto out = new coord_t[nd * numVertices];
 
   // For each vertex, increase an integeer
   for (size_t i = 0; i < numVertices; ++i) {
@@ -153,7 +153,7 @@ TMDE(coord_t *MDBoxBase)::getVertexesArray(size_t &numVertices) const {
     for (size_t d = 0; d < nd; d++) {
       // Use a bit mask to look at each bit of the integer we are iterating
       // through.
-      size_t mask = 1 << d;
+      size_t mask = size_t{1} << d;
       if ((i & mask) > 0) {
         // Bit is 1, use the max of the dimension
         out[outIndex + d] = extents[d].getMax();
@@ -196,7 +196,7 @@ TMDE(coord_t *MDBoxBase)::getVertexesArray(size_t &numVertices,
   numVertices = (size_t)1 << outDimensions;
 
   // Allocate the array of the right size
-  coord_t *out = new coord_t[outDimensions * numVertices];
+  auto out = new coord_t[outDimensions * numVertices];
 
   // For each vertex, increase an integeer
   for (size_t i = 0; i < numVertices; ++i) {
@@ -240,14 +240,12 @@ TMDE(coord_t *MDBoxBase)::getVertexesArray(size_t &numVertices,
 TMDE(size_t MDBoxBase)::addEvents(const std::vector<MDE> &events) {
   size_t numBad = 0;
   // --- Go event by event and add them ----
-  typename std::vector<MDE>::const_iterator it = events.begin();
-  typename std::vector<MDE>::const_iterator it_end = events.end();
   m_dataMutex.lock();
-  for (; it != it_end; ++it) {
+  for (const auto &evnt : events) {
     // Check out-of-bounds-ness
     bool badEvent = false;
     for (size_t d = 0; d < nd; d++) {
-      coord_t x = it->getCenter(d);
+      coord_t x = evnt.getCenter(d);
       if (extents[d].outside(x)) {
         badEvent = true;
         break;
@@ -259,7 +257,7 @@ TMDE(size_t MDBoxBase)::addEvents(const std::vector<MDE> &events) {
       ++numBad;
     else
       // Event was in bounds; add it
-      addEventUnsafe(*it);
+      addEventUnsafe(evnt);
   }
   m_dataMutex.unlock();
   return numBad;
@@ -274,12 +272,8 @@ TMDE(size_t MDBoxBase)::addEvents(const std::vector<MDE> &events) {
  */
 TMDE(size_t MDBoxBase)::addEventsUnsafe(const std::vector<MDE> &events) {
   // --- Go event by event and add them ----
-  typename std::vector<MDE>::const_iterator it = events.begin();
-  typename std::vector<MDE>::const_iterator it_end = events.end();
-  for (; it != it_end; ++it) {
-    // Check out-of-bounds-ness
-    // Event was in bounds; add it
-    addEventUnsafe(*it);
+  for (const auto &evnt : events) {
+    addEventUnsafe(evnt);
   }
 
   return 0;

@@ -162,12 +162,13 @@ DECLARE_SUBWINDOW(TomographyIfaceViewQtGUI)
  * @param parent Parent window (most likely the Mantid main app window).
  */
 TomographyIfaceViewQtGUI::TomographyIfaceViewQtGUI(QWidget *parent)
-    : UserSubWindow(parent), ITomographyIfaceView(), m_tabROIW(NULL),
+    : UserSubWindow(parent), ITomographyIfaceView(), m_tabROIW(nullptr),
       m_processingJobsIDs(), m_currentComputeRes(""), m_currentReconTool(""),
       m_imgPath(""), m_logMsgs(), m_systemSettings(), m_toolsSettings(),
       m_settings(), m_settingsGroup("CustomInterfaces/Tomography"),
-      m_availPlugins(), m_currPlugins(), m_currentParamPath(),
-      m_presenter(NULL) {
+      m_settingsSubGroupEnergy(m_settingsGroup + "/EnergyBands"),
+      m_aggAlgRunner(), m_availPlugins(), m_currPlugins(), m_currentParamPath(),
+      m_presenter(nullptr) {
 
   // defaults from the tools
   m_tomopyMethod = ToolConfigTomoPy::methods().front().first;
@@ -194,6 +195,7 @@ void TomographyIfaceViewQtGUI::initLayout() {
   m_uiTabSetup.setupUi(tabSetupW);
   m_ui.tabMain->addTab(tabSetupW, QString("Setup"));
 
+  // this is a Qt widget, let Qt manage the pointer
   m_tabROIW = new ImageROIViewQtWidget(m_ui.tabMain);
   m_ui.tabMain->addTab(m_tabROIW, QString("ROI etc."));
 
@@ -205,9 +207,9 @@ void TomographyIfaceViewQtGUI::initLayout() {
   m_uiTabVisualize.setupUi(tabVizW);
   m_ui.tabMain->addTab(tabVizW, QString("Visualize"));
 
-  QWidget *tabConvertW = new QWidget();
-  m_uiTabConvertFormats.setupUi(tabConvertW);
-  m_ui.tabMain->addTab(tabConvertW, QString("Convert"));
+  // this is a Qt widget, let Qt manage the pointer
+  QWidget *m_tabImggFormats = new ImggFormatsConvertViewQtWidget();
+  m_ui.tabMain->addTab(m_tabImggFormats, QString("Convert"));
 
   QWidget *tabEBandsW = new QWidget();
   m_uiTabEnergy.setupUi(tabEBandsW);
@@ -228,7 +230,6 @@ void TomographyIfaceViewQtGUI::initLayout() {
 
   // extra / experimental tabs:
   doSetupSectionVisualize();
-  doSetupSectionConvert();
   doSetupSectionEnergy();
 
   // presenter that knows how to handle a ITomographyIfaceView should take care
@@ -421,22 +422,11 @@ void TomographyIfaceViewQtGUI::doSetupSectionVisualize() {
           this, SLOT(defaultDirLocalVisualizeClicked()));
   connect(m_uiTabVisualize.pushButton_remote_default_dir, SIGNAL(released()),
           this, SLOT(defaultDirRemoteVisualizeClicked()));
-}
 
-void TomographyIfaceViewQtGUI::doSetupSectionConvert() {
-  connect(m_uiTabConvertFormats.pushButton_browse_input, SIGNAL(released()),
-          this, SLOT(browseImgInputConvertClicked()));
-
-  connect(m_uiTabConvertFormats.pushButton_browse_output, SIGNAL(released()),
-          this, SLOT(browseImgOutputConvertClicked()));
-}
-
-void TomographyIfaceViewQtGUI::doSetupSectionEnergy() {
-  connect(m_uiTabEnergy.pushButton_browse_input, SIGNAL(released()), this,
-          SLOT(browseEnergyInputClicked()));
-
-  connect(m_uiTabEnergy.pushButton_browse_input, SIGNAL(released()), this,
-          SLOT(browseEnergyOutputClicked()));
+  connect(m_uiTabVisualize.pushButton_browse_paraview, SIGNAL(released()), this,
+          SLOT(browseVisToolParaviewClicked()));
+  connect(m_uiTabVisualize.pushButton_browse_octopus, SIGNAL(released()), this,
+          SLOT(browseVisToolOctopusClicked()));
 }
 
 void TomographyIfaceViewQtGUI::doSetupSectionSystemSettings() {
@@ -829,6 +819,8 @@ void TomographyIfaceViewQtGUI::readSettings() {
 
   restoreGeometry(qs.value("interface-win-geometry").toByteArray());
 
+  readSettingsEnergy();
+
   qs.endGroup();
 }
 
@@ -929,6 +921,9 @@ QDataStream &operator<<(QDataStream &stream, TomoPathsConfig const &cfg) {
 void TomographyIfaceViewQtGUI::saveSettings() const {
   QSettings qs;
   qs.beginGroup(QString::fromStdString(m_settingsGroup));
+
+  saveSettingsEnergy();
+
   qs.setValue("on-close-ask-for-confirmation",
               m_settings.onCloseAskForConfirmation);
   qs.setValue("use-keep-alive", m_settings.useKeepAlive);
@@ -1992,40 +1987,14 @@ void TomographyIfaceViewQtGUI::defaultDirRemoteVisualizeClicked() {
   }
 }
 
-void TomographyIfaceViewQtGUI::browseVisToolParaviewClicke() {
+void TomographyIfaceViewQtGUI::browseVisToolParaviewClicked() {
   m_setupParaviewPath =
-      checkUserBrowseDir(m_uiTabConvertFormats.lineEdit_input);
+      checkUserBrowseDir(m_uiTabVisualize.lineEdit_paraview_location);
 }
 
 void TomographyIfaceViewQtGUI::browseVisToolOctopusClicked() {
   m_setupOctopusVisPath =
-      checkUserBrowseDir(m_uiTabConvertFormats.lineEdit_input);
-}
-
-void TomographyIfaceViewQtGUI::browseImgInputConvertClicked() {
-  // Not using this path to update the "current" path where to load from, but
-  // it could be an option.
-  // const std::string path =
-  checkUserBrowseDir(m_uiTabConvertFormats.lineEdit_input);
-  // m_pathsConfig.updatePathDarks(str, );
-  // m_presenter->notify(ITomographyIfacePresenter::TomoPathsChanged);
-}
-
-void TomographyIfaceViewQtGUI::browseImgOutputConvertClicked() {
-  // Not using this path to update the "current" path where to load from, but
-  // it could be an option.
-  // const std::string path =
-  checkUserBrowseDir(m_uiTabConvertFormats.lineEdit_output);
-  // m_pathsConfig.updatePathDarks(str, );
-  // m_presenter->notify(ITomographyIfacePresenter::TomoPathsChanged);
-}
-
-void TomographyIfaceViewQtGUI::browseEnergyInputClicked() {
-  checkUserBrowseDir(m_uiTabEnergy.lineEdit_input_path);
-}
-
-void TomographyIfaceViewQtGUI::browseEnergyOutputClicked() {
-  checkUserBrowseDir(m_uiTabEnergy.lineEdit_output_path);
+      checkUserBrowseDir(m_uiTabVisualize.lineEdit_octopus_vis_location);
 }
 
 /**
@@ -2055,8 +2024,8 @@ std::string TomographyIfaceViewQtGUI::checkUserBrowseDir(
     prev = le->text();
   }
 
-  QString path(QFileDialog::getExistingDirectory(
-      this, tr(QString::fromStdString(userMsg)), prev));
+  QString path(
+      QFileDialog::getExistingDirectory(this, tr(userMsg.c_str()), prev));
 
   if (!path.isEmpty()) {
     le->setText(path);
@@ -2096,8 +2065,7 @@ std::string TomographyIfaceViewQtGUI::checkUserBrowseFile(
     prev = le->text();
   }
 
-  QString path(QFileDialog::getOpenFileName(
-      this, tr(QString::fromStdString(userMsg)), prev));
+  QString path(QFileDialog::getOpenFileName(this, tr(userMsg.c_str()), prev));
 
   if (!path.isEmpty()) {
     le->setText(path);

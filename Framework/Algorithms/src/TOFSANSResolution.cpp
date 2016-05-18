@@ -113,7 +113,7 @@ void TOFSANSResolution::exec() {
 
   // Initialize Dq
   MantidVec &DxOut = iqWS->dataDx(0);
-  for (int i = 0; i < xLength - 1; i++)
+  for (int i = 0; i < xLength; i++)
     DxOut[i] = 0.0;
 
   const V3D samplePos = reducedWS->getInstrument()->getSample()->getPos();
@@ -151,8 +151,8 @@ void TOFSANSResolution::exec() {
 
     // Multiplicative factor to go from lambda to Q
     // Don't get fooled by the function name...
-    const double theta = reducedWS->detectorTwoTheta(det);
-    const double factor = 4.0 * M_PI * sin(theta / 2.0);
+    const double theta = reducedWS->detectorTwoTheta(*det);
+    const double factor = 4.0 * M_PI * sin(0.5 * theta);
 
     const MantidVec &XIn = reducedWS->readX(i);
     const MantidVec &YIn = reducedWS->readY(i);
@@ -202,8 +202,8 @@ void TOFSANSResolution::exec() {
                     wl_bin_over_wl * wl_bin_over_wl);
 
       // By using only events with a positive weight, we use only the data
-      // distribution and
-      // leave out the background events
+      // distribution and leave out the background events.
+      // Note: we are looping over bins, therefore the xLength-1.
       if (iq >= 0 && iq < xLength - 1 && !boost::math::isnan(dq_over_q) &&
           dq_over_q > 0 && YIn[j] > 0) {
         _dx[iq] += q * dq_over_q * YIn[j];
@@ -214,6 +214,7 @@ void TOFSANSResolution::exec() {
     }
 
     // Move over the distributions for that pixel
+    // Note: we are looping over bins, therefore the xLength-1.
     PARALLEL_CRITICAL(iq) /* Write to shared memory - must protect */
     for (int iq = 0; iq < xLength - 1; iq++) {
       DxOut[iq] += _dx[iq];
@@ -226,7 +227,9 @@ void TOFSANSResolution::exec() {
     PARALLEL_END_INTERUPT_REGION
   }
   PARALLEL_CHECK_INTERUPT_REGION
+
   // Normalize according to the chosen weighting scheme
+  // Note: we are looping over bins, therefore the xLength-1.
   for (int i = 0; i < xLength - 1; i++) {
     if (XNorm[i] == 0)
       continue;

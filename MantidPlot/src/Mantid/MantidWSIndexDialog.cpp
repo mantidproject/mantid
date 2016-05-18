@@ -29,13 +29,13 @@ MantidWSIndexWidget::MantidWSIndexWidget(QWidget *parent, Qt::WFlags flags,
                                          const bool showWaterfallOption)
     : QWidget(parent, flags), m_spectra(false),
       m_waterfall(showWaterfallOption), m_wsNames(wsNames),
-      m_wsIndexIntervals(), m_spectraIdIntervals(), m_wsIndexChoice(),
+      m_wsIndexIntervals(), m_spectraNumIntervals(), m_wsIndexChoice(),
       m_spectraIdChoice() {
   checkForSpectraAxes();
   // Generate the intervals allowed to be plotted by the user.
   generateWsIndexIntervals();
   if (m_spectra) {
-    generateSpectraIdIntervals();
+    generateSpectraNumIntervals();
   }
   init();
 }
@@ -111,7 +111,7 @@ bool MantidWSIndexWidget::waterfallPlotRequested() const {
  * Called when user edits workspace field
  */
 void MantidWSIndexWidget::editedWsField() {
-  if (usingSpectraIDs()) {
+  if (usingSpectraNumbers()) {
     m_spectraField->lineEdit()->clear();
     m_spectraField->setError("");
   }
@@ -179,12 +179,16 @@ void MantidWSIndexWidget::init() {
  */
 void MantidWSIndexWidget::initWorkspaceBox() {
   m_wsBox = new QVBoxLayout;
-  m_wsMessage = new QLabel(
-      tr("Enter Workspace Indices: " + m_wsIndexIntervals.toQString()));
+  const QString wsIndices = m_wsIndexIntervals.toQString();
+  m_wsMessage = new QLabel(tr("Enter Workspace Indices: " + wsIndices));
   m_wsField = new QLineEditWithErrorMark();
 
   m_wsField->lineEdit()->setValidator(
       new IntervalListValidator(this, m_wsIndexIntervals));
+  if (wsIndices == "0") { // single spectrum
+    m_wsField->lineEdit()->setEnabled(false);
+    m_wsField->lineEdit()->setText("0");
+  }
   m_wsBox->add(m_wsMessage);
   m_wsBox->add(m_wsField);
   m_outer->addItem(m_wsBox);
@@ -198,18 +202,22 @@ void MantidWSIndexWidget::initWorkspaceBox() {
  */
 void MantidWSIndexWidget::initSpectraBox() {
   m_spectraBox = new QVBoxLayout;
-  m_spectraMessage =
-      new QLabel(tr("Enter Spectra IDs: " + m_spectraIdIntervals.toQString()));
+  const QString spectraNumbers = m_spectraNumIntervals.toQString();
+  m_spectraMessage = new QLabel(tr("Enter Spectra Numbers: " + spectraNumbers));
   m_spectraField = new QLineEditWithErrorMark();
   m_orMessage = new QLabel(tr("<br>Or"));
 
   m_spectraField->lineEdit()->setValidator(
-      new IntervalListValidator(this, m_spectraIdIntervals));
+      new IntervalListValidator(this, m_spectraNumIntervals));
+  if (spectraNumbers == "1") { // single spectrum
+    m_spectraField->lineEdit()->setEnabled(false);
+    m_spectraField->lineEdit()->setText("1");
+  }
   m_spectraBox->add(m_spectraMessage);
   m_spectraBox->add(m_spectraField);
   m_spectraBox->add(m_orMessage);
 
-  if (usingSpectraIDs())
+  if (usingSpectraNumbers())
     m_outer->addItem(m_spectraBox);
 
   connect(m_spectraField->lineEdit(), SIGNAL(textEdited(const QString &)), this,
@@ -233,7 +241,7 @@ void MantidWSIndexWidget::initOptionsBoxes() {
 /**
 * Check to see if *all* workspaces have a spectrum axis.
 * If even one does not have a spectra axis, then we wont
-* ask the user to enter spectra IDs - only workspace indices.
+* ask the user to enter spectra Numberss - only workspace indices.
 */
 void MantidWSIndexWidget::checkForSpectraAxes() {
   QList<QString>::const_iterator it = m_wsNames.constBegin();
@@ -291,9 +299,9 @@ void MantidWSIndexWidget::generateWsIndexIntervals() {
 }
 
 /**
- * Get available intervals for spectra IDs
+ * Get available intervals for spectra Numbers
  */
-void MantidWSIndexWidget::generateSpectraIdIntervals() {
+void MantidWSIndexWidget::generateSpectraNumIntervals() {
   bool firstWs = true;
   foreach (const QString wsName, m_wsNames) {
     Mantid::API::MatrixWorkspace_const_sptr ws =
@@ -312,11 +320,11 @@ void MantidWSIndexWidget::generateSpectraIdIntervals() {
     }
 
     if (firstWs) {
-      m_spectraIdIntervals = spectraIntervalList;
+      m_spectraNumIntervals = spectraIntervalList;
       firstWs = false;
     } else {
-      m_spectraIdIntervals.setIntervalList(
-          IntervalList::intersect(m_spectraIdIntervals, spectraIntervalList));
+      m_spectraNumIntervals.setIntervalList(
+          IntervalList::intersect(m_spectraNumIntervals, spectraIntervalList));
     }
   }
 }
@@ -325,8 +333,8 @@ void MantidWSIndexWidget::generateSpectraIdIntervals() {
  * Whether widget is using spectra IDs or workspace indices
  * @returns True if using spectra IDs
  */
-bool MantidWSIndexWidget::usingSpectraIDs() const {
-  return m_spectra && m_spectraIdIntervals.getList().size() > 0;
+bool MantidWSIndexWidget::usingSpectraNumbers() const {
+  return m_spectra && m_spectraNumIntervals.getList().size() > 0;
 }
 
 //----------------------------------

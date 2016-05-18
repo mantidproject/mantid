@@ -11,6 +11,7 @@
 
 #include <boost/lexical_cast.hpp>
 
+#include "Poco/DirectoryIterator.h"
 #include <Poco/File.h>
 
 #include <QThread>
@@ -35,8 +36,12 @@ const std::string EnggDiffractionPresenter::g_runNumberErrorStr =
 
 // discouraged at the moment
 const bool EnggDiffractionPresenter::g_askUserCalibFilename = false;
+
 const std::string EnggDiffractionPresenter::g_vanIntegrationWSName =
     "engggui_vanadium_integration_ws";
+const std::string EnggDiffractionPresenter::g_vanCurvesWSName =
+    "engggui_vanadium_curves_ws";
+
 int EnggDiffractionPresenter::g_croppedCounter = 0;
 int EnggDiffractionPresenter::g_plottingCounter = 0;
 bool EnggDiffractionPresenter::g_abortThread = false;
@@ -123,6 +128,10 @@ void EnggDiffractionPresenter::notify(
     processRebinMultiperiod();
     break;
 
+  case IEnggDiffractionPresenter::FittingRunNo:
+    fittingRunNoChanged();
+    break;
+
   case IEnggDiffractionPresenter::FitPeaks:
     processFitPeaks();
 
@@ -207,11 +216,11 @@ void EnggDiffractionPresenter::ProcessCropCalib() {
     if (m_view->currentCalibSpecNos().empty() &&
         specNoNum == BankMode::SPECNOS) {
       throw std::invalid_argument(
-          "The Spectrum IDs cannot be empty, must be a"
+          "The Spectrum Nos cannot be empty, must be a"
           "valid range or a Bank Name can be selected instead");
     }
   } catch (std::invalid_argument &ia) {
-    m_view->userWarning("Error in the inputs required for calibrate",
+    m_view->userWarning("Error in the inputs required for cropped calibration",
                         ia.what());
     return;
   }
@@ -453,8 +462,219 @@ void EnggDiffractionPresenter::processRebinMultiperiod() {
   startAsyncRebinningPulsesWorker(runNo, nperiods, timeStep, outWSName);
 }
 
+// Fitting Tab Run Number & Bank handling here
+void MantidQt::CustomInterfaces::EnggDiffractionPresenter::
+    fittingRunNoChanged() {
+
+  try {
+    std::string strFocusedFile = m_view->getFittingRunNo();
+    QString focusedFile = QString::fromStdString(strFocusedFile);
+    // file name
+    Poco::Path selectedfPath(strFocusedFile);
+    Poco::Path bankDir;
+
+    // handling of vectors
+    auto runnoDirVector = m_view->getFittingRunNumVec();
+    runnoDirVector.clear();
+
+    std::string strFPath = selectedfPath.toString();
+    // returns empty if no directory is found
+    std::vector<std::string> splitBaseName =
+        m_view->splitFittingDirectory(strFPath);
+    // runNo when single focused file selected
+    std::vector<std::string> runNoVec;
+
+    if (selectedfPath.isFile() && !splitBaseName.empty()) {
+
+#ifdef __unix__
+      bankDir = selectedfPath.parent();
+#else
+      bankDir = (bankDir).expand(selectedfPath.parent().toString());
+#endif
+      if (!splitBaseName.empty() && splitBaseName.size() > 3) {
+        std::string foc_file = splitBaseName[0] + "_" + splitBaseName[1] + "_" +
+                               splitBaseName[2] + "_" + splitBaseName[3];
+        std::string strBankDir = bankDir.toString();
+
+        if (strBankDir.empty()) {
+          m_view->userWarning(
+              "Invalid Input",
+              "Please check that a valid directory is "
+              "set for Output Folder under Focusing Settings on the "
+              "settings tab. "
+              "Please try again");
+        } else {
+
+          updateFittingDirVec(strBankDir, foc_file, false, runnoDirVector);
+          m_view->setFittingRunNumVec(runnoDirVector);
+
+          // add bank to the combo-box and list view
+          m_view->addBankItems(splitBaseName, focusedFile);
+          runNoVec.clear();
+          runNoVec.push_back(splitBaseName[1]);
+          auto fittingMultiRunMode = m_view->getFittingMultiRunMode();
+          if (!fittingMultiRunMode)
+            m_view->addRunNoItem(runNoVec, false);
+        }
+      }
+      // assuming that no directory is found so look for number
+      // if run number length greater
+    } else if (focusedFile.count() > 4) {
+      if (strFocusedFile.find("-") != std::string::npos) {
+        std::vector<std::string> firstLastRunNoVec;
+        boost::split(firstLastRunNoVec, strFocusedFile, boost::is_any_of("-"));
+        std::string firstRun;
+        std::string lastRun;
+        if (!firstLastRunNoVec.empty()) {
+          firstRun = firstLastRunNoVec[0];
+          lastRun = firstLastRunNoVec[1];
+
+          m_view->setFittingMultiRunMode(true);
+          enableMultiRun(firstRun, lastRun, runnoDirVector);
+        }
+
+      } else {
+        // if given a single run number instead
+        auto focusDir = m_view->getFocusDir();
+
+        if (focusDir.empty()) {
+          m_view->userWarning(
+              "Invalid Input",
+              "Please check that a valid directory is "
+              "set for Output Folder under Focusing Settings on the "
+              "settings tab. "
+              "Please try again");
+        } else {
+
+          updateFittingDirVec(focusDir, strFocusedFile, false, runnoDirVector);
+          m_view->setFittingRunNumVec(runnoDirVector);
+
+          // add bank to the combo-box and list view
+          m_view->addBankItems(splitBaseName, focusedFile);
+          runNoVec.clear();
+          runNoVec.push_back(strFocusedFile);
+
+          auto fittingMultiRunMode = m_view->getFittingMultiRunMode();
+          if (!fittingMultiRunMode)
+            m_view->addRunNoItem(runNoVec, false);
+        }
+      }
+    }
+    // set the directory here to the first in the vector if its not empty
+    if (!runnoDirVector.empty()) {
+      QString firstDir = QString::fromStdString(runnoDirVector[0]);
+      m_view->setFittingRunNo(firstDir);
+
+    } else if (m_view->getFittingRunNo().empty()) {
+      m_view->userWarning("Invalid Input",
+                          "Invalid directory or run number given. "
+                          "Please try again");
+    }
+
+  } catch (std::runtime_error &re) {
+    m_view->userWarning("Invalid file",
+                        "Unable to select the file; " +
+                            static_cast<std::string>(re.what()));
+    return;
+  }
+}
+
+void EnggDiffractionPresenter::updateFittingDirVec(
+    const std::string &bankDir, const std::string &focusedFile, bool multi_run,
+    std::vector<std::string> &fittingRunNoDirVec) {
+
+  try {
+    std::string cwd(bankDir);
+    Poco::DirectoryIterator it(cwd);
+    Poco::DirectoryIterator end;
+    while (it != end) {
+      if (it->isFile()) {
+        std::string itFilePath = it->path();
+        Poco::Path itBankfPath(itFilePath);
+
+        std::string itbankFileName = itBankfPath.getBaseName();
+        // check if it not any other file.. e.g: texture
+        if (itbankFileName.find(focusedFile) != std::string::npos) {
+          fittingRunNoDirVec.push_back(itFilePath);
+          if (multi_run)
+            return;
+        }
+      }
+      ++it;
+    }
+  } catch (std::runtime_error &re) {
+    m_view->userWarning("Invalid file",
+                        "File not found in the following directory; " +
+                            bankDir + ". " +
+                            static_cast<std::string>(re.what()));
+  }
+}
+
+void EnggDiffractionPresenter::enableMultiRun(
+    std::string firstRun, std::string lastRun,
+    std::vector<std::string> &fittingRunNoDirVec) {
+
+  bool firstDig = m_view->isDigit(firstRun);
+  bool lastDig = m_view->isDigit(lastRun);
+
+  std::vector<std::string> RunNumberVec;
+  if (firstDig && lastDig) {
+    int firstNum = std::stoi(firstRun);
+    int lastNum = std::stoi(lastRun);
+
+    if ((lastNum - firstNum) > 200) {
+      m_view->userWarning(
+          "Please try again",
+          "The specified run number range is "
+          "far to big, please try a smaller range of consecutive run numbers.");
+    }
+
+    else if (firstNum <= lastNum) {
+
+      for (int i = firstNum; i <= lastNum; i++) {
+        RunNumberVec.push_back(std::to_string(i));
+      }
+
+      auto focusDir = m_view->getFocusDir();
+      if (focusDir.empty()) {
+        m_view->userWarning(
+            "Invalid Input",
+            "Please check that a valid directory is "
+            "set for Output Folder under Focusing Settings on the "
+            "settings tab. "
+            "Please try again");
+      } else {
+        // if given a single run number instead
+        for (size_t i = 0; i < RunNumberVec.size(); i++) {
+          updateFittingDirVec(focusDir, RunNumberVec[i], true,
+                              fittingRunNoDirVec);
+        }
+        int diff = (lastNum - firstNum) + 1;
+        auto global_vec_size = fittingRunNoDirVec.size();
+        if (size_t(diff) == global_vec_size) {
+
+          m_view->addRunNoItem(RunNumberVec, true);
+
+          m_view->setBankEmit();
+        }
+      }
+    } else {
+      m_view->userWarning("Invalid Run Number",
+                          "One or more run file not found "
+                          "from the specified range of runs."
+                          "Please try again");
+    }
+  } else {
+    m_view->userWarning("Invalid Run Number",
+                        "The specfied range of run number "
+                        "entered is invalid. Please try again");
+  }
+}
+
+// Process Fitting Peaks begins here
+
 void EnggDiffractionPresenter::processFitPeaks() {
-  const std::string focusedRunNo = m_view->fittingRunNo();
+  const std::string focusedRunNo = m_view->getFittingRunNo();
   const std::string fitPeaksData = m_view->fittingPeaksData();
 
   g_log.debug() << "the expected peaks are: " << fitPeaksData << std::endl;
@@ -560,6 +780,7 @@ void EnggDiffractionPresenter::doFitting(const std::string &focusedRunNo,
   }
 
   // run the algorithm EnggFitPeaks with workspace loaded above
+  // requires unit in Time of Flight
   auto enggFitPeaks =
       Mantid::API::AlgorithmManager::Instance().createUnmanaged("EnggFitPeaks");
   const std::string FocusedFitPeaksTableName =
@@ -618,7 +839,7 @@ void EnggDiffractionPresenter::runFittingAlgs(
       ADS.retrieveWS<ITableWorkspace>(FocusedFitPeaksTableName);
 
   size_t rowCount = table->rowCount();
-  std::string single_peak_out_WS = "engggui_fitting_single_peaks";
+  const std::string single_peak_out_WS = "engggui_fitting_single_peaks";
   std::string current_peak_out_WS;
 
   std::string Bk2BkExpFunctionStr;
@@ -626,6 +847,7 @@ void EnggDiffractionPresenter::runFittingAlgs(
   std::string endX = "";
 
   if (rowCount > size_t(0)) {
+
     for (size_t i = 0; i < rowCount; i++) {
 
       // get the functionStrFactory to generate the string for function
@@ -637,7 +859,9 @@ void EnggDiffractionPresenter::runFittingAlgs(
 
       g_log.debug() << "startX: " + startX + " . endX: " + endX << std::endl;
 
-      current_peak_out_WS = "engggui_fitting_single_peaks" + std::to_string(i);
+      current_peak_out_WS =
+          "__engggui_fitting_single_peaks" + std::to_string(i);
+      std::string current_peak_cloned_WS;
 
       // run EvaluateFunction algorithm with focused workspace to produce
       // the correct fit function
@@ -654,29 +878,31 @@ void EnggDiffractionPresenter::runFittingAlgs(
 
       // if the first peak
       if (i == size_t(0)) {
-        auto renameWs =
-            Mantid::API::AlgorithmManager::Instance().createUnmanaged(
-                "RenameWorkspace");
-        g_log.notice() << "EvaluateFunction algorithm has started" << std::endl;
-        try {
-          renameWs->initialize();
 
-          renameWs->setProperty("InputWorkspace",
-                                "engggui_fitting_single_peaks0");
-          renameWs->setProperty("OutputWorkspace", single_peak_out_WS);
-          renameWs->execute();
-        } catch (std::runtime_error &re) {
-          g_log.error() << "Could not run the algorithm EvaluateFunction, "
-                           "Error description: " +
-                               static_cast<std::string>(re.what())
-                        << std::endl;
-        }
+        // create a workspace clone of bank focus file
+        // this will import all information of the previous file
+        runCloneWorkspaceAlg(FocusedWSName, single_peak_out_WS);
+
+        setDataToClonedWS(current_peak_out_WS, single_peak_out_WS);
+
       } else {
+        current_peak_cloned_WS =
+            "__engggui_fitting_cloned_peaks" + std::to_string(i);
+
+        runCloneWorkspaceAlg(FocusedWSName, current_peak_cloned_WS);
+
+        setDataToClonedWS(current_peak_out_WS, current_peak_cloned_WS);
+
         // append all peaks in to single workspace & remove
-        runAppendSpectraAlg(single_peak_out_WS, current_peak_out_WS);
+        runAppendSpectraAlg(single_peak_out_WS, current_peak_cloned_WS);
         ADS.remove(current_peak_out_WS);
+        ADS.remove(current_peak_cloned_WS);
       }
     }
+
+    // convert units for both workspaces to dSpacing from ToF
+    runConvetUnitsAlg(single_peak_out_WS);
+    runConvetUnitsAlg(FocusedWSName);
   }
 
   m_fittingFinishedOK = true;
@@ -697,7 +923,7 @@ std::string EnggDiffractionPresenter::functionStrFactory(
   double S = paramTableWS->cell<double>(row, size_t(11));
 
   startX = boost::lexical_cast<std::string>(X0 - (3 * S));
-  endX = boost::lexical_cast<std::string>(X0 + (3 * S));
+  endX = boost::lexical_cast<std::string>(X0 + (5 * S));
 
   std::string functionStr =
       "name=LinearBackground,A0=" + boost::lexical_cast<std::string>(A0) +
@@ -786,6 +1012,54 @@ void EnggDiffractionPresenter::runRebinToWorkspaceAlg(
                          static_cast<std::string>(re.what())
                   << std::endl;
   }
+}
+
+void EnggDiffractionPresenter::runConvetUnitsAlg(std::string workspaceName) {
+
+  auto ConvertUnits =
+      Mantid::API::AlgorithmManager::Instance().createUnmanaged("ConvertUnits");
+  try {
+    ConvertUnits->initialize();
+    ConvertUnits->setProperty("InputWorkspace", workspaceName);
+    ConvertUnits->setProperty("OutputWorkspace", workspaceName);
+    std::string targetUnit = "dSpacing";
+    ConvertUnits->setProperty("Target", targetUnit);
+    ConvertUnits->setPropertyValue("EMode", "Elastic");
+    ConvertUnits->execute();
+  } catch (std::runtime_error &re) {
+    g_log.error() << "Could not run the algorithm ConvertUnits, "
+                     "Error description: " +
+                         static_cast<std::string>(re.what())
+                  << std::endl;
+  }
+}
+
+void EnggDiffractionPresenter::runCloneWorkspaceAlg(
+    std::string inputWorkspace, const std::string &outputWorkspace) {
+
+  auto cloneWorkspace =
+      Mantid::API::AlgorithmManager::Instance().createUnmanaged(
+          "CloneWorkspace");
+  try {
+    cloneWorkspace->initialize();
+    cloneWorkspace->setProperty("InputWorkspace", inputWorkspace);
+    cloneWorkspace->setProperty("OutputWorkspace", outputWorkspace);
+    cloneWorkspace->execute();
+  } catch (std::runtime_error &re) {
+    g_log.error() << "Could not run the algorithm CreateWorkspace, "
+                     "Error description: " +
+                         static_cast<std::string>(re.what())
+                  << std::endl;
+  }
+}
+
+void EnggDiffractionPresenter::setDataToClonedWS(std::string &current_WS,
+                                                 const std::string &cloned_WS) {
+  AnalysisDataServiceImpl &ADS = Mantid::API::AnalysisDataService::Instance();
+  auto currentPeakWS = ADS.retrieveWS<MatrixWorkspace>(current_WS);
+  auto currentClonedWS = ADS.retrieveWS<MatrixWorkspace>(cloned_WS);
+  currentClonedWS->getSpectrum(0)
+      ->setData(currentPeakWS->readY(0), currentPeakWS->readE(0));
 }
 
 void EnggDiffractionPresenter::plotFitPeaksCurves() {
@@ -911,117 +1185,115 @@ bool EnggDiffractionPresenter::validateRBNumber(const std::string &rbn) const {
 }
 
 /**
-* Checks if the provided run number is valid and if a direcotory is provided
-* it will convert it to a run number
+* Checks if the provided run number is valid and if a directory is
+* provided it will convert it to a run number. It also records the
+* paths the user has browsed to.
 *
-* @param dir takes the input/directory of the user
+* @param userPaths the input/directory given by the user via the "browse"
+* button
 *
 * @return run_number 6 character string of a run number
 */
-std::string
-EnggDiffractionPresenter::isValidRunNumber(std::vector<std::string> dir) {
+std::string EnggDiffractionPresenter::isValidRunNumber(
+    const std::vector<std::string> &userPaths) {
 
-  std::vector<std::string> run_vec = dir;
   std::string run_number;
+  if (userPaths.empty() || userPaths.front().empty()) {
+    return run_number;
+  }
 
-  // if empty string
-  size_t i = 0;
-  if (!dir.empty() && dir.at(i) != "") {
+  for (const auto &path : userPaths) {
+    run_number = "";
+    try {
+      if (Poco::File(path).exists()) {
+        Poco::Path inputDir = path;
 
-    auto p = run_vec.begin();
-    int i = 0;
-    while (p != run_vec.end()) {
-      run_number = *p;
-      p++;
-      i++;
+        // get file name via poco::path
+        std::string filename = inputDir.getFileName();
 
-      try {
-        if (Poco::File(run_number).exists()) {
-          Poco::Path inputDir = run_number;
-          run_number = "";
-          // get file name name via poco::path
-
-          std::string filename = inputDir.getFileName();
-
-          // convert to int or assign it to size_t
-          for (size_t i = 0; i < filename.size(); i++) {
-            char *str = &filename[i];
-            if (std::isdigit(*str)) {
-              run_number += filename[i];
-            }
+        // convert to int or assign it to size_t
+        for (size_t i = 0; i < filename.size(); i++) {
+          char *str = &filename[i];
+          if (std::isdigit(*str)) {
+            run_number += filename[i];
           }
-          run_number.erase(0, run_number.find_first_not_of('0'));
         }
+        run_number.erase(0, run_number.find_first_not_of('0'));
 
-      } catch (std::runtime_error &re) {
-        throw std::invalid_argument("Error browsing selected file: " +
-                                    static_cast<std::string>(re.what()));
-      } catch (...) {
-        throw std::invalid_argument("Error browsing selected file: ");
+        // The path of this file needs to be added in the search
+        // path as the user can browse to any path not included in
+        // the interface settings
+        recordPathBrowsedTo(inputDir.toString());
       }
+
+    } catch (std::runtime_error &re) {
+      throw std::invalid_argument("Error while checking the selected file: " +
+                                  static_cast<std::string>(re.what()));
+    } catch (Poco::FileNotFoundException &rexc) {
+      throw std::invalid_argument("Error while checking the selected file. "
+                                  "There was a problem with the file: " +
+                                  std::string(rexc.what()));
     }
   }
 
-  g_log.debug() << "run number is: " << run_number << std::endl;
+  g_log.debug() << "Run number inferred from browse path (" << userPaths.front()
+                << ") is: " << run_number << std::endl;
 
   return run_number;
 }
 
 /**
-* Checks if the provided run number is valid and if a direcotory is provided
+* Checks if the provided run number is valid and if a directory is provided
 *
-* @param dir takes the input/directory of the user
+* @param paths takes the input/paths of the user
 *
 * @return vector of string multi_run_number, 6 character string of a run number
 */
-std::vector<std::string>
-EnggDiffractionPresenter::isValidMultiRunNumber(std::vector<std::string> dir) {
+std::vector<std::string> EnggDiffractionPresenter::isValidMultiRunNumber(
+    const std::vector<std::string> &paths) {
 
-  std::vector<std::string> run_vec = dir;
-  std::string run_number;
   std::vector<std::string> multi_run_number;
+  if (paths.empty() || paths.front().empty())
+    return multi_run_number;
 
-  // if empty string
-  size_t i = 0;
-  if (!dir.empty() && dir.at(i) != "") {
+  for (auto path : paths) {
+    std::string run_number;
+    try {
+      if (Poco::File(path).exists()) {
+        Poco::Path inputDir = path;
 
-    auto p = run_vec.begin();
-    int i = 0;
-    while (p != run_vec.end()) {
-      run_number = *p;
-      p++;
-      i++;
+        // get file name name via poco::path
+        std::string filename = inputDir.getFileName();
 
-      try {
-        if (Poco::File(run_number).exists()) {
-          Poco::Path inputDir = run_number;
-          run_number = "";
-          // get file name name via poco::path
-
-          std::string filename = inputDir.getFileName();
-
-          // convert to int or assign it to size_t
-          for (size_t i = 0; i < filename.size(); i++) {
-            char *str = &filename[i];
-            if (std::isdigit(*str)) {
-              run_number += filename[i];
-            }
+        // convert to int or assign it to size_t
+        for (size_t i = 0; i < filename.size(); i++) {
+          char *str = &filename[i];
+          if (std::isdigit(*str)) {
+            run_number += filename[i];
           }
-          run_number.erase(0, run_number.find_first_not_of('0'));
         }
-      } catch (std::runtime_error &re) {
-        throw std::invalid_argument("Error browsing selected file: " +
-                                    static_cast<std::string>(re.what()));
-      } catch (...) {
-        throw std::invalid_argument("Error browsing selected file: ");
-      }
+        run_number.erase(0, run_number.find_first_not_of('0'));
 
-      multi_run_number.push_back(run_number);
+        recordPathBrowsedTo(inputDir.toString());
+      }
+    } catch (std::runtime_error &re) {
+      throw std::invalid_argument(
+          "Error while looking for a run number in the files selected: " +
+          static_cast<std::string>(re.what()));
+    } catch (Poco::FileNotFoundException &rexc) {
+      throw std::invalid_argument("Error while looking for a run number in the "
+                                  "files selected. There was a problem with "
+                                  "the file(s): " +
+                                  std::string(rexc.what()));
     }
+
+    multi_run_number.push_back(run_number);
   }
 
-  g_log.debug() << "run number selected for multi-run: " << run_number
-                << std::endl;
+  g_log.debug()
+      << "First and last run number inferred from a multi-run selection: "
+      << multi_run_number.front() << " ... " << multi_run_number.back()
+      << std::endl;
 
   return multi_run_number;
 }
@@ -1060,19 +1332,23 @@ void EnggDiffractionPresenter::inputChecksBeforeCalibrate(
 }
 
 /**
-* What should be the name of the output GSAS calibration file, given
-* the Vanadium and Ceria runs
-*
-* @param vanNo number of the Vanadium run, which is normally part of the name
-* @param ceriaNo number of the Ceria run, which is normally part of the name
-*
-* @return filename (without the full path)
-*/
+ * What should be the name of the output GSAS calibration file, given
+ * the Vanadium and Ceria runs
+ *
+ * @param vanNo number of the Vanadium run, which is normally part of the name
+ * @param ceriaNo number of the Ceria run, which is normally part of the name
+ * @param bankName bank name when generating a file for an individual
+ * bank. Leave empty to use a generic name for all banks
+ *
+ * @return filename (without the full path)
+ */
 std::string
 EnggDiffractionPresenter::outputCalibFilename(const std::string &vanNo,
-                                              const std::string &ceriaNo) {
+                                              const std::string &ceriaNo,
+                                              const std::string &bankName) {
   std::string outFilename = "";
-  const std::string sugg = buildCalibrateSuggestedFilename(vanNo, ceriaNo);
+  const std::string sugg =
+      buildCalibrateSuggestedFilename(vanNo, ceriaNo, bankName);
   if (!g_askUserCalibFilename) {
     outFilename = sugg;
   } else {
@@ -1220,16 +1496,20 @@ void EnggDiffractionPresenter::doNewCalibration(const std::string &outFilename,
   }
   if (!cs.m_inputDirRaw.empty() && Poco::File(cs.m_inputDirRaw).exists())
     conf.appendDataSearchDir(cs.m_inputDirRaw);
+  for (const auto &browsed : m_browsedToPaths) {
+    conf.appendDataSearchDir(browsed);
+  }
 
   try {
     m_calibFinishedOK = false;
     doCalib(cs, vanNo, ceriaNo, outFilename, specNos);
     m_calibFinishedOK = true;
-  } catch (std::runtime_error &) {
-    g_log.error() << "The calibration calculations failed. One of the "
-                     "algorithms did not execute correctly. See log messages "
-                     "for details. "
-                  << std::endl;
+  } catch (std::runtime_error &rexc) {
+    g_log.error()
+        << "The calibration calculations failed. One of the "
+           "algorithms did not execute correctly. See log messages for "
+           "further details. Error: " +
+               std::string(rexc.what()) << std::endl;
   } catch (std::invalid_argument &) {
     g_log.error()
         << "The calibration calculations failed. Some input properties "
@@ -1256,34 +1536,38 @@ void EnggDiffractionPresenter::calibrationFinished() {
     const std::string vanNo = isValidRunNumber(m_view->newVanadiumNo());
 
     const std::string ceriaNo = isValidRunNumber(m_view->newCeriaNo());
-    const std::string outFilename =
-        buildCalibrateSuggestedFilename(vanNo, ceriaNo);
-    m_view->newCalibLoaded(vanNo, ceriaNo, outFilename);
+    m_view->newCalibLoaded(vanNo, ceriaNo, m_calibFullPath);
     g_log.notice()
         << "Cablibration finished and ready as 'current calibration'."
         << std::endl;
   }
   if (m_workerThread) {
     delete m_workerThread;
-    m_workerThread = NULL;
+    m_workerThread = nullptr;
   }
 }
 
 /**
-* Build a suggested name for a new calibration, by appending instrument name,
-* relevant run numbers, etc., like: ENGINX_241391_236516_both_banks.par
-*
-* @param vanNo number of the Vanadium run
-* @param ceriaNo number of the Ceria run
-*
-* @return Suggested name for a new calibration file, following
-* ENGIN-X practices
-*/
+ * Build a suggested name for a new calibration, by appending instrument name,
+ * relevant run numbers, etc., like: ENGINX_241391_236516_all_banks.par
+ *
+ * @param vanNo number of the Vanadium run
+ * @param ceriaNo number of the Ceria run
+ * @param bankName bank name when generating a file for an individual
+ * bank. Leave empty to use a generic name for all banks
+ *
+ * @return Suggested name for a new calibration file, following
+ * ENGIN-X practices
+ */
 std::string EnggDiffractionPresenter::buildCalibrateSuggestedFilename(
-    const std::string &vanNo, const std::string &ceriaNo) const {
-  // default and only one supported
+    const std::string &vanNo, const std::string &ceriaNo,
+    const std::string &bankName) const {
+  // default and only one supported instrument for now
   std::string instStr = g_enginxStr;
-  std::string nameAppendix = "_both_banks";
+  std::string nameAppendix = "_all_banks";
+  if (!bankName.empty()) {
+    nameAppendix = "_" + bankName;
+  }
   std::string curInst = m_view->currentInstrument();
   if ("ENGIN-X" != curInst && "ENGINX" != curInst) {
     instStr = "UNKNOWNINST";
@@ -1348,17 +1632,37 @@ void EnggDiffractionPresenter::doCalib(const EnggDiffCalibSettings &cs,
   // Bank 1 and 2 - ENGIN-X
   // bank 1 - loops once & used for cropped calibration
   // bank 2 - loops twice, one with each bank & used for new calibration
-  const size_t bankNo1 = 1;
-  const size_t bankNo2 = 2;
   std::vector<double> difc, tzero;
+  // for the names of the output files
+  std::vector<std::string> bankNames;
 
   bool specNumUsed = specNos != "";
+  // TODO: this needs sanitizing, it should be simpler
   if (specNumUsed) {
+    constexpr size_t bankNo1 = 1;
+
     difc.resize(bankNo1);
     tzero.resize(bankNo1);
+    int selection = m_view->currentCropCalibBankName();
+    if (0 == selection) {
+      // user selected "custom" name
+      const std::string customName = m_view->currentCalibCustomisedBankName();
+      if (customName.empty()) {
+        bankNames.emplace_back("cropped");
+      } else {
+        bankNames.push_back(customName);
+      }
+    } else if (1 == selection) {
+      bankNames.push_back("North");
+    } else {
+      bankNames.push_back("South");
+    }
   } else {
+    constexpr size_t bankNo2 = 2;
+
     difc.resize(bankNo2);
     tzero.resize(bankNo2);
+    bankNames = {"North", "South"};
   }
 
   for (size_t i = 0; i < difc.size(); i++) {
@@ -1387,25 +1691,56 @@ void EnggDiffractionPresenter::doCalib(const EnggDiffCalibSettings &cs,
               re.what() + " Please check also the log messages for details.";
       throw;
     }
-    difc[i] = alg->getProperty("Difc");
-    tzero[i] = alg->getProperty("Zero");
+
+    try {
+      difc[i] = alg->getProperty("DIFC");
+      tzero[i] = alg->getProperty("TZERO");
+    } catch (std::runtime_error &rexc) {
+      g_log.error() << "Error in calibration. ",
+          "The calibration algorithm EnggCalibrate run succesfully but could "
+          "not retrieve the outputs DIFC and TZERO. Error description: " +
+              std::string(rexc.what()) +
+              " Please check also the log messages for additional details.";
+      throw;
+    }
 
     g_log.notice() << " * Bank " << i + 1 << " calibrated, "
                    << "difc: " << difc[i] << ", zero: " << tzero[i]
                    << std::endl;
   }
-  // Creates appropriate directory
-  Poco::Path saveDir = outFilesDir("Calibration");
 
-  // Double horror: 1st use a python script
-  // 2nd: because runPythonCode does this by emitting a signal that goes to
-  // MantidPlot,
-  // it has to be done in the view (which is a UserSubWindow).
+  // Creates appropriate output directory
+  Poco::Path saveDir = outFilesDir("Calibration");
   Poco::Path outFullPath(saveDir);
   outFullPath.append(outFilename);
 
-  m_view->writeOutCalibFile(outFullPath.toString(), difc, tzero);
-  g_log.notice() << "Calibration file written as " << outFullPath.toString()
+  // Double horror: 1st use a python script
+  // 2nd: because runPythonCode does this by emitting a signal that goes to
+  // MantidPlot, it has to be done in the view (which is a UserSubWindow).
+  // First write the all banks parameters file
+  m_calibFullPath = outFullPath.toString();
+  writeOutCalibFile(m_calibFullPath, difc, tzero, bankNames);
+  // Then write one individual file per bank, using different templates and the
+  // specific bank name as suffix
+  for (size_t bankIdx = 0; bankIdx < difc.size(); ++bankIdx) {
+    Poco::Path bankOutputFullPath(saveDir);
+    const std::string bankFilename = buildCalibrateSuggestedFilename(
+        vanNo, ceriaNo, "bank_" + bankNames[bankIdx]);
+    bankOutputFullPath.append(bankFilename);
+    std::string templateFile = "template_ENGINX_241391_236516_North_bank.prm";
+    if (1 == bankIdx) {
+      templateFile = "template_ENGINX_241391_236516_South_bank.prm";
+    }
+
+    const std::string outPathName = bankOutputFullPath.toString();
+    writeOutCalibFile(outPathName, {difc[bankIdx]}, {tzero[bankIdx]},
+                      {bankNames[bankIdx]}, templateFile);
+    if (1 == difc.size()) {
+      // it is a  single bank or cropped calibration, so take its specific name
+      m_calibFullPath = outPathName;
+    }
+  }
+  g_log.notice() << "Calibration file written as " << m_calibFullPath
                  << std::endl;
 
   // plots the calibrated workspaces.
@@ -1458,7 +1793,7 @@ void EnggDiffractionPresenter::inputChecksBeforeFocusCropped(
   }
 
   if (specNos.empty()) {
-    throw std::invalid_argument("The list of spectrum IDs cannot be empty when "
+    throw std::invalid_argument("The list of spectrum Nos cannot be empty when "
                                 "focusing in 'cropped' mode.");
   }
 
@@ -1647,95 +1982,98 @@ void EnggDiffractionPresenter::doFocusRun(const std::string &dir,
                                           const std::string &specNos,
                                           const std::string &dgFile) {
 
-  if (!g_abortThread) {
-
-    // to track last valid run
-    g_lastValidRun = runNo;
-
-    g_log.notice() << "Generating new focusing workspace(s) and file(s) into "
-                      "this directory: "
-                   << dir << std::endl;
-
-    // TODO: this is almost 100% common with doNewCalibrate() - refactor
-    EnggDiffCalibSettings cs = m_view->currentCalibSettings();
-    Mantid::Kernel::ConfigServiceImpl &conf =
-        Mantid::Kernel::ConfigService::Instance();
-    const std::vector<std::string> tmpDirs = conf.getDataSearchDirs();
-    // in principle, the run files will be found from 'DirRaw', and the
-    // pre-calculated Vanadium corrections from 'DirCalib'
-    if (!cs.m_inputDirCalib.empty() &&
-        Poco::File(cs.m_inputDirCalib).exists()) {
-      conf.appendDataSearchDir(cs.m_inputDirCalib);
-    }
-    if (!cs.m_inputDirRaw.empty() && Poco::File(cs.m_inputDirRaw).exists()) {
-      conf.appendDataSearchDir(cs.m_inputDirRaw);
-    }
-
-    // Prepare special inputs for "texture" focusing
-    std::vector<size_t> bankIDs;
-    std::vector<std::string> effectiveFilenames;
-    std::vector<std::string> specs;
-    if (!specNos.empty()) {
-      // Cropped focusing
-      // just to iterate once, but there's no real bank here
-      bankIDs.push_back(0);
-      specs.push_back(specNos); // one spectrum IDs list given by the user
-      effectiveFilenames.push_back(outputFocusCroppedFilename(runNo));
-    } else {
-      if (dgFile.empty()) {
-        // Basic/normal focusing
-        for (size_t bidx = 0; bidx < banks.size(); bidx++) {
-          if (banks[bidx]) {
-            bankIDs.push_back(bidx + 1);
-            specs.emplace_back("");
-            effectiveFilenames = outputFocusFilenames(runNo, banks);
-          }
-        }
-      } else {
-        // texture focusing
-        try {
-          loadDetectorGroupingCSV(dgFile, bankIDs, specs);
-        } catch (std::runtime_error &re) {
-          g_log.error() << "Error loading detector grouping file: " + dgFile +
-                               ". Detailed error: " + re.what()
-                        << std::endl;
-          bankIDs.clear();
-          specs.clear();
-        }
-        effectiveFilenames = outputFocusTextureFilenames(runNo, bankIDs);
-      }
-    }
-
-    // focus all requested banks
-    for (size_t idx = 0; idx < bankIDs.size(); idx++) {
-
-      Poco::Path fpath(dir);
-      const std::string fullFilename =
-          fpath.append(effectiveFilenames[idx]).toString();
-      g_log.notice() << "Generating new focused file (bank " +
-                            boost::lexical_cast<std::string>(bankIDs[idx]) +
-                            ") for run " + runNo + " into: "
-                     << effectiveFilenames[idx] << std::endl;
-      try {
-        m_focusFinishedOK = false;
-        doFocusing(cs, fullFilename, runNo, bankIDs[idx], specs[idx], dgFile);
-        m_focusFinishedOK = true;
-      } catch (std::runtime_error &) {
-        g_log.error()
-            << "The focusing calculations failed. One of the algorithms"
-               "did not execute correctly. See log messages for details."
-            << std::endl;
-      } catch (std::invalid_argument &ia) {
-        g_log.error() << "The focusing failed. Some input properties "
-                         "were not valid. "
-                         "See log messages for details. Error: "
-                      << ia.what() << std::endl;
-      }
-    }
-
-    // restore initial data search paths
-    conf.setDataSearchDirs(tmpDirs);
+  if (g_abortThread) {
+    return;
   }
+
+  // to track last valid run
+  g_lastValidRun = runNo;
+
+  g_log.notice() << "Generating new focusing workspace(s) and file(s) into "
+                    "this directory: "
+                 << dir << std::endl;
+
+  // TODO: this is almost 100% common with doNewCalibrate() - refactor
+  EnggDiffCalibSettings cs = m_view->currentCalibSettings();
+  Mantid::Kernel::ConfigServiceImpl &conf =
+      Mantid::Kernel::ConfigService::Instance();
+  const std::vector<std::string> tmpDirs = conf.getDataSearchDirs();
+  // in principle, the run files will be found from 'DirRaw', and the
+  // pre-calculated Vanadium corrections from 'DirCalib'
+  if (!cs.m_inputDirCalib.empty() && Poco::File(cs.m_inputDirCalib).exists()) {
+    conf.appendDataSearchDir(cs.m_inputDirCalib);
+  }
+  if (!cs.m_inputDirRaw.empty() && Poco::File(cs.m_inputDirRaw).exists()) {
+    conf.appendDataSearchDir(cs.m_inputDirRaw);
+  }
+  for (const auto &browsed : m_browsedToPaths) {
+    conf.appendDataSearchDir(browsed);
+  }
+
+  // Prepare special inputs for "texture" focusing
+  std::vector<size_t> bankIDs;
+  std::vector<std::string> effectiveFilenames;
+  std::vector<std::string> specs;
+  if (!specNos.empty()) {
+    // Cropped focusing
+    // just to iterate once, but there's no real bank here
+    bankIDs.push_back(0);
+    specs.push_back(specNos); // one spectrum Nos list given by the user
+    effectiveFilenames.push_back(outputFocusCroppedFilename(runNo));
+  } else {
+    if (dgFile.empty()) {
+      // Basic/normal focusing
+      for (size_t bidx = 0; bidx < banks.size(); bidx++) {
+        if (banks[bidx]) {
+          bankIDs.push_back(bidx + 1);
+          specs.emplace_back("");
+          effectiveFilenames = outputFocusFilenames(runNo, banks);
+        }
+      }
+    } else {
+      // texture focusing
+      try {
+        loadDetectorGroupingCSV(dgFile, bankIDs, specs);
+      } catch (std::runtime_error &re) {
+        g_log.error() << "Error loading detector grouping file: " + dgFile +
+                             ". Detailed error: " + re.what()
+                      << std::endl;
+        bankIDs.clear();
+        specs.clear();
+      }
+      effectiveFilenames = outputFocusTextureFilenames(runNo, bankIDs);
+    }
+  }
+
+  // focus all requested banks
+  for (size_t idx = 0; idx < bankIDs.size(); idx++) {
+
+    Poco::Path fpath(dir);
+    const std::string fullFilename =
+        fpath.append(effectiveFilenames[idx]).toString();
+    g_log.notice() << "Generating new focused file (bank " +
+                          boost::lexical_cast<std::string>(bankIDs[idx]) +
+                          ") for run " + runNo + " into: "
+                   << effectiveFilenames[idx] << std::endl;
+    try {
+      m_focusFinishedOK = false;
+      doFocusing(cs, fullFilename, runNo, bankIDs[idx], specs[idx], dgFile);
+      m_focusFinishedOK = true;
+    } catch (std::runtime_error &rexc) {
+      g_log.error() << "The focusing calculations failed. One of the algorithms"
+                       "did not execute correctly. See log messages for "
+                       "further details. Error: " +
+                           std::string(rexc.what()) << std::endl;
+    } catch (std::invalid_argument &ia) {
+      g_log.error() << "The focusing failed. Some input properties "
+                       "were not valid. "
+                       "See log messages for details. Error: "
+                    << ia.what() << std::endl;
+    }
+  }
+
+  // restore initial data search paths
+  conf.setDataSearchDirs(tmpDirs);
 }
 
 void EnggDiffractionPresenter::loadDetectorGroupingCSV(
@@ -1761,7 +2099,7 @@ void EnggDiffractionPresenter::loadDetectorGroupingCSV(
       throw std::runtime_error(
           "In file '" + dgFile + "', wrong format in line: " +
           boost::lexical_cast<std::string>(li) +
-          " which does not containe any delimiters (comma, etc.)");
+          " which does not contain any delimiters (comma, etc.)");
     }
 
     try {
@@ -1777,7 +2115,7 @@ void EnggDiffractionPresenter::loadDetectorGroupingCSV(
         throw std::runtime_error("In file '" + dgFile +
                                  "', wrong format in line: " +
                                  boost::lexical_cast<std::string>(li) +
-                                 ", the list of spectrum IDs is empty!");
+                                 ", the list of spectrum Nos is empty!");
       }
 
       size_t bankID = boost::lexical_cast<size_t>(bstr);
@@ -2206,7 +2544,7 @@ void EnggDiffractionPresenter::loadVanadiumPrecalcWorkspaces(
       Mantid::API::AlgorithmManager::Instance().createUnmanaged("LoadNexus");
   algCurves->initialize();
   algCurves->setPropertyValue("Filename", preCurvesFilename);
-  std::string curvesWSName = "engggui_vanadium_curves_ws";
+  const std::string curvesWSName = g_vanCurvesWSName;
   algCurves->setPropertyValue("OutputWorkspace", curvesWSName);
   algCurves->execute();
   // algCurves->getProperty("OutputWorkspace");
@@ -2276,7 +2614,7 @@ void EnggDiffractionPresenter::calcVanadiumWorkspaces(
   alg->setProperty("VanadiumWorkspace", vanWS);
   std::string integName = g_vanIntegrationWSName;
   alg->setPropertyValue("OutIntegrationWorkspace", integName);
-  std::string curvesName = "engggui_van_curves_ws";
+  const std::string curvesName = g_vanCurvesWSName;
   alg->setPropertyValue("OutCurvesWorkspace", curvesName);
   alg->execute();
 
@@ -2577,12 +2915,8 @@ void EnggDiffractionPresenter::plotCalibWorkspace(std::vector<double> difc,
                                                   std::string specNos) {
   const bool plotCalibWS = m_view->plotCalibWorkspace();
   if (plotCalibWS) {
-    if (g_plottingCounter == 1) {
-      m_view->plotVanCurvesCalibOutput();
-    } else {
-      m_view->plotReplacingWindow("engggui_vanadium_curves_ws", "[0, 1, 2]",
-                                  "2");
-    }
+    std::string pyCode = vanadiumCurvesPlotFactory();
+    m_view->plotCalibOutput(pyCode);
 
     // Get the Customised Bank Name text-ield string from qt
     std::string CustomisedBankName = m_view->currentCalibCustomisedBankName();
@@ -2591,7 +2925,7 @@ void EnggDiffractionPresenter::plotCalibWorkspace(std::vector<double> difc,
     const std::string pythonCode =
         DifcZeroWorkspaceFactory(difc, tzero, specNos, CustomisedBankName) +
         plotDifcZeroWorkspace(CustomisedBankName);
-    m_view->plotDifcZeroCalibOutput(pythonCode);
+    m_view->plotCalibOutput(pythonCode);
   }
 }
 
@@ -2768,6 +3102,32 @@ std::string EnggDiffractionPresenter::outFileNameFactory(
     fullFilename = "ENGINX_" + runNo + "_bank_" + bank + format;
   }
   return fullFilename;
+}
+
+std::string EnggDiffractionPresenter::vanadiumCurvesPlotFactory() {
+  std::string pyCode =
+
+      "van_curve_twin_ws = \"__engggui_vanadium_curves_twin_ws\"\n"
+
+      "if(mtd.doesExist(van_curve_twin_ws)):\n"
+      " DeleteWorkspace(van_curve_twin_ws)\n"
+
+      "CloneWorkspace(InputWorkspace = \"engggui_vanadium_curves_ws\", "
+      "OutputWorkspace = van_curve_twin_ws)\n"
+
+      "van_curves_ws = workspace(van_curve_twin_ws)\n"
+      "for i in range(1, 3):\n"
+      " if (i == 1):\n"
+      "  curve_plot_bank_1 = plotSpectrum(van_curves_ws, [0, 1, "
+      "2]).activeLayer()\n"
+      "  curve_plot_bank_1.setTitle(\"Engg GUI Vanadium Curves Bank 1\")\n"
+
+      " if (i == 2):\n"
+      "  curve_plot_bank_2 = plotSpectrum(van_curves_ws, [3, 4, "
+      "5]).activeLayer()\n"
+      "  curve_plot_bank_2.setTitle(\"Engg GUI Vanadium Curves Bank 2\")\n";
+
+  return pyCode;
 }
 
 /**
@@ -2970,6 +3330,83 @@ Poco::Path EnggDiffractionPresenter::outFilesDir(std::string addToDir) {
     g_log.error() << "Error while find/creating a path: " << re.what();
   }
   return saveDir;
+}
+
+/**
+ * To write the calibration/instrument parameter for GSAS.
+ *
+ * @param outFilename name of the output .par/.prm/.iparm file for GSAS
+ * @param difc list of GSAS DIFC values to include in the file
+ * @param tzero list of GSAS TZERO values to include in the file
+ * @param bankNames list of bank names corresponding the the difc/tzero
+ * @param templateFile a template file where to replace the difc/zero
+ * values. An empty default implies using an "all-banks" template.
+ */
+void EnggDiffractionPresenter::writeOutCalibFile(
+    const std::string &outFilename, const std::vector<double> &difc,
+    const std::vector<double> &tzero, const std::vector<std::string> &bankNames,
+    const std::string &templateFile) {
+  // TODO: this is horrible and should be changed to avoid running
+  // Python code. Update this as soon as we have a more stable way of
+  // generating IPARM/PRM files.
+
+  // Writes a file doing this:
+  // write_ENGINX_GSAS_iparam_file(output_file, difc, zero, ceria_run=241391,
+  // vanadium_run=236516, template_file=None):
+
+  // this replace is to prevent issues with network drives on windows:
+  const std::string safeOutFname =
+      boost::replace_all_copy(outFilename, "\\", "/");
+  std::string pyCode = "import EnggUtils\n";
+  pyCode += "import os\n";
+  // normalize apparently not needed after the replace, but to be double-safe:
+  pyCode += "GSAS_iparm_fname = os.path.normpath('" + safeOutFname + "')\n";
+  pyCode += "bank_names = []\n";
+  pyCode += "Difcs = []\n";
+  pyCode += "Zeros = []\n";
+  std::string templateFileVal = "None";
+  if (!templateFile.empty()) {
+    templateFileVal = "'" + templateFile + "'";
+  }
+  pyCode += "template_file = " + templateFileVal + "\n";
+  for (size_t i = 0; i < difc.size(); i++) {
+    pyCode += "bank_names.append('" + bankNames[i] + "')\n";
+    pyCode +=
+        "Difcs.append(" + boost::lexical_cast<std::string>(difc[i]) + ")\n";
+    pyCode +=
+        "Zeros.append(" + boost::lexical_cast<std::string>(tzero[i]) + ")\n";
+  }
+  pyCode +=
+      "EnggUtils.write_ENGINX_GSAS_iparam_file(output_file=GSAS_iparm_fname, "
+      "bank_names=bank_names, difc=Difcs, tzero=Zeros, "
+      "template_file=template_file) \n";
+
+  const auto status = m_view->enggRunPythonCode(pyCode);
+  g_log.information() << "Saved output calibration file via Python. Status: "
+                      << status << std::endl;
+}
+
+/**
+ * Note down a directory that needs to be added to the data search
+ * path when looking for run files. This simply uses a vector and adds
+ * all the paths, as the ConfigService will take care of duplicates,
+ * invalid directories, etc.
+ *
+ * @param filename (full) path to a file
+ */
+void EnggDiffractionPresenter::recordPathBrowsedTo(
+    const std::string &filename) {
+
+  Poco::File file(filename);
+  if (!file.exists() || !file.isFile())
+    return;
+
+  Poco::Path path(filename);
+  Poco::File directory(path.parent());
+  if (!directory.exists() || !directory.isDirectory())
+    return;
+
+  m_browsedToPaths.push_back(directory.path());
 }
 
 } // namespace CustomInterfaces

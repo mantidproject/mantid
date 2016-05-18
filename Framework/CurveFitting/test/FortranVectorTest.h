@@ -205,6 +205,23 @@ public:
     TS_ASSERT_EQUALS(v(2), 10.2);
     TS_ASSERT_EQUALS(v(3), 10.3);
   }
+
+  void test_int_array() {
+    typedef FortranVector<std::vector<int>> FortranIntVector;
+    FortranIntVector ivec(1, 3);
+    ivec(1) = 11;
+    ivec(2) = 22;
+    ivec(3) = 33;
+
+    TS_ASSERT_EQUALS(ivec(1), 11);
+    TS_ASSERT_EQUALS(ivec(2), 22);
+    TS_ASSERT_EQUALS(ivec(3), 33);
+
+    ivec.allocate(-1, 1);
+    TS_ASSERT_EQUALS(ivec(-1), 11);
+    TS_ASSERT_EQUALS(ivec(0), 22);
+    TS_ASSERT_EQUALS(ivec(1), 33);
+  }
 };
 
 #endif /* MANTID_CURVEFITTING_FORTRANVECTORTEST_H_ */

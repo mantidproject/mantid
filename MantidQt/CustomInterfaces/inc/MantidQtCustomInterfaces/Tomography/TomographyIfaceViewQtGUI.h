@@ -5,16 +5,17 @@
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidQtAPI/BatchAlgorithmRunner.h"
 #include "MantidQtAPI/UserSubWindow.h"
 #include "MantidQtCustomInterfaces/DllConfig.h"
-#include "MantidQtCustomInterfaces/Tomography/ImageROIViewQtWidget.h"
 #include "MantidQtCustomInterfaces/Tomography/ITomographyIfacePresenter.h"
 #include "MantidQtCustomInterfaces/Tomography/ITomographyIfaceView.h"
+#include "MantidQtCustomInterfaces/Tomography/ImageROIViewQtWidget.h"
+#include "MantidQtCustomInterfaces/Tomography/ImggFormatsConvertViewQtWidget.h"
 #include "MantidQtCustomInterfaces/Tomography/TomoToolConfigDialog.h"
 #include "MantidQtCustomInterfaces/Tomography/TomoSystemSettings.h"
 
 #include "ui_ImageSelectCoRAndRegions.h"
-#include "ui_ImgFormatsConversion.h"
 #include "ui_TomographyIfaceQtGUI.h"
 #include "ui_TomographyIfaceQtTabEnergy.h"
 #include "ui_TomographyIfaceQtTabFiltersSettings.h"
@@ -33,6 +34,11 @@ class ImageROIViewQtWidget;
 class QMutex;
 
 namespace MantidQt {
+
+namespace API {
+class BatchAlgorithmRunner;
+}
+
 namespace CustomInterfaces {
 
 /**
@@ -156,6 +162,13 @@ public:
     return m_tabROIW->userSelection();
   }
 
+  std::map<std::string, std::string>
+  currentAggregateBandsParams() const override {
+    return grabCurrentAggParams();
+  }
+
+  void runAggregateBands(Mantid::API::IAlgorithm_sptr alg) override;
+
 private slots:
   /// for buttons, run tab, and similar
   void reconstructClicked();
@@ -200,12 +213,8 @@ private slots:
   void sendToOctopusVisClicked();
   void defaultDirLocalVisualizeClicked();
   void defaultDirRemoteVisualizeClicked();
-  void browseVisToolParaviewClicke();
+  void browseVisToolParaviewClicked();
   void browseVisToolOctopusClicked();
-
-  // convert formats section/tab
-  void browseImgInputConvertClicked();
-  void browseImgOutputConvertClicked();
 
   // processing of energy bands
   void browseEnergyInputClicked();
@@ -219,6 +228,12 @@ private slots:
 
   // reset all system / advanced settings
   void resetSystemSettings();
+
+  // start aggregation of energy/wavelength bands
+  void pushButtonAggClicked();
+  void browseAggScriptClicked();
+  // aggregation run finished
+  void finishedAggBands(bool error);
 
   // for the savu functionality - waiting for Savu
   void menuSaveClicked();
@@ -241,7 +256,6 @@ private:
   void doSetupSectionRun();
   void doSetupSectionFilters();
   void doSetupSectionVisualize();
-  void doSetupSectionConvert();
   void doSetupSectionEnergy();
   void doSetupSectionSystemSettings();
   void doSetupGeneralWidgets();
@@ -250,8 +264,12 @@ private:
 
   /// Load default interface settings for each tab, normally on startup
   void readSettings();
+  /// for the energy bands tab/widget
+  void readSettingsEnergy();
   /// save settings (before closing)
   void saveSettings() const override;
+  /// for the energy bands tab/widget
+  void saveSettingsEnergy() const;
 
   void updateSystemSettings(const TomoSystemSettings &setts);
 
@@ -285,6 +303,8 @@ private:
 
   void sendToVisTool(const std::string &toolName, const std::string &pathString,
                      const std::string &appendBin);
+
+  std::map<std::string, std::string> grabCurrentAggParams() const;
 
   void sendLog(const std::string &msg);
 
@@ -335,11 +355,11 @@ private:
   Ui::TomographyIfaceQtTabFiltersSettings m_uiTabFilters;
   Ui::ImageSelectCoRAndRegions m_uiTabCoR;
   Ui::TomographyIfaceQtTabVisualize m_uiTabVisualize;
-  Ui::ImgFormatsConversion m_uiTabConvertFormats;
   Ui::TomographyIfaceQtTabEnergy m_uiTabEnergy;
   Ui::TomographyIfaceQtTabSystemSettings m_uiTabSystemSettings;
 
   ImageROIViewQtWidget *m_tabROIW;
+  ImggFormatsConvertViewQtWidget *m_tabImggFormats;
 
   /// Tool specific setup dialogs
   Ui::TomoToolConfigAstra m_uiAstra;
@@ -427,6 +447,10 @@ private:
 
   // path name for persistent settings
   std::string m_settingsGroup;
+  std::string m_settingsSubGroupEnergy;
+
+  // To run aggregation of wavelength/energy bands
+  std::unique_ptr<MantidQt::API::BatchAlgorithmRunner> m_aggAlgRunner;
 
   // TODO? move to TomographyIfaceModel or TomographyIfaceSavuModel.h
   // plugins for Savu config files

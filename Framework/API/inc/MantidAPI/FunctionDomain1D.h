@@ -45,6 +45,10 @@ namespace API {
 */
 class MANTID_API_DLL FunctionDomain1D : public FunctionDomain {
 public:
+  /// copying is not allowed.
+  FunctionDomain1D(const FunctionDomain1D &right) = delete;
+  /// copying is not allowed.
+  FunctionDomain1D &operator=(const FunctionDomain1D &) = delete;
   /// Return the number of arguments in the domain
   size_t size() const override { return m_n; }
   /// Get an x value.
@@ -66,10 +70,6 @@ protected:
   }
 
 private:
-  /// Private copy constructor - copying is not allowed.
-  FunctionDomain1D(const FunctionDomain1D &right);
-  /// Private copy assignment operator - copying is not allowed.
-  FunctionDomain1D &operator=(const FunctionDomain1D &);
   const double *m_data; ///< pointer to the start of the domain data
   size_t m_n;           ///< size of the data
 };

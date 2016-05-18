@@ -40,8 +40,7 @@ XmlHandler::get_metadata(const std::string &tag_to_ignore) {
       std::string key =
           pNode->parentNode()->nodeName() + "/" + pNode->nodeName();
       std::string value = pNode->innerText();
-      auto to_insert = std::pair<std::string, std::string>(key, value);
-      metadata.insert(to_insert);
+      metadata.emplace(key, value);
     }
     pNode = it.nextNode();
   }
@@ -68,10 +67,7 @@ XmlHandler::get_attributes_from_tag(const std::string &xpath) {
     Poco::XML::NamedNodeMap *attributes = detectorNode->attributes();
     for (unsigned int i = 0; i < attributes->length(); i++) {
       Poco::XML::Node *attribute = attributes->item(i);
-      std::string key = attribute->nodeName();
-      std::string value = attribute->nodeValue();
-      auto to_insert = std::pair<std::string, std::string>(key, value);
-      attributes_map.insert(to_insert);
+      attributes_map.emplace(attribute->nodeName(), attribute->nodeValue());
     }
   }
   return attributes_map;

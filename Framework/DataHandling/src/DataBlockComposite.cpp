@@ -404,17 +404,17 @@ bool DataBlockComposite::operator==(const DataBlockComposite &other) const {
 void DataBlockComposite::removeSpectra(DataBlockComposite &toRemove) {
   // Get intervals for current data blocks
   std::vector<std::pair<int64_t, int64_t>> originalIntervals;
-  for (auto &dataBlock : m_dataBlocks) {
-    originalIntervals.emplace_back(std::make_pair(
-        dataBlock.getMinSpectrumID(), dataBlock.getMaxSpectrumID()));
+  for (const auto &dataBlock : m_dataBlocks) {
+    originalIntervals.emplace_back(dataBlock.getMinSpectrumID(),
+                                   dataBlock.getMaxSpectrumID());
   }
 
   // Get intervals for the data blocks which should be removed
   auto removeBlocks = toRemove.getDataBlocks();
   std::vector<std::pair<int64_t, int64_t>> toRemoveIntervals;
-  for (auto &dataBlock : removeBlocks) {
-    toRemoveIntervals.emplace_back(std::make_pair(
-        dataBlock.getMinSpectrumID(), dataBlock.getMaxSpectrumID()));
+  for (const auto &dataBlock : removeBlocks) {
+    toRemoveIntervals.emplace_back(dataBlock.getMinSpectrumID(),
+                                   dataBlock.getMaxSpectrumID());
   }
 
   // Now create the new intervals which don't include the removeInterval
@@ -437,7 +437,7 @@ void DataBlockComposite::removeSpectra(DataBlockComposite &toRemove) {
   auto numberOfChannels = m_dataBlocks[0].getNumberOfChannels();
 
   m_dataBlocks.clear();
-  for (auto &newInterval : newIntervals) {
+  for (const auto &newInterval : newIntervals) {
     DataBlock dataBlock(numberOfPeriods,
                         newInterval.second - newInterval.first + 1,
                         numberOfChannels);

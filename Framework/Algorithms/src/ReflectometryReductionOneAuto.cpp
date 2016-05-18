@@ -8,6 +8,24 @@
 #include "MantidKernel/RebinParamsValidator.h"
 #include <boost/optional.hpp>
 
+/*Anonymous namespace*/
+namespace {
+/**
+* Helper free function to calculate MomentumTransfer from lambda and theta
+* @param lambda : Value in wavelength
+* @param theta  : Value in Degrees
+* @return MomentumTransfer
+* @
+*/
+double calculateQ(double lambda, double theta) {
+  if (lambda == 0.0)
+    throw std::runtime_error("Minimum/Maximum value of the IvsLambda Workspace "
+                             "is 0. Cannot calculate Q");
+  double thetaInRad = theta * M_PI / 180;
+  return (4 * M_PI * sin(thetaInRad)) / lambda;
+}
+}
+/*end of Anonymous namespace*/
 namespace Mantid {
 namespace Algorithms {
 
@@ -100,6 +118,10 @@ void ReflectometryReductionOneAuto::init() {
 
   declareProperty("EndOverlap", Mantid::EMPTY_DBL(), "End overlap in Q.",
                   Direction::Input);
+  declareProperty("ScaleFactor", 1.0,
+                  "Factor you wish to scale Q workspace by.", Direction::Input);
+  auto index_bounds = boost::make_shared<BoundedValidator<int>>();
+  index_bounds->setLower(0);
 
   declareProperty(make_unique<PropertyWithValue<int>>(
                       "I0MonitorIndex", Mantid::EMPTY_INT(), Direction::Input),
@@ -114,22 +136,32 @@ void ReflectometryReductionOneAuto::init() {
                   "Wavelength Max in angstroms", Direction::Input);
   declareProperty("WavelengthStep", Mantid::EMPTY_DBL(),
                   "Wavelength step in angstroms", Direction::Input);
-  declareProperty(make_unique<PropertyWithValue<double>>(
-                      "MonitorBackgroundWavelengthMin", Mantid::EMPTY_DBL(),
-                      Direction::Input),
-                  "Monitor wavelength background min in angstroms");
-  declareProperty(make_unique<PropertyWithValue<double>>(
-                      "MonitorBackgroundWavelengthMax", Mantid::EMPTY_DBL(),
-                      Direction::Input),
-                  "Monitor wavelength background max in angstroms");
-  declareProperty(make_unique<PropertyWithValue<double>>(
-                      "MonitorIntegrationWavelengthMin", Mantid::EMPTY_DBL(),
-                      Direction::Input),
-                  "Monitor integral min in angstroms");
-  declareProperty(make_unique<PropertyWithValue<double>>(
-                      "MonitorIntegrationWavelengthMax", Mantid::EMPTY_DBL(),
-                      Direction::Input),
-                  "Monitor integral max in angstroms");
+  declareProperty("MomentumTransferMinimum", Mantid::EMPTY_DBL(),
+                  "Minimum Q value in IvsQ "
+                  "Workspace. Used for Rebinning "
+                  "the IvsQ Workspace",
+                  Direction::Input);
+  declareProperty("MomentumTransferStep", Mantid::EMPTY_DBL(),
+                  "Resolution value in IvsQ Workspace. Used for Rebinning the "
+                  "IvsQ Workspace. This value will be made minus to apply "
+                  "logarithmic rebinning. If you wish to have linear "
+                  "bin-widths then please provide a negative DQQ",
+                  Direction::Input);
+  declareProperty("MomentumTransferMaximum", Mantid::EMPTY_DBL(),
+                  "Maximum Q value in IvsQ "
+                  "Workspace. Used for Rebinning "
+                  "the IvsQ Workspace",
+                  Direction::Input);
+  declareProperty("MonitorBackgroundWavelengthMin", Mantid::EMPTY_DBL(),
+                  "Monitor wavelength background min in angstroms",
+                  Direction::Input);
+  declareProperty("MonitorBackgroundWavelengthMax", Mantid::EMPTY_DBL(),
+                  "Monitor wavelength background max in angstroms",
+                  Direction::Input);
+  declareProperty("MonitorIntegrationWavelengthMin", Mantid::EMPTY_DBL(),
+                  "Monitor integral min in angstroms", Direction::Input);
+  declareProperty("MonitorIntegrationWavelengthMax", Mantid::EMPTY_DBL(),
+                  "Monitor integral max in angstroms", Direction::Input);
   declareProperty(make_unique<PropertyWithValue<std::string>>(
                       "DetectorComponentName", "", Direction::Input),
                   "Name of the detector component i.e. point-detector. If "
@@ -476,21 +508,76 @@ void ReflectometryReductionOneAuto::exec() {
     if (theta_in.is_initialized()) {
       refRedOne->setProperty("ThetaIn", theta_in.get());
     }
+    double scaleFactor = getProperty("ScaleFactor");
+    if (scaleFactor != 1.0) {
+      refRedOne->setProperty("ScaleFactor", scaleFactor);
+    }
+    auto momentumTransferMinimum = isSet<double>("MomentumTransferMinimum");
+    auto momentumTransferStep = isSet<double>("MomentumTransferStep");
+    auto momentumTransferMaximum = isSet<double>("MomentumTransferMaximum");
 
+    if (momentumTransferStep.is_initialized()) {
+      refRedOne->setProperty("MomentumTransferStep",
+                             momentumTransferStep.get());
+    }
+    if (momentumTransferMinimum.is_initialized())
+      refRedOne->setProperty("MomentumTransferMinimum",
+                             momentumTransferMinimum.get());
+    if (momentumTransferMaximum.is_initialized())
+      refRedOne->setProperty("MomentumTransferMaximum",
+                             momentumTransferMaximum.get());
+    if (theta_in.is_initialized()) {
+      if (!momentumTransferMinimum.is_initialized())
+        momentumTransferMinimum = calculateQ(wavelength_max, theta_in.get());
+      if (!momentumTransferStep.is_initialized()) {
+        IAlgorithm_sptr calcResAlg =
+            AlgorithmManager::Instance().create("CalculateResolution");
+        calcResAlg->setProperty("Workspace", in_ws);
+        calcResAlg->setProperty("TwoTheta", theta_in.get());
+        calcResAlg->execute();
+        if (!calcResAlg->isExecuted())
+          throw std::runtime_error(
+              "CalculateResolution failed. Please manually "
+              "enter a value in the dQ/Q column.");
+        double resolution = calcResAlg->getProperty("Resolution");
+        momentumTransferStep = resolution;
+      }
+      if (!momentumTransferMaximum.is_initialized())
+        momentumTransferMaximum = calculateQ(wavelength_min, theta_in.get());
+      refRedOne->setProperty("MomentumTransferMinimum",
+                             momentumTransferMinimum.get());
+      refRedOne->setProperty("MomentumTransferStep",
+                             momentumTransferStep.get());
+      refRedOne->setProperty("MomentumTransferMaximum",
+                             momentumTransferMaximum.get());
+    }
     refRedOne->execute();
     if (!refRedOne->isExecuted()) {
       throw std::runtime_error(
           "ReflectometryReductionOne did not execute sucessfully");
-    } else {
-      MatrixWorkspace_sptr new_IvsQ1 =
-          refRedOne->getProperty("OutputWorkspace");
-      MatrixWorkspace_sptr new_IvsLam1 =
-          refRedOne->getProperty("OutputWorkspaceWavelength");
-      double thetaOut1 = refRedOne->getProperty("ThetaOut");
-      setProperty("OutputWorkspace", new_IvsQ1);
-      setProperty("OutputWorkspaceWavelength", new_IvsLam1);
-      setProperty("ThetaOut", thetaOut1);
     }
+
+    MatrixWorkspace_sptr new_IvsQ1 = refRedOne->getProperty("OutputWorkspace");
+    MatrixWorkspace_sptr new_IvsLam1 =
+        refRedOne->getProperty("OutputWorkspaceWavelength");
+    double thetaOut1 = refRedOne->getProperty("ThetaOut");
+    setProperty("OutputWorkspace", new_IvsQ1);
+    setProperty("OutputWorkspaceWavelength", new_IvsLam1);
+    setProperty("ThetaOut", thetaOut1);
+    // set properties so they can be retrieved by GenericDataProcesser if
+    // necessary.
+    setProperty("MomentumTransferMinimum",
+                boost::lexical_cast<double>(
+                    refRedOne->getPropertyValue("MomentumTransferMinimum")));
+    setProperty("MomentumTransferStep",
+                boost::lexical_cast<double>(
+                    refRedOne->getPropertyValue("MomentumTransferStep")));
+    setProperty("MomentumTransferMaximum",
+                boost::lexical_cast<double>(
+                    refRedOne->getPropertyValue("MomentumTransferMaximum")));
+    setProperty("ThetaIn", boost::lexical_cast<double>(
+                               refRedOne->getPropertyValue("ThetaIn")));
+
   } else {
     throw std::runtime_error(
         "ReflectometryReductionOne could not be initialised");
@@ -539,7 +626,7 @@ ReflectometryReductionOneAuto::sumOverTransmissionGroup(
   // We used .release because clone() will return a unique_ptr.
   // we need to release the ownership of the pointer so that it
   // can be cast into a shared_ptr of type Workspace.
-  Workspace_sptr transmissionRunSum(transGroup->getItem(0)->clone().release());
+  Workspace_sptr transmissionRunSum(transGroup->getItem(0)->clone());
 
   // make a variable to store the overall total of the summation
   MatrixWorkspace_sptr total;
@@ -742,6 +829,18 @@ bool ReflectometryReductionOneAuto::processGroups() {
   }
 
   // We finished successfully
+  // set the values of these properties so they can be retrieved by the
+  // Interface.
+  this->setProperty("MomentumTransferMinimum",
+                    boost::lexical_cast<double>(
+                        alg->getPropertyValue("MomentumTransferMinimum")));
+  this->setProperty("MomentumTransferStep",
+                    boost::lexical_cast<double>(
+                        alg->getPropertyValue("MomentumTransferStep")));
+  this->setProperty("MomentumTransferMaximum",
+                    boost::lexical_cast<double>(
+                        alg->getPropertyValue("MomentumTransferMaximum")));
+  // setting output properties.
   this->setPropertyValue("OutputWorkspace", outputIvsQ);
   this->setPropertyValue("OutputWorkspaceWavelength", outputIvsLam);
   setExecuted(true);

@@ -6,7 +6,7 @@
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidAPI/TableRow.h"
 
-#include <stdio.h>
+#include <cstdio>
 
 using namespace Mantid;
 using namespace Mantid::API;

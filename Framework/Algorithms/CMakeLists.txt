@@ -225,8 +225,11 @@ set ( SRC_FILES
 	src/RingProfile.cpp
 	src/SANSCollimationLengthEstimator.cpp
 	src/SANSDirectBeamScaling.cpp
+	src/SampleCorrections/MCAbsorptionStrategy.cpp
+	src/SampleCorrections/MCInteractionVolume.cpp
 	src/SampleCorrections/MayersSampleCorrection.cpp
 	src/SampleCorrections/MayersSampleCorrectionStrategy.cpp
+	src/SampleCorrections/RectangularBeamProfile.cpp
 	src/SassenaFFT.cpp
 	src/Scale.cpp
 	src/ScaleX.cpp
@@ -510,8 +513,12 @@ set ( INC_FILES
 	inc/MantidAlgorithms/RingProfile.h
 	inc/MantidAlgorithms/SANSCollimationLengthEstimator.h
 	inc/MantidAlgorithms/SANSDirectBeamScaling.h
+	inc/MantidAlgorithms/SampleCorrections/IBeamProfile.h
+	inc/MantidAlgorithms/SampleCorrections/MCAbsorptionStrategy.h
+	inc/MantidAlgorithms/SampleCorrections/MCInteractionVolume.h
 	inc/MantidAlgorithms/SampleCorrections/MayersSampleCorrection.h
 	inc/MantidAlgorithms/SampleCorrections/MayersSampleCorrectionStrategy.h
+	inc/MantidAlgorithms/SampleCorrections/RectangularBeamProfile.h
 	inc/MantidAlgorithms/SassenaFFT.h
 	inc/MantidAlgorithms/Scale.h
 	inc/MantidAlgorithms/ScaleX.h
@@ -709,6 +716,7 @@ set ( TEST_FILES
 	GetDetOffsetsMultiPeaksTest.h
 	GetDetectorOffsetsTest.h
 	GetEiTest.h
+	GetEiV1Test.h    
 	GetTimeSeriesLogInformationTest.h
 	GroupWorkspacesTest.h
 	HRPDSlabCanAbsorptionTest.h
@@ -721,12 +729,14 @@ set ( TEST_FILES
 	InvertMaskTest.h
 	LogarithmTest.h
 	LorentzCorrectionTest.h
+	MCAbsorptionStrategyTest.h
+	MCInteractionVolumeTest.h
 	MaskBinsFromTableTest.h
 	MaskBinsTest.h
-	MaxEntTest.h
 	MaxEnt/MaxentDataTest.h
 	MaxEnt/MaxentEntropyNegativeValuesTest.h
 	MaxEnt/MaxentEntropyPositiveValuesTest.h
+	MaxEntTest.h
 	MaxMinTest.h
 	MayersSampleCorrectionStrategyTest.h
 	MayersSampleCorrectionTest.h
@@ -772,6 +782,7 @@ set ( TEST_FILES
 	RebinTest.h
 	RebinToWorkspaceTest.h
 	RebunchTest.h
+	RectangularBeamProfileTest.h
 	ReflectometryReductionOneAutoTest.h
 	ReflectometryReductionOneTest.h
 	RegroupTest.h
@@ -794,6 +805,7 @@ set ( TEST_FILES
 	ScaleTest.h
 	ScaleXTest.h
 	SetInstrumentParameterTest.h
+	SetUncertaintiesTest.h
 	ShiftLogTimeTest.h
 	SignalOverErrorTest.h
 	SmoothDataTest.h

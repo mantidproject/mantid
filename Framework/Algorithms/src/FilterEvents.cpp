@@ -808,7 +808,7 @@ void FilterEvents::setupCustomizedTOFCorrection() {
         m_detTofOffsets[i] = fiter->second;
     } // ENDFOR (each spectrum i)
   } else {
-    // It is spectrum ID already
+    // It is spectrum Number already
     map<detid_t, double>::iterator fiter;
     // correction factor
     for (fiter = toffactormap.begin(); fiter != toffactormap.end(); ++fiter) {
@@ -1029,31 +1029,40 @@ Kernel::TimeSplitterType FilterEvents::generateSplitters(int wsindex) {
  */
 void FilterEvents::splitLog(EventWorkspace_sptr eventws, std::string logname,
                             TimeSplitterType &splitters) {
-  Kernel::TimeSeriesProperty<double> *prop =
+  // cast property to both double TimeSeriesProperty and IntSeriesProperty
+  Kernel::TimeSeriesProperty<double> *dbl_prop =
       dynamic_cast<Kernel::TimeSeriesProperty<double> *>(
           eventws->mutableRun().getProperty(logname));
-  if (!prop) {
-    g_log.warning() << "Log " << logname
-                    << " is not TimeSeriesProperty.  Unable to split."
-                    << std::endl;
-    return;
+  Kernel::TimeSeriesProperty<int> *int_prop =
+      dynamic_cast<Kernel::TimeSeriesProperty<int> *>(
+          eventws->mutableRun().getProperty(logname));
+
+  if (!dbl_prop && !int_prop) {
+    std::stringstream errmsg;
+    errmsg << "Log " << logname
+           << " is not TimeSeriesProperty<int> or TimeSeriesProperty<double>. "
+           << "Unable to split.";
+    throw std::runtime_error(errmsg.str());
   } else {
     for (const auto &split : splitters) {
-      g_log.debug() << "[FilterEvents DB1226] Going to filter workspace "
-                    << eventws->name() << ": "
+      g_log.debug() << "Workspace " << eventws->name() << ": "
                     << "log name = " << logname
                     << ", duration = " << split.duration() << " from "
                     << split.start() << " to " << split.stop() << ".\n";
     }
-  }
 
-  prop->filterByTimes(splitters);
+    // split log
+    if (dbl_prop)
+      dbl_prop->filterByTimes(splitters);
+    else
+      int_prop->filterByTimes(splitters);
+  }
 
   return;
 }
 
 //----------------------------------------------------------------------------------------------
-/** Get all filterable logs' names
+/** Get all filterable logs' names (double and integer)
  * @returns Vector of names of logs
  */
 std::vector<std::string> FilterEvents::getTimeSeriesLogNames() {
@@ -1062,10 +1071,15 @@ std::vector<std::string> FilterEvents::getTimeSeriesLogNames() {
   const std::vector<Kernel::Property *> allprop =
       m_eventWS->mutableRun().getProperties();
   for (auto ip : allprop) {
-    Kernel::TimeSeriesProperty<double> *timeprop =
+    // cast to double log and integer log
+    Kernel::TimeSeriesProperty<double> *dbltimeprop =
         dynamic_cast<Kernel::TimeSeriesProperty<double> *>(ip);
-    if (timeprop) {
-      std::string pname = timeprop->name();
+    Kernel::TimeSeriesProperty<int> *inttimeprop =
+        dynamic_cast<Kernel::TimeSeriesProperty<int> *>(ip);
+
+    // append to vector if it is either double TimeSeries or int TimeSeries
+    if (dbltimeprop || inttimeprop) {
+      std::string pname = ip->name();
       lognames.push_back(pname);
     }
   }

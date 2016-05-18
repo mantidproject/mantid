@@ -812,6 +812,8 @@ void MWRunFiles::inspectThreadResult() {
     setFileProblem("");
   }
 
+  emit fileInspectionFinished();
+
   // Only emit the signal if file(s) were found
   if (!m_foundFiles.isEmpty())
     emit filesFound();

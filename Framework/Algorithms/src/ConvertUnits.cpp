@@ -14,6 +14,7 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
+#include "MantidKernel/DeltaEMode.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/UnitFactory.h"
 
@@ -212,7 +213,7 @@ API::MatrixWorkspace_sptr ConvertUnits::setupOutputWorkspace(
   // If input and output workspaces are NOT the same, create a new workspace for
   // the output
   if (outputWS != inputWS) {
-    outputWS = MatrixWorkspace_sptr(inputWS->clone().release());
+    outputWS = inputWS->clone();
   }
 
   if (!m_inputEvents && m_distribution) {
@@ -239,6 +240,10 @@ API::MatrixWorkspace_sptr ConvertUnits::setupOutputWorkspace(
 
   // Set the final unit that our output workspace will have
   outputWS->getAxis(0)->unit() = m_outputUnit;
+  // Store the emode
+  const bool overwrite(true);
+  outputWS->mutableRun().addProperty("deltaE-mode", getPropertyValue("EMode"),
+                                     overwrite);
 
   return outputWS;
 }
@@ -418,7 +423,7 @@ void ConvertUnits::convertViaTOF(Kernel::Unit_const_sptr fromUnit,
   bool bUseSignedVersion =
       (!parameters.empty()) &&
       find(parameters.begin(), parameters.end(), "Always") != parameters.end();
-  function<double(IDetector_const_sptr)> thetaFunction =
+  function<double(const IDetector &)> thetaFunction =
       bUseSignedVersion
           ? bind(&MatrixWorkspace::detectorSignedTwoTheta, outputWS, _1)
           : bind(&MatrixWorkspace::detectorTwoTheta, outputWS, _1);
@@ -437,7 +442,7 @@ void ConvertUnits::convertViaTOF(Kernel::Unit_const_sptr fromUnit,
       if (!det->isMonitor()) {
         l2 = det->getDistance(*sample);
         // The scattering angle for this detector (in radians).
-        twoTheta = thetaFunction(det);
+        twoTheta = thetaFunction(*det);
         // If an indirect instrument, try getting Efixed from the geometry
         if (emode == 2) // indirect
         {

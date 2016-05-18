@@ -8,7 +8,7 @@ set (SYSTEM_PACKAGE_TARGET RUNTIME)
 ###########################################################################
 # Compiler options.
 ###########################################################################
-add_definitions ( -DWIN32 -D_WINDOWS -DMS_VISUAL_STUDIO )
+add_definitions ( -D_WINDOWS -DMS_VISUAL_STUDIO )
 add_definitions ( -D_USE_MATH_DEFINES -DNOMINMAX )
 add_definitions ( -DGSL_DLL -DJSON_DLL )
 add_definitions ( -DPOCO_NO_UNWINDOWS )
@@ -25,10 +25,6 @@ add_definitions ( -D_SCL_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_WARNINGS )
 # /Zc:wchar_t- - Do not treat wchar_t as a builtin type. Required for Qt to
 #           work with wstring
 set ( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP /w34296 /w34389 /Zc:wchar_t-" )
-
-# As discussed here: http://code.google.com/p/googletest/issues/detail?id=412
-# gtest requires changing the _VARAIDIC_MAX value for VS2012 as it defaults to 5
-add_definitions ( -D_variadic_max=10 )
 
 # Set PCH heap limit, the default does not work when running msbuild from the commandline for some reason
 # Any other value lower or higher seems to work but not the default. It it is fine without this when compiling

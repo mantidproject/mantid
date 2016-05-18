@@ -13,6 +13,11 @@ Muon ALC
 
 - The default directory for the last run is now set to the same directory selected for the first run `#15524 <https://github.com/mantidproject/mantid/pull/15524>`_
 - Fixed an occasional crash seen when "Auto" was selected `#15673 <https://github.com/mantidproject/mantid/pull/15673>`_
+- Several usability fixes were made to the interface: `#16161 <https://github.com/mantidproject/mantid/pull/16161>`_
+
+  - The "Function" box was renamed "Take log value at" and moved next to the log to which it applies
+  - The integration start time is initialised to the first good data rather than the first time bin
+  - The choice of periods is no longer reset when a new first run is loaded
 
 Muon Analysis
 #############
@@ -33,6 +38,11 @@ Muon Analysis
   - *Average Temperature* is calculated from all logs
   - *Start* and *End* are the earliest start and latest end
 
+- When the window is resized, all widgets within the window should now resize with it. This enables the interface to be used on smaller screens. `#15382 <https://github.com/mantidproject/mantid/pull/15832>`_
+- "Plot/Remove guess" now deals correctly with the case when a new run is loaded. `#15872 <https://github.com/mantidproject/mantid/pull/15872>`_
+- When plotting data from a new run in the same window as the previous plot, previous fits now remain on the graph, to enable easy comparison between datasets. They can be removed with the "Clear fit curves" option. `#16018 <https://github.com/mantidproject/mantid/pull/16018>`_
+- A crash was fixed when loading data on Linux. `#16234 <https://github.com/mantidproject/mantid/pull/16234>`_
+
 Algorithms
 ----------
 
@@ -47,11 +57,17 @@ Algorithms
 - :ref:`FFT <algm-FFT>`: added property *AutoShift* to enable automatic phase correction for workspaces not centred at zero. `#15747 <https://github.com/mantidproject/mantid/pull/15747>`_
 - :ref:`AsymmetryCalc <algm-AsymmetryCalc>`: a bug was fixed where the algorithm failed to run on input WorkspaceGroups. `#15404 <https://github.com/mantidproject/mantid/pull/15404>`_
 - :ref:`MaxEnt <algm-MaxEnt>`: MaxEnt now handles positive images `#15494 <https://github.com/mantidproject/mantid/pull/15494>`_
-- :ref:`MaxEnt <algm-MaxEnt>`: Some improvements/fixes were added (output label, X rounding errors, and ability to increase the
-  number of points in the image and reconstructed data) `#15606 <https://github.com/mantidproject/mantid/pull/15606>`
+- :ref:`MaxEnt <algm-MaxEnt>`: Some improvements/fixes were added (output label, X rounding errors and ability to increase the
+  number of points in the image and reconstructed data) `#15606 <https://github.com/mantidproject/mantid/pull/15606>`_
+- :ref:`MaxEnt <algm-MaxEnt>`: *AutoShift* property was added. As in :ref:`FFT <algm-FFT>` this property allows for automatic phase correction for workspaces not centred at zero `#16031 <https://github.com/mantidproject/mantid/pull/16031>`_
+- :ref:`LoadMuonNexus <algm-LoadMuonNexus>`: If the NeXus file (version 1) does not contain a grouping entry, or the grouping entry it contains is invalid, then the grouping will be loaded from the IDF. This enables use of such files in the ALC interface. `#16107 <https://github.com/mantidproject/mantid/pull/16107>`_
 
 Fit Functions
 -------------
+
+- :ref:`Keren <func-Keren>` has been added as a new fit function - Amit Keren's 
+generalisation of the Abragam relaxation function to a longitudinal field,
+for fitting the time-dependent muon polarisation.
 
 |
 

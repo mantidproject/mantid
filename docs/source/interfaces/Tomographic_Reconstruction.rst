@@ -132,7 +132,7 @@ relevant file and data formats is given here:
   <http://en.wikipedia.org/wiki/FITS>`__ used to store images in
   files. You can see the details on how FITS images can be loaded into
   Mantid in the documentation of the algorithm LoadFITS
-  `<http://docs.mantidproject.org/nightly/algorithms/LoadFITS-v1.html>`__.
+  :ref:`LoadFITS <algm-LoadFITS>`.
 
 * TIFF: `Tagged Image File Format
   <http://en.wikipedia.org/wiki/Tagged_Image_File_Format>`__ images
@@ -362,27 +362,62 @@ Energy bands
              of combining energy bands from energy selective experiments.
              This is work in progress.
 
+Here it is possible to aggregate stacks of images normally acquired as
+energy/wavelength selective data. This interface is based on the
+algorithm :ref:`ImggAggWavelengths <algm-ImggAggWavelengths>` which
+supports different ways of aggregating the input images. In the
+simplest case, a number of output bands can be produced by aggregating
+the input bands split into uniform segments. This is called "uniform
+bands". When the number of uniform bands is one, all the wavelengths
+are aggregated into a single output stack.  It is also possible to
+specify a list of boundaries or ranges of image indices. For example
+if an input dataset consists of 1000 images per projection angle (here
+indexed from 0 to 999), three partially (50%) overlapping output bands
+could by produced by specifying the ranges as "0-499, 250-749,
+500-999". In principle it is also possible to aggregate images by time
+of flight ranges, based on specific extension headers that must be
+included in the input (FITS) images. This option is disabled at the
+moment.  Please refer to the documentation of :ref:`ImggAggWavelengths
+<algm-ImggAggWavelengths>` for lower level details on how the
+algorithm processes the input directories and files.
+
 .. figure:: /images/tomo_tab7_energy_bands.png
    :align: center
    :scale: 60%
 
-Conversion between formats
---------------------------
-
-.. warning:: The interface is being extended to provide a simple graphical
-             interface to convert between different image formats for
-             convenience and interoperability with third party tools.
-             This is work in progress as support for new formats is being
-             integrated.
+Convert image formats
+---------------------
 
 .. figure:: /images/tomo_tab6_formats_convert.png
    :align: center
    :scale: 60%
 
+This interface provides a simple way of converting stacks of images
+between diferent formats. This is for convenience and interoperability
+with third party tools that for example may not be able to load FITS
+images but require them in TIFF format. All the images found under the
+input path (directory) will be converted from the input format
+selected into the output format. The output images will be created
+under the output path (directory) with the same tree structure as the
+input images.
+
+The conversion process will look for images recursively inside the
+input directory. That is, it will process all its subdirectories and
+the subdirectories of these up to a given maximum depth.  To limit the
+search depth. The usual default value is 3 which is sufficient for
+stacks of images and sets of stacks of images from a series of samples
+for an experiment, following the conventions for IMAT tomography
+data. If higher depth values than the default are used we recommend to
+take extreme care, making sure the input path given makes sense. This
+process can be lengthy and demanding in terms of disk space when
+processing more than one or a small number of experiments (RB
+reference numbers), and especially so for wavelength dependent
+experiments.
+
 Example
 -------
 
-TODO: there should be an example using a small data set.
+TODO: there should be a worked out example using a small data set.
 
 TomoPy
 ------
@@ -394,8 +429,8 @@ Astra Toolbox
 
 TODO: how to use it. Hints.
 
-Astra Toolbox
--------------
+MuhRec
+------
 
 TODO: how to use it. Hints.
 

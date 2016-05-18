@@ -141,8 +141,12 @@ class LRReflectivityOutput(PythonAlgorithm):
 
                 if data_y_i[j] > 0:
                     if data_y[j] > 0:
-                        data_y[j] = 0.5 * (data_y[j] + data_y_i[j])
-                        data_e[j] = 0.5 * math.sqrt(data_e[j] * data_e[j] + data_e_i[j] * data_e_i[j])
+                        denom = 1.0 / data_e[j]**2 + 1.0 / data_e_i[j]**2
+                        data_y[j] = (data_y[j]/data_e[j]**2 + data_y_i[j]/data_e_i[j]**2) / denom
+                        data_e[j] = math.sqrt(1.0 / denom)
+
+                        #data_y[j] = 0.5 * (data_y[j] + data_y_i[j])
+                        #data_e[j] = 0.5 * math.sqrt(data_e[j] * data_e[j] + data_e_i[j] * data_e_i[j])
                     else:
                         data_y[j] = data_y_i[j]
                         data_e[j] = data_e_i[j]
@@ -169,8 +173,9 @@ class LRReflectivityOutput(PythonAlgorithm):
             total = 0.0
             weights = 0.0
             for i in range(len(y_values)):
-                total += e_values[i] * y_values[i]
-                weights += e_values[i]
+                w = 1.0 / e_values[i]**2
+                total += w * y_values[i]
+                weights += w
             scaling_factor = total / weights
 
         Scale(InputWorkspace=scaled_ws_list[0] + '_histo', OutputWorkspace=scaled_ws_list[0] + '_scaled',
@@ -189,8 +194,10 @@ class LRReflectivityOutput(PythonAlgorithm):
         start_time = mtd[scaled_ws_list[0] + '_scaled'].getRun().getProperty("start_time").value
         experiment = mtd[scaled_ws_list[0] + '_scaled'].getRun().getProperty("experiment_identifier").value
         run_number = mtd[scaled_ws_list[0] + '_scaled'].getRun().getProperty("run_number").value
+        run_title = mtd[scaled_ws_list[0] + '_scaled'].getTitle()
 
         content = '# Experiment %s Run %s\n' % (experiment, run_number)
+        content += '# Run title: %s\n' % run_title
         content += '# Run start time: %s\n' % start_time
         content += '# Reduction time: %s\n' % time.ctime()
         content += '# Mantid version: %s\n' % mantid.__version__

@@ -65,7 +65,7 @@ void LoadMuonNexus::init() {
   declareProperty("AutoGroup", false,
                   "Determines whether the spectra are automatically grouped\n"
                   "together based on the groupings in the NeXus file, only\n"
-                  "for single period data (default no)");
+                  "for single period data (default no). Version 1 only.");
 
   auto mustBeNonNegative = boost::make_shared<BoundedValidator<int64_t>>();
   mustBeNonNegative->setLower(0);
@@ -73,13 +73,14 @@ void LoadMuonNexus::init() {
                   "0 indicates that every entry is loaded, into a separate "
                   "workspace within a group. "
                   "A positive number identifies one entry to be loaded, into "
-                  "one worskspace");
+                  "one workspace");
 
   std::vector<std::string> FieldOptions{"Transverse", "Longitudinal"};
   declareProperty("MainFieldDirection", "Transverse",
                   boost::make_shared<StringListValidator>(FieldOptions),
                   "Output the main field direction if specified in Nexus file "
-                  "(run/instrument/detector/orientation, default longitudinal)",
+                  "(run/instrument/detector/orientation, default "
+                  "longitudinal). Version 1 only.",
                   Direction::Output);
 
   declareProperty("TimeZero", 0.0,
@@ -92,13 +93,15 @@ void LoadMuonNexus::init() {
   declareProperty(
       make_unique<WorkspaceProperty<Workspace>>(
           "DeadTimeTable", "", Direction::Output, PropertyMode::Optional),
-      "Table or a group of tables containing detector dead times");
+      "Table or a group of tables containing detector dead times. Version 1 "
+      "only.");
 
-  declareProperty(make_unique<WorkspaceProperty<Workspace>>(
-                      "DetectorGroupingTable", "", Direction::Output,
-                      PropertyMode::Optional),
-                  "Table or a group of tables with information about the "
-                  "detector grouping stored in the file (if any)");
+  declareProperty(
+      make_unique<WorkspaceProperty<Workspace>>("DetectorGroupingTable", "",
+                                                Direction::Output,
+                                                PropertyMode::Optional),
+      "Table or a group of tables with information about the "
+      "detector grouping stored in the file (if any). Version 1 only.");
 }
 
 /// Validates the optional 'spectra to read' properties, if they have been set

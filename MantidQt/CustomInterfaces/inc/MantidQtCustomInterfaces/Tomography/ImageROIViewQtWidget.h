@@ -64,7 +64,7 @@ class MANTIDQT_CUSTOMINTERFACES_DLL ImageROIViewQtWidget
 
 public:
   ImageROIViewQtWidget(QWidget *parent = 0);
-  ~ImageROIViewQtWidget() override{};
+  ~ImageROIViewQtWidget() override;
 
   void setParams(ImageStackPreParams &params) override;
 
@@ -114,7 +114,13 @@ public:
 
   void updateImageType(const Mantid::API::WorkspaceGroup_sptr wsg) override;
 
+  virtual std::string askSingleImagePath() override;
+
   std::string askImgOrStackPath() override;
+
+  std::string askColorMapFile() override;
+
+  void updateColorMap(const std::string &filename) override;
 
   void saveSettings() const override;
 
@@ -138,11 +144,15 @@ protected:
   void mouseFinishNormArea(int x, int y);
 
 private slots:
-  void browseImgClicked();
+  void browseImageClicked();
+  void browseStackClicked();
 
   void rotationUpdated(int idx);
 
   void imageTypeUpdated(int idx);
+
+  void loadColorMapRequest();
+  void colorRangeChanged();
 
   void corClicked();
   void corResetClicked();
@@ -236,6 +246,9 @@ private:
   /// this holds the base image on top of which rectangles and other
   /// objects are drawn
   boost::scoped_ptr<QPixmap> m_basePixmap;
+
+  /// current color map used to visualize the image/slice
+  std::string m_colorMapFilename;
 
   /// persistent settings
   static const std::string m_settingsGroup;

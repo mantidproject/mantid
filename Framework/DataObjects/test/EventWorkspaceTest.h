@@ -348,8 +348,8 @@ public:
     // Out of range
     TS_ASSERT_THROWS(ew->dataX(-123), std::range_error);
     TS_ASSERT_THROWS(ew->dataX(5123), std::range_error);
-    TS_ASSERT_THROWS(ew->dataE(5123), std::range_error);
-    TS_ASSERT_THROWS(ew->dataY(5123), std::range_error);
+    TS_ASSERT_THROWS(ew->dataE(5123), NotImplementedError);
+    TS_ASSERT_THROWS(ew->dataY(5123), NotImplementedError);
 
     // Can't try the const access; copy constructors are not allowed.
   }
@@ -500,8 +500,8 @@ public:
 
     // Check the bins contain 2
     data1 = ew2->dataE(0);
-    TS_ASSERT_DELTA(ew2->dataE(0)[1], sqrt(2.0), 1e-6);
-    TS_ASSERT_DELTA(data1[1], sqrt(2.0), 1e-6);
+    TS_ASSERT_DELTA(ew2->dataE(0)[1], M_SQRT2, 1e-6);
+    TS_ASSERT_DELTA(data1[1], M_SQRT2, 1e-6);
     // But the Y is still 2.0
     TS_ASSERT_DELTA(ew2->dataY(0)[1], 2.0, 1e-6);
 
@@ -791,7 +791,7 @@ public:
       const MantidVec &Y = ew1->readY(i);
       TS_ASSERT_DELTA(Y[0], 2.0, 1e-5);
       const MantidVec &E = ew1->readE(i);
-      TS_ASSERT_DELTA(E[0], sqrt(2.0), 1e-5);
+      TS_ASSERT_DELTA(E[0], M_SQRT2, 1e-5);
 
       // Vector with 10 bins, 10 wide
       MantidVec X;
@@ -809,7 +809,7 @@ public:
       const MantidVec &Y_other = ew1->readY(i + 1);
       TS_ASSERT_DELTA(Y_other[0], 2.0, 1e-5);
       const MantidVec &E_other = ew1->readE(i + 1);
-      TS_ASSERT_DELTA(E_other[0], sqrt(2.0), 1e-5);
+      TS_ASSERT_DELTA(E_other[0], M_SQRT2, 1e-5);
     }
     // suppress unused argument when built without openmp.
     UNUSED_ARG(do_parallel)
@@ -885,6 +885,25 @@ public:
     TS_ASSERT_THROWS_NOTHING(wsCastNonConst = (IEventWorkspace_sptr)val);
     TS_ASSERT(wsCastNonConst != NULL);
     TS_ASSERT_EQUALS(wsCastConst, wsCastNonConst);
+  }
+
+  void test_writeAccessInvalidatesCommonBinsFlagIsSet() {
+    int numEvents = 2;
+    int numHistograms = 2;
+    EventWorkspace_sptr ws =
+        WorkspaceCreationHelper::CreateRandomEventWorkspace(numEvents,
+                                                            numHistograms);
+    // Calling isCommonBins() sets the flag m_isCommonBinsFlagSet
+    TS_ASSERT(ws->isCommonBins());
+    // Calling dataX should unset the flag m_isCommonBinsFlagSet
+    ws->dataX(0)[0] += 0.0;
+    // m_isCommonBinsFlagSet is false, so this will re-validate and notice that
+    // dataX is still identical.
+    TS_ASSERT(ws->isCommonBins());
+    ws->dataX(0)[0] += 0.1;
+    // m_isCommonBinsFlagSet is false, so this will re-validate and notice that
+    // dataX(0) is now different from dataX(1).
+    TS_ASSERT(!ws->isCommonBins());
   }
 };
 

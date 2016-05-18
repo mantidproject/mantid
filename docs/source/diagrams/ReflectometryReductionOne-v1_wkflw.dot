@@ -14,6 +14,9 @@ digraph ReflectometryReductionOne {
    sourceRotationAngleBack [label = "-Rotation Angle"]
     thetaOut          [label="ThetaOut"]
     corrAlg           [label="CorrectionAlgorithm"]
+    momentumTransferMin  [label="MomentumTransferMinimum"]
+    momentumTransferStep [label="MomentumTransferStep"]
+    momentumTransferMax  [label="MomentumTransferMaximum"]
   }
 
   subgraph decisions {
@@ -28,6 +31,8 @@ digraph ReflectometryReductionOne {
     checkCorrAlg    [label="CorrectionAlgorithm?"]
     checkSourceRotation [label="Is Source in Correct Position?"]
     checkSourceRotationBack [label = "Was Source Rotated?"]
+    checkRebin      [label="MomentumTransferMinimum/MomentumTransferStep/MomentumTransferMaximum given?"]
+    checkScale      [label="ScaleFactor given?"]
   }
 
   subgraph algorithms {
@@ -44,6 +49,8 @@ digraph ReflectometryReductionOne {
     expCorr         [label="ExponentialCorrection"]
     rotateSource [label = "RotateSource"]
     rotateSourceBack [label="RotateSource"]
+    rebin           [label="Rebin"]
+    scale           [label="Scale"]
   }
 
   subgraph processes {
@@ -112,4 +119,11 @@ digraph ReflectometryReductionOne {
   checkSourceRotationBack -> outputWorkspaceMT [label="No"]
   sourceRotationAngleBack -> rotateSourceBack [label = "Rotate back by Rotation Angle"]
   rotateSourceBack      -> outputWorkspaceMT
+  outputWorkspaceMT   ->  checkRebin
+  checkRebin          ->  checkScale [label="No"]
+  checkRebin         -> rebin [label="Yes"]
+  momentumTransferMin  -> rebin
+  momentumTransferStep -> rebin
+  momentumTransferMax  -> rebin
+  
 }
