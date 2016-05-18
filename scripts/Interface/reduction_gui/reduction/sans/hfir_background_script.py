@@ -1,4 +1,3 @@
-# pylint: disable=invalid-name, R0902, R0904, R0912
 """
     Classes for each reduction step. Those are kept separately
     from the the interface class so that the HFIRReduction class could

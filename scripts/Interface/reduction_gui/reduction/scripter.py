@@ -1,4 +1,4 @@
-# pylint: disable=invalid-name, bad-builtin, W0613, R0913, W0122
+# pylint: disable=invalid-name, bad-builtin
 """
     Reduction scripter used to take reduction parameters
     end produce a Mantid reduction script
@@ -591,6 +591,9 @@ class BaseReductionScripter(object):
         else:
             Logger("scripter").error("Mantid is unavailable to submit a reduction job")
 
+# Disable warning about the use of exec, which we knowingly use to 
+# execute generated code.
+# pylint: disable=W0122
     def execute_script(self, script):
         """
             Executes the given script code.
