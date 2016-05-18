@@ -571,7 +571,7 @@ void IqtFit::updatePlot() {
         outputGroup->getItem(specNo));
     if (ws) {
       if (m_uiForm.ckPlotGuess->isChecked()) {
-        m_uiForm.ppPlot->removeSpectrum("Guess");
+        m_uiForm.ckPlotGuess->setChecked(false);
       }
       m_uiForm.ppPlot->addSpectrum("Fit", ws, 1, Qt::red);
       m_uiForm.ppPlot->addSpectrum("Diff", ws, 2, Qt::blue);
