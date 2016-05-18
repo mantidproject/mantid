@@ -418,7 +418,7 @@ class ReductionOptions(BaseScriptElement):
         self.sample_detector_distance = BaseScriptElement.getPropertyValue(
             alg, "SampleDetectorDistance", default=ReductionOptions.sample_detector_distance)
         self.detector_offset = BaseScriptElement.getPropertyValue(
-            alg, "SampleDetectorDistanceOffset", default=ReductionOptions.detector_offset)
+            alg, "SampleDetectorDistanceOffset", default=self.detector_offset)
         self.wavelength = BaseScriptElement.getPropertyValue(
             alg, "Wavelength", default=ReductionOptions.wavelength)
         self.wavelength_spread = BaseScriptElement.getPropertyValue(
