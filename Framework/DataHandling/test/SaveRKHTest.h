@@ -10,7 +10,7 @@
 #include <Poco/File.h>
 using namespace Mantid::API;
 using Mantid::HistogramData::BinEdges;
-using Mantid::HistogramData::BinEdgeVariances;
+using Mantid::HistogramData::PointVariances;
 
 class SaveRKHTest : public CxxTest::TestSuite {
 public:
@@ -262,7 +262,7 @@ private:
         "Workspace2D", nSpec, x_length, y_length);
     BinEdges x(x_length);
     std::iota(x.begin(), x.end(), 0.0);
-    BinEdgeVariances dx(y_length);
+    PointVariances dx(y_length);
     std::iota(dx.begin(), dx.end(), 0.0);
     for (size_t j = 0; j < nSpec; ++j) {
       ws->setBinEdges(j, x);
