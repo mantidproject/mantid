@@ -5,6 +5,7 @@
 #include "MantidAlgorithms/MaxEnt/MaxentEntropyNegativeValues.h"
 #include "MantidAlgorithms/MaxEnt/MaxentEntropyPositiveValues.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/EqualBinsChecker.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/UnitFactory.h"
 #include <boost/make_shared.hpp>
@@ -168,29 +169,12 @@ std::map<std::string, std::string> MaxEnt::validateInputs() {
 
     const double warningLevel = 0.01;
     const double errorLevel = 0.5;
-    bool printWarning = false;
-    // Average spacing
-    const MantidVec &X = inWS->readX(0);
-    const double dx =
-        (X[X.size() - 1] - X[0]) / static_cast<double>(X.size() - 1);
-    for (size_t i = 1; i < X.size() - 1; i++) {
-      // 1% accuracy exceeded, but data still usable
-      if (std::abs(X[i] - X[0] - static_cast<double>(i) * dx) / dx >
-          warningLevel) {
-        printWarning = true;
-        if (std::abs(X[i] - X[0] - static_cast<double>(i) * dx) / dx >
-            errorLevel) {
-          // 50% accuracy exceeded, data not usable
-          printWarning = false;
-          result["InputWorkspace"] =
-              "X axis must be linear (all bins have same width)";
-          break;
-        }
-      }
-    }
-    if (printWarning) {
-      g_log.warning() << "Bin widths differ by more than " << warningLevel * 100
-                      << "% of average\n";
+
+    Kernel::EqualBinsChecker binChecker(inWS->readX(0), errorLevel,
+                                        warningLevel);
+    const std::string binError = binChecker.validate();
+    if (!binError.empty()) {
+      result["InputWorkspace"] = binError;
     }
 
     // 2. If the input signal is complex, we expect an even number of histograms

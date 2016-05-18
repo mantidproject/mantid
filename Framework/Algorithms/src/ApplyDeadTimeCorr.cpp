@@ -5,6 +5,7 @@
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidKernel/EqualBinsChecker.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/TimeSeriesProperty.h"
@@ -140,29 +141,11 @@ std::map<std::string, std::string> ApplyDeadTimeCorr::validateInputs() {
   MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
   if (inputWS) { // in case input was a WorkspaceGroup
     const MantidVec &xValues = inputWS->readX(0);
-    const size_t xSize = xValues.size();
-    if (xSize < 2) {
-      errors["InputWorkspace"] = "Input workspace cannot be empty";
-    } else {
-      // average bin width
-      const double dx =
-          (xValues[xSize - 1] - xValues[0]) / static_cast<double>(xSize - 1);
-
-      // Use cumulative errors
-      auto difference = [&xValues, &dx](size_t i) {
-        return std::abs((xValues[i] - xValues[0] - (double)i * dx) / dx);
-      };
-
-      // Check each width against dx
-      constexpr double tolerance = 0.5;
-      for (size_t i = 1; i < xValues.size() - 2; i++) {
-        if (difference(i) > tolerance) {
-          g_log.error() << "dx=" << xValues[i + 1] - xValues[i] << ' ' << dx
-                        << ' ' << i << std::endl;
-          errors["InputWorkspace"] = "Uneven bin widths in input workspace";
-          break;
-        }
-      }
+    constexpr double tolerance = 0.5;
+    Kernel::EqualBinsChecker binChecker(xValues, tolerance, -1);
+    const std::string binError = binChecker.validate();
+    if (!binError.empty()) {
+      errors["InputWorkspace"] = binError;
     }
   }
   return errors;
