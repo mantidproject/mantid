@@ -217,7 +217,7 @@ class BaseScriptElement(object):
             algs_with_data = [d for d in algs if d is not None]
             if len(algs_with_data) > 0:
                 return algs_with_data[0]
-            return None
+            return (None, None)
 
         # The process information is on SASprocess/SASprocessnote
         process_dom = dom.getElementsByTagName("SASprocessnote")

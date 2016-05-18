@@ -41,12 +41,12 @@ class SampleData(BaseScriptElement):
             """
                 Create XML from the current data.
             """
-            xml  = "<DirectBeam>\n"
-            xml += "  <sample_file>%s</sample_file>\n" % self.sample_file
-            xml += "  <direct_beam>%s</direct_beam>\n" % self.direct_beam
-            xml += "  <beam_radius>%g</beam_radius>\n" % self.beam_radius
-            xml += "</DirectBeam>\n"
-            return xml
+            xml_out  = "<DirectBeam>\n"
+            xml_out += "  <sample_file>%s</sample_file>\n" % self.sample_file
+            xml_out += "  <direct_beam>%s</direct_beam>\n" % self.direct_beam
+            xml_out += "  <beam_radius>%g</beam_radius>\n" % self.beam_radius
+            xml_out += "</DirectBeam>\n"
+            return xml_out
 
         def find(self, dom):
             element_list = dom.getElementsByTagName("DirectBeam")
@@ -115,16 +115,16 @@ class SampleData(BaseScriptElement):
             """
                 Create XML from the current data.
             """
-            xml  = "<BeamSpreader>\n"
-            xml += "  <sample_scatt>%s</sample_scatt>\n" % self.sample_scatt
-            xml += "  <sample_spreader>%s</sample_spreader>\n" % self.sample_spreader
-            xml += "  <direct_scatt>%s</direct_scatt>\n" % self.direct_scatt
-            xml += "  <direct_spreader>%s</direct_spreader>\n" % self.direct_spreader
+            xml_out  = "<BeamSpreader>\n"
+            xml_out += "  <sample_scatt>%s</sample_scatt>\n" % self.sample_scatt
+            xml_out += "  <sample_spreader>%s</sample_spreader>\n" % self.sample_spreader
+            xml_out += "  <direct_scatt>%s</direct_scatt>\n" % self.direct_scatt
+            xml_out += "  <direct_spreader>%s</direct_spreader>\n" % self.direct_spreader
 
-            xml += "  <spreader_trans>%g</spreader_trans>\n" % self.spreader_trans
-            xml += "  <spreader_trans_spread>%g</spreader_trans_spread>\n" % self.spreader_trans_spread
-            xml += "</BeamSpreader>\n"
-            return xml
+            xml_out += "  <spreader_trans>%g</spreader_trans>\n" % self.spreader_trans
+            xml_out += "  <spreader_trans_spread>%g</spreader_trans_spread>\n" % self.spreader_trans_spread
+            xml_out += "</BeamSpreader>\n"
+            return xml_out
 
         def find(self, dom):
             element_list = dom.getElementsByTagName("BeamSpreader")
@@ -266,22 +266,22 @@ class SampleData(BaseScriptElement):
         """
             Create XML from the current data.
         """
-        xml  = "<Transmission>\n"
-        xml += "  <trans>%g</trans>\n" % self.transmission
-        xml += "  <trans_spread>%g</trans_spread>\n" % self.transmission_spread
-        xml += "  <calculate_trans>%s</calculate_trans>\n" % str(self.calculate_transmission)
-        xml += "  <theta_dependent>%s</theta_dependent>\n" % str(self.theta_dependent)
-        xml += "  <dark_current>%s</dark_current>\n" % str(self.dark_current)
-        xml += self.calculation_method.to_xml()
-        xml += "</Transmission>\n"
-        xml += "<SampleData>\n"
-        xml += "  <separate_jobs>%s</separate_jobs>\n" % str(self.separate_jobs)
-        xml += "  <sample_thickness>%g</sample_thickness>\n" % self.sample_thickness
+        xml_out  = "<Transmission>\n"
+        xml_out += "  <trans>%g</trans>\n" % self.transmission
+        xml_out += "  <trans_spread>%g</trans_spread>\n" % self.transmission_spread
+        xml_out += "  <calculate_trans>%s</calculate_trans>\n" % str(self.calculate_transmission)
+        xml_out += "  <theta_dependent>%s</theta_dependent>\n" % str(self.theta_dependent)
+        xml_out += "  <dark_current>%s</dark_current>\n" % str(self.dark_current)
+        xml_out += self.calculation_method.to_xml()
+        xml_out += "</Transmission>\n"
+        xml_out += "<SampleData>\n"
+        xml_out += "  <separate_jobs>%s</separate_jobs>\n" % str(self.separate_jobs)
+        xml_out += "  <sample_thickness>%g</sample_thickness>\n" % self.sample_thickness
         for item in self.data_files:
-            xml += "  <data_file>%s</data_file>\n" % item.strip()
-        xml += "</SampleData>\n"
+            xml_out += "  <data_file>%s</data_file>\n" % item.strip()
+        xml_out += "</SampleData>\n"
 
-        return xml
+        return xml_out
 
     def from_xml(self, xml_str):
         """
