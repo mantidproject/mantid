@@ -9617,11 +9617,11 @@ void ApplicationWindow::showMarkerPopupMenu() {
                         SLOT(clearSelection()));
   markerMenu.insertSeparator();
   if (g->arrowMarkerSelected())
-    markerMenu.insertItem(tr("&Properties..."), this, SLOT(showLineDialog()));
+    markerMenu.addAction(tr("&Properties..."), this, SLOT(showLineDialog()));
   else if (g->imageMarkerSelected())
-    markerMenu.insertItem(tr("&Properties..."), this, SLOT(showImageDialog()));
+    markerMenu.addAction(tr("&Properties..."), this, SLOT(showImageDialog()));
   else
-    markerMenu.insertItem(tr("&Properties..."), this, SLOT(showTextDialog()));
+    markerMenu.addAction(tr("&Properties..."), this, SLOT(showTextDialog()));
 
   markerMenu.exec(QCursor::pos());
 }
@@ -9698,7 +9698,7 @@ void ApplicationWindow::savedProject() {
   while (f) {
     QList<MdiSubWindow *> folderWindows = f->windowsList();
     foreach (MdiSubWindow *w, folderWindows) {
-      if (w->isA("Matrix")) {
+      if (strcmp(w->metaObject()->className(), "Matrix") == 0) {
         Matrix *m = dynamic_cast<Matrix *>(w);
         if (m)
           m->undoStack()->setClean();
@@ -9734,7 +9734,7 @@ void ApplicationWindow::dropEvent(QDropEvent *e) { mantidUI->drop(e); }
 
 void ApplicationWindow::dragEnterEvent(QDragEnterEvent *e) {
   if (e->source()) {
-    e->accept(mantidUI->canAcceptDrop(e));
+    e->setAccepted(mantidUI->canAcceptDrop(e));
     return;
   }
   e->ignore();
@@ -9853,29 +9853,28 @@ void ApplicationWindow::deleteSelectedItems() {
 
 void ApplicationWindow::showListViewSelectionMenu(const QPoint &p) {
   QMenu cm(this);
-  cm.insertItem(tr("&Show All Windows"), this, SLOT(showSelectedWindows()));
-  cm.insertItem(tr("&Hide All Windows"), this, SLOT(hideSelectedWindows()));
-  cm.insertSeparator();
-  cm.insertItem(tr("&Delete Selection"), this, SLOT(deleteSelectedItems()),
+  cm.addAction(tr("&Show All Windows"), this, SLOT(showSelectedWindows()));
+  cm.addAction(tr("&Hide All Windows"), this, SLOT(hideSelectedWindows()));
+  cm.addSeparator();
+  cm.addAction(tr("&Delete Selection"), this, SLOT(deleteSelectedItems()),
                 Qt::Key_F8);
   cm.exec(lv->mapToGlobal(p));
 }
 
 void ApplicationWindow::showListViewPopupMenu(const QPoint &p) {
   QMenu cm(this);
-  QMenu window(this);
 
-  window.addAction(actionNewTable);
-  window.addAction(actionNewMatrix);
-  window.addAction(actionNewNote);
-  window.addAction(actionNewGraph);
-  window.addAction(actionNewFunctionPlot);
-  window.addAction(actionNewSurfacePlot);
-  window.addAction(actionNewTiledWindow);
-  cm.insertItem(tr("New &Window"), &window);
+  auto window = cm.addMenu(tr("New &Window"));
+  window->addAction(actionNewTable);
+  window->addAction(actionNewMatrix);
+  window->addAction(actionNewNote);
+  window->addAction(actionNewGraph);
+  window->addAction(actionNewFunctionPlot);
+  window->addAction(actionNewSurfacePlot);
+  window->addAction(actionNewTiledWindow);
 
-  cm.insertSeparator();
-  cm.insertItem(tr("Auto &Column Width"), lv, SLOT(adjustColumns()));
+  cm.addSeparator();
+  cm.addAction(tr("Auto &Column Width"), lv, SLOT(adjustColumns()));
   cm.exec(lv->mapToGlobal(p));
 }
 
@@ -9914,76 +9913,74 @@ void ApplicationWindow::showWindowPopupMenu(const QPoint &p) {
   MdiSubWindow *w = wli->window();
   if (w) {
     QMenu cm(this);
-    QMenu plots(this);
 
     cm.addAction(actionActivateWindow);
     cm.addAction(actionMinimizeWindow);
     cm.addAction(actionMaximizeWindow);
-    cm.insertSeparator();
+    cm.addSeparator();
     if (!hidden(w))
       cm.addAction(actionHideWindow);
-    cm.insertItem(getQPixmap("close_xpm"), tr("&Delete Window"), w,
+    cm.addAction(getQPixmap("close_xpm"), tr("&Delete Window"), w,
                   SLOT(close()), Qt::Key_F8);
-    cm.insertSeparator();
-    cm.insertItem(tr("&Rename Window"), this, SLOT(renameWindow()), Qt::Key_F2);
+    cm.addSeparator();
+    cm.addAction(tr("&Rename Window"), this, SLOT(renameWindow()), Qt::Key_F2);
     cm.addAction(actionResizeWindow);
-    cm.insertSeparator();
-    cm.insertItem(getQPixmap("fileprint_xpm"), tr("&Print Window"), w,
+    cm.addSeparator();
+    cm.addAction(getQPixmap("fileprint_xpm"), tr("&Print Window"), w,
                   SLOT(print()));
-    cm.insertSeparator();
-    cm.insertItem(tr("&Properties..."), this, SLOT(windowProperties()));
+    cm.addSeparator();
+    cm.addAction(tr("&Properties..."), this, SLOT(windowProperties()));
 
     if (w->inherits("Table")) {
       QStringList graphs = dependingPlots(w->objectName());
       if (static_cast<int>(graphs.count()) > 0) {
-        cm.insertSeparator();
+        cm.addSeparator();
+        auto plots = cm.addMenu(tr("D&epending Graphs"));
         for (int i = 0; i < static_cast<int>(graphs.count()); i++)
-          plots.insertItem(graphs[i], window(graphs[i]), SLOT(showMaximized()));
-
-        cm.insertItem(tr("D&epending Graphs"), &plots);
+          plots->addAction(graphs[i], window(graphs[i]), SLOT(showMaximized()));
       }
-    } else if (w->isA("Matrix")) {
+    } else if (strcmp(w->metaObject()->className(), "Matrix") == 0) {
       QStringList graphs = depending3DPlots(dynamic_cast<Matrix *>(w));
       if (static_cast<int>(graphs.count()) > 0) {
-        cm.insertSeparator();
+        cm.addSeparator();
+        auto plots = cm.addMenu(tr("D&epending 3D Graphs"));
         for (int i = 0; i < static_cast<int>(graphs.count()); i++)
-          plots.insertItem(graphs[i], window(graphs[i]), SLOT(showMaximized()));
-
-        cm.insertItem(tr("D&epending 3D Graphs"), &plots);
+          plots->addAction(graphs[i], window(graphs[i]), SLOT(showMaximized()));
       }
-    } else if (w->isA("MultiLayer")) {
+    } else if (strcmp(w->metaObject()->className(), "MultiLayer") == 0) {
       tablesDepend->clear();
       QStringList tbls = multilayerDependencies(w);
       int n = static_cast<int>(tbls.count());
       if (n > 0) {
-        cm.insertSeparator();
+        cm.addSeparator();
         for (int i = 0; i < n; i++)
-          tablesDepend->insertItem(tbls[i], i, -1);
-
-        cm.insertItem(tr("D&epends on"), tablesDepend);
+          tablesDepend->addAction(tbls[i]);
+        auto tablesDependMenuAction = cm.addMenu(tablesDepend);
+        tablesDependMenuAction->setText("D&epends on");
       }
-    } else if (w->isA("Graph3D")) {
+    } else if (strcmp(w->metaObject()->className(), "Graph3D") == 0) {
       Graph3D *sp = dynamic_cast<Graph3D *>(w);
       if (!sp)
         return;
       Matrix *m = sp->matrix();
       QString formula = sp->formula();
       if (!formula.isEmpty()) {
-        cm.insertSeparator();
+        cm.addSeparator();
         if (formula.contains("_")) {
           QStringList tl = formula.split("_", QString::SkipEmptyParts);
           tablesDepend->clear();
-          tablesDepend->insertItem(tl[0], 0, -1);
-          cm.insertItem(tr("D&epends on"), tablesDepend);
+          tablesDepend->addAction(tl[0]);
+          auto tablesDependMenuAction = cm.addMenu(tablesDepend);
+          tablesDependMenuAction->setText("D&epends on");
         } else if (m) {
-          plots.insertItem(m->objectName(), m, SLOT(showNormal()));
-          cm.insertItem(tr("D&epends on"), &plots);
+          auto plots = cm.addMenu(tr("D&epends on"));
+          plots->addAction(m->objectName(), m, SLOT(showNormal()));
         } else {
-          plots.insertItem(formula, w, SLOT(showNormal()));
-          cm.insertItem(tr("Function"), &plots);
+          auto plots = cm.addMenu(tr("Function"));
+          plots->addAction(formula, w, SLOT(showNormal()));
         }
       }
-    } else if (w->isA("TiledWindow")) {
+    } else if (strcmp(w->metaObject()->className(), "TiledWindow") == 0) {
       std::cerr << "Menu for TiledWindow" << std::endl;
     }
     cm.exec(lv->mapToGlobal(p));
@@ -9991,7 +9988,8 @@ void ApplicationWindow::showWindowPopupMenu(const QPoint &p) {
 }
 
 void ApplicationWindow::showTable(int i) {
-  Table *t = table(tablesDepend->text(i));
+  auto selectedAction = tablesDepend->actions().at(i);
+  Table *t = table(selectedAction->text());
   if (!t)
     return;
 
@@ -10024,7 +10022,7 @@ QStringList ApplicationWindow::depending3DPlots(Matrix *m) {
   QStringList plots;
   QList<MdiSubWindow *> windows = windowsList();
   foreach (MdiSubWindow *w, windows) {
-    if (w->isA("Graph3D")) {
+    if (strcmp(w->metaObject()->className(), "Graph3D") == 0) {
       auto g3d = dynamic_cast<Graph3D *>(w);
       if (g3d && g3d->matrix() == m)
         plots << w->objectName();
@@ -10038,21 +10036,21 @@ QStringList ApplicationWindow::dependingPlots(const QString &name) {
 
   QList<MdiSubWindow *> windows = windowsList();
   foreach (MdiSubWindow *w, windows) {
-    if (w->isA("MultiLayer")) {
+    if (strcmp(w->metaObject()->className(), "MultiLayer") == 0) {
       auto ml = dynamic_cast<MultiLayer *>(w);
       if (!ml)
         return plots;
       QList<Graph *> layers = ml->layersList();
       foreach (Graph *g, layers) {
         onPlot = g->curvesList();
-        onPlot = onPlot.grep(name, TRUE);
+        onPlot = onPlot.filter(name, Qt::CaseSensitive);
         if (static_cast<int>(onPlot.count()) &&
             !plots.contains(w->objectName()))
           plots << w->objectName();
       }
-    } else if (w->isA("Graph3D")) {
+    } else if (strcmp(w->metaObject()->className(), "Graph3D") == 0) {
       auto g3d = dynamic_cast<Graph3D *>(w);
-      if (g3d && (g3d->formula()).contains(name, TRUE) &&
+      if (g3d && (g3d->formula()).contains(name, Qt::CaseSensitive) &&
           !plots.contains(w->objectName()))
         plots << w->objectName();
     }
@@ -10097,123 +10095,119 @@ void ApplicationWindow::showGraphContextMenu() {
     return;
   }
 
-  QMenu axes(this);
-  QMenu colour(this);
-  QMenu normalization(this);
-  QMenu normMD(this);
-  QMenu exports(this);
-  QMenu copy(this);
-  QMenu prints(this);
-
   if (ag->isPiePlot())
-    cm.insertItem(tr("Re&move Pie Curve"), ag, SLOT(removePie()));
+    cm.addAction(tr("Re&move Pie Curve"), ag, SLOT(removePie()));
   else {
     if (ag->visibleCurves() != ag->curves()) {
       cm.addAction(actionShowAllCurves);
-      cm.insertSeparator();
+      cm.addSeparator();
     }
     cm.addAction(actionShowCurvesDialog);
     cm.addAction(actionAddFunctionCurve);
     if (m_enableQtiPlotFitting) {
-      cm.insertItem(tr("Anal&yze"), analysisMenu);
+      auto analysisMenuAction = cm.addMenu(analysisMenu);
+      analysisMenuAction->setText(tr("Anal&yze"));
     }
   }
 
   if (lastCopiedLayer) {
-    cm.insertSeparator();
-    cm.insertItem(getQPixmap("paste_xpm"), tr("&Paste Layer"), this,
+    cm.addSeparator();
+    cm.addAction(getQPixmap("paste_xpm"), tr("&Paste Layer"), this,
                   SLOT(pasteSelection()));
   } else if (d_text_copy) {
-    cm.insertSeparator();
-    cm.insertItem(getQPixmap("paste_xpm"), tr("&Paste Text"), plot,
+    cm.addSeparator();
+    cm.addAction(getQPixmap("paste_xpm"), tr("&Paste Text"), plot,
                   SIGNAL(pasteMarker()));
   } else if (d_arrow_copy) {
-    cm.insertSeparator();
-    cm.insertItem(getQPixmap("paste_xpm"), tr("&Paste Line/Arrow"), plot,
+    cm.addSeparator();
+    cm.addAction(getQPixmap("paste_xpm"), tr("&Paste Line/Arrow"), plot,
                   SIGNAL(pasteMarker()));
   } else if (d_image_copy) {
-    cm.insertSeparator();
-    cm.insertItem(getQPixmap("paste_xpm"), tr("&Paste Image"), plot,
+    cm.addSeparator();
+    cm.addAction(getQPixmap("paste_xpm"), tr("&Paste Image"), plot,
                   SIGNAL(pasteMarker()));
   }
-  cm.insertSeparator();
-  axes.insertItem(tr("Lo&g(x),Log(y)"), ag, SLOT(logLogAxes()));
-  axes.insertItem(tr("Log(&x),Linear(y)"), ag, SLOT(logXLinY()));
-  axes.insertItem(tr("Linear(x),Log(&y)"), ag, SLOT(logYlinX()));
-  axes.insertItem(tr("&Linear(x),Linear(y)"), ag, SLOT(linearAxes()));
-  cm.insertItem(tr("&Axes"), &axes);
+  cm.addSeparator();
 
-  colour.insertItem(tr("Lo&g Scale"), ag, SLOT(logColor()));
-  colour.insertItem(tr("&Linear"), ag, SLOT(linColor()));
-  cm.insertItem(tr("&Color Bar"), &colour);
+  auto axes = cm.addMenu(tr("&Axes"));
+  axes->addAction(tr("Lo&g(x),Log(y)"), ag, SLOT(logLogAxes()));
+  axes->addAction(tr("Log(&x),Linear(y)"), ag, SLOT(logXLinY()));
+  axes->addAction(tr("Linear(x),Log(&y)"), ag, SLOT(logYlinX()));
+  axes->addAction(tr("&Linear(x),Linear(y)"), ag, SLOT(linearAxes()));
+
+  auto colour = cm.addMenu(tr("&Color Bar"));
+  colour->addAction(tr("Lo&g Scale"), ag, SLOT(logColor()));
+  colour->addAction(tr("&Linear"), ag, SLOT(linColor()));
 
   if (ag->normalizable()) {
-    QAction *noNorm = new QAction(tr("N&one"), &normalization);
+    auto normalization = cm.addMenu(tr("&Normalization"));
+    auto noNorm = new QAction(tr("N&one"), normalization);
     noNorm->setCheckable(true);
     connect(noNorm, SIGNAL(activated()), ag, SLOT(noNormalization()));
-    normalization.addAction(noNorm);
+    normalization->addAction(noNorm);
 
-    QAction *binNorm = new QAction(tr("&Bin Width"), &normalization);
+    auto binNorm = new QAction(tr("&Bin Width"), normalization);
     binNorm->setCheckable(true);
     connect(binNorm, SIGNAL(activated()), ag, SLOT(binWidthNormalization()));
-    normalization.addAction(binNorm);
+    normalization->addAction(binNorm);
 
-    QActionGroup *normalizationActions = new QActionGroup(this);
+    auto normalizationActions = new QActionGroup(this);
     normalizationActions->setExclusive(true);
     normalizationActions->addAction(noNorm);
     normalizationActions->addAction(binNorm);
 
     noNorm->setChecked(!ag->isDistribution());
     binNorm->setChecked(ag->isDistribution());
-    cm.insertItem(tr("&Normalization"), &normalization);
   } else if (ag->normalizableMD()) {
-    QAction *noNormMD = new QAction(tr("N&one"), &normMD);
+    auto normMD = cm.addMenu("MD &Normalization");
+    auto noNormMD = new QAction(tr("N&one"), normMD);
     noNormMD->setCheckable(true);
     connect(noNormMD, SIGNAL(activated()), ag, SLOT(noNormalizationMD()));
-    normMD.addAction(noNormMD);
+    normMD->addAction(noNormMD);
 
-    QAction *volNormMD = new QAction(tr("&Volume"), &normMD);
+    auto volNormMD = new QAction(tr("&Volume"), normMD);
     volNormMD->setCheckable(true);
     connect(volNormMD, SIGNAL(activated()), ag, SLOT(volumeNormalizationMD()));
-    normMD.addAction(volNormMD);
+    normMD->addAction(volNormMD);
 
-    QAction *eventsNormMD = new QAction(tr("&Events"), &normMD);
+    auto eventsNormMD = new QAction(tr("&Events"), normMD);
     eventsNormMD->setCheckable(true);
     connect(eventsNormMD, SIGNAL(activated()), ag,
             SLOT(numEventsNormalizationMD()));
-    normMD.addAction(eventsNormMD);
+    normMD->addAction(eventsNormMD);
 
-    int normalization = ag->normalizationMD();
+    auto normalization = ag->normalizationMD();
     noNormMD->setChecked(0 == normalization);
     volNormMD->setChecked(1 == normalization);
     eventsNormMD->setChecked(2 == normalization);
-    cm.insertItem("MD &Normalization", &normMD);
   }
 
-  QMenu plotType(this);
   if (ag->curves() > 1) {
-    QAction *waterfall = new QAction(tr("&Waterfall"), &plotType);
+    auto plotType = cm.addMenu(tr("&Plot Type"));
+    auto waterfall = new QAction(tr("&Waterfall"), plotType);
     waterfall->setCheckable(true);
     waterfall->setChecked(ag->isWaterfallPlot());
     connect(waterfall, SIGNAL(toggled(bool)), plot,
             SLOT(toggleWaterfall(bool)));
-    plotType.addAction(waterfall);
-    cm.insertItem(tr("&Plot Type"), &plotType);
+    plotType->addAction(waterfall);
   }
 
-  cm.insertSeparator();
-  copy.insertItem(tr("&Layer"), this, SLOT(copyActiveLayer()));
-  copy.insertItem(tr("&Window"), plot, SLOT(copyAllLayers()));
-  cm.insertItem(getQPixmap("copy_xpm"), tr("&Copy"), &copy);
+  cm.addSeparator();
 
-  exports.insertItem(tr("&Layer"), this, SLOT(exportLayer()));
-  exports.insertItem(tr("&Window"), this, SLOT(exportGraph()));
-  cm.insertItem(tr("E&xport"), &exports);
+  auto copy = cm.addMenu(getQPixmap("copy_xpm"), tr("&Copy"));
+  copy->addAction(tr("&Layer"), this, SLOT(copyActiveLayer()));
+  copy->addAction(tr("&Window"), plot, SLOT(copyAllLayers()));
 
-  prints.insertItem(tr("&Layer"), plot, SLOT(printActiveLayer()));
-  prints.insertItem(tr("&Window"), plot, SLOT(print()));
-  cm.insertItem(getQPixmap("fileprint_xpm"), tr("&Print"), &prints);
-  cm.insertSeparator();
+  auto exports = cm.addMenu(tr("E&xport"));
+  exports->addAction(tr("&Layer"), this, SLOT(exportLayer()));
+  exports->addAction(tr("&Window"), this, SLOT(exportGraph()));
+
+  auto prints = cm.addMenu(getQPixmap("fileprint_xpm"), tr("&Print"));
+  prints->addAction(tr("&Layer"), plot, SLOT(printActiveLayer()));
+  prints->addAction(tr("&Window"), plot, SLOT(print()));
+
+  cm.addSeparator();
+
   cm.insertItem(tr("P&roperties..."), this, SLOT(showGeneralPlotDialog()));
   cm.insertSeparator();
   cm.insertItem(getQPixmap("close_xpm"), tr("&Delete Layer"), plot,
