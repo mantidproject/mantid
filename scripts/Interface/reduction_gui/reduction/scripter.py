@@ -4,6 +4,8 @@
     end produce a Mantid reduction script
 """
 # Check whether Mantid is available
+# Disable unused import warning
+# pylint: disable=W0611
 try:
     from mantid.kernel import ConfigService, Logger, version_str
 
@@ -208,7 +210,7 @@ class BaseScriptElement(object):
             if len(setup_alg_str) == 0:
                 return None
             filename = BaseScriptElement.getStringElement(process_dom_, 'Filename', '')
-            return Algorithm.fromString(str(setup_alg_str)), filename
+            return (Algorithm.fromString(str(setup_alg_str)), filename)
 
         def _process_list(dom_list):
             algs = [_process_setup_info(d) for d in dom_list]

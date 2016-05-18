@@ -1,4 +1,4 @@
-# pylint: disable=invalid-name, W0633, W0611, R0902, R0904, W0702, R0912, C0301
+# pylint: disable=invalid-name, R0902, R0904, R0912
 """
     Classes for each reduction step. Those are kept separately
     from the the interface class so that the HFIRReduction class could
@@ -9,12 +9,13 @@ from reduction_gui.reduction.scripter import BaseScriptElement
 from reduction_gui.reduction.sans.hfir_sample_script import SampleData
 
 # Check whether we are running in MantidPlot
-IS_IN_MANTIDPLOT = False
+# Disable unused import warning
+# pylint: disable=W0611
 try:
     import mantidplot
     IS_IN_MANTIDPLOT = True
-except:
-    pass
+except(ImportError, ImportWarning):
+    IS_IN_MANTIDPLOT = False
 
 
 class Background(BaseScriptElement):
@@ -47,7 +48,7 @@ class Background(BaseScriptElement):
                 @param xml_str: text to read the data from
             """
             self.reset()
-            alg, _ = BaseScriptElement.getAlgorithmFromXML(xml_str)
+            (alg, _) = BaseScriptElement.getAlgorithmFromXML(xml_str)
 
             self.sample_file = BaseScriptElement.getPropertyValue(alg, "BckTransmissionSampleDataFile", default='')
             self.direct_beam = BaseScriptElement.getPropertyValue(alg, "BckTransmissionEmptyDataFile", default='')
@@ -90,7 +91,7 @@ class Background(BaseScriptElement):
                 @param xml_str: text to read the data from
             """
             self.reset()
-            alg, _ = BaseScriptElement.getAlgorithmFromXML(xml_str)
+            (alg, _) = BaseScriptElement.getAlgorithmFromXML(xml_str)
 
             self.sample_scatt = BaseScriptElement.getPropertyValue(alg, "BckTransSampleScatteringFilename", default='')
             self.sample_spreader = BaseScriptElement.getPropertyValue(alg, "BckTransSampleSpreaderFilename", default='')
@@ -229,7 +230,7 @@ class Background(BaseScriptElement):
             @param xml_str: text to read the data from
         """
         self.reset()
-        alg, _ = BaseScriptElement.getAlgorithmFromXML(xml_str)
+        (alg, _) = BaseScriptElement.getAlgorithmFromXML(xml_str)
 
         self.background_file = BaseScriptElement.getPropertyValue(alg, "BackgroundFiles", default='')
         self.background_corr = len(self.background_file)>0

@@ -238,7 +238,7 @@ class ReductionOptions(BaseOptions):
         self.reset()
         super(ReductionOptions, self).from_setup_info(xml_str)
 
-        alg, _ = BaseScriptElement.getAlgorithmFromXML(xml_str)
+        (alg, _) = BaseScriptElement.getAlgorithmFromXML(xml_str)
         self.use_config_cutoff = BaseScriptElement.getPropertyValue(alg, "UseConfigTOFCuts",
                                                                     default=ReductionOptions.use_config_cutoff)
         self.correct_for_flight_path = BaseScriptElement.getPropertyValue(alg, "CorrectForFlightPath",

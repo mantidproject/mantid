@@ -1,4 +1,4 @@
-# pylint: disable=invalid-name, W0633, W0611, R0902, R0904, W0702, R0912, C0301
+# pylint: disable=invalid-name, R0902, R0904, R0912
 """
     Detector options for reduction
 """
@@ -6,12 +6,13 @@ import xml.dom.minidom
 from reduction_gui.reduction.scripter import BaseScriptElement
 
 # Check whether we are running in MantidPlot
-IS_IN_MANTIDPLOT = False
+# Disable unused import warning
+# pylint: disable=W0611
 try:
     import mantidplot
     IS_IN_MANTIDPLOT = True
-except:
-    pass
+except(ImportError, ImportWarning):
+    IS_IN_MANTIDPLOT = False
 
 
 class Detector(BaseScriptElement):
@@ -226,7 +227,7 @@ class Detector(BaseScriptElement):
             @param xml_str: text to read the data from
         """
         self.reset()
-        alg, _ = BaseScriptElement.getAlgorithmFromXML(xml_str)
+        (alg, _) = BaseScriptElement.getAlgorithmFromXML(xml_str)
 
         # Sensitivity correction
         self.sensitivity_data = BaseScriptElement.getPropertyValue(alg, "SensitivityFile", default='')

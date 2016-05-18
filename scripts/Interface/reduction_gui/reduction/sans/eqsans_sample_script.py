@@ -69,6 +69,6 @@ class SampleData(BaseSampleData):
         self.reset()
         super(SampleData, self).from_setup_info(xml_str)
 
-        alg, _ = BaseScriptElement.getAlgorithmFromXML(xml_str)
+        (alg, _) = BaseScriptElement.getAlgorithmFromXML(xml_str)
         self.combine_transmission_frames = BaseScriptElement.getPropertyValue(alg, "FitFramesTogether",
                                                                               default=SampleData.combine_transmission_frames)

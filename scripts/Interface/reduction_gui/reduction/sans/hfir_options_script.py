@@ -406,7 +406,7 @@ class ReductionOptions(BaseScriptElement):
             @param xml_str: text to read the data from
         """
         self.reset()
-        alg, _ = BaseScriptElement.getAlgorithmFromXML(xml_str)
+        (alg, _) = BaseScriptElement.getAlgorithmFromXML(xml_str)
 
         self.sample_detector_distance = BaseScriptElement.getPropertyValue(
             alg, "SampleDetectorDistance", default=ReductionOptions.sample_detector_distance)
