@@ -506,7 +506,10 @@ def QuestRun(samWS,resWS,nbs,erange,nbins,Fit,Loop,Plot,Save):
 
     fitOp = [o_el, o_bgd, o_w1, o_res]
 
-    workdir = getDefaultWorkingDirectory()
+    workdir = config['defaultsave.directory']
+    if not os.path.isdir(workdir):
+        workdir = os.getcwd()
+        logger.information('Default Save directory is not set. Defaulting to current working Directory: ' + workdir)
 
     array_len = 4096                           # length of array in Fortran
     CheckXrange(erange,'Energy')
