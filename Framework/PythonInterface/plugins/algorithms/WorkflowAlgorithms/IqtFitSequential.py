@@ -109,7 +109,7 @@ class IqtFitSequential(PythonAlgorithm):
         logger.information(self._function)
 
         setup_prog.report('Cropping workspace')
-        tmp_fit_name = "__furyfit_fit_ws"
+        tmp_fit_name = "__IqtFit_ws"
         crop_alg = self.createChildAlgorithm("CropWorkspace")
         crop_alg.setProperty("InputWorkspace", self._input_ws)
         crop_alg.setProperty("OutputWorkspace", tmp_fit_name)
@@ -122,7 +122,7 @@ class IqtFitSequential(PythonAlgorithm):
             self._spec_max = num_hist - 1
 
         # Name stem for generated workspace
-        output_workspace = '%sfury_%s%d_to_%d' % (getWSprefix(self._input_ws.getName()),
+        output_workspace = '%sIqtFit_%s_s%d_to_%d' % (getWSprefix(self._input_ws.getName()),
                                                   self._fit_type, self._spec_min,
                                                   self._spec_max)
 
@@ -160,6 +160,8 @@ class IqtFitSequential(PythonAlgorithm):
         delete_alg.execute()
         delete_alg.setProperty("Workspace", output_workspace + '_Parameters')
         delete_alg.execute()
+        delete_alg.setProperty("Workspace", tmp_fit_name)
+        delete_alg.execute()
 
         conclusion_prog.report('Renaming workspaces')
         # rename workspaces to match user input
@@ -188,7 +190,7 @@ class IqtFitSequential(PythonAlgorithm):
         # Process generated workspaces
         wsnames = mtd[self._fit_group_name].getNames()
         for i, workspace in enumerate(wsnames):
-            output_ws = output_workspace + '_%d_Workspace' % i
+            output_ws = output_workspace + '_Workspace_%d' % i
             rename_alg.setProperty("InputWorkspace", workspace)
             rename_alg.setProperty("OutputWorkspace", output_ws)
             rename_alg.execute()
