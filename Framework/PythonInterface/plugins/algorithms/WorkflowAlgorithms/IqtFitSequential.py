@@ -122,7 +122,7 @@ class IqtFitSequential(PythonAlgorithm):
             self._spec_max = num_hist - 1
 
         # Name stem for generated workspace
-        output_workspace = '%sIqtFit_%s%d_to_%d' % (getWSprefix(self._input_ws.getName()),
+        output_workspace = '%sIqtFit_%s_s%d_to_%d' % (getWSprefix(self._input_ws.getName()),
                                                   self._fit_type, self._spec_min,
                                                   self._spec_max)
 
@@ -190,7 +190,7 @@ class IqtFitSequential(PythonAlgorithm):
         # Process generated workspaces
         wsnames = mtd[self._fit_group_name].getNames()
         for i, workspace in enumerate(wsnames):
-            output_ws = output_workspace + '_%d_Workspace' % i
+            output_ws = output_workspace + '_Workspace_%d' % i
             rename_alg.setProperty("InputWorkspace", workspace)
             rename_alg.setProperty("OutputWorkspace", output_ws)
             rename_alg.execute()
