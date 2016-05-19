@@ -111,8 +111,9 @@ private:
   void addRunProperty(const std::string &name, const T &value,
                       const std::string &units = "");
   void setBeamTrapRunProperty(std::map<std::string, std::string> &metadata);
-  void moveDetector(double sample_detector_distance);
+  void moveDetector(double, double);
   double detectorDistance(std::map<std::string, std::string> &metadata);
+  double detectorTranslation(std::map<std::string, std::string> &metadata);
   void setMetadataAsRunProperties(std::map<std::string, std::string> &metadata);
   void rotateDetector(const double &);
 

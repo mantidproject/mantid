@@ -212,7 +212,8 @@ void LoadSpice2D::exec() {
 
   // sample_detector_distances
   double detector_distance = detectorDistance(metadata);
-  moveDetector(detector_distance);
+  double detector_tranlation = detectorTranslation(metadata);
+  moveDetector(detector_distance, detector_tranlation);
 
   setProperty("OutputWorkspace", m_workspace);
 }
@@ -444,8 +445,11 @@ void LoadSpice2D::setMetadataAsRunProperties(
   // start_time
   std::map<std::string, std::string> attributes =
       m_xmlHandler.get_attributes_from_tag("/");
-  addRunProperty<std::string>(attributes, "start_time", "start_time", "");
+
   addRunProperty<std::string>(attributes, "start_time", "run_start", "");
+
+  m_workspace->mutableRun().setStartAndEndTime(attributes["start_time"],
+                                               attributes["end_time"]);
 
   // sample thickness
   addRunProperty<double>(metadata, "Header/Sample_Thickness",
@@ -507,10 +511,25 @@ LoadSpice2D::detectorDistance(std::map<std::string, std::string> &metadata) {
   return sample_detector_distance;
 }
 
+double
+LoadSpice2D::detectorTranslation(std::map<std::string, std::string> &metadata) {
+
+  // detectorTranslations
+  double detectorTranslation = 0;
+  from_string<double>(detectorTranslation,
+                      metadata["Motor_Positions/detector_trans"], std::dec);
+  detectorTranslation /= 1000.0; // mm to meters conversion
+
+  g_log.debug() << "Detector Translation = " << detectorTranslation
+                << " meters." << std::endl;
+  return detectorTranslation;
+}
+
 /**
  * Places the detector at the right sample_detector_distance
  */
-void LoadSpice2D::moveDetector(double sample_detector_distance) {
+void LoadSpice2D::moveDetector(double sample_detector_distance,
+                               double translation_distance) {
   // Move the detector to the right position
   API::IAlgorithm_sptr mover = createChildAlgorithm("MoveInstrumentComponent");
 
@@ -523,6 +542,7 @@ void LoadSpice2D::moveDetector(double sample_detector_distance) {
     mover->setProperty<API::MatrixWorkspace_sptr>("Workspace", m_workspace);
     mover->setProperty("ComponentName", detID);
     mover->setProperty("Z", sample_detector_distance / 1000.0);
+    mover->setProperty("X", -translation_distance);
     mover->execute();
   } catch (std::invalid_argument &e) {
     g_log.error("Invalid argument to MoveInstrumentComponent Child Algorithm");
