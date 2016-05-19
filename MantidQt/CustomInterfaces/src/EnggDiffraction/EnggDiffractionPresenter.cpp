@@ -885,7 +885,7 @@ void EnggDiffractionPresenter::runFittingAlgs(
       runCloneWorkspaceAlg(FocusedWSName, single_peak_out_WS);
 
       setDataToClonedWS(current_peak_out_WS, single_peak_out_WS);
-
+	  ADS.remove(current_peak_out_WS);
     } else {
       current_peak_cloned_WS =
           "__engggui_fitting_cloned_peaks" + std::to_string(i);

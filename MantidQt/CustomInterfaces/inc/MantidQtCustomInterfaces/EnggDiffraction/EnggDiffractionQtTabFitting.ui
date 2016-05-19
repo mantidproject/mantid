@@ -417,7 +417,7 @@
            <bool>false</bool>
           </property>
           <property name="text">
-           <string>Plot Separate Window</string>
+           <string>Plot To Separate Window</string>
           </property>
          </widget>
         </item>
