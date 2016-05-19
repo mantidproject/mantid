@@ -27,7 +27,6 @@ class BASISReduction(PythonAlgorithm):
     _dMask = None
 
     # class variables related to division by Vanadium (normalization)
-    _doNorm = None  # stores the selected item from normalization_types
     _normRange = None
     _norm_run_list = None
     _normWs = None
@@ -38,6 +37,11 @@ class BASISReduction(PythonAlgorithm):
     _samMonWs = None
     _samWsRun = None
     _samSqwWs = None
+
+    def __init__(self):
+        PythonAlgorithm.__init__(self)
+        self._doNorm = None  # stores the selected item from normalization_types
+        self._normalizeToFirst = False
 
     def category(self):
         return "Inelastic\\Reduction"
@@ -114,6 +118,8 @@ class BASISReduction(PythonAlgorithm):
         self._maskFile = self.getProperty("MaskFile").value
         self._groupDetOpt = self.getProperty("GroupDetectors").value
         self._normalizeToFirst = self.getProperty("NormalizeToFirst").value
+        self._normalizeToVanadium = self.getProperty("GroupDetectors").value
+        self._doNorm = self.getProperty("DivideByVanadium").value
 
         datasearch = config["datasearch.searcharchive"]
         if datasearch != "On":
@@ -136,8 +142,9 @@ class BASISReduction(PythonAlgorithm):
         ############################
         ##  Process the Vanadium  ##
         ############################
+
         norm_runs = self.getProperty("NormRunNumbers").value
-        if bool(norm_runs):
+        if self._doNorm and bool(norm_runs):
             if ";" in norm_runs:
                 raise SyntaxError("Normalization does not support run groups")
             self._doNorm = self.getProperty("NormalizationType").value
