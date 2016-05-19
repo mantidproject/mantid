@@ -1140,11 +1140,11 @@ class TestGetQResolutionForMergedWorkspaces(unittest.TestCase):
         x1 = [1,2,3]
         e1 = [1,1]
         y1 = [2,2]
-        dx1 = [1.,2.,3.]
+        dx1 = [1.,2.]
         x2 = [1,2,3,4]
         e2 = [1,1, 1]
         y2 = [2,2, 2]
-        dx2 = [1.,2.,3.,4.]
+        dx2 = [1.,2.,3.]
         provide_workspace_with_x_errors(front_name, True, 1, x1, y1, e1, dx1)
         provide_workspace_with_x_errors(rear_name, True, 1, x2, y2, e2, dx2)
         provide_workspace_with_x_errors(result_name, False, 1)
