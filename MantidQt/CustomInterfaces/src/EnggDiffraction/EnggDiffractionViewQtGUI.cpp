@@ -259,6 +259,9 @@ void EnggDiffractionViewQtGUI::doSetupTabFitting() {
   connect(m_uiTabFitting.pushButton_clear_peak_list, SIGNAL(released()),
           SLOT(clearPeakList()));
 
+  connect(m_uiTabFitting.pushButton_plot_separate_window, SIGNAL(released()),
+	  SLOT(plotSeparateWindow()));
+
   m_uiTabFitting.dataPlot->setCanvasBackground(Qt::white);
   m_uiTabFitting.dataPlot->setAxisTitle(QwtPlot::xBottom, "d-Spacing (A)");
   m_uiTabFitting.dataPlot->setAxisTitle(QwtPlot::yLeft, "Counts (us)^-1");
@@ -1357,6 +1360,25 @@ void EnggDiffractionViewQtGUI::setFittingRunNo(QString path) {
 
 std::string EnggDiffractionViewQtGUI::getFittingRunNo() const {
   return m_uiTabFitting.lineEdit_pushButton_run_num->text().toStdString();
+}
+
+void EnggDiffractionViewQtGUI::plotSeparateWindow() {
+  std::string pyCode =
+
+      "single_peak_ws = workspace(\"engggui_fitting_single_peaks\")\n"
+      "tot_spec = single_peak_ws.getNumberHistograms()\n"
+
+      "spec_list = []\n"
+      "for i in range(0, tot_spec):\n"
+      " spec_list.append(i)\n"
+
+      "plotSpectrum(single_peak_ws, spec_list)\n";
+
+  std::string status =
+      runPythonCode(QString::fromStdString(pyCode), false).toStdString();
+  m_logMsgs.emplace_back("Plotted output focused data, with status string " +
+                         status);
+  m_presenter->notify(IEnggDiffractionPresenter::LogMsg);
 }
 
 std::string EnggDiffractionViewQtGUI::fittingPeaksData() const {

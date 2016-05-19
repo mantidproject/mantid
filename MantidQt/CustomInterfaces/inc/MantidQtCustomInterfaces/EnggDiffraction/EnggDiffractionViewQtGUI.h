@@ -278,6 +278,7 @@ private slots:
   void clearPeakList();
   void fitClicked();
   void FittingRunNo();
+  void plotSeparateWindow();
   void setBankDir(int idx);
   void listViewFittingRun();
 
