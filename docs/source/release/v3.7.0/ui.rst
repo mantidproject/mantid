@@ -31,6 +31,8 @@ Line plots
 SliceViewer Improvements
 ########################
 
+-  The Matlab defulat colour map viridis has been added to Mantid
+
 -  The SliceViewer is now able to display ellipsoidal peak shapes. Note
    that the displayed ellipse is the result of the viewing plane cutting
    the peak ellipsoid.
@@ -158,7 +160,6 @@ Bugs Resolved
 -  Plots from tables auto-update when the TableWorkspace is replaced in the ADS. If extra rows are added then the new points are added to the graph.
 
 - The Fit property browser (Fit Function window) in MantidPlot now supports fitting data plotted from a TableWorkspace.
-
 
 
 Full list of

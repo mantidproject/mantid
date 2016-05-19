@@ -329,9 +329,9 @@ Output
 
 Once the Fit button has been clicked, wait until the Fitting process has
 completed and upon completion you should be able to view on the Fitting
-tab plots the focused workspace in the background in black, whereas the
-expected peaks plotted in various colours over lapping the focused
-workspace peaks.
+tab; the focused workspace plotted in the background in grey crosses.
+Whereas the expected peaks plotted in various colours over lapping the
+focused workspace peaks.
 
 Within the :ref:`Preview-Engineering_Diffraction-ref` section user is
 able to zoom-in or zoom-out as well as select, add and save peaks.
@@ -352,7 +352,10 @@ Preview
 ^^^^^^^
 Once the fitting process has completed and you are able to view a
 focused workspace with listed expected peaks on the data plot, Select
-Peak button should should also be enabled.
+Peak button should should also be enabled. If the fitting fails with
+the given peaks then the focused workspace will still be plotted so
+that user can select peaks manually.
+
 By clicking Select Peak button the peak picker tool can be activated.
 To select a peak simply hold *Shift* key and left-click on the graph
 near the peak's center.
@@ -365,9 +368,14 @@ the plot.
 
 When user is satisfied with the center position of the peak, you may
 add the selected peak to :ref:`ExpectedPeaks-Engineering_Diffraction-ref`
-list by clicking Add Peak button. User may rerun Fit process with
-the new selected peaks or save the peaks list as *CSV* file by clicking
-Save Peak List button.
+list by clicking Add Peak button. User may rerun Fit process by
+clearing peaks list using Clear button and manually selecting peaking
+using Select Peak button or instead Save the peaks list in *CSV* file
+by clicking Save button.
+
+User may plot single peak fitting workspace in separate window by using
+Plot To Separate Window button, if the *engggui_fitting_single_peaks*
+is available.
 
 .. _setting-Engineering_Diffraction-ref:
 

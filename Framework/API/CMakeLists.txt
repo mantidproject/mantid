@@ -116,7 +116,6 @@ set ( SRC_FILES
 	src/RemoteJobManagerFactory.cpp
 	src/Run.cpp
 	src/Sample.cpp
-	src/SampleEnvironment.cpp
 	src/SampleShapeValidator.cpp
 	src/SampleValidator.cpp
 	src/ScopedWorkspace.cpp
@@ -300,7 +299,6 @@ set ( INC_FILES
 	inc/MantidAPI/RemoteJobManagerFactory.h
 	inc/MantidAPI/Run.h
 	inc/MantidAPI/Sample.h
-	inc/MantidAPI/SampleEnvironment.h
 	inc/MantidAPI/SampleShapeValidator.h
 	inc/MantidAPI/SampleValidator.h
 	inc/MantidAPI/ScopedWorkspace.h
@@ -408,7 +406,6 @@ set ( TEST_FILES
 	RawCountValidatorTest.h
 	RemoteJobManagerFactoryTest.h
 	RunTest.h
-	SampleEnvironmentTest.h
 	SampleShapeValidatorTest.h
 	SampleTest.h
 	SampleValidatorTest.h

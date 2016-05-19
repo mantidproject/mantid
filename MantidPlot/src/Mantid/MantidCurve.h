@@ -61,7 +61,7 @@ public:
   QList<ErrorBarSettings *> errorBarSettingsList() const override;
 
   /// Invalidates the bounding rect forcing it to be recalculated
-  void invalidateBoundingRect(){m_boundingRect = QwtDoubleRect();}
+  void invalidateBoundingRect();
 
   /*-------------------------------------------------------------------------------------
   Public Base/Common methods

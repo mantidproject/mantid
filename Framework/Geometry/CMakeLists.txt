@@ -1,5 +1,4 @@
 set ( SRC_FILES
-	${SRC_FILES} ${OPENCASCADE_SRC}
 	src/ComponentParser.cpp
 	src/Crystal/BasicHKLFilters.cpp
 	src/Crystal/BraggScatterer.cpp
@@ -44,6 +43,7 @@ set ( SRC_FILES
 	src/Crystal/V3R.cpp
 	src/IObjComponent.cpp
 	src/Instrument.cpp
+	src/Instrument/Can.cpp
 	src/Instrument/CompAssembly.cpp
 	src/Instrument/Component.cpp
 	src/Instrument/ComponentHelper.cpp
@@ -63,6 +63,10 @@ set ( SRC_FILES
 	src/Instrument/RectangularDetector.cpp
 	src/Instrument/RectangularDetectorPixel.cpp
 	src/Instrument/ReferenceFrame.cpp
+	src/Instrument/SampleEnvironment.cpp
+	src/Instrument/SampleEnvironmentFactory.cpp
+	src/Instrument/SampleEnvironmentSpec.cpp
+	src/Instrument/SampleEnvironmentSpecParser.cpp
 	src/Instrument/StructuredDetector.cpp
 	src/Instrument/XMLInstrumentParameter.cpp
 	src/MDGeometry/CompositeImplicitFunction.cpp
@@ -109,7 +113,7 @@ set ( SRC_FILES
 	src/Rendering/GeometryHandler.cpp
 	src/Rendering/GluGeometryHandler.cpp
 	src/Rendering/GluGeometryRenderer.cpp
-    src/Rendering/StructuredGeometryHandler.cpp
+	src/Rendering/StructuredGeometryHandler.cpp
 	src/Rendering/vtkGeometryCacheReader.cpp
 	src/Rendering/vtkGeometryCacheWriter.cpp
 	src/Surfaces/Cone.cpp
@@ -193,7 +197,7 @@ set ( INC_FILES
 	inc/MantidGeometry/IDetector_fwd.h
 	inc/MantidGeometry/IObjComponent.h
 	inc/MantidGeometry/Instrument.h
-	inc/MantidGeometry/Instrument_fwd.h
+	inc/MantidGeometry/Instrument/Can.h
 	inc/MantidGeometry/Instrument/CompAssembly.h
 	inc/MantidGeometry/Instrument/Component.h
 	inc/MantidGeometry/Instrument/ComponentHelper.h
@@ -216,8 +220,13 @@ set ( INC_FILES
 	inc/MantidGeometry/Instrument/RectangularDetector.h
 	inc/MantidGeometry/Instrument/RectangularDetectorPixel.h
 	inc/MantidGeometry/Instrument/ReferenceFrame.h
+	inc/MantidGeometry/Instrument/SampleEnvironment.h
+	inc/MantidGeometry/Instrument/SampleEnvironmentFactory.h
+	inc/MantidGeometry/Instrument/SampleEnvironmentSpec.h
+	inc/MantidGeometry/Instrument/SampleEnvironmentSpecParser.h
 	inc/MantidGeometry/Instrument/StructuredDetector.h
 	inc/MantidGeometry/Instrument/XMLInstrumentParameter.h
+	inc/MantidGeometry/Instrument_fwd.h
 	inc/MantidGeometry/MDGeometry/CompositeImplicitFunction.h
 	inc/MantidGeometry/MDGeometry/GeneralFrame.h
 	inc/MantidGeometry/MDGeometry/HKL.h
@@ -260,7 +269,6 @@ set ( INC_FILES
 	inc/MantidGeometry/Objects/ShapeFactory.h
 	inc/MantidGeometry/Objects/Track.h
 	inc/MantidGeometry/Rendering/BitmapGeometryHandler.h
-    inc/MantidGeometry/Rendering/StructuredGeometryHandler.h
 	inc/MantidGeometry/Rendering/CacheGeometryGenerator.h
 	inc/MantidGeometry/Rendering/CacheGeometryHandler.h
 	inc/MantidGeometry/Rendering/CacheGeometryRenderer.h
@@ -271,6 +279,7 @@ set ( INC_FILES
 	inc/MantidGeometry/Rendering/OCGeometryHandler.h
 	inc/MantidGeometry/Rendering/OCGeometryRenderer.h
 	inc/MantidGeometry/Rendering/OpenGL_Headers.h
+	inc/MantidGeometry/Rendering/StructuredGeometryHandler.h
 	inc/MantidGeometry/Rendering/vtkGeometryCacheReader.h
 	inc/MantidGeometry/Rendering/vtkGeometryCacheWriter.h
 	inc/MantidGeometry/Surfaces/BaseVisit.h
@@ -296,6 +305,7 @@ set ( TEST_FILES
 	BraggScattererFactoryTest.h
 	BraggScattererInCrystalStructureTest.h
 	BraggScattererTest.h
+	CanTest.h
 	CenteringGroupTest.h
 	CompAssemblyTest.h
 	ComponentHelperTest.h
@@ -387,14 +397,19 @@ set ( TEST_FILES
 	RulesSurfPointTest.h
 	RulesTest.h
 	RulesUnionTest.h
+	SampleEnvironmentFactoryTest.h
+	SampleEnvironmentSpecFileFinderTest.h
+	SampleEnvironmentSpecParserTest.h
+	SampleEnvironmentSpecTest.h
+	SampleEnvironmentTest.h
 	ScalarUtilsTest.h
 	ShapeFactoryTest.h
 	SpaceGroupFactoryTest.h
 	SpaceGroupTest.h
 	SphereTest.h
-	StructuredDetectorTest.h
 	StructureFactorCalculatorSummationTest.h
 	StructureFactorCalculatorTest.h
+	StructuredDetectorTest.h
 	SurfaceFactoryTest.h
 	SurfaceTest.h
 	SymmetryElementFactoryTest.h

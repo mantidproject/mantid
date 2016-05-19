@@ -256,6 +256,12 @@ void EnggDiffractionViewQtGUI::doSetupTabFitting() {
   connect(m_uiTabFitting.pushButton_save_peak_list, SIGNAL(released()),
           SLOT(savePeakList()));
 
+  connect(m_uiTabFitting.pushButton_clear_peak_list, SIGNAL(released()),
+          SLOT(clearPeakList()));
+
+  connect(m_uiTabFitting.pushButton_plot_separate_window, SIGNAL(released()),
+          SLOT(plotSeparateWindow()));
+
   m_uiTabFitting.dataPlot->setCanvasBackground(Qt::white);
   m_uiTabFitting.dataPlot->setAxisTitle(QwtPlot::xBottom, "d-Spacing (A)");
   m_uiTabFitting.dataPlot->setAxisTitle(QwtPlot::yLeft, "Counts (us)^-1");
@@ -698,6 +704,8 @@ void EnggDiffractionViewQtGUI::enableCalibrateAndFocusActions(bool enable) {
   m_uiTabFitting.pushButton_fitting_browse_peaks->setEnabled(enable);
   m_uiTabFitting.lineEdit_fitting_peaks->setEnabled(enable);
   m_uiTabFitting.pushButton_fit->setEnabled(enable);
+  m_uiTabFitting.pushButton_clear_peak_list->setEnabled(enable);
+  m_uiTabFitting.pushButton_save_peak_list->setEnabled(enable);
   m_uiTabFitting.comboBox_bank->setEnabled(enable);
   m_uiTabFitting.groupBox_fititng_preview->setEnabled(enable);
 }
@@ -794,7 +802,26 @@ std::string EnggDiffractionViewQtGUI::readPeaksFile(std::string fileDir) {
 }
 
 void EnggDiffractionViewQtGUI::setDataVector(
-    std::vector<boost::shared_ptr<QwtData>> &data, bool focused) {
+    std::vector<boost::shared_ptr<QwtData>> &data, bool focused,
+    bool plotSinglePeaks) {
+
+  if (!plotSinglePeaks) {
+    // clear vector and detach curves to avoid plot crash
+    // when only plotting focused workspace
+    for (auto curves : m_fittedDataVector) {
+      if (curves) {
+        curves->detach();
+        delete curves;
+      }
+    }
+
+    if (m_fittedDataVector.size() > 0)
+      m_fittedDataVector.clear();
+
+    // set it as false as there will be no valid workspace to plot
+    m_uiTabFitting.pushButton_plot_separate_window->setEnabled(false);
+  }
+
   if (focused) {
     dataCurvesFactory(data, m_focusedDataVector, focused);
   } else {
@@ -818,11 +845,11 @@ void EnggDiffractionViewQtGUI::dataCurvesFactory(
     dataVector.clear();
   resetView();
 
-  // dark colours could be removed so the colored peaks stand out more
+  // dark colours could be removed so that the coloured peaks stand out more
   const std::array<QColor, 16> QPenList{
       {Qt::white, Qt::red, Qt::darkRed, Qt::green, Qt::darkGreen, Qt::blue,
        Qt::darkBlue, Qt::cyan, Qt::darkCyan, Qt::magenta, Qt::darkMagenta,
-       Qt::yellow, Qt::darkYellow, Qt::gray, Qt::darkGray, Qt::lightGray}};
+       Qt::yellow, Qt::darkYellow, Qt::gray, Qt::lightGray, Qt::black}};
 
   std::mt19937 gen;
   std::uniform_int_distribution<std::size_t> dis(0, QPenList.size() - 1);
@@ -831,10 +858,18 @@ void EnggDiffractionViewQtGUI::dataCurvesFactory(
     auto *peak = data[i].get();
 
     QwtPlotCurve *dataCurve = new QwtPlotCurve();
-    dataCurve->setStyle(QwtPlotCurve::Lines);
     if (!focused) {
+      dataCurve->setStyle(QwtPlotCurve::Lines);
       auto randIndex = dis(gen);
-      dataCurve->setPen(QPen(QPenList[randIndex], 1));
+      dataCurve->setPen(QPen(QPenList[randIndex], 2));
+
+      // only set enabled when single peak workspace plotted
+      m_uiTabFitting.pushButton_plot_separate_window->setEnabled(true);
+    } else {
+      dataCurve->setStyle(QwtPlotCurve::NoCurve);
+      // focused workspace in bg set as darkGrey crosses insted of line
+      dataCurve->setSymbol(QwtSymbol(QwtSymbol::XCross, QBrush(),
+                                     QPen(Qt::darkGray, 1), QSize(3, 3)));
     }
     dataCurve->setRenderHint(QwtPlotItem::RenderAntialiased, true);
 
@@ -1327,6 +1362,32 @@ std::string EnggDiffractionViewQtGUI::getFittingRunNo() const {
   return m_uiTabFitting.lineEdit_pushButton_run_num->text().toStdString();
 }
 
+void EnggDiffractionViewQtGUI::plotSeparateWindow() {
+  std::string pyCode =
+
+      "fitting_single_peaks_twin_ws = \"__engggui_fitting_single_peaks_twin\"\n"
+      "if (mtd.doesExist(fitting_single_peaks_twin_ws)):\n"
+      " DeleteWorkspace(fitting_single_peaks_twin_ws)\n"
+
+      "single_peak_ws = CloneWorkspace(InputWorkspace = "
+      "\"engggui_fitting_single_peaks\", OutputWorkspace = "
+      "fitting_single_peaks_twin_ws)\n"
+      "tot_spec = single_peak_ws.getNumberHistograms()\n"
+
+      "spec_list = []\n"
+      "for i in range(0, tot_spec):\n"
+      " spec_list.append(i)\n"
+
+      "fitting_plot = plotSpectrum(single_peak_ws, spec_list).activeLayer()\n"
+      "fitting_plot.setTitle(\"Engg GUI Single Peaks Fitting Workspace\")\n";
+
+  std::string status =
+      runPythonCode(QString::fromStdString(pyCode), false).toStdString();
+  m_logMsgs.emplace_back("Plotted output focused data, with status string " +
+                         status);
+  m_presenter->notify(IEnggDiffractionPresenter::LogMsg);
+}
+
 std::string EnggDiffractionViewQtGUI::fittingPeaksData() const {
   // this should be moved to Helper or could use the poco string tokenizers
   std::string exptPeaks =
@@ -1579,6 +1640,10 @@ void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::savePeakList() {
                 "Invalid file path or or could not be saved. Please try again");
     return;
   }
+}
+
+void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::clearPeakList() {
+  m_uiTabFitting.lineEdit_fitting_peaks->clear();
 }
 
 void EnggDiffractionViewQtGUI::instrumentChanged(int /*idx*/) {
