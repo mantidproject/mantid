@@ -37,16 +37,28 @@ namespace Kernel {
 */
 class MANTID_KERNEL_DLL EqualBinsChecker {
 public:
+  /// Type of bin to compare others to
+  enum class ReferenceBin { Average, First };
+  /// Type of errors to check
+  enum class ErrorType { Cumulative, Individual };
   EqualBinsChecker(const MantidVec &xData, const double errorLevel,
                    const double warningLevel = -1);
   virtual ~EqualBinsChecker() = default;
   virtual std::string validate() const;
+  virtual void setReferenceBin(const ReferenceBin &refBinType);
+  virtual void setErrorType(const ErrorType &errorType);
+
+protected:
+  virtual double getReferenceDx() const;
+  virtual double getDifference(const size_t bin, const double dx) const;
 
 private:
   const MantidVec &m_xData;
   const double m_errorLevel;
   const bool m_warn;
   const double m_warningLevel;
+  ReferenceBin m_refBinType;
+  ErrorType m_errorType;
 };
 
 } // namespace Kernel

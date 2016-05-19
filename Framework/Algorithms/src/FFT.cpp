@@ -358,6 +358,15 @@ bool FFT::areBinWidthsUneven(const MantidVec &xValues) const {
   const double warnValue = acceptXRoundingErrors ? 0.1 : -1;
 
   Kernel::EqualBinsChecker binChecker(xValues, tolerance, warnValue);
+
+  // Compatibility with previous behaviour
+  if (!acceptXRoundingErrors) {
+    // Compare each bin width to the first (not the average)
+    binChecker.setReferenceBin(EqualBinsChecker::ReferenceBin::First);
+    // Use individual errors (not cumulative)
+    binChecker.setErrorType(EqualBinsChecker::ErrorType::Individual);
+  }
+
   const std::string binError = binChecker.validate();
   return !binError.empty();
 }
