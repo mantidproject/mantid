@@ -249,13 +249,12 @@ private:
       dataStream.clear();
       dataStream.str(line);
       dataStream >> indexMarker >> d1 >> separator >> d2 >> separator >> d3 >>
-          separator >> dEnd >> separator;
+          separator;
       TS_ASSERT_EQUALS(indexMarker, spec);
       TS_ASSERT_EQUALS(separator, ",");
       TS_ASSERT_DELTA(d1, sqrt(double(spec)), 1e-5);
       TS_ASSERT_DELTA(d2, sqrt(double(spec)), 1e-5);
       TS_ASSERT_DELTA(d3, sqrt(double(spec)), 1e-5);
-      TS_ASSERT_DELTA(dEnd, sqrt(double(spec)), 1e-5);
     }
     stream.close();
   }
