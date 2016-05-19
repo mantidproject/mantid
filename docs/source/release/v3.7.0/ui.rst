@@ -5,15 +5,6 @@ UI & Usability Changes
 .. contents:: Table of Contents
    :local:
 
-Installation
-------------
-
-Windows
-#######
-
-OS X
-####
-
 User Interface
 --------------
 
@@ -37,8 +28,35 @@ Line plots
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 - For single-spectrum data, the choice of spectrum number to plot has been disabled because it has only one possible answer.
 
+SliceViewer Improvements
+########################
+
+-  The SliceViewer is now able to display ellipsoidal peak shapes. Note
+   that the displayed ellipse is the result of the viewing plane cutting
+   the peak ellipsoid.
+
+.. figure::  ../../images/Elliptical_peaks_slice_viewer.png
+   :align: center
+
+VSI Improvements
+################
+
+-  The representation of points in the splatter plot was changed from opaque cubes to translucent spheres.
+
+.. figure::  ../../images/VSIPointGaussianRepresentation.png
+   :align: center
+
+- The sphere and ellipse wireframes have been simplified so that it is easier to see the enclosed points.
+
+.. figure:: ../../images/VSIEllipses.png
+    :align: center
+
+- Removed the error-prone right-click option to view peaks workspaces in the VSI. One should load a MDWorkspace,
+  then drag the corresponding peaks workspace into the VSI window.
+
+
 Instrument View
-###############
+---------------
 
 -  The instrument view is now exposed to python as a stand-alone widget.
    In it's current implementation, the instrument view depends on the
@@ -95,17 +113,14 @@ Instrument View
         ConfigService.setFacility(facility)
 
 
-Algorithm Toolbox
-#################
-
 Scripting Window
-################
+----------------
 
 - If `MantidPlot` was launched with the `-x` option but the script was already opened by the recent files list then
   the wrong script would be executed. This bug has been fixed. `#15682 <https://github.com/mantidproject/mantid/issue/15682>`_
 
 Documentation
-#############
+-------------
 
 - Documentation has been added for fitting functions :ref:`BSpline <func-BSpline>` and
   :ref:`CubicSpline <func-CubicSpline>` then attempts to be more verbose about their use and how to
@@ -144,33 +159,7 @@ Bugs Resolved
 
 - The Fit property browser (Fit Function window) in MantidPlot now supports fitting data plotted from a TableWorkspace.
 
-SliceViewer Improvements
-------------------------
 
--  The SliceViewer is now able to display ellipsoidal peak shapes. Note
-   that the displayed ellipse is the result of the viewing plane cutting
-   the peak ellipsoid.
-
-.. figure::  ../../images/Elliptical_peaks_slice_viewer.png
-   :align: center
-
-VSI Improvements
-----------------
-
--  The representation of points in the splatter plot was changed from opaque cubes to translucent spheres.
-
-.. figure::  ../../images/VSIPointGaussianRepresentation.png
-   :align: center
-
-- The sphere and ellipse wireframes have been simplified so that it is easier to see the enclosed points.
-
-.. figure:: ../../images/VSIEllipses.png
-    :align: center
-
-- Removed the error-prone right-click option to view peaks workspaces in the VSI. One should load a MDWorkspace,
-  then drag the corresponding peaks workspace into the VSI window.
-
-|
 
 Full list of
 `GUI <http://github.com/mantidproject/mantid/pulls?q=is%3Apr+milestone%3A%22Release+3.7%22+is%3Amerged+label%3A%22Component%3A+GUI%22>`_

@@ -48,10 +48,9 @@ This tab provides a graphical interface to calculate calibrations and
 visualize them.
 
 It is possible to
-- generate a new calibration file (which becomes the new current
-  calibration)
-- load an existing calibration from a GSAS instrument
-  parameters file previously generated
+
+- generate a new calibration file (which becomes the new current calibration)
+- load an existing calibration from a GSAS instrument parameters file previously generated
 
 For the current calibration, the following parameters are displayed:
 the vanadium run number, the calibration sample run number, and the
@@ -291,6 +290,8 @@ To use the Fitting tab, user is required to provide:
 2. List of expected peaks which can be either by browsing a (*CSV*) file
    or entering within the text-field simply click on the Fit button.
 
+.. _ExpectedPeaks-Engineering_Diffraction-ref:
+
 Parameters
 ^^^^^^^^^^
 
@@ -311,8 +312,6 @@ Focused Run #:
   of the graph, from where each run number can be selected from by click on it.
   The interface will then automatically update the Plot Bank combo-box
   according to the bank files found for each entered/selected run-number.
-
-.. _ExpectedPeaks-Engineering_Diffraction-ref:
 
 Peaks:
   A list of dSpacing values to be translated into TOF to find expected

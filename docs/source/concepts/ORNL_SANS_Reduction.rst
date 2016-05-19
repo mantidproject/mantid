@@ -1,4 +1,4 @@
-.. _Facilities File:
+.. _Reduction for ORNL SANS:
 
 .. role:: xml(literal)
    :class: highlight
@@ -41,6 +41,7 @@ Reduction script
 ----------------
 
 .. code-block:: python
+
   import mantid
   from mantid.simpleapi import *
   from reduction_workflow.instruments.sans.hfir_command_interface import *

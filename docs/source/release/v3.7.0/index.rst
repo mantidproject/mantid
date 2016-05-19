@@ -4,19 +4,17 @@
 Mantid 3.7.0 Release Notes
 ==========================
 
-.. figure:: ../../images/ReleaseUnderConstruction.jpg
+.. figure:: ../../images/VSIEllipses.png
    :class: screenshot
-   :width: 550px
    :align: right
 
-   Release image
+   Splatter plot views using translucent spheres and clearer sphere and ellipse wireframes
 
 .. contents:: Table of Contents
    :local:
 
-.. warning:: This release is still under construction. The changes can be found in the nightly builds on the `download page`_.
-
-**TODO: Add paragraph summarizing big changes**
+We are proud to announce version 3.7 of Mantid, this release contains
+several improvements to the advanced visualisation and the CLI for multidimensional data.
 
 This is just one of many improvements in this release, so please take a
 look at the release notes, which are filled with details of the
@@ -47,8 +45,8 @@ Changes
 .. toctree::
    :titlesonly:
 
-   Framework <framework>
    User Interface & Usability <ui>
+   Framework <framework>
    Direct Inelastic <direct_inelastic>
    Indirect Inelastic <indirect_inelastic>
    SANS <sans>

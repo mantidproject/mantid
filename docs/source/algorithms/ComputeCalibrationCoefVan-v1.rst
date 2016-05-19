@@ -42,7 +42,7 @@ Workspace containing these correction coefficients is created as an output and c
 
 
 Restrictions on the input workspaces
-###################################
+####################################
 
 The valid input workspace:
 

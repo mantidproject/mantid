@@ -28,10 +28,10 @@ directly:
 This function requires some inputs and allow for some optional
 parameters as well. The minimum set of parameters required are:
 
-* The workspace whose instrument is based on tubes (ws), where the counts in the tube pixels have been integrated
-* Definition of the set of tubes to be calibrated (tubeSet)
-* The position of the known points (knownPositions)
-* The shape of the known points (funcForm). Currently, we accept two shapes identified as 1 for :ref:`Gaussian <func-Gaussian>` and 2 for Edges.
+- The workspace whose instrument is based on tubes (ws), where the counts in the tube pixels have been integrated
+- Definition of the set of tubes to be calibrated (tubeSet)
+- The position of the known points (knownPositions)
+- The shape of the known points (funcForm). Currently, we accept two shapes identified as 1 for :ref:`Gaussian <func-Gaussian>` and 2 for Edges.
 
 Parameter: Workspace
 ####################
@@ -53,8 +53,7 @@ The second step is to define what are the tubes to be calibrated
 (**tubeSet**). This parameter accepts the following inputs:
 
 * As single string that defines a set of tubes 
-  (e.g. MERLIN/door2/tube_1_1), door (e.g. MAPS/A1_window), or the whole instrument 
-  (e.g. MAPS)
+  (e.g. MERLIN/door2/tube_1_1), door (e.g. MAPS/A1_window), or the whole instrument (e.g. MAPS)
 * A list of strings (e.g. [MERLIN/door2/tube_1_1, MERLIN/door2/tube_1_2], [MERLIN/door1, MERLIN/door2])
 * A `TubeSpec <TubeSpec>`__ object.
 

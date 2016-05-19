@@ -125,8 +125,8 @@ The ChildAlgorithms used by LoadMuonNexus are:
 
 -  :ref:`algm-LoadMuonNexus-v1` - this loads the muon nexus file if not identified as
    version 2. It in turn uses the following child algorithm:
-    -  :ref:`algm-LoadMuonLog` - this reads log information from the Nexus file and uses
-       it to create TimeSeriesProperty entries in the workspace.
+   -  :ref:`algm-LoadMuonLog` - this reads log information from the Nexus file and uses
+      it to create TimeSeriesProperty entries in the workspace.
 -  :ref:`algm-LoadInstrument` - this algorithm looks for an XML description of the
    instrument and if found reads it.
 -  :ref:`algm-LoadInstrumentFromNexus` - this is called if the normal

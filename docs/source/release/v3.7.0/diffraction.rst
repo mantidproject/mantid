@@ -7,16 +7,38 @@ Diffraction Changes
 
 Documentation
 -------------
+ 
+- The documentation for all calibration approaches, including Powder diffraction, single crystal and engineering calibrations has been pulled together, and expanded :ref:`here <Calibration Intro>`. 
 
-- The documentation for all calibration approaches, including Powder diffraction, single crystal and engineering calibrations has been pulled together, and expanded :ref:`here<Calibration>`.
+Powder Diffraction
+------------------
 
-Crystal Improvements
---------------------
+- :ref:`PDFFourierTransform <algm-PDFFourierTransform>` has been corrected in its calculation of errors.
+
+Powder Diffraction Scripts
+##########################
+
+- Pearl powder diffraction has been integrated and can be found
+  `scripts/PearlPowderISIS`. The routines/script has been differentiated from
+  the long list of directories of calibration and raw files. The calibration
+  directories can be found in a file by the name of pearl_calib_factory.py,
+  whereas the raw directories can be found in a file by the name of
+  pearl_cycle_factory.py.
+
+- PowderISIS script has been renamed to CryPowderISIS and can be found within
+  the following folder `scripts/CryPowderISIS`
+
+- :ref:`pearl-powder-diffraction-ref` documentation has been implemented and
+  PowderISIS script documentation has been renamed to
+  :ref:`cry-powder-diffraction-ref`
+
+Single Crystal Improvements
+---------------------------
 
 - :ref:`SCDCalibratePanels <algm-SCDCalibratePanels>` has parameter errors reduced,
-   option for simplex minimization, and 3 new workspaces which can plot calculated 
-   vs theoretical columns, rows, and TOF for each bank. Calibration is now as good 
-   as ISAW's for Mandi data.
+  an option for simplex minimization, and 3 new workspaces which can plot calculated 
+  vs theoretical columns, rows, and TOF for each bank. Calibration is now as good 
+  as ISAW's for Mandi data.
 - 5 detectors added to the MANDI instrument geometry
 - :ref:`LoadCIF <algm-LoadCIF>` can now also load structures where only anisotropic displacement parameters are given,
   which are converted to equivalent isotropic parameters.
@@ -54,7 +76,8 @@ Engineering Diffraction
 - New algorithm :ref:`SaveNexusPD <algm-SaveNexusPD>` which creates a nexus file for use in GUDRUN and will hopefully be supported by Rietveld packages in the future.
 
 
-Graphical user interface:
+Graphical user interface
+########################
 
 - Vanadium Curves and Ceria Peaks graphs are plotted once basic and cropped
   calibration process has been carried out
@@ -97,8 +120,7 @@ Imaging
 - The new algorithm :ref:`ImggAggregateWavelengths <algm-ImggAggregateWavelengths>`
   aggregates stacks of images from wavelength dependent data.
 
-- The algorithm `ImggTomographicReconstruction
-  <algm-ImggTomographicReconstruction>` has been introduced. This is a
+- The algorithm `ImggTomographicReconstruction <algm-ImggTomographicReconstruction>` has been introduced. This is a
   first experimental version that implements the Filtered
   Back-Projection (FBP) reconstruction method using the FBP
   implementation of the `TomoPy package
@@ -107,7 +129,8 @@ Imaging
   using the algorithm :ref:`SaveFITS <algm-SaveFITS>`.
 
 
-Improvements in the tomographic reconstruction graphical user interface:
+Improvements in the tomographic reconstruction graphical user interface
+#######################################################################
 
 - New capabilities added when visualizing stacks of images:
 
@@ -131,28 +154,7 @@ Improvements in the tomographic reconstruction graphical user interface:
   <algm-ImggAggregateWavelengths>`.
 
 
-Powder Diffraction
-------------------
 
-- :ref:`PDFFourierTransform <algm-PDFFourierTransform>` has been corrected in its calculation of errors.
-
-
-Powder Diffraction Scripts
---------------------------
-
-- Pearl powder diffraction has been integrated and can be found
-  `scripts/PearlPowderISIS`. The routines/script has been differentiated from
-  the long list of directories of calibration and raw files. The calibration
-  directories can be found in a file by the name of pearl_calib_factory.py,
-  whereas the raw directories can be found in a file by the name of
-  pearl_cycle_factory.py.
-
-- PowderISIS script has been renamed to CryPowderISIS and can be found within
-  the following folder `scripts/CryPowderISIS`
-
-- :ref:`pearl-powder-diffraction-ref` documentation has been implemented and
-  PowderISIS script documentation has been renamed to
-  :ref:`cry-powder-diffraction-ref`
 
 Full list of `diffraction <http://github.com/mantidproject/mantid/pulls?q=is%3Apr+milestone%3A%22Release+3.7%22+is%3Amerged+label%3A%22Component%3A+Diffraction%22>`_
 and

@@ -59,10 +59,10 @@ Action Buttons
 .. categories:: Interfaces DynamicPDF
 
 Developer's Corner
-----------------
+------------------
 
 Diagrams
-~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~
 
 .. diagram:: DPDFBackgroundRemover_mainComponents.dot
 

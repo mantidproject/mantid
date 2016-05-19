@@ -16,20 +16,20 @@ Among the examples, inside the :py:mod:`Examples` folder, the user is encouraged
 
 * :py:func:`~Examples.TubeCalibDemoMaps_All.minimalInput` shows the easiest way to use calibrate.
 * :py:func:`~Examples.TubeCalibDemoMaps_All.provideTheExpectedValue` shows the usage of **fitPar** parameter to provide
-the expected values for the peaks in pixels.
+  the expected values for the peaks in pixels.
 * :py:func:`~Examples.TubeCalibDemoMaps_All.changeMarginAndExpectedValue` demonstrate how to use **margin**, **fitPar**,
- **plotTube**, and **outputPeak**
+  **plotTube**, and **outputPeak**
 * :py:func:`~Examples.TubeCalibDemoMaps_All.improvingCalibrationSingleTube` explores the usage of **rangeList** and
-**overridePeaks** to improve the calibration of specific tubes.
+  **overridePeaks** to improve the calibration of specific tubes.
 * :py:func:`~Examples.TubeCalibDemoMaps_All.improvingCalibrationOfListOfTubes` extends theimprovingCalibrationSingleTube
-to provide a good calibration to almost all instrument.
+  to provide a good calibration to almost all instrument.
 * :py:func:`~Examples.TubeCalibDemoMaps_All.calibrateB2Window` explore a singularity of the MAP14919 example, where the
-second peak does not appear clear on some tubes inside one door. So, this example, shows how to use **rangeList** to
-carry a calibration to the group of tubes.
+  second peak does not appear clear on some tubes inside one door. So, this example, shows how to use **rangeList** to
+  carry a calibration to the group of tubes.
 * :py:func:`~Examples.TubeCalibDemoMaps_All.completeCalibration` demonstrate how the **rangeList**, **overridePeaks**,
-may be used together to allow the calibration of the whole instrument, despite, its particularities in some cases.
+  may be used together to allow the calibration of the whole instrument, despite, its particularities in some cases.
 * :py:func:`~Examples.TubeCalibDemoMaps_All.findThoseTubesThatNeedSpecialCareForCalibration` show an aproach to find the
-tubes that will require special care on calibrating. It will also help to find detectors that are not working well.
+  tubes that will require special care on calibrating. It will also help to find detectors that are not working well.
 
 ========
 Examples
@@ -617,7 +617,7 @@ def savePeak(peakTable, filePath):
        savePeak(peakTable, 'myfolder/myfile.txt')
 
     :param filePath: where to save the file. If the filePath is not given as an absolute path, it will be considered
-    relative to the defaultsave.directory.
+                     relative to the defaultsave.directory.
 
     The file will be saved with the following format:
 

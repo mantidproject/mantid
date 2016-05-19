@@ -56,7 +56,6 @@ The peak functions (shapes):
 
 * :ref:`BackToBackExponential<func-BackToBackExponential>` (used in EnggFitPeaks, to fit the peaks when accuracy is needed)
 * :ref:`Gaussian<func-Gaussian>` (used in FindPeaks when the a quick validation is needed, but fit accuracy is not vital)
-* :ref:`Bk2BkExpConvPV <func-Bk2BkExpConvPV>` (is the Mantid equivalent to the function used in GSAS).
 
 File Formats
 ############

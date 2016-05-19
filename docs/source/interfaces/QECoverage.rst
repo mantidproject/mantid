@@ -29,7 +29,7 @@ To overplot the calculated Q-E trajectories, set the "Plot Over" check box.
 
 The plot range is from Emin to Ei for direct, and from -Ef to Emax for indirect
 geometry spectrometers, and Emin and Emax may be inputted in the appropriate text
-box. If this box is left empty, Emin=-|Ei| (Emax=|Ef|) is set automatically for
+box. If this box is left empty, Emin=-Ei (Emax=Ef) is set automatically for
 direct (indirect) geometry.
 
 You can choose to create a 1D Mantid workspace for latter plotting using the
