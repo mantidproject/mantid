@@ -154,6 +154,8 @@ SliceViewer Improvements
 .. figure::  ../../images/Elliptical_peaks_slice_viewer.png
    :align: center
 
+-  Added viridis colormap
+
 VSI Improvements
 ----------------
 
