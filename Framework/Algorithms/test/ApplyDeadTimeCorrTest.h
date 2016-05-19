@@ -187,14 +187,12 @@ public:
     // Dead time table
     auto deadTimes = makeDeadTimeTable(numSpectra);
 
-    // Test that algorithm throws
+    // Test that algorithm throws when property is set
     ApplyDeadTimeCorr applyDT;
     applyDT.initialize();
     applyDT.setChild(true);
-    TS_ASSERT_THROWS_NOTHING(applyDT.setProperty("InputWorkspace", rebinned));
-    applyDT.setProperty("DeadTimeTable", deadTimes);
-    applyDT.setProperty("OutputWorkspace", "__NotUsed");
-    TS_ASSERT_THROWS(applyDT.execute(), std::runtime_error);
+    TS_ASSERT_THROWS(applyDT.setProperty("InputWorkspace", rebinned),
+                     std::invalid_argument);
   }
 
 private:

@@ -437,6 +437,17 @@ public:
     TS_ASSERT_DELTA(outWS->readY(0)[28], -outWSOffsetted->readY(0)[28], 0.1)
   }
 
+  void test_unevenlySpacedInputData() {
+    auto ws = createWorkspaceReal(3, 0.0);
+    Mantid::MantidVec xData{0, 1, 5};
+    ws->setX(0, xData);
+    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("MaxEnt");
+    alg->initialize();
+    alg->setChild(true);
+    TS_ASSERT_THROWS(alg->setProperty("InputWorkspace", ws),
+                     std::invalid_argument);
+  }
+
   MatrixWorkspace_sptr createWorkspaceReal(size_t maxt, double phase) {
 
     // Create cosine with phase 'phase'
