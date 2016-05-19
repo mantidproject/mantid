@@ -313,7 +313,7 @@ def IQxQy(nbins=100):
 def NoIQxQy():
     ReductionSingleton().reduction_properties["Do2DReduction"] = False
 
-def Mask(nx_low=0, nx_high=0, ny_low=0, ny_high=0, component_name=None):
+def Mask(nx_low=0, nx_high=0, ny_low=0, ny_high=0, component_name=""):
     '''
     Maks edges of a component_name
     By default is the main detector for both GPSANS and BioSans

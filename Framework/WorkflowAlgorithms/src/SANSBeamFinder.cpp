@@ -304,6 +304,15 @@ void SANSBeamFinder::maskEdges(MatrixWorkspace_sptr beamCenterWS, int high,
   maskAlg->setProperty("Workspace", beamCenterWS);
   maskAlg->setProperty("DetectorList", IDs);
   maskAlg->execute();
+
+  // HAcking to mask Wing Detector when finding the beam center
+  if (instrument->getComponentByName("wing_detector")) {
+    maskAlg = createChildAlgorithm("SANSMask");
+    maskAlg->setProperty("Workspace", beamCenterWS);
+    maskAlg->setPropertyValue("Facility", "HFIR");
+    maskAlg->setProperty("MaskedFullComponent", "wing_detector");
+    maskAlg->execute();
+  }
 }
 
 } // namespace WorkflowAlgorithms
