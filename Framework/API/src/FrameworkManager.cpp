@@ -291,7 +291,7 @@ FrameworkManagerImpl::createAlgorithm(const std::string &algName,
   IAlgorithm *alg = AlgorithmManager::Instance()
                         .create(algName, version)
                         .get(); // createAlgorithm(algName);
-  alg->setPropertiesWithSimpleString(propertiesArray);
+  alg->setPropertiesWithString(propertiesArray);
 
   return alg;
 }

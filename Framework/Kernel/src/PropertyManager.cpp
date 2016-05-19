@@ -292,6 +292,44 @@ void PropertyManager::setProperties(
 }
 
 /** Sets all the declared properties from a string.
+  @param propertiesString :: Either a list of name = value pairs separated by a
+    semicolon or a JSON code string.
+  @param ignoreProperties :: A set of names of any properties NOT to set
+  from the propertiesArray
+*/
+void PropertyManager::setPropertiesWithString(
+    const std::string &propertiesString,
+    const std::unordered_set<std::string> &ignoreProperties) {
+  if (propertiesString.empty()) {
+    return;
+  }
+  auto firstSymbol = propertiesString.find_first_not_of(" \n\t");
+  if (firstSymbol == std::string::npos) {
+    return;
+  }
+  if (propertiesString[firstSymbol] == '{') {
+    setPropertiesWithJSONString(propertiesString, ignoreProperties);
+  } else {
+    setPropertiesWithSimpleString(propertiesString, ignoreProperties);
+  }
+}
+
+
+/** Sets all the declared properties from a string.
+  @param propertiesString :: A JSON code string.
+  @param ignoreProperties :: A set of names of any properties NOT to set
+  from the propertiesArray
+*/
+void PropertyManager::setPropertiesWithJSONString(
+    const std::string &propertiesString,
+    const std::unordered_set<std::string> &ignoreProperties) {
+  ::Json::Reader reader;
+  ::Json::Value propertyJson;
+  reader.parse(propertiesString, propertyJson);
+  setProperties(propertyJson, ignoreProperties);
+}
+
+/** Sets all the declared properties from a string.
   @param propertiesString :: A list of name = value pairs separated by a
     semicolon
   @param ignoreProperties :: A set of names of any properties NOT to set

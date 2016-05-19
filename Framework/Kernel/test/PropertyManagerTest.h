@@ -526,6 +526,40 @@ public:
                mgr.validateProperties());
   }
 
+  void test_setPropertiesWithSimpleString() {
+    PropertyManagerHelper mgr;
+
+    mgr.declareProperty(
+        Mantid::Kernel::make_unique<PropertyWithValue<double>>("double", 12.0),
+        "docs");
+    mgr.declareProperty(
+        Mantid::Kernel::make_unique<PropertyWithValue<int>>("int", 23), "docs");
+
+    mgr.setPropertiesWithString("double= 13.0 ;int=22 ");
+    double d = mgr.getProperty("double");
+    int i = mgr.getProperty("int");
+    TS_ASSERT_EQUALS(d, 13.0);
+    TS_ASSERT_EQUALS(i, 22);
+
+    mgr.setPropertiesWithString("double= 23.4 ;int=11", {"int"});
+    d = mgr.getProperty("double");
+    i = mgr.getProperty("int");
+    TS_ASSERT_EQUALS(d, 23.4);
+    TS_ASSERT_EQUALS(i, 22);
+
+    mgr.setPropertiesWithString("{\"double\": 14.0, \"int\":33}");
+    d = mgr.getProperty("double");
+    i = mgr.getProperty("int");
+    TS_ASSERT_EQUALS(d, 14.0);
+    TS_ASSERT_EQUALS(i, 33);
+
+    mgr.setPropertiesWithString("{\"double\": 12.3 ,\"int\":11}", {"int"});
+    d = mgr.getProperty("double");
+    i = mgr.getProperty("int");
+    TS_ASSERT_EQUALS(d, 12.3);
+    TS_ASSERT_EQUALS(i, 33);
+  }
+
 private:
   PropertyManagerHelper *manager;
 };

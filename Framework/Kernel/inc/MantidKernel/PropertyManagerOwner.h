@@ -70,7 +70,7 @@ public:
                          std::unordered_set<std::string>()) override;
 
   // sets all the declared properties using a simple string format
-  void setPropertiesWithSimpleString(
+  void setPropertiesWithString(
       const std::string &propertiesString,
       const std::unordered_set<std::string> &ignoreProperties =
           std::unordered_set<std::string>()) override;

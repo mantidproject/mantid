@@ -74,10 +74,10 @@ void PropertyManagerOwner::setProperties(
   @param ignoreProperties :: A set of names of any properties NOT to set
   from the propertiesArray
 */
-void PropertyManagerOwner::setPropertiesWithSimpleString(
+void PropertyManagerOwner::setPropertiesWithString(
     const std::string &propertiesString,
     const std::unordered_set<std::string> &ignoreProperties) {
-  m_properties->setPropertiesWithSimpleString(propertiesString,
+  m_properties->setPropertiesWithString(propertiesString,
                                               ignoreProperties);
 }
 
