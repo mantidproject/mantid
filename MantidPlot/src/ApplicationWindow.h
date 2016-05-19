@@ -208,7 +208,7 @@ public slots:
   /// Load mantid data files (generic load algorithm)
   void loadDataFileByName(QString fn);
   /// Open from the list of recent files
-  void openRecentFile(int index);
+  void openRecentFile(QAction* action);
 
   /**
   * \brief Create a new project from a data file.
@@ -602,7 +602,7 @@ public slots:
   MultiLayer* prepareMultiLayer(bool& isNew, MultiLayer* window, const QString& newWindowName = "Graph",
     bool clearWindow = false);
 
-  void openRecentProject(int index);
+  void openRecentProject(QAction* action);
 
   //@}
 

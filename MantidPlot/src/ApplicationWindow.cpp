@@ -538,10 +538,10 @@ void ApplicationWindow::init(bool factorySettings, const QStringList &args) {
       this, SLOT(showWindowPopupMenu(const QPoint &)));
   connect(lv, SIGNAL(deleteSelection()), this, SLOT(deleteSelectedItems()));
 
-  connect(recentProjectsMenu, SIGNAL(activated(int)), this,
-          SLOT(openRecentProject(int)));
-  connect(recentFilesMenu, SIGNAL(activated(int)), this,
-          SLOT(openRecentFile(int)));
+  connect(recentProjectsMenu, SIGNAL(triggered(QAction*)), this,
+          SLOT(openRecentProject(QAction*)));
+  connect(recentFilesMenu, SIGNAL(triggered(QAction*)), this,
+          SLOT(openRecentFile(QAction*)));
 
   // apply user settings
   updateAppFonts();
@@ -4505,9 +4505,8 @@ ApplicationWindow *ApplicationWindow::open(const QString &fn,
   return app;
 }
 
-void ApplicationWindow::openRecentFile(int index) {
-  auto recentFilesAction = recentFilesMenu->actions().at(index);
-  auto fn = recentFilesAction->data().toString();
+void ApplicationWindow::openRecentFile(QAction* action) {
+  auto fn = action->data().toString();
   // if "," found in the QString
   if (fn.indexOf(",", 0)) {
     try {
@@ -4537,9 +4536,8 @@ void ApplicationWindow::openRecentFile(int index) {
   saveSettings(); // save new list of recent files
 }
 
-void ApplicationWindow::openRecentProject(int index) {
-  auto recentProjectsAction = recentProjectsMenu->actions().at(index);
-  QString fn = recentProjectsAction->text();
+void ApplicationWindow::openRecentProject(QAction* action) {
+  QString fn = action->text();
   int pos = fn.indexOf(" ", 0);
   fn = fn.right(fn.length() - pos - 1);
 
