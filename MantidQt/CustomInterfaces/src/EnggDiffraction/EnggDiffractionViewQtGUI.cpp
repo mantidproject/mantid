@@ -1365,14 +1365,21 @@ std::string EnggDiffractionViewQtGUI::getFittingRunNo() const {
 void EnggDiffractionViewQtGUI::plotSeparateWindow() {
   std::string pyCode =
 
-      "single_peak_ws = workspace(\"engggui_fitting_single_peaks\")\n"
+      "fitting_single_peaks_twin_ws = \"__engggui_fitting_single_peaks_twin\"\n"
+      "if (mtd.doesExist(fitting_single_peaks_twin_ws)):\n"
+      " DeleteWorkspace(fitting_single_peaks_twin_ws)\n"
+
+      "single_peak_ws = CloneWorkspace(InputWorkspace = "
+      "\"engggui_fitting_single_peaks\", OutputWorkspace = "
+      "fitting_single_peaks_twin_ws)\n"
       "tot_spec = single_peak_ws.getNumberHistograms()\n"
 
       "spec_list = []\n"
       "for i in range(0, tot_spec):\n"
       " spec_list.append(i)\n"
 
-      "plotSpectrum(single_peak_ws, spec_list)\n";
+      "fitting_plot = plotSpectrum(single_peak_ws, spec_list).activeLayer()\n"
+      "fitting_plot.setTitle(\"Engg GUI Single Peaks Fitting Workspace\")\n";
 
   std::string status =
       runPythonCode(QString::fromStdString(pyCode), false).toStdString();
