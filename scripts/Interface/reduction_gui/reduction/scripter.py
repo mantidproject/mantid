@@ -217,7 +217,7 @@ class BaseScriptElement(object):
             algs_with_data = [d for d in algs if d is not None]
             if len(algs_with_data) > 0:
                 return algs_with_data[0]
-            return (None, None)
+            return None
 
         # The process information is on SASprocess/SASprocessnote
         process_dom = dom.getElementsByTagName("SASprocessnote")
@@ -230,7 +230,8 @@ class BaseScriptElement(object):
 
         if output is None:
             raise RuntimeError("Could not find reduction information in file")
-        return output
+        # The following line is a little most explicit than it needs to be on purpose.
+        return (output[0], output[1])
 
     @classmethod
     def getPropertyValue(cls, algorithm, property_name, default=None):
