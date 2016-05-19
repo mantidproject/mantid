@@ -77,8 +77,7 @@ void PropertyManagerOwner::setProperties(
 void PropertyManagerOwner::setPropertiesWithString(
     const std::string &propertiesString,
     const std::unordered_set<std::string> &ignoreProperties) {
-  m_properties->setPropertiesWithString(propertiesString,
-                                              ignoreProperties);
+  m_properties->setPropertiesWithString(propertiesString, ignoreProperties);
 }
 
 /** Set the value of a property by string

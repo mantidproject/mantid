@@ -314,7 +314,6 @@ void PropertyManager::setPropertiesWithString(
   }
 }
 
-
 /** Sets all the declared properties from a string.
   @param propertiesString :: A JSON code string.
   @param ignoreProperties :: A set of names of any properties NOT to set
