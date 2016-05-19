@@ -20,7 +20,34 @@ class VesuvioTests(unittest.TestCase):
         if monitor_name in mtd:
             mtd.remove(monitor_name)
 
+
+    #==================== Test spectrum list validation ============================
+
+    def test_spectrum_list_single_range(self):
+        diff_mode = "DoubleDifference"
+        self._run_load("14188", "10-20", diff_mode)
+
+        # check workspace created
+        self.assertTrue(mtd.doesExist(self.ws_name))
+
+    def test_spectrum_list_comma_separated_list(self):
+        diff_mode = "DoubleDifference"
+        self._run_load("14188", "10,20,30,40", diff_mode)
+
+        # check workspace created
+        self.assertTrue(mtd.doesExist(self.ws_name))
+
+    def test_spectrum_list_comma_separated_ranges(self):
+        diff_mode = "DoubleDifference"
+        self._run_load("14188", "10-20;30-40", diff_mode, do_size_check=False)
+
+        # check workspace created
+        self.assertTrue(mtd.doesExist(self.ws_name))
+
+
     #================== Success cases ================================
+
+
     def test_load_with_back_scattering_spectra_produces_correct_workspace_using_double_difference(self):
         diff_mode = "DoubleDifference"
         self._run_load("14188", "3-134", diff_mode)
@@ -287,7 +314,7 @@ class VesuvioTests(unittest.TestCase):
                 self.assertAlmostEqual(sigma_gauss, 52.3, places=tol_places)
                 self.assertAlmostEqual(hwhm_lorentz, 141.2, places=tol_places)
 
-    def _run_load(self, runs, spectra, diff_opt, ip_file="", sum_runs=False, load_mon=False):
+    def _run_load(self, runs, spectra, diff_opt, ip_file="", sum_runs=False, load_mon=False, do_size_check=True):
         ms.LoadVesuvio(Filename=runs,OutputWorkspace=self.ws_name,
                        SpectrumList=spectra,Mode=diff_opt,InstrumentParFile=ip_file,
                        SumSpectra=sum_runs, LoadMonitors=load_mon)
@@ -309,8 +336,9 @@ class VesuvioTests(unittest.TestCase):
                 return len(elements)
             else:
                 return 1
+        if do_size_check:
+            self._do_size_check(self.ws_name, expected_size())
 
-        self._do_size_check(self.ws_name, expected_size())
         loaded_data = mtd[self.ws_name]
         if "Difference" in diff_opt:
             self.assertTrue(not loaded_data.isHistogramData())
@@ -324,7 +352,7 @@ class VesuvioTests(unittest.TestCase):
     def _do_size_check(self,name, expected_nhist):
         loaded_data = mtd[name]
         self.assertEquals(expected_nhist, loaded_data.getNumberHistograms())
-
+'''
     #================== Failure cases ================================
 
     def test_run_range_bad_order_raises_error(self):
@@ -379,7 +407,7 @@ class VesuvioTests(unittest.TestCase):
         self.assertTrue("__loadraw_evs" not in mtd)
         self.assertTrue("__loadraw_evs_monitors" not in mtd)
 
-
+'''
 #====================================================================================
 
 class LoadVesuvioTest(stresstesting.MantidStressTest):
