@@ -228,6 +228,7 @@ using Mantid::Kernel::Logger;
 namespace {
 /// static logger
 Logger g_log("ApplicationWindow");
+
 }
 
 extern "C" {
@@ -1110,8 +1111,11 @@ void ApplicationWindow::insertTranslatedStrings() {
   standardTools->setWindowTitle(tr("Standard Tools"));
   formatToolBar->setWindowTitle(tr("Format"));
 
-  fileMenu->changeItem(recentMenuID, tr("&Recent Projects"));
-  fileMenu->changeItem(recentFilesMenuID, tr("R&ecent Files"));
+  auto recentProjectsMenuAction = recentProjectsMenu->menuAction();
+  recentProjectsMenuAction->setText(tr("&Recent Projects"));
+
+  auto recentFilesMenuAction = recentFilesMenu->menuAction();
+  recentFilesMenuAction->setText(tr("R&ecent Files"));
 
   translateActionsStrings();
   customMenu(activeWindow());
@@ -8344,7 +8348,7 @@ void ApplicationWindow::drawArrow() {
         tr("<h4>There are no plot layers available in this window.</h4>"
            "<p><h4>Please add a layer and try again!</h4>"));
 
-    btnPointer->setOn(true);
+    btnPointer->setChecked(true);
     return;
   }
 
@@ -8442,15 +8446,15 @@ void ApplicationWindow::clearSelection() {
   if (!m)
     return;
 
-  if (m->inherits("Table")) {
+  if (isOfType(m, "Table")) {
     auto t = dynamic_cast<Table *>(m);
     if (t)
       t->clearSelection();
-  } else if (m->isA("Matrix")) {
+  } else if (isOfType(m, "Matrix")) {
     auto matrix = dynamic_cast<Matrix *>(m);
     if (matrix)
       matrix->clearSelection();
-  } else if (m->isA("MultiLayer")) {
+  } else if (isOfType(m, "MultiLayer")) {
     auto ml = dynamic_cast<MultiLayer *>(m);
     if (!ml)
       return;
@@ -8473,7 +8477,7 @@ void ApplicationWindow::clearSelection() {
       g->removeTitle();
     else if (g->markerSelected())
       g->removeMarker();
-  } else if (m->isA("Note")) {
+  } else if (isOfType(m, "Note")) {
     auto note = dynamic_cast<Note *>(m);
     if (note)
       note->editor()->clear();
@@ -8494,11 +8498,11 @@ void ApplicationWindow::copySelection() {
     Table *table = dynamic_cast<Table *>(m);
     if (table)
       table->copySelection();
-  } else if (m->isA("Matrix")) {
+  } else if (isOfType(m, "Matrix")) {
     Matrix *matrix = dynamic_cast<Matrix *>(m);
     if (matrix)
       matrix->copySelection();
-  } else if (m->isA("MultiLayer")) {
+  } else if (isOfType(m, "MultiLayer")) {
     MultiLayer *plot = dynamic_cast<MultiLayer *>(m);
     if (!plot || plot->layers() == 0)
       return;
@@ -8520,7 +8524,7 @@ void ApplicationWindow::copySelection() {
       copyActiveLayer();
 
     plot->copyAllLayers();
-  } else if (m->isA("Note")) {
+  } else if (isOfType(m, "Note")) {
     Note *note = dynamic_cast<Note *>(m);
     if (note)
       note->editor()->copy();
@@ -8596,15 +8600,15 @@ void ApplicationWindow::pasteSelection() {
     auto table = dynamic_cast<Table *>(m);
     if (table)
       table->pasteSelection();
-  } else if (m->isA("Matrix")) {
+  } else if (isOfType(m, "Matrix")) {
     auto matrix = dynamic_cast<Matrix *>(m);
     if (matrix)
       matrix->pasteSelection();
-  } else if (m->isA("Note")) {
+  } else if (isOfType(m, "Note")) {
     auto note = dynamic_cast<Note *>(m);
     if (note)
       note->editor()->paste();
-  } else if (m->isA("MultiLayer")) {
+  } else if (isOfType(m, "MultiLayer")) {
     MultiLayer *plot = dynamic_cast<MultiLayer *>(m);
     if (!plot)
       return;
@@ -8680,7 +8684,7 @@ MdiSubWindow *ApplicationWindow::clone(MdiSubWindow *w) {
   MdiSubWindow::Status status = w->status();
   QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
-  if (w->isA("MultiLayer")) {
+  if (isOfType(w, "MultiLayer")) {
     MultiLayer *g = dynamic_cast<MultiLayer *>(w);
     if (!g)
       return NULL;
@@ -8709,7 +8713,7 @@ MdiSubWindow *ApplicationWindow::clone(MdiSubWindow *w) {
       }
     }
 
-  } else if (w->isA("Graph3D")) {
+  } else if (isOfType(w, "Graph3D")) {
     Graph3D *g = dynamic_cast<Graph3D *>(w);
     if (!g)
       return NULL;
@@ -8759,7 +8763,7 @@ MdiSubWindow *ApplicationWindow::clone(MdiSubWindow *w) {
     if (g3d)
       g3d->copy(g);
     customToolBars(nw);
-  } else if (w->isA("Matrix")) {
+  } else if (isOfType(w, "Matrix")) {
     auto matrix = dynamic_cast<Matrix *>(w);
     if (!matrix)
       return NULL;
@@ -8767,7 +8771,7 @@ MdiSubWindow *ApplicationWindow::clone(MdiSubWindow *w) {
     auto nwmatrix = dynamic_cast<Matrix *>(nw);
     if (nwmatrix)
       nwmatrix->copy(matrix);
-  } else if (w->isA("Note")) {
+  } else if (isOfType(w, "Note")) {
     auto note = dynamic_cast<Note *>(w);
     if (!note)
       return NULL;
@@ -8784,10 +8788,10 @@ MdiSubWindow *ApplicationWindow::clone(MdiSubWindow *w) {
   }
 
   if (nw) {
-    if (w->isA("MultiLayer")) {
+    if (isOfType(w, "MultiLayer")) {
       if (status == MdiSubWindow::Maximized)
         nw->showMaximized();
-    } else if (w->isA("Graph3D")) {
+    } else if (isOfType(w, "Graph3D")) {
       auto g3d = dynamic_cast<Graph3D *>(nw);
       if (!g3d)
         return NULL;
@@ -9140,7 +9144,7 @@ void ApplicationWindow::removeWindowFromLists(MdiSubWindow *w) {
       QString name = m->colName(i);
       removeCurves(name);
     }
-  } else if (w->isA("MultiLayer")) {
+  } else if (isOfType(w, "MultiLayer")) {
     MultiLayer *ml = dynamic_cast<MultiLayer *>(w);
     if (!ml)
       return;
@@ -9148,7 +9152,7 @@ void ApplicationWindow::removeWindowFromLists(MdiSubWindow *w) {
     if (!g)
       return;
     btnPointer->setChecked(true);
-  } else if (w->isA("Matrix")) {
+  } else if (isOfType(w, "Matrix")) {
     auto matrix = dynamic_cast<Matrix *>(w);
     if (matrix)
       remove3DMatrixPlots(matrix);
@@ -9218,7 +9222,7 @@ void ApplicationWindow::analysisMenuAboutToShow() {
   if (!w)
     return;
 
-  if (w->isA("MultiLayer")) {
+  if (isOfType(w, "MultiLayer")) {
     // The tool doesn't work yet (DataPickerTool)
     // QMenu *translateMenu = analysisMenu->addMenu (tr("&Translate"));
     // translateMenu->addAction(actionTranslateVert);
@@ -9227,7 +9231,7 @@ void ApplicationWindow::analysisMenuAboutToShow() {
     analysisMenu->addAction(actionDifferentiate);
     analysisMenu->addAction(actionIntegrate);
     analysisMenu->addAction(actionShowIntDialog);
-    analysisMenu->insertSeparator();
+    analysisMenu->addSeparator();
 
     smoothMenu->clear();
     smoothMenu = analysisMenu->addMenu(tr("&Smooth"));
@@ -9242,13 +9246,13 @@ void ApplicationWindow::analysisMenuAboutToShow() {
     filterMenu->addAction(actionBandPassFilter);
     filterMenu->addAction(actionBandBlockFilter);
 
-    analysisMenu->insertSeparator();
+    analysisMenu->addSeparator();
     analysisMenu->addAction(actionInterpolate);
     analysisMenu->addAction(actionFFT);
-    analysisMenu->insertSeparator();
+    analysisMenu->addSeparator();
     analysisMenu->addAction(actionFitLinear);
     analysisMenu->addAction(actionShowFitPolynomDialog);
-    analysisMenu->insertSeparator();
+    analysisMenu->addSeparator();
 
     decayMenu->clear();
     decayMenu = analysisMenu->addMenu(tr("Fit E&xponential Decay"));
@@ -9267,19 +9271,19 @@ void ApplicationWindow::analysisMenuAboutToShow() {
     // multiPeakMenu->addAction(actionMultiPeakGauss);
     // multiPeakMenu->addAction(actionMultiPeakLorentz);
 
-    analysisMenu->insertSeparator();
+    analysisMenu->addSeparator();
     analysisMenu->addAction(actionShowFitDialog);
-  } else if (w->isA("Matrix")) {
+  } else if (isOfType(w, "Matrix")) {
     analysisMenu->addAction(actionIntegrate);
-    analysisMenu->insertSeparator();
+    analysisMenu->addSeparator();
     analysisMenu->addAction(actionFFT);
     analysisMenu->addAction(actionMatrixFFTDirect);
     analysisMenu->addAction(actionMatrixFFTInverse);
   } else if (w->inherits("Table")) {
     analysisMenu->addAction(actionShowColStatistics);
     analysisMenu->addAction(actionShowRowStatistics);
-    analysisMenu->insertSeparator();
-    if (w->isA("Table")) {
+    analysisMenu->addSeparator();
+    if (isOfType(w, "Table")) {
       analysisMenu->addAction(actionSortSelection);
     }
     analysisMenu->addAction(actionSortTable);
@@ -9289,15 +9293,15 @@ void ApplicationWindow::analysisMenuAboutToShow() {
     normMenu->addAction(actionNormalizeSelection);
     normMenu->addAction(actionNormalizeTable);
 
-    analysisMenu->insertSeparator();
+    analysisMenu->addSeparator();
     analysisMenu->addAction(actionFFT);
-    analysisMenu->insertSeparator();
+    analysisMenu->addSeparator();
     analysisMenu->addAction(actionCorrelate);
     analysisMenu->addAction(actionAutoCorrelate);
-    analysisMenu->insertSeparator();
+    analysisMenu->addSeparator();
     analysisMenu->addAction(actionConvolute);
     analysisMenu->addAction(actionDeconvolute);
-    analysisMenu->insertSeparator();
+    analysisMenu->addSeparator();
     analysisMenu->addAction(actionShowFitDialog);
   }
   reloadCustomActions();
@@ -9307,22 +9311,22 @@ void ApplicationWindow::matrixMenuAboutToShow() {
   matrixMenu->clear();
   matrixMenu->addAction(actionSetMatrixProperties);
   matrixMenu->addAction(actionSetMatrixDimensions);
-  matrixMenu->insertSeparator();
+  matrixMenu->addSeparator();
   matrixMenu->addAction(actionSetMatrixValues);
   matrixMenu->addAction(actionTableRecalculate);
-  matrixMenu->insertSeparator();
+  matrixMenu->addSeparator();
   matrixMenu->addAction(actionRotateMatrix);
   matrixMenu->addAction(actionRotateMatrixMinus);
   matrixMenu->addAction(actionFlipMatrixVertically);
   matrixMenu->addAction(actionFlipMatrixHorizontally);
-  matrixMenu->insertSeparator();
+  matrixMenu->addSeparator();
   matrixMenu->addAction(actionTransposeMatrix);
   matrixMenu->addAction(actionInvertMatrix);
   matrixMenu->addAction(actionMatrixDeterminant);
-  matrixMenu->insertSeparator();
+  matrixMenu->addSeparator();
   matrixMenu->addAction(actionGoToRow);
   matrixMenu->addAction(actionGoToColumn);
-  matrixMenu->insertSeparator();
+  matrixMenu->addSeparator();
   QMenu *matrixViewMenu = matrixMenu->addMenu(tr("Vie&w"));
   matrixViewMenu->addAction(actionViewMatrixImage);
   matrixViewMenu->addAction(actionViewMatrix);
@@ -9330,10 +9334,10 @@ void ApplicationWindow::matrixMenuAboutToShow() {
   matrixPaletteMenu->addAction(actionMatrixGrayScale);
   matrixPaletteMenu->addAction(actionMatrixRainbowScale);
   matrixPaletteMenu->addAction(actionMatrixCustomScale);
-  matrixMenu->insertSeparator();
+  matrixMenu->addSeparator();
   matrixMenu->addAction(actionMatrixColumnRow);
   matrixMenu->addAction(actionMatrixXY);
-  matrixMenu->insertSeparator();
+  matrixMenu->addSeparator();
   QMenu *convertToTableMenu =
       matrixMenu->addMenu(tr("&Convert to Spreadsheet"));
   convertToTableMenu->addAction(actionConvertMatrixDirect);
@@ -9377,37 +9381,40 @@ void ApplicationWindow::fileMenuAboutToShow() {
   openMenu->addAction(actionOpenProj);
   openMenu->addAction(actionLoadFile);
 
-  recentMenuID =
-      fileMenu->insertItem(tr("&Recent Projects"), recentProjectsMenu);
+  auto recentProjectsMenuAction = fileMenu->addMenu(recentProjectsMenu);
+  recentProjectsMenuAction->setText(tr("&Recent Projects"));
 
-  recentFilesMenuID =
-      fileMenu->insertItem(tr("R&ecent Files"), recentFilesMenu);
+  auto recentFilesMenuAction = fileMenu->addMenu(recentFilesMenu);
+  recentFilesMenuAction->setText(tr("R&ecent Files"));
 
-  fileMenu->insertSeparator();
+  fileMenu->addSeparator();
   fileMenu->addAction(actionManageDirs);
-  fileMenu->insertSeparator();
+  fileMenu->addSeparator();
   fileMenu->addAction(actionLoadImage);
   fileMenu->addAction(actionScriptRepo);
 
   MdiSubWindow *w = activeWindow();
-  if (w && w->isA("Matrix"))
+
+  if (w && isOfType(w, "Matrix"))
     fileMenu->addAction(actionExportMatrix);
 
-  fileMenu->insertSeparator();
+  fileMenu->addSeparator();
   fileMenu->addAction(actionSaveProjectAs);
 
   saveMenu = fileMenu->addMenu(tr("&Save"));
   saveMenu->addAction(actionSaveFile);
   saveMenu->addAction(actionSaveProject);
 
-  fileMenu->insertSeparator();
+  fileMenu->addSeparator();
 
   fileMenu->addAction(actionPrint);
   fileMenu->addAction(actionPrintAllPlots);
-  fileMenu->insertSeparator();
+  fileMenu->addSeparator();
   MdiSubWindow *t = activeWindow();
-  if (t &&
-      (t->isA("Matrix") || t->inherits("Table") || t->isA("MantidMatrix"))) {
+  auto isMatrix = isOfType(t, "Matrix");
+  auto isTable = isOfType(t, "Table");
+  auto isMantidMatrix = isOfType(t, "MantidMatrix");
+  if (t && (isMatrix|| isTable || isMantidMatrix)) {
     actionShowExportASCIIDialog->setEnabled(true);
   } else {
     actionShowExportASCIIDialog->setEnabled(false);
@@ -9415,13 +9422,13 @@ void ApplicationWindow::fileMenuAboutToShow() {
 
   fileMenu->addAction(actionShowExportASCIIDialog);
   fileMenu->addAction(actionLoad);
-  fileMenu->insertSeparator();
+  fileMenu->addSeparator();
   fileMenu->addAction(actionclearAllMemory);
 #ifdef USE_TCMALLOC
   fileMenu->addAction(actionreleaseFreeMemory);
 #endif
 
-  fileMenu->insertSeparator();
+  fileMenu->addSeparator();
   fileMenu->addAction(actionCloseAllWindows);
 
   reloadCustomActions();
@@ -9441,66 +9448,67 @@ void ApplicationWindow::windowsMenuAboutToShow() {
     return;
   }
 
-  windowsMenu->insertItem(tr("&Cascade"), this, SLOT(cascade()));
-  windowsMenu->insertItem(tr("&Tile"), this, SLOT(tileMdiWindows()));
-  windowsMenu->insertSeparator();
+  windowsMenu->addAction(tr("&Cascade"), this, SLOT(cascade()));
+  windowsMenu->addAction(tr("&Tile"), this, SLOT(tileMdiWindows()));
+  windowsMenu->addSeparator();
   windowsMenu->addAction(actionNextWindow);
   windowsMenu->addAction(actionPrevWindow);
-  windowsMenu->insertSeparator();
+  windowsMenu->addSeparator();
   windowsMenu->addAction(actionRename);
 
   windowsMenu->addAction(actionCopyWindow);
   MdiSubWindow *activeWin = activeWindow();
   if (!activeWin)
     return;
-  if (activeWin->isA("MantidMatrix") || activeWin->isA("InstrumentWindow")) {
+
+  if (isOfType(activeWin, "MantidMatrix") || isOfType(activeWin, "InstrumentWindow")) {
     actionCopyWindow->setEnabled(false);
   } else {
     actionCopyWindow->setEnabled(true);
   }
 
-  windowsMenu->insertSeparator();
+  windowsMenu->addSeparator();
 
   windowsMenu->addAction(actionResizeActiveWindow);
   if (activeWin->getFloatingWindow()) {
-    windowsMenu->insertItem(tr("Change to docked"), this,
+    windowsMenu->addAction(tr("Change to docked"), this,
                             SLOT(changeActiveToDocked()));
   } else {
-    windowsMenu->insertItem(tr("Change to floating"), this,
+    windowsMenu->addAction(tr("Change to floating"), this,
                             SLOT(changeActiveToFloating()));
   }
-  windowsMenu->insertItem(tr("&Hide Window"), this, SLOT(hideActiveWindow()));
+  windowsMenu->addAction(tr("&Hide Window"), this, SLOT(hideActiveWindow()));
 
 // Having the shorcut set here is neccessary on Windows, but
 // leads to an error message elsewhere. Don't know why and don't
 // have a better solution than this right now.
 #ifdef _WIN32
-  windowsMenu->insertItem(getQPixmap("close_xpm"), tr("Close &Window"), this,
+  windowsMenu->addAction(getQPixmap("close_xpm"), tr("Close &Window"), this,
                           SLOT(closeActiveWindow()), Qt::CTRL + Qt::Key_W);
 #else
-  windowsMenu->insertItem(getQPixmap("close_xpm"), tr("Close &Window"), this,
+  windowsMenu->addAction(getQPixmap("close_xpm"), tr("Close &Window"), this,
                           SLOT(closeActiveWindow()));
 #endif
 
   if (n > 0 && n < 10) {
-    windowsMenu->insertSeparator();
+    windowsMenu->addSeparator();
     for (int i = 0; i < n; ++i) {
-      int id = windowsMenu->insertItem(windows.at(i)->objectName(), this,
+      auto activated = windowsMenu->addAction(windows.at(i)->objectName(), this,
                                        SLOT(windowsMenuActivated(int)));
-      windowsMenu->setItemParameter(id, i);
-      windowsMenu->setItemChecked(id, currentFolder()->activeWindow() ==
-                                          windows.at(i));
+      activated->setData(i);
+      auto isChecked = currentFolder()->activeWindow() == windows.at(i);
+      activated->setChecked(isChecked);
     }
   } else if (n >= 10) {
-    windowsMenu->insertSeparator();
+    windowsMenu->addSeparator();
     for (int i = 0; i < 9; ++i) {
-      int id = windowsMenu->insertItem(windows.at(i)->objectName(), this,
-                                       SLOT(windowsMenuActivated(int)));
-      windowsMenu->setItemParameter(id, i);
-      windowsMenu->setItemChecked(id, activeWindow() == windows.at(i));
+      auto activated = windowsMenu->addAction(windows.at(i)->objectName(), this, SLOT(windowsMenuActivated(int)));
+      activated->setData(i);
+      auto isChecked = activeWindow() == windows.at(i);
+      activated->setChecked(isChecked);
     }
-    windowsMenu->insertSeparator();
-    windowsMenu->insertItem(tr("More windows..."), this,
+    windowsMenu->addSeparator();
+    windowsMenu->addAction(tr("More windows..."), this,
                             SLOT(showMoreWindows()));
   }
   reloadCustomActions();
@@ -9538,7 +9546,8 @@ void ApplicationWindow::interfaceMenuAboutToShow() {
       continue;
     QMenu *categoryMenu = new QMenu(interfaceMenu);
     categoryMenu->setObjectName(category + "Menu");
-    interfaceMenu->insertItem(tr(category), categoryMenu);
+    auto categoryMenuAction = interfaceMenu->addMenu(categoryMenu);
+    categoryMenuAction->setText(tr(category));
     categoryMenus[category] = categoryMenu;
   }
 
@@ -9554,7 +9563,8 @@ void ApplicationWindow::interfaceMenuAboutToShow() {
     foreach (const QString category, m_interfaceCategories[name]) {
       if (!categoryMenus.contains(category))
         continue;
-      QAction *openInterface = new QAction(tr(name), interfaceMenu);
+      QAction *openInterface = new QAction(interfaceMenu);
+      openInterface->setObjectName(tr(name));
       openInterface->setData(data);
       categoryMenus[category]->addAction(openInterface);
 
@@ -9568,7 +9578,7 @@ void ApplicationWindow::interfaceMenuAboutToShow() {
             SLOT(performCustomAction(QAction *)));
   }
 
-  interfaceMenu->insertSeparator();
+  interfaceMenu->addSeparator();
 
   // Allow user to customise categories.
   QAction *customiseCategoriesAction =
@@ -9598,24 +9608,24 @@ void ApplicationWindow::showMarkerPopupMenu() {
   QMenu markerMenu(this);
 
   if (g->imageMarkerSelected()) {
-    markerMenu.insertItem(getQPixmap("pixelProfile_xpm"),
+    markerMenu.addAction(getQPixmap("pixelProfile_xpm"),
                           tr("&View Pixel Line profile"), this,
                           SLOT(pixelLineProfile()));
-    markerMenu.insertItem(tr("&Intensity Matrix"), this,
+    markerMenu.addAction(tr("&Intensity Matrix"), this,
                           SLOT(intensityTable()));
-    markerMenu.insertSeparator();
+    markerMenu.addSeparator();
   }
 
   if (!(g->activeTool() && dynamic_cast<PeakPickerTool *>(g->activeTool()))) {
-    markerMenu.insertItem(getQPixmap("cut_xpm"), tr("&Cut"), this,
+    markerMenu.addAction(getQPixmap("cut_xpm"), tr("&Cut"), this,
                           SLOT(cutSelection()));
-    markerMenu.insertItem(getQPixmap("copy_xpm"), tr("&Copy"), this,
+    markerMenu.addAction(getQPixmap("copy_xpm"), tr("&Copy"), this,
                           SLOT(copySelection()));
   }
 
-  markerMenu.insertItem(getQPixmap("erase_xpm"), tr("&Delete"), this,
+  markerMenu.addAction(getQPixmap("erase_xpm"), tr("&Delete"), this,
                         SLOT(clearSelection()));
-  markerMenu.insertSeparator();
+  markerMenu.addSeparator();
   if (g->arrowMarkerSelected())
     markerMenu.insertItem(tr("&Properties..."), this, SLOT(showLineDialog()));
   else if (g->imageMarkerSelected())
@@ -17248,3 +17258,8 @@ QString ApplicationWindow::saveProjectFolder(Folder *folder, int &windowCount,
 
   return text;
 }
+
+bool ApplicationWindow::isOfType(const QObject* obj, const char* toCompare) const {
+  return strcmp(obj->metaObject()->className(), toCompare) == 0;
+}
+
