@@ -1034,6 +1034,8 @@ public slots:
   void dropInTiledWindow( MdiSubWindow *w, QPoint pos );
   //@}
 
+  bool isOfType(const QObject* obj, const char* toCompare) const;
+
 signals:
   void modified();
   void shutting_down();
