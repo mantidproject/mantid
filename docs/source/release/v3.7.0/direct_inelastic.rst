@@ -16,8 +16,8 @@ Improvements
 Crystal Field
 -------------
 
-FOCUS fortran program that fits crystal field parameters is being translated into Mantid (C++ and python).
-The release notes on this work will go here.
+A fitting function was added (:ref:`CrystalFieldSpectrum <func-CrystalFieldSpectrum>`) that fits crystal field parameters to a spectrum.
+It is based on fortran program FOCUS which was translated into C++.
 
 Phonon DOS
 ----------
