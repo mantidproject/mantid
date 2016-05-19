@@ -133,9 +133,10 @@ void Histogram::setSharedE(const Kernel::cow_ptr<HistogramE> &e) & {
 void Histogram::setSharedDx(const Kernel::cow_ptr<HistogramDx> &Dx) & {
   // Setting a NULL Dx is fine, this disables x errors.
   // Note that we compare with m_x -- m_dx might be NULL.
-  if (Dx && m_x->size() != Dx->size())
-    throw std::logic_error("Histogram::setSharedDx: size mismatch\n");
-  m_dx = Dx;
+  PointStandardDeviations points(Dx);
+  if(points)
+    checkSize(points);
+  m_dx = points.cowData();
 }
 
 template <> void Histogram::initX(const Points &x) {

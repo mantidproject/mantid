@@ -1838,9 +1838,14 @@ void LoadNexusProcessed::loadBlock(NXDataSetTyped<double> &data,
   double *err_end = err_start + nchannels;
   double *farea_start = nullptr;
   double *farea_end = nullptr;
-  const int64_t nxbins(m_xbins.size());
   double *xErrors_start = nullptr;
   double *xErrors_end = nullptr;
+  size_t dx_increment = nchannels;
+  // NexusFileIO stores Dx data for all spectra (sharing not preserved) so dim0
+  // is the histograms, dim1 is Dx length. For old files this is nchannels+1,
+  // otherwise nchannels. See #16298.
+  // WARNING: We are dropping the last Dx value for old files!
+  size_t dx_input_increment = xErrors.dim1();
   RebinnedOutput_sptr rb_workspace;
   if (hasFArea) {
     farea.load(static_cast<int>(blocksize), static_cast<int>(hist));
@@ -1851,7 +1856,7 @@ void LoadNexusProcessed::loadBlock(NXDataSetTyped<double> &data,
   if (hasXErrors) {
     xErrors.load(static_cast<int>(blocksize), static_cast<int>(hist));
     xErrors_start = xErrors();
-    xErrors_end = xErrors_start + nxbins;
+    xErrors_end = xErrors_start + dx_increment;
   }
 
   int64_t final(hist + blocksize);
@@ -1874,8 +1879,8 @@ void LoadNexusProcessed::loadBlock(NXDataSetTyped<double> &data,
       local_workspace->setSharedDx(
           hist, Kernel::make_cow<HistogramData::HistogramDx>(xErrors_start,
                                                              xErrors_end));
-      xErrors_start += nxbins;
-      xErrors_end += nxbins;
+      xErrors_start += dx_input_increment;
+      xErrors_end += dx_input_increment;
     }
 
     local_workspace->setX(hist, m_xbins.cowData());
@@ -1916,9 +1921,14 @@ void LoadNexusProcessed::loadBlock(NXDataSetTyped<double> &data,
   double *err_end = err_start + nchannels;
   double *farea_start = nullptr;
   double *farea_end = nullptr;
-  const int64_t nxbins(m_xbins.size());
   double *xErrors_start = nullptr;
   double *xErrors_end = nullptr;
+  size_t dx_increment = nchannels;
+  // NexusFileIO stores Dx data for all spectra (sharing not preserved) so dim0
+  // is the histograms, dim1 is Dx length. For old files this is nchannels+1,
+  // otherwise nchannels. See #16298.
+  // WARNING: We are dropping the last Dx value for old files!
+  size_t dx_input_increment = xErrors.dim1();
   RebinnedOutput_sptr rb_workspace;
   if (hasFArea) {
     farea.load(static_cast<int>(blocksize), static_cast<int>(hist));
@@ -1929,7 +1939,7 @@ void LoadNexusProcessed::loadBlock(NXDataSetTyped<double> &data,
   if (hasXErrors) {
     xErrors.load(static_cast<int>(blocksize), static_cast<int>(hist));
     xErrors_start = xErrors();
-    xErrors_end = xErrors_start + nxbins;
+    xErrors_end = xErrors_start + dx_increment;
   }
 
   int64_t final(hist + blocksize);
@@ -1952,8 +1962,8 @@ void LoadNexusProcessed::loadBlock(NXDataSetTyped<double> &data,
       local_workspace->setSharedDx(
           wsIndex, Kernel::make_cow<HistogramData::HistogramDx>(xErrors_start,
                                                                 xErrors_end));
-      xErrors_start += nxbins;
-      xErrors_end += nxbins;
+      xErrors_start += dx_input_increment;
+      xErrors_end += dx_input_increment;
     }
     local_workspace->setX(wsIndex, m_xbins.cowData());
     ++hist;
@@ -1997,6 +2007,12 @@ void LoadNexusProcessed::loadBlock(NXDataSetTyped<double> &data,
   double *farea_end = nullptr;
   double *xErrors_start = nullptr;
   double *xErrors_end = nullptr;
+  size_t dx_increment = nchannels;
+  // NexusFileIO stores Dx data for all spectra (sharing not preserved) so dim0
+  // is the histograms, dim1 is Dx length. For old files this is nchannels+1,
+  // otherwise nchannels. See #16298.
+  // WARNING: We are dropping the last Dx value for old files!
+  size_t dx_input_increment = xErrors.dim1();
   RebinnedOutput_sptr rb_workspace;
   if (hasFArea) {
     farea.load(static_cast<int>(blocksize), static_cast<int>(hist));
@@ -2013,7 +2029,7 @@ void LoadNexusProcessed::loadBlock(NXDataSetTyped<double> &data,
   if (hasXErrors) {
     xErrors.load(static_cast<int>(blocksize), static_cast<int>(hist));
     xErrors_start = xErrors();
-    xErrors_end = xErrors_start + nxbins;
+    xErrors_end = xErrors_start + dx_increment;
   }
 
   while (hist < final) {
@@ -2035,8 +2051,8 @@ void LoadNexusProcessed::loadBlock(NXDataSetTyped<double> &data,
       local_workspace->setSharedDx(
           wsIndex, Kernel::make_cow<HistogramData::HistogramDx>(xErrors_start,
                                                                 xErrors_end));
-      xErrors_start += nxbins;
-      xErrors_end += nxbins;
+      xErrors_start += dx_input_increment;
+      xErrors_end += dx_input_increment;
     }
     MantidVec &X = local_workspace->dataX(wsIndex);
     X.assign(xbin_start, xbin_end);

@@ -405,7 +405,8 @@ int NexusFileIO::writeNexusProcessedData2D(
     // Potentially x error
     if (localworkspace->hasDx(0)) {
       dims_array[0] = static_cast<int>(nSpect);
-      dims_array[1] = static_cast<int>(localworkspace->readX(0).size());
+      dims_array[1] =
+          static_cast<int>(localworkspace->histogram(0).dx().size());
       std::string dxErrorName = "xerrors";
       NXcompmakedata(fileID, dxErrorName.c_str(), NX_FLOAT64, 2, dims_array,
                      m_nexuscompression, asize);
