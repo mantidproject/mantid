@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='ASCII'?>
-<instrument last-modified="2016-05-16 16:43:36.344312"
+<instrument last-modified="2016-05-19 16:43:36.344312"
 	name="BIOSANS"
 	valid-from="2016-04-22 00:00:00"
 	valid-to="2100-01-31 23:59:59"
@@ -55,7 +55,7 @@
 	
 	<!-- Detector: -->
 	<type name="detector1" is="rectangular_detector" type="pixel_rectangular" xpixels="192"
-		xstart="-0.52525" xstep="0.0055" ypixels="256" ystart="-0.54825" ystep="0.0043">
+		xstart="0.52525" xstep="-0.0055" ypixels="256" ystart="-0.54825" ystep="0.0043">
 		<properties />
 	</type>
 	

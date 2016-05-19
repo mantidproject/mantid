@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='ASCII'?>
-<instrument last-modified="2013-03-23 15:02:05"
+<instrument last-modified="2013-03-24 15:02:05"
 	name="BioSANS"
 	valid-from="2012-02-01 00:00:00"
 	valid-to="2016-04-26 23:59:59"
@@ -55,7 +55,7 @@
 	
 	<!-- Detector: -->
 	<type name="detector1" is="rectangular_detector" type="pixel_rectangular" xpixels="192"
-		xstart="-0.52525" xstep="0.0055" ypixels="256" ystart="-0.54825" ystep="0.0043">
+		xstart="0.52525" xstep="-0.0055" ypixels="256" ystart="-0.54825" ystep="0.0043">
 		<properties />
 	</type>
 	
