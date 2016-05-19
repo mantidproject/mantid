@@ -10,7 +10,7 @@ class ReductionOptions(BaseOptions):
     nx_pixels = None
     ny_pixels = None
     pixel_size = None
-    detector_offset = 0.0
+    default_detector_offset = 0.0
 
     # Use TOF cuts from configuration file
     use_config_cutoff = True
@@ -52,7 +52,7 @@ class ReductionOptions(BaseOptions):
         self.nx_pixels = ReductionOptions.nx_pixels
         self.ny_pixels = ReductionOptions.ny_pixels
         self.pixel_size = ReductionOptions.pixel_size
-        self.detector_offset = ReductionOptions.detector_offset
+        self.detector_offset = ReductionOptions.default_detector_offset
 
         self.use_config_cutoff = ReductionOptions.use_config_cutoff
         self.low_TOF_cut = ReductionOptions.low_TOF_cut
@@ -195,6 +195,11 @@ class ReductionOptions(BaseOptions):
 
         dom = xml.dom.minidom.parseString(xml_str)
 
+        instrument_dom = dom.getElementsByTagName("Instrument")[0]
+        self.detector_offset = BaseScriptElement.getFloatElement(instrument_dom, "detector_offset",
+                                                                 default=ReductionOptions.default_detector_offset)
+
+
         # TOF cutoff and correction
         element_list = dom.getElementsByTagName("TOFcorr")
         if len(element_list)>0:
@@ -238,6 +243,8 @@ class ReductionOptions(BaseOptions):
         super(ReductionOptions, self).from_setup_info(xml_str)
 
         (alg, _) = BaseScriptElement.getAlgorithmFromXML(xml_str)
+        self.detector_offset = BaseScriptElement.getPropertyValue(
+            alg, "SampleDetectorDistanceOffset", default=ReductionOptions.default_detector_offset)
         self.use_config_cutoff = BaseScriptElement.getPropertyValue(alg, "UseConfigTOFCuts",
                                                                     default=ReductionOptions.use_config_cutoff)
         self.correct_for_flight_path = BaseScriptElement.getPropertyValue(alg, "CorrectForFlightPath",
