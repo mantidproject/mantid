@@ -42,6 +42,9 @@ function( SET_TARGET_OUTPUT_DIRECTORY TARGET OUTPUT_DIR )
 
       # Lets get the location of the output for the given target
       # and copy it to where we want it to go
+      add_custom_command( TARGET ${TARGET} POST_BUILD
+                          COMMAND ${CMAKE_COMMAND} ARGS -E make_directory
+                          ${OUTPUT_DIR})
       add_custom_command (TARGET ${TARGET} POST_BUILD 
                           COMMAND ${CMAKE_COMMAND} ARGS -E echo 
                           "Copying \"$<TARGET_FILE:${TARGET}>\" to \"${OUTPUT_DIR}/\" "
