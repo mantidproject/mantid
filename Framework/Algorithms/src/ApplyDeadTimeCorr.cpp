@@ -5,7 +5,7 @@
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/TableRow.h"
-#include "MantidKernel/EqualBinsChecker.h"
+#include "MantidAPI/EqualBinSizesValidator.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/TimeSeriesProperty.h"
@@ -30,7 +30,8 @@ DECLARE_ALGORITHM(ApplyDeadTimeCorr)
 void ApplyDeadTimeCorr::init() {
 
   declareProperty(make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
-                      "InputWorkspace", "", Direction::Input),
+                      "InputWorkspace", "", Direction::Input,
+                      boost::make_shared<EqualBinSizesValidator>(0.5)),
                   "The name of the input workspace containing measured counts");
 
   declareProperty(make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(
@@ -129,26 +130,6 @@ void ApplyDeadTimeCorr::exec() {
     throw std::invalid_argument(
         "Row count was bigger than the Number of Histograms.");
   }
-}
-
-/**
- * Validates input properties:
- * - input workspace must have all bins the same size (within reasonable error)
- * @returns :: map of property names to error strings (empty if no error)
- */
-std::map<std::string, std::string> ApplyDeadTimeCorr::validateInputs() {
-  std::map<std::string, std::string> errors;
-  MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
-  if (inputWS) { // in case input was a WorkspaceGroup
-    const MantidVec &xValues = inputWS->readX(0);
-    constexpr double tolerance = 0.5;
-    Kernel::EqualBinsChecker binChecker(xValues, tolerance, -1);
-    const std::string binError = binChecker.validate();
-    if (!binError.empty()) {
-      errors["InputWorkspace"] = binError;
-    }
-  }
-  return errors;
 }
 
 } // namespace Mantid

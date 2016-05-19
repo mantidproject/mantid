@@ -1,11 +1,11 @@
 #include "MantidAlgorithms/MaxEnt.h"
+#include "MantidAPI/EqualBinSizesValidator.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/TextAxis.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAlgorithms/MaxEnt/MaxentEntropyNegativeValues.h"
 #include "MantidAlgorithms/MaxEnt/MaxentEntropyPositiveValues.h"
 #include "MantidKernel/BoundedValidator.h"
-#include "MantidKernel/EqualBinsChecker.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/UnitFactory.h"
 #include <boost/make_shared.hpp>
@@ -79,8 +79,13 @@ const std::string MaxEnt::summary() const {
  */
 void MaxEnt::init() {
 
+  // X values in input workspace must be (almost) equally spaced
+  const double warningLevel = 0.01;
+  const double errorLevel = 0.5;
   declareProperty(
-      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
+      make_unique<WorkspaceProperty<>>(
+          "InputWorkspace", "", Direction::Input,
+          boost::make_shared<EqualBinSizesValidator>(errorLevel, warningLevel)),
       "An input workspace.");
 
   declareProperty("ComplexData", false,
@@ -164,20 +169,7 @@ std::map<std::string, std::string> MaxEnt::validateInputs() {
   MatrixWorkspace_sptr inWS = getProperty("InputWorkspace");
 
   if (inWS) {
-
-    // 1. X values in input workspace must be (almost) equally spaced
-
-    const double warningLevel = 0.01;
-    const double errorLevel = 0.5;
-
-    Kernel::EqualBinsChecker binChecker(inWS->readX(0), errorLevel,
-                                        warningLevel);
-    const std::string binError = binChecker.validate();
-    if (!binError.empty()) {
-      result["InputWorkspace"] = binError;
-    }
-
-    // 2. If the input signal is complex, we expect an even number of histograms
+    // If the input signal is complex, we expect an even number of histograms
     // in the input workspace
 
     size_t nhistograms = inWS->getNumberHistograms();
