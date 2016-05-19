@@ -78,6 +78,9 @@ Improvements
 
 - Updated the :ref:`SimulatedDensityOfStates <algm-SimulatedDensityOfStates>` workflow diagram to show an overview of the algorithm.
 
+- the *Iqt* interface now validates that EMin is strictly less than EMax and that they are both not equal to 0
+
+
 Bugfixes
 --------
 
@@ -85,8 +88,12 @@ Bugfixes
 - :ref:`ISISIndirectEnergyTransfer <algm-ISISIndirectEnergyTransfer>` only corrects for detailed balance when one is actually specified as input.
 - :ref:`SimulatedDensityOfStates <algm-SimulatedDensityOfStates>` should no longer manipulate the actual data values and only rebins the data to the desired bin width.
 - :ref:`VesuvioCorrections <algm-VesuvioCorrections>` no longer always fits using only the first spectrum in the input workspace.
-- Fix bug with *BayesQuasi* docs not displaying online
-- The mini plot range bars in *BayesQuasi* now automatically update on sample loading.
+- Fix bug with :ref: `BayesQuasi <algm-BayesQuasi>` docs not displaying online
+- *BayesStretched* interface now gives the option of using the current working directory if no default save path is provided.
+- The mini plot range bars in all interfaces now automatically update when a file is loaded.
+- In the *I(Q, t) Fit* interface, checking the plot guess check box now correctly adds and removes the curve from the plot
+- In the *BayesQuasi* interface ResNorm files are now automatically loaded from file locations when entered.
+- :ref:`LoadVesuvio <algm-LoadVesuvio>` now correctly parses input in the form 10-20,30-40,50-60
 
 
 `Full list of changes on GitHub <http://github.com/mantidproject/mantid/pulls?q=is%3Apr+milestone%3A%22Release+3.7%22+is%3Amerged+label%3A%22Component%3A+Indirect+Inelastic%22>`_

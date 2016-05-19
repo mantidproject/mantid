@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
 // Includes
 //------------------------------------------------------------------------------
-#include "MantidAPI/SampleEnvironment.h"
+#include "MantidGeometry/Instrument/SampleEnvironment.h"
 #include "MantidGeometry/IObjComponent.h"
 #include "MantidGeometry/Objects/Object.h"
 #include "MantidGeometry/Objects/Track.h"
 
 namespace Mantid {
-namespace API {
+namespace Geometry {
 using Geometry::BoundingBox;
 using Geometry::Track;
 using Kernel::Material;
@@ -20,57 +20,55 @@ using Kernel::V3D;
 /**
  * Constructor specifying a name for the environment. It is empty by default and
  * required by various other users of it
- * @param name :: A name for the environment kit
+ * @param name A human-readable name for the kit
+ * @param can The object that represents the can
  */
-SampleEnvironment::SampleEnvironment(const std::string &name)
-    : m_name(name), m_elements() {}
+SampleEnvironment::SampleEnvironment(std::string name, Can_const_sptr can)
+    : m_name(std::move(name)), m_components(1, can) {}
 
 /**
  * @return An axis-aligned BoundingBox object that encompasses the whole kit.
  */
 Geometry::BoundingBox SampleEnvironment::boundingBox() const {
   BoundingBox box;
-  auto itrEnd = m_elements.end();
-  for (auto itr = m_elements.begin(); itr != itrEnd; ++itr) {
-    box.grow(itr->getBoundingBox());
+  for (const auto &component : m_components) {
+    box.grow(component->getBoundingBox());
   }
   return box;
 }
 
 /**
- * @param element A shape + material object
- */
-void SampleEnvironment::add(const Geometry::Object &element) {
-  m_elements.push_back(element);
-}
-
-/**
  * Is the point given a valid point within the environment
- * @param point :: Is the point valid within the environment
+ * @param point Is the point valid within the environment
  * @returns True if the point is within the environment
  */
 bool SampleEnvironment::isValid(const V3D &point) const {
-  auto itrEnd = m_elements.end();
-  for (auto itr = m_elements.begin(); itr != itrEnd; ++itr) {
-    if (itr->isValid(point)) {
+  for (const auto &component : m_components) {
+    if (component->isValid(point))
       return true;
-    }
   }
   return false;
 }
 
 /**
  * Update the given track with intersections within the environment
- * @param track :: The track is updated with an intersection with the
+ * @param track The track is updated with an intersection with the
  *        environment
  * @return The total number of segments added to the track
  */
 int SampleEnvironment::interceptSurfaces(Track &track) const {
   int nsegments(0);
-  for (const auto &element : m_elements) {
-    nsegments += element.interceptSurface(track);
+  for (const auto &component : m_components) {
+    nsegments += component->interceptSurface(track);
   }
   return nsegments;
+}
+
+/**
+ * @param component An object defining some component of the environment
+ */
+void SampleEnvironment::add(const Object_const_sptr &component) {
+  m_components.emplace_back(component);
 }
 }
 }

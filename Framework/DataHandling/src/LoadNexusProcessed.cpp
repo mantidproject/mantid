@@ -1581,9 +1581,9 @@ API::Workspace_sptr LoadNexusProcessed::loadEntry(NXRoot &root,
   // Are we a distribution
   std::string dist = xbins.attributes("distribution");
   if (dist == "1") {
-    local_workspace->isDistribution(true);
+    local_workspace->setDistribution(true);
   } else {
-    local_workspace->isDistribution(false);
+    local_workspace->setDistribution(false);
   }
 
   // Get information from all but data group

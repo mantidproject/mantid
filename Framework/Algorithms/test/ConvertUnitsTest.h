@@ -223,6 +223,8 @@ public:
             "quickOut2"));
     TS_ASSERT_EQUALS(output->getAxis(0)->unit()->unitID(), "Energy");
     TS_ASSERT_DELTA(output->dataX(1)[1], 10.10, 0.01);
+    // Check EMode has been set
+    TS_ASSERT_EQUALS(Mantid::Kernel::DeltaEMode::Elastic, output->getEMode());
 
     AnalysisDataService::Instance().remove("quickOut2");
   }
@@ -384,6 +386,8 @@ public:
             outputSpace));
     TS_ASSERT_EQUALS(output->getAxis(0)->unit()->unitID(), "DeltaE");
     TS_ASSERT_EQUALS(output->blocksize(), 1669);
+    // Check EMode has been set
+    TS_ASSERT_EQUALS(Mantid::Kernel::DeltaEMode::Direct, output->getEMode());
 
     ConvertUnits conv2;
     conv2.initialize();
@@ -400,6 +404,8 @@ public:
     TS_ASSERT_EQUALS(output->getAxis(0)->unit()->unitID(),
                      "DeltaE_inWavenumber");
     TS_ASSERT_EQUALS(output->blocksize(), 2275);
+    // Check EMode has been set
+    TS_ASSERT_EQUALS(Mantid::Kernel::DeltaEMode::Indirect, output->getEMode());
 
     AnalysisDataService::Instance().remove(outputSpace);
   }
@@ -448,6 +454,8 @@ public:
     TS_ASSERT_DIFFERS(a_tof, WS->getEventList(wkspIndex).getEvents()[0].tof());
     // and a X changed
     TS_ASSERT_DIFFERS(a_x, WS->getEventList(wkspIndex).dataX()[1]);
+    // Check EMode has been set
+    TS_ASSERT_EQUALS(Mantid::Kernel::DeltaEMode::Direct, WS->getEMode());
   }
 
   void testExecEvent_TwoStepConversionWithDeltaE() {

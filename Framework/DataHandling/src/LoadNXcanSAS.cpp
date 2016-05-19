@@ -213,7 +213,7 @@ bool hasQDev(H5::Group &dataGroup) {
 void loadData1D(H5::Group &dataGroup,
                 Mantid::API::MatrixWorkspace_sptr workspace) {
   // General
-  workspace->isDistribution(true);
+  workspace->setDistribution(true);
 
   // Load the Q value
   Mantid::MantidVec qData =
@@ -326,7 +326,7 @@ void readQyInto2DWorkspace(H5::DataSet &dataSet,
 void loadData2D(H5::Group &dataGroup,
                 Mantid::API::MatrixWorkspace_sptr workspace) {
   // General
-  workspace->isDistribution(true);
+  workspace->setDistribution(true);
   //-----------------------------------------
   // Load the I value.
   auto iDataSet = dataGroup.openDataSet(sasDataI);

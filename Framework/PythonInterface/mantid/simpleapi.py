@@ -47,6 +47,19 @@ def specialization_exists(name):
     """
     return name in __SPECIALIZED_FUNCTIONS__
 
+def extract_progress_kwargs(kwargs):
+    """
+    Returns tuple(startProgress, endProgress, kwargs) with the special
+    keywords removed from kwargs. If the progress keywords are not
+    specified, None will be returned in their place.
+    """
+    start = kwargs.get('startProgress')
+    end   = kwargs.get('endProgress')
+    for item in ('startProgress', 'endProgress'):
+        if item in kwargs:
+            del kwargs[item]
+    return (start, end, kwargs)
+
 def Load(*args, **kwargs):
     """
     Load is a more flexible algorithm than other Mantid algorithms.
@@ -85,7 +98,9 @@ def Load(*args, **kwargs):
     filename, = _get_mandatory_args('Load', ["Filename"], *args, **kwargs)
 
     # Create and execute
-    algm = _create_algorithm_object('Load')
+    (_startProgress, _endProgress, kwargs) = extract_progress_kwargs(kwargs)
+    algm = _create_algorithm_object('Load', startProgress=_startProgress,
+                                    endProgress=_endProgress)
     _set_logging_option(algm, kwargs)
     try:
         algm.setProperty('Filename', filename) # Must be set first
@@ -300,7 +315,10 @@ def FitDialog(*args, **kwargs):
     if 'Disable' not in arguments: arguments['Disable']=''
     if 'Message' not in arguments: arguments['Message']=''
 
-    algm = _create_algorithm_object('Fit')
+    (_startProgress, _endProgress, kwargs) = extract_progress_kwargs(kwargs)
+
+    algm = _create_algorithm_object('Fit', startProgress=_startProgress,
+                                    endProgress=_endProgress)
     set_properties_dialog(algm,**arguments)
     algm.execute()
     return algm
@@ -360,7 +378,9 @@ def CutMD(*args, **kwargs):
                 kwargs["P{0}Bin".format(bin+1)] = bins[bin]
 
     # Create and execute
-    algm = _create_algorithm_object('CutMD')
+    (_startProgress, _endProgress, kwargs) = extract_progress_kwargs(kwargs)
+    algm = _create_algorithm_object('CutMD', startProgress=_startProgress,
+                                    endProgress=_endProgress)
     _set_logging_option(algm, kwargs)
 
     # Now check that all the kwargs we've got are correct
@@ -830,13 +850,7 @@ def _create_algorithm_function(algorithm, version, _algm_object):
             _version = kwargs["Version"]
             del kwargs["Version"]
 
-        _startProgress, _endProgress = (None, None)
-        if 'startProgress' in kwargs:
-            _startProgress = kwargs['startProgress']
-            del kwargs['startProgress']
-        if 'endProgress' in kwargs:
-            _endProgress = kwargs['endProgress']
-            del kwargs['endProgress']
+        (_startProgress, _endProgress, kwargs) = extract_progress_kwargs(kwargs)
 
         algm = _create_algorithm_object(algorithm, _version, _startProgress, _endProgress)
         _set_logging_option(algm, kwargs)

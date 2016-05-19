@@ -32,7 +32,7 @@ distribution
   if ( lhs->YUnit().empty() )
   {
     out->setYUnit("");
-    out->isDistribution(false); // might be, maybe not?
+    out->setDistribution(false); // might be, maybe not?
   }
   // Else units are questionable...
   else

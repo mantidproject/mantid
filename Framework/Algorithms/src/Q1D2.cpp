@@ -345,7 +345,7 @@ Q1D2::setUpOutputWorkspace(const std::vector<double> &binParams) const {
 
   // Set the X vector for the output workspace
   outputWS->setX(0, XOut);
-  outputWS->isDistribution(true);
+  outputWS->setDistribution(true);
 
   outputWS->getSpectrum(0)->clearDetectorIDs();
   outputWS->getSpectrum(0)->setSpectrumNo(1);

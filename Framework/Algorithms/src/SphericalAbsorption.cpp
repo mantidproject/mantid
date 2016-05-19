@@ -75,7 +75,7 @@ void SphericalAbsorption::exec() {
   // Create the output workspace
   MatrixWorkspace_sptr correctionFactors =
       WorkspaceFactory::Instance().create(m_inputWS);
-  correctionFactors->isDistribution(
+  correctionFactors->setDistribution(
       true);                       // The output of this is a distribution
   correctionFactors->setYUnit(""); // Need to explicitly set YUnit to nothing
   correctionFactors->setYUnitLabel("Attenuation factor");

@@ -94,7 +94,7 @@ void SANSSolidAngleCorrection::exec() {
   MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace");
   if (outputWS != inputWS) {
     outputWS = WorkspaceFactory::Instance().create(inputWS);
-    outputWS->isDistribution(true);
+    outputWS->setDistribution(true);
     outputWS->setYUnit("");
     outputWS->setYUnitLabel("Steradian");
     setProperty("OutputWorkspace", outputWS);

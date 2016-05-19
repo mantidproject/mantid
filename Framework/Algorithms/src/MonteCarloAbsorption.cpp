@@ -7,12 +7,12 @@
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/Sample.h"
-#include "MantidAPI/SampleEnvironment.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
+#include "MantidGeometry/Instrument/SampleEnvironment.h"
 
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
@@ -233,15 +233,16 @@ MatrixWorkspace_sptr MonteCarloAbsorption::createOutputWorkspace(
   MatrixWorkspace_sptr outputWS = inputWS.clone();
   // The algorithm computes the signal values at bin centres so they should
   // be treated as a distribution
-  outputWS->isDistribution(true);
+  outputWS->setDistribution(true);
   outputWS->setYUnit("");
   outputWS->setYUnitLabel("Attenuation factor");
   return outputWS;
 }
 
 /**
- * Create the requested beam profile. Currently hardcoded to a rectangular
- * beam of the same height/width as the sample's bounding box
+ * Create the beam profile. Currently only supports Rectangular. The dimensions
+ * are either specified by those provided by `SetBeam` algorithm or default
+ * to the width and height of the samples bounding box
  * @param instrument A reference to the instrument object
  * @param sample A reference to the sample object
  * @return A new IBeamProfile object
@@ -249,12 +250,21 @@ MatrixWorkspace_sptr MonteCarloAbsorption::createOutputWorkspace(
 std::unique_ptr<IBeamProfile>
 MonteCarloAbsorption::createBeamProfile(const Instrument &instrument,
                                         const Sample &sample) const {
-  // This should ultimately come from information set by the user
   const auto frame = instrument.getReferenceFrame();
-  const auto bbox = sample.getShape().getBoundingBox().width();
+  const auto source = instrument.getSource();
 
-  double beamWidth(bbox[frame->pointingHorizontal()]),
-      beamHeight(bbox[frame->pointingUp()]);
+  auto beamWidthParam = source->getNumberParameter("beam-width");
+  auto beamHeightParam = source->getNumberParameter("beam-height");
+  double beamWidth(-1.0), beamHeight(-1.0);
+  if (beamWidthParam.size() == 1 && beamHeightParam.size() == 1) {
+    beamWidth = beamWidthParam[0];
+    beamHeight = beamHeightParam[0];
+  } else {
+    const auto bbox = sample.getShape().getBoundingBox().width();
+    beamWidth = bbox[frame->pointingHorizontal()];
+    beamHeight = bbox[frame->pointingUp()];
+  }
+
   return Mantid::Kernel::make_unique<RectangularBeamProfile>(
       *frame, instrument.getSource()->getPos(), beamWidth, beamHeight);
 }

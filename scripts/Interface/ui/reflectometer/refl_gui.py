@@ -1,4 +1,4 @@
-# pylint: disable = too-many-lines, invalid-name, line-too-long, too-many-instance-attributes, too-many-branches,too-many-locals, too-many-nested-blocks
+﻿# pylint: disable = too-many-lines, invalid-name, line-too-long, too-many-instance-attributes, too-many-branches,too-many-locals, too-many-nested-blocks
 
 try:
     from mantidplot import *
@@ -59,7 +59,7 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
         self.__graphs = dict()
 
         self._last_trans = ""
-        self.__icat_file_map = None
+        self.icat_file_map = None
 
         self.__instrumentRuns = None
 
@@ -417,7 +417,8 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
                 active_session_id = session_object.getPropertyValue("Session")
 
             # Fetch out an existing session id
-            active_session_id = CatalogManager.getActiveSessions()[-1].getSessionId() # TODO. This might be another catalog session, but at present there is no way to tell.
+            active_session_id = CatalogManager.getActiveSessions()[-1].getSessionId()
+            # This might be another catalog session, but at present there is no way to tell.
 
             search_alg = AlgorithmManager.create('CatalogGetDataFiles')
             search_alg.initialize()
@@ -428,7 +429,7 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
             search_alg.execute()
             search_results = search_alg.getProperty('OutputWorkspace').value
 
-            self.__icat_file_map = {}
+            self.icat_file_map = {}
             self.statusMain.clearMessage()
             for row in search_results:
                 file_name = row['Name']
@@ -438,7 +439,7 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
 
                 if bool(re.search('(raw)$', file_name, re.IGNORECASE)): # Filter to only display and map raw files.
                     title = (run_number + ': ' + description).strip()
-                    self.SampleText.__icat_file_map[title] = (file_id, run_number, file_name)
+                    self.icat_file_map[title] = (file_id, run_number, file_name)
                     self.listMain.addItem(title)
             self.listMain.sortItems()
             del search_results
@@ -600,7 +601,7 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
             if len(split_title) != 3:
                 split_title = re.split(":", idx.text())
                 if len(split_title) != 2:
-                    logger.warning('cannot transfer ' +  idx.text() + ' title is not in the right form ')
+                    logger.warning('cannot transfer ' + idx.text() + ' title is not in the right form ')
                 else:
                     theta = 0
                     split_title.append(theta) # Append a dummy theta value.
@@ -649,8 +650,9 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
 
 
             contents = str(idx.text()).strip()
-            file_id, _runnumber, file_name = self.__icat_file_map[contents]
-            active_session_id = CatalogManager.getActiveSessions()[-1].getSessionId() # TODO. This might be another catalog session, but at present there is no way to tell.
+            file_id, _runnumber, file_name = self.icat_file_map[contents]
+            active_session_id = CatalogManager.getActiveSessions()[-1].getSessionId()
+            # This might be another catalog session, but at present there is no way to tell.
 
             save_location = config['defaultsave.directory']
 
@@ -886,7 +888,7 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
 
             if canMantidPlot:
                 # Get the existing graph if it exists
-                base_graph = self.__graphs.get(wksp[i], None)
+                base_graph = self.__graphs.get(wksp[0], None)
 
                 # Clear the window if we're the first of a new set of curves
                 clearWindow = (i == 0)
@@ -900,7 +902,7 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
                 titl = groupGet(ws_name_binned, 'samp', 'run_title')
                 if type(titl) == str:
                     base_graph.activeLayer().setTitle(titl)
-                base_graph.activeLayer().setAxisScale(Layer.Left, 1e-8, 100.0, Layer.Log10)
+                base_graph.activeLayer().setAxisScale(Layer.Left, _Imin * 0.1, _Imax * 10, Layer.Log10)
                 base_graph.activeLayer().setAxisScale(Layer.Bottom, Qmin * 0.9, Qmax * 1.1, Layer.Log10)
                 base_graph.activeLayer().setAutoScale()
 
@@ -968,10 +970,10 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
                 logger.notice('Reusing transmission workspace ' + transrun_named)
                 transmission_ws = mtd[transrun_named]
 
-        angle = str(self.tableMain.item(row, which * 5 + 1).text())
+        angle_str = str(self.tableMain.item(row, which * 5 + 1).text())
 
-        if len(angle) > 0:
-            angle = float(angle)
+        if len(angle_str) > 0:
+            angle = float(angle_str)
         else:
             angle = None
 

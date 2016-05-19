@@ -86,6 +86,11 @@ appendTimeSeriesLogs(boost::shared_ptr<Mantid::API::Workspace> toAppend,
 MANTIDQT_CUSTOMINTERFACES_DLL QString
 runNumberString(const std::string &workspaceName, const std::string &firstRun);
 
+/// Decide if grouping needs to be reloaded
+MANTIDQT_CUSTOMINTERFACES_DLL bool isReloadGroupingNecessary(
+    const boost::shared_ptr<Mantid::API::Workspace> currentWorkspace,
+    const boost::shared_ptr<Mantid::API::Workspace> loadedWorkspace);
+
 /**
  * A class which deals with auto-saving the widget values. Widgets are
  * registered and then on any

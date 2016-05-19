@@ -30,6 +30,10 @@ Crystal Improvements
 Engineering Diffraction
 -----------------------
 
+- The new algorithm :ref:`GSASIIRefineFitPeaks <algm-GSASIIRefineFitPeaks>`
+  can be used to call the GSAS-II software repeatedly to refine lattice
+  parameters (whole pattern refinement) and/or fit peaks.
+
 - New algorithm added:
   :ref:`EnggFitDIFCFromPeaks<algm-EnggFitDIFCFromPeaks>`, which forks
   from the old
@@ -46,6 +50,9 @@ Engineering Diffraction
 
 - Phase information files for ENGIN-X are now distributed together
   with the ENGIN-X scripts.
+
+- New algorithm :ref:`SaveNexusPD <algm-SaveNexusPD>` which creates a nexus file for use in GUDRUN and will hopefully be supported by Rietveld packages in the future.
+
 
 Graphical user interface:
 
@@ -82,8 +89,12 @@ Graphical user interface:
   the consecutive run numbers to the list widget from the range provided by the
   user, bank combo-box will update upon selection of run number.
 
-
-- New algorithm :ref:`SaveNexusPD <algm-SaveNexusPD>` which creates a nexus file for use in GUDRUN and will hopefully be supported by Rietveld packages in the future.
+- Further improvements to Fitting tab, if for some reason the fitting
+  fails, the focused workspace should still be plotted. This will
+  enable user to select valid peaks and run Fit accordingly. User also
+  now have an option to plot single peak fitting in separate workspace
+  by using *Plot To Separate Window* button. Peak list can now also be
+  cleared using the *Clear* button.
 
 Imaging
 -------
@@ -91,8 +102,15 @@ Imaging
 - The new algorithm :ref:`ImggAggregateWavelengths <algm-ImggAggregateWavelengths>`
   aggregates stacks of images from wavelength dependent data.
 
+- The algorithm `ImggTomographicReconstruction
+  <algm-ImggTomographicReconstruction>` has been introduced. This is a
+  first experimental version that implements the Filtered
+  Back-Projection (FBP) reconstruction method using the FBP
+  implementation of the `TomoPy package
+  <http://www.aps.anl.gov/tomopy/>`_.
 - Images loaded as Mantid workspaces can now be saved into FITS files
   using the algorithm :ref:`SaveFITS <algm-SaveFITS>`.
+
 
 Improvements in the tomographic reconstruction graphical user interface:
 

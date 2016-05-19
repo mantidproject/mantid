@@ -150,7 +150,7 @@ void LoadDaveGrp::exec() {
           API::WorkspaceFactory::Instance().create("Workspace2D", this->nGroups,
                                                    this->xLength, yLength));
   // Force the workspace to be a distribution
-  outputWorkspace->isDistribution(true);
+  outputWorkspace->setDistribution(true);
 
   // Set the x-axis units
   outputWorkspace->getAxis(0)->unit() =

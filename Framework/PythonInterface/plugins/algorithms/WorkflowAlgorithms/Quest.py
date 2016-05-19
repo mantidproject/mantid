@@ -81,6 +81,10 @@ class Quest(PythonAlgorithm):
         saveOp = self.getProperty('Save').value
 
         workdir = config['defaultsave.directory']
+        if not os.path.isdir(workdir):
+            workdir = os.getcwd()
+            logger.information('Default Save directory is not set. Defaulting to current working Directory: ' + workdir)
+
         if inType == 'File':
             spath = os.path.join(workdir, sname+'.nxs')        # path name for sample nxs file
             LoadNexusProcessed(Filename=spath, OutputWorkspace=sname)

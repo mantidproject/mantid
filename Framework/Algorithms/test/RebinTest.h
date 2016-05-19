@@ -38,7 +38,7 @@ public:
 
   void testworkspace1D_dist() {
     Workspace2D_sptr test_in1D = Create1DWorkspace(50);
-    test_in1D->isDistribution(true);
+    test_in1D->setDistribution(true);
     AnalysisDataService::Instance().add("test_in1D", test_in1D);
 
     Rebin rebin;
@@ -110,7 +110,7 @@ public:
 
   void testworkspace1D_logarithmic_binning() {
     Workspace2D_sptr test_in1D = Create1DWorkspace(50);
-    test_in1D->isDistribution(true);
+    test_in1D->setDistribution(true);
     AnalysisDataService::Instance().add("test_in1D", test_in1D);
 
     Rebin rebin;
@@ -144,7 +144,7 @@ public:
 
   void testworkspace2D_dist() {
     Workspace2D_sptr test_in2D = Create2DWorkspace(50, 20);
-    test_in2D->isDistribution(true);
+    test_in2D->setDistribution(true);
     AnalysisDataService::Instance().add("test_in2D", test_in2D);
 
     Rebin rebin;
@@ -341,7 +341,7 @@ public:
   void testMaskedBinsDist() {
     Workspace2D_sptr test_in1D = Create1DWorkspace(50);
     AnalysisDataService::Instance().add("test_Rebin_mask_dist", test_in1D);
-    test_in1D->isDistribution(true);
+    test_in1D->setDistribution(true);
     maskFirstBins("test_Rebin_mask_dist", "test_Rebin_masked_ws", 10.0);
 
     Rebin rebin;
@@ -395,7 +395,7 @@ public:
 
   void testMaskedBinsIntegratedCounts() {
     Workspace2D_sptr test_in1D = Create1DWorkspace(51);
-    test_in1D->isDistribution(false);
+    test_in1D->setDistribution(false);
     AnalysisDataService::Instance().add("test_Rebin_mask_raw", test_in1D);
 
     Rebin rebin;
