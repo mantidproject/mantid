@@ -6,14 +6,19 @@
 #include "MantidCurveFitting/Functions/Keren.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
+
+#include <numeric>
 
 using Mantid::CurveFitting::Functions::Keren;
 using Mantid::API::Workspace_sptr;
 using Mantid::API::AlgorithmManager;
 using Mantid::API::IFunction_sptr;
+using Mantid::API::WorkspaceFactory;
+using Mantid::HistogramData::HistogramX;
 
 /**
  * Structure to hold Y, E data with X0 and DeltaX
@@ -175,12 +180,14 @@ private:
    */
   Workspace_sptr getMockDataWorkspace() {
     MockData data = getMockData();
-    auto ws = WorkspaceCreationHelper::Create2DWorkspaceBinned(1, 40, data.x0,
-                                                               data.dX);
-    Mantid::MantidVec &Y = ws->dataY(0);
-    Mantid::MantidVec &E = ws->dataE(0);
-    Y = data.y;
-    E = data.e;
+    size_t N = data.y.size();
+    auto ws = WorkspaceFactory::Instance().create("Workspace2D", 1, N, N);
+    HistogramX x(N);
+    std::iota(x.begin(), x.end(), data.x0);
+    x *= data.dX;
+    ws->histogram(0).mutableX() = x;
+    ws->dataY(0) = data.y;
+    ws->dataE(0) = data.e;
     return ws;
   }
 };
