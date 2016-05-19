@@ -93,6 +93,7 @@ Bugfixes
 - *BayesStretched* interface now gives the option of using the current working directory if no default save path is provided.
 - The mini plot range bars in all interfaces now automatically update when a file is loaded.
 - In the *BayesQuasi* interface ResNorm files are now automatically loaded from file locations when entered.
+- :ref:`LoadVesuvio <algm-LoadVesuvio>` now correctly parses input in the form 10-20,30-40,50-60
 
 
 `Full list of changes on GitHub <http://github.com/mantidproject/mantid/pulls?q=is%3Apr+milestone%3A%22Release+3.7%22+is%3Amerged+label%3A%22Component%3A+Indirect+Inelastic%22>`_
