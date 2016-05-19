@@ -89,7 +89,12 @@ Graphical user interface:
   the consecutive run numbers to the list widget from the range provided by the
   user, bank combo-box will update upon selection of run number.
 
-
+- Further improvements to Fitting tab, if for some reason the fitting
+  fails, the focused workspace should still be plotted. This will
+  enable user to select valid peaks and run Fit accordingly. User also
+  now have an option to plot single peak fitting in separate workspace
+  by using *Plot To Separate Window* button. Peak list can now also be
+  cleared using the *Clear* button.
 
 Imaging
 -------
