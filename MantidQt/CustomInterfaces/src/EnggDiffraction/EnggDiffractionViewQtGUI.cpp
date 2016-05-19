@@ -260,7 +260,7 @@ void EnggDiffractionViewQtGUI::doSetupTabFitting() {
           SLOT(clearPeakList()));
 
   connect(m_uiTabFitting.pushButton_plot_separate_window, SIGNAL(released()),
-	  SLOT(plotSeparateWindow()));
+          SLOT(plotSeparateWindow()));
 
   m_uiTabFitting.dataPlot->setCanvasBackground(Qt::white);
   m_uiTabFitting.dataPlot->setAxisTitle(QwtPlot::xBottom, "d-Spacing (A)");
@@ -1643,8 +1643,7 @@ void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::savePeakList() {
 }
 
 void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::clearPeakList() {
-  QString emptyStr = "";
-  m_uiTabFitting.lineEdit_fitting_peaks->setText(emptyStr);
+  m_uiTabFitting.lineEdit_fitting_peaks->clear();
 }
 
 void EnggDiffractionViewQtGUI::instrumentChanged(int /*idx*/) {
