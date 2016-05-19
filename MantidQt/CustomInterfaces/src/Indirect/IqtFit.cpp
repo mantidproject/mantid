@@ -302,7 +302,7 @@ std::string IqtFit::constructBaseName(const std::string &inputName,
 
   QString baseName = QString::fromStdString(inputName);
   baseName = baseName.left(baseName.lastIndexOf("_"));
-  baseName += "_Iqt_";
+  baseName += "_IqtFit_";
   baseName += functionType;
   baseName += QString::number(specMin);
   baseName += "_to_";

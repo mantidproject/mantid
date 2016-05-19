@@ -93,6 +93,7 @@ Bugfixes
 - The mini plot range bars in all interfaces now automatically update when a file is loaded.
 - In the *I(Q, t) Fit* interface, checking the plot guess check box now correctly adds and removes the curve from the plot
 - In the *BayesQuasi* interface ResNorm files are now automatically loaded from file locations when entered.
+- :ref:`LoadVesuvio <algm-LoadVesuvio>` now correctly parses input in the form 10-20,30-40,50-60
 
 
 `Full list of changes on GitHub <http://github.com/mantidproject/mantid/pulls?q=is%3Apr+milestone%3A%22Release+3.7%22+is%3Amerged+label%3A%22Component%3A+Indirect+Inelastic%22>`_
