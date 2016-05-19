@@ -133,6 +133,8 @@ void IqtFit::setup() {
           SLOT(specMinChanged(int)));
   connect(m_uiForm.spSpectraMax, SIGNAL(valueChanged(int)), this,
           SLOT(specMaxChanged(int)));
+  connect(m_uiForm.ckPlotGuess, SIGNAL(toggled(bool)), this,
+          SLOT(plotGuessChanged(bool)));
 
   // Set a custom handler for the QTreePropertyBrowser's ContextMenu event
   m_ffTree->setContextMenuPolicy(Qt::CustomContextMenu);
@@ -569,7 +571,7 @@ void IqtFit::updatePlot() {
         outputGroup->getItem(specNo));
     if (ws) {
       if (m_uiForm.ckPlotGuess->isChecked()) {
-        m_uiForm.ppPlot->removeSpectrum("Guess");
+        m_uiForm.ckPlotGuess->setChecked(false);
       }
       m_uiForm.ppPlot->addSpectrum("Fit", ws, 1, Qt::red);
       m_uiForm.ppPlot->addSpectrum("Diff", ws, 2, Qt::blue);
@@ -652,6 +654,13 @@ void IqtFit::propertyChanged(QtProperty *prop, double val) {
     m_dblManager->setValue(m_properties["Exponential2.Intensity"], val);
     m_dblManager->setValue(m_properties["StretchedExp.Intensity"], val);
   }
+}
+
+void IqtFit::plotGuessChanged(bool checked) {
+  if (!checked)
+    m_uiForm.ppPlot->removeSpectrum("Guess");
+  else
+    plotGuess(NULL);
 }
 
 void IqtFit::checkBoxUpdate(QtProperty *prop, bool checked) {

@@ -91,6 +91,7 @@ Bugfixes
 - Fix bug with :ref: `BayesQuasi <algm-BayesQuasi>` docs not displaying online
 - *BayesStretched* interface now gives the option of using the current working directory if no default save path is provided.
 - The mini plot range bars in all interfaces now automatically update when a file is loaded.
+- In the *I(Q, t) Fit* interface, checking the plot guess check box now correctly adds and removes the curve from the plot
 - In the *BayesQuasi* interface ResNorm files are now automatically loaded from file locations when entered.
 
 
