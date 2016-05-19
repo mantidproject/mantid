@@ -352,7 +352,7 @@ class VesuvioTests(unittest.TestCase):
     def _do_size_check(self,name, expected_nhist):
         loaded_data = mtd[name]
         self.assertEquals(expected_nhist, loaded_data.getNumberHistograms())
-'''
+
     #================== Failure cases ================================
 
     def test_run_range_bad_order_raises_error(self):
@@ -407,7 +407,7 @@ class VesuvioTests(unittest.TestCase):
         self.assertTrue("__loadraw_evs" not in mtd)
         self.assertTrue("__loadraw_evs_monitors" not in mtd)
 
-'''
+
 #====================================================================================
 
 class LoadVesuvioTest(stresstesting.MantidStressTest):
