@@ -57,7 +57,7 @@ used in the instrument definition files to define detector shapes. See
 Multiple containers container be specified in the definition. The correct container for a run
 must be chosen by the user at the time the environment is attached to a
 workspace with the ``Environment`` option on the
-:ref:`algm-SetSample-v1` algorithm.
+:ref:`SetSample <algm-SetSample>` algorithm.
 
 Materials
 #########
@@ -69,7 +69,7 @@ tags and each material must have a unique :xml:`id` within the file. The :xml:`i
 is used to reference the material when defining a container or component.
 
 The other attributes define the properties of the material. The allowed attributes
-map to the arguments of a similar name on the :ref:`algm-SetSampleMaterial-v1` algorithm
+map to the arguments of a similar name on the :ref:`SetSampleMaterial <algm-SetSampleMaterial>` algorithm
 
 - formula
 - atomicnumber
@@ -119,4 +119,4 @@ example, a heat shield container be added to the above definition like so:
 
 A new material, ``aluminium`` has been added to the materials list and the heat shield
 is defined as an arbitrary :xml:`component`. The :xml:`component` tag behaves in a similar fashion to
-the :xml:`container` tag with the exception that it containernot contain a :xml:`samplegeometry`.
+the :xml:`container` tag with the exception that it container not contain a :xml:`samplegeometry`.
