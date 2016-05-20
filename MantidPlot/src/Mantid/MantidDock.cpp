@@ -6,23 +6,17 @@
 #include "MantidWSIndexDialog.h"
 #include "FlowLayout.h"
 #include "WorkspaceIcons.h"
-#include "Graph3D.h"
 #include "MantidGroupPlotGenerator.h"
 
-#include <MantidAPI/AlgorithmFactory.h>
 #include <MantidAPI/FileProperty.h>
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidGeometry/Instrument.h"
-#include <MantidGeometry/MDGeometry/IMDDimension.h>
-#include <MantidGeometry/Crystal/OrientedLattice.h>
 #include <MantidKernel/make_unique.h>
 #include <MantidQtMantidWidgets/LineEditWithClear.h>
 #include <MantidQtAPI/InterfaceManager.h>
-#include <MantidQtAPI/Message.h>
 
 #include <Poco/Path.h>
 

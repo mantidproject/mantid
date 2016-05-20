@@ -36,15 +36,9 @@
 
 #include <qwt_plot.h>
 
-#include <QMessageBox>
-#include <QLayout>
 #include <QGroupBox>
 #include <QSpinBox>
-#include <QCheckBox>
-#include <QPushButton>
-#include <QLabel>
 #include <QComboBox>
-#include <QTabWidget>
 
 LineDialog::LineDialog(ArrowMarker *line, QWidget *parent, Qt::WFlags fl)
     : QDialog(parent, fl) {
