@@ -10483,7 +10483,7 @@ void ApplicationWindow::showStandAloneHelp() {
                               "<p><a href = "
                               "http://www.mantidproject.org/"
                               "MantidPlot:_Help>http://www.mantidproject.org/"
-                              "MantidPlot::_Help</a></p>");
+                              "MantidPlot:_Help</a></p>");
     exit(0);
   }
 
