@@ -88,6 +88,16 @@ public:
     TS_ASSERT_EQUALS(label, "EMU00000001-3, 5-6, 8, 10-4");
   }
 
+  void test_getRunLabel_noWS_singleRun() {
+    const std::string label = getRunLabel("MUSR", {15189});
+    TS_ASSERT_EQUALS(label, "MUSR00015189");
+  }
+
+  void test_getRunLabel_noWS_severalRuns() {
+    const std::string label = getRunLabel("MUSR", {15189, 15190, 15192});
+    TS_ASSERT_EQUALS(label, "MUSR00015189-90, 15192");
+  }
+
   void test_sumWorkspaces() {
     MatrixWorkspace_sptr ws1 =
         WorkspaceCreationHelper::Create2DWorkspace123(1, 3);
@@ -385,6 +395,52 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         result = isReloadGroupingNecessary(currentWs, loadedWs));
     TS_ASSERT_EQUALS(result, true);
+  }
+
+  void test_generateWorkspaceName() {
+    MantidQt::CustomInterfaces::Muon::DatasetParams params;
+    params.instrument = "MUSR";
+    params.runs = {15192, 15190, 15189};
+    params.itemType = MantidQt::CustomInterfaces::Muon::Group;
+    params.itemName = "fwd";
+    params.plotType = MantidQt::CustomInterfaces::Muon::Counts;
+    params.periods = "1+3-2+4";
+    params.version = 2;
+    const std::string wsName = generateWorkspaceName(params);
+    const std::string expected =
+        "MUSR00015189-90, 15192; Group; fwd; Counts; 1+3-2+4; #2";
+    TS_ASSERT_EQUALS(expected, wsName);
+  }
+
+  void test_generateWorkspaceName_noPeriods() {
+    MantidQt::CustomInterfaces::Muon::DatasetParams params;
+    params.instrument = "MUSR";
+    params.runs = {15192, 15190, 15189};
+    params.itemType = MantidQt::CustomInterfaces::Muon::Group;
+    params.itemName = "fwd";
+    params.plotType = MantidQt::CustomInterfaces::Muon::Counts;
+    params.periods = "";
+    params.version = 2;
+    const std::string wsName = generateWorkspaceName(params);
+    const std::string expected =
+        "MUSR00015189-90, 15192; Group; fwd; Counts; #2";
+    TS_ASSERT_EQUALS(expected, wsName);
+  }
+
+  void test_generateWorkspaceName_givenLabel() {
+    MantidQt::CustomInterfaces::Muon::DatasetParams params;
+    params.instrument = "MUSR";
+    params.runs = {15192, 15190, 15189};
+    params.label = "MyLabel00123"; // should be used in preference to inst/runs
+    params.itemType = MantidQt::CustomInterfaces::Muon::Group;
+    params.itemName = "fwd";
+    params.plotType = MantidQt::CustomInterfaces::Muon::Counts;
+    params.periods = "1+3-2+4";
+    params.version = 2;
+    const std::string wsName = generateWorkspaceName(params);
+    const std::string expected =
+        "MyLabel00123; Group; fwd; Counts; 1+3-2+4; #2";
+    TS_ASSERT_EQUALS(expected, wsName);
   }
 
 private:
