@@ -6,6 +6,7 @@ if ( CXXTEST_FOUND )
             MantidWidgets
             API
             Geometry
+            HistogramData
             Kernel
             ${QT_LIBRARIES}
             ${Boost_LIBRARIES}
