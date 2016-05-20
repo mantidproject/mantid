@@ -9698,7 +9698,7 @@ void ApplicationWindow::savedProject() {
   while (f) {
     QList<MdiSubWindow *> folderWindows = f->windowsList();
     foreach (MdiSubWindow *w, folderWindows) {
-      if (strcmp(w->metaObject()->className(), "Matrix") == 0) {
+      if (isOfType(w, "Matrix")) {
         Matrix *m = dynamic_cast<Matrix *>(w);
         if (m)
           m->undoStack()->setClean();
@@ -9939,7 +9939,7 @@ void ApplicationWindow::showWindowPopupMenu(const QPoint &p) {
         for (int i = 0; i < static_cast<int>(graphs.count()); i++)
           plots->addAction(graphs[i], window(graphs[i]), SLOT(showMaximized()));
       }
-    } else if (strcmp(w->metaObject()->className(), "Matrix") == 0) {
+    } else if (isOfType(w, "Matrix")) {
       QStringList graphs = depending3DPlots(dynamic_cast<Matrix *>(w));
       if (static_cast<int>(graphs.count()) > 0) {
         cm.addSeparator();
@@ -9947,7 +9947,7 @@ void ApplicationWindow::showWindowPopupMenu(const QPoint &p) {
         for (int i = 0; i < static_cast<int>(graphs.count()); i++)
           plots->addAction(graphs[i], window(graphs[i]), SLOT(showMaximized()));
       }
-    } else if (strcmp(w->metaObject()->className(), "MultiLayer") == 0) {
+    } else if (isOfType(w, "MultiLayer")) {
       tablesDepend->clear();
       QStringList tbls = multilayerDependencies(w);
       int n = static_cast<int>(tbls.count());
@@ -9958,7 +9958,7 @@ void ApplicationWindow::showWindowPopupMenu(const QPoint &p) {
         auto tablesDependMenuAction = cm.addMenu(tablesDepend);
         tablesDependMenuAction->setText("D&epends on");
       }
-    } else if (strcmp(w->metaObject()->className(), "Graph3D") == 0) {
+    } else if (isOfType(w, "Graph3D")) {
       Graph3D *sp = dynamic_cast<Graph3D *>(w);
       if (!sp)
         return;
@@ -9980,7 +9980,7 @@ void ApplicationWindow::showWindowPopupMenu(const QPoint &p) {
           plots->addAction(formula, w, SLOT(showNormal()));
         }
       }
-    } else if (strcmp(w->metaObject()->className(), "TiledWindow") == 0) {
+    } else if (isOfType(w, "TiledWindow")) {
       std::cerr << "Menu for TiledWindow" << std::endl;
     }
     cm.exec(lv->mapToGlobal(p));
@@ -10022,7 +10022,7 @@ QStringList ApplicationWindow::depending3DPlots(Matrix *m) {
   QStringList plots;
   QList<MdiSubWindow *> windows = windowsList();
   foreach (MdiSubWindow *w, windows) {
-    if (strcmp(w->metaObject()->className(), "Graph3D") == 0) {
+    if (isOfType(w, "Graph3D")) {
       auto g3d = dynamic_cast<Graph3D *>(w);
       if (g3d && g3d->matrix() == m)
         plots << w->objectName();
@@ -10036,7 +10036,7 @@ QStringList ApplicationWindow::dependingPlots(const QString &name) {
 
   QList<MdiSubWindow *> windows = windowsList();
   foreach (MdiSubWindow *w, windows) {
-    if (strcmp(w->metaObject()->className(), "MultiLayer") == 0) {
+    if (isOfType(w, "MultiLayer")) {
       auto ml = dynamic_cast<MultiLayer *>(w);
       if (!ml)
         return plots;
@@ -10048,7 +10048,7 @@ QStringList ApplicationWindow::dependingPlots(const QString &name) {
             !plots.contains(w->objectName()))
           plots << w->objectName();
       }
-    } else if (strcmp(w->metaObject()->className(), "Graph3D") == 0) {
+    } else if (isOfType(w, "Graph3D")) {
       auto g3d = dynamic_cast<Graph3D *>(w);
       if (g3d && (g3d->formula()).contains(name, Qt::CaseSensitive) &&
           !plots.contains(w->objectName()))
@@ -17241,4 +17241,8 @@ QString ApplicationWindow::saveProjectFolder(Folder *folder, int &windowCount,
   }
 
   return text;
+}
+
+bool ApplicationWindow::isOfType(QObject* obj, const char* toCompare) const {
+  return strcmp(obj->metaObject()->className(), toCompare) == 0;
 }
