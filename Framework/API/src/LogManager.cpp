@@ -2,7 +2,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/LogManager.h"
-#include "MantidAPI/PropertyNexus.h"
+#include "MantidKernel/PropertyNexus.h"
 
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/TimeSplitter.h"
@@ -344,7 +344,6 @@ void LogManager::saveNexus(::NeXus::File *file, const std::string &group,
   for (auto &prop : props) {
     try {
       prop->saveProperty(file);
-      // PropertyNexus::saveProperty(file, prop);
     } catch (std::invalid_argument &exc) {
       g_log.warning(exc.what());
     }

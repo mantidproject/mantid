@@ -1,8 +1,10 @@
 #include "MantidKernel/PropertyWithValue.h"
+#include "mantidKernel/Matrix.h"
 
 namespace Mantid {
 
 namespace Kernel {
+
 /// @cond
 #define INSTANTIATE(Type)                                                      \
   template DLLExport class PropertyWithValue<Type>;                            \
@@ -10,11 +12,11 @@ namespace Kernel {
 
 // Explicit instantiations
 INSTANTIATE(int)
-INSTANTIATE(long)
+// INSTANTIATE(long)
 INSTANTIATE(long long)
 INSTANTIATE(unsigned short int)
 INSTANTIATE(unsigned int)
-INSTANTIATE(unsigned long)
+// INSTANTIATE(unsigned long)
 INSTANTIATE(unsigned long long)
 INSTANTIATE(bool)
 INSTANTIATE(OptionalBool)

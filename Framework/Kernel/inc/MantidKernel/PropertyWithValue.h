@@ -351,9 +351,9 @@ public:
     return new PropertyWithValue<TYPE>(*this);
   }
 
-  void saveProperty(::NeXus::File *file) override {
-    savePropertyWithValue(file);
-  }
+  void saveProperty(::NeXus::File *file) override;
+  void saveProperty(::NeXus::File *file, std::true_type);
+  void saveProperty(::NeXus::File *file, std::false_type);
 
   /** Get the value of the property as a string
    *  @return The property's value
@@ -550,11 +550,6 @@ protected:
   TYPE m_initialValue;
 
 private:
-  void savePropertyWithValue(::NeXus::File *file) {
-    file->makeGroup(this->name(), "NXlog", 1);
-    file->writeData("value", m_value);
-    file->closeGroup();
-  }
   /**
    * Set the value of the property via a reference to another property.
    * If the value is unacceptable the value is not changed but a string is
@@ -633,6 +628,33 @@ private:
   /// Private default constructor
   PropertyWithValue();
 };
+
+#define PROPERTYWITHVALUE_SAVEPROPERTY(type)                                   \
+  template <>                                                                  \
+  inline void PropertyWithValue<type>::saveProperty(::NeXus::File *file) {     \
+    file->makeGroup(this->name(), "NXlog", 1);                                 \
+    file->writeData("value", (*this)());                                       \
+    file->closeGroup();                                                        \
+  }
+
+PROPERTYWITHVALUE_SAVEPROPERTY(float)
+PROPERTYWITHVALUE_SAVEPROPERTY(double)
+PROPERTYWITHVALUE_SAVEPROPERTY(int32_t)
+PROPERTYWITHVALUE_SAVEPROPERTY(uint32_t)
+PROPERTYWITHVALUE_SAVEPROPERTY(int64_t)
+PROPERTYWITHVALUE_SAVEPROPERTY(uint64_t)
+PROPERTYWITHVALUE_SAVEPROPERTY(std::vector<double>)
+PROPERTYWITHVALUE_SAVEPROPERTY(std::vector<int>)
+
+template <>
+inline void PropertyWithValue<std::string>::saveProperty(::NeXus::File *file) {
+  file->makeGroup(this->name(), "NXlog", 1);
+  file->writeData("value", this->value());
+  file->closeGroup();
+}
+
+template <typename TYPE>
+inline void PropertyWithValue<TYPE>::saveProperty(::NeXus::File * /*file*/){};
 
 template <typename TYPE>
 Logger PropertyWithValue<TYPE>::g_logger("PropertyWithValue");

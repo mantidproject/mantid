@@ -975,19 +975,14 @@ template <typename TYPE>
 void TimeSeriesProperty<TYPE>::addValues(
     const std::vector<Kernel::DateAndTime> &times,
     const std::vector<TYPE> &values) {
-  for (size_t i = 0; i < times.size(); i++) {
-    if (i >= values.size())
-      break;
-    else {
-      m_values.push_back(TimeValueUnit<TYPE>(times[i], values[i]));
-      m_size++;
-    }
+  size_t length = std::min(times.size(), values.size());
+  m_size += length;
+  for (size_t i = 0; i < length; ++i) {
+    m_values.emplace_back(times[i], values[i]);
   }
 
   if (!values.empty())
     m_propSortedFlag = TimeSeriesSortStatus::TSUNKNOWN;
-
-  return;
 }
 
 /** replace vectors of values to the map. First we clear the vectors
@@ -2092,10 +2087,26 @@ TimeSeriesProperty<TYPE>::setValueFromProperty(const Property &right) {
 }
 
 //----------------------------------------------------------------------------------------------
+/** Saves the time vector has time + start attribute */
+template <typename TYPE>
+void TimeSeriesProperty<TYPE>::saveTimeVector(::NeXus::File *file) {
+  std::vector<DateAndTime> times = this->timesAsVector();
+  const DateAndTime &start = times.front();
+  std::vector<double> timeSec(times.size());
+  for (size_t i = 0; i < times.size(); i++)
+    timeSec[i] = static_cast<double>(times[i].totalNanoseconds() -
+                                     start.totalNanoseconds()) *
+                 1e-9;
+  file->writeData("time", timeSec);
+  file->openData("time");
+  file->putAttr("start", start.toISO8601String());
+  file->closeData();
+}
+
+//----------------------------------------------------------------------------------------------
 /** Helper function to save a TimeSeriesProperty<> */
 template <>
-void TimeSeriesProperty<std::string>::saveTimeSeriesProperty(
-    ::NeXus::File *file) {
+void TimeSeriesProperty<std::string>::saveProperty(::NeXus::File *file) {
   std::vector<std::string> values = this->valuesAsVector();
   if (values.empty())
     return;
@@ -2109,20 +2120,19 @@ void TimeSeriesProperty<std::string>::saveTimeSeriesProperty(
   // Increment by 1 to have the 0 terminator
   maxlen++;
   // Copy into one array
-  auto strs = new char[values.size() * maxlen];
-  memset(strs, 0, values.size() * maxlen);
-  for (size_t i = 0; i < values.size(); i++)
-    strncpy(&strs[i * maxlen], values[i].c_str(), values[i].size());
+  std::vector<char> strs(values.size() * maxlen);
+  auto strs_it = strs.begin();
+  for (const auto &prop : values)
+    std::copy(prop.begin(), prop.end(),
+              std::next(strs_it, static_cast<long>(maxlen)));
 
-  std::vector<int> dims;
-  dims.push_back(int(values.size()));
-  dims.push_back(int(maxlen));
+  std::vector<int> dims{static_cast<int>(values.size()),
+                        static_cast<int>(maxlen)};
   file->makeData("value", ::NeXus::CHAR, dims, true);
-  file->putData((void *)strs);
+  file->putData(strs.data());
   file->closeData();
   saveTimeVector(file);
   file->closeGroup();
-  delete[] strs;
 }
 
 /**
@@ -2131,16 +2141,11 @@ void TimeSeriesProperty<std::string>::saveTimeSeriesProperty(
  * UINT8
  * for the value and add an attribute boolean to inidcate it is actually a bool
  */
-template <>
-void TimeSeriesProperty<bool>::saveTimeSeriesProperty(::NeXus::File *file) {
+template <> void TimeSeriesProperty<bool>::saveProperty(::NeXus::File *file) {
   std::vector<bool> value = this->valuesAsVector();
   if (value.empty())
     return;
-  const size_t nvalues = value.size();
-  std::vector<uint8_t> asUint(nvalues);
-  for (size_t i = 0; i < nvalues; ++i) {
-    asUint[i] = static_cast<uint8_t>(value[i]);
-  }
+  std::vector<uint8_t> asUint(value.begin(), value.end());
   file->makeGroup(this->name(), "NXlog", 1);
   file->writeData("value", asUint);
   file->putAttr("boolean", "1");
@@ -2149,7 +2154,7 @@ void TimeSeriesProperty<bool>::saveTimeSeriesProperty(::NeXus::File *file) {
 }
 
 template <typename TYPE>
-void TimeSeriesProperty<TYPE>::saveTimeSeriesProperty(::NeXus::File *file) {
+void TimeSeriesProperty<TYPE>::saveProperty(::NeXus::File *file) {
   auto value = this->valuesAsVector();
   if (value.empty())
     return;

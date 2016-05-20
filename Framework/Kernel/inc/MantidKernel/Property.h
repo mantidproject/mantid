@@ -131,7 +131,9 @@ public:
   void setBriefDocumentation(const std::string &documentation);
 
   virtual void saveProperty(::NeXus::File * /*file*/) {
-    throw std::runtime_error("not implemented");
+    throw std::invalid_argument("Property::saveProperty - Cannot save '" +
+                                this->name() +
+                                "', property type not implemented.");
   }
   /// Returns the value of the property as a string
   virtual std::string value() const = 0;
