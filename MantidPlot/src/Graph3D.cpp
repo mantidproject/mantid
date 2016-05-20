@@ -1905,8 +1905,6 @@ void Graph3D::print()
         printer.setOrientation(QPrinter::Portrait);
 	printer.setColorMode (QPrinter::Color);
 	printer.setFullPage(false);
-	//x approve this! @shahroz
-
 	QPrintDialog dialog;
 	if(dialog.exec()){
         QImage im = sp->grabFrameBuffer(true);

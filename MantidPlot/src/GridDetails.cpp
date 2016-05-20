@@ -105,7 +105,7 @@ GridDetails::GridDetails(ApplicationWindow* app, Graph* graph, int alignment, QW
   else
   {
     m_cmbGridAxis->addItem(tr("Left"));
-    m_cmbGridAxis->addItem(tr("Right")); //x use insertItem with diff param?
+    m_cmbGridAxis->addItem(tr("Right"));
     m_chkZeroLine = new QCheckBox(tr("Y=0"));
   }
   rightLayout->addWidget(m_cmbGridAxis, 4, 1);
