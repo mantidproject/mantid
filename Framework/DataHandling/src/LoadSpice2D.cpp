@@ -313,6 +313,8 @@ std::vector<int> LoadSpice2D::getData(const std::string &dataXpath = "//Data") {
 
   // let's see how many detectors we have
   std::vector<std::string> detectors = m_xmlHandler.get_subnodes(dataXpath);
+  g_log.debug() << "Number the detectors found in Xpath " << dataXpath << " = "
+                << detectors.size() << std::endl;
 
   // iterate every detector in the xml file
   for (const auto detector : detectors) {
@@ -322,20 +324,32 @@ std::vector<int> LoadSpice2D::getData(const std::string &dataXpath = "//Data") {
         m_xmlHandler.get_attributes_from_tag(detectorXpath);
     std::pair<int, int> dims = parseDetectorDimensions(attributes["type"]);
     totalDataSize += dims.first * dims.second;
+    g_log.debug() << "Parsing detector XPath " << detectorXpath
+                  << " with dimensions: " << dims.first << " x " << dims.second
+                  << " = " << dims.first * dims.second << std::endl;
 
     std::string data_str = m_xmlHandler.get_text_from_tag(detectorXpath);
+    g_log.debug() << "The size of detector contents (xpath = " << detectorXpath
+                  << ") is " << data_str.size() << " bytes." << std::endl;
     // convert string data into a vector<int>
     std::stringstream iss(data_str);
-    int number;
+    double number;
     while (iss >> number) {
-      data.push_back(number);
+      data.push_back(static_cast<int>(number));
     }
+    g_log.debug() << "Detector XPath: " << detectorXpath
+                  << " parsed. Total size of data processed up to now = "
+                  << data.size() << " from a total of " << totalDataSize
+                  << std::endl;
   }
 
-  if (data.size() != totalDataSize)
+  if (data.size() != totalDataSize) {
+    g_log.error() << "Total data size = " << totalDataSize
+                  << ". Parsed data size = " << data.size() << std::endl;
     throw Kernel::Exception::NotImplementedError(
         "Inconsistent data set: There were more data pixels found than "
         "declared in the Spice XML meta-data.");
+  }
   return data;
 }
 
