@@ -67,10 +67,9 @@ void ApplyPaalmanPings::run() {
   applyCorrAlg->initialize();
 
   // get Sample Workspace
-  QString sampleWsName = m_uiForm.dsSample->getCurrentDataName();
   MatrixWorkspace_sptr sampleWs =
       AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-          sampleWsName.toStdString());
+		  m_sampleWorkspaceName);
   m_originalSampleUnits = sampleWs->getAxis(0)->unit()->unitID();
 
   // If not in wavelength then do conversion
@@ -80,7 +79,7 @@ void ApplyPaalmanPings::run() {
     absCorProps["SampleWorkspace"] =
         addConvertUnitsStep(sampleWs, "Wavelength");
   } else {
-    absCorProps["SampleWorkspace"] = sampleWsName.toStdString();
+    absCorProps["SampleWorkspace"] = m_sampleWorkspaceName;
   }
 
   const bool useCan = m_uiForm.ckUseCan->isChecked();
@@ -88,18 +87,19 @@ void ApplyPaalmanPings::run() {
   const bool useCorrections = m_uiForm.ckUseCorrections->isChecked();
   // Get Can and Clone
   if (useCan) {
-    QString canWsName = m_uiForm.dsContainer->getCurrentDataName();
     MatrixWorkspace_sptr canWs =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
 			m_containerWorkspaceName);
-    m_containerWorkspaceName = canWsName.toStdString() + "_Shifted";
+    m_containerWorkspaceName = m_containerWorkspaceName + "_Shifted";
     IAlgorithm_sptr clone =
         AlgorithmManager::Instance().create("CloneWorkspace");
     clone->initialize();
     clone->setProperty("InputWorkspace", canWs);
     clone->setProperty("Outputworkspace", m_containerWorkspaceName);
     clone->execute();
-	MatrixWorkspace_sptr canCloneWs = clone->getProperty("OutputWorkspace");
+    MatrixWorkspace_sptr canCloneWs =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+            m_containerWorkspaceName);
     if (useShift) {
       IAlgorithm_sptr scaleX = AlgorithmManager::Instance().create("ScaleX");
       scaleX->initialize();
@@ -125,7 +125,7 @@ void ApplyPaalmanPings::run() {
       absCorProps["CanWorkspace"] =
           addConvertUnitsStep(canCloneWs, "Wavelength");
     } else {
-      absCorProps["CanWorkspace"] = canWsName.toStdString();
+      absCorProps["CanWorkspace"] = m_containerWorkspaceName;
     }
 
     bool useCanScale = m_uiForm.ckScaleCan->isChecked();
@@ -135,7 +135,8 @@ void ApplyPaalmanPings::run() {
     }
 
     if (useShift) {
-      addRebinStep(canCloneName, sampleWsName);
+      addRebinStep(QString::fromStdString(m_containerWorkspaceName),
+                   QString::fromStdString(m_sampleWorkspaceName));
     } else {
       // Check for same binning across sample and container
       if (!checkWorkspaceBinningMatches(sampleWs, canCloneWs)) {
@@ -148,7 +149,8 @@ void ApplyPaalmanPings::run() {
                                            QMessageBox::NoButton);
 
         if (result == QMessageBox::Yes) {
-          addRebinStep(canCloneName, sampleWsName);
+          addRebinStep(QString::fromStdString(m_containerWorkspaceName),
+                       QString::fromStdString(m_sampleWorkspaceName));
         } else {
           m_batchAlgoRunner->clearQueue();
           g_log.error("Cannot apply absorption corrections using a sample and "
@@ -207,9 +209,10 @@ void ApplyPaalmanPings::run() {
   }
 
   // Generate output workspace name
-  int nameCutIndex = sampleWsName.lastIndexOf("_");
+  auto QStrSampleWsName = QString::fromStdString(m_sampleWorkspaceName);
+  int nameCutIndex = QStrSampleWsName.lastIndexOf("_");
   if (nameCutIndex == -1)
-    nameCutIndex = sampleWsName.length();
+    nameCutIndex = QStrSampleWsName.length();
 
   QString correctionType;
   switch (m_uiForm.cbGeometry->currentIndex()) {
@@ -223,7 +226,7 @@ void ApplyPaalmanPings::run() {
     correctionType = "anl";
     break;
   }
-  QString outputWsName = sampleWsName.left(nameCutIndex);
+  QString outputWsName = QStrSampleWsName.left(nameCutIndex);
 
   // Using corrections
   if (m_uiForm.ckUseCorrections->isChecked()) {
@@ -234,17 +237,16 @@ void ApplyPaalmanPings::run() {
 
   // Using container
   if (m_uiForm.ckUseCan->isChecked()) {
-    auto containerWsName = m_uiForm.dsContainer->getCurrentDataName();
     MatrixWorkspace_sptr containerWs =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            containerWsName.toStdString());
+			m_containerWorkspaceName);
     auto run = containerWs->run();
     if (run.hasProperty("run_number")) {
       outputWsName +=
           "_" + QString::fromStdString(run.getProperty("run_number")->value());
     } else {
-      auto canCutIndex = containerWsName.indexOf("_");
-      outputWsName += "_" + containerWsName.left(canCutIndex);
+      auto canCutIndex = QString::fromStdString(m_containerWorkspaceName).indexOf("_");
+      outputWsName += "_" + QString::fromStdString(m_containerWorkspaceName).left(canCutIndex);
     }
   }
 
@@ -386,6 +388,9 @@ void ApplyPaalmanPings::postProcessComplete(bool error) {
 
   if (plotType == "Contour" || plotType == "Both")
     plot2D(QString::fromStdString(m_pythonExportWsName));
+
+  m_sampleWorkspaceName = m_uiForm.dsSample->getCurrentDataName();
+  m_containerWorkspaceName = m_uiForm.dsContainer->getCurrentDataName();
 }
 
 bool ApplyPaalmanPings::validate() {
@@ -405,7 +410,7 @@ bool ApplyPaalmanPings::validate() {
     uiv.checkDataSelectorIsValid("Container", m_uiForm.dsContainer);
 
     // Check can and sample workspaces are the same "type" (reduced or S(Q, w))
-    QString sample = m_uiForm.dsSample->getCurrentDataName();
+	QString sample = m_uiForm.dsSample->getCurrentDataName();
     QString sampleType =
         sample.right(sample.length() - sample.lastIndexOf("_"));
     QString container = m_uiForm.dsContainer->getCurrentDataName();
@@ -506,7 +511,7 @@ void ApplyPaalmanPings::plotPreview(int wsIndex) {
 
   // Plot sample
   m_uiForm.ppPreview->addSpectrum(
-      "Sample", m_uiForm.dsSample->getCurrentDataName(), wsIndex, Qt::black);
+      "Sample", QString::fromStdString(m_sampleWorkspaceName), wsIndex, Qt::black);
 
   // Plot result
   if (!m_pythonExportWsName.empty())
@@ -517,13 +522,13 @@ void ApplyPaalmanPings::plotPreview(int wsIndex) {
   // Scale can
   if (useCan) {
     if (m_uiForm.ckScaleCan->isChecked()) {
-      auto canName = m_uiForm.dsContainer->getCurrentDataName();
+      auto canName = m_containerWorkspaceName;
       if (m_uiForm.ckShiftCan->isChecked()) {
         canName += "_Shifted";
       }
       IAlgorithm_sptr scaleCan = AlgorithmManager::Instance().create("Scale");
       scaleCan->initialize();
-      scaleCan->setProperty("InputWorkspace", canName.toStdString());
+      scaleCan->setProperty("InputWorkspace", m_containerWorkspaceName);
       scaleCan->setProperty("OutputWorkspace", "__container_corrected");
       scaleCan->setProperty("Factor", m_uiForm.spCanScale->value());
       scaleCan->setProperty("Operation", "Multiply");
@@ -531,21 +536,9 @@ void ApplyPaalmanPings::plotPreview(int wsIndex) {
     }
 
     // Plot container
-    if (m_uiForm.ckScaleCan->isChecked()) {
-      m_uiForm.ppPreview->addSpectrum("Container", "__container_corrected",
-                                      wsIndex, Qt::red);
-    } else {
-      if (m_uiForm.ckShiftCan->isChecked()) {
-        m_uiForm.ppPreview->addSpectrum(
-            "Container",
-            (m_uiForm.dsContainer->getCurrentDataName() + "_Shifted"),
-            wsIndex, Qt::red);
-      } else {
-        m_uiForm.ppPreview->addSpectrum(
-            "Container", m_uiForm.dsContainer->getCurrentDataName(), wsIndex,
-            Qt::red);
-      }
-    }
+    m_uiForm.ppPreview->addSpectrum(
+        "Container", QString::fromStdString(m_containerWorkspaceName), wsIndex,
+        Qt::red);
   }
 }
 
