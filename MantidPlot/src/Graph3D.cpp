@@ -40,6 +40,7 @@
 #include <QMessageBox>
 #include <QFileDialog>
 #include <QPrinter>
+#include <QPrintDialog>
 #include <QClipboard>
 #include <QPixmap>
 #include <QBitmap>
@@ -102,11 +103,11 @@ Triple UserParametricSurface::operator()(double u, double v)
 		parser.DefineVar("u", &u);
 		parser.DefineVar("v", &v);
 
-		parser.SetExpr((const std::string)d_x_formula.ascii());
+		parser.SetExpr((const std::string)d_x_formula.toAscii());
 		x = parser.Eval();
-		parser.SetExpr((const std::string)d_y_formula.ascii());
+		parser.SetExpr((const std::string)d_y_formula.toAscii());
 		y = parser.Eval();
-		parser.SetExpr((const std::string)d_z_formula.ascii());
+		parser.SetExpr((const std::string)d_z_formula.toAscii());
 		z = parser.Eval();
 	}
 	catch(mu::ParserError &e){
@@ -575,20 +576,20 @@ void Graph3D::updateData(Table* table)
 		return;
 
 	QString name = plotAssociation;
-	int pos=name.find("_",0);
-	int posX=name.find("(",pos);
+	int pos=name.indexOf("_",0);
+	int posX=name.indexOf("(",pos);
 	QString xColName=name.mid(pos+1,posX-pos-1);
 
-	pos=name.find(",", posX);
-	posX=name.find("(", pos);
+	pos=name.indexOf(",", posX);
+	posX=name.indexOf("(", pos);
 	QString yColName=name.mid(pos+1, posX-pos-1);
 
 	int xCol=table->colIndex(xColName);
 	int yCol=table->colIndex(yColName);
 
-	if (name.contains("(Z)", true)) {
-		pos=name.find(",", posX);
-		posX=name.find("(", pos);
+	if (name.contains("(Z)", Qt::CaseSensitive)) {
+		pos=name.indexOf(",", posX);
+		posX=name.indexOf("(", pos);
 		QString zColName=name.mid(pos+1, posX-pos-1);
 		int zCol=table->colIndex(zColName);
 		resetNonEmptyStyle();
@@ -834,7 +835,7 @@ void Graph3D::setTickLengths(const QStringList& lst)
 	double majorl, minorl;
 	QStringList tick_length = lst;
 	if (static_cast<int>(lst.count()) > 6)
-		tick_length.remove(tick_length.first());
+		tick_length.removeAll(tick_length.first());
 
 	majorl=tick_length[0].toDouble();
 	minorl=tick_length[1].toDouble();
@@ -1333,24 +1334,24 @@ void Graph3D::setScales(double xl, double xr, double yl, double yr, double zl, d
     } else if (d_table){
 		QString name = plotAssociation;
 
-		int pos = name.find("_", 0);
-		int posX = name.find("(", pos);
+		int pos = name.indexOf("_", 0);
+		int posX = name.indexOf("(", pos);
 		QString xColName = name.mid(pos+1, posX-pos-1);
 		int xCol = d_table->colIndex(xColName);
 
-		pos = name.find(",", posX);
-		posX = name.find("(", pos);
+		pos = name.indexOf(",", posX);
+		posX = name.indexOf("(", pos);
 		QString yColName = name.mid(pos+1, posX-pos-1);
 		int yCol = d_table->colIndex(yColName);
 
-		if (name.endsWith("(Z)",true)){
-			pos = name.find(",",posX);
-			posX = name.find("(",pos);
+		if (name.endsWith("(Z)", Qt::CaseSensitive)){
+			pos = name.indexOf(",",posX);
+			posX = name.indexOf("(",pos);
 			QString zColName = name.mid(pos+1,posX-pos-1);
 			int zCol = d_table->colIndex(zColName);
 
 			loadData(d_table, xCol, yCol, zCol, xl, xr, yl, yr, zl, zr);
-		} else if (name.endsWith("(Y)",true))
+		} else if (name.endsWith("(Y)", Qt::CaseSensitive))
 			updateScales(xl, xr, yl, yr, zl, zr, xCol, yCol);
 	}
     resetAxesLabels();
@@ -1612,22 +1613,22 @@ void Graph3D::setColors(const QStringList& colors)
 void Graph3D::scaleFonts(double factor)
 {
 	QFont font = sp->coordinates()->axes[X1].numberFont();
-	font.setPointSizeFloat(font.pointSizeFloat()*factor);
+	font.setPointSizeF(font.pointSizeFloat()*factor);
 	sp->coordinates()->setNumberFont (font);
 
-	titleFnt.setPointSizeFloat(factor*titleFnt.pointSizeFloat());
+	titleFnt.setPointSizeF(factor*titleFnt.pointSizeFloat());
 	sp->setTitleFont(titleFnt.family(),titleFnt.pointSize(),titleFnt.weight(),titleFnt.italic());
 
 	font = xAxisLabelFont();
-	font.setPointSizeFloat(factor*font.pointSizeFloat());
+	font.setPointSizeF(factor*font.pointSizeFloat());
 	setXAxisLabelFont(font);
 
 	font = yAxisLabelFont();
-	font.setPointSizeFloat(factor*font.pointSizeFloat());
+	font.setPointSizeF(factor*font.pointSizeFloat());
 	setYAxisLabelFont(font);
 
 	font = zAxisLabelFont();
-	font.setPointSizeFloat(factor*font.pointSizeFloat());
+	font.setPointSizeF(factor*font.pointSizeFloat());
 	setZAxisLabelFont(font);
 }
 
@@ -1904,7 +1905,10 @@ void Graph3D::print()
         printer.setOrientation(QPrinter::Portrait);
 	printer.setColorMode (QPrinter::Color);
 	printer.setFullPage(false);
-	if (printer.setup()){
+	//x approve this! @shahroz
+
+	QPrintDialog dialog;
+	if(dialog.exec()){
         QImage im = sp->grabFrameBuffer(true);
         QPainter paint(&printer);
         paint.drawImage(printer.pageRect(), im);
@@ -1932,7 +1936,7 @@ void Graph3D::exportImage(const QString& fileName, int quality, bool transparent
 
 		QColor background = QColor (Qt::white);
 		QRgb backgroundPixel = background.rgb ();
-		QImage image = pic.convertToImage();
+		QImage image = pic.toImage();
 		for (int y=0; y<image.height(); y++){
 			for ( int x=0; x<image.width(); x++ ){
 				QRgb rgb = image.pixel(x, y);

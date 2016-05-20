@@ -286,7 +286,7 @@ public slots:
   //! Map curve pointer to index.
   int curveIndex(QwtPlotCurve *c) const;
   //! map curve title to index
-  int curveIndex(const QString &title){return plotItemsList().findIndex(title);}
+  int curveIndex(const QString &title){return plotItemsList().indexOf(title);}
   //! get curve by index
   QwtPlotCurve* curve(int index);
   //! get curve by name
