@@ -98,14 +98,14 @@ GridDetails::GridDetails(ApplicationWindow* app, Graph* graph, int alignment, QW
   m_cmbGridAxis = new QComboBox();
   if (m_alignment == 1)
   {
-    m_cmbGridAxis->insertItem(tr("Bottom"));
-    m_cmbGridAxis->insertItem(tr("Top"));
+    m_cmbGridAxis->addItem(tr("Bottom"));
+    m_cmbGridAxis->addItem(tr("Top"));
     m_chkZeroLine = new QCheckBox(tr("X=0"));
   }
   else
   {
-    m_cmbGridAxis->insertItem(tr("Left"));
-    m_cmbGridAxis->insertItem(tr("Right"));
+    m_cmbGridAxis->addItem(tr("Left"));
+    m_cmbGridAxis->addItem(tr("Right")); //x use insertItem with diff param?
     m_chkZeroLine = new QCheckBox(tr("Y=0"));
   }
   rightLayout->addWidget(m_cmbGridAxis, 4, 1);
@@ -153,7 +153,7 @@ void GridDetails::initWidgets()
       m_dspnWidthMajor->setValue(majPenX.widthF());
 
       QPen minPenX = grd->minPenX();
-      m_cmbTypeMinor->setCurrentItem(minPenX.style() - 1);
+      m_cmbTypeMinor->setCurrentIndex(minPenX.style() - 1);
       m_cboxColorMinor->setColor(minPenX.color());
       m_dspnWidthMinor->setValue(minPenX.widthF());
 
@@ -171,7 +171,7 @@ void GridDetails::initWidgets()
       m_dspnWidthMajor->setValue(majPenY.widthF());
 
       QPen minPenY = grd->minPenY();
-      m_cmbTypeMinor->setCurrentItem(minPenY.style() - 1);
+      m_cmbTypeMinor->setCurrentIndex(minPenY.style() - 1);
       m_cboxColorMinor->setColor(minPenY.color());
       m_dspnWidthMinor->setValue(minPenY.widthF());
 

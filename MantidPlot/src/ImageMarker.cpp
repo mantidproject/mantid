@@ -39,7 +39,9 @@ ImageMarker::ImageMarker(const QString& fn):
 	QList<QByteArray> lst = QImageReader::supportedImageFormats();
 	for (int i=0; i<(int)lst.count(); i++){
 		if (fn.contains("." + lst[i])){
-			d_pic.load(fn, lst[i], QPixmap::Auto);
+			//+ d_pic.load(fn, lst[i], QPixmap::Auto); review required
+			d_pic.load(fn, lst[i], Qt::ImageConversionFlag::AutoColor);
+
 			d_size = d_pic.size();
 			d_file_name = fn;
 			break;

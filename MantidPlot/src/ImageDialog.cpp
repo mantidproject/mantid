@@ -35,7 +35,7 @@
 ImageDialog::ImageDialog( QWidget* parent, Qt::WFlags fl )
   : QDialog( parent, fl ), aspect_ratio(1.)
 {
-	setName( "ImageDialog" );
+	setObjectName( "ImageDialog" );
 	setWindowTitle( tr( "MantidPlot - Image Geometry" ) );
 
 	QGroupBox *gb1 = new QGroupBox(tr("Origin"));
