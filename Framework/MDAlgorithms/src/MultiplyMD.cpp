@@ -85,8 +85,8 @@ void MultiplyMD::execEventScalar(typename MDEventWorkspace<MDE, nd>::sptr ws) {
         // Multiply weight by a scalar, propagating error
         float oldSignal = it->getSignal();
         float signal = oldSignal * scalar;
-        float errorSquared =
-            scalarSquared * it->getErrorSquared() + oldSignal * oldSignal * scalarErrorSquared;
+        float errorSquared = scalarSquared * it->getErrorSquared() +
+                             oldSignal * oldSignal * scalarErrorSquared;
         it->setSignal(signal);
         it->setErrorSquared(errorSquared);
       }

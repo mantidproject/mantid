@@ -86,7 +86,8 @@ void DivideMD::execEventScalar(typename MDEventWorkspace<MDE, nd>::sptr ws) {
         float signal = oldSignal / scalar;
         float errorSquared =
             it->getErrorSquared() / scalarSquared +
-            scalarErrorSquared *oldSignal * oldSignal / (scalarSquared * scalarSquared);
+            scalarErrorSquared *oldSignal * oldSignal /
+                (scalarSquared * scalarSquared);
         it->setSignal(signal);
         it->setErrorSquared(errorSquared);
         ic++;
