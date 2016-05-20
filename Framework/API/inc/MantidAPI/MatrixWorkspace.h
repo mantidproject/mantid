@@ -345,15 +345,6 @@ public:
     getSpectrum(index)->setData(Y, E);
   }
 
-  /** Sets the data in the workspace
-  @param index :: the workspace index to set.
-  @param Y :: Y vector
-  @param E :: Error vector   */
-  virtual void setData(const std::size_t index, const MantidVecPtr::ptr_type &Y,
-                       const MantidVecPtr::ptr_type &E) {
-    getSpectrum(index)->setData(Y, E);
-  }
-
   /**
    * Probes if DX (X Error) values were set on a particular spectrum
    * @param index: the workspace index

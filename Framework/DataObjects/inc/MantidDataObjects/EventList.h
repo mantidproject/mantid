@@ -212,15 +212,6 @@ public:
                const MantidVecPtr & /*E*/) override {
     throw std::runtime_error("EventList: cannot set Y or E data directly.");
   }
-  /// Disallowed data accessors - can't modify Y/E on a EventList
-  void setData(const MantidVecPtr::ptr_type & /*Y*/) override {
-    throw std::runtime_error("EventList: cannot set Y or E data directly.");
-  }
-  /// Disallowed data accessors - can't modify Y/E on a EventList
-  void setData(const MantidVecPtr::ptr_type & /*Y*/,
-               const MantidVecPtr::ptr_type & /*E*/) override {
-    throw std::runtime_error("EventList: cannot set Y or E data directly.");
-  }
 
   /// Disallowed data accessors - can't modify Y/E on a EventList
   MantidVec &dataY() override {

@@ -65,10 +65,6 @@ public:
   virtual void setData(const MantidVecPtr &Y) = 0;
   virtual void setData(const MantidVecPtr &Y, const MantidVecPtr &E) = 0;
 
-  virtual void setData(const MantidVecPtr::ptr_type &Y) = 0;
-  virtual void setData(const MantidVecPtr::ptr_type &Y,
-                       const MantidVecPtr::ptr_type &E) = 0;
-
   virtual void clearData() = 0;
 
   virtual MantidVec &dataY() = 0;

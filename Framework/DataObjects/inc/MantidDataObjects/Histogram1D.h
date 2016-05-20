@@ -66,15 +66,6 @@ public:
     refE = E;
   }
 
-  /// Sets the data.
-  void setData(const MantidVecPtr::ptr_type &Y) override { refY = Y; }
-  /// Sets the data and errors
-  void setData(const MantidVecPtr::ptr_type &Y,
-               const MantidVecPtr::ptr_type &E) override {
-    refY = Y;
-    refE = E;
-  }
-
   /// Zero the data (Y&E) in this spectrum
   void clearData() override;
 

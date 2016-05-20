@@ -69,15 +69,6 @@ public:
     data_E.assign(E->begin(), E->end());
   }
 
-  void setData(const MantidVecPtr::ptr_type &Y) override {
-    data.assign(Y->begin(), Y->end());
-  }
-  void setData(const MantidVecPtr::ptr_type &Y,
-               const MantidVecPtr::ptr_type &E) override {
-    data.assign(Y->begin(), Y->end());
-    data_E.assign(E->begin(), E->end());
-  }
-
   MantidVec &dataY() override { return data; }
   MantidVec &dataE() override { return data_E; }
 
