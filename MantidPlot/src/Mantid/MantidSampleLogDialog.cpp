@@ -7,19 +7,12 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/ArrayProperty.h"
 
-#include <QTreeWidgetItem>
-#include <QTreeWidget>
 #include <QHeaderView>
-#include <QPushButton>
-#include <QHBoxLayout>
-#include <QVBoxLayout>
 #include <QFormLayout>
 #include <QMenu>
-#include <QAction>
 #include <QGroupBox>
 #include <QRadioButton>
 #include <QFileInfo>
-#include <QMessageBox>
 #include <sstream>
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/MultipleExperimentInfos.h"
@@ -41,9 +34,11 @@ using namespace Mantid::Kernel;
 *        ExperimentInfo objects. Should only be non-zero for MDWorkspaces.
 */
 MantidSampleLogDialog::MantidSampleLogDialog(const QString & wsname, MantidUI* mui, Qt::WFlags flags, size_t experimentInfoIndex)  :
-  QDialog(mui->appWindow(), flags), m_wsname(wsname), m_experimentInfoIndex(experimentInfoIndex), m_mantidUI(mui)
+  QDialog(mui->appWindow(), flags), m_wsname(wsname.toStdString()), m_experimentInfoIndex(experimentInfoIndex), m_mantidUI(mui)
 {
-  setWindowTitle(tr("MantidPlot - " + wsname + " sample logs"));
+  std::stringstream ss;
+  ss << "MantidPlot - " << wsname.toStdString().c_str() << " sample logs";
+  setWindowTitle(QString::fromStdString(ss.str()));
 
   m_tree = new QTreeWidget;
   QStringList titles;
@@ -110,8 +105,8 @@ MantidSampleLogDialog::MantidSampleLogDialog(const QString & wsname, MantidUI* m
       QHBoxLayout * numSelectorLayout = new QHBoxLayout;
       QLabel * lbl = new QLabel("Experiment Info #");
       m_spinNumber = new QSpinBox;
-      m_spinNumber->setMinValue(0);
-      m_spinNumber->setMaxValue(int(mei->getNumExperimentInfo())-1);
+      m_spinNumber->setMinimum(0);
+      m_spinNumber->setMaximum(int(mei->getNumExperimentInfo())-1);
       m_spinNumber->setValue(int(m_experimentInfoIndex));
       numSelectorLayout->addWidget(lbl);
       numSelectorLayout->addWidget(m_spinNumber);

@@ -98,7 +98,9 @@ LineViewer::LineViewer(QWidget *parent)
   m_plotLayout = new QVBoxLayout(ui.frmPlot);
   m_plot = new QwtPlot();
   m_plot->autoRefresh();
-  m_plot->setBackgroundColor(QColor(255, 255, 255)); // White background
+  QPalette palette;
+  palette.setColor(m_plot->backgroundRole(), QColor(255, 255, 255));
+  m_plot->setPalette(palette);
   m_plotLayout->addWidget(m_plot, 1);
 
   // Make the 2 curves

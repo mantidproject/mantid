@@ -70,7 +70,7 @@ void LineProfileTool::calculateLineProfile(const QPoint& start, const QPoint& en
 
 	QPoint o = d_target->origin();
 	QPixmap pic = d_target->pixmap();
-	QImage image = pic.convertToImage();
+	QImage image = pic.toImage();
 
 	int x1 = start.x()-o.x();
 	int x2 = end.x()-o.x();

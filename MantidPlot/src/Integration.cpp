@@ -52,8 +52,8 @@ d_variable(var)
 
 	MyParser parser;
 	double x = 0.0;
-	parser.DefineVar(d_variable.ascii(), &x);
-	parser.SetExpr(d_formula.ascii());
+	parser.DefineVar(d_variable.latin1(), &x);
+	parser.SetExpr(d_formula.latin1());
 	try {
 		parser.Eval();
 	} catch(mu::ParserError &e) {
@@ -121,8 +121,8 @@ double Integration::trapezf(int n)
 {
     MyParser parser;
 	double x = d_from;
-	parser.DefineVar(d_variable.ascii(), &x);
-	parser.SetExpr(d_formula.ascii());
+	parser.DefineVar(d_variable.latin1(), &x);
+	parser.SetExpr(d_formula.latin1());
 
     static double s;
     if (n == 1){
