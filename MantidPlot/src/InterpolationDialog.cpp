@@ -119,7 +119,7 @@ double from, to;
 try
 	{
 	MyParser parser;
-	parser.SetExpr(boxStart->text().replace(",", ".").latin1());
+	parser.SetExpr(boxStart->text().replace(",", ".").toAscii());
 	from = parser.Eval();
 	}
 catch(mu::ParserError &e)
@@ -132,7 +132,7 @@ catch(mu::ParserError &e)
 try
 	{
 	MyParser parser;
-	parser.SetExpr(boxEnd->text().replace(",", ".").latin1());
+	parser.SetExpr(boxEnd->text().replace(",", ".").toAscii());
 	to = parser.Eval();
 	}
 catch(mu::ParserError &e)
