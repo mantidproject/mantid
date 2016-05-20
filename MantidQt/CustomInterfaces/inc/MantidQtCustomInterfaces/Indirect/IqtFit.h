@@ -39,6 +39,7 @@ private slots:
   void backgroundSelected(double val);
   void propertyChanged(QtProperty *, double);
   void checkBoxUpdate(QtProperty *prop, bool checked);
+  void plotGuessChanged(bool);
   void singleFit();
   void plotGuess(QtProperty *);
   void fitContextMenu(const QPoint &);
@@ -59,6 +60,7 @@ private:
   void constrainIntensities(Mantid::API::CompositeFunction_sptr func);
   QString minimizerString(QString outputName) const;
   std::string constructBaseName(const std::string &inputName,
+                                const std::string &fitType, const bool &multi,
                                 const long &specMin, const long &specMax);
   void plotWorkspace();
   void saveResult();

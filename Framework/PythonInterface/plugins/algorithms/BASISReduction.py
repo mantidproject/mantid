@@ -27,7 +27,6 @@ class BASISReduction(PythonAlgorithm):
     _dMask = None
 
     # class variables related to division by Vanadium (normalization)
-    _doNorm = None  # stores the selected item from normalization_types
     _normRange = None
     _norm_run_list = None
     _normWs = None
@@ -39,6 +38,11 @@ class BASISReduction(PythonAlgorithm):
     _samWsRun = None
     _samSqwWs = None
 
+    def __init__(self):
+        PythonAlgorithm.__init__(self)
+        self._doNorm = None  # stores the selected item from normalization_types
+        self._normalizeToFirst = False
+
     def category(self):
         return "Inelastic\\Reduction"
 
@@ -49,7 +53,7 @@ class BASISReduction(PythonAlgorithm):
         return 1
 
     def summary(self):
-        return "This algorithm is meant to temporarily deal with letting BASIS reduce lots of files via Mantid."
+        return "Multiple-file BASIS reduction."
 
     def PyInit(self):
         self._short_inst = "BSS"
@@ -76,6 +80,8 @@ class BASISReduction(PythonAlgorithm):
         self.declareProperty("GroupDetectors", "None",
                              StringListValidator(grouping_type),
                              "Switch for grouping detectors")
+
+        self.declareProperty("NormalizeToFirst", False, "Normalize spectra to intensity of spectrum with lowest Q?")
 
         # Properties setting the division by vanadium
         titleDivideByVanadium = "Normalization by Vanadium"
@@ -111,6 +117,9 @@ class BASISReduction(PythonAlgorithm):
         self._noMonNorm = self.getProperty("NoMonitorNorm").value
         self._maskFile = self.getProperty("MaskFile").value
         self._groupDetOpt = self.getProperty("GroupDetectors").value
+        self._normalizeToFirst = self.getProperty("NormalizeToFirst").value
+        self._normalizeToVanadium = self.getProperty("GroupDetectors").value
+        self._doNorm = self.getProperty("DivideByVanadium").value
 
         datasearch = config["datasearch.searcharchive"]
         if datasearch != "On":
@@ -133,8 +142,9 @@ class BASISReduction(PythonAlgorithm):
         ############################
         ##  Process the Vanadium  ##
         ############################
+
         norm_runs = self.getProperty("NormRunNumbers").value
-        if bool(norm_runs):
+        if self._doNorm and bool(norm_runs):
             if ";" in norm_runs:
                 raise SyntaxError("Normalization does not support run groups")
             self._doNorm = self.getProperty("NormalizationType").value
@@ -191,7 +201,8 @@ class BASISReduction(PythonAlgorithm):
             # involving this S(Q,w)
             api.ClearMaskFlag(Workspace=self._samSqwWs)
             # Scale so that elastic line has Y-values ~ 1
-            self._ScaleY(self._samSqwWs)
+            if self._normalizeToFirst:
+                self._ScaleY(self._samSqwWs)
             # Output Dave and Nexus files
             extension = "_divided.dat" if self._doNorm else ".dat"
             dave_grp_filename = self._makeRunName(self._samWsRun,

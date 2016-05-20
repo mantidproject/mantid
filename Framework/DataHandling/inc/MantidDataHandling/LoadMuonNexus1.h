@@ -120,7 +120,9 @@ private:
                       std::vector<double> deadTimes);
 
   /// Loads detector grouping information
-  API::Workspace_sptr loadDetectorGrouping(Mantid::NeXus::NXRoot &root);
+  API::Workspace_sptr
+  loadDetectorGrouping(Mantid::NeXus::NXRoot &root,
+                       Mantid::Geometry::Instrument_const_sptr inst);
 
   /// Creates Detector Grouping Table using all the data from the range
   DataObjects::TableWorkspace_sptr

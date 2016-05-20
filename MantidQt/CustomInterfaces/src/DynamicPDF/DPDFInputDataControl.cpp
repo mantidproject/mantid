@@ -27,6 +27,7 @@ namespace DynamicPDF {
  */
 InputDataControl::InputDataControl() :
   m_workspace(),
+  m_selectedWorkspaceIndex{0},
   m_domain() {
   this->observePreDelete(true); // Subscribe to notifications
 }

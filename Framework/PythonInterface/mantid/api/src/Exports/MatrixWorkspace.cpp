@@ -253,9 +253,8 @@ void export_MatrixWorkspace() {
       .def("setYUnit", &MatrixWorkspace::setYUnit,
            (arg("self"), arg("newUnit")),
            "Sets a new unit for the data (Y axis) in the workspace")
-      .def("setDistribution", (bool &(MatrixWorkspace::*)(const bool)) &
-                                  MatrixWorkspace::isDistribution,
-           (arg("self"), arg("newVal")), return_value_policy<return_by_value>(),
+      .def("setDistribution", &MatrixWorkspace::setDistribution,
+           (arg("self"), arg("newVal")),
            "Set distribution flag. If True the workspace has been divided by "
            "the bin-width.")
       .def("replaceAxis", &MatrixWorkspace::replaceAxis,

@@ -1171,12 +1171,22 @@ void LoadEventNexus::init() {
                                            Direction::Input),
       "If present, load the monitors as events. '''WARNING:''' WILL "
       "SIGNIFICANTLY INCREASE MEMORY USAGE (optional, default False). ");
-  declareProperty(make_unique<PropertyWithValue<bool>>("LoadEventMonitors",
-                                                       true, Direction::Input),
-                  "blablabla");
-  declareProperty(make_unique<PropertyWithValue<bool>>("LoadHistoMonitors",
-                                                       true, Direction::Input),
-                  "blablabla");
+
+  declareProperty("LoadEventMonitors", true,
+                  "Load event monitor in NeXus file both event monitor and "
+                  "histogram monitor found in NeXus file."
+                  "If both of LoadEventMonitor and LoadHistoMonitor are true, "
+                  "or both of them are false,"
+                  "then it is in the auto mode such that any existing monitor "
+                  "will be loaded.");
+
+  declareProperty("LoadHistoMonitors", true,
+                  "Load histogram monitor in NeXus file both event monitor and "
+                  "histogram monitor found in NeXus file."
+                  "If both of LoadEventMonitor and LoadHistoMonitor are true, "
+                  "or both of them are false,"
+                  "then it is in the auto mode such that any existing monitor "
+                  "will be loaded.");
 
   declareProperty(make_unique<PropertyWithValue<double>>(
                       "FilterMonByTofMin", EMPTY_DBL(), Direction::Input),

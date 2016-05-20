@@ -107,8 +107,10 @@ class ComputeIncoherentDOS(PythonAlgorithm):
         mev2k = (constants.elementary_charge / 1000) / constants.k
 
         # Converts energy to meV for bose factor later
+        input_en_in_meV = 1
         if u0 == 'DeltaE_inWavenumber' or u1 == 'DeltaE_inWavenumber':
             en = en / mev2cm
+            input_en_in_meV = 0
 
         # Checks energy bins are ok.
         if EnergyBinning.count(',') != 2:
@@ -119,7 +121,7 @@ class ComputeIncoherentDOS(PythonAlgorithm):
             ei = max(en)
         try:
             # Do this in a function to make sure no other variables can be evaluated other than Emin, Emax and Ei.
-            if cm:
+            if not input_en_in_meV:
                 dosebin = evaluateEbin(min(en*mev2cm), max(en*mev2cm), ei*mev2cm, EnergyBinning)
             else:
                 dosebin = evaluateEbin(min(en), max(en), ei, EnergyBinning)
@@ -141,6 +143,9 @@ class ComputeIncoherentDOS(PythonAlgorithm):
         DWF = np.exp(-2*(qqgrid**2*msd))
         idm = np.where(engrid < 0)
         idp = np.where(engrid >= 0)
+        # The expression for the population (Bose) factor and phonon energy dependence below actually refer to the phonon
+        # energy (always defined to be positive) rather than the neutron energy transfer. So we need the absolute value here
+        engrid = np.abs(engrid)
         expm = np.exp(-engrid[idm]*mev2k/Temperature)
         expp = np.exp(-engrid[idp]*mev2k/Temperature)
         Bose = DWF*0
@@ -165,7 +170,6 @@ class ComputeIncoherentDOS(PythonAlgorithm):
 
         # Convert to wavenumbers if requested (y-axis is in mbarns/sr/fu/meV -> mb/sr/fu/cm^-1)
         if cm:
-            en = en*mev2cm
             y = y/mev2cm
             e = e/mev2cm
             yunit = 'DeltaE_inWavenumber'
@@ -183,7 +187,12 @@ class ComputeIncoherentDOS(PythonAlgorithm):
 
         # Make a 1D (energy dependent) cut
         dos1d = Rebin2D(dos2d, [dq[0], dq[1]-dq[0], dq[1]], dosebin, True, True)
-        dos1d.setYUnit(yunit)
+        if cm and input_en_in_meV:
+            dos1d.getAxis(0).setUnit('DeltaE_inWavenumber')
+            dos1d = ScaleX(dos1d, mev2cm)
+        elif not cm and not input_en_in_meV:
+            dos1d.getAxis(0).setUnit('DeltaE')
+            dos1d = ScaleX(dos1d, 1/mev2cm)
 
         if absunits:
             print "Converting to states/energy"

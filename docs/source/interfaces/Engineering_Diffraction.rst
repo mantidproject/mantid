@@ -39,6 +39,7 @@ RB Number
   likely because the file specified has not been found. Error message
   can be viewed by hovering over the red star sign.
 
+.. _ui engineering calibration:
 
 Calibration
 -----------
@@ -46,9 +47,19 @@ Calibration
 This tab provides a graphical interface to calculate calibrations and
 visualize them.
 
-It is possible to load an existing calibration (as a CSV file) and to
-generate a new calibration file (which becomes the new current
-calibration).
+It is possible to
+- generate a new calibration file (which becomes the new current
+  calibration)
+- load an existing calibration from a GSAS instrument
+  parameters file previously generated
+
+For the current calibration, the following parameters are displayed:
+the vanadium run number, the calibration sample run number, and the
+path to the output calibration file. This output calibration file is a
+GSAS instrument parameters file (IPARM/PAR/PRM). The interface
+produces a "all_banks" calibration file and in addition a calibration
+file for every individual bank. All the calibration files are writen
+in the same directory.
 
 With the help of Cropped Calibration user can also calibrate according
 to bank or by setting the Spectrum Numbers once the Cropped Calibration group
@@ -275,7 +286,8 @@ background fit peaks in those areas using a peak fitting function.
 
 To use the Fitting tab, user is required to provide:
 
-1. A focused file as Focus Run input by browsing or entering run number
+1. A focused file as Focus Run input by browsing or entering single/multi
+   run number
 2. List of expected peaks which can be either by browsing a (*CSV*) file
    or entering within the text-field simply click on the Fit button.
 
@@ -286,15 +298,19 @@ These parameters are required to process Fitting successfully:
 
 Focused Run #:
   Focused workspace directory or selected with the help of browse button.
-  User may also select the file by simply entering the file run number,
-  which is located within the focused output directory.
+  User may also select the file/s by simply entering the file run number
+  or a range of consecutive run number separated by dash (`-`), for
+  example: "194547-194550" or "241391-241399". It is  compulsory for
+  these file/s to be located within the focused output directory.
   Focused workspace can be generated with the help of
   :ref:`focus-Engineering_Diffraction-ref` tab, the output folder
   directory can be set in the :ref:`setting-Engineering_Diffraction-ref`
   tab under the *Focusing settings* section.
-  The interface will automatically select all the bank files found with the
-  same run-number and update the Plot Bank combo-box and Bank list
-  accordingly.
+  When a valid range of consecutive run numbers is given, the interface will
+  automatically import and add the run number/s to the list on the right side
+  of the graph, from where each run number can be selected from by click on it.
+  The interface will then automatically update the Plot Bank combo-box
+  according to the bank files found for each entered/selected run-number.
 
 .. _ExpectedPeaks-Engineering_Diffraction-ref:
 
@@ -314,9 +330,9 @@ Output
 
 Once the Fit button has been clicked, wait until the Fitting process has
 completed and upon completion you should be able to view on the Fitting
-tab plots the focused workspace in the background in black, whereas the
-expected peaks plotted in various colours over lapping the focused
-workspace peaks.
+tab; the focused workspace plotted in the background in grey crosses.
+Whereas the expected peaks plotted in various colours over lapping the
+focused workspace peaks.
 
 Within the :ref:`Preview-Engineering_Diffraction-ref` section user is
 able to zoom-in or zoom-out as well as select, add and save peaks.
@@ -337,7 +353,10 @@ Preview
 ^^^^^^^
 Once the fitting process has completed and you are able to view a
 focused workspace with listed expected peaks on the data plot, Select
-Peak button should should also be enabled.
+Peak button should should also be enabled. If the fitting fails with
+the given peaks then the focused workspace will still be plotted so
+that user can select peaks manually.
+
 By clicking Select Peak button the peak picker tool can be activated.
 To select a peak simply hold *Shift* key and left-click on the graph
 near the peak's center.
@@ -350,9 +369,14 @@ the plot.
 
 When user is satisfied with the center position of the peak, you may
 add the selected peak to :ref:`ExpectedPeaks-Engineering_Diffraction-ref`
-list by clicking Add Peak button. User may rerun Fit process with
-the new selected peaks or save the peaks list as *CSV* file by clicking
-Save Peak List button.
+list by clicking Add Peak button. User may rerun Fit process by
+clearing peaks list using Clear button and manually selecting peaking
+using Select Peak button or instead Save the peaks list in *CSV* file
+by clicking Save button.
+
+User may plot single peak fitting workspace in separate window by using
+Plot To Separate Window button, if the *engggui_fitting_single_peaks*
+is available.
 
 .. _setting-Engineering_Diffraction-ref:
 
@@ -397,8 +421,9 @@ Force recalculate
   that calculate the corrections
 
 Template .prm file
-  By changing this option you can Use a different template file for the
-  output GSAS IPAR that is generated in the Calibration tab.
+  By changing this option you can Use a different template file for
+  the output GSAS IPAR/PAR/PRM that is generated in the Calibration
+  tab.
 
 Rebin for Calibrate
   This sets a rebin width parameter that can be used by underlying

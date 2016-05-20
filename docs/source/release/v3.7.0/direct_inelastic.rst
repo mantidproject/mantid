@@ -9,6 +9,7 @@ Improvements
 ------------
 
 - New CNCS formula to calculate T0 accounts for different phasing of the choppers since August 2015
+- The documentation for all calibration approaches, including PSD tube calibration has been pulled together :ref:`here<Calibration>`
 
 `Full list of changes on GitHub <http://github.com/mantidproject/mantid/pulls?q=is%3Apr+milestone%3A%22Release+3.7%22+is%3Amerged+label%3A%22Component%3A+Direct+Inelastic%22>`_
 

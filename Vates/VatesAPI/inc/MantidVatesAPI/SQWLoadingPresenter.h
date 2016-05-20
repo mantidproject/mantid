@@ -44,7 +44,7 @@ namespace Mantid
               ProgressAction &rebinningProgressUpdate,
               ProgressAction &drawingProgressUpdate) override;
       void
-      extractMetadata(Mantid::API::IMDEventWorkspace_sptr eventWs) override;
+      extractMetadata(const Mantid::API::IMDEventWorkspace &eventWs) override;
       void executeLoadMetadata() override;
       ~SQWLoadingPresenter() override;
       bool canReadFile() const override;

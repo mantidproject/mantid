@@ -64,19 +64,19 @@ public:
   /// Update the algorithm progress.
   void updateAlgorithmProgress(double, const std::string& message);
   /// Getter for the input geometry xml
-  const char* GetInputGeometryXML();
+  std::string GetInputGeometryXML();
   /// Getter for the special coodinate value
   int GetSpecialCoordinates();
   /// Getter for the workspace name
-  const char* GetWorkspaceName();
+  const std::string &GetWorkspaceName();
   /// Getter for the workspace type
-  const char *GetWorkspaceTypeName();
+  std::string GetWorkspaceTypeName();
   /// Getter for the minimum value of the workspace data.
   double GetMinValue();
   /// Getter for the maximum value of the workspace data.
   double GetMaxValue();
   /// Getter for the instrument associated with the workspace data.
-  const char* GetInstrument();
+  std::string GetInstrument();
 
 protected:
   vtkMDEWSource();
@@ -99,9 +99,6 @@ private:
 
   /// MVP presenter.
   std::unique_ptr<Mantid::VATES::MDLoadingPresenter> m_presenter;
-
-  /// Cached typename.
-  std::string typeName;
 
   /// Normalization option
   Mantid::VATES::VisualNormalization m_normalization;

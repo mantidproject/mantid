@@ -67,10 +67,9 @@ template <> inline std::string toString(const std::string &value) {
 /// Convert a sequence of values to a string for printing
 template <typename SequenceType, typename ElementType>
 std::string toString(const SequenceType &values) {
-  typename SequenceType::const_iterator iend = values.end();
+  auto iend = values.end();
   std::ostringstream os;
-  for (typename SequenceType::const_iterator itr = values.begin();
-       itr != iend;) {
+  for (auto itr = values.begin(); itr != iend;) {
     os << toString(*itr);
     if (++itr != iend) {
       os << ",";
@@ -130,12 +129,7 @@ template <typename ElementType> struct std_set_exporter {
       PyErr_SetString(PyExc_IndexError, "Index out of range");
       boost::python::throw_error_already_set();
     }
-    typename w_t::const_iterator p = self.begin();
-    while (i > 0) {
-      p++;
-      i--;
-    }
-    return *p;
+    return *std::next(self.begin(), i);
   }
 
   static boost::python::tuple getinitargs(w_t const &self) {

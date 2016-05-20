@@ -206,7 +206,7 @@ if (COVERALLS)
         endforeach()
         #remove initial \n
         string(SUBSTRING ${SRCS_FILE} 1 -1 SRCS_FILE)
-  set( SRCS_FILENAME "${CMAKE_CURRENT_BINARY_DIR}/sources.txt") 
+  set( SRCS_FILENAME "${CMAKE_CURRENT_BINARY_DIR}/sources.txt")
   file(WRITE ${SRCS_FILENAME} ${SRCS_FILE})
   coveralls_setup(
     ${SRCS_FILENAME}
@@ -220,7 +220,7 @@ endif ()
 ###########################################################################
 
 # N.B. INBUNDLE variable is empty except on Mac (set in DarwinSetup.cmake)
-install ( DIRECTORY installers/colormaps/ DESTINATION ${INBUNDLE}colormaps PATTERN ".svn" EXCLUDE )
+install ( DIRECTORY installers/colormaps/ DESTINATION ${INBUNDLE}colormaps)
 
 # Install the files (.desktop and icon) to create a menu item, but only if installing to /opt/Mantid
 if ( ${CMAKE_SYSTEM_NAME} STREQUAL "Linux" AND CMAKE_INSTALL_PREFIX STREQUAL "/opt/Mantid" )
@@ -255,7 +255,7 @@ if ( ENABLE_CPACK )
       message ( STATUS " CPACK_PACKAGE_FILE_NAME = ${CPACK_PACKAGE_FILE_NAME}" )
 
       # rhel requirements
-      set ( CPACK_RPM_PACKAGE_REQUIRES "qt4 >= 4.2,nexus >= 4.3.1,nexus-python >= 4.3.1,gsl,glibc,qwtplot3d-qt4,muParser,numpy" )
+      set ( CPACK_RPM_PACKAGE_REQUIRES "qt4 >= 4.2,nexus >= 4.3.1,nexus-python >= 4.3.1,gsl,glibc,qwtplot3d-qt4,muParser,numpy,h5py" )
       # OCE
       set( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},OCE-draw,OCE-foundation,OCE-modeling,OCE-ocaf,OCE-visualization")
       set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},poco-crypto,poco-data,poco-mysql,poco-sqlite,poco-odbc,poco-util,poco-xml,poco-zip,poco-net,poco-netssl,poco-foundation,PyQt4,sip" )
@@ -294,6 +294,7 @@ if ( ENABLE_CPACK )
                            "qt4-dev-tools,"
                            "libqwt5-qt4,"
                            "libqwtplot3d-qt4-0,"
+                           "python-h5py,"
                            "python-numpy,"
                            "python-sip,"
                            "python-qt4,"

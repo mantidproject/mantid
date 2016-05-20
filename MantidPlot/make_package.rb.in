@@ -11,6 +11,13 @@ def copyFile(file)
   end
 end
 
+def copyOptionalFile(file)
+  if File.exist?(file)
+    p "copying optional file #{file}"
+    output = system("cp #{file} Contents/MacOS/")
+  end
+end
+
 def addPythonLibrary(directory)
   p "copying directory #{directory}"
   output = system("rsync -a --exclude=.pyc #{directory} Contents/MacOS/")
@@ -216,10 +223,13 @@ directories.each do |directory|
   addPythonLibrary("#{path}/#{directory}")
 end
 
-files = ["gnureadline.so","readline.py","pyparsing.py","mistune.py","mistune.so"]
+files = ["gnureadline.so","readline.py","pyparsing.py","mistune.py"]
 files.each do |file|
   copyFile("#{path}/#{file}")
 end
+
+#mistune.so isn't present in v0.7
+copyOptionalFile("#{path}/mistune.so")
 
 `mkdir Contents/MacOS/bin`
 `cp /usr/local/bin/ipython Contents/MacOS/bin/`

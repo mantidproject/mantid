@@ -89,8 +89,8 @@ private:
  */
 template <class C>
 void ParameterFactory::subscribe(const std::string &className) {
-  typename FactoryMap::iterator it = s_map.find(className);
-  if (!className.empty() && it == s_map.end()) {
+  auto it = s_map.find(className);
+  if (!className.empty() && it == s_map.cend()) {
     s_map[className] =
         Mantid::Kernel::make_unique<Kernel::Instantiator<C, Parameter>>();
   } else {

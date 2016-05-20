@@ -651,8 +651,12 @@ void SplatterPlotView::updatePeaksFilter(pqPipelineSource* filter) {
       throw std::runtime_error("The peaks viewer does not contain a valid peaks workspace.");
     }
 
-    vtkSMPropertyHelper(filter->getProxy(), MantidQt::API::MdConstants::PeaksWorkspace).Set(workspaceNamesConcatentated.c_str());
-    vtkSMPropertyHelper(filter->getProxy(), MantidQt::API::MdConstants::Delimiter).Set(m_peaksWorkspaceNameDelimiter.c_str());
+    vtkSMPropertyHelper(filter->getProxy(),
+                        MantidQt::API::MdConstants::PeaksWorkspace)
+        .Set(0, workspaceNamesConcatentated.c_str());
+    vtkSMPropertyHelper(filter->getProxy(),
+                        MantidQt::API::MdConstants::PeaksWorkspace)
+        .Set(1, m_peaksWorkspaceNameDelimiter.c_str());
     emit this->triggerAccept();
     filter->updatePipeline();
     this->resetCamera();

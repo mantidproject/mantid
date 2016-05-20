@@ -172,7 +172,9 @@ public:
       peaksContainer.push_back(pw_ptr);
     }
 
-    peaksFilter.initialize(peaksContainer, 0.5, 0, static_cast<int>(coordinateSystem));
+    peaksFilter.initialize(peaksContainer, 0.5,
+                           Mantid::Geometry::PeakShape::RadiusType::Radius,
+                           coordinateSystem);
     FakeProgressAction updateProgress;
     TSM_ASSERT_THROWS_NOTHING("Should execute regularly.", peaksFilter.execute(updateProgress));
   }

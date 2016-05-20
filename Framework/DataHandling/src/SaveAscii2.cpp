@@ -474,8 +474,7 @@ void SaveAscii2::populateAngleMetaData() {
  * Populate all required meta data in the meta data map
  */
 void SaveAscii2::populateAllMetaData() {
-  for (auto iter = m_metaData.begin(); iter != m_metaData.end(); ++iter) {
-    auto metaDataType = *iter;
+  for (const auto &metaDataType : m_metaData) {
     if (metaDataType.compare("spectrumnumber") == 0)
       populateSpectrumNumberMetaData();
     if (metaDataType.compare("q") == 0)
@@ -487,14 +486,7 @@ void SaveAscii2::populateAllMetaData() {
 
 bool SaveAscii2::findElementInUnorderedStringVector(
     const std::vector<std::string> &vector, const std::string &toFind) {
-  auto containsElement = false;
-  for (auto iter = vector.begin(); iter != vector.end(); ++iter) {
-    const auto vectorElement = *iter;
-    if (vectorElement.compare(toFind) == 0) {
-      containsElement = true;
-    }
-  }
-  return containsElement;
+  return std::find(vector.cbegin(), vector.cend(), toFind) != vector.cend();
 }
 
 } // namespace DataHandling

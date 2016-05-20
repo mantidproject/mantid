@@ -65,7 +65,7 @@ namespace MantidQt
       void setSource(const QString & source);
       /// Get the current source are emitted
       inline const QString & source() const { return m_logChannel->source(); }
-
+      
     signals:
       /// Indicate that a message of error or higher has been received.
       void errorReceived(const QString & text);
@@ -133,6 +133,9 @@ namespace MantidQt
       QSignalMapper *m_logLevelMapping;
       /// Log level actions
       QAction  *m_error,*m_warning,*m_notice, *m_information, *m_debug;
+
+      // the name of the fliter channel
+      const std::string m_FilterChannelName = "MessageDisplayPriority";
     };
 
   }

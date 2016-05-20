@@ -54,11 +54,12 @@ set ( SRC_FILES
 	src/MantidVersion.cpp
 	src/MaskedProperty.cpp
 	src/Material.cpp
+	src/MaterialBuilder.cpp
+	src/MaterialXMLParser.cpp
 	src/Math/ChebyshevPolyFit.cpp
 	src/Math/Distributions/BoseEinsteinDistribution.cpp
 	src/Math/Distributions/ChebyshevPolynomial.cpp
 	src/Math/Distributions/ChebyshevSeries.cpp
-	src/Math/Distributions/HermitePolynomials.cpp
 	src/Math/Optimization/SLSQPMinimizer.cpp
 	src/Matrix.cpp
 	src/MatrixProperty.cpp
@@ -204,11 +205,12 @@ set ( INC_FILES
 	inc/MantidKernel/MantidVersion.h
 	inc/MantidKernel/MaskedProperty.h
 	inc/MantidKernel/Material.h
+	inc/MantidKernel/MaterialBuilder.h
+	inc/MantidKernel/MaterialXMLParser.h
 	inc/MantidKernel/Math/ChebyshevPolyFit.h
 	inc/MantidKernel/Math/Distributions/BoseEinsteinDistribution.h
 	inc/MantidKernel/Math/Distributions/ChebyshevPolynomial.h
 	inc/MantidKernel/Math/Distributions/ChebyshevSeries.h
-	inc/MantidKernel/Math/Distributions/HermitePolynomials.h
 	inc/MantidKernel/Math/Optimization/SLSQPMinimizer.h
 	inc/MantidKernel/Matrix.h
 	inc/MantidKernel/MatrixProperty.h
@@ -331,7 +333,6 @@ set ( TEST_FILES
 	FreeBlockTest.h
 	FunctionTaskTest.h
 	GlobTest.h
-	HermitePolynomialsTest.h
 	IPropertySettingsTest.h
 	ISaveableTest.h
 	IValidatorTest.h
@@ -353,7 +354,9 @@ set ( TEST_FILES
 	MakeUniqueTest.h
 	MandatoryValidatorTest.h
 	MaskedPropertyTest.h
+	MaterialBuilderTest.h
 	MaterialTest.h
+	MaterialXMLParserTest.h
 	MatrixPropertyTest.h
 	MatrixTest.h
 	MemoryTest.h

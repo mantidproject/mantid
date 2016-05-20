@@ -162,7 +162,10 @@ class LoadVesuvio(LoadEmptyVesuvio):
 
         # Validate SpectrumList
         grp_spectra_list = self.getProperty(SPECTRA_PROP).value
-        if ";" in grp_spectra_list:
+        if "," in grp_spectra_list:
+            # Split on ',' if in form of 2-3,6-7
+            grp_spectra_list = grp_spectra_list.split(",")
+        elif ";" in grp_spectra_list:
             # Split on ';' if in form of 2-3;6-7
             grp_spectra_list = grp_spectra_list.split(";")
         else:
@@ -176,9 +179,6 @@ class LoadVesuvio(LoadEmptyVesuvio):
                 spectra_list = spectra_grp.split("-")
                 # Validate format
                 issues = self._validate_range_formatting(spectra_list[0], spectra_list[1], SPECTRA_PROP, issues)
-            elif "," in spectra_grp:
-                # Split comma separated lists
-                spectra_list = spectra_grp.split(",")
             else:
                 # Single spectra (put into list for use in loop)
                 spectra_list = [spectra_grp]

@@ -9,6 +9,10 @@
 Description
 -----------
 
+.. warning::
+
+   This algorithm will be deprecated in the next version of Mantid. Please, use :ref:`algm-ConvertUnits` and :ref:`algm-ConvertToDistribution` instead.
+   To correct time-of-flight considering the fitted elastic peak position, use algorithm :ref:`algm-CorrectTOF`.
 
 Converts X-axis units of the given workspace or group of workspaces from time-of-flight to energy transfer. Conversion is performed in a following way. The new X-axis data (:math:`\Delta E`, meV) are calculated as
 
