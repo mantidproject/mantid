@@ -9411,10 +9411,8 @@ void ApplicationWindow::fileMenuAboutToShow() {
   fileMenu->addAction(actionPrintAllPlots);
   fileMenu->addSeparator();
   MdiSubWindow *t = activeWindow();
-  auto isMatrix = isOfType(t, "Matrix");
-  auto isTable = isOfType(t, "Table");
-  auto isMantidMatrix = isOfType(t, "MantidMatrix");
-  if (t && (isMatrix|| isTable || isMantidMatrix)) {
+
+  if (t && (isOfType(t, "Matrix")|| isOfType(t, "Table") || isOfType(t, "MantidMatrix"))) {
     actionShowExportASCIIDialog->setEnabled(true);
   } else {
     actionShowExportASCIIDialog->setEnabled(false);
