@@ -73,6 +73,8 @@ public:
   void splashMessage(bool visible, const std::string &shortMsg,
                      const std::string &description) override;
 
+  void showStatus(const std::string &sts) override;
+
   void userWarning(const std::string &warn,
                    const std::string &description) override;
 

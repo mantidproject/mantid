@@ -65,6 +65,14 @@ public:
                              const std::string &description) = 0;
 
   /**
+   * Display the current status (running some algorithms, finished,
+   * ready, etc.), in a status bar or similar.
+   *
+   * @param sts status message which should be concise
+   */
+  virtual void showStatus(const std::string &sts) = 0;
+
+  /**
    * Display a warning to the user (for example as a pop-up window).
    *
    * @param warn warning title, should be short and would normally be

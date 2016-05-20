@@ -322,6 +322,9 @@ void EnggDiffractionViewQtGUI::doSetupTabSettings() {
 void EnggDiffractionViewQtGUI::doSetupGeneralWidgets() {
   doSetupSplashMsg();
 
+  // don't show the re-size corner
+  m_ui.statusbar->setSizeGripEnabled(false);
+
   // change instrument
   connect(m_ui.comboBox_instrument, SIGNAL(currentIndexChanged(int)), this,
           SLOT(instrumentChanged(int)));
@@ -630,6 +633,10 @@ void EnggDiffractionViewQtGUI::splashMessage(bool visible,
                       pos.y() - m_splashMsg->height() / 2);
   }
   m_splashMsg->setVisible(visible);
+}
+
+void EnggDiffractionViewQtGUI::showStatus(const std::string &sts) {
+  m_ui.statusbar->showMessage(QString::fromStdString(sts));
 }
 
 void EnggDiffractionViewQtGUI::userWarning(const std::string &err,

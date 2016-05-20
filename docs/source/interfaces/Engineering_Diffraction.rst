@@ -20,6 +20,12 @@ functionality areas of the interface.
 
 General options
 ^^^^^^^^^^^^^^^
+RB Number
+  To enable the GUI specify a RB Number (where "RB Number" usually
+  denotes the experiment reference number at ISIS). This reference
+  will be used for the output paths, so that files from different
+  users and/or experiments can be kept separate.
+
 Instrument
  Select the instrument. Only ENGIN-X (ISIS) is supported in this version.
 
@@ -29,11 +35,10 @@ Instrument
 Close
   Close the interface
 
-RB Number
-  To enable the GUI specify a RB Number (where "RB Number" usually
-  denotes the experiment reference number at ISIS). This reference
-  will be used for the output paths, so that files from different
-  users and/or experiments can be kept separate.
+Status at the bottom of the interface
+  Here there will be a short message that indicates whether the last
+  important calculations finished successfully, and when the interface
+  is busy calculating (calibrating, focusing, fitting, etc.).
 
 * Red Star Sign
   If a red star sign is displayed next to the Browse Button, it is mostly

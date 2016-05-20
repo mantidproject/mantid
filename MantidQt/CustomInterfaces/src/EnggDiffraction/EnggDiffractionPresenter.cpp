@@ -169,6 +169,7 @@ void EnggDiffractionPresenter::notify(
 
 void EnggDiffractionPresenter::processStart() {
   EnggDiffCalibSettings cs = m_view->currentCalibSettings();
+  m_view->showStatus("Ready");
 }
 
 void EnggDiffractionPresenter::processLoadExistingCalib() {
@@ -205,6 +206,7 @@ void EnggDiffractionPresenter::processCalcCalib() {
 
   const std::string outFilename = outputCalibFilename(vanNo, ceriaNo);
 
+  m_view->showStatus("Calculating calibration...");
   m_view->enableCalibrateAndFocusActions(false);
   // alternatively, this would be GUI-blocking:
   // doNewCalibration(outFilename, vanNo, ceriaNo, specNos);
@@ -252,6 +254,7 @@ void EnggDiffractionPresenter::ProcessCropCalib() {
     specNo = m_view->currentCalibSpecNos();
   }
 
+  m_view->showStatus("Calculating cropped calibration...");
   m_view->enableCalibrateAndFocusActions(false);
   // alternatively, this would be GUI-blocking:
   // doNewCalibration(outFilename, vanNo, ceriaNo, specNo/bankName);
@@ -404,11 +407,11 @@ void EnggDiffractionPresenter::startFocusing(
 
   const std::string focusDir = m_view->focusingDir();
 
+  m_view->showStatus("Focusing...");
   m_view->enableCalibrateAndFocusActions(false);
   // GUI-blocking alternative:
   // doFocusRun(focusDir, outFilenames, runNo, banks, specNos, dgFile)
   // focusingFinished()
-
   startAsyncFocusWorker(focusDir, multi_RunNo, banks, specNos, dgFile);
 }
 
@@ -433,6 +436,7 @@ void EnggDiffractionPresenter::processRebinTime() {
                         outWSName + "'. This "
                                     "may take some seconds... " << std::endl;
 
+  m_view->showStatus("Rebinning by time...");
   m_view->enableCalibrateAndFocusActions(false);
   // GUI-blocking alternative:
   // doRebinningTime(runNo, bin, outWSName)
@@ -459,6 +463,7 @@ void EnggDiffractionPresenter::processRebinMultiperiod() {
                         outWSName + "'. This "
                                     "may take some seconds... " << std::endl;
 
+  m_view->showStatus("Rebinning by pulses...");
   m_view->enableCalibrateAndFocusActions(false);
   // GUI-blocking alternative:
   // doRebinningPulses(runNo, nperiods, timeStep, outWSName)
@@ -698,6 +703,7 @@ void EnggDiffractionPresenter::processFitPeaks() {
 
   // startAsyncFittingWorker
   // doFitting()
+  m_view->showStatus("Fitting single peaks...");
   startAsyncFittingWorker(focusedRunNo, fitPeaksData);
 }
 
@@ -1067,38 +1073,43 @@ void EnggDiffractionPresenter::plotFitPeaksCurves() {
   std::string singlePeaksWs = "engggui_fitting_single_peaks";
   std::string focusedPeaksWs = "engggui_fitting_focused_ws";
 
-  if (ADS.doesExist(singlePeaksWs) || ADS.doesExist(focusedPeaksWs)) {
-
-    try {
-      auto focusedPeaksWS = ADS.retrieveWS<MatrixWorkspace>(focusedPeaksWs);
-      auto focusedData = ALCHelper::curveDataFromWs(focusedPeaksWS);
-      m_view->setDataVector(focusedData, true, m_fittingFinishedOK);
-
-      if (m_fittingFinishedOK) {
-        g_log.debug() << "single peaks fitting being plotted now." << std::endl;
-        auto singlePeaksWS = ADS.retrieveWS<MatrixWorkspace>(singlePeaksWs);
-        auto singlePeaksData = ALCHelper::curveDataFromWs(singlePeaksWS);
-        m_view->setDataVector(singlePeaksData, false, true);
-
-      } else {
-        g_log.notice() << "Focused workspace has been plotted to the "
-                          "graph; further peaks can be adding using Peak Tools."
-                       << std::endl;
-        g_log.warning() << "Peaks could not be plotted as the fitting process "
-                           "did not finish correctly." << std::endl;
-      }
-
-    } catch (std::runtime_error) {
-      g_log.error()
-          << "Unable to finish of the plotting of the graph for "
-             "engggui_fitting_focused_fitpeaks  workspace. Error "
-             "description. Please check also the log message for detail.";
-      throw;
-    }
-  } else {
-    g_log.error() << "Fitting could not be plotted as there is no " +
+  if (!ADS.doesExist(singlePeaksWs) && !ADS.doesExist(focusedPeaksWs)) {
+    g_log.error() << "Fitting results could not be plotted as there is no " +
                          singlePeaksWs + " or " + focusedPeaksWs +
                          " workspace found." << std::endl;
+    m_view->showStatus("Error while fitting peaks");
+    return;
+  }
+
+  try {
+    auto focusedPeaksWS = ADS.retrieveWS<MatrixWorkspace>(focusedPeaksWs);
+    auto focusedData = ALCHelper::curveDataFromWs(focusedPeaksWS);
+    m_view->setDataVector(focusedData, true, m_fittingFinishedOK);
+
+    if (m_fittingFinishedOK) {
+      g_log.debug() << "single peaks fitting being plotted now." << std::endl;
+      auto singlePeaksWS = ADS.retrieveWS<MatrixWorkspace>(singlePeaksWs);
+      auto singlePeaksData = ALCHelper::curveDataFromWs(singlePeaksWS);
+      m_view->setDataVector(singlePeaksData, false, true);
+      m_view->showStatus("Peaks fitted successfully");
+
+    } else {
+      g_log.notice() << "Focused workspace has been plotted to the "
+                        "graph; further peaks can be adding using Peak Tools."
+                     << std::endl;
+      g_log.warning() << "Peaks could not be plotted as the fitting process "
+                         "did not finish correctly." << std::endl;
+      m_view->showStatus("No peaks could be fitted");
+    }
+
+  } catch (std::runtime_error) {
+    g_log.error()
+        << "Unable to finish of the plotting of the graph for "
+           "engggui_fitting_focused_fitpeaks  workspace. Error "
+           "description. Please check also the log message for detail.";
+
+    m_view->showStatus("Error while plotting the peaks fitted");
+    throw;
   }
 }
 
@@ -1114,19 +1125,19 @@ void EnggDiffractionPresenter::fittingFinished() {
       m_workerThread = NULL;
     }
 
+    m_view->showStatus(
+        "Single peak fitting process did not complete successfully");
   } else {
     g_log.notice() << "The single peak fitting finished - the output "
                       "workspace is ready." << std::endl;
 
+    m_view->showStatus("Single peak fittin process finished. Ready");
     if (m_workerThread) {
       delete m_workerThread;
       m_workerThread = NULL;
     }
-
-    g_log.notice()
-        << "EnggDiffraction GUI: plotting peaks for single peak fits "
-           "has started... " << std::endl;
   }
+
   try {
     // should now plot the focused workspace when single peak fitting
     // process fails
@@ -1166,9 +1177,15 @@ void EnggDiffractionPresenter::processRBNumberChange() {
   m_view->enableTabs(valid);
   m_view->splashMessage(!valid, g_shortMsgRBNumberRequired,
                         g_msgRBNumberRequired);
+  if (!valid) {
+    m_view->showStatus("Valid RB number required");
+  } else {
+    m_view->showStatus("Ready");
+  }
 }
 
 void EnggDiffractionPresenter::processShutDown() {
+  m_view->showStatus("Closing...");
   m_view->saveSettings();
   cleanup();
 }
@@ -1544,8 +1561,9 @@ void EnggDiffractionPresenter::calibrationFinished() {
 
   m_view->enableCalibrateAndFocusActions(true);
   if (!m_calibFinishedOK) {
-    g_log.warning() << "The cablibration did not finish correctly."
-                    << std::endl;
+    g_log.warning() << "The cablibration did not finish correctly. Please "
+                       "check previous log messages for details." << std::endl;
+    m_view->showStatus("Calibration didn't finish succesfully. Ready");
   } else {
     const std::string vanNo = isValidRunNumber(m_view->newVanadiumNo());
 
@@ -1554,6 +1572,7 @@ void EnggDiffractionPresenter::calibrationFinished() {
     g_log.notice()
         << "Cablibration finished and ready as 'current calibration'."
         << std::endl;
+    m_view->showStatus("Calibration finished succesfully. Ready");
   }
   if (m_workerThread) {
     delete m_workerThread;
@@ -2152,18 +2171,21 @@ void EnggDiffractionPresenter::focusingFinished() {
   if (!m_view)
     return;
 
-  m_view->enableCalibrateAndFocusActions(true);
   if (!m_focusFinishedOK) {
-    g_log.warning() << "The cablibration did not finish correctly."
-                    << std::endl;
+    g_log.warning() << "The focusing did not finish correctly. Check previous "
+                       "log messages for details" << std::endl;
+    m_view->showStatus("Focusing didn't finish succesfully. Ready");
   } else {
     g_log.notice() << "Focusing finished - focused run(s) are ready."
                    << std::endl;
+    m_view->showStatus("Focusing finished succesfully. Ready");
   }
   if (m_workerThread) {
     delete m_workerThread;
     m_workerThread = NULL;
   }
+
+  m_view->enableCalibrateAndFocusActions(true);
 
   // display warning and information to the users regarding Stop Focus
   if (g_abortThread) {
@@ -2178,6 +2200,7 @@ void EnggDiffractionPresenter::focusingFinished() {
              "run number: " << g_lastValidRun
           << " , total number of focus run that could not be processed: "
           << (lastRun - lastValid) << std::endl;
+      m_view->showStatus("Focusing stopped. Ready");
     }
   }
 }
@@ -2860,19 +2883,22 @@ void EnggDiffractionPresenter::rebinningFinished() {
   if (!m_view)
     return;
 
-  m_view->enableCalibrateAndFocusActions(true);
   if (!m_rebinningFinishedOK) {
-    g_log.warning()
-        << "The pre-processing (re-binning) did not finish correctly."
-        << std::endl;
+    g_log.warning() << "The pre-processing (re-binning) did not finish "
+                       "correctly. Check previous log messages for details"
+                    << std::endl;
+    m_view->showStatus("Rebinning didn't finish succesfully. Ready");
   } else {
     g_log.notice() << "Pre-processing (re-binning) finished - the output "
                       "workspace is ready." << std::endl;
+    m_view->showStatus("Rebinning finished succesfully. Ready");
   }
   if (m_workerThread) {
     delete m_workerThread;
     m_workerThread = NULL;
   }
+
+  m_view->enableCalibrateAndFocusActions(true);
 }
 
 /**
