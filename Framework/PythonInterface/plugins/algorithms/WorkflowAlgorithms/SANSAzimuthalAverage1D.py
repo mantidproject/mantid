@@ -92,7 +92,7 @@ class SANSAzimuthalAverage1D(PythonAlgorithm):
                 binning_prop = self._get_aligned_binning(qmin, qmax)
             else:
                 binning_prop = "%g, %g, %g" % (qmin, qstep, qmax)
-                workspace.getRun().addProperty("qstep",qstep, True)
+                workspace.getRun().addProperty("qstep",float(qstep), True)
             self.setPropertyValue("Binning", binning_prop)
             
             

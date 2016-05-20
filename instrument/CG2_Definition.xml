@@ -5,7 +5,7 @@
             name="CG2"
             valid-from="2016-04-22 00:00:00"
             valid-to="2100-01-31 23:59:59"
-		    last-modified="2016-04-29 08:24:35.208311">
+		    last-modified="2016-05-20 08:24:35.208311">
 
 
   <defaults>
@@ -66,7 +66,7 @@
 
 <!-- Detector: -->
 <type name="detector1" is="rectangular_detector" type="pixel"
-    xpixels="192" xstart="-0.52525" xstep="0.00550"
+    xpixels="192" xstart="-0.52425" xstep="0.00550"
     ypixels="256" ystart="-0.54825" ystep="0.00430">
     <properties />
 </type>
