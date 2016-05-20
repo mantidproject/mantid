@@ -1195,7 +1195,7 @@ void GenericDataProcessorPresenter::clearSelected() {
       m_model->setData(m_model->index(*row, i), "");
     }
     // 'Group' column
-    m_model->setData(m_model->index(*row, m_columns - 2), getUnusedGroup());
+    m_model->setData(m_model->index(*row, m_columns - 2), getUnusedGroup(ignore));
     // 'Options' column
     m_model->setData(m_model->index(*row, m_columns - 1), "");
   }

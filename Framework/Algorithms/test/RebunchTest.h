@@ -80,7 +80,7 @@ public:
 
   void testworkspace2D_dist() {
     Workspace2D_sptr test_in2D = Create2DWorkspaceHist(50, 20);
-    test_in2D->isDistribution(true);
+    test_in2D->setDistribution(true);
     AnalysisDataService::Instance().add("test_in2D", test_in2D);
 
     Rebunch rebunch;

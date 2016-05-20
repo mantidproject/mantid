@@ -280,8 +280,7 @@ public:
     std::ofstream file(m_filename.c_str());
     file << "Runs,Angle,QMin,QMax,Group,Options" << std::endl
          << "14456,0.7,1.443,8.992,1," << std::endl
-         << "18553,0.3,1.233,4.388,3,ProcessingInstructions=\"1:2\""
-         << ", Rebin=\"1.5,0.25,5.6\"" << std::endl;
+         << "18553,0.3,1.233,4.388,3," << std::endl;
     file.close();
     Mantid::API::IAlgorithm_sptr alg =
         Mantid::API::AlgorithmManager::Instance().create("LoadTBL");
@@ -314,8 +313,6 @@ public:
     TS_ASSERT_EQUALS(secondRow.cell<std::string>(0), "18553");
     TS_ASSERT_EQUALS(secondRow.cell<std::string>(1), "0.3");
     TS_ASSERT_EQUALS(secondRow.cell<std::string>(3), "4.388");
-    TS_ASSERT_EQUALS(secondRow.cell<std::string>(5),
-                     "ProcessingInstructions=\"1:2\", Rebin=\"1.5,0.25,5.6\"");
 
     TS_ASSERT_THROWS_NOTHING(Poco::File(m_abspath).remove());
   }

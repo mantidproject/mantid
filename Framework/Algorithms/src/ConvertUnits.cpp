@@ -14,6 +14,7 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
+#include "MantidKernel/DeltaEMode.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/UnitFactory.h"
 
@@ -239,6 +240,10 @@ API::MatrixWorkspace_sptr ConvertUnits::setupOutputWorkspace(
 
   // Set the final unit that our output workspace will have
   outputWS->getAxis(0)->unit() = m_outputUnit;
+  // Store the emode
+  const bool overwrite(true);
+  outputWS->mutableRun().addProperty("deltaE-mode", getPropertyValue("EMode"),
+                                     overwrite);
 
   return outputWS;
 }

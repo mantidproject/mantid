@@ -1274,30 +1274,21 @@ MuonAnalysis::getGrouping(boost::shared_ptr<LoadResult> loadResult) const {
   auto result = boost::make_shared<GroupResult>();
 
   boost::shared_ptr<Mantid::API::Grouping> groupingToUse;
-
   Instrument_const_sptr instr =
       firstPeriod(loadResult->loadedWorkspace)->getInstrument();
 
-  // Check whether the instrument was changed
-  int instrIndex = m_uiForm.instrSelector->findText(
-      QString::fromStdString(instr->getName()));
-  bool instrChanged = m_uiForm.instrSelector->currentIndex() != instrIndex;
-
-  // Check whether the number of spectra was changed
-  bool noSpectraChanged(true);
-
+  Workspace_sptr currentWS;
   if (AnalysisDataService::Instance().doesExist(m_workspace_name)) {
-    auto currentWs =
+    currentWS =
         AnalysisDataService::Instance().retrieveWS<Workspace>(m_workspace_name);
-    size_t currentNoSpectra = firstPeriod(currentWs)->getNumberHistograms();
-
-    size_t loadedNoSpectra =
-        firstPeriod(loadResult->loadedWorkspace)->getNumberHistograms();
-
-    noSpectraChanged = (currentNoSpectra != loadedNoSpectra);
+  } else {
+    currentWS = nullptr;
   }
 
-  if (!noSpectraChanged && !instrChanged && isGroupingSet()) {
+  const bool reloadNecessary =
+      isReloadGroupingNecessary(currentWS, loadResult->loadedWorkspace);
+
+  if (!reloadNecessary && isGroupingSet()) {
     // Use grouping currently set
     result->usedExistGrouping = true;
     groupingToUse = boost::make_shared<Mantid::API::Grouping>(
@@ -3170,7 +3161,7 @@ void MuonAnalysis::fillGroupingTable(const Grouping &grouping) {
  */
 std::string MuonAnalysis::getSummedPeriods() const {
   auto summed = m_uiForm.homePeriodBox1->text().toStdString();
-  summed.erase(std::remove(summed.begin(), summed.end(), ' '));
+  summed.erase(std::remove(summed.begin(), summed.end(), ' '), summed.end());
   return summed;
 }
 
@@ -3180,7 +3171,8 @@ std::string MuonAnalysis::getSummedPeriods() const {
  */
 std::string MuonAnalysis::getSubtractedPeriods() const {
   auto subtracted = m_uiForm.homePeriodBox2->text().toStdString();
-  subtracted.erase(std::remove(subtracted.begin(), subtracted.end(), ' '));
+  subtracted.erase(std::remove(subtracted.begin(), subtracted.end(), ' '),
+                   subtracted.end());
   return subtracted;
 }
 

@@ -16462,31 +16462,31 @@ void ApplicationWindow::customMultilayerToolButtons(MultiLayer *w) {
 
     else if (g->areRangeSelectorsOn()) {
     } else if (dynamic_cast<PeakPickerTool *>(tool))
-      btnMultiPeakPick->setOn(true);
+      btnMultiPeakPick->setChecked(true);
     else if (dynamic_cast<DataPickerTool *>(tool)) {
       switch (dynamic_cast<DataPickerTool *>(tool)->getMode()) {
       case DataPickerTool::Move:
-        btnMovePoints->setOn(true);
+        btnMovePoints->setChecked(true);
         break;
       case DataPickerTool::Remove:
-        btnRemovePoints->setOn(true);
+        btnRemovePoints->setChecked(true);
         break;
       case DataPickerTool::Display:
-        btnCursor->setOn(true);
+        btnCursor->setChecked(true);
         break;
       default:
-        btnPointer->setOn(true);
+        btnPointer->setChecked(true);
       }
     } else if (dynamic_cast<DrawPointTool *>(tool))
-      actionDrawPoints->setOn(true);
+      actionDrawPoints->setChecked(true);
     else if (dynamic_cast<ScreenPickerTool *>(tool))
-      btnPicker->setOn(true);
+      btnPicker->setChecked(true);
     else if (dynamic_cast<LabelTool *>(tool))
-      btnLabel->setOn(true);
+      btnLabel->setChecked(true);
     else
-      btnPointer->setOn(true);
+      btnPointer->setChecked(true);
   } else
-    btnPointer->setOn(true);
+    btnPointer->setChecked(true);
 }
 /**  save workspace data in nexus format
  *   @param wsName :: name of the ouput file.
@@ -16527,7 +16527,7 @@ void ApplicationWindow::panOnPlot() {
         this, tr("QtiPlot - Warning"),
         tr("<h4>There are no plot layers available in this window.</h4>"
            "<p><h4>Please add a layer and try again!</h4>"));
-    btnPointer->setOn(true);
+    btnPointer->setChecked(true);
     return;
   }
 
@@ -16857,7 +16857,7 @@ void ApplicationWindow::changeToDocked(MdiSubWindow *w) {
  */
 void ApplicationWindow::removeFloatingWindow(FloatingWindow *w) {
   if (m_floatingWindows.contains(w)) {
-    m_floatingWindows.remove(w);
+    m_floatingWindows.removeAll(w);
     if (w->mdiSubWindow()) {
       closeWindow(w->mdiSubWindow());
     }
@@ -16897,7 +16897,7 @@ void ApplicationWindow::detachMdiSubwindow(MdiSubWindow *w) {
   FloatingWindow *fw = w->getFloatingWindow();
   if (fw) {
     fw->removeMdiSubWindow();
-    m_floatingWindows.remove(fw);
+    m_floatingWindows.removeAll(fw);
     fw->deleteLater();
     return;
   }
@@ -16931,7 +16931,7 @@ bool ApplicationWindow::event(QEvent *e) {
       }
 
       if (clickedWidget) {
-        QString class_name = clickedWidget->className();
+        QString class_name = clickedWidget->metaObject()->className();
         if (class_name == "QToolButton" || class_name == "QToolBar" ||
             class_name == "QMenuBar") {
           needToActivate = false;
@@ -17029,7 +17029,7 @@ void ApplicationWindow::changeActiveToDocked() {
  * @param w :: Pointer to a MdiSubWindow.
  */
 bool ApplicationWindow::isDefaultFloating(const MdiSubWindow *w) const {
-  QString wClassName = w->className();
+  QString wClassName = w->metaObject()->className();
   return isDefaultFloating(wClassName);
 }
 
@@ -17158,8 +17158,8 @@ TiledWindow *ApplicationWindow::getTiledWindowAtPos(QPoint pos) {
     TiledWindow *tw = dynamic_cast<TiledWindow *>(w->widget());
     if (tw) {
       QPoint mdiOrigin = mapFromGlobal(pos);
-      auto r = w->visibleRect();
-      r.moveBy(mdiOrigin.x(), mdiOrigin.y());
+      auto r = w->visibleRegion();
+      r.translate(mdiOrigin);
       if (r.contains(pos)) {
         return tw;
       }
@@ -17170,8 +17170,8 @@ TiledWindow *ApplicationWindow::getTiledWindowAtPos(QPoint pos) {
     TiledWindow *tw = dynamic_cast<TiledWindow *>(w->mdiSubWindow());
     if (tw) {
       QPoint mdiOrigin = mapFromGlobal(pos);
-      auto r = w->visibleRect();
-      r.moveBy(mdiOrigin.x(), mdiOrigin.y());
+      auto r = w->visibleRegion();
+      r.translate(mdiOrigin);
       if (r.contains(pos)) {
         return tw;
       }

@@ -168,7 +168,7 @@ class NSISInstaller(MantidInstaller):
         # The NSIS uninstaller actually runs a new process & detaches itself from the parent
         # process so that it is able to remove itself. This means that the /WAIT has no affect
         # because the parent appears to finish almost immediately
-        run('start "Uninstaller" /B /WAIT ' + uninstall_path + ' /S')
+        run(uninstall_path + ' /S')
         # Wait for 30 seconds for it to finish
         log("Waiting 30 seconds for uninstaller to finish")
         time.sleep(30)

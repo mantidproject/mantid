@@ -51,6 +51,7 @@ class LRAutoReduction(PythonAlgorithm):
 
         self.declareProperty(IntArrayProperty("SequenceInfo", [0, 0, 0], direction=Direction.Output),
                              "Run sequence information (run number, sequence ID, sequence number).")
+        self.declareProperty("SlitTolerance", 0.02, doc="Tolerance for matching slit positions")
 
     def _get_series_info(self, filename):
         """
@@ -528,6 +529,7 @@ class LRAutoReduction(PythonAlgorithm):
 
     def PyExec(self):
         filename = self.getProperty("Filename").value
+        slit_tolerance = self.getProperty("SlitTolerance").value
 
         # Determine where we are in the scan
         run_number, first_run_of_set, sequence_number, do_reduction, is_direct_beam = self._get_series_info(filename)
@@ -549,10 +551,12 @@ class LRAutoReduction(PythonAlgorithm):
             # so either use the medium in the data file or a default name
             meta_data_run = self.event_data.getRun()
             incident_medium = self._read_property(meta_data_run, "incident_medium", "medium")
+            file_id = incident_medium.replace("medium","")
             LRDirectBeamSort(RunList=range(first_run_of_set, first_run_of_set + sequence_number),
                              UseLowResCut=True, ComputeScalingFactors=True, TOFSteps=sf_tof_step,
                              IncidentMedium=incident_medium,
-                             ScalingFactorFile=os.path.join(output_dir, "sf_%s_auto.cfg" % first_run_of_set))
+                             SlitTolerance=slit_tolerance,
+                             ScalingFactorFile=os.path.join(output_dir, "sf_%s_%s_auto.cfg" % (first_run_of_set, file_id)))
             return
         elif not do_reduction:
             logger.notice("The data is of a type that does not have to be reduced")
@@ -585,6 +589,7 @@ class LRAutoReduction(PythonAlgorithm):
                                       ScalingFactorFile=str(data_set.scaling_factor_file),
                                       SlitsWidthFlag=data_set.slits_width_flag,
                                       ApplyPrimaryFraction=True,
+                                      SlitTolerance=slit_tolerance,
                                       PrimaryFractionRange=[data_set.clocking_from, data_set.clocking_to],
                                       OutputWorkspace='reflectivity_%s_%s_%s' % (first_run_of_set, sequence_number, run_number))
 
