@@ -6,9 +6,16 @@ are configured to find the Vesuvio data
 """
 import unittest
 import platform
+import numpy as np
 from mantid.api import AlgorithmManager
 import vesuvio.testing as testing
 import vesuvio.commands as vesuvio
+
+def _get_peak_height_and_bin(y_data):
+    peak_height = np.amax(y_data)
+    peak_bin = np.argmax(y_data)
+    return peak_height, peak_bin
+
 
 class VesuvioTOFFitTest(unittest.TestCase):
 
@@ -59,8 +66,9 @@ class VesuvioTOFFitTest(unittest.TestCase):
 
         self.assertAlmostEqual(0.0155041, output_ws.readY(0)[0])
         self.assertAlmostEqual(-0.0070975, output_ws.readY(0)[-1])
-        self.assertAlmostEqual(0.8693019e-05, output_ws.readY(1)[0])
-        self.assertTrue(abs(0.746e-04 - output_ws.readY(1)[-1]) < 0.2e-06)
+        peak_height_val, peak_height_bin = _get_peak_height_and_bin(output_ws.readY(1))
+        self.assertTrue(abs(0.14780208913 - peak_height_val) < 0.002)
+        self.assertTrue(abs(158 - peak_height_bin) <= 1)
 
     def test_single_run_produces_correct_output_workspace_index0_kfixed_including_background(self):
         profiles = "function=GramCharlier,width=[2, 5, 7],hermite_coeffs=[1, 0, 0],k_free=0,sears_flag=1;"\
@@ -82,8 +90,9 @@ class VesuvioTOFFitTest(unittest.TestCase):
 
         self.assertAlmostEqual(0.0279822, output_ws.readY(0)[0])
         self.assertAlmostEqual(0.0063585, output_ws.readY(0)[-1])
-        self.assertTrue(abs(-0.012 - output_ws.readY(1)[0]) < 0.002)
-        self.assertTrue(abs(0.0056 - output_ws.readY(1)[-1]) < 0.0004)
+        peak_height_val, peak_height_bin = _get_peak_height_and_bin(output_ws.readY(1))
+        self.assertTrue(abs(0.129538171297 - peak_height_val) < 0.002)
+        self.assertTrue(abs(159 - peak_height_bin) <= 1)
     # -------------- Failure cases ------------------
 
     def test_empty_masses_raises_error(self):
