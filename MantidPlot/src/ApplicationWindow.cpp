@@ -13436,156 +13436,156 @@ void ApplicationWindow::translateActionsStrings() {
   actionShowTextDialog->setMenuText(tr("&Properties"));
   actionActivateWindow->setMenuText(tr("&Activate Window"));
   actionMinimizeWindow->setMenuText(tr("Mi&nimize Window"));
-  actionMaximizeWindow->setMenuText(tr("Ma&ximize Window"));
-  actionHideWindow->setMenuText(tr("&Hide Window"));
-  actionResizeWindow->setMenuText(tr("Re&size Window..."));
-  actionEditSurfacePlot->setMenuText(tr("&Surface..."));
-  actionAdd3DData->setMenuText(tr("&Data Set..."));
-  actionSetMatrixProperties->setMenuText(tr("Set &Properties..."));
-  actionSetMatrixDimensions->setMenuText(tr("Set &Dimensions..."));
+  actionMaximizeWindow->setText(tr("Ma&ximize Window"));
+  actionHideWindow->setText(tr("&Hide Window"));
+  actionResizeWindow->setText(tr("Re&size Window..."));
+  actionEditSurfacePlot->setText(tr("&Surface..."));
+  actionAdd3DData->setText(tr("&Data Set..."));
+  actionSetMatrixProperties->setText(tr("Set &Properties..."));
+  actionSetMatrixDimensions->setText(tr("Set &Dimensions..."));
   actionSetMatrixDimensions->setShortcut(tr("Ctrl+D"));
-  actionSetMatrixValues->setMenuText(tr("Set &Values..."));
+  actionSetMatrixValues->setText(tr("Set &Values..."));
   actionSetMatrixValues->setToolTip(tr("Set Matrix Values"));
   actionSetMatrixValues->setShortcut(tr("Alt+Q"));
-  actionImagePlot->setMenuText(tr("&Image Plot"));
+  actionImagePlot->setText(tr("&Image Plot"));
   actionImagePlot->setToolTip(tr("Image Plot"));
-  actionTransposeMatrix->setMenuText(tr("&Transpose"));
-  actionRotateMatrix->setMenuText(tr("R&otate 90"));
+  actionTransposeMatrix->setText(tr("&Transpose"));
+  actionRotateMatrix->setText(tr("R&otate 90"));
   actionRotateMatrix->setToolTip(tr("Rotate 90° Clockwise"));
-  actionRotateMatrixMinus->setMenuText(tr("Rotate &-90"));
+  actionRotateMatrixMinus->setText(tr("Rotate &-90"));
   actionRotateMatrixMinus->setToolTip(tr("Rotate 90° Counterclockwise"));
-  actionFlipMatrixVertically->setMenuText(tr("Flip &V"));
+  actionFlipMatrixVertically->setText(tr("Flip &V"));
   actionFlipMatrixVertically->setToolTip(tr("Flip Vertically"));
-  actionFlipMatrixHorizontally->setMenuText(tr("Flip &H"));
+  actionFlipMatrixHorizontally->setText(tr("Flip &H"));
   actionFlipMatrixHorizontally->setToolTip(tr("Flip Horizontally"));
 
-  actionMatrixXY->setMenuText(tr("Show &X/Y"));
-  actionMatrixColumnRow->setMenuText(tr("Show &Column/Row"));
-  actionViewMatrix->setMenuText(tr("&Data mode"));
-  actionViewMatrixImage->setMenuText(tr("&Image mode"));
-  actionMatrixGrayScale->setMenuText(tr("&Gray Scale"));
-  actionMatrixRainbowScale->setMenuText(tr("&Rainbow"));
-  actionMatrixCustomScale->setMenuText(tr("&Custom"));
-  actionInvertMatrix->setMenuText(tr("&Invert"));
-  actionMatrixDeterminant->setMenuText(tr("&Determinant"));
-  actionConvertMatrixDirect->setMenuText(tr("&Direct"));
-  actionConvertMatrixXYZ->setMenuText(tr("&XYZ Columns"));
-  actionConvertMatrixYXZ->setMenuText(tr("&YXZ Columns"));
-  actionExportMatrix->setMenuText(tr("&Export Image ..."));
+  actionMatrixXY->setText(tr("Show &X/Y"));
+  actionMatrixColumnRow->setText(tr("Show &Column/Row"));
+  actionViewMatrix->setText(tr("&Data mode"));
+  actionViewMatrixImage->setText(tr("&Image mode"));
+  actionMatrixGrayScale->setText(tr("&Gray Scale"));
+  actionMatrixRainbowScale->setText(tr("&Rainbow"));
+  actionMatrixCustomScale->setText(tr("&Custom"));
+  actionInvertMatrix->setText(tr("&Invert"));
+  actionMatrixDeterminant->setText(tr("&Determinant"));
+  actionConvertMatrixDirect->setText(tr("&Direct"));
+  actionConvertMatrixXYZ->setText(tr("&XYZ Columns"));
+  actionConvertMatrixYXZ->setText(tr("&YXZ Columns"));
+  actionExportMatrix->setText(tr("&Export Image ..."));
 
-  actionConvertTable->setMenuText(tr("Convert to &Matrix"));
-  actionConvertTableToWorkspace->setMenuText(tr("Convert to Table&Workspace"));
-  actionConvertTableToMatrixWorkspace->setMenuText(
+  actionConvertTable->setText(tr("Convert to &Matrix"));
+  actionConvertTableToWorkspace->setText(tr("Convert to Table&Workspace"));
+  actionConvertTableToMatrixWorkspace->setText(
       tr("Convert to MatrixWorkspace"));
-  actionPlot3DWireFrame->setMenuText(tr("3D &Wire Frame"));
-  actionPlot3DHiddenLine->setMenuText(tr("3D &Hidden Line"));
-  actionPlot3DPolygons->setMenuText(tr("3D &Polygons"));
-  actionPlot3DWireSurface->setMenuText(tr("3D Wire &Surface"));
-  actionSortTable->setMenuText(tr("Sort Ta&ble"));
-  actionSortSelection->setMenuText(tr("Sort Columns"));
-  actionNormalizeTable->setMenuText(tr("&Table"));
-  actionNormalizeSelection->setMenuText(tr("&Columns"));
-  actionCorrelate->setMenuText(tr("Co&rrelate"));
-  actionAutoCorrelate->setMenuText(tr("&Autocorrelate"));
-  actionConvolute->setMenuText(tr("&Convolute"));
-  actionDeconvolute->setMenuText(tr("&Deconvolute"));
-  actionTranslateHor->setMenuText(tr("&Horizontal"));
-  actionTranslateVert->setMenuText(tr("&Vertical"));
-  actionSetAscValues->setMenuText(tr("Ro&w Numbers"));
+  actionPlot3DWireFrame->setText(tr("3D &Wire Frame"));
+  actionPlot3DHiddenLine->setText(tr("3D &Hidden Line"));
+  actionPlot3DPolygons->setText(tr("3D &Polygons"));
+  actionPlot3DWireSurface->setText(tr("3D Wire &Surface"));
+  actionSortTable->setText(tr("Sort Ta&ble"));
+  actionSortSelection->setText(tr("Sort Columns"));
+  actionNormalizeTable->setText(tr("&Table"));
+  actionNormalizeSelection->setText(tr("&Columns"));
+  actionCorrelate->setText(tr("Co&rrelate"));
+  actionAutoCorrelate->setText(tr("&Autocorrelate"));
+  actionConvolute->setText(tr("&Convolute"));
+  actionDeconvolute->setText(tr("&Deconvolute"));
+  actionTranslateHor->setText(tr("&Horizontal"));
+  actionTranslateVert->setText(tr("&Vertical"));
+  actionSetAscValues->setText(tr("Ro&w Numbers"));
   actionSetAscValues->setToolTip(tr("Fill selected columns with row numbers"));
-  actionSetRandomValues->setMenuText(tr("&Random Values"));
+  actionSetRandomValues->setText(tr("&Random Values"));
   actionSetRandomValues->setToolTip(
       tr("Fill selected columns with random numbers"));
-  actionSetXCol->setMenuText(tr("&X"));
+  actionSetXCol->setText(tr("&X"));
   actionSetXCol->setToolTip(tr("Set column as X"));
-  actionSetYCol->setMenuText(tr("&Y"));
+  actionSetYCol->setText(tr("&Y"));
   actionSetYCol->setToolTip(tr("Set column as Y"));
-  actionSetZCol->setMenuText(tr("&Z"));
+  actionSetZCol->setText(tr("&Z"));
   actionSetZCol->setToolTip(tr("Set column as Z"));
-  actionSetXErrCol->setMenuText(tr("X E&rror"));
-  actionSetYErrCol->setMenuText(tr("Y &Error"));
+  actionSetXErrCol->setText(tr("X E&rror"));
+  actionSetYErrCol->setText(tr("Y &Error"));
   actionSetYErrCol->setToolTip(tr("Set as Y Error Bars"));
-  actionSetLabelCol->setMenuText(tr("&Label"));
+  actionSetLabelCol->setText(tr("&Label"));
   actionSetLabelCol->setToolTip(tr("Set as Labels"));
-  actionDisregardCol->setMenuText(tr("&Disregard"));
+  actionDisregardCol->setText(tr("&Disregard"));
   actionDisregardCol->setToolTip(tr("Disregard Columns"));
-  actionReadOnlyCol->setMenuText(tr("&Read Only"));
+  actionReadOnlyCol->setText(tr("&Read Only"));
 
-  actionBoxPlot->setMenuText(tr("&Box Plot"));
+  actionBoxPlot->setText(tr("&Box Plot"));
   actionBoxPlot->setToolTip(tr("Box and whiskers plot"));
 
-  actionMultiPeakGauss->setMenuText(tr("&Gaussian..."));
-  actionMultiPeakLorentz->setMenuText(tr("&Lorentzian..."));
-  actionHomePage->setMenuText(tr("&Mantid Homepage")); // Mantid change
-  // actionCheckUpdates->setMenuText(tr("Search for &Updates")); //Mantid change
+  actionMultiPeakGauss->setText(tr("&Gaussian..."));
+  actionMultiPeakLorentz->setText(tr("&Lorentzian..."));
+  actionHomePage->setText(tr("&Mantid Homepage")); // Mantid change
+  // actionCheckUpdates->setText(tr("Search for &Updates")); //Mantid change
   // - commented out
   // actionHelpForums->setText(tr("Visit QtiPlot &Forums"));
   actionHelpBugReports->setText(tr("Report a &Bug"));
   actionAskHelp->setText(tr("Ask for Help"));
-  // actionDownloadManual->setMenuText(tr("Download &Manual"));//Mantid change -
+  // actionDownloadManual->setText(tr("Download &Manual"));//Mantid change -
   // commented out
-  // actionTranslations->setMenuText(tr("&Translations"));//Mantid change -
+  // actionTranslations->setText(tr("&Translations"));//Mantid change -
   // commented out
-  // actionDonate->setMenuText(tr("Make a &Donation"));
-  // actionTechnicalSupport->setMenuText(tr("Technical &Support"));
+  // actionDonate->setText(tr("Make a &Donation"));
+  // actionTechnicalSupport->setText(tr("Technical &Support"));
 
-  btnPointer->setMenuText(tr("Selection &Tools"));
+  btnPointer->setText(tr("Selection &Tools"));
   btnPointer->setToolTip(tr("Selection Tools"));
 
-  btnZoomIn->setMenuText(tr("&Zoom In"));
+  btnZoomIn->setText(tr("&Zoom In"));
   btnZoomIn->setShortcut(tr("Ctrl++"));
   btnZoomIn->setToolTip(tr("Zoom In"));
 
-  btnZoomOut->setMenuText(tr("Zoom &Out"));
+  btnZoomOut->setText(tr("Zoom &Out"));
   btnZoomOut->setShortcut(tr("Ctrl+-"));
   btnZoomOut->setToolTip(tr("Zoom Out"));
 
-  actionPanPlot->setMenuText(tr("Panning Tool (zoom with mouse wheel)"));
+  actionPanPlot->setText(tr("Panning Tool (zoom with mouse wheel)"));
   actionPanPlot->setToolTip(tr("Panning Tool (zoom with mouse wheel)"));
 
-  btnCursor->setMenuText(tr("&Data Reader"));
+  btnCursor->setText(tr("&Data Reader"));
   btnCursor->setShortcut(tr("CTRL+D"));
   btnCursor->setToolTip(tr("Data Reader"));
 
-  btnPicker->setMenuText(tr("S&creen Reader"));
+  btnPicker->setText(tr("S&creen Reader"));
   btnPicker->setToolTip(tr("Screen reader"));
 
-  btnLabel->setMenuText(tr("Add &Label"));
+  btnLabel->setText(tr("Add &Label"));
   btnLabel->setToolTip(tr("Add Label"));
 
-  actionDrawPoints->setMenuText(tr("&Draw Data Points"));
+  actionDrawPoints->setText(tr("&Draw Data Points"));
   actionDrawPoints->setToolTip(tr("Draw Data Points"));
 
-  btnMovePoints->setMenuText(tr("&Move Data Points..."));
+  btnMovePoints->setText(tr("&Move Data Points..."));
   btnMovePoints->setShortcut(tr("Ctrl+ALT+M"));
   btnMovePoints->setToolTip(tr("Move data points"));
 
-  btnRemovePoints->setMenuText(tr("Remove &Bad Data Points..."));
+  btnRemovePoints->setText(tr("Remove &Bad Data Points..."));
   btnRemovePoints->setShortcut(tr("Alt+B"));
   btnRemovePoints->setToolTip(tr("Remove data points"));
 
-  btnArrow->setMenuText(tr("Draw &Arrow"));
+  btnArrow->setText(tr("Draw &Arrow"));
   btnArrow->setShortcut(tr("Ctrl+Alt+A"));
   btnArrow->setToolTip(tr("Draw Arrow"));
 
-  btnLine->setMenuText(tr("Draw Li&ne"));
+  btnLine->setText(tr("Draw Li&ne"));
   btnLine->setShortcut(tr("CtrL+Alt+N"));
   btnLine->setToolTip(tr("Draw Line"));
 
   // FIXME: is setText necessary for action groups?
   //	coord->setText( tr( "Coordinates" ) );
-  //	coord->setMenuText( tr( "&Coord" ) );
+  //	coord->setText( tr( "&Coord" ) );
   //  coord->setStatusTip( tr( "Coordinates" ) );
   Box->setText(tr("Box"));
-  Box->setMenuText(tr("Box"));
+  Box->setText(tr("Box"));
   Box->setToolTip(tr("Box"));
   Box->setStatusTip(tr("Box"));
   Frame->setText(tr("Frame"));
-  Frame->setMenuText(tr("&Frame"));
+  Frame->setText(tr("&Frame"));
   Frame->setToolTip(tr("Frame"));
   Frame->setStatusTip(tr("Frame"));
   None->setText(tr("No Axes"));
-  None->setMenuText(tr("No Axes"));
+  None->setText(tr("No Axes"));
   None->setToolTip(tr("No axes"));
   None->setStatusTip(tr("No axes"));
 
@@ -13597,31 +13597,31 @@ void ApplicationWindow::translateActionsStrings() {
   floor->setToolTip(tr("Floor grid"));
 
   wireframe->setText(tr("Wireframe"));
-  wireframe->setMenuText(tr("Wireframe"));
+  wireframe->setText(tr("Wireframe"));
   wireframe->setToolTip(tr("Wireframe"));
   wireframe->setStatusTip(tr("Wireframe"));
   hiddenline->setText(tr("Hidden Line"));
-  hiddenline->setMenuText(tr("Hidden Line"));
+  hiddenline->setText(tr("Hidden Line"));
   hiddenline->setToolTip(tr("Hidden line"));
   hiddenline->setStatusTip(tr("Hidden line"));
   polygon->setText(tr("Polygon Only"));
-  polygon->setMenuText(tr("Polygon Only"));
+  polygon->setText(tr("Polygon Only"));
   polygon->setToolTip(tr("Polygon only"));
   polygon->setStatusTip(tr("Polygon only"));
   filledmesh->setText(tr("Mesh & Filled Polygons"));
-  filledmesh->setMenuText(tr("Mesh & Filled Polygons"));
+  filledmesh->setText(tr("Mesh & Filled Polygons"));
   filledmesh->setToolTip(tr("Mesh & filled Polygons"));
   filledmesh->setStatusTip(tr("Mesh & filled Polygons"));
   pointstyle->setText(tr("Dots"));
-  pointstyle->setMenuText(tr("Dots"));
+  pointstyle->setText(tr("Dots"));
   pointstyle->setToolTip(tr("Dots"));
   pointstyle->setStatusTip(tr("Dots"));
   barstyle->setText(tr("Bars"));
-  barstyle->setMenuText(tr("Bars"));
+  barstyle->setText(tr("Bars"));
   barstyle->setToolTip(tr("Bars"));
   barstyle->setStatusTip(tr("Bars"));
   conestyle->setText(tr("Cones"));
-  conestyle->setMenuText(tr("Cones"));
+  conestyle->setText(tr("Cones"));
   conestyle->setToolTip(tr("Cones"));
   conestyle->setStatusTip(tr("Cones"));
   crossHairStyle->setText(tr("Crosshairs"));
