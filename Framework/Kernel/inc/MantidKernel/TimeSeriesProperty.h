@@ -4,11 +4,13 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidKernel/DllConfig.h"
 #include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/DllConfig.h"
 #include "MantidKernel/ITimeSeriesProperty.h"
 #include "MantidKernel/Property.h"
+#include "MantidKernel/PropertyNexus.h"
 #include "MantidKernel/Statistics.h"
+#include <cstdint>
 #include <utility>
 
 namespace Mantid {
@@ -120,6 +122,10 @@ public:
   /// Return time series property, containing time derivative of current
   /// property
   std::unique_ptr<TimeSeriesProperty<double>> getDerivative() const;
+
+  void saveProperty(::NeXus::File *file) override {
+    saveTimeSeriesProperty(file);
+  }
 
   /// "Virtual" copy constructor with a time shift in seconds
   Property *cloneWithTimeShift(const double timeShift) const override;
@@ -289,6 +295,24 @@ public:
   void reserve(size_t size) { m_values.reserve(size); };
 
 private:
+  //----------------------------------------------------------------------------------------------
+  /** Saves the time vector has time + start attribute */
+  void saveTimeVector(::NeXus::File *file) {
+    std::vector<DateAndTime> times = this->timesAsVector();
+    DateAndTime start = times[0];
+    std::vector<double> timeSec(times.size());
+    for (size_t i = 0; i < times.size(); i++)
+      timeSec[i] =
+          double(times[i].totalNanoseconds() - start.totalNanoseconds()) * 1e-9;
+    file->writeData("time", timeSec);
+    file->openData("time");
+    file->putAttr("start", start.toISO8601String());
+    file->closeData();
+  }
+
+  //! Helper function to save a TimeSeriesProperty<>
+  void saveTimeSeriesProperty(::NeXus::File *file);
+
   /// Sort the property into increasing times
   void sort() const;
   ///  Find the index of the entry of time t in the mP vector (sorted)

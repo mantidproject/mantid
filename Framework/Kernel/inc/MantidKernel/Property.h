@@ -8,6 +8,7 @@
 #ifndef Q_MOC_RUN
 #include <boost/shared_ptr.hpp>
 #endif
+#include <nexus/NeXusFile.hpp>
 #include <set>
 #include <string>
 #include <vector>
@@ -129,6 +130,9 @@ public:
   void setDocumentation(const std::string &documentation);
   void setBriefDocumentation(const std::string &documentation);
 
+  virtual void saveProperty(::NeXus::File * /*file*/) {
+    throw std::runtime_error("not implemented");
+  }
   /// Returns the value of the property as a string
   virtual std::string value() const = 0;
   /// Set the value of the property via a string.  If the value is unacceptable

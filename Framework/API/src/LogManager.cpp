@@ -343,7 +343,8 @@ void LogManager::saveNexus(::NeXus::File *file, const std::string &group,
   std::vector<Property *> props = m_manager.getProperties();
   for (auto &prop : props) {
     try {
-      PropertyNexus::saveProperty(file, prop);
+      prop->saveProperty(file);
+      // PropertyNexus::saveProperty(file, prop);
     } catch (std::invalid_argument &exc) {
       g_log.warning(exc.what());
     }

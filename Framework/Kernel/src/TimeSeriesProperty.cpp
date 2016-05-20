@@ -2091,6 +2091,77 @@ TimeSeriesProperty<TYPE>::setValueFromProperty(const Property &right) {
   return "";
 }
 
+//----------------------------------------------------------------------------------------------
+/** Helper function to save a TimeSeriesProperty<> */
+template <>
+void TimeSeriesProperty<std::string>::saveTimeSeriesProperty(
+    ::NeXus::File *file) {
+  std::vector<std::string> values = this->valuesAsVector();
+  if (values.empty())
+    return;
+  file->makeGroup(this->name(), "NXlog", 1);
+
+  // Find the max length of any string
+  size_t maxlen = 0;
+  for (auto &value : values)
+    if (value.size() > maxlen)
+      maxlen = value.size();
+  // Increment by 1 to have the 0 terminator
+  maxlen++;
+  // Copy into one array
+  auto strs = new char[values.size() * maxlen];
+  memset(strs, 0, values.size() * maxlen);
+  for (size_t i = 0; i < values.size(); i++)
+    strncpy(&strs[i * maxlen], values[i].c_str(), values[i].size());
+
+  std::vector<int> dims;
+  dims.push_back(int(values.size()));
+  dims.push_back(int(maxlen));
+  file->makeData("value", ::NeXus::CHAR, dims, true);
+  file->putData((void *)strs);
+  file->closeData();
+  saveTimeVector(file);
+  file->closeGroup();
+  delete[] strs;
+}
+
+/**
+ * Helper function to save a TimeSeriesProperty<bool>
+ * At the time of writing NeXus does not support boolean directly. We will use a
+ * UINT8
+ * for the value and add an attribute boolean to inidcate it is actually a bool
+ */
+template <>
+void TimeSeriesProperty<bool>::saveTimeSeriesProperty(::NeXus::File *file) {
+  std::vector<bool> value = this->valuesAsVector();
+  if (value.empty())
+    return;
+  const size_t nvalues = value.size();
+  std::vector<uint8_t> asUint(nvalues);
+  for (size_t i = 0; i < nvalues; ++i) {
+    asUint[i] = static_cast<uint8_t>(value[i]);
+  }
+  file->makeGroup(this->name(), "NXlog", 1);
+  file->writeData("value", asUint);
+  file->putAttr("boolean", "1");
+  saveTimeVector(file);
+  file->closeGroup();
+}
+
+template <typename TYPE>
+void TimeSeriesProperty<TYPE>::saveTimeSeriesProperty(::NeXus::File *file) {
+  auto value = this->valuesAsVector();
+  if (value.empty())
+    return;
+  file->makeGroup(this->name(), "NXlog", 1);
+  file->writeData("value", value);
+  file->openData("value");
+  file->putAttr("units", this->units());
+  file->closeData();
+  saveTimeVector(file);
+  file->closeGroup();
+}
+
 /// @cond
 // -------------------------- Macro to instantiation concrete types
 // --------------------------------
@@ -2100,10 +2171,10 @@ TimeSeriesProperty<TYPE>::setValueFromProperty(const Property &right) {
 // -------------------------- Concrete instantiation
 // -----------------------------------------------
 INSTANTIATE(int)
-INSTANTIATE(long)
+// INSTANTIATE(long)
 INSTANTIATE(long long)
 INSTANTIATE(unsigned int)
-INSTANTIATE(unsigned long)
+// INSTANTIATE(unsigned long)
 INSTANTIATE(unsigned long long)
 INSTANTIATE(float)
 INSTANTIATE(double)

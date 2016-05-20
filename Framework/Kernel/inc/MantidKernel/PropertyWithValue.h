@@ -16,10 +16,12 @@
 #include <boost/algorithm/string/trim.hpp>
 #endif
 
-#include <MantidKernel/StringTokenizer.h>
-#include <vector>
-#include <type_traits>
+#include <nexus/NeXusFile.hpp>
+
 #include "MantidKernel/IPropertySettings.h"
+#include <MantidKernel/StringTokenizer.h>
+#include <type_traits>
+#include <vector>
 
 namespace Mantid {
 
@@ -349,6 +351,10 @@ public:
     return new PropertyWithValue<TYPE>(*this);
   }
 
+  void saveProperty(::NeXus::File *file) override {
+    savePropertyWithValue(file);
+  }
+
   /** Get the value of the property as a string
    *  @return The property's value
    */
@@ -544,6 +550,11 @@ protected:
   TYPE m_initialValue;
 
 private:
+  void savePropertyWithValue(::NeXus::File *file) {
+    file->makeGroup(this->name(), "NXlog", 1);
+    file->writeData("value", m_value);
+    file->closeGroup();
+  }
   /**
    * Set the value of the property via a reference to another property.
    * If the value is unacceptable the value is not changed but a string is
