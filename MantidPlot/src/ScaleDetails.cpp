@@ -291,8 +291,8 @@ void ScaleDetails::initWidgets()
       m_dteEndDateTime->setDateTime(origin.addSecs((int) end));
 
       m_cmbUnit->show();
-      m_cmbUnit->insertItem(tr("days"));
-      m_cmbUnit->insertItem(tr("weeks"));
+      m_cmbUnit->addItem(tr("days"));
+      m_cmbUnit->addItem(tr("weeks"));
       m_dspnStep->setValue(m_graph->axisStep(m_mappedaxis) / 86400.0);
       m_dspnStep->setSingleStep(1);
     }
@@ -314,10 +314,10 @@ void ScaleDetails::initWidgets()
         m_timEndTime->setTime(origin.addMSecs((int) end));
 
         m_cmbUnit->show();
-        m_cmbUnit->insertItem(tr("millisec."));
-        m_cmbUnit->insertItem(tr("sec."));
-        m_cmbUnit->insertItem(tr("min."));
-        m_cmbUnit->insertItem(tr("hours"));
+        m_cmbUnit->addItem(tr("millisec."));
+        m_cmbUnit->addItem(tr("sec."));
+        m_cmbUnit->addItem(tr("min."));
+        m_cmbUnit->addItem(tr("hours"));
         m_cmbUnit->setCurrentIndex(1);
         m_dspnStep->setValue(m_graph->axisStep(m_mappedaxis) / 1e3);
         m_dspnStep->setSingleStep(1000);
@@ -382,7 +382,7 @@ void ScaleDetails::initWidgets()
       m_chkLog10AfterBreak->setChecked(sc_engine->log10ScaleAfterBreak());
       m_chkBreakDecoration->setChecked(sc_engine->hasBreakDecoration());
       m_chkInvert->setChecked(sc_engine->testAttribute(QwtScaleEngine::Inverted));
-      m_cmbScaleType->setCurrentItem(scale_type);
+      m_cmbScaleType->setCurrentIndex(scale_type);
       m_dspnN->setValue(sc_engine->nthPower());
       m_cmbMinorValue->clear();
       if (scale_type == ScaleTransformation::Log10)

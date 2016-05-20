@@ -112,7 +112,7 @@ QwtText ScaleDraw::label(double value) const
 				QChar sign = s[0];
 				s.remove (sign);
 
-				while (l>1 && s.startsWith ("0", false)){
+				while (l>1 && s.startsWith ("0", Qt::CaseInsensitive)){
 					s.remove ( 0, 1 );
 					l = s.length();
 				}
@@ -305,7 +305,7 @@ double ScaleDraw::transformValue(double value) const
 			else if (d_formula.contains("y"))
 				parser.DefineVar("y", &value);
 
-			parser.SetExpr(d_formula.ascii());
+			parser.SetExpr(d_formula.toStdString());
 			lbl=parser.Eval();
         }
         catch(mu::ParserError &){

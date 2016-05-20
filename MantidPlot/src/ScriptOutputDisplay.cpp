@@ -231,7 +231,7 @@ void ScriptOutputDisplay::print()
   print_dlg->setWindowTitle(tr("Print Output"));
   if (print_dlg->exec() != QDialog::Accepted)
     return;
-  QTextDocument document(text());
+  QTextDocument document(toPlainText());
   document.print(&printer);
 }
 

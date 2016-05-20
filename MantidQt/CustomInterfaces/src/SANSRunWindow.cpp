@@ -559,12 +559,12 @@ void SANSRunWindow::connectAnalysDetSignals() {
           SLOT(updateTransInfo(int)));
   connect(m_uiForm.transFit_ck_can, SIGNAL(stateChanged(int)), this,
           SLOT(updateTransInfo(int)));
-  updateTransInfo(m_uiForm.transFit_ck->state());
+  updateTransInfo(m_uiForm.transFit_ck->checkState());
   m_uiForm.transFit_ck_can->toggle();
 
   connect(m_uiForm.frontDetQrangeOnOff, SIGNAL(stateChanged(int)), this,
           SLOT(updateFrontDetQrange(int)));
-  updateFrontDetQrange(m_uiForm.frontDetQrangeOnOff->state());
+  updateFrontDetQrange(m_uiForm.frontDetQrangeOnOff->checkState());
 
   connect(m_uiForm.enableRearFlood_ck, SIGNAL(stateChanged(int)), this,
           SLOT(prepareFlood(int)));
@@ -1133,7 +1133,7 @@ bool SANSRunWindow::loadCSVFile() {
     if (!line.isEmpty()) {
       // if first line of batch contain string MANTID_BATCH_FILE this is a
       // 'metadata' line
-      if (!line.upper().contains("MANTID_BATCH_FILE"))
+      if (!line.toUpper().contains("MANTID_BATCH_FILE"))
         errors += addBatchLine(line, ",");
     }
   }
