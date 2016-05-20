@@ -20,7 +20,9 @@ ApplyPaalmanPings::ApplyPaalmanPings(QWidget *parent) : CorrectionsTab(parent) {
   connect(m_uiForm.cbGeometry, SIGNAL(currentIndexChanged(int)), this,
           SLOT(handleGeometryChange(int)));
   connect(m_uiForm.dsSample, SIGNAL(dataReady(const QString &)), this,
-          SLOT(newData(const QString &)));
+          SLOT(newSample(const QString &)));
+  connect(m_uiForm.dsContainer, SIGNAL(dataReady(const QString &)), this,
+          SLOT(newContainer(const QString &)));
   connect(m_uiForm.spPreviewSpec, SIGNAL(valueChanged(int)), this,
           SLOT(plotPreview(int)));
 
@@ -35,16 +37,26 @@ void ApplyPaalmanPings::setup() {}
  *
  * @param dataName Name of new data source
  */
-void ApplyPaalmanPings::newData(const QString &dataName) {
-  const MatrixWorkspace_sptr sampleWs =
+void ApplyPaalmanPings::newSample(const QString &dataName) {
+  const MatrixWorkspace_sptr sampleWS =
       AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
           dataName.toStdString());
-  m_uiForm.spPreviewSpec->setMaximum(
-      static_cast<int>(sampleWs->getNumberHistograms()) - 1);
 
-  // Plot the sample curve
+  // Plot the curve
   m_uiForm.ppPreview->clear();
-  m_uiForm.ppPreview->addSpectrum("Sample", sampleWs, 0, Qt::black);
+  m_uiForm.ppPreview->addSpectrum("Sample", sampleWS, 0, Qt::black);
+  m_uiForm.spPreviewSpec->setMaximum(
+      static_cast<int>(sampleWS->getNumberHistograms()) - 1);
+  m_sampleWorkspaceName = dataName;
+}
+
+void ApplyPaalmanPings::newContainer(const QString &dataName) {
+  const MatrixWorkspace_sptr containerWS =
+      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+          dataName.toStdString());
+  m_uiForm.ppPreview->removeSpectrum("Contianer");
+  m_uiForm.ppPreview->addSpectrum("Container", containerWS, 0, Qt::red);
+  m_containerWorkspaceName = dataName;
 }
 
 void ApplyPaalmanPings::run() {
@@ -79,31 +91,30 @@ void ApplyPaalmanPings::run() {
     QString canWsName = m_uiForm.dsContainer->getCurrentDataName();
     MatrixWorkspace_sptr canWs =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            canWsName.toStdString());
-    QString canCloneName = canWsName + "_Shifted";
+			m_containerWorkspaceName);
+    m_containerWorkspaceName = canWsName.toStdString() + "_Shifted";
     IAlgorithm_sptr clone =
         AlgorithmManager::Instance().create("CloneWorkspace");
     clone->initialize();
     clone->setProperty("InputWorkspace", canWs);
-    clone->setProperty("Outputworkspace", canCloneName.toStdString());
+    clone->setProperty("Outputworkspace", m_containerWorkspaceName);
     clone->execute();
-    MatrixWorkspace_sptr canCloneWs =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            canCloneName.toStdString());
-
-    IAlgorithm_sptr scaleX = AlgorithmManager::Instance().create("ScaleX");
-    scaleX->initialize();
-    scaleX->setProperty("InputWorkspace", canCloneWs);
-    scaleX->setProperty("OutputWorkspace", canCloneName.toStdString());
-    scaleX->setProperty("Factor", m_uiForm.spCanShift->value());
-    scaleX->setProperty("Operation", "Add");
-    scaleX->execute();
+	MatrixWorkspace_sptr canCloneWs = clone->getProperty("OutputWorkspace");
+    if (useShift) {
+      IAlgorithm_sptr scaleX = AlgorithmManager::Instance().create("ScaleX");
+      scaleX->initialize();
+      scaleX->setProperty("InputWorkspace", canCloneWs);
+      scaleX->setProperty("OutputWorkspace", m_containerWorkspaceName);
+      scaleX->setProperty("Factor", m_uiForm.spCanShift->value());
+      scaleX->setProperty("Operation", "Add");
+      scaleX->execute();
+    }
     IAlgorithm_sptr rebin =
         AlgorithmManager::Instance().create("RebinToWorkspace");
     rebin->initialize();
     rebin->setProperty("WorkspaceToRebin", canCloneWs);
     rebin->setProperty("WorkspaceToMatch", sampleWs);
-    rebin->setProperty("OutputWorkspace", canCloneName.toStdString());
+    rebin->setProperty("OutputWorkspace", m_containerWorkspaceName);
     rebin->execute();
 
     // If not in wavelength then do conversion

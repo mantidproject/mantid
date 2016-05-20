@@ -17,7 +17,9 @@ private slots:
   /// Handles the geometry being changed
   void handleGeometryChange(int index);
   /// Handles a new sample being loaded
-  void newData(const QString &dataName);
+  void newSample(const QString &dataName);
+  /// Handles a new container being loaded
+  void newContainer(const QString &dataName);
   /// Updates the preview mini plot
   void plotPreview(int wsIndex);
   /// Handle abs. correction algorithm completion
@@ -38,6 +40,10 @@ private:
   Ui::ApplyPaalmanPings m_uiForm;
 
   std::string m_originalSampleUnits;
+
+  std::string m_sampleWorkspaceName;
+  std::string m_containerWorkspaceName;
+
 };
 
 } // namespace CustomInterfaces
