@@ -74,7 +74,7 @@ Usage
                                                                   Masses=masses,
                                                                   MassProfiles=profiles,
                                                                   ContainerScale=0.1,
-                                                                  GammaBackground=0.2)
+                                                                  GammaBackgroundScale=0.2)
 
 .. categories::
 
