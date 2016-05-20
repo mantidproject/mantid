@@ -59,8 +59,8 @@ void MultiplyMD::execEventScalar(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   // Get the scalar multiplying
   float scalar = float(m_rhs_scalar->dataY(0)[0]);
   float scalarError = float(m_rhs_scalar->dataE(0)[0]);
-  float scalarRelativeErrorSquared =
-      (scalarError * scalarError) / (scalar * scalar);
+  float scalarErrorSquared = scalarError * scalarError;
+  float scalarSquared = scalar * scalar;
 
   // Get all the MDBoxes contained
   MDBoxBase<MDE, nd> *parentBox = ws->getBox();
@@ -86,8 +86,7 @@ void MultiplyMD::execEventScalar(typename MDEventWorkspace<MDE, nd>::sptr ws) {
         float oldSignal = it->getSignal();
         float signal = oldSignal * scalar;
         float errorSquared =
-            signal * signal * (it->getErrorSquared() / (oldSignal * oldSignal) +
-                               scalarRelativeErrorSquared);
+            scalarSquared * it->getErrorSquared() + oldSignal * oldSignal * scalarErrorSquared;
         it->setSignal(signal);
         it->setErrorSquared(errorSquared);
       }
