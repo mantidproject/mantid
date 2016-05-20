@@ -11837,9 +11837,9 @@ void ApplicationWindow::integrate() {
   if (!w)
     return;
 
-  if (strcmp(w->metaObject()->className(), "MultiLayer") == 0)
+  if (isOfType(w, "MultiLayer"))
     analysis(Integrate);
-  else if (strcmp(w->metaObject()->className(), "Matrix") == 0) {
+  else if (isOfType(w, "Matrix")) {
     auto matrix = dynamic_cast<Matrix *>(w);
     if (!matrix)
       return;
@@ -12024,7 +12024,7 @@ void ApplicationWindow::setAppColors(const QColor &wc, const QColor &pc,
 void ApplicationWindow::setPlot3DOptions() {
   QList<MdiSubWindow *> windows = windowsList();
   foreach (MdiSubWindow *w, windows) {
-    if (strcmp(w->metaObject()->className(), "Graph3D") == 0) {
+    if (isOfType(w, "Graph3D")) {
       Graph3D *g = dynamic_cast<Graph3D *>(w);
       if (!g)
         continue;
@@ -17248,4 +17248,8 @@ QString ApplicationWindow::saveProjectFolder(Folder *folder, int &windowCount,
   }
 
   return text;
+}
+
+bool ApplicationWindow::isOfType(QObject* obj, const char* toCompare) const {
+  return strcmp(obj->metaObject()->className(), toCompare) == 0;
 }
