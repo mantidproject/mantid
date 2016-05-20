@@ -10249,10 +10249,10 @@ void ApplicationWindow::showGraphContextMenu() {
   prints.insertItem(tr("&Window"), plot, SLOT(print()));
   cm.insertItem(getQPixmap("fileprint_xpm"), tr("&Print"), &prints);
   cm.insertSeparator();
-  cm.insertItem(tr("P&roperties..."), this, SLOT(showGeneralPlotDialog()));
-  cm.insertSeparator();
-  cm.insertItem(getQPixmap("close_xpm"), tr("&Delete Layer"), plot,
-                SLOT(confirmRemoveLayer()));
+  cm.addAction(tr("P&roperties..."), this, SLOT(showGeneralPlotDialog()));
+  cm.addSeparator();
+  cm.addAction(getQPixmap("close_xpm"), tr("&Delete Layer"), plot,
+               SLOT(confirmRemoveLayer()));
   cm.exec(QCursor::pos());
 }
 
@@ -10262,15 +10262,16 @@ void ApplicationWindow::showWindowContextMenu() {
     return;
 
   QMenu cm(this);
-  QMenu plot3D(this);
-  if (w->isA("MultiLayer")) {
+  QMenu plot3D(tr("3D &Plot"), this);
+  const std::string windowType = w->metaObject()->className();
+  if (windowType == "MultiLayer") {
     MultiLayer *g = dynamic_cast<MultiLayer *>(w);
     if (!g)
       return;
     if (lastCopiedLayer) {
-      cm.insertItem(getQPixmap("paste_xpm"), tr("&Paste Layer"), this,
-                    SLOT(pasteSelection()));
-      cm.insertSeparator();
+      cm.addAction(getQPixmap("paste_xpm"), tr("&Paste Layer"), this,
+                   SLOT(pasteSelection()));
+      cm.addSeparator();
     }
 
     cm.addAction(actionAddLayer);
@@ -10278,85 +10279,84 @@ void ApplicationWindow::showWindowContextMenu() {
       cm.addAction(actionDeleteLayer);
 
     cm.addAction(actionShowLayerDialog);
-    cm.insertSeparator();
+    cm.addSeparator();
     cm.addAction(actionRename);
     cm.addAction(actionCopyWindow);
-    cm.insertSeparator();
-    cm.insertItem(getQPixmap("copy_xpm"), tr("&Copy Page"), g,
-                  SLOT(copyAllLayers()));
-    cm.insertItem(tr("E&xport Page"), this, SLOT(exportGraph()));
+    cm.addSeparator();
+    cm.addAction(getQPixmap("copy_xpm"), tr("&Copy Page"), g,
+                 SLOT(copyAllLayers()));
+    cm.addAction(tr("E&xport Page"), this, SLOT(exportGraph()));
     cm.addAction(actionPrint);
-    cm.insertSeparator();
+    cm.addSeparator();
     cm.addAction(actionCloseWindow);
-  } else if (w->isA("Graph3D")) {
+  } else if (windowType == "Graph3D") {
     Graph3D *g = dynamic_cast<Graph3D *>(w);
     if (!g)
       return;
     if (!g->hasData()) {
-      cm.insertItem(tr("3D &Plot"), &plot3D);
+      cm.addMenu(&plot3D);
       plot3D.addAction(actionAdd3DData);
-      plot3D.insertItem(tr("&Matrix..."), this, SLOT(add3DMatrixPlot()));
+      plot3D.addAction(tr("&Matrix..."), this, SLOT(add3DMatrixPlot()));
       plot3D.addAction(actionEditSurfacePlot);
     } else {
       if (g->table())
-        cm.insertItem(tr("Choose &Data Set..."), this, SLOT(change3DData()));
+        cm.addAction(tr("Choose &Data Set..."), this, SLOT(change3DData()));
       else if (g->matrix())
-        cm.insertItem(tr("Choose &Matrix..."), this, SLOT(change3DMatrix()));
+        cm.addAction(tr("Choose &Matrix..."), this, SLOT(change3DMatrix()));
       else if (g->userFunction() || g->parametricSurface())
         cm.addAction(actionEditSurfacePlot);
-      cm.insertItem(getQPixmap("erase_xpm"), tr("C&lear"), g,
-                    SLOT(clearData()));
+      cm.addAction(getQPixmap("erase_xpm"), tr("C&lear"), g, SLOT(clearData()));
     }
 
-    cm.insertSeparator();
+    cm.addSeparator();
     cm.addAction(actionRename);
     cm.addAction(actionCopyWindow);
-    cm.insertSeparator();
-    cm.insertItem(tr("&Copy Graph"), g, SLOT(copyImage()));
-    cm.insertItem(tr("&Export"), this, SLOT(exportGraph()));
+    cm.addSeparator();
+    cm.addAction(tr("&Copy Graph"), g, SLOT(copyImage()));
+    cm.addAction(tr("&Export"), this, SLOT(exportGraph()));
     cm.addAction(actionPrint);
-    cm.insertSeparator();
+    cm.addSeparator();
     cm.addAction(actionCloseWindow);
-  } else if (w->isA("Matrix")) {
+  } else if (windowType == "Matrix") {
     Matrix *t = dynamic_cast<Matrix *>(w);
     if (!t)
       return;
     if (t->viewType() == Matrix::TableView) {
-      cm.insertItem(getQPixmap("cut_xpm"), tr("Cu&t"), t, SLOT(cutSelection()));
-      cm.insertItem(getQPixmap("copy_xpm"), tr("&Copy"), t,
-                    SLOT(copySelection()));
-      cm.insertItem(getQPixmap("paste_xpm"), tr("&Paste"), t,
+      cm.addAction(getQPixmap("cut_xpm"), tr("Cu&t"), t, SLOT(cutSelection()));
+      cm.addAction(getQPixmap("copy_xpm"), tr("&Copy"), t,
+                   SLOT(copySelection()));
+      cm.addAction(getQPixmap("paste_xpm"), tr("&Paste"), t,
                     SLOT(pasteSelection()));
-      cm.insertSeparator();
-      cm.insertItem(getQPixmap("insert_row_xpm"), tr("&Insert Row"), t,
+      cm.addSeparator();
+      cm.addAction(getQPixmap("insert_row_xpm"), tr("&Insert Row"), t,
                     SLOT(insertRow()));
-      cm.insertItem(getQPixmap("insert_column_xpm"), tr("&Insert Column"), t,
+      cm.addAction(getQPixmap("insert_column_xpm"), tr("&Insert Column"), t,
                     SLOT(insertColumn()));
       if (t->numSelectedRows() > 0)
-        cm.insertItem(getQPixmap("delete_row_xpm"), tr("&Delete Rows"), t,
+        cm.addAction(getQPixmap("delete_row_xpm"), tr("&Delete Rows"), t,
                       SLOT(deleteSelectedRows()));
       else if (t->numSelectedColumns() > 0)
-        cm.insertItem(getQPixmap("delete_column_xpm"), tr("&Delete Columns"), t,
+        cm.addAction(getQPixmap("delete_column_xpm"), tr("&Delete Columns"), t,
                       SLOT(deleteSelectedColumns()));
 
-      cm.insertItem(getQPixmap("erase_xpm"), tr("Clea&r"), t,
+      cm.addAction(getQPixmap("erase_xpm"), tr("Clea&r"), t,
                     SLOT(clearSelection()));
     } else if (t->viewType() == Matrix::ImageView) {
       cm.addAction(actionImportImage);
       cm.addAction(actionExportMatrix);
-      cm.insertSeparator();
+      cm.addSeparator();
       cm.addAction(actionSetMatrixProperties);
       cm.addAction(actionSetMatrixDimensions);
-      cm.insertSeparator();
+      cm.addSeparator();
       cm.addAction(actionSetMatrixValues);
       cm.addAction(actionTableRecalculate);
-      cm.insertSeparator();
+      cm.addSeparator();
       cm.addAction(actionRotateMatrix);
       cm.addAction(actionRotateMatrixMinus);
-      cm.insertSeparator();
+      cm.addSeparator();
       cm.addAction(actionFlipMatrixVertically);
       cm.addAction(actionFlipMatrixHorizontally);
-      cm.insertSeparator();
+      cm.addSeparator();
       cm.addAction(actionTransposeMatrix);
       cm.addAction(actionInvertMatrix);
     }
@@ -10372,8 +10372,8 @@ void ApplicationWindow::customWindowTitleBarMenu(MdiSubWindow *w, QMenu *menu) {
     menu->addAction(actionShowExportASCIIDialog);
     menu->addSeparator();
   }
-
-  if (w->isA("Note"))
+  const std::string windowClassName = w->metaObject()->className();
+  if (windowClassName == "Note")
     menu->addAction(actionSaveNote);
 
   menu->addAction(actionPrint);
@@ -10400,73 +10400,73 @@ void ApplicationWindow::showTableContextMenu(bool selection) {
       if (isEditable)
         cm.addAction(actionShowColumnValuesDialog);
       if (isEditable)
-        cm.insertItem(getQPixmap("cut_xpm"), tr("Cu&t"), t,
-                      SLOT(cutSelection()));
-      cm.insertItem(getQPixmap("copy_xpm"), tr("&Copy"), t,
-                    SLOT(copySelection()));
+        cm.addAction(getQPixmap("cut_xpm"), tr("Cu&t"), t,
+                     SLOT(cutSelection()));
+      cm.addAction(getQPixmap("copy_xpm"), tr("&Copy"), t,
+                   SLOT(copySelection()));
       if (isEditable)
-        cm.insertItem(getQPixmap("paste_xpm"), tr("&Paste"), t,
-                      SLOT(pasteSelection()));
-      cm.insertSeparator();
+        cm.addAction(getQPixmap("paste_xpm"), tr("&Paste"), t,
+                     SLOT(pasteSelection()));
+      cm.addSeparator();
       if (isEditable)
         cm.addAction(actionTableRecalculate);
       if (isEditable)
-        cm.insertItem(getQPixmap("insert_row_xpm"), tr("&Insert Row"), t,
-                      SLOT(insertRow()));
-      cm.insertItem(getQPixmap("delete_row_xpm"), tr("&Delete Row"), t,
-                    SLOT(deleteSelectedRows()));
+        cm.addAction(getQPixmap("insert_row_xpm"), tr("&Insert Row"), t,
+                     SLOT(insertRow()));
+      cm.addAction(getQPixmap("delete_row_xpm"), tr("&Delete Row"), t,
+                   SLOT(deleteSelectedRows()));
       if (isEditable)
-        cm.insertItem(getQPixmap("erase_xpm"), tr("Clea&r Row"), t,
-                      SLOT(clearSelection()));
-      cm.insertSeparator();
+        cm.addAction(getQPixmap("erase_xpm"), tr("Clea&r Row"), t,
+                     SLOT(clearSelection()));
+      cm.addSeparator();
       cm.addAction(actionShowRowStatistics);
     } else if (t->numSelectedRows() > 1) {
       if (isEditable)
         cm.addAction(actionShowColumnValuesDialog);
       if (isEditable)
-        cm.insertItem(getQPixmap("cut_xpm"), tr("Cu&t"), t,
-                      SLOT(cutSelection()));
-      cm.insertItem(getQPixmap("copy_xpm"), tr("&Copy"), t,
-                    SLOT(copySelection()));
+        cm.addAction(getQPixmap("cut_xpm"), tr("Cu&t"), t,
+                     SLOT(cutSelection()));
+      cm.addAction(getQPixmap("copy_xpm"), tr("&Copy"), t,
+                   SLOT(copySelection()));
       if (isEditable)
-        cm.insertItem(getQPixmap("paste_xpm"), tr("&Paste"), t,
-                      SLOT(pasteSelection()));
-      cm.insertSeparator();
+        cm.addAction(getQPixmap("paste_xpm"), tr("&Paste"), t,
+                     SLOT(pasteSelection()));
+      cm.addSeparator();
       if (isEditable)
         cm.addAction(actionTableRecalculate);
-      cm.insertItem(getQPixmap("delete_row_xpm"), tr("&Delete Rows"), t,
-                    SLOT(deleteSelectedRows()));
+      cm.addAction(getQPixmap("delete_row_xpm"), tr("&Delete Rows"), t,
+                   SLOT(deleteSelectedRows()));
       if (isEditable)
-        cm.insertItem(getQPixmap("erase_xpm"), tr("Clea&r Rows"), t,
-                      SLOT(clearSelection()));
-      cm.insertSeparator();
+        cm.addAction(getQPixmap("erase_xpm"), tr("Clea&r Rows"), t,
+                     SLOT(clearSelection()));
+      cm.addSeparator();
       cm.addAction(actionShowRowStatistics);
     } else if (t->numRows() > 0 && t->numCols() > 0) {
       if (isEditable)
         cm.addAction(actionShowColumnValuesDialog);
       if (isEditable)
-        cm.insertItem(getQPixmap("cut_xpm"), tr("Cu&t"), t,
-                      SLOT(cutSelection()));
-      cm.insertItem(getQPixmap("copy_xpm"), tr("&Copy"), t,
-                    SLOT(copySelection()));
+        cm.addAction(getQPixmap("cut_xpm"), tr("Cu&t"), t,
+                     SLOT(cutSelection()));
+      cm.addAction(getQPixmap("copy_xpm"), tr("&Copy"), t,
+                   SLOT(copySelection()));
       if (isEditable)
-        cm.insertItem(getQPixmap("paste_xpm"), tr("&Paste"), t,
-                      SLOT(pasteSelection()));
-      cm.insertSeparator();
+        cm.addAction(getQPixmap("paste_xpm"), tr("&Paste"), t,
+                     SLOT(pasteSelection()));
+      cm.addSeparator();
       if (isEditable)
         cm.addAction(actionTableRecalculate);
       if (isEditable)
-        cm.insertItem(getQPixmap("erase_xpm"), tr("Clea&r"), t,
-                      SLOT(clearSelection()));
+        cm.addAction(getQPixmap("erase_xpm"), tr("Clea&r"), t,
+                     SLOT(clearSelection()));
     }
   } else {
     cm.addAction(actionShowExportASCIIDialog);
-    cm.insertSeparator();
+    cm.addSeparator();
     if (!isFixedColumns)
       cm.addAction(actionAddColToTable);
     if (isEditable)
       cm.addAction(actionClearTable);
-    cm.insertSeparator();
+    cm.addSeparator();
     cm.addAction(actionGoToRow);
     cm.addAction(actionGoToColumn);
   }
@@ -10513,17 +10513,17 @@ void ApplicationWindow::showStandAloneHelp() {
   QFile helpFile(helpPath);
   if (!helpPath.isEmpty() && !helpFile.exists()) {
     QMessageBox::critical(0, tr("MantidPlot - Help Files Not Found!"), // Mantid
-                          tr("The manual can be downloaded from the following "
+                          tr("The manual can be found at the following "
                              "internet address:") +
                               "<p><a href = "
-                              "http://soft.proindependent.com/"
-                              "manuals.html>http://soft.proindependent.com/"
-                              "manuals.html</a></p>");
+                              "http://www.mantidproject.org/"
+                              "MantidPlot:_Help>http://www.mantidproject.org/"
+                              "MantidPlot:_Help</a></p>");
     exit(0);
   }
 
   QFileInfo fi(helpPath);
-  QString profilePath = QString(fi.dirPath(true) + "/qtiplot.adp");
+  QString profilePath = QString(fi.absolutePath() + "/qtiplot.adp");
   if (!QFile(profilePath).exists()) {
     QMessageBox::critical(
         0, tr("MantidPlot - Help Profile Not Found!"), // Mantid
@@ -10534,8 +10534,8 @@ void ApplicationWindow::showStandAloneHelp() {
             tr("This file is provided with the MantidPlot manual which can be "
                "downloaded from the following internet address:") +
             "<p><a href = "
-            "http://soft.proindependent.com/manuals.html>http://"
-            "soft.proindependent.com/manuals.html</a></p>");
+            "http://www.mantidproject.org/MantidPlot:_Help>http://"
+            "www.mantidproject.org/MantidPlot:_Help</a></p>");
     exit(0);
   }
 
@@ -10552,22 +10552,22 @@ void ApplicationWindow::showHelp() {
     QMessageBox::critical(
         this, tr("MantidPlot - Help Files Not Found!"), // Mantid
         tr("Please indicate the location of the help file!") + "<br>" +
-            tr("The manual can be downloaded from the following internet "
+            tr("The manual can be found at the following internet "
                "address:") +
             "<p><a href = "
-            "http://soft.proindependent.com/manuals.html>http://"
-            "soft.proindependent.com/manuals.html</a></p>");
-    QString fn =
-        QFileDialog::getOpenFileName(QDir::currentDirPath(), "*.html", this);
+            "http://www.mantidproject.org/MantidPlot:_Help>http://"
+            "www.mantidproject.org/MantidPlot:_Help</a></p>");
+    QString fn = QFileDialog::getOpenFileName(this, "Open help file",
+                                              QDir::currentPath(), "*.html");
     if (!fn.isEmpty()) {
       QFileInfo fi(fn);
-      helpFilePath = fi.absFilePath();
+      helpFilePath = fi.absoluteFilePath();
       saveSettings();
     }
   }
 
   QFileInfo fi(helpFilePath);
-  QString profilePath = QString(fi.dirPath(true) + "/qtiplot.adp");
+  QString profilePath = QString(fi.absolutePath() + "/qtiplot.adp");
   if (!QFile(profilePath).exists()) {
     QMessageBox::critical(
         this, tr("MantidPlot - Help Profile Not Found!"), // Mantid
@@ -10578,8 +10578,8 @@ void ApplicationWindow::showHelp() {
             tr("This file is provided with the MantidPlot manual which can be "
                "downloaded from the following internet address:") +
             "<p><a href = "
-            "http://soft.proindependent.com/manuals.html>http://"
-            "soft.proindependent.com/manuals.html</a></p>");
+            "http://www.mantidproject.org/MantidPlot:_Help>http://"
+            "www.mantidproject.org/MantidPlot:_Help</a></p>");
     return;
   }
 
@@ -10703,10 +10703,10 @@ void ApplicationWindow::addFunctionCurve() {
 void ApplicationWindow::updateFunctionLists(int type, QStringList &formulas) {
   int maxListSize = 10;
   if (type == 2) {
-    rFunctions.remove(formulas[0]);
+    rFunctions.removeAll(formulas[0]);
     rFunctions.push_front(formulas[0]);
 
-    thetaFunctions.remove(formulas[1]);
+    thetaFunctions.removeAll(formulas[1]);
     thetaFunctions.push_front(formulas[1]);
 
     while ((int)rFunctions.size() > maxListSize)
@@ -10714,10 +10714,10 @@ void ApplicationWindow::updateFunctionLists(int type, QStringList &formulas) {
     while ((int)thetaFunctions.size() > maxListSize)
       thetaFunctions.pop_back();
   } else if (type == 1) {
-    xFunctions.remove(formulas[0]);
+    xFunctions.removeAll(formulas[0]);
     xFunctions.push_front(formulas[0]);
 
-    yFunctions.remove(formulas[1]);
+    yFunctions.removeAll(formulas[1]);
     yFunctions.push_front(formulas[1]);
 
     while ((int)xFunctions.size() > maxListSize)
@@ -10971,12 +10971,12 @@ void ApplicationWindow::pickFloorStyle(QAction *action) {
 }
 
 void ApplicationWindow::custom3DActions(MdiSubWindow *w) {
-  if (w && w->isA("Graph3D")) {
+  if (w && std::string(w->metaObject()->className()) == "Graph3D") {
     Graph3D *plot = dynamic_cast<Graph3D *>(w);
     if (!plot)
       return;
-    actionAnimate->setOn(plot->isAnimated());
-    actionPerspective->setOn(!plot->isOrthogonal());
+    actionAnimate->setChecked(plot->isAnimated());
+    actionPerspective->setChecked(!plot->isOrthogonal());
     switch (plot->plotStyle()) {
     case FILLEDMESH:
       wireframe->setChecked(false);
@@ -11155,34 +11155,34 @@ void ApplicationWindow::initPlot3DToolBar() {
   grids->setEnabled(true);
   grids->setExclusive(false);
   front = new QAction(grids);
-  front->setMenuText(tr("Front"));
+  front->setText(tr("Front"));
   front->setCheckable(true);
   front->setIcon(QIcon(getQPixmap("frontGrid_xpm")));
   back = new QAction(grids);
-  back->setMenuText(tr("Back"));
+  back->setText(tr("Back"));
   back->setCheckable(true);
   back->setIcon(QIcon(getQPixmap("backGrid_xpm")));
   right = new QAction(grids);
-  right->setMenuText(tr("Right"));
+  right->setText(tr("Right"));
   right->setCheckable(true);
   right->setIcon(QIcon(getQPixmap("leftGrid_xpm")));
   left = new QAction(grids);
-  left->setMenuText(tr("Left"));
+  left->setText(tr("Left"));
   left->setCheckable(true);
   left->setIcon(QIcon(getQPixmap("rightGrid_xpm")));
   ceil = new QAction(grids);
-  ceil->setMenuText(tr("Ceiling"));
+  ceil->setText(tr("Ceiling"));
   ceil->setCheckable(true);
   ceil->setIcon(QIcon(getQPixmap("ceilGrid_xpm")));
   floor = new QAction(grids);
-  floor->setMenuText(tr("Floor"));
+  floor->setText(tr("Floor"));
   floor->setCheckable(true);
   floor->setIcon(QIcon(getQPixmap("floorGrid_xpm")));
 
   actionPerspective = new QAction(this);
-  actionPerspective->setToggleAction(TRUE);
-  actionPerspective->setIconSet(getQPixmap("perspective_xpm"));
-  actionPerspective->setOn(!orthogonal3DPlots);
+  actionPerspective->setCheckable(true);
+  actionPerspective->setIcon(getQPixmap("perspective_xpm"));
+  actionPerspective->setChecked(!orthogonal3DPlots);
   connect(actionPerspective, SIGNAL(toggled(bool)), this,
           SLOT(togglePerspective(bool)));
 
