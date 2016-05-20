@@ -60,7 +60,7 @@ CurvesDialog::CurvesDialog( ApplicationWindow* app, Graph* g, Qt::WFlags fl )
   if (!app) {
     throw std::logic_error("Null ApplicationWindow pointer is passed to CurvesDialog.");
   }
-  setName( "CurvesDialog" );
+  setObjectName( "CurvesDialog" );
   setWindowTitle( tr( "MantidPlot - Add/Remove curves" ) );
   setSizeGripEnabled(true);
   setFocus();
@@ -101,14 +101,14 @@ CurvesDialog::CurvesDialog( ApplicationWindow* app, Graph* g, Qt::WFlags fl )
   //add button (move to graph contents)
   QVBoxLayout* vl1 = new QVBoxLayout();
   btnAdd = new QPushButton();
-  btnAdd->setPixmap( getQPixmap("next_xpm") );
+  btnAdd->setIcon( getQPixmap("next_xpm") );
   btnAdd->setFixedWidth (35);
   btnAdd->setFixedHeight (30);
   vl1->addWidget(btnAdd);
 
   //remove button (move to available data)
   btnRemove = new QPushButton();
-  btnRemove->setPixmap( getQPixmap("prev_xpm") );
+  btnRemove->setIcon( getQPixmap("prev_xpm") );
   btnRemove->setFixedWidth (35);
   btnRemove->setFixedHeight(30);
   vl1->addWidget(btnRemove);
@@ -261,9 +261,9 @@ void CurvesDialog::contextMenuEvent(QContextMenuEvent *e)
     QMenu contextMenu(this);
     QList<QListWidgetItem *> lst = available->selectedItems();
     if (lst.size() > 1)
-      contextMenu.insertItem(tr("&Plot Selection"), this, SLOT(addCurves()));
+      contextMenu.addAction(tr("&Plot Selection"), this, SLOT(addCurves()));
     else if (lst.size() == 1)
-      contextMenu.insertItem(tr("&Plot"), this, SLOT(addCurves()));
+      contextMenu.addAction(tr("&Plot"), this, SLOT(addCurves()));
     contextMenu.exec(QCursor::pos());
   }
 
@@ -275,9 +275,9 @@ void CurvesDialog::contextMenuEvent(QContextMenuEvent *e)
     QList<QListWidgetItem *> lst = contents->selectedItems();
     
 	if (lst.size() > 1)
-      contextMenu.insertItem(tr("&Delete Selection"), this, SLOT(removeCurves()));
+      contextMenu.addAction(tr("&Delete Selection"), this, SLOT(removeCurves()));
     else if (lst.size() > 0)
-      contextMenu.insertItem(tr("&Delete Curve"), this, SLOT(removeCurves()));
+      contextMenu.addAction(tr("&Delete Curve"), this, SLOT(removeCurves()));
     contextMenu.exec(QCursor::pos());
   }
   e->accept();
@@ -298,25 +298,25 @@ void CurvesDialog::init()
 
   int style = d_app->defaultCurveStyle;
   if (style == Graph::Line)
-    boxStyle->setCurrentItem(0);
+    boxStyle->setCurrentIndex(0);
   else if (style == Graph::Scatter)
-    boxStyle->setCurrentItem(1);
+    boxStyle->setCurrentIndex(1);
   else if (style == Graph::LineSymbols)
-    boxStyle->setCurrentItem(2);
+    boxStyle->setCurrentIndex(2);
   else if (style == Graph::VerticalDropLines)
-    boxStyle->setCurrentItem(3);
+    boxStyle->setCurrentIndex(3);
   else if (style == Graph::Spline)
-    boxStyle->setCurrentItem(4);
+    boxStyle->setCurrentIndex(4);
   else if (style == Graph::VerticalSteps)
-    boxStyle->setCurrentItem(5);
+    boxStyle->setCurrentIndex(5);
   else if (style == Graph::HorizontalSteps)
-    boxStyle->setCurrentItem(6);
+    boxStyle->setCurrentIndex(6);
   else if (style == Graph::Area)
-    boxStyle->setCurrentItem(7);
+    boxStyle->setCurrentIndex(7);
   else if (style == Graph::VerticalBars)
-    boxStyle->setCurrentItem(8);
+    boxStyle->setCurrentIndex(8);
   else if (style == Graph::HorizontalBars)
-    boxStyle->setCurrentItem(9);
+    boxStyle->setCurrentIndex(9);
 
   QList<MdiSubWindow *> wList = d_app->windowsList();
   foreach(MdiSubWindow* w, wList)
@@ -509,7 +509,7 @@ void CurvesDialog::enableBtnOK(){
 int CurvesDialog::curveStyle()
 {
   int style = 0;
-  switch (boxStyle->currentItem())
+  switch (boxStyle->currentIndex())
   {
  case 0:
     style = Graph::Line;

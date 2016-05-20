@@ -153,7 +153,7 @@ void FFTDialog::accept()
 	try
 	{
 		MyParser parser;
-		parser.SetExpr(boxSampling->text().ascii());
+		parser.SetExpr(boxSampling->text().latin1());
 		sampling=parser.Eval();
 	}
 	catch(mu::ParserError &e)
@@ -193,7 +193,7 @@ void FFTDialog::accept()
 void FFTDialog::setGraph(Graph *g)
 {
 	graph = g;
-	boxName->insertStringList (g->analysableCurvesList());
+	boxName->insertItems (-1, g->analysableCurvesList());
 	activateCurve(boxName->currentText());
 }
 
@@ -217,13 +217,13 @@ void FFTDialog::setTable(Table *t)
 {
 	d_table = t;
 	QStringList l = t->columnsList();
-	boxName->insertStringList (l);
-	boxReal->insertStringList (l);
-	boxImaginary->insertStringList (l);
+	boxName->insertItems (-1, l);
+	boxReal->insertItems (-1, l);
+	boxImaginary->insertItems (-1, l);
 
 	int xcol = t->firstXCol();
 	if (xcol >= 0){
-		boxName->setCurrentItem(xcol);
+		boxName->setCurrentIndex(xcol);
 
 		double x0 = t->text(0, xcol).toDouble();
 		double x1 = t->text(1, xcol).toDouble();
@@ -233,14 +233,14 @@ void FFTDialog::setTable(Table *t)
 	l = t->selectedColumns();
 	int selected = (int)l.size();
 	if (!selected){
-		boxReal->setCurrentText(QString());
-		boxImaginary->setCurrentText(QString());
+		boxReal->setItemText(boxReal->currentIndex(), QString());
+		boxImaginary->setItemText(boxImaginary->currentIndex(), QString());
 	} else if (selected == 1) {
-		boxReal->setCurrentItem(t->colIndex(l[0]));
-		boxImaginary->setCurrentText(QString());
+		boxReal->setCurrentIndex(t->colIndex(l[0]));
+		boxImaginary->setItemText(boxImaginary->currentIndex(), QString());
 	} else {
-		boxReal->setCurrentItem(t->colIndex(l[0]));
-		boxImaginary->setCurrentItem(t->colIndex(l[1]));
+		boxReal->setCurrentIndex(t->colIndex(l[0]));
+		boxImaginary->setCurrentIndex(t->colIndex(l[1]));
 	}
 }
 
