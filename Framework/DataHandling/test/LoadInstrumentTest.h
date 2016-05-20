@@ -66,7 +66,7 @@ public:
         (*e)[j] = (i + j) % 78;
       }
       // Populate the workspace.
-      ws2D->histogram(i).setPoints(timeChannelsVec);
+      ws2D->setPoints(i, timeChannelsVec);
       ws2D->setData(i, v, e);
     }
 

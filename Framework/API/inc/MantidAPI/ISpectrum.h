@@ -4,14 +4,11 @@
 #include "MantidKernel/System.h"
 #include "MantidGeometry/IDTypes.h"
 #include "MantidKernel/cow_ptr.h"
+#include "MantidHistogramData/Histogram.h"
 
 #include <set>
 
 namespace Mantid {
-namespace HistogramData {
-class Histogram;
-class HistogramX;
-}
 namespace API {
 
 /** A "spectrum" is an object that holds the data for a particular spectrum,
@@ -125,8 +122,26 @@ public:
   virtual bool hasDx() const;
   virtual void resetHasDx();
 
-  virtual const HistogramData::Histogram &histogram() const = 0;
-  virtual HistogramData::Histogram &histogram() = 0;
+  HistogramData::Histogram histogram() const { return histogramRef(); }
+
+  HistogramData::BinEdges binEdges() const { return histogramRef().binEdges(); }
+  HistogramData::Points points() const { return histogramRef().binEdges(); }
+  template <typename... T> void setBinEdges(T &&... data) {
+    mutableHistogramRef().setBinEdges(std::forward<T>(data)...);
+  }
+  template <typename... T> void setPoints(T &&... data) {
+    mutableHistogramRef().setPoints(std::forward<T>(data)...);
+  }
+  const HistogramData::HistogramX &x() const { return histogramRef().x(); }
+  HistogramData::HistogramX &mutableX() {
+    return mutableHistogramRef().mutableX();
+  }
+  Kernel::cow_ptr<HistogramData::HistogramX> sharedX() const {
+    return histogramRef().sharedX();
+  }
+  void setSharedX(const Kernel::cow_ptr<HistogramData::HistogramX> &x) {
+    mutableHistogramRef().setSharedX(x);
+  }
 
 protected:
   /// The spectrum number of this spectrum
@@ -140,6 +155,10 @@ protected:
 
   /// Flag to indicate if Dx (X error) is being used or not
   mutable bool m_hasDx;
+
+private:
+  virtual const HistogramData::Histogram &histogramRef() const = 0;
+  virtual HistogramData::Histogram &mutableHistogramRef() = 0;
 };
 
 } // namespace API

@@ -31,7 +31,6 @@
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/INearestNeighbours.h"
 #include "MantidKernel/cow_ptr.h"
-#include "MantidHistogramData/Histogram.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -98,13 +97,18 @@ public:
     std::fill(eValues.begin(), eValues.end(), 0.0);
   }
 
-  const HistogramData::Histogram &histogram() const { return m_histogram; }
-  HistogramData::Histogram &histogram() { return m_histogram; }
-
 protected:
   HistogramData::Histogram m_histogram;
   MantidVec data;
   MantidVec data_E;
+
+private:
+  const HistogramData::Histogram &histogramRef() const override {
+    return m_histogram;
+  }
+  HistogramData::Histogram &mutableHistogramRef() override {
+    return m_histogram;
+  }
 };
 
 //===================================================================================================================

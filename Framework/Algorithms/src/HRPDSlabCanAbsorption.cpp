@@ -130,7 +130,7 @@ void HRPDSlabCanAbsorption::exec() {
       angleFactor = 1.0 / std::abs(cos(theta));
     }
 
-    const auto lambdas = workspace->histogram(i).points();
+    const auto lambdas = workspace->points(i);
     for (size_t j = 0; j < specSize; ++j) {
       const double lambda = lambdas[j];
 

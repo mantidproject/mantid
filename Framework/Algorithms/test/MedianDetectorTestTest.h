@@ -204,7 +204,7 @@ public:
     (*bigEnough)[0] = 1.2 * m_YSum * (0.5 * Nhist);
 
     for (int j = 0; j < Nhist; ++j) {
-      m_2DWS->histogram(j).setBinEdges(x);
+      m_2DWS->setBinEdges(j, x);
       boost::shared_ptr<MantidVec> spectrum = boost::make_shared<MantidVec>();
       // the spectravalues will be multiples of the random numbers above
       for (int l = 0; l < specLength - 1; ++l) {

@@ -146,7 +146,7 @@ void InterpolatingRebin::outputYandEValues(
   Progress prog(this, 0.0, 1.0, histnumber);
   for (int hist = 0; hist < histnumber; ++hist) {
     // get const references to input Workspace arrays (no copying)
-    const auto &XValues = inputW->histogram(hist).binEdges();
+    const auto &XValues = inputW->binEdges(hist);
     const MantidVec &YValues = inputW->readY(hist);
     const MantidVec &YErrors = inputW->readE(hist);
 
@@ -164,7 +164,7 @@ void InterpolatingRebin::outputYandEValues(
     }
 
     // Populate the output workspace X values
-    outputW->histogram(hist).setBinEdges(XValues_new);
+    outputW->setBinEdges(hist, XValues_new);
 
     prog.report();
   }

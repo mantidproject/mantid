@@ -86,7 +86,7 @@ DataObjects::Workspace2D_sptr PoldiAutoCorrelationCore::finalizeCalculation(
 
   outputWorkspace->dataY(0) = correctedCorrelatedIntensities;
 
-  outputWorkspace->histogram(0).setPoints(qValues);
+  outputWorkspace->setPoints(0, qValues);
 
   return outputWorkspace;
 }

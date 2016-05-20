@@ -8,7 +8,6 @@
 #include <boost/scoped_ptr.hpp>
 #endif
 
-#include "MantidHistogramData/Histogram.h"
 #include "MantidAPI/DllConfig.h"
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/IMDWorkspace.h"
@@ -180,15 +179,34 @@ public:
   /// index.
   virtual const ISpectrum *getSpectrum(const size_t index) const = 0;
 
-  /// Return reference to Histogram at the given workspace index.
-  HistogramData::Histogram &histogram(const size_t index) {
-    invalidateCommonBinsFlag();
+  /// Returns the Histogram at the given workspace index.
+  HistogramData::Histogram histogram(const size_t index) const {
     return getSpectrum(index)->histogram();
   }
-
-  /// Return const reference to Histogram at the given workspace index.
-  const HistogramData::Histogram &histogram(const size_t index) const {
-    return getSpectrum(index)->histogram();
+  HistogramData::BinEdges binEdges(const size_t index) const {
+    return getSpectrum(index)->binEdges();
+  }
+  HistogramData::Points points(const size_t index) const {
+    return getSpectrum(index)->binEdges();
+  }
+  template <typename... T> void setBinEdges(const size_t index, T &&... data) {
+    getSpectrum(index)->setBinEdges(std::forward<T>(data)...);
+  }
+  template <typename... T> void setPoints(const size_t index, T &&... data) {
+    getSpectrum(index)->setPoints(std::forward<T>(data)...);
+  }
+  const HistogramData::HistogramX &x(const size_t index) const {
+    return getSpectrum(index)->x();
+  }
+  HistogramData::HistogramX &mutableX(const size_t index) {
+    return getSpectrum(index)->mutableX();
+  }
+  Kernel::cow_ptr<HistogramData::HistogramX> sharedX(const size_t index) const {
+    return getSpectrum(index)->sharedX();
+  }
+  void setSharedX(const size_t index,
+                  const Kernel::cow_ptr<HistogramData::HistogramX> &x) {
+    getSpectrum(index)->setSharedX(x);
   }
 
   // Methods for getting read-only access to the data.

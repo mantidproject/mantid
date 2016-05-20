@@ -353,7 +353,7 @@ void ResampleX::exec() {
           g_log.debug() << "delta[wkspindex=" << wkspIndex << "] = " << delta
                         << " xmin=" << xmins[wkspIndex]
                         << " xmax=" << xmaxs[wkspIndex] << "\n";
-          outputEventWS->histogram(wkspIndex).setBinEdges(xValues);
+          outputEventWS->setBinEdges(wkspIndex, xValues);
           prog.report(name()); // Report progress
           PARALLEL_END_INTERUPT_REGION
         }
@@ -389,7 +389,7 @@ void ResampleX::exec() {
             this->determineBinning(xValues, xmins[wkspIndex], xmaxs[wkspIndex]);
         g_log.debug() << "delta[wkspindex=" << wkspIndex << "] = " << delta
                       << "\n";
-        outputWS->histogram(wkspIndex).setBinEdges(xValues);
+        outputWS->setBinEdges(wkspIndex, xValues);
 
         // Get a const event list reference. inputEventWS->dataY() doesn't work.
         const EventList &el = inputEventWS->getEventList(wkspIndex);
@@ -481,7 +481,7 @@ void ResampleX::exec() {
       }
 
       // Populate the output workspace X values
-      outputWS->histogram(wkspIndex).setBinEdges(XValues_new);
+      outputWS->setBinEdges(wkspIndex, XValues_new);
 
       prog.report(name());
       PARALLEL_END_INTERUPT_REGION

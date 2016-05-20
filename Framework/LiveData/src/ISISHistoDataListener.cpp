@@ -433,7 +433,7 @@ void ISISHistoDataListener::getData(int period, int index, int count,
 
   for (size_t i = 0; i < static_cast<size_t>(count); ++i) {
     size_t wi = workspaceIndex + i;
-    workspace->histogram(wi).setBinEdges(m_bins[m_timeRegime]);
+    workspace->setBinEdges(wi, m_bins[m_timeRegime]);
     MantidVec &y = workspace->dataY(wi);
     MantidVec &e = workspace->dataE(wi);
     workspace->getSpectrum(wi)

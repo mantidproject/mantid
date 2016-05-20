@@ -399,8 +399,8 @@ public:
     auto tinyWS = MatrixWorkspace_sptr(new Workspace2D());
     // 2 spectra, 2 x values, 1 y value per spectra
     tinyWS->initialize(2, 2, 1);
-    tinyWS->histogram(0).setBinEdges(x);
-    tinyWS->histogram(1).setBinEdges(x);
+    tinyWS->setBinEdges(0, x);
+    tinyWS->setBinEdges(1, x);
     tinyWS->setData(0, detData, e);
     tinyWS->setData(1, monData, e);
 

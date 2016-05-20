@@ -384,7 +384,7 @@ void GetAllEi::exec() {
     Signal[i] = peaks[i].height;
     Error[i] = peaks[i].sigma;
   }
-  result_ws->histogram(0).setPoints(peaks_positions);
+  result_ws->setPoints(0, peaks_positions);
 
   setProperty("OutputWorkspace", result_ws);
 }

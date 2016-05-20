@@ -344,7 +344,7 @@ Q1D2::setUpOutputWorkspace(const std::vector<double> &binParams) const {
   outputWS->setYUnitLabel("1/cm");
 
   // Set the X vector for the output workspace
-  outputWS->histogram(0).setBinEdges(XOut);
+  outputWS->setBinEdges(0, XOut);
   outputWS->setDistribution(true);
 
   outputWS->getSpectrum(0)->clearDetectorIDs();

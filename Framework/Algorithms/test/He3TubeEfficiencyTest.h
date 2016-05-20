@@ -184,7 +184,7 @@ private:
     x.mutableData()[nbins] = static_cast<double>((1. + nbins) / 10.);
 
     for (int i = 0; i < nspecs; i++) {
-      space2D->histogram(i).setBinEdges(x);
+      space2D->setBinEdges(i, x);
       space2D->setData(i, y, e);
       space2D->getSpectrum(i)->setSpectrumNo(i);
     }

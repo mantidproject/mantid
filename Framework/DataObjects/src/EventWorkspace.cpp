@@ -749,7 +749,7 @@ void EventWorkspace::setAllX(const HistogramData::BinEdges &x) {
   for (; i != this->data.end(); ++i) {
     // This is an EventWorkspace, so changing X size is ok as long as we clear
     // the MRU below, i.e., we bypass the size check of Histogram::setBinEdges.
-    (*i)->histogram().setX(x.cowData());
+    (*i)->setX(x.cowData());
   }
 
   // Clear MRU lists now, free up memory

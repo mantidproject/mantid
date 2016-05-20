@@ -96,7 +96,7 @@ void TOFSANSResolutionByPixel::exec() {
   // create interpolation table from sigmaModeratorVSwavelength
   Kernel::Interpolation lookUpTable;
 
-  const auto xInterpolate = sigmaModeratorVSwavelength->histogram(0).points();
+  const auto xInterpolate = sigmaModeratorVSwavelength->points(0);
   const MantidVec yInterpolate = sigmaModeratorVSwavelength->readY(0);
 
   // prefer the input to be a pointworkspace and create interpolation function

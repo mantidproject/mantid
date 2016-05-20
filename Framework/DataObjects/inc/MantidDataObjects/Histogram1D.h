@@ -4,7 +4,6 @@
 #include "MantidAPI/ISpectrum.h"
 #include "MantidKernel/cow_ptr.h"
 #include "MantidKernel/System.h"
-#include "MantidHistogramData/Histogram.h"
 
 namespace Mantid {
 namespace DataObjects {
@@ -100,8 +99,17 @@ public:
     return ((readX().size() + refY->size() + refE->size()) * sizeof(double));
   }
 
-  const HistogramData::Histogram &histogram() const override;
-  HistogramData::Histogram &histogram() override;
+  void setHistogram(const HistogramData::Histogram &other) {
+    mutableHistogramRef() = other;
+  }
+
+private:
+  const HistogramData::Histogram &histogramRef() const override {
+    return m_histogram;
+  }
+  HistogramData::Histogram &mutableHistogramRef() override {
+    return m_histogram;
+  }
 };
 
 } // namespace DataObjects

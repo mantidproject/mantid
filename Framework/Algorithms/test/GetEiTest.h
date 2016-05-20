@@ -250,8 +250,8 @@ private:
       }
       xdata.mutableData()[i] = xValue;
     }
-    testWS->histogram(0).setBinEdges(xdata);
-    testWS->histogram(1).setBinEdges(xdata);
+    testWS->setBinEdges(0, xdata);
+    testWS->setBinEdges(1, xdata);
     return testWS;
   }
 

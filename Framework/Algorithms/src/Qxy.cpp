@@ -382,7 +382,7 @@ Qxy::setUpOutputWorkspace(API::MatrixWorkspace_const_sptr inputWorkspace) {
 
   // Fill the X vectors in the output workspace
   for (int i = 0; i < bins - 1; ++i) {
-    outputWorkspace->histogram(i).setBinEdges(axis);
+    outputWorkspace->setBinEdges(i, axis);
     for (int j = 0; j < bins - j; ++j) {
       outputWorkspace->dataY(i)[j] = std::numeric_limits<double>::quiet_NaN();
       outputWorkspace->dataE(i)[j] = std::numeric_limits<double>::quiet_NaN();

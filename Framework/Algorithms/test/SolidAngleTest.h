@@ -42,7 +42,7 @@ public:
     }
 
     for (int j = 0; j < Nhist; ++j) {
-      space2D->histogram(j).setBinEdges(x);
+      space2D->setBinEdges(j, x);
       space2D->setData(j, a, e);
       // Just set the spectrum number to match the index
       space2D->getSpectrum(j)->setSpectrumNo(j + 1);

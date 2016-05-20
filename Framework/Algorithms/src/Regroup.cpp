@@ -93,7 +93,7 @@ void Regroup::exec() {
     // output data arrays are implicitly filled by function
     rebin(XValues, YValues, YErrors, xoldIndex, YValues_new, YErrors_new, dist);
 
-    outputW->histogram(hist).setBinEdges(XValues_new);
+    outputW->setBinEdges(hist, XValues_new);
 
     if (hist % progress_step == 0) {
       progress(double(hist) / histnumber);

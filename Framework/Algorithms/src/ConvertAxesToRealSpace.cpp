@@ -242,7 +242,7 @@ void ConvertAxesToRealSpace::exec() {
   int nOutputHist = static_cast<int>(outputWs->getNumberHistograms());
   PARALLEL_FOR1(outputWs)
   for (int i = 0; i < nOutputHist; ++i) {
-    outputWs->histogram(i).setPoints(x);
+    outputWs->setPoints(i, x);
   }
 
   // insert the data into the new workspace

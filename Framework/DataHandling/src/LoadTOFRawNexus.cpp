@@ -428,7 +428,7 @@ void LoadTOFRawNexus::loadBank(const std::string &nexusfilename,
     spec->setSpectrumNo(specnum_t(wi + 1));
     spec->setDetectorID(pixel_id[i - iPart]);
     // Set the shared X pointer
-    spec->histogram().setBinEdges(X);
+    spec->setBinEdges(X);
 
     // Extract the Y
     MantidVec &Y = spec->dataY();

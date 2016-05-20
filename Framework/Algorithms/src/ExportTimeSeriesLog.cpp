@@ -339,8 +339,8 @@ void ExportTimeSeriesLog::setupEventWorkspace(
 
   // Now, create a default X-vector for histogramming, with just 2 bins.
   std::vector<WeightedEventNoTime> &events = outEL.getWeightedEventsNoTime();
-  outEventWS->histogram(0).setBinEdges(
-      HistogramData::BinEdges{events.begin()->tof(), events.rbegin()->tof()});
+  outEventWS->setBinEdges(0, HistogramData::BinEdges{events.begin()->tof(),
+                                                     events.rbegin()->tof()});
 
   return;
 }

@@ -162,7 +162,7 @@ void LoadSPE::exec() {
   Progress progress(this, 0, 1, nhist);
   for (size_t j = 0; j < nhist; ++j) {
     // Set the common X vector
-    workspace->histogram(j).setBinEdges(XValues);
+    workspace->setBinEdges(j, XValues);
     // Read in the Y & E data
     readHistogram(speFile, workspace, j);
 

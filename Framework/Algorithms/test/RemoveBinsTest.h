@@ -233,8 +233,8 @@ public:
 
     //   0     2     5     6       Y
 
-    testWorkspace->histogram(0).setBinEdges(X);
-    testWorkspace->histogram(1).setBinEdges(X);
+    testWorkspace->setBinEdges(0, X);
+    testWorkspace->setBinEdges(1, X);
     testWorkspace->setData(0, Y, Y);
     testWorkspace->setData(1, Y, Y);
 

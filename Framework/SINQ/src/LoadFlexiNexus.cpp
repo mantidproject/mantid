@@ -170,7 +170,7 @@ void LoadFlexiNexus::load2DWorkspace(NeXus::File *fin) {
     // Create and fill another vector for the errors, containing sqrt(count)
     Mantid::MantidVec &E = ws->dataE(wsIndex);
     std::transform(Y.begin(), Y.end(), E.begin(), dblSqrt);
-    ws->histogram(wsIndex).setX(x);
+    ws->setX(wsIndex, x);
     // Xtof		ws->getAxis(1)->spectraNo(i)= i;
     ws->getSpectrum(wsIndex)
         ->setSpectrumNo(static_cast<specnum_t>(yData[wsIndex]));

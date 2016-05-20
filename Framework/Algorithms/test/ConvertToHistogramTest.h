@@ -51,7 +51,7 @@ public:
     Points x(numYPoints);
     std::iota(begin(x), end(x), 0.0);
     for (int i = 0; i < numSpectra; ++i) {
-      testWS->histogram(i).setPoints(x);
+      testWS->setPoints(i, x);
     }
 
     TS_ASSERT_EQUALS(testWS->isHistogramData(), false);

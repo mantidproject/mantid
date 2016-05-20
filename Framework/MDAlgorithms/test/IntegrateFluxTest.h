@@ -356,7 +356,7 @@ private:
       *i = *(i - 1) + 0.3;
     }
     for (size_t spec = 0; spec != ws->getNumberHistograms(); ++spec) {
-      ws->histogram(spec).setBinEdges(x);
+      ws->setBinEdges(spec, x);
       auto &y = ws->dataY(spec);
       for (auto j = y.begin(); j != y.end(); ++j) {
         auto i = std::distance(y.begin(), j);
@@ -376,7 +376,7 @@ private:
       *i = tmp *(1.0 + 0.0001 * tmp) + 0.3;
     }
     for (size_t spec = 0; spec != ws->getNumberHistograms(); ++spec) {
-      ws->histogram(spec).setBinEdges(x);
+      ws->setBinEdges(spec, x);
       auto &y = ws->dataY(spec);
       for (auto j = y.begin(); j != y.end(); ++j) {
         auto i = std::distance(y.begin(), j);
@@ -395,7 +395,7 @@ private:
       *i = *(i - 1) + 0.3;
     }
     for (size_t spec = 0; spec != ws->getNumberHistograms(); ++spec) {
-      ws->histogram(spec).setBinEdges(x);
+      ws->setBinEdges(spec, x);
       auto &y = ws->dataY(spec);
       for (auto j = y.begin(); j != y.end(); ++j) {
         auto i = std::distance(y.begin(), j);
@@ -416,7 +416,7 @@ private:
       *i = *(i - 1) + 0.3;
     }
     for (size_t spec = 0; spec != ws->getNumberHistograms(); ++spec) {
-      ws->histogram(spec).setPoints(x);
+      ws->setPoints(spec, x);
       auto &y = ws->dataY(spec);
       for (auto j = y.begin(); j != y.end(); ++j) {
         auto i = std::distance(y.begin(), j);
@@ -436,7 +436,7 @@ private:
       *i = tmp *(1.0 + 0.0001 * tmp) + 0.3;
     }
     for (size_t spec = 0; spec != ws->getNumberHistograms(); ++spec) {
-      ws->histogram(spec).setPoints(x);
+      ws->setPoints(spec, x);
       auto &y = ws->dataY(spec);
       for (auto j = y.begin(); j != y.end(); ++j) {
         auto i = std::distance(y.begin(), j);

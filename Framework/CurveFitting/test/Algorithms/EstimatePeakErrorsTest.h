@@ -283,7 +283,7 @@ private:
     std::vector<double> e(n, 1.0);
 
     fun.function(x, y);
-    ws->histogram(0).setPoints(x.toVector());
+    ws->setPoints(0, x.toVector());
     ws->getSpectrum(0)->setData(y.toVector(), e);
     assert(n == noise.size());
     for (size_t i = 0; i < n; ++i) {

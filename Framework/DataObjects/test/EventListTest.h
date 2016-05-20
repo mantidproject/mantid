@@ -68,7 +68,7 @@ public:
     // Modify EventList such that is does not contain default values.
     el.setSpectrumNo(42);
     MantidVec x{0.1, 0.2, 0.3};
-    el.histogram() = Histogram(BinEdges(x));
+    el.setX(make_cow<HistogramX>(x));
     el.setDx(x);
 
     EventList other;
@@ -762,7 +762,7 @@ public:
       // bins of 10 microsec
       shared_x.push_back(tof);
     }
-    el.histogram() = Histogram(BinEdges(shared_x));
+    el.setX(make_cow<HistogramX>(shared_x));
     // Do we have the same data in X?
     const EventList el2(el);
     TS_ASSERT(el2.constDataX() == shared_x);
@@ -785,7 +785,7 @@ public:
       // bins of 10 microsec
       shared_x.push_back(tof);
     }
-    el.histogram() = Histogram(BinEdges(shared_x));
+    el.setX(make_cow<HistogramX>(shared_x));
     // Do we have the same data in X?
     const EventList el2(el);
     TS_ASSERT(el2.constDataX() == shared_x);
@@ -855,7 +855,7 @@ public:
       shared_x.push_back(pulse_time);
     }
 
-    eList.histogram() = Histogram(BinEdges(shared_x));
+    eList.setX(make_cow<HistogramX>(shared_x));
     // Do we have the same data in X?
     TS_ASSERT(eList.constDataX() == shared_x);
 
@@ -881,7 +881,7 @@ public:
       shared_x.push_back(pulse_time);
     }
 
-    eList.histogram() = Histogram(BinEdges(shared_x));
+    eList.setX(make_cow<HistogramX>(shared_x));
     // Do we have the same data in X?
     TS_ASSERT(eList.constDataX() == shared_x);
 
@@ -905,7 +905,7 @@ public:
       shared_x.push_back(time_at_sample);
     }
 
-    eList.histogram() = Histogram(BinEdges(shared_x));
+    eList.setX(make_cow<HistogramX>(shared_x));
     // Do we have the same data in X?
     TS_ASSERT(eList.constDataX() == shared_x);
 
@@ -966,7 +966,7 @@ public:
                                                 // microseconds.
     }
 
-    el.histogram() = Histogram(BinEdges(shared_x));
+    el.setX(make_cow<HistogramX>(shared_x));
     // Do we have the same data in X?
     TS_ASSERT(el.constDataX() == shared_x);
 
@@ -1069,7 +1069,7 @@ public:
     for (double tof = BIN_DELTA * 10; tof < BIN_DELTA * (NUMBINS + 1);
          tof += BIN_DELTA)
       shared_x.push_back(tof);
-    el.histogram() = Histogram(BinEdges(shared_x));
+    el.setX(make_cow<HistogramX>(shared_x));
 
     // Get them back
     const EventList el3(el); // need to copy to a const method in order to
@@ -1093,7 +1093,7 @@ public:
     for (double tof = BIN_DELTA * 10; tof < BIN_DELTA * (NUMBINS + 1);
          tof += BIN_DELTA)
       shared_x.push_back(tof);
-    el.histogram() = Histogram(BinEdges(shared_x));
+    el.setX(make_cow<HistogramX>(shared_x));
     const EventList el3(el); // need to copy to a const method in order to
                              // access the data directly.
     MantidVec X = el3.constDataX();

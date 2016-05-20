@@ -138,7 +138,7 @@ void CorrectKiKf::exec() {
 
     MantidVec &yOut = outputWS->dataY(i);
     MantidVec &eOut = outputWS->dataE(i);
-    const auto &xIn = inputWS->histogram(i).points();
+    const auto &xIn = inputWS->points(i);
     const MantidVec &yIn = inputWS->readY(i);
     const MantidVec &eIn = inputWS->readE(i);
     // Copy the energy transfer axis

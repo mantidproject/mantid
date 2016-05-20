@@ -185,7 +185,7 @@ private:
     HistogramX x(N);
     std::iota(x.begin(), x.end(), data.x0);
     x *= data.dX;
-    ws->histogram(0).mutableX() = x;
+    ws->mutableX(0) = x;
     ws->dataY(0) = data.y;
     ws->dataE(0) = data.e;
     return ws;

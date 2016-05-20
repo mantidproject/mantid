@@ -96,7 +96,7 @@ void MDHistoToWorkspace2D::recurseData(IMDHistoWorkspace_sptr inWS,
     for (unsigned int i = 0; i < dim->getNBins(); i++) {
       xData.push_back(dim->getX(i));
     }
-    outWS->histogram(m_currentSpectra).setPoints(xData);
+    outWS->setPoints(m_currentSpectra, xData);
     outWS->getSpectrum(m_currentSpectra)
         ->setSpectrumNo(static_cast<specnum_t>(m_currentSpectra));
     m_currentSpectra++;

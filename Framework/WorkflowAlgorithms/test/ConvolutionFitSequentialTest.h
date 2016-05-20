@@ -284,7 +284,7 @@ public:
     std::generate(begin(x1), end(x1), [&j] { return 0.5 + 0.75 * j++; });
 
     for (int i = 0; i < ylen; i++) {
-      testWs->histogram(i).setBinEdges(x1);
+      testWs->setBinEdges(i, x1);
       testWs->setData(i, y1, e1);
     }
 
@@ -318,7 +318,7 @@ public:
     std::generate(begin(x1), end(x1), [&j] { return 0.5 + 0.75 * j++; });
 
     for (int i = 0; i < totalBins; i++) {
-      testWs->histogram(i).setBinEdges(x1);
+      testWs->setBinEdges(i, x1);
       testWs->setData(i, y1, e1);
     }
 

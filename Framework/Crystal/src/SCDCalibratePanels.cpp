@@ -170,7 +170,7 @@ SCDCalibratePanels::calcWorkspace(DataObjects::PeaksWorkspace_sptr &pwks,
   MatrixWorkspace_sptr mwkspc =
       API::WorkspaceFactory::Instance().create("Workspace2D", 1, N, N);
 
-  mwkspc->histogram(0).setPoints(xRef);
+  mwkspc->setPoints(0, xRef);
   mwkspc->setData(0, yvals, errs);
 
   return boost::dynamic_pointer_cast<DataObjects::Workspace2D>(mwkspc);

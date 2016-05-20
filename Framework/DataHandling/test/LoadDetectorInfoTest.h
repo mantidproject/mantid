@@ -213,7 +213,7 @@ void makeTestWorkspace(const int ndets, const int nbins,
   std::vector<Mantid::MantidVecPtr> data(ndets);
   errors.access().resize(nbins, 1.0);
   for (int j = 0; j < ndets; ++j) {
-    space2D->histogram(j).setBinEdges(xs);
+    space2D->setBinEdges(j, xs);
     data[j].access().resize(nbins, j + 1); // the y values will be different for
                                            // each spectra (1+index_number) but
                                            // the same for each bin

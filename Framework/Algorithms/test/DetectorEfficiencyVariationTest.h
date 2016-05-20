@@ -127,9 +127,9 @@ public:
     boost::shared_ptr<MantidVec> forInputA, forInputB;
 
     for (int j = 0; j < Nhist; ++j) {
-      inputA->histogram(j).setBinEdges(x);
+      inputA->setBinEdges(j, x);
       // both workspaces must have the same x bins
-      inputB->histogram(j).setBinEdges(x);
+      inputB->setBinEdges(j, x);
       forInputA.reset(new MantidVec);
       forInputB.reset(new MantidVec);
       // the spectravalues will be multiples of the random numbers above

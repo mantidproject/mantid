@@ -43,7 +43,7 @@ Points Histogram::points() const {
 /** Sets the internal x-data pointer of the Histogram.
 
   Throws if the size does not match the current size. */
-void Histogram::setSharedX(const Kernel::cow_ptr<HistogramX> &X) {
+void Histogram::setSharedX(const Kernel::cow_ptr<HistogramX> &X) & {
   // TODO Check size only if we have y-data.
   if (m_x->size() != X->size())
     throw std::logic_error("Histogram::setSharedX: size mismatch\n");

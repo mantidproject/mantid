@@ -37,6 +37,7 @@ using std::endl;
 using namespace boost::posix_time;
 using Mantid::HistogramData::BinEdges;
 using Mantid::HistogramData::Histogram;
+using Mantid::HistogramData::HistogramX;
 
 //==========================================================================================
 class EventWorkspaceTest : public CxxTest::TestSuite {
@@ -793,7 +794,7 @@ public:
       MantidVec X;
       for (size_t j = 0; j < 11; j++)
         X.push_back(static_cast<double>(j) * 10.0);
-      ew1->histogram(i) = Histogram(BinEdges(X));
+      ew1->setX(i, make_cow<HistogramX>(X));
 
       // Now it should be 20 in that spot
       const MantidVec &Y_now = ew1->readY(i);

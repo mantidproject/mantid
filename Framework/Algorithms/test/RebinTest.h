@@ -502,7 +502,7 @@ private:
     }
 
     for (int i = 0; i < ylen; i++) {
-      retVal->histogram(i).setBinEdges(x1);
+      retVal->setBinEdges(i, x1);
       retVal->setData(i, y1, e1);
     }
 

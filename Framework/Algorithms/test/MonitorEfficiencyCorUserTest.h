@@ -111,7 +111,7 @@ private:
         -1.75, -1.,   -0.25, 0.5,   1.25, 2.,    2.75, 3.5,   4.25, 5.};
 
     for (size_t wi = 0; wi < dataws->getNumberHistograms(); wi++) {
-      dataws->histogram(wi).setBinEdges(binEdges);
+      dataws->setBinEdges(wi, binEdges);
     }
 
     dataws->getAxis(0)->setUnit("TOF");

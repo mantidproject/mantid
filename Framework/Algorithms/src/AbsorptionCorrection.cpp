@@ -186,7 +186,7 @@ void AbsorptionCorrection::exec() {
     MantidVec &Y = correctionFactors->dataY(i);
 
     // Loop through the bins in the current spectrum every m_xStep
-    const auto lambdas = m_inputWS->histogram(i).points();
+    const auto lambdas = m_inputWS->points(i);
     for (int64_t j = 0; j < specSize; j = j + m_xStep) {
       const double lambda = lambdas[j];
       if (m_emode == 0) // Elastic

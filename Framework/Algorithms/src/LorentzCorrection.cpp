@@ -106,7 +106,7 @@ void LorentzCorrection::exec() {
     const double sinTheta = std::sin(twoTheta / 2);
     double sinThetaSq = sinTheta * sinTheta;
 
-    const auto points = inWS->histogram(i).points();
+    const auto points = inWS->points(i);
     const auto pos = std::find(cbegin(points), cend(points), 0.0);
     if (pos != cend(points)) {
       std::stringstream buffer;

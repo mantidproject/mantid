@@ -25,13 +25,13 @@ public:
     m_right_ws->initialize(1, 3, 3);
 
     auto points = {0.0, 1.0, 2.0};
-    m_right_ws->histogram(0).setPoints(points);
+    m_right_ws->setPoints(0, points);
 
     m_wrong_ws = boost::make_shared<WorkspaceTester>();
     m_wrong_ws->initialize(1, 3, 3);
 
     points = {2.0, 1.0, 0.0};
-    m_wrong_ws->histogram(0).setPoints(points);
+    m_wrong_ws->setPoints(0, points);
   }
 
   void testRight() { TS_ASSERT_EQUALS(validator.isValid(m_right_ws), ""); }

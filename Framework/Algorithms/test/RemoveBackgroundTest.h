@@ -203,7 +203,7 @@ public:
     auto bgWS = boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
         API::WorkspaceFactory::Instance().create("Workspace2D", 1, 2, 1));
     auto binEdges = {0.0, 1.0};
-    bgWS->histogram(0).setBinEdges(binEdges);
+    bgWS->setBinEdges(0, binEdges);
     bgWS->getAxis(0)->setUnit("TOF");
     MantidVec &Ybg = bgWS->dataY(0);
     Ybg[0] = 0;

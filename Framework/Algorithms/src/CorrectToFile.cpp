@@ -86,7 +86,7 @@ void CorrectToFile::exec() {
     Progress prg(this, 0 /*LOAD_TIME*/, 1.0, nOutSpec);
 
     for (int64_t i = 0; i < nOutSpec; ++i) {
-      const auto xIn = toCorrect->histogram(i).points();
+      const auto xIn = toCorrect->points(i);
       outputWS->setX(i, toCorrect->refX(i));
 
       MantidVec &yOut = outputWS->dataY(i);

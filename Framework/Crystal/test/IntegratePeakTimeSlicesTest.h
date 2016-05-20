@@ -83,7 +83,7 @@ public:
                   [&i] { return 18000.0 + i++ * 100; });
 
     for (size_t k = 0; k < wsPtr->getNumberHistograms(); k++)
-      wsPtr->histogram(k).setBinEdges(x_vals);
+      wsPtr->setBinEdges(k, x_vals);
 
     Geometry::Instrument_const_sptr instP = wsPtr->getInstrument();
     IComponent_const_sptr bankC =

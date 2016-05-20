@@ -12,7 +12,6 @@
 #include "MantidKernel/System.h"
 #include "MantidKernel/TimeSplitter.h"
 #include "MantidKernel/Unit.h"
-#include "MantidHistogramData/Histogram.h"
 #include <cstddef>
 #include <iosfwd>
 #include <set>
@@ -360,10 +359,16 @@ public:
                           Mantid::Kernel::Unit *toUnit);
   void convertUnitsQuickly(const double &factor, const double &power);
 
-  const HistogramData::Histogram &histogram() const override;
-  HistogramData::Histogram &histogram() override;
-
 private:
+  const HistogramData::Histogram &histogramRef() const override {
+    return m_histogram;
+  }
+  HistogramData::Histogram &mutableHistogramRef() override {
+    if (mru)
+      mru->deleteIndex(this->m_specNo);
+    return m_histogram;
+  }
+
   /// Histogram object holding the histogram data. Currently only X.
   HistogramData::Histogram m_histogram;
 

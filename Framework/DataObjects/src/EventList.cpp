@@ -4545,15 +4545,5 @@ void EventList::convertUnitsQuickly(const double &factor, const double &power) {
   }
 }
 
-const HistogramData::Histogram &EventList::histogram() const {
-  return m_histogram;
-}
-
-HistogramData::Histogram &EventList::histogram() {
-  if (mru)
-    mru->deleteIndex(this->m_specNo);
-  return m_histogram;
-}
-
 } /// namespace DataObjects
 } /// namespace Mantid

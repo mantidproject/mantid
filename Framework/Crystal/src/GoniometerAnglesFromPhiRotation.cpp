@@ -269,7 +269,7 @@ void GoniometerAnglesFromPhiRotation::exec() {
     Yvals.access().push_back(0.0);
   }
 
-  ws->histogram(0).setPoints(Xvals);
+  ws->setPoints(0, Xvals);
   ws->setData(0, Yvals);
 
   //       -------------Set up other Fit function arguments------------------

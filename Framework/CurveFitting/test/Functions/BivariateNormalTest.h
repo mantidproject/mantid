@@ -127,7 +127,7 @@ public:
     }
     NormalFit.setAttributeValue("CalcVariances", CalcVariances);
 
-    ws->histogram(0).setPoints(x_vec_ptr);
+    ws->setPoints(0, x_vec_ptr);
     ws->setData(0, data);
     ws->setData(1, xvals);
     ws->setData(2, yvals);

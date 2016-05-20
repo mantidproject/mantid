@@ -46,7 +46,7 @@ public:
     MantidVecPtr vec;
     vec.access().resize(5, 1.0);
     for (int j = 0; j < numspec; ++j) {
-      space2D->histogram(j).setBinEdges(x);
+      space2D->setBinEdges(j, x);
       space2D->setData(j, vec, vec);
       space2D->getSpectrum(j)->setSpectrumNo(j);
       space2D->getSpectrum(j)->setDetectorID(j);

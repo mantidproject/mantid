@@ -129,7 +129,7 @@ private:
     e.access()[nbins - 1] = 0.0;
 
     for (int i = 0; i < nspecs; i++) {
-      space2D->histogram(i).setBinEdges(x);
+      space2D->setBinEdges(i, x);
       space2D->setData(i, y, e);
     }
 

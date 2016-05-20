@@ -446,7 +446,7 @@ MatrixWorkspace_sptr ReflectometryTransform::executeNormPoly(
   outWS->replaceAxis(1, verticalAxis);
   HistogramData::BinEdges binEdges(xBinsVec);
   for (size_t i = 0; i < zBinsVec.size() - 1; ++i)
-    outWS->histogram(i).setBinEdges(binEdges);
+    outWS->setBinEdges(i, binEdges);
 
   verticalAxis->title() = m_d1Label;
 

@@ -108,7 +108,7 @@ void Q1DWeighted::exec() {
   setProperty("OutputWorkspace", outputWS);
 
   // Set the X vector for the output workspace
-  outputWS->histogram(0).setBinEdges(XOut);
+  outputWS->setBinEdges(0, XOut);
   MantidVec &YOut = outputWS->dataY(0);
   MantidVec &EOut = outputWS->dataE(0);
 
@@ -149,7 +149,7 @@ void Q1DWeighted::exec() {
         UnitFactory::Instance().create("MomentumTransfer");
     wedge_ws->setYUnitLabel("1/cm");
     wedge_ws->setDistribution(true);
-    wedge_ws->histogram(0).setBinEdges(XOut);
+    wedge_ws->setBinEdges(0, XOut);
     wedge_ws->mutableRun().addProperty("wedge_angle", center_angle, "degrees",
                                        true);
     wedgeWorkspaces.push_back(wedge_ws);

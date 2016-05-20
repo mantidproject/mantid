@@ -138,7 +138,7 @@ private:
     }
     xdata.mutableData()[numBins] = 4 * numBins;
     for (int ihist = 0; ihist < numHists; ihist++)
-      testWS->histogram(ihist).setBinEdges(xdata);
+      testWS->setBinEdges(ihist, xdata);
     return testWS;
   }
 

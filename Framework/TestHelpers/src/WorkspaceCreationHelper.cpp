@@ -78,7 +78,7 @@ Workspace2D_sptr Create1DWorkspaceRand(int size) {
   std::generate(e1.access().begin(), e1.access().end(), randFunc);
   auto retVal = boost::make_shared<Workspace2D>();
   retVal->initialize(1, size, size);
-  retVal->histogram(0).setPoints(size, 1.0);
+  retVal->setPoints(0, size, 1.0);
   retVal->setData(0, y1, e1);
   return retVal;
 }
@@ -90,7 +90,7 @@ Workspace2D_sptr Create1DWorkspaceConstant(int size, double value,
   e1.access().resize(size, error);
   auto retVal = boost::make_shared<Workspace2D>();
   retVal->initialize(1, size, size);
-  retVal->histogram(0).setPoints(size, 1.0);
+  retVal->setPoints(0, size, 1.0);
   retVal->setData(0, y1, e1);
   return retVal;
 }
@@ -112,7 +112,7 @@ Workspace2D_sptr Create1DWorkspaceFib(int size) {
   e1.access().resize(size);
   auto retVal = boost::make_shared<Workspace2D>();
   retVal->initialize(1, size, size);
-  retVal->histogram(0).setPoints(size, 1.0);
+  retVal->setPoints(0, size, 1.0);
   retVal->setData(0, y1, e1);
   return retVal;
 }
@@ -265,7 +265,7 @@ Workspace2D_sptr Create2DWorkspaceBinned(int nhist, int nbins, double x0,
   auto retVal = boost::make_shared<Workspace2D>();
   retVal->initialize(nhist, nbins + 1, nbins);
   for (int i = 0; i < nhist; i++) {
-    retVal->histogram(i).setBinEdges(x);
+    retVal->setBinEdges(i, x);
     retVal->setData(i, y, e);
   }
   return retVal;
@@ -288,7 +288,7 @@ Workspace2D_sptr Create2DWorkspaceBinned(int nhist, const int numBoundaries,
   auto retVal = boost::make_shared<Workspace2D>();
   retVal->initialize(nhist, numBins + 1, numBins);
   for (int i = 0; i < nhist; i++) {
-    retVal->histogram(i).setBinEdges(x);
+    retVal->setBinEdges(i, x);
     retVal->setData(i, y, e);
   }
   return retVal;
@@ -672,8 +672,7 @@ CreateGroupedEventWorkspace(std::vector<std::vector<int>> groups, int numBins,
       for (int i = 0; i < numBins; ++i) {
         x1[i] = x0 + static_cast<double>(i) * binDelta;
       }
-      retVal->histogram(g) =
-          HistogramData::Histogram(HistogramData::BinEdges(x1));
+      retVal->setX(g, make_cow<HistogramData::HistogramX>(x1));
     }
   }
 
@@ -1081,7 +1080,7 @@ RebinnedOutput_sptr CreateRebinnedOutputWorkspace() {
 
   // Now set the axis values
   for (int i = 0; i < numHist; ++i) {
-    outputWS->histogram(i).setBinEdges(x1);
+    outputWS->setBinEdges(i, x1);
     verticalAxis->setValue(i, qaxis[i]);
   }
   // One more to set on the 'y' axis

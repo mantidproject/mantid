@@ -88,7 +88,7 @@ void UnaryOperation::exec() {
     // if it's shared, which isn't thread-safe.
     MantidVec &YOut = out_work->dataY(i);
     MantidVec &EOut = out_work->dataE(i);
-    const auto X = in_work->histogram(i).points();
+    const auto X = in_work->points(i);
     const MantidVec &Y = in_work->readY(i);
     const MantidVec &E = in_work->readE(i);
 

@@ -50,23 +50,30 @@ public:
       throw std::logic_error("Histogram: BinEdges size cannot be 1");
   }
 
+  // Copy and move need to be declared and defaulted, since we need to have the
+  // lvalue reference qualifier on the assignment operators.
+  Histogram(const Histogram &) = default;
+  Histogram(Histogram &&) = default;
+  Histogram &operator=(const Histogram &)& = default;
+  Histogram &operator=(Histogram &&)& = default;
+
   XMode xMode() const noexcept { return m_xMode; }
 
   BinEdges binEdges() const;
   Points points() const;
-  template <typename... T> void setBinEdges(T &&... data);
-  template <typename... T> void setPoints(T &&... data);
+  template <typename... T> void setBinEdges(T &&... data) & ;
+  template <typename... T> void setPoints(T &&... data) & ;
 
   const HistogramX &x() const { return *m_x; }
-  HistogramX &mutableX() { return m_x.access(); }
+  HistogramX &mutableX() & { return m_x.access(); }
 
   Kernel::cow_ptr<HistogramX> sharedX() const { return m_x; }
-  void setSharedX(const Kernel::cow_ptr<HistogramX> &X);
+  void setSharedX(const Kernel::cow_ptr<HistogramX> &X) & ;
 
   // Temporary legacy interface to X
-  void setX(const Kernel::cow_ptr<HistogramX> &X) { m_x = X; }
-  MantidVec &dataX() { return m_x.access().mutableRawData(); }
-  const MantidVec &dataX() const { return m_x->rawData(); }
+  void setX(const Kernel::cow_ptr<HistogramX> &X) & { m_x = X; }
+  MantidVec &dataX() & { return m_x.access().mutableRawData(); }
+  const MantidVec &dataX() const & { return m_x->rawData(); }
   const MantidVec &readX() const { return m_x->rawData(); }
   Kernel::cow_ptr<HistogramX> ptrX() const { return m_x; }
 
@@ -83,7 +90,7 @@ private:
  Any arguments that can be used for constructing a BinEdges object are allowed,
  however, a size check ensures that the Histogram stays valid, i.e., that x and
  y lengths are consistent. */
-template <typename... T> void Histogram::setBinEdges(T &&... data) {
+template <typename... T> void Histogram::setBinEdges(T &&... data) & {
   BinEdges edges(std::forward<T>(data)...);
   // If there is no data changing the size is ok.
   // if(m_y)
@@ -99,7 +106,7 @@ template <typename... T> void Histogram::setBinEdges(T &&... data) {
  Any arguments that can be used for constructing a Points object are allowed,
  however, a size check ensures that the Histogram stays valid, i.e., that x and
  y lengths are consistent. */
-template <typename... T> void Histogram::setPoints(T &&... data) {
+template <typename... T> void Histogram::setPoints(T &&... data) & {
   Points points(std::forward<T>(data)...);
   // If there is no data changing the size is ok.
   // if(m_y)

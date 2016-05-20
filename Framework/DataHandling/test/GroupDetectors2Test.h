@@ -32,6 +32,7 @@ using namespace Mantid::DataObjects;
 using Mantid::detid_t;
 using Mantid::HistogramData::BinEdges;
 using Mantid::HistogramData::Histogram;
+using Mantid::HistogramData::HistogramX;
 
 class GroupDetectors2Test : public CxxTest::TestSuite {
 public:
@@ -57,7 +58,7 @@ public:
     Mantid::MantidVecPtr errors, data[NHIST];
     errors.access().resize(NBINS, 1.0);
     for (int j = 0; j < NHIST; ++j) {
-      space2D->histogram(j).setBinEdges(xs);
+      space2D->setBinEdges(j, xs);
       data[j].access().resize(NBINS, j + 1); // the y values will be different
                                              // for each spectra
                                              // (1+index_number) but the same
@@ -616,8 +617,8 @@ public:
 
     // Create an axis for each pixel.
     for (size_t pix = 0; pix < inputW->getNumberHistograms(); pix++) {
-      inputW->histogram(pix) =
-          Histogram(BinEdges(std::vector<double>{1.0, 2.0, 3.0, 4.0, 1e6}));
+      inputW->setX(pix, make_cow<HistogramX>(
+                            std::vector<double>{1.0, 2.0, 3.0, 4.0, 1e6}));
       inputW->getEventList(pix).addEventQuickly(TofEvent(1000.0));
     }
 
@@ -722,8 +723,8 @@ public:
 
     // Create an axis for each pixel.
     for (size_t pix = 0; pix < inputW->getNumberHistograms(); pix++) {
-      inputW->histogram(pix) =
-          Histogram(BinEdges(std::vector<double>{1.0, 2.0, 3.0, 4.0, 1e6}));
+      inputW->setX(pix, make_cow<HistogramX>(
+                            std::vector<double>{1.0, 2.0, 3.0, 4.0, 1e6}));
       inputW->getEventList(pix).addEventQuickly(TofEvent(1000.0));
     }
 

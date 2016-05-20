@@ -178,7 +178,7 @@ void Rebin::exec() {
         PARALLEL_START_INTERUPT_REGION
 
         // Set the X axis for each output histogram
-        outputWS->histogram(i).setBinEdges(XValues_new);
+        outputWS->setBinEdges(i, XValues_new);
 
         // Get a const event list reference. eventInputWS->dataY() doesn't work.
         const EventList &el = eventInputWS->getEventList(i);
@@ -264,7 +264,7 @@ void Rebin::exec() {
       }
 
       // Populate the output workspace X values
-      outputWS->histogram(hist).setBinEdges(XValues_new);
+      outputWS->setBinEdges(hist, XValues_new);
 
       prog.report(name());
       PARALLEL_END_INTERUPT_REGION

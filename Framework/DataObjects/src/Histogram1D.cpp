@@ -32,10 +32,5 @@ Kernel::cow_ptr<HistogramData::HistogramX> Histogram1D::ptrX() const {
   return m_histogram.ptrX();
 }
 
-const HistogramData::Histogram &Histogram1D::histogram() const {
-  return m_histogram;
-}
-HistogramData::Histogram &Histogram1D::histogram() { return m_histogram; }
-
 } // namespace DataObjects
 } // namespace Mantid
