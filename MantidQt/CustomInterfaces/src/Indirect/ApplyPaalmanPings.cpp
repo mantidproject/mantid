@@ -69,7 +69,7 @@ void ApplyPaalmanPings::run() {
   // get Sample Workspace
   MatrixWorkspace_sptr sampleWs =
       AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-		  m_sampleWorkspaceName);
+          m_sampleWorkspaceName);
   m_originalSampleUnits = sampleWs->getAxis(0)->unit()->unitID();
 
   // If not in wavelength then do conversion
@@ -89,7 +89,7 @@ void ApplyPaalmanPings::run() {
   if (useCan) {
     MatrixWorkspace_sptr canWs =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-			m_containerWorkspaceName);
+            m_containerWorkspaceName);
     m_containerWorkspaceName = m_containerWorkspaceName + "_Shifted";
     IAlgorithm_sptr clone =
         AlgorithmManager::Instance().create("CloneWorkspace");
@@ -239,14 +239,17 @@ void ApplyPaalmanPings::run() {
   if (m_uiForm.ckUseCan->isChecked()) {
     MatrixWorkspace_sptr containerWs =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-			m_containerWorkspaceName);
+            m_containerWorkspaceName);
     auto run = containerWs->run();
     if (run.hasProperty("run_number")) {
       outputWsName +=
           "_" + QString::fromStdString(run.getProperty("run_number")->value());
     } else {
-      auto canCutIndex = QString::fromStdString(m_containerWorkspaceName).indexOf("_");
-      outputWsName += "_" + QString::fromStdString(m_containerWorkspaceName).left(canCutIndex);
+      auto canCutIndex =
+          QString::fromStdString(m_containerWorkspaceName).indexOf("_");
+      outputWsName +=
+          "_" +
+          QString::fromStdString(m_containerWorkspaceName).left(canCutIndex);
     }
   }
 
@@ -410,7 +413,7 @@ bool ApplyPaalmanPings::validate() {
     uiv.checkDataSelectorIsValid("Container", m_uiForm.dsContainer);
 
     // Check can and sample workspaces are the same "type" (reduced or S(Q, w))
-	QString sample = m_uiForm.dsSample->getCurrentDataName();
+    QString sample = m_uiForm.dsSample->getCurrentDataName();
     QString sampleType =
         sample.right(sample.length() - sample.lastIndexOf("_"));
     QString container = m_uiForm.dsContainer->getCurrentDataName();
@@ -510,8 +513,9 @@ void ApplyPaalmanPings::plotPreview(int wsIndex) {
   m_uiForm.ppPreview->clear();
 
   // Plot sample
-  m_uiForm.ppPreview->addSpectrum(
-      "Sample", QString::fromStdString(m_sampleWorkspaceName), wsIndex, Qt::black);
+  m_uiForm.ppPreview->addSpectrum("Sample",
+                                  QString::fromStdString(m_sampleWorkspaceName),
+                                  wsIndex, Qt::black);
 
   // Plot result
   if (!m_pythonExportWsName.empty())
