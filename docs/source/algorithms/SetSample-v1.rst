@@ -24,10 +24,43 @@ relate to the respective argument.
 Environment
 ###########
 
+Specifies the sample enviorment kit to be used. There are two required keywords:
+
+- ``Name``: The name of the predefined kit
+- ``Container``: The id of the container within the predefined kit
+
+See :ref:`SampleEnvironment` concept page for further details on how the creating
+a definition file.
+
+The name of a kit is must be unique for a given instrument. The following
+procedure is used when trying to find a named definition, e.g ``CRYO-01``:
+
+- check the instrument name on the input workspace:
+
+  - if this is a known instrument at a known facility (is in Facilities.xml) then 
+    use these as ``FACILITY`` & ``INSTRUMENT`` respectively
+
+  - else use the default facility and instrument as ``FACILITY`` & ``INSTRUMENT`` respectively
+
+- append ``.xml`` to the given kit name
+
+- find the current list of directories containing instrument definition files
+  (see :ref:`Instrument Definition Directories <InstrumentDefinitionFile_Directories>`
+  for the default directory list)
+
+- for each (``INSTDIR``) in turn:
+
+  - construct a test path ``INSTDIR/sampleenvironments/FACILITY/INSTRUMENT/CRYO-01.xml``
+
+  - if this file exists then select this as the kit file and the search stops
+
+  - otherwise if the file does not exist continue onto the next ``INSTDIR``
+
+
 Geometry
 ########
 
-Specifies the shape of the sample. This container be specified in 1 of 2 ways:
+Specifies the shape of the sample. This can be specified in 1 of 2 ways:
 
 - if an environment is specified that already knows the geometry of the sample
   then the fields of the known geometry container be customized. See :ref:`SampleEnvironment`
@@ -56,73 +89,54 @@ Please see the algorithm documentation for the supported keywords.
 Usage
 -----
 
-The following examples assume that a file called ``CRYO-01.xml`` exists in the
-``instrument/sampleenvironments/FACILITY/INSTRUMENT/`` directory
+The following example uses a test file called ``CRYO-01.xml`` in the
+``[INSTALLDIR]/instrument/sampleenvironments/TEST_LIVE/ISIS_Histogram/`` directory.
 
-.. code-block:: xml
+**Example - Container with preset cylinderical sample geometry**
 
-    <!-- Definition of Cryostat 01-->
-    <environmentspec>
-      <materials>
-        <material id="van" formula="V"/>
-      </materials>
-      <components>
-        <containers>
-          <container id="8mm" material="van">
-            <geometry>
-              <hollow-cylinder id="cyla">
-                <centre-of-bottom-base x="0.0" y="-0.025" z="0.0"/>
-                <axis x="0.0" y="1" z="0" />
-                <inner-radius val="0.008" />
-                <outer-radius val="0.018" />
-                <height val="0.05" />
-              </hollow-cylinder>
-            </geometry>
-            <samplegeometry>
-              <cylinder id="cyla">
-                <centre-of-bottom-base x="0.0" y="-0.025" z="0.0"/>
-                <axis x="0.0" y="1" z="0" />
-                <radius val="0.008" />
-                <height val="0.05" />
-              </cylinder>
-            </samplegeometry>
-          </container>
-        </containers>
-      </components>
-    </environmentspec>
+.. testsetup:: *
 
-**Example - container with preset cylinderical sample geometry**
+   FACILITY_AT_START = config['default.facility']
+   INSTRUMENT_AT_START = config['default.instrument']
+   config['default.facility'] = 'TEST_LIVE'
+   config['default.instrument'] = 'ISIS_Histogram'
 
-.. test-code:: Ex1
+.. testcleanup:: *
+
+   config['default.facility'] = FACILITY_AT_START
+   config['default.instrument'] = INSTRUMENT_AT_START
+
+.. testcode:: Ex1
 
    # A fake host workspace, replace this with your real one.
    ws = CreateSampleWorkspace()
+
    # Use geometry as is from environment defintion
-   SetSample(ws, Environment={'Name': 'CRYO-01', 'Container': '8mm'},
+   SetSample(ws, Environment={'Name': 'CRYO-01', 'Can': '8mm'},
              Material={'ChemicalFormula': '(Li7)2-C-H4-N-Cl6'})
 
 **Example - Override height of preset cylinder sample**
 
-.. test-code:: Ex2
+.. testcode:: Ex2
 
    # A fake host workspace, replace this with your real one.
    ws = CreateSampleWorkspace()
    # Use geometry from environment but set differnet height for sample
-   SetSample(ws, Environment={'Name': 'CRYO-01', 'Container': '8mm'},
-             Geometry={'Height': 4.0}
+   SetSample(ws, Environment={'Name': 'CRYO-01', 'Can': '8mm'},
+             Geometry={'Height': 4.0},
              Material={'ChemicalFormula': '(Li7)2-C-H4-N-Cl6'})
 
 **Example - Override complete sample geometry**
 
-.. test-code:: Ex3
+.. testcode:: Ex3
 
    # A fake host workspace, replace this with your real one.
    ws = CreateSampleWorkspace()
    # Use geometry from environment but set differnet height for sample
-   SetSample(ws, Environment={'Name': 'CRYO-01', 'Container': '8mm'},
+   SetSample(ws, Environment={'Name': 'CRYO-01', 'Can': '8mm'},
              Geometry={'Shape': 'HollowCylinder', 'Height': 4.0, 
                        'InnerRadius': 0.8, 'OuterRadius': 1.0, 
-                       'Center': [0.,0.,0.], 'Axis':1}
+                       'Center': [0.,0.,0.], 'Axis':1},
              Material={'ChemicalFormula': '(Li7)2-C-H4-N-Cl6'})
 
 .. categories::
