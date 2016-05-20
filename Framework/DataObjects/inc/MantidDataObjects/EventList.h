@@ -204,12 +204,14 @@ public:
     throw std::runtime_error("EventList: cannot set Y or E data directly.");
   }
   /// Disallowed data accessors - can't modify Y/E on a EventList
-  void setData(const MantidVecPtr & /*Y*/) override {
+  void
+  setData(const Kernel::cow_ptr<HistogramData::HistogramY> & /*Y*/) override {
     throw std::runtime_error("EventList: cannot set Y or E data directly.");
   }
   /// Disallowed data accessors - can't modify Y/E on a EventList
-  void setData(const MantidVecPtr & /*Y*/,
-               const MantidVecPtr & /*E*/) override {
+  void
+  setData(const Kernel::cow_ptr<HistogramData::HistogramY> & /*Y*/,
+          const Kernel::cow_ptr<HistogramData::HistogramE> & /*E*/) override {
     throw std::runtime_error("EventList: cannot set Y or E data directly.");
   }
 

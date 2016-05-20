@@ -332,7 +332,8 @@ public:
   /** Sets the data in the workspace
   @param index :: the workspace index to set.
   @param Y :: Y vector  */
-  virtual void setData(const std::size_t index, const MantidVecPtr &Y) {
+  virtual void setData(const std::size_t index,
+                       const Kernel::cow_ptr<HistogramData::HistogramY> &Y) {
     getSpectrum(index)->setData(Y);
   }
 
@@ -340,8 +341,9 @@ public:
   @param index :: the workspace index to set.
   @param Y :: Y vector
   @param E :: Error vector   */
-  virtual void setData(const std::size_t index, const MantidVecPtr &Y,
-                       const MantidVecPtr &E) {
+  virtual void setData(const std::size_t index,
+                       const Kernel::cow_ptr<HistogramData::HistogramY> &Y,
+                       const Kernel::cow_ptr<HistogramData::HistogramE> &E) {
     getSpectrum(index)->setData(Y, E);
   }
 

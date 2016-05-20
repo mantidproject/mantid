@@ -9,6 +9,12 @@
 #include "MantidHistogramData/Points.h"
 #include "MantidHistogramData/PointStandardDeviations.h"
 #include "MantidHistogramData/PointVariances.h"
+#include "MantidHistogramData/Counts.h"
+#include "MantidHistogramData/CountVariances.h"
+#include "MantidHistogramData/CountStandardDeviations.h"
+#include "MantidHistogramData/Frequencies.h"
+#include "MantidHistogramData/FrequencyVariances.h"
+#include "MantidHistogramData/FrequencyStandardDeviations.h"
 
 #include <vector>
 
@@ -41,6 +47,8 @@ namespace HistogramData {
 class MANTID_HISTOGRAMDATA_DLL Histogram {
 private:
   Kernel::cow_ptr<HistogramX> m_x;
+  Kernel::cow_ptr<HistogramY> m_y{nullptr};
+  Kernel::cow_ptr<HistogramE> m_e{nullptr};
   // Mutable until Dx legacy interface is removed.
   mutable Kernel::cow_ptr<HistogramDx> m_dx{nullptr};
 
@@ -94,6 +102,20 @@ public:
   const MantidVec &dataX() const & { return m_x->rawData(); }
   const MantidVec &readX() const { return m_x->rawData(); }
   Kernel::cow_ptr<HistogramX> ptrX() const { return m_x; }
+
+  // Temporary legacy interface to Y
+  void setY(const Kernel::cow_ptr<HistogramY> &Y) & { m_y = Y; }
+  MantidVec &dataY() & { return m_y.access().mutableRawData(); }
+  const MantidVec &dataY() const & { return m_y->rawData(); }
+  const MantidVec &readY() const { return m_y->rawData(); }
+  Kernel::cow_ptr<HistogramY> ptrY() const { return m_y; }
+
+  // Temporary legacy interface to E
+  void setE(const Kernel::cow_ptr<HistogramE> &E) & { m_e = E; }
+  MantidVec &dataE() & { return m_e.access().mutableRawData(); }
+  const MantidVec &dataE() const & { return m_e->rawData(); }
+  const MantidVec &readE() const { return m_e->rawData(); }
+  Kernel::cow_ptr<HistogramE> ptrE() const { return m_e; }
 
   // Temporary legacy interface to Dx. Note that accessors mimic the current
   // behavior which always has Dx allocated.

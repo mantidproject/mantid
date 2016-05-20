@@ -136,21 +136,17 @@ void LoadEmptyInstrument::exec() {
 
   // ---- Set the values ----------
   if (!MakeEventWorkspace) {
-    MantidVecPtr x, v, v_monitor;
-    x.access().resize(2);
-    x.access()[0] = 1.0;
-    x.access()[1] = 2.0;
-    v.access().resize(1);
-    v.access()[0] = detector_value;
-    v_monitor.access().resize(1);
-    v_monitor.access()[0] = monitor_value;
+    auto v_y = make_shared<HistogramData::HistogramY>(1, detector_value);
+    auto v_e = make_shared<HistogramData::HistogramE>(1, detector_value);
+    auto v_monitor_y = make_shared<HistogramData::HistogramY>(1, monitor_value);
+    auto v_monitor_e = make_shared<HistogramData::HistogramE>(1, monitor_value);
 
     for (size_t i = 0; i < outWS->getNumberHistograms(); i++) {
       IDetector_const_sptr det = outWS->getDetector(i);
       if (det->isMonitor())
-        outWS->setData(i, v_monitor, v_monitor);
+        outWS->setData(i, v_monitor_y, v_monitor_e);
       else
-        outWS->setData(i, v, v);
+        outWS->setData(i, v_y, v_e);
     }
   }
   // Save in output

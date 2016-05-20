@@ -1229,13 +1229,13 @@ double DataModeHandler::getNewRCRadius() {
  * @param yvals   The y(row) values of the data to be considered
  * @param counts  The intensity at the given row and column (and timeslice)
  */
-void DataModeHandler::setHeightHalfWidthInfo(Mantid::MantidVecPtr &xvals,
-                                             Mantid::MantidVecPtr &yvals,
-                                             Mantid::MantidVecPtr &counts) {
+void DataModeHandler::setHeightHalfWidthInfo(const MantidVec &xvals,
+                                             const MantidVec &yvals,
+                                             const MantidVec &counts) {
   double minCount, maxCount;
-  MantidVec X = xvals.access();
-  MantidVec Y = yvals.access();
-  MantidVec C = counts.access();
+  const auto & X = xvals;
+  const auto & Y = yvals;
+  const auto & C = counts;
   VarxHW = -1;
   VaryHW = -1;
   int N = static_cast<int>(X.size());
@@ -1566,15 +1566,10 @@ void IntegratePeakTimeSlices::SetUpData1(
   for (int i = 0; i < NAttributes + 2; i++)
     StatBase.push_back(0);
 
-  Mantid::MantidVecPtr yvals;
-  Mantid::MantidVecPtr errs;
-  Mantid::MantidVecPtr xvals;
-  Mantid::MantidVecPtr Yvals;
-
-  Mantid::MantidVec &yvalB = yvals.access();
-  Mantid::MantidVec &errB = errs.access();
-  Mantid::MantidVec &xvalB = xvals.access();
-  Mantid::MantidVec &YvalB = Yvals.access();
+  MantidVec yvals;
+  MantidVec errs;
+  MantidVec xvals;
+  MantidVec Yvals;
 
   double TotBoundaryIntensities = 0;
   int nBoundaryCells = 0;
@@ -1636,12 +1631,12 @@ void IntegratePeakTimeSlices::SetUpData1(
         }
 
         N++;
-        yvalB.push_back(intensity);
+        yval.push_back(intensity);
         double sigma = 1;
 
-        errB.push_back(sigma);
-        xvalB.push_back(col);
-        YvalB.push_back(row);
+        err.push_back(sigma);
+        xval.push_back(col);
+        Yval.push_back(row);
 
         xRef.push_back(static_cast<double>(jj));
         jj++;

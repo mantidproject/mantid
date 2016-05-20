@@ -55,25 +55,26 @@ public:
     return m_histogram.ptrX();
   }
 
-  void setData(const MantidVec &Y) override { data = Y; }
+  void setData(const MantidVec &Y) override { m_histogram.dataY() = Y; }
   void setData(const MantidVec &Y, const MantidVec &E) override {
-    data = Y;
-    data_E = E;
+    m_histogram.dataY() = Y;
+    m_histogram.dataE() = E;
   }
 
-  void setData(const MantidVecPtr &Y) override {
-    data.assign(Y->begin(), Y->end());
+  void setData(const cow_ptr<HistogramData::HistogramY> &Y) override {
+    m_histogram.setY(Y);
   }
-  void setData(const MantidVecPtr &Y, const MantidVecPtr &E) override {
-    data.assign(Y->begin(), Y->end());
-    data_E.assign(E->begin(), E->end());
+  void setData(const cow_ptr<HistogramData::HistogramY> &Y,
+               const cow_ptr<HistogramData::HistogramE> &E) override {
+    m_histogram.setY(Y);
+    m_histogram.setE(E);
   }
 
-  MantidVec &dataY() override { return data; }
-  MantidVec &dataE() override { return data_E; }
+  MantidVec &dataY() override { return m_histogram.dataY(); }
+  MantidVec &dataE() override { return m_histogram.dataE(); }
 
-  const MantidVec &dataY() const override { return data; }
-  const MantidVec &dataE() const override { return data_E; }
+  const MantidVec &dataY() const override { return m_histogram.dataY(); }
+  const MantidVec &dataE() const override { return m_histogram.dataE(); }
 
   size_t getMemorySize() const override {
     return data.size() * sizeof(double) * 2;

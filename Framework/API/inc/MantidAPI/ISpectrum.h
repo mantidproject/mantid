@@ -62,8 +62,9 @@ public:
   virtual void setData(const MantidVec &Y) = 0;
   virtual void setData(const MantidVec &Y, const MantidVec &E) = 0;
 
-  virtual void setData(const MantidVecPtr &Y) = 0;
-  virtual void setData(const MantidVecPtr &Y, const MantidVecPtr &E) = 0;
+  virtual void setData(const Kernel::cow_ptr<HistogramData::HistogramY> &Y) = 0;
+  virtual void setData(const Kernel::cow_ptr<HistogramData::HistogramY> &Y,
+                       const Kernel::cow_ptr<HistogramData::HistogramE> &E) = 0;
 
   virtual void clearData() = 0;
 
