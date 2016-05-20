@@ -118,7 +118,6 @@ IntDialog::IntDialog(QWidget* parent, Graph *g, Qt::WFlags fl )
 void IntDialog::accept()
 {
 	QString formula = boxName->toPlainText().remove("\n");
-	//+ review required
 	Integration *i = new Integration(formula, boxVariable->text(),
 										dynamic_cast<ApplicationWindow *>(this->parent()), d_graph, boxStart->value(), boxEnd->value());
 	i->setTolerance(boxTol->text().toDouble());

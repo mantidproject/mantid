@@ -11,7 +11,6 @@ ImportWorkspaceDlg::ImportWorkspaceDlg(QWidget *parent, size_t num) :
                         QString::number(numHists) + "):")
                          .toAscii()
                          .constData());
-  //+ review required
 
   labelLow = new QLabel(tr("From:"));
   lineLow = new QLineEdit;
