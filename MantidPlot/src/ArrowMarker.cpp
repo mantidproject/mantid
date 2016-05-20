@@ -405,21 +405,21 @@ bool ArrowMarker::eventFilter(QObject *, QEvent *e)
 				handler.moveCenter (startPoint());
 				if (handler.contains(me->pos()))
 				{
-					QApplication::setOverrideCursor(QCursor(Qt::SizeAllCursor), true);
+					QApplication::changeOverrideCursor(QCursor(Qt::SizeAllCursor));
 					d_op = MoveStart;
 					return true;
 				}
 				handler.moveCenter (endPoint());
 				if (handler.contains(me->pos()))
 				{
-					QApplication::setOverrideCursor(QCursor(Qt::SizeAllCursor), true);
+					QApplication::changeOverrideCursor(QCursor(Qt::SizeAllCursor));
 					d_op = MoveEnd;
 					return true;
 				}
 				int d = qRound(width() + (int)floor(headLength()*tan(M_PI*headAngle()/180.0) + 0.5));
 				if (dist(me->pos().x(),me->pos().y()) <= d)
 				{
-					QApplication::setOverrideCursor(QCursor(Qt::SizeAllCursor), true);
+					QApplication::changeOverrideCursor(QCursor(Qt::SizeAllCursor));
 					d_op = MoveBoth;
 					d_op_startat = me->pos()-startPoint();
 					return true;
