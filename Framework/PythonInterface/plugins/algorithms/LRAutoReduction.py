@@ -5,6 +5,7 @@ import re
 import platform
 import time
 import mantid
+import numpy as np
 from mantid.api import *
 from mantid.simpleapi import *
 from mantid.kernel import *
@@ -36,6 +37,10 @@ class LRAutoReduction(PythonAlgorithm):
         self.declareProperty(IntArrayProperty("PrimaryFractionRange", [117, 197],
                                               IntArrayLengthValidator(2), direction=Direction.Input),
                              "Pixel range to use for calculating the primary fraction correction.")
+        self.declareProperty(IntArrayProperty("DirectBeamList", [], direction=Direction.Input),
+                             "List of direct beam run numbers (integers)")
+        self.declareProperty(FileProperty("ScalingFactorFile", "", FileAction.OptionalLoad, extensions=['.cfg', '.txt']), "Scaling factor file")
+        self.declareProperty("IncidentMedium", "medium", "Name of the incident medium")
         # ---------------------------------------------------------------------
 
         self.declareProperty("ScalingFactorTOFStep", 200.0, "Bin width in TOF for fitting scaling factors")
@@ -141,7 +146,7 @@ class LRAutoReduction(PythonAlgorithm):
 
         if sequence_number == -1:
             logger.notice("Title: %s" % title)
-            raise RuntimeError, "Could not identify sequence number. Make sure the run title ends with -n where 1 < n < 7"
+            raise(RuntimeError, "Could not identify sequence number. Make sure the run title ends with -n where 1 < n < 7")
 
         return first_run_of_set, sequence_number, is_direct_beam
 
@@ -190,7 +195,7 @@ class LRAutoReduction(PythonAlgorithm):
         elif len(s.data_sets) > 0:
             data_set = s.data_sets[0]
         else:
-            raise RuntimeError, "Invalid reduction template"
+            raise(RuntimeError, "Invalid reduction template")
 
         self.data_series_template = s
 
@@ -270,6 +275,7 @@ class LRAutoReduction(PythonAlgorithm):
         # If so, load it and only overwrite the part we are dealing with here.
         template_file = self._get_output_template_path(first_run_of_set)
         if os.path.isfile(template_file):
+            logger.notice("Writing template: %s" % template_file)
             fd = open(template_file, "r")
             xml_str = fd.read()
             s = DataSeries()
@@ -286,16 +292,18 @@ class LRAutoReduction(PythonAlgorithm):
         # TODO: sync up names with new DAS
         # Get information from meta-data
         meta_data_run = self.event_data.getRun()
-        incident_medium = self._read_property(meta_data_run, "incident_medium", "medium")
-        q_min = self._read_property(meta_data_run, "output_q_min", 0.001)
-        q_step = -abs(self._read_property(meta_data_run, "output_q_step", 0.02))
-        dQ_constant = self._read_property(meta_data_run, "dq_constant", 0.004)
-        dQ_slope = self._read_property(meta_data_run, "dq_slope", 0.02)
-        angle_offset = self._read_property(meta_data_run, "angle_offset", 0.016)
-        angle_offset_err = self._read_property(meta_data_run, "angle_offset_error", 0.001)
-        sf_file = self._read_property(meta_data_run, "scaling_factor_file", "/SNS/REF_L/shared/sf.txt")
-        if len(sf_file.strip()) == 0:
-            logger.error("No scaling factor file supplied")
+        _incident_medium = self.getProperty("IncidentMedium").value
+        incident_medium = self._read_property(meta_data_run, "incident_medium", _incident_medium)
+        
+        q_min = self._read_property(meta_data_run, "output_q_min", 0.001)[0]
+        q_step = -abs(self._read_property(meta_data_run, "output_q_step", 0.02))[0]
+        dQ_constant = self._read_property(meta_data_run, "dq_constant", 0.004)[0]
+        dQ_slope = self._read_property(meta_data_run, "dq_slope", 0.02)[0]
+        angle_offset = self._read_property(meta_data_run, "angle_offset", 0.016)[0]
+        angle_offset_err = self._read_property(meta_data_run, "angle_offset_error", 0.001)[0]
+        
+        _sf_file = self.getProperty("ScalingFactorFile").value
+        sf_file = self._read_property(meta_data_run, "scaling_factor_file", _sf_file)
 
         def _new_data_set():
             d = DataSets()
@@ -375,21 +383,29 @@ class LRAutoReduction(PythonAlgorithm):
         """
         # Wavelength of the data we are reducing
         data_wl = self.event_data.getRun().getProperty('LambdaRequest').value[0]
+        data_thi = self.event_data.getRun().getProperty('thi').value[0]
 
-        direct_beam_runs = self._read_property(meta_data_run, "direct_beam_runs", [])
+        _direct_beam_runs = self.getProperty("DirectBeamList").value
+        direct_beam_runs = self._read_property(meta_data_run, "direct_beam_runs", _direct_beam_runs)
+            
 
         # For each run, load and compare the wavelength
         direct_beam_found = None
         for r in direct_beam_runs:
             direct_beam_data = LoadEventNexus(Filename="REF_L_%s" % r)
+            # Only consider zero-attenuator runs
+            att = direct_beam_data.getRun().getProperty('vAtt').value[0]-1
+            if not att == 0:
+                continue
             wl = direct_beam_data.getRun().getProperty('LambdaRequest').value[0]
-            if data_wl == wl:
+            thi = direct_beam_data.getRun().getProperty('thi').value[0]
+            if np.abs(data_wl - wl) < 0.01 and np.abs(data_thi - thi) < 0.015:
                 direct_beam_found = r
                 break
 
         # Raise an exception if we haven't found our direct beam run
         if direct_beam_found is None:
-            raise RuntimeError, "Could not find a valid direct beam run for wl=%s in %s" % (data_wl, str(direct_beam_runs))
+            raise(RuntimeError, "Could not find a valid direct beam run for wl=%s in %s" % (data_wl, str(direct_beam_runs)))
 
         # Find the direct beam peak
         peak, low_res = self._find_peaks(direct_beam_data)
