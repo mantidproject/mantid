@@ -450,11 +450,10 @@ void ApplicationWindow::init(bool factorySettings, const QStringList &args) {
   QString pyQtInterfacesProperty = QString::fromStdString(
       Mantid::Kernel::ConfigService::Instance().getString(
           "mantidqt.python_interfaces"));
-  foreach (const QString pyQtInterfaceInfo,
-           QStringList::split(" ", pyQtInterfacesProperty)) {
+  foreach (const QString pyQtInterfaceInfo, pyQtInterfacesProperty.split(" ")) {
     QString pyQtInterfaceFile;
     QSet<QString> pyQtInterfaceCategories;
-    const QStringList tokens = QStringList::split("/", pyQtInterfaceInfo);
+    const QStringList tokens = pyQtInterfaceInfo.split("/");
 
     if (tokens.size() == 0) // Empty token - ignore.
     {
@@ -466,7 +465,7 @@ void ApplicationWindow::init(bool factorySettings, const QStringList &args) {
     } else if (tokens.size() ==
                2) // Assume correct interface name and categories.
     {
-      pyQtInterfaceCategories += QStringList::split(";", tokens[0]).toSet();
+      pyQtInterfaceCategories += tokens[0].split(";").toSet();
       pyQtInterfaceFile = tokens[1];
     } else // Too many forward slashes, or no space between two interfaces.
            // Warn user and move on.
@@ -489,7 +488,7 @@ void ApplicationWindow::init(bool factorySettings, const QStringList &args) {
       m_allCategories += pyQtInterfaceCategories;
     } else {
       g_log.warning() << "Could not find interface script: "
-                      << scriptPath.ascii() << "\n";
+                      << scriptPath.toAscii().data() << "\n";
     }
   }
 
@@ -1075,15 +1074,15 @@ void ApplicationWindow::initToolBars() {
   connect(sb, SIGNAL(valueChanged(int)), this, SLOT(setFontSize(int)));
   actionFontSize = formatToolBar->addWidget(sb);
 
-  actionFontBold->addTo(formatToolBar);
-  actionFontItalic->addTo(formatToolBar);
+  formatToolBar->addAction(actionFontBold);
+  formatToolBar->addAction(actionFontItalic);
 
-  actionUnderline->addTo(formatToolBar);
-  actionSuperscript->addTo(formatToolBar);
-  actionSubscript->addTo(formatToolBar);
-  actionGreekSymbol->addTo(formatToolBar);
-  actionGreekMajSymbol->addTo(formatToolBar);
-  actionMathSymbol->addTo(formatToolBar);
+  formatToolBar->addAction(actionUnderline);
+  formatToolBar->addAction(actionSuperscript);
+  formatToolBar->addAction(actionSubscript);
+  formatToolBar->addAction(actionGreekSymbol);
+  formatToolBar->addAction(actionGreekMajSymbol);
+  formatToolBar->addAction(actionMathSymbol);
 
   formatToolBar->setEnabled(false);
   formatToolBar->hide();
@@ -1110,6 +1109,7 @@ void ApplicationWindow::insertTranslatedStrings() {
   standardTools->setWindowTitle(tr("Standard Tools"));
   formatToolBar->setWindowTitle(tr("Format"));
 
+  // Use the implementation of GROUP 4
   fileMenu->changeItem(recentMenuID, tr("&Recent Projects"));
   fileMenu->changeItem(recentFilesMenuID, tr("R&ecent Files"));
 
@@ -1132,10 +1132,10 @@ void ApplicationWindow::initMainMenu() {
   edit = new QMenu(this);
   edit->setObjectName("editMenu");
 
-  edit->insertSeparator();
+  edit->addSeparator();
   edit->addAction(actionCopySelection);
   edit->addAction(actionPasteSelection);
-  edit->insertSeparator();
+  edit->addSeparator();
   edit->addAction(actionDeleteFitTables);
 
   connect(edit, SIGNAL(aboutToShow()), this, SLOT(editMenuAboutToShow()));
@@ -1143,39 +1143,36 @@ void ApplicationWindow::initMainMenu() {
   view = new QMenu(this);
   view->setObjectName("viewMenu");
 
-  view->setCheckable(true);
-
   view->addAction(actionShowExplorer);
   view->addAction(actionShowLog);
 
-  view->insertSeparator();
+  view->addSeparator();
   view->addAction(actionShowScriptWindow); // Mantid
   view->addAction(actionShowScriptInterpreter);
-  view->insertSeparator();
+  view->addSeparator();
 
   mantidUI->addMenuItems(view);
 
-  view->insertSeparator();
+  view->addSeparator();
   toolbarsMenu = view->addMenu(tr("&Toolbars"));
   view->addAction(actionShowConfigureDialog);
-  view->insertSeparator();
+  view->addSeparator();
   view->addAction(actionCustomActionDialog);
 
   graph = new QMenu(this);
   graph->setObjectName("graphMenu");
-  graph->setCheckable(true);
   graph->addAction(actionAddErrorBars);
   graph->addAction(actionRemoveErrorBars);
   graph->addAction(actionShowCurvesDialog);
   graph->addAction(actionAddFunctionCurve);
   graph->addAction(actionNewLegend);
-  graph->insertSeparator();
+  graph->addSeparator();
   graph->addAction(btnLabel);
   graph->addAction(btnArrow);
   graph->addAction(btnLine);
   graph->addAction(actionTimeStamp);
   graph->addAction(actionAddImage);
-  graph->insertSeparator(); // layers section
+  graph->addSeparator(); // layers section
   graph->addAction(actionAddLayer);
   graph->addAction(actionDeleteLayer);
   graph->addAction(actionShowLayerDialog);
@@ -1186,16 +1183,16 @@ void ApplicationWindow::initMainMenu() {
   plot3DMenu->addAction(actionPlot3DHiddenLine);
   plot3DMenu->addAction(actionPlot3DPolygons);
   plot3DMenu->addAction(actionPlot3DWireSurface);
-  plot3DMenu->insertSeparator();
+  plot3DMenu->addSeparator();
   plot3DMenu->addAction(actionPlot3DBars);
   plot3DMenu->addAction(actionPlot3DScatter);
-  plot3DMenu->insertSeparator();
+  plot3DMenu->addSeparator();
   plot3DMenu->addAction(actionImagePlot);
   plot3DMenu->addAction(actionColorMap);
   plot3DMenu->addAction(actionNoContourColorMap);
   plot3DMenu->addAction(actionContourMap);
   plot3DMenu->addAction(actionGrayMap);
-  plot3DMenu->insertSeparator();
+  plot3DMenu->addSeparator();
   // plot3DMenu->addAction(actionPlotHistogram);
 
   matrixMenu = new QMenu(this);
@@ -1209,7 +1206,6 @@ void ApplicationWindow::initMainMenu() {
 
   plotDataMenu = new QMenu(this);
   plotDataMenu->setObjectName("plotDataMenu");
-  plotDataMenu->setCheckable(true);
   connect(plotDataMenu, SIGNAL(aboutToShow()), this,
           SLOT(plotDataMenuAboutToShow()));
 
@@ -1245,7 +1241,6 @@ void ApplicationWindow::initMainMenu() {
 
   windowsMenu = new QMenu(this);
   windowsMenu->setObjectName("windowsMenu");
-  windowsMenu->setCheckable(true);
   connect(windowsMenu, SIGNAL(aboutToShow()), this,
           SLOT(windowsMenuAboutToShow()));
 
@@ -1266,12 +1261,12 @@ void ApplicationWindow::initMainMenu() {
   help->addAction(actionMantidConcepts);
   help->addAction(actionMantidAlgorithms);
   help->addAction(actionmantidplotHelp);
-  help->insertSeparator();
+  help->addSeparator();
   help->addAction(actionHelpBugReports);
   help->addAction(actionAskHelp);
-  help->insertSeparator();
+  help->addSeparator();
   help->addAction(actionFirstTimeSetup);
-  help->insertSeparator();
+  help->addSeparator();
 
   help->addAction(actionAbout);
 
@@ -1301,19 +1296,19 @@ void ApplicationWindow::tableMenuAboutToShow() {
   setAsMenu->addAction(actionSetXCol);
   setAsMenu->addAction(actionSetYCol);
   setAsMenu->addAction(actionSetZCol);
-  setAsMenu->insertSeparator();
+  setAsMenu->addSeparator();
   setAsMenu->addAction(actionSetLabelCol);
   setAsMenu->addAction(actionDisregardCol);
-  setAsMenu->insertSeparator();
+  setAsMenu->addSeparator();
   setAsMenu->addAction(actionSetXErrCol);
   setAsMenu->addAction(actionSetYErrCol);
-  setAsMenu->insertSeparator();
+  setAsMenu->addSeparator();
   setAsMenu->addAction(tr("&Read-only"), this, SLOT(setReadOnlyColumns()));
   setAsMenu->addAction(tr("Read/&Write"), this, SLOT(setReadWriteColumns()));
 
   tableMenu->addAction(actionShowColumnOptionsDialog);
   if (isEditable)
-    tableMenu->insertSeparator();
+    tableMenu->addSeparator();
 
   if (isEditable)
     tableMenu->addAction(actionShowColumnValuesDialog);
@@ -1328,15 +1323,15 @@ void ApplicationWindow::tableMenuAboutToShow() {
 
   if (isEditable)
     tableMenu->addAction(actionClearTable);
-  tableMenu->insertSeparator();
+  tableMenu->addSeparator();
   if (!isFixedColumns)
     tableMenu->addAction(actionAddColToTable);
   tableMenu->addAction(actionShowColsDialog);
-  tableMenu->insertSeparator();
+  tableMenu->addSeparator();
   tableMenu->addAction(actionHideSelectedColumns);
   tableMenu->addAction(actionShowAllColumns);
   if (!isFixedColumns)
-    tableMenu->insertSeparator();
+    tableMenu->addSeparator();
   if (!isFixedColumns)
     tableMenu->addAction(actionMoveColFirst);
   if (!isFixedColumns)
@@ -1347,23 +1342,23 @@ void ApplicationWindow::tableMenuAboutToShow() {
     tableMenu->addAction(actionMoveColLast);
   if (!isFixedColumns)
     tableMenu->addAction(actionSwapColumns);
-  tableMenu->insertSeparator();
-  if (t->isA("Table"))
+  tableMenu->addSeparator();
+  if (isOfType(t, "Table"))
     tableMenu->addAction(actionShowRowsDialog);
   tableMenu->addAction(actionDeleteRows);
-  tableMenu->insertSeparator();
+  tableMenu->addSeparator();
   tableMenu->addAction(actionGoToRow);
   tableMenu->addAction(actionGoToColumn);
-  tableMenu->insertSeparator();
+  tableMenu->addSeparator();
   tableMenu->addAction(actionConvertTable);
-  if (t->isA("Table")) // but not MantidTable
+  if (isOfType(t, "Table")) // but not MantidTable
   {
     tableMenu->addAction(actionConvertTableToWorkspace);
   }
   tableMenu->addAction(actionConvertTableToMatrixWorkspace);
   tableMenu->addAction(actionSortTable);
 
-  tableMenu->insertSeparator();
+  tableMenu->addSeparator();
   tableMenu->addAction(actionShowPlotWizard);
 
   reloadCustomActions();
@@ -1376,10 +1371,10 @@ void ApplicationWindow::plotDataMenuAboutToShow() {
   plotDataMenu->addAction(btnZoomOut);
   plotDataMenu->addAction(actionPanPlot);
   plotDataMenu->addAction(actionUnzoom);
-  plotDataMenu->insertSeparator();
+  plotDataMenu->addSeparator();
   plotDataMenu->addAction(btnCursor);
   plotDataMenu->addAction(btnPicker);
-  plotDataMenu->insertSeparator();
+  plotDataMenu->addSeparator();
   plotDataMenu->addAction(actionDrawPoints);
   plotDataMenu->addAction(btnMovePoints);
   plotDataMenu->addAction(btnRemovePoints);
@@ -1400,20 +1395,20 @@ void ApplicationWindow::plotMenuAboutToShow() {
   specialPlotMenu->addAction(actionPlotSpline);
   specialPlotMenu->addAction(actionPlotVertSteps);
   specialPlotMenu->addAction(actionPlotHorSteps);
-  plot2DMenu->insertSeparator();
+  plot2DMenu->addSeparator();
   plot2DMenu->addAction(actionPlotVerticalBars);
   plot2DMenu->addAction(actionPlotHorizontalBars);
   plot2DMenu->addAction(actionPlotArea);
   plot2DMenu->addAction(actionPlotPie);
   plot2DMenu->addAction(actionPlotVectXYXY);
   plot2DMenu->addAction(actionPlotVectXYAM);
-  plot2DMenu->insertSeparator();
+  plot2DMenu->addSeparator();
 
   QMenu *statMenu = plot2DMenu->addMenu(tr("Statistical &Graphs"));
   statMenu->addAction(actionBoxPlot);
   statMenu->addAction(actionPlotHistogram);
   statMenu->addAction(actionPlotStackedHistograms);
-  statMenu->insertSeparator();
+  statMenu->addSeparator();
   statMenu->addAction(actionStemPlot);
 
   QMenu *panelsMenu = plot2DMenu->addMenu(tr("Pa&nel"));
@@ -1433,11 +1428,16 @@ void ApplicationWindow::plotMenuAboutToShow() {
 
 void ApplicationWindow::customMenu(MdiSubWindow *w) {
   myMenuBar()->clear();
-  myMenuBar()->insertItem(tr("&File"), fileMenu);
+  auto fileMenuAction = myMenuBar()->addMenu(fileMenu);
+  fileMenuAction->setText(tr("&File"));
   fileMenuAboutToShow();
-  myMenuBar()->insertItem(tr("&Edit"), edit);
+
+  auto editMenuAction = myMenuBar()->addMenu(edit);
+  editMenuAction->setText(tr("&Edit"));
   editMenuAboutToShow();
-  myMenuBar()->insertItem(tr("&View"), view);
+
+  auto viewMenuAction = myMenuBar()->addMenu(view);
+  viewMenuAction->setText(tr("&View"));
 
   // these use the same keyboard shortcut (Ctrl+Return) and should not be
   // enabled at the same time
@@ -1456,29 +1456,37 @@ void ApplicationWindow::customMenu(MdiSubWindow *w) {
     else
       actionShowExportASCIIDialog->setEnabled(false);
 
-    if (w->isA("MultiLayer")) {
-      myMenuBar()->insertItem(tr("&Graph"), graph);
-      myMenuBar()->insertItem(tr("&Data"), plotDataMenu);
+    if (isOfType(w, "MultiLayer")) {
+      auto graphMenuAction = myMenuBar()->addMenu(graph);
+      graphMenuAction->setText(tr("&Graph"));
+
+      auto plotDataMenuAction = myMenuBar()->addMenu(plotDataMenu);
+      plotDataMenuAction->setText(tr("&Data"));
+
       plotDataMenuAboutToShow();
       if (m_enableQtiPlotFitting) {
-        myMenuBar()->insertItem(tr("&Analysis"), analysisMenu);
+        auto analysisMenuAction = myMenuBar()->addMenu(analysisMenu);
+        analysisMenuAction->setText(tr("&Analysis"));
         analysisMenuAboutToShow();
       }
-      myMenuBar()->insertItem(tr("For&mat"), format);
+      auto formatMenuAction = myMenuBar()->addMenu(format);
+      formatMenuAction->setText(tr("For&mat"));
+
       format->clear();
       format->addAction(actionShowPlotDialog);
-      format->insertSeparator();
+      format->addSeparator();
       format->addAction(actionShowScaleDialog);
       format->addAction(actionShowAxisDialog);
       actionShowAxisDialog->setEnabled(true);
-      format->insertSeparator();
+      format->addSeparator();
       format->addAction(actionShowGridDialog);
       format->addAction(actionShowTitleDialog);
 
-    } else if (w->isA("Graph3D")) {
+    } else if (isOfType(w, "Graph3D")) {
       disableActions();
 
-      myMenuBar()->insertItem(tr("For&mat"), format);
+      auto formatMenuAction = myMenuBar()->addMenu(format);
+      formatMenuAction->setText(tr("For&mat"));
 
       actionPrint->setEnabled(true);
 
@@ -1529,24 +1537,33 @@ void ApplicationWindow::customMenu(MdiSubWindow *w) {
       format->addAction(actionAnimate);
 
     } else if (w->inherits("Table")) {
-      myMenuBar()->insertItem(tr("&Plot"), plot2DMenu);
-      myMenuBar()->insertItem(tr("&Analysis"), analysisMenu);
+      auto plot2DMenuAction = myMenuBar()->addMenu(plot2DMenu);
+      plot2DMenuAction->setText(tr("&Plot"));
+
+      auto analysisMenuAction = myMenuBar()->addMenu(analysisMenu);
+      analysisMenuAction->setText(tr("&Analysis"));
       analysisMenuAboutToShow();
-      myMenuBar()->insertItem(tr("&Table"), tableMenu);
+
+      auto tableMenuAction = myMenuBar()->addMenu(tableMenu);
+      tableMenuAction->setText(tr("&Table"));
+
       tableMenuAboutToShow();
       actionTableRecalculate->setEnabled(true);
-
-    } else if (w->isA("Matrix")) {
+    } else if (isOfType(w, "Matrix")) {
       actionTableRecalculate->setEnabled(true);
-      myMenuBar()->insertItem(tr("3D &Plot"), plot3DMenu);
-      myMenuBar()->insertItem(tr("&Matrix"), matrixMenu);
+      auto plot3DMenuAction = myMenuBar()->addMenu(plot3DMenu);
+      plot3DMenuAction->setText(tr("3D &Plot"));
+
+      auto matrixMenuAction = myMenuBar()->addMenu(matrixMenu);
+      matrixMenuAction->setText(tr("&Matrix"));
       matrixMenuAboutToShow();
-      myMenuBar()->insertItem(tr("&Analysis"), analysisMenu);
+
+      auto analysisMenuAction = myMenuBar()->addMenu(analysisMenu);
+      analysisMenuAction->setText(tr("&Analysis"));
       analysisMenuAboutToShow();
-
-    } else if (w->isA("TiledWindow")) {
-      myMenuBar()->insertItem(tr("Tiled Window"), tiledWindowMenu);
-
+    } else if (isOfType(w, "TiledWindow")) {
+      auto tiledWindowMenuAction = myMenuBar()->addMenu(tiledWindowMenu);
+      tiledWindowMenuAction->setText(tr("Tiled Window"));
     } else if (!mantidUI->menuAboutToShow(w)) // Note that this call has a
                                               // side-effect (it enables menus)
       disableActions();
@@ -1555,23 +1572,28 @@ void ApplicationWindow::customMenu(MdiSubWindow *w) {
     disableActions();
 
   if (!currentFolder()->isEmpty()) {
-    myMenuBar()->insertItem(tr("&Windows"), windowsMenu);
+    auto windowsMenuAction = myMenuBar()->addMenu(windowsMenu);
+    windowsMenuAction->setText(tr("&Windows"));
     windowsMenuAboutToShow();
   }
   // -- Mantid: add script actions, if any exist --
   QListIterator<QMenu *> mIter(d_user_menus);
   while (mIter.hasNext()) {
     QMenu *item = mIter.next();
-    myMenuBar()->insertItem(tr(item->title()), item);
+    auto itemMenuAction = myMenuBar()->addMenu(item);
+    itemMenuAction->setText(tr(item->title()));
   }
 
-  myMenuBar()->insertItem(tr("&Catalog"), icat);
+  auto catalogMenuAction = myMenuBar()->addMenu(icat);
+  catalogMenuAction->setText(tr("&Catalog"));
 
   // -- INTERFACE MENU --
-  myMenuBar()->insertItem(tr("&Interfaces"), interfaceMenu);
+  auto interfaceMenuAction = myMenuBar()->addMenu(interfaceMenu);
+  interfaceMenuAction->setText(tr("&Interfaces"));
   interfaceMenuAboutToShow();
 
-  myMenuBar()->insertItem(tr("&Help"), help);
+  auto helpMenuAction = myMenuBar()->addMenu(help);
+  helpMenuAction->setText(tr("&Help"));
 
   reloadCustomActions();
 }
@@ -1670,7 +1692,7 @@ void ApplicationWindow::customToolBars(MdiSubWindow *w) {
   if (!w)
     return;
 
-  if (w->isA("MultiLayer") && d_plot_tool_bar) {
+  if (isOfType(w, "MultiLayer") && d_plot_tool_bar) {
     if (!plotTools->isVisible())
       plotTools->show();
     plotTools->setEnabled(true);
@@ -1679,7 +1701,7 @@ void ApplicationWindow::customToolBars(MdiSubWindow *w) {
       formatToolBar->setEnabled(true);
       formatToolBar->show();
     }
-  } else if (w->isA("Graph3D")) {
+  } else if (isOfType(w, "Graph3D")) {
     custom3DActions(w);
   }
 }
@@ -2078,7 +2100,7 @@ void ApplicationWindow::updateTableNames(const QString &oldName,
         g->updateCurveNames(oldName, newName);
     } else if (g3d) {
       QString name = g3d->formula();
-      if (name.contains(oldName, true)) {
+      if (name.contains(oldName, Qt::CaseSensitive)) {
         name.replace(oldName, newName);
         g3d->setPlotAssociation(name);
       }
@@ -17261,3 +17283,8 @@ QString ApplicationWindow::saveProjectFolder(Folder *folder, int &windowCount,
 
   return text;
 }
+
+bool ApplicationWindow::isOfType(QObject* obj, const char* toCompare) const {
+  return strcmp(obj->metaObject()->className(), toCompare) == 0;
+}
+
