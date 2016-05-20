@@ -4462,7 +4462,7 @@ ApplicationWindow *ApplicationWindow::open(const QString &fn,
   QString fname = fn;
   if (fn.endsWith(".qti.gz", Qt::CaseInsensitive) ||
       fn.endsWith(".mantid.gz", Qt::CaseInsensitive)) { // decompress using zlib
-    file_uncompress(tr(fname.toAscii()).toStdString().c_str());
+    file_uncompress(fname.toAscii().data());
     fname = fname.left(fname.size() - 3);
   }
 
