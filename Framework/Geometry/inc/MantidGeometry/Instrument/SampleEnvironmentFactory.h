@@ -34,6 +34,7 @@ namespace Geometry {
  */
 class MANTID_GEOMETRY_DLL ISampleEnvironmentSpecFinder {
 public:
+  virtual ~ISampleEnvironmentSpecFinder() = default;
   virtual SampleEnvironmentSpec_uptr find(const std::string &facility,
                                           const std::string &instrument,
                                           const std::string &name) const = 0;
