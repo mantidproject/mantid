@@ -310,7 +310,7 @@ void ImportASCIIDialog::initPreview(int previewMode)
 				d_preview_table->setNumericPrecision(app->d_decimal_digits);
 				d_preview_stack->addWidget(d_preview_table);
 				enableTableOptions(true);
-			} else if (w->isA("Matrix")){
+			} else if (strcmp(w->metaObject()->className(), "Matrix") == 0){
         d_preview_matrix = new PreviewMatrix(app, dynamic_cast<Matrix *>(w));
 				d_preview_stack->addWidget(d_preview_matrix);
 				enableTableOptions(false);
@@ -604,9 +604,9 @@ void PreviewTable::importASCII(const QString &fname, const QString &sep, int ign
         QTextStream t(&f);
 		QString s = t.readLine();//read first line
 		if (simplifySpaces)
-			s = s.simplifyWhiteSpace();
+			s = s.simplified();
 		else if (stripSpaces)
-			s = s.stripWhiteSpace();
+			s = s.trimmed();
 
 		QStringList line = s.split(sep);
 		int cols = line.size();
@@ -672,9 +672,9 @@ void PreviewTable::importASCII(const QString &fname, const QString &sep, int ign
             if (importComments){//import comments
                 s = t.readLine();//read 2nd line
                 if (simplifySpaces)
-                    s = s.simplifyWhiteSpace();
+                    s = s.simplified();
                 else if (stripSpaces)
-                    s = s.stripWhiteSpace();
+                    s = s.trimmed();
                 line = s.split(sep, QString::SkipEmptyParts);
                 for (int i=0; i<line.size(); i++)
                     comments[startCol + i] = line[i];
@@ -696,9 +696,9 @@ void PreviewTable::importASCII(const QString &fname, const QString &sep, int ign
 		while (!t.atEnd() && row < rows){
 		    s = t.readLine();
 			if (simplifySpaces)
-				s = s.simplifyWhiteSpace();
+				s = s.simplified();
 			else if (stripSpaces)
-				s = s.stripWhiteSpace();
+				s = s.trimmed();
 			line = s.split(sep);
 			int lc = line.size();
 			if (lc > cols) {
