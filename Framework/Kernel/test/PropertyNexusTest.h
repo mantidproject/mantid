@@ -8,7 +8,6 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/Timer.h"
 #include "MantidTestHelpers/NexusTestHelper.h"
-#include <boost/scoped_ptr.hpp>
 #include <cxxtest/TestSuite.h>
 
 using namespace Mantid;
