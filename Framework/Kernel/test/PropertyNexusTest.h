@@ -1,8 +1,8 @@
 #ifndef MANTID_API_PROPERTYNEXUSTEST_H_
 #define MANTID_API_PROPERTYNEXUSTEST_H_
 
-#include "MantidAPI/PropertyNexus.h"
 #include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/PropertyNexus.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/TimeSeriesProperty.h"
@@ -31,7 +31,7 @@ public:
     TS_ASSERT_EQUALS(p->value(), other->value());
   }
 
-  void xtest_saving_then_loading() {
+  void test_saving_then_loading() {
     NexusTestHelper th(true);
     th.createFile("PropertyNexusTest.nxs");
     PropertyWithValue<int> pi("int_val", 123);
@@ -42,12 +42,12 @@ public:
     PropertyWithValue<std::vector<double>> pvd("vector_double_val",
                                                std::vector<double>(2, 1.4));
 
-    PropertyNexus::saveProperty(th.file, &pi);
-    PropertyNexus::saveProperty(th.file, &pu);
-    PropertyNexus::saveProperty(th.file, &pd);
-    PropertyNexus::saveProperty(th.file, &pf);
-    PropertyNexus::saveProperty(th.file, &ps);
-    PropertyNexus::saveProperty(th.file, &pvd);
+    pi.saveProperty(th.file);
+    pu.saveProperty(th.file);
+    pd.saveProperty(th.file);
+    pf.saveProperty(th.file);
+    ps.saveProperty(th.file);
+    pvd.saveProperty(th.file);
 
     TimeSeriesProperty<int> tspi("int_series");
     tspi.addValue(DateAndTime("2011-01-01T00:00:01"), 1234);
@@ -65,10 +65,10 @@ public:
     tsps.addValue(DateAndTime("2011-01-01T00:00:01"), "help me i");
     tsps.addValue(DateAndTime("2011-01-01T00:01:02"), "am stuck in a NXS file");
 
-    PropertyNexus::saveProperty(th.file, &tspi);
-    PropertyNexus::saveProperty(th.file, &tspd);
-    PropertyNexus::saveProperty(th.file, &tspb);
-    PropertyNexus::saveProperty(th.file, &tsps);
+    tspi.saveProperty(th.file);
+    tspd.saveProperty(th.file);
+    tspb.saveProperty(th.file);
+    tsps.saveProperty(th.file);
 
     // ---- Now re-load and compare to the original ones
     // ----------------------------
