@@ -5,7 +5,6 @@
 #include <vector>
 
 #include "MantidAPI/AlgorithmManager.h"
-#include <MantidAPI/FileFinder.h>
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/Progress.h"
 #include "MantidAPI/ScopedWorkspace.h"
@@ -20,6 +19,7 @@
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "Poco/File.h"
+#include <MantidAPI/FileFinder.h>
 
 namespace // anonymous
     {
@@ -823,13 +823,9 @@ double PlotAsymmetryByLogValue::getLogValue(MatrixWorkspace &ws) {
     return value;
   if (convertLogToDouble<int>(property, value, m_logFunc))
     return value;
-  if (convertLogToDouble<long>(property, value, m_logFunc))
-    return value;
   if (convertLogToDouble<long long>(property, value, m_logFunc))
     return value;
   if (convertLogToDouble<unsigned int>(property, value, m_logFunc))
-    return value;
-  if (convertLogToDouble<unsigned long>(property, value, m_logFunc))
     return value;
   if (convertLogToDouble<unsigned long long>(property, value, m_logFunc))
     return value;

@@ -2113,18 +2113,19 @@ void TimeSeriesProperty<std::string>::saveProperty(::NeXus::File *file) {
   file->makeGroup(this->name(), "NXlog", 1);
 
   // Find the max length of any string
-  size_t maxlen = 0;
-  for (auto &value : values)
-    if (value.size() > maxlen)
-      maxlen = value.size();
+  auto max_it = std::max_element(values.begin(), values.end(),
+                   [](const std::string &a, const std::string &b) {
+                     return a.size() < b.size();
+                   });
   // Increment by 1 to have the 0 terminator
-  maxlen++;
+  size_t maxlen = max_it->size() + 1;
   // Copy into one array
   std::vector<char> strs(values.size() * maxlen);
-  auto strs_it = strs.begin();
-  for (const auto &prop : values)
-    std::copy(prop.begin(), prop.end(),
-              std::next(strs_it, static_cast<long>(maxlen)));
+  size_t index = 0;
+  for (const auto &prop : values) {
+    std::copy(prop.begin(), prop.end(), &strs[index]);
+    index += maxlen;
+  }
 
   std::vector<int> dims{static_cast<int>(values.size()),
                         static_cast<int>(maxlen)};
