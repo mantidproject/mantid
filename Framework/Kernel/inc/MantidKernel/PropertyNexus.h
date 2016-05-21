@@ -35,7 +35,7 @@ namespace Kernel {
 */
 namespace PropertyNexus {
 
-DLLExport Mantid::Kernel::Property *loadProperty(::NeXus::File *file,
+DLLExport std::unique_ptr<Property> loadProperty(::NeXus::File *file,
                                                  const std::string &group);
 }
 

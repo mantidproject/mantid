@@ -8,10 +8,13 @@
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/make_unique.h"
 
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/scoped_array.hpp>
+
+#include <memory>
 
 using namespace Mantid::Kernel;
 using namespace ::NeXus;
@@ -37,20 +40,21 @@ namespace PropertyNexus {
  * @return Property *
  */
 template <typename NumT>
-Property *makeProperty(::NeXus::File *file, const std::string &name,
-                       std::vector<Kernel::DateAndTime> &times) {
+std::unique_ptr<Property>
+makeProperty(::NeXus::File *file, const std::string &name,
+             std::vector<Kernel::DateAndTime> &times) {
   std::vector<NumT> values;
   file->getData(values);
   if (times.empty()) {
     if (values.size() == 1) {
-      return new PropertyWithValue<NumT>(name, values[0]);
+      return make_unique<PropertyWithValue<NumT>>(name, values[0]);
     } else {
-      return new ArrayProperty<NumT>(name, values);
+      return make_unique<ArrayProperty<NumT>>(name, values);
     }
   } else {
-    auto prop = new TimeSeriesProperty<NumT>(name);
+    auto prop = make_unique<TimeSeriesProperty<NumT>>(name);
     prop->addValues(times, values);
-    return prop;
+    return std::unique_ptr<Property>(std::move(prop));
   }
 }
 
@@ -61,9 +65,9 @@ Property *makeProperty(::NeXus::File *file, const std::string &name,
 * @param times :: vector of times, empty = single property with value
 * @return Property *
 */
-Property *makeTimeSeriesBoolProperty(::NeXus::File *file,
-                                     const std::string &name,
-                                     std::vector<Kernel::DateAndTime> &times) {
+std::unique_ptr<Property>
+makeTimeSeriesBoolProperty(::NeXus::File *file, const std::string &name,
+                           std::vector<Kernel::DateAndTime> &times) {
   std::vector<uint8_t> savedValues;
   file->getData(savedValues);
   const size_t nvals = savedValues.size();
@@ -71,18 +75,19 @@ Property *makeTimeSeriesBoolProperty(::NeXus::File *file,
   for (size_t i = 0; i < nvals; ++i) {
     realValues[i] = (savedValues[i] != 0);
   }
-  auto prop = new TimeSeriesProperty<bool>(name);
+  auto prop = make_unique<TimeSeriesProperty<bool>>(name);
   prop->addValues(times, realValues);
-  return prop;
+  return std::unique_ptr<Property>(std::move(prop));
 }
 
 /** Make a string/vector\<string\> property */
-Property *makeStringProperty(::NeXus::File *file, const std::string &name,
-                             std::vector<Kernel::DateAndTime> &times) {
+std::unique_ptr<Property>
+makeStringProperty(::NeXus::File *file, const std::string &name,
+                   std::vector<Kernel::DateAndTime> &times) {
   std::vector<std::string> values;
   if (times.empty()) {
     std::string bigString = file->getStrData();
-    return new PropertyWithValue<std::string>(name, bigString);
+    return make_unique<PropertyWithValue<std::string>>(name, bigString);
   } else {
     if (file->getInfo().dims.size() != 2)
       throw std::runtime_error("NXlog loading failed on field " + name +
@@ -95,9 +100,9 @@ Property *makeStringProperty(::NeXus::File *file, const std::string &name,
     for (int i = 0; i < numStrings; i++)
       values.push_back(std::string(data.get() + i * span));
 
-    auto prop = new TimeSeriesProperty<std::string>(name);
+    auto prop = make_unique<TimeSeriesProperty<std::string>>(name);
     prop->addValues(times, values);
-    return prop;
+    return std::unique_ptr<Property>(std::move(prop));
   }
 }
 
@@ -109,7 +114,8 @@ Property *makeStringProperty(::NeXus::File *file, const std::string &name,
  * @param group :: name of NXlog group to open
  * @return Property pointer
  */
-Property *loadProperty(::NeXus::File *file, const std::string &group) {
+std::unique_ptr<Property> loadProperty(::NeXus::File *file,
+                                       const std::string &group) {
   file->openGroup(group, "NXlog");
 
   // Times in second offsets
@@ -151,7 +157,7 @@ Property *loadProperty(::NeXus::File *file, const std::string &group) {
   }
 
   file->openData("value");
-  Property *retVal = nullptr;
+  std::unique_ptr<Property> retVal = nullptr;
   switch (file->getInfo().type) {
   case ::NeXus::FLOAT32:
     retVal = makeProperty<float>(file, group, times);

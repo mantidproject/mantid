@@ -74,46 +74,20 @@ public:
     // ----------------------------
     th.reopenFile();
 
-    check_prop(boost::scoped_ptr<Property>(
-                   PropertyNexus::loadProperty(th.file, "int_val"))
-                   .get(),
-               &pi);
-    check_prop(boost::scoped_ptr<Property>(
-                   PropertyNexus::loadProperty(th.file, "uint_val"))
-                   .get(),
-               &pu);
-    check_prop(boost::scoped_ptr<Property>(
-                   PropertyNexus::loadProperty(th.file, "double_val"))
-                   .get(),
-               &pd);
-    check_prop(boost::scoped_ptr<Property>(
-                   PropertyNexus::loadProperty(th.file, "float_val"))
-                   .get(),
-               &pf);
-    check_prop(boost::scoped_ptr<Property>(
-                   PropertyNexus::loadProperty(th.file, "string_val"))
-                   .get(),
-               &ps);
-    check_prop(boost::scoped_ptr<Property>(
-                   PropertyNexus::loadProperty(th.file, "vector_double_val"))
-                   .get(),
+    check_prop(PropertyNexus::loadProperty(th.file, "int_val").get(), &pi);
+    check_prop(PropertyNexus::loadProperty(th.file, "uint_val").get(), &pu);
+    check_prop(PropertyNexus::loadProperty(th.file, "double_val").get(), &pd);
+    check_prop(PropertyNexus::loadProperty(th.file, "float_val").get(), &pf);
+    check_prop(PropertyNexus::loadProperty(th.file, "string_val").get(), &ps);
+    check_prop(PropertyNexus::loadProperty(th.file, "vector_double_val").get(),
                &pvd);
 
-    check_prop(boost::scoped_ptr<Property>(
-                   PropertyNexus::loadProperty(th.file, "int_series"))
-                   .get(),
-               &tspi);
-    check_prop(boost::scoped_ptr<Property>(
-                   PropertyNexus::loadProperty(th.file, "double_series"))
-                   .get(),
+    check_prop(PropertyNexus::loadProperty(th.file, "int_series").get(), &tspi);
+    check_prop(PropertyNexus::loadProperty(th.file, "double_series").get(),
                &tspd);
-    check_prop(boost::scoped_ptr<Property>(
-                   PropertyNexus::loadProperty(th.file, "bool_series"))
-                   .get(),
+    check_prop(PropertyNexus::loadProperty(th.file, "bool_series").get(),
                &tspb);
-    check_prop(boost::scoped_ptr<Property>(
-                   PropertyNexus::loadProperty(th.file, "string_series"))
-                   .get(),
+    check_prop(PropertyNexus::loadProperty(th.file, "string_series").get(),
                &tsps);
   }
 };
