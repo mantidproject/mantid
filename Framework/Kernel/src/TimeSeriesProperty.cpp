@@ -2113,10 +2113,11 @@ void TimeSeriesProperty<std::string>::saveProperty(::NeXus::File *file) {
   file->makeGroup(this->name(), "NXlog", 1);
 
   // Find the max length of any string
-  auto max_it = std::max_element(values.begin(), values.end(),
-                   [](const std::string &a, const std::string &b) {
-                     return a.size() < b.size();
-                   });
+  auto max_it =
+      std::max_element(values.begin(), values.end(),
+                       [](const std::string &a, const std::string &b) {
+                         return a.size() < b.size();
+                       });
   // Increment by 1 to have the 0 terminator
   size_t maxlen = max_it->size() + 1;
   // Copy into one array
