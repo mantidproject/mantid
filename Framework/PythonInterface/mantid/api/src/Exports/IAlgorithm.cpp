@@ -108,7 +108,7 @@ PyObject *getInputPropertiesWithMandatoryFirst(IAlgorithm &self) {
        ++itr) {
     Property *p = *itr;
     if (p->direction() != Direction::Output) {
-      PyList_Append(names, PyString_FromString(p->name().c_str()));
+      PyList_Append(names, PyBytes_FromString(p->name().c_str()));
     }
   }
   return names;
@@ -130,7 +130,7 @@ PyObject *getAlgorithmPropertiesOrdered(IAlgorithm &self) {
   for (PropertyVector::const_iterator itr = properties.begin(); itr != iend;
        ++itr) {
     Property *p = *itr;
-    PyList_Append(names, PyString_FromString(p->name().c_str()));
+    PyList_Append(names, PyBytes_FromString(p->name().c_str()));
   }
   return names;
 }
@@ -146,7 +146,7 @@ PyObject *getOutputProperties(IAlgorithm &self) {
   PyObject *names = PyList_New(0);
   for (auto p : properties) {
     if (p->direction() == Direction::Output) {
-      PyList_Append(names, PyString_FromString(p->name().c_str()));
+      PyList_Append(names, PyBytes_FromString(p->name().c_str()));
     }
   }
   return names;

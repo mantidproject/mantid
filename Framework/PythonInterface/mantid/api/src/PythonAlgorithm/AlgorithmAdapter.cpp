@@ -145,9 +145,13 @@ bool AlgorithmAdapter<BaseAlgorithm>::isRunning() const {
     PyObject *result = PyObject_CallObject(m_isRunningObj, nullptr);
     if (PyErr_Occurred())
       Environment::throwRuntimeError(true);
-    if (PyBool_Check(result))
-      return PyInt_AsLong(result);
-    else
+    if (PyBool_Check(result)) {
+#if PY_MAJOR_VERSION >= 3
+      return static_cast<bool>(PyLong_AsLong(result));
+#else
+      return static_cast<bool>(PyInt_AsLong(result));
+#endif
+    } else
       throw std::runtime_error(
           "AlgorithmAdapter.isRunning - Expected bool return type.");
   }

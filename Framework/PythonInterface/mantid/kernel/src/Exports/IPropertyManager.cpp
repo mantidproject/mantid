@@ -25,7 +25,8 @@ namespace {
  */
 void setProperty(IPropertyManager &self, const std::string &name,
                  const boost::python::object &value) {
-  if (PyString_Check(value.ptr())) // String values can be set directly
+  // String values can be set directly
+  if (PyBytes_Check(value.ptr()))
   {
     self.setPropertyValue(name, boost::python::extract<std::string>(value));
   } else {

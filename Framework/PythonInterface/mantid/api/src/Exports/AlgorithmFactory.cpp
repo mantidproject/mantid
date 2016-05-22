@@ -40,8 +40,8 @@ PyObject *getRegisteredAlgorithms(AlgorithmFactoryImpl &self,
   PyObject *registered = PyDict_New();
   for (size_t i = 0; i < nkeys; ++i) {
     std::pair<std::string, int> algInfo = self.decodeName(keys[i]);
-    PyObject *name = PyString_FromString(algInfo.first.c_str());
-    PyObject *vers = PyInt_FromLong(algInfo.second);
+    PyObject *name = PyBytes_FromString(algInfo.first.c_str());
+    PyObject *vers = PyLong_FromLong(algInfo.second);
     if (PyDict_Contains(registered, name) == 1) {
       // A list already exists, create a copy and add this version
       PyObject *versions = PyDict_GetItem(registered, name);

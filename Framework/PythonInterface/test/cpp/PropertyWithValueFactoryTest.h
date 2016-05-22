@@ -57,7 +57,7 @@ public:
   }
 
   void test_builtin_type_creates_string_type_property_without_error() {
-    CREATE_PROPERTY_TEST_BODY(std::string, PyString_FromString("unit"));
+    CREATE_PROPERTY_TEST_BODY(std::string, PyBytes_FromString("unit"));
   }
 
   void test_builtin_type_create_double_array_from_tuple_type_property() {
