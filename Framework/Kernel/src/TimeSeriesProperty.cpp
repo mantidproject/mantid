@@ -7,8 +7,6 @@
 
 #include <boost/regex.hpp>
 
-using namespace std;
-
 namespace Mantid {
 namespace Kernel {
 namespace {
@@ -780,7 +778,7 @@ double TimeSeriesProperty<TYPE>::timeAverageValue() const {
     TimeSplitterType filter;
     filter.push_back(SplittingInterval(this->firstTime(), this->lastTime()));
     retVal = this->averageValueInFilter(filter);
-  } catch (exception &) {
+  } catch (std::exception &) {
     // just return nan
     retVal = std::numeric_limits<double>::quiet_NaN();
   }
@@ -978,7 +976,7 @@ void TimeSeriesProperty<TYPE>::addValues(
   size_t length = std::min(times.size(), values.size());
   m_size += length;
   for (size_t i = 0; i < length; ++i) {
-    m_values.emplace_back(times[i], values[i]);
+    m_values.emplace_back(times[i], values[static_cast<size_t>(i)]);
   }
 
   if (!values.empty())
@@ -1309,7 +1307,7 @@ TYPE TimeSeriesProperty<TYPE>::getSingleValue(const DateAndTime &t) const {
       // If query time "t" is later than the end time of the  series
       index = static_cast<int>(m_values.size()) - 1;
     } else if (index > int(m_values.size())) {
-      stringstream errss;
+      std::stringstream errss;
       errss << "TimeSeriesProperty.findIndex() returns index (" << index
             << " ) > maximum defined value " << m_values.size();
       throw std::logic_error(errss.str());
@@ -1360,7 +1358,7 @@ TYPE TimeSeriesProperty<TYPE>::getSingleValue(const DateAndTime &t,
       // If query time "t" is later than the end time of the  series
       index = static_cast<int>(m_values.size()) - 1;
     } else if (index > int(m_values.size())) {
-      stringstream errss;
+      std::stringstream errss;
       errss << "TimeSeriesProperty.findIndex() returns index (" << index
             << " ) > maximum defined value " << m_values.size();
       throw std::logic_error(errss.str());
