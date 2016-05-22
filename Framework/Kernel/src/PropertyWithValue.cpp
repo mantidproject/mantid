@@ -11,13 +11,11 @@ namespace Kernel {
   template DLLExport class PropertyWithValue<std::vector<Type>>;
 
 // Explicit instantiations
-INSTANTIATE(int)
-// INSTANTIATE(long)
-INSTANTIATE(long long)
-INSTANTIATE(unsigned short int)
-INSTANTIATE(unsigned int)
-// INSTANTIATE(unsigned long)
-INSTANTIATE(unsigned long long)
+INSTANTIATE(int32_t)
+INSTANTIATE(int64_t)
+INSTANTIATE(uint16_t)
+INSTANTIATE(uint32_t)
+INSTANTIATE(uint64_t)
 INSTANTIATE(bool)
 INSTANTIATE(OptionalBool)
 INSTANTIATE(double)

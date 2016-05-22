@@ -79,7 +79,7 @@ set ( SRC_FILES
 	src/PropertyManager.cpp
 	src/PropertyManagerDataService.cpp
 	src/PropertyManagerOwner.cpp
-	src/PropertyManagerProperty.cpp
+    src/PropertyManagerProperty.cpp
     src/PropertyNexus.cpp
 	src/PropertyWithValue.cpp
 	src/ProxyInfo.cpp

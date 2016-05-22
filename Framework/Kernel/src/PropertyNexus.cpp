@@ -94,11 +94,11 @@ makeStringProperty(::NeXus::File *file, const std::string &name,
                                ". Expected rank 2.");
     int64_t numStrings = file->getInfo().dims[0];
     int64_t span = file->getInfo().dims[1];
-    boost::scoped_array<char> data(new char[numStrings * span]);
+    auto data = std::make_unique<char[]>(numStrings * span);
     file->getData(data.get());
-    values.reserve(size_t(numStrings));
-    for (int i = 0; i < numStrings; i++)
-      values.push_back(std::string(data.get() + i * span));
+    values.reserve(static_cast<size_t>(numStrings));
+    for (int64_t i = 0; i < numStrings; i++)
+      values.emplace_back(data.get() + i * span);
 
     auto prop = make_unique<TimeSeriesProperty<std::string>>(name);
     prop->addValues(times, values);

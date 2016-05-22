@@ -352,8 +352,6 @@ public:
   }
 
   void saveProperty(::NeXus::File *file) override;
-  void saveProperty(::NeXus::File *file, std::true_type);
-  void saveProperty(::NeXus::File *file, std::false_type);
 
   /** Get the value of the property as a string
    *  @return The property's value
@@ -644,7 +642,7 @@ PROPERTYWITHVALUE_SAVEPROPERTY(uint32_t)
 PROPERTYWITHVALUE_SAVEPROPERTY(int64_t)
 PROPERTYWITHVALUE_SAVEPROPERTY(uint64_t)
 PROPERTYWITHVALUE_SAVEPROPERTY(std::vector<double>)
-PROPERTYWITHVALUE_SAVEPROPERTY(std::vector<int>)
+PROPERTYWITHVALUE_SAVEPROPERTY(std::vector<int32_t>)
 
 template <>
 inline void PropertyWithValue<std::string>::saveProperty(::NeXus::File *file) {
@@ -654,7 +652,9 @@ inline void PropertyWithValue<std::string>::saveProperty(::NeXus::File *file) {
 }
 
 template <typename TYPE>
-inline void PropertyWithValue<TYPE>::saveProperty(::NeXus::File * /*file*/){};
+inline void PropertyWithValue<TYPE>::saveProperty(::NeXus::File *file) {
+  this->saveProperty(file);
+};
 
 template <typename TYPE>
 Logger PropertyWithValue<TYPE>::g_logger("PropertyWithValue");

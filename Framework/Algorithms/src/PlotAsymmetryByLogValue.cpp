@@ -821,13 +821,13 @@ double PlotAsymmetryByLogValue::getLogValue(MatrixWorkspace &ws) {
     return value;
   if (convertLogToDouble<float>(property, value, m_logFunc))
     return value;
-  if (convertLogToDouble<int>(property, value, m_logFunc))
+  if (convertLogToDouble<int32_t>(property, value, m_logFunc))
     return value;
-  if (convertLogToDouble<long long>(property, value, m_logFunc))
+  if (convertLogToDouble<int64_t>(property, value, m_logFunc))
     return value;
-  if (convertLogToDouble<unsigned int>(property, value, m_logFunc))
+  if (convertLogToDouble<uint32_t>(property, value, m_logFunc))
     return value;
-  if (convertLogToDouble<unsigned long long>(property, value, m_logFunc))
+  if (convertLogToDouble<uint64_t>(property, value, m_logFunc))
     return value;
   // try if it's a string and can be lexically cast to double
   auto slog =
