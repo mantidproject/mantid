@@ -94,7 +94,7 @@ makeStringProperty(::NeXus::File *file, const std::string &name,
                                ". Expected rank 2.");
     int64_t numStrings = file->getInfo().dims[0];
     int64_t span = file->getInfo().dims[1];
-    auto data = std::make_unique<char[]>(numStrings * span);
+    auto data = make_unique<char[]>(numStrings * span);
     file->getData(data.get());
     values.reserve(static_cast<size_t>(numStrings));
     for (int64_t i = 0; i < numStrings; i++)

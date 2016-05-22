@@ -1,5 +1,4 @@
 #include "MantidKernel/PropertyWithValue.h"
-#include "mantidKernel/Matrix.h"
 
 namespace Mantid {
 

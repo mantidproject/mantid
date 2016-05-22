@@ -654,7 +654,7 @@ inline void PropertyWithValue<std::string>::saveProperty(::NeXus::File *file) {
 template <typename TYPE>
 inline void PropertyWithValue<TYPE>::saveProperty(::NeXus::File *file) {
   this->saveProperty(file);
-};
+}
 
 template <typename TYPE>
 Logger PropertyWithValue<TYPE>::g_logger("PropertyWithValue");
