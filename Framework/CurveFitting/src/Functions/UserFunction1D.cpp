@@ -66,11 +66,9 @@ void UserFunction1D::prepare() {
   // Set the initial values to the fit parameters
   std::string initParams = getProperty("InitialParameters");
   if (!initParams.empty()) {
-    typedef boost::tokenizer<boost::char_separator<char>> tokenizer;
-
-    boost::char_separator<char> sep(",");
-    tokenizer values(initParams, sep);
-    for (tokenizer::iterator it = values.begin(); it != values.end(); ++it) {
+    Mantid::Kernel::StringTokenizer values(
+        initParams, ",", Mantid::Kernel::StringTokenizer::TOK_TRIM);
+    for (auto it = values.begin(); it != values.end(); ++it) {
       size_t ieq = it->find('=');
       if (ieq == std::string::npos)
         throw std::invalid_argument("Property InitialParameters is malformed");
