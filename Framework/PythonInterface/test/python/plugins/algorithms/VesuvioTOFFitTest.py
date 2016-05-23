@@ -91,7 +91,7 @@ class VesuvioTOFFitTest(unittest.TestCase):
         self.assertAlmostEqual(0.0279822, output_ws.readY(0)[0])
         self.assertAlmostEqual(0.0063585, output_ws.readY(0)[-1])
         peak_height_val, peak_height_bin = _get_peak_height_and_bin(output_ws.readY(1))
-        self.assertTrue(abs(0.129538171297 - peak_height_val) < 0.002)
+        self.assertTrue(abs(0.129538171297 - peak_height_val) < 0.003)
         self.assertTrue(abs(159 - peak_height_bin) <= 1)
     # -------------- Failure cases ------------------
 
