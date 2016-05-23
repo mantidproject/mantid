@@ -402,8 +402,8 @@ void LogManager::clearLogs() { m_manager.clear(); }
   LogManager::getPropertyValueAsType(const std::string &) const;
 
 INSTANTIATE(double)
-INSTANTIATE(int)
-INSTANTIATE(long)
+INSTANTIATE(int32_t)
+INSTANTIATE(int64_t)
 INSTANTIATE(uint32_t)
 INSTANTIATE(uint64_t)
 INSTANTIATE(std::string)
