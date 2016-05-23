@@ -23,6 +23,8 @@ using namespace Mantid::DataObjects;
 using Mantid::detid_t;
 using Mantid::specnum_t;
 using Mantid::HistogramData::BinEdges;
+using Mantid::HistogramData::HistogramY;
+using Mantid::HistogramData::HistogramE;
 
 class GroupDetectorsTest : public CxxTest::TestSuite {
 public:
@@ -36,11 +38,11 @@ public:
     space->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
     Workspace2D_sptr space2D = boost::dynamic_pointer_cast<Workspace2D>(space);
     BinEdges x(6, 10.0);
-    MantidVecPtr vec;
-    vec.access().resize(5, 1.0);
+    auto y = make_cow<HistogramY>(5, 1.0);
+    auto e = make_cow<HistogramE>(5, 1.0);
     for (int j = 0; j < 5; ++j) {
       space2D->setBinEdges(j, x);
-      space2D->setData(j, vec, vec);
+      space2D->setData(j, y, e);
       space2D->getSpectrum(j)->setSpectrumNo(j);
       space2D->getSpectrum(j)->setDetectorID(j);
     }

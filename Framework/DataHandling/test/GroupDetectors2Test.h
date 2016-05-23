@@ -33,6 +33,8 @@ using Mantid::detid_t;
 using Mantid::HistogramData::BinEdges;
 using Mantid::HistogramData::Histogram;
 using Mantid::HistogramData::HistogramX;
+using Mantid::HistogramData::HistogramY;
+using Mantid::HistogramData::HistogramE;
 
 class GroupDetectors2Test : public CxxTest::TestSuite {
 public:
@@ -55,15 +57,15 @@ public:
     space->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
     Workspace2D_sptr space2D = boost::dynamic_pointer_cast<Workspace2D>(space);
     BinEdges xs(NBINS + 1, 10.0);
-    Mantid::MantidVecPtr errors, data[NHIST];
-    errors.access().resize(NBINS, 1.0);
+    auto errors = make_cow<HistogramE>(NBINS, 1.0);
     for (int j = 0; j < NHIST; ++j) {
       space2D->setBinEdges(j, xs);
-      data[j].access().resize(NBINS, j + 1); // the y values will be different
-                                             // for each spectra
-                                             // (1+index_number) but the same
-                                             // for each bin
-      space2D->setData(j, data[j], errors);
+      auto data =
+          make_cow<HistogramY>(NBINS, j + 1); // the y values will be different
+                                              // for each spectra
+                                              // (1+index_number) but the same
+                                              // for each bin
+      space2D->setData(j, data, errors);
       space2D->getSpectrum(j)->setSpectrumNo(j + 1); // spectra numbers are also
                                                      // 1 + index_numbers
                                                      // because this is the

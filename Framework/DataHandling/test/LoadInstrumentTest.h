@@ -56,18 +56,17 @@ public:
                   [&j] { return j++ * 100; });
     // loop to create data
     for (int i = 0; i < histogramNumber; i++) {
-      boost::shared_ptr<Mantid::MantidVec> v(new Mantid::MantidVec),
-          e(new Mantid::MantidVec);
-      v->resize(timechannels);
-      e->resize(timechannels);
+      std::vector<double> v(timechannels);
+      std::vector<double> e(timechannels);
       // timechannels
       for (int j = 0; j < timechannels; j++) {
-        (*v)[j] = (i + j) % 256;
-        (*e)[j] = (i + j) % 78;
+        v[j] = (i + j) % 256;
+        e[j] = (i + j) % 78;
       }
       // Populate the workspace.
       ws2D->setPoints(i, timeChannelsVec);
-      ws2D->setData(i, v, e);
+      ws2D->dataY(i) = v;
+      ws2D->dataE(i) = e;
     }
 
     // put this workspace in the data service

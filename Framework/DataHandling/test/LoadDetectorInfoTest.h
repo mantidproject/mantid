@@ -31,6 +31,8 @@ using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace Mantid::DataObjects;
 using Mantid::HistogramData::BinEdges;
+using Mantid::HistogramData::HistogramY;
+using Mantid::HistogramData::HistogramE;
 
 /* choose an instrument to test, we could test all instruments
  * every time but I think a detailed test on the smallest workspace
@@ -209,15 +211,14 @@ void makeTestWorkspace(const int ndets, const int nbins,
   space->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
   Workspace2D_sptr space2D = boost::dynamic_pointer_cast<Workspace2D>(space);
   BinEdges xs(nbins + 1, 0.0);
-  Mantid::MantidVecPtr errors;
-  std::vector<Mantid::MantidVecPtr> data(ndets);
-  errors.access().resize(nbins, 1.0);
+  auto errors = make_cow<HistogramE>(nbins, 1.0);
   for (int j = 0; j < ndets; ++j) {
     space2D->setBinEdges(j, xs);
-    data[j].access().resize(nbins, j + 1); // the y values will be different for
-                                           // each spectra (1+index_number) but
-                                           // the same for each bin
-    space2D->setData(j, data[j], errors);
+    auto data = make_cow<HistogramY>(
+        nbins, j + 1); // the y values will be different for
+                       // each spectra (1+index_number) but
+                       // the same for each bin
+    space2D->setData(j, data, errors);
     ISpectrum *spec = space2D->getSpectrum(j);
     spec->setSpectrumNo(j + 1);
     spec->setDetectorID(j);
