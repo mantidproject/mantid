@@ -13625,7 +13625,6 @@ void ApplicationWindow::translateActionsStrings() {
   conestyle->setToolTip(tr("Cones"));
   conestyle->setStatusTip(tr("Cones"));
   crossHairStyle->setText(tr("Crosshairs"));
-  crossHairStyle->setText(tr("Crosshairs"));
   crossHairStyle->setToolTip(tr("Crosshairs"));
   crossHairStyle->setStatusTip(tr("Crosshairs"));
 
@@ -13633,34 +13632,29 @@ void ApplicationWindow::translateActionsStrings() {
   // floorstyle->setMenuText( tr( "Floor Style" ) );
   // floorstyle->setStatusTip( tr( "Floor Style" ) );
   floordata->setText(tr("Floor Data Projection"));
-  floordata->setText(tr("Floor Data Projection"));
   floordata->setToolTip(tr("Floor data projection"));
   floordata->setStatusTip(tr("Floor data projection"));
-  flooriso->setText(tr("Floor Isolines"));
+
   flooriso->setText(tr("Floor Isolines"));
   flooriso->setToolTip(tr("Floor isolines"));
   flooriso->setStatusTip(tr("Floor isolines"));
-  floornone->setText(tr("Empty Floor"));
+
   floornone->setText(tr("Empty Floor"));
   floornone->setToolTip(tr("Empty floor"));
   floornone->setStatusTip(tr("Empty floor"));
 
   actionAnimate->setText(tr("Animation"));
-  actionAnimate->setText(tr("Animation"));
   actionAnimate->setToolTip(tr("Animation"));
   actionAnimate->setStatusTip(tr("Animation"));
 
-  actionPerspective->setText(tr("Enable perspective"));
   actionPerspective->setText(tr("Enable perspective"));
   actionPerspective->setToolTip(tr("Enable perspective"));
   actionPerspective->setStatusTip(tr("Enable perspective"));
 
   actionResetRotation->setText(tr("Reset rotation"));
-  actionResetRotation->setText(tr("Reset rotation"));
   actionResetRotation->setToolTip(tr("Reset rotation"));
   actionResetRotation->setStatusTip(tr("Reset rotation"));
 
-  actionFitFrame->setText(tr("Fit frame to window"));
   actionFitFrame->setText(tr("Fit frame to window"));
   actionFitFrame->setToolTip(tr("Fit frame to window"));
   actionFitFrame->setStatusTip(tr("Fit frame to window"));
@@ -15177,7 +15171,7 @@ void ApplicationWindow::windowProperties() {
   if (QString(w->metaObject()->className()) == "Matrix") {
     mbox->setIconPixmap(getQPixmap("matrix_xpm"));
     s += tr("Type") + ": " + tr("Matrix") + "\n\n";
-  } else if (QString(w->metaObject()->className()) == "Table") {
+  } else if (w->inherits("Table")) {
     mbox->setIconPixmap(getQPixmap("worksheet_xpm"));
     s += tr("Type") + ": " + tr("Table") + "\n\n";
   } else if (QString(w->metaObject()->className()) == "Note") {
