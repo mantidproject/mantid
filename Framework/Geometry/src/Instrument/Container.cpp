@@ -1,4 +1,4 @@
-#include "MantidGeometry/Instrument/Can.h"
+#include "MantidGeometry/Instrument/Container.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 
 #include "Poco/DOM/AutoPtr.h"
@@ -26,7 +26,8 @@ constexpr const char *VAL_ATT = "val";
  * to be updated
  * @param args A hash of tag names to values
  */
-void updateTreeValues(Poco::XML::Element *root, const Can::ShapeArgs &args) {
+void updateTreeValues(Poco::XML::Element *root,
+                      const Container::ShapeArgs &args) {
   using namespace Poco::XML;
   NodeIterator nodeIter(root, NodeFilter::SHOW_ELEMENT);
   Node *node = nodeIter.nextNode();
@@ -48,12 +49,12 @@ void updateTreeValues(Poco::XML::Element *root, const Can::ShapeArgs &args) {
  * Construct a Can providing an XML definition shape
  * @param canXML Definition of the can shape in xml
  */
-Can::Can(std::string canXML) : Object(canXML) {}
+Container::Container(std::string xml) : Object(xml) {}
 
 /**
  * @return True if the can contains a defintion of the sample shape
  */
-bool Can::hasSampleShape() const { return !m_sampleShapeXML.empty(); }
+bool Container::hasSampleShape() const { return !m_sampleShapeXML.empty(); }
 
 /**
  * Return an object that represents the sample shape from the current
@@ -62,7 +63,8 @@ bool Can::hasSampleShape() const { return !m_sampleShapeXML.empty(); }
  * @param args A hash of tag values to use in place of the default
  * @return A pointer to a object modeling the sample shape
  */
-Object_sptr Can::createSampleShape(const Can::ShapeArgs &args) const {
+Object_sptr
+Container::createSampleShape(const Container::ShapeArgs &args) const {
   using namespace Poco::XML;
   if (!hasSampleShape()) {
     throw std::runtime_error("Can::createSampleShape() - No definition found "
@@ -92,7 +94,7 @@ Object_sptr Can::createSampleShape(const Can::ShapeArgs &args) const {
  * Set the definition of the sample shape for this can
  * @param sampleShapeXML
  */
-void Can::setSampleShape(const std::string &sampleShapeXML) {
+void Container::setSampleShape(const std::string &sampleShapeXML) {
   using namespace Poco::XML;
   std::istringstream instrm(sampleShapeXML);
   InputSource src(instrm);

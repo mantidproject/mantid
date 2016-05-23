@@ -4,7 +4,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidGeometry/Instrument/SampleEnvironmentSpecParser.h"
-#include "MantidGeometry/Instrument/Can.h"
+#include "MantidGeometry/Instrument/Container.h"
 
 #include "Poco/AutoPtr.h"
 #include "Poco/SAX/InputSource.h"
@@ -32,7 +32,7 @@ public:
   // Success tests
   //----------------------------------------------------------------------------
   void test_Single_Can_Single_Material_With_SampleGeometry() {
-    using Mantid::Geometry::Can_const_sptr;
+    using Mantid::Geometry::Container_const_sptr;
 
     const std::string name = "CRYO001";
     auto spec = parseSpec(name, "<environmentspec>"
@@ -40,8 +40,8 @@ public:
                                 "  <material id=\"van\" formula=\"V\"/>"
                                 " </materials>"
                                 " <components>"
-                                "  <cans>"
-                                "   <can id=\"10mm\" material=\"van\">"
+                                "  <containers>"
+                                "   <container id=\"10mm\" material=\"van\">"
                                 "    <geometry>"
                                 "     <sphere id=\"sp-1\">"
                                 "      <radius val=\"0.1\"/>"
@@ -54,15 +54,15 @@ public:
                                 "      <centre x=\"0.0\"  y=\"0.0\" z=\"0.0\"/>"
                                 "     </sphere>"
                                 "    </samplegeometry>"
-                                "   </can>"
-                                "  </cans>"
+                                "   </container>"
+                                "  </containers>"
                                 " </components>"
                                 "</environmentspec>");
 
     TS_ASSERT_EQUALS(name, spec->name());
     TS_ASSERT_EQUALS(1, spec->ncans());
     TS_ASSERT_EQUALS(0, spec->ncomponents());
-    Can_const_sptr can10mm;
+    Container_const_sptr can10mm;
     TS_ASSERT_THROWS_NOTHING(can10mm = spec->findCan("10mm"));
     TS_ASSERT(can10mm);
     TS_ASSERT_EQUALS("10mm", can10mm->id());
@@ -71,7 +71,7 @@ public:
   }
 
   void test_Single_Can_Single_Material_With_No_SampleGeometry() {
-    using Mantid::Geometry::Can_const_sptr;
+    using Mantid::Geometry::Container_const_sptr;
 
     const std::string name = "CRYO001";
     auto spec = parseSpec(name, "<environmentspec>"
@@ -79,23 +79,23 @@ public:
                                 "  <material id=\"van\" formula=\"V\"/>"
                                 " </materials>"
                                 " <components>"
-                                "  <cans>"
-                                "   <can id=\"10mm\" material=\"van\">"
+                                "  <containers>"
+                                "   <container id=\"10mm\" material=\"van\">"
                                 "    <geometry>"
                                 "     <sphere id=\"sp-1\">"
                                 "      <radius val=\"0.1\"/>"
                                 "      <centre x=\"0.0\"  y=\"0.0\" z=\"0.0\"/>"
                                 "     </sphere>"
                                 "    </geometry>"
-                                "   </can>"
-                                "  </cans>"
+                                "   </container>"
+                                "  </containers>"
                                 " </components>"
                                 "</environmentspec>");
 
     TS_ASSERT_EQUALS(name, spec->name());
     TS_ASSERT_EQUALS(1, spec->ncans());
     TS_ASSERT_EQUALS(0, spec->ncomponents());
-    Can_const_sptr can10mm;
+    Container_const_sptr can10mm;
     TS_ASSERT_THROWS_NOTHING(can10mm = spec->findCan("10mm"));
     TS_ASSERT(can10mm);
     TS_ASSERT_EQUALS("10mm", can10mm->id());
@@ -104,7 +104,7 @@ public:
   }
 
   void test_Single_Can_And_Single_Componenent_With_SampleGeometry() {
-    using Mantid::Geometry::Can_const_sptr;
+    using Mantid::Geometry::Container_const_sptr;
 
     const std::string name = "CRYO001";
     auto spec = parseSpec(name, "<environmentspec>"
@@ -113,8 +113,8 @@ public:
                                 "  <material id=\"alum\" formula=\"Al\"/>"
                                 " </materials>"
                                 " <components>"
-                                "  <cans>"
-                                "   <can id=\"10mm\" material=\"van\">"
+                                "  <containers>"
+                                "   <container id=\"10mm\" material=\"van\">"
                                 "    <geometry>"
                                 "     <sphere id=\"sp-1\">"
                                 "      <radius val=\"0.1\"/>"
@@ -127,8 +127,8 @@ public:
                                 "      <centre x=\"0.0\"  y=\"0.0\" z=\"0.0\"/>"
                                 "     </sphere>"
                                 "    </samplegeometry>"
-                                "   </can>"
-                                "  </cans>"
+                                "   </container>"
+                                "  </containers>"
                                 "  <component id=\"outer\" material=\"alum\">"
                                 "    <geometry>"
                                 "     <sphere id=\"sp-1\">"
@@ -142,7 +142,7 @@ public:
 
     TS_ASSERT_EQUALS(name, spec->name());
     TS_ASSERT_EQUALS(1, spec->ncans());
-    Can_const_sptr can10mm;
+    Container_const_sptr can10mm;
     TS_ASSERT_THROWS_NOTHING(can10mm = spec->findCan("10mm"));
     TS_ASSERT(can10mm);
     TS_ASSERT_EQUALS("10mm", can10mm->id());
@@ -153,7 +153,7 @@ public:
   }
 
   void test_Multiple_Cans_And_Muliple_Componenents_With_SampleGeometry() {
-    using Mantid::Geometry::Can_const_sptr;
+    using Mantid::Geometry::Container_const_sptr;
 
     const std::string name = "CRYO001";
     auto spec = parseSpec(name, "<environmentspec>"
@@ -162,8 +162,8 @@ public:
                                 "  <material id=\"alum\" formula=\"Al\"/>"
                                 " </materials>"
                                 " <components>"
-                                "  <cans>"
-                                "   <can id=\"8mm\" material=\"alum\">"
+                                "  <containers>"
+                                "   <container id=\"8mm\" material=\"alum\">"
                                 "    <geometry>"
                                 "     <sphere id=\"sp-1\">"
                                 "      <radius val=\"0.05\"/>"
@@ -176,8 +176,8 @@ public:
                                 "      <centre x=\"0.0\"  y=\"0.0\" z=\"0.0\"/>"
                                 "     </sphere>"
                                 "    </samplegeometry>"
-                                "   </can>"
-                                "   <can id=\"10mm\" material=\"van\">"
+                                "   </container>"
+                                "   <container id=\"10mm\" material=\"van\">"
                                 "    <geometry>"
                                 "     <sphere id=\"sp-1\">"
                                 "      <radius val=\"0.1\"/>"
@@ -190,8 +190,8 @@ public:
                                 "      <centre x=\"0.0\"  y=\"0.0\" z=\"0.0\"/>"
                                 "     </sphere>"
                                 "    </samplegeometry>"
-                                "   </can>"
-                                "  </cans>"
+                                "   </container>"
+                                "  </containers>"
                                 "  <component id=\"outer1\" material=\"alum\">"
                                 "    <geometry>"
                                 "     <sphere id=\"sp-1\">"
@@ -215,7 +215,7 @@ public:
     TS_ASSERT_EQUALS(2, spec->ncomponents());
     TS_ASSERT_EQUALS(2, spec->ncans());
     // 10mm
-    Can_const_sptr can10mm;
+    Container_const_sptr can10mm;
     TS_ASSERT_THROWS_NOTHING(can10mm = spec->findCan("10mm"));
     TS_ASSERT(can10mm);
     TS_ASSERT_EQUALS("10mm", can10mm->id());
@@ -223,7 +223,7 @@ public:
     TS_ASSERT_EQUALS("van", can10mm->material().name());
     TS_ASSERT(can10mm->hasSampleShape());
     // 8mm
-    Can_const_sptr can8mm;
+    Container_const_sptr can8mm;
     TS_ASSERT_THROWS_NOTHING(can8mm = spec->findCan("8mm"));
     TS_ASSERT(can8mm);
     TS_ASSERT_EQUALS("8mm", can8mm->id());
@@ -249,7 +249,7 @@ public:
   }
 
   void test_Missing_Geometry_Tag_Under_Can_Throws_Error() {
-    using Mantid::Geometry::Can_const_sptr;
+    using Mantid::Geometry::Container_const_sptr;
 
     const std::string name = "CRYO001";
     TS_ASSERT_THROWS(parseSpec(name,
@@ -258,8 +258,8 @@ public:
                                "  <material id=\"van\" formula=\"V\"/>"
                                " </materials>"
                                " <components>"
-                               "  <cans>"
-                               "   <can id=\"10mm\" material=\"van\">"
+                               "  <containers>"
+                               "   <container id=\"10mm\" material=\"van\">"
                                "     <sphere id=\"sp-1\">"
                                "      <radius val=\"0.1\"/>"
                                "      <centre x=\"0.0\"  y=\"0.0\" z=\"0.0\"/>"
@@ -270,15 +270,15 @@ public:
                                "      <centre x=\"0.0\"  y=\"0.0\" z=\"0.0\"/>"
                                "     </sphere>"
                                "    </samplegeometry>"
-                               "   </can>"
-                               "  </cans>"
+                               "   </container>"
+                               "  </containers>"
                                " </components>"
                                "</environmentspec>"),
                      std::runtime_error);
   }
 
   void test_Missing_Can_ID_Throws_Error() {
-    using Mantid::Geometry::Can_const_sptr;
+    using Mantid::Geometry::Container_const_sptr;
 
     const std::string name = "CRYO001";
     TS_ASSERT_THROWS(parseSpec(name,
@@ -287,8 +287,8 @@ public:
                                "  <material id=\"van\" formula=\"V\"/>"
                                " </materials>"
                                " <components>"
-                               "  <cans>"
-                               "   <can material=\"van\">"
+                               "  <containers>"
+                               "   <container material=\"van\">"
                                "     <sphere id=\"sp-1\">"
                                "      <radius val=\"0.1\"/>"
                                "      <centre x=\"0.0\"  y=\"0.0\" z=\"0.0\"/>"
@@ -299,15 +299,15 @@ public:
                                "      <centre x=\"0.0\"  y=\"0.0\" z=\"0.0\"/>"
                                "     </sphere>"
                                "    </samplegeometry>"
-                               "   </can>"
-                               "  </cans>"
+                               "   </container>"
+                               "  </containers>"
                                " </components>"
                                "</environmentspec>"),
                      std::runtime_error);
   }
 
   void test_Missing_Material_For_Can_Throws_Error() {
-    using Mantid::Geometry::Can_const_sptr;
+    using Mantid::Geometry::Container_const_sptr;
 
     const std::string name = "CRYO001";
     TS_ASSERT_THROWS(parseSpec(name,
@@ -316,8 +316,8 @@ public:
                                "  <material id=\"van\" formula=\"V\"/>"
                                " </materials>"
                                " <components>"
-                               "  <cans>"
-                               "   <can id=\"10mm\">"
+                               "  <containers>"
+                               "   <container id=\"10mm\">"
                                "     <sphere id=\"sp-1\">"
                                "      <radius val=\"0.1\"/>"
                                "      <centre x=\"0.0\"  y=\"0.0\" z=\"0.0\"/>"
@@ -328,8 +328,8 @@ public:
                                "      <centre x=\"0.0\"  y=\"0.0\" z=\"0.0\"/>"
                                "     </sphere>"
                                "    </samplegeometry>"
-                               "   </can>"
-                               "  </cans>"
+                               "   </container>"
+                               "  </containers>"
                                " </components>"
                                "</environmentspec>"),
                      std::runtime_error);
