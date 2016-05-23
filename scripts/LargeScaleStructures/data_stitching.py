@@ -203,13 +203,10 @@ class DataSet(object):
 
         # Put back dQ
         dq_scaled = mtd[self._ws_scaled].dataDx(0)
-        for i in range(len(dq)):
+        for i in range(len(dq_scaled)):
             dq_scaled[i] = dq[i]
 
         if xmin is not None and xmax is not None:
-            # Make sure we have point data
-            ConvertToPointData(InputWorkspace=self._ws_scaled,
-                               OutputWorkspace=self._ws_scaled)
             x = mtd[self._ws_scaled].readX(0)
             dx = dq_scaled
             y = mtd[self._ws_scaled].readY(0)
@@ -273,6 +270,13 @@ class DataSet(object):
             raise RuntimeError, "Specified file doesn't exist: %s" % self._file_path
 
         if mtd.doesExist(self._ws_name):
+            # If we have hisogram data, convert it first.
+            # Make sure not to modify the original workspace.
+            if mtd[self._ws_name].isHistogramData():
+                point_data_ws = '%s_' % self._ws_name
+                ConvertToPointData(InputWorkspace=self._ws_name,
+                                   OutputWorkspace=point_data_ws)
+                self._ws_name = point_data_ws
             self._ws_scaled = self._ws_name+"_scaled"
             if update_range:
                 self._restricted_range = restricted_range
