@@ -120,6 +120,11 @@ MANTIDQT_CUSTOMINTERFACES_DLL bool isReloadGroupingNecessary(
     const boost::shared_ptr<Mantid::API::Workspace> currentWorkspace,
     const boost::shared_ptr<Mantid::API::Workspace> loadedWorkspace);
 
+/// Parse run label into instrument and runs
+MANTIDQT_CUSTOMINTERFACES_DLL void parseRunLabel(const std::string &label,
+                                                 std::string &instrument,
+                                                 std::vector<int> &runNumbers);
+
 /**
  * A class which deals with auto-saving the widget values. Widgets are
  * registered and then on any

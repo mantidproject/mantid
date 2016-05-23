@@ -15,6 +15,7 @@
 #include <QCheckBox>
 #include <QComboBox>
 
+#include <boost/lexical_cast.hpp>
 #include <boost/scope_exit.hpp>
 #include <stdexcept>
 
@@ -915,8 +916,93 @@ bool isReloadGroupingNecessary(
  * @returns :: Struct containing dataset parameters
  */
 Muon::DatasetParams parseWorkspaceName(const std::string &wsName) {
-  // TODO
-  return Muon::DatasetParams();
+  Muon::DatasetParams params;
+
+  Mantid::Kernel::StringTokenizer tokenizer(
+      wsName, ";", Mantid::Kernel::StringTokenizer::TOK_TRIM);
+  const size_t numTokens = tokenizer.count();
+  if (numTokens < 5) {
+    throw std::invalid_argument("Could not parse workspace name: " + wsName);
+  }
+
+  params.label = tokenizer[0];
+  parseRunLabel(params.label, params.instrument, params.runs);
+  const std::string itemType = tokenizer[1];
+  params.itemType = (itemType == "Group") ? Muon::Group : Muon::Pair;
+  params.itemName = tokenizer[2];
+  const std::string plotType = tokenizer[3];
+  if (plotType == "Asym") {
+    params.plotType = Muon::Asymmetry;
+  } else if (plotType == "Counts") {
+    params.plotType = Muon::Counts;
+  } else {
+    params.plotType = Muon::Logarithm;
+  }
+  std::string versionString;
+  if (numTokens > 5) { // periods included
+    params.periods = tokenizer[4];
+    versionString = tokenizer[5];
+  } else {
+    versionString = tokenizer[4];
+  }
+  // Remove the # from the version string
+  versionString.erase(
+      std::remove(versionString.begin(), versionString.end(), '#'),
+      versionString.end());
+
+  try {
+    params.version = boost::lexical_cast<size_t>(versionString);
+  } catch (const boost::bad_lexical_cast &) {
+    params.version = 1; // Set to 1 and ignore the error
+  }
+
+  return params;
+}
+
+/**
+ * Parse a run label e.g. "MUSR00015189-91, 15193" into instrument
+ * ("MUSR") and set of runs (15189, 15190, 15191, 15193).
+ * Assumes instrument name doesn't contain the character 0.
+ * @param label :: [input] Label to parse
+ * @param instrument :: [output] Name of instrument
+ * @param runNumbers :: [output] Vector to fill with run numbers
+ * @throws std::invalid_argument if input cannot be parsed
+ */
+void parseRunLabel(const std::string &label, std::string &instrument,
+                   std::vector<int> &runNumbers) {
+  const size_t zeroPos = label.find_first_of('0');
+  instrument = label.substr(0, zeroPos);
+  const size_t numPos = label.find_first_not_of('0', zeroPos);
+  std::string runString = label.substr(numPos, label.size());
+  // sets of continuous ranges
+  Mantid::Kernel::StringTokenizer rangeTokenizer(
+      runString, ",", Mantid::Kernel::StringTokenizer::TOK_TRIM);
+  for (const auto &range : rangeTokenizer.asVector()) {
+    Mantid::Kernel::StringTokenizer pairTokenizer(
+        range, "-", Mantid::Kernel::StringTokenizer::TOK_TRIM);
+    try {
+      if (pairTokenizer.count() == 2) {
+        // Range of run numbers
+        // Deal with common part of string: "151" in "15189-91"
+        const size_t diff =
+            pairTokenizer[0].length() - pairTokenizer[1].length();
+        const std::string endRun =
+            pairTokenizer[0].substr(0, diff) + pairTokenizer[1];
+        const int start = boost::lexical_cast<int>(pairTokenizer[0]);
+        const int end = boost::lexical_cast<int>(endRun);
+        for (int run = start; run < end + 1; run++) {
+          runNumbers.push_back(run);
+        }
+      } else if (pairTokenizer.count() == 1) {
+        // Single run
+        runNumbers.push_back(boost::lexical_cast<int>(pairTokenizer[0]));
+      } else {
+        throw std::invalid_argument("Failed to parse run label: " + label);
+      }
+    } catch (const boost::bad_lexical_cast &) {
+      throw std::invalid_argument("Failed to parse run label: " + label);
+    }
+  }
 }
 
 /**

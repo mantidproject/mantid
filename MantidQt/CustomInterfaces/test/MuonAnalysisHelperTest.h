@@ -473,6 +473,16 @@ public:
     TS_ASSERT_EQUALS(params.version, 2);
   }
 
+  void test_parseRunLabel() {
+    const std::string runLabel = "MUSR00015189-91, 15193-4, 15196";
+    std::string instrument = "";
+    std::vector<int> runs;
+    std::vector<int> expectedRuns{15189, 15190, 15191, 15193, 15194, 15196};
+    TS_ASSERT_THROWS_NOTHING(parseRunLabel(runLabel, instrument, runs));
+    TS_ASSERT_EQUALS(instrument, "MUSR");
+    TS_ASSERT_EQUALS(runs, expectedRuns);
+  }
+
 private:
   // Creates a single-point workspace with instrument and runNumber set
   Workspace_sptr createWs(const std::string &instrName, int runNumber,
