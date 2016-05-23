@@ -77,7 +77,7 @@ public:
   const MantidVec &dataE() const override { return m_histogram.dataE(); }
 
   size_t getMemorySize() const override {
-    return data.size() * sizeof(double) * 2;
+    return readY().size() * sizeof(double) * 2;
   }
 
   /// Mask the spectrum to this value
@@ -91,8 +91,6 @@ public:
 
 protected:
   HistogramData::Histogram m_histogram;
-  MantidVec data;
-  MantidVec data_E;
 
 private:
   const HistogramData::Histogram &histogramRef() const override {
@@ -119,8 +117,8 @@ public:
     vec.resize(spec, HistogramData::getHistogramXMode(j, k));
     for (size_t i = 0; i < spec; i++) {
       vec[i].dataX().resize(j, 1.0);
-      vec[i].dataY().resize(k, 1.0);
-      vec[i].dataE().resize(k, 1.0);
+      vec[i].setData(make_cow<Mantid::HistogramData::HistogramY>(k, 1.0),
+                     make_cow<Mantid::HistogramData::HistogramE>(k, 1.0));
       vec[i].addDetectorID(detid_t(i));
       vec[i].setSpectrumNo(specnum_t(i + 1));
     }
