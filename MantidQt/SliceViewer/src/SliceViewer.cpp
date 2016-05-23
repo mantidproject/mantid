@@ -311,7 +311,8 @@ void SliceViewer::initMenus() {
     bar = parentWindow->menuBar();
   else {
     // Widget is not in a QMainWindow. Make a menu bar
-    bar = new QMenuBar(this, "Main Menu Bar");
+    bar = new QMenuBar(this);
+    bar->setObjectName("Main Menu Bar");
     ui.verticalLayout->insertWidget(0, bar);
   }
 
@@ -951,7 +952,7 @@ void SliceViewer::setNormalization(Mantid::API::MDNormalization norm,
     if (norm == Mantid::API::NoNormalization) {
       comboNormalization->setCurrentIndex(0);
     } else if (norm == Mantid::API::VolumeNormalization) {
-      comboNormalization->setCurrentItem(1);
+      comboNormalization->setCurrentIndex(1);
     } else {
       comboNormalization->setCurrentIndex(2);
     }
@@ -1196,7 +1197,7 @@ void SliceViewer::updateDisplaySlot(int index, double value) {
   UNUSED_ARG(value)
   this->updateDisplay();
   // Trigger a rebin on each movement of the slice point
-  if (m_rebinMode && ui.btnAutoRebin->isOn())
+  if (m_rebinMode && ui.btnAutoRebin->isChecked())
     this->rebinParamsChanged();
 
   // Update the colors scale if required
@@ -1244,7 +1245,7 @@ void SliceViewer::copyImageToClipboard() {
   // Create the image
   QPixmap pix = this->getImage();
   // Set the clipboard
-  QApplication::clipboard()->setImage(pix, QClipboard::Clipboard);
+  QApplication::clipboard()->setImage(pix.toImage(), QClipboard::Clipboard);
 }
 
 /**
