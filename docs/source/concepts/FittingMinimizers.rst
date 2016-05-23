@@ -76,18 +76,31 @@ the `GNU Scientific Libraty routines for least-squares fitting
 Comparison of relative goodness of fit and run time
 ---------------------------------------------------
 
-Relative comparison of minimizers available in Mantid.
-
-The best possible results with Mantid minimizers are given a top score
+Here we describe a comparison of minimizers available in Mantid, in
+terms of how they perform when fitting several benchmark test
+problems. This is a relative comparison in the sense that the best
+possible results with Mantid minimizers are given a top score of
 "1". The ranking is continuous and the score of a minimizer represents
-the ratio between its performance and the performance of the best.
+the ratio between its performance and the performance of the best. We
+compare accuracy and run time.
 
 .. Q: accuracy metric: sum of squared residuals or chi2 variants
 
-Accuracy, using as metric the sum of squared errors.
+All the minimizers available in Mantid 3.7 were compared, with the
+exception of FABADA which belongs to a different class of methods and
+would not be compared in a fair manner. Minimizers are used here as
+"black boxes", without any special initialization, constraints, or
+rewriting of the equations to fit.
 
-Run time. Each fitting problem takes a small fraction of a second. For
-robustness, N repetitions.
+Accuracy is measured using the sum of squared fitting errors as
+metric, or "ChiSquared" as defined in :ref:`Fit
+<algm-CalculateChiSquared>`, where the fitting errors are the
+difference between the expected outputs and the outputs calculated by
+the model fitted: :math:`\chi_{1}^{2} = \sum_{i} (y_i - f_i)^2` (see
+:ref:`CalculateChiSquared <algm-CalculateChiSquared>` for full details
+and different variants).  Run time is measured for the execution of
+the :ref:`Fit <algm-Fit>` algorithm for an equation and dataset
+previously created.
 
 For example, a ranking of 1.25 for a given problem means:
 
@@ -96,29 +109,19 @@ For example, a ranking of 1.25 for a given problem means:
 - Referring to the run time, it takes 25% more time than the fastest
   minimizer.
 
-Minimizers used as "black boxes", without any special initialization,
-constraints, rewriting of the equations to fit.
-
-Cost function used: `Least squares` (weighted).
-
-The difference between the expected outputs and the outputs calculated
-by the model fitted: :math:`\chi_{1}^{2} = \sum_{i} (y_i - f_i)^2`
-(see :ref:`CalculateChiSquared <algm-CalculateChiSquared>` for full
-details and different variants).
-
 .. There would be two alternative for the errors:
    1. Without errors, as it is
    2. With "simulated" sqrt(X) errors
    Here we use 2 because Levenberg-Marquardt doesn't work with 1 ('Unweighted least squares' cost function
 
-All the minimizers available in Mantid 3.7, with the exception of
-FABADA which belongs to a different class of methods and could not be
-compared here in a fair manner.
+The cost function used in all cases is `Least squares` (weighted by
+the errors, as usually applied in Mantid).
+
 
 Benchmark problems
 ##################
 
-Each test problem included in this benchmark is defined by the
+Each test problem included in this comparison is defined by the
 following information:
 
 - Input data (:math:`x_i` values)
@@ -127,12 +130,16 @@ following information:
 - Starting point or initial values of the function parameters
 - Certified or reference best values for the parameters, with an associated residual of the certified or best model 
 
-The problems have been obtained from two different sources:
+The problems have been obtained from two different benchmarks:
 
 - `NIST nonlinear regression problems <http://itl.nist.gov/div898/strd/general/dataarchive.html>`__.
 
 - The `Constrained and Unconstrained Testing Environment <http://www.cuter.rl.ac.uk/Problems/mastsif.html>`__
   set of test problems for linear and nonlinear optimization.
+
+As the NIST problems do not include measurement errors, assuming that
+these datasets would represent spectra from a typical Mantid workspace
+we introduce errors as the square root of the observations.
 
 From the second source, which is a large collection of diverse
 problems (over a thousand) a subset of problems that are relevant for
