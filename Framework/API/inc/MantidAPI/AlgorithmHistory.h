@@ -21,14 +21,23 @@ class IAlgorithm;
 class Algorithm;
 class AlgorithmHistory;
 
+namespace Detail {
+// Written as a template in order to get around circular issue of CompareHistory
+// needing to know the implementation of AlgorithmHistory and AlgorithmHistory
+// needing to know the implementation of CompareHistory.
+template <class T> struct CompareHistory {
+  bool operator()(const boost::shared_ptr<T> &lhs,
+                  const boost::shared_ptr<T> &rhs) {
+    return (*lhs) < (*rhs);
+  }
+};
+}
+
 // typedefs for algorithm history pointers
 typedef boost::shared_ptr<AlgorithmHistory> AlgorithmHistory_sptr;
 typedef boost::shared_ptr<const AlgorithmHistory> AlgorithmHistory_const_sptr;
-
 typedef std::set<AlgorithmHistory_sptr,
-                 boost::function<bool(const AlgorithmHistory_const_sptr,
-                                      const AlgorithmHistory_const_sptr)>>
-    AlgorithmHistories;
+                 Detail::CompareHistory<AlgorithmHistory>> AlgorithmHistories;
 
 /** @class AlgorithmHistory AlgorithmHistory.h API/MAntidAPI/AlgorithmHistory.h
 
@@ -60,7 +69,7 @@ typedef std::set<AlgorithmHistory_sptr,
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
 
-class MANTID_API_DLL AlgorithmHistory final {
+class MANTID_API_DLL AlgorithmHistory {
 
 public:
   /// History container
@@ -70,7 +79,7 @@ public:
       const Algorithm *const alg,
       const Kernel::DateAndTime &start = Kernel::DateAndTime::defaultTime(),
       const double &duration = -1.0, std::size_t uexeccount = 0);
-  virtual ~AlgorithmHistory();
+  ~AlgorithmHistory();
   AlgorithmHistory &operator=(const AlgorithmHistory &);
   AlgorithmHistory(const AlgorithmHistory &);
   AlgorithmHistory(
@@ -119,11 +128,6 @@ public:
   inline bool operator==(const AlgorithmHistory &other) const {
     return (execCount() == other.execCount() && name() == other.name());
   }
-  /// Less than operator for pointers
-  inline bool compareHistory(const boost::shared_ptr<AlgorithmHistory> lhs,
-                             const boost::shared_ptr<AlgorithmHistory> rhs) {
-    return *lhs < *rhs;
-  }
   /// Create a concrete algorithm based on a history record
   boost::shared_ptr<IAlgorithm> createAlgorithm() const;
   /// Create an child algorithm from a history record at a given index
@@ -143,7 +147,7 @@ public:
 
 private:
   // private constructor
-  AlgorithmHistory();
+  AlgorithmHistory() = default;
   // Set properties of algorithm
   void setProperties(const Algorithm *const alg);
   /// The name of the Algorithm
@@ -160,14 +164,6 @@ private:
   std::size_t m_execCount;
   /// set of child algorithm histories for this history record
   AlgorithmHistories m_childHistories;
-};
-
-struct CompareHistory {
-  /// Less than operator for pointers
-  static bool compare(const AlgorithmHistory_const_sptr lhs,
-                      const AlgorithmHistory_const_sptr rhs) {
-    return (*lhs) < (*rhs);
-  }
 };
 
 MANTID_API_DLL std::ostream &operator<<(std::ostream &,
