@@ -443,6 +443,36 @@ public:
     TS_ASSERT_EQUALS(expected, wsName);
   }
 
+  void test_parseWorkspaceName() {
+    const std::string workspaceName =
+        "MUSR00015189-90, 15192; Group; fwd; Counts; 1+3-2+4; #2";
+    const std::vector<int> expectedRuns{15189, 15190, 15192};
+    const auto params = parseWorkspaceName(workspaceName);
+    TS_ASSERT_EQUALS(params.instrument, "MUSR");
+    TS_ASSERT_EQUALS(params.runs, expectedRuns);
+    TS_ASSERT_EQUALS(params.label, "MUSR00015189-90, 15192");
+    TS_ASSERT_EQUALS(params.itemType, MantidQt::CustomInterfaces::Muon::Group);
+    TS_ASSERT_EQUALS(params.itemName, "fwd");
+    TS_ASSERT_EQUALS(params.plotType, MantidQt::CustomInterfaces::Muon::Counts);
+    TS_ASSERT_EQUALS(params.periods, "1+3-2+4");
+    TS_ASSERT_EQUALS(params.version, 2);
+  }
+
+  void test_parseWorkspaceName_noPeriods() {
+    const std::string workspaceName =
+        "MUSR00015189-90, 15192; Group; fwd; Counts; #2";
+    const std::vector<int> expectedRuns{15189, 15190, 15192};
+    const auto params = parseWorkspaceName(workspaceName);
+    TS_ASSERT_EQUALS(params.instrument, "MUSR");
+    TS_ASSERT_EQUALS(params.runs, expectedRuns);
+    TS_ASSERT_EQUALS(params.label, "MUSR00015189-90, 15192");
+    TS_ASSERT_EQUALS(params.itemType, MantidQt::CustomInterfaces::Muon::Group);
+    TS_ASSERT_EQUALS(params.itemName, "fwd");
+    TS_ASSERT_EQUALS(params.plotType, MantidQt::CustomInterfaces::Muon::Counts);
+    TS_ASSERT_EQUALS(params.periods, "");
+    TS_ASSERT_EQUALS(params.version, 2);
+  }
+
 private:
   // Creates a single-point workspace with instrument and runNumber set
   Workspace_sptr createWs(const std::string &instrName, int runNumber,
