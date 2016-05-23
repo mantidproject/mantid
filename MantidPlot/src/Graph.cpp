@@ -4349,7 +4349,7 @@ void Graph::copy(Graph *g) {
   foreach (LegendWidget *t, texts) {
     if (t == g->legend())
       d_legend = insertText(t);
-    else if (t->isA("PieLabel")) {
+	else if (strcmp(t->metaObject()->className(), "PieLabel") == 0) {
       QwtPieCurve *pie = dynamic_cast<QwtPieCurve *>(curve(0));
       if (pie)
         pie->addLabel(dynamic_cast<PieLabel *>(t), true);
@@ -5885,7 +5885,7 @@ void Graph::loadFromProject(const std::string &lines, ApplicationWindow *app,
     tsv >> pieName;
 
     if (!app->renamedTables.isEmpty()) {
-      QString caption = pieName.left(pieName.find("_", 0));
+      QString caption = pieName.left(pieName.indexOf("_", 0));
       if (app->renamedTables.contains(caption)) {
         int index = app->renamedTables.indexOf(caption);
         QString newCaption = app->renamedTables[++index];
@@ -6166,7 +6166,7 @@ void Graph::loadFromProject(const std::string &lines, ApplicationWindow *app,
       QStringList sl =
           QString::fromUtf8(tsv.lineAsString("ErrorBars").c_str()).split("\t");
       if (!app->renamedTables.isEmpty()) {
-        QString caption = sl[4].left(sl[4].find("_", 0));
+        QString caption = sl[4].left(sl[4].indexOf("_", 0));
         if (app->renamedTables.contains(caption)) {
           // modify the name of the curve according to the new table name
           int index = app->renamedTables.indexOf(caption);
@@ -6719,7 +6719,7 @@ std::string Graph::saveMarkers() {
 
     if (l == d_legend)
       s += "<legend>";
-    else if (l->isA("PieLabel")) {
+	else if (strcmp(l->metaObject()->className(), "PieLabel") == 0) {
       if (l->text().isEmpty())
         continue;
 
@@ -6747,7 +6747,7 @@ std::string Graph::saveMarkers() {
     s += "\t" + textList.join("\t");
     if (l == d_legend)
       s += "</legend>\n";
-    else if (l->isA("PieLabel"))
+	else if (strcmp(l->metaObject()->className(), "PieLabel") == 0)
       s += "</PieLabel>\n";
     else
       s += "</text>\n";
