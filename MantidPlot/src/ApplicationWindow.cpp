@@ -450,11 +450,10 @@ void ApplicationWindow::init(bool factorySettings, const QStringList &args) {
   QString pyQtInterfacesProperty = QString::fromStdString(
       Mantid::Kernel::ConfigService::Instance().getString(
           "mantidqt.python_interfaces"));
-  foreach (const QString pyQtInterfaceInfo,
-           QStringList::split(" ", pyQtInterfacesProperty)) {
+  foreach (const QString pyQtInterfaceInfo, pyQtInterfacesProperty.split(" ")) {
     QString pyQtInterfaceFile;
     QSet<QString> pyQtInterfaceCategories;
-    const QStringList tokens = QStringList::split("/", pyQtInterfaceInfo);
+    const QStringList tokens = pyQtInterfaceInfo.split("/");
 
     if (tokens.size() == 0) // Empty token - ignore.
     {
@@ -466,7 +465,7 @@ void ApplicationWindow::init(bool factorySettings, const QStringList &args) {
     } else if (tokens.size() ==
                2) // Assume correct interface name and categories.
     {
-      pyQtInterfaceCategories += QStringList::split(";", tokens[0]).toSet();
+      pyQtInterfaceCategories += tokens[0].split(";").toSet();
       pyQtInterfaceFile = tokens[1];
     } else // Too many forward slashes, or no space between two interfaces.
            // Warn user and move on.
@@ -489,7 +488,7 @@ void ApplicationWindow::init(bool factorySettings, const QStringList &args) {
       m_allCategories += pyQtInterfaceCategories;
     } else {
       g_log.warning() << "Could not find interface script: "
-                      << scriptPath.ascii() << "\n";
+                      << scriptPath.toAscii().data() << "\n";
     }
   }
 
@@ -1075,15 +1074,15 @@ void ApplicationWindow::initToolBars() {
   connect(sb, SIGNAL(valueChanged(int)), this, SLOT(setFontSize(int)));
   actionFontSize = formatToolBar->addWidget(sb);
 
-  actionFontBold->addTo(formatToolBar);
-  actionFontItalic->addTo(formatToolBar);
+  formatToolBar->addAction(actionFontBold);
+  formatToolBar->addAction(actionFontItalic);
 
-  actionUnderline->addTo(formatToolBar);
-  actionSuperscript->addTo(formatToolBar);
-  actionSubscript->addTo(formatToolBar);
-  actionGreekSymbol->addTo(formatToolBar);
-  actionGreekMajSymbol->addTo(formatToolBar);
-  actionMathSymbol->addTo(formatToolBar);
+  formatToolBar->addAction(actionUnderline);
+  formatToolBar->addAction(actionSuperscript);
+  formatToolBar->addAction(actionSubscript);
+  formatToolBar->addAction(actionGreekSymbol);
+  formatToolBar->addAction(actionGreekMajSymbol);
+  formatToolBar->addAction(actionMathSymbol);
 
   formatToolBar->setEnabled(false);
   formatToolBar->hide();
@@ -1110,6 +1109,7 @@ void ApplicationWindow::insertTranslatedStrings() {
   standardTools->setWindowTitle(tr("Standard Tools"));
   formatToolBar->setWindowTitle(tr("Format"));
 
+  // Use the implementation of GROUP 4
   fileMenu->changeItem(recentMenuID, tr("&Recent Projects"));
   fileMenu->changeItem(recentFilesMenuID, tr("R&ecent Files"));
 
@@ -1132,10 +1132,10 @@ void ApplicationWindow::initMainMenu() {
   edit = new QMenu(this);
   edit->setObjectName("editMenu");
 
-  edit->insertSeparator();
+  edit->addSeparator();
   edit->addAction(actionCopySelection);
   edit->addAction(actionPasteSelection);
-  edit->insertSeparator();
+  edit->addSeparator();
   edit->addAction(actionDeleteFitTables);
 
   connect(edit, SIGNAL(aboutToShow()), this, SLOT(editMenuAboutToShow()));
@@ -1143,39 +1143,36 @@ void ApplicationWindow::initMainMenu() {
   view = new QMenu(this);
   view->setObjectName("viewMenu");
 
-  view->setCheckable(true);
-
   view->addAction(actionShowExplorer);
   view->addAction(actionShowLog);
 
-  view->insertSeparator();
+  view->addSeparator();
   view->addAction(actionShowScriptWindow); // Mantid
   view->addAction(actionShowScriptInterpreter);
-  view->insertSeparator();
+  view->addSeparator();
 
   mantidUI->addMenuItems(view);
 
-  view->insertSeparator();
+  view->addSeparator();
   toolbarsMenu = view->addMenu(tr("&Toolbars"));
   view->addAction(actionShowConfigureDialog);
-  view->insertSeparator();
+  view->addSeparator();
   view->addAction(actionCustomActionDialog);
 
   graph = new QMenu(this);
   graph->setObjectName("graphMenu");
-  graph->setCheckable(true);
   graph->addAction(actionAddErrorBars);
   graph->addAction(actionRemoveErrorBars);
   graph->addAction(actionShowCurvesDialog);
   graph->addAction(actionAddFunctionCurve);
   graph->addAction(actionNewLegend);
-  graph->insertSeparator();
+  graph->addSeparator();
   graph->addAction(btnLabel);
   graph->addAction(btnArrow);
   graph->addAction(btnLine);
   graph->addAction(actionTimeStamp);
   graph->addAction(actionAddImage);
-  graph->insertSeparator(); // layers section
+  graph->addSeparator(); // layers section
   graph->addAction(actionAddLayer);
   graph->addAction(actionDeleteLayer);
   graph->addAction(actionShowLayerDialog);
@@ -1186,16 +1183,16 @@ void ApplicationWindow::initMainMenu() {
   plot3DMenu->addAction(actionPlot3DHiddenLine);
   plot3DMenu->addAction(actionPlot3DPolygons);
   plot3DMenu->addAction(actionPlot3DWireSurface);
-  plot3DMenu->insertSeparator();
+  plot3DMenu->addSeparator();
   plot3DMenu->addAction(actionPlot3DBars);
   plot3DMenu->addAction(actionPlot3DScatter);
-  plot3DMenu->insertSeparator();
+  plot3DMenu->addSeparator();
   plot3DMenu->addAction(actionImagePlot);
   plot3DMenu->addAction(actionColorMap);
   plot3DMenu->addAction(actionNoContourColorMap);
   plot3DMenu->addAction(actionContourMap);
   plot3DMenu->addAction(actionGrayMap);
-  plot3DMenu->insertSeparator();
+  plot3DMenu->addSeparator();
   // plot3DMenu->addAction(actionPlotHistogram);
 
   matrixMenu = new QMenu(this);
@@ -1209,7 +1206,6 @@ void ApplicationWindow::initMainMenu() {
 
   plotDataMenu = new QMenu(this);
   plotDataMenu->setObjectName("plotDataMenu");
-  plotDataMenu->setCheckable(true);
   connect(plotDataMenu, SIGNAL(aboutToShow()), this,
           SLOT(plotDataMenuAboutToShow()));
 
@@ -1245,7 +1241,6 @@ void ApplicationWindow::initMainMenu() {
 
   windowsMenu = new QMenu(this);
   windowsMenu->setObjectName("windowsMenu");
-  windowsMenu->setCheckable(true);
   connect(windowsMenu, SIGNAL(aboutToShow()), this,
           SLOT(windowsMenuAboutToShow()));
 
@@ -1266,12 +1261,12 @@ void ApplicationWindow::initMainMenu() {
   help->addAction(actionMantidConcepts);
   help->addAction(actionMantidAlgorithms);
   help->addAction(actionmantidplotHelp);
-  help->insertSeparator();
+  help->addSeparator();
   help->addAction(actionHelpBugReports);
   help->addAction(actionAskHelp);
-  help->insertSeparator();
+  help->addSeparator();
   help->addAction(actionFirstTimeSetup);
-  help->insertSeparator();
+  help->addSeparator();
 
   help->addAction(actionAbout);
 
@@ -1301,19 +1296,19 @@ void ApplicationWindow::tableMenuAboutToShow() {
   setAsMenu->addAction(actionSetXCol);
   setAsMenu->addAction(actionSetYCol);
   setAsMenu->addAction(actionSetZCol);
-  setAsMenu->insertSeparator();
+  setAsMenu->addSeparator();
   setAsMenu->addAction(actionSetLabelCol);
   setAsMenu->addAction(actionDisregardCol);
-  setAsMenu->insertSeparator();
+  setAsMenu->addSeparator();
   setAsMenu->addAction(actionSetXErrCol);
   setAsMenu->addAction(actionSetYErrCol);
-  setAsMenu->insertSeparator();
+  setAsMenu->addSeparator();
   setAsMenu->addAction(tr("&Read-only"), this, SLOT(setReadOnlyColumns()));
   setAsMenu->addAction(tr("Read/&Write"), this, SLOT(setReadWriteColumns()));
 
   tableMenu->addAction(actionShowColumnOptionsDialog);
   if (isEditable)
-    tableMenu->insertSeparator();
+    tableMenu->addSeparator();
 
   if (isEditable)
     tableMenu->addAction(actionShowColumnValuesDialog);
@@ -1328,15 +1323,15 @@ void ApplicationWindow::tableMenuAboutToShow() {
 
   if (isEditable)
     tableMenu->addAction(actionClearTable);
-  tableMenu->insertSeparator();
+  tableMenu->addSeparator();
   if (!isFixedColumns)
     tableMenu->addAction(actionAddColToTable);
   tableMenu->addAction(actionShowColsDialog);
-  tableMenu->insertSeparator();
+  tableMenu->addSeparator();
   tableMenu->addAction(actionHideSelectedColumns);
   tableMenu->addAction(actionShowAllColumns);
   if (!isFixedColumns)
-    tableMenu->insertSeparator();
+    tableMenu->addSeparator();
   if (!isFixedColumns)
     tableMenu->addAction(actionMoveColFirst);
   if (!isFixedColumns)
@@ -1347,23 +1342,23 @@ void ApplicationWindow::tableMenuAboutToShow() {
     tableMenu->addAction(actionMoveColLast);
   if (!isFixedColumns)
     tableMenu->addAction(actionSwapColumns);
-  tableMenu->insertSeparator();
-  if (t->isA("Table"))
+  tableMenu->addSeparator();
+  if (isOfType(t, "Table"))
     tableMenu->addAction(actionShowRowsDialog);
   tableMenu->addAction(actionDeleteRows);
-  tableMenu->insertSeparator();
+  tableMenu->addSeparator();
   tableMenu->addAction(actionGoToRow);
   tableMenu->addAction(actionGoToColumn);
-  tableMenu->insertSeparator();
+  tableMenu->addSeparator();
   tableMenu->addAction(actionConvertTable);
-  if (t->isA("Table")) // but not MantidTable
+  if (isOfType(t, "Table")) // but not MantidTable
   {
     tableMenu->addAction(actionConvertTableToWorkspace);
   }
   tableMenu->addAction(actionConvertTableToMatrixWorkspace);
   tableMenu->addAction(actionSortTable);
 
-  tableMenu->insertSeparator();
+  tableMenu->addSeparator();
   tableMenu->addAction(actionShowPlotWizard);
 
   reloadCustomActions();
@@ -1376,10 +1371,10 @@ void ApplicationWindow::plotDataMenuAboutToShow() {
   plotDataMenu->addAction(btnZoomOut);
   plotDataMenu->addAction(actionPanPlot);
   plotDataMenu->addAction(actionUnzoom);
-  plotDataMenu->insertSeparator();
+  plotDataMenu->addSeparator();
   plotDataMenu->addAction(btnCursor);
   plotDataMenu->addAction(btnPicker);
-  plotDataMenu->insertSeparator();
+  plotDataMenu->addSeparator();
   plotDataMenu->addAction(actionDrawPoints);
   plotDataMenu->addAction(btnMovePoints);
   plotDataMenu->addAction(btnRemovePoints);
@@ -1400,20 +1395,20 @@ void ApplicationWindow::plotMenuAboutToShow() {
   specialPlotMenu->addAction(actionPlotSpline);
   specialPlotMenu->addAction(actionPlotVertSteps);
   specialPlotMenu->addAction(actionPlotHorSteps);
-  plot2DMenu->insertSeparator();
+  plot2DMenu->addSeparator();
   plot2DMenu->addAction(actionPlotVerticalBars);
   plot2DMenu->addAction(actionPlotHorizontalBars);
   plot2DMenu->addAction(actionPlotArea);
   plot2DMenu->addAction(actionPlotPie);
   plot2DMenu->addAction(actionPlotVectXYXY);
   plot2DMenu->addAction(actionPlotVectXYAM);
-  plot2DMenu->insertSeparator();
+  plot2DMenu->addSeparator();
 
   QMenu *statMenu = plot2DMenu->addMenu(tr("Statistical &Graphs"));
   statMenu->addAction(actionBoxPlot);
   statMenu->addAction(actionPlotHistogram);
   statMenu->addAction(actionPlotStackedHistograms);
-  statMenu->insertSeparator();
+  statMenu->addSeparator();
   statMenu->addAction(actionStemPlot);
 
   QMenu *panelsMenu = plot2DMenu->addMenu(tr("Pa&nel"));
@@ -1433,11 +1428,16 @@ void ApplicationWindow::plotMenuAboutToShow() {
 
 void ApplicationWindow::customMenu(MdiSubWindow *w) {
   myMenuBar()->clear();
-  myMenuBar()->insertItem(tr("&File"), fileMenu);
+  auto fileMenuAction = myMenuBar()->addMenu(fileMenu);
+  fileMenuAction->setText(tr("&File"));
   fileMenuAboutToShow();
-  myMenuBar()->insertItem(tr("&Edit"), edit);
+
+  auto editMenuAction = myMenuBar()->addMenu(edit);
+  editMenuAction->setText(tr("&Edit"));
   editMenuAboutToShow();
-  myMenuBar()->insertItem(tr("&View"), view);
+
+  auto viewMenuAction = myMenuBar()->addMenu(view);
+  viewMenuAction->setText(tr("&View"));
 
   // these use the same keyboard shortcut (Ctrl+Return) and should not be
   // enabled at the same time
@@ -1456,29 +1456,37 @@ void ApplicationWindow::customMenu(MdiSubWindow *w) {
     else
       actionShowExportASCIIDialog->setEnabled(false);
 
-    if (w->isA("MultiLayer")) {
-      myMenuBar()->insertItem(tr("&Graph"), graph);
-      myMenuBar()->insertItem(tr("&Data"), plotDataMenu);
+    if (isOfType(w, "MultiLayer")) {
+      auto graphMenuAction = myMenuBar()->addMenu(graph);
+      graphMenuAction->setText(tr("&Graph"));
+
+      auto plotDataMenuAction = myMenuBar()->addMenu(plotDataMenu);
+      plotDataMenuAction->setText(tr("&Data"));
+
       plotDataMenuAboutToShow();
       if (m_enableQtiPlotFitting) {
-        myMenuBar()->insertItem(tr("&Analysis"), analysisMenu);
+        auto analysisMenuAction = myMenuBar()->addMenu(analysisMenu);
+        analysisMenuAction->setText(tr("&Analysis"));
         analysisMenuAboutToShow();
       }
-      myMenuBar()->insertItem(tr("For&mat"), format);
+      auto formatMenuAction = myMenuBar()->addMenu(format);
+      formatMenuAction->setText(tr("For&mat"));
+
       format->clear();
       format->addAction(actionShowPlotDialog);
-      format->insertSeparator();
+      format->addSeparator();
       format->addAction(actionShowScaleDialog);
       format->addAction(actionShowAxisDialog);
       actionShowAxisDialog->setEnabled(true);
-      format->insertSeparator();
+      format->addSeparator();
       format->addAction(actionShowGridDialog);
       format->addAction(actionShowTitleDialog);
 
-    } else if (w->isA("Graph3D")) {
+    } else if (isOfType(w, "Graph3D")) {
       disableActions();
 
-      myMenuBar()->insertItem(tr("For&mat"), format);
+      auto formatMenuAction = myMenuBar()->addMenu(format);
+      formatMenuAction->setText(tr("For&mat"));
 
       actionPrint->setEnabled(true);
 
@@ -1529,24 +1537,33 @@ void ApplicationWindow::customMenu(MdiSubWindow *w) {
       format->addAction(actionAnimate);
 
     } else if (w->inherits("Table")) {
-      myMenuBar()->insertItem(tr("&Plot"), plot2DMenu);
-      myMenuBar()->insertItem(tr("&Analysis"), analysisMenu);
+      auto plot2DMenuAction = myMenuBar()->addMenu(plot2DMenu);
+      plot2DMenuAction->setText(tr("&Plot"));
+
+      auto analysisMenuAction = myMenuBar()->addMenu(analysisMenu);
+      analysisMenuAction->setText(tr("&Analysis"));
       analysisMenuAboutToShow();
-      myMenuBar()->insertItem(tr("&Table"), tableMenu);
+
+      auto tableMenuAction = myMenuBar()->addMenu(tableMenu);
+      tableMenuAction->setText(tr("&Table"));
+
       tableMenuAboutToShow();
       actionTableRecalculate->setEnabled(true);
-
-    } else if (w->isA("Matrix")) {
+    } else if (isOfType(w, "Matrix")) {
       actionTableRecalculate->setEnabled(true);
-      myMenuBar()->insertItem(tr("3D &Plot"), plot3DMenu);
-      myMenuBar()->insertItem(tr("&Matrix"), matrixMenu);
+      auto plot3DMenuAction = myMenuBar()->addMenu(plot3DMenu);
+      plot3DMenuAction->setText(tr("3D &Plot"));
+
+      auto matrixMenuAction = myMenuBar()->addMenu(matrixMenu);
+      matrixMenuAction->setText(tr("&Matrix"));
       matrixMenuAboutToShow();
-      myMenuBar()->insertItem(tr("&Analysis"), analysisMenu);
+
+      auto analysisMenuAction = myMenuBar()->addMenu(analysisMenu);
+      analysisMenuAction->setText(tr("&Analysis"));
       analysisMenuAboutToShow();
-
-    } else if (w->isA("TiledWindow")) {
-      myMenuBar()->insertItem(tr("Tiled Window"), tiledWindowMenu);
-
+    } else if (isOfType(w, "TiledWindow")) {
+      auto tiledWindowMenuAction = myMenuBar()->addMenu(tiledWindowMenu);
+      tiledWindowMenuAction->setText(tr("Tiled Window"));
     } else if (!mantidUI->menuAboutToShow(w)) // Note that this call has a
                                               // side-effect (it enables menus)
       disableActions();
@@ -1555,23 +1572,28 @@ void ApplicationWindow::customMenu(MdiSubWindow *w) {
     disableActions();
 
   if (!currentFolder()->isEmpty()) {
-    myMenuBar()->insertItem(tr("&Windows"), windowsMenu);
+    auto windowsMenuAction = myMenuBar()->addMenu(windowsMenu);
+    windowsMenuAction->setText(tr("&Windows"));
     windowsMenuAboutToShow();
   }
   // -- Mantid: add script actions, if any exist --
   QListIterator<QMenu *> mIter(d_user_menus);
   while (mIter.hasNext()) {
     QMenu *item = mIter.next();
-    myMenuBar()->insertItem(tr(item->title()), item);
+    auto itemMenuAction = myMenuBar()->addMenu(item);
+    itemMenuAction->setText(tr(item->title()));
   }
 
-  myMenuBar()->insertItem(tr("&Catalog"), icat);
+  auto catalogMenuAction = myMenuBar()->addMenu(icat);
+  catalogMenuAction->setText(tr("&Catalog"));
 
   // -- INTERFACE MENU --
-  myMenuBar()->insertItem(tr("&Interfaces"), interfaceMenu);
+  auto interfaceMenuAction = myMenuBar()->addMenu(interfaceMenu);
+  interfaceMenuAction->setText(tr("&Interfaces"));
   interfaceMenuAboutToShow();
 
-  myMenuBar()->insertItem(tr("&Help"), help);
+  auto helpMenuAction = myMenuBar()->addMenu(help);
+  helpMenuAction->setText(tr("&Help"));
 
   reloadCustomActions();
 }
@@ -1670,7 +1692,7 @@ void ApplicationWindow::customToolBars(MdiSubWindow *w) {
   if (!w)
     return;
 
-  if (w->isA("MultiLayer") && d_plot_tool_bar) {
+  if (isOfType(w, "MultiLayer") && d_plot_tool_bar) {
     if (!plotTools->isVisible())
       plotTools->show();
     plotTools->setEnabled(true);
@@ -1679,7 +1701,7 @@ void ApplicationWindow::customToolBars(MdiSubWindow *w) {
       formatToolBar->setEnabled(true);
       formatToolBar->show();
     }
-  } else if (w->isA("Graph3D")) {
+  } else if (isOfType(w, "Graph3D")) {
     custom3DActions(w);
   }
 }
@@ -2078,7 +2100,7 @@ void ApplicationWindow::updateTableNames(const QString &oldName,
         g->updateCurveNames(oldName, newName);
     } else if (g3d) {
       QString name = g3d->formula();
-      if (name.contains(oldName, true)) {
+      if (name.contains(oldName, Qt::CaseSensitive)) {
         name.replace(oldName, newName);
         g3d->setPlotAssociation(name);
       }
@@ -5818,14 +5840,14 @@ void ApplicationWindow::exportGraph() {
           tr("<h4>There are no plot layers available in this window!</h4>"));
       return;
     }
-  } else if (w->isA("Graph3D"))
+  } else if (std::string(w->metaObject()->className()) == "Graph3D")
     plot3D = dynamic_cast<Graph3D *>(w);
   else
     return;
 
   ImageExportDialog *ied =
       new ImageExportDialog(this, plot2D != NULL, d_extended_export_dialog);
-  ied->setDir(workingDir);
+  ied->setDirectory(workingDir);
   ied->selectFilter(d_image_export_filter);
   if (ied->exec() != QDialog::Accepted)
     return;
@@ -5864,7 +5886,7 @@ void ApplicationWindow::exportGraph() {
   } else {
     QList<QByteArray> list = QImageWriter::supportedImageFormats();
     for (int i = 0; i < (int)list.count(); i++) {
-      if (selected_filter.contains("." + (list[i]).lower())) {
+      if (selected_filter.contains("." + (list[i]).toLower())) {
         if (plot2D)
           plot2D->exportImage(file_name, ied->quality(), ied->transparency());
         else if (plot3D)
@@ -5889,7 +5911,7 @@ void ApplicationWindow::exportLayer() {
 
   ImageExportDialog *ied =
       new ImageExportDialog(this, g != NULL, d_extended_export_dialog);
-  ied->setDir(workingDir);
+  ied->setDirectory(workingDir);
   ied->selectFilter(d_image_export_filter);
   if (ied->exec() != QDialog::Accepted)
     return;
@@ -5923,7 +5945,7 @@ void ApplicationWindow::exportLayer() {
   else {
     QList<QByteArray> list = QImageWriter::supportedImageFormats();
     for (int i = 0; i < (int)list.count(); i++)
-      if (selected_filter.contains("." + (list[i]).lower()))
+      if (selected_filter.contains("." + (list[i]).toLower()))
         g->exportImage(file_name, ied->quality(), ied->transparency());
   }
 }
@@ -5938,7 +5960,7 @@ void ApplicationWindow::exportAllGraphs() {
   ied->setLabelText(QFileDialog::FileType, tr("Output format:"));
   ied->setLabelText(QFileDialog::FileName, tr("Directory:"));
 
-  ied->setDir(workingDir);
+  ied->setDirectory(workingDir);
   ied->selectFilter(d_image_export_filter);
 
   if (ied->exec() != QDialog::Accepted)
@@ -5951,7 +5973,7 @@ void ApplicationWindow::exportAllGraphs() {
 
   QString output_dir = ied->selectedFiles()[0];
   QString file_suffix = ied->selectedFilter();
-  file_suffix.lower();
+  file_suffix = file_suffix.toLower();
   file_suffix.remove("*");
 
   bool confirm_overwrite = true;
@@ -5960,7 +5982,8 @@ void ApplicationWindow::exportAllGraphs() {
 
   QList<MdiSubWindow *> windows = windowsList();
   foreach (MdiSubWindow *w, windows) {
-    if (w->isA("MultiLayer")) {
+    const std::string windowClassName = w->metaObject()->className();
+    if (windowClassName == "MultiLayer") {
       plot3D = 0;
       plot2D = dynamic_cast<MultiLayer *>(w);
       if (!plot2D)
@@ -5975,7 +5998,7 @@ void ApplicationWindow::exportAllGraphs() {
         QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
         continue;
       }
-    } else if (w->isA("Graph3D")) {
+    } else if (windowClassName == "Graph3D") {
       plot2D = 0;
       plot3D = dynamic_cast<Graph3D *>(w);
       if (!plot3D)
@@ -6040,7 +6063,7 @@ void ApplicationWindow::exportAllGraphs() {
     } else {
       QList<QByteArray> list = QImageWriter::supportedImageFormats();
       for (int i = 0; i < (int)list.count(); i++) {
-        if (file_suffix.contains("." + (list[i]).lower())) {
+        if (file_suffix.contains("." + (list[i]).toLower())) {
           if (plot2D)
             plot2D->exportImage(file_name, ied->quality(), ied->transparency());
           else if (plot3D)
@@ -6176,11 +6199,12 @@ void ApplicationWindow::savetoNexusFile() {
   if (!fileName.isEmpty()) {
     std::string wsName;
     MdiSubWindow *w = activeWindow();
+    const std::string windowClassName = w->metaObject()->className();
     if (w) {
-      if (w->isA("MantidMatrix")) {
+      if (windowClassName == "MantidMatrix") {
         wsName = dynamic_cast<MantidMatrix *>(w)->getWorkspaceName();
 
-      } else if (w->isA("MantidTable")) {
+      } else if (windowClassName == "MantidTable") {
         wsName = dynamic_cast<MantidTable *>(w)->getWorkspaceName();
       } else {
         throw std::runtime_error("Invalid input for SaveNexus, you cannot save "
@@ -6247,7 +6271,7 @@ void ApplicationWindow::saveProjectAs(const QString &fileName, bool compress) {
       // Make the directory
       QString dir(fn);
       if (fn.contains('.'))
-        dir = fn.left(fn.find('.'));
+        dir = fn.left(fn.indexOf('.'));
       QDir().mkdir(dir);
 
       // Get the file name
@@ -6262,7 +6286,7 @@ void ApplicationWindow::saveProjectAs(const QString &fileName, bool compress) {
     }
 
     QFileInfo fi(fn);
-    workingDir = fi.dirPath(true);
+    workingDir = fi.absolutePath();
     QString baseName = fi.fileName();
     if (!baseName.contains("."))
       // fn.append(".qti");
@@ -6270,7 +6294,7 @@ void ApplicationWindow::saveProjectAs(const QString &fileName, bool compress) {
 
     projectname = fn;
     if (saveProject(compress)) {
-      recentProjects.remove(projectname);
+      recentProjects.removeAll(projectname);
       recentProjects.push_front(projectname);
       updateRecentProjectsList();
 
@@ -6376,7 +6400,7 @@ bool ApplicationWindow::setWindowName(MdiSubWindow *w, const QString &text) {
 
   if (w->inherits("Table"))
     updateTableNames(name, newName);
-  else if (w->isA("Matrix"))
+  else if (std::string(w->metaObject()->className()) == "Matrix")
     changeMatrixName(name, newName);
 
   w->setCaptionPolicy(w->captionPolicy());
@@ -6500,8 +6524,8 @@ void ApplicationWindow::showTitleDialog() {
   MdiSubWindow *w = activeWindow();
   if (!w)
     return;
-
-  if (w->isA("MultiLayer")) {
+  const std::string windowClassName = w->metaObject()->className();
+  if (windowClassName == "MultiLayer") {
     auto ml = dynamic_cast<MultiLayer *>(w);
     if (!ml)
       return;
@@ -6512,7 +6536,7 @@ void ApplicationWindow::showTitleDialog() {
       td->setGraph(g);
       td->exec();
     }
-  } else if (w->isA("Graph3D")) {
+  } else if (windowClassName == "Graph3D") {
     Plot3DDialog *pd = dynamic_cast<Plot3DDialog *>(showPlot3dDialog());
     if (pd)
       pd->showTitleTab();
@@ -6540,15 +6564,18 @@ void ApplicationWindow::showAxisTitleDialog() {
 void ApplicationWindow::showExportASCIIDialog() {
   QString tableName = QString::null;
   MdiSubWindow *t = activeWindow();
-  if (t &&
-      (t->isA("Matrix") || t->inherits("Table") || t->isA("MantidMatrix"))) {
-    tableName = t->objectName();
+  if (t) {
+    const std::string tClassName = t->metaObject()->className();
+    if (tClassName == "Matrix" || t->inherits("Table") ||
+        tClassName == "MantidMatrix") {
+      tableName = t->objectName();
 
-    ExportDialog *ed =
-        new ExportDialog(tableName, this, Qt::WindowContextHelpButtonHint);
-    ed->setAttribute(Qt::WA_DeleteOnClose);
-    ed->setColumnSeparator(columnSeparator);
-    ed->exec();
+      ExportDialog *ed =
+          new ExportDialog(tableName, this, Qt::WindowContextHelpButtonHint);
+      ed->setAttribute(Qt::WA_DeleteOnClose);
+      ed->setColumnSeparator(columnSeparator);
+      ed->exec();
+    }
   }
 }
 
@@ -6565,7 +6592,8 @@ void ApplicationWindow::exportAllTables(const QString &sep, bool colNames,
     bool success = true;
     QList<MdiSubWindow *> windows = windowsList();
     foreach (MdiSubWindow *w, windows) {
-      if (w->inherits("Table") || w->isA("Matrix")) {
+      if (w->inherits("Table") ||
+          std::string(w->metaObject()->className()) == "Matrix") {
         QString fileName = dir + "/" + w->objectName() + ".txt";
         QFile f(fileName);
         if (f.exists(fileName) && confirmOverwrite) {
@@ -6604,8 +6632,11 @@ void ApplicationWindow::exportASCII(const QString &tableName,
                                     const QString &sep, bool colNames,
                                     bool colComments, bool expSelection) {
   MdiSubWindow *w = window(tableName);
-  if (!w ||
-      !(w->isA("Matrix") || w->inherits("Table") || w->isA("MantidMatrix")))
+  if (!w)
+    return;
+  const std::string windowClassName = w->metaObject()->className();
+  if (!(windowClassName == "Matrix" || w->inherits("Table") ||
+        windowClassName == "MantidMatrix"))
     return;
 
   QString selectedFilter;
@@ -6619,7 +6650,7 @@ void ApplicationWindow::exportASCII(const QString &tableName,
     if (baseName.contains(".") == 0)
       fname.append(selectedFilter.remove("*"));
 
-    asciiDirPath = fi.dirPath(true);
+    asciiDirPath = fi.absolutePath();
 
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
     auto t = dynamic_cast<Table *>(w);
@@ -6628,7 +6659,7 @@ void ApplicationWindow::exportASCII(const QString &tableName,
       t->exportASCII(fname, sep, colNames, colComments, expSelection);
     else if (m)
       m->exportASCII(fname, sep, expSelection);
-    else if (w->isA("MantidMatrix")) {
+    else if (windowClassName == "MantidMatrix") {
       // call save ascii
       try {
         Mantid::API::IAlgorithm_sptr alg =
@@ -6878,7 +6909,6 @@ void ApplicationWindow::showColMenu(int c) {
   QMenu fill(this);
   QMenu sorting(this);
   QMenu colType(this);
-  colType.setCheckable(true);
   QMenu panels(this);
   QMenu stat(this);
   QMenu norm(this);
@@ -6903,7 +6933,7 @@ void ApplicationWindow::showColMenu(int c) {
                           tr("&Horizontal Steps"), this, SLOT(plotHorSteps()));
     specialPlot.setTitle(tr("Special Line/Symb&ol"));
     plot.addMenu(&specialPlot);
-    plot.insertSeparator();
+    plot.addSeparator();
 
     plot.addAction(QIcon(getQPixmap("vertBars_xpm")), tr("&Columns"), this,
                    SLOT(plotVerticalBars()));
@@ -6914,7 +6944,7 @@ void ApplicationWindow::showColMenu(int c) {
 
     plot.addAction(QIcon(getQPixmap("pie_xpm")), tr("&Pie"), this,
                    SLOT(plotPie()));
-    plot.insertSeparator();
+    plot.addSeparator();
 
     plot.addAction(QIcon(getQPixmap("ribbon_xpm")), tr("3D Ribbo&n"), this,
                    SLOT(plot3DRibbon()));
@@ -6925,7 +6955,7 @@ void ApplicationWindow::showColMenu(int c) {
     plot.addAction(QIcon(getQPixmap("trajectory_xpm")), tr("3D &Trajectory"),
                    this, SLOT(plot3DTrajectory()));
 
-    plot.insertSeparator();
+    plot.addSeparator();
 
     stat.addAction(actionBoxPlot);
     stat.addAction(QIcon(getQPixmap("histogram_xpm")), tr("&Histogram"), this,
@@ -6933,14 +6963,14 @@ void ApplicationWindow::showColMenu(int c) {
     stat.addAction(QIcon(getQPixmap("stacked_hist_xpm")),
                    tr("&Stacked Histograms"), this,
                    SLOT(plotStackedHistograms()));
-    stat.insertSeparator();
+    stat.addSeparator();
     stat.addAction(actionStemPlot);
     stat.setTitle(tr("Statistical &Graphs"));
     plot.addMenu(&stat);
 
     plot.setTitle(tr("&Plot"));
     contextMenu.addMenu(&plot);
-    contextMenu.insertSeparator();
+    contextMenu.addSeparator();
 
     if (isEditable)
       contextMenu.addAction(QIcon(getQPixmap("cut_xpm")), tr("Cu&t"), w,
@@ -6950,7 +6980,7 @@ void ApplicationWindow::showColMenu(int c) {
     if (isEditable)
       contextMenu.addAction(QIcon(getQPixmap("paste_xpm")), tr("Past&e"), w,
                             SLOT(pasteSelection()));
-    contextMenu.insertSeparator();
+    contextMenu.addSeparator();
 
     QAction *xColID = colType.addAction(QIcon(getQPixmap("x_col_xpm")),
                                         tr("&X"), this, SLOT(setXCol()));
@@ -6961,7 +6991,7 @@ void ApplicationWindow::showColMenu(int c) {
     QAction *zColID = colType.addAction(QIcon(getQPixmap("z_col_xpm")),
                                         tr("&Z"), this, SLOT(setZCol()));
     zColID->setCheckable(true);
-    colType.insertSeparator();
+    colType.addSeparator();
     QAction *labelID =
         colType.addAction(QIcon(getQPixmap("set_label_col_xpm")), tr("&Label"),
                           this, SLOT(setLabelCol()));
@@ -6970,7 +7000,7 @@ void ApplicationWindow::showColMenu(int c) {
         colType.addAction(QIcon(getQPixmap("disregard_col_xpm")), tr("&None"),
                           this, SLOT(disregardCol()));
     noneID->setCheckable(true);
-    colType.insertSeparator();
+    colType.addSeparator();
     QAction *xErrColID =
         colType.addAction(tr("X E&rror"), this, SLOT(setXErrCol()));
     xErrColID->setCheckable(true);
@@ -6978,7 +7008,7 @@ void ApplicationWindow::showColMenu(int c) {
         colType.addAction(QIcon(getQPixmap("errors_xpm")), tr("Y &Error"), this,
                           SLOT(setYErrCol()));
     yErrColID->setCheckable(true);
-    colType.insertSeparator();
+    colType.addSeparator();
 
     if (w->colPlotDesignation(c) == Table::X)
       xColID->setChecked(true);
@@ -6995,7 +7025,7 @@ void ApplicationWindow::showColMenu(int c) {
     else
       noneID->setChecked(true);
 
-    actionReadOnlyCol->addTo(&colType);
+    colType.addAction(actionReadOnlyCol);
     actionReadOnlyCol->setCheckable(true);
     actionReadOnlyCol->setChecked(w->isReadOnlyColumn(c));
 
@@ -7004,7 +7034,7 @@ void ApplicationWindow::showColMenu(int c) {
 
     if (w) {
       if (isEditable)
-        contextMenu.insertSeparator();
+        contextMenu.addSeparator();
 
       if (isEditable)
         contextMenu.addAction(actionShowColumnValuesDialog);
@@ -7022,10 +7052,10 @@ void ApplicationWindow::showColMenu(int c) {
       if (isEditable)
         contextMenu.addMenu(&norm);
 
-      contextMenu.insertSeparator();
+      contextMenu.addSeparator();
       contextMenu.addAction(actionShowColStatistics);
 
-      contextMenu.insertSeparator();
+      contextMenu.addSeparator();
 
       if (isEditable)
         contextMenu.addAction(QIcon(getQPixmap("erase_xpm")), tr("Clea&r"), w,
@@ -7035,13 +7065,13 @@ void ApplicationWindow::showColMenu(int c) {
                               tr("&Delete"), w, SLOT(removeCol()));
       contextMenu.addAction(actionHideSelectedColumns);
       contextMenu.addAction(actionShowAllColumns);
-      contextMenu.insertSeparator();
+      contextMenu.addSeparator();
       if (!isFixedColumns)
         contextMenu.addAction(getQPixmap("insert_column_xpm"), tr("&Insert"), w,
                               SLOT(insertCol()));
       if (!isFixedColumns)
         contextMenu.addAction(actionAddColToTable);
-      contextMenu.insertSeparator();
+      contextMenu.addSeparator();
 
       sorting.addAction(QIcon(getQPixmap("sort_ascending_xpm")),
                         tr("&Ascending"), w, SLOT(sortColAsc()));
@@ -7056,7 +7086,7 @@ void ApplicationWindow::showColMenu(int c) {
         contextMenu.addAction(actionSortTable);
     }
 
-    contextMenu.insertSeparator();
+    contextMenu.addSeparator();
     contextMenu.addAction(actionShowColumnOptionsDialog);
   } else if ((int)w->selectedColumns().count() > 1) {
     plot.addAction(QIcon(getQPixmap("lPlot_xpm")), tr("&Line"), this,
@@ -7078,7 +7108,7 @@ void ApplicationWindow::showColMenu(int c) {
                           tr("&Vertical Steps"), this, SLOT(plotHorSteps()));
     specialPlot.setTitle(tr("Special Line/Symb&ol"));
     plot.addMenu(&specialPlot);
-    plot.insertSeparator();
+    plot.addSeparator();
 
     plot.addAction(QIcon(getQPixmap("vertBars_xpm")), tr("&Columns"), this,
                    SLOT(plotVerticalBars()));
@@ -7088,7 +7118,7 @@ void ApplicationWindow::showColMenu(int c) {
                    SLOT(plotArea()));
     plot.addAction(QIcon(getQPixmap("vectXYXY_xpm")), tr("Vectors &XYXY"), this,
                    SLOT(plotVectXYXY()));
-    plot.insertSeparator();
+    plot.addSeparator();
 
     stat.addAction(actionBoxPlot);
     stat.addAction(QIcon(getQPixmap("histogram_xpm")), tr("&Histogram"), this,
@@ -7096,7 +7126,7 @@ void ApplicationWindow::showColMenu(int c) {
     stat.addAction(QIcon(getQPixmap("stacked_hist_xpm")),
                    tr("&Stacked Histograms"), this,
                    SLOT(plotStackedHistograms()));
-    stat.insertSeparator();
+    stat.addSeparator();
     stat.addAction(actionStemPlot);
     stat.setTitle(tr("Statistical &Graphs"));
     plot.addMenu(&stat);
@@ -7116,7 +7146,7 @@ void ApplicationWindow::showColMenu(int c) {
 
     plot.setTitle(tr("&Plot"));
     contextMenu.addMenu(&plot);
-    contextMenu.insertSeparator();
+    contextMenu.addSeparator();
     if (isEditable)
       contextMenu.addAction(QIcon(getQPixmap("cut_xpm")), tr("Cu&t"), w,
                             SLOT(cutSelection()));
@@ -7125,7 +7155,7 @@ void ApplicationWindow::showColMenu(int c) {
     if (isEditable)
       contextMenu.addAction(QIcon(getQPixmap("paste_xpm")), tr("Past&e"), w,
                             SLOT(pasteSelection()));
-    contextMenu.insertSeparator();
+    contextMenu.addSeparator();
 
     if (w) {
       if (isEditable)
@@ -7136,25 +7166,25 @@ void ApplicationWindow::showColMenu(int c) {
                               SLOT(removeCol()));
       contextMenu.addAction(actionHideSelectedColumns);
       contextMenu.addAction(actionShowAllColumns);
-      contextMenu.insertSeparator();
+      contextMenu.addSeparator();
       if (isEditable)
         contextMenu.addAction(tr("&Insert"), w, SLOT(insertCol()));
       if (isEditable)
         contextMenu.addAction(actionAddColToTable);
       if (isEditable)
-        contextMenu.insertSeparator();
+        contextMenu.addSeparator();
     }
 
     colType.addAction(actionSetXCol);
     colType.addAction(actionSetYCol);
     colType.addAction(actionSetZCol);
-    colType.insertSeparator();
+    colType.addSeparator();
     colType.addAction(actionSetLabelCol);
     colType.addAction(actionDisregardCol);
-    colType.insertSeparator();
+    colType.addSeparator();
     colType.addAction(actionSetXErrCol);
     colType.addAction(actionSetYErrCol);
-    colType.insertSeparator();
+    colType.addSeparator();
     colType.addAction(tr("&Read-only"), this, SLOT(setReadOnlyColumns()));
     colType.addAction(tr("Read/&Write"), this, SLOT(setReadWriteColumns()));
     colType.setTitle(tr("Set As"));
@@ -7162,7 +7192,7 @@ void ApplicationWindow::showColMenu(int c) {
 
     if (w) {
       if (isEditable)
-        contextMenu.insertSeparator();
+        contextMenu.addSeparator();
 
       fill.addAction(actionSetAscValues);
       fill.addAction(actionSetRandomValues);
@@ -7177,12 +7207,12 @@ void ApplicationWindow::showColMenu(int c) {
         contextMenu.addMenu(&norm);
 
       if (isSortable)
-        contextMenu.insertSeparator();
+        contextMenu.addSeparator();
       if (isSortable)
         contextMenu.addAction(actionSortSelection);
       if (isSortable)
         contextMenu.addAction(actionSortTable);
-      contextMenu.insertSeparator();
+      contextMenu.addSeparator();
       contextMenu.addAction(actionShowColStatistics);
     }
   }
@@ -7262,7 +7292,8 @@ void ApplicationWindow::showGeneralPlotDialog() {
   if (!plot)
     return;
 
-  if (plot->isA("MultiLayer")) {
+  const std::string plotClassName = plot->metaObject()->className();
+  if (plotClassName == "MultiLayer") {
     // do the dynamic_casts inside a try/c, as there may be issues with the
     // plots
     // (source data/table/matrix has been removed/closed, etc.)
@@ -7276,7 +7307,7 @@ void ApplicationWindow::showGeneralPlotDialog() {
     }
     if (ml && ml->layers())
       showPlotDialog();
-  } else if (plot->isA("Graph3D")) {
+  } else if (plotClassName == "Graph3D") {
     QDialog *gd = showScaleDialog();
     Plot3DDialog *plot3D;
     try {
@@ -7295,8 +7326,9 @@ void ApplicationWindow::showAxisDialog() {
   if (!plot)
     return;
 
+  const std::string plotClassName = plot->metaObject()->className();
   QDialog *gd = showScaleDialog();
-  if (gd && plot->isA("MultiLayer")) {
+  if (gd && plotClassName == "MultiLayer") {
     MultiLayer *ml = dynamic_cast<MultiLayer *>(plot);
     if (!ml || !ml->layers())
       return;
@@ -7304,7 +7336,7 @@ void ApplicationWindow::showAxisDialog() {
     auto ad = dynamic_cast<AxesDialog *>(gd);
     if (ad)
       ad->showAxesPage();
-  } else if (gd && plot->isA("Graph3D")) {
+  } else if (gd && plotClassName == "Graph3D") {
     Plot3DDialog *p3d = dynamic_cast<Plot3DDialog *>(gd);
     if (p3d)
       p3d->showAxisTab();
@@ -7321,8 +7353,8 @@ QDialog *ApplicationWindow::showScaleDialog() {
   MdiSubWindow *w = activeWindow();
   if (!w)
     return 0;
-
-  if (w->isA("MultiLayer")) {
+  const std::string windowClassName = w->metaObject()->className();
+  if (windowClassName == "MultiLayer") {
     auto ml = dynamic_cast<MultiLayer *>(w);
     if (!ml || ml->isEmpty())
       return 0;
@@ -7341,7 +7373,7 @@ QDialog *ApplicationWindow::showScaleDialog() {
     AxesDialog *ad = new AxesDialog(this, g);
     ad->exec();
     return ad;
-  } else if (w->isA("Graph3D"))
+  } else if (windowClassName == "Graph3D")
     return showPlot3dDialog();
 
   return 0;
@@ -7417,7 +7449,7 @@ void ApplicationWindow::showCurveContextMenu(int curveKey) {
 
   QMenu curveMenu(this);
   curveMenu.addAction(c->title().text(), this, SLOT(showCurvePlotDialog()));
-  curveMenu.insertSeparator();
+  curveMenu.addSeparator();
 
   curveMenu.addAction(actionHideCurve);
   actionHideCurve->setData(curveKey);
@@ -7434,7 +7466,7 @@ void ApplicationWindow::showCurveContextMenu(int curveKey) {
 
   if (g->visibleCurves() != g->curves())
     curveMenu.addAction(actionShowAllCurves);
-  curveMenu.insertSeparator();
+  curveMenu.addSeparator();
 
   if (g->activeTool()) {
     if (g->activeTool()->rtti() == PlotToolInterface::Rtti_RangeSelector ||
@@ -7443,7 +7475,7 @@ void ApplicationWindow::showCurveContextMenu(int curveKey) {
   }
 
   if (c->type() == Graph::Function) {
-    curveMenu.insertSeparator();
+    curveMenu.addSeparator();
     curveMenu.addAction(actionEditFunction);
     actionEditFunction->setData(curveKey);
   } else if (c->type() != Graph::ErrorBars) {
@@ -7453,7 +7485,7 @@ void ApplicationWindow::showCurveContextMenu(int curveKey) {
         curveMenu.addAction(actionCutSelection);
         curveMenu.addAction(actionPasteSelection);
         curveMenu.addAction(actionClearSelection);
-        curveMenu.insertSeparator();
+        curveMenu.addSeparator();
         if (g->activeTool()->rtti() == PlotToolInterface::Rtti_RangeSelector) {
           QAction *act = new QAction(tr("Set Display Range"), this);
           connect(act, SIGNAL(activated()),
@@ -7474,7 +7506,7 @@ void ApplicationWindow::showCurveContextMenu(int curveKey) {
       actionCurveFullRange->setEnabled(true);
     actionCurveFullRange->setData(curveKey);
 
-    curveMenu.insertSeparator();
+    curveMenu.addSeparator();
   }
 
   curveMenu.addAction(actionShowCurveWorksheet);
@@ -7483,7 +7515,7 @@ void ApplicationWindow::showCurveContextMenu(int curveKey) {
   curveMenu.addAction(actionShowCurvePlotDialog);
   actionShowCurvePlotDialog->setData(curveKey);
 
-  curveMenu.insertSeparator();
+  curveMenu.addSeparator();
 
   curveMenu.addAction(actionRemoveCurve);
   actionRemoveCurve->setData(curveKey);
@@ -7591,16 +7623,16 @@ void ApplicationWindow::zoomIn() {
         this, tr("MantidPlot - Warning"), // Mantid
         tr("<h4>There are no plot layers available in this window.</h4>"
            "<p><h4>Please add a layer and try again!</h4>"));
-    btnPointer->setOn(true);
+    btnPointer->setChecked(true);
     return;
   }
 
   if (dynamic_cast<Graph *>(plot->activeGraph())->isPiePlot()) {
-    if (btnZoomIn->isOn())
+    if (btnZoomIn->isChecked())
       QMessageBox::warning(
           this, tr("MantidPlot - Warning"), // Mantid
           tr("This functionality is not available for pie plots!"));
-    btnPointer->setOn(true);
+    btnPointer->setChecked(true);
     return;
   }
 
@@ -7621,7 +7653,7 @@ void ApplicationWindow::zoomOut() {
     return;
 
   (dynamic_cast<Graph *>(plot->activeGraph()))->zoomOut();
-  btnPointer->setOn(true);
+  btnPointer->setChecked(true);
 }
 
 void ApplicationWindow::setAutoScale() {
@@ -7738,7 +7770,8 @@ void ApplicationWindow::exportPDF() {
 
   auto ml = dynamic_cast<MultiLayer *>(w);
 
-  if (w->isA("MultiLayer") && ml && ml->isEmpty()) {
+  if (std::string(w->metaObject()->className()) == "MultiLayer" && ml &&
+      ml->isEmpty()) {
     QMessageBox::warning(
         this, tr("MantidPlot - Warning"), // Mantid
         tr("<h4>There are no plot layers available in this window.</h4>"));
@@ -7753,7 +7786,7 @@ void ApplicationWindow::exportPDF() {
     if (!baseName.contains("."))
       fname.append(".pdf");
 
-    workingDir = fi.dirPath(true);
+    workingDir = fi.absolutePath();
 
     QFile f(fname);
     if (!f.open(QIODevice::WriteOnly)) {
@@ -7779,7 +7812,8 @@ void ApplicationWindow::print() {
     return;
 
   auto ml = dynamic_cast<MultiLayer *>(w);
-  if (w->isA("MultiLayer") && ml && ml->isEmpty()) {
+  if (std::string(w->metaObject()->className()) == "MultiLayer" && ml &&
+      ml->isEmpty()) {
     QMessageBox::warning(
         this, tr("MantidPlot - Warning"), // Mantid
         tr("<h4>There are no plot layers available in this window.</h4>"));
@@ -7793,22 +7827,23 @@ void ApplicationWindow::printAllPlots() {
   printer.setOrientation(QPrinter::Landscape);
   printer.setColorMode(QPrinter::Color);
   printer.setFullPage(true);
-
-  if (printer.setup()) {
+  QPrintDialog dialog(&printer);
+  if (dialog.exec()) {
     QPainter *paint = new QPainter(&printer);
 
     int plots = 0;
     QList<MdiSubWindow *> windows = windowsList();
     foreach (MdiSubWindow *w, windows) {
-      if (w->isA("MultiLayer"))
+      if (std::string(w->metaObject()->className()) == "MultiLayer")
         plots++;
     }
 
-    printer.setMinMax(0, plots);
+    dialog.setMinMax(0, plots);
     printer.setFromTo(0, plots);
 
     foreach (MdiSubWindow *w, windows) {
-      if (w->isA("MultiLayer") && printer.newPage()) {
+      if (std::string(w->metaObject()->className()) == "MultiLayer" &&
+          printer.newPage()) {
         MultiLayer *ml = dynamic_cast<MultiLayer *>(w);
         if (ml)
           ml->printAllLayers(paint);
@@ -7850,7 +7885,7 @@ void ApplicationWindow::showFitDialog() {
     return;
 
   MultiLayer *plot = 0;
-  if (w->isA("MultiLayer"))
+  if (std::string(w->metaObject()->className()) == "MultiLayer")
     plot = dynamic_cast<MultiLayer *>(w);
   else if (w->inherits("Table")) {
     Table *t = dynamic_cast<Table *>(w);
@@ -7911,7 +7946,7 @@ void ApplicationWindow::showFFTDialog() {
     return;
 
   FFTDialog *sd = 0;
-  if (w->isA("MultiLayer")) {
+  if (std::string(w->metaObject()->className()) == "MultiLayer") {
     MultiLayer *ml = dynamic_cast<MultiLayer *>(w);
     if (!ml)
       return;
@@ -8208,7 +8243,7 @@ void ApplicationWindow::selectMultiPeak(MultiLayer *plot,
             this, tr("MantidPlot - Warning"),
             tr("This functionality is not available for the underlying data."));
         delete ppicker;
-        btnPointer->setOn(true);
+        btnPointer->setChecked(true);
         return;
       }
       if (xmin != xmax) {
@@ -8309,7 +8344,7 @@ void ApplicationWindow::addImage() {
       filter); // Mantid
   if (!fn.isEmpty()) {
     QFileInfo fi(fn);
-    imagesDirPath = fi.dirPath(true);
+    imagesDirPath = fi.absolutePath();
 
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
     g->addImage(fn);
@@ -10218,10 +10253,10 @@ void ApplicationWindow::showGraphContextMenu() {
   prints.insertItem(tr("&Window"), plot, SLOT(print()));
   cm.insertItem(getQPixmap("fileprint_xpm"), tr("&Print"), &prints);
   cm.insertSeparator();
-  cm.insertItem(tr("P&roperties..."), this, SLOT(showGeneralPlotDialog()));
-  cm.insertSeparator();
-  cm.insertItem(getQPixmap("close_xpm"), tr("&Delete Layer"), plot,
-                SLOT(confirmRemoveLayer()));
+  cm.addAction(tr("P&roperties..."), this, SLOT(showGeneralPlotDialog()));
+  cm.addSeparator();
+  cm.addAction(getQPixmap("close_xpm"), tr("&Delete Layer"), plot,
+               SLOT(confirmRemoveLayer()));
   cm.exec(QCursor::pos());
 }
 
@@ -10231,15 +10266,16 @@ void ApplicationWindow::showWindowContextMenu() {
     return;
 
   QMenu cm(this);
-  QMenu plot3D(this);
-  if (w->isA("MultiLayer")) {
+  QMenu plot3D(tr("3D &Plot"), this);
+  const std::string windowType = w->metaObject()->className();
+  if (windowType == "MultiLayer") {
     MultiLayer *g = dynamic_cast<MultiLayer *>(w);
     if (!g)
       return;
     if (lastCopiedLayer) {
-      cm.insertItem(getQPixmap("paste_xpm"), tr("&Paste Layer"), this,
-                    SLOT(pasteSelection()));
-      cm.insertSeparator();
+      cm.addAction(getQPixmap("paste_xpm"), tr("&Paste Layer"), this,
+                   SLOT(pasteSelection()));
+      cm.addSeparator();
     }
 
     cm.addAction(actionAddLayer);
@@ -10247,85 +10283,84 @@ void ApplicationWindow::showWindowContextMenu() {
       cm.addAction(actionDeleteLayer);
 
     cm.addAction(actionShowLayerDialog);
-    cm.insertSeparator();
+    cm.addSeparator();
     cm.addAction(actionRename);
     cm.addAction(actionCopyWindow);
-    cm.insertSeparator();
-    cm.insertItem(getQPixmap("copy_xpm"), tr("&Copy Page"), g,
-                  SLOT(copyAllLayers()));
-    cm.insertItem(tr("E&xport Page"), this, SLOT(exportGraph()));
+    cm.addSeparator();
+    cm.addAction(getQPixmap("copy_xpm"), tr("&Copy Page"), g,
+                 SLOT(copyAllLayers()));
+    cm.addAction(tr("E&xport Page"), this, SLOT(exportGraph()));
     cm.addAction(actionPrint);
-    cm.insertSeparator();
+    cm.addSeparator();
     cm.addAction(actionCloseWindow);
-  } else if (w->isA("Graph3D")) {
+  } else if (windowType == "Graph3D") {
     Graph3D *g = dynamic_cast<Graph3D *>(w);
     if (!g)
       return;
     if (!g->hasData()) {
-      cm.insertItem(tr("3D &Plot"), &plot3D);
+      cm.addMenu(&plot3D);
       plot3D.addAction(actionAdd3DData);
-      plot3D.insertItem(tr("&Matrix..."), this, SLOT(add3DMatrixPlot()));
+      plot3D.addAction(tr("&Matrix..."), this, SLOT(add3DMatrixPlot()));
       plot3D.addAction(actionEditSurfacePlot);
     } else {
       if (g->table())
-        cm.insertItem(tr("Choose &Data Set..."), this, SLOT(change3DData()));
+        cm.addAction(tr("Choose &Data Set..."), this, SLOT(change3DData()));
       else if (g->matrix())
-        cm.insertItem(tr("Choose &Matrix..."), this, SLOT(change3DMatrix()));
+        cm.addAction(tr("Choose &Matrix..."), this, SLOT(change3DMatrix()));
       else if (g->userFunction() || g->parametricSurface())
         cm.addAction(actionEditSurfacePlot);
-      cm.insertItem(getQPixmap("erase_xpm"), tr("C&lear"), g,
-                    SLOT(clearData()));
+      cm.addAction(getQPixmap("erase_xpm"), tr("C&lear"), g, SLOT(clearData()));
     }
 
-    cm.insertSeparator();
+    cm.addSeparator();
     cm.addAction(actionRename);
     cm.addAction(actionCopyWindow);
-    cm.insertSeparator();
-    cm.insertItem(tr("&Copy Graph"), g, SLOT(copyImage()));
-    cm.insertItem(tr("&Export"), this, SLOT(exportGraph()));
+    cm.addSeparator();
+    cm.addAction(tr("&Copy Graph"), g, SLOT(copyImage()));
+    cm.addAction(tr("&Export"), this, SLOT(exportGraph()));
     cm.addAction(actionPrint);
-    cm.insertSeparator();
+    cm.addSeparator();
     cm.addAction(actionCloseWindow);
-  } else if (w->isA("Matrix")) {
+  } else if (windowType == "Matrix") {
     Matrix *t = dynamic_cast<Matrix *>(w);
     if (!t)
       return;
     if (t->viewType() == Matrix::TableView) {
-      cm.insertItem(getQPixmap("cut_xpm"), tr("Cu&t"), t, SLOT(cutSelection()));
-      cm.insertItem(getQPixmap("copy_xpm"), tr("&Copy"), t,
-                    SLOT(copySelection()));
-      cm.insertItem(getQPixmap("paste_xpm"), tr("&Paste"), t,
+      cm.addAction(getQPixmap("cut_xpm"), tr("Cu&t"), t, SLOT(cutSelection()));
+      cm.addAction(getQPixmap("copy_xpm"), tr("&Copy"), t,
+                   SLOT(copySelection()));
+      cm.addAction(getQPixmap("paste_xpm"), tr("&Paste"), t,
                     SLOT(pasteSelection()));
-      cm.insertSeparator();
-      cm.insertItem(getQPixmap("insert_row_xpm"), tr("&Insert Row"), t,
+      cm.addSeparator();
+      cm.addAction(getQPixmap("insert_row_xpm"), tr("&Insert Row"), t,
                     SLOT(insertRow()));
-      cm.insertItem(getQPixmap("insert_column_xpm"), tr("&Insert Column"), t,
+      cm.addAction(getQPixmap("insert_column_xpm"), tr("&Insert Column"), t,
                     SLOT(insertColumn()));
       if (t->numSelectedRows() > 0)
-        cm.insertItem(getQPixmap("delete_row_xpm"), tr("&Delete Rows"), t,
+        cm.addAction(getQPixmap("delete_row_xpm"), tr("&Delete Rows"), t,
                       SLOT(deleteSelectedRows()));
       else if (t->numSelectedColumns() > 0)
-        cm.insertItem(getQPixmap("delete_column_xpm"), tr("&Delete Columns"), t,
+        cm.addAction(getQPixmap("delete_column_xpm"), tr("&Delete Columns"), t,
                       SLOT(deleteSelectedColumns()));
 
-      cm.insertItem(getQPixmap("erase_xpm"), tr("Clea&r"), t,
+      cm.addAction(getQPixmap("erase_xpm"), tr("Clea&r"), t,
                     SLOT(clearSelection()));
     } else if (t->viewType() == Matrix::ImageView) {
       cm.addAction(actionImportImage);
       cm.addAction(actionExportMatrix);
-      cm.insertSeparator();
+      cm.addSeparator();
       cm.addAction(actionSetMatrixProperties);
       cm.addAction(actionSetMatrixDimensions);
-      cm.insertSeparator();
+      cm.addSeparator();
       cm.addAction(actionSetMatrixValues);
       cm.addAction(actionTableRecalculate);
-      cm.insertSeparator();
+      cm.addSeparator();
       cm.addAction(actionRotateMatrix);
       cm.addAction(actionRotateMatrixMinus);
-      cm.insertSeparator();
+      cm.addSeparator();
       cm.addAction(actionFlipMatrixVertically);
       cm.addAction(actionFlipMatrixHorizontally);
-      cm.insertSeparator();
+      cm.addSeparator();
       cm.addAction(actionTransposeMatrix);
       cm.addAction(actionInvertMatrix);
     }
@@ -10341,8 +10376,8 @@ void ApplicationWindow::customWindowTitleBarMenu(MdiSubWindow *w, QMenu *menu) {
     menu->addAction(actionShowExportASCIIDialog);
     menu->addSeparator();
   }
-
-  if (w->isA("Note"))
+  const std::string windowClassName = w->metaObject()->className();
+  if (windowClassName == "Note")
     menu->addAction(actionSaveNote);
 
   menu->addAction(actionPrint);
@@ -10369,73 +10404,73 @@ void ApplicationWindow::showTableContextMenu(bool selection) {
       if (isEditable)
         cm.addAction(actionShowColumnValuesDialog);
       if (isEditable)
-        cm.insertItem(getQPixmap("cut_xpm"), tr("Cu&t"), t,
-                      SLOT(cutSelection()));
-      cm.insertItem(getQPixmap("copy_xpm"), tr("&Copy"), t,
-                    SLOT(copySelection()));
+        cm.addAction(getQPixmap("cut_xpm"), tr("Cu&t"), t,
+                     SLOT(cutSelection()));
+      cm.addAction(getQPixmap("copy_xpm"), tr("&Copy"), t,
+                   SLOT(copySelection()));
       if (isEditable)
-        cm.insertItem(getQPixmap("paste_xpm"), tr("&Paste"), t,
-                      SLOT(pasteSelection()));
-      cm.insertSeparator();
+        cm.addAction(getQPixmap("paste_xpm"), tr("&Paste"), t,
+                     SLOT(pasteSelection()));
+      cm.addSeparator();
       if (isEditable)
         cm.addAction(actionTableRecalculate);
       if (isEditable)
-        cm.insertItem(getQPixmap("insert_row_xpm"), tr("&Insert Row"), t,
-                      SLOT(insertRow()));
-      cm.insertItem(getQPixmap("delete_row_xpm"), tr("&Delete Row"), t,
-                    SLOT(deleteSelectedRows()));
+        cm.addAction(getQPixmap("insert_row_xpm"), tr("&Insert Row"), t,
+                     SLOT(insertRow()));
+      cm.addAction(getQPixmap("delete_row_xpm"), tr("&Delete Row"), t,
+                   SLOT(deleteSelectedRows()));
       if (isEditable)
-        cm.insertItem(getQPixmap("erase_xpm"), tr("Clea&r Row"), t,
-                      SLOT(clearSelection()));
-      cm.insertSeparator();
+        cm.addAction(getQPixmap("erase_xpm"), tr("Clea&r Row"), t,
+                     SLOT(clearSelection()));
+      cm.addSeparator();
       cm.addAction(actionShowRowStatistics);
     } else if (t->numSelectedRows() > 1) {
       if (isEditable)
         cm.addAction(actionShowColumnValuesDialog);
       if (isEditable)
-        cm.insertItem(getQPixmap("cut_xpm"), tr("Cu&t"), t,
-                      SLOT(cutSelection()));
-      cm.insertItem(getQPixmap("copy_xpm"), tr("&Copy"), t,
-                    SLOT(copySelection()));
+        cm.addAction(getQPixmap("cut_xpm"), tr("Cu&t"), t,
+                     SLOT(cutSelection()));
+      cm.addAction(getQPixmap("copy_xpm"), tr("&Copy"), t,
+                   SLOT(copySelection()));
       if (isEditable)
-        cm.insertItem(getQPixmap("paste_xpm"), tr("&Paste"), t,
-                      SLOT(pasteSelection()));
-      cm.insertSeparator();
+        cm.addAction(getQPixmap("paste_xpm"), tr("&Paste"), t,
+                     SLOT(pasteSelection()));
+      cm.addSeparator();
       if (isEditable)
         cm.addAction(actionTableRecalculate);
-      cm.insertItem(getQPixmap("delete_row_xpm"), tr("&Delete Rows"), t,
-                    SLOT(deleteSelectedRows()));
+      cm.addAction(getQPixmap("delete_row_xpm"), tr("&Delete Rows"), t,
+                   SLOT(deleteSelectedRows()));
       if (isEditable)
-        cm.insertItem(getQPixmap("erase_xpm"), tr("Clea&r Rows"), t,
-                      SLOT(clearSelection()));
-      cm.insertSeparator();
+        cm.addAction(getQPixmap("erase_xpm"), tr("Clea&r Rows"), t,
+                     SLOT(clearSelection()));
+      cm.addSeparator();
       cm.addAction(actionShowRowStatistics);
     } else if (t->numRows() > 0 && t->numCols() > 0) {
       if (isEditable)
         cm.addAction(actionShowColumnValuesDialog);
       if (isEditable)
-        cm.insertItem(getQPixmap("cut_xpm"), tr("Cu&t"), t,
-                      SLOT(cutSelection()));
-      cm.insertItem(getQPixmap("copy_xpm"), tr("&Copy"), t,
-                    SLOT(copySelection()));
+        cm.addAction(getQPixmap("cut_xpm"), tr("Cu&t"), t,
+                     SLOT(cutSelection()));
+      cm.addAction(getQPixmap("copy_xpm"), tr("&Copy"), t,
+                   SLOT(copySelection()));
       if (isEditable)
-        cm.insertItem(getQPixmap("paste_xpm"), tr("&Paste"), t,
-                      SLOT(pasteSelection()));
-      cm.insertSeparator();
+        cm.addAction(getQPixmap("paste_xpm"), tr("&Paste"), t,
+                     SLOT(pasteSelection()));
+      cm.addSeparator();
       if (isEditable)
         cm.addAction(actionTableRecalculate);
       if (isEditable)
-        cm.insertItem(getQPixmap("erase_xpm"), tr("Clea&r"), t,
-                      SLOT(clearSelection()));
+        cm.addAction(getQPixmap("erase_xpm"), tr("Clea&r"), t,
+                     SLOT(clearSelection()));
     }
   } else {
     cm.addAction(actionShowExportASCIIDialog);
-    cm.insertSeparator();
+    cm.addSeparator();
     if (!isFixedColumns)
       cm.addAction(actionAddColToTable);
     if (isEditable)
       cm.addAction(actionClearTable);
-    cm.insertSeparator();
+    cm.addSeparator();
     cm.addAction(actionGoToRow);
     cm.addAction(actionGoToColumn);
   }
@@ -10482,17 +10517,17 @@ void ApplicationWindow::showStandAloneHelp() {
   QFile helpFile(helpPath);
   if (!helpPath.isEmpty() && !helpFile.exists()) {
     QMessageBox::critical(0, tr("MantidPlot - Help Files Not Found!"), // Mantid
-                          tr("The manual can be downloaded from the following "
+                          tr("The manual can be found at the following "
                              "internet address:") +
                               "<p><a href = "
-                              "http://soft.proindependent.com/"
-                              "manuals.html>http://soft.proindependent.com/"
-                              "manuals.html</a></p>");
+                              "http://www.mantidproject.org/"
+                              "MantidPlot:_Help>http://www.mantidproject.org/"
+                              "MantidPlot:_Help</a></p>");
     exit(0);
   }
 
   QFileInfo fi(helpPath);
-  QString profilePath = QString(fi.dirPath(true) + "/qtiplot.adp");
+  QString profilePath = QString(fi.absolutePath() + "/qtiplot.adp");
   if (!QFile(profilePath).exists()) {
     QMessageBox::critical(
         0, tr("MantidPlot - Help Profile Not Found!"), // Mantid
@@ -10503,8 +10538,8 @@ void ApplicationWindow::showStandAloneHelp() {
             tr("This file is provided with the MantidPlot manual which can be "
                "downloaded from the following internet address:") +
             "<p><a href = "
-            "http://soft.proindependent.com/manuals.html>http://"
-            "soft.proindependent.com/manuals.html</a></p>");
+            "http://www.mantidproject.org/MantidPlot:_Help>http://"
+            "www.mantidproject.org/MantidPlot:_Help</a></p>");
     exit(0);
   }
 
@@ -10521,22 +10556,22 @@ void ApplicationWindow::showHelp() {
     QMessageBox::critical(
         this, tr("MantidPlot - Help Files Not Found!"), // Mantid
         tr("Please indicate the location of the help file!") + "<br>" +
-            tr("The manual can be downloaded from the following internet "
+            tr("The manual can be found at the following internet "
                "address:") +
             "<p><a href = "
-            "http://soft.proindependent.com/manuals.html>http://"
-            "soft.proindependent.com/manuals.html</a></p>");
-    QString fn =
-        QFileDialog::getOpenFileName(QDir::currentDirPath(), "*.html", this);
+            "http://www.mantidproject.org/MantidPlot:_Help>http://"
+            "www.mantidproject.org/MantidPlot:_Help</a></p>");
+    QString fn = QFileDialog::getOpenFileName(this, "Open help file",
+                                              QDir::currentPath(), "*.html");
     if (!fn.isEmpty()) {
       QFileInfo fi(fn);
-      helpFilePath = fi.absFilePath();
+      helpFilePath = fi.absoluteFilePath();
       saveSettings();
     }
   }
 
   QFileInfo fi(helpFilePath);
-  QString profilePath = QString(fi.dirPath(true) + "/qtiplot.adp");
+  QString profilePath = QString(fi.absolutePath() + "/qtiplot.adp");
   if (!QFile(profilePath).exists()) {
     QMessageBox::critical(
         this, tr("MantidPlot - Help Profile Not Found!"), // Mantid
@@ -10547,8 +10582,8 @@ void ApplicationWindow::showHelp() {
             tr("This file is provided with the MantidPlot manual which can be "
                "downloaded from the following internet address:") +
             "<p><a href = "
-            "http://soft.proindependent.com/manuals.html>http://"
-            "soft.proindependent.com/manuals.html</a></p>");
+            "http://www.mantidproject.org/MantidPlot:_Help>http://"
+            "www.mantidproject.org/MantidPlot:_Help</a></p>");
     return;
   }
 
@@ -10672,10 +10707,10 @@ void ApplicationWindow::addFunctionCurve() {
 void ApplicationWindow::updateFunctionLists(int type, QStringList &formulas) {
   int maxListSize = 10;
   if (type == 2) {
-    rFunctions.remove(formulas[0]);
+    rFunctions.removeAll(formulas[0]);
     rFunctions.push_front(formulas[0]);
 
-    thetaFunctions.remove(formulas[1]);
+    thetaFunctions.removeAll(formulas[1]);
     thetaFunctions.push_front(formulas[1]);
 
     while ((int)rFunctions.size() > maxListSize)
@@ -10683,10 +10718,10 @@ void ApplicationWindow::updateFunctionLists(int type, QStringList &formulas) {
     while ((int)thetaFunctions.size() > maxListSize)
       thetaFunctions.pop_back();
   } else if (type == 1) {
-    xFunctions.remove(formulas[0]);
+    xFunctions.removeAll(formulas[0]);
     xFunctions.push_front(formulas[0]);
 
-    yFunctions.remove(formulas[1]);
+    yFunctions.removeAll(formulas[1]);
     yFunctions.push_front(formulas[1]);
 
     while ((int)xFunctions.size() > maxListSize)
@@ -10940,12 +10975,12 @@ void ApplicationWindow::pickFloorStyle(QAction *action) {
 }
 
 void ApplicationWindow::custom3DActions(MdiSubWindow *w) {
-  if (w && w->isA("Graph3D")) {
+  if (w && std::string(w->metaObject()->className()) == "Graph3D") {
     Graph3D *plot = dynamic_cast<Graph3D *>(w);
     if (!plot)
       return;
-    actionAnimate->setOn(plot->isAnimated());
-    actionPerspective->setOn(!plot->isOrthogonal());
+    actionAnimate->setChecked(plot->isAnimated());
+    actionPerspective->setChecked(!plot->isOrthogonal());
     switch (plot->plotStyle()) {
     case FILLEDMESH:
       wireframe->setChecked(false);
@@ -11124,34 +11159,34 @@ void ApplicationWindow::initPlot3DToolBar() {
   grids->setEnabled(true);
   grids->setExclusive(false);
   front = new QAction(grids);
-  front->setMenuText(tr("Front"));
+  front->setText(tr("Front"));
   front->setCheckable(true);
   front->setIcon(QIcon(getQPixmap("frontGrid_xpm")));
   back = new QAction(grids);
-  back->setMenuText(tr("Back"));
+  back->setText(tr("Back"));
   back->setCheckable(true);
   back->setIcon(QIcon(getQPixmap("backGrid_xpm")));
   right = new QAction(grids);
-  right->setMenuText(tr("Right"));
+  right->setText(tr("Right"));
   right->setCheckable(true);
   right->setIcon(QIcon(getQPixmap("leftGrid_xpm")));
   left = new QAction(grids);
-  left->setMenuText(tr("Left"));
+  left->setText(tr("Left"));
   left->setCheckable(true);
   left->setIcon(QIcon(getQPixmap("rightGrid_xpm")));
   ceil = new QAction(grids);
-  ceil->setMenuText(tr("Ceiling"));
+  ceil->setText(tr("Ceiling"));
   ceil->setCheckable(true);
   ceil->setIcon(QIcon(getQPixmap("ceilGrid_xpm")));
   floor = new QAction(grids);
-  floor->setMenuText(tr("Floor"));
+  floor->setText(tr("Floor"));
   floor->setCheckable(true);
   floor->setIcon(QIcon(getQPixmap("floorGrid_xpm")));
 
   actionPerspective = new QAction(this);
-  actionPerspective->setToggleAction(TRUE);
-  actionPerspective->setIconSet(getQPixmap("perspective_xpm"));
-  actionPerspective->setOn(!orthogonal3DPlots);
+  actionPerspective->setCheckable(true);
+  actionPerspective->setIcon(getQPixmap("perspective_xpm"));
+  actionPerspective->setChecked(!orthogonal3DPlots);
   connect(actionPerspective, SIGNAL(toggled(bool)), this,
           SLOT(togglePerspective(bool)));
 
@@ -16466,31 +16501,31 @@ void ApplicationWindow::customMultilayerToolButtons(MultiLayer *w) {
 
     else if (g->areRangeSelectorsOn()) {
     } else if (dynamic_cast<PeakPickerTool *>(tool))
-      btnMultiPeakPick->setOn(true);
+      btnMultiPeakPick->setChecked(true);
     else if (dynamic_cast<DataPickerTool *>(tool)) {
       switch (dynamic_cast<DataPickerTool *>(tool)->getMode()) {
       case DataPickerTool::Move:
-        btnMovePoints->setOn(true);
+        btnMovePoints->setChecked(true);
         break;
       case DataPickerTool::Remove:
-        btnRemovePoints->setOn(true);
+        btnRemovePoints->setChecked(true);
         break;
       case DataPickerTool::Display:
-        btnCursor->setOn(true);
+        btnCursor->setChecked(true);
         break;
       default:
-        btnPointer->setOn(true);
+        btnPointer->setChecked(true);
       }
     } else if (dynamic_cast<DrawPointTool *>(tool))
-      actionDrawPoints->setOn(true);
+      actionDrawPoints->setChecked(true);
     else if (dynamic_cast<ScreenPickerTool *>(tool))
-      btnPicker->setOn(true);
+      btnPicker->setChecked(true);
     else if (dynamic_cast<LabelTool *>(tool))
-      btnLabel->setOn(true);
+      btnLabel->setChecked(true);
     else
-      btnPointer->setOn(true);
+      btnPointer->setChecked(true);
   } else
-    btnPointer->setOn(true);
+    btnPointer->setChecked(true);
 }
 /**  save workspace data in nexus format
  *   @param wsName :: name of the ouput file.
@@ -16531,7 +16566,7 @@ void ApplicationWindow::panOnPlot() {
         this, tr("QtiPlot - Warning"),
         tr("<h4>There are no plot layers available in this window.</h4>"
            "<p><h4>Please add a layer and try again!</h4>"));
-    btnPointer->setOn(true);
+    btnPointer->setChecked(true);
     return;
   }
 
@@ -16861,7 +16896,7 @@ void ApplicationWindow::changeToDocked(MdiSubWindow *w) {
  */
 void ApplicationWindow::removeFloatingWindow(FloatingWindow *w) {
   if (m_floatingWindows.contains(w)) {
-    m_floatingWindows.remove(w);
+    m_floatingWindows.removeAll(w);
     if (w->mdiSubWindow()) {
       closeWindow(w->mdiSubWindow());
     }
@@ -16901,7 +16936,7 @@ void ApplicationWindow::detachMdiSubwindow(MdiSubWindow *w) {
   FloatingWindow *fw = w->getFloatingWindow();
   if (fw) {
     fw->removeMdiSubWindow();
-    m_floatingWindows.remove(fw);
+    m_floatingWindows.removeAll(fw);
     fw->deleteLater();
     return;
   }
@@ -16935,7 +16970,7 @@ bool ApplicationWindow::event(QEvent *e) {
       }
 
       if (clickedWidget) {
-        QString class_name = clickedWidget->className();
+        QString class_name = clickedWidget->metaObject()->className();
         if (class_name == "QToolButton" || class_name == "QToolBar" ||
             class_name == "QMenuBar") {
           needToActivate = false;
@@ -17033,7 +17068,7 @@ void ApplicationWindow::changeActiveToDocked() {
  * @param w :: Pointer to a MdiSubWindow.
  */
 bool ApplicationWindow::isDefaultFloating(const MdiSubWindow *w) const {
-  QString wClassName = w->className();
+  QString wClassName = w->metaObject()->className();
   return isDefaultFloating(wClassName);
 }
 
@@ -17162,8 +17197,8 @@ TiledWindow *ApplicationWindow::getTiledWindowAtPos(QPoint pos) {
     TiledWindow *tw = dynamic_cast<TiledWindow *>(w->widget());
     if (tw) {
       QPoint mdiOrigin = mapFromGlobal(pos);
-      auto r = w->visibleRect();
-      r.moveBy(mdiOrigin.x(), mdiOrigin.y());
+      auto r = w->visibleRegion();
+      r.translate(mdiOrigin);
       if (r.contains(pos)) {
         return tw;
       }
@@ -17174,8 +17209,8 @@ TiledWindow *ApplicationWindow::getTiledWindowAtPos(QPoint pos) {
     TiledWindow *tw = dynamic_cast<TiledWindow *>(w->mdiSubWindow());
     if (tw) {
       QPoint mdiOrigin = mapFromGlobal(pos);
-      auto r = w->visibleRect();
-      r.moveBy(mdiOrigin.x(), mdiOrigin.y());
+      auto r = w->visibleRegion();
+      r.translate(mdiOrigin);
       if (r.contains(pos)) {
         return tw;
       }
@@ -17256,3 +17291,4 @@ QString ApplicationWindow::saveProjectFolder(Folder *folder, int &windowCount,
 bool ApplicationWindow::isOfType(const QObject* obj, const char* toCompare) const {
   return strcmp(obj->metaObject()->className(), toCompare) == 0;
 }
+
