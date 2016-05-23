@@ -450,60 +450,27 @@ void MuonAnalysis::plotItem(ItemType itemType, int tableRow,
  */
 std::string MuonAnalysis::getNewAnalysisWSName(ItemType itemType, int tableRow,
                                                PlotType plotType) {
-  std::ostringstream workspaceName;
-  const static std::string sep("; ");
+  Muon::DatasetParams params;
 
-  // Instrument and run number
-  workspaceName << m_currentLabel << sep;
-
-  // Pair/group and name of pair/group
-  if (itemType == Pair) {
-    workspaceName << "Pair" << sep;
-    workspaceName << m_uiForm.pairTable->item(tableRow, 0)->text().toStdString()
-                  << sep;
-  } else if (itemType == Group) {
-    workspaceName << "Group" << sep;
-    workspaceName
-        << m_uiForm.groupTable->item(tableRow, 0)->text().toStdString() << sep;
-  }
-
-  // Type of plot
-  switch (plotType) {
-  case Asymmetry:
-    workspaceName << "Asym";
-    break;
-  case Counts:
-    workspaceName << "Counts";
-    break;
-  case Logarithm:
-    workspaceName << "Logs";
-    break;
-  }
-
-  // Period(s)
-  const auto periods = getPeriodLabels();
-  if (!periods.empty()) {
-    workspaceName << sep << periods;
-  }
+  params.label = m_currentLabel;
+  params.itemType = itemType;
+  auto table = (itemType == Pair) ? m_uiForm.pairTable : m_uiForm.groupTable;
+  params.itemName = table->item(tableRow, 0)->text().toStdString();
+  params.plotType = plotType;
+  params.periods = getPeriodLabels();
 
   // Version - always "#1" if overwrite is on, otherwise increment
-  workspaceName << sep << "#";
-  std::string newName;
-  if (isOverwriteEnabled()) {
-    workspaceName << "1"; // Always use #1
-    newName = workspaceName.str();
-  } else {
+  params.version = 1;
+  std::string workspaceName = generateWorkspaceName(params);
+  if (!isOverwriteEnabled()) {
     // If overwrite is disabled, need to find unique name for the new workspace
-    newName = workspaceName.str();
-    std::string uniqueName;
-    int plotNum(1);
-    do {
-      uniqueName = newName + std::to_string(plotNum++);
-    } while (AnalysisDataService::Instance().doesExist(uniqueName));
-    newName = uniqueName;
+    while (AnalysisDataService::Instance().doesExist(workspaceName)) {
+      params.version++;
+      workspaceName = generateWorkspaceName(params);
+    }
   }
 
-  return newName;
+  return workspaceName;
 }
 
 /**
