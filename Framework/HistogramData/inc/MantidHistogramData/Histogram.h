@@ -267,6 +267,11 @@ void Histogram::setPointStandardDeviations(T &&... data) & {
   m_dx = points.cowData();
 }
 
+/** Sets the Histogram's counts.
+
+ Any arguments that can be used for constructing a Counts object are allowed,
+ however, a size check ensures that the Histogram stays valid, i.e., that x and
+ y lengths are consistent. */
 template <typename... T> void Histogram::setCounts(T &&... data) & {
   Counts counts(std::forward<T>(data)...);
   checkSize(counts);
@@ -275,12 +280,68 @@ template <typename... T> void Histogram::setCounts(T &&... data) & {
   m_y = counts.cowData();
 }
 
+/// Sets the Histogram's count variances.
+template <typename... T> void Histogram::setCountVariances(T &&... data) & {
+  CountVariances counts(std::forward<T>(data)...);
+  checkSize(counts);
+  // No sensible self assignment is possible, we do not store variances, so if
+  // anyone tries to set our current data as variances it must be an error.
+  if (selfAssignmentE(data...))
+    throw std::logic_error("Histogram::setCountVariances: Attempt to "
+                           "self-assign standard deviations as variance.");
+  // Convert variances to standard deviations before storing it.
+  m_e = CountStandardDeviations(std::move(counts)).cowData();
+}
+
+/// Sets the Histogram's count standard deviations.
+template <typename... T>
+void Histogram::setCountStandardDeviations(T &&... data) & {
+  CountStandardDeviations counts(std::forward<T>(data)...);
+  checkSize(counts);
+  if (selfAssignmentE(data...))
+    return;
+  m_e = counts.cowData();
+}
+
+/** Sets the Histogram's frequencies.
+
+ Any arguments that can be used for constructing a Frequencies object are
+ allowed, however, a size check ensures that the Histogram stays valid, i.e.,
+ that x and y lengths are consistent. */
 template <typename... T> void Histogram::setFrequencies(T &&... data) & {
   Frequencies frequencies(std::forward<T>(data)...);
   checkSize(frequencies);
+  // No sensible self assignment is possible, we do not store frequencies, so if
+  // anyone tries to set our current data as frequencies it must be an error.
   if (selfAssignmentY(data...))
-    return;
-  m_y = Counts(frequencies).cowData();
+    throw std::logic_error("Histogram::setFrequencies: Attempt to self-assign "
+                           "counts as frequencies.");
+  m_y = Counts(frequencies, binEdges()).cowData();
+}
+
+/// Sets the Histogram's frequency variances.
+template <typename... T> void Histogram::setFrequencyVariances(T &&... data) & {
+  FrequencyVariances frequencies(std::forward<T>(data)...);
+  checkSize(frequencies);
+  // No sensible self assignment is possible, we do not store frequencies, so if
+  // anyone tries to set our current data as frequencies it must be an error.
+  if (selfAssignmentE(data...))
+    throw std::logic_error("Histogram::setFrequencyVariances: Attempt to "
+                           "self-assign counts as frequencies.");
+  m_e = CountStandardDeviations(frequencies, binEdges()).cowData();
+}
+
+/// Sets the Histogram's frequency standard deviations.
+template <typename... T>
+void Histogram::setFrequencyStandardDeviations(T &&... data) & {
+  FrequencyStandardDeviations frequencies(std::forward<T>(data)...);
+  checkSize(frequencies);
+  // No sensible self assignment is possible, we do not store frequencies, so if
+  // anyone tries to set our current data as frequencies it must be an error.
+  if (selfAssignmentE(data...))
+    throw std::logic_error("Histogram::setFrequencyVariances: Attempt to "
+                           "self-assign counts as frequencies.");
+  m_e = CountStandardDeviations(frequencies, binEdges()).cowData();
 }
 
 template <> void Histogram::checkSize(const BinEdges &data) const;

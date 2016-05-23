@@ -7,11 +7,15 @@
 
 using Mantid::HistogramData::Histogram;
 using Mantid::HistogramData::HistogramX;
+using Mantid::HistogramData::HistogramY;
+using Mantid::HistogramData::HistogramE;
 using Mantid::HistogramData::getHistogramXMode;
 using Mantid::HistogramData::Points;
 using Mantid::HistogramData::BinEdges;
 using Mantid::HistogramData::Counts;
+using Mantid::HistogramData::CountStandardDeviations;
 using Mantid::HistogramData::Frequencies;
+using Mantid::HistogramData::FrequencyStandardDeviations;
 
 class HistogramTest : public CxxTest::TestSuite {
 public:
@@ -494,6 +498,108 @@ public:
     TS_ASSERT_EQUALS(&h.readY(), old_address);
   }
 
+  void test_setFrequencies_size_mismatch() {
+    Histogram h1(Points(2));
+    TS_ASSERT_THROWS(h1.setFrequencies(std::vector<double>(1)),
+                     std::logic_error);
+    TS_ASSERT_THROWS(h1.setFrequencies(std::vector<double>(3)),
+                     std::logic_error);
+    TS_ASSERT_THROWS(h1.setFrequencies(Frequencies(1)), std::logic_error);
+    TS_ASSERT_THROWS(h1.setFrequencies(Frequencies(3)), std::logic_error);
+    Histogram h2(BinEdges(2));
+    TS_ASSERT_THROWS(h2.setFrequencies(std::vector<double>(0)),
+                     std::logic_error);
+    TS_ASSERT_THROWS(h2.setFrequencies(std::vector<double>(2)),
+                     std::logic_error);
+    TS_ASSERT_THROWS(h2.setFrequencies(Frequencies(0)), std::logic_error);
+    TS_ASSERT_THROWS(h2.setFrequencies(Frequencies(2)), std::logic_error);
+  }
+
+  void test_setFrequencies_size_mismatch_degenerate() {
+    Histogram h1(Points(0));
+    TS_ASSERT_THROWS(h1.setFrequencies(std::vector<double>(1)),
+                     std::logic_error);
+    TS_ASSERT_THROWS(h1.setFrequencies(Frequencies(1)), std::logic_error);
+    Histogram h2(BinEdges(0));
+    TS_ASSERT_THROWS(h2.setFrequencies(std::vector<double>(1)),
+                     std::logic_error);
+    TS_ASSERT_THROWS(h2.setFrequencies(Frequencies(1)), std::logic_error);
+  }
+
+  void test_setFrequencies_self_assignment() {
+    Histogram h(Points(0));
+    h.setFrequencies(0);
+    auto &y = h.y();
+    h.setCounts(y);
+    // y is always counts, setting it as frequencies must fail.
+    TS_ASSERT_THROWS(h.setFrequencies(y), std::logic_error);
+  }
+
+  void test_setFrequencies_legacy_self_assignment() {
+    Histogram h(Points(0));
+    h.setCounts(0);
+    auto &y = h.readY();
+    TS_ASSERT_THROWS(h.setFrequencies(y), std::logic_error);
+  }
+
+  void test_setCountVariances() {
+    Histogram h(Points(2));
+    TS_ASSERT_THROWS_NOTHING(h.setCountVariances(2));
+  }
+
+  void test_setCountStandardDeviations() {
+    Histogram h(Points(2));
+    TS_ASSERT_THROWS_NOTHING(h.setCountStandardDeviations(2));
+  }
+
+  void test_setFrequencyVariances() {
+    Histogram h(Points(2));
+    TS_ASSERT_THROWS_NOTHING(h.setFrequencyVariances(2));
+  }
+
+  void test_setFrequencyStandardDeviations() {
+    Histogram h(Points(2));
+    TS_ASSERT_THROWS_NOTHING(h.setFrequencyStandardDeviations(2));
+  }
+
+  void test_setCountVariances_size_mismatch() {
+    Histogram h(Points(2));
+    TS_ASSERT_THROWS(h.setCountVariances(1), std::logic_error);
+    TS_ASSERT_THROWS(h.setCountVariances(3), std::logic_error);
+  }
+
+  void test_setCountStandardDeviations_size_mismatch() {
+    Histogram h(Points(2));
+    TS_ASSERT_THROWS(h.setCountStandardDeviations(1), std::logic_error);
+    TS_ASSERT_THROWS(h.setCountStandardDeviations(3), std::logic_error);
+  }
+
+  void test_setFrequencyVariances_size_mismatch() {
+    Histogram h(Points(2));
+    TS_ASSERT_THROWS(h.setFrequencyVariances(1), std::logic_error);
+    TS_ASSERT_THROWS(h.setFrequencyVariances(3), std::logic_error);
+  }
+
+  void test_setFrequencyStandardDeviations_size_mismatch() {
+    Histogram h(Points(2));
+    TS_ASSERT_THROWS(h.setFrequencyStandardDeviations(1), std::logic_error);
+    TS_ASSERT_THROWS(h.setFrequencyStandardDeviations(3), std::logic_error);
+  }
+
+  void test_error_setter_self_assignment() {
+    Histogram h(Points(2));
+    h.setCountVariances(2);
+    auto &e = h.e();
+    auto old_address = &e;
+    // e is always count standard deviations, self assignment as variances or
+    // frequencies should fail unless we are setting count standard deviations.
+    TS_ASSERT_THROWS(h.setCountVariances(e), std::logic_error);
+    TS_ASSERT_THROWS(h.setFrequencyVariances(e), std::logic_error);
+    TS_ASSERT_THROWS(h.setFrequencyStandardDeviations(e), std::logic_error);
+    TS_ASSERT_THROWS_NOTHING(h.setCountStandardDeviations(e));
+    TS_ASSERT_EQUALS(&h.e(), old_address);
+  }
+
   void test_x() {
     Histogram hist(Points({0.1, 0.2, 0.4}));
     TS_ASSERT_EQUALS(hist.x()[0], 0.1);
@@ -560,6 +666,132 @@ public:
     Histogram hist(edges);
     auto points = hist.points();
     TS_ASSERT_THROWS(hist.setSharedX(points.cowData()), std::logic_error);
+  }
+
+  void test_y() {
+    Histogram hist(Points(3));
+    hist.setCounts(Counts{0.1, 0.2, 0.4});
+    TS_ASSERT_EQUALS(hist.y()[0], 0.1);
+    TS_ASSERT_EQUALS(hist.y()[1], 0.2);
+    TS_ASSERT_EQUALS(hist.y()[2], 0.4);
+  }
+
+  void test_y_references_internal_data() {
+    Histogram hist(Points(0));
+    hist.setCounts(0);
+    auto copy(hist);
+    TS_ASSERT_EQUALS(&hist.y(), &copy.y());
+  }
+
+  void test_mutableY() {
+    Histogram hist(Points(3));
+    hist.setCounts(Counts{0.1, 0.2, 0.4});
+    TS_ASSERT_EQUALS(hist.mutableY()[0], 0.1);
+    TS_ASSERT_EQUALS(hist.mutableY()[1], 0.2);
+    TS_ASSERT_EQUALS(hist.mutableY()[2], 0.4);
+  }
+
+  void test_mutableY_triggers_copy() {
+    Histogram hist(Points(0));
+    hist.setCounts(0);
+    auto copy(hist);
+    TS_ASSERT_DIFFERS(&hist.y(), &copy.mutableY());
+  }
+
+  void test_y_references_same_data_as_counts() {
+    Histogram hist(Points(0));
+    hist.setCounts(0);
+    TS_ASSERT_EQUALS(&hist.y(), &hist.counts().data());
+    TS_ASSERT_DIFFERS(&hist.y(), &hist.frequencies().data());
+  }
+
+  void test_sharedY() {
+    auto data = Mantid::Kernel::make_cow<HistogramY>(0);
+    Histogram hist{BinEdges(0)};
+    hist.setCounts(data);
+    TS_ASSERT_EQUALS(hist.sharedY(), data);
+  }
+
+  void test_setSharedY() {
+    auto data1 = Mantid::Kernel::make_cow<HistogramY>(0);
+    auto data2 = Mantid::Kernel::make_cow<HistogramY>(0);
+    Histogram hist{BinEdges(0)};
+    hist.setCounts(data1);
+    TS_ASSERT_EQUALS(hist.sharedY(), data1);
+    TS_ASSERT_THROWS_NOTHING(hist.setSharedY(data2));
+    TS_ASSERT_DIFFERS(hist.sharedY(), data1);
+    TS_ASSERT_EQUALS(hist.sharedY(), data2);
+  }
+
+  void test_setSharedY_size_mismatch() {
+    auto data1 = Mantid::Kernel::make_cow<HistogramY>(0);
+    auto data2 = Mantid::Kernel::make_cow<HistogramY>(2);
+    Histogram hist{BinEdges(0)};
+    hist.setCounts(data1);
+    TS_ASSERT_THROWS(hist.setSharedY(data2), std::logic_error);
+  }
+
+  void test_e() {
+    Histogram hist(Points(3));
+    hist.setCountStandardDeviations(CountStandardDeviations{0.1, 0.2, 0.4});
+    TS_ASSERT_EQUALS(hist.e()[0], 0.1);
+    TS_ASSERT_EQUALS(hist.e()[1], 0.2);
+    TS_ASSERT_EQUALS(hist.e()[2], 0.4);
+  }
+
+  void test_e_references_internal_data() {
+    Histogram hist(Points(0));
+    hist.setCountStandardDeviations(0);
+    auto copy(hist);
+    TS_ASSERT_EQUALS(&hist.e(), &copy.e());
+  }
+
+  void test_mutableE() {
+    Histogram hist(Points(3));
+    hist.setCountStandardDeviations(CountStandardDeviations{0.1, 0.2, 0.4});
+    TS_ASSERT_EQUALS(hist.mutableE()[0], 0.1);
+    TS_ASSERT_EQUALS(hist.mutableE()[1], 0.2);
+    TS_ASSERT_EQUALS(hist.mutableE()[2], 0.4);
+  }
+
+  void test_mutableE_triggers_copy() {
+    Histogram hist(Points(0));
+    hist.setCountStandardDeviations(0);
+    auto copy(hist);
+    TS_ASSERT_DIFFERS(&hist.e(), &copy.mutableE());
+  }
+
+  void test_e_references_same_data_as_counts() {
+    Histogram hist(Points(0));
+    hist.setCountStandardDeviations(0);
+    TS_ASSERT_EQUALS(&hist.e(), &hist.countStandardDeviations().data());
+    TS_ASSERT_DIFFERS(&hist.e(), &hist.frequencyStandardDeviations().data());
+  }
+
+  void test_sharedE() {
+    auto data = Mantid::Kernel::make_cow<HistogramE>(0);
+    Histogram hist{BinEdges(0)};
+    hist.setCountStandardDeviations(data);
+    TS_ASSERT_EQUALS(hist.sharedE(), data);
+  }
+
+  void test_setSharedE() {
+    auto data1 = Mantid::Kernel::make_cow<HistogramE>(0);
+    auto data2 = Mantid::Kernel::make_cow<HistogramE>(0);
+    Histogram hist{BinEdges(0)};
+    hist.setCountStandardDeviations(data1);
+    TS_ASSERT_EQUALS(hist.sharedE(), data1);
+    TS_ASSERT_THROWS_NOTHING(hist.setSharedE(data2));
+    TS_ASSERT_DIFFERS(hist.sharedE(), data1);
+    TS_ASSERT_EQUALS(hist.sharedE(), data2);
+  }
+
+  void test_setSharedE_size_mismatch() {
+    auto data1 = Mantid::Kernel::make_cow<HistogramE>(0);
+    auto data2 = Mantid::Kernel::make_cow<HistogramE>(2);
+    Histogram hist{BinEdges(0)};
+    hist.setCountStandardDeviations(data1);
+    TS_ASSERT_THROWS(hist.setSharedE(data2), std::logic_error);
   }
 };
 
