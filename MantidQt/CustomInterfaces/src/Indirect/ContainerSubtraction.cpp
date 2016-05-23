@@ -343,9 +343,6 @@ void ContainerSubtraction::plotPreview(int wsIndex) {
         "Subtracted", QString::fromStdString(m_pythonExportWsName), wsIndex,
         Qt::green);
 
-  const bool shift = m_uiForm.ckShiftCan->isChecked();
-  const bool scale = m_uiForm.ckScaleCan->isChecked();
-
   m_uiForm.ppPreview->addSpectrum(
       "Container", QString::fromStdString(m_containerWorkspaceName), wsIndex,
       Qt::red);
