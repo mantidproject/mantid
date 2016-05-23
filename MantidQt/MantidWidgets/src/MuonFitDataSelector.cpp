@@ -43,8 +43,7 @@ MuonFitDataSelector::MuonFitDataSelector(QWidget *parent, int runNumber,
 
 /**
  * Connect signals from UI elements to re-emit a signal that "user has changed
- * something" i.e. workspacePropertiesChanged, selectedGroupsChanged,
- * selectedPeriodsChanged
+ * something"
  */
 void MuonFitDataSelector::setUpConnections() {
   connect(m_ui.runs, SIGNAL(filesFound()), this, SLOT(userChangedRuns()));
@@ -56,6 +55,8 @@ void MuonFitDataSelector::setUpConnections() {
           SIGNAL(dataPropertiesChanged()));
   connect(m_ui.chkCombine, SIGNAL(stateChanged(int)), this,
           SLOT(periodCombinationStateChanged(int)));
+  connect(m_ui.chkCombine, SIGNAL(clicked()), this,
+          SIGNAL(selectedPeriodsChanged()));
 }
 
 /**
@@ -235,7 +236,7 @@ void MuonFitDataSelector::addGroupCheckbox(const QString &name) {
   m_groupBoxes.insert(name, checkBox);
   checkBox->setChecked(true);
   m_ui.verticalLayoutGroups->add(checkBox);
-  connect(checkBox, SIGNAL(stateChanged(int)), this,
+  connect(checkBox, SIGNAL(clicked(bool)), this,
           SIGNAL(selectedGroupsChanged()));
 }
 
@@ -266,7 +267,7 @@ void MuonFitDataSelector::setNumPeriods(size_t numPeriods) {
       auto checkbox = new QCheckBox(name);
       m_periodBoxes.insert(name, checkbox);
       m_ui.verticalLayoutPeriods->add(checkbox);
-      connect(checkbox, SIGNAL(stateChanged(int)), this,
+      connect(checkbox, SIGNAL(clicked()), this,
               SIGNAL(selectedPeriodsChanged()));
     }
   } else if (numPeriods < currentPeriods) {
@@ -503,7 +504,6 @@ void MuonFitDataSelector::setPeriodCombination(bool on) {
 void MuonFitDataSelector::periodCombinationStateChanged(int state) {
   m_ui.txtFirst->setEnabled(state == Qt::Checked);
   m_ui.txtSecond->setEnabled(state == Qt::Checked);
-  emit selectedPeriodsChanged();
 }
 
 } // namespace MantidWidgets
