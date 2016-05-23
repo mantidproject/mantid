@@ -442,7 +442,7 @@ endif(UNITY_BUILD)
 
 # ===================== Open Cascade ===================
 if (ENABLE_OPENCASCADE)
-  set (SRC_FILES ${SRC_FILES} ${OPENCASCADE_SRC} )
+  LIST (APPEND SRC_FILES ${OPENCASCADE_SRC} )
 endif ()
 
 # A few defines needed for OpenCascade on the Mac
