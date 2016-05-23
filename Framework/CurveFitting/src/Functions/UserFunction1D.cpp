@@ -68,12 +68,12 @@ void UserFunction1D::prepare() {
   if (!initParams.empty()) {
     Mantid::Kernel::StringTokenizer values(
         initParams, ",", Mantid::Kernel::StringTokenizer::TOK_TRIM);
-    for (auto it = values.begin(); it != values.end(); ++it) {
-      size_t ieq = it->find('=');
+    for (auto it : values) {
+      size_t ieq = it.find('=');
       if (ieq == std::string::npos)
         throw std::invalid_argument("Property InitialParameters is malformed");
-      std::string varName = it->substr(0, ieq);
-      std::string varValue = it->substr(ieq + 1);
+      std::string varName = it.substr(0, ieq);
+      std::string varValue = it.substr(ieq + 1);
       size_t i0 = varName.find_first_not_of(" \t");
       size_t i1 = varName.find_last_not_of(" \t");
       if (i0 == std::string::npos)
