@@ -58,11 +58,12 @@ void ContainerSubtraction::run() {
   }
 
   MatrixWorkspace_sptr canWs =
-	  AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-		  m_containerWorkspaceName);
+      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+          m_containerWorkspaceName);
   // Check for same binning across sample and container
   if (shift) {
-	  addRebinStep(QString::fromStdString(m_containerWorkspaceName), QString::fromStdString(m_sampleWorkspaceName));
+    addRebinStep(QString::fromStdString(m_containerWorkspaceName),
+                 QString::fromStdString(m_sampleWorkspaceName));
   } else {
     if (!checkWorkspaceBinningMatches(sampleWs, canWs)) {
       const char *text =
@@ -114,7 +115,7 @@ void ContainerSubtraction::run() {
 
   MatrixWorkspace_sptr containerWs =
       AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-		  m_containerWorkspaceName);
+          m_containerWorkspaceName);
   std::string runNum = "";
   int containerNameCutIndex = 0;
   if (containerWs->run().hasProperty("run_number")) {
@@ -239,7 +240,7 @@ void ContainerSubtraction::newSample(const QString &dataName) {
   // Remove old sample and fit
   m_uiForm.ppPreview->removeSpectrum("Subtracted");
   m_uiForm.ppPreview->removeSpectrum("Sample");
-  
+
   // Get new workspace
   const MatrixWorkspace_sptr sampleWs =
       AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
@@ -257,7 +258,6 @@ void ContainerSubtraction::newSample(const QString &dataName) {
 
   m_uiForm.spShift->setMinimum(min);
   m_uiForm.spShift->setMaximum(max);
-
 }
 
 /**
@@ -265,7 +265,7 @@ void ContainerSubtraction::newSample(const QString &dataName) {
 * @param dataName Name of new data source
 */
 void ContainerSubtraction::newContainer(const QString &dataName) {
-	// Remove old container and fit
+  // Remove old container and fit
   m_uiForm.ppPreview->removeSpectrum("Subtracted");
   m_uiForm.ppPreview->removeSpectrum("Container");
 
@@ -295,19 +295,21 @@ void ContainerSubtraction::updateCan() {
     IAlgorithm_sptr scale = AlgorithmManager::Instance().create("Scale");
     scale->initialize();
     scale->setLogging(false);
-    scale->setProperty("InputWorkspace", m_uiForm.dsContainer->getCurrentDataName().toStdString());
+    scale->setProperty(
+        "InputWorkspace",
+        m_uiForm.dsContainer->getCurrentDataName().toStdString());
     scale->setProperty("OutputWorkspace", m_containerWorkspaceName);
     scale->setProperty("Operation", "Multiply");
     scale->setProperty("Factor", m_uiForm.spCanScale->value());
     scale->execute();
-	IAlgorithm_sptr scaleX = AlgorithmManager::Instance().create("ScaleX");
-	scaleX->initialize();
-	scaleX->setLogging(false);
-	scaleX->setProperty("InputWorkspace", m_containerWorkspaceName);
-	scaleX->setProperty("OutputWorkspace", m_containerWorkspaceName);
-	scaleX->setProperty("Factor", m_uiForm.spShift->value());
-	scaleX->setProperty("Operation", "Add");
-	scaleX->execute();
+    IAlgorithm_sptr scaleX = AlgorithmManager::Instance().create("ScaleX");
+    scaleX->initialize();
+    scaleX->setLogging(false);
+    scaleX->setProperty("InputWorkspace", m_containerWorkspaceName);
+    scaleX->setProperty("OutputWorkspace", m_containerWorkspaceName);
+    scaleX->setProperty("Factor", m_uiForm.spShift->value());
+    scaleX->setProperty("Operation", "Add");
+    scaleX->execute();
   }
   if (m_sampleWorkspaceName.compare("") != 0) {
     IAlgorithm_sptr rebin =
@@ -331,8 +333,9 @@ void ContainerSubtraction::plotPreview(int wsIndex) {
   m_uiForm.ppPreview->clear();
 
   // Plot sample
-  m_uiForm.ppPreview->addSpectrum(
-      "Sample", QString::fromStdString(m_sampleWorkspaceName), wsIndex, Qt::black);
+  m_uiForm.ppPreview->addSpectrum("Sample",
+                                  QString::fromStdString(m_sampleWorkspaceName),
+                                  wsIndex, Qt::black);
 
   // Plot result
   if (!m_pythonExportWsName.empty())

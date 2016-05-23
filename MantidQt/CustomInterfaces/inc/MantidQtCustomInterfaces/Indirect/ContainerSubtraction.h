@@ -15,7 +15,7 @@ public:
 private slots:
   /// Handles a new sample being loaded
   void newSample(const QString &dataName);
-  /// Handles a new container being loaded 
+  /// Handles a new container being loaded
   void newContainer(const QString &dataName);
   /// Handles a change in the can scale or shift
   void updateCan();
