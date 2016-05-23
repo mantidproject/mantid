@@ -91,6 +91,8 @@ public slots:
   void setEndTimeQuietly(double end) override;
   /// Called when user changes runs
   void userChangedRuns();
+  /// Called when period combination box checked/unchecked
+  void periodCombinationStateChanged(int state);
 
 signals:
   /// Edited the ws index, start or end fields
@@ -117,6 +119,8 @@ private:
   void setUpConnections();
   /// Set type for fit
   void setFitType(IMuonFitDataSelector::FitType type);
+  /// Check/uncheck "Combination" box and enable/disable text boxes
+  void setPeriodCombination(bool on);
   /// Member - user interface
   Ui::MuonFitDataSelector m_ui;
   /// Map of group names to checkboxes

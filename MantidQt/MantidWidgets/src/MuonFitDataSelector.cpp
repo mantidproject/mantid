@@ -55,7 +55,7 @@ void MuonFitDataSelector::setUpConnections() {
   connect(m_ui.txtEnd, SIGNAL(editingFinished()), this,
           SIGNAL(dataPropertiesChanged()));
   connect(m_ui.chkCombine, SIGNAL(stateChanged(int)), this,
-          SIGNAL(selectedPeriodsChanged()));
+          SLOT(periodCombinationStateChanged(int)));
 }
 
 /**
@@ -213,7 +213,7 @@ void MuonFitDataSelector::setDefaultValues() {
   this->setWorkspaceIndex(0);
   this->setStartTime(0.0);
   this->setEndTime(0.0);
-  m_ui.chkCombine->setChecked(false);
+  setPeriodCombination(false);
 }
 
 /**
@@ -357,7 +357,7 @@ void MuonFitDataSelector::setChosenPeriod(const QString &period) {
     for (auto checkbox : m_periodBoxes) {
       checkbox->setChecked(true);
     }
-    m_ui.chkCombine->setChecked(false);
+    setPeriodCombination(false);
   } else {
     for (auto checkbox : m_periodBoxes) {
       checkbox->setChecked(false);
@@ -372,10 +372,10 @@ void MuonFitDataSelector::setChosenPeriod(const QString &period) {
           iter.value()->setChecked(true);
         }
       }
-      m_ui.chkCombine->setChecked(false);
+      setPeriodCombination(false);
     } else {
       // set the combination
-      m_ui.chkCombine->setChecked(true);
+      setPeriodCombination(true);
       QStringList parts = period.split('-');
       if (parts.size() == 2) {
         m_ui.txtFirst->setText(parts[0].replace("+", ", "));
@@ -472,6 +472,28 @@ void MuonFitDataSelector::setFitType(IMuonFitDataSelector::FitType type) {
     m_ui.rbCoAdd->setChecked(type == FitType::CoAdd);
     m_ui.rbSimultaneous->setChecked(type == FitType::Simultaneous);
   }
+}
+
+/**
+ * Check/uncheck period combination checkbox and set the textboxes
+ * enabled/disabled
+ * @param on :: [input] Turn on or off
+ */
+void MuonFitDataSelector::setPeriodCombination(bool on) {
+  m_ui.chkCombine->setChecked(on);
+  m_ui.txtFirst->setEnabled(on);
+  m_ui.txtSecond->setEnabled(on);
+}
+
+/**
+ * Slot: Keeps enabled/disabled state of textboxes in sync with checkbox
+ * for period combination choices
+ * @param state :: [input] New check state of box
+ */
+void MuonFitDataSelector::periodCombinationStateChanged(int state) {
+  m_ui.txtFirst->setEnabled(state == Qt::Checked);
+  m_ui.txtSecond->setEnabled(state == Qt::Checked);
+  emit selectedPeriodsChanged();
 }
 
 } // namespace MantidWidgets
