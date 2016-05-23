@@ -219,8 +219,35 @@ public:
   void setPointStandardDeviations(const size_t index, T &&... data) {
     getSpectrum(index)->setPointStandardDeviations(std::forward<T>(data)...);
   }
+  HistogramData::Counts counts(const size_t index) const {
+    return getSpectrum(index)->counts();
+  }
+  HistogramData::CountVariances countVariances(const size_t index) const {
+    return getSpectrum(index)->countVariances();
+  }
+  HistogramData::CountStandardDeviations
+  countStandardDeviations(const size_t index) const {
+    return getSpectrum(index)->countStandardDeviations();
+  }
+  HistogramData::Frequencies frequencies(const size_t index) const {
+    return getSpectrum(index)->frequencies();
+  }
+  HistogramData::FrequencyVariances
+  frequencyVariances(const size_t index) const {
+    return getSpectrum(index)->frequencyVariances();
+  }
+  HistogramData::FrequencyStandardDeviations
+  frequencyStandardDeviations(const size_t index) const {
+    return getSpectrum(index)->frequencyStandardDeviations();
+  }
   const HistogramData::HistogramX &x(const size_t index) const {
     return getSpectrum(index)->x();
+  }
+  const HistogramData::HistogramY &y(const size_t index) const {
+    return getSpectrum(index)->y();
+  }
+  const HistogramData::HistogramE &e(const size_t index) const {
+    return getSpectrum(index)->e();
   }
   const HistogramData::HistogramDx &dx(const size_t index) const {
     return getSpectrum(index)->dx();
@@ -233,6 +260,12 @@ public:
   }
   Kernel::cow_ptr<HistogramData::HistogramX> sharedX(const size_t index) const {
     return getSpectrum(index)->sharedX();
+  }
+  Kernel::cow_ptr<HistogramData::HistogramY> sharedY(const size_t index) const {
+    return getSpectrum(index)->sharedY();
+  }
+  Kernel::cow_ptr<HistogramData::HistogramE> sharedE(const size_t index) const {
+    return getSpectrum(index)->sharedE();
   }
   Kernel::cow_ptr<HistogramData::HistogramDx>
   sharedDx(const size_t index) const {
