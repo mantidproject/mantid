@@ -352,16 +352,27 @@ void MuonFitDataSelector::setChosenGroup(const QString &group) {
  * (can be just one period or a combination)
  */
 void MuonFitDataSelector::setChosenPeriod(const QString &period) {
+  // Begin by unchecking everything
+  for (auto checkbox : m_periodBoxes) {
+    checkbox->setChecked(false);
+  }
+
   // If single-period or all periods, string will be empty
   if (period.isEmpty()) {
-    for (auto checkbox : m_periodBoxes) {
-      checkbox->setChecked(true);
+    if (m_periodBoxes.size() == 1) { // single-period
+      setPeriodCombination(false);
+      m_periodBoxes.begin().value()->setChecked(true);
+    } else { // all periods selected
+      setPeriodCombination(true);
+      QString combination;
+      for (int i = 0; i < m_periodBoxes.count() - 1; i++) {
+        combination.append(QString::number(i + 1)).append(", ");
+      }
+      m_ui.txtFirst->setText(
+          combination.append(QString::number(m_periodBoxes.count())));
+      m_ui.txtSecond->clear();
     }
-    setPeriodCombination(false);
   } else {
-    for (auto checkbox : m_periodBoxes) {
-      checkbox->setChecked(false);
-    }
     bool onePeriod(false);
     const int chosenPeriod = period.toInt(&onePeriod);
     if (onePeriod) {
@@ -414,8 +425,7 @@ QVariant MuonFitDataSelector::getUserInput() const {
  * MantidWidget. In practice it is probably easier to set the input
  * using other methods.
  *
- * This function doesn't support setting runs, chosen groups or chosen periods
- * (done through UI only).
+ * This function doesn't support setting runs, groups or periods.
  *
  * The input QVariant is a QVariantMap of (parameter, value) pairs.
  * @param value :: [input] QVariant containing a QVariantMap
