@@ -18,7 +18,10 @@
 using Mantid::Algorithms::ConvolutionFitSequential;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
+using Mantid::Kernel::make_cow;
 using Mantid::HistogramData::BinEdges;
+using Mantid::HistogramData::HistogramY;
+using Mantid::HistogramData::HistogramE;
 
 class ConvolutionFitSequentialTest : public CxxTest::TestSuite {
 public:
@@ -273,10 +276,8 @@ public:
     auto ws = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
         xlen, xlen - 1, false, false, true, "testInst");
     BinEdges x1(xlen, 0.0);
-    boost::shared_ptr<Mantid::MantidVec> y1(
-        new Mantid::MantidVec(xlen - 1, 3.0));
-    boost::shared_ptr<Mantid::MantidVec> e1(
-        new Mantid::MantidVec(xlen - 1, sqrt(3.0)));
+    auto y1 = make_cow<HistogramY>(xlen - 1, 3.0);
+    auto e1 = make_cow<HistogramE>(xlen - 1, sqrt(3.0));
 
     MatrixWorkspace_sptr testWs(ws);
     testWs->initialize(ylen, xlen, xlen - 1);
@@ -307,10 +308,8 @@ public:
     auto convFitRes = WorkspaceFactory::Instance().create(
         "Workspace2D", totalHist + 1, totalBins + 1, totalBins);
     BinEdges x1(totalBins + 1, 0.0);
-    boost::shared_ptr<Mantid::MantidVec> y1(
-        new Mantid::MantidVec(totalBins, 3.0));
-    boost::shared_ptr<Mantid::MantidVec> e1(
-        new Mantid::MantidVec(totalBins, sqrt(3.0)));
+    auto y1 = make_cow<HistogramY>(totalBins, 3.0);
+    auto e1 = make_cow<HistogramE>(totalBins, sqrt(3.0));
 
     MatrixWorkspace_sptr testWs(convFitRes);
     testWs->initialize(totalHist + 1, totalBins + 1, totalBins);

@@ -92,7 +92,7 @@ public:
 
     bool CalcVariances = 0;
 
-    Mantid::MantidVecPtr xvals, yvals, data;
+    Mantid::MantidVec xvals, yvals, data;
     int sgn1 = 1;
     int sgn2 = 1;
     for (int i = 0; i < nCells; i++) {
@@ -111,12 +111,12 @@ public:
         sgn1 = -sgn1 + 1;
         sgn2 = sgn1;
       }
-      xvals.access().push_back(x);
-      yvals.access().push_back(y);
+      xvals.push_back(x);
+      yvals.push_back(y);
       double val =
           NormVal(background, intensity, Mcol, Mrow, Vx, Vy, Vxy, y, x);
 
-      data.access().push_back(val);
+      data.push_back(val);
     }
 
     Points x_vec_ptr(nCells);
@@ -128,9 +128,9 @@ public:
     NormalFit.setAttributeValue("CalcVariances", CalcVariances);
 
     ws->setPoints(0, x_vec_ptr);
-    ws->setData(0, data);
-    ws->setData(1, xvals);
-    ws->setData(2, yvals);
+    ws->dataY(0) = data;
+    ws->dataY(1) = xvals;
+    ws->dataY(2) = yvals;
 
     NormalFit.setMatrixWorkspace(ws, 0, 0.0, 30.0);
 
@@ -156,8 +156,8 @@ public:
     //  std::cout<<"-------------------------------------"<<std::endl;
     for (int i = 0; i < nCells; i++) {
 
-      double x = xvals.access()[i];
-      double y = yvals.access()[i];
+      double x = xvals[i];
+      double y = yvals[i];
       double d = NormVal(background, intensity, Mcol, Mrow, Vx, Vy, Vxy, y, x);
 
       TS_ASSERT_DELTA(d, out[i], .001);
