@@ -1973,8 +1973,6 @@ void MuonAnalysis::selectMultiPeak(const QString &wsName) {
   }
 
   if (wsName != m_fitDataHelper->getAssignedFirstRun()) {
-    m_fitDataHelper->setAssignedFirstRun(wsName);
-
     // Set the available groups/pairs and periods
     const Grouping groups = m_groupingHelper.parseGroupingTable();
     QStringList groupsAndPairs;
@@ -1986,6 +1984,9 @@ void MuonAnalysis::selectMultiPeak(const QString &wsName) {
                    std::back_inserter(groupsAndPairs), &QString::fromStdString);
     m_dataSelector->setAvailableGroups(groupsAndPairs);
     m_dataSelector->setNumPeriods(m_numPeriods);
+
+    // Set the selected run, group/pair and period
+    m_fitDataHelper->setAssignedFirstRun(wsName);
   }
 
   QString code;

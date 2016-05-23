@@ -22,11 +22,13 @@ public:
   virtual double getStartTime() const = 0;
   virtual double getEndTime() const = 0;
   virtual void setNumPeriods(size_t numPeriods) = 0;
+  virtual void setChosenPeriod(const QString &period) = 0;
   virtual QStringList getPeriodSelections() const = 0;
   virtual void setWorkspaceDetails(const QString &runNumbers,
                                    const QString &instName) = 0;
   virtual void setAvailableGroups(const QStringList &groupNames) = 0;
   virtual QStringList getChosenGroups() const = 0;
+  virtual void setChosenGroup(const QString &group) = 0;
   virtual void setWorkspaceIndex(unsigned int index) = 0;
   virtual void setStartTime(double start) = 0;
   virtual void setEndTime(double end) = 0;

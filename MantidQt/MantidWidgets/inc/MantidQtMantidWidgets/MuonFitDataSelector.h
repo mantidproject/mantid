@@ -62,8 +62,12 @@ public:
   double getEndTime() const override;
   /// Get names of chosen groups
   QStringList getChosenGroups() const override;
+  /// Set chosen group
+  void setChosenGroup(const QString &group) override;
   /// Get selected periods
   QStringList getPeriodSelections() const override;
+  /// Set selected period
+  void setChosenPeriod(const QString &period) override;
   /// Get type of fit
   IMuonFitDataSelector::FitType getFitType() const override;
 

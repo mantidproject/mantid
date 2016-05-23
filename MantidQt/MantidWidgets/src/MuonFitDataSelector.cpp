@@ -244,10 +244,9 @@ void MuonFitDataSelector::addGroupCheckbox(const QString &name) {
  * (ready to add new ones)
  */
 void MuonFitDataSelector::clearGroupCheckboxes() {
-  for (auto iter = m_groupBoxes.constBegin(); iter != m_groupBoxes.constEnd();
-       ++iter) {
-    m_ui.verticalLayoutGroups->remove(iter.data());
-    iter.data()->deleteLater(); // will disconnect signal automatically
+  for (const auto &checkbox : m_groupBoxes) {
+    m_ui.verticalLayoutGroups->remove(checkbox);
+    checkbox->deleteLater(); // will disconnect signal automatically
   }
   m_groupBoxes.clear();
 }
@@ -332,6 +331,58 @@ QStringList MuonFitDataSelector::getChosenGroups() const {
     }
   }
   return chosen;
+}
+
+/**
+ * Set the chosen group ticked and all others off
+ * Used when switching from Home tab to Data Analysis tab
+ * @param group :: [input] Name of group to select
+ */
+void MuonFitDataSelector::setChosenGroup(const QString &group) {
+  for (auto iter = m_groupBoxes.constBegin(); iter != m_groupBoxes.constEnd();
+       ++iter) {
+    iter.value()->setChecked(iter.key() == group);
+  }
+}
+
+/**
+ * Set the chosen period/combination ticked and all others off
+ * Used when switching from Home tab to Data Analysis tab
+ * @param period :: [input] Period string to set selected
+ * (can be just one period or a combination)
+ */
+void MuonFitDataSelector::setChosenPeriod(const QString &period) {
+  // If single-period or all periods, string will be empty
+  if (period.isEmpty()) {
+    for (auto checkbox : m_periodBoxes) {
+      checkbox->setChecked(true);
+    }
+    m_ui.chkCombine->setChecked(false);
+  } else {
+    for (auto checkbox : m_periodBoxes) {
+      checkbox->setChecked(false);
+    }
+    bool onePeriod(false);
+    const int chosenPeriod = period.toInt(&onePeriod);
+    if (onePeriod) {
+      // set just one
+      for (auto iter = m_periodBoxes.constBegin();
+           iter != m_periodBoxes.constEnd(); ++iter) {
+        if (iter.key() == period) {
+          iter.value()->setChecked(true);
+        }
+      }
+      m_ui.chkCombine->setChecked(false);
+    } else {
+      // set the combination
+      m_ui.chkCombine->setChecked(true);
+      QStringList parts = period.split('-');
+      if (parts.size() == 2) {
+        m_ui.txtFirst->setText(parts[0].replace("+", ", "));
+        m_ui.txtSecond->setText(parts[1].replace("+", ", "));
+      }
+    }
+  }
 }
 
 /**

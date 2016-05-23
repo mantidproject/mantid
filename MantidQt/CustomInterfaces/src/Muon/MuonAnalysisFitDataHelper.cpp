@@ -1,4 +1,5 @@
 #include "MantidQtCustomInterfaces/Muon/MuonAnalysisFitDataHelper.h"
+#include "MantidQtCustomInterfaces/Muon/MuonAnalysisHelper.h"
 
 using MantidQt::MantidWidgets::IMuonFitDataSelector;
 using MantidQt::MantidWidgets::IWorkspaceFitControl;
@@ -72,19 +73,25 @@ void MuonAnalysisFitDataHelper::setAssignedFirstRun(const QString &wsName) {
 
   m_PPAssignedFirstRun = wsName;
   // Parse workspace name here for run number and instrument name
-  const QString instRun = wsName.section(';', 0, 0).trimmed();
+  const auto wsParams =
+      MuonAnalysisHelper::parseWorkspaceName(wsName.toStdString());
+  const QString instRun = QString::fromStdString(wsParams.label);
   const int firstZero = instRun.indexOf("0");
-  const QString instName = instRun.left(firstZero);
   const QString numberString = instRun.right(instRun.size() - firstZero);
-  m_dataSelector->setWorkspaceDetails(numberString, instName);
+  m_dataSelector->setWorkspaceDetails(
+      numberString, QString::fromStdString(wsParams.instrument));
   m_dataSelector->setWorkspaceIndex(0u); // always has only one spectrum
   // Check for multiple runs
-  if (numberString.contains('-') || numberString.contains(',')) {
+  if (wsParams.runs.size() > 1) {
     m_fitBrowser->allowSequentialFits(false);
   } else {
     m_fitBrowser->allowSequentialFits(
         true); // will still be forbidden if no function
   }
+
+  // Set selected groups/pairs and periods here too
+  m_dataSelector->setChosenGroup(QString::fromStdString(wsParams.itemName));
+  m_dataSelector->setChosenPeriod(QString::fromStdString(wsParams.periods));
 }
 
 /**
