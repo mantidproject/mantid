@@ -250,6 +250,14 @@ void ContainerSubtraction::newSample(const QString &dataName) {
   // Plot the sample curve
   m_uiForm.ppPreview->addSpectrum("Sample", sampleWs, 0, Qt::black);
   m_sampleWorkspaceName = dataName.toStdString();
+
+  // Set min/max container shift
+  auto min = sampleWs->getXMin();
+  auto max = sampleWs->getXMax();
+
+  m_uiForm.spShift->setMinimum(min);
+  m_uiForm.spShift->setMaximum(max);
+
 }
 
 /**
