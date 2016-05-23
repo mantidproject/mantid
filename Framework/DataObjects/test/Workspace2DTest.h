@@ -38,9 +38,8 @@ public:
                                                   double x0 = 0.0,
                                                   double deltax = 1.0) {
     auto x = Kernel::make_cow<HistogramData::HistogramX>(nbins + 1);
-    MantidVecPtr y, e;
-    y.access().resize(nbins, 2); // Value of 2.0 in all ys
-    e.access().resize(nbins, M_SQRT2);
+    auto y = Kernel::make_cow<HistogramData::HistogramY>(nbins, 2);
+    auto e = Kernel::make_cow<HistogramData::HistogramE>(nbins, M_SQRT2);
     for (int i = 0; i < nbins + 1; ++i) {
       x.access()[i] = x0 + i * deltax;
     }
@@ -111,8 +110,7 @@ public:
 
   void testSetData_cowptr() {
     double aNumber = 5.5;
-    MantidVecPtr v;
-    v.access() = MantidVec(nbins, aNumber);
+    auto v = Kernel::make_cow<HistogramData::HistogramY>(nbins, aNumber);
     TS_ASSERT_THROWS_NOTHING(ws->setData(0, v));
     TS_ASSERT_EQUALS(ws->dataY(0)[0], aNumber);
     TS_ASSERT_DIFFERS(ws->dataY(1)[0], aNumber);
@@ -120,9 +118,8 @@ public:
 
   void testSetData_cowptr2() {
     double aNumber = 5.6;
-    MantidVecPtr v, e;
-    v.access() = MantidVec(nbins, aNumber);
-    e.access() = MantidVec(nbins, aNumber * 2);
+    auto v = Kernel::make_cow<HistogramData::HistogramY>(nbins, aNumber);
+    auto e = Kernel::make_cow<HistogramData::HistogramE>(nbins, aNumber * 2);
     TS_ASSERT_THROWS_NOTHING(ws->setData(0, v, e));
     TS_ASSERT_EQUALS(ws->dataY(0)[0], aNumber);
     TS_ASSERT_EQUALS(ws->dataE(0)[0], aNumber * 2);
@@ -132,10 +129,8 @@ public:
 
   void testSetData() {
     double aNumber = 5.7;
-    const boost::shared_ptr<MantidVec> v =
-        boost::make_shared<MantidVec>(nbins, aNumber);
-    const boost::shared_ptr<MantidVec> e =
-        boost::make_shared<MantidVec>(nbins, aNumber * 2);
+    auto v = boost::make_shared<HistogramData::HistogramY>(nbins, aNumber);
+    auto e = boost::make_shared<HistogramData::HistogramE>(nbins, aNumber * 2);
     TS_ASSERT_THROWS_NOTHING(ws->setData(0, v, e));
     TS_ASSERT_EQUALS(ws->dataY(0)[0], aNumber);
     TS_ASSERT_EQUALS(ws->dataE(0)[0], aNumber * 2);

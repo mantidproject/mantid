@@ -74,11 +74,11 @@ public:
           boost::dynamic_pointer_cast<Workspace2D>(space);
 
       BinEdges x(6, 10.0);
-      MantidVecPtr vec;
-      vec.access().resize(5, 1.0);
+      auto y = Kernel::make_cow<HistogramData::HistogramY>(5, 1.0);
+      auto e = Kernel::make_cow<HistogramData::HistogramE>(5, 1.0);
       for (int j = 0; j < numspec; ++j) {
         space2D->setBinEdges(j, x);
-        space2D->setData(j, vec, vec);
+        space2D->setData(j, y, e);
         space2D->getSpectrum(j)->setSpectrumNo(j);
         space2D->getSpectrum(j)->setDetectorID(j);
       }

@@ -10,6 +10,7 @@
 
 using Mantid::DataObjects::Histogram1D;
 using Mantid::MantidVec;
+using Mantid::Kernel::make_cow;
 using namespace Mantid::HistogramData;
 
 class Histogram1DTest : public CxxTest::TestSuite {
@@ -18,8 +19,8 @@ private:
   Histogram1D h{Histogram::XMode::Points};
   Histogram1D h2{Histogram::XMode::Points};
   MantidVec x1, y1, e1; // vectors
-  typedef boost::shared_ptr<MantidVec> parray;
-  parray pa, pb; // Shared_ptr to vectors
+  boost::shared_ptr<HistogramY> pa;
+  boost::shared_ptr<HistogramE> pb;
 public:
   void setUp() override {
     nel = 100;
@@ -28,12 +29,14 @@ public:
     y1.resize(nel);
     std::fill(y1.begin(), y1.end(), rand());
     e1.resize(nel);
-    pa = parray(new MantidVec(nel));
+    pa = boost::make_shared<HistogramY>(nel);
     std::fill(pa->begin(), pa->end(), rand());
-    pb = parray(new MantidVec(nel));
-    std::fill(pa->begin(), pa->end(), rand());
+    pb = boost::make_shared<HistogramE>(nel);
+    std::fill(pb->begin(), pb->end(), rand());
     h.setHistogram(Histogram(Points(100)));
     h2.setHistogram(Histogram(Points(100)));
+    h.setData(make_cow<HistogramY>(100), make_cow<HistogramE>(100));
+    h2.setData(make_cow<HistogramY>(100), make_cow<HistogramE>(100));
   }
 
   void testsetgetXvector() {
@@ -66,12 +69,12 @@ public:
   }
   void testsetgetDataYPointer() {
     h.setData(pa);
-    TS_ASSERT_EQUALS(h.dataY(), *pa);
+    TS_ASSERT_EQUALS(h.dataY(), pa->rawData());
   }
   void testsetgetDataYEPointer() {
     h.setData(pa, pb);
-    TS_ASSERT_EQUALS(h.dataY(), *pa);
-    TS_ASSERT_EQUALS(h.dataE(), *pb);
+    TS_ASSERT_EQUALS(h.dataY(), pa->rawData());
+    TS_ASSERT_EQUALS(h.dataE(), pb->rawData());
   }
   void testgetXindex() {
     h.setPoints(x1);
