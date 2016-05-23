@@ -214,20 +214,20 @@ void FunctionDialog::setCurveToModify(Graph *g, int curve)
 		boxPoints->setValue(c->dataSize());
 	} else if (c->functionType() == FunctionCurve::Polar) {
 		optionStack->setCurrentIndex(2);
-		boxType->setCurrentItem(2);
+		boxType->setCurrentIndex(2);
 
-		boxPolarRadius->setCurrentText(formulas[0]);
-		boxPolarTheta->setCurrentText(formulas[1]);
+		boxPolarRadius->setItemText(boxPolarRadius->currentIndex(), formulas[0]);
+		boxPolarTheta->setItemText(boxPolarTheta->currentIndex(), formulas[1]);
 		boxPolarParameter->setText(c->variable());
 		boxPolarFrom->setText(QString::number(c->startRange(), 'g', 15));
 		boxPolarTo->setText(QString::number(c->endRange(), 'g', 15));
 		boxPolarPoints->setValue(c->dataSize());
 	} else if (c->functionType() == FunctionCurve::Parametric) {
-		boxType->setCurrentItem(1);
+		boxType->setCurrentIndex(1);
 		optionStack->setCurrentIndex(1);
 
-		boxXFunction->setCurrentText(formulas[0]);
-		boxYFunction->setCurrentText(formulas[1]);
+		boxXFunction->setItemText(boxXFunction->currentIndex(), formulas[0]);
+		boxYFunction->setItemText(boxYFunction->currentIndex(), formulas[1]);
 		boxParameter->setText(c->variable());
 		boxParFrom->setText(QString::number(c->startRange(), 'g', 15));
 		boxParTo->setText(QString::number(c->endRange(), 'g', 15));
@@ -237,7 +237,7 @@ void FunctionDialog::setCurveToModify(Graph *g, int curve)
 
 void FunctionDialog::clearList()
 {
-	int type=boxType->currentItem();
+	int type=boxType->currentIndex();
 	switch (type)
 	{
 		case 0:
@@ -260,15 +260,15 @@ void FunctionDialog::clearList()
 
 void FunctionDialog::acceptFunction()
 {
-	QString from=boxFrom->text().lower();
-	QString to=boxTo->text().lower();
-	QString points=boxPoints->text().lower();
+	QString from=boxFrom->text().toLower();
+	QString to=boxTo->text().toLower();
+	QString points=boxPoints->text().toLower();
 
 	double start, end;
 	try
 	{
 		MyParser parser;
-		parser.SetExpr(from.ascii());
+		parser.SetExpr(from.toAscii().constData());
 		start=parser.Eval();
 	}
 	catch(mu::ParserError &e)
@@ -280,7 +280,7 @@ void FunctionDialog::acceptFunction()
 	try
 	{
 		MyParser parser;
-		parser.SetExpr(to.ascii());
+		parser.SetExpr(to.toAscii().constData());
 		end=parser.Eval();
 	}
 	catch(mu::ParserError &e)
@@ -306,7 +306,7 @@ void FunctionDialog::acceptFunction()
 		MyParser parser;
 		double x=start;
 		parser.DefineVar("x", &x);
-		parser.SetExpr(formula.ascii());
+		parser.SetExpr(formula.toAscii().constData());
 		parser.Eval();
     // cppcheck-suppress unreadVariable
 		x=end;
@@ -320,7 +320,7 @@ void FunctionDialog::acceptFunction()
 	}
 
 	// Collecting all the information
-	int type = boxType->currentItem();
+	int type = boxType->currentIndex();
 	QStringList formulas;
 	formulas+=formula;
 	if (!error)
@@ -339,15 +339,15 @@ void FunctionDialog::acceptFunction()
 }
 void FunctionDialog::acceptParametric()
 {
-	QString from=boxParFrom->text().lower();
-	QString to=boxParTo->text().lower();
-	QString points=boxParPoints->text().lower();
+	QString from=boxParFrom->text().toLower();
+	QString to=boxParTo->text().toLower();
+	QString points=boxParPoints->text().toLower();
 
 	double start, end;
 	try
 	{
 		MyParser parser;
-		parser.SetExpr(from.ascii());
+		parser.SetExpr(from.toAscii().constData());
 		start=parser.Eval();
 	}
 	catch(mu::ParserError &e)
@@ -360,7 +360,7 @@ void FunctionDialog::acceptParametric()
 	try
 	{
 		MyParser parser;
-		parser.SetExpr(to.ascii());
+		parser.SetExpr(to.toAscii().constData());
 		end=parser.Eval();
 	}
 	catch(mu::ParserError &e)
@@ -386,8 +386,8 @@ void FunctionDialog::acceptParametric()
 	{
 		MyParser parser;
 		double parameter=start;
-		parser.DefineVar((boxParameter->text()).ascii(), &parameter);
-		parser.SetExpr(xformula.ascii());
+		parser.DefineVar((boxParameter->text()).toAscii().constData(), &parameter);
+		parser.SetExpr(xformula.toAscii().constData());
 		parser.Eval();
     // cppcheck-suppress unreadVariable
 		parameter=end;
@@ -403,8 +403,8 @@ void FunctionDialog::acceptParametric()
 	{
 		MyParser parser;
 		double parameter=start;
-		parser.DefineVar((boxParameter->text()).ascii(), &parameter);
-		parser.SetExpr(yformula.ascii());
+		parser.DefineVar((boxParameter->text()).toAscii().constData(), &parameter);
+		parser.SetExpr(yformula.toAscii().constData());
 		parser.Eval();
     // cppcheck-suppress unreadVariable
 		parameter=end;
@@ -417,7 +417,7 @@ void FunctionDialog::acceptParametric()
 		error=true;
 	}
 	// Collecting all the information
-	int type = boxType->currentItem();
+	int type = boxType->currentIndex();
 	QStringList formulas;
 	formulas+=xformula;
 	formulas+=yformula;
@@ -437,15 +437,15 @@ void FunctionDialog::acceptParametric()
 
 void FunctionDialog::acceptPolar()
 {
-	QString from=boxPolarFrom->text().lower();
-	QString to=boxPolarTo->text().lower();
-	QString points=boxPolarPoints->text().lower();
+	QString from=boxPolarFrom->text().toLower();
+	QString to=boxPolarTo->text().toLower();
+	QString points=boxPolarPoints->text().toLower();
 
 	double start, end;
 	try
 	{
 		MyParser parser;
-		parser.SetExpr(from.ascii());
+		parser.SetExpr(from.toAscii().constData());
 		start=parser.Eval();
 	}
 	catch(mu::ParserError &e)
@@ -458,7 +458,7 @@ void FunctionDialog::acceptPolar()
 	try
 	{
 		MyParser parser;
-		parser.SetExpr(to.ascii());
+		parser.SetExpr(to.toAscii().constData());
 		end=parser.Eval();
 	}
 	catch(mu::ParserError &e)
@@ -484,8 +484,8 @@ void FunctionDialog::acceptPolar()
 	{
 		MyParser parser;
 		double parameter=start;;
-		parser.DefineVar((boxPolarParameter->text()).ascii(), &parameter);
-		parser.SetExpr(rformula.ascii());
+		parser.DefineVar((boxPolarParameter->text()).toAscii().constData(), &parameter);
+		parser.SetExpr(rformula.toAscii().constData());
 		parser.Eval();
     // cppcheck-suppress unreadVariable
 		parameter=end;
@@ -501,8 +501,8 @@ void FunctionDialog::acceptPolar()
 	{
 		MyParser parser;
 		double parameter=start;;
-		parser.DefineVar((boxPolarParameter->text()).ascii(), &parameter);
-		parser.SetExpr(tformula.ascii());
+		parser.DefineVar((boxPolarParameter->text()).toAscii().constData(), &parameter);
+		parser.SetExpr(tformula.toAscii().constData());
 		parser.Eval();
     // cppcheck-suppress unreadVariable
 		parameter=end;
@@ -515,7 +515,7 @@ void FunctionDialog::acceptPolar()
 		error=true;
 	}
 	// Collecting all the information
-	int type = boxType->currentItem();
+	int type = boxType->currentIndex();
 	QStringList formulas;
 	formulas+=rformula;
 	formulas+=tformula;
