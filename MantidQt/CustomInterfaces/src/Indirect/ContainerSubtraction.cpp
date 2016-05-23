@@ -57,10 +57,6 @@ void ContainerSubtraction::run() {
     absCorProps["SampleWorkspace"] = m_sampleWorkspaceName;
   }
 
-  // Construct Can input name
-  if (shift) {
-	  m_containerWorkspaceName += "_Shifted";
-  }
   MatrixWorkspace_sptr canWs =
 	  AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
 		  m_containerWorkspaceName);
@@ -240,6 +236,11 @@ void ContainerSubtraction::loadSettings(const QSettings &settings) {
  * @param dataName Name of new data source
  */
 void ContainerSubtraction::newSample(const QString &dataName) {
+  // Remove old sample and fit
+  m_uiForm.ppPreview->removeSpectrum("Subtracted");
+  m_uiForm.ppPreview->removeSpectrum("Sample");
+  
+  // Get new workspace
   const MatrixWorkspace_sptr sampleWs =
       AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
           dataName.toStdString());
@@ -247,7 +248,6 @@ void ContainerSubtraction::newSample(const QString &dataName) {
       static_cast<int>(sampleWs->getNumberHistograms()) - 1);
 
   // Plot the sample curve
-  m_uiForm.ppPreview->clear();
   m_uiForm.ppPreview->addSpectrum("Sample", sampleWs, 0, Qt::black);
   m_sampleWorkspaceName = dataName.toStdString();
 }
@@ -257,17 +257,24 @@ void ContainerSubtraction::newSample(const QString &dataName) {
 * @param dataName Name of new data source
 */
 void ContainerSubtraction::newContainer(const QString &dataName) {
+	// Remove old container and fit
+  m_uiForm.ppPreview->removeSpectrum("Subtracted");
+  m_uiForm.ppPreview->removeSpectrum("Container");
+
+  // Get new workspace
   const MatrixWorkspace_sptr containerWs =
       AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
           dataName.toStdString());
-  // Clone can for use in algorithm
+
+  // Clone container for use in preprocessing
   IAlgorithm_sptr clone = AlgorithmManager::Instance().create("CloneWorkspace");
   clone->initialize();
   clone->setProperty("InputWorkspace", containerWs);
   clone->setProperty("Outputworkspace", "__processed_can");
   clone->execute();
   m_containerWorkspaceName = "__processed_can";
-  m_uiForm.ppPreview->removeSpectrum("Container");
+
+  // Plot new container
   m_uiForm.ppPreview->addSpectrum("Container", containerWs, 0, Qt::red);
   m_containerWorkspaceName = "__processed_can";
 }
