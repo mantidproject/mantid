@@ -1,8 +1,10 @@
 #include "MantidQtCustomInterfaces/Muon/MuonAnalysisFitDataHelper.h"
 #include "MantidQtCustomInterfaces/Muon/MuonAnalysisHelper.h"
+#include "MantidAPI/AnalysisDataService.h"
 
 using MantidQt::MantidWidgets::IMuonFitDataSelector;
 using MantidQt::MantidWidgets::IWorkspaceFitControl;
+using Mantid::API::AnalysisDataService;
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -34,18 +36,16 @@ void MuonAnalysisFitDataHelper::handleDataPropertiesChanged() {
 
 /**
  * Called when data selector reports "selected groups changed"
- * Updates WS name
  */
 void MuonAnalysisFitDataHelper::handleSelectedGroupsChanged() {
-  // TODO: implement this
+  createWorkspacesToFit();
 }
 
 /**
  * Called when data selector reports "selected periods changed"
- * Updates WS name
  */
 void MuonAnalysisFitDataHelper::handleSelectedPeriodsChanged() {
-  // TODO: implement this
+  createWorkspacesToFit();
 }
 
 /**
@@ -100,13 +100,39 @@ void MuonAnalysisFitDataHelper::setAssignedFirstRun(const QString &wsName) {
  * The signal from that will set peak picker and UI properties
  */
 void MuonAnalysisFitDataHelper::handleDataWorkspaceChanged() {
-  // TODO: implement this
-  throw std::runtime_error("TODO: create workspace and set in fit browser");
-  const QString wsName("THIS_DOESNT_EXIST_YET");
-  // create the workspace here and add to ADS
-  // is it single, co-added or simultaneous?
-  const auto fitType = m_dataSelector->getFitType();
-  m_fitBrowser->setWorkspaceName(wsName);
+  createWorkspacesToFit();
+}
+
+/**
+ * Gets names of all workspaces needed from the view and updates the
+ * model (fit browser) with these. Creates all workspaces that don't
+ * yet exist in the ADS and adds them. Sets the workspace name, which
+ * sends a signal to update the peak picker.
+ */
+void MuonAnalysisFitDataHelper::createWorkspacesToFit() {
+  // From view, get names of all workspaces needed
+  std::vector<std::string> workspaces;
+  const auto runs = m_dataSelector->getRuns(); // this is filenames
+  const auto groups = m_dataSelector->getChosenGroups();
+  const auto periods = m_dataSelector->getPeriodSelections();
+
+  Muon::DatasetParams params;
+  //params.instrument = 
+
+  // Update model with these
+  //m_fitBrowser->... (m_workspacesToFit)
+
+  // For each name, if not in the ADS, create and add it
+  for (const auto &workspace : workspaces) {
+    if (!AnalysisDataService::Instance().doesExist(workspace)) {
+      //AnalysisDataService::Instance().add(workspace, ...)
+    }
+  }
+   
+  // NB This is necessary to set peak picker, UI properties via signal!
+  if (!workspaces.empty()) {
+    m_fitBrowser->setWorkspaceName(QString::fromStdString(workspaces.front()));
+  }
 }
 
 } // namespace CustomInterfaces

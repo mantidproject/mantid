@@ -57,6 +57,8 @@ public:
   void handleDataWorkspaceChanged();
 
 private:
+  /// Create workspaces to fit and update fit browser (model)
+  void createWorkspacesToFit();
   /// Fit browser to update (non-owning pointer)
   MantidQt::MantidWidgets::IWorkspaceFitControl *m_fitBrowser;
   /// Data selector to get input from (non-owning pointer)

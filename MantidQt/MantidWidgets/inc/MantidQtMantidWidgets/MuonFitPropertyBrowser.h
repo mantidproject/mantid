@@ -90,6 +90,8 @@ private:
   bool isWorkspaceValid(Mantid::API::Workspace_sptr) const override;
   /// Layout for extra widgets
   QVBoxLayout *m_additionalLayout;
+  /// Names of workspaces to fit
+  std::vector<std::string> m_workspacesToFit;
 };
 
 } // MantidQt
