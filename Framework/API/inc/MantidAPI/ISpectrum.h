@@ -9,6 +9,9 @@
 #include <set>
 
 namespace Mantid {
+namespace DataObjects {
+class Workspace2D;
+}
 namespace API {
 
 /** A "spectrum" is an object that holds the data for a particular spectrum,
@@ -184,6 +187,8 @@ public:
   void setSharedDx(const Kernel::cow_ptr<HistogramData::HistogramDx> &dx) {
     mutableHistogramRef().setSharedDx(dx);
   }
+
+  friend class DataObjects::Workspace2D;
 
 protected:
   /// The spectrum number of this spectrum

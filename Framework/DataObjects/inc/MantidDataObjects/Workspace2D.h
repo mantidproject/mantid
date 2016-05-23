@@ -94,6 +94,50 @@ public:
                      bool loadAsRectImg = false, double scale_1 = 1.0,
                      bool parallelExecution = true);
 
+  template <typename... T> void setCounts(const size_t index, T &&... data) & {
+    getSpectrum(index)->mutableHistogramRef().setCounts(
+        std::forward<T>(data)...);
+  }
+  template <typename... T>
+  void setCountVariances(const size_t index, T &&... data) & {
+    getSpectrum(index)->mutableHistogramRef().setCountVariances(
+        std::forward<T>(data)...);
+  }
+  template <typename... T>
+  void setCountStandardDeviations(const size_t index, T &&... data) & {
+    getSpectrum(index)->mutableHistogramRef().setCountStandardDeviations(
+        std::forward<T>(data)...);
+  }
+  template <typename... T>
+  void setFrequencies(const size_t index, T &&... data) & {
+    getSpectrum(index)->mutableHistogramRef().setFrequencies(
+        std::forward<T>(data)...);
+  }
+  template <typename... T>
+  void setFrequencyVariances(const size_t index, T &&... data) & {
+    getSpectrum(index)->mutableHistogramRef().setFrequencyVariances(
+        std::forward<T>(data)...);
+  }
+  template <typename... T>
+  void setFrequencyStandardDeviations(const size_t index, T &&... data) & {
+    getSpectrum(index)->mutableHistogramRef().setFrequencyStandardDeviations(
+        std::forward<T>(data)...);
+  }
+  HistogramData::HistogramY &mutableY(const size_t index) {
+    return getSpectrum(index)->mutableHistogramRef().mutableY();
+  }
+  HistogramData::HistogramE &mutableE(const size_t index) {
+    return getSpectrum(index)->mutableHistogramRef().mutableE();
+  }
+  void setSharedY(const size_t index,
+                  const Kernel::cow_ptr<HistogramData::HistogramY> &y) {
+    getSpectrum(index)->mutableHistogramRef().setSharedY(y);
+  }
+  void setSharedE(const size_t index,
+                  const Kernel::cow_ptr<HistogramData::HistogramE> &e) {
+    getSpectrum(index)->mutableHistogramRef().setSharedE(e);
+  }
+
 protected:
   /// Protected copy constructor. May be used by childs for cloning.
   Workspace2D(const Workspace2D &other);
