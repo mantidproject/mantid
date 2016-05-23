@@ -10,6 +10,8 @@ using Mantid::HistogramData::HistogramX;
 using Mantid::HistogramData::getHistogramXMode;
 using Mantid::HistogramData::Points;
 using Mantid::HistogramData::BinEdges;
+using Mantid::HistogramData::Counts;
+using Mantid::HistogramData::Frequencies;
 
 class HistogramTest : public CxxTest::TestSuite {
 public:
@@ -145,6 +147,46 @@ public:
     const Histogram hist(Points{0.1, 0.2, 0.4});
     const auto points = hist.points();
     TS_ASSERT_EQUALS(&points[0], &hist.x()[0]);
+  }
+
+  void test_no_counts_and_frequencies() {
+    const Histogram hist(BinEdges{0.1, 0.2, 0.4});
+    TS_ASSERT(!hist.counts());
+    TS_ASSERT(!hist.countVariances());
+    TS_ASSERT(!hist.countStandardDeviations());
+    TS_ASSERT(!hist.frequencies());
+    TS_ASSERT(!hist.frequencyVariances());
+    TS_ASSERT(!hist.frequencyStandardDeviations());
+  }
+
+  void test_counts() {
+    Histogram hist(BinEdges{0.1, 0.2, 0.4});
+    hist.setCounts(Counts{10, 100});
+    TS_ASSERT(hist.counts());
+    TS_ASSERT_EQUALS(hist.counts().size(), 2);
+    TS_ASSERT_EQUALS(hist.counts()[0], 10);
+    TS_ASSERT_EQUALS(hist.counts()[1], 100);
+  }
+
+  void test_counts_references_internal_data() {
+    Histogram hist(BinEdges{0.1, 0.2, 0.4});
+    hist.setCounts(Counts{10, 100});
+    TS_ASSERT_EQUALS(&hist.counts()[0], &hist.counts()[0]);
+  }
+
+  void test_frequencies() {
+    Histogram hist(BinEdges{0.1, 0.2, 0.4});
+    hist.setCounts(Counts{10, 100});
+    TS_ASSERT(hist.frequencies());
+    TS_ASSERT_EQUALS(hist.frequencies().size(), 2);
+    TS_ASSERT_EQUALS(hist.frequencies()[0], 100.0);
+    TS_ASSERT_EQUALS(hist.frequencies()[1], 500.0);
+  }
+
+  void test_frequencies_does_not_reference_internal_data() {
+    Histogram hist(BinEdges{0.1, 0.2, 0.4});
+    hist.setCounts(Counts{10, 100});
+    TS_ASSERT_DIFFERS(&hist.frequencies()[0], &hist.frequencies()[0]);
   }
 
   void test_setPoints_from_vector() {
@@ -410,6 +452,46 @@ public:
     TS_ASSERT_DELTA(hist.dx()[0], 0.5, 1e-14);
     TS_ASSERT_DELTA(hist.dx()[1], 1.5, 1e-14);
     TS_ASSERT_DELTA(hist.dx()[2], 2.5, 1e-14);
+  }
+
+  void test_setCounts_size_mismatch() {
+    Histogram h1(Points(2));
+    TS_ASSERT_THROWS(h1.setCounts(std::vector<double>(1)), std::logic_error);
+    TS_ASSERT_THROWS(h1.setCounts(std::vector<double>(3)), std::logic_error);
+    TS_ASSERT_THROWS(h1.setCounts(Counts(1)), std::logic_error);
+    TS_ASSERT_THROWS(h1.setCounts(Counts(3)), std::logic_error);
+    Histogram h2(BinEdges(2));
+    TS_ASSERT_THROWS(h2.setCounts(std::vector<double>(0)), std::logic_error);
+    TS_ASSERT_THROWS(h2.setCounts(std::vector<double>(2)), std::logic_error);
+    TS_ASSERT_THROWS(h2.setCounts(Counts(0)), std::logic_error);
+    TS_ASSERT_THROWS(h2.setCounts(Counts(2)), std::logic_error);
+  }
+
+  void test_setCounts_size_mismatch_degenerate() {
+    Histogram h1(Points(0));
+    TS_ASSERT_THROWS(h1.setCounts(std::vector<double>(1)), std::logic_error);
+    TS_ASSERT_THROWS(h1.setCounts(Counts(1)), std::logic_error);
+    Histogram h2(BinEdges(0));
+    TS_ASSERT_THROWS(h2.setCounts(std::vector<double>(1)), std::logic_error);
+    TS_ASSERT_THROWS(h2.setCounts(Counts(1)), std::logic_error);
+  }
+
+  void test_setCounts_self_assignment() {
+    Histogram h(Points(0));
+    h.setCounts(0);
+    auto &y = h.y();
+    auto old_address = &y;
+    h.setCounts(y);
+    TS_ASSERT_EQUALS(&h.y(), old_address);
+  }
+
+  void test_setCounts_legacy_self_assignment() {
+    Histogram h(Points(0));
+    h.setCounts(0);
+    auto &y = h.readY();
+    auto old_address = &y;
+    h.setPoints(y);
+    TS_ASSERT_EQUALS(&h.readY(), old_address);
   }
 
   void test_x() {

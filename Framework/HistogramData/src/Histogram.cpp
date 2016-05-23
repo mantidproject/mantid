@@ -76,15 +76,53 @@ PointStandardDeviations Histogram::pointStandardDeviations() const {
     return PointStandardDeviations(m_dx);
 }
 
+Counts Histogram::counts() const { return Counts(m_y); }
+
+CountVariances Histogram::countVariances() const {
+  return CountVariances(countStandardDeviations());
+}
+
+CountStandardDeviations Histogram::countStandardDeviations() const {
+  return CountStandardDeviations(m_e);
+}
+
+Frequencies Histogram::frequencies() const {
+  return Frequencies(counts(), binEdges());
+}
+
+FrequencyVariances Histogram::frequencyVariances() const {
+  return FrequencyVariances(countVariances(), binEdges());
+}
+
+FrequencyStandardDeviations Histogram::frequencyStandardDeviations() const {
+  return FrequencyStandardDeviations(countStandardDeviations(), binEdges());
+}
+
 /** Sets the internal x-data pointer of the Histogram.
 
   Throws if the size does not match the current size. */
-void Histogram::setSharedX(const Kernel::cow_ptr<HistogramX> &X) & {
+void Histogram::setSharedX(const Kernel::cow_ptr<HistogramX> &x) & {
   // TODO Check size only if we have y-data.
   // TODO but if size changes, also need to invalidate m_dx!
-  if (m_x->size() != X->size())
+  if (m_x->size() != x->size())
     throw std::logic_error("Histogram::setSharedX: size mismatch\n");
-  m_x = X;
+  m_x = x;
+}
+
+/** Sets the internal y-data pointer of the Histogram.
+
+  Throws if the size does not match the current size. */
+void Histogram::setSharedY(const Kernel::cow_ptr<HistogramY> &y) & {
+  checkSize(*y);
+  m_y = y;
+}
+
+/** Sets the internal e-data pointer of the Histogram.
+
+  Throws if the size does not match the current size. */
+void Histogram::setSharedE(const Kernel::cow_ptr<HistogramE> &e) & {
+  checkSize(*e);
+  m_e = e;
 }
 
 /** Sets the internal dx-data pointer of the Histogram.
@@ -98,16 +136,7 @@ void Histogram::setSharedDx(const Kernel::cow_ptr<HistogramDx> &Dx) & {
   m_dx = Dx;
 }
 
-void Histogram::checkSize(const Points &points) const {
-  size_t target = m_x->size();
-  // 0 edges -> 0 points, otherwise points are 1 less than edges.
-  if (xMode() == XMode::BinEdges && target > 0)
-    target--;
-  if (target != points.size())
-    throw std::logic_error("Histogram: size mismatch of Points\n");
-}
-
-void Histogram::checkSize(const BinEdges &binEdges) const {
+template <> void Histogram::checkSize(const BinEdges &binEdges) const {
   size_t target = m_x->size();
   // 0 points -> 0 edges, otherwise edges are 1 more than points.
   if (xMode() == XMode::Points && target > 0)

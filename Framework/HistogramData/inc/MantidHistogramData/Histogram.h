@@ -86,14 +86,35 @@ public:
   template <typename... T> void setPointVariances(T &&... data) & ;
   template <typename... T> void setPointStandardDeviations(T &&... data) & ;
 
+  Counts counts() const;
+  CountVariances countVariances() const;
+  CountStandardDeviations countStandardDeviations() const;
+  Frequencies frequencies() const;
+  FrequencyVariances frequencyVariances() const;
+  FrequencyStandardDeviations frequencyStandardDeviations() const;
+  template <typename... T> void setCounts(T &&... data) & ;
+  template <typename... T> void setCountVariances(T &&... data) & ;
+  template <typename... T> void setCountStandardDeviations(T &&... data) & ;
+  template <typename... T> void setFrequencies(T &&... data) & ;
+  template <typename... T> void setFrequencyVariances(T &&... data) & ;
+  template <typename... T> void setFrequencyStandardDeviations(T &&... data) & ;
+
   const HistogramX &x() const { return *m_x; }
+  const HistogramY &y() const { return *m_y; }
+  const HistogramE &e() const { return *m_e; }
   const HistogramDx &dx() const { return *m_dx; }
   HistogramX &mutableX() & { return m_x.access(); }
+  HistogramY &mutableY() & { return m_y.access(); }
+  HistogramE &mutableE() & { return m_e.access(); }
   HistogramDx &mutableDx() & { return m_dx.access(); }
 
   Kernel::cow_ptr<HistogramX> sharedX() const { return m_x; }
+  Kernel::cow_ptr<HistogramY> sharedY() const { return m_y; }
+  Kernel::cow_ptr<HistogramE> sharedE() const { return m_e; }
   Kernel::cow_ptr<HistogramDx> sharedDx() const { return m_dx; }
-  void setSharedX(const Kernel::cow_ptr<HistogramX> &X) & ;
+  void setSharedX(const Kernel::cow_ptr<HistogramX> &x) & ;
+  void setSharedY(const Kernel::cow_ptr<HistogramY> &y) & ;
+  void setSharedE(const Kernel::cow_ptr<HistogramE> &e) & ;
   void setSharedDx(const Kernel::cow_ptr<HistogramDx> &Dx) & ;
 
   // Temporary legacy interface to X
@@ -136,10 +157,11 @@ public:
   }
 
 private:
-  void checkSize(const Points &points) const;
-  void checkSize(const BinEdges &binEdges) const;
+  template <class T> void checkSize(const T &data) const;
   template <class... T> bool selfAssignmentX(const T &...) { return false; }
   template <class... T> bool selfAssignmentDx(const T &...) { return false; }
+  template <class... T> bool selfAssignmentY(const T &...) { return false; }
+  template <class... T> bool selfAssignmentE(const T &...) { return false; }
   void switchDxToBinEdges();
   void switchDxToPoints();
 
@@ -245,6 +267,33 @@ void Histogram::setPointStandardDeviations(T &&... data) & {
   m_dx = points.cowData();
 }
 
+template <typename... T> void Histogram::setCounts(T &&... data) & {
+  Counts counts(std::forward<T>(data)...);
+  checkSize(counts);
+  if (selfAssignmentY(data...))
+    return;
+  m_y = counts.cowData();
+}
+
+template <typename... T> void Histogram::setFrequencies(T &&... data) & {
+  Frequencies frequencies(std::forward<T>(data)...);
+  checkSize(frequencies);
+  if (selfAssignmentY(data...))
+    return;
+  m_y = Counts(frequencies).cowData();
+}
+
+template <> void Histogram::checkSize(const BinEdges &data) const;
+
+template <class T> void Histogram::checkSize(const T &data) const {
+  size_t target = m_x->size();
+  // 0 edges -> 0 points, otherwise points are 1 less than edges.
+  if (xMode() == XMode::BinEdges && target > 0)
+    target--;
+  if (target != data.size())
+    throw std::logic_error("Histogram: size mismatch of data.\n");
+}
+
 template <> inline bool Histogram::selfAssignmentX(const HistogramX &data) {
   return &data == m_x.get();
 }
@@ -261,6 +310,24 @@ template <> inline bool Histogram::selfAssignmentDx(const HistogramDx &data) {
 template <>
 inline bool Histogram::selfAssignmentDx(const std::vector<double> &data) {
   return &data == &(m_dx->rawData());
+}
+
+template <> inline bool Histogram::selfAssignmentY(const HistogramY &data) {
+  return &data == m_y.get();
+}
+
+template <>
+inline bool Histogram::selfAssignmentY(const std::vector<double> &data) {
+  return &data == &(m_y->rawData());
+}
+
+template <> inline bool Histogram::selfAssignmentE(const HistogramE &data) {
+  return &data == m_e.get();
+}
+
+template <>
+inline bool Histogram::selfAssignmentE(const std::vector<double> &data) {
+  return &data == &(m_e->rawData());
 }
 
 MANTID_HISTOGRAMDATA_DLL Histogram::XMode getHistogramXMode(size_t xLength,
