@@ -202,7 +202,9 @@ MantidMatrixCurve *MantidMatrixCurve::clone(const Graph *g) const {
 void MantidMatrixCurve::loadData() {
   // This should only be called for waterfall plots
   // Calculate the offsets...
-  computeWaterfallOffsets();
+  double xDataOffset = 0.0;
+  double yDataOffset = 0.0;
+  computeWaterfallOffsets(xDataOffset, yDataOffset);
 
   Plot *plot = static_cast<Plot *>(this->plot());
   Graph *g = static_cast<Graph *>(plot->parent());
@@ -211,8 +213,9 @@ void MantidMatrixCurve::loadData() {
       dynamic_cast<MantidQwtWorkspaceData &>(this->data());
 
   data.setWaterfallPlot(g->isWaterfallPlot());
-  data.setXOffset(d_x_offset);
-  data.setYOffset(d_y_offset);
+  data.setXOffset(xDataOffset);
+  data.setYOffset(yDataOffset);
+  invalidateBoundingRect();
 }
 
 void MantidMatrixCurve::setData(const QwtData &data) {
@@ -228,6 +231,7 @@ QwtDoubleRect MantidMatrixCurve::boundingRect() const {
 
 void MantidMatrixCurve::draw(QPainter *p, const QwtScaleMap &xMap,
                              const QwtScaleMap &yMap, const QRect &rect) const {
+  p->translate(d_x_offset, -d_y_offset);
   PlotCurve::draw(p, xMap, yMap, rect);
 
   if (m_drawErrorBars) // drawing error bars
@@ -238,10 +242,6 @@ void MantidMatrixCurve::draw(QPainter *p, const QwtScaleMap &xMap,
       throw std::runtime_error(
           "Only MantidQwtWorkspaceData can be set to a MantidMatrixCurve");
     }
-    p->translate(d_x_offset,
-                 -d_y_offset); // For waterfall plots (will be zero otherwise)
-    // Don't really know why you'd want errors on a waterfall plot, but just in
-    // case...
     doDraw(p, xMap, yMap, rect, d);
   }
 }

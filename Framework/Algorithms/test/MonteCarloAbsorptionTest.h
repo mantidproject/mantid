@@ -4,7 +4,7 @@
 #include "MantidAlgorithms/MonteCarloAbsorption.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FrameworkManager.h"
-#include "MantidAPI/SampleEnvironment.h"
+#include "MantidGeometry/Instrument/SampleEnvironment.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/UnitFactory.h"
@@ -182,24 +182,14 @@ private:
       const V3D baseCentre(0.0, -height / 2.0, 0.0);
       const V3D axis(0.0, 1.0, 0.0);
 
-      // Define a container shape. Use a simple cylinder
-      std::ostringstream xml;
-      xml << "<cylinder id=\"" << id << "\">"
-          << "<centre-of-bottom-base x=\"" << baseCentre.X() << "\" y=\""
-          << baseCentre.Y() << "\" z=\"" << baseCentre.Z() << "\"/>"
-          << "<axis x=\"" << axis.X() << "\" y=\"" << axis.Y() << "\" z=\""
-          << axis.Z() << "\"/>"
-          << "<radius val=\"" << radius << "\" />"
-          << "<height val=\"" << height << "\" />"
-          << "</cylinder>";
-
       ShapeFactory shapeMaker;
-      Object_sptr containerShape = shapeMaker.createShape(xml.str());
-      containerShape->setMaterial(Material(
+      auto can = shapeMaker.createShape<Can>(
+          ComponentCreationHelper::cappedCylinderXML(radius, height, baseCentre,
+                                                     axis, id));
+      can->setMaterial(Material(
           "CanMaterial", PhysicalConstants::getNeutronAtom(26, 0), 0.01));
-      SampleEnvironment *can = new SampleEnvironment("can");
-      can->add(*containerShape);
-      space->mutableSample().setEnvironment(can);
+      SampleEnvironment *env = new SampleEnvironment("can", can);
+      space->mutableSample().setEnvironment(env);
     } else if (wsProps.sampleEnviron == Environment::UserBeamSize) {
       auto source = inst->getSource();
       pmap.addDouble(source->getComponentID(), "beam-width", wsProps.beamWidth);

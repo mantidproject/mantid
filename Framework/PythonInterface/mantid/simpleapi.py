@@ -47,6 +47,19 @@ def specialization_exists(name):
     """
     return name in __SPECIALIZED_FUNCTIONS__
 
+def extract_progress_kwargs(kwargs):
+    """
+    Returns tuple(startProgress, endProgress, kwargs) with the special
+    keywords removed from kwargs. If the progress keywords are not
+    specified, None will be returned in their place.
+    """
+    start = kwargs.get('startProgress')
+    end   = kwargs.get('endProgress')
+    for item in ('startProgress', 'endProgress'):
+        if item in kwargs:
+            del kwargs[item]
+    return (start, end, kwargs)
+
 def Load(*args, **kwargs):
     """
     Load is a more flexible algorithm than other Mantid algorithms.
@@ -85,7 +98,9 @@ def Load(*args, **kwargs):
     filename, = _get_mandatory_args('Load', ["Filename"], *args, **kwargs)
 
     # Create and execute
-    algm = _create_algorithm_object('Load')
+    (_startProgress, _endProgress, kwargs) = extract_progress_kwargs(kwargs)
+    algm = _create_algorithm_object('Load', startProgress=_startProgress,
+                                    endProgress=_endProgress)
     _set_logging_option(algm, kwargs)
     try:
         algm.setProperty('Filename', filename) # Must be set first
@@ -177,7 +192,7 @@ def fitting_algorithm(f):
     When applied to a function definition this decorator replaces its code with code of
     function 'wrapper' defined below.
     """
-    
+
     function_name = f.__name__
 
     def wrapper(*args, **kwargs):
@@ -231,9 +246,9 @@ def fitting_algorithm(f):
     wrapper.__doc__ = f.__doc__
     if not function_name in __SPECIALIZED_FUNCTIONS__:
         __SPECIALIZED_FUNCTIONS__.append(function_name)
-    
+
     return wrapper
-    
+
 # Use a python decorator (defined above) to generate the code for this function.
 @fitting_algorithm
 def Fit(*args, **kwargs):
@@ -300,7 +315,10 @@ def FitDialog(*args, **kwargs):
     if 'Disable' not in arguments: arguments['Disable']=''
     if 'Message' not in arguments: arguments['Message']=''
 
-    algm = _create_algorithm_object('Fit')
+    (_startProgress, _endProgress, kwargs) = extract_progress_kwargs(kwargs)
+
+    algm = _create_algorithm_object('Fit', startProgress=_startProgress,
+                                    endProgress=_endProgress)
     set_properties_dialog(algm,**arguments)
     algm.execute()
     return algm
@@ -360,7 +378,9 @@ def CutMD(*args, **kwargs):
                 kwargs["P{0}Bin".format(bin+1)] = bins[bin]
 
     # Create and execute
-    algm = _create_algorithm_object('CutMD')
+    (_startProgress, _endProgress, kwargs) = extract_progress_kwargs(kwargs)
+    algm = _create_algorithm_object('CutMD', startProgress=_startProgress,
+                                    endProgress=_endProgress)
     _set_logging_option(algm, kwargs)
 
     # Now check that all the kwargs we've got are correct
@@ -429,7 +449,7 @@ def rename_wrapper(f):
     """
     Decorator generating code for RenameWorkspace algorithm.
     """
-    
+
     function_name = f.__name__
 
     def wrapper(*args, **kwargs):
@@ -818,15 +838,21 @@ def _create_algorithm_function(algorithm, version, _algm_object):
 
     def algorithm_wrapper(*args, **kwargs):
         """
-            Note that if the Version parameter is passed, we will create
-            the proper version of the algorithm without failing.
+        Note that if the Version parameter is passed, we will create
+        the proper version of the algorithm without failing.
+
+        If both startProgress and endProgress are supplied they will
+        be used.
         """
 
         _version = version
         if "Version" in kwargs:
             _version = kwargs["Version"]
             del kwargs["Version"]
-        algm = _create_algorithm_object(algorithm, _version)
+
+        (_startProgress, _endProgress, kwargs) = extract_progress_kwargs(kwargs)
+
+        algm = _create_algorithm_object(algorithm, _version, _startProgress, _endProgress)
         _set_logging_option(algm, kwargs)
 
         # Temporary removal of unneeded parameter from user's python scripts
@@ -911,7 +937,7 @@ def _create_algorithm_function(algorithm, version, _algm_object):
     return algorithm_wrapper
 #-------------------------------------------------------------------------------------------------------------
 
-def _create_algorithm_object(name, version=-1):
+def _create_algorithm_object(name, version=-1, startProgress=None, endProgress=None):
     """
     Create and initialize the named algorithm of the given version. This
     method checks whether the function call has come from within a PyExec
@@ -923,7 +949,12 @@ def _create_algorithm_object(name, version=-1):
     import inspect
     parent = _find_parent_pythonalgorithm(inspect.currentframe())
     if parent is not None:
-        alg = parent.createChildAlgorithm(name, version)
+        kwargs = {'version':version}
+        if (startProgress is not None) and (endProgress is not None):
+            kwargs['startProgress'] = float(startProgress)
+            kwargs['endProgress'] = float(endProgress)
+        alg = parent.createChildAlgorithm(name, **kwargs)
+
         alg.setLogging(parent.isLogging()) # default is to log if parent is logging
 
         # Historic: simpleapi functions always put stuff in the ADS

@@ -1,8 +1,8 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidKernel/Quat.h"
 
+#include "MantidGeometry/Instrument/Can.h"
 #include "MantidGeometry/Objects/Object.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidGeometry/Rendering/GluGeometryHandler.h"
@@ -1425,13 +1425,8 @@ ShapeFactory::createHexahedralShape(double xlb, double xlf, double xrf,
 void ShapeFactory::createGeometryHandler(Poco::XML::Element *pElem,
                                          boost::shared_ptr<Object> Obj) {
 
-  boost::shared_ptr<GeometryHandler> handler =
-      boost::make_shared<GluGeometryHandler>(Obj);
-
-  Obj->setGeometryHandler(handler);
-
-  GluGeometryHandler *geomHandler =
-      dynamic_cast<GluGeometryHandler *>(handler.get());
+  auto geomHandler = boost::make_shared<GluGeometryHandler>(Obj);
+  Obj->setGeometryHandler(geomHandler);
 
   if (pElem->tagName() == "cuboid") {
     auto corners = parseCuboid(pElem);
@@ -1490,8 +1485,12 @@ void ShapeFactory::createGeometryHandler(Poco::XML::Element *pElem,
 // Template instantations
 template MANTID_GEOMETRY_DLL boost::shared_ptr<Object>
 ShapeFactory::createShape(std::string shapeXML, bool addTypeTag);
+template MANTID_GEOMETRY_DLL boost::shared_ptr<Can>
+ShapeFactory::createShape(std::string shapeXML, bool addTypeTag);
 
 template MANTID_GEOMETRY_DLL boost::shared_ptr<Object>
+ShapeFactory::createShape(Poco::XML::Element *pElem);
+template MANTID_GEOMETRY_DLL boost::shared_ptr<Can>
 ShapeFactory::createShape(Poco::XML::Element *pElem);
 ///@endcond
 
