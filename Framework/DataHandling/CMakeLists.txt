@@ -162,6 +162,8 @@ set ( SRC_FILES
 	src/SaveSavuTomoConfig.cpp
 	src/SaveToSNSHistogramNexus.cpp
 	src/SaveVTK.cpp
+	src/SetBeam.cpp
+	src/SetSample.cpp
 	src/SetSampleMaterial.cpp
 	src/SetScalingPSD.cpp
 	src/SortTableWorkspace.cpp
@@ -330,6 +332,8 @@ set ( INC_FILES
 	inc/MantidDataHandling/SaveSavuTomoConfig.h
 	inc/MantidDataHandling/SaveToSNSHistogramNexus.h
 	inc/MantidDataHandling/SaveVTK.h
+	inc/MantidDataHandling/SetBeam.h
+	inc/MantidDataHandling/SetSample.h
 	inc/MantidDataHandling/SetSampleMaterial.h
 	inc/MantidDataHandling/SetScalingPSD.h
 	inc/MantidDataHandling/SortTableWorkspace.h
@@ -489,7 +493,9 @@ set ( TEST_FILES
 	SaveSPETest.h
 	SaveSavuTomoConfigTest.h
 	SaveToSNSHistogramNexusTest.h
+	SetBeamTest.h
 	SetSampleMaterialTest.h
+	SetSampleTest.h
 	SetScalingPSDTest.h
 	SortTableWorkspaceTest.h
 	StartAndEndTimeFromNexusFileExtractorTest.h

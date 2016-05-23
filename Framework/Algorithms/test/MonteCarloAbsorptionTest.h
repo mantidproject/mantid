@@ -4,7 +4,7 @@
 #include "MantidAlgorithms/MonteCarloAbsorption.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FrameworkManager.h"
-#include "MantidAPI/SampleEnvironment.h"
+#include "MantidGeometry/Instrument/SampleEnvironment.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/UnitFactory.h"
@@ -22,7 +22,7 @@ public:
   void test_Workspace_With_Just_Sample_For_Elastic() {
     using Mantid::Kernel::DeltaEMode;
     TestWorkspaceDescriptor wsProps = {5, 10, Environment::SampleOnly,
-                                       DeltaEMode::Elastic};
+                                       DeltaEMode::Elastic, -1, -1};
     auto outputWS = runAlgorithm(wsProps);
 
     verifyDimensions(wsProps, outputWS);
@@ -43,7 +43,7 @@ public:
   void test_Workspace_With_Just_Sample_For_Direct() {
     using Mantid::Kernel::DeltaEMode;
     TestWorkspaceDescriptor wsProps = {1, 10, Environment::SampleOnly,
-                                       DeltaEMode::Direct};
+                                       DeltaEMode::Direct, -1, -1};
     auto outputWS = runAlgorithm(wsProps);
 
     verifyDimensions(wsProps, outputWS);
@@ -57,7 +57,7 @@ public:
   void test_Workspace_With_Just_Sample_For_Indirect() {
     using Mantid::Kernel::DeltaEMode;
     TestWorkspaceDescriptor wsProps = {1, 10, Environment::SampleOnly,
-                                       DeltaEMode::Indirect};
+                                       DeltaEMode::Indirect, -1, -1};
     auto outputWS = runAlgorithm(wsProps);
 
     verifyDimensions(wsProps, outputWS);
@@ -71,7 +71,7 @@ public:
   void test_Workspace_With_Sample_And_Container() {
     using Mantid::Kernel::DeltaEMode;
     TestWorkspaceDescriptor wsProps = {1, 10, Environment::SamplePlusCan,
-                                       DeltaEMode::Elastic};
+                                       DeltaEMode::Elastic, -1, -1};
     auto outputWS = runAlgorithm(wsProps);
 
     verifyDimensions(wsProps, outputWS);
@@ -80,6 +80,20 @@ public:
     TS_ASSERT_DELTA(0.22929866, outputWS->readY(0).front(), delta);
     TS_ASSERT_DELTA(0.21436937, outputWS->readY(0)[middle_index], delta);
     TS_ASSERT_DELTA(0.23038325, outputWS->readY(0).back(), delta);
+  }
+
+  void test_Workspace_Beam_Size_Set() {
+    using Mantid::Kernel::DeltaEMode;
+    TestWorkspaceDescriptor wsProps = {1, 10, Environment::UserBeamSize,
+                                       DeltaEMode::Elastic, 0.18, 0.15};
+    auto outputWS = runAlgorithm(wsProps);
+
+    verifyDimensions(wsProps, outputWS);
+    const double delta(1e-08);
+    const size_t middle_index(4);
+    TS_ASSERT_DELTA(0.0343979777, outputWS->readY(0).front(), delta);
+    TS_ASSERT_DELTA(0.0437048479, outputWS->readY(0)[middle_index], delta);
+    TS_ASSERT_DELTA(0.0433649673, outputWS->readY(0).back(), delta);
   }
 
   //---------------------------------------------------------------------------
@@ -110,13 +124,15 @@ public:
   }
 
 private:
-  enum class Environment { SampleOnly, SamplePlusCan };
+  enum class Environment { SampleOnly, SamplePlusCan, UserBeamSize };
 
   struct TestWorkspaceDescriptor {
     int nspectra;
     int nbins;
     Environment sampleEnviron;
     unsigned int emode;
+    double beamWidth;
+    double beamHeight;
   };
 
   Mantid::API::MatrixWorkspace_const_sptr
@@ -166,24 +182,19 @@ private:
       const V3D baseCentre(0.0, -height / 2.0, 0.0);
       const V3D axis(0.0, 1.0, 0.0);
 
-      // Define a container shape. Use a simple cylinder
-      std::ostringstream xml;
-      xml << "<cylinder id=\"" << id << "\">"
-          << "<centre-of-bottom-base x=\"" << baseCentre.X() << "\" y=\""
-          << baseCentre.Y() << "\" z=\"" << baseCentre.Z() << "\"/>"
-          << "<axis x=\"" << axis.X() << "\" y=\"" << axis.Y() << "\" z=\""
-          << axis.Z() << "\"/>"
-          << "<radius val=\"" << radius << "\" />"
-          << "<height val=\"" << height << "\" />"
-          << "</cylinder>";
-
       ShapeFactory shapeMaker;
-      Object_sptr containerShape = shapeMaker.createShape(xml.str());
-      containerShape->setMaterial(Material(
+      auto can = shapeMaker.createShape<Can>(
+          ComponentCreationHelper::cappedCylinderXML(radius, height, baseCentre,
+                                                     axis, id));
+      can->setMaterial(Material(
           "CanMaterial", PhysicalConstants::getNeutronAtom(26, 0), 0.01));
-      SampleEnvironment *can = new SampleEnvironment("can");
-      can->add(*containerShape);
-      space->mutableSample().setEnvironment(can);
+      SampleEnvironment *env = new SampleEnvironment("can", can);
+      space->mutableSample().setEnvironment(env);
+    } else if (wsProps.sampleEnviron == Environment::UserBeamSize) {
+      auto source = inst->getSource();
+      pmap.addDouble(source->getComponentID(), "beam-width", wsProps.beamWidth);
+      pmap.addDouble(source->getComponentID(), "beam-height",
+                     wsProps.beamHeight);
     }
     return space;
   }

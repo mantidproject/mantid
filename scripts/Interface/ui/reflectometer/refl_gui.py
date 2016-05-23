@@ -59,7 +59,7 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
         self.__graphs = dict()
 
         self._last_trans = ""
-        self.__icat_file_map = None
+        self.icat_file_map = None
 
         self.__instrumentRuns = None
 
@@ -417,7 +417,8 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
                 active_session_id = session_object.getPropertyValue("Session")
 
             # Fetch out an existing session id
-            active_session_id = CatalogManager.getActiveSessions()[-1].getSessionId() # TODO. This might be another catalog session, but at present there is no way to tell.
+            active_session_id = CatalogManager.getActiveSessions()[-1].getSessionId()
+            # This might be another catalog session, but at present there is no way to tell.
 
             search_alg = AlgorithmManager.create('CatalogGetDataFiles')
             search_alg.initialize()
@@ -428,7 +429,7 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
             search_alg.execute()
             search_results = search_alg.getProperty('OutputWorkspace').value
 
-            self.__icat_file_map = {}
+            self.icat_file_map = {}
             self.statusMain.clearMessage()
             for row in search_results:
                 file_name = row['Name']
@@ -438,7 +439,7 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
 
                 if bool(re.search('(raw)$', file_name, re.IGNORECASE)): # Filter to only display and map raw files.
                     title = (run_number + ': ' + description).strip()
-                    self.__icat_file_map[title] = (file_id, run_number, file_name)
+                    self.icat_file_map[title] = (file_id, run_number, file_name)
                     self.listMain.addItem(title)
             self.listMain.sortItems()
             del search_results
@@ -600,7 +601,7 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
             if len(split_title) != 3:
                 split_title = re.split(":", idx.text())
                 if len(split_title) != 2:
-                    logger.warning('cannot transfer ' +  idx.text() + ' title is not in the right form ')
+                    logger.warning('cannot transfer ' + idx.text() + ' title is not in the right form ')
                 else:
                     theta = 0
                     split_title.append(theta) # Append a dummy theta value.
@@ -649,8 +650,9 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
 
 
             contents = str(idx.text()).strip()
-            file_id, _runnumber, file_name = self.__icat_file_map[contents]
-            active_session_id = CatalogManager.getActiveSessions()[-1].getSessionId() # TODO. This might be another catalog session, but at present there is no way to tell.
+            file_id, _runnumber, file_name = self.icat_file_map[contents]
+            active_session_id = CatalogManager.getActiveSessions()[-1].getSessionId()
+            # This might be another catalog session, but at present there is no way to tell.
 
             save_location = config['defaultsave.directory']
 
@@ -968,10 +970,10 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
                 logger.notice('Reusing transmission workspace ' + transrun_named)
                 transmission_ws = mtd[transrun_named]
 
-        angle = str(self.tableMain.item(row, which * 5 + 1).text())
+        angle_str = str(self.tableMain.item(row, which * 5 + 1).text())
 
-        if len(angle) > 0:
-            angle = float(angle)
+        if len(angle_str) > 0:
+            angle = float(angle_str)
         else:
             angle = None
 

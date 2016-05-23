@@ -6,10 +6,10 @@
 namespace Mantid {
 namespace API {
 class Sample;
-class SampleEnvironment;
 }
 namespace Geometry {
 class Object;
+class SampleEnvironment;
 }
 namespace Kernel {
 class PseudoRandomNumberGenerator;
@@ -58,7 +58,7 @@ public:
 
 private:
   const Geometry::Object &m_sample;
-  const API::SampleEnvironment *m_env;
+  const Geometry::SampleEnvironment *m_env;
 };
 
 } // namespace Algorithms

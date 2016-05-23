@@ -1,8 +1,8 @@
 #include "MantidAlgorithms/CopySample.h"
 #include "MantidKernel/System.h"
 #include "MantidAPI/IMDEventWorkspace.h"
-#include "MantidAPI/SampleEnvironment.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidGeometry/Instrument/SampleEnvironment.h"
 #include "MantidKernel/EnabledWhenProperty.h"
 namespace Mantid {
 namespace Algorithms {
@@ -10,8 +10,9 @@ namespace Algorithms {
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CopySample)
 
-using namespace Mantid::Kernel;
 using namespace Mantid::API;
+using namespace Mantid::Kernel;
+using Geometry::SampleEnvironment;
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
