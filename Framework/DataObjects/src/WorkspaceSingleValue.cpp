@@ -14,8 +14,8 @@ WorkspaceSingleValue::WorkspaceSingleValue(double value, double error)
     : API::MatrixWorkspace() {
   // Set the "histogram" to the single value
   data.dataX().resize(1, 0.0);
-  data.dataY().resize(1, value);
-  data.dataE().resize(1, error);
+  data.setData(Kernel::make_cow<HistogramData::HistogramY>(1, value),
+               Kernel::make_cow<HistogramData::HistogramE>(1, error));
   data.setPointStandardDeviations(1, 0.0);
 
   setDistribution(true);
