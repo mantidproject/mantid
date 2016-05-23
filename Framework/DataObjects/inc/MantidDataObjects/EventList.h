@@ -191,6 +191,10 @@ public:
   const MantidVec &readX() const override;
   Kernel::cow_ptr<HistogramData::HistogramX> ptrX() const override;
 
+  MantidVec &dataDx() override;
+  const MantidVec &dataDx() const override;
+  const MantidVec &readDx() const override;
+
   // TODO: This overload will probably be needed in a future to work with Event
   // data properly
   // std::pair<double,double> getXDataRange()const;

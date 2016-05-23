@@ -55,6 +55,10 @@ public:
     return m_histogram.ptrX();
   }
 
+  MantidVec &dataDx() override { return m_histogram.dataDx(); }
+  const MantidVec &dataDx() const override { return m_histogram.dataDx(); }
+  const MantidVec &readDx() const override { return m_histogram.readDx(); }
+
   void setData(const MantidVec &Y) override { m_histogram.dataY() = Y; }
   void setData(const MantidVec &Y, const MantidVec &E) override {
     m_histogram.dataY() = Y;

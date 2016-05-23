@@ -32,5 +32,9 @@ Kernel::cow_ptr<HistogramData::HistogramX> Histogram1D::ptrX() const {
   return m_histogram.ptrX();
 }
 
+MantidVec &Histogram1D::dataDx() { return m_histogram.dataDx(); }
+const MantidVec &Histogram1D::dataDx() const { return m_histogram.dataDx(); }
+const MantidVec &Histogram1D::readDx() const { return m_histogram.readDx(); }
+
 } // namespace DataObjects
 } // namespace Mantid

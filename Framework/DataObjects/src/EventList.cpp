@@ -1482,6 +1482,10 @@ Kernel::cow_ptr<HistogramData::HistogramX> EventList::ptrX() const {
   return m_histogram.ptrX();
 }
 
+MantidVec &EventList::dataDx() { return m_histogram.dataDx(); }
+const MantidVec &EventList::dataDx() const { return m_histogram.dataDx(); }
+const MantidVec &EventList::readDx() const { return m_histogram.readDx(); }
+
 // ==============================================================================================
 // --- Return Data Vectors --------------------------------------------------
 // ==============================================================================================

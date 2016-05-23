@@ -46,6 +46,10 @@ public:
   const MantidVec &readX() const override;
   Kernel::cow_ptr<HistogramData::HistogramX> ptrX() const override;
 
+  MantidVec &dataDx() override;
+  const MantidVec &dataDx() const override;
+  const MantidVec &readDx() const override;
+
   /// Sets the data.
   void setData(const MantidVec &Y) override { m_histogram.dataY() = Y; };
   /// Sets the data and errors
