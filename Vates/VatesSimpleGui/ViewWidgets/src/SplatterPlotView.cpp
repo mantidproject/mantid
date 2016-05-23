@@ -302,14 +302,14 @@ void SplatterPlotView::checkPeaksCoordinates()
   {
 
     int peakViewCoords = vtkSMPropertyHelper(this->origSrc->getProxy(),
-                                             MantidQt::API::MdConstants::MantidParaViewSpecialCoordinates).GetAsInt();
+                                             MantidQt::API::MdConstants::MantidParaViewSpecialCoordinates.toAscii().constData()).GetAsInt();
     // Make commensurate with vtkPeakMarkerFactory
     peakViewCoords--;
 
     foreach(pqPipelineSource *src, this->m_peaksSource)
     {
       vtkSMPropertyHelper(src->getProxy(),
-                          MantidQt::API::MdConstants::PeakDimensions).Set(peakViewCoords);
+                          MantidQt::API::MdConstants::PeakDimensions.toAscii().constData()).Set(peakViewCoords);
       src->getProxy()->UpdateVTKObjects();
     }
   }
@@ -403,7 +403,7 @@ void SplatterPlotView::readAndSendCoordinates()
   {
     // Get coordinate type
     int peakViewCoords = vtkSMPropertyHelper(this->origSrc->getProxy(),
-                                             MantidQt::API::MdConstants::MantidParaViewSpecialCoordinates).GetAsInt();
+                                             MantidQt::API::MdConstants::MantidParaViewSpecialCoordinates.toAscii().constData()).GetAsInt();
     // Make commensurate with vtkPeakMarkerFactory
     peakViewCoords--;
 
@@ -609,9 +609,11 @@ void SplatterPlotView::setPeakButton(bool state)
  */
 void SplatterPlotView::setPeakSourceFrame(pqPipelineSource* source)
 {
-  int peakViewCoords = vtkSMPropertyHelper(this->origSrc->getProxy(), MantidQt::API::MdConstants::MantidParaViewSpecialCoordinates).GetAsInt();
+  int peakViewCoords = vtkSMPropertyHelper(this->origSrc->getProxy(),
+                                           MantidQt::API::MdConstants::MantidParaViewSpecialCoordinates.toAscii().constData()).GetAsInt();
   peakViewCoords--;
-  vtkSMPropertyHelper(source->getProxy(), MantidQt::API::MdConstants::PeakDimensions).Set(peakViewCoords);
+  vtkSMPropertyHelper(source->getProxy(),
+                      MantidQt::API::MdConstants::PeakDimensions.toAscii().constData()).Set(peakViewCoords);
 }
 
 /**
@@ -619,9 +621,11 @@ void SplatterPlotView::setPeakSourceFrame(pqPipelineSource* source)
  */
 bool SplatterPlotView::checkIfPeaksWorkspaceIsAlreadyBeingTracked(pqPipelineSource* source) {
   bool isContained = false;
-  std::string sourceName(vtkSMPropertyHelper(source->getProxy(), MantidQt::API::MdConstants::WorkspaceName).GetAsString());
+  std::string sourceName(vtkSMPropertyHelper(source->getProxy(),
+                                             MantidQt::API::MdConstants::WorkspaceName.toAscii().constData()).GetAsString());
   for (QList<QPointer<pqPipelineSource>>::Iterator it = m_peaksSource.begin(); it != m_peaksSource.end(); ++it) {
-    std::string trackedName(vtkSMPropertyHelper((*it)->getProxy(), MantidQt::API::MdConstants::WorkspaceName).GetAsString());
+    std::string trackedName(vtkSMPropertyHelper((*it)->getProxy(),
+                                                MantidQt::API::MdConstants::WorkspaceName.toAscii().constData()).GetAsString());
     if ((*it == source) || (sourceName == trackedName)) {
       isContained = true;
       break;
@@ -652,10 +656,10 @@ void SplatterPlotView::updatePeaksFilter(pqPipelineSource* filter) {
     }
 
     vtkSMPropertyHelper(filter->getProxy(),
-                        MantidQt::API::MdConstants::PeaksWorkspace)
+                        MantidQt::API::MdConstants::PeaksWorkspace.toAscii().constData())
         .Set(0, workspaceNamesConcatentated.c_str());
     vtkSMPropertyHelper(filter->getProxy(),
-                        MantidQt::API::MdConstants::PeaksWorkspace)
+                        MantidQt::API::MdConstants::PeaksWorkspace.toAscii().constData())
         .Set(1, m_peaksWorkspaceNameDelimiter.c_str());
     emit this->triggerAccept();
     filter->updatePipeline();

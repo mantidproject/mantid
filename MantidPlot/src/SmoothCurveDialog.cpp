@@ -47,7 +47,7 @@ SmoothCurveDialog::SmoothCurveDialog(int method, QWidget* parent, Qt::WFlags fl 
 {
   smooth_method = method;
 
-  setName( "SmoothCurveDialog" );
+  setObjectName( "SmoothCurveDialog" );
   setWindowTitle(tr("MantidPlot - Smoothing Options"));
 
   QGroupBox *gb1 = new QGroupBox();
@@ -97,7 +97,7 @@ SmoothCurveDialog::SmoothCurveDialog(int method, QWidget* parent, Qt::WFlags fl 
       gl1->addWidget(boxColor, 2, 1);
       gl1->setRowStretch(3, 1);
   }
-  gl1->setColStretch(2, 1);
+  gl1->setColumnStretch(2, 1);
 
   btnSmooth = new QPushButton(tr( "&Smooth" ));
   btnSmooth->setDefault(true);
@@ -149,6 +149,6 @@ void SmoothCurveDialog::activateCurve(const QString& curveName)
 	if (!c || c->rtti() != QwtPlotItem::Rtti_PlotCurve)
 		return;
 
-	boxPointsLeft->setMaxValue(c->dataSize()/2);
+	boxPointsLeft->setMaximum(c->dataSize()/2);
 	}
 }

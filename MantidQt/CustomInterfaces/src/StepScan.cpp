@@ -169,7 +169,7 @@ void StepScan::startLiveListenerComplete(bool error)
 
 void StepScan::loadFile(bool async)
 {
-  const QString filename = m_uiForm.mWRunFiles->getUserInput().asString();
+  const QString filename = m_uiForm.mWRunFiles->getUserInput().toString();
   // This handles the fact that mwRunFiles emits the filesFound signal more than
   // we want (on some platforms). TODO: Consider dealing with this up in mwRunFiles.
   if ( filename != m_inputFilename && m_uiForm.mWRunFiles->isValid() )
