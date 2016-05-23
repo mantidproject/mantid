@@ -43,8 +43,8 @@ public:
                             "  <material id=\"van\" formula=\"V\"/>"
                             " </materials>"
                             " <components>"
-                            "  <cans>"
-                            "   <can id=\"10mm\" material=\"van\">"
+                            "  <containers>"
+                            "   <container id=\"10mm\" material=\"van\">"
                             "    <geometry>"
                             "     <sphere id=\"sp-1\">"
                             "      <radius val=\"0.1\"/>"
@@ -57,8 +57,8 @@ public:
                             "      <centre x=\"0.0\"  y=\"0.0\" z=\"0.0\"/>"
                             "     </sphere>"
                             "    </samplegeometry>"
-                            "   </can>"
-                            "  </cans>"
+                            "   </container>"
+                            "  </containers>"
                             " </components>"
                             "</environmentspec>";
     Poco::File envFile(Poco::Path(testDirec, m_envName + ".xml"));
@@ -154,7 +154,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(env = &(sample.getEnvironment()));
     TS_ASSERT_EQUALS(m_envName, env->name());
     TS_ASSERT_EQUALS(1, env->nelements());
-    TS_ASSERT_EQUALS("10mm", env->canID());
+    TS_ASSERT_EQUALS("10mm", env->containerID());
     const auto &sampleShape = sample.getShape();
     TS_ASSERT(sampleShape.hasValidShape());
   }
@@ -187,7 +187,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(env = &(sample.getEnvironment()));
     TS_ASSERT_EQUALS(m_envName, env->name());
     TS_ASSERT_EQUALS(1, env->nelements());
-    TS_ASSERT_EQUALS("10mm", env->canID());
+    TS_ASSERT_EQUALS("10mm", env->containerID());
     const auto &sampleShape = sample.getShape();
     TS_ASSERT(sampleShape.hasValidShape());
     // New shape
@@ -267,12 +267,12 @@ public:
 
     auto args = boost::make_shared<PropertyManager>();
     args->declareProperty(
-        Mantid::Kernel::make_unique<StringProperty>("Can", "8mm"), "");
+        Mantid::Kernel::make_unique<StringProperty>("Container", "8mm"), "");
     alg->setProperty("Environment", args);
     TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
   }
 
-  void test_Environment_Args_Without_Can_Invalid() {
+  void test_Environment_Args_Without_Container_Invalid() {
     using Mantid::Kernel::PropertyManager;
     using StringProperty = Mantid::Kernel::PropertyWithValue<std::string>;
     auto inputWS = WorkspaceCreationHelper::Create2DWorkspaceBinned(1, 1);
@@ -302,7 +302,7 @@ public:
     TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
     args->removeProperty("Name");
     args->declareProperty(
-        Mantid::Kernel::make_unique<StringProperty>("Can", ""), "");
+        Mantid::Kernel::make_unique<StringProperty>("Container", ""), "");
     alg->setProperty("Environment", args);
     TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
   }
@@ -353,7 +353,7 @@ private:
     props->declareProperty(
         Mantid::Kernel::make_unique<StringProperty>("Name", m_envName), "");
     props->declareProperty(
-        Mantid::Kernel::make_unique<StringProperty>("Can", "10mm"), "");
+        Mantid::Kernel::make_unique<StringProperty>("Container", "10mm"), "");
     return props;
   }
 

@@ -21,14 +21,14 @@ public:
   static void destroySuite(SampleEnvironmentTest *suite) { delete suite; }
 
   void test_Constructor_Sets_Name_And_Single_Element() {
-    using Mantid::Geometry::Can;
-    auto can = boost::make_shared<Can>("");
+    using Mantid::Geometry::Container;
+    auto can = boost::make_shared<Container>("");
     can->setID("8mm");
 
     SampleEnvironment kit("TestKit", can);
     TS_ASSERT_EQUALS(kit.name(), "TestKit");
-    TS_ASSERT_EQUALS(kit.canID(), "8mm");
-    TS_ASSERT_EQUALS(kit.can(), can);
+    TS_ASSERT_EQUALS(kit.containerID(), "8mm");
+    TS_ASSERT_EQUALS(kit.container(), can);
     TS_ASSERT_EQUALS(1, kit.nelements());
   }
 

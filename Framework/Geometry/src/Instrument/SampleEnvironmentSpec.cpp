@@ -17,7 +17,8 @@ SampleEnvironmentSpec::SampleEnvironmentSpec(std::string name)
  * @return A pointer to the retrieved Can instance
  * @throws std::invalid_argument
  */
-Can_const_sptr SampleEnvironmentSpec::findCan(const std::string &id) const {
+Container_const_sptr
+SampleEnvironmentSpec::findCan(const std::string &id) const {
   auto indexIter = m_cans.find(id);
   if (indexIter != m_cans.end())
     return indexIter->second;
@@ -46,7 +47,7 @@ SampleEnvironmentSpec::buildEnvironment(const std::string &canID) const {
  * @param can A pointer to a Can object
  * @throws std::invalid::argument if the id is empty
  */
-void SampleEnvironmentSpec::addCan(const Can_const_sptr &can) {
+void SampleEnvironmentSpec::addCan(const Container_const_sptr &can) {
   if (can->id().empty()) {
     throw std::invalid_argument("SampleEnvironmentSpec::addCan() - Can must "
                                 "have an id field. Empty string found.");

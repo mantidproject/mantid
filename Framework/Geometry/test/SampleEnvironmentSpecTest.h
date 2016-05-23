@@ -29,9 +29,9 @@ public:
   }
 
   void test_Add_Can_Stores_Can_Linked_To_ID() {
-    using Mantid::Geometry::Can;
+    using Mantid::Geometry::Container;
     SampleEnvironmentSpec spec("CRYO-001");
-    auto testCan = boost::make_shared<Can>("");
+    auto testCan = boost::make_shared<Container>("");
     testCan->setID("8mm");
 
     TS_ASSERT_EQUALS(0, spec.ncans());
@@ -51,7 +51,7 @@ public:
   }
 
   void test_buildEnvironment_Creates_Expected_Environment() {
-    using Mantid::Geometry::Can;
+    using Mantid::Geometry::Container;
     using Mantid::Geometry::ShapeFactory;
     using Mantid::Kernel::V3D;
 
@@ -79,22 +79,22 @@ public:
   // Failure tests
   //----------------------------------------------------------------------------
   void test_Add_Can_With_Empty_ID_Throws_Invalid_Argument() {
-    using Mantid::Geometry::Can;
+    using Mantid::Geometry::Container;
     SampleEnvironmentSpec spec("CRYO-001");
-    auto testCan = boost::make_shared<const Can>("");
+    auto testCan = boost::make_shared<const Container>("");
 
     TS_ASSERT_THROWS(spec.addCan(testCan), std::invalid_argument);
   }
 
   void test_Find_Throws_If_ID_Not_Found() {
-    using Mantid::Geometry::Can;
+    using Mantid::Geometry::Container;
     SampleEnvironmentSpec spec("CRYO-001");
 
     TS_ASSERT_THROWS(spec.findCan("8mm"), std::invalid_argument);
   }
 
   void test_BuildEnvironment_Throws_If_ID_Not_Found() {
-    using Mantid::Geometry::Can;
+    using Mantid::Geometry::Container;
     SampleEnvironmentSpec spec("CRYO-001");
 
     TS_ASSERT_THROWS(spec.buildEnvironment("8mm"), std::invalid_argument);

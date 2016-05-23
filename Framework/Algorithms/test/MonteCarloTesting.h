@@ -65,7 +65,7 @@ createAnnulus(double innerRadius, double outerRadius, double height,
 
 inline Mantid::API::Sample createSamplePlusCan() {
   using Mantid::API::Sample;
-  using Mantid::Geometry::Can;
+  using Mantid::Geometry::Container;
   using Mantid::Geometry::SampleEnvironment;
   using Mantid::Geometry::ShapeFactory;
   using Mantid::Kernel::Material;

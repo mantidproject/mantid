@@ -3,7 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 #include "MantidGeometry/Instrument/SampleEnvironmentFactory.h"
-#include "MantidGeometry/Instrument/Can.h"
+#include "MantidGeometry/Instrument/Container.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 
 #include "MantidTestHelpers/ComponentCreationHelper.h"
