@@ -117,10 +117,7 @@ SCDCalibratePanels::calcWorkspace(DataObjects::PeaksWorkspace_sptr &pwks,
   //   Y = 0. as the function evals to (Q-vec) - (UB * hkl * 2pi)
   //   E = the weighting as used in the cost function
   Mantid::MantidVec xRef;
-  Mantid::MantidVecPtr yvals;
-  Mantid::MantidVec &yvalB = yvals.access();
-  Mantid::MantidVecPtr errs;
-  Mantid::MantidVec &errB = errs.access();
+  Mantid::MantidVec errB;
   bounds.clear();
   bounds.push_back(0);
 
@@ -162,7 +159,8 @@ SCDCalibratePanels::calcWorkspace(DataObjects::PeaksWorkspace_sptr &pwks,
     bounds.push_back(N);
   } // for @ bank name
 
-  yvalB.assign(xRef.size(), 0.0);
+  auto yvals = make_cow<HistogramData::HistogramY>(xRef.size(), 0.0);
+  auto errs = make_cow<HistogramData::HistogramE>(std::move(errB));
 
   if (N < 4) // If not well indexed
     return boost::make_shared<DataObjects::Workspace2D>();

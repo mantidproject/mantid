@@ -1566,10 +1566,10 @@ void IntegratePeakTimeSlices::SetUpData1(
   for (int i = 0; i < NAttributes + 2; i++)
     StatBase.push_back(0);
 
-  MantidVec yvals;
-  MantidVec errs;
-  MantidVec xvals;
-  MantidVec Yvals;
+  Mantid::MantidVec yvalB;
+  Mantid::MantidVec errB;
+  Mantid::MantidVec xvalB;
+  Mantid::MantidVec YvalB;
 
   double TotBoundaryIntensities = 0;
   int nBoundaryCells = 0;
@@ -1631,12 +1631,12 @@ void IntegratePeakTimeSlices::SetUpData1(
         }
 
         N++;
-        yval.push_back(intensity);
+        yvalB.push_back(intensity);
         double sigma = 1;
 
-        err.push_back(sigma);
-        xval.push_back(col);
-        Yval.push_back(row);
+        errB.push_back(sigma);
+        xvalB.push_back(col);
+        YvalB.push_back(row);
 
         xRef.push_back(static_cast<double>(jj));
         jj++;
@@ -1680,10 +1680,15 @@ void IntegratePeakTimeSlices::SetUpData1(
   Data->setX(1, pX);
   Data->setX(2, pX);
 
+  auto yvals = Kernel::make_cow<HistogramData::HistogramY>(std::move(yvalB));
+  auto errs = Kernel::make_cow<HistogramData::HistogramE>(std::move(errB));
+  auto xvals = Kernel::make_cow<HistogramData::HistogramY>(std::move(xvalB));
+  auto Yvals = Kernel::make_cow<HistogramData::HistogramY>(std::move(YvalB));
   ws->setData(0, yvals, errs);
   ws->setData(1, xvals);
   ws->setData(2, Yvals);
-  m_AttributeValues->setHeightHalfWidthInfo(xvals, Yvals, yvals);
+  m_AttributeValues->setHeightHalfWidthInfo(xvals->rawData(), Yvals->rawData(),
+                                            yvals->rawData());
 
   StatBase[IStartRow] = minRow;
   StatBase[IStartCol] = minCol;

@@ -165,10 +165,6 @@ void OptimizeCrystalPlacement::exec() {
   std::vector<int> RunNumList;
   std::vector<V3D> ChiPhiOmega;
   Mantid::MantidVec xRef;
-  Mantid::MantidVecPtr yvals;
-  Mantid::MantidVecPtr errs;
-  Mantid::MantidVec &yvalB = yvals.access();
-  Mantid::MantidVec &errB = errs.access();
 
   int nPeaksUsed = 0;
   double HKLintOffsetMax = getProperty("MaxIndexingError");
@@ -205,14 +201,8 @@ void OptimizeCrystalPlacement::exec() {
     {
       nPeaksUsed++;
       xRef.push_back(static_cast<double>(i));
-      yvalB.push_back(0.0);
-      errB.push_back(1.0);
       xRef.push_back(static_cast<double>(i));
-      yvalB.push_back(0.0);
-      errB.push_back(1.0);
       xRef.push_back(static_cast<double>(i));
-      yvalB.push_back(0.0);
-      errB.push_back(1.0);
     }
   }
 
@@ -227,6 +217,8 @@ void OptimizeCrystalPlacement::exec() {
   }
 
   int N = 3 * nPeaksUsed; // Peaks->getNumberPeaks();
+  auto yvals = make_cow<HistogramData::HistogramY>(N, 0.0);
+  auto errs = make_cow<HistogramData::HistogramE>(N, 1.0);
   mwkspc = WorkspaceFactory::Instance().create("Workspace2D",
                                                static_cast<size_t>(1), N, N);
   mwkspc->setPoints(0, xRef);

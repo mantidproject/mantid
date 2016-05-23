@@ -290,21 +290,19 @@ MatrixWorkspace_sptr CreateSampleWorkspace::createHistogramWorkspace(
     int start_at_pixelID, Geometry::Instrument_sptr inst,
     const std::string &functionString, bool isRandom) {
   HistogramData::BinEdges x(numBins + 1);
-  MantidVecPtr y, e;
-  e.access().resize(numBins);
   for (int i = 0; i < numBins + 1; ++i) {
     x.mutableData()[i] = x0 + i * binDelta;
   }
 
   std::vector<double> xValues(cbegin(x), cend(x) - 1);
-  y.access() = evalFunction(functionString, xValues, isRandom ? 1 : 0);
-  e.access().resize(numBins);
+  auto y = make_cow<HistogramData::HistogramY>(
+      evalFunction(functionString, xValues, isRandom ? 1 : 0));
+  auto e = make_cow<HistogramData::HistogramE>(y->cbegin(), y->cend());
 
   // calculate e as sqrt(y)
   typedef double (*uf)(double);
   uf dblSqrt = std::sqrt;
-  std::transform(y.access().begin(), y.access().end(), e.access().begin(),
-                 dblSqrt);
+  std::transform(e->cbegin(), e->cend(), e.access().begin(), dblSqrt);
 
   MatrixWorkspace_sptr retVal = boost::make_shared<DataObjects::Workspace2D>();
   retVal->initialize(numPixels, numBins + 1, numBins);

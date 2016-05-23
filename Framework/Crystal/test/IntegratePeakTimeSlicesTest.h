@@ -141,8 +141,8 @@ public:
             0.0, MaxPeakIntensity * (1 - abs(row - PeakRow) / MaxPeakRCSpan));
         double MaxRC =
             max<double>(0.0, MaxR * (1 - abs(col - PeakCol) / MaxPeakRCSpan));
-        MantidVecPtr dataY;
-        MantidVecPtr dataE;
+        MantidVec dataY;
+        MantidVec dataE;
 
         for (int chan = 0; chan < NTimes; chan++) {
           double val = max<double>(
@@ -151,15 +151,16 @@ public:
           T[chan] += val;
           val += 1.4;
 
-          dataY.access().push_back(val);
-          dataE.access().push_back(sqrt(val));
+          dataY.push_back(val);
+          dataE.push_back(sqrt(val));
           if ((val - 1.4) > MaxPeakIntensity * .1) {
             double Q = calcQ(bankR, instP, row, col, 1000.0 + chan * 50);
             dQ = max<double>(dQ, fabs(Q - Q0));
           }
         }
 
-        wsPtr->setData(wsIndex, dataY, dataE);
+        wsPtr->dataY(wsIndex) = dataY;
+        wsPtr->dataE(wsIndex) = dataE;
       }
 
     PeaksWorkspace_sptr pks(new PeaksWorkspace());

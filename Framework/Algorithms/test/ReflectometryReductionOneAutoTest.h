@@ -18,6 +18,8 @@ using namespace Mantid::Kernel;
 using Mantid::MantidVec;
 using Mantid::MantidVecPtr;
 using Mantid::HistogramData::BinEdges;
+using Mantid::HistogramData::HistogramY;
+using Mantid::HistogramData::HistogramE;
 
 namespace {
 class PropertyFinder {
@@ -387,14 +389,9 @@ public:
     //-----------------
     // Single bin from 1->2
     BinEdges x{1, 2};
-    MantidVecPtr e, detData, monData;
-
-    // No error at all
-    e.access().resize(1, 0.0);
-
-    // Set the detector and monitor y values
-    detData.access().resize(1, 10);
-    monData.access().resize(1, 5);
+    auto detData = make_cow<HistogramY>(1, 10);
+    auto monData = make_cow<HistogramY>(1, 5);
+    auto e = make_cow<HistogramE>(1, 0.0);
 
     auto tinyWS = MatrixWorkspace_sptr(new Workspace2D());
     // 2 spectra, 2 x values, 1 y value per spectra

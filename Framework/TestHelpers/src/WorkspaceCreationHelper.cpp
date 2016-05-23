@@ -66,32 +66,32 @@ void removeWS(const std::string &name) {
 }
 
 Workspace2D_sptr Create1DWorkspaceRand(int size) {
-  MantidVecPtr y1, e1;
-  y1.access().resize(size);
+  MantidVec y1(size);
+  MantidVec e1(size);
 
   MersenneTwister randomGen(DateAndTime::getCurrentTime().nanoseconds(), 0,
                             std::numeric_limits<int>::max());
   auto randFunc = [&randomGen] { return randomGen.nextValue(); };
 
-  std::generate(y1.access().begin(), y1.access().end(), randFunc);
-  e1.access().resize(size);
-  std::generate(e1.access().begin(), e1.access().end(), randFunc);
+  std::generate(y1.begin(), y1.end(), randFunc);
+  std::generate(e1.begin(), e1.end(), randFunc);
   auto retVal = boost::make_shared<Workspace2D>();
   retVal->initialize(1, size, size);
   retVal->setPoints(0, size, 1.0);
-  retVal->setData(0, y1, e1);
+  retVal->dataY(0) = y1;
+  retVal->dataE(0) = e1;
   return retVal;
 }
 
 Workspace2D_sptr Create1DWorkspaceConstant(int size, double value,
                                            double error) {
-  MantidVecPtr y1, e1;
-  y1.access().resize(size, value);
-  e1.access().resize(size, error);
+  MantidVec y1(size, value);
+  MantidVec e1(size, error);
   auto retVal = boost::make_shared<Workspace2D>();
   retVal->initialize(1, size, size);
   retVal->setPoints(0, size, 1.0);
-  retVal->setData(0, y1, e1);
+  retVal->dataY(0) = y1;
+  retVal->dataE(0) = e1;
   return retVal;
 }
 
@@ -105,14 +105,14 @@ Workspace2D_sptr Create1DWorkspaceConstantWithXerror(int size, double value,
 }
 
 Workspace2D_sptr Create1DWorkspaceFib(int size) {
-  MantidVecPtr y1, e1;
-  y1.access().resize(size);
-  std::generate(y1.access().begin(), y1.access().end(), FibSeries<double>());
-  e1.access().resize(size);
+  MantidVec y1(size);
+  MantidVec e1(size);
+  std::generate(y1.begin(), y1.end(), FibSeries<double>());
   auto retVal = boost::make_shared<Workspace2D>();
   retVal->initialize(1, size, size);
   retVal->setPoints(0, size, 1.0);
-  retVal->setData(0, y1, e1);
+  retVal->dataY(0) = y1;
+  retVal->dataE(0) = e1;
   return retVal;
 }
 
@@ -154,9 +154,8 @@ Create2DWorkspaceWithValues(int64_t nHist, int64_t nBins, bool isHist,
                             double xVal, double yVal, double eVal) {
   auto x1 = Kernel::make_cow<HistogramData::HistogramX>(
       isHist ? nBins + 1 : nBins, xVal);
-  MantidVecPtr y1, e1;
-  y1.access().resize(nBins, yVal);
-  e1.access().resize(nBins, eVal);
+  auto y1 = Kernel::make_cow<HistogramData::HistogramY>(nBins, yVal);
+  auto e1 = Kernel::make_cow<HistogramData::HistogramE>(nBins, eVal);
   auto retVal = boost::make_shared<Workspace2D>();
   retVal->initialize(nHist, isHist ? nBins + 1 : nBins, nBins);
   for (int i = 0; i < nHist; i++) {
@@ -255,9 +254,8 @@ WorkspaceGroup_sptr CreateWorkspaceGroup(int nEntries, int nHist, int nBins,
 Workspace2D_sptr Create2DWorkspaceBinned(int nhist, int nbins, double x0,
                                          double deltax) {
   HistogramData::BinEdges x(nbins + 1);
-  MantidVecPtr y, e;
-  y.access().resize(nbins, 2);
-  e.access().resize(nbins, M_SQRT2);
+  auto y = Kernel::make_cow<HistogramData::HistogramY>(nbins, 2);
+  auto e = Kernel::make_cow<HistogramData::HistogramE>(nbins, M_SQRT2);
   for (int i = 0; i < nbins + 1; ++i) {
     x.mutableData()[i] = x0 + i * deltax;
   }
@@ -277,10 +275,9 @@ Workspace2D_sptr Create2DWorkspaceBinned(int nhist, int nbins, double x0,
 Workspace2D_sptr Create2DWorkspaceBinned(int nhist, const int numBoundaries,
                                          const double xBoundaries[]) {
   HistogramData::BinEdges x(numBoundaries);
-  MantidVecPtr y, e;
   const int numBins = numBoundaries - 1;
-  y.access().resize(numBins, 2);
-  e.access().resize(numBins, M_SQRT2);
+  auto y = Kernel::make_cow<HistogramData::HistogramY>(numBins, 2);
+  auto e = Kernel::make_cow<HistogramData::HistogramE>(numBins, M_SQRT2);
   for (int i = 0; i < numBoundaries; ++i) {
     x.mutableData()[i] = xBoundaries[i];
   }

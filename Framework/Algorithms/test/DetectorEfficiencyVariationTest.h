@@ -26,6 +26,8 @@ using namespace Mantid::API;
 using namespace Mantid::Algorithms;
 using namespace Mantid::DataObjects;
 using Mantid::HistogramData::BinEdges;
+using Mantid::HistogramData::HistogramY;
+using Mantid::HistogramData::HistogramE;
 
 class DetectorEfficiencyVariationTest : public CxxTest::TestSuite {
 public:
@@ -122,32 +124,29 @@ public:
 
     // the error values aren't used and aren't tested so we'll use some basic
     // data
-    boost::shared_ptr<MantidVec> errors =
-        boost::make_shared<MantidVec>(ySize, 1);
-    boost::shared_ptr<MantidVec> forInputA, forInputB;
+    auto errors = make_cow<HistogramE>(ySize, 1);
 
     for (int j = 0; j < Nhist; ++j) {
       inputA->setBinEdges(j, x);
       // both workspaces must have the same x bins
       inputB->setBinEdges(j, x);
-      forInputA.reset(new MantidVec);
-      forInputB.reset(new MantidVec);
+      std::vector<double> forInputA, forInputB;
       // the spectravalues will be multiples of the random numbers above
       for (int l = 0; l < ySize; ++l) {
-        forInputA->push_back(yArray[l]);
+        forInputA.push_back(yArray[l]);
         // there is going to be a small difference between the workspaces that
         // will vary with histogram number
-        forInputB->push_back(forInputA->back() *
-                             (1 + m_ramp * (j - (Nhist / 2))));
+        forInputB.push_back(forInputA.back() *
+                            (1 + m_ramp * (j - (Nhist / 2))));
       }
       // insert a particularly large value to pick up later
       m_LargeValue = 3.1;
       if (j == Nhist - 1)
         for (int l = 0; l < ySize; ++l)
-          (*forInputB)[l] = (*forInputA)[l] * m_LargeValue;
+          forInputB[l] = forInputA[l] * m_LargeValue;
 
-      inputA->setData(j, forInputA, errors);
-      inputB->setData(j, forInputB, errors);
+      inputA->setData(j, make_cow<HistogramY>(std::move(forInputA)), errors);
+      inputB->setData(j, make_cow<HistogramY>(std::move(forInputB)), errors);
       // Just set the spectrum number to match the index, spectra numbers and
       // detector maps must be indentical for both
       inputA->getSpectrum(j)->setSpectrumNo(j + 1);

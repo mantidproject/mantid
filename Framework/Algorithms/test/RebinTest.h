@@ -20,6 +20,8 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::API;
 using namespace Mantid::Algorithms;
 using Mantid::HistogramData::BinEdges;
+using Mantid::HistogramData::HistogramY;
+using Mantid::HistogramData::HistogramE;
 
 class RebinTest : public CxxTest::TestSuite {
 public:
@@ -470,10 +472,8 @@ public:
 
 private:
   Workspace2D_sptr Create1DWorkspace(int size) {
-    boost::shared_ptr<Mantid::MantidVec> y1(
-        new Mantid::MantidVec(size - 1, 3.0));
-    boost::shared_ptr<Mantid::MantidVec> e1(
-        new Mantid::MantidVec(size - 1, sqrt(3.0)));
+    auto y1 = make_cow<HistogramY>(size - 1, 3.0);
+    auto e1 = make_cow<HistogramE>(size - 1, sqrt(3.0));
     Workspace2D_sptr retVal(new Workspace2D);
     retVal->initialize(1, size, size - 1);
     double j = 1.0;
@@ -487,10 +487,8 @@ private:
 
   Workspace2D_sptr Create2DWorkspace(int xlen, int ylen) {
     BinEdges x1(xlen, 0.0);
-    boost::shared_ptr<Mantid::MantidVec> y1(
-        new Mantid::MantidVec(xlen - 1, 3.0));
-    boost::shared_ptr<Mantid::MantidVec> e1(
-        new Mantid::MantidVec(xlen - 1, sqrt(3.0)));
+    auto y1 = make_cow<HistogramY>(xlen - 1, 3.0);
+    auto e1 = make_cow<HistogramE>(xlen - 1, sqrt(3.0));
 
     Workspace2D_sptr retVal(new Workspace2D);
     retVal->initialize(ylen, xlen, xlen - 1);

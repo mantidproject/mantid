@@ -19,6 +19,8 @@ using namespace Mantid::Kernel;
 using namespace Mantid::Algorithms;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
+using Mantid::HistogramData::HistogramY;
+using Mantid::HistogramData::HistogramE;
 
 class FindDeadDetectorsTest : public CxxTest::TestSuite {
 public:
@@ -42,28 +44,28 @@ public:
     work_in->setInstrument(instr);
 
     // yVeryDead is a detector that never responds and produces no counts
-    boost::shared_ptr<Mantid::MantidVec> yVeryDead(
-        new Mantid::MantidVec(sizex, 0));
+    auto yVeryDead = make_cow<HistogramY>(sizex, 0);
+    auto eVeryDead = make_cow<HistogramE>(sizex, 0);
     // yTooDead gives some counts at the start but has a whole region full of
     // zeros
     double TD[sizex] = {2, 4, 5, 1, 0, 0, 0, 0, 0, 0};
-    boost::shared_ptr<Mantid::MantidVec> yTooDead(
-        new Mantid::MantidVec(TD, TD + 10));
+    auto yTooDead = make_cow<HistogramY>(TD, TD + 10);
+    auto eTooDead = make_cow<HistogramE>(TD, TD + 10);
     // yStrange dies after giving some counts but then comes back
     double S[sizex] = {0.2, 4, 50, 0.001, 0, 0, 0, 0, 1, 0};
-    boost::shared_ptr<Mantid::MantidVec> yStrange(
-        new Mantid::MantidVec(S, S + 10));
+    auto yStrange = make_cow<HistogramY>(S, S + 10);
+    auto eStrange = make_cow<HistogramE>(S, S + 10);
     for (int i = 0; i < sizey; i++) {
       if (i % 3 == 0) { // the last column is set arbitrarily to have the same
                         // values as the second because the errors shouldn't
                         // make any difference
-        work_in->setData(i, yTooDead, yTooDead);
+        work_in->setData(i, yTooDead, eTooDead);
       }
       if (i % 2 == 0) {
-        work_in->setData(i, yVeryDead, yVeryDead);
+        work_in->setData(i, yVeryDead, eVeryDead);
       }
       if (i == 19) {
-        work_in->setData(i, yStrange, yTooDead);
+        work_in->setData(i, yStrange, eTooDead);
       }
       work_in->getSpectrum(i)->setSpectrumNo(i);
 

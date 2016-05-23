@@ -258,15 +258,12 @@ void GoniometerAnglesFromPhiRotation::exec() {
                                               3 * Npeaks));
 
   MantidVec Xvals;
-  MantidVec Yvals;
+  auto Yvals = make_cow<HistogramData::HistogramY>(3 * Npeaks, 0.0);
 
   for (int i = 0; i < Npeaks; ++i) {
     Xvals.push_back(i);
-    Yvals.push_back(0.0);
     Xvals.push_back(i);
-    Yvals.push_back(0.0);
     Xvals.push_back(i);
-    Yvals.push_back(0.0);
   }
 
   ws->setPoints(0, Xvals);

@@ -19,6 +19,8 @@ using namespace Mantid::API;
 using namespace Mantid::Algorithms;
 using namespace Mantid::DataObjects;
 using Mantid::HistogramData::BinEdges;
+using Mantid::HistogramData::HistogramY;
+using Mantid::HistogramData::HistogramE;
 
 class SolidAngleTest : public CxxTest::TestSuite {
 public:
@@ -32,13 +34,11 @@ public:
         WorkspaceFactory::Instance().create("Workspace2D", Nhist, 11, 10);
     Workspace2D_sptr space2D = boost::dynamic_pointer_cast<Workspace2D>(space);
     BinEdges x{0, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000};
-    boost::shared_ptr<Mantid::MantidVec> a =
-        boost::make_shared<Mantid::MantidVec>(10);
-    boost::shared_ptr<Mantid::MantidVec> e =
-        boost::make_shared<Mantid::MantidVec>(10);
+    auto a = make_cow<HistogramY>(10);
+    auto e = make_cow<HistogramE>(10);
     for (int i = 0; i < 10; ++i) {
-      (*a)[i] = i;
-      (*e)[i] = sqrt(double(i));
+      a.access()[i] = i;
+      e.access()[i] = sqrt(double(i));
     }
 
     for (int j = 0; j < Nhist; ++j) {

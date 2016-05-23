@@ -18,6 +18,8 @@ using namespace Mantid::Algorithms;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using Mantid::HistogramData::BinEdges;
+using Mantid::HistogramData::HistogramY;
+using Mantid::HistogramData::HistogramE;
 
 class RemoveBinsTest : public CxxTest::TestSuite {
 public:
@@ -221,22 +223,15 @@ public:
     testWorkspace->initialize(2, 5, 4);
 
     BinEdges X{0, 10, 20, 30, 40};
-    auto Y = boost::make_shared<Mantid::MantidVec>();
-
-    for (int i = 0; i < 4; ++i) {
-      if (i == 2) {
-        Y->push_back(2.0 * i + 1);
-      } else {
-        Y->push_back(2.0 * i);
-      }
-    }
-
-    //   0     2     5     6       Y
+    std::vector<double> Y{0, 2, 5, 6};
+    std::vector<double> E{0, 2, 5, 6};
 
     testWorkspace->setBinEdges(0, X);
     testWorkspace->setBinEdges(1, X);
-    testWorkspace->setData(0, Y, Y);
-    testWorkspace->setData(1, Y, Y);
+    testWorkspace->dataY(0) = Y;
+    testWorkspace->dataE(0) = E;
+    testWorkspace->dataY(1) = Y;
+    testWorkspace->dataE(1) = E;
 
     testWorkspace->getAxis(0)->unit() =
         Mantid::Kernel::UnitFactory::Instance().create("TOF");

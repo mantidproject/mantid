@@ -13,6 +13,8 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::API;
 using namespace Mantid::Algorithms;
 using Mantid::HistogramData::BinEdges;
+using Mantid::HistogramData::HistogramY;
+using Mantid::HistogramData::HistogramE;
 
 class RegroupTest : public CxxTest::TestSuite {
 public:
@@ -46,33 +48,14 @@ public:
     TS_ASSERT_DELTA(outX[7], 12.5, 0.000001);
     TS_ASSERT_DELTA(outX[12], 20.75, 0.000001);
 
-    /*const std::vector<double> outY=rebindata->dataY(0);
-    const std::vector<double> outE=rebindata->dataE(0);
-
-    TS_ASSERT_DELTA(outX[7],15.5  ,0.000001);
-    TS_ASSERT_DELTA(outY[7],3.0 ,0.000001);
-    TS_ASSERT_DELTA(outE[7], sqrt(4.5)/2.0  ,0.000001);
-
-    TS_ASSERT_DELTA(outX[12],24.2 ,0.000001);
-    TS_ASSERT_DELTA(outY[12],3.0 ,0.000001);
-    TS_ASSERT_DELTA(outE[12],sqrt(5.445)/2.42 ,0.000001);
-
-    TS_ASSERT_DELTA(outX[17],32.0  ,0.000001);
-    TS_ASSERT_DELTA(outY[17],3.0 ,0.000001);
-    TS_ASSERT_DELTA(outE[17],sqrt(2.25) ,0.000001);
-    bool dist=rebindata->isDistribution();
-    TS_ASSERT(dist);
-    //*/
     AnalysisDataService::Instance().remove("test_in1D");
     AnalysisDataService::Instance().remove("test_out");
   }
 
 private:
   Workspace2D_sptr Create1DWorkspace(int size) {
-    boost::shared_ptr<Mantid::MantidVec> y1(
-        new Mantid::MantidVec(size - 1, 3.0));
-    boost::shared_ptr<Mantid::MantidVec> e1(
-        new Mantid::MantidVec(size - 1, sqrt(3.0)));
+    auto y1 = make_cow<HistogramY>(size - 1, 3.0);
+    auto e1 = make_cow<HistogramE>(size - 1, sqrt(3.0));
     Workspace2D_sptr retVal(new Workspace2D);
     retVal->initialize(1, size, size - 1);
     double j = 1.0;
@@ -86,10 +69,8 @@ private:
 
   Workspace2D_sptr Create2DWorkspace(int xlen, int ylen) {
     BinEdges x1(xlen, 0.0);
-    boost::shared_ptr<Mantid::MantidVec> y1(
-        new Mantid::MantidVec(xlen - 1, 3.0));
-    boost::shared_ptr<Mantid::MantidVec> e1(
-        new Mantid::MantidVec(xlen - 1, sqrt(3.0)));
+    auto y1 = make_cow<HistogramY>(xlen - 1, 3.0);
+    auto e1 = make_cow<HistogramE>(xlen - 1, sqrt(3.0));
 
     Workspace2D_sptr retVal(new Workspace2D);
     retVal->initialize(ylen, xlen, xlen - 1);

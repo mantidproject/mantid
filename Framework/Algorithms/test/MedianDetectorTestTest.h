@@ -28,6 +28,8 @@ using namespace Mantid::API;
 using namespace Mantid::Algorithms;
 using namespace Mantid::DataObjects;
 using Mantid::HistogramData::BinEdges;
+using Mantid::HistogramData::HistogramY;
+using Mantid::HistogramData::HistogramE;
 
 const int THEMASKED(40);
 const int SAVEDBYERRORBAR(143);
@@ -192,25 +194,21 @@ public:
     }
 
     // most error values will be small so that they wont affect the tests
-    boost::shared_ptr<MantidVec> smallErrors(
-        new MantidVec(specLength - 1, 0.01 * m_YSum / specLength));
+    auto smallErrors = boost::make_shared<HistogramE>(
+        specLength - 1, 0.01 * m_YSum / specLength);
     // if the SignificanceTest property is set to one, knowing what happens in
     // the loop below, these errors will just make or break the tests
-    boost::shared_ptr<MantidVec> almostBigEnough(
-        new MantidVec(specLength - 1, 0));
+    auto almostBigEnough = boost::make_shared<HistogramE>(specLength - 1, 0);
     (*almostBigEnough)[0] = 0.9 * m_YSum * (0.5 * Nhist - 1);
-    boost::shared_ptr<MantidVec> bigEnough =
-        boost::make_shared<MantidVec>(specLength - 1, 0);
+    auto bigEnough = boost::make_shared<HistogramE>(specLength - 1, 0);
     (*bigEnough)[0] = 1.2 * m_YSum * (0.5 * Nhist);
 
     for (int j = 0; j < Nhist; ++j) {
       m_2DWS->setBinEdges(j, x);
-      boost::shared_ptr<MantidVec> spectrum = boost::make_shared<MantidVec>();
       // the spectravalues will be multiples of the random numbers above
-      for (int l = 0; l < specLength - 1; ++l) {
-        spectrum->push_back(j * yArray[l]);
-      }
-      boost::shared_ptr<MantidVec> errors = smallErrors;
+      auto spectrum = make_cow<HistogramY>(yArray, yArray + specLength - 1);
+      spectrum.access() *= j;
+      auto errors = smallErrors;
       if (j == Nhist - 2)
         errors = almostBigEnough;
       if (j == SAVEDBYERRORBAR)

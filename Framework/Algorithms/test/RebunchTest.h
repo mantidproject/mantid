@@ -14,6 +14,8 @@ using namespace Mantid::API;
 using namespace Mantid::Algorithms;
 using Mantid::HistogramData::BinEdges;
 using Mantid::HistogramData::Points;
+using Mantid::HistogramData::HistogramY;
+using Mantid::HistogramData::HistogramE;
 
 class RebunchTest : public CxxTest::TestSuite {
 public:
@@ -179,12 +181,8 @@ private:
 
   Workspace2D_sptr Create2DWorkspaceHist(int xlen, int ylen) {
     BinEdges x1(xlen, 0.0);
-    boost::shared_ptr<Mantid::MantidVec> y1(
-        new Mantid::MantidVec(xlen - 1, 0.0));
-    boost::shared_ptr<Mantid::MantidVec> e1(
-        new Mantid::MantidVec(xlen - 1, 0.0));
-    boost::shared_ptr<Mantid::MantidVec> e2(
-        new Mantid::MantidVec(xlen - 1, 0.0));
+    auto y1 = boost::make_shared<HistogramY>(xlen - 1, 0.0);
+    auto e1 = boost::make_shared<HistogramE>(xlen - 1, 0.0);
 
     Workspace2D_sptr retVal(new Workspace2D);
     retVal->initialize(ylen, xlen, xlen - 1);
@@ -211,12 +209,8 @@ private:
 
   Workspace2D_sptr Create2DWorkspacePnt(int xlen, int ylen) {
     Points x1(xlen, 0.0);
-    boost::shared_ptr<Mantid::MantidVec> y1 =
-        boost::make_shared<Mantid::MantidVec>(xlen, 0.0);
-    boost::shared_ptr<Mantid::MantidVec> e1 =
-        boost::make_shared<Mantid::MantidVec>(xlen, 0.0);
-    boost::shared_ptr<Mantid::MantidVec> e2 =
-        boost::make_shared<Mantid::MantidVec>(xlen, 0.0);
+    auto y1 = boost::make_shared<HistogramY>(xlen - 1, 0.0);
+    auto e1 = boost::make_shared<HistogramE>(xlen - 1, 0.0);
 
     Workspace2D_sptr retVal(new Workspace2D);
     retVal->initialize(ylen, xlen, xlen);

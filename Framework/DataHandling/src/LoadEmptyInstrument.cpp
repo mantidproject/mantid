@@ -136,10 +136,10 @@ void LoadEmptyInstrument::exec() {
 
   // ---- Set the values ----------
   if (!MakeEventWorkspace) {
-    auto v_y = make_shared<HistogramData::HistogramY>(1, detector_value);
-    auto v_e = make_shared<HistogramData::HistogramE>(1, detector_value);
-    auto v_monitor_y = make_shared<HistogramData::HistogramY>(1, monitor_value);
-    auto v_monitor_e = make_shared<HistogramData::HistogramE>(1, monitor_value);
+    auto v_y = make_cow<HistogramData::HistogramY>(1, detector_value);
+    auto v_e = make_cow<HistogramData::HistogramE>(1, detector_value);
+    auto v_monitor_y = make_cow<HistogramData::HistogramY>(1, monitor_value);
+    auto v_monitor_e = make_cow<HistogramData::HistogramE>(1, monitor_value);
 
     for (size_t i = 0; i < outWS->getNumberHistograms(); i++) {
       IDetector_const_sptr det = outWS->getDetector(i);
