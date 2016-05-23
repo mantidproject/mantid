@@ -119,12 +119,12 @@ public:
 
   // Temporary legacy interface to Dx. Note that accessors mimic the current
   // behavior which always has Dx allocated.
-  MantidVec &dataDx() {
+  MantidVec &dataDx() & {
     if(!m_dx)
       m_dx = Kernel::make_cow<HistogramDx>(m_x->size(), 0.0);
     return m_dx.access().mutableRawData();
   }
-  const MantidVec &dataDx() const {
+  const MantidVec &dataDx() const & {
     if(!m_dx)
       m_dx = Kernel::make_cow<HistogramDx>(m_x->size(), 0.0);
     return m_dx->rawData();
