@@ -274,7 +274,7 @@ class DataSet(object):
         elif mtd.doesExist(self._file_path):
             self._ws_name = self._file_path
         else:
-            raise RuntimeError, "Specified file doesn't exist: %s" % self._file_path
+            raise RuntimeError("Specified file doesn't exist: %s" % self._file_path)
 
         if mtd.doesExist(self._ws_name):
             # If we have hisogram data, convert it first.
@@ -313,17 +313,17 @@ class DataSet(object):
         x = mtd[self._ws_name].readX(0)
         y = mtd[self._ws_name].readY(0)
         e = mtd[self._ws_name].readE(0)
-        sum = 0.0
+        sum_cts = 0.0
         sum_err = 0.0
         for i in range(len(y)):
             upper_bound = x[i]
             if len(x) == len(y)+1:
                 upper_bound = x[i+1]
             if x[i] >= xmin and upper_bound <= xmax:
-                sum += y[i]/(e[i]*e[i])
+                sum_cts += y[i]/(e[i]*e[i])
                 sum_err += 1.0/(e[i]*e[i])
 
-        return sum_err/sum
+        return sum_err/sum_cts
 
     def integrate(self, xmin=None, xmax=None):
         """
@@ -344,7 +344,7 @@ class DataSet(object):
 
         is_histo = len(x) == len(y)+1
         if not is_histo and len(x) != len(y):
-            raise(RuntimeError, "Corrupted I(q) %s" % self._ws_name)
+            raise RuntimeError("Corrupted I(q) %s" % self._ws_name)
 
         sum = 0.0
         for i in range(len(y)-1):
@@ -382,7 +382,7 @@ class Stitcher(object):
             @param id: position of the data set in the list
         """
         if id < 0 or id > len(self._data_sets)-1:
-            raise(RuntimeError, "Stitcher has not data set number %s" % str(id))
+            raise RuntimeError("Stitcher has not data set number %s" % str(id))
         return self._data_sets[id]
 
     def size(self):
@@ -448,7 +448,7 @@ class Stitcher(object):
             @param id: index of the reference in the internal file list.
         """
         if id >= len(self._data_sets):
-            raise(RuntimeError, "Stitcher: invalid reference ID")
+            raise RuntimeError("Stitcher: invalid reference ID")
         self._reference = id
 
     def save_combined(self, file_path=None, as_canSAS=True, workspace=None):
@@ -567,18 +567,18 @@ def stitch(data_list=[], q_min=None, q_max=None, output_workspace=None,
        (q_max is not None and q_min is None):
         error_msg = "Both q_min and q_max parameters should be provided, not just one"
         Logger("data_stitching").error(error_msg)
-        raise(RuntimeError, error_msg)
+        raise RuntimeError(error_msg)
 
     if not type(data_list) == list:
         error_msg = "The data_list parameter should be a list"
         Logger("data_stitching").error(error_msg)
-        raise(RuntimeError, error_msg)
+        raise RuntimeError(error_msg)
 
     n_data_sets = len(data_list)
     if n_data_sets < 2:
         error_msg = "The data_list parameter should contain at least two data sets"
         Logger("data_stitching").error(error_msg)
-        raise(RuntimeError, error_msg)
+        raise RuntimeError(error_msg)
 
     # Check whether we just need to scale the data sets using the provided
     # scaling factors
@@ -589,7 +589,7 @@ def stitch(data_list=[], q_min=None, q_max=None, output_workspace=None,
         else:
             error_msg = "If the scale parameter is provided as a list, it should have the same length as data_list"
             Logger("data_stitching").error(error_msg)
-            raise(RuntimeError, error_msg)
+            raise RuntimeError(error_msg)
 
     is_q_range_limited = False
     if q_min is not None and q_max is not None:
@@ -602,16 +602,16 @@ def stitch(data_list=[], q_min=None, q_max=None, output_workspace=None,
         if not type(q_min) == list or not type(q_max) == list:
             error_msg = "The q_min and q_max parameters must be lists"
             Logger("data_stitching").error(error_msg)
-            raise(RuntimeError, error_msg)
+            raise RuntimeError(error_msg)
 
         if not len(q_min) == n_data_sets-1:
             error_msg = "The length of q_min must be 1 shorter than the length of data_list: q_min=%s" % str(q_min)
             Logger("data_stitching").error(error_msg)
-            raise(RuntimeError, error_msg)
+            raise RuntimeError(error_msg)
         if not len(q_max) == n_data_sets-1:
             error_msg = "The length of q_max must be 1 shorter than the length of data_list: q_max=%s" % str(q_max)
             Logger("data_stitching").error(error_msg)
-            raise(RuntimeError, error_msg)
+            raise RuntimeError(error_msg)
 
         # Sanity check
         for i in range(n_data_sets-1):
@@ -621,7 +621,7 @@ def stitch(data_list=[], q_min=None, q_max=None, output_workspace=None,
             except:
                 error_msg = "The Q range parameters are invalid: q_min=%s   q_max=%s" % (str(q_min), str(q_max))
                 Logger("data_stitching").error(error_msg)
-                raise(RuntimeError, error_msg)
+                raise RuntimeError(error_msg)
     else:
         q_min = (n_data_sets-1)*[None]
         q_max = (n_data_sets-1)*[None]
