@@ -9,12 +9,17 @@ from Direct.DirectEnergyConversion import DirectEnergyConversion
 import os
 import re
 import time
-try:
-    import h5py
-    h5py_installed = True
-except ImportError:
+
+# h5py seems to hang mantid imports on RHEL6
+import platform
+if platform.linux_distribution()[2] == 'Santiago':
     h5py_installed = False
-    pass
+else:
+    try:
+        import h5py
+        h5py_installed = True
+    except ImportError:
+        h5py_installed = False
 from abc import abstractmethod
 
 # R0921 abstract class not referenced -- wrong, client references it.

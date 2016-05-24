@@ -312,9 +312,8 @@ SmoothMD::gaussianSmooth(IMDHistoWorkspace_const_sptr toSmooth,
   // Create a kernel for each dimension and
   std::vector<KernelVector> gaussian_kernels;
   gaussian_kernels.reserve(widthVector.size());
-  for (size_t dimension_number = 0; dimension_number < widthVector.size();
-       ++dimension_number) {
-    gaussian_kernels.push_back(gaussianKernel(widthVector[dimension_number]));
+  for (const auto width : widthVector) {
+    gaussian_kernels.push_back(gaussianKernel(width));
   }
 
   const int nThreads = Mantid::API::FrameworkManager::Instance()
@@ -337,7 +336,7 @@ SmoothMD::gaussianSmooth(IMDHistoWorkspace_const_sptr toSmooth,
     }
 
     PARALLEL_FOR_NO_WSP_CHECK()
-    for (int it = 0; it < int(iterators.size()); ++it) {
+    for (int it = 0; it < int(iterators.size()); ++it) { // NOLINT
 
       PARALLEL_START_INTERUPT_REGION
       boost::scoped_ptr<MDHistoWorkspaceIterator> iterator(

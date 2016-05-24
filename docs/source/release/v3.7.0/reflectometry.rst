@@ -28,6 +28,12 @@ ReflectometryReductionOne
 Reflectometry Reduction Interface
 ---------------------------------
 
+- The ReflTBL data handling algorithms (namely SaveReflTBL and LoadReflTBL) have been generalised to allow for any number of column headings and 
+  custom column heading titles. Any old ReflTBL files will still work with the new algorithms (SaveTBL and LoadTBL) however any new tables created
+  using SaveTBL will now be made with the new format. In the new format, the first line of the TBL file will contain a comma-separated list of column headings
+  and all subsequent lines will define the data for each row. For an example this new format see here `LoadTBL <http://docs.mantidproject.org/nightly/algorithms/LoadTBL-v1.html>`_ .
+  `#15968 <https://github.com/mantidproject/mantid/pull/15968>`_
+
 ISIS Reflectometry (Polref)
 ###########################
 
@@ -38,9 +44,15 @@ ISIS Reflectometry (Polref)
   Mantid will raise an unexpected exception. This has now been fixed resulting in a warning being shown to the user that a certain row does not
   contain a Run Number. `#15820 <https://github.com/mantidproject/mantid/pull/15820>`_
 - Some changes were made to the interface as part of a code refactoring (functional behaviour remains the same). 
-  The only change visible to user is a new progress bar that has been added to the *Search Runs* section. It show the progress when
+  As a consequence there are some changes visible to users: a new progress bar that has been added to the *Search Runs* section, which shows the progress when
   transferring runs. The progress bar that existed before will only indicate the progress of processing that is
-  in progress. `#15670 <https://github.com/mantidproject/mantid/pull/15670>`_
+  in progress. `#15670 <https://github.com/mantidproject/mantid/pull/15670>`_. A new section below the processing table has been added. It
+  summarises the algorithms used in the reduction and allows users to specify global options for them. Options to be applied to invidual rows can still
+  be specified via the 'Options' column. User documentation has been updated accordingly `#15943 <https://github.com/mantidproject/mantid/pull/15943>`_.
+  The aim of this code refactoring is to have a General Data Processor Framework shared accross different technique areas that need to execute complex
+  batch-processing via DataProcessorAlgorithms. Standardisation across similar user interfaces will help avoid the maintenance effort involved in looking
+  after specific user interfaces, making the wider project more robust to changes thanks to the introduction of fast, automated testing.
+  Some of the target user interfaces that can benefit from this new design are SANS (both at ANSTO and ISIS), Powder at SNS and SCD at SNS.
 
 .. figure:: /images/ISISReflectometryPolref_newTableView.png
 

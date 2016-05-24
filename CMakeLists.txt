@@ -58,11 +58,6 @@ if ( ${CMAKE_SYSTEM_NAME} MATCHES "Darwin" )
 endif ()
 
 ###########################################################################
-# Set working Python versions
-###########################################################################
-set ( Python_ADDITIONAL_VERSIONS 2.7 2.6 )
-
-###########################################################################
 # Cross-platform setup
 ###########################################################################
 include ( CommonSetup )
@@ -220,7 +215,7 @@ endif ()
 ###########################################################################
 
 # N.B. INBUNDLE variable is empty except on Mac (set in DarwinSetup.cmake)
-install ( DIRECTORY installers/colormaps/ DESTINATION ${INBUNDLE}colormaps PATTERN ".svn" EXCLUDE )
+install ( DIRECTORY installers/colormaps/ DESTINATION ${INBUNDLE}colormaps)
 
 # Install the files (.desktop and icon) to create a menu item, but only if installing to /opt/Mantid
 if ( ${CMAKE_SYSTEM_NAME} STREQUAL "Linux" AND CMAKE_INSTALL_PREFIX STREQUAL "/opt/Mantid" )

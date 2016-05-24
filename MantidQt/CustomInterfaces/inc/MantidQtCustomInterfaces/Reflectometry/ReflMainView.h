@@ -12,8 +12,8 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 // Forward decs
-class ReflCommand;
-using ReflCommand_uptr = std::unique_ptr<ReflCommand>;
+class DataProcessorCommand;
+using DataProcessorCommand_uptr = std::unique_ptr<DataProcessorCommand>;
 
 /** @class ReflMainView
 
@@ -63,8 +63,9 @@ public:
                                  const std::string &defaultInstrument) = 0;
   virtual void setTransferMethods(const std::set<std::string> &methods) = 0;
   virtual void
-  setTableCommands(std::vector<ReflCommand_uptr> tableCommands) = 0;
-  virtual void setRowCommands(std::vector<ReflCommand_uptr> rowCommands) = 0;
+  setTableCommands(std::vector<DataProcessorCommand_uptr> tableCommands) = 0;
+  virtual void
+  setRowCommands(std::vector<DataProcessorCommand_uptr> rowCommands) = 0;
   virtual void clearCommands() = 0;
 
   // Accessor methods

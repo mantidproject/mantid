@@ -184,7 +184,7 @@ public:
                                                 Contains("1"),
                                                 Contains("2")))).Times(1);
     // Test time limits
-    EXPECT_CALL(*m_view, setTimeLimits(Le(-0.54),Ge(31.44))).Times(1);
+    EXPECT_CALL(*m_view, setTimeLimits(Le(0.107), Ge(31.44))).Times(1);
     m_view->selectFirstRun();
   }
 

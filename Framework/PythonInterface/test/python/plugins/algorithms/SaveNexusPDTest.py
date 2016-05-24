@@ -4,14 +4,19 @@ from mantid.api import AnalysisDataService
 from mantid.simpleapi import CreateWorkspace, SaveNexusPD
 import numpy as np
 import os
+import platform
 from testhelpers import WorkspaceCreationHelper as WCH
 import unittest
 
-runTests = True
-try:
-    import h5py
-except ImportError:
+# RHEL6 has troubles with h5py
+if platform.linux_distribution()[2] == 'Santiago':
     runTests = False
+else:
+    runTests = True
+    try:
+        import h5py
+    except ImportError:
+        runTests = False
 
 class SaveNexusPDTest(unittest.TestCase):
     def saveFilePath(self, wkspname):

@@ -2,11 +2,11 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Sample.h"
-#include "MantidAPI/SampleEnvironment.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/Crystal/CrystalStructure.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
+#include "MantidGeometry/Instrument/SampleEnvironment.h"
 #include "MantidKernel/Strings.h"
 
 #include <nexus/NeXusException.hpp>
@@ -17,6 +17,7 @@ namespace API {
 using namespace Mantid::Kernel;
 using Geometry::Object;
 using Geometry::OrientedLattice;
+using Geometry::SampleEnvironment;
 using Geometry::ShapeFactory;
 
 /**

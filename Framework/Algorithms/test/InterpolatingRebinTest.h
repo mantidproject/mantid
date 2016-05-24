@@ -19,7 +19,7 @@ class InterpolatingRebinTest : public CxxTest::TestSuite {
 public:
   void testWorkspace_dist() {
     Workspace2D_sptr test_in1D = Create1DData();
-    test_in1D->isDistribution(true);
+    test_in1D->setDistribution(true);
     AnalysisDataService::Instance().add("InterpolatingRebinTest_indist",
                                         test_in1D);
 
@@ -96,7 +96,7 @@ public:
   void testWorkspace_nondist() {
 
     Workspace2D_sptr test_in1D = Create1DData();
-    test_in1D->isDistribution(false);
+    test_in1D->setDistribution(false);
     AnalysisDataService::Instance().add("InterpolatingRebinTest_in_nondist",
                                         test_in1D);
 
@@ -161,7 +161,7 @@ public:
 
   void testWorkspace_close() {
     Workspace2D_sptr test_in1D = Create1DData();
-    test_in1D->isDistribution(true);
+    test_in1D->setDistribution(true);
     AnalysisDataService::Instance().add("InterpolatingRebinTest_inclose",
                                         test_in1D);
 
@@ -206,7 +206,7 @@ public:
   void testNullDataHandling() {
 
     Workspace2D_sptr test_in1D = badData();
-    test_in1D->isDistribution(true);
+    test_in1D->setDistribution(true);
     AnalysisDataService::Instance().add("InterpolatingRebinTest_in_nulldata",
                                         test_in1D);
 
