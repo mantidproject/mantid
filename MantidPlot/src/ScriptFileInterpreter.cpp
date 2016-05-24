@@ -225,7 +225,7 @@ ScriptFileInterpreter::replaceSelectedText(const ScriptEditor *editor,
   int UTF8_CodePage = 65001;
   const char *b =
       ((editor->SCI_GETCODEPAGE == UTF8_CodePage) ? text.toUtf8().constData()
-                                                  : text.toLatin1());
+                                                  : text.toLatin1().constData());
   editor->SendScintilla(editor->SCI_REPLACESEL, b);
 }
 
