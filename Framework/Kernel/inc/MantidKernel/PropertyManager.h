@@ -88,7 +88,7 @@ public:
                      IPropertyManager *targetPropertyManager,
                      const std::unordered_set<std::string> &ignoreProperties =
                          std::unordered_set<std::string>());
-  void setPropertiesWithSimpleString(
+  void setPropertiesWithString(
       const std::string &propertiesString,
       const std::unordered_set<std::string> &ignoreProperties =
           std::unordered_set<std::string>()) override;
@@ -127,6 +127,12 @@ protected:
 private:
   /// Transform the given string to a key for the property index
   const std::string createKey(const std::string &text) const;
+  void setPropertiesWithSimpleString(
+      const std::string &propertiesString,
+      const std::unordered_set<std::string> &ignoreProperties);
+  void setPropertiesWithJSONString(
+      const std::string &propertiesString,
+      const std::unordered_set<std::string> &ignoreProperties);
 
   /// typedef for the map holding the properties
   typedef std::map<std::string, std::unique_ptr<Property>> PropertyMap;
