@@ -9681,8 +9681,8 @@ void ApplicationWindow::showMoreWindows() {
 
 void ApplicationWindow::windowsMenuActivated() {
   QList<MdiSubWindow *> windows = currentFolder()->windowsList();
-  QObject* obj = sender();
-  QAction* action = qobject_cast<QAction*>(sender());
+  auto obj = sender();
+  auto action = qobject_cast<QAction*>(obj);
   auto id = action->data().asInt();
   MdiSubWindow *w = windows.at(id);
   if (w) {
