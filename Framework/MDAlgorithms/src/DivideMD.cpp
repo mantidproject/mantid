@@ -59,7 +59,7 @@ void DivideMD::execEventScalar(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   float scalar = float(m_rhs_scalar->dataY(0)[0]);
   float scalarError = float(m_rhs_scalar->dataE(0)[0]);
   float scalarErrorSquared = scalarError * scalarError;
-  float inverseScalarSquared = 1. / (scalar * scalar);
+  float inverseScalarSquared = 1.f / (scalar * scalar);
 
   // Get all the MDBoxes contained
   MDBoxBase<MDE, nd> *parentBox = ws->getBox();
