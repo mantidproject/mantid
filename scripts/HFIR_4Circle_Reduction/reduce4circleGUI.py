@@ -2142,8 +2142,9 @@ class MainWindow(QtGui.QMainWindow):
         # peak center
         weight_peak_centers, weight_peak_intensities = peak_info.get_weighted_peak_centres()
         qx, qy, qz = peak_info.get_peak_centre()
-        # [NEXT/FUTURE] Use a real peak intensity other than 100000
-        intensity = 100000
+        # get peak intensity
+        intensity = self._myControl.get_peak_integrated_intensity(exp_number, scan_number)
+        #intensity = 100000
 
         # convert from list to ndarray
         num_pt_peaks = len(weight_peak_centers)
