@@ -102,7 +102,7 @@ namespace Factory
       QPointer<MantidQt::SliceViewer::SliceViewerWindow> window = *it;
       if (window)
         // Close with delete
-        window->close(true);
+        window->close();
     }
     m_windows.clear();
   }
@@ -114,7 +114,7 @@ namespace Factory
   {
     if (w)
     {
-      w->close(true);
+      w->close();
       m_windows.remove(w);
     }
   }

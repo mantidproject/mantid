@@ -279,7 +279,7 @@ void TiledWindow::init(int nrows, int ncols)
   m_layout->setRowMinimumHeight(0,minimumTileHeight);
   for(int col = 0; col < ncols; ++col)
   {
-    m_layout->setColStretch( col, 1 );
+    m_layout->setColumnStretch( col, 1 );
   }
 
   m_scrollArea->setWidget(innerWidget);
@@ -512,7 +512,7 @@ void TiledWindow::addWidget(MdiSubWindow *widget, int row, int col)
     // prepare the cell
     m_layout->setColumnMinimumWidth(col,minimumTileWidth);
     m_layout->setRowMinimumHeight(row,minimumTileHeight);
-    m_layout->setColStretch(col,1);
+    m_layout->setColumnStretch(col,1);
     // detach the widget from ApplicationWindow
     widget->detach();
     // widget must have it's parent
