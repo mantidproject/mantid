@@ -154,4 +154,42 @@ private:
   }
 };
 
+/// Performance tests
+class ALCLatestFileFinderTestPerformance : public CxxTest::TestSuite {
+public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static ALCLatestFileFinderTestPerformance *createSuite() {
+    return new ALCLatestFileFinderTestPerformance();
+  }
+  static void destroySuite(ALCLatestFileFinderTestPerformance *suite) {
+    delete suite;
+  }
+
+  ALCLatestFileFinderTestPerformance() {
+    for (size_t i = 10; i < 59; i++) {
+      std::ostringstream time, run;
+      time << "2116-03-16T18:00:" << i;
+      run << "900" << i;
+      m_files.emplace_back(time.str(), "MUSR", run.str());
+    }
+  }
+
+  // Set up files here - will be deleted when the class is destroyed
+  void setUp() override {}
+
+  void tearDown() override {
+    TS_ASSERT_EQUALS(m_mostRecent, m_files.back().getFileName());
+  }
+
+  void test_latestFileFinder_performance() {
+    ALCLatestFileFinder finder(m_files[0].getFileName());
+    m_mostRecent = finder.getMostRecentFile();
+  }
+
+private:
+  std::vector<TestFile> m_files;
+  std::string m_mostRecent;
+};
+
 #endif /* MANTID_CUSTOMINTERFACES_ALCLATESTFILEFINDERTEST_H_ */
