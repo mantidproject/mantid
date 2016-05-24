@@ -840,10 +840,6 @@ void SCDCalibratePanels::exec() {
         tie(iFunc, true, "SampleX", samplePos.X() + SampleXoffset);
         tie(iFunc, true, "SampleY", samplePos.Y() + SampleYoffset);
         tie(iFunc, true, "SampleZ", samplePos.Z() + SampleZoffset);
-      } else {
-          iFunc->fixParameter("SampleX");
-          iFunc->fixParameter("SampleY");
-          iFunc->fixParameter("SampleZ");
       }
 
       tie(iFunc, !useL0, "l0", L0_bank);
