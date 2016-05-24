@@ -236,12 +236,13 @@ void ScriptFileInterpreter::showContextMenu(const QPoint &clickPoint) {
   QMenu context(this);
   context.addAction("&Save", m_editor, SLOT(saveToCurrentFile()));
 
-  auto * copyAction = context.addAction("&Copy", m_editor, SLOT(copy()));
+  auto *copyAction = context.addAction("&Copy", m_editor, SLOT(copy()));
   context.insertSeparator(copyAction);
   context.addAction("C&ut", m_editor, SLOT(cut()));
   context.addAction("P&aste", m_editor, SLOT(paste()));
 
-  auto * execAction = context.addAction("E&xecute Selection", this, SLOT(executeSelection()));
+  auto *execAction =
+      context.addAction("E&xecute Selection", this, SLOT(executeSelection()));
   context.insertSeparator(execAction);
   context.addAction("Execute &All", this, SLOT(executeAll()));
 

@@ -33,14 +33,9 @@
 #include "PolynomialFit.h"
 
 #include <QSpinBox>
-#include <QCheckBox>
 #include <QMessageBox>
-#include <QLayout>
 #include <QGroupBox>
-#include <QPushButton>
-#include <QLabel>
 #include <QLineEdit>
-#include <QComboBox>
 
 PolynomFitDialog::PolynomFitDialog( QWidget* parent, Qt::WFlags fl )
   : QDialog( parent, fl ), graph(NULL)

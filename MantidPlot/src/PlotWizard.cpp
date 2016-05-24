@@ -32,14 +32,7 @@
 #include "Graph3D.h"
 
 #include <QApplication>
-#include <QHBoxLayout>
-#include <QVBoxLayout>
-#include <QGridLayout>
-#include <QSizePolicy>
-#include <QLabel>
-#include <QMessageBox>
 #include <QGroupBox>
-#include <QPushButton>
 #include <QListWidget>
 #include <QComboBox>
 

@@ -35,16 +35,8 @@
 #include "ApplicationWindow.h"
 #include "Mantid/MantidUI.h"
 
-#include <QObject>
-#include <QStringList>
-#include <QDir>
-#include <QApplication>
-#include <QTemporaryFile>
-#include <QTextStream>
-
 #include <Qsci/qscilexerpython.h>
 #include "MantidKernel/ConfigService.h"
-#include "MantidQtAPI/InterfaceManager.h"
 
 #include <cassert>
 
@@ -404,7 +396,8 @@ const QStringList PythonScripting::mathFunctions() const {
 }
 
 const QString PythonScripting::mathFunctionDoc(const QString &name) const {
-  PyObject *mathf = PyDict_GetItemString(m_math, name.toAscii().constData()); // borrowed
+  PyObject *mathf =
+      PyDict_GetItemString(m_math, name.toAscii().constData()); // borrowed
   if (!mathf)
     return "";
   PyObject *pydocstr = PyObject_GetAttrString(mathf, "__doc__"); // new

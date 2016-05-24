@@ -36,9 +36,6 @@
 
 #include "sipAPI_qti.h"
 
-#include <QVariant>
-#include <QMessageBox>
-
 #include <stdexcept>
 
 namespace {

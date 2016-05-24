@@ -30,10 +30,7 @@
 #include "ColorBox.h"
 #include "Table.h"
 
-#include <QPaintDevice>
 #include <QPainter>
-#include <QPainterPath>
-#include <QVarLengthArray>
 #include <QMessageBox>
 #include <QApplication>
 

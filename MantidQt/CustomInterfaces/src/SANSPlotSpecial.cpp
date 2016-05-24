@@ -8,8 +8,6 @@
 #include "MantidQtMantidWidgets/RangeSelector.h"
 
 #include <QLineEdit>
-#include <QDesktopServices>
-#include <QUrl>
 #include "qwt_plot_curve.h"
 
 namespace MantidQt
