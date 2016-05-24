@@ -1099,7 +1099,7 @@ private slots:
   void plotDataMenuAboutToShow();
   void tableMenuAboutToShow();
   void windowsMenuAboutToShow();
-  void windowsMenuActivated( int id );
+  void windowsMenuActivated();
   void interfaceMenuAboutToShow();
   void tiledWindowMenuAboutToShow();
 

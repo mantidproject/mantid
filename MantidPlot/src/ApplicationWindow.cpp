@@ -9526,7 +9526,7 @@ void ApplicationWindow::windowsMenuAboutToShow() {
     windowsMenu->addSeparator();
     for (int i = 0; i < n; ++i) {
       auto activated = windowsMenu->addAction(windows.at(i)->objectName(), this,
-                                       SLOT(windowsMenuActivated(int)));
+                                       SLOT(windowsMenuActivated()));
       activated->setData(i);
       auto isChecked = currentFolder()->activeWindow() == windows.at(i);
       activated->setChecked(isChecked);
@@ -9534,7 +9534,8 @@ void ApplicationWindow::windowsMenuAboutToShow() {
   } else if (n >= 10) {
     windowsMenu->addSeparator();
     for (int i = 0; i < 9; ++i) {
-      auto activated = windowsMenu->addAction(windows.at(i)->objectName(), this, SLOT(windowsMenuActivated(int)));
+      auto activated = windowsMenu->addAction(windows.at(i)->objectName(), this,
+                                       SLOT(windowsMenuActivated()));
       activated->setData(i);
       auto isChecked = activeWindow() == windows.at(i);
       activated->setChecked(isChecked);
@@ -9597,6 +9598,7 @@ void ApplicationWindow::interfaceMenuAboutToShow() {
         continue;
       QAction *openInterface = new QAction(interfaceMenu);
       openInterface->setObjectName(tr(name));
+      openInterface->setText(tr(name));
       openInterface->setData(data);
       categoryMenus[category]->addAction(openInterface);
 
@@ -9677,8 +9679,11 @@ void ApplicationWindow::showMoreWindows() {
     explorerWindow->show();
 }
 
-void ApplicationWindow::windowsMenuActivated(int id) {
+void ApplicationWindow::windowsMenuActivated() {
   QList<MdiSubWindow *> windows = currentFolder()->windowsList();
+  QObject* obj = sender();
+  QAction* action = qobject_cast<QAction*>(sender());
+  auto id = action->data().asInt();
   MdiSubWindow *w = windows.at(id);
   if (w) {
     this->activateWindow(w);
