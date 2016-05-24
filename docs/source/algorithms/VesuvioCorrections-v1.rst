@@ -42,7 +42,7 @@ Usage
                          ParameterType='Number', Value='20.0')
 
   #######################Create dummy fit parameters#############################
-  params = ms.CreateEmptyTableWorkspace(OutputWorkspace='__VesuvioCorrections_test_fit_params')
+  params = CreateEmptyTableWorkspace(OutputWorkspace='__VesuvioCorrections_test_fit_params')
 
   params.addColumn('str', 'Name')
   params.addColumn('float', 'Value')
