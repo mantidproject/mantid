@@ -94,13 +94,13 @@ public:
   void test_getMostRecentFile() {
     auto files = generateTestFiles();
     ALCLatestFileFinder finder(files[0].getFileName());
-    TS_ASSERT_EQUALS(finder.getMostRecentFile(), files[1].getFileName());
+    TS_ASSERT_EQUALS(finder.getMostRecentFile(), files[2].getFileName());
     { // file added
       auto newFile = TestFile("2116-03-15T15:00:00", "MUSR", "90003");
       TS_ASSERT_EQUALS(finder.getMostRecentFile(), newFile.getFileName());
     }
     // file removed (newFile went out of scope)
-    TS_ASSERT_EQUALS(finder.getMostRecentFile(), files[1].getFileName());
+    TS_ASSERT_EQUALS(finder.getMostRecentFile(), files[2].getFileName());
   }
 
   /**
@@ -110,7 +110,7 @@ public:
     auto files = generateTestFiles();
     auto nonNexus = TestFile("2116-03-15T16:00:00", "MUSR", "90004", "run");
     ALCLatestFileFinder finder(files[0].getFileName());
-    TS_ASSERT_EQUALS(finder.getMostRecentFile(), files[1].getFileName());
+    TS_ASSERT_EQUALS(finder.getMostRecentFile(), files[2].getFileName());
   }
 
   /**
@@ -122,7 +122,7 @@ public:
     ALCLatestFileFinder finder(files[0].getFileName());
     std::string foundFile;
     TS_ASSERT_THROWS_NOTHING(foundFile = finder.getMostRecentFile());
-    TS_ASSERT_EQUALS(foundFile, files[1].getFileName());
+    TS_ASSERT_EQUALS(foundFile, files[2].getFileName());
   }
 
   /**
@@ -134,21 +134,22 @@ public:
     ALCLatestFileFinder finder(files[0].getFileName());
     std::string foundFile;
     TS_ASSERT_THROWS_NOTHING(foundFile = finder.getMostRecentFile());
-    TS_ASSERT_EQUALS(foundFile, files[1].getFileName());
+    TS_ASSERT_EQUALS(foundFile, files[2].getFileName());
   }
 
 private:
   /**
    * Generate three scoped test files
-   * The second file is the most recent
+   * The creation dates go in run number order, as is the case with real files
+   * (confirmed with scientists that this is always the case)
    * @returns :: vector containing three files
    */
   std::vector<TestFile> generateTestFiles() {
     std::vector<TestFile> files;
     // 100 years so it won't clash with other files in temp directory
     files.emplace_back("2116-03-15T12:00:00", "MUSR", "90000");
-    files.emplace_back("2116-03-15T14:00:00", "MUSR", "90001");
-    files.emplace_back("2116-03-15T13:00:00", "MUSR", "90002");
+    files.emplace_back("2116-03-15T13:00:00", "MUSR", "90001");
+    files.emplace_back("2116-03-15T14:00:00", "MUSR", "90002");
     return files;
   }
 };
