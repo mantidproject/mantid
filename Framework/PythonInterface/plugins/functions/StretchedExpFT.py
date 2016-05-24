@@ -32,7 +32,6 @@ import copy
 import scipy.constants
 from scipy.fftpack import dct, fft, fftfreq
 from math import gamma
-from pdb import set_trace as tr
 
 class StretchedExpFT(IFunction1D):
     # Class variables
@@ -97,7 +96,7 @@ class StretchedExpFT(IFunction1D):
         erange = 2*max(abs(xvals))
         dt = StretchedExpFT._planck_constant/erange  # spacing in time
         tmax = StretchedExpFT._planck_constant/de  # maximum reciprocal time
-        # round to an upper power of two (minus one)
+        # round to an upper power of two
         nt = 2**(1+int(np.log(tmax/dt)/np.log(2)))
         sampled_times = dt * np.arange(-nt, nt)
         decay = np.exp(-(np.abs(sampled_times)/p['Tau'])**p['Beta'])
