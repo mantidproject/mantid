@@ -3932,7 +3932,7 @@ void Graph::showAxisTitleMenu() {
 
 void Graph::showAxisContextMenu(int axis) {
   QMenu menu(this);
-  menu.setCheckable(true);
+  menu.isCheckable();
 
   menu.addAction(getQPixmap("unzoom_xpm"), tr("&Rescale to show all"), this,
                  SLOT(setAutoScale()), tr("Ctrl+Shift+R"));

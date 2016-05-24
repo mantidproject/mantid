@@ -298,7 +298,7 @@ void FunctionDialog::acceptFunction()
 		return;
 	}
 
-	QString formula = boxFunction->text().simplified();
+	QString formula = boxFunction->toPlainText().simplified();
 	bool error=false;
 
 	try
