@@ -13,7 +13,7 @@ set ( Boost_LIBRARIES ) # Empty out the variable after previous use
 # We need to find the right boost python version for the given python version. Unfortunately
 # there is not standard naming convention across the platforms, for example:
 #  - fedora, arch: libboost_python.so (python2), libboost_python3.so (python3)
-#  - debian, ubuntu: libboost_python.so (python2), libboost_python34.so (python 3.4)
+#  - debian, ubuntu: libboost_python.so (python2), libboost_python-py34.so (python 3.4)
 #  - windows: boost_python (python2), ????? (python3)
 #  - others?
 if ( MSVC )
