@@ -2,6 +2,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidKernel/UserStringParser.h"
+#include "MantidKernel/StringTokenizer.h"
 #include <boost/lexical_cast.hpp>
 
 namespace Mantid {
@@ -84,14 +85,12 @@ bool UserStringParser::Contains(const std::string &input, char ch) {
 std::vector<std::string>
 UserStringParser::separateComma(const std::string &input) {
 
-  typedef boost::tokenizer<boost::char_separator<char>> tokenizer;
-  boost::char_separator<char> commasep(",");
+  typedef Mantid::Kernel::StringTokenizer tokenizer;
   std::vector<std::string> commaseparatedvalues;
 
-  tokenizer tokens(input, commasep);
-  for (tokenizer::iterator tokItr = tokens.begin(); tokItr != tokens.end();
-       ++tokItr) {
-    commaseparatedvalues.push_back(*tokItr);
+  tokenizer tokens(input, ",", Mantid::Kernel::StringTokenizer::TOK_TRIM);
+  for (const auto &tokItr : tokens) {
+    commaseparatedvalues.push_back(tokItr);
   }
   return commaseparatedvalues;
 }
@@ -149,14 +148,13 @@ void UserStringParser::Tokenize(const std::string &input,
                                 const std::string &delimiter,
                                 unsigned int &start, unsigned int &end,
                                 unsigned int &step) {
-  typedef boost::tokenizer<boost::char_separator<char>> tokenizer;
+  typedef Mantid::Kernel::StringTokenizer tokenizer;
 
-  boost::char_separator<char> seps(delimiter.c_str());
+  const std::string seps(delimiter.c_str());
   std::vector<std::string> temp;
   tokenizer tokens(input, seps);
-  for (tokenizer::const_iterator tokItr = tokens.begin();
-       tokItr != tokens.end(); ++tokItr) {
-    temp.push_back(*tokItr);
+  for (const auto &tokItr : tokens) {
+    temp.push_back(tokItr);
   }
   if (temp.empty()) {
     return;
