@@ -481,8 +481,7 @@ void SCDPanelErrors::function1D(double *out, const double *xValues,
   for (size_t i = 0; i < StartX; ++i)
     out[i] = 0.;
   for (size_t i = StartX; i <= EndX; ++i) {
-    double dErr = fitWS->getRef<double>(std::string("d(obs) - d(calc)"), i);
-    if (dErr > 0.0) out[i] = 1/dErr;
+    out[i] = fitWS->getRef<double>(std::string("d(obs) - d(calc)"), i);
     /// fitWS->getRef<double>(std::string("d(obs)"), i);
   }
 
