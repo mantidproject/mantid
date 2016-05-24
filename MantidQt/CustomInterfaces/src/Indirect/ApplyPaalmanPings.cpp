@@ -1,4 +1,3 @@
-
 #include "MantidQtCustomInterfaces/Indirect/ApplyPaalmanPings.h"
 #include "MantidQtCustomInterfaces/UserInputValidator.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -25,6 +24,10 @@ ApplyPaalmanPings::ApplyPaalmanPings(QWidget *parent) : CorrectionsTab(parent) {
           SLOT(newContainer(const QString &)));
   connect(m_uiForm.spPreviewSpec, SIGNAL(valueChanged(int)), this,
           SLOT(plotPreview(int)));
+  connect(m_uiForm.spCanScale, SIGNAL(valueChanged(double)), this,
+          SLOT(updateContainer()));
+  connect(m_uiForm.spCanShift, SIGNAL(valueChanged(double)), this,
+          SLOT(updateContainer()));
 
   m_uiForm.spPreviewSpec->setMinimum(0);
   m_uiForm.spPreviewSpec->setMaximum(0);
@@ -33,30 +36,83 @@ ApplyPaalmanPings::ApplyPaalmanPings(QWidget *parent) : CorrectionsTab(parent) {
 void ApplyPaalmanPings::setup() {}
 
 /**
- * Disables corrections when using S(Q, w) as input data.
- *
- * @param dataName Name of new data source
- */
+* Disables corrections when using S(Q, w) as input data.
+*
+* @param dataName Name of new data source
+*/
 void ApplyPaalmanPings::newSample(const QString &dataName) {
-  const MatrixWorkspace_sptr sampleWS =
+  // Remove old curves
+  m_uiForm.ppPreview->removeSpectrum("Sample");
+  m_uiForm.ppPreview->removeSpectrum("Corrected");
+
+  // Get workspace
+  const MatrixWorkspace_sptr sampleWs =
       AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
           dataName.toStdString());
 
   // Plot the curve
-  m_uiForm.ppPreview->clear();
-  m_uiForm.ppPreview->addSpectrum("Sample", sampleWS, 0, Qt::black);
+  m_uiForm.ppPreview->addSpectrum("Sample", sampleWs, 0, Qt::black);
   m_uiForm.spPreviewSpec->setMaximum(
-      static_cast<int>(sampleWS->getNumberHistograms()) - 1);
-  m_sampleWorkspaceName = dataName;
+      static_cast<int>(sampleWs->getNumberHistograms()) - 1);
+  m_sampleWorkspaceName = dataName.toStdString();
+
+  // Set maximum / minimum can shift
+  m_uiForm.spCanShift->setMinimum(sampleWs->getXMin());
+  m_uiForm.spCanShift->setMaximum(sampleWs->getXMax());
 }
 
 void ApplyPaalmanPings::newContainer(const QString &dataName) {
-  const MatrixWorkspace_sptr containerWS =
+  // Remove old curves
+  m_uiForm.ppPreview->removeSpectrum("Container");
+  m_uiForm.ppPreview->removeSpectrum("Corrected");
+
+  // get Workspace
+  const MatrixWorkspace_sptr containerWs =
       AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
           dataName.toStdString());
-  m_uiForm.ppPreview->removeSpectrum("Contianer");
-  m_uiForm.ppPreview->addSpectrum("Container", containerWS, 0, Qt::red);
-  m_containerWorkspaceName = dataName;
+  // Clone for use in plotting and alg
+  IAlgorithm_sptr clone = AlgorithmManager::Instance().create("CloneWorkspace");
+  clone->initialize();
+  clone->setProperty("InputWorkspace", containerWs);
+  clone->setProperty("Outputworkspace", "__processed_can");
+  clone->execute();
+  m_uiForm.ppPreview->addSpectrum("Container", containerWs, 0, Qt::red);
+  m_containerWorkspaceName = "__processed_can";
+}
+
+void ApplyPaalmanPings::updateContainer() {
+  const auto canName = m_uiForm.dsContainer->getCurrentDataName();
+  if (canName.compare("") != 0) {
+    IAlgorithm_sptr scaleX = AlgorithmManager::Instance().create("ScaleX");
+    scaleX->initialize();
+    scaleX->setLogging(false);
+    scaleX->setProperty("InputWorkspace", canName.toStdString());
+    scaleX->setProperty("OutputWorkspace", m_containerWorkspaceName);
+    scaleX->setProperty("Factor", m_uiForm.spCanShift->value());
+    scaleX->setProperty("Operation", "Add");
+    scaleX->execute();
+
+    IAlgorithm_sptr scale = AlgorithmManager::Instance().create("Scale");
+    scale->initialize();
+    scale->setLogging(false);
+    scale->setProperty("InputWorkspace", m_containerWorkspaceName);
+    scale->setProperty("OutputWorkspace", m_containerWorkspaceName);
+    scale->setProperty("Factor", m_uiForm.spCanScale->value());
+    scale->setProperty("Operation", "Multiply");
+    scale->execute();
+  }
+
+  if (m_uiForm.dsSample->getCurrentDataName().compare("") != 0) {
+    IAlgorithm_sptr rebin =
+        AlgorithmManager::Instance().create("RebinToWorkspace");
+    rebin->initialize();
+    rebin->setLogging(false);
+    rebin->setProperty("WorkspaceToRebin", m_containerWorkspaceName);
+    rebin->setProperty("WorkspaceToMatch", m_sampleWorkspaceName);
+    rebin->setProperty("OutputWorkspace", m_containerWorkspaceName);
+    rebin->execute();
+  }
+  plotPreview(m_uiForm.spPreviewSpec->value());
 }
 
 void ApplyPaalmanPings::run() {
@@ -83,81 +139,75 @@ void ApplyPaalmanPings::run() {
   }
 
   const bool useCan = m_uiForm.ckUseCan->isChecked();
-  const bool useShift = m_uiForm.ckShiftCan->isChecked();
   const bool useCorrections = m_uiForm.ckUseCorrections->isChecked();
   // Get Can and Clone
+  MatrixWorkspace_sptr canClone;
   if (useCan) {
-    MatrixWorkspace_sptr canWs =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            m_containerWorkspaceName);
-    m_containerWorkspaceName = m_containerWorkspaceName + "_Shifted";
-    IAlgorithm_sptr clone =
-        AlgorithmManager::Instance().create("CloneWorkspace");
-    clone->initialize();
-    clone->setProperty("InputWorkspace", canWs);
-    clone->setProperty("Outputworkspace", m_containerWorkspaceName);
-    clone->execute();
-    MatrixWorkspace_sptr canCloneWs =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            m_containerWorkspaceName);
-    if (useShift) {
-      IAlgorithm_sptr scaleX = AlgorithmManager::Instance().create("ScaleX");
-      scaleX->initialize();
-      scaleX->setProperty("InputWorkspace", canCloneWs);
-      scaleX->setProperty("OutputWorkspace", m_containerWorkspaceName);
-      scaleX->setProperty("Factor", m_uiForm.spCanShift->value());
-      scaleX->setProperty("Operation", "Add");
-      scaleX->execute();
+    const auto canName =
+        m_uiForm.dsContainer->getCurrentDataName().toStdString();
+	const auto cloneName = "__algorithm_can";
+	IAlgorithm_sptr clone = AlgorithmManager::Instance().create("CloneWorkspace");
+	clone->initialize();
+	clone->setProperty("InputWorkspace", canName);
+	clone->setProperty("Outputworkspace", cloneName);
+	clone->execute();
+
+    const bool useShift = m_uiForm.ckShiftCan->isChecked();
+	if (useShift) {
+		IAlgorithm_sptr scaleX = AlgorithmManager::Instance().create("ScaleX");
+		scaleX->initialize();
+		scaleX->setLogging(false);
+		scaleX->setProperty("InputWorkspace", cloneName);
+		scaleX->setProperty("OutputWorkspace", cloneName);
+		scaleX->setProperty("Factor", m_uiForm.spCanShift->value());
+		scaleX->setProperty("Operation", "Add");
+		scaleX->execute();
+		IAlgorithm_sptr rebin =
+			AlgorithmManager::Instance().create("RebinToWorkspace");
+		rebin->initialize();
+		rebin->setLogging(false);
+		rebin->setProperty("WorkspaceToRebin", cloneName);
+		rebin->setProperty("WorkspaceToMatch", m_sampleWorkspaceName);
+		rebin->setProperty("OutputWorkspace", cloneName);
+		rebin->execute();
+	}
+	canClone = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(cloneName);
+    // Check for same binning across sample and container
+    if (!checkWorkspaceBinningMatches(sampleWs, canClone)) {
+      const char *text =
+          "Binning on sample and container does not match."
+          "Would you like to rebin the container to match the sample?";
+
+      int result = QMessageBox::question(NULL, tr("Rebin sample?"), tr(text),
+                                         QMessageBox::Yes, QMessageBox::No,
+                                         QMessageBox::NoButton);
+
+      if (result == QMessageBox::Yes) {
+        addRebinStep(QString::fromStdString(canName),
+                     QString::fromStdString(m_sampleWorkspaceName));
+      } else {
+        m_batchAlgoRunner->clearQueue();
+        g_log.error("Cannot apply absorption corrections "
+                    "using a sample and "
+                    "container with different binning.");
+        return;
+      }
     }
-    IAlgorithm_sptr rebin =
-        AlgorithmManager::Instance().create("RebinToWorkspace");
-    rebin->initialize();
-    rebin->setProperty("WorkspaceToRebin", canCloneWs);
-    rebin->setProperty("WorkspaceToMatch", sampleWs);
-    rebin->setProperty("OutputWorkspace", m_containerWorkspaceName);
-    rebin->execute();
 
     // If not in wavelength then do conversion
-    std::string originalCanUnits = canCloneWs->getAxis(0)->unit()->unitID();
+    std::string originalCanUnits = canClone->getAxis(0)->unit()->unitID();
     if (originalCanUnits != "Wavelength") {
       g_log.information("Container workspace not in wavelength, need to "
                         "convert to continue.");
-      absCorProps["CanWorkspace"] =
-          addConvertUnitsStep(canCloneWs, "Wavelength");
+      absCorProps["CanWorkspace"] = addConvertUnitsStep(canClone, "Wavelength");
     } else {
-      absCorProps["CanWorkspace"] = m_containerWorkspaceName;
+      absCorProps["CanWorkspace"] = cloneName;
     }
 
-    bool useCanScale = m_uiForm.ckScaleCan->isChecked();
+    const bool useCanScale = m_uiForm.ckScaleCan->isChecked();
     if (useCanScale) {
-      double canScaleFactor = m_uiForm.spCanScale->value();
+      const double canScaleFactor = m_uiForm.spCanScale->value();
       applyCorrAlg->setProperty("CanScaleFactor", canScaleFactor);
-    }
-
-    if (useShift) {
-      addRebinStep(QString::fromStdString(m_containerWorkspaceName),
-                   QString::fromStdString(m_sampleWorkspaceName));
-    } else {
-      // Check for same binning across sample and container
-      if (!checkWorkspaceBinningMatches(sampleWs, canCloneWs)) {
-        const char *text =
-            "Binning on sample and container does not match."
-            "Would you like to rebin the container to match the sample?";
-
-        int result = QMessageBox::question(NULL, tr("Rebin sample?"), tr(text),
-                                           QMessageBox::Yes, QMessageBox::No,
-                                           QMessageBox::NoButton);
-
-        if (result == QMessageBox::Yes) {
-          addRebinStep(QString::fromStdString(m_containerWorkspaceName),
-                       QString::fromStdString(m_sampleWorkspaceName));
-        } else {
-          m_batchAlgoRunner->clearQueue();
-          g_log.error("Cannot apply absorption corrections using a sample and "
-                      "container with different binning.");
-          return;
-        }
-      }
     }
   }
 
@@ -237,19 +287,17 @@ void ApplyPaalmanPings::run() {
 
   // Using container
   if (m_uiForm.ckUseCan->isChecked()) {
+    const auto canName =
+        m_uiForm.dsContainer->getCurrentDataName().toStdString();
     MatrixWorkspace_sptr containerWs =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            m_containerWorkspaceName);
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(canName);
     auto run = containerWs->run();
     if (run.hasProperty("run_number")) {
       outputWsName +=
           "_" + QString::fromStdString(run.getProperty("run_number")->value());
     } else {
-      auto canCutIndex =
-          QString::fromStdString(m_containerWorkspaceName).indexOf("_");
-      outputWsName +=
-          "_" +
-          QString::fromStdString(m_containerWorkspaceName).left(canCutIndex);
+      auto canCutIndex = QString::fromStdString(canName).indexOf("_");
+      outputWsName += "_" + QString::fromStdString(canName).left(canCutIndex);
     }
   }
 
@@ -267,16 +315,18 @@ void ApplyPaalmanPings::run() {
 
   // Set the result workspace for Python script export
   m_pythonExportWsName = outputWsName.toStdString();
+  // m_containerWorkspaceName = m_uiForm.dsContainer->getCurrentDataName();
+  // updateContainer();
 }
 
 /**
- * Adds a rebin to workspace step to the calculation for when using a sample and
- *container that
- * have different binning.
- *
- * @param toRebin
- * @param toMatch
- */
+* Adds a rebin to workspace step to the calculation for when using a sample and
+*container that
+* have different binning.
+*
+* @param toRebin
+* @param toMatch
+*/
 void ApplyPaalmanPings::addRebinStep(QString toRebin, QString toMatch) {
   API::BatchAlgorithmRunner::AlgorithmRuntimeProps rebinProps;
   rebinProps["WorkspaceToMatch"] = toMatch.toStdString();
@@ -292,13 +342,13 @@ void ApplyPaalmanPings::addRebinStep(QString toRebin, QString toMatch) {
 }
 
 /**
- * Adds a spline interpolation as a step in the calculation for using legacy
- *correction factor
- * workspaces.
- *
- * @param toInterpolate Pointer to the workspace to interpolate
- * @param toMatch Name of the workspace to match
- */
+* Adds a spline interpolation as a step in the calculation for using legacy
+*correction factor
+* workspaces.
+*
+* @param toInterpolate Pointer to the workspace to interpolate
+* @param toMatch Name of the workspace to match
+*/
 void ApplyPaalmanPings::addInterpolationStep(MatrixWorkspace_sptr toInterpolate,
                                              std::string toMatch) {
   API::BatchAlgorithmRunner::AlgorithmRuntimeProps interpolationProps;
@@ -316,10 +366,10 @@ void ApplyPaalmanPings::addInterpolationStep(MatrixWorkspace_sptr toInterpolate,
 }
 
 /**
- * Handles completion of the abs. correction algorithm.
- *
- * @param error True if algorithm failed.
- */
+* Handles completion of the abs. correction algorithm.
+*
+* @param error True if algorithm failed.
+*/
 void ApplyPaalmanPings::absCorComplete(bool error) {
   disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
              SLOT(absCorComplete(bool)));
@@ -335,6 +385,7 @@ void ApplyPaalmanPings::absCorComplete(bool error) {
   if (m_originalSampleUnits != "Wavelength") {
     auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
         m_pythonExportWsName);
+
     std::string eMode("");
     if (m_originalSampleUnits == "dSpacing")
       eMode = "Elastic";
@@ -366,10 +417,10 @@ void ApplyPaalmanPings::absCorComplete(bool error) {
 }
 
 /**
- * Handles completion of the unit conversion and saving algorithm.
- *
- * @param error True if algorithm failed.
- */
+* Handles completion of the unit conversion and saving algorithm.
+*
+* @param error True if algorithm failed.
+*/
 void ApplyPaalmanPings::postProcessComplete(bool error) {
   disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
              SLOT(postProcessComplete(bool)));
@@ -391,9 +442,6 @@ void ApplyPaalmanPings::postProcessComplete(bool error) {
 
   if (plotType == "Contour" || plotType == "Both")
     plot2D(QString::fromStdString(m_pythonExportWsName));
-
-  m_sampleWorkspaceName = m_uiForm.dsSample->getCurrentDataName();
-  m_containerWorkspaceName = m_uiForm.dsContainer->getCurrentDataName();
 }
 
 bool ApplyPaalmanPings::validate() {
@@ -478,10 +526,10 @@ void ApplyPaalmanPings::loadSettings(const QSettings &settings) {
 }
 
 /**
- * Handles when the type of geometry changes
- *
- * Updates the file extension to search for
- */
+* Handles when the type of geometry changes
+*
+* Updates the file extension to search for
+*/
 void ApplyPaalmanPings::handleGeometryChange(int index) {
   QString ext("");
   switch (index) {
@@ -503,10 +551,10 @@ void ApplyPaalmanPings::handleGeometryChange(int index) {
 }
 
 /**
- * Replots the preview plot.
- *
- * @param wsIndex Spectrum index to plot
- */
+* Replots the preview plot.
+*
+* @param wsIndex Spectrum index to plot
+*/
 void ApplyPaalmanPings::plotPreview(int wsIndex) {
   bool useCan = m_uiForm.ckUseCan->isChecked();
 
@@ -522,24 +570,8 @@ void ApplyPaalmanPings::plotPreview(int wsIndex) {
     m_uiForm.ppPreview->addSpectrum(
         "Corrected", QString::fromStdString(m_pythonExportWsName), wsIndex,
         Qt::green);
-
-  // Scale can
+  // Plot container
   if (useCan) {
-    if (m_uiForm.ckScaleCan->isChecked()) {
-      auto canName = m_containerWorkspaceName;
-      if (m_uiForm.ckShiftCan->isChecked()) {
-        canName += "_Shifted";
-      }
-      IAlgorithm_sptr scaleCan = AlgorithmManager::Instance().create("Scale");
-      scaleCan->initialize();
-      scaleCan->setProperty("InputWorkspace", m_containerWorkspaceName);
-      scaleCan->setProperty("OutputWorkspace", "__container_corrected");
-      scaleCan->setProperty("Factor", m_uiForm.spCanScale->value());
-      scaleCan->setProperty("Operation", "Multiply");
-      scaleCan->execute();
-    }
-
-    // Plot container
     m_uiForm.ppPreview->addSpectrum(
         "Container", QString::fromStdString(m_containerWorkspaceName), wsIndex,
         Qt::red);

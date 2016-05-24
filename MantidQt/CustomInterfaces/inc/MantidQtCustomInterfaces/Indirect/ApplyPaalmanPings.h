@@ -20,6 +20,8 @@ private slots:
   void newSample(const QString &dataName);
   /// Handles a new container being loaded
   void newContainer(const QString &dataName);
+  /// Updates the container
+  void updateContainer();
   /// Updates the preview mini plot
   void plotPreview(int wsIndex);
   /// Handle abs. correction algorithm completion
