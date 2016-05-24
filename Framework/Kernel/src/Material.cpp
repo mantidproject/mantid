@@ -8,7 +8,6 @@
 #include <boost/make_shared.hpp>
 #include <boost/regex.hpp>
 
-
 namespace Mantid {
 
 namespace Kernel {
