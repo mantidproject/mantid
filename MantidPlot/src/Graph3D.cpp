@@ -1613,22 +1613,22 @@ void Graph3D::setColors(const QStringList& colors)
 void Graph3D::scaleFonts(double factor)
 {
 	QFont font = sp->coordinates()->axes[X1].numberFont();
-	font.setPointSizeF(font.pointSizeFloat()*factor);
+	font.setPointSizeF(font.pointSizeF()*factor);
 	sp->coordinates()->setNumberFont (font);
 
-	titleFnt.setPointSizeF(factor*titleFnt.pointSizeFloat());
+	titleFnt.setPointSizeF(factor*titleFnt.pointSizeF());
 	sp->setTitleFont(titleFnt.family(),titleFnt.pointSize(),titleFnt.weight(),titleFnt.italic());
 
 	font = xAxisLabelFont();
-	font.setPointSizeF(factor*font.pointSizeFloat());
+	font.setPointSizeF(factor*font.pointSizeF());
 	setXAxisLabelFont(font);
 
 	font = yAxisLabelFont();
-	font.setPointSizeF(factor*font.pointSizeFloat());
+	font.setPointSizeF(factor*font.pointSizeF());
 	setYAxisLabelFont(font);
 
 	font = zAxisLabelFont();
-	font.setPointSizeF(factor*font.pointSizeFloat());
+	font.setPointSizeF(factor*font.pointSizeF());
 	setZAxisLabelFont(font);
 }
 
