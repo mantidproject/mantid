@@ -29,6 +29,8 @@
            .ranking-low-5-parent {background-color:#b30000;}
          </style>
 
+.. _Minimizers_individual_comparison:
+
 Comparison of minimizers for individual test problems
 -----------------------------------------------------
 
@@ -40,11 +42,11 @@ The following color codes are used to distinguish different levels of
 performance, note the irregular (increasing) difference between level
 boundaries):
 
-- :ranking-top-1:`best or within 10%`
-- :ranking-top-2:`within 33% over the best`
-- :ranking-med-3:`within 75% over the best`
-- :ranking-low-4:`within 200% over the best`
-- :ranking-low-5:`over 200% of best`
+- :ranking-top-1:`best or within 10%` (ranking < 1.1)
+- :ranking-top-2:`within 33% over the best` (1.1 < ranking < 1.33)
+- :ranking-med-3:`within 75% over the best` (1.33 < ranking < 1.75)
+- :ranking-low-4:`within 200% over the best` (1.75 < ranking < 3)
+- :ranking-low-5:`over 200% of best` (ranking > 3)
 
 The integer numbers 1 and 2 next to the problem names denote the
 starting point (all NIST problems are usually tested for two different
@@ -56,9 +58,18 @@ starting points). By clicking on the names of the test problems
 Comparison in terms of accuracy
 ###############################
 
-.. Accuracy for individual NIST problems
-   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-   .. include:: minimizers_comparison/v3.7.0/comparison_v3.7_acc.txt
+For details on the ranking approach and the color codes see
+:ref:`above <Minimizers_individual_comparison>` and :ref:`the
+summarized results <FittingMinimizers>`. When interpreting these
+results note that the median shown in the summarized results is
+calculated excluding undefined values. Undefined accuracy values are
+obtained when the minimizers fail to produce any result and are shown
+in the detailed results as "nan". For the more difficult groups of
+problems the proportion of undefined values is higher for some
+minimizers. This can bias the statistics shown in the summary table in
+favor of the minimizers that fail more often, as some of the the hard
+problems are excluded from the median instead of contributing to a
+higher median (lower ranking).
 
 Accuracy for individual NIST problems, "lower" difficulty
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -79,9 +90,9 @@ Accuracy for individual NIST problems, "higher" difficulty
 Comparison in terms of run time
 ###############################
 
-.. Run time for individual NIST problems
-   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-   .. include:: minimizers_comparison/v3.7.0/comparison_v3.7_runtime.txt
+For details on the ranking approach and the color codes see
+:ref:`above <Minimizers_individual_comparison>` and :ref:`the
+summarized results <FittingMinimizers>`.
 
 Run time for individual NIST problems, "lower" difficulty
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

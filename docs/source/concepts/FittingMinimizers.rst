@@ -66,25 +66,33 @@ Finally, :ref:`FABADA <FABADA>` is an algorithm for Bayesian data
 analysis. It is excluded from the comparison described below, as it is
 a substantially different algorithm.
 
-In most cases, the implementations of these algorithms are based on
-the `GNU Scientific Libraty routines for least-squares fitting
+In most cases, the implementation of these algorithms is based on the
+`GNU Scientific Libraty routines for least-squares fitting
 <https://www.gnu.org/software/gsl/manual/html_node/Least_002dSquares-Fitting.html#Least_002dSquares-Fitting>`__
 
-**TODO: Exceptions that are not GSL methods: Levenberg-MarquardMD**.
+**TODO: Exceptions that are not GSL methods? Levenberg-MarquardMD?**.
 
 
 Comparison of relative goodness of fit and run time
 ---------------------------------------------------
 
 Here we describe a comparison of minimizers available in Mantid, in
-terms of how they perform when fitting several benchmark test
-problems. This is a relative comparison in the sense that the best
-possible results with Mantid minimizers are given a top score of
-"1". The ranking is continuous and the score of a minimizer represents
-the ratio between its performance and the performance of the best. We
-compare accuracy and run time.
+terms of how they perform when fitting several benchmark
+problems. This is a relative comparison in the sense that for every
+problem the best possible results with Mantid minimizers are given a
+top score of "1". The ranking is continuous and the score of a
+minimizer represents the ratio between its performance and the
+performance of the best. We compare accuracy and run time.
 
 .. Q: accuracy metric: sum of squared residuals or chi2 variants
+
+For example, a ranking of 1.25 for a minimizer for a given problem
+means:
+
+- Referring to the accuracy of a minimizer, it produces a solution
+  with squared residuals 25% larger than the best solution in Mantid.
+- Referring to the run time, it takes 25% more time than the fastest
+  minimizer.
 
 All the minimizers available in Mantid 3.7 were compared, with the
 exception of FABADA which belongs to a different class of methods and
@@ -101,13 +109,6 @@ the model fitted: :math:`\chi_{1}^{2} = \sum_{i} (y_i - f_i)^2` (see
 and different variants).  Run time is measured for the execution of
 the :ref:`Fit <algm-Fit>` algorithm for an equation and dataset
 previously created.
-
-For example, a ranking of 1.25 for a given problem means:
-
-- Referring to the accuracy of a minimizer, it produces a solution
-  with squared residuals 25% larger than the best solution in Mantid.
-- Referring to the run time, it takes 25% more time than the fastest
-  minimizer.
 
 .. There would be two alternative for the errors:
    1. Without errors, as it is
@@ -155,13 +156,12 @@ Comparison in terms of accuracy
 ###############################
 
 
-Summary
-^^^^^^^
+Summary, median ranking
+^^^^^^^^^^^^^^^^^^^^^^^
 
 The summary table shows the median ranking across all the test
 problems. See :ref:`detailed results by test problem (accuracy)
 <Minimizers_comparison_in_terms_of_accuracy>`.
-
 
 .. Q: In tables: show values as absolute or relative to the best one
    for each problem? Absolute for the best in a column on the right?
@@ -173,6 +173,8 @@ problems. See :ref:`detailed results by test problem (accuracy)
 
 .. include:: minimizers_comparison/v3.7.0/comparison_v3.7_acc_summary.txt
 
+:ref:`Detailed results by test problem (accuracy)
+<Minimizers_comparison_in_terms_of_accuracy>`
 
 Comparison in terms of run time
 ###############################
@@ -186,6 +188,8 @@ problems. See :ref:`detailed results by test problem (run time)
 
 .. include:: minimizers_comparison/v3.7.0/comparison_v3.7_runtime_summary.txt
 
+:ref:`Detailed results by test problem (run time)
+<Minimizers_comparison_in_terms_of_run_time>`.
 
 References:
              
