@@ -118,29 +118,25 @@ bool compareEventPulseTimeTOF(const TofEvent &e1, const TofEvent &e2) {
 // -------------------------------------------------------------------
 
 /// Constructor (empty)
-EventList::EventList()
-    : eventType(TOF), order(UNSORTED), mru(nullptr), m_lockedMRU(false) {}
+EventList::EventList() : eventType(TOF), order(UNSORTED), mru(nullptr) {}
 
 /** Constructor with a MRU list
  * @param mru :: pointer to the MRU of the parent EventWorkspace
  * @param specNo :: the spectrum number for the event list
  */
 EventList::EventList(EventWorkspaceMRU *mru, specnum_t specNo)
-    : IEventList(specNo), eventType(TOF), order(UNSORTED), mru(mru),
-      m_lockedMRU(false) {}
+    : IEventList(specNo), eventType(TOF), order(UNSORTED), mru(mru) {}
 
 /** Constructor copying from an existing event list
  * @param rhs :: EventList object to copy*/
-EventList::EventList(const EventList &rhs)
-    : IEventList(rhs), mru(rhs.mru), m_lockedMRU(false) {
+EventList::EventList(const EventList &rhs) : IEventList(rhs), mru(rhs.mru) {
   // Call the copy operator to do the job,
   this->operator=(rhs);
 }
 
 /** Constructor, taking a vector of events.
  * @param events :: Vector of TofEvent's */
-EventList::EventList(const std::vector<TofEvent> &events)
-    : mru(nullptr), m_lockedMRU(false) {
+EventList::EventList(const std::vector<TofEvent> &events) : mru(nullptr) {
   this->events.assign(events.begin(), events.end());
   this->eventType = TOF;
   this->order = UNSORTED;
@@ -148,8 +144,7 @@ EventList::EventList(const std::vector<TofEvent> &events)
 
 /** Constructor, taking a vector of events.
  * @param events :: Vector of WeightedEvent's */
-EventList::EventList(const std::vector<WeightedEvent> &events)
-    : mru(nullptr), m_lockedMRU(false) {
+EventList::EventList(const std::vector<WeightedEvent> &events) : mru(nullptr) {
   this->weightedEvents.assign(events.begin(), events.end());
   this->eventType = WEIGHTED;
   this->order = UNSORTED;
@@ -158,7 +153,7 @@ EventList::EventList(const std::vector<WeightedEvent> &events)
 /** Constructor, taking a vector of events.
  * @param events :: Vector of WeightedEventNoTime's */
 EventList::EventList(const std::vector<WeightedEventNoTime> &events)
-    : mru(nullptr), m_lockedMRU(false) {
+    : mru(nullptr) {
   this->weightedEventsNoTime.assign(events.begin(), events.end());
   this->eventType = WEIGHTED_NOTIME;
   this->order = UNSORTED;
@@ -1524,10 +1519,10 @@ const MantidVec &EventList::constDataY() const {
 
   if (yData == nullptr) {
     // Create the MRU object
-    yData = new MantidVecWithMarker(this->m_specNo, this->m_lockedMRU);
+    yData = new MantidVecWithMarker(this->m_specNo);
 
     // prepare to update the uncertainties
-    auto eData = new MantidVecWithMarker(this->m_specNo, this->m_lockedMRU);
+    auto eData = new MantidVecWithMarker(this->m_specNo);
     mru->ensureEnoughBuffersE(thread);
 
     // see if E should be calculated;
@@ -1566,7 +1561,7 @@ const MantidVec &EventList::constDataE() const {
 
   if (eData == nullptr) {
     // Create the MRU object
-    eData = new MantidVecWithMarker(this->m_specNo, this->m_lockedMRU);
+    eData = new MantidVecWithMarker(this->m_specNo);
 
     // Now use that to get E -- Y values are generated from another function
     MantidVec Y_ignored;

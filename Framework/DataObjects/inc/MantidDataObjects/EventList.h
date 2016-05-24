@@ -379,9 +379,6 @@ private:
   /// Mutex that is locked while sorting an event list
   mutable std::mutex m_sortMutex;
 
-  /// Lock out deletion of items in the MRU
-  mutable bool m_lockedMRU;
-
   template <class T>
   static typename std::vector<T>::const_iterator
   findFirstEvent(const std::vector<T> &events, const double seek_tof);
