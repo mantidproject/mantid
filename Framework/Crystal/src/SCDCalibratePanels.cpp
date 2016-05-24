@@ -12,6 +12,7 @@
 #include <fstream>
 #include "MantidGeometry/Crystal/IndexingUtils.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidGeometry/Crystal/ReducedCell.h"
 #include <Poco/File.h>
 #include <sstream>
 
@@ -107,7 +108,7 @@ DataObjects::Workspace2D_sptr
 SCDCalibratePanels::calcWorkspace(DataObjects::PeaksWorkspace_sptr &pwks,
                                   vector<string> &bankNames, double tolerance,
                                   vector<int> &bounds) {
-  int N = 0;
+  int N =0;
   if (tolerance <= 0)
     tolerance = .5;
   tolerance = min<double>(.5, tolerance);
@@ -125,41 +126,33 @@ SCDCalibratePanels::calcWorkspace(DataObjects::PeaksWorkspace_sptr &pwks,
   bounds.clear();
   bounds.push_back(0);
 
-  double sumSigInt = 0.0;
-  double sumInt = 0.0;
-  double sumBinCnt = 0.0;
-  for (int it = 0; it != pwks->getNumberPeaks(); ++it) {
-    const Peak &peak = pwks->getPeak(it);
-    sumSigInt += peak.getSigmaIntensity();
-    sumInt += peak.getIntensity();
-    sumBinCnt += peak.getBinCount();
-  }
-
   for (size_t k = 0; k < bankNames.size(); ++k) {
     for (int j = 0; j < pwks->getNumberPeaks(); ++j) {
       const Geometry::IPeak &peak = pwks->getPeak(j);
       if (std::find(bankNames.begin(), bankNames.end(), peak.getBankName()) !=
           bankNames.end())
         if (IndexingUtils::ValidIndex(peak.getHKL(), tolerance)) {
-          N += 3;
+          N += 1;
 
           // 1/sigma is considered the weight for the fit
           // weight = 1/error in FunctionDomain1DSpectrumCreator
           double weight = 1.;                // default is even weighting
           if (peak.getSigmaIntensity() > 0.) // prefer weight by sigmaI
-            weight = sumSigInt / peak.getSigmaIntensity();
+            weight = 1.0 / peak.getSigmaIntensity();
           else if (peak.getIntensity() > 0.) // next favorite weight by I
-            weight = sumInt / peak.getIntensity();
+            weight = 1.0 / peak.getIntensity();
           else if (peak.getBinCount() > 0.) // then by counts in peak centre
-            weight = sumBinCnt / peak.getBinCount();
+            weight = 1.0 / peak.getBinCount();
 
           const double PEAK_INDEX = static_cast<double>(j);
-          for (size_t i = 0; i < 3; ++i) {
+          for (size_t i = 0; i < 1; ++i) {
             xRef.push_back(PEAK_INDEX);
             errB.push_back(weight);
           }
         }
     } // for @ peak
+
+
     bounds.push_back(N);
   } // for @ bank name
 
@@ -169,7 +162,7 @@ SCDCalibratePanels::calcWorkspace(DataObjects::PeaksWorkspace_sptr &pwks,
     return boost::make_shared<DataObjects::Workspace2D>();
 
   MatrixWorkspace_sptr mwkspc =
-      API::WorkspaceFactory::Instance().create("Workspace2D", 1, 3 * N, 3 * N);
+      API::WorkspaceFactory::Instance().create("Workspace2D", 1, N, N);
 
   mwkspc->setX(0, pX);
   mwkspc->setData(0, yvals, errs);
@@ -500,23 +493,28 @@ bool GoodStart(const PeaksWorkspace_sptr &peaksWs, double a, double b, double c,
     }
   }
 
-  Kernel::Logger g_log("Calibration");
   // determine the lattice constants
-  OrientedLattice lat = peaksWs->sample().getOrientedLattice();
-  g_log.notice() << "Lattice before optimization: " << lat << "\n";
+  Kernel::Matrix<double> UB(3, 3);
+  IndexingUtils::Optimize_UB(UB, hkl, qVecs);
+  std::vector<double> lat(7);
+  IndexingUtils::GetLatticeParameters(UB, lat);
+
+  Kernel::Logger g_log("Calibration");
+  g_log.notice() << "Lattice before optimization: " << lat[0] << " " << lat[1] << " " << lat[2] << " "
+    << lat[3] << " " << lat[4] << " " << lat[5] << "\n";
 
   // see if the lattice constants are no worse than 25% out
-  if (fabs(lat.a() - a) / a > .25)
+  if (fabs(lat[0] - a) / a > .25)
     return false;
-  if (fabs(lat.b() - b) / b > .25)
+  if (fabs(lat[1] - b) / b > .25)
     return false;
-  if (fabs(lat.c() - c) / c > .25)
+  if (fabs(lat[2] - c) / c > .25)
     return false;
-  if (fabs(lat.alpha() - alpha) / alpha > .25)
+  if (fabs(lat[3] - alpha) / alpha > .25)
     return false;
-  if (fabs(lat.beta() - beta) / beta > .25)
+  if (fabs(lat[4] - beta) / beta > .25)
     return false;
-  if (fabs(lat.gamma() - gamma) / gamma > .25)
+  if (fabs(lat[5] - gamma) / gamma > .25)
     return false;
 
   return true;
@@ -619,7 +617,7 @@ void SCDCalibratePanels::exec() {
   }
 
   int nPeaks = peaksWs->getNumberPeaks();
-
+  std::string cell_type = getProperty("CellType");
   double a = getProperty("a");
   double b = getProperty("b");
   double c = getProperty("c");
@@ -636,7 +634,7 @@ void SCDCalibratePanels::exec() {
     alpha = latt.alpha();
     beta = latt.beta();
     gamma = latt.gamma();
-  } else {
+  } /*else {
     boost::shared_ptr<Algorithm> alg =
         createChildAlgorithm("FindUBUsingLatticeParameters", .2, .9, true);
     alg->setProperty("PeaksWorkspace", peaksWs);
@@ -649,7 +647,7 @@ void SCDCalibratePanels::exec() {
     alg->setProperty("NumInitial", 15);
     alg->setProperty("Tolerance", 0.12);
     alg->executeAsChildAlg();
-  }
+  }*/
   double tolerance = getProperty("tolerance");
 
   string DetCalFileName = getProperty("DetCalFilename");
@@ -922,7 +920,7 @@ void SCDCalibratePanels::exec() {
       fit_alg->setProperty("MaxIterations", Niterations);
       fit_alg->setProperty("InputWorkspace", ws);
       fit_alg->setProperty("Output", "out");
-      // fit_alg->setProperty("CreateOutput", true);
+      fit_alg->setProperty("CreateOutput", true);
       fit_alg->setProperty("CalcErrors", false);
       fit_alg->setPropertyValue("Minimizer", minimizer + ",AbsError=" +
                                                  minimizerError + ",RelError=" +
@@ -930,9 +928,9 @@ void SCDCalibratePanels::exec() {
       fit_alg->executeAsChildAlg();
 
       PARALLEL_CRITICAL(afterFit) {
-        // MatrixWorkspace_sptr fitWS = fit_alg->getProperty("OutputWorkspace");
-        // AnalysisDataService::Instance().addOrReplace("out"+boost::lexical_cast<std::string>(iGr),
-        // fitWS);
+        MatrixWorkspace_sptr fitWS = fit_alg->getProperty("OutputWorkspace");
+        //AnalysisDataService::Instance().addOrReplace("out"+boost::lexical_cast<std::string>(iGr),
+         //fitWS);
         g_log.debug() << "Finished executing Fit algorithm\n";
         string OutputStatus = fit_alg->getProperty("OutputStatus");
         g_log.notice() << BankNameString << " Output Status=" << OutputStatus
@@ -1138,30 +1136,84 @@ void SCDCalibratePanels::exec() {
   string XmlFileName = getProperty("XmlFilename");
   saveXmlFile(XmlFileName, Groups, peaksWs->getInstrument());
 
-  IAlgorithm_sptr ub_alg;
-  try {
-    ub_alg = createChildAlgorithm("CalculateUMatrix", -1, -1, false);
-  } catch (Exception::NotFoundError &) {
-    g_log.error("Can't locate CalculateUMatrix algorithm");
-    throw;
+  IFunction_sptr fn =
+      FunctionFactory::Instance().createFunction("LatticeFunction");
+  fn->setAttributeValue("LatticeSystem", cell_type);
+  fn->addTies("ZeroShift=0.0");
+  fn->setParameter("a", a);
+  if(cell_type == ReducedCell::TRICLINIC() || cell_type == ReducedCell::MONOCLINIC() || cell_type == ReducedCell::ORTHORHOMBIC() ) {
+  fn->setParameter("b", b);
   }
-  ub_alg->setProperty("PeaksWorkspace", peaksWs);
-  ub_alg->setProperty("a", a);
-  ub_alg->setProperty("b", b);
-  ub_alg->setProperty("c", c);
-  ub_alg->setProperty("alpha", alpha);
-  ub_alg->setProperty("beta", beta);
-  ub_alg->setProperty("gamma", gamma);
-  ub_alg->executeAsChildAlg();
-  OrientedLattice o_lattice = peaksWs->mutableSample().getOrientedLattice();
-  Kernel::Matrix<double> UB(3, 3);
-  UB = o_lattice.getUB();
-  std::vector<double> sigabc(6);
-  SelectCellWithForm::DetermineErrors(sigabc, UB, peaksWs, tolerance);
-  o_lattice.setError(sigabc[0], sigabc[1], sigabc[2], sigabc[3], sigabc[4],
-                     sigabc[5]);
-  peaksWs->mutableSample().setOrientedLattice(&o_lattice);
-  g_log.notice() << "Lattice after optimization: " << o_lattice << "\n";
+  if(cell_type == ReducedCell::TRICLINIC() || cell_type == ReducedCell::TETRAGONAL() || cell_type == ReducedCell::ORTHORHOMBIC() || cell_type == ReducedCell::HEXAGONAL() || cell_type == ReducedCell::MONOCLINIC()) {
+  fn->setParameter("c", c);
+  }
+  if(cell_type == ReducedCell::TRICLINIC() || cell_type == ReducedCell::RHOMBOHEDRAL() ) {
+  fn->setParameter("Alpha", alpha);
+  }
+  if(cell_type == ReducedCell::TRICLINIC() || cell_type == ReducedCell::MONOCLINIC()) {
+  fn->setParameter("Beta", beta);
+  }
+  if(cell_type == ReducedCell::TRICLINIC()) {
+  fn->setParameter("Gamma", gamma);
+  }
+
+
+  IAlgorithm_sptr fit = Mantid::API::AlgorithmFactory::Instance().create("Fit", -1);
+  fit->initialize();
+  fit->setChild(true);
+  fit->setLogging(false);
+  fit->setProperty("Function", fn);
+  fit->setProperty("InputWorkspace", peaksWs);
+  fit->setProperty("CostFunction", "Unweighted least squares");
+  fit->setProperty("CreateOutput", true);
+  fit->execute();
+
+  IAlgorithm_sptr ub_alg;
+    try {
+      ub_alg = createChildAlgorithm("CalculateUMatrix", -1, -1, false);
+    } catch (Exception::NotFoundError &) {
+      g_log.error("Can't locate CalculateUMatrix algorithm");
+      throw;
+    }
+
+    ub_alg->setProperty("PeaksWorkspace", peaksWs);
+    ub_alg->setProperty("a", fn->getParameter("a"));
+  if(cell_type == ReducedCell::TRICLINIC() || cell_type == ReducedCell::MONOCLINIC() || cell_type == ReducedCell::ORTHORHOMBIC() ) {
+    ub_alg->setProperty("b", fn->getParameter("b"));
+} else {
+    ub_alg->setProperty("b", fn->getParameter("a"));
+}
+  if(cell_type == ReducedCell::TRICLINIC() || cell_type == ReducedCell::TETRAGONAL() || cell_type == ReducedCell::ORTHORHOMBIC() || cell_type == ReducedCell::HEXAGONAL() || cell_type == ReducedCell::MONOCLINIC()) {
+    ub_alg->setProperty("c", fn->getParameter("c"));
+} else {
+    ub_alg->setProperty("c", fn->getParameter("a"));
+}
+  if(cell_type == ReducedCell::TRICLINIC() || cell_type == ReducedCell::RHOMBOHEDRAL() ) {
+    ub_alg->setProperty("alpha", fn->getParameter("Alpha"));
+} else {
+    ub_alg->setProperty("alpha", 90.0);
+}
+  if(cell_type == ReducedCell::TRICLINIC() || cell_type == ReducedCell::MONOCLINIC()) {
+    ub_alg->setProperty("beta", fn->getParameter("Beta"));
+} else {
+    ub_alg->setProperty("beta", 90.0);
+}
+  if(cell_type == ReducedCell::TRICLINIC()) {
+    ub_alg->setProperty("gamma", fn->getParameter("Gamma"));
+} else {
+    ub_alg->setProperty("gamma", 90.0);
+}
+    ub_alg->executeAsChildAlg();
+    DblMatrix UB = peaksWs->mutableSample().getOrientedLattice().getUB();
+    OrientedLattice lattice;
+    lattice.setUB(UB);
+    /*lattice.set(fn->getParameter("a"), fn->getParameter("b"), fn->getParameter("c"),
+                  fn->getParameter("Alpha"), fn->getParameter("Beta"), fn->getParameter("Gamma"));
+    lattice.setError(fn->getError(0), fn->getError(1),
+                       fn->getError(2), fn->getError(3),
+                       fn->getError(4), fn->getError(5));*/
+  peaksWs->mutableSample().setOrientedLattice(&lattice);
+  g_log.notice() << "Lattice after optimization: " << lattice << "\n";
 
   // We must sort the peaks
   // std::vector<std::pair<std::string, bool>> criteria;
@@ -1501,7 +1553,17 @@ void SCDCalibratePanels::init() {
   declareProperty("gamma", EMPTY_DBL(), mustBePositive,
                   "Lattice Parameter gamma in degrees (Leave empty to use "
                   "lattice constants in peaks workspace)");
-
+  std::vector<std::string> cellTypes;
+  cellTypes.push_back(ReducedCell::CUBIC());
+  cellTypes.push_back(ReducedCell::TETRAGONAL());
+  cellTypes.push_back(ReducedCell::ORTHORHOMBIC());
+  cellTypes.push_back(ReducedCell::HEXAGONAL());
+  cellTypes.push_back(ReducedCell::RHOMBOHEDRAL());
+  cellTypes.push_back(ReducedCell::MONOCLINIC());
+  cellTypes.push_back(ReducedCell::TRICLINIC());
+  declareProperty("CellType", cellTypes[0],
+                  boost::make_shared<StringListValidator>(cellTypes),
+                  "Select the cell type.");
   declareProperty("useL0", false, "Fit the L0(source to sample) distance");
   declareProperty("usetimeOffset", false, "Fit the time offset value");
   declareProperty("usePanelWidth", false, "Fit the Panel Width value");
@@ -1979,5 +2041,37 @@ void SCDCalibratePanels::removeOutliers(std::vector<double> &intensities) {
   }
 }
 
+Peak SCDCalibratePanels::createNewPeak(const Geometry::IPeak &peak_old,
+                                   Geometry::Instrument_const_sptr instrNew,
+                                   double T0, double L0) {
+  Geometry::Instrument_const_sptr inst = peak_old.getInstrument();
+  if (inst->getComponentID() != instrNew->getComponentID()) {
+    g_log.error("All peaks must have the same instrument");
+    throw invalid_argument("All peaks must have the same instrument");
+  }
+
+  double T = peak_old.getTOF() + T0;
+
+  int ID = peak_old.getDetectorID();
+
+  Kernel::V3D hkl = peak_old.getHKL();
+  // peak_old.setDetectorID(ID); //set det positions
+  Peak peak(instrNew, ID, peak_old.getWavelength(), hkl,
+            peak_old.getGoniometerMatrix());
+
+  Units::Wavelength wl;
+
+  wl.initialize(L0, peak.getL2(), peak.getScattering(), 0,
+                peak_old.getInitialEnergy(), 0.0);
+
+  peak.setWavelength(wl.singleFromTOF(T));
+  peak.setIntensity(peak_old.getIntensity());
+  peak.setSigmaIntensity(peak_old.getSigmaIntensity());
+  peak.setRunNumber(peak_old.getRunNumber());
+  peak.setBinCount(peak_old.getBinCount());
+
+  //!!!peak.setDetectorID(ID);
+  return peak;
+}
 } // namespace Crystal
 } // namespace Mantid

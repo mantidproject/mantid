@@ -54,6 +54,9 @@ void OptimizeLatticeForCellType::init() {
   declareProperty("Tolerance", 0.12, "Indexing Tolerance");
   declareProperty("EdgePixels", 0,
                   "Remove peaks that are at pixels this close to edge. ");
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>("OutputWorkspace","",
+                                                         Direction::Output),
+                  "Returns the goodness of the fit");
   declareProperty(make_unique<PropertyWithValue<double>>("OutputChi2", 0.0,
                                                          Direction::Output),
                   "Returns the goodness of the fit");
@@ -143,12 +146,16 @@ void OptimizeLatticeForCellType::exec() {
     fit_alg->setProperty("InputWorkspace", peakWS);
     fit_alg->setProperty("CostFunction", "Unweighted least squares");
     fit_alg->setProperty("CreateOutput", true);
-    fit_alg->setProperty("Output", "fit");
     fit_alg->executeAsChildAlg();
 
     double chisq = fit_alg->getProperty("OutputChi2overDoF");
     Geometry::UnitCell refinedCell = latticeFunction->getUnitCell();
 
+
+  auto output = fit_alg->getProperty("OutputWorkspace");
+  //setProperty("OutputWorkspace", output);
+
+  AnalysisDataService::Instance().addOrReplace("fit", output);
     IAlgorithm_sptr ub_alg;
     try {
       ub_alg = createChildAlgorithm("CalculateUMatrix", -1, -1, false);

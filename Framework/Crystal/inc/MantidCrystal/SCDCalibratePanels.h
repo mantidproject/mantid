@@ -250,6 +250,11 @@ private:
                              const std::vector<std::string> &names,
                              const std::vector<double> &params,
                              const std::vector<double> &errs);
+
+  DataObjects::Peak createNewPeak(const Geometry::IPeak &peak_old,
+                                     Geometry::Instrument_const_sptr instrNew,
+                                     double T0, double L0);
+
   /// Function to find peaks near detector edge
   bool edgePixel(DataObjects::PeaksWorkspace_sptr ws, std::string bankName,
                  int col, int row, int Edge);

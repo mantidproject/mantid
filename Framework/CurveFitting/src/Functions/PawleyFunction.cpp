@@ -278,6 +278,45 @@ void PawleyParameterFunction::createLatticeSystemParameters(
   }
 
   declareParameter("ZeroShift", 0.0);
+
+ /* declareParameter("f0_detWidthScale", 1.0, "panel Width");
+  declareParameter("f0_detHeightScale", 1.0, "panel Height");
+
+  declareParameter("f0_Xoffset", 0.0, "Panel Center x offset");
+  declareParameter("f0_Yoffset", 0.0, "Panel Center y offset");
+  declareParameter("f0_Zoffset", 0.0, "Panel Center z offset");
+
+  declareParameter("f0_Xrot", 0.0,
+                   "Rotation(degrees) Panel Center in x axis direction");
+  declareParameter("f0_Yrot", 0.0,
+                   "Rotation(degrees) Panel Center in y axis direction");
+  declareParameter("f0_Zrot", 0.0,
+                   "Rotation(degrees) Panel Center in z axis direction");
+
+  declareParameter("l0", 0.0, "Initial Flight Path");
+  declareParameter("t0", 0.0, "Time offset");
+  declareParameter("SampleX", 0.0, "Sample x offset");
+  declareParameter("SampleY", 0.0, "Sample y offset");
+  declareParameter("SampleZ", 0.0, "Sample z offset");
+
+    NGroups = value.asInt();
+    for (int k = 1; k < NGroups; ++k) {
+      std::string prefix = "f" + boost::lexical_cast<std::string>(k) + "_";
+      declareParameter(prefix + "detWidthScale", 1.0, "panel Width");
+      declareParameter(prefix + "detHeightScale", 1.0, "panelHeight");
+
+      declareParameter(prefix + "Xoffset", 0.0, "Panel Center x offset");
+      declareParameter(prefix + "Yoffset", 0.0, "Panel Center y offset");
+      declareParameter(prefix + "Zoffset", 0.0, "Panel Center z offset");
+
+      declareParameter(prefix + "Xrot", 0.0,
+                       "Rotation(degrees) Panel Center in x axis direction");
+      declareParameter(prefix + "Yrot", 0.0,
+                       "Rotation(degrees) Panel Center in y axis direction");
+      declareParameter(prefix + "Zrot", 0.0,
+                       "Rotation(degrees) Panel Center in z axis direction");
+    }
+*/
 }
 
 /// Adds a default constraint so that cell edge lengths can not be less than 0.
