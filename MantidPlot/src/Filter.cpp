@@ -50,7 +50,7 @@ Filter::Filter( ApplicationWindow *parent, Graph *g, const QString& name)
 }
 
 Filter::Filter( ApplicationWindow *parent, Table *t, const QString& name)
-: QObject( parent, name)
+: QObject( parent)
 {
 	init();
 	setObjectName(name);
