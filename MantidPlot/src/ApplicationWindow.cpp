@@ -537,10 +537,10 @@ void ApplicationWindow::init(bool factorySettings, const QStringList &args) {
       this, SLOT(showWindowPopupMenu(const QPoint &)));
   connect(lv, SIGNAL(deleteSelection()), this, SLOT(deleteSelectedItems()));
 
-  connect(recentProjectsMenu, SIGNAL(activated(int)), this,
-          SLOT(openRecentProject(int)));
-  connect(recentFilesMenu, SIGNAL(activated(int)), this,
-          SLOT(openRecentFile(int)));
+  connect(recentProjectsMenu, SIGNAL(triggered(QAction*)), this,
+          SLOT(openRecentProject(QAction*)));
+  connect(recentFilesMenu, SIGNAL(triggered(QAction*)), this,
+          SLOT(openRecentFile(QAction*)));
 
   // apply user settings
   updateAppFonts();
@@ -2133,7 +2133,7 @@ void ApplicationWindow::changeMatrixName(const QString &oldName,
                                          const QString &newName) {
   QList<MdiSubWindow *> windows = windowsList();
   foreach (MdiSubWindow *w, windows) {
-    if (w->isA("Graph3D")) {
+    if (isOfType(w, "Graph3D")) {
       auto g3d = dynamic_cast<Graph3D *>(w);
       if (!g3d)
         return;
@@ -2142,7 +2142,7 @@ void ApplicationWindow::changeMatrixName(const QString &oldName,
         s.replace(oldName, newName);
         g3d->setPlotAssociation(s);
       }
-    } else if (w->isA("MultiLayer")) {
+    } else if (isOfType(w, "MultiLayer")) {
       auto ml = dynamic_cast<MultiLayer *>(w);
       if (!ml)
         return;
@@ -2202,11 +2202,11 @@ void ApplicationWindow::updateMatrixPlots(MdiSubWindow *window) {
 
   QList<MdiSubWindow *> windows = windowsList();
   foreach (MdiSubWindow *w, windows) {
-    if (w->isA("Graph3D")) {
+    if (isOfType(w, "Graph3D")) {
       auto g3d = dynamic_cast<Graph3D *>(w);
       if (g3d && g3d->matrix() == m)
         g3d->updateMatrixData(m);
-    } else if (w->isA("MultiLayer")) {
+    } else if (isOfType(w, "MultiLayer")) {
       auto ml = dynamic_cast<MultiLayer *>(w);
       if (!ml)
         continue;
@@ -2415,7 +2415,7 @@ Graph3D *ApplicationWindow::plotParametricSurface(
 }
 
 void ApplicationWindow::updateSurfaceFuncList(const QString &s) {
-  surfaceFunc.remove(s);
+  surfaceFunc.removeAll(s);
   surfaceFunc.push_front(s);
   while ((int)surfaceFunc.size() > 10)
     surfaceFunc.pop_back();
@@ -2425,18 +2425,18 @@ Graph3D *ApplicationWindow::dataPlot3D(const QString &caption,
                                        const QString &formula, double xl,
                                        double xr, double yl, double yr,
                                        double zl, double zr) {
-  int pos = formula.find("_", 0);
+  int pos = formula.indexOf("_", 0);
   QString wCaption = formula.left(pos);
 
   Table *w = table(wCaption);
   if (!w)
     return 0;
 
-  int posX = formula.find("(", pos);
+  int posX = formula.indexOf("(", pos);
   QString xCol = formula.mid(pos + 1, posX - pos - 1);
 
-  pos = formula.find(",", posX);
-  posX = formula.find("(", pos);
+  pos = formula.indexOf(",", posX);
+  posX = formula.indexOf("(", pos);
   QString yCol = formula.mid(pos + 1, posX - pos - 1);
 
   Graph3D *plot = new Graph3D("", this, 0);
@@ -2501,23 +2501,23 @@ Graph3D *ApplicationWindow::openPlotXYZ(const QString &caption,
                                         const QString &formula, double xl,
                                         double xr, double yl, double yr,
                                         double zl, double zr) {
-  int pos = formula.find("_", 0);
+  int pos = formula.indexOf("_", 0);
   QString wCaption = formula.left(pos);
 
   Table *w = table(wCaption);
   if (!w)
     return 0;
 
-  int posX = formula.find("(X)", pos);
+  int posX = formula.indexOf("(X)", pos);
   QString xColName = formula.mid(pos + 1, posX - pos - 1);
 
-  pos = formula.find(",", posX);
+  pos = formula.indexOf(",", posX);
 
-  posX = formula.find("(Y)", pos);
+  posX = formula.indexOf("(Y)", pos);
   QString yColName = formula.mid(pos + 1, posX - pos - 1);
 
-  pos = formula.find(",", posX);
-  posX = formula.find("(Z)", pos);
+  pos = formula.indexOf(",", posX);
+  posX = formula.indexOf("(Z)", pos);
   QString zColName = formula.mid(pos + 1, posX - pos - 1);
 
   int xCol = w->colIndex(xColName);
@@ -2562,7 +2562,7 @@ void ApplicationWindow::initPlot3D(Graph3D *plot) {
   addMdiSubWindow(plot);
   connectSurfacePlot(plot);
 
-  plot->setIcon(getQPixmap("trajectory_xpm"));
+  plot->setWindowIcon(getQPixmap("trajectory_xpm"));
   plot->show();
   plot->setFocus();
 
@@ -2577,7 +2577,7 @@ void ApplicationWindow::exportMatrix() {
 
   ImageExportDialog *ied =
       new ImageExportDialog(this, m != NULL, d_extended_export_dialog);
-  ied->setDir(workingDir);
+  ied->setDirectory(workingDir);
   ied->selectFilter(d_image_export_filter);
   if (ied->exec() != QDialog::Accepted)
     return;
@@ -2608,7 +2608,7 @@ void ApplicationWindow::exportMatrix() {
   else {
     QList<QByteArray> list = QImageWriter::supportedImageFormats();
     for (int i = 0; i < (int)list.count(); i++) {
-      if (selected_filter.contains("." + (list[i]).lower()))
+      if (selected_filter.contains("." + (list[i]).toLower()))
         m->image().save(file_name, list[i], ied->quality());
     }
   }
@@ -2631,7 +2631,7 @@ Matrix *ApplicationWindow::importImage(const QString &fileName) {
                                       imagesDirPath, filter); // Mantid
     if (!fn.isEmpty()) {
       QFileInfo fi(fn);
-      imagesDirPath = fi.dirPath(true);
+      imagesDirPath = fi.absolutePath();
     }
   }
 
@@ -2673,7 +2673,7 @@ void ApplicationWindow::loadImage() {
   if (!fn.isEmpty()) {
     loadImage(fn);
     QFileInfo fi(fn);
-    imagesDirPath = fi.dirPath(true);
+    imagesDirPath = fi.absolutePath();
   }
 }
 
@@ -2875,28 +2875,28 @@ MultiLayer *ApplicationWindow::multilayerPlot(
 
   for (int i = 0; i < curves; i++) {
     QString s = colList[i];
-    int pos = s.find(":", 0);
+    int pos = s.indexOf(":", 0);
     QString caption = s.left(pos) + "_";
     Table *w = dynamic_cast<Table *>(table(caption));
 
-    int posX = s.find("(X)", pos);
+    int posX = s.indexOf("(X)", pos);
     QString xColName = caption + s.mid(pos + 2, posX - pos - 2);
     int xCol = w->colIndex(xColName);
 
-    posX = s.find(",", posX);
-    int posY = s.find("(Y)", posX);
+    posX = s.indexOf(",", posX);
+    int posY = s.indexOf("(Y)", posX);
     QString yColName = caption + s.mid(posX + 2, posY - posX - 2);
 
     PlotCurve *c = NULL;
     if (s.contains("(yErr)") || s.contains("(xErr)")) {
-      posY = s.find(",", posY);
+      posY = s.indexOf(",", posY);
       int posErr, errType;
       if (s.contains("(yErr)")) {
         errType = QwtErrorPlotCurve::Vertical;
-        posErr = s.find("(yErr)", posY);
+        posErr = s.indexOf("(yErr)", posY);
       } else {
         errType = QwtErrorPlotCurve::Horizontal;
-        posErr = s.find("(xErr)", posY);
+        posErr = s.indexOf("(xErr)", posY);
       }
 
       QString errColName = caption + s.mid(posY + 2, posErr - posY - 2);
@@ -2974,7 +2974,11 @@ void ApplicationWindow::customTable(Table *w) {
   QColorGroup cg;
   cg.setColor(QColorGroup::Base, QColor(tableBkgdColor));
   cg.setColor(QColorGroup::Text, QColor(tableTextColor));
-  w->setPalette(QPalette(cg, cg, cg));
+  QPalette palette;
+  palette.setActive(cg);
+  palette.setDisabled(cg);
+  palette.setInactive(cg);
+  w->setPalette(palette);
 
   w->setHeaderColor(tableHeaderColor);
   w->setTextFont(tableTextFont);
@@ -3151,8 +3155,8 @@ void ApplicationWindow::initTable(Table *w, const QString &caption) {
   customTable(w);
 
   w->setName(name);
-  if (!w->isA("MantidTable"))
-    w->setIcon(getQPixmap("worksheet_xpm"));
+  if (!isOfType(w, "MantidTable"))
+    w->setWindowIcon(getQPixmap("worksheet_xpm"));
 
   addMdiSubWindow(w);
 }
@@ -3645,7 +3649,7 @@ Table *ApplicationWindow::table(const QString &name) {
 Matrix *ApplicationWindow::matrix(const QString &name) {
   QString caption = name;
   if (!renamedTables.isEmpty() && renamedTables.contains(caption)) {
-    int index = renamedTables.findIndex(caption);
+    int index = renamedTables.indexOf(caption);
     caption = renamedTables[index + 1];
   }
 
@@ -3653,7 +3657,7 @@ Matrix *ApplicationWindow::matrix(const QString &name) {
   while (f) {
     QList<MdiSubWindow *> folderWindows = f->windowsList();
     foreach (MdiSubWindow *w, folderWindows) {
-      if (w->isA("Matrix") && w->objectName() == caption)
+      if (isOfType(w, "Matrix") && w->objectName() == caption)
         return dynamic_cast<Matrix *>(w);
     }
     f = f->folderBelow();
@@ -3685,21 +3689,21 @@ MdiSubWindow *ApplicationWindow::activeWindow(WindowType type) {
     break;
 
   case MultiLayerWindow:
-    if (active->isA("MultiLayer"))
+    if (isOfType(active, "MultiLayer"))
       return active;
     else
       return NULL;
     break;
 
   case NoteWindow:
-    if (active->isA("Note"))
+    if (isOfType(active, "Note"))
       return active;
     else
       return NULL;
     break;
 
   case Plot3DWindow:
-    if (active->isA("Graph3D"))
+    if (isOfType(active, "Graph3D"))
       return active;
     else
       return NULL;
@@ -3961,14 +3965,14 @@ void ApplicationWindow::removeCurves(const QString &name) {
 
   QList<MdiSubWindow *> windows = windowsList();
   foreach (MdiSubWindow *w, windows) {
-    if (w->isA("MultiLayer")) {
+    if (isOfType(w, "MultiLayer")) {
       auto ml = dynamic_cast<MultiLayer *>(w);
       if (!ml)
         return;
       QList<Graph *> layers = ml->layersList();
       foreach (Graph *g, layers)
         g->removeCurves(name);
-    } else if (w->isA("Graph3D")) {
+    } else if (isOfType(w, "Graph3D")) {
       auto g3d = dynamic_cast<Graph3D *>(w);
       if (g3d && g3d->formula().contains(name))
         g3d->clearData();
@@ -3980,14 +3984,14 @@ void ApplicationWindow::removeCurves(const QString &name) {
 void ApplicationWindow::updateCurves(Table *t, const QString &name) {
   QList<MdiSubWindow *> windows = windowsList();
   foreach (MdiSubWindow *w, windows) {
-    if (w->isA("MultiLayer")) {
+    if (isOfType(w, "MultiLayer")) {
       MultiLayer *ml = dynamic_cast<MultiLayer *>(w);
       if (ml) {
         QList<Graph *> layers = ml->layersList();
         foreach (Graph *g, layers)
           g->updateCurvesData(t, name);
       }
-    } else if (w->isA("Graph3D")) {
+    } else if (isOfType(w, "Graph3D")) {
       Graph3D *g = dynamic_cast<Graph3D *>(w);
       if (g && (g->formula()).contains(name))
         g->updateData(t);
@@ -4064,7 +4068,7 @@ void ApplicationWindow::updateConfirmOptions(bool askTables, bool askMatrices,
   if (confirmCloseMatrix != askMatrices) {
     confirmCloseMatrix = askMatrices;
     foreach (MdiSubWindow *w, windows) {
-      if (w->isA("Matrix")) {
+      if (isOfType(w, "Matrix")) {
         w->confirmClose(confirmCloseMatrix);
       }
     }
@@ -4073,7 +4077,7 @@ void ApplicationWindow::updateConfirmOptions(bool askTables, bool askMatrices,
   if (confirmClosePlot2D != askPlots2D) {
     confirmClosePlot2D = askPlots2D;
     foreach (MdiSubWindow *w, windows) {
-      if (w->isA("MultiLayer")) {
+      if (isOfType(w, "MultiLayer")) {
         w->confirmClose(confirmClosePlot2D);
       }
     }
@@ -4082,7 +4086,7 @@ void ApplicationWindow::updateConfirmOptions(bool askTables, bool askMatrices,
   if (confirmClosePlot3D != askPlots3D) {
     confirmClosePlot3D = askPlots3D;
     foreach (MdiSubWindow *w, windows) {
-      if (w->isA("Graph3D"))
+      if (isOfType(w, "Graph3D"))
         w->confirmClose(confirmClosePlot3D);
     }
   }
@@ -4090,7 +4094,7 @@ void ApplicationWindow::updateConfirmOptions(bool askTables, bool askMatrices,
   if (confirmCloseNotes != askNotes) {
     confirmCloseNotes = askNotes;
     foreach (MdiSubWindow *w, windows) {
-      if (w->isA("Note"))
+      if (isOfType(w, "Note"))
         w->confirmClose(confirmCloseNotes);
     }
   }
@@ -4099,7 +4103,7 @@ void ApplicationWindow::updateConfirmOptions(bool askTables, bool askMatrices,
     confirmCloseInstrWindow = askInstrWindow;
 
     foreach (MdiSubWindow *w, windows) {
-      if (w->isA("InstrumentWindow")) {
+      if (isOfType(w, "InstrumentWindow")) {
         w->confirmClose(confirmCloseInstrWindow);
       }
     }
@@ -4123,7 +4127,7 @@ void ApplicationWindow::setGraphDefaultSettings(bool autoscale, bool scaleFonts,
 
   QList<MdiSubWindow *> windows = windowsList();
   foreach (MdiSubWindow *w, windows) {
-    if (w->isA("MultiLayer")) {
+    if (isOfType(w, "MultiLayer")) {
       auto ml = dynamic_cast<MultiLayer *>(w);
       if (!ml)
         continue;
@@ -4196,7 +4200,7 @@ void ApplicationWindow::importASCII() {
   ImportASCIIDialog *import_dialog = new ImportASCIIDialog(
       !activeWindow(TableWindow) && !activeWindow(MatrixWindow), this,
       d_extended_import_ASCII_dialog);
-  import_dialog->setDir(asciiDirPath);
+  import_dialog->setDirectory(asciiDirPath);
   import_dialog->selectFilter(d_ASCII_file_filter);
   if (import_dialog->exec() != QDialog::Accepted)
     return;
@@ -4316,7 +4320,7 @@ void ApplicationWindow::importASCII(
         t->notifyChanges();
         emit modifiedProject(t);
       }
-    } else if (w->isA("Matrix")) {
+    } else if (isOfType(w, "Matrix")) {
       Matrix *m = dynamic_cast<Matrix *>(w);
       if (m) {
         for (int i = 0; i < files.size(); i++) {
@@ -4349,7 +4353,7 @@ void ApplicationWindow::importASCII(
       if (update_dec_separators)
         t->updateDecimalSeparators(local_separators);
       t->notifyChanges();
-    } else if (w->isA("Matrix")) {
+    } else if (isOfType(w, "Matrix")) {
       Matrix *m = dynamic_cast<Matrix *>(w);
       if (!m)
         return;
@@ -4407,7 +4411,7 @@ void ApplicationWindow::open() {
 
     if (projectname != "untitled") {
       QFileInfo fi(projectname);
-      QString pn = fi.absFilePath();
+      QString pn = fi.absoluteFilePath();
       if (fn == pn) {
         QMessageBox::warning(
             this, tr("MantidPlot - File openning error"), // Mantid
@@ -4480,7 +4484,7 @@ ApplicationWindow *ApplicationWindow::open(const QString &fn,
   QString fname = fn;
   if (fn.endsWith(".qti.gz", Qt::CaseInsensitive) ||
       fn.endsWith(".mantid.gz", Qt::CaseInsensitive)) { // decompress using zlib
-    file_uncompress(fname.ascii());
+    file_uncompress(fname.toAscii().data());
     fname = fname.left(fname.size() - 3);
   }
 
@@ -4523,19 +4527,19 @@ ApplicationWindow *ApplicationWindow::open(const QString &fn,
   return app;
 }
 
-void ApplicationWindow::openRecentFile(int index) {
-  QString fn = recentFilesMenu->findItem(index)->data().asString();
+void ApplicationWindow::openRecentFile(QAction* action) {
+  auto fn = action->data().toString();
   // if "," found in the QString
-  if (fn.find(",", 0)) {
+  if (fn.indexOf(",", 0)) {
     try {
-      int pos = fn.find(" ", 0);
+      int pos = fn.indexOf(" ", 0);
       fn = fn.right(fn.length() - pos - 1);
       loadDataFileByName(fn);
     } catch (Mantid::Kernel::Exception::NotFoundError &) {
       throw;
     }
   } else {
-    int pos = fn.find(" ", 0);
+    int pos = fn.indexOf(" ", 0);
     fn = fn.right(fn.length() - pos - 1);
     QFile f(fn);
     if (!f.exists()) {
@@ -4545,7 +4549,7 @@ void ApplicationWindow::openRecentFile(int index) {
              "<p>It will be removed from the list of recent files.")
               .arg(fn));
 
-      recentFiles.remove(fn);
+      recentFiles.removeAll(fn);
       updateRecentFilesList();
       return;
     }
@@ -4554,9 +4558,9 @@ void ApplicationWindow::openRecentFile(int index) {
   saveSettings(); // save new list of recent files
 }
 
-void ApplicationWindow::openRecentProject(int index) {
-  QString fn = recentProjectsMenu->text(index);
-  int pos = fn.find(" ", 0);
+void ApplicationWindow::openRecentProject(QAction* action) {
+  QString fn = action->text();
+  int pos = fn.indexOf(" ", 0);
   fn = fn.right(fn.length() - pos - 1);
 
   QFile f(fn);
@@ -4574,7 +4578,7 @@ void ApplicationWindow::openRecentProject(int index) {
 
   if (projectname != "untitled") {
     QFileInfo fi(projectname);
-    QString pn = fi.absFilePath();
+    QString pn = fi.absoluteFilePath();
     if (fn == pn) {
       QMessageBox::warning(
           this, tr("MantidPlot - File open error"), // Mantid
@@ -4617,7 +4621,7 @@ ApplicationWindow *ApplicationWindow::openProject(const QString &filename,
     throw std::runtime_error("Couldn't open project file");
 
   QTextStream fileTS(&file);
-  fileTS.setEncoding(QTextStream::UnicodeUTF8);
+  fileTS.setCodec(QTextCodec::codecForName("UTF-8")) ;
 
   QString baseName = fileInfo.fileName();
 
@@ -4658,8 +4662,8 @@ ApplicationWindow *ApplicationWindow::openProject(const QString &filename,
   {
     // WHY use another fileinfo?
     QFileInfo fi2(file);
-    QString fileName = fi2.absFilePath();
-    recentProjects.remove(filename);
+    QString fileName = fi2.absoluteFilePath();
+    recentProjects.removeAll(filename);
     recentProjects.push_front(filename);
     updateRecentProjectsList();
   }
@@ -4845,7 +4849,7 @@ void ApplicationWindow::openProjectFolder(std::string lines,
 bool ApplicationWindow::setScriptingLanguage(const QString &lang) {
   if (lang.isEmpty())
     return false;
-  if (scriptingEnv() && lang == scriptingEnv()->name())
+  if (scriptingEnv() && lang == scriptingEnv()->objectName())
     return true;
 
   if (m_bad_script_envs.contains(lang)) {
@@ -5124,44 +5128,44 @@ void ApplicationWindow::readSettings() {
 
   // Transform from the old setting for plot defaults, will only happen once.
   if (!settings.contains("/UpdateForPlotImprovements1")) {
-    settings.writeEntry("/UpdateForPlotImprovements1", "true");
+    settings.setValue("/UpdateForPlotImprovements1", "true");
     settings.beginGroup("/General");
 
-    settings.writeEntry("/Antialiasing", "true");
+    settings.setValue("/Antialiasing", "true");
 
     // enable right and top axes without labels
     settings.beginWriteArray("EnabledAxes");
     int i = 1;
     settings.setArrayIndex(i);
-    settings.writeEntry("enabled", "true");
-    settings.writeEntry("labels", "false");
+    settings.setValue("enabled", "true");
+    settings.setValue("labels", "false");
     i = 3;
     settings.setArrayIndex(i);
-    settings.writeEntry("enabled", "true");
-    settings.writeEntry("labels", "false");
+    settings.setValue("enabled", "true");
+    settings.setValue("labels", "false");
     settings.endArray();
     settings.endGroup();
 
     // ticks should be in
     settings.beginGroup("/Ticks");
-    settings.writeEntry("/MajTicksStyle", ScaleDraw::In);
-    settings.writeEntry("/MinTicksStyle", ScaleDraw::In);
+    settings.setValue("/MajTicksStyle", ScaleDraw::In);
+    settings.setValue("/MinTicksStyle", ScaleDraw::In);
     settings.endGroup();
 
     // legend to opaque
     settings.beginGroup("/Legend");
-    settings.writeEntry("/Transparency", 255);
+    settings.setValue("/Transparency", 255);
     settings.endGroup(); // Legend
   }
   // Transform from the old setting for plot defaults, will only happen once.
   if (!settings.contains("/UpdateForPlotImprovements2")) {
-    settings.writeEntry("/UpdateForPlotImprovements2", "true");
+    settings.setValue("/UpdateForPlotImprovements2", "true");
     settings.beginGroup("/General");
 
     // turn axes backbones off as these rarely join at the corners
-    settings.writeEntry("/AxesBackbones", "false");
+    settings.setValue("/AxesBackbones", "false");
 
-    settings.writeEntry("/CanvasFrameWidth", "1");
+    settings.setValue("/CanvasFrameWidth", "1");
     settings.endGroup();
   }
 
@@ -5442,8 +5446,8 @@ void ApplicationWindow::readSettings() {
       if (pyQtInterfaces.contains(baseName))
         continue;
 
-      if (user_windows.grep(keyName).size() > 0 ||
-          pyQtInterfaces.grep(keyName).size() > 0) {
+      if (user_windows.filter(keyName).size() > 0 ||
+          pyQtInterfaces.filter(keyName).size() > 0) {
         duplicated_custom_menu.append(menu + "/" + keyName);
       }
       if (QFileInfo(settings.value(keyName).toString()).exists())
@@ -5468,7 +5472,7 @@ void ApplicationWindow::readSettings() {
     // started.
     // QMessageBox::warning(this, tr("MantidPlot - Menu Warning"),
     // tr(mess.ascii()));
-    g_log.warning() << mess.ascii() << "\n";
+    g_log.warning() << tr(mess.toAscii()).toStdString() << "\n";
     settings.setValue("/DuplicationDialogShown", true);
   }
 }
@@ -5826,7 +5830,7 @@ void ApplicationWindow::exportGraph() {
 
   MultiLayer *plot2D = 0;
   Graph3D *plot3D = 0;
-  if (w->isA("MultiLayer")) {
+  if (isOfType(w, "MultiLayer")) {
     plot2D = dynamic_cast<MultiLayer *>(w);
     if (!plot2D)
       return;
