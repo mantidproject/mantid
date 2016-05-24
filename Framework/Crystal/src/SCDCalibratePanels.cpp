@@ -159,19 +159,16 @@ SCDCalibratePanels::calcWorkspace(DataObjects::PeaksWorkspace_sptr &pwks,
     bounds.push_back(N);
   } // for @ bank name
 
-  auto yvals = make_cow<HistogramData::HistogramY>(xRef.size(), 0.0);
-  auto errs = make_cow<HistogramData::HistogramE>(std::move(errB));
-
   if (N < 4) // If not well indexed
     return boost::make_shared<DataObjects::Workspace2D>();
 
-  MatrixWorkspace_sptr mwkspc =
-      API::WorkspaceFactory::Instance().create("Workspace2D", 1, N, N);
+  auto mwkspc = API::createWorkspace<Workspace2D>(1, N, N);
 
   mwkspc->setPoints(0, xRef);
-  mwkspc->setData(0, yvals, errs);
+  mwkspc->setCounts(0, xRef.size(), 0.0);
+  mwkspc->setCountStandardDeviations(0, std::move(errB));
 
-  return boost::dynamic_pointer_cast<DataObjects::Workspace2D>(mwkspc);
+  return mwkspc;
 }
 
 /**

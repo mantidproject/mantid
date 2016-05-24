@@ -19,8 +19,8 @@ using namespace Mantid::API;
 using namespace Mantid::Algorithms;
 using namespace Mantid::DataObjects;
 using Mantid::HistogramData::BinEdges;
-using Mantid::HistogramData::HistogramY;
-using Mantid::HistogramData::HistogramE;
+using Mantid::HistogramData::Counts;
+using Mantid::HistogramData::CountVariances;
 
 class SolidAngleTest : public CxxTest::TestSuite {
 public:
@@ -30,27 +30,22 @@ public:
   SolidAngleTest() : inputSpace(""), outputSpace("") {
     // Set up a small workspace for testing
     // Nhist = 144;
-    Workspace_sptr space =
-        WorkspaceFactory::Instance().create("Workspace2D", Nhist, 11, 10);
-    Workspace2D_sptr space2D = boost::dynamic_pointer_cast<Workspace2D>(space);
+    auto space2D = createWorkspace<Workspace2D>(Nhist, 11, 10);
     BinEdges x{0, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000};
-    auto a = make_cow<HistogramY>(10);
-    auto e = make_cow<HistogramE>(10);
-    for (int i = 0; i < 10; ++i) {
-      a.access()[i] = i;
-      e.access()[i] = sqrt(double(i));
-    }
+    Counts a{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+    CountVariances e(a.begin(), a.end());
 
     for (int j = 0; j < Nhist; ++j) {
       space2D->setBinEdges(j, x);
-      space2D->setData(j, a, e);
+      space2D->setCounts(j, a);
+      space2D->setCountVariances(j, e);
       // Just set the spectrum number to match the index
       space2D->getSpectrum(j)->setSpectrumNo(j + 1);
     }
 
     // Register the workspace in the data service
     inputSpace = "SATestWorkspace";
-    AnalysisDataService::Instance().add(inputSpace, space);
+    AnalysisDataService::Instance().add(inputSpace, space2D);
 
     // Load the instrument data
     Mantid::DataHandling::LoadInstrument loader;

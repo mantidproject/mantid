@@ -18,8 +18,6 @@ using namespace Mantid::Algorithms;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using Mantid::HistogramData::BinEdges;
-using Mantid::HistogramData::HistogramY;
-using Mantid::HistogramData::HistogramE;
 
 class RemoveBinsTest : public CxxTest::TestSuite {
 public:

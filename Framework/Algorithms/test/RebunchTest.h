@@ -8,14 +8,16 @@
 #include "MantidAlgorithms/Rebunch.h"
 #include "MantidAPI/WorkspaceProperty.h"
 
+#include <numeric>
+
 using namespace Mantid::Kernel;
 using namespace Mantid::DataObjects;
 using namespace Mantid::API;
 using namespace Mantid::Algorithms;
 using Mantid::HistogramData::BinEdges;
 using Mantid::HistogramData::Points;
-using Mantid::HistogramData::HistogramY;
-using Mantid::HistogramData::HistogramE;
+using Mantid::HistogramData::Counts;
+using Mantid::HistogramData::CountVariances;
 
 class RebunchTest : public CxxTest::TestSuite {
 public:
@@ -181,8 +183,6 @@ private:
 
   Workspace2D_sptr Create2DWorkspaceHist(int xlen, int ylen) {
     BinEdges x1(xlen, 0.0);
-    auto y1 = boost::make_shared<HistogramY>(xlen - 1, 0.0);
-    auto e1 = boost::make_shared<HistogramE>(xlen - 1, 0.0);
 
     Workspace2D_sptr retVal(new Workspace2D);
     retVal->initialize(ylen, xlen, xlen - 1);
@@ -192,16 +192,16 @@ private:
       x = j * 0.5;
       j += 1.5;
     }
-    j = 1.0;
-    for (int i = 0; i < xlen - 1; i++) {
-      (*y1)[i] = j;
-      (*e1)[i] = sqrt(j);
-      j += 1;
-    }
+
+    Counts y1(xlen - 1);
+    CountVariances e1(xlen - 1);
+    std::iota(y1.begin(), y1.end(), 1.0);
+    std::iota(e1.begin(), e1.end(), 1.0);
 
     for (int i = 0; i < ylen; i++) {
       retVal->setBinEdges(i, x1);
-      retVal->setData(i, y1, e1);
+      retVal->setCounts(i, y1);
+      retVal->setCountVariances(i, e1);
     }
 
     return retVal;
@@ -209,8 +209,6 @@ private:
 
   Workspace2D_sptr Create2DWorkspacePnt(int xlen, int ylen) {
     Points x1(xlen, 0.0);
-    auto y1 = boost::make_shared<HistogramY>(xlen - 1, 0.0);
-    auto e1 = boost::make_shared<HistogramE>(xlen - 1, 0.0);
 
     Workspace2D_sptr retVal(new Workspace2D);
     retVal->initialize(ylen, xlen, xlen);
@@ -220,16 +218,16 @@ private:
       x = j * 0.5;
       j += 1.5;
     }
-    j = 1.0;
-    for (int i = 0; i < xlen; i++) {
-      (*y1)[i] = j;
-      (*e1)[i] = sqrt(j);
-      j += 1.5;
-    }
+
+    Counts y1(xlen);
+    std::iota(y1.begin(), y1.end(), 0.0);
+    y1 = 1.5 * y1 + 1.0;
+    CountVariances e1(y1.begin(), y1.end());
 
     for (int i = 0; i < ylen; i++) {
       retVal->setPoints(i, x1);
-      retVal->setData(i, y1, e1);
+      retVal->setCounts(i, y1);
+      retVal->setCountVariances(i, e1);
     }
 
     return retVal;

@@ -20,8 +20,8 @@ using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
-using Mantid::HistogramData::HistogramY;
-using Mantid::HistogramData::HistogramE;
+using Mantid::HistogramData::Counts;
+using Mantid::HistogramData::CountStandardDeviations;
 
 class FindDetectorsOutsideLimitsTest : public CxxTest::TestSuite {
 public:
@@ -44,28 +44,31 @@ public:
     work_in->setInstrument(instr);
 
     // yVeryDead is a detector with low counts
-    auto yVeryDead = make_cow<HistogramY>(sizex, 0.1);
-    auto eVeryDead = make_cow<HistogramE>(sizex, 0.1);
+    Counts yVeryDead(sizex, 0.1);
+    CountStandardDeviations eVeryDead(sizex, 0.1);
     // yTooDead gives some counts at the start but has a whole region full of
     // zeros
     double TD[sizex] = {2, 4, 5, 10, 0, 0, 0, 0, 0, 0};
-    auto yTooDead = make_cow<HistogramY>(TD, TD + 10);
-    auto eTooDead = make_cow<HistogramE>(TD, TD + 10);
+    Counts yTooDead(TD, TD + 10);
+    CountStandardDeviations eTooDead(TD, TD + 10);
     // yStrange dies after giving some counts but then comes back
     double S[sizex] = {0.2, 4, 50, 0.001, 0, 0, 0, 0, 1, 0};
-    auto yStrange = make_cow<HistogramY>(S, S + 10);
-    auto eStrange = make_cow<HistogramE>(S, S + 10);
+    Counts yStrange(S, S + 10);
+    CountStandardDeviations eStrange(S, S + 10);
     for (int i = 0; i < sizey; i++) {
       if (i % 3 == 0) { // the last column is set arbitrarily to have the same
                         // values as the second because the errors shouldn't
                         // make any difference
-        work_in->setData(i, yTooDead, eTooDead);
+        work_in->setCounts(i, yTooDead);
+        work_in->setCountStandardDeviations(i, eTooDead);
       }
       if (i % 2 == 0) {
-        work_in->setData(i, yVeryDead, eVeryDead);
+        work_in->setCounts(i, yVeryDead);
+        work_in->setCountStandardDeviations(i, eVeryDead);
       }
       if (i == 19) {
-        work_in->setData(i, yStrange, eTooDead);
+        work_in->setCounts(i, yStrange);
+        work_in->setCountStandardDeviations(i, eTooDead);
       }
       work_in->getSpectrum(i)->setSpectrumNo(i);
 

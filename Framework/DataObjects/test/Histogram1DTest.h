@@ -35,8 +35,10 @@ public:
     std::fill(pb->begin(), pb->end(), rand());
     h.setHistogram(Histogram(Points(100)));
     h2.setHistogram(Histogram(Points(100)));
-    h.setData(make_cow<HistogramY>(100), make_cow<HistogramE>(100));
-    h2.setData(make_cow<HistogramY>(100), make_cow<HistogramE>(100));
+    h.setCounts(100);
+    h.setCountStandardDeviations(100);
+    h2.setCounts(100);
+    h2.setCountStandardDeviations(100);
   }
 
   void testsetgetXvector() {

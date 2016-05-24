@@ -26,8 +26,8 @@ using namespace Mantid::API;
 using namespace Mantid::Algorithms;
 using namespace Mantid::DataObjects;
 using Mantid::HistogramData::BinEdges;
-using Mantid::HistogramData::HistogramY;
-using Mantid::HistogramData::HistogramE;
+using Mantid::HistogramData::Counts;
+using Mantid::HistogramData::CountStandardDeviations;
 
 class DetectorEfficiencyVariationTest : public CxxTest::TestSuite {
 public:
@@ -124,7 +124,7 @@ public:
 
     // the error values aren't used and aren't tested so we'll use some basic
     // data
-    auto errors = make_cow<HistogramE>(ySize, 1);
+    CountStandardDeviations errors(ySize, 1);
 
     for (int j = 0; j < Nhist; ++j) {
       inputA->setBinEdges(j, x);
@@ -145,8 +145,10 @@ public:
         for (int l = 0; l < ySize; ++l)
           forInputB[l] = forInputA[l] * m_LargeValue;
 
-      inputA->setData(j, make_cow<HistogramY>(std::move(forInputA)), errors);
-      inputB->setData(j, make_cow<HistogramY>(std::move(forInputB)), errors);
+      inputA->setCounts(j, std::move(forInputA));
+      inputB->setCounts(j, std::move(forInputB));
+      inputA->setCountStandardDeviations(j, errors);
+      inputB->setCountStandardDeviations(j, errors);
       // Just set the spectrum number to match the index, spectra numbers and
       // detector maps must be indentical for both
       inputA->getSpectrum(j)->setSpectrumNo(j + 1);

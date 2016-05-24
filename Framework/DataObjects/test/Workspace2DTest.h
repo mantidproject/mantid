@@ -17,6 +17,8 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
 using namespace Mantid::API;
+using HistogramData::Counts;
+using HistogramData::CountStandardDeviations;
 
 class Workspace2DTest : public CxxTest::TestSuite {
 public:
@@ -38,8 +40,8 @@ public:
                                                   double x0 = 0.0,
                                                   double deltax = 1.0) {
     auto x = Kernel::make_cow<HistogramData::HistogramX>(nbins + 1);
-    auto y = Kernel::make_cow<HistogramData::HistogramY>(nbins, 2);
-    auto e = Kernel::make_cow<HistogramData::HistogramE>(nbins, M_SQRT2);
+    Counts y(nbins, 2);
+    CountStandardDeviations e(nbins, M_SQRT2);
     for (int i = 0; i < nbins + 1; ++i) {
       x.access()[i] = x0 + i * deltax;
     }
@@ -47,7 +49,8 @@ public:
     retVal->initialize(nhist, nbins + 1, nbins);
     for (int i = 0; i < nhist; i++) {
       retVal->setX(i, x);
-      retVal->setData(i, y, e);
+      retVal->setCounts(i, y);
+      retVal->setCountStandardDeviations(i, e);
     }
 
     return retVal;

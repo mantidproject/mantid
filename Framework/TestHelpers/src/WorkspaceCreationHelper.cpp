@@ -44,6 +44,8 @@ using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using Mantid::MantidVec;
 using Mantid::MantidVecPtr;
+using HistogramData::Counts;
+using HistogramData::CountStandardDeviations;
 
 MockAlgorithm::MockAlgorithm(size_t nSteps) {
   m_Progress = Mantid::Kernel::make_unique<API::Progress>(this, 0, 1, nSteps);
@@ -154,13 +156,14 @@ Create2DWorkspaceWithValues(int64_t nHist, int64_t nBins, bool isHist,
                             double xVal, double yVal, double eVal) {
   auto x1 = Kernel::make_cow<HistogramData::HistogramX>(
       isHist ? nBins + 1 : nBins, xVal);
-  auto y1 = Kernel::make_cow<HistogramData::HistogramY>(nBins, yVal);
-  auto e1 = Kernel::make_cow<HistogramData::HistogramE>(nBins, eVal);
+  Counts y1(nBins, yVal);
+  CountStandardDeviations e1(nBins, eVal);
   auto retVal = boost::make_shared<Workspace2D>();
   retVal->initialize(nHist, isHist ? nBins + 1 : nBins, nBins);
   for (int i = 0; i < nHist; i++) {
     retVal->setX(i, x1);
-    retVal->setData(i, y1, e1);
+    retVal->setCounts(i, y1);
+    retVal->setCountStandardDeviations(i, e1);
     retVal->getSpectrum(i)->setDetectorID(i);
     retVal->getSpectrum(i)->setSpectrumNo(i);
   }
@@ -254,8 +257,8 @@ WorkspaceGroup_sptr CreateWorkspaceGroup(int nEntries, int nHist, int nBins,
 Workspace2D_sptr Create2DWorkspaceBinned(int nhist, int nbins, double x0,
                                          double deltax) {
   HistogramData::BinEdges x(nbins + 1);
-  auto y = Kernel::make_cow<HistogramData::HistogramY>(nbins, 2);
-  auto e = Kernel::make_cow<HistogramData::HistogramE>(nbins, M_SQRT2);
+  Counts y(nbins, 2);
+  CountStandardDeviations e(nbins, M_SQRT2);
   for (int i = 0; i < nbins + 1; ++i) {
     x.mutableData()[i] = x0 + i * deltax;
   }
@@ -263,7 +266,8 @@ Workspace2D_sptr Create2DWorkspaceBinned(int nhist, int nbins, double x0,
   retVal->initialize(nhist, nbins + 1, nbins);
   for (int i = 0; i < nhist; i++) {
     retVal->setBinEdges(i, x);
-    retVal->setData(i, y, e);
+    retVal->setCounts(i, y);
+    retVal->setCountStandardDeviations(i, e);
   }
   return retVal;
 }
@@ -276,8 +280,8 @@ Workspace2D_sptr Create2DWorkspaceBinned(int nhist, const int numBoundaries,
                                          const double xBoundaries[]) {
   HistogramData::BinEdges x(numBoundaries);
   const int numBins = numBoundaries - 1;
-  auto y = Kernel::make_cow<HistogramData::HistogramY>(numBins, 2);
-  auto e = Kernel::make_cow<HistogramData::HistogramE>(numBins, M_SQRT2);
+  Counts y(numBins, 2);
+  CountStandardDeviations e(numBins, M_SQRT2);
   for (int i = 0; i < numBoundaries; ++i) {
     x.mutableData()[i] = xBoundaries[i];
   }
@@ -285,7 +289,8 @@ Workspace2D_sptr Create2DWorkspaceBinned(int nhist, const int numBoundaries,
   retVal->initialize(nhist, numBins + 1, numBins);
   for (int i = 0; i < nhist; i++) {
     retVal->setBinEdges(i, x);
-    retVal->setData(i, y, e);
+    retVal->setCounts(i, y);
+    retVal->setCountStandardDeviations(i, e);
   }
   return retVal;
 }

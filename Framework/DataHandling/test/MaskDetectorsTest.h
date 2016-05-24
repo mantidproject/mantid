@@ -24,8 +24,8 @@ using Mantid::MantidVecPtr;
 using Mantid::detid_t;
 using Mantid::specnum_t;
 using Mantid::HistogramData::BinEdges;
-using Mantid::HistogramData::HistogramY;
-using Mantid::HistogramData::HistogramE;
+using Mantid::HistogramData::Counts;
+using Mantid::HistogramData::CountStandardDeviations;
 
 class MaskDetectorsTest : public CxxTest::TestSuite {
 public:
@@ -71,16 +71,16 @@ public:
       spaceEvent->setAllX(BinEdges{0.0, 10.0});
 
     } else if (!asMaskWorkspace) {
-      space = WorkspaceFactory::Instance().create("Workspace2D", numspec, 6, 5);
-      Workspace2D_sptr space2D =
-          boost::dynamic_pointer_cast<Workspace2D>(space);
+      auto space2D = createWorkspace<Workspace2D>(numspec, 6, 5);
+      space = space2D;
 
       BinEdges x(6, 10.0);
-      auto y = make_cow<HistogramY>(5, 1.0);
-      auto e = make_cow<HistogramE>(5, 1.0);
+      Counts y(5, 1.0);
+      CountStandardDeviations e(5, 1.0);
       for (int j = 0; j < numspec; ++j) {
         space2D->setBinEdges(j, x);
-        space2D->setData(j, y, e);
+        space2D->setCounts(j, y);
+        space2D->setCountStandardDeviations(j, e);
         space2D->getSpectrum(j)->setSpectrumNo(j);
         space2D->getSpectrum(j)->setDetectorID(j);
       }

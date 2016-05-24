@@ -33,8 +33,8 @@ using Mantid::detid_t;
 using Mantid::HistogramData::BinEdges;
 using Mantid::HistogramData::Histogram;
 using Mantid::HistogramData::HistogramX;
-using Mantid::HistogramData::HistogramY;
-using Mantid::HistogramData::HistogramE;
+using Mantid::HistogramData::Counts;
+using Mantid::HistogramData::CountStandardDeviations;
 
 class GroupDetectors2Test : public CxxTest::TestSuite {
 public:
@@ -52,20 +52,16 @@ public:
     // which is a Child Algorithm of GroupDetectors)
     FrameworkManager::Instance();
     // Set up a small workspace for testing
-    MatrixWorkspace_sptr space = WorkspaceFactory::Instance().create(
-        "Workspace2D", NHIST, NBINS + 1, NBINS);
-    space->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
-    Workspace2D_sptr space2D = boost::dynamic_pointer_cast<Workspace2D>(space);
+    auto space2D = createWorkspace<Workspace2D>(NHIST, NBINS + 1, NBINS);
+    space2D->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
     BinEdges xs(NBINS + 1, 10.0);
-    auto errors = make_cow<HistogramE>(NBINS, 1.0);
+    CountStandardDeviations errors(NBINS, 1.0);
     for (int j = 0; j < NHIST; ++j) {
       space2D->setBinEdges(j, xs);
-      auto data =
-          make_cow<HistogramY>(NBINS, j + 1); // the y values will be different
-                                              // for each spectra
-                                              // (1+index_number) but the same
-                                              // for each bin
-      space2D->setData(j, data, errors);
+      // the y values will be different for each spectra (1+index_number) but
+      // the same for each bin
+      space2D->setCounts(j, NBINS, j + 1);
+      space2D->setCountStandardDeviations(j, errors);
       space2D->getSpectrum(j)->setSpectrumNo(j + 1); // spectra numbers are also
                                                      // 1 + index_numbers
                                                      // because this is the
@@ -78,10 +74,10 @@ public:
       Detector *d = new Detector("det", i, 0);
       instr->markAsDetector(d);
     }
-    space->setInstrument(instr);
+    space2D->setInstrument(instr);
 
     // Register the workspace in the data service
-    AnalysisDataService::Instance().add(inputWS, space);
+    AnalysisDataService::Instance().add(inputWS, space2D);
   }
 
   ~GroupDetectors2Test() override {

@@ -18,8 +18,6 @@ using namespace Mantid::Kernel;
 using Mantid::MantidVec;
 using Mantid::MantidVecPtr;
 using Mantid::HistogramData::BinEdges;
-using Mantid::HistogramData::HistogramY;
-using Mantid::HistogramData::HistogramE;
 
 namespace {
 class PropertyFinder {
@@ -389,17 +387,15 @@ public:
     //-----------------
     // Single bin from 1->2
     BinEdges x{1, 2};
-    auto detData = make_cow<HistogramY>(1, 10);
-    auto monData = make_cow<HistogramY>(1, 5);
-    auto e = make_cow<HistogramE>(1, 0.0);
 
-    auto tinyWS = MatrixWorkspace_sptr(new Workspace2D());
     // 2 spectra, 2 x values, 1 y value per spectra
-    tinyWS->initialize(2, 2, 1);
+    auto tinyWS = createWorkspace<Workspace2D>(2, 2, 1);
     tinyWS->setBinEdges(0, x);
     tinyWS->setBinEdges(1, x);
-    tinyWS->setData(0, detData, e);
-    tinyWS->setData(1, monData, e);
+    tinyWS->setCounts(0, 1, 10.0);
+    tinyWS->setCountStandardDeviations(0, 1, 0.0);
+    tinyWS->setCounts(1, 1, 5.0);
+    tinyWS->setCountStandardDeviations(1, 1, 0.0);
 
     tinyWS->setTitle("Test histogram");
     tinyWS->getAxis(0)->setUnit("Wavelength");

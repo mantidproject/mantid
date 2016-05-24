@@ -31,8 +31,8 @@ using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace Mantid::DataObjects;
 using Mantid::HistogramData::BinEdges;
-using Mantid::HistogramData::HistogramY;
-using Mantid::HistogramData::HistogramE;
+using Mantid::HistogramData::Counts;
+using Mantid::HistogramData::CountStandardDeviations;
 
 /* choose an instrument to test, we could test all instruments
  * every time but I think a detailed test on the smallest workspace
@@ -206,26 +206,23 @@ void writeLargeTestDatFile(const std::string &filename, const int ndets) {
 // Set up a small workspace for testing
 void makeTestWorkspace(const int ndets, const int nbins,
                        const std::string &ads_name) {
-  MatrixWorkspace_sptr space = WorkspaceFactory::Instance().create(
-      "Workspace2D", ndets, nbins + 1, nbins);
-  space->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
-  Workspace2D_sptr space2D = boost::dynamic_pointer_cast<Workspace2D>(space);
+  auto space2D = createWorkspace<Workspace2D>(ndets, nbins + 1, nbins);
+  space2D->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
   BinEdges xs(nbins + 1, 0.0);
-  auto errors = make_cow<HistogramE>(nbins, 1.0);
+  CountStandardDeviations errors(nbins, 1.0);
   for (int j = 0; j < ndets; ++j) {
     space2D->setBinEdges(j, xs);
-    auto data = make_cow<HistogramY>(
-        nbins, j + 1); // the y values will be different for
-                       // each spectra (1+index_number) but
-                       // the same for each bin
-    space2D->setData(j, data, errors);
+    // the y values will be different for each spectra (1+index_number) but the
+    // same for each bin
+    space2D->setCounts(j, nbins, j + 1);
+    space2D->setCountStandardDeviations(j, errors);
     ISpectrum *spec = space2D->getSpectrum(j);
     spec->setSpectrumNo(j + 1);
     spec->setDetectorID(j);
   }
 
   Instrument_sptr instr(new Instrument);
-  space->setInstrument(instr);
+  space2D->setInstrument(instr);
   ObjComponent *samplePos = new ObjComponent("sample-pos", instr.get());
   instr->markAsSamplePos(samplePos);
 
@@ -237,7 +234,7 @@ void makeTestWorkspace(const int ndets, const int nbins,
   }
 
   // Register the workspace in the data service
-  AnalysisDataService::Instance().add(ads_name, space);
+  AnalysisDataService::Instance().add(ads_name, space2D);
 }
 }
 

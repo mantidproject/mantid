@@ -17,8 +17,6 @@ using namespace Mantid::API;
 using namespace Mantid::Algorithms;
 using namespace Mantid::DataObjects;
 using Mantid::HistogramData::HistogramX;
-using Mantid::HistogramData::HistogramY;
-using Mantid::HistogramData::HistogramE;
 
 class CorrectKiKfTest : public CxxTest::TestSuite {
 public:

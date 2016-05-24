@@ -3,6 +3,7 @@
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/FunctionDomain1D.h"
 #include "MantidAPI/FunctionProperty.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
@@ -26,6 +27,9 @@ using namespace Geometry;
 using namespace DataObjects;
 using Mantid::MantidVec;
 using Mantid::MantidVecPtr;
+using HistogramData::Counts;
+using HistogramData::CountVariances;
+using HistogramData::CountStandardDeviations;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CreateSampleWorkspace)
@@ -295,22 +299,16 @@ MatrixWorkspace_sptr CreateSampleWorkspace::createHistogramWorkspace(
   }
 
   std::vector<double> xValues(cbegin(x), cend(x) - 1);
-  auto y = make_cow<HistogramData::HistogramY>(
-      evalFunction(functionString, xValues, isRandom ? 1 : 0));
-  auto e = make_cow<HistogramData::HistogramE>(y->cbegin(), y->cend());
+  Counts y(evalFunction(functionString, xValues, isRandom ? 1 : 0));
+  CountStandardDeviations e(CountVariances(y.cbegin(), y.cend()));
 
-  // calculate e as sqrt(y)
-  typedef double (*uf)(double);
-  uf dblSqrt = std::sqrt;
-  std::transform(e->cbegin(), e->cend(), e.access().begin(), dblSqrt);
-
-  MatrixWorkspace_sptr retVal = boost::make_shared<DataObjects::Workspace2D>();
-  retVal->initialize(numPixels, numBins + 1, numBins);
+  auto retVal = createWorkspace<Workspace2D>(numPixels, numBins + 1, numBins);
   retVal->setInstrument(inst);
 
   for (size_t wi = 0; wi < static_cast<size_t>(numPixels); wi++) {
     retVal->setBinEdges(wi, x);
-    retVal->setData(wi, y, e);
+    retVal->setCounts(wi, y);
+    retVal->setCountStandardDeviations(wi, e);
     retVal->getSpectrum(wi)->setDetectorID(detid_t(start_at_pixelID + wi));
     retVal->getSpectrum(wi)->setSpectrumNo(specnum_t(wi + 1));
   }

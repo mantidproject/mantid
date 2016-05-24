@@ -28,8 +28,8 @@ using namespace Mantid::API;
 using namespace Mantid::Algorithms;
 using namespace Mantid::DataObjects;
 using Mantid::HistogramData::BinEdges;
-using Mantid::HistogramData::HistogramY;
-using Mantid::HistogramData::HistogramE;
+using Mantid::HistogramData::Counts;
+using Mantid::HistogramData::CountStandardDeviations;
 
 const int THEMASKED(40);
 const int SAVEDBYERRORBAR(143);
@@ -194,27 +194,28 @@ public:
     }
 
     // most error values will be small so that they wont affect the tests
-    auto smallErrors = boost::make_shared<HistogramE>(
-        specLength - 1, 0.01 * m_YSum / specLength);
+    CountStandardDeviations smallErrors(specLength - 1,
+                                        0.01 * m_YSum / specLength);
     // if the SignificanceTest property is set to one, knowing what happens in
     // the loop below, these errors will just make or break the tests
-    auto almostBigEnough = boost::make_shared<HistogramE>(specLength - 1, 0);
-    (*almostBigEnough)[0] = 0.9 * m_YSum * (0.5 * Nhist - 1);
-    auto bigEnough = boost::make_shared<HistogramE>(specLength - 1, 0);
-    (*bigEnough)[0] = 1.2 * m_YSum * (0.5 * Nhist);
+    CountStandardDeviations almostBigEnough(specLength - 1, 0);
+    almostBigEnough.mutableData()[0] = 0.9 * m_YSum * (0.5 * Nhist - 1);
+    CountStandardDeviations bigEnough(specLength - 1, 0);
+    bigEnough.mutableData()[0] = 1.2 * m_YSum * (0.5 * Nhist);
 
     for (int j = 0; j < Nhist; ++j) {
       m_2DWS->setBinEdges(j, x);
       // the spectravalues will be multiples of the random numbers above
-      auto spectrum = make_cow<HistogramY>(yArray, yArray + specLength - 1);
-      spectrum.access() *= j;
+      Counts spectrum(yArray, yArray + specLength - 1);
+      spectrum *= j;
       auto errors = smallErrors;
       if (j == Nhist - 2)
         errors = almostBigEnough;
       if (j == SAVEDBYERRORBAR)
         errors = bigEnough;
 
-      m_2DWS->setData(j, spectrum, errors);
+      m_2DWS->setCounts(j, spectrum);
+      m_2DWS->setCountStandardDeviations(j, errors);
       // Just set the spectrum number to match the index
       m_2DWS->getSpectrum(j)->setSpectrumNo(j + 1);
     }

@@ -208,7 +208,6 @@ void OptimizeCrystalPlacement::exec() {
 
   g_log.notice() << "Number initially indexed = " << nPeaksUsed
                  << " at tolerance = " << HKLintOffsetMax << std::endl;
-  MatrixWorkspace_sptr mwkspc;
 
   if (nPeaksUsed < 1) {
     g_log.error() << "Error in UB too large. 0 peaks indexed at "
@@ -217,12 +216,10 @@ void OptimizeCrystalPlacement::exec() {
   }
 
   int N = 3 * nPeaksUsed; // Peaks->getNumberPeaks();
-  auto yvals = make_cow<HistogramData::HistogramY>(N, 0.0);
-  auto errs = make_cow<HistogramData::HistogramE>(N, 1.0);
-  mwkspc = WorkspaceFactory::Instance().create("Workspace2D",
-                                               static_cast<size_t>(1), N, N);
+  auto mwkspc = createWorkspace<Workspace2D>(1, N, N);
   mwkspc->setPoints(0, xRef);
-  mwkspc->setData(0, yvals, errs);
+  mwkspc->setCounts(0, N, 0.0);
+  mwkspc->setCountStandardDeviations(0, N, 1.0);
 
   std::string FuncArg = "name=PeakHKLErrors,PeakWorkspaceName=" +
                         getPropertyValue("PeaksWorkspace") + "";

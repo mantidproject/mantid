@@ -251,14 +251,9 @@ void GoniometerAnglesFromPhiRotation::exec() {
   //----------------------- Optimize around best
   //-------------------------------------------
 
-  //               --------Create Workspace -------------------
-  boost::shared_ptr<DataObjects::Workspace2D> ws =
-      boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
-          WorkspaceFactory::Instance().create("Workspace2D", 1, 3 * Npeaks,
-                                              3 * Npeaks));
+  auto ws = createWorkspace<Workspace2D>(1, 3 * Npeaks, 3 * Npeaks);
 
   MantidVec Xvals;
-  auto Yvals = make_cow<HistogramData::HistogramY>(3 * Npeaks, 0.0);
 
   for (int i = 0; i < Npeaks; ++i) {
     Xvals.push_back(i);
@@ -267,7 +262,6 @@ void GoniometerAnglesFromPhiRotation::exec() {
   }
 
   ws->setPoints(0, Xvals);
-  ws->setData(0, Yvals);
 
   //       -------------Set up other Fit function arguments------------------
   V3D dir(MinData[2], MinData[3], MinData[4]);

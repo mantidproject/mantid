@@ -1680,15 +1680,11 @@ void IntegratePeakTimeSlices::SetUpData1(
   Data->setX(1, pX);
   Data->setX(2, pX);
 
-  auto yvals = Kernel::make_cow<HistogramData::HistogramY>(std::move(yvalB));
-  auto errs = Kernel::make_cow<HistogramData::HistogramE>(std::move(errB));
-  auto xvals = Kernel::make_cow<HistogramData::HistogramY>(std::move(xvalB));
-  auto Yvals = Kernel::make_cow<HistogramData::HistogramY>(std::move(YvalB));
-  ws->setData(0, yvals, errs);
-  ws->setData(1, xvals);
-  ws->setData(2, Yvals);
-  m_AttributeValues->setHeightHalfWidthInfo(xvals->rawData(), Yvals->rawData(),
-                                            yvals->rawData());
+  ws->setCounts(0, yvalB);
+  ws->setCountStandardDeviations(0, errB);
+  ws->setCounts(1, xvalB);
+  ws->setCounts(2, YvalB);
+  m_AttributeValues->setHeightHalfWidthInfo(xvalB, YvalB, yvalB);
 
   StatBase[IStartRow] = minRow;
   StatBase[IStartCol] = minCol;
