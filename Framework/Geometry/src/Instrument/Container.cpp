@@ -46,8 +46,8 @@ void updateTreeValues(Poco::XML::Element *root,
 // Public methods
 //------------------------------------------------------------------------------
 /**
- * Construct a Can providing an XML definition shape
- * @param canXML Definition of the can shape in xml
+ * Construct a container providing an XML definition shape
+ * @param xml Definition of the shape in xml
  */
 Container::Container(std::string xml) : Object(xml) {}
 
