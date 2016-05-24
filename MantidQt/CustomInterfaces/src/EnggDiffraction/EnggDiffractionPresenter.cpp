@@ -3370,6 +3370,12 @@ Poco::Path EnggDiffractionPresenter::outFilesDir(std::string addToDir) {
  * @param difc list of GSAS DIFC values to include in the file
  * @param tzero list of GSAS TZERO values to include in the file
  * @param bankNames list of bank names corresponding the the difc/tzero
+ *
+ * @param ceriaNo ceria/calibration run number, to be replaced in the
+ * template file
+ *
+ * @param vanNo vanadium run number, to be replaced in the template file
+ *
  * @param templateFile a template file where to replace the difc/zero
  * values. An empty default implies using an "all-banks" template.
  */
