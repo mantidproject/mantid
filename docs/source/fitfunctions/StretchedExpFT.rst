@@ -15,10 +15,15 @@ Description
 
 Provides the Fourier Transform of the Symmetrized Stretched Exponential Function
 
-.. math:: S(Q,E) = \mathcal{F}( height(Q) \cdot e^{-|\frac{x}{\tau(Q)}|^{\beta(Q)}} )
+.. math:: S(Q,E) = Height \int_{-\infty}^{\infty} dt/h \cdot e^{-i2\pi (E-Center)t/h} \cdot e^{-|\frac{t}{Tau}|^{Beta}} )
 
-If the energy units of energy are micro-eV, then tau is expressed in pico-seconds. If E-units are micro-eV then
+with :math:`h` Planck's constant. If the energy units of energy are micro-eV, then tau is expressed in pico-seconds. If E-units are micro-eV then
 tau is expressed in nano-seconds.
+
+Properties:
+
+- Normalization :math:`\int_{-\infty}^{\infty} dE \cdot S(Q,E) = Height`
+- Maximum :math:`S(Q,E\equiv 0)=Height \cdot Tau \cdot Beta^{-1} \cdot \Gamma(Beta^{-1})`
 
 .. _StretchedExpFT-usage:
 
@@ -32,13 +37,13 @@ The QENS signal is modeled by the convolution of a resolution function
 with elastic and StretchedExpFT components.
 Noise is modeled by a linear background:
 
-$S(E) = R(E) \otimes (\alpha \delta(E) + StretchedExpFT(E) + (a+bE)$
+:math:`S(Q,E) = R(Q,E) \otimes (\alpha \delta(E) + StretchedExpFT(Q,E)) + (a+bE)`
 
 Obtaining an initial guess close to the optimal fit is critical. For this model, it is recommended to follow these steps:
 - In the Fit Function window of MantidPlot, construct the model.
-- Tie parameter height of StretchedExpFT to zero, then carry out the Fit. This will result in optimized elastic line and background.
-- Until parameter height of StretchedExpFT but tie parameter beta to 1.0, then carry out the fit. This will result in optimized model using an exponential.
-- Use the parameters of the previous fit as the initial guess.
+- Tie parameter :math:`Height` of StretchedExpFT to zero, then carry out the Fit. This will result in optimized elastic line and background.
+- Untie parameter :math:`Height` of StretchedExpFT and tie parameter :math:`Beta` to 1.0, then carry out the fit. This will result in optimized model using an exponential.
+- Release the tie on Beta  and redo the fit.
 
 .. testcode:: ExampleStretchedExpFT
 
@@ -52,7 +57,7 @@ Obtaining an initial guess close to the optimal fit is critical. For this model,
    function_string  = "(composite=Convolution,FixResolution=true,NumDeriv=true;"
    function_string += "name=TabulatedFunction,Workspace=resolution,WorkspaceIndex=0,Scaling=1,Shift=0,XScaling=1;"
    function_string += "(name=DeltaFunction,Height=1,Centre=0;"
-   function_string += "name=StretchedExpFT,height=0.1,tau=100,beta=0.98,Origin=0));"
+   function_string += "name=StretchedExpFT,Height=0.1,Tau=100,Beta=0.98,Center=0));"
    function_string += "name=LinearBackground,A0=0,A1=0"
 
    # Carry out the fit. Produces workspaces  fit_results_Parameters,
@@ -65,7 +70,7 @@ Obtaining an initial guess close to the optimal fit is critical. For this model,
       Output="fit_results")
 
    # Collect and print parameters for StrechtedExpFT
-   parameters_of_interest = ("tau", "beta")
+   parameters_of_interest = ("Tau", "Beta")
    values_found = {}
    ws = mtd["fit_results_Parameters"]  # Workspace containing optimized parameters
    for row_index in range(ws.rowCount()):
@@ -74,8 +79,8 @@ Obtaining an initial guess close to the optimal fit is critical. For this model,
          if parameter in full_parameter_name:
             values_found[parameter] = ws.row(row_index)["Value"]
             break
-   print "The optimal parameters are tau={0:4.1f} and beta={1:4.2f}"\
-      .format(values_found["tau"], values_found["beta"])
+print "The optimal parameters are Tau={0:2.0f} and Beta={1:3.1f}"\
+      .format(values_found["Tau"], values_found["Beta"])
 
 .. testcleanup:: ExampleStretchedExpFT
 
@@ -89,7 +94,7 @@ Output:
 
 .. testoutput:: ExampleStretchedExpFT
 
-   The optimal parameters are tau=57.2 and beta=0.68
+   The optimal parameters are Tau=57 and Beta=0.6
 
 .. categories::
 

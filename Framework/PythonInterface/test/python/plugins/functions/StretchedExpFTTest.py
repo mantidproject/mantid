@@ -1,7 +1,10 @@
 import unittest
 from mantid.kernel import *
 from mantid.api import *
-from mantid.simpleapi import Fit
+from mantid.simpleapi import Fit, CreateWorkspace, SaveNexus
+import scipy.constants
+import numpy as np
+
 import testhelpers
 from pdb import set_trace as tr
 
@@ -71,7 +74,9 @@ class _InternalMakeSEFTData( PythonAlgorithm ):
         self.setProperty('OutputWorkspace', wspace)  # Stores the workspace as the given name
 
 
-class StretchedExpFTTest( unittest.TestCase ):
+class StretchedExpFTTest(unittest.TestCase):
+    # Class variables
+    _planck_constant = scipy.constants.Planck/scipy.constants.e*1E15  # meV*psec
 
     @property
     def skipTest(self):
@@ -81,62 +86,92 @@ class StretchedExpFTTest( unittest.TestCase ):
         except ImportError:
             return True
 
-    def test_registered(self):
+    def asserFit(self, workspace, height, beta, tau):
+        unacceptable_chi_square = 1.0
+        msg = ""
+        for irow in range(workspace.rowCount()):
+            row = workspace.row(irow)
+            name = row['Name']
+            if name == "Cost function value":
+                chi_square = row['Value']
+                msg += " chi_square=" + str(chi_square)
+            elif name == "f0.Tau":
+                tauOptimal = row['Value']
+                msg += " tauOptimal=" + str(tauOptimal)
+            elif name == "f0.Beta":
+                betaOptimal = row['Value']
+                msg += " betaOptimal=" + str(betaOptimal)
+            elif name == "f0.Height":
+                heightOptimal = row['Value']
+                msg += " heightOptimal=" + str(heightOptimal)
+        self.assertTrue(chi_square < unacceptable_chi_square, msg)
+        self.assertTrue(abs(height - heightOptimal)/height < 0.01, msg)
+        self.assertTrue(abs(beta - betaOptimal) < 0.01, msg)
+        self.assertTrue(abs(tau - tauOptimal)/tauOptimal < 0.01, msg)
+        print msg
+
+    def createData(self, functor):
+        """Generate data for the fit"""
+        de = 0.0004  # energy spacing in meV
+        energies = np.arange(-0.1, 0.5, de)
+        data = functor(energies)
+        background = 0.01*max(data)
+        data += background
+        errorBars = data*0.1
+        return CreateWorkspace(energies, data, errorBars, UnitX='DeltaE',
+                               OutputWorkspace="data")
+
+    def cleanFit(self):
+        """Removes workspaces created during the fit"""
+        mtd.remove('data')
+        mtd.remove('fit_NormalisedCovarianceMatrix')
+        mtd.remove('fit_Parameters')
+        mtd.remove('fit_Workspace')
+
+    def testRegistered(self):
         try:
             FunctionFactory.createFunction('StretchedExpFT')
         except RuntimeError, exc:
             self.fail('Could not create StretchedExpFT function: %s' % str(exc))
 
-    def test_fit(self):
+    def testGaussian(self):
+        """ Test the Fourier transform of a gaussian is a Gaussian"""
+        print "testGaussian"
         if self.skipTest:  # python2.6 doesn't have skipping decorators
             return
+        # Target parameters
+        tau = 20.0    # picoseconds
+        beta = 2.0    # gaussian
+        height = 1.0  # We want identity, not just proporcionality
+        # Analytical Fourier transform of exp(-(t/tau)**2)
+        E0 = StretchedExpFTTest._planck_constant/tau
+        functor = lambda E: np.sqrt(np.pi)/E0 * np.exp(-(np.pi*E/E0)**2)
+        self.createData(functor)  # Create workspace "data"
+        # Initial guess reasonably far from target parameters
+        fString = "name=StretchedExpFT,Height=3.0,Tau=50,Beta=1.5,Center=0.0002;" +\
+                  "name=FlatBackground,A0=0.0"
+        Fit(Function=fString, InputWorkspace="data", MaxIterations=100, Output="fit")
+        self.asserFit(mtd["fit_Parameters"], height, beta, tau)
+        self.cleanFit()
 
-        from random import random
-        # the variation range below is [x*0.9, x*1.1]. Should be bigger,
-        # but not until parameter constraints have been exposed to python
-        variation = lambda x: x * (1+(random()-0.5)/5.)
-
-        # Generate data workspace using random parameters around height=0.1,tau=100, beta=1,
-        # and centered at the origin
-        parms = {'height': variation(0.1),  'tau': variation(100),  'beta': variation(1)}
-
-        Nh = 2000
-        de = 0.0004
-        AlgorithmFactory.subscribe(_InternalMakeSEFTData)
-        alg = testhelpers.run_algorithm('_InternalMakeSEFTData', nhalfbins=Nh, de=de, OutputWorkspace='_test_seft_data', **parms)
-
-        sx = -Nh*de+de/2
-        ex = (Nh-1)*de+de/2
-        # Our initial guess is not centered at the origin, but around de
-        initial_parameters = 'height=0.1, tau=100, beta=1, Origin=%f' % variation(de)
-        func_string = 'name=StretchedExpFT,%s' % initial_parameters
-        Fit(Function=func_string, InputWorkspace='_test_seft_data', StartX=sx, EndX=ex, CreateOutput=1, MaxIterations=20)
-
-        parms['Origin'] = 0.0  # insert (Origin,0.0) to parameter dictionary for assessment of fit results
-        ws = mtd['_test_seft_data_Parameters']
-        #tr()
-        fitted = ''
-        unacceptable_chi_square = 3.0
-        chi_square = unacceptable_chi_square
-        for irow in range(ws.rowCount()):
-            row = ws.row(irow)
-            name = row['Name']
-            if name == 'Cost function value':
-                chi_square = row['Value']
-            elif name in parms.keys():
-                fitted += '{0}={1}, '.format(name, row['Value'])
-        target = ', '.join('{0}={1}'.format(key, val) for key, val in parms.items())
-        msg = 'Cost function {0} too high\nTargets were {1},\nbut obtained {2}'.format(chi_square, target, fitted)
-        self.assertTrue(chi_square < unacceptable_chi_square, msg)
-        msg = 'Cost function ={0}\n'.format(chi_square)
-        msg += 'Target parameters were {0}\n'.format(target)
-        msg += 'Started with parameters {0}\n'.format(initial_parameters)
-        msg += 'obtained fitted parameters {0}'.format(fitted)
-        print msg
-        mtd.remove('_test_seft_data')
-        mtd.remove('_test_seft_data_NormalisedCovarianceMatrix')
-        mtd.remove('_test_seft_data_Parameters')
-        mtd.remove('_test_seft_data_Workspace')
+    def testLorentzian(self):
+        """ Test the Fourier transform of a exponential is a Lorentzian"""
+        if self.skipTest:  # python2.6 doesn't have skipping decorators
+            return
+        # Target parameters
+        tau = 100.0  # picoseconds
+        beta = 1.0  # exponential
+        height = 1.0  # We want identity, not just proporcionality
+        # Analytical Fourier transform of exp(-t/tau)
+        hwhm = StretchedExpFTTest._planck_constant/(2*np.pi*tau)
+        functor = lambda E: (1.0/np.pi) * hwhm/(hwhm**2 + E**2)
+        self.createData(functor)  # Create workspace "data"
+        # Initial guess reasonably far from target parameters
+        fString = "name=StretchedExpFT,Height=3.0,Tau=50,Beta=1.5,Center=0.0002;" +\
+                  "name=FlatBackground,A0=0.0"
+        Fit(Function=fString, InputWorkspace="data", MaxIterations=100, Output="fit")
+        self.asserFit(mtd["fit_Parameters"], height, beta, tau)
+        self.cleanFit()
 
 if __name__ == '__main__':
     unittest.main()
