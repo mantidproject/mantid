@@ -490,8 +490,9 @@ void ConfigDialog::initAppPage()
   topBoxLayout->addWidget( lblScriptingLanguage, 3, 0 );
   boxScriptingLanguage = new QComboBox();
   QStringList llist = ScriptingLangManager::languages();
-  boxScriptingLanguage->insertStringList(llist);
-  boxScriptingLanguage->setCurrentItem(llist.findIndex(app->defaultScriptingLang));
+  boxScriptingLanguage->insertItems(-1, llist);
+  boxScriptingLanguage->setCurrentIndex(
+      llist.indexOf(app->defaultScriptingLang));
   topBoxLayout->addWidget( boxScriptingLanguage, 3, 1 );
 
   lblUndoStackSize = new QLabel();
@@ -1196,7 +1197,11 @@ void ConfigDialog::updateChildren(std::map<std::string, std::string> &programKey
   for( ; pItr != programKeysAndDetails.end(); ++pItr)
   {
     QTreeWidgetItem *item = new QTreeWidgetItem(program);
-    item->setText(0, tr("   " + QString::fromStdString(pItr->first) + " --- " + QString::fromStdString(pItr->second)));
+    QString itemText = QString("   ")
+                           .append(QString::fromStdString(pItr->first))
+                           .append(" --- ")
+                           .append(QString::fromStdString(pItr->second));
+    item->setText(0, itemText);
     program->addChild(item);
   }
 }
@@ -1806,7 +1811,7 @@ void ConfigDialog::initFittingPage()
   lblPeaksColor = new QLabel();
   multiPeakLayout->addWidget(lblPeaksColor);
   boxPeaksColor = new ColorBox(0);
-  boxPeaksColor->setCurrentItem(app->peakCurvesColor);
+  boxPeaksColor->setCurrentIndex(app->peakCurvesColor);
   multiPeakLayout->addWidget(boxPeaksColor);
 
   groupBoxFitParameters = new QGroupBox();
@@ -2159,25 +2164,25 @@ void ConfigDialog::languageChange()
 
   int style = app->defaultCurveStyle;
   if (style == Graph::Line)
-    boxCurveStyle->setCurrentItem(0);
+    boxCurveStyle->setCurrentIndex(0);
   else if (style == Graph::Scatter)
-    boxCurveStyle->setCurrentItem(1);
+    boxCurveStyle->setCurrentIndex(1);
   else if (style == Graph::LineSymbols)
-    boxCurveStyle->setCurrentItem(2);
+    boxCurveStyle->setCurrentIndex(2);
   else if (style == Graph::VerticalDropLines)
-    boxCurveStyle->setCurrentItem(3);
+    boxCurveStyle->setCurrentIndex(3);
   else if (style == Graph::Spline)
-    boxCurveStyle->setCurrentItem(4);
+    boxCurveStyle->setCurrentIndex(4);
   else if (style == Graph::VerticalSteps)
-    boxCurveStyle->setCurrentItem(5);
+    boxCurveStyle->setCurrentIndex(5);
   else if (style == Graph::HorizontalSteps)
-    boxCurveStyle->setCurrentItem(6);
+    boxCurveStyle->setCurrentIndex(6);
   else if (style == Graph::Area)
-    boxCurveStyle->setCurrentItem(7);
+    boxCurveStyle->setCurrentIndex(7);
   else if (style == Graph::VerticalBars)
-    boxCurveStyle->setCurrentItem(8);
+    boxCurveStyle->setCurrentIndex(8);
   else if (style == Graph::HorizontalBars)
-    boxCurveStyle->setCurrentItem(9);
+    boxCurveStyle->setCurrentIndex(9);
 
   //plots 3D
   lblResolution->setText(tr("Resolution"));
@@ -2270,7 +2275,7 @@ void ConfigDialog::apply()
 
   // tables page
   QString sep = boxSeparator->currentText();
-  sep.replace(tr("TAB"), "\t", false);
+  sep.replace(tr("TAB"), "\t", Qt::CaseInsensitive);
   sep.replace("\\t", "\t");
   sep.replace(tr("SPACE"), " ");
   sep.replace("\\s", " ");
@@ -2336,8 +2341,8 @@ void ConfigDialog::apply()
   // 2D plots page: ticks tab
   app->majTicksLength = boxMajTicksLength->value();
   app->minTicksLength = boxMinTicksLength->value();
-  app->majTicksStyle = boxMajTicks->currentItem();
-  app->minTicksStyle = boxMinTicks->currentItem();
+  app->majTicksStyle = boxMajTicks->currentIndex();
+  app->minTicksStyle = boxMinTicks->currentIndex();
   // 2D plots page: fonts tab
   app->plotAxesFont=axesFont;
   app->plotNumbersFont=numbersFont;
@@ -2348,7 +2353,7 @@ void ConfigDialog::apply()
   app->d_scale_plots_on_print = boxScaleLayersOnPrint->isChecked();
   QList<MdiSubWindow*> windows = app->windowsList();
   foreach(MdiSubWindow *w, windows){
-    if (w->isA("MultiLayer")){
+    if (std::string(w->metaObject()->className()) == "MultiLayer") {
       MultiLayer* multiLayer = dynamic_cast<MultiLayer*>(w);
       if (multiLayer) {
         multiLayer->setScaleLayersOnPrint(boxScaleLayersOnPrint->isChecked());
@@ -2670,8 +2675,7 @@ QStringList ConfigDialog::buildHiddenCategoryString(QTreeWidgetItem *parent)
 int ConfigDialog::curveStyle()
 {
   int style = 0;
-  switch (boxCurveStyle->currentItem())
-  {
+  switch (boxCurveStyle->currentIndex()) {
   case 0:
     style = Graph::Line;
     break;
