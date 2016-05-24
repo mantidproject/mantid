@@ -2959,11 +2959,15 @@ VectorCurve *Graph::plotVectorCurve(Table *w, const QStringList &colList,
 
   VectorCurve *v = 0;
   if (style == VectXYAM)
-    v = new VectorCurve(VectorCurve::XYAM, w, colList[0].toAscii().constData(), colList[1].toAscii().constData(),
-                        colList[2].toAscii().constData(), colList[3].toAscii().constData(), startRow, endRow);
+    v = new VectorCurve(VectorCurve::XYAM, w, colList[0].toAscii().constData(),
+                        colList[1].toAscii().constData(),
+                        colList[2].toAscii().constData(),
+                        colList[3].toAscii().constData(), startRow, endRow);
   else
-    v = new VectorCurve(VectorCurve::XYXY, w, colList[0].toAscii().constData(), colList[1].toAscii().constData(),
-                        colList[2].toAscii().constData(), colList[3].toAscii().constData(), startRow, endRow);
+    v = new VectorCurve(VectorCurve::XYXY, w, colList[0].toAscii().constData(),
+                        colList[1].toAscii().constData(),
+                        colList[2].toAscii().constData(),
+                        colList[3].toAscii().constData(), startRow, endRow);
 
   if (!v)
     return NULL;
@@ -3621,8 +3625,7 @@ void Graph::restoreFunction(const QStringList &lst) {
         end = l[1].toDouble();
       }
     } else if (s.contains("<Points>"))
-      points =
-          s.remove("<Points>").remove("</Points>").trimmed().toInt();
+      points = s.remove("<Points>").remove("</Points>").trimmed().toInt();
     else if (s.contains("<Style>")) {
       style = s.remove("<Style>").remove("</Style>").trimmed().toInt();
       break;
@@ -3872,9 +3875,9 @@ void Graph::showPlotErrorMessage(QWidget *parent,
 void Graph::showTitleContextMenu() {
   QMenu titleMenu(this);
   titleMenu.addAction(getQPixmap("cut_xpm"), tr("&Cut"), this,
-                       SLOT(cutTitle()));
+                      SLOT(cutTitle()));
   titleMenu.addAction(getQPixmap("copy_xpm"), tr("&Copy"), this,
-                       SLOT(copyTitle()));
+                      SLOT(copyTitle()));
   titleMenu.addAction(tr("&Delete"), this, SLOT(removeTitle()));
   titleMenu.addSeparator();
   titleMenu.addAction(tr("&Properties..."), this, SIGNAL(viewTitleDialog()));
@@ -3920,13 +3923,13 @@ void Graph::copyAxisTitle() {
 void Graph::showAxisTitleMenu() {
   QMenu titleMenu(this);
   titleMenu.addAction(getQPixmap("cut_xpm"), tr("&Cut"), this,
-                       SLOT(cutAxisTitle()));
+                      SLOT(cutAxisTitle()));
   titleMenu.addAction(getQPixmap("copy_xpm"), tr("&Copy"), this,
-                       SLOT(copyAxisTitle()));
+                      SLOT(copyAxisTitle()));
   titleMenu.addAction(tr("&Delete"), this, SLOT(removeAxisTitle()));
   titleMenu.addSeparator();
   titleMenu.addAction(tr("&Properties..."), this,
-                       SIGNAL(showAxisTitleDialog()));
+                      SIGNAL(showAxisTitleDialog()));
   titleMenu.exec(QCursor::pos());
 }
 
@@ -4180,10 +4183,12 @@ void Graph::copy(Graph *g) {
           vs = VectorCurve::XYAM;
         VectorCurve *cvVC = dynamic_cast<VectorCurve *>(cv);
         if (cvVC) {
-          c = new VectorCurve(vs, cv->table(), cv->xColumnName().toAscii().constData(),
-                              cv->title().text().toAscii(), cvVC->vectorEndXAColName().toAscii().constData(),
-                              cvVC->vectorEndYMColName().toAscii().constData(), cv->startRow(),
-                              cv->endRow());
+          c = new VectorCurve(vs, cv->table(),
+                              cv->xColumnName().toAscii().constData(),
+                              cv->title().text().toAscii(),
+                              cvVC->vectorEndXAColName().toAscii().constData(),
+                              cvVC->vectorEndYMColName().toAscii().constData(),
+                              cv->startRow(), cv->endRow());
           c_keys[i] = d_plot->insertCurve(c);
 
           VectorCurve *cVC = dynamic_cast<VectorCurve *>(c);
@@ -4349,7 +4354,7 @@ void Graph::copy(Graph *g) {
   foreach (LegendWidget *t, texts) {
     if (t == g->legend())
       d_legend = insertText(t);
-	else if (strcmp(t->metaObject()->className(), "PieLabel") == 0) {
+    else if (strcmp(t->metaObject()->className(), "PieLabel") == 0) {
       QwtPieCurve *pie = dynamic_cast<QwtPieCurve *>(curve(0));
       if (pie)
         pie->addLabel(dynamic_cast<PieLabel *>(t), true);
@@ -6719,7 +6724,7 @@ std::string Graph::saveMarkers() {
 
     if (l == d_legend)
       s += "<legend>";
-	else if (strcmp(l->metaObject()->className(), "PieLabel") == 0) {
+    else if (strcmp(l->metaObject()->className(), "PieLabel") == 0) {
       if (l->text().isEmpty())
         continue;
 
@@ -6747,7 +6752,7 @@ std::string Graph::saveMarkers() {
     s += "\t" + textList.join("\t");
     if (l == d_legend)
       s += "</legend>\n";
-	else if (strcmp(l->metaObject()->className(), "PieLabel") == 0)
+    else if (strcmp(l->metaObject()->className(), "PieLabel") == 0)
       s += "</PieLabel>\n";
     else
       s += "</text>\n";

@@ -134,7 +134,7 @@ MdiSubWindow *Folder::findWindow(const QString &s, bool windowNames,
 
   auto qt_cs = Qt::CaseInsensitive;
   if (!caseSensitive)
-	  qt_cs = Qt::CaseInsensitive;
+    qt_cs = Qt::CaseInsensitive;
 
   foreach (w, lstWindows) {
     if (windowNames) {
@@ -237,9 +237,7 @@ Folder *Folder::rootFolder() {
   return i;
 }
 
-bool Folder::isEmpty() const {
-  return lstWindows.isEmpty();
-}
+bool Folder::isEmpty() const { return lstWindows.isEmpty(); }
 
 /*****************************************************************************
  *
