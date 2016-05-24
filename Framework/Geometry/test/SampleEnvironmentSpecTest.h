@@ -28,18 +28,18 @@ public:
     TS_ASSERT_EQUALS("CRYO-001", spec.name());
   }
 
-  void test_Add_Can_Stores_Can_Linked_To_ID() {
+  void test_Add_Container_Stores_Container_Linked_To_ID() {
     using Mantid::Geometry::Container;
     SampleEnvironmentSpec spec("CRYO-001");
-    auto testCan = boost::make_shared<Container>("");
-    testCan->setID("8mm");
+    auto testContainer = boost::make_shared<Container>("");
+    testContainer->setID("8mm");
 
     TS_ASSERT_EQUALS(0, spec.ncans());
-    TS_ASSERT_THROWS_NOTHING(spec.addCan(testCan));
+    TS_ASSERT_THROWS_NOTHING(spec.addContainer(testContainer));
     TS_ASSERT_EQUALS(1, spec.ncans());
-    auto retrieved = spec.findCan("8mm");
+    auto retrieved = spec.findContainer("8mm");
     TS_ASSERT(retrieved);
-    TS_ASSERT_EQUALS(testCan, retrieved);
+    TS_ASSERT_EQUALS(testContainer, retrieved);
   }
 
   void test_AddObject_Stores_Reference_To_Object() {
@@ -56,16 +56,16 @@ public:
     using Mantid::Kernel::V3D;
 
     ShapeFactory factory;
-    auto small = factory.createShape<Can>(
+    auto small = factory.createShape<Container>(
         ComponentCreationHelper::sphereXML(0.004, V3D(), "sp-1"));
     small->setID("8mm");
-    auto large = factory.createShape<Can>(
+    auto large = factory.createShape<Container>(
         ComponentCreationHelper::sphereXML(0.005, V3D(), "sp-2"));
     large->setID("10mm");
 
     SampleEnvironmentSpec spec("CRYO-001");
-    spec.addCan(small);
-    spec.addCan(large);
+    spec.addContainer(small);
+    spec.addContainer(large);
     spec.addComponent(
         ComponentCreationHelper::createSphere(0.05, V3D(0, 0, -0.1)));
 
@@ -78,19 +78,19 @@ public:
   //----------------------------------------------------------------------------
   // Failure tests
   //----------------------------------------------------------------------------
-  void test_Add_Can_With_Empty_ID_Throws_Invalid_Argument() {
+  void test_Add_Container_With_Empty_ID_Throws_Invalid_Argument() {
     using Mantid::Geometry::Container;
     SampleEnvironmentSpec spec("CRYO-001");
-    auto testCan = boost::make_shared<const Container>("");
+    auto testContainer = boost::make_shared<const Container>("");
 
-    TS_ASSERT_THROWS(spec.addCan(testCan), std::invalid_argument);
+    TS_ASSERT_THROWS(spec.addContainer(testContainer), std::invalid_argument);
   }
 
   void test_Find_Throws_If_ID_Not_Found() {
     using Mantid::Geometry::Container;
     SampleEnvironmentSpec spec("CRYO-001");
 
-    TS_ASSERT_THROWS(spec.findCan("8mm"), std::invalid_argument);
+    TS_ASSERT_THROWS(spec.findContainer("8mm"), std::invalid_argument);
   }
 
   void test_BuildEnvironment_Throws_If_ID_Not_Found() {

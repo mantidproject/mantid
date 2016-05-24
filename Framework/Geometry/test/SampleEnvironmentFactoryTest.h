@@ -33,7 +33,7 @@ public:
   //----------------------------------------------------------------------------
   // Success tests
   //----------------------------------------------------------------------------
-  void test_Known_Specification_And_Can_Returns_Environment() {
+  void test_Known_Specification_And_Container_Returns_Environment() {
     using Mantid::Geometry::SampleEnvironment_uptr;
 
     SampleEnvironmentFactory factory(
@@ -42,7 +42,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         env = std::move(factory.create("facility", "inst", "CRYO001", "10mm")));
     TS_ASSERT_EQUALS("CRYO001", env->name());
-    TS_ASSERT_EQUALS("10mm", env->canID());
+    TS_ASSERT_EQUALS("10mm", env->containerID());
     TS_ASSERT_EQUALS(1, env->nelements());
     TS_ASSERT_EQUALS(1, factory.cacheSize());
   }
@@ -57,7 +57,7 @@ public:
                      std::runtime_error);
   }
 
-  void test_Known_Specification_Unknown_Can_Throws() {
+  void test_Known_Specification_Unknown_Container_Throws() {
     SampleEnvironmentFactory factory(
         Mantid::Kernel::make_unique<TestSampleEnvSpecFinder>());
     TS_ASSERT_THROWS(factory.create("unknown", "unknown", "CRYO001", "unknown"),
@@ -90,17 +90,17 @@ private:
       using namespace Mantid::Kernel;
 
       ShapeFactory factory;
-      auto small = factory.createShape<Can>(
+      auto small = factory.createShape<Container>(
           ComponentCreationHelper::sphereXML(0.004, V3D(), "sp-1"));
       small->setID("8mm");
-      auto large = factory.createShape<Can>(
+      auto large = factory.createShape<Container>(
           ComponentCreationHelper::sphereXML(0.005, V3D(), "sp-2"));
       large->setID("10mm");
 
       // Prepare a sample environment spec
       auto spec = Mantid::Kernel::make_unique<SampleEnvironmentSpec>("CRYO001");
-      spec->addCan(small);
-      spec->addCan(large);
+      spec->addContainer(small);
+      spec->addContainer(large);
       return std::move(spec);
     }
   };

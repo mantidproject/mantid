@@ -42,7 +42,7 @@ namespace Geometry {
 class MANTID_GEOMETRY_DLL SampleEnvironmentSpec {
 public:
   // Convenience typedefs
-  using CanIndex = std::unordered_map<std::string, Container_const_sptr>;
+  using ContainerIndex = std::unordered_map<std::string, Container_const_sptr>;
   using ComponentList = std::vector<Object_const_sptr>;
 
   SampleEnvironmentSpec(std::string name);
@@ -53,16 +53,16 @@ public:
   inline size_t ncans() const { return m_cans.size(); }
   /// @return The number of non-can components
   inline size_t ncomponents() const { return m_components.size(); }
-  Container_const_sptr findCan(const std::string &id) const;
+  Container_const_sptr findContainer(const std::string &id) const;
 
   SampleEnvironment_uptr buildEnvironment(const std::string &canID) const;
 
-  void addCan(const Container_const_sptr &can);
+  void addContainer(const Container_const_sptr &can);
   void addComponent(const Object_const_sptr &component);
 
 private:
   std::string m_name;
-  CanIndex m_cans;
+  ContainerIndex m_cans;
   ComponentList m_components;
 };
 

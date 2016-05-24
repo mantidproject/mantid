@@ -39,7 +39,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(kit->add(shape));
     TS_ASSERT_EQUALS(4, kit->nelements());
     TS_ASSERT_EQUALS(kit->name(), "TestKit");
-    TS_ASSERT_EQUALS(kit->canID(), "8mm");
+    TS_ASSERT_EQUALS(kit->containerID(), "8mm");
   }
 
   void test_IsValid_Tests_All_Components() {
@@ -89,7 +89,7 @@ private:
 
     // at centre
     ShapeFactory factory;
-    auto can = factory.createShape<Can>(
+    auto can = factory.createShape<Container>(
         ComponentCreationHelper::sphereXML(0.01, V3D(0, 0, 0), "sp-1"));
     can->setID("8mm");
     auto kit = boost::make_shared<SampleEnvironment>("TestKit", can);

@@ -63,7 +63,7 @@ public:
     TS_ASSERT_EQUALS(1, spec->ncans());
     TS_ASSERT_EQUALS(0, spec->ncomponents());
     Container_const_sptr can10mm;
-    TS_ASSERT_THROWS_NOTHING(can10mm = spec->findCan("10mm"));
+    TS_ASSERT_THROWS_NOTHING(can10mm = spec->findContainer("10mm"));
     TS_ASSERT(can10mm);
     TS_ASSERT_EQUALS("10mm", can10mm->id());
     TS_ASSERT(can10mm->hasValidShape());
@@ -96,7 +96,7 @@ public:
     TS_ASSERT_EQUALS(1, spec->ncans());
     TS_ASSERT_EQUALS(0, spec->ncomponents());
     Container_const_sptr can10mm;
-    TS_ASSERT_THROWS_NOTHING(can10mm = spec->findCan("10mm"));
+    TS_ASSERT_THROWS_NOTHING(can10mm = spec->findContainer("10mm"));
     TS_ASSERT(can10mm);
     TS_ASSERT_EQUALS("10mm", can10mm->id());
     TS_ASSERT(can10mm->hasValidShape());
@@ -143,7 +143,7 @@ public:
     TS_ASSERT_EQUALS(name, spec->name());
     TS_ASSERT_EQUALS(1, spec->ncans());
     Container_const_sptr can10mm;
-    TS_ASSERT_THROWS_NOTHING(can10mm = spec->findCan("10mm"));
+    TS_ASSERT_THROWS_NOTHING(can10mm = spec->findContainer("10mm"));
     TS_ASSERT(can10mm);
     TS_ASSERT_EQUALS("10mm", can10mm->id());
     TS_ASSERT(can10mm->hasValidShape());
@@ -216,7 +216,7 @@ public:
     TS_ASSERT_EQUALS(2, spec->ncans());
     // 10mm
     Container_const_sptr can10mm;
-    TS_ASSERT_THROWS_NOTHING(can10mm = spec->findCan("10mm"));
+    TS_ASSERT_THROWS_NOTHING(can10mm = spec->findContainer("10mm"));
     TS_ASSERT(can10mm);
     TS_ASSERT_EQUALS("10mm", can10mm->id());
     TS_ASSERT(can10mm->hasValidShape());
@@ -224,7 +224,7 @@ public:
     TS_ASSERT(can10mm->hasSampleShape());
     // 8mm
     Container_const_sptr can8mm;
-    TS_ASSERT_THROWS_NOTHING(can8mm = spec->findCan("8mm"));
+    TS_ASSERT_THROWS_NOTHING(can8mm = spec->findContainer("8mm"));
     TS_ASSERT(can8mm);
     TS_ASSERT_EQUALS("8mm", can8mm->id());
     TS_ASSERT(can8mm->hasValidShape());

@@ -177,7 +177,7 @@ void SampleEnvironmentSpecParser::parseAndAddContainers(
   while (node) {
     Element *childElement = static_cast<Element *>(node);
     if (childElement->nodeName() == CONTAINER_TAG) {
-      spec->addCan(parseContainer(childElement));
+      spec->addContainer(parseContainer(childElement));
     }
     node = nodeIter.nextNode();
   }
