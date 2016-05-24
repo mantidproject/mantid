@@ -60,7 +60,8 @@ WorkspaceJoiners::execWS2D(API::MatrixWorkspace_const_sptr ws1,
 
     // Copy X,Y,E
     outSpec->setX(XValues);
-    outSpec->setData(inSpec->dataY(), inSpec->dataE());
+    outSpec->dataY() = inSpec->dataY();
+    outSpec->dataE() = inSpec->dataE();
     // Copy the spectrum number/detector IDs
     outSpec->copyInfoFrom(*inSpec);
 
@@ -91,7 +92,8 @@ WorkspaceJoiners::execWS2D(API::MatrixWorkspace_const_sptr ws1,
 
     // Copy X,Y,E
     outSpec->setX(XValues);
-    outSpec->setData(inSpec->dataY(), inSpec->dataE());
+    outSpec->dataY() = inSpec->dataY();
+    outSpec->dataE() = inSpec->dataE();
     // Copy the spectrum number/detector IDs
     outSpec->copyInfoFrom(*inSpec);
 

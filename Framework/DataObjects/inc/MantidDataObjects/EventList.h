@@ -200,26 +200,6 @@ public:
   // std::pair<double,double> getXDataRange()const;
 
   /// Disallowed data accessors - can't modify Y/E on a EventList
-  void setData(const MantidVec & /*Y*/) override {
-    throw std::runtime_error("EventList: cannot set Y or E data directly.");
-  }
-  /// Disallowed data accessors - can't modify Y/E on a EventList
-  void setData(const MantidVec & /*Y*/, const MantidVec & /*E*/) override {
-    throw std::runtime_error("EventList: cannot set Y or E data directly.");
-  }
-  /// Disallowed data accessors - can't modify Y/E on a EventList
-  void
-  setData(const Kernel::cow_ptr<HistogramData::HistogramY> & /*Y*/) override {
-    throw std::runtime_error("EventList: cannot set Y or E data directly.");
-  }
-  /// Disallowed data accessors - can't modify Y/E on a EventList
-  void
-  setData(const Kernel::cow_ptr<HistogramData::HistogramY> & /*Y*/,
-          const Kernel::cow_ptr<HistogramData::HistogramE> & /*E*/) override {
-    throw std::runtime_error("EventList: cannot set Y or E data directly.");
-  }
-
-  /// Disallowed data accessors - can't modify Y/E on a EventList
   MantidVec &dataY() override {
     throw std::runtime_error(
         "EventList: non-const access to Y data is not possible.");

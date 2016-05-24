@@ -51,11 +51,12 @@ public:
     TS_ASSERT_EQUALS(h.dataX(), x1);
   }
   void testsetgetDataYVector() {
-    h.setData(y1);
+    h.setCounts(y1);
     TS_ASSERT_EQUALS(h.dataY(), y1);
   }
   void testsetgetDataYEVector() {
-    h.setData(y1, e1);
+    h.setCounts(y1);
+    h.setCountStandardDeviations(e1);
     TS_ASSERT_EQUALS(h.dataY(), y1);
     TS_ASSERT_EQUALS(h.dataE(), e1);
   }
@@ -70,11 +71,12 @@ public:
     TS_ASSERT_EQUALS(&(*h.ptrX()), &(*px));
   }
   void testsetgetDataYPointer() {
-    h.setData(pa);
+    h.setCounts(pa);
     TS_ASSERT_EQUALS(h.dataY(), pa->rawData());
   }
   void testsetgetDataYEPointer() {
-    h.setData(pa, pb);
+    h.setCounts(pa);
+    h.setCountStandardDeviations(pb);
     TS_ASSERT_EQUALS(h.dataY(), pa->rawData());
     TS_ASSERT_EQUALS(h.dataE(), pb->rawData());
   }
@@ -83,33 +85,25 @@ public:
     TS_ASSERT_EQUALS(h.dataX()[4], x1[4]);
   }
   void testgetYindex() {
-    h.setData(y1);
+    h.setCounts(y1);
     TS_ASSERT_EQUALS(h.dataY()[4], y1[4]);
   }
   void testgetEindex() {
-    h.setData(y1, e1);
+    h.setCounts(y1);
+    h.setCountStandardDeviations(e1);
     TS_ASSERT_EQUALS(h.dataE()[4], e1[4]);
   }
-  void testoperatorbracket() {
-    //	  h.setPoints(x1);
-    //	  h.setData(y1,e1);
-    //	  double* xye;
-    //	  xye=h[0];
-    //	  TS_ASSERT_EQUALS(*xye,x1[0]);
-    //	  TS_ASSERT_EQUALS(*(xye+1),y1[0]);
-    //	  TS_ASSERT_EQUALS(*(xye+2),e1[0]);
-  }
-
   void testrangeexceptionX() {
     h.setPoints(x1);
     TS_ASSERT_THROWS(h.dataX().at(nel), std::out_of_range);
   }
   void testrangeexceptionY() {
-    h.setData(y1);
+    h.setCounts(y1);
     TS_ASSERT_THROWS(h.dataY().at(nel), std::out_of_range);
   }
   void testrangeexceptionE() {
-    h.setData(y1, e1);
+    h.setCounts(y1);
+    h.setCountStandardDeviations(e1);
     TS_ASSERT_THROWS(h.dataE().at(nel), std::out_of_range);
   }
 };

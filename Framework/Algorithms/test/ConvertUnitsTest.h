@@ -33,16 +33,15 @@ class ConvertUnitsTest : public CxxTest::TestSuite {
 public:
   void setup_WS() {
     // Set up a small workspace for testing
-    Workspace_sptr space =
-        WorkspaceFactory::Instance().create("Workspace2D", 256, 11, 10);
-    Workspace2D_sptr space2D = boost::dynamic_pointer_cast<Workspace2D>(space);
+    auto space2D = createWorkspace<Workspace2D>(256, 11, 10);
     BinEdges x{0, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000};
     Counts a{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
     CountVariances variances{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
     CountStandardDeviations e(variances);
     for (int j = 0; j < 256; ++j) {
       space2D->setBinEdges(j, x);
-      space2D->setData(j, a.cowData(), e.cowData());
+      space2D->setCounts(j, a);
+      space2D->setCountStandardDeviations(j, e);
       // Just set the spectrum number to match the index
       space2D->getSpectrum(j)->setSpectrumNo(j);
       space2D->getSpectrum(j)->setDetectorID(j);
@@ -51,7 +50,7 @@ public:
 
     // Register the workspace in the data service
     this->inputSpace = "testWorkspace";
-    AnalysisDataService::Instance().addOrReplace(inputSpace, space);
+    AnalysisDataService::Instance().addOrReplace(inputSpace, space2D);
 
     // Load the instrument data
     Mantid::DataHandling::LoadInstrument loader;
@@ -185,7 +184,8 @@ public:
     double test[10] = {11, 22, 33, 44, 55, 66, 77, 88, 99, 1010};
     Counts testY(test, test + 10);
     CountStandardDeviations testE(test, test + 10);
-    output2D->setData(111, testY.cowData(), testE.cowData());
+    output2D->setCounts(111, testY);
+    output2D->setCountStandardDeviations(111, testE);
     y = output2D->dataY(111);
     TS_ASSERT_EQUALS(y[3], 44.0);
     yIn = input2D->dataY(111);

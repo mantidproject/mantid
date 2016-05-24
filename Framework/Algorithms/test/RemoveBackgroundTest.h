@@ -241,10 +241,9 @@ private:
     auto cloneWS = API::WorkspaceFactory::Instance().create(SourceWS);
 
     auto X = SourceWS->refX(0);
-    const MantidVec &Y = SourceWS->readY(0);
-    const MantidVec &E = SourceWS->readE(0);
     cloneWS->setX(0, X);
-    cloneWS->getSpectrum(0)->setData(Y, E);
+    cloneWS->dataY(0) = SourceWS->readY(0);
+    cloneWS->dataE(0) = SourceWS->readE(0);
 
     return cloneWS;
   }

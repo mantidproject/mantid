@@ -111,30 +111,32 @@ public:
     TS_ASSERT_THROWS(ws->setX(nhist + 5, v), std::range_error);
   }
 
-  void testSetData_cowptr() {
+  void testSetCounts_cowptr() {
     double aNumber = 5.5;
     auto v = Kernel::make_cow<HistogramData::HistogramY>(nbins, aNumber);
-    TS_ASSERT_THROWS_NOTHING(ws->setData(0, v));
+    TS_ASSERT_THROWS_NOTHING(ws->setCounts(0, v));
     TS_ASSERT_EQUALS(ws->dataY(0)[0], aNumber);
     TS_ASSERT_DIFFERS(ws->dataY(1)[0], aNumber);
   }
 
-  void testSetData_cowptr2() {
+  void testSetCounts_cowptr2() {
     double aNumber = 5.6;
     auto v = Kernel::make_cow<HistogramData::HistogramY>(nbins, aNumber);
     auto e = Kernel::make_cow<HistogramData::HistogramE>(nbins, aNumber * 2);
-    TS_ASSERT_THROWS_NOTHING(ws->setData(0, v, e));
+    TS_ASSERT_THROWS_NOTHING(ws->setCounts(0, v));
+    TS_ASSERT_THROWS_NOTHING(ws->setCountStandardDeviations(0, e));
     TS_ASSERT_EQUALS(ws->dataY(0)[0], aNumber);
     TS_ASSERT_EQUALS(ws->dataE(0)[0], aNumber * 2);
     TS_ASSERT_DIFFERS(ws->dataY(1)[0], aNumber);
     TS_ASSERT_DIFFERS(ws->dataE(1)[0], aNumber * 2);
   }
 
-  void testSetData() {
+  void testSetCounts() {
     double aNumber = 5.7;
     auto v = boost::make_shared<HistogramData::HistogramY>(nbins, aNumber);
     auto e = boost::make_shared<HistogramData::HistogramE>(nbins, aNumber * 2);
-    TS_ASSERT_THROWS_NOTHING(ws->setData(0, v, e));
+    TS_ASSERT_THROWS_NOTHING(ws->setCounts(0, v));
+    TS_ASSERT_THROWS_NOTHING(ws->setCountStandardDeviations(0, e));
     TS_ASSERT_EQUALS(ws->dataY(0)[0], aNumber);
     TS_ASSERT_EQUALS(ws->dataE(0)[0], aNumber * 2);
     TS_ASSERT_DIFFERS(ws->dataY(1)[0], aNumber);

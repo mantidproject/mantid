@@ -53,25 +53,6 @@ public:
   const MantidVec &dataDx() const override;
   const MantidVec &readDx() const override;
 
-  /// Sets the data.
-  void setData(const MantidVec &Y) override { m_histogram.dataY() = Y; };
-  /// Sets the data and errors
-  void setData(const MantidVec &Y, const MantidVec &E) override {
-    m_histogram.dataY() = Y;
-    m_histogram.dataE() = E;
-  }
-
-  /// Sets the data.
-  void setData(const Kernel::cow_ptr<HistogramData::HistogramY> &Y) override {
-    m_histogram.setY(Y);
-  }
-  /// Sets the data and errors
-  void setData(const Kernel::cow_ptr<HistogramData::HistogramY> &Y,
-               const Kernel::cow_ptr<HistogramData::HistogramE> &E) override {
-    m_histogram.setY(Y);
-    m_histogram.setE(E);
-  }
-
   /// Zero the data (Y&E) in this spectrum
   void clearData() override;
 

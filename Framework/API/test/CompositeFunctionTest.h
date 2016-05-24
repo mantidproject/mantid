@@ -21,8 +21,8 @@ public:
   CompositeFunctionTest_MocSpectrum(size_t nx, size_t ny)
       : SpectrumTester(HistogramData::getHistogramXMode(nx, ny)) {
     dataX().resize(nx);
-    setData(make_cow<HistogramData::HistogramY>(ny),
-            make_cow<HistogramData::HistogramE>(ny));
+    dataY().resize(ny);
+    dataE().resize(ny);
   }
 };
 

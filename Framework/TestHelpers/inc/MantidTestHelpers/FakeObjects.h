@@ -41,9 +41,15 @@ using namespace Mantid;
 class SpectrumTester : public ISpectrum {
 public:
   SpectrumTester(HistogramData::Histogram::XMode mode)
-      : ISpectrum(), m_histogram(mode) {}
+      : ISpectrum(), m_histogram(mode) {
+    m_histogram.setCounts(0);
+    m_histogram.setCountStandardDeviations(0);
+  }
   SpectrumTester(const specnum_t specNo, HistogramData::Histogram::XMode mode)
-      : ISpectrum(specNo), m_histogram(mode) {}
+      : ISpectrum(specNo), m_histogram(mode) {
+    m_histogram.setCounts(0);
+    m_histogram.setCountStandardDeviations(0);
+  }
 
   void setX(const cow_ptr<HistogramData::HistogramX> &X) override {
     m_histogram.setX(X);
@@ -58,21 +64,6 @@ public:
   MantidVec &dataDx() override { return m_histogram.dataDx(); }
   const MantidVec &dataDx() const override { return m_histogram.dataDx(); }
   const MantidVec &readDx() const override { return m_histogram.readDx(); }
-
-  void setData(const MantidVec &Y) override { m_histogram.dataY() = Y; }
-  void setData(const MantidVec &Y, const MantidVec &E) override {
-    m_histogram.dataY() = Y;
-    m_histogram.dataE() = E;
-  }
-
-  void setData(const cow_ptr<HistogramData::HistogramY> &Y) override {
-    m_histogram.setY(Y);
-  }
-  void setData(const cow_ptr<HistogramData::HistogramY> &Y,
-               const cow_ptr<HistogramData::HistogramE> &E) override {
-    m_histogram.setY(Y);
-    m_histogram.setE(E);
-  }
 
   MantidVec &dataY() override { return m_histogram.dataY(); }
   MantidVec &dataE() override { return m_histogram.dataE(); }
@@ -121,8 +112,8 @@ public:
     vec.resize(spec, HistogramData::getHistogramXMode(j, k));
     for (size_t i = 0; i < spec; i++) {
       vec[i].dataX().resize(j, 1.0);
-      vec[i].setData(make_cow<Mantid::HistogramData::HistogramY>(k, 1.0),
-                     make_cow<Mantid::HistogramData::HistogramE>(k, 1.0));
+      vec[i].dataY().resize(k, 1.0);
+      vec[i].dataE().resize(k, 1.0);
       vec[i].addDetectorID(detid_t(i));
       vec[i].setSpectrumNo(specnum_t(i + 1));
     }
