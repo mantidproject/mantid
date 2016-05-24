@@ -13660,7 +13660,6 @@ void ApplicationWindow::translateActionsStrings() {
   conestyle->setToolTip(tr("Cones"));
   conestyle->setStatusTip(tr("Cones"));
   crossHairStyle->setText(tr("Crosshairs"));
-  crossHairStyle->setMenuText(tr("Crosshairs"));
   crossHairStyle->setToolTip(tr("Crosshairs"));
   crossHairStyle->setStatusTip(tr("Crosshairs"));
 
@@ -13668,39 +13667,34 @@ void ApplicationWindow::translateActionsStrings() {
   // floorstyle->setMenuText( tr( "Floor Style" ) );
   // floorstyle->setStatusTip( tr( "Floor Style" ) );
   floordata->setText(tr("Floor Data Projection"));
-  floordata->setMenuText(tr("Floor Data Projection"));
   floordata->setToolTip(tr("Floor data projection"));
   floordata->setStatusTip(tr("Floor data projection"));
+
   flooriso->setText(tr("Floor Isolines"));
-  flooriso->setMenuText(tr("Floor Isolines"));
   flooriso->setToolTip(tr("Floor isolines"));
   flooriso->setStatusTip(tr("Floor isolines"));
+
   floornone->setText(tr("Empty Floor"));
-  floornone->setMenuText(tr("Empty Floor"));
   floornone->setToolTip(tr("Empty floor"));
   floornone->setStatusTip(tr("Empty floor"));
 
   actionAnimate->setText(tr("Animation"));
-  actionAnimate->setMenuText(tr("Animation"));
   actionAnimate->setToolTip(tr("Animation"));
   actionAnimate->setStatusTip(tr("Animation"));
 
   actionPerspective->setText(tr("Enable perspective"));
-  actionPerspective->setMenuText(tr("Enable perspective"));
   actionPerspective->setToolTip(tr("Enable perspective"));
   actionPerspective->setStatusTip(tr("Enable perspective"));
 
   actionResetRotation->setText(tr("Reset rotation"));
-  actionResetRotation->setMenuText(tr("Reset rotation"));
   actionResetRotation->setToolTip(tr("Reset rotation"));
   actionResetRotation->setStatusTip(tr("Reset rotation"));
 
   actionFitFrame->setText(tr("Fit frame to window"));
-  actionFitFrame->setMenuText(tr("Fit frame to window"));
   actionFitFrame->setToolTip(tr("Fit frame to window"));
   actionFitFrame->setStatusTip(tr("Fit frame to window"));
 
-  actionWaterfallPlot->setMenuText(tr("&Waterfall Plot"));
+  actionWaterfallPlot->setText(tr("&Waterfall Plot"));
   actionWaterfallPlot->setToolTip(tr("Waterfall Plot"));
 }
 
@@ -13709,8 +13703,8 @@ Graph3D *ApplicationWindow::openMatrixPlot3D(const QString &caption,
                                              double xl, double xr, double yl,
                                              double yr, double zl, double zr) {
   QString name = matrix_name;
-  name.remove("matrix<", true);
-  name.remove(">");
+  name.remove("matrix<", Qt::CaseSensitive);
+  name.remove(">", Qt::CaseSensitive);
   Matrix *m = matrix(name);
   if (!m)
     return 0;
@@ -13911,7 +13905,7 @@ ApplicationWindow *ApplicationWindow::importOPJ(const QString &filename,
     app->setWindowTitle("MantidPlot - " + filename); // Mantid
     app->restoreApplicationGeometry();
     app->projectname = filename;
-    app->recentProjects.remove(filename);
+    app->recentProjects.removeAll(filename);
     app->recentProjects.push_front(filename);
     app->updateRecentProjectsList();
 
@@ -13924,7 +13918,7 @@ ApplicationWindow *ApplicationWindow::importOPJ(const QString &filename,
              filename.endsWith(".ogw", Qt::CaseInsensitive)) {
     // cppcheck-suppress unusedScopedObject
     ImportOPJ(this, filename);
-    recentProjects.remove(filename);
+    recentProjects.removeAll(filename);
     recentProjects.push_front(filename);
     updateRecentProjectsList();
     return this;
@@ -13936,12 +13930,12 @@ void ApplicationWindow::deleteFitTables() {
   QList<QWidget *> *mLst = new QList<QWidget *>();
   QList<MdiSubWindow *> windows = windowsList();
   foreach (MdiSubWindow *w, windows) {
-    if (w->isA("MultiLayer"))
+    if (QString(w->metaObject()->className()) == "MultiLayer")
       mLst->append(w);
   }
 
   foreach (QWidget *ml, *mLst) {
-    if (ml->isA("MultiLayer")) {
+    if (QString(ml->metaObject()->className()) == "MultiLayer") {
       auto cml = dynamic_cast<MultiLayer *>(ml);
       if (!cml)
         continue;
@@ -14019,8 +14013,8 @@ void ApplicationWindow::updateRecentProjectsList() {
   recentProjectsMenu->clear();
 
   for (int i = 0; i < (int)recentProjects.size(); i++)
-    recentProjectsMenu->insertItem("&" + QString::number(i + 1) + " " +
-                                   recentProjects[i]);
+    recentProjectsMenu->addAction("&" + QString::number(i + 1) + " " +
+                                  recentProjects[i]);
 }
 
 void ApplicationWindow::updateRecentFilesList(QString fname) {
@@ -14059,10 +14053,10 @@ void ApplicationWindow::updateRecentFilesList(QString fname) {
       // The file property could not parse the string, use as is
       ostr << "&" << menuCount << " " << recentFiles[i].toStdString();
     }
-    QMenuItem *mi = new QMenuItem;
-    mi->setText(QString::fromStdString(ostr.str()));
-    mi->setData(recentFiles[i]);
-    recentFilesMenu->insertItem(mi);
+    QString actionText = QString::fromStdString(ostr.str());
+    QAction *ma = new QAction(actionText, nullptr);
+    ma->setData(recentFiles[i]);
+    recentFilesMenu->addAction(ma);
     menuCount++;
   }
 }
@@ -14264,9 +14258,9 @@ void ApplicationWindow::fitMultiPeak(int profile) {
     return;
   } else {
     bool ok;
-    int peaks = QInputDialog::getInteger(
+    int peaks = QInputDialog::getInteger(this,
         tr("MantidPlot - Enter the number of peaks"), // Mantid
-        tr("Peaks"), 2, 2, 1000000, 1, &ok, this);
+        tr("Peaks"), 2, 2, 1000000, 1, &ok);
     if (ok && peaks) {
       g->setActiveTool(
           new MultiPeakFitTool(g, this, (MultiPeakFit::PeakProfile)profile,
@@ -14337,7 +14331,7 @@ void ApplicationWindow::parseCommandLineArguments(const QStringList &args) {
         (str == "-r" || str == "--revision") ||
         (str == "-a" || str == "--about") || (str == "-h" || str == "--help")) {
       g_log.warning()
-          << str.ascii()
+          << str.latin1()
           << ": This command line option must be used without other arguments!";
     } else if ((str == "-d" || str == "--default-settings")) {
       default_settings = true;
@@ -14355,7 +14349,7 @@ void ApplicationWindow::parseCommandLineArguments(const QStringList &args) {
     else if (file_name.isEmpty() &&
              (str.startsWith("-") || str.startsWith("--"))) {
       g_log.warning()
-          << "'" << str.ascii() << "' unknown command line option!\n"
+          << "'" << str.latin1() << "' unknown command line option!\n"
           << "Type 'MantidPlot -h'' to see the list of the valid options.";
       unknown_opt_found = true;
       break;
@@ -14395,7 +14389,7 @@ void ApplicationWindow::parseCommandLineArguments(const QStringList &args) {
       return;
     }
 
-    workingDir = fi.dirPath(true);
+    workingDir = fi.absolutePath();
     saveSettings(); // the recent projects must be saved
 
     QStringList cmdArgs = args;
@@ -14437,11 +14431,11 @@ void ApplicationWindow::createLanguagesList() {
 
   QString qmPath = d_translations_folder;
   QDir dir(qmPath);
-  QStringList fileNames = dir.entryList("qtiplot_*.qm");
+  QStringList fileNames = dir.entryList(QStringList("qtiplot_*.qm"));
   for (int i = 0; i < (int)fileNames.size(); i++) {
     QString locale = fileNames[i];
-    locale = locale.mid(locale.find('_') + 1);
-    locale.truncate(locale.find('.'));
+    locale = locale.mid(locale.indexOf('_') + 1);
+    locale.truncate(locale.indexOf('.'));
     locales.push_back(locale);
   }
   locales.push_back("en");
@@ -14486,7 +14480,7 @@ QStringList ApplicationWindow::matrixNames() {
   while (f) {
     QList<MdiSubWindow *> folderWindows = f->windowsList();
     foreach (MdiSubWindow *w, folderWindows) {
-      if (w->isA("Matrix"))
+      if (QString(w->metaObject()->className()) == "Matrix")
         names << w->objectName();
     }
     f = f->folderBelow();
@@ -14499,7 +14493,7 @@ QStringList ApplicationWindow::mantidmatrixNames() {
   while (f) {
     QList<MdiSubWindow *> folderWindows = f->windowsList();
     foreach (MdiSubWindow *w, folderWindows) {
-      if (w->isA("MantidMatrix"))
+      if (QString(w->metaObject()->className()) == "MantidMatrix")
         names << w->objectName();
     }
     f = f->folderBelow();
@@ -14525,7 +14519,7 @@ bool ApplicationWindow::projectHas2DPlots() {
   while (f) {
     QList<MdiSubWindow *> folderWindows = f->windowsList();
     foreach (MdiSubWindow *w, folderWindows) {
-      if (w->isA("MultiLayer"))
+      if (QString(w->metaObject()->className()) == "MultiLayer")
         return true;
     }
     f = f->folderBelow();
@@ -14561,7 +14555,7 @@ Folder *ApplicationWindow::appendProject(const QString &fn,
   }
 
   QTextStream fileTS(&file);
-  fileTS.setEncoding(QTextStream::UnicodeUTF8);
+  fileTS.setCodec(QTextCodec::codecForName("UTF-8"));
 
   QString baseName = fileInfo.fileName();
 
@@ -14658,18 +14652,18 @@ void ApplicationWindow::saveProjectFile(Folder *folder, const QString &fn,
   text += saveProjectFolder(folder, windowCount, true);
 
   text.prepend("<windows>\t" + QString::number(windowCount) + "\n");
-  text.prepend("<scripting-lang>\t" + QString(scriptingEnv()->name()) + "\n");
+  text.prepend("<scripting-lang>\t" + QString(scriptingEnv()->objectName()) + "\n");
   text.prepend("MantidPlot " + QString::number(maj_version) + "." +
                QString::number(min_version) + "." +
                QString::number(patch_version) + " project file\n");
 
   QTextStream t(&f);
-  t.setEncoding(QTextStream::UnicodeUTF8);
+  t.setCodec(QTextCodec::codecForName("UTF-8"));
   t << text;
   f.close();
 
   if (compress) {
-    file_compress(fn.ascii(), "w9");
+    file_compress(fn.latin1(), "w9");
   }
 
   QApplication::restoreOverrideCursor();
@@ -14688,7 +14682,7 @@ void ApplicationWindow::saveFolderAsProject(Folder *f) {
       this, tr("Save project as"), workingDir, filter, &selectedFilter);
   if (!fn.isEmpty()) {
     QFileInfo fi(fn);
-    workingDir = fi.dirPath(true);
+    workingDir = fi.absolutePath();
     QString baseName = fi.fileName();
     if (!baseName.contains("."))
       fn.append(".qti");
@@ -14708,26 +14702,25 @@ void ApplicationWindow::showFolderPopupMenu(QTreeWidgetItem *it, const QPoint &p
   QMenu cm(this);
   QMenu window(this);
   QMenu viewWindowsMenu(this);
-  viewWindowsMenu.setCheckable(true);
 
   cm.insertItem(tr("&Find..."), this, SLOT(showFindDialogue()));
   cm.insertSeparator();
-  cm.insertItem(tr("App&end Project..."), this, SLOT(appendProject()));
+  cm.addAction(tr("App&end Project..."), this, SLOT(appendProject()));
 
   auto fli = dynamic_cast<FolderListItem *>(it);
   if (!fli)
     return;
 
   if (fli->folder()->parent())
-    cm.insertItem(tr("Save &As Project..."), this, SLOT(saveAsProject()));
+    cm.addAction(tr("Save &As Project..."), this, SLOT(saveAsProject()));
   else
-    cm.insertItem(tr("Save Project &As..."), this, SLOT(saveProjectAs()));
-  cm.insertSeparator();
+    cm.addAction(tr("Save Project &As..."), this, SLOT(saveProjectAs()));
+  cm.addSeparator();
 
   if (fromFolders && show_windows_policy != HideAll) {
-    cm.insertItem(tr("&Show All Windows"), this, SLOT(showAllFolderWindows()));
-    cm.insertItem(tr("&Hide All Windows"), this, SLOT(hideAllFolderWindows()));
-    cm.insertSeparator();
+    cm.addAction(tr("&Show All Windows"), this, SLOT(showAllFolderWindows()));
+    cm.addAction(tr("&Hide All Windows"), this, SLOT(hideAllFolderWindows()));
+    cm.addSeparator();
   }
 
   if (fromFolders) {
@@ -14738,20 +14731,20 @@ void ApplicationWindow::showFolderPopupMenu(QTreeWidgetItem *it, const QPoint &p
     window.addAction(actionNewFunctionPlot);
     window.addAction(actionNewSurfacePlot);
     window.addAction(actionNewTiledWindow);
-    cm.insertItem(tr("New &Window"), &window);
+    cm.addMenu(&window)->setText(tr("New &Window"));
   }
 
   QStringList lst;
   lst << tr("&None") << tr("&Windows in Active Folder");
   for (int i = 0; i < lst.size(); ++i) {
-    int id = viewWindowsMenu.insertItem(lst[i], this,
-                                        SLOT(setShowWindowsPolicy(int)));
-    viewWindowsMenu.setItemParameter(id, i);
-    viewWindowsMenu.setItemChecked(id, show_windows_policy == i);
+    auto action = viewWindowsMenu.addAction(lst[i], this,
+                                            SLOT(setShowWindowsPolicy(int)));
+    action->setData(i);
+    action->setChecked(show_windows_policy == i);
   }
-  cm.insertItem(tr("&View Windows"), &viewWindowsMenu);
-  cm.insertSeparator();
-  cm.insertItem(tr("&Properties..."), this, SLOT(folderProperties()));
+  cm.addMenu(&viewWindowsMenu)->setText(tr("&View Windows"));
+  cm.addSeparator();
+  cm.addAction(tr("&Properties..."), this, SLOT(folderProperties()));
   if (fromFolders) {
     cm.exec(folders->mapToGlobal(p));
   } else {
@@ -14885,7 +14878,7 @@ void ApplicationWindow::addFolder() {
 
   QStringList lst = currentFolder()->subfolders();
   QString name = tr("New Folder");
-  lst = lst.grep(name);
+  lst = lst.filter(name);
   if (!lst.isEmpty())
     name += " (" + QString::number(lst.size() + 1) + ")";
 
@@ -14907,7 +14900,7 @@ Folder *ApplicationWindow::addFolder(QString name, Folder *parent) {
   }
 
   QStringList lst = parent->subfolders();
-  lst = lst.grep(name);
+  lst = lst.filter(name);
   if (!lst.isEmpty())
     name += " (" + QString::number(lst.size() + 1) + ")";
 
@@ -15128,10 +15121,10 @@ bool ApplicationWindow::changeFolder(Folder *newFolder, bool force) {
       active_window->showMinimized(); // ws->setActiveWindow() makes minimized
                                       // windows to be shown normally
     else if (active_window_state == MdiSubWindow::Maximized) {
-      if (active_window->isA("Graph3D"))
+      if (QString(active_window->metaObject()->className()) == "Graph3D")
         static_cast<Graph3D *>(active_window)->setIgnoreFonts(true);
       active_window->showMaximized();
-      if (active_window->isA("Graph3D"))
+      if (QString(active_window->metaObject()->className()) == "Graph3D")
         static_cast<Graph3D *>(active_window)->setIgnoreFonts(false);
     }
   }
@@ -15159,25 +15152,25 @@ void ApplicationWindow::addListViewItem(MdiSubWindow *w) {
     return;
 
   WindowListItem *it = new WindowListItem(lv, w);
-  if (w->isA("Matrix")) {
+  if (QString(w->metaObject()->className()) == "Matrix") {
     it->setIcon(0, getQPixmap("matrix_xpm"));
     it->setText(1, tr("Matrix"));
   } else if (w->inherits("Table")) {
     it->setIcon(0, getQPixmap("worksheet_xpm"));
     it->setText(1, tr("Table"));
-  } else if (w->isA("Note")) {
+  } else if (QString(w->metaObject()->className()) == "Note") {
     it->setIcon(0, getQPixmap("note_xpm"));
     it->setText(1, tr("Note"));
-  } else if (w->isA("MultiLayer")) {
+  } else if (QString(w->metaObject()->className()) == "MultiLayer") {
     it->setIcon(0, getQPixmap("graph_xpm"));
     it->setText(1, tr("Graph"));
-  } else if (w->isA("Graph3D")) {
+  } else if (QString(w->metaObject()->className()) == "Graph3D") {
     it->setIcon(0, getQPixmap("trajectory_xpm"));
     it->setText(1, tr("3D Graph"));
-  } else if (w->isA("MantidMatrix")) {
+  } else if (QString(w->metaObject()->className()) == "MantidMatrix") {
     it->setIcon(0, getQPixmap("mantid_matrix_xpm"));
     it->setText(1, tr("Workspace"));
-  } else if (w->isA("InstrumentWindow")) {
+  } else if (QString(w->metaObject()->className()) == "InstrumentWindow") {
     it->setText(1, tr("Instrument"));
   } else {
     it->setText(1, tr("Custom window"));
@@ -15210,19 +15203,19 @@ void ApplicationWindow::windowProperties() {
   s += tr("Label") + ": " + static_cast<MdiSubWindow *>(w)->windowLabel() +
        "\n\n";
 
-  if (w->isA("Matrix")) {
+  if (QString(w->metaObject()->className()) == "Matrix") {
     mbox->setIconPixmap(getQPixmap("matrix_xpm"));
     s += tr("Type") + ": " + tr("Matrix") + "\n\n";
   } else if (w->inherits("Table")) {
     mbox->setIconPixmap(getQPixmap("worksheet_xpm"));
     s += tr("Type") + ": " + tr("Table") + "\n\n";
-  } else if (w->isA("Note")) {
+  } else if (QString(w->metaObject()->className()) == "Note") {
     mbox->setIconPixmap(getQPixmap("note_xpm"));
     s += tr("Type") + ": " + tr("Note") + "\n\n";
-  } else if (w->isA("MultiLayer")) {
+  } else if (QString(w->metaObject()->className()) == "MultiLayer") {
     mbox->setIconPixmap(getQPixmap("graph_xpm"));
     s += tr("Type") + ": " + tr("Graph") + "\n\n";
-  } else if (w->isA("Graph3D")) {
+  } else if (QString(w->metaObject()->className()) == "Graph3D") {
     mbox->setIconPixmap(getQPixmap("trajectory_xpm"));
     s += tr("Type") + ": " + tr("3D Graph") + "\n\n";
   }
@@ -15319,7 +15312,7 @@ void ApplicationWindow::goToRow() {
   if (!w)
     return;
 
-  if (w->inherits("Table") || w->isA("Matrix")) {
+  if (w->inherits("Table") || QString(w->metaObject()->className()) == "Matrix") {
     bool ok;
     int row = QInputDialog::getInteger(
         this, tr("MantidPlot - Enter row number"), tr("Row"), // Mantid
@@ -15344,7 +15337,7 @@ void ApplicationWindow::goToColumn() {
   if (!w)
     return;
 
-  if (w->inherits("Table") || w->isA("Matrix")) {
+  if (w->inherits("Table") || QString(w->metaObject()->className()) == "Matrix") {
     bool ok;
     int col = QInputDialog::getInteger(
         this, tr("MantidPlot - Enter column number"), tr("Column"), // Mantid
@@ -15496,7 +15489,7 @@ void ApplicationWindow::cascade() {
     if (!innerWidget) {
       throw std::runtime_error("A non-MdiSubWindow detected in the MDI area");
     }
-    w->setActiveWindow();
+    w->activateWindow();
     innerWidget->setNormal();
     w->setGeometry(x, y, w->geometry().width(), w->geometry().height());
     w->raise();
@@ -15695,7 +15688,7 @@ MultiLayer *ApplicationWindow::generate2DGraph(Graph::CurveType type) {
 
     return multilayerPlot(table, table->selectedColumns(), type,
                           table->topSelectedRow(), table->bottomSelectedRow());
-  } else if (w->isA("Matrix")) {
+  } else if (QString(w->metaObject()->className()) == "Matrix") {
     Matrix *m = static_cast<Matrix *>(w);
     return plotHistogram(m);
   }
@@ -15862,7 +15855,7 @@ void ApplicationWindow::setToolbars() {
   plotTools->setVisible(d_plot_tool_bar);
   displayBar->setVisible(d_display_tool_bar);
   formatToolBar->setVisible(d_format_tool_bar);
-  plotTools->setEnabled(w && w->isA("MultiLayer"));
+  plotTools->setEnabled(w && QString(w->metaObject()->className()) == "MultiLayer");
 }
 
 void ApplicationWindow::saveFitFunctions(const QStringList &lst) {
@@ -15891,10 +15884,10 @@ void ApplicationWindow::saveFitFunctions(const QStringList &lst) {
       if (!s.isEmpty()) {
         NonLinearFit *fit = new NonLinearFit(this, 0);
 
-        int pos1 = s.find("(", 0);
+        int pos1 = s.indexOf("(", 0);
         fit->setObjectName(s.left(pos1));
 
-        int pos2 = s.find(")", pos1);
+        int pos2 = s.indexOf(")", pos1);
         QString par = s.mid(pos1 + 4, pos2 - pos1 - 4);
         QStringList paramList =
             par.split(QRegExp("[,;]+[\\s]*"), QString::SkipEmptyParts);
@@ -16298,11 +16291,12 @@ void ApplicationWindow::addUserMenu(const QString &topMenu) {
 
   QMenu *customMenu = new QMenu(topMenu);
   customMenu->setTitle(topMenu);
-  customMenu->setName(topMenu);
+  customMenu->setObjectName(topMenu.toAscii().constData());
   connect(customMenu, SIGNAL(triggered(QAction *)), this,
           SLOT(performCustomAction(QAction *)));
   d_user_menus.append(customMenu);
   myMenuBar()->insertItem(tr(topMenu), customMenu);
+  myMenuBar()->addMenu(customMenu)->setText(tr(topMenu.toAscii().constData()));
 }
 
 void ApplicationWindow::addUserMenuAction(const QString &parentMenu,
@@ -16322,13 +16316,13 @@ void ApplicationWindow::addUserMenuAction(const QString &parentMenu,
       return;
   }
 
-  QAction *scriptAction = new QAction(tr(niceName), topMenu);
+  QAction *scriptAction = new QAction(tr(niceName.toAscii().constData()), topMenu);
   scriptAction->setData(itemData);
   topMenu->addAction(scriptAction);
   d_user_actions.append(scriptAction);
 
   // Remove name from the list of removed interfaces if applicable
-  removed_interfaces.remove(niceName);
+  removed_interfaces.removeAll(niceName);
 }
 
 void ApplicationWindow::removeUserMenu(const QString &parentMenu) {
@@ -16381,7 +16375,7 @@ QList<QMenu *> ApplicationWindow::menusList() {
   QList<QMenu *> lst;
   QObjectList children = this->children();
   foreach (QObject *w, children) {
-    if (w->isA("QMenu"))
+    if (QString(w->metaObject()->className()) == "QMenu")
       lst << static_cast<QMenu *>(w);
   }
   return lst;
@@ -16394,7 +16388,7 @@ QList<QToolBar *> ApplicationWindow::toolBarsList() const {
   QList<QToolBar *> lst;
   QObjectList children = this->children();
   foreach (QObject *w, children) {
-    if (w->isA("QToolBar"))
+    if (QString(w->metaObject()->className()) == "QToolBar")
       lst << static_cast<QToolBar *>(w);
   }
   return lst;
@@ -16485,7 +16479,7 @@ QString ApplicationWindow::endOfLine() {
  */
 void ApplicationWindow::customMultilayerToolButtons(MultiLayer *w) {
   if (!w) {
-    btnPointer->setOn(true);
+    btnPointer->setChecked(true);
     return;
   }
 
@@ -16493,7 +16487,7 @@ void ApplicationWindow::customMultilayerToolButtons(MultiLayer *w) {
   if (g) {
     PlotToolInterface *tool = g->activeTool();
     if (g->zoomOn())
-      btnZoomIn->setOn(true);
+      btnZoomIn->setChecked(true);
 
     else if (g->areRangeSelectorsOn()) {
     } else if (dynamic_cast<PeakPickerTool *>(tool))
