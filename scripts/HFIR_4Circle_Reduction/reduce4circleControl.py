@@ -144,6 +144,16 @@ class CWSCDReductionControl(object):
 
         return
 
+    @staticmethod
+    def apply_lorentz_correction(peak_intensity, q, wavelength, step_omega):
+        """ Apply lorentz correction to intensity """
+        # calculate theta
+        sin_theta = q * wavelength/(4*math.pi)
+        theta = math.asin(sin_theta)
+        corrected_intensity = peak_intensity * math.sin(2*theta) * step_omega
+
+        return corrected_intensity
+
     def calculate_peak_center(self, exp_number, scan_number, pt_numbers=None):
         """
         Calculate center of peak by weighting the peak centers of multiple Pt (slice from 3D peak)
@@ -440,6 +450,19 @@ class CWSCDReductionControl(object):
         avg_bg = float(bg_sum) / len(bg_pt_list)
 
         return avg_bg
+
+    def export_to_fullprof(self, exp_number, scan_number_list, fullprof_file_name):
+        """
+        Export peak intensities to Fullprof data file
+        :param exp_number:
+        :param scan_number_list:
+        :param fullprof_file_name:
+        :return:
+        """
+        # TODO/NOW/ - Doc, check and ...
+
+
+        return
 
     def export_md_data(self, exp_number, scan_number, base_file_name):
         """

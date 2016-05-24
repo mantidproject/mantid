@@ -175,6 +175,10 @@ class MainWindow(QtGui.QMainWindow):
                      self.do_view_merged_scans_3d)
         self.connect(self.ui.pushButton_showUB, QtCore.SIGNAL('clicked()'),
                      self.do_view_ub)
+        self.connect(self.ui.checkBox_mergeScanTabLorentzCorr, QtCore.SIGNAL('stateChanged(int)'),
+                     self.evt_apply_lorentz_correction_mt)
+        self.connect(self.ui.pushButton_exportPeaks, QtCore.SIGNAL('clicked()'),
+                     self.do_export_to_fp)
 
         # Tab 'Integrate Peaks'
         self.connect(self.ui.pushButton_integratePt, QtCore.SIGNAL('clicked()'),
@@ -903,6 +907,34 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
+    def do_export_to_fp(self):
+        """ Export selected reflections to Fullprof single crystal data file for analysis
+        :return:
+        """
+        # get selected lines
+        selected_rows = self.ui.tableWidget_mergeScans.get_selected_rows(True)
+        if len(selected_rows) == 0:
+            self.pop_one_button_dialog('There isn\'t any peak selected.')
+            return
+
+        # get the file name
+        fp_name = str(QtGui.QFileDialog.getSaveFileName(self, 'Save to Fullprof File'))
+
+        # return due to cancel
+        if len(fp_name) == 0:
+            return
+
+        # collect information
+        exp_number = int(self.ui.lineEdit_exp)
+        scan_number_list = list()
+        for i_row in selected_rows:
+            scan_number_list.append(self.ui.tableWidget_mergeScans.get_scan_number(i_row))
+
+        # write
+        self._myControl.export_to_fullprof(exp_number, scan_number_list, fp_name)
+
+        return
+
     def do_filter_sort_survey_table(self):
         """
         Sort and filter survey table by specified field
@@ -1193,14 +1225,6 @@ class MainWindow(QtGui.QMainWindow):
         # END-FOR
 
         return
-
-    def doAddScanPtToRefineUB(self):
-        """ Add scan/pt numbers to the list of data points for refining ub matrix
-
-        And the added scan number and pt numbers will be reflected in the (left sidebar)
-
-        """
-        raise RuntimeError("ASAP")
 
     def do_index_ub_peaks(self):
         """ Index the peaks in the UB matrix peak table
@@ -2216,6 +2240,26 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.tabWidget.setCurrentIndex(MainWindow.TabPage['View Raw Data'])
         self.ui.lineEdit_run.setText(str(scan_num))
         self.ui.lineEdit_rawDataPtNo.setText(str(pt_num))
+
+        return
+
+    def evt_apply_lorentz_correction_mt(self):
+        """
+        Apply Lorentz corrections to the integrated peak intensities of all the selected peaks.
+        :return:
+        """
+        # select rows
+        selected_rows = self.ui.tableWidget_mergeScans.get_selected_rows(True)
+
+        # apply for each
+        for row_number in selected_rows:
+            scan_number = self.ui.tableWidget_mergeScans.get_scan_number(row_number)
+            peak_intensity = self.ui.tableWidget_mergeScans.get_intensity(row_number)
+            q = self._myControl.calculate_Q(self.ui.tableWidget_mergeScans.get_peak_center(q=True))
+            wavelength = self._myControl.get_wavelength(exp_number, scan_number)
+            step_omega = self._myControl.get_motor_step(exp_number, scan_number)
+            corrected = self._myControl.apply_lorentz_correction(peak_intensity, q, wavelength, step_omega)
+            self.ui.tableWidget_mergeScans.set_peak_intensity(row_number, corrected, lorentz_corrected=True)
 
         return
 
