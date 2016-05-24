@@ -31,10 +31,9 @@ public:
     using namespace boost::python;                                             \
     using namespace Mantid::Kernel;                                            \
     object pyvalue = object(handle<>(PythonCall));                             \
-    boost::shared_ptr<PropertyWithValue<CType>> valueProp =                    \
-        createAndCheckPropertyTraits<CType>("TestProperty", pyvalue,           \
-                                            Direction::Input);                 \
-    checkPropertyValue<CType>(valueProp, pyvalue);                             \
+    auto valueProp = createAndCheckPropertyTraits<CType>(                      \
+        "TestProperty", pyvalue, Direction::Input);                            \
+    checkPropertyValue<CType>(std::move(valueProp), pyvalue);                  \
   }
 
 #define CREATE_ARRAY_PROPERTY_TEST_BODY(CType, PythonCall)                     \
@@ -44,10 +43,9 @@ public:
     using namespace Mantid::Kernel;                                            \
     typedef std::vector<CType> TypeVec;                                        \
     object pyvalue = object(handle<>(PythonCall));                             \
-    boost::shared_ptr<PropertyWithValue<TypeVec>> valueProp =                  \
-        createAndCheckPropertyTraits<TypeVec>("TestProperty", pyvalue,         \
-                                              Direction::Input);               \
-    checkArrayPropertyValue<CType>(valueProp, pyvalue);                        \
+    auto valueProp = createAndCheckPropertyTraits<TypeVec>(                    \
+        "TestProperty", pyvalue, Direction::Input);                            \
+    checkArrayPropertyValue<CType>(std::move(valueProp), pyvalue);             \
   }
 
   void test_builtin_type_creates_int_type_property_without_error() {
@@ -82,29 +80,29 @@ public:
 
 private:
   template <typename ExpectedType>
-  boost::shared_ptr<PropertyWithValue<ExpectedType>>
+  std::unique_ptr<PropertyWithValue<ExpectedType>>
   createAndCheckPropertyTraits(const std::string &name,
                                const boost::python::object &value,
                                const unsigned int direction) {
     using Mantid::Kernel::Property;
-    Property *namedProp(NULL);
+    std::unique_ptr<Property> namedProp;
     TS_ASSERT_THROWS_NOTHING(
         namedProp = PropertyWithValueFactory::create(name, value, direction));
     TS_ASSERT(namedProp);
     // Is it correctly typed
-    PropertyWithValue<ExpectedType> *typedProp =
-        dynamic_cast<PropertyWithValue<ExpectedType> *>(namedProp);
+    std::unique_ptr<PropertyWithValue<ExpectedType>> typedProp(
+        dynamic_cast<PropertyWithValue<ExpectedType> *>(namedProp.release()));
     TS_ASSERT(typedProp);
 
     // Traits
-    TS_ASSERT_EQUALS(namedProp->name(), name);
-    TS_ASSERT_EQUALS(namedProp->direction(), direction);
-    return boost::shared_ptr<PropertyWithValue<ExpectedType>>(typedProp);
+    TS_ASSERT_EQUALS(typedProp->name(), name);
+    TS_ASSERT_EQUALS(typedProp->direction(), direction);
+    return typedProp;
   }
 
   template <typename ValueType>
   void
-  checkPropertyValue(boost::shared_ptr<PropertyWithValue<ValueType>> valueProp,
+  checkPropertyValue(std::unique_ptr<PropertyWithValue<ValueType>> valueProp,
                      const boost::python::object &expectedValue) {
     const ValueType srcValue = boost::python::extract<ValueType>(expectedValue);
     const ValueType propValue = (*valueProp)();

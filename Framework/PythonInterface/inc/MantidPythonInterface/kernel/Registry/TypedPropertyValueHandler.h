@@ -70,20 +70,21 @@ struct DLLExport TypedPropertyValueHandler : public PropertyValueHandler {
    * @param direction :: The direction of the property
    * @returns A pointer to a newly constructed property instance
    */
-  Kernel::Property *create(const std::string &name,
-                           const boost::python::object &defaultValue,
-                           const boost::python::object &validator,
-                           const unsigned int direction) const override {
+  std::unique_ptr<Kernel::Property>
+  create(const std::string &name, const boost::python::object &defaultValue,
+         const boost::python::object &validator,
+         const unsigned int direction) const override {
+    using Mantid::Kernel::IValidator;
+    using Mantid::Kernel::PropertyWithValue;
     using boost::python::extract;
     const ValueType valueInC = extract<ValueType>(defaultValue)();
-    Kernel::Property *valueProp(nullptr);
+    std::unique_ptr<Kernel::Property> valueProp;
     if (isNone(validator)) {
-      valueProp =
-          new Kernel::PropertyWithValue<ValueType>(name, valueInC, direction);
+      valueProp = Mantid::Kernel::make_unique<PropertyWithValue<ValueType>>(
+          name, valueInC, direction);
     } else {
-      const Kernel::IValidator *propValidator =
-          extract<Kernel::IValidator *>(validator);
-      valueProp = new Kernel::PropertyWithValue<ValueType>(
+      const IValidator *propValidator = extract<IValidator *>(validator);
+      valueProp = Mantid::Kernel::make_unique<PropertyWithValue<ValueType>>(
           name, valueInC, propValidator->clone(), direction);
     }
     return valueProp;
@@ -128,22 +129,26 @@ struct DLLExport TypedPropertyValueHandler<boost::shared_ptr<T>>
    * @param direction :: The direction of the property
    * @returns A pointer to a newly constructed property instance
    */
-  Kernel::Property *create(const std::string &name,
-                           const boost::python::object &defaultValue,
-                           const boost::python::object &validator,
-                           const unsigned int direction) const override {
+  std::unique_ptr<Kernel::Property>
+  create(const std::string &name, const boost::python::object &defaultValue,
+         const boost::python::object &validator,
+         const unsigned int direction) const override {
+    using Kernel::IValidator;
+    using Kernel::Property;
+    using Kernel::PropertyWithValue;
     using boost::python::extract;
     const PropertyValueType valueInC =
         extract<PropertyValueType>(defaultValue)();
-    Kernel::Property *valueProp(nullptr);
+    std::unique_ptr<Property> valueProp;
     if (isNone(validator)) {
-      valueProp = new Kernel::PropertyWithValue<PropertyValueType>(
-          name, valueInC, direction);
+      valueProp =
+          Mantid::Kernel::make_unique<PropertyWithValue<PropertyValueType>>(
+              name, valueInC, direction);
     } else {
-      const Kernel::IValidator *propValidator =
-          extract<Kernel::IValidator *>(validator);
-      valueProp = new Kernel::PropertyWithValue<PropertyValueType>(
-          name, valueInC, propValidator->clone(), direction);
+      const IValidator *propValidator = extract<IValidator *>(validator);
+      valueProp =
+          Mantid::Kernel::make_unique<PropertyWithValue<PropertyValueType>>(
+              name, valueInC, propValidator->clone(), direction);
     }
     return valueProp;
   }

@@ -12,7 +12,7 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/regex.hpp>
 
-#include <ctype.h>
+#include <cctype>
 #include <functional>
 #include <numeric>
 

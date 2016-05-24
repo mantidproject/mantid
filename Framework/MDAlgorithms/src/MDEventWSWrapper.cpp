@@ -138,7 +138,7 @@ template <> void MDEventWSWrapper::splitBoxList<0>() {
 }
 
 /// helper function to refresh centroid on MDEventWorkspace with nd dimensions
-template <size_t nd> void MDEventWSWrapper::calcCentroidND(void) {
+template <size_t nd> void MDEventWSWrapper::calcCentroidND() {
 
   DataObjects::MDEventWorkspace<DataObjects::MDEvent<nd>, nd> *const pWs =
       dynamic_cast<
@@ -151,7 +151,7 @@ template <size_t nd> void MDEventWSWrapper::calcCentroidND(void) {
 }
 /// the function used in template metaloop termination on 0 dimensions and as
 /// the function which will throw the error on undefined MDWorkspaceWrapper
-template <> void MDEventWSWrapper::calcCentroidND<0>(void) {
+template <> void MDEventWSWrapper::calcCentroidND<0>() {
   throw(std::invalid_argument(" class has not been initiated"));
 }
 

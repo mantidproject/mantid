@@ -93,7 +93,7 @@ const PyArrayIndex &getArrayIndex() {
  * @param direction :: Specifies whether the property is Input, InOut or Output
  * @returns A pointer to a new Property object
  */
-Kernel::Property *PropertyWithValueFactory::create(
+std::unique_ptr<Kernel::Property> PropertyWithValueFactory::create(
     const std::string &name, const boost::python::object &defaultValue,
     const boost::python::object &validator, const unsigned int direction) {
   const auto &propHandle = lookup(defaultValue.ptr());
@@ -109,7 +109,7 @@ Kernel::Property *PropertyWithValueFactory::create(
  * @param direction :: Specifies whether the property is Input, InOut or Output
  * @returns A pointer to a new Property object
  */
-Kernel::Property *
+std::unique_ptr<Kernel::Property>
 PropertyWithValueFactory::create(const std::string &name,
                                  const boost::python::object &defaultValue,
                                  const unsigned int direction) {

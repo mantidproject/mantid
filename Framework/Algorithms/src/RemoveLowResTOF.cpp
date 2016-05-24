@@ -10,9 +10,9 @@
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/UnitFactory.h"
+#include <cmath>
 #include <limits>
 #include <map>
-#include <math.h>
 
 namespace Mantid {
 namespace Algorithms {

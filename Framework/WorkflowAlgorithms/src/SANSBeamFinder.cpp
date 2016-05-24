@@ -6,7 +6,7 @@
 #include "MantidWorkflowAlgorithms/HFIRInstrument.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/AlgorithmProperty.h"
-#include "MantidAPI/PropertyManagerDataService.h"
+#include "MantidKernel/PropertyManagerDataService.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/PropertyManager.h"

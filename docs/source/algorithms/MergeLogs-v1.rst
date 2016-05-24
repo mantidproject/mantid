@@ -9,7 +9,7 @@
 Description
 -----------
 
-Two `TimeSeriesProperty <http://www.mantidproject.org/TimeSeriesProperty>`_ logs are merged together
+Two :ref:`TimeSeriesProperty` logs are merged together
 by the time stamps.
 
 Output

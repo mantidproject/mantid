@@ -4,16 +4,16 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include <stdint.h>
+#include "MantidAPI/IMDWorkspace.h"
+#include "MantidAPI/ITableWorkspace_fwd.h"
+#include "MantidAPI/MDGeometry.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
-#include <vector>
-#include <stdarg.h>
-#include "MantidAPI/MDGeometry.h"
 #include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
-#include "MantidAPI/IMDWorkspace.h"
 #include "MantidKernel/SpecialCoordinateSystem.h"
-#include "MantidAPI/ITableWorkspace_fwd.h"
+#include <cstdarg>
+#include <cstdint>
+#include <vector>
 
 namespace Mantid {
 

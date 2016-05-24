@@ -99,6 +99,10 @@ namespace CustomInterfaces
     // -- End of IALCDataLoadingView interface -----------------------------------------------------
 
   private:
+    /// Common function to set available items in a combo box
+    void setAvailableItems(QComboBox *comboBox,
+                           const std::vector<std::string> &items);
+
     /// UI form
     Ui::ALCDataLoadingView m_ui;
 

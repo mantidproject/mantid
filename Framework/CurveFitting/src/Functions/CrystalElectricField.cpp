@@ -662,8 +662,8 @@ void calculateEigesystem(DoubleFortranVector &eigenvalues,
   // -------------------------------------------------------------------
 
   ComplexFortranMatrix bex(1, 1, -1, 1);
-  bex(1, 1) = -(bext(1) - i * bext(2)) / sqrt(2.0);
-  bex(1, -1) = (bext(1) + i * bext(2)) / sqrt(2.0);
+  bex(1, 1) = -(bext(1) - i * bext(2)) * M_SQRT1_2;
+  bex(1, -1) = (bext(1) + i * bext(2)) * M_SQRT1_2;
   bex(1, 0) = bext(3);
 
   //  calculates Bex(1,q) for a canted moment
@@ -683,8 +683,8 @@ void calculateEigesystem(DoubleFortranVector &eigenvalues,
   }
 
   ComplexType rbextp, rbextm, rbextz;
-  rbextp = rbex(1, -1) * sqrt(2.0);
-  rbextm = rbex(1, 1) * (-sqrt(2.0));
+  rbextp = rbex(1, -1) * M_SQRT2;
+  rbextm = rbex(1, 1) * (-M_SQRT2);
   rbextz = rbex(1, 0);
 
   auto facmol = 2 * (gj - 1) * myb;

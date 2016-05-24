@@ -9,12 +9,12 @@
 #include <gsl/gsl_fft_halfcomplex.h>
 #include <gsl/gsl_eigen.h>
 
-#include <cmath>
 #include <algorithm>
-#include <numeric>
-#include <limits>
+#include <cassert>
+#include <cmath>
 #include <functional>
-#include <assert.h>
+#include <limits>
+#include <numeric>
 #include <sstream>
 
 namespace Mantid {

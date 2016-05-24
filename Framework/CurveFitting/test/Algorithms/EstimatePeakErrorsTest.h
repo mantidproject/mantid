@@ -150,12 +150,12 @@ public:
     TS_ASSERT_DELTA(res->cell<double>(0, 1), -3.9865, 1e-4);
     TS_ASSERT_DELTA(res->cell<double>(1, 1), 3.1881, 1e-4);
     TS_ASSERT_DELTA(res->cell<double>(2, 1), 2.0011, 1e-4);
-    TS_ASSERT_DELTA(res->cell<double>(3, 1), 9.3859, 1e-4);
+    TS_ASSERT_DELTA(res->cell<double>(3, 1), 10.0218, 1e-4);
 
     TS_ASSERT_DELTA(res->cell<double>(0, 2), 0.1764, 1e-4);
     TS_ASSERT_DELTA(res->cell<double>(1, 2), 0.5690, 1e-4);
-    TS_ASSERT_DELTA(res->cell<double>(2, 2), 0.5969, 1e-4);
-    TS_ASSERT_DELTA(res->cell<double>(3, 2), 2.4468, 1e-4);
+    TS_ASSERT_DELTA(res->cell<double>(2, 2), 0.5968, 1e-4);
+    TS_ASSERT_DELTA(res->cell<double>(3, 2), 2.6126, 1e-4);
 
     TS_ASSERT_EQUALS(res->cell<std::string>(4, 0), "f1.Centre");
     TS_ASSERT_EQUALS(res->cell<std::string>(5, 0), "f1.Height");
@@ -165,12 +165,12 @@ public:
     TS_ASSERT_DELTA(res->cell<double>(4, 1), 3.0064, 1e-4);
     TS_ASSERT_DELTA(res->cell<double>(5, 1), 2.1327, 1e-4);
     TS_ASSERT_DELTA(res->cell<double>(6, 1), 2.9908, 1e-4);
-    TS_ASSERT_DELTA(res->cell<double>(7, 1), 9.3838, 1e-4);
+    TS_ASSERT_DELTA(res->cell<double>(7, 1), 10.0196, 1e-4);
 
     TS_ASSERT_DELTA(res->cell<double>(4, 2), 0.3234, 1e-4);
     TS_ASSERT_DELTA(res->cell<double>(5, 2), 0.4756, 1e-4);
     TS_ASSERT_DELTA(res->cell<double>(6, 2), 1.2002, 1e-4);
-    TS_ASSERT_DELTA(res->cell<double>(7, 2), 3.5530, 1e-4);
+    TS_ASSERT_DELTA(res->cell<double>(7, 2), 3.7937, 1e-4);
 
     AnalysisDataService::Instance().clear();
   }
@@ -205,14 +205,14 @@ public:
     TS_ASSERT_EQUALS(res->cell<std::string>(3, 0), "f0.Intensity");
 
     TS_ASSERT_DELTA(res->cell<double>(0, 1), -4.0000, 1e-4);
-    TS_ASSERT_DELTA(res->cell<double>(1, 1), 3.1877, 1e-4);
+    TS_ASSERT_DELTA(res->cell<double>(1, 1), 3.1878, 1e-4);
     TS_ASSERT_DELTA(res->cell<double>(2, 1), 2.0012, 1e-4);
-    TS_ASSERT_DELTA(res->cell<double>(3, 1), 9.3849, 1e-4);
+    TS_ASSERT_DELTA(res->cell<double>(3, 1), 10.0207, 1e-4);
 
     TS_ASSERT_DELTA(res->cell<double>(0, 2), 0.0000, 1e-4);
     TS_ASSERT_DELTA(res->cell<double>(1, 2), 0.5609, 1e-4);
     TS_ASSERT_DELTA(res->cell<double>(2, 2), 0.5797, 1e-4);
-    TS_ASSERT_DELTA(res->cell<double>(3, 2), 2.2561, 1e-4);
+    TS_ASSERT_DELTA(res->cell<double>(3, 2), 2.4090, 1e-4);
 
     TS_ASSERT_EQUALS(res->cell<std::string>(4, 0), "f1.Centre");
     TS_ASSERT_EQUALS(res->cell<std::string>(5, 0), "f1.Height");
@@ -222,7 +222,7 @@ public:
     TS_ASSERT_DELTA(res->cell<double>(4, 1), 3.0056, 1e-4);
     TS_ASSERT_DELTA(res->cell<double>(5, 1), 2.1320, 1e-4);
     TS_ASSERT_DELTA(res->cell<double>(6, 1), 2.9921, 1e-4);
-    TS_ASSERT_DELTA(res->cell<double>(7, 1), 9.3849, 1e-4);
+    TS_ASSERT_DELTA(res->cell<double>(7, 1), 10.0207, 1e-4);
 
     TS_ASSERT_DELTA(res->cell<double>(4, 2), 0.3231, 1e-4);
     TS_ASSERT_DELTA(res->cell<double>(5, 2), 0.4668, 1e-4);
@@ -258,6 +258,24 @@ public:
 
 private:
   MatrixWorkspace_sptr createWorkspace(const IFunction &fun) const {
+    const double noiseLevel = 0.1;
+    const std::vector<double> noise(
+        {0.429616, 0.390155, -0.183624, -0.369293, -0.316081, -0.460241,
+         -0.29544, 0.326436, 0.067725, 0.0320779, 0.0955447, 0.45631, 0.464515,
+         -0.0380737, 0.153177, 0.423738, 0.248907, -0.126079, 0.15357,
+         -0.345027, 0.247715, 0.392344, 0.461307, -0.47321, -0.491612,
+         -0.208498, -0.393556, -0.101256, -0.201296, 0.307289, 0.156411,
+         0.127094, 0.309813, 0.407925, 0.372176, 0.0563973, 0.464648, 0.339919,
+         0.223685, -0.449512, 0.142475, 0.306235, 0.217454, 0.430816, -0.032401,
+         -0.13597, -0.174415, 0.190948, -0.0603554, -0.370685, 0.229689,
+         0.332686, 0.494015, -0.181646, 0.176874, 0.237202, 0.290823, 0.0967696,
+         -0.329086, -0.136293, -0.473151, 0.294971, 0.30037, 0.198481, 0.403723,
+         0.321879, -0.475324, 0.399466, -0.00825268, 0.331899, 0.0262552,
+         0.409958, 0.096366, 0.474914, -0.448042, 0.15612, 0.39509, 0.31199,
+         0.228266, -0.397256, 0.31835, -0.262472, 0.000222752, -0.120655,
+         0.310189, 0.199236, -0.404031, -0.0150548, -0.28105, -0.0847778,
+         -0.241281, 0.138662, -0.0318942, 0.25929, -0.0406268, 0.0575229,
+         0.20951, 0.193455, -0.321947, 0.413259});
     size_t n = 100;
     auto ws = WorkspaceFactory::Instance().create("Workspace2D", 1, n, n);
     FunctionDomain1DVector x(-10, 10, n);
@@ -267,7 +285,11 @@ private:
     fun.function(x, y);
     ws->setX(0, x.toVector());
     ws->getSpectrum(0)->setData(y.toVector(), e);
-    addNoise(ws, 0.1);
+    assert(n == noise.size());
+    for (size_t i = 0; i < n; ++i) {
+      ws->dataY(0)[i] += noiseLevel * noise[i];
+      ws->dataE(0)[i] += noiseLevel;
+    }
     return ws;
   }
 };

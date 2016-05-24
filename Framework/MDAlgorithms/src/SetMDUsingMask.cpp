@@ -1,9 +1,9 @@
 #include "MantidMDAlgorithms/SetMDUsingMask.h"
-#include "MantidKernel/System.h"
-#include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
+#include "MantidAPI/IMDWorkspace.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
-#include <float.h>
+#include "MantidKernel/System.h"
+#include <cfloat>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;

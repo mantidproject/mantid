@@ -59,7 +59,6 @@ AxisDetails::AxisDetails(ApplicationWindow* app, Graph* graph, int mappedaxis, Q
   titleBoxLayout->setSpacing(2);
 
   m_txtTitle = new QTextEdit();
-  m_txtTitle->setTextFormat(Qt::PlainText);
   QFontMetrics metrics(this->font());
   m_txtTitle->setMaximumHeight(3 * metrics.height());
   titleBoxLayout->addWidget(m_txtTitle);
@@ -145,8 +144,8 @@ AxisDetails::AxisDetails(ApplicationWindow* app, Graph* graph, int mappedaxis, Q
   rightBoxLayout->addWidget(m_lblTable, 1, 0);
 
   m_cmbTableName = new QComboBox();
-  m_cmbTableName->insertStringList(m_tablesList);
-  m_cmbColName->insertStringList(m_app->columnsList(Table::All));
+  m_cmbTableName->insertItems(-1, m_tablesList);
+  m_cmbColName->insertItems(-1, m_app->columnsList(Table::All));
   rightBoxLayout->addWidget(m_cmbTableName, 1, 1);
 
   m_lblFormat = new QLabel(tr("Format"));
@@ -177,9 +176,7 @@ AxisDetails::AxisDetails(ApplicationWindow* app, Graph* graph, int mappedaxis, Q
   rightBoxLayout->addWidget(m_chkShowFormula, 6, 0);
 
   m_txtFormula = new QTextEdit();
-  m_txtFormula->setTextFormat(Qt::PlainText);
   m_txtFormula->setMaximumHeight(3 * metrics.height());
-  //m_txtFormula->hide();
   rightBoxLayout->addWidget(m_txtFormula, 6, 1);
   rightBoxLayout->setRowStretch(7, 1);
 
@@ -231,7 +228,7 @@ void AxisDetails::initWidgets()
 
     //Top
     m_chkShowAxis->setChecked(axisOn);
-    m_txtTitle->setText(m_graph->axisTitle(m_mappedaxis));
+    m_txtTitle->setPlainText(m_graph->axisTitle(m_mappedaxis));
     m_labelFont = m_graph->axisTitleFont(m_mappedaxis);
 
     //bottom left
@@ -266,7 +263,8 @@ void AxisDetails::initWidgets()
     }
     else if (m_cmbAxisType->currentIndex() == ScaleDraw::Text)
     {
-      m_cmbColName->setCurrentText(m_graph->axisFormatInfo(m_mappedaxis));
+      m_cmbColName->setItemText(m_cmbColName->currentIndex(),
+                                m_graph->axisFormatInfo(m_mappedaxis));
     }
 
     m_spnPrecision->setEnabled(format != 0);
@@ -291,7 +289,7 @@ void AxisDetails::initWidgets()
     {
       m_chkShowFormula->setChecked(true);
       m_txtFormula->setEnabled(true);
-      m_txtFormula->setText(formula);
+      m_txtFormula->setPlainText(formula);
     }
     else
     {
@@ -349,7 +347,7 @@ bool AxisDetails::valid()
   {
     if (m_chkShowFormula->isChecked())
     {
-      QString formula = m_txtFormula->text().lower();
+      QString formula = m_txtFormula->toPlainText().toLower();
       try
       {
         double value = 1.0;
@@ -362,7 +360,7 @@ bool AxisDetails::valid()
         {
           parser.DefineVar("y", &value);
         }
-        parser.SetExpr(formula.ascii());
+        parser.SetExpr(formula.toLatin1().data());
         parser.Eval();
       }
       catch(mu::ParserError &e)
@@ -385,7 +383,7 @@ void AxisDetails::apply()
   {
     Table *w = m_app->table(m_cmbColName->currentText());
 
-    QString formula = m_txtFormula->text();
+    QString formula = m_txtFormula->toPlainText();
     if (!m_chkShowFormula->isChecked())
     {
       formula = QString();
@@ -412,7 +410,7 @@ void AxisDetails::apply()
     m_graph->showAxis(m_mappedaxis, m_cmbAxisType->currentIndex(), formatInfo, w, m_chkShowAxis->isChecked(), m_cmbMajorTicksType->currentIndex(),
       m_cmbMinorTicksType->currentIndex(), m_grpShowLabels->isChecked(), m_cbtnAxisColor->color(), m_cmbFormat->currentIndex(), m_spnPrecision->value(),
       m_spnAngle->value(), m_spnBaseline->value(), formula, m_cbtnAxisNumColor->color());
-    m_graph->setAxisTitle(m_mappedaxis, m_txtTitle->text());
+    m_graph->setAxisTitle(m_mappedaxis, m_txtTitle->toPlainText());
     m_graph->setAxisFont(m_mappedaxis, m_scaleFont);
     m_graph->setAxisTitleFont(m_mappedaxis, m_labelFont);
     m_modified = false;
@@ -472,11 +470,12 @@ void AxisDetails::setAxisFormatOptions(int type)
     {
       m_lblFormat->show();
       m_cmbFormat->show();
-      m_cmbFormat->insertItem(tr("Automatic"));
-      m_cmbFormat->insertItem(tr("Decimal: 100.0"));
-      m_cmbFormat->insertItem(tr("Scientific: 1e2"));
-      m_cmbFormat->insertItem(tr("Scientific: 10^2"));
-      m_cmbFormat->setCurrentIndex(m_graph->plotWidget()->axisLabelFormat(m_mappedaxis));
+      m_cmbFormat->insertItem(m_cmbFormat->count(), tr("Automatic"));
+      m_cmbFormat->insertItem(m_cmbFormat->count(), tr("Decimal: 100.0"));
+      m_cmbFormat->insertItem(m_cmbFormat->count(), tr("Scientific: 1e2"));
+      m_cmbFormat->insertItem(m_cmbFormat->count(), tr("Scientific: 10^2"));
+      m_cmbFormat->setCurrentIndex(
+          m_graph->plotWidget()->axisLabelFormat(m_mappedaxis));
 
       m_lblPrecision->show();
       m_spnPrecision->show();
@@ -498,10 +497,12 @@ void AxisDetails::setAxisFormatOptions(int type)
       int day = (QDate::currentDate()).dayOfWeek();
       m_lblFormat->show();
       m_cmbFormat->show();
-      m_cmbFormat->insertItem(QDate::shortDayName(day));
-      m_cmbFormat->insertItem(QDate::longDayName(day));
-      m_cmbFormat->insertItem((QDate::shortDayName(day)).left(1));
-      m_cmbFormat->setCurrentIndex((m_graph->axisFormatInfo(m_mappedaxis)).toInt());
+      m_cmbFormat->insertItem(m_cmbFormat->count(), QDate::shortDayName(day));
+      m_cmbFormat->insertItem(m_cmbFormat->count(), QDate::longDayName(day));
+      m_cmbFormat->insertItem(m_cmbFormat->count(),
+                              (QDate::shortDayName(day)).left(1));
+      m_cmbFormat->setCurrentIndex(
+          (m_graph->axisFormatInfo(m_mappedaxis)).toInt());
       break;
     }
   case 3:
@@ -509,10 +510,14 @@ void AxisDetails::setAxisFormatOptions(int type)
       int month = (QDate::currentDate()).month();
       m_lblFormat->show();
       m_cmbFormat->show();
-      m_cmbFormat->insertItem(QDate::shortMonthName(month));
-      m_cmbFormat->insertItem(QDate::longMonthName(month));
-      m_cmbFormat->insertItem((QDate::shortMonthName(month)).left(1));
-      m_cmbFormat->setCurrentIndex((m_graph->axisFormatInfo(m_mappedaxis)).toInt());
+      m_cmbFormat->insertItem(m_cmbFormat->count(),
+                              QDate::shortMonthName(month));
+      m_cmbFormat->insertItem(m_cmbFormat->count(),
+                              QDate::longMonthName(month));
+      m_cmbFormat->insertItem(m_cmbFormat->count(),
+                              (QDate::shortMonthName(month)).left(1));
+      m_cmbFormat->setCurrentIndex(
+          (m_graph->axisFormatInfo(m_mappedaxis)).toInt());
     }
     break;
 
@@ -526,23 +531,23 @@ void AxisDetails::setAxisFormatOptions(int type)
         QString::KeepEmptyParts);
       if (lst.count() == 2)
       {
-        m_cmbFormat->insertItem(lst[1]);
-        m_cmbFormat->setCurrentText(lst[1]);
+        m_cmbFormat->insertItem(m_cmbFormat->count(), lst[1]);
+        m_cmbFormat->setItemText(m_cmbFormat->currentIndex(), lst[1]);
       }
 
-      m_cmbFormat->insertItem("h");
-      m_cmbFormat->insertItem("h ap");
-      m_cmbFormat->insertItem("h AP");
-      m_cmbFormat->insertItem("h:mm");
-      m_cmbFormat->insertItem("h:mm ap");
-      m_cmbFormat->insertItem("hh:mm");
-      m_cmbFormat->insertItem("h:mm:ss");
-      m_cmbFormat->insertItem("h:mm:ss.zzz");
-      m_cmbFormat->insertItem("mm:ss");
-      m_cmbFormat->insertItem("mm:ss.zzz");
-      m_cmbFormat->insertItem("hmm");
-      m_cmbFormat->insertItem("hmmss");
-      m_cmbFormat->insertItem("hhmmss");
+      m_cmbFormat->insertItem(m_cmbFormat->count(), "h");
+      m_cmbFormat->insertItem(m_cmbFormat->count(), "h ap");
+      m_cmbFormat->insertItem(m_cmbFormat->count(), "h AP");
+      m_cmbFormat->insertItem(m_cmbFormat->count(), "h:mm");
+      m_cmbFormat->insertItem(m_cmbFormat->count(), "h:mm ap");
+      m_cmbFormat->insertItem(m_cmbFormat->count(), "hh:mm");
+      m_cmbFormat->insertItem(m_cmbFormat->count(), "h:mm:ss");
+      m_cmbFormat->insertItem(m_cmbFormat->count(), "h:mm:ss.zzz");
+      m_cmbFormat->insertItem(m_cmbFormat->count(), "mm:ss");
+      m_cmbFormat->insertItem(m_cmbFormat->count(), "mm:ss.zzz");
+      m_cmbFormat->insertItem(m_cmbFormat->count(), "hmm");
+      m_cmbFormat->insertItem(m_cmbFormat->count(), "hmmss");
+      m_cmbFormat->insertItem(m_cmbFormat->count(), "hhmmss");
       break;
     }
   case 5:
@@ -555,14 +560,14 @@ void AxisDetails::setAxisFormatOptions(int type)
         QString::KeepEmptyParts);
       if (lst.count() == 2)
       {
-        m_cmbFormat->insertItem(lst[1]);
-        m_cmbFormat->setCurrentText(lst[1]);
+        m_cmbFormat->insertItem(m_cmbFormat->count(), lst[1]);
+        m_cmbFormat->setItemText(m_cmbFormat->currentIndex(), lst[1]);
       }
-      m_cmbFormat->insertItem("yyyy-MM-dd");
-      m_cmbFormat->insertItem("dd.MM.yyyy");
-      m_cmbFormat->insertItem("ddd MMMM d yy");
-      m_cmbFormat->insertItem("dd/MM/yyyy");
-      m_cmbFormat->insertItem("HH:mm:ss");
+      m_cmbFormat->insertItem(m_cmbFormat->count(), "yyyy-MM-dd");
+      m_cmbFormat->insertItem(m_cmbFormat->count(), "dd.MM.yyyy");
+      m_cmbFormat->insertItem(m_cmbFormat->count(), "ddd MMMM d yy");
+      m_cmbFormat->insertItem(m_cmbFormat->count(), "dd/MM/yyyy");
+      m_cmbFormat->insertItem(m_cmbFormat->count(), "HH:mm:ss");
       break;
     }
   case 6:
@@ -570,7 +575,7 @@ void AxisDetails::setAxisFormatOptions(int type)
       m_lblTable->show();
       QString tableName = m_graph->axisFormatInfo(m_mappedaxis);
       if (m_tablesList.contains(tableName))
-        m_cmbTableName->setCurrentText(tableName);
+        m_cmbTableName->setItemText(m_cmbTableName->currentIndex(), tableName);
       m_cmbTableName->show();
       break;
     }

@@ -1,6 +1,6 @@
 #include "MantidAlgorithms/PDDetermineCharacterizations.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/PropertyManagerDataService.h"
+#include "MantidKernel/PropertyManagerDataService.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/TimeSeriesProperty.h"
@@ -9,10 +9,10 @@ namespace Mantid {
 namespace Algorithms {
 
 using Mantid::API::ITableWorkspace_const_sptr;
-using Mantid::API::PropertyManagerDataService;
 using Mantid::API::WorkspaceProperty;
 using Mantid::Kernel::ArrayProperty;
 using Mantid::Kernel::Direction;
+using Mantid::Kernel::PropertyManagerDataService;
 using Mantid::Kernel::PropertyWithValue;
 using Mantid::Kernel::TimeSeriesProperty;
 

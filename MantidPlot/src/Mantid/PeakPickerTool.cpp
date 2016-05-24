@@ -417,16 +417,22 @@ void PeakPickerTool::addPeak(double c,double h)
   MantidQt::MantidWidgets::PropertyHandler* handler = m_fitPropertyBrowser->addFunction(fnName);
   if (!handler || !handler->pfun()) return;
   handler->setCentre(c);
-  double width = handler->fwhm();
-  if (width == 0 && m_width != 0.0)
+  //if previous width was set use that
+  if (handler->fwhm() == 0 && m_width != 0.0)
   {
     handler->setFwhm(m_width);
   }
-  if (handler->fwhm() > 0.)
+  handler->calcBase();
+  // if no width still try to estimate
+  if (handler->fwhm() == 0.)
   {
-    handler->calcBase();
+    double w = handler->EstimateFwhm();
+    if (w > 0) {
+      handler->setFwhm(w);
+    }
   }
   handler->setHeight(h);
+
 }
 
 // Give new centre and height to the current peak
@@ -553,8 +559,11 @@ void PeakPickerTool::functionRemoved()
  */
 void PeakPickerTool::algorithmFinished(const QString& out)
 {
-  // Remove old curves first
-  removeFitCurves();
+  // Remove old curves first, unless this is muon data
+  // (muon scientists want to keep old fits until cleared manually)
+  if (!isMuonData()) {
+    removeFitCurves();
+  }
 
   // If style needs to be changed from default, signal pair second will be true and change to line.
   auto * curve = new MantidMatrixCurve("",out,graph(),1,MantidMatrixCurve::Spectrum, false, m_shouldBeNormalised, Graph::Line);
@@ -1069,7 +1078,7 @@ void PeakPickerTool::removeFitCurves()
 
 /**
  * Called from constructor.
- * Sets up tool based on curves in graph.
+ * Sets up tool based on the given curve.
  * @param curve :: [input] Curve to use for initialization
  * @returns :: success or failure
  */
@@ -1084,10 +1093,17 @@ bool PeakPickerTool::initializeFromCurve(PlotCurve *curve) {
   } else {
     MantidMatrixCurve *mcurve = dynamic_cast<MantidMatrixCurve *>(curve);
     if (mcurve) {
-      m_wsName = mcurve->workspaceName();
-      m_spec = mcurve->workspaceIndex();
-      m_shouldBeNormalised =
-          mcurve->isDistribution() && mcurve->isNormalizable();
+      const QString title = mcurve->title().text();
+      if (title.contains("Workspace-Calc")) {
+        // Don't set up from a fit curve
+        return false;
+      } else {
+        // Set up the tool from this curve
+        m_wsName = mcurve->workspaceName();
+        m_spec = mcurve->workspaceIndex();
+        m_shouldBeNormalised =
+            mcurve->isDistribution() && mcurve->isNormalizable();
+      }
     } else {
       return false;
     }
@@ -1119,4 +1135,16 @@ void PeakPickerTool::addExistingFitsAndGuess(const QStringList &curvesList) {
     m_fitPropertyBrowser->setTextPlotGuess(hasGuess ? "Remove guess"
                                                     : "Plot guess");
   }
+}
+
+/**
+ * Tests if the peak picker tool is connected to a MuonFitPropertyBrowser or a
+ * regular FitPropertyBrowser.
+ * @returns :: True for muon data, false otherwise
+ */
+bool PeakPickerTool::isMuonData() const {
+  const auto muonBrowser =
+      dynamic_cast<MantidQt::MantidWidgets::MuonFitPropertyBrowser *>(
+          m_fitPropertyBrowser);
+  return (muonBrowser != nullptr);
 }

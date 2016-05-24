@@ -7,9 +7,9 @@
 #include "MantidKernel/Logger.h"
 #include <cfloat>
 
+#include <cmath>
 #include <functional>
 #include <limits>
-#include <math.h>
 #include <stdexcept>
 
 using std::ostream;

@@ -12,12 +12,12 @@
 #include <boost/multi_index/ordered_index.hpp>
 #include <boost/multi_index/sequenced_index.hpp>
 #endif
-#include <map>
-#include <stdint.h>
-#include <vector>
-#include <list>
+#include <cstdint>
 #include <limits>
+#include <list>
+#include <map>
 #include <mutex>
+#include <vector>
 
 namespace Mantid {
 namespace Kernel {

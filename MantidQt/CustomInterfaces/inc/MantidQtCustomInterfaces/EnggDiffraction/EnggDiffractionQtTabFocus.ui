@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>616</width>
-    <height>630</height>
+    <width>660</width>
+    <height>680</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -47,13 +47,6 @@
       <item row="1" column="0">
        <layout class="QHBoxLayout" name="horizontalLayout_4">
         <item>
-         <widget class="QLabel" name="label_banks_sel">
-          <property name="text">
-           <string>Banks:</string>
-          </property>
-         </widget>
-        </item>
-        <item>
          <spacer name="horizontalSpacer_5">
           <property name="orientation">
            <enum>Qt::Horizontal</enum>
@@ -65,6 +58,13 @@
            </size>
           </property>
          </spacer>
+        </item>
+        <item>
+         <widget class="QLabel" name="label_banks_sel">
+          <property name="text">
+           <string>Banks:</string>
+          </property>
+         </widget>
         </item>
        </layout>
       </item>
@@ -131,7 +131,7 @@
          </spacer>
         </item>
         <item>
-         <widget class="MantidQt::MantidWidgets::MWRunFiles" name="lineEdit_run_num" native="true">
+         <widget class="MantidQt::MantidWidgets::MWRunFiles" name="MWRunFiles_run_num" native="true">
           <property name="text" stdset="0">
            <string/>
           </property>
@@ -189,7 +189,7 @@
          </spacer>
         </item>
         <item>
-         <widget class="MantidQt::MantidWidgets::MWRunFiles" name="lineEdit_cropped_run_num" native="true">
+         <widget class="MantidQt::MantidWidgets::MWRunFiles" name="MWRunFiles_cropped_run_num" native="true">
           <property name="text" stdset="0">
            <string/>
           </property>
@@ -305,7 +305,7 @@
          </spacer>
         </item>
         <item>
-         <widget class="MantidQt::MantidWidgets::MWRunFiles" name="lineEdit_texture_run_num" native="true">
+         <widget class="MantidQt::MantidWidgets::MWRunFiles" name="MWRunFiles_texture_run_num" native="true">
           <property name="text" stdset="0">
            <string/>
           </property>
@@ -397,7 +397,7 @@
     </spacer>
    </item>
    <item>
-    <widget class="QGroupBox" name="groupBox_focus_3">
+    <widget class="QGroupBox" name="groupBox_focus_output_options">
      <property name="minimumSize">
       <size>
        <width>596</width>
@@ -411,9 +411,12 @@
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout_20">
         <item>
-         <widget class="QCheckBox" name="checkBox_FocusedWS">
+         <widget class="QCheckBox" name="checkBox_plot_focused_ws">
           <property name="text">
            <string>Plot Focused Workspace</string>
+          </property>
+          <property name="checked">
+           <bool>true</bool>
           </property>
          </widget>
         </item>
@@ -457,7 +460,7 @@
         <item>
          <widget class="QComboBox" name="comboBox_PlotData">
           <property name="sizePolicy">
-           <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
@@ -505,9 +508,12 @@
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout_22">
         <item>
-         <widget class="QCheckBox" name="checkBox_SaveOutputFiles">
+         <widget class="QCheckBox" name="checkBox_save_output_files">
           <property name="text">
-           <string>Output Files</string>
+           <string>Save output Files</string>
+          </property>
+          <property name="checked">
+           <bool>true</bool>
           </property>
          </widget>
         </item>
@@ -554,7 +560,7 @@
            <bool>true</bool>
           </property>
           <property name="sizePolicy">
-           <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
@@ -568,7 +574,7 @@
           <property name="maximumSize">
            <size>
             <width>175</width>
-            <height>20</height>
+            <height>16777215</height>
            </size>
           </property>
           <property name="sizeIncrement">
@@ -606,7 +612,7 @@
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout_13">
      <item>
-      <widget class="QPushButton" name="pushButton_stopFocus">
+      <widget class="QPushButton" name="pushButton_stop_focus">
        <property name="text">
         <string>Stop Focus</string>
        </property>

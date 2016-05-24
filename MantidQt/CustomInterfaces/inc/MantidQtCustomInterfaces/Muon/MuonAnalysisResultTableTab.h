@@ -136,10 +136,6 @@ private:
   std::string getFileName();
   QMap<int,int> getWorkspaceColors(const QStringList& wsList);
   
-  /// Gets "run number: period" string from workspace
-  static QString runNumberString(const std::string &workspaceName,
-                                 const std::string &firstRun);
-
   Ui::MuonAnalysis& m_uiForm;
   int m_numLogsdisplayed;
   

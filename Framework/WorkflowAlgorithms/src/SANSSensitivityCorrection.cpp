@@ -17,7 +17,7 @@
 #include "MantidNexus/NexusFileIO.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidAPI/AlgorithmProperty.h"
-#include "MantidAPI/PropertyManagerDataService.h"
+#include "MantidKernel/PropertyManagerDataService.h"
 #include "MantidKernel/PropertyManager.h"
 namespace Mantid {
 namespace WorkflowAlgorithms {

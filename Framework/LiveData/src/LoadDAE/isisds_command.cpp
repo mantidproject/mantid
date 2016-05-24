@@ -29,9 +29,9 @@
 
 ///@cond nodoc
 
-#include <stdio.h>
-#include "MantidKernel/System.h"
 #include "isisds_command.h"
+#include "MantidKernel/System.h"
+#include <cstdio>
 
 /*
  * versions of these structures
@@ -43,17 +43,17 @@
 
 #ifndef _WIN32
 #define closesocket close
-#include <stdlib.h>
-#include <stdio.h>
-#include <stdarg.h>
-#include <string.h>
-#include <sys/socket.h>
+#include <arpa/inet.h>
+#include <cstdarg>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <fcntl.h>
 #include <netdb.h>
 #include <netinet/in.h>
-#include <arpa/inet.h>
-#include <fcntl.h>
-#include <unistd.h>
 #include <sys/select.h>
+#include <sys/socket.h>
+#include <unistd.h>
 #endif
 
 /** Try to align to 64 bit (8 bytes) boundaries

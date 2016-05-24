@@ -203,6 +203,9 @@ private:
   int m_endX;   ///<end index in xValues array in functionMW. -1 use all.
 
   std::vector<std::string> m_attrNames;
+
+  // ki-kf for Inelastic convention; kf-ki for Crystallography convention
+  std::string convention;
 };
 }
 }

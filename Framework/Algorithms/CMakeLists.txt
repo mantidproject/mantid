@@ -142,6 +142,7 @@ set ( SRC_FILES
 	src/He3TubeEfficiency.cpp
 	src/IQTransform.cpp
 	src/IdentifyNoisyDetectors.cpp
+	src/ImggTomographicReconstruction.cpp
 	src/IntegrateByComponent.cpp
 	src/Integration.cpp
 	src/InterpolatingRebin.cpp
@@ -225,8 +226,11 @@ set ( SRC_FILES
 	src/RingProfile.cpp
 	src/SANSCollimationLengthEstimator.cpp
 	src/SANSDirectBeamScaling.cpp
+	src/SampleCorrections/MCAbsorptionStrategy.cpp
+	src/SampleCorrections/MCInteractionVolume.cpp
 	src/SampleCorrections/MayersSampleCorrection.cpp
 	src/SampleCorrections/MayersSampleCorrectionStrategy.cpp
+	src/SampleCorrections/RectangularBeamProfile.cpp
 	src/SassenaFFT.cpp
 	src/Scale.cpp
 	src/ScaleX.cpp
@@ -265,6 +269,7 @@ set ( SRC_FILES
 	src/TimeAtSampleStrategyDirect.cpp
 	src/TimeAtSampleStrategyElastic.cpp
 	src/TimeAtSampleStrategyIndirect.cpp
+	src/Tomography/FBPTomopy.cpp
 	src/Transpose.cpp
 	src/UnGroupWorkspace.cpp
 	src/UnaryOperation.cpp
@@ -278,6 +283,12 @@ set ( SRC_FILES
 	src/WienerSmooth.cpp
 	src/WorkspaceJoiners.cpp
 	src/XDataConverter.cpp
+)
+
+# C as they originally come from a different project (tomopy)
+set ( C_SRC_FILES
+	src/Tomography/tomopy/fbp.c
+	src/Tomography/tomopy/utils.c
 )
 
 set ( INC_FILES
@@ -425,6 +436,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/He3TubeEfficiency.h
 	inc/MantidAlgorithms/IQTransform.h
 	inc/MantidAlgorithms/IdentifyNoisyDetectors.h
+	inc/MantidAlgorithms/ImggTomographicReconstruction.h
 	inc/MantidAlgorithms/IntegrateByComponent.h
 	inc/MantidAlgorithms/Integration.h
 	inc/MantidAlgorithms/InterpolatingRebin.h
@@ -509,8 +521,12 @@ set ( INC_FILES
 	inc/MantidAlgorithms/RingProfile.h
 	inc/MantidAlgorithms/SANSCollimationLengthEstimator.h
 	inc/MantidAlgorithms/SANSDirectBeamScaling.h
+	inc/MantidAlgorithms/SampleCorrections/IBeamProfile.h
+	inc/MantidAlgorithms/SampleCorrections/MCAbsorptionStrategy.h
+	inc/MantidAlgorithms/SampleCorrections/MCInteractionVolume.h
 	inc/MantidAlgorithms/SampleCorrections/MayersSampleCorrection.h
 	inc/MantidAlgorithms/SampleCorrections/MayersSampleCorrectionStrategy.h
+	inc/MantidAlgorithms/SampleCorrections/RectangularBeamProfile.h
 	inc/MantidAlgorithms/SassenaFFT.h
 	inc/MantidAlgorithms/Scale.h
 	inc/MantidAlgorithms/ScaleX.h
@@ -550,6 +566,9 @@ set ( INC_FILES
 	inc/MantidAlgorithms/TimeAtSampleStrategyDirect.h
 	inc/MantidAlgorithms/TimeAtSampleStrategyElastic.h
 	inc/MantidAlgorithms/TimeAtSampleStrategyIndirect.h
+	inc/MantidAlgorithms/Tomography/FBPTomopy.h
+	inc/MantidAlgorithms/Tomography/tomopy/fbp.h
+	inc/MantidAlgorithms/Tomography/tomopy/utils.h
 	inc/MantidAlgorithms/Transpose.h
 	inc/MantidAlgorithms/UnGroupWorkspace.h
 	inc/MantidAlgorithms/UnaryOperation.h
@@ -574,7 +593,7 @@ set(SRC_UNITY_IGNORE_FILES src/AlignDetectors.cpp
 
 if(UNITY_BUILD)
   include(UnityBuild)
-  enable_unity_build(Algorithms SRC_FILES SRC_UNITY_IGNORE_FILES 10)
+  enable_unity_build(Algorithms SRC_FILES C_SRC_FILES SRC_UNITY_IGNORE_FILES 10)
 endif(UNITY_BUILD)
 
 set ( TEST_FILES
@@ -708,24 +727,28 @@ set ( TEST_FILES
 	GetDetOffsetsMultiPeaksTest.h
 	GetDetectorOffsetsTest.h
 	GetEiTest.h
+	GetEiV1Test.h    
 	GetTimeSeriesLogInformationTest.h
 	GroupWorkspacesTest.h
 	HRPDSlabCanAbsorptionTest.h
 	He3TubeEfficiencyTest.h
 	IQTransformTest.h
 	IdentifyNoisyDetectorsTest.h
+	ImggTomographicReconstructionTest.h
 	IntegrateByComponentTest.h
 	IntegrationTest.h
 	InterpolatingRebinTest.h
 	InvertMaskTest.h
 	LogarithmTest.h
 	LorentzCorrectionTest.h
+	MCAbsorptionStrategyTest.h
+	MCInteractionVolumeTest.h
 	MaskBinsFromTableTest.h
 	MaskBinsTest.h
-	MaxEntTest.h
 	MaxEnt/MaxentDataTest.h
 	MaxEnt/MaxentEntropyNegativeValuesTest.h
 	MaxEnt/MaxentEntropyPositiveValuesTest.h
+	MaxEntTest.h
 	MaxMinTest.h
 	MayersSampleCorrectionStrategyTest.h
 	MayersSampleCorrectionTest.h
@@ -771,6 +794,7 @@ set ( TEST_FILES
 	RebinTest.h
 	RebinToWorkspaceTest.h
 	RebunchTest.h
+	RectangularBeamProfileTest.h
 	ReflectometryReductionOneAutoTest.h
 	ReflectometryReductionOneTest.h
 	RegroupTest.h
@@ -793,7 +817,7 @@ set ( TEST_FILES
 	ScaleTest.h
 	ScaleXTest.h
 	SetInstrumentParameterTest.h
-        SetUncertaintiesTest.h
+	SetUncertaintiesTest.h
 	ShiftLogTimeTest.h
 	SignalOverErrorTest.h
 	SmoothDataTest.h
@@ -821,6 +845,7 @@ set ( TEST_FILES
 	TimeAtSampleStrategyDirectTest.h
 	TimeAtSampleStrategyElasticTest.h
 	TimeAtSampleStrategyIndirectTest.h
+	Tomography/FBPTomopyTest.h
 	TransposeTest.h
 	UnGroupWorkspaceTest.h
 	UnaryOperationTest.h
@@ -837,7 +862,7 @@ set ( TEST_FILES
 set ( TEST_PY_FILES NormaliseToUnityTest.py )
 
 if (COVERALLS)
-    foreach( loop_var ${SRC_FILES} ${INC_FILES})
+    foreach( loop_var ${SRC_FILES} ${C_SRC_FILES} ${INC_FILES})
       set_property(GLOBAL APPEND PROPERTY COVERAGE_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/${loop_var}")
     endforeach(loop_var)
 endif()
@@ -845,7 +870,7 @@ endif()
 # Add a precompiled header where they are supported
 enable_precompiled_headers ( inc/MantidAlgorithms/PrecompiledHeader.h SRC_FILES )
 # Add the target for this directory
-add_library ( Algorithms ${SRC_FILES} ${INC_FILES})
+add_library ( Algorithms ${SRC_FILES} ${C_SRC_FILES} ${INC_FILES})
 # Set the name of the generated library
 set_target_properties ( Algorithms PROPERTIES OUTPUT_NAME MantidAlgorithms
 						           COMPILE_DEFINITIONS "IN_MANTID_ALGORITHMS" )

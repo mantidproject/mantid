@@ -17,6 +17,8 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/make_unique.h"
 
+#include <cmath>
+
 using namespace Mantid::API;
 
 namespace {
@@ -113,7 +115,7 @@ vtkMDLineFactory::create(ProgressAction &progressUpdating) const {
       progressUpdating.eventRaised(double(iBox) * progressFactor);
 
       Mantid::signal_t signal_normalized = it->getNormalizedSignal();
-      if (!isSpecial(signal_normalized) &&
+      if (std::isfinite(signal_normalized) &&
           m_thresholdRange->inRange(signal_normalized)) {
         useBox[iBox] = true;
         signals->InsertNextValue(static_cast<float>(signal_normalized));

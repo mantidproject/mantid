@@ -583,7 +583,7 @@ int ExperimentInfo::getRunNumber() const {
  * the instrument if one is not found. If neither exist then the run is
  * considered Elastic.
  * @return The emode enum for the energy transfer mode of this run. Currently
- * only checks the instrument
+ * checks the sample log & instrument in this order
  */
 Kernel::DeltaEMode::Type ExperimentInfo::getEMode() const {
   static const char *emodeTag = "deltaE-mode";

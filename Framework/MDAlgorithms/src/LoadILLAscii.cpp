@@ -26,11 +26,11 @@
 #include <Poco/TemporaryFile.h>
 
 #include <algorithm>
+#include <cstdio>
+#include <cstring>
+#include <fstream>
 #include <iterator> // std::distance
 #include <sstream>
-#include <fstream>
-#include <stdio.h>
-#include <string.h>
 
 namespace Mantid {
 namespace MDAlgorithms {

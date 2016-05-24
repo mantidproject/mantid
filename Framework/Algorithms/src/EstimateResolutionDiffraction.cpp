@@ -12,7 +12,7 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/V3D.h"
 
-#include <math.h>
+#include <cmath>
 
 using namespace Mantid;
 using namespace Mantid::API;

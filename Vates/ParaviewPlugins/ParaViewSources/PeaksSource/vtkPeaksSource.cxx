@@ -26,10 +26,9 @@ using Mantid::API::Workspace_sptr;
 using Mantid::API::AnalysisDataService;
 
 /// Constructor
-vtkPeaksSource::vtkPeaksSource() :  m_wsName(""), 
-  m_wsTypeName(""), m_uintPeakMarkerSize(0.3),
-  m_dimToShow(vtkPeakMarkerFactory::Peak_in_Q_lab)
-{
+vtkPeaksSource::vtkPeaksSource()
+    : m_uintPeakMarkerSize{0.3},
+      m_dimToShow{vtkPeakMarkerFactory::Peak_in_Q_lab} {
   this->SetNumberOfInputPorts(0);
   this->SetNumberOfOutputPorts(1);
 }
@@ -120,21 +119,14 @@ void vtkPeaksSource::updateAlgorithmProgress(double progress, const std::string&
 /*
 Getter for the workspace type name.
 */
-char* vtkPeaksSource::GetWorkspaceTypeName()
-{
-  return const_cast<char*>(m_wsTypeName.c_str());
+const std::string &vtkPeaksSource::GetWorkspaceTypeName() {
+  return m_wsTypeName;
 }
 
-const char* vtkPeaksSource::GetWorkspaceName()
-{
-  return m_wsName.c_str();
-}
+const std::string &vtkPeaksSource::GetWorkspaceName() { return m_wsName; }
 
 /**
  * Gets the (first) instrument which is associated with the workspace.
  * @return The name of the instrument.
  */
-const char* vtkPeaksSource::GetInstrument()
-{
-  return m_instrument.c_str();
-}
+const std::string &vtkPeaksSource::GetInstrument() { return m_instrument; }

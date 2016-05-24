@@ -77,8 +77,8 @@ public:
         std::vector<double> inverseRadiiSquared
             = {1 / std::pow(radii[0], 2), 1 / std::pow(radii[1], 2),
                1 / std::pow(radii[2], 2)};
-        Mantid::Kernel::V3D dir1(1 / std::sqrt(2), -1 / std::sqrt(2), 0.0);
-        Mantid::Kernel::V3D dir2(1 / std::sqrt(2), 1 / std::sqrt(2), 0.0);
+        Mantid::Kernel::V3D dir1(M_SQRT1_2, -1 * M_SQRT1_2, 0.0);
+        Mantid::Kernel::V3D dir2(M_SQRT1_2, M_SQRT1_2, 0.0);
         Mantid::Kernel::V3D dir3(0.0, 0.0, 1.0);
         std::vector<Mantid::Kernel::V3D> directions = {dir1, dir2, dir3};
 

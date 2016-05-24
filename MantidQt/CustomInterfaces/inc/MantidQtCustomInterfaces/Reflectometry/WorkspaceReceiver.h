@@ -1,10 +1,6 @@
 #ifndef MANTID_CUSTOMINTERFACES_WORKSPACERECEIVER_H
 #define MANTID_CUSTOMINTERFACES_WORKSPACERECEIVER_H
 
-#include "MantidQtCustomInterfaces/Reflectometry/ReflCommandBase.h"
-#include <set>
-#include <string>
-
 namespace MantidQt {
 namespace CustomInterfaces {
 /** @class WorkspaceReceiver

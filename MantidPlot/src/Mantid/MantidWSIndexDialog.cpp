@@ -179,14 +179,19 @@ void MantidWSIndexWidget::init() {
  */
 void MantidWSIndexWidget::initWorkspaceBox() {
   m_wsBox = new QVBoxLayout;
-  m_wsMessage = new QLabel(
-      tr("Enter Workspace Indices: " + m_wsIndexIntervals.toQString()));
+  const QString wsIndices = m_wsIndexIntervals.toQString();
+  const QString label = "Enter Workspace Indices: " + wsIndices;
+  m_wsMessage = new QLabel(tr(label.toAscii().constData()));
   m_wsField = new QLineEditWithErrorMark();
 
   m_wsField->lineEdit()->setValidator(
       new IntervalListValidator(this, m_wsIndexIntervals));
-  m_wsBox->add(m_wsMessage);
-  m_wsBox->add(m_wsField);
+  if (wsIndices == "0") { // single spectrum
+    m_wsField->lineEdit()->setEnabled(false);
+    m_wsField->lineEdit()->setText("0");
+  }
+  m_wsBox->addWidget(m_wsMessage);
+  m_wsBox->addWidget(m_wsField);
   m_outer->addItem(m_wsBox);
 
   connect(m_wsField->lineEdit(), SIGNAL(textEdited(const QString &)), this,
@@ -198,16 +203,21 @@ void MantidWSIndexWidget::initWorkspaceBox() {
  */
 void MantidWSIndexWidget::initSpectraBox() {
   m_spectraBox = new QVBoxLayout;
-  m_spectraMessage =
-      new QLabel(tr("Enter Spectra Numbers: " + m_spectraNumIntervals.toQString()));
+  const QString spectraNumbers = m_spectraNumIntervals.toQString();
+  const QString label = "Enter Spectra Numbers: " + spectraNumbers;
+  m_spectraMessage = new QLabel(tr(label.toAscii().constData()));
   m_spectraField = new QLineEditWithErrorMark();
   m_orMessage = new QLabel(tr("<br>Or"));
 
   m_spectraField->lineEdit()->setValidator(
       new IntervalListValidator(this, m_spectraNumIntervals));
-  m_spectraBox->add(m_spectraMessage);
-  m_spectraBox->add(m_spectraField);
-  m_spectraBox->add(m_orMessage);
+  if (spectraNumbers == "1") { // single spectrum
+    m_spectraField->lineEdit()->setEnabled(false);
+    m_spectraField->lineEdit()->setText("1");
+  }
+  m_spectraBox->addWidget(m_spectraMessage);
+  m_spectraBox->addWidget(m_spectraField);
+  m_spectraBox->addWidget(m_orMessage);
 
   if (usingSpectraNumbers())
     m_outer->addItem(m_spectraBox);
@@ -223,7 +233,7 @@ void MantidWSIndexWidget::initOptionsBoxes() {
   m_optionsBox = new QHBoxLayout;
   m_waterfallOpt = new QCheckBox("Waterfall Plot");
   if (m_waterfall)
-    m_optionsBox->add(m_waterfallOpt);
+    m_optionsBox->addWidget(m_waterfallOpt);
   else
     m_waterfallOpt->setChecked(true);
 

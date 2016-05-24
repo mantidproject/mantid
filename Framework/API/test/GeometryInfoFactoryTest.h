@@ -61,7 +61,7 @@ public:
 
   void test_getSourcePos() {
     GeometryInfoFactory factory(m_workspace);
-    TS_ASSERT_EQUALS(factory.getSourcePos(), Kernel::V3D(-20.0, 0.0, 0.0));
+    TS_ASSERT_EQUALS(factory.getSourcePos(), Kernel::V3D(0.0, 0.0, -20.0));
   }
 
   void test_getSamplePos() {

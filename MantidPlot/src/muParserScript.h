@@ -35,7 +35,7 @@
 #include "MantidGeometry/muParser_Silent.h"
 #include "math.h"
 #include <gsl/gsl_sf.h>
-#include <q3asciidict.h>
+#include <QMap>
 
 class ScriptingEnv;
 
@@ -46,6 +46,7 @@ class muParserScript: public Script
   public:
     muParserScript(ScriptingEnv *env, const QString &name,
                    QObject *context, bool checkMultilineCode = true);
+    ~muParserScript();
 
     bool compilesToCompleteStatement(const QString &) const override {
       return true;
@@ -79,9 +80,10 @@ class muParserScript: public Script
     static double *mu_addVariable(const char *name, void *){ return current->addVariable(name); }
     static double *mu_addVariableR(const char *name, void *) { return current->addVariableR(name); }
     static QString compileColArg(const QString& in);
+    static void clearVariables(QMap<QString, double*> &vars);
 
     mu::Parser parser, rparser;
-    Q3AsciiDict<double> variables, rvariables;
+    QMap<QString, double*> variables, rvariables;
     QStringList muCode;
     //! Flag telling is the parser should warn users on multiline code input
     bool d_warn_multiline_code;

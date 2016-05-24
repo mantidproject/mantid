@@ -30,7 +30,7 @@ class OFFSPECReflRedOneAutoPolarizationCorrection(stresstesting.MantidStressTest
                                                               FirstTransmissionRun=transWorkspace,
                                                               ThetaIn="1.2",WavelengthMin=2.0,
                                                               WavelengthMax=12.0,CorrectionAlgorithm='None',
-                                                              PolarizationAnalysis='PA',
+                                                              PolarizationAnalysis='PA', MomentumTransferStep=0.1,
                                                               CPp=CPp,CAp=CAp,CRho=CRho,CAlpha=CAlpha)
         return True
 

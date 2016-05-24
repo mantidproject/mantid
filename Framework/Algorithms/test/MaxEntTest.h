@@ -395,6 +395,48 @@ public:
     AnalysisDataService::Instance().clear();
   }
 
+  void testPhaseShift() {
+
+    auto ws = createWorkspaceComplex();
+
+    // Run MaxEnt
+    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("MaxEnt");
+    alg->initialize();
+    alg->setChild(true);
+    alg->setProperty("InputWorkspace", ws);
+    alg->setProperty("ComplexData", true);
+    alg->setProperty("AutoShift", true);
+    alg->setProperty("A", 1.0);
+    alg->setProperty("ChiTarget", 102.);
+    alg->setPropertyValue("ReconstructedImage", "image");
+    alg->setPropertyValue("ReconstructedData", "data");
+    alg->setPropertyValue("EvolChi", "evolChi");
+    alg->setPropertyValue("EvolAngle", "evolAngle");
+    alg->execute();
+    MatrixWorkspace_sptr outWS = alg->getProperty("ReconstructedImage");
+
+    // Offset
+    IAlgorithm_sptr scaleX = AlgorithmManager::Instance().create("ScaleX");
+    scaleX->initialize();
+    scaleX->setChild(true);
+    scaleX->setProperty("InputWorkspace", ws);
+    scaleX->setProperty("Factor", "1");
+    scaleX->setProperty("Operation", "Add");
+    scaleX->setPropertyValue("OutputWorkspace", "__NotUsed");
+    scaleX->execute();
+    MatrixWorkspace_sptr offsetted = scaleX->getProperty("OutputWorkspace");
+
+    // Run MaxEnt on the offsetted ws
+    alg->setProperty("InputWorkspace", offsetted);
+    alg->execute();
+    MatrixWorkspace_sptr outWSOffsetted =
+        alg->getProperty("ReconstructedImage");
+
+    // outWS and outWSOffsetted are shifted by ~pi -> there should be a factor
+    // ~(-1) between them
+    TS_ASSERT_DELTA(outWS->readY(0)[28], -outWSOffsetted->readY(0)[28], 0.1)
+  }
+
   MatrixWorkspace_sptr createWorkspaceReal(size_t maxt, double phase) {
 
     // Create cosine with phase 'phase'

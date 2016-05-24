@@ -633,7 +633,7 @@ private:
         TS_ASSERT(ws.hasDx(0));
         TS_ASSERT_EQUALS(ws.readDx(0)[0], 0.0);
         TS_ASSERT_EQUALS(ws.readDx(0)[1], 1.0);
-        TS_ASSERT_EQUALS(ws.readDx(0)[2], sqrt(2.0));
+        TS_ASSERT_EQUALS(ws.readDx(0)[2], M_SQRT2);
         TS_ASSERT_EQUALS(ws.readDx(0)[3], sqrt(3.0));
         // Check that the length of x and dx is the same
         auto x = ws.readX(0);
@@ -644,7 +644,7 @@ private:
         TS_ASSERT(ws.hasDx(0));
         TS_ASSERT_EQUALS(ws.readDx(0)[0], 0.0 + 1.0);
         TS_ASSERT_EQUALS(ws.readDx(0)[1], 1.0 + 1.0);
-        TS_ASSERT_EQUALS(ws.readDx(0)[2], sqrt(2.0) + 1.0);
+        TS_ASSERT_EQUALS(ws.readDx(0)[2], M_SQRT2 + 1.0);
         TS_ASSERT_EQUALS(ws.readDx(0)[3], sqrt(3.0) + 1.0);
       } else {
         TSM_ASSERT("Should never reach here", false);

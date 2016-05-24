@@ -7,7 +7,7 @@
 #include "MantidKernel/System.h"
 #include "MantidAPI/FileFinder.h"
 #include "MantidAPI/AlgorithmManager.h"
-#include "MantidAPI/PropertyManagerDataService.h"
+#include "MantidKernel/PropertyManagerDataService.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/PropertyManager.h"

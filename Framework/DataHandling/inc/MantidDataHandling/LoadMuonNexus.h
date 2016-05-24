@@ -17,7 +17,7 @@ namespace Mantid {
 namespace DataHandling {
 /** @class LoadMuonNexus LoadMuonNexus.h DataHandling/LoadMuonNexus.h
 
-It is a base class for loadres for versions 1 and 2 of the muon nexus file
+It is a base class for loaders for versions 1 and 2 of the muon nexus file
 format.
 It implements property initialization and some common for both versions methods.
 

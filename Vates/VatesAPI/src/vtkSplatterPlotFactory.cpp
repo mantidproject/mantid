@@ -316,7 +316,7 @@ void vtkSplatterPlotFactory::doCreateMDHisto(
 
         // Make sure that the signal is not bad and is in the range and larger
         // than 0
-        if (!Mantid::VATES::isSpecial(static_cast<double>(signalScalar)) &&
+        if (std::isfinite(signalScalar) &&
             m_thresholdRange->inRange(signalScalar) &&
             (signalScalar > static_cast<signal_t>(0.0))) {
           in[0] = (minX + (static_cast<coord_t>(x) + 0.5f) * incrementX);

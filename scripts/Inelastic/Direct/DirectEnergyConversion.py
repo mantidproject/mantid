@@ -30,8 +30,7 @@ def setup_reducer(inst_name,reload_instrument=False):
         raise RuntimeError('Unknown instrument "%s" or wrong IDF file for this instrument, cannot continue' % inst_name)
 
 #How could it be that abstract class is not referenced R0921? What it means?
-#pylint: disable=R0921
-#pylint: disable=too-many-instance-attributes
+#pylint: disable=too-many-instance-attributes,R0921
 class DirectEnergyConversion(object):
     """
     Performs a convert to energy assuming the provided instrument is
@@ -350,7 +349,7 @@ class DirectEnergyConversion(object):
         """
         # Support for old reduction interface:
         self.prop_man.set_input_parameters_ignore_nan\
-            (wb_run=wb_run,sample_run=sample_run,incident_energy=ei_guess,energy_bins=rebin,
+            (wb_run=wb_run,sample_run=sample_run,incident_energy=ei_guess,energy_bins=rebin,\
             map_file=map_file,monovan_run=monovan_run,wb_for_monovan_run=wb_for_monovan_run)
         #
         self.prop_man.set_input_parameters(**kwargs)
@@ -459,9 +458,8 @@ class DirectEnergyConversion(object):
         psi = PropertyManager.psi.read_psi_from_workspace(sample_ws)
         if not prop_man.motor_offset is None and np.isnan(psi):
             #logs have a problem
-            prop_man.log('*** Can not retrieve rotation value from sample environment logs: {0}.\n' + \
-                '    Rotation angle remains undefined'.\
-                format(prop_man.motor_log_names))
+            prop_man.log("*** Can not retrieve rotation value from sample environment logs: {0}.\n"
+                "     Rotation angle remains undefined".format(prop_man.motor_log_names))
             PropertyManager.psi = None # Just in case
         else:
             # store psi in property not to retrieve it from workspace again
@@ -593,14 +591,18 @@ class DirectEnergyConversion(object):
         """
         # do not remove background from vanadium (sample background is not
         # fit for that anyway)
+#pylint: disable=E0203
         current_bkg_opt = self.check_background
+#pylint: disable=attribute-defined-outside-init
         self.check_background = False
         # what we want to do with absolute units:
+#pylint: disable=E0203
         if self.mono_correction_factor: # Correction provided.  Just apply it
             deltaE_ws_sample = self.apply_absolute_normalization(deltaE_ws_sample,PropertyManager.monovan_run,\
                                                             ei_guess,PropertyManager.wb_for_monovan_run,\
                                                             ' provided ')
         elif cashed_mono_int:  # Correction cashed from previous run
+#pylint: disable=attribute-defined-outside-init
             self.mono_correction_factor = cashed_mono_int
             deltaE_ws_sample = self.apply_absolute_normalization(deltaE_ws_sample,PropertyManager.monovan_run,\
                                                             ei_guess,PropertyManager.wb_for_monovan_run,\
@@ -791,16 +793,16 @@ class DirectEnergyConversion(object):
                 psp = workspace.getSpectrum(specID)
                 detIDs = psp.getDetectorIDs()
                 for detID in detIDs:
-                    MoveInstrumentComponent(Workspace=workspace,ComponentName= 'Detector',
-                                DetectorID=detID,X=detPos.getX(),Y=detPos.getY(),
+                    MoveInstrumentComponent(Workspace=workspace,ComponentName= 'Detector',\
+                                DetectorID=detID,X=detPos.getX(),Y=detPos.getY(),\
                                 Z=detPos.getZ(),RelativePosition=False)
             wsIDs.append(specID)
 
         if len(spectra_list) == 1:
-            ExtractSingleSpectrum(InputWorkspace=workspace,OutputWorkspace=target_ws_name,
+            ExtractSingleSpectrum(InputWorkspace=workspace,OutputWorkspace=target_ws_name,\
             WorkspaceIndex=wsIDs[0])
         else:
-            SumSpectra(InputWorkspace=workspace,OutputWorkspace=target_ws_name,
+            SumSpectra(InputWorkspace=workspace,OutputWorkspace=target_ws_name,\
             ListOfWorkspaceIndices=wsIDs)
         ws = mtd[target_ws_name]
         sp = ws.getSpectrum(0)
@@ -837,7 +839,7 @@ class DirectEnergyConversion(object):
 
         # Calculate the incident energy
         #Returns: ei,mon1_peak,mon1_index,tzero
-        ei,mon1_peak,mon1_index,_ = \
+        ei,mon1_peak,_,_ = \
             GetEi(InputWorkspace=monitor_ws, Monitor1Spec=ei_mon_spectra[0],
                   Monitor2Spec=ei_mon_spectra[1],
                   EnergyEstimate=ei_guess,FixEi=fix_ei)
@@ -849,6 +851,7 @@ class DirectEnergyConversion(object):
            # case)
            #Find TOF range, correspondent to incident energy monitor peak
             energy_rage = self.mon2_norm_energy_range
+#pylint: disable=attribute-defined-outside-init
             self._mon2_norm_time_range = self.get_TOF_for_energies(monitor_ws,energy_rage,\
                                                                  [self.mon2_norm_spec],None,self._debug_mode)
         #end
@@ -1043,7 +1046,7 @@ class DirectEnergyConversion(object):
                 range_min = TOF_range[0]
                 range_max = TOF_range[1]
        # Normalize to monitor 2
-        NormaliseToMonitor(InputWorkspace=old_name,OutputWorkspace=old_name,IntegrationRangeMin=range_min,
+        NormaliseToMonitor(InputWorkspace=old_name,OutputWorkspace=old_name,IntegrationRangeMin=range_min,\
                            IntegrationRangeMax=range_max,IncludePartialBins=True,**kwargs)
 
         norm_ws_name = kwargs['NormFactorWS']
@@ -1145,8 +1148,8 @@ class DirectEnergyConversion(object):
                 # Calculate the incident energy and TOF when the particles access Monitor1
                 try:
                     ei,mon1_peak,mon1_index,_ = \
-                    GetEi(InputWorkspace=monitor_ws, Monitor1Spec=mon_1_spec_ID,
-                        Monitor2Spec=mon_2_spec_ID,
+                    GetEi(InputWorkspace=monitor_ws, Monitor1Spec=mon_1_spec_ID,\
+                        Monitor2Spec=mon_2_spec_ID,\
                         EnergyEstimate=ei_guess,FixEi=fix_ei)
                     mon1_det = monitor_ws.getDetector(mon1_index)
                     mon1_pos = mon1_det.getPos()
@@ -1492,7 +1495,7 @@ class DirectEnergyConversion(object):
 --------> Abs norm factors: Sigma^2: {9}
 --------> Abs norm factors: Poisson: {10}
 --------> Abs norm factors: TGP    : {11}\n"""\
-                .format(ws_name,minmax[0],minmax[1],nhist,sum(signal),sum(error),izerc,scale_factor,
+                .format(ws_name,minmax[0],minmax[1],nhist,sum(signal),sum(error),izerc,scale_factor,\
                           norm_factor['LibISIS'],norm_factor['SigSq'],norm_factor['Poisson'],norm_factor['TGP'])
             log_value = log_value + log1_value
             propman.log(log_value,'error')

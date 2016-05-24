@@ -21,7 +21,7 @@
 #else
 #include <Poco/FileStream.h>
 #include <Poco/NullStream.h>
-#include <stdlib.h>
+#include <cstdlib>
 #endif
 
 // jsoncpp

@@ -154,6 +154,8 @@ public:
   void setBase(const double& b){m_base = b;}
   void calcBase();//< caclulate baseline from workspace data
   void calcBaseAll();//< calc baseline for all peaks in the function
+  /// Estimate the FwHM for a peak
+  double EstimateFwhm() const;
 
   double height()const;
   double centre()const;
@@ -164,7 +166,6 @@ public:
   void fix(const QString& parName);
   void removeTie(QtProperty* prop);
   void removeTie(const QString& propName);
-
   void addConstraint(QtProperty* parProp,bool lo,bool up,double loBound,double upBound);
   void removeConstraint(QtProperty* parProp);
 

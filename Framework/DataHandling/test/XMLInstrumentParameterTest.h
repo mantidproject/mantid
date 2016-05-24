@@ -58,7 +58,7 @@ public:
     TS_ASSERT_DELTA(ret2[0].Y(), 0.0, 0.0001);
     TS_ASSERT_DELTA(ret2[0].X(), 0.0, 0.0001);
     TS_ASSERT_DELTA(ret2[0].Z(), 0.1499, 0.0001);
-    std::vector<double> ret3 = paramMap.getDouble("slit1", "opening height");
+    std::vector<double> ret3 = paramMap.getDouble("slit1", "vertical gap");
     TS_ASSERT_EQUALS(static_cast<int>(ret3.size()), 1);
     TS_ASSERT_DELTA(ret3[0], 0.5005, 0.0001);
   }

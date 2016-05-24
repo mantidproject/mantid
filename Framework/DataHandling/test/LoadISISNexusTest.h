@@ -697,7 +697,7 @@ public:
     TS_ASSERT_EQUALS(243, detWS0->getNumberHistograms());
     TS_ASSERT_DELTA(105, detWS0->readX(1)[1], 1e-08);
     TS_ASSERT_DELTA(2, detWS0->readY(1)[1], 1e-08);
-    TS_ASSERT_DELTA(std::sqrt(2.0), detWS0->readE(1)[1], 1e-08);
+    TS_ASSERT_DELTA(M_SQRT2, detWS0->readE(1)[1], 1e-08);
     TS_ASSERT_EQUALS(detWS0->getSpectrum(0)->getSpectrumNo(), 4);
 
     auto monWS0 =

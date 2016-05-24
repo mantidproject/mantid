@@ -44,8 +44,8 @@ set ( SRC_FILES
 	src/FunctionParameterDecorator.cpp
 	src/FunctionProperty.cpp
 	src/FunctionValues.cpp
-	src/GeometryInfoFactory.cpp
 	src/GeometryInfo.cpp
+	src/GeometryInfoFactory.cpp
 	src/GridDomain.cpp
 	src/GridDomain1D.cpp
 	src/GroupingLoader.cpp
@@ -110,14 +110,12 @@ set ( SRC_FILES
 	src/PeakFunctionIntegrator.cpp
 	src/Progress.cpp
 	src/Projection.cpp
-	src/PropertyManagerDataService.cpp
 	src/PropertyNexus.cpp
 	src/RawCountValidator.cpp
 	src/RefAxis.cpp
 	src/RemoteJobManagerFactory.cpp
 	src/Run.cpp
 	src/Sample.cpp
-	src/SampleEnvironment.cpp
 	src/SampleShapeValidator.cpp
 	src/SampleValidator.cpp
 	src/ScopedWorkspace.cpp
@@ -200,8 +198,8 @@ set ( INC_FILES
 	inc/MantidAPI/FunctionParameterDecorator.h
 	inc/MantidAPI/FunctionProperty.h
 	inc/MantidAPI/FunctionValues.h
-	inc/MantidAPI/GeometryInfoFactory.h
 	inc/MantidAPI/GeometryInfo.h
+	inc/MantidAPI/GeometryInfoFactory.h
 	inc/MantidAPI/GridDomain.h
 	inc/MantidAPI/GridDomain1D.h
 	inc/MantidAPI/GroupingLoader.h
@@ -295,14 +293,12 @@ set ( INC_FILES
 	inc/MantidAPI/PeakFunctionIntegrator.h
 	inc/MantidAPI/Progress.h
 	inc/MantidAPI/Projection.h
-	inc/MantidAPI/PropertyManagerDataService.h
 	inc/MantidAPI/PropertyNexus.h
 	inc/MantidAPI/RawCountValidator.h
 	inc/MantidAPI/RefAxis.h
 	inc/MantidAPI/RemoteJobManagerFactory.h
 	inc/MantidAPI/Run.h
 	inc/MantidAPI/Sample.h
-	inc/MantidAPI/SampleEnvironment.h
 	inc/MantidAPI/SampleShapeValidator.h
 	inc/MantidAPI/SampleValidator.h
 	inc/MantidAPI/ScopedWorkspace.h
@@ -406,12 +402,10 @@ set ( TEST_FILES
 	ParameterTieTest.h
 	PeakFunctionIntegratorTest.h
 	ProjectionTest.h
-	PropertyManagerDataServiceTest.h
 	PropertyNexusTest.h
 	RawCountValidatorTest.h
 	RemoteJobManagerFactoryTest.h
 	RunTest.h
-	SampleEnvironmentTest.h
 	SampleShapeValidatorTest.h
 	SampleTest.h
 	SampleValidatorTest.h

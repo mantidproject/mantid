@@ -211,15 +211,14 @@ struct Pulse {
 #pragma pack(pop)
 
 void LoadLogsForSNSPulsedMagnet::ParsePulseIDLogFile() {
-  std::vector<Pulse> *pulses;
+  std::vector<Pulse> pulses;
   BinaryFile<Pulse> pulseFile(m_pulseidfilename);
   this->m_numpulses = pulseFile.getNumElements();
   pulses = pulseFile.loadAll();
-  for (auto &pulse : *pulses) {
+  for (const auto &pulse : pulses) {
     this->m_pulseidseconds.push_back(pulse.seconds);
     this->m_pulseidnanoseconds.push_back(pulse.nanoseconds);
   }
-  delete pulses;
 }
 
 void LoadLogsForSNSPulsedMagnet::addProperty() {

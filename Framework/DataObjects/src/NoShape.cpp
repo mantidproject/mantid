@@ -33,9 +33,11 @@ int NoShape::algorithmVersion() const { return -1; }
  * @brief Return the unique shape name associated with this type
  * @return Shape name
  */
-std::string NoShape::shapeName() const { return "none"; }
+std::string NoShape::shapeName() const { return NoShape::noShapeName(); }
 
 Kernel::SpecialCoordinateSystem NoShape::frame() const { return Kernel::None; }
+
+const std::string NoShape::noShapeName() { return "none"; }
 
 } // namespace DataObjects
 } // namespace Mantid

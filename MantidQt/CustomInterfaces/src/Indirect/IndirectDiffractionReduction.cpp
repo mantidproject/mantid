@@ -361,7 +361,7 @@ void IndirectDiffractionReduction::runOSIRISdiffonlyReduction() {
 
   if (m_uiForm.ckUseCan->isChecked()) {
     osirisDiffReduction->setProperty(
-        "Container", m_uiForm.rfCanFiles->getFirstFilename().toStdString());
+        "Container", m_uiForm.rfCanFiles->getFilenames().join(",").toStdString());
     if (m_uiForm.ckCanScale->isChecked())
       osirisDiffReduction->setProperty("ContainerScaleFactor",
                                        m_uiForm.spCanScale->value());

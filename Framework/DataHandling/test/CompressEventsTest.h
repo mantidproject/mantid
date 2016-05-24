@@ -96,7 +96,7 @@ public:
     TS_ASSERT_EQUALS(output->readX(0).size(), 101);
     // Y and E values are the same
     TS_ASSERT_DELTA(output->readY(0)[1], 2.0, 1e-5);
-    TS_ASSERT_DELTA(output->readE(0)[1], sqrt(2.0), 1e-5);
+    TS_ASSERT_DELTA(output->readE(0)[1], M_SQRT2, 1e-5);
     TS_ASSERT_EQUALS(output->YUnit(), input->YUnit());
     TS_ASSERT_EQUALS(output->getAxis(0)->unit(), input->getAxis(0)->unit());
     TS_ASSERT_EQUALS(output->getAxis(1)->unit(), input->getAxis(1)->unit());

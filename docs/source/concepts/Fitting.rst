@@ -28,7 +28,9 @@ a so-called least-squares cost function which has the form
 
 .. math:: \sum_i \left( \frac{y_i^{obs}-y_i}{\sigma_i} \right)^2
 
-where the :math:`y_i`'s are calculated from a model. 
+where :math:`y_i` is shorthand for :math:`y(x_i)`, i.e. the :math:`y`-value 
+calculated at the observed value :math:`x_i` from a model, and :math:`y_i^{obs}`
+and :math:`\sigma_i` the observed and error estimate values at :math:`x_i` respectively. 
 Mantid supports a number of other cost functions and these are described :ref:`here <algm-Fit>`. 
 The above cost function is the default Mantid cost function. If you use the 
 :ref:`Fit algorithm <algm-Fit>` this cost function goes under the name 
@@ -48,12 +50,11 @@ the figure above, this corresponds either to reach target B through fitting from
 the value of the fitting parameter shown by the red label 1 or 2, or reach 
 target A from the parameter position 3. This is the common problem in 
 reducing/analysing where 'good' initial values of the fitting parameters are known, for 
-instance, from knowledge of the instrument, the scientific problem in question 
-or say a peak search algorithm is assumed to provide good initial fitting 
-parameter values. 
+instance from: knowledge of the instrument, the scientific problem in question, 
+or a peak search algorithm is assumed to provide good initial fitting parameter values. 
 
-Local minimizers can be grouped into strictly downhill minimizers and local 
-minimizers, where the former will always find the nearest local minimum whereas 
+Local minimization algorithms can be grouped into strictly downhill minimizers and local 
+minimizers, where the former will find a lower value whereas 
 for the latter this is not guaranteed. For a description of the minimizers 
 Mantid supports see :ref:`here <algm-Fit>`. The default Mantid minimizer is 
 Levenberg-Marquardt, 

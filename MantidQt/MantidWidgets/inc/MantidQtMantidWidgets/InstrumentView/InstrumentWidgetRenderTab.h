@@ -1,8 +1,8 @@
 #ifndef INSTRUMENTWIDGETRENDERTAB_H_
 #define INSTRUMENTWIDGETRENDERTAB_H_
 
-#include <MantidQtMantidWidgets/WidgetDllOption.h>
 #include "InstrumentWidgetTab.h"
+#include <MantidQtMantidWidgets/WidgetDllOption.h>
 
 #include "MantidQtAPI/GraphOptions.h"
 
@@ -17,107 +17,104 @@ class QActionGroup;
 class QMenu;
 class QLineEdit;
 
-namespace MantidQt
-{
-	namespace MantidWidgets
-	{
-		class InstrumentWidget;
-		class BinDialog;
-		class ColorMapWidget;
+namespace MantidQt {
+namespace MantidWidgets {
+class InstrumentWidget;
+class BinDialog;
+class ColorMapWidget;
 
-		/**
-		* Implements the Render tab in InstrumentWidget.
-		*/
-		class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS InstrumentWidgetRenderTab : public InstrumentWidgetTab
-		{
-			Q_OBJECT
+/**
+* Implements the Render tab in InstrumentWidget.
+*/
+class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS InstrumentWidgetRenderTab
+    : public InstrumentWidgetTab {
+  Q_OBJECT
 
-		public:
-			explicit InstrumentWidgetRenderTab(InstrumentWidget *instrWindow);
-                        ~InstrumentWidgetRenderTab() override;
-                        void initSurface() override;
-                        void saveSettings(QSettings &) const override;
-                        void loadSettings(const QSettings &) override;
-                        void setupColorBarScaling(const MantidColorMap&, double);
-			GraphOptions::ScaleType getScaleType()const;
-			void setScaleType(GraphOptions::ScaleType type);
-			void setAxis(const QString& axisName);
-			bool areAxesOn()const;
-			void setupColorBar(const MantidColorMap&, double, double, double, bool);
+public:
+  explicit InstrumentWidgetRenderTab(InstrumentWidget *instrWindow);
+  ~InstrumentWidgetRenderTab() override;
+  void initSurface() override;
+  void saveSettings(QSettings &) const override;
+  void loadSettings(const QSettings &) override;
+  void setupColorBarScaling(const MantidColorMap &, double);
+  GraphOptions::ScaleType getScaleType() const;
+  void setScaleType(GraphOptions::ScaleType type);
+  void setAxis(const QString &axisName);
+  bool areAxesOn() const;
+  void setupColorBar(const MantidColorMap &, double, double, double, bool);
 
-		signals:
-			void rescaleColorMap();
-			void setAutoscaling(bool);
+signals:
+  void rescaleColorMap();
+  void setAutoscaling(bool);
 
-			public slots:
-			void setMinValue(double value, bool apply = true);
-			void setMaxValue(double value, bool apply = true);
-			void setRange(double minValue, double maxValue, bool apply = true);
-			void showAxes(bool on);
-			void displayDetectorsOnly(bool yes);
-			void enableGL(bool on);
-			void setColorMapAutoscaling(bool);
-			void changeColorMap(const QString & filename = "");
-			void setSurfaceType(int);
-			void flipUnwrappedView(bool);
-			void saveImage(QString filename = "");
+public slots:
+  void setMinValue(double value, bool apply = true);
+  void setMaxValue(double value, bool apply = true);
+  void setRange(double minValue, double maxValue, bool apply = true);
+  void showAxes(bool on);
+  void displayDetectorsOnly(bool yes);
+  void enableGL(bool on);
+  void setColorMapAutoscaling(bool);
+  void changeColorMap(const QString &filename = "");
+  void setSurfaceType(int);
+  void flipUnwrappedView(bool);
+  void saveImage(QString filename = "");
 
-			private slots:
+private slots:
 
-			void showResetView(int);
-			void showFlipControl(int);
-			/// Called before the display setting menu opens. Filters out menu options.
-			void displaySettingsAboutToshow();
-			/// Change the type of the surfac
-			void surfaceTypeChanged(int index);
-			void colorMapChanged();
-			void scaleTypeChanged(int);
-			void nthPowerChanged(double);
-			void glOptionChanged(bool);
-			void showMenuToolTip(QAction*);
-			void setUCorrection();
+  void showResetView(int);
+  void showFlipControl(int);
+  /// Called before the display setting menu opens. Filters out menu options.
+  void displaySettingsAboutToshow();
+  /// Change the type of the surfac
+  void surfaceTypeChanged(int index);
+  void colorMapChanged();
+  void scaleTypeChanged(int);
+  void nthPowerChanged(double);
+  void glOptionChanged(bool);
+  void showMenuToolTip(QAction *);
+  void setUCorrection();
 
-		private:
-                  void showEvent(QShowEvent *) override;
-                        QMenu* createPeaksMenu();
-			QFrame * setupAxisFrame();
-			void setPrecisionMenuItemChecked(int n);
-			void enable3DSurface(bool on);
-			QPointF getUCorrection() const;
+private:
+  void showEvent(QShowEvent *) override;
+  QMenu *createPeaksMenu();
+  QFrame *setupAxisFrame();
+  void setPrecisionMenuItemChecked(int n);
+  void enable3DSurface(bool on);
+  QPointF getUCorrection() const;
 
-			QPushButton *m_surfaceTypeButton;
-			QPushButton *mSaveImage;
-			ColorMapWidget* m_colorMapWidget;
-			QFrame* m_resetViewFrame;
-			QComboBox *mAxisCombo;
-			QCheckBox *m_flipCheckBox;
-			QPushButton *m_peakOverlaysButton;
-			QCheckBox *m_autoscaling;
+  QPushButton *m_surfaceTypeButton;
+  QPushButton *mSaveImage;
+  ColorMapWidget *m_colorMapWidget;
+  QFrame *m_resetViewFrame;
+  QComboBox *mAxisCombo;
+  QCheckBox *m_flipCheckBox;
+  QPushButton *m_peakOverlaysButton;
+  QCheckBox *m_autoscaling;
 
-			QActionGroup *m_surfaceTypeActionGroup;
-			QAction *m_full3D;
-			QAction *m_cylindricalX;
-			QAction *m_cylindricalY;
-			QAction *m_cylindricalZ;
-			QAction *m_sphericalX;
-			QAction *m_sphericalY;
-			QAction *m_sphericalZ;
-			QAction *m_sideBySide;
+  QActionGroup *m_surfaceTypeActionGroup;
+  QAction *m_full3D;
+  QAction *m_cylindricalX;
+  QAction *m_cylindricalY;
+  QAction *m_cylindricalZ;
+  QAction *m_sphericalX;
+  QAction *m_sphericalY;
+  QAction *m_sphericalZ;
+  QAction *m_sideBySide;
 
-			QAction *m_colorMap;
-			QAction *m_backgroundColor;
-			QAction *m_displayAxes;
-			QAction *m_displayDetectorsOnly;
-			QAction *m_wireframe;
-			QAction *m_lighting;
-			QAction *m_GLView; ///< toggle between OpenGL and simple view
-			QAction *m_UCorrection;
-			QActionGroup *m_precisionActionGroup;
-			QList<QAction*> m_precisionActions;
+  QAction *m_colorMap;
+  QAction *m_backgroundColor;
+  QAction *m_displayAxes;
+  QAction *m_displayDetectorsOnly;
+  QAction *m_wireframe;
+  QAction *m_lighting;
+  QAction *m_GLView; ///< toggle between OpenGL and simple view
+  QAction *m_UCorrection;
+  QActionGroup *m_precisionActionGroup;
+  QList<QAction *> m_precisionActions;
 
-			friend class InstrumentWidget;
-
-		};
-	}//MantidWidgets
-}//MantidQt
+  friend class InstrumentWidget;
+};
+} // MantidWidgets
+} // MantidQt
 #endif /*INSTRUMENTWIDGETRENDERTAB_H_*/

@@ -33,7 +33,7 @@ vtkStandardNewMacro(vtkMDEWSource)
 
     /// Constructor
     vtkMDEWSource::vtkMDEWSource()
-    : m_wsName(""), m_depth(1000), m_time(0), m_normalization(AutoSelect) {
+    : m_depth(1000), m_time(0), m_normalization(AutoSelect) {
   this->SetNumberOfInputPorts(0);
   this->SetNumberOfOutputPorts(1);
 }
@@ -73,14 +73,14 @@ void vtkMDEWSource::SetWsName(std::string name)
   themeselves.
   @return geometry xml const * char reference.
 */
-const char *vtkMDEWSource::GetInputGeometryXML() {
+std::string vtkMDEWSource::GetInputGeometryXML() {
   if (m_presenter == nullptr) {
-    return "";
+    return std::string();
   }
   try {
-    return m_presenter->getGeometryXML().c_str();
+    return m_presenter->getGeometryXML();
   } catch (std::runtime_error &) {
-    return "";
+    return std::string();
   }
 }
 
@@ -136,14 +136,14 @@ double vtkMDEWSource::GetMaxValue() {
  * Gets the (first) instrument which is associated with the workspace.
  * @return The name of the instrument.
  */
-const char *vtkMDEWSource::GetInstrument() {
+std::string vtkMDEWSource::GetInstrument() {
   if (nullptr == m_presenter) {
-    return "";
+    return std::string();
   }
   try {
-    return m_presenter->getInstrument().c_str();
+    return m_presenter->getInstrument();
   } catch (std::runtime_error &) {
-    return "";
+    return std::string();
   }
 }
 
@@ -322,21 +322,16 @@ void vtkMDEWSource::updateAlgorithmProgress(double progress, const std::string& 
 /*
 Getter for the workspace type name.
 */
-char *vtkMDEWSource::GetWorkspaceTypeName() {
+std::string vtkMDEWSource::GetWorkspaceTypeName() {
   if (m_presenter == nullptr) {
-    return const_cast<char *>("");
+    return std::string();
   }
   try {
     // Forward request on to MVP presenter
-    typeName = m_presenter->getWorkspaceTypeName();
-    return const_cast<char *>(typeName.c_str());
+    return m_presenter->getWorkspaceTypeName();
   } catch (std::runtime_error &) {
-    return const_cast<char *>("");
+    return std::string();
   }
 }
 
-const char* vtkMDEWSource::GetWorkspaceName()
-{
-  return m_wsName.c_str();
-}
-
+const std::string &vtkMDEWSource::GetWorkspaceName() { return m_wsName; }
