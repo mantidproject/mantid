@@ -49,7 +49,7 @@
 MatrixValuesDialog::MatrixValuesDialog( ScriptingEnv *env, QWidget* parent, Qt::WFlags fl )
   : QDialog( parent, fl ), Scripted(env), matrix(NULL)
 {
-    setName( "MatrixValuesDialog" );
+    setObjectName("MatrixValuesDialog");
     setWindowTitle( tr( "MantidPlot - Set Matrix Values" ) );
     setSizeGripEnabled(true);
 
