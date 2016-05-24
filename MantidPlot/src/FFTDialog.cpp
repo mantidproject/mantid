@@ -153,7 +153,7 @@ void FFTDialog::accept()
 	try
 	{
 		MyParser parser;
-		parser.SetExpr(boxSampling->text().latin1());
+		parser.SetExpr(boxSampling->text().toAscii().constData());
 		sampling=parser.Eval();
 	}
 	catch(mu::ParserError &e)
