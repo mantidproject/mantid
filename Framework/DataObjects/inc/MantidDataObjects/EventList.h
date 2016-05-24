@@ -156,9 +156,6 @@ public:
   void clear(const bool removeDetIDs = true) override;
   void clearUnused();
 
-  void lockData() const override;
-  void unlockData() const override;
-
   void setMRU(EventWorkspaceMRU *newMRU);
 
   EventWorkspaceMRU *getMRU();

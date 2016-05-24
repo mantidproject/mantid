@@ -198,9 +198,6 @@ void EventList::createFromHistogram(const ISpectrum *inSpec, bool GenerateZeros,
   double inf = std::numeric_limits<double>::infinity();
   double ninf = -inf;
 
-  // For thread safety
-  inSpec->lockData();
-
   // Get the input histogram
   const MantidVec &X = inSpec->readX();
   const MantidVec &Y = inSpec->readY();
@@ -271,8 +268,6 @@ void EventList::createFromHistogram(const ISpectrum *inSpec, bool GenerateZeros,
   // Manually set that this is sorted by TOF, since it is. This will make it
   // "threadSafe" in other algos.
   this->setSortOrder(TOF_SORT);
-
-  inSpec->unlockData();
 }
 
 // --------------------------------------------------------------------------
@@ -915,17 +910,6 @@ EventWorkspaceMRU *EventList::getMRU() { return mru; }
  * @param num :: number of events that will be in this EventList
  */
 void EventList::reserve(size_t num) { this->events.reserve(num); }
-
-// ---------------------------------------------------------
-/** Lock access to the data so that it does not get deleted while reading.
- * Call this BEFORE readY() and readE().
- */
-void EventList::lockData() const { m_lockedMRU = true; }
-
-/** Unlock access to the data so that it can again get deleted.
- * Call this once you are done with using the Y or E data.
- */
-void EventList::unlockData() const { m_lockedMRU = false; }
 
 // ==============================================================================================
 // --- Sorting functions -----------------------------------------------------
