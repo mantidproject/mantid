@@ -781,7 +781,7 @@ FitData::FitData(Fit1D *fit, const std::string &fixed)
   Mantid::Kernel::StringTokenizer namesStrTok(
       fixed, ",", Mantid::Kernel::StringTokenizer::TOK_TRIM);
   active.insert(active.begin(), fit1D->m_parameterNames.size(), true);
-  for (auto name : namesStrTok) {
+  for (const auto &name : namesStrTok) {
     std::vector<std::string>::const_iterator i = std::find(
         fit1D->m_parameterNames.begin(), fit1D->m_parameterNames.end(), name);
     if (i != fit1D->m_parameterNames.end()) {

@@ -22,6 +22,7 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/MultiThreaded.h"
+#include "MantidKernel/StringTokenizer.h"
 #include "MantidNexus/NexusClasses.h"
 #include "MantidNexus/NexusFileIO.h"
 
@@ -29,8 +30,6 @@
 #include <boost/regex.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/shared_array.hpp>
-
-#include <MantidKernel/StringTokenizer.h>
 
 #include <nexus/NeXusException.hpp>
 
@@ -302,7 +301,8 @@ Workspace_sptr LoadNexusProcessed::doAccelleratedMultiPeriodLoading(
     std::stringstream buffer;
     buffer << "Group entry " << p - 1 << " has fractional area present. Try "
                                          "reloading with FastMultiPeriod set "
-                                         "off." << std::endl;
+                                         "off."
+           << std::endl;
     throw std::runtime_error(buffer.str());
   }
 
@@ -1708,15 +1708,14 @@ void LoadNexusProcessed::loadNonSpectraAxis(
     NXChar axisData = data.openNXChar("axis2");
     axisData.load();
     std::string axisLabels(axisData(), axisData.dim0());
-    // Use boost::tokenizer to split up the input
-    boost::char_separator<char> sep("\n");
-    boost::tokenizer<boost::char_separator<char>> tokenizer(axisLabels, sep);
+    // Use Mantid::Kernel::StringTokenizer to split up the input
+    Mantid::Kernel::StringTokenizer tokenizer(
+        axisLabels, "\n", Mantid::Kernel::StringTokenizer::TOK_TRIM);
     // We must cast the axis object to TextAxis so we may use ->setLabel
     TextAxis *textAxis = static_cast<TextAxis *>(axis);
     int i = 0;
-    for (auto tokIter = tokenizer.begin(); tokIter != tokenizer.end();
-         ++tokIter, ++i) {
-      textAxis->setLabel(i, *tokIter);
+    for (const auto &tokIter : tokenizer) {
+      textAxis->setLabel(i, tokIter);
     }
   }
 }

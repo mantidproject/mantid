@@ -7,10 +7,9 @@
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/ListValidator.h"
-
-#include <boost/tokenizer.hpp>
+#include "MantidKernel/StringTokenizer.h"
+#include "MantidKernel/UnitFactory.h"
 
 #include <cstring>
 #include <fstream>
@@ -20,11 +19,11 @@ namespace DataHandling {
 DECLARE_FILELOADER_ALGORITHM(LoadSNSspec)
 
 /**
- * Return the confidence with with this algorithm can load the file
- * @param descriptor A descriptor for the file
- * @returns An integer specifying the confidence level. 0 indicates it will not
- * be used
- */
+* Return the confidence with with this algorithm can load the file
+* @param descriptor A descriptor for the file
+* @returns An integer specifying the confidence level. 0 indicates it will not
+* be used
+*/
 int LoadSNSspec::confidence(Kernel::FileDescriptor &descriptor) const {
   if (!descriptor.isAscii())
     return 0;
@@ -33,8 +32,8 @@ int LoadSNSspec::confidence(Kernel::FileDescriptor &descriptor) const {
 
   int confidence(0), axiscols(0), datacols(0);
   std::string str;
-  typedef boost::tokenizer<boost::char_separator<char>> tokenizer;
-  boost::char_separator<char> sep(" ");
+  typedef Mantid::Kernel::StringTokenizer tokenizer;
+  const std::string sep = " ";
   bool snsspec(false);
 
   while (std::getline(file, str)) {
@@ -47,8 +46,9 @@ int LoadSNSspec::confidence(Kernel::FileDescriptor &descriptor) const {
       // if it's comment line
       if (str.at(0) == '#') {
         if (str.at(1) == 'L') {
-          tokenizer tok(str, sep);
-          for (tokenizer::iterator beg = tok.begin(); beg != tok.end(); ++beg) {
+          tokenizer tok(str, sep,
+                        Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
+          for (const auto &it : tok) {
             ++axiscols;
           }
           // if the file contains a comment line starting with "#L" followed
@@ -59,8 +59,9 @@ int LoadSNSspec::confidence(Kernel::FileDescriptor &descriptor) const {
         }
       } else {
         // check first data line is a 3 column line
-        tokenizer tok(str, sep);
-        for (tokenizer::iterator beg = tok.begin(); beg != tok.end(); ++beg) {
+        tokenizer tok(str, sep,
+                      Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
+        for (const auto &it : tok) {
           ++datacols;
         }
         break;
@@ -142,12 +143,13 @@ void LoadSNSspec::exec() {
 
     // line with data, need to be parsed by white spaces
     if (!str.empty() && str[0] != '#') {
-      typedef boost::tokenizer<boost::char_separator<char>> tokenizer;
-      boost::char_separator<char> sep(" ");
-      tokenizer tok(str, sep);
-      for (tokenizer::iterator beg = tok.begin(); beg != tok.end(); ++beg) {
+      typedef Mantid::Kernel::StringTokenizer tokenizer;
+      const std::string sep = " ";
+      tokenizer tok(str, sep,
+                    Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
+      for (const auto &beg : tok) {
         std::stringstream ss;
-        ss << *beg;
+        ss << beg;
         double d;
         ss >> d;
         input.push_back(d);

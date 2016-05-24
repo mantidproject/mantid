@@ -8,7 +8,8 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidKernel/ListValidator.h"
-#include <boost/tokenizer.hpp>
+#include "MantidKernel/StringTokenizer.h"
+
 #include <nexus/NeXusFile.hpp>
 #include <nexus/NeXusException.hpp>
 
@@ -20,7 +21,7 @@ using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
 using namespace std;
 
-typedef boost::tokenizer<boost::char_separator<char>> tokenizer;
+typedef Mantid::Kernel::StringTokenizer tokenizer;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CreateChunkingFromInstrument)
@@ -278,10 +279,9 @@ vector<string> getGroupNames(const string &names) {
     return groups;
 
   // do the actual splitting
-  const boost::char_separator<char> SEPERATOR(",");
-  tokenizer tokens(names, SEPERATOR);
-  for (auto item = tokens.begin(); item != tokens.end(); ++item) {
-    groups.push_back(*item);
+  tokenizer tokens(names, ",", Mantid::Kernel::StringTokenizer::TOK_TRIM);
+  for (const auto &item : tokens) {
+    groups.push_back(item);
   }
 
   return groups;

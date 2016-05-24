@@ -2,9 +2,9 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/Functions/UserFunction1D.h"
-#include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/MandatoryValidator.h"
-#include <boost/tokenizer.hpp>
+#include "MantidKernel/StringTokenizer.h"
+#include "MantidKernel/UnitFactory.h"
 
 namespace Mantid {
 namespace CurveFitting {
@@ -68,7 +68,7 @@ void UserFunction1D::prepare() {
   if (!initParams.empty()) {
     Mantid::Kernel::StringTokenizer values(
         initParams, ",", Mantid::Kernel::StringTokenizer::TOK_TRIM);
-    for (auto it : values) {
+    for (const auto &it : values) {
       size_t ieq = it.find('=');
       if (ieq == std::string::npos)
         throw std::invalid_argument("Property InitialParameters is malformed");
