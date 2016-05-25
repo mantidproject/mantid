@@ -99,9 +99,9 @@ void NonLinearFit::setFormula(const QString& s)
 		parser.DefineVar("x", &xvar);
 		for (int k=0; k<(int)d_p; k++){
 			param[k]=gsl_vector_get(d_param_init, k);
-			parser.DefineVar(d_param_names[k].ascii(), &param[k]);
+			parser.DefineVar(d_param_names[k].toAscii().constData(), &param[k]);
 		}
-		parser.SetExpr(s.ascii());
+		parser.SetExpr(s.toAscii().constData());
 		parser.Eval() ;
 		delete[] param;
 	}
@@ -141,11 +141,11 @@ void NonLinearFit::calculateFitCurveData(double *X, double *Y)
 {
 	MyParser parser;
 	for (int i=0; i<d_p; i++)
-		parser.DefineVar(d_param_names[i].ascii(), &d_results[i]);
+		parser.DefineVar(d_param_names[i].toAscii().constData(), &d_results[i]);
 
 	double x;
 	parser.DefineVar("x", &x);
-	parser.SetExpr(d_formula.ascii());
+	parser.SetExpr(d_formula.toAscii().constData());
 
 	if (d_gen_function){
 		double X0 = d_x[0];
@@ -168,8 +168,8 @@ double NonLinearFit::eval(double *par, double x)
 {
 	MyParser parser;
 	for (int i=0; i<d_p; i++)
-		parser.DefineVar(d_param_names[i].ascii(), &par[i]);
+		parser.DefineVar(d_param_names[i].toAscii().constData(), &par[i]);
 	parser.DefineVar("x", &x);
-	parser.SetExpr(d_formula.ascii());
+	parser.SetExpr(d_formula.toAscii().constData());
     return parser.Eval();
 }

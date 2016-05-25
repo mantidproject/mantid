@@ -46,11 +46,6 @@ muParserScript::muParserScript(ScriptingEnv *env,  const QString &name, QObject 
 : Script(env,name, Script::NonInteractive, context),
   d_warn_multiline_code(checkMultilineCode)
 {
-  // warning for multiline code removed, therefore the variable d_warn_multiline_code is not used
-  // however it has been left in, to remove the need to affect the class hierarchy.
-  variables.setAutoDelete(true);
-  rvariables.setAutoDelete(true);
-
   parser.DefineConst("pi", M_PI);
   parser.DefineConst("Pi", M_PI);
   parser.DefineConst("PI", M_PI);
@@ -76,6 +71,11 @@ muParserScript::muParserScript(ScriptingEnv *env,  const QString &name, QObject 
   parser.SetVarFactory(mu_addVariable);
   rparser.SetVarFactory(mu_addVariableR);
 
+}
+
+muParserScript::~muParserScript() {
+  clearVariables(variables);
+  clearVariables(rvariables);
 }
 
 double muParserScript::col(const QString &arg)
@@ -127,7 +127,7 @@ double muParserScript::col(const QString &arg)
     row = (int) *(variables["i"]) - 1;
   else
     return 0;
-  rvariables.clear();
+  clearVariables(rvariables);
   if (row < 0 || row >= table->numRows())
     throw Parser::exception_type(tr("There's no row %1 in table %2!").
         arg(row+1).arg(context()->name()).ascii());
@@ -136,8 +136,9 @@ double muParserScript::col(const QString &arg)
         arg(col+1).arg(context()->name()).ascii());
   if (table->text(row, col).isEmpty())
     throw new EmptySourceError();
-  else
+  else {
     return table->cell(row,col);
+  }
 }
 
 double muParserScript::tablecol(const QString &arg)
@@ -187,7 +188,7 @@ double muParserScript::tablecol(const QString &arg)
     row = (int) *(variables["i"]) - 1;
   else
     row = -1;
-  rvariables.clear();
+  clearVariables(rvariables);
   if (row < 0 || row >= target_table->numRows())
     throw Parser::exception_type(tr("There's no row %1 in table %2!").
         arg(row+1).arg(target_table->name()).ascii());
@@ -450,8 +451,9 @@ bool muParserScript::compileImpl()
 
 QVariant muParserScript::evaluateImpl()
 {
-  if (!compile(scriptCode()))
+  if (!compile(scriptCode())) {
     return QVariant();
+  }
   double val = 0.0;
   try {
     current = this;
@@ -490,4 +492,11 @@ bool muParserScript::executeImpl()
 void muParserScript::abortImpl()
 {
   // does nothing
+}
+
+void muParserScript::clearVariables(QMap<QString, double*> &vars) {
+  for(auto varPtr : vars){
+    delete varPtr;
+  }
+  vars.clear();
 }

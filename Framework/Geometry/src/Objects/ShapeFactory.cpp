@@ -1425,13 +1425,8 @@ ShapeFactory::createHexahedralShape(double xlb, double xlf, double xrf,
 void ShapeFactory::createGeometryHandler(Poco::XML::Element *pElem,
                                          boost::shared_ptr<Object> Obj) {
 
-  boost::shared_ptr<GeometryHandler> handler =
-      boost::make_shared<GluGeometryHandler>(Obj);
-
-  Obj->setGeometryHandler(handler);
-
-  GluGeometryHandler *geomHandler =
-      dynamic_cast<GluGeometryHandler *>(handler.get());
+  auto geomHandler = boost::make_shared<GluGeometryHandler>(Obj);
+  Obj->setGeometryHandler(geomHandler);
 
   if (pElem->tagName() == "cuboid") {
     auto corners = parseCuboid(pElem);
