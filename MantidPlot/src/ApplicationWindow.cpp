@@ -886,10 +886,6 @@ void ApplicationWindow::initGlobalConstants() {
 
   // MG: On Linux, if cups defines a printer queue that cannot be contact, the
   // QPrinter constructor hangs and doesn't timeout.
-
-  //	QPrinterInfo::availablePrinters();
-
-  //	d_export_resolution = QPrinter().resolution();
   d_export_color = true;
   d_export_vector_size = static_cast<int>(QPrinter::Custom);
   d_keep_plot_aspect = true;
@@ -5387,8 +5383,6 @@ void ApplicationWindow::readSettings() {
       settings.value("/ImageFileTypeFilter", ".png").toString();
   d_export_transparency = settings.value("/ExportTransparency", false).toBool();
   d_export_quality = settings.value("/ImageQuality", 100).toInt();
-  //	d_export_resolution = settings.value("/Resolution",
-  // QPrinter().resolution()).toInt();
   d_export_color = settings.value("/ExportColor", true).toBool();
   d_export_vector_size =
       settings.value("/ExportPageSize", QPrinter::Custom).toInt();
