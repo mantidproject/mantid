@@ -966,7 +966,7 @@ void MantidDockWidget::deleteWorkspaces() {
   if ((m_deleteButton->hasFocus() || m_tree->hasFocus()) && !items.empty()) {
     deleteExplorer = true;
   }
-  if ((m && m->metaObject()->className() == "MantidMatrix") &&
+  if ((m && (strcmp(m->metaObject()->className(), "MantidMatrix") == 0)) &&
       (!m->workspaceName().isEmpty() &&
        m_ads.doesExist(m->workspaceName().toStdString()))) {
     deleteActive = true;
