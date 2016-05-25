@@ -1531,15 +1531,15 @@ const MantidVec &EventList::dataY() const {
   mru->ensureEnoughBuffersY(thread);
 
   // Is the data in the mrulist?
-  MantidVecWithMarker *yData;
-  yData = mru->findY(thread, this->m_specNo);
+  auto yData = mru->findY(thread, this->m_specNo);
 
   if (yData == nullptr) {
     // Create the MRU object
-    yData = new MantidVecWithMarker(this->m_specNo, this->m_lockedMRU);
+    yData = new TypeWithMarker<MantidVec>(this->m_specNo, this->m_lockedMRU);
 
     // prepare to update the uncertainties
-    auto eData = new MantidVecWithMarker(this->m_specNo, this->m_lockedMRU);
+    auto eData =
+        new TypeWithMarker<MantidVec>(this->m_specNo, this->m_lockedMRU);
     mru->ensureEnoughBuffersE(thread);
 
     // see if E should be calculated;
@@ -1573,12 +1573,11 @@ const MantidVec &EventList::dataE() const {
   mru->ensureEnoughBuffersE(thread);
 
   // Is the data in the mrulist?
-  MantidVecWithMarker *eData;
-  eData = mru->findE(thread, this->m_specNo);
+  auto eData = mru->findE(thread, this->m_specNo);
 
   if (eData == nullptr) {
     // Create the MRU object
-    eData = new MantidVecWithMarker(this->m_specNo, this->m_lockedMRU);
+    eData = new TypeWithMarker<MantidVec>(this->m_specNo, this->m_lockedMRU);
 
     // Now use that to get E -- Y values are generated from another function
     MantidVec Y_ignored;

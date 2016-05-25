@@ -14,12 +14,10 @@ namespace DataObjects {
 //============================================================================
 //============================================================================
 /**
- * This little class holds a MantidVec of data and an index marker that
- * is used for uniqueness.
+ * This little class holds data and an index marker that is used for uniqueness.
  * This is used in the MRUList.
- *
  */
-class MantidVecWithMarker {
+template <class T> class TypeWithMarker {
 public:
   /**
    * Constructor.
@@ -27,28 +25,17 @@ public:
    * @param locked :: reference to a bool that will be set to true if
    *        the marker should NOT be deleted
    */
-  MantidVecWithMarker(const size_t the_index, bool &locked)
+  TypeWithMarker(const size_t the_index, bool &locked)
       : m_index(the_index), m_locked(locked) {}
-
-  /// Destructor
-  ~MantidVecWithMarker() {
-    m_data.clear();
-    // Trick to release the allocated memory
-    // MantidVec().swap(m_data);
-  }
-
-private:
-  /// Unimplemented, private copy constructor
-  MantidVecWithMarker(const MantidVecWithMarker &other);
-  /// Unimplemented, private assignment operator
-  MantidVecWithMarker &operator=(const MantidVecWithMarker &other);
+  TypeWithMarker(const TypeWithMarker &other) = delete;
+  TypeWithMarker &operator=(const TypeWithMarker &other) = delete;
 
 public:
   /// Unique index value.
   size_t m_index;
 
   /// Pointer to a vector of data
-  MantidVec m_data;
+  T m_data;
 
   /// Function returns a unique index, used for hashing for MRU list
   size_t hashIndexFunction() const { return m_index; }
@@ -90,7 +77,7 @@ public:
 class DLLExport EventWorkspaceMRU {
 public:
   // Typedef for a Most-Recently-Used list of Data objects.
-  typedef Mantid::Kernel::MRUList<MantidVecWithMarker> mru_list;
+  typedef Mantid::Kernel::MRUList<TypeWithMarker<MantidVec>> mru_list;
   // Typedef for a vector of MRUlists.
   typedef std::vector<mru_list *> mru_lists;
 
@@ -102,10 +89,10 @@ public:
 
   void clear();
 
-  MantidVecWithMarker *findY(size_t thread_num, size_t index);
-  MantidVecWithMarker *findE(size_t thread_num, size_t index);
-  void insertY(size_t thread_num, MantidVecWithMarker *data);
-  void insertE(size_t thread_num, MantidVecWithMarker *data);
+  TypeWithMarker<MantidVec> *findY(size_t thread_num, size_t index);
+  TypeWithMarker<MantidVec> *findE(size_t thread_num, size_t index);
+  void insertY(size_t thread_num, TypeWithMarker<MantidVec> *data);
+  void insertE(size_t thread_num, TypeWithMarker<MantidVec> *data);
 
   void deleteIndex(size_t index);
 
@@ -122,7 +109,7 @@ protected:
   mutable mru_lists m_bufferedDataE;
 
   /// These markers will be deleted when they are NOT locked
-  mutable std::vector<MantidVecWithMarker *> m_markersToDelete;
+  mutable std::vector<TypeWithMarker<MantidVec> *> m_markersToDelete;
 
   /// Mutex around accessing m_markersToDelete
   std::mutex m_toDeleteMutex;

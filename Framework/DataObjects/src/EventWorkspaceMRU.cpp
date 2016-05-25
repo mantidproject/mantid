@@ -92,10 +92,10 @@ void EventWorkspaceMRU::clear() {
  *
  * @param thread_num :: number of the thread in which this is run
  * @param index :: index of the data to return
- * @return pointer to the MantidVecWithMarker that has the data; NULL if not
- *found.
+ * @return pointer to the TypeWithMarker that has the data; NULL if not found.
  */
-MantidVecWithMarker *EventWorkspaceMRU::findY(size_t thread_num, size_t index) {
+TypeWithMarker<MantidVec> *EventWorkspaceMRU::findY(size_t thread_num,
+                                                    size_t index) {
   std::lock_guard<std::mutex> _lock(m_changeMruListsMutexY);
   return m_bufferedDataY[thread_num]->find(index);
 }
@@ -104,10 +104,10 @@ MantidVecWithMarker *EventWorkspaceMRU::findY(size_t thread_num, size_t index) {
  *
  * @param thread_num :: number of the thread in which this is run
  * @param index :: index of the data to return
- * @return pointer to the MantidVecWithMarker that has the data; NULL if not
- *found.
+ * @return pointer to the TypeWithMarker that has the data; NULL if not found.
  */
-MantidVecWithMarker *EventWorkspaceMRU::findE(size_t thread_num, size_t index) {
+TypeWithMarker<MantidVec> *EventWorkspaceMRU::findE(size_t thread_num,
+                                                    size_t index) {
   std::lock_guard<std::mutex> _lock(m_changeMruListsMutexE);
   return m_bufferedDataE[thread_num]->find(index);
 }
@@ -116,12 +116,14 @@ MantidVecWithMarker *EventWorkspaceMRU::findE(size_t thread_num, size_t index) {
  *
  * @param thread_num :: thread being accessed
  * @param data :: the new data
- * @return a MantidVecWithMarker * that needs to be deleted, or NULL if nothing
- *needs to be deleted.
+ * @return a TypeWithMarker * that needs to be deleted, or NULL if nothing needs
+ * to be deleted.
  */
-void EventWorkspaceMRU::insertY(size_t thread_num, MantidVecWithMarker *data) {
+void EventWorkspaceMRU::insertY(size_t thread_num,
+                                TypeWithMarker<MantidVec> *data) {
   std::lock_guard<std::mutex> _lock(m_changeMruListsMutexY);
-  MantidVecWithMarker *oldData = m_bufferedDataY[thread_num]->insert(data);
+  TypeWithMarker<MantidVec> *oldData =
+      m_bufferedDataY[thread_num]->insert(data);
   // And clear up the memory of the old one, if it is dropping out.
   if (oldData) {
     if (oldData->m_locked) {
@@ -136,12 +138,14 @@ void EventWorkspaceMRU::insertY(size_t thread_num, MantidVecWithMarker *data) {
  *
  * @param thread_num :: thread being accessed
  * @param data :: the new data
- * @return a MantidVecWithMarker * that needs to be deleted, or NULL if nothing
- *needs to be deleted.
+ * @return a TypeWithMarker * that needs to be deleted, or NULL if nothing needs
+ * to be deleted.
  */
-void EventWorkspaceMRU::insertE(size_t thread_num, MantidVecWithMarker *data) {
+void EventWorkspaceMRU::insertE(size_t thread_num,
+                                TypeWithMarker<MantidVec> *data) {
   std::lock_guard<std::mutex> _lock(m_changeMruListsMutexE);
-  MantidVecWithMarker *oldData = m_bufferedDataE[thread_num]->insert(data);
+  TypeWithMarker<MantidVec> *oldData =
+      m_bufferedDataE[thread_num]->insert(data);
   // And clear up the memory of the old one, if it is dropping out.
   if (oldData) {
     if (oldData->m_locked) {
