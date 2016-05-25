@@ -773,7 +773,7 @@ bool Plot3DDialog::updatePlot()
 		double start, end;
 		try {
 			MyParser parser;
-			parser.SetExpr(from.latin1());
+			parser.SetExpr(from.toAscii().constData());
 			start = parser.Eval();
 		} catch(mu::ParserError &e){
 			QMessageBox::critical(0,tr("MantidPlot - Start limit error"),  QString::fromStdString(e.GetMsg()));
@@ -783,7 +783,7 @@ bool Plot3DDialog::updatePlot()
 
 		try {
 			MyParser parser;
-			parser.SetExpr(to.latin1());
+			parser.SetExpr(to.toAscii().constData());
 			end = parser.Eval();
 		} catch(mu::ParserError &e){
 			QMessageBox::critical(0,tr("MantidPlot - End limit error"), QString::fromStdString(e.GetMsg()));
