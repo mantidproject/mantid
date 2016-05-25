@@ -1188,7 +1188,6 @@ void ApplicationWindow::initMainMenu() {
   plot3DMenu->addAction(actionContourMap);
   plot3DMenu->addAction(actionGrayMap);
   plot3DMenu->addSeparator();
-  // plot3DMenu->addAction(actionPlotHistogram);
 
   matrixMenu = new QMenu(this);
   matrixMenu->setObjectName("matrixMenu");
@@ -3006,13 +3005,6 @@ void ApplicationWindow::setPreferences(Graph *g) {
     g->setScale(QwtPlot::yRight, d_axes_scales[1]);
     g->setScale(QwtPlot::xBottom, d_axes_scales[2]);
     g->setScale(QwtPlot::xTop, d_axes_scales[3]);
-
-    // QtiPlot makes these calls here (as of 26/6/12), but they spoil color fill
-    // plots for us.
-    //   Losing them seems to have no detrimental effect. Perhaps we need to
-    //   update our updateSecondaryAxis code to match QtiPlot's.
-    // g->updateSecondaryAxis(QwtPlot::xTop);
-    // g->updateSecondaryAxis(QwtPlot::yRight);
 
     QList<int> ticksList;
     ticksList << majTicksStyle << majTicksStyle << majTicksStyle
@@ -6247,7 +6239,7 @@ void ApplicationWindow::saveProjectAs(const QString &fileName, bool compress) {
   QString fn = fileName;
   if (fileName.isEmpty()) {
     QString filter = tr("MantidPlot project") +
-                     " (*.mantid);;"; // tr("QtiPlot project")+" (*.qti);;";
+                     " (*.mantid);;"; 
     filter += tr("Compressed MantidPlot project") + " (*.mantid.gz)";
 
     QString selectedFilter;
@@ -6282,7 +6274,6 @@ void ApplicationWindow::saveProjectAs(const QString &fileName, bool compress) {
     workingDir = fi.absolutePath();
     QString baseName = fi.fileName();
     if (!baseName.contains("."))
-      // fn.append(".qti");
       fn.append(".mantid");
 
     projectname = fn;
@@ -8244,10 +8235,6 @@ void ApplicationWindow::selectMultiPeak(MultiLayer *plot,
         mantidUI->fitFunctionBrowser()->setEndX(xmax);
       }
       g->setActiveTool(ppicker);
-      // do we need this? PeakPickerTool::windowStateChanged does nothing
-      // connect(plot,SIGNAL(windowStateChanged(Qt::WindowStates,
-      // Qt::WindowStates)),ppicker,SLOT(windowStateChanged(Qt::WindowStates,
-      // Qt::WindowStates)));
     }
   }
 }
@@ -8737,7 +8724,6 @@ MdiSubWindow *ApplicationWindow::clone(MdiSubWindow *w) {
       for (auto j = 0; j < nt->numRows(); j++) {
         auto io = t->table()->item(j, i);
         nt->table()->setItem(j, i, io);
-        // nt->table()->item(j, i)->setText(t->table()->item(j, i)->text());
       }
     }
 
