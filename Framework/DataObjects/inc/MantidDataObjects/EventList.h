@@ -6,7 +6,6 @@
 #endif
 #include "MantidAPI/IEventList.h"
 #include "MantidDataObjects/Events.h"
-#include "MantidDataObjects/EventWorkspaceMRU.h"
 #include "MantidKernel/cow_ptr.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/System.h"
@@ -20,6 +19,7 @@
 
 namespace Mantid {
 namespace DataObjects {
+class EventWorkspaceMRU;
 
 /// How the event list is sorted.
 enum EventSortType {
@@ -334,11 +334,7 @@ private:
   const HistogramData::Histogram &histogramRef() const override {
     return m_histogram;
   }
-  HistogramData::Histogram &mutableHistogramRef() override {
-    if (mru)
-      mru->deleteIndex(this->m_specNo);
-    return m_histogram;
-  }
+  HistogramData::Histogram &mutableHistogramRef() override;
 
   /// Histogram object holding the histogram data. Currently only X.
   HistogramData::Histogram m_histogram;
