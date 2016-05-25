@@ -12933,17 +12933,8 @@ void ApplicationWindow::createActions() {
   connect(actionMultiPeakLorentz, SIGNAL(activated()), this,
           SLOT(fitMultiPeakLorentz()));
 
-  // actionCheckUpdates = new QAction(tr("Search for &Updates"), this);
-  // connect(actionCheckUpdates, SIGNAL(activated()), this,
-  // SLOT(searchForUpdates()));
-
   actionHomePage = new QAction(tr("&Mantid Homepage"), this); // Mantid change
   connect(actionHomePage, SIGNAL(activated()), this, SLOT(showHomePage()));
-
-  // actionHelpForums = new QAction(tr("QtiPlot &Forums"), this); // Mantid
-  // change
-  //	connect(actionHelpForums, SIGNAL(triggered()), this,
-  // SLOT(showForums())); // Mantid change
 
   actionHelpBugReports = new QAction(tr("Report a &Bug"), this);
   connect(actionHelpBugReports, SIGNAL(triggered()), this,
@@ -13509,17 +13500,8 @@ void ApplicationWindow::translateActionsStrings() {
   actionMultiPeakGauss->setMenuText(tr("&Gaussian..."));
   actionMultiPeakLorentz->setMenuText(tr("&Lorentzian..."));
   actionHomePage->setMenuText(tr("&Mantid Homepage")); // Mantid change
-  // actionCheckUpdates->setMenuText(tr("Search for &Updates")); //Mantid change
-  // - commented out
-  // actionHelpForums->setText(tr("Visit QtiPlot &Forums"));
   actionHelpBugReports->setText(tr("Report a &Bug"));
   actionAskHelp->setText(tr("Ask for Help"));
-  // actionDownloadManual->setMenuText(tr("Download &Manual"));//Mantid change -
-  // commented out
-  // actionTranslations->setMenuText(tr("&Translations"));//Mantid change -
-  // commented out
-  // actionDonate->setMenuText(tr("Make a &Donation"));
-  // actionTechnicalSupport->setMenuText(tr("Technical &Support"));
 
   btnPointer->setMenuText(tr("Selection &Tools"));
   btnPointer->setToolTip(tr("Selection Tools"));

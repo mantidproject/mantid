@@ -838,29 +838,12 @@ public slots:
 
   //! Updates the recent projects list and menu (but doesn't insert anything)
   void updateRecentProjectsList();
-
   //! Inserts file name in the list of recent files (if fname not empty) and updates the "recent files" menu
   void updateRecentFilesList(QString fname="");
-
-  //!  connected to the done(bool) signal of the http object
-  //void receivedVersionFile(bool error);
-  //!  called when the user presses the actionCheckUpdates
-  //void searchForUpdates();
-
-  //! Open support page in external browser
-  //void showSupportPage();
-  //! Open donation page in external browser
-  //void showDonationsPage();
   //! Open QtiPlot homepage in external browser
   void showHomePage();
-  //! Open forums page at berliOS in external browser
-  //void showForums();
   //! Open bug tracking system at berliOS in external browser
   void showBugTracker();
-  //! Show download page in external browser
-  //void downloadManual();
-  //! Show translations page in external browser
-  //void downloadTranslation();
 
   void parseCommandLineArguments(const QStringList& args);
   void createLanguagesList();
@@ -1038,7 +1021,6 @@ public slots:
 signals:
   void modified();
   void shutting_down();
-  //void changeToMDI(MdiSubWindow*);
 
 protected:
   bool event(QEvent *e) override;
