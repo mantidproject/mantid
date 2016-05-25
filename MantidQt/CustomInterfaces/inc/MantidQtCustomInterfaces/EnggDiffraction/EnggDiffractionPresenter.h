@@ -12,9 +12,11 @@
 
 #include <boost/scoped_ptr.hpp>
 
-#include <Poco/Path.h>
-
 #include <QObject>
+
+namespace Poco {
+  class Path;
+}
 
 class QThread;
 
@@ -302,8 +304,15 @@ private:
   std::string outFileNameFactory(std::string inputWorkspace, std::string runNo,
                                  std::string bank, std::string format);
 
-  // generates a directory if not found and handles the path
-  Poco::Path outFilesDir(std::string addToDir);
+  // returns a directory as a path, creating it if not found, and checking errors
+  Poco::Path outFilesUserDir(const std::string &addToDir);
+  Poco::Path outFilesGeneralDir(const std::string &addComponent);
+  Poco::Path outFilesRootDir();
+
+  /// convenience methods to copy files to different destinations
+  void copyToGeneral(const Poco::Path &source, const std::string &pathComp);
+  void copyToUser(const Poco::Path &source, const std::string &pathComp);
+  void copyFocusedToUserAndAll(const std::string &fullFilename);
 
   // generates appropriate names for table workspaces
   std::string outFitParamsTblNameGenerator(const std::string specNos,

@@ -1743,7 +1743,8 @@ void EnggDiffractionPresenter::doCalib(const EnggDiffCalibSettings &cs,
   }
 
   // Creates appropriate output directory
-  Poco::Path saveDir = outFilesDir("Calibration");
+  const std::string calibrationComp = "Calibration";
+  auto saveDir = outFilesUserDir(calibrationComp);
   Poco::Path outFullPath(saveDir);
   outFullPath.append(outFilename);
 
@@ -1753,6 +1754,8 @@ void EnggDiffractionPresenter::doCalib(const EnggDiffCalibSettings &cs,
   // First write the all banks parameters file
   m_calibFullPath = outFullPath.toString();
   writeOutCalibFile(m_calibFullPath, difc, tzero, bankNames, ceriaNo, vanNo);
+  copyToGeneral(outFullPath, calibrationComp);
+
   // Then write one individual file per bank, using different templates and the
   // specific bank name as suffix
   for (size_t bankIdx = 0; bankIdx < difc.size(); ++bankIdx) {
@@ -1768,6 +1771,7 @@ void EnggDiffractionPresenter::doCalib(const EnggDiffCalibSettings &cs,
     const std::string outPathName = bankOutputFullPath.toString();
     writeOutCalibFile(outPathName, {difc[bankIdx]}, {tzero[bankIdx]},
                       {bankNames[bankIdx]}, ceriaNo, vanNo, templateFile);
+    copyToGeneral(bankOutputFullPath, calibrationComp);
     if (1 == difc.size()) {
       // it is a  single bank or cropped calibration, so take its specific name
       m_calibFullPath = outPathName;
@@ -2379,6 +2383,8 @@ void EnggDiffractionPresenter::doFocusing(const EnggDiffCalibSettings &cs,
   g_log.notice() << "Saved focused workspace as file: " << fullFilename
                  << std::endl;
 
+  copyFocusedToUserAndAll(fullFilename);
+
   bool saveOutputFiles = m_view->saveFocusedOutputFiles();
 
   if (saveOutputFiles) {
@@ -2976,8 +2982,9 @@ void EnggDiffractionPresenter::saveFocusedXYE(const std::string inputWorkspace,
   std::string fullFilename =
       outFileNameFactory(inputWorkspace, runNo, bank, ".dat");
 
+  const std::string focusingComp = "Focus";
   // Creates appropriate directory
-  Poco::Path saveDir = outFilesDir("Focus");
+  auto saveDir = outFilesUserDir(focusingComp);
 
   // append the full file name in the end
   saveDir.append(fullFilename);
@@ -2989,7 +2996,7 @@ void EnggDiffractionPresenter::saveFocusedXYE(const std::string inputWorkspace,
         "SaveFocusedXYE");
     alg->initialize();
     alg->setProperty("InputWorkspace", inputWorkspace);
-    std::string filename(saveDir.toString());
+    const std::string filename(saveDir.toString());
     alg->setPropertyValue("Filename", filename);
     alg->setProperty("SplitFiles", false);
     alg->setPropertyValue("StartAtBankNumber", bank);
@@ -3004,6 +3011,7 @@ void EnggDiffractionPresenter::saveFocusedXYE(const std::string inputWorkspace,
   }
   g_log.notice() << "Saved focused workspace as file: " << saveDir.toString()
                  << std::endl;
+  copyToGeneral(saveDir, focusingComp);
 }
 
 /**
@@ -3021,8 +3029,9 @@ void EnggDiffractionPresenter::saveGSS(const std::string inputWorkspace,
   std::string fullFilename =
       outFileNameFactory(inputWorkspace, runNo, bank, ".gss");
 
+  const std::string focusingComp = "Focus";
   // Creates appropriate directory
-  Poco::Path saveDir = outFilesDir("Focus");
+  auto saveDir = outFilesUserDir(focusingComp);
 
   // append the full file name in the end
   saveDir.append(fullFilename);
@@ -3049,6 +3058,7 @@ void EnggDiffractionPresenter::saveGSS(const std::string inputWorkspace,
   }
   g_log.notice() << "Saved focused workspace as file: " << saveDir.toString()
                  << std::endl;
+  copyToGeneral(saveDir, focusingComp);
 }
 
 /**
@@ -3069,14 +3079,17 @@ void EnggDiffractionPresenter::saveOpenGenie(const std::string inputWorkspace,
   std::string fullFilename =
       outFileNameFactory(inputWorkspace, runNo, bank, ".his");
 
+  std::string comp;
   Poco::Path saveDir;
   if (inputWorkspace.std::string::find("curves") != std::string::npos ||
       inputWorkspace.std::string::find("intgration") != std::string::npos) {
     // Creates appropriate directory
-    saveDir = outFilesDir("Calibration");
+    comp = "Calibration";
+    saveDir = outFilesUserDir(comp);
   } else {
     // Creates appropriate directory
-    saveDir = outFilesDir("Focus");
+    comp = "Focus";
+    saveDir = outFilesUserDir(comp);
   }
 
   // append the full file name in the end
@@ -3103,6 +3116,7 @@ void EnggDiffractionPresenter::saveOpenGenie(const std::string inputWorkspace,
   }
   g_log.notice() << "Saves OpenGenieAscii (.his) file written as: "
                  << saveDir.toString() << std::endl;
+  copyToGeneral(saveDir, comp);
 }
 
 /**
@@ -3328,39 +3342,216 @@ std::string EnggDiffractionPresenter::outFitParamsTblNameGenerator(
 }
 
 /**
-* Generates a directory if not found and handles the path
+* Produces a path to the output directory where files are going to be
+* written for a specific user + RB number / experiment ID. It creates
+* the output directory if not found, and checks if it is ok and readable.
 *
-* @param addToDir directs to right dir by passing focus or calibration
+* @param addToDir adds a component to a specific directory for
+* focusing, calibration or other files, for example "Calibration" or
+* "Focus"
 */
-Poco::Path EnggDiffractionPresenter::outFilesDir(std::string addToDir) {
-  Poco::Path saveDir;
+Poco::Path
+EnggDiffractionPresenter::outFilesUserDir(const std::string &addToDir) {
   std::string rbn = m_view->getRBNumber();
+  Poco::Path dir = outFilesRootDir();
+
+  try {
+    dir.append("User");
+    dir.append(rbn);
+    dir.append(addToDir);
+
+    Poco::File dirFile(dir);
+    if (!dirFile.exists()) {
+      dirFile.createDirectories();
+    }
+  } catch (Poco::FileAccessDeniedException &e) {
+    g_log.error()
+        << "Error caused by file access/permission, path to user directory: "
+        << dir.toString() << ". Error details: " << e.what() << std::endl;
+  } catch (std::runtime_error &re) {
+    g_log.error() << "Error while finding/creating a user path: "
+                  << dir.toString() << ". Error details: " << re.what()
+                  << std::endl;
+  }
+  return dir;
+}
+
+/**
+* Produces a path to the output directory where files are going to be
+* written for a specific user + RB number / experiment ID. It creates
+* the output directory if not found. See outFilesUserDir() for the
+* sibling method that produces user/rb number-specific directories.
+*
+* @param addComponent path component to add to the root of general
+* files, for example "Calibration" or "Focus"
+*/
+Poco::Path
+EnggDiffractionPresenter::outFilesGeneralDir(const std::string &addComponent) {
+  std::string rbn = m_view->getRBNumber();
+  Poco::Path dir = outFilesRootDir();
 
   try {
 
-// takes to the root of directory according to the platform
-// and appends the following string provided
-#ifdef __unix__
-    saveDir = Poco::Path().home();
-    saveDir.append("EnginX_Mantid");
-    saveDir.append("User");
-    saveDir.append(rbn);
-    saveDir.append(addToDir);
-#else
-    // else or for windows run this
-    saveDir =
-        (saveDir).expand("C:/EnginX_Mantid/User/" + rbn + "/" + addToDir + "/");
-#endif
-
-    if (!Poco::File(saveDir.toString()).exists()) {
-      Poco::File(saveDir.toString()).createDirectories();
-    }
+    dir.append(addComponent);
   } catch (Poco::FileAccessDeniedException &e) {
-    g_log.error() << "error caused by file access/permission: " << e.what();
+    g_log.error()
+        << "Error caused by file access/permission, path to general directory: "
+        << dir.toString() << ". Error details: " << e.what() << std::endl;
   } catch (std::runtime_error &re) {
-    g_log.error() << "Error while find/creating a path: " << re.what();
+    g_log.error() << "Error while finding/creating a general path: "
+                  << dir.toString() << ". Error details: " << re.what()
+                  << std::endl;
   }
-  return saveDir;
+  return dir;
+}
+
+/**
+ * Produces the root path where output files are going to be written.
+ */
+Poco::Path EnggDiffractionPresenter::outFilesRootDir() {
+  const std::string rootDir = "EnginX_Mantid";
+  Poco::Path dir;
+
+  try {
+// takes to the root of directory according to the platform
+#ifdef __unix__
+    dir = Poco::Path().home();
+#else
+    const std::string ROOT_DRIVE = "C:";
+    dir.assign(ROOT_DRIVE);
+#endif
+    dir.append(rootDir);
+
+    Poco::File dirFile(dir);
+    if (!dirFile.exists()) {
+      dirFile.createDirectories();
+      g_log.notice() << "Creating output directory root for the first time: "
+                     << dir.toString() << std::endl;
+    }
+
+  } catch (Poco::FileAccessDeniedException &e) {
+    g_log.error() << "Error, access/permission denied for root directory: "
+                  << dir.toString()
+                  << ". This is a severe error. The interface will not behave "
+                     "correctly when generating files. Error details: "
+                  << e.what() << std::endl;
+  } catch (std::runtime_error &re) {
+    g_log.error() << "Error while finding/creating the root directory: "
+                  << dir.toString()
+                  << ". This is a severe error. Details: " << re.what()
+                  << std::endl;
+  }
+
+  return dir;
+}
+
+/**
+ * Copy files to the general directories. Normally files are produced
+ * in the user/RB number specific directories and then can be copied
+ * to the general/all directories using this method.
+ *
+ * @param source path to the file to copy
+ *
+ * @param pathComp path component to use for the copy file in the
+ * general directories, for example "Calibration" or "Focus"
+ */
+void EnggDiffractionPresenter::copyToGeneral(const Poco::Path &source,
+                                             const std::string &pathComp) {
+  Poco::File file(source);
+  if (!file.exists() || !file.canRead()) {
+    g_log.warning()
+        << "Cannot copy the file " << source.toString()
+        << " to the general/all users directories because it cannot be read."
+        << std::endl;
+    return;
+  }
+
+  auto destDir = outFilesGeneralDir(pathComp);
+  try {
+    Poco::File destDirFile(destDir);
+    if (!destDirFile.exists()) {
+      destDirFile.createDirectories();
+    }
+  } catch (std::runtime_error &rexc) {
+    g_log.error() << "Could not create output directory for the general/all "
+                     "files. Cannot copy the user files there:  "
+                  << destDir.toString() << ". Error details: " << rexc.what()
+                  << std::endl;
+
+    return;
+  }
+
+  try {
+    file.copyTo(destDir.toString());
+  } catch (std::runtime_error &rexc) {
+    g_log.error() << " Could not copy the file '" << file.path() << "' to "
+                  << destDir.toString() << ". Error details: " << rexc.what()
+                  << std::endl;
+  }
+
+  g_log.information() << "Copied file '" << source.toString()
+                      << "'to general/all directory: " << destDir.toString()
+                      << std::endl;
+}
+
+/**
+ * Copy files to the user/RB number directories.
+ *
+ * @param source path to the file to copy
+ *
+ * @param pathComp path component to use for the copy file in the
+ * general directories, for example "Calibration" or "Focus"
+ */
+void EnggDiffractionPresenter::copyToUser(const Poco::Path &source,
+                                          const std::string &pathComp) {
+  Poco::File file(source);
+  if (!file.exists() || !file.canRead()) {
+    g_log.warning() << "Cannot copy the file " << source.toString()
+                    << " to the user directories because it cannot be read."
+                    << std::endl;
+    return;
+  }
+
+  auto destDir = outFilesUserDir(pathComp);
+  try {
+    Poco::File destDirFile(destDir);
+    if (!destDirFile.exists()) {
+      destDirFile.createDirectories();
+    }
+  } catch (std::runtime_error &rexc) {
+    g_log.error() << "Could not create output directory for the user "
+                     "files. Cannot copy the user files there:  "
+                  << destDir.toString() << ". Error details: " << rexc.what()
+                  << std::endl;
+
+    return;
+  }
+
+  try {
+    file.copyTo(destDir.toString());
+  } catch (std::runtime_error &rexc) {
+    g_log.error() << " Could not copy the file '" << file.path() << "' to "
+                  << destDir.toString() << ". Error details: " << rexc.what()
+                  << std::endl;
+  }
+
+  g_log.information() << "Copied file '" << source.toString()
+                      << "'to user directory: " << destDir.toString()
+                      << std::endl;
+}
+
+void EnggDiffractionPresenter::copyFocusedToUserAndAll(
+    const std::string &fullFilename) {
+  // The files are saved by SaveNexus in the Settings/Focusing output folder.
+  // Then they need to go to the user and 'all' directories.
+  // The "Settings/Focusing output folder" may go away in the future
+  Poco::Path nxsPath(fullFilename);
+  const std::string focusingComp = "Focus";
+  auto saveDir = outFilesUserDir(focusingComp);
+  Poco::Path outFullPath(saveDir);
+  outFullPath.append(nxsPath.getFileName());
+  copyToUser(nxsPath, focusingComp);
+  copyToGeneral(nxsPath, focusingComp);
 }
 
 /**
