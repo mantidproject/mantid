@@ -14,6 +14,7 @@ Powder Diffraction
 ------------------
 
 - :ref:`PDFFourierTransform <algm-PDFFourierTransform>` has been corrected in its calculation of errors.
+- New algorithm: :ref:`PDToGUDRUN <algm-PDToGUDRUN>` loads and processes data for use in `GUDRUN <http://www.isis.stfc.ac.uk/instruments/sandals/data-analysis/gudrun8864.html>`_.
 
 Powder Diffraction Scripts
 ##########################
@@ -157,7 +158,6 @@ Improvements in the tomographic reconstruction graphical user interface
   pass, and supports different aggregation methods via the new
   algorithm :ref:`ImggAggregateWavelengths
   <algm-ImggAggregateWavelengths>`.
-
 
 
 
