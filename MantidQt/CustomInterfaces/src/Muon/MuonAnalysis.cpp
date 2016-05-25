@@ -1202,7 +1202,9 @@ MuonAnalysis::load(const QStringList &files) const {
 
     if (f == files.constBegin()) {
       // These are only needed for the first file
-      load->setPropertyValue("DeadTimeTable", "__NotUsed");
+      if (m_uiForm.deadTimeType->currentText() == "From Data File") {
+        load->setPropertyValue("DeadTimeTable", "__NotUsed");
+      }
       load->setPropertyValue("DetectorGroupingTable", "__NotUsed");
     }
 
@@ -1218,7 +1220,9 @@ MuonAnalysis::load(const QStringList &files) const {
           -1)
         throw std::runtime_error("Instrument is not recognized: " + instrName);
 
-      result->loadedDeadTimes = load->getProperty("DeadTimeTable");
+      if (m_uiForm.deadTimeType->currentText() == "From Data File") {
+        result->loadedDeadTimes = load->getProperty("DeadTimeTable");
+      }
       result->loadedGrouping = load->getProperty("DetectorGroupingTable");
       result->mainFieldDirection =
           static_cast<std::string>(load->getProperty("MainFieldDirection"));
