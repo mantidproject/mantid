@@ -82,7 +82,8 @@ void ApplyPaalmanPings::newContainer(const QString &dataName) {
 
 void ApplyPaalmanPings::updateContainer() {
   const auto canName = m_uiForm.dsContainer->getCurrentDataName();
-  if (canName.compare("") != 0) {
+  const auto canValid = m_uiForm.dsContainer->isValid();
+  if (canValid) {
     IAlgorithm_sptr scaleX = AlgorithmManager::Instance().create("ScaleX");
     scaleX->initialize();
     scaleX->setLogging(false);
@@ -100,17 +101,24 @@ void ApplyPaalmanPings::updateContainer() {
     scale->setProperty("Factor", m_uiForm.spCanScale->value());
     scale->setProperty("Operation", "Multiply");
     scale->execute();
-  }
 
-  if (m_uiForm.dsSample->getCurrentDataName().compare("") != 0) {
-    IAlgorithm_sptr rebin =
-        AlgorithmManager::Instance().create("RebinToWorkspace");
-    rebin->initialize();
-    rebin->setLogging(false);
-    rebin->setProperty("WorkspaceToRebin", m_containerWorkspaceName);
-    rebin->setProperty("WorkspaceToMatch", m_sampleWorkspaceName);
-    rebin->setProperty("OutputWorkspace", m_containerWorkspaceName);
-    rebin->execute();
+    const auto sampleValid = m_uiForm.dsSample->isValid();
+    if (sampleValid) {
+      IAlgorithm_sptr rebin =
+          AlgorithmManager::Instance().create("RebinToWorkspace");
+      rebin->initialize();
+      rebin->setLogging(false);
+      rebin->setProperty("WorkspaceToRebin", m_containerWorkspaceName);
+      rebin->setProperty("WorkspaceToMatch", m_sampleWorkspaceName);
+      rebin->setProperty("OutputWorkspace", m_containerWorkspaceName);
+      rebin->execute();
+    } else {
+      // Sample was not valid so do not rebin
+      return;
+    }
+  } else {
+    // Can was not valid so do not replot
+    return;
   }
   plotPreview(m_uiForm.spPreviewSpec->value());
 }
