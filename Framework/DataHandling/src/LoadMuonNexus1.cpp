@@ -379,7 +379,7 @@ void LoadMuonNexus1::loadDeadTimes(NXRoot &root) {
     } else {
 
       if (m_numberOfPeriods == 1) {
-        // Simpliest case - one dead time for one detector
+        // Simplest case - one dead time for one detector
 
         // Populate deadTimes
         for (auto &spectra : specToLoad) {
@@ -389,6 +389,19 @@ void LoadMuonNexus1::loadDeadTimes(NXRoot &root) {
         TableWorkspace_sptr table = createDeadTimeTable(specToLoad, deadTimes);
         setProperty("DeadTimeTable", table);
 
+      } else if (numDeadTimes == m_numberOfSpectra) {
+        // Multiple periods, but the same dead times for each
+
+        specToLoad.clear();
+        for (int i = 1; i < numDeadTimes + 1; i++) {
+          specToLoad.push_back(i);
+        }
+        for (const auto &spectrum : specToLoad) {
+          deadTimes.emplace_back(deadTimesData[spectrum - 1]);
+        }
+        // Load into table
+        TableWorkspace_sptr table = createDeadTimeTable(specToLoad, deadTimes);
+        setProperty("DeadTimeTable", table);
       } else {
         // More complex case - different dead times for different periods
 
