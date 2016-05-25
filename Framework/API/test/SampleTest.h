@@ -4,7 +4,7 @@
 #include "MantidAPI/Sample.h"
 #include "MantidGeometry/Crystal/CrystalStructure.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
-#include "MantidGeometry/Instrument/Can.h"
+#include "MantidGeometry/Instrument/Container.h"
 #include "MantidGeometry/Instrument/SampleEnvironment.h"
 #include "MantidKernel/Exception.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
@@ -54,7 +54,7 @@ public:
     Sample sample;
     const std::string envName("TestKit");
     SampleEnvironment *kit =
-        new SampleEnvironment(envName, boost::make_shared<const Can>(""));
+        new SampleEnvironment(envName, boost::make_shared<const Container>(""));
     kit->add(boost::make_shared<const Object>());
 
     TS_ASSERT_THROWS_NOTHING(sample.setEnvironment(kit));
