@@ -850,7 +850,13 @@ def _create_algorithm_function(algorithm, version, _algm_object):
             _version = kwargs["Version"]
             del kwargs["Version"]
 
-        (_startProgress, _endProgress, kwargs) = extract_progress_kwargs(kwargs)
+        _startProgress, _endProgress = (None, None)
+        if 'startProgress' in kwargs:
+            _startProgress = kwargs['startProgress']
+            del kwargs['startProgress']
+        if 'endProgress' in kwargs:
+            _endProgress = kwargs['endProgress']
+            del kwargs['endProgress']
 
         algm = _create_algorithm_object(algorithm, _version, _startProgress, _endProgress)
         _set_logging_option(algm, kwargs)
