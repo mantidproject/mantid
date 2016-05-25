@@ -57,7 +57,7 @@ Obtaining an initial guess close to the optimal fit is critical. For this model,
    function_string  = "(composite=Convolution,FixResolution=true,NumDeriv=true;"
    function_string += "name=TabulatedFunction,Workspace=resolution,WorkspaceIndex=0,Scaling=1,Shift=0,XScaling=1;"
    function_string += "(name=DeltaFunction,Height=1,Centre=0;"
-   function_string += "name=StretchedExpFT,Height=0.1,Tau=100,Beta=0.98,Center=0));"
+   function_string += "name=StretchedExpFT,Height=1.0,Tau=100,Beta=0.98,Center=0));"
    function_string += "name=LinearBackground,A0=0,A1=0"
 
    # Carry out the fit. Produces workspaces  fit_results_Parameters,
@@ -94,7 +94,7 @@ Output:
 
 .. testoutput:: ExampleStretchedExpFT
 
-   The optimal parameters are Tau=57 and Beta=0.6
+   The optimal parameters are Tau=54 and Beta=0.6
 
 .. categories::
 
