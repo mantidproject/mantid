@@ -1217,8 +1217,14 @@ MuonAnalysis::load(const QStringList &files) const {
 
       // Check that is a valid Muon instrument
       if (m_uiForm.instrSelector->findText(QString::fromStdString(instrName)) ==
-          -1)
-        throw std::runtime_error("Instrument is not recognized: " + instrName);
+          -1) {
+        if (0 !=
+            instrName.compare(
+                "DEVA")) { // special case - no IDF but let it load anyway
+          throw std::runtime_error("Instrument is not recognized: " +
+                                   instrName);
+        }
+      }
 
       if (m_uiForm.deadTimeType->currentText() == "From Data File") {
         result->loadedDeadTimes = load->getProperty("DeadTimeTable");

@@ -373,7 +373,15 @@ std::string getRunLabel(const Workspace_sptr& ws)
   int runNumber = firstPrd->getRunNumber();
   std::string instrName = firstPrd->getInstrument()->getName();
 
-  int zeroPadding = ConfigService::Instance().getInstrument(instrName).zeroPadding(runNumber);
+  int zeroPadding;
+  try {
+    zeroPadding =
+        ConfigService::Instance().getInstrument(instrName).zeroPadding(
+            runNumber);
+  } catch (const Mantid::Kernel::Exception::NotFoundError &) {
+    // Old muon instrument without an IDF - default to 3 zeros
+    zeroPadding = 3;
+  }
 
   std::ostringstream label;
   label << instrName;
