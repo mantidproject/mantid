@@ -6,6 +6,17 @@
 
 namespace Mantid {
 namespace HistogramData {
+class CountStandardDeviations;
+class CountVariances;
+class FrequencyStandardDeviations;
+class FrequencyVariances;
+class HistogramE;
+namespace detail {
+template <class CountStandardDeviations, class HistogramE> class VectorOf;
+template <class CountVariances, class HistogramE> class VectorOf;
+template <class FrequencyStandardDeviations, class HistogramE> class VectorOf;
+template <class FrequencyVariances, class HistogramE> class VectorOf;
+}
 
 /** HistogramE
 
@@ -46,6 +57,10 @@ public:
 
   // The classes are friends, such that they can modify the length.
   friend class Histogram;
+  friend class detail::VectorOf<CountStandardDeviations, HistogramE>;
+  friend class detail::VectorOf<CountVariances, HistogramE>;
+  friend class detail::VectorOf<FrequencyStandardDeviations, HistogramE>;
+  friend class detail::VectorOf<FrequencyVariances, HistogramE>;
 };
 
 } // namespace HistogramData
