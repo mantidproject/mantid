@@ -28,7 +28,10 @@ EventWorkspaceMRU::~EventWorkspaceMRU() {
     }
   }
 
-  for (auto &marker : m_markersToDelete) {
+  for (auto &marker : m_markersToDeleteY) {
+    delete marker;
+  }
+  for (auto &marker : m_markersToDeleteE) {
     delete marker;
   }
 }
@@ -44,7 +47,7 @@ void EventWorkspaceMRU::ensureEnoughBuffersE(size_t thread_num) const {
     m_bufferedDataE.resize(thread_num + 1, nullptr);
     for (auto &data : m_bufferedDataE) {
       if (!data)
-        data = new mru_list(50); // Create a MRU list with this many entries.
+        data = new mru_listE(50); // Create a MRU list with this many entries.
     }
   }
 }
@@ -59,7 +62,7 @@ void EventWorkspaceMRU::ensureEnoughBuffersY(size_t thread_num) const {
     m_bufferedDataY.resize(thread_num + 1, nullptr);
     for (auto &data : m_bufferedDataY) {
       if (!data)
-        data = new mru_list(50); // Create a MRU list with this many entries.
+        data = new mru_listY(50); // Create a MRU list with this many entries.
     }
   }
 }
@@ -70,10 +73,14 @@ void EventWorkspaceMRU::clear() {
   std::lock_guard<std::mutex> _lock(this->m_toDeleteMutex);
 
   // FIXME: don't clear the locked ones!
-  for (auto &marker : m_markersToDelete)
+  for (auto &marker : m_markersToDeleteY)
     if (!marker->m_locked)
       delete marker;
-  m_markersToDelete.clear();
+  m_markersToDeleteY.clear();
+  for (auto &marker : m_markersToDeleteE)
+    if (!marker->m_locked)
+      delete marker;
+  m_markersToDeleteE.clear();
 
   // Make sure you free up the memory in the MRUs
   for (auto &data : m_bufferedDataY)
@@ -94,8 +101,8 @@ void EventWorkspaceMRU::clear() {
  * @param index :: index of the data to return
  * @return pointer to the TypeWithMarker that has the data; NULL if not found.
  */
-TypeWithMarker<MantidVec> *EventWorkspaceMRU::findY(size_t thread_num,
-                                                    size_t index) {
+TypeWithMarker<HistogramData::Counts> *
+EventWorkspaceMRU::findY(size_t thread_num, size_t index) {
   std::lock_guard<std::mutex> _lock(m_changeMruListsMutexY);
   return m_bufferedDataY[thread_num]->find(index);
 }
@@ -106,8 +113,8 @@ TypeWithMarker<MantidVec> *EventWorkspaceMRU::findY(size_t thread_num,
  * @param index :: index of the data to return
  * @return pointer to the TypeWithMarker that has the data; NULL if not found.
  */
-TypeWithMarker<MantidVec> *EventWorkspaceMRU::findE(size_t thread_num,
-                                                    size_t index) {
+TypeWithMarker<HistogramData::CountStandardDeviations> *
+EventWorkspaceMRU::findE(size_t thread_num, size_t index) {
   std::lock_guard<std::mutex> _lock(m_changeMruListsMutexE);
   return m_bufferedDataE[thread_num]->find(index);
 }
@@ -119,16 +126,14 @@ TypeWithMarker<MantidVec> *EventWorkspaceMRU::findE(size_t thread_num,
  * @return a TypeWithMarker * that needs to be deleted, or NULL if nothing needs
  * to be deleted.
  */
-void EventWorkspaceMRU::insertY(size_t thread_num,
-                                TypeWithMarker<MantidVec> *data) {
+void EventWorkspaceMRU::insertY(size_t thread_num, YWithMarker *data) {
   std::lock_guard<std::mutex> _lock(m_changeMruListsMutexY);
-  TypeWithMarker<MantidVec> *oldData =
-      m_bufferedDataY[thread_num]->insert(data);
+  auto oldData = m_bufferedDataY[thread_num]->insert(data);
   // And clear up the memory of the old one, if it is dropping out.
   if (oldData) {
     if (oldData->m_locked) {
       std::lock_guard<std::mutex> _lock(this->m_toDeleteMutex);
-      m_markersToDelete.push_back(oldData);
+      m_markersToDeleteY.push_back(oldData);
     } else
       delete oldData;
   }
@@ -141,16 +146,14 @@ void EventWorkspaceMRU::insertY(size_t thread_num,
  * @return a TypeWithMarker * that needs to be deleted, or NULL if nothing needs
  * to be deleted.
  */
-void EventWorkspaceMRU::insertE(size_t thread_num,
-                                TypeWithMarker<MantidVec> *data) {
+void EventWorkspaceMRU::insertE(size_t thread_num, EWithMarker *data) {
   std::lock_guard<std::mutex> _lock(m_changeMruListsMutexE);
-  TypeWithMarker<MantidVec> *oldData =
-      m_bufferedDataE[thread_num]->insert(data);
+  auto oldData = m_bufferedDataE[thread_num]->insert(data);
   // And clear up the memory of the old one, if it is dropping out.
   if (oldData) {
     if (oldData->m_locked) {
       std::lock_guard<std::mutex> _lock(this->m_toDeleteMutex);
-      m_markersToDelete.push_back(oldData);
+      m_markersToDeleteE.push_back(oldData);
     } else
       delete oldData;
   }

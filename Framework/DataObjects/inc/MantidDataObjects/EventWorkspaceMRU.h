@@ -5,6 +5,8 @@
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/cow_ptr.h"
 #include "MantidKernel/MRUList.h"
+#include "MantidHistogramData/Counts.h"
+#include "MantidHistogramData/CountStandardDeviations.h"
 #include <vector>
 #include <mutex>
 
@@ -76,10 +78,11 @@ public:
 */
 class DLLExport EventWorkspaceMRU {
 public:
+  using YWithMarker = TypeWithMarker<HistogramData::Counts>;
+  using EWithMarker = TypeWithMarker<HistogramData::CountStandardDeviations>;
   // Typedef for a Most-Recently-Used list of Data objects.
-  typedef Mantid::Kernel::MRUList<TypeWithMarker<MantidVec>> mru_list;
-  // Typedef for a vector of MRUlists.
-  typedef std::vector<mru_list *> mru_lists;
+  using mru_listY = Kernel::MRUList<YWithMarker>;
+  using mru_listE = Kernel::MRUList<EWithMarker>;
 
   EventWorkspaceMRU();
   ~EventWorkspaceMRU();
@@ -89,10 +92,10 @@ public:
 
   void clear();
 
-  TypeWithMarker<MantidVec> *findY(size_t thread_num, size_t index);
-  TypeWithMarker<MantidVec> *findE(size_t thread_num, size_t index);
-  void insertY(size_t thread_num, TypeWithMarker<MantidVec> *data);
-  void insertE(size_t thread_num, TypeWithMarker<MantidVec> *data);
+  YWithMarker *findY(size_t thread_num, size_t index);
+  EWithMarker *findE(size_t thread_num, size_t index);
+  void insertY(size_t thread_num, YWithMarker *data);
+  void insertE(size_t thread_num, EWithMarker *data);
 
   void deleteIndex(size_t index);
 
@@ -103,13 +106,14 @@ public:
 
 protected:
   /// The most-recently-used list of dataY histograms
-  mutable mru_lists m_bufferedDataY;
+  mutable std::vector<mru_listY *> m_bufferedDataY;
 
   /// The most-recently-used list of dataE histograms
-  mutable mru_lists m_bufferedDataE;
+  mutable std::vector<mru_listE *> m_bufferedDataE;
 
   /// These markers will be deleted when they are NOT locked
-  mutable std::vector<TypeWithMarker<MantidVec> *> m_markersToDelete;
+  mutable std::vector<YWithMarker *> m_markersToDeleteY;
+  mutable std::vector<EWithMarker *> m_markersToDeleteE;
 
   /// Mutex around accessing m_markersToDelete
   std::mutex m_toDeleteMutex;

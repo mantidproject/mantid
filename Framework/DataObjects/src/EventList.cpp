@@ -1535,18 +1535,20 @@ const MantidVec &EventList::dataY() const {
 
   if (yData == nullptr) {
     // Create the MRU object
-    yData = new TypeWithMarker<MantidVec>(this->m_specNo, this->m_lockedMRU);
+    yData = new TypeWithMarker<HistogramData::Counts>(this->m_specNo,
+                                                      this->m_lockedMRU);
 
     // prepare to update the uncertainties
-    auto eData =
-        new TypeWithMarker<MantidVec>(this->m_specNo, this->m_lockedMRU);
+    auto eData = new TypeWithMarker<HistogramData::CountStandardDeviations>(
+        this->m_specNo, this->m_lockedMRU);
     mru->ensureEnoughBuffersE(thread);
 
     // see if E should be calculated;
     bool skipErrors = (eventType == TOF);
 
     // Set the Y data in it
-    this->generateHistogram(readX(), yData->m_data, eData->m_data, skipErrors);
+    this->generateHistogram(readX(), yData->m_data.mutableRawData(),
+                            eData->m_data.mutableRawData(), skipErrors);
 
     // Lets save it in the MRU
     mru->insertY(thread, yData);
@@ -1555,7 +1557,7 @@ const MantidVec &EventList::dataY() const {
     } else
       delete eData; // Need to clear up this memory if it wasn't put into MRU
   }
-  return yData->m_data;
+  return yData->m_data.rawData();
 }
 
 /** Look in the MRU to see if the E histogram has been generated before.
@@ -1577,16 +1579,17 @@ const MantidVec &EventList::dataE() const {
 
   if (eData == nullptr) {
     // Create the MRU object
-    eData = new TypeWithMarker<MantidVec>(this->m_specNo, this->m_lockedMRU);
+    eData = new TypeWithMarker<HistogramData::CountStandardDeviations>(
+        this->m_specNo, this->m_lockedMRU);
 
     // Now use that to get E -- Y values are generated from another function
     MantidVec Y_ignored;
-    this->generateHistogram(readX(), Y_ignored, eData->m_data);
+    this->generateHistogram(readX(), Y_ignored, eData->m_data.mutableRawData());
 
     // Lets save it in the MRU
     mru->insertE(thread, eData);
   }
-  return eData->m_data;
+  return eData->m_data.rawData();
 }
 
 // --------------------------------------------------------------------------
