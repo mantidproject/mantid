@@ -74,9 +74,9 @@ void ReflectometryWorkflowBase::initWavelengthInputs() {
 
   declareProperty(
       make_unique<PropertyWithValue<double>>(
-          "WavelengthStep", 0.05,
+          "WavelengthStep", 0.02,
           boost::make_shared<MandatoryValidator<double>>(), Direction::Input),
-      "Wavelength rebinning step in angstroms. Defaults to 0.05. Used for "
+      "Wavelength rebinning step in angstroms. Defaults to 0.02. Used for "
       "rebinning intermediate workspaces converted into wavelength.");
 
   declareProperty(make_unique<PropertyWithValue<double>>(
