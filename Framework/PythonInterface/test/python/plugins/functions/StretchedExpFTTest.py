@@ -8,9 +8,9 @@ from pdb import set_trace as tr
 class _InternalMakeSEFTData( PythonAlgorithm ):
 
     def PyInit(self):
-        self.declareProperty('height', 1.0, validator=FloatBoundedValidator(lower=0))
-        self.declareProperty('tau', 100.0, validator=FloatBoundedValidator(lower=0))
-        self.declareProperty('beta', 1.0, validator=FloatBoundedValidator(lower=0))
+        self.declareProperty('Height', 1.0, validator=FloatBoundedValidator(lower=0))
+        self.declareProperty('Tau', 100.0, validator=FloatBoundedValidator(lower=0))
+        self.declareProperty('Beta', 1.0, validator=FloatBoundedValidator(lower=0))
         self.declareProperty('nhalfbins', 100)
         self.declareProperty('de', 0.0004)  # energy step, in meV
         self.declareProperty(MatrixWorkspaceProperty('OutputWorkspace', '', direction=Direction.Output))
@@ -34,9 +34,9 @@ class _InternalMakeSEFTData( PythonAlgorithm ):
         dt = plank_constant/(M*de)  # ps ( or ns), time step
         sampled_times = dt*np.arange(-nhalfbins, nhalfbins+1)
 
-        height = self.getProperty('height').value
-        tau = self.getProperty('tau').value
-        beta = self.getProperty('beta').value
+        height = self.getProperty('Height').value
+        tau = self.getProperty('Tau').value
+        beta = self.getProperty('Beta').value
 
         # Define the stretched exponential on the time domain, then do its Fourier transform
         exponent = -(np.abs(sampled_times)/tau)**beta
@@ -98,7 +98,7 @@ class StretchedExpFTTest( unittest.TestCase ):
 
         # Generate data workspace using random parameters around height=0.1,tau=100, beta=1,
         # and centered at the origin
-        parms = {'height': variation(0.1),  'tau': variation(100),  'beta': variation(1)}
+        parms = {'Height': variation(0.1),  'Tau': variation(100),  'Beta': variation(1)}
 
         Nh = 2000
         de = 0.0004
@@ -108,11 +108,11 @@ class StretchedExpFTTest( unittest.TestCase ):
         sx = -Nh*de+de/2
         ex = (Nh-1)*de+de/2
         # Our initial guess is not centered at the origin, but around de
-        initial_parameters = 'height=0.1, tau=100, beta=1, Origin=%f' % variation(de)
+        initial_parameters = 'Mode=FFT,Height=0.1, Tau=100, Beta=1, Center=%f' % variation(de)
         func_string = 'name=StretchedExpFT,%s' % initial_parameters
         Fit(Function=func_string, InputWorkspace='_test_seft_data', StartX=sx, EndX=ex, CreateOutput=1, MaxIterations=20)
 
-        parms['Origin'] = 0.0  # insert (Origin,0.0) to parameter dictionary for assessment of fit results
+        parms['Center'] = 0.0  # insert (Center,0.0) to parameter dictionary for assessment of fit results
         ws = mtd['_test_seft_data_Parameters']
         #tr()
         fitted = ''
