@@ -1516,15 +1516,10 @@ MantidVec *EventList::makeDataE() const {
   return E;
 }
 
-/** Look in the MRU to see if the Y histogram has been generated before.
- * If so, return that. If not, calculate, cache and return it.
- *
- * @return reference to the Y vector.
- */
-const MantidVec &EventList::dataY() const {
+HistogramData::Counts EventList::counts() const {
   if (!mru)
-    throw std::runtime_error("'EventList::dataY() const' called with no MRU "
-                             "set. This is not allowed.");
+    throw std::runtime_error(
+        "'EventList::counts()' called with no MRU set. This is not allowed.");
 
   // This is the thread number from which this function was called.
   int thread = PARALLEL_THREAD_NUMBER;
@@ -1554,18 +1549,17 @@ const MantidVec &EventList::dataY() const {
       mru->insertE(thread, eData, this->m_specNo, this->m_lockedMRU);
     }
   }
-  return yData.rawData();
+  return yData;
 }
 
-/** Look in the MRU to see if the E histogram has been generated before.
- * If so, return that. If not, calculate, cache and return it.
- *
- * @return reference to the E vector.
- */
-const MantidVec &EventList::dataE() const {
+HistogramData::CountVariances EventList::countVariances() const {
+  return HistogramData::CountVariances(countStandardDeviations());
+}
+
+HistogramData::CountStandardDeviations EventList::countStandardDeviations() const {
   if (!mru)
-    throw std::runtime_error("'EventList::dataE() const' called with no MRU "
-                             "set. This is not allowed.");
+    throw std::runtime_error("'EventList::countStandardDeviations()' called "
+                             "with no MRU set. This is not allowed.");
 
   // This is the thread number from which this function was called.
   int thread = PARALLEL_THREAD_NUMBER;
@@ -1584,7 +1578,52 @@ const MantidVec &EventList::dataE() const {
     // Lets save it in the MRU
     mru->insertE(thread, eData, this->m_specNo, this->m_lockedMRU);
   }
-  return eData.rawData();
+  return eData;
+}
+HistogramData::Frequencies EventList::frequencies() const {
+  return HistogramData::Frequencies(counts(), binEdges());
+}
+HistogramData::FrequencyVariances EventList::frequencyVariances() const {
+  return HistogramData::FrequencyVariances(countVariances(), binEdges());
+}
+HistogramData::FrequencyStandardDeviations
+EventList::frequencyStandardDeviations() const {
+  return HistogramData::FrequencyStandardDeviations(countStandardDeviations(),
+                                                    binEdges());
+}
+const HistogramData::HistogramY &EventList::y() const {
+  return counts().data();
+}
+const HistogramData::HistogramE &EventList::e() const {
+  return countStandardDeviations().data();
+}
+Kernel::cow_ptr<HistogramData::HistogramY> EventList::sharedY() const {
+  return counts().cowData();
+}
+Kernel::cow_ptr<HistogramData::HistogramE> EventList::sharedE() const {
+  return countStandardDeviations().cowData();
+}
+
+/** Look in the MRU to see if the Y histogram has been generated before.
+ * If so, return that. If not, calculate, cache and return it.
+ *
+ * @return reference to the Y vector.
+ */
+const MantidVec &EventList::dataY() const {
+  // WARNING: counts() is stored in MRU, returning reference fine as long as it
+  // stays there.
+  return counts().rawData();
+}
+
+/** Look in the MRU to see if the E histogram has been generated before.
+ * If so, return that. If not, calculate, cache and return it.
+ *
+ * @return reference to the E vector.
+ */
+const MantidVec &EventList::dataE() const {
+  // WARNING: countStandardDeviations() is stored in MRU, returning reference
+  // fine as long as it stays there.
+  return countStandardDeviations().rawData();
 }
 
 // --------------------------------------------------------------------------

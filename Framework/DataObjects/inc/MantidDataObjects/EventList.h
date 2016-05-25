@@ -330,6 +330,19 @@ public:
                           Mantid::Kernel::Unit *toUnit);
   void convertUnitsQuickly(const double &factor, const double &power);
 
+  HistogramData::Counts counts() const override;
+  HistogramData::CountVariances countVariances() const override;
+  HistogramData::CountStandardDeviations
+  countStandardDeviations() const override;
+  HistogramData::Frequencies frequencies() const override;
+  HistogramData::FrequencyVariances frequencyVariances() const override;
+  HistogramData::FrequencyStandardDeviations
+  frequencyStandardDeviations() const override;
+  const HistogramData::HistogramY &y() const override;
+  const HistogramData::HistogramE &e() const override;
+  Kernel::cow_ptr<HistogramData::HistogramY> sharedY() const override;
+  Kernel::cow_ptr<HistogramData::HistogramE> sharedE() const override;
+
 private:
   const HistogramData::Histogram &histogramRef() const override {
     return m_histogram;

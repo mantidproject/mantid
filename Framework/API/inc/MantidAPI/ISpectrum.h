@@ -135,26 +135,33 @@ public:
   template <typename... T> void setPointStandardDeviations(T &&... data) {
     mutableHistogramRef().setPointStandardDeviations(std::forward<T>(data)...);
   }
-  HistogramData::Counts counts() const { return histogramRef().counts(); }
-  HistogramData::CountVariances countVariances() const {
+  virtual HistogramData::Counts counts() const {
+    return histogramRef().counts();
+  }
+  virtual HistogramData::CountVariances countVariances() const {
     return histogramRef().countVariances();
   }
-  HistogramData::CountStandardDeviations countStandardDeviations() const {
+  virtual HistogramData::CountStandardDeviations
+  countStandardDeviations() const {
     return histogramRef().countStandardDeviations();
   }
-  HistogramData::Frequencies frequencies() const {
+  virtual HistogramData::Frequencies frequencies() const {
     return histogramRef().frequencies();
   }
-  HistogramData::FrequencyVariances frequencyVariances() const {
+  virtual HistogramData::FrequencyVariances frequencyVariances() const {
     return histogramRef().frequencyVariances();
   }
-  HistogramData::FrequencyStandardDeviations
+  virtual HistogramData::FrequencyStandardDeviations
   frequencyStandardDeviations() const {
     return histogramRef().frequencyStandardDeviations();
   }
   const HistogramData::HistogramX &x() const { return histogramRef().x(); }
-  const HistogramData::HistogramY &y() const { return histogramRef().y(); }
-  const HistogramData::HistogramE &e() const { return histogramRef().e(); }
+  virtual const HistogramData::HistogramY &y() const {
+    return histogramRef().y();
+  }
+  virtual const HistogramData::HistogramE &e() const {
+    return histogramRef().e();
+  }
   const HistogramData::HistogramDx &dx() const { return histogramRef().dx(); }
   HistogramData::HistogramX &mutableX() {
     return mutableHistogramRef().mutableX();
@@ -165,10 +172,10 @@ public:
   Kernel::cow_ptr<HistogramData::HistogramX> sharedX() const {
     return histogramRef().sharedX();
   }
-  Kernel::cow_ptr<HistogramData::HistogramY> sharedY() const {
+  virtual Kernel::cow_ptr<HistogramData::HistogramY> sharedY() const {
     return histogramRef().sharedY();
   }
-  Kernel::cow_ptr<HistogramData::HistogramE> sharedE() const {
+  virtual Kernel::cow_ptr<HistogramData::HistogramE> sharedE() const {
     return histogramRef().sharedE();
   }
   Kernel::cow_ptr<HistogramData::HistogramDx> sharedDx() const {
