@@ -1099,7 +1099,7 @@ private slots:
   void plotDataMenuAboutToShow();
   void tableMenuAboutToShow();
   void windowsMenuAboutToShow();
-  void windowsMenuActivated( int id );
+  void windowsMenuActivated();
   void interfaceMenuAboutToShow();
   void tiledWindowMenuAboutToShow();
 
@@ -1298,7 +1298,7 @@ public:
   QColor tableBkgdColor, tableTextColor, tableHeaderColor;
   QString projectname, columnSeparator, helpFilePath, appLanguage;
   QString configFilePath, fitPluginsPath, fitModelsPath, asciiDirPath, imagesDirPath, scriptsDirPath;
-  int ignoredLines, savingTimerId, plot3DResolution, recentMenuID, recentFilesMenuID;
+  int ignoredLines, savingTimerId, plot3DResolution;
   bool renameColumns, strip_spaces, simplify_spaces;
   QStringList recentProjects, recentFiles;
   bool saved, showPlot3DProjection, showPlot3DLegend, orthogonal3DPlots, autoscale3DPlots;
@@ -1452,6 +1452,7 @@ private:
   QAction *actionPanPlot;
   QAction *actionWaterfallPlot;
   QAction *actionNewTiledWindow;
+
 
   QList<QAction *> d_user_actions;
   QList<QMenu* > d_user_menus; //Mantid
