@@ -12939,17 +12939,8 @@ void ApplicationWindow::createActions() {
   connect(actionMultiPeakLorentz, SIGNAL(activated()), this,
           SLOT(fitMultiPeakLorentz()));
 
-  // actionCheckUpdates = new QAction(tr("Search for &Updates"), this);
-  // connect(actionCheckUpdates, SIGNAL(activated()), this,
-  // SLOT(searchForUpdates()));
-
   actionHomePage = new QAction(tr("&Mantid Homepage"), this); // Mantid change
   connect(actionHomePage, SIGNAL(activated()), this, SLOT(showHomePage()));
-
-  // actionHelpForums = new QAction(tr("QtiPlot &Forums"), this); // Mantid
-  // change
-  //	connect(actionHelpForums, SIGNAL(triggered()), this,
-  // SLOT(showForums())); // Mantid change
 
   actionHelpBugReports = new QAction(tr("Report a &Bug"), this);
   connect(actionHelpBugReports, SIGNAL(triggered()), this,
@@ -13507,20 +13498,11 @@ void ApplicationWindow::translateActionsStrings() {
   actionBoxPlot->setText(tr("&Box Plot"));
   actionBoxPlot->setToolTip(tr("Box and whiskers plot"));
 
-  actionMultiPeakGauss->setText(tr("&Gaussian..."));
-  actionMultiPeakLorentz->setText(tr("&Lorentzian..."));
-  actionHomePage->setText(tr("&Mantid Homepage")); // Mantid change
-  // actionCheckUpdates->setText(tr("Search for &Updates")); //Mantid change
-  // - commented out
-  // actionHelpForums->setText(tr("Visit QtiPlot &Forums"));
+  actionMultiPeakGauss->setMenuText(tr("&Gaussian..."));
+  actionMultiPeakLorentz->setMenuText(tr("&Lorentzian..."));
+  actionHomePage->setMenuText(tr("&Mantid Homepage")); // Mantid change
   actionHelpBugReports->setText(tr("Report a &Bug"));
   actionAskHelp->setText(tr("Ask for Help"));
-  // actionDownloadManual->setText(tr("Download &Manual"));//Mantid change -
-  // commented out
-  // actionTranslations->setText(tr("&Translations"));//Mantid change -
-  // commented out
-  // actionDonate->setText(tr("Make a &Donation"));
-  // actionTechnicalSupport->setText(tr("Technical &Support"));
 
   btnPointer->setText(tr("Selection &Tools"));
   btnPointer->setToolTip(tr("Selection Tools"));
