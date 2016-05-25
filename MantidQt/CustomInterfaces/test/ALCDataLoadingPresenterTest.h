@@ -184,9 +184,9 @@ public:
                                                 Contains("1"),
                                                 Contains("2")))).Times(1);
     // Test time limits
-    boost::optional<std::pair<double, double>> timeRange;
-    timeRange.emplace(0.0, 0.0);
-    ON_CALL(*m_view, timeRange()).WillByDefault(Return(timeRange));
+    auto timeRange = std::make_pair<double, double>(0.0, 0.0);
+    ON_CALL(*m_view, timeRange())
+        .WillByDefault(Return(boost::make_optional(timeRange)));
     EXPECT_CALL(*m_view, setTimeLimits(Le(0.107), Ge(31.44))).Times(1);
     m_view->selectFirstRun();
   }
@@ -206,9 +206,10 @@ public:
                                    Contains("1"), Contains("2"))))
         .Times(1);
     // Test time limits
-    boost::optional<std::pair<double, double>> timeRange;
-    timeRange.emplace(0.1, 10.0); // this is not the first run loaded
-    ON_CALL(*m_view, timeRange()).WillByDefault(Return(timeRange));
+    auto timeRange =
+        std::make_pair<double, double>(0.1, 10.0); // not the first run loaded
+    ON_CALL(*m_view, timeRange())
+        .WillByDefault(Return(boost::make_optional(timeRange)));
     EXPECT_CALL(*m_view, setTimeLimits(_, _))
         .Times(0); // shouldn't reset time limits
     m_view->selectFirstRun();
