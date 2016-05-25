@@ -5,7 +5,6 @@
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Crystal/IndexingUtils.h"
 #include "MantidKernel/ConfigService.h"
-#include "MantidCrystal/SelectCellWithForm.h"
 
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
@@ -279,7 +278,7 @@ void SCDPanelErrors::Check(DataObjects::PeaksWorkspace_sptr &pkwsp,
                                 "index in the PeaksWorkspace");
   }
 
-  if ((EndX - StartX + 1) < 4) {
+  if ((EndX - StartX + 1) / 3 < 4) {
     throw std::invalid_argument("Not enough peaks to process banks " +
                                 BankNames);
   }
@@ -354,7 +353,7 @@ SCDPanelErrors::getNewInstrument(const Geometry::IPeak &peak) const {
   return instChange;
 }
 
-DataObjects::Peak SCDPanelErrors::createNewPeak(const Geometry::IPeak &peak_old,
+Peak SCDPanelErrors::createNewPeak(const Geometry::IPeak &peak_old,
                                    Geometry::Instrument_sptr instrNew,
                                    double T0, double L0) {
   Geometry::Instrument_const_sptr inst = peak_old.getInstrument();
@@ -369,7 +368,7 @@ DataObjects::Peak SCDPanelErrors::createNewPeak(const Geometry::IPeak &peak_old,
 
   Kernel::V3D hkl = peak_old.getHKL();
   // peak_old.setDetectorID(ID); //set det positions
-  DataObjects:: Peak peak(instrNew, ID, peak_old.getWavelength(), hkl,
+  Peak peak(instrNew, ID, peak_old.getWavelength(), hkl,
             peak_old.getGoniometerMatrix());
 
   Wavelength wl;
@@ -420,16 +419,19 @@ void SCDPanelErrors::function1D(double *out, const double *xValues,
   Check(m_peaks, xValues, nData, StartX, EndX);
 
   g_log.debug() << "BankNames " << BankNames << "   Number of peaks"
-                << (EndX  - StartX + 1) << std::endl;
+                << (EndX - StartX + 1) / 3 << std::endl;
 
   // some pointers for the updated instrument
   boost::shared_ptr<Geometry::Instrument> instChange =
-      getNewInstrument(m_peaks->getPeak(static_cast<int>(xValues[StartX])));
-  auto pw = PeaksWorkspace_sptr(new PeaksWorkspace);
+      getNewInstrument(m_peaks->getPeak(0));
+
+  //---------------------------- Calculate q and hkl vectors-----------------
+
+  vector<Kernel::V3D> hkl_vectors;
+  vector<Kernel::V3D> q_vectors;
   double t0 = getParameter("t0");
   double l0 = getParameter("l0");
-  // Don't get peaks for last 6 lattice entries
-  for (size_t i = StartX; i <= EndX; i += 1) {
+  for (size_t i = StartX; i <= EndX; i += 3) {
     // the x-values are the peak indices as triplets, convert them to size_t
     if (xValues[i] < 0.)
       throw invalid_argument(
@@ -443,49 +445,38 @@ void SCDPanelErrors::function1D(double *out, const double *xValues,
     }
 
     IPeak &peak_old = m_peaks->getPeak(static_cast<int>(pkIndex));
+    Kernel::V3D hkl = peak_old.getHKL();
 
+    // eliminate tolerance cause only those peaks that are OK should be here
+    if (IndexingUtils::ValidIndex(hkl, tolerance)) {
+      hkl_vectors.push_back(hkl);
       Peak peak = createNewPeak(peak_old, instChange, t0, l0);
-      pw->addPeak(peak);
-
+      q_vectors.push_back(peak.getQSampleFrame());
+    }
   }
 
   //----------------------------------Calculate out
   //----------------------------------
 
-  IFunction_sptr fn =
-      FunctionFactory::Instance().createFunction("LatticeFunction");
-  fn->setAttributeValue("LatticeSystem", "Triclinic");
-  fn->addTies("ZeroShift=0.0");
-  fn->setParameter("a", a);
-  fn->setParameter("b", b);
-  fn->setParameter("c", c);
-  fn->setParameter("Alpha", alpha);
-  fn->setParameter("Beta", beta);
-  fn->setParameter("Gamma", gamma);
+  // determine the OrientedLattice for converting to Q-sample
+  Geometry::OrientedLattice lattice(*m_unitCell.get());
+  lattice.setUB(m_peaks->sample().getOrientedLattice().getUB());
 
-  IAlgorithm_sptr fit = Mantid::API::AlgorithmFactory::Instance().create("Fit", -1);
-  fit->initialize();
-  fit->setChild(true);
-  fit->setLogging(false);
-  fit->setProperty("Function", fn);
-  fit->setProperty("InputWorkspace", pw); 
-  fit->setProperty("MaxIterations", 1);
-  fit->setProperty("CostFunction", "Unweighted least squares");
-  fit->setProperty("CreateOutput", true);
-  fit->execute();
-
-  ITableWorkspace_sptr fitWS = fit->getProperty("OutputWorkspace");
-  double chiSq = fit->getProperty("OutputChi2overDoF");
-
+  // cumulative error
+  double chiSq = 0; // for debug log message
 
   for (size_t i = 0; i < StartX; ++i)
     out[i] = 0.;
-  for (size_t i = StartX; i <= EndX; ++i) {
-    out[i] = fitWS->getRef<double>(std::string("d(obs) - d(calc)"), i);
-    /// fitWS->getRef<double>(std::string("d(obs)"), i);
+  for (size_t i = 0; i < q_vectors.size(); ++i) {
+    Kernel::V3D err = q_vectors[i] - lattice.qFromHKL(hkl_vectors[i]);
+    size_t outIndex = 3 * i + StartX;
+    out[outIndex + 0] = err[0];
+    out[outIndex + 1] = err[1];
+    out[outIndex + 2] = err[2];
+    chiSq += err[0] * err[0] + err[1] * err[1] + err[2] * err[2];
   }
 
-  for (size_t i = EndX + 1; i < nData; ++i)
+  for (size_t i = EndX; i < nData; ++i)
     out[i] = 0.;
 
   g_log.debug() << "Parameters" << std::endl;
@@ -499,7 +490,7 @@ void SCDPanelErrors::function1D(double *out, const double *xValues,
 
   // Get values for test program. TODO eliminate
   g_log.debug() << "  out[evenxx]=";
-  for (size_t i = 0; i < nData; ++i) //std::min<size_t>(nData, 30); ++i)
+  for (size_t i = 0; i < std::min<size_t>(nData, 30); ++i)
     g_log.debug() << out[i] << "  ";
 
   g_log.debug() << std::endl;
@@ -552,6 +543,19 @@ double SCDPanelErrors::checkForNonsenseParameters() const {
   return 5. * r;
 }
 
+void updateDerivResult(PeaksWorkspace_sptr peaks, V3D &unRotDeriv,
+                       Matrix<double> &Result, size_t peak,
+                       vector<int> &peakIndx) {
+  Matrix<double> GonMatrix =
+      peaks->getPeak(peakIndx[peak]).getGoniometerMatrix();
+  GonMatrix.Invert();
+
+  V3D RotDeriv = GonMatrix * unRotDeriv;
+
+  for (int kk = 0; kk < 3; ++kk)
+    Result[kk][peak] = RotDeriv[kk];
+}
+
 void SCDPanelErrors::functionDeriv1D(Jacobian *out, const double *xValues,
                                      const size_t nData) {
   if (nData <= 0)
@@ -597,7 +601,7 @@ SCDPanelErrors::calcWorkspace(DataObjects::PeaksWorkspace_sptr &pwks,
     }
 
   MatrixWorkspace_sptr mwkspc = API::WorkspaceFactory::Instance().create(
-      "Workspace2D", static_cast<size_t>(3), N, N);
+      "Workspace2D", static_cast<size_t>(3), 3 * N, 3 * N);
 
   mwkspc->setX(0, pX);
   mwkspc->setX(1, pX);
