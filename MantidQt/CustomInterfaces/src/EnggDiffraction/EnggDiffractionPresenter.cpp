@@ -923,6 +923,9 @@ void EnggDiffractionPresenter::runFittingAlgs(
 std::string EnggDiffractionPresenter::functionStrFactory(
     Mantid::API::ITableWorkspace_sptr &paramTableWS, std::string tableName,
     size_t row, std::string &startX, std::string &endX) {
+  const double windowLeft = 6;
+  const double windowRight = 9;
+
   AnalysisDataServiceImpl &ADS = Mantid::API::AnalysisDataService::Instance();
   paramTableWS = ADS.retrieveWS<ITableWorkspace>(tableName);
 
@@ -934,8 +937,8 @@ std::string EnggDiffractionPresenter::functionStrFactory(
   double X0 = paramTableWS->cell<double>(row, size_t(5));
   double S = paramTableWS->cell<double>(row, size_t(11));
 
-  startX = boost::lexical_cast<std::string>(X0 - (3 * S));
-  endX = boost::lexical_cast<std::string>(X0 + (5 * S));
+  startX = boost::lexical_cast<std::string>(X0 - (windowLeft * S));
+  endX = boost::lexical_cast<std::string>(X0 + (windowRight * S));
 
   std::string functionStr =
       "name=LinearBackground,A0=" + boost::lexical_cast<std::string>(A0) +
