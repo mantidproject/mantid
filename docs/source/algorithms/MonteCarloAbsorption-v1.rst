@@ -30,7 +30,7 @@ Method
 ######
 
 By default, the material for the sample & containers will define the values of the cross section used to compute the absorption factor and will
-include contributions from both the total scattering cross section & absorption cross section. 
+include contributions from both the total scattering cross section & absorption cross section.
 This follows the Hamilton-Darwin [#DAR]_, [#HAM]_ approach as described by T. M. Sabine in the International Tables of Crystallography Vol. C [#SAB]_.
 
 The algorithm proceeds as follows. For each spectrum:
@@ -68,12 +68,12 @@ The algorithm proceeds as follows. For each spectrum:
 
      - compute the self-attenuation factor for all intersections as
        :math:`\prod\limits_{i} \exp(-(\rho_{1i}\sigma_{1i}(\lambda_{1i})l_{1i} + \rho_{2i}\sigma_{2i}(\lambda_{2i})l_{2i}))`
-       where :math:`\rho` is the mass density of the material & 
+       where :math:`\rho` is the mass density of the material &
        :math:`\sigma` the absorption cross-section at a given wavelength
 
      - accumulate this factor with the factor for all `NEvents`
 
-   * average the accumulated attentuation factors over `NEvents` and assign this as the correction factor for 
+   * average the accumulated attentuation factors over `NEvents` and assign this as the correction factor for
      this :math:`\lambda_{step}`.
 
 #. finally, perform an interpolation through the unsimulated wavelength points
@@ -133,7 +133,7 @@ default facility and instrument respectively. The definition can be found at
    data = ConvertUnits(data, Target="Wavelength")
    # Sample geometry is defined by container but not completely filled so
    # we just define the height
-   SetSample(data, Environment={'Name': 'CRYO-01', 'Can': '8mm'},
+   SetSample(data, Environment={'Name': 'CRYO-01', 'Container': '8mm'},
              Geometry={'Height': 4.0},
              Material={'ChemicalFormula': '(Li7)2-C-H4-N-Cl6'})
    # Simulating every data point can be slow. Use a smaller set and interpolate

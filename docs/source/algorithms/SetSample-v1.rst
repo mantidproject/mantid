@@ -37,7 +37,7 @@ procedure is used when trying to find a named definition, e.g ``CRYO-01``:
 
 - check the instrument name on the input workspace:
 
-  - if this is a known instrument at a known facility (is in Facilities.xml) then 
+  - if this is a known instrument at a known facility (is in Facilities.xml) then
     use these as ``FACILITY`` & ``INSTRUMENT`` respectively
 
   - else use the default facility and instrument as ``FACILITY`` & ``INSTRUMENT`` respectively
@@ -67,14 +67,14 @@ Specifies the shape of the sample. This can be specified in 1 of 2 ways:
   concept page for further details
 - a full definition of the shape.
 
-For defining the full shape a key called ``Shape`` specifying the desired shape is 
+For defining the full shape a key called ``Shape`` specifying the desired shape is
 expected along with additional keys specifying the values (all values are assumed to
 be in centimeters):
 
 - ``FlatPlate``: Width, Height, Thick, Center
 - ``Cylinder``: Height, Radius, Center, Axis (X=0, Y=1, Z=2)
 - ``HollowCylinder``: Height, InnerRadius, OuterRadius, Center, Axis(X=0, Y=1, Z=2)
-- ``CSG``: Value is a string containing any generic shape as detailed in 
+- ``CSG``: Value is a string containing any generic shape as detailed in
   :ref:`HowToDefineGeometricShape`
 
 The ``Center`` key is expected to be a list of three values indicating the :python:`[X,Y,Z]`
@@ -112,7 +112,7 @@ The following example uses a test file called ``CRYO-01.xml`` in the
    ws = CreateSampleWorkspace()
 
    # Use geometry as is from environment defintion
-   SetSample(ws, Environment={'Name': 'CRYO-01', 'Can': '8mm'},
+   SetSample(ws, Environment={'Name': 'CRYO-01', 'Container': '8mm'},
              Material={'ChemicalFormula': '(Li7)2-C-H4-N-Cl6'})
 
 **Example - Override height of preset cylinder sample**
@@ -122,7 +122,7 @@ The following example uses a test file called ``CRYO-01.xml`` in the
    # A fake host workspace, replace this with your real one.
    ws = CreateSampleWorkspace()
    # Use geometry from environment but set differnet height for sample
-   SetSample(ws, Environment={'Name': 'CRYO-01', 'Can': '8mm'},
+   SetSample(ws, Environment={'Name': 'CRYO-01', 'Container': '8mm'},
              Geometry={'Height': 4.0},
              Material={'ChemicalFormula': '(Li7)2-C-H4-N-Cl6'})
 
@@ -133,13 +133,12 @@ The following example uses a test file called ``CRYO-01.xml`` in the
    # A fake host workspace, replace this with your real one.
    ws = CreateSampleWorkspace()
    # Use geometry from environment but set differnet height for sample
-   SetSample(ws, Environment={'Name': 'CRYO-01', 'Can': '8mm'},
-             Geometry={'Shape': 'HollowCylinder', 'Height': 4.0, 
-                       'InnerRadius': 0.8, 'OuterRadius': 1.0, 
+   SetSample(ws, Environment={'Name': 'CRYO-01', 'Container': '8mm'},
+             Geometry={'Shape': 'HollowCylinder', 'Height': 4.0,
+                       'InnerRadius': 0.8, 'OuterRadius': 1.0,
                        'Center': [0.,0.,0.], 'Axis':1},
              Material={'ChemicalFormula': '(Li7)2-C-H4-N-Cl6'})
 
 .. categories::
 
 .. sourcelink::
-
