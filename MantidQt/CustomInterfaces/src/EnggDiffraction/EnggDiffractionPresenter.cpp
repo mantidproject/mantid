@@ -3390,7 +3390,6 @@ EnggDiffractionPresenter::outFilesUserDir(const std::string &addToDir) {
 */
 Poco::Path
 EnggDiffractionPresenter::outFilesGeneralDir(const std::string &addComponent) {
-  std::string rbn = m_view->getRBNumber();
   Poco::Path dir = outFilesRootDir();
 
   try {
