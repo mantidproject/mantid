@@ -30,7 +30,7 @@ from numpy import interp
 import numpy as np
 import copy
 import scipy.constants
-from scipy.fftpack import dct, fft, fftfreq
+from scipy.fftpack import fft, fftfreq
 from math import gamma
 
 class StretchedExpFT(IFunction1D):

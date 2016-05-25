@@ -79,7 +79,7 @@ Obtaining an initial guess close to the optimal fit is critical. For this model,
          if parameter in full_parameter_name:
             values_found[parameter] = ws.row(row_index)["Value"]
             break
-print "The optimal parameters are Tau={0:2.0f} and Beta={1:3.1f}"\
+   print "The optimal parameters are Tau={0:2.0f} and Beta={1:3.1f}"\
       .format(values_found["Tau"], values_found["Beta"])
 
 .. testcleanup:: ExampleStretchedExpFT
