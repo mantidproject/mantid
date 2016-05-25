@@ -47,7 +47,7 @@ TableDialog::TableDialog(Table *t, Qt::WFlags fl )
     : QDialog( t, fl),
     d_table(t)
 {
-    setName( "TableDialog" );
+    setObjectName( "TableDialog" );
     setWindowTitle( tr( "MantidPlot - Column options" ) );
     setSizeGripEnabled(true);
 
@@ -271,7 +271,7 @@ void TableDialog::updateColumn(int sc)
         if (formatBox->findText(format) < 0)
             formatBox->insertItem(0, format);
 
-        formatBox->setCurrentText(format);
+        formatBox->setItemText(0, format);
     } else if (colType == Table::Day){
         QString format = d_table->columnFormat(sc);
         if (format == "ddd")
@@ -311,7 +311,7 @@ void TableDialog::apply()
 
     int sc = d_table->selectedColumn();
     d_table->setColumnWidth(colWidth->value(), applyToAllBox->isChecked());
-    d_table->setColComment(sc, comments->text().replace("\n", " ").replace("\t", " "));
+    d_table->setColComment(sc, comments->toPlainText().replace("\n", " ").replace("\t", " "));
     d_table->setColName(sc, name.replace("_", "-"), enumerateAllBox->isChecked());
 
     bool rightColumns = applyToRightCols->isChecked();
@@ -528,7 +528,7 @@ void TableDialog::setDateTimeFormat(int type, const QString& format, bool allRig
 
     if (formatBox->findText(format) < 0){
         formatBox->insertItem(0, format);
-        formatBox->setCurrentText(format);
+        formatBox->setItemText(0, format);
     }
     d_table->notifyChanges();
 }

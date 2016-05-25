@@ -3,28 +3,28 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidGeometry/Instrument/Can.h"
+#include "MantidGeometry/Instrument/Container.h"
 #include "MantidGeometry/Objects/Rules.h"
 #include "MantidGeometry/Surfaces/Sphere.h"
 
 #include <boost/make_shared.hpp>
 
-using Mantid::Geometry::Can;
+using Mantid::Geometry::Container;
 
-class CanTest : public CxxTest::TestSuite {
+class ContainerTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static CanTest *createSuite() { return new CanTest(); }
-  static void destroySuite(CanTest *suite) { delete suite; }
+  static ContainerTest *createSuite() { return new ContainerTest(); }
+  static void destroySuite(ContainerTest *suite) { delete suite; }
 
   // ---------------------------------------------------------------------------
   // Success tests
   // ---------------------------------------------------------------------------
   void test_Default_Constructor_Has_No_Sample_Shape() {
-    Can can;
+    Container can;
     TS_ASSERT_EQUALS(false, can.hasSampleShape());
-    TS_ASSERT_THROWS(can.createSampleShape(Can::ShapeArgs()),
+    TS_ASSERT_THROWS(can.createSampleShape(Container::ShapeArgs()),
                      std::runtime_error);
   }
 
@@ -35,7 +35,7 @@ public:
                       "<radius val=\"0.0030\" />"
                       "<height val=\"0.05\" />"
                       "</cylinder>";
-    Can can(xml);
+    Container can(xml);
     TS_ASSERT_EQUALS(false, can.hasSampleShape());
     TS_ASSERT_EQUALS(xml, can.getShapeXML());
   }
@@ -47,8 +47,8 @@ public:
                         "<radius val=\"1.0\" /> "
                         "</sphere></samplegeometry>");
     Object_sptr sampleShape;
-    TS_ASSERT_THROWS_NOTHING(sampleShape =
-                                 can->createSampleShape(Can::ShapeArgs()));
+    TS_ASSERT_THROWS_NOTHING(
+        sampleShape = can->createSampleShape(Container::ShapeArgs()));
     TS_ASSERT(sampleShape->hasValidShape());
     TS_ASSERT_DELTA(1.0, getSphereRadius(*sampleShape), 1e-10);
   }
@@ -60,7 +60,7 @@ public:
                         "<radius val=\"1.0\" /> "
                         "</sphere></samplegeometry>");
     Object_sptr sampleShape;
-    Can::ShapeArgs args = {{"radius", 0.5}};
+    Container::ShapeArgs args = {{"radius", 0.5}};
     TS_ASSERT_THROWS_NOTHING(sampleShape = can->createSampleShape(args));
     TS_ASSERT(sampleShape->hasValidShape());
     TS_ASSERT_DELTA(0.5, getSphereRadius(*sampleShape), 1e-10);
@@ -73,7 +73,7 @@ public:
                         "<radius val=\"1.0\" /> "
                         "</sphere></samplegeometry>");
     Object_sptr sampleShape;
-    Can::ShapeArgs args = {{"height", 0.5}};
+    Container::ShapeArgs args = {{"height", 0.5}};
     TS_ASSERT_THROWS_NOTHING(sampleShape = can->createSampleShape(args));
     TS_ASSERT(sampleShape->hasValidShape());
     TS_ASSERT_DELTA(1.0, getSphereRadius(*sampleShape), 1e-10);
@@ -91,8 +91,8 @@ public:
   }
 
 private:
-  Mantid::Geometry::Can_sptr createTestCan() {
-    return boost::make_shared<Can>(
+  Mantid::Geometry::Container_sptr createTestCan() {
+    return boost::make_shared<Container>(
         "<type name=\"usertype\"><cylinder>"
         "<centre-of-bottom-base x=\"0.0\" y=\"0.0\" z=\"0.0\" />"
         "<axis x=\"0.0\" y=\"1.0\" z=\"0\" />"
