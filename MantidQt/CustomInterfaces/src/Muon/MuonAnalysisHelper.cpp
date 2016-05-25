@@ -827,7 +827,11 @@ QString runNumberString(const std::string &workspaceName,
     // Remove "INST000" off the start
     // No muon instruments have numbers in their names
     size_t numPos = instRuns.find_first_of("123456789");
-    instRuns = instRuns.substr(numPos, instRuns.size());
+    if (numPos != std::string::npos) {
+      instRuns = instRuns.substr(numPos, instRuns.size());
+    } else { // run number was zero?
+      instRuns = "0";
+    }
     if (numTokens > 5) { // periods included
       periods = tokenizer[4];
     }
