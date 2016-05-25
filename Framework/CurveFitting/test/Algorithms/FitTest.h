@@ -1,15 +1,15 @@
 #ifndef CURVEFITTING_FITTEST_H_
 #define CURVEFITTING_FITTEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include "MantidTestHelpers/FakeObjects.h"
+#include <cxxtest/TestSuite.h>
 
+#include "FitTestHelpers.h"
 #include "MantidAPI/FrameworkManager.h"
-#include "MantidAPI/IFuncMinimizer.h"
 #include "MantidAPI/FuncMinimizerFactory.h"
+#include "MantidAPI/IFuncMinimizer.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidCurveFitting/Algorithms/Fit.h"
-#include "FitTestHelpers.h"
 
 using namespace Mantid;
 using namespace Mantid::CurveFitting;
@@ -127,6 +127,60 @@ public:
     TS_ASSERT(!fit.existsProperty("SomeOutput"));
     TS_ASSERT(
         !API::AnalysisDataService::Instance().doesExist("MinimizerOutput"));
+  }
+
+  void test_function_Abragam() {
+
+    // create mock data to test against
+    int ndata = 21;
+    API::MatrixWorkspace_sptr ws = API::WorkspaceFactory::Instance().create(
+        "Workspace2D", 1, ndata, ndata);
+    Mantid::MantidVec &x = ws->dataX(0);
+    Mantid::MantidVec &y = ws->dataY(0);
+    Mantid::MantidVec &e = ws->dataE(0);
+    for (int i = 0; i < ndata; i++) {
+      x[i] = static_cast<double>(i);
+      e[i] = 0.01;
+    }
+    y[0] = 0.212132034;
+    y[1] = 0.110872429;
+    y[2] = -0.004130004;
+    y[3] = -0.107644046;
+    y[4] = -0.181984622;
+    y[5] = -0.218289678;
+    y[6] = -0.215908947;
+    y[7] = -0.180739307;
+    y[8] = -0.123016506;
+    y[9] = -0.054943061;
+    y[10] = 0.011526466;
+    y[11] = 0.066481012;
+    y[12] = 0.103250678;
+    y[13] = 0.118929645;
+    y[14] = 0.114251678;
+    y[15] = 0.092934753;
+    y[16] = 0.060672555;
+    y[17] = 0.023977227;
+    y[18] = -0.010929869;
+    y[19] = -0.039018774;
+    y[20] = -0.057037526;
+
+    Fit fit;
+    fit.initialize();
+    fit.setProperty("Function", "name=Abragam");
+    fit.setProperty("InputWorkspace", ws);
+    fit.execute();
+
+    // Test the goodness of the fit
+    double chi2 = fit.getProperty("OutputChi2overDoF");
+    TS_ASSERT_DELTA(chi2, 0.000001, 0.000001);
+
+    // Test the fitting parameters
+    IFunction_sptr func = fit.getProperty("Function");
+    TS_ASSERT_DELTA(func->getParameter("A"), 0.3, 0.001);
+    TS_ASSERT_DELTA(func->getParameter("Omega"), 0.4, 0.001);
+    TS_ASSERT_DELTA(func->getParameter("Phi"), M_PI / 4.0, 0.01); // 45 degrees
+    TS_ASSERT_DELTA(func->getParameter("Sigma"), 0.2, 0.001);
+    TS_ASSERT_DELTA(func->getParameter("Tau"), 2.0, 0.01);
   }
 };
 
