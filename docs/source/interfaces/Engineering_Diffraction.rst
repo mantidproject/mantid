@@ -82,6 +82,15 @@ Fitted and Difc/TZero Straight Line for comparison. More information
 regarding the fit peaks can be found on the
 :ref:`EnggFitPeaks<algm-EnggFitPeaks>` documentation.
 
+The calibration files are written into two different output
+directories. First, they are written to a user specific directory
+which for the ENGIN-X instrument on Windows systems is
+`C:/EnginX_Mantid/User/<RBNumber>/Calibration`. On other platforms
+this is found under the home directory rather than `C:`. They are also
+copied into a general (all) output directory:
+`C:/EnginX_Mantid/Calibration` on Windows or
+`~/EnginX_Mantid/Calibration` on other platforms.
+
 Parameters
 ^^^^^^^^^^
 
@@ -187,6 +196,15 @@ current focus run process has been completed. Inside the *Result Log*
 a warning message will be displayed with last successful run and total
 number of focus runs that could not be processed.
 
+The focused data files are saved in NeXus format into the user
+specific and general directories (as with the calibration output
+files). That is the files are written into
+`C:/EnginX_Mantid/User/<RBNumber>/Calibration` and
+`C:/EnginX_Mantid/Calibration` on Windows, or
+`~/EnginX_Mantid/User/<RBNumber>/Calibration` and
+`~/EnginX_Mantid/Calibration` on other platforms.  See below for
+additional, optional outputs.
+
 Run Number
 ^^^^^^^^^^
 The run provided to focus can be for example 228061-228063, this will
@@ -223,12 +241,15 @@ Replacing Plots and then decides to change it to One Window -
 Waterfall during a run, the interface will carry on by plotting
 Waterfall within the same window.
 
-The user also has an option of generated GSS, XYE and OpenGenie
-formatted file by clicking the Output Files checkbox. This will
-generated three different files for each focused output workspace
-in Mantid. These files can be found with appropriate name at location:
-`C:\EnginX_Mantid\User\236516\Focus` on Windows, the
-EnginX_Mantid folder can be found on `Desktop/Home` on other platforms.
+The user also has an option of saving GSS, XYE and OpenGenie formatted
+file by clicking the Output Files checkbox. This will generate three
+different files for each focused output workspace in Mantid. These
+files can be found with appropriate name at location:
+`C:\EnginX_Mantid\User\<RBNumber>\Focus` on Windows, the `EnginX_Mantid`
+folder can be found on the home directory on other platforms. The
+files are also copied to the general (all) output directory, that is
+`C:\EnginX_Mantid\Focus` on Windows and `EnginX_Mantid\Focus` under
+the user home on other platforms.
 
 The Multiple Runs Focus Mode combo-box enables two alternative
 focus mode. `Focus Individual Run Files Separately` is the default
