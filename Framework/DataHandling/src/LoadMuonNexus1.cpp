@@ -510,6 +510,20 @@ LoadMuonNexus1::loadDetectorGrouping(NXRoot &root,
         if (table->rowCount() != 0)
           return table;
 
+      } else if (numGroupingEntries == m_numberOfSpectra) {
+        // Multiple periods - same grouping for each
+        specToLoad.clear();
+        for (int i = 1; i < m_numberOfSpectra + 1; i++) {
+          specToLoad.push_back(i);
+        }
+        for (const auto &spectrum : specToLoad) {
+          grouping.emplace_back(groupingData[spectrum - 1]);
+        }
+        // Load into table
+        TableWorkspace_sptr table =
+            createDetectorGroupingTable(specToLoad, grouping);
+        if (table->rowCount() != 0)
+          return table;
       } else {
         // More complex case - grouping information for every period
 
@@ -553,7 +567,18 @@ LoadMuonNexus1::loadDetectorGrouping(NXRoot &root,
     return idfGrouping->toTable();
   } catch (const std::runtime_error &) {
     g_log.warning("Loading dummy grouping");
-    return groupLoader.getDummyGrouping()->toTable();
+    auto dummyGrouping = boost::make_shared<Grouping>();
+    if (inst->getNumberDetectors() != 0) {
+      dummyGrouping = groupLoader.getDummyGrouping();
+    } else {
+      // Make sure it uses the right number of detectors
+      std::ostringstream oss;
+      oss << "1-" << m_numberOfSpectra;
+      dummyGrouping->groups.push_back(oss.str());
+      dummyGrouping->description = "Dummy grouping";
+      dummyGrouping->groupNames.emplace_back("all");
+    }
+    return dummyGrouping->toTable();
   }
 }
 
