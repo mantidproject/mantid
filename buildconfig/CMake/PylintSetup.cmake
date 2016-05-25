@@ -41,12 +41,17 @@ if ( PYLINT_FOUND )
         scripts/test
         Testing/SystemTests/tests/analysis/reference
   )
+  set ( PYLINT_OUTPUT_DIR ${CMAKE_BINARY_DIR}/bin/Testing )
+  set ( PYLINT_NTHREADS 8 )
+
   add_custom_target ( pylintcheck
                       COMMAND ${PYTHON_EXECUTABLE} ${PYLINT_RUNNER_SCRIPT} --format=${PYLINT_OUTPUT_FORMAT}
+                              --output=${PYLINT_OUTPUT_DIR}
                               --rcfile=${PYLINT_CFG_FILE}
                               --mantidpath=${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}
                               --basedir=${BASE_DIR} --nofail
                               --exclude="${PYLINT_EXCLUDES}"
+                              --parallel=${PYLINT_NTHREADS}
                               ${PYLINT_INCLUDES}
                       COMMENT "Running pylint on selected python files"
                     )
