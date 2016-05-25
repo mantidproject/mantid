@@ -184,8 +184,7 @@ int main( int argc, char ** argv )
 
       exit(0);
     }
-    //else if ( str == "-m" || str == "--manual" ) // Not for the time being at least
-    //  ApplicationWindow::showStandAloneHelp();
+
   }
 
   MantidApplication app( argc, argv );
