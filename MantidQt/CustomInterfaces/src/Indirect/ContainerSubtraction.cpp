@@ -57,13 +57,41 @@ void ContainerSubtraction::run() {
     absCorProps["SampleWorkspace"] = m_sampleWorkspaceName;
   }
 
+  const auto canName = m_uiForm.dsContainer->getCurrentDataName().toStdString();
+  const auto cloneName = "__algorithm_can";
+
+  IAlgorithm_sptr cloneAlg =
+      AlgorithmManager::Instance().create("CloneWorkspace");
+  cloneAlg->initialize();
+  cloneAlg->setLogging(false);
+  cloneAlg->setProperty("InputWorkspace", canName);
+  cloneAlg->setProperty("OutputWorkspace", cloneName);
+  cloneAlg->execute();
+
   MatrixWorkspace_sptr canWs =
-      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-          m_containerWorkspaceName);
+      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(cloneName);
+
   // Check for same binning across sample and container
   if (shift) {
-    addRebinStep(QString::fromStdString(m_containerWorkspaceName),
-                 QString::fromStdString(m_sampleWorkspaceName));
+
+    IAlgorithm_sptr scaleX = AlgorithmManager::Instance().create("ScaleX");
+    scaleX->initialize();
+    scaleX->setLogging(false);
+    scaleX->setProperty("InputWorkspace", canWs);
+    scaleX->setProperty("Factor", m_uiForm.spShift->value());
+    scaleX->setProperty("Operation", "Add");
+    scaleX->setProperty("OutputWorkspace", cloneName);
+    scaleX->execute();
+
+    IAlgorithm_sptr rebin =
+        AlgorithmManager::Instance().create("RebinToWorkspace");
+    rebin->initialize();
+    rebin->setLogging(false);
+    rebin->setProperty("WorkspaceToRebin", cloneName);
+    rebin->setProperty("WorkspaceToMatch", m_sampleWorkspaceName);
+    rebin->setProperty("OutputWorkspace", cloneName);
+    rebin->execute();
+
   } else {
     if (!checkWorkspaceBinningMatches(sampleWs, canWs)) {
       const char *text =
@@ -80,7 +108,7 @@ void ContainerSubtraction::run() {
         rebin->initialize();
         rebin->setProperty("WorkspaceToRebin", canWs);
         rebin->setProperty("WorkspaceToMatch", sampleWs);
-        rebin->setProperty("OutputWorkspace", m_containerWorkspaceName);
+        rebin->setProperty("OutputWorkspace", cloneName);
         rebin->execute();
       } else {
         m_batchAlgoRunner->clearQueue();
@@ -98,7 +126,7 @@ void ContainerSubtraction::run() {
                       "convert to continue.");
     absCorProps["CanWorkspace"] = addConvertUnitsStep(canWs, "Wavelength");
   } else {
-    absCorProps["CanWorkspace"] = m_containerWorkspaceName;
+    absCorProps["CanWorkspace"] = cloneName;
   }
 
   if (scale) {
