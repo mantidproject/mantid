@@ -737,7 +737,6 @@ public slots:
   void showMoreWindows();
   void showMarkerPopupMenu();
   void showHelp();
-  static void showStandAloneHelp();
   void chooseHelpFolder();
   void showPlotWizard();
   void showFitPolynomDialog();
