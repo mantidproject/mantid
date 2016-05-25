@@ -14,8 +14,8 @@ Crystal Improvements
 --------------------
 
 - :ref:`SCDCalibratePanels <algm-SCDCalibratePanels>` has parameter errors reduced,
-   option for simplex minimization, and 3 new workspaces which can plot calculated 
-   vs theoretical columns, rows, and TOF for each bank. Calibration is now as good 
+   option for simplex minimization, and 3 new workspaces which can plot calculated
+   vs theoretical columns, rows, and TOF for each bank. Calibration is now as good
    as ISAW's for Mandi data.
 - 5 detectors added to the MANDI instrument geometry
 - :ref:`LoadCIF <algm-LoadCIF>` can now also load structures where only anisotropic displacement parameters are given,
@@ -89,7 +89,12 @@ Graphical user interface:
   the consecutive run numbers to the list widget from the range provided by the
   user, bank combo-box will update upon selection of run number.
 
-
+- Further improvements to Fitting tab, if for some reason the fitting
+  fails, the focused workspace should still be plotted. This will
+  enable user to select valid peaks and run Fit accordingly. User also
+  now have an option to plot single peak fitting in separate workspace
+  by using *Plot To Separate Window* button. Peak list can now also be
+  cleared using the *Clear* button.
 
 Imaging
 -------
@@ -135,6 +140,9 @@ Powder Diffraction
 ------------------
 
 - :ref:`PDFFourierTransform <algm-PDFFourierTransform>` has been corrected in its calculation of errors.
+
+- New algorithm: :ref:`PDToGUDRUN <algm-PDToGUDRUN>` loads and processes data for use in `GUDRUN <http://www.isis.stfc.ac.uk/instruments/sandals/data-analysis/gudrun8864.html>`_.
+
 
 
 Powder Diffraction Scripts

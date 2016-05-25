@@ -35,7 +35,7 @@ public:
 // -----------------------------------------------------------------------------
 // Create test samples
 // -----------------------------------------------------------------------------
-enum class TestSampleType { SolidSphere, Annulus, SamplePlusCan };
+enum class TestSampleType { SolidSphere, Annulus, SamplePlusContainer };
 
 inline std::string annulusXML(double innerRadius, double outerRadius,
                               double height,
@@ -63,9 +63,9 @@ createAnnulus(double innerRadius, double outerRadius, double height,
       annulusXML(innerRadius, outerRadius, height, upAxis));
 }
 
-inline Mantid::API::Sample createSamplePlusCan() {
+inline Mantid::API::Sample createSamplePlusContainer() {
   using Mantid::API::Sample;
-  using Mantid::Geometry::Can;
+  using Mantid::Geometry::Container;
   using Mantid::Geometry::SampleEnvironment;
   using Mantid::Geometry::ShapeFactory;
   using Mantid::Kernel::Material;
@@ -75,12 +75,12 @@ inline Mantid::API::Sample createSamplePlusCan() {
   // Create an annulus Vanadium can with silicon sample
   const double height(0.05), innerRadius(0.0046), outerRadius(0.005);
   const V3D centre(0, 0, -0.5 * height), upAxis(0, 0, 1);
-  // Can
-  auto can = ShapeFactory().createShape<Can>(
+  // Container
+  auto can = ShapeFactory().createShape<Container>(
       annulusXML(innerRadius, outerRadius, height, upAxis));
   can->setMaterial(Material("Vanadium", getNeutronAtom(23), 0.02));
   auto environment =
-      Mantid::Kernel::make_unique<SampleEnvironment>("Annulus Can", can);
+      Mantid::Kernel::make_unique<SampleEnvironment>("Annulus Container", can);
   // Sample volume
   auto sampleCell = ComponentCreationHelper::createCappedCylinder(
       innerRadius, height, centre, upAxis, "sample");
@@ -103,8 +103,8 @@ inline Mantid::API::Sample createTestSample(TestSampleType sampleType) {
   using namespace Mantid::Geometry;
 
   Sample testSample;
-  if (sampleType == TestSampleType::SamplePlusCan) {
-    testSample = createSamplePlusCan();
+  if (sampleType == TestSampleType::SamplePlusContainer) {
+    testSample = createSamplePlusContainer();
   } else {
     Object_sptr shape;
     if (sampleType == TestSampleType::SolidSphere) {
