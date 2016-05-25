@@ -163,7 +163,7 @@ namespace CustomInterfaces
     {
       auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(sqwWsName.toStdString());
       int numHist = static_cast<int>(ws->getNumberHistograms());
-      plotSpectrum(sqwWsName, 0, numHist);
+      plotSpectrum(sqwWsName, 0, numHist-1);
     }
   }
 
