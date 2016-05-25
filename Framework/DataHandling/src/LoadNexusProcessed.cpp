@@ -1709,7 +1709,7 @@ void LoadNexusProcessed::loadNonSpectraAxis(
     std::string axisLabels(axisData(), axisData.dim0());
     // Use boost::tokenizer to split up the input
     Mantid::Kernel::StringTokenizer tokenizer(
-        axisLabels, "\n", Mantid::Kernel::StringTokenizer::TOK_TRIM);
+        axisLabels, "\n", Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
     // We must cast the axis object to TextAxis so we may use ->setLabel
     TextAxis *textAxis = static_cast<TextAxis *>(axis);
     int i = 0;
