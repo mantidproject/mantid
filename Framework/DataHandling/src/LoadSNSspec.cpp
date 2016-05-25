@@ -48,7 +48,7 @@ int LoadSNSspec::confidence(Kernel::FileDescriptor &descriptor) const {
         if (str.at(1) == 'L') {
           tokenizer tok(str, sep,
                         Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
-          axiscols = tok.asVector().size() - 1;
+          axiscols = static_cast<int>(tok.asVector().size());
           // if the file contains a comment line starting with "#L" followed
           // by three columns this could be loadsnsspec file
           if (axiscols > 2) {
@@ -59,7 +59,7 @@ int LoadSNSspec::confidence(Kernel::FileDescriptor &descriptor) const {
         // check first data line is a 3 column line
         tokenizer tok(str, sep,
                       Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
-        datacols = tok.asVector().size() - 1;
+        datacols = static_cast<int>(tok.asVector().size());
         break;
       }
     } catch (std::out_of_range &) {
