@@ -101,10 +101,13 @@ void EventWorkspaceMRU::clear() {
  * @param index :: index of the data to return
  * @return pointer to the TypeWithMarker that has the data; NULL if not found.
  */
-TypeWithMarker<HistogramData::Counts> *
-EventWorkspaceMRU::findY(size_t thread_num, size_t index) {
+HistogramData::Counts EventWorkspaceMRU::findY(size_t thread_num,
+                                               size_t index) {
   std::lock_guard<std::mutex> _lock(m_changeMruListsMutexY);
-  return m_bufferedDataY[thread_num]->find(index);
+  auto result = m_bufferedDataY[thread_num]->find(index);
+  if(result)
+    return result->m_data;
+  return HistogramData::Counts();
 }
 
 /** Find a Y histogram in the MRU
@@ -113,10 +116,13 @@ EventWorkspaceMRU::findY(size_t thread_num, size_t index) {
  * @param index :: index of the data to return
  * @return pointer to the TypeWithMarker that has the data; NULL if not found.
  */
-TypeWithMarker<HistogramData::CountStandardDeviations> *
+HistogramData::CountStandardDeviations
 EventWorkspaceMRU::findE(size_t thread_num, size_t index) {
   std::lock_guard<std::mutex> _lock(m_changeMruListsMutexE);
-  return m_bufferedDataE[thread_num]->find(index);
+  auto result = m_bufferedDataE[thread_num]->find(index);
+  if(result)
+    return result->m_data;
+  return HistogramData::CountStandardDeviations();
 }
 
 /** Insert a new histogram into the MRU
@@ -126,9 +132,12 @@ EventWorkspaceMRU::findE(size_t thread_num, size_t index) {
  * @return a TypeWithMarker * that needs to be deleted, or NULL if nothing needs
  * to be deleted.
  */
-void EventWorkspaceMRU::insertY(size_t thread_num, YWithMarker *data) {
+void EventWorkspaceMRU::insertY(size_t thread_num, HistogramData::Counts data,
+                                const size_t index, bool &locked) {
   std::lock_guard<std::mutex> _lock(m_changeMruListsMutexY);
-  auto oldData = m_bufferedDataY[thread_num]->insert(data);
+  auto yWithMarker = new TypeWithMarker<HistogramData::Counts>(index, locked);
+  yWithMarker->m_data = std::move(data);
+  auto oldData = m_bufferedDataY[thread_num]->insert(yWithMarker);
   // And clear up the memory of the old one, if it is dropping out.
   if (oldData) {
     if (oldData->m_locked) {
@@ -146,9 +155,14 @@ void EventWorkspaceMRU::insertY(size_t thread_num, YWithMarker *data) {
  * @return a TypeWithMarker * that needs to be deleted, or NULL if nothing needs
  * to be deleted.
  */
-void EventWorkspaceMRU::insertE(size_t thread_num, EWithMarker *data) {
+void EventWorkspaceMRU::insertE(size_t thread_num,
+                                HistogramData::CountStandardDeviations data,
+                                const size_t index, bool &locked) {
   std::lock_guard<std::mutex> _lock(m_changeMruListsMutexE);
-  auto oldData = m_bufferedDataE[thread_num]->insert(data);
+  auto eWithMarker =
+      new TypeWithMarker<HistogramData::CountStandardDeviations>(index, locked);
+  eWithMarker->m_data = std::move(data);
+  auto oldData = m_bufferedDataE[thread_num]->insert(eWithMarker);
   // And clear up the memory of the old one, if it is dropping out.
   if (oldData) {
     if (oldData->m_locked) {

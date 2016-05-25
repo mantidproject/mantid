@@ -1533,31 +1533,28 @@ const MantidVec &EventList::dataY() const {
   // Is the data in the mrulist?
   auto yData = mru->findY(thread, this->m_specNo);
 
-  if (yData == nullptr) {
+  if (!yData) {
     // Create the MRU object
-    yData = new TypeWithMarker<HistogramData::Counts>(this->m_specNo,
-                                                      this->m_lockedMRU);
+    yData = HistogramData::Counts(0);
 
     // prepare to update the uncertainties
-    auto eData = new TypeWithMarker<HistogramData::CountStandardDeviations>(
-        this->m_specNo, this->m_lockedMRU);
+    auto eData = HistogramData::CountStandardDeviations(0);
     mru->ensureEnoughBuffersE(thread);
 
     // see if E should be calculated;
     bool skipErrors = (eventType == TOF);
 
     // Set the Y data in it
-    this->generateHistogram(readX(), yData->m_data.mutableRawData(),
-                            eData->m_data.mutableRawData(), skipErrors);
+    this->generateHistogram(readX(), yData.mutableRawData(),
+                            eData.mutableRawData(), skipErrors);
 
     // Lets save it in the MRU
-    mru->insertY(thread, yData);
+    mru->insertY(thread, yData, this->m_specNo, this->m_lockedMRU);
     if (!skipErrors) {
-      mru->insertE(thread, eData);
-    } else
-      delete eData; // Need to clear up this memory if it wasn't put into MRU
+      mru->insertE(thread, eData, this->m_specNo, this->m_lockedMRU);
+    }
   }
-  return yData->m_data.rawData();
+  return yData.rawData();
 }
 
 /** Look in the MRU to see if the E histogram has been generated before.
@@ -1577,19 +1574,17 @@ const MantidVec &EventList::dataE() const {
   // Is the data in the mrulist?
   auto eData = mru->findE(thread, this->m_specNo);
 
-  if (eData == nullptr) {
-    // Create the MRU object
-    eData = new TypeWithMarker<HistogramData::CountStandardDeviations>(
-        this->m_specNo, this->m_lockedMRU);
+  if (!eData) {
+    eData = HistogramData::CountStandardDeviations(0);
 
     // Now use that to get E -- Y values are generated from another function
     MantidVec Y_ignored;
-    this->generateHistogram(readX(), Y_ignored, eData->m_data.mutableRawData());
+    this->generateHistogram(readX(), Y_ignored, eData.mutableRawData());
 
     // Lets save it in the MRU
-    mru->insertE(thread, eData);
+    mru->insertE(thread, eData, this->m_specNo, this->m_lockedMRU);
   }
-  return eData->m_data.rawData();
+  return eData.rawData();
 }
 
 // --------------------------------------------------------------------------
