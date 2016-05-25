@@ -498,7 +498,7 @@ bool Table::muParserCalculate(int col, int startRow, int endRow,
   connect(mup, SIGNAL(print(const QString &)), scriptingEnv(),
           SIGNAL(print(const QString &)));
 
-  double *r = mup->defineVariable("i");
+  double *r = mup->defineVariable("i", 1.0);
   mup->defineVariable("j", (double)col);
   mup->defineVariable("sr", startRow + 1.0);
   mup->defineVariable("er", endRow + 1.0);

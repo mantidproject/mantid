@@ -26,10 +26,6 @@ add_definitions ( -D_SCL_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_WARNINGS )
 #           work with wstring
 set ( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP /w34296 /w34389 /Zc:wchar_t-" )
 
-# As discussed here: http://code.google.com/p/googletest/issues/detail?id=412
-# gtest requires changing the _VARAIDIC_MAX value for VS2012 as it defaults to 5
-add_definitions ( -D_variadic_max=10 )
-
 # Set PCH heap limit, the default does not work when running msbuild from the commandline for some reason
 # Any other value lower or higher seems to work but not the default. It it is fine without this when compiling
 # in the GUI though...

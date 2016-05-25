@@ -100,7 +100,7 @@ void Regroup::exec() {
     }
   }
 
-  outputW->isDistribution(dist);
+  outputW->setDistribution(dist);
 
   // Copy units
   if (outputW->getAxis(0)->unit().get())

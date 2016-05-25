@@ -10,6 +10,7 @@ DEFAULT_RANGE = [6.24, 6.30]
 DEFAULT_MASK_GROUP_DIR = "/SNS/BSS/shared/autoreduce"
 DEFAULT_MASK_FILE = "BASIS_Mask.xml"
 DEFAULT_VANADIUM_ENERGY_RANGE = [-0.0034, 0.0034]  # meV
+DEFAULT_VANADIUM_BINS = [-0.0034, 0.068, 0.0034]  # meV
 
 #pylint: disable=too-many-instance-attributes
 class BASISReduction(PythonAlgorithm):
@@ -26,18 +27,23 @@ class BASISReduction(PythonAlgorithm):
     _overrideMask = None
     _dMask = None
 
-    # class variables related to division by Vanadium (normalization)
-    _doNorm = None  # stores the selected item from normalization_types
-    _normRange = None
-    _norm_run_list = None
-    _normWs = None
-    _normMonWs = None
-
     _run_list = None  # a list of runs, or a list of sets of runs
     _samWs = None
     _samMonWs = None
     _samWsRun = None
     _samSqwWs = None
+
+    def __init__(self):
+        PythonAlgorithm.__init__(self)
+
+        self._normalizeToFirst = False
+        # variables related to division by Vanadium (normalization)
+        self._doNorm = None  # stores the selected item from normalization_types
+        self._normalizationType = None
+        self._normRange = None
+        self._norm_run_list = None
+        self._normWs = None
+        self._normMonWs = None
 
     def category(self):
         return "Inelastic\\Reduction"
@@ -49,7 +55,7 @@ class BASISReduction(PythonAlgorithm):
         return 1
 
     def summary(self):
-        return "This algorithm is meant to temporarily deal with letting BASIS reduce lots of files via Mantid."
+        return "Multiple-file BASIS reduction."
 
     def PyInit(self):
         self._short_inst = "BSS"
@@ -76,6 +82,8 @@ class BASISReduction(PythonAlgorithm):
         self.declareProperty("GroupDetectors", "None",
                              StringListValidator(grouping_type),
                              "Switch for grouping detectors")
+
+        self.declareProperty("NormalizeToFirst", False, "Normalize spectra to intensity of spectrum with lowest Q?")
 
         # Properties setting the division by vanadium
         titleDivideByVanadium = "Normalization by Vanadium"
@@ -111,6 +119,9 @@ class BASISReduction(PythonAlgorithm):
         self._noMonNorm = self.getProperty("NoMonitorNorm").value
         self._maskFile = self.getProperty("MaskFile").value
         self._groupDetOpt = self.getProperty("GroupDetectors").value
+        self._normalizeToFirst = self.getProperty("NormalizeToFirst").value
+        self._normalizeToVanadium = self.getProperty("GroupDetectors").value
+        self._doNorm = self.getProperty("DivideByVanadium").value
 
         datasearch = config["datasearch.searcharchive"]
         if datasearch != "On":
@@ -133,12 +144,13 @@ class BASISReduction(PythonAlgorithm):
         ############################
         ##  Process the Vanadium  ##
         ############################
+
         norm_runs = self.getProperty("NormRunNumbers").value
-        if bool(norm_runs):
+        if self._doNorm and bool(norm_runs):
             if ";" in norm_runs:
                 raise SyntaxError("Normalization does not support run groups")
-            self._doNorm = self.getProperty("NormalizationType").value
-            self.log().information("Divide by Vanadium with normalization" + self._doNorm)
+            self._normalizationType = self.getProperty("NormalizationType").value
+            self.log().information("Divide by Vanadium with normalization" + self._normalizationType)
 
             # The following steps are common to all types of Vanadium normalization
 
@@ -148,7 +160,7 @@ class BASISReduction(PythonAlgorithm):
             self._normWs = self._sum_and_calibrate(norm_set, extra_extension="_norm")
 
             # This rebin integrates counts onto a histogram of a single bin
-            if self._doNorm == "by detectorID":
+            if self._normalizationType == "by detectorID":
                 normRange = self.getProperty("NormWavelengthRange").value
                 self._normRange = [normRange[0], normRange[1]-normRange[0], normRange[1]]
                 api.Rebin(InputWorkspace=self._normWs, OutputWorkspace=self._normWs,
@@ -159,8 +171,10 @@ class BASISReduction(PythonAlgorithm):
                                            OutputWorkspace="BASIS_NORM_MASK")
 
             # additional reduction steps when normalizing by Q slice
-            if self._doNorm == "by Q slice":
-                self._normWs = self._group_and_SofQW(self._normWs, self._etBins, isSample=False)
+            if self._normalizationType == "by Q slice":
+                self._normWs = self._group_and_SofQW(self._normWs,
+                                                     DEFAULT_VANADIUM_BINS,
+                                                     isSample=False)
 
         ##########################
         ##  Process the sample  ##
@@ -175,23 +189,21 @@ class BASISReduction(PythonAlgorithm):
                 api.MaskDetectors(Workspace=self._samWs,
                                   MaskedWorkspace='BASIS_NORM_MASK')
             # Divide by Vanadium
-            if self._doNorm == "by detector ID":
+            if self._normalizationType == "by detector ID":
                 api.Divide(LHSWorkspace=self._samWs, RHSWorkspace=self._normWs,
                            OutputWorkspace=self._samWs)
             # additional reduction steps
             self._samSqwWs = self._group_and_SofQW(self._samWs, self._etBins, isSample=True)
             # Divide by Vanadium
-            if self._doNorm == "by Q slice":
-                api.Integration(InputWorkspace=self._normWs, OutputWorkspace=self._normWs,
-                                RangeLower=DEFAULT_VANADIUM_ENERGY_RANGE[0],
-                                RangeUpper=DEFAULT_VANADIUM_ENERGY_RANGE[1])
+            if self._normalizationType == "by Q slice":
                 api.Divide(LHSWorkspace=self._samSqwWs, RHSWorkspace=self._normWs,
                            OutputWorkspace=self._samSqwWs)
             # Clear mask from reduced file. Needed for binary operations
             # involving this S(Q,w)
             api.ClearMaskFlag(Workspace=self._samSqwWs)
             # Scale so that elastic line has Y-values ~ 1
-            self._ScaleY(self._samSqwWs)
+            if self._normalizeToFirst:
+                self._ScaleY(self._samSqwWs)
             # Output Dave and Nexus files
             extension = "_divided.dat" if self._doNorm else ".dat"
             dave_grp_filename = self._makeRunName(self._samWsRun,
@@ -320,6 +332,8 @@ class BASISReduction(PythonAlgorithm):
     def _group_and_SofQW(self, wsName, etRebins, isSample=True):
         """ Transforms from wavelength and detector ID to S(Q,E)
         @param wsName: workspace as a function of wavelength and detector id
+        @param etRebins: final energy domain and bin width
+        @param isSample: discriminates between sample and vanadium
         @return: S(Q,E)
         """
         api.ConvertUnits(InputWorkspace=wsName,

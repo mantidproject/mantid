@@ -7,7 +7,7 @@
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/UserCatalogInfo.h"
 #include "MantidQtCustomInterfaces/ProgressableView.h"
-#include "MantidQtCustomInterfaces/Reflectometry/IReflTablePresenter.h"
+#include "MantidQtCustomInterfaces/Reflectometry/DataProcessorPresenter.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ProgressPresenter.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflCatalogSearcher.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflLegacyTransferStrategy.h"
@@ -28,8 +28,9 @@ using namespace Mantid::Kernel;
 namespace MantidQt {
 namespace CustomInterfaces {
 ReflMainViewPresenter::ReflMainViewPresenter(
-    ReflMainView *mainView, IReflTablePresenter *tablePresenter,
-    ProgressableView *progressView, boost::shared_ptr<IReflSearcher> searcher)
+    ReflMainView *mainView, ProgressableView *progressView,
+    boost::shared_ptr<DataProcessorPresenter> tablePresenter,
+    boost::shared_ptr<IReflSearcher> searcher)
     : m_view(mainView), m_tablePresenter(tablePresenter),
       m_progressView(progressView), m_searcher(searcher) {
 
@@ -116,12 +117,12 @@ void ReflMainViewPresenter::pushCommands() {
   const size_t rowCommStart = 10;
   // We want to have two menus
   // Populate the "Reflectometry" menu
-  std::vector<ReflCommand_uptr> tableCommands;
+  std::vector<DataProcessorCommand_uptr> tableCommands;
   for (size_t i = 0; i < rowCommStart; i++)
     tableCommands.push_back(std::move(commands[i]));
   m_view->setTableCommands(std::move(tableCommands));
   // Populate the "Edit" menu
-  std::vector<ReflCommand_uptr> rowCommands;
+  std::vector<DataProcessorCommand_uptr> rowCommands;
   for (size_t i = rowCommStart; i < nCommands; i++)
     rowCommands.push_back(std::move(commands[i]));
   m_view->setRowCommands(std::move(rowCommands));

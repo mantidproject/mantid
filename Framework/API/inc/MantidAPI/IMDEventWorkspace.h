@@ -44,7 +44,7 @@ public:
 
   /// Get the minimum extents that hold the data
   virtual std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>>
-  getMinimumExtents(size_t depth = 2) = 0;
+  getMinimumExtents(size_t depth = 2) const = 0;
 
   /// Returns some information about the box controller, to be displayed in the
   /// GUI, for example
@@ -58,6 +58,9 @@ public:
 
   /// @return true if the workspace is file-backed
   virtual bool isFileBacked() const = 0;
+
+  /// set filebacked on the contained box
+  virtual void setFileBacked() = 0;
 
   /// Split the top-level MDBox into a MDGridBox.
   virtual void splitBox() = 0;

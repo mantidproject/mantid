@@ -126,6 +126,17 @@ public:
 
     TSM_ASSERT_EQUALS("Radius should be taken to be the max of the ABC radii",
                       3.0, shape.radius());
+    TSM_ASSERT_EQUALS(
+        "Radius should be taken to be the max of the ABC radii", 3.0,
+        shape.radius(Mantid::Geometry::PeakShape::RadiusType::Radius));
+    TSM_ASSERT_EQUALS(
+        "Radius should be taken to be the max of the ABC BackgroundInner radii",
+        3.0,
+        shape.radius(Mantid::Geometry::PeakShape::RadiusType::InnerRadius));
+    TSM_ASSERT_EQUALS(
+        "Radius should be taken to be the max of the ABC BackgroundOuter radii",
+        3.0,
+        shape.radius(Mantid::Geometry::PeakShape::RadiusType::OuterRadius));
   }
 
   void test_shape_name() {

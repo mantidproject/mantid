@@ -17,6 +17,16 @@ namespace {
 Mantid::Kernel::Logger g_log("H5Util");
 
 const std::string NX_ATTR_CLASS("NX_class");
+
+H5::DataSet writeScalarStrDataSet(Group &group, const std::string &name,
+                                  const std::string &value) {
+  StrType dataType(0, value.length() + 1);
+  DataSpace dataSpace = getDataSpace(1);
+  H5::DataSet data = group.createDataSet(name, dataType, dataSpace);
+  data.write(value, dataType);
+  return data;
+}
+
 } // anonymous
 
 // -------------------------------------------------------------------
@@ -85,19 +95,26 @@ DSetCreatPropList setCompressionAttributes(const std::size_t length,
   return propList;
 }
 
-void writeStrAttribute(Group &location, const std::string &name,
+template <typename LocationType>
+void writeStrAttribute(LocationType &location, const std::string &name,
                        const std::string &value) {
   StrType attrType(0, H5T_VARIABLE);
   DataSpace attrSpace(H5S_SCALAR);
-  auto groupAttr = location.createAttribute(name, attrType, attrSpace);
-  groupAttr.write(attrType, value);
+  auto attribute = location.createAttribute(name, attrType, attrSpace);
+  attribute.write(attrType, value);
 }
 
 void write(Group &group, const std::string &name, const std::string &value) {
-  StrType dataType(0, value.length() + 1);
-  DataSpace dataSpace = getDataSpace(1);
-  H5::DataSet data = group.createDataSet(name, dataType, dataSpace);
-  data.write(value, dataType);
+  writeScalarStrDataSet(group, name, value);
+}
+
+void writeWithStrAttributes(
+    H5::Group &group, const std::string &name, const std::string &value,
+    const std::map<std::string, std::string> &attributes) {
+  auto data = writeScalarStrDataSet(group, name, value);
+  for (const auto &attribute : attributes) {
+    writeStrAttribute(data, attribute.first, attribute.second);
+  }
 }
 
 template <typename NumT>
@@ -142,6 +159,15 @@ std::string readString(H5::Group &group, const std::string &name) {
 std::string readString(H5::DataSet &dataset) {
   std::string value;
   dataset.read(value, dataset.getDataType(), dataset.getSpace());
+  return value;
+}
+
+template <typename LocationType>
+std::string readAttributeAsString(LocationType &location,
+                                  const std::string &attributeName) {
+  auto attribute = location.openAttribute(attributeName);
+  std::string value;
+  attribute.read(attribute.getDataType(), value);
   return value;
 }
 
@@ -213,6 +239,26 @@ template <typename NumT> std::vector<NumT> readArray1DCoerce(DataSet &dataset) {
   // not a supported type
   throw DataTypeIException();
 }
+
+// -------------------------------------------------------------------
+// instantiations for writeStrAttribute
+// -------------------------------------------------------------------
+template MANTID_DATAHANDLING_DLL void
+writeStrAttribute(H5::Group &location, const std::string &name,
+                  const std::string &value);
+
+template MANTID_DATAHANDLING_DLL void
+writeStrAttribute(H5::DataSet &location, const std::string &name,
+                  const std::string &value);
+
+// -------------------------------------------------------------------
+// instantiations for readAttributeAsString
+// -------------------------------------------------------------------
+template MANTID_DATAHANDLING_DLL std::string
+readAttributeAsString(H5::Group &location, const std::string &attributeName);
+
+template MANTID_DATAHANDLING_DLL std::string
+readAttributeAsString(H5::DataSet &location, const std::string &attributeName);
 
 // -------------------------------------------------------------------
 // instantiations for writeArray1D
