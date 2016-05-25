@@ -42,7 +42,7 @@ Object::Object() : Object("") {}
 *  @param shapeXML : string with original shape xml.
 */
 Object::Object(const std::string &shapeXML)
-    : TopRule(), m_boundingBox(), AABBxMax(0), AABByMax(0), AABBzMax(0),
+    : TopRule(nullptr), m_boundingBox(), AABBxMax(0), AABByMax(0), AABBzMax(0),
       AABBxMin(0), AABByMin(0), AABBzMin(0), boolBounded(false), ObjNum(0),
       handle(), bGeometryCaching(false),
       vtkCacheReader(boost::shared_ptr<vtkGeometryCacheReader>()),

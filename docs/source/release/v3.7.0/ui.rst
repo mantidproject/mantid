@@ -102,7 +102,7 @@ Scripting Window
 ################
 
 - If `MantidPlot` was launched with the `-x` option but the script was already opened by the recent files list then
-  the wrong script would be executed. This bug has been fixed. `#15682 <https://github.com/mantidproject/mantid/issue/15682>`_
+  the wrong script would be executed. This bug has been fixed. `#15682 <https://github.com/mantidproject/mantid/issues/15682>`_
 
 Documentation
 #############

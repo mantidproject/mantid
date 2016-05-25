@@ -159,7 +159,7 @@ TextDialog::TextDialog(TextType type, QWidget* parent, Qt::WFlags fl)
   */
 
   textEditBox = new QTextEdit();
-  textEditBox->setTextFormat(Qt::PlainText);
+  textEditBox->setAcceptRichText(false);
   textEditBox->setFont(QFont());
 
   formatButtons =  new TextFormatButtons(textEditBox, TextFormatButtons::AxisLabel);
@@ -263,7 +263,7 @@ void TextDialog::apply()
 		QColor c = backgroundBtn->color();
 		c.setAlpha(boxBackgroundTransparency->value());
 
-		d_legend->setText(textEditBox->text());
+		d_legend->setText(textEditBox->toPlainText());
 		if (boxApplyToAll->isChecked())
 			formatAllLabels();
 		else {

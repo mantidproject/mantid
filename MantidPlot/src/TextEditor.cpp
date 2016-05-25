@@ -108,26 +108,26 @@ void TextEditor::closeEvent(QCloseEvent *e)
     if (g) {
       QString s = QString();
       if (auto legend = dynamic_cast<LegendWidget*>(d_target)){
-        s = text();
+        s = toPlainText();
         legend->setText(s);
         d_target->show();
         g->setSelectedText(NULL);
       } else if (auto pieLabel = dynamic_cast<PieLabel*>(d_target)){
-        s = text();
+        s = toPlainText();
         pieLabel->setCustomText(s);
         d_target->show();
         g->setSelectedText(NULL);
-      } else if (d_target->isA("QwtTextLabel")){
+      } else if (QString(d_target->metaObject()->className()) == "QwtTextLabel"){
         QwtText title = g->plotWidget()->title();
-        s = text();
+        s = toPlainText();
         if(s.isEmpty())
           s = " ";
         title.setText(s);			
         g->plotWidget()->setTitle(title);
-      } else if (d_target->isA("QwtScaleWidget")){
+      } else if (QString(d_target->metaObject()->className()) == "QwtScaleWidget"){
         QwtScaleWidget *scale = (QwtScaleWidget*)d_target;
         QwtText title = scale->title();
-        s = text();
+        s = toPlainText();
         if(s.isEmpty())
           s = " ";
         title.setText(s);

@@ -1,4 +1,4 @@
-# 
+#
 # This module attempts to find the Python Sphinx
 # documentation generator
 #
@@ -12,7 +12,7 @@
 #=============================================================
 
 find_program( SPHINX_EXECUTABLE NAME sphinx-build.cmd sphinx-build
-  PATHS ${CMAKE_LIBRARY_PATH}/python2.7/Scripts
+  PATHS ${CMAKE_LIBRARY_PATH}/python${PYTHON_MAJOR_VERSION}.${PYTHON_MINOR_VERSION}/Scripts
   PATH_SUFFIXES bin
   DOC "Sphinx documentation generator"
 )

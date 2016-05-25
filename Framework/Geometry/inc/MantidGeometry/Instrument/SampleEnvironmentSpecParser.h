@@ -61,9 +61,9 @@ private:
   void parseMaterials(Poco::XML::Element *element);
   void parseAndAddComponents(SampleEnvironmentSpec *spec,
                              Poco::XML::Element *element) const;
-  void parseAndAddCans(SampleEnvironmentSpec *spec,
-                       Poco::XML::Element *element) const;
-  Can_const_sptr parseCan(Poco::XML::Element *element) const;
+  void parseAndAddContainers(SampleEnvironmentSpec *spec,
+                             Poco::XML::Element *element) const;
+  Container_const_sptr parseContainer(Poco::XML::Element *element) const;
   template <typename ObjectType>
   boost::shared_ptr<ObjectType>
   parseComponent(Poco::XML::Element *element) const;

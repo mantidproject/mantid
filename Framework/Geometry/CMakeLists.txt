@@ -43,7 +43,7 @@ set ( SRC_FILES
 	src/Crystal/V3R.cpp
 	src/IObjComponent.cpp
 	src/Instrument.cpp
-	src/Instrument/Can.cpp
+	src/Instrument/Container.cpp
 	src/Instrument/CompAssembly.cpp
 	src/Instrument/Component.cpp
 	src/Instrument/ComponentHelper.cpp
@@ -197,7 +197,7 @@ set ( INC_FILES
 	inc/MantidGeometry/IDetector_fwd.h
 	inc/MantidGeometry/IObjComponent.h
 	inc/MantidGeometry/Instrument.h
-	inc/MantidGeometry/Instrument/Can.h
+	inc/MantidGeometry/Instrument/Container.h
 	inc/MantidGeometry/Instrument/CompAssembly.h
 	inc/MantidGeometry/Instrument/Component.h
 	inc/MantidGeometry/Instrument/ComponentHelper.h
@@ -305,7 +305,7 @@ set ( TEST_FILES
 	BraggScattererFactoryTest.h
 	BraggScattererInCrystalStructureTest.h
 	BraggScattererTest.h
-	CanTest.h
+	ContainerTest.h
 	CenteringGroupTest.h
 	CompAssemblyTest.h
 	ComponentHelperTest.h
@@ -442,7 +442,7 @@ endif(UNITY_BUILD)
 
 # ===================== Open Cascade ===================
 if (ENABLE_OPENCASCADE)
-  set (SRC_FILES ${SRC_FILES} ${OPENCASCADE_SRC} )
+  LIST (APPEND SRC_FILES ${OPENCASCADE_SRC} )
 endif ()
 
 # A few defines needed for OpenCascade on the Mac
