@@ -19,6 +19,7 @@ using namespace Mantid::Geometry;
 using namespace Mantid::API;
 using HistogramData::Counts;
 using HistogramData::CountStandardDeviations;
+using WorkspaceCreationHelper::Create2DWorkspaceBinned;
 
 class Workspace2DTest : public CxxTest::TestSuite {
 public:
@@ -34,26 +35,6 @@ public:
     nbins = 5;
     nhist = 10;
     ws = Create2DWorkspaceBinned(nhist, nbins);
-  }
-
-  static Workspace2D_sptr Create2DWorkspaceBinned(int nhist, int nbins,
-                                                  double x0 = 0.0,
-                                                  double deltax = 1.0) {
-    auto x = Kernel::make_cow<HistogramData::HistogramX>(nbins + 1);
-    Counts y(nbins, 2);
-    CountStandardDeviations e(nbins, M_SQRT2);
-    for (int i = 0; i < nbins + 1; ++i) {
-      x.access()[i] = x0 + i * deltax;
-    }
-    Workspace2D_sptr retVal(new Workspace2D());
-    retVal->initialize(nhist, nbins + 1, nbins);
-    for (int i = 0; i < nhist; i++) {
-      retVal->setX(i, x);
-      retVal->setCounts(i, y);
-      retVal->setCountStandardDeviations(i, e);
-    }
-
-    return retVal;
   }
 
   void testClone() {
@@ -94,8 +75,7 @@ public:
 
   void testSetX() {
     double aNumber = 5.3;
-    boost::shared_ptr<HistogramData::HistogramX> v =
-        boost::make_shared<HistogramData::HistogramX>(nbins, aNumber);
+    auto v = boost::make_shared<HistogramData::HistogramX>(nbins + 1, aNumber);
     TS_ASSERT_THROWS_NOTHING(ws->setX(0, v));
     TS_ASSERT_EQUALS(ws->dataX(0)[0], aNumber);
     TS_ASSERT_THROWS(ws->setX(-1, v), std::range_error);
@@ -104,7 +84,7 @@ public:
 
   void testSetX_cowptr() {
     double aNumber = 5.4;
-    auto v = Kernel::make_cow<HistogramData::HistogramX>(nbins, aNumber);
+    auto v = Kernel::make_cow<HistogramData::HistogramX>(nbins + 1, aNumber);
     TS_ASSERT_THROWS_NOTHING(ws->setX(0, v));
     TS_ASSERT_EQUALS(ws->dataX(0)[0], aNumber);
     TS_ASSERT_THROWS(ws->setX(-1, v), std::range_error);
