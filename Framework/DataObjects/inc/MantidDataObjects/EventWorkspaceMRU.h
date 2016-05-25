@@ -24,8 +24,6 @@ public:
   /**
    * Constructor.
    * @param the_index :: unique index into the workspace of this data
-   * @param locked :: reference to a bool that will be set to true if
-   *        the marker should NOT be deleted
    */
   MantidVecWithMarker(const size_t the_index) : m_index(the_index) {}
 
