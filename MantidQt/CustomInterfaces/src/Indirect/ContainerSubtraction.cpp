@@ -397,6 +397,19 @@ void ContainerSubtraction::postProcessComplete(bool error) {
 
   if (plotType == "Contour" || plotType == "Both")
     plot2D(QString::fromStdString(m_pythonExportWsName));
+
+  // Clean up unwanted workspaces
+  IAlgorithm_sptr deleteAlg =
+      AlgorithmManager::Instance().create("DeleteWorkspace");
+  deleteAlg->initialize();
+  deleteAlg->setProperty("Workspace", "__algorithm_can");
+  deleteAlg->execute();
+  const auto conv =
+      AnalysisDataService::Instance().doesExist("__algorithm_can_Wavelength");
+  if (conv) {
+    deleteAlg->setProperty("Workspace", "__algorithm_can_Wavelength");
+    deleteAlg->execute();
+  }
 }
 
 /**
