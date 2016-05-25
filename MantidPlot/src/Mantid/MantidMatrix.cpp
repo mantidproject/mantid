@@ -845,7 +845,7 @@ bool MantidMatrix::setSelectedColumns() {
 }
 
 void MantidMatrix::dependantClosed(MdiSubWindow *w) {
-  if (w->metaObject()->className() == "Table") {
+  if (strcmp(w->metaObject()->className(), "Table") == 0) {
     QMap<MultiLayer *, Table *>::iterator itr;
     for (itr = m_plots1D.begin(); itr != m_plots1D.end(); ++itr) {
       if (itr.value() == dynamic_cast<Table *>(w)) {
@@ -853,7 +853,7 @@ void MantidMatrix::dependantClosed(MdiSubWindow *w) {
         break;
       }
     }
-  } else if (w->metaObject()->className() == "MultiLayer") {
+  } else if (strcmp(w->metaObject()->className(), "MultiLayer") == 0) {
     int i = m_plots2D.indexOf(dynamic_cast<MultiLayer *>(w));
     if (i >= 0)
       m_plots2D.remove(i);
