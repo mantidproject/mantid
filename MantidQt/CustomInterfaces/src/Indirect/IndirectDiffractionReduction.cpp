@@ -487,10 +487,6 @@ void IndirectDiffractionReduction::instrumentSelected(
   double specMin = instrument->getNumberParameter("spectra-min")[0];
   double specMax = instrument->getNumberParameter("spectra-max")[0];
 
-  if (instrumentName == "OSIRIS" && reflectionName == "diffspec") {
-	  specMax = 15;
-  }
-
   m_uiForm.spSpecMin->setValue(static_cast<int>(specMin));
   m_uiForm.spSpecMax->setValue(static_cast<int>(specMax));
 
