@@ -971,7 +971,6 @@ void ApplicationWindow::initToolBars() {
   btnCursor->setActionGroup(dataTools);
   btnCursor->setCheckable(true);
   btnCursor->setIcon(QIcon(getQPixmap("select_xpm")));
-  // plotTools->addAction(btnCursor); disabled until fixed (#2783)
   btnPicker = new QAction(tr("S&creen Reader"), this);
   btnPicker->setActionGroup(dataTools);
   btnPicker->setCheckable(true);
@@ -982,21 +981,18 @@ void ApplicationWindow::initToolBars() {
   actionDrawPoints->setActionGroup(dataTools);
   actionDrawPoints->setCheckable(true);
   actionDrawPoints->setIcon(QIcon(getQPixmap("draw_points_xpm")));
-  // plotTools->addAction(actionDrawPoints); disabled until fixed (#2783)
 
   btnMovePoints = new QAction(tr("&Move Data Points..."), this);
   btnMovePoints->setShortcut(tr("Ctrl+ALT+M"));
   btnMovePoints->setActionGroup(dataTools);
   btnMovePoints->setCheckable(true);
   btnMovePoints->setIcon(QIcon(getQPixmap("hand_xpm")));
-  // plotTools->addAction(btnMovePoints); disabled until fixed (#2783)
 
   btnRemovePoints = new QAction(tr("Remove &Bad Data Points..."), this);
   btnRemovePoints->setShortcut(tr("Alt+B"));
   btnRemovePoints->setActionGroup(dataTools);
   btnRemovePoints->setCheckable(true);
   btnRemovePoints->setIcon(QIcon(getQPixmap("gomme_xpm")));
-  // plotTools->addAction(btnRemovePoints); disabled until fixed (#2783)
 
   if (mantidUI->fitFunctionBrowser()) {
     btnMultiPeakPick = new QAction(tr("Select Multiple Peaks..."), this);
