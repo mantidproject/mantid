@@ -769,9 +769,6 @@ public slots:
   void showColorMapDialog();
   //@}
 
-  void translateCurveHor();
-  void translateCurveVert();
-
   //! Removes the curve identified by a key stored in the data() of actionRemoveCurve.
   void removeCurve();
   void hideCurve();
@@ -1404,7 +1401,7 @@ private:
   QAction *actionLowPassFilter, *actionHighPassFilter, *actionBandPassFilter, *actionBandBlockFilter;
   QAction *actionSortTable, *actionSortSelection, *actionNormalizeSelection;
   QAction *actionNormalizeTable, *actionConvolute, *actionDeconvolute, *actionCorrelate, *actionAutoCorrelate;
-  QAction *actionTranslateHor, *actionTranslateVert, *actionSetAscValues, *actionSetRandomValues;
+  QAction *actionSetAscValues, *actionSetRandomValues;
   QAction *actionSetXCol, *actionSetYCol, *actionSetZCol, *actionSetLabelCol, *actionDisregardCol, *actionSetXErrCol, *actionSetYErrCol;
   QAction *actionBoxPlot, *actionMultiPeakGauss, *actionMultiPeakLorentz, *actionCheckUpdates;
   QAction *actionDonate, *actionHomePage, *actionDownloadManual, *actionTechnicalSupport, *actionTranslations;
