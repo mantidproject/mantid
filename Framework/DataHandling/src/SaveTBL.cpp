@@ -90,8 +90,9 @@ void SaveTBL::exec() {
                                                     "will not be saved.");
           else
             throw std::runtime_error(
-                "Saving TBL unsuccessful, please check the " + groupHeading +
-                " column is of type int");
+                "Saving TBL was unsuccessful, " + groupHeading +
+                " column must be of type \"int\". Removal of " + filename +
+                " failed, please check that this file exists.");
         } else
           writeVal<int>(row.Int(columnIndex), file);
       } else if (ws->getColumn(columnIndex)->type() != "str") {
