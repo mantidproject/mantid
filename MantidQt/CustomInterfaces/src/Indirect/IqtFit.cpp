@@ -657,10 +657,13 @@ void IqtFit::propertyChanged(QtProperty *prop, double val) {
 }
 
 void IqtFit::plotGuessChanged(bool checked) {
-  if (!checked)
+  if (!checked) {
     m_uiForm.ppPlot->removeSpectrum("Guess");
-  else
+  } else {
+    m_uiForm.ppPlot->removeSpectrum("Fit");
+    m_uiForm.ppPlot->removeSpectrum("Diff");
     plotGuess(NULL);
+  }
 }
 
 void IqtFit::checkBoxUpdate(QtProperty *prop, bool checked) {
