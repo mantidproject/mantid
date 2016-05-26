@@ -10506,7 +10506,7 @@ void ApplicationWindow::showHelp() {
             "www.mantidproject.org/MantidPlot:_Help</a></p>");
     return;
   }
-
+  
 }
 
 void ApplicationWindow::showPlotWizard() {
