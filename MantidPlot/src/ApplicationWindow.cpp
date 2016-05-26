@@ -13356,17 +13356,11 @@ void ApplicationWindow::translateActionsStrings() {
   actionAbout->setText(tr("&About MantidPlot")); // Mantid
   actionAbout->setShortcut(tr("F1"));
 
-  // actionShowHelp->setMenuText(tr("&Help"));
-  // actionShowHelp->setShortcut(tr("Ctrl+H"));
-
   actionMantidConcepts->setText(tr("&Mantid Concepts"));
 
   actionMantidAlgorithms->setText("&Algorithm Descriptions");
 
   actionmantidplotHelp->setText("&MantidPlot Help");
-
-  // actionChooseHelpFolder->setMenuText(tr("&Choose Help Folder..."));
-  // actionRename->setMenuText(tr("&Rename Window"));
 
   actionCloseWindow->setText(tr("Close &Window"));
   actionCloseWindow->setShortcut(tr("Ctrl+W"));
@@ -13522,9 +13516,6 @@ void ApplicationWindow::translateActionsStrings() {
   btnLine->setToolTip(tr("Draw Line"));
 
   // FIXME: is setText necessary for action groups?
-  //	coord->setText( tr( "Coordinates" ) );
-  //	coord->setMenuText( tr( "&Coord" ) );
-  //  coord->setStatusTip( tr( "Coordinates" ) );
   Box->setText(tr("Box"));
   Box->setMenuText(tr("Box"));
   Box->setToolTip(tr("Box"));
@@ -13577,9 +13568,6 @@ void ApplicationWindow::translateActionsStrings() {
   crossHairStyle->setToolTip(tr("Crosshairs"));
   crossHairStyle->setStatusTip(tr("Crosshairs"));
 
-  // floorstyle->setText( tr( "Floor Style" ) );
-  // floorstyle->setMenuText( tr( "Floor Style" ) );
-  // floorstyle->setStatusTip( tr( "Floor Style" ) );
   floordata->setText(tr("Floor Data Projection"));
   floordata->setToolTip(tr("Floor data projection"));
   floordata->setStatusTip(tr("Floor data projection"));
@@ -14188,7 +14176,6 @@ void ApplicationWindow::showHomePage() {
   QDesktopServices::openUrl(QUrl("http://www.mantidproject.org"));
 }
 void ApplicationWindow::showMantidConcepts() {
-  // QDesktopServices::openUrl(QUrl("http://www.mantidproject.org/Category:Concepts"));
   HelpWindow::showConcept(this);
 }
 void ApplicationWindow::showalgorithmDescriptions() {
@@ -14754,7 +14741,6 @@ void ApplicationWindow::projectProperties() {
       new QMessageBox(tr("Properties"), s, QMessageBox::NoIcon, QMessageBox::Ok,
                       QMessageBox::NoButton, QMessageBox::NoButton, this);
 
-  // mbox->setIconPixmap(QPixmap( qtiplot_logo_xpm ));
   mbox->show();
 }
 
@@ -14774,9 +14760,7 @@ void ApplicationWindow::folderProperties() {
        tr("windows");
   s += ", " + QString::number(currentFolder()->subfolders().count()) + " " +
        tr("folders") + "\n\n";
-  // s += "\n\n\n";
   s += tr("Created") + ": " + currentFolder()->birthDate() + "\n\n";
-  // s += tr("Modified") + ": " + currentFolder()->modificationDate() + "\n\n";
 
   QMessageBox *mbox =
       new QMessageBox(tr("Properties"), s, QMessageBox::NoIcon, QMessageBox::Ok,
@@ -15000,8 +14984,6 @@ bool ApplicationWindow::changeFolder(Folder *newFolder, bool force) {
       else if (w->status() == MdiSubWindow::Maximized)
         w->setMaximized();
     }
-    // else
-    //  w->setStatus(MdiSubWindow::Hidden);
 
     addListViewItem(w);
   }
