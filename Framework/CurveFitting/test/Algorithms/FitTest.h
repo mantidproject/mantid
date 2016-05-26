@@ -406,6 +406,41 @@ public:
     TS_ASSERT_DELTA(func->getParameter("Delta"), 0.16, 0.001);
     TS_ASSERT_DELTA(func->getParameter("Lambda"), 0.1, 0.001);
   }
+
+  void test_function_StaticKuboToyabeTimesGausDecay() {
+
+    // Mock data
+    int ndata = 15;
+    API::MatrixWorkspace_sptr ws = API::WorkspaceFactory::Instance().create(
+        "Workspace2D", 1, ndata, ndata);
+    Mantid::MantidVec &x = ws->dataX(0);
+    Mantid::MantidVec &y = ws->dataY(0);
+    Mantid::MantidVec &e = ws->dataE(0);
+    for (int i = 0; i < ndata; i++) {
+      x[i] = static_cast<double>(i);
+      e[i] = 1.0;
+    }
+    // A = 0.24, Delta = 0.16, Sigma = 0.1
+    y = {0.24,       0.231594,   0.207961,   0.173407,   0.133761,
+         0.0948783,  0.0613345,  0.035692,   0.0184429,  0.0084925,
+         0.00390022, 0.00258855, 0.00283237, 0.00347216, 0.00390132};
+
+    Fit fit;
+    fit.initialize();
+    fit.setProperty("Function", "name=StaticKuboToyabeTimesGausDecay");
+    fit.setProperty("InputWorkspace", ws);
+    fit.execute();
+
+    // Test the goodness of the fit
+    double chi2 = fit.getProperty("OutputChi2overDoF");
+    TS_ASSERT_DELTA(chi2, 0.0001, 0.0001);
+
+    // Test the fitting parameters
+    IFunction_sptr func = fit.getProperty("Function");
+    TS_ASSERT_DELTA(func->getParameter("A"), 0.24, 0.0001);
+    TS_ASSERT_DELTA(func->getParameter("Delta"), 0.16, 0.001);
+    TS_ASSERT_DELTA(func->getParameter("Sigma"), 0.1, 0.001);
+  }
 };
 
 class FitTestPerformance : public CxxTest::TestSuite {
