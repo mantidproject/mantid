@@ -283,6 +283,54 @@ public:
                     0.01);                                    // Period of 8
     TS_ASSERT_DELTA(func->getParameter("Phi"), M_PI_4, 0.01); // 45 degrees
   }
+
+  void test_function_GausDecay() {
+
+    // Mock data
+    int ndata = 20;
+    API::MatrixWorkspace_sptr ws = API::WorkspaceFactory::Instance().create(
+        "Workspace2D", 1, ndata, ndata);
+    Mantid::MantidVec &x = ws->dataX(0);
+    Mantid::MantidVec &y = ws->dataY(0);
+    Mantid::MantidVec &e = ws->dataE(0);
+    for (int i = 0; i < ndata; i++) {
+      x[i] = static_cast<double>(i - 8);
+      e[i] = 1.0;
+    }
+    y[0] = 0.01;
+    y[1] = 0.16;
+    y[2] = 1.2;
+    y[3] = 5.6;
+    y[4] = 18.2;
+    y[5] = 43.68;
+    y[6] = 80.08;
+    y[7] = 114.4;
+    y[8] = 128.7;
+    y[9] = 114.4;
+    y[10] = 80.08;
+    y[11] = 43.68;
+    y[12] = 18.2;
+    y[13] = 5.6;
+    y[14] = 1.2;
+    y[15] = 0.16;
+    y[16] = 0.01;
+    y[17] = 0.00;
+
+    Fit fit;
+    fit.initialize();
+    fit.setProperty("Function", "name=GausDecay");
+    fit.setProperty("InputWorkspace", ws);
+    fit.execute();
+
+    // Test the goodness of the fit
+    double chi2 = fit.getProperty("OutputChi2overDoF");
+    TS_ASSERT_DELTA(chi2, 0.0, 1.0);
+
+    // Test the fitting parameters
+    IFunction_sptr func = fit.getProperty("Function");
+    TS_ASSERT_DELTA(func->getParameter("A"), 129.194, 0.001);
+    TS_ASSERT_DELTA(func->getParameter("Sigma"), 0.348, 0.001);
+  }
 };
 
 class FitTestPerformance : public CxxTest::TestSuite {
