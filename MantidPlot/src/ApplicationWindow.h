@@ -652,9 +652,9 @@ public slots:
   void fitSigmoidal();
   void fitGauss();
   void fitLorentz();
-  void fitMultiPeak(int profile);
-  void fitMultiPeakGauss();
-  void fitMultiPeakLorentz();
+  //void fitMultiPeak(int profile);
+  //void fitMultiPeakGauss();
+  //void fitMultiPeakLorentz();
   //@}
 
   //! \name Calculus
@@ -1403,7 +1403,7 @@ private:
   QAction *actionNormalizeTable, *actionConvolute, *actionDeconvolute, *actionCorrelate, *actionAutoCorrelate;
   QAction *actionSetAscValues, *actionSetRandomValues;
   QAction *actionSetXCol, *actionSetYCol, *actionSetZCol, *actionSetLabelCol, *actionDisregardCol, *actionSetXErrCol, *actionSetYErrCol;
-  QAction *actionBoxPlot, *actionMultiPeakGauss, *actionMultiPeakLorentz, *actionCheckUpdates;
+  QAction *actionBoxPlot, /**actionMultiPeakGauss, *actionMultiPeakLorentz,*/ *actionCheckUpdates;
   QAction *actionDonate, *actionHomePage, *actionDownloadManual, *actionTechnicalSupport, *actionTranslations;
   QAction *actionHelpForums, *actionHelpBugReports, *actionAskHelp;
   QAction *actionShowPlotDialog, *actionShowScaleDialog;
