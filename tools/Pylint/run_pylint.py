@@ -14,7 +14,7 @@ import sys
 import time
 
 # Default output format
-DEFAULT_PYLINT_FORMAT = 'text'
+DEFAULT_PYLINT_FORMAT = '{msg_id}:{line:3d},{column}: {obj}: {msg}'
 # Exe to call
 DEFAULT_PYLINT_EXE = 'pylint'
 # Default log level
@@ -141,8 +141,7 @@ def parse_arguments(argv):
                            "Default is to simply call 'pylint'")
     parser.add_option("-f", "--format", dest="format", metavar = "FORMAT",
                       help="If provided, use the given format type "\
-                           "[default=%s]. Options are: text, html, msvs, "\
-                           "parseable" % DEFAULT_PYLINT_FORMAT)
+                           "[default=%s]." % DEFAULT_PYLINT_FORMAT)
     parser.add_option("-m", "--mantidpath", dest="mantidpath", metavar="MANTIDPATH",
                       help="If provided, use this as the MANTIDPATH, overriding"
                            "anything that is currently set.")
@@ -225,7 +224,7 @@ def create_dir_if_required(path):
     Arguments:
       path (str): Absolute path to a directory
     """
-    if not os.path.exists(path):
+    if path and not os.path.exists(path):
         os.makedirs(path)
 
 #------------------------------------------------------------------------------
@@ -471,7 +470,7 @@ def build_pylint_cmd(srcpath, options):
       A list of args to pass to subprocess.Popen
     """
     cmd = [options.exe]
-    cmd.extend(["-f", options.format])
+    cmd.extend(["--msg-template=" + options.format])
     if options.rcfile is not None:
         cmd.extend(["--rcfile=" + options.rcfile])
     # and finally, source module

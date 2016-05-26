@@ -76,7 +76,8 @@ fi
 # Need this because some strange control sequences when using default TERM=xterm
 export TERM="linux"
 PYLINT_OUTPUT_DIR=$BUILD_DIR/pylint
-$SCL_ON_RHEL6 "cmake ${CMAKE_GENERATOR} -DCMAKE_BUILD_TYPE=${BUILD_CONFIG} -DENABLE_CPACK=OFF -DMAKE_VATES=OFF -DPYLINT_OUTPUT_FORMAT=parseable -DPYLINT_NTHREADS=$BUILD_THREADS -DPYLINT_OUTPUT_DIR=${PYLINT_OUTPUT_DIR} .."
+PYLINT_FORMAT="{path}:{line}: [{msg_id}({symbol}), {obj}] {msg}"
+$SCL_ON_RHEL6 "cmake ${CMAKE_GENERATOR} -DCMAKE_BUILD_TYPE=${BUILD_CONFIG} -DENABLE_CPACK=OFF -DMAKE_VATES=OFF -DPYLINT_MSG_TEMPLATE=\"${PYLINT_FORMAT}\" -DPYLINT_NTHREADS=$BUILD_THREADS -DPYLINT_OUTPUT_DIR=${PYLINT_OUTPUT_DIR} .."
 
 ###############################################################################
 # Build step (we only need the framework)
