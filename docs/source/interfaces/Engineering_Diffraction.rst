@@ -53,7 +53,8 @@ Calibration
 This tab provides a graphical interface to calculate calibrations and
 visualize them.
 
-It is possible to
+It is possible to:
+
 - generate a new calibration file (which becomes the new current
   calibration)
 - load an existing calibration from a GSAS instrument
@@ -90,6 +91,11 @@ this is found under the home directory rather than `C:`. They are also
 copied into a general (all) output directory:
 `C:/EnginX_Mantid/Calibration` on Windows or
 `~/EnginX_Mantid/Calibration` on other platforms.
+
+The calibration parameters for each bank are made available for user
+inspection in a workspace named
+**engggui_calibration_banks_parameters** which is updated when new
+calibrations are loaded or calculated.
 
 Parameters
 ^^^^^^^^^^
@@ -357,9 +363,11 @@ Output
 
 Once the Fit button has been clicked, wait until the Fitting process has
 completed and upon completion you should be able to view on the Fitting
-tab; the focused workspace plotted in the background in grey crosses.
-Whereas the expected peaks plotted in various colours over lapping the
-focused workspace peaks.
+tab:
+
+- The focused workspace plotted in the background in gray crosses.
+- The expected peaks plotted in various colours over lapping the
+  focused workspace peaks.
 
 Within the :ref:`Preview-Engineering_Diffraction-ref` section user is
 able to zoom-in or zoom-out as well as select, add and save peaks.
@@ -373,6 +381,20 @@ workspaces window:
    so the fitted data can be compared with focused data
 3. The *engggui_fitting_single_peaks* workspace within each workspace
    index representing individual expected peak.
+
+In the plots, the x or abscissa axis is in d-spacing units, which are
+more convenient for peak fitting than time-of-flight. However the run
+files and the focus files are normally stored as time-of-flight
+data. For this reason a conversion from the time-of-flight data to
+d-spacing is required. The conversion is performed using the current
+calibration of banks. The interface handles this internally and adds
+special sample logs to the fitting workspaces
+(*engggui_fitting_single_peaks* and *engggui_fitting_focused_ws*). By
+inspecting the sample logs of these workspaces. The conversion is
+performed using the `GSAS
+<https://subversion.xray.aps.anl.gov/trac/pyGSAS>`__ equations, as
+calculated by the algorithm :ref:`AlignDetectors
+<algm-AlignDetectors>`
 
 .. _Preview-Engineering_Diffraction-ref:
 
@@ -440,7 +462,7 @@ is being refined.
 The Following advanced settings are available to customize the
 behavior of this interface:
 
-Force recalculate
+Force recalculate all existing Vanadium files
   If this is enabled, Vanadium corrections will be recalculated even
   if previous correction results are available for the current Vanadium
   run number. This is not required unless a modification is done to the
