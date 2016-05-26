@@ -182,6 +182,55 @@ public:
     TS_ASSERT_DELTA(func->getParameter("Sigma"), 0.2, 0.001);
     TS_ASSERT_DELTA(func->getParameter("Tau"), 2.0, 0.01);
   }
+
+  void test_function_ExpDecayMuon() {
+
+    // Mock data
+    int ndata = 20;
+    API::MatrixWorkspace_sptr ws = API::WorkspaceFactory::Instance().create(
+        "Workspace2D", 1, ndata, ndata);
+    Mantid::MantidVec &x = ws->dataX(0);
+    Mantid::MantidVec &y = ws->dataY(0);
+    Mantid::MantidVec &e = ws->dataE(0);
+    for (int i = 0; i < ndata; i++) {
+      x[i] = static_cast<double>(i);
+      e[i] = 1.0;
+    }
+    y[0] = 5.0;
+    y[1] = 3.582656552869;
+    y[2] = 2.567085595163;
+    y[3] = 1.839397205857;
+    y[4] = 1.317985690579;
+    y[5] = 0.9443780141878;
+    y[6] = 0.6766764161831;
+    y[7] = 0.484859839322;
+    y[8] = 0.347417256114;
+    y[9] = 0.2489353418393;
+    y[10] = 0.1783699667363;
+    y[11] = 0.1278076660325;
+    y[12] = 0.09157819444367;
+    y[13] = 0.0656186436847;
+    y[14] = 0.04701781275748;
+    y[15] = 0.03368973499543;
+    y[16] = 0.02413974996916;
+    y[17] = 0.01729688668232;
+    y[18] = 0.01239376088333;
+
+    Fit fit;
+    fit.initialize();
+    fit.setProperty("Function", "name=ExpDecayMuon");
+    fit.setProperty("InputWorkspace", ws);
+    fit.execute();
+
+    // Test the goodness of the fit
+    double chi2 = fit.getProperty("OutputChi2overDoF");
+    TS_ASSERT_DELTA(chi2, 0.0001, 0.0001);
+
+    // Test the fitting parameters
+    IFunction_sptr func = fit.getProperty("Function");
+    TS_ASSERT_DELTA(func->getParameter("A"), 5, 0.0001);
+    TS_ASSERT_DELTA(func->getParameter("Lambda"), 0.3333, 0.001);
+  }
 };
 
 class FitTestPerformance : public CxxTest::TestSuite {
