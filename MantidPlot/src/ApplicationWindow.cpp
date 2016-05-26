@@ -13436,12 +13436,7 @@ void ApplicationWindow::translateActionsStrings() {
   actionHomePage->setMenuText(tr("&Mantid Homepage")); // Mantid change
   actionHelpBugReports->setText(tr("Report a &Bug"));
   actionAskHelp->setText(tr("Ask for Help"));
-
-<<<<<<< HEAD
   btnPointer->setText(tr("Selection &Tools"));
-=======
-  btnPointer->setMenuText(tr("Selection &Tools"));
->>>>>>> Re #16326 removed commented out code
   btnPointer->setToolTip(tr("Selection Tools"));
 
   btnZoomIn->setText(tr("&Zoom In"));
