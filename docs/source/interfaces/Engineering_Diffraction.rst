@@ -324,6 +324,8 @@ To use the Fitting tab, user is required to provide:
 2. List of expected peaks which can be either by browsing a (*CSV*) file
    or entering within the text-field simply click on the Fit button.
 
+.. _ExpectedPeaks-Engineering_Diffraction-ref:
+
 Parameters
 ^^^^^^^^^^
 
@@ -344,8 +346,6 @@ Focused Run #:
   of the graph, from where each run number can be selected from by click on it.
   The interface will then automatically update the Plot Bank combo-box
   according to the bank files found for each entered/selected run-number.
-
-.. _ExpectedPeaks-Engineering_Diffraction-ref:
 
 Peaks:
   A list of dSpacing values to be translated into TOF to find expected

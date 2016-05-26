@@ -135,6 +135,7 @@ algorithms that may need to manipulate/use it.
     :width: 650px
     :height: 250px
     :align: center
+
 Usage
 -----
 
