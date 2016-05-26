@@ -28,6 +28,12 @@ ApplyPaalmanPings::ApplyPaalmanPings(QWidget *parent) : CorrectionsTab(parent) {
           SLOT(updateContainer()));
   connect(m_uiForm.spCanShift, SIGNAL(valueChanged(double)), this,
           SLOT(updateContainer()));
+  connect(m_uiForm.ckShiftCan, SIGNAL(toggled(bool)), this,
+          SLOT(updateContainer()));
+  connect(m_uiForm.ckScaleCan, SIGNAL(toggled(bool)), this,
+          SLOT(updateContainer()));
+  connect(m_uiForm.ckUseCan, SIGNAL(toggled(bool)), this,
+          SLOT(updateContainer()));
 
   m_uiForm.spPreviewSpec->setMinimum(0);
   m_uiForm.spPreviewSpec->setMaximum(0);
@@ -83,24 +89,33 @@ void ApplyPaalmanPings::newContainer(const QString &dataName) {
 void ApplyPaalmanPings::updateContainer() {
   const auto canName = m_uiForm.dsContainer->getCurrentDataName();
   const auto canValid = m_uiForm.dsContainer->isValid();
-  if (canValid) {
-    IAlgorithm_sptr scaleX = AlgorithmManager::Instance().create("ScaleX");
-    scaleX->initialize();
-    scaleX->setLogging(false);
-    scaleX->setProperty("InputWorkspace", canName.toStdString());
-    scaleX->setProperty("OutputWorkspace", m_containerWorkspaceName);
-    scaleX->setProperty("Factor", m_uiForm.spCanShift->value());
-    scaleX->setProperty("Operation", "Add");
-    scaleX->execute();
+  const auto useCan = m_uiForm.ckUseCan->isChecked();
+  if (canValid && useCan) {
+    auto shift = m_uiForm.spCanShift->value();
+    if (!m_uiForm.ckShiftCan->isChecked())
+      shift = 0.0;
 
-    IAlgorithm_sptr scale = AlgorithmManager::Instance().create("Scale");
-    scale->initialize();
-    scale->setLogging(false);
-    scale->setProperty("InputWorkspace", m_containerWorkspaceName);
-    scale->setProperty("OutputWorkspace", m_containerWorkspaceName);
-    scale->setProperty("Factor", m_uiForm.spCanScale->value());
-    scale->setProperty("Operation", "Multiply");
-    scale->execute();
+    auto scale = m_uiForm.spCanScale->value();
+    if (!m_uiForm.ckScaleCan->isChecked())
+      scale = 1.0;
+
+    IAlgorithm_sptr scaleXAlg = AlgorithmManager::Instance().create("ScaleX");
+    scaleXAlg->initialize();
+	scaleXAlg->setLogging(false);
+	scaleXAlg->setProperty("InputWorkspace", canName.toStdString());
+	scaleXAlg->setProperty("OutputWorkspace", m_containerWorkspaceName);
+	scaleXAlg->setProperty("Factor", shift);
+	scaleXAlg->setProperty("Operation", "Add");
+	scaleXAlg->execute();
+
+    IAlgorithm_sptr scaleAlg = AlgorithmManager::Instance().create("Scale");
+	scaleAlg->initialize();
+	scaleAlg->setLogging(false);
+	scaleAlg->setProperty("InputWorkspace", m_containerWorkspaceName);
+	scaleAlg->setProperty("OutputWorkspace", m_containerWorkspaceName);
+	scaleAlg->setProperty("Factor", scale);
+	scaleAlg->setProperty("Operation", "Multiply");
+	scaleAlg->execute();
 
     const auto sampleValid = m_uiForm.dsSample->isValid();
     if (sampleValid) {
@@ -114,10 +129,12 @@ void ApplyPaalmanPings::updateContainer() {
       rebin->execute();
     } else {
       // Sample was not valid so do not rebin
+	  m_uiForm.ppPreview->removeSpectrum("Container");
       return;
     }
   } else {
     // Can was not valid so do not replot
+	m_uiForm.ppPreview->removeSpectrum("Container");
     return;
   }
   plotPreview(m_uiForm.spPreviewSpec->value());
