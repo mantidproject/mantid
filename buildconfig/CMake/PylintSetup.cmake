@@ -41,8 +41,10 @@ if ( PYLINT_FOUND )
         scripts/test
         Testing/SystemTests/tests/analysis/reference
   )
-  set ( PYLINT_OUTPUT_DIR ${CMAKE_BINARY_DIR}/bin/Testing )
-  set ( PYLINT_NTHREADS 8 )
+
+  set ( PYLINT_OUTPUT_DIR "" CACHE STRING "Directory used to write the output from each pyint check." )
+  # Choose the number of threads used
+  set ( PYLINT_NTHREADS 8 CACHE STRING "Number of processes used for running pylint" )
 
   add_custom_target ( pylintcheck
                       COMMAND ${PYTHON_EXECUTABLE} ${PYLINT_RUNNER_SCRIPT} --format=${PYLINT_OUTPUT_FORMAT}
