@@ -96,6 +96,7 @@ Bugfixes
 - :ref:`LoadVesuvio <algm-LoadVesuvio>` now correctly parses input in the form 10-20,30-40,50-60
 - The *ContainerSubtraction* Interface should no longer crash when changing preview spectra in the miniplot
 - Using the Spectra option in *S(Q,w)* interface now works correctly
+- It is now possible to properly update the Rebinning option in the *ISISCalibration* interface in *Indirect Data Reduction*
 
 
 
