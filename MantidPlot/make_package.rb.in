@@ -145,7 +145,7 @@ if( "@MAKE_VATES@" == "ON" )
   `install_name_tool -id @rpath/libNonOrthogonalSource.dylib pvplugins/pvplugins/libNonOrthogonalSource.dylib`
 end
 
-#use install_name_tool to change dependencies form /usr/local to libraries in the package.
+#use install_name_tool to change dependencies from /usr/local to libraries in the package.
 search_patterns = ["**/*.dylib","**/*.so","**/MantidPlot","**/VatesSimpleGui"]
 search_patterns.each do |pattern|
   Dir[pattern].each do |library|
@@ -194,7 +194,8 @@ pyqt4_patterns.each do |pattern|
   end
 end
 
-#use install_name_tool to change dependencies form /usr/local to libraries in the package.
+#Homebrew recently switched the linking from /usr/local/lib/* to /usr/local/opt/qt/lib/*
+#This attempts to determine the correct path to pass to install_name_tool.
 QtLinkingDir = []
 Dir[pyqt4_patterns[0]].each do |library|
   dependencies = `otool -L #{library}`
