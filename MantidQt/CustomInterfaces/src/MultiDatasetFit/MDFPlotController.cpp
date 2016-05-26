@@ -273,22 +273,32 @@ void PlotController::exportCurrentPlot()
 }
 
 /// Export all plots
-void PlotController::exportAllPlots()
-{
+void PlotController::exportAllPlots() {
   int nPlots = owner()->getNumberOfSpectra();
-  if (nPlots <= 0) return;
-  QString pyInput = "from mantidplot import newTiledWindow\n";
-  pyInput += "newTiledWindow(sources=[";
-  for(int index = 0; index < nPlots; ++index)
-  {
-    if (index > 0)
-    {
-      pyInput += ",";
-    }
-    pyInput += QString("(%1)").arg(makePyPlotSource(index));
+  int exportPlot = QMessageBox::Yes;
+  if (nPlots > 20) {
+    exportPlot = QMessageBox::question(owner(), "Export All Plot?",
+                                       "Are you sure, you want to export " +
+                                           QString::number(nPlots) +
+                                           " plots? This may take a long time!",
+                                       QMessageBox::Yes, QMessageBox::No);
   }
-  pyInput += "])\n";
-  owner()->runPythonCode(pyInput);
+
+  if (exportPlot == QMessageBox::Yes) {
+
+    if (nPlots <= 0)
+      return;
+    QString pyInput = "from mantidplot import newTiledWindow\n";
+    pyInput += "newTiledWindow(sources=[";
+    for (int index = 0; index < nPlots; ++index) {
+      if (index > 0) {
+        pyInput += ",";
+      }
+      pyInput += QString("(%1)").arg(makePyPlotSource(index));
+    }
+    pyInput += "])\n";
+    owner()->runPythonCode(pyInput);
+  }
 }
 
 /// Disable all plot tools. It is a helper method 
