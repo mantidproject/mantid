@@ -336,6 +336,41 @@ public:
                     0.01);                                    // Period of 8
     TS_ASSERT_DELTA(func->getParameter("Phi"), M_PI_4, 0.01); //  45 degrees
   }
+
+  void test_function_StaticKuboToyabe() {
+
+    // Mock data
+    int ndata = 18;
+    API::MatrixWorkspace_sptr ws = API::WorkspaceFactory::Instance().create(
+        "Workspace2D", 1, ndata, ndata);
+    Mantid::MantidVec &x = ws->dataX(0);
+    Mantid::MantidVec &y = ws->dataY(0);
+    Mantid::MantidVec &e = ws->dataE(0);
+    for (int i = 0; i < ndata; i++) {
+      x[i] = static_cast<double>(i);
+      e[i] = 0.01;
+    }
+    // Calculated with A = 0.24 and Delta = 0.16 on an Excel spreadsheet
+    y = {0.24,        0.233921146, 0.216447929, 0.189737312, 0.156970237,
+         0.121826185, 0.08791249,  0.058260598, 0.034976545, 0.019090369,
+         0.01060189,  0.008680652, 0.011954553, 0.018817301, 0.027696749,
+         0.037247765, 0.046457269, 0.054669182};
+
+    Fit fit;
+    fit.initialize();
+    fit.setProperty("Function", "name=StaticKuboToyabe");
+    fit.setProperty("InputWorkspace", ws);
+    fit.execute();
+
+    // Test the goodness of the fit
+    double chi2 = fit.getProperty("OutputChi2overDoF");
+    TS_ASSERT_DELTA(chi2, 0.0001, 0.0001);
+
+    // Test the fitting parameters
+    IFunction_sptr func = fit.getProperty("Function");
+    TS_ASSERT_DELTA(func->getParameter("A"), 0.24, 0.001);
+    TS_ASSERT_DELTA(func->getParameter("Delta"), 0.16, 0.001);
+  }
 };
 
 class FitTestPerformance : public CxxTest::TestSuite {
