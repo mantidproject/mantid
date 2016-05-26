@@ -9237,11 +9237,6 @@ void ApplicationWindow::analysisMenuAboutToShow() {
     return;
 
   if (isOfType(w, "MultiLayer")) {
-    // The tool doesn't work yet (DataPickerTool)
-    // QMenu *translateMenu = analysisMenu->addMenu (tr("&Translate"));
-    // translateMenu->addAction(actionTranslateVert);
-    // translateMenu->addAction(actionTranslateHor);
-    // analysisMenu->insertSeparator();
     analysisMenu->addAction(actionDifferentiate);
     analysisMenu->addAction(actionIntegrate);
     analysisMenu->addAction(actionShowIntDialog);
@@ -12853,14 +12848,6 @@ void ApplicationWindow::createActions() {
   actionDeconvolute = new QAction(tr("&Deconvolute"), this);
   connect(actionDeconvolute, SIGNAL(activated()), this, SLOT(deconvolute()));
 
-  actionTranslateHor = new QAction(tr("&Horizontal"), this);
-  connect(actionTranslateHor, SIGNAL(activated()), this,
-          SLOT(translateCurveHor()));
-
-  actionTranslateVert = new QAction(tr("&Vertical"), this);
-  connect(actionTranslateVert, SIGNAL(activated()), this,
-          SLOT(translateCurveVert()));
-
   actionSetAscValues = new QAction(QIcon(getQPixmap("rowNumbers_xpm")),
                                    tr("Ro&w Numbers"), this);
   connect(actionSetAscValues, SIGNAL(activated()), this, SLOT(setAscValues()));
@@ -13442,8 +13429,8 @@ void ApplicationWindow::translateActionsStrings() {
   actionAutoCorrelate->setMenuText(tr("&Autocorrelate"));
   actionConvolute->setMenuText(tr("&Convolute"));
   actionDeconvolute->setMenuText(tr("&Deconvolute"));
-  actionTranslateHor->setMenuText(tr("&Horizontal"));
-  actionTranslateVert->setMenuText(tr("&Vertical"));
+  //actionTranslateHor->setMenuText(tr("&Horizontal"));
+  //actionTranslateVert->setMenuText(tr("&Vertical"));
   actionSetAscValues->setMenuText(tr("Ro&w Numbers"));
   actionSetAscValues->setToolTip(tr("Fill selected columns with row numbers"));
   actionSetRandomValues->setMenuText(tr("&Random Values"));
@@ -13961,72 +13948,6 @@ void ApplicationWindow::updateRecentFilesList(QString fname) {
     ma->setData(recentFiles[i]);
     recentFilesMenu->addAction(ma);
     menuCount++;
-  }
-}
-
-void ApplicationWindow::translateCurveHor() {
-  MultiLayer *plot = dynamic_cast<MultiLayer *>(activeWindow(MultiLayerWindow));
-  if (!plot)
-    return;
-  if (plot->isEmpty()) {
-    QMessageBox::warning(
-        this, tr("MantidPlot - Warning"), // Mantid
-        tr("<h4>There are no plot layers available in this window.</h4>"
-           "<p><h4>Please add a layer and try again!</h4>"));
-    btnPointer->setChecked(true);
-    return;
-  }
-
-  Graph *g = dynamic_cast<Graph *>(plot->activeGraph());
-  if (!g)
-    return;
-
-  if (g->isPiePlot()) {
-    QMessageBox::warning(
-        this, tr("MantidPlot - Warning"), // Mantid
-        tr("This functionality is not available for pie plots!"));
-
-    btnPointer->setChecked(true);
-    return;
-  } else if (g->validCurvesDataSize()) {
-    btnPointer->setChecked(true);
-    g->setActiveTool(
-        new TranslateCurveTool(g, this, TranslateCurveTool::Horizontal, info,
-                               SLOT(setText(const QString &))));
-    displayBar->show();
-  }
-}
-
-void ApplicationWindow::translateCurveVert() {
-  MultiLayer *plot = dynamic_cast<MultiLayer *>(activeWindow(MultiLayerWindow));
-  if (!plot)
-    return;
-  if (plot->isEmpty()) {
-    QMessageBox::warning(
-        this, tr("MantidPlot - Warning"), // Mantid
-        tr("<h4>There are no plot layers available in this window.</h4>"
-           "<p><h4>Please add a layer and try again!</h4>"));
-    btnPointer->setChecked(true);
-    return;
-  }
-
-  Graph *g = dynamic_cast<Graph *>(plot->activeGraph());
-  if (!g)
-    return;
-
-  if (g->isPiePlot()) {
-    QMessageBox::warning(
-        this, tr("MantidPlot - Warning"), // Mantid
-        tr("This functionality is not available for pie plots!"));
-
-    btnPointer->setChecked(true);
-    return;
-  } else if (g->validCurvesDataSize()) {
-    btnPointer->setChecked(true);
-    g->setActiveTool(new TranslateCurveTool(g, this,
-                                            TranslateCurveTool::Vertical, info,
-                                            SLOT(setText(const QString &))));
-    displayBar->show();
   }
 }
 
