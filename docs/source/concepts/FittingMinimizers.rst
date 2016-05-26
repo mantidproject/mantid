@@ -12,7 +12,7 @@ in Mantid. Given the following elements:
 - a cost function (e.g., squared errors weighted by the spectrum errors),
 - and a minimizer,
 
-The minimizer is the algorith or method that adjusts the function
+The minimizer is the method that adjusts the function
 parameters so that the model fits the data as closely as possible. The
 cost function defines the concept of how close a fit is to the
 data. See the general concept page on :ref:`Fitting <Fitting>` for a
