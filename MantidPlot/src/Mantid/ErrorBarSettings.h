@@ -64,6 +64,7 @@ private:
 
   friend class MantidCurve;
   friend class MantidMatrixCurve;
+  friend class MantidMDCurve;
 };
 
 #endif

@@ -184,7 +184,34 @@ public:
                                                 Contains("1"),
                                                 Contains("2")))).Times(1);
     // Test time limits
+    auto timeRange = std::make_pair<double, double>(0.0, 0.0);
+    ON_CALL(*m_view, timeRange())
+        .WillByDefault(Return(boost::make_optional(timeRange)));
     EXPECT_CALL(*m_view, setTimeLimits(Le(0.107), Ge(31.44))).Times(1);
+    m_view->selectFirstRun();
+  }
+
+  void test_updateAvailableInfo_NotFirstRun() {
+    EXPECT_CALL(*m_view, firstRun()).WillRepeatedly(Return("MUSR00015189.nxs"));
+    // Test logs
+    EXPECT_CALL(*m_view,
+                setAvailableLogs(
+                    AllOf(Property(&std::vector<std::string>::size, 39),
+                          Contains("run_number"), Contains("sample_magn_field"),
+                          Contains("Field_Danfysik"))))
+        .Times(1);
+    // Test periods
+    EXPECT_CALL(*m_view, setAvailablePeriods(
+                             AllOf(Property(&std::vector<std::string>::size, 2),
+                                   Contains("1"), Contains("2"))))
+        .Times(1);
+    // Test time limits
+    auto timeRange =
+        std::make_pair<double, double>(0.1, 10.0); // not the first run loaded
+    ON_CALL(*m_view, timeRange())
+        .WillByDefault(Return(boost::make_optional(timeRange)));
+    EXPECT_CALL(*m_view, setTimeLimits(_, _))
+        .Times(0); // shouldn't reset time limits
     m_view->selectFirstRun();
   }
 

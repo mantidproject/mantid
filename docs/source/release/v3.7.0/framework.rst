@@ -180,6 +180,7 @@ Script Repository
 -----------------
 
 - A bug has been fixed that caused uploads to fail with some incorrectly configured proxy servers.
+- The default timeout has been increased from 5s to 30s to avoid hitting the timeout when tying to download some larger files.
 
 |
 
