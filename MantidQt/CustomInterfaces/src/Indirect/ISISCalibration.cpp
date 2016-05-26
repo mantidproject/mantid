@@ -381,7 +381,6 @@ namespace CustomInterfaces
    */
   void ISISCalibration::calPlotRaw()
   {
-    setDefaultInstDetails();
 
     QString filename = m_uiForm.leRunNo->getFirstFilename();
 
@@ -424,6 +423,8 @@ namespace CustomInterfaces
     auto calBackground = m_uiForm.ppCalibration->getRangeSelector("CalBackground");
     setPlotPropertyRange(calPeak, m_properties["CalELow"], m_properties["CalEHigh"], range);
     setPlotPropertyRange(calBackground, m_properties["CalStart"], m_properties["CalEnd"], range);
+
+    setDefaultInstDetails();
 
     m_uiForm.ppCalibration->replot();
 
