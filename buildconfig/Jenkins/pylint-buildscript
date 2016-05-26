@@ -54,6 +54,9 @@ cd $BUILD_DIR
 # Clean some artifacts
 ###############################################################################
 rm -rf $BUILD_DIR/bin
+# legacy file
+rm -fr $BUILD_DIR/pylint.log
+
 
 ###############################################################################
 ## Build configuration
