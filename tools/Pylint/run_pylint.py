@@ -114,7 +114,7 @@ def main(argv):
 
     options, args = parse_arguments(argv[1:])
     setup_environment(options.mantidpath)
-
+    create_dir_if_required(options.outputdir)
     status = run_checks(args, options)
 
     if status or options.nofail:
@@ -215,6 +215,18 @@ def setup_mantidpath(mantidpath):
     # for subprocesses
     os.environ["PYTHONPATH"] = mantidpath + os.pathsep + cur_pypath
     sys.path.insert(0, mantidpath) # for current process
+
+#------------------------------------------------------------------------------
+
+def create_dir_if_required(path):
+    """
+    Create the given directory if it doesn't exist
+
+    Arguments:
+      path (str): Absolute path to a directory
+    """
+    if not os.path.exists(path):
+        os.makedirs(path)
 
 #------------------------------------------------------------------------------
 
