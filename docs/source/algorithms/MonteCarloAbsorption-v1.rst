@@ -144,8 +144,11 @@ References
 ----------
 
 .. [#DAR] Darwin, C. G., *Philos. Mag.*, **43** 800 (1922)
+          `doi: 10.1080/10448639208218770 <http://dx.doi.org/10.1080/10448639208218770>`_
 .. [#HAM] Hamilton, W.C., *Acta Cryst*, **10**, 629 (1957)
-.. [#SAB] Sabine, T. M., *International Tables for Crystallography*, Vol. C, Page 603, Ed. Wilson, A. J. C and Prince, E. Kluwer Publishers (1999).
+          `doi: 10.1107/S0365110X57002212 <http://dx.doi.org/10.1107/S0365110X57002212>`_
+.. [#SAB] Sabine, T. M., *International Tables for Crystallography*, Vol. C, Page 609, Ed. Wilson, A. J. C and Prince, E. Kluwer Publishers (2004)
+          `doi: 10.1107/97809553602060000103 <http://dx.doi.org/10.1107/97809553602060000103>`_
 
 |
 
