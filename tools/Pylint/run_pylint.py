@@ -254,6 +254,18 @@ def get_serializer(filename):
 
 #------------------------------------------------------------------------------
 
+def cleanup_serializer(serializer):
+    """
+    Close a file handle if the serializer points to one.
+
+    Arguments:
+      serializer: File-like object with a write method, can be stdout
+    """
+    if serializer != sys.stdout:
+        serializer.close()
+
+#------------------------------------------------------------------------------
+
 def run_checks(relpaths, options):
     """
     Run pylint on the chosen files/directories
@@ -276,8 +288,12 @@ def run_checks(relpaths, options):
     results = Results()
     logging.debug("Parallezing over {0} processes".format(options.parallel))
     for index, target in enumerate(target_paths):
-        results_path = get_results_path(options.outputdir,
-                                        os.path.relpath(target, options.basedir))
+        if options.outputdir:
+            results_path = get_results_path(options.outputdir,
+                                            os.path.relpath(target, options.basedir))
+        else:
+            # indicates sys.stdout
+            results_path = None
         if len(processes) == max_jobs:
             logging.debug("Full processor load hit. Waiting for available slot.")
             while True:
@@ -290,7 +306,7 @@ def run_checks(relpaths, options):
                     time.sleep(0.2)
         #endif
         logging.debug("Slot available. Running next check.")
-        serializer = open(results_path, 'w')
+        serializer = get_serializer(results_path)
         processes.append(start_pylint(target, serializer, options))
     #endfor
     # There will be a last set of processes in the list
@@ -327,10 +343,10 @@ def get_proc_results(processes, wait=False):
             running.append(proc_info)
         else:
             results.add(proc_info[1], (exitcode == 0))
-            proc_info[2].close()
+            cleanup_serializer(proc_info[2])
 
     if wait:
-        assert(len(running) == 0)
+        assert len(running) == 0
         return None, results
     else:
         return running, results
@@ -400,7 +416,7 @@ def find_importable_targets(dirpath):
 
 def get_results_path(dirname, target):
     """
-    Return the path to a results file for the given target
+    Return the path to a results file for the given target.
 
     Args:
       dirname (str): An output directory to store the file
