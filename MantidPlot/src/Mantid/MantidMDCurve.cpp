@@ -4,6 +4,7 @@
 #include <qpainter.h>
 #include <qwt_symbol.h>
 #include "MantidAPI/AnalysisDataService.h"
+#include "ErrorBarSettings.h"
 #include "../Graph.h"
 #include "../ApplicationWindow.h"
 #include "../MultiLayer.h"
@@ -88,6 +89,16 @@ void MantidMDCurve::init(Graph* g, bool distr, Graph::CurveType style)
     setStyle(QwtPlotCurve::Lines);
   }
   g->insertCurve(this,lineWidth);
+
+
+  // set the option to draw all error bars from the global settings
+  if (hasErrorBars()) {
+    setErrorBars(true, g->multiLayer()->applicationWindow()->drawAllErrors);
+  }
+  // Initialise error bar colour to match curve colour
+  m_errorSettings->m_color = pen().color();
+  m_errorSettings->setWidth(pen().widthF());
+
   connect(g,SIGNAL(axisScaleChanged(int,bool)),this,SLOT(axisScaleChanged(int,bool)));
   observePostDelete();
   connect( this, SIGNAL(resetData(const QString&)), this, SLOT(dataReset(const QString&)) );

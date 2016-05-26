@@ -297,6 +297,27 @@ public:
     doTestRunNumberString("15189-90, 15192", true);
   }
 
+  // This can happen when loading very old files in which the stored run number
+  // is zero
+  void test_runNumberString_zeroRunNumber() {
+    const std::string sep("; ");
+    std::ostringstream wsName;
+    wsName << "DEVA000" << sep;
+    wsName << "Pair" << sep;
+    wsName << "long" << sep;
+    wsName << "Asym" << sep;
+    wsName << "1+2" << sep;
+    wsName << "#1";
+
+    // create expected output
+    QString expected = "0: 1+2";
+    QString result;
+
+    // test
+    TS_ASSERT_THROWS_NOTHING(result = runNumberString(wsName.str(), "0"));
+    TS_ASSERT_EQUALS(expected, result);
+  }
+
   void test_isReloadGroupingNecessary_No() {
     const auto currentWs = createWs("MUSR", 15189);
     const auto loadedWs = createWs("MUSR", 15190);

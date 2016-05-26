@@ -21,10 +21,11 @@ using Kernel::V3D;
  * Constructor specifying a name for the environment. It is empty by default and
  * required by various other users of it
  * @param name A human-readable name for the kit
- * @param can The object that represents the can
+ * @param container The object that represents the can
  */
-SampleEnvironment::SampleEnvironment(std::string name, Can_const_sptr can)
-    : m_name(std::move(name)), m_components(1, can) {}
+SampleEnvironment::SampleEnvironment(std::string name,
+                                     Container_const_sptr container)
+    : m_name(std::move(name)), m_components(1, container) {}
 
 /**
  * @return An axis-aligned BoundingBox object that encompasses the whole kit.
