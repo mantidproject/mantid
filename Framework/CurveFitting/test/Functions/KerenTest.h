@@ -95,7 +95,6 @@ public:
     TS_ASSERT_THROWS_NOTHING(function.wrapFunc1D(&y, &x, 1));
     TS_ASSERT_DELTA(y, 0.9434, 0.001);
   }
-
 };
 
 #endif /* MANTID_CURVEFITTING_KERENTEST_H_ */
