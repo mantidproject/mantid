@@ -293,27 +293,41 @@ void MultiDatasetFit::fitSimultaneous()
 }
 
 /// Run the fitting algorithm.
-void MultiDatasetFit::fit()
-{
-  if ( !m_functionBrowser->hasFunction() )
-  {
-    QMessageBox::warning( this, "MantidPlot - Warning","Function wasn't set." );
+void MultiDatasetFit::fit() {
+  if (!m_functionBrowser->hasFunction()) {
+    QMessageBox::warning(this, "MantidPlot - Warning", "Function wasn't set.");
     return;
   }
 
   auto fittingType = m_fitOptionsBrowser->getCurrentFittingType();
-  
-  if (fittingType == MantidWidgets::FitOptionsBrowser::Simultaneous)
-  {
-    fitSimultaneous();
-  }
-  else if (fittingType == MantidWidgets::FitOptionsBrowser::Sequential)
-  {
-    fitSequential();
-  }
-  else
-  {
-    throw std::logic_error("Unrecognised fitting type. Only Normal and Sequential are accepted.");
+  auto n = getNumberOfSpectra();
+  int fitAll = QMessageBox::Yes;
+
+  if (fittingType == MantidWidgets::FitOptionsBrowser::Simultaneous) {
+    if (n > 20) {
+      fitAll = QMessageBox::question(this, "Fit All?",
+                                     "Are you sure you would like to fit " +
+                                         QString::number(n) +
+                                         " spectrum simultaneously?",
+                                     QMessageBox::Yes, QMessageBox::No);
+    }
+    if (fitAll == QMessageBox::Yes) {
+      fitSimultaneous();
+    }
+
+  } else if (fittingType == MantidWidgets::FitOptionsBrowser::Sequential) {
+    if (n > 100) {
+      fitAll = QMessageBox::question(
+          this, "Fit All?", "Are you sure you would like to fit " +
+                                QString::number(n) + " spectrum sequentially?",
+          QMessageBox::Yes, QMessageBox::No);
+    }
+    if (fitAll == QMessageBox::Yes) {
+      fitSequential();
+    }
+  } else {
+    throw std::logic_error(
+        "Unrecognised fitting type. Only Normal and Sequential are accepted.");
   }
 }
 
