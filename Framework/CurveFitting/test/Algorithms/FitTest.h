@@ -479,6 +479,45 @@ public:
     TS_ASSERT_DELTA(func->getParameter("Lambda"), 0.63, 0.001);
     TS_ASSERT_LESS_THAN(func->getParameter("Beta"), 1.00);
   }
+
+  void test_function_StretchExpMuon() {
+
+    // Mock data
+    int ndata = 20;
+    API::MatrixWorkspace_sptr ws = API::WorkspaceFactory::Instance().create(
+        "Workspace2D", 1, ndata, ndata);
+    Mantid::MantidVec &x = ws->dataX(0);
+    Mantid::MantidVec &y = ws->dataY(0);
+    Mantid::MantidVec &e = ws->dataE(0);
+    // values extracted from y(x)=2*exp(-(x/4)^0.5)
+    y = {2,          1.2130613,  0.98613738, 0.84124005, 0.73575888,
+         0.65384379, 0.58766531, 0.53273643, 0.48623347, 0.44626032,
+         0.41148132, 0.38092026, 0.35384241, 0.32968143, 0.30799199,
+         0.28841799, 0.27067057, 0.25451242, 0.2397465,  0.22620756};
+    for (int i = 0; i < ndata; i++) {
+      x[i] = static_cast<double>(i);
+      e[i] = 0.1 * y[i];
+    }
+
+    Fit fit;
+    fit.initialize();
+    fit.setProperty("Function",
+                    "name=StretchExpMuon, A=1.5, Lambda=0.2, Beta=0.4");
+    fit.setProperty("InputWorkspace", ws);
+    fit.setPropertyValue("StartX", "0");
+    fit.setPropertyValue("EndX", "19");
+    fit.execute();
+
+    // Test the goodness of the fit
+    double chi2 = fit.getProperty("OutputChi2overDoF");
+    TS_ASSERT_DELTA(chi2, 0.001, 0.001);
+
+    // Test the fitting parameters
+    IFunction_sptr func = fit.getProperty("Function");
+    TS_ASSERT_DELTA(func->getParameter("A"), 2.0, 0.02);
+    TS_ASSERT_DELTA(func->getParameter("Lambda"), 0.25, 0.0025);
+    TS_ASSERT_DELTA(func->getParameter("Beta"), 0.5, 0.05);
+  }
 };
 
 class FitTestPerformance : public CxxTest::TestSuite {
