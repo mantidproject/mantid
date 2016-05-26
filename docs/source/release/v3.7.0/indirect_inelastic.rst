@@ -30,7 +30,7 @@ Jump Fit
 Diffraction
 ###########
 
-- OSIRIS Diffraction DiffOnly interface and the :ref `OSIRISDiffractionReduction <algm-OSIRISDiffractionReduction>` algorithm now support the use of multiple
+- OSIRIS Diffraction DiffOnly interface and the :ref:`OSIRISDiffractionReduction <algm-OSIRISDiffractionReduction>` algorithm now support the use of multiple
   contianer runs. Additional validation also ensures you have the same number of sample/vanadium/container runs.
 
 
