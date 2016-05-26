@@ -181,6 +181,9 @@ void MultiDatasetFit::fitSequential()
 {
   try
   {
+	// disable button to avoid multiple fit click
+	m_uiForm.btnFit->setEnabled(false);
+
     std::ostringstream input;
 
     int n = getNumberOfSpectra();
@@ -228,6 +231,7 @@ void MultiDatasetFit::fitSimultaneous()
 {
   try
   {
+	m_uiForm.btnFit->setEnabled(false);
     auto fun = createFunction();
     auto fit = Mantid::API::AlgorithmManager::Instance().create("Fit");
     fit->initialize();
@@ -418,6 +422,7 @@ void MultiDatasetFit::finishFit(bool error)
       showParameterPlot();
     }
   }
+  m_uiForm.btnFit->setEnabled(true);
 }
 
 /// Update the interface to have the same parameter values as in a function.
