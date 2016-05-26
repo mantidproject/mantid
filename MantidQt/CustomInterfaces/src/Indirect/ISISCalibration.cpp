@@ -519,14 +519,19 @@ namespace CustomInterfaces
         double res = params[0];
 
         // Set default rebinning bounds
-        QPair<double, double> peakRange(-res*10, res*10);
+        QPair<double, double> peakRange(-res * 10, res * 10);
         auto resPeak = m_uiForm.ppResolution->getRangeSelector("ResPeak");
-        setRangeSelector(resPeak, m_properties["ResELow"], m_properties["ResEHigh"], peakRange);
+        setPlotPropertyRange(resPeak, m_properties["ResELow"],
+                             m_properties["ResEHigh"], peakRange);
+        setRangeSelector(resPeak, m_properties["ResELow"],
+                         m_properties["ResEHigh"], peakRange);
 
         // Set default background bounds
-        QPair<double, double> backgroundRange(-res*9, -res*8);
-        auto resBackground = m_uiForm.ppResolution->getRangeSelector("ResBackground");
-        setRangeSelector(resBackground, m_properties["ResStart"], m_properties["ResEnd"], backgroundRange);
+        QPair<double, double> backgroundRange(-res * 9, -res * 8);
+        auto resBackground =
+            m_uiForm.ppResolution->getRangeSelector("ResBackground");
+        setRangeSelector(resBackground, m_properties["ResStart"],
+                         m_properties["ResEnd"], backgroundRange);
       }
     }
   }
