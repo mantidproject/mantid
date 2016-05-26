@@ -1222,9 +1222,6 @@ void ApplicationWindow::initMainMenu() {
   decayMenu = new QMenu(this);
   decayMenu->setObjectName("decayMenu");
 
-  multiPeakMenu = new QMenu(this);
-  multiPeakMenu->setObjectName("multiPeakMenu");
-
   analysisMenu = new QMenu(this);
   analysisMenu->setObjectName("analysisMenu");
   connect(analysisMenu, SIGNAL(aboutToShow()), this,
@@ -8178,7 +8175,7 @@ void ApplicationWindow::showCursor() {
 
 /**  Switch on the multi-peak selecting tool for fitting
  * with the Fit algorithm of multiple peaks on a single background
- */
+ */ 
 void ApplicationWindow::selectMultiPeak(bool showFitPropertyBrowser) {
   MultiLayer *plot = dynamic_cast<MultiLayer *>(activeWindow(MultiLayerWindow));
   if (!plot)
@@ -9273,12 +9270,6 @@ void ApplicationWindow::analysisMenuAboutToShow() {
     analysisMenu->addAction(actionFitSigmoidal);
     analysisMenu->addAction(actionFitGauss);
     analysisMenu->addAction(actionFitLorentz);
-
-    // The tool doesn't work yet (DataPickerTool)
-    // multiPeakMenu->clear();
-    // multiPeakMenu = analysisMenu->addMenu (tr("Fit &Multi-peak"));
-    // multiPeakMenu->addAction(actionMultiPeakGauss);
-    // multiPeakMenu->addAction(actionMultiPeakLorentz);
 
     analysisMenu->addSeparator();
     analysisMenu->addAction(actionShowFitDialog);
@@ -12887,14 +12878,6 @@ void ApplicationWindow::createActions() {
       new QAction(QIcon(getQPixmap("boxPlot_xpm")), tr("&Box Plot"), this);
   connect(actionBoxPlot, SIGNAL(activated()), this, SLOT(plotBoxDiagram()));
 
-  actionMultiPeakGauss = new QAction(tr("&Gaussian..."), this);
-  connect(actionMultiPeakGauss, SIGNAL(activated()), this,
-          SLOT(fitMultiPeakGauss()));
-
-  actionMultiPeakLorentz = new QAction(tr("&Lorentzian..."), this);
-  connect(actionMultiPeakLorentz, SIGNAL(activated()), this,
-          SLOT(fitMultiPeakLorentz()));
-
   actionHomePage = new QAction(tr("&Mantid Homepage"), this); // Mantid change
   connect(actionHomePage, SIGNAL(activated()), this, SLOT(showHomePage()));
 
@@ -13453,8 +13436,6 @@ void ApplicationWindow::translateActionsStrings() {
   actionBoxPlot->setMenuText(tr("&Box Plot"));
   actionBoxPlot->setToolTip(tr("Box and whiskers plot"));
 
-  actionMultiPeakGauss->setMenuText(tr("&Gaussian..."));
-  actionMultiPeakLorentz->setMenuText(tr("&Lorentzian..."));
   actionHomePage->setMenuText(tr("&Mantid Homepage")); // Mantid change
   actionHelpBugReports->setText(tr("Report a &Bug"));
   actionAskHelp->setText(tr("Ask for Help"));
@@ -14047,50 +14028,6 @@ void ApplicationWindow::disregardCol() {
     return;
 
   t->setPlotDesignation(Table::None);
-}
-
-void ApplicationWindow::fitMultiPeakGauss() {
-  fitMultiPeak((int)MultiPeakFit::Gauss);
-}
-
-void ApplicationWindow::fitMultiPeakLorentz() {
-  fitMultiPeak((int)MultiPeakFit::Lorentz);
-}
-
-void ApplicationWindow::fitMultiPeak(int profile) {
-  MultiLayer *plot = dynamic_cast<MultiLayer *>(activeWindow(MultiLayerWindow));
-  if (!plot)
-    return;
-  if (plot->isEmpty()) {
-    QMessageBox::warning(
-        this, tr("MantidPlot - Warning"), // Mantid
-        tr("<h4>There are no plot layers available in this window.</h4>"
-           "<p><h4>Please add a layer and try again!</h4>"));
-    btnPointer->setChecked(true);
-    return;
-  }
-
-  Graph *g = dynamic_cast<Graph *>(plot->activeGraph());
-  if (!g || !g->validCurvesDataSize())
-    return;
-
-  if (g->isPiePlot()) {
-    QMessageBox::warning(
-        this, tr("MantidPlot - Warning"), // Mantid
-        tr("This functionality is not available for pie plots!"));
-    return;
-  } else {
-    bool ok;
-    int peaks = QInputDialog::getInteger(this,
-        tr("MantidPlot - Enter the number of peaks"), // Mantid
-        tr("Peaks"), 2, 2, 1000000, 1, &ok);
-    if (ok && peaks) {
-      g->setActiveTool(
-          new MultiPeakFitTool(g, this, (MultiPeakFit::PeakProfile)profile,
-                               peaks, info, SLOT(setText(const QString &))));
-      displayBar->show();
-    }
-  }
 }
 
 void ApplicationWindow::showHomePage() {
