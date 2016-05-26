@@ -4,8 +4,8 @@
     <material id="van" formula="V"/>
   </materials>
   <components>
-    <cans>
-      <can id="8mm" material="van">
+    <containers>
+      <container id="8mm" material="van">
 	<geometry>
 	  <hollow-cylinder id="cyla">
 	    <centre-of-bottom-base x="0.0" y="-0.025" z="0.0"/>
@@ -23,7 +23,7 @@
 	    <height val="0.05" />
 	  </cylinder>
 	</samplegeometry>
-      </can>
-    </cans>
+      </container>
+    </containers>
   </components>
 </environmentspec>
