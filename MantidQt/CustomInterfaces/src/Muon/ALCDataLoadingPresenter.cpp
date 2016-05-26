@@ -253,10 +253,13 @@ void ALCDataLoadingPresenter::updateAvailableInfo() {
   }
   m_view->setAvailablePeriods(periods);
 
-  // Set time limits
-  m_view->setTimeLimits(firstGoodData - timeZero, ws->readX(0).back());
-  // Set allowed time range
-  m_view->setTimeRange(ws->readX(0).front(), ws->readX(0).back());
+  // Set time limits if this is the first data loaded (will both be zero)
+  if (auto timeLimits = m_view->timeRange()) {
+    if (std::abs(timeLimits->first) < 0.0001 &&
+        std::abs(timeLimits->second) < 0.0001) {
+      m_view->setTimeLimits(firstGoodData - timeZero, ws->readX(0).back());
+    }
+  }
 }
 
 MatrixWorkspace_sptr ALCDataLoadingPresenter::exportWorkspace() {
