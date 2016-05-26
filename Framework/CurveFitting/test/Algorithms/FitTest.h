@@ -441,6 +441,44 @@ public:
     TS_ASSERT_DELTA(func->getParameter("Delta"), 0.16, 0.001);
     TS_ASSERT_DELTA(func->getParameter("Sigma"), 0.1, 0.001);
   }
+
+  void test_function_StaticKuboToyabeTimesStretchExp() {
+
+    // Mock data
+    int ndata = 18;
+    API::MatrixWorkspace_sptr ws = API::WorkspaceFactory::Instance().create(
+        "Workspace2D", 1, ndata, ndata);
+    Mantid::MantidVec &x = ws->dataX(0);
+    Mantid::MantidVec &y = ws->dataY(0);
+    Mantid::MantidVec &e = ws->dataE(0);
+    for (int i = 0; i < ndata; i++) {
+      x[i] = static_cast<double>(i);
+      e[i] = 1.0;
+    }
+    // Calculated with A = 0.24, Delta = 0.06, Lambda = 0.63 and
+    // Beta = 0.63
+    y = {0.24,        0.113248409, 0.074402367, 0.052183632, 0.037812471,
+         0.027927981, 0.020873965, 0.015717258, 0.011885418, 0.009005914,
+         0.006825573, 0.005166593, 0.003900885, 0.002934321, 0.002196637,
+         0.001634742, 0.001208136, 0.000885707};
+
+    Fit fit;
+    fit.initialize();
+    fit.setProperty("Function", "name=StaticKuboToyabeTimesStretchExp");
+    fit.setProperty("InputWorkspace", ws);
+    fit.execute();
+
+    // Test the goodness of the fit
+    double chi2 = fit.getProperty("OutputChi2overDoF");
+    TS_ASSERT_DELTA(chi2, 0.0001, 0.0001);
+
+    // Test the fitting parameters
+    IFunction_sptr func = fit.getProperty("Function");
+    TS_ASSERT_DELTA(func->getParameter("A"), 0.24, 0.0001);
+    TS_ASSERT_DELTA(func->getParameter("Delta"), 0.06, 0.001);
+    TS_ASSERT_DELTA(func->getParameter("Lambda"), 0.63, 0.001);
+    TS_ASSERT_LESS_THAN(func->getParameter("Beta"), 1.00);
+  }
 };
 
 class FitTestPerformance : public CxxTest::TestSuite {
