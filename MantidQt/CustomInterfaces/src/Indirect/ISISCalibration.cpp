@@ -101,7 +101,6 @@ namespace CustomInterfaces
     auto resBackground = m_uiForm.ppResolution->addRangeSelector("ResBackground");
     resBackground->setColour(Qt::darkGreen);
     auto resPeak = m_uiForm.ppResolution->addRangeSelector("ResPeak");
-    resPeak->setInfoOnly(true);
 
     // SIGNAL/SLOT CONNECTIONS
     // Update instrument information when a new instrument config is selected
