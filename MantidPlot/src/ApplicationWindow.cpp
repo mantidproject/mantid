@@ -10507,9 +10507,6 @@ void ApplicationWindow::showHelp() {
     return;
   }
 
-  QStringList cmdLst = QStringList() << "-profile" << profilePath;
-  //  assistant->setArguments( cmdLst );
-  //  assistant->showPage(helpFilePath);
 }
 
 void ApplicationWindow::showPlotWizard() {
