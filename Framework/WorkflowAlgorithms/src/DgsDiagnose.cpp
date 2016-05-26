@@ -301,7 +301,6 @@ void DgsDiagnose::exec() {
     maskWS = diag->getProperty("OutputWorkspace");
   } else {
     typedef Mantid::Kernel::StringTokenizer tokenizer;
-    boost::char_separator<char> sep("(,);");
     tokenizer tokens(diag_spectra[0], "(,);",
                      Mantid::Kernel::StringTokenizer::TOK_TRIM);
     for (auto tok_iter = tokens.begin(); tok_iter != tokens.end();) {
