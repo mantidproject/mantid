@@ -85,7 +85,7 @@ void PlotController::tableUpdated()
   for(int row = 0; row < rowCount; ++row)
   {
     QString itemText = QString("%1 (%2)").arg(m_table->item(row,wsColumn)->text(),m_table->item(row,wsIndexColumn)->text());
-    m_plotSelector->insertItem(-1, itemText);
+    m_plotSelector->insertItem(row, itemText);
   }
   m_plotData.clear();
   m_currentIndex = -1;
