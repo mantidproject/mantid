@@ -15554,12 +15554,6 @@ void ApplicationWindow::restoreApplicationGeometry() {
 
 void ApplicationWindow::scriptsDirPathChanged(const QString &path) {
   scriptsDirPath = path;
-
-  //  QList<MdiSubWindow*> windows = windowsList();
-  //  foreach(MdiSubWindow *w, windows){
-  //    if (w->isA("Note"))
-  //      dynamic_cast<Note*>(w)->setDirPath(path);
-  //  }
 }
 
 void ApplicationWindow::makeToolbarsMenu()
