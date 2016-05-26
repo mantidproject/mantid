@@ -99,7 +99,7 @@ Run time for individual NIST problems, "lower" difficulty
 
 .. include:: minimizers_comparison/v3.7.0/comparison_v3.7_runtime_nist_lower.txt
 
-Run time for individual NIST problems, "lower" difficulty
+Run time for individual NIST problems, "average" difficulty
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. include:: minimizers_comparison/v3.7.0/comparison_v3.7_runtime_nist_average.txt
