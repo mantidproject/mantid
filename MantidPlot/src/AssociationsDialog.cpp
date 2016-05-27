@@ -48,7 +48,7 @@
 AssociationsDialog::AssociationsDialog( Graph* g, Qt::WFlags fl )
     : QDialog( g, fl )
 {
-  setName( "AssociationsDialog" );
+  setObjectName("AssociationsDialog");
   setWindowTitle( tr( "MantidPlot - Plot Associations" ) );
   setModal(true);
   setSizeGripEnabled(true);

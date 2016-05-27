@@ -7,6 +7,7 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidAPI/Progress.h"
 #include "MantidAPI/TableRow.h"
@@ -159,10 +160,12 @@ void LoadMuonNexus::runLoadInstrument(
 
   // If loading instrument definition file fails,
   // we may get instrument by some other means yet to be decided upon
-  // at present we do nothing.
-  // if ( ! loadInst->isExecuted() )
-  //{
-  //}
+  // at present just create a dummy instrument with the correct name.
+  if (!loadInst->isExecuted()) {
+    auto inst = boost::make_shared<Geometry::Instrument>();
+    inst->setName(m_instrument_name);
+    localWorkspace->setInstrument(inst);
+  }
 }
 
 /**

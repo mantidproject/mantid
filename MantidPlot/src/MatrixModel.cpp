@@ -508,9 +508,9 @@ bool MatrixModel::importASCII(const QString &fname, const QString &sep,
 
   QString s = t.readLine();
   if (simplifySpaces)
-    s = s.simplifyWhiteSpace();
+    s = s.simplified();
   else if (stripSpaces)
-    s = s.stripWhiteSpace();
+    s = s.trimmed();
 
   QStringList line = s.split(sep);
   int cols = line.size();
@@ -551,9 +551,9 @@ bool MatrixModel::importASCII(const QString &fname, const QString &sep,
   for (int i = startRow; i < d_rows; i++) {
     s = t.readLine();
     if (simplifySpaces)
-      s = s.simplifyWhiteSpace();
+      s = s.simplified();
     else if (stripSpaces)
-      s = s.stripWhiteSpace();
+      s = s.trimmed();
     line = s.split(sep);
     int lc = line.size();
     if (lc > cols)

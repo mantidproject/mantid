@@ -27,7 +27,7 @@ namespace SpectrumView
  *  @param parent Top-level widget for object.
  */
 SpectrumView::SpectrumView(QWidget *parent) :
-  QMainWindow(parent, 0),
+  QMainWindow(parent),
   WorkspaceObserver(),
   m_ui(new Ui::SpectrumViewer()),
   m_sliderHandler(NULL),
@@ -249,7 +249,7 @@ void SpectrumView::respondToTabCloseReqest(int tab)
       }
     }
     m_svConnections->removeSpectrumDisplay(displayToRemove.get());
-    m_spectrumDisplay.remove(displayToRemove);
+    m_spectrumDisplay.removeAll(displayToRemove);
     m_ui->imageTabs->removeTab(tab);
     m_hGraph->clear();
     m_vGraph->clear();

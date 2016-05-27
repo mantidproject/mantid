@@ -97,6 +97,8 @@ private:
     QString (FitOptionsBrowser::*getter)(QtProperty*)const, 
     void (FitOptionsBrowser::*setter)(QtProperty*,const QString&));
 
+  void removeProperty(const QString &name);
+
   //  Setters and getters
   QString getMinimizer(QtProperty*) const;
   void setMinimizer(QtProperty*, const QString&);

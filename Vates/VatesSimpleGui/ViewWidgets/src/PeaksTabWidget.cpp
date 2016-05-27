@@ -93,7 +93,7 @@ void PeaksTabWidget::updateTabs(
     std::map<std::string, std::vector<bool>> visiblePeaks, std::map<std::string, QColor> colors) {
   // Iterate over all tabs
   for (int i = 0; i < m_tabWidget->count(); i++) {
-    QString label = m_tabWidget->label(i);
+    QString label = m_tabWidget->tabText(i);
 
     // Check if the peaks workspace still exists, if it does update, else delete
     // the tab.

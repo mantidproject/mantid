@@ -48,10 +48,10 @@ This tab provides a graphical interface to calculate calibrations and
 visualize them.
 
 It is possible to
-- generate a new calibration file (which becomes the new current
-  calibration)
-- load an existing calibration from a GSAS instrument
-  parameters file previously generated
+ - generate a new calibration file (which becomes the new current
+   calibration)
+ - load an existing calibration from a GSAS instrument
+   parameters file previously generated
 
 For the current calibration, the following parameters are displayed:
 the vanadium run number, the calibration sample run number, and the
@@ -186,7 +186,7 @@ Run Number
 The run provided to focus can be for example 228061-228063, this will
 run all the files within the given range as long as the file
 directories are included in the
-`User Directories <http://www.mantidproject.org/SplittersWorkspace>`_.
+`User Directories <http://www.mantidproject.org/ManageUserDirectories>`_.
 The user may also provide an input of 228061-3 or 228061, 228062,
 2280623 which should work the same way.
 

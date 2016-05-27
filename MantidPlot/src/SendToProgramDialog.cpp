@@ -56,7 +56,9 @@ SendToProgramDialog::SendToProgramDialog(QWidget* parent, QString programName, s
 
   //Set the name of the program you wish to edit and make it so that the user can't change it
   m_uiform.nameText->setText(programName);
-  m_uiform.nameText->setBackgroundColor(QColor(230,230,230));
+  QPalette palette;
+  palette.setColor(m_uiform.nameText->backgroundRole(), QColor(230,230,230));
+  m_uiform.nameText->setPalette(palette);
   m_uiform.nameText->setReadOnly(true);
 
   //Assign the collected data on the program to the form boxes
