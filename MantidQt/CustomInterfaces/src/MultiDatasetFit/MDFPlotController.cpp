@@ -457,7 +457,7 @@ void PlotController::showGuessFunction(bool ok)
   m_showGuessFunction = ok;
   if (ok)
   {
-    updateGuessPlot();
+	plotGuess();
   }
   else
   {
