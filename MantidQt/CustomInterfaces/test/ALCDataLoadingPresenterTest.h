@@ -215,6 +215,16 @@ public:
     m_view->selectFirstRun();
   }
 
+  void test_badCustomGrouping() {
+    ON_CALL(*m_view, detectorGroupingType()).WillByDefault(Return("Custom"));
+    ON_CALL(*m_view, getForwardGrouping()).WillByDefault(Return("1-48"));
+    // Too many detectors (MUSR has only 64)
+    ON_CALL(*m_view, getBackwardGrouping()).WillByDefault(Return("49-96"));
+    EXPECT_CALL(*m_view, displayError(StrNe(""))).Times(1);
+    m_view->selectFirstRun();
+    m_view->requestLoading();
+  }
+
   void test_updateAvailableLogs_invalidFirstRun()
   {
     ON_CALL(*m_view, firstRun()).WillByDefault(Return(""));
@@ -291,8 +301,8 @@ public:
     // Set grouping, the same as the default
     ON_CALL(*m_view, getForwardGrouping()).WillByDefault(Return("33-64"));
     ON_CALL(*m_view, getBackwardGrouping()).WillByDefault(Return("1-32"));
-    EXPECT_CALL(*m_view, getForwardGrouping()).Times(1);
-    EXPECT_CALL(*m_view, getBackwardGrouping()).Times(1);
+    EXPECT_CALL(*m_view, getForwardGrouping()).Times(2);
+    EXPECT_CALL(*m_view, getBackwardGrouping()).Times(2);
     EXPECT_CALL(*m_view, enableAll()).Times(1);
     EXPECT_CALL(*m_view, setDataCurve(AllOf(Property(&QwtData::size, 3),
                                             QwtDataX(0, 1350, 1E-8),
@@ -305,7 +315,7 @@ public:
                                             VectorValue(0,1.285E-3,1E-6),
                                             VectorValue(1,1.284E-3,1E-6),
                                             VectorValue(2,1.280E-3,1E-6))));
-
+    m_view->selectFirstRun();
     m_view->requestLoading();
   }
 
