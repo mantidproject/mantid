@@ -989,6 +989,54 @@ public:
     TS_ASSERT_DELTA(out->getParameter("Location"), 2.2, 0.1);
     TS_ASSERT_DELTA(out->getParameter("Scale"), 0.25, 0.01);
   }
+
+  void test_function_PseudoVoigt() {
+
+    // Mock data
+    int ndata = 100;
+    API::MatrixWorkspace_sptr ws = API::WorkspaceFactory::Instance().create(
+        "Workspace2D", 1, ndata, ndata);
+    Mantid::MantidVec &x = ws->dataX(0);
+    Mantid::MantidVec &y = ws->dataY(0);
+    Mantid::MantidVec &e = ws->dataE(0);
+    y = {0.680508, 0.459591, 0.332266, 1.2717,   0.925787, 1.36216,  0.890605,
+         0.983653, 0.965918, 0.916039, 0.979414, 0.861061, 0.973214, 1.53418,
+         1.52668,  1.10537,  1.36965,  1.64708,  1.52887,  2.0042,   2.11257,
+         2.44183,  2.29917,  2.61657,  2.25268,  2.82788,  3.089,    3.45517,
+         3.41001,  4.39168,  5.0277,   5.2431,   6.8158,   7.80098,  9.45674,
+         11.6082,  14.9449,  17.964,   22.4709,  28.9806,  35.2087,  42.7603,
+         51.2697,  61.032,   71.2193,  81.0546,  90.7571,  99.5076,  106.364,
+         111.216,  112.877,  111.288,  106.463,  99.5477,  90.7675,  81.7059,
+         71.0115,  61.3214,  51.5543,  42.6311,  35.1712,  28.3785,  22.593,
+         18.2557,  14.7387,  11.8552,  9.44558,  8.04787,  6.46706,  5.64766,
+         4.62926,  4.28496,  4.01921,  3.85923,  3.15543,  2.44881,  2.2804,
+         2.08211,  2.47078,  2.47588,  2.45599,  1.88098,  1.76205,  1.37918,
+         1.95951,  1.97868,  1.24903,  1.15062,  1.33571,  0.965367, 1.07663,
+         1.40468,  0.982297, 0.85258,  1.23184,  0.882275, 0.911729, 0.614329,
+         1.26008,  1.07271};
+    for (size_t i = 0; i < ndata; ++i) {
+      x[i] = static_cast<double>(i) * 0.01 - 0.5;
+      e[i] = sqrt(fabs(y[i]));
+    }
+
+    Fit fit;
+    fit.initialize();
+    fit.setProperty("Function", "name=PseudoVoigt, PeakCentre=0.0, FWHM=0.15, "
+                                "Height=112.78, Mixing=0.7");
+    fit.setProperty("InputWorkspace", ws);
+    TS_ASSERT_THROWS_NOTHING(TS_ASSERT(fit.execute()))
+    TS_ASSERT(fit.isExecuted());
+
+    IFunction_sptr fitted = fit.getProperty("Function");
+    TS_ASSERT_DELTA(fitted->getError(0), 0.0, 1e-6);
+    TS_ASSERT_DELTA(fitted->getError(2), 0.0, 1e-6);
+    TS_ASSERT_DELTA(fitted->getError(1), 0.0, 1e-6);
+    TS_ASSERT_DELTA(fitted->getError(3), 0.0, 1e-6);
+    TS_ASSERT_DELTA(fitted->getParameter("Mixing"), 0.7, 1e-2);
+    TS_ASSERT_DELTA(fitted->getParameter("PeakCentre"), 0.0, 1e-4);
+    TS_ASSERT_DELTA(fitted->getParameter("Height"), 112.78, 0.5);
+    TS_ASSERT_DELTA(fitted->getParameter("FWHM"), 0.15, 1e-2);
+  }
 };
 
 class FitTestPerformance : public CxxTest::TestSuite {
