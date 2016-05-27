@@ -204,7 +204,7 @@ void DetectorEfficiencyCor::correctForEfficiency(int64_t spectraIn) {
 
   // get a pointer to the detectors that created the spectrum
   const std::set<detid_t> &dets =
-      m_inputWS->getSpectrum(spectraIn)->getDetectorIDs();
+      m_inputWS->getSpectrum(spectraIn).getDetectorIDs();
   const double ndets(static_cast<double>(dets.size())); // We correct each pixel
                                                         // so make sure we
                                                         // average the

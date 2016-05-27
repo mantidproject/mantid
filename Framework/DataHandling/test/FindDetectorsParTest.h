@@ -422,9 +422,9 @@ private:
 
     for (int j = 0; j < NHIST; ++j) {
       // Just set the spectrum number to match the index
-      ISpectrum *spec = inputWS->getSpectrum(j);
-      spec->setSpectrumNo(j + 1);
-      spec->setDetectorID(j + 1);
+      auto &spec = inputWS->getSpectrum(j);
+      spec.setSpectrumNo(j + 1);
+      spec.setDetectorID(j + 1);
     }
 
     AnalysisDataService::Instance().add(WS_Name, inputWS);
@@ -465,9 +465,9 @@ private:
     // get pointers to the detectors, contributed into group;
     partDetectors = pDet->getDetectors();
 
-    inputWS->getSpectrum(0)->setSpectrumNo(1);
-    inputWS->getSpectrum(0)->clearDetectorIDs();
-    inputWS->getSpectrum(0)->addDetectorIDs(pDet->getDetectorIDs());
+    inputWS->getSpectrum(0).setSpectrumNo(1);
+    inputWS->getSpectrum(0).clearDetectorIDs();
+    inputWS->getSpectrum(0).addDetectorIDs(pDet->getDetectorIDs());
 
     for (size_t i = 0; i < NDET; i++) {
       spInst->markAsDetector(partDetectors[i].get());

@@ -165,8 +165,8 @@ Create2DWorkspaceWithValues(int64_t nHist, int64_t nBins, bool isHist,
   for (int i = 0; i < nHist; i++) {
     retVal->setX(i, x1);
     retVal->setData(i, y1, e1);
-    retVal->getSpectrum(i)->setDetectorID(i);
-    retVal->getSpectrum(i)->setSpectrumNo(i);
+    retVal->getSpectrum(i).setDetectorID(i);
+    retVal->getSpectrum(i).setSpectrumNo(i);
   }
   retVal = maskSpectra(retVal, maskedWorkspaceIndices);
   return retVal;
@@ -372,8 +372,8 @@ create2DWorkspaceWithRectangularInstrument(int numBanks, int numPixels,
   ws->setInstrument(inst);
   ws->getAxis(0)->setUnit("dSpacing");
   for (size_t wi = 0; wi < ws->getNumberHistograms(); wi++) {
-    ws->getSpectrum(wi)->setDetectorID(detid_t(numPixels * numPixels + wi));
-    ws->getSpectrum(wi)->setSpectrumNo(specnum_t(wi));
+    ws->getSpectrum(wi).setDetectorID(detid_t(numPixels * numPixels + wi));
+    ws->getSpectrum(wi).setSpectrumNo(specnum_t(wi));
   }
 
   return ws;
@@ -495,8 +495,8 @@ create2DWorkspaceWithReflectometryInstrument(double startX) {
   workspace->setYUnit("Counts");
 
   workspace->setInstrument(instrument);
-  workspace->getSpectrum(0)->setDetectorID(det->getID());
-  workspace->getSpectrum(1)->setDetectorID(monitor->getID());
+  workspace->getSpectrum(0).setDetectorID(det->getID());
+  workspace->getSpectrum(1).setDetectorID(monitor->getID());
   return workspace;
 }
 
@@ -528,7 +528,7 @@ void createInstrumentForWorkspaceWithDistances(
     instrument->markAsDetector(det);
 
     // Link it to the workspace
-    workspace->getSpectrum(i)->addDetectorID(det->getID());
+    workspace->getSpectrum(i).addDetectorID(det->getID());
   }
 }
 
@@ -743,10 +743,10 @@ MatrixWorkspace_sptr CreateGroupedWorkspace2D(size_t numHist, int numBins,
           static_cast<int>(numHist)));
 
   for (int g = 0; g < static_cast<int>(numHist); g++) {
-    ISpectrum *spec = retVal->getSpectrum(g);
+    auto &spec = retVal->getSpectrum(g);
     for (int i = 1; i <= 9; i++)
-      spec->addDetectorID(g * 9 + i);
-    spec->setSpectrumNo(g + 1); // Match detector ID and spec NO
+      spec.addDetectorID(g * 9 + i);
+    spec.setSpectrumNo(g + 1); // Match detector ID and spec NO
   }
   return boost::dynamic_pointer_cast<MatrixWorkspace>(retVal);
 }
@@ -763,10 +763,10 @@ CreateGroupedWorkspace2DWithRingsAndBoxes(size_t RootOfNumHist, int numBins,
       ComponentCreationHelper::createTestInstrumentCylindrical(
           static_cast<int>(numHist)));
   for (int g = 0; g < static_cast<int>(numHist); g++) {
-    ISpectrum *spec = retVal->getSpectrum(g);
+    auto &spec = retVal->getSpectrum(g);
     for (int i = 1; i <= 9; i++)
-      spec->addDetectorID(g * 9 + i);
-    spec->setSpectrumNo(g + 1); // Match detector ID and spec NO
+      spec.addDetectorID(g * 9 + i);
+    spec.setSpectrumNo(g + 1); // Match detector ID and spec NO
   }
   return boost::dynamic_pointer_cast<MatrixWorkspace>(retVal);
 }
@@ -921,13 +921,13 @@ createProcessedInelasticWS(const std::vector<double> &L2,
           L2, polar, azimutal));
 
   for (int g = 0; g < static_cast<int>(numPixels); g++) {
-    ISpectrum *spec = ws->getSpectrum(g);
+    auto &spec = ws->getSpectrum(g);
     // we just made (in createCylInstrumentWithDetInGivenPosisions) det ID-s to
     // start from 1
-    spec->setDetectorID(g + 1);
+    spec.setDetectorID(g + 1);
     // and this is absolutely different nummer, corresponding to det ID just by
     // chance ? -- some uncertainties remain
-    spec->setSpectrumNo(g + 1);
+    spec.setSpectrumNo(g + 1);
     // spec->setSpectrumNo(g+1);
     //   spec->addDetectorID(g*9);
     //   spec->setSpectrumNo(g+1); // Match detector ID and spec NO

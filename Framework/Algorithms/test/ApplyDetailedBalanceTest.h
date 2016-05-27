@@ -162,7 +162,7 @@ private:
     for (int i = 0; i < nspecs; i++) {
       ws2D->setX(i, xv);
       ws2D->setData(i, yv, ev);
-      ws2D->getSpectrum(i)->setSpectrumNo(i);
+      ws2D->getSpectrum(i).setSpectrumNo(i);
     }
 
     AnalysisDataService::Instance().add(inputWSname, ws2D);

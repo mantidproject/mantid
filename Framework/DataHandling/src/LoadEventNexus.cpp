@@ -1435,11 +1435,9 @@ void LoadEventNexus::makeMapToEventLists(std::vector<std::vector<T>> &vectors) {
     }
     for (size_t period = 0; period < m_ws->nPeriods(); ++period) {
       for (size_t i = 0; i < m_ws->getNumberHistograms(); ++i) {
-        const ISpectrum *spec = m_ws->getSpectrum(i);
-        if (spec) {
-          getEventsFrom(m_ws->getEventList(i, period),
-                        vectors[period][spec->getSpectrumNo()]);
-        }
+        const auto &spec = m_ws->getSpectrum(i);
+        getEventsFrom(m_ws->getEventList(i, period),
+                      vectors[period][spec.getSpectrumNo()]);
       }
     }
   } else {

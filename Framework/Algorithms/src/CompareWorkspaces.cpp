@@ -727,23 +727,23 @@ bool CompareWorkspaces::checkSpectraMap(MatrixWorkspace_const_sptr ws1,
   }
 
   for (size_t i = 0; i < ws1->getNumberHistograms(); i++) {
-    const ISpectrum *spec1 = ws1->getSpectrum(i);
-    const ISpectrum *spec2 = ws2->getSpectrum(i);
-    if (spec1->getSpectrumNo() != spec2->getSpectrumNo()) {
+    const auto &spec1 = ws1->getSpectrum(i);
+    const auto &spec2 = ws2->getSpectrum(i);
+    if (spec1.getSpectrumNo() != spec2.getSpectrumNo()) {
       recordMismatch("Spectrum number mismatch");
       return false;
     }
-    if (spec1->getDetectorIDs().size() != spec2->getDetectorIDs().size()) {
+    if (spec1.getDetectorIDs().size() != spec2.getDetectorIDs().size()) {
       std::ostringstream out;
       out << "Number of detector IDs mismatch: "
-          << spec1->getDetectorIDs().size() << " vs "
-          << spec2->getDetectorIDs().size() << " at workspace index " << i;
+          << spec1.getDetectorIDs().size() << " vs "
+          << spec2.getDetectorIDs().size() << " at workspace index " << i;
       recordMismatch(out.str());
       return false;
     }
-    auto it2 = spec2->getDetectorIDs().cbegin();
-    for (auto it1 = spec1->getDetectorIDs().cbegin();
-         it1 != spec1->getDetectorIDs().cend(); ++it1, ++it2) {
+    auto it2 = spec2.getDetectorIDs().cbegin();
+    for (auto it1 = spec1.getDetectorIDs().cbegin();
+         it1 != spec1.getDetectorIDs().cend(); ++it1, ++it2) {
       if (*it1 != *it2) {
         recordMismatch("Detector IDs mismatch");
         return false;

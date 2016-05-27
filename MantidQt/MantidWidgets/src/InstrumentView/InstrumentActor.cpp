@@ -644,7 +644,7 @@ void InstrumentActor::resetColors() {
     double integratedValue = m_specIntegrs[wi];
     try {
       // Find if the detector is masked
-      const auto &dets = sharedWorkspace->getSpectrum(wi)->getDetectorIDs();
+      const auto &dets = sharedWorkspace->getSpectrum(wi).getDetectorIDs();
       bool masked = false;
 
       if (mask) {

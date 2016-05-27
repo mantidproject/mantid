@@ -40,7 +40,7 @@ SpecialWorkspace2D::SpecialWorkspace2D(Geometry::Instrument_const_sptr inst,
   // Make the mapping, which will be used for speed later.
   detID_to_WI.clear();
   for (size_t wi = 0; wi < m_noVectors; wi++) {
-    set<detid_t> dets = getSpectrum(wi)->getDetectorIDs();
+    auto &dets = getSpectrum(wi).getDetectorIDs();
     for (auto det : dets) {
       detID_to_WI[det] = wi;
     }
@@ -60,7 +60,7 @@ SpecialWorkspace2D::SpecialWorkspace2D(API::MatrixWorkspace_const_sptr parent) {
   // Make the mapping, which will be used for speed later.
   detID_to_WI.clear();
   for (size_t wi = 0; wi < m_noVectors; wi++) {
-    set<detid_t> dets = getSpectrum(wi)->getDetectorIDs();
+    auto &dets = getSpectrum(wi).getDetectorIDs();
     for (auto det : dets) {
       detID_to_WI[det] = wi;
     }
@@ -190,7 +190,7 @@ SpecialWorkspace2D::getDetectorIDs(const std::size_t workspaceIndex) const {
   if (size_t(workspaceIndex) > this->getNumberHistograms())
     throw std::invalid_argument(
         "SpecialWorkspace2D::getDetectorID(): Invalid workspaceIndex given.");
-  return this->getSpectrum(workspaceIndex)->getDetectorIDs();
+  return this->getSpectrum(workspaceIndex).getDetectorIDs();
 }
 
 //--------------------------------------------------------------------------------------------
@@ -353,8 +353,8 @@ bool SpecialWorkspace2D::isCompatible(
 
   // 2. Check detector ID
   for (size_t ispec = 0; ispec < numhist1; ispec++) {
-    set<detid_t> ids1 = this->getSpectrum(ispec)->getDetectorIDs();
-    set<detid_t> ids2 = ws->getSpectrum(ispec)->getDetectorIDs();
+    set<detid_t> ids1 = this->getSpectrum(ispec).getDetectorIDs();
+    set<detid_t> ids2 = ws->getSpectrum(ispec).getDetectorIDs();
 
     if (ids1.size() != ids2.size()) {
       g_log.debug() << "Spectra " << ispec

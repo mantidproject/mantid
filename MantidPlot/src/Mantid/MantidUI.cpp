@@ -1195,10 +1195,10 @@ Table *MantidUI::createDetectorTable(
     colValues << QVariant(static_cast<double>(wsIndex));
     const double dataY0(ws->readY(wsIndex)[0]), dataE0(ws->readE(wsIndex)[0]);
     try {
-      ISpectrum *spectrum = ws->getSpectrum(wsIndex);
-      Mantid::specnum_t specNo = spectrum->getSpectrumNo();
+      auto &spectrum = ws->getSpectrum(wsIndex);
+      Mantid::specnum_t specNo = spectrum.getSpectrumNo();
       QString detIds("");
-      const auto &ids = spectrum->getDetectorIDs();
+      const auto &ids = spectrum.getDetectorIDs();
       size_t ndets = ids.size();
       auto iter = ids.begin();
       auto itEnd = ids.end();

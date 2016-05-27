@@ -313,8 +313,8 @@ MatrixWorkspace_sptr CreateSampleWorkspace::createHistogramWorkspace(
   for (size_t wi = 0; wi < static_cast<size_t>(numPixels); wi++) {
     retVal->setX(wi, x);
     retVal->setData(wi, y, e);
-    retVal->getSpectrum(wi)->setDetectorID(detid_t(start_at_pixelID + wi));
-    retVal->getSpectrum(wi)->setSpectrumNo(specnum_t(wi + 1));
+    retVal->getSpectrum(wi).setDetectorID(detid_t(start_at_pixelID + wi));
+    retVal->getSpectrum(wi).setSpectrumNo(specnum_t(wi + 1));
   }
 
   return retVal;

@@ -1299,7 +1299,7 @@ void SNSLiveEventDataListener::initMonitorWorkspace() {
                                                     monitorsBuffer, true);
   // Set the id numbers
   for (size_t i = 0; i < monitors.size(); ++i) {
-    monitorsBuffer->getSpectrum(i)->setDetectorID(monitors[i]);
+    monitorsBuffer->getSpectrum(i).setDetectorID(monitors[i]);
   }
 
   m_monitorIndexMap = monitorsBuffer->getDetectorIDToWorkspaceIndexMap(true);

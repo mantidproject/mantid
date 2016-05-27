@@ -564,11 +564,11 @@ DetectorDiagnostic::makeMap(API::MatrixWorkspace_sptr countsWS) {
   }
 
   for (size_t i = 0; i < countsWS->getNumberHistograms(); i++) {
-    detid_t d = (*((countsWS->getSpectrum(i))->getDetectorIDs().begin()));
+    detid_t d = (*(countsWS->getSpectrum(i).getDetectorIDs().begin()));
     std::vector<boost::shared_ptr<const Mantid::Geometry::IComponent>> anc =
         instrument->getDetector(d)->getAncestors();
     // std::vector<boost::shared_ptr<const IComponent> >
-    // anc=(*(countsWS->getSpectrum(i)->getDetectorIDs().begin()))->getAncestors();
+    // anc=(*(countsWS->getSpectrum(i)->getDetectorIDs().begin())).getAncestors();
     if (anc.size() < static_cast<size_t>(m_parents)) {
       g_log.warning("Too many levels up. Will ignore LevelsUp");
       m_parents = 0;
@@ -639,7 +639,7 @@ DetectorDiagnostic::calculateMedian(const API::MatrixWorkspace_sptr input,
 
       if (checkForMask) {
         const std::set<detid_t> &detids =
-            input->getSpectrum(hists[i])->getDetectorIDs();
+            input->getSpectrum(hists[i]).getDetectorIDs();
         if (instrument->isDetectorMasked(detids))
           continue;
         if (instrument->isMonitor(detids))

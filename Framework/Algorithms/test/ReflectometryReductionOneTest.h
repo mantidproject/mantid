@@ -45,9 +45,9 @@ public:
     const int monitorIndex = 0;
 
     specnum_t specId1 =
-        toConvert->getSpectrum(workspaceIndexToKeep1)->getSpectrumNo();
+        toConvert->getSpectrum(workspaceIndexToKeep1).getSpectrumNo();
     specnum_t monitorSpecId =
-        toConvert->getSpectrum(monitorIndex)->getSpectrumNo();
+        toConvert->getSpectrum(monitorIndex).getSpectrumNo();
 
     // Define one spectra to keep
     detectorIndexRange.push_back(static_cast<int>(workspaceIndexToKeep1));
@@ -177,7 +177,7 @@ public:
     // set the instrument to this workspace
     m_tinyReflWS->setInstrument(instrument);
     // set this detector ready for processing instructions
-    m_tinyReflWS->getSpectrum(0)->setDetectorID(det->getID());
+    m_tinyReflWS->getSpectrum(0).setDetectorID(det->getID());
 
     auto alg = AlgorithmManager::Instance().create("ReflectometryReductionOne");
     alg->setRethrows(true);
@@ -336,7 +336,7 @@ public:
     // set the instrument to this workspace
     m_tinyReflWS->setInstrument(instrument);
     // set this detector ready for processing instructions
-    m_tinyReflWS->getSpectrum(0)->setDetectorID(det->getID());
+    m_tinyReflWS->getSpectrum(0).setDetectorID(det->getID());
 
     auto alg = AlgorithmManager::Instance().create("ReflectometryReductionOne");
     alg->setRethrows(true);

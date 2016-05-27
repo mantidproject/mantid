@@ -237,8 +237,8 @@ void GetAllEi::exec() {
   auto lastChopper = pInstrument->getChopperPoint(nChoppers-1);
   ///<---------------------------------------------------
   */
-  auto baseSpectrum = inputWS->getSpectrum(det1WSIndex);
-  std::pair<double, double> TOF_range = baseSpectrum->getXDataRange();
+  auto &baseSpectrum = inputWS->getSpectrum(det1WSIndex);
+  std::pair<double, double> TOF_range = baseSpectrum.getXDataRange();
 
   double Period =
       (0.5 * 1.e+6) / chopSpeed; // 0.5 because some choppers open twice.
@@ -262,9 +262,9 @@ void GetAllEi::exec() {
     printDebugModeInfo(guess_opening, TOF_range, destUnit);
   }
   std::pair<double, double> Mon1_Erange =
-      monitorWS->getSpectrum(0)->getXDataRange();
+      monitorWS->getSpectrum(0).getXDataRange();
   std::pair<double, double> Mon2_Erange =
-      monitorWS->getSpectrum(1)->getXDataRange();
+      monitorWS->getSpectrum(1).getXDataRange();
   double eMin = std::max(Mon1_Erange.first, Mon2_Erange.first);
   double eMax = std::min(Mon1_Erange.second, Mon2_Erange.second);
   g_log.debug() << boost::str(
@@ -883,11 +883,11 @@ GetAllEi::buildWorkspaceToFit(const API::MatrixWorkspace_sptr &inputWS,
   wsIndex0 = inputWS->getIndexFromSpectrumNumber(specNum1);
   specnum_t specNum2 = getProperty("Monitor2SpecID");
   size_t wsIndex1 = inputWS->getIndexFromSpectrumNumber(specNum2);
-  auto pSpectr1 = inputWS->getSpectrum(wsIndex0);
-  auto pSpectr2 = inputWS->getSpectrum(wsIndex1);
+  auto &pSpectr1 = inputWS->getSpectrum(wsIndex0);
+  auto &pSpectr2 = inputWS->getSpectrum(wsIndex1);
   // assuming equally binned ws.
   // auto bins       = inputWS->dataX(wsIndex0);
-  auto bins = pSpectr1->dataX();
+  auto bins = pSpectr1.dataX();
   size_t XLength = bins.size();
   size_t YLength = inputWS->dataY(wsIndex0).size();
   auto working_ws =
@@ -911,14 +911,14 @@ GetAllEi::buildWorkspaceToFit(const API::MatrixWorkspace_sptr &inputWS,
     Error2[i] = inputWS->dataE(wsIndex1)[i];
   }
   // copy detector mapping
-  API::ISpectrum *spectrum = working_ws->getSpectrum(0);
-  spectrum->setSpectrumNo(specNum1);
-  spectrum->clearDetectorIDs();
-  spectrum->addDetectorIDs(pSpectr1->getDetectorIDs());
-  spectrum = working_ws->getSpectrum(1);
-  spectrum->setSpectrumNo(specNum2);
-  spectrum->clearDetectorIDs();
-  spectrum->addDetectorIDs(pSpectr2->getDetectorIDs());
+  auto &spectrum1 = working_ws->getSpectrum(0);
+  spectrum1.setSpectrumNo(specNum1);
+  spectrum1.clearDetectorIDs();
+  spectrum1.addDetectorIDs(pSpectr1.getDetectorIDs());
+  auto &spectrum2 = working_ws->getSpectrum(1);
+  spectrum2.setSpectrumNo(specNum2);
+  spectrum2.clearDetectorIDs();
+  spectrum2.addDetectorIDs(pSpectr2.getDetectorIDs());
 
   if (inputWS->getAxis(0)->unit()->caption() != "Energy") {
     API::IAlgorithm_sptr conv = createChildAlgorithm("ConvertUnits");

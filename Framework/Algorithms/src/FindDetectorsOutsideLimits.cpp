@@ -133,7 +133,7 @@ void FindDetectorsOutsideLimits::exec() {
 
     if (checkForMask) {
       const std::set<detid_t> &detids =
-          countsWS->getSpectrum(i)->getDetectorIDs();
+          countsWS->getSpectrum(i).getDetectorIDs();
       if (instrument->isMonitor(detids)) {
         continue; // do include or exclude from mask
       }

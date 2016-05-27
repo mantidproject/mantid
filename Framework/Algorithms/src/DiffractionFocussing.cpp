@@ -146,9 +146,9 @@ void DiffractionFocussing::exec() {
     outE.assign(tmpE.begin(), tmpE.end());
     outY.assign(tmpY.begin(), tmpY.end());
     outX.assign(tmpX.begin(), tmpX.end());
-    API::ISpectrum *inSpec = tmpW->getSpectrum(i);
-    outputW->getSpectrum(hist)->setSpectrumNo(inSpec->getSpectrumNo());
-    inSpec->setSpectrumNo(-1);
+    auto &inSpec = tmpW->getSpectrum(i);
+    outputW->getSpectrum(hist).setSpectrumNo(inSpec.getSpectrumNo());
+    inSpec.setSpectrumNo(-1);
   }
 
   progress(1.);

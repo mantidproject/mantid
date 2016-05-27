@@ -58,14 +58,14 @@ public:
     // been broken
     TSM_ASSERT_EQUALS("Dx vectors should be shared between spectra by default "
                       "(after a LoadRaw)",
-                      in->getSpectrum(0)->ptrDx(), in->getSpectrum(1)->ptrDx())
+                      in->getSpectrum(0).ptrDx(), in->getSpectrum(1).ptrDx())
     MatrixWorkspace_const_sptr out =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("out");
     // Check sharing of the Dx vectors (which are unused in this case) has not
     // been broken
     TSM_ASSERT_EQUALS(
         "Dx vectors should remain shared between spectra after CloneWorkspace",
-        out->getSpectrum(0)->ptrDx(), out->getSpectrum(1)->ptrDx())
+        out->getSpectrum(0).ptrDx(), out->getSpectrum(1).ptrDx())
 
     // Best way to test this is to use the CheckWorkspacesMatch algorithm
     Mantid::Algorithms::CheckWorkspacesMatch checker;

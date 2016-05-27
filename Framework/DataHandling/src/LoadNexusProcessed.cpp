@@ -1672,13 +1672,13 @@ void LoadNexusProcessed::readInstrumentGroup(
         (m_list &&
          find(m_spec_list.begin(), m_spec_list.end(), i) !=
              m_spec_list.end())) {
-      ISpectrum *spec = local_workspace->getSpectrum(index);
-      spec->setSpectrumNo(spectrum);
+      auto &spec = local_workspace->getSpectrum(index);
+      spec.setSpectrumNo(spectrum);
       ++index;
 
       int start = spectraInfo.detectorIndex[i - 1];
       int end = start + spectraInfo.detectorCount[i - 1];
-      spec->setDetectorIDs(
+      spec.setDetectorIDs(
           std::set<detid_t>(spectraInfo.detectorList.get() + start,
                             spectraInfo.detectorList.get() + end));
     }

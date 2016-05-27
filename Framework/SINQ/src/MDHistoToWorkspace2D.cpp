@@ -98,7 +98,7 @@ void MDHistoToWorkspace2D::recurseData(IMDHistoWorkspace_sptr inWS,
     }
     outWS->setX(m_currentSpectra, xData);
     outWS->getSpectrum(m_currentSpectra)
-        ->setSpectrumNo(static_cast<specnum_t>(m_currentSpectra));
+        .setSpectrumNo(static_cast<specnum_t>(m_currentSpectra));
     m_currentSpectra++;
   } else {
     // recurse deeper
@@ -118,10 +118,10 @@ void MDHistoToWorkspace2D::checkW2D(
   g_log.information() << "W2D has " << nSpectra << " histograms of length "
                       << length;
   for (size_t i = 0; i < nSpectra; i++) {
-    ISpectrum *spec = outWS->getSpectrum(i);
-    x = spec->dataX();
-    y = spec->dataY();
-    e = spec->dataE();
+    auto &spec = outWS->getSpectrum(i);
+    x = spec.dataX();
+    y = spec.dataY();
+    e = spec.dataE();
     if (x.size() != length) {
       g_log.information() << "Spectrum " << i << " x-size mismatch, is "
                           << x.size() << " should be " << length << "\n";

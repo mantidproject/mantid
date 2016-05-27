@@ -82,8 +82,8 @@ public:
   const API::Run &run() const;
   API::Run &mutableRun();
   API::Sample &mutableSample();
-  Mantid::API::ISpectrum *getSpectrum(const size_t index);
-  const Mantid::API::ISpectrum *getSpectrum(const size_t index) const;
+  Mantid::API::ISpectrum &getSpectrum(const size_t index);
+  const Mantid::API::ISpectrum &getSpectrum(const size_t index) const;
   Mantid::API::Axis *getAxis(const size_t &i) const;
   size_t getNumberHistograms() const;
   const DataObjects::EventList &

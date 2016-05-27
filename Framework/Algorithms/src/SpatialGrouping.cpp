@@ -73,8 +73,8 @@ void SpatialGrouping::exec() {
   // Make a map key = spectrum number, value = detector at that spectrum
   m_detectors.clear();
   for (size_t i = 0; i < inputWorkspace->getNumberHistograms(); i++) {
-    const ISpectrum *spec = inputWorkspace->getSpectrum(i);
-    m_detectors[spec->getSpectrumNo()] = inputWorkspace->getDetector(i);
+    const auto &spec = inputWorkspace->getSpectrum(i);
+    m_detectors[spec.getSpectrumNo()] = inputWorkspace->getDetector(i);
   }
 
   // TODO: There is a confusion in this algorithm between detector IDs and
@@ -172,8 +172,8 @@ void SpatialGrouping::exec() {
       // smap.getDetectors((*grpIt)[i]);
       size_t workspaceIndex =
           inputWorkspace->getIndexFromSpectrumNumber((*grpIt)[i]);
-      const std::set<detid_t> &detIds =
-          inputWorkspace->getSpectrum(workspaceIndex)->getDetectorIDs();
+      const auto &detIds =
+          inputWorkspace->getSpectrum(workspaceIndex).getDetectorIDs();
       for (auto detId : detIds) {
         xml << "," << detId;
       }

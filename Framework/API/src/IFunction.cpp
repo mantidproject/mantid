@@ -717,7 +717,7 @@ void IFunction::setMatrixWorkspace(
     const Geometry::ParameterMap &paramMap = workspace->instrumentParameters();
 
     Geometry::IDetector_const_sptr det;
-    size_t numDetectors = workspace->getSpectrum(wi)->getDetectorIDs().size();
+    size_t numDetectors = workspace->getSpectrum(wi).getDetectorIDs().size();
     if (numDetectors > 1) {
       // If several detectors are on this workspace index, just use the ID of
       // the first detector
@@ -725,7 +725,7 @@ void IFunction::setMatrixWorkspace(
       // and not the group. Ask Roman.
       Instrument_const_sptr inst = workspace->getInstrument();
       det = inst->getDetector(
-          *workspace->getSpectrum(wi)->getDetectorIDs().begin());
+          *workspace->getSpectrum(wi).getDetectorIDs().begin());
     } else
       // Get the detector (single) at this workspace index
       det = workspace->getDetector(wi);

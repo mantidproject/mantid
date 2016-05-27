@@ -936,32 +936,32 @@ size_t GroupDetectors2::formGroups(API::MatrixWorkspace_const_sptr inputWS,
   for (storage_map::const_iterator it = m_GroupWsInds.begin();
        it != m_GroupWsInds.end(); ++it) {
     // This is the grouped spectrum
-    ISpectrum *outSpec = outputWS->getSpectrum(outIndex);
+    auto &outSpec = outputWS->getSpectrum(outIndex);
 
     // The spectrum number of the group is the key
-    outSpec->setSpectrumNo(it->first);
+    outSpec.setSpectrumNo(it->first);
     // Start fresh with no detector IDs
-    outSpec->clearDetectorIDs();
+    outSpec.clearDetectorIDs();
 
     // Copy over X data from first spectrum, the bin boundaries for all spectra
     // are assumed to be the same here
-    outSpec->dataX() = inputWS->readX(0);
+    outSpec.dataX() = inputWS->readX(0);
 
     // the Y values and errors from spectra being grouped are combined in the
     // output spectrum
-    MantidVec &firstY = outSpec->dataY();
+    MantidVec &firstY = outSpec.dataY();
     // Keep track of number of detectors required for masking
     size_t nonMaskedSpectra(0);
     beh->dataX(outIndex)[0] = 0.0;
     beh->dataE(outIndex)[0] = 0.0;
     for (auto originalWI : it->second) {
       // detectors to add to firstSpecNum
-      const ISpectrum *fromSpectrum = inputWS->getSpectrum(originalWI);
+      const auto &fromSpectrum = inputWS->getSpectrum(originalWI);
 
       // Add up all the Y spectra and store the result in the first one
-      auto fEit = outSpec->dataE().begin();
-      auto Yit = fromSpectrum->dataY().cbegin();
-      auto Eit = fromSpectrum->dataE().cbegin();
+      auto fEit = outSpec.dataE().begin();
+      auto Yit = fromSpectrum.dataY().cbegin();
+      auto Eit = fromSpectrum.dataE().cbegin();
       for (auto fYit = firstY.begin(); fYit != firstY.end();
            ++fYit, ++fEit, ++Yit, ++Eit) {
         *fYit += *Yit;
@@ -970,7 +970,7 @@ size_t GroupDetectors2::formGroups(API::MatrixWorkspace_const_sptr inputWS,
       }
 
       // detectors to add to the output spectrum
-      outSpec->addDetectorIDs(fromSpectrum->getDetectorIDs());
+      outSpec.addDetectorIDs(fromSpectrum.getDetectorIDs());
       try {
         Geometry::IDetector_const_sptr det = inputWS->getDetector(originalWI);
         if (!det->isMasked())
@@ -1132,20 +1132,20 @@ void GroupDetectors2::moveOthers(const std::set<int64_t> &unGroupedSet,
     size_t sourceIndex = static_cast<size_t>(copyFrIt);
 
     // The input spectrum we'll copy
-    const ISpectrum *inputSpec = inputWS->getSpectrum(sourceIndex);
+    const auto &inputSpec = inputWS->getSpectrum(sourceIndex);
 
     // Destination of the copying
-    ISpectrum *outputSpec = outputWS->getSpectrum(outIndex);
+    auto &outputSpec = outputWS->getSpectrum(outIndex);
 
     // Copy the data
-    outputSpec->dataX() = inputSpec->dataX();
-    outputSpec->dataY() = inputSpec->dataY();
-    outputSpec->dataE() = inputSpec->dataE();
+    outputSpec.dataX() = inputSpec.dataX();
+    outputSpec.dataY() = inputSpec.dataY();
+    outputSpec.dataE() = inputSpec.dataE();
 
     // Spectrum numbers etc.
-    outputSpec->setSpectrumNo(inputSpec->getSpectrumNo());
-    outputSpec->clearDetectorIDs();
-    outputSpec->addDetectorIDs(inputSpec->getDetectorIDs());
+    outputSpec.setSpectrumNo(inputSpec.getSpectrumNo());
+    outputSpec.clearDetectorIDs();
+    outputSpec.addDetectorIDs(inputSpec.getDetectorIDs());
 
     // go to the next free index in the output workspace
     outIndex++;

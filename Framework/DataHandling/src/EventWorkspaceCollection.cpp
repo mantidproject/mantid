@@ -146,11 +146,11 @@ API::Run &EventWorkspaceCollection::mutableRun() {
 API::Sample &EventWorkspaceCollection::mutableSample() {
   return m_WsVec[0]->mutableSample();
 }
-Mantid::API::ISpectrum *
+Mantid::API::ISpectrum &
 EventWorkspaceCollection::getSpectrum(const size_t index) {
   return m_WsVec[0]->getSpectrum(index);
 }
-const Mantid::API::ISpectrum *
+const Mantid::API::ISpectrum &
 EventWorkspaceCollection::getSpectrum(const size_t index) const {
   return m_WsVec[0]->getSpectrum(index);
 }
@@ -160,7 +160,7 @@ void EventWorkspaceCollection::setSpectrumNumbersFromUniqueSpectra(
   for (auto &ws : m_WsVec) {
     size_t counter = 0;
     for (auto spectrum : uniqueSpectra) {
-      ws->getSpectrum(counter)->setSpectrumNo(spectrum);
+      ws->getSpectrum(counter).setSpectrumNo(spectrum);
       ++counter;
     }
   }
@@ -169,16 +169,16 @@ void EventWorkspaceCollection::setSpectrumNumbersFromUniqueSpectra(
 void EventWorkspaceCollection::setSpectrumNumberForAllPeriods(
     const size_t spectrumNumber, const specnum_t specid) {
   for (auto &ws : m_WsVec) {
-    auto spec = ws->getSpectrum(spectrumNumber);
-    spec->setSpectrumNo(specid);
+    auto &spec = ws->getSpectrum(spectrumNumber);
+    spec.setSpectrumNo(specid);
   }
 }
 
 void EventWorkspaceCollection::setDetectorIdsForAllPeriods(
     const size_t spectrumNumber, const detid_t id) {
   for (auto &ws : m_WsVec) {
-    auto spec = ws->getSpectrum(spectrumNumber);
-    spec->setDetectorID(id);
+    auto &spec = ws->getSpectrum(spectrumNumber);
+    spec.setDetectorID(id);
   }
 }
 

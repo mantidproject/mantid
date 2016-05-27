@@ -437,8 +437,8 @@ public:
 
     // Add instrument to workspace
     tinyWS->setInstrument(instrument);
-    tinyWS->getSpectrum(0)->addDetectorID(det->getID());
-    tinyWS->getSpectrum(1)->addDetectorID(monitor->getID());
+    tinyWS->getSpectrum(0).addDetectorID(det->getID());
+    tinyWS->getSpectrum(1).addDetectorID(monitor->getID());
 
     // Now we can parameterize the instrument
     auto tinyInst = tinyWS->getInstrument();

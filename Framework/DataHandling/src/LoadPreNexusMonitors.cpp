@@ -199,9 +199,9 @@ void LoadPreNexusMonitors::exec() {
     localWorkspace->dataY(i) = intensity;
     localWorkspace->dataE(i) = error;
     // Just have spectrum number be the same as the monitor number but -ve.
-    ISpectrum *spectrum = localWorkspace->getSpectrum(i);
-    spectrum->setSpectrumNo(monitorIDs[i]);
-    spectrum->setDetectorID(-monitorIDs[i]);
+    auto &spectrum = localWorkspace->getSpectrum(i);
+    spectrum.setSpectrumNo(monitorIDs[i]);
+    spectrum.setDetectorID(-monitorIDs[i]);
   }
 
   g_log.debug() << "Setting axis zero to TOF" << std::endl;

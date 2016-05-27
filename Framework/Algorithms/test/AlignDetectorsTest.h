@@ -76,12 +76,12 @@ public:
     TS_ASSERT_EQUALS(outWS->dataY(2)[50], inWS->dataY(1)[50]);
 
     for (size_t i = 0; i < outWS->getNumberHistograms(); i++) {
-      TS_ASSERT_EQUALS(outWS->getSpectrum(i)->getSpectrumNo(),
-                       inWS->getSpectrum(i)->getSpectrumNo());
-      TS_ASSERT_EQUALS(outWS->getSpectrum(i)->getDetectorIDs().size(),
-                       inWS->getSpectrum(i)->getDetectorIDs().size());
-      TS_ASSERT_EQUALS(*outWS->getSpectrum(i)->getDetectorIDs().begin(),
-                       *inWS->getSpectrum(i)->getDetectorIDs().begin());
+      TS_ASSERT_EQUALS(outWS->getSpectrum(i).getSpectrumNo(),
+                       inWS->getSpectrum(i).getSpectrumNo());
+      TS_ASSERT_EQUALS(outWS->getSpectrum(i).getDetectorIDs().size(),
+                       inWS->getSpectrum(i).getDetectorIDs().size());
+      TS_ASSERT_EQUALS(*outWS->getSpectrum(i).getDetectorIDs().begin(),
+                       *inWS->getSpectrum(i).getDetectorIDs().begin());
     }
 
     AnalysisDataService::Instance().remove(outputWS);

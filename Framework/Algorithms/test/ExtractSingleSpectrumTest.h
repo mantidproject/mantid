@@ -109,17 +109,13 @@ private:
   void do_Spectrum_Tests(MatrixWorkspace_sptr outputWS, const specnum_t specID,
                          const detid_t detID) {
     TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 1);
-    const Mantid::API::ISpectrum *spectrum(NULL);
-    TS_ASSERT_THROWS_NOTHING(spectrum = outputWS->getSpectrum(0));
-    if (spectrum) {
-      TS_ASSERT_EQUALS(spectrum->getSpectrumNo(), specID);
-      auto detids = spectrum->getDetectorIDs();
-      TS_ASSERT_EQUALS(detids.size(), 1);
-      const detid_t id = *(detids.begin());
-      TS_ASSERT_EQUALS(id, detID);
-    } else {
-      TS_FAIL("No spectra/detectors associated with extracted histogram.");
-    }
+    TS_ASSERT_THROWS_NOTHING(outputWS->getSpectrum(0));
+    const auto &spectrum = outputWS->getSpectrum(0);
+    TS_ASSERT_EQUALS(spectrum.getSpectrumNo(), specID);
+    auto detids = spectrum.getDetectorIDs();
+    TS_ASSERT_EQUALS(detids.size(), 1);
+    const detid_t id = *(detids.begin());
+    TS_ASSERT_EQUALS(id, detID);
   }
 };
 

@@ -430,8 +430,8 @@ void SANSDiagnostics::getSpectraList(
   size_t aux;
   // this is a costly opperation and should be done just once for each file
   for (size_t i = 0; i < mws_sptr->getNumberHistograms(); ++i) {
-    const ISpectrum *const spec = mws_sptr->getSpectrum(i);
-    auto detIDs = spec->getDetectorIDs();
+    const auto &spec = mws_sptr->getSpectrum(i);
+    auto detIDs = spec.getDetectorIDs();
     if (!detIDs.empty()) {
       // Assuming 1 detector per spectrum (the old code would have failed if it
       // wasn't)
@@ -439,7 +439,7 @@ void SANSDiagnostics::getSpectraList(
       // if detector id inside the range
       if (detID >= rectDet->getMinimumDetectorId() &&
           detID <= rectDet->getMaximumDetectorId()) {
-        aux = spec->getSpectrumNo();
+        aux = spec.getSpectrumNo();
         if (aux > max_spec_index)
           max_spec_index = aux;
         if (aux < min_spec_index)
@@ -456,8 +456,8 @@ void SANSDiagnostics::getSpectraList(
   specList.clear();
   // it is not really required, it could stay with the workspace id, just for
   // compatibility
-  specList.push_back(mws_sptr->getSpectrum(min_spec_index)->getSpectrumNo());
-  specList.push_back(mws_sptr->getSpectrum(max_spec_index)->getSpectrumNo());
+  specList.push_back(mws_sptr->getSpectrum(min_spec_index).getSpectrumNo());
+  specList.push_back(mws_sptr->getSpectrum(max_spec_index).getSpectrumNo());
 }
 /** This method returns the minimum and maximum spectrum Nos
   * @param specList - list of spectra.

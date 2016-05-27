@@ -248,7 +248,7 @@ public:
     ew->resizeTo(3);
     TS_ASSERT_EQUALS(ew->getNumberHistograms(), 3);
     for (size_t i = 0; i < ew->getNumberHistograms(); ++i) {
-      TS_ASSERT_EQUALS(ew->getSpectrum(i)->getSpectrumNo(), i + 1);
+      TS_ASSERT_EQUALS(ew->getSpectrum(i).getSpectrumNo(), i + 1);
       // TS_ASSERT( ew->getEventList(i).empty() );
       TS_ASSERT_EQUALS(ew->readX(i).size(), 2);
     }
@@ -272,11 +272,11 @@ public:
     TS_ASSERT_EQUALS(ew->getNumberHistograms(), numpixels);
     int badcount = 0;
     for (int i = 0; i < numpixels; i++) {
-      ISpectrum *spec = ew->getSpectrum(i);
-      bool b = spec->hasDetectorID(i + 1);
+      auto &spec = ew->getSpectrum(i);
+      bool b = spec.hasDetectorID(i + 1);
       TSM_ASSERT("Workspace i has the given detector id i+1", b);
       TSM_ASSERT_EQUALS("Matching detector ID and spectrum number.",
-                        spec->getSpectrumNo(), i + 1);
+                        spec.getSpectrumNo(), i + 1);
       if (b)
         if (badcount++ > 40)
           break;
@@ -321,7 +321,7 @@ public:
     // pixel id: 5,15,25, etc.
     for (int wi = 0; wi < static_cast<int>(uneven->getNumberHistograms());
          wi++) {
-      TS_ASSERT_EQUALS(*uneven->getSpectrum(wi)->getDetectorIDs().begin(),
+      TS_ASSERT_EQUALS(*uneven->getSpectrum(wi).getDetectorIDs().begin(),
                        5 + wi * 10);
     }
 
@@ -657,13 +657,13 @@ public:
         boost::dynamic_pointer_cast<const EventWorkspace>(ew);
 
     // OK, we grab data0 from the MRU.
-    const ISpectrum *inSpec = ew2->getSpectrum(0);
-    const ISpectrum *inSpec300 = ew2->getSpectrum(300);
-    inSpec->lockData();
-    inSpec300->lockData();
+    const auto &inSpec = ew2->getSpectrum(0);
+    const auto &inSpec300 = ew2->getSpectrum(300);
+    inSpec.lockData();
+    inSpec300.lockData();
 
-    const MantidVec &data0 = inSpec->readY();
-    const MantidVec &e300 = inSpec300->readE();
+    const MantidVec &data0 = inSpec.readY();
+    const MantidVec &e300 = inSpec300.readE();
     TS_ASSERT_EQUALS(data0.size(), NUMBINS - 1);
     MantidVec data0_copy(data0);
     MantidVec e300_copy(e300);
@@ -681,8 +681,8 @@ public:
       TS_ASSERT_EQUALS(e300[i], e300_copy[i]);
     }
 
-    inSpec->unlockData();
-    inSpec300->unlockData();
+    inSpec.unlockData();
+    inSpec300.unlockData();
 
     MantidVec otherData = ew2->readY(255);
 

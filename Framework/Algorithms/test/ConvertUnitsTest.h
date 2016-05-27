@@ -49,8 +49,8 @@ public:
       space2D->setX(j, x);
       space2D->setData(j, a, e);
       // Just set the spectrum number to match the index
-      space2D->getSpectrum(j)->setSpectrumNo(j);
-      space2D->getSpectrum(j)->setDetectorID(j);
+      space2D->getSpectrum(j).setSpectrumNo(j);
+      space2D->getSpectrum(j).setDetectorID(j);
     }
     space2D->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
 
@@ -368,7 +368,7 @@ public:
     physicalPixel->setPos(-0.34732, -3.28797, -2.29022);
     testInst->add(physicalPixel);
     testInst->markAsDetector(physicalPixel);
-    ws->getSpectrum(0)->addDetectorID(physicalPixel->getID());
+    ws->getSpectrum(0).addDetectorID(physicalPixel->getID());
 
     ConvertUnits conv;
     conv.initialize();

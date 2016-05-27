@@ -130,7 +130,7 @@ void SofQWNormalisedPolygon::exec() {
     const double phiUpper = phi + phiHalfWidth;
 
     const double efixed = m_EmodeProperties.getEFixed(*detector);
-    const specnum_t specNo = inputWS->getSpectrum(i)->getSpectrumNo();
+    const specnum_t specNo = inputWS->getSpectrum(i).getSpectrumNo();
     std::stringstream logStream;
     for (size_t j = 0; j < nEnergyBins; ++j) {
       m_progress->report("Computing polygon intersections");
@@ -168,7 +168,7 @@ void SofQWNormalisedPolygon::exec() {
         // Add this spectra-detector pair to the mapping
         PARALLEL_CRITICAL(SofQWNormalisedPolygon_spectramap) {
           specNumberMapping.push_back(
-              outputWS->getSpectrum(qIndex - 1)->getSpectrumNo());
+              outputWS->getSpectrum(qIndex - 1).getSpectrumNo());
           detIDMapping.push_back(detector->getID());
         }
       }
@@ -290,7 +290,7 @@ void SofQWNormalisedPolygon::initAngularCachesNonPSD(
     m_thetaWidths[i] = std::fabs(2.0 * std::atan(boxWidth / l2));
     if (g_log.is(Logger::Priority::PRIO_DEBUG)) {
       g_log.debug() << "Detector at spectrum ="
-                    << workspace->getSpectrum(i)->getSpectrumNo()
+                    << workspace->getSpectrum(i).getSpectrumNo()
                     << ", width=" << m_thetaWidths[i] * 180.0 / M_PI
                     << " degrees\n";
     }
@@ -319,7 +319,7 @@ void SofQWNormalisedPolygon::initAngularCachesPSD(
     m_progress->report("Calculating detector angular widths");
     DetConstPtr detector = workspace->getDetector(i);
     g_log.debug() << "Current histogram: " << i << std::endl;
-    specnum_t inSpec = workspace->getSpectrum(i)->getSpectrumNo();
+    specnum_t inSpec = workspace->getSpectrum(i).getSpectrumNo();
     SpectraDistanceMap neighbours =
         workspace->getNeighboursExact(inSpec, numNeighbours, true);
 

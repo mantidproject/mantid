@@ -217,9 +217,9 @@ void makeTestWorkspace(const int ndets, const int nbins,
                                            // each spectra (1+index_number) but
                                            // the same for each bin
     space2D->setData(j, data[j], errors);
-    ISpectrum *spec = space2D->getSpectrum(j);
-    spec->setSpectrumNo(j + 1);
-    spec->setDetectorID(j);
+    auto &spec = space2D->getSpectrum(j);
+    spec.setSpectrumNo(j + 1);
+    spec.setDetectorID(j);
   }
 
   Instrument_sptr instr(new Instrument);

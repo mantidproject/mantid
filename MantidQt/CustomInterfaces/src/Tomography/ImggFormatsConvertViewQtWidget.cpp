@@ -281,9 +281,9 @@ ImggFormatsConvertViewQtWidget::loadImg(const std::string &inputName,
   imgWks->setTitle(inputName);
   const double scaleFactor = std::numeric_limits<unsigned char>::max();
   for (int yi = 0; yi < static_cast<int>(width); ++yi) {
-    const auto &row = imgWks->getSpectrum(yi);
-    auto &dataY = row->dataY();
-    auto &dataX = row->dataX();
+    auto &row = imgWks->getSpectrum(yi);
+    auto &dataY = row.dataY();
+    auto &dataX = row.dataX();
     std::fill(dataX.begin(), dataX.end(), static_cast<double>(yi));
     for (int xi = 0; xi < static_cast<int>(width); ++xi) {
       QRgb vRgb = img.pixel(xi, yi);

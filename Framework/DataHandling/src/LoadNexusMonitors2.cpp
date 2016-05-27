@@ -262,8 +262,8 @@ void LoadNexusMonitors2::exec() {
     file.closeGroup(); // NXmonitor
 
     // Default values, might change later.
-    m_workspace->getSpectrum(ws_index)->setSpectrumNo(spectrumNo);
-    m_workspace->getSpectrum(ws_index)->setDetectorID(monIndex);
+    m_workspace->getSpectrum(ws_index).setSpectrumNo(spectrumNo);
+    m_workspace->getSpectrum(ws_index).setDetectorID(monIndex);
 
     ++ws_index;
     prog3.report();
@@ -357,8 +357,8 @@ void LoadNexusMonitors2::exec() {
 
   // Fix the detector IDs/spectrum numbers
   for (size_t i = 0; i < m_workspace->getNumberHistograms(); i++) {
-    m_workspace->getSpectrum(i)->setSpectrumNo(spectra_numbers[i]);
-    m_workspace->getSpectrum(i)->setDetectorID(detector_numbers[i]);
+    m_workspace->getSpectrum(i).setSpectrumNo(spectra_numbers[i]);
+    m_workspace->getSpectrum(i).setDetectorID(detector_numbers[i]);
   }
   // add filename
   m_workspace->mutableRun().addProperty("Filename", m_filename);

@@ -423,9 +423,7 @@ void RingProfile::processInstrumentRingProfile(
       g_log.debug() << "Bin for the index " << i << " = " << bin_n
                     << " Pos = " << det->getPos() << std::endl;
 
-      // get the reference to the spectrum
-      auto spectrum_pt = inputWS->getSpectrum(i);
-      const MantidVec &refY = spectrum_pt->dataY();
+      const MantidVec &refY = inputWS->getSpectrum(i).dataY();
       // accumulate the values of this spectrum inside this bin
       for (size_t sp_ind = 0; sp_ind < inputWS->blocksize(); sp_ind++)
         output_bins[bin_n] += refY[sp_ind];

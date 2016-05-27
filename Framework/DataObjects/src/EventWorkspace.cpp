@@ -185,21 +185,21 @@ size_t EventWorkspace::getNumberHistograms() const { return this->data.size(); }
 
 //--------------------------------------------------------------------------------------------
 /// Return the underlying ISpectrum ptr at the given workspace index.
-Mantid::API::ISpectrum *EventWorkspace::getSpectrum(const size_t index) {
+Mantid::API::ISpectrum &EventWorkspace::getSpectrum(const size_t index) {
   if (index >= m_noVectors)
     throw std::range_error(
         "EventWorkspace::getSpectrum, workspace index out of range");
   invalidateCommonBinsFlag();
-  return data[index];
+  return *data[index];
 }
 
 /// Return the underlying ISpectrum ptr at the given workspace index.
-const Mantid::API::ISpectrum *
+const Mantid::API::ISpectrum &
 EventWorkspace::getSpectrum(const size_t index) const {
   if (index >= m_noVectors)
     throw std::range_error(
         "EventWorkspace::getSpectrum, workspace index out of range");
-  return data[index];
+  return *data[index];
 }
 
 //-----------------------------------------------------------------------------
@@ -578,7 +578,7 @@ void EventWorkspace::padSpectra() {
   resizeTo(pixelIDs.size());
 
   for (size_t i = 0; i < pixelIDs.size(); ++i) {
-    getSpectrum(i)->setDetectorID(pixelIDs[i]);
+    getSpectrum(i).setDetectorID(pixelIDs[i]);
   }
 }
 
@@ -594,8 +594,8 @@ void EventWorkspace::padSpectra(const std::vector<int32_t> &specList) {
     for (size_t i = 0; i < specList.size(); ++i) {
       // specList ranges from 1, ..., N
       // detector ranges from 0, ..., N-1
-      getSpectrum(i)->setDetectorID(specList[i] - 1);
-      getSpectrum(i)->setSpectrumNo(specList[i]);
+      getSpectrum(i).setDetectorID(specList[i] - 1);
+      getSpectrum(i).setSpectrumNo(specList[i]);
     }
   }
 }
@@ -635,7 +635,7 @@ void EventWorkspace::deleteEmptyLists() {
 /// @param index :: the workspace index to return
 /// @returns A reference to the vector of binned X values
 MantidVec &EventWorkspace::dataX(const std::size_t index) {
-  return getSpectrum(index)->dataX();
+  return getSpectrum(index).dataX();
 }
 
 /// Return the data X error vector at a given workspace index
@@ -644,7 +644,7 @@ MantidVec &EventWorkspace::dataX(const std::size_t index) {
 /// @param index :: the workspace index to return
 /// @returns A reference to the vector of binned error values
 MantidVec &EventWorkspace::dataDx(const std::size_t index) {
-  return getSpectrum(index)->dataDx();
+  return getSpectrum(index).dataDx();
 }
 
 /// Return the data Y vector at a given workspace index
@@ -671,34 +671,34 @@ MantidVec &EventWorkspace::dataE(const std::size_t) {
 /** @return the const data X vector at a given workspace index
  * @param index :: workspace index   */
 const MantidVec &EventWorkspace::dataX(const std::size_t index) const {
-  return getSpectrum(index)->readX();
+  return getSpectrum(index).readX();
 }
 
 /** @return the const data X error vector at a given workspace index
  * @param index :: workspace index   */
 const MantidVec &EventWorkspace::dataDx(const std::size_t index) const {
-  return getSpectrum(index)->readDx();
+  return getSpectrum(index).readDx();
 }
 
 //---------------------------------------------------------------------------
 /** @return the const data Y vector at a given workspace index
  * @param index :: workspace index   */
 const MantidVec &EventWorkspace::dataY(const std::size_t index) const {
-  return getSpectrum(index)->readY();
+  return getSpectrum(index).readY();
 }
 
 //---------------------------------------------------------------------------
 /** @return the const data E (error) vector at a given workspace index
  * @param index :: workspace index   */
 const MantidVec &EventWorkspace::dataE(const std::size_t index) const {
-  return getSpectrum(index)->readE();
+  return getSpectrum(index).readE();
 }
 
 //---------------------------------------------------------------------------
 /** @return a pointer to the X data vector at a given workspace index
  * @param index :: workspace index   */
 Kernel::cow_ptr<MantidVec> EventWorkspace::refX(const std::size_t index) const {
-  return getSpectrum(index)->ptrX();
+  return getSpectrum(index).ptrX();
 }
 
 //---------------------------------------------------------------------------

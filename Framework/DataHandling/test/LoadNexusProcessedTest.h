@@ -133,8 +133,7 @@ public:
     // Test spectrum numbers are as expected
     size_t index(0);
     for (auto spectrum : {3, 4, 5}) {
-      TS_ASSERT_EQUALS(matrix_ws->getSpectrum(index)->getSpectrumNo(),
-                       spectrum);
+      TS_ASSERT_EQUALS(matrix_ws->getSpectrum(index).getSpectrumNo(), spectrum);
       index++;
     }
     doHistoryTest(matrix_ws);
@@ -173,8 +172,7 @@ public:
     // Test spectrum numbers
     size_t index(0);
     for (auto spectrum : {2, 3, 4, 5}) {
-      TS_ASSERT_EQUALS(matrix_ws->getSpectrum(index)->getSpectrumNo(),
-                       spectrum);
+      TS_ASSERT_EQUALS(matrix_ws->getSpectrum(index).getSpectrumNo(), spectrum);
       index++;
     }
 
@@ -216,8 +214,7 @@ public:
     // Test spectrum numbers
     size_t index(0);
     for (auto spectrum : {2, 3, 4, 5, 6}) {
-      TS_ASSERT_EQUALS(matrix_ws->getSpectrum(index)->getSpectrumNo(),
-                       spectrum);
+      TS_ASSERT_EQUALS(matrix_ws->getSpectrum(index).getSpectrumNo(), spectrum);
       index++;
     }
 
@@ -1249,8 +1246,8 @@ private:
     // Check spectra in loaded workspace
     MatrixWorkspace_sptr outputWs =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("output");
-    TS_ASSERT_EQUALS(1, outputWs->getSpectrum(0)->getSpectrumNo());
-    TS_ASSERT_EQUALS(2, outputWs->getSpectrum(1)->getSpectrumNo());
+    TS_ASSERT_EQUALS(1, outputWs->getSpectrum(0).getSpectrumNo());
+    TS_ASSERT_EQUALS(2, outputWs->getSpectrum(1).getSpectrumNo());
     TS_ASSERT_EQUALS(inputWs->readX(0), outputWs->readX(0));
     TS_ASSERT_EQUALS(inputWs->readX(1), outputWs->readX(1));
     TS_ASSERT_EQUALS(inputWs->readY(0), outputWs->readY(0));

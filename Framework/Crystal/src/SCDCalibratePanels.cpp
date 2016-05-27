@@ -1135,9 +1135,9 @@ void SCDCalibratePanels::exec() {
       bank = boost::lexical_cast<int>(bankName.substr(k + 1));
     if (bank != bankLast) {
       iSpectrum++;
-      ColWksp->getSpectrum(iSpectrum)->setSpectrumNo(specnum_t(bank));
-      RowWksp->getSpectrum(iSpectrum)->setSpectrumNo(specnum_t(bank));
-      TofWksp->getSpectrum(iSpectrum)->setSpectrumNo(specnum_t(bank));
+      ColWksp->getSpectrum(iSpectrum).setSpectrumNo(specnum_t(bank));
+      RowWksp->getSpectrum(iSpectrum).setSpectrumNo(specnum_t(bank));
+      TofWksp->getSpectrum(iSpectrum).setSpectrumNo(specnum_t(bank));
       bankLast = bank;
       icount = 0;
     }

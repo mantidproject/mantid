@@ -1611,7 +1611,7 @@ void IntegratePeakTimeSlices::SetUpData1(
 
     {
       spec_idList += boost::lexical_cast<std::string>(
-          inpWkSpace->getSpectrum(workspaceIndex)->getSpectrumNo());
+          inpWkSpace->getSpectrum(workspaceIndex).getSpectrumNo());
 
       double R1 = dist.scalar_prod(m_yvec);
       double R1a = R1 / m_cellHeight;

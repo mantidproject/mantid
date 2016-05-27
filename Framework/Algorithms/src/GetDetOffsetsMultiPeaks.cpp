@@ -495,8 +495,7 @@ void GetDetOffsetsMultiPeaks::calculateDetectorsOffsets() {
           calculatePeakOffset(wi, fittedpeakpositions, tofitpeakpositions);
 
       // Get the list of detectors in this pixel
-      const std::set<detid_t> &dets =
-          m_inputWS->getSpectrum(wi)->getDetectorIDs();
+      const auto &dets = m_inputWS->getSpectrum(wi).getDetectorIDs();
 
       // Most of the exec time is in FitSpectra, so this critical block should
       // not be a problem.
@@ -858,7 +857,7 @@ int GetDetOffsetsMultiPeaks::fitSpectra(
     // throw if minD >= maxD
     std::stringstream ess;
     ess << "Stuff went wrong with wkspIndex=" << wi
-        << " specNum=" << inputW->getSpectrum(wi)->getSpectrumNo();
+        << " specNum=" << inputW->getSpectrum(wi).getSpectrumNo();
     throw std::runtime_error(ess.str());
   }
 
@@ -870,8 +869,8 @@ int GetDetOffsetsMultiPeaks::fitSpectra(
     }
   }
   std::stringstream dbss;
-  dbss << "D-RANGE[" << inputW->getSpectrum(wi)->getSpectrumNo()
-       << "]: " << minD << " -> " << maxD;
+  dbss << "D-RANGE[" << inputW->getSpectrum(wi).getSpectrumNo() << "]: " << minD
+       << " -> " << maxD;
   g_log.debug(dbss.str());
 
   // Setup the fit windows

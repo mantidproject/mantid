@@ -155,10 +155,10 @@ bool VesuvioCalculateGammaBackground::calculateBackground(
   m_correctedWS->dataE(outputIndex) = m_inputWS->readE(inputIndex);
 
   try {
-    const auto *inSpec = m_inputWS->getSpectrum(inputIndex);
-    const specnum_t spectrumNo(inSpec->getSpectrumNo());
-    m_backgroundWS->getSpectrum(outputIndex)->copyInfoFrom(*inSpec);
-    m_correctedWS->getSpectrum(outputIndex)->copyInfoFrom(*inSpec);
+    const auto &inSpec = m_inputWS->getSpectrum(inputIndex);
+    const specnum_t spectrumNo(inSpec.getSpectrumNo());
+    m_backgroundWS->getSpectrum(outputIndex).copyInfoFrom(inSpec);
+    m_correctedWS->getSpectrum(outputIndex).copyInfoFrom(inSpec);
 
     if (spectrumNo >= FORWARD_SCATTER_SPECMIN &&
         spectrumNo <= FORWARD_SCATTER_SPECMAX) {
@@ -290,7 +290,7 @@ void VesuvioCalculateGammaBackground::calculateBackgroundFromFoils(
                    ctfoil.begin(), std::minus<double>());
   }
   bool reversed = (m_reversed.count(m_inputWS->getSpectrum(inputIndex)
-                                        ->getSpectrumNo()) != 0);
+                                        .getSpectrumNo()) != 0);
   // This is quicker than the if within the loop
   if (reversed) {
     // The reversed ones should be (C0 - C1)

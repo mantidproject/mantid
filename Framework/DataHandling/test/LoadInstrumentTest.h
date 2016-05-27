@@ -71,8 +71,8 @@ public:
     // put this workspace in the data service
     TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(wsName, ws2D));
     // We want to test id the spectra mapping changes
-    TS_ASSERT_EQUALS(ws2D->getSpectrum(0)->getSpectrumNo(), 1);
-    TS_ASSERT_EQUALS(ws2D->getSpectrum(256)->getSpectrumNo(), 257);
+    TS_ASSERT_EQUALS(ws2D->getSpectrum(0).getSpectrumNo(), 1);
+    TS_ASSERT_EQUALS(ws2D->getSpectrum(256).getSpectrumNo(), 257);
     TS_ASSERT_EQUALS(ws2D->getNumberHistograms(), 2584);
 
     loader.setPropertyValue("Filename", "HET_Definition.xml");
@@ -138,7 +138,7 @@ public:
     TS_ASSERT_EQUALS(output->getAxis(1)->spectraNo(256), 257);
     TS_ASSERT_EQUALS(output->getAxis(1)->spectraNo(257), 258);
 
-    auto ids_from_map = output->getSpectrum(257)->getDetectorIDs();
+    auto ids_from_map = output->getSpectrum(257).getDetectorIDs();
     IDetector_const_sptr det_from_ws = output->getDetector(257);
     TS_ASSERT_EQUALS(ids_from_map.size(), 1);
     TS_ASSERT_EQUALS(*ids_from_map.begin(), 602);

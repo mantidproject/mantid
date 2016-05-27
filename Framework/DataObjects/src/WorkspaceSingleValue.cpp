@@ -42,15 +42,15 @@ void WorkspaceSingleValue::init(const std::size_t &NVectors,
 
 //--------------------------------------------------------------------------------------------
 /// Return the underlying ISpectrum ptr at the given workspace index.
-Mantid::API::ISpectrum *
+Mantid::API::ISpectrum &
 WorkspaceSingleValue::getSpectrum(const size_t /*index*/) {
-  return &data;
+  return data;
 }
 
 /// Return the underlying ISpectrum ptr at the given workspace index.
-const Mantid::API::ISpectrum *
+const Mantid::API::ISpectrum &
 WorkspaceSingleValue::getSpectrum(const size_t /*index*/) const {
-  return &data;
+  return data;
 }
 
 /// Rebin the workspace. Not implemented for this workspace.

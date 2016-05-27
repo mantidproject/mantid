@@ -252,13 +252,13 @@ public:
     TS_ASSERT_EQUALS(ew->getAxis(1)->length(), 2);
 
     // Are the pixel IDs ok?
-    TS_ASSERT_EQUALS(ew->getSpectrum(0)->getSpectrumNo(), 46);
-    auto dets = ew->getSpectrum(0)->getDetectorIDs();
+    TS_ASSERT_EQUALS(ew->getSpectrum(0).getSpectrumNo(), 46);
+    auto dets = ew->getSpectrum(0).getDetectorIDs();
     TS_ASSERT_EQUALS(dets.size(), 1);
     TS_ASSERT_EQUALS(*dets.begin(), 45);
 
-    TS_ASSERT_EQUALS(ew->getSpectrum(1)->getSpectrumNo(), 111);
-    dets = ew->getSpectrum(1)->getDetectorIDs();
+    TS_ASSERT_EQUALS(ew->getSpectrum(1).getSpectrumNo(), 111);
+    dets = ew->getSpectrum(1).getDetectorIDs();
     TS_ASSERT_EQUALS(dets.size(), 1);
     TS_ASSERT_EQUALS(*dets.begin(), 110);
   }

@@ -226,7 +226,7 @@ namespace CustomInterfaces
   {
     // Set the preview spectrum number to the first spectrum in the workspace
     MatrixWorkspace_sptr sampleWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(workspaceName.toStdString());
-    int minSpectrumRange = sampleWS->getSpectrum(0)->getSpectrumNo();
+    int minSpectrumRange = sampleWS->getSpectrum(0).getSpectrumNo();
     m_dblManager->setValue(m_properties["PreviewSpec"], static_cast<double>(minSpectrumRange));
 
     updateMiniPlots();
@@ -284,8 +284,8 @@ namespace CustomInterfaces
       // Get the range of possible spectra numbers
       QString workspaceName = m_uiForm.dsInput->getCurrentDataName();
       MatrixWorkspace_sptr sampleWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(workspaceName.toStdString());
-      int minSpectrumRange = sampleWS->getSpectrum(0)->getSpectrumNo();
-      int maxSpectrumRange = sampleWS->getSpectrum(sampleWS->getNumberHistograms()-1)->getSpectrumNo();
+      int minSpectrumRange = sampleWS->getSpectrum(0).getSpectrumNo();
+      int maxSpectrumRange = sampleWS->getSpectrum(sampleWS->getNumberHistograms()-1).getSpectrumNo();
 
       // If entered value is lower then set spectra number to lowest valid value
       if(value < minSpectrumRange)

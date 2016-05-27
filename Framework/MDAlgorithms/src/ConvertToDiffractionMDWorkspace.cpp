@@ -162,11 +162,11 @@ void ConvertToDiffractionMDWorkspace::convertSpectrum(int workspaceIndex) {
     EventList el;
 
     // Create the events using the bins
-    const ISpectrum *inSpec = m_inWS->getSpectrum(workspaceIndex);
+    const auto &inSpec = m_inWS->getSpectrum(workspaceIndex);
     // If OneEventPerBin, generate exactly 1 event per bin, including zeros.
     // If !OneEventPerBin, generate up to 10 events per bin, excluding zeros
     el.createFromHistogram(
-        inSpec, OneEventPerBin /* Generate zeros */,
+        &inSpec, OneEventPerBin /* Generate zeros */,
         !OneEventPerBin /* Multiple events */,
         (OneEventPerBin ? 1 : 10) /* Max of this many events per bin */);
 

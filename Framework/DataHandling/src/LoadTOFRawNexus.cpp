@@ -428,17 +428,17 @@ void LoadTOFRawNexus::loadBank(const std::string &nexusfilename,
     size_t wi = id_to_wi.find(pixelID)->second;
 
     // Set the basic info of that spectrum
-    ISpectrum *spec = WS->getSpectrum(wi);
-    spec->setSpectrumNo(specnum_t(wi + 1));
-    spec->setDetectorID(pixel_id[i - iPart]);
+    auto &spec = WS->getSpectrum(wi);
+    spec.setSpectrumNo(specnum_t(wi + 1));
+    spec.setDetectorID(pixel_id[i - iPart]);
     // Set the shared X pointer
-    spec->setX(X);
+    spec.setX(X);
 
     // Extract the Y
-    MantidVec &Y = spec->dataY();
+    MantidVec &Y = spec.dataY();
     Y.assign(data.begin() + i * m_numBins, data.begin() + (i + 1) * m_numBins);
 
-    MantidVec &E = spec->dataE();
+    MantidVec &E = spec.dataE();
 
     if (hasErrors) {
       // Copy the errors from the loaded document

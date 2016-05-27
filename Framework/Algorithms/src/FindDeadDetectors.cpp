@@ -91,18 +91,18 @@ void FindDeadDetectors::exec() {
     iprogress_step = 1;
   for (int64_t i = 0; i < int64_t(numSpec); ++i) {
     // Spectrum in the integratedWorkspace
-    ISpectrum *spec = integratedWorkspace->getSpectrum(i);
-    double &y = spec->dataY()[0];
+    auto &spec = integratedWorkspace->getSpectrum(i);
+    double &y = spec.dataY()[0];
     if (y > deadThreshold) {
       y = liveValue;
     } else {
       ++countSpec;
       y = deadValue;
-      const specnum_t specNo = spec->getSpectrumNo();
+      const specnum_t specNo = spec.getSpectrumNo();
       // Write the spectrum number to file
       file << i << " " << specNo;
       // Get the list of detectors for this spectrum and iterate over
-      const auto &dets = spec->getDetectorIDs();
+      const auto &dets = spec.getDetectorIDs();
       for (const auto &det : dets) {
         // Write the detector ID to file, log & the FoundDead output property
         file << " " << det;

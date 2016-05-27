@@ -196,7 +196,7 @@ void ExtractSpectra::execHistogram() {
     }
     // Copy spectrum number & detectors
     outputWorkspace->getSpectrum(j)
-        ->copyInfoFrom(*m_inputWorkspace->getSpectrum(i));
+        .copyInfoFrom(m_inputWorkspace->getSpectrum(i));
 
     if (!m_commonBoundaries)
       this->cropRagged(outputWorkspace, static_cast<int>(i), j);

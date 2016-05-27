@@ -115,10 +115,10 @@ void WorkspaceFactoryImpl::initializeFromParent(
   // Same number of histograms = copy over the spectra data
   if (parent->getNumberHistograms() == child->getNumberHistograms()) {
     for (size_t wi = 0; wi < parent->getNumberHistograms(); wi++) {
-      ISpectrum *childSpec = child->getSpectrum(wi);
-      const ISpectrum *parentSpec = parent->getSpectrum(wi);
+      auto &childSpec = child->getSpectrum(wi);
+      const auto &parentSpec = parent->getSpectrum(wi);
       // Copy spectrum number and detector IDs
-      childSpec->copyInfoFrom(*parentSpec);
+      childSpec.copyInfoFrom(parentSpec);
     }
   }
 

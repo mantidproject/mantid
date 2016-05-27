@@ -77,7 +77,7 @@ void store_value(DataObjects::Workspace2D_sptr ws, int specID, double value,
   X[1] = wavelength + dwavelength / 2.0;
   Y[0] = value;
   E[0] = error;
-  ws->getSpectrum(specID)->setSpectrumNo(specID);
+  ws->getSpectrum(specID).setSpectrumNo(specID);
 }
 
 /**
@@ -545,7 +545,7 @@ void LoadSpice2D::runLoadMappingTable(
 
   // Monitor: IDs start at 1 and increment by 1
   for (int i = 0; i < nMonitors; i++) {
-    localWorkspace->getSpectrum(icount)->setDetectorID(icount + 1);
+    localWorkspace->getSpectrum(icount).setDetectorID(icount + 1);
     icount++;
   }
 
@@ -553,7 +553,7 @@ void LoadSpice2D::runLoadMappingTable(
   for (int ix = 0; ix < nxbins; ix++) {
     for (int iy = 0; iy < nybins; iy++) {
       localWorkspace->getSpectrum(icount)
-          ->setDetectorID(1000000 + iy * 1000 + ix);
+          .setDetectorID(1000000 + iy * 1000 + ix);
       icount++;
     }
   }

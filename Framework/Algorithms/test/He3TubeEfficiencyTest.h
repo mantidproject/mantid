@@ -185,7 +185,7 @@ private:
     for (int i = 0; i < nspecs; i++) {
       space2D->setX(i, x);
       space2D->setData(i, y, e);
-      space2D->getSpectrum(i)->setSpectrumNo(i);
+      space2D->getSpectrum(i).setSpectrumNo(i);
     }
 
     AnalysisDataService::Instance().add(inputWS, space2D);

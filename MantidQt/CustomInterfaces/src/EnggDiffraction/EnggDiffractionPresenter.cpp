@@ -1066,7 +1066,7 @@ void EnggDiffractionPresenter::setDataToClonedWS(std::string &current_WS,
   auto currentPeakWS = ADS.retrieveWS<MatrixWorkspace>(current_WS);
   auto currentClonedWS = ADS.retrieveWS<MatrixWorkspace>(cloned_WS);
   currentClonedWS->getSpectrum(0)
-      ->setData(currentPeakWS->readY(0), currentPeakWS->readE(0));
+      .setData(currentPeakWS->readY(0), currentPeakWS->readE(0));
 }
 
 void EnggDiffractionPresenter::plotFitPeaksCurves() {

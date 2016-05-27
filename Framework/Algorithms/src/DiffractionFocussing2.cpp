@@ -201,15 +201,15 @@ void DiffractionFocussing2::exec() {
     out->dataX(static_cast<int64_t>(dif)) = Xout;
 
     // This is the output spectrum
-    ISpectrum *outSpec = out->getSpectrum(outWorkspaceIndex);
+    auto &outSpec = out->getSpectrum(outWorkspaceIndex);
 
     // Also set the spectrum number to the group number
-    outSpec->setSpectrumNo(group);
-    outSpec->clearDetectorIDs();
+    outSpec.setSpectrumNo(group);
+    outSpec.clearDetectorIDs();
 
     // Get the references to Y and E output and rebin
-    MantidVec &Yout = outSpec->dataY();
-    MantidVec &Eout = outSpec->dataE();
+    MantidVec &Yout = outSpec.dataY();
+    MantidVec &Eout = outSpec.dataE();
 
     // Initialize the group's weight vector here and the dummy vector used for
     // accumulating errors.
@@ -221,13 +221,13 @@ void DiffractionFocussing2::exec() {
     for (size_t i = 0; i < groupSize; i++) {
       size_t inWorkspaceIndex = indices[i];
       // This is the input spectrum
-      const ISpectrum *inSpec = m_matrixInputW->getSpectrum(inWorkspaceIndex);
+      const auto &inSpec = m_matrixInputW->getSpectrum(inWorkspaceIndex);
       // Get reference to its old X,Y,and E.
-      const MantidVec &Xin = inSpec->readX();
-      const MantidVec &Yin = inSpec->readY();
-      const MantidVec &Ein = inSpec->readE();
+      const MantidVec &Xin = inSpec.readX();
+      const MantidVec &Yin = inSpec.readY();
+      const MantidVec &Ein = inSpec.readE();
 
-      outSpec->addDetectorIDs(inSpec->getDetectorIDs());
+      outSpec.addDetectorIDs(inSpec.getDetectorIDs());
       try {
         VectorHelper::rebinHistogram(Xin, Yin, Ein, Xout, Yout, Eout, true);
       } catch (...) {
@@ -518,8 +518,7 @@ void DiffractionFocussing2::execEvent() {
  *  @return Group number if successful otherwise return -1
  */
 int DiffractionFocussing2::validateSpectrumInGroup(size_t wi) {
-  const std::set<detid_t> &dets =
-      m_matrixInputW->getSpectrum(wi)->getDetectorIDs();
+  const auto &dets = m_matrixInputW->getSpectrum(wi).getDetectorIDs();
   if (dets.empty()) // Not in group
   {
     g_log.debug() << wi << " <- this workspace index is empty!\n";
@@ -590,13 +589,9 @@ void DiffractionFocussing2::determineRebinParameters() {
       continue;
 
     // the spectrum is the real thing we want to work with
-    const ISpectrum *spec = m_matrixInputW->getSpectrum(wi);
-    if (spec == nullptr) {
-      groupAtWorkspaceIndex[wi] = -1;
-      continue;
-    }
+    const auto &spec = m_matrixInputW->getSpectrum(wi);
     if (checkForMask) {
-      if (instrument->isDetectorMasked(spec->getDetectorIDs())) {
+      if (instrument->isDetectorMasked(spec.getDetectorIDs())) {
         groupAtWorkspaceIndex[wi] = -1;
         continue;
       }
@@ -610,7 +605,7 @@ void DiffractionFocussing2::determineRebinParameters() {
     }
     const double min = (gpit->second).first;
     const double max = (gpit->second).second;
-    const MantidVec &X = spec->readX();
+    const MantidVec &X = spec.readX();
     double temp = X.front();
     if (temp < (min)) // New Xmin found
       (gpit->second).first = temp;

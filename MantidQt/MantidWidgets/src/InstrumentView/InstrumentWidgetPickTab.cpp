@@ -1539,12 +1539,7 @@ return;
 						size_t i = 0;
 						for (std::vector<Mantid::detid_t>::const_iterator id = detids.begin(); id != detids.end(); ++id, ++i)
 						{
-							Mantid::API::ISpectrum * spec = ws->getSpectrum(i);
-							if (!spec)
-							{
-								throw std::runtime_error("Spectrum not found");
-							}
-							spec->setDetectorID(*id);
+							ws->getSpectrum(i).setDetectorID(*id);
 						}
 					}
 

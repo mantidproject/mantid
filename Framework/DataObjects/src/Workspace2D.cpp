@@ -245,7 +245,7 @@ void Workspace2D::setImageYAndE(const API::MantidImage &imageY,
 
 //--------------------------------------------------------------------------------------------
 /// Return the underlying ISpectrum ptr at the given workspace index.
-ISpectrum *Workspace2D::getSpectrum(const size_t index) {
+ISpectrum &Workspace2D::getSpectrum(const size_t index) {
   if (index >= m_noVectors) {
     std::stringstream ss;
     ss << "Workspace2D::getSpectrum, histogram number " << index
@@ -253,17 +253,17 @@ ISpectrum *Workspace2D::getSpectrum(const size_t index) {
     throw std::range_error(ss.str());
   }
   invalidateCommonBinsFlag();
-  return data[index];
+  return *data[index];
 }
 
-const ISpectrum *Workspace2D::getSpectrum(const size_t index) const {
+const ISpectrum &Workspace2D::getSpectrum(const size_t index) const {
   if (index >= m_noVectors) {
     std::stringstream ss;
     ss << "Workspace2D::getSpectrum, histogram number " << index
        << " out of range " << m_noVectors;
     throw std::range_error(ss.str());
   }
-  return data[index];
+  return *data[index];
 }
 
 //--------------------------------------------------------------------------------------------
@@ -294,10 +294,10 @@ void Workspace2D::generateHistogram(const std::size_t index, const MantidVec &X,
     throw std::range_error(
         "Workspace2D::generateHistogram, histogram number out of range");
   // output data arrays are implicitly filled by function
-  const ISpectrum *spec = this->getSpectrum(index);
-  const MantidVec &currentX = spec->readX();
-  const MantidVec &currentY = spec->readY();
-  const MantidVec &currentE = spec->readE();
+  const auto &spec = this->getSpectrum(index);
+  const MantidVec &currentX = spec.readX();
+  const MantidVec &currentY = spec.readY();
+  const MantidVec &currentE = spec.readE();
   if (X.size() <= 1)
     throw std::runtime_error(
         "Workspace2D::generateHistogram(): X vector must be at least length 2");

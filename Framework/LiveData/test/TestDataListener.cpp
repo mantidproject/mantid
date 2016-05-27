@@ -86,7 +86,7 @@ void TestDataListener::createEmptyWorkspace() {
       WorkspaceFactory::Instance().create("EventWorkspace", 2, 2, 1));
   // Give detector IDs
   for (size_t i = 0; i < m_buffer->getNumberHistograms(); i++)
-    m_buffer->getSpectrum(i)->setDetectorID(detid_t(i));
+    m_buffer->getSpectrum(i).setDetectorID(detid_t(i));
   // Create in TOF units
   m_buffer->getAxis(0)->setUnit("TOF");
   // Load a fake instrument

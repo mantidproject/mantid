@@ -92,9 +92,9 @@ void IntegrateByComponent::exec() {
       for (int i = 0; i < static_cast<int>(hists.size()); ++i) { // NOLINT
         PARALLEL_START_INTERUPT_REGION
 
-        const std::set<detid_t> &detids =
+        const auto &detids =
             integratedWS->getSpectrum(hists[i])
-                ->getDetectorIDs(); // should be only one detector per spectrum
+                .getDetectorIDs(); // should be only one detector per spectrum
         if (instrument->isDetectorMasked(detids))
           continue;
         if (instrument->isMonitor(detids))
@@ -135,7 +135,7 @@ void IntegrateByComponent::exec() {
         PARALLEL_START_INTERUPT_REGION
         const std::set<detid_t> &detids =
             integratedWS->getSpectrum(hists[i])
-                ->getDetectorIDs(); // should be only one detector per spectrum
+                .getDetectorIDs(); // should be only one detector per spectrum
         if (instrument->isDetectorMasked(detids))
           continue;
         if (instrument->isMonitor(detids))
@@ -207,7 +207,7 @@ IntegrateByComponent::makeMap(API::MatrixWorkspace_sptr countsWS, int parents) {
   }
 
   for (size_t i = 0; i < countsWS->getNumberHistograms(); i++) {
-    detid_t d = (*((countsWS->getSpectrum(i))->getDetectorIDs().begin()));
+    detid_t d = (*(countsWS->getSpectrum(i).getDetectorIDs().begin()));
     try {
       std::vector<boost::shared_ptr<const Mantid::Geometry::IComponent>> anc =
           instrument->getDetector(d)->getAncestors();

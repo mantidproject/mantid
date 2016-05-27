@@ -66,11 +66,11 @@ public:
   std::size_t blocksize() const override;
 
   /// Return the underlying ISpectrum ptr at the given workspace index.
-  Mantid::API::ISpectrum *getSpectrum(const size_t index) override;
+  Mantid::API::ISpectrum &getSpectrum(const size_t index) override;
 
   /// Return the underlying ISpectrum ptr (const version) at the given workspace
   /// index.
-  const Mantid::API::ISpectrum *getSpectrum(const size_t index) const override;
+  const Mantid::API::ISpectrum &getSpectrum(const size_t index) const override;
 
   /// Generate a new histogram by rebinning the existing histogram.
   void generateHistogram(const std::size_t index, const MantidVec &X,

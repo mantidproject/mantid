@@ -121,10 +121,9 @@ public:
   size_t blocksize() const override {
     return vec.empty() ? 0 : vec[0].dataY().size();
   }
-  ISpectrum *getSpectrum(const size_t index) override { return &vec[index]; }
-  const ISpectrum *getSpectrum(const size_t index) const override {
-    return &vec[index];
-    ;
+  ISpectrum &getSpectrum(const size_t index) override { return vec[index]; }
+  const ISpectrum &getSpectrum(const size_t index) const override {
+    return vec[index];
   }
   void generateHistogram(const std::size_t, const MantidVec &, MantidVec &,
                          MantidVec &, bool) const override {}

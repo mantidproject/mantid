@@ -291,7 +291,7 @@ void SaveGSS::writeGSASFile(const std::string &outfilename, bool append,
     // Determine bank number into GSAS file
     int bankid;
     if (m_useSpecAsBank) {
-      bankid = static_cast<int>(inputWS->getSpectrum(iws)->getSpectrumNo());
+      bankid = static_cast<int>(inputWS->getSpectrum(iws).getSpectrumNo());
     } else {
       bankid = basebanknumber + iws;
     }

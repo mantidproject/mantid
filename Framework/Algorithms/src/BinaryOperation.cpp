@@ -1006,8 +1006,7 @@ BinaryOperation::buildBinaryOperationTable(
     bool done = false;
 
     // List of detectors on lhs side
-    const std::set<detid_t> &lhsDets =
-        lhs->getSpectrum(lhsWI)->getDetectorIDs();
+    const auto &lhsDets = lhs->getSpectrum(lhsWI).getDetectorIDs();
 
     // ----------------- Matching Workspace Indices and Detector IDs
     // --------------------------------------
@@ -1017,8 +1016,7 @@ BinaryOperation::buildBinaryOperationTable(
     if (rhsWI < rhs_nhist) // don't go out of bounds
     {
       // Get the detector IDs at that workspace index.
-      const std::set<detid_t> &rhsDets =
-          rhs->getSpectrum(rhsWI)->getDetectorIDs();
+      const auto &rhsDets = rhs->getSpectrum(rhsWI).getDetectorIDs();
 
       // Checks that lhsDets is a subset of rhsDets
       if (std::includes(rhsDets.begin(), rhsDets.end(), lhsDets.begin(),
@@ -1066,8 +1064,7 @@ BinaryOperation::buildBinaryOperationTable(
       //  match the detector ID.
       // NOTE: This can be SUPER SLOW!
       for (rhsWI = 0; rhsWI < static_cast<int64_t>(rhs_nhist); rhsWI++) {
-        const std::set<detid_t> &rhsDets =
-            rhs->getSpectrum(rhsWI)->getDetectorIDs();
+        const auto &rhsDets = rhs->getSpectrum(rhsWI).getDetectorIDs();
 
         // Checks that lhsDets is a subset of rhsDets
         if (std::includes(rhsDets.begin(), rhsDets.end(), lhsDets.begin(),

@@ -85,9 +85,9 @@ public:
     TS_ASSERT_DELTA((*WS->refX(0))[0], 44162.6, 0.05);
     TS_ASSERT_DELTA((*WS->refX(0))[1], 60830.2, 0.05);
     // Valid spectrum info
-    TS_ASSERT_EQUALS(WS->getSpectrum(0)->getSpectrumNo(), 1);
-    TS_ASSERT_EQUALS(WS->getSpectrum(0)->getDetectorIDs().size(), 1);
-    TS_ASSERT_EQUALS(*WS->getSpectrum(0)->getDetectorIDs().begin(), 0);
+    TS_ASSERT_EQUALS(WS->getSpectrum(0).getSpectrumNo(), 1);
+    TS_ASSERT_EQUALS(WS->getSpectrum(0).getDetectorIDs().size(), 1);
+    TS_ASSERT_EQUALS(*WS->getSpectrum(0).getDetectorIDs().begin(), 0);
 
     // Check one event from one pixel - does it have a reasonable pulse time
     TS_ASSERT(WS->getEventListPtr(1000)->getEvents()[0].pulseTime() >
@@ -246,13 +246,13 @@ public:
                "spectra filtered",
                outWs->getNumberHistograms() == specList.size());
     TSM_ASSERT("Some spectra were not found in the workspace",
-               outWs->getSpectrum(0)->getSpectrumNo() == 13);
+               outWs->getSpectrum(0).getSpectrumNo() == 13);
     TSM_ASSERT("Some spectra were not found in the workspace",
-               outWs->getSpectrum(1)->getSpectrumNo() == 16);
+               outWs->getSpectrum(1).getSpectrumNo() == 16);
     TSM_ASSERT("Some spectra were not found in the workspace",
-               outWs->getSpectrum(2)->getSpectrumNo() == 21);
+               outWs->getSpectrum(2).getSpectrumNo() == 21);
     TSM_ASSERT("Some spectra were not found in the workspace",
-               outWs->getSpectrum(3)->getSpectrumNo() == 28);
+               outWs->getSpectrum(3).getSpectrumNo() == 28);
 
     // B) test SpectrumMin and SpectrumMax
     wsName = "test_partial_spectra_loading_SpectrumMin_SpectrumMax";
@@ -274,7 +274,7 @@ public:
     const size_t numSpecs = specMax - specMin + 1;
     TS_ASSERT_EQUALS(outWs->getNumberHistograms(), numSpecs);
     for (size_t specIdx = 0; specIdx < numSpecs; specIdx++) {
-      TS_ASSERT_EQUALS(outWs->getSpectrum(specIdx)->getSpectrumNo(),
+      TS_ASSERT_EQUALS(outWs->getSpectrum(specIdx).getSpectrumNo(),
                        static_cast<int>(specMin + specIdx));
     }
 
@@ -310,10 +310,10 @@ public:
     const size_t n = sMax - sMin + 1; // this n is the 20...22, excluding '17'
     TS_ASSERT_EQUALS(outWs->getNumberHistograms(), n + 1); // +1 is the '17'
     // 17 should come from SpectrumList
-    TS_ASSERT_EQUALS(outWs->getSpectrum(0)->getSpectrumNo(), 17);
+    TS_ASSERT_EQUALS(outWs->getSpectrum(0).getSpectrumNo(), 17);
     // and then sMin(20)...sMax(22)
     for (size_t specIdx = 0; specIdx < n; specIdx++) {
-      TS_ASSERT_EQUALS(outWs->getSpectrum(specIdx + 1)->getSpectrumNo(),
+      TS_ASSERT_EQUALS(outWs->getSpectrum(specIdx + 1).getSpectrumNo(),
                        static_cast<int>(sMin + specIdx));
     }
   }
@@ -364,12 +364,12 @@ public:
                       outWs->getNumberEvents(), outWs2->getNumberEvents());
 
     TSM_ASSERT("Some spectra were not found in the workspace",
-               outWs->getSpectrum(0)->getSpectrumNo() == 10);
+               outWs->getSpectrum(0).getSpectrumNo() == 10);
 
     TSM_ASSERT("Some spectra were not found in the workspace",
-               outWs->getSpectrum(10)->getSpectrumNo() == 20);
+               outWs->getSpectrum(10).getSpectrumNo() == 20);
     TSM_ASSERT("Some spectra were not found in the workspace",
-               outWs->getSpectrum(11)->getSpectrumNo() == 45);
+               outWs->getSpectrum(11).getSpectrumNo() == 45);
 
     AnalysisDataService::Instance().remove(wsName);
     AnalysisDataService::Instance().remove(wsName2);
@@ -727,11 +727,11 @@ public:
       }
       for (size_t index = 0; index < ws->getNumberHistograms(); ++index) {
         if (isFirstChildWorkspace) {
-          specids.push_back(ws->getSpectrum(index)->getSpectrumNo());
+          specids.push_back(ws->getSpectrum(index).getSpectrumNo());
         } else {
           TSM_ASSERT_EQUALS(
               "The spectrNo should be the same for all child workspaces.",
-              specids[index], ws->getSpectrum(index)->getSpectrumNo());
+              specids[index], ws->getSpectrum(index).getSpectrumNo());
         }
       }
 

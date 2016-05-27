@@ -59,11 +59,11 @@ public:
 
   //------------------------------------------------------------
   // Return the underlying ISpectrum ptr at the given workspace index.
-  Mantid::API::ISpectrum *getSpectrum(const size_t index) override;
+  Mantid::API::ISpectrum &getSpectrum(const size_t index) override;
 
   // Return the underlying ISpectrum ptr (const version) at the given workspace
   // index.
-  const Mantid::API::ISpectrum *getSpectrum(const size_t index) const override;
+  const Mantid::API::ISpectrum &getSpectrum(const size_t index) const override;
 
   void generateHistogram(const std::size_t index, const MantidVec &X,
                          MantidVec &Y, MantidVec &E,

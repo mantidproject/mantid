@@ -193,10 +193,10 @@ namespace CustomInterfaces
 
     double efixed = getEFixed(energyWs);
 
-    auto spectrum = energyWs->getSpectrum(0);
-    spectrum->setSpectrumNo(3);
-    spectrum->clearDetectorIDs();
-    spectrum->addDetectorID(3);
+    auto &spectrum = energyWs->getSpectrum(0);
+    spectrum.setSpectrumNo(3);
+    spectrum.clearDetectorIDs();
+    spectrum.addDetectorID(3);
 
     IAlgorithm_sptr convUnitsAlg = AlgorithmManager::Instance().create("ConvertUnits");
     convUnitsAlg->setChild(true);

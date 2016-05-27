@@ -103,15 +103,10 @@ void SaveDetectorsGrouping::createGroupDetectorIDMap(
     }
 
     // c) Convert workspace ID to detector ID
-    const API::ISpectrum *mspec = mGroupWS->getSpectrum(iws);
-    if (!mspec) {
-      g_log.error() << "Workspace index " << iws
-                    << " has no spectrum.  Impossible!" << std::endl;
-      throw;
-    }
-    auto detids = mspec->getDetectorIDs();
+    const auto &mspec = mGroupWS->getSpectrum(iws);
+    auto &detids = mspec.getDetectorIDs();
     if (detids.size() != 1) {
-      g_log.error() << "Spectrum " << mspec->getSpectrumNo() << " has "
+      g_log.error() << "Spectrum " << mspec.getSpectrumNo() << " has "
                     << detids.size() << " detectors.  Not allowed situation!"
                     << std::endl;
       throw;

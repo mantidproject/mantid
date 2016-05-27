@@ -191,7 +191,7 @@ public:
     TS_ASSERT_EQUALS(output->blocksize(), 4);
 
     TS_ASSERT_EQUALS(output->getAxis(1)->length(), numgroups);
-    TS_ASSERT_EQUALS(output->getSpectrum(0)->getSpectrumNo(), 1);
+    TS_ASSERT_EQUALS(output->getSpectrum(0).getSpectrumNo(), 1);
 
     // Events in these two banks alone
     if (preserveEvents)
@@ -203,7 +203,7 @@ public:
     // Now let's test the grouping of detector UDETS to groups
     for (size_t wi = 0; wi < output->getNumberHistograms(); wi++) {
       // This is the list of the detectors (grouped)
-      auto mylist = output->getSpectrum(wi)->getDetectorIDs();
+      auto mylist = output->getSpectrum(wi).getDetectorIDs();
       // 1024 pixels in a bank
       TS_ASSERT_EQUALS(mylist.size(), bankWidthInPixels * bankWidthInPixels);
     }

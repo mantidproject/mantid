@@ -259,8 +259,7 @@ double RemoveLowResTOF::calcTofMin(const std::size_t workspaceIndex) {
 
   // Get a vector of detector IDs
   std::vector<detid_t> detNumbers;
-  const std::set<detid_t> &detSet =
-      m_inputWS->getSpectrum(workspaceIndex)->getDetectorIDs();
+  const auto &detSet = m_inputWS->getSpectrum(workspaceIndex).getDetectorIDs();
   detNumbers.assign(detSet.begin(), detSet.end());
 
   double tmin = 0.;

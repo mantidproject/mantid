@@ -145,15 +145,15 @@ void LoadIsawSpectrum::exec() {
 
   // Go through each point at this run / bank
   for (size_t i = 0; i < spectra.size(); i++) {
-    ISpectrum *outSpec = outWS->getSpectrum(i);
-    outSpec->clearDetectorIDs();
+    auto &outSpec = outWS->getSpectrum(i);
+    outSpec.clearDetectorIDs();
     for (int j = 0; j < detList[i]->xpixels(); j++)
       for (int k = 0; k < detList[i]->ypixels(); k++)
-        outSpec->addDetectorID(
+        outSpec.addDetectorID(
             static_cast<detid_t>(detList[i]->getDetectorIDAtXY(j, k)));
-    MantidVec &outY = outSpec->dataY();
-    MantidVec &outE = outSpec->dataE();
-    MantidVec &outX = outSpec->dataX();
+    MantidVec &outY = outSpec.dataY();
+    MantidVec &outE = outSpec.dataE();
+    MantidVec &outX = outSpec.dataX();
     // This is the scattered beam direction
     V3D dir = detList[i]->getPos() - samplePos;
 

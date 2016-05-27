@@ -234,8 +234,7 @@ double ScaleX::getScaleFactor(const API::MatrixWorkspace_const_sptr &inputWS,
   Geometry::IDetector_const_sptr det;
   auto inst = inputWS->getInstrument();
 
-  auto *spec = inputWS->getSpectrum(index);
-  const auto &ids = spec->getDetectorIDs();
+  const auto &ids = inputWS->getSpectrum(index).getDetectorIDs();
   const size_t ndets(ids.size());
   if (ndets > 0) {
     try {
