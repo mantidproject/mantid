@@ -116,11 +116,8 @@ previously created.
    2. With "simulated" sqrt(X) errors
    Here we use 2 because Levenberg-Marquardt doesn't work with 1 ('Unweighted least squares' cost function
 
-**TODO: move this to the alternative / weighted comparison**
-The cost function used in all cases is least squares weigted by the
-input errors, named in the list of cost functions available in Mantid
-as `Least squares`. This is the default cost function in Mantid.
-
+The cost function used in this general comparison is 'Least squares'
+but without using input errors.
 
 Benchmark problems
 ##################
@@ -141,9 +138,11 @@ The problems have been obtained from two different benchmarks:
 - The `Constrained and Unconstrained Testing Environment <http://www.cuter.rl.ac.uk/Problems/mastsif.html>`__
   set of test problems for linear and nonlinear optimization.
 
-As the NIST problems do not include measurement errors, assuming that
-these datasets would represent spectra from a typical Mantid workspace
-we introduce errors as the square root of the observations.
+As the test problems do not define observational errors this
+comparison does not use the weights of the least squares cost
+function.  An :ref:`alternative comparison using simulated errors is
+also available <Minimizers_weighted_comparison>`, with similar results
+overall.
 
 From the second source, which is a large collection of diverse
 problems (over a thousand) a subset of problems that are relevant for
@@ -164,7 +163,9 @@ Summary, median ranking
 
 The summary table shows the median ranking across all the test
 problems. See :ref:`detailed results by test problem (accuracy)
-<Minimizers_comparison_in_terms_of_accuracy>`.
+<Minimizers_comparison_in_terms_of_accuracy>`. Alternatively, see the
+:ref:`detailed results when using weighted least squares as cost
+function <Minimizers_weighted_comparison_in_terms_of_accuracy>`.
 
 .. Q: In tables: show values as absolute or relative to the best one
    for each problem? Absolute for the best in a column on the right?
@@ -174,7 +175,7 @@ problems. See :ref:`detailed results by test problem (accuracy)
 
 .. summary splitting the NIST problems into three blocks as originally done in the NIST pages
 
-.. include:: minimizers_comparison/v3.7.0/comparison_v3.7_acc_summary.txt
+.. include:: minimizers_comparison/v3.7.0/comparison_unweighted_v3.7_acc_summary.txt
 
 
 Comparison in terms of run time
@@ -185,9 +186,11 @@ Summary, median ranking
 
 The summary table shows the median ranking across all the test
 problems. See :ref:`detailed results by test problem (run time)
-<Minimizers_comparison_in_terms_of_run_time>`.
+<Minimizers_comparison_in_terms_of_run_time>`. Alternatively, see the
+:ref:`detailed results when using weighted least squares as cost
+function <Minimizers_weighted_comparison_in_terms_of_run_time>`.
 
-.. include:: minimizers_comparison/v3.7.0/comparison_v3.7_runtime_summary.txt
+.. include:: minimizers_comparison/v3.7.0/comparison_unweighted_v3.7_runtime_summary.txt
 
 
 References:

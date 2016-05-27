@@ -7,21 +7,18 @@ Comparison of minimizers, with weighted least squares
 .. include:: minimizers_comparison/color_definitions.txt
 
 Here we provide a summary and detailed results for a comparison of
-minimizers in Mantid when using the cost function weighted least
-squares.  For an explanation of the comparison approach see the
-:ref:`General comparison of minimizers <FittingMinimizers>`. The
-difference between the results presented here and the general is that
-the cost function used is least squares weigted by the input
-errors and the
-
-in all cases is least squares weigted by the
-input errors, named in the list of cost functions available in Mantid
-as `Least squares`. This is the default cost function in Mantid.
-
-
-. This cost function is named in the list of cost functions
+minimizers in Mantid when using weights in the cost function. For an
+explanation of the comparison approach and the results obtained when
+not using weights see the :ref:`General comparison of minimizers
+<FittingMinimizers>`.  In the alternative results presented here the
+cost function used is least squares and weigths by input observational
+errors. This cost function is named in the list of cost functions
 available in Mantid as `Least squares`, it is the default cost
 function in Mantid and the most commonly used for neutron data.
+
+As the NIST problems do not include measurement errors, assuming that
+these datasets would represent spectra from a typical Mantid workspace
+we introduce errors as the square root of the observations.
 
 .. _Minimizers_weighted_comparison_in_terms_of_accuracy:
 
