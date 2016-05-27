@@ -255,7 +255,7 @@ if ( ENABLE_CPACK )
       message ( STATUS " CPACK_PACKAGE_FILE_NAME = ${CPACK_PACKAGE_FILE_NAME}" )
 
       # rhel requirements
-      set ( CPACK_RPM_PACKAGE_REQUIRES "qt4 >= 4.2,nexus >= 4.3.1,nexus-python >= 4.3.1,gsl,glibc,qwtplot3d-qt4,muParser,numpy,h5py" )
+      set ( CPACK_RPM_PACKAGE_REQUIRES "qt4 >= 4.2,nexus >= 4.3.1,nexus-python >= 4.3.1,gsl,glibc,qwtplot3d-qt4,muParser,numpy,h5py >= 2.3.1,PyCifRW >= 4.2.1" )
       # OCE
       set( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},OCE-draw,OCE-foundation,OCE-modeling,OCE-ocaf,OCE-visualization")
       set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},poco-crypto,poco-data,poco-mysql,poco-sqlite,poco-odbc,poco-util,poco-xml,poco-zip,poco-net,poco-netssl,poco-foundation,PyQt4,sip" )
@@ -307,7 +307,8 @@ if ( ENABLE_CPACK )
                            "ipython-notebook,"
                            "python-matplotlib,"
                            "python-scipy,"
-                           "libpocofoundation11,libpocoutil11,libpoconet11,libpoconetssl11,libpococrypto11,libpocoxml11" )
+                           "libpocofoundation11,libpocoutil11,libpoconet11,libpoconetssl11,libpococrypto11,libpocoxml11,"
+                           "python-pycifrw (>= 4.2.1)" )
         set ( PERFTOOLS_DEB_PACKAGE "libgoogle-perftools4 (>= 1.7)" )
         if( "${UNIX_CODENAME}" STREQUAL "wily"  OR "${UNIX_CODENAME}" STREQUAL "xenial")
             list ( APPEND DEPENDS_LIST ", libnexus0v5 (>= 4.3),libjsoncpp0v5 (>= 0.7.0),libqscintilla2-12v5, libmuparser2v5,libqwtplot3d-qt4-0v5")
