@@ -2,7 +2,6 @@
 #define DELTAFUNCTIONTEST_H
 
 #include <cxxtest/TestSuite.h>
-#include "MantidCurveFitting/Algorithms/Fit.h"
 
 #include "MantidCurveFitting/Functions/DeltaFunction.h"
 #include "MantidCurveFitting/Functions/Convolution.h"
