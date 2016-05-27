@@ -323,10 +323,10 @@ Output:
 .. figure:: ../images/MaxEntPositiveImage.png
    :align: center
 
-Increasing the density of points in the image
----------------------------------------------
+Increasing the number of points in the image
+--------------------------------------------
 
-The algorithm has an input property, *DensityFactor* that allows to increase the number of points in the reconstructed image. This is
+The algorithm has an input property, *ResolutionFactor* that allows to increase the number of points in the reconstructed image. This is
 at present done by extending the range (and also the number of points) in the reconstructed data. The number of reconstructed
 points can be increased by any integer factor, but note that this will slow down the algorithm and a greater number of maxent iterations may be needed
 for the algorithm to converge to a solution.
@@ -334,26 +334,26 @@ for the algorithm to converge to a solution.
 An example script where the density of points is increased by a factor of 2 can be found below. Note that when a factor of 2 is used,
 the reconstructed data is twice the size of the original (experimental) data.
 
-.. testcode:: ExDensityFactor
+.. testcode:: ExResolutionFactor
 
    Load(Filename=r'EMU00020884.nxs', OutputWorkspace='ws')
    CropWorkspace(InputWorkspace='ws', OutputWorkspace='ws', XMin=0.17, XMax=4.5, EndWorkspaceIndex=0)
    ws = RemoveExpDecay(InputWorkspace='ws')
    ws = Rebin(InputWorkspace='ws', Params='0.016')
-   evolChi1, evolAngle1, image1, data1 = MaxEnt(InputWorkspace='ws', A=0.0001, ChiTarget=300, MaxIterations=2500, DensityFactor=1)
-   evolChi2, evolAngle2, image2, data2 = MaxEnt(InputWorkspace='ws', A=0.0001, ChiTarget=300, MaxIterations=5000, DensityFactor=2)
+   evolChi1, evolAngle1, image1, data1 = MaxEnt(InputWorkspace='ws', A=0.0001, ChiTarget=300, MaxIterations=2500, ResolutionFactor=1)
+   evolChi2, evolAngle2, image2, data2 = MaxEnt(InputWorkspace='ws', A=0.0001, ChiTarget=300, MaxIterations=5000, ResolutionFactor=2)
 
-   print "Image at %.3f:  %.3f (DensityFactor=1)" % (image1.readX(0)[103], image1.readY(0)[103])
-   print "Image at %.3f: %.3f (DensityFactor=2)" % (image2.readX(0)[258], image2.readY(0)[258])
+   print "Image at %.3f:  %.3f (ResolutionFactor=1)" % (image1.readX(0)[103], image1.readY(0)[103])
+   print "Image at %.3f: %.3f (ResolutionFactor=2)" % (image2.readX(0)[258], image2.readY(0)[258])
 
 Output:
 
-.. testoutput:: ExDensityFactor
+.. testoutput:: ExResolutionFactor
 
-   Image at -7.407:  0.000 (DensityFactor=1)
-   Image at -1.389: -0.081 (DensityFactor=2)
+   Image at -7.407:  0.000 (ResolutionFactor=1)
+   Image at -1.389: -0.081 (ResolutionFactor=2)
 
-.. figure:: ../images/MaxEntDensityFactor.png
+.. figure:: ../images/MaxEntResolutionFactor.png
    :align: center
 
 In the next example, we increased the density of points by factors of 10, 20 and 40. We show the reconstructed image (left) and
@@ -365,12 +365,12 @@ a zoom into the region :math:`0.82 < x < 1.44` and :math:`-0.187 < y < 0.004`.
    CropWorkspace(InputWorkspace='ws', OutputWorkspace='ws', XMin=0.17, XMax=4.5, EndWorkspaceIndex=0)
    ws = RemoveExpDecay(InputWorkspace='ws')
    ws = Rebin(InputWorkspace='ws', Params='0.016')
-   evolChi1, evolAngle1, image1, data1 = MaxEnt(InputWorkspace='ws', A=0.0001, ChiTarget=300, MaxIterations=2500, DensityFactor=1)
-   evolChi10, evolAngle10, image10, data10 = MaxEnt(InputWorkspace='ws', A=0.0001, ChiTarget=300, MaxIterations=25000, DensityFactor=10)
-   evolChi20, evolAngle20, image20, data20 = MaxEnt(InputWorkspace='ws', A=0.0001, ChiTarget=300, MaxIterations=50000, DensityFactor=20)
-   evolChi40, evolAngle40, image40, data40 = MaxEnt(InputWorkspace='ws', A=0.0001, ChiTarget=300, MaxIterations=75000, DensityFactor=40)
+   evolChi1, evolAngle1, image1, data1 = MaxEnt(InputWorkspace='ws', A=0.0001, ChiTarget=300, MaxIterations=2500, ResolutionFactor=1)
+   evolChi10, evolAngle10, image10, data10 = MaxEnt(InputWorkspace='ws', A=0.0001, ChiTarget=300, MaxIterations=25000, ResolutionFactor=10)
+   evolChi20, evolAngle20, image20, data20 = MaxEnt(InputWorkspace='ws', A=0.0001, ChiTarget=300, MaxIterations=50000, ResolutionFactor=20)
+   evolChi40, evolAngle40, image40, data40 = MaxEnt(InputWorkspace='ws', A=0.0001, ChiTarget=300, MaxIterations=75000, ResolutionFactor=40)
 
-.. figure:: ../images/MaxEntDensityFactor2.png
+.. figure:: ../images/MaxEntResolutionFactor2.png
    :align: center
 
 References

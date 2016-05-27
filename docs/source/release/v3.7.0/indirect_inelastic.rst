@@ -30,7 +30,7 @@ Jump Fit
 Diffraction
 ###########
 
-- OSIRIS Diffraction DiffOnly interface and the :ref `OSIRISDiffractionReduction <algm-OSIRISDiffractionReduction>` algorithm now support the use of multiple
+- OSIRIS Diffraction DiffOnly interface and the :ref:`OSIRISDiffractionReduction <algm-OSIRISDiffractionReduction>` algorithm now support the use of multiple
   contianer runs. Additional validation also ensures you have the same number of sample/vanadium/container runs.
 
 
@@ -94,8 +94,14 @@ Bugfixes
 - In the *I(Q, t) Fit* interface, checking the plot guess check box now correctly adds and removes the curve from the plot
 - In the *BayesQuasi* interface ResNorm files are now automatically loaded from file locations when entered.
 - :ref:`LoadVesuvio <algm-LoadVesuvio>` now correctly parses input in the form 10-20,30-40,50-60
+<<<<<<< HEAD
+- The *ApplyPaalmanPings* interface no longer crashes when attempting to preview different spectra when shift option is checked but the algorithm has not been run
+=======
 - The *ContainerSubtraction* Interface should no longer crash when changing preview spectra in the miniplot
+>>>>>>> origin/release-v3.7
 - Using the Spectra option in *S(Q,w)* interface now works correctly
+- It is now possible to properly update the Rebinning option in the *ISISCalibration* interface in *Indirect Data Reduction*
+- The Plot Output options in the *I(Q, t) Fit* interface now update properly when switching between Fit Types
 
 
 

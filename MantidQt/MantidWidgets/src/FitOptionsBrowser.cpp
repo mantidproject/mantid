@@ -285,6 +285,20 @@ void FitOptionsBrowser::addProperty(const QString& name, QtProperty* prop,
   m_setters[prop] = setter;
 }
 
+/**
+ * Remove a property previously added with addProperty
+ * (If property doesn't exist, does nothing).
+ * @param name :: [input] Name of property to remove
+ */
+void FitOptionsBrowser::removeProperty(const QString &name) {
+  if (m_propertyNameMap.contains(name)) {
+    const auto prop = m_propertyNameMap[name];
+    m_getters.remove(prop);
+    m_setters.remove(prop);
+    m_propertyNameMap.remove(name);
+  }
+}
+
 /*                *********************
  *                **  Private Slots  **
  *                *********************/
@@ -328,6 +342,7 @@ void FitOptionsBrowser::updateMinimizer()
     if ( prop != m_minimizer )
     {
       m_minimizerGroup->removeSubProperty(prop);
+      removeProperty(prop->propertyName());
     }
   }
 

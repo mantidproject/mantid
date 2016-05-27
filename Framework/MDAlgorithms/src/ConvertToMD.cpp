@@ -246,6 +246,15 @@ void ConvertToMD::exec() {
   // Set the normalization of the event workspace
   m_Convertor->setDisplayNormalization(spws, m_InWS2D);
 
+  if (fileBackEnd) {
+    auto savemd = this->createChildAlgorithm("SaveMD");
+    savemd->setProperty("InputWorkspace", spws);
+    savemd->setPropertyValue("Filename", out_filename);
+    savemd->setProperty("UpdateFileBackEnd", true);
+    savemd->setProperty("MakeFileBacked", false);
+    savemd->executeAsChildAlg();
+  }
+
   // JOB COMPLETED:
   setProperty("OutputWorkspace",
               boost::dynamic_pointer_cast<IMDEventWorkspace>(spws));
