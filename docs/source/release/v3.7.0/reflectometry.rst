@@ -22,7 +22,11 @@ ReflectometryReductionOne
 -------------------------
 
 - Transmission corrections options are now applicable with both PointDetectorAnalysis and MultiDetectorAnalysis modes as long as a first 
-  transmission workspace has been provided.
+  transmission workspace has been provided. `#15683 <https://github.com/mantidproject/mantid/pull/15683>`_
+  
+- In CreateTransmissionWorkspace and ReflectometryReductionOne the default value for the algorithm property WavelengthStep has been changed
+  from 0.05 to 0.02.
+
 
 Reflectometry Reduction Interface
 ---------------------------------
