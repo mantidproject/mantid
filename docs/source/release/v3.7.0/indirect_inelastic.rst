@@ -96,6 +96,7 @@ Bugfixes
 - :ref:`LoadVesuvio <algm-LoadVesuvio>` now correctly parses input in the form 10-20,30-40,50-60
 - The *ContainerSubtraction* Interface should no longer crash when changing preview spectra in the miniplot
 - Using the Spectra option in *S(Q,w)* interface now works correctly
+- The Plot Output options in the *I(Q, t) Fit* interface now update properly when switching between Fit Types
 
 
 
