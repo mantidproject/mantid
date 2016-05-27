@@ -94,7 +94,7 @@ class StretchedExpFT(IFunction1D):
         # of increasing energy values
         de = (xvals[-1] - xvals[0]) / (ne-1)
         erange = 2*max(abs(xvals))
-        dt = StretchedExpFT._planck_constant/erange  # spacing in time
+        dt = 0.5*StretchedExpFT._planck_constant/erange  # spacing in time
         tmax = StretchedExpFT._planck_constant/de  # maximum reciprocal time
         # round to an upper power of two
         nt = 2**(1+int(np.log(tmax/dt)/np.log(2)))
