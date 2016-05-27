@@ -137,6 +137,8 @@ private:
   QString m_outputWorkspaceName;
   /// Fit algorithm runner
   boost::shared_ptr<API::AlgorithmRunner> m_fitRunner;
+  /// Remembers setting for just current session
+  int m_fitAllSettings;
 };
 
 } // CustomInterfaces

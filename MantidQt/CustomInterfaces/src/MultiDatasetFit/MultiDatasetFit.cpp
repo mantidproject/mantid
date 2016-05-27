@@ -36,7 +36,7 @@ DECLARE_SUBWINDOW(MultiDatasetFit)
 /// @param parent :: The parent widget
 MultiDatasetFit::MultiDatasetFit(QWidget *parent)
 :UserSubWindow(parent), m_plotController(NULL), m_dataController(NULL), m_functionBrowser(NULL),
- m_fitOptionsBrowser(NULL)
+ m_fitOptionsBrowser(NULL), m_fitAllSettings(QMessageBox::No)
 {
 }
 
@@ -181,8 +181,9 @@ void MultiDatasetFit::fitSequential()
 {
   try
   {
-	// disable button to avoid multiple fit click
-	m_uiForm.btnFit->setEnabled(false);
+
+    /// disable button to avoid multiple fit click
+    m_uiForm.btnFit->setEnabled(false);
 
     std::ostringstream input;
 
@@ -231,7 +232,8 @@ void MultiDatasetFit::fitSimultaneous()
 {
   try
   {
-	m_uiForm.btnFit->setEnabled(false);
+
+    m_uiForm.btnFit->setEnabled(false);
     auto fun = createFunction();
     auto fit = Mantid::API::AlgorithmManager::Instance().create("Fit");
     fit->initialize();
@@ -304,23 +306,29 @@ void MultiDatasetFit::fit() {
   int fitAll = QMessageBox::Yes;
 
   if (fittingType == MantidWidgets::FitOptionsBrowser::Simultaneous) {
-    if (n > 20) {
+    if (n > 20 && m_fitAllSettings == QMessageBox::No) {
       fitAll = QMessageBox::question(this, "Fit All?",
                                      "Are you sure you would like to fit " +
                                          QString::number(n) +
                                          " spectrum simultaneously?",
                                      QMessageBox::Yes, QMessageBox::No);
+
+      if (fitAll == QMessageBox::Yes)
+        m_fitAllSettings = QMessageBox::Yes;
     }
     if (fitAll == QMessageBox::Yes) {
       fitSimultaneous();
     }
 
   } else if (fittingType == MantidWidgets::FitOptionsBrowser::Sequential) {
-    if (n > 100) {
+    if (n > 100 && m_fitAllSettings == QMessageBox::No) {
       fitAll = QMessageBox::question(
           this, "Fit All?", "Are you sure you would like to fit " +
                                 QString::number(n) + " spectrum sequentially?",
           QMessageBox::Yes, QMessageBox::No);
+
+      if (fitAll == QMessageBox::Yes)
+        m_fitAllSettings = QMessageBox::Yes;
     }
     if (fitAll == QMessageBox::Yes) {
       fitSequential();
