@@ -843,9 +843,11 @@ void EnggDiffractionPresenter::processFitPeaks() {
                         outWSName + "'. This "
                                     "may take some seconds... " << std::endl;
 
+  m_view->showStatus("Fitting single peaks...");
+  // disable GUI to avoid any double threads
+  m_view->enableCalibrateAndFocusActions(false);
   // startAsyncFittingWorker
   // doFitting()
-  m_view->showStatus("Fitting single peaks...");
   startAsyncFittingWorker(focusedRunNo, fitPeaksData);
 }
 
@@ -943,8 +945,6 @@ void EnggDiffractionPresenter::setDifcTzero(MatrixWorkspace_sptr wks) const {
 
 void EnggDiffractionPresenter::doFitting(const std::string &focusedRunNo,
                                          const std::string &ExpectedPeaks) {
-  // disable GUI to avoid any double threads
-  m_view->enableCalibrateAndFocusActions(false);
   g_log.notice() << "EnggDiffraction GUI: starting new fitting with file "
                  << focusedRunNo << ". This may take a few seconds... "
                  << std::endl;
