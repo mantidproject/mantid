@@ -183,19 +183,15 @@ size_t EventWorkspace::blocksize() const {
  */
 size_t EventWorkspace::getNumberHistograms() const { return this->data.size(); }
 
-//--------------------------------------------------------------------------------------------
-/// Return the underlying ISpectrum ptr at the given workspace index.
-Mantid::API::ISpectrum &EventWorkspace::getSpectrum(const size_t index) {
-  if (index >= m_noVectors)
-    throw std::range_error(
-        "EventWorkspace::getSpectrum, workspace index out of range");
+/// Return const reference to EventList at the given workspace index.
+EventList &EventWorkspace::getSpectrum(const size_t index) {
   invalidateCommonBinsFlag();
-  return *data[index];
+  return const_cast<EventList &>(
+      static_cast<const EventWorkspace &>(*this).getSpectrum(index));
 }
 
-/// Return the underlying ISpectrum ptr at the given workspace index.
-const Mantid::API::ISpectrum &
-EventWorkspace::getSpectrum(const size_t index) const {
+/// Return const reference to EventList at the given workspace index.
+const EventList &EventWorkspace::getSpectrum(const size_t index) const {
   if (index >= m_noVectors)
     throw std::range_error(
         "EventWorkspace::getSpectrum, workspace index out of range");

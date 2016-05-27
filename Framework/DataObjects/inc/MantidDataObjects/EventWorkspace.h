@@ -75,13 +75,8 @@ public:
   // Get the number of histograms. aka the number of pixels or detectors.
   std::size_t getNumberHistograms() const override;
 
-  //------------------------------------------------------------
-  // Return the underlying ISpectrum ptr at the given workspace index.
-  Mantid::API::ISpectrum &getSpectrum(const size_t index) override;
-
-  // Return the underlying ISpectrum ptr (const version) at the given workspace
-  // index.
-  const Mantid::API::ISpectrum &getSpectrum(const size_t index) const override;
+  EventList &getSpectrum(const size_t index) override;
+  const EventList &getSpectrum(const size_t index) const override;
 
   //------------------------------------------------------------
 
