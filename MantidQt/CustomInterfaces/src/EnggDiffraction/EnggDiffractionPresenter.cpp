@@ -273,9 +273,9 @@ void EnggDiffractionPresenter::grabCalibParms(const std::string &fname) {
             parms.emplace_back(GSASCalibrationParms(bid, difc, difa, tzero));
           } catch (std::runtime_error &rexc) {
             g_log.warning()
-                << "Erro when trying to extract parameters from this line:  "
-                << line << ". This calibration file may not load correctly."
-                << std::endl;
+                << "Error when trying to extract parameters from this line:  "
+                << line << ". This calibration file may not load correctly. "
+                           "Error details: " << rexc.what() << std::endl;
           }
         } else {
           g_log.warning() << "Could not parse correctly a parameters "
@@ -288,9 +288,10 @@ void EnggDiffractionPresenter::grabCalibParms(const std::string &fname) {
     }
 
   } catch (std::runtime_error &rexc) {
-    g_log.error() << "Error while loading calibration / GSAS IPARM file ("
-                  << fname << "). Could not . Please check the file."
-                  << std::endl;
+    g_log.error()
+        << "Error while loading calibration / GSAS IPARM file (" << fname
+        << "). Could not parse the file. Please check its contents. Details: "
+        << rexc.what() << std::endl;
   }
 
   m_currentCalibParms = parms;
@@ -1310,8 +1311,9 @@ void EnggDiffractionPresenter::runAlignDetectorsAlg(std::string workspaceName) {
       alg->setProperty("Workspace", workspaceName);
       alg->execute();
     } catch (std::runtime_error &rexc) {
-      g_log.error() << "Could not run ConvertFromDistribution"
-                    << std::endl; // TODO TODO TODO TODO *****
+      g_log.error() << "Could not run ConvertFromDistribution. Error: "
+                    << rexc.what() << std::endl;
+      return;
     }
   }
 
