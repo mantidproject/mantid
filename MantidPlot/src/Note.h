@@ -59,7 +59,7 @@ public slots:
   void modifiedNote();
 
   // QTextEdit methods
-  QString text() { return te->text(); }
+  QString text() { return te->toPlainText(); }
   void setText(const QString &s) { te->setText(s); }
 
   void print() override;

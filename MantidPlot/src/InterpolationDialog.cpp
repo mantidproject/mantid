@@ -44,7 +44,7 @@
 InterpolationDialog::InterpolationDialog( QWidget* parent, Qt::WFlags fl )
   : QDialog( parent, fl ), graph(NULL)
 {
-    setName( "InterpolationDialog" );
+    setObjectName( "InterpolationDialog" );
     setWindowTitle(tr("MantidPlot - Interpolation Options"));
 
     QGroupBox *gb1 = new QGroupBox();
@@ -56,9 +56,9 @@ InterpolationDialog::InterpolationDialog( QWidget* parent, Qt::WFlags fl )
 
     gl1->addWidget(new QLabel(tr("Spline")), 1, 0);
     boxMethod = new QComboBox();
-    boxMethod->insertItem(tr("Linear"));
-    boxMethod->insertItem(tr("Cubic"));
-    boxMethod->insertItem(tr("Non-rounded Akima"));
+    boxMethod->addItem(tr("Linear"));
+    boxMethod->addItem(tr("Cubic"));
+    boxMethod->addItem(tr("Non-rounded Akima"));
     gl1->addWidget(boxMethod, 1, 1);
 
     gl1->addWidget(new QLabel(tr("Points")), 2, 0);
@@ -119,7 +119,7 @@ double from, to;
 try
 	{
 	MyParser parser;
-	parser.SetExpr(boxStart->text().replace(",", ".").ascii());
+	parser.SetExpr(boxStart->text().replace(",", ".").toAscii().constData());
 	from = parser.Eval();
 	}
 catch(mu::ParserError &e)
@@ -132,7 +132,7 @@ catch(mu::ParserError &e)
 try
 	{
 	MyParser parser;
-	parser.SetExpr(boxEnd->text().replace(",", ".").ascii());
+	parser.SetExpr(boxEnd->text().replace(",", ".").toAscii().constData());
 	to = parser.Eval();
 	}
 catch(mu::ParserError &e)
@@ -157,22 +157,20 @@ i->run();
 delete i;
 }
 
-void InterpolationDialog::setGraph(Graph *g)
-{
-	graph = g;
-	boxName->addItems(g->analysableCurvesList());
+void InterpolationDialog::setGraph(Graph *g) {
+  graph = g;
+  boxName->addItems(g->analysableCurvesList());
 
-    QString selectedCurve = g->selectedCurveTitle();
-	if (!selectedCurve.isEmpty())
-	{
-	    int index = boxName->findText (selectedCurve);
-		boxName->setCurrentItem(index);
-	}
+  QString selectedCurve = g->selectedCurveTitle();
+  if (!selectedCurve.isEmpty()) {
+    int index = boxName->findText(selectedCurve);
+    boxName->setCurrentIndex(index);
+  }
 
-    activateCurve(boxName->currentText());
+  activateCurve(boxName->currentText());
 
-	connect (graph, SIGNAL(closedGraph()), this, SLOT(close()));
-	connect (graph, SIGNAL(dataRangeChanged()), this, SLOT(changeDataRange()));
+  connect(graph, SIGNAL(closedGraph()), this, SLOT(close()));
+  connect(graph, SIGNAL(dataRangeChanged()), this, SLOT(changeDataRange()));
 }
 
 void InterpolationDialog::activateCurve(const QString& curveName)

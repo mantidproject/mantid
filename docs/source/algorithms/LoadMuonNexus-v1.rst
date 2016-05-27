@@ -159,9 +159,9 @@ Log values are loaded into the workspace run object as follows:
 +-------------------------------------------+-------------------------------+
 | - single-period:                          | ``goodfrm`` (number of good   |
 | ``run/instrument/beam/frames_good``       | frames)                       |
-|                                           |                               |
 | - multi-period:                           |                               | 
 | ``run/instrument/beam/frames_period_daq`` |                               |
+|                                           |                               |
 +-------------------------------------------+-------------------------------+
 | Other NX\_LOG entries under ``run``       | time series (via LoadMuonLog) |
 +-------------------------------------------+-------------------------------+

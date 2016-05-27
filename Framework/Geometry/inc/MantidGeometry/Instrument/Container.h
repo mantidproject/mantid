@@ -1,5 +1,5 @@
-#ifndef MANTID_GEOMETRY_CAN_H_
-#define MANTID_GEOMETRY_CAN_H_
+#ifndef MANTID_GEOMETRY_CONTAINER_H_
+#define MANTID_GEOMETRY_CONTAINER_H_
 
 #include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/Objects/Object.h"
@@ -9,7 +9,7 @@ namespace Mantid {
 namespace Geometry {
 
 /**
-  Models a Can, which is used to hold a sample in the beam. It gets most
+  Models a Container is used to hold a sample in the beam. It gets most
   of its functionality from Geometry::Object but can also hold a
   definition of what the sample geometry itself would be. If the sample shape
   definition is set then we term this a constriained sample geometry.
@@ -35,12 +35,12 @@ namespace Geometry {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_GEOMETRY_DLL Can final : public Object {
+class MANTID_GEOMETRY_DLL Container final : public Object {
 public:
   typedef std::unordered_map<std::string, double> ShapeArgs;
 
-  Can() = default;
-  Can(std::string canXML);
+  Container() = default;
+  Container(std::string xml);
 
   bool hasSampleShape() const;
   Object_sptr createSampleShape(const ShapeArgs &args) const;
@@ -52,11 +52,11 @@ private:
 };
 
 /// Typdef for a shared pointer
-typedef boost::shared_ptr<Can> Can_sptr;
+typedef boost::shared_ptr<Container> Container_sptr;
 /// Typdef for a shared pointer to a const object
-typedef boost::shared_ptr<const Can> Can_const_sptr;
+typedef boost::shared_ptr<const Container> Container_const_sptr;
 
 } // namespace Geometry
 } // namespace Mantid
 
-#endif /* MANTID_GEOMETRY_CAN_H_ */
+#endif /* MANTID_GEOMETRY_CONTAINER_H_ */

@@ -155,11 +155,11 @@ void SymbolBox::setStyle(const QwtSymbol::Style& style)
   {
     if (symbols[i] == style)
     {
-      setCurrentItem(int(i));
+      setCurrentIndex(int(i));
       return;
     }
   }
-  setCurrentItem(0);
+  setCurrentIndex(0);
 //  const QwtSymbol::Style*ite = std::find(symbols, symbols + sizeof(symbols), style);
 //  if (ite == symbols + sizeof(symbols))
 //    this->setCurrentIndex(0);

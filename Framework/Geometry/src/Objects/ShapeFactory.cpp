@@ -2,7 +2,7 @@
 // Includes
 //----------------------------------------------------------------------
 
-#include "MantidGeometry/Instrument/Can.h"
+#include "MantidGeometry/Instrument/Container.h"
 #include "MantidGeometry/Objects/Object.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidGeometry/Rendering/GluGeometryHandler.h"
@@ -1485,12 +1485,12 @@ void ShapeFactory::createGeometryHandler(Poco::XML::Element *pElem,
 // Template instantations
 template MANTID_GEOMETRY_DLL boost::shared_ptr<Object>
 ShapeFactory::createShape(std::string shapeXML, bool addTypeTag);
-template MANTID_GEOMETRY_DLL boost::shared_ptr<Can>
+template MANTID_GEOMETRY_DLL boost::shared_ptr<Container>
 ShapeFactory::createShape(std::string shapeXML, bool addTypeTag);
 
 template MANTID_GEOMETRY_DLL boost::shared_ptr<Object>
 ShapeFactory::createShape(Poco::XML::Element *pElem);
-template MANTID_GEOMETRY_DLL boost::shared_ptr<Can>
+template MANTID_GEOMETRY_DLL boost::shared_ptr<Container>
 ShapeFactory::createShape(Poco::XML::Element *pElem);
 ///@endcond
 

@@ -77,7 +77,7 @@ rejected. For example, this call will filter out veto pulses:
 Comparing with other event filtering algorithms
 ###############################################
 
-Wiki page `EventFiltering <http://www.mantidproject.org/EventFiltering>`__ has a detailed
+Wiki page :ref:`EventFiltering` has a detailed
 introduction on event filtering in MantidPlot.
 
 
