@@ -10,6 +10,7 @@
 #include "MantidAPI/IFuncMinimizer.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidCurveFitting/Algorithms/Fit.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid;
 using namespace Mantid::CurveFitting;
@@ -819,6 +820,174 @@ public:
     TS_ASSERT_DELTA(out->getParameter("f1.Sigma"), 26.08, 1);
     TS_ASSERT_DELTA(out->getParameter("f0.A0"), 8, 1);
     TS_ASSERT_DELTA(out->getParameter("f0.A1"), 0.0, 0.01);
+  }
+
+#if !(defined __APPLE__)
+  /**
+  * Changing compiler on OS X has yet again caused this (and only this) test to
+  * fail.
+  * Switch it off until it is clear why the other Fit tests are okay on OS X
+  * using Intel
+  */
+  void test_Function_IkedaCarpenterPV_NoInstrument() {
+    // Try to fit an IC peak to a Gaussian mock data peak
+    // Note that fitting a none-totally optimized IC to a Gaussian peak so
+    // not a perfect fit - but pretty ok result
+
+    int ndata = 31;
+    API::MatrixWorkspace_sptr ws = API::WorkspaceFactory::Instance().create(
+        "Workspace2D", 1, ndata, ndata);
+    Mantid::MantidVec &x = ws->dataX(0);
+    Mantid::MantidVec &y = ws->dataY(0);
+    Mantid::MantidVec &e = ws->dataE(0);
+    y = {0.0000,  0.0003,  0.0028,  0.0223,  0.1405,  0.6996,  2.7608,  8.6586,
+         21.6529, 43.3558, 69.8781, 91.2856, 97.5646, 86.4481, 64.7703, 42.3348,
+         25.3762, 15.0102, 9.4932,  6.7037,  5.2081,  4.2780,  3.6037,  3.0653,
+         2.6163,  2.2355,  1.9109,  1.6335,  1.3965,  1.1938,  1.0206};
+    e = {0.0056, 0.0176, 0.0539, 0.1504, 0.3759, 0.8374, 1.6626, 2.9435,
+         4.6543, 6.5855, 8.3603, 9.5553, 9.8785, 9.2987, 8.0490, 6.5075,
+         5.0385, 3.8753, 3.0821, 2.5902, 2.2831, 2.0693, 1.8993, 1.7518,
+         1.6185, 1.4962, 1.3833, 1.2791, 1.1827, 1.0936, 1.0112};
+    for (int i = 0; i < ndata; i++) {
+      x[i] = i * 5;
+    }
+
+    Fit fit;
+    fit.initialize();
+    TS_ASSERT(fit.isInitialized());
+    fit.setProperty(
+        "Function",
+        "name=IkedaCarpenterPV, I=1000, SigmaSquared=25.0, Gamma=0.1, X0=50.0");
+    fit.setProperty("Ties", "Alpha0=1.6, Alpha1=1.5, Beta0=31.9, Kappa=46.0");
+    fit.setProperty("InputWorkspace", ws);
+    fit.setPropertyValue("StartX", "0");
+    fit.setPropertyValue("EndX", "150");
+    TS_ASSERT_THROWS_NOTHING(fit.execute());
+    TS_ASSERT(fit.isExecuted());
+
+    // test the output from fit is what you expect
+    double chi2 = fit.getProperty("OutputChi2overDoF");
+    TS_ASSERT_DELTA(chi2, 0.0, 0.1);
+
+    IFunction_sptr out = fit.getProperty("Function");
+    TS_ASSERT_DELTA(out->getParameter("I"), 3101.672, 0.1);
+    TS_ASSERT_DELTA(out->getParameter("Alpha0"), 1.6, 0.0001);
+    TS_ASSERT_DELTA(out->getParameter("Alpha1"), 1.5, 0.001);
+    TS_ASSERT_DELTA(out->getParameter("Beta0"), 31.9, 0.0001);
+    TS_ASSERT_DELTA(out->getParameter("Kappa"), 46.0, 0.0001);
+    TS_ASSERT_DELTA(out->getParameter("SigmaSquared"), 99.935, 0.1);
+    TS_ASSERT_DELTA(out->getParameter("Gamma"), 0.0, 0.1);
+    TS_ASSERT_DELTA(out->getParameter("X0"), 49.984, 0.1);
+  }
+
+  void test_Function_IkedaCarpenterPV_FullInstrument_DeltaE() {
+    // create mock data to test against
+    int ndata = 31;
+    auto ws = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
+        2, ndata, false, false, false);
+    ws->getAxis(0)->setUnit("DeltaE");
+    for (int i = 0; i < ndata; i++) {
+      ws->dataX(0)[i] = i * 5;
+    }
+    Mantid::MantidVec &x = ws->dataX(0);
+    Mantid::MantidVec &y = ws->dataY(0);
+    Mantid::MantidVec &e = ws->dataE(0);
+    y = {0.0000,  0.0003,  0.0028,  0.0223,  0.1405,  0.6996,  2.7608,  8.6586,
+         21.6529, 43.3558, 69.8781, 91.2856, 97.5646, 86.4481, 64.7703, 42.3348,
+         25.3762, 15.0102, 9.4932,  6.7037,  5.2081,  4.2780,  3.6037,  3.0653,
+         2.6163,  2.2355,  1.9109,  1.6335,  1.3965,  1.1938,  1.0206};
+    e = {0.0056, 0.0176, 0.0539, 0.1504, 0.3759, 0.8374, 1.6626, 2.9435,
+         4.6543, 6.5855, 8.3603, 9.5553, 9.8785, 9.2987, 8.0490, 6.5075,
+         5.0385, 3.8753, 3.0821, 2.5902, 2.2831, 2.0693, 1.8993, 1.7518,
+         1.6185, 1.4962, 1.3833, 1.2791, 1.1827, 1.0936, 1.0112};
+    for (int i = 0; i < ndata; i++) {
+      x[i] = i * 5;
+    }
+
+    // Direct
+
+    Fit fitDirect;
+    fitDirect.initialize();
+    TS_ASSERT(fitDirect.isInitialized());
+    fitDirect.setProperty("Function", "name=IkedaCarpenterPV, I=1000, "
+                                      "SigmaSquared=25.0, Gamma=0.1, X0=50.0");
+    fitDirect.setProperty("InputWorkspace", ws);
+    fitDirect.setProperty("Ties",
+                          "Alpha0=1.6, Alpha1=1.5, Beta0=31.9, Kappa=46.0");
+    fitDirect.setPropertyValue("StartX", "0");
+    fitDirect.setPropertyValue("EndX", "150");
+
+    // Set efixed for direct
+    ws->mutableRun().addProperty<std::string>("deltaE-mode", "direct");
+    ws->mutableRun().addProperty<double>("Ei", 11.0);
+    TS_ASSERT_THROWS_NOTHING(fitDirect.execute());
+    TS_ASSERT(fitDirect.isExecuted());
+
+    double chi2 = fitDirect.getProperty("OutputChi2overDoF");
+    TS_ASSERT_DELTA(chi2, 22.745, 0.1);
+
+    // Indirect
+
+    Fit fitIndirect;
+    fitIndirect.initialize();
+    TS_ASSERT(fitIndirect.isInitialized());
+    fitIndirect.setProperty("Function",
+                            "name=IkedaCarpenterPV, I=1000, "
+                            "SigmaSquared=25.0, Gamma=0.1, X0=50.0");
+    fitIndirect.setProperty("InputWorkspace", ws);
+    fitIndirect.setProperty("Ties",
+                            "Alpha0=1.6, Alpha1=1.5, Beta0=31.9, Kappa=46.0");
+    fitIndirect.setPropertyValue("StartX", "0");
+    fitIndirect.setPropertyValue("EndX", "150");
+
+    // Set efixed for indirect
+    ws->mutableRun().addProperty<std::string>("deltaE-mode", "indirect", true);
+    auto &pmap = ws->instrumentParameters();
+    auto inst = ws->getInstrument()->baseInstrument();
+    pmap.addDouble(inst.get(), "EFixed", 20.0);
+    TS_ASSERT_THROWS_NOTHING(fitIndirect.execute());
+    TS_ASSERT(fitIndirect.isExecuted());
+
+    chi2 = fitIndirect.getProperty("OutputChi2overDoF");
+    TS_ASSERT_DELTA(chi2, 0.5721, 1);
+  }
+#endif
+
+  void test_function_LogNormal() {
+
+    // Mock data
+    int ndata = 20;
+    API::MatrixWorkspace_sptr ws = API::WorkspaceFactory::Instance().create(
+        "Workspace2D", 1, ndata, ndata);
+    Mantid::MantidVec &x = ws->dataX(0);
+    Mantid::MantidVec &y = ws->dataY(0);
+    Mantid::MantidVec &e = ws->dataE(0);
+    y = {0.0,        1.52798e-15, 6.4577135e-07, 0.0020337351, 0.12517292,
+         1.2282908,  4.3935083,   8.5229866,     11.127883,    11.110426,
+         9.1925694,  6.6457304,   4.353104,      2.6504159,    1.5279732,
+         0.84552286, 0.45371715,  0.23794487,    0.12268847,   0.0624878};
+    for (int i = 0; i < ndata; i++) {
+      x[i] = i;
+      e[i] = 0.1 * y[i];
+    }
+
+    Fit fit;
+    fit.initialize();
+    fit.setProperty("Function",
+                    "name=LogNormal, Height=90., Location=2., Scale=0.2");
+    fit.setProperty("InputWorkspace", ws);
+    TS_ASSERT_THROWS_NOTHING(TS_ASSERT(fit.execute()))
+    TS_ASSERT(fit.isExecuted());
+
+    // test the output from fit is what you expect
+    double dummy = fit.getProperty("OutputChi2overDoF");
+    TS_ASSERT_DELTA(dummy, 0.001, 0.001);
+
+    IFunction_sptr out = fit.getProperty("Function");
+    // golden standard y(x) = 100.0 / x * exp( -(log(x)-2.2)^2/(2*0.25^2) )
+    TS_ASSERT_DELTA(out->getParameter("Height"), 100.0, 0.1);
+    TS_ASSERT_DELTA(out->getParameter("Location"), 2.2, 0.1);
+    TS_ASSERT_DELTA(out->getParameter("Scale"), 0.25, 0.01);
   }
 };
 
