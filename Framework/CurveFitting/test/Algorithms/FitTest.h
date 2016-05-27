@@ -180,11 +180,25 @@ public:
       x[i] = static_cast<double>(i);
       e[i] = 1.0;
     }
-    y = {5.0, 3.582656552869, 2.567085595163, 1.839397205857, 1.317985690579,
-         0.9443780141878, 0.6766764161831, 0.484859839322, 0.347417256114,
-         0.2489353418393, 0.1783699667363, 0.1278076660325, 0.09157819444367,
-         0.0656186436847, 0.04701781275748, 0.03368973499543, 0.02413974996916,
-         0.01729688668232, 0.01239376088333};
+    y = {5.0,
+         3.582656552869,
+         2.567085595163,
+         1.839397205857,
+         1.317985690579,
+         0.9443780141878,
+         0.6766764161831,
+         0.484859839322,
+         0.347417256114,
+         0.2489353418393,
+         0.1783699667363,
+         0.1278076660325,
+         0.09157819444367,
+         0.0656186436847,
+         0.04701781275748,
+         0.03368973499543,
+         0.02413974996916,
+         0.01729688668232,
+         0.01239376088333};
 
     Fit fit;
     fit.initialize();
@@ -217,12 +231,26 @@ public:
       x[i] = static_cast<double>(i);
       e[i] = 1.;
     }
-    y = {5 * sqrh, 0.0, -2.567085595163 * sqrh, -1.839397205857,
-         -1.317985690579 * sqrh, 0.0, 0.6766764161831 * sqrh, 0.484859839322,
-         0.347417256114 * sqrh, 0.0, -0.1783699667363 * sqrh, -0.1278076660325,
-         -0.09157819444367 * sqrh, 0.0, 0.04701781275748 * sqrh,
-         0.03368973499543, 0.02413974996916 * sqrh, 0.0,
-         -0.01239376088333 * sqrh, 0.0};
+    y = {5 * sqrh,
+         0.0,
+         -2.567085595163 * sqrh,
+         -1.839397205857,
+         -1.317985690579 * sqrh,
+         0.0,
+         0.6766764161831 * sqrh,
+         0.484859839322,
+         0.347417256114 * sqrh,
+         0.0,
+         -0.1783699667363 * sqrh,
+         -0.1278076660325,
+         -0.09157819444367 * sqrh,
+         0.0,
+         0.04701781275748 * sqrh,
+         0.03368973499543,
+         0.02413974996916 * sqrh,
+         0.0,
+         -0.01239376088333 * sqrh,
+         0.0};
 
     Fit fit;
     fit.initialize();
@@ -537,6 +565,60 @@ public:
     TS_ASSERT_DELTA(func->getParameter("A"), 2.0, 0.02);
     TS_ASSERT_DELTA(func->getParameter("Lambda"), 0.25, 0.0025);
     TS_ASSERT_DELTA(func->getParameter("Beta"), 0.5, 0.05);
+  }
+
+  void test_function_Bk2BkExpConvPV() {
+
+    // Mock data
+    int ndata = 35;
+    API::MatrixWorkspace_sptr ws = API::WorkspaceFactory::Instance().create(
+        "Workspace2D", 1, ndata, ndata);
+    Mantid::MantidVec &x = ws->dataX(0);
+    Mantid::MantidVec &y = ws->dataY(0);
+    Mantid::MantidVec &e = ws->dataE(0);
+    // values extracted from y(x)=2*exp(-(x/4)^0.5)
+    x = {54999.094000, 55010.957000, 55022.820000, 55034.684000, 55046.547000,
+         55058.410000, 55070.273000, 55082.137000, 55094.000000, 55105.863000,
+         55117.727000, 55129.590000, 55141.453000, 55153.320000, 55165.184000,
+         55177.047000, 55188.910000, 55200.773000, 55212.637000, 55224.500000,
+         55236.363000, 55248.227000, 55260.090000, 55271.953000, 55283.816000,
+         55295.680000, 55307.543000, 55319.406000, 55331.270000, 55343.133000,
+         55354.996000, 55366.859000, 55378.727000, 55390.590000, 55402.453000};
+    y = {2.628336,    4.034647,   6.193415,   9.507247,   14.594171,
+         22.402889,   34.389721,  52.790192,  81.035973,  124.394840,
+         190.950440,  293.010220, 447.602290, 664.847780, 900.438170,
+         1028.003700, 965.388730, 787.024410, 603.501770, 456.122890,
+         344.132350,  259.611210, 195.848420, 147.746310, 111.458510,
+         84.083313,   63.431709,  47.852318,  36.099365,  27.233042,
+         20.544367,   15.498488,  11.690837,  8.819465,   6.653326};
+    for (int i = 0; i < ndata; i++) {
+      e[i] = std::sqrt(fabs(y[i]));
+    }
+
+    Fit fit;
+    fit.initialize();
+    TS_ASSERT(fit.isInitialized());
+    fit.setProperty("Function", "name=Bk2BkExpConvPV, Height=1000");
+    fit.setProperty("Ties", "TOF_h=55175.79, Alpha=0.03613, Beta=0.02376, "
+                            "Sigma2=187.50514, Gamma=0");
+    fit.setProperty("InputWorkspace", ws);
+    fit.setProperty("Minimizer", "Levenberg-MarquardtMD");
+    fit.setProperty("CostFunction", "Least squares");
+    fit.setProperty("MaxIterations", 100);
+    TS_ASSERT_THROWS_NOTHING(fit.execute());
+    TS_ASSERT(fit.isExecuted());
+
+    // Test fitting results
+
+    double chi2 = fit.getProperty("OutputChi2overDoF");
+    TS_ASSERT(chi2 < 1.5);
+
+    std::string fitStatus = fit.getProperty("OutputStatus");
+    TS_ASSERT_EQUALS(fitStatus, "success");
+
+    IFunction_sptr func = fit.getProperty("Function");
+    TS_ASSERT_DELTA(func->getParameter("TOF_h"), 55175.79, 1.0E-8);
+    TS_ASSERT_DELTA(func->getParameter("Height"), 96000, 100);
   }
 };
 
