@@ -30,7 +30,7 @@ Jump Fit
 Diffraction
 ###########
 
-- OSIRIS Diffraction DiffOnly interface and the :ref `OSIRISDiffractionReduction <algm-OSIRISDiffractionReduction>` algorithm now support the use of multiple
+- OSIRIS Diffraction DiffOnly interface and the :ref:`OSIRISDiffractionReduction <algm-OSIRISDiffractionReduction>` algorithm now support the use of multiple
   contianer runs. Additional validation also ensures you have the same number of sample/vanadium/container runs.
 
 
@@ -97,6 +97,8 @@ Bugfixes
 - The *ContainerSubtraction* Interface should no longer crash when changing preview spectra in the miniplot
 - Using the Spectra option in *S(Q,w)* interface now works correctly
 - :ref:`IqtFitSequential <algm-IqtFitSequential>` and :ref:`IqtFitMultiple <algm-IqtFitMultiple>` now correctly add sample logs to their output workspaces
+- The Plot Output options in the *I(Q, t) Fit* interface now update properly when switching between Fit Types
+
 
 
 `Full list of changes on GitHub <http://github.com/mantidproject/mantid/pulls?q=is%3Apr+milestone%3A%22Release+3.7%22+is%3Amerged+label%3A%22Component%3A+Indirect+Inelastic%22>`_
