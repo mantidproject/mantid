@@ -79,8 +79,10 @@ Obtaining an initial guess close to the optimal fit is critical. For this model,
          if parameter in full_parameter_name:
             values_found[parameter] = ws.row(row_index)["Value"]
             break
-   print "The optimal parameters are Tau={0:2.0f} and Beta={1:3.1f}"\
-      .format(values_found["Tau"], values_found["Beta"])
+   if values_found["Beta"] > 0.63 and values_found["Beta"] < 0.71:
+      print "Beta found within [0.63, 0.71]"
+   if values_found["Tau"] > 54.0 and values_found["Tau"] < 60.0:
+      print "Tau found within [54.0, 60.0]"
 
 .. testcleanup:: ExampleStretchedExpFT
 
@@ -94,7 +96,8 @@ Output:
 
 .. testoutput:: ExampleStretchedExpFT
 
-   The optimal parameters are Tau=54 and Beta=0.6
+   Beta found within [0.63, 0.71]
+   Tau found within [54.0, 60.0]
 
 .. categories::
 
