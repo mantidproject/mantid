@@ -100,6 +100,7 @@ Bugfixes
 - The *ContainerSubtraction* Interface should no longer crash when changing preview spectra in the miniplot
 >>>>>>> origin/release-v3.7
 - Using the Spectra option in *S(Q,w)* interface now works correctly
+- It is now possible to properly update the Rebinning option in the *ISISCalibration* interface in *Indirect Data Reduction*
 - The Plot Output options in the *I(Q, t) Fit* interface now update properly when switching between Fit Types
 
 
