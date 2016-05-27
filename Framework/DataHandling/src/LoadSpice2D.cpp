@@ -544,6 +544,10 @@ LoadSpice2D::detectorTranslation(std::map<std::string, std::string> &metadata) {
  */
 void LoadSpice2D::moveDetector(double sample_detector_distance,
                                double translation_distance) {
+  // Some tests fail if the detector is moved here.
+  // TODO: Move the detector here and not the SANSLoad
+  UNUSED_ARG(translation_distance);
+
   // Move the detector to the right position
   API::IAlgorithm_sptr mover = createChildAlgorithm("MoveInstrumentComponent");
 
@@ -556,7 +560,7 @@ void LoadSpice2D::moveDetector(double sample_detector_distance,
     mover->setProperty<API::MatrixWorkspace_sptr>("Workspace", m_workspace);
     mover->setProperty("ComponentName", detID);
     mover->setProperty("Z", sample_detector_distance / 1000.0);
-    mover->setProperty("X", -translation_distance);
+    // mover->setProperty("X", -translation_distance);
     mover->execute();
   } catch (std::invalid_argument &e) {
     g_log.error("Invalid argument to MoveInstrumentComponent Child Algorithm");
