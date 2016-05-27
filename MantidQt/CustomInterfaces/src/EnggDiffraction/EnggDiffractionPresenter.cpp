@@ -3732,7 +3732,7 @@ Poco::Path EnggDiffractionPresenter::outFilesRootDir() {
 #ifdef __unix__
     dir = Poco::Path().home();
 #else
-    const std::string ROOT_DRIVE = "C:";
+    const std::string ROOT_DRIVE = "C:/";
     dir.assign(ROOT_DRIVE);
 #endif
     dir.append(rootDir);
