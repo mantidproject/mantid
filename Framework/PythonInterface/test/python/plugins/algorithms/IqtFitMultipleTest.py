@@ -27,6 +27,9 @@ class IqtFitMultipleTest(unittest.TestCase):
         self._validate_matrix_values(result)
         self._validate_group_values(fit_group)
 
+        self._validate_sample_log_values(result)
+        self._validate_sample_log_values(fit_group.getItem(0))
+
 
     def _validate_table_shape(self, tableWS):
         # Check length of rows and columns
@@ -128,6 +131,21 @@ class IqtFitMultipleTest(unittest.TestCase):
         diff = sub_ws.readY(2)
         self.assertEquals(round(diff[0], 19), -5.31797e-14)
         self.assertEquals(round(diff[-1],6), 0.018612)
+
+    def _validate_sample_log_values(self, matrixWS):
+        run = matrixWS.getRun()
+        # Check additionally added logs
+        self.assertEqual(run.getProperty('fit_type').value, '1S')
+        self.assertEqual(run.getProperty('intensities_constrained').value, 'True')
+        self.assertEqual(run.getProperty('beta_constrained').value, 'True')
+        self.assertEqual(run.getProperty('end_x').value, 0.2)
+        self.assertEqual(run.getProperty('start_x').value, 0.0)
+
+        # Check copied logs from input
+        self.assertEqual(run.getProperty('current_period').value, 1)
+        self.assertEqual(run.getProperty('iqt_resolution_workspace').value, 'iris26173_graphite002_res')
+        self.assertEqual(run.getProperty('iqt_sample_workspace').value, 'iris26176_graphite002_red')
+
 
 #---------------------------------------Success cases--------------------------------------
 
