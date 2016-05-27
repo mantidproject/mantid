@@ -17,6 +17,7 @@ Muon ALC
   - The "Function" box was renamed "Take log value at" and moved next to the log to which it applies
   - The integration start time is initialised to the first good data rather than the first time bin, and is not reset when a new first run is loaded
   - The choice of periods is no longer reset when a new first run is loaded
+- Performance has been improved slightly for the "Auto" latest file finding functionality.
 
 Muon Analysis
 #############
