@@ -30,7 +30,7 @@ Jump Fit
 Diffraction
 ###########
 
-- OSIRIS Diffraction DiffOnly interface and the :ref `OSIRISDiffractionReduction <algm-OSIRISDiffractionReduction>` algorithm now support the use of multiple
+- OSIRIS Diffraction DiffOnly interface and the :ref:`OSIRISDiffractionReduction <algm-OSIRISDiffractionReduction>` algorithm now support the use of multiple
   contianer runs. Additional validation also ensures you have the same number of sample/vanadium/container runs.
 
 
@@ -97,6 +97,7 @@ Bugfixes
 - The *ContainerSubtraction* Interface should no longer crash when changing preview spectra in the miniplot
 - Using the Spectra option in *S(Q,w)* interface now works correctly
 - It is now possible to properly update the Rebinning option in the *ISISCalibration* interface in *Indirect Data Reduction*
+- The Plot Output options in the *I(Q, t) Fit* interface now update properly when switching between Fit Types
 
 
 

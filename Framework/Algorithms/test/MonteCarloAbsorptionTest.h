@@ -70,7 +70,7 @@ public:
 
   void test_Workspace_With_Sample_And_Container() {
     using Mantid::Kernel::DeltaEMode;
-    TestWorkspaceDescriptor wsProps = {1, 10, Environment::SamplePlusCan,
+    TestWorkspaceDescriptor wsProps = {1, 10, Environment::SamplePlusContainer,
                                        DeltaEMode::Elastic, -1, -1};
     auto outputWS = runAlgorithm(wsProps);
 
@@ -124,7 +124,7 @@ public:
   }
 
 private:
-  enum class Environment { SampleOnly, SamplePlusCan, UserBeamSize };
+  enum class Environment { SampleOnly, SamplePlusContainer, UserBeamSize };
 
   struct TestWorkspaceDescriptor {
     int nspectra;
@@ -175,7 +175,7 @@ private:
         Material("Vanadium", PhysicalConstants::getNeutronAtom(23, 0), 0.072));
     space->mutableSample().setShape(*sampleShape);
 
-    if (wsProps.sampleEnviron == Environment::SamplePlusCan) {
+    if (wsProps.sampleEnviron == Environment::SamplePlusContainer) {
       const std::string id("container");
       const double radius(0.11);
       const double height(0.03);
@@ -183,7 +183,7 @@ private:
       const V3D axis(0.0, 1.0, 0.0);
 
       ShapeFactory shapeMaker;
-      auto can = shapeMaker.createShape<Can>(
+      auto can = shapeMaker.createShape<Container>(
           ComponentCreationHelper::cappedCylinderXML(radius, height, baseCentre,
                                                      axis, id));
       can->setMaterial(Material(

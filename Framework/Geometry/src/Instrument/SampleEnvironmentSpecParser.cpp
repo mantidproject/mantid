@@ -23,8 +23,8 @@ namespace {
 std::string MATERIALS_TAG = "materials";
 std::string COMPONENTS_TAG = "components";
 std::string COMPONENT_TAG = "component";
-std::string CANS_TAG = "cans";
-std::string CAN_TAG = "can";
+std::string CONTAINERS_TAG = "containers";
+std::string CONTAINER_TAG = "container";
 std::string COMPONENTGEOMETRY_TAG = "geometry";
 std::string SAMPLEGEOMETRY_TAG = "samplegeometry";
 }
@@ -154,8 +154,8 @@ void SampleEnvironmentSpecParser::parseAndAddComponents(
   while (node) {
     Element *childElement = static_cast<Element *>(node);
     const auto &nodeName = childElement->nodeName();
-    if (nodeName == CANS_TAG) {
-      parseAndAddCans(spec, childElement);
+    if (nodeName == CONTAINERS_TAG) {
+      parseAndAddContainers(spec, childElement);
     } else if (nodeName == COMPONENT_TAG) {
       spec->addComponent(parseComponent<Object>(childElement));
     }
@@ -164,20 +164,20 @@ void SampleEnvironmentSpecParser::parseAndAddComponents(
 }
 
 /**
- * Take a \<cans\> tag, parse the definitions and add them to the spec.
+ * Take a \<containers\> tag, parse the definitions and add them to the spec.
  * It requires the materials to have been parsed.
  * @param spec A pointer to a SampleEnvironmentSpec to update
  * @param element A pointer to a cans element
  */
-void SampleEnvironmentSpecParser::parseAndAddCans(SampleEnvironmentSpec *spec,
-                                                  Element *element) const {
+void SampleEnvironmentSpecParser::parseAndAddContainers(
+    SampleEnvironmentSpec *spec, Element *element) const {
   NodeIterator nodeIter(element, NodeFilter::SHOW_ELEMENT);
   nodeIter.nextNode();
   Node *node = nodeIter.nextNode();
   while (node) {
     Element *childElement = static_cast<Element *>(node);
-    if (childElement->nodeName() == CAN_TAG) {
-      spec->addCan(parseCan(childElement));
+    if (childElement->nodeName() == CONTAINER_TAG) {
+      spec->addContainer(parseContainer(childElement));
     }
     node = nodeIter.nextNode();
   }
@@ -185,12 +185,13 @@ void SampleEnvironmentSpecParser::parseAndAddCans(SampleEnvironmentSpec *spec,
 
 /**
  * Parse a single definition of a Can
- * @param element A pointer to an XML \<can\> element
+ * @param element A pointer to an XML \<container\> element
  * @return A new Can instance
  */
-Can_const_sptr SampleEnvironmentSpecParser::parseCan(Element *element) const {
-  using Mantid::Geometry::Can;
-  auto can = parseComponent<Can>(element);
+Container_const_sptr
+SampleEnvironmentSpecParser::parseContainer(Element *element) const {
+  using Mantid::Geometry::Container;
+  auto can = parseComponent<Container>(element);
   auto sampleGeometry = element->getChildElement(SAMPLEGEOMETRY_TAG);
   if (sampleGeometry) {
     DOMWriter writer;
@@ -204,7 +205,7 @@ Can_const_sptr SampleEnvironmentSpecParser::parseCan(Element *element) const {
 /**
  * Parse a single definition of a component. If the component is a can the
  * sample geometry, if available, is also parsed.
- * @param element A pointer to an XML \<can\> element
+ * @param element A pointer to an XML \<container\> element
  * @return A new Object instance of the given type
  */
 template <typename ObjectType>
@@ -238,7 +239,7 @@ Mantid::Geometry::SampleEnvironmentSpecParser::parseComponent(
 ///@cond
 template boost::shared_ptr<Object>
 Mantid::Geometry::SampleEnvironmentSpecParser::parseComponent(Element *) const;
-template boost::shared_ptr<Can>
+template boost::shared_ptr<Container>
 Mantid::Geometry::SampleEnvironmentSpecParser::parseComponent(Element *) const;
 ///@endcond
 

@@ -39,8 +39,8 @@ public:
                             "  <material id=\"van\" formula=\"V\"/>"
                             " </materials>"
                             " <components>"
-                            "  <cans>"
-                            "   <can id=\"10mm\" material=\"van\">"
+                            "  <containers>"
+                            "   <container id=\"10mm\" material=\"van\">"
                             "    <geometry>"
                             "     <sphere id=\"sp-1\">"
                             "      <radius val=\"0.1\"/>"
@@ -53,8 +53,8 @@ public:
                             "      <centre x=\"0.0\"  y=\"0.0\" z=\"0.0\"/>"
                             "     </sphere>"
                             "    </samplegeometry>"
-                            "   </can>"
-                            "  </cans>"
+                            "   </container>"
+                            "  </containers>"
                             " </components>"
                             "</environmentspec>";
     Poco::File envFile(Poco::Path(testDirec, m_envName + ".xml"));
