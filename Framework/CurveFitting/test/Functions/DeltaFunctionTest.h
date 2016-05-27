@@ -3,8 +3,8 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidCurveFitting/Functions/DeltaFunction.h"
 #include "MantidCurveFitting/Functions/Convolution.h"
+#include "MantidCurveFitting/Functions/DeltaFunction.h"
 
 #include "MantidAPI/FunctionDomain1D.h"
 #include "MantidAPI/FunctionValues.h"
@@ -84,6 +84,11 @@ public:
 
 class DeltaFunctionTest : public CxxTest::TestSuite {
 public:
+  void test_category() {
+    DeltaFunction fn;
+    TS_ASSERT_EQUALS(fn.category(), "Peak");
+  }
+
   void testDeltaFunction() {
     Convolution conv;
     // set the resolution function

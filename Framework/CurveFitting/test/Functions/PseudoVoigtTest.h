@@ -158,6 +158,11 @@ public:
     m_dfdf.push_back(2.526016311933117e+01);
   }
 
+  void testCategory() {
+    PseudoVoigt fn;
+    TS_ASSERT_EQUALS(fn.category(), "Peak");
+  }
+
   void testPseudoVoigtValues() {
     IFunction_sptr pv = getInitializedPV(1.0, 4.78, 0.05, 0.7);
 

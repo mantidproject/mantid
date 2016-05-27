@@ -42,6 +42,11 @@ DECLARE_FUNCTION(SimplexGaussian)
 
 class GaussianTest : public CxxTest::TestSuite {
 public:
+  void test_category() {
+    Gaussian fn;
+    TS_ASSERT_EQUALS(fn.category(), "Peak");
+  }
+
   void test_with_Levenberg_Marquardt() {
     API::FunctionDomain1D_sptr domain(
         new API::FunctionDomain1DVector(79292.4, 79603.6, 41));
