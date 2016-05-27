@@ -628,8 +628,8 @@ LoadNexusLogs::createTimeSeries(::NeXus::File &file,
     // This string splitting only makes sense of the number of string offsets
     // is equal to the number of time values.
     if (ntimes != str_offsets.size()) {
-       throw ::NeXus::Exception(
-           "Number of string offsets does not match number of time values");
+      throw ::NeXus::Exception(
+          "Number of string offsets does not match number of time values");
     }
     for (size_t i = 0; i < ntimes; ++i) {
       // Get the length of the string to extract from the offset values
