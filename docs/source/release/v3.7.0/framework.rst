@@ -98,7 +98,7 @@ Improved
 -  When plotting a workspace that had been normalized by bin widths, the y-axis unit label was incorrect.
    An appropriate labelling has now been implemented.
 -  :ref:`SumSpectra <algm-SumSpectra>` fixed broken scaling of bins for the `WeightedSum=true` case.
--  :ref:`LoadISISNexus <algm-LoadISISNexus>` now works correctly for data with non-contiguous detector IDs for either monitors or detectors. 
+-  :ref:`LoadISISNexus <algm-LoadISISNexus>` now works correctly for data with non-contiguous detector IDs for either monitors or detectors.
 -  A bug has been fixed in several algorithms where they would crash when given a :ref:`WorkspaceGroup <WorkspaceGroup>` as input (if run in the GUI). These algorithms are:
 
    - :ref:`AsymmetryCalc <algm-AsymmetryCalc>`
@@ -112,7 +112,7 @@ Improved
   now allow user to choose to load either histogram monitor or event monitor only with 2 new
   properties (``LoadEventMonitor`` and ``LoadHistogramMonitor``).
 - :ref:`CreateSimulationWorkspace <algm-CreateSimulationWorkspace>` now matches the IDF of the simulation workspace to the IDF of a reference workspace (either Nexus or Raw).
-- :ref:`LoadNexusProcessed <algm-LoadNexusProcessed>` now correctly reads in event data that does not have a common x-axis. 
+- :ref:`LoadNexusProcessed <algm-LoadNexusProcessed>` now correctly reads in event data that does not have a common x-axis.
 - :ref:`LoadNexusLogs <algm-LoadNexusLogs>` allows now to load logs from an entry other than the first. :ref:`LoadEventNexus <algm-LoadEventNexus>` now loads the correct logs when an *NXentry* is given
 - :ref:`FFT <algm-FFT>`: added property *AutoShift* to enable automatic phase correction for workspaces not centred at zero.
 - :ref:`SaveAscii <algm-SaveAscii>` now has a SpectrumMetaData property that allows for addition information to be displayed along with the SpectrumNumber. Currently the supported MetaData is SpectrumNumber, Q and Angle.
@@ -121,7 +121,8 @@ Improved
 - :ref:`SetSampleMaterial <algm-SetSampleMaterial>` will now work out the number density from the chemical formula and mass density if these are given in the input. A user specified number density or if Z and the unit cell volume is given will override the value calculated from the chemical formula and mass density.
 - :ref:`ComputeCalibrationCoefVan <algm-ComputeCalibrationCoefVan>`
   does not perform fit of data by itself, but requires an additional argument: ``EPPTable``. This should accelerate the data reduction workflow, because fitting results can be reused. Table with elastic peak positions can be created using the new :ref:`FindEPP <algm-FindEPP>` algorithm.
-- :ref:`MonteCarloAbsorption <algm-MonteCarloAbsorption>` now supports inelastic instruments. It relies on :ref:`ConvertUnits <algm-ConvertUnits>` having set the correct EMode. 
+- :ref:`MonteCarloAbsorption <algm-MonteCarloAbsorption>` now supports inelastic instruments. It relies on :ref:`ConvertUnits <algm-ConvertUnits>` having set the correct EMode.
+- :ref:`SofQWNormalisedPolygon <algm-SofQWNormalisedPolygon>` has been fixed to normalize the data correctly. Previous versions contained a bug when removing the bin-width normalization that may have already been present on the input data
 
 
 Deprecated
