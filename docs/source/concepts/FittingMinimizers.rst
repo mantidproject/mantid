@@ -9,17 +9,17 @@ in Mantid. Given the following elements:
 - a dataset (e.g. a spectrum),
 - a model or function to fit (e.g. a peak or background function, with parameters),
 - an initial guess or starting point for the parameters of the function,
-- a cost function (e.g., squared errors weighted by the spectrum errors),
-- and a minimizer,
+- a cost function (e.g., squared residuals (fitting errors) weighted by the
+  spectrum errors),
+- and a minimizer.
 
-The minimizer is the method that adjusts the function
-parameters so that the model fits the data as closely as possible. The
-cost function defines the concept of how close a fit is to the
-data. See the general concept page on :ref:`Fitting <Fitting>` for a
-broader discussion of how these components interplay when fitting a
-model with Mantid.
+The minimizer is the method that adjusts the function parameters so
+that the model fits the data as closely as possible. The cost function
+defines the concept of how close a fit is to the data. See the general
+concept page on :ref:`Fitting <Fitting>` for a broader discussion of
+how these components interplay when fitting a model with Mantid.
 
-Several minimizers are included with Mantid and can be seleced in the
+Several minimizers are included with Mantid and can be selected in the
 `Fit Function property browser
 <http://www.mantidproject.org/MantidPlot:_Creating_Fit_Functions>`__
 or when using the algorithm :ref:`Fit <algm-Fit>` The following
@@ -29,30 +29,29 @@ options are available:
 - `SteepestDescent <https://en.wikipedia.org/wiki/Gradient_descent>`__
 - `Conjugate gradient (Fletcher-Reeves imp.) <https://en.wikipedia.org/wiki/Nonlinear_conjugate_gradient_method>`__
 - `Conjugate gradient (Polak-Ribiere imp.) <https://en.wikipedia.org/wiki/Nonlinear_conjugate_gradient_method>`__
-- `BFGS (Broyden-Fletcher-Goldarfb-Shanno) <https://en.wikipedia.org/wiki/Broyden–Fletcher–Goldfarb–Shanno_algorithm>`__
+- `BFGS (Broyden-Fletcher-Goldfarb-Shanno) <https://en.wikipedia.org/wiki/Broyden–Fletcher–Goldfarb–Shanno_algorithm>`__
 - `Levenberg-Marquardt <https://en.wikipedia.org/wiki/Levenberg-Marquardt_algorithm>`__ (default)
 - Levenberg-MarquardtMD
 - Damping
 - :ref:`FABADA <FABADA>`
 
-**TODO: Missing info: *Damping* differences between Lev-Mar and Lev-Mar "MD"**.
+**TODO: Missing info: Damping. Also: differences between Lev-Mar and Lev-Mar "MD"**.
 
 All these algorithms are `iterative
 <https://en.wikipedia.org/wiki/Iterative_method>`__.  The *Simplex*
 algorithm, also known as Nelder–Mead method, belongs to the class of
 optimization algorithms without derivatives, or derivative-free
-optimization (another example of this class would be simulated
-annealing). Note that here simplex refers to downhill simplex
+optimization. Note that here simplex refers to downhill simplex
 optimization. *Steepest descent* and the two variants of Conjugate
 Gradient included with Mantid (*Fletcher-Reeves* and *Polak-Ribiere*)
 belong to the class of optimization or minimization algorithms
 generally known as conjugate gradient, which use first-order
-derivatives. The derivatives are calculated on the error of the fit to
-drive the iterative process towards a local minimum.
+derivatives. The derivatives are calculated with respect to the cost
+function to drive the iterative process towards a local minimum.
 
 BFGS and the Levenberg-Marquardt algorithms belong to the second-order
 class of algorithms, in the sense that they use second-order
-information of the error function (second derivatives or the Hessian
+information of the cost function (second derivatives or the Hessian
 matrix). Some algorithms like BFGS approximate the Hessian by the
 gradient values of successive iterations. The Levenberg-Marquard
 algorithm is a modified Gauss-Newton that introduces an adaptive term
@@ -96,9 +95,11 @@ means:
 
 All the minimizers available in Mantid 3.7 were compared, with the
 exception of FABADA which belongs to a different class of methods and
-would not be compared in a fair manner. Minimizers are used here as
-"black boxes", without any special initialization, constraints, or
-rewriting of the equations to fit.
+would not be compared in a fair manner. For all the minimizers
+compared here the algorithm :ref:`Fit <algm-Fit>` was run using the
+same initialization or starting points for test every problem, as
+specified in the test problem definitions. No constraints or ties were
+added.
 
 Accuracy is measured using the sum of squared fitting errors as
 metric, or "ChiSquared" as defined in :ref:`Fit
@@ -115,8 +116,10 @@ previously created.
    2. With "simulated" sqrt(X) errors
    Here we use 2 because Levenberg-Marquardt doesn't work with 1 ('Unweighted least squares' cost function
 
-The cost function used in all cases is `Least squares` (weighted by
-the errors, as usually applied in Mantid).
+**TODO: move this to the alternative / weighted comparison**
+The cost function used in all cases is least squares weigted by the
+input errors, named in the list of cost functions available in Mantid
+as `Least squares`. This is the default cost function in Mantid.
 
 
 Benchmark problems
@@ -173,8 +176,6 @@ problems. See :ref:`detailed results by test problem (accuracy)
 
 .. include:: minimizers_comparison/v3.7.0/comparison_v3.7_acc_summary.txt
 
-:ref:`Detailed results by test problem (accuracy)
-<Minimizers_comparison_in_terms_of_accuracy>`
 
 Comparison in terms of run time
 ###############################
@@ -188,8 +189,6 @@ problems. See :ref:`detailed results by test problem (run time)
 
 .. include:: minimizers_comparison/v3.7.0/comparison_v3.7_runtime_summary.txt
 
-:ref:`Detailed results by test problem (run time)
-<Minimizers_comparison_in_terms_of_run_time>`.
 
 References:
              

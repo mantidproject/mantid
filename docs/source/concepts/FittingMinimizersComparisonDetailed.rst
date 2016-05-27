@@ -84,15 +84,17 @@ Accuracy for individual NIST problems, "higher" difficulty
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 .. include:: minimizers_comparison/v3.7.0/comparison_v3.7_acc_nist_higher.txt
 
-.. _Minimizers_comparison_in_terms_of_run_time:
 
+.. _Minimizers_comparison_in_terms_of_run_time:
 
 Comparison in terms of run time
 ###############################
 
 For details on the ranking approach and the color codes see
 :ref:`above <Minimizers_individual_comparison>` and :ref:`the
-summarized results <FittingMinimizers>`.
+summarized results <FittingMinimizers>`. Note that this comparison is
+approximate and was performed on a particular platform (Ubuntu) and
+machine.
 
 Run time for individual NIST problems, "lower" difficulty
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
