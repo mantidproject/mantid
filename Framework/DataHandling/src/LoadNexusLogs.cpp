@@ -552,7 +552,7 @@ LoadNexusLogs::createTimeSeries(::NeXus::File &file,
     std::transform(time_double.begin(), time_double.end(), time_double.begin(),
                    std::bind2nd(std::multiplies<double>(), 60.0));
   }
-  
+
   // String logs use offsets to cut the 'value' string into strings
   // corresponding to each individual time value. Get the offset now
   // before we have to enter the 'value' element.
@@ -579,9 +579,10 @@ LoadNexusLogs::createTimeSeries(::NeXus::File &file,
   // Now the actual data
   ::NeXus::Info info = file.getInfo();
   // Check the size. The size should match the number of time values,
-  // except in the case of string values, which will be split using the 
+  // except in the case of string values, which will be split using the
   // offset information.
-  if (size_t(info.dims[0]) != time_double.size() && info.type != ::NeXus::CHAR) {
+  if (size_t(info.dims[0]) != time_double.size() &&
+      info.type != ::NeXus::CHAR) {
     file.closeData();
     throw ::NeXus::Exception("Invalid value entry for time series");
   }
@@ -623,15 +624,16 @@ LoadNexusLogs::createTimeSeries(::NeXus::File &file,
     DateAndTime::createVector(start_time, time_double, times);
 
     const size_t ntimes = times.size();
-    
+
     // This string splitting only makes sense of the number of string offsets
     // is equal to the number of time values.
     if (ntimes != str_offsets.size()) {
-       throw ::NeXus::Exception("Number of string offsets does not match number of time values");
+       throw ::NeXus::Exception(
+           "Number of string offsets does not match number of time values");
     }
     for (size_t i = 0; i < ntimes; ++i) {
       // Get the length of the string to extract from the offset values
-      size_t str_length = i == ntimes-1 ? values.size() : str_offsets[i+1];
+      size_t str_length = i == ntimes - 1 ? values.size() : str_offsets[i + 1];
       str_length -= str_offsets[i];
       std::string value_i =
           std::string(values.data() + str_offsets[i], str_length);
