@@ -620,6 +620,206 @@ public:
     TS_ASSERT_DELTA(func->getParameter("TOF_h"), 55175.79, 1.0E-8);
     TS_ASSERT_DELTA(func->getParameter("Height"), 96000, 100);
   }
+
+  void test_function_Gaussian_LMMinimizer() {
+
+    // Mock data
+    int ndata = 20;
+    API::MatrixWorkspace_sptr ws = API::WorkspaceFactory::Instance().create(
+        "Workspace2D", 1, ndata, ndata);
+    Mantid::MantidVec &x = ws->dataX(0);
+    Mantid::MantidVec &y = ws->dataY(0);
+    Mantid::MantidVec &e = ws->dataE(0);
+    y = {3.56811123,   3.25921675,  2.69444562,  3.05054488,  2.86077216,
+         2.29916480,   2.57468876,  3.65843827,  15.31622763, 56.57989073,
+         101.20662386, 76.30364797, 31.54892552, 8.09166673,  3.20615343,
+         2.95246554,   2.75421444,  3.70180447,  2.77832668,  2.29507565};
+    for (size_t i = 0; i < ndata; i++) {
+      x[i] = static_cast<double>(i + 1);
+      y[i] -= 2.8765;
+    }
+    e = {1.72776328,  1.74157482, 1.73451042, 1.73348562, 1.74405622,
+         1.72626701,  1.75911386, 2.11866496, 4.07631054, 7.65159052,
+         10.09984173, 8.95849024, 5.42231173, 2.64064858, 1.81697576,
+         1.72347732,  1.73406310, 1.73116711, 1.71790285, 1.72734254};
+
+    Fit fit;
+    fit.initialize();
+    TS_ASSERT(fit.isInitialized());
+    fit.setProperty("Function",
+                    "name=Gaussian, PeakCentre=11.2, Height=100.7, Sigma=2.2");
+    fit.setProperty("InputWorkspace", ws);
+    fit.setProperty("Minimizer", "Levenberg-MarquardtMD");
+    TS_ASSERT_THROWS_NOTHING(fit.execute());
+    TS_ASSERT(fit.isExecuted());
+
+    // test the output from fit
+    double dummy = fit.getProperty("OutputChi2overDoF");
+    TS_ASSERT_DELTA(dummy, 0.035, 0.01);
+
+    IFunction_sptr out = fit.getProperty("Function");
+    TS_ASSERT_DELTA(out->getParameter("Height"), 97.8036, 0.0001);
+    TS_ASSERT_DELTA(out->getParameter("PeakCentre"), 11.2356, 0.0001);
+    TS_ASSERT_DELTA(out->getParameter("Sigma") * 2.0 * sqrt(2.0 * M_LN2),
+                    2.6237, 0.0001);
+  }
+
+  void test_function_Gaussian_SimplexMinimizer() {
+
+    // Mock data
+    int ndata = 20;
+    API::MatrixWorkspace_sptr ws = API::WorkspaceFactory::Instance().create(
+        "Workspace2D", 1, ndata, ndata);
+    Mantid::MantidVec &x = ws->dataX(0);
+    Mantid::MantidVec &y = ws->dataY(0);
+    Mantid::MantidVec &e = ws->dataE(0);
+    y = {3.56811123,   3.25921675,  2.69444562,  3.05054488,  2.86077216,
+         2.29916480,   2.57468876,  3.65843827,  15.31622763, 56.57989073,
+         101.20662386, 76.30364797, 31.54892552, 8.09166673,  3.20615343,
+         2.95246554,   2.75421444,  3.70180447,  2.77832668,  2.29507565};
+    for (size_t i = 0; i < ndata; i++) {
+      x[i] = static_cast<double>(i + 1);
+      y[i] -= 2.8765;
+    }
+    e = {1.72776328,  1.74157482, 1.73451042, 1.73348562, 1.74405622,
+         1.72626701,  1.75911386, 2.11866496, 4.07631054, 7.65159052,
+         10.09984173, 8.95849024, 5.42231173, 2.64064858, 1.81697576,
+         1.72347732,  1.73406310, 1.73116711, 1.71790285, 1.72734254};
+
+    Fit fit;
+    fit.initialize();
+    TS_ASSERT(fit.isInitialized());
+    fit.setProperty(
+        "Function",
+        "name=Gaussian, PeakCentre=11.2, Height=100.7, Sigma=0.934254");
+    fit.setProperty("InputWorkspace", ws);
+    fit.setProperty("Minimizer", "Simplex");
+    TS_ASSERT_THROWS_NOTHING(fit.execute());
+    TS_ASSERT(fit.isExecuted());
+
+    std::string minimizer = fit.getProperty("Minimizer");
+    TS_ASSERT(minimizer.compare("Simplex") == 0);
+
+    double dummy = fit.getProperty("OutputChi2overDoF");
+    TS_ASSERT_DELTA(dummy, 0.035, 0.01);
+
+    IFunction_sptr out = fit.getProperty("Function");
+    TS_ASSERT_DELTA(out->getParameter("Height"), 97.8091, 0.01);
+    TS_ASSERT_DELTA(out->getParameter("PeakCentre"), 11.2356, 0.001);
+    TS_ASSERT_DELTA(out->getParameter("Sigma") * 2.0 * sqrt(2.0 * M_LN2),
+                    2.6240, 0.001);
+  }
+
+  void test_function_Gaussian_HRP38692Data() {
+
+    // Pick values taken from HRPD_for_UNIT_TESTING.xml
+    // here we have an example where an upper constraint on Sigma <= 100 makes
+    // the Gaussian fit below success. The starting value of Sigma is here 300.
+    // Note that the fit is equally successful if we had no constraint on Sigma
+    // and used a starting of Sigma = 100.
+
+    int ndata = 41;
+    API::MatrixWorkspace_sptr ws = API::WorkspaceFactory::Instance().create(
+        "Workspace2D", 1, ndata, ndata);
+    Mantid::MantidVec &x = ws->dataX(0);
+    Mantid::MantidVec &y = ws->dataY(0);
+    Mantid::MantidVec &e = ws->dataE(0);
+    // x-values in time-of-flight
+    for (size_t i = 0; i < 8; i++)
+      x[i] = 79292.4375 + 7.875 * double(i);
+    for (size_t i = 8; i < ndata; i++)
+      x[i] = 79347.625 + 8.0 * (double(i) - 8.0);
+    // y-values
+    y = {7,   8,   4,   9,   4,   10,  10,  5,   8,   7,  10, 18, 30, 71,
+         105, 167, 266, 271, 239, 221, 179, 133, 126, 88, 85, 52, 37, 51,
+         32,  31,  17,  21,  15,  13,  12,  12,  10,  7,  5,  9,  6};
+    // errors are the square root of the Y-value
+    for (size_t i = 0; i < ndata; i++)
+      e[i] = sqrt(y[i]);
+
+    Fit fit;
+    fit.initialize();
+    TS_ASSERT(fit.isInitialized());
+    fit.setProperty("Function", "name=LinearBackground, A0=0, A1=0; "
+                                "name=Gaussian, PeakCentre=79450.0, "
+                                "Height=200.0, Sigma=300");
+    fit.setProperty("Constraints", "20 < f1.Sigma < 100");
+    fit.setProperty("Ties", "f0.A1=0");
+    fit.setProperty("InputWorkspace", ws);
+    fit.setPropertyValue("StartX", "79300");
+    fit.setPropertyValue("EndX", "79600");
+    TS_ASSERT_THROWS_NOTHING(fit.execute());
+    TS_ASSERT(fit.isExecuted());
+
+    // test the output from fit is what you expect
+    double dummy = fit.getProperty("OutputChi2overDoF");
+    TS_ASSERT_DELTA(dummy, 5.2, 0.1);
+    IFunction_sptr out = fit.getProperty("Function");
+    TS_ASSERT_DELTA(out->getParameter("f1.Height"), 232., 1);
+    TS_ASSERT_DELTA(out->getParameter("f1.PeakCentre"), 79430.1, 10);
+    TS_ASSERT_DELTA(out->getParameter("f1.Sigma"), 26.0, 0.1);
+    TS_ASSERT_DELTA(out->getParameter("f0.A0"), 8.09, 0.1);
+    TS_ASSERT_DELTA(out->getParameter("f0.A1"), 0.0, 0.01);
+  }
+
+  void test_function_Gaussian_HRP38692Data_SimplexMinimizer() {
+
+    // here we have an example where an upper constraint on Sigma <= 100
+    // makes
+    // the Gaussian fit below success. The starting value of Sigma is here
+    // 300.
+    // Note that the fit is equally successful if we had no constraint on
+    // Sigma
+    // and used a starting of Sigma = 100.
+    // Note that the no constraint simplex with Sigma = 300 also does not
+    // locate
+    // the correct minimum but not as badly as levenberg-marquardt
+
+    int ndata = 41;
+    API::MatrixWorkspace_sptr ws = API::WorkspaceFactory::Instance().create(
+        "Workspace2D", 1, ndata, ndata);
+    Mantid::MantidVec &x = ws->dataX(0);
+    Mantid::MantidVec &y = ws->dataY(0);
+    Mantid::MantidVec &e = ws->dataE(0);
+    // x-values in time-of-flight
+    for (size_t i = 0; i < 8; i++)
+      x[i] = 79292.4375 + 7.875 * double(i);
+    for (size_t i = 8; i < ndata; i++)
+      x[i] = 79347.625 + 8.0 * (double(i) - 8.0);
+    // y-values
+    y = {7,   8,   4,   9,   4,   10,  10,  5,   8,   7,  10, 18, 30, 71,
+         105, 167, 266, 271, 239, 221, 179, 133, 126, 88, 85, 52, 37, 51,
+         32,  31,  17,  21,  15,  13,  12,  12,  10,  7,  5,  9,  6};
+    // errors are the square root of the Y-value
+    for (size_t i = 0; i < ndata; i++)
+      e[i] = sqrt(y[i]);
+
+    Fit fit;
+    fit.initialize();
+    TS_ASSERT(fit.isInitialized());
+    fit.setProperty("Function", "name=LinearBackground, A0=0, A1=0; "
+                                "name=Gaussian, PeakCentre=79450.0, "
+                                "Height=200.0, Sigma=10.0");
+    fit.setProperty("Constraints", "20 < f1.Sigma < 100");
+    fit.setProperty("Ties", "f0.A1=0");
+    fit.setProperty("InputWorkspace", ws);
+    fit.setProperty("Minimizer", "Simplex");
+    TS_ASSERT_THROWS_NOTHING(fit.execute());
+    TS_ASSERT(fit.isExecuted());
+
+    std::string minimizer = fit.getProperty("Minimizer");
+    TS_ASSERT(minimizer.compare("Simplex") == 0);
+
+    double dummy = fit.getProperty("OutputChi2overDoF");
+    TS_ASSERT_DELTA(dummy, 2.5911, 1);
+
+    IFunction_sptr out = fit.getProperty("Function");
+    TS_ASSERT_DELTA(out->getParameter("f1.Height"), 232, 1);
+    TS_ASSERT_DELTA(out->getParameter("f1.PeakCentre"), 79430, 1);
+    TS_ASSERT_DELTA(out->getParameter("f1.Sigma"), 26.08, 1);
+    TS_ASSERT_DELTA(out->getParameter("f0.A0"), 8, 1);
+    TS_ASSERT_DELTA(out->getParameter("f0.A1"), 0.0, 0.01);
+  }
 };
 
 class FitTestPerformance : public CxxTest::TestSuite {
