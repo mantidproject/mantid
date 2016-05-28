@@ -4,7 +4,6 @@ from mantid.api import *
 from mantid.kernel import *
 from mantid import config
 import os
-from pdb import set_trace as tr
 
 MICROEV_TO_MILLIEV = 1000.0
 DEFAULT_BINS = [-740, 1.6, 740]
