@@ -142,17 +142,16 @@ void CreateTransmissionWorkspaceAuto::exec() {
         instrument->getNumberParameter("PointDetectorStop")[0]);
     if (analysis_mode == "PointDetectorAnalysis") {
       if (start == stop) {
-        processing_commands = boost::lexical_cast<std::string>(start);
+        processing_commands = std::to_string(start);
       } else {
-        processing_commands = boost::lexical_cast<std::string>(start) + ":" +
-                              boost::lexical_cast<std::string>(stop);
+        processing_commands =
+            std::to_string(start) + ":" + std::to_string(stop);
       }
     } else {
       processing_commands =
-          boost::lexical_cast<std::string>(static_cast<int>(
+          std::to_string(static_cast<int>(
               instrument->getNumberParameter("MultiDetectorStart")[0])) +
-          ":" +
-          boost::lexical_cast<std::string>(firstWS->getNumberHistograms() - 1);
+          ":" + std::to_string(firstWS->getNumberHistograms() - 1);
     }
   } else {
     std::string processing_commands_temp =

@@ -196,7 +196,7 @@ LoadIsawPeaks::ApplyCalibInfo(std::ifstream &in, std::string startChar,
       throw std::length_error("incorrect type of data for panel ");
     }
 
-    std::string SbankNum = boost::lexical_cast<std::string>(bankNum);
+    std::string SbankNum = std::to_string(bankNum);
     std::string bankName = "bank";
     if (instr->getName() == "WISH") {
       if (bankNum < 10)

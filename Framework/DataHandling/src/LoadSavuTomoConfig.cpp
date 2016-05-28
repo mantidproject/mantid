@@ -159,7 +159,7 @@ ITableWorkspace_sptr LoadSavuTomoConfig::loadFile(std::string &fname,
   for (size_t j = 0; j < pluginsLen; j++) {
     API::TableRow table = ws->appendRow();
 
-    std::string entryIdx = boost::lexical_cast<std::string>(j);
+    std::string entryIdx = std::to_string(j);
     try {
       f->openGroup(entryIdx, "NXnote");
     } catch (NeXus::Exception &e) {

@@ -511,7 +511,7 @@ bool LoadISISNexus2::checkOptionalProperties(bool bseparateMonitors,
     std::string err =
         "Inconsistent range property. SpectrumMax is larger than number of "
         "spectra: " +
-        boost::lexical_cast<std::string>(m_loadBlockInfo.getMaxSpectrumID());
+        std::to_string(m_loadBlockInfo.getMaxSpectrumID());
     throw std::invalid_argument(err);
   }
 
@@ -519,10 +519,9 @@ bool LoadISISNexus2::checkOptionalProperties(bool bseparateMonitors,
   m_entrynumber = getProperty("EntryNumber");
   if (static_cast<int>(m_entrynumber) > m_loadBlockInfo.getNumberOfPeriods() ||
       m_entrynumber < 0) {
-    std::string err =
-        "Invalid entry number entered. File contains " +
-        boost::lexical_cast<std::string>(m_loadBlockInfo.getNumberOfPeriods()) +
-        " period. ";
+    std::string err = "Invalid entry number entered. File contains " +
+                      std::to_string(m_loadBlockInfo.getNumberOfPeriods()) +
+                      " period. ";
     throw std::invalid_argument(err);
   }
 
@@ -971,8 +970,7 @@ void LoadISISNexus2::loadRunDetails(
   m_proton_charge = static_cast<double>(entry.getFloat("proton_charge"));
   runDetails.setProtonCharge(m_proton_charge);
 
-  std::string run_num =
-      boost::lexical_cast<std::string>(entry.getInt("run_number"));
+  std::string run_num = std::to_string(entry.getInt("run_number"));
   runDetails.addProperty("run_number", run_num);
 
   //

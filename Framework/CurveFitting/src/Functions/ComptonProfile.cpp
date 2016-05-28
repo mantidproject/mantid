@@ -98,7 +98,7 @@ void ComptonProfile::buildCaches() {
   } catch (Kernel::Exception::NotFoundError &) {
     throw std::invalid_argument("ComptonProfile - Workspace has no detector "
                                 "attached to histogram at index " +
-                                boost::lexical_cast<std::string>(m_wsIndex));
+                                std::to_string(m_wsIndex));
   }
 
   m_resolutionFunction->setAttributeValue("Mass", m_mass);

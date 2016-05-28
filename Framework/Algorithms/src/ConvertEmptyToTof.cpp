@@ -177,7 +177,7 @@ void ConvertEmptyToTof::validateWorkspaceIndices(std::vector<int> &v) {
     for (auto index : v) {
       if (index < 0 || static_cast<size_t>(index) >= nHist) {
         throw std::runtime_error("Spectra index out of limits: " +
-                                 boost::lexical_cast<std::string>(index));
+                                 std::to_string(index));
       }
     }
   }
@@ -202,7 +202,7 @@ void ConvertEmptyToTof::validateChannelIndices(std::vector<int> &v) {
     for (auto &index : v) {
       if (index < 0 || static_cast<size_t>(index) >= blockSize) {
         throw std::runtime_error("Channel index out of limits: " +
-                                 boost::lexical_cast<std::string>(index));
+                                 std::to_string(index));
       }
     }
   }

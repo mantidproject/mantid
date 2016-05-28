@@ -111,8 +111,7 @@ void OptimizeLatticeForCellType::exec() {
         runWS[count]->addPeak(peak);
         run = peak.getRunNumber();
         AnalysisDataService::Instance().addOrReplace(
-            boost::lexical_cast<std::string>(run) + ws->getName(),
-            runWS[count]);
+            std::to_string(run) + ws->getName(), runWS[count]);
       } else {
         runWS[count]->addPeak(peak);
       }

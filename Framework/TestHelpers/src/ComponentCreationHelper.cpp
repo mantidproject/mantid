@@ -382,13 +382,7 @@ createCylInstrumentWithDetInGivenPositions(const std::vector<double> &L2,
 
   for (size_t i = 0; i < azim.size(); i++) {
     Detector *physicalPixel = new Detector(
-        "det" + boost::lexical_cast<std::string>(i), pixelID, pixelShape, bank);
-    double zpos = L2[i] * cos(polar[i]);
-    double xpos = L2[i] * sin(polar[i]) * cos(azim[i]);
-    double ypos = L2[i] * sin(polar[i]) * sin(azim[i]);
-    physicalPixel->setPos(xpos, ypos, zpos);
-    pixelID++;
-    bank->add(physicalPixel);
+        "det" + std::to_string(k->add(physicalPixel);
     testInst->markAsDetector(physicalPixel);
   }
   testInst->add(bank);

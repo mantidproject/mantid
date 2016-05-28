@@ -147,7 +147,7 @@ void LoadDetectorsGroupingFile::exec() {
     std::map<int, std::string> groupNamesMap = loader.getGroupNamesMap();
 
     for (auto &group : groupNamesMap) {
-      std::string groupIdStr = boost::lexical_cast<std::string>(group.first);
+      std::string groupIdStr = std::to_string(first);
       m_groupWS->mutableRun().addProperty("GroupName_" + groupIdStr,
                                           group.second);
     }

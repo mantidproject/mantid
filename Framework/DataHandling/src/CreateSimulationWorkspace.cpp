@@ -342,7 +342,7 @@ MantidVecPtr CreateSimulationWorkspace::createBinBoundaries() const {
   if (numBoundaries <= 2) {
     throw std::invalid_argument(
         "Error in BinParams - Gave invalid number of bin boundaries: " +
-        boost::lexical_cast<std::string>(numBoundaries));
+        std::to_string(numBoundaries));
   }
   return binsPtr;
 }

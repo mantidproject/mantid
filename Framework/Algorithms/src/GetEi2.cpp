@@ -237,7 +237,7 @@ double GetEi2::calculateEi(const double initial_guess) {
       if (!m_fixedei) {
         throw std::invalid_argument(
             "No peak found for the monitor with spectra num: " +
-            boost::lexical_cast<std::string>(spec_nums[i]) + " (at " +
+            std::to_string(spec_nums[i]) + " (at " +
             boost::lexical_cast<std::string>(det_distances[i]) +
             "  metres from source).\n");
       } else {

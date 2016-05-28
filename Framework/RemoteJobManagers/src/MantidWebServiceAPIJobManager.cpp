@@ -415,8 +415,8 @@ std::string MantidWebServiceAPIJobManager::submitRemoteJob(
   MantidWebServiceAPIHelper::PostDataMap postData;
 
   postData["TransID"] = transactionID;
-  postData["NumNodes"] = boost::lexical_cast<std::string>(numNodes);
-  postData["CoresPerNode"] = boost::lexical_cast<std::string>(coresPerNode);
+  postData["NumNodes"] = std::to_string(numNodes);
+  postData["CoresPerNode"] = std::to_string(coresPerNode);
 
   postData["ScriptName"] = runnable;
   postData[runnable] = param;

@@ -445,7 +445,7 @@ void SaveAscii2::populateSpectrumNumberMetaData() {
   const size_t nHist = m_ws->getNumberHistograms();
   for (size_t i = 0; i < nHist; i++) {
     const auto specNum = m_ws->getSpectrum(i)->getSpectrumNo();
-    const auto specNumStr = boost::lexical_cast<std::string>(specNum);
+    const auto specNumStr = std::to_string(specNum);
     spectrumNumbers.push_back(specNumStr);
   }
   m_metaDataMap["spectrumnumber"] = spectrumNumbers;

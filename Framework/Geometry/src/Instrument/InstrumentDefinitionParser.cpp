@@ -2841,8 +2841,7 @@ InstrumentDefinitionParser::convertLocationsElement(
 
     if (!name.empty()) {
       // Add name with appropriate numeric postfix
-      pLoc->setAttribute(
-          "name", name + boost::lexical_cast<std::string>(nameCountStart + i));
+      pLoc->setAttribute("name", name + std::to_string(nameCountStart + i));
     }
 
     // Copy values of all the attributes set

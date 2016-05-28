@@ -60,9 +60,9 @@ bool PropertyHistory::isEmptyDefault() const {
   }
   // Empty values
   if (emptyValues.empty()) {
-    emptyValues.push_back(boost::lexical_cast<std::string>(EMPTY_INT()));
+    emptyValues.push_back(std::to_string(EMPTY_INT()));
     emptyValues.push_back(boost::lexical_cast<std::string>(EMPTY_DBL()));
-    emptyValues.push_back(boost::lexical_cast<std::string>(EMPTY_LONG()));
+    emptyValues.push_back(std::to_string(EMPTY_LONG()));
   }
 
   // If default, input, number type and matches empty value then return true

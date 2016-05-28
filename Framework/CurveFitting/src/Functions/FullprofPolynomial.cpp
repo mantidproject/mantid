@@ -16,7 +16,7 @@ DECLARE_FUNCTION(FullprofPolynomial)
 FullprofPolynomial::FullprofPolynomial() : m_n(6), m_bkpos(1.) {
   // Declare first 6th order polynomial as default
   for (int i = 0; i < m_n; ++i) {
-    std::string parName = "A" + boost::lexical_cast<std::string>(i);
+    std::string parName = "A" + std::to_string(i);
     declareParameter(parName);
   }
 }
@@ -130,7 +130,7 @@ void FullprofPolynomial::setAttribute(const std::string &attName,
 
       m_n = attint;
       for (int i = 0; i < m_n; ++i) {
-        std::string parName = "A" + boost::lexical_cast<std::string>(i);
+        std::string parName = "A" + std::to_string(i);
         declareParameter(parName);
       }
     }

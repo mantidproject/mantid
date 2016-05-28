@@ -211,7 +211,7 @@ void GoniometerAnglesFromPhiRotation::exec() {
   }
 
   int RunNum = PeaksRun2->getPeak(0).getRunNumber();
-  std::string RunNumStr = boost::lexical_cast<std::string>(RunNum);
+  std::string RunNumStr = std::to_string(RunNum);
   int Npeaks = PeaksRun2->getNumberPeaks();
 
   // n indexed, av err, phi, chi,omega

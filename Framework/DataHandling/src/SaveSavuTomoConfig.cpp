@@ -181,8 +181,7 @@ void SaveSavuTomoConfig::saveFile(
       // std::string cite = w->cell<std::string>(ti, 3);
 
       // but in the file it goes as: data (params), id, name
-      nxFile.makeGroup(boost::lexical_cast<std::string>(procCount++), "NXnote",
-                       true);
+      nxFile.makeGroup(std::to_string(procCount++), "NXnote", true);
       nxFile.writeData("data", params);
       nxFile.writeData("id", id);
       nxFile.writeData("name", name);

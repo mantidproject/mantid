@@ -95,9 +95,8 @@ void LoadQKK::exec() {
   size_t nx = hmm.dim2(); // third dimension
   size_t nHist = ny * nx; // number of spectra in the dataset
   if (nHist == 0) {
-    throw std::runtime_error("Error in data dimensions: " +
-                             boost::lexical_cast<std::string>(ny) + " X " +
-                             boost::lexical_cast<std::string>(nx));
+    throw std::runtime_error("Error in data dimensions: " + std::to_string(ny) +
+                             " X " + std::to_string(nx));
   }
 
   // Set the workspace structure. The workspace will contain nHist spectra each
