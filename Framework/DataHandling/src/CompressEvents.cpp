@@ -110,12 +110,10 @@ void CompressEvents::exec() {
     for (int64_t i = 0; i < noSpectra; ++i) {
       PARALLEL_START_INTERUPT_REGION
       // The input (also output) event list
-      EventList *output_el = outputWS->getEventListPtr(static_cast<size_t>(i));
-      if (output_el) {
-        // The EventList method does the work.
-        output_el->compressEvents(tolerance, output_el);
-        Mantid::API::MemoryManager::Instance().releaseFreeMemory();
-      }
+      auto &output_el = outputWS->getSpectrum(static_cast<size_t>(i));
+      // The EventList method does the work.
+      output_el.compressEvents(tolerance, &output_el);
+      Mantid::API::MemoryManager::Instance().releaseFreeMemory();
       prog.report("Compressing");
       PARALLEL_END_INTERUPT_REGION
     }

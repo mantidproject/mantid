@@ -403,8 +403,8 @@ void FilterEventsByLogValuePreNexus::exec() {
     PARALLEL_FOR_NO_WSP_CHECK()
     for (int64_t i = 0; i < numberOfSpectra; i++) {
       PARALLEL_START_INTERUPT_REGION
-      m_localWorkspace->getEventListPtr(i)
-          ->setSortOrder(DataObjects::PULSETIME_SORT);
+      m_localWorkspace->getSpectrum(i)
+          .setSortOrder(DataObjects::PULSETIME_SORT);
       PARALLEL_END_INTERUPT_REGION
     }
     PARALLEL_CHECK_INTERUPT_REGION

@@ -377,14 +377,14 @@ public:
         if (usedDetIds[pixID - m_min_id]) {
           // Find the the workspace index corresponding to that pixel ID
           size_t wi = pixelID_to_wi_vector[pixID + pixelID_to_wi_offset];
-          EventList *el = outputWS.getEventListPtr(wi);
+          auto &el = outputWS.getSpectrum(wi);
           if (compress)
-            el->compressEvents(alg->compressTolerance, el);
+            el.compressEvents(alg->compressTolerance, &el);
           else {
             if (pulsetimesincreasing)
-              el->setSortOrder(DataObjects::PULSETIME_SORT);
+              el.setSortOrder(DataObjects::PULSETIME_SORT);
             else
-              el->setSortOrder(DataObjects::UNSORTED);
+              el.setSortOrder(DataObjects::UNSORTED);
           }
         }
       }

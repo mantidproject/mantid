@@ -233,9 +233,7 @@ void FilterByLogValue::exec() {
       PARALLEL_START_INTERUPT_REGION
 
       // Get the output event list (should be empty)
-      EventList *output_el = outputWS->getEventListPtr(i);
-      std::vector<EventList *> outputs;
-      outputs.push_back(output_el);
+      std::vector<EventList *> outputs{&outputWS->getSpectrum(i)};
 
       // and this is the input event list
       const EventList &input_el = inputWS->getEventList(i);

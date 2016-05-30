@@ -146,11 +146,10 @@ API::Run &EventWorkspaceCollection::mutableRun() {
 API::Sample &EventWorkspaceCollection::mutableSample() {
   return m_WsVec[0]->mutableSample();
 }
-Mantid::API::ISpectrum &
-EventWorkspaceCollection::getSpectrum(const size_t index) {
+EventList &EventWorkspaceCollection::getSpectrum(const size_t index) {
   return m_WsVec[0]->getSpectrum(index);
 }
-const Mantid::API::ISpectrum &
+const EventList &
 EventWorkspaceCollection::getSpectrum(const size_t index) const {
   return m_WsVec[0]->getSpectrum(index);
 }
@@ -261,11 +260,6 @@ void EventWorkspaceCollection::updateSpectraUsing(
   for (auto &ws : m_WsVec) {
     ws->updateSpectraUsing(map);
   }
-}
-
-DataObjects::EventList *EventWorkspaceCollection::getEventListPtr(size_t i) {
-  return m_WsVec[0]->getEventListPtr(
-      i); // TODO, just take from the first workspace
 }
 
 void EventWorkspaceCollection::populateInstrumentParameters() {

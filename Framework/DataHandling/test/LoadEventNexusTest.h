@@ -90,7 +90,7 @@ public:
     TS_ASSERT_EQUALS(*WS->getSpectrum(0).getDetectorIDs().begin(), 0);
 
     // Check one event from one pixel - does it have a reasonable pulse time
-    TS_ASSERT(WS->getEventListPtr(1000)->getEvents()[0].pulseTime() >
+    TS_ASSERT(WS->getSpectrum(1000).getEvents()[0].pulseTime() >
               DateAndTime(int64_t(1e9 * 365 * 10)));
 
     // Check filename
@@ -166,9 +166,8 @@ public:
 
       int pixelID = 2000;
 
-      std::vector<TofEvent> events1 = WS->getEventListPtr(pixelID)->getEvents();
-      std::vector<TofEvent> events2 =
-          WS2->getEventListPtr(pixelID)->getEvents();
+      std::vector<TofEvent> events1 = WS->getSpectrum(pixelID).getEvents();
+      std::vector<TofEvent> events2 = WS2->getSpectrum(pixelID).getEvents();
 
       // std::cout << events1.size() << std::endl;
       TS_ASSERT_EQUALS(events1.size(), events2.size());

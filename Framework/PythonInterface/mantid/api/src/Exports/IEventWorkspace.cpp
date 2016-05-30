@@ -23,8 +23,8 @@ void export_IEventWorkspace() {
       .def("getTofMax", &IEventWorkspace::getTofMax, args("self"),
            "Returns the maximum TOF value (in microseconds) held by the "
            "workspace")
-      .def("getEventList", (IEventList * (IEventWorkspace::*)(const int)) &
-                               IEventWorkspace::getEventListPtr,
+      .def("getEventList", (IEventList & (IEventWorkspace::*)(const size_t)) &
+                               IEventWorkspace::getSpectrum,
            return_internal_reference<>(), args("self", "workspace_index"),
            "Return the event list managing the events at the given workspace "
            "index")

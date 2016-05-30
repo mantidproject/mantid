@@ -252,12 +252,12 @@ public:
                             1, 5, 10, 0, 1, 3),
                         evout;
     AnalysisDataService::Instance().add("test_ev_rep", evin);
-    EventList *evlist = evin->getEventListPtr(0);
-    evlist->switchTo(WEIGHTED);
-    evlist->getWeightedEvents().at(0).m_weight = static_cast<float>(0.01);
-    evlist->getWeightedEvents().at(1).m_weight =
+    auto &evlist = evin->getSpectrum(0);
+    evlist.switchTo(WEIGHTED);
+    evlist.getWeightedEvents().at(0).m_weight = static_cast<float>(0.01);
+    evlist.getWeightedEvents().at(1).m_weight =
         std::numeric_limits<float>::infinity();
-    evlist->getWeightedEvents().at(2).m_weight =
+    evlist.getWeightedEvents().at(2).m_weight =
         std::numeric_limits<float>::quiet_NaN();
 
     Mantid::Algorithms::ReplaceSpecialValues alg;

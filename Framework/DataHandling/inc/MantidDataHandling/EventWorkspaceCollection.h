@@ -82,8 +82,8 @@ public:
   const API::Run &run() const;
   API::Run &mutableRun();
   API::Sample &mutableSample();
-  Mantid::API::ISpectrum &getSpectrum(const size_t index);
-  const Mantid::API::ISpectrum &getSpectrum(const size_t index) const;
+  DataObjects::EventList &getSpectrum(const size_t index);
+  const DataObjects::EventList &getSpectrum(const size_t index) const;
   Mantid::API::Axis *getAxis(const size_t &i) const;
   size_t getNumberHistograms() const;
   const DataObjects::EventList &
@@ -106,7 +106,6 @@ public:
   void
   setMonitorWorkspace(const boost::shared_ptr<API::MatrixWorkspace> &monitorWS);
   void updateSpectraUsing(const API::SpectrumDetectorMapping &map);
-  DataObjects::EventList *getEventListPtr(size_t i);
   void populateInstrumentParameters();
   void setTitle(std::string title);
   void applyFilter(boost::function<void(API::MatrixWorkspace_sptr)> func);

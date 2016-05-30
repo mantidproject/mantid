@@ -130,7 +130,7 @@ public:
     it = logMap.begin();
     Kernel::DateAndTime start = it->first;
 
-    std::vector<TofEvent> events1 = ew->getEventListPtr(1000)->getEvents();
+    std::vector<TofEvent> events1 = ew->getSpectrum(1000).getEvents();
     for (size_t i = 0; i < events1.size(); i++) {
       std::cout << (events1[i].pulseTime() - start) << " sec \n";
     }

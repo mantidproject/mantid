@@ -81,7 +81,6 @@ public:
   MOCK_CONST_METHOD1(getTimeAtSampleMax, DateAndTime(double));
   MOCK_CONST_METHOD1(getTimeAtSampleMin, DateAndTime(double));
   MOCK_CONST_METHOD0(getEventType, EventType());
-  MOCK_METHOD1(getEventListPtr, IEventList *(const std::size_t));
   MOCK_CONST_METHOD5(generateHistogram,
                      void(const std::size_t, const Mantid::MantidVec &,
                           Mantid::MantidVec &, Mantid::MantidVec &, bool));
@@ -90,9 +89,9 @@ public:
   MOCK_CONST_METHOD0(blocksize, std::size_t());
   MOCK_CONST_METHOD0(size, std::size_t());
   MOCK_CONST_METHOD0(getNumberHistograms, std::size_t());
-  MOCK_METHOD1(getSpectrum, Mantid::API::ISpectrum &(const std::size_t));
+  MOCK_METHOD1(getSpectrum, Mantid::API::IEventList &(const std::size_t));
   MOCK_CONST_METHOD1(getSpectrum,
-                     const Mantid::API::ISpectrum &(const std::size_t));
+                     const Mantid::API::IEventList &(const std::size_t));
   MOCK_METHOD3(init, void(const size_t &, const size_t &, const size_t &));
   MOCK_CONST_METHOD0(getSpecialCoordinateSystem,
                      Mantid::Kernel::SpecialCoordinateSystem());

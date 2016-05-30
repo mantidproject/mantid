@@ -493,15 +493,6 @@ EventWorkspace::getEventList(const std::size_t workspace_index) const {
 }
 
 //-----------------------------------------------------------------------------
-/** Get an EventList pointer at the given workspace index number
- * @param workspace_index :: index into WS
- * @return an EventList pointer at the given workspace index number
- */
-EventList *EventWorkspace::getEventListPtr(const std::size_t workspace_index) {
-  return data[workspace_index];
-}
-
-//-----------------------------------------------------------------------------
 /** Either return an existing EventList from the list, or
  * create a new one if needed and expand the list.
  *  to finalize the stuff that needs to.

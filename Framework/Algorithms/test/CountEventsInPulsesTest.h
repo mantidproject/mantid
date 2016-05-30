@@ -318,7 +318,7 @@ public:
 
     // 5. Add Events
     for (size_t iws = 3; iws < 5; ++iws) {
-      DataObjects::EventList *eventlist = eventWS->getEventListPtr(iws);
+      auto &eventlist = eventWS->getSpectrum(iws);
 
       for (size_t ip = 0; ip < numpulses - 1; ip++) {
         Kernel::DateAndTime pulsetime =
@@ -330,7 +330,7 @@ public:
         for (size_t ie = 0; ie < numevents; ie++) {
           double tof = static_cast<double>(ie + 1) * dtof_ms;
           DataObjects::TofEvent newevent(tof, pulsetime);
-          eventlist->addEventQuickly(newevent);
+          eventlist.addEventQuickly(newevent);
 
           // std::cout << "Spec " <<  iws << "  Pulse Time = " << pulsetime <<
           // ".. Index " << ie << "  TOF = " << tof << std::endl;

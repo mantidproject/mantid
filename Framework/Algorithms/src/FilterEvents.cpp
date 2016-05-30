@@ -843,7 +843,6 @@ void FilterEvents::setupCustomizedTOFCorrection() {
  */
 void FilterEvents::filterEventsBySplitters(double progressamount) {
   size_t numberOfSpectra = m_eventWS->getNumberHistograms();
-  std::map<int, DataObjects::EventWorkspace_sptr>::iterator wsiter;
 
   // Loop over the histograms (detector spectra) to do split from 1 event list
   // to N event list
@@ -860,12 +859,10 @@ void FilterEvents::filterEventsBySplitters(double progressamount) {
       // Get the output event lists (should be empty) to be a map
       std::map<int, DataObjects::EventList *> outputs;
       PARALLEL_CRITICAL(build_elist) {
-        for (wsiter = m_outputWS.begin(); wsiter != m_outputWS.end();
-             ++wsiter) {
-          int index = wsiter->first;
-          DataObjects::EventList *output_el =
-              wsiter->second->getEventListPtr(iws);
-          outputs.emplace(index, output_el);
+        for(auto &ws : m_outputWS) {
+          int index = ws.first;
+          auto &output_el = ws.second->getSpectrum(iws);
+          outputs.emplace(index, &output_el);
         }
       }
 
@@ -904,9 +901,9 @@ void FilterEvents::filterEventsBySplitters(double progressamount) {
 
   double numws = static_cast<double>(m_outputWS.size());
   double outwsindex = 0.;
-  for (wsiter = m_outputWS.begin(); wsiter != m_outputWS.end(); ++wsiter) {
-    int wsindex = wsiter->first;
-    DataObjects::EventWorkspace_sptr opws = wsiter->second;
+  for(auto &ws : m_outputWS) {
+    int wsindex = ws.first;
+    DataObjects::EventWorkspace_sptr opws = ws.second;
 
     // Generate a list of splitters for current output workspace
     Kernel::TimeSplitterType splitters = generateSplitters(wsindex);
@@ -944,7 +941,6 @@ void FilterEvents::filterEventsBySplitters(double progressamount) {
 void FilterEvents::filterEventsByVectorSplitters(double progressamount) {
   size_t numberOfSpectra = m_eventWS->getNumberHistograms();
   // FIXME : consider to use vector to index workspace and event list
-  std::map<int, DataObjects::EventWorkspace_sptr>::iterator wsiter;
 
   // Loop over the histograms (detector spectra) to do split from 1 event list
   // to N event list
@@ -960,12 +956,10 @@ void FilterEvents::filterEventsByVectorSplitters(double progressamount) {
       // Get the output event lists (should be empty) to be a map
       map<int, DataObjects::EventList *> outputs;
       PARALLEL_CRITICAL(build_elist) {
-        for (wsiter = m_outputWS.begin(); wsiter != m_outputWS.end();
-             ++wsiter) {
-          int index = wsiter->first;
-          DataObjects::EventList *output_el =
-              wsiter->second->getEventListPtr(iws);
-          outputs.emplace(index, output_el);
+        for(auto &ws : m_outputWS) {
+          int index = ws.first;
+          auto &output_el = ws.second->getSpectrum(iws);
+          outputs.emplace(index, &output_el);
         }
       }
 

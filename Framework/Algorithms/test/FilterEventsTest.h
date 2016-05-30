@@ -656,7 +656,7 @@ public:
         "proton_charge");
 
     for (size_t i = 0; i < eventWS->getNumberHistograms(); i++) {
-      DataObjects::EventList *elist = eventWS->getEventListPtr(i);
+      auto &elist = eventWS->getSpectrum(i);
 
       for (int64_t pid = 0; pid < static_cast<int64_t>(numpulses); pid++) {
         int64_t pulsetime_i64 = pid * pulsedt + runstart.totalNanoseconds();
@@ -665,7 +665,7 @@ public:
         for (size_t e = 0; e < 10; e++) {
           double tof = static_cast<double>(e * tofdt / 1000);
           DataObjects::TofEvent event(tof, pulsetime);
-          elist->addEventQuickly(event);
+          elist.addEventQuickly(event);
         }
       } // FOR each pulse
     }   // For each bank
@@ -714,11 +714,11 @@ public:
 
     // Add neutrons
     for (size_t i = 0; i < eventWS->getNumberHistograms(); i++) {
-      DataObjects::EventList *elist = eventWS->getEventListPtr(i);
+      auto &elist = eventWS->getSpectrum(i);
 
       for (size_t ievent = 0; ievent < fakeevlist.getNumberEvents(); ++ievent) {
         TofEvent tofevent = fakeevlist.getEvent(ievent);
-        elist->addEventQuickly(tofevent);
+        elist.addEventQuickly(tofevent);
       } // FOR each pulse
     }   // For each bank
 
@@ -762,11 +762,11 @@ public:
     // Add neutrons
     EventList fakeevlist = fake_uniform_time_sns_data(runstart_i64, pulsedt);
     for (size_t i = 0; i < eventWS->getNumberHistograms(); i++) {
-      DataObjects::EventList *elist = eventWS->getEventListPtr(i);
+      auto &elist = eventWS->getSpectrum(i);
 
       for (size_t ievent = 0; ievent < fakeevlist.getNumberEvents(); ++ievent) {
         TofEvent tofevent = fakeevlist.getEvent(ievent);
-        elist->addEventQuickly(tofevent);
+        elist.addEventQuickly(tofevent);
       } // FOR each pulse
     }   // For each bank
 
@@ -814,11 +814,11 @@ public:
 
     // Add neutrons
     for (size_t i = 0; i < eventWS->getNumberHistograms(); i++) {
-      DataObjects::EventList *elist = eventWS->getEventListPtr(i);
+      auto &elist = eventWS->getSpectrum(i);
 
       for (size_t ievent = 0; ievent < fakeevlist.getNumberEvents(); ++ievent) {
         TofEvent tofevent = fakeevlist.getEvent(ievent);
-        elist->addEventQuickly(tofevent);
+        elist.addEventQuickly(tofevent);
       } // FOR each pulse
     }   // For each bank
 

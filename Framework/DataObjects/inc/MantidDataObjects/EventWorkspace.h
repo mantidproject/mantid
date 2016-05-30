@@ -147,9 +147,6 @@ public:
   virtual const EventList &
   getEventList(const std::size_t workspace_index) const;
 
-  // Get an EventList pointer at the given workspace index number
-  EventList *getEventListPtr(const std::size_t workspace_index) override;
-
   // Get or add an EventList
   EventList &getOrAddEventList(const std::size_t workspace_index);
 
