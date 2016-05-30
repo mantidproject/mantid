@@ -34,9 +34,9 @@ Usage
     # Run the cross-correlation. This is using a TDC timing offset of 56000ns.
     wsOut = CorelliCrossCorrelate(ws,56000)
 
-    print 'The detector 172305 has ' + str(ws.getEventList(172305).getNumberEvents()) + ' events.'
-    print 'The event weights before cross-correlation are ' + str(ws.getEventList(172305).getWeights())
-    print 'The event weights after  cross-correlation are ' + str(wsOut.getEventList(172305).getWeights())
+    print 'The detector 172305 has ' + str(ws.getSpectrum(172305).getNumberEvents()) + ' events.'
+    print 'The event weights before cross-correlation are ' + str(ws.getSpectrum(172305).getWeights())
+    print 'The event weights after  cross-correlation are ' + str(wsOut.getSpectrum(172305).getWeights())
 
 Output:
 

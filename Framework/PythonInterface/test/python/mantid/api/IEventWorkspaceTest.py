@@ -60,6 +60,11 @@ class IEventWorkspaceTest(unittest.TestCase):
         self.assertAlmostEquals(weightErrorList[0], 1.0) #first value
         self.assertAlmostEquals(weightErrorList[len(weightErrorList)-1], 1.0) #last value
 
+    def test_deprecated_getEventList(self):
+        el = self._test_ws.getEventList(0)
+        self.assertTrue(isinstance(el, IEventList))
+        self.assertEquals(el.getNumberEvents(), 200)
+
 
 if __name__ == '__main__':
     unittest.main()
