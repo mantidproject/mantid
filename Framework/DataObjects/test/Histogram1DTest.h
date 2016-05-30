@@ -123,6 +123,23 @@ public:
     TS_ASSERT_EQUALS(&clone.readE(), oldE);
   }
 
+  void test_constructor_from_ISpectrum() {
+    Histogram1D resource;
+    resource.dataX() = {0.1};
+    resource.dataY() = {0.2};
+    resource.dataE() = {0.3};
+    const Mantid::API::ISpectrum &source = resource;
+    Histogram1D clone(source);
+    // X is shared...
+    TS_ASSERT_EQUALS(&clone.readX(), &source.readX());
+    // .. but not Y and E, since they are not part of ISpectrum.
+    TS_ASSERT_DIFFERS(&clone.readY(), &source.readY());
+    TS_ASSERT_DIFFERS(&clone.readE(), &source.readE());
+    TS_ASSERT_EQUALS(clone.readX()[0], 0.1);
+    TS_ASSERT_EQUALS(clone.readY()[0], 0.2);
+    TS_ASSERT_EQUALS(clone.readE()[0], 0.3);
+  }
+
   void test_copy_assignment() {
     const Histogram1D source;
     Histogram1D clone;
@@ -143,6 +160,24 @@ public:
     TS_ASSERT_EQUALS(&clone.readX(), oldX);
     TS_ASSERT_EQUALS(&clone.readY(), oldY);
     TS_ASSERT_EQUALS(&clone.readE(), oldE);
+  }
+
+  void test_assign_ISpectrum() {
+    Histogram1D resource;
+    resource.dataX() = {0.1};
+    resource.dataY() = {0.2};
+    resource.dataE() = {0.3};
+    const Mantid::API::ISpectrum &source = resource;
+    Histogram1D clone;
+    clone = source;
+    // X is shared...
+    TS_ASSERT_EQUALS(&clone.readX(), &source.readX());
+    // .. but not Y and E, since they are not part of ISpectrum.
+    TS_ASSERT_DIFFERS(&clone.readY(), &source.readY());
+    TS_ASSERT_DIFFERS(&clone.readE(), &source.readE());
+    TS_ASSERT_EQUALS(clone.readX()[0], 0.1);
+    TS_ASSERT_EQUALS(clone.readY()[0], 0.2);
+    TS_ASSERT_EQUALS(clone.readE()[0], 0.3);
   }
 };
 #endif /*TESTHISTOGRAM1D_*/

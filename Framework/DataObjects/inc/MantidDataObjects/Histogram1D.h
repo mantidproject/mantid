@@ -37,6 +37,15 @@ protected:
   MantidVecPtr refE; ///< RefCounted Error
 
 public:
+  Histogram1D() = default;
+  Histogram1D(const Histogram1D &) = default;
+  Histogram1D(Histogram1D &&) = default;
+  Histogram1D(const ISpectrum &other);
+
+  Histogram1D &operator=(const Histogram1D &) = default;
+  Histogram1D &operator=(Histogram1D &&) = default;
+  Histogram1D &operator=(const ISpectrum &rhs);
+
   /// Sets the data.
   void setData(const MantidVec &Y) override { refY.access() = Y; };
   /// Sets the data and errors
