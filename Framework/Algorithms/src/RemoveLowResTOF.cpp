@@ -200,8 +200,7 @@ void RemoveLowResTOF::execEvent() {
                         << outW->getSpectrum(workspaceIndex).getNumberEvents()
                         << " of it. \n";
         numClearedEventLists += 1;
-        numClearedEvents +=
-            outW->getSpectrum(workspaceIndex).getNumberEvents();
+        numClearedEvents += outW->getSpectrum(workspaceIndex).getNumberEvents();
         outW->getSpectrum(workspaceIndex).clear(false);
 
         if (m_outputLowResTOF)

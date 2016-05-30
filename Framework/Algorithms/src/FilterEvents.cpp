@@ -859,7 +859,7 @@ void FilterEvents::filterEventsBySplitters(double progressamount) {
       // Get the output event lists (should be empty) to be a map
       std::map<int, DataObjects::EventList *> outputs;
       PARALLEL_CRITICAL(build_elist) {
-        for(auto &ws : m_outputWS) {
+        for (auto &ws : m_outputWS) {
           int index = ws.first;
           auto &output_el = ws.second->getSpectrum(iws);
           outputs.emplace(index, &output_el);
@@ -901,7 +901,7 @@ void FilterEvents::filterEventsBySplitters(double progressamount) {
 
   double numws = static_cast<double>(m_outputWS.size());
   double outwsindex = 0.;
-  for(auto &ws : m_outputWS) {
+  for (auto &ws : m_outputWS) {
     int wsindex = ws.first;
     DataObjects::EventWorkspace_sptr opws = ws.second;
 
@@ -956,7 +956,7 @@ void FilterEvents::filterEventsByVectorSplitters(double progressamount) {
       // Get the output event lists (should be empty) to be a map
       map<int, DataObjects::EventList *> outputs;
       PARALLEL_CRITICAL(build_elist) {
-        for(auto &ws : m_outputWS) {
+        for (auto &ws : m_outputWS) {
           int index = ws.first;
           auto &output_el = ws.second->getSpectrum(iws);
           outputs.emplace(index, &output_el);

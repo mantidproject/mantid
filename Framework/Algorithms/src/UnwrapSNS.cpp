@@ -209,8 +209,7 @@ void UnwrapSNS::execEvent() {
   for (int workspaceIndex = 0; workspaceIndex < m_numberOfSpectra;
        workspaceIndex++) {
     //    PARALLEL_START_INTERUPT_REGION
-    std::size_t numEvents =
-        outW->getSpectrum(workspaceIndex).getNumberEvents();
+    std::size_t numEvents = outW->getSpectrum(workspaceIndex).getNumberEvents();
     bool isMonitor;
     double Ld = this->calculateFlightpath(workspaceIndex, isMonitor);
     MantidVec time_bins;
