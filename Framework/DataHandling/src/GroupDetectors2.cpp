@@ -147,9 +147,15 @@ void GroupDetectors2::exec() {
   // doesn't want them
   const size_t numUnGrouped = keepAll ? unGroupedSet.size() - 1 : 0;
 
-  MatrixWorkspace_sptr outputWS = WorkspaceFactory::Instance().create(
-      inputWS, m_GroupWsInds.size() + numUnGrouped, inputWS->readX(0).size(),
-      inputWS->blocksize());
+  auto outputWS = boost::dynamic_pointer_cast<Workspace2D>(
+      WorkspaceFactory::Instance().create(
+          inputWS, m_GroupWsInds.size() + numUnGrouped,
+          inputWS->readX(0).size(), inputWS->blocksize()));
+  // The cast might fail if the input is a WorkspaceSingleValue. That does not
+  // seem to make sense for this algorithm, so we throw.
+  if (!outputWS)
+    throw std::invalid_argument(
+        "Input workspace must be an EventWorkspace or Workspace2D");
 
   // prepare to move the requested histograms into groups, first estimate how
   // long for progress reporting. +1 in the demonator gets rid of any divide by
@@ -168,7 +174,7 @@ void GroupDetectors2::exec() {
   // If we're keeping ungrouped spectra
   if (keepAll) {
     // copy them into the output workspace
-    moveOthers(unGroupedSet, inputWS, outputWS, outIndex);
+    moveOthers(unGroupedSet, *inputWS, *outputWS, outIndex);
   }
 
   g_log.information() << name() << " algorithm has finished\n";
@@ -236,7 +242,7 @@ void GroupDetectors2::execEvent() {
   // If we're keeping ungrouped spectra
   if (keepAll) {
     // copy them into the output workspace
-    moveOthersEvent(unGroupedSet, inputWS, outputWS, outIndex);
+    moveOthers(unGroupedSet, *inputWS, *outputWS, outIndex);
   }
 
   // Set all X bins on the output
@@ -1105,118 +1111,6 @@ GroupDetectors2::formGroupsEvent(DataObjects::EventWorkspace_const_sptr inputWS,
   g_log.debug() << name() << " created " << outIndex
                 << " new grouped spectra\n";
   return outIndex;
-}
-
-/**
-*  Only to be used if the KeepUnGrouped property is true, moves the spectra that
-* were not selected
-*  to be in a group to the end of the output spectrum
-*  @param unGroupedSet :: list of WORKSPACE indexes that were included in a
-* group
-*  @param inputWS :: user selected input workspace for the algorithm
-*  @param outputWS :: user selected output workspace for the algorithm
-*  @param outIndex :: the next spectra index available after the grouped spectra
-*/
-void GroupDetectors2::moveOthers(const std::set<int64_t> &unGroupedSet,
-                                 API::MatrixWorkspace_const_sptr inputWS,
-                                 API::MatrixWorkspace_sptr outputWS,
-                                 size_t outIndex) {
-  g_log.debug() << "Starting to copy the ungrouped spectra" << std::endl;
-  double prog4Copy = (1. - 1. * static_cast<double>(m_FracCompl)) /
-                     static_cast<double>(unGroupedSet.size());
-
-  // go thorugh all the spectra in the input workspace
-  for (auto copyFrIt : unGroupedSet) {
-    if (copyFrIt == USED)
-      continue; // Marked as not to be used
-    size_t sourceIndex = static_cast<size_t>(copyFrIt);
-
-    // The input spectrum we'll copy
-    const auto &inputSpec = inputWS->getSpectrum(sourceIndex);
-
-    // Destination of the copying
-    auto &outputSpec = outputWS->getSpectrum(outIndex);
-
-    // Copy the data
-    outputSpec.dataX() = inputSpec.dataX();
-    outputSpec.dataY() = inputSpec.dataY();
-    outputSpec.dataE() = inputSpec.dataE();
-
-    // Spectrum numbers etc.
-    outputSpec.setSpectrumNo(inputSpec.getSpectrumNo());
-    outputSpec.clearDetectorIDs();
-    outputSpec.addDetectorIDs(inputSpec.getDetectorIDs());
-
-    // go to the next free index in the output workspace
-    outIndex++;
-    // make regular progress reports and check for cancelling the algorithm
-    if (outIndex % INTERVAL == 0) {
-      m_FracCompl += INTERVAL * prog4Copy;
-      if (m_FracCompl > 1.0) {
-        m_FracCompl = 1.0;
-      }
-      progress(m_FracCompl);
-      interruption_point();
-    }
-  }
-
-  g_log.debug() << name() << " copied " << unGroupedSet.size() - 1
-                << " ungrouped spectra\n";
-}
-
-/**
-*  Only to be used if the KeepUnGrouped property is true, moves the spectra that
-* were not selected
-*  to be in a group to the end of the output spectrum
-*  @param unGroupedSet :: list of WORKSPACE indexes that were included in a
-* group
-*  @param inputWS :: user selected input workspace for the algorithm
-*  @param outputWS :: user selected output workspace for the algorithm
-*  @param outIndex :: the next spectra index available after the grouped spectra
-*/
-void GroupDetectors2::moveOthersEvent(
-    const std::set<int64_t> &unGroupedSet,
-    DataObjects::EventWorkspace_const_sptr inputWS,
-    DataObjects::EventWorkspace_sptr outputWS, size_t outIndex) {
-  g_log.debug() << "Starting to copy the ungrouped spectra" << std::endl;
-  double prog4Copy = (1. - 1. * static_cast<double>(m_FracCompl)) /
-                     static_cast<double>(unGroupedSet.size());
-
-  // go thorugh all the spectra in the input workspace
-  for (auto copyFrIt : unGroupedSet) {
-    if (copyFrIt == USED)
-      continue; // Marked as not to be used
-    size_t sourceIndex = static_cast<size_t>(copyFrIt);
-
-    // The input spectrum we'll copy
-    const EventList &inputSpec = inputWS->getSpectrum(sourceIndex);
-
-    // Destination of the copying
-    EventList &outputSpec = outputWS->getSpectrum(outIndex);
-
-    // Copy the data
-    outputSpec += inputSpec;
-
-    // Spectrum numbers etc.
-    outputSpec.setSpectrumNo(inputSpec.getSpectrumNo());
-    outputSpec.clearDetectorIDs();
-    outputSpec.addDetectorIDs(inputSpec.getDetectorIDs());
-
-    // go to the next free index in the output workspace
-    outIndex++;
-    // make regular progress reports and check for cancelling the algorithm
-    if (outIndex % INTERVAL == 0) {
-      m_FracCompl += INTERVAL * prog4Copy;
-      if (m_FracCompl > 1.0) {
-        m_FracCompl = 1.0;
-      }
-      progress(m_FracCompl);
-      interruption_point();
-    }
-  }
-
-  g_log.debug() << name() << " copied " << unGroupedSet.size() - 1
-                << " ungrouped spectra\n";
 }
 
 // RangeHelper
