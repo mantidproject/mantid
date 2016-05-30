@@ -163,9 +163,9 @@ Summary, median ranking
 
 The summary table shows the median ranking across all the test
 problems. See :ref:`detailed results by test problem (accuracy)
-<Minimizers_comparison_in_terms_of_accuracy>`. Alternatively, see the
-:ref:`detailed results when using weighted least squares as cost
-function <Minimizers_weighted_comparison_in_terms_of_accuracy>`.
+<Minimizers_unweighted_comparison_in_terms_of_accuracy>`. Alternatively,
+see the :ref:`detailed results when using weighted least squares as
+cost function <Minimizers_weighted_comparison_in_terms_of_accuracy>`.
 
 .. Q: In tables: show values as absolute or relative to the best one
    for each problem? Absolute for the best in a column on the right?
@@ -186,9 +186,9 @@ Summary, median ranking
 
 The summary table shows the median ranking across all the test
 problems. See :ref:`detailed results by test problem (run time)
-<Minimizers_comparison_in_terms_of_run_time>`. Alternatively, see the
-:ref:`detailed results when using weighted least squares as cost
-function <Minimizers_weighted_comparison_in_terms_of_run_time>`.
+<Minimizers_unweighted_comparison_in_terms_of_run_time>`. Alternatively,
+see the :ref:`detailed results when using weighted least squares as
+cost function <Minimizers_weighted_comparison_in_terms_of_run_time>`.
 
 .. include:: minimizers_comparison/v3.7.0/comparison_unweighted_v3.7_runtime_summary.txt
 

@@ -11,14 +11,18 @@ minimizers in Mantid when using weights in the cost function. For an
 explanation of the comparison approach and the results obtained when
 not using weights see the :ref:`General comparison of minimizers
 <FittingMinimizers>`.  In the alternative results presented here the
-cost function used is least squares and weigths by input observational
-errors. This cost function is named in the list of cost functions
-available in Mantid as `Least squares`, it is the default cost
-function in Mantid and the most commonly used for neutron data.
+cost function used is least squares and weigths are defined from input
+observational error estimates. See the :ref:`general concept page on
+fitting <Fitting>` for an explanation on how the error estimates are
+used in the least squares cost function.  This cost function is named
+in the list of cost functions available in Mantid as "Least
+squares". It is the default cost function in Mantid and the most
+commonly used for neutron data.
 
 As the NIST problems do not include measurement errors, assuming that
-these datasets would represent spectra from a typical Mantid workspace
-we introduce errors as the square root of the observations.
+these datasets would represent data from a typical Mantid workspace we
+introduce observational error estimates calculated as the square root
+of the observations.
 
 .. _Minimizers_weighted_comparison_in_terms_of_accuracy:
 
@@ -28,14 +32,10 @@ Comparison in terms of accuracy
 
 Summary, median ranking
 ^^^^^^^^^^^^^^^^^^^^^^^
-a
-
 .. include:: minimizers_comparison/v3.7.0/comparison_weighted_v3.7_acc_summary.txt
 
 Accuracy for individual NIST problems, "lower" difficulty
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-b
-
 .. include:: minimizers_comparison/v3.7.0/comparison_weighted_v3.7_acc_nist_lower.txt
 
 Accuracy for individual NIST problems, "average" difficulty
