@@ -200,8 +200,8 @@ public:
   void testGetSpectrum() {
     WorkspaceTester ws;
     ws.initialize(4, 1, 1);
-    TS_ASSERT_THROWS_NOTHING(auto &spec = ws.getSpectrum(0));
-    TS_ASSERT_THROWS_NOTHING(auto &spec = ws.getSpectrum(3));
+    TS_ASSERT_THROWS_NOTHING(ws.getSpectrum(0));
+    TS_ASSERT_THROWS_NOTHING(ws.getSpectrum(3));
   }
 
   /** Get a detector sptr for each spectrum */
