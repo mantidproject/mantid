@@ -1106,8 +1106,8 @@ void EnggDiffractionPresenter::runFittingAlgs(
 std::string EnggDiffractionPresenter::functionStrFactory(
     Mantid::API::ITableWorkspace_sptr &paramTableWS, std::string tableName,
     size_t row, std::string &startX, std::string &endX) {
-  const double windowLeft = 6;
-  const double windowRight = 9;
+  const double windowLeft = 9;
+  const double windowRight = 12;
 
   AnalysisDataServiceImpl &ADS = Mantid::API::AnalysisDataService::Instance();
   paramTableWS = ADS.retrieveWS<ITableWorkspace>(tableName);

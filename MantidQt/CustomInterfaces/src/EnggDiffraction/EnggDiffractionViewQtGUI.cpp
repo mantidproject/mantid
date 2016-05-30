@@ -624,6 +624,9 @@ std::string EnggDiffractionViewQtGUI::guessDefaultFullCalibrationPath() const {
 void EnggDiffractionViewQtGUI::splashMessage(bool visible,
                                              const std::string &shortMsg,
                                              const std::string &description) {
+  if (!m_splashMsg)
+    return;
+
   m_splashMsg->setWindowTitle(QString::fromStdString(shortMsg));
   m_splashMsg->setText(QString::fromStdString(description));
   // when showing the message, force it to show up centered
