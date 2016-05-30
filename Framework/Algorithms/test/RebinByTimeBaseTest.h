@@ -48,7 +48,7 @@ createEventWorkspace(const int numberspectra, const int nDistrubutedEvents,
           uint64_t(((double)i + 0.5) * binWidth); // Stick an event with a
                                                   // pulse_time in the middle of
                                                   // each pulse_time bin.
-      retVal->getEventList(pix) += TofEvent(tof, pulseTime);
+      retVal->getSpectrum(pix) += TofEvent(tof, pulseTime);
     }
   }
 

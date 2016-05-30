@@ -1436,7 +1436,7 @@ void LoadEventNexus::makeMapToEventLists(std::vector<std::vector<T>> &vectors) {
     for (size_t period = 0; period < m_ws->nPeriods(); ++period) {
       for (size_t i = 0; i < m_ws->getNumberHistograms(); ++i) {
         const auto &spec = m_ws->getSpectrum(i);
-        getEventsFrom(m_ws->getEventList(i, period),
+        getEventsFrom(m_ws->getSpectrum(i, period),
                       vectors[period][spec.getSpectrumNo()]);
       }
     }
@@ -1458,7 +1458,7 @@ void LoadEventNexus::makeMapToEventLists(std::vector<std::vector<T>> &vectors) {
       // Save a POINTER to the vector
       if (wi < m_ws->getNumberHistograms()) {
         for (size_t period = 0; period < m_ws->nPeriods(); ++period) {
-          getEventsFrom(m_ws->getEventList(wi, period),
+          getEventsFrom(m_ws->getSpectrum(wi, period),
                         vectors[period][j - pixelID_to_wi_offset]);
         }
       }
@@ -1893,7 +1893,7 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
   } else {
     // Convert to weighted events
     for (size_t i = 0; i < m_ws->getNumberHistograms(); i++) {
-      m_ws->getEventList(i).switchTo(API::WEIGHTED);
+      m_ws->getSpectrum(i).switchTo(API::WEIGHTED);
     }
     this->makeMapToEventLists<WeightedEventVector_pt>(weightedEventVectors);
   }
@@ -1901,7 +1901,7 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
   // Set all (empty) event lists as sorted by pulse time. That way, calling
   // SortEvents will not try to sort these empty lists.
   for (size_t i = 0; i < m_ws->getNumberHistograms(); i++)
-    m_ws->getEventList(i).setSortOrder(DataObjects::PULSETIME_SORT);
+    m_ws->getSpectrum(i).setSortOrder(DataObjects::PULSETIME_SORT);
 
   // Count the limits to time of flight
   shortest_tof =
@@ -2028,7 +2028,7 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
         for (int64_t i = 0; i < numHistograms; ++i) {
           PARALLEL_START_INTERUPT_REGION
           // Do the offsetting
-          m_ws->getEventList(i).addTof(mT0);
+          m_ws->getSpectrum(i).addTof(mT0);
           PARALLEL_END_INTERUPT_REGION
         }
         PARALLEL_CHECK_INTERUPT_REGION
@@ -2752,7 +2752,7 @@ void LoadEventNexus::loadTimeOfFlightData(::NeXus::File &file,
 
   // loop over spectra
   for (size_t wi = start_wi; wi < end_wi; ++wi) {
-    EventList &event_list = WS->getEventList(wi);
+    EventList &event_list = WS->getSpectrum(wi);
     // sort the events
     event_list.sortTof();
     std::vector<TofEvent> &events = event_list.getEvents();

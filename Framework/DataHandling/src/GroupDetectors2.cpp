@@ -1046,7 +1046,7 @@ GroupDetectors2::formGroupsEvent(DataObjects::EventWorkspace_const_sptr inputWS,
   for (storage_map::const_iterator it = m_GroupWsInds.begin();
        it != m_GroupWsInds.end(); ++it) {
     // This is the grouped spectrum
-    EventList &outEL = outputWS->getEventList(outIndex);
+    EventList &outEL = outputWS->getSpectrum(outIndex);
 
     // The spectrum number of the group is the key
     outEL.setSpectrumNo(it->first);
@@ -1060,7 +1060,7 @@ GroupDetectors2::formGroupsEvent(DataObjects::EventWorkspace_const_sptr inputWS,
     beh->dataX(outIndex)[0] = 0.0;
     beh->dataE(outIndex)[0] = 0.0;
     for (auto originalWI : it->second) {
-      const EventList &fromEL = inputWS->getEventList(originalWI);
+      const EventList &fromEL = inputWS->getSpectrum(originalWI);
       // Add the event lists with the operator
       outEL += fromEL;
 
@@ -1189,10 +1189,10 @@ void GroupDetectors2::moveOthersEvent(
     size_t sourceIndex = static_cast<size_t>(copyFrIt);
 
     // The input spectrum we'll copy
-    const EventList &inputSpec = inputWS->getEventList(sourceIndex);
+    const EventList &inputSpec = inputWS->getSpectrum(sourceIndex);
 
     // Destination of the copying
-    EventList &outputSpec = outputWS->getEventList(outIndex);
+    EventList &outputSpec = outputWS->getSpectrum(outIndex);
 
     // Copy the data
     outputSpec += inputSpec;

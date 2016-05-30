@@ -799,7 +799,7 @@ void SmoothNeighbours::execEvent(Mantid::DataObjects::EventWorkspace_sptr ws) {
       // if(sum)outEL.copyInfoFrom(*ws->getSpectrum(inWI));
       double weight = it->second;
       // Copy the event list
-      EventList tmpEL = ws->getEventList(inWI);
+      EventList tmpEL = ws->getSpectrum(inWI);
       // Scale it
       tmpEL *= weight;
       // Add it

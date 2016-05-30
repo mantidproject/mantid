@@ -825,7 +825,7 @@ void LoadNexusMonitors2::readEventMonitorEntry(NeXus::File &file, size_t i) {
   file.closeData();
 
   // load up the event list
-  DataObjects::EventList &event_list = eventWS->getEventList(i);
+  DataObjects::EventList &event_list = eventWS->getSpectrum(i);
 
   Mantid::Kernel::DateAndTime pulsetime(0);
   Mantid::Kernel::DateAndTime lastpulsetime(0);

@@ -371,7 +371,7 @@ void DiffractionFocussing2::execEvent() {
 
     totalHistProcess += static_cast<int>(indices.size());
     for (auto index : indices) {
-      size_required[iGroup] += m_eventW->getEventList(index).getNumberEvents();
+      size_required[iGroup] += m_eventW->getSpectrum(index).getNumberEvents();
     }
     prog->report(1, "Pre-counting");
   }
@@ -423,7 +423,7 @@ void DiffractionFocussing2::execEvent() {
         if (group == 1)
         {
           // Accumulate the chunk
-          numEventsInChunk += eventW->getEventList(wi).getNumberEvents();
+          numEventsInChunk += eventW->getSpectrum(wi).getNumberEvents();
         }
       } */
 
@@ -436,7 +436,7 @@ void DiffractionFocussing2::execEvent() {
       for (int i = wiChunk * chunkSize; i < max; i++) {
         // Accumulate the chunk
         size_t wi = indices[i];
-        chunkEL += m_eventW->getEventList(wi);
+        chunkEL += m_eventW->getSpectrum(wi);
       }
 
       // Rejoin the chunk with the rest.
@@ -458,7 +458,7 @@ void DiffractionFocussing2::execEvent() {
       const std::vector<size_t> &indices = this->m_wsIndices[group];
       for (auto wi : indices) {
         // In workspace index iGroup, put what was in the OLD workspace index wi
-        out->getOrAddEventList(iGroup) += m_eventW->getEventList(wi);
+        out->getOrAddEventList(iGroup) += m_eventW->getSpectrum(wi);
 
         prog->reportIncrement(1, "Appending Lists");
 
@@ -466,7 +466,7 @@ void DiffractionFocussing2::execEvent() {
         // one!
         if (inPlace) {
           boost::const_pointer_cast<EventWorkspace>(m_eventW)
-              ->getEventList(wi)
+              ->getSpectrum(wi)
               .clear();
           Mantid::API::MemoryManager::Instance().releaseFreeMemory();
         }

@@ -234,9 +234,9 @@ void LoadMcStas::readEventData(
   std::vector<detid_t> detIDs = instrument->getDetectorIDs();
 
   for (size_t i = 0; i < instrument->getNumberDetectors(); i++) {
-    eventWS->getEventList(i).addDetectorID(detIDs[i]);
+    eventWS->getSpectrum(i).addDetectorID(detIDs[i]);
     // spectrum number are treated as equal to detector IDs for McStas data
-    eventWS->getEventList(i).setSpectrumNo(detIDs[i]);
+    eventWS->getSpectrum(i).setSpectrumNo(detIDs[i]);
   }
   // the one is here for the moment for backward compatibility
   eventWS->rebuildSpectraMapping(true);
@@ -348,18 +348,18 @@ void LoadMcStas::readEventData(
             detIDtoWSindex_map.find(detectorID)->second;
 
         int64_t pulse_time = 0;
-        // eventWS->getEventList(workspaceIndex) +=
+        // eventWS->getSpectrum(workspaceIndex) +=
         // TofEvent(detector_time,pulse_time);
-        // eventWS->getEventList(workspaceIndex) += TofEvent(detector_time);
+        // eventWS->getSpectrum(workspaceIndex) += TofEvent(detector_time);
         // The following line puts the events into the weighted event instance
         // Originally this was coded so the error squared is 1 it should be
         // data[numberOfDataColumn * in]*data[numberOfDataColumn * in]
         // introduced flag to allow old usage
         if (errorBarsSetTo1) {
-          eventWS->getEventList(workspaceIndex) += WeightedEvent(
+          eventWS->getSpectrum(workspaceIndex) += WeightedEvent(
               detector_time, pulse_time, data[numberOfDataColumn * in], 1.0);
         } else {
-          eventWS->getEventList(workspaceIndex) += WeightedEvent(
+          eventWS->getSpectrum(workspaceIndex) += WeightedEvent(
               detector_time, pulse_time, data[numberOfDataColumn * in],
               data[numberOfDataColumn * in] * data[numberOfDataColumn * in]);
         }

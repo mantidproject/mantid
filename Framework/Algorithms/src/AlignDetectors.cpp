@@ -389,7 +389,7 @@ void AlignDetectors::execEvent() {
 
     auto toDspacing = converter.getConversionFunc(
         outputWS->getSpectrum(size_t(i)).getDetectorIDs());
-    outputWS->getEventList(i).convertTof(toDspacing);
+    outputWS->getSpectrum(i).convertTof(toDspacing);
 
     progress.report();
     PARALLEL_END_INTERUPT_REGION

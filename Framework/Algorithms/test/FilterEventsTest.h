@@ -65,7 +65,7 @@ public:
 
     TS_ASSERT_EQUALS(eventws->getNumberEvents(), 500);
 
-    DataObjects::EventList elist = eventws->getEventList(0);
+    DataObjects::EventList elist = eventws->getSpectrum(0);
     TS_ASSERT_EQUALS(elist.getNumberEvents(), 50);
     TS_ASSERT(elist.hasDetectorID(1));
 
@@ -129,7 +129,7 @@ public:
             AnalysisDataService::Instance().retrieve("FilteredWS01_0"));
     TS_ASSERT(filteredws0);
     TS_ASSERT_EQUALS(filteredws0->getNumberHistograms(), 10);
-    TS_ASSERT_EQUALS(filteredws0->getEventList(0).getNumberEvents(), 4);
+    TS_ASSERT_EQUALS(filteredws0->getSpectrum(0).getNumberEvents(), 4);
     TS_ASSERT_EQUALS(filteredws0->run().getProtonCharge(), 10);
 
     // Check Workspace group 1
@@ -137,7 +137,7 @@ public:
         boost::dynamic_pointer_cast<DataObjects::EventWorkspace>(
             AnalysisDataService::Instance().retrieve("FilteredWS01_1"));
     TS_ASSERT(filteredws1);
-    TS_ASSERT_EQUALS(filteredws1->getEventList(1).getNumberEvents(), 16);
+    TS_ASSERT_EQUALS(filteredws1->getSpectrum(1).getNumberEvents(), 16);
     TS_ASSERT_EQUALS(filteredws1->run().getProtonCharge(), 11);
 
     // Check Workspace group 2
@@ -145,10 +145,10 @@ public:
         boost::dynamic_pointer_cast<DataObjects::EventWorkspace>(
             AnalysisDataService::Instance().retrieve("FilteredWS01_2"));
     TS_ASSERT(filteredws2);
-    TS_ASSERT_EQUALS(filteredws2->getEventList(1).getNumberEvents(), 21);
+    TS_ASSERT_EQUALS(filteredws2->getSpectrum(1).getNumberEvents(), 21);
     TS_ASSERT_EQUALS(filteredws2->run().getProtonCharge(), 21);
 
-    DataObjects::EventList elist3 = filteredws2->getEventList(3);
+    DataObjects::EventList elist3 = filteredws2->getSpectrum(3);
     elist3.sortPulseTimeTOF();
 
     DataObjects::TofEvent eventmin = elist3.getEvent(0);
@@ -228,23 +228,23 @@ public:
             AnalysisDataService::Instance().retrieve("FilteredWS01_1"));
     TS_ASSERT(filteredws0);
     TS_ASSERT_EQUALS(filteredws0->getNumberHistograms(), 10);
-    TS_ASSERT_EQUALS(filteredws0->getEventList(0).getNumberEvents(), 4);
+    TS_ASSERT_EQUALS(filteredws0->getSpectrum(0).getNumberEvents(), 4);
 
     // 4.2 Workspace group 1
     DataObjects::EventWorkspace_sptr filteredws1 =
         boost::dynamic_pointer_cast<DataObjects::EventWorkspace>(
             AnalysisDataService::Instance().retrieve("FilteredWS01_2"));
     TS_ASSERT(filteredws1);
-    TS_ASSERT_EQUALS(filteredws1->getEventList(1).getNumberEvents(), 16);
+    TS_ASSERT_EQUALS(filteredws1->getSpectrum(1).getNumberEvents(), 16);
 
     // 4.3 Workspace group 2
     DataObjects::EventWorkspace_sptr filteredws2 =
         boost::dynamic_pointer_cast<DataObjects::EventWorkspace>(
             AnalysisDataService::Instance().retrieve("FilteredWS01_3"));
     TS_ASSERT(filteredws2);
-    TS_ASSERT_EQUALS(filteredws2->getEventList(1).getNumberEvents(), 21);
+    TS_ASSERT_EQUALS(filteredws2->getSpectrum(1).getNumberEvents(), 21);
 
-    DataObjects::EventList elist3 = filteredws2->getEventList(3);
+    DataObjects::EventList elist3 = filteredws2->getSpectrum(3);
     elist3.sortPulseTimeTOF();
 
     DataObjects::TofEvent eventmin = elist3.getEvent(0);
@@ -318,8 +318,8 @@ public:
             AnalysisDataService::Instance().retrieve("SplittedDataX_0"));
     TS_ASSERT(filteredws0);
     TS_ASSERT_EQUALS(filteredws0->getNumberHistograms(), 10);
-    TS_ASSERT_EQUALS(filteredws0->getEventList(0).getNumberEvents(), 15);
-    TS_ASSERT_EQUALS(filteredws0->getEventList(9).getNumberEvents(), 15);
+    TS_ASSERT_EQUALS(filteredws0->getSpectrum(0).getNumberEvents(), 15);
+    TS_ASSERT_EQUALS(filteredws0->getSpectrum(9).getNumberEvents(), 15);
     TS_ASSERT_EQUALS(filteredws0->run().getProtonCharge(), 5);
 
     // 4.2 Workspace group 1
@@ -327,11 +327,11 @@ public:
         boost::dynamic_pointer_cast<DataObjects::EventWorkspace>(
             AnalysisDataService::Instance().retrieve("SplittedDataX_1"));
     TS_ASSERT(filteredws1);
-    TS_ASSERT_EQUALS(filteredws1->getEventList(1).getNumberEvents(), 10);
+    TS_ASSERT_EQUALS(filteredws1->getSpectrum(1).getNumberEvents(), 10);
     TS_ASSERT_EQUALS(filteredws0->run().getProtonCharge(), 5);
 
     // 4.3 Some individual events
-    DataObjects::EventList elist3 = filteredws1->getEventList(3);
+    DataObjects::EventList elist3 = filteredws1->getSpectrum(3);
     elist3.sortPulseTimeTOF();
 
     if (elist3.getNumberEvents() > 0) {
@@ -398,7 +398,7 @@ public:
     }
 
     // Check individual events
-    EventList &ev0 = ws7->getEventList(0);
+    EventList &ev0 = ws7->getSpectrum(0);
     TS_ASSERT_EQUALS(ev0.getNumberEvents(), 1);
     std::vector<double> vectofs = ev0.getTofs();
     TS_ASSERT_DELTA(vectofs[0], 272.0, 0.001);
@@ -585,24 +585,24 @@ public:
             AnalysisDataService::Instance().retrieve("FilteredWS10_1"));
     TS_ASSERT(filteredws0);
     TS_ASSERT_EQUALS(filteredws0->getNumberHistograms(), 10);
-    TS_ASSERT_EQUALS(filteredws0->getEventList(0).getNumberEvents(), 3);
+    TS_ASSERT_EQUALS(filteredws0->getSpectrum(0).getNumberEvents(), 3);
 
     // Workspace 1
     DataObjects::EventWorkspace_sptr filteredws1 =
         boost::dynamic_pointer_cast<DataObjects::EventWorkspace>(
             AnalysisDataService::Instance().retrieve("FilteredWS10_2"));
     TS_ASSERT(filteredws1);
-    TS_ASSERT_EQUALS(filteredws1->getEventList(1).getNumberEvents(), 16);
+    TS_ASSERT_EQUALS(filteredws1->getSpectrum(1).getNumberEvents(), 16);
 
     // Workspace 2
     DataObjects::EventWorkspace_sptr filteredws2 =
         boost::dynamic_pointer_cast<DataObjects::EventWorkspace>(
             AnalysisDataService::Instance().retrieve("FilteredWS10_3"));
     TS_ASSERT(filteredws2);
-    TS_ASSERT_EQUALS(filteredws2->getEventList(1).getNumberEvents(), 27);
+    TS_ASSERT_EQUALS(filteredws2->getSpectrum(1).getNumberEvents(), 27);
 
     // Check spectrum 3 of workspace 2
-    DataObjects::EventList elist3 = filteredws2->getEventList(3);
+    DataObjects::EventList elist3 = filteredws2->getSpectrum(3);
     elist3.sortPulseTimeTOF();
 
     DataObjects::TofEvent eventmin = elist3.getEvent(0);

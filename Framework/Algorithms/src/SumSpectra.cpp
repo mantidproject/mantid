@@ -440,7 +440,7 @@ void SumSpectra::execEvent(EventWorkspace_const_sptr localworkspace,
   Progress progress(this, 0, 1, indices.size());
 
   // Get the pointer to the output event list
-  EventList &outEL = outputWorkspace->getEventList(0);
+  EventList &outEL = outputWorkspace->getSpectrum(0);
   outEL.setSpectrumNo(m_outSpecNum);
   outEL.clearDetectorIDs();
 
@@ -473,7 +473,7 @@ void SumSpectra::execEvent(EventWorkspace_const_sptr localworkspace,
     numSpectra++;
 
     // Add the event lists with the operator
-    const EventList &tOutEL = localworkspace->getEventList(i);
+    const EventList &tOutEL = localworkspace->getSpectrum(i);
     if (tOutEL.empty()) {
       ++numZeros;
     }

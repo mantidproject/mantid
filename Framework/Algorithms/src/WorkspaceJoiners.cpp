@@ -153,7 +153,7 @@ MatrixWorkspace_sptr WorkspaceJoiners::execEvent() {
   for (int64_t i = 0; i < nhist1; ++i) {
     // Copy the events over
     output->getOrAddEventList(i) =
-        event_ws1->getEventList(i); // Should fire the copy constructor
+        event_ws1->getSpectrum(i); // Should fire the copy constructor
     auto &outSpec = output->getSpectrum(i);
     const auto &inSpec = event_ws1->getSpectrum(i);
     outSpec.copyInfoFrom(inSpec);
@@ -168,7 +168,7 @@ MatrixWorkspace_sptr WorkspaceJoiners::execEvent() {
     int64_t output_wi = j + nhist1;
     // Copy the events over
     output->getOrAddEventList(output_wi) =
-        event_ws2->getEventList(j); // Should fire the copy constructor
+        event_ws2->getSpectrum(j); // Should fire the copy constructor
     auto &outSpec = output->getSpectrum(output_wi);
     const auto &inSpec = event_ws2->getSpectrum(j);
     outSpec.copyInfoFrom(inSpec);

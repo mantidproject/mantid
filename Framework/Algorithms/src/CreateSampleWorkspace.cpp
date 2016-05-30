@@ -364,7 +364,7 @@ EventWorkspace_sptr CreateSampleWorkspace::createEventWorkspace(
 
   const double hourInSeconds = 60 * 60;
   for (int wi = 0; wi < numPixels; wi++) {
-    EventList &el = retVal->getEventList(workspaceIndex);
+    EventList &el = retVal->getSpectrum(workspaceIndex);
     el.setSpectrumNo(wi + 1);
     el.setDetectorID(wi + start_at_pixelID);
 

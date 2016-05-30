@@ -210,7 +210,7 @@ void UnwrapSNS::execEvent() {
        workspaceIndex++) {
     //    PARALLEL_START_INTERUPT_REGION
     std::size_t numEvents =
-        outW->getEventList(workspaceIndex).getNumberEvents();
+        outW->getSpectrum(workspaceIndex).getNumberEvents();
     bool isMonitor;
     double Ld = this->calculateFlightpath(workspaceIndex, isMonitor);
     MantidVec time_bins;
@@ -222,7 +222,7 @@ void UnwrapSNS::execEvent() {
     }
     if (numEvents > 0) {
       MantidVec times(numEvents);
-      outW->getEventList(workspaceIndex).getTofs(times);
+      outW->getSpectrum(workspaceIndex).getTofs(times);
       double filterVal = m_Tmin * Ld / m_LRef;
       for (size_t j = 0; j < numEvents; j++) {
         if (times[j] < filterVal)
@@ -230,7 +230,7 @@ void UnwrapSNS::execEvent() {
         else
           break; // stop filtering
       }
-      outW->getEventList(workspaceIndex).setTofs(times);
+      outW->getSpectrum(workspaceIndex).setTofs(times);
     }
     m_progress->report();
     //    PARALLEL_END_INTERUPT_REGION

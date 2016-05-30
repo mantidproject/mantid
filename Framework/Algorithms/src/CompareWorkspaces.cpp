@@ -449,8 +449,8 @@ bool CompareWorkspaces::compareEventWorkspaces(
     if (!mismatchedEvent ||
         checkallspectra) // This guard will avoid checking unnecessarily
     {
-      const EventList &el1 = ews1.getEventList(i);
-      const EventList &el2 = ews2.getEventList(i);
+      const EventList &el1 = ews1.getSpectrum(i);
+      const EventList &el2 = ews2.getSpectrum(i);
       bool printdetail = (i == wsindex2print);
       if (printdetail) {
         g_log.information() << "Spectrum " << i

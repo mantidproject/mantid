@@ -372,7 +372,7 @@ void FilterEvents::examineEventWS() {
         m_vecSkip[i] = true;
 
         ++numskipspec;
-        const EventList &elist = m_eventWS->getEventList(i);
+        const EventList &elist = m_eventWS->getSpectrum(i);
         numeventsskip += elist.getNumberEvents();
         msgss << i;
         if (numskipspec % 10 == 0)
@@ -772,7 +772,7 @@ void FilterEvents::setupCustomizedTOFCorrection() {
       // It is assumed that there is one detector per spectra.
       // If there are more than 1 spectrum, it is very likely to have problem
       // with correction factor
-      const DataObjects::EventList events = m_eventWS->getEventList(i);
+      const DataObjects::EventList events = m_eventWS->getSpectrum(i);
       auto detids = events.getDetectorIDs();
       if (detids.size() != 1) {
         // Check whether there are more than 1 detector per spectra.
@@ -867,7 +867,7 @@ void FilterEvents::filterEventsBySplitters(double progressamount) {
       }
 
       // Get a holder on input workspace's event list of this spectrum
-      const DataObjects::EventList &input_el = m_eventWS->getEventList(iws);
+      const DataObjects::EventList &input_el = m_eventWS->getSpectrum(iws);
 
       // Perform the filtering (using the splitting function and just one
       // output)
@@ -964,7 +964,7 @@ void FilterEvents::filterEventsByVectorSplitters(double progressamount) {
       }
 
       // Get a holder on input workspace's event list of this spectrum
-      const DataObjects::EventList &input_el = m_eventWS->getEventList(iws);
+      const DataObjects::EventList &input_el = m_eventWS->getSpectrum(iws);
 
       bool printdetail = false;
       if (m_useDBSpectrum)

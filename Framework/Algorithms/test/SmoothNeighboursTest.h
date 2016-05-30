@@ -93,13 +93,13 @@ public:
     }
     if (type == WEIGHTED_NOTIME) {
       for (size_t i = 0; i < in_ws->getNumberHistograms(); i++) {
-        EventList &el = in_ws->getEventList(i);
+        EventList &el = in_ws->getSpectrum(i);
         el.compressEvents(0.0, &el);
       }
     }
 
     // Multiply by 2 the workspace at index 4
-    EventList &el = in_ws->getEventList(4);
+    EventList &el = in_ws->getSpectrum(4);
     el += el;
 
     // Register the workspace in the data service
@@ -176,13 +176,13 @@ public:
     }
     if (type == WEIGHTED_NOTIME) {
       for (size_t i = 0; i < in_ws->getNumberHistograms(); i++) {
-        EventList &el = in_ws->getEventList(i);
+        EventList &el = in_ws->getSpectrum(i);
         el.compressEvents(0.0, &el);
       }
     }
 
     // Multiply by 2 the workspace at index 4
-    EventList &el = in_ws->getEventList(4);
+    EventList &el = in_ws->getSpectrum(4);
     el += el;
 
     size_t nevents0 = in_ws->getNumberEvents();

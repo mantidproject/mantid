@@ -79,8 +79,8 @@ public:
     TS_ASSERT_EQUALS(numEvents, eventsPerPixel);
     do_Spectrum_Tests(outputWS, 4, 4);
     TS_ASSERT_EQUALS(eventWS->blocksize(), 50);
-    TS_ASSERT_DELTA(outputWS->getEventList(0).getTofMin(), 4.5, 1e-08);
-    TS_ASSERT_DELTA(outputWS->getEventList(0).getTofMax(), 28.5, 1e-08);
+    TS_ASSERT_DELTA(outputWS->getSpectrum(0).getTofMin(), 4.5, 1e-08);
+    TS_ASSERT_DELTA(outputWS->getSpectrum(0).getTofMax(), 28.5, 1e-08);
   }
 
 private:

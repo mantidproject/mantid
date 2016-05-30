@@ -200,17 +200,17 @@ public:
     TS_ASSERT_EQUALS(outputWS->getInstrument()->getName(), "CNCS");
 
     std::size_t wkspIndex = 4348; // a good workspace index (with events)
-    TS_ASSERT_EQUALS(outputWS->getEventList(wkspIndex).getNumberEvents(), 11);
-    if (outputWS->getEventList(wkspIndex).getNumberEvents() != 11)
+    TS_ASSERT_EQUALS(outputWS->getSpectrum(wkspIndex).getNumberEvents(), 11);
+    if (outputWS->getSpectrum(wkspIndex).getNumberEvents() != 11)
       return;
 
-    TS_ASSERT_EQUALS(outputWS->getEventList(wkspIndex).getEvents()[0].tof(),
-                     inputWS->getEventList(wkspIndex).getEvents()[0].tof());
+    TS_ASSERT_EQUALS(outputWS->getSpectrum(wkspIndex).getEvents()[0].tof(),
+                     inputWS->getSpectrum(wkspIndex).getEvents()[0].tof());
     // It should be possible to change an event list and not affect the other
     // one
-    outputWS->getEventList(wkspIndex).convertTof(1.5, 0.2);
-    TS_ASSERT_DIFFERS(outputWS->getEventList(wkspIndex).getEvents()[0].tof(),
-                      inputWS->getEventList(wkspIndex).getEvents()[0].tof());
+    outputWS->getSpectrum(wkspIndex).convertTof(1.5, 0.2);
+    TS_ASSERT_DIFFERS(outputWS->getSpectrum(wkspIndex).getEvents()[0].tof(),
+                      inputWS->getSpectrum(wkspIndex).getEvents()[0].tof());
 
     // Setting X should still be possible
     Kernel::cow_ptr<MantidVec> x;

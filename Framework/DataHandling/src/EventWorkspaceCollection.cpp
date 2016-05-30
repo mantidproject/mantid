@@ -108,7 +108,7 @@ void EventWorkspaceCollection::setNPeriods(
 
 void EventWorkspaceCollection::reserveEventListAt(size_t wi, size_t size) {
   for (auto &ws : m_WsVec) {
-    ws->getEventList(wi).reserve(size);
+    ws->getSpectrum(wi).reserve(size);
   }
 }
 
@@ -187,28 +187,17 @@ Mantid::API::Axis *EventWorkspaceCollection::getAxis(const size_t &i) const {
 size_t EventWorkspaceCollection::getNumberHistograms() const {
   return m_WsVec[0]->getNumberHistograms();
 }
-const DataObjects::EventList &
-EventWorkspaceCollection::getEventList(const size_t workspace_index) const {
-  return m_WsVec[0]->getEventList(
-      workspace_index); // TODO need to know PERIOD number TOO
-}
 
 const DataObjects::EventList &
-EventWorkspaceCollection::getEventList(const size_t workspace_index,
-                                       const size_t periodNumber) const {
-  return m_WsVec[periodNumber]->getEventList(workspace_index);
+EventWorkspaceCollection::getSpectrum(const size_t workspace_index,
+                                      const size_t periodNumber) const {
+  return m_WsVec[periodNumber]->getSpectrum(workspace_index);
 }
 
 DataObjects::EventList &
-EventWorkspaceCollection::getEventList(const size_t workspace_index,
-                                       const size_t periodNumber) {
-  return m_WsVec[periodNumber]->getEventList(workspace_index);
-}
-
-DataObjects::EventList &
-EventWorkspaceCollection::getEventList(const std::size_t workspace_index) {
-  return m_WsVec[0]->getEventList(
-      workspace_index); // TODO need to know PERIOD number TOO
+EventWorkspaceCollection::getSpectrum(const size_t workspace_index,
+                                      const size_t periodNumber) {
+  return m_WsVec[periodNumber]->getSpectrum(workspace_index);
 }
 
 std::vector<size_t> EventWorkspaceCollection::getSpectrumToWorkspaceIndexVector(

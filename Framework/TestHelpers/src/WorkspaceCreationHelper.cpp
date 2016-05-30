@@ -412,10 +412,10 @@ createEventWorkspaceWithFullInstrument(int numBanks, int numPixels,
   // re-assign detector IDs to the rectangular detector
   int detID = numPixels * numPixels;
   for (int wi = 0; wi < static_cast<int>(ws->getNumberHistograms()); wi++) {
-    ws->getEventList(wi).clearDetectorIDs();
+    ws->getSpectrum(wi).clearDetectorIDs();
     if (clearEvents)
-      ws->getEventList(wi).clear(true);
-    ws->getEventList(wi).setDetectorID(detID);
+      ws->getSpectrum(wi).clear(true);
+    ws->getSpectrum(wi).setDetectorID(detID);
     detID++;
   }
   return ws;
@@ -441,10 +441,10 @@ createEventWorkspaceWithNonUniformInstrument(int numBanks, bool clearEvents) {
 
   // Re-assign detector IDs
   for (size_t wi = 0; wi < ws->getNumberHistograms(); wi++) {
-    ws->getEventList(wi).clearDetectorIDs();
+    ws->getSpectrum(wi).clearDetectorIDs();
     if (clearEvents)
-      ws->getEventList(wi).clear(true);
-    ws->getEventList(wi).setDetectorID(detectorIds[wi]);
+      ws->getSpectrum(wi).clear(true);
+    ws->getSpectrum(wi).setDetectorID(detectorIds[wi]);
   }
 
   return ws;
@@ -597,7 +597,7 @@ CreateEventWorkspaceWithStartTime(int numPixels, int numBins, int numEvents,
     size_t workspaceIndex = 0;
     for (int pix = start_at_pixelID + 0; pix < start_at_pixelID + numPixels;
          pix++) {
-      EventList &el = retVal->getEventList(workspaceIndex);
+      EventList &el = retVal->getSpectrum(workspaceIndex);
       el.setSpectrumNo(pix);
       el.setDetectorID(pix);
 
@@ -716,7 +716,7 @@ EventWorkspace_sptr CreateRandomEventWorkspace(size_t numbins, size_t numpixels,
   // Make up some data for each pixels
   for (size_t i = 0; i < numpixels; i++) {
     // Create one event for each bin
-    EventList &events = retVal->getEventList(static_cast<detid_t>(i));
+    EventList &events = retVal->getSpectrum(static_cast<detid_t>(i));
     for (std::size_t ie = 0; ie < numbins; ie++) {
       // Create a list of events, randomize
       events += TofEvent(static_cast<double>(randomGen.nextValue()),

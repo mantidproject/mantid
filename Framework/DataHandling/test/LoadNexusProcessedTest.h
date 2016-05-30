@@ -386,15 +386,15 @@ public:
     TS_ASSERT_EQUALS(ws->readX(0).size(), 100);
 
     for (size_t wi = 0; wi < 5; wi++) {
-      const EventList &el = ws->getEventList(wi);
+      const EventList &el = ws->getSpectrum(wi);
       TS_ASSERT_EQUALS(el.getEventType(), type);
       TS_ASSERT(el.hasDetectorID(detid_t(wi + 1) * 10));
     }
-    TS_ASSERT_EQUALS(ws->getEventList(0).getNumberEvents(), 300);
-    TS_ASSERT_EQUALS(ws->getEventList(1).getNumberEvents(), 100);
-    TS_ASSERT_EQUALS(ws->getEventList(2).getNumberEvents(), 200);
-    TS_ASSERT_EQUALS(ws->getEventList(3).getNumberEvents(), 0);
-    TS_ASSERT_EQUALS(ws->getEventList(4).getNumberEvents(), 100);
+    TS_ASSERT_EQUALS(ws->getSpectrum(0).getNumberEvents(), 300);
+    TS_ASSERT_EQUALS(ws->getSpectrum(1).getNumberEvents(), 100);
+    TS_ASSERT_EQUALS(ws->getSpectrum(2).getNumberEvents(), 200);
+    TS_ASSERT_EQUALS(ws->getSpectrum(3).getNumberEvents(), 0);
+    TS_ASSERT_EQUALS(ws->getSpectrum(4).getNumberEvents(), 100);
 
     // Do the comparison algo to check that they really are the same
     origWS->sortAll(TOF_SORT, NULL);
@@ -1166,7 +1166,7 @@ private:
 
     EventWorkspace_sptr ws =
         WorkspaceCreationHelper::CreateGroupedEventWorkspace(groups, 30, 1.0);
-    ws->getEventList(4).clear();
+    ws->getSpectrum(4).clear();
 
     TS_ASSERT_EQUALS(ws->getNumberHistograms(), groups.size());
 

@@ -139,7 +139,7 @@ typedef DataObjects::MDLeanEvent<3> MDE;
 void ConvertToDiffractionMDWorkspace::convertSpectrum(int workspaceIndex) {
   if (m_inEventWS && !OneEventPerBin) {
     // ---------- Convert events directly -------------------------
-    EventList &el = m_inEventWS->getEventList(workspaceIndex);
+    EventList &el = m_inEventWS->getSpectrum(workspaceIndex);
 
     // Call the right templated function
     switch (el.getEventType()) {
@@ -535,7 +535,7 @@ void ConvertToDiffractionMDWorkspace::exec() {
     // Get an idea of how many events we'll be adding
     size_t eventsAdding = m_inWS->blocksize();
     if (m_inEventWS && !OneEventPerBin)
-      eventsAdding = m_inEventWS->getEventList(wi).getNumberEvents();
+      eventsAdding = m_inEventWS->getSpectrum(wi).getNumberEvents();
 
     if (MultiThreadedAdding) {
       // Equivalent to calling "this->convertSpectrum(wi)"

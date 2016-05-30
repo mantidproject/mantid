@@ -953,7 +953,7 @@ void FilterEventsByLogValuePreNexus::procEvents(
       for (detid_t j = 0; j < m_detid_max + 1; j++) {
         size_t wi = m_pixelToWkspindex[j];
         // Save a POINTER to the vector<tofEvent>
-        theseEventVectors[j] = &partWS->getEventList(wi).getEvents();
+        theseEventVectors[j] = &partWS->getSpectrum(wi).getEvents();
       }
     } // END FOR [Threads]
 
@@ -1028,19 +1028,19 @@ void FilterEventsByLogValuePreNexus::procEvents(
         size_t wi = size_t(iwi);
 
         // The output event list.
-        EventList &el = workspace->getEventList(wi);
+        EventList &el = workspace->getSpectrum(wi);
         el.clear(false);
 
         // How many events will it have?
         size_t numEvents = 0;
         for (size_t i = 0; i < numThreads; i++)
-          numEvents += partWorkspaces[i]->getEventList(wi).getNumberEvents();
+          numEvents += partWorkspaces[i]->getSpectrum(wi).getNumberEvents();
         // This will avoid too much copying.
         el.reserve(numEvents);
 
         // Now merge the event lists
         for (size_t i = 0; i < numThreads; i++) {
-          EventList &partEl = partWorkspaces[i]->getEventList(wi);
+          EventList &partEl = partWorkspaces[i]->getSpectrum(wi);
           el += partEl.getEvents();
           // Free up memory as you go along.
           partEl.clear(false);
@@ -1287,11 +1287,11 @@ void FilterEventsByLogValuePreNexus::procEventsLinear(
 
 // The addEventQuickly method does not clear the cache, making things slightly
 // faster.
-// workspace->getEventList(this->m_pixelToWkspindex[pid]).addEventQuickly(event);
+// workspace->getSpectrum(this->m_pixelToWkspindex[pid]).addEventQuickly(event);
 
 // - Add event to data structure
 // (This is equivalent to
-// workspace->getEventList(this->m_pixelToWkspindex[pid]).addEventQuickly(event))
+// workspace->getSpectrum(this->m_pixelToWkspindex[pid]).addEventQuickly(event))
 // (But should be faster as a bunch of these calls were cached.)
 #if defined(__GNUC__) && !(defined(__INTEL_COMPILER)) && !(defined(__clang__))
         // This avoids a copy constructor call but is only available with GCC
@@ -1599,7 +1599,7 @@ void FilterEventsByLogValuePreNexus::filterEvents() {
       for (detid_t j = 0; j < m_detid_max + 1; j++) {
         size_t wi = m_pixelToWkspindex[j];
         // Save a POINTER to the vector<tofEvent>
-        theseEventVectors[j] = &partWS->getEventList(wi).getEvents();
+        theseEventVectors[j] = &partWS->getSpectrum(wi).getEvents();
       }
     } // END FOR [Threads]
 
@@ -1675,19 +1675,19 @@ void FilterEventsByLogValuePreNexus::filterEvents() {
         size_t wi = size_t(iwi);
 
         // The output event list.
-        EventList &el = m_localWorkspace->getEventList(wi);
+        EventList &el = m_localWorkspace->getSpectrum(wi);
         el.clear(false);
 
         // How many events will it have?
         size_t numEvents = 0;
         for (size_t i = 0; i < numThreads; i++)
-          numEvents += partWorkspaces[i]->getEventList(wi).getNumberEvents();
+          numEvents += partWorkspaces[i]->getSpectrum(wi).getNumberEvents();
         // This will avoid too much copying.
         el.reserve(numEvents);
 
         // Now merge the event lists
         for (size_t i = 0; i < numThreads; i++) {
-          EventList &partEl = partWorkspaces[i]->getEventList(wi);
+          EventList &partEl = partWorkspaces[i]->getSpectrum(wi);
           el += partEl.getEvents();
           // Free up memory as you go along.
           partEl.clear(false);
@@ -2073,7 +2073,7 @@ void FilterEventsByLogValuePreNexus::filterEventsLinear(
 
 // Add event to vector of events
 // (This is equivalent to
-// workspace->getEventList(this->m_pixelToWkspindex[pid]).addEventQuickly(event))
+// workspace->getSpectrum(this->m_pixelToWkspindex[pid]).addEventQuickly(event))
 // (But should be faster as a bunch of these calls were cached.)
 #if defined(__GNUC__) && !(defined(__INTEL_COMPILER)) && !(defined(__clang__))
         // This avoids a copy constructor call but is only available with GCC

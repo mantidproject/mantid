@@ -81,7 +81,7 @@ void ConvertToEventWorkspace::exec() {
     const auto &inSpec = inWS->getSpectrum(wi);
 
     // The output event list
-    EventList &el = outWS->getEventList(wi);
+    EventList &el = outWS->getSpectrum(wi);
 
     // This method fills in the events
     el.createFromHistogram(&inSpec, GenerateZeros, GenerateMultipleEvents,

@@ -773,7 +773,7 @@ int NexusFileIO::writeNexusProcessedDataEvent(
   for (size_t wi = 0; wi < ws->getNumberHistograms(); wi++) {
     std::ostringstream group_name;
     group_name << "event_list_" << wi;
-    this->writeEventList(ws->getEventList(wi), group_name.str());
+    this->writeEventList(ws->getSpectrum(wi), group_name.str());
   }
 
   // Close up the overall group

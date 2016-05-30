@@ -107,7 +107,7 @@ public:
       in_ws *= 2.0;
     if (type == WEIGHTED_NOTIME) {
       for (size_t i = 0; i < in_ws->getNumberHistograms(); i++) {
-        EventList &el = in_ws->getEventList(i);
+        EventList &el = in_ws->getSpectrum(i);
         el.compressEvents(0.0, &el);
       }
     }

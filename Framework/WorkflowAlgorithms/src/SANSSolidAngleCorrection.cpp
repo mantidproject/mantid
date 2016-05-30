@@ -214,7 +214,7 @@ void SANSSolidAngleCorrection::execEvent() {
     } else {
       corr = theta_term * theta_term * theta_term;
     }
-    EventList &el = outputEventWS->getEventList(i);
+    EventList &el = outputEventWS->getSpectrum(i);
     el *= corr;
     progress.report("Solid Angle Correction");
     PARALLEL_END_INTERUPT_REGION

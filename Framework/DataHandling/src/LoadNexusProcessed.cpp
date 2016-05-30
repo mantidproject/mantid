@@ -742,7 +742,7 @@ LoadNexusProcessed::loadEventEntry(NXData &wksp_cls, NXDouble &xbins,
     int64_t index_start = indices[wi];
     int64_t index_end = indices[wi + 1];
     if (index_end >= index_start) {
-      EventList &el = ws->getEventList(j);
+      EventList &el = ws->getSpectrum(j);
       el.switchTo(type);
 
       // Allocate all the required memory

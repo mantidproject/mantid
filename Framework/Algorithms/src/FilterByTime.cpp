@@ -142,9 +142,9 @@ void FilterByTime::exec() {
     PARALLEL_START_INTERUPT_REGION
 
     // Get the output event list (should be empty)
-    EventList &output_el = outputWS->getEventList(i);
+    EventList &output_el = outputWS->getSpectrum(i);
     // and this is the input event list
-    const EventList &input_el = inputWS->getEventList(i);
+    const EventList &input_el = inputWS->getSpectrum(i);
 
     // Perform the filtering
     input_el.filterByPulseTime(start, stop, output_el);

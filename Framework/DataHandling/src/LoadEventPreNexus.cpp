@@ -533,7 +533,7 @@ void LoadEventPreNexus::procEvents(
     for (detid_t j = 0; j < detid_max + 1; j++) {
       size_t wi = pixel_to_wkspindex[j];
       // Save a POINTER to the vector<tofEvent>
-      theseEventVectors[j] = &partWS->getEventList(wi).getEvents();
+      theseEventVectors[j] = &partWS->getSpectrum(wi).getEvents();
     }
   }
 
@@ -603,19 +603,19 @@ void LoadEventPreNexus::procEvents(
       size_t wi = size_t(iwi);
 
       // The output event list.
-      EventList &el = workspace->getEventList(wi);
+      EventList &el = workspace->getSpectrum(wi);
       el.clear(false);
 
       // How many events will it have?
       size_t numEvents = 0;
       for (size_t i = 0; i < numThreads; i++)
-        numEvents += partWorkspaces[i]->getEventList(wi).getNumberEvents();
+        numEvents += partWorkspaces[i]->getSpectrum(wi).getNumberEvents();
       // This will avoid too much copying.
       el.reserve(numEvents);
 
       // Now merge the event lists
       for (size_t i = 0; i < numThreads; i++) {
-        EventList &partEl = partWorkspaces[i]->getEventList(wi);
+        EventList &partEl = partWorkspaces[i]->getSpectrum(wi);
         el += partEl.getEvents();
         // Free up memory as you go along.
         partEl.clear(false);
@@ -776,10 +776,10 @@ void LoadEventPreNexus::procEventsLinear(
 
     // The addEventQuickly method does not clear the cache, making things
     // slightly faster.
-    // workspace->getEventList(this->pixel_to_wkspindex[pid]).addEventQuickly(event);
+    // workspace->getSpectrum(this->pixel_to_wkspindex[pid]).addEventQuickly(event);
 
     // This is equivalent to
-    // workspace->getEventList(this->pixel_to_wkspindex[pid]).addEventQuickly(event);
+    // workspace->getSpectrum(this->pixel_to_wkspindex[pid]).addEventQuickly(event);
     // But should be faster as a bunch of these calls were cached.
     arrayOfVectors[pid]->push_back(event);
 

@@ -513,7 +513,7 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::BeamMonitorPkt &pkt) {
         while (pkt.nextEvent(risingEdge, cycle, tof)) {
           // Add the event. Note that they're in units of 100 ns in the packet,
           // need to change to microseconds.
-          monitorBuffer->getEventList(it->second)
+          monitorBuffer->getSpectrum(it->second)
               .addEventQuickly(DataObjects::TofEvent(tof / 10.0, pktTime));
         }
       } else {
@@ -1342,7 +1342,7 @@ void SNSLiveEventDataListener::appendEvent(
   if (it != m_indexMap.end()) {
     std::size_t workspaceIndex = it->second;
     Mantid::DataObjects::TofEvent event(tof, pulseTime);
-    m_eventBuffer->getEventList(workspaceIndex).addEventQuickly(event);
+    m_eventBuffer->getSpectrum(workspaceIndex).addEventQuickly(event);
   } else {
     g_log.warning() << "Invalid pixel ID: " << pixelId << " (TofF: " << tof
                     << " microseconds)" << std::endl;

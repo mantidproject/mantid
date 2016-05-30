@@ -129,7 +129,7 @@ public:
       xRef[4] = 1e6;
       // Set an X-axis
       inputW->setX(pix, axis);
-      inputW->getEventList(pix).addEventQuickly(TofEvent(1000.0));
+      inputW->getSpectrum(pix).addEventQuickly(TofEvent(1000.0));
     }
 
     // ------------ Create a grouping workspace by name -------------
@@ -277,7 +277,7 @@ public:
     // Fill a whole bunch of events
     PARALLEL_FOR_NO_WSP_CHECK()
     for (int i = 0; i < static_cast<int>(ws->getNumberHistograms()); i++) {
-      EventList &el = ws->getEventList(i);
+      EventList &el = ws->getSpectrum(i);
       for (int j = 0; j < 20; j++) {
         el.addEventQuickly(TofEvent(double(j) * 1e-3));
       }

@@ -87,7 +87,7 @@ void ConvertToDetectorFaceMD::convertEventList(
     boost::shared_ptr<Mantid::DataObjects::MDEventWorkspace<MDE, nd>> outWS,
     size_t workspaceIndex, coord_t x, coord_t y, coord_t bankNum,
     uint16_t runIndex, int32_t detectorID) {
-  EventList &el = in_ws->getEventList(workspaceIndex);
+  EventList &el = in_ws->getSpectrum(workspaceIndex);
 
   // The 3/4D DataObjects that will be added into the MDEventWorkspce
   std::vector<MDE> out_events;
@@ -282,7 +282,7 @@ void ConvertToDetectorFaceMD::exec() {
         coord_t yPos = static_cast<coord_t>(y);
         coord_t bankPos = static_cast<coord_t>(bankNum);
 
-        EventList &el = in_ws->getEventList(wi);
+        EventList &el = in_ws->getSpectrum(wi);
 
         // We want to bind to the right templated function, so we have to know
         // the type of TofEvent contained in the EventList.

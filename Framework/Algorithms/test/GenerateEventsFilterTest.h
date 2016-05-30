@@ -113,8 +113,8 @@ public:
     DataObjects::EventWorkspace_sptr eventWS = createEventWorkspace();
     for (size_t i = 0; i < eventWS->getNumberHistograms(); ++i)
       std::cout << "Spectrum " << i << ": max pulse time = "
-                << eventWS->getEventList(i).getPulseTimeMax() << " = "
-                << eventWS->getEventList(i).getPulseTimeMin().totalNanoseconds()
+                << eventWS->getSpectrum(i).getPulseTimeMax() << " = "
+                << eventWS->getSpectrum(i).getPulseTimeMin().totalNanoseconds()
                 << "\n";
 
     int64_t timeinterval_ns = 15000;

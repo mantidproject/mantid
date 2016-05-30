@@ -203,7 +203,7 @@ public:
     auto outWs =
         AnalysisDataService::Instance().retrieveWS<EventWorkspace>(wsName);
 
-    auto eventList = outWs->getEventList(4348);
+    auto eventList = outWs->getSpectrum(4348);
     auto events = eventList.getEvents();
 
     double max = events.begin()->tof();
@@ -438,8 +438,8 @@ public:
                      111274); // There are (slightly) fewer events
     for (size_t wi = 0; wi < WS->getNumberHistograms(); wi++) {
       // Pixels with at least one event will have switched
-      if (WS->getEventList(wi).getNumberEvents() > 0)
-        TS_ASSERT_EQUALS(WS->getEventList(wi).getEventType(), WEIGHTED_NOTIME)
+      if (WS->getSpectrum(wi).getNumberEvents() > 0)
+        TS_ASSERT_EQUALS(WS->getSpectrum(wi).getEventType(), WEIGHTED_NOTIME)
     }
   }
 
@@ -618,9 +618,9 @@ public:
     TS_ASSERT_EQUALS(WS->getNumberEvents(), 10730347);
     for (size_t wi = 0; wi < WS->getNumberHistograms(); wi++) {
       // Times are NON-zero for ALL pixels.
-      if (WS->getEventList(wi).getNumberEvents() > 0) {
+      if (WS->getSpectrum(wi).getNumberEvents() > 0) {
         int64_t nanosec =
-            WS->getEventList(wi).getEvents()[0].pulseTime().totalNanoseconds();
+            WS->getSpectrum(wi).getEvents()[0].pulseTime().totalNanoseconds();
         TS_ASSERT_DIFFERS(nanosec, 0)
         if (nanosec == 0) {
           std::cout << "Failure at WI " << wi << std::endl;
@@ -665,12 +665,12 @@ public:
     TS_ASSERT_EQUALS(WS->getNumberEvents(), 2);
     for (size_t wi = 0; wi < numHist; wi += 5000) {
       // All events should be weighted events for simulated data
-      TS_ASSERT_EQUALS(WS->getEventList(wi).getEventType(), WEIGHTED);
+      TS_ASSERT_EQUALS(WS->getSpectrum(wi).getEventType(), WEIGHTED);
     }
     // Check one event
-    TS_ASSERT_DELTA(WS->getEventList(26798).getWeightedEvents()[0].weight(),
+    TS_ASSERT_DELTA(WS->getSpectrum(26798).getWeightedEvents()[0].weight(),
                     1.8124e-11, 1.0e-4);
-    TS_ASSERT_EQUALS(WS->getEventList(26798).getWeightedEvents()[0].tof(),
+    TS_ASSERT_EQUALS(WS->getSpectrum(26798).getWeightedEvents()[0].tof(),
                      1476.0);
   }
 

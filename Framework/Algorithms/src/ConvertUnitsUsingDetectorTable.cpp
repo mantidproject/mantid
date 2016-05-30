@@ -375,7 +375,7 @@ void ConvertUnitsUsingDetectorTable::convertViaTOF(
                                  twoTheta, emode, efixed, delta);
         // EventWorkspace part, modifying the EventLists.
         if (m_inputEvents) {
-          eventWS->getEventList(wsid)
+          eventWS->getSpectrum(wsid)
               .convertUnitsViaTof(localFromUnit, localOutputUnit);
         }
         // Clear unit memory
@@ -474,7 +474,7 @@ void ConvertUnitsUsingDetectorTable::convertQuickly(
     }
     // Convert the events themselves if necessary. Inefficiently.
     if (m_inputEvents) {
-      eventWS->getEventList(k).convertUnitsQuickly(factor, power);
+      eventWS->getSpectrum(k).convertUnitsQuickly(factor, power);
     }
     prog.report("Convert to " + m_outputUnit->unitID());
     PARALLEL_END_INTERUPT_REGION
@@ -559,7 +559,7 @@ void ConvertUnitsUsingDetectorTable::reverse(API::MatrixWorkspace_sptr WS) {
     for (int j = 0; j < m_numberOfSpectra_i; ++j) {
       PARALLEL_START_INTERUPT_REGION
       if (m_inputEvents) {
-        eventWS->getEventList(j).reverse();
+        eventWS->getSpectrum(j).reverse();
       } else {
         std::reverse(WS->dataX(j).begin(), WS->dataX(j).end());
         std::reverse(WS->dataY(j).begin(), WS->dataY(j).end());

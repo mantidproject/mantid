@@ -93,8 +93,8 @@ public:
     // Meet the number in details
     for (size_t iw = 3; iw < 5; iw++) {
       /* Special Check
-      DataObjects::EventList events = outWS->getEventList(iw);
-      for (size_t ie = 0; ie < outWS->getEventList(iw).getNumberEvents(); ++ie)
+      DataObjects::EventList events = outWS->getSpectrum(iw);
+      for (size_t ie = 0; ie < outWS->getSpectrum(iw).getNumberEvents(); ++ie)
       {
           DataObjects::TofEvent event = events.getEvent(ie);
           std::cout << "Event " << ie << " : TOF = " << event.tof() << "   Pulse
@@ -169,7 +169,7 @@ public:
     TS_ASSERT_EQUALS(outWS->readX(0).size(), numpulses);
 
     for (size_t i = 0; i < 5; ++i) {
-      DataObjects::EventList events = eventWS->getEventList(i);
+      DataObjects::EventList events = eventWS->getSpectrum(i);
       std::cout << "WorkspaceIndex " << i
                 << " Events Size = " << events.getNumberEvents() << std::endl;
     }
@@ -227,7 +227,7 @@ public:
     TS_ASSERT_EQUALS(outWS->readX(0).size(), numpulses);
 
     for (size_t i = 0; i < 5; ++i) {
-      DataObjects::EventList events = eventWS->getEventList(i);
+      DataObjects::EventList events = eventWS->getSpectrum(i);
       std::cout << "WorkspaceIndex " << i
                 << " Events Size = " << events.getNumberEvents() << std::endl;
     }
@@ -286,7 +286,7 @@ public:
 
         detid_t detectorid = -99;
         std::set<detid_t> detectorids =
-            eventWS->getEventList(wsindex).getDetectorIDs();
+            eventWS->getSpectrum(wsindex).getDetectorIDs();
         std::set<detid_t>::iterator detiter;
         for (detiter = detectorids.begin(); detiter != detectorids.end();
              ++detiter) {

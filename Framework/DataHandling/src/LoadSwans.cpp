@@ -239,7 +239,7 @@ void LoadSwans::setMetaDataAsWorkspaceProperties(
 void LoadSwans::loadDataIntoTheWorkspace(
     const std::map<uint32_t, std::vector<uint32_t>> &eventMap) {
   for (const auto &position : eventMap) {
-    EventList &el = m_ws->getEventList(position.first);
+    EventList &el = m_ws->getSpectrum(position.first);
     el.setSpectrumNo(position.first);
     el.setDetectorID(position.first);
     for (const auto &event : position.second) {

@@ -107,7 +107,7 @@ public:
 
     // Check a few values
     for (size_t ihist = 0; ihist < testWS->getNumberHistograms(); ++ihist) {
-      const EventList &evlist = testWS->getEventList(ihist);
+      const EventList &evlist = testWS->getSpectrum(ihist);
       const MantidVec &tofs_b = evlist.getTofs();
       const MantidVec &xarray = evlist.readX();
       for (size_t ibin = 0; ibin < xarray.size(); ibin += 400) {
@@ -152,7 +152,7 @@ private:
         Mantid::Kernel::UnitFactory::Instance().create("TOF");
     const size_t numHists = testWS->getNumberHistograms();
     for (size_t ihist = 0; ihist < numHists; ++ihist) {
-      EventList &evlist = testWS->getEventList(ihist);
+      EventList &evlist = testWS->getSpectrum(ihist);
       MantidVecPtr xdata;
       xdata.access().resize(numBins + 1);
       for (int ibin = 0; ibin <= numBins; ++ibin) {

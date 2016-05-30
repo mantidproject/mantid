@@ -87,7 +87,7 @@ void CompressEvents::exec() {
       // Linux. Using this signed type suppresses warnings below
       const size_t index = static_cast<size_t>(i);
       // The input event list
-      EventList &input_el = inputWS->getEventList(index);
+      EventList &input_el = inputWS->getSpectrum(index);
       // And on the output side
       EventList &output_el = outputWS->getOrAddEventList(index);
       // Copy other settings into output

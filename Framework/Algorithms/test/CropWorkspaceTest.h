@@ -135,11 +135,11 @@ public:
     TS_ASSERT_EQUALS(3, ws->getNumberHistograms()); // reduced histograms
     TS_ASSERT_EQUALS(30, ws->getNumberEvents());
 
-    TS_ASSERT(40. <= ws->getEventList(0).getTofMin());
-    TS_ASSERT(50. >= ws->getEventList(0).getTofMax());
+    TS_ASSERT(40. <= ws->getSpectrum(0).getTofMin());
+    TS_ASSERT(50. >= ws->getSpectrum(0).getTofMax());
 
-    TS_ASSERT(40. <= ws->getEventList(2).getTofMin());
-    TS_ASSERT(50. >= ws->getEventList(2).getTofMax());
+    TS_ASSERT(40. <= ws->getSpectrum(2).getTofMin());
+    TS_ASSERT(50. >= ws->getSpectrum(2).getTofMax());
   }
 
   void testExec() {

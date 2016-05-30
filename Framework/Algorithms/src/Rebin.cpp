@@ -181,7 +181,7 @@ void Rebin::exec() {
         outputWS->setX(i, XValues_new);
 
         // Get a const event list reference. eventInputWS->dataY() doesn't work.
-        const EventList &el = eventInputWS->getEventList(i);
+        const EventList &el = eventInputWS->getSpectrum(i);
         MantidVec y_data, e_data;
         // The EventList takes care of histogramming.
         el.generateHistogram(*XValues_new, y_data, e_data);

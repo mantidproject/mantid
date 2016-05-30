@@ -329,7 +329,7 @@ void AnvredCorrection::execEvent() {
     // scattered beam
     double scattering = dir.angle(V3D(0.0, 0.0, 1.0));
 
-    EventList el = eventW->getEventList(i);
+    EventList el = eventW->getSpectrum(i);
     el.switchTo(WEIGHTED_NOTIME);
     std::vector<WeightedEventNoTime> events = el.getWeightedEventsNoTime();
 
@@ -360,12 +360,12 @@ void AnvredCorrection::execEvent() {
     }
     correctionFactors->getOrAddEventList(i) += events;
 
-    auto &dets = eventW->getEventList(i).getDetectorIDs();
+    auto &dets = eventW->getSpectrum(i).getDetectorIDs();
     for (auto const &det : dets)
       correctionFactors->getOrAddEventList(i).addDetectorID(det);
     // When focussing in place, you can clear out old memory from the input one!
     if (inPlace) {
-      eventW->getEventList(i).clear();
+      eventW->getSpectrum(i).clear();
       Mantid::API::MemoryManager::Instance().releaseFreeMemory();
     }
 

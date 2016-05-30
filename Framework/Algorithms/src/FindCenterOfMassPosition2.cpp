@@ -93,7 +93,7 @@ void FindCenterOfMassPosition2::exec() {
     for (int i = 0; i < numSpec; i++) {
       double sum_i(0), err_i(0);
       progress.report("Integrating events");
-      const EventList &el = inputEventWS->getEventList(i);
+      const EventList &el = inputEventWS->getSpectrum(i);
       el.integrate(0, 0, true, sum_i, err_i);
       y_values[i] = sum_i;
       e_values[i] = err_i;

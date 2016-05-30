@@ -622,7 +622,7 @@ public:
       xRef[4] = 1e6;
       // Set an X-axis
       inputW->setX(pix, axis);
-      inputW->getEventList(pix).addEventQuickly(TofEvent(1000.0));
+      inputW->getSpectrum(pix).addEventQuickly(TofEvent(1000.0));
     }
 
     // ------------ Create a grouping workspace to match -------------
@@ -734,7 +734,7 @@ public:
       xRef[4] = 1e6;
       // Set an X-axis
       inputW->setX(pix, axis);
-      inputW->getEventList(pix).addEventQuickly(TofEvent(1000.0));
+      inputW->getSpectrum(pix).addEventQuickly(TofEvent(1000.0));
     }
 
     // ------------ Create a grouped workspace using GroupDetectors

@@ -502,7 +502,7 @@ void BinaryOperation::doSingleValue() {
     for (int64_t i = 0; i < numHists; ++i) {
       PARALLEL_START_INTERUPT_REGION
       m_out->setX(i, m_lhs->refX(i));
-      performEventBinaryOperation(m_eout->getEventList(i), rhsY, rhsE);
+      performEventBinaryOperation(m_eout->getSpectrum(i), rhsY, rhsE);
       m_progress->report(this->name());
       PARALLEL_END_INTERUPT_REGION
     }
@@ -551,7 +551,7 @@ void BinaryOperation::doSingleColumn() {
 
       // m_out->setX(i, m_lhs->refX(i)); //unnecessary - that was copied before.
       if (propagateSpectraMask(m_lhs, m_rhs, i, m_out)) {
-        performEventBinaryOperation(m_eout->getEventList(i), rhsY, rhsE);
+        performEventBinaryOperation(m_eout->getSpectrum(i), rhsY, rhsE);
       }
       m_progress->report(this->name());
       PARALLEL_END_INTERUPT_REGION
@@ -600,7 +600,7 @@ void BinaryOperation::doSingleSpectrum() {
       // -------- The rhs is ALSO an EventWorkspace --------
 
       // Pull out the single eventList on the right
-      const EventList &rhs_spectrum = m_erhs->getEventList(0);
+      const EventList &rhs_spectrum = m_erhs->getSpectrum(0);
 
       // Now loop over the spectra of the left hand side calling the virtual
       // function
@@ -612,7 +612,7 @@ void BinaryOperation::doSingleSpectrum() {
         // before.
 
         // Perform the operation on the event list on the output (== lhs)
-        performEventBinaryOperation(m_eout->getEventList(i), rhs_spectrum);
+        performEventBinaryOperation(m_eout->getSpectrum(i), rhs_spectrum);
         m_progress->report(this->name());
         PARALLEL_END_INTERUPT_REGION
       }
@@ -634,7 +634,7 @@ void BinaryOperation::doSingleSpectrum() {
         // m_out->setX(i,m_lhs->refX(i)); //unnecessary - that was copied
         // before.
         // Perform the operation on the event list on the output (== lhs)
-        performEventBinaryOperation(m_eout->getEventList(i), rhsX, rhsY, rhsE);
+        performEventBinaryOperation(m_eout->getSpectrum(i), rhsX, rhsY, rhsE);
         m_progress->report(this->name());
         PARALLEL_END_INTERUPT_REGION
       }
@@ -716,12 +716,12 @@ void BinaryOperation::do2D(bool mismatchedSpectra) {
         }
         // Reach here? Do the division
         // Perform the operation on the event list on the output (== lhs)
-        performEventBinaryOperation(m_eout->getEventList(i),
-                                    m_erhs->getEventList(rhs_wi));
+        performEventBinaryOperation(m_eout->getSpectrum(i),
+                                    m_erhs->getSpectrum(rhs_wi));
 
         // Free up memory on the RHS if that is possible
         if (m_ClearRHSWorkspace)
-          const_cast<EventList &>(m_erhs->getEventList(rhs_wi)).clear();
+          const_cast<EventList &>(m_erhs->getSpectrum(rhs_wi)).clear();
         PARALLEL_END_INTERUPT_REGION
       }
       PARALLEL_CHECK_INTERUPT_REGION
@@ -748,13 +748,13 @@ void BinaryOperation::do2D(bool mismatchedSpectra) {
         }
 
         // Reach here? Do the division
-        performEventBinaryOperation(m_eout->getEventList(i),
+        performEventBinaryOperation(m_eout->getSpectrum(i),
                                     m_rhs->readX(rhs_wi), m_rhs->readY(rhs_wi),
                                     m_rhs->readE(rhs_wi));
 
         // Free up memory on the RHS if that is possible
         if (m_ClearRHSWorkspace)
-          const_cast<EventList &>(m_erhs->getEventList(rhs_wi)).clear();
+          const_cast<EventList &>(m_erhs->getSpectrum(rhs_wi)).clear();
 
         PARALLEL_END_INTERUPT_REGION
       }
@@ -797,7 +797,7 @@ void BinaryOperation::do2D(bool mismatchedSpectra) {
 
       // Free up memory on the RHS if that is possible
       if (m_ClearRHSWorkspace)
-        const_cast<EventList &>(m_erhs->getEventList(rhs_wi)).clear();
+        const_cast<EventList &>(m_erhs->getSpectrum(rhs_wi)).clear();
 
       PARALLEL_END_INTERUPT_REGION
     }

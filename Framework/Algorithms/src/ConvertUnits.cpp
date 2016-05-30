@@ -309,16 +309,16 @@ void ConvertUnits::convertQuickly(API::MatrixWorkspace_sptr outputWS,
     }
     // Convert the events themselves if necessary. Inefficiently.
     if (m_inputEvents) {
-      eventWS->getEventList(k).convertUnitsQuickly(factor, power);
+      eventWS->getSpectrum(k).convertUnitsQuickly(factor, power);
 
       //      std::vector<double> tofs;
-      //      eventWS->getEventList(k).getTofs(tofs);
+      //      eventWS->getSpectrum(k).getTofs(tofs);
       //      std::vector<double>::iterator tofIt;
       //      for (tofIt = tofs.begin(); tofIt != tofs.end(); ++tofIt)
       //      {
       //        *tofIt = factor * std::pow(*tofIt,power);
       //      }
-      //      eventWS->getEventList(k).setTofs(tofs);
+      //      eventWS->getSpectrum(k).setTofs(tofs);
     }
     prog.report("Convert to " + m_outputUnit->unitID());
     PARALLEL_END_INTERUPT_REGION
@@ -488,14 +488,14 @@ void ConvertUnits::convertViaTOF(Kernel::Unit_const_sptr fromUnit,
 
       // EventWorkspace part, modifying the EventLists.
       if (m_inputEvents) {
-        eventWS->getEventList(i)
+        eventWS->getSpectrum(i)
             .convertUnitsViaTof(localFromUnit, localOutputUnit);
 
         //        std::vector<double> tofs;
-        //        eventWS->getEventList(i).getTofs(tofs);
+        //        eventWS->getSpectrum(i).getTofs(tofs);
         //        localFromUnit->toTOF(tofs,emptyVec,l1,l2,twoTheta,emode,efixed,delta);
         //        localOutputUnit->fromTOF(tofs,emptyVec,l1,l2,twoTheta,emode,efixed,delta);
-        //        eventWS->getEventList(i).setTofs(tofs);
+        //        eventWS->getSpectrum(i).setTofs(tofs);
       }
       // Clear unit memory
       delete localFromUnit;
@@ -598,7 +598,7 @@ void ConvertUnits::reverse(API::MatrixWorkspace_sptr WS) {
     for (int j = 0; j < m_numberOfSpectra_i; ++j) {
       PARALLEL_START_INTERUPT_REGION
       if (m_inputEvents) {
-        eventWS->getEventList(j).reverse();
+        eventWS->getSpectrum(j).reverse();
       } else {
         std::reverse(WS->dataX(j).begin(), WS->dataX(j).end());
         std::reverse(WS->dataY(j).begin(), WS->dataY(j).end());

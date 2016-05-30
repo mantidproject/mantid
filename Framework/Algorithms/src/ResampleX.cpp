@@ -392,7 +392,7 @@ void ResampleX::exec() {
         outputWS->setX(wkspIndex, xValues);
 
         // Get a const event list reference. inputEventWS->dataY() doesn't work.
-        const EventList &el = inputEventWS->getEventList(wkspIndex);
+        const EventList &el = inputEventWS->getSpectrum(wkspIndex);
         MantidVec y_data, e_data;
         // The EventList takes care of histogramming.
         el.generateHistogram(xValues, y_data, e_data);

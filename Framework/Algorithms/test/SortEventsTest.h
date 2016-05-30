@@ -58,7 +58,7 @@ public:
         AnalysisDataService::Instance().retrieveWS<const EventWorkspace>(
             wsName);
 
-    std::vector<TofEvent> ve = outWS->getEventList(0).getEvents();
+    std::vector<TofEvent> ve = outWS->getSpectrum(0).getEvents();
     TS_ASSERT_EQUALS(ve.size(), NUMBINS);
     for (size_t i = 0; i < ve.size() - 1; i++)
       TS_ASSERT_LESS_THAN_EQUALS(ve[i].tof(), ve[i + 1].tof());
@@ -83,7 +83,7 @@ public:
     EventWorkspace_const_sptr outWS =
         AnalysisDataService::Instance().retrieveWS<const EventWorkspace>(
             wsName);
-    std::vector<TofEvent> ve = outWS->getEventList(0).getEvents();
+    std::vector<TofEvent> ve = outWS->getSpectrum(0).getEvents();
     TS_ASSERT_EQUALS(ve.size(), NUMBINS);
     for (size_t i = 0; i < ve.size() - 1; i++)
       TS_ASSERT_LESS_THAN_EQUALS(ve[i].pulseTime(), ve[i + 1].pulseTime());
@@ -107,7 +107,7 @@ public:
     EventWorkspace_const_sptr outWS =
         AnalysisDataService::Instance().retrieveWS<const EventWorkspace>(
             wsName);
-    std::vector<TofEvent> ve = outWS->getEventList(0).getEvents();
+    std::vector<TofEvent> ve = outWS->getSpectrum(0).getEvents();
     TS_ASSERT_EQUALS(ve.size(), NUMBINS);
     for (size_t i = 0; i < ve.size() - 1; i++) {
       bool less = true;
