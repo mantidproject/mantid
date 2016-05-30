@@ -31,7 +31,7 @@ namespace DataObjects {
   File change history is stored at: <https://github.com/mantidproject/mantid>.
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport Histogram1D : public Mantid::API::ISpectrum {
+class DLLExport Histogram1D final : public Mantid::API::ISpectrum {
 protected:
   MantidVecPtr refY; ///< RefCounted Y
   MantidVecPtr refE; ///< RefCounted Error

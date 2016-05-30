@@ -102,5 +102,47 @@ public:
     h.setData(y1, e1);
     TS_ASSERT_THROWS(h.dataE().at(nel), std::out_of_range);
   }
+
+  void test_copy_constructor() {
+    const Histogram1D source;
+    Histogram1D clone(source);
+    TS_ASSERT_EQUALS(&clone.readX(), &source.readX());
+    TS_ASSERT_EQUALS(&clone.readY(), &source.readY());
+    TS_ASSERT_EQUALS(&clone.readE(), &source.readE());
+  }
+
+  void test_move_constructor() {
+    Histogram1D source;
+    auto oldX = &source.readX();
+    auto oldY = &source.readY();
+    auto oldE = &source.readE();
+    Histogram1D clone(std::move(source));
+    TS_ASSERT(!source.ptrX());
+    TS_ASSERT_EQUALS(&clone.readX(), oldX);
+    TS_ASSERT_EQUALS(&clone.readY(), oldY);
+    TS_ASSERT_EQUALS(&clone.readE(), oldE);
+  }
+
+  void test_copy_assignment() {
+    const Histogram1D source;
+    Histogram1D clone;
+    clone = source;
+    TS_ASSERT_EQUALS(&clone.readX(), &source.readX());
+    TS_ASSERT_EQUALS(&clone.readY(), &source.readY());
+    TS_ASSERT_EQUALS(&clone.readE(), &source.readE());
+  }
+
+  void test_move_assignment() {
+    Histogram1D source;
+    auto oldX = &source.readX();
+    auto oldY = &source.readY();
+    auto oldE = &source.readE();
+    Histogram1D clone;
+    clone = std::move(source);
+    TS_ASSERT(!source.ptrX());
+    TS_ASSERT_EQUALS(&clone.readX(), oldX);
+    TS_ASSERT_EQUALS(&clone.readY(), oldY);
+    TS_ASSERT_EQUALS(&clone.readE(), oldE);
+  }
 };
 #endif /*TESTHISTOGRAM1D_*/
