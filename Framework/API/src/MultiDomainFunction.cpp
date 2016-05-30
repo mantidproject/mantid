@@ -199,17 +199,19 @@ MultiDomainFunction::getLocalAttribute(size_t i,
   if (i >= nFunctions()) {
     throw std::out_of_range("Function index is out of range.");
   }
-  auto it = m_domains.find(i);
-  if (it == m_domains.end()) {
-    return IFunction::Attribute("All");
-  } else if (it->second.size() == 1 && it->second.front() == i) {
-    return IFunction::Attribute("i");
-  } else if (!it->second.empty()) {
-    std::string out(std::to_string(front()));
-    for (auto i = it->second.begin() + 1; i != it->second.end(); ++it) {
-      out += "," + std::to_string(*i);
+  try {
+    auto it = m_domains.at(i);
+    if (it.size() == 1 && it.front() == i) {
+      return IFunction::Attribute("i");
+    } else if (!it.empty()) {
+      auto out = std::to_string(it.front());
+      for (auto i = it.begin() + 1; i != it.end(); ++i) {
+        out += "," + std::to_string(*i);
+      }
+      return IFunction::Attribute(out);
     }
-    return IFunction::Attribute(out);
+  } catch (const std::out_of_range &) {
+    return IFunction::Attribute("All");
   }
   return IFunction::Attribute("");
 }

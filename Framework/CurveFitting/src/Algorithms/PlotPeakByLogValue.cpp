@@ -418,7 +418,7 @@ PlotPeakByLogValue::getWorkspace(const InputData &data) {
                 boost::dynamic_pointer_cast<API::WorkspaceGroup>(rws);
             if (gws) {
               std::string propName =
-                  "OUTPUTWORKSPACE_" + std::to_string(period);
+                  "OUTPUTWORKSPACE_" + std::to_string(data.period);
               if (load->existsProperty(propName)) {
                 Workspace_sptr rws1 = load->getProperty(propName);
                 out.ws =
