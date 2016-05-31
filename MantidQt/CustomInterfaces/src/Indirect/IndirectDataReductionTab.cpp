@@ -183,6 +183,7 @@ namespace CustomInterfaces
     std::string idfDirectory = Mantid::Kernel::ConfigService::Instance().getString("instrumentDefinition.directory");
     QString ipfFilename = QString::fromStdString(idfDirectory) + instName + "_" + analyser + "_" + reflection + "_Parameters.xml";
 
+
     IAlgorithm_sptr loadParamAlg = AlgorithmManager::Instance().create("LoadParameterFile");
     loadParamAlg->setChild(true);
     loadParamAlg->initialize();
@@ -192,11 +193,11 @@ namespace CustomInterfaces
     energyWs = loadParamAlg->getProperty("Workspace");
 
     double efixed = getEFixed(energyWs);
-
+    auto instrument = energyWs->getInstrument();
     auto spectrum = energyWs->getSpectrum(0);
-    spectrum->setSpectrumNo(3);
+    spectrum->setSpectrumNo(instrument->getNumberParameter("spectra-min")[0]);
     spectrum->clearDetectorIDs();
-    spectrum->addDetectorID(3);
+    spectrum->addDetectorID(instrument->getNumberParameter("spectra-max")[0]);
 
     IAlgorithm_sptr convUnitsAlg = AlgorithmManager::Instance().create("ConvertUnits");
     convUnitsAlg->setChild(true);
