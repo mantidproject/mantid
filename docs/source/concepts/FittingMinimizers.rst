@@ -35,8 +35,6 @@ options are available:
 - Damping
 - :ref:`FABADA <FABADA>`
 
-**TODO: Missing info: Damping. Also: differences between Lev-Mar and Lev-Mar "MD"**.
-
 All these algorithms are `iterative
 <https://en.wikipedia.org/wiki/Iterative_method>`__.  The *Simplex*
 algorithm, also known as Nelder–Mead method, belongs to the class of
@@ -68,8 +66,6 @@ a substantially different algorithm.
 In most cases, the implementation of these algorithms is based on the
 `GNU Scientific Libraty routines for least-squares fitting
 <https://www.gnu.org/software/gsl/manual/html_node/Least_002dSquares-Fitting.html#Least_002dSquares-Fitting>`__
-
-**TODO: Exceptions that are not GSL methods? Levenberg-MarquardMD?**.
 
 
 Comparison of relative goodness of fit and run time
@@ -117,7 +113,7 @@ previously created.
    Here we use 2 because Levenberg-Marquardt doesn't work with 1 ('Unweighted least squares' cost function
 
 The cost function used in this general comparison is 'Least squares'
-but without using input errors.
+but without using input error estimates (see details below).
 
 Benchmark problems
 ##################
@@ -131,28 +127,15 @@ following information:
 - Starting point or initial values of the function parameters
 - Certified or reference best values for the parameters, with an associated residual of the certified or best model 
 
-The problems have been obtained from two different benchmarks:
+The problems have been obtained from the following benchmark:
 
 - `NIST nonlinear regression problems <http://itl.nist.gov/div898/strd/general/dataarchive.html>`__.
-
-- The `Constrained and Unconstrained Testing Environment <http://www.cuter.rl.ac.uk/Problems/mastsif.html>`__
-  set of test problems for linear and nonlinear optimization.
 
 As the test problems do not define observational errors this
 comparison does not use the weights of the least squares cost
 function.  An :ref:`alternative comparison using simulated errors is
 also available <Minimizers_weighted_comparison>`, with similar results
 overall.
-
-From the second source, which is a large collection of diverse
-problems (over a thousand) a subset of problems that are relevant for
-fitting in Mantid was selected. These problems are unconstrained, with
-a sum of squared objective function, and regular (first and second
-derivatives exist and are continuous everywhere), following the `CUTE
-classification scheme
-<http://www.cuter.rl.ac.uk/Problems/classification.shtml>`__ for
-optimization test problems.
-
 
 Comparison in terms of accuracy
 ###############################
