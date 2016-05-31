@@ -85,7 +85,7 @@ ImportOPJ::ImportOPJ(ApplicationWindow *app, const QString& filename) :
 		mw(app)
 {
 	xoffset=0;
-	OPJFile opj((const char *)filename.latin1());
+	OPJFile opj((const char *)filename.toAscii().constData());
 	parse_error = opj.Parse();
 	importTables(opj);
 	importGraphs(opj);
@@ -108,7 +108,7 @@ bool ImportOPJ::createProjectTree(const OPJFile& opj)
 		return false;
 	FolderListItem* item = static_cast<FolderListItem*>(mw->folders->firstChild());
 	item->setText(0, root->name.c_str());
-	item->folder()->setName(root->name.c_str());
+	item->folder()->setObjectName(root->name.c_str());
 	Folder* projectFolder = mw->projectFolder();
 	QHash< tree<projectNode>::iterator, Folder*> parent;
 	parent[root] = projectFolder;

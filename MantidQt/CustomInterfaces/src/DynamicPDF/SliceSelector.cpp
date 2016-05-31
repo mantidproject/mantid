@@ -295,7 +295,7 @@ void SliceSelector::initPickerLine(){
 bool SliceSelector::isWorkspaceValid(){
   /// check the pointer to the workspace is not empty
   if(!m_loadedWorkspace->m_ws){
-    auto title = QString::fromStdString(this->name());
+    auto title = this->objectName();
     auto error = QString::fromStdString("Workspace must be of type MatrixWorkspace");
     QMessageBox::warning(this, title, error);
     return false;
@@ -303,7 +303,7 @@ bool SliceSelector::isWorkspaceValid(){
   /// check the units of the "X-axis" is momentum transfer
   auto axis = m_loadedWorkspace->m_ws->getAxis(0);
   if (axis->unit()->unitID() != "MomentumTransfer") {
-    auto title = QString::fromStdString(this->name());
+    auto title = this->objectName();
     auto error = QString::fromStdString("X-axis units must be momentum transfer");
     QMessageBox::warning(this, title, error);
     return false;
@@ -311,7 +311,7 @@ bool SliceSelector::isWorkspaceValid(){
   /// check the units of the "vertical" dimension is energy transfer
   axis = m_loadedWorkspace->m_ws->getAxis(1);
   if (axis->unit()->unitID() != "DeltaE") {
-    auto title = QString::fromStdString(this->name());
+    auto title = this->objectName();
     auto error = QString::fromStdString("Y-axis units must be energy transfer (meV)");
     QMessageBox::warning(this, title, error);
     return false;

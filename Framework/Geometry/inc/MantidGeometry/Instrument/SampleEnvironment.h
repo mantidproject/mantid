@@ -5,7 +5,7 @@
 // Includes
 //------------------------------------------------------------------------------
 #include "MantidGeometry/DllConfig.h"
-#include "MantidGeometry/Instrument/Can.h"
+#include "MantidGeometry/Instrument/Container.h"
 
 namespace Mantid {
 namespace Geometry {
@@ -38,15 +38,15 @@ class Track;
 */
 class MANTID_GEOMETRY_DLL SampleEnvironment {
 public:
-  SampleEnvironment(std::string name, Can_const_sptr can);
+  SampleEnvironment(std::string name, Container_const_sptr container);
 
   /// @return The name of kit
   inline const std::string name() const { return m_name; }
   /// @return The name of can
-  inline const std::string canID() const { return can()->id(); }
+  inline const std::string containerID() const { return container()->id(); }
   /// @return A const ptr to the can instance
-  inline Can_const_sptr can() const {
-    return boost::static_pointer_cast<const Can>(m_components.front());
+  inline Container_const_sptr container() const {
+    return boost::static_pointer_cast<const Container>(m_components.front());
   }
   /// @return The number of elements the environment is composed of
   inline size_t nelements() const { return m_components.size(); }

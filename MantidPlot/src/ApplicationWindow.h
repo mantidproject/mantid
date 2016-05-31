@@ -208,7 +208,7 @@ public slots:
   /// Load mantid data files (generic load algorithm)
   void loadDataFileByName(QString fn);
   /// Open from the list of recent files
-  void openRecentFile(int index);
+  void openRecentFile(QAction* action);
 
   /**
   * \brief Create a new project from a data file.
@@ -602,7 +602,7 @@ public slots:
   MultiLayer* prepareMultiLayer(bool& isNew, MultiLayer* window, const QString& newWindowName = "Graph",
     bool clearWindow = false);
 
-  void openRecentProject(int index);
+  void openRecentProject(QAction* action);
 
   //@}
 
@@ -1034,7 +1034,7 @@ public slots:
   void dropInTiledWindow( MdiSubWindow *w, QPoint pos );
   //@}
 
-  bool isOfType(QObject* obj, const char* toCompare) const;
+  bool isOfType(const QObject* obj, const char* toCompare) const;
 
 signals:
   void modified();
@@ -1099,7 +1099,7 @@ private slots:
   void plotDataMenuAboutToShow();
   void tableMenuAboutToShow();
   void windowsMenuAboutToShow();
-  void windowsMenuActivated( int id );
+  void windowsMenuActivated();
   void interfaceMenuAboutToShow();
   void tiledWindowMenuAboutToShow();
 
@@ -1298,7 +1298,7 @@ public:
   QColor tableBkgdColor, tableTextColor, tableHeaderColor;
   QString projectname, columnSeparator, helpFilePath, appLanguage;
   QString configFilePath, fitPluginsPath, fitModelsPath, asciiDirPath, imagesDirPath, scriptsDirPath;
-  int ignoredLines, savingTimerId, plot3DResolution, recentMenuID, recentFilesMenuID;
+  int ignoredLines, savingTimerId, plot3DResolution;
   bool renameColumns, strip_spaces, simplify_spaces;
   QStringList recentProjects, recentFiles;
   bool saved, showPlot3DProjection, showPlot3DLegend, orthogonal3DPlots, autoscale3DPlots;
@@ -1452,6 +1452,7 @@ private:
   QAction *actionPanPlot;
   QAction *actionWaterfallPlot;
   QAction *actionNewTiledWindow;
+
 
   QList<QAction *> d_user_actions;
   QList<QMenu* > d_user_menus; //Mantid
