@@ -28,11 +28,13 @@ void initTypeLookup(PyTypeIndex &index) {
   typedef TypedPropertyValueHandler<double> FloatHandler;
   index.emplace(&PyFloat_Type, boost::make_shared<FloatHandler>());
 
-  typedef TypedPropertyValueHandler<long> IntHandler;
-  index.emplace(&PyLong_Type, boost::make_shared<IntHandler>());
-
   typedef TypedPropertyValueHandler<bool> BoolHandler;
   index.emplace(&PyBool_Type, boost::make_shared<BoolHandler>());
+
+  // Python 2/3 have an arbitrary-sized long type. The handler
+  // will raise an error if the input value overflows a C long
+  typedef TypedPropertyValueHandler<long> IntHandler;
+  index.emplace(&PyLong_Type, boost::make_shared<IntHandler>());
 
   // In Python 3 all strings are unicode but in Python 2 unicode strings
   // must be explicitly requested. The C++ string handler will accept both
@@ -42,6 +44,9 @@ void initTypeLookup(PyTypeIndex &index) {
   index.emplace(&PyUnicode_Type, boost::make_shared<AsciiStrHandler>());
 
 #if PY_MAJOR_VERSION < 3
+  // Version < 3 had separate fixed-precision long and arbitrary precision
+  // long objects. Handle these too
+  index.emplace(&PyInt_Type, boost::make_shared<IntHandler>());
   // Version 2 also has the PyString_Type
   index.emplace(&PyString_Type, boost::make_shared<AsciiStrHandler>());
 #endif
