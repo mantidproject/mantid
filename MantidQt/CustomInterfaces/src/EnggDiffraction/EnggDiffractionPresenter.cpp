@@ -1881,9 +1881,8 @@ void EnggDiffractionPresenter::calibrationFinished() {
     const std::string ceriaNo = isValidRunNumber(m_view->newCeriaNo());
     updateCalibParmsTable();
     m_view->newCalibLoaded(vanNo, ceriaNo, m_calibFullPath);
-    g_log.notice()
-        << "Cablibration finished and ready as 'current calibration'."
-        << std::endl;
+    g_log.notice() << "Calibration finished and ready as 'current calibration'."
+                   << std::endl;
     m_view->showStatus("Calibration finished succesfully. Ready");
   }
   if (m_workerThread) {
