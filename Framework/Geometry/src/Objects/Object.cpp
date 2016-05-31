@@ -726,14 +726,9 @@ int Object::procString(const std::string &Line) {
   // Do outside loop...
   int nullInt;
   while (procPair(Ln, RuleList, nullInt))
-    ;
+  {}
 
-  if (RuleList.size() != 1) {
-    std::cerr << "Map size not equal to 1 == " << RuleList.size() << std::endl;
-    std::cerr << "Error Object::ProcString : " << Ln << std::endl;
-    exit(1);
-    return 0;
-  }
+  assert(RuleList.size() == 1);
   TopRule = std::move((RuleList.begin())->second);
   return 1;
 }

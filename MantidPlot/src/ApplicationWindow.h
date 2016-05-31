@@ -737,7 +737,6 @@ public slots:
   void showMoreWindows();
   void showMarkerPopupMenu();
   void showHelp();
-  static void showStandAloneHelp();
   void chooseHelpFolder();
   void showPlotWizard();
   void showFitPolynomDialog();
@@ -1161,7 +1160,7 @@ private slots:
   bool shouldWeShowFirstTimeSetup(const QStringList& commandArguments);
   /// Open up the FirstRunSetup dialog
   void showFirstTimeSetup();
-  
+
   ApplicationWindow* loadScript(const QString& fn, bool existingProject = false);
 
 public:

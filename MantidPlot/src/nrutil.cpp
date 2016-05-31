@@ -5,6 +5,16 @@
 
 #include "nrutil.h"
 
+#include "MantidKernel/Logger.h"
+
+namespace {
+  Mantid::Kernel::Logger &LOGGER() {
+    static Mantid::Kernel::Logger glog("nrutil");
+    return glog;
+  }
+
+}
+
 int IMIN(int ia, int ib)
 	{
 	if (ia<=ib)
@@ -14,11 +24,8 @@ int IMIN(int ia, int ib)
 	}
 
 void nrerror(const char * error_text)
-{//Numerical Recipes standard error handler
-fprintf(stderr,"Numerical Recipes run-time error...\n");
-fprintf(stderr,"%s\n",error_text);
-fprintf(stderr,"...now exiting to system...\n");
-exit(1);
+{
+  LOGGER().error(error_text);
 }
 
 double **matrix(long nrl, long nrh, long ncl, long nch)

@@ -10502,60 +10502,6 @@ void ApplicationWindow::chooseHelpFolder() {
   }
 }
 
-void ApplicationWindow::showStandAloneHelp() {
-#ifdef Q_OS_MAC // Mac
-  QSettings settings(QSettings::IniFormat, QSettings::UserScope,
-                     QCoreApplication::organizationName(),
-                     QCoreApplication::applicationName());
-#else
-  QSettings settings; //(QSettings::NativeFormat,QSettings::UserScope,
-                      //"ProIndependent", "QtiPlot");
-#endif
-
-  settings.beginGroup("/General");
-  settings.beginGroup("/Paths");
-  QString helpPath = settings.value("/HelpFile", qApp->applicationDirPath() +
-                                                     "/manual/index.html")
-                         .toString();
-  settings.endGroup();
-  settings.endGroup();
-
-  QFile helpFile(helpPath);
-  if (!helpPath.isEmpty() && !helpFile.exists()) {
-    QMessageBox::critical(0, tr("MantidPlot - Help Files Not Found!"), // Mantid
-                          tr("The manual can be found at the following "
-                             "internet address:") +
-                              "<p><a href = "
-                              "http://www.mantidproject.org/"
-                              "MantidPlot:_Help>http://www.mantidproject.org/"
-                              "MantidPlot:_Help</a></p>");
-    exit(0);
-  }
-
-  QFileInfo fi(helpPath);
-  QString profilePath = QString(fi.absolutePath() + "/qtiplot.adp");
-  if (!QFile(profilePath).exists()) {
-    QMessageBox::critical(
-        0, tr("MantidPlot - Help Profile Not Found!"), // Mantid
-        tr("The assistant could not start because the file <b>%1</b> was not "
-           "found in the help file directory!")
-                .arg("qtiplot.adp") +
-            "<br>" +
-            tr("This file is provided with the MantidPlot manual which can be "
-               "downloaded from the following internet address:") +
-            "<p><a href = "
-            "http://www.mantidproject.org/MantidPlot:_Help>http://"
-            "www.mantidproject.org/MantidPlot:_Help</a></p>");
-    exit(0);
-  }
-
-  QStringList cmdLst = QStringList() << "-profile" << profilePath;
-  //  QAssistantClient *assist = new QAssistantClient( QString(), 0);
-  //  assist->setArguments( cmdLst );
-  //  assist->showPage(helpPath);
-  //  connect(assist, SIGNAL(assistantClosed()), qApp, SLOT(quit()) );
-}
-
 void ApplicationWindow::showHelp() {
   QFile helpFile(helpFilePath);
   if (!helpFile.exists()) {
@@ -17293,5 +17239,3 @@ QString ApplicationWindow::saveProjectFolder(Folder *folder, int &windowCount,
 bool ApplicationWindow::isOfType(const QObject* obj, const char* toCompare) const {
   return strcmp(obj->metaObject()->className(), toCompare) == 0;
 }
-
-

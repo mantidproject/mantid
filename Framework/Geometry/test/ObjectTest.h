@@ -1115,10 +1115,7 @@ private:
     // Note that the testObject now manages the "new Plane"
     for (auto vc = SurfLine.cbegin(); vc != SurfLine.cend(); ++vc) {
       auto A = Geometry::SurfaceFactory::Instance()->processLine(vc->second);
-      if (!A) {
-        std::cerr << "Failed to process line " << vc->second << std::endl;
-        exit(1);
-      }
+      assert(A);
       A->setName(vc->first);
       SMap.insert(STYPE::value_type(vc->first,
                                     boost::shared_ptr<Surface>(A.release())));

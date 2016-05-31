@@ -150,7 +150,7 @@ int main( int argc, char ** argv )
     QString str(argv[1]);
     if ( str == "-v" || str == "--version" )
     {
-      std::cout << Mantid::Kernel::MantidVersion::version() << " (" << 
+      std::cout << Mantid::Kernel::MantidVersion::version() << " (" <<
                    Mantid::Kernel::MantidVersion::releaseDate() << ")" << std::endl;
       exit(0);
     }
@@ -160,7 +160,7 @@ int main( int argc, char ** argv )
       std::cout << revision.toStdString() << std::endl;
       exit(0);
     }
-    else if ( str == "-a" || str == "--about" ) 
+    else if ( str == "-a" || str == "--about" )
     {
       MantidApplication app( argc, argv );  // Needed to avoid an error
       ApplicationWindow::about();
@@ -184,8 +184,6 @@ int main( int argc, char ** argv )
 
       exit(0);
     }
-    //else if ( str == "-m" || str == "--manual" ) // Not for the time being at least
-    //  ApplicationWindow::showStandAloneHelp();
   }
 
   MantidApplication app( argc, argv );
