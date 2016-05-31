@@ -32,7 +32,11 @@ options are available:
 - `BFGS (Broyden-Fletcher-Goldfarb-Shanno) <https://en.wikipedia.org/wiki/Broyden–Fletcher–Goldfarb–Shanno_algorithm>`__
 - `Levenberg-Marquardt <https://en.wikipedia.org/wiki/Levenberg-Marquardt_algorithm>`__ (default)
 - Levenberg-MarquardtMD
-- Damping
+
+  A `Levenberg-Marquardt <https://en.wikipedia.org/wiki/Levenberg-Marquardt_algorithm>`__ implmentation generalised to allow different cost functions, and supporting chunking techniques for large datasets.
+- Damping 
+
+  A `Gauss-Newton <https://en.wikipedia.org/wiki/Gauss–Newton_algorithm#Improved_versions>`__ algorithm with damping.
 - :ref:`FABADA <FABADA>`
 
 All these algorithms are `iterative
