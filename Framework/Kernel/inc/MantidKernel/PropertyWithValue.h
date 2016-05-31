@@ -148,6 +148,7 @@ void toValue(const std::string &, boost::shared_ptr<T> &) {
   throw boost::bad_lexical_cast();
 }
 
+namespace detail {
 // vector<int> specializations
 template <typename T>
 void toValue(const std::string &strvalue, std::vector<T> &value,
@@ -177,9 +178,28 @@ void toValue(const std::string &strvalue, std::vector<T> &value,
       [](const std::string &str) { return boost::lexical_cast<T>(str); });
 }
 
+// bool and char doen't make sense as types to generate a range.
+// This is similar to std::is_integral<T>, but bool and char are std::false_type
+template <class T> struct is_range_type : public std::false_type {};
+template <class T> struct is_range_type<const T> : public is_range_type<T> {};
+template <class T>
+struct is_range_type<volatile const T> : public is_range_type<T> {};
+template <class T>
+struct is_range_type<volatile T> : public is_range_type<T> {};
+
+template <> struct is_range_type<unsigned short> : public std::true_type {};
+template <> struct is_range_type<unsigned int> : public std::true_type {};
+template <> struct is_range_type<unsigned long> : public std::true_type {};
+template <> struct is_range_type<unsigned long long> : public std::true_type {};
+
+template <> struct is_range_type<short> : public std::true_type {};
+template <> struct is_range_type<int> : public std::true_type {};
+template <> struct is_range_type<long> : public std::true_type {};
+template <> struct is_range_type<long long> : public std::true_type {};
+}
 template <typename T>
 void toValue(const std::string &strvalue, std::vector<T> &value) {
-  toValue(strvalue, value, std::is_integral<T>());
+  detail::toValue(strvalue, value, detail::is_range_type<T>());
 }
 
 template <typename T>
