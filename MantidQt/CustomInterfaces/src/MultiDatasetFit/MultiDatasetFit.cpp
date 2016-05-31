@@ -224,6 +224,7 @@ void MultiDatasetFit::fitSequential()
       mess += "...";
     }
     QMessageBox::critical( this, "MantidPlot - Error", QString("PlotPeakByLogValue failed:\n\n  %1").arg(mess) );
+    m_uiForm.btnFit->setEnabled(true);
   }
 }
 
@@ -291,6 +292,7 @@ void MultiDatasetFit::fitSimultaneous()
       mess += "...";
     }
     QMessageBox::critical( this, "MantidPlot - Error", QString("Fit failed:\n\n  %1").arg(mess) );
+    m_uiForm.btnFit->setEnabled(true);
   }
 }
 
