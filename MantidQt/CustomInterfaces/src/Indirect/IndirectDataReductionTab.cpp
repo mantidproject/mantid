@@ -194,8 +194,10 @@ std::map<std::string, double> IndirectDataReductionTab::getRangesFromInstrument(
   energyWs = loadParamAlg->getProperty("Workspace");
 
   double efixed = getEFixed(energyWs);
-  Mantid::specnum_t spectraMin =
+  auto spectraMinDbl =
       energyWs->getInstrument()->getNumberParameter("spectra-min")[0];
+  Mantid::specnum_t spectraMin =
+      boost::lexical_cast<Mantid::specnum_t>(spectraMinDbl);
 
   auto spectrum = energyWs->getSpectrum(0);
   spectrum->setSpectrumNo(spectraMin);
