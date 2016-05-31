@@ -1,17 +1,16 @@
-#ifndef MANTID_ALGORITHMS_MAXENTDATA_H_
-#define MANTID_ALGORITHMS_MAXENTDATA_H_
+#ifndef MANTID_ALGORITHMS_MAXENTCALCULATOR_H_
+#define MANTID_ALGORITHMS_MAXENTCALCULATOR_H_
 
 #include "MantidAlgorithms/DllConfig.h"
 #include "MantidAlgorithms/MaxEnt/MaxentEntropy.h"
-#include "MantidKernel/Matrix.h"
+#include "MantidAlgorithms/MaxEnt/MaxentCoefficients.h"
+#include "MantidAlgorithms/MaxEnt/MaxentTransform.h"
 #include <boost/shared_ptr.hpp>
 
 namespace Mantid {
 namespace Algorithms {
 
-/** MaxentData : Class containing MaxEnt data. MaxEnt data is defined by
-  experimental (measured) data, reconstructed data (both in data and image
-  space), search directions, and quadratic coefficients. Search directions and
+/** MaxentCalculator : TODO: Search directions and
   quadratic coefficients are calculated following J. Skilling and R. K. Bryan:
   "Maximum entropy image reconstruction: general algorithm" (1984), section 3.6.
 
@@ -37,19 +36,11 @@ namespace Algorithms {
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
-// Auxiliary class to store quadratic coefficients
-struct QuadraticCoefficients {
-  Kernel::DblMatrix s1; // Quadratic coefficient S_mu
-  Kernel::DblMatrix c1; // Quadratic coefficient C_mu
-  Kernel::DblMatrix s2; // Quadratic coefficient g_mu_nu
-  Kernel::DblMatrix c2; // Quadratic coefficient M_mu_nu
-};
-
-class MANTID_ALGORITHMS_DLL MaxentData final {
+class MANTID_ALGORITHMS_DLL MaxentCalculator final {
 public:
-  MaxentData(MaxentEntropy_sptr entropy);
-  MaxentData() = delete;
-  virtual ~MaxentData() = default;
+	MaxentCalculator(MaxentEntropy_sptr entropy, MaxentTransform_sptr transform);
+	MaxentCalculator() = delete;
+  virtual ~MaxentCalculator() = default;
 
   // Loads real data
   void loadReal(const std::vector<double> &data,
@@ -89,10 +80,6 @@ private:
   void correctImage();
   // Calculates chi-square
   void calculateChisq();
-  // Transforms from image space to data space
-  std::vector<double> transformImageToData(const std::vector<double> &input);
-  // Transforms from data space to image space
-  std::vector<double> transformDataToImage(const std::vector<double> &input);
 
   // Member variables
   // The experimental (measured) data
@@ -111,6 +98,8 @@ private:
   double m_chisq;
   // The type of entropy
   MaxentEntropy_sptr m_entropy;
+	// The type of transform
+	MaxentTransform_sptr m_transform;
   // The search directions
   std::vector<std::vector<double>> m_directionsIm;
   // The quadratic coefficients
@@ -118,9 +107,9 @@ private:
 };
 
 // Helper typedef for scoped pointer of this type.
-typedef boost::shared_ptr<MaxentData> MaxentData_sptr;
+typedef boost::shared_ptr<MaxentCalculator> MaxentCalculator_sptr;
 
 } // namespace Algorithms
 } // namespace Mantid
 
-#endif /* MANTID_ALGORITHMS_MAXENTDATA_H_ */
+#endif /* MANTID_ALGORITHMS_MAXENTCALCULATOR_H_ */

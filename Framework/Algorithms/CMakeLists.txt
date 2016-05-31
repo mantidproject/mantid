@@ -155,9 +155,12 @@ set ( SRC_FILES
 	src/MatrixWorkspaceAccess.cpp
 	src/Max.cpp
 	src/MaxEnt.cpp
-	src/MaxEnt/MaxentData.cpp
+	src/MaxEnt/MaxentCalculator.cpp
 	src/MaxEnt/MaxentEntropyNegativeValues.cpp
 	src/MaxEnt/MaxentEntropyPositiveValues.cpp
+	src/MaxEnt/MaxentSpaceComplex.cpp
+	src/MaxEnt/MaxentSpaceReal.cpp
+	src/MaxEnt/MaxentTransformFourier.cpp
 	src/MaxMin.cpp
 	src/MedianDetectorTest.cpp
 	src/MergeRuns.cpp
@@ -449,10 +452,15 @@ set ( INC_FILES
 	inc/MantidAlgorithms/MatrixWorkspaceAccess.h
 	inc/MantidAlgorithms/Max.h
 	inc/MantidAlgorithms/MaxEnt.h
-	inc/MantidAlgorithms/MaxEnt/MaxentData.h
+	inc/MantidAlgorithms/MaxEnt/MaxentCalculator.h
 	inc/MantidAlgorithms/MaxEnt/MaxentEntropy.h
 	inc/MantidAlgorithms/MaxEnt/MaxentEntropyNegativeValues.h
 	inc/MantidAlgorithms/MaxEnt/MaxentEntropyPositiveValues.h
+	inc/MantidAlgorithms/MaxEnt/MaxentSpace.h
+	inc/MantidAlgorithms/MaxEnt/MaxentSpaceComplex.h
+	inc/MantidAlgorithms/MaxEnt/MaxentSpaceReal.h
+	inc/MantidAlgorithms/MaxEnt/MaxentTransform.h
+	inc/MantidAlgorithms/MaxEnt/MaxentTransformFourier.h
 	inc/MantidAlgorithms/MaxMin.h
 	inc/MantidAlgorithms/MedianDetectorTest.h
 	inc/MantidAlgorithms/MergeRuns.h
@@ -745,10 +753,13 @@ set ( TEST_FILES
 	MCInteractionVolumeTest.h
 	MaskBinsFromTableTest.h
 	MaskBinsTest.h
-	MaxEnt/MaxentDataTest.h
+	MaxEnt/MaxentCalculatorTest.h
 	MaxEnt/MaxentEntropyNegativeValuesTest.h
 	MaxEnt/MaxentEntropyPositiveValuesTest.h
+	MaxEnt/MaxentSpaceComplexTest.h
+	MaxEnt/MaxentSpaceRealTest.h
 	MaxEntTest.h
+	MaxEnt/MaxentTransformFourierTest.h
 	MaxMinTest.h
 	MayersSampleCorrectionStrategyTest.h
 	MayersSampleCorrectionTest.h

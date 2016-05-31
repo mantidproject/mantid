@@ -4,6 +4,9 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAlgorithms/MaxEnt/MaxentEntropyNegativeValues.h"
 #include "MantidAlgorithms/MaxEnt/MaxentEntropyPositiveValues.h"
+#include "MantidAlgorithms/MaxEnt/MaxentSpaceComplex.h"
+#include "MantidAlgorithms/MaxEnt/MaxentSpaceReal.h"
+#include "MantidAlgorithms/MaxEnt/MaxentTransformFourier.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/UnitFactory.h"
@@ -86,6 +89,10 @@ void MaxEnt::init() {
                   "Whether or not the input data are complex. If true, the "
                   "input workspace is expected to have an even number of "
                   "histograms.");
+
+	declareProperty("ComplexImage", true,
+		"Whether or not the image is complex.");
+
 
   declareProperty("PositiveImage", false, "If true, the reconstructed image "
                                           "must be positive. It can take "
@@ -213,8 +220,10 @@ void MaxEnt::exec() {
 
   // MaxEnt parameters
   // Complex data?
-  bool complex = getProperty("ComplexData");
-  // Image must be positive?
+  bool complexData = getProperty("ComplexData");
+	// Complex image?
+	bool complexImage = getProperty("ComplexImage");
+	// Image must be positive?
   bool positiveImage = getProperty("PositiveImage");
   // Autoshift
   bool autoShift = getProperty("AutoShift");
@@ -244,15 +253,33 @@ void MaxEnt::exec() {
   // Number of X bins
   size_t npointsX = inWS->isHistogramData() ? npoints + 1 : npoints;
 
+	MaxentSpace_sptr dataSpace;
+	if (complexData) {
+		dataSpace = boost::make_shared<MaxentSpaceComplex>();
+	}
+	else {
+		dataSpace = boost::make_shared<MaxentSpaceReal>();
+	}
+
+	MaxentSpace_sptr imageSpace;
+	if (complexImage) {
+		imageSpace = boost::make_shared<MaxentSpaceComplex>();
+	}
+	else {
+		imageSpace = boost::make_shared<MaxentSpaceReal>();
+	}
+
+	// The type of transform. Currently a 1D Fourier Transform
+	MaxentTransform_sptr transform = boost::make_shared<MaxentTransformFourier>(dataSpace, imageSpace);
   // The type of entropy we are going to use (depends on the type of image,
   // positive only, or positive and/or negative)
-  MaxentData_sptr maxentData;
+  MaxentCalculator_sptr maxentCalculator;
   if (positiveImage) {
-    maxentData = boost::make_shared<MaxentData>(
-        boost::make_shared<MaxentEntropyPositiveValues>());
+		maxentCalculator = boost::make_shared<MaxentCalculator>(
+        boost::make_shared<MaxentEntropyPositiveValues>(), transform);
   } else {
-    maxentData = boost::make_shared<MaxentData>(
-        boost::make_shared<MaxentEntropyNegativeValues>());
+		maxentCalculator = boost::make_shared<MaxentCalculator>(
+        boost::make_shared<MaxentEntropyNegativeValues>(), transform);
   }
 
   // Output workspaces
@@ -261,7 +288,7 @@ void MaxEnt::exec() {
   MatrixWorkspace_sptr outEvolChi;
   MatrixWorkspace_sptr outEvolTest;
 
-  nspec = complex ? nspec / 2 : nspec;
+  nspec = complexData ? nspec / 2 : nspec;
   outImageWS =
       WorkspaceFactory::Instance().create(inWS, 2 * nspec, npointsX, npoints);
   outDataWS =
@@ -275,17 +302,17 @@ void MaxEnt::exec() {
     // Start distribution (flat background)
     std::vector<double> image(npoints, background);
 
-    if (complex) {
+    if (complexData) {
       auto dataRe = inWS->readY(s);
       auto dataIm = inWS->readY(s + nspec);
       auto errorsRe = inWS->readE(s);
       auto errorsIm = inWS->readE(s + nspec);
-      maxentData->loadComplex(dataRe, dataIm, errorsRe, errorsIm, image,
+			maxentCalculator->loadComplex(dataRe, dataIm, errorsRe, errorsIm, image,
                               background);
     } else {
       auto data = inWS->readY(s);
       auto error = inWS->readE(s);
-      maxentData->loadReal(data, error, image, background);
+			maxentCalculator->loadReal(data, error, image, background);
     }
 
     // To record the algorithm's progress
@@ -300,21 +327,21 @@ void MaxEnt::exec() {
 
       // Calculate quadratic model coefficients
       // (SB eq. 21 and 24)
-      maxentData->calculateQuadraticCoefficients();
-      double currAngle = maxentData->getAngle();
-      double currChisq = maxentData->getChisq();
-      auto coeffs = maxentData->getQuadraticCoefficients();
+			maxentCalculator->calculateQuadraticCoefficients();
+      double currAngle = maxentCalculator->getAngle();
+      double currChisq = maxentCalculator->getChisq();
+      auto coeffs = maxentCalculator->getQuadraticCoefficients();
 
       // Calculate delta to construct new image (SB eq. 25)
       auto delta = move(coeffs, chiTarget / currChisq, chiEps, alphaIter);
 
       // Apply distance penalty (SB eq. 33)
-      image = maxentData->getImage();
+      image = maxentCalculator->getImage();
       delta = applyDistancePenalty(delta, coeffs, image, background, distEps);
 
       // Update image according to 'delta' and calculate the new Chi-square
-      maxentData->updateImage(delta);
-      currChisq = maxentData->getChisq();
+			maxentCalculator->updateImage(delta);
+      currChisq = maxentCalculator->getChisq();
 
       // Record the evolution of Chi-square and angle(S,C)
       evolChi[it] = currChisq;
@@ -336,8 +363,8 @@ void MaxEnt::exec() {
     } // iterations
 
     // Get calculated data
-    auto solData = maxentData->getReconstructedData();
-    auto solImage = maxentData->getImage();
+    auto solData = maxentCalculator->getReconstructedData();
+    auto solImage = maxentCalculator->getImage();
 
     // Populate the output workspaces
     populateDataWS(inWS, s, nspec, solData, outDataWS);

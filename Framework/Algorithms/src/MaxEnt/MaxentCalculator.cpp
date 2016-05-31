@@ -1,6 +1,5 @@
-#include "MantidAlgorithms/MaxEnt/MaxentData.h"
-#include <boost/shared_array.hpp>
-#include <gsl/gsl_fft_complex.h>
+#include "MantidAlgorithms/MaxEnt/MaxentCalculator.h"
+#include "MantidAlgorithms/MaxEnt/MaxentTransformFourier.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -10,10 +9,11 @@ namespace Algorithms {
 * @param entropy : pointer MaxentEntropy object defining the entropy formula to
 * use
 */
-MaxentData::MaxentData(MaxentEntropy_sptr entropy)
+MaxentCalculator::MaxentCalculator(MaxentEntropy_sptr entropy,
+                                   MaxentTransform_sptr transform)
     : m_data(), m_errors(), m_image(), m_dataCalc(), m_background(1.0),
-      m_angle(-1.), m_chisq(-1.), m_entropy(entropy), m_directionsIm(),
-      m_coeffs() {}
+      m_angle(-1.), m_chisq(-1.), m_entropy(entropy), m_transform(transform),
+      m_directionsIm(), m_coeffs() {}
 
 /**
 * Loads a real signal
@@ -23,7 +23,7 @@ MaxentData::MaxentData(MaxentEntropy_sptr entropy)
 * @param background : [input] A background level
 * use
 */
-void MaxentData::loadReal(const std::vector<double> &data,
+void MaxentCalculator::loadReal(const std::vector<double> &data,
                           const std::vector<double> &errors,
                           const std::vector<double> &image, double background) {
 
@@ -71,7 +71,7 @@ void MaxentData::loadReal(const std::vector<double> &data,
 * @param background : [input] A background level
 * use
 */
-void MaxentData::loadComplex(const std::vector<double> &dataRe,
+void MaxentCalculator::loadComplex(const std::vector<double> &dataRe,
                              const std::vector<double> &dataIm,
                              const std::vector<double> &errorsRe,
                              const std::vector<double> &errorsIm,
@@ -115,7 +115,7 @@ void MaxentData::loadComplex(const std::vector<double> &dataRe,
 * @param image : [input] A starting distribution for the image
 * @param background : [input] The background or sky level
 */
-void MaxentData::initImageSpace(const std::vector<double> &image,
+void MaxentCalculator::initImageSpace(const std::vector<double> &image,
                                 double background) {
 
   // Set to -1, these will be calculated later
@@ -125,13 +125,13 @@ void MaxentData::initImageSpace(const std::vector<double> &image,
   m_image = image;
   m_background = background;
   correctImage();
-  m_dataCalc = transformImageToData(image);
+  m_dataCalc = m_transform->imageToData(image);
 }
 
 /**
 * Corrects the image according to the type of entropy
 */
-void MaxentData::correctImage() {
+void MaxentCalculator::correctImage() {
 
 	m_image = m_entropy->correctValues(m_image, m_background);
 
@@ -145,7 +145,7 @@ void MaxentData::correctImage() {
 * calculated search directions.
 * @param delta : [input] The increment to be added to the image
 */
-void MaxentData::updateImage(const std::vector<double> &delta) {
+void MaxentCalculator::updateImage(const std::vector<double> &delta) {
 
   if (m_image.empty()) {
     throw std::runtime_error("No data were loaded");
@@ -164,7 +164,7 @@ void MaxentData::updateImage(const std::vector<double> &delta) {
   }
   correctImage();
 
-  m_dataCalc = transformImageToData(m_image);
+  m_dataCalc = m_transform->imageToData(m_image);
 
   calculateChisq();
   m_chisq = getChisq();
@@ -178,7 +178,7 @@ void MaxentData::updateImage(const std::vector<double> &delta) {
 * data and errors
 * @return : The gradient of chi-square as a vector
 */
-std::vector<double> MaxentData::calculateChiGrad() const {
+std::vector<double> MaxentCalculator::calculateChiGrad() const {
 
   // Calculates the gradient of Chi
   // CGrad_i = -2 * [ data_i - dataCalc_i ] / [ error_i ]^2
@@ -213,7 +213,7 @@ std::vector<double> MaxentData::calculateChiGrad() const {
 * Calculates the entropy (not needed for the moment)
 * @return : The entropy as a vector
 */
-std::vector<double> MaxentData::calculateEntropy() const {
+std::vector<double> MaxentCalculator::calculateEntropy() const {
 
   throw std::runtime_error("Not implemented");
 }
@@ -222,7 +222,7 @@ std::vector<double> MaxentData::calculateEntropy() const {
 * Returns the reconstructed (calculated) data
 * @return : The reconstructed data as a vector
 */
-std::vector<double> MaxentData::getReconstructedData() const {
+std::vector<double> MaxentCalculator::getReconstructedData() const {
 
   if (m_dataCalc.empty()) {
     // If it is empty it means we didn't load valid data
@@ -235,7 +235,7 @@ std::vector<double> MaxentData::getReconstructedData() const {
 * Returns the (reconstructed) image
 * @return : The image as a vector
 */
-std::vector<double> MaxentData::getImage() const {
+std::vector<double> MaxentCalculator::getImage() const {
 
   if (m_image.empty()) {
     // If it is empty it means we didn't load valid data
@@ -248,7 +248,7 @@ std::vector<double> MaxentData::getImage() const {
 * Returns the search directions (in image space)
 * @return : The search directions
 */
-std::vector<std::vector<double>> MaxentData::getSearchDirections() const {
+std::vector<std::vector<double>> MaxentCalculator::getSearchDirections() const {
 
   return m_directionsIm;
 }
@@ -257,7 +257,7 @@ std::vector<std::vector<double>> MaxentData::getSearchDirections() const {
 * Returns the quadratic coefficients
 * @return : The quadratic coefficients
 */
-QuadraticCoefficients MaxentData::getQuadraticCoefficients() const {
+QuadraticCoefficients MaxentCalculator::getQuadraticCoefficients() const {
 
   if (!m_coeffs.c1.size().first) {
     // This means that none of the coefficients were calculated
@@ -271,7 +271,7 @@ QuadraticCoefficients MaxentData::getQuadraticCoefficients() const {
 * entropy (calculated and initialized in calculateQuadraticCoefficients())
 * @return : The angle
 */
-double MaxentData::getAngle() const {
+double MaxentCalculator::getAngle() const {
 
   if (m_angle == -1) {
     throw std::runtime_error("Angle has not been calculated");
@@ -283,7 +283,7 @@ double MaxentData::getAngle() const {
 * Returns chi-square (it is calculated if necessary)
 * @return : Chi-square
 */
-double MaxentData::getChisq() {
+double MaxentCalculator::getChisq() {
 
   if (m_data.empty() || m_errors.empty() || m_dataCalc.empty()) {
     throw std::runtime_error("Cannot get chi-square");
@@ -300,7 +300,7 @@ double MaxentData::getChisq() {
 * and SB. 22). Also calculates the angle between the gradient of chi-square and
 * the gradient of the entropy
 */
-void MaxentData::calculateQuadraticCoefficients() {
+void MaxentCalculator::calculateQuadraticCoefficients() {
 
   // Two search directions
   const size_t dim = 2;
@@ -317,7 +317,7 @@ void MaxentData::calculateQuadraticCoefficients() {
   size_t npoints = m_image.size();
 
   // Gradient of chi (in image space)
-  std::vector<double> cgrad = transformDataToImage(calculateChiGrad());
+  std::vector<double> cgrad = m_transform->dataToImage(calculateChiGrad());
   // Gradient of entropy
 	std::vector<double> sgrad = m_entropy->derivative(m_image, m_background);
   // Metric (second derivative of the entropy)
@@ -367,8 +367,8 @@ void MaxentData::calculateQuadraticCoefficients() {
   // Not needed outside this method
   auto directionsDat =
       std::vector<std::vector<double>>(2, std::vector<double>(npoints, 0.));
-  directionsDat[0] = transformImageToData(m_directionsIm[0]);
-  directionsDat[1] = transformImageToData(m_directionsIm[1]);
+  directionsDat[0] = m_transform->imageToData(m_directionsIm[0]);
+  directionsDat[1] = m_transform->imageToData(m_directionsIm[1]);
 
   double chiSq = getChisq();
 
@@ -425,7 +425,7 @@ void MaxentData::calculateQuadraticCoefficients() {
 /**
 * Calculates chi-square
 */
-void MaxentData::calculateChisq() {
+void MaxentCalculator::calculateChisq() {
 
   size_t npoints = m_data.size();
 
@@ -438,81 +438,6 @@ void MaxentData::calculateChisq() {
       m_chisq += term * term;
     }
   }
-}
-
-/**
-* Transforms from image-space to data-space (Backward Fourier Transform)
-* @param input : [input] A vector in image-space
-* @return : The vector in data-space
-*/
-std::vector<double>
-MaxentData::transformImageToData(const std::vector<double> &input) {
-
-  /* Performs backward Fourier transform */
-
-  size_t n = input.size();
-
-  if (n % 2) {
-    throw std::invalid_argument("Cannot transform to data space");
-  }
-
-  /* Prepare the data */
-  boost::shared_array<double> result(new double[n]);
-  for (size_t i = 0; i < n; i++) {
-    result[i] = input[i];
-  }
-
-  /* Backward FT */
-  gsl_fft_complex_wavetable *wavetable = gsl_fft_complex_wavetable_alloc(n / 2);
-  gsl_fft_complex_workspace *workspace = gsl_fft_complex_workspace_alloc(n / 2);
-  gsl_fft_complex_inverse(result.get(), 1, n / 2, wavetable, workspace);
-  gsl_fft_complex_wavetable_free(wavetable);
-  gsl_fft_complex_workspace_free(workspace);
-
-  std::vector<double> output(n);
-  for (size_t i = 0; i < n; i++) {
-    output[i] = result[i];
-  }
-
-  return output;
-}
-
-/**
-* Transforms from data-space to image-space (Forward Fourier Transform)
-* @param input : [input] A vector in data-space
-* @return : The vector in image-space
-*/
-std::vector<double>
-MaxentData::transformDataToImage(const std::vector<double> &input) {
-
-  /* Performs forward Fourier transform */
-
-  size_t n = input.size();
-
-  if (n % 2) {
-    throw std::invalid_argument("Cannot transform to data space");
-  }
-
-  /* Prepare the data */
-  boost::shared_array<double> result(new double[n]);
-  for (size_t i = 0; i < n; i++) {
-    result[i] = input[i];
-  }
-
-  /*  Fourier transofrm */
-  gsl_fft_complex_wavetable *wavetable = gsl_fft_complex_wavetable_alloc(n / 2);
-  gsl_fft_complex_workspace *workspace = gsl_fft_complex_workspace_alloc(n / 2);
-  gsl_fft_complex_forward(result.get(), 1, n / 2, wavetable, workspace);
-  gsl_fft_complex_wavetable_free(wavetable);
-  gsl_fft_complex_workspace_free(workspace);
-
-  /* Get the data */
-  std::vector<double> output(n);
-  for (size_t i = 0; i < n; i++) {
-    output[i] = result[i];
-  }
-
-  return output;
 }
 
 } // namespace Algorithms

@@ -3,7 +3,8 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAlgorithms/DllConfig.h"
-#include "MantidAlgorithms/MaxEnt/MaxentData.h"
+#include "MantidAlgorithms/MaxEnt/MaxentCalculator.h"
+#include "MantidAlgorithms/MaxEnt/MaxentCoefficients.h"
 #include "MantidKernel/Matrix.h"
 
 namespace Mantid {
