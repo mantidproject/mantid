@@ -265,12 +265,15 @@ void WorkspaceSelector::refresh() {
     items = ads.getObjectNames();
   }
 
+  QStringList namesToAdd;
   for (auto it = items.begin(); it != items.end(); ++it) {
     QString name = QString::fromStdString(*it);
     if (checkEligibility(name, ads.retrieve(*it))) {
-      addItem(name);
+      namesToAdd << name;
     }
   }
+  namesToAdd.sort();
+  this->addItems(namesToAdd);
 }
 
 /**
