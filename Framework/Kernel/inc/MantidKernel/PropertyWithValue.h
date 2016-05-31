@@ -178,7 +178,7 @@ void toValue(const std::string &strvalue, std::vector<T> &value,
       [](const std::string &str) { return boost::lexical_cast<T>(str); });
 }
 
-// bool and char doen't make sense as types to generate a range.
+// bool and char don't make sense as types to generate a range of values.
 // This is similar to std::is_integral<T>, but bool and char are std::false_type
 template <class T> struct is_range_type : public std::false_type {};
 template <class T> struct is_range_type<const T> : public is_range_type<T> {};
