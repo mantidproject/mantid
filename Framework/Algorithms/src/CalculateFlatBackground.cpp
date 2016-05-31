@@ -117,9 +117,9 @@ void CalculateFlatBackground::exec() {
     PARALLEL_FOR2(inputWS, outputWS)
     for (int i = 0; i < numHists; ++i) {
       PARALLEL_START_INTERUPT_REGION
-      outputWS->dataX(i) = inputWS->readX(i);
-      outputWS->dataY(i) = inputWS->readY(i);
-      outputWS->dataE(i) = inputWS->readE(i);
+      outputWS->setSharedX(i, inputWS->sharedX(i));
+      outputWS->setSharedY(i, inputWS->sharedY(i));
+      outputWS->setSharedE(i, inputWS->sharedE(i));
       m_progress->report();
       PARALLEL_END_INTERUPT_REGION
     }

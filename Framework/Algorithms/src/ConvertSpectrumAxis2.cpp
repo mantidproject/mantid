@@ -77,13 +77,6 @@ void ConvertSpectrumAxis2::exec() {
   // Assign value to the member variable storing the number of histograms.
   size_t nHist = inputWS->getNumberHistograms();
 
-  // Assign values to the member variables to store number of bins.
-  size_t nBins = inputWS->blocksize();
-
-  const bool isHist = inputWS->isHistogramData();
-
-  size_t nxBins = isHist ? nBins + 1 : nBins;
-
   // The unit to convert to.
   const std::string unitTarget = getProperty("Target");
 
@@ -99,7 +92,7 @@ void ConvertSpectrumAxis2::exec() {
 
   // Create an output workspace and set the property for it.
   MatrixWorkspace_sptr outputWS = createOutputWorkspace(
-      progress, unitTarget, inputWS, nHist, nBins, nxBins);
+      progress, unitTarget, inputWS, nHist);
   setProperty("OutputWorkspace", outputWS);
 }
 
@@ -198,17 +191,15 @@ void ConvertSpectrumAxis2::createElasticQMap(API::Progress &progress,
 * @param targetUnit :: Target conversion unit
 * @param inputWS :: Input workspace
 * @param nHist :: Stores the number of histograms
-* @param nBins :: Stores the number of bins
-* @param nxBins :: Stores the number of x bins
 */
 MatrixWorkspace_sptr ConvertSpectrumAxis2::createOutputWorkspace(
     API::Progress &progress, const std::string &targetUnit,
-    API::MatrixWorkspace_sptr &inputWS, size_t nHist, size_t nBins,
-    size_t nxBins) {
+    API::MatrixWorkspace_sptr &inputWS, size_t nHist) {
   // Create the output workspace. Can not re-use the input one because the
   // spectra are re-ordered.
   MatrixWorkspace_sptr outputWorkspace = WorkspaceFactory::Instance().create(
-      inputWS, m_indexMap.size(), nxBins, nBins);
+      inputWS, m_indexMap.size(), inputWS->readX(0).size(),
+      inputWS->readY(0).size());
 
   // Now set up a new numeric axis holding the theta values corresponding to
   // each spectrum.
@@ -233,9 +224,9 @@ MatrixWorkspace_sptr ConvertSpectrumAxis2::createOutputWorkspace(
     // Set the axis value.
     newAxis->setValue(currentIndex, it->first);
     // Copy over the data.
-    outputWorkspace->dataX(currentIndex) = inputWS->dataX(it->second);
-    outputWorkspace->dataY(currentIndex) = inputWS->dataY(it->second);
-    outputWorkspace->dataE(currentIndex) = inputWS->dataE(it->second);
+    outputWorkspace->setSharedX(currentIndex, inputWS->sharedX(it->second));
+    outputWorkspace->setSharedY(currentIndex, inputWS->sharedY(it->second));
+    outputWorkspace->setSharedE(currentIndex, inputWS->sharedE(it->second));
     // We can keep the spectrum numbers etc.
     outputWorkspace->getSpectrum(currentIndex)
         ->copyInfoFrom(*inputWS->getSpectrum(it->second));
