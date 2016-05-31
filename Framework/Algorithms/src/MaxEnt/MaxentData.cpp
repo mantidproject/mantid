@@ -133,9 +133,7 @@ void MaxentData::initImageSpace(const std::vector<double> &image,
 */
 void MaxentData::correctImage() {
 
-  for (auto &im : m_image) {
-    im = m_entropy->correctValue(im, m_background);
-  }
+	m_image = m_entropy->correctValues(m_image, m_background);
 
   // Reset m_angle and m_chisq to default
   m_angle = -1.;
@@ -221,23 +219,6 @@ std::vector<double> MaxentData::calculateEntropy() const {
 }
 
 /**
-* Calculates the gradient of the entropy (depends on the type of entropy)
-* @return : The gradient of the entropy as a vector
-*/
-std::vector<double> MaxentData::calculateEntropyGrad() const {
-
-  const size_t size = m_image.size();
-
-  std::vector<double> entropyGrad(size, 0.);
-
-  for (size_t i = 0; i < size; i++) {
-    entropyGrad[i] = m_entropy->getDerivative(m_image[i] / m_background);
-  }
-
-  return entropyGrad;
-}
-
-/**
 * Returns the reconstructed (calculated) data
 * @return : The reconstructed data as a vector
 */
@@ -261,23 +242,6 @@ std::vector<double> MaxentData::getImage() const {
     throw std::runtime_error("No data were loaded");
   }
   return m_image;
-}
-
-/**
-* Calculates the metric (depends on the type of entropy)
-* @return : The metric as a vector
-*/
-std::vector<double> MaxentData::calculateMetric() const {
-
-  const size_t size = m_image.size();
-
-  std::vector<double> metric(size, 0.);
-
-  for (size_t i = 0; i < size; i++) {
-    metric[i] = m_entropy->getSecondDerivative(m_image[i]);
-  }
-
-  return metric;
 }
 
 /**
@@ -355,9 +319,9 @@ void MaxentData::calculateQuadraticCoefficients() {
   // Gradient of chi (in image space)
   std::vector<double> cgrad = transformDataToImage(calculateChiGrad());
   // Gradient of entropy
-  std::vector<double> sgrad = calculateEntropyGrad();
-  // Metric
-  std::vector<double> metric = calculateMetric();
+	std::vector<double> sgrad = m_entropy->derivative(m_image, m_background);
+  // Metric (second derivative of the entropy)
+	std::vector<double> metric = m_entropy->secondDerivative(m_image);
 
   double cnorm = 0.;
   double snorm = 0.;

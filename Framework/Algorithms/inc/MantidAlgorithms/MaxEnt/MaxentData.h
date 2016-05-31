@@ -83,10 +83,6 @@ private:
   std::vector<double> calculateChiGrad() const;
   // Calculates the entropy
   std::vector<double> calculateEntropy() const;
-  // Calculates the gradient of S (entropy)
-  std::vector<double> calculateEntropyGrad() const;
-  // Calculates the metric (second derivative of S)
-  std::vector<double> calculateMetric() const;
   // Returns the search directions
   std::vector<std::vector<double>> getSearchDirections() const;
   // Corrects the image

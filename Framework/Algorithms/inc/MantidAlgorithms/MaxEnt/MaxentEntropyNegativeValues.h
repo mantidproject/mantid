@@ -38,11 +38,14 @@ namespace Algorithms {
 class MANTID_ALGORITHMS_DLL MaxentEntropyNegativeValues : public MaxentEntropy {
 public:
   // First derivative
-  double getDerivative(double value) override;
+  std::vector<double> derivative(const std::vector<double> &values,
+                                 double background) override;
   // Second derivative
-  double getSecondDerivative(double value) override;
+  std::vector<double>
+  secondDerivative(const std::vector<double> &values) override;
   // Correct negative values
-  double correctValue(double value, double newValue) override;
+  std::vector<double> correctValues(const std::vector<double> &values,
+                                    double newValue) override;
 };
 
 // Helper typedef for shared pointer of this type.
