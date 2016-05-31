@@ -24,20 +24,22 @@ using Mantid::Kernel::ArrayBoundedValidator;
 using Mantid::Kernel::BoundedValidator;
 using Mantid::Kernel::Direction;
 using Mantid::Kernel::RebinParamsValidator;
+using Mantid::Kernel::make_unique;
 using std::vector;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(PDCalibration)
 
 namespace { // anonymous
-const auto isNonZero = [] (const double value) { return value != 0.; };
+const auto isNonZero = [](const double value) { return value != 0.; };
 }
 
 //----------------------------------------------------------------------------------------------
 /// private inner class
 class PDCalibration::FittedPeaks {
 public:
-  FittedPeaks(API::MatrixWorkspace_const_sptr wksp, const std::size_t wkspIndex) {
+  FittedPeaks(API::MatrixWorkspace_const_sptr wksp,
+              const std::size_t wkspIndex) {
     this->wkspIndex = wkspIndex;
 
     // convert workspace index into detector id
@@ -70,7 +72,6 @@ public:
         break;
       }
     }
-
   }
 
   void setPositions(const std::vector<double> &peaksInD,
@@ -79,16 +80,15 @@ public:
 
     const std::size_t numOrig = peaksInD.size();
     for (std::size_t i = 0; i < numOrig; ++i) {
-        const double centre = toTof(peaksInD[i]);
-        if (centre < tofMax && centre > tofMin) {
-          inDPos.push_back(peaksInD[i]);
-          inTofPos.push_back(peaksInD[i]);
-          inTofWindows.push_back(peaksInDWindows[2*i]);
-          inTofWindows.push_back(peaksInDWindows[2*i+1]);
-        }
+      const double centre = toTof(peaksInD[i]);
+      if (centre < tofMax && centre > tofMin) {
+        inDPos.push_back(peaksInD[i]);
+        inTofPos.push_back(peaksInD[i]);
+        inTofWindows.push_back(peaksInDWindows[2 * i]);
+        inTofWindows.push_back(peaksInDWindows[2 * i + 1]);
+      }
     }
-    std::transform(inTofPos.begin(), inTofPos.end(),
-                   inTofPos.begin(), toTof);
+    std::transform(inTofPos.begin(), inTofPos.end(), inTofPos.begin(), toTof);
     std::transform(inTofWindows.begin(), inTofWindows.end(),
                    inTofWindows.begin(), toTof);
   }
@@ -134,19 +134,17 @@ const std::string PDCalibration::summary() const {
 /** Initialize the algorithm's properties.
  */
 void PDCalibration::init() {
-  declareProperty( // TODO fix this mess
-      new WorkspaceProperty<MatrixWorkspace>("UncalibratedWorkspace", "", Direction::Output),
-      "");
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      "UncalibratedWorkspace", "", Direction::Output),
+                  "");
 
-
-  this->declareProperty(
-      new FileProperty("SignalFile", "", FileProperty::Load,
-                       {"_event.nxs", ".nxs.h5", ".nxs"}),
-      "Calibration measurement");
-  this->declareProperty(
-      new FileProperty("BackgroundFile", "", FileProperty::OptionalLoad,
-                       {"_event.nxs", ".nxs.h5", ".nxs"}),
-      "Calibration background");
+  const std::vector<std::string> exts{"_event.nxs", ".nxs.h5", ".nxs"};
+  declareProperty(make_unique<FileProperty>(
+                      "SignalFile", "", FileProperty::FileAction::Load, exts),
+                  "Calibration measurement");
+  declareProperty(make_unique<FileProperty>("BackgroundFile", "",
+                                            FileProperty::OptionalLoad, exts),
+                  "Calibration background");
 
   auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
@@ -159,29 +157,30 @@ void PDCalibration::init() {
   declareProperty("FilterBadPulses", 95., range,
                   "The percentage of the average to use as the lower bound");
 
-  declareProperty(
-      new ArrayProperty<double>("TofBinning",
-                                boost::make_shared<RebinParamsValidator>()),
-        "Min, Step, and Max of time-of-flight bins. " \
-        "Logarithmic binning is used if Step is negative.");
+  declareProperty(make_unique<ArrayProperty<double>>(
+                      "TofBinning", boost::make_shared<RebinParamsValidator>()),
+                  "Min, Step, and Max of time-of-flight bins. "
+                  "Logarithmic binning is used if Step is negative.");
 
+  const std::vector<std::string> exts2{".h5", ".cal"};
   // TODO should be optional
-  declareProperty(
-      new FileProperty("PreviousCalibration", "", FileProperty::Load, // FileProperty::OptionalLoad,
-                       {".h5", ".cal"}),
-      "Calibration measurement");
+  declareProperty(make_unique<FileProperty>(
+                      "PreviousCalibration", "",
+                      FileProperty::Load, // FileProperty::OptionalLoad,
+                      exts2),
+                  "Calibration measurement");
 
   auto mustBePosArr =
       boost::make_shared<Kernel::ArrayBoundedValidator<double>>();
   mustBePosArr->setLower(0.0);
   declareProperty(
-        new ArrayProperty<double>("PeakPositions", mustBePosArr),
-        "Comma delimited d-space positions of reference peaks.");
+      make_unique<ArrayProperty<double>>("PeakPositions", mustBePosArr),
+      "Comma delimited d-space positions of reference peaks.");
 
-//  declareProperty(new WorkspaceProperty<API::ITableWorkspace>(
-//                    "RefTOFTable", "", Direction::Output),
-//                  "");
-  declareProperty(new WorkspaceProperty<API::ITableWorkspace>(
+  //  declareProperty(new WorkspaceProperty<API::ITableWorkspace>(
+  //                    "RefTOFTable", "", Direction::Output),
+  //                  "");
+  declareProperty(make_unique<WorkspaceProperty<API::ITableWorkspace>>(
                       "OutputCalibrationTable", "", Direction::Output),
                   "");
 }
@@ -196,20 +195,20 @@ void PDCalibration::exec() {
 
   m_peaksInDspacing = getProperty("PeakPositions");
   const double peakWindowMaxInDSpacing = 0.1; // TODO configurable
-  const auto windowsInDSpacing = dSpacingWindows(m_peaksInDspacing, peakWindowMaxInDSpacing);
+  const auto windowsInDSpacing =
+      dSpacingWindows(m_peaksInDspacing, peakWindowMaxInDSpacing);
 
   for (std::size_t i = 0; i < m_peaksInDspacing.size(); ++i) {
-    std::cout << "[" << i << "] "
-              << windowsInDSpacing[2*i] << " < "
-              << m_peaksInDspacing[i] << " < "
-              << windowsInDSpacing[2*i + 1]
+    std::cout << "[" << i << "] " << windowsInDSpacing[2 * i] << " < "
+              << m_peaksInDspacing[i] << " < " << windowsInDSpacing[2 * i + 1]
               << std::endl;
   }
 
   m_uncalibratedWS = loadAndBin();
   setProperty("UncalibratedWorkspace", m_uncalibratedWS);
 
-  auto uncalibratedEWS = boost::dynamic_pointer_cast<EventWorkspace>(m_uncalibratedWS);
+  auto uncalibratedEWS =
+      boost::dynamic_pointer_cast<EventWorkspace>(m_uncalibratedWS);
   bool isEvent = bool(uncalibratedEWS);
 
   loadOldCalibration();
@@ -219,83 +218,96 @@ void PDCalibration::exec() {
   // cppcheck-suppress syntaxError
   PRAGMA_OMP(parallel for schedule(dynamic, 1) )
   for (std::size_t wkspIndex = 0; wkspIndex < NUMHIST; ++wkspIndex) {
-      PARALLEL_START_INTERUPT_REGION
-      if (isEvent && uncalibratedEWS->getEventList(wkspIndex).empty()) {
-        //std::cout << "Empty event list at wkspIndex = " << wkspIndex << std::endl;
-        continue;
+    PARALLEL_START_INTERUPT_REGION
+    if (isEvent && uncalibratedEWS->getEventList(wkspIndex).empty()) {
+      // std::cout << "Empty event list at wkspIndex = " << wkspIndex <<
+      // std::endl;
+      continue;
+    }
+
+    PDCalibration::FittedPeaks peaks(m_uncalibratedWS, wkspIndex);
+    auto toTof = getDSpacingToTof(peaks.detid);
+    peaks.setPositions(m_peaksInDspacing, windowsInDSpacing, toTof);
+
+    if (peaks.inTofPos.empty())
+      continue;
+
+    //       std::cout << "****************************** detid = " <<
+    //       peaks.detid
+    //                 << " wkspIndex = " << wkspIndex
+    //                 << " numPeaks = " << peaks.inTofPos.size() << std::endl;
+    //       std::cout << "--> TOFRANGE " << peaks.tofMin << " -> " <<
+    //       peaks.tofMax << std::endl;
+
+    auto alg = createChildAlgorithm("FindPeaks");
+    alg->setProperty("InputWorkspace", m_uncalibratedWS);
+    alg->setProperty("WorkspaceIndex", static_cast<int>(wkspIndex));
+    alg->setProperty("PeakPositions", peaks.inTofPos);
+    alg->setProperty("FitWindows", peaks.inTofWindows);
+    alg->setProperty("FWHM", 7);                           // TODO default
+    alg->setProperty("Tolerance", 4);                      // TODO default
+    alg->setProperty("PeakFunction", "Gaussian");          // TODO configurable?
+    alg->setProperty("BackgroundType", "Linear");          // TODO configurable?
+    alg->setProperty("HighBackground", true);              // TODO configurable?
+    alg->setProperty("MinGuessedPeakWidth", 4);            // TODO configurable?
+    alg->setProperty("MaxGuessedPeakWidth", 4);            // TODO configurable?
+    alg->setProperty("MinimumPeakHeight", 2.);             // TODO configurable?
+    alg->setProperty("StartFromObservedPeakCentre", true); // TODO configurable?
+    alg->executeAsChildAlg();
+    API::ITableWorkspace_sptr fittedTable = alg->getProperty("PeaksList");
+    //       std::cout << "fitted rowcount " << fittedTable->rowCount() <<
+    //       std::endl;
+
+    //       std::cout << "old: ";
+    //       for (auto tof: peaks.inTofPos) {
+    //         std::cout << tof << " ";
+    //       }
+    //       std::cout << std::endl;
+
+    //       std::cout << "------------------------------" << std::endl;
+    double difc_cumm = 0.;
+    size_t difc_count = 0;
+    for (size_t i = 0; i < fittedTable->rowCount(); ++i) {
+      // Get peak value
+      double centre = fittedTable->getRef<double>("centre", i);
+      double width = fittedTable->getRef<double>("width", i);
+      double height = fittedTable->getRef<double>("height", i);
+      double chi2 = fittedTable->getRef<double>("chi2", i);
+
+      //         std::cout << "d=" << m_peaksInDspacing[i]<< " centre old=" <<
+      //         peaks.inTofPos[i];
+      if (chi2 > 1.e10) {
+        //           std::cout << " failed to fit - chisq" << chi2 << std::endl;
+      } else if (peaks.inTofWindows[2 * i] >= centre ||
+                 peaks.inTofWindows[2 * i + 1] <= centre) {
+        //           std::cout << " failed to fit - centre " <<
+        //           peaks.inTofWindows[2*i] << " < " << centre
+        //                     << " < " << peaks.inTofWindows[2*i+1] <<
+        //                     std::endl;
+      } else {
+        double difc = centre / m_peaksInDspacing[i];
+        difc_cumm += difc;
+        difc_count += 1;
+
+        //           std::cout << " new=" << centre << " width=" << width << "
+        //           height=" << height
+        //                     << " chi2=" << chi2 << " difc=" << difc <<
+        //                     std::endl;
       }
+    }
+    if (difc_count > 0) {
+      setCalibrationValues(
+          peaks.detid, (difc_cumm / static_cast<double>(difc_count)), 0., 0.);
 
-      PDCalibration::FittedPeaks peaks(m_uncalibratedWS, wkspIndex);
-      auto toTof = getDSpacingToTof(peaks.detid);
-      peaks.setPositions(m_peaksInDspacing, windowsInDSpacing, toTof);
+      //           std::cout << "avg difc = " <<
+      //           (difc_cumm/static_cast<double>(difc_count)) << std::endl;
+    } else {
+      //           std::cout << "failed to fit - zero peaks found in " <<
+      //           peaks.detid << std::endl;
+    }
 
-      if (peaks.inTofPos.empty())
-        continue;
-
-//       std::cout << "****************************** detid = " << peaks.detid
-//                 << " wkspIndex = " << wkspIndex
-//                 << " numPeaks = " << peaks.inTofPos.size() << std::endl;
-//       std::cout << "--> TOFRANGE " << peaks.tofMin << " -> " << peaks.tofMax << std::endl;
-
-       auto alg = createChildAlgorithm("FindPeaks");
-       alg->setProperty("InputWorkspace", m_uncalibratedWS);
-       alg->setProperty("WorkspaceIndex", static_cast<int>(wkspIndex));
-       alg->setProperty("PeakPositions", peaks.inTofPos);
-       alg->setProperty("FitWindows", peaks.inTofWindows);
-       alg->setProperty("FWHM", 7); // TODO default
-       alg->setProperty("Tolerance", 4); // TODO default
-       alg->setProperty("PeakFunction", "Gaussian"); // TODO configurable?
-       alg->setProperty("BackgroundType","Linear"); // TODO configurable?
-       alg->setProperty("HighBackground", true); // TODO configurable?
-       alg->setProperty("MinGuessedPeakWidth", 4); // TODO configurable?
-       alg->setProperty("MaxGuessedPeakWidth", 4); // TODO configurable?
-       alg->setProperty("MinimumPeakHeight", 2.); // TODO configurable?
-       alg->setProperty("StartFromObservedPeakCentre", true); // TODO configurable?
-       alg->executeAsChildAlg();
-       API::ITableWorkspace_sptr fittedTable = alg->getProperty("PeaksList");
-//       std::cout << "fitted rowcount " << fittedTable->rowCount() << std::endl;
-
-//       std::cout << "old: ";
-//       for (auto tof: peaks.inTofPos) {
-//         std::cout << tof << " ";
-//       }
-//       std::cout << std::endl;
-
-//       std::cout << "------------------------------" << std::endl;
-       double difc_cumm = 0.;
-       size_t difc_count = 0;
-       for (size_t i = 0; i < fittedTable->rowCount(); ++i) {
-         // Get peak value
-         double centre = fittedTable->getRef<double>("centre", i);
-         double width = fittedTable->getRef<double>("width", i);
-         double height = fittedTable->getRef<double>("height", i);
-         double chi2 = fittedTable->getRef<double>("chi2", i);
-
-//         std::cout << "d=" << m_peaksInDspacing[i]<< " centre old=" << peaks.inTofPos[i];
-         if (chi2 > 1.e10) {
-//           std::cout << " failed to fit - chisq" << chi2 << std::endl;
-         } else if (peaks.inTofWindows[2*i] >= centre || peaks.inTofWindows[2*i+1] <= centre) {
-//           std::cout << " failed to fit - centre " << peaks.inTofWindows[2*i] << " < " << centre
-//                     << " < " << peaks.inTofWindows[2*i+1] << std::endl;
-         } else {
-           double difc = centre / m_peaksInDspacing[i];
-           difc_cumm += difc;
-           difc_count += 1;
-
-//           std::cout << " new=" << centre << " width=" << width << " height=" << height
-//                     << " chi2=" << chi2 << " difc=" << difc << std::endl;
-         }
-       }
-       if (difc_count > 0) {
-           setCalibrationValues(peaks.detid, (difc_cumm/static_cast<double>(difc_count)), 0., 0.);
-
-//           std::cout << "avg difc = " << (difc_cumm/static_cast<double>(difc_count)) << std::endl;
-       } else {
-//           std::cout << "failed to fit - zero peaks found in " << peaks.detid << std::endl;
-       }
-
-       //break;
-       PARALLEL_END_INTERUPT_REGION
+    // break;
+    PARALLEL_END_INTERUPT_REGION
   }
   PARALLEL_CHECK_INTERUPT_REGION
 }
@@ -318,8 +330,9 @@ struct d_to_tof {
 };
 }
 
-vector<double> PDCalibration::dSpacingWindows(const std::vector<double> &centres,
-                                              const double widthMax) {
+vector<double>
+PDCalibration::dSpacingWindows(const std::vector<double> &centres,
+                               const double widthMax) {
   if (widthMax <= 0. || isEmpty(widthMax)) {
     return vector<double>(); // option is turned off
   }
@@ -337,12 +350,12 @@ vector<double> PDCalibration::dSpacingWindows(const std::vector<double> &centres
     if (i == 0)
       widthLeft = .5 * (centres[1] - centres[0]);
     else
-      widthLeft = .5 * (centres[i] - centres[i-1]);
+      widthLeft = .5 * (centres[i] - centres[i - 1]);
     widthLeft = std::min(widthLeft, widthMax);
 
     // calculate right
     if (i + 1 == numPeaks)
-      widthRight = .5 * (centres[numPeaks-1] - centres[numPeaks - 2]);
+      widthRight = .5 * (centres[numPeaks - 1] - centres[numPeaks - 2]);
     else
       widthRight = .5 * (centres[i + 1] - centres[i]);
     widthRight = std::min(widthRight, widthMax);
@@ -354,18 +367,21 @@ vector<double> PDCalibration::dSpacingWindows(const std::vector<double> &centres
   return windows;
 }
 
-std::function<double(double)> PDCalibration::getDSpacingToTof(const detid_t detid) {
-    auto rowNum = m_detidToRow[detid];
+std::function<double(double)>
+PDCalibration::getDSpacingToTof(const detid_t detid) {
+  auto rowNum = m_detidToRow[detid];
 
-    // to start this is the old calibration values
-    const double difa = m_calibrationTable->getRef<double>("difa", rowNum);
-    const double difc = m_calibrationTable->getRef<double>("difc", rowNum);
-    const double tzero = m_calibrationTable->getRef<double>("tzero", rowNum);
+  // to start this is the old calibration values
+  const double difa = m_calibrationTable->getRef<double>("difa", rowNum);
+  const double difc = m_calibrationTable->getRef<double>("difc", rowNum);
+  const double tzero = m_calibrationTable->getRef<double>("tzero", rowNum);
 
-    return d_to_tof(difc, difa, tzero);
+  return d_to_tof(difc, difa, tzero);
 }
 
-void PDCalibration::setCalibrationValues(const detid_t detid, const double difc, const double difa, const double tzero) {
+void PDCalibration::setCalibrationValues(const detid_t detid, const double difc,
+                                         const double difa,
+                                         const double tzero) {
   auto rowNum = m_detidToRow[detid];
 
   // detid is already there
@@ -375,11 +391,11 @@ void PDCalibration::setCalibrationValues(const detid_t detid, const double difc,
 
   size_t hasDasIdsOffset = 0; // because it adds a column
   if (m_hasDasIds)
-      hasDasIdsOffset++;
+    hasDasIdsOffset++;
 
   // TODO calculate values
-  m_calibrationTable->cell<double>(rowNum, 4+hasDasIdsOffset) = 0.; // tofmin
-  m_calibrationTable->cell<double>(rowNum, 5+hasDasIdsOffset) = 0.; // tofmax
+  m_calibrationTable->cell<double>(rowNum, 4 + hasDasIdsOffset) = 0.; // tofmin
+  m_calibrationTable->cell<double>(rowNum, 5 + hasDasIdsOffset) = 0.; // tofmax
 }
 
 MatrixWorkspace_sptr PDCalibration::load(const std::string filename) {
@@ -408,14 +424,12 @@ MatrixWorkspace_sptr PDCalibration::loadAndBin() {
   }
 
   const std::string signalFile = getProperty("Signalfile");
-  g_log.information() << "Loading signal file \""
-                      << signalFile << "\"\n";
+  g_log.information() << "Loading signal file \"" << signalFile << "\"\n";
   auto signalWS = load(getProperty("SignalFile"));
 
   const std::string backFile = getProperty("Backgroundfile");
   if (!backFile.empty()) {
-    g_log.information() << "Loading background file \""
-                        << backFile << "\"\n";
+    g_log.information() << "Loading background file \"" << backFile << "\"\n";
     auto backWS = load(backFile);
 
     double signalPcharge = signalWS->run().getProtonCharge();
@@ -436,8 +450,8 @@ MatrixWorkspace_sptr PDCalibration::loadAndBin() {
     algCompress->setProperty("InputWorkspace", signalWS);
     algCompress->setProperty("OutputWorkspace", signalWS);
     algCompress->executeAsChildAlg();
-    DataObjects::EventWorkspace_sptr compressResult
-      = algCompress->getProperty("OutputWorkspace");
+    DataObjects::EventWorkspace_sptr compressResult =
+        algCompress->getProperty("OutputWorkspace");
     signalWS = boost::dynamic_pointer_cast<MatrixWorkspace>(compressResult);
   }
 
@@ -460,60 +474,62 @@ API::MatrixWorkspace_sptr PDCalibration::rebin(API::MatrixWorkspace_sptr wksp) {
 namespace {
 
 bool hasDasIDs(API::ITableWorkspace_const_sptr table) {
-    const auto columnNames = table->getColumnNames();
-    return (std::find(columnNames.begin(), columnNames.end(), std::string("dasid")) != columnNames.end());
+  const auto columnNames = table->getColumnNames();
+  return (std::find(columnNames.begin(), columnNames.end(),
+                    std::string("dasid")) != columnNames.end());
 }
-
 }
 
 void PDCalibration::loadOldCalibration() {
-    // load the old one
-    std::string filename = getProperty("PreviousCalibration");
-    auto alg = createChildAlgorithm("LoadDiffCal");
-    alg->setProperty("Filename", filename);
-    alg->setProperty("WorkspaceName", "NOMold"); // TODO
-    alg->setProperty("MakeGroupingWorkspace", false);
-    alg->setProperty("MakeMaskWorkspace", false);
-    alg->setProperty("TofMin", m_tofMin);
-    alg->setProperty("TofMax", m_tofMax);
-    alg->executeAsChildAlg();
-    API::ITableWorkspace_sptr calibrationTableOld = alg->getProperty("OutputCalWorkspace");
+  // load the old one
+  std::string filename = getProperty("PreviousCalibration");
+  auto alg = createChildAlgorithm("LoadDiffCal");
+  alg->setProperty("Filename", filename);
+  alg->setProperty("WorkspaceName", "NOMold"); // TODO
+  alg->setProperty("MakeGroupingWorkspace", false);
+  alg->setProperty("MakeMaskWorkspace", false);
+  alg->setProperty("TofMin", m_tofMin);
+  alg->setProperty("TofMax", m_tofMax);
+  alg->executeAsChildAlg();
+  API::ITableWorkspace_sptr calibrationTableOld =
+      alg->getProperty("OutputCalWorkspace");
 
-    m_hasDasIds = hasDasIDs(calibrationTableOld);
+  m_hasDasIds = hasDasIDs(calibrationTableOld);
 
-    // generate the map of detid -> row
-    API::ColumnVector<int> detIDs = calibrationTableOld->getVector("detid");
-    const size_t numDets = detIDs.size();
-    for (size_t i = 0; i < numDets; ++i) {
-      m_detidToRow[static_cast<detid_t>(detIDs[i])] = i;
-    }
+  // generate the map of detid -> row
+  API::ColumnVector<int> detIDs = calibrationTableOld->getVector("detid");
+  const size_t numDets = detIDs.size();
+  for (size_t i = 0; i < numDets; ++i) {
+    m_detidToRow[static_cast<detid_t>(detIDs[i])] = i;
+  }
 
-    // create a new workspace
-    m_calibrationTable = boost::make_shared<DataObjects::TableWorkspace>();
-    // TODO m_calibrationTable->setTitle("");
-    m_calibrationTable->addColumn("int", "detid");
-    m_calibrationTable->addColumn("double", "difc");
-    m_calibrationTable->addColumn("double", "difa");
-    m_calibrationTable->addColumn("double", "tzero");
+  // create a new workspace
+  m_calibrationTable = boost::make_shared<DataObjects::TableWorkspace>();
+  // TODO m_calibrationTable->setTitle("");
+  m_calibrationTable->addColumn("int", "detid");
+  m_calibrationTable->addColumn("double", "difc");
+  m_calibrationTable->addColumn("double", "difa");
+  m_calibrationTable->addColumn("double", "tzero");
+  if (m_hasDasIds)
+    m_calibrationTable->addColumn("int", "dasid");
+  m_calibrationTable->addColumn("double", "tofmin");
+  m_calibrationTable->addColumn("double", "tofmax");
+  setProperty("OutputCalibrationTable", m_calibrationTable);
+
+  // copy over the values
+  for (std::size_t rowNum = 0; rowNum < calibrationTableOld->rowCount();
+       ++rowNum) {
+    API::TableRow newRow = m_calibrationTable->appendRow();
+
+    newRow << calibrationTableOld->getRef<int>("detid", rowNum);
+    newRow << calibrationTableOld->getRef<double>("difc", rowNum);
+    newRow << calibrationTableOld->getRef<double>("difa", rowNum);
+    newRow << calibrationTableOld->getRef<double>("tzero", rowNum);
     if (m_hasDasIds)
-      m_calibrationTable->addColumn("int", "dasid");
-    m_calibrationTable->addColumn("double", "tofmin");
-    m_calibrationTable->addColumn("double", "tofmax");
-    setProperty("OutputCalibrationTable", m_calibrationTable);
-
-    // copy over the values
-    for (std::size_t rowNum = 0; rowNum < calibrationTableOld->rowCount(); ++rowNum) {
-        API::TableRow newRow = m_calibrationTable->appendRow();
-
-        newRow << calibrationTableOld->getRef<int>("detid", rowNum);
-        newRow << calibrationTableOld->getRef<double>("difc", rowNum);
-        newRow << calibrationTableOld->getRef<double>("difa", rowNum);
-        newRow << calibrationTableOld->getRef<double>("tzero", rowNum);
-        if (m_hasDasIds)
-            newRow << calibrationTableOld->getRef<int>("dasid", rowNum);
-        newRow << 0.; // tofmin   TODO
-        newRow << 0.; // tofmax   TODO
-    }
+      newRow << calibrationTableOld->getRef<int>("dasid", rowNum);
+    newRow << 0.; // tofmin   TODO
+    newRow << 0.; // tofmax   TODO
+  }
 }
 
 } // namespace Algorithms
