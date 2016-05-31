@@ -193,11 +193,12 @@ namespace CustomInterfaces
     energyWs = loadParamAlg->getProperty("Workspace");
 
     double efixed = getEFixed(energyWs);
-    auto instrument = energyWs->getInstrument();
+    Mantid::specnum_t spectraMin = energyWs->getInstrument()->getNumberParameter("spectra-min")[0];
+
     auto spectrum = energyWs->getSpectrum(0);
-    spectrum->setSpectrumNo(instrument->getNumberParameter("spectra-min")[0]);
+    spectrum->setSpectrumNo(spectraMin);
     spectrum->clearDetectorIDs();
-    spectrum->addDetectorID(instrument->getNumberParameter("spectra-max")[0]);
+    spectrum->addDetectorID(spectraMin);
 
     IAlgorithm_sptr convUnitsAlg = AlgorithmManager::Instance().create("ConvertUnits");
     convUnitsAlg->setChild(true);
