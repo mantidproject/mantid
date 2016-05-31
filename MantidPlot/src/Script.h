@@ -109,8 +109,6 @@ public slots:
   /// Request that execution of this script be aborted
   void abort();
 
-  /// Asks Mantid to release all free memory
-  void releaseFreeMemory();
   /// Sets the execution mode to NotExecuting
   void setNotExecuting();
   /// Sets the execution mode to Running to indicate something is running
