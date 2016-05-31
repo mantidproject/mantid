@@ -161,6 +161,7 @@ Bugs Resolved
 
 - The Fit property browser (Fit Function window) in MantidPlot now supports fitting data plotted from a TableWorkspace.
 
+- Multi-dataset fit interface: a bug was fixed in the "edit local parameter" dialog where entering a value and selecting "fix" (for example) would truncate the final digit of the entered value.
 
 Full list of
 `GUI <http://github.com/mantidproject/mantid/pulls?q=is%3Apr+milestone%3A%22Release+3.7%22+is%3Amerged+label%3A%22Component%3A+GUI%22>`_
