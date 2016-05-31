@@ -2,8 +2,8 @@
 #define MANTID_ALGORITHMS_MAXENTCALCULATOR_H_
 
 #include "MantidAlgorithms/DllConfig.h"
-#include "MantidAlgorithms/MaxEnt/MaxentEntropy.h"
 #include "MantidAlgorithms/MaxEnt/MaxentCoefficients.h"
+#include "MantidAlgorithms/MaxEnt/MaxentEntropy.h"
 #include "MantidAlgorithms/MaxEnt/MaxentTransform.h"
 #include <boost/shared_ptr.hpp>
 
@@ -38,23 +38,20 @@ namespace Algorithms {
 
 class MANTID_ALGORITHMS_DLL MaxentCalculator final {
 public:
-	MaxentCalculator(MaxentEntropy_sptr entropy, MaxentTransform_sptr transform);
-	MaxentCalculator() = delete;
+	// Constructor
+  MaxentCalculator(MaxentEntropy_sptr entropy, MaxentTransform_sptr transform);
+	// Deleted default constructor
+  MaxentCalculator() = delete;
+	// Destructor
   virtual ~MaxentCalculator() = default;
 
-  // Loads real data
-  void loadReal(const std::vector<double> &data,
-                const std::vector<double> &errors,
-                const std::vector<double> &image, double background);
-  // Loads complex data
-  void loadComplex(const std::vector<double> &dataRe,
-                   const std::vector<double> &dataIm,
-                   const std::vector<double> &errorsRe,
-                   const std::vector<double> &errorsIm,
-                   const std::vector<double> &image, double background);
-  // Updates the image
-  void updateImage(const std::vector<double> &delta);
-  // Returns the reconstructed (calculated) data
+  // Calculates quadratic coefficients
+  void calculateQuadraticCoefficients(const std::vector<double> &data,
+                                      const std::vector<double> &errors,
+                                      const std::vector<double> &image,
+                                      double background);
+
+	// Returns the reconstructed (calculated) data
   std::vector<double> getReconstructedData() const;
   // Returns the image
   std::vector<double> getImage() const;
@@ -64,12 +61,11 @@ public:
   double getAngle() const;
   // Returns the chi-square
   double getChisq();
-  // Calculates the quadratic coefficient for the current data
-  void calculateQuadraticCoefficients();
+
+	// Updates the image
+	void updateImage(const std::vector<double> &delta);
 
 private:
-  // Initializes the member variables related to the image
-  void initImageSpace(const std::vector<double> &image, double background);
   // Calculates the gradient of chi
   std::vector<double> calculateChiGrad() const;
   // Calculates the entropy
@@ -98,8 +94,8 @@ private:
   double m_chisq;
   // The type of entropy
   MaxentEntropy_sptr m_entropy;
-	// The type of transform
-	MaxentTransform_sptr m_transform;
+  // The type of transform
+  MaxentTransform_sptr m_transform;
   // The search directions
   std::vector<std::vector<double>> m_directionsIm;
   // The quadratic coefficients

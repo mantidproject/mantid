@@ -16,119 +16,6 @@ MaxentCalculator::MaxentCalculator(MaxentEntropy_sptr entropy,
       m_directionsIm(), m_coeffs() {}
 
 /**
-* Loads a real signal
-* @param data : [input] A vector containing the experimental data
-* @param errors : [input] A vector containing the experimental errors
-* @param image : [input] A starting distribution for the image
-* @param background : [input] A background level
-* use
-*/
-void MaxentCalculator::loadReal(const std::vector<double> &data,
-                          const std::vector<double> &errors,
-                          const std::vector<double> &image, double background) {
-
-  if (data.size() != errors.size()) {
-    // Data and errors must have the same number of points
-    throw std::runtime_error("Couldn't load invalid data");
-  }
-  if (image.size() % (2 * data.size())) {
-    // If data and errors have N datapoints, image should have 2*F*N datapoints
-    // Where F is an integer factor
-    throw std::runtime_error("Couldn't load invalid image");
-  }
-  if (background == 0) {
-    throw std::runtime_error("Background must be positive");
-  }
-
-  size_t size = data.size();
-
-  initImageSpace(image, background);
-
-  m_data = std::vector<double>(2 * size);
-  m_errors = std::vector<double>(2 * size);
-  // Load the experimental (measured data)
-  // Even indices correspond to the real part
-  // Odd indices correspond to the imaginary part
-  for (size_t i = 0; i < size; i++) {
-    m_data[2 * i] = data[i];
-    m_data[2 * i + 1] = 0.;
-    m_errors[2 * i] = errors[i];
-    m_errors[2 * i + 1] = 0.;
-  }
-}
-
-/**
-* Loads a complex signal
-* @param dataRe : [input] A vector containing the real part of the experimental
-* data
-* @param dataIm : [input] A vector containing the imaginary part of the
-* experimental data
-* @param errorsRe : [input] A vector containing the experimental errors
-* (associated with the real part)
-* @param errorsIm : [input] A vector containing the experimental errors
-* (associated with the imaginary part)
-* @param image : [input] A starting distribution for the image
-* @param background : [input] A background level
-* use
-*/
-void MaxentCalculator::loadComplex(const std::vector<double> &dataRe,
-                             const std::vector<double> &dataIm,
-                             const std::vector<double> &errorsRe,
-                             const std::vector<double> &errorsIm,
-                             const std::vector<double> &image,
-                             double background) {
-
-  if ((dataRe.size() != dataIm.size()) || (errorsRe.size() % errorsIm.size()) ||
-      (dataRe.size() != errorsRe.size())) {
-    // Real and imaginary components must have the same number of datapoints
-    throw std::runtime_error("Couldn't load invalid data");
-  }
-  if (image.size() % (2 * dataRe.size())) {
-    // If real and imaginary parts have N datapoints, image should have 2N
-    // datapoints
-    throw std::runtime_error("Couldn't load invalid image");
-  }
-  if (background == 0) {
-    throw std::runtime_error("Background must be positive");
-  }
-
-  size_t size = dataRe.size();
-
-  initImageSpace(image, background);
-
-  m_data = std::vector<double>(2 * size);
-  m_errors = std::vector<double>(2 * size);
-  // Load the experimental (measured data)
-  // Even indices correspond to the real part
-  // Odd indices correspond to the imaginary part
-  for (size_t i = 0; i < size; i++) {
-    m_data[2 * i] = dataRe[i];
-    m_data[2 * i + 1] = dataIm[i];
-    m_errors[2 * i] = errorsRe[i];
-    m_errors[2 * i + 1] = errorsIm[i];
-  }
-}
-
-/**
-* Initializes some of the member variables, those which are common to real and
-* complex data
-* @param image : [input] A starting distribution for the image
-* @param background : [input] The background or sky level
-*/
-void MaxentCalculator::initImageSpace(const std::vector<double> &image,
-                                double background) {
-
-  // Set to -1, these will be calculated later
-  m_angle = -1.;
-  m_chisq = -1.;
-  // Load image, calculated data and background
-  m_image = image;
-  m_background = background;
-  correctImage();
-  m_dataCalc = m_transform->imageToData(image);
-}
-
-/**
 * Corrects the image according to the type of entropy
 */
 void MaxentCalculator::correctImage() {
@@ -300,28 +187,49 @@ double MaxentCalculator::getChisq() {
 * and SB. 22). Also calculates the angle between the gradient of chi-square and
 * the gradient of the entropy
 */
-void MaxentCalculator::calculateQuadraticCoefficients() {
+void MaxentCalculator::calculateQuadraticCoefficients(
+    const std::vector<double> &data, const std::vector<double> &errors,
+    const std::vector<double> &image, double background) {
+
+  // Some checks
+  if (data.empty() || errors.empty()) {
+    throw std::invalid_argument(
+        "Cannot calculate quadratic coefficients: invalid data");
+  }
+  if (image.empty()) {
+    throw std::invalid_argument(
+        "Cannot calculate quadratic coefficients: invalid image");
+  }
+  if (background == 0) {
+    throw std::invalid_argument(
+        "Cannot calculate quadratic coefficients: invalid background");
+  }
+  m_data = data;
+  m_errors = errors;
+  m_image = m_entropy->correctValues(image, background);
+  m_background = background;
+  m_dataCalc = m_transform->imageToData(image);
+
+  // Set to -1, these will be calculated later
+  m_angle = -1.;
+  m_chisq = -1.;
 
   // Two search directions
   const size_t dim = 2;
-
-  // Some checks
-  if (m_data.empty() || m_errors.empty() || m_image.empty() ||
-      m_dataCalc.empty()) {
-    throw std::runtime_error("Data were not loaded");
-  }
-  if (m_dataCalc.size() != m_image.size()) {
-    throw std::invalid_argument("Couldn't calculate the search directions");
-  }
 
   size_t npoints = m_image.size();
 
   // Gradient of chi (in image space)
   std::vector<double> cgrad = m_transform->dataToImage(calculateChiGrad());
   // Gradient of entropy
-	std::vector<double> sgrad = m_entropy->derivative(m_image, m_background);
+  std::vector<double> sgrad = m_entropy->derivative(m_image, m_background);
   // Metric (second derivative of the entropy)
-	std::vector<double> metric = m_entropy->secondDerivative(m_image);
+  std::vector<double> metric = m_entropy->secondDerivative(m_image);
+
+  if (cgrad.size() != npoints || sgrad.size() != npoints ||
+      metric.size() != npoints)
+    throw std::runtime_error(
+        "Cannot calculate quadratic coefficients: invalid image space");
 
   double cnorm = 0.;
   double snorm = 0.;

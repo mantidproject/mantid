@@ -296,23 +296,21 @@ void MaxEnt::exec() {
   outEvolChi = WorkspaceFactory::Instance().create(inWS, nspec, niter, niter);
   outEvolTest = WorkspaceFactory::Instance().create(inWS, nspec, niter, niter);
 
-  npoints *= 2;
+  npoints = complexImage? npoints * 2 : npoints;
   for (size_t s = 0; s < nspec; s++) {
 
     // Start distribution (flat background)
     std::vector<double> image(npoints, background);
 
+		std::vector<double> data;
+		std::vector<double> errors;
     if (complexData) {
-      auto dataRe = inWS->readY(s);
-      auto dataIm = inWS->readY(s + nspec);
-      auto errorsRe = inWS->readE(s);
-      auto errorsIm = inWS->readE(s + nspec);
-			maxentCalculator->loadComplex(dataRe, dataIm, errorsRe, errorsIm, image,
-                              background);
-    } else {
-      auto data = inWS->readY(s);
-      auto error = inWS->readE(s);
-			maxentCalculator->loadReal(data, error, image, background);
+			data = toComplex(inWS, s, false);
+			errors = toComplex(inWS, s, true);
+    } 
+		else {
+      data = inWS->readY(s);
+      errors = inWS->readE(s);
     }
 
     // To record the algorithm's progress
@@ -325,9 +323,9 @@ void MaxEnt::exec() {
     // Run maxent algorithm
     for (size_t it = 0; it < niter; it++) {
 
-      // Calculate quadratic model coefficients
-      // (SB eq. 21 and 24)
-			maxentCalculator->calculateQuadraticCoefficients();
+      // Calculate quadratic model coefficients (SB eq. 21 and 24)
+      maxentCalculator->calculateQuadraticCoefficients(data, errors, image,
+                                                       background);
       double currAngle = maxentCalculator->getAngle();
       double currChisq = maxentCalculator->getChisq();
       auto coeffs = maxentCalculator->getQuadraticCoefficients();
@@ -390,6 +388,37 @@ void MaxEnt::exec() {
 }
 
 //----------------------------------------------------------------------------------------------
+
+/** Returns a given spectrum as a complex number
+* @param inWS :: [input] The input workspace containing all the spectra
+* @param spec :: [input] The spectrum of interest
+* @param errors :: [input] If true, returns the errors, otherwise returns the counts
+* @return : Spectrum 'spec' as a complex vector
+*/
+std::vector<double> MaxEnt::toComplex(const API::MatrixWorkspace_sptr &inWS,
+                                      size_t spec, bool errors) {
+
+	std::vector<double> result(inWS->blocksize() * 2);
+
+	if (inWS->getNumberHistograms() % 2)
+		throw std::invalid_argument("Cannot convert input workspace to complex data");
+
+	size_t nspec = inWS->getNumberHistograms() / 2;
+
+	if (!errors) {
+		for (size_t i = 0; i < inWS->blocksize(); i++) {
+			result[2 * i] = inWS->readY(spec)[i];
+			result[2 * i + 1] = inWS->readY(spec + nspec)[i];
+		}
+	}
+	else {
+		for (size_t i = 0; i < inWS->blocksize(); i++) {
+			result[2 * i] = inWS->readE(spec)[i];
+			result[2 * i + 1] = inWS->readE(spec + nspec)[i];
+		}
+	}
+	return result;
+}
 
 /** Bisection method to move delta one step closer towards the solution
 * @param coeffs :: [input] The current quadratic coefficients
