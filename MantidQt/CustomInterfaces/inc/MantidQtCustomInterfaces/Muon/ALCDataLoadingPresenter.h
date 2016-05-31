@@ -84,6 +84,9 @@ namespace CustomInterfaces
     /// Start/stop watching directory
     void changeWatchState(bool watching);
 
+    /// Check custom grouping is sensible
+    bool checkCustomGrouping();
+
     /// View which the object works with
     IALCDataLoadingView* const m_view;
 
@@ -98,6 +101,9 @@ namespace CustomInterfaces
 
     /// ID of timer, if one is running
     int m_timerID;
+
+    /// Number of detectors for current first run
+    size_t m_numDetectors;
   };
 
 

@@ -33,6 +33,11 @@ public:
     TS_ASSERT_DELTA(fn.getParameter("Beta"), 0.2, 0.0001)
   }
 
+  void test_category() {
+    TS_ASSERT_EQUALS(fn.categories().size(), 1);
+    TS_ASSERT_EQUALS(fn.category(), "Muon");
+  }
+
   void test_values() {
 
     fn.setParameter("A", 2.0);
