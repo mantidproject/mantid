@@ -4,10 +4,13 @@
 
     It is intended for internal use.
 """
-from mantid.kernel.funcreturns import lhs_info
-import _api
+from __future__ import absolute_import
+
+from ..kernel.funcreturns import lhs_info
+from . import _api
 
 import inspect as _inspect
+from six import iteritems
 
 #------------------------------------------------------------------------------
 # Binary Ops
@@ -40,7 +43,7 @@ def attach_binary_operators_to_workspace():
         "Xor":"__xor__"
     }
     # Loop through and add each one in turn
-    for alg, attributes in operations.iteritems():
+    for alg, attributes in iteritems(operations):
         if type(attributes) == str: attributes = [attributes]
         for attr in attributes:
             add_operator_func(attr, alg, attr.startswith('__i'), attr.startswith('__r'))
@@ -120,7 +123,7 @@ def attach_unary_operators_to_workspace():
         'NotMD':'__invert__'
     }
     # Loop through and add each one in turn
-    for alg, attributes in operations.iteritems():
+    for alg, attributes in iteritems(operations):
         if type(attributes) == str: attributes = [attributes]
         for attr in attributes:
             add_operator_func(attr, alg)

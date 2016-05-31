@@ -115,7 +115,7 @@ for directory in plugin_dirs:
         all_plugins, algs = _plugins.find_plugins(directory)
         plugin_files += all_plugins
         alg_files += algs
-    except ValueError, exc:
+    except ValueError as exc:
         logger.warning(str(exc))
         continue
 
