@@ -605,8 +605,6 @@ LoadNexusLogs::createTimeSeries(::NeXus::File &file,
   } else if (info.type == ::NeXus::CHAR) {
     std::string values;
     try {
-      // The number of items is the number of time values
-      const int64_t nitems = time_double.size();
       const int64_t total_length = info.dims[0];
       boost::scoped_array<char> val_array(new char[total_length]);
       file.getData(val_array.get());
