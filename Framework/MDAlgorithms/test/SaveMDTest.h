@@ -44,8 +44,7 @@ public:
   }
 
   void do_test_exec(size_t numPerBox, std::string filename,
-                    bool MakeFileBacked = false,
-                    bool UpdateFileBackEnd = false,
+                    bool MakeFileBacked = false, bool UpdateFileBackEnd = false,
                     bool OtherFileName = false) {
 
     // Make a 1D MDEventWorkspace
@@ -92,11 +91,9 @@ public:
     // Continue the test
     if (UpdateFileBackEnd) {
       do_test_UpdateFileBackEnd(ws, filename);
-    }
-    else if (OtherFileName){
+    } else if (OtherFileName) {
       do_test_OtherFileName(ws, filename);
-    }
-    else {
+    } else {
       ws->clearFileBacked(false);
       if (Poco::File(this_filename).exists())
         Poco::File(this_filename).remove();
@@ -146,7 +143,8 @@ public:
       Poco::File(fullPath).remove();
   }
 
-  void do_test_OtherFileName(MDEventWorkspace1Lean::sptr ws, std::string originalFileName) {
+  void do_test_OtherFileName(MDEventWorkspace1Lean::sptr ws,
+                             std::string originalFileName) {
     const std::string otherFileName = "SaveMD_other_file_name.nxs";
 
     auto algSave = AlgorithmManager::Instance().createUnmanaged("SaveMD");
@@ -157,7 +155,7 @@ public:
     algSave->execute();
     TS_ASSERT(algSave->isExecuted());
 
-    // Now reload into another workspace 
+    // Now reload into another workspace
     {
       auto load_alg = AlgorithmManager::Instance().createUnmanaged("LoadMD");
       load_alg->initialize();
@@ -167,18 +165,18 @@ public:
       load_alg->setProperty("OutputWorkspace", "blank");
       TS_ASSERT_THROWS_NOTHING(load_alg->execute());
       Mantid::API::IMDWorkspace_sptr reference_out_ws =
-        load_alg->getProperty("OutputWorkspace");
+          load_alg->getProperty("OutputWorkspace");
       // Make sure that the output workspaces exist
       TS_ASSERT(ws);
       TS_ASSERT(reference_out_ws);
       auto ws_cast =
-        boost::dynamic_pointer_cast<Mantid::API::IMDHistoWorkspace_sptr>(
-          reference_out_ws);
+          boost::dynamic_pointer_cast<Mantid::API::IMDHistoWorkspace_sptr>(
+              reference_out_ws);
 
       // Compare the loaded and original workspace
       auto compare_alg =
-        Mantid::API::AlgorithmManager::Instance().createUnmanaged(
-          "CompareMDWorkspaces");
+          Mantid::API::AlgorithmManager::Instance().createUnmanaged(
+              "CompareMDWorkspaces");
       compare_alg->setChild(true);
       compare_alg->initialize();
       compare_alg->setProperty("Workspace1", ws);

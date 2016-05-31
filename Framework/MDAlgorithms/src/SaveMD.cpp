@@ -22,15 +22,17 @@ using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 
 namespace {
-  template <typename MDE, size_t nd>
-  void prepareUpdate(MDBoxFlatTree& BoxFlatStruct, BoxController* bc, typename MDEventWorkspace<MDE, nd>::sptr ws,  std::string filename) {
-    // remove all boxes from the DiskBuffer. DB will calculate boxes positions
-    // on HDD.
-    bc->getFileIO()->flushCache();
-    // flatten the box structure; this will remember boxes file positions in the
-    // box structure
-    BoxFlatStruct.initFlatStructure(ws, filename);
-  }
+template <typename MDE, size_t nd>
+void prepareUpdate(MDBoxFlatTree &BoxFlatStruct, BoxController *bc,
+                   typename MDEventWorkspace<MDE, nd>::sptr ws,
+                   std::string filename) {
+  // remove all boxes from the DiskBuffer. DB will calculate boxes positions
+  // on HDD.
+  bc->getFileIO()->flushCache();
+  // flatten the box structure; this will remember boxes file positions in the
+  // box structure
+  BoxFlatStruct.initFlatStructure(ws, filename);
+}
 }
 
 namespace Mantid {
@@ -99,22 +101,22 @@ void SaveMD::doSaveEvents(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   bool makeFileBackend = getProperty("MakeFileBacked");
   if (updateFileBackend && makeFileBackend)
     throw std::invalid_argument(
-      "Please choose either UpdateFileBackEnd or MakeFileBacked, not both.");
+        "Please choose either UpdateFileBackEnd or MakeFileBacked, not both.");
 
   bool wsIsFileBacked = ws->isFileBacked();
   std::string filename = getPropertyValue("Filename");
   BoxController_sptr bc = ws->getBoxController();
-  auto copyFile = wsIsFileBacked && !filename.empty() && filename != bc->getFilename();
+  auto copyFile =
+      wsIsFileBacked && !filename.empty() && filename != bc->getFilename();
   if (wsIsFileBacked) {
     if (makeFileBackend) {
       throw std::runtime_error(
-        "MakeFileBacked selected but workspace is already file backed.");
+          "MakeFileBacked selected but workspace is already file backed.");
     }
-  }
-  else {
+  } else {
     if (updateFileBackend) {
       throw std::runtime_error(
-        "UpdateFileBackEnd selected but workspace is not file backed.");
+          "UpdateFileBackEnd selected but workspace is not file backed.");
     }
   }
 
@@ -140,7 +142,7 @@ void SaveMD::doSaveEvents(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   int nDims = static_cast<int>(nd);
   bool data_exist;
   auto file = file_holder_type(MDBoxFlatTree::createOrOpenMDWSgroup(
-    filename, nDims, MDE::getTypeName(), false, data_exist));
+      filename, nDims, MDE::getTypeName(), false, data_exist));
 
   // Save each NEW ExperimentInfo to a spot in the file
   MDBoxFlatTree::saveExperimentInfos(file.get(), ws);
@@ -155,22 +157,20 @@ void SaveMD::doSaveEvents(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   if (updateFileBackend) // the workspace is already file backed;
   {
     prepareUpdate<MDE, nd>(BoxFlatStruct, bc.get(), ws, filename);
-  }
-  else if (copyFile) {
+  } else if (copyFile) {
     // Update the original file
     if (ws->fileNeedsUpdating()) {
       prepareUpdate<MDE, nd>(BoxFlatStruct, bc.get(), ws, filename);
       BoxFlatStruct.saveBoxStructure(filename);
     }
     Poco::File(bc->getFilename()).copyTo(filename);
-  }
-  else // not file backed;
+  } else // not file backed;
   {
     // the boxes file positions are unknown and we need to calculate it.
     BoxFlatStruct.initFlatStructure(ws, filename);
     // create saver class
     auto Saver = boost::shared_ptr<API::IBoxControllerIO>(
-      new DataObjects::BoxControllerNeXusIO(bc.get()));
+        new DataObjects::BoxControllerNeXusIO(bc.get()));
     Saver->setDataType(sizeof(coord_t), MDE::getTypeName());
     if (makeFileBackend) {
       // store saver with box controller
@@ -204,8 +204,7 @@ void SaveMD::doSaveEvents(typename MDEventWorkspace<MDE, nd>::sptr ws) {
       Saver->flushCache();
       // drop NeXus on HDD (not sure if it really necessary but just in case )
       Saver->flushData();
-    }
-    else // just save data, and finish with it
+    } else // just save data, and finish with it
     {
       Saver->openFile(filename, "w");
       BoxFlatStruct.setBoxesFilePositions(false);
@@ -230,7 +229,7 @@ void SaveMD::doSaveEvents(typename MDEventWorkspace<MDE, nd>::sptr ws) {
 
   // Save box structure;
   if (!copyFile) {
-   BoxFlatStruct.saveBoxStructure(filename);
+    BoxFlatStruct.saveBoxStructure(filename);
   }
 
   delete prog;
