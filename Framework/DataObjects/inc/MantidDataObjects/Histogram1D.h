@@ -37,7 +37,8 @@ protected:
   MantidVecPtr refE; ///< RefCounted Error
 
 public:
-  Histogram1D() = default;
+  // Dummy implementation to avoid issues with POD default cosntruction.
+  Histogram1D() {}
   Histogram1D(const Histogram1D &) = default;
   Histogram1D(Histogram1D &&) = default;
   Histogram1D(const ISpectrum &other);
