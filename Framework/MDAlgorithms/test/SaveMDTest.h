@@ -92,7 +92,7 @@ public:
     if (UpdateFileBackEnd) {
       do_test_UpdateFileBackEnd(ws, filename);
     } else if (OtherFileName) {
-      do_test_OtherFileName(ws, filename);
+      do_test_OtherFileName(ws, this_filename);
     } else {
       ws->clearFileBacked(false);
       if (Poco::File(this_filename).exists())
