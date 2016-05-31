@@ -3,6 +3,7 @@
 //-----------------------------------------------------------------------------
 #include "MantidGeometry/Math/Quadrilateral.h"
 #include "MantidKernel/Exception.h"
+#include <algorithm>
 
 namespace Mantid {
 namespace Geometry {

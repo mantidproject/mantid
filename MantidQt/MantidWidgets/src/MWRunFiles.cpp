@@ -794,6 +794,7 @@ void MWRunFiles::inspectThreadResult() {
 
   if (!error.empty()) {
     setFileProblem(QString::fromStdString(error));
+    emit fileInspectionFinished();
     return;
   }
 

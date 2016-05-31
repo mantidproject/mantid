@@ -64,6 +64,9 @@ namespace {
 Kernel::Logger g_log("ScriptRepositoryImpl");
 }
 
+/// Default timeout
+int DEFAULT_TIMEOUT_SEC = 30;
+
 const char *timeformat = "%Y-%b-%d %H:%M:%S";
 
 const char *emptyURL =
@@ -1394,7 +1397,7 @@ void ScriptRepositoryImpl::doDownloadFile(const std::string &url_file,
     int timeout;
     if (!ConfigService::Instance().getValue("network.scriptrepo.timeout",
                                             timeout)) {
-      timeout = 5; // the default value if the key is not found
+      timeout = DEFAULT_TIMEOUT_SEC;
     }
     inetHelper.setTimeout(timeout);
 
