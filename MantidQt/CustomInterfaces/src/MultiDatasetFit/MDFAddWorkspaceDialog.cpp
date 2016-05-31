@@ -32,6 +32,7 @@ AddWorkspaceDialog::AddWorkspaceDialog(QWidget *parent):QDialog(parent),m_maxInd
       workspaceNames << QString::fromStdString( *name );
     }
   }
+  workspaceNames.sort();
   connect(m_uiForm.cbWorkspaceName,SIGNAL(currentIndexChanged(const QString&)),this,SLOT(workspaceNameChanged(const QString&)));
   m_uiForm.cbWorkspaceName->addItems( workspaceNames );
 
