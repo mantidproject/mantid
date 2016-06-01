@@ -558,13 +558,12 @@ PlotPeakByLogValue::makeNames() const {
             try {
               start = boost::lexical_cast<double>(range[0]);
               end = boost::lexical_cast<double>(range[1]);
-            }
-            catch (boost::bad_lexical_cast &) {
+            } catch (boost::bad_lexical_cast &) {
               throw std::runtime_error(
-                std::string("Provided incorrect range values. Range is "
-                  "specfifed by start_value:stop_value, but "
-                  "provided ") +
-                range[0] + std::string(" and ") + range[1]);
+                  std::string("Provided incorrect range values. Range is "
+                              "specfifed by start_value:stop_value, but "
+                              "provided ") +
+                  range[0] + std::string(" and ") + range[1]);
             }
             if (start > end)
               std::swap(start, end);
