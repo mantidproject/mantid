@@ -506,5 +506,26 @@ void MuonFitDataSelector::periodCombinationStateChanged(int state) {
   m_ui.txtSecond->setEnabled(state == Qt::Checked);
 }
 
+/**
+ * Return the instrument name currently set as the override
+ * for the data selector
+ * @returns :: instrument name
+ */
+QString MuonFitDataSelector::getInstrumentName() const {
+  return m_ui.runs->getInstrumentOverride();
+}
+
+/**
+ * Return the runs entered by the user
+ * @returns :: run number string if valid, else empty string
+ */
+QString MuonFitDataSelector::getRuns() const {
+  if (m_ui.runs->isValid()) {
+    return m_ui.runs->getText();
+  } else {
+    return "";
+  }
+}
+
 } // namespace MantidWidgets
 } // namespace MantidQt

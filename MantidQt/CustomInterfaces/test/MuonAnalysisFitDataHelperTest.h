@@ -34,6 +34,8 @@ public:
   MOCK_METHOD1(setStartTimeQuietly, void(double));
   MOCK_METHOD1(setEndTimeQuietly, void(double));
   MOCK_CONST_METHOD0(getFitType, IMuonFitDataSelector::FitType());
+  MOCK_CONST_METHOD0(getInstrumentName, QString());
+  MOCK_CONST_METHOD0(getRuns, QString());
 };
 
 /// Mock fit property browser

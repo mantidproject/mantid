@@ -70,6 +70,10 @@ public:
   void setChosenPeriod(const QString &period) override;
   /// Get type of fit
   IMuonFitDataSelector::FitType getFitType() const override;
+  /// Get instrument name
+  QString getInstrumentName() const override;
+  /// Get selected run numbers
+  QString getRuns() const override;
 
 public slots:
   /// Set number of periods in data

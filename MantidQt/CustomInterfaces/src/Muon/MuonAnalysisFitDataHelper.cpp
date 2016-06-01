@@ -117,7 +117,10 @@ void MuonAnalysisFitDataHelper::createWorkspacesToFit() {
   const auto periods = m_dataSelector->getPeriodSelections();
 
   Muon::DatasetParams params;
-  //params.instrument = 
+  QString instRuns = m_dataSelector->getInstrumentName();
+  instRuns.append(m_dataSelector->getRuns());
+  MuonAnalysisHelper::parseRunLabel(instRuns.toStdString(), params.instrument,
+                                    params.runs);
 
   // Update model with these
   //m_fitBrowser->... (m_workspacesToFit)

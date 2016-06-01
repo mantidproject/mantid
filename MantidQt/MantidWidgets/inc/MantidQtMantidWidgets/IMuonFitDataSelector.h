@@ -35,6 +35,8 @@ public:
   virtual void setStartTimeQuietly(double start) = 0;
   virtual void setEndTimeQuietly(double end) = 0;
   virtual FitType getFitType() const = 0;
+  virtual QString getInstrumentName() const = 0;
+  virtual QString getRuns() const = 0;
 };
 } // namespace MantidWidgets
 } // namespace MantidQt
