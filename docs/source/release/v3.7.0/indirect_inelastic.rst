@@ -100,6 +100,7 @@ Bugfixes
 - :ref:`IqtFitSequential <algm-IqtFitSequential>` and :ref:`IqtFitMultiple <algm-IqtFitMultiple>` now correctly add sample logs to their output workspaces
 - It is now possible to properly update the Rebinning option in the *ISISCalibration* interface in *Indirect Data Reduction*
 - The Plot Output options in the *I(Q, t) Fit* interface now update properly when switching between Fit Types
+- The Data Reduction *ISIS Calibration* interface should now update the range bars correctly for OSIRIS
 
 
 
