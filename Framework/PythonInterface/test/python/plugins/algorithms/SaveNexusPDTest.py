@@ -81,7 +81,7 @@ class SaveNexusPDTest(unittest.TestCase):
 
             nxmoderator = nxinstrument['moderator']
             if withInstrument:
-                self.assertLess(nxmoderator['distance'][0], 0.)
+                self.assertTrue(nxmoderator['distance'][0] < 0.)
 
             for name in nxinstrument.keys():
                 if name == 'moderator':

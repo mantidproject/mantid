@@ -22,6 +22,7 @@ namespace MantidQt
       m_hintLabel->ensurePolished();
 
       connect(this, SIGNAL(textEdited(const QString&)), this, SLOT(updateHints(const QString&)));
+      connect(this, SIGNAL(editingFinished()), this, SLOT(hideHints()));
     }
 
     HintingLineEdit::~HintingLineEdit()
@@ -83,6 +84,10 @@ namespace MantidQt
       //Suggest one of them to the user via auto-completion
       insertSuggestion();
     }
+
+    /** Hides the list of hints
+    */
+    void HintingLineEdit::hideHints() { m_hintLabel->hide(); }
 
     /** Updates the list of hints matching the user's current input */
     void HintingLineEdit::updateMatches()

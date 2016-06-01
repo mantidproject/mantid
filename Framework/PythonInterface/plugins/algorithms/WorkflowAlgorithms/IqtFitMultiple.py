@@ -189,15 +189,15 @@ class IqtFitMultiple(PythonAlgorithm):
                                                          ParameterNames=parameter_names)
 
         # create and add sample logs
-        sample_logs  = {'start_x': self._start_x, 'end_x': self._end_x, 'fit_type': self._fit_type,
+        sample_logs  = {'start_x': self._start_x, 'end_x': self._end_x, 'fit_type': self._fit_type[:-2],
                         'intensities_constrained': self._intensities_constrained, 'beta_constrained': True}
 
         conclusion_prog.report('Copying sample logs')
         CopyLogs(InputWorkspace=self._input_ws, OutputWorkspace=self._result_name)
         CopyLogs(InputWorkspace=self._input_ws, OutputWorkspace=self._fit_group_name)
 
-        log_names = [item[0] for item in sample_logs]
-        log_values = [item[1] for item in sample_logs]
+        log_names = [item for item in sample_logs]
+        log_values = [sample_logs[item] for item in sample_logs]
         conclusion_prog.report('Adding sample logs')
         AddSampleLogMultiple(Workspace=self._result_name, LogNames=log_names, LogValues=log_values)
         AddSampleLogMultiple(Workspace=self._fit_group_name, LogNames=log_names, LogValues=log_values)

@@ -200,7 +200,7 @@ void SaveFITS::writeFITSHeaderEntry(const std::string &hdr,
                                     std::ofstream &file) {
   static const std::vector<char> blanks(g_maxLenHdr, 32);
 
-  size_t count = hdr.size();
+  auto count = hdr.size();
   if (count >= g_maxLenHdr)
     count = g_maxLenHdr;
 

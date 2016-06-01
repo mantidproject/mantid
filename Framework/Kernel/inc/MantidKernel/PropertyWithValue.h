@@ -205,8 +205,8 @@ template <typename T> T extractToValueVector(const std::string &strvalue) {
                      tokenizer::TOK_IGNORE_EMPTY | tokenizer::TOK_TRIM);       \
     value.clear();                                                             \
     value.reserve(values.count());                                             \
-    for (tokenizer::Iterator it = values.begin(); it != values.end(); ++it) {  \
-      appendValue(*it, value);                                                 \
+    for (const auto &token : values) {                                         \
+      appendValue(token, value);                                               \
     }                                                                          \
   }
 

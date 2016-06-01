@@ -153,15 +153,6 @@ public:
                            const std::string &description) = 0;
 
   /**
-   * To enable/disable all actions in the view. Useful when it is
-   * necessary to prevent the user from requesting actions. For
-   * example, during a lenghty execution of a process, drawing, etc.
-   *
-   * @param enable whether to enable or disable actions.
-   */
-  virtual void enableActions(bool enable) = 0;
-
-  /**
    * Display an error message (for example as a pop-up window).
    *
    * @param err Error title, should be short and would normally be
@@ -171,6 +162,15 @@ public:
    */
   virtual void userError(const std::string &err,
                          const std::string &description) = 0;
+
+  /**
+   * To enable/disable all actions in the view. Useful when it is
+   * necessary to prevent the user from requesting actions. For
+   * example, during a lenghty execution of a process, drawing, etc.
+   *
+   * @param enable whether to enable or disable actions.
+   */
+  virtual void enableActions(bool enable) = 0;
 
   /**
    * The images of the type selected by the user (samples/flats/darks).

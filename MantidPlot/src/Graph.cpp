@@ -1388,6 +1388,13 @@ void Graph::setAxisScale(int axis, double start, double end, int scaleType,
     updateSecondaryAxis(QwtPlot::xTop);
     updateSecondaryAxis(QwtPlot::yRight);
   }
+
+  for(auto c: d_plot->curves()) {
+    auto mmc = dynamic_cast<MantidMatrixCurve*>(c);
+    if (mmc) {
+      mmc->loadData();
+    }
+  }
   d_plot->replot();
   ////keep markers on canvas area
   updateMarkersBoundingRect();

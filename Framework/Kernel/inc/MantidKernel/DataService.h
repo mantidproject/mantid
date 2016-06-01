@@ -233,7 +233,7 @@ public:
 
     // find if the Tobject already exists
     std::string foundName;
-    svc_it it = findNameWithCaseSearch(name, foundName);
+    auto it = findNameWithCaseSearch(name, foundName);
     if (it != datamap.end()) {
       g_log.debug("Data Object '" + foundName +
                   "' replaced in data service.\n");
@@ -264,7 +264,7 @@ public:
     m_mutex.lock();
 
     std::string foundName;
-    svc_it it = findNameWithCaseSearch(name, foundName);
+    auto it = findNameWithCaseSearch(name, foundName);
     if (it == datamap.end()) {
       g_log.debug(" remove '" + name + "' cannot be found");
       m_mutex.unlock();
@@ -305,7 +305,7 @@ public:
     m_mutex.lock();
 
     std::string foundName;
-    svc_it it = findNameWithCaseSearch(oldName, foundName);
+    auto it = findNameWithCaseSearch(oldName, foundName);
     if (it == datamap.end()) {
       g_log.warning(" rename '" + oldName + "' cannot be found");
       m_mutex.unlock();
@@ -365,7 +365,7 @@ public:
     std::lock_guard<std::recursive_mutex> _lock(m_mutex);
 
     std::string foundName;
-    svc_it it = findNameWithCaseSearch(name, foundName);
+    auto it = findNameWithCaseSearch(name, foundName);
     if (it != datamap.end()) {
       return it->second;
     } else {
@@ -382,7 +382,7 @@ public:
     std::lock_guard<std::recursive_mutex> _lock(m_mutex);
 
     std::string foundName;
-    svc_it it = findNameWithCaseSearch(name, foundName);
+    auto it = findNameWithCaseSearch(name, foundName);
     return it != datamap.end();
   }
 
@@ -394,8 +394,8 @@ public:
       return datamap.size();
     } else {
       size_t count = 0;
-      for (svc_constit it = datamap.begin(); it != datamap.end(); ++it) {
-        if (!isHiddenDataServiceObject(it->first))
+      for (auto &it : datamap) {
+        if (!isHiddenDataServiceObject(it.first))
           ++count;
       }
       return count;
@@ -410,9 +410,9 @@ public:
     std::lock_guard<std::recursive_mutex> _lock(m_mutex);
 
     std::unordered_set<std::string> names;
-    for (svc_constit it = datamap.begin(); it != datamap.end(); ++it) {
-      if (!isHiddenDataServiceObject(it->first)) {
-        names.insert(it->first);
+    for (const auto &item : datamap) {
+      if (!isHiddenDataServiceObject(item.first)) {
+        names.insert(item.first);
       }
     }
     return names;
@@ -423,8 +423,8 @@ public:
     std::lock_guard<std::recursive_mutex> _lock(m_mutex);
 
     std::unordered_set<std::string> names;
-    for (svc_constit it = datamap.begin(); it != datamap.end(); ++it) {
-      names.insert(it->first);
+    for (const auto &item : datamap) {
+      names.insert(item.first);
     }
     return names;
   }
@@ -513,7 +513,7 @@ private:
 
     // Exact match
     foundName = name;
-    svc_it match = data.find(name);
+    auto match = data.find(name);
     if (match != data.end())
       return match;
 

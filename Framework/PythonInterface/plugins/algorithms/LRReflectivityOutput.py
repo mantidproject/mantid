@@ -194,8 +194,10 @@ class LRReflectivityOutput(PythonAlgorithm):
         start_time = mtd[scaled_ws_list[0] + '_scaled'].getRun().getProperty("start_time").value
         experiment = mtd[scaled_ws_list[0] + '_scaled'].getRun().getProperty("experiment_identifier").value
         run_number = mtd[scaled_ws_list[0] + '_scaled'].getRun().getProperty("run_number").value
+        run_title = mtd[scaled_ws_list[0] + '_scaled'].getTitle()
 
         content = '# Experiment %s Run %s\n' % (experiment, run_number)
+        content += '# Run title: %s\n' % run_title
         content += '# Run start time: %s\n' % start_time
         content += '# Reduction time: %s\n' % time.ctime()
         content += '# Mantid version: %s\n' % mantid.__version__

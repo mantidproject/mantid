@@ -47,8 +47,31 @@ public:
   IEnggDiffractionView(){};
   virtual ~IEnggDiffractionView(){};
 
-  /// @name Direct (and usually modal) user interaction
+  /// @name Direct (and usually modal, or at least top/pop-up level) user
+  /// interaction
   //@{
+  /**
+   * To display important messages that need maximum visibility
+   * (normally a dialog on top of the interface). This can be used to
+   * control the visibility and content of the message. An example use
+   * case is to inform the user that certain inputs are absolutely
+   * needed to use the interface functionality.
+   *
+   * @param visible whether the "splash"/important message should be visible
+   * @param shortMsg short/one line message summary
+   * @param description message with full details
+   */
+  virtual void splashMessage(bool visible, const std::string &shortMsg,
+                             const std::string &description) = 0;
+
+  /**
+   * Display the current status (running some algorithms, finished,
+   * ready, etc.), in a status bar or similar.
+   *
+   * @param sts status message which should be concise
+   */
+  virtual void showStatus(const std::string &sts) = 0;
+
   /**
    * Display a warning to the user (for example as a pop-up window).
    *
@@ -122,7 +145,7 @@ public:
   * selected spec will be passed as a bank for the calibrartion
   * process to be carried out
   *
-  * @return which format should to applied for plotting data
+  * @return Bank selection index: spectrum-numbers / north / south
   */
   virtual int currentCropCalibBankName() const = 0;
 
@@ -213,16 +236,17 @@ public:
                               const std::string &fname) = 0;
 
   /**
-   * Write a GSAS file. Temporarily here until we have a more final
-   * way of generating these files.
+   * Run Python code received as a script string. This is used for
+   * example to write GSAS instrument parameters file, or other code
+   * included with the Engg scripts. Temporarily here until we have a
+   * more final way of generating these files. A SaveGSAS algorithm
+   * that can handle ENGIN-X files would be ideal.
    *
-   * @param outFilename output file name
-   * @param difc difc values (one per bank)
-   * @param tzero tzero values (one per bank)
+   * @param pyCode Python script as a string
+   *
+   * @return status string from running the code
    */
-  virtual void writeOutCalibFile(const std::string &outFilename,
-                                 const std::vector<double> &difc,
-                                 const std::vector<double> &tzero) = 0;
+  virtual std::string enggRunPythonCode(const std::string &pyCode) = 0;
 
   /**
    * Enable/disable all the sections or tabs of the interface. To be
@@ -456,10 +480,11 @@ public:
   * generates and sets the curves on the fitting tab
   * @param data of the workspace to be passed as QwtData
   * @param focused to check whether focused workspace
+  * @param plotSinglePeaks whether to plot single peak fitting ws
   *
   */
   virtual void setDataVector(std::vector<boost::shared_ptr<QwtData>> &data,
-                             bool focused) = 0;
+                             bool focused, bool plotSinglePeaks) = 0;
   //@}
 
   /**
@@ -478,19 +503,12 @@ public:
   virtual bool saveFocusedOutputFiles() const = 0;
 
   /**
-  * Produces vanadium curves graph with three spectrum for calib
-  * output.
-  *
-  */
-  virtual void plotVanCurvesCalibOutput() = 0;
-
-  /**
-  * Produces ceria peaks graph with two spectrum for calib
-  * output.
+  * Produces vanadium curves graph with three spectrum and
+  * ceria peaks graph with two spectrum for calib output.
   *
   * @param pyCode string which is passed to Mantid via pyScript
   */
-  virtual void plotDifcZeroCalibOutput(const std::string &pyCode) = 0;
+  virtual void plotCalibOutput(const std::string &pyCode) = 0;
 
   /**
   * Produces a single spectrum graph for focused output.

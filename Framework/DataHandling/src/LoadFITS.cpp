@@ -56,6 +56,9 @@ struct FITSInfo {
 };
 
 // Static class constants
+const std::string LoadFITS::g_END_KEYNAME = "END";
+const std::string LoadFITS::g_COMMENT_KEYNAME = "COMMENT";
+const std::string LoadFITS::g_XTENSION_KEYNAME = "XTENSION";
 const std::string LoadFITS::g_BIT_DEPTH_NAME = "BitDepthName";
 const std::string LoadFITS::g_ROTATION_NAME = "RotationName";
 const std::string LoadFITS::g_AXIS_NAMES_NAME = "AxisNames";
@@ -281,7 +284,7 @@ void LoadFITS::loadHeader(const std::string &filePath, FITSInfo &header) {
     // Various extensions to the FITS format are used elsewhere, and
     // must be parsed differently if used. This loader Loader
     // doesn't support this.
-    header.extension = header.headerKeys["XTENSION"];
+    header.extension = header.headerKeys[g_XTENSION_KEYNAME];
   } catch (std::exception &e) {
     throw std::runtime_error(
         "Failed to process the '" + m_headerNAxisNameKey +
@@ -316,7 +319,7 @@ void LoadFITS::loadHeader(const std::string &filePath, FITSInfo &header) {
       // by
       // Starlight XPRESS cameras)
       try {
-        double doff =
+        auto doff =
             boost::lexical_cast<double>(header.headerKeys[m_headerOffsetKey]);
         double intPart;
         if (0 != modf(doff, &intPart)) {
@@ -584,7 +587,7 @@ void LoadFITS::parseHeader(FITSInfo &headerInfo) {
   // Iterate 80 bytes at a time until header is parsed | 2880 bytes is the
   // fixed header length of FITS
   // 2880/80 = 36 iterations required
-  const std::string commentKW = "COMMENT";
+  const std::string commentKW = g_COMMENT_KEYNAME;
   bool endFound = false;
 
   while (!endFound &&
@@ -623,7 +626,7 @@ void LoadFITS::parseHeader(FITSInfo &headerInfo) {
         boost::trim(key);
         boost::trim(value);
 
-        if (key == "END")
+        if (key == g_END_KEYNAME)
           endFound = true;
 
         if (key != "")
@@ -793,7 +796,7 @@ void LoadFITS::addAxesInfoAndLogs(Workspace2D_sptr ws, bool loadAsRectImg,
     unitLbl->setLabel("height", "cm");
     ws->getAxis(1)->unit() = unitLbl;
 
-    ws->isDistribution(true);
+    ws->setDistribution(true);
   } else {
     // TODO: what to do when loading 1pixel - 1 spectrum?
   }

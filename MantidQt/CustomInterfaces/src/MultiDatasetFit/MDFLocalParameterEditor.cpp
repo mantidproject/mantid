@@ -99,6 +99,9 @@ namespace MDF
 
   m_editor->installEventFilter(this);
 
+  connect(m_editor, SIGNAL(textEdited(const QString &)), this,
+          SLOT(updateValue(const QString &)));
+
   setEditorState();
 }
 
@@ -239,6 +242,14 @@ QString LocalParameterEditor::setTieDialog(QString tie)
     return input.textValue();
   }
   return "";
+}
+
+/**
+ * SLOT: when user edits value, make sure m_value is updated
+ * @param value :: [input] Changed text in the edit box
+ */
+void LocalParameterEditor::updateValue(const QString &value) {
+  m_value = value;
 }
 
 } // MDF

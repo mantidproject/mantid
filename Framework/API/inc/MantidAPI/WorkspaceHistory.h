@@ -56,6 +56,8 @@ public:
   virtual ~WorkspaceHistory();
   /// Copy constructor
   WorkspaceHistory(const WorkspaceHistory &);
+  /// Deleted copy assignment operator
+  WorkspaceHistory &operator=(const WorkspaceHistory &) = delete;
   /// Retrieve the algorithm history list
   const AlgorithmHistories &getAlgorithmHistories() const;
   /// Retrieve the environment history
@@ -90,8 +92,6 @@ public:
   void loadNexus(::NeXus::File *file);
 
 private:
-  /// Private, unimplemented copy assignment operator
-  WorkspaceHistory &operator=(const WorkspaceHistory &);
   /// Recursive function to load the algorithm history tree from file
   void loadNestedHistory(
       ::NeXus::File *file,

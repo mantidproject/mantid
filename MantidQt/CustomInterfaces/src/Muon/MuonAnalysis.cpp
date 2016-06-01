@@ -1202,7 +1202,9 @@ MuonAnalysis::load(const QStringList &files) const {
 
     if (f == files.constBegin()) {
       // These are only needed for the first file
-      load->setPropertyValue("DeadTimeTable", "__NotUsed");
+      if (m_uiForm.deadTimeType->currentText() == "From Data File") {
+        load->setPropertyValue("DeadTimeTable", "__NotUsed");
+      }
       load->setPropertyValue("DetectorGroupingTable", "__NotUsed");
     }
 
@@ -1215,10 +1217,18 @@ MuonAnalysis::load(const QStringList &files) const {
 
       // Check that is a valid Muon instrument
       if (m_uiForm.instrSelector->findText(QString::fromStdString(instrName)) ==
-          -1)
-        throw std::runtime_error("Instrument is not recognized: " + instrName);
+          -1) {
+        if (0 !=
+            instrName.compare(
+                "DEVA")) { // special case - no IDF but let it load anyway
+          throw std::runtime_error("Instrument is not recognized: " +
+                                   instrName);
+        }
+      }
 
-      result->loadedDeadTimes = load->getProperty("DeadTimeTable");
+      if (m_uiForm.deadTimeType->currentText() == "From Data File") {
+        result->loadedDeadTimes = load->getProperty("DeadTimeTable");
+      }
       result->loadedGrouping = load->getProperty("DetectorGroupingTable");
       result->mainFieldDirection =
           static_cast<std::string>(load->getProperty("MainFieldDirection"));
@@ -1274,30 +1284,21 @@ MuonAnalysis::getGrouping(boost::shared_ptr<LoadResult> loadResult) const {
   auto result = boost::make_shared<GroupResult>();
 
   boost::shared_ptr<Mantid::API::Grouping> groupingToUse;
-
   Instrument_const_sptr instr =
       firstPeriod(loadResult->loadedWorkspace)->getInstrument();
 
-  // Check whether the instrument was changed
-  int instrIndex = m_uiForm.instrSelector->findText(
-      QString::fromStdString(instr->getName()));
-  bool instrChanged = m_uiForm.instrSelector->currentIndex() != instrIndex;
-
-  // Check whether the number of spectra was changed
-  bool noSpectraChanged(true);
-
+  Workspace_sptr currentWS;
   if (AnalysisDataService::Instance().doesExist(m_workspace_name)) {
-    auto currentWs =
+    currentWS =
         AnalysisDataService::Instance().retrieveWS<Workspace>(m_workspace_name);
-    size_t currentNoSpectra = firstPeriod(currentWs)->getNumberHistograms();
-
-    size_t loadedNoSpectra =
-        firstPeriod(loadResult->loadedWorkspace)->getNumberHistograms();
-
-    noSpectraChanged = (currentNoSpectra != loadedNoSpectra);
+  } else {
+    currentWS = nullptr;
   }
 
-  if (!noSpectraChanged && !instrChanged && isGroupingSet()) {
+  const bool reloadNecessary =
+      isReloadGroupingNecessary(currentWS, loadResult->loadedWorkspace);
+
+  if (!reloadNecessary && isGroupingSet()) {
     // Use grouping currently set
     result->usedExistGrouping = true;
     groupingToUse = boost::make_shared<Mantid::API::Grouping>(
@@ -1882,7 +1883,10 @@ void MuonAnalysis::plotSpectrum(const QString &wsName, bool logScale) {
   s << "  if y_auto:";
   s << "    layer.setAutoScale()";
   s << "  else:";
-  s << "    layer.setAxisScale(Layer.Left, y_min, y_max)";
+  s << "    try:";
+  s << "      layer.setAxisScale(Layer.Left, float(y_min), float(y_max))";
+  s << "    except ValueError:";
+  s << "      layer.setAutoScale()";
   s << "";
 
   // Plot the data!
@@ -3167,7 +3171,7 @@ void MuonAnalysis::fillGroupingTable(const Grouping &grouping) {
  */
 std::string MuonAnalysis::getSummedPeriods() const {
   auto summed = m_uiForm.homePeriodBox1->text().toStdString();
-  summed.erase(std::remove(summed.begin(), summed.end(), ' '));
+  summed.erase(std::remove(summed.begin(), summed.end(), ' '), summed.end());
   return summed;
 }
 
@@ -3177,7 +3181,8 @@ std::string MuonAnalysis::getSummedPeriods() const {
  */
 std::string MuonAnalysis::getSubtractedPeriods() const {
   auto subtracted = m_uiForm.homePeriodBox2->text().toStdString();
-  subtracted.erase(std::remove(subtracted.begin(), subtracted.end(), ' '));
+  subtracted.erase(std::remove(subtracted.begin(), subtracted.end(), ' '),
+                   subtracted.end());
   return subtracted;
 }
 
