@@ -465,7 +465,7 @@ set_property ( TARGET API PROPERTY FOLDER "MantidFramework" )
 
 target_link_libraries ( API LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} ${JSONCPP_LIBRARIES} ${MANTIDLIBS} ${GSL_LIBRARIES} ${NEXUS_LIBRARIES} ${WINSOCK} )
 if(MAKE_VATES)
-  target_include_directories( API PRIVATE ${PARAVIEW_INCLUDE_DIRS} )
+  target_include_directories( API SYSTEM PRIVATE ${PARAVIEW_INCLUDE_DIRS} )
   target_link_libraries ( API LINK_PRIVATE vtkPVClientServerCoreRendering )
 endif()
 
