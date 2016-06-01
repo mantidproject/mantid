@@ -10,16 +10,13 @@
 #include "MantidAPI/IFuncMinimizer.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidCurveFitting/Algorithms/Fit.h"
-
-#include "MantidCurveFitting/Functions/StretchExp.h"
-#include "MantidAPI/CompositeFunction.h"
-
-
+#include "MantidDataObjects/Workspace2D.h"
 
 using namespace Mantid;
+using namespace Mantid::API;
 using namespace Mantid::CurveFitting;
 using namespace Mantid::CurveFitting::Algorithms;
-using namespace Mantid::API;
+using namespace Mantid::DataObjects;
 
 namespace {
 class TestMinimizer : public API::IFuncMinimizer {
@@ -185,11 +182,25 @@ public:
       x[i] = static_cast<double>(i);
       e[i] = 1.0;
     }
-    y = {5.0, 3.582656552869, 2.567085595163, 1.839397205857, 1.317985690579,
-         0.9443780141878, 0.6766764161831, 0.484859839322, 0.347417256114,
-         0.2489353418393, 0.1783699667363, 0.1278076660325, 0.09157819444367,
-         0.0656186436847, 0.04701781275748, 0.03368973499543, 0.02413974996916,
-         0.01729688668232, 0.01239376088333};
+    y = {5.0,
+         3.582656552869,
+         2.567085595163,
+         1.839397205857,
+         1.317985690579,
+         0.9443780141878,
+         0.6766764161831,
+         0.484859839322,
+         0.347417256114,
+         0.2489353418393,
+         0.1783699667363,
+         0.1278076660325,
+         0.09157819444367,
+         0.0656186436847,
+         0.04701781275748,
+         0.03368973499543,
+         0.02413974996916,
+         0.01729688668232,
+         0.01239376088333};
 
     Fit fit;
     fit.initialize();
@@ -222,12 +233,26 @@ public:
       x[i] = static_cast<double>(i);
       e[i] = 1.;
     }
-    y = {5 * sqrh, 0.0, -2.567085595163 * sqrh, -1.839397205857,
-         -1.317985690579 * sqrh, 0.0, 0.6766764161831 * sqrh, 0.484859839322,
-         0.347417256114 * sqrh, 0.0, -0.1783699667363 * sqrh, -0.1278076660325,
-         -0.09157819444367 * sqrh, 0.0, 0.04701781275748 * sqrh,
-         0.03368973499543, 0.02413974996916 * sqrh, 0.0,
-         -0.01239376088333 * sqrh, 0.0};
+    y = {5 * sqrh,
+         0.0,
+         -2.567085595163 * sqrh,
+         -1.839397205857,
+         -1.317985690579 * sqrh,
+         0.0,
+         0.6766764161831 * sqrh,
+         0.484859839322,
+         0.347417256114 * sqrh,
+         0.0,
+         -0.1783699667363 * sqrh,
+         -0.1278076660325,
+         -0.09157819444367 * sqrh,
+         0.0,
+         0.04701781275748 * sqrh,
+         0.03368973499543,
+         0.02413974996916 * sqrh,
+         0.0,
+         -0.01239376088333 * sqrh,
+         0.0};
 
     Fit fit;
     fit.initialize();
@@ -548,72 +573,93 @@ public:
 
   void test_resolutoin_Fit() {}
 
-  void testAgainstMockData() {
-	  Algorithms::Fit alg2;
-	  TS_ASSERT_THROWS_NOTHING(alg2.initialize());
-	  TS_ASSERT(alg2.isInitialized());
+  void getStretchExpMockData(Mantid::MantidVec &y, Mantid::MantidVec &e) {
+    // values extracted from y(x)=2*exp(-(x/4)^0.5)
+    y[0] = 2;
+    y[1] = 1.2130613;
+    y[2] = 0.98613738;
+    y[3] = 0.84124005;
+    y[4] = 0.73575888;
+    y[5] = 0.65384379;
+    y[6] = 0.58766531;
+    y[7] = 0.53273643;
+    y[8] = 0.48623347;
+    y[9] = 0.44626032;
+    y[10] = 0.41148132;
+    y[11] = 0.38092026;
+    y[12] = 0.35384241;
+    y[13] = 0.32968143;
+    y[14] = 0.30799199;
+    y[15] = 0.28841799;
+    y[16] = 0.27067057;
+    y[17] = 0.25451242;
+    y[18] = 0.2397465;
+    y[19] = 0.22620756;
 
-	  // create mock data to test against
-	  std::string wsName = "StretchExpMockData";
-	  int histogramNumber = 1;
-	  int timechannels = 20;
-	  Workspace_sptr ws = WorkspaceFactory::Instance().create(
-		  "Workspace2D", histogramNumber, timechannels, timechannels);
-	  Workspace2D_sptr ws2D = boost::dynamic_pointer_cast<Workspace2D>(ws);
-	  // in this case, x-values are just the running index
-	  for (int i = 0; i < 20; i++)
-		  ws2D->dataX(0)[i] = 1.0 * i + 0.00001;
-	  Mantid::MantidVec &y = ws2D->dataY(0); // y-values (counts)
-	  Mantid::MantidVec &e = ws2D->dataE(0); // error values of counts
-	  getMockData(y, e);
-
-	  // put this workspace in the data service
-	  TS_ASSERT_THROWS_NOTHING(
-		  AnalysisDataService::Instance().addOrReplace(wsName, ws2D));
-
-	  // set up StretchExp fitting function
-	  StretchExp fn;
-	  fn.initialize();
-
-	  // get close to exact values with an initial guess
-	  fn.setParameter("Height", 1.5);
-	  fn.setParameter("Lifetime", 5.0);
-	  fn.setParameter("Stretching", 0.4);
-
-	  // alg2.setFunction(fn);
-	  alg2.setPropertyValue("Function", fn.asString());
-
-	  // Set which spectrum to fit against and initial starting values
-	  alg2.setPropertyValue("InputWorkspace", wsName);
-	  alg2.setPropertyValue("WorkspaceIndex", "0");
-	  alg2.setPropertyValue("StartX", "0");
-	  alg2.setPropertyValue("EndX", "19");
-
-	  // execute fit
-	  TS_ASSERT_THROWS_NOTHING(TS_ASSERT(alg2.execute()))
-
-		  TS_ASSERT(alg2.isExecuted());
-
-	  // test the output from fit is what you expect
-	  double dummy = alg2.getProperty("OutputChi2overDoF");
-	  TS_ASSERT_DELTA(dummy, 0.001, 0.001);
-
-	  IFunction_sptr out = alg2.getProperty("Function");
-	  // golden standard y(x)=2*exp(-(x/4)^0.5)
-	  // allow for a 1% error in Height and Lifetime, and 10% error in the
-	  // Stretching exponent
-	  TS_ASSERT_DELTA(out->getParameter("Height"), 2.0, 0.02);
-	  TS_ASSERT_DELTA(out->getParameter("Lifetime"), 4.0, 0.04);
-	  TS_ASSERT_DELTA(out->getParameter("Stretching"), 0.5, 0.05);
-
-	  // check its categories
-	  const std::vector<std::string> categories = out->categories();
-	  TS_ASSERT(categories.size() == 1);
-	  TS_ASSERT(categories[0] == "General");
-
-	  AnalysisDataService::Instance().remove(wsName);
+    for (int i = 0; i <= 19; i++) {
+      // estimate errors as ten percent of the "count number"
+      const double cc = 0.1;
+      e[i] = cc * y[i];
+    }
   }
 
+  void test_function_StretchExp_Against_MockData() {
+    Algorithms::Fit alg2;
+    TS_ASSERT_THROWS_NOTHING(alg2.initialize());
+    TS_ASSERT(alg2.isInitialized());
+
+    // create mock data to test against
+    std::string wsName = "StretchExpMockData";
+    int histogramNumber = 1;
+    int timechannels = 20;
+    Workspace_sptr ws = WorkspaceFactory::Instance().create(
+        "Workspace2D", histogramNumber, timechannels, timechannels);
+    Workspace2D_sptr ws2D = boost::dynamic_pointer_cast<Workspace2D>(ws);
+    // in this case, x-values are just the running index
+    for (int i = 0; i < 20; i++)
+      ws2D->dataX(0)[i] = 1.0 * i + 0.00001;
+    Mantid::MantidVec &y = ws2D->dataY(0); // y-values (counts)
+    Mantid::MantidVec &e = ws2D->dataE(0); // error values of counts
+    getStretchExpMockData(y, e);
+
+    // put this workspace in the data service
+    TS_ASSERT_THROWS_NOTHING(
+        AnalysisDataService::Instance().addOrReplace(wsName, ws2D));
+
+    alg2.setPropertyValue(
+        "Function",
+        "name=StretchExp, Height=1.5, Lifetime=5.0, Stretching=0.4");
+
+    // Set which spectrum to fit against and initial starting values
+    alg2.setPropertyValue("InputWorkspace", wsName);
+    alg2.setPropertyValue("WorkspaceIndex", "0");
+    alg2.setPropertyValue("StartX", "0");
+    alg2.setPropertyValue("EndX", "19");
+
+    // execute fit
+    TS_ASSERT_THROWS_NOTHING(TS_ASSERT(alg2.execute()))
+
+    TS_ASSERT(alg2.isExecuted());
+
+    // test the output from fit is what you expect
+    double dummy = alg2.getProperty("OutputChi2overDoF");
+    TS_ASSERT_DELTA(dummy, 0.001, 0.001);
+
+    IFunction_sptr out = alg2.getProperty("Function");
+    // golden standard y(x)=2*exp(-(x/4)^0.5)
+    // allow for a 1% error in Height and Lifetime, and 10% error in the
+    // Stretching exponent
+    TS_ASSERT_DELTA(out->getParameter("Height"), 2.0, 0.02);
+    TS_ASSERT_DELTA(out->getParameter("Lifetime"), 4.0, 0.04);
+    TS_ASSERT_DELTA(out->getParameter("Stretching"), 0.5, 0.05);
+
+    // check its categories
+    const std::vector<std::string> categories = out->categories();
+    TS_ASSERT(categories.size() == 1);
+    TS_ASSERT(categories[0] == "General");
+
+    AnalysisDataService::Instance().remove(wsName);
+  }
 };
 
 class FitTestPerformance : public CxxTest::TestSuite {
