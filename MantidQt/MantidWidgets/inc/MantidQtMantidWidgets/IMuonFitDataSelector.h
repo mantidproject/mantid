@@ -17,7 +17,7 @@ class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS IMuonFitDataSelector {
 public:
   enum class FitType { Single, CoAdd, Simultaneous };
   virtual ~IMuonFitDataSelector() {}
-  virtual QStringList getRuns() const = 0;
+  virtual QStringList getFilenames() const = 0;
   virtual unsigned int getWorkspaceIndex() const = 0;
   virtual double getStartTime() const = 0;
   virtual double getEndTime() const = 0;

@@ -52,8 +52,8 @@ public:
   /// Set user input through a common interface
   void setUserInput(const QVariant &value) override;
   // --- IMuonFitDataSelector methods
-  /// Get selected run numbers
-  QStringList getRuns() const override;
+  /// Get selected filenames
+  QStringList getFilenames() const override;
   /// Get selected workspace index
   unsigned int getWorkspaceIndex() const override;
   /// Get selected start time

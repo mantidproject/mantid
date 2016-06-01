@@ -66,7 +66,7 @@ void MuonFitDataSelector::setUpConnections() {
  */
 void MuonFitDataSelector::userChangedRuns() {
   // check for single run and enable/disable radio buttons
-  const auto runs = getRuns();
+  const auto runs = getFilenames();
   if (runs.size() < 2) {
     setFitType(FitType::Single);
   } else {
@@ -167,7 +167,7 @@ void MuonFitDataSelector::setEndTime(double end) {
  * Get the filenames of the supplied run numbers
  * @returns :: list of run filenames
  */
-QStringList MuonFitDataSelector::getRuns() const {
+QStringList MuonFitDataSelector::getFilenames() const {
   return m_ui.runs->getFilenames();
 }
 
@@ -413,7 +413,7 @@ QVariant MuonFitDataSelector::getUserInput() const {
   map.insert("Workspace index", getWorkspaceIndex());
   map.insert("Start", getStartTime());
   map.insert("End", getEndTime());
-  map.insert("Runs", getRuns());
+  map.insert("Runs", getFilenames());
   map.insert("Groups", getChosenGroups());
   map.insert("Periods", getPeriodSelections());
   return map;

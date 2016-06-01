@@ -17,7 +17,7 @@ using namespace testing;
 /// Mock data selector widget
 class MockDataSelector : public IMuonFitDataSelector {
 public:
-  MOCK_CONST_METHOD0(getRuns, QStringList());
+  MOCK_CONST_METHOD0(getFilenames, QStringList());
   MOCK_CONST_METHOD0(getWorkspaceIndex, unsigned int());
   MOCK_CONST_METHOD0(getStartTime, double());
   MOCK_CONST_METHOD0(getEndTime, double());

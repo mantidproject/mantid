@@ -112,7 +112,7 @@ void MuonAnalysisFitDataHelper::handleDataWorkspaceChanged() {
 void MuonAnalysisFitDataHelper::createWorkspacesToFit() {
   // From view, get names of all workspaces needed
   std::vector<std::string> workspaces;
-  const auto runs = m_dataSelector->getRuns(); // this is filenames
+  const auto filenames = m_dataSelector->getFilenames();
   const auto groups = m_dataSelector->getChosenGroups();
   const auto periods = m_dataSelector->getPeriodSelections();
 
