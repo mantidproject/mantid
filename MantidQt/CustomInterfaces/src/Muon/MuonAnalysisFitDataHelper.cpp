@@ -119,8 +119,28 @@ void MuonAnalysisFitDataHelper::createWorkspacesToFit() {
   Muon::DatasetParams params;
   QString instRuns = m_dataSelector->getInstrumentName();
   instRuns.append(m_dataSelector->getRuns());
+  std::vector<int> selectedRuns;
   MuonAnalysisHelper::parseRunLabel(instRuns.toStdString(), params.instrument,
-                                    params.runs);
+                                    selectedRuns);
+
+  // We need to know if the runs are sequential (loop over selectedRuns) or
+  // co-added (use whole run string at once)
+
+  params.version = 1; // ???
+  //params.plotType =  // ???
+
+  // generate workspace names
+  //for (const int run : selectedRuns) {
+    for (const auto &group : groups) {
+      //params.itemType = group? pair? how to tell?
+      params.itemName = group.toStdString();
+      for (const auto &period : periods) {
+        params.periods = period;
+        workspaces.push_back(MuonAnalysisHelper::generateWorkspaceName(params));
+      }
+    }
+  //}
+
 
   // Update model with these
   //m_fitBrowser->... (m_workspacesToFit)
