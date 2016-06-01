@@ -970,7 +970,16 @@ Muon::DatasetParams parseWorkspaceName(const std::string &wsName) {
  */
 void parseRunLabel(const std::string &label, std::string &instrument,
                    std::vector<int> &runNumbers) {
-  const size_t zeroPos = label.find_first_of('0');
+  const size_t zeroPos = [&label] {
+    const size_t pos = label.find_first_of('0');
+    if (pos != std::string::npos) {
+      return pos;
+    } else {
+      // If there are no zeros, it's probably something like "MUSR15189-91" so
+      // split at first number
+      return label.find_first_of("123456789");
+    }
+  }();
   instrument = label.substr(0, zeroPos);
   const size_t numPos = label.find_first_not_of('0', zeroPos);
   std::string runString = label.substr(numPos, label.size());

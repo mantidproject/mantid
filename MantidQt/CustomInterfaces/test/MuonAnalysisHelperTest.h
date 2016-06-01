@@ -483,6 +483,16 @@ public:
     TS_ASSERT_EQUALS(runs, expectedRuns);
   }
 
+  void test_parseRunLabel_noZeros() {
+    const std::string runLabel = "EMU12345-8";
+    std::string instrument = "";
+    std::vector<int> runs;
+    std::vector<int> expectedRuns{12345, 12346, 12347, 12348};
+    TS_ASSERT_THROWS_NOTHING(parseRunLabel(runLabel, instrument, runs));
+    TS_ASSERT_EQUALS(instrument, "EMU");
+    TS_ASSERT_EQUALS(runs, expectedRuns);
+  }
+
 private:
   // Creates a single-point workspace with instrument and runNumber set
   Workspace_sptr createWs(const std::string &instrName, int runNumber,
