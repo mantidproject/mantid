@@ -42,10 +42,9 @@ public:
   ~RefImagePlotItem();
 
   /// Draw the image (this is called by QWT and must not be called directly.)
-  virtual void draw(      QPainter    * painter,
-                    const QwtScaleMap & xMap,
-                    const QwtScaleMap & yMap,
-                    const QRect       & canvasRect) const;
+  virtual void draw(QPainter *painter, const QwtScaleMap &xMap,
+                    const QwtScaleMap &yMap,
+                    const QRect &canvasRect) const override;
 
 private:
   const RefLimitsHandler * const m_limitsHandler;
