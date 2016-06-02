@@ -8,6 +8,6 @@ Installed-Size: 0
 Maintainer: Mantid Project <mantid-help@mantidproject.org>
 Description: Installs all packages required for a Mantid developer
  A metapackage which requires all the dependencies and tools that are 
- required for Mantid development. It works for Ubuntu version 14.04, 14.10
+ required for Mantid development. It works for Ubuntu versions 14.04 and 16.04
  Some packages (poco) must be newer than those in the Ubuntu repository. Please 
  follow instructions at http://www.mantidproject.org/Mantid_Prerequisites#Repositories
