@@ -119,7 +119,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         self.declareProperty(FileProperty(name="LogFilename",
                                           defaultValue="", action=FileAction.OptionalLoad,
                                           extensions=EXTENSIONS_NXS),
-                             "Event file to donate logs")
+                             "Optional file to copy logs from")
 
         self.declareProperty("PreserveEvents", True,
                              "Argument to supply to algorithms that can change from events to histograms.")
@@ -574,6 +574,17 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                                                 str(self._filterBadPulses), str(wksp))
                 self.log().information(message)
         # END-IF (filter bad pulse)
+
+        # this if block is only for sample runs and only for testing new adara files
+        if filename in self.getProperty("Filename").value:
+            donorLogfilename = self.getProperty("LogFilename").value
+            if donorLogfilename is not None and len(donorLogfilename) > 0:
+                api.Load(Filename=donorLogfilename, MetaDataOnly=True, OutputWorkspace='temp_log_donor')
+                api.CopyLogs(InputWorkspace='temp_log_donor', OutputWorkspace=wksp,
+                                    MergeStrategy='MergeKeepExisting')
+                api.DeleteWorkspace('temp_log_donor')
+                wksp = mtd[str(wksp)]  # convert back to a pointer
+                print wksp
 
         return wksp
 
