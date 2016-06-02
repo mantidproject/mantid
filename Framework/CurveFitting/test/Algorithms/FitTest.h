@@ -569,9 +569,28 @@ public:
     TS_ASSERT_DELTA(func->getParameter("Beta"), 0.5, 0.05);
   }
 
-  void test_function_product() {}
+  void testProductFunction() {
 
-  void test_resolutoin_Fit() {}
+    // Mock data
+    int ndata = 30;
+    API::MatrixWorkspace_sptr ws = API::WorkspaceFactory::Instance().create(
+        "Workspace2D", 1, ndata, ndata);
+    Mantid::MantidVec &x = ws->dataX(0);
+    Mantid::MantidVec &y = ws->dataY(0);
+    Mantid::MantidVec &e = ws->dataE(0);
+    // values extracted from y(x)=2*exp(-(x/4)^0.5)
+    x = {0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9,
+         1, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9,
+         2, 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7, 2.8, 2.9};
+    y = {0.001362, 0.00434468, 0.0127937, 0.0347769, 0.0872653, 0.202138,
+         0.432228, 0.853165,   1.55457,   2.61483,   4.06006,   5.8194,
+         7.69982,  9.40459,    10.6036,   11.0364,   10.6036,   9.40459,
+         7.69982,  5.8194,     4.06006,   2.61483,   1.55457,   0.853165,
+         0.432228, 0.202138,   0.0872653, 0.0347769, 0.0127937, 0.00434468};
+    e = {0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1,
+         0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1,
+         0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1};
+  }
 
   void getStretchExpMockData(Mantid::MantidVec &y, Mantid::MantidVec &e) {
     // values extracted from y(x)=2*exp(-(x/4)^0.5)
