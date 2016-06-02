@@ -17,7 +17,6 @@ public:
 
 class StretchExpTest : public CxxTest::TestSuite {
 public:
-
   void test_derivative_at_0() {
     Mantid::API::FunctionDomain1DVector x(0);
     StretchExpTest_Jacobian jac;
