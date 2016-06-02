@@ -385,6 +385,24 @@ public:
     alg.setPropertyValue("OutputWorkspace", "dummy");
     TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
   }
+
+  void test_wrong_number_of_dimensions() {
+
+    std::vector<int> shapeShape = {5, 7, 1, 1};
+    auto shapeWS = makeHistoWorkspace(shapeShape, false, 1);
+
+    std::vector<int> dataShape = {5, 1};
+    auto dataWSTranspose = makeHistoWorkspace(dataShape);
+
+    ReplicateMD alg;
+    alg.setRethrows(true);
+    alg.setChild(true);
+    alg.initialize();
+    alg.setProperty("DataWorkspace", dataWSTranspose);
+    alg.setProperty("ShapeWorkspace", shapeWS);
+    alg.setPropertyValue("OutputWorkspace", "dummy");
+    TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
+  }
 };
 
 //=====================================================================================
