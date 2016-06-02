@@ -77,7 +77,6 @@
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidQtSliceViewer/SliceViewerWindow.h"
 #include "MantidQtFactory/WidgetFactory.h"
-#include "MantidAPI/MemoryManager.h"
 
 #include "MantidQtSpectrumViewer/SpectrumView.h"
 #include <typeinfo>
@@ -2063,12 +2062,6 @@ void MantidUI::clearAllMemory(const bool prompt) {
   // Relevant notifications are connected to signals that will close all
   // dependent windows
   Mantid::API::FrameworkManager::Instance().clear();
-}
-
-/** Release any free memory back to the system */
-void MantidUI::releaseFreeMemory() {
-  // This only does something if TCMalloc is used
-  Mantid::API::MemoryManager::Instance().releaseFreeMemory();
 }
 
 void MantidUI::saveProject(bool saved) {
