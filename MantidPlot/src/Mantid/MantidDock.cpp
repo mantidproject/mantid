@@ -6,23 +6,17 @@
 #include "MantidWSIndexDialog.h"
 #include "FlowLayout.h"
 #include "WorkspaceIcons.h"
-#include "Graph3D.h"
 #include "MantidGroupPlotGenerator.h"
 
-#include <MantidAPI/AlgorithmFactory.h>
 #include <MantidAPI/FileProperty.h>
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidGeometry/Instrument.h"
-#include <MantidGeometry/MDGeometry/IMDDimension.h>
-#include <MantidGeometry/Crystal/OrientedLattice.h>
 #include <MantidKernel/make_unique.h>
 #include <MantidQtMantidWidgets/LineEditWithClear.h>
 #include <MantidQtAPI/InterfaceManager.h>
-#include <MantidQtAPI/Message.h>
 
 #include <Poco/Path.h>
 
@@ -305,11 +299,9 @@ void MantidDockWidget::createSortMenuActions() {
 
   m_ascendingSortAction->setCheckable(true);
   m_ascendingSortAction->setEnabled(true);
-  m_ascendingSortAction->setToggleAction(true);
 
   m_descendingSortAction->setCheckable(true);
   m_descendingSortAction->setEnabled(true);
-  m_descendingSortAction->setToggleAction(true);
 
   QActionGroup *sortDirectionGroup = new QActionGroup(m_sortMenu);
   sortDirectionGroup->addAction(m_ascendingSortAction);
@@ -319,11 +311,9 @@ void MantidDockWidget::createSortMenuActions() {
 
   m_byNameChoice->setCheckable(true);
   m_byNameChoice->setEnabled(true);
-  m_byNameChoice->setToggleAction(true);
 
   m_byLastModifiedChoice->setCheckable(true);
   m_byLastModifiedChoice->setEnabled(true);
-  m_byLastModifiedChoice->setToggleAction(true);
 
   m_sortChoiceGroup = new QActionGroup(m_sortMenu);
   m_sortChoiceGroup->addAction(m_byNameChoice);
@@ -720,8 +710,8 @@ void MantidDockWidget::addClearMenuItems(QMenu *menu, const QString &wsName) {
 * @param text : the string to filter on.
 */
 void MantidDockWidget::filterWorkspaceTree(const QString &text) {
-  const QString filterText = text.stripWhiteSpace();
-  QRegExp filterRegEx(filterText, false);
+  const QString filterText = text.trimmed();
+  QRegExp filterRegEx(filterText, Qt::CaseInsensitive);
 
   // show all items
   QTreeWidgetItemIterator it(m_tree);
@@ -988,7 +978,7 @@ void MantidDockWidget::deleteWorkspaces() {
   if ((m_deleteButton->hasFocus() || m_tree->hasFocus()) && !items.empty()) {
     deleteExplorer = true;
   }
-  if ((m && m->isA("MantidMatrix")) &&
+  if ((m && (strcmp(m->metaObject()->className(), "MantidMatrix") == 0)) &&
       (!m->workspaceName().isEmpty() &&
        m_ads.doesExist(m->workspaceName().toStdString()))) {
     deleteActive = true;
@@ -1304,7 +1294,7 @@ void MantidDockWidget::popupMenu(const QPoint &pos) {
           }
           QString name = QString::fromStdString(programNames[i]);
           // Setup new menu option for the program
-          m_program = new QAction(tr(name), this);
+          m_program = new QAction(name, this);
           connect(m_program, SIGNAL(activated()), m_programMapper, SLOT(map()));
           // Send name of program when clicked
           m_programMapper->setMapping(m_program, name);
@@ -1965,7 +1955,7 @@ AlgorithmDockWidget::AlgorithmDockWidget(MantidUI *mui, ApplicationWindow *w)
           m_mantidUI, SLOT(showAlgorithmDialog(const QString &, const int)));
 
   m_runningLayout = new QHBoxLayout();
-  m_runningLayout->setName("testA");
+  m_runningLayout->setObjectName("testA");
 
   m_runningButton = new QPushButton("Details");
   m_runningLayout->addStretch();
@@ -1974,7 +1964,9 @@ AlgorithmDockWidget::AlgorithmDockWidget(MantidUI *mui, ApplicationWindow *w)
           SLOT(showAlgMonitor()));
 
   QFrame *f = new QFrame(this);
-  QVBoxLayout *layout = new QVBoxLayout(f, 4 /*border*/, 4 /*spacing*/);
+  QVBoxLayout *layout = new QVBoxLayout(f);
+  layout->setSpacing(4);
+  layout->setMargin(4);
   f->setLayout(layout);
   layout->setMargin(0);
   layout->addWidget(m_selector);

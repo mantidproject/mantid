@@ -66,10 +66,9 @@ void LabelTool::xAxisClicked(const QwtPolygon &x)
 
   QMenu * clickMenu = new QMenu(d_graph);  
 
-  QAction * addXAxisLabel = new QAction(tr(QString::fromStdString(m_xPosSigFigs.c_str())), this);
+  QAction * addXAxisLabel = new QAction(tr(m_xPosSigFigs.c_str()), this);
   clickMenu->addAction(addXAxisLabel);
   connect(addXAxisLabel,SIGNAL(triggered()), this, SLOT(insertXCoord()));
-  clickMenu->insertSeparator();
 
   clickMenu->exec(QCursor::pos());
 }
@@ -115,10 +114,9 @@ void LabelTool::yAxisClicked(const QwtPolygon &y)
 
   QMenu * clickMenu = new QMenu(d_graph);
   
-  QAction * addYAxisLabel = new QAction(tr(QString::fromStdString(m_yPosSigFigs.c_str())), this);
+  QAction * addYAxisLabel = new QAction(tr(m_yPosSigFigs.c_str()), this);
   clickMenu->addAction(addYAxisLabel);
   connect(addYAxisLabel,SIGNAL(triggered()), this, SLOT(insertYCoord()));
-  clickMenu->insertSeparator();
 
   clickMenu->exec(QCursor::pos());
 }
@@ -296,7 +294,7 @@ void LabelTool::blankRegionClicked()
 
   foreach(QString wsName, workspaceNames())
   {
-		QAction * qa = new QAction(tr(wsName),this);
+		QAction * qa = new QAction(wsName,this);
 		workspaces->addAction(qa);
 		connect(qa,SIGNAL(triggered()),this,SLOT(insertLegend()));
   }
@@ -306,7 +304,7 @@ void LabelTool::blankRegionClicked()
 
   foreach(QString logProperty, logValues())
   {
-		QAction * qa = new QAction(tr(logProperty),this);
+		QAction * qa = new QAction(logProperty,this);
 		logVals->addAction(qa);
 		connect(qa,SIGNAL(triggered()),this,SLOT(insertLegend()));
   }
@@ -321,23 +319,25 @@ void LabelTool::dataPointClicked()
   
   // For displaying data coordinates.
 
-  QAction * addCoordinateLabel = new QAction(tr(QString::fromStdString(m_dataCoords.c_str())), this);
+  QAction * addCoordinateLabel = new QAction(tr(m_dataCoords.c_str()), this);
   clickMenu->addAction(addCoordinateLabel);
   connect(addCoordinateLabel,SIGNAL(triggered()), this, SLOT(insertDataCoord()));
 
-  clickMenu->insertSeparator();
-
-  QAction * addErrorLabel = new QAction(tr(QString::fromStdString(m_error.c_str())), this);
+  QAction * addErrorLabel = new QAction(tr(m_error.c_str()), this);
   clickMenu->addAction(addErrorLabel);
   connect(addErrorLabel,SIGNAL(triggered()), this, SLOT(insertErrorValue()));
 
-  clickMenu->insertSeparator();
-  
+  // add a separator before addErrorLabel
+  clickMenu->insertSeparator(addErrorLabel);
+
   // For adding labels onto workspace.
   QAction * addLabel = new QAction(tr("Add a label"), this);
   clickMenu->addAction(addLabel);
   connect(addLabel,SIGNAL(triggered()), this, SLOT(insertTextBox()));
- 
+
+  // add a separator before addLabel
+  clickMenu->insertSeparator(addLabel);
+
   // For workspace information.
   QMenu * info = clickMenu->addMenu(tr("More info..."));
   QMenu * workspaces = info->addMenu(tr("Workspaces"));

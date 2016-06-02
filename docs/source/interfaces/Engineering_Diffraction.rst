@@ -216,7 +216,7 @@ Run Number
 The run provided to focus can be for example 228061-228063, this will
 run all the files within the given range as long as the file
 directories are included in the
-`User Directories <http://www.mantidproject.org/SplittersWorkspace>`_.
+`User Directories <http://www.mantidproject.org/ManageUserDirectories>`_.
 The user may also provide an input of 228061-3 or 228061, 228062,
 2280623 which should work the same way.
 

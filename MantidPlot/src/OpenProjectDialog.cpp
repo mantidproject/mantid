@@ -38,7 +38,7 @@ OpenProjectDialog::OpenProjectDialog(QWidget *parent, bool extended, Qt::WFlags 
 	: ExtensibleFileDialog(parent, extended, flags)
 {
 	//setCaption(tr("QtiPlot - Open Project"));
-	setCaption(tr("MantidPlot - Open Project"));
+	setWindowTitle(tr("MantidPlot - Open Project"));
 	setFileMode(ExistingFile);
 	QStringList filters;
 	//filters << tr("QtiPlot project") + " (*.qti)"
