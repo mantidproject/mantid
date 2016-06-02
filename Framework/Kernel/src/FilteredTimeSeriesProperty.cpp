@@ -49,7 +49,7 @@ FilteredTimeSeriesProperty<HeldType>::unfiltered() const {
 // -------------------------- Macro to instantiation concrete types
 // --------------------------------
 #define INSTANTIATE(TYPE)                                                      \
-  template MANTID_KERNEL_DLL class FilteredTimeSeriesProperty<TYPE>;
+  template class MANTID_KERNEL_DLL FilteredTimeSeriesProperty<TYPE>;
 
 // -------------------------- Concrete instantiation
 // -----------------------------------------------

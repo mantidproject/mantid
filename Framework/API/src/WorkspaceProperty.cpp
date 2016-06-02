@@ -9,17 +9,17 @@
 namespace Mantid {
 namespace API {
 ///@cond TEMPLATE
-template MANTID_API_DLL class Mantid::API::WorkspaceProperty<
+template class MANTID_API_DLL Mantid::API::WorkspaceProperty<
     Mantid::API::Workspace>;
-template MANTID_API_DLL class Mantid::API::WorkspaceProperty<
+template class MANTID_API_DLL Mantid::API::WorkspaceProperty<
     Mantid::API::IEventWorkspace>;
-template MANTID_API_DLL class Mantid::API::WorkspaceProperty<
+template class MANTID_API_DLL Mantid::API::WorkspaceProperty<
     Mantid::API::IMDEventWorkspace>;
-template MANTID_API_DLL class Mantid::API::WorkspaceProperty<
+template class MANTID_API_DLL Mantid::API::WorkspaceProperty<
     Mantid::API::IMDWorkspace>;
-template MANTID_API_DLL class Mantid::API::WorkspaceProperty<
+template class MANTID_API_DLL Mantid::API::WorkspaceProperty<
     Mantid::API::MatrixWorkspace>;
-template MANTID_API_DLL class Mantid::API::WorkspaceProperty<
+template class MANTID_API_DLL Mantid::API::WorkspaceProperty<
     Mantid::API::ITableWorkspace>;
 ///@endcond TEMPLATE
 } // namespace API
