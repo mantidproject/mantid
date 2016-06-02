@@ -590,6 +590,35 @@ public:
     e = {0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1,
          0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1,
          0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1};
+
+    Mantid::CurveFitting::Algorithms::Fit fit;
+    fit.initialize();
+
+    fit.setPropertyValue(
+        "Function", "composite=ProductFunction,NumDeriv=false;name="
+                    "Gaussian,Height=3,PeakCentre=1,Sigma=0.5,ties=(Height="
+                    "3.0,PeakCentre=1.0,Sigma=0.5);name=Gaussian,Height=15,"
+                    "PeakCentre=2.5,Sigma=0.5,ties=(Sigma=0.5)");
+    fit.setProperty("InputWorkspace", ws);
+    fit.setPropertyValue("WorkspaceIndex", "0");
+
+    // execute fit
+    TS_ASSERT_THROWS_NOTHING(TS_ASSERT(fit.execute()))
+    TS_ASSERT(fit.isExecuted());
+
+    // test the output from fit is what you expect
+
+    double dummy = fit.getProperty("OutputChi2overDoF");
+    TS_ASSERT_DELTA(dummy, 0.0, 0.01);
+
+    Mantid::API::IFunction_sptr outF = fit.getProperty("Function");
+
+    TS_ASSERT_DELTA(outF->getParameter("f0.PeakCentre"), 1.0, 0.001);
+    TS_ASSERT_DELTA(outF->getParameter("f0.Height"), 3.0, 0.001);
+    TS_ASSERT_DELTA(outF->getParameter("f0.Sigma"), 0.5, 0.001);
+    TS_ASSERT_DELTA(outF->getParameter("f1.PeakCentre"), 2.0, 0.001);
+    TS_ASSERT_DELTA(outF->getParameter("f1.Height"), 10.0, 0.01);
+    TS_ASSERT_DELTA(outF->getParameter("f1.Sigma"), 0.5, 0.001);
   }
 
   void getStretchExpMockData(Mantid::MantidVec &y, Mantid::MantidVec &e) {
