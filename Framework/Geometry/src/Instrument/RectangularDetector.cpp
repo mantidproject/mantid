@@ -235,7 +235,10 @@ double RectangularDetector::xstart() const {
     double scaling = 1.0;
     if (m_map->contains(m_rectBase, "scalex"))
       scaling = m_map->get(m_rectBase, "scalex")->value<double>();
-    return m_rectBase->m_xstart * scaling;
+    double shift = 0.0;
+    if (m_map->contains(m_rectBase, "shiftx"))
+      shift = m_map->get(m_rectBase, "shiftx")->value<double>();
+    return m_rectBase->m_xstart * scaling + shift;
   } else
     return this->m_xstart;
 }
@@ -247,7 +250,10 @@ double RectangularDetector::ystart() const {
     double scaling = 1.0;
     if (m_map->contains(m_rectBase, "scaley"))
       scaling = m_map->get(m_rectBase, "scaley")->value<double>();
-    return m_rectBase->m_ystart * scaling;
+    double shift = 0.0;
+    if (m_map->contains(m_rectBase, "shifty"))
+      shift = m_map->get(m_rectBase, "shifty")->value<double>();
+    return m_rectBase->m_ystart * scaling + shift;
   } else
     return this->m_ystart;
 }
@@ -326,10 +332,16 @@ V3D RectangularDetector::getRelativePosAtXY(int x, int y) const {
     double scalex = 1.0;
     if (m_map->contains(m_rectBase, "scalex"))
       scalex = m_map->get(m_rectBase, "scalex")->value<double>();
+    double shiftx = 0.0;
+    if (m_map->contains(m_rectBase, "shiftx"))
+      shiftx = m_map->get(m_rectBase, "shiftx")->value<double>();
     double scaley = 1.0;
     if (m_map->contains(m_rectBase, "scaley"))
       scaley = m_map->get(m_rectBase, "scaley")->value<double>();
-    return m_rectBase->getRelativePosAtXY(x, y) * V3D(scalex, scaley, 1.0);
+    double shifty = 0.0;
+    if (m_map->contains(m_rectBase, "shifty"))
+      shifty = m_map->get(m_rectBase, "shifty")->value<double>();
+    return m_rectBase->getRelativePosAtXY(x, y) * V3D(scalex, scaley, 1.0) + V3D(shiftx, shifty, 0.0);
   } else
     return V3D(m_xstart + m_xstep * x, m_ystart + m_ystep * y, 0);
 }
