@@ -148,7 +148,6 @@ void OptimizeLatticeForCellType::exec() {
     double chisq = fit_alg->getProperty("OutputChi2overDoF");
     Geometry::UnitCell refinedCell = latticeFunction->getUnitCell();
 
-
     IAlgorithm_sptr ub_alg;
     try {
       ub_alg = createChildAlgorithm("CalculateUMatrix", -1, -1, false);

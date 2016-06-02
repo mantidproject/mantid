@@ -152,7 +152,6 @@ SCDCalibratePanels::calcWorkspace(DataObjects::PeaksWorkspace_sptr &pwks,
         }
     } // for @ peak
 
-
     bounds.push_back(N);
   } // for @ bank name
 
@@ -503,8 +502,9 @@ bool GoodStart(const PeaksWorkspace_sptr &peaksWs, double a, double b, double c,
   peaksWs->mutableSample().setOrientedLattice(&o_lattice);
 
   Kernel::Logger g_log("Calibration");
-  g_log.notice() << "Lattice before optimization: " << lat[0] << " " << lat[1] << " " << lat[2] << " "
-    << lat[3] << " " << lat[4] << " " << lat[5] << "\n";
+  g_log.notice() << "Lattice before optimization: " << lat[0] << " " << lat[1]
+                 << " " << lat[2] << " " << lat[3] << " " << lat[4] << " "
+                 << lat[5] << "\n";
 
   // see if the lattice constants are no worse than 25% out
   if (fabs(lat[0] - a) / a > .25)
@@ -551,18 +551,17 @@ static inline void constrain(IFunction_sptr &iFunc, const string &parName,
 }
 
 } // end anonymous namespace
-//-----------------------------------------------------------------------------------------
-/**
-  @param  ws           Name of workspace containing peaks
-  @param  bankName     Name of bank containing peak
-  @param  col          Column number containing peak
-  @param  row          Row number containing peak
-  @param  Edge         Number of edge points for each bank
-  @return True if peak is on edge
-*/
-bool SCDCalibratePanels::edgePixel(PeaksWorkspace_sptr ws,
-                                           std::string bankName, int col,
-                                           int row, int Edge) {
+  //-----------------------------------------------------------------------------------------
+  /**
+    @param  ws           Name of workspace containing peaks
+    @param  bankName     Name of bank containing peak
+    @param  col          Column number containing peak
+    @param  row          Row number containing peak
+    @param  Edge         Number of edge points for each bank
+    @return True if peak is on edge
+  */
+bool SCDCalibratePanels::edgePixel(PeaksWorkspace_sptr ws, std::string bankName,
+                                   int col, int row, int Edge) {
   if (bankName.compare("None") == 0)
     return false;
   Geometry::Instrument_const_sptr Iptr = ws->getInstrument();
@@ -932,8 +931,8 @@ void SCDCalibratePanels::exec() {
 
       PARALLEL_CRITICAL(afterFit) {
         MatrixWorkspace_sptr fitWS = fit_alg->getProperty("OutputWorkspace");
-        //AnalysisDataService::Instance().addOrReplace("out"+boost::lexical_cast<std::string>(iGr),
-         //fitWS);
+        // AnalysisDataService::Instance().addOrReplace("out"+boost::lexical_cast<std::string>(iGr),
+        // fitWS);
         g_log.debug() << "Finished executing Fit algorithm\n";
         string OutputStatus = fit_alg->getProperty("OutputStatus");
         g_log.notice() << BankNameString << " Output Status=" << OutputStatus
@@ -1134,7 +1133,8 @@ void SCDCalibratePanels::exec() {
     peak.setDetectorID(peak.getDetectorID());
   }
 
-  //-----------------------Save new instrument to  xml(for LoadParameterFile) files----------
+  //-----------------------Save new instrument to  xml(for LoadParameterFile)
+  //files----------
   this->progress(.96, "Saving xml param file");
   string XmlFileName = getProperty("XmlFilename");
   saveXmlFile(XmlFileName, Groups, peaksWs->getInstrument());
@@ -1144,24 +1144,32 @@ void SCDCalibratePanels::exec() {
   fn->setAttributeValue("LatticeSystem", cell_type);
   fn->addTies("ZeroShift=0.0");
   fn->setParameter("a", a);
-  if(cell_type == ReducedCell::TRICLINIC() || cell_type == ReducedCell::MONOCLINIC() || cell_type == ReducedCell::ORTHORHOMBIC() ) {
-  fn->setParameter("b", b);
+  if (cell_type == ReducedCell::TRICLINIC() ||
+      cell_type == ReducedCell::MONOCLINIC() ||
+      cell_type == ReducedCell::ORTHORHOMBIC()) {
+    fn->setParameter("b", b);
   }
-  if(cell_type == ReducedCell::TRICLINIC() || cell_type == ReducedCell::TETRAGONAL() || cell_type == ReducedCell::ORTHORHOMBIC() || cell_type == ReducedCell::HEXAGONAL() || cell_type == ReducedCell::MONOCLINIC()) {
-  fn->setParameter("c", c);
+  if (cell_type == ReducedCell::TRICLINIC() ||
+      cell_type == ReducedCell::TETRAGONAL() ||
+      cell_type == ReducedCell::ORTHORHOMBIC() ||
+      cell_type == ReducedCell::HEXAGONAL() ||
+      cell_type == ReducedCell::MONOCLINIC()) {
+    fn->setParameter("c", c);
   }
-  if(cell_type == ReducedCell::TRICLINIC() || cell_type == ReducedCell::RHOMBOHEDRAL() ) {
-  fn->setParameter("Alpha", alpha);
+  if (cell_type == ReducedCell::TRICLINIC() ||
+      cell_type == ReducedCell::RHOMBOHEDRAL()) {
+    fn->setParameter("Alpha", alpha);
   }
-  if(cell_type == ReducedCell::TRICLINIC() || cell_type == ReducedCell::MONOCLINIC()) {
-  fn->setParameter("Beta", beta);
+  if (cell_type == ReducedCell::TRICLINIC() ||
+      cell_type == ReducedCell::MONOCLINIC()) {
+    fn->setParameter("Beta", beta);
   }
-  if(cell_type == ReducedCell::TRICLINIC()) {
-  fn->setParameter("Gamma", gamma);
+  if (cell_type == ReducedCell::TRICLINIC()) {
+    fn->setParameter("Gamma", gamma);
   }
 
-
-  IAlgorithm_sptr fit = Mantid::API::AlgorithmFactory::Instance().create("Fit", -1);
+  IAlgorithm_sptr fit =
+      Mantid::API::AlgorithmFactory::Instance().create("Fit", -1);
   fit->initialize();
   fit->setChild(true);
   fit->setLogging(false);
@@ -1172,61 +1180,68 @@ void SCDCalibratePanels::exec() {
   fit->execute();
 
   IAlgorithm_sptr ub_alg;
-    try {
-      ub_alg = createChildAlgorithm("CalculateUMatrix", -1, -1, false);
-    } catch (Exception::NotFoundError &) {
-      g_log.error("Can't locate CalculateUMatrix algorithm");
-      throw;
-    }
+  try {
+    ub_alg = createChildAlgorithm("CalculateUMatrix", -1, -1, false);
+  } catch (Exception::NotFoundError &) {
+    g_log.error("Can't locate CalculateUMatrix algorithm");
+    throw;
+  }
 
-    ub_alg->setProperty("PeaksWorkspace", peaksWs);
-    ub_alg->setProperty("a", fn->getParameter("a"));
+  ub_alg->setProperty("PeaksWorkspace", peaksWs);
+  ub_alg->setProperty("a", fn->getParameter("a"));
   double sigabc[6];
-    sigabc[0] = fn->getError(0);
-  if(cell_type == ReducedCell::TRICLINIC() || cell_type == ReducedCell::MONOCLINIC() || cell_type == ReducedCell::ORTHORHOMBIC() ) {
+  sigabc[0] = fn->getError(0);
+  if (cell_type == ReducedCell::TRICLINIC() ||
+      cell_type == ReducedCell::MONOCLINIC() ||
+      cell_type == ReducedCell::ORTHORHOMBIC()) {
     ub_alg->setProperty("b", fn->getParameter("b"));
     sigabc[1] = fn->getError(1);
-} else {
+  } else {
     ub_alg->setProperty("b", fn->getParameter("a"));
     sigabc[1] = fn->getError(0);
-}
-  if(cell_type == ReducedCell::TRICLINIC() || cell_type == ReducedCell::TETRAGONAL() || cell_type == ReducedCell::ORTHORHOMBIC() || cell_type == ReducedCell::HEXAGONAL() || cell_type == ReducedCell::MONOCLINIC()) {
+  }
+  if (cell_type == ReducedCell::TRICLINIC() ||
+      cell_type == ReducedCell::TETRAGONAL() ||
+      cell_type == ReducedCell::ORTHORHOMBIC() ||
+      cell_type == ReducedCell::HEXAGONAL() ||
+      cell_type == ReducedCell::MONOCLINIC()) {
     ub_alg->setProperty("c", fn->getParameter("c"));
     sigabc[2] = fn->getError(2);
-} else {
+  } else {
     ub_alg->setProperty("c", fn->getParameter("a"));
     sigabc[2] = fn->getError(0);
-}
-  if(cell_type == ReducedCell::TRICLINIC() || cell_type == ReducedCell::RHOMBOHEDRAL() ) {
+  }
+  if (cell_type == ReducedCell::TRICLINIC() ||
+      cell_type == ReducedCell::RHOMBOHEDRAL()) {
     ub_alg->setProperty("alpha", fn->getParameter("Alpha"));
     sigabc[3] = fn->getError(3);
-} else {
+  } else {
     ub_alg->setProperty("alpha", 90.0);
     sigabc[3] = 0.0;
-}
-  if(cell_type == ReducedCell::TRICLINIC() || cell_type == ReducedCell::MONOCLINIC()) {
+  }
+  if (cell_type == ReducedCell::TRICLINIC() ||
+      cell_type == ReducedCell::MONOCLINIC()) {
     ub_alg->setProperty("beta", fn->getParameter("Beta"));
     sigabc[4] = fn->getError(4);
-} else {
+  } else {
     ub_alg->setProperty("beta", 90.0);
     sigabc[4] = 0.0;
-}
-  if(cell_type == ReducedCell::TRICLINIC()) {
+  }
+  if (cell_type == ReducedCell::TRICLINIC()) {
     ub_alg->setProperty("gamma", fn->getParameter("Gamma"));
     sigabc[5] = fn->getError(5);
-} else if(cell_type == ReducedCell::HEXAGONAL()) {
+  } else if (cell_type == ReducedCell::HEXAGONAL()) {
     ub_alg->setProperty("gamma", 120.0);
     sigabc[5] = 0.0;
-} else {
+  } else {
     ub_alg->setProperty("gamma", 90.0);
     sigabc[5] = 0.0;
-}
-    ub_alg->executeAsChildAlg();
-    OrientedLattice lattice = peaksWs->mutableSample().getOrientedLattice();
-    DblMatrix UB = lattice.getUB();
-    lattice.setError(sigabc[0], sigabc[1],
-                       sigabc[2], sigabc[3],
-                       sigabc[4], sigabc[5]);
+  }
+  ub_alg->executeAsChildAlg();
+  OrientedLattice lattice = peaksWs->mutableSample().getOrientedLattice();
+  DblMatrix UB = lattice.getUB();
+  lattice.setError(sigabc[0], sigabc[1], sigabc[2], sigabc[3], sigabc[4],
+                   sigabc[5]);
   peaksWs->mutableSample().setOrientedLattice(&lattice);
   g_log.notice() << "Lattice after optimization: " << lattice << "\n";
 
@@ -1723,7 +1738,6 @@ void SCDCalibratePanels::init() {
 
   declareProperty("EdgePixels", 0,
                   "Remove peaks that are at pixels this close to edge. ");
-
 }
 
 /**
