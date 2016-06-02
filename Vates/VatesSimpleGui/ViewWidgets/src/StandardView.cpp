@@ -47,7 +47,7 @@ class QMenuWithToolTip: public QMenu {
 public:
   explicit QMenuWithToolTip(QWidget *parent) : QMenu(parent) {}
 
-  bool event(QEvent* e) {
+  bool event(QEvent *e) override {
     if (QEvent::ToolTip == e->type()) {
       // grab the action specific tooltip
       QHelpEvent *he = dynamic_cast<QHelpEvent*>(e);

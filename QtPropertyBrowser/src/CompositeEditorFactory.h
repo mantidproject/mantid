@@ -31,20 +31,18 @@ public:
   }
 
 protected:
-  void connectPropertyManager(ManagerType *manager)
-  {
+  void connectPropertyManager(ManagerType *manager) override {
     (void) manager; // Unused
     // Do nothing
   }
 
-  void disconnectPropertyManager(ManagerType *manager)
-  {
+  void disconnectPropertyManager(ManagerType *manager) override {
     (void) manager; // Unused
     // Do nothing
   }
 
-  QWidget *createEditorForManager(ManagerType *manager, QtProperty *property, QWidget *parent)
-  {
+  QWidget *createEditorForManager(ManagerType *manager, QtProperty *property,
+                                  QWidget *parent) override {
     if ( !m_secondaryFactory )
     {
       throw std::logic_error("Secondary editor factory isn't set.");
