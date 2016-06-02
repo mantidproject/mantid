@@ -1633,10 +1633,10 @@ void SCDCalibratePanels::init() {
 
   // ---------- outputs
   const std::vector<std::string> detcalExts{".DetCal", ".Det_Cal"};
-  declareProperty(Kernel::make_unique<FileProperty>("DetCalFilename", "SCDCalibrate.DetCal",
-                                                    FileProperty::Save,
-                                                    detcalExts),
-                  "Path to an ISAW-style .detcal file to save.");
+  declareProperty(
+      Kernel::make_unique<FileProperty>("DetCalFilename", "SCDCalibrate.DetCal",
+                                        FileProperty::Save, detcalExts),
+      "Path to an ISAW-style .detcal file to save.");
 
   declareProperty(
       Kernel::make_unique<FileProperty>("XmlFilename", "",
