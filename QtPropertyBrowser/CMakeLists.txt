@@ -133,9 +133,7 @@ endif ()
 
 target_link_libraries ( ${PROJECT_NAME} LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} ${QT_LIBRARIES} )
 
-if ( WIN32 )
-  add_definitions ( -DQT_QTPROPERTYBROWSER_EXPORT )
-endif ( WIN32 )
+add_definitions ( -DQT_QTPROPERTYBROWSER_EXPORT )
 
 # This is, for the most part, not our code so disable an Intel compiler
 # warning that crops up a lot in this package

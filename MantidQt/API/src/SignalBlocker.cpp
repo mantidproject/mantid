@@ -42,10 +42,10 @@ template <typename Type> void SignalBlocker<Type>::release() {
 }
 
 // Template instances we need.
-template class SignalBlocker<QObject>;
-template class SignalBlocker<QAction>;
-template class SignalBlocker<QPushButton>;
-template class SignalBlocker<QComboBox>;
+template class EXPORT_OPT_MANTIDQT_API SignalBlocker<QObject>;
+template class EXPORT_OPT_MANTIDQT_API SignalBlocker<QAction>;
+template class EXPORT_OPT_MANTIDQT_API SignalBlocker<QPushButton>;
+template class EXPORT_OPT_MANTIDQT_API SignalBlocker<QComboBox>;
 
 } // namespace API
 } // namespace Mantid
