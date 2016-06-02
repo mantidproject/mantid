@@ -646,7 +646,15 @@ public:
     }
   }
 
-  void test_res_fit() {
+  void tearDown() override {
+    std::string resFileName = "ResolutionTestResolution.res";
+    Poco::File phandle(resFileName);
+    if (phandle.exists()) {
+      phandle.remove();
+    }
+  }
+
+  void test_resolution_fit() {
 
     const int nX = 100;
     const int nY = nX - 1;
@@ -710,6 +718,21 @@ public:
         1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000,
         1.000000,
     };
+
+    X.back() = X[98] + dx;
+    AnalysisDataService::Instance().add("ResolutionTest_WS", ws);
+
+    Algorithms::Fit fit;
+    fit.initialize();
+
+    fit.setPropertyValue(
+        "Function", "composite=Convolution,"
+                    "FixResolution=true,NumDeriv=true;name=Resolution,FileName="
+                    "\"ResolutionTestResolution.res\","
+                    "WorkspaceIndex=0;name=ResolutionTest_Gauss,c=5,h=2,s=1");
+    fit.setPropertyValue("InputWorkspace", "ResolutionTest_WS");
+    fit.setPropertyValue("WorkspaceIndex", "0");
+    fit.execute();
   }
 
   void getStretchExpMockData(Mantid::MantidVec &y, Mantid::MantidVec &e) {
