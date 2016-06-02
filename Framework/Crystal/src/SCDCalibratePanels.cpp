@@ -424,11 +424,11 @@ void SCDCalibratePanels::CalcInitParams(
   else
     posPre = newBank->getRelativePos();
 
-  /*V3D change = posPre - posI;
+  V3D change = posPre - posI;
 
   Xoffset0 = change.X();
   Yoffset0 = change.Y();
-  Zoffset0 = change.Z();*/
+  Zoffset0 = change.Z();
 
   double scalexI = 1.;
   double scalexPre = 1.;
@@ -856,7 +856,7 @@ void SCDCalibratePanels::exec() {
       tie(iFunc, !use_PanelHeight, "f0_detHeightScale", detHeightScale0);
       tie(iFunc, !use_PanelPosition, "f0_Xoffset", Xoffset0);
       tie(iFunc, !use_PanelPosition, "f0_Yoffset", Yoffset0);
-      tie(iFunc, true, "f0_Zoffset", Zoffset0);
+      tie(iFunc, !use_PanelPosition, "f0_Zoffset", Zoffset0);
       tie(iFunc, !use_PanelOrientation, "f0_Xrot", Xrot0);
       tie(iFunc, !use_PanelOrientation, "f0_Yrot", Yrot0);
       tie(iFunc, !use_PanelOrientation, "f0_Zrot", Zrot0);
@@ -1802,8 +1802,10 @@ void SCDCalibratePanels::updateBankParams(
 
   if (!posv.empty()) {
     V3D pos = posv[0];
-    pmap->addDouble(bank_const.get(), "scalex", pos.X());
-    pmap->addDouble(bank_const.get(), "scaley", pos.Y());
+    pmap->addDouble(bank_const.get(), "x", pos.X());
+    pmap->addDouble(bank_const.get(), "y", pos.Y());
+    pmap->addDouble(bank_const.get(), "z", pos.Z());
+    pmap->addV3D(bank_const.get(), "pos", pos);
   }
 
   boost::shared_ptr<Parameter> rot = pmapSv->get(bank_const.get(), ("rot"));
@@ -1907,7 +1909,7 @@ void SCDCalibratePanels::FixUpBankParameterMap(
     if (RotCenters)
       rot.rotate(Center);
 
-    /*V3D pos1 = bank->getRelativePos();
+    V3D pos1 = bank->getRelativePos();
 
     pmap->addPositionCoordinate(bank.get(), string("x"), pos.X() + pos1.X() +
                                                              Center.X() -
@@ -1917,7 +1919,7 @@ void SCDCalibratePanels::FixUpBankParameterMap(
                                                              Center_orig.Y());
     pmap->addPositionCoordinate(bank.get(), string("z"), pos.Z() + pos1.Z() +
                                                              Center.Z() -
-                                                             Center_orig.Z());*/
+                                                             Center_orig.Z());
 
     Quat2RotxRotyRotz(rot, rotx, roty, rotz);
 
@@ -1939,8 +1941,6 @@ void SCDCalibratePanels::FixUpBankParameterMap(
 
     pmap->addDouble(bank.get(), string("scalex"), scalex);
     pmap->addDouble(bank.get(), string("scaley"), scaley);
-    pmap->addDouble(bank.get(), string("shiftx"), pos.X());
-    pmap->addDouble(bank.get(), string("shifty"), pos.Y());
     // cout<<"Thru param fix for "<<bankName<<". pos="<<bank->getPos()<<endl;
   } // For @ bank
 }
