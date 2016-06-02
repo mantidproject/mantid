@@ -1766,9 +1766,12 @@ void FunctionBrowser::removeTie()
   }
 }
 
-/// Remove all tie properties
-void FunctionBrowser::removeAllTieProperties()
-{
+/**
+ * Remove all tie properties from local parameters
+ * (Called when changing datasets)
+ * Ties on global parameters are left as they are.
+ */
+void FunctionBrowser::removeAllLocalTieProperties() {
   QList<QtProperty*> tieProperties;
   for (auto p : m_properties)
   {
@@ -1777,9 +1780,11 @@ void FunctionBrowser::removeAllTieProperties()
       tieProperties << p.prop;
     }
   }
-  for (auto prop : tieProperties)
-  {
-    removeProperty(prop);
+  for (auto prop : tieProperties) {
+    if (prop->hasOption(globalOptionName) &&
+        !prop->checkOption(globalOptionName)) {
+      removeProperty(prop);
+    }
   }
 }
 
@@ -2087,7 +2092,7 @@ void FunctionBrowser::setCurrentDataset(int i)
   {
     throw std::runtime_error("Dataset index is outside the range");
   }
-  removeAllTieProperties();
+  removeAllLocalTieProperties();
   auto localParameters = getLocalParameters();
   foreach(QString par, localParameters)
   {

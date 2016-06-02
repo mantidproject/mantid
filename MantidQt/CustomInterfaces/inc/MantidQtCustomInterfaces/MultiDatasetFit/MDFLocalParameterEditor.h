@@ -40,6 +40,8 @@ private slots:
   void removeTie();
   void setTieAll();
   void removeAllTies();
+  void updateValue(const QString &value);
+
 private:
   bool eventFilter(QObject *widget, QEvent *evn) override;
   void setEditorState();
