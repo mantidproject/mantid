@@ -19,7 +19,8 @@ using namespace Mantid::API;
 namespace {
 
 MDHistoWorkspace_sptr makeHistoWorkspace(const std::vector<int> &shape,
-                                         bool transpose = false, double value = 0.0) {
+                                         bool transpose = false,
+                                         double value = 0.0) {
 
   IAlgorithm *create =
       FrameworkManager::Instance().createAlgorithm("CreateMDHistoWorkspace");
@@ -44,8 +45,8 @@ MDHistoWorkspace_sptr makeHistoWorkspace(const std::vector<int> &shape,
   if (value == 0.0) {
     std::vector<double> signalArray;
     signalArray.reserve(flatSize);
-    for(size_t i = 0; i < flatSize; ++i) {
-      signalArray.push_back(static_cast<double>(i+1));
+    for (size_t i = 0; i < flatSize; ++i) {
+      signalArray.push_back(static_cast<double>(i + 1));
     }
     create->setProperty("SignalInput", signalArray);
   } else {
@@ -311,7 +312,7 @@ public:
     alg.setPropertyValue("OutputWorkspace", "dummy");
     try {
       alg.execute();
-    } catch (std::exception& e) {
+    } catch (std::exception &e) {
       TSM_ASSERT(e.what(), false);
       return;
     }
@@ -323,10 +324,10 @@ public:
     TS_ASSERT_EQUALS(shapeWS->getNPoints(), outWS->getNPoints());
 
     size_t index = 0;
-    for(size_t i = 0; i < 7; ++i) {
-      for(size_t j = 0; j < 5; ++j, ++index) {
+    for (size_t i = 0; i < 7; ++i) {
+      for (size_t j = 0; j < 5; ++j, ++index) {
         auto signal = outWS->signalAt(index);
-         TS_ASSERT_EQUALS(signal, static_cast<double>(i + 1));
+        TS_ASSERT_EQUALS(signal, static_cast<double>(i + 1));
       }
     }
   }
@@ -348,7 +349,7 @@ public:
     alg.setPropertyValue("OutputWorkspace", "dummy");
     try {
       alg.execute();
-    } catch (std::exception& e) {
+    } catch (std::exception &e) {
       TSM_ASSERT(e.what(), false);
       return;
     }
@@ -360,8 +361,8 @@ public:
     TS_ASSERT_EQUALS(shapeWS->getNPoints(), outWS->getNPoints());
 
     size_t index = 0;
-    for(size_t i = 0; i < 7; ++i) {
-      for(size_t j = 0; j < 5; ++j, ++index) {
+    for (size_t i = 0; i < 7; ++i) {
+      for (size_t j = 0; j < 5; ++j, ++index) {
         auto signal = outWS->signalAt(index);
         TS_ASSERT_EQUALS(signal, static_cast<double>(j + 1));
       }
