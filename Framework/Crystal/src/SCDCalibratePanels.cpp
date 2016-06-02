@@ -1134,7 +1134,7 @@ void SCDCalibratePanels::exec() {
   }
 
   //-----------------------Save new instrument to  xml(for LoadParameterFile)
-  //files----------
+  // files----------
   this->progress(.96, "Saving xml param file");
   string XmlFileName = getProperty("XmlFilename");
   saveXmlFile(XmlFileName, Groups, peaksWs->getInstrument());
@@ -1633,8 +1633,8 @@ void SCDCalibratePanels::init() {
 
   // ---------- outputs
   const std::vector<std::string> detcalExts{".DetCal", ".Det_Cal"};
-  declareProperty(Kernel::make_unique<FileProperty>("DetCalFilename", "",
-                                                    FileProperty::OptionalSave,
+  declareProperty(Kernel::make_unique<FileProperty>("DetCalFilename", "SCDCalibrate.DetCal",
+                                                    FileProperty::Save,
                                                     detcalExts),
                   "Path to an ISAW-style .detcal file to save.");
 
