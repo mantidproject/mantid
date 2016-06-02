@@ -10,6 +10,24 @@ from mantid.api import AlgorithmManager
 import vesuvio.commands as vesuvio
 import vesuvio.testing as testing
 
+
+##======================HELPER FUNCTIONS===============================##
+
+def _get_peak_height_and_bin_index(y_data):
+    peak_height = np.amax(y_data)
+    peak_bin = np.argmax(y_data)
+    return peak_height, peak_bin
+
+
+def _matches_expected_within_tolerance(expected, actual, tolerance = 0.01):
+    """
+    Ensures the expected value matches the actual value within a tolerance (default 0.01)
+    """
+    return abs(expected - actual) < tolerance
+
+
+##=====================================================================##
+
 class VesuvioPreFitTest(unittest.TestCase):
 
     _test_ws = None
