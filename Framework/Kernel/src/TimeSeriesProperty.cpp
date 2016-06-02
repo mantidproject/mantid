@@ -2095,7 +2095,7 @@ TimeSeriesProperty<TYPE>::setValueFromProperty(const Property &right) {
 // -------------------------- Macro to instantiation concrete types
 // --------------------------------
 #define INSTANTIATE(TYPE)                                                      \
-  template MANTID_KERNEL_DLL class TimeSeriesProperty<TYPE>;
+  template class MANTID_KERNEL_DLL TimeSeriesProperty<TYPE>;
 
 // -------------------------- Concrete instantiation
 // -----------------------------------------------

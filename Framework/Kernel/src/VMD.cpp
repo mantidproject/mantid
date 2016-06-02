@@ -133,8 +133,8 @@ VMDBase<TYPE>::getNormalVector(const std::vector<VMDBase<TYPE>> &vectors) {
 }
 
 /// Instantiate VMDBase classes
-template MANTID_KERNEL_DLL class VMDBase<double>;
-template MANTID_KERNEL_DLL class VMDBase<float>;
+template class MANTID_KERNEL_DLL VMDBase<double>;
+template class MANTID_KERNEL_DLL VMDBase<float>;
 
 } // namespace Mantid
 } // namespace Kernel

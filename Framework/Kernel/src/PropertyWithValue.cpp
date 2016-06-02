@@ -5,8 +5,8 @@ namespace Mantid {
 namespace Kernel {
 /// @cond
 #define INSTANTIATE(Type)                                                      \
-  template DLLExport class PropertyWithValue<Type>;                            \
-  template DLLExport class PropertyWithValue<std::vector<Type>>;
+  template class DLLExport PropertyWithValue<Type>;                            \
+  template class DLLExport PropertyWithValue<std::vector<Type>>;
 
 // Explicit instantiations
 INSTANTIATE(int)
