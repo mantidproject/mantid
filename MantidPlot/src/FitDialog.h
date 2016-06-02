@@ -107,8 +107,9 @@ private slots:
 	void showParameterRange(bool);
 
 private:
+	bool isOfType(const QObject *obj, const char *toCompare) const;
 	void loadPlugins();
-    void loadUserFunctions();
+	void loadUserFunctions();
 	void initBuiltInFunctions();
 	void modifyGuesses(double* initVal);
 	QStringList builtInFunctionNames();

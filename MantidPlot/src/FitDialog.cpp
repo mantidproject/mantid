@@ -727,8 +727,9 @@ void FitDialog::showFitPage()
 		return;
 
     if (d_current_fit->type() == Fit::BuiltIn && 
-		((d_current_fit->className() == "PolynomialFit") || (d_current_fit->className() == "LinearFit")
-		|| d_current_fit->className() == "LinearSlopeFit")){
+	(isOfType(d_current_fit, "PolynomialFit") ||
+	 isOfType(d_current_fit, "LinearFit") ||
+	 isOfType(d_current_fit, "LinearSlopeFit"))){
         btnParamRange->setEnabled(false);
         boxAlgorithm->setEnabled(false);
 		boxPoints->setEnabled(false);
@@ -816,8 +817,9 @@ void FitDialog::showEditPage()
 void FitDialog::showAdvancedPage()
 {
 	tw->setCurrentWidget (advancedPage);
-	if (d_current_fit && ((d_current_fit->className() == "PolynomialFit") || 
-		(d_current_fit->className() == "LinearFit") || (d_current_fit->className() == "LinearSlopeFit"))){
+	if (d_current_fit && (isOfType(d_current_fit,"PolynomialFit") ||
+			      isOfType(d_current_fit, "LinearFit") ||
+			      isOfType(d_current_fit, "LinearSlopeFit"))){
 		scaleErrorsBox->setChecked(false);
 		scaleErrorsBox->setEnabled(false);
 	} else {
@@ -1156,9 +1158,9 @@ void FitDialog::accept() {
     d_current_fit->generateFunction(generatePointsBtn->isChecked(),
                                     generatePointsBox->value());
     d_current_fit->setMaximumIterations(boxPoints->value());
-    if (!(d_current_fit->className() == "PolynomialFit") &&
-        !(d_current_fit->className() == "LinearFit") &&
-        !(d_current_fit->className() == "LinearSlopeFit"))
+    if (!isOfType(d_current_fit, "PolynomialFit") &&
+        !isOfType(d_current_fit, "LinearFit") &&
+        !isOfType(d_current_fit, "LinearSlopeFit"))
       d_current_fit->scaleErrors(scaleErrorsBox->isChecked());
     d_current_fit->fit();
     double *res = d_current_fit->results();
@@ -1510,6 +1512,10 @@ QString FitDialog::parseFormula(const QString& s)
 		}
 	}
 	return formula;
+}
+
+bool FitDialog::isOfType(const QObject *obj, const char *toCompare) const {
+  return strcmp(obj->metaObject()->className(), toCompare) == 0;
 }
 
 template<class Widget>
