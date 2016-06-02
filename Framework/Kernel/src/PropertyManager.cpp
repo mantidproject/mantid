@@ -324,8 +324,14 @@ void PropertyManager::setPropertiesWithJSONString(
     const std::unordered_set<std::string> &ignoreProperties) {
   ::Json::Reader reader;
   ::Json::Value propertyJson;
-  reader.parse(propertiesString, propertyJson);
-  setProperties(propertyJson, ignoreProperties);
+
+  if (reader.parse(propertiesString, propertyJson)) {
+    setProperties(propertyJson, ignoreProperties);
+  } else {
+    throw std::invalid_argument(
+        "Could not parse JSON string when trying to set a property from: " +
+        propertiesString);
+  }
 }
 
 /** Sets all the declared properties from a string.
