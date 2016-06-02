@@ -68,7 +68,7 @@ private:
 template class MANTID_API_DLL
     Mantid::Kernel::SingletonHolder<FuncMinimizerFactoryImpl>;
 #endif /* _WIN32 */
-typedef MANTID_API_DLL Mantid::Kernel::SingletonHolder<FuncMinimizerFactoryImpl>
+typedef Mantid::Kernel::SingletonHolder<FuncMinimizerFactoryImpl>
     FuncMinimizerFactory;
 
 } // namespace API

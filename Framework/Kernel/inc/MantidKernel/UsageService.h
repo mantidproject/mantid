@@ -144,7 +144,7 @@ inline
 #endif
     template class MANTID_KERNEL_DLL
         Mantid::Kernel::SingletonHolder<UsageServiceImpl>;
-typedef MANTID_KERNEL_DLL Mantid::Kernel::SingletonHolder<UsageServiceImpl>
+typedef Mantid::Kernel::SingletonHolder<UsageServiceImpl>
     UsageService;
 
 } // namespace API

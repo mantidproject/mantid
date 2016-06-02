@@ -98,7 +98,7 @@ private:
   template class EXPORT_OPT_MANTIDQT_API Mantid::Kernel::SingletonHolder<AlgorithmInputHistoryImpl>;
 #endif /* _WIN32 */
   /// The specific instantiation of the templated type
-  typedef EXPORT_OPT_MANTIDQT_API Mantid::Kernel::SingletonHolder<AlgorithmInputHistoryImpl> AlgorithmInputHistory;
+  typedef Mantid::Kernel::SingletonHolder<AlgorithmInputHistoryImpl> AlgorithmInputHistory;
 
 }
 }

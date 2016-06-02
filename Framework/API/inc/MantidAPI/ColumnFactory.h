@@ -70,7 +70,7 @@ private:
 template class MANTID_API_DLL
     Mantid::Kernel::SingletonHolder<ColumnFactoryImpl>;
 #endif /* _WIN32 */
-typedef MANTID_API_DLL Mantid::Kernel::SingletonHolder<ColumnFactoryImpl>
+typedef Mantid::Kernel::SingletonHolder<ColumnFactoryImpl>
     ColumnFactory;
 
 } // namespace API

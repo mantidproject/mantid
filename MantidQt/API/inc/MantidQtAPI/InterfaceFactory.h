@@ -75,7 +75,7 @@ template class EXPORT_OPT_MANTIDQT_API
     Mantid::Kernel::SingletonHolder<AlgorithmDialogFactoryImpl>;
 #endif /* _WIN32 */
 /// The specific instantiation of the templated type
-typedef EXPORT_OPT_MANTIDQT_API Mantid::Kernel::SingletonHolder<
+typedef Mantid::Kernel::SingletonHolder<
     AlgorithmDialogFactoryImpl> AlgorithmDialogFactory;
 
 /**
@@ -190,7 +190,7 @@ template class EXPORT_OPT_MANTIDQT_API
     Mantid::Kernel::SingletonHolder<UserSubWindowFactoryImpl>;
 #endif /* _WIN32 */
 /// The specific instantiation of the templated type
-typedef EXPORT_OPT_MANTIDQT_API Mantid::Kernel::SingletonHolder<
+typedef Mantid::Kernel::SingletonHolder<
     UserSubWindowFactoryImpl> UserSubWindowFactory;
 }
 }

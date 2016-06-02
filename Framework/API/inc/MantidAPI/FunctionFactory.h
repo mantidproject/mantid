@@ -149,7 +149,7 @@ const std::vector<std::string> &FunctionFactoryImpl::getFunctionNames() const {
 template class MANTID_API_DLL
     Mantid::Kernel::SingletonHolder<FunctionFactoryImpl>;
 #endif /* _WIN32 */
-typedef MANTID_API_DLL Mantid::Kernel::SingletonHolder<FunctionFactoryImpl>
+typedef Mantid::Kernel::SingletonHolder<FunctionFactoryImpl>
     FunctionFactory;
 
 /// Convenient typedef for an UpdateNotification
