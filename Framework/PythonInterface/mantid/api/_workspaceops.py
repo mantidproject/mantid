@@ -6,11 +6,11 @@
 """
 from __future__ import absolute_import
 
-from ..kernel.funcreturns import lhs_info
+from ..kernel.funcinspect import lhs_info, customise_func
 from . import _api
 
 import inspect as _inspect
-from six import iteritems
+from six import iteritems, get_function_code
 
 #------------------------------------------------------------------------------
 # Binary Ops
@@ -213,15 +213,10 @@ def attach_func_as_method(name, func_obj, self_param_name, workspace_types=None)
         return func_obj(*args, **kwargs)
     #------------------------------------------------------------------
     # Add correct meta-properties for the method
-    _method_impl.__name__ = func_obj.__name__
-    _method_impl.__doc__ = func_obj.__doc__
-    f = _method_impl.func_code
     signature = ['self']
-    signature.extend(func_obj.func_code.co_varnames)
-    c = f.__new__(f.__class__, f.co_argcount, f.co_nlocals, f.co_stacksize, f.co_flags, f.co_code, f.co_consts, f.co_names,
-                  tuple(signature), f.co_filename, f.co_name, f.co_firstlineno, f.co_lnotab, f.co_freevars)
-    # Replace the code object of the wrapper function
-    _method_impl.func_code = c
+    signature.extend(get_function_code(func_obj).co_varnames)
+    customise_func(_method_impl, func_obj.__name__,
+                   tuple(signature), func_obj.__doc__)
 
     if workspace_types or len(workspace_types) > 0:
         for typename in workspace_types:

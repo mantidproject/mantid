@@ -21,5 +21,5 @@ from . import packagesetup as _packagesetup
 # Make modules available in this namespace
 ###############################################################################
 from . import environment
-from . import funcreturns
+from . import funcinspect
 from ._aliases import *

@@ -4,9 +4,28 @@ Defines functions to dynamically load Python modules.
 These modules may define extensions to C++ types, e.g.
 algorithms, fit functions etc.
 """
+from __future__ import absolute_import
+
 import os as _os
-import imp as _imp
-from mantid.kernel import logger, Logger, config
+try:
+    from importlib.machinery import SourceFileLoader
+except ImportError:
+    # imp is deprecated in Python 3 but importlib doesn't exist
+    # in Python 2.
+    # We only use a single function so implement a handwritten compatability
+    # class
+    import imp as _imp
+    class SourceFileLoader(object):
+
+        def __init__(self, name, pathname):
+            self._name = name
+            self._pathname = pathname
+
+        def load_module(self):
+            return _imp.load_source(self._name, self._pathname)
+    #endclass
+
+from . import logger, Logger, config
 
 # String that separates paths (should be in the ConfigService)
 PATH_SEPARATOR=";"
@@ -35,7 +54,7 @@ class PluginLoader(object):
         name = _os.path.basename(pathname) # Including extension
         name = _os.path.splitext(name)[0]
         self._logger.debug("Loading python plugin %s" % pathname)
-        return _imp.load_source(name, pathname)
+        return SourceFileLoader(name, pathname).load_module()
 
 #======================================================================================================================
 # High-level functions to assist with loading
@@ -84,8 +103,6 @@ def find_plugins(top_dir):
             if f.endswith(PluginLoader.extension):
                 filename = _os.path.join(root, f)
                 all_plugins.append(filename)
-                if contains_newapi_algorithm(filename):
-                    algs.append(filename)
 
     return all_plugins, algs
 
@@ -163,10 +180,9 @@ def load_from_file(filepath):
     """
     loaded = []
     try:
-        if contains_newapi_algorithm(filepath):
-            name, module = load_plugin(filepath)
-            loaded.append(module)
-    except Exception, exc:
+        name, module = load_plugin(filepath)
+        loaded.append(module)
+    except Exception as exc:
         logger.warning("Failed to load plugin %s. Error: %s" % (filepath, str(exc)))
 
     return loaded
@@ -208,30 +224,3 @@ def sync_attrs(source_module, attrs, clients):
                 setattr(plugin, func_name, attr)
 
 #======================================================================================================================
-
-def contains_newapi_algorithm(filename):
-    """
-        Inspects the given file to check whether
-        it contains an algorithm written with this API.
-        The check is simple. If registerPyAlgorithm is
-        discovered then it will not be considered a new API algorithm
-
-        @param filename :: A full file path pointing to a python file
-        @returns True if a python algorithm written with the new API
-        has been found.
-    """
-    alg_found = True
-    try:
-        with open(filename,'r') as file:
-            for line in reversed(file.readlines()):
-                if 'registerPyAlgorithm' in line:
-                    alg_found = False
-                    break
-                if 'AlgorithmFactory.subscribe' in line:
-                    alg_found = True
-                    break
-    except IOError:
-        # something wrong with reading the file
-        alg_found = False
-
-    return alg_found

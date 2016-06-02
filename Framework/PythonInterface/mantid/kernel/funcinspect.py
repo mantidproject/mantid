@@ -10,6 +10,51 @@ import opcode
 import inspect
 
 #-------------------------------------------------------------------------------
+def replace_signature(func, varnames):
+    """
+    Replace the signature of the given function object with that given by
+    varnames
+    :param func: Function whose signature is to be replaced
+    :param varnames: A tuple of names of arguments and local variables
+    """
+    # Code object is different in Python 3
+    if hasattr(func, 'func_code'):
+        # Version 2
+        code_attr = 'func_code'
+        f = func.func_code
+        c = f.__new__(f.__class__, f.co_argcount, f.co_nlocals, f.co_stacksize,
+                      f.co_flags, f.co_code, f.co_consts, f.co_names,
+                      varnames, f.co_filename, f.co_name, f.co_firstlineno,
+                      f.co_lnotab, f.co_freevars)
+    else:
+        code_attr = '__code__'
+        f = func.__code__
+        c = f.__new__(f.__class__, f.co_argcount, f.co_kwonlyargcount,
+                      f.co_nlocals, f.co_stacksize, f.co_flags, f.co_code, 
+                      f.co_consts, f.co_names, varnames, 
+                      f.co_filename, f.co_name, f.co_firstlineno,
+                      f.co_lnotab, f.co_freevars)
+    #endif
+    setattr(func, code_attr, c)
+
+#-------------------------------------------------------------------------------
+def customise_func(func, name, signature, docstring):
+    """
+    Takes the definition of the algorithm function and replaces
+    the attributes of the instance to make it look like a handwritten
+    function definition
+    :param func: A function object holding the definition
+    :param name: The name of the algorithm
+    :param signature: A new signature for the function. Expecting a 2-tuple
+                      of arguments and local variables. See _replace_signature
+    :param docstring: A string containing the function documentation
+    """
+    func.__name__ = str(name)
+    func.__doc__ = docstring
+    replace_signature(func, signature)
+    return func
+
+#-------------------------------------------------------------------------------
 def decompile(code_object):
     """
     Taken from
