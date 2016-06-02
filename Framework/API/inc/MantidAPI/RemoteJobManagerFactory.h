@@ -95,7 +95,7 @@ template class MANTID_API_DLL
 #endif /* _WIN32 */
 
 // The factory is just a specialisation of SingletonHolder
-typedef MANTID_API_DLL Mantid::Kernel::SingletonHolder<
+typedef Mantid::Kernel::SingletonHolder<
     RemoteJobManagerFactoryImpl> RemoteJobManagerFactory;
 
 } // namespace API

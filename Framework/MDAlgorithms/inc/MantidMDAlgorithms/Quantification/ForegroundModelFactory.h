@@ -72,8 +72,7 @@ template class MANTID_MDALGORITHMS_DLL
     Kernel::SingletonHolder<ForegroundModelFactoryImpl>;
 #endif /* _WIN32 */
 /// Typedef singleton instance to ForegroundFactory
-typedef MANTID_MDALGORITHMS_DLL
-    Kernel::SingletonHolder<ForegroundModelFactoryImpl> ForegroundModelFactory;
+typedef Kernel::SingletonHolder<ForegroundModelFactoryImpl> ForegroundModelFactory;
 }
 }
 

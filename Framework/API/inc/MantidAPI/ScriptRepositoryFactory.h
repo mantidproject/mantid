@@ -74,7 +74,7 @@ private:
 template class MANTID_API_DLL
     Mantid::Kernel::SingletonHolder<ScriptRepositoryFactoryImpl>;
 #endif /* _WIN32 */
-typedef MANTID_API_DLL Mantid::Kernel::SingletonHolder<
+typedef Mantid::Kernel::SingletonHolder<
     ScriptRepositoryFactoryImpl> ScriptRepositoryFactory;
 
 } // namespace API

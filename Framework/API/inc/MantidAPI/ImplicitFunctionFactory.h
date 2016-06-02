@@ -73,7 +73,7 @@ template class MANTID_API_DLL
     Mantid::Kernel::SingletonHolder<ImplicitFunctionFactoryImpl>;
 #endif /* _WIN32 */
 
-typedef MANTID_API_DLL Mantid::Kernel::SingletonHolder<
+typedef Mantid::Kernel::SingletonHolder<
     ImplicitFunctionFactoryImpl> ImplicitFunctionFactory;
 }
 }

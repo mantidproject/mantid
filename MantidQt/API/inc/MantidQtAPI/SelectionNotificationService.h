@@ -70,7 +70,7 @@ namespace MantidQt
   template class EXPORT_OPT_MANTIDQT_API Mantid::Kernel::SingletonHolder<SelectionNotificationServiceImpl>;
 #endif /* _WIN32 */
 
-  typedef EXPORT_OPT_MANTIDQT_API Mantid::Kernel::SingletonHolder<SelectionNotificationServiceImpl> SelectionNotificationService;
+  typedef Mantid::Kernel::SingletonHolder<SelectionNotificationServiceImpl> SelectionNotificationService;
 
   }
 }

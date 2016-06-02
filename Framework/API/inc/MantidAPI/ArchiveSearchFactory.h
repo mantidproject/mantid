@@ -64,7 +64,7 @@ template class MANTID_API_DLL
     Mantid::Kernel::SingletonHolder<ArchiveSearchFactoryImpl>;
 #endif /* _WIN32 */
 
-typedef MANTID_API_DLL Mantid::Kernel::SingletonHolder<ArchiveSearchFactoryImpl>
+typedef Mantid::Kernel::SingletonHolder<ArchiveSearchFactoryImpl>
     ArchiveSearchFactory;
 }
 }
