@@ -160,8 +160,8 @@ def generate():
     classes = classes_cpp + mdevent_types
 
     padding,lines,lines_after=parse_file("../inc/MantidDataObjects/MDEventFactory.h",
-                                                 "//### BEGIN AUTO-GENERATED CODE ###",
-                                                 "//### END AUTO-GENERATED CODE ###");
+                                                 "//### BEGIN AUTO-GENERATED CODE",
+                                                 "//### END AUTO-GENERATED CODE");
 
     nDim = int(find_num_dim(lines));
     print " numDimensions to be generated: ",nDim
@@ -212,8 +212,8 @@ def generate():
 
     # =========== Do the Source File ===========
     padding,lines,lines_after=parse_file("./MDEventFactory.cpp",
-                                         "//### BEGIN AUTO-GENERATED CODE ###",
-                                         "//### END AUTO-GENERATED CODE ###");
+                                         "//### BEGIN AUTO-GENERATED CODE",
+                                         "//### END AUTO-GENERATED CODE");
 
     header_lines = map(lambda x : padding+x,header.split("\n"));
     footer_lines = map(lambda x : padding+x,footer.split("\n"));
