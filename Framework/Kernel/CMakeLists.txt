@@ -616,14 +616,7 @@ else ()
   set ( MANTID_ROOT .. )
 endif ()
 
-# Whether or not to check for updates is tied to a patch version being defined
-# nighly/unstable is basically ISO8601 so it will be longer than 8 char.
-# This affects Mantid.properties.install only.
-string( LENGTH "VERSION_PATCH ${VERSION_PATCH}" VERSION_PATCH_LENGTH)
-set (ENABLE_WEB_UPDATES 0)
-if (${VERSION_PATCH_LENGTH} LESS 8)
-  set (ENABLE_WEB_UPDATES 1)
-endif()
+set (ENABLE_WEB_UPDATES 1)
 
 set ( PLUGINS ${MANTID_ROOT}/plugins )
 set ( PYTHONPLUGIN_DIRS "${PLUGINS}/python" )
