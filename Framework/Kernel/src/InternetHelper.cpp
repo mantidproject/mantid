@@ -304,11 +304,8 @@ void InternetHelper::setProxy(const Kernel::ProxyInfo &proxy) {
 
 /** Process any headers from the response stream
 Basic implementation does nothing.
-
-@param res : The http response
 */
-void InternetHelper::processResponseHeaders(
-    const Poco::Net::HTTPResponse&) {}
+void InternetHelper::processResponseHeaders(const Poco::Net::HTTPResponse &) {}
 
 /** Process any HTTP errors states.
 
