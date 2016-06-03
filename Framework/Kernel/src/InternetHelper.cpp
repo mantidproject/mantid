@@ -228,11 +228,10 @@ int InternetHelper::sendHTTPRequest(const std::string &url,
   return retStatus;
 }
 
-
-  /** Performs a request using https
-  * @param url the address to the network resource
-  * @param responseStream The stream to fill with the reply on success
-  **/
+/** Performs a request using https
+* @param url the address to the network resource
+* @param responseStream The stream to fill with the reply on success
+**/
 int InternetHelper::sendHTTPSRequest(const std::string &url,
                                      std::ostream &responseStream) {
   int retStatus = 0;
@@ -308,8 +307,8 @@ Basic implementation does nothing.
 
 @param res : The http response
 */
-void InternetHelper::processResponseHeaders(const Poco::Net::HTTPResponse& res) {
-}
+void InternetHelper::processResponseHeaders(
+    const Poco::Net::HTTPResponse &res) {}
 
 /** Process any HTTP errors states.
 

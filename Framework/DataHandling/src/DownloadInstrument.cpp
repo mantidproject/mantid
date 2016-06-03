@@ -364,7 +364,7 @@ int DownloadInstrument::doDownloadFile(const std::string &urlFile,
 
   int retStatus = 0;
   GitHubApiHelper inetHelper;
-  inetHelper.headers().insert(headers.begin(),headers.end());
+  inetHelper.headers().insert(headers.begin(), headers.end());
   retStatus = inetHelper.downloadFile(urlFile, localFilePath);
   return retStatus;
 }
