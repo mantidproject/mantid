@@ -130,7 +130,7 @@ public:
   const std::string &getHeader(const std::string &key);
   void clearHeaders();
   StringToStringMap &headers();
-  void reset();
+  virtual void reset();
 
   // Proxy methods
   Kernel::ProxyInfo &getProxy(const std::string &url);
@@ -147,6 +147,7 @@ protected:
                                std::ostream &responseStream);
   virtual int sendHTTPRequest(const std::string &url,
                               std::ostream &responseStream);
+  virtual void processResponseHeaders(const Poco::Net::HTTPResponse &res);
   virtual int processErrorStates(const Poco::Net::HTTPResponse &res,
                                  std::istream &rs, const std::string &url);
 

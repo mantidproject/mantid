@@ -1,5 +1,5 @@
 #include "MantidDataHandling/CheckMantidVersion.h"
-#include "MantidKernel/InternetHelper.h"
+#include "MantidKernel/GitHubApiHelper.h"
 #include "MantidKernel/MantidVersion.h"
 #include "MantidKernel/Strings.h"
 
@@ -113,8 +113,8 @@ void CheckMantidVersion::exec() {
       // formatting issues like missing quotes or brackets.
       g_log.warning() << "Error found when parsing version information "
                          "retrieved from GitHub as a JSON string. "
-                         "Error trying to parse this JSON string: " << json
-                      << std::endl
+                         "Error trying to parse this JSON string: "
+                      << json << std::endl
                       << ". Parsing error details: "
                       << r.getFormattedErrorMessages() << std::endl;
     }
@@ -237,11 +237,11 @@ behaviour.
 */
 std::string CheckMantidVersion::getVersionsFromGitHub(const std::string &url) {
 
-  Kernel::InternetHelper inetHelper;
+  Kernel::GitHubApiHelper inetHelper;
   std::ostringstream os;
   int tzd = 0;
 
-  inetHelper.headers().emplace(
+  inetHelper.addHeader(
       "if-modified-since",
       Poco::DateTimeFormatter::format(
           Poco::DateTimeParser::parse(MantidVersion::releaseDate(), tzd),

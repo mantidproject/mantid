@@ -134,6 +134,7 @@ int InternetHelper::sendRequestAndProcess(HTTPClientSession &session,
   if (retStatus == HTTP_OK ||
       (retStatus == HTTP_CREATED && m_method == HTTPRequest::HTTP_POST)) {
     Poco::StreamCopier::copyStream(rs, responseStream);
+    processResponseHeaders(*m_response);
     return retStatus;
   } else if (isRelocated(retStatus)) {
     return this->processRelocation(*m_response, responseStream);
@@ -227,10 +228,11 @@ int InternetHelper::sendHTTPRequest(const std::string &url,
   return retStatus;
 }
 
-/** Performs a request using https
-* @param url the address to the network resource
-* @param responseStream The stream to fill with the reply on success
-**/
+
+  /** Performs a request using https
+  * @param url the address to the network resource
+  * @param responseStream The stream to fill with the reply on success
+  **/
 int InternetHelper::sendHTTPSRequest(const std::string &url,
                                      std::ostream &responseStream) {
   int retStatus = 0;
@@ -299,6 +301,14 @@ void InternetHelper::clearProxy() { m_isProxySet = false; }
 void InternetHelper::setProxy(const Kernel::ProxyInfo &proxy) {
   m_proxyInfo = proxy;
   m_isProxySet = true;
+}
+
+/** Process any headers from the response stream
+Basic implementation does nothing.
+
+@param res : The http response
+*/
+void InternetHelper::processResponseHeaders(const Poco::Net::HTTPResponse& res) {
 }
 
 /** Process any HTTP errors states.
