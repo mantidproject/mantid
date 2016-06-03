@@ -50,10 +50,11 @@ construct a subspace from a set of *search directions* to approach the maximum e
 the image :math:`x` is set to the flat background :math:`A` and the search directions are constructed
 using the gradients of :math:`S` and :math:`\chi^2`:
 
-.. math:: \mathbf{e}_1 = f\left(\nabla S\right)
-.. math:: \mathbf{e}_2 = f\left(\nabla \chi^2\right)
+.. math:: \mathbf{e}_1 = \left|x\right|\left(\nabla S\right)
+.. math:: \mathbf{e}_2 = \left|x\right|\left(\nabla \chi^2\right)
 
-where :math:`f\left(\nabla S\right)` stands for a componentwise multiplication. The algorithm next uses
+where :math:`a\left(b\right)` stands for a componentwise multiplication between vectors
+:math:`a` and :math:`b`. The algorithm next uses
 a quadratic approximation to determine the increment :math:`\delta \mathbf{x}` that *moves* the image
 one step closer to the solution:
 
