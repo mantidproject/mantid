@@ -56,8 +56,8 @@ private:
 template class MANTID_API_DLL
     Mantid::Kernel::SingletonHolder<InstrumentDataServiceImpl>;
 #endif /* _WIN32 */
-typedef Mantid::Kernel::SingletonHolder<
-    InstrumentDataServiceImpl> InstrumentDataService;
+typedef Mantid::Kernel::SingletonHolder<InstrumentDataServiceImpl>
+    InstrumentDataService;
 
 } // Namespace API
 } // Namespace Mantid

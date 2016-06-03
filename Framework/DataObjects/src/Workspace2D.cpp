@@ -324,8 +324,8 @@ void Workspace2D::generateHistogram(const std::size_t index, const MantidVec &X,
 } // NamespaceMantid
 
 ///\cond TEMPLATE
-template class DLLExport Mantid::API::WorkspaceProperty<
-    Mantid::DataObjects::Workspace2D>;
+template class DLLExport
+    Mantid::API::WorkspaceProperty<Mantid::DataObjects::Workspace2D>;
 
 namespace Mantid {
 namespace Kernel {

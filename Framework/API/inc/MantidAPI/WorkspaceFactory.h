@@ -105,8 +105,7 @@ private:
 template class MANTID_API_DLL
     Mantid::Kernel::SingletonHolder<WorkspaceFactoryImpl>;
 #endif /* _WIN32 */
-typedef Mantid::Kernel::SingletonHolder<WorkspaceFactoryImpl>
-    WorkspaceFactory;
+typedef Mantid::Kernel::SingletonHolder<WorkspaceFactoryImpl> WorkspaceFactory;
 
 } // namespace Kernel
 } // namespace Mantid

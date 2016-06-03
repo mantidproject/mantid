@@ -54,8 +54,8 @@ private:
 template class MANTID_KERNEL_DLL
     Mantid::Kernel::SingletonHolder<PropertyManagerDataServiceImpl>;
 #endif /* _WIN32 */
-typedef  Mantid::Kernel::SingletonHolder<
-    PropertyManagerDataServiceImpl> PropertyManagerDataService;
+typedef Mantid::Kernel::SingletonHolder<PropertyManagerDataServiceImpl>
+    PropertyManagerDataService;
 
 } // Namespace Kernel
 } // Namespace Mantid

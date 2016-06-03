@@ -75,8 +75,8 @@ private:
 template class MANTID_API_DLL
     Mantid::Kernel::SingletonHolder<TransformScaleFactoryImpl>;
 #endif /* _WIN32 */
-typedef Mantid::Kernel::SingletonHolder<
-    TransformScaleFactoryImpl> TransformScaleFactory;
+typedef Mantid::Kernel::SingletonHolder<TransformScaleFactoryImpl>
+    TransformScaleFactory;
 
 } // namespace API
 } // namespace Mantid

@@ -71,8 +71,8 @@ template class MANTID_MDALGORITHMS_DLL
     Kernel::SingletonHolder<MDResolutionConvolutionFactoryImpl>;
 #endif /* _WIN32 */
 /// Typedef singleton instance to MDResolutionConvolutionFactory
-typedef Kernel::SingletonHolder<
-    MDResolutionConvolutionFactoryImpl> MDResolutionConvolutionFactory;
+typedef Kernel::SingletonHolder<MDResolutionConvolutionFactoryImpl>
+    MDResolutionConvolutionFactory;
 }
 }
 
