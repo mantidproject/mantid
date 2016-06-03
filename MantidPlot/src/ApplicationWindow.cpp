@@ -216,6 +216,10 @@
 
 #include "MantidQtAPI/ScriptRepositoryView.h"
 
+#ifdef MAKE_VATES
+#include "vtkPVDisplayInformation.h"
+#endif
+
 using namespace Qwt3D;
 using namespace MantidQt::API;
 using Mantid::Kernel::ConfigService;
@@ -370,6 +374,11 @@ void ApplicationWindow::init(bool factorySettings, const QStringList &args) {
     LibraryManager::Instance().OpenAllLibraries(config.getPVPluginsPath(),
                                                 false);
   }
+
+#ifdef MAKE_VATES
+  if (!vtkPVDisplayInformation::SupportsOpenGLLocally())
+    g_log.error("The OpenGL configuration does not support the VSI.");
+#endif
 
   // Create UI object
   mantidUI = new MantidUI(this);
