@@ -119,7 +119,7 @@ DownloadInstrument::StringToStringMap DownloadInstrument::processRepository() {
   // get the instrument directories
   auto instrumentDirs =
       Mantid::Kernel::ConfigService::Instance().getInstrumentDirectories();
-  Poco::Path installPath(instrumentDirs[instrumentDirs.size() - 1]);
+  Poco::Path installPath(instrumentDirs.back());
   installPath.makeDirectory();
   Poco::Path localPath(instrumentDirs[0]);
   localPath.makeDirectory();
