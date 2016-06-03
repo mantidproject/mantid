@@ -607,7 +607,7 @@ public:
          2.29916480,   2.57468876,  3.65843827,  15.31622763, 56.57989073,
          101.20662386, 76.30364797, 31.54892552, 8.09166673,  3.20615343,
          2.95246554,   2.75421444,  3.70180447,  2.77832668,  2.29507565};
-    for (size_t i = 0; i < ndata; i++) {
+    for (int i = 0; i < ndata; i++) {
       x[i] = static_cast<double>(i + 1);
       y[i] -= 2.8765;
     }
@@ -650,7 +650,7 @@ public:
          2.29916480,   2.57468876,  3.65843827,  15.31622763, 56.57989073,
          101.20662386, 76.30364797, 31.54892552, 8.09166673,  3.20615343,
          2.95246554,   2.75421444,  3.70180447,  2.77832668,  2.29507565};
-    for (size_t i = 0; i < ndata; i++) {
+    for (int i = 0; i < ndata; i++) {
       x[i] = static_cast<double>(i + 1);
       y[i] -= 2.8765;
     }
@@ -698,16 +698,16 @@ public:
     Mantid::MantidVec &y = ws->dataY(0);
     Mantid::MantidVec &e = ws->dataE(0);
     // x-values in time-of-flight
-    for (size_t i = 0; i < 8; i++)
+    for (int i = 0; i < 8; i++)
       x[i] = 79292.4375 + 7.875 * double(i);
-    for (size_t i = 8; i < ndata; i++)
+    for (int i = 8; i < ndata; i++)
       x[i] = 79347.625 + 8.0 * (double(i) - 8.0);
     // y-values
     y = {7,   8,   4,   9,   4,   10,  10,  5,   8,   7,  10, 18, 30, 71,
          105, 167, 266, 271, 239, 221, 179, 133, 126, 88, 85, 52, 37, 51,
          32,  31,  17,  21,  15,  13,  12,  12,  10,  7,  5,  9,  6};
     // errors are the square root of the Y-value
-    for (size_t i = 0; i < ndata; i++)
+    for (int i = 0; i < ndata; i++)
       e[i] = sqrt(y[i]);
 
     Fit fit;
@@ -755,16 +755,16 @@ public:
     Mantid::MantidVec &y = ws->dataY(0);
     Mantid::MantidVec &e = ws->dataE(0);
     // x-values in time-of-flight
-    for (size_t i = 0; i < 8; i++)
+    for (int i = 0; i < 8; i++)
       x[i] = 79292.4375 + 7.875 * double(i);
-    for (size_t i = 8; i < ndata; i++)
+    for (int i = 8; i < ndata; i++)
       x[i] = 79347.625 + 8.0 * (double(i) - 8.0);
     // y-values
     y = {7,   8,   4,   9,   4,   10,  10,  5,   8,   7,  10, 18, 30, 71,
          105, 167, 266, 271, 239, 221, 179, 133, 126, 88, 85, 52, 37, 51,
          32,  31,  17,  21,  15,  13,  12,  12,  10,  7,  5,  9,  6};
     // errors are the square root of the Y-value
-    for (size_t i = 0; i < ndata; i++)
+    for (int i = 0; i < ndata; i++)
       e[i] = sqrt(y[i]);
 
     Fit fit;
@@ -986,7 +986,7 @@ public:
          1.95951,  1.97868,  1.24903,  1.15062,  1.33571,  0.965367, 1.07663,
          1.40468,  0.982297, 0.85258,  1.23184,  0.882275, 0.911729, 0.614329,
          1.26008,  1.07271};
-    for (size_t i = 0; i < ndata; ++i) {
+    for (int i = 0; i < ndata; ++i) {
       x[i] = static_cast<double>(i) * 0.01 - 0.5;
       e[i] = sqrt(fabs(y[i]));
     }
