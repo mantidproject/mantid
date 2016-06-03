@@ -976,7 +976,7 @@ void TimeSeriesProperty<TYPE>::addValues(
   size_t length = std::min(times.size(), values.size());
   m_size += static_cast<int>(length);
   for (size_t i = 0; i < length; ++i) {
-    m_values.emplace_back(times[i], values[static_cast<size_t>(i)]);
+    m_values.emplace_back(times[i], values[i]);
   }
 
   if (!values.empty())
