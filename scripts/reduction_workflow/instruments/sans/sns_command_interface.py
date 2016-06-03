@@ -5,32 +5,33 @@
 # Import the specific commands that we need - some of these are used in systemtests
 from reduction_workflow.command_interface import *
 
-from hfir_command_interface import DarkCurrent, NoDarkCurrent, NoNormalization
-from hfir_command_interface import SolidAngle, NoSolidAngle
-from hfir_command_interface import DirectBeamCenter, ScatteringBeamCenter
-from hfir_command_interface import SetBeamCenter as BaseSetBeamCenter
+from .hfir_command_interface import DarkCurrent, NoDarkCurrent, NoNormalization
+from .hfir_command_interface import SolidAngle, NoSolidAngle
+from .hfir_command_interface import DirectBeamCenter, ScatteringBeamCenter
+from .hfir_command_interface import SetBeamCenter as BaseSetBeamCenter
 
-from hfir_command_interface import SensitivityCorrection, SetSensitivityBeamCenter
-from hfir_command_interface import SensitivityDirectBeamCenter, SensitivityScatteringBeamCenter
-from hfir_command_interface import NoSensitivityCorrection, DivideByThickness
+from .hfir_command_interface import SensitivityCorrection, SetSensitivityBeamCenter
+from .hfir_command_interface import SensitivityDirectBeamCenter, SensitivityScatteringBeamCenter
+from .hfir_command_interface import NoSensitivityCorrection, DivideByThickness
 
-from hfir_command_interface import IQxQy, NoIQxQy, SaveIq, NoSaveIq, SaveIqAscii
+from .hfir_command_interface import IQxQy, NoIQxQy, SaveIq, NoSaveIq, SaveIqAscii
 
-from hfir_command_interface import DirectBeamTransmission, TransmissionDarkCurrent
-from hfir_command_interface import ThetaDependentTransmission
-from hfir_command_interface import SetTransmissionBeamCenter, TransmissionDirectBeamCenter
-from hfir_command_interface import SetTransmission, NoTransmission
+from .hfir_command_interface import DirectBeamTransmission, TransmissionDarkCurrent
+from .hfir_command_interface import ThetaDependentTransmission
+from .hfir_command_interface import SetTransmissionBeamCenter, TransmissionDirectBeamCenter
+from .hfir_command_interface import SetTransmission, NoTransmission
 
-from hfir_command_interface import Background, NoBackground, NoBckTransmission
-from hfir_command_interface import SetBckTransmission, BckDirectBeamTransmission
-from hfir_command_interface import SetBckTransmissionBeamCenter, BckThetaDependentTransmission
-from hfir_command_interface import BckTransmissionDirectBeamCenter, BckTransmissionDarkCurrent
+from .hfir_command_interface import Background, NoBackground, NoBckTransmission
+from .hfir_command_interface import SetBckTransmission, BckDirectBeamTransmission
+from .hfir_command_interface import SetBckTransmissionBeamCenter, BckThetaDependentTransmission
+from .hfir_command_interface import BckTransmissionDirectBeamCenter, BckTransmissionDarkCurrent
 
-from hfir_command_interface import SetSampleDetectorOffset, SetSampleDetectorDistance
-from hfir_command_interface import Mask, MaskRectangle, MaskDetectors, MaskDetectorSide
-from hfir_command_interface import SetAbsoluteScale, SetDirectBeamAbsoluteScale
-from hfir_command_interface import Stitch
-
+from .hfir_command_interface import SetSampleDetectorOffset, SetSampleDetectorDistance
+from .hfir_command_interface import Mask, MaskRectangle, MaskDetectors, MaskDetectorSide
+from .hfir_command_interface import SetAbsoluteScale, SetDirectBeamAbsoluteScale
+from .hfir_command_interface import Stitch
+# For Swans
+from .hfir_command_interface import AzimuthalAverage as HFIRAzimuthalAverage
 #from mantid.api import AlgorithmManager
 #from mantid.kernel import Logger
 #import mantid.simpleapi as simpleapi
@@ -44,6 +45,21 @@ def EQSANS(keep_events=False, property_manager=None):
     ReductionSingleton().reduction_properties["PreserveEvents"]=keep_events
     SolidAngle()
     AzimuthalAverage()
+    if property_manager is not None:
+        ReductionSingleton().set_reduction_table_name(property_manager)
+
+def SWANS(keep_events=False, property_manager=None):
+    '''
+    Copied from EQSANS with respective changes
+    Note that SWANS uses AzimuthalAverage from HFIR!
+    '''
+    Clear()
+    ReductionSingleton().set_instrument("SWANS",
+                                        "SetupSWANSReduction",
+                                        "SANSReduction")
+    ReductionSingleton().reduction_properties["PreserveEvents"]=keep_events
+    SolidAngle()
+    HFIRAzimuthalAverage()
     if property_manager is not None:
         ReductionSingleton().set_reduction_table_name(property_manager)
 

@@ -1,14 +1,21 @@
 #include "MantidDataHandling/LoadSwans.h"
+#include "MantidAPI/Axis.h"
+#include "MantidKernel/UnitFactory.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidDataHandling/LoadHelper.h"
 #include "MantidGeometry/Instrument/ComponentHelper.h"
 #include "MantidKernel/StringTokenizer.h"
+#include "MantidAPI/RegisterFileLoader.h"
 
 #include <map>
 #include <iostream>
 #include <fstream>
 #include <algorithm>
 #include <boost/tokenizer.hpp>
+#include <boost/foreach.hpp>
+#include <boost/range/combine.hpp>
+#include <boost/algorithm/string/predicate.hpp> //starts_with
+#include <Poco/Path.h>
 
 namespace Mantid {
 namespace DataHandling {
@@ -19,7 +26,7 @@ using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 
 // Register the algorithm into the AlgorithmFactory
-DECLARE_ALGORITHM(LoadSwans)
+DECLARE_FILELOADER_ALGORITHM(LoadSwans)
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
@@ -49,10 +56,12 @@ const std::string LoadSwans::summary() const { return "Loads SNS SWANS Data"; }
  * be used
  */
 int LoadSwans::confidence(Kernel::FileDescriptor &descriptor) const {
-  // since this is a test loader, the confidence will always be 0!
-  // I don't want the Load algorithm to pick this one!
-  if (descriptor.extension().compare(".dat") != 0)
-    return 1;
+
+  std::string filename = Poco::Path(descriptor.filename()).getFileName();
+
+  if (descriptor.extension().compare(".dat") == 0 &&
+      boost::starts_with(filename, "RUN"))
+    return 100;
   else
     return 0;
 }
@@ -67,11 +76,30 @@ void LoadSwans::init() {
       "relative path. The file extension must be .dat.");
 
   declareProperty(make_unique<FileProperty>("FilenameMetaData", "",
-                                            FileProperty::Load, "meta.dat"),
+                                            API::FileProperty::OptionalLoad,
+                                            "meta.dat"),
                   "The name of the text file to read, including its full or "
                   "relative path. The file extension must be meta.dat.");
 
-  declareProperty(make_unique<WorkspaceProperty<EventWorkspace>>(
+  declareProperty(
+      make_unique<FileProperty>("FilenameAutoRecord", "",
+                                API::FileProperty::OptionalLoad, ".txt"),
+      "The name of the AutoRecord.txt file to read, including its full or "
+      "relative path. The file extension must be .txt");
+
+  declareProperty(make_unique<PropertyWithValue<double>>(
+                      "FilterByTofMin", 10000.0, Direction::Input),
+                  "Optional: To exclude events that do not fall within a range "
+                  "of times-of-flight. "
+                  "This is the minimum accepted value in microseconds.");
+
+  declareProperty(make_unique<PropertyWithValue<double>>(
+                      "FilterByTofMax", 30000.0, Direction::Input),
+                  "Optional: To exclude events that do not fall within a range "
+                  "of times-of-flight. "
+                  "This is the maximum accepted value in microseconds.");
+
+  declareProperty(make_unique<WorkspaceProperty<Workspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "The name to use for the output workspace");
 }
@@ -126,11 +154,11 @@ void LoadSwans::placeDetectorInSpace() {
       m_ws->getInstrument()->getStringParameter("detector-name")[0];
   const double distance = static_cast<double>(
       m_ws->getInstrument()->getNumberParameter("detector-sample-distance")[0]);
-  // Make the angle negative to accommodate the sense of rotation.
-  const double angle = -m_ws->run().getPropertyValueAsType<double>("angle");
+  const double angle = m_ws->run().getPropertyValueAsType<double>("angle");
 
-  g_log.information() << "Moving detector " << componentName << " " << distance
-                      << " meters and " << angle << " degrees." << std::endl;
+  g_log.information() << "LoadSwans::placeDetectorInSpace: Moving detector "
+                      << componentName << " " << distance << " meters and "
+                      << angle << " degrees." << std::endl;
 
   LoadHelper helper;
   constexpr double deg2rad = M_PI / 180.0;
@@ -143,6 +171,9 @@ void LoadSwans::placeDetectorInSpace() {
   const V3D axis(0.0, 1.0, 0.0);
   Quat rotation(angle, axis);
   helper.rotateComponent(m_ws, componentName, rotation);
+
+  // keep the Z distance as property
+  m_ws->mutableRun().addProperty<double>("sample_detector_distance", distance);
 }
 
 /**
@@ -156,9 +187,6 @@ std::map<uint32_t, std::vector<uint32_t>> LoadSwans::loadData() {
   std::string filename = getPropertyValue("FilenameData");
   std::ifstream input(filename, std::ifstream::binary | std::ios::ate);
   input.seekg(0);
-
-  m_ws->initialize(m_detector_size, 1, 1);
-
   std::map<uint32_t, std::vector<uint32_t>> eventMap;
 
   while (input.is_open()) {
@@ -166,11 +194,16 @@ std::map<uint32_t, std::vector<uint32_t>> LoadSwans::loadData() {
       break;
     uint32_t tof = 0;
     input.read(reinterpret_cast<char *>(&tof), sizeof(tof));
-    tof -= static_cast<uint32_t>(1e9);
-    tof = static_cast<uint32_t>(tof * 0.1);
-
     uint32_t pos = 0;
     input.read(reinterpret_cast<char *>(&pos), sizeof(pos));
+
+    // The 1e9 added to the tof ticks is used to signal a “problem” with the
+    // event.
+    // 2e6 is the maximum allowed tof tick for 5Hz operation, thus a very safe
+    // upperlimit.
+    if (tof > 2e6)
+      tof -= static_cast<uint32_t>(1e9);
+    tof = static_cast<uint32_t>(tof * 0.1);
     if (pos < 400000) {
       g_log.warning() << "Detector index invalid: " << pos << std::endl;
       continue;
@@ -189,10 +222,21 @@ std::map<uint32_t, std::vector<uint32_t>> LoadSwans::loadData() {
 std::vector<double> LoadSwans::loadMetaData() {
   std::vector<double> metadata;
   std::string filename = getPropertyValue("FilenameMetaData");
+
+  // if the filename for metadata was not given, strip the extension of the data
+  // file, and add _meta.dat
+  if (filename == "") {
+    std::string filenameData = getPropertyValue("FilenameData");
+    size_t lastindex = filenameData.find_last_of(".");
+    std::string rawname = filenameData.substr(0, lastindex);
+    filename = rawname + "_meta.dat";
+    g_log.information("Assuming meta data file: " + filename);
+  }
+
   std::ifstream infile(filename);
   if (infile.fail()) {
     g_log.error("Error reading file " + filename);
-    throw Exception::FileError("Unable to read data in File:", filename);
+    throw Exception::FileError("Unable to read meta data in File:", filename);
   }
   std::string line;
   while (getline(infile, line)) {
@@ -216,6 +260,94 @@ std::vector<double> LoadSwans::loadMetaData() {
   return metadata;
 }
 
+/**
+ * Loads the /SNS/VULCAN/IPTS-16013/shared/AutoRecord.txt file *
+ * If not given will try to look for it from the filename
+ * /SNS/VULCAN/IPTS-16013/shared/SANS_detector/RUN80814.dat
+ *
+ * The AutoRecord is of the format:
+ * RUN     IPTS    Title   Notes   Sample  ITEM    StartTime       Duration
+ *ProtonCharge    TotalCounts     Monitor1        Monitor2        X       Y
+ *Z       O       HROT    VROT    BandCentre      BandWidth       Frequency
+ *Guide   IX      IY      IZ      IHA     IVA     Collimator
+ *MTSDisplacement MTSForce        MTSStrain       MTSStress       MTSAngle
+ *MTSTorque       MTSLaser        MTSlaserstrain  MTSDisplaceoffset
+ *MTSAngleceoffset        MTST1   MTST2   MTST3   MTST4   MTSHighTempStrain
+ *FurnaceT        FurnaceOT       FurnacePower    VacT    VacOT
+ *EuroTherm1Powder        EuroTherm1SP    EuroTherm1Temp  EuroTherm2Powder
+ *EuroTherm2SP    EuroTherm2Temp
+ * 80680   IPTS-16013      SWANS TESTING   SWANS TESTING   No sample       -1.0
+ *2016-02-12 09:35:45.856802666-EST       147.697776      179951088095.549500
+ *678.000000      2.000000        2.000000        1.411   -25.707 -152.067
+ *45.0    0.0     0.0     2.0     2.88    30.0    181.993 100.003 -0.125201
+ *-1.458688       4.997994        11.990609       0.0     2.25265546341
+ *2267.793997     0.010018        47.1121006667   -2.408037       11.7260375
+ *-0.010656       2.3415954       1.135141        1.470575        28.412535
+ *29.690638       542.133681      542.133681      0.00477137777778        0.0
+ *0.0     0.0     0.0     0.0     0.0     0.0     0.0     0.0     0.0     0.0
+ *
+ *
+ * It builds a dictionary for this run
+ */
+
+void LoadSwans::setAutoRecordAsWorkspaceProperties(std::string runNumber) {
+
+  std::string filename = getPropertyValue("FilenameAutoRecord");
+
+  // if the filename for AutoRecord was not given, find it from the data file.
+  if (filename == "") {
+    std::string filenameData = getPropertyValue("FilenameData");
+    size_t lastIndexForIPTS = filenameData.find("IPTS");
+    size_t lastIndexForIPTSBar = filenameData.find("/", lastIndexForIPTS);
+    std::string rawname = filenameData.substr(0, lastIndexForIPTSBar);
+    filename = rawname + "/shared/AutoRecord.txt";
+    g_log.information("Assuming AutoRecord file: " + filename);
+  }
+
+  std::vector<std::string> header;
+  std::vector<std::string> values;
+  std::ifstream infile(filename);
+  if (infile.fail()) {
+    g_log.error("Error reading AutoRecord file " + filename);
+  } else {
+    int count = 0;
+    std::string line;
+    while (getline(infile, line)) {
+      if (!line.empty()) {
+        auto tokenizer = Mantid::Kernel::StringTokenizer(
+            line, "\t", Mantid::Kernel::StringTokenizer::TOK_TRIM |
+                            Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
+        if (count == 0) {
+          g_log.debug() << "HEADER: " << line << std::endl;
+          for (const auto &token : tokenizer)
+            header.push_back(token);
+        } else {
+          if (tokenizer[0] == runNumber) {
+            g_log.debug() << "Value for run " << runNumber << ": " << line
+                          << std::endl;
+            for (const auto &token : tokenizer)
+              values.push_back(token);
+            break;
+          }
+        }
+      }
+      count++;
+    }
+    // Sets parsed data as properties in the ws
+    API::Run &runDetails = m_ws->mutableRun();
+    std::vector<std::string>::const_iterator ih, iv;
+    for (ih = header.begin(), iv = values.begin();
+         ih < header.end() && iv < values.end(); ++ih, ++iv) {
+      try {
+        double value = boost::lexical_cast<double>(*iv);
+        runDetails.addProperty<double>(*ih, value, true);
+      } catch (const boost::bad_lexical_cast &) {
+        runDetails.addProperty(*ih, *iv, true);
+      }
+    }
+  }
+}
+
 /*
  * Known metadata positions to date:
  * 0 - run number
@@ -228,8 +360,13 @@ std::vector<double> LoadSwans::loadMetaData() {
 void LoadSwans::setMetaDataAsWorkspaceProperties(
     const std::vector<double> &metadata) {
   API::Run &runDetails = m_ws->mutableRun();
+  runDetails.addProperty<double>("run_number", metadata[0]);
   runDetails.addProperty<double>("wavelength", metadata[1]);
+  runDetails.addProperty<double>("chopper_frequency",
+                                 metadata[2]); // chopper frequency
   runDetails.addProperty<double>("angle", metadata[5]);
+  setAutoRecordAsWorkspaceProperties(
+      boost::lexical_cast<std::string>(metadata[0]));
 }
 
 /*
@@ -238,6 +375,12 @@ void LoadSwans::setMetaDataAsWorkspaceProperties(
  */
 void LoadSwans::loadDataIntoTheWorkspace(
     const std::map<uint32_t, std::vector<uint32_t>> &eventMap) {
+
+  m_ws->initialize(m_detector_size, 1, 1);
+  m_ws->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
+  m_ws->setYUnit("Counts");
+  m_ws->setTitle("SWANS Event Workspace");
+
   for (const auto &position : eventMap) {
     EventList &el = m_ws->getEventList(position.first);
     el.setSpectrumNo(position.first);
@@ -255,14 +398,12 @@ void LoadSwans::loadDataIntoTheWorkspace(
  * longest-tof
  */
 void LoadSwans::setTimeAxis() {
-  const unsigned int shortest_tof = static_cast<unsigned int>(
-      m_ws->getInstrument()->getNumberParameter("shortest-tof")[0]);
-  const unsigned int longest_tof = static_cast<unsigned int>(
-      m_ws->getInstrument()->getNumberParameter("longest-tof")[0]);
+  double shortest_tof = getProperty("FilterByTofMin");
+  double longest_tof = getProperty("FilterByTofMax");
   // Now, create a default X-vector for histogramming, with just 2 bins.
   Kernel::cow_ptr<MantidVec> axis;
   MantidVec &xRef = axis.access();
-  xRef = {static_cast<double>(shortest_tof), static_cast<double>(longest_tof)};
+  xRef = {shortest_tof, longest_tof};
   // Set the binning axis using this.
   m_ws->setAllX(axis);
 }

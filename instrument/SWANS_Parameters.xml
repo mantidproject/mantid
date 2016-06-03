@@ -27,13 +27,6 @@
 		<parameter name="detector-sample-distance">
 			<value val="2"/>
 		</parameter>
-					
-		<parameter name="shortest-tof">
-			<value val="10000"/>
-		</parameter>
-		<parameter name="longest-tof">
-			<value val="30000"/>
-		</parameter>
 		
 	</component-link>
 </parameter-file>    

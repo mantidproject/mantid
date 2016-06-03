@@ -25,8 +25,8 @@ set ( SRC_FILES
 	src/MuonGroupAsymmetryCalculator.cpp
 	src/MuonGroupCalculator.cpp
 	src/MuonGroupCountsCalculator.cpp
-	src/MuonProcess.cpp
 	src/MuonPairAsymmetryCalculator.cpp
+	src/MuonProcess.cpp
 	src/ProcessIndirectFitParameters.cpp
 	src/RefReduction.cpp
 	src/RefRoi.cpp
@@ -34,9 +34,11 @@ set ( SRC_FILES
 	src/SANSBeamFluxCorrection.cpp
 	src/SANSSensitivityCorrection.cpp
 	src/SANSSolidAngleCorrection.cpp
+	src/SWANSLoad.cpp
 	src/SetupEQSANSReduction.cpp
 	src/SetupHFIRReduction.cpp
 	src/SetupILLD33Reduction.cpp
+	src/SetupSWANSReduction.cpp
 	src/StepScan.cpp
 	src/WorkflowAlgorithmHelpers.cpp
 )
@@ -71,8 +73,8 @@ set ( INC_FILES
 	inc/MantidWorkflowAlgorithms/MuonGroupAsymmetryCalculator.h
 	inc/MantidWorkflowAlgorithms/MuonGroupCalculator.h
 	inc/MantidWorkflowAlgorithms/MuonGroupCountsCalculator.h
-	inc/MantidWorkflowAlgorithms/MuonProcess.h
 	inc/MantidWorkflowAlgorithms/MuonPairAsymmetryCalculator.h
+	inc/MantidWorkflowAlgorithms/MuonProcess.h
 	inc/MantidWorkflowAlgorithms/ProcessIndirectFitParameters.h
 	inc/MantidWorkflowAlgorithms/RefReduction.h
 	inc/MantidWorkflowAlgorithms/RefRoi.h
@@ -80,9 +82,11 @@ set ( INC_FILES
 	inc/MantidWorkflowAlgorithms/SANSBeamFluxCorrection.h
 	inc/MantidWorkflowAlgorithms/SANSSensitivityCorrection.h
 	inc/MantidWorkflowAlgorithms/SANSSolidAngleCorrection.h
+	inc/MantidWorkflowAlgorithms/SWANSLoad.h
 	inc/MantidWorkflowAlgorithms/SetupEQSANSReduction.h
 	inc/MantidWorkflowAlgorithms/SetupHFIRReduction.h
 	inc/MantidWorkflowAlgorithms/SetupILLD33Reduction.h
+	inc/MantidWorkflowAlgorithms/SetupSWANSReduction.h
 	inc/MantidWorkflowAlgorithms/StepScan.h
 	inc/MantidWorkflowAlgorithms/WorkflowAlgorithmHelpers.h
 )
@@ -100,6 +104,7 @@ set ( TEST_FILES
 set ( TEST_PY_FILES
   EQSANSQ2DTest.py
   SANSBeamFluxCorrectionTest.py
+  SetupSWANSReductionTest.py
 )
 
 if (COVERALLS)
