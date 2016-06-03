@@ -143,7 +143,6 @@ void OptimizeLatticeForCellType::exec() {
     fit_alg->setProperty("InputWorkspace", peakWS);
     fit_alg->setProperty("CostFunction", "Unweighted least squares");
     fit_alg->setProperty("CreateOutput", true);
-    fit_alg->setProperty("Output", "fit");
     fit_alg->executeAsChildAlg();
 
     double chisq = fit_alg->getProperty("OutputChi2overDoF");
