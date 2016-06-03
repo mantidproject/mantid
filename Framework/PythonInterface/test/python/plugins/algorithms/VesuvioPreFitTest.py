@@ -4,6 +4,7 @@ Unit test for Vesuvio pre-fitting steps
 Assumes that mantid can be imported and the data paths
 are configured to find the Vesuvio data
 """
+import numpy as np
 import unittest
 
 from mantid.api import AlgorithmManager
@@ -35,22 +36,22 @@ class VesuvioPreFitTest(unittest.TestCase):
         self.assertAlmostEqual(562.0, output_ws.readX(0)[-1])
 
         # Expected values
-        expected_peak_height_spec1 = 1
-        expected_peak_height_spec2 = 2
-        expected_bin_index_spec1 = 1
-        expected_bin_index_spec2 = 2
+        expected_peak_height_spec1 = 0.4555026
+        expected_peak_height_spec2 = 0.50082883
+        expected_bin_index_spec1 = 139
+        expected_bin_index_spec2 = 139
 
         # Peak height and bin index
         peak_height_spec1, bin_index_spec1 = self._get_peak_height_and_bin_index(output_ws.readY(0))
         peak_height_spec2, bin_index_spec2 = self._get_peak_height_and_bin_index(output_ws.readY(1))
 
         # Check first spectra matches expected
-        self.assertTrue(self._equal_within_tolerance(expected_peak_height_spec1, peak_height_spec1)
-        self.assertTrue(self._equal_within_tolerance(expected_bin_index_spec1, bin_index_spec1)
+        self.assertTrue(self._equal_within_tolerance(expected_peak_height_spec1, peak_height_spec1))
+        self.assertTrue(self._equal_within_tolerance(expected_bin_index_spec1, bin_index_spec1))
 
         # Check second spectra matches expected
-        self.assertTrue(self._equal_within_tolerance(expected_peak_height_spec2, peak_height_spec2)
-        self.assertTrue(self._equal_within_tolerance(expected_bin_index_spec2, bin_index_spec2)
+        self.assertTrue(self._equal_within_tolerance(expected_peak_height_spec2, peak_height_spec2))
+        self.assertTrue(self._equal_within_tolerance(expected_bin_index_spec2, bin_index_spec2))
 
 
     def test_mask_only_masks_over_threshold(self):
@@ -68,22 +69,22 @@ class VesuvioPreFitTest(unittest.TestCase):
         self.assertAlmostEqual(562.0, output_ws.readX(0)[-1])
 
         # Expected values
-        expected_peak_height_spec1 = 1
-        expected_peak_height_spec2 = 2
-        expected_bin_index_spec1 = 1
-        expected_bin_index_spec2 = 2
+        expected_peak_height_spec1 = 0.4663805
+        expected_peak_height_spec2 = 0.523506
+        expected_bin_index_spec1 = 59
+        expected_bin_index_spec2 = 139
 
         # Peak height and bin index
         peak_height_spec1, bin_index_spec1 = self._get_peak_height_and_bin_index(output_ws.readY(0))
         peak_height_spec2, bin_index_spec2 = self._get_peak_height_and_bin_index(output_ws.readY(1))
 
         # Check first spectra matches expected
-        self.assertTrue(self._equal_within_tolerance(expected_peak_height_spec1, peak_height_spec1)
-        self.assertTrue(self._equal_within_tolerance(expected_bin_index_spec1, bin_index_spec1)
+        self.assertTrue(self._equal_within_tolerance(expected_peak_height_spec1, peak_height_spec1))
+        self.assertTrue(self._equal_within_tolerance(expected_bin_index_spec1, bin_index_spec1))
 
         # Check second spectra matches expected
-        self.assertTrue(self._equal_within_tolerance(expected_peak_height_spec2, peak_height_spec2)
-        self.assertTrue(self._equal_within_tolerance(expected_bin_index_spec2, bin_index_spec2)
+        self.assertTrue(self._equal_within_tolerance(expected_peak_height_spec2, peak_height_spec2))
+        self.assertTrue(self._equal_within_tolerance(expected_bin_index_spec2, bin_index_spec2))
 
         # Check masked data
         self.assertAlmostEqual(0.0, output_ws.readY(1)[-1])
