@@ -315,15 +315,6 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         else:
             # Process each sample run
             for sam_run_number in samRuns:
-                # check
-                """
-                err_msg = 'sample run number %s must be either int or numpy.int32, ' \
-                          'but not %s' % (str(sam_run_number), str(type(sam_run_number)))
-                assert isinstance(sam_run_number, int) or isinstance(sam_run_number, numpy.int32), err_msg
-                if sam_run_number <= 0:
-                    self.log().warning('Sample run number %d is less and equal to zero!' % sam_run_number)
-                    continue
-                """
                 # first round of processing the sample
                 self._info = None
                 returned = self._focusChunks(sam_run_number, timeFilterWall, calib, splitwksp=self._splitws,
@@ -464,8 +455,8 @@ class SNSPowderReduction(DataProcessorAlgorithm):
 
     def _determineInstrument(self, filename):
         name = getBasename(filename)
-        name = name.split('_')[:-1]
-        self._instrument = '_'.join(name)
+        parts = name.split('_')
+        self._instrument = ConfigService.getInstrument(parts[0]).shortName()  # only works for instruments without '_'
 
     def _loadCharacterizations(self):
         self._focusPos = {}
