@@ -30,7 +30,7 @@ public:
     Mantid::API::FunctionDomain1DVector x(0, 2, 10);
     Mantid::API::FunctionValues y(x);
 
-		TS_ASSERT_THROWS_NOTHING(fn.function(x, y));
+    TS_ASSERT_THROWS_NOTHING(fn.function(x, y));
     TS_ASSERT_DELTA(y[0], 1.5716, 1e-4);
     TS_ASSERT_DELTA(y[1], 1.6150, 1e-4);
     TS_ASSERT_DELTA(y[2], 1.6599, 1e-4);
@@ -41,7 +41,7 @@ public:
     TS_ASSERT_DELTA(y[7], 1.8999, 1e-4);
     TS_ASSERT_DELTA(y[8], 1.9498, 1e-4);
     TS_ASSERT_DELTA(y[9], 2.0000, 1e-4);
-	}
+  }
 };
 
 #endif /*ENDERFCTEST_H_*/
