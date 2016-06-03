@@ -1,7 +1,6 @@
 #ifndef MANTID_ALGORITHMS_MAXENTENTROPYNEGATIVEVALUES_H_
 #define MANTID_ALGORITHMS_MAXENTENTROPYNEGATIVEVALUES_H_
 
-#include "MantidAlgorithms/DllConfig.h"
 #include "MantidAlgorithms/MaxEnt/MaxentEntropy.h"
 
 namespace Mantid {

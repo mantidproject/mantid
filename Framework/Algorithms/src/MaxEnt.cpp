@@ -21,10 +21,6 @@ using Mantid::API::WorkspaceProperty;
 using namespace API;
 using namespace Kernel;
 
-using MaxentCalculator_sptr = std::shared_ptr<MaxentCalculator>;
-using MaxentEntropy_sptr = std::shared_ptr<MaxentEntropy>;
-using MaxentSpace_sptr = std::shared_ptr<MaxentSpace>;
-
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(MaxEnt)
 
@@ -253,33 +249,35 @@ void MaxEnt::exec() {
   // Number of X bins
   size_t npointsX = inWS->isHistogramData() ? npoints + 1 : npoints;
 
+  // Is our data space real or complex?
   MaxentSpace_sptr dataSpace;
   if (complexData) {
     dataSpace = std::make_shared<MaxentSpaceComplex>();
   } else {
     dataSpace = std::make_shared<MaxentSpaceReal>();
   }
-
+  // Is our image space real or complex?
   MaxentSpace_sptr imageSpace;
   if (complexImage) {
     imageSpace = std::make_shared<MaxentSpaceComplex>();
   } else {
     imageSpace = std::make_shared<MaxentSpaceReal>();
   }
-
   // The type of transform. Currently a 1D Fourier Transform
   MaxentTransform_sptr transform =
       std::make_shared<MaxentTransformFourier>(dataSpace, imageSpace);
+
   // The type of entropy we are going to use (depends on the type of image,
   // positive only, or positive and/or negative)
-  MaxentCalculator_sptr maxentCalculator;
+  MaxentEntropy_sptr entropy;
   if (positiveImage) {
-    maxentCalculator = std::make_shared<MaxentCalculator>(
-        std::make_shared<MaxentEntropyPositiveValues>(), transform);
+    entropy = std::make_shared<MaxentEntropyPositiveValues>();
   } else {
-    maxentCalculator = std::make_shared<MaxentCalculator>(
-        std::make_shared<MaxentEntropyNegativeValues>(), transform);
+    entropy = std::make_shared<MaxentEntropyNegativeValues>();
   }
+
+  // Entropy and transform is all we need to set up a calculator
+  MaxentCalculator maxentCalculator = MaxentCalculator(entropy, transform);
 
   // Output workspaces
   MatrixWorkspace_sptr outImageWS;
@@ -323,22 +321,22 @@ void MaxEnt::exec() {
 
       // Iterates one step towards the solution. This means calculating
       // quadratic coefficients, search directions, angle and chi-sq
-      maxentCalculator->iterate(data, errors, image, background);
+      maxentCalculator.iterate(data, errors, image, background);
 
       // Calculate delta to construct new image (SB eq. 25)
-      double currChisq = maxentCalculator->getChisq();
-      auto coeffs = maxentCalculator->getQuadraticCoefficients();
+      double currChisq = maxentCalculator.getChisq();
+      auto coeffs = maxentCalculator.getQuadraticCoefficients();
       auto delta = move(coeffs, chiTarget / currChisq, chiEps, alphaIter);
 
       // Apply distance penalty (SB eq. 33)
       delta = applyDistancePenalty(delta, coeffs, image, background, distEps);
 
       // Update image
-      auto dirs = maxentCalculator->getSearchDirections();
+      auto dirs = maxentCalculator.getSearchDirections();
       image = updateImage(image, delta, dirs);
 
       // Record the evolution of Chi-square and angle(S,C)
-      double currAngle = maxentCalculator->getAngle();
+      double currAngle = maxentCalculator.getAngle();
       evolChi[it] = currChisq;
       evolTest[it] = currAngle;
 
@@ -358,8 +356,8 @@ void MaxEnt::exec() {
     } // iterations
 
     // Get calculated data
-    auto solData = maxentCalculator->getReconstructedData();
-    auto solImage = maxentCalculator->getImage();
+    auto solData = maxentCalculator.getReconstructedData();
+    auto solImage = maxentCalculator.getImage();
 
     // Populate the output workspaces
     populateDataWS(inWS, s, nspec, solData, complexData, outDataWS);
