@@ -308,7 +308,7 @@ Basic implementation does nothing.
 @param res : The http response
 */
 void InternetHelper::processResponseHeaders(
-    const Poco::Net::HTTPResponse &res) {}
+    const Poco::Net::HTTPResponse&) {}
 
 /** Process any HTTP errors states.
 
