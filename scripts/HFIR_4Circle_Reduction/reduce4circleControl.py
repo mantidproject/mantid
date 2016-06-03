@@ -15,6 +15,7 @@ import numpy
 
 from fourcircle_utility import *
 from peakprocesshelper import PeakProcessHelper
+import fputility
 
 import mantid
 import mantid.simpleapi as api
@@ -451,16 +452,82 @@ class CWSCDReductionControl(object):
 
         return avg_bg
 
-    def export_to_fullprof(self, exp_number, scan_number_list, fullprof_file_name):
+    def get_wave_length(self, exp_number, scan_number_list):
+        """
+        Get the wavelength.
+        Exception: RuntimeError if there are more than 1 wavelength found with all given scan numbers
+        :param scan_number_list:
+        :return:
+        """
+        # get the SPICE workspace
+        wave_length_set = set()
+
+        # go through all the SPICE table workspace
+        for scan_number in scan_number_list:
+            spice_table_name = get_spice_table_name(exp_number, scan_number)
+            spice_table = AnalysisDataService.retrieve(spice_table_name)
+            curr_wl = get_wave_length(spice_table)
+            wave_length_set.add(curr_wl)
+        # END-FOR
+
+        if len(wave_length_set) > 1:
+            raise RuntimeError('There are more than 1 (%s) wave length found in scans.' % str(wave_length_set))
+
+        return wave_length_set.pop()
+
+    def export_to_fullprof(self, exp_number, scan_number_list, scan_kindex_dict, k_shift_dict, user_header,
+                           fullprof_file_name):
         """
         Export peak intensities to Fullprof data file
         :param exp_number:
         :param scan_number_list:
+        :param scan_kindex_dict:
+        :param k_shift_dict:
+        :param user_header:
         :param fullprof_file_name:
         :return:
         """
-        # TODO/NOW/ - Doc, check and ...
+        # check
+        assert isinstance(exp_number, int), 'Experiment number must be an integer.'
+        assert isinstance(scan_number_list, list), 'Scan number list must be a list but not %s.' \
+                                                   '' % str(type(scan_number_list))
+        assert len(scan_number_list) > 0
 
+        # get wave-length
+        try:
+            exp_wave_length = self.get_wave_length(exp_number, scan_number_list)
+        except RuntimeError as error:
+            return False, str(error)
+
+        # form k-shift and peak intensity information
+        assert isinstance(scan_kindex_dict, dict)
+        error_message = 'Number of scans with k-shift must either be 0 (no shift at all) or ' \
+                        'equal to number of total scans.'
+        assert len(scan_kindex_dict) == 0 or len(scan_kindex_dict) == len(scan_number_list)
+
+        # form peaks
+        peaks = list()
+        no_shift = len(scan_kindex_dict) == 0
+        for scan_number in scan_number_list:
+            peak_dict = dict()
+            peak_dict['hkl'] = self._myPeakInfoDict[(exp_number, scan_number)].get_hkl()
+            peak_dict['intensity'] = self._myPeakInfoDict[(exp_number, scan_number)].get_intensity()
+            peak_dict['sigma'] = self._myPeakInfoDict[(exp_number, scan_number)].get_sigma()
+            if no_shift:
+                peak_dict['kindex'] = 0
+            else:
+                peak_dict['kindex'] = scan_kindex_dict[scan_number]
+            peaks.append(peak_dict)
+        # END-FOR (scan_number)
+
+        try:
+            fputility.write_scd_fullprof_kvector(user_header=user_header, wave_length=exp_wave_length,
+                                                 k_vector_dict=k_shift_dict, peak_dict_list=peaks,
+                                                 fp_file_name=fullprof_file_name)
+        except AssertionError as error:
+            return False, str(error)
+        except RuntimeError as error:
+            return False, str(error)
 
         return
 
@@ -1034,6 +1101,10 @@ class CWSCDReductionControl(object):
             run_number_i = peak_i.getRunNumber() % 1000
             intensity_i = peak_i.getIntensity()
             pt_dict[run_number_i] = intensity_i
+
+        raise NotImplementedError('Think of a good data structure to store integrated peak.'
+                                  'It is a bad practise to get the integrated value from'
+                                  'table from GUI.')
 
         return True, pt_dict
 
