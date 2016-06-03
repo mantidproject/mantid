@@ -5,21 +5,6 @@ using namespace Mantid::Kernel;
 namespace Mantid {
 namespace Kernel {
 
-/**
-  Prints a text representation of itself
-  @param os :: the Stream to output to
-  @param v :: the vector to output
-  @return the output stream
-  */
-std::ostream &operator<<(std::ostream &os, const VMDBase<double> &v) {
-  os << v.toString();
-  return os;
-}
-
-std::ostream &operator<<(std::ostream &os, const VMDBase<float> &v) {
-  os << v.toString();
-  return os;
-}
 
 //-------------------------------------------------------------------------------------------------
 /** Make an orthogonal system with 2 input 3D vectors.
@@ -135,6 +120,23 @@ VMDBase<TYPE>::getNormalVector(const std::vector<VMDBase<TYPE>> &vectors) {
 /// Instantiate VMDBase classes
 template class MANTID_KERNEL_DLL VMDBase<double>;
 template class MANTID_KERNEL_DLL VMDBase<float>;
+
+
+/**
+  Prints a text representation of itself
+  @param os :: the Stream to output to
+  @param v :: the vector to output
+  @return the output stream
+  */
+std::ostream &operator<<(std::ostream &os, const VMDBase<double> &v) {
+  os << v.toString();
+  return os;
+}
+
+std::ostream &operator<<(std::ostream &os, const VMDBase<float> &v) {
+  os << v.toString();
+  return os;
+}
 
 } // namespace Mantid
 } // namespace Kernel
