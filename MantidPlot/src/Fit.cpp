@@ -632,9 +632,9 @@ void Fit::fit() {
 
   QApplication::setOverrideCursor(Qt::WaitCursor);
 
-  const char *function = d_formula.ascii();
+  const char *function = d_formula.toAscii().constData();
   QString names = d_param_names.join(",");
-  const char *parNames = names.ascii();
+  const char *parNames = names.toAscii().constData();
 
   struct FitData d_data = {static_cast<size_t>(d_n),
                            static_cast<size_t>(d_p),

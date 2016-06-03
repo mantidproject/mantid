@@ -1,10 +1,6 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAlgorithms/DiffractionFocussing2.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
-#include "MantidAPI/MemoryManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/ISpectrum.h"
 #include "MantidAPI/RawCountValidator.h"
@@ -468,7 +464,6 @@ void DiffractionFocussing2::execEvent() {
           boost::const_pointer_cast<EventWorkspace>(m_eventW)
               ->getEventList(wi)
               .clear();
-          Mantid::API::MemoryManager::Instance().releaseFreeMemory();
         }
       }
       PARALLEL_END_INTERUPT_REGION

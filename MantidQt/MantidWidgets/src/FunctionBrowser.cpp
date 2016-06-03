@@ -462,8 +462,7 @@ public:
   }
 protected:
   /// Create string property
-  FunctionBrowser::AProperty apply(const std::string& str)const
-  {
+  FunctionBrowser::AProperty apply(const std::string &str) const override {
     QtProperty* prop = NULL;
     if (m_attName == "FileName")
     {
@@ -488,29 +487,26 @@ protected:
     return m_browser->addProperty(m_parent,prop);
   }
   /// Create double property
-  FunctionBrowser::AProperty apply(const double& d)const
-  {
+  FunctionBrowser::AProperty apply(const double &d) const override {
     QtProperty* prop = m_browser->m_attributeDoubleManager->addProperty(m_attName);
     m_browser->m_attributeDoubleManager->setValue(prop, d);
     return m_browser->addProperty(m_parent,prop);
   }
   /// Create int property
-  FunctionBrowser::AProperty apply(const int& i)const
-  {
+  FunctionBrowser::AProperty apply(const int &i) const override {
     QtProperty* prop = m_browser->m_attributeIntManager->addProperty(m_attName);
     m_browser->m_attributeIntManager->setValue(prop, i);
     return m_browser->addProperty(m_parent,prop);
   }
   /// Create bool property
-  FunctionBrowser::AProperty apply(const bool& b)const
-  {
+  FunctionBrowser::AProperty apply(const bool &b) const override {
     QtProperty* prop = m_browser->m_attributeBoolManager->addProperty(m_attName);
     m_browser->m_attributeBoolManager->setValue(prop, b);
     return m_browser->addProperty(m_parent,prop);
   }
   /// Create vector property
-  FunctionBrowser::AProperty apply(const std::vector<double>& v)const
-  {
+  FunctionBrowser::AProperty
+  apply(const std::vector<double> &v) const override {
     QtProperty* prop = m_browser->m_attributeVectorManager->addProperty(m_attName);
     FunctionBrowser::AProperty aprop = m_browser->addProperty(m_parent,prop);
 
@@ -551,8 +547,7 @@ public:
   }
 protected:
   /// Set string attribute
-  void apply(std::string& str)const
-  {
+  void apply(std::string &str) const override {
     QString attName = m_prop->propertyName();
     if ( attName == "FileName" )
     {
@@ -572,37 +567,33 @@ protected:
     }
   }
   /// Set double attribute
-  void apply(double& d)const
-  {
+  void apply(double &d) const override {
     d = m_browser->m_attributeDoubleManager->value(m_prop);
   }
   /// Set int attribute
-  void apply(int& i)const
-  {
+  void apply(int &i) const override {
     i = m_browser->m_attributeIntManager->value(m_prop);
   }
   /// Set bool attribute
-  void apply(bool& b)const
-  {
+  void apply(bool &b) const override {
     b = m_browser->m_attributeBoolManager->value(m_prop);
   }
   /// Set vector attribute
-  void apply(std::vector<double>& v)const
-  {
-      //throw std::runtime_error("Vector setter not implemented.");
-      QList<QtProperty*> members = m_prop->subProperties();
-      if ( members.empty() ) throw std::runtime_error("FunctionBrowser: empty vector attribute group.");
-      int n = members.size() - 1;
-      if ( n == 0 )
-      {
-          v.clear();
-          return;
-      }
-      v.resize( n );
-      for(int i = 0; i < n; ++i)
-      {
-          v[i] = m_browser->m_attributeVectorDoubleManager->value( members[i+1] );
-      }
+  void apply(std::vector<double> &v) const override {
+    // throw std::runtime_error("Vector setter not implemented.");
+    QList<QtProperty *> members = m_prop->subProperties();
+    if (members.empty())
+      throw std::runtime_error(
+          "FunctionBrowser: empty vector attribute group.");
+    int n = members.size() - 1;
+    if (n == 0) {
+      v.clear();
+      return;
+    }
+    v.resize(n);
+    for (int i = 0; i < n; ++i) {
+      v[i] = m_browser->m_attributeVectorDoubleManager->value(members[i + 1]);
+    }
   }
 private:
   FunctionBrowser* m_browser;
@@ -1766,9 +1757,12 @@ void FunctionBrowser::removeTie()
   }
 }
 
-/// Remove all tie properties
-void FunctionBrowser::removeAllTieProperties()
-{
+/**
+ * Remove all tie properties from local parameters
+ * (Called when changing datasets)
+ * Ties on global parameters are left as they are.
+ */
+void FunctionBrowser::removeAllLocalTieProperties() {
   QList<QtProperty*> tieProperties;
   for (auto p : m_properties)
   {
@@ -1777,9 +1771,11 @@ void FunctionBrowser::removeAllTieProperties()
       tieProperties << p.prop;
     }
   }
-  for (auto prop : tieProperties)
-  {
-    removeProperty(prop);
+  for (auto prop : tieProperties) {
+    if (prop->hasOption(globalOptionName) &&
+        !prop->checkOption(globalOptionName)) {
+      removeProperty(prop);
+    }
   }
 }
 
@@ -2087,7 +2083,7 @@ void FunctionBrowser::setCurrentDataset(int i)
   {
     throw std::runtime_error("Dataset index is outside the range");
   }
-  removeAllTieProperties();
+  removeAllLocalTieProperties();
   auto localParameters = getLocalParameters();
   foreach(QString par, localParameters)
   {

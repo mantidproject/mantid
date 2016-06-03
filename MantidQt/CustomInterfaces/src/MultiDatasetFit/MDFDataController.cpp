@@ -124,10 +124,6 @@ void DataController::workspaceSelectionChanged()
 {
   auto selection = m_dataTable->selectionModel();
   bool enableRemoveButton = selection->hasSelection();
-  if ( enableRemoveButton )
-  {
-    enableRemoveButton = selection->selectedRows().size() > 0;
-  }
 
   emit hasSelection(enableRemoveButton);
 }

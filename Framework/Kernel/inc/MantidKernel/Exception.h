@@ -122,7 +122,7 @@ public:
   FileError(const FileError &A);
   /// Assignment operator
   FileError &operator=(const FileError &A);
-  const char *what() const throw() override;
+  const char *what() const noexcept override;
 };
 
 /// Records the filename, the description of failure and the line on which it
@@ -147,14 +147,14 @@ public:
   ParseError(const ParseError &A);
   /// Assignment operator
   ParseError &operator=(const ParseError &A);
-  const char *what() const throw() override;
+  const char *what() const noexcept override;
 };
 
 /// Marks code as not implemented yet.
 class MANTID_KERNEL_DLL NotImplementedError final : public std::logic_error {
 public:
   NotImplementedError(const std::string &);
-  const char *what() const throw() override;
+  const char *what() const noexcept override;
 };
 
 /// Exception for when an item is not found in a collection.
@@ -173,7 +173,7 @@ public:
   NotFoundError(const NotFoundError &A);
   /// Assignment operator
   NotFoundError &operator=(const NotFoundError &A);
-  const char *what() const throw() override;
+  const char *what() const noexcept override;
 };
 
 /// Exception for when an item is already in a collection.
@@ -190,7 +190,7 @@ public:
   /// Assignment operator
   ExistsError &operator=(const ExistsError &A);
 
-  const char *what() const throw() override;
+  const char *what() const noexcept override;
 };
 
 /**
@@ -228,7 +228,7 @@ public:
   /// Assignment operator
   AbsObjMethod &operator=(const AbsObjMethod &A);
 
-  const char *what() const throw() override;
+  const char *what() const noexcept override;
 };
 
 /// Exception for errors associated with the instrument definition.
@@ -247,7 +247,7 @@ public:
   /// Assignment operator
   InstrumentDefinitionError &operator=(const InstrumentDefinitionError &A);
 
-  const char *what() const throw() override;
+  const char *what() const noexcept override;
 };
 
 /**
@@ -267,7 +267,7 @@ public:
   /// Assignment operator
   OpenGLError &operator=(const OpenGLError &A);
 
-  const char *what() const throw() override;
+  const char *what() const noexcept override;
 };
 /**
 \class MisMatch
@@ -288,7 +288,7 @@ public:
   MisMatch<T> &operator=(const MisMatch<T> &rhs);
 
   /// Overloaded reporting method
-  const char *what() const throw() override;
+  const char *what() const noexcept override;
 };
 
 /**
@@ -310,7 +310,7 @@ public:
   IndexError &operator=(const IndexError &A);
 
   /// Overloaded reporting method
-  const char *what() const throw() override;
+  const char *what() const noexcept override;
 };
 
 /** Exception thrown when an attempt is made to dereference a null pointer
@@ -326,7 +326,7 @@ private:
 public:
   NullPointerException(const std::string &place, const std::string &objectName);
   /// Overloaded reporting method
-  const char *what() const throw() override;
+  const char *what() const noexcept override;
 };
 
 /** Exception thrown when error occurs accessing an internet resource
@@ -343,7 +343,7 @@ private:
 public:
   InternetError(const std::string &message, const int &errorCode = 0);
   /// Overloaded reporting method
-  const char *what() const throw() override;
+  const char *what() const noexcept override;
   const int &errorCode() const;
 };
 

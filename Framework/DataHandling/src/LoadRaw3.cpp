@@ -1,9 +1,5 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidDataHandling/LoadRaw3.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidAPI/MemoryManager.h"
 #include "MantidAPI/WorkspaceGroup_fwd.h"
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/SpectraAxis.h"

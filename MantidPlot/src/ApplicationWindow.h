@@ -1387,7 +1387,7 @@ private:
   QAction *actionLoad;
   QAction *actionCopyWindow, *actionShowAllColumns, *actionHideSelectedColumns;
   QAction *actionCutSelection, *actionCopySelection, *actionPasteSelection, *actionClearSelection;
-  QAction *actionShowExplorer, *actionShowLog, *actionAddLayer, *actionShowLayerDialog, *actionAutomaticLayout,*actionclearAllMemory, *actionreleaseFreeMemory;
+  QAction *actionShowExplorer, *actionShowLog, *actionAddLayer, *actionShowLayerDialog, *actionAutomaticLayout,*actionclearAllMemory;
   QAction *actionCatalogLogin,*actionCatalogSearch, *actionCatalogPublish, *actionCatalogLogout;
   QAction *actionSwapColumns, *actionMoveColRight, *actionMoveColLeft, *actionMoveColFirst, *actionMoveColLast;
   QAction *actionExportGraph, *actionExportAllGraphs, *actionPrint, *actionPrintAllPlots, *actionShowExportASCIIDialog;

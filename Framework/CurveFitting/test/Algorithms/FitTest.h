@@ -542,6 +542,40 @@ public:
     TS_ASSERT_DELTA(func->getParameter("Beta"), 0.5, 0.05);
   }
 
+  void test_function_EndErfc() {
+
+    // Mock data
+    int ndata = 13;
+    API::MatrixWorkspace_sptr ws = API::WorkspaceFactory::Instance().create(
+        "Workspace2D", 1, ndata, ndata);
+    Mantid::MantidVec &x = ws->dataX(0);
+    Mantid::MantidVec &y = ws->dataY(0);
+    Mantid::MantidVec &e = ws->dataE(0);
+    // values extracted from y(x)=2*exp(-(x/4)^0.5)
+    y = {1, 3, 4, 28, 221, 872, 1495, 1832, 1830, 1917, 2045, 1996, 0};
+    for (int i = 0; i < ndata; i++) {
+      x[i] = static_cast<double>(5 * i);
+      e[i] = 1.0;
+    }
+
+    Fit fit;
+    fit.initialize();
+    fit.setProperty("Function", "name=EndErfc, A=2000, B=50, C=6, D=0");
+    fit.setProperty("InputWorkspace", ws);
+    fit.setPropertyValue("StartX", "5");
+    fit.setPropertyValue("EndX", "55");
+    fit.execute();
+
+    double dummy = fit.getProperty("OutputChi2overDoF");
+    TS_ASSERT_DELTA(dummy, 0.0001, 20000);
+
+    IFunction_sptr out = fit.getProperty("Function");
+    TS_ASSERT_DELTA(out->getParameter("A"), 1000, 30.0);
+    TS_ASSERT_DELTA(out->getParameter("B"), 26, 0.1);
+    TS_ASSERT_DELTA(out->getParameter("C"), 7.7, 0.1);
+    TS_ASSERT_DELTA(out->getParameter("D"), 0, 0.1);
+  }
+
   void test_function_ProductFunction() {
 
     // Mock data

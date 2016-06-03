@@ -92,7 +92,6 @@ set ( SRC_FILES
 	src/MatrixWSIndexCalculator.cpp
 	src/MatrixWorkspace.cpp
 	src/MatrixWorkspaceMDIterator.cpp
-	src/MemoryManager.cpp
 	src/ModeratorModel.cpp
 	src/MultiDomainFunction.cpp
 	src/MultiPeriodGroupAlgorithm.cpp
@@ -275,7 +274,6 @@ set ( INC_FILES
 	inc/MantidAPI/MatrixWorkspaceMDIterator.h
 	inc/MantidAPI/MatrixWorkspaceValidator.h
 	inc/MantidAPI/MatrixWorkspace_fwd.h
-	inc/MantidAPI/MemoryManager.h
 	inc/MantidAPI/ModeratorModel.h
 	inc/MantidAPI/MultiDomainFunction.h
 	inc/MantidAPI/MultiPeriodGroupAlgorithm.h
@@ -386,7 +384,6 @@ set ( TEST_FILES
 	LogManagerTest.h
 	MDGeometryTest.h
 	MatrixWorkspaceMDIteratorTest.h
-	MemoryManagerTest.h
 	ModeratorModelTest.h
 	MultiDomainFunctionTest.h
 	MultiPeriodGroupAlgorithmTest.h
@@ -464,6 +461,10 @@ endif ()
 set_property ( TARGET API PROPERTY FOLDER "MantidFramework" )
 
 target_link_libraries ( API LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} ${JSONCPP_LIBRARIES} ${MANTIDLIBS} ${GSL_LIBRARIES} ${NEXUS_LIBRARIES} ${WINSOCK} )
+if(MAKE_VATES)
+  target_include_directories( API SYSTEM PRIVATE ${PARAVIEW_INCLUDE_DIRS} )
+  target_link_libraries ( API LINK_PRIVATE vtkPVClientServerCoreRendering )
+endif()
 
 # Add the unit tests directory
 add_subdirectory ( test )

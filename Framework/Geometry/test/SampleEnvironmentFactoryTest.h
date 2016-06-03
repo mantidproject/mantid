@@ -25,7 +25,7 @@ public:
     delete suite;
   }
 
-  void tearDown() {
+  void tearDown() override {
     // Clear monostate cache
     SampleEnvironmentFactory().clearCache();
   }

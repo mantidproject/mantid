@@ -15,8 +15,7 @@ namespace MantidQt
 		{
 		public:
 			explicit OpenGLError(const std::string& msg) :m_msg(msg) {}
-                        ~OpenGLError() throw() override {}
-                        const char *what() const throw() override {
+                        const char *what() const noexcept override {
                           return m_msg.c_str();
                         }
                         static bool check(const std::string& funName);

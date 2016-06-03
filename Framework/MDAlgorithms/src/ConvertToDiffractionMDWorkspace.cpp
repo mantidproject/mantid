@@ -2,7 +2,6 @@
 
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/IMDEventWorkspace.h"
-#include "MantidAPI/MemoryManager.h"
 #include "MantidAPI/Progress.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidDataObjects/EventWorkspace.h"
@@ -307,14 +306,7 @@ void ConvertToDiffractionMDWorkspace::convertEventList(int workspaceIndex,
 
     // Clear out the EventList to save memory
     if (ClearInputWorkspace) {
-      // Track how much memory you cleared
-      size_t memoryCleared = el.getMemorySize();
-      // Clear it now
       el.clear();
-      // For Linux with tcmalloc, make sure memory goes back, if you've cleared
-      // 200 Megs
-      MemoryManager::Instance().releaseFreeMemoryIfAccumulated(
-          memoryCleared, static_cast<size_t>(2e8));
     }
   }
   prog->reportIncrement(numEvents, "Adding Events");

@@ -9460,9 +9460,6 @@ void ApplicationWindow::fileMenuAboutToShow() {
   fileMenu->addAction(actionLoad);
   fileMenu->addSeparator();
   fileMenu->addAction(actionclearAllMemory);
-#ifdef USE_TCMALLOC
-  fileMenu->addAction(actionreleaseFreeMemory);
-#endif
 
   fileMenu->addSeparator();
   fileMenu->addAction(actionCloseAllWindows);
@@ -13096,12 +13093,6 @@ void ApplicationWindow::createActions() {
   actionclearAllMemory->setShortcut(QKeySequence::fromString("Ctrl+Shift+L"));
   connect(actionclearAllMemory, SIGNAL(triggered()), mantidUI,
           SLOT(clearAllMemory()));
-
-#ifdef USE_TCMALLOC
-  actionreleaseFreeMemory = new QAction("&Release Free Memory", this);
-  connect(actionreleaseFreeMemory, SIGNAL(triggered()), mantidUI,
-          SLOT(releaseFreeMemory()));
-#endif
 
   actionPanPlot = new QAction(QIcon(":/panning.png"), tr("Panning tool"), this);
   connect(actionPanPlot, SIGNAL(activated()), this, SLOT(panOnPlot()));

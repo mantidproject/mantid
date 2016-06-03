@@ -104,8 +104,6 @@ public:
     tofconv_tofconverter_content = TOFCONV_CONVERTER;
     fail = false;
   }
-  ~ScriptRepositoryImplLocal() throw() override{};
-
   std::string repository_json_content;
   std::string tofconv_readme_content;
   std::string tofconv_tofconverter_content;

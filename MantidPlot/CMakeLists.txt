@@ -798,6 +798,11 @@ target_link_libraries ( MantidPlot LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
             ${OPENGL_LIBRARIES}
 )
 
+if(MAKE_VATES)
+  target_include_directories( MantidPlot SYSTEM PRIVATE ${PARAVIEW_INCLUDE_DIRS} )
+  target_link_libraries ( MantidPlot LINK_PRIVATE vtkPVClientServerCoreRendering )
+endif()
+
 if (WITH_ASAN)
   target_link_libraries ( MantidPlot LINK_PRIVATE -lasan )
 endif ()

@@ -85,7 +85,7 @@ void PlotController::tableUpdated()
   for(int row = 0; row < rowCount; ++row)
   {
     QString itemText = QString("%1 (%2)").arg(m_table->item(row,wsColumn)->text(),m_table->item(row,wsIndexColumn)->text());
-    m_plotSelector->insertItem(-1, itemText);
+    m_plotSelector->insertItem(row, itemText);
   }
   m_plotData.clear();
   m_currentIndex = -1;
@@ -273,22 +273,32 @@ void PlotController::exportCurrentPlot()
 }
 
 /// Export all plots
-void PlotController::exportAllPlots()
-{
+void PlotController::exportAllPlots() {
   int nPlots = owner()->getNumberOfSpectra();
-  if (nPlots <= 0) return;
-  QString pyInput = "from mantidplot import newTiledWindow\n";
-  pyInput += "newTiledWindow(sources=[";
-  for(int index = 0; index < nPlots; ++index)
-  {
-    if (index > 0)
-    {
-      pyInput += ",";
-    }
-    pyInput += QString("(%1)").arg(makePyPlotSource(index));
+  int exportPlot = QMessageBox::Yes;
+  if (nPlots > 20) {
+    exportPlot = QMessageBox::question(owner(), "Export All Plot?",
+                                       "Are you sure, you want to export " +
+                                           QString::number(nPlots) +
+                                           " plots? This may take a long time!",
+                                       QMessageBox::Yes, QMessageBox::No);
   }
-  pyInput += "])\n";
-  owner()->runPythonCode(pyInput);
+
+  if (exportPlot == QMessageBox::Yes) {
+
+    if (nPlots <= 0)
+      return;
+    QString pyInput = "from mantidplot import newTiledWindow\n";
+    pyInput += "newTiledWindow(sources=[";
+    for (int index = 0; index < nPlots; ++index) {
+      if (index > 0) {
+        pyInput += ",";
+      }
+      pyInput += QString("(%1)").arg(makePyPlotSource(index));
+    }
+    pyInput += "])\n";
+    owner()->runPythonCode(pyInput);
+  }
 }
 
 /// Disable all plot tools. It is a helper method 
@@ -447,7 +457,7 @@ void PlotController::showGuessFunction(bool ok)
   m_showGuessFunction = ok;
   if (ok)
   {
-    plotGuess();
+	plotGuess();
   }
   else
   {
