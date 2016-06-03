@@ -82,9 +82,6 @@ public:
 
     for (const auto &it : elements) {
       std::string element(it);
-
-      boost::trim(element);
-
       try {
         newValues.push_back(boost::lexical_cast<Type>(element));
       } catch (boost::bad_lexical_cast &) {

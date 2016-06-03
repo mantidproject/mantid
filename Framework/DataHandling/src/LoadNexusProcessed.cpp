@@ -79,22 +79,6 @@ struct SpectraInfo {
         spectraNumbers(other.spectraNumbers),
         detectorIndex(other.detectorIndex), detectorCount(other.detectorCount),
         detectorList(other.detectorList) {}
-
-  /*
-  SpectraInfo& operator=(const SpectraInfo& other)
-  {
-  if (&other != this)
-  {
-  nSpectra = other.nSpectra;
-  hasSpectra = other.hasSpectra;
-  spectraNumbers = other.spectraNumbers;
-  detectorIndex = other.detectorIndex;
-  detectorCount = other.detectorCount;
-  detectorList = other.detectorList;
-  }
-  return *this;
-  }
-  */
 };
 
 // Helper typdef.
@@ -301,7 +285,8 @@ Workspace_sptr LoadNexusProcessed::doAccelleratedMultiPeriodLoading(
     std::stringstream buffer;
     buffer << "Group entry " << p - 1 << " has fractional area present. Try "
                                          "reloading with FastMultiPeriod set "
-                                         "off." << std::endl;
+                                         "off."
+           << std::endl;
     throw std::runtime_error(buffer.str());
   }
 

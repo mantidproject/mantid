@@ -272,19 +272,12 @@ string parentName(IComponent_const_sptr comp, const vector<string> &names) {
  * @return The vector of instrument component names.
  */
 vector<string> getGroupNames(const string &names) {
-  vector<string> groups;
-
   // check that there is something
   if (names.empty())
-    return groups;
-
+    return std::vector<string>();
   // do the actual splitting
   tokenizer tokens(names, ",", Mantid::Kernel::StringTokenizer::TOK_TRIM);
-  for (const auto &item : tokens) {
-    groups.push_back(item);
-  }
-
-  return groups;
+  return tokens.asVector();
 }
 
 /**

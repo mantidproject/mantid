@@ -347,10 +347,7 @@ void PropertyManager::setPropertiesWithSimpleString(
                       Mantid::Kernel::StringTokenizer::TOK_TRIM);
   int index = 0;
   // Iterate over the properties
-  for (const auto &it : propPairs) {
-    // Pair of the type "
-    std::string pair = it;
-
+  for (const auto &pair : propPairs) {
     size_t n = pair.find('=');
     if (n != std::string::npos) {
       // Normal "PropertyName=value" string.

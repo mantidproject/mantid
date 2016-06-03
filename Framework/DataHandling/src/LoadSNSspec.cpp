@@ -30,7 +30,8 @@ int LoadSNSspec::confidence(Kernel::FileDescriptor &descriptor) const {
 
   auto &file = descriptor.data();
 
-  int confidence(0), axiscols(0), datacols(0);
+  int confidence(0);
+  size_t axiscols(0), datacols(0);
   std::string str;
   typedef Mantid::Kernel::StringTokenizer tokenizer;
   const std::string sep = " ";
@@ -44,11 +45,11 @@ int LoadSNSspec::confidence(Kernel::FileDescriptor &descriptor) const {
 
     try {
       // if it's comment line
+      tokenizer tok(str, sep,
+                    Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
       if (str.at(0) == '#') {
         if (str.at(1) == 'L') {
-          tokenizer tok(str, sep,
-                        Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
-          axiscols = static_cast<int>(tok.asVector().size());
+          axiscols = tok.count();
           // if the file contains a comment line starting with "#L" followed
           // by three columns this could be loadsnsspec file
           if (axiscols > 2) {
@@ -57,9 +58,7 @@ int LoadSNSspec::confidence(Kernel::FileDescriptor &descriptor) const {
         }
       } else {
         // check first data line is a 3 column line
-        tokenizer tok(str, sep,
-                      Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
-        datacols = static_cast<int>(tok.asVector().size());
+        datacols = tok.count();
         break;
       }
     } catch (std::out_of_range &) {
@@ -144,11 +143,7 @@ void LoadSNSspec::exec() {
       tokenizer tok(str, sep,
                     Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
       for (const auto &beg : tok) {
-        std::stringstream ss;
-        ss << beg;
-        double d;
-        ss >> d;
-        input.push_back(d);
+        input.push_back(std::stod(beg));
       }
     }
 

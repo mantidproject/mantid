@@ -90,11 +90,7 @@ void LoadSpec::exec() {
       tokenizer tok(str, sep,
                     Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
       for (const auto &beg : tok) {
-        std::stringstream ss;
-        ss << beg;
-        double d;
-        ss >> d;
-        input.push_back(d);
+        input.push_back(std::stod(beg));
       }
     }
 
