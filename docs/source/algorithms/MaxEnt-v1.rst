@@ -20,18 +20,26 @@ More specifically, the algorithm maximizes the entropy :math:`S\left(x\right)` s
 .. math:: \chi^2 = \sum_m \frac{\left(d_m - d_m^c\right)^2}{\sigma_m^2} \leq C_{target}
 
 where :math:`d_m` are the experimental data, :math:`\sigma_m` the associated errors, and :math:`d_m^c`
-the calculated or reconstructed data. The image is the set of numbers
-:math:`\{x_0, x_1, \dots, x_N\}` which relates to the measured data as:
+the calculated or reconstructed data. The image is a set of numbers
+:math:`\{x_0, x_1, \dots, x_N\}` related to the measured data via a 1D Fourier transform:
 
-.. math:: d_m = \sum_j M_{mj} x_j
+.. math:: d_m = \frac{1}{N} \sum_{j=0}^{N-1} x_j e^{i 2\pi m j / N}
 
-where the measurement kernel matrix :math:`\mathbf{M}` represents a Fourier transform,
-:math:`M_{mj} = \exp\left(-ik_mj\right)`. At present, nothing is assumed about :math:`x_j`:
-it can be either positive or negative and real or complex, and the entropy is defined as
+Note that even for real input data the reconstructed image can be complex, which means that both real and
+imaginary parts will be taken into account for the calculations. This is the default behaviour, which can be
+changed by setting the input property *ComplexImage* to *False*. Note that the algorithm will fail to converge
+if the image is complex and this option is set to *False*. For this reason, it is recomended to use the default
+when no prior knowledge is available. The entropy is defined on the image :math:`\{x_j\}` as:
 
 .. math:: S = \sum_j \left(x_j/A\right) \sinh^{-1} \left(x_j/A\right)
 
-where :math:`A` is a constant. The sensitive of the reconstructed image to reconstructed
+or
+
+.. math:: S = -\sum_j x_j \left(\log(x_j/A)-1\right)
+
+where :math:`A` is a constant and the formula to use depends on the input property *PositiveImage*: when it is
+set to *False* the first equation will be applied, whereas the latter expresion will be used if this property
+is set to *True*. The sensitive of the reconstructed image to reconstructed
 image will vary depending on the data. In general a smaller value would preduce a
 sharper image. See section 4.7 in Ref. [1] for recommended strategy to selected :math:`A`.
 
@@ -84,7 +92,7 @@ the output workspaces whether the algorithm was evolving towards the correct sol
 On the other hand, the user must always check the validity of the solution by inspecting *EvolChi* and *EvolAngle*,
 whose values will be set to zero once the true maximum entropy solution is found.
 
-.. table:: Table 1. Output workspaces for the case of real data (M histograms and N bins in the input workspace)
+.. table:: Table 1. Output workspaces for a real input workspace with M histograms and N bins
 
     +-------------------+------------------------------+----------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
     | Workspace         | Number of histograms         | Number of bins | Description                                                                                                                                                                                                                                                                                                        |
@@ -98,7 +106,7 @@ whose values will be set to zero once the true maximum entropy solution is found
     | ReconstructedData | 2M                           | N              | For spectrum :math:`s` in the input workspace, the reconstructed data are stored in spectrum :math:`s` (real part) and :math:`s+M` (imaginary part). Note that although the input is real, the imaginary part is recorded for debugging purposes, it should be zero for all data points.                           |
     +-------------------+------------------------------+----------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 
-.. table:: Table 2. Output workspaces for the case of complex input (2M histograms and N bins in the input workspace. Real and imaginary parts must be consecutive)
+.. table:: Table 2. Output workspaces for a complex input workspace with 2M histograms and N bins.
 
     +-------------------+------------------------------+----------------+------------------------------------------------------------------------------------------------------------------------------------------------------------+
     | Workspace         | Number of histograms         | Number of bins | Description                                                                                                                                                |
@@ -276,7 +284,7 @@ Positive Images
 
 The algorithm allows users to restrict the reconstructed image to positive values only. This behaviour can be
 selected by setting the input property *PositiveImage* to true. In this case, the entropy is defined by the
-alternative expression:
+expression:
 
 .. math:: S = -\sum_j x_j \left(\log(x_j/A)-1\right)
 
@@ -326,10 +334,10 @@ Output:
 Increasing the number of points in the image
 --------------------------------------------
 
-The algorithm has an input property, *ResolutionFactor* that allows to increase the number of points in the reconstructed image. This is
-at present done by extending the range (and also the number of points) in the reconstructed data. The number of reconstructed
-points can be increased by any integer factor, but note that this will slow down the algorithm and a greater number of maxent iterations may be needed
-for the algorithm to converge to a solution.
+The algorithm has an input property, *ResolutionFactor*, that allows to increase the number of points in the reconstructed image. This is
+at present done by extending the range (and therefore the number of points) in the reconstructed data. The number of reconstructed
+points can be increased by any integer factor, but note that this will slow down the algorithm and you may need to increase the number of
+maxent iterations so that the algorithm is able to converge to a solution.
 
 An example script where the density of points is increased by a factor of 2 can be found below. Note that when a factor of 2 is used,
 the reconstructed data is twice the size of the original (experimental) data.

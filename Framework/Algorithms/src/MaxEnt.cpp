@@ -71,7 +71,7 @@ const std::string MaxEnt::summary() const {
   return "Runs Maximum Entropy method on every spectrum of an input workspace. "
          "Note this algorithm is still in development, and its interface is "
          "likely to change. It currently works for the case where data and "
-         "image are related by a Fourier transform.";
+         "image are related by a 1D Fourier transform.";
 }
 
 //----------------------------------------------------------------------------------------------
@@ -81,18 +81,29 @@ void MaxEnt::init() {
 
   declareProperty(
       make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
-      "An input workspace.");
+      "An input workspace. Each spectrum is analyzed independently and "
+      "sequentially.");
 
   declareProperty("ComplexData", false,
-                  "Whether or not the input data are complex. If true, the "
+                  "If true, the input data is assumed to be complex and the "
                   "input workspace is expected to have an even number of "
-                  "histograms.");
+                  "histograms (2N). Spectrum numbers S and S+N are assumed to "
+                  "be the real and imaginary part of the complex signal "
+                  "respectively.");
 
-  declareProperty("ComplexImage", true, "Whether or not the image is complex.");
+  declareProperty("ComplexImage", true,
+                  "If true, the algorithm will use complex images for the "
+                  "calculations. This is the recommended option when there is "
+                  "no prior knowledge about the image. If the image is known "
+                  "to be real, this option can be set to false and the "
+                  "algorithm will only consider the real part for "
+                  "calculations.");
 
-  declareProperty("PositiveImage", false, "If true, the reconstructed image "
-                                          "must be positive. It can take "
-                                          "negative values otherwise");
+  declareProperty("PositiveImage", false,
+                  "If true, the reconstructed image is only allowed to take "
+                  "positive values. It can take negative values otherwise. "
+                  "This option defines the entropy formula that will be used "
+                  "for the calculations (see next section for more details).");
 
   declareProperty("AutoShift", false,
                   "Automatically calculate and apply phase shift. Zero on the "
@@ -124,30 +135,30 @@ void MaxEnt::init() {
   declareProperty(make_unique<PropertyWithValue<double>>("DistancePenalty", 0.1,
                                                          mustBeNonNegative,
                                                          Direction::Input),
-                  "Distance penalty applied to the current image");
+                  "Distance penalty applied to the current image at each iteration.");
 
   declareProperty(make_unique<PropertyWithValue<double>>(
                       "MaxAngle", 0.05, mustBeNonNegative, Direction::Input),
-                  "Maximum degree of non-parallelism between S and C");
+                  "Maximum degree of non-parallelism between S and C.");
 
   mustBePositive = boost::make_shared<BoundedValidator<size_t>>();
   mustBePositive->setLower(1);
   declareProperty(make_unique<PropertyWithValue<size_t>>(
                       "MaxIterations", 20000, mustBePositive, Direction::Input),
-                  "Maximum number of iterations");
+                  "Maximum number of iterations.");
 
   declareProperty(make_unique<PropertyWithValue<size_t>>("AlphaChopIterations",
                                                          500, mustBePositive,
                                                          Direction::Input),
-                  "Maximum number of iterations in alpha chop");
+                  "Maximum number of iterations in alpha chop.");
 
   declareProperty(
       make_unique<WorkspaceProperty<>>("EvolChi", "", Direction::Output),
-      "Output workspace containing the evolution of Chi-sq");
+      "Output workspace containing the evolution of Chi-sq.");
   declareProperty(
       make_unique<WorkspaceProperty<>>("EvolAngle", "", Direction::Output),
       "Output workspace containing the evolution of "
-      "non-paralellism between S and C");
+      "non-paralellism between S and C.");
   declareProperty(make_unique<WorkspaceProperty<>>("ReconstructedImage", "",
                                                    Direction::Output),
                   "The output workspace containing the reconstructed image.");
