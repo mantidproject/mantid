@@ -406,6 +406,64 @@ public:
       }
     }
   }
+
+  void test_forward_backward() {
+
+    MaxentSpace_sptr dataSpace = std::make_shared<MaxentSpaceComplex>();
+    MaxentSpace_sptr imageSpace = std::make_shared<MaxentSpaceComplex>();
+    MaxentTransformFourier transform(dataSpace, imageSpace);
+
+    // sin (x) + i cos(x)
+    std::vector<double> complexImage = {0.0,
+                                        1.0,
+                                        0.309016994375,
+                                        0.951056516295,
+                                        0.587785252292,
+                                        0.809016994375,
+                                        0.809016994375,
+                                        0.587785252292,
+                                        0.951056516295,
+                                        0.309016994375,
+                                        1.0,
+                                        6.12323399574e-17,
+                                        0.951056516295,
+                                        -0.309016994375,
+                                        0.809016994375,
+                                        -0.587785252292,
+                                        0.587785252292,
+                                        -0.809016994375,
+                                        0.309016994375,
+                                        -0.951056516295,
+                                        1.22464679915e-16,
+                                        -1.0,
+                                        -0.309016994375,
+                                        -0.951056516295,
+                                        -0.587785252292,
+                                        -0.809016994375,
+                                        -0.809016994375,
+                                        -0.587785252292,
+                                        -0.951056516295,
+                                        -0.309016994375,
+                                        -1.0,
+                                        -1.83697019872e-16,
+                                        -0.951056516295,
+                                        0.309016994375,
+                                        -0.809016994375,
+                                        0.587785252292,
+                                        -0.587785252292,
+                                        0.809016994375,
+                                        -0.309016994375,
+                                        0.951056516295};
+
+    auto complexData = transform.imageToData(complexImage);
+    auto newImage = transform.dataToImage(complexData);
+
+    TS_ASSERT_EQUALS(complexData.size(), complexImage.size());
+    TS_ASSERT_EQUALS(newImage.size(), complexImage.size());
+    for (size_t i = 0; i < complexImage.size(); i++) {
+      TS_ASSERT_DELTA(newImage[i], complexImage[i], 1e-3);
+    }
+  }
 };
 
 #endif /* MANTID_ALGORITHMS_MAXENTTRANSFORMFOURIERTEST_H_ */
