@@ -1,64 +1,20 @@
 #include "MantidAlgorithms/MaxEnt/MaxentCalculator.h"
-#include "MantidAlgorithms/MaxEnt/MaxentTransformFourier.h"
 
 namespace Mantid {
 namespace Algorithms {
 
 /**
 * Constructor
-* @param entropy : pointer MaxentEntropy object defining the entropy formula to
-* use
+* @param entropy : pointer to MaxentEntropy object defining the entropy formula
+* to use
+* @param transform : pointer to MaxentTransform object defining how to transform
+* from data space to image space and vice-versa
 */
 MaxentCalculator::MaxentCalculator(MaxentEntropy_sptr entropy,
                                    MaxentTransform_sptr transform)
     : m_data(), m_errors(), m_image(), m_dataCalc(), m_background(1.0),
       m_angle(-1.), m_chisq(-1.), m_entropy(entropy), m_transform(transform),
       m_directionsIm(), m_coeffs() {}
-
-/**
-* Corrects the image according to the type of entropy
-*/
-void MaxentCalculator::correctImage() {
-
-	m_image = m_entropy->correctValues(m_image, m_background);
-
-  // Reset m_angle and m_chisq to default
-  m_angle = -1.;
-  m_chisq = -1.;
-}
-
-/**
-* Updates the image according to an increment delta. Uses the previously
-* calculated search directions.
-* @param delta : [input] The increment to be added to the image
-*/
-void MaxentCalculator::updateImage(const std::vector<double> &delta) {
-
-  if (m_image.empty()) {
-    throw std::runtime_error("No data were loaded");
-  }
-  if (m_directionsIm.empty()) {
-    throw std::runtime_error("Search directions haven't been calculated");
-  }
-  if (delta.size() != m_directionsIm.size()) {
-    throw std::invalid_argument("Image couldn't be updated");
-  }
-  // Calculate the new image
-  for (size_t i = 0; i < m_image.size(); i++) {
-    for (size_t k = 0; k < delta.size(); k++) {
-      m_image[i] = m_image[i] + delta[k] * m_directionsIm[k][i];
-    }
-  }
-  correctImage();
-
-  m_dataCalc = m_transform->imageToData(m_image);
-
-  calculateChisq();
-  m_chisq = getChisq();
-
-  // Reset m_angle to default
-  m_angle = -1.;
-}
 
 /**
 * Calculates the gradient of chi-square using the experimental data, calculated
@@ -74,7 +30,7 @@ std::vector<double> MaxentCalculator::calculateChiGrad() const {
       (m_dataCalc.size() % m_data.size())) {
     // Data and errors must have the same number of data points
     // but the reconstructed (calculated) data may contain more points
-    throw std::invalid_argument("Cannot compute gradient of Chi");
+    throw std::runtime_error("Cannot compute gradient of Chi");
   }
 
   // We only consider the experimental data points to calculate chi grad
@@ -94,15 +50,6 @@ std::vector<double> MaxentCalculator::calculateChiGrad() const {
   }
 
   return cgrad;
-}
-
-/**
-* Calculates the entropy (not needed for the moment)
-* @return : The entropy as a vector
-*/
-std::vector<double> MaxentCalculator::calculateEntropy() const {
-
-  throw std::runtime_error("Not implemented");
 }
 
 /**
@@ -126,7 +73,7 @@ std::vector<double> MaxentCalculator::getImage() const {
 
   if (m_image.empty()) {
     // If it is empty it means we didn't load valid data
-    throw std::runtime_error("No data were loaded");
+    throw std::runtime_error("No image was loaded");
   }
   return m_image;
 }
@@ -137,6 +84,9 @@ std::vector<double> MaxentCalculator::getImage() const {
 */
 std::vector<std::vector<double>> MaxentCalculator::getSearchDirections() const {
 
+  if (m_directionsIm.empty()) {
+    throw std::runtime_error("Search directions have not been calculated");
+  }
   return m_directionsIm;
 }
 
@@ -167,32 +117,33 @@ double MaxentCalculator::getAngle() const {
 }
 
 /**
-* Returns chi-square (it is calculated if necessary)
+* Returns chi-square
 * @return : Chi-square
 */
 double MaxentCalculator::getChisq() {
 
-  if (m_data.empty() || m_errors.empty() || m_dataCalc.empty()) {
-    throw std::runtime_error("Cannot get chi-square");
+  if (m_chisq == -1.) {
+    throw std::runtime_error("Chisq has not been calculated");
   }
-  // If data were loaded we can calculate chi-square
-  if (m_chisq == -1.)
-    calculateChisq();
-
   return m_chisq;
 }
 
 /**
-* Calculates the search directions and quadratic coefficients (equations SB. 21
-* and SB. 22). Also calculates the angle between the gradient of chi-square and
-* the gradient of the entropy
+* Performs an iteration and calculates everything: search directions (SB. 21),
+* quadratic coefficients (SB. 22), angle between the gradient of chi-square and
+* the gradient of the entropy, and chi-sqr
+* @param data : [input] The experimental data as a vector (real or complex)
+* @param errors : [input] The experimental errors as a vector (real or complex)
+* @param image : [input] The image as a vector (real or complex)
+* @param background : [input] The background
 */
-void MaxentCalculator::calculateQuadraticCoefficients(
-    const std::vector<double> &data, const std::vector<double> &errors,
-    const std::vector<double> &image, double background) {
+void MaxentCalculator::iterate(const std::vector<double> &data,
+                               const std::vector<double> &errors,
+                               const std::vector<double> &image,
+                               double background) {
 
   // Some checks
-  if (data.empty() || errors.empty()) {
+  if (data.empty() || errors.empty() || (data.size() != errors.size())) {
     throw std::invalid_argument(
         "Cannot calculate quadratic coefficients: invalid data");
   }
@@ -278,6 +229,7 @@ void MaxentCalculator::calculateQuadraticCoefficients(
   directionsDat[0] = m_transform->imageToData(m_directionsIm[0]);
   directionsDat[1] = m_transform->imageToData(m_directionsIm[1]);
 
+  calculateChisq();
   double chiSq = getChisq();
 
   // Calculate the quadratic coefficients SB. eq 24
@@ -335,6 +287,9 @@ void MaxentCalculator::calculateQuadraticCoefficients(
 */
 void MaxentCalculator::calculateChisq() {
 
+  if (m_data.empty() || m_errors.empty() || m_dataCalc.empty()) {
+    throw std::runtime_error("Cannot calculate chi-square");
+  }
   size_t npoints = m_data.size();
 
   // Calculate

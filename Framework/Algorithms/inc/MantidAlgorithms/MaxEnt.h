@@ -74,19 +74,25 @@ private:
   /// Moves the system one step closer towards the solution
   std::vector<double> move(const QuadraticCoefficients &coeffs,
                            double chiTarget, double chiEps, size_t alphaIter);
-  /// TODO Description
+  /// Applies a distance penalty
   std::vector<double> applyDistancePenalty(const std::vector<double> &beta,
                                            const QuadraticCoefficients &coeffs,
                                            const std::vector<double> &image,
                                            double background, double distEps);
+  /// Updates the image
+  std::vector<double> updateImage(const std::vector<double> &image,
+                                  const std::vector<double> &delta,
+                                  const std::vector<std::vector<double>> dirs);
+
   /// Populates the output workspace containing the reconstructed data
   void populateDataWS(const API::MatrixWorkspace_sptr &inWS, size_t spec,
                       size_t nspec, const std::vector<double> &result,
-                      API::MatrixWorkspace_sptr &outWS);
+                      bool complex, API::MatrixWorkspace_sptr &outWS);
   /// Populates the output workspace containing the reconstructed image
   void populateImageWS(const API::MatrixWorkspace_sptr &inWS, size_t spec,
                        size_t nspec, const std::vector<double> &result,
-                       API::MatrixWorkspace_sptr &outWS, bool autoShift);
+                       bool complex, API::MatrixWorkspace_sptr &outWS,
+                       bool autoShift);
 };
 
 } // namespace Algorithms

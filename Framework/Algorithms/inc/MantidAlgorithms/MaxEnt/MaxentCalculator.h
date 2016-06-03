@@ -5,10 +5,13 @@
 #include "MantidAlgorithms/MaxEnt/MaxentCoefficients.h"
 #include "MantidAlgorithms/MaxEnt/MaxentEntropy.h"
 #include "MantidAlgorithms/MaxEnt/MaxentTransform.h"
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 namespace Mantid {
 namespace Algorithms {
+
+using MaxentEntropy_sptr = std::shared_ptr<MaxentEntropy>;
+using MaxentTransform_sptr = std::shared_ptr<MaxentTransform>;
 
 /** MaxentCalculator : TODO: Search directions and
   quadratic coefficients are calculated following J. Skilling and R. K. Bryan:
@@ -38,42 +41,35 @@ namespace Algorithms {
 
 class MANTID_ALGORITHMS_DLL MaxentCalculator final {
 public:
-	// Constructor
+  // Constructor
   MaxentCalculator(MaxentEntropy_sptr entropy, MaxentTransform_sptr transform);
-	// Deleted default constructor
+  // Deleted default constructor
   MaxentCalculator() = delete;
-	// Destructor
+  // Destructor
   virtual ~MaxentCalculator() = default;
 
-  // Calculates quadratic coefficients
-  void calculateQuadraticCoefficients(const std::vector<double> &data,
-                                      const std::vector<double> &errors,
-                                      const std::vector<double> &image,
-                                      double background);
+  // Runs maxent iteration
+  void iterate(const std::vector<double> &data,
+               const std::vector<double> &errors,
+               const std::vector<double> &image, double background);
 
-	// Returns the reconstructed (calculated) data
+  // Getters
+  // Returns the reconstructed (calculated) data
   std::vector<double> getReconstructedData() const;
   // Returns the image
   std::vector<double> getImage() const;
   // Returns the quadratic coefficients
   QuadraticCoefficients getQuadraticCoefficients() const;
+  // Returns the search directions
+  std::vector<std::vector<double>> getSearchDirections() const;
   // Returns the angle between Grad(S) and Grad(C)
   double getAngle() const;
   // Returns the chi-square
   double getChisq();
 
-	// Updates the image
-	void updateImage(const std::vector<double> &delta);
-
 private:
   // Calculates the gradient of chi
   std::vector<double> calculateChiGrad() const;
-  // Calculates the entropy
-  std::vector<double> calculateEntropy() const;
-  // Returns the search directions
-  std::vector<std::vector<double>> getSearchDirections() const;
-  // Corrects the image
-  void correctImage();
   // Calculates chi-square
   void calculateChisq();
 
@@ -92,18 +88,16 @@ private:
   double m_angle;
   // Chi-square
   double m_chisq;
-  // The type of entropy
-  MaxentEntropy_sptr m_entropy;
-  // The type of transform
-  MaxentTransform_sptr m_transform;
   // The search directions
   std::vector<std::vector<double>> m_directionsIm;
   // The quadratic coefficients
   QuadraticCoefficients m_coeffs;
-};
 
-// Helper typedef for scoped pointer of this type.
-typedef boost::shared_ptr<MaxentCalculator> MaxentCalculator_sptr;
+  // The type of entropy
+  MaxentEntropy_sptr m_entropy;
+  // The type of transform
+  MaxentTransform_sptr m_transform;
+};
 
 } // namespace Algorithms
 } // namespace Mantid

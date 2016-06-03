@@ -3,11 +3,11 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAlgorithms/MaxEnt.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/TextAxis.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAlgorithms/MaxEnt.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
@@ -152,6 +152,7 @@ public:
     TS_ASSERT(angle);
 
     // Test some values
+    TS_ASSERT_EQUALS(data->readY(0).size(), 50);
     TS_ASSERT_DELTA(data->readY(0)[25], 0.3112, 0.0001);
     TS_ASSERT_DELTA(data->readY(0)[26], 0.4893, 0.0001);
     TS_ASSERT_DELTA(data->readY(0)[27], 0.6485, 0.0001);

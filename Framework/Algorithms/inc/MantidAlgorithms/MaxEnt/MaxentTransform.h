@@ -43,9 +43,6 @@ public:
   virtual std::vector<double> dataToImage(const std::vector<double> &data) = 0;
 };
 
-// Helper typedef for scoped pointer of this type.
-typedef boost::shared_ptr<MaxentTransform> MaxentTransform_sptr;
-
 } // namespace Algorithms
 } // namespace Mantid
 

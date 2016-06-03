@@ -48,10 +48,6 @@ public:
                                     double newValue) override;
 };
 
-// Helper typedef for shared pointer of this type.
-typedef boost::shared_ptr<MaxentEntropyNegativeValues>
-    MaxentEntropyNegativeValues_sptr;
-
 } // namespace Algorithms
 } // namespace Mantid
 

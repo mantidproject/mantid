@@ -45,9 +45,6 @@ public:
 	virtual std::vector<double> fromComplex(const std::vector<double> &values) = 0;
 };
 
-// Helper typedef for scoped pointer of this type.
-typedef boost::shared_ptr<MaxentSpace> MaxentSpace_sptr;
-
 } // namespace Algorithms
 } // namespace Mantid
 

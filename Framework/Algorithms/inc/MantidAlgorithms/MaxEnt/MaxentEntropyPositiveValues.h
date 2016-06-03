@@ -44,9 +44,6 @@ public:
   std::vector<double> correctValues(const std::vector<double> &values,
                                     double newValue) override;
 };
-// Helper typedef for scoped pointer of this type.
-typedef boost::shared_ptr<MaxentEntropyPositiveValues>
-    MaxentEntropyPositiveValues_sptr;
 
 } // namespace Algorithms
 } // namespace Mantid

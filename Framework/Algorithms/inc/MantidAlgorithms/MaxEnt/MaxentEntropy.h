@@ -48,9 +48,6 @@ public:
                                             double newValue) = 0;
 };
 
-// Helper typedef for scoped pointer of this type.
-typedef boost::shared_ptr<MaxentEntropy> MaxentEntropy_sptr;
-
 } // namespace Algorithms
 } // namespace Mantid
 

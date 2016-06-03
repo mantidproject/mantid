@@ -1,14 +1,12 @@
-#ifndef MANTID_ALGORITHMS_MAXENTDATATEST_H_
-#define MANTID_ALGORITHMS_MAXENTDATATEST_H_
+#ifndef MANTID_ALGORITHMS_MAXENTCALCULATORTEST_H_
+#define MANTID_ALGORITHMS_MAXENTCALCULATORTEST_H_
 
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 
-#include "MantidAlgorithms/MaxEnt/MaxentData.h"
+#include "MantidAlgorithms/MaxEnt/MaxentCalculator.h"
 #include "MantidAlgorithms/MaxEnt/MaxentEntropy.h"
-
-#include <boost/make_shared.hpp>
-#include <boost/shared_ptr.hpp>
+#include "MantidAlgorithms/MaxEnt/MaxentTransform.h"
 
 using namespace Mantid::Algorithms;
 using namespace testing;
@@ -16,254 +14,297 @@ using namespace testing;
 class MockEntropy : public MaxentEntropy {
 
 public:
-  MOCK_METHOD1(getDerivative, double(double));
-  MOCK_METHOD1(getSecondDerivative, double(double));
-  MOCK_METHOD2(correctValue, double(double, double));
+  MOCK_METHOD2(derivative,
+               std::vector<double>(const std::vector<double> &, double));
+  MOCK_METHOD1(secondDerivative,
+               std::vector<double>(const std::vector<double> &));
+  MOCK_METHOD2(correctValues,
+               std::vector<double>(const std::vector<double> &, double));
 };
-typedef boost::shared_ptr<MockEntropy> MockEntropy_sptr;
 
-class MaxentDataTest : public CxxTest::TestSuite {
+class MockTransform : public MaxentTransform {
+
+public:
+  MOCK_METHOD1(imageToData, std::vector<double>(const std::vector<double> &));
+  MOCK_METHOD1(dataToImage, std::vector<double>(const std::vector<double> &));
+};
+
+using MockEntropy_sptr = std::shared_ptr<MockEntropy>;
+
+class MaxentCalculatorTest : public CxxTest::TestSuite {
 
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static MaxentDataTest *createSuite() { return new MaxentDataTest(); }
-  static void destroySuite(MaxentDataTest *suite) { delete suite; }
+  static MaxentCalculatorTest *createSuite() {
+    return new MaxentCalculatorTest();
+  }
+  static void destroySuite(MaxentCalculatorTest *suite) { delete suite; }
 
-  void test_bad_real_input() {
+  void test_bad_input() {
 
     MockEntropy *entropy = new NiceMock<MockEntropy>();
-    MaxentData_sptr maxentData =
-        boost::make_shared<MaxentData>(boost::shared_ptr<MockEntropy>(entropy));
+    MockTransform *transform = new NiceMock<MockTransform>();
+    MaxentCalculator calculator =
+        MaxentCalculator(std::shared_ptr<MockEntropy>(entropy),
+                         std::shared_ptr<MockTransform>(transform));
 
-    // Bad image size (should be at least 2*data.size())
-    std::vector<double> dat = {0, 1};
-    std::vector<double> err = {1, 1};
-    std::vector<double> img = {0, 0};
+    std::vector<double> vec = {0, 1};
+    std::vector<double> emptyVec = {};
     double bkg = 1;
-    TS_ASSERT_THROWS(maxentData->loadReal(dat, err, img, bkg),
-                     std::runtime_error);
 
-    // Bad errors size (should be data.size())
-    err = std::vector<double>{1};
-    img = std::vector<double>{0, 0, 0, 0};
-    TS_ASSERT_THROWS(maxentData->loadReal(dat, err, img, bkg),
-                     std::runtime_error);
+    // Empty image
+    TS_ASSERT_THROWS(calculator.iterate(vec, vec, emptyVec, bkg),
+                     std::invalid_argument);
+    // Empty errors
+    TS_ASSERT_THROWS(calculator.iterate(vec, emptyVec, vec, bkg),
+                     std::invalid_argument);
+    // Empty data
+    TS_ASSERT_THROWS(calculator.iterate(emptyVec, vec, vec, bkg),
+                     std::invalid_argument);
 
     // Bad background (should be positive)
-    err = std::vector<double>{1, 1};
-    bkg = 0;
-    TS_ASSERT_THROWS(maxentData->loadReal(dat, err, img, bkg),
-                     std::runtime_error);
-  }
-  void test_bad_complex_input() {
+    TS_ASSERT_THROWS(calculator.iterate(vec, vec, vec, 0),
+                     std::invalid_argument);
 
-    MockEntropy *entropy = new NiceMock<MockEntropy>();
-    MaxentData_sptr maxentData =
-        boost::make_shared<MaxentData>(boost::shared_ptr<MockEntropy>(entropy));
-
-    // Size mismatch between real and imaginary components
-    std::vector<double> datRe = {0, 1};
-    std::vector<double> datIm = {0};
-    std::vector<double> err = {1, 1};
-    std::vector<double> img = {0, 0, 0, 0};
-    double bkg = 1;
-    TS_ASSERT_THROWS(maxentData->loadComplex(datRe, datIm, err, err, img, bkg),
-                     std::runtime_error);
-
-    // Wrong image size
-    img = std::vector<double>{0, 0};
-    TS_ASSERT_THROWS(maxentData->loadComplex(datRe, datRe, err, err, img, bkg),
-                     std::runtime_error);
-
-    // Bad background (should be positive)
-    img = std::vector<double>{0, 0, 0, 0};
-    bkg = 0;
-    TS_ASSERT_THROWS(maxentData->loadComplex(datRe, datIm, err, err, img, bkg),
-                     std::runtime_error);
-  }
-  void test_data_not_loaded() {
-
-    MockEntropy *entropy = new NiceMock<MockEntropy>();
-    MaxentData_sptr maxentData =
-        boost::make_shared<MaxentData>(boost::shared_ptr<MockEntropy>(entropy));
-
-    // When data were not loaded public methods should throw an exception
-    TS_ASSERT_THROWS(maxentData->updateImage(std::vector<double>{0, 1}),
-                     std::runtime_error);
-    TS_ASSERT_THROWS(maxentData->getReconstructedData(), std::runtime_error);
-    TS_ASSERT_THROWS(maxentData->getImage(), std::runtime_error);
-    TS_ASSERT_THROWS(maxentData->getQuadraticCoefficients(),
-                     std::runtime_error);
-    TS_ASSERT_THROWS(maxentData->getAngle(), std::runtime_error);
-    TS_ASSERT_THROWS(maxentData->getChisq(), std::runtime_error);
-    TS_ASSERT_THROWS(maxentData->calculateQuadraticCoefficients(),
-                     std::runtime_error);
-  }
-
-  void test_update_image() {
-    // Test the public method updateImage()
-
-    MockEntropy *entropy = new NiceMock<MockEntropy>();
-    MaxentData_sptr maxentData =
-        boost::make_shared<MaxentData>(boost::shared_ptr<MockEntropy>(entropy));
-
-    std::vector<double> dat = {0, 0};
-    std::vector<double> img = {0, 0, 0, 0};
-    maxentData->loadComplex(dat, dat, dat, dat, img, 0.1);
-
-    // Trying to update without calculating search directions first
-    TS_ASSERT_THROWS(maxentData->updateImage(std::vector<double>{0, 0}),
-                     std::runtime_error);
-
-    // Calculate search directions
-    maxentData->calculateQuadraticCoefficients();
-
-    // Trying to update using a vector with wrong size
-    TS_ASSERT_THROWS(maxentData->updateImage(std::vector<double>{0, 0, 0}),
+    // Size mismatch between data and errors
+    std::vector<double> vec2 = {0, 1, 1};
+    TS_ASSERT_THROWS(calculator.iterate(vec, vec2, vec, bkg),
                      std::invalid_argument);
   }
 
-  void test_chisq_data() {
+  void test_size_mismatch_data_image() {
+
+    // Test the case where there is a mismatch in size between data space and
+    // image space
 
     MockEntropy *entropy = new NiceMock<MockEntropy>();
-    MaxentData_sptr maxentData =
-        boost::make_shared<MaxentData>(boost::shared_ptr<MockEntropy>(entropy));
+    MockTransform *transform = new NiceMock<MockTransform>();
+    MaxentCalculator calculator =
+        MaxentCalculator(std::shared_ptr<MaxentEntropy>(entropy),
+                         std::shared_ptr<MaxentTransform>(transform));
 
+    // Input data
+    // Vector in image space
+    std::vector<double> vec1 = {0, 1};
+    // Vector in data space
+    std::vector<double> vec2 = {1, 1, 1};
+    // Background
+    double bkg = 1;
+
+    EXPECT_CALL(*entropy, correctValues(vec2, 1))
+        .Times(1)
+        .WillOnce(Return(vec1));
+    EXPECT_CALL(*transform, imageToData(vec2)).Times(1).WillOnce(Return(vec2));
+    EXPECT_CALL(*transform, dataToImage(vec2)).Times(0);
+    EXPECT_CALL(*entropy, derivative(vec2, 1)).Times(0);
+    EXPECT_CALL(*entropy, secondDerivative(vec2)).Times(0);
+    TS_ASSERT_THROWS(calculator.iterate(vec1, vec1, vec2, bkg),
+                     std::runtime_error);
+
+    Mock::VerifyAndClearExpectations(entropy);
+    Mock::VerifyAndClearExpectations(transform);
+  }
+
+  void test_size_complex_data_real_image() {
+
+    // As data and image spaces can be real/complex spaces independently, the
+    // following situations are not considered size mismatches:
+    // data.size() = 2 * image.size()
+    // 2 * data.size() = image.size()
+
+    MockEntropy *entropy = new NiceMock<MockEntropy>();
+    MockTransform *transform = new NiceMock<MockTransform>();
+    MaxentCalculator calculator =
+        MaxentCalculator(std::shared_ptr<MaxentEntropy>(entropy),
+                         std::shared_ptr<MaxentTransform>(transform));
+
+    // Input data
+    // Vector in data space
+    std::vector<double> vec1 = {0, 1};
+    // Vector in image space
+    std::vector<double> vec2 = {1, 1, 1, 1};
+    // Background
+    double bkg = 1;
+
+    EXPECT_CALL(*entropy, correctValues(vec2, 1))
+        .Times(1)
+        .WillOnce(Return(vec2));
+    EXPECT_CALL(*transform, imageToData(_))
+        .Times(3)
+        .WillRepeatedly(Return(vec1));
+    EXPECT_CALL(*transform, dataToImage(_)).Times(1).WillOnce(Return(vec2));
+    EXPECT_CALL(*entropy, derivative(vec2, 1)).Times(1).WillOnce(Return(vec2));
+    EXPECT_CALL(*entropy, secondDerivative(vec2))
+        .Times(1)
+        .WillOnce(Return(vec2));
+    TS_ASSERT_THROWS_NOTHING(calculator.iterate(vec1, vec1, vec2, bkg));
+
+    Mock::VerifyAndClearExpectations(entropy);
+    Mock::VerifyAndClearExpectations(transform);
+  }
+
+  void test_size_resolution_factor() {
+
+    // As we may be applying a resolution factor != 1, the following is
+    // not considered a size mismatch:
+    // data.size() = N * image.size() (where N is an integer number)
+    // However the opposite:
+    // N * data.size() = image.size() (where N is an integer number)
+    // is a size mismatch
+
+    MockEntropy *entropy = new NiceMock<MockEntropy>();
+    MockTransform *transform = new NiceMock<MockTransform>();
+    MaxentCalculator calculator =
+        MaxentCalculator(std::shared_ptr<MaxentEntropy>(entropy),
+                         std::shared_ptr<MaxentTransform>(transform));
+
+    // Input data
+    // Vector in data space
+    std::vector<double> vec1 = {0, 1};
+    // Vector in image space
+    std::vector<double> vec2 = {1, 1, 1, 1, 1, 1, 1, 1};
+    // Background
+    double bkg = 1;
+
+    EXPECT_CALL(*entropy, correctValues(vec2, 1))
+        .Times(1)
+        .WillOnce(Return(vec2));
+    EXPECT_CALL(*transform, imageToData(_))
+        .Times(3)
+        .WillRepeatedly(Return(vec1));
+    EXPECT_CALL(*transform, dataToImage(_)).Times(1).WillOnce(Return(vec2));
+    EXPECT_CALL(*entropy, derivative(vec2, 1)).Times(1).WillOnce(Return(vec2));
+    EXPECT_CALL(*entropy, secondDerivative(vec2))
+        .Times(1)
+        .WillOnce(Return(vec2));
+    // This is OK: data.size() = N * image.size()
+    TS_ASSERT_THROWS_NOTHING(calculator.iterate(vec1, vec1, vec2, bkg));
+
+    EXPECT_CALL(*entropy, correctValues(vec1, 1))
+        .Times(1)
+        .WillOnce(Return(vec2));
+    EXPECT_CALL(*transform, imageToData(_))
+        .Times(1)
+        .WillRepeatedly(Return(vec1));
+    EXPECT_CALL(*transform, dataToImage(_)).Times(0);
+    EXPECT_CALL(*entropy, derivative(_, _)).Times(0);
+    EXPECT_CALL(*entropy, secondDerivative(_)).Times(0);
+    // But this is not: N * data.size() = image.size()
+    TS_ASSERT_THROWS(calculator.iterate(vec2, vec2, vec1, bkg),
+                     std::runtime_error);
+
+    Mock::VerifyAndClearExpectations(entropy);
+    Mock::VerifyAndClearExpectations(transform);
+  }
+
+  void test_data_not_loaded() {
+
+    MockEntropy *entropy = new NiceMock<MockEntropy>();
+    MockTransform *transform = new NiceMock<MockTransform>();
+    MaxentCalculator calculator =
+        MaxentCalculator(std::shared_ptr<MockEntropy>(entropy),
+                         std::shared_ptr<MockTransform>(transform));
+
+    // When data were not loaded public methods should throw an exception
+    TS_ASSERT_THROWS(calculator.getReconstructedData(), std::runtime_error);
+    TS_ASSERT_THROWS(calculator.getImage(), std::runtime_error);
+    TS_ASSERT_THROWS(calculator.getSearchDirections(), std::runtime_error);
+    TS_ASSERT_THROWS(calculator.getQuadraticCoefficients(), std::runtime_error);
+    TS_ASSERT_THROWS(calculator.getAngle(), std::runtime_error);
+    TS_ASSERT_THROWS(calculator.getChisq(), std::runtime_error);
+  }
+
+  void test_chisq_angle() {
+
+    MockEntropy *entropy = new NiceMock<MockEntropy>();
+    MockTransform *transform = new NiceMock<MockTransform>();
+    MaxentCalculator calculator =
+        MaxentCalculator(std::shared_ptr<MaxentEntropy>(entropy),
+                         std::shared_ptr<MaxentTransform>(transform));
+
+    // Input data
     std::vector<double> dat = {1, 1};
     std::vector<double> err = {1, 1};
     std::vector<double> img = {0, 0, 0, 0};
     double bkg = 1.;
+    // Calc data
+    std::vector<double> datC = {0, 0};
 
-    EXPECT_CALL(*entropy, correctValue(0, bkg)).Times(4);
-    TS_ASSERT_THROWS_NOTHING(maxentData->loadReal(dat, err, img, bkg));
+    EXPECT_CALL(*entropy, correctValues(img, bkg))
+        .Times(1)
+        .WillOnce(Return(img));
+    EXPECT_CALL(*transform, imageToData(_))
+        .Times(3)
+        .WillRepeatedly(Return(datC));
+    EXPECT_CALL(*transform, dataToImage(_)).Times(1).WillOnce(Return(img));
+    EXPECT_CALL(*entropy, derivative(img, bkg)).Times(1).WillOnce(Return(img));
+    EXPECT_CALL(*entropy, secondDerivative(img)).Times(1).WillOnce(Return(img));
 
-    TS_ASSERT_EQUALS(maxentData->getChisq(), 2);
+    TS_ASSERT_THROWS_NOTHING(calculator.iterate(dat, err, img, bkg));
+    TS_ASSERT_EQUALS(calculator.getChisq(), 2);
+    TS_ASSERT_DELTA(calculator.getAngle(), 0.7071, 1e-4);
+
+    Mock::VerifyAndClearExpectations(entropy);
+    Mock::VerifyAndClearExpectations(transform);
   }
 
-  void test_quadratic_coefficients() {
+  void test_dirs_coefficients() {
 
     MockEntropy *entropy = new NiceMock<MockEntropy>();
-    MaxentData_sptr maxentData =
-        boost::make_shared<MaxentData>(boost::shared_ptr<MockEntropy>(entropy));
+    MockTransform *transform = new NiceMock<MockTransform>();
+    MaxentCalculator calculator =
+        MaxentCalculator(std::shared_ptr<MaxentEntropy>(entropy),
+                         std::shared_ptr<MaxentTransform>(transform));
 
-    std::vector<double> dat = {0.5, 0.5};
-    std::vector<double> err = {0.1, 0.1};
-    std::vector<double> img = {1, 1, 1, 1};
-    double bkg = 0.1;
-
-    EXPECT_CALL(*entropy, correctValue(1., bkg))
-        .Times(4)
-        .WillRepeatedly(Return(1.));
-    TS_ASSERT_THROWS_NOTHING(maxentData->loadReal(dat, err, img, bkg));
-
-    EXPECT_CALL(*entropy, getDerivative(1. / 0.1))
-        .Times(4)
-        .WillRepeatedly(Return(1.));
-    EXPECT_CALL(*entropy, getSecondDerivative(1.))
-        .Times(4)
-        .WillRepeatedly(Return(1.));
-    TS_ASSERT_THROWS_NOTHING(maxentData->calculateQuadraticCoefficients());
-
-    auto coeff = maxentData->getQuadraticCoefficients();
-    double angle = maxentData->getAngle();
-    double chisq = maxentData->getChisq();
-
-    TS_ASSERT_DELTA(angle, 0.5, 1E-6);
-    TS_ASSERT_DELTA(chisq, 50, 1E-6);
-    // s1, c1
-    TS_ASSERT_DELTA(coeff.s1[0][0], 1, 1E-6);
-    TS_ASSERT_DELTA(coeff.s1[1][0], 2, 1E-6);
-    TS_ASSERT_DELTA(coeff.c1[0][0], 4, 1E-6);
-    TS_ASSERT_DELTA(coeff.c1[1][0], 2, 1E-6);
-    // s2
-    TS_ASSERT_DELTA(coeff.s2[0][0], -10, 1E-6);
-    TS_ASSERT_DELTA(coeff.s2[1][0], -5, 1E-6);
-    TS_ASSERT_DELTA(coeff.s2[0][1], -5, 1E-6);
-    TS_ASSERT_DELTA(coeff.s2[1][1], -10, 1E-6);
-    // c2
-    TS_ASSERT_DELTA(coeff.c2[0][0], 2, 1E-6);
-    TS_ASSERT_DELTA(coeff.c2[1][0], 1, 1E-6);
-    TS_ASSERT_DELTA(coeff.c2[0][1], 1, 1E-6);
-    TS_ASSERT_DELTA(coeff.c2[1][1], 1, 1E-6);
-  }
-
-  void test_update_image_updates_dataCalc() {
-
-    MockEntropy *entropy = new NiceMock<MockEntropy>();
-    MaxentData_sptr maxentData =
-        boost::make_shared<MaxentData>(boost::shared_ptr<MockEntropy>(entropy));
-
-    std::vector<double> dat = {0.5, 0.5};
-    std::vector<double> err = {0.1, 0.1};
-    std::vector<double> img = {1, 1, 1, 1};
-    double bkg = 0.1;
-
-    EXPECT_CALL(*entropy, correctValue(1., bkg))
-        .Times(4)
-        .WillRepeatedly(Return(1.));
-    TS_ASSERT_THROWS_NOTHING(maxentData->loadReal(dat, err, img, bkg));
-
-    // Get the calculated data
-    auto dataCalc = maxentData->getReconstructedData();
-
-    // Calculate quad coeffs and search directions
-    EXPECT_CALL(*entropy, getDerivative(1. / 0.1))
-        .Times(4)
-        .WillRepeatedly(Return(1.));
-    EXPECT_CALL(*entropy, getSecondDerivative(1.))
-        .Times(4)
-        .WillRepeatedly(Return(1.));
-    TS_ASSERT_THROWS_NOTHING(maxentData->calculateQuadraticCoefficients());
-
-    // Update the image
-    EXPECT_CALL(*entropy, correctValue(_, _))
-        .Times(4)
-        .WillRepeatedly(Return(0.5));
-    TS_ASSERT_THROWS_NOTHING(
-        maxentData->updateImage(std::vector<double>{1, 1}));
-
-    // Get the calculated data
-    auto newDataCalc = maxentData->getReconstructedData();
-    // Should have been updated
-    TS_ASSERT_DIFFERS(dataCalc, newDataCalc);
-  }
-
-  void test_extended_image() {
-    // The input image may be F times the size of the
-    // experimental data and errors
-
-    MockEntropy *entropy = new NiceMock<MockEntropy>();
-    MaxentData_sptr maxentData =
-        boost::make_shared<MaxentData>(boost::shared_ptr<MockEntropy>(entropy));
-
-    // Real case
-
-    // Bad image size (should be F*2*dat.size() with F an integer number)
-    std::vector<double> dat = {0, 1};
+    // Input data
+    std::vector<double> dat = {1, 1};
     std::vector<double> err = {1, 1};
-    std::vector<double> img = {0, 0, 0, 0, 0};
-    double bkg = 1;
-    TS_ASSERT_THROWS(maxentData->loadReal(dat, err, img, bkg),
-                     std::runtime_error);
+    std::vector<double> img = {1, 1, 1, 1};
+    double bkg = 1.;
+    // Calc data
+    std::vector<double> datC = {0, 0};
 
-    // OK, image is 2 * (2 * dat.size())
-    img = std::vector<double>{0, 0, 0, 0, 0, 0, 0, 0};
-    TS_ASSERT_THROWS_NOTHING(maxentData->loadReal(dat, err, img, bkg));
+    EXPECT_CALL(*entropy, correctValues(img, bkg))
+        .Times(1)
+        .WillOnce(Return(img));
+    EXPECT_CALL(*transform, imageToData(_))
+        .Times(3)
+        .WillRepeatedly(Return(datC));
+    EXPECT_CALL(*transform, dataToImage(_)).Times(1).WillOnce(Return(img));
+    EXPECT_CALL(*entropy, derivative(img, bkg)).Times(1).WillOnce(Return(img));
+    EXPECT_CALL(*entropy, secondDerivative(img)).Times(1).WillOnce(Return(img));
 
-    // Complex case
+    TS_ASSERT_THROWS_NOTHING(calculator.iterate(dat, err, img, bkg));
 
-    // Bad image size (should be F*2*dat.size() with F an integer number)
-    img = std::vector<double>{0, 0, 0, 0, 0};
-    TS_ASSERT_THROWS(maxentData->loadComplex(dat, dat, err, err, img, bkg),
-                     std::runtime_error);
+    auto dirs = calculator.getSearchDirections();
+    TS_ASSERT_EQUALS(dirs[0].size(), 4);
+    TS_ASSERT_EQUALS(dirs[1].size(), 4);
+    for (size_t i = 0; i < 4; i++) {
+      TS_ASSERT_DELTA(dirs[0][i], 0.5, 1E-6);
+      TS_ASSERT_DELTA(dirs[1][i], 0.5, 1E-6);
+    }
 
-    // OK, image is 3 * (2 * dat.size())
-    img = std::vector<double>{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+    auto coeff = calculator.getQuadraticCoefficients();
+    // s1, c1
+    TS_ASSERT_DELTA(coeff.s1[0][0], 2, 1E-6);
+    TS_ASSERT_DELTA(coeff.s1[1][0], 2, 1E-6);
+    TS_ASSERT_DELTA(coeff.c1[0][0], 1, 1E-6);
+    TS_ASSERT_DELTA(coeff.c1[1][0], 1, 1E-6);
+    // s2
+    TS_ASSERT_DELTA(coeff.s2[0][0], -1, 1E-6);
+    TS_ASSERT_DELTA(coeff.s2[1][0], -1, 1E-6);
+    TS_ASSERT_DELTA(coeff.s2[0][1], -1, 1E-6);
+    TS_ASSERT_DELTA(coeff.s2[1][1], -1, 1E-6);
+    // c2
+    TS_ASSERT_DELTA(coeff.c2[0][0], 0, 1E-6);
+    TS_ASSERT_DELTA(coeff.c2[1][0], 0, 1E-6);
+    TS_ASSERT_DELTA(coeff.c2[0][1], 0, 1E-6);
+    TS_ASSERT_DELTA(coeff.c2[1][1], 0, 1E-6);
 
-    TS_ASSERT_THROWS_NOTHING(
-        maxentData->loadComplex(dat, dat, err, err, img, bkg));
+    Mock::VerifyAndClearExpectations(entropy);
+    Mock::VerifyAndClearExpectations(transform);
   }
 };
 
-#endif /* MANTID_ALGORITHMS_MAXENTDATATEST_H_ */
+#endif /* MANTID_ALGORITHMS_MAXENTCALCULATORTEST_H_ */

@@ -32,7 +32,7 @@ MaxentTransformFourier::imageToData(const std::vector<double> &image) {
   /* Prepare the data */
   boost::shared_array<double> result(new double[n]);
   for (size_t i = 0; i < n; i++) {
-    result[i] = image[i];
+    result[i] = complexImage[i];
   }
 
   /* Backward FT */
@@ -72,7 +72,7 @@ MaxentTransformFourier::dataToImage(const std::vector<double> &data) {
   /* Prepare the data */
   boost::shared_array<double> result(new double[n]);
   for (size_t i = 0; i < n; i++) {
-    result[i] = data[i];
+    result[i] = complexData[i];
   }
 
   /*  Fourier transofrm */
