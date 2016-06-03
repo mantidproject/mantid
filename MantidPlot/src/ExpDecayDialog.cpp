@@ -47,7 +47,7 @@ ExpDecayDialog::ExpDecayDialog(int type, QWidget* parent, Qt::WFlags fl )
     boxFirst(NULL), boxSecond(NULL), boxThird(NULL), boxStart(NULL), boxYOffset(NULL),
     thirdLabel(NULL), dampingLabel(NULL), boxColor(NULL)
 {
-    setName( "ExpDecayDialog" );
+    setObjectName( "ExpDecayDialog" );
 
 	slopes = type;
 
@@ -155,7 +155,7 @@ void ExpDecayDialog::setGraph(Graph *g)
 	if (!selectedCurve.isEmpty())
 	{
 	    int index = boxName->findText (selectedCurve);
-		boxName->setCurrentItem(index);
+		boxName->setCurrentIndex(index);
 	}
     activateCurve(boxName->currentText());
 
@@ -236,7 +236,7 @@ void ExpDecayDialog::fit()
 
   	if (fitter->setDataFromCurve(boxName->currentText(), boxStart->text().toDouble(), c->maxXValue()))
 	{
-		fitter->setColor(boxColor->currentItem());
+		fitter->setColor(boxColor->currentIndex());
 		fitter->scaleErrors(app->fit_scale_errors);
         fitter->setOutputPrecision(app->fit_output_precision);
 		fitter->generateFunction(app->generateUniformFitPoints, app->fitPoints);

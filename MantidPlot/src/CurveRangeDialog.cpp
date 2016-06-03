@@ -42,7 +42,7 @@ CurveRangeDialog::CurveRangeDialog(QWidget* parent, Qt::WFlags fl )
   : QDialog( parent, fl ), d_curve(NULL), d_graph(NULL)
 {
     setWindowTitle(tr("MantidPlot - Plot range"));
-    setName( "CurveRangeDialog" );
+    setObjectName( "CurveRangeDialog" );
 
     QGroupBox *gb1 = new QGroupBox();
     QGridLayout *gl1 = new QGridLayout(gb1);
@@ -53,12 +53,12 @@ CurveRangeDialog::CurveRangeDialog(QWidget* parent, Qt::WFlags fl )
 
     gl1->addWidget(new QLabel(tr("From row number")), 1, 0);
     boxStart = new QSpinBox();
-    boxStart->setMinValue(1);
+    boxStart->setMinimum(1);
     gl1->addWidget(boxStart, 1, 1);
 
     gl1->addWidget(new QLabel(tr("To row number")), 2, 0);
     boxEnd = new QSpinBox();
-    boxEnd->setMinValue(1);
+    boxEnd->setMinimum(1);
     gl1->addWidget(boxEnd, 2, 1);
     gl1->setRowStretch(3, 1);
 
@@ -105,8 +105,8 @@ void CurveRangeDialog::setCurveToModify(Graph *g, int curve)
     Table *t = d_curve->table();
 	if (t)
 	{
-		boxStart->setMaxValue(t->numRows());
-		boxEnd->setMaxValue(t->numRows());
+		boxStart->setMaximum(t->numRows());
+		boxEnd->setMaximum(t->numRows());
 	}
 
 	boxName->setText(d_curve->title().text());
