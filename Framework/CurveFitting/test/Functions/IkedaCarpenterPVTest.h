@@ -50,12 +50,12 @@ public:
     Mantid::API::FunctionValues y(x);
 
     TS_ASSERT_THROWS_NOTHING(fn.function(x, y));
-    TS_ASSERT_DELTA(y[9], 43.359, 0.1);
-    TS_ASSERT_DELTA(y[10], 69.884, 0.1);
-    TS_ASSERT_DELTA(y[11], 91.288, 0.1);
-    TS_ASSERT_DELTA(y[12], 97.563, 0.1);
-    TS_ASSERT_DELTA(y[13], 86.442, 0.1);
-    TS_ASSERT_DELTA(y[14], 64.769, 0.1);
+    TS_ASSERT_DELTA(y[9], 51.1755, 1e-4);
+    TS_ASSERT_DELTA(y[10], 78.1676, 1e-4);
+    TS_ASSERT_DELTA(y[11], 95.6899, 1e-4);
+    TS_ASSERT_DELTA(y[12], 94.9801, 1e-4);
+    TS_ASSERT_DELTA(y[13], 77.7493, 1e-4);
+    TS_ASSERT_DELTA(y[14], 53.8871, 1e-4);
   }
 };
 
