@@ -11,23 +11,6 @@ import vesuvio.commands as vesuvio
 import vesuvio.testing as testing
 
 
-##======================HELPER FUNCTIONS===============================##
-
-def _get_peak_height_and_bin_index(y_data):
-    peak_height = np.amax(y_data)
-    peak_bin = np.argmax(y_data)
-    return peak_height, peak_bin
-
-
-def _matches_expected_within_tolerance(expected, actual, tolerance = 0.01):
-    """
-    Ensures the expected value matches the actual value within a tolerance (default 0.01)
-    """
-    return abs(expected - actual) < tolerance
-
-
-##=====================================================================##
-
 class VesuvioPreFitTest(unittest.TestCase):
 
     _test_ws = None
@@ -51,10 +34,24 @@ class VesuvioPreFitTest(unittest.TestCase):
         self.assertAlmostEqual(50.0, output_ws.readX(0)[0])
         self.assertAlmostEqual(562.0, output_ws.readX(0)[-1])
 
-        self.assertAlmostEqual(0.09337135, output_ws.readY(0)[0])
-        self.assertAlmostEqual(0.00060365, output_ws.readY(0)[-1])
-        self.assertAlmostEqual(0.084563, output_ws.readY(1)[0])
-        self.assertAlmostEqual(-0.00403775, output_ws.readY(1)[-1])
+        # Expected values
+        expected_peak_height_spec1 = 1
+        expected_peak_height_spec2 = 2
+        expected_bin_index_spec1 = 1
+        expected_bin_index_spec2 = 2
+
+        # Peak height and bin index
+        peak_height_spec1, bin_index_spec1 = self._get_peak_height_and_bin_index(output_ws.readY(0))
+        peak_height_spec2, bin_index_spec2 = self._get_peak_height_and_bin_index(output_ws.readY(1))
+
+        # Check first spectra matches expected
+        self.assertTrue(self._equal_within_tolerance(expected_peak_height_spec1, peak_height_spec1)
+        self.assertTrue(self._equal_within_tolerance(expected_bin_index_spec1, bin_index_spec1)
+
+        # Check second spectra matches expected
+        self.assertTrue(self._equal_within_tolerance(expected_peak_height_spec2, peak_height_spec2)
+        self.assertTrue(self._equal_within_tolerance(expected_bin_index_spec2, bin_index_spec2)
+
 
     def test_mask_only_masks_over_threshold(self):
         err_start = self._test_ws.readE(1)[-1]
@@ -70,10 +67,25 @@ class VesuvioPreFitTest(unittest.TestCase):
         self.assertAlmostEqual(50.0, output_ws.readX(0)[0])
         self.assertAlmostEqual(562.0, output_ws.readX(0)[-1])
 
-        self.assertAlmostEqual(0.0279822, output_ws.readY(0)[0])
-        self.assertAlmostEqual(0.0063585, output_ws.readY(0)[-1])
-        self.assertAlmostEqual(0.0155041, output_ws.readY(1)[0])
-        # Masked
+        # Expected values
+        expected_peak_height_spec1 = 1
+        expected_peak_height_spec2 = 2
+        expected_bin_index_spec1 = 1
+        expected_bin_index_spec2 = 2
+
+        # Peak height and bin index
+        peak_height_spec1, bin_index_spec1 = self._get_peak_height_and_bin_index(output_ws.readY(0))
+        peak_height_spec2, bin_index_spec2 = self._get_peak_height_and_bin_index(output_ws.readY(1))
+
+        # Check first spectra matches expected
+        self.assertTrue(self._equal_within_tolerance(expected_peak_height_spec1, peak_height_spec1)
+        self.assertTrue(self._equal_within_tolerance(expected_bin_index_spec1, bin_index_spec1)
+
+        # Check second spectra matches expected
+        self.assertTrue(self._equal_within_tolerance(expected_peak_height_spec2, peak_height_spec2)
+        self.assertTrue(self._equal_within_tolerance(expected_bin_index_spec2, bin_index_spec2)
+
+        # Check masked data
         self.assertAlmostEqual(0.0, output_ws.readY(1)[-1])
 
     # -------------- Failure cases ------------------
@@ -93,6 +105,19 @@ class VesuvioPreFitTest(unittest.TestCase):
         for key, value in kwargs.iteritems():
             alg.setProperty(key, value)
         return alg
+
+
+    def _get_peak_height_and_bin_index(self, y_data):
+        peak_height = np.amax(y_data)
+        peak_bin = np.argmax(y_data)
+        return peak_height, peak_bin
+
+
+    def _equal_within_tolerance(self, expected, actual, tolerance = 0.01):
+        """
+        Ensures the expected value matches the actual value within a tolerance (default 0.01)
+        """
+        return abs(expected - actual) < tolerance
 
 
 if __name__ == "__main__":
