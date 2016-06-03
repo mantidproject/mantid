@@ -645,7 +645,7 @@ private:
   template <>                                                                  \
   inline void PropertyWithValue<type>::saveProperty(::NeXus::File *file) {     \
     file->makeGroup(this->name(), "NXlog", 1);                                 \
-    file->writeData("value", (*this)());                                       \
+    file->writeData("value", m_value);                                         \
     file->closeGroup();                                                        \
   }
 
@@ -655,15 +655,9 @@ PROPERTYWITHVALUE_SAVEPROPERTY(int32_t)
 PROPERTYWITHVALUE_SAVEPROPERTY(uint32_t)
 PROPERTYWITHVALUE_SAVEPROPERTY(int64_t)
 PROPERTYWITHVALUE_SAVEPROPERTY(uint64_t)
+PROPERTYWITHVALUE_SAVEPROPERTY(std::string)
 PROPERTYWITHVALUE_SAVEPROPERTY(std::vector<double>)
 PROPERTYWITHVALUE_SAVEPROPERTY(std::vector<int32_t>)
-
-template <>
-inline void PropertyWithValue<std::string>::saveProperty(::NeXus::File *file) {
-  file->makeGroup(this->name(), "NXlog", 1);
-  file->writeData("value", this->value());
-  file->closeGroup();
-}
 
 template <typename TYPE>
 inline void PropertyWithValue<TYPE>::saveProperty(::NeXus::File *file) {
