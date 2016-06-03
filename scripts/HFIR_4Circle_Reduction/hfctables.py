@@ -259,6 +259,7 @@ UB_Peak_Table_Setup = [('Scan', 'int'),
                        ('Q_z', 'float'),
                        ('Selected', 'checkbox'),
                        ('m1', 'float'),
+                       ('lambda', 'float'),  # wave length
                        ('Error', 'float')]
 
 

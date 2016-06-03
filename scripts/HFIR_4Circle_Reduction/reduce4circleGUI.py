@@ -24,8 +24,8 @@ else:
 
 import reduce4circleControl as r4c
 import guiutility as gutil
-from peakprocesshelper import PeakProcessHelper
-import fourcircle_utility as fcutil
+# from peakprocesshelper import PeakProcessHelper
+import fourcircle_utility as hb3a
 import plot3dwindow
 
 try:
@@ -179,6 +179,10 @@ class MainWindow(QtGui.QMainWindow):
                      self.evt_apply_lorentz_correction_mt)
         self.connect(self.ui.pushButton_exportPeaks, QtCore.SIGNAL('clicked()'),
                      self.do_export_to_fp)
+        self.connect(self.ui.checkBox_selectAllScans2Merge, QtCore.SIGNAL('stateChanged(int)'),
+                     self.do_select_merged_scans)
+        self.connect(self.ui.pushButton_applyKShift, QtCore.SIGNAL('clicked()'),
+                     self.do_apply_k_shift)
 
         # Tab 'Integrate Peaks'
         self.connect(self.ui.pushButton_integratePt, QtCore.SIGNAL('clicked()'),
@@ -272,6 +276,7 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.tableWidget_surveyTable.setup()
         self.ui.tableWidget_peakIntegration.setup()
         self.ui.tableWidget_mergeScans.setup()
+        self.ui.tableWidget_ubInUse.setup()
 
         return
 
@@ -787,7 +792,7 @@ class MainWindow(QtGui.QMainWindow):
         scan_list_str = str(self.ui.lineEdit_downloadScans.text())
         if len(scan_list_str) > 0:
             # user specifies scans to download
-            valid, scan_list = fcutil.parse_int_array(scan_list_str)
+            valid, scan_list = hb3a.parse_int_array(scan_list_str)
             if valid is False:
                 error_message = scan_list
                 self.pop_one_button_dialog(error_message)
@@ -800,7 +805,7 @@ class MainWindow(QtGui.QMainWindow):
             exp_no = ret_obj
             assert isinstance(exp_no, int)
             server_url = str(self.ui.lineEdit_url.text())
-            scan_list = fcutil.get_scans_list(server_url, exp_no, return_list=True)
+            scan_list = hb3a.get_scans_list(server_url, exp_no, return_list=True)
         self.pop_one_button_dialog('Going to download scans %s.' % str(scan_list))
 
         # Check location
@@ -1219,6 +1224,8 @@ class MainWindow(QtGui.QMainWindow):
             background_pt_list = pt_number_list[:num_bg_pt] + pt_number_list[-num_bg_pt:]
             avg_bg_value = self._myControl.estimate_background(pt_dict, background_pt_list)
             intensity_i = self._myControl.simple_integrate_peak(pt_dict, avg_bg_value)
+            # set the calculated peak intensity to _peakInfoDict
+            self._myControl.set_peak_intensity(exp_number, scan_number, intensity_i)
 
             # set the value to table
             self.ui.tableWidget_mergeScans.set_peak_intensity(row_number, None, intensity_i)
@@ -1263,10 +1270,10 @@ class MainWindow(QtGui.QMainWindow):
         access_mode = str(self.ui.comboBox_mode.currentText())
         if access_mode == 'Local':
             spice_dir = str(self.ui.lineEdit_localSpiceDir.text())
-            message = fcutil.get_scans_list_local_disk(spice_dir, exp_no)
+            message = hb3a.get_scans_list_local_disk(spice_dir, exp_no)
         else:
             url = str(self.ui.lineEdit_url.text())
-            message = fcutil.get_scans_list(url, exp_no)
+            message = hb3a.get_scans_list(url, exp_no)
 
         self.pop_one_button_dialog(message)
 
@@ -1762,6 +1769,13 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
+    def do_apply_k_shift(self):
+        """ Apply k-shift to selected reflections
+        :return:
+        """
+        # TODO/NOW - Implement ASAP
+        return
+
     def do_apply_roi(self):
         """ Save current selection of region of interest
         :return:
@@ -1842,6 +1856,16 @@ class MainWindow(QtGui.QMainWindow):
         """
         self.ui.tableWidget_surveyTable.select_all_rows(self._surveyTableFlag)
         self._surveyTableFlag = not self._surveyTableFlag
+
+        return
+
+    def do_select_merged_scans(self):
+        """
+        :return:
+        """
+        # TODO/NOW - Doc & implement!
+        curr_state = self.ui.checkBox_selectAllScans2Merge.isChecked()
+        print '[DB...BAT] current state is changed to ', curr_state
 
         return
 
@@ -2055,7 +2079,7 @@ class MainWindow(QtGui.QMainWindow):
         """
         url = str(self.ui.lineEdit_url.text())
 
-        url_is_good, err_msg = fcutil.check_url(url)
+        url_is_good, err_msg = hb3a.check_url(url)
         if url_is_good is True:
             self.pop_one_button_dialog("URL %s is valid." % url)
             self.ui.lineEdit_url.setStyleSheet("color: green;")
@@ -2408,10 +2432,11 @@ class MainWindow(QtGui.QMainWindow):
         h, k, l = peak_info.get_user_hkl()
         q_x, q_y, q_z = peak_info.get_peak_centre()
         m1 = self._myControl.get_sample_log_value(exp_number, scan_number, 1, '_m1')
+        wave_length = hb3a.convert_to_wave_length(m1=m1)
 
         # Set to table
         status, err_msg = self.ui.tableWidget_peaksCalUB.append_row(
-            [scan_number, -1, h, k, l, q_x, q_y, q_z, False, m1, ''])
+            [scan_number, -1, h, k, l, q_x, q_y, q_z, False, m1, wave_length, ''])
         if status is False:
             self.pop_one_button_dialog(err_msg)
 

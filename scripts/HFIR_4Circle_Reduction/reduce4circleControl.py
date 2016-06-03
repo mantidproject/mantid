@@ -195,6 +195,8 @@ class CWSCDReductionControl(object):
         helper = PeakProcessHelper(exp_number, scan_number, peak_ws_name)
         helper.calculate_peak_center()
         peak_center = helper.get_peak_centre()
+        # set the merged peak information to data structure
+        self._myPeakInfoDict[(exp_number, scan_number)] = helper
 
         return True, peak_center
 
@@ -1021,7 +1023,6 @@ class CWSCDReductionControl(object):
                              merge_peaks=True, use_mask=False,
                              normalization='', mask_ws_name=None):
         """
-
         :param exp:
         :param scan:
         :param peak_radius:
@@ -1101,10 +1102,7 @@ class CWSCDReductionControl(object):
             run_number_i = peak_i.getRunNumber() % 1000
             intensity_i = peak_i.getIntensity()
             pt_dict[run_number_i] = intensity_i
-
-        raise NotImplementedError('Think of a good data structure to store integrated peak.'
-                                  'It is a bad practise to get the integrated value from'
-                                  'table from GUI.')
+        # END-FOR
 
         return True, pt_dict
 
@@ -1949,6 +1947,26 @@ class CWSCDReductionControl(object):
             ptlist.append(ptno)
 
         return ptlist
+
+    def set_peak_intensity(self, exp_number, scan_number, intensity):
+        """
+
+        :param exp_number:
+        :param scan_number:
+        :param intensity:
+        :return:
+        """
+        # TODO/NOW: Implement ASAP
+
+        # get dictionary item
+
+        # set intensity
+
+        # calculate sigma
+
+        blabla
+
+        return
 
     @staticmethod
     def simple_integrate_peak(pt_intensity_dict, bg_value):

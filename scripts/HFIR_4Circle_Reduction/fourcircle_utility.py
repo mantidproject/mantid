@@ -49,6 +49,26 @@ def check_url(url, read_lines=False):
     return url_good, error_message
 
 
+def convert_to_wave_length(m1):
+    """ Convert motor m1's position to HB3A's neutron wave length
+    Mapping:
+    m1 = -25.87 --> 1.0030
+       = -39.17 --> 1.5424
+    :param m1: float, m1's position
+    :return: wave length
+    """
+    assert isinstance(m1, float)
+
+    if abs(m1 - (-25.870000)) < 0.2:
+        wave_length = 1.003
+    elif abs(m1 - (-39.17)) < 0.2:
+        wave_length = 1.5424
+    else:
+        raise RuntimeError('m1 position %f is not a recognized position for wave length.' % m1)
+
+    return wave_length
+
+
 def generate_mask_file(file_path, ll_corner, ur_corner, rectangular=True):
     """ Generate a Mantid RIO/Mask XML file
     Requirements:
