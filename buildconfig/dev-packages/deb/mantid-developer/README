@@ -2,5 +2,5 @@ This directory contains the structure required to build the simple mantid-develo
 
 To build the package:
    * Switch to the directory containing this file
-   * Run "dpkg --build mantid-developer-1.2.5"
-   * A file called mantid-developer-1.2.5.deb will appear in the current directory.
+   * Run "dpkg --build mantid-developer/mantid-developer-1.2.7"
+   * A file called mantid-developer-1.2.7.deb will appear in the mantid-developer directory.

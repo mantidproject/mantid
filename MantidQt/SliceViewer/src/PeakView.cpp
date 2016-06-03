@@ -35,10 +35,9 @@ void PeakView::doPaintPeaks(QPaintEvent *)
     const auto viewWidth
         = m_plot->axisScaleDiv(QwtPlot::xBottom)->interval().width();
 
-    QPainter painter(this);
-
     for (size_t i = 0; i < m_viewablePeaks.size(); ++i) {
         if (m_viewablePeaks[i]) {
+            QPainter painter(this);
             // Get the peak
             auto &peak = m_peaks[i];
             const auto &origin = peak->getOrigin();
