@@ -255,7 +255,7 @@ public:
     TS_ASSERT_DELTA(data->readY(1)[37], 0.8074, 0.0001);
   }
 
-  void test_density_factor() {
+  void test_resolution_factor() {
     // Real signal: cos(w * x)
 
     size_t npoints = 50;
@@ -268,7 +268,7 @@ public:
     alg->setProperty("InputWorkspace", ws);
     alg->setProperty("A", 0.1);
     alg->setProperty("ChiTarget", 50.);
-    alg->setProperty("DensityFactor", "3");
+    alg->setProperty("ResolutionFactor", "3");
     alg->setPropertyValue("ReconstructedImage", "image");
     alg->setPropertyValue("ReconstructedData", "data");
     alg->setPropertyValue("EvolChi", "evolChi");
@@ -393,6 +393,48 @@ public:
     alg.setPropertyValue("EvolAngle", "evolAngle");
     TS_ASSERT_THROWS_NOTHING(alg.wrapValidateInputs());
     AnalysisDataService::Instance().clear();
+  }
+
+  void testPhaseShift() {
+
+    auto ws = createWorkspaceComplex();
+
+    // Run MaxEnt
+    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("MaxEnt");
+    alg->initialize();
+    alg->setChild(true);
+    alg->setProperty("InputWorkspace", ws);
+    alg->setProperty("ComplexData", true);
+    alg->setProperty("AutoShift", true);
+    alg->setProperty("A", 1.0);
+    alg->setProperty("ChiTarget", 102.);
+    alg->setPropertyValue("ReconstructedImage", "image");
+    alg->setPropertyValue("ReconstructedData", "data");
+    alg->setPropertyValue("EvolChi", "evolChi");
+    alg->setPropertyValue("EvolAngle", "evolAngle");
+    alg->execute();
+    MatrixWorkspace_sptr outWS = alg->getProperty("ReconstructedImage");
+
+    // Offset
+    IAlgorithm_sptr scaleX = AlgorithmManager::Instance().create("ScaleX");
+    scaleX->initialize();
+    scaleX->setChild(true);
+    scaleX->setProperty("InputWorkspace", ws);
+    scaleX->setProperty("Factor", "1");
+    scaleX->setProperty("Operation", "Add");
+    scaleX->setPropertyValue("OutputWorkspace", "__NotUsed");
+    scaleX->execute();
+    MatrixWorkspace_sptr offsetted = scaleX->getProperty("OutputWorkspace");
+
+    // Run MaxEnt on the offsetted ws
+    alg->setProperty("InputWorkspace", offsetted);
+    alg->execute();
+    MatrixWorkspace_sptr outWSOffsetted =
+        alg->getProperty("ReconstructedImage");
+
+    // outWS and outWSOffsetted are shifted by ~pi -> there should be a factor
+    // ~(-1) between them
+    TS_ASSERT_DELTA(outWS->readY(0)[28], -outWSOffsetted->readY(0)[28], 0.1)
   }
 
   MatrixWorkspace_sptr createWorkspaceReal(size_t maxt, double phase) {

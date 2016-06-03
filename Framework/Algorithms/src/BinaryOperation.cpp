@@ -1,10 +1,6 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAlgorithms/BinaryOperation.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/Axis.h"
-#include "MantidAPI/MemoryManager.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
@@ -226,7 +222,7 @@ void BinaryOperation::exec() {
             "Contact the developers.");
     } else {
       // You HAVE to copy the data from lhs to to the output!
-      m_out = MatrixWorkspace_sptr(m_lhs->clone().release());
+      m_out = m_lhs->clone();
       // Make sure m_eout still points to the same as m_out;
       m_eout = boost::dynamic_pointer_cast<EventWorkspace>(m_out);
     }

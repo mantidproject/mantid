@@ -434,7 +434,7 @@ ScaleDraw::ScaleType Graph::axisType(int axis) {
 
 void Graph::setLabelsNumericFormat(int axis, int format, int prec,
                                    const QString &formula) {
-  ScaleDraw *sd = new ScaleDraw(d_plot, formula.ascii());
+  ScaleDraw *sd = new ScaleDraw(d_plot, formula.toAscii());
   sd->setNumericFormat((ScaleDraw::NumericFormat)format);
   sd->setNumericPrecision(prec);
   sd->setScaleDiv(d_plot->axisScaleDraw(axis)->scaleDiv());
@@ -1476,7 +1476,7 @@ void Graph::exportImage(const QString &fileName, int quality,
 
     QColor background = QColor(Qt::white);
     QRgb backgroundPixel = background.rgb();
-    QImage image = pic.convertToImage();
+    QImage image = pic.toImage();
     for (int y = 0; y < image.height(); y++) {
       for (int x = 0; x < image.width(); x++) {
         QRgb rgb = image.pixel(x, y);
@@ -1535,7 +1535,7 @@ void Graph::exportVector(const QString &fileName, int, bool color,
       int width = static_cast<int>(height * plot_aspect);
       int x = (printer.width() - width) / 2;
       plotRect = QRect(x, margin, width, height);
-    } else if (plot_aspect >= page_aspect) {
+    } else {
       int margin = (int)((0.1 / 2.54) * printer.logicalDpiX()); // 1 mm margins
       int width = printer.width() - 2 * margin;
       int height = static_cast<int>(width / plot_aspect);
@@ -1591,7 +1591,7 @@ void Graph::print() {
     QPainter paint(&printer);
     if (d_print_cropmarks) {
       QRect cr = plotRect; // cropmarks rectangle
-      cr.addCoords(-1, -1, 2, 2);
+      cr.adjust(-1, -1, 2, 2);
       paint.save();
       paint.setPen(QPen(QColor(Qt::black), 0.5, Qt::DashLine));
       paint.drawLine(paperRect.left(), cr.top(), paperRect.right(), cr.top());
@@ -2748,7 +2748,7 @@ PlotCurve *Graph::insertCurve(Table *w, const QString &xColName,
       if (xColType == Table::Text) {
         if (xLabels.contains(xval) == 0)
           xLabels << xval;
-        X[size] = (double)(xLabels.findIndex(xval) + 1);
+        X[size] = (double)(xLabels.indexOf(xval) + 1);
       } else if (xColType == Table::Time) {
         QTime time = QTime::fromString(xval, date_time_fmt);
         if (time.isValid())
@@ -2959,11 +2959,15 @@ VectorCurve *Graph::plotVectorCurve(Table *w, const QStringList &colList,
 
   VectorCurve *v = 0;
   if (style == VectXYAM)
-    v = new VectorCurve(VectorCurve::XYAM, w, colList[0], colList[1],
-                        colList[2], colList[3], startRow, endRow);
+    v = new VectorCurve(VectorCurve::XYAM, w, colList[0].toAscii().constData(),
+                        colList[1].toAscii().constData(),
+                        colList[2].toAscii().constData(),
+                        colList[3].toAscii().constData(), startRow, endRow);
   else
-    v = new VectorCurve(VectorCurve::XYXY, w, colList[0], colList[1],
-                        colList[2], colList[3], startRow, endRow);
+    v = new VectorCurve(VectorCurve::XYXY, w, colList[0].toAscii().constData(),
+                        colList[1].toAscii().constData(),
+                        colList[2].toAscii().constData(),
+                        colList[3].toAscii().constData(), startRow, endRow);
 
   if (!v)
     return NULL;
@@ -3121,7 +3125,7 @@ void Graph::removeCurves(const QString &s) {
 }
 
 void Graph::removeCurve(const QString &s) {
-  removeCurve(plotItemsList().findIndex(s));
+  removeCurve(plotItemsList().indexOf(s));
 }
 
 void Graph::removeCurve(int index) {
@@ -3212,11 +3216,11 @@ void Graph::removeLegendItem(int index) {
   if (index >= (int)items.count())
     return;
 
-  QStringList l = items.grep("\\l(" + QString::number(index + 1) + ")");
+  QStringList l = items.filter("\\l(" + QString::number(index + 1) + ")");
   if (l.isEmpty())
     return;
 
-  items.remove(l[0]); // remove the corresponding legend string
+  items.removeAll(l[0]); // remove the corresponding legend string
 
   for (int i = 0; i < items.count();
        i++) { // set new curves indexes in legend text
@@ -3606,14 +3610,14 @@ void Graph::restoreFunction(const QStringList &lst) {
     if (s.contains("<Type>"))
       type = (FunctionCurve::FunctionType)s.remove("<Type>")
                  .remove("</Type>")
-                 .stripWhiteSpace()
+                 .trimmed()
                  .toInt();
     else if (s.contains("<Title>"))
-      title = s.remove("<Title>").remove("</Title>").stripWhiteSpace();
+      title = s.remove("<Title>").remove("</Title>").trimmed();
     else if (s.contains("<Expression>"))
       formulas = s.remove("<Expression>").remove("</Expression>").split("\t");
     else if (s.contains("<Variable>"))
-      var = s.remove("<Variable>").remove("</Variable>").stripWhiteSpace();
+      var = s.remove("<Variable>").remove("</Variable>").trimmed();
     else if (s.contains("<Range>")) {
       QStringList l = s.remove("<Range>").remove("</Range>").split("\t");
       if (l.size() == 2) {
@@ -3621,10 +3625,9 @@ void Graph::restoreFunction(const QStringList &lst) {
         end = l[1].toDouble();
       }
     } else if (s.contains("<Points>"))
-      points =
-          s.remove("<Points>").remove("</Points>").stripWhiteSpace().toInt();
+      points = s.remove("<Points>").remove("</Points>").trimmed().toInt();
     else if (s.contains("<Style>")) {
-      style = s.remove("<Style>").remove("</Style>").stripWhiteSpace().toInt();
+      style = s.remove("<Style>").remove("</Style>").trimmed().toInt();
       break;
     }
   }
@@ -3714,26 +3717,26 @@ void Graph::scaleFonts(double factor) {
         continue;
 
       QFont font = lw->font();
-      font.setPointSizeFloat(factor * font.pointSizeFloat());
+      font.setPointSizeF(factor * font.pointSizeF());
       lw->setFont(font);
     }
   }
 
   for (int i = 0; i < QwtPlot::axisCnt; i++) {
     QFont font = axisFont(i);
-    font.setPointSizeFloat(factor * font.pointSizeFloat());
+    font.setPointSizeF(factor * font.pointSizeF());
     d_plot->setAxisFont(i, font);
 
     QwtText title = d_plot->axisTitle(i);
     font = title.font();
-    font.setPointSizeFloat(factor * font.pointSizeFloat());
+    font.setPointSizeF(factor * font.pointSizeF());
     title.setFont(font);
     d_plot->setAxisTitle(i, title);
   }
 
   QwtText title = d_plot->title();
   QFont font = title.font();
-  font.setPointSizeFloat(factor * font.pointSizeFloat());
+  font.setPointSizeF(factor * font.pointSizeF());
   title.setFont(font);
   d_plot->setTitle(title);
 
@@ -3743,7 +3746,7 @@ void Graph::scaleFonts(double factor) {
     if (dc && dc->rtti() != QwtPlotItem::Rtti_PlotSpectrogram &&
         dc->type() != Graph::Function && dc->hasLabels()) {
       QFont font = dc->labelsFont();
-      font.setPointSizeFloat(factor * font.pointSizeFloat());
+      font.setPointSizeF(factor * font.pointSizeF());
       dc->setLabelsFont(font);
       if (dc->hasSelectedLabels())
         notifyFontChange(font);
@@ -3871,13 +3874,13 @@ void Graph::showPlotErrorMessage(QWidget *parent,
 
 void Graph::showTitleContextMenu() {
   QMenu titleMenu(this);
-  titleMenu.insertItem(getQPixmap("cut_xpm"), tr("&Cut"), this,
-                       SLOT(cutTitle()));
-  titleMenu.insertItem(getQPixmap("copy_xpm"), tr("&Copy"), this,
-                       SLOT(copyTitle()));
-  titleMenu.insertItem(tr("&Delete"), this, SLOT(removeTitle()));
-  titleMenu.insertSeparator();
-  titleMenu.insertItem(tr("&Properties..."), this, SIGNAL(viewTitleDialog()));
+  titleMenu.addAction(getQPixmap("cut_xpm"), tr("&Cut"), this,
+                      SLOT(cutTitle()));
+  titleMenu.addAction(getQPixmap("copy_xpm"), tr("&Copy"), this,
+                      SLOT(copyTitle()));
+  titleMenu.addAction(tr("&Delete"), this, SLOT(removeTitle()));
+  titleMenu.addSeparator();
+  titleMenu.addAction(tr("&Properties..."), this, SIGNAL(viewTitleDialog()));
   titleMenu.exec(QCursor::pos());
 }
 
@@ -3919,39 +3922,39 @@ void Graph::copyAxisTitle() {
 
 void Graph::showAxisTitleMenu() {
   QMenu titleMenu(this);
-  titleMenu.insertItem(getQPixmap("cut_xpm"), tr("&Cut"), this,
-                       SLOT(cutAxisTitle()));
-  titleMenu.insertItem(getQPixmap("copy_xpm"), tr("&Copy"), this,
-                       SLOT(copyAxisTitle()));
-  titleMenu.insertItem(tr("&Delete"), this, SLOT(removeAxisTitle()));
-  titleMenu.insertSeparator();
-  titleMenu.insertItem(tr("&Properties..."), this,
-                       SIGNAL(showAxisTitleDialog()));
+  titleMenu.addAction(getQPixmap("cut_xpm"), tr("&Cut"), this,
+                      SLOT(cutAxisTitle()));
+  titleMenu.addAction(getQPixmap("copy_xpm"), tr("&Copy"), this,
+                      SLOT(copyAxisTitle()));
+  titleMenu.addAction(tr("&Delete"), this, SLOT(removeAxisTitle()));
+  titleMenu.addSeparator();
+  titleMenu.addAction(tr("&Properties..."), this,
+                      SIGNAL(showAxisTitleDialog()));
   titleMenu.exec(QCursor::pos());
 }
 
 void Graph::showAxisContextMenu(int axis) {
   QMenu menu(this);
-  menu.setCheckable(true);
+  menu.isCheckable();
 
-  menu.insertItem(getQPixmap("unzoom_xpm"), tr("&Rescale to show all"), this,
-                  SLOT(setAutoScale()), tr("Ctrl+Shift+R"));
-  menu.insertSeparator();
-  menu.insertItem(tr("&Hide axis"), this, SLOT(hideSelectedAxis()));
+  menu.addAction(getQPixmap("unzoom_xpm"), tr("&Rescale to show all"), this,
+                 SLOT(setAutoScale()), tr("Ctrl+Shift+R"));
+  menu.addSeparator();
+  menu.addAction(tr("&Hide axis"), this, SLOT(hideSelectedAxis()));
 
-  int gridsID = menu.insertItem(tr("&Show grids"), this, SLOT(showGrids()));
+  auto gridsID = menu.addAction(tr("&Show grids"), this, SLOT(showGrids()));
   if (axis == QwtScaleDraw::LeftScale || axis == QwtScaleDraw::RightScale) {
     if (d_plot->grid()->yEnabled())
-      menu.setItemChecked(gridsID, true);
+      gridsID->setChecked(true);
   } else {
     if (d_plot->grid()->xEnabled())
-      menu.setItemChecked(gridsID, true);
+      gridsID->setChecked(true);
   }
 
-  menu.insertSeparator();
+  menu.addSeparator();
 
-  menu.insertItem(tr("&Scale..."), this, SLOT(showScaleDialog()));
-  menu.insertItem(tr("&Properties..."), this, SLOT(showAxisDialog()));
+  menu.addAction(tr("&Scale..."), this, SLOT(showScaleDialog()));
+  menu.addAction(tr("&Properties..."), this, SLOT(showAxisDialog()));
   menu.exec(QCursor::pos());
 }
 
@@ -4180,10 +4183,12 @@ void Graph::copy(Graph *g) {
           vs = VectorCurve::XYAM;
         VectorCurve *cvVC = dynamic_cast<VectorCurve *>(cv);
         if (cvVC) {
-          c = new VectorCurve(vs, cv->table(), cv->xColumnName(),
-                              cv->title().text(), cvVC->vectorEndXAColName(),
-                              cvVC->vectorEndYMColName(), cv->startRow(),
-                              cv->endRow());
+          c = new VectorCurve(vs, cv->table(),
+                              cv->xColumnName().toAscii().constData(),
+                              cv->title().text().toAscii(),
+                              cvVC->vectorEndXAColName().toAscii().constData(),
+                              cvVC->vectorEndYMColName().toAscii().constData(),
+                              cv->startRow(), cv->endRow());
           c_keys[i] = d_plot->insertCurve(c);
 
           VectorCurve *cVC = dynamic_cast<VectorCurve *>(c);
@@ -4349,7 +4354,7 @@ void Graph::copy(Graph *g) {
   foreach (LegendWidget *t, texts) {
     if (t == g->legend())
       d_legend = insertText(t);
-    else if (t->isA("PieLabel")) {
+    else if (strcmp(t->metaObject()->className(), "PieLabel") == 0) {
       QwtPieCurve *pie = dynamic_cast<QwtPieCurve *>(curve(0));
       if (pie)
         pie->addLabel(dynamic_cast<PieLabel *>(t), true);
@@ -5885,9 +5890,9 @@ void Graph::loadFromProject(const std::string &lines, ApplicationWindow *app,
     tsv >> pieName;
 
     if (!app->renamedTables.isEmpty()) {
-      QString caption = pieName.left(pieName.find("_", 0));
+      QString caption = pieName.left(pieName.indexOf("_", 0));
       if (app->renamedTables.contains(caption)) {
-        int index = app->renamedTables.findIndex(caption);
+        int index = app->renamedTables.indexOf(caption);
         QString newCaption = app->renamedTables[++index];
         pieName.replace(caption + "_", newCaption + "_");
       }
@@ -6166,10 +6171,10 @@ void Graph::loadFromProject(const std::string &lines, ApplicationWindow *app,
       QStringList sl =
           QString::fromUtf8(tsv.lineAsString("ErrorBars").c_str()).split("\t");
       if (!app->renamedTables.isEmpty()) {
-        QString caption = sl[4].left(sl[4].find("_", 0));
+        QString caption = sl[4].left(sl[4].indexOf("_", 0));
         if (app->renamedTables.contains(caption)) {
           // modify the name of the curve according to the new table name
-          int index = app->renamedTables.findIndex(caption);
+          int index = app->renamedTables.indexOf(caption);
           QString newCaption = app->renamedTables[++index];
           sl.replaceInStrings(caption + "_", newCaption + "_");
         }
@@ -6719,7 +6724,7 @@ std::string Graph::saveMarkers() {
 
     if (l == d_legend)
       s += "<legend>";
-    else if (l->isA("PieLabel")) {
+    else if (strcmp(l->metaObject()->className(), "PieLabel") == 0) {
       if (l->text().isEmpty())
         continue;
 
@@ -6747,7 +6752,7 @@ std::string Graph::saveMarkers() {
     s += "\t" + textList.join("\t");
     if (l == d_legend)
       s += "</legend>\n";
-    else if (l->isA("PieLabel"))
+    else if (strcmp(l->metaObject()->className(), "PieLabel") == 0)
       s += "</PieLabel>\n";
     else
       s += "</text>\n";

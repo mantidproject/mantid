@@ -1,7 +1,3 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
-#include "MantidAPI/MemoryManager.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/FunctionFactory.h"
@@ -75,7 +71,7 @@ void PeakIntegration::exec() {
   /// Output peaks workspace, create if needed
   PeaksWorkspace_sptr peaksW = getProperty("OutPeaksWorkspace");
   if (peaksW != inPeaksW)
-    peaksW.reset(inPeaksW->clone().release());
+    peaksW = inPeaksW->clone();
 
   double qspan = 0.12;
   m_IC = getProperty("IkedaCarpenterTOF");
@@ -328,7 +324,6 @@ int PeakIntegration::fitneighbours(int ipeak, std::string det_name, int x0,
 
   slice_alg->setProperty("NBadEdgePixels", nPixels);
   slice_alg->executeAsChildAlg();
-  Mantid::API::MemoryManager::Instance().releaseFreeMemory();
 
   MantidVec &Xout = outputW->dataX(idet);
   MantidVec &Yout = outputW->dataY(idet);

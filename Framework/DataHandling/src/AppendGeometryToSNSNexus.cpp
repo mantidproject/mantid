@@ -227,7 +227,7 @@ void AppendGeometryToSNSNexus::exec() {
                   pixel_id.push_back(det->getID());
                   distance.push_back(det->getDistance(*sample));
                   azimuthal_angle.push_back(det->getPhi());
-                  polar_angle.push_back(ws->detectorTwoTheta(det));
+                  polar_angle.push_back(ws->detectorTwoTheta(*det));
                 }
 
                 // Write Pixel ID to file

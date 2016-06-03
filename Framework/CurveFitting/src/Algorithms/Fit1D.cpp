@@ -17,6 +17,7 @@
 #include <gsl/gsl_multifit_nlin.h>
 #include <gsl/gsl_multimin.h>
 #include <gsl/gsl_blas.h>
+#include <gsl/gsl_version.h>
 
 #include <cmath>
 #include <numeric>
@@ -612,7 +613,14 @@ void Fit1D::exec() {
     std::vector<double> sdExtended;
     if (isDerivDefined) {
       covar = gsl_matrix_alloc(l_data.p, l_data.p);
+#if GSL_MAJOR_VERSION < 2
       gsl_multifit_covar(s->J, 0.0, covar);
+#else
+      gsl_matrix *J = gsl_matrix_alloc(l_data.n, l_data.p);
+      gsl_multifit_fdfsolver_jac(s, J);
+      gsl_multifit_covar(J, 0.0, covar);
+      gsl_matrix_free(J);
+#endif
 
       int iPNotFixed = 0;
       for (size_t i = 0; i < nParams(); i++) {

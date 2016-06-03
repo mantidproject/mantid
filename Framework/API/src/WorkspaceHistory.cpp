@@ -24,20 +24,17 @@ Kernel::Logger g_log("WorkspaceHistory");
 }
 
 /// Default Constructor
-WorkspaceHistory::WorkspaceHistory()
-    : m_environment(),
-      m_algorithms(boost::bind(CompareHistory::compare, _1, _2)) {}
+WorkspaceHistory::WorkspaceHistory() : m_environment() {}
 
 /// Destructor
-WorkspaceHistory::~WorkspaceHistory() {}
+WorkspaceHistory::~WorkspaceHistory() = default;
 
 /**
   Standard Copy Constructor
   @param A :: WorkspaceHistory Item to copy
  */
 WorkspaceHistory::WorkspaceHistory(const WorkspaceHistory &A)
-    : m_environment(A.m_environment),
-      m_algorithms(boost::bind(CompareHistory::compare, _1, _2)) {
+    : m_environment(A.m_environment) {
   m_algorithms = A.m_algorithms;
 }
 
@@ -67,7 +64,7 @@ void WorkspaceHistory::addHistory(const WorkspaceHistory &otherHistory) {
 
 /// Append an AlgorithmHistory to this WorkspaceHistory
 void WorkspaceHistory::addHistory(AlgorithmHistory_sptr algHistory) {
-  m_algorithms.insert(algHistory);
+  m_algorithms.insert(std::move(algHistory));
 }
 
 /*
@@ -98,9 +95,7 @@ WorkspaceHistory::getAlgorithmHistory(const size_t index) const {
     throw std::out_of_range(
         "WorkspaceHistory::getAlgorithmHistory() - Index out of range");
   }
-  auto start = m_algorithms.cbegin();
-  std::advance(start, index);
-  return *start;
+  return *std::next(m_algorithms.cbegin(), index);
 }
 
 /**
@@ -148,9 +143,9 @@ void WorkspaceHistory::printSelf(std::ostream &os, const int indent) const {
   AlgorithmHistories::const_iterator it;
   os << std::string(indent, ' ') << "Histories:" << std::endl;
 
-  for (it = m_algorithms.begin(); it != m_algorithms.end(); ++it) {
+  for (const auto &algorithm : m_algorithms) {
     os << std::endl;
-    (*it)->printSelf(os, indent + 2);
+    algorithm->printSelf(os, indent + 2);
   }
 }
 

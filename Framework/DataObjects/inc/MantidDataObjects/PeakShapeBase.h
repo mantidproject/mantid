@@ -4,6 +4,7 @@
 #include "MantidKernel/System.h"
 #include "MantidGeometry/Crystal/PeakShape.h"
 #include "MantidKernel/SpecialCoordinateSystem.h"
+
 #include <string>
 
 namespace Json {
@@ -37,6 +38,7 @@ namespace DataObjects {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
+
 class DLLExport PeakShapeBase : public Mantid::Geometry::PeakShape {
 
 public:
@@ -50,8 +52,6 @@ public:
   std::string algorithmName() const override;
   /// Get the version of the algorithm used to make this shape
   int algorithmVersion() const override;
-  /// Radius
-  virtual double radius() const = 0;
 
 protected:
   /// Copy constructor

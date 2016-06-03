@@ -39,7 +39,7 @@ public:
                                                  eout, false);
     for (std::size_t i = 0; i < size2 - 1; i++) {
       TS_ASSERT_DELTA(yout[i], 0.5, 1e-7);
-      TS_ASSERT_DELTA(eout[i], 1.0 / sqrt(2.0), 1e-7);
+      TS_ASSERT_DELTA(eout[i], M_SQRT1_2, 1e-7);
     }
     std::vector<double> returnX(xin), returnY(size1 - 1), returnE(size1 - 1);
 

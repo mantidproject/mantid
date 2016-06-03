@@ -184,8 +184,45 @@ public:
                                                 Contains("1"),
                                                 Contains("2")))).Times(1);
     // Test time limits
-    EXPECT_CALL(*m_view, setTimeLimits(Le(-0.54),Ge(31.44))).Times(1);
+    auto timeRange = std::make_pair<double, double>(0.0, 0.0);
+    ON_CALL(*m_view, timeRange())
+        .WillByDefault(Return(boost::make_optional(timeRange)));
+    EXPECT_CALL(*m_view, setTimeLimits(Le(0.107), Ge(31.44))).Times(1);
     m_view->selectFirstRun();
+  }
+
+  void test_updateAvailableInfo_NotFirstRun() {
+    EXPECT_CALL(*m_view, firstRun()).WillRepeatedly(Return("MUSR00015189.nxs"));
+    // Test logs
+    EXPECT_CALL(*m_view,
+                setAvailableLogs(
+                    AllOf(Property(&std::vector<std::string>::size, 39),
+                          Contains("run_number"), Contains("sample_magn_field"),
+                          Contains("Field_Danfysik"))))
+        .Times(1);
+    // Test periods
+    EXPECT_CALL(*m_view, setAvailablePeriods(
+                             AllOf(Property(&std::vector<std::string>::size, 2),
+                                   Contains("1"), Contains("2"))))
+        .Times(1);
+    // Test time limits
+    auto timeRange =
+        std::make_pair<double, double>(0.1, 10.0); // not the first run loaded
+    ON_CALL(*m_view, timeRange())
+        .WillByDefault(Return(boost::make_optional(timeRange)));
+    EXPECT_CALL(*m_view, setTimeLimits(_, _))
+        .Times(0); // shouldn't reset time limits
+    m_view->selectFirstRun();
+  }
+
+  void test_badCustomGrouping() {
+    ON_CALL(*m_view, detectorGroupingType()).WillByDefault(Return("Custom"));
+    ON_CALL(*m_view, getForwardGrouping()).WillByDefault(Return("1-48"));
+    // Too many detectors (MUSR has only 64)
+    ON_CALL(*m_view, getBackwardGrouping()).WillByDefault(Return("49-96"));
+    EXPECT_CALL(*m_view, displayError(StrNe(""))).Times(1);
+    m_view->selectFirstRun();
+    m_view->requestLoading();
   }
 
   void test_updateAvailableLogs_invalidFirstRun()
@@ -264,8 +301,8 @@ public:
     // Set grouping, the same as the default
     ON_CALL(*m_view, getForwardGrouping()).WillByDefault(Return("33-64"));
     ON_CALL(*m_view, getBackwardGrouping()).WillByDefault(Return("1-32"));
-    EXPECT_CALL(*m_view, getForwardGrouping()).Times(1);
-    EXPECT_CALL(*m_view, getBackwardGrouping()).Times(1);
+    EXPECT_CALL(*m_view, getForwardGrouping()).Times(2);
+    EXPECT_CALL(*m_view, getBackwardGrouping()).Times(2);
     EXPECT_CALL(*m_view, enableAll()).Times(1);
     EXPECT_CALL(*m_view, setDataCurve(AllOf(Property(&QwtData::size, 3),
                                             QwtDataX(0, 1350, 1E-8),
@@ -278,7 +315,7 @@ public:
                                             VectorValue(0,1.285E-3,1E-6),
                                             VectorValue(1,1.284E-3,1E-6),
                                             VectorValue(2,1.280E-3,1E-6))));
-
+    m_view->selectFirstRun();
     m_view->requestLoading();
   }
 

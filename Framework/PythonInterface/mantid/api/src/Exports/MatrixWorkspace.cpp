@@ -182,8 +182,6 @@ Mantid::API::Run &getSampleDetailsDeprecated(MatrixWorkspace &self) {
 void export_MatrixWorkspace() {
   /// Typedef to remove const qualifier on input detector shared_ptr. See
   /// Policies/RemoveConst.h for more details
-  typedef double (MatrixWorkspace::*getDetectorSignature)(
-      Mantid::Geometry::IDetector_sptr det) const;
 
   class_<MatrixWorkspace, boost::python::bases<ExperimentInfo, IMDWorkspace>,
          boost::noncopyable>("MatrixWorkspace", no_init)
@@ -198,12 +196,10 @@ void export_MatrixWorkspace() {
                (arg("self"), arg("xvalue"), arg("workspaceIndex")),
                "Returns the index of the bin containing the given xvalue. The "
                "workspace_index is optional [default=0]"))
-      .def("detectorTwoTheta",
-           (getDetectorSignature)&MatrixWorkspace::detectorTwoTheta,
+      .def("detectorTwoTheta", &MatrixWorkspace::detectorTwoTheta,
            (arg("self"), arg("det")),
            "Returns the two theta value for a given detector")
-      .def("detectorSignedTwoTheta",
-           (getDetectorSignature)&MatrixWorkspace::detectorSignedTwoTheta,
+      .def("detectorSignedTwoTheta", &MatrixWorkspace::detectorSignedTwoTheta,
            (arg("self"), arg("det")),
            "Returns the signed two theta value for given detector")
       .def("getSpectrum", (ISpectrum * (MatrixWorkspace::*)(const size_t)) &
@@ -257,9 +253,8 @@ void export_MatrixWorkspace() {
       .def("setYUnit", &MatrixWorkspace::setYUnit,
            (arg("self"), arg("newUnit")),
            "Sets a new unit for the data (Y axis) in the workspace")
-      .def("setDistribution", (bool &(MatrixWorkspace::*)(const bool)) &
-                                  MatrixWorkspace::isDistribution,
-           (arg("self"), arg("newVal")), return_value_policy<return_by_value>(),
+      .def("setDistribution", &MatrixWorkspace::setDistribution,
+           (arg("self"), arg("newVal")),
            "Set distribution flag. If True the workspace has been divided by "
            "the bin-width.")
       .def("replaceAxis", &MatrixWorkspace::replaceAxis,

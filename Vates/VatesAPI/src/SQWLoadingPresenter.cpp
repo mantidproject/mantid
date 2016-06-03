@@ -102,20 +102,21 @@ namespace Mantid
 
     @param eventWs : event workspace to get the information from.
     */
-    void SQWLoadingPresenter::extractMetadata(Mantid::API::IMDEventWorkspace_sptr eventWs)
-    {
+    void SQWLoadingPresenter::extractMetadata(
+        const Mantid::API::IMDEventWorkspace &eventWs) {
       using namespace Mantid::Geometry;
       MDGeometryBuilderXML<NoDimensionPolicy> refresh;
       this->xmlBuilder= refresh; //Reassign.
       std::vector<IMDDimension_sptr> dimensions;
-      size_t nDimensions = eventWs->getNumDims();
+      size_t nDimensions = eventWs.getNumDims();
       for (size_t d=0; d<nDimensions; d++)
       {
-        IMDDimension_const_sptr inDim = eventWs->getDimension(d);
-        axisLabels.push_back(makeAxisTitle(inDim));
+        IMDDimension_const_sptr inDim = eventWs.getDimension(d);
+        axisLabels.push_back(makeAxisTitle(*inDim));
         //Copy the dimension, but set the ID and name to be the same. This is an assumption in bintohistoworkspace.
-        MDHistoDimension_sptr dim(new MDHistoDimension(inDim->getName(), inDim->getName(), inDim->getMDFrame(), inDim->getMinimum(), inDim->getMaximum(), size_t(10)));
-        dimensions.push_back(dim);
+        dimensions.push_back(boost::make_shared<MDHistoDimension>(
+            inDim->getName(), inDim->getName(), inDim->getMDFrame(),
+            inDim->getMinimum(), inDim->getMaximum(), size_t{10}));
       }
 
       //Configuring the geometry xml builder allows the object panel associated with this reader to later
@@ -162,7 +163,7 @@ namespace Mantid
       Mantid::API::IMDEventWorkspace_sptr eventWs = boost::dynamic_pointer_cast<Mantid::API::IMDEventWorkspace>(result);
       m_wsTypeName = eventWs->id();
       //Call base-class extraction method.
-      extractMetadata(eventWs);
+      extractMetadata(*eventWs);
     }
 
     ///Destructor

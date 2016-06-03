@@ -163,7 +163,7 @@ void MultipleScatteringCylinderAbsorption::exec() {
     // not in-place so create a new copy
     MatrixWorkspace_sptr out_WS = getProperty("OutputWorkspace");
     if (in_WS != out_WS) {
-      out_WS = MatrixWorkspace_sptr(in_WS->clone().release());
+      out_WS = in_WS->clone();
     }
     auto out_WSevent = boost::dynamic_pointer_cast<EventWorkspace>(out_WS);
 
@@ -179,7 +179,7 @@ void MultipleScatteringCylinderAbsorption::exec() {
         throw std::runtime_error("Failed to find detector");
       if (det->isMasked())
         continue;
-      const double tth_rad = out_WSevent->detectorTwoTheta(det);
+      const double tth_rad = out_WSevent->detectorTwoTheta(*det);
 
       EventList &eventList = out_WSevent->getEventList(index);
       vector<double> tof_vec, y_vec, err_vec;
@@ -214,7 +214,7 @@ void MultipleScatteringCylinderAbsorption::exec() {
         throw std::runtime_error("Failed to find detector");
       if (det->isMasked())
         continue;
-      const double tth_rad = in_WS->detectorTwoTheta(det);
+      const double tth_rad = in_WS->detectorTwoTheta(*det);
 
       MantidVec tof_vec = in_WS->readX(index);
       MantidVec y_vec = in_WS->readY(index);

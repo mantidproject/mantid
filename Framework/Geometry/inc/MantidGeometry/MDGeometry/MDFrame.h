@@ -39,6 +39,7 @@ class DLLExport MDFrame {
 public:
   virtual Mantid::Kernel::UnitLabel getUnitLabel() const = 0;
   virtual const Mantid::Kernel::MDUnit &getMDUnit() const = 0;
+  virtual bool setMDUnit(const Mantid::Kernel::MDUnit &newUnit) = 0;
   virtual bool canConvertTo(const Mantid::Kernel::MDUnit &otherUnit) const = 0;
   virtual bool isQ() const = 0;
   virtual bool isSameType(const MDFrame &frame) const = 0;

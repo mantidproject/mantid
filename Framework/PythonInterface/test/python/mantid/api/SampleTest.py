@@ -1,6 +1,7 @@
 import unittest
 from mantid.api import Sample
 from mantid.simpleapi import CreateWorkspace
+from mantid.simpleapi import SetSampleMaterial
 from mantid.geometry import CrystalStructure
 
 class SampleTest(unittest.TestCase):
@@ -45,6 +46,24 @@ class SampleTest(unittest.TestCase):
         self.assertEquals(sample.hasCrystalStructure(), False)
         self.assertRaises(RuntimeError, sample.getCrystalStructure)
 
+    def test_material(self):
+        SetSampleMaterial(self._ws,"Al2 O3",SampleMassDensity=4)
+        material = self._ws.sample().getMaterial()
+
+        self.assertAlmostEqual(material.numberDensity, 0.0236, places=4)
+        self.assertAlmostEqual(material.relativeMolecularMass(), 101.961, places=3)
+
+        atoms, numatoms = material.chemicalFormula()
+
+        self.assertEquals(len(atoms), len(numatoms))
+        self.assertEquals(len(atoms), 2)
+        self.assertEquals(numatoms[0], 2)
+        self.assertEquals(numatoms[1], 3)
+
+        xs0 = atoms[0].neutron()
+        xs1 = atoms[1].neutron()
+        xs = ( xs0['coh_scatt_xs']*2 + xs1['coh_scatt_xs']*3 ) / 5
+        self.assertAlmostEquals(material.cohScatterXSection(), xs, places=4)
 
 
 

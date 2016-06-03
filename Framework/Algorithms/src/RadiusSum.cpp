@@ -12,8 +12,8 @@
 
 #include <boost/foreach.hpp>
 
+#include <cmath>
 #include <limits>
-#include <math.h>
 #include <numeric>
 #include <sstream>
 

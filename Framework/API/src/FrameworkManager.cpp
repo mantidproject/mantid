@@ -1,23 +1,23 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/InstrumentDataService.h"
-#include "MantidAPI/MemoryManager.h"
-#include "MantidAPI/PropertyManagerDataService.h"
 #include "MantidAPI/WorkspaceGroup.h"
-#include "MantidKernel/UsageService.h"
 
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/LibraryManager.h"
 #include "MantidKernel/Memory.h"
 #include "MantidKernel/MultiThreaded.h"
+#include "MantidKernel/PropertyManagerDataService.h"
+#include "MantidKernel/UsageService.h"
 
 #include <Poco/ActiveResult.h>
 
 #include <cstdarg>
+
+#ifdef MAKE_VATES
+#include "vtkPVDisplayInformation.h"
+#endif
 
 #ifdef _WIN32
 #include <winsock2.h>
@@ -79,6 +79,11 @@ FrameworkManagerImpl::FrameworkManagerImpl()
 #ifdef MPI_BUILD
   g_log.notice() << "This MPI process is rank: "
                  << boost::mpi::communicator().rank() << std::endl;
+#endif
+
+#ifdef MAKE_VATES
+  if (!vtkPVDisplayInformation::SupportsOpenGLLocally())
+    g_log.error() << "The OpenGL configuration does not support the VSI.\n";
 #endif
 
   g_log.debug() << "FrameworkManager created." << std::endl;
@@ -236,7 +241,6 @@ void FrameworkManagerImpl::clearAlgorithms() {
  */
 void FrameworkManagerImpl::clearData() {
   AnalysisDataService::Instance().clear();
-  Mantid::API::MemoryManager::Instance().releaseFreeMemory();
 }
 
 /**
@@ -250,6 +254,7 @@ void FrameworkManagerImpl::clearInstruments() {
  * Clear memory associated with the PropertyManagers
  */
 void FrameworkManagerImpl::clearPropertyManagers() {
+  using Kernel::PropertyManagerDataService;
   PropertyManagerDataService::Instance().clear();
 }
 
@@ -290,7 +295,7 @@ FrameworkManagerImpl::createAlgorithm(const std::string &algName,
   IAlgorithm *alg = AlgorithmManager::Instance()
                         .create(algName, version)
                         .get(); // createAlgorithm(algName);
-  alg->setPropertiesWithSimpleString(propertiesArray);
+  alg->setPropertiesWithString(propertiesArray);
 
   return alg;
 }
@@ -410,7 +415,6 @@ bool FrameworkManagerImpl::deleteWorkspace(const std::string &wsName) {
                   << std::endl;
     retVal = false;
   }
-  Mantid::API::MemoryManager::Instance().releaseFreeMemory();
   return retVal;
 }
 

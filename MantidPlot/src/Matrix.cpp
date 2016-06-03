@@ -315,7 +315,8 @@ void Matrix::setDimensions(int rows, int cols)
     QApplication::restoreOverrideCursor();
     QMessageBox::critical(d_matrix_model->matrix(), tr("MantidPlot") + " - " + tr("Input Size Error"),
       tr("The dimensions you have specified are not acceptable!") + "\n" +
-      tr("Please enter positive values for which the product rows*columns does not exceed the maximum integer value available (") + tr(QString::number(INT_MAX)) + tr(")!"));
+      tr("Please enter positive values for which the product rows*columns does not exceed the maximum integer value available (") +
+      tr(QString::number(INT_MAX).toAscii().constData()) + tr(")!"));
     return;
   }
 
@@ -513,7 +514,7 @@ bool Matrix::muParserCalculate(int startRow, int endRow, int startCol, int endCo
 
 bool Matrix::calculate(int startRow, int endRow, int startCol, int endCol, bool forceMuParser)
 {
-  if (QString(scriptingEnv()->name()) == "muParser" || forceMuParser)
+  if (QString(scriptingEnv()->objectName()) == "muParser" || forceMuParser)
     return muParserCalculate(startRow, endRow, startCol, endCol);
 
   double *buffer = d_matrix_model->dataCopy(startRow, endRow, startCol, endCol);
@@ -922,7 +923,7 @@ void Matrix::print(const QString& fileName)
     tr.setWidth(w);
     tr.setHeight(br.height());
     header_label = d_matrix_model->headerData(i, Qt::Horizontal).toString();
-    p.drawText(tr, Qt::AlignCenter, header_label,-1);
+    p.drawText(tr, Qt::AlignCenter, header_label.left(-1));
     right += w;
     p.drawLine(right, height, right, height+tr.height());
 
@@ -944,7 +945,7 @@ void Matrix::print(const QString& fileName)
     br.setTopLeft(QPoint(right,height));
     br.setWidth(vertHeaderWidth);
     br.setHeight(tr.height());
-    p.drawText(br,Qt::AlignCenter,cell_text,-1);
+    p.drawText(br, Qt::AlignCenter, cell_text.left(-1));
     right += vertHeaderWidth;
     p.drawLine(right, height, right, height+tr.height());
 
@@ -955,7 +956,7 @@ void Matrix::print(const QString& fileName)
       br.setTopLeft(QPoint(right,height));
       br.setWidth(w);
       br.setHeight(tr.height());
-      p.drawText(br, Qt::AlignCenter, cell_text, -1);
+      p.drawText(br, Qt::AlignCenter, cell_text.left(-1));
       right += w;
       p.drawLine(right, height, right, height+tr.height());
 
@@ -1020,7 +1021,7 @@ void Matrix::exportVector(const QString& fileName, int res, bool color, bool kee
       int width = static_cast<int>(height*aspect);
       int x = (printer.width()- width)/2;
       rect = QRect(x, margin, width, height);
-    } else if (aspect >= page_aspect){
+    } else {
       int margin = (int) ((0.1/2.54)*printer.logicalDpiX()); // 1 mm margins
       int width = printer.width() - 2*margin;
       int height = static_cast<int>(width/aspect);
@@ -1311,22 +1312,23 @@ void Matrix::setColorMap(const QStringList& lst)
   d_color_map_type = Custom;
 
   QStringList::const_iterator line = lst.begin();
-  QString s = (*line).stripWhiteSpace();
+  QString s = (*line).trimmed();
 
-  int mode = s.remove("<Mode>").remove("</Mode>").stripWhiteSpace().toInt();
+  int mode = s.remove("<Mode>").remove("</Mode>").trimmed().toInt();
   s = *(++line);
-  QColor color1 = QColor(s.remove("<MinColor>").remove("</MinColor>").stripWhiteSpace());
+  QColor color1 = QColor(s.remove("<MinColor>").remove("</MinColor>").trimmed());
   s = *(++line);
-  QColor color2 = QColor(s.remove("<MaxColor>").remove("</MaxColor>").stripWhiteSpace());
+  QColor color2 = QColor(s.remove("<MaxColor>").remove("</MaxColor>").trimmed());
 
   d_color_map = QwtLinearColorMap(color1, color2);
   d_color_map.setMode((QwtLinearColorMap::Mode)mode);
 
   s = *(++line);
-  int stops = s.remove("<ColorStops>").remove("</ColorStops>").stripWhiteSpace().toInt();
+  int stops = s.remove("<ColorStops>").remove("</ColorStops>").trimmed().toInt();
   for (int i = 0; i < stops; i++){
-    s = (*(++line)).stripWhiteSpace();
-    QStringList l = QStringList::split("\t", s.remove("<Stop>").remove("</Stop>"));
+    s = (*(++line)).trimmed();
+    s.remove("<Stop>").remove("</Stop>");
+    auto l = s.split("\t");
     d_color_map.addColorStop(l[0].toDouble(), QColor(l[1]));
   }
 }

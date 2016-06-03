@@ -275,8 +275,8 @@ public:
     TS_ASSERT_DELTA(d[1][0], -sqrt(0.5), 1e-7);
     TS_ASSERT_DELTA(d[1][1], sqrt(0.5), 1e-7);
     TS_ASSERT_DELTA(d[2][2], -1., 1e-7);
-    TS_ASSERT_DELTA(v[0], -sqrt(2.), 1e-7);
-    TS_ASSERT_DELTA(v[1], sqrt(2.), 1e-7);
+    TS_ASSERT_DELTA(v[0], -M_SQRT2, 1e-7);
+    TS_ASSERT_DELTA(v[1], M_SQRT2, 1e-7);
     TS_ASSERT_DELTA(v[2], 3., 1e-7);
   }
 

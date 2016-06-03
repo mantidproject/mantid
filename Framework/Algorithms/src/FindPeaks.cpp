@@ -695,7 +695,7 @@ void FindPeaks::calculateStandardDeviation(
     const API::MatrixWorkspace_sptr &smoothed, const int &w) {
   // Guard against anyone changing the value of z, which would mean different
   // phi values were needed (see Marriscotti p.312)
-  assert(g_z == 5);
+  static_assert(g_z == 5, "Value of z has changed!");
   // Have to adjust for fact that I normalise Si (unlike the paper)
   const int factor = static_cast<int>(std::pow(static_cast<double>(w), g_z));
 
@@ -1087,6 +1087,8 @@ int FindPeaks::findPeakBackground(const MatrixWorkspace_sptr &input,
         "No 7th column for use FindPeakBackground result or not. ");
 
   if (peaklisttablews->rowCount() > 0) {
+    // setting fitresult currently breaks several tests
+    // see issues ##13667, 13950 and 15978
     int fitresult = peaklisttablews->Int(0, 6);
     g_log.information() << "fitresult=" << fitresult << "\n";
   }

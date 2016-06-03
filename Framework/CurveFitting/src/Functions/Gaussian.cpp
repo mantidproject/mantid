@@ -3,6 +3,7 @@
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/Functions/Gaussian.h"
 #include "MantidAPI/FunctionFactory.h"
+#include <boost/math/special_functions/fpclassify.hpp>
 
 #include <cmath>
 #include <numeric>
@@ -12,12 +13,12 @@ namespace CurveFitting {
 namespace Functions {
 
 using namespace CurveFitting;
-
 using namespace Kernel;
-
 using namespace API;
 
 DECLARE_FUNCTION(Gaussian)
+
+Gaussian::Gaussian() : IPeakFunction(), m_intensityCache(0.0) {}
 
 void Gaussian::init() {
   declareParameter("Height", 0.0, "Height of peak");
@@ -72,6 +73,52 @@ double Gaussian::activeParameter(size_t i) const {
   else
     return getParameter(i);
 }
+
+double Gaussian::centre() const { return getParameter("PeakCentre"); }
+double Gaussian::height() const { return getParameter("Height"); }
+double Gaussian::fwhm() const {
+  return 2.0 * sqrt(2.0 * M_LN2) * getParameter("Sigma");
+}
+double Gaussian::intensity() const {
+  auto sigma = getParameter("Sigma");
+  if (sigma == 0.0) {
+    auto height = getParameter("Height");
+    if (boost::math::isfinite(height)) {
+      m_intensityCache = height;
+    }
+  } else {
+    m_intensityCache =
+        getParameter("Height") * getParameter("Sigma") * sqrt(2.0 * M_PI);
+  }
+  return m_intensityCache;
+}
+
+void Gaussian::setCentre(const double c) { setParameter("PeakCentre", c); }
+void Gaussian::setHeight(const double h) { setParameter("Height", h); }
+void Gaussian::setFwhm(const double w) {
+  setParameter("Sigma", w / (2.0 * sqrt(2.0 * M_LN2)));
+}
+void Gaussian::setIntensity(const double i) {
+  m_intensityCache = i;
+  auto sigma = getParameter("Sigma");
+  if (sigma == 0.0) {
+    setParameter("Height", i);
+  } else {
+    setParameter("Height", i / (sigma * sqrt(2.0 * M_PI)));
+  }
+}
+
+void Gaussian::fixCentre() { fixParameter("PeakCentre"); }
+
+void Gaussian::unfixCentre() { unfixParameter("PeakCentre"); }
+
+void Gaussian::fixIntensity() {
+  std::string formula =
+      std::to_string(intensity() / sqrt(2.0 * M_PI)) + "/Sigma";
+  tie("Height", formula);
+}
+
+void Gaussian::unfixIntensity() { removeTie("Height"); }
 
 } // namespace Functions
 } // namespace CurveFitting

@@ -110,11 +110,11 @@ vtkMDQuadFactory::create(ProgressAction &progressUpdating) const {
       progressUpdating.eventRaised(progressFactor * double(iBox));
 
       Mantid::signal_t signal = it->getNormalizedSignal();
-      if (!isSpecial(signal) && m_thresholdRange->inRange(signal)) {
+      if (std::isfinite(signal) && m_thresholdRange->inRange(signal)) {
         useBox[iBox] = true;
         signals->InsertNextValue(static_cast<float>(signal));
 
-        auto coords = std::unique_ptr<coord_t>(
+        auto coords = std::unique_ptr<coord_t[]>(
             it->getVertexesArray(nVertexes, nNonIntegrated, masks.get()));
 
         // Iterate through all coordinates. Candidate for speed improvement.

@@ -9,8 +9,6 @@
 
 #ifndef Q_MOC_RUN
 #include <boost/random/mersenne_twister.hpp>
-#include <boost/random/uniform_real.hpp>
-#include <boost/random/variate_generator.hpp>
 #endif
 
 namespace Mantid {
@@ -48,13 +46,8 @@ namespace Kernel {
   File change history is stored at: <https://github.com/mantidproject/mantid>.
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_KERNEL_DLL MersenneTwister : public PseudoRandomNumberGenerator {
-  /// Typedef for a uniform distribution of doubles
-  typedef boost::uniform_real<double> uniform_double;
-  /// Typedef for a variate generator tying together the Mersenne Twister
-  /// algorithm with a uniform disribution
-  typedef boost::variate_generator<
-      boost::mt19937 &, boost::uniform_real<double>> uniform_generator;
+class MANTID_KERNEL_DLL MersenneTwister final
+    : public PseudoRandomNumberGenerator {
 
 public:
   /// Construct the generator with an initial seed. It can be reseeded using
@@ -64,13 +57,21 @@ public:
   MersenneTwister(const size_t seedValue, const double start, const double end);
   /// Destructor
   ~MersenneTwister() override;
+
+  MersenneTwister(const MersenneTwister &) = delete;
+  MersenneTwister &operator=(const MersenneTwister &) = delete;
+
   /// Set the random number seed
   void setSeed(const size_t seedValue) override;
   /// Sets the range of the subsequent calls to next
   void setRange(const double start, const double end) override;
-  /// Generate the next random number in the sequence within the given range,
-  /// (default=[0.0,1.0]).
-  double nextValue() override;
+  /// Generate the next random number in the sequence within the given range
+  /// default range
+  inline double nextValue() override { return nextValue(m_start, m_end); }
+  /// Generate the next random number in the sequence within the given range.
+  double nextValue(double start, double end) override;
+  /// Return the next integer in the sequence within the given range
+  int nextInt(int start, int end) override;
   /// Resets the generator
   void restart() override;
   /// Saves the current state of the generator
@@ -80,13 +81,12 @@ public:
   void restore() override;
 
 private:
-  DISABLE_DEFAULT_CONSTRUCT(MersenneTwister)
-  DISABLE_COPY_AND_ASSIGN(MersenneTwister)
-
   /// The boost Mersenne Twister generator
   boost::mt19937 m_generator;
-  /// A boost distribution class to produce uniform numbers between a range
-  uniform_double m_uniform_dist;
+  /// Minimum in range
+  double m_start;
+  /// Maximum in range
+  double m_end;
   /// The current seed
   boost::mt19937::result_type m_currentSeed;
   /// A generator that will take the value when save is requested. Pointer so

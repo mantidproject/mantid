@@ -375,6 +375,16 @@ void CompositeFunction::checkFunction() {
   }
 }
 
+/**
+ * Remove all member functions
+ */
+void CompositeFunction::clear() {
+  m_nParams = 0;
+  m_paramOffsets.clear();
+  m_IFunction.clear();
+  m_functions.clear();
+}
+
 /** Add a function
  * @param f :: A pointer to the added function
  * @return The function index

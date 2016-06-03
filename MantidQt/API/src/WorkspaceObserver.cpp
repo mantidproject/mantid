@@ -76,7 +76,7 @@ namespace MantidQt
 
     /**
      * Turn on observations of workspace delete notifications from the ADS
-     * @param turnOn :: If true observe the notifications, other wise disable observation [default=true]
+     * @param turnOn :: If true observe the notifications, otherwise disable observation [default=true]
      */
     void WorkspaceObserver::observePreDelete(bool turnOn)
     {

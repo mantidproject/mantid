@@ -393,99 +393,95 @@ void ArrowMarker::setEditable(bool yes)
 	plot()->replot();
 }
 
-bool ArrowMarker::eventFilter(QObject *, QEvent *e)
-{
-	switch(e->type()) {
-		case QEvent::MouseButtonPress:
-			{
-				const QMouseEvent *me = (const QMouseEvent *)e;
-				if (me->button() != Qt::LeftButton)
-					return false;
-				QRect handler = QRect (QPoint(0,0), QSize(10, 10));
-				handler.moveCenter (startPoint());
-				if (handler.contains(me->pos()))
-				{
-					QApplication::setOverrideCursor(QCursor(Qt::SizeAllCursor), true);
-					d_op = MoveStart;
-					return true;
-				}
-				handler.moveCenter (endPoint());
-				if (handler.contains(me->pos()))
-				{
-					QApplication::setOverrideCursor(QCursor(Qt::SizeAllCursor), true);
-					d_op = MoveEnd;
-					return true;
-				}
-				int d = qRound(width() + (int)floor(headLength()*tan(M_PI*headAngle()/180.0) + 0.5));
-				if (dist(me->pos().x(),me->pos().y()) <= d)
-				{
-					QApplication::setOverrideCursor(QCursor(Qt::SizeAllCursor), true);
-					d_op = MoveBoth;
-					d_op_startat = me->pos()-startPoint();
-					return true;
-				}
-				return false;
-			}
-		case QEvent::MouseMove:
-			{
-				const QMouseEvent *me = (const QMouseEvent *)e;
-				switch(d_op) {
-					case MoveStart:
-						setStartPoint(me->pos());
-						plot()->replot();
-						return true;
-					case MoveEnd:
-						setEndPoint(me->pos());
-						plot()->replot();
-						return true;
-					case MoveBoth:
-						setEndPoint(endPoint()+me->pos()-d_op_startat-startPoint());
-						setStartPoint(me->pos()-d_op_startat);
-						plot()->replot();
-						return true;
-					default:
-						return false;
-				}
-			}
-		case QEvent::MouseButtonRelease:
-			{
-				const QMouseEvent *me = (const QMouseEvent *)e;
-				switch(d_op) {
-					case MoveStart:
-						setStartPoint(me->pos());
-						plot()->replot();
-						d_op = None;
-						QApplication::restoreOverrideCursor();
-						return true;
-					case MoveEnd:
-						setEndPoint(me->pos());
-						plot()->replot();
-						d_op = None;
-						QApplication::restoreOverrideCursor();
-						return true;
-					case MoveBoth:
-						setXValue(plot()->invTransform(xAxis(), me->pos().x()-d_op_startat.x()));
-						setYValue(plot()->invTransform(yAxis(), me->pos().y()-d_op_startat.y()));
-						plot()->replot();
-						d_op = None;
-						QApplication::restoreOverrideCursor();
-						return true;
-					default:
-						d_op = None;
-						QApplication::restoreOverrideCursor();
-						return false;
-				}
-			}
-		case QEvent::MouseButtonDblClick:
-			{
-				const QMouseEvent *me = (const QMouseEvent *)e;
-				if (me->button() != Qt::LeftButton)
-					return false;
-				LineDialog *ld = new LineDialog(this, plot()->window());
-				ld->exec();
-				return true;
-			}
-		default:
-			return false;
-	}
+bool ArrowMarker::eventFilter(QObject *, QEvent *e) {
+  switch (e->type()) {
+  case QEvent::MouseButtonPress: {
+    const QMouseEvent *me = (const QMouseEvent *)e;
+    if (me->button() != Qt::LeftButton)
+      return false;
+    QRect handler = QRect(QPoint(0, 0), QSize(10, 10));
+    handler.moveCenter(startPoint());
+    if (handler.contains(me->pos())) {
+      QApplication::changeOverrideCursor(QCursor(Qt::SizeAllCursor));
+      d_op = MoveStart;
+      return true;
+    }
+    handler.moveCenter(endPoint());
+    if (handler.contains(me->pos())) {
+      QApplication::changeOverrideCursor(QCursor(Qt::SizeAllCursor));
+      d_op = MoveEnd;
+      return true;
+    }
+    int d = qRound(
+        width() +
+        (int)floor(headLength() * tan(M_PI * headAngle() / 180.0) + 0.5));
+    if (dist(me->pos().x(), me->pos().y()) <= d) {
+      QApplication::changeOverrideCursor(QCursor(Qt::SizeAllCursor));
+      d_op = MoveBoth;
+      d_op_startat = me->pos() - startPoint();
+      return true;
+    }
+    return false;
+  }
+  case QEvent::MouseMove: {
+    const QMouseEvent *me = (const QMouseEvent *)e;
+    switch (d_op) {
+    case MoveStart:
+      setStartPoint(me->pos());
+      plot()->replot();
+      return true;
+    case MoveEnd:
+      setEndPoint(me->pos());
+      plot()->replot();
+      return true;
+    case MoveBoth:
+      setEndPoint(endPoint() + me->pos() - d_op_startat - startPoint());
+      setStartPoint(me->pos() - d_op_startat);
+      plot()->replot();
+      return true;
+    default:
+      return false;
+    }
+  }
+  case QEvent::MouseButtonRelease: {
+    const QMouseEvent *me = (const QMouseEvent *)e;
+    switch (d_op) {
+    case MoveStart:
+      setStartPoint(me->pos());
+      plot()->replot();
+      d_op = None;
+      QApplication::restoreOverrideCursor();
+      return true;
+    case MoveEnd:
+      setEndPoint(me->pos());
+      plot()->replot();
+      d_op = None;
+      QApplication::restoreOverrideCursor();
+      return true;
+    case MoveBoth:
+      setXValue(
+          plot()->invTransform(xAxis(), me->pos().x() - d_op_startat.x()));
+      setYValue(
+          plot()->invTransform(yAxis(), me->pos().y() - d_op_startat.y()));
+      plot()->replot();
+      d_op = None;
+      QApplication::restoreOverrideCursor();
+      return true;
+    default:
+      d_op = None;
+      QApplication::restoreOverrideCursor();
+      return false;
+    }
+  }
+  case QEvent::MouseButtonDblClick: {
+    const QMouseEvent *me = (const QMouseEvent *)e;
+    if (me->button() != Qt::LeftButton)
+      return false;
+    LineDialog *ld = new LineDialog(this, plot()->window());
+    ld->exec();
+    return true;
+  }
+  default:
+    return false;
+  }
 }

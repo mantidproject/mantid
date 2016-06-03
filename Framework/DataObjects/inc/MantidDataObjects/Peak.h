@@ -117,6 +117,8 @@ public:
   std::string getBankName() const override;
   int getRow() const override;
   int getCol() const override;
+  void setRow(int m_row);
+  void setCol(int m_col);
 
   Mantid::Kernel::V3D getDetPos() const override;
   double getL1() const override;

@@ -48,22 +48,22 @@ public:
 
 private:
   /// A string identifier for this function
-  std::string name() const;
+  std::string name() const override;
   /// Declare the function parameters
-  void declareParameters();
+  void declareParameters() override;
   /// Declare parameters that will never participate in the fit
-  void declareAttributes();
+  void declareAttributes() override;
   /// Set an attribute value (and possibly cache its value)
-  void setAttribute(const std::string &name, const Attribute &value);
+  void setAttribute(const std::string &name, const Attribute &value) override;
 
   /// Returns the indices of the intensity parameters
-  std::vector<size_t> intensityParameterIndices() const;
+  std::vector<size_t> intensityParameterIndices() const override;
   /// Fill in the columns of the matrix for this mass
   size_t fillConstraintMatrix(Kernel::DblMatrix &cmatrix, const size_t start,
-                              const std::vector<double> &errors) const;
+                              const std::vector<double> &errors) const override;
 
   /// Compute the function
-  void massProfile(double *result, const size_t nData) const;
+  void massProfile(double *result, const size_t nData) const override;
 
   /// Helper to allow the amplitude to be specified separately
   void massProfile(double *result, const size_t nData,

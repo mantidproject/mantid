@@ -327,14 +327,12 @@ std::vector<T> Matrix<T>::operator*(const std::vector<T> &Vec) const
   @return Matrix(This * Vec)
 */
 {
-  std::vector<T> Out;
   if (ny > Vec.size())
     throw Kernel::Exception::MisMatch<size_t>(ny, Vec.size(),
                                               "Matrix::operator*(Vec)");
 
-  Out.resize(nx);
+  std::vector<T> Out(nx);
   for (size_t i = 0; i < nx; i++) {
-    Out[i] = 0;
     for (size_t j = 0; j < ny; j++) {
       Out[i] += V[i][j] * Vec[j];
     }

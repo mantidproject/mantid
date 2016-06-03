@@ -121,6 +121,16 @@ public:
   // prePostProcSettings() const
   MOCK_CONST_METHOD0(prePostProcSettings,
                      MantidQt::CustomInterfaces::TomoReconFiltersSettings());
+
+  // virtual std::map<std::string, std::string>
+  // currentAggregateBandsParams() const
+  typedef std::map<std::string, std::string>
+      workaroundForMSVCIssueWithVariadicMacros;
+  MOCK_CONST_METHOD0(currentAggregateBandsParams,
+                     workaroundForMSVCIssueWithVariadicMacros());
+
+  // virtual void runAggregateBands(Mantid::API::IAlgorithm_sptr alg)
+  MOCK_METHOD1(runAggregateBands, void(Mantid::API::IAlgorithm_sptr alg));
 };
 
 #endif // MANTID_CUSTOMINTERFACES_TOMOGRAPHYIFACEVIEWMOCK_H

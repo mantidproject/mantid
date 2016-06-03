@@ -26,10 +26,6 @@ add_definitions ( -D_SCL_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_WARNINGS )
 #           work with wstring
 set ( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP /w34296 /w34389 /Zc:wchar_t-" )
 
-# As discussed here: http://code.google.com/p/googletest/issues/detail?id=412
-# gtest requires changing the _VARAIDIC_MAX value for VS2012 as it defaults to 5
-add_definitions ( -D_variadic_max=10 )
-
 # Set PCH heap limit, the default does not work when running msbuild from the commandline for some reason
 # Any other value lower or higher seems to work but not the default. It it is fine without this when compiling
 # in the GUI though...
@@ -44,13 +40,12 @@ set ( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Zm${VISUALSTUDIO_COMPILERHEAPLIMIT}" 
 endif()
 
 ###########################################################################
-# On Windows we want to bundle Python. The necessary libraries are in
-# THIRD_PARTY_DIR/lib/python2.7
+# On Windows we want to bundle Python.
 ###########################################################################
-set ( PYTHON_DIR ${THIRD_PARTY_DIR}/lib/python2.7 )
+set ( PYTHON_DIR ${THIRD_PARTY_DIR}/lib/python${PYTHON_MAJOR_VERSION}.${PYTHON_MINOR_VERSION} )
 ## Set the variables that FindPythonLibs would set
 set ( PYTHON_INCLUDE_PATH "${PYTHON_DIR}/Include" )
-set ( PYTHON_LIBRARIES ${PYTHON_DIR}/libs/python27.lib )
+set ( PYTHON_LIBRARIES ${PYTHON_DIR}/libs/python${PYTHON_MAJOR_VERSION}${PYTHON_MINOR_VERSION}.lib )
 
 ## The executable
 set ( PYTHON_EXECUTABLE "${PYTHON_DIR}/python.exe" CACHE FILEPATH "The location of the python executable" FORCE )
@@ -110,7 +105,7 @@ add_custom_target ( mantidpython ALL
     COMMENT "Generating mantidpython" )
 # install version
 set ( MANTIDPYTHON_PREAMBLE "set PYTHONHOME=%_BIN_DIR%\nset PATH=%_BIN_DIR%;%_BIN_DIR%\\..\\plugins;%_BIN_DIR%\\..\\PVPlugins;%PATH%" )
-configure_file ( ${PACKAGING_DIR}/mantidpython.bat.in 
+configure_file ( ${PACKAGING_DIR}/mantidpython.bat.in
     ${PROJECT_BINARY_DIR}/mantidpython.bat.install @ONLY )
 
 ###########################################################################

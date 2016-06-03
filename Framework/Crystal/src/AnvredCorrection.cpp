@@ -1,10 +1,6 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidCrystal/AnvredCorrection.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/InstrumentValidator.h"
-#include "MantidAPI/MemoryManager.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidKernel/BoundedValidator.h"
@@ -366,7 +362,6 @@ void AnvredCorrection::execEvent() {
     // When focussing in place, you can clear out old memory from the input one!
     if (inPlace) {
       eventW->getEventList(i).clear();
-      Mantid::API::MemoryManager::Instance().releaseFreeMemory();
     }
 
     prog.report();
@@ -579,8 +574,20 @@ void AnvredCorrection::scale_init(IDetector_const_sptr det,
                               not1(std::ptr_fun(::isdigit))),
                     bankNameStr.end());
   Strings::convert(bankNameStr, bank);
+  // Distance to center of detector
+  boost::shared_ptr<const IComponent> det0 = inst->getComponentByName(bankName);
+  if (inst->getName().compare("CORELLI") ==
+      0) // for Corelli with sixteenpack under bank
+  {
+    std::vector<Geometry::IComponent_const_sptr> children;
+    boost::shared_ptr<const Geometry::ICompAssembly> asmb =
+        boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(
+            inst->getComponentByName(bankName));
+    asmb->getChildren(children, false);
+    det0 = children[0];
+  }
   IComponent_const_sptr sample = inst->getSample();
-  double cosA = inst->getComponentByName(bankName)->getDistance(*sample) / L2;
+  double cosA = det0->getDistance(*sample) / L2;
   pathlength = depth / cosA;
 }
 void AnvredCorrection::scale_exec(int &bank, double &lambda, double &depth,

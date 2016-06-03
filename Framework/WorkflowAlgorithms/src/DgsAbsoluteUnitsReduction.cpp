@@ -1,6 +1,6 @@
 #include "MantidWorkflowAlgorithms/DgsAbsoluteUnitsReduction.h"
 #include "MantidWorkflowAlgorithms/WorkflowAlgorithmHelpers.h"
-#include "MantidAPI/PropertyManagerDataService.h"
+#include "MantidKernel/PropertyManagerDataService.h"
 #include "MantidKernel/Atom.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/NeutronAtom.h"

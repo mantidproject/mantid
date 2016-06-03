@@ -28,7 +28,7 @@ vtkStandardNewMacro(vtkMDHWSource)
 
     /// Constructor
     vtkMDHWSource::vtkMDHWSource()
-    : m_wsName(""), m_time(0), m_normalizationOption(AutoSelect) {
+    : m_time(0), m_normalizationOption(AutoSelect) {
   this->SetNumberOfInputPorts(0);
   this->SetNumberOfOutputPorts(1);
 }
@@ -40,8 +40,7 @@ vtkMDHWSource::~vtkMDHWSource() {}
   Setter for the workspace name.
   @param name : workspace name to extract from ADS.
 */
-void vtkMDHWSource::SetWsName(std::string name)
-{
+void vtkMDHWSource::SetWsName(const std::string &name) {
   if(m_wsName != name && name != "")
   {
     m_wsName = name;
@@ -53,14 +52,14 @@ void vtkMDHWSource::SetWsName(std::string name)
   Gets the geometry xml from the workspace. Allows object panels to configure themeselves.
   @return geometry xml const * char reference.
 */
-const char *vtkMDHWSource::GetInputGeometryXML() {
+std::string vtkMDHWSource::GetInputGeometryXML() {
   if (m_presenter == nullptr) {
-    return "";
+    return std::string();
   }
   try {
-    return m_presenter->getGeometryXML().c_str();
+    return m_presenter->getGeometryXML();
   } catch (std::runtime_error &) {
-    return "";
+    return std::string();
   }
 }
 
@@ -116,14 +115,14 @@ double vtkMDHWSource::GetMaxValue() {
  * Gets the (first) instrument which is associated with the workspace.
  * @return The name of the instrument.
  */
-const char *vtkMDHWSource::GetInstrument() {
+std::string vtkMDHWSource::GetInstrument() {
   if (nullptr == m_presenter) {
-    return "";
+    return std::string();
   }
   try {
-    return m_presenter->getInstrument().c_str();
+    return m_presenter->getInstrument();
   } catch (std::runtime_error &) {
-    return "";
+    return std::string();
   }
 }
 
@@ -299,25 +298,18 @@ void vtkMDHWSource::updateAlgorithmProgress(double progress, const std::string& 
 /*
 Getter for the workspace type name.
 */
-char* vtkMDHWSource::GetWorkspaceTypeName()
-{
+std::string vtkMDHWSource::GetWorkspaceTypeName() {
   if (m_presenter == nullptr) {
-    return const_cast<char *>("");
+    return std::string();
   }
   try {
     //Forward request on to MVP presenter
-    typeName = m_presenter->getWorkspaceTypeName();
-    return const_cast<char*>(typeName.c_str());
+    return m_presenter->getWorkspaceTypeName();
   }
   catch(std::runtime_error&)
   {
-    return const_cast<char*>("");
+    return std::string();
   }
 }
 
-const char* vtkMDHWSource::GetWorkspaceName()
-{
-  return m_wsName.c_str();
-}
-
-
+const std::string &vtkMDHWSource::GetWorkspaceName() { return m_wsName; }

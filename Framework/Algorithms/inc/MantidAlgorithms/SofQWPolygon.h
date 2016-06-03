@@ -88,7 +88,7 @@ private:
   /// Init variables cache base on the given workspace
   void initCachedValues(API::MatrixWorkspace_const_sptr workspace);
   /// Init the theta index
-  void initThetaCache(API::MatrixWorkspace_const_sptr workspace);
+  void initThetaCache(const API::MatrixWorkspace &workspace);
 
   SofQCommon m_EmodeProperties;
   //---------------------------------------------------------------------------------

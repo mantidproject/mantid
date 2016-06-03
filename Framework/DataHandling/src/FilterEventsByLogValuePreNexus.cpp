@@ -2,7 +2,6 @@
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileFinder.h"
 #include "MantidAPI/FileProperty.h"
-#include "MantidAPI/MemoryManager.h"
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
@@ -1019,9 +1018,6 @@ void FilterEventsByLogValuePreNexus::procEvents(
       PARALLEL_START_INTERUPT_REGION
       m_prog->resetNumSteps(workspace->getNumberHistograms(), 0.8, 0.95);
 
-      size_t memoryCleared = 0;
-      MemoryManager::Instance().releaseFreeMemory();
-
       // Merge all workspaces, index by index.
       PARALLEL_FOR_NO_WSP_CHECK()
       for (int iwi = 0; iwi < int(workspace->getNumberHistograms()); iwi++) {
@@ -1045,22 +1041,9 @@ void FilterEventsByLogValuePreNexus::procEvents(
           // Free up memory as you go along.
           partEl.clear(false);
         }
-
-        // With TCMalloc, release memory when you accumulate enough to make
-        // sense
-        PARALLEL_CRITICAL(FilterEventsByLogValuePreNexus_trackMemory) {
-          memoryCleared += numEvents;
-          if (memoryCleared > 10000000) // ten million events = about 160 MB
-          {
-            MemoryManager::Instance().releaseFreeMemory();
-            memoryCleared = 0;
-          }
-        }
         m_prog->report("Merging Workspaces");
       }
 
-      // Final memory release
-      MemoryManager::Instance().releaseFreeMemory();
       g_log.debug() << tim << " to merge workspaces together." << std::endl;
       PARALLEL_END_INTERUPT_REGION
     }
@@ -1072,7 +1055,6 @@ void FilterEventsByLogValuePreNexus::procEvents(
       delete[] eventVectors[i];
     }
     delete[] eventVectors;
-    // delete [] pulsetimes;
 
     m_prog->resetNumSteps(3, 0.94, 1.00);
 
@@ -1665,9 +1647,6 @@ void FilterEventsByLogValuePreNexus::filterEvents() {
       PARALLEL_START_INTERUPT_REGION
       m_prog->resetNumSteps(m_localWorkspace->getNumberHistograms(), 0.8, 0.95);
 
-      size_t memoryCleared = 0;
-      MemoryManager::Instance().releaseFreeMemory();
-
       // Merge all workspaces, index by index.
       PARALLEL_FOR_NO_WSP_CHECK()
       for (int iwi = 0; iwi < int(m_localWorkspace->getNumberHistograms());
@@ -1692,22 +1671,9 @@ void FilterEventsByLogValuePreNexus::filterEvents() {
           // Free up memory as you go along.
           partEl.clear(false);
         }
-
-        // With TCMalloc, release memory when you accumulate enough to make
-        // sense
-        PARALLEL_CRITICAL(FilterEventsByLogValuePreNexus_trackMemory) {
-          memoryCleared += numEvents;
-          if (memoryCleared > 10000000) // ten million events = about 160 MB
-          {
-            MemoryManager::Instance().releaseFreeMemory();
-            memoryCleared = 0;
-          }
-        }
         m_prog->report("Merging Workspaces");
       }
 
-      // Final memory release
-      MemoryManager::Instance().releaseFreeMemory();
       g_log.debug() << tim << " to merge workspaces together." << std::endl;
       PARALLEL_END_INTERUPT_REGION
     }
@@ -1719,7 +1685,6 @@ void FilterEventsByLogValuePreNexus::filterEvents() {
       delete[] eventVectors[i];
     }
     delete[] eventVectors;
-    // delete [] pulsetimes;
 
     m_prog->resetNumSteps(3, 0.94, 1.00);
 
@@ -2416,7 +2381,7 @@ void FilterEventsByLogValuePreNexus::readPulseidFile(
     return;
   }
 
-  std::vector<Pulse> *pulses;
+  std::vector<Pulse> pulses;
 
   // set up for reading
   // Open the file; will throw if there is any problem
@@ -2446,19 +2411,18 @@ void FilterEventsByLogValuePreNexus::readPulseidFile(
   if (m_numPulses > 0) {
     DateAndTime lastPulseDateTime(0, 0);
     this->pulsetimes.reserve(m_numPulses);
-    for (size_t i = 0; i < m_numPulses; i++) {
-      Pulse &it = (*pulses)[i];
-      DateAndTime pulseDateTime(static_cast<int64_t>(it.seconds),
-                                static_cast<int64_t>(it.nanoseconds));
+    for (const auto &pulse : pulses) {
+      DateAndTime pulseDateTime(static_cast<int64_t>(pulse.seconds),
+                                static_cast<int64_t>(pulse.nanoseconds));
       this->pulsetimes.push_back(pulseDateTime);
-      this->m_vecEventIndex.push_back(it.event_index);
+      this->m_vecEventIndex.push_back(pulse.event_index);
 
       if (pulseDateTime < lastPulseDateTime)
         this->m_pulseTimesIncreasing = false;
       else
         lastPulseDateTime = pulseDateTime;
 
-      temp = it.pCurrent;
+      temp = pulse.pCurrent;
       this->m_protonCharge.push_back(temp);
       if (temp < 0.)
         this->g_log.warning("Individual proton charge < 0 being ignored");
@@ -2468,9 +2432,6 @@ void FilterEventsByLogValuePreNexus::readPulseidFile(
   }
 
   this->m_protonChargeTot = this->m_protonChargeTot * CURRENT_CONVERSION;
-
-  // Clear the vector
-  delete pulses;
 }
 
 } // namespace DataHandling

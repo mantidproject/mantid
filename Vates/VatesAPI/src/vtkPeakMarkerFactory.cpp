@@ -204,7 +204,7 @@ stack.
       peakDataSet->Allocate(1);
       peakDataSet->SetPoints(peakPoint.GetPointer());
 
-      IPeak & peak = m_workspace->getPeak(i);
+      const IPeak &peak = m_workspace->getPeak(i);
 
       // Choose the dimensionality of the position to show
       V3D pos = getPosition(peak);
@@ -219,8 +219,8 @@ stack.
       // Pick the radius up from the factory if possible, otherwise use the user-provided value.
       if(shape.shapeName() == Mantid::DataObjects::PeakShapeSpherical::sphereShapeName())
       {
-        const Mantid::DataObjects::PeakShapeSpherical& sphericalShape = dynamic_cast<const Mantid::DataObjects::PeakShapeSpherical&>(shape);
-        double peakRadius = sphericalShape.radius();
+        double peakRadius =
+            shape.radius(Mantid::Geometry::PeakShape::Radius).get();
 
         vtkNew<vtkRegularPolygonSource> polygonSource;
         polygonSource->GeneratePolygonOff();

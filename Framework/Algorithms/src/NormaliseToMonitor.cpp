@@ -566,7 +566,7 @@ void NormaliseToMonitor::normaliseBinByBin(
   // Only create output workspace if different to input one
   if (outputWorkspace != inputWorkspace) {
     if (inputEvent) {
-      outputWorkspace = MatrixWorkspace_sptr(inputWorkspace->clone().release());
+      outputWorkspace = inputWorkspace->clone();
     } else
       outputWorkspace = WorkspaceFactory::Instance().create(inputWorkspace);
   }

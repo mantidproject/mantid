@@ -16,10 +16,10 @@
 #include "ui_EnggDiffractionQtTabSettings.h"
 
 #include <boost/scoped_ptr.hpp>
-#include <qwt_plot_curve.h>
 #include <qwt_plot_zoomer.h>
 
 // Qt classes forward declarations
+class QMessageBox;
 class QMutex;
 
 namespace MantidQt {
@@ -70,6 +70,11 @@ public:
   /// This interface's categories.
   static QString categoryInfo() { return "Diffraction"; }
 
+  void splashMessage(bool visible, const std::string &shortMsg,
+                     const std::string &description) override;
+
+  void showStatus(const std::string &sts) override;
+
   void userWarning(const std::string &warn,
                    const std::string &description) override;
 
@@ -114,9 +119,7 @@ public:
   void newCalibLoaded(const std::string &vanadiumNo, const std::string &ceriaNo,
                       const std::string &fname) override;
 
-  void writeOutCalibFile(const std::string &outFilename,
-                         const std::vector<double> &difc,
-                         const std::vector<double> &tzero) override;
+  std::string enggRunPythonCode(const std::string &pyCode) override;
 
   void enableTabs(bool enable) override;
 
@@ -150,12 +153,43 @@ public:
 
   double rebinningPulsesTime() const override;
 
-  std::string fittingRunNo() const override;
+  void setFittingRunNo(QString path) override;
+
+  std::string getFittingRunNo() const override;
 
   std::string fittingPeaksData() const override;
 
+  std::vector<std::string>
+  splitFittingDirectory(std::string &selectedfPath) override;
+
+  void setBankEmit() override;
+
+  std::string getFocusDir() override;
+
   void setDataVector(std::vector<boost::shared_ptr<QwtData>> &data,
-                     bool focused) override;
+                     bool focused, bool plotSinglePeaks) override;
+
+  void addBankItems(std::vector<std::string> splittedBaseName,
+                    QString selectedFile) override;
+
+  void addRunNoItem(std::vector<std::string> runNumVector,
+                    bool multiRun) override;
+
+  std::vector<std::string> getFittingRunNumVec() override;
+
+  void setFittingRunNumVec(std::vector<std::string> assignVec) override;
+
+  bool getFittingMultiRunMode() override;
+
+  void setFittingMultiRunMode(bool mode) override;
+
+  bool isDigit(std::string text) override;
+
+  void setDefaultBank(std::vector<std::string> splittedBaseName,
+                      QString selectedFile);
+
+  std::string fittingRunNoFactory(std::string bank, std::string fileName,
+                                  std::string &bankDir, std::string fileDir);
 
   std::string readPeaksFile(std::string fileDir);
 
@@ -164,8 +198,7 @@ public:
 
   void setPeakPickerEnabled(bool enabled);
 
-  void
-  setPeakPicker(const Mantid::API::IPeakFunction_const_sptr &peak);
+  void setPeakPicker(const Mantid::API::IPeakFunction_const_sptr &peak);
 
   double getPeakCentre() const;
 
@@ -183,15 +216,17 @@ public:
                            const std::string &spectrum,
                            const std::string &type) override;
 
-  void plotVanCurvesCalibOutput() override;
-
-  void plotDifcZeroCalibOutput(const std::string &pyCode) override;
+  void plotCalibOutput(const std::string &pyCode) override;
 
   bool saveFocusedOutputFiles() const override;
 
   int currentPlotType() const override { return m_currentType; }
 
   int currentMultiRunMode() const override { return m_currentRunMode; }
+
+signals:
+  void getBanks();
+  void setBank();
 
 private slots:
   /// for buttons, do calibrate, focus, event->histo rebin, and similar
@@ -204,7 +239,6 @@ private slots:
   void focusStopClicked();
   void rebinTimeClicked();
   void rebinMultiperiodClicked();
-  void fitClicked();
 
   // slots of the settings tab/section of the interface
   void browseInputDirCalib();
@@ -236,22 +270,23 @@ private slots:
   // slots of plot spectrum check box status
   void plotFocusStatus();
 
-  // updates the cropped calib run number with new ceria
-  void updateCroppedCalibRun();
-
   // enables the text field when appropriate bank name is selected
   void enableSpecNos();
 
   // slot of the fitting peaks per part of the interface
   void browseFitFocusedRun();
-  void fittingBankIdChanged(int idx);
+  void resetFittingMultiMode();
   void setBankIdComboBox(int idx);
   void browsePeaksToFit();
-  void fittingListWidgetBank(int idx);
-  void setListWidgetBank(int idx);
   void setPeakPick();
   void addPeakToList();
   void savePeakList();
+  void clearPeakList();
+  void fitClicked();
+  void FittingRunNo();
+  void plotSeparateWindow();
+  void setBankDir(int idx);
+  void listViewFittingRun();
 
   // show the standard Mantid help window with this interface's help
   void openHelpWin();
@@ -260,6 +295,7 @@ private:
   /// Setup the interface (tab UI)
   void initLayout() override;
   void doSetupGeneralWidgets();
+  void doSetupSplashMsg();
   void doSetupTabCalib();
   void doSetupTabFocus();
   void doSetupTabPreproc();
@@ -316,13 +352,20 @@ private:
   // multi-run focus mode type selected
   int static m_currentRunMode;
 
-  int static m_bank_Id;
+  /// indentifier for fitting multi-run or single run input
+  bool static m_fittingMutliRunMode;
+
+  // vector holding directory of focused bank file
+  std::vector<std::string> static m_fitting_runno_dir_vec;
 
   /// current calibration produced in the 'Calibration' tab
   std::string m_currentCalibFilename;
   /// calibration settings - from/to the 'settings' tab
   EnggDiffCalibSettings m_calibSettings;
   std::string m_outCalibFilename;
+
+  /// To show important non-modal messages
+  QMessageBox *m_splashMsg;
 
   /// This is in principle the only settings for 'focus'
   std::string m_focusDir;

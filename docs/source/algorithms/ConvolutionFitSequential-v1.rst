@@ -55,9 +55,9 @@ Usage
   
   print "Result has %i Spectra" %result_ws.getNumberHistograms()
   
-  print "Amplitude 0: %.5f" %(result_ws.readY(0)[0])
-  print "Amplitude 1: %.5f" %(result_ws.readY(0)[1])
-  print "Amplitude 2: %.5f" %(result_ws.readY(0)[2])
+  print "Amplitude 0: %.3f" %(result_ws.readY(0)[0])
+  print "Amplitude 1: %.3f" %(result_ws.readY(0)[1])
+  print "Amplitude 2: %.3f" %(result_ws.readY(0)[2])
   
   print "X axis at 0: %.5f" %(result_ws.readX(0)[0])
   print "X axis at 1: %.5f" %(result_ws.readX(0)[1])
@@ -74,9 +74,9 @@ Output:
   
   Result has 2 Spectra
   
-  Amplitude 0: 4.29258
-  Amplitude 1: 4.17928
-  Amplitude 2: 3.97924
+  Amplitude 0: 4.293
+  Amplitude 1: 4.179
+  Amplitude 2: 3.979
 
   X axis at 0: 0.52531
   X axis at 1: 0.72917

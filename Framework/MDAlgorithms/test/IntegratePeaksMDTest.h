@@ -156,7 +156,7 @@ public:
     TS_ASSERT_DELTA(peakWS0->getPeak(0).getIntensity(), 2.0, 1e-2);
 
     // Error is also calculated
-    TS_ASSERT_DELTA(peakWS0->getPeak(0).getSigmaIntensity(), sqrt(2.0), 1e-2);
+    TS_ASSERT_DELTA(peakWS0->getPeak(0).getSigmaIntensity(), M_SQRT2, 1e-2);
 
     // Test profile Gaussian
     std::string fnct = "Gaussian";
@@ -164,7 +164,7 @@ public:
     // More accurate integration changed values
     TS_ASSERT_DELTA(peakWS0->getPeak(0).getIntensity(), 2.0, 1e-2);
     // Error is also calculated
-    TS_ASSERT_DELTA(peakWS0->getPeak(0).getSigmaIntensity(), sqrt(2.0), 1e-2);
+    TS_ASSERT_DELTA(peakWS0->getPeak(0).getSigmaIntensity(), M_SQRT2, 1e-2);
     Poco::File(Mantid::Kernel::ConfigService::Instance().getString(
                    "defaultsave.directory") +
                "IntegratePeaksMDTest_MDEWSGaussian.dat").remove();
@@ -175,7 +175,7 @@ public:
 
     // TS_ASSERT_DELTA( peakWS0->getPeak(0).getIntensity(), 2.0, 0.2);
     // Error is also calculated
-    // TS_ASSERT_DELTA( peakWS0->getPeak(0).getSigmaIntensity(), sqrt(2.0),
+    // TS_ASSERT_DELTA( peakWS0->getPeak(0).getSigmaIntensity(), M_SQRT2,
     // 0.2);
     Poco::File(Mantid::Kernel::ConfigService::Instance().getString(
                    "defaultsave.directory") +
@@ -186,7 +186,7 @@ public:
     TS_ASSERT_DELTA( peakWS0->getPeak(0).getIntensity(), 2.0, 1e-2);
 
     // Error is also calculated
-    TS_ASSERT_DELTA( peakWS0->getPeak(0).getSigmaIntensity(), sqrt(2.0),
+    TS_ASSERT_DELTA( peakWS0->getPeak(0).getSigmaIntensity(), M_SQRT2,
     1e-2);*/
     // ------------- Integrate with 0.1 radius but IntegrateIfOnEdge
     // false------------------------
@@ -195,7 +195,7 @@ public:
     TS_ASSERT_DELTA(peakWS0->getPeak(0).getIntensity(), 2.0, 1e-2);
 
     // Error is also calculated
-    TS_ASSERT_DELTA(peakWS0->getPeak(0).getSigmaIntensity(), sqrt(2.0), 1e-2);
+    TS_ASSERT_DELTA(peakWS0->getPeak(0).getSigmaIntensity(), M_SQRT2, 1e-2);
 
     AnalysisDataService::Instance().remove("IntegratePeaksMDTest_peaks");
 

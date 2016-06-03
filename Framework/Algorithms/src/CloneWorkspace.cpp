@@ -37,7 +37,7 @@ void CloneWorkspace::exec() {
 
   if (inputMatrix || iTableWS) {
     // Workspace::clone() is polymorphic, we can use the same for all types
-    Workspace_sptr outputWS(inputWorkspace->clone().release());
+    Workspace_sptr outputWS(inputWorkspace->clone());
     setProperty("OutputWorkspace", outputWS);
   } else if (inputMD) {
     // Call the CloneMDWorkspace algo to handle MDEventWorkspace

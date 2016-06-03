@@ -61,10 +61,6 @@ size_t CostFuncFitting::nParams() const {
 void CostFuncFitting::setFittingFunction(API::IFunction_sptr function,
                                          API::FunctionDomain_sptr domain,
                                          API::FunctionValues_sptr values) {
-  if (domain->size() != values->size()) {
-    throw std::runtime_error(
-        "Function domain and values objects are incompatible.");
-  }
   m_function = function;
   m_domain = domain;
   m_values = values;

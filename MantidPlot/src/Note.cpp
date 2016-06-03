@@ -52,7 +52,8 @@ Note::Note(const QString& label, QWidget* parent, const QString& name, Qt::WFlag
 
 void Note::init()
 {
-  te = new QTextEdit(this, name());
+  te = new QTextEdit(this);
+  te->setObjectName(name());
   setWidget(te);
 
   setGeometry(0, 0, 500, 200);
@@ -128,7 +129,7 @@ QString Note::exportASCII(const QString &filename)
     }
 
     QTextStream t( &f );
-    t.setEncoding(QTextStream::UnicodeUTF8);
+    t.setCodec(QTextCodec::codecForName("UTF-8"));
     t << text();
     f.close();
   }
@@ -185,7 +186,7 @@ std::string Note::saveToProject(ApplicationWindow* app)
   tsv.writeLine(name().toStdString()) << birthDate();
   tsv.writeRaw(app->windowGeometryInfo(this));
   tsv.writeLine("WindowLabel") << windowLabel() << captionPolicy();
-  tsv.writeSection("content", te->text().stripWhiteSpace().toUtf8().constData());
+  tsv.writeSection("content", te->toPlainText().trimmed().toUtf8().constData());
   tsv.writeRaw("</note>");
   return tsv.outputLines();
 }

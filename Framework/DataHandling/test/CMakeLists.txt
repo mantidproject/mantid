@@ -10,6 +10,7 @@ if ( CXXTEST_FOUND )
                         ../../TestHelpers/src/StartFrameworkManager.cpp
                         ../../TestHelpers/src/InstrumentCreationHelper.cpp
                         ../../TestHelpers/src/WorkspaceCreationHelper.cpp
+                        NXcanSASTestHelper.cpp
       )
 
   cxxtest_add_test ( DataHandlingTest ${TEST_FILES} )

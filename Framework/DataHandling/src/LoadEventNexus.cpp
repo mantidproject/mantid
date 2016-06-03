@@ -1,12 +1,8 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidDataHandling/LoadEventNexus.h"
 #include "MantidDataHandling/EventWorkspaceCollection.h"
 
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
-#include "MantidAPI/MemoryManager.h"
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/SpectrumDetectorMapping.h"
 #include "MantidGeometry/Instrument.h"
@@ -408,11 +404,6 @@ public:
       alg->bad_tofs += badTofs;
       alg->discarded_events += my_discarded_events;
     }
-
-    // For Linux with tcmalloc, make sure memory goes back;
-    // but don't call if more than 15% of memory is still available, since that
-    // slows down the loading.
-    MemoryManager::Instance().releaseFreeMemoryIfAbove(0.85);
 
 #ifndef _WIN32
     alg->getLogger().debug() << "Time to process " << entry_name << " "
@@ -1171,12 +1162,22 @@ void LoadEventNexus::init() {
                                            Direction::Input),
       "If present, load the monitors as events. '''WARNING:''' WILL "
       "SIGNIFICANTLY INCREASE MEMORY USAGE (optional, default False). ");
-  declareProperty(make_unique<PropertyWithValue<bool>>("LoadEventMonitors",
-                                                       true, Direction::Input),
-                  "blablabla");
-  declareProperty(make_unique<PropertyWithValue<bool>>("LoadHistoMonitors",
-                                                       true, Direction::Input),
-                  "blablabla");
+
+  declareProperty("LoadEventMonitors", true,
+                  "Load event monitor in NeXus file both event monitor and "
+                  "histogram monitor found in NeXus file."
+                  "If both of LoadEventMonitor and LoadHistoMonitor are true, "
+                  "or both of them are false,"
+                  "then it is in the auto mode such that any existing monitor "
+                  "will be loaded.");
+
+  declareProperty("LoadHistoMonitors", true,
+                  "Load histogram monitor in NeXus file both event monitor and "
+                  "histogram monitor found in NeXus file."
+                  "If both of LoadEventMonitor and LoadHistoMonitor are true, "
+                  "or both of them are false,"
+                  "then it is in the auto mode such that any existing monitor "
+                  "will be loaded.");
 
   declareProperty(make_unique<PropertyWithValue<double>>(
                       "FilterMonByTofMin", EMPTY_DBL(), Direction::Input),
@@ -1388,9 +1389,6 @@ void LoadEventNexus::exec() {
       this->runLoadMonitors();
     }
   }
-
-  // Some memory feels like it sticks around (on Linux). Free it.
-  MemoryManager::Instance().releaseFreeMemory();
 
   return;
 }

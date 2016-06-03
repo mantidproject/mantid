@@ -5,15 +5,6 @@ UI & Usability Changes
 .. contents:: Table of Contents
    :local:
 
-Installation
-------------
-
-Windows
-#######
-
-OS X
-####
-
 User Interface
 --------------
 
@@ -33,8 +24,41 @@ Line plots
 .. figure::  ../../images/R37PlotAllErrorsOption.png
    :align: center
 
+3D plots from group workspaces
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+- For single-spectrum data, the choice of spectrum number to plot has been disabled because it has only one possible answer.
+
+SliceViewer Improvements
+########################
+
+-  The Matlab defulat colour map viridis has been added to Mantid
+
+-  The SliceViewer is now able to display ellipsoidal peak shapes. Note
+   that the displayed ellipse is the result of the viewing plane cutting
+   the peak ellipsoid.
+
+.. figure::  ../../images/Elliptical_peaks_slice_viewer.png
+   :align: center
+
+VSI Improvements
+################
+
+-  The representation of points in the splatter plot was changed from opaque cubes to translucent spheres.
+
+.. figure::  ../../images/VSIPointGaussianRepresentation.png
+   :align: center
+
+- The sphere and ellipse wireframes have been simplified so that it is easier to see the enclosed points.
+
+.. figure:: ../../images/VSIEllipses.png
+    :align: center
+
+- Removed the error-prone right-click option to view peaks workspaces in the VSI. One should load a MDWorkspace,
+  then drag the corresponding peaks workspace into the VSI window.
+
+
 Instrument View
-###############
+---------------
 
 -  The instrument view is now exposed to python as a stand-alone widget.
    In it's current implementation, the instrument view depends on the
@@ -91,23 +115,33 @@ Instrument View
         ConfigService.setFacility(facility)
 
 
-Algorithm Toolbox
-#################
-
 Scripting Window
-################
+----------------
 
 - If `MantidPlot` was launched with the `-x` option but the script was already opened by the recent files list then
-  the wrong script would be executed. This bug has been fixed. `#15682 <https://github.com/mantidproject/mantid/issue/15682>`_
+  the wrong script would be executed. This bug has been fixed. `#15682 <https://github.com/mantidproject/mantid/issues/15682>`_
 
 Documentation
-#############
+-------------
 
 - Documentation has been added for fitting functions :ref:`BSpline <func-BSpline>` and
   :ref:`CubicSpline <func-CubicSpline>` then attempts to be more verbose about their use and how to
   implement them. The Documentation now contains example images of splines
   and also concrete equations that describe them
   `#15064 <https://github.com/mantidproject/mantid/pull/15064>`_
+
+- The documentation of several Nexus loading algorithms has been improved with the addition of a table that shows how various
+  items of data move from the Nexus file to the workspace. These algorithms are
+  :ref:`LoadEventNexus <algm-LoadEventNexus>`,
+  :ref:`LoadISISNexus <algm-LoadISISNexus>`,
+  :ref:`LoadMcStas <algm-LoadMcStas>`,
+  :ref:`LoadMuonNexus <algm-LoadMuonNexus>` (both versions) and
+  :ref:`LoadNexusLogs <algm-LoadNexusLogs>`.
+  Also :ref:`LoadNexus <algm-LoadNexus>` documentation now explains how it determines which load algorithm to run.
+
+- The documentation for all calibration approaches has been pulled together, improved and expanded :ref:`here<Calibration>`.
+
+
 
 Bugs Resolved
 -------------
@@ -117,39 +151,19 @@ Bugs Resolved
 
 -  VSI: The TECHNIQUE-DEPENDENT initial view now checks for Spectroscopy before Neutron Diffraction.
 
+-  A bug was fixed in the Fit property browser where the "Plot Difference" and other checkboxes affected the display of parameter errors. Now only the "Show Parameter Errors" box will control this.
+
 -  Plots from tables: the axis labels correspond to the data plotted and not just the first two columns.
 
 -  Plots from tables: the title of the plot is the title of the TableWorkspace rather than the default "Table" (this is useful when several tables and plots are open)
 
 -  Plots from tables auto-update when the TableWorkspace is replaced in the ADS. If extra rows are added then the new points are added to the graph.
 
-SliceViewer Improvements
-------------------------
+- The Fit property browser (Fit Function window) in MantidPlot now supports fitting data plotted from a TableWorkspace.
 
--  The SliceViewer is now able to display ellipsoidal peak shapes. Note
-   that the displayed ellipse is the result of the viewing plane cutting
-   the peak ellipsoid.
+- Multi-dataset fit interface: a bug was fixed in the "edit local parameter" dialog where entering a value and selecting "fix" (for example) would truncate the final digit of the entered value.
 
-.. figure::  ../../images/Elliptical_peaks_slice_viewer.png
-   :align: center
-
-VSI Improvements
-----------------
-
--  The representation of points in the splatter plot was changed from opaque cubes to translucent spheres.
-
-.. figure::  ../../images/VSIPointGaussianRepresentation.png
-   :align: center
-
-- The sphere and ellipse wireframes have been simplified so that it is easier to see the enclosed points.
-
-.. figure:: ../../images/VSIEllipses.png
-    :align: center
-
-- Removed the error-prone right-click option to view peaks workspaces in the VSI. One should load a MDWorkspace,
-  then drag the corresponding peaks workspace into the VSI window.
-
-|
+- Multi-dataset fit interface: a bug was fixed where global parameters would lose their ties when a fit was run or the dataset was changed.
 
 Full list of
 `GUI <http://github.com/mantidproject/mantid/pulls?q=is%3Apr+milestone%3A%22Release+3.7%22+is%3Amerged+label%3A%22Component%3A+GUI%22>`_

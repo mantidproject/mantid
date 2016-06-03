@@ -1,13 +1,52 @@
 #include "MantidKernel/Material.h"
+#include "MantidKernel/Atom.h"
 #include "MantidKernel/NeutronAtom.h"
+#include <boost/python/tuple.hpp>
+#include <boost/python/list.hpp>
 #include <boost/python/class.hpp>
 #include <boost/python/copy_const_reference.hpp>
 #include <boost/python/make_function.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
 
 using Mantid::Kernel::Material;
+using Mantid::PhysicalConstants::Atom;
 using Mantid::PhysicalConstants::NeutronAtom;
 using namespace boost::python;
+
+namespace {
+/**
+ *
+ * @param chemicalFormula the chemical formula of the material (compound)
+ * @return a tuple consisting of a list of the elements and their proportions
+ */
+tuple chemicalFormula(Material &self) {
+  std::string chemicalSymbols = self.name();
+  Material::ChemicalFormula CF =
+      Material::parseChemicalFormula(chemicalSymbols);
+  list atoms, numberAtoms;
+  for (size_t i = 0; i < CF.atoms.size(); i++) {
+    atoms.append(CF.atoms[i]);
+    numberAtoms.append(CF.numberAtoms[i]);
+  }
+  return make_tuple(atoms, numberAtoms);
+}
+
+/**
+ *
+ * @param rmm the relative molecular (formula) mass of this material
+ * @return the relative molecular mass
+ */
+double relativeMolecularMass(Material &self) {
+  std::string chemicalSymbols = self.name();
+  Material::ChemicalFormula CF =
+      Material::parseChemicalFormula(chemicalSymbols);
+  double retval = 0.;
+  for (size_t i = 0; i < CF.atoms.size(); i++) {
+    retval += CF.atoms[i]->mass * CF.numberAtoms[i];
+  }
+  return retval;
+}
+}
 
 void export_Material() {
   register_ptr_to_python<Material *>();
@@ -40,5 +79,8 @@ void export_Material() {
            (double (Material::*)(double) const)(&Material::absorbXSection),
            (arg("self"),
             arg("lambda") = static_cast<double>(NeutronAtom::ReferenceLambda)),
-           "Absorption Cross-Section");
+           "Absorption Cross-Section")
+      .def("chemicalFormula", &chemicalFormula, arg("self"), "Chemical Formula")
+      .def("relativeMolecularMass", &relativeMolecularMass, arg("self"),
+           "Relative Molecular Mass");
 }

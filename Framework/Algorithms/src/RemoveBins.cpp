@@ -288,7 +288,7 @@ void RemoveBins::calculateDetectorPosition(const int &index, double &l1,
   if (!det->isMonitor()) {
     l2 = det->getDistance(*sample);
     // The scattering angle for this detector (in radians).
-    twoTheta = m_inputWorkspace->detectorTwoTheta(det);
+    twoTheta = m_inputWorkspace->detectorTwoTheta(*det);
   } else // If this is a monitor then make l1+l2 = source-detector distance and
          // twoTheta=0
   {

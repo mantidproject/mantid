@@ -90,6 +90,44 @@ public:
     TS_ASSERT(mult2.m_2.gsl() == m2.gsl());
   }
 
+  void test_zeros() {
+    ComplexMatrix m(10, 12);
+    for (size_t i = 0; i < m.size1(); ++i) {
+      for (size_t j = 0; j < m.size2(); ++j) {
+        ComplexType value = m(i, j);
+        TS_ASSERT_EQUALS(value.real(), 0.0);
+        TS_ASSERT_EQUALS(value.imag(), 0.0);
+      }
+    }
+  }
+
+  void test_resize() {
+    ComplexMatrix m(5, 6);
+    for (size_t i = 0; i < m.size1(); ++i) {
+      for (size_t j = 0; j < m.size2(); ++j) {
+        ComplexType value(static_cast<double>(i), static_cast<double>(j));
+      }
+    }
+
+    m.resize(12, 10);
+    for (size_t i = 0; i < m.size1(); ++i) {
+      for (size_t j = 0; j < m.size2(); ++j) {
+        ComplexType value = m(i, j);
+        TS_ASSERT_EQUALS(value.real(), 0.0);
+        TS_ASSERT_EQUALS(value.imag(), 0.0);
+      }
+    }
+
+    m.resize(3, 4);
+    for (size_t i = 0; i < m.size1(); ++i) {
+      for (size_t j = 0; j < m.size2(); ++j) {
+        ComplexType value = m(i, j);
+        TS_ASSERT_EQUALS(value.real(), 0.0);
+        TS_ASSERT_EQUALS(value.imag(), 0.0);
+      }
+    }
+  }
+
   void test_multiply_two_matrices() {
     ComplexMatrix m1(2, 2);
     m1.set(0, 0, v1);

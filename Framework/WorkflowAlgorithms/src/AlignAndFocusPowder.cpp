@@ -4,7 +4,7 @@
 #include "MantidWorkflowAlgorithms/AlignAndFocusPowder.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/PropertyManagerDataService.h"
+#include "MantidKernel/PropertyManagerDataService.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/GroupingWorkspace.h"
 #include "MantidDataObjects/MaskWorkspace.h"
@@ -323,7 +323,7 @@ void AlignAndFocusPowder::exec() {
   m_outputW = getProperty("OutputWorkspace");
   if (m_inputEW) {
     if (m_outputW != m_inputW) {
-      m_outputEW = EventWorkspace_sptr(m_inputEW->clone().release());
+      m_outputEW = m_inputEW->clone();
     }
     m_outputEW = boost::dynamic_pointer_cast<EventWorkspace>(m_outputW);
   } else {

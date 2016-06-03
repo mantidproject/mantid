@@ -8,7 +8,7 @@
 #include "Poco/Path.h"
 #include "Poco/String.h"
 #include "MantidAPI/AlgorithmProperty.h"
-#include "MantidAPI/PropertyManagerDataService.h"
+#include "MantidKernel/PropertyManagerDataService.h"
 #include "MantidKernel/PropertyManager.h"
 
 namespace Mantid {

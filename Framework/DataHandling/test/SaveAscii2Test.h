@@ -4,7 +4,9 @@
 #include <cxxtest/TestSuite.h>
 #include "MantidDataHandling/SaveAscii2.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/TextAxis.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <fstream>
@@ -260,6 +262,41 @@ public:
     AnalysisDataService::Instance().remove(m_name);
   }
 
+  void test_non_spectrum_axisworkspace() {
+    Mantid::DataObjects::Workspace2D_sptr wsToSave;
+    writeSampleWS(wsToSave, false);
+
+    SaveAscii2 save;
+    std::string filename = initSaveAscii2(save);
+
+    TS_ASSERT_THROWS_NOTHING(save.setProperty("WriteSpectrumID", true));
+    TS_ASSERT_THROWS_NOTHING(save.execute());
+
+    // has the algorithm written a file to disk?
+    TS_ASSERT(Poco::File(filename).exists());
+
+    // Now make some checks on the content of the file
+    std::ifstream in(filename.c_str());
+    int specID;
+    std::string header1, header2, header3, separator, comment;
+
+    // Test that the first few column headers, separator and first two bins are
+    // as expected
+    in >> comment >> header1 >> separator >> header2 >> separator >> header3 >>
+        specID;
+    TS_ASSERT_EQUALS(comment, "#");
+    TS_ASSERT_EQUALS(separator, ",");
+    TS_ASSERT_EQUALS(header1, "X");
+    TS_ASSERT_EQUALS(header2, "Y");
+    TS_ASSERT_EQUALS(header3, "E");
+    TS_ASSERT_EQUALS(specID, 1);
+
+    in.close();
+
+    Poco::File(filename).remove();
+    AnalysisDataService::Instance().remove(m_name);
+  }
+
   void testExec_no_header() {
     Mantid::DataObjects::Workspace2D_sptr wsToSave;
     writeSampleWS(wsToSave);
@@ -419,6 +456,20 @@ public:
     // the algorithm didn't run so there should be no file
     // the algorithm shouldn't have written a file to disk
     TS_ASSERT(!Poco::File(filename).exists());
+
+    AnalysisDataService::Instance().remove(m_name);
+  }
+
+  void test_fail_spectrum_number_in_meta_data_for_non_spectrum_axis_ws() {
+    Mantid::DataObjects::Workspace2D_sptr wsToSave;
+    writeSampleWS(wsToSave, false);
+
+    SaveAscii2 save;
+    std::string filename = initSaveAscii2(save);
+
+    TS_ASSERT_THROWS_NOTHING(
+        save.setProperty("SpectrumMetaData", "SpectrumNumber"));
+    TS_ASSERT_THROWS_ANYTHING(save.execute());
 
     AnalysisDataService::Instance().remove(m_name);
   }
@@ -687,7 +738,8 @@ public:
   }
 
 private:
-  void writeSampleWS(Mantid::DataObjects::Workspace2D_sptr &wsToSave) {
+  void writeSampleWS(Mantid::DataObjects::Workspace2D_sptr &wsToSave,
+                     const bool &isSpectra = true) {
     wsToSave = boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(
         WorkspaceFactory::Instance().create("Workspace2D", 2, 3, 3));
     for (int i = 0; i < 2; i++) {
@@ -699,6 +751,13 @@ private:
         Y[j] = (i + 1) * (2. + 4. * X[j]);
         E[j] = 1.;
       }
+    }
+
+    if (!isSpectra) {
+      auto textAxis = new TextAxis(2);
+      textAxis->setLabel(0, "Test Axis 1");
+      textAxis->setLabel(1, "Test Axis 2");
+      wsToSave->replaceAxis(1, textAxis);
     }
 
     AnalysisDataService::Instance().add(m_name, wsToSave);

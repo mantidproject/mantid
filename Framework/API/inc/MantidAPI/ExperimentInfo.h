@@ -5,9 +5,9 @@
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
 
-#include "MantidGeometry/Instrument_fwd.h"
-#include "MantidGeometry/IDetector_fwd.h"
 #include "MantidAPI/SpectraDetectorTypes.h"
+#include "MantidGeometry/IDetector.h"
+#include "MantidGeometry/Instrument_fwd.h"
 
 #include "MantidKernel/DeltaEMode.h"
 

@@ -54,7 +54,7 @@ namespace Geometry {
 using Kernel::V3D;
 
 Intersection::Intersection(std::unique_ptr<Rule> Ix, std::unique_ptr<Rule> Iy)
-    : Rule(), A(std::move(Iy)), B(std::move(Ix))
+    : Rule(), A(std::move(Ix)), B(std::move(Iy))
 /**
   Intersection constructor from two Rule ptrs.
   - Sets A,B's parents to *this

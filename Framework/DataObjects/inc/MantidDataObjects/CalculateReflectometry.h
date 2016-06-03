@@ -13,14 +13,9 @@ namespace DataObjects {
 class CalculateReflectometry {
 
 protected:
-  const double to_radians_factor;
+  const double to_radians_factor = M_PI / 180.0;
 
 public:
-  /**
-   Constructor
-   */
-  CalculateReflectometry() : to_radians_factor(M_PI / 180.0) {}
-
   virtual ~CalculateReflectometry() = default;
 
   /**

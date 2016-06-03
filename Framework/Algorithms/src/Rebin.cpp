@@ -147,7 +147,7 @@ void Rebin::exec() {
 
     if (PreserveEvents) {
       if (!inPlace) {
-        outputWS = MatrixWorkspace_sptr(inputWS->clone().release());
+        outputWS = inputWS->clone();
       }
       auto eventOutputWS =
           boost::dynamic_pointer_cast<EventWorkspace>(outputWS);
@@ -270,7 +270,7 @@ void Rebin::exec() {
       PARALLEL_END_INTERUPT_REGION
     }
     PARALLEL_CHECK_INTERUPT_REGION
-    outputWS->isDistribution(dist);
+    outputWS->setDistribution(dist);
 
     // Now propagate any masking correctly to the output workspace
     // More efficient to have this in a separate loop because

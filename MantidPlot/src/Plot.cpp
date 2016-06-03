@@ -503,7 +503,7 @@ int Plot::closestCurve(int xpos, int ypos, int &dist, int &point)
 	int key = -1;
 	for (QMap<int, QwtPlotItem *>::iterator iter = d_curves.begin(); iter != d_curves.end(); ++iter )
 	{
-		QwtPlotItem *item = (QwtPlotItem *)iter.data();
+		QwtPlotItem *item = (QwtPlotItem *)iter.value();
 		if (!item)
 			continue;
 

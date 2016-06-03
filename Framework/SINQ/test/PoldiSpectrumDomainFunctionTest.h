@@ -106,7 +106,7 @@ public:
     function.setDecoratedFunction("Gaussian");
     function.setParameter("Height", 679.59369981039407842726); // 1.9854805);
     function.setParameter("Sigma",
-                          0.0027446316797104233 / (2.0 * sqrt(2.0 * log(2.0))));
+                          0.0027446316797104233 / (2.0 * sqrt(2.0 * M_LN2)));
     function.setParameter("PeakCentre", 1.1086444);
 
     function.m_deltaT = 3.0;
@@ -153,7 +153,7 @@ public:
     function.setDecoratedFunction("Gaussian");
     function.setParameter("Height", 679.59369981039407842726); // 1.9854805);
     function.setParameter("Sigma",
-                          0.0027446316797104233 / (2.0 * sqrt(2.0 * log(2.0))));
+                          0.0027446316797104233 / (2.0 * sqrt(2.0 * M_LN2)));
     function.setParameter("PeakCentre", 1.1086444);
 
     function.m_deltaT = 3.0;
@@ -200,8 +200,8 @@ public:
     function->initialize();
     function->setDecoratedFunction("Gaussian");
     function->setParameter("Height", 1.9854805);
-    function->setParameter("Sigma", 0.0027446316797104233 /
-                                        (2.0 * sqrt(2.0 * log(2.0))));
+    function->setParameter("Sigma",
+                           0.0027446316797104233 / (2.0 * sqrt(2.0 * M_LN2)));
     function->setParameter("PeakCentre", 1.1086444);
 
     function->m_deltaT = 3.0;

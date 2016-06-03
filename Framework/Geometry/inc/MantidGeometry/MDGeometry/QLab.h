@@ -39,6 +39,7 @@ public:
   QLab();
   Mantid::Kernel::UnitLabel getUnitLabel() const override;
   const Mantid::Kernel::MDUnit &getMDUnit() const override;
+  bool setMDUnit(const Mantid::Kernel::MDUnit &newUnit) override;
   bool canConvertTo(const Mantid::Kernel::MDUnit &otherUnit) const override;
   bool isQ() const override;
   bool isSameType(const MDFrame &frame) const override;

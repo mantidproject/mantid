@@ -13,17 +13,12 @@ DECLARE_ALGORITHM(EQSANSResolution)
  * Double Boltzmann fit to the TOF resolution as a function of wavelength
  */
 double EQSANSResolution::getTOFResolution(double wl) {
-  double y0 = -388;
-  double A = 3838;
-  double frac = 0.04398;
-  double x01 = 3.392;
-  double x02 = 134.3;
-  double k1 = -0.5587;
-  double k2 = -65.46;
-
-  return y0 +
-         A * (frac / (1 + std::exp((wl - x01) / k1)) +
-              (1 - frac) / (1 + std::exp((wl - x02) / k2)));
+  if (wl > 2.0) {
+    return 0.0148 * wl * wl * wl - 0.5233 * wl * wl + 6.4797 * wl + 231.99;
+  } else {
+    return 392.31 * pow(wl, 6) - 3169.3 * pow(wl, 5) + 10445 * pow(wl, 4) -
+           17872 * wl * wl * wl + 16509 * wl * wl - 7448.4 * wl + 1280.5;
+  }
 }
 
 } // namespace Algorithms

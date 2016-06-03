@@ -1,31 +1,31 @@
+#include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/Column.h"
 #include "MantidAPI/ColumnFactory.h"
-#include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include <nexus/NeXusException.hpp>
-#include <nexus/NeXusFile.hpp>
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceProperty.h"
-#include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidDataObjects/Peak.h"
 #include "MantidDataObjects/TableColumn.h"
 #include "MantidDataObjects/TableWorkspace.h"
-#include "MantidDataObjects/Peak.h"
-#include "MantidKernel/Quat.h"
-#include "MantidKernel/V3D.h"
+#include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/PhysicalConstants.h"
+#include "MantidKernel/Quat.h"
 #include "MantidKernel/Unit.h"
-#include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidKernel/V3D.h"
 #include <algorithm>
 #include <boost/shared_ptr.hpp>
+#include <cmath>
+#include <cstdio>
+#include <cstdlib>
 #include <exception>
 #include <fstream>
-#include <math.h>
+#include <nexus/NeXusException.hpp>
+#include <nexus/NeXusFile.hpp>
 #include <ostream>
-#include <stdio.h>
-#include <stdlib.h>
 #include <string>
 
 using namespace Mantid::API;
@@ -841,6 +841,12 @@ API::LogManager_sptr PeaksWorkspace::logs() {
 
   m_logCash = API::LogManager_sptr(&(this->mutableRun()), NullDeleter());
   return m_logCash;
+}
+
+ITableWorkspace *
+PeaksWorkspace::doCloneColumns(const std::vector<std::string> &) const {
+  throw Kernel::Exception::NotImplementedError(
+      "PeaksWorkspace cannot clone columns.");
 }
 }
 }

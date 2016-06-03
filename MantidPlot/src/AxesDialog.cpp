@@ -738,9 +738,9 @@ void AxesDialog::showGridPage()
 /**shows the General tab
 *
 */
-void AxesDialog::showGeneralPage()
-{
-  m_generalDialog->showPage(m_generalPage);
+void AxesDialog::showGeneralPage() {
+  const int generalIndex = m_generalDialog->indexOf(m_generalPage);
+  m_generalDialog->setCurrentIndex(generalIndex);
 }
 
 /**launches the dialog
@@ -785,12 +785,11 @@ void AxesDialog::setCurrentScale(int axisPos)
       break;
     }
   }
-  if (m_generalDialog->currentPage() == dynamic_cast<QWidget*>(m_scalesPage))
-  {
+  if (m_generalDialog->currentWidget() ==
+      dynamic_cast<QWidget *>(m_scalesPage)) {
     m_lstScales->setCurrentRow(axis);
-  }
-  else if (m_generalDialog->currentPage() == dynamic_cast<QWidget*>(m_axesPage))
-  {
+  } else if (m_generalDialog->currentWidget() ==
+             dynamic_cast<QWidget *>(m_axesPage)) {
     m_lstAxes->setCurrentRow(axis);
   }
 }
@@ -992,9 +991,9 @@ void AxesDialog::initGridPage()
 
   bottombox->addWidget(new QLabel(tr("Apply To")), 0, 0, Qt::AlignRight);
   m_cmbApplyGridFormat = new QComboBox();
-  m_cmbApplyGridFormat->insertItem(tr("This Layer"));
-  m_cmbApplyGridFormat->insertItem(tr("This Window"));
-  m_cmbApplyGridFormat->insertItem(tr("All Windows"));
+  m_cmbApplyGridFormat->insertItem(0, tr("This Layer"));
+  m_cmbApplyGridFormat->insertItem(1, tr("This Window"));
+  m_cmbApplyGridFormat->insertItem(2, tr("All Windows"));
   bottombox->addWidget(m_cmbApplyGridFormat, 0, 1, Qt::AlignLeft);
 
   m_chkAntialiseGrid = new QCheckBox(tr("An&tialised"));
@@ -1082,7 +1081,7 @@ void AxesDialog::setModified()
 */
 void AxesDialog::changeMinorTicksLength(int minLength)
 {
-  m_spnMajorTicksLength->setMinValue(minLength);
+  m_spnMajorTicksLength->setMinimum(minLength);
 }
 
 /** sets the Maximum length of minor ticks
@@ -1091,7 +1090,7 @@ void AxesDialog::changeMinorTicksLength(int minLength)
 */
 void AxesDialog::changeMajorTicksLength(int majLength)
 {
-  m_spnMinorTicksLength->setMaxValue(majLength);
+  m_spnMinorTicksLength->setMaximum(majLength);
 }
 
 /** makes sure the selected axis on the scale and axis tabs are the same

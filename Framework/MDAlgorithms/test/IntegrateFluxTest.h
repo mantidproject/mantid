@@ -403,7 +403,7 @@ private:
       }
       // std::cerr << std::accumulate( y.begin(), y.end(), 0.0 ) << std::endl;
     }
-    ws->isDistribution(true);
+    ws->setDistribution(true);
     Mantid::API::AnalysisDataService::Instance().addOrReplace(wsName, ws);
   }
 

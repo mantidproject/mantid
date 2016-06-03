@@ -13,7 +13,8 @@ namespace PhysicalConstants {
  * to the NeutronAtom information by a pointer. The information in this table
  * is generated using the DANSE project's periodictable python module.
  */
-struct MANTID_KERNEL_DLL Atom {
+class MANTID_KERNEL_DLL Atom {
+public:
   /// Standard constructor
   Atom(const std::string &symbol, const uint16_t z, const uint16_t a,
        const double abundance, const double mass, const double density);

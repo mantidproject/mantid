@@ -1925,7 +1925,7 @@ void LeBailFit::setupBuiltInRandomWalkStrategy() {
   m_funcParameters["Alph1t"].mcA0 = 0.05;
 
   // c) Beta
-  for (auto parname : betas) {
+  for (const auto &parname : betas) {
     m_funcParameters[parname].mcA1 = 1.0;
     m_funcParameters[parname].nonnegative = false;
   }

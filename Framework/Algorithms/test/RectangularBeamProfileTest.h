@@ -1,0 +1,93 @@
+#ifndef MANTID_ALGORITHMS_RECTANGULARBEAMPROFILETEST_H_
+#define MANTID_ALGORITHMS_RECTANGULARBEAMPROFILETEST_H_
+
+#include <cxxtest/TestSuite.h>
+
+#include "MantidAlgorithms/SampleCorrections/RectangularBeamProfile.h"
+#include "MonteCarloTesting.h"
+#include "MantidGeometry/Instrument/ReferenceFrame.h"
+
+using Mantid::Algorithms::RectangularBeamProfile;
+
+class RectangularBeamProfileTest : public CxxTest::TestSuite {
+public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static RectangularBeamProfileTest *createSuite() {
+    return new RectangularBeamProfileTest();
+  }
+  static void destroySuite(RectangularBeamProfileTest *suite) { delete suite; }
+
+  //----------------------------------------------------------------------------
+  // Success cases
+  //----------------------------------------------------------------------------
+  void test_GeneratePoint_Respects_ReferenceFrame() {
+    using Mantid::Kernel::V3D;
+    using namespace MonteCarloTesting;
+    using namespace ::testing;
+
+    const double width(0.1), height(0.2);
+    // Test-frame is non-standard X=beam
+    RectangularBeamProfile profile(createTestFrame(), V3D(), width, height);
+
+    MockRNG rng;
+    const double rand(0.75);
+    EXPECT_CALL(rng, nextValue())
+        .Times(Exactly(2))
+        .WillRepeatedly(Return(rand));
+    auto ray = profile.generatePoint(rng);
+    TS_ASSERT_EQUALS(V3D(0.0, 0.025, 0.05), ray.startPos);
+    TS_ASSERT_EQUALS(V3D(1.0, 0, 0), ray.unitDir);
+  }
+
+  void test_GeneratePoint_Respects_Center() {
+    using Mantid::Kernel::V3D;
+    using namespace MonteCarloTesting;
+    using namespace ::testing;
+
+    const double width(0.1), height(0.2);
+    const V3D center(1, 2, -3);
+    RectangularBeamProfile profile(createTestFrame(), center, width, height);
+
+    MockRNG rng;
+    const double rand(0.75);
+    EXPECT_CALL(rng, nextValue())
+        .Times(Exactly(2))
+        .WillRepeatedly(Return(rand));
+    auto ray = profile.generatePoint(rng);
+    TS_ASSERT_EQUALS(V3D(1.0, 2.025, -2.95), ray.startPos);
+    TS_ASSERT_EQUALS(V3D(1.0, 0, 0), ray.unitDir);
+  }
+
+  void test_GeneratePoint_Uses_2_Different_Random_Numbers() {
+    using Mantid::Kernel::V3D;
+    using namespace MonteCarloTesting;
+    using namespace ::testing;
+
+    const double width(0.1), height(0.2);
+    const V3D center(1, 2, -3);
+    RectangularBeamProfile profile(createTestFrame(), center, width, height);
+
+    MockRNG rng;
+    const double rand1(0.75), rand2(0.25);
+    EXPECT_CALL(rng, nextValue())
+        .Times(Exactly(2))
+        .WillOnce(Return(rand1))
+        .WillRepeatedly(Return(rand2));
+    auto ray = profile.generatePoint(rng);
+    TS_ASSERT_EQUALS(V3D(1.0, 1.975, -2.95), ray.startPos);
+    TS_ASSERT_EQUALS(V3D(1.0, 0, 0), ray.unitDir);
+  }
+
+private:
+  Mantid::Geometry::ReferenceFrame createTestFrame() {
+    using Mantid::Geometry::ReferenceFrame;
+    using Mantid::Geometry::PointingAlong;
+    using Mantid::Geometry::Handedness;
+
+    return ReferenceFrame(PointingAlong::Z, PointingAlong::X, Handedness::Right,
+                          "source");
+  }
+};
+
+#endif /* MANTID_ALGORITHMS_RECTANGULARBEAMPROFILETEST_H_ */

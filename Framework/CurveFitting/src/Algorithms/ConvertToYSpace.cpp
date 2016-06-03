@@ -78,7 +78,7 @@ DetectorParams ConvertToYSpace::getDetectorParameters(
   detpar.l1 = sample->getDistance(*source);
   detpar.l2 = det->getDistance(*sample);
   detpar.pos = det->getPos();
-  detpar.theta = ws->detectorTwoTheta(det);
+  detpar.theta = ws->detectorTwoTheta(*det);
   detpar.t0 = ConvertToYSpace::getComponentParameter(det, pmap, "t0") *
               1e-6; // Convert to seconds
   detpar.efixed = ConvertToYSpace::getComponentParameter(det, pmap, "efixed");

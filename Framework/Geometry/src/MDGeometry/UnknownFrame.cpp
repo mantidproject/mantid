@@ -15,6 +15,8 @@ bool UnknownFrame::canConvertTo(const Mantid::Kernel::MDUnit &) const {
   return false; // Cannot convert since it is unknown
 }
 
+bool UnknownFrame::setMDUnit(const Mantid::Kernel::MDUnit &) { return false; }
+
 std::string UnknownFrame::name() const { return UnknownFrameName; }
 
 Mantid::Kernel::UnitLabel UnknownFrame::getUnitLabel() const {

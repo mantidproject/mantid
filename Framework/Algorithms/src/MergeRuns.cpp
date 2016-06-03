@@ -264,7 +264,7 @@ void MergeRuns::execEvent() {
 
   // Create a new output event workspace, by copying the first WS in the list
   EventWorkspace_sptr inputWS = m_inEventWS[0];
-  EventWorkspace_sptr outWS(inputWS->clone().release());
+  EventWorkspace_sptr outWS(inputWS->clone());
 
   int64_t n = m_inEventWS.size() - 1;
   m_progress = new Progress(this, 0.0, 1.0, n);

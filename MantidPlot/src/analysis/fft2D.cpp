@@ -35,7 +35,7 @@ void fft(double* x_int_re, double* x_int_im, int taille)
 {
     int size_2=taille>>1;
     double base = 2*M_PI/taille;
-    const double SQ_2=sqrt(2.0);
+    const double SQ_2 = M_SQRT2;
     QVarLengthArray<double> pair_re(size_2), pair_im(size_2), impair_re(size_2), impair_im(size_2);//double pair_re[size_2], pair_im[size_2], impair_re[size_2], impair_im[size_2];
     for(int i=0; i<size_2; i++){
         int tmp1=(i<<1);
@@ -65,7 +65,7 @@ void fft_inv(double* x_int_re, double* x_int_im, int taille)
 {
     int size_2=taille>>1;
     double base=2*M_PI/taille;
-    const double SQ_2=sqrt(2.0);//const double SQ_2=sqrt(2);
+    const double SQ_2 = M_SQRT2; // const double SQ_2=sqrt(2);
     QVarLengthArray<double> pair_re(size_2), pair_im(size_2), impair_re(size_2), impair_im(size_2);//double pair_re[size_2], pair_im[size_2], impair_re[size_2], impair_im[size_2];
     for(int i=0; i<size_2; i++){
         int tmp1=i<<1;

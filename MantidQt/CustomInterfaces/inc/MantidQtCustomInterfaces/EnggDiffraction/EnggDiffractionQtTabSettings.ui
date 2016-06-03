@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>616</width>
-    <height>560</height>
+    <width>660</width>
+    <height>680</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -181,8 +181,11 @@
           <layout class="QHBoxLayout" name="horizontalLayout_4">
            <item>
             <widget class="QCheckBox" name="checkBox_force_recalculate_overwrite">
+             <property name="toolTip">
+              <string>Recalculate the vanadium curve and per-pixel integration even if files are available with results previously calculated</string>
+             </property>
              <property name="text">
-              <string>Force recalculate and overwrite all existing intermediate files</string>
+              <string>Force recalculate all existing Vanadium files</string>
              </property>
             </widget>
            </item>

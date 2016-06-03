@@ -95,7 +95,7 @@ void Divide::setOutputUnits(const API::MatrixWorkspace_const_sptr lhs,
   // dimensionless
   else if (lhs->YUnit() == rhs->YUnit() && rhs->blocksize() > 1) {
     out->setYUnit("");
-    out->isDistribution(true);
+    out->setDistribution(true);
   }
   // Else we need to set the unit that results from the division
   else {

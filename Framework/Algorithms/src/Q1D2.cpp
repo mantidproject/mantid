@@ -345,7 +345,7 @@ Q1D2::setUpOutputWorkspace(const std::vector<double> &binParams) const {
 
   // Set the X vector for the output workspace
   outputWS->setX(0, XOut);
-  outputWS->isDistribution(true);
+  outputWS->setDistribution(true);
 
   outputWS->getSpectrum(0)->clearDetectorIDs();
   outputWS->getSpectrum(0)->setSpectrumNo(1);
@@ -595,7 +595,7 @@ void Q1D2::convertWavetoQ(const size_t wsInd, const bool doGravity,
     // Calculate the Q values for the current spectrum, using Q =
     // 4*pi*sin(theta)/lambda
     const double factor =
-        2.0 * FOUR_PI * sin(m_dataWS->detectorTwoTheta(det) / 2.0);
+        2.0 * FOUR_PI * sin(m_dataWS->detectorTwoTheta(*det) * 0.5);
     for (; waves != end; ++Qs, ++waves) {
       // the HistogramValidator at the start should ensure that we have one more
       // bin on the input wavelengths

@@ -33,12 +33,14 @@ using Mantid::Kernel::Quat;
 
 namespace ComponentCreationHelper {
 //----------------------------------------------------------------------------------------------
+
 /**
- * Create a capped cylinder object
+ * Return the XML for a capped cylinder
  */
-Object_sptr createCappedCylinder(double radius, double height,
-                                 const V3D &baseCentre, const V3D &axis,
-                                 const std::string &id) {
+std::string cappedCylinderXML(double radius, double height,
+                              const Mantid::Kernel::V3D &baseCentre,
+                              const Mantid::Kernel::V3D &axis,
+                              const std::string &id) {
   std::ostringstream xml;
   xml << "<cylinder id=\"" << id << "\">"
       << "<centre-of-bottom-base x=\"" << baseCentre.X() << "\" y=\""
@@ -48,9 +50,17 @@ Object_sptr createCappedCylinder(double radius, double height,
       << "<radius val=\"" << radius << "\" />"
       << "<height val=\"" << height << "\" />"
       << "</cylinder>";
+  return xml.str();
+}
 
-  ShapeFactory shapeMaker;
-  return shapeMaker.createShape(xml.str());
+/**
+ * Create a capped cylinder object
+ */
+Object_sptr createCappedCylinder(double radius, double height,
+                                 const V3D &baseCentre, const V3D &axis,
+                                 const std::string &id) {
+  return ShapeFactory().createShape(
+      cappedCylinderXML(radius, height, baseCentre, axis, id));
 }
 
 //----------------------------------------------------------------------------------------------

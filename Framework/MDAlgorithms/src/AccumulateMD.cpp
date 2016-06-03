@@ -9,6 +9,8 @@
 #include "MantidAPI/FileFinder.h"
 #include "MantidAPI/HistoryView.h"
 #include "MantidDataObjects/MDHistoWorkspaceIterator.h"
+#include "MantidAPI/FileProperty.h"
+#include "MantidKernel/EnabledWhenProperty.h"
 #include <Poco/File.h>
 
 using namespace Mantid::Kernel;
@@ -290,6 +292,20 @@ void AccumulateMD::init() {
       make_unique<PropertyWithValue<bool>>("Clean", false, Direction::Input),
       "Create workspace from fresh rather than appending to "
       "existing workspace data.");
+
+  declareProperty(
+      make_unique<FileProperty>("Filename", "", FileProperty::OptionalSave,
+                                ".nxs"),
+      "The name of the Nexus file to write, as a full or relative path.\n"
+      "Only used if FileBackEnd is true.");
+  setPropertySettings("Filename", make_unique<EnabledWhenProperty>(
+                                      "CreateFileBackEnd", IS_EQUAL_TO, "1"));
+
+  declareProperty("FileBackEnd", false,
+                  "If true, Filename must also be specified. The algorithm "
+                  "will create the specified file in addition to an output "
+                  "workspace. The workspace will load data from the file on "
+                  "demand in order to reduce memory use.");
 }
 
 /*
@@ -299,6 +315,9 @@ void AccumulateMD::exec() {
 
   IMDEventWorkspace_sptr input_ws = this->getProperty("InputWorkspace");
   std::vector<std::string> input_data = this->getProperty("DataSources");
+
+  const std::string out_filename = this->getProperty("Filename");
+  const bool filebackend = this->getProperty("FileBackEnd");
 
   std::vector<double> psi = this->getProperty("Psi");
   padParameterVector(psi, input_data.size());
@@ -332,8 +351,8 @@ void AccumulateMD::exec() {
   bool do_clean = this->getProperty("Clean");
   if (do_clean) {
     this->progress(0.5);
-    IMDEventWorkspace_sptr out_ws =
-        createMDWorkspace(input_data, psi, gl, gs, efix);
+    IMDEventWorkspace_sptr out_ws = createMDWorkspace(
+        input_data, psi, gl, gs, efix, out_filename, filebackend);
     this->setProperty("OutputWorkspace", out_ws);
     g_log.notice() << this->name() << " successfully created a clean workspace"
                    << std::endl;
@@ -368,7 +387,7 @@ void AccumulateMD::exec() {
   // Use CreateMD with the new data to make a temp workspace
   // Merge the temp workspace with the input workspace using MergeMD
   IMDEventWorkspace_sptr tmp_ws =
-      createMDWorkspace(input_data, psi, gl, gs, efix);
+      createMDWorkspace(input_data, psi, gl, gs, efix, "", false);
   this->interruption_point();
   this->progress(0.5); // Report as CreateMD is complete
 
@@ -411,7 +430,8 @@ void AccumulateMD::exec() {
 IMDEventWorkspace_sptr AccumulateMD::createMDWorkspace(
     const std::vector<std::string> &data_sources,
     const std::vector<double> &psi, const std::vector<double> &gl,
-    const std::vector<double> &gs, const std::vector<double> &efix) {
+    const std::vector<double> &gs, const std::vector<double> &efix,
+    const std::string &filename, const bool filebackend) {
 
   Algorithm_sptr create_alg = createChildAlgorithm("CreateMD");
 
@@ -426,6 +446,10 @@ IMDEventWorkspace_sptr AccumulateMD::createMDWorkspace(
   create_alg->setProperty("Gl", gl);
   create_alg->setProperty("Gs", gs);
   create_alg->setPropertyValue("InPlace", this->getPropertyValue("InPlace"));
+  if (filebackend) {
+    create_alg->setProperty("Filename", filename);
+    create_alg->setProperty("FileBackEnd", filebackend);
+  }
   create_alg->executeAsChildAlg();
 
   return create_alg->getProperty("OutputWorkspace");
@@ -450,6 +474,13 @@ std::map<std::string, std::string> AccumulateMD::validateInputs() {
   const std::vector<double> gl = this->getProperty("Gl");
   const std::vector<double> gs = this->getProperty("Gs");
   const std::vector<double> efix = this->getProperty("Efix");
+  const std::string filename = this->getProperty("Filename");
+  const bool fileBackEnd = this->getProperty("FileBackEnd");
+
+  if (fileBackEnd && filename.empty()) {
+    validation_output["Filename"] =
+        "Filename must be given if FileBackEnd is required.";
+  }
 
   const size_t ws_entries = data_sources.size();
 

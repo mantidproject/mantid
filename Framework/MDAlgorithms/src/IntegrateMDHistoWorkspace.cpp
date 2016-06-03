@@ -319,8 +319,8 @@ void IntegrateMDHistoWorkspace::exec() {
   if (emptyCount == pbins.size()) {
     // No work to do.
     g_log.information(this->name() + " Direct clone of input.");
-    this->setProperty("OutputWorkspace", boost::shared_ptr<IMDHistoWorkspace>(
-                                             inWS->clone().release()));
+    this->setProperty("OutputWorkspace",
+                      boost::shared_ptr<IMDHistoWorkspace>(inWS->clone()));
   } else {
 
     /* Create the output workspace in the right shape. This allows us to iterate
@@ -409,7 +409,6 @@ void IntegrateMDHistoWorkspace::exec() {
         performWeightedSum(inIterator.get(), box, sumSignal, sumSQErrors,
                            sumNEvents); // Use the present position. neighbours
                                         // below exclude the current position.
-
         // Look at all of the neighbours of our position. We previously
         // calculated what the width vector would need to be.
         auto neighbourIndexes =

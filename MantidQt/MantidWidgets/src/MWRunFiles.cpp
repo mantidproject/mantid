@@ -794,6 +794,7 @@ void MWRunFiles::inspectThreadResult() {
 
   if (!error.empty()) {
     setFileProblem(QString::fromStdString(error));
+    emit fileInspectionFinished();
     return;
   }
 
@@ -811,6 +812,8 @@ void MWRunFiles::inspectThreadResult() {
   } else {
     setFileProblem("");
   }
+
+  emit fileInspectionFinished();
 
   // Only emit the signal if file(s) were found
   if (!m_foundFiles.isEmpty())

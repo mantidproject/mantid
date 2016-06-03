@@ -115,7 +115,7 @@ void ConvertSpectrumAxis2::createThetaMap(API::Progress &progress,
                                           size_t nHist) {
   // Set up binding to member funtion. Avoids condition as part of loop over
   // nHistograms.
-  boost::function<double(IDetector_const_sptr)> thetaFunction;
+  boost::function<double(const IDetector &)> thetaFunction;
   if (targetUnit.compare("signed_theta") == 0 ||
       targetUnit.compare("SignedTheta") == 0) {
     thetaFunction =
@@ -131,7 +131,7 @@ void ConvertSpectrumAxis2::createThetaMap(API::Progress &progress,
     try {
       IDetector_const_sptr det = inputWS->getDetector(i);
       // Invoke relevant member function.
-      m_indexMap.emplace(thetaFunction(det) * 180.0 / M_PI, i);
+      m_indexMap.emplace(thetaFunction(*det) * rad2deg, i);
     } catch (Exception::NotFoundError &) {
       if (!warningGiven)
         g_log.warning("The instrument definition is incomplete - spectra "
@@ -167,7 +167,7 @@ void ConvertSpectrumAxis2::createElasticQMap(API::Progress &progress,
     IDetector_const_sptr detector = inputWS->getDetector(i);
     double twoTheta(0.0), efixed(0.0);
     if (!detector->isMonitor()) {
-      twoTheta = inputWS->detectorTwoTheta(detector) / 2.0;
+      twoTheta = 0.5 * inputWS->detectorTwoTheta(*detector);
       efixed = getEfixed(detector, inputWS, emode); // get efixed
     } else {
       twoTheta = 0.0;

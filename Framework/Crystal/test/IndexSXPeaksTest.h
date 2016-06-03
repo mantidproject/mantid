@@ -55,7 +55,7 @@ public:
               double dTolerance = 0.01) {
 
     // Take a copy of the original peaks workspace.
-    PeaksWorkspace_sptr local(m_masterPeaks->clone().release());
+    PeaksWorkspace_sptr local(m_masterPeaks->clone());
     // Clear the copies hkl values with some invalid values so that we'll know
     // if we fail.
     for (int i = 0; i < nPixels; i++) {
@@ -114,7 +114,7 @@ public:
   }
 
   void test_colinearPeaksThrows() {
-    PeaksWorkspace_sptr temp(m_masterPeaks->clone().release());
+    PeaksWorkspace_sptr temp(m_masterPeaks->clone());
 
     for (int i = 0; i < m_masterPeaks->getNumberPeaks(); i++) {
       IPeak &peak = m_masterPeaks->getPeak(i);

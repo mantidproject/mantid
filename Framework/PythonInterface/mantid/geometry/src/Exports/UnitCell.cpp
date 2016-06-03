@@ -167,6 +167,7 @@ void export_UnitCell() {
       .def("getGstar", &UnitCell::getGstar, arg("self"),
            return_readonly_numpy())
       .def("getB", &UnitCell::getB, arg("self"), return_readonly_numpy())
+      .def("getBinv", &UnitCell::getBinv, arg("self"), return_readonly_numpy())
       .def("recalculateFromGstar", &recalculateFromGstar,
            (arg("self"), arg("NewGstar")));
 

@@ -51,7 +51,7 @@ void Scale::exec() {
 
     if (outputWS == inputWS) {
       if (hasDx) {
-        bufferWS = MatrixWorkspace_sptr(inputWS->clone().release());
+        bufferWS = inputWS->clone();
       }
       inputWS *= factor;
     } else {
@@ -63,7 +63,7 @@ void Scale::exec() {
 
     if (outputWS == inputWS) {
       if (hasDx) {
-        bufferWS = MatrixWorkspace_sptr(inputWS->clone().release());
+        bufferWS = inputWS->clone();
       }
       inputWS += factor;
     } else {

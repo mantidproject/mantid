@@ -5,8 +5,14 @@
 namespace Mantid {
 namespace API {
 
-/**
- */
+/// Returns a clone of the workspace
+/// @param colNames :: Names of the column to clone. If empty clone
+///   all columns.
+ITableWorkspace_uptr
+ITableWorkspace::clone(const std::vector<std::string> &colNames) const {
+  return ITableWorkspace_uptr(doCloneColumns(colNames));
+}
+
 const std::string ITableWorkspace::toString() const {
   std::ostringstream os;
   os << id() << "\n";

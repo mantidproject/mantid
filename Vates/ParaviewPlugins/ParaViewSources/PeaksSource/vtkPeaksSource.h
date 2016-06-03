@@ -39,6 +39,8 @@ class VTK_EXPORT vtkPeaksSource : public vtkPolyDataAlgorithm
 {
 public:
   static vtkPeaksSource *New();
+  vtkPeaksSource(const vtkPeaksSource &) = delete;
+  void operator=(const vtkPeaksSource &) = delete;
   vtkTypeMacro(vtkPeaksSource,
                vtkPolyDataAlgorithm) void PrintSelf(ostream &os,
                                                     vtkIndent indent) override;
@@ -50,11 +52,11 @@ public:
   /// Update the algorithm progress.
   void updateAlgorithmProgress(double progress, const std::string& message);
   /// Getter for the workspace name
-  const char* GetWorkspaceName();
+  const std::string &GetWorkspaceName();
   /// Getter for the workspace type
-  char* GetWorkspaceTypeName();
+  const std::string &GetWorkspaceTypeName();
   /// Getter for the instrument associated with the workspace
-  const char* GetInstrument();
+  const std::string &GetInstrument();
 
 protected:
   vtkPeaksSource();
@@ -82,8 +84,5 @@ private:
 
   /// Instrument name.
   std::string m_instrument;
-
-  vtkPeaksSource(const vtkPeaksSource&);
-  void operator = (const vtkPeaksSource&);
 };
 #endif

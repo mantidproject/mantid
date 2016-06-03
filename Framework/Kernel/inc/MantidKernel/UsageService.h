@@ -6,7 +6,7 @@
 
 #include <json/value.h>
 
-#include <Poco/ActiveResult.h>
+#include <Poco/ActiveMethod.h>
 #include <Poco/Timer.h>
 
 #include <queue>
@@ -108,16 +108,14 @@ private:
   /// Send featureUsageReport
   void sendFeatureUsageReport(const bool synchronous);
 
+  int sendStartupAsyncImpl(const std::string &message);
+  int sendFeatureAsyncImpl(const std::string &message);
+
   /// A method to handle the timerCallbacks
   void timerCallback(Poco::Timer &);
 
   // generate Json header for feature calls
   ::Json::Value generateFeatureHeader();
-
-  Poco::ActiveResult<int> sendStartupAsync(const std::string &message);
-  int sendStartupAsyncImpl(const std::string &message);
-  Poco::ActiveResult<int> sendFeatureAsync(const std::string &message);
-  int sendFeatureAsyncImpl(const std::string &message);
 
   /// a timer
   Poco::Timer m_timer;
@@ -132,6 +130,11 @@ private:
   bool m_isEnabled;
   mutable std::mutex m_mutex;
   std::string m_application;
+
+  /// Async method for sending startup notifications
+  Poco::ActiveMethod<int, std::string, UsageServiceImpl> m_startupActiveMethod;
+  /// Async method for sending feature notifications
+  Poco::ActiveMethod<int, std::string, UsageServiceImpl> m_featureActiveMethod;
 };
 
 /// Forward declaration of a specialisation of SingletonHolder for

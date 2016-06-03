@@ -27,7 +27,7 @@ public:
     offsetStr << offset;
 
     Workspace2D_sptr input = makeDummyWorkspace2D();
-    input->isDistribution(true);
+    input->setDistribution(true);
     AnalysisDataService::Instance().add("input2D", input);
 
     ChangeBinOffset alg2D;

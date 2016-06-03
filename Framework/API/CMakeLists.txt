@@ -38,13 +38,14 @@ set ( SRC_FILES
 	src/FrameworkManager.cpp
 	src/FuncMinimizerFactory.cpp
 	src/FunctionDomain1D.cpp
+	src/FunctionDomainGeneral.cpp
 	src/FunctionDomainMD.cpp
 	src/FunctionFactory.cpp
 	src/FunctionParameterDecorator.cpp
 	src/FunctionProperty.cpp
 	src/FunctionValues.cpp
-	src/GeometryInfoFactory.cpp
 	src/GeometryInfo.cpp
+	src/GeometryInfoFactory.cpp
 	src/GridDomain.cpp
 	src/GridDomain1D.cpp
 	src/GroupingLoader.cpp
@@ -58,6 +59,7 @@ set ( SRC_FILES
 	src/IFunction.cpp
 	src/IFunction1D.cpp
 	src/IFunction1DSpectrum.cpp
+	src/IFunctionGeneral.cpp
 	src/IFunctionMD.cpp
 	src/IFunctionMW.cpp
 	src/ILatticeFunction.cpp
@@ -90,7 +92,6 @@ set ( SRC_FILES
 	src/MatrixWSIndexCalculator.cpp
 	src/MatrixWorkspace.cpp
 	src/MatrixWorkspaceMDIterator.cpp
-	src/MemoryManager.cpp
 	src/ModeratorModel.cpp
 	src/MultiDomainFunction.cpp
 	src/MultiPeriodGroupAlgorithm.cpp
@@ -108,14 +109,12 @@ set ( SRC_FILES
 	src/PeakFunctionIntegrator.cpp
 	src/Progress.cpp
 	src/Projection.cpp
-	src/PropertyManagerDataService.cpp
 	src/PropertyNexus.cpp
 	src/RawCountValidator.cpp
 	src/RefAxis.cpp
 	src/RemoteJobManagerFactory.cpp
 	src/Run.cpp
 	src/Sample.cpp
-	src/SampleEnvironment.cpp
 	src/SampleShapeValidator.cpp
 	src/SampleValidator.cpp
 	src/ScopedWorkspace.cpp
@@ -192,13 +191,14 @@ set ( INC_FILES
 	inc/MantidAPI/FuncMinimizerFactory.h
 	inc/MantidAPI/FunctionDomain.h
 	inc/MantidAPI/FunctionDomain1D.h
+	inc/MantidAPI/FunctionDomainGeneral.h
 	inc/MantidAPI/FunctionDomainMD.h
 	inc/MantidAPI/FunctionFactory.h
 	inc/MantidAPI/FunctionParameterDecorator.h
 	inc/MantidAPI/FunctionProperty.h
 	inc/MantidAPI/FunctionValues.h
-	inc/MantidAPI/GeometryInfoFactory.h
 	inc/MantidAPI/GeometryInfo.h
+	inc/MantidAPI/GeometryInfoFactory.h
 	inc/MantidAPI/GridDomain.h
 	inc/MantidAPI/GridDomain1D.h
 	inc/MantidAPI/GroupingLoader.h
@@ -223,6 +223,7 @@ set ( INC_FILES
 	inc/MantidAPI/IFunction.h
 	inc/MantidAPI/IFunction1D.h
 	inc/MantidAPI/IFunction1DSpectrum.h
+	inc/MantidAPI/IFunctionGeneral.h
 	inc/MantidAPI/IFunctionMD.h
 	inc/MantidAPI/IFunctionMW.h
 	inc/MantidAPI/IFunctionWithLocation.h
@@ -273,7 +274,6 @@ set ( INC_FILES
 	inc/MantidAPI/MatrixWorkspaceMDIterator.h
 	inc/MantidAPI/MatrixWorkspaceValidator.h
 	inc/MantidAPI/MatrixWorkspace_fwd.h
-	inc/MantidAPI/MemoryManager.h
 	inc/MantidAPI/ModeratorModel.h
 	inc/MantidAPI/MultiDomainFunction.h
 	inc/MantidAPI/MultiPeriodGroupAlgorithm.h
@@ -291,14 +291,12 @@ set ( INC_FILES
 	inc/MantidAPI/PeakFunctionIntegrator.h
 	inc/MantidAPI/Progress.h
 	inc/MantidAPI/Projection.h
-	inc/MantidAPI/PropertyManagerDataService.h
 	inc/MantidAPI/PropertyNexus.h
 	inc/MantidAPI/RawCountValidator.h
 	inc/MantidAPI/RefAxis.h
 	inc/MantidAPI/RemoteJobManagerFactory.h
 	inc/MantidAPI/Run.h
 	inc/MantidAPI/Sample.h
-	inc/MantidAPI/SampleEnvironment.h
 	inc/MantidAPI/SampleShapeValidator.h
 	inc/MantidAPI/SampleValidator.h
 	inc/MantidAPI/ScopedWorkspace.h
@@ -354,6 +352,7 @@ set ( TEST_FILES
 	FrameworkManagerTest.h
 	FuncMinimizerFactoryTest.h
 	FunctionAttributeTest.h
+	FunctionDomainGeneralTest.h
 	FunctionDomainTest.h
 	FunctionFactoryTest.h
 	FunctionParameterDecoratorTest.h
@@ -385,7 +384,6 @@ set ( TEST_FILES
 	LogManagerTest.h
 	MDGeometryTest.h
 	MatrixWorkspaceMDIteratorTest.h
-	MemoryManagerTest.h
 	ModeratorModelTest.h
 	MultiDomainFunctionTest.h
 	MultiPeriodGroupAlgorithmTest.h
@@ -401,12 +399,10 @@ set ( TEST_FILES
 	ParameterTieTest.h
 	PeakFunctionIntegratorTest.h
 	ProjectionTest.h
-	PropertyManagerDataServiceTest.h
 	PropertyNexusTest.h
 	RawCountValidatorTest.h
 	RemoteJobManagerFactoryTest.h
 	RunTest.h
-	SampleEnvironmentTest.h
 	SampleShapeValidatorTest.h
 	SampleTest.h
 	SampleValidatorTest.h
@@ -465,6 +461,10 @@ endif ()
 set_property ( TARGET API PROPERTY FOLDER "MantidFramework" )
 
 target_link_libraries ( API LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} ${JSONCPP_LIBRARIES} ${MANTIDLIBS} ${GSL_LIBRARIES} ${NEXUS_LIBRARIES} ${WINSOCK} )
+if(MAKE_VATES)
+  target_include_directories( API SYSTEM PRIVATE ${PARAVIEW_INCLUDE_DIRS} )
+  target_link_libraries ( API LINK_PRIVATE vtkPVClientServerCoreRendering )
+endif()
 
 # Add the unit tests directory
 add_subdirectory ( test )

@@ -162,7 +162,7 @@ void Qxy::exec() {
     double phi = atan2(detPos.Y(), detPos.X());
     double a = cos(phi);
     double b = sin(phi);
-    double sinTheta = sin(inputWorkspace->detectorTwoTheta(det) / 2.0);
+    double sinTheta = sin(inputWorkspace->detectorTwoTheta(*det) * 0.5);
 
     // Get references to the data for this spectrum
     const MantidVec &X = inputWorkspace->readX(i);
@@ -321,7 +321,7 @@ void Qxy::exec() {
 
   // Divide the output data by the solid angles
   outputWorkspace /= weights;
-  outputWorkspace->isDistribution(true);
+  outputWorkspace->setDistribution(true);
 
   // Count of the number of empty cells
   const size_t nhist = outputWorkspace->getNumberHistograms();

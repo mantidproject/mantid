@@ -30,9 +30,9 @@ private:
     const Mantid::MantidVec &xData = ws->readX(0);
 
     auto detector = ws->getDetector(0);
-    double twotheta = ws->detectorTwoTheta(detector);
-    double lam = (xData[bin_index] + xData[bin_index + 1]) / 2;
-    double weight = std::sin(twotheta / 2);
+    double twotheta = ws->detectorTwoTheta(*detector);
+    double lam = 0.5 * (xData[bin_index] + xData[bin_index + 1]);
+    double weight = std::sin(0.5 * twotheta);
     weight = weight * weight;
     weight = weight / (lam * lam * lam * lam);
     return weight;

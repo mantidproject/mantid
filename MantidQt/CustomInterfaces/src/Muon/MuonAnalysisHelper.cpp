@@ -3,6 +3,7 @@
 #include "MantidKernel/InstrumentInfo.h"
 #include "MantidKernel/EmptyValues.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/StringTokenizer.h"
 
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/AlgorithmManager.h"
@@ -372,7 +373,15 @@ std::string getRunLabel(const Workspace_sptr& ws)
   int runNumber = firstPrd->getRunNumber();
   std::string instrName = firstPrd->getInstrument()->getName();
 
-  int zeroPadding = ConfigService::Instance().getInstrument(instrName).zeroPadding(runNumber);
+  int zeroPadding;
+  try {
+    zeroPadding =
+        ConfigService::Instance().getInstrument(instrName).zeroPadding(
+            runNumber);
+  } catch (const Mantid::Kernel::Exception::NotFoundError &) {
+    // Old muon instrument without an IDF - default to 3 zeros
+    zeroPadding = 3;
+  }
 
   std::ostringstream label;
   label << instrName;
@@ -795,6 +804,104 @@ void appendTimeSeriesLogs(Workspace_sptr toAppend, Workspace_sptr resultant,
   } else {
     throw std::invalid_argument("Workspaces have different number of periods");
   }
+}
+
+/**
+ * Uses the format of the workspace name
+ * (INST00012345-8; Pair; long; Asym; [1+2-3+4]; #2)
+ * to get a string in the format "run number: period"
+ * @param workspaceName :: [input] Name of the workspace
+ * @param firstRun :: [input] First run number - use this if tokenizing fails
+ * @returns Run number/period string
+ */
+QString runNumberString(const std::string &workspaceName,
+                        const std::string &firstRun) {
+  std::string periods = "";        // default
+  std::string instRuns = firstRun; // default
+
+  Mantid::Kernel::StringTokenizer tokenizer(
+      workspaceName, ";", Mantid::Kernel::StringTokenizer::TOK_TRIM);
+  const size_t numTokens = tokenizer.count();
+  if (numTokens > 4) { // format is ok
+    instRuns = tokenizer[0];
+    // Remove "INST000" off the start
+    // No muon instruments have numbers in their names
+    size_t numPos = instRuns.find_first_of("123456789");
+    if (numPos != std::string::npos) {
+      instRuns = instRuns.substr(numPos, instRuns.size());
+    } else { // run number was zero?
+      instRuns = "0";
+    }
+    if (numTokens > 5) { // periods included
+      periods = tokenizer[4];
+    }
+  }
+
+  QString ret(instRuns.c_str());
+  if (!periods.empty()) {
+    ret.append(": ").append(periods.c_str());
+  }
+  return ret;
+}
+
+/**
+ * Determines if the grouping already loaded can be reused, or if
+ * grouping must be re-loaded.
+ * Criteria: reload if
+ * - instrument has changed
+ * - instrument same, but field direction has changed
+ * - number of histograms has changed
+ * @param currentWorkspace :: [input] Data already in interface
+ * @param loadedWorkspace :: [input] New data just loaded
+ * @returns :: True or false to load new grouping
+ * @throws std::invalid_argument if loadedWorkspace is null
+ */
+bool isReloadGroupingNecessary(
+    const boost::shared_ptr<Mantid::API::Workspace> currentWorkspace,
+    const boost::shared_ptr<Mantid::API::Workspace> loadedWorkspace) {
+  if (!loadedWorkspace) {
+    throw std::invalid_argument("No loaded workspace to get grouping for!");
+  }
+  if (!currentWorkspace) {
+    // No previous data, so we need to load grouping from scratch
+    return true;
+  }
+
+  bool reloadNecessary = false;
+  const auto loadedData = firstPeriod(loadedWorkspace);
+  const auto currentData = firstPeriod(currentWorkspace);
+
+  // Check if instrument has changed
+  const auto loadedInstrument = loadedData->getInstrument()->getName();
+  const auto currentInstrument = currentData->getInstrument()->getName();
+  if (loadedInstrument != currentInstrument) {
+    reloadNecessary = true;
+  }
+
+  // Check if field direction has changed, even if instrument hasn't
+  // (e.g. MUSR - same instrument can have different field directions)
+  if (!reloadNecessary) {
+    Mantid::Kernel::Property *loadedField = nullptr, *currentField = nullptr;
+    try {
+      loadedField = loadedData->run().getLogData("main_field_direction");
+      currentField = currentData->run().getLogData("main_field_direction");
+    } catch (std::exception &) {
+      // Log not found in one or both workspaces - ignore it
+    }
+    if (loadedField && currentField &&
+        loadedField->value() != currentField->value()) {
+      reloadNecessary = true;
+    }
+  }
+
+  // Check if number of spectra have changed
+  if (!reloadNecessary) {
+    const auto loadedNumSpectra = loadedData->getNumberHistograms();
+    const auto currentNumSpectra = currentData->getNumberHistograms();
+    reloadNecessary = (loadedNumSpectra != currentNumSpectra);
+  }
+
+  return reloadNecessary;
 }
 
 } // namespace MuonAnalysisHelper

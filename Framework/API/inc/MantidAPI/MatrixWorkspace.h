@@ -92,8 +92,8 @@ public:
   /**@name Instrument queries */
   //@{
   Geometry::IDetector_const_sptr getDetector(const size_t workspaceIndex) const;
-  double detectorTwoTheta(Geometry::IDetector_const_sptr det) const;
-  double detectorSignedTwoTheta(Geometry::IDetector_const_sptr det) const;
+  double detectorTwoTheta(const Geometry::IDetector &det) const;
+  double detectorSignedTwoTheta(const Geometry::IDetector &det) const;
 
   //@}
 
@@ -284,7 +284,7 @@ public:
   /// Set the specified Dx (X Error) array to point to the given existing array
   virtual void setDx(const std::size_t index,
                      const MantidVecPtr::ptr_type &Dx) {
-    getSpectrum(index)->setX(Dx);
+    getSpectrum(index)->setDx(Dx);
     invalidateCommonBinsFlag();
   }
 
@@ -356,7 +356,7 @@ public:
 
   /// Are the Y-values dimensioned?
   const bool &isDistribution() const;
-  bool &isDistribution(bool newValue);
+  void setDistribution(bool newValue);
 
   /// Mask a given workspace index, setting the data and error values to zero
   void maskWorkspaceIndex(const std::size_t index);

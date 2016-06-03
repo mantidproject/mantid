@@ -1,14 +1,14 @@
 #include "MantidGeometry/Instrument/ObjCompAssembly.h"
 #include "MantidGeometry/Instrument/ObjComponent.h"
 #include "MantidGeometry/Instrument/ParComponentFactory.h"
-#include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidGeometry/Objects/Object.h"
+#include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Logger.h"
 #include <algorithm>
-#include <stdexcept>
-#include <ostream>
 #include <iostream>
+#include <ostream>
+#include <stdexcept>
 
 namespace {
 Mantid::Kernel::Logger g_log("ObjCompAssembly");
@@ -383,7 +383,7 @@ boost::shared_ptr<Object> ObjCompAssembly::createOutline() {
   obj->GetObjectGeom(otype, vectors, radius, height);
   if (otype == 1) {
     type = "box";
-  } else if (otype == 3) {
+  } else if (otype == 4) {
     type = "cylinder";
   } else {
     throw std::runtime_error(

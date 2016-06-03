@@ -80,13 +80,18 @@ void MuonAnalysisFitDataTab::groupFittedWorkspaces(QString workspaceName)
     inputWorkspaces.push_back(wsWorkspace);
   }
 
-  if (inputWorkspaces.size() > 1)
-  {
-    std::string groupName = workspaceName.left(workspaceName.find(';')).toStdString();
+  if (inputWorkspaces.size() > 1) {
+    const std::string groupName = [&workspaceName] {
+      const int index = workspaceName.indexOf(';');
+      if (index != -1) {
+        return workspaceName.left(index).toStdString();
+      } else {
+        return workspaceName.toStdString();
+      }
+    }();
     MuonAnalysisHelper::groupWorkspaces(groupName, inputWorkspaces);
   }
 }
-
 }
 }
 }

@@ -13,6 +13,7 @@
 
 #include <boost/lexical_cast.hpp>
 #include <gsl/gsl_blas.h>
+#include <gsl/gsl_version.h>
 
 namespace Mantid {
 namespace CurveFitting {
@@ -139,7 +140,14 @@ double LevenbergMarquardtMinimizer::costFunctionVal() {
  */
 void LevenbergMarquardtMinimizer::calCovarianceMatrix(double epsrel,
                                                       gsl_matrix *covar) {
+#if GSL_MAJOR_VERSION < 2
   gsl_multifit_covar(m_gslSolver->J, epsrel, covar);
+#else
+  gsl_matrix *J = gsl_matrix_alloc(gslContainer.n, gslContainer.p);
+  gsl_multifit_fdfsolver_jac(m_gslSolver, J);
+  gsl_multifit_covar(J, epsrel, covar);
+  gsl_matrix_free(J);
+#endif
 }
 
 } // namespace FuncMinimisers

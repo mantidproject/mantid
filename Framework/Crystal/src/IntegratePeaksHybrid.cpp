@@ -164,7 +164,7 @@ void IntegratePeaksHybrid::exec() {
   const double peakOuterRadius = getProperty("BackgroundOuterRadius");
   const double halfPeakOuterRadius = peakOuterRadius / 2;
   if (peakWS != inPeakWS) {
-    peakWS = IPeaksWorkspace_sptr(inPeakWS->clone().release());
+    peakWS = inPeakWS->clone();
   }
 
   {

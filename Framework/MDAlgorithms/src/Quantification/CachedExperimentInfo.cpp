@@ -185,7 +185,7 @@ void CachedExperimentInfo::initCaches(
                                 boost::lexical_cast<std::string>(det->getID()));
   }
 
-  const double rad2deg = 180. / M_PI;
+  constexpr double rad2deg = 180. / M_PI;
   const double thetaInDegs = twoTheta() * rad2deg;
   const double phiInDegs = phi() * rad2deg;
 

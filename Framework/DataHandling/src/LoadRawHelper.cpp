@@ -1,11 +1,7 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidDataHandling/LoadRawHelper.h"
 #include "LoadRaw/isisraw2.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
-#include "MantidAPI/MemoryManager.h"
 #include "MantidAPI/SpectrumDetectorMapping.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
@@ -1275,7 +1271,7 @@ LoadRawHelper::getLogFilenamesfromADS(const std::string &pathToRawFile) {
   Poco::Path logpath(pathToRawFile);
   size_t pos = pathToRawFile.find_last_of('/');
   if (pos == std::string::npos) {
-    pos = pathToRawFile.find_last_of("\\");
+    pos = pathToRawFile.find_last_of('\\');
   }
   if (pos != std::string::npos) {
     path = pathToRawFile.substr(0, pos);

@@ -26,6 +26,7 @@
 #include "MantidCurveFitting/Functions/UserFunction.h"
 #include "MantidCurveFitting/Functions/LinearBackground.h"
 #include "MantidCurveFitting/CostFunctions/CostFuncLeastSquares.h"
+#include <boost/math/special_functions/fpclassify.hpp>
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
@@ -212,12 +213,12 @@ public:
     TS_ASSERT(s.minimize());
 
     API::IFunction_sptr res = costFun->getFittingFunction();
-    std::cerr << "result=" << s.getError() << std::endl;
-    std::cerr << "cost=" << costFun->val() << std::endl;
-    for (size_t i = 0; i < res->nParams(); ++i) {
-      std::cerr << res->parameterName(i) << " = " << res->getParameter(i)
-                << std::endl;
-    }
+    // std::cerr << "result=" << s.getError() << std::endl;
+    // std::cerr << "cost=" << costFun->val() << std::endl;
+    // for (size_t i = 0; i < res->nParams(); ++i) {
+    //  std::cerr << res->parameterName(i) << " = " << res->getParameter(i)
+    //            << std::endl;
+    //}
   }
 
   // Also pick values taken from HRPD_for_UNIT_TESTING.xml
@@ -401,7 +402,6 @@ public:
     TS_ASSERT_DELTA(pk->height(), 97.8091, 0.01);
     TS_ASSERT_DELTA(pk->centre(), 11.2356, 0.001);
     TS_ASSERT_DELTA(pk->fwhm(), 2.6240, 0.001);
-    std::cerr << pk->height() << std::endl;
 
     AnalysisDataService::Instance().remove(wsName);
   }
@@ -536,9 +536,8 @@ public:
 
     TS_ASSERT_EQUALS(fn->intensity(), 0.0);
 
-    // This does not work, because fwhm is 0 and height is 0
-    TS_ASSERT_THROWS(fn->setIntensity(20.0), std::invalid_argument);
-    TS_ASSERT_EQUALS(fn->intensity(), 0.0);
+    TS_ASSERT_THROWS_NOTHING(fn->setIntensity(20.0));
+    TS_ASSERT_EQUALS(fn->intensity(), 20.0);
 
     // Now, fwhm is not zero
     fn->setFwhm(0.02);
@@ -553,6 +552,39 @@ public:
 
     TS_ASSERT_THROWS_NOTHING(fn->getCentreParameterName());
     TS_ASSERT_EQUALS(fn->getCentreParameterName(), "PeakCentre");
+  }
+
+  void test_fixing() {
+    Gaussian fn;
+    fn.initialize();
+
+    fn.fixCentre();
+    auto i = fn.parameterIndex("PeakCentre");
+    TS_ASSERT(fn.isFixed(i));
+    fn.unfixCentre();
+    TS_ASSERT(!fn.isFixed(i));
+
+    fn.setParameter("Height", 1.0);
+    auto intensity = fn.intensity();
+    fn.fixIntensity();
+    fn.setParameter("Sigma", 2.0);
+    fn.applyTies();
+    TS_ASSERT_DELTA(fn.intensity(), intensity, 1e-6);
+    TS_ASSERT_DELTA(fn.getParameter("Height"), 0.199471, 1e-6);
+
+    fn.setParameter("Sigma", 3.0);
+    fn.applyTies();
+    TS_ASSERT_DELTA(fn.intensity(), intensity, 1e-6);
+    TS_ASSERT_DELTA(fn.getParameter("Height"), 0.132981, 1e-6);
+
+    fn.setParameter("Sigma", 0.0);
+    fn.applyTies();
+    TS_ASSERT_DELTA(fn.intensity(), intensity, 1e-6);
+
+    fn.setParameter("Sigma", 1.0);
+    fn.applyTies();
+    TS_ASSERT_DELTA(fn.intensity(), intensity, 1e-6);
+    TS_ASSERT_DELTA(fn.getParameter("Height"), 0.398942, 1e-6);
   }
 };
 

@@ -235,7 +235,7 @@ DetectorAngularCache initAngularCaches(const MatrixWorkspace *const workspace) {
       continue;
     }
     // We have to convert theta from radians to degrees
-    const double theta = workspace->detectorSignedTwoTheta(det) * 180.0 / M_PI;
+    const double theta = workspace->detectorSignedTwoTheta(*det) * rad2deg;
     thetas[i] = theta;
     /**
      * Determine width from shape geometry. A group is assumed to contain

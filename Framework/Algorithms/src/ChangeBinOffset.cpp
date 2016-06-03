@@ -33,7 +33,7 @@ void ChangeBinOffset::exec() {
   const MatrixWorkspace_sptr inputW = getProperty("InputWorkspace");
   MatrixWorkspace_sptr outputW = getProperty("OutputWorkspace");
   if (outputW != inputW) {
-    outputW = MatrixWorkspace_sptr(inputW->clone().release());
+    outputW = inputW->clone();
     setProperty("OutputWorkspace", outputW);
   }
 

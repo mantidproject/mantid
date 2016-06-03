@@ -1,7 +1,6 @@
 #include "MantidDataHandling/LoadEventPreNexus2.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileFinder.h"
-#include "MantidAPI/MemoryManager.h"
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/EventWorkspace.h"
@@ -851,9 +850,6 @@ void LoadEventPreNexus2::procEvents(
       PARALLEL_START_INTERUPT_REGION
       prog->resetNumSteps(workspace->getNumberHistograms(), 0.8, 0.95);
 
-      size_t memoryCleared = 0;
-      MemoryManager::Instance().releaseFreeMemory();
-
       // Merge all workspaces, index by index.
       PARALLEL_FOR_NO_WSP_CHECK()
       for (int iwi = 0; iwi < int(workspace->getNumberHistograms()); iwi++) {
@@ -877,21 +873,8 @@ void LoadEventPreNexus2::procEvents(
           // Free up memory as you go along.
           partEl.clear(false);
         }
-
-        // With TCMalloc, release memory when you accumulate enough to make
-        // sense
-        PARALLEL_CRITICAL(LoadEventPreNexus2_trackMemory) {
-          memoryCleared += numEvents;
-          if (memoryCleared > 10000000) // ten million events = about 160 MB
-          {
-            MemoryManager::Instance().releaseFreeMemory();
-            memoryCleared = 0;
-          }
-        }
         prog->report("Merging Workspaces");
       }
-      // Final memory release
-      MemoryManager::Instance().releaseFreeMemory();
       g_log.debug() << tim << " to merge workspaces together." << std::endl;
       PARALLEL_END_INTERUPT_REGION
     }
@@ -1331,7 +1314,7 @@ void LoadEventPreNexus2::readPulseidFile(const std::string &filename,
     return;
   }
 
-  std::vector<Pulse> *pulses;
+  std::vector<Pulse> pulses;
 
   // set up for reading
   // Open the file; will throw if there is any problem
@@ -1360,19 +1343,18 @@ void LoadEventPreNexus2::readPulseidFile(const std::string &filename,
     double temp;
     DateAndTime lastPulseDateTime(0, 0);
     this->pulsetimes.reserve(num_pulses);
-    for (size_t i = 0; i < num_pulses; i++) {
-      Pulse &it = (*pulses)[i];
-      DateAndTime pulseDateTime(static_cast<int64_t>(it.seconds),
-                                static_cast<int64_t>(it.nanoseconds));
+    for (const auto &pulse : pulses) {
+      DateAndTime pulseDateTime(static_cast<int64_t>(pulse.seconds),
+                                static_cast<int64_t>(pulse.nanoseconds));
       this->pulsetimes.push_back(pulseDateTime);
-      this->event_indices.push_back(it.event_index);
+      this->event_indices.push_back(pulse.event_index);
 
       if (pulseDateTime < lastPulseDateTime)
         this->pulsetimesincreasing = false;
       else
         lastPulseDateTime = pulseDateTime;
 
-      temp = it.pCurrent;
+      temp = pulse.pCurrent;
       this->proton_charge.push_back(temp);
       if (temp < 0.)
         this->g_log.warning("Individual proton charge < 0 being ignored");
@@ -1387,12 +1369,9 @@ void LoadEventPreNexus2::readPulseidFile(const std::string &filename,
     std::stringstream dbss;
     for (size_t i = 0; i < m_dbOpNumPulses; ++i)
       dbss << "[Pulse] " << i << "\t " << event_indices[i] << "\t "
-           << pulsetimes[i].totalNanoseconds() << "\n";
+           << pulsetimes[i].totalNanoseconds() << '\n';
     g_log.information(dbss.str());
   }
-
-  // Clear the vector
-  delete pulses;
 }
 
 //----------------------------------------------------------------------------------------------

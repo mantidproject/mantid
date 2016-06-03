@@ -1,3 +1,4 @@
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceGroup.h"
@@ -116,6 +117,10 @@ void TomographyIfacePresenter::notify(
 
   case ITomographyIfacePresenter::ViewImg:
     processViewImg();
+    break;
+
+  case ITomographyIfacePresenter::AggregateEnergyBands:
+    processAggregateEnergyBands();
     break;
 
   case ITomographyIfacePresenter::LogMsg:
@@ -463,6 +468,91 @@ void TomographyIfacePresenter::processLogMsg() {
   for (size_t i = 0; i < msgs.size(); i++) {
     m_model->logMsg(msgs[i]);
   }
+}
+
+void TomographyIfacePresenter::processAggregateEnergyBands() {
+  auto algParams = m_view->currentAggregateBandsParams();
+
+  // check necessary parameters
+  if (algParams.end() == algParams.find("InputPath") ||
+      algParams.end() == algParams.find("OutputPath") ||
+      algParams["InputPath"].empty() || algParams["OutputPath"].empty()) {
+    m_view->userError("Invalid input properties",
+                      "You need to provide the input properties InputPath and "
+                      "OutputPath. Both are mandatory and should point to "
+                      "existing directories");
+    return;
+  }
+
+  // check the paths are usable
+  if (!usableEnergyBandsPaths(algParams))
+    return;
+
+  const std::string algName = "ImggAggregateWavelengths";
+  auto alg = Mantid::API::AlgorithmManager::Instance().create(algName);
+  try {
+    alg->initialize();
+    for (const auto &param : algParams) {
+      alg->setPropertyValue(param.first, param.second);
+    }
+  } catch (std::runtime_error &rexc) {
+    m_view->userError("Problem when initializing algorithm",
+                      "Could not initialize the algorithm " + algName +
+                          " with the options currently set. Error details: " +
+                          rexc.what());
+  }
+
+  // pass hot potato to the view which has the algorithm runner
+  m_view->runAggregateBands(alg);
+
+  m_model->logMsg(" The energy/wavelength bands are being aggregated in the "
+                  "background. You can check the log messages and the "
+                  "algorithms window to track its progress. ");
+}
+
+/**
+ * Checks that the input/output directories exists and are readable
+ *
+ * @param algParams parameters to be passed to the bands aggregation
+ * algorithm
+ *
+ * @return whether it is safe to use the path properties/options given
+ */
+bool TomographyIfacePresenter::usableEnergyBandsPaths(
+    const std::map<std::string, std::string> &algParams) {
+  bool usable = false;
+  try {
+    const std::string name = algParams.at("InputPath");
+    Poco::File inPath(name);
+    if (!inPath.canRead() || !inPath.isDirectory()) {
+      m_view->userError("Invalid input path",
+                        "The input path must be a readable directory: " + name);
+      return usable;
+    }
+  } catch (Poco::FileNotFoundException &rexc) {
+    m_view->userError("Invalid input path",
+                      "The input path must exist on disk. Details: " +
+                          std::string(rexc.what()));
+    return usable;
+  }
+  try {
+    const std::string name = algParams.at("OutputPath");
+    Poco::File outPath(name);
+    if (!outPath.canRead() || !outPath.isDirectory()) {
+      m_view->userError("Invalid output path",
+                        "The output path must be a readable directory: " +
+                            name);
+      return usable;
+    }
+  } catch (Poco::FileNotFoundException &rexc) {
+    m_view->userError("Invalid output path",
+                      "The output path must exist on disk. Details: " +
+                          std::string(rexc.what()));
+    return usable;
+  }
+
+  usable = true;
+  return usable;
 }
 
 void TomographyIfacePresenter::processShutDown() {

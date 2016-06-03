@@ -88,14 +88,21 @@ const std::string ExperimentInfo::toString() const {
   std::ostringstream out;
 
   Geometry::Instrument_const_sptr inst = this->getInstrument();
-  out << "Instrument: " << inst->getName() << " ("
-      << inst->getValidFromDate().toFormattedString("%Y-%b-%d") << " to "
-      << inst->getValidToDate().toFormattedString("%Y-%b-%d") << ")";
-  out << "\n";
-  if (!inst->getFilename().empty()) {
-    out << "Instrument from: " << inst->getFilename();
-    out << "\n";
+  const auto instName = inst->getName();
+  out << "Instrument: ";
+  if (!instName.empty()) {
+    out << instName << " ("
+        << inst->getValidFromDate().toFormattedString("%Y-%b-%d") << " to "
+        << inst->getValidToDate().toFormattedString("%Y-%b-%d") << ")";
+    const auto instFilename = inst->getFilename();
+    if (!instFilename.empty()) {
+      out << "Instrument from: " << instFilename;
+      out << "\n";
+    }
+  } else {
+    out << "None";
   }
+  out << "\n";
 
   // parameter files loaded
   auto paramFileVector = this->instrumentParameters().getParameterFilenames();
@@ -178,7 +185,7 @@ Geometry::ParameterMap &ExperimentInfo::instrumentParameters() {
 *    @return a const reference to the instrument ParameterMap.
 */
 const Geometry::ParameterMap &ExperimentInfo::instrumentParameters() const {
-  return *m_parmap.get();
+  return *m_parmap;
 }
 
 //---------------------------------------------------------------------------------------
@@ -583,7 +590,7 @@ int ExperimentInfo::getRunNumber() const {
  * the instrument if one is not found. If neither exist then the run is
  * considered Elastic.
  * @return The emode enum for the energy transfer mode of this run. Currently
- * only checks the instrument
+ * checks the sample log & instrument in this order
  */
 Kernel::DeltaEMode::Type ExperimentInfo::getEMode() const {
   static const char *emodeTag = "deltaE-mode";

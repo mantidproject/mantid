@@ -90,7 +90,7 @@ void SofQWPolygon::exec() {
     double halfWidth(0.5 * m_thetaWidth);
     const double thetaLower = theta - halfWidth;
     const double thetaUpper = theta + halfWidth;
-    const double efixed = m_EmodeProperties.getEFixed(det);
+    const double efixed = m_EmodeProperties.getEFixed(*det);
 
     for (size_t j = 0; j < nenergyBins; ++j) {
       m_progress->report("Computing polygon intersections");
@@ -180,9 +180,9 @@ double SofQWPolygon::calculateIndirectQ(const double efixed,
  * @param workspace :: Workspace pointer
  */
 void SofQWPolygon::initCachedValues(API::MatrixWorkspace_const_sptr workspace) {
-  m_EmodeProperties.initCachedValues(workspace, this);
+  m_EmodeProperties.initCachedValues(*workspace, this);
   // Index theta cache
-  initThetaCache(workspace);
+  initThetaCache(*workspace);
 }
 
 /**
@@ -193,8 +193,8 @@ void SofQWPolygon::initCachedValues(API::MatrixWorkspace_const_sptr workspace) {
  * values are required very frequently so the total time is more than
  * offset by this precaching step
  */
-void SofQWPolygon::initThetaCache(API::MatrixWorkspace_const_sptr workspace) {
-  const size_t nhist = workspace->getNumberHistograms();
+void SofQWPolygon::initThetaCache(const API::MatrixWorkspace &workspace) {
+  const size_t nhist = workspace.getNumberHistograms();
   m_thetaPts = std::vector<double>(nhist);
   size_t ndets(0);
   double minTheta(DBL_MAX), maxTheta(-DBL_MAX);
@@ -205,10 +205,10 @@ void SofQWPolygon::initThetaCache(API::MatrixWorkspace_const_sptr workspace) {
     m_progress->report("Calculating detector angles");
     IDetector_const_sptr det;
     try {
-      det = workspace->getDetector(i);
+      det = workspace.getDetector(i);
       // Check to see if there is an EFixed, if not skip it
       try {
-        m_EmodeProperties.getEFixed(det);
+        m_EmodeProperties.getEFixed(*det);
       } catch (std::runtime_error &) {
         det.reset();
       }
@@ -224,13 +224,10 @@ void SofQWPolygon::initThetaCache(API::MatrixWorkspace_const_sptr workspace) {
       m_thetaPts[i] = -1.0; // Indicates a detector to skip
     } else {
       ++ndets;
-      const double theta = workspace->detectorTwoTheta(det);
+      const double theta = workspace.detectorTwoTheta(*det);
       m_thetaPts[i] = theta;
-      if (theta < minTheta) {
-        minTheta = theta;
-      } else if (theta > maxTheta) {
-        maxTheta = theta;
-      }
+      minTheta = std::min(minTheta, theta);
+      maxTheta = std::max(maxTheta, theta);
     }
   }
 

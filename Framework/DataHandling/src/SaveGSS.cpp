@@ -122,10 +122,10 @@ void getFocusedPos(MatrixWorkspace_const_sptr wksp, const int spectrum,
     throw std::runtime_error(errss.str());
   }
   l2 = det->getDistance(*sample);
-  tth = wksp->detectorTwoTheta(det);
+  tth = wksp->detectorTwoTheta(*det);
 
-  difc = ((2.0 * PhysicalConstants::NeutronMass * sin(tth / 2.0) * (l1 + l2)) /
-          (PhysicalConstants::h * 1e4));
+  difc = ((2.0 * PhysicalConstants::NeutronMass * sin(tth * 0.5) * (l1 + l2)) /
+          (PhysicalConstants::h * 1.e4));
 
   return;
 }

@@ -123,8 +123,8 @@ public:
   // removed at some point.
   void test_getTwoThetaLegacy() {
     auto info = GeometryInfo(*m_factory, *(m_workspace.getSpectrum(2)));
-    TS_ASSERT_EQUALS(info.getTwoTheta(),
-                     m_workspace.detectorTwoTheta(info.getDetector()));
+    auto det = info.getDetector();
+    TS_ASSERT_EQUALS(info.getTwoTheta(), m_workspace.detectorTwoTheta(*det));
   }
 
   void test_getSignedTwoTheta() {
@@ -143,8 +143,9 @@ public:
   // be removed at some point.
   void test_getSignedTwoThetaLegacy() {
     auto info = GeometryInfo(*m_factory, *(m_workspace.getSpectrum(2)));
+    auto det = info.getDetector();
     TS_ASSERT_EQUALS(info.getSignedTwoTheta(),
-                     m_workspace.detectorSignedTwoTheta(info.getDetector()));
+                     m_workspace.detectorSignedTwoTheta(*det));
   }
 
 private:

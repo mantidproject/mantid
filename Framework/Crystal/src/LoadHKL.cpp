@@ -49,6 +49,7 @@ void LoadHKL::exec() {
 
   std::string filename = getPropertyValue("Filename");
   PeaksWorkspace_sptr ws(new PeaksWorkspace());
+  bool cosines = false;
 
   std::fstream in;
   in.open(filename.c_str(), std::ios::in);
@@ -83,6 +84,8 @@ void LoadHKL::exec() {
   double mu1 = 0.0, mu2 = 0.0, wl1 = 0.0, wl2 = 0.0, sc1 = 0.0, astar1 = 0.0;
   do {
     getline(in, line);
+    if (line.length() > 125)
+      cosines = true;
     double h = atof(line.substr(0, 4).c_str());
     double k = atof(line.substr(4, 4).c_str());
     double l = atof(line.substr(8, 4).c_str());
@@ -91,13 +94,22 @@ void LoadHKL::exec() {
     double Inti = atof(line.substr(12, 8).c_str());
     double SigI = atof(line.substr(20, 8).c_str());
     double wl = atof(line.substr(32, 8).c_str());
-    double tbar = atof(line.substr(40, 7).c_str()); // tbar
-    int run = atoi(line.substr(47, 7).c_str());
-    static_cast<void>(atoi(line.substr(54, 7).c_str())); // seqNum
-    double trans = atof(line.substr(61, 7).c_str());     // transmission
-    int bank = atoi(line.substr(68, 4).c_str());
-    double scattering = atof(line.substr(72, 9).c_str());
-    static_cast<void>(atof(line.substr(81, 9).c_str())); // dspace
+    double tbar, trans, scattering;
+    int run, bank;
+    if (cosines) {
+      tbar = atof(line.substr(40, 8).c_str()); // tbar
+      run = atoi(line.substr(102, 6).c_str());
+      trans = atof(line.substr(114, 7).c_str()); // transmission
+      bank = atoi(line.substr(121, 4).c_str());
+      scattering = atof(line.substr(125, 9).c_str());
+    } else {
+      tbar = atof(line.substr(40, 7).c_str()); // tbar
+      run = atoi(line.substr(47, 7).c_str());
+      trans = atof(line.substr(61, 7).c_str()); // transmission
+      bank = atoi(line.substr(68, 4).c_str());
+      scattering = atof(line.substr(72, 9).c_str());
+    }
+
     if (first) {
       mu1 = -std::log(trans) / tbar;
       wl1 = wl / 1.8;
@@ -119,6 +131,12 @@ void LoadHKL::exec() {
     std::string bankName = oss.str();
 
     peak.setBankName(bankName);
+    if (cosines) {
+      int col = atoi(line.substr(142, 7).c_str());
+      int row = atoi(line.substr(149, 7).c_str());
+      peak.setCol(col);
+      peak.setRow(row);
+    }
     ws->addPeak(peak);
 
   } while (!in.eof());

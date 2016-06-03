@@ -17,7 +17,7 @@ class RegroupTest : public CxxTest::TestSuite {
 public:
   void testworkspace1D_dist() {
     Workspace2D_sptr test_in1D = Create1DWorkspace(50);
-    test_in1D->isDistribution(true);
+    test_in1D->setDistribution(true);
     AnalysisDataService::Instance().add("test_in1D", test_in1D);
 
     Regroup regroup;

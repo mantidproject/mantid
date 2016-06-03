@@ -150,14 +150,14 @@ signals:
     void clicked();
 
 protected:
-    void mousePressEvent(QMouseEvent *e);
-    void mouseMoveEvent(QMouseEvent *e);
-    void mouseReleaseEvent(QMouseEvent *e);
-    void keyPressEvent(QKeyEvent *e);
-    void keyReleaseEvent(QKeyEvent *e);
-    void paintEvent(QPaintEvent *e);
-    void focusInEvent(QFocusEvent *e);
-    void focusOutEvent(QFocusEvent *e);
+  void mousePressEvent(QMouseEvent *e) override;
+  void mouseMoveEvent(QMouseEvent *e) override;
+  void mouseReleaseEvent(QMouseEvent *e) override;
+  void keyPressEvent(QKeyEvent *e) override;
+  void keyReleaseEvent(QKeyEvent *e) override;
+  void paintEvent(QPaintEvent *e) override;
+  void focusInEvent(QFocusEvent *e) override;
+  void focusOutEvent(QFocusEvent *e) override;
 };
 
 /*
@@ -185,10 +185,10 @@ public slots:
     void setColor(const QColor &color, const QString &text = QString());
 
 protected:
-    void mousePressEvent(QMouseEvent *e);
-    void mouseReleaseEvent(QMouseEvent *e);
-    void mouseMoveEvent(QMouseEvent *e);
-    void paintEvent(QPaintEvent *e);
+  void mousePressEvent(QMouseEvent *e) override;
+  void mouseReleaseEvent(QMouseEvent *e) override;
+  void mouseMoveEvent(QMouseEvent *e) override;
+  void paintEvent(QPaintEvent *e) override;
 
 private:
     QColor c;
@@ -229,12 +229,12 @@ protected slots:
     void updateSelected();
 
 protected:
-    void keyPressEvent(QKeyEvent *e);
-    void showEvent(QShowEvent *e);
-    void hideEvent(QHideEvent *e);
-    void mouseReleaseEvent(QMouseEvent *e);
+  void keyPressEvent(QKeyEvent *e) override;
+  void showEvent(QShowEvent *e) override;
+  void hideEvent(QHideEvent *e) override;
+  void mouseReleaseEvent(QMouseEvent *e) override;
 
-    void regenerateGrid();
+  void regenerateGrid();
 
 private:
     QMap<int, QMap<int, QWidget *> > widgetAt;

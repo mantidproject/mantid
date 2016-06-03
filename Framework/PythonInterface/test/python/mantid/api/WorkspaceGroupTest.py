@@ -87,5 +87,18 @@ class WorkspaceGroupTest(unittest.TestCase):
         mtd.remove('grouped_1')
         mtd.remove('grouped_2')
 
+    def test_sortByName(self):
+        run_algorithm('CreateSingleValuedWorkspace', OutputWorkspace="w1")
+        run_algorithm('CreateSingleValuedWorkspace', OutputWorkspace="w4")
+        run_algorithm('GroupWorkspaces',InputWorkspaces='w4,w1',
+                      OutputWorkspace='group')
+        group = mtd['group']
+        names = ' '.join(list(group.getNames()))
+        self.assertTrue("w4 w1"==names)
+        group.sortByName()
+        names = ' '.join(list(group.getNames()))
+        self.assertTrue("w1 w4"==names)
+
+
 if __name__ == '__main__':
     unittest.main()

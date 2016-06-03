@@ -1,12 +1,12 @@
 #include "MantidAlgorithms/AnnularRingAbsorption.h"
 
-#include "MantidAPI/SampleEnvironment.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ObjComponent.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
+#include "MantidGeometry/Instrument/SampleEnvironment.h"
 #include "MantidGeometry/Objects/Object.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 
@@ -25,6 +25,7 @@ namespace Mantid {
 namespace Algorithms {
 using namespace Mantid::API;
 using Mantid::Geometry::ObjComponent;
+using Mantid::Geometry::SampleEnvironment;
 using namespace Mantid::Kernel;
 
 // Register the algorithm into the AlgorithmFactory

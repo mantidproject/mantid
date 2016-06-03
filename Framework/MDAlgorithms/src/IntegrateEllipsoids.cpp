@@ -341,7 +341,7 @@ void IntegrateEllipsoids::exec() {
   Mantid::DataObjects::PeaksWorkspace_sptr peak_ws =
       getProperty("OutputWorkspace");
   if (peak_ws != in_peak_ws) {
-    peak_ws.reset(in_peak_ws->clone().release());
+    peak_ws = in_peak_ws->clone();
   }
 
   // get UBinv and the list of

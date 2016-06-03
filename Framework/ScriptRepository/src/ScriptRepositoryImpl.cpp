@@ -43,7 +43,7 @@ using Mantid::Kernel::NetworkProxy;
 #else
 #include <Poco/FileStream.h>
 #include <Poco/NullStream.h>
-#include <stdlib.h>
+#include <cstdlib>
 #endif
 #include <Poco/StreamCopier.h>
 #include <Poco/DirectoryIterator.h>
@@ -63,6 +63,9 @@ namespace {
 /// static logger
 Kernel::Logger g_log("ScriptRepositoryImpl");
 }
+
+/// Default timeout
+int DEFAULT_TIMEOUT_SEC = 30;
 
 const char *timeformat = "%Y-%b-%d %H:%M:%S";
 
@@ -453,7 +456,7 @@ std::vector<std::string> ScriptRepositoryImpl::listFiles() {
   ensureValidRepository();
 
   repo.clear();
-  assert(repo.size() == 0);
+  assert(repo.empty());
   try {
     parseCentralRepository(repo);
     parseLocalRepository(repo);
@@ -1201,7 +1204,7 @@ std::string ScriptRepositoryImpl::doDeleteRemoteFile(
 
  An invalid repository accepts only the ::install method.
  */
-bool ScriptRepositoryImpl::isValid(void) { return valid; }
+bool ScriptRepositoryImpl::isValid() { return valid; }
 
 /**
  * Implements ScriptRepository::check4Update. It downloads the file
@@ -1216,7 +1219,7 @@ bool ScriptRepositoryImpl::isValid(void) { return valid; }
  *
  *  @return List of all files automatically downloaded.
  */
-std::vector<std::string> ScriptRepositoryImpl::check4Update(void) {
+std::vector<std::string> ScriptRepositoryImpl::check4Update() {
   g_log.debug() << "ScriptRepositoryImpl checking for update\n";
   // download the new repository json file
   // download the repository json
@@ -1291,7 +1294,7 @@ void ScriptRepositoryImpl::setIgnorePatterns(const std::string &patterns) {
 /**
  @todo describe
  */
-std::string ScriptRepositoryImpl::ignorePatterns(void) {
+std::string ScriptRepositoryImpl::ignorePatterns() {
   ConfigServiceImpl &config = ConfigService::Instance();
   std::string ignore_string = config.getString("ScriptRepositoryIgnore", false);
   return ignore_string;
@@ -1394,7 +1397,7 @@ void ScriptRepositoryImpl::doDownloadFile(const std::string &url_file,
     int timeout;
     if (!ConfigService::Instance().getValue("network.scriptrepo.timeout",
                                             timeout)) {
-      timeout = 5; // the default value if the key is not found
+      timeout = DEFAULT_TIMEOUT_SEC;
     }
     inetHelper.setTimeout(timeout);
 

@@ -70,7 +70,7 @@ void TOFExtinction::exec() {
   /// Output peaks workspace, create if needed
   PeaksWorkspace_sptr peaksW = getProperty("OutputWorkspace");
   if (peaksW != inPeaksW)
-    peaksW.reset(inPeaksW->clone().release());
+    peaksW = inPeaksW->clone();
 
   const Kernel::Material *m_sampleMaterial =
       &(inPeaksW->sample().getMaterial());
@@ -123,8 +123,8 @@ void TOFExtinction::exec() {
       sigfsq_ys = getSigFsqr(EgLaueI, cell, wl, twoth, tbar, fsq, sigfsq);
     } else if (cType.compare("Type I Gaussian") == 0) {
       // Apply correction to fsq with Type-I BCG for testing
-      double EgLaueI = std::sqrt(2.0) *
-                       getEgLaue(Eg, twoth, wl, divBeam, betaBeam) * 2.0 / 3.0;
+      double EgLaueI =
+          M_SQRT2 * getEgLaue(Eg, twoth, wl, divBeam, betaBeam) * 2.0 / 3.0;
       double Xqt = getXqt(EgLaueI, cell, wl, twoth, tbar, fsq);
       y_corr = getGaussian(Xqt, twoth);
       sigfsq_ys = getSigFsqr(EgLaueI, cell, wl, twoth, tbar, fsq, sigfsq);

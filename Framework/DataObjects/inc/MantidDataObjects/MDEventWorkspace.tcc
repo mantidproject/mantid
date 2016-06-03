@@ -88,6 +88,12 @@ TMDE(MDEventWorkspace)::~MDEventWorkspace() { delete data; }
 TMDE(void MDEventWorkspace)::setFileBacked(const std::string & /*fileName*/) {
   throw Kernel::Exception::NotImplementedError(" Not yet implemented");
 }
+/*
+ * Set filebacked on the contained box
+ */
+TMDE(void MDEventWorkspace)::setFileBacked() {
+  this->getBox()->setFileBacked();
+}
 /** If the workspace was filebacked, this would clear file-backed information
  *from the workspace nodes and close the files responsible for file backing
  *
@@ -369,7 +375,7 @@ TMDE(signal_t MDEventWorkspace)::getSignalWithMaskAtCoord(
  *workspace
  */
 TMDE(std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>>
-         MDEventWorkspace)::getMinimumExtents(size_t depth) {
+         MDEventWorkspace)::getMinimumExtents(size_t depth) const {
   std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>> out(nd);
   std::vector<API::IMDNode *> boxes;
   // Get all the end (leaf) boxes
@@ -817,7 +823,7 @@ TMDE(void MDEventWorkspace)::getBoundariesInDimension(
   for (size_t i = 1; i <= num_boundaries; i++) {
     size_t current_id = std::numeric_limits<size_t>::max();
     // Position along the line
-    coord_t this_x = i * box_size;
+    coord_t this_x = static_cast<coord_t>(i) * box_size;
     auto linePos = static_cast<coord_t>(this_x / fabs(dir_current_dim));
     // Full position
     auto pos = start + (dir * linePos);

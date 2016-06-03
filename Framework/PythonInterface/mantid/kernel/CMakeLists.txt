@@ -43,6 +43,8 @@ set ( EXPORT_FILES
   src/Exports/UnitLabel.cpp
   src/Exports/DeltaEMode.cpp
   src/Exports/PropertyManager.cpp
+  src/Exports/PropertyManagerDataService.cpp
+  src/Exports/PropertyManagerProperty.cpp
   src/Exports/PropertyHistory.cpp
   src/Exports/Memory.cpp
   src/Exports/ProgressBase.cpp
@@ -50,6 +52,7 @@ set ( EXPORT_FILES
   src/Exports/Statistics.cpp
   src/Exports/OptionalBool.cpp
   src/Exports/UsageService.cpp
+  src/Exports/Atom.cpp
 )
 
 set ( MODULE_DEFINITION ${CMAKE_CURRENT_BINARY_DIR}/kernel.cpp )
@@ -68,6 +71,7 @@ set ( SRC_FILES
   src/Converters/PyObjectToV3D.cpp
   src/Converters/PyObjectToVMD.cpp
   src/Converters/WrapWithNumpy.cpp
+  src/Registry/MappingTypeHandler.cpp
   src/Registry/PropertyWithValueFactory.cpp
   src/Registry/SequenceTypeHandler.cpp
   src/Registry/TypeRegistry.cpp
@@ -98,6 +102,7 @@ set ( INC_FILES
   ${HEADER_DIR}/kernel/Policies/RemoveConst.h
   ${HEADER_DIR}/kernel/Policies/ToWeakPtr.h
   ${HEADER_DIR}/kernel/Policies/VectorToNumpy.h
+  ${HEADER_DIR}/kernel/Registry/MappingTypeHandler.h
   ${HEADER_DIR}/kernel/Registry/PropertyValueHandler.h
   ${HEADER_DIR}/kernel/Registry/PropertyWithValueFactory.h
   ${HEADER_DIR}/kernel/Registry/SequenceTypeHandler.h

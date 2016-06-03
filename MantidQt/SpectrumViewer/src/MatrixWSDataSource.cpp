@@ -282,12 +282,12 @@ std::vector<std::string> MatrixWSDataSource::getInfoList(double x, double y) {
       l2 = l2 - l1;
     } else {
       l2 = det->getDistance(*m_sample);
-      two_theta = m_matWs->detectorTwoTheta(det);
+      two_theta = m_matWs->detectorTwoTheta(*det);
       azi = det->getPhi();
     }
     SVUtils::PushNameValue("L2", 8, 4, l2, list);
-    SVUtils::PushNameValue("TwoTheta", 8, 2, two_theta * 180. / M_PI, list);
-    SVUtils::PushNameValue("Azimuthal", 8, 2, azi * 180. / M_PI, list);
+    SVUtils::PushNameValue("TwoTheta", 8, 2, two_theta * deg2rad, list);
+    SVUtils::PushNameValue("Azimuthal", 8, 2, azi * deg2rad, list);
 
     /* For now, only support diffractometers and monitors. */
     /* We need a portable way to determine emode and */

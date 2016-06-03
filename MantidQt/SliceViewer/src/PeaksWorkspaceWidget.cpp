@@ -252,33 +252,49 @@ PeaksWorkspaceWidget::getPeaksWorkspace() const {
   return m_ws;
 }
 
-
 /**
  * Set the background color
  * @param backgroundColor: a peak view color for the background buttons
  */
-void PeaksWorkspaceWidget::setBackgroundColor(const PeakViewColor & backgroundColor) {
+void PeaksWorkspaceWidget::setBackgroundColor(
+    const PeakViewColor &backgroundColor) {
   // Need to set the three buttons sepearately
   auto backgroundColorSphere = backgroundColor.colorSphere;
   auto backgroundColorEllipsoid = backgroundColor.colorEllipsoid;
 
-  ui.btnBackgroundColorSphere->setBackgroundColor(backgroundColorSphere);
-  ui.btnBackgroundColorEllipsoid->setBackgroundColor(backgroundColorEllipsoid);
+  QPalette palette;
+  palette.setColor(ui.btnBackgroundColorSphere->backgroundRole(),
+                   backgroundColorSphere);
+  ui.btnBackgroundColorSphere->setPalette(palette);
+
+  palette.setColor(ui.btnBackgroundColorEllipsoid->backgroundRole(),
+                   backgroundColorEllipsoid);
+  ui.btnBackgroundColorEllipsoid->setPalette(palette);
 }
 
 /**
  * Set the foreground color
  * @param foregroundColor
  */
-void PeaksWorkspaceWidget::setForegroundColor(const PeakViewColor & foregroundColor) {
+void PeaksWorkspaceWidget::setForegroundColor(
+    const PeakViewColor &foregroundColor) {
   // Need to set the three buttons sepearately
   auto foregroundColorCross = foregroundColor.colorCross;
   auto foregroundColorSphere = foregroundColor.colorSphere;
   auto foregroundColorEllipsoid = foregroundColor.colorEllipsoid;
 
-  ui.btnPeakColor->setBackgroundColor(foregroundColorCross);
-  ui.btnPeakColorSphere->setBackgroundColor(foregroundColorSphere);
-  ui.btnPeakColorEllipsoid->setBackgroundColor(foregroundColorEllipsoid);
+  QPalette palette;
+
+  palette.setColor(ui.btnPeakColor->backgroundRole(), foregroundColorCross);
+  ui.btnPeakColor->setPalette(palette);
+
+  palette.setColor(ui.btnPeakColorSphere->backgroundRole(),
+                   foregroundColorSphere);
+  ui.btnPeakColorSphere->setPalette(palette);
+
+  palette.setColor(ui.btnPeakColorEllipsoid->backgroundRole(),
+                   foregroundColorEllipsoid);
+  ui.btnPeakColorEllipsoid->setPalette(palette);
 }
 
 /**
@@ -372,11 +388,12 @@ void PeaksWorkspaceWidget::exitAddPeaksMode() {
     scopedBlocker->setChecked(false);
 }
 
-
 void PeaksWorkspaceWidget::onForegroundColorCrossClicked() {
   auto selectedColor = getSelectedColor();
   if (selectedColor.isValid()) {
-    ui.btnPeakColor->setBackgroundColor(selectedColor);
+    QPalette palette;
+    palette.setColor(ui.btnPeakColor->backgroundRole(), selectedColor);
+    ui.btnPeakColor->setPalette(palette);
     onForegroundPeakViewColorClicked();
   }
 }
@@ -384,7 +401,10 @@ void PeaksWorkspaceWidget::onForegroundColorCrossClicked() {
 void PeaksWorkspaceWidget::onBackgroundColorSphereClicked() {
   auto selectedColor = getSelectedColor();
   if (selectedColor.isValid()) {
-    ui.btnBackgroundColorSphere->setBackgroundColor(selectedColor);
+    QPalette palette;
+    palette.setColor(ui.btnBackgroundColorSphere->backgroundRole(),
+                     selectedColor);
+    ui.btnBackgroundColorSphere->setPalette(palette);
     onBackgroundPeakViewColorClicked();
   }
 }
@@ -392,7 +412,9 @@ void PeaksWorkspaceWidget::onBackgroundColorSphereClicked() {
 void PeaksWorkspaceWidget::onForegroundColorSphereClicked() {
   auto selectedColor = getSelectedColor();
   if (selectedColor.isValid()) {
-    ui.btnPeakColorSphere->setBackgroundColor(selectedColor);
+    QPalette palette;
+    palette.setColor(ui.btnPeakColorSphere->backgroundRole(), selectedColor);
+    ui.btnPeakColorSphere->setPalette(palette);
     onForegroundPeakViewColorClicked();
   }
 }
@@ -400,7 +422,10 @@ void PeaksWorkspaceWidget::onForegroundColorSphereClicked() {
 void PeaksWorkspaceWidget::onBackgroundColorEllipsoidClicked() {
   auto selectedColor = getSelectedColor();
   if (selectedColor.isValid()) {
-    ui.btnBackgroundColorEllipsoid->setBackgroundColor(selectedColor);
+    QPalette palette;
+    palette.setColor(ui.btnBackgroundColorEllipsoid->backgroundRole(),
+                     selectedColor);
+    ui.btnBackgroundColorEllipsoid->setPalette(palette);
     onBackgroundPeakViewColorClicked();
   }
 }
@@ -408,7 +433,9 @@ void PeaksWorkspaceWidget::onBackgroundColorEllipsoidClicked() {
 void PeaksWorkspaceWidget::onForegroundColorEllipsoidClicked() {
   auto selectedColor = getSelectedColor();
   if (selectedColor.isValid()) {
-    ui.btnPeakColorEllipsoid->setBackgroundColor(selectedColor);
+    QPalette palette;
+    palette.setColor(ui.btnPeakColorEllipsoid->backgroundRole(), selectedColor);
+    ui.btnPeakColorEllipsoid->setPalette(palette);
     onForegroundPeakViewColorClicked();
   }
 }

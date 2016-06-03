@@ -120,7 +120,7 @@ void OptimizeLatticeForCellType::exec() {
   }
   // finally do the optimization
   for (auto &i_run : runWS) {
-    DataObjects::PeaksWorkspace_sptr peakWS(i_run->clone().release());
+    DataObjects::PeaksWorkspace_sptr peakWS(i_run->clone());
     AnalysisDataService::Instance().addOrReplace("_peaks", peakWS);
     const DblMatrix UB = peakWS->sample().getOrientedLattice().getUB();
     std::vector<double> lat(6);

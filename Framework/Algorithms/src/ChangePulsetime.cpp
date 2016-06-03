@@ -53,7 +53,7 @@ void ChangePulsetime::exec() {
   EventWorkspace_const_sptr in_ws = getProperty("InputWorkspace");
   EventWorkspace_sptr out_ws = getProperty("OutputWorkspace");
   if (!out_ws) {
-    out_ws = EventWorkspace_sptr(in_ws->clone().release());
+    out_ws = in_ws->clone();
   }
 
   // Either use the given list or use all spectra

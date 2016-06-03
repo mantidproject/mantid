@@ -109,7 +109,7 @@ void CloneMDWorkspace::doClone(
                       boost::dynamic_pointer_cast<IMDWorkspace>(outWS));
   } else {
     // Perform the clone in memory.
-    IMDWorkspace_sptr outWS(ws->clone().release());
+    IMDWorkspace_sptr outWS(ws->clone());
     setProperty("OutputWorkspace", outWS);
   }
 }
@@ -128,7 +128,7 @@ void CloneMDWorkspace::exec() {
     CALL_MDEVENT_FUNCTION(this->doClone, inWS);
   } else if (inHistoWS) {
     // Polymorphic clone().
-    IMDWorkspace_sptr outWS(inHistoWS->clone().release());
+    IMDWorkspace_sptr outWS(inHistoWS->clone());
     // And set to the output. Easy.
     this->setProperty("OutputWorkspace", outWS);
   } else {

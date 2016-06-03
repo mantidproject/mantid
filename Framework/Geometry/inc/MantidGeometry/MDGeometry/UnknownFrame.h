@@ -39,6 +39,7 @@ public:
   UnknownFrame(std::unique_ptr<Kernel::MDUnit> unit);
   UnknownFrame(const Kernel::UnitLabel &unit);
   std::string name() const override;
+  bool setMDUnit(const Mantid::Kernel::MDUnit &newUnit) override;
   bool canConvertTo(const Mantid::Kernel::MDUnit &otherUnit) const override;
   bool isQ() const override;
   bool isSameType(const MDFrame &frame) const override;

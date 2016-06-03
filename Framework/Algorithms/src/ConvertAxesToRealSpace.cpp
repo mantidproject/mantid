@@ -152,9 +152,9 @@ void ConvertAxesToRealSpace::exec() {
         } else if (axisSelection == "phi") {
           axisValue = phi;
         } else if (axisSelection == "2theta") {
-          axisValue = inputWs->detectorTwoTheta(det);
+          axisValue = inputWs->detectorTwoTheta(*det);
         } else if (axisSelection == "signed2theta") {
-          axisValue = inputWs->detectorSignedTwoTheta(det);
+          axisValue = inputWs->detectorSignedTwoTheta(*det);
         }
 
         if (axisIndex == 0) {

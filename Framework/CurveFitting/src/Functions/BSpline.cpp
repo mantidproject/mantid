@@ -7,6 +7,7 @@
 #include "MantidAPI/FunctionFactory.h"
 
 #include <boost/lexical_cast.hpp>
+#include <gsl/gsl_version.h>
 
 namespace Mantid {
 namespace CurveFitting {
@@ -95,11 +96,13 @@ void BSpline::derivative1D(double *out, const double *xValues, size_t nData,
 
   int splineOrder = getAttribute("Order").asInt();
   size_t k = static_cast<size_t>(splineOrder);
+#if GSL_MAJOR_VERSION < 2
   if (!m_bsplineDerivWorkspace) {
     gsl_bspline_deriv_workspace *ws = gsl_bspline_deriv_alloc(k);
     m_bsplineDerivWorkspace = boost::shared_ptr<gsl_bspline_deriv_workspace>(
         ws, ReleaseBSplineDerivativeWorkspace());
   }
+#endif
 
   GSLMatrix B(k, order + 1);
   double startX = getAttribute("StartX").asDouble();
@@ -116,9 +119,14 @@ void BSpline::derivative1D(double *out, const double *xValues, size_t nData,
     } else {
       size_t jstart(0);
       size_t jend(0);
+#if GSL_MAJOR_VERSION < 2
       gsl_bspline_deriv_eval_nonzero(x, order, B.gsl(), &jstart, &jend,
                                      m_bsplineWorkspace.get(),
                                      m_bsplineDerivWorkspace.get());
+#else
+      gsl_bspline_deriv_eval_nonzero(x, order, B.gsl(), &jstart, &jend,
+                                     m_bsplineWorkspace.get());
+#endif
       double val = 0.0;
       for (size_t j = jstart; j <= jend; ++j) {
         val += getParameter(j) * B.get(j - jstart, order);

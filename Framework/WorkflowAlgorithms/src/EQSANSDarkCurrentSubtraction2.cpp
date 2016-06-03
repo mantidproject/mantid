@@ -5,7 +5,7 @@
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidAPI/AlgorithmProperty.h"
 #include "MantidAPI/FileProperty.h"
-#include "MantidAPI/PropertyManagerDataService.h"
+#include "MantidKernel/PropertyManagerDataService.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidKernel/PropertyManager.h"

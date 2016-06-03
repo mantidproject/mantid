@@ -87,7 +87,7 @@ void SofQWNormalisedPolygon::exec() {
       new API::Progress(this, 0.0, 1.0, nreports));
 
   // Compute input caches
-  m_EmodeProperties.initCachedValues(inputWS, this);
+  m_EmodeProperties.initCachedValues(*inputWS, this);
 
   std::vector<double> par =
       inputWS->getInstrument()->getNumberParameter("detector-neighbour-offset");
@@ -129,7 +129,7 @@ void SofQWNormalisedPolygon::exec() {
     const double phiLower = phi - phiHalfWidth;
     const double phiUpper = phi + phiHalfWidth;
 
-    const double efixed = m_EmodeProperties.getEFixed(detector);
+    const double efixed = m_EmodeProperties.getEFixed(*detector);
     const specnum_t specNo = inputWS->getSpectrum(i)->getSpectrumNo();
     std::stringstream logStream;
     for (size_t j = 0; j < nEnergyBins; ++j) {
@@ -245,7 +245,7 @@ void SofQWNormalisedPolygon::initAngularCachesNonPSD(
       det = workspace->getDetector(i);
       // Check to see if there is an EFixed, if not skip it
       try {
-        m_EmodeProperties.getEFixed(det);
+        m_EmodeProperties.getEFixed(*det);
       } catch (std::runtime_error &) {
         det.reset();
       }
@@ -262,8 +262,7 @@ void SofQWNormalisedPolygon::initAngularCachesNonPSD(
       this->m_thetaWidths[i] = -1.0;
       continue;
     }
-    const double theta = workspace->detectorTwoTheta(det);
-    this->m_theta[i] = theta;
+    this->m_theta[i] = workspace->detectorTwoTheta(*det);
 
     /**
      * Determine width from shape geometry. A group is assumed to contain
@@ -330,7 +329,7 @@ void SofQWNormalisedPolygon::initAngularCachesPSD(
     double phiWidth = -DBL_MAX;
 
     // Find theta and phi widths
-    double theta = workspace->detectorTwoTheta(detector);
+    double theta = workspace->detectorTwoTheta(*detector);
     double phi = detector->getPhi();
 
     specnum_t deltaPlus1 = inSpec + 1;
@@ -344,7 +343,7 @@ void SofQWNormalisedPolygon::initAngularCachesPSD(
       if (spec == deltaPlus1 || spec == deltaMinus1 || spec == deltaPlusT ||
           spec == deltaMinusT) {
         DetConstPtr detector_n = workspace->getDetector(spec - 1);
-        double theta_n = workspace->detectorTwoTheta(detector_n) / 2.0;
+        double theta_n = workspace->detectorTwoTheta(*detector_n) * 0.5;
         double phi_n = detector_n->getPhi();
 
         double dTheta = std::fabs(theta - theta_n);
