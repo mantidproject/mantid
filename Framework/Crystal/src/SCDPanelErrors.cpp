@@ -34,7 +34,7 @@ DECLARE_FUNCTION(SCDPanelErrors)
 // UB ified q's are below.
 
 namespace { // anonymous namespace
-static const double ONE_OVER_TWO_PI = 1. / M_2_PI;
+// static const double ONE_OVER_TWO_PI = 1. / M_2_PI;
 const string LATTICE_A("a");
 const string LATTICE_B("b");
 const string LATTICE_C("c");
