@@ -19,50 +19,48 @@ Logger g_log("InternetHelper");
 //----------------------------------------------------------------------------------------------
 /** Constructor
 */
-GitHubApiHelper::GitHubApiHelper()
-  : InternetHelper()
-{
+GitHubApiHelper::GitHubApiHelper() : InternetHelper() {
   addAuthenticationToken();
 }
-
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
 */
 GitHubApiHelper::GitHubApiHelper(const Kernel::ProxyInfo &proxy)
-  : InternetHelper(proxy) {
+    : InternetHelper(proxy) {
   addAuthenticationToken();
 }
 
 //----------------------------------------------------------------------------------------------
 /** Destructor
 */
-GitHubApiHelper::~GitHubApiHelper() {
-}
+GitHubApiHelper::~GitHubApiHelper() {}
 
 void GitHubApiHelper::reset() {
   InternetHelper::reset();
   addAuthenticationToken();
 }
 
-void GitHubApiHelper::processResponseHeaders(const Poco::Net::HTTPResponse &res) {
+void GitHubApiHelper::processResponseHeaders(
+    const Poco::Net::HTTPResponse &res) {
   // get github api rate limit information if available;
   int rateLimitRemaining;
   int rateLimitLimit;
   DateAndTime rateLimitReset;
   try {
     rateLimitLimit =
-      boost::lexical_cast<int>(res.get("X-RateLimit-Limit", "-1"));
+        boost::lexical_cast<int>(res.get("X-RateLimit-Limit", "-1"));
     rateLimitRemaining =
-      boost::lexical_cast<int>(res.get("X-RateLimit-Remaining", "-1"));
+        boost::lexical_cast<int>(res.get("X-RateLimit-Remaining", "-1"));
     rateLimitReset.set_from_time_t(
-      boost::lexical_cast<int>(res.get("X-RateLimit-Reset", "0")));
+        boost::lexical_cast<int>(res.get("X-RateLimit-Reset", "0")));
   } catch (boost::bad_lexical_cast const &) {
     rateLimitLimit = -1;
   }
   if (rateLimitLimit > -1) {
-    g_log.debug() << "GitHub API " << rateLimitRemaining << " of " << rateLimitLimit <<
-      " calls left. Resets at " << rateLimitReset.toSimpleString() << std::endl;
+    g_log.debug() << "GitHub API " << rateLimitRemaining << " of "
+                  << rateLimitLimit << " calls left. Resets at "
+                  << rateLimitReset.toSimpleString() << " GMT" << std::endl;
   }
 }
 } // namespace Kernel

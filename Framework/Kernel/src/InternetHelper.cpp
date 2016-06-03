@@ -359,7 +359,7 @@ int InternetHelper::processErrorStates(const Poco::Net::HTTPResponse &res,
   } else if ((retStatus == HTTP_FORBIDDEN) && (rateLimitRemaining == 0)) {
     throw Exception::InternetError(
         "The Github API rate limit has been reached, try again after " +
-            rateLimitReset.toSimpleString(),
+            rateLimitReset.toSimpleString() + " GMT",
         retStatus);
   } else {
     std::stringstream info;
