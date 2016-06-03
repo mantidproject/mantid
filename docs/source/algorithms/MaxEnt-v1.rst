@@ -331,6 +331,18 @@ Output:
 .. figure:: ../images/MaxEntPositiveImage.png
    :align: center
 
+Complex Images
+--------------
+
+By default the input property *ComplexImage* is set to *True* and the algorithm will assume complex images for the calculations.
+This means that the set of numbers :math:`\{x_j\}` that form the image will have a real and an imaginary part, and both components will be
+considered to evaluate the entropy, :math:`S\left(x_j\right)`, and its derivative, :math:`\nabla S\left(x_j\right)`. This effectively means
+splitting the entropy (the same applies to its derivative) in two terms, :math:`S\left(x_j\right) = \left[S\left(x_j^{re}\right), S\left(x_j^{im}\right)\right]`,
+where the first one refers to the real part of the entropy and the second one to the imaginary part. This is the recommended option when no prior knowledge
+about the image is available, as trying to reconstruct images that are inherently complex discarding the imaginary part will prevent the algorithm
+from converging. If the image is known to be real this property can be safely set to *False*.
+
+
 Increasing the number of points in the image
 --------------------------------------------
 
