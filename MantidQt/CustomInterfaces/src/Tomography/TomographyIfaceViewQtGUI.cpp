@@ -163,9 +163,10 @@ DECLARE_SUBWINDOW(TomographyIfaceViewQtGUI)
  */
 TomographyIfaceViewQtGUI::TomographyIfaceViewQtGUI(QWidget *parent)
     : UserSubWindow(parent), ITomographyIfaceView(), m_tabROIW(nullptr),
-      m_processingJobsIDs(), m_currentComputeRes(""), m_currentReconTool(""),
-      m_imgPath(""), m_logMsgs(), m_systemSettings(), m_toolsSettings(),
-      m_settings(), m_settingsGroup("CustomInterfaces/Tomography"),
+      m_tabImggFormats(nullptr), m_processingJobsIDs(), m_currentComputeRes(""),
+      m_currentReconTool(""), m_imgPath(""), m_logMsgs(), m_systemSettings(),
+      m_toolsSettings(), m_settings(),
+      m_settingsGroup("CustomInterfaces/Tomography"),
       m_settingsSubGroupEnergy(m_settingsGroup + "/EnergyBands"),
       m_aggAlgRunner(), m_availPlugins(), m_currPlugins(), m_currentParamPath(),
       m_presenter(nullptr) {

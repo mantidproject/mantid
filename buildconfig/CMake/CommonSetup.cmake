@@ -66,7 +66,7 @@ endif ()
 find_package ( Doxygen ) # optional
 
 if(CMAKE_HOST_WIN32)
-  find_package ( ZLIB REQUIRED 
+  find_package ( ZLIB REQUIRED
     CONFIGS zlib-config.cmake )
   set (HDF5_DIR "${THIRD_PARTY_DIR}/cmake")
   find_package ( HDF5 COMPONENTS CXX HL REQUIRED
@@ -84,6 +84,7 @@ else()
 endif()
 
 find_package ( PythonInterp )
+set ( Python_ADDITIONAL_VERSIONS ${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR} )
 
 find_package ( OpenSSL REQUIRED )
 

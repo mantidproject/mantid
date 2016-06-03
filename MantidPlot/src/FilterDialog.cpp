@@ -48,7 +48,7 @@ FilterDialog::FilterDialog(int type, QWidget* parent, Qt::WFlags fl )
     setWindowTitle(tr("MantidPlot - Filter options"));
     filter_type = type;
 
-    setName( "FilterDialog" );
+    setObjectName( "FilterDialog" );
 
     QGroupBox *gb1 = new QGroupBox();
     QGridLayout *gl1 = new QGridLayout(gb1);
@@ -118,7 +118,7 @@ double from = 0.0, to = 0.0;
 try
 	{
 	MyParser parser;
-	parser.SetExpr(boxStart->text().replace(",", ".").ascii());
+	parser.SetExpr(boxStart->text().replace(",", ".").toAscii().constData());
 	from = parser.Eval();
 	}
 catch(mu::ParserError &e)
@@ -141,7 +141,7 @@ if (filter_type >= FFTFilter::BandPass)
 	try
 		{
 		MyParser parser;
-		parser.SetExpr(boxEnd->text().replace(",", ".").ascii());
+		parser.SetExpr(boxEnd->text().replace(",", ".").toAscii().constData());
 		to=parser.Eval();
 		}
 	catch(mu::ParserError &e)

@@ -151,7 +151,7 @@ void Convolution::addResultCurve()
 		d_table->setText(i, cols2, locale.toString(d_x[i], 'g', app->d_decimal_digits));
 	}
 
-	QStringList l = d_table->colNames().grep(tr("Index"));
+	QStringList l = d_table->colNames().filter(tr("Index"));
 	QString id = QString::number((int)l.size()+1);
 	QString label = objectName() + id;
 

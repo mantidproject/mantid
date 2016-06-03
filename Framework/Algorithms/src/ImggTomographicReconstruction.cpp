@@ -257,14 +257,19 @@ ImggTomographicReconstruction::prepareProjectionAngles(
     API::WorkspaceGroup_const_sptr wks, double minAngle,
     double maxAngle) const {
 
-  auto angles = Kernel::make_unique<std::vector<float>>(wks->size());
+  auto projCount = wks->size();
+  auto angles = Kernel::make_unique<std::vector<float>>(projCount);
 
   auto vec = *angles;
+  if (vec.empty())
+    return angles;
+
   double factor = (maxAngle - minAngle);
-  for (size_t idx = 0; idx < wks->size(); ++idx) {
+  vec[0] = static_cast<float>(minAngle);
+  for (size_t idx = 1; idx < projCount; ++idx) {
     vec[idx] = static_cast<float>(minAngle +
                                   factor * static_cast<double>(idx) /
-                                      static_cast<double>(idx - 1));
+                                      static_cast<double>(projCount - 1));
   }
 
   return angles;

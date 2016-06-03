@@ -40,12 +40,6 @@ public:
       throw std::invalid_argument("Invalid abstract presenter");
     }
   };
-  virtual ~DataProcessorCommandBase(){};
-
-  virtual void execute() = 0;
-  virtual std::string name() = 0;
-  virtual std::string icon() = 0;
-
 protected:
   DataProcessorPresenter *const m_presenter;
 };

@@ -543,7 +543,7 @@ void CustomActionDialog::setCurrentAction(int row)
 	if (!w)
 		return;
 
-	if (w->isA("QToolBar")){
+	if (qstrcmp("QToolBar", w->metaObject()->className()) == 0){
       int index = toolBarBox->findText((dynamic_cast<QToolBar*>(w))->windowTitle());
     	if (index >= 0){
         	toolBarBox->setCurrentIndex(index);

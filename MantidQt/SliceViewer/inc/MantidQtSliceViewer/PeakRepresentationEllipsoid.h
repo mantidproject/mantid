@@ -61,6 +61,8 @@ public:
   /// Show the background radius
   void showBackgroundRadius(const bool show) override;
 
+  static const double zeroRadius;
+
 protected:
   std::shared_ptr<PeakPrimitives> getDrawingInformation(
       PeakRepresentationViewInformation viewInformation) override;

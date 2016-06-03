@@ -48,7 +48,7 @@
 SurfaceDialog::SurfaceDialog( QWidget* parent, Qt::WFlags fl )
     : QDialog( parent, fl )
 {
-	setName( "SurfaceDialog" );
+	setObjectName( "SurfaceDialog" );
 	setWindowTitle(tr("MantidPlot - Define surface plot"));
     setSizeGripEnabled( true );
 
@@ -285,7 +285,7 @@ void SurfaceDialog::setFunction(Graph3D *g)
 	if (!f)
 		return;
 
-    boxFunction->setCurrentText(f->formula());
+    boxFunction->setItemText(boxFunction->currentIndex(), f->formula());
     boxFuncColumns->setValue(static_cast<int>(f->columns()));
     boxFuncRows->setValue(static_cast<int>(f->rows()));
 
@@ -317,7 +317,7 @@ void SurfaceDialog::acceptParametricSurface()
     int list_size = 15;
     QString x_formula = boxX->text();
 	try {
-		parser.SetExpr(x_formula.ascii());
+		parser.SetExpr(x_formula.toAscii().constData());
 		parser.Eval();
 	} catch(mu::ParserError &e){
 		QMessageBox::critical(app, tr("MantidPlot - X Formula Error"), QString::fromStdString(e.GetMsg()));
@@ -325,14 +325,14 @@ void SurfaceDialog::acceptParametricSurface()
 		return;
 	}
 
-    app->d_param_surface_func.remove(x_formula);
+    app->d_param_surface_func.removeAll(x_formula);
 	app->d_param_surface_func.push_front(x_formula);
 	while ((int)app->d_param_surface_func.size() > list_size)
 		app->d_param_surface_func.pop_back();
 
     QString y_formula = boxY->text();
 	try {
-		parser.SetExpr(y_formula.ascii());
+		parser.SetExpr(y_formula.toAscii().constData());
 		parser.Eval();
 	} catch(mu::ParserError &e){
 		QMessageBox::critical(app, tr("MantidPlot - Y Formula Error"), QString::fromStdString(e.GetMsg()));
@@ -340,14 +340,14 @@ void SurfaceDialog::acceptParametricSurface()
 		return;
 	}
 
-    app->d_param_surface_func.remove(y_formula);
+    app->d_param_surface_func.removeAll(y_formula);
 	app->d_param_surface_func.push_front(y_formula);
 	while ((int)app->d_param_surface_func.size() > list_size)
 		app->d_param_surface_func.pop_back();
 
     QString z_formula = boxZ->text();
 	try {
-		parser.SetExpr(z_formula.ascii());
+		parser.SetExpr(z_formula.toAscii().constData());
 		parser.Eval();
 	} catch(mu::ParserError &e){
 		QMessageBox::critical(app, tr("MantidPlot - Z Formula Error"), QString::fromStdString(e.GetMsg()));
@@ -355,18 +355,18 @@ void SurfaceDialog::acceptParametricSurface()
 		return;
 	}
 
-    app->d_param_surface_func.remove(z_formula);
+    app->d_param_surface_func.removeAll(z_formula);
 	app->d_param_surface_func.push_front(z_formula);
 	while ((int)app->d_param_surface_func.size() > list_size)
 		app->d_param_surface_func.pop_back();
 
-	QString ufrom = boxUFrom->text().lower();
-	QString uto = boxUTo->text().lower();
-	QString vfrom = boxVFrom->text().lower();
-	QString vto = boxVTo->text().lower();
+	QString ufrom = boxUFrom->text().toLower();
+	QString uto = boxUTo->text().toLower();
+	QString vfrom = boxVFrom->text().toLower();
+	QString vto = boxVTo->text().toLower();
 	double ul, ur, vl, vr;
 	try{
-		parser.SetExpr(ufrom.ascii());
+		parser.SetExpr(ufrom.toAscii().constData());
 		ul = parser.Eval();
 	}
 	catch(mu::ParserError &e){
@@ -376,7 +376,7 @@ void SurfaceDialog::acceptParametricSurface()
 	}
 
 	try{
-		parser.SetExpr(uto.ascii());
+		parser.SetExpr(uto.toAscii().constData());
 		ur = parser.Eval();
 	}
 	catch(mu::ParserError &e){
@@ -386,7 +386,7 @@ void SurfaceDialog::acceptParametricSurface()
 	}
 
 	try{
-		parser.SetExpr(vfrom.ascii());
+		parser.SetExpr(vfrom.toAscii().constData());
 		vl = parser.Eval();
 	}
 	catch(mu::ParserError &e){
@@ -396,7 +396,7 @@ void SurfaceDialog::acceptParametricSurface()
 	}
 
 	try{
-		parser.SetExpr(vto.ascii());
+		parser.SetExpr(vto.toAscii().constData());
 		vr = parser.Eval();
 	}
 	catch(mu::ParserError &e){
@@ -422,18 +422,18 @@ void SurfaceDialog::acceptFunction()
 {
 ApplicationWindow *app = static_cast<ApplicationWindow *>(this->parent());
 
-QString Xfrom=boxXFrom->text().lower();
-QString Xto=boxXTo->text().lower();
-QString Yfrom=boxYFrom->text().lower();
-QString Yto=boxYTo->text().lower();
-QString Zfrom=boxZFrom->text().lower();
-QString Zto=boxZTo->text().lower();
+QString Xfrom=boxXFrom->text().toLower();
+QString Xto=boxXTo->text().toLower();
+QString Yfrom=boxYFrom->text().toLower();
+QString Yto=boxYTo->text().toLower();
+QString Zfrom=boxZFrom->text().toLower();
+QString Zto=boxZTo->text().toLower();
 
 double fromX, toX, fromY,toY, fromZ,toZ;
 try
 	{
 	MyParser parser;
-	parser.SetExpr(Xfrom.ascii());
+	parser.SetExpr(Xfrom.toAscii().constData());
 	fromX=parser.Eval();
 	}
 catch(mu::ParserError &e)
@@ -445,7 +445,7 @@ catch(mu::ParserError &e)
 try
 	{
 	MyParser parser;
-	parser.SetExpr(Xto.ascii());
+	parser.SetExpr(Xto.toAscii().constData());
 	toX=parser.Eval();
 	}
 catch(mu::ParserError &e)
@@ -458,7 +458,7 @@ catch(mu::ParserError &e)
 try
 	{
 	MyParser parser;
-	parser.SetExpr(Yfrom.ascii());
+	parser.SetExpr(Yfrom.toAscii().constData());
 	fromY=parser.Eval();
 	}
 catch(mu::ParserError &e)
@@ -470,7 +470,7 @@ catch(mu::ParserError &e)
 try
 	{
 	MyParser parser;
-	parser.SetExpr(Yto.ascii());
+	parser.SetExpr(Yto.toAscii().constData());
 	toY=parser.Eval();
 	}
 catch(mu::ParserError &e)
@@ -482,7 +482,7 @@ catch(mu::ParserError &e)
 try
 	{
 	MyParser parser;
-	parser.SetExpr(Zfrom.ascii());
+	parser.SetExpr(Zfrom.toAscii().constData());
 	fromZ=parser.Eval();
 	}
 catch(mu::ParserError &e)
@@ -494,7 +494,7 @@ catch(mu::ParserError &e)
 try
 	{
 	MyParser parser;
-	parser.SetExpr(Zto.ascii());
+	parser.SetExpr(Zto.toAscii().constData());
 	toZ=parser.Eval();
 	}
 catch(mu::ParserError &e)
@@ -521,7 +521,7 @@ try
 	double y=fromY;
 	parser.DefineVar("x", &x);
 	parser.DefineVar("y", &y);
-	parser.SetExpr(formula.ascii());
+	parser.SetExpr(formula.toAscii().constData());
 
 	
 	parser.Eval();

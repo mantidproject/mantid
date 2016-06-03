@@ -214,7 +214,16 @@ void SampleTransmission::algorithmComplete(bool error)
 
   m_uiForm.twResults->resizeColumnToContents(0);
 
-  // Plot transmission curve on preview plot
-  m_uiForm.ppTransmission->addSpectrum("Transmission", "CalculatedSampleTransmission", 0);
-  m_uiForm.ppTransmission->resizeX();
+  try {
+    // Plot transmission curve on preview plot
+    m_uiForm.ppTransmission->addSpectrum("Transmission",
+                                         "CalculatedSampleTransmission", 0);
+    m_uiForm.ppTransmission->resizeX();
+  } catch (std::runtime_error &e) {
+    // PreviewPlot may throw an exception if our workspace has less than two X
+    // values
+    showInformationBox(
+        QString::fromStdString("Unable to plot CalculatedSampleTransmission: " +
+                               std::string(e.what())));
+  }
 }

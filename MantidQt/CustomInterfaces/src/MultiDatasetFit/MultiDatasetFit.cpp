@@ -36,7 +36,7 @@ DECLARE_SUBWINDOW(MultiDatasetFit)
 /// @param parent :: The parent widget
 MultiDatasetFit::MultiDatasetFit(QWidget *parent)
 :UserSubWindow(parent), m_plotController(NULL), m_dataController(NULL), m_functionBrowser(NULL),
- m_fitOptionsBrowser(NULL)
+ m_fitOptionsBrowser(NULL), m_fitAllSettings(QMessageBox::No)
 {
 }
 
@@ -181,6 +181,10 @@ void MultiDatasetFit::fitSequential()
 {
   try
   {
+
+    /// disable button to avoid multiple fit click
+    m_uiForm.btnFit->setEnabled(false);
+
     std::ostringstream input;
 
     int n = getNumberOfSpectra();
@@ -220,6 +224,7 @@ void MultiDatasetFit::fitSequential()
       mess += "...";
     }
     QMessageBox::critical( this, "MantidPlot - Error", QString("PlotPeakByLogValue failed:\n\n  %1").arg(mess) );
+    m_uiForm.btnFit->setEnabled(true);
   }
 }
 
@@ -228,6 +233,8 @@ void MultiDatasetFit::fitSimultaneous()
 {
   try
   {
+
+    m_uiForm.btnFit->setEnabled(false);
     auto fun = createFunction();
     auto fit = Mantid::API::AlgorithmManager::Instance().create("Fit");
     fit->initialize();
@@ -285,31 +292,52 @@ void MultiDatasetFit::fitSimultaneous()
       mess += "...";
     }
     QMessageBox::critical( this, "MantidPlot - Error", QString("Fit failed:\n\n  %1").arg(mess) );
+    m_uiForm.btnFit->setEnabled(true);
   }
 }
 
 /// Run the fitting algorithm.
-void MultiDatasetFit::fit()
-{
-  if ( !m_functionBrowser->hasFunction() )
-  {
-    QMessageBox::warning( this, "MantidPlot - Warning","Function wasn't set." );
+void MultiDatasetFit::fit() {
+  if (!m_functionBrowser->hasFunction()) {
+    QMessageBox::warning(this, "MantidPlot - Warning", "Function wasn't set.");
     return;
   }
 
   auto fittingType = m_fitOptionsBrowser->getCurrentFittingType();
-  
-  if (fittingType == MantidWidgets::FitOptionsBrowser::Simultaneous)
-  {
-    fitSimultaneous();
-  }
-  else if (fittingType == MantidWidgets::FitOptionsBrowser::Sequential)
-  {
-    fitSequential();
-  }
-  else
-  {
-    throw std::logic_error("Unrecognised fitting type. Only Normal and Sequential are accepted.");
+  auto n = getNumberOfSpectra();
+  int fitAll = QMessageBox::Yes;
+
+  if (fittingType == MantidWidgets::FitOptionsBrowser::Simultaneous) {
+    if (n > 20 && m_fitAllSettings == QMessageBox::No) {
+      fitAll = QMessageBox::question(this, "Fit All?",
+                                     "Are you sure you would like to fit " +
+                                         QString::number(n) +
+                                         " spectrum simultaneously?",
+                                     QMessageBox::Yes, QMessageBox::No);
+
+      if (fitAll == QMessageBox::Yes)
+        m_fitAllSettings = QMessageBox::Yes;
+    }
+    if (fitAll == QMessageBox::Yes) {
+      fitSimultaneous();
+    }
+
+  } else if (fittingType == MantidWidgets::FitOptionsBrowser::Sequential) {
+    if (n > 100 && m_fitAllSettings == QMessageBox::No) {
+      fitAll = QMessageBox::question(
+          this, "Fit All?", "Are you sure you would like to fit " +
+                                QString::number(n) + " spectrum sequentially?",
+          QMessageBox::Yes, QMessageBox::No);
+
+      if (fitAll == QMessageBox::Yes)
+        m_fitAllSettings = QMessageBox::Yes;
+    }
+    if (fitAll == QMessageBox::Yes) {
+      fitSequential();
+    }
+  } else {
+    throw std::logic_error(
+        "Unrecognised fitting type. Only Normal and Sequential are accepted.");
   }
 }
 
@@ -418,6 +446,7 @@ void MultiDatasetFit::finishFit(bool error)
       showParameterPlot();
     }
   }
+  m_uiForm.btnFit->setEnabled(true);
 }
 
 /// Update the interface to have the same parameter values as in a function.

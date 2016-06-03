@@ -208,7 +208,7 @@ public slots:
   /// Load mantid data files (generic load algorithm)
   void loadDataFileByName(QString fn);
   /// Open from the list of recent files
-  void openRecentFile(int index);
+  void openRecentFile(QAction* action);
 
   /**
   * \brief Create a new project from a data file.
@@ -602,7 +602,7 @@ public slots:
   MultiLayer* prepareMultiLayer(bool& isNew, MultiLayer* window, const QString& newWindowName = "Graph",
     bool clearWindow = false);
 
-  void openRecentProject(int index);
+  void openRecentProject(QAction* action);
 
   //@}
 
@@ -1034,6 +1034,8 @@ public slots:
   void dropInTiledWindow( MdiSubWindow *w, QPoint pos );
   //@}
 
+  bool isOfType(const QObject* obj, const char* toCompare) const;
+
 signals:
   void modified();
   void shutting_down();
@@ -1097,7 +1099,7 @@ private slots:
   void plotDataMenuAboutToShow();
   void tableMenuAboutToShow();
   void windowsMenuAboutToShow();
-  void windowsMenuActivated( int id );
+  void windowsMenuActivated();
   void interfaceMenuAboutToShow();
   void tiledWindowMenuAboutToShow();
 
@@ -1296,7 +1298,7 @@ public:
   QColor tableBkgdColor, tableTextColor, tableHeaderColor;
   QString projectname, columnSeparator, helpFilePath, appLanguage;
   QString configFilePath, fitPluginsPath, fitModelsPath, asciiDirPath, imagesDirPath, scriptsDirPath;
-  int ignoredLines, savingTimerId, plot3DResolution, recentMenuID, recentFilesMenuID;
+  int ignoredLines, savingTimerId, plot3DResolution;
   bool renameColumns, strip_spaces, simplify_spaces;
   QStringList recentProjects, recentFiles;
   bool saved, showPlot3DProjection, showPlot3DLegend, orthogonal3DPlots, autoscale3DPlots;
@@ -1385,7 +1387,7 @@ private:
   QAction *actionLoad;
   QAction *actionCopyWindow, *actionShowAllColumns, *actionHideSelectedColumns;
   QAction *actionCutSelection, *actionCopySelection, *actionPasteSelection, *actionClearSelection;
-  QAction *actionShowExplorer, *actionShowLog, *actionAddLayer, *actionShowLayerDialog, *actionAutomaticLayout,*actionclearAllMemory, *actionreleaseFreeMemory;
+  QAction *actionShowExplorer, *actionShowLog, *actionAddLayer, *actionShowLayerDialog, *actionAutomaticLayout,*actionclearAllMemory;
   QAction *actionCatalogLogin,*actionCatalogSearch, *actionCatalogPublish, *actionCatalogLogout;
   QAction *actionSwapColumns, *actionMoveColRight, *actionMoveColLeft, *actionMoveColFirst, *actionMoveColLast;
   QAction *actionExportGraph, *actionExportAllGraphs, *actionPrint, *actionPrintAllPlots, *actionShowExportASCIIDialog;
@@ -1450,6 +1452,7 @@ private:
   QAction *actionPanPlot;
   QAction *actionWaterfallPlot;
   QAction *actionNewTiledWindow;
+
 
   QList<QAction *> d_user_actions;
   QList<QMenu* > d_user_menus; //Mantid

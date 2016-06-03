@@ -42,9 +42,8 @@ namespace MantidQt
     {
     public:
       HintingLineEditFactory(HintStrategy* hintStrategy) : m_strategy(hintStrategy) {};
-      virtual ~HintingLineEditFactory() {};
-      virtual QWidget* createEditor(QWidget* parent, const QStyleOptionViewItem& option, const QModelIndex& index) const
-      {
+      QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &option,
+                            const QModelIndex &index) const override {
         Q_UNUSED(option);
         Q_UNUSED(index);
 

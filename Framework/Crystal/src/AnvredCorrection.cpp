@@ -1,10 +1,6 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidCrystal/AnvredCorrection.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/InstrumentValidator.h"
-#include "MantidAPI/MemoryManager.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidKernel/BoundedValidator.h"
@@ -366,7 +362,6 @@ void AnvredCorrection::execEvent() {
     // When focussing in place, you can clear out old memory from the input one!
     if (inPlace) {
       eventW->getEventList(i).clear();
-      Mantid::API::MemoryManager::Instance().releaseFreeMemory();
     }
 
     prog.report();

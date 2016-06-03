@@ -91,9 +91,10 @@ public:
   {
   public:
     /// Return a message
-    const char *what() const throw() override {
-      return "File saving was cancelled";
-    }
+    const char *what() const noexcept override { return m_msg.c_str(); }
+
+  private:
+    std::string m_msg{"File Saving was cancelled"};
   };
 
 

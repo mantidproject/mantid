@@ -20,6 +20,12 @@ functionality areas of the interface.
 
 General options
 ^^^^^^^^^^^^^^^
+RB Number
+  To enable the GUI specify a RB Number (where "RB Number" usually
+  denotes the experiment reference number at ISIS). This reference
+  will be used for the output paths, so that files from different
+  users and/or experiments can be kept separate.
+
 Instrument
  Select the instrument. Only ENGIN-X (ISIS) is supported in this version.
 
@@ -29,10 +35,10 @@ Instrument
 Close
   Close the interface
 
-RB Number
-  To enable the GUI specify a RB Number, the RB number will be used for the
-  output paths, so that files from different users and/or experiments can
-  be kept separate.
+Status at the bottom of the interface
+  Here there will be a short message that indicates whether the last
+  important calculations finished successfully, and when the interface
+  is busy calculating (calibrating, focusing, fitting, etc.).
 
 * Red Star Sign
   If a red star sign is displayed next to the Browse Button, it is mostly
@@ -47,7 +53,8 @@ Calibration
 This tab provides a graphical interface to calculate calibrations and
 visualize them.
 
-It is possible to
+It is possible to:
+
 - generate a new calibration file (which becomes the new current
   calibration)
 - load an existing calibration from a GSAS instrument
@@ -75,6 +82,20 @@ utilised to plot the Ceria peaks per bank, the graph will plot Peaks
 Fitted and Difc/TZero Straight Line for comparison. More information
 regarding the fit peaks can be found on the
 :ref:`EnggFitPeaks<algm-EnggFitPeaks>` documentation.
+
+The calibration files are written into two different output
+directories. First, they are written to a user specific directory
+which for the ENGIN-X instrument on Windows systems is
+`C:/EnginX_Mantid/User/<RBNumber>/Calibration`. On other platforms
+this is found under the home directory rather than `C:`. They are also
+copied into a general (all) output directory:
+`C:/EnginX_Mantid/Calibration` on Windows or
+`~/EnginX_Mantid/Calibration` on other platforms.
+
+The calibration parameters for each bank are made available for user
+inspection in a workspace named
+**engggui_calibration_banks_parameters** which is updated when new
+calibrations are loaded or calculated.
 
 Parameters
 ^^^^^^^^^^
@@ -181,12 +202,21 @@ current focus run process has been completed. Inside the *Result Log*
 a warning message will be displayed with last successful run and total
 number of focus runs that could not be processed.
 
+The focused data files are saved in NeXus format into the user
+specific and general directories (as with the calibration output
+files). That is the files are written into
+`C:/EnginX_Mantid/User/<RBNumber>/Calibration` and
+`C:/EnginX_Mantid/Calibration` on Windows, or
+`~/EnginX_Mantid/User/<RBNumber>/Calibration` and
+`~/EnginX_Mantid/Calibration` on other platforms.  See below for
+additional, optional outputs.
+
 Run Number
 ^^^^^^^^^^
 The run provided to focus can be for example 228061-228063, this will
 run all the files within the given range as long as the file
 directories are included in the
-`User Directories <http://www.mantidproject.org/SplittersWorkspace>`_.
+`User Directories <http://www.mantidproject.org/ManageUserDirectories>`_.
 The user may also provide an input of 228061-3 or 228061, 228062,
 2280623 which should work the same way.
 
@@ -217,12 +247,15 @@ Replacing Plots and then decides to change it to One Window -
 Waterfall during a run, the interface will carry on by plotting
 Waterfall within the same window.
 
-The user also has an option of generated GSS, XYE and OpenGenie
-formatted file by clicking the Output Files checkbox. This will
-generated three different files for each focused output workspace
-in Mantid. These files can be found with appropriate name at location:
-`C:\EnginX_Mantid\User\236516\Focus` on Windows, the
-EnginX_Mantid folder can be found on `Desktop/Home` on other platforms.
+The user also has an option of saving GSS, XYE and OpenGenie formatted
+file by clicking the Output Files checkbox. This will generate three
+different files for each focused output workspace in Mantid. These
+files can be found with appropriate name at location:
+`C:\EnginX_Mantid\User\<RBNumber>\Focus` on Windows, the `EnginX_Mantid`
+folder can be found on the home directory on other platforms. The
+files are also copied to the general (all) output directory, that is
+`C:\EnginX_Mantid\Focus` on Windows and `EnginX_Mantid\Focus` under
+the user home on other platforms.
 
 The Multiple Runs Focus Mode combo-box enables two alternative
 focus mode. `Focus Individual Run Files Separately` is the default
@@ -291,6 +324,8 @@ To use the Fitting tab, user is required to provide:
 2. List of expected peaks which can be either by browsing a (*CSV*) file
    or entering within the text-field simply click on the Fit button.
 
+.. _ExpectedPeaks-Engineering_Diffraction-ref:
+
 Parameters
 ^^^^^^^^^^
 
@@ -312,8 +347,6 @@ Focused Run #:
   The interface will then automatically update the Plot Bank combo-box
   according to the bank files found for each entered/selected run-number.
 
-.. _ExpectedPeaks-Engineering_Diffraction-ref:
-
 Peaks:
   A list of dSpacing values to be translated into TOF to find expected
   peaks. These peaks can be manually written or imported by selecting a
@@ -330,9 +363,11 @@ Output
 
 Once the Fit button has been clicked, wait until the Fitting process has
 completed and upon completion you should be able to view on the Fitting
-tab; the focused workspace plotted in the background in grey crosses.
-Whereas the expected peaks plotted in various colours over lapping the
-focused workspace peaks.
+tab:
+
+- The focused workspace plotted in the background in gray crosses.
+- The expected peaks plotted in various colours over lapping the
+  focused workspace peaks.
 
 Within the :ref:`Preview-Engineering_Diffraction-ref` section user is
 able to zoom-in or zoom-out as well as select, add and save peaks.
@@ -346,6 +381,20 @@ workspaces window:
    so the fitted data can be compared with focused data
 3. The *engggui_fitting_single_peaks* workspace within each workspace
    index representing individual expected peak.
+
+In the plots, the x or abscissa axis is in d-spacing units, which are
+more convenient for peak fitting than time-of-flight. However the run
+files and the focus files are normally stored as time-of-flight
+data. For this reason a conversion from the time-of-flight data to
+d-spacing is required. The conversion is performed using the current
+calibration of banks. The interface handles this internally and adds
+special sample logs to the fitting workspaces
+(*engggui_fitting_single_peaks* and *engggui_fitting_focused_ws*). By
+inspecting the sample logs of these workspaces. The conversion is
+performed using the `GSAS
+<https://subversion.xray.aps.anl.gov/trac/pyGSAS>`__ equations, as
+calculated by the algorithm :ref:`AlignDetectors
+<algm-AlignDetectors>`
 
 .. _Preview-Engineering_Diffraction-ref:
 
@@ -413,7 +462,7 @@ is being refined.
 The Following advanced settings are available to customize the
 behavior of this interface:
 
-Force recalculate
+Force recalculate all existing Vanadium files
   If this is enabled, Vanadium corrections will be recalculated even
   if previous correction results are available for the current Vanadium
   run number. This is not required unless a modification is done to the

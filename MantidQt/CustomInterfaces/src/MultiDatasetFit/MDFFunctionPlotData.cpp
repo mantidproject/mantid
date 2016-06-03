@@ -8,7 +8,10 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/Exception.h"
 
+#include <qwt_plot.h>
 #include <qwt_plot_curve.h>
+
+
 
 namespace MantidQt
 {
@@ -58,9 +61,20 @@ void MDFFunctionPlotData::setDomain(double startX, double endX, size_t nX)
 }
 
 /// Show the curves on a plot.
-void MDFFunctionPlotData::show(QwtPlot *plot)
-{
+void MDFFunctionPlotData::show(QwtPlot *plot) {
   m_functionCurve->attach(plot);
+
+  auto itemList = plot->itemList();
+
+  // set the guess plot on the bottom
+  double lowestZ = 0.0;
+  for (auto item : itemList) {
+    auto z = item->z();
+    if (lowestZ > z)
+      lowestZ = z;
+  }
+
+  m_functionCurve->setZ(lowestZ - 1.0);
 }
 
 /// Hide the curves from any plot.

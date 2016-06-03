@@ -1,8 +1,4 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidDataHandling/CompressEvents.h"
-#include "MantidAPI/MemoryManager.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/ArrayProperty.h"
@@ -114,7 +110,6 @@ void CompressEvents::exec() {
       if (output_el) {
         // The EventList method does the work.
         output_el->compressEvents(tolerance, output_el);
-        Mantid::API::MemoryManager::Instance().releaseFreeMemory();
       }
       prog.report("Compressing");
       PARALLEL_END_INTERUPT_REGION

@@ -500,7 +500,6 @@ public slots:
 
   // Clear all Mantid related memory
   void clearAllMemory(const bool prompt = true);
-  void releaseFreeMemory();
   // Ticket #672
   void saveNexusWorkspace();
   QString saveToString(const std::string &workingDir);
