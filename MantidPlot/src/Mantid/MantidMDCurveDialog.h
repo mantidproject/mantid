@@ -8,31 +8,29 @@
 /** Dialog asking the user for some options on how to plot a MDWorkspace
  * before plotting
  */
-class MantidMDCurveDialog : public QDialog
-{
-    Q_OBJECT
+class MantidMDCurveDialog : public QDialog {
+  Q_OBJECT
 
 public:
-    MantidMDCurveDialog(QWidget *parent = 0, QString wsName=QString());
-    ~MantidMDCurveDialog() override;
+  MantidMDCurveDialog(QWidget *parent = 0, QString wsName = QString());
+  ~MantidMDCurveDialog() override;
 
-    LinePlotOptions * getLineOptionsWidget()
-    {return m_lineOptions; }
+  LinePlotOptions *getLineOptionsWidget() { return m_lineOptions; }
 
-    bool showErrorBars();
+  bool showErrorBars();
 
 public slots:
-    void on_btnOK_clicked();
-    void on_btnCancel_clicked();
+  void on_btnOK_clicked();
+  void on_btnCancel_clicked();
 
 private:
-    Ui::MantidMDCurveDialogClass ui;
+  Ui::MantidMDCurveDialogClass ui;
 
-    /// Name of the workspace to plot
-    QString m_wsName;
+  /// Name of the workspace to plot
+  QString m_wsName;
 
-    /// Widget with MD plot options
-    LinePlotOptions * m_lineOptions;
+  /// Widget with MD plot options
+  LinePlotOptions *m_lineOptions;
 };
 
 #endif // MANTIDMDCURVEDIALOG_H

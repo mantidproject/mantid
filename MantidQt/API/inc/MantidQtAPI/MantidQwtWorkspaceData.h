@@ -42,7 +42,7 @@ class MatrixWorkspace;
 class EXPORT_OPT_MANTIDQT_API MantidQwtWorkspaceData : public QwtData {
 public:
   MantidQwtWorkspaceData(bool logScaleY);
-  MantidQwtWorkspaceData(const MantidQwtWorkspaceData& data);
+  MantidQwtWorkspaceData(const MantidQwtWorkspaceData &data);
   MantidQwtWorkspaceData &operator=(const MantidQwtWorkspaceData &);
 
   virtual QString getXAxisLabel() const = 0;
@@ -63,11 +63,11 @@ public:
   virtual void setYOffset(const double y);
   virtual void setWaterfallPlot(bool on);
   virtual bool isWaterfallPlot() const;
-  double offsetY() const {return m_offsetY;}
+  double offsetY() const { return m_offsetY; }
 
   void calculateYMinAndMax(/*const std::vector<double> &yvalues*/) const;
-protected:
 
+protected:
   virtual double getX(size_t i) const = 0;
   virtual double getY(size_t i) const = 0;
   virtual double getE(size_t i) const = 0;

@@ -416,8 +416,8 @@ vtkSplatterPlotFactory::create(ProgressAction &progressUpdating) const {
   if (nd > 3) {
     // Slice from >3D down to 3D
     this->slice = true;
-      this->sliceMask = Mantid::Kernel::make_unique<bool[]>(nd);
-      this->sliceImplicitFunction = boost::make_shared<MDImplicitFunction>();
+    this->sliceMask = Mantid::Kernel::make_unique<bool[]>(nd);
+    this->sliceImplicitFunction = boost::make_shared<MDImplicitFunction>();
     // Make the mask of dimensions
     // TODO: Smarter mapping
     for (size_t d = 0; d < nd; d++)

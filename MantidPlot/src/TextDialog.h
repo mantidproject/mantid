@@ -46,79 +46,78 @@ class QwtScaleWidget;
 #include "TextFormatButtons.h"
 
 //! Options dialog for text labels/axes labels
-class TextDialog : public QDialog
-{
-	Q_OBJECT
+class TextDialog : public QDialog {
+  Q_OBJECT
 
 public:
-	//! Label types
-	enum TextType{
-		TextMarker, /**< normal text label */
-		AxisTitle,   /**< axis label */
-		LayerTitle
-	};
+  //! Label types
+  enum TextType {
+    TextMarker, /**< normal text label */
+    AxisTitle,  /**< axis label */
+    LayerTitle
+  };
 
-	//! Constructor
-	/**
-	 * @param type :: text type (TextMarker | AxisTitle)
-	 * @param parent :: parent widget
-	 * @param fl :: window flags
-	 */
-	TextDialog(TextType type, QWidget* parent = 0, Qt::WFlags fl = 0 );
+  //! Constructor
+  /**
+   * @param type :: text type (TextMarker | AxisTitle)
+   * @param parent :: parent widget
+   * @param fl :: window flags
+   */
+  TextDialog(TextType type, QWidget *parent = 0, Qt::WFlags fl = 0);
 
-	//! Return axis label alignment
-	/**
-	 * \sa setAlignment()
-	 */
-	int alignment();
+  //! Return axis label alignment
+  /**
+   * \sa setAlignment()
+   */
+  int alignment();
 
 public slots:
-	//! Set the contents of the text editor box
-	void setText(const QString & t);
-	//! Set axis label alignment
-	/**
-	 * @param align :: alignment (can be -1 for invalid,
-	 *  Qt::AlignHCenter, Qt::AlignLeft, or Qt::AlignRight)
-	 */
-	void setAlignment(int align);
-	void setGraph(Graph *g);
-	void setLegendWidget(LegendWidget *);
+  //! Set the contents of the text editor box
+  void setText(const QString &t);
+  //! Set axis label alignment
+  /**
+   * @param align :: alignment (can be -1 for invalid,
+   *  Qt::AlignHCenter, Qt::AlignLeft, or Qt::AlignRight)
+   */
+  void setAlignment(int align);
+  void setGraph(Graph *g);
+  void setLegendWidget(LegendWidget *);
 
 private slots:
-	//! Let the user select another font
-	void customFont();
-	//! Accept changes and close dialog
-        void accept() override;
-        //! Apply changes
-	void apply();
-	void setDefaultValues();
+  //! Let the user select another font
+  void customFont();
+  //! Accept changes and close dialog
+  void accept() override;
+  //! Apply changes
+  void apply();
+  void setDefaultValues();
 
-	void updateTransparency(int alpha);
+  void updateTransparency(int alpha);
 
 protected:
-	void formatAllLabels();
+  void formatAllLabels();
 
-	//! current font
-	QFont selectedFont;
-	TextType textType;
+  //! current font
+  QFont selectedFont;
+  TextType textType;
 
-	ColorButton *colorBtn, *backgroundBtn;
-	QPushButton *buttonFont;
-	QComboBox *backgroundBox;
-	QPushButton *buttonOk;
-	QPushButton *buttonCancel;
-	QPushButton *buttonApply;
-	QPushButton *buttonDefault;
-	QTextEdit *textEditBox;
-	QGroupBox *groupBox1;
-	QComboBox *alignmentBox;
-	TextFormatButtons *formatButtons;
-	QSpinBox *boxBackgroundTransparency;
-	QCheckBox *boxApplyToAll;
+  ColorButton *colorBtn, *backgroundBtn;
+  QPushButton *buttonFont;
+  QComboBox *backgroundBox;
+  QPushButton *buttonOk;
+  QPushButton *buttonCancel;
+  QPushButton *buttonApply;
+  QPushButton *buttonDefault;
+  QTextEdit *textEditBox;
+  QGroupBox *groupBox1;
+  QComboBox *alignmentBox;
+  TextFormatButtons *formatButtons;
+  QSpinBox *boxBackgroundTransparency;
+  QCheckBox *boxApplyToAll;
 
-	LegendWidget *d_legend;
-	Graph *d_graph;
-	QwtScaleWidget *d_scale;
+  LegendWidget *d_legend;
+  Graph *d_graph;
+  QwtScaleWidget *d_scale;
 };
 
 #endif // TEXTDLG_H

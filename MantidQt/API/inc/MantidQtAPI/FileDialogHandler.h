@@ -3,20 +3,18 @@
 
 #include <QFileDialog>
 #ifdef Q_OS_DARWIN
-  #include <errno.h>
-  #include <sys/sysctl.h>
+#include <errno.h>
+#include <sys/sysctl.h>
 #endif
 
-
-namespace MantidQt
-{
-namespace API 
-{
-/** 
+namespace MantidQt {
+namespace API {
+/**
     Contains modifications to Qt functions where problems have been found
     on certain operating systems
 
-    Copyright &copy; 2009-2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+    Copyright &copy; 2009-2010 ISIS Rutherford Appleton Laboratory, NScD Oak
+   Ridge National Laboratory & European Spallation Source
     @date 17/09/2010
 
     This file is part of Mantid.
@@ -35,29 +33,36 @@ namespace API
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
     File change history is stored at: <https://github.com/mantidproject/mantid>
-    Code Documentation is available at: <http://doxygen.mantidproject.org>    
+    Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-struct FileDialogHandler
-{
-  /** The MacOS's native save dialog crashes when running a 10.6 package on 10.8 so this function, which takes
-  *  the same arguments as the Qt function, ensures a nonnative object is used on the Mac when necessary.
+struct FileDialogHandler {
+  /** The MacOS's native save dialog crashes when running a 10.6 package on 10.8
+  * so this function, which takes
+  *  the same arguments as the Qt function, ensures a nonnative object is used
+  * on the Mac when necessary.
   *  If compiled on 10.8 the native will be used
   *  @param parent :: the dialog will be shown centered over this parent widget
-  *  @param caption :: The dialog's caption 
-  *  @param dir :: The file dialog's working directory will be set to dir. If dir includes a file name, the file will be selected
+  *  @param caption :: The dialog's caption
+  *  @param dir :: The file dialog's working directory will be set to dir. If
+  * dir includes a file name, the file will be selected
   *  @param filter :: extensions of files to look for
-  *  @param selectedFilter :: pass a pointer an existing string that will be filled with the extension the user selected
-  *  @param options :: The options argument holds various options about how to run the dialog
+  *  @param selectedFilter :: pass a pointer an existing string that will be
+  * filled with the extension the user selected
+  *  @param options :: The options argument holds various options about how to
+  * run the dialog
   */
-  static QString getSaveFileName(QWidget * parent = 0, const QString & caption = QString(), const QString & dir = QString(), const QString & filter = QString(), QString * selectedFilter = 0, QFileDialog::Options options = 0)
-  {
+  static QString getSaveFileName(QWidget *parent = 0,
+                                 const QString &caption = QString(),
+                                 const QString &dir = QString(),
+                                 const QString &filter = QString(),
+                                 QString *selectedFilter = 0,
+                                 QFileDialog::Options options = 0) {
     options = options | QFileDialog::DontUseNativeDialog;
-    return QFileDialog::getSaveFileName(parent, caption, dir, filter, selectedFilter, options);
+    return QFileDialog::getSaveFileName(parent, caption, dir, filter,
+                                        selectedFilter, options);
   }
-
 };
-
 }
 }
 
-#endif          //MANTIDQT_API_FILEDIALOGHANDLER_H_
+#endif // MANTIDQT_API_FILEDIALOGHANDLER_H_

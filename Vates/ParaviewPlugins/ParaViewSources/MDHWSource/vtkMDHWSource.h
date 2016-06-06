@@ -1,4 +1,4 @@
-#ifndef _vtkMDHWSource_h 
+#ifndef _vtkMDHWSource_h
 #define _vtkMDHWSource_h
 
 #include "MantidKernel/make_unique.h"
@@ -7,20 +7,20 @@
 
 #include <string>
 
-namespace Mantid
-{
-  namespace VATES
-  {
-    class MDLoadingPresenter;
-  }
+namespace Mantid {
+namespace VATES {
+class MDLoadingPresenter;
+}
 }
 
-/*  Source for fetching Multidimensional Workspace out of the Mantid Analysis Data Service
+/*  Source for fetching Multidimensional Workspace out of the Mantid Analysis
+   Data Service
     and converting them into vtkDataSets as part of the pipeline source.
 
     @date 01/12/2011
 
-    Copyright &copy; 2007-9 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+    Copyright &copy; 2007-9 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+   National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -43,8 +43,7 @@ namespace Mantid
 */
 
 // cppcheck-suppress class_X_Y
-class VTK_EXPORT vtkMDHWSource : public vtkStructuredGridAlgorithm
-{
+class VTK_EXPORT vtkMDHWSource : public vtkStructuredGridAlgorithm {
 public:
   vtkMDHWSource(const vtkMDHWSource &) = delete;
   void operator=(const vtkMDHWSource &) = delete;
@@ -88,7 +87,6 @@ protected:
                   vtkInformationVector *) override;
 
 private:
-  
   /// Name of the workspace.
   std::string m_wsName;
 
@@ -101,7 +99,6 @@ private:
   /// Normalization Option
   Mantid::VATES::VisualNormalization m_normalizationOption;
 
-
-  void setTimeRange(vtkInformationVector* outputVector);
+  void setTimeRange(vtkInformationVector *outputVector);
 };
 #endif

@@ -31,41 +31,43 @@
 
 #include "Filter.h"
 
-class FFT : public Filter
-{
-Q_OBJECT
+class FFT : public Filter {
+  Q_OBJECT
 
 public:
-    FFT(ApplicationWindow *parent, Table *t, const QString& realColName, const QString& imagColName = QString(), int from = 1, int to = -1);
-	FFT(ApplicationWindow *parent, Graph *g, const QString& curveTitle);
-    FFT(ApplicationWindow *parent, Graph *g, const QString& curveTitle, double start, double end);
+  FFT(ApplicationWindow *parent, Table *t, const QString &realColName,
+      const QString &imagColName = QString(), int from = 1, int to = -1);
+  FFT(ApplicationWindow *parent, Graph *g, const QString &curveTitle);
+  FFT(ApplicationWindow *parent, Graph *g, const QString &curveTitle,
+      double start, double end);
 
-    void setInverseFFT(bool inverse = true){d_inverse = inverse;};
-    void setSampling(double sampling){d_sampling = sampling;};
-    void normalizeAmplitudes(bool norm = true){d_normalize = norm;};
-    void shiftFrequencies(bool shift = true){d_shift_order = shift;};
+  void setInverseFFT(bool inverse = true) { d_inverse = inverse; };
+  void setSampling(double sampling) { d_sampling = sampling; };
+  void normalizeAmplitudes(bool norm = true) { d_normalize = norm; };
+  void shiftFrequencies(bool shift = true) { d_shift_order = shift; };
 
 private:
-    void init();
-    void output() override;
-    void output(const QString &text);
+  void init();
+  void output() override;
+  void output(const QString &text);
 
-    QString fftCurve();
-    QString fftTable();
+  QString fftCurve();
+  QString fftTable();
 
-    bool setDataFromTable(Table *t, const QString &realColName,
-                          const QString &imagColName = QString(), int from = 0,
-                          int to = -1) override;
+  bool setDataFromTable(Table *t, const QString &realColName,
+                        const QString &imagColName = QString(), int from = 0,
+                        int to = -1) override;
 
-    double d_sampling;
-    //! Flag telling if an inverse FFT must be performed.
-    bool d_inverse;
-    //! Flag telling if the amplitudes in the output spectrum must be normalized.
-    bool d_normalize;
-    //! Flag telling if the output frequencies must be shifted in order to have a zero-centered spectrum.
-    bool d_shift_order;
+  double d_sampling;
+  //! Flag telling if an inverse FFT must be performed.
+  bool d_inverse;
+  //! Flag telling if the amplitudes in the output spectrum must be normalized.
+  bool d_normalize;
+  //! Flag telling if the output frequencies must be shifted in order to have a
+  // zero-centered spectrum.
+  bool d_shift_order;
 
-    int d_real_col, d_imag_col;
+  int d_real_col, d_imag_col;
 };
 
 #endif

@@ -1,3 +1,4 @@
+// clang-format off
 /*
  * pixmaps.cpp : file containing the definitions of pixelmaps in pixmaps.h
  *

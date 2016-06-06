@@ -546,7 +546,7 @@ void IqtFit::typeSelection(int index) {
  * Update the current plot option selected
  */
 void IqtFit::updateCurrentPlotOption(QString newOption) {
-	m_plotOption = newOption.toStdString();
+  m_plotOption = newOption.toStdString();
 }
 
 void IqtFit::updatePlot() {

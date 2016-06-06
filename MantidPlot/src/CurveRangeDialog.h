@@ -38,26 +38,25 @@ class Graph;
 class DataCurve;
 
 //! Curve range dialog
-class CurveRangeDialog : public QDialog
-{
-    Q_OBJECT
+class CurveRangeDialog : public QDialog {
+  Q_OBJECT
 
 public:
-    CurveRangeDialog(QWidget* parent = 0, Qt::WFlags fl = 0 );
+  CurveRangeDialog(QWidget *parent = 0, Qt::WFlags fl = 0);
 
 public slots:
-	void setCurveToModify(Graph *g, int curve);
-        void accept() override;
+  void setCurveToModify(Graph *g, int curve);
+  void accept() override;
 
 private:
-	DataCurve *d_curve;
-	Graph *d_graph;
+  DataCurve *d_curve;
+  Graph *d_graph;
 
-    QPushButton* buttonOK;
-	QPushButton* buttonCancel;
-	QLabel* boxName;
-	QSpinBox* boxStart;
-	QSpinBox* boxEnd;
+  QPushButton *buttonOK;
+  QPushButton *buttonCancel;
+  QLabel *boxName;
+  QSpinBox *boxStart;
+  QSpinBox *boxEnd;
 };
 
 #endif

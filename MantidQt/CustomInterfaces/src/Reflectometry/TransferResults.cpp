@@ -9,11 +9,13 @@ TransferResults::TransferResults(std::vector<COLUMN_MAP_TYPE> transferRuns,
   m_errorRuns = errorRuns;
 }
 
-std::vector<std::map<std::string, std::string> > TransferResults::getTransferRuns() {
+std::vector<std::map<std::string, std::string>>
+TransferResults::getTransferRuns() {
   return m_transferRuns;
 }
 
-std::vector<std::map<std::string, std::string> > TransferResults::getErrorRuns() {
+std::vector<std::map<std::string, std::string>>
+TransferResults::getErrorRuns() {
   return m_errorRuns;
 }
 
