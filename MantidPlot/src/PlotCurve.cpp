@@ -50,8 +50,7 @@ using namespace Mantid::API;
 
 PlotCurve::PlotCurve(const QString &name)
     : QwtPlotCurve(name), d_type(0), d_x_offset(0.0), d_y_offset(0.0),
-      d_side_lines(false),
-      d_skip_symbols(1), m_isDistribution(false) {}
+      d_side_lines(false), d_skip_symbols(1), m_isDistribution(false) {}
 
 PlotCurve::PlotCurve(const PlotCurve &c)
     : QObject(), QwtPlotCurve(c.title().text()), d_type(c.d_type),
@@ -308,10 +307,10 @@ void PlotCurve::computeWaterfallOffsets(double &xDataOffset,
       double yRange = plot->axisScaleDiv(Plot::yLeft)->range();
 
       // First compute offsets in a linear scale
-      xDataOffset = index * g->waterfallXOffset() * 0.01 *
-                    xRange / (double)(curves - 1);
-      yDataOffset = index * g->waterfallYOffset() * 0.01 *
-                    yRange / (double)(curves - 1);
+      xDataOffset =
+          index * g->waterfallXOffset() * 0.01 * xRange / (double)(curves - 1);
+      yDataOffset =
+          index * g->waterfallYOffset() * 0.01 * yRange / (double)(curves - 1);
 
       // Corresponding offset on the screen in pixels
       d_x_offset = plot->canvas()->width() * xDataOffset / xRange;

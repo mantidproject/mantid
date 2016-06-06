@@ -33,36 +33,36 @@
 #include <QLocale>
 
 Differentiation::Differentiation(ApplicationWindow *parent, Graph *g)
-: Filter(parent, g)
-{
-	init();
+    : Filter(parent, g) {
+  init();
 }
 
-Differentiation::Differentiation(ApplicationWindow *parent, Graph *g, const QString& curveTitle)
-: Filter(parent, g)
-{
-	init();
-	setDataFromCurve(curveTitle);
+Differentiation::Differentiation(ApplicationWindow *parent, Graph *g,
+                                 const QString &curveTitle)
+    : Filter(parent, g) {
+  init();
+  setDataFromCurve(curveTitle);
 }
 
-Differentiation::Differentiation(ApplicationWindow *parent, Graph *g, const QString& curveTitle, double start, double end)
-: Filter(parent, g)
-{
-	init();
-	setDataFromCurve(curveTitle, start, end);
+Differentiation::Differentiation(ApplicationWindow *parent, Graph *g,
+                                 const QString &curveTitle, double start,
+                                 double end)
+    : Filter(parent, g) {
+  init();
+  setDataFromCurve(curveTitle, start, end);
 }
 
-Differentiation::Differentiation(ApplicationWindow *parent, Table *t, const QString& xCol, const QString& yCol, int start, int end)
-: Filter(parent, t)
-{
-	init();
-	setDataFromTable(t, xCol, yCol, start, end);
+Differentiation::Differentiation(ApplicationWindow *parent, Table *t,
+                                 const QString &xCol, const QString &yCol,
+                                 int start, int end)
+    : Filter(parent, t) {
+  init();
+  setDataFromTable(t, xCol, yCol, start, end);
 }
 
-void Differentiation::init()
-{
-	setObjectName(tr("Derivative"));
-    d_min_points = 4;
+void Differentiation::init() {
+  setObjectName(tr("Derivative"));
+  d_min_points = 4;
 }
 
 void Differentiation::output() {

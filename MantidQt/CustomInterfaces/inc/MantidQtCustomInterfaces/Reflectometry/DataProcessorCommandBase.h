@@ -40,6 +40,7 @@ public:
       throw std::invalid_argument("Invalid abstract presenter");
     }
   };
+
 protected:
   DataProcessorPresenter *const m_presenter;
 };

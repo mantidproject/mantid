@@ -102,8 +102,7 @@ void MessageDisplay::attachLoggingChannel() {
 
   QSettings settings;
   int priority = settings.value(QString::fromStdString(m_FilterChannelName),
-                                Message::Priority::PRIO_NOTICE)
-                     .toInt();
+                                Message::Priority::PRIO_NOTICE).toInt();
 
   auto &configService = Mantid::Kernel::ConfigService::Instance();
   configService.registerLoggingFilterChannel(m_FilterChannelName,

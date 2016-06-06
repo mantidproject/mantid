@@ -4,9 +4,8 @@
 #include "MantidKernel/Logger.h"
 #include <Poco/Path.h>
 
-
 #if defined(__INTEL_COMPILER)
-  #pragma warning disable 1170
+#pragma warning disable 1170
 #endif
 
 #include <pqActiveObjects.h>
@@ -22,39 +21,31 @@
 #include <vtkSMProxy.h>
 
 #if defined(__INTEL_COMPILER)
-  #pragma warning enable 1170
+#pragma warning enable 1170
 #endif
 
 #include <QMessageBox>
 
-namespace Mantid
-{
-namespace Vates
-{
-namespace SimpleGui
-{
-namespace
-{
-  /// Static logger
-  Kernel::Logger g_log("ThreeSliceView");
+namespace Mantid {
+namespace Vates {
+namespace SimpleGui {
+namespace {
+/// Static logger
+Kernel::Logger g_log("ThreeSliceView");
 }
 
-
-ThreeSliceView::ThreeSliceView(QWidget *parent, RebinnedSourcesManager* rebinnedSourcesManager) :
-  ViewBase(parent, rebinnedSourcesManager), m_mainView(), m_ui()
-{
+ThreeSliceView::ThreeSliceView(QWidget *parent,
+                               RebinnedSourcesManager *rebinnedSourcesManager)
+    : ViewBase(parent, rebinnedSourcesManager), m_mainView(), m_ui() {
   this->m_ui.setupUi(this);
   this->m_mainView = this->createRenderView(this->m_ui.mainRenderFrame,
-                                          QString("OrthographicSliceView"));
+                                            QString("OrthographicSliceView"));
   pqActiveObjects::instance().setActiveView(this->m_mainView);
 }
 
-ThreeSliceView::~ThreeSliceView()
-{
-}
+ThreeSliceView::~ThreeSliceView() {}
 
-void ThreeSliceView::destroyView()
-{
+void ThreeSliceView::destroyView() {
   pqObjectBuilder *builder = pqApplicationCore::instance()->getObjectBuilder();
   // Active source disappears in only this view, so set it from the
   // internal source before destroying view.
@@ -62,30 +53,24 @@ void ThreeSliceView::destroyView()
   builder->destroy(this->m_mainView);
 }
 
-pqRenderView* ThreeSliceView::getView()
-{
-  return this->m_mainView.data();
-}
+pqRenderView *ThreeSliceView::getView() { return this->m_mainView.data(); }
 
-void ThreeSliceView::render()
-{
+void ThreeSliceView::render() {
   this->makeThreeSlice();
   this->resetDisplay();
   emit this->triggerAccept();
 }
 
-void ThreeSliceView::makeThreeSlice()
-{
+void ThreeSliceView::makeThreeSlice() {
   pqPipelineSource *src = NULL;
   src = pqActiveObjects::instance().activeSource();
 
-  pqObjectBuilder* builder = pqApplicationCore::instance()->getObjectBuilder();
+  pqObjectBuilder *builder = pqApplicationCore::instance()->getObjectBuilder();
 
   // Do not allow overplotting PeaksWorkspaces
-  if (this->isPeaksWorkspace(src))
-  {
+  if (this->isPeaksWorkspace(src)) {
     QMessageBox::warning(this, QApplication::tr("Overplotting Warning"),
-                         QApplication::tr("Threeslice mode does not allow "\
+                         QApplication::tr("Threeslice mode does not allow "
                                           "overlay of PeaksWorkspaces"));
     // Need to destroy source since we tried to load it and set the active
     // back to something. In this case we'll choose the original source
@@ -96,22 +81,16 @@ void ThreeSliceView::makeThreeSlice()
 
   this->origSrc = src;
 
-  pqDataRepresentation *drep = builder->createDataRepresentation(\
-        this->origSrc->getOutputPort(0), this->m_mainView);
+  pqDataRepresentation *drep = builder->createDataRepresentation(
+      this->origSrc->getOutputPort(0), this->m_mainView);
   vtkSMPropertyHelper(drep->getProxy(), "Representation").Set("Slices");
   drep->getProxy()->UpdateVTKObjects();
-  this->origRep = qobject_cast<pqPipelineRepresentation*>(drep);
+  this->origRep = qobject_cast<pqPipelineRepresentation *>(drep);
 }
 
-void ThreeSliceView::renderAll()
-{
-  this->m_mainView->render();
-}
+void ThreeSliceView::renderAll() { this->m_mainView->render(); }
 
-void ThreeSliceView::resetDisplay()
-{
-  this->m_mainView->resetDisplay();
-}
+void ThreeSliceView::resetDisplay() { this->m_mainView->resetDisplay(); }
 
 /*
 void ThreeSliceView::correctVisibility()
@@ -119,17 +98,13 @@ void ThreeSliceView::correctVisibility()
   //this->correctColorScaleRange();
 }
 */
-void ThreeSliceView::correctColorScaleRange()
-{
-  QPair<double, double> range = this->origRep->getLookupTable()->getScalarRange();
+void ThreeSliceView::correctColorScaleRange() {
+  QPair<double, double> range =
+      this->origRep->getLookupTable()->getScalarRange();
   emit this->dataRange(range.first, range.second);
 }
 
-void ThreeSliceView::resetCamera()
-{
-  this->m_mainView->resetCamera();
-}
-
+void ThreeSliceView::resetCamera() { this->m_mainView->resetCamera(); }
 }
 }
 }

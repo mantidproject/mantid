@@ -7,7 +7,8 @@
 
   @date 23/02/2015
 
-  Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+  Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+  National Laboratory & European Spallation Source
 
   This file is part of Mantid.
 
@@ -28,20 +29,17 @@
   Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
 
-
 class vtkPolyData;
 
-namespace Mantid
-{
-namespace VATES
-{
-  class DLLExport vtkSinglePeakMarker
-  {
-  public:
-    vtkSinglePeakMarker();
-    ~vtkSinglePeakMarker();
-    vtkPolyData* createSinglePeakMarker(double x, double y, double z, double radius);
-  };
+namespace Mantid {
+namespace VATES {
+class DLLExport vtkSinglePeakMarker {
+public:
+  vtkSinglePeakMarker();
+  ~vtkSinglePeakMarker();
+  vtkPolyData *createSinglePeakMarker(double x, double y, double z,
+                                      double radius);
+};
 }
 }
 #endif

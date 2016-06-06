@@ -2,7 +2,8 @@
     File                 : ExportDialog.h
     Project              : QtiPlot
     --------------------------------------------------------------------
-    Copyright            : (C) 2006 by Ion Vasilief, Tilman Hoener zu Siederdissen
+    Copyright            : (C) 2006 by Ion Vasilief, Tilman Hoener zu
+ Siederdissen
     Email (use @ for *)  : ion_vasilief*yahoo.fr, thzs*gmx.net
     Description          : Export ASCII dialog
 
@@ -36,53 +37,54 @@ class QComboBox;
 class QLabel;
 
 //! Export ASCII dialog
-class ExportDialog : public QDialog
-{
+class ExportDialog : public QDialog {
   Q_OBJECT
 
 public:
-	//! Constructor
-	/**
-	 * @param tableName :: active table name
-	 * @param parent :: parent widget
-	 * @param fl :: window flags
-	 */
-  ExportDialog(const QString& tableName, QWidget* parent = 0, Qt::WFlags fl = 0 );
+  //! Constructor
+  /**
+   * @param tableName :: active table name
+   * @param parent :: parent widget
+   * @param fl :: window flags
+   */
+  ExportDialog(const QString &tableName, QWidget *parent = 0,
+               Qt::WFlags fl = 0);
 
 private:
   void closeEvent(QCloseEvent *) override;
 
-  QPushButton* buttonOk;
-  QPushButton* buttonCancel;
-  QPushButton* buttonHelp;
-  QCheckBox* boxNames;
-  QCheckBox* boxComments;
-  QCheckBox* boxSelection;
-  QCheckBox* boxAllTables;
-  QComboBox* boxSeparator;
-  QComboBox* boxTable;
+  QPushButton *buttonOk;
+  QPushButton *buttonCancel;
+  QPushButton *buttonHelp;
+  QCheckBox *boxNames;
+  QCheckBox *boxComments;
+  QCheckBox *boxSelection;
+  QCheckBox *boxAllTables;
+  QComboBox *boxSeparator;
+  QComboBox *boxTable;
   QLabel *sepText;
 
 public slots:
-	//! Set the column delimiter
-	void setColumnSeparator(const QString& sep);
+  //! Set the column delimiter
+  void setColumnSeparator(const QString &sep);
 
 private slots:
-	//! Enable/disable the tables combox box
-	/**
-	 * The tables combo box is disabled when
-	 * the checkbox "all" is selected.
-	 */
-	void enableTableName(bool ok);
+  //! Enable/disable the tables combox box
+  /**
+   * The tables combo box is disabled when
+   * the checkbox "all" is selected.
+   */
+  void enableTableName(bool ok);
 
-	//! Enable/disable export options depending if the selected window is a Table or a Matrix.
-	void updateOptions(const QString & name);
+  //! Enable/disable export options depending if the selected window is a Table
+  // or a Matrix.
+  void updateOptions(const QString &name);
 
 protected slots:
-	//! Accept changes
+  //! Accept changes
   void accept() override;
-        //! Display help
-	void help();
+  //! Display help
+  void help();
 };
 
 #endif // ExportDialog_H

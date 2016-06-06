@@ -5,10 +5,8 @@
 #include "MantidVatesAPI/WorkspaceProvider.h"
 #include <boost/optional.hpp>
 
-namespace Mantid
-{
-namespace VATES
-{
+namespace Mantid {
+namespace VATES {
 /**
 Collection of functions related to box information
 

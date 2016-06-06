@@ -144,15 +144,13 @@ SaveMDWorkspaceToVTKImpl::getPresenter(bool isHistoWorkspace,
       Mantid::Kernel::make_unique<SingleWorkspaceProvider>(workspace);
   if (isHistoWorkspace) {
     InMemoryPresenterFactory<MDHWInMemoryLoadingPresenter,
-                             EmptyWorkspaceNamePolicy>
-        presenterFactory;
+                             EmptyWorkspaceNamePolicy> presenterFactory;
     presenter = presenterFactory.create(std::move(view), workspace,
                                         std::move(workspaceProvider));
   } else {
     view->setRecursionDepth(recursionDepth);
     InMemoryPresenterFactory<MDEWInMemoryLoadingPresenter,
-                             EmptyWorkspaceNamePolicy>
-        presenterFactory;
+                             EmptyWorkspaceNamePolicy> presenterFactory;
     presenter = presenterFactory.create(std::move(view), workspace,
                                         std::move(workspaceProvider));
   }

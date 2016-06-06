@@ -35,41 +35,35 @@
                  <http://doxygen.mantidproject.org>
  */
 
-namespace MantidQt
-{
-namespace SpectrumView
-{
+namespace MantidQt {
+namespace SpectrumView {
 
-class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER TrackingPicker : public QwtPlotPicker
-{
+class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER TrackingPicker : public QwtPlotPicker {
   Q_OBJECT
 
 public:
-
   /// Construct a tracking picker to work with the specified canvas
-  TrackingPicker(QwtPlotCanvas* canvas);
+  TrackingPicker(QwtPlotCanvas *canvas);
 
   /// Disable (or enable) position readout at cursor position, even if
   /// tracking is ON.  Tracking MUST be on for the mouseMoved signal to be
   /// emitted.
-  void hideReadout( bool hide );
+  void hideReadout(bool hide);
 
 signals:
   /// This signal will be emitted for each mouse moved event
-  void mouseMoved(const QPoint & point) const;
+  void mouseMoved(const QPoint &point) const;
 
 protected:
-
   /// Override base class method, to emit a mousedMoved() signal for each move
   QwtText trackerText(const QPoint &point) const override;
   QwtText trackerText(const QwtDoublePoint &pos) const override;
 
 private:
   bool m_hideReadout;
-
 };
 
 } // namespace SpectrumView
 } // namespace MantidQt
 
-#endif  // TRACKING_PICKER_H
+#endif // TRACKING_PICKER_H
