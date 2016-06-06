@@ -2472,7 +2472,7 @@ void ConfigDialog::apply() {
   // 3D plots page
   app->plot3DColors = {
       btnToColor->color().name(),   btnLabels->color().name(),
-      btnMesh->color().name(),      mbtnGrid->color().name(),
+      btnMesh->color().name(),      btnGrid->color().name(),
       btnFromColor->color().name(), btnNumbers->color().name(),
       btnAxes->color().name(),      btnBackground3D->color().name()};
   app->showPlot3DLegend = boxShowLegend->isChecked();
