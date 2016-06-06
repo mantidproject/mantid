@@ -1,7 +1,11 @@
 #include "MantidKernel/GitHubApiHelper.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/Logger.h"
+#include <Poco/StreamCopier.h>
+#include <Poco/URI.h>
+#include <Poco/Net/HTTPRequest.h>
 #include <Poco/Net/HTTPResponse.h>
+#include <Poco/Net/HTTPSClientSession.h>
 
 namespace Mantid {
 namespace Kernel {
@@ -41,10 +45,14 @@ void GitHubApiHelper::reset() {
   addAuthenticationToken();
 }
 
+bool GitHubApiHelper::isAuthenticated() {
+  return (m_headers.find("Authorization") != m_headers.end());
+}
+
 void GitHubApiHelper::processResponseHeaders(
     const Poco::Net::HTTPResponse &res) {
   // get github api rate limit information if available;
-  int rateLimitRemaining;
+  int rateLimitRemaining = 0;
   int rateLimitLimit;
   DateAndTime rateLimitReset;
   try {
@@ -63,5 +71,50 @@ void GitHubApiHelper::processResponseHeaders(
                   << rateLimitReset.toSimpleString() << " GMT" << std::endl;
   }
 }
+
+int GitHubApiHelper::processAnonymousRequest(
+    const Poco::Net::HTTPResponse &response, Poco::URI &uri,
+    std::ostream &responseStream) {
+  if (isAuthenticated()) {
+    g_log.debug("Repeating API call anonymously\n");
+    removeHeader("Authorization");
+    return this->sendRequest(uri.toString(), responseStream);
+  } else {
+    g_log.warning("Authentication failed and anonymous access refused\n");
+    return response.getStatus();
+  }
+}
+
+int GitHubApiHelper::sendRequestAndProcess(HTTPClientSession &session,
+                                           Poco::URI &uri,
+                                           std::ostream &responseStream) {
+  // create a request
+  this->createRequest(uri);
+  session.sendRequest(*m_request) << m_body;
+
+  std::istream &rs = session.receiveResponse(*m_response);
+  int retStatus = m_response->getStatus();
+  g_log.debug() << "Answer from web: " << retStatus << " "
+                << m_response->getReason() << std::endl;
+
+  if (retStatus == HTTP_OK ||
+      (retStatus == HTTP_CREATED && m_method == HTTPRequest::HTTP_POST)) {
+    Poco::StreamCopier::copyStream(rs, responseStream);
+    processResponseHeaders(*m_response);
+    return retStatus;
+  } else if ((retStatus == HTTP_FORBIDDEN && isAuthenticated()) ||
+             (retStatus == HTTP_UNAUTHORIZED) ||
+             (retStatus == HTTP_NOT_FOUND)) {
+    // If authentication fails you can get HTTP_UNAUTHORIZED or HTTP_NOT_FOUND
+    // If the limit runs out you can get HTTP_FORBIDDEN
+    return this->processAnonymousRequest(*m_response, uri, responseStream);
+  } else if (isRelocated(retStatus)) {
+    return this->processRelocation(*m_response, responseStream);
+  } else {
+    Poco::StreamCopier::copyStream(rs, responseStream);
+    return processErrorStates(*m_response, rs, uri.toString());
+  }
+}
+
 } // namespace Kernel
 } // namespace Mantid

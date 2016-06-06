@@ -38,11 +38,16 @@ public:
   virtual ~GitHubApiHelper();
 
   void reset() override;
+  bool isAuthenticated();
 
 protected:
   virtual void processResponseHeaders(const Poco::Net::HTTPResponse &res) override;
-
+  virtual int sendRequestAndProcess(Poco::Net::HTTPClientSession &session,
+    Poco::URI &uri, std::ostream &responseStream) override;
 private:
+  int processAnonymousRequest(const Poco::Net::HTTPResponse &response,
+    Poco::URI &uri,
+    std::ostream &responseStream);
   void addAuthenticationToken() {
     addHeader("Authorization",
               "token @GITHUB_AUTHORIZATION_TOKEN@");

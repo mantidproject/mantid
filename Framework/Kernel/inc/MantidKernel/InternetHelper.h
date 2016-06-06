@@ -150,13 +150,13 @@ protected:
   virtual void processResponseHeaders(const Poco::Net::HTTPResponse &res);
   virtual int processErrorStates(const Poco::Net::HTTPResponse &res,
                                  std::istream &rs, const std::string &url);
+  virtual int sendRequestAndProcess(Poco::Net::HTTPClientSession &session,
+                                    Poco::URI &uri,
+                                    std::ostream &responseStream);
 
-private:
   void setupProxyOnSession(Poco::Net::HTTPClientSession &session,
                            const std::string &proxyUrl);
   void createRequest(Poco::URI &uri);
-  int sendRequestAndProcess(Poco::Net::HTTPClientSession &session,
-                            Poco::URI &uri, std::ostream &responseStream);
   int processRelocation(const Poco::Net::HTTPResponse &response,
                         std::ostream &responseStream);
   bool isRelocated(const int response);
