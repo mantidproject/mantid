@@ -29,9 +29,9 @@ std::map<std::string, std::string> parseKeyValueString(const std::string &str) {
       str, boost::escaped_list_separator<char>("\\", ",", "\"'"));
   std::map<std::string, std::string> kvp;
 
-  for (auto it = tok.begin(); it != tok.end(); ++it) {
+  for (const auto &it : tok) {
     std::vector<std::string> valVec;
-    boost::split(valVec, *it, boost::is_any_of("="));
+    boost::split(valVec, it, boost::is_any_of("="));
 
     if (valVec.size() > 1) {
       // We split on all '='s. The first delimits the key, the rest are assumed
@@ -47,11 +47,11 @@ std::map<std::string, std::string> parseKeyValueString(const std::string &str) {
       boost::trim(value);
 
       if (key.empty() || value.empty())
-        throw std::runtime_error("Invalid key value pair, '" + *it + "'");
+        throw std::runtime_error("Invalid key value pair, '" + it + "'");
 
       kvp[key] = value;
     } else {
-      throw std::runtime_error("Invalid key value pair, '" + *it + "'");
+      throw std::runtime_error("Invalid key value pair, '" + it + "'");
     }
   }
   return kvp;
