@@ -37,14 +37,14 @@ void IqtFit::setup() {
   m_ffTree = new QtTreePropertyBrowser(m_parentWidget);
   m_uiForm.properties->addWidget(m_ffTree);
 
-  auto fitRangeSelector = m_uiForm.ppPlot->addRangeSelector("FuryFitRange");
+  auto fitRangeSelector = m_uiForm.ppPlot->addRangeSelector("IqtFitRange");
   connect(fitRangeSelector, SIGNAL(minValueChanged(double)), this,
           SLOT(xMinSelected(double)));
   connect(fitRangeSelector, SIGNAL(maxValueChanged(double)), this,
           SLOT(xMaxSelected(double)));
 
   auto backgroundRangeSelector = m_uiForm.ppPlot->addRangeSelector(
-      "FuryFitBackground", MantidWidgets::RangeSelector::YSINGLE);
+      "IqtFitBackground", MantidWidgets::RangeSelector::YSINGLE);
   backgroundRangeSelector->setRange(0.0, 1.0);
   backgroundRangeSelector->setColour(Qt::darkGreen);
   connect(backgroundRangeSelector, SIGNAL(minValueChanged(double)), this,
@@ -564,7 +564,7 @@ void IqtFit::updatePlot() {
     const QPair<double, double> curveRange =
         m_uiForm.ppPlot->getCurveRange("Sample");
     const std::pair<double, double> range(curveRange.first, curveRange.second);
-    m_uiForm.ppPlot->getRangeSelector("FuryFitRange")
+    m_uiForm.ppPlot->getRangeSelector("IqtFitRange")
         ->setRange(range.first, range.second);
     m_ffRangeManager->setRange(m_properties["StartX"], range.first,
                                range.second);
@@ -653,9 +653,9 @@ void IqtFit::backgroundSelected(double val) {
 }
 
 void IqtFit::propertyChanged(QtProperty *prop, double val) {
-  auto fitRangeSelector = m_uiForm.ppPlot->getRangeSelector("FuryFitRange");
+  auto fitRangeSelector = m_uiForm.ppPlot->getRangeSelector("IqtFitRange");
   auto backgroundRangeSelector =
-      m_uiForm.ppPlot->getRangeSelector("FuryFitBackground");
+      m_uiForm.ppPlot->getRangeSelector("IqtFitBackground");
 
   if (prop == m_properties["StartX"]) {
     fitRangeSelector->setMinimum(val);
@@ -811,7 +811,7 @@ void IqtFit::singleFit() {
   QString pyInput =
       "from IndirectCommon import getWSprefix\nprint getWSprefix('%1')\n";
   pyInput = pyInput.arg(m_ffInputWSName);
-  m_singleFitOutputName = runPythonCode(pyInput).trimmed() + QString("fury_") +
+  m_singleFitOutputName = runPythonCode(pyInput).trimmed() + QString("iqt_") +
                           ftype + m_uiForm.spPlotSpectrum->text();
 
   // Create the Fit Algorithm
