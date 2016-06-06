@@ -315,6 +315,12 @@ void Iqt::calculateBinning() {
     showMessageBox("Number of resolution bins is less than 5.\nResults may be "
                    "inaccurate.");
 
+  IAlgorithm_sptr deleteAlg = AlgorithmManager::Instance().create("DeleteWorkspace");
+  deleteAlg->initialize();
+  deleteAlg->setChild(true);
+  deleteAlg->setProperty("Workspace", paramTableName);
+  deleteAlg->execute();
+
 }
 
 void Iqt::loadSettings(const QSettings &settings) {
