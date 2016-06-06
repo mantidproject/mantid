@@ -44,7 +44,7 @@ std::vector<double> MaxentEntropyNegativeValues::secondDerivative(
 /**
 * Corrects the image. For PosNeg images there is nothing to correct so we just
 * return the vector we were given
-* @param value : [input] The values of the image as a vector
+* @param values : [input] The values of the image as a vector
 * @param newValue : [input] The new value to use (unused variable)
 * @return : The corrected values as a vector
 */

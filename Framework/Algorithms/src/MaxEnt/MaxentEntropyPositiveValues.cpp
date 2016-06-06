@@ -25,7 +25,7 @@ MaxentEntropyPositiveValues::derivative(const std::vector<double> &values,
 
 /**
 * Returns the second derivative at a given point.
-* @param value : [input] The values of the image as a vector
+* @param values : [input] The values of the image as a vector
 * @return : The second derivative as a vector
 */
 std::vector<double> MaxentEntropyPositiveValues::secondDerivative(
