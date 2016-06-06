@@ -1613,7 +1613,7 @@ void fillFromStream(std::istream &is, Kernel::Matrix<T> &in,
 
 // Symbol definitions for common types
 template class MANTID_KERNEL_DLL Matrix<double>;
-template class MANTID_KERNEL_DLL Matrix<int>;
+template class Matrix<int>;
 template class MANTID_KERNEL_DLL Matrix<float>;
 
 template MANTID_KERNEL_DLL std::ostream &operator<<(std::ostream &,
