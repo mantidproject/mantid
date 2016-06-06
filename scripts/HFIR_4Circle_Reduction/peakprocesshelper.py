@@ -45,6 +45,9 @@ class PeakProcessHelper(object):
 
         self._myLastPeakUB = None
 
+        self._myIntensity = 0.
+        self._mySigma = 0.
+
         return
 
     def calculate_peak_center(self):
@@ -220,6 +223,39 @@ class PeakProcessHelper(object):
 
         for i in xrange(3):
             self._calculatedHKL[i] = hkl[i]
+
+        return
+
+    def get_intensity(self):
+        """ Get current peak intensity
+        :return:
+        """
+        return self._myIntensity
+
+    def set_intensity(self, peak_intensity):
+        """ Set peak intensity
+        :param peak_intensity:
+        :return:
+        """
+        assert isinstance(peak_intensity, float) and peak_intensity >= -0.
+
+        self._myIntensity = peak_intensity
+
+        return
+
+    def get_sigma(self):
+        """ Get peak intensity's sigma
+        :return:
+        """
+        return self._mySigma
+
+    def set_sigma(self, sigma):
+        """ set peak intensity's sigma
+        :return:
+        """
+        assert isinstance(sigma, float) and sigma > -0.
+
+        self._mySigma = sigma
 
         return
 

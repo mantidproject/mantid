@@ -929,13 +929,14 @@ class MainWindow(QtGui.QMainWindow):
             return
 
         # collect information
-        exp_number = int(self.ui.lineEdit_exp)
+        exp_number = int(self.ui.lineEdit_exp.text())
         scan_number_list = list()
         for i_row in selected_rows:
             scan_number_list.append(self.ui.tableWidget_mergeScans.get_scan_number(i_row))
 
         # write
-        self._myControl.export_to_fullprof(exp_number, scan_number_list, fp_name)
+        user_header = 'blablabla'
+        self._myControl.export_to_fullprof(exp_number, scan_number_list, user_header, fp_name)
 
         return
 
@@ -1138,16 +1139,6 @@ class MainWindow(QtGui.QMainWindow):
             self.pop_one_button_dialog('No scan is selected for scan')
             return
 
-        # get the parameters for integration
-        # SKIPPED!
-        # status, peak_radius = gutil.parse_float_editors([self.ui.lineEdit_peakRadius], allow_blank=False)
-        # if status is False:
-        #    self.pop_one_button_dialog('Peak radius is not given right')
-        #    return
-
-        # merged workspace base name
-        # use_default_merge_name = self.ui.checkBox_useDefaultMergedName.isChecked()
-
         # get experiment number
         status, ret_obj = gutil.parse_integers_editors(self.ui.lineEdit_exp, allow_blank=False)
         if status:
@@ -1158,8 +1149,8 @@ class MainWindow(QtGui.QMainWindow):
 
         # mask workspace
         selected_mask = str(self.ui.comboBox_maskNames1.currentText())
-        if selected_mask == 'No Mask':
-            selected_mask = None
+        if selected_mask.lower().startswith('no mask'):
+            selected_mask = ''
             mask_det = False
         else:
             mask_det = True
@@ -1191,7 +1182,7 @@ class MainWindow(QtGui.QMainWindow):
             merged = self.ui.tableWidget_mergeScans.get_merged_status(row_number)
             if merged is False:
                 self._myControl.merge_pts_in_scan(exp_no=exp_number, scan_no=scan_number, pt_num_list=pt_number_list,
-                                                  target_frame='qsample')
+                                                  target_frame='q-sample')
                 self.ui.tableWidget_mergeScans.set_status_by_row(row_number, 'Done')
             # END-IF
 
@@ -1206,7 +1197,8 @@ class MainWindow(QtGui.QMainWindow):
             # mask workspace
             # VZ-FUTURE: consider to modify method generate_mask_workspace() such that it can be generalized outside
             #            loop
-            self._myControl.check_generate_mask_workspace(exp_number, scan_number, selected_mask)
+            if mask_det:
+                self._myControl.check_generate_mask_workspace(exp_number, scan_number, selected_mask)
 
             # integrate peak
             status, ret_obj = self._myControl.integrate_scan_peaks(exp=exp_number,
@@ -1701,16 +1693,21 @@ class MainWindow(QtGui.QMainWindow):
         """
         # find out the merged runs
         scan_info_tup_list = self._myControl.get_merged_scans()
-        print '[DB-BAT] Scan Info List: ', scan_info_tup_list
+
+        # get existing scan numbers
+        existing_scan_number_list = self.ui.tableWidget_mergeScans.get_scan_list()
 
         # append the row to the merged scan table
         for scan_info_tup in scan_info_tup_list:
-            exp_number = scan_info_tup[0]
             scan_number = scan_info_tup[1]
-            # pt_number_list = scan_info_tup[2]
-            ws_name = 'whatever'
-            ws_group = -1
-            self.ui.tableWidget_mergeScans.add_new_merged_data(exp_number, scan_number, ws_name, ws_group)
+            # skip if existing
+            if scan_number in existing_scan_number_list:
+                continue
+
+            exp_number = scan_info_tup[0]
+            pt_number_list = scan_info_tup[2]
+            ws_name = hb3a.get_merged_md_name('HB3A', exp_number, scan_number, pt_number_list)
+            self.ui.tableWidget_mergeScans.add_new_merged_data(exp_number, scan_number, ws_name)
 
         return
 
@@ -1777,10 +1774,10 @@ class MainWindow(QtGui.QMainWindow):
         selected_row_numbers = self.ui.tableWidget_mergeScans.get_selected_rows(True)
         for row_index in selected_row_numbers:
             scan_number = self.ui.tableWidget_mergeScans.get_scan_number(row_index)
-            scan_list.append(scan_list)
+            scan_list.append(scan_number)
 
         # parse the k-vector
-        kshift_str_vec = str(self.ui.lineEdit_K.text()).split(',')
+        kshift_str_vec = str(self.ui.lineEdit_kShiftVector.text()).split(',')
         if len(kshift_str_vec) != 3:
             error_message = 'K-shift vector must be in format kx, ky, kz. ' \
                             'Present input %s does not meet the format.' % kshift_str_vec
@@ -1790,11 +1787,8 @@ class MainWindow(QtGui.QMainWindow):
         k_y = float(kshift_str_vec[1])
         k_z = float(kshift_str_vec[2])
 
-        # get experiment
-        exp_number = int(self.ui.lineEdit_exp.text())
-
         # form the set up
-        self._myControl.set_k_shift(exp_number, scan_list, (k_x, k_y, k_z))
+        self._myControl.set_k_shift(scan_list, (k_x, k_y, k_z))
 
         return
 
@@ -1887,7 +1881,7 @@ class MainWindow(QtGui.QMainWindow):
         """
         curr_state = self.ui.checkBox_selectAllScans2Merge.isChecked()
         for row_index in range(self.ui.tableWidget_mergeScans.rowCount()):
-            self.ui.tableWidget_mergeScans.set_status_by_row(row_index, curr_state)
+            self.ui.tableWidget_mergeScans.select_all_rows(curr_state)
 
         return
 
@@ -2294,6 +2288,8 @@ class MainWindow(QtGui.QMainWindow):
         Apply Lorentz corrections to the integrated peak intensities of all the selected peaks.
         :return:
         """
+        # TODO/NOW - better documentation!
+
         # get experiment number
         exp_number = int(self.ui.lineEdit_exp.text())
 
@@ -2302,13 +2298,23 @@ class MainWindow(QtGui.QMainWindow):
 
         # apply for each
         for row_number in selected_rows:
+            # get scan number
             scan_number = self.ui.tableWidget_mergeScans.get_scan_number(row_number)
-            peak_intensity = self.ui.tableWidget_mergeScans.get_intensity(row_number)
-            q = self._myControl.calculate_Q(self.ui.tableWidget_mergeScans.get_peak_center(q=True))
+            # get peak information object
+            peak_info_obj = self._myControl.get_peak_info(exp_number, scan_number)
+            # ... ...
+            peak_intensity = peak_info_obj.get_intensity()
+            # ... ...
+            q = peak_info_obj.get_peak_centre_v3d().norm()
             wavelength = self._myControl.get_wave_length(exp_number, [scan_number])
-            step_omega = self._myControl.get_motor_step(exp_number, scan_number)
-            corrected = self._myControl.apply_lorentz_correction(peak_intensity, q, wavelength, step_omega)
-            self.ui.tableWidget_mergeScans.set_peak_intensity(row_number, corrected, lorentz_corrected=True)
+            self.ui.tableWidget_mergeScans.set_wave_length(row_number, wavelength)
+            # ... ...
+            motor_move_tup = self._myControl.get_motor_step(exp_number, scan_number)
+            self.ui.tableWidget_mergeScans.set_motor_info(row_number, motor_move_tup)
+            motor_step = motor_move_tup[1]
+            # .. ...
+            corrected = self._myControl.apply_lorentz_correction(peak_intensity, q, wavelength, motor_step)
+            self.ui.tableWidget_mergeScans.set_peak_intensity(row_number, None, corrected, lorentz_corrected=True)
 
         return
 

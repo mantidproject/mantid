@@ -2824,7 +2824,7 @@ p, li { white-space: pre-wrap; }
                </spacer>
               </item>
               <item row="0" column="6">
-               <widget class="QLineEdit" name="lineEdit_3"/>
+               <widget class="QLineEdit" name="lineEdit_kShiftVector"/>
               </item>
               <item row="2" column="5">
                <widget class="QLabel" name="label_48">

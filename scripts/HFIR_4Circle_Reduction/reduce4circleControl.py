@@ -155,6 +155,8 @@ class CWSCDReductionControl(object):
         sin_theta = q * wavelength/(4*math.pi)
         theta = math.asin(sin_theta)
         corrected_intensity = peak_intensity * math.sin(2*theta) * step_omega
+        print '[DB] Lorentz correction: I * sin(2*theta) * delta(omega) = %.5f * sin(2*%.5f) * %.5f =' \
+              ' %.5f; q = %.5f.' % (peak_intensity, theta*180/math.pi, step_omega, corrected_intensity, q)
 
         return corrected_intensity
 
@@ -396,7 +398,7 @@ class CWSCDReductionControl(object):
 
         if AnalysisDataService.doesExist(mask_ws_name) is False:
             # if the workspace does not exist, create a new mask workspace
-            assert mask_tag in self._roiDict
+            assert mask_tag in self._roiDict, 'Mask tag |%s| does not exist in ROI dictionary!' % mask_tag
             region_of_interest = self._roiDict[mask_tag]
             ll = region_of_interest[0]
             ur = region_of_interest[1]
@@ -457,7 +459,8 @@ class CWSCDReductionControl(object):
 
         return avg_bg
 
-    def get_wave_length(self, exp_number, scan_number_list):
+    @staticmethod
+    def get_wave_length(exp_number, scan_number_list):
         """
         Get the wavelength.
         Exception: RuntimeError if there are more than 1 wavelength found with all given scan numbers
@@ -470,8 +473,7 @@ class CWSCDReductionControl(object):
         # go through all the SPICE table workspace
         for scan_number in scan_number_list:
             spice_table_name = get_spice_table_name(exp_number, scan_number)
-            spice_table = AnalysisDataService.retrieve(spice_table_name)
-            curr_wl = get_wave_length(spice_table)
+            curr_wl = get_wave_length(spice_table_name)
             wave_length_set.add(curr_wl)
         # END-FOR
 
@@ -480,7 +482,8 @@ class CWSCDReductionControl(object):
 
         return wave_length_set.pop()
 
-    def get_motor_step(self, exp_number, scan_number):
+    @staticmethod
+    def get_motor_step(exp_number, scan_number):
         """ For omega/phi scan, get the average step of the motor
         :param exp_number:
         :param scan_number:
@@ -496,17 +499,23 @@ class CWSCDReductionControl(object):
 
         # get the motors values
         omega_vec = get_log_data(spice_table, 'omega')
-        omega_step = get_statistics(omega_vec)
+        omega_dev, omega_step, omega_step_dev = get_step_motor_parameters(omega_vec)
+        omega_tup = omega_dev, ('omega', omega_step, omega_step_dev)
+
+        chi_vec = get_log_data(spice_table, 'chi')
+        chi_dev, chi_step, chi_step_dev = get_step_motor_parameters(chi_vec)
+        chi_tup = chi_dev, ('chi', chi_step, chi_step_dev)
 
         phi_vec = get_log_data(spice_table, 'phi')
-        phi_step = get_statistics(phi_vec)
+        phi_dev, phi_step, phi_step_dev = get_step_motor_parameters(phi_vec)
+        phi_tup = phi_dev, ('phi', phi_step, phi_step_dev)
 
-        motor_step = max(abs(omega_step), abs(phi_step))
+        # find the one that moves
+        move_tup = max([omega_tup, chi_tup, phi_tup])
 
-        return motor_step
+        return move_tup[1]
 
-
-    def export_to_fullprof(self, exp_number, scan_number_list, scan_kindex_dict, k_shift_dict, user_header,
+    def export_to_fullprof(self, exp_number, scan_number_list, user_header,
                            fullprof_file_name):
         """
         Export peak intensities to Fullprof data file
@@ -530,11 +539,22 @@ class CWSCDReductionControl(object):
         except RuntimeError as error:
             return False, str(error)
 
+        # get the information whether there is any k-shift vector specified by user
+        print '[DB...Prototype] Current k-shift vectors are ... ', self._kShiftDict
+
         # form k-shift and peak intensity information
-        assert isinstance(scan_kindex_dict, dict)
+        scan_kindex_dict = dict()
+        k_shift_dict = dict()
+        for k_index, tup_value in enumerate(self._kShiftDict):
+            k_shift_dict[k_index] = tup_value[0]
+            for scan_number in tup_value[1]:
+                scan_kindex_dict[scan_number] = k_index
+            # END-FOR (scan_number)
+        # END-FOR (_kShiftDict)
+
         error_message = 'Number of scans with k-shift must either be 0 (no shift at all) or ' \
-                        'equal to number of total scans.'
-        assert len(scan_kindex_dict) == 0 or len(scan_kindex_dict) == len(scan_number_list)
+                        'equal to or larger than the number scans to export.'
+        assert len(scan_kindex_dict) == 0 or len(scan_kindex_dict) >= len(scan_number_list), error_message
 
         # form peaks
         peaks = list()
@@ -1881,7 +1901,6 @@ class CWSCDReductionControl(object):
 
     def set_k_shift(self, scan_number_list, k_shift_vector):
         """ Set k-shift vector
-        :param exp_number:
         :param scan_number_list:
         :param k_shift_vector:
         :return:

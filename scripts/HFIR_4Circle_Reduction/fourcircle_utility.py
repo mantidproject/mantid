@@ -463,6 +463,45 @@ def get_integrated_peak_ws_name(exp_number, scan_number, pt_list, mask=False,
     return ws_name
 
 
+def get_log_data(spice_table, log_name):
+    """
+
+    :param spice_table:
+    :param log_name:
+    :return:
+    """
+    # TODO/NOW - Doc
+    assert isinstance(log_name, str), 'Log name must be a string.'
+
+    col_names = spice_table.getColumnNames()
+    log_col_index = col_names.index(log_name)
+    if log_col_index >= len(col_names):
+        raise KeyError('Log name %s does not exist in SPICE table.' % log_name)
+
+    num_rows = spice_table.rowCount()
+    log_vector = numpy.ndarray((num_rows,), 'float')
+    for i in range(num_rows):
+        log_vector[i] = spice_table.cell(i, log_col_index)
+
+    return log_vector
+
+
+def get_step_motor_parameters(log_value_vector):
+    """
+    Get motor log value statistics
+    :param log_value_vector:
+    :return:
+    """
+    # TODO/NOW - check and doc!
+    std_dev = numpy.std(log_value_vector)
+
+    step_vector = log_value_vector[1:] - log_value_vector[:-1]
+    step_dev = numpy.std(step_vector)
+    step = sum(step_vector)/len(step_vector)
+
+    return std_dev, step, step_dev
+
+
 def get_merged_md_name(instrument_name, exp_no, scan_no, pt_list):
     """
     Build the merged scan's MDEventworkspace's name under convention
@@ -557,7 +596,7 @@ def get_wave_length(spice_table_name):
     """
     # check
     assert isinstance(spice_table_name, str), 'Input SPICE table workspace name must be a string.'
-    assert AnalysisDataService.doesexist(spice_table_name)
+    assert AnalysisDataService.doesExist(spice_table_name)
 
     spice_table_ws = AnalysisDataService.retrieve(spice_table_name)
 

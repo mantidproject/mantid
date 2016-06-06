@@ -389,17 +389,19 @@ class ProcessTableWidget(tableBase.NTableWidget):
     Extended table for peaks used to calculate UB matrix
     """
     TableSetup = [('Scan', 'int'),
-                  ('Number Pt', 'int'),
-                  ('Status', 'str'),
-                  ('Total Counts', 'float'),
                   ('Intensity', 'float'),
-                  ('Select', 'checkbox'),
+                  ('Corrected Intensity', 'float'),
+                  ('Status', 'str'),
+                  ('Pt Size', 'int'),
+                  ('Total Counts', 'float'),
+                  ('Motor', 'str'),
+                  ('Wavelength', 'float'),
                   ('Merged Workspace', 'str'),
-                  ('Group Name', 'str')]
+                  ('Select', 'checkbox')]
 
     def __init__(self, parent):
         """
-
+        Initialization
         :param parent:
         :return:
         """
@@ -407,13 +409,33 @@ class ProcessTableWidget(tableBase.NTableWidget):
 
         return
 
-    def add_new_merged_data(self, exp_number, scan_number, ws_name, ws_group):
+    @staticmethod
+    def _generate_empty_row(scan_number, num_pt=None, status='In-Queue', ws_name=''):
+        """ Generate a list for empty row with scan number
+        :param scan_number:
+        :param num_pt:
+        :param status:
+        :param ws_name
+        :return:
+        """
+        # TODO/NOW - Doc and check
+        intensity = None
+        corr_int = None
+        total_counts = 0
+        motor_info = ''
+        wave_length = 0
+
+        new_row = [scan_number, intensity, corr_int, status, num_pt, total_counts,
+                   motor_info, wave_length, ws_name, False]
+
+        return new_row
+
+    def add_new_merged_data(self, exp_number, scan_number, ws_name):
         """
         Append a new row with merged data
         :param exp_number:
         :param scan_number:
         :param ws_name:
-        :param ws_group:
         :return:
         """
         # check
@@ -422,7 +444,7 @@ class ProcessTableWidget(tableBase.NTableWidget):
         assert isinstance(ws_name, str)
 
         # construct a row
-        new_row = [scan_number, -1, 'done', -1, -1, False, ws_name, ws_group]
+        new_row = self._generate_empty_row(scan_number, ws_name=ws_name)
         self.append_row(new_row)
 
         return
@@ -436,19 +458,11 @@ class ProcessTableWidget(tableBase.NTableWidget):
         assert isinstance(scans, list)
 
         # set value as default
-        num_pt = None
-        red_status = 'In Queue'
-        counts = None
-        intensity = None
-        select = False
-        merged_ws = None
-        group_name = None
-
         # Append rows
         for scan in scans:
             # set the list
-            row_value_list = [scan, num_pt, red_status, counts, intensity, select, merged_ws, group_name]
-            status, err = self.append_row(row_value_list)
+            new_row = self._generate_empty_row(scan_number=scan)
+            status, err = self.append_row(new_row)
             if status is False:
                 raise RuntimeError(err)
 
@@ -566,13 +580,29 @@ class ProcessTableWidget(tableBase.NTableWidget):
 
         return ''
 
-    def set_peak_intensity(self, row_number, scan_number, peak_intensity):
+    def set_motor_info(self, row_number, motor_move_tup):
+        """
+
+        :param motor_move_tup:
+        :return:
+        """
+        # TODO/NOW - Doc and check
+
+        motor_info = '%s: %.5f (%.5f)' % (motor_move_tup[0], motor_move_tup[1], motor_move_tup[2])
+
+        motor_col_index = self.TableSetup.index(('Motor', 'str'))
+        self.update_cell_value(row_number, motor_col_index, motor_info)
+
+        return
+
+    def set_peak_intensity(self, row_number, scan_number, peak_intensity, lorentz_corrected=False):
         """ Set peak intensity to a row or scan
         Requirement: Either row number or scan number must be given
         Guarantees: peak intensity is set
         :param row_number:
         :param scan_number:
         :param peak_intensity:
+        :param lorentz_corrected:
         :return:
         """
         # check requirements
@@ -598,7 +628,11 @@ class ProcessTableWidget(tableBase.NTableWidget):
                 raise RuntimeError('Scan %d cannot be found in the table.' % scan_number)
         # END-IF
 
-        intensity_col_index = ProcessTableWidget.TableSetup.index(('Intensity', 'float'))
+        if lorentz_corrected:
+            col_name = ('Corrected Intensity', 'float')
+        else:
+            col_name = ('Intensity', 'float')
+        intensity_col_index = ProcessTableWidget.TableSetup.index(col_name)
         return self.update_cell_value(row_number, intensity_col_index, peak_intensity)
 
     def set_pt_by_row(self, row_number, pt_list):
@@ -611,7 +645,7 @@ class ProcessTableWidget(tableBase.NTableWidget):
         assert isinstance(row_number, int)
         assert isinstance(pt_list, list)
 
-        j_pt = self.get_column_index('Number Pt')
+        j_pt = self.get_column_index('Pt')
         self.update_cell_value(row_number, j_pt, len(pt_list))
 
         return ''
@@ -650,11 +684,23 @@ class ProcessTableWidget(tableBase.NTableWidget):
         """
         # Check
         assert isinstance(row_number, int)
-        assert isinstance(status, str)
+        assert isinstance(status, str), 'Status (description) must be a string, but not %s.' % str(type(status))
 
         # Set
         i_status = self.TableSetup.index(('Status', 'str'))
         self.update_cell_value(row_number, i_status, status)
+
+        return
+
+    def set_wave_length(self, row_number, wave_length):
+        """ Set wave length to n
+        :param row_number:
+        :param wave_length:
+        :return:
+        """
+        # TODO/NOW - check and doc
+        col_index = self.TableSetup.index(('Wavelength', 'float'))
+        self.update_cell_value(row_number, col_index, wave_length)
 
         return
 
@@ -703,12 +749,9 @@ class ProcessTableWidget(tableBase.NTableWidget):
         assert isinstance(ws_group_name, str) or ws_group_name is None
 
         j_ws_name = self.get_column_index('Merged Workspace')
-        j_group_name = self.get_column_index('Group Name')
 
         if merged_md_name is not None:
             self.update_cell_value(row_number, j_ws_name, merged_md_name)
-        if ws_group_name is not None:
-            self.update_cell_value(row_number, j_group_name, ws_group_name)
 
         return
 
