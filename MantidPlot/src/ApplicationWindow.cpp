@@ -10502,6 +10502,7 @@ void ApplicationWindow::showHelp() {
             "www.mantidproject.org/MantidPlot:_Help</a></p>");
     return;
   }
+
 }
 
 void ApplicationWindow::showPlotWizard() {
@@ -13428,6 +13429,7 @@ void ApplicationWindow::translateActionsStrings() {
   actionHomePage->setMenuText(tr("&Mantid Homepage")); // Mantid change
   actionHelpBugReports->setText(tr("Report a &Bug"));
   actionAskHelp->setText(tr("Ask for Help"));
+
   btnPointer->setText(tr("Selection &Tools"));
   btnPointer->setToolTip(tr("Selection Tools"));
 
