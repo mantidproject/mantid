@@ -1,11 +1,10 @@
 #ifndef LOW_STEP_HIGH_INPUT_WIDGET_H_
-#define LOW_STEP_HIGH_INPUT_WIDGET_H_ 
+#define LOW_STEP_HIGH_INPUT_WIDGET_H_
 
 #include "BinInputWidget.h"
 class QLineEdit;
 
-class LowHighStepInputWidget : public BinInputWidget
-{  
+class LowHighStepInputWidget : public BinInputWidget {
   Q_OBJECT
 public:
   int getEntry(double min, double max) const override;
@@ -14,9 +13,10 @@ public:
   ~LowHighStepInputWidget() override;
 private slots:
   void nBinsListener();
+
 private:
-   /// Low/High/Step boxes
-   QLineEdit* m_step;
+  /// Low/High/Step boxes
+  QLineEdit *m_step;
 };
 
 #endif

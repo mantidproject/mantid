@@ -3,11 +3,12 @@
 
 #include "MantidKernel/System.h"
 
-/*  
-    This file contains the DLLExport/DLLImport linkage configuration for the 
+/*
+    This file contains the DLLExport/DLLImport linkage configuration for the
     MantidQt CustomInterfaces library
 
-    Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+    Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+   National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -23,7 +24,7 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
-    
+
     File change history is stored at: <https://github.com/mantidproject/mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */

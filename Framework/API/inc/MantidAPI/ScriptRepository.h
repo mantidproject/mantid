@@ -104,7 +104,7 @@ public:
                       const std::string &file = std::string(), int line = -1);
 
   /// Returns the message string.
-  const char *what() const throw() override;
+  const char *what() const noexcept override;
 
   /// Returns the error description with technical details on the origin and
   /// cause.

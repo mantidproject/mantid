@@ -19,9 +19,7 @@ public:
                        const std::string &coordinateSystem,
                        PeakViewColor defaultForegroundPeakViewColor,
                        PeakViewColor defaultBackgroundPeakViewColor,
-                       const bool canAddPeaks,
-                       PeaksViewer *parent);
-
+                       const bool canAddPeaks, PeaksViewer *parent);
 
   std::set<QString> getShownColumns();
   void setShownColumns(std::set<QString> &cols);
@@ -41,7 +39,8 @@ signals:
   void peakColourChanged(Mantid::API::IPeaksWorkspace_const_sptr, QColor);
   void peakColorchanged(Mantid::API::IPeaksWorkspace_const_sptr, PeakViewColor);
   void backgroundColourChanged(Mantid::API::IPeaksWorkspace_const_sptr, QColor);
-  void backgroundColorChanged(Mantid::API::IPeaksWorkspace_const_sptr, PeakViewColor);
+  void backgroundColorChanged(Mantid::API::IPeaksWorkspace_const_sptr,
+                              PeakViewColor);
   void backgroundRadiusShown(Mantid::API::IPeaksWorkspace_const_sptr, bool);
   void removeWorkspace(Mantid::API::IPeaksWorkspace_const_sptr);
   void hideInPlot(Mantid::API::IPeaksWorkspace_const_sptr, bool);
@@ -73,7 +72,7 @@ private:
   /// Workspace name.
   QString m_nameText;
   /// Parent widget
-  PeaksViewer* const m_parent;
+  PeaksViewer *const m_parent;
 
 private slots:
   void onForegroundColorCrossClicked();

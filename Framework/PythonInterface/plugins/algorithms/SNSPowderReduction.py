@@ -384,7 +384,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
             # the final bit of math to remove container run and vanadium run
             if can_run_ws_name is not None:
                 # must convert the sample to a matrix workspace if the can run isn't one
-                if allEventWorkspaces(can_run_ws_name, sam_ws_name):
+                if not allEventWorkspaces(can_run_ws_name, sam_ws_name):
                     sam_ws = api.ConvertToMatrixWorkspace(InputWorkspace=sam_ws_name,
                                                           OutputWorkspace=sam_ws_name)
                     assert sam_ws is not None
@@ -444,7 +444,6 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                 if self._scaleFactor != 1.:
                     sam_ws = api.Scale(sam_ws_name, Factor=self._scaleFactor, OutputWorkspace=sam_ws_name)
                 self._save(sam_ws_name, self._info, normalized, False)
-            #mtd.releaseFreeMemory()
 
         # ENDFOR
 

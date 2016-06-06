@@ -327,8 +327,7 @@ boost::tuple<std::string, std::string> postprocessGroupString(
   stitch_string << outputWSName;
   stitch_string << completeOutputProperties(
                        postprocessor.name(),
-                       postprocessor.numberOfOutputProperties())
-                << " = ";
+                       postprocessor.numberOfOutputProperties()) << " = ";
   stitch_string << postprocessor.name() << "(";
   stitch_string << postprocessor.inputProperty() << " = '";
   stitch_string << boost::algorithm::join(inputNames, ", ") << "'";

@@ -216,6 +216,10 @@
 
 #include "MantidQtAPI/ScriptRepositoryView.h"
 
+#ifdef MAKE_VATES
+#include "vtkPVDisplayInformation.h"
+#endif
+
 using namespace Qwt3D;
 using namespace MantidQt::API;
 using Mantid::Kernel::ConfigService;
@@ -370,6 +374,11 @@ void ApplicationWindow::init(bool factorySettings, const QStringList &args) {
                                                 false);
   }
 
+#ifdef MAKE_VATES
+  if (!vtkPVDisplayInformation::SupportsOpenGLLocally())
+    g_log.error("The OpenGL configuration does not support the VSI.");
+#endif
+
   // Create UI object
   mantidUI = new MantidUI(this);
 
@@ -392,11 +401,10 @@ void ApplicationWindow::init(bool factorySettings, const QStringList &args) {
   folders->header()->hide();
   folders->setSelectionMode(QAbstractItemView::SingleSelection);
 
-  connect(folders, SIGNAL(currentItemChanged(QTreeWidgetItem *, QTreeWidgetItem *)), this,
-          SLOT(folderItemChanged(QTreeWidgetItem *, QTreeWidgetItem *)));
   connect(folders,
-          SIGNAL(customContextMenuRequested(const QPoint &)),
-          this,
+          SIGNAL(currentItemChanged(QTreeWidgetItem *, QTreeWidgetItem *)),
+          this, SLOT(folderItemChanged(QTreeWidgetItem *, QTreeWidgetItem *)));
+  connect(folders, SIGNAL(customContextMenuRequested(const QPoint &)), this,
           SLOT(showFolderPopupMenu(const QPoint &)));
   connect(folders, SIGNAL(deleteSelection()), this,
           SLOT(deleteSelectedItems()));
@@ -532,15 +540,14 @@ void ApplicationWindow::init(bool factorySettings, const QStringList &args) {
   connect(this, SIGNAL(modified()), this, SLOT(modifiedProject()));
   connect(d_workspace, SIGNAL(subWindowActivated(QMdiSubWindow *)), this,
           SLOT(windowActivated(QMdiSubWindow *)));
-  connect(
-      lv, SIGNAL(customContextMenuRequested(const QPoint &)),
-      this, SLOT(showWindowPopupMenu(const QPoint &)));
+  connect(lv, SIGNAL(customContextMenuRequested(const QPoint &)), this,
+          SLOT(showWindowPopupMenu(const QPoint &)));
   connect(lv, SIGNAL(deleteSelection()), this, SLOT(deleteSelectedItems()));
 
-  connect(recentProjectsMenu, SIGNAL(triggered(QAction*)), this,
-          SLOT(openRecentProject(QAction*)));
-  connect(recentFilesMenu, SIGNAL(triggered(QAction*)), this,
-          SLOT(openRecentFile(QAction*)));
+  connect(recentProjectsMenu, SIGNAL(triggered(QAction *)), this,
+          SLOT(openRecentProject(QAction *)));
+  connect(recentFilesMenu, SIGNAL(triggered(QAction *)), this,
+          SLOT(openRecentFile(QAction *)));
 
   // apply user settings
   updateAppFonts();
@@ -885,10 +892,6 @@ void ApplicationWindow::initGlobalConstants() {
 
   // MG: On Linux, if cups defines a printer queue that cannot be contact, the
   // QPrinter constructor hangs and doesn't timeout.
-
-  //	QPrinterInfo::availablePrinters();
-
-  //	d_export_resolution = QPrinter().resolution();
   d_export_color = true;
   d_export_vector_size = static_cast<int>(QPrinter::Custom);
   d_keep_plot_aspect = true;
@@ -904,8 +907,6 @@ QMenuBar *ApplicationWindow::myMenuBar() {
 
 void ApplicationWindow::initToolBars() {
   initPlot3DToolBar();
-
-  //	setWindowIcon(QIcon(getQPixmap("logo_xpm")));
   setWindowIcon(QIcon(":/MantidPlot_Icon_32offset.png"));
   QPixmap openIcon, saveIcon;
 
@@ -974,7 +975,6 @@ void ApplicationWindow::initToolBars() {
   btnCursor->setActionGroup(dataTools);
   btnCursor->setCheckable(true);
   btnCursor->setIcon(QIcon(getQPixmap("select_xpm")));
-  // plotTools->addAction(btnCursor); disabled until fixed (#2783)
   btnPicker = new QAction(tr("S&creen Reader"), this);
   btnPicker->setActionGroup(dataTools);
   btnPicker->setCheckable(true);
@@ -985,21 +985,18 @@ void ApplicationWindow::initToolBars() {
   actionDrawPoints->setActionGroup(dataTools);
   actionDrawPoints->setCheckable(true);
   actionDrawPoints->setIcon(QIcon(getQPixmap("draw_points_xpm")));
-  // plotTools->addAction(actionDrawPoints); disabled until fixed (#2783)
 
   btnMovePoints = new QAction(tr("&Move Data Points..."), this);
   btnMovePoints->setShortcut(tr("Ctrl+ALT+M"));
   btnMovePoints->setActionGroup(dataTools);
   btnMovePoints->setCheckable(true);
   btnMovePoints->setIcon(QIcon(getQPixmap("hand_xpm")));
-  // plotTools->addAction(btnMovePoints); disabled until fixed (#2783)
 
   btnRemovePoints = new QAction(tr("Remove &Bad Data Points..."), this);
   btnRemovePoints->setShortcut(tr("Alt+B"));
   btnRemovePoints->setActionGroup(dataTools);
   btnRemovePoints->setCheckable(true);
   btnRemovePoints->setIcon(QIcon(getQPixmap("gomme_xpm")));
-  // plotTools->addAction(btnRemovePoints); disabled until fixed (#2783)
 
   if (mantidUI->fitFunctionBrowser()) {
     btnMultiPeakPick = new QAction(tr("Select Multiple Peaks..."), this);
@@ -1093,7 +1090,12 @@ void ApplicationWindow::insertTranslatedStrings() {
     setWindowTitle(tr("MantidPlot - untitled")); // Mantid
 
   QStringList labels;
-  labels << "Name" << "Type"<<"View" << "Size"<< "Created" << "Label";
+  labels << "Name"
+         << "Type"
+         << "View"
+         << "Size"
+         << "Created"
+         << "Label";
   lv->setHeaderLabels(labels);
   lv->resizeColumnToContents(0);
   lv->resizeColumnToContents(1);
@@ -1109,9 +1111,11 @@ void ApplicationWindow::insertTranslatedStrings() {
   standardTools->setWindowTitle(tr("Standard Tools"));
   formatToolBar->setWindowTitle(tr("Format"));
 
-  // Use the implementation of GROUP 4
-  fileMenu->changeItem(recentMenuID, tr("&Recent Projects"));
-  fileMenu->changeItem(recentFilesMenuID, tr("R&ecent Files"));
+  auto recentProjectsMenuAction = recentProjectsMenu->menuAction();
+  recentProjectsMenuAction->setText(tr("&Recent Projects"));
+
+  auto recentFilesMenuAction = recentFilesMenu->menuAction();
+  recentFilesMenuAction->setText(tr("R&ecent Files"));
 
   translateActionsStrings();
   customMenu(activeWindow());
@@ -1193,7 +1197,6 @@ void ApplicationWindow::initMainMenu() {
   plot3DMenu->addAction(actionContourMap);
   plot3DMenu->addAction(actionGrayMap);
   plot3DMenu->addSeparator();
-  // plot3DMenu->addAction(actionPlotHistogram);
 
   matrixMenu = new QMenu(this);
   matrixMenu->setObjectName("matrixMenu");
@@ -1227,9 +1230,6 @@ void ApplicationWindow::initMainMenu() {
 
   decayMenu = new QMenu(this);
   decayMenu->setObjectName("decayMenu");
-
-  multiPeakMenu = new QMenu(this);
-  multiPeakMenu->setObjectName("multiPeakMenu");
 
   analysisMenu = new QMenu(this);
   analysisMenu->setObjectName("analysisMenu");
@@ -2596,8 +2596,7 @@ void ApplicationWindow::exportMatrix() {
     QMessageBox::critical(
         this, tr("MantidPlot - Export error"), // Mantid
         tr("Could not write to file: <br><h4> %1 </h4><p>Please verify that "
-           "you have the right to write to this location!")
-            .arg(file_name));
+           "you have the right to write to this location!").arg(file_name));
     return;
   }
 
@@ -3011,13 +3010,6 @@ void ApplicationWindow::setPreferences(Graph *g) {
     g->setScale(QwtPlot::yRight, d_axes_scales[1]);
     g->setScale(QwtPlot::xBottom, d_axes_scales[2]);
     g->setScale(QwtPlot::xTop, d_axes_scales[3]);
-
-    // QtiPlot makes these calls here (as of 26/6/12), but they spoil color fill
-    // plots for us.
-    //   Losing them seems to have no detrimental effect. Perhaps we need to
-    //   update our updateSecondaryAxis code to match QtiPlot's.
-    // g->updateSecondaryAxis(QwtPlot::xTop);
-    // g->updateSecondaryAxis(QwtPlot::yRight);
 
     QList<int> ticksList;
     ticksList << majTicksStyle << majTicksStyle << majTicksStyle
@@ -3879,7 +3871,6 @@ void ApplicationWindow::defineErrorBars(const QString &name, int type,
     ycol = t->colIndex(xColName);
 
   QVarLengthArray<double> Y(t->col(ycol));
-  // Y=t->col(ycol);
   QString errColName = t->colName(c);
 
   double prc = percent.toDouble();
@@ -4504,8 +4495,7 @@ ApplicationWindow *ApplicationWindow::open(const QString &fn,
       int choice = QMessageBox::question(
           this, tr("MantidPlot - File opening error"), // Mantid
           tr("The file <b>%1</b> is corrupted, but there exists a backup "
-             "copy.<br>Do you want to open the backup instead?")
-              .arg(fn),
+             "copy.<br>Do you want to open the backup instead?").arg(fn),
           QMessageBox::Yes | QMessageBox::Default,
           QMessageBox::No | QMessageBox::Escape);
       if (choice == QMessageBox::Yes)
@@ -4527,7 +4517,7 @@ ApplicationWindow *ApplicationWindow::open(const QString &fn,
   return app;
 }
 
-void ApplicationWindow::openRecentFile(QAction* action) {
+void ApplicationWindow::openRecentFile(QAction *action) {
   auto fn = action->data().toString();
   // if "," found in the QString
   if (fn.indexOf(",", 0)) {
@@ -4546,8 +4536,7 @@ void ApplicationWindow::openRecentFile(QAction* action) {
       QMessageBox::critical(
           this, tr("MantidPlot - File Open Error"), // Mantid
           tr("The file: <b> %1 </b> <p>is not there anymore!"
-             "<p>It will be removed from the list of recent files.")
-              .arg(fn));
+             "<p>It will be removed from the list of recent files.").arg(fn));
 
       recentFiles.removeAll(fn);
       updateRecentFilesList();
@@ -4558,7 +4547,7 @@ void ApplicationWindow::openRecentFile(QAction* action) {
   saveSettings(); // save new list of recent files
 }
 
-void ApplicationWindow::openRecentProject(QAction* action) {
+void ApplicationWindow::openRecentProject(QAction *action) {
   QString fn = action->text();
   int pos = fn.indexOf(" ", 0);
   fn = fn.right(fn.length() - pos - 1);
@@ -4568,8 +4557,7 @@ void ApplicationWindow::openRecentProject(QAction* action) {
     QMessageBox::critical(
         this, tr("MantidPlot - File Open Error"), // Mantid
         tr("The file: <b> %1 </b> <p>does not exist anymore!"
-           "<p>It will be removed from the list of recent projects.")
-            .arg(fn));
+           "<p>It will be removed from the list of recent projects.").arg(fn));
 
     recentProjects.remove(fn);
     updateRecentProjectsList();
@@ -4621,7 +4609,7 @@ ApplicationWindow *ApplicationWindow::openProject(const QString &filename,
     throw std::runtime_error("Couldn't open project file");
 
   QTextStream fileTS(&file);
-  fileTS.setCodec(QTextCodec::codecForName("UTF-8")) ;
+  fileTS.setCodec(QTextCodec::codecForName("UTF-8"));
 
   QString baseName = fileInfo.fileName();
 
@@ -4971,8 +4959,7 @@ void ApplicationWindow::readSettings() {
   // set logging level to the last saved level
   int lastLoggingLevel =
       settings.value("/LastLoggingLevel",
-                     Mantid::Kernel::Logger::Priority::PRIO_NOTICE)
-          .toInt();
+                     Mantid::Kernel::Logger::Priority::PRIO_NOTICE).toInt();
   Mantid::Kernel::Logger::setLevelForAll(lastLoggingLevel);
 
   d_backup_files = settings.value("/BackupProjects", true).toBool();
@@ -5257,7 +5244,7 @@ void ApplicationWindow::readSettings() {
   applyCurveStyleToMantid = settings.value("/ApplyMantid", true).toBool();
   // Once only for DrawAllErrors set to true, by SSC request
   bool setDrawAllErrorsSetToTrueOnce =
-    settings.value("/DrawAllErrorsSetToTrueOnce", false).toBool();
+      settings.value("/DrawAllErrorsSetToTrueOnce", false).toBool();
   if (!setDrawAllErrorsSetToTrueOnce) {
     settings.setValue("/DrawAllErrors", true);
     settings.setValue("/DrawAllErrorsSetToTrueOnce", true);
@@ -5330,9 +5317,8 @@ void ApplicationWindow::readSettings() {
                       .name();
   plot3DColors << QColor(settings.value("/Axes", "#000000").value<QColor>())
                       .name();
-  plot3DColors << QColor(
-                      settings.value("/Background", "#ffffff").value<QColor>())
-                      .name();
+  plot3DColors << QColor(settings.value("/Background", "#ffffff")
+                             .value<QColor>()).name();
   settings.endGroup(); // Colors
   settings.endGroup();
   /* ----------------- end group 3D Plots --------------------------- */
@@ -5384,8 +5370,6 @@ void ApplicationWindow::readSettings() {
       settings.value("/ImageFileTypeFilter", ".png").toString();
   d_export_transparency = settings.value("/ExportTransparency", false).toBool();
   d_export_quality = settings.value("/ImageQuality", 100).toInt();
-  //	d_export_resolution = settings.value("/Resolution",
-  // QPrinter().resolution()).toInt();
   d_export_color = settings.value("/ExportColor", true).toBool();
   d_export_vector_size =
       settings.value("/ExportPageSize", QPrinter::Custom).toInt();
@@ -5866,8 +5850,7 @@ void ApplicationWindow::exportGraph() {
     QMessageBox::critical(
         this, tr("MantidPlot - Export error"), // Mantid
         tr("Could not write to file: <br><h4> %1 </h4><p>Please verify that "
-           "you have the right to write to this location!")
-            .arg(file_name));
+           "you have the right to write to this location!").arg(file_name));
     return;
   }
   file.close();
@@ -5930,8 +5913,7 @@ void ApplicationWindow::exportLayer() {
     QMessageBox::critical(
         this, tr("MantidPlot - Export error"), // Mantid
         tr("Could not write to file: <br><h4> %1 </h4><p>Please verify that "
-           "you have the right to write to this location!")
-            .arg(file_name));
+           "you have the right to write to this location!").arg(file_name));
     return;
   }
   file.close();
@@ -5993,8 +5975,7 @@ void ApplicationWindow::exportAllGraphs() {
         QMessageBox::warning(
             this, tr("MantidPlot - Warning"), // Mantid
             tr("There are no plot layers available in window <b>%1</b>.<br>"
-               "Graph window not exported!")
-                .arg(plot2D->objectName()));
+               "Graph window not exported!").arg(plot2D->objectName()));
         QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
         continue;
       }
@@ -6012,8 +5993,7 @@ void ApplicationWindow::exportAllGraphs() {
       QApplication::restoreOverrideCursor();
 
       QString msg = tr("A file called: <p><b>%1</b><p>already exists. "
-                       "Do you want to overwrite it?")
-                        .arg(file_name);
+                       "Do you want to overwrite it?").arg(file_name);
       QMessageBox msgBox(QMessageBox::Question,
                          tr("MantidPlot - Overwrite file?"), msg, // Mantid
                          QMessageBox::Yes | QMessageBox::YesToAll |
@@ -6253,8 +6233,7 @@ void ApplicationWindow::loadDataFileByName(QString fn) {
 void ApplicationWindow::saveProjectAs(const QString &fileName, bool compress) {
   QString fn = fileName;
   if (fileName.isEmpty()) {
-    QString filter = tr("MantidPlot project") +
-                     " (*.mantid);;"; // tr("QtiPlot project")+" (*.qti);;";
+    QString filter = tr("MantidPlot project") + " (*.mantid);;";
     filter += tr("Compressed MantidPlot project") + " (*.mantid.gz)";
 
     QString selectedFilter;
@@ -6289,7 +6268,6 @@ void ApplicationWindow::saveProjectAs(const QString &fileName, bool compress) {
     workingDir = fi.absolutePath();
     QString baseName = fi.fileName();
     if (!baseName.contains("."))
-      // fn.append(".qti");
       fn.append(".mantid");
 
     projectname = fn;
@@ -6601,8 +6579,7 @@ void ApplicationWindow::exportAllTables(const QString &sep, bool colNames,
           auto result = QMessageBox::question(
               this, tr("MantidPlot - Overwrite file?"),
               tr("A file called: <p><b>%1</b><p>already exists. "
-                 "Do you want to overwrite it?")
-                  .arg(fileName),
+                 "Do you want to overwrite it?").arg(fileName),
               tr("&Yes"), tr("&All"), tr("&Cancel"), 0, 1);
 
           if (result == 1)
@@ -7422,7 +7399,6 @@ void ApplicationWindow::showPlotDialog(int curveKey) {
   PlotDialog *pd = new PlotDialog(d_extended_plot_dialog, this, w);
   pd->setAttribute(Qt::WA_DeleteOnClose);
   pd->insertColumnsList(columnsList(Table::All));
-  // pd->setMultiLayer(w);
   if (curveKey >= 0) {
     Graph *g = w->activeGraph();
     if (g)
@@ -7794,8 +7770,7 @@ void ApplicationWindow::exportPDF() {
           this, tr("MantidPlot - Export error"), // Mantid
           tr("Could not write to file: <h4>%1</h4><p>Please verify that you "
              "have the right to write to this location or that the file is not "
-             "being used by another application!")
-              .arg(fname));
+             "being used by another application!").arg(fname));
       return;
     }
 
@@ -8251,10 +8226,6 @@ void ApplicationWindow::selectMultiPeak(MultiLayer *plot,
         mantidUI->fitFunctionBrowser()->setEndX(xmax);
       }
       g->setActiveTool(ppicker);
-      // do we need this? PeakPickerTool::windowStateChanged does nothing
-      // connect(plot,SIGNAL(windowStateChanged(Qt::WindowStates,
-      // Qt::WindowStates)),ppicker,SLOT(windowStateChanged(Qt::WindowStates,
-      // Qt::WindowStates)));
     }
   }
 }
@@ -8383,7 +8354,7 @@ void ApplicationWindow::drawArrow() {
         tr("<h4>There are no plot layers available in this window.</h4>"
            "<p><h4>Please add a layer and try again!</h4>"));
 
-    btnPointer->setOn(true);
+    btnPointer->setChecked(true);
     return;
   }
 
@@ -8481,15 +8452,15 @@ void ApplicationWindow::clearSelection() {
   if (!m)
     return;
 
-  if (m->inherits("Table")) {
+  if (isOfType(m, "Table")) {
     auto t = dynamic_cast<Table *>(m);
     if (t)
       t->clearSelection();
-  } else if (m->isA("Matrix")) {
+  } else if (isOfType(m, "Matrix")) {
     auto matrix = dynamic_cast<Matrix *>(m);
     if (matrix)
       matrix->clearSelection();
-  } else if (m->isA("MultiLayer")) {
+  } else if (isOfType(m, "MultiLayer")) {
     auto ml = dynamic_cast<MultiLayer *>(m);
     if (!ml)
       return;
@@ -8512,7 +8483,7 @@ void ApplicationWindow::clearSelection() {
       g->removeTitle();
     else if (g->markerSelected())
       g->removeMarker();
-  } else if (m->isA("Note")) {
+  } else if (isOfType(m, "Note")) {
     auto note = dynamic_cast<Note *>(m);
     if (note)
       note->editor()->clear();
@@ -8533,11 +8504,11 @@ void ApplicationWindow::copySelection() {
     Table *table = dynamic_cast<Table *>(m);
     if (table)
       table->copySelection();
-  } else if (m->isA("Matrix")) {
+  } else if (isOfType(m, "Matrix")) {
     Matrix *matrix = dynamic_cast<Matrix *>(m);
     if (matrix)
       matrix->copySelection();
-  } else if (m->isA("MultiLayer")) {
+  } else if (isOfType(m, "MultiLayer")) {
     MultiLayer *plot = dynamic_cast<MultiLayer *>(m);
     if (!plot || plot->layers() == 0)
       return;
@@ -8559,7 +8530,7 @@ void ApplicationWindow::copySelection() {
       copyActiveLayer();
 
     plot->copyAllLayers();
-  } else if (m->isA("Note")) {
+  } else if (isOfType(m, "Note")) {
     Note *note = dynamic_cast<Note *>(m);
     if (note)
       note->editor()->copy();
@@ -8635,15 +8606,15 @@ void ApplicationWindow::pasteSelection() {
     auto table = dynamic_cast<Table *>(m);
     if (table)
       table->pasteSelection();
-  } else if (m->isA("Matrix")) {
+  } else if (isOfType(m, "Matrix")) {
     auto matrix = dynamic_cast<Matrix *>(m);
     if (matrix)
       matrix->pasteSelection();
-  } else if (m->isA("Note")) {
+  } else if (isOfType(m, "Note")) {
     auto note = dynamic_cast<Note *>(m);
     if (note)
       note->editor()->paste();
-  } else if (m->isA("MultiLayer")) {
+  } else if (isOfType(m, "MultiLayer")) {
     MultiLayer *plot = dynamic_cast<MultiLayer *>(m);
     if (!plot)
       return;
@@ -8719,7 +8690,7 @@ MdiSubWindow *ApplicationWindow::clone(MdiSubWindow *w) {
   MdiSubWindow::Status status = w->status();
   QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
-  if (w->isA("MultiLayer")) {
+  if (isOfType(w, "MultiLayer")) {
     MultiLayer *g = dynamic_cast<MultiLayer *>(w);
     if (!g)
       return NULL;
@@ -8744,11 +8715,10 @@ MdiSubWindow *ApplicationWindow::clone(MdiSubWindow *w) {
       for (auto j = 0; j < nt->numRows(); j++) {
         auto io = t->table()->item(j, i);
         nt->table()->setItem(j, i, io);
-        // nt->table()->item(j, i)->setText(t->table()->item(j, i)->text());
       }
     }
 
-  } else if (w->isA("Graph3D")) {
+  } else if (isOfType(w, "Graph3D")) {
     Graph3D *g = dynamic_cast<Graph3D *>(w);
     if (!g)
       return NULL;
@@ -8798,7 +8768,7 @@ MdiSubWindow *ApplicationWindow::clone(MdiSubWindow *w) {
     if (g3d)
       g3d->copy(g);
     customToolBars(nw);
-  } else if (w->isA("Matrix")) {
+  } else if (isOfType(w, "Matrix")) {
     auto matrix = dynamic_cast<Matrix *>(w);
     if (!matrix)
       return NULL;
@@ -8806,7 +8776,7 @@ MdiSubWindow *ApplicationWindow::clone(MdiSubWindow *w) {
     auto nwmatrix = dynamic_cast<Matrix *>(nw);
     if (nwmatrix)
       nwmatrix->copy(matrix);
-  } else if (w->isA("Note")) {
+  } else if (isOfType(w, "Note")) {
     auto note = dynamic_cast<Note *>(w);
     if (!note)
       return NULL;
@@ -8823,10 +8793,10 @@ MdiSubWindow *ApplicationWindow::clone(MdiSubWindow *w) {
   }
 
   if (nw) {
-    if (w->isA("MultiLayer")) {
+    if (isOfType(w, "MultiLayer")) {
       if (status == MdiSubWindow::Maximized)
         nw->showMaximized();
-    } else if (w->isA("Graph3D")) {
+    } else if (isOfType(w, "Graph3D")) {
       auto g3d = dynamic_cast<Graph3D *>(nw);
       if (!g3d)
         return NULL;
@@ -9179,7 +9149,7 @@ void ApplicationWindow::removeWindowFromLists(MdiSubWindow *w) {
       QString name = m->colName(i);
       removeCurves(name);
     }
-  } else if (w->isA("MultiLayer")) {
+  } else if (isOfType(w, "MultiLayer")) {
     MultiLayer *ml = dynamic_cast<MultiLayer *>(w);
     if (!ml)
       return;
@@ -9187,7 +9157,7 @@ void ApplicationWindow::removeWindowFromLists(MdiSubWindow *w) {
     if (!g)
       return;
     btnPointer->setChecked(true);
-  } else if (w->isA("Matrix")) {
+  } else if (isOfType(w, "Matrix")) {
     auto matrix = dynamic_cast<Matrix *>(w);
     if (matrix)
       remove3DMatrixPlots(matrix);
@@ -9208,8 +9178,8 @@ void ApplicationWindow::closeWindow(MdiSubWindow *window) {
   removeWindowFromLists(window);
 
   // update list view in project explorer
-  auto found =
-      lv->findItems(window->objectName(), Qt::MatchExactly | Qt::MatchCaseSensitive, 0);
+  auto found = lv->findItems(window->objectName(),
+                             Qt::MatchExactly | Qt::MatchCaseSensitive, 0);
 
   if (!found.isEmpty())
     lv->takeTopLevelItem(lv->indexOfTopLevelItem(found[0]));
@@ -9257,16 +9227,11 @@ void ApplicationWindow::analysisMenuAboutToShow() {
   if (!w)
     return;
 
-  if (w->isA("MultiLayer")) {
-    // The tool doesn't work yet (DataPickerTool)
-    // QMenu *translateMenu = analysisMenu->addMenu (tr("&Translate"));
-    // translateMenu->addAction(actionTranslateVert);
-    // translateMenu->addAction(actionTranslateHor);
-    // analysisMenu->insertSeparator();
+  if (isOfType(w, "MultiLayer")) {
     analysisMenu->addAction(actionDifferentiate);
     analysisMenu->addAction(actionIntegrate);
     analysisMenu->addAction(actionShowIntDialog);
-    analysisMenu->insertSeparator();
+    analysisMenu->addSeparator();
 
     smoothMenu->clear();
     smoothMenu = analysisMenu->addMenu(tr("&Smooth"));
@@ -9281,13 +9246,13 @@ void ApplicationWindow::analysisMenuAboutToShow() {
     filterMenu->addAction(actionBandPassFilter);
     filterMenu->addAction(actionBandBlockFilter);
 
-    analysisMenu->insertSeparator();
+    analysisMenu->addSeparator();
     analysisMenu->addAction(actionInterpolate);
     analysisMenu->addAction(actionFFT);
-    analysisMenu->insertSeparator();
+    analysisMenu->addSeparator();
     analysisMenu->addAction(actionFitLinear);
     analysisMenu->addAction(actionShowFitPolynomDialog);
-    analysisMenu->insertSeparator();
+    analysisMenu->addSeparator();
 
     decayMenu->clear();
     decayMenu = analysisMenu->addMenu(tr("Fit E&xponential Decay"));
@@ -9300,25 +9265,19 @@ void ApplicationWindow::analysisMenuAboutToShow() {
     analysisMenu->addAction(actionFitGauss);
     analysisMenu->addAction(actionFitLorentz);
 
-    // The tool doesn't work yet (DataPickerTool)
-    // multiPeakMenu->clear();
-    // multiPeakMenu = analysisMenu->addMenu (tr("Fit &Multi-peak"));
-    // multiPeakMenu->addAction(actionMultiPeakGauss);
-    // multiPeakMenu->addAction(actionMultiPeakLorentz);
-
-    analysisMenu->insertSeparator();
+    analysisMenu->addSeparator();
     analysisMenu->addAction(actionShowFitDialog);
-  } else if (w->isA("Matrix")) {
+  } else if (isOfType(w, "Matrix")) {
     analysisMenu->addAction(actionIntegrate);
-    analysisMenu->insertSeparator();
+    analysisMenu->addSeparator();
     analysisMenu->addAction(actionFFT);
     analysisMenu->addAction(actionMatrixFFTDirect);
     analysisMenu->addAction(actionMatrixFFTInverse);
   } else if (w->inherits("Table")) {
     analysisMenu->addAction(actionShowColStatistics);
     analysisMenu->addAction(actionShowRowStatistics);
-    analysisMenu->insertSeparator();
-    if (w->isA("Table")) {
+    analysisMenu->addSeparator();
+    if (isOfType(w, "Table")) {
       analysisMenu->addAction(actionSortSelection);
     }
     analysisMenu->addAction(actionSortTable);
@@ -9328,15 +9287,15 @@ void ApplicationWindow::analysisMenuAboutToShow() {
     normMenu->addAction(actionNormalizeSelection);
     normMenu->addAction(actionNormalizeTable);
 
-    analysisMenu->insertSeparator();
+    analysisMenu->addSeparator();
     analysisMenu->addAction(actionFFT);
-    analysisMenu->insertSeparator();
+    analysisMenu->addSeparator();
     analysisMenu->addAction(actionCorrelate);
     analysisMenu->addAction(actionAutoCorrelate);
-    analysisMenu->insertSeparator();
+    analysisMenu->addSeparator();
     analysisMenu->addAction(actionConvolute);
     analysisMenu->addAction(actionDeconvolute);
-    analysisMenu->insertSeparator();
+    analysisMenu->addSeparator();
     analysisMenu->addAction(actionShowFitDialog);
   }
   reloadCustomActions();
@@ -9346,22 +9305,22 @@ void ApplicationWindow::matrixMenuAboutToShow() {
   matrixMenu->clear();
   matrixMenu->addAction(actionSetMatrixProperties);
   matrixMenu->addAction(actionSetMatrixDimensions);
-  matrixMenu->insertSeparator();
+  matrixMenu->addSeparator();
   matrixMenu->addAction(actionSetMatrixValues);
   matrixMenu->addAction(actionTableRecalculate);
-  matrixMenu->insertSeparator();
+  matrixMenu->addSeparator();
   matrixMenu->addAction(actionRotateMatrix);
   matrixMenu->addAction(actionRotateMatrixMinus);
   matrixMenu->addAction(actionFlipMatrixVertically);
   matrixMenu->addAction(actionFlipMatrixHorizontally);
-  matrixMenu->insertSeparator();
+  matrixMenu->addSeparator();
   matrixMenu->addAction(actionTransposeMatrix);
   matrixMenu->addAction(actionInvertMatrix);
   matrixMenu->addAction(actionMatrixDeterminant);
-  matrixMenu->insertSeparator();
+  matrixMenu->addSeparator();
   matrixMenu->addAction(actionGoToRow);
   matrixMenu->addAction(actionGoToColumn);
-  matrixMenu->insertSeparator();
+  matrixMenu->addSeparator();
   QMenu *matrixViewMenu = matrixMenu->addMenu(tr("Vie&w"));
   matrixViewMenu->addAction(actionViewMatrixImage);
   matrixViewMenu->addAction(actionViewMatrix);
@@ -9369,10 +9328,10 @@ void ApplicationWindow::matrixMenuAboutToShow() {
   matrixPaletteMenu->addAction(actionMatrixGrayScale);
   matrixPaletteMenu->addAction(actionMatrixRainbowScale);
   matrixPaletteMenu->addAction(actionMatrixCustomScale);
-  matrixMenu->insertSeparator();
+  matrixMenu->addSeparator();
   matrixMenu->addAction(actionMatrixColumnRow);
   matrixMenu->addAction(actionMatrixXY);
-  matrixMenu->insertSeparator();
+  matrixMenu->addSeparator();
   QMenu *convertToTableMenu =
       matrixMenu->addMenu(tr("&Convert to Spreadsheet"));
   convertToTableMenu->addAction(actionConvertMatrixDirect);
@@ -9416,37 +9375,39 @@ void ApplicationWindow::fileMenuAboutToShow() {
   openMenu->addAction(actionOpenProj);
   openMenu->addAction(actionLoadFile);
 
-  recentMenuID =
-      fileMenu->insertItem(tr("&Recent Projects"), recentProjectsMenu);
+  auto recentProjectsMenuAction = fileMenu->addMenu(recentProjectsMenu);
+  recentProjectsMenuAction->setText(tr("&Recent Projects"));
 
-  recentFilesMenuID =
-      fileMenu->insertItem(tr("R&ecent Files"), recentFilesMenu);
+  auto recentFilesMenuAction = fileMenu->addMenu(recentFilesMenu);
+  recentFilesMenuAction->setText(tr("R&ecent Files"));
 
-  fileMenu->insertSeparator();
+  fileMenu->addSeparator();
   fileMenu->addAction(actionManageDirs);
-  fileMenu->insertSeparator();
+  fileMenu->addSeparator();
   fileMenu->addAction(actionLoadImage);
   fileMenu->addAction(actionScriptRepo);
 
   MdiSubWindow *w = activeWindow();
-  if (w && w->isA("Matrix"))
+
+  if (w && isOfType(w, "Matrix"))
     fileMenu->addAction(actionExportMatrix);
 
-  fileMenu->insertSeparator();
+  fileMenu->addSeparator();
   fileMenu->addAction(actionSaveProjectAs);
 
   saveMenu = fileMenu->addMenu(tr("&Save"));
   saveMenu->addAction(actionSaveFile);
   saveMenu->addAction(actionSaveProject);
 
-  fileMenu->insertSeparator();
+  fileMenu->addSeparator();
 
   fileMenu->addAction(actionPrint);
   fileMenu->addAction(actionPrintAllPlots);
-  fileMenu->insertSeparator();
+  fileMenu->addSeparator();
   MdiSubWindow *t = activeWindow();
-  if (t &&
-      (t->isA("Matrix") || t->inherits("Table") || t->isA("MantidMatrix"))) {
+
+  if (t && (isOfType(t, "Matrix") || isOfType(t, "Table") ||
+            isOfType(t, "MantidMatrix"))) {
     actionShowExportASCIIDialog->setEnabled(true);
   } else {
     actionShowExportASCIIDialog->setEnabled(false);
@@ -9454,13 +9415,10 @@ void ApplicationWindow::fileMenuAboutToShow() {
 
   fileMenu->addAction(actionShowExportASCIIDialog);
   fileMenu->addAction(actionLoad);
-  fileMenu->insertSeparator();
+  fileMenu->addSeparator();
   fileMenu->addAction(actionclearAllMemory);
-#ifdef USE_TCMALLOC
-  fileMenu->addAction(actionreleaseFreeMemory);
-#endif
 
-  fileMenu->insertSeparator();
+  fileMenu->addSeparator();
   fileMenu->addAction(actionCloseAllWindows);
 
   reloadCustomActions();
@@ -9480,67 +9438,70 @@ void ApplicationWindow::windowsMenuAboutToShow() {
     return;
   }
 
-  windowsMenu->insertItem(tr("&Cascade"), this, SLOT(cascade()));
-  windowsMenu->insertItem(tr("&Tile"), this, SLOT(tileMdiWindows()));
-  windowsMenu->insertSeparator();
+  windowsMenu->addAction(tr("&Cascade"), this, SLOT(cascade()));
+  windowsMenu->addAction(tr("&Tile"), this, SLOT(tileMdiWindows()));
+  windowsMenu->addSeparator();
   windowsMenu->addAction(actionNextWindow);
   windowsMenu->addAction(actionPrevWindow);
-  windowsMenu->insertSeparator();
+  windowsMenu->addSeparator();
   windowsMenu->addAction(actionRename);
 
   windowsMenu->addAction(actionCopyWindow);
   MdiSubWindow *activeWin = activeWindow();
   if (!activeWin)
     return;
-  if (activeWin->isA("MantidMatrix") || activeWin->isA("InstrumentWindow")) {
+
+  if (isOfType(activeWin, "MantidMatrix") ||
+      isOfType(activeWin, "InstrumentWindow")) {
     actionCopyWindow->setEnabled(false);
   } else {
     actionCopyWindow->setEnabled(true);
   }
 
-  windowsMenu->insertSeparator();
+  windowsMenu->addSeparator();
 
   windowsMenu->addAction(actionResizeActiveWindow);
   if (activeWin->getFloatingWindow()) {
-    windowsMenu->insertItem(tr("Change to docked"), this,
-                            SLOT(changeActiveToDocked()));
+    windowsMenu->addAction(tr("Change to docked"), this,
+                           SLOT(changeActiveToDocked()));
   } else {
-    windowsMenu->insertItem(tr("Change to floating"), this,
-                            SLOT(changeActiveToFloating()));
+    windowsMenu->addAction(tr("Change to floating"), this,
+                           SLOT(changeActiveToFloating()));
   }
-  windowsMenu->insertItem(tr("&Hide Window"), this, SLOT(hideActiveWindow()));
+  windowsMenu->addAction(tr("&Hide Window"), this, SLOT(hideActiveWindow()));
 
 // Having the shorcut set here is neccessary on Windows, but
 // leads to an error message elsewhere. Don't know why and don't
 // have a better solution than this right now.
 #ifdef _WIN32
-  windowsMenu->insertItem(getQPixmap("close_xpm"), tr("Close &Window"), this,
-                          SLOT(closeActiveWindow()), Qt::CTRL + Qt::Key_W);
+  windowsMenu->addAction(getQPixmap("close_xpm"), tr("Close &Window"), this,
+                         SLOT(closeActiveWindow()), Qt::CTRL + Qt::Key_W);
 #else
-  windowsMenu->insertItem(getQPixmap("close_xpm"), tr("Close &Window"), this,
-                          SLOT(closeActiveWindow()));
+  windowsMenu->addAction(getQPixmap("close_xpm"), tr("Close &Window"), this,
+                         SLOT(closeActiveWindow()));
 #endif
 
   if (n > 0 && n < 10) {
-    windowsMenu->insertSeparator();
+    windowsMenu->addSeparator();
     for (int i = 0; i < n; ++i) {
-      int id = windowsMenu->insertItem(windows.at(i)->objectName(), this,
-                                       SLOT(windowsMenuActivated(int)));
-      windowsMenu->setItemParameter(id, i);
-      windowsMenu->setItemChecked(id, currentFolder()->activeWindow() ==
-                                          windows.at(i));
+      auto activated = windowsMenu->addAction(windows.at(i)->objectName(), this,
+                                              SLOT(windowsMenuActivated()));
+      activated->setData(i);
+      auto isChecked = currentFolder()->activeWindow() == windows.at(i);
+      activated->setChecked(isChecked);
     }
   } else if (n >= 10) {
-    windowsMenu->insertSeparator();
+    windowsMenu->addSeparator();
     for (int i = 0; i < 9; ++i) {
-      int id = windowsMenu->insertItem(windows.at(i)->objectName(), this,
-                                       SLOT(windowsMenuActivated(int)));
-      windowsMenu->setItemParameter(id, i);
-      windowsMenu->setItemChecked(id, activeWindow() == windows.at(i));
+      auto activated = windowsMenu->addAction(windows.at(i)->objectName(), this,
+                                              SLOT(windowsMenuActivated()));
+      activated->setData(i);
+      auto isChecked = activeWindow() == windows.at(i);
+      activated->setChecked(isChecked);
     }
-    windowsMenu->insertSeparator();
-    windowsMenu->insertItem(tr("More windows..."), this,
-                            SLOT(showMoreWindows()));
+    windowsMenu->addSeparator();
+    windowsMenu->addAction(tr("More windows..."), this,
+                           SLOT(showMoreWindows()));
   }
   reloadCustomActions();
 }
@@ -9577,7 +9538,8 @@ void ApplicationWindow::interfaceMenuAboutToShow() {
       continue;
     QMenu *categoryMenu = new QMenu(interfaceMenu);
     categoryMenu->setObjectName(category + "Menu");
-    interfaceMenu->insertItem(tr(category), categoryMenu);
+    auto categoryMenuAction = interfaceMenu->addMenu(categoryMenu);
+    categoryMenuAction->setText(tr(category));
     categoryMenus[category] = categoryMenu;
   }
 
@@ -9593,7 +9555,9 @@ void ApplicationWindow::interfaceMenuAboutToShow() {
     foreach (const QString category, m_interfaceCategories[name]) {
       if (!categoryMenus.contains(category))
         continue;
-      QAction *openInterface = new QAction(tr(name), interfaceMenu);
+      QAction *openInterface = new QAction(interfaceMenu);
+      openInterface->setObjectName(tr(name));
+      openInterface->setText(tr(name));
       openInterface->setData(data);
       categoryMenus[category]->addAction(openInterface);
 
@@ -9607,7 +9571,7 @@ void ApplicationWindow::interfaceMenuAboutToShow() {
             SLOT(performCustomAction(QAction *)));
   }
 
-  interfaceMenu->insertSeparator();
+  interfaceMenu->addSeparator();
 
   // Allow user to customise categories.
   QAction *customiseCategoriesAction =
@@ -9637,24 +9601,23 @@ void ApplicationWindow::showMarkerPopupMenu() {
   QMenu markerMenu(this);
 
   if (g->imageMarkerSelected()) {
-    markerMenu.insertItem(getQPixmap("pixelProfile_xpm"),
-                          tr("&View Pixel Line profile"), this,
-                          SLOT(pixelLineProfile()));
-    markerMenu.insertItem(tr("&Intensity Matrix"), this,
-                          SLOT(intensityTable()));
-    markerMenu.insertSeparator();
+    markerMenu.addAction(getQPixmap("pixelProfile_xpm"),
+                         tr("&View Pixel Line profile"), this,
+                         SLOT(pixelLineProfile()));
+    markerMenu.addAction(tr("&Intensity Matrix"), this, SLOT(intensityTable()));
+    markerMenu.addSeparator();
   }
 
   if (!(g->activeTool() && dynamic_cast<PeakPickerTool *>(g->activeTool()))) {
-    markerMenu.insertItem(getQPixmap("cut_xpm"), tr("&Cut"), this,
-                          SLOT(cutSelection()));
-    markerMenu.insertItem(getQPixmap("copy_xpm"), tr("&Copy"), this,
-                          SLOT(copySelection()));
+    markerMenu.addAction(getQPixmap("cut_xpm"), tr("&Cut"), this,
+                         SLOT(cutSelection()));
+    markerMenu.addAction(getQPixmap("copy_xpm"), tr("&Copy"), this,
+                         SLOT(copySelection()));
   }
 
-  markerMenu.insertItem(getQPixmap("erase_xpm"), tr("&Delete"), this,
-                        SLOT(clearSelection()));
-  markerMenu.insertSeparator();
+  markerMenu.addAction(getQPixmap("erase_xpm"), tr("&Delete"), this,
+                       SLOT(clearSelection()));
+  markerMenu.addSeparator();
   if (g->arrowMarkerSelected())
     markerMenu.addAction(tr("&Properties..."), this, SLOT(showLineDialog()));
   else if (g->imageMarkerSelected())
@@ -9674,8 +9637,11 @@ void ApplicationWindow::showMoreWindows() {
     explorerWindow->show();
 }
 
-void ApplicationWindow::windowsMenuActivated(int id) {
+void ApplicationWindow::windowsMenuActivated() {
   QList<MdiSubWindow *> windows = currentFolder()->windowsList();
+  auto obj = sender();
+  auto action = qobject_cast<QAction *>(obj);
+  auto id = action->data().asInt();
   MdiSubWindow *w = windows.at(id);
   if (w) {
     this->activateWindow(w);
@@ -9896,7 +9862,7 @@ void ApplicationWindow::showListViewSelectionMenu(const QPoint &p) {
   cm.addAction(tr("&Hide All Windows"), this, SLOT(hideSelectedWindows()));
   cm.addSeparator();
   cm.addAction(tr("&Delete Selection"), this, SLOT(deleteSelectedItems()),
-                Qt::Key_F8);
+               Qt::Key_F8);
   cm.exec(lv->mapToGlobal(p));
 }
 
@@ -9960,13 +9926,13 @@ void ApplicationWindow::showWindowPopupMenu(const QPoint &p) {
     if (!hidden(w))
       cm.addAction(actionHideWindow);
     cm.addAction(getQPixmap("close_xpm"), tr("&Delete Window"), w,
-                  SLOT(close()), Qt::Key_F8);
+                 SLOT(close()), Qt::Key_F8);
     cm.addSeparator();
     cm.addAction(tr("&Rename Window"), this, SLOT(renameWindow()), Qt::Key_F2);
     cm.addAction(actionResizeWindow);
     cm.addSeparator();
     cm.addAction(getQPixmap("fileprint_xpm"), tr("&Print Window"), w,
-                  SLOT(print()));
+                 SLOT(print()));
     cm.addSeparator();
     cm.addAction(tr("&Properties..."), this, SLOT(windowProperties()));
 
@@ -10035,7 +10001,8 @@ void ApplicationWindow::showTable(int i) {
   updateWindowLists(t);
 
   t->showMaximized();
-  auto found = lv->findItems(t->objectName(), Qt::MatchExactly | Qt::MatchCaseSensitive, 0);
+  auto found = lv->findItems(t->objectName(),
+                             Qt::MatchExactly | Qt::MatchCaseSensitive, 0);
   if (!found.isEmpty())
     found[0]->setText(2, tr("Maximized"));
 }
@@ -10051,7 +10018,8 @@ void ApplicationWindow::showTable(const QString &curve) {
   w->table()->clearSelection();
   w->table()->selectColumn(colIndex);
   w->showMaximized();
-  auto found = lv->findItems(w->objectName(), Qt::MatchExactly | Qt::MatchCaseSensitive, 0);
+  auto found = lv->findItems(w->objectName(),
+                             Qt::MatchExactly | Qt::MatchCaseSensitive, 0);
   if (!found.isEmpty())
     found[0]->setText(2, tr("Maximized"));
   emit modified();
@@ -10152,19 +10120,19 @@ void ApplicationWindow::showGraphContextMenu() {
   if (lastCopiedLayer) {
     cm.addSeparator();
     cm.addAction(getQPixmap("paste_xpm"), tr("&Paste Layer"), this,
-                  SLOT(pasteSelection()));
+                 SLOT(pasteSelection()));
   } else if (d_text_copy) {
     cm.addSeparator();
     cm.addAction(getQPixmap("paste_xpm"), tr("&Paste Text"), plot,
-                  SIGNAL(pasteMarker()));
+                 SIGNAL(pasteMarker()));
   } else if (d_arrow_copy) {
     cm.addSeparator();
     cm.addAction(getQPixmap("paste_xpm"), tr("&Paste Line/Arrow"), plot,
-                  SIGNAL(pasteMarker()));
+                 SIGNAL(pasteMarker()));
   } else if (d_image_copy) {
     cm.addSeparator();
     cm.addAction(getQPixmap("paste_xpm"), tr("&Paste Image"), plot,
-                  SIGNAL(pasteMarker()));
+                 SIGNAL(pasteMarker()));
   }
   cm.addSeparator();
 
@@ -10324,21 +10292,21 @@ void ApplicationWindow::showWindowContextMenu() {
       cm.addAction(getQPixmap("copy_xpm"), tr("&Copy"), t,
                    SLOT(copySelection()));
       cm.addAction(getQPixmap("paste_xpm"), tr("&Paste"), t,
-                    SLOT(pasteSelection()));
+                   SLOT(pasteSelection()));
       cm.addSeparator();
       cm.addAction(getQPixmap("insert_row_xpm"), tr("&Insert Row"), t,
-                    SLOT(insertRow()));
+                   SLOT(insertRow()));
       cm.addAction(getQPixmap("insert_column_xpm"), tr("&Insert Column"), t,
-                    SLOT(insertColumn()));
+                   SLOT(insertColumn()));
       if (t->numSelectedRows() > 0)
         cm.addAction(getQPixmap("delete_row_xpm"), tr("&Delete Rows"), t,
-                      SLOT(deleteSelectedRows()));
+                     SLOT(deleteSelectedRows()));
       else if (t->numSelectedColumns() > 0)
         cm.addAction(getQPixmap("delete_column_xpm"), tr("&Delete Columns"), t,
-                      SLOT(deleteSelectedColumns()));
+                     SLOT(deleteSelectedColumns()));
 
       cm.addAction(getQPixmap("erase_xpm"), tr("Clea&r"), t,
-                    SLOT(clearSelection()));
+                   SLOT(clearSelection()));
     } else if (t->viewType() == Matrix::ImageView) {
       cm.addAction(actionImportImage);
       cm.addAction(actionExportMatrix);
@@ -10490,60 +10458,6 @@ void ApplicationWindow::chooseHelpFolder() {
   }
 }
 
-void ApplicationWindow::showStandAloneHelp() {
-#ifdef Q_OS_MAC // Mac
-  QSettings settings(QSettings::IniFormat, QSettings::UserScope,
-                     QCoreApplication::organizationName(),
-                     QCoreApplication::applicationName());
-#else
-  QSettings settings; //(QSettings::NativeFormat,QSettings::UserScope,
-                      //"ProIndependent", "QtiPlot");
-#endif
-
-  settings.beginGroup("/General");
-  settings.beginGroup("/Paths");
-  QString helpPath = settings.value("/HelpFile", qApp->applicationDirPath() +
-                                                     "/manual/index.html")
-                         .toString();
-  settings.endGroup();
-  settings.endGroup();
-
-  QFile helpFile(helpPath);
-  if (!helpPath.isEmpty() && !helpFile.exists()) {
-    QMessageBox::critical(0, tr("MantidPlot - Help Files Not Found!"), // Mantid
-                          tr("The manual can be found at the following "
-                             "internet address:") +
-                              "<p><a href = "
-                              "http://www.mantidproject.org/"
-                              "MantidPlot:_Help>http://www.mantidproject.org/"
-                              "MantidPlot:_Help</a></p>");
-    exit(0);
-  }
-
-  QFileInfo fi(helpPath);
-  QString profilePath = QString(fi.absolutePath() + "/qtiplot.adp");
-  if (!QFile(profilePath).exists()) {
-    QMessageBox::critical(
-        0, tr("MantidPlot - Help Profile Not Found!"), // Mantid
-        tr("The assistant could not start because the file <b>%1</b> was not "
-           "found in the help file directory!")
-                .arg("qtiplot.adp") +
-            "<br>" +
-            tr("This file is provided with the MantidPlot manual which can be "
-               "downloaded from the following internet address:") +
-            "<p><a href = "
-            "http://www.mantidproject.org/MantidPlot:_Help>http://"
-            "www.mantidproject.org/MantidPlot:_Help</a></p>");
-    exit(0);
-  }
-
-  QStringList cmdLst = QStringList() << "-profile" << profilePath;
-  //  QAssistantClient *assist = new QAssistantClient( QString(), 0);
-  //  assist->setArguments( cmdLst );
-  //  assist->showPage(helpPath);
-  //  connect(assist, SIGNAL(assistantClosed()), qApp, SLOT(quit()) );
-}
-
 void ApplicationWindow::showHelp() {
   QFile helpFile(helpFilePath);
   if (!helpFile.exists()) {
@@ -10570,8 +10484,7 @@ void ApplicationWindow::showHelp() {
     QMessageBox::critical(
         this, tr("MantidPlot - Help Profile Not Found!"), // Mantid
         tr("The assistant could not start because the file <b>%1</b> was not "
-           "found in the help file directory!")
-                .arg("qtiplot.adp") +
+           "found in the help file directory!").arg("qtiplot.adp") +
             "<br>" +
             tr("This file is provided with the MantidPlot manual which can be "
                "downloaded from the following internet address:") +
@@ -10580,10 +10493,6 @@ void ApplicationWindow::showHelp() {
             "www.mantidproject.org/MantidPlot:_Help</a></p>");
     return;
   }
-
-  QStringList cmdLst = QStringList() << "-profile" << profilePath;
-  //  assistant->setArguments( cmdLst );
-  //  assistant->showPage(helpFilePath);
 }
 
 void ApplicationWindow::showPlotWizard() {
@@ -11185,14 +11094,14 @@ void ApplicationWindow::initPlot3DToolBar() {
           SLOT(togglePerspective(bool)));
 
   actionResetRotation = new QAction(this);
-  actionResetRotation->setToggleAction(false);
-  actionResetRotation->setIconSet(getQPixmap("reset_rotation_xpm"));
+  actionResetRotation->setCheckable(false);
+  actionResetRotation->setIcon(getQPixmap("reset_rotation_xpm"));
   connect(actionResetRotation, SIGNAL(activated()), this,
           SLOT(resetRotation()));
 
   actionFitFrame = new QAction(this);
-  actionFitFrame->setToggleAction(false);
-  actionFitFrame->setIconSet(getQPixmap("fit_frame_xpm"));
+  actionFitFrame->setCheckable(false);
+  actionFitFrame->setIcon(getQPixmap("fit_frame_xpm"));
   connect(actionFitFrame, SIGNAL(activated()), this, SLOT(fitFrameToLayer()));
 
   // plot style actions
@@ -11248,8 +11157,8 @@ void ApplicationWindow::initPlot3DToolBar() {
   floornone->setChecked(true);
 
   actionAnimate = new QAction(this);
-  actionAnimate->setToggleAction(true);
-  actionAnimate->setIconSet(getQPixmap("movie_xpm"));
+  actionAnimate->setCheckable(true);
+  actionAnimate->setIcon(getQPixmap("movie_xpm"));
 
   connect(actionAnimate, SIGNAL(toggled(bool)), this,
           SLOT(toggle3DAnimation(bool)));
@@ -11278,10 +11187,9 @@ void ApplicationWindow::pixelLineProfile() {
     return;
 
   bool ok;
-  int res = QInputDialog::getInteger(
-      tr("MantidPlot - Set the number of pixels to average"),
-      tr("Number of averaged pixels"), 1, 1, 2000, 2, // Mantid
-      &ok, this);
+  auto res = QInputDialog::getInt(
+      this, tr("MantidPlot - Set the number of pixels to average"),
+      tr("Number of averaged pixels"), 1, 1, 2000, 2, &ok);
   if (!ok)
     return;
 
@@ -11681,16 +11589,16 @@ void ApplicationWindow::openSurfacePlot(const std::string &lines,
 
     const QString funcQStr = QString::fromStdString(funcStr);
 
-    if (funcQStr.endsWith("(Y)", true)) {
+    if (funcQStr.endsWith("(Y)", Qt::CaseSensitive)) {
       plot = dataPlot3D(QString::fromStdString(caption),
                         QString::fromStdString(funcStr), val2, val3, val4, val5,
                         val6, val7);
-    } else if (funcQStr.contains("(Z)", true) > 0) {
+    } else if (funcQStr.contains("(Z)", Qt::CaseSensitive) > 0) {
       plot = openPlotXYZ(QString::fromStdString(caption),
                          QString::fromStdString(funcStr), val2, val3, val4,
                          val5, val6, val7);
-    } else if (funcQStr.startsWith("matrix<", true) &&
-               funcQStr.endsWith(">", false)) {
+    } else if (funcQStr.startsWith("matrix<", Qt::CaseSensitive) &&
+               funcQStr.endsWith(">", Qt::CaseInsensitive)) {
       plot = openMatrixPlot3D(QString::fromStdString(caption),
                               QString::fromStdString(funcStr), val2, val3, val4,
                               val5, val6, val7);
@@ -11869,9 +11777,9 @@ void ApplicationWindow::integrate() {
   if (!w)
     return;
 
-  if (w->isA("MultiLayer"))
+  if (isOfType(w, "MultiLayer"))
     analysis(Integrate);
-  else if (w->isA("Matrix")) {
+  else if (isOfType(w, "Matrix")) {
     auto matrix = dynamic_cast<Matrix *>(w);
     if (!matrix)
       return;
@@ -11976,8 +11884,6 @@ void ApplicationWindow::connectMultilayerPlot(MultiLayer *g) {
   connect(g, SIGNAL(createTable(const QString &, int, int, const QString &)),
           this, SLOT(newTable(const QString &, int, int, const QString &)));
   connect(g, SIGNAL(viewTitleDialog()), this, SLOT(showTitleDialog()));
-  // connect
-  // (g,SIGNAL(modifiedWindow(MdiSubWindow*)),this,SLOT(modifiedProject(MdiSubWindow*)));
   connect(g, SIGNAL(modifiedPlot()), this, SLOT(modifiedProject()));
   connect(g, SIGNAL(showLineDialog()), this, SLOT(showLineDialog()));
   connect(g, SIGNAL(pasteMarker()), this, SLOT(pasteSelection()));
@@ -12056,7 +11962,7 @@ void ApplicationWindow::setAppColors(const QColor &wc, const QColor &pc,
 void ApplicationWindow::setPlot3DOptions() {
   QList<MdiSubWindow *> windows = windowsList();
   foreach (MdiSubWindow *w, windows) {
-    if (w->isA("Graph3D")) {
+    if (isOfType(w, "Graph3D")) {
       Graph3D *g = dynamic_cast<Graph3D *>(w);
       if (!g)
         continue;
@@ -12208,7 +12114,7 @@ void ApplicationWindow::createActions() {
 #else
   actionShowScriptWindow->setShortcut(tr("F3"));
 #endif
-  actionShowScriptWindow->setToggleAction(true);
+  actionShowScriptWindow->setCheckable(true);
   connect(actionShowScriptWindow, SIGNAL(activated()), this,
           SLOT(showScriptWindow()));
 
@@ -12220,7 +12126,7 @@ void ApplicationWindow::createActions() {
 #else
   actionShowScriptInterpreter->setShortcut(tr("F4"));
 #endif
-  actionShowScriptInterpreter->setToggleAction(true);
+  actionShowScriptInterpreter->setCheckable(true);
   connect(actionShowScriptInterpreter, SIGNAL(activated()), this,
           SLOT(showScriptInterpreter()));
 #endif
@@ -12556,7 +12462,6 @@ void ApplicationWindow::createActions() {
   connect(actionShowColumnOptionsDialog, SIGNAL(activated()), this,
           SLOT(showColumnOptionsDialog()));
 
-  // JZ May 3, 2011: Removed this because it segfaults.
   actionShowColumnValuesDialog = new QAction(
       QIcon(getQPixmap("formula_xpm")), tr("Set Column &Values ..."), this);
   connect(actionShowColumnValuesDialog, SIGNAL(activated()), this,
@@ -12918,14 +12823,6 @@ void ApplicationWindow::createActions() {
   actionDeconvolute = new QAction(tr("&Deconvolute"), this);
   connect(actionDeconvolute, SIGNAL(activated()), this, SLOT(deconvolute()));
 
-  actionTranslateHor = new QAction(tr("&Horizontal"), this);
-  connect(actionTranslateHor, SIGNAL(activated()), this,
-          SLOT(translateCurveHor()));
-
-  actionTranslateVert = new QAction(tr("&Vertical"), this);
-  connect(actionTranslateVert, SIGNAL(activated()), this,
-          SLOT(translateCurveVert()));
-
   actionSetAscValues = new QAction(QIcon(getQPixmap("rowNumbers_xpm")),
                                    tr("Ro&w Numbers"), this);
   connect(actionSetAscValues, SIGNAL(activated()), this, SLOT(setAscValues()));
@@ -12966,25 +12863,8 @@ void ApplicationWindow::createActions() {
       new QAction(QIcon(getQPixmap("boxPlot_xpm")), tr("&Box Plot"), this);
   connect(actionBoxPlot, SIGNAL(activated()), this, SLOT(plotBoxDiagram()));
 
-  actionMultiPeakGauss = new QAction(tr("&Gaussian..."), this);
-  connect(actionMultiPeakGauss, SIGNAL(activated()), this,
-          SLOT(fitMultiPeakGauss()));
-
-  actionMultiPeakLorentz = new QAction(tr("&Lorentzian..."), this);
-  connect(actionMultiPeakLorentz, SIGNAL(activated()), this,
-          SLOT(fitMultiPeakLorentz()));
-
-  // actionCheckUpdates = new QAction(tr("Search for &Updates"), this);
-  // connect(actionCheckUpdates, SIGNAL(activated()), this,
-  // SLOT(searchForUpdates()));
-
   actionHomePage = new QAction(tr("&Mantid Homepage"), this); // Mantid change
   connect(actionHomePage, SIGNAL(activated()), this, SLOT(showHomePage()));
-
-  // actionHelpForums = new QAction(tr("QtiPlot &Forums"), this); // Mantid
-  // change
-  //	connect(actionHelpForums, SIGNAL(triggered()), this,
-  // SLOT(showForums())); // Mantid change
 
   actionHelpBugReports = new QAction(tr("Report a &Bug"), this);
   connect(actionHelpBugReports, SIGNAL(triggered()), this,
@@ -13084,12 +12964,6 @@ void ApplicationWindow::createActions() {
   connect(actionclearAllMemory, SIGNAL(triggered()), mantidUI,
           SLOT(clearAllMemory()));
 
-#ifdef USE_TCMALLOC
-  actionreleaseFreeMemory = new QAction("&Release Free Memory", this);
-  connect(actionreleaseFreeMemory, SIGNAL(triggered()), mantidUI,
-          SLOT(releaseFreeMemory()));
-#endif
-
   actionPanPlot = new QAction(QIcon(":/panning.png"), tr("Panning tool"), this);
   connect(actionPanPlot, SIGNAL(activated()), this, SLOT(panOnPlot()));
 
@@ -13127,388 +13001,383 @@ void ApplicationWindow::translateActionsStrings() {
   actionGreekMajSymbol->setToolTip(tr("Greek"));
   actionMathSymbol->setToolTip(tr("Mathematical Symbols"));
 
-  actionShowCurvePlotDialog->setMenuText(tr("&Plot details..."));
-  actionShowCurveWorksheet->setMenuText(tr("&Worksheet"));
-  actionRemoveCurve->setMenuText(tr("&Delete"));
-  actionEditFunction->setMenuText(tr("&Edit Function..."));
+  actionShowCurvePlotDialog->setText(tr("&Plot details..."));
+  actionShowCurveWorksheet->setText(tr("&Worksheet"));
+  actionRemoveCurve->setText(tr("&Delete"));
+  actionEditFunction->setText(tr("&Edit Function..."));
 
-  actionCurveFullRange->setMenuText(tr("&Reset to Full Range"));
-  actionEditCurveRange->setMenuText(tr("Edit &Range..."));
-  actionHideCurve->setMenuText(tr("&Hide"));
-  actionHideOtherCurves->setMenuText(tr("Hide &Other Curves"));
-  actionShowAllCurves->setMenuText(tr("&Show All Curves"));
+  actionCurveFullRange->setText(tr("&Reset to Full Range"));
+  actionEditCurveRange->setText(tr("Edit &Range..."));
+  actionHideCurve->setText(tr("&Hide"));
+  actionHideOtherCurves->setText(tr("Hide &Other Curves"));
+  actionShowAllCurves->setText(tr("&Show All Curves"));
 
-  actionNewProject->setMenuText(tr("New &Project"));
+  actionNewProject->setText(tr("New &Project"));
   actionNewProject->setToolTip(tr("Open a New Project"));
   actionNewProject->setShortcut(tr("Ctrl+N"));
 
-  actionNewGraph->setMenuText(tr("New &Graph"));
+  actionNewGraph->setText(tr("New &Graph"));
   actionNewGraph->setToolTip(tr("Create an empty 2D plot"));
   actionNewGraph->setShortcut(tr("Ctrl+G"));
 
-  actionNewNote->setMenuText(tr("New &Note"));
+  actionNewNote->setText(tr("New &Note"));
   actionNewNote->setToolTip(tr("Create an empty note window"));
 
-  actionNewTable->setMenuText(tr("New &Table"));
+  actionNewTable->setText(tr("New &Table"));
   actionNewTable->setShortcut(tr("Ctrl+T"));
   actionNewTable->setToolTip(tr("New table"));
 
-  actionNewTiledWindow->setMenuText(tr("New Tiled &Window"));
+  actionNewTiledWindow->setText(tr("New Tiled &Window"));
   actionNewTiledWindow->setShortcut(tr("Ctrl+Shift+T"));
   actionNewTiledWindow->setToolTip(tr("New tiled window"));
 
-  actionNewMatrix->setMenuText(tr("New &Matrix"));
+  actionNewMatrix->setText(tr("New &Matrix"));
   actionNewMatrix->setShortcut(tr("Ctrl+M"));
   actionNewMatrix->setToolTip(tr("New matrix"));
 
-  actionNewFunctionPlot->setMenuText(tr("New &Function Plot"));
+  actionNewFunctionPlot->setText(tr("New &Function Plot"));
   actionNewFunctionPlot->setToolTip(tr("Create a new 2D function plot"));
 
-  actionNewSurfacePlot->setMenuText(tr("New 3D &Surface Plot"));
+  actionNewSurfacePlot->setText(tr("New 3D &Surface Plot"));
   actionNewSurfacePlot->setToolTip(tr("Create a new 3D surface plot"));
   actionNewSurfacePlot->setShortcut(tr("Ctrl+ALT+Z"));
 
-  actionOpenProj->setMenuText(tr("&Project"));
+  actionOpenProj->setText(tr("&Project"));
   actionOpenProj->setShortcut(tr("Ctrl+Shift+O"));
   actionOpenProj->setToolTip(tr("Load Mantid Project"));
 
-  actionLoadFile->setMenuText(tr("&File"));
+  actionLoadFile->setText(tr("&File"));
   actionLoadFile->setShortcut(tr("Ctrl+Shift+F"));
   actionLoadFile->setToolTip(tr("Load Data File"));
 
-  actionLoadImage->setMenuText(tr("Open Image &File"));
+  actionLoadImage->setText(tr("Open Image &File"));
   actionLoadImage->setShortcut(tr("Ctrl+I"));
 
-  actionImportImage->setMenuText(tr("Import I&mage..."));
+  actionImportImage->setText(tr("Import I&mage..."));
 
-  actionSaveFile->setMenuText(tr("&Nexus"));
+  actionSaveFile->setText(tr("&Nexus"));
   actionSaveFile->setToolTip(tr("Save as NeXus file"));
   actionSaveFile->setShortcut(tr("Ctrl+S"));
 
-  actionSaveProject->setMenuText(tr("&Project"));
+  actionSaveProject->setText(tr("&Project"));
   actionSaveProject->setToolTip(tr("Save Mantid Project"));
   actionSaveProject->setShortcut(tr("Ctrl+Shift+S"));
 
-  actionSaveProjectAs->setMenuText(tr("Save Project &As..."));
+  actionSaveProjectAs->setText(tr("Save Project &As..."));
   actionSaveProjectAs->setToolTip(
       tr("Save Mantid Project using a different name or path"));
 
-  actionLoad->setMenuText(tr("&Import ASCII..."));
+  actionLoad->setText(tr("&Import ASCII..."));
   actionLoad->setToolTip(tr("Import data file(s)"));
   actionLoad->setShortcut(tr("Ctrl+K"));
 
-  actionCopyWindow->setMenuText(tr("&Duplicate"));
+  actionCopyWindow->setText(tr("&Duplicate"));
   actionCopyWindow->setToolTip(tr("Duplicate window"));
 
-  actionCutSelection->setMenuText(tr("Cu&t Selection"));
+  actionCutSelection->setText(tr("Cu&t Selection"));
   actionCutSelection->setToolTip(tr("Cut selection"));
   actionCutSelection->setShortcut(tr("Ctrl+X"));
 
-  actionCopySelection->setMenuText(tr("&Copy Selection"));
+  actionCopySelection->setText(tr("&Copy Selection"));
   actionCopySelection->setToolTip(tr("Copy Selection"));
   actionCopySelection->setShortcut(tr("Ctrl+C"));
 
-  actionPasteSelection->setMenuText(tr("&Paste Selection"));
+  actionPasteSelection->setText(tr("&Paste Selection"));
   actionPasteSelection->setToolTip(tr("Paste Selection"));
   actionPasteSelection->setShortcut(tr("Ctrl+V"));
 
-  actionClearSelection->setMenuText(tr("&Delete Selection"));
+  actionClearSelection->setText(tr("&Delete Selection"));
   actionClearSelection->setToolTip(tr("Delete selection"));
   actionClearSelection->setShortcut(tr("Del", "delete key"));
 
-  actionShowExplorer->setMenuText(tr("Project &Explorer"));
+  actionShowExplorer->setText(tr("Project &Explorer"));
   actionShowExplorer->setShortcut(tr("Ctrl+E"));
   actionShowExplorer->setToolTip(tr("Show project explorer"));
 
-  actionShowLog->setMenuText(tr("Results &Log"));
+  actionShowLog->setText(tr("Results &Log"));
   actionShowLog->setToolTip(tr("Results Log"));
 
 #ifdef SCRIPTING_PYTHON
-  actionShowScriptWindow->setMenuText(tr("&Script Window"));
+  actionShowScriptWindow->setText(tr("&Script Window"));
   actionShowScriptWindow->setToolTip(tr("Script Window"));
 #endif
 
-  actionCustomActionDialog->setMenuText(tr("Manage Custom Menus..."));
+  actionCustomActionDialog->setText(tr("Manage Custom Menus..."));
 
-  actionAddLayer->setMenuText(tr("Add La&yer"));
+  actionAddLayer->setText(tr("Add La&yer"));
   actionAddLayer->setToolTip(tr("Add Layer"));
   actionAddLayer->setShortcut(tr("Alt+L"));
 
-  actionShowLayerDialog->setMenuText(tr("Arran&ge Layers"));
+  actionShowLayerDialog->setText(tr("Arran&ge Layers"));
   actionShowLayerDialog->setToolTip(tr("Arrange Layers"));
   actionShowLayerDialog->setShortcut(tr("Alt+A"));
 
-  actionAutomaticLayout->setMenuText(tr("Automatic Layout"));
+  actionAutomaticLayout->setText(tr("Automatic Layout"));
   actionAutomaticLayout->setToolTip(tr("Automatic Layout"));
 
-  actionExportGraph->setMenuText(tr("&Current"));
+  actionExportGraph->setText(tr("&Current"));
   actionExportGraph->setShortcut(tr("Alt+G"));
   actionExportGraph->setToolTip(tr("Export current graph"));
 
-  actionExportAllGraphs->setMenuText(tr("&All"));
+  actionExportAllGraphs->setText(tr("&All"));
   actionExportAllGraphs->setShortcut(tr("Alt+X"));
   actionExportAllGraphs->setToolTip(tr("Export all graphs"));
 
-  actionExportPDF->setMenuText(tr("&Export PDF"));
+  actionExportPDF->setText(tr("&Export PDF"));
   actionExportPDF->setShortcut(tr("Ctrl+Alt+P"));
   actionExportPDF->setToolTip(tr("Export to PDF"));
 
-  actionPrint->setMenuText(tr("&Print"));
+  actionPrint->setText(tr("&Print"));
   actionPrint->setShortcut(tr("Ctrl+P"));
   actionPrint->setToolTip(tr("Print window"));
 
-  actionPrintAllPlots->setMenuText(tr("Print All Plo&ts"));
-  actionShowExportASCIIDialog->setMenuText(tr("E&xport ASCII"));
+  actionPrintAllPlots->setText(tr("Print All Plo&ts"));
+  actionShowExportASCIIDialog->setText(tr("E&xport ASCII"));
 
-  actionCloseAllWindows->setMenuText(tr("&Quit"));
+  actionCloseAllWindows->setText(tr("&Quit"));
   actionCloseAllWindows->setShortcut(tr("Ctrl+Q"));
 
-  actionDeleteFitTables->setMenuText(tr("Delete &Fit Tables"));
-  actionShowPlotWizard->setMenuText(tr("Plot &Wizard"));
+  actionDeleteFitTables->setText(tr("Delete &Fit Tables"));
+  actionShowPlotWizard->setText(tr("Plot &Wizard"));
   actionShowPlotWizard->setShortcut(tr("Ctrl+Alt+W"));
 
-  actionShowConfigureDialog->setMenuText(tr("&Preferences..."));
+  actionShowConfigureDialog->setText(tr("&Preferences..."));
 
-  actionShowCurvesDialog->setMenuText(tr("Add/Remove &Curve..."));
+  actionShowCurvesDialog->setText(tr("Add/Remove &Curve..."));
   actionShowCurvesDialog->setShortcut(tr("Ctrl+Alt+C"));
   actionShowCurvesDialog->setToolTip(tr("Add curve to graph"));
 
-  actionAddErrorBars->setMenuText(tr("Add &Error Bars..."));
+  actionAddErrorBars->setText(tr("Add &Error Bars..."));
   actionAddErrorBars->setToolTip(tr("Add Error Bars..."));
   actionAddErrorBars->setShortcut(tr("Ctrl+Alt+E"));
 
-  actionRemoveErrorBars->setMenuText(tr("&Remove Error Bars..."));
+  actionRemoveErrorBars->setText(tr("&Remove Error Bars..."));
   actionRemoveErrorBars->setToolTip(tr("Remove Error Bars..."));
   actionRemoveErrorBars->setShortcut(tr("Ctrl+Alt+R"));
 
-  actionAddFunctionCurve->setMenuText(tr("Add &Function..."));
+  actionAddFunctionCurve->setText(tr("Add &Function..."));
   actionAddFunctionCurve->setToolTip(tr("Add Function..."));
   actionAddFunctionCurve->setShortcut(tr("Ctrl+Alt+F"));
 
-  actionUnzoom->setMenuText(tr("&Rescale to Show All"));
+  actionUnzoom->setText(tr("&Rescale to Show All"));
   actionUnzoom->setShortcut(tr("Ctrl+Shift+R"));
   actionUnzoom->setToolTip(tr("Rescale to Show All"));
 
-  actionNewLegend->setMenuText(tr("Add New &Legend"));
+  actionNewLegend->setText(tr("Add New &Legend"));
   actionNewLegend->setShortcut(tr("Ctrl+Alt+L"));
   actionNewLegend->setToolTip(tr("Add New Legend"));
 
-  actionTimeStamp->setMenuText(tr("Add Time &Stamp"));
+  actionTimeStamp->setText(tr("Add Time &Stamp"));
   actionTimeStamp->setShortcut(tr("Ctrl+Alt+S"));
   actionTimeStamp->setToolTip(tr("Date & time "));
 
-  actionAddImage->setMenuText(tr("Add &Image"));
+  actionAddImage->setText(tr("Add &Image"));
   actionAddImage->setToolTip(tr("Add Image"));
   actionAddImage->setShortcut(tr("Ctrl+Alt+I"));
 
-  actionPlotL->setMenuText(tr("&Line"));
+  actionPlotL->setText(tr("&Line"));
   actionPlotL->setToolTip(tr("Plot as line"));
 
-  actionPlotP->setMenuText(tr("&Scatter"));
+  actionPlotP->setText(tr("&Scatter"));
   actionPlotP->setToolTip(tr("Plot as symbols"));
 
-  actionPlotLP->setMenuText(tr("Line + S&ymbol"));
+  actionPlotLP->setText(tr("Line + S&ymbol"));
   actionPlotLP->setToolTip(tr("Plot as line + symbols"));
 
-  actionPlotVerticalDropLines->setMenuText(tr("Vertical &Drop Lines"));
+  actionPlotVerticalDropLines->setText(tr("Vertical &Drop Lines"));
 
-  actionPlotSpline->setMenuText(tr("&Spline"));
-  actionPlotVertSteps->setMenuText(tr("&Vertical Steps"));
-  actionPlotHorSteps->setMenuText(tr("&Horizontal Steps"));
+  actionPlotSpline->setText(tr("&Spline"));
+  actionPlotVertSteps->setText(tr("&Vertical Steps"));
+  actionPlotHorSteps->setText(tr("&Horizontal Steps"));
 
-  actionPlotVerticalBars->setMenuText(tr("&Columns"));
+  actionPlotVerticalBars->setText(tr("&Columns"));
   actionPlotVerticalBars->setToolTip(tr("Plot with vertical bars"));
 
-  actionPlotHorizontalBars->setMenuText(tr("&Rows"));
+  actionPlotHorizontalBars->setText(tr("&Rows"));
   actionPlotHorizontalBars->setToolTip(tr("Plot with horizontal bars"));
 
-  actionPlotArea->setMenuText(tr("&Area"));
+  actionPlotArea->setText(tr("&Area"));
   actionPlotArea->setToolTip(tr("Plot area"));
 
-  actionPlotPie->setMenuText(tr("&Pie"));
+  actionPlotPie->setText(tr("&Pie"));
   actionPlotPie->setToolTip(tr("Plot pie"));
 
-  actionPlotVectXYXY->setMenuText(tr("&Vectors XYXY"));
+  actionPlotVectXYXY->setText(tr("&Vectors XYXY"));
   actionPlotVectXYXY->setToolTip(tr("Vectors XYXY"));
 
-  actionPlotVectXYAM->setMenuText(tr("Vectors XY&AM"));
+  actionPlotVectXYAM->setText(tr("Vectors XY&AM"));
   actionPlotVectXYAM->setToolTip(tr("Vectors XYAM"));
 
-  actionPlotHistogram->setMenuText(tr("&Histogram"));
-  actionPlotStackedHistograms->setMenuText(tr("&Stacked Histogram"));
-  actionPlot2VerticalLayers->setMenuText(tr("&Vertical 2 Layers"));
-  actionPlot2HorizontalLayers->setMenuText(tr("&Horizontal 2 Layers"));
-  actionPlot4Layers->setMenuText(tr("&4 Layers"));
-  actionPlotStackedLayers->setMenuText(tr("&Stacked Layers"));
+  actionPlotHistogram->setText(tr("&Histogram"));
+  actionPlotStackedHistograms->setText(tr("&Stacked Histogram"));
+  actionPlot2VerticalLayers->setText(tr("&Vertical 2 Layers"));
+  actionPlot2HorizontalLayers->setText(tr("&Horizontal 2 Layers"));
+  actionPlot4Layers->setText(tr("&4 Layers"));
+  actionPlotStackedLayers->setText(tr("&Stacked Layers"));
 
-  actionStemPlot->setMenuText(tr("Stem-and-&Leaf Plot"));
+  actionStemPlot->setText(tr("Stem-and-&Leaf Plot"));
   actionStemPlot->setToolTip(tr("Stem-and-Leaf Plot"));
 
-  actionPlot3DRibbon->setMenuText(tr("&Ribbon"));
+  actionPlot3DRibbon->setText(tr("&Ribbon"));
   actionPlot3DRibbon->setToolTip(tr("Plot 3D ribbon"));
 
-  actionPlot3DBars->setMenuText(tr("&Bars"));
+  actionPlot3DBars->setText(tr("&Bars"));
   actionPlot3DBars->setToolTip(tr("Plot 3D bars"));
 
-  actionPlot3DScatter->setMenuText(tr("&Scatter"));
+  actionPlot3DScatter->setText(tr("&Scatter"));
   actionPlot3DScatter->setToolTip(tr("Plot 3D scatter"));
 
-  actionPlot3DTrajectory->setMenuText(tr("&Trajectory"));
+  actionPlot3DTrajectory->setText(tr("&Trajectory"));
   actionPlot3DTrajectory->setToolTip(tr("Plot 3D trajectory"));
 
-  actionColorMap->setMenuText(tr("Contour + &Color Fill"));
+  actionColorMap->setText(tr("Contour + &Color Fill"));
   actionColorMap->setToolTip(tr("Contour Lines + Color Fill"));
 
-  actionNoContourColorMap->setMenuText(tr("Color &Fill"));
+  actionNoContourColorMap->setText(tr("Color &Fill"));
   actionNoContourColorMap->setToolTip(tr("Color Fill (No contours)"));
 
-  actionContourMap->setMenuText(tr("Contour &Lines"));
+  actionContourMap->setText(tr("Contour &Lines"));
   actionContourMap->setToolTip(tr("Contour Lines"));
 
-  actionGrayMap->setMenuText(tr("&Gray Scale Map"));
+  actionGrayMap->setText(tr("&Gray Scale Map"));
   actionGrayMap->setToolTip(tr("Gray Scale Map"));
 
-  actionShowColStatistics->setMenuText(tr("Statistics on &Columns"));
+  actionShowColStatistics->setText(tr("Statistics on &Columns"));
   actionShowColStatistics->setToolTip(tr("Selected columns statistics"));
 
-  actionShowRowStatistics->setMenuText(tr("Statistics on &Rows"));
+  actionShowRowStatistics->setText(tr("Statistics on &Rows"));
   actionShowRowStatistics->setToolTip(tr("Selected rows statistics"));
-  actionShowIntDialog->setMenuText(tr("Integr&ate Function..."));
-  actionIntegrate->setMenuText(tr("&Integrate"));
-  actionInterpolate->setMenuText(tr("Inte&rpolate ..."));
-  actionLowPassFilter->setMenuText(tr("&Low Pass..."));
-  actionHighPassFilter->setMenuText(tr("&High Pass..."));
-  actionBandPassFilter->setMenuText(tr("&Band Pass..."));
-  actionBandBlockFilter->setMenuText(tr("&Band Block..."));
-  actionFFT->setMenuText(tr("&FFT..."));
-  actionSmoothSavGol->setMenuText(tr("&Savitzky-Golay..."));
-  actionSmoothFFT->setMenuText(tr("&FFT Filter..."));
-  actionSmoothAverage->setMenuText(tr("Moving Window &Average..."));
-  actionDifferentiate->setMenuText(tr("&Differentiate"));
-  actionFitLinear->setMenuText(tr("Fit &Linear"));
-  actionShowFitPolynomDialog->setMenuText(tr("Fit &Polynomial ..."));
-  actionShowExpDecayDialog->setMenuText(tr("&First Order ..."));
-  actionShowTwoExpDecayDialog->setMenuText(tr("&Second Order ..."));
-  actionShowExpDecay3Dialog->setMenuText(tr("&Third Order ..."));
-  actionFitExpGrowth->setMenuText(tr("Fit Exponential Gro&wth ..."));
-  actionFitSigmoidal->setMenuText(tr("Fit &Boltzmann (Sigmoidal)"));
-  actionFitGauss->setMenuText(tr("Fit &Gaussian"));
-  actionFitLorentz->setMenuText(tr("Fit Lorent&zian"));
+  actionShowIntDialog->setText(tr("Integr&ate Function..."));
+  actionIntegrate->setText(tr("&Integrate"));
+  actionInterpolate->setText(tr("Inte&rpolate ..."));
+  actionLowPassFilter->setText(tr("&Low Pass..."));
+  actionHighPassFilter->setText(tr("&High Pass..."));
+  actionBandPassFilter->setText(tr("&Band Pass..."));
+  actionBandBlockFilter->setText(tr("&Band Block..."));
+  actionFFT->setText(tr("&FFT..."));
+  actionSmoothSavGol->setText(tr("&Savitzky-Golay..."));
+  actionSmoothFFT->setText(tr("&FFT Filter..."));
+  actionSmoothAverage->setText(tr("Moving Window &Average..."));
+  actionDifferentiate->setText(tr("&Differentiate"));
+  actionFitLinear->setText(tr("Fit &Linear"));
+  actionShowFitPolynomDialog->setText(tr("Fit &Polynomial ..."));
+  actionShowExpDecayDialog->setText(tr("&First Order ..."));
+  actionShowTwoExpDecayDialog->setText(tr("&Second Order ..."));
+  actionShowExpDecay3Dialog->setText(tr("&Third Order ..."));
+  actionFitExpGrowth->setText(tr("Fit Exponential Gro&wth ..."));
+  actionFitSigmoidal->setText(tr("Fit &Boltzmann (Sigmoidal)"));
+  actionFitGauss->setText(tr("Fit &Gaussian"));
+  actionFitLorentz->setText(tr("Fit Lorent&zian"));
 
-  actionShowFitDialog->setMenuText(tr("Fit &Wizard..."));
+  actionShowFitDialog->setText(tr("Fit &Wizard..."));
   actionShowFitDialog->setShortcut(tr("Ctrl+Y"));
 
-  actionShowPlotDialog->setMenuText(tr("&Plot ..."));
-  actionShowScaleDialog->setMenuText(tr("&Scales..."));
-  actionShowAxisDialog->setMenuText(tr("&Axes..."));
-  actionShowGridDialog->setMenuText(tr("&Grid ..."));
-  actionShowTitleDialog->setMenuText(tr("&Title ..."));
-  actionShowColumnOptionsDialog->setMenuText(tr("Column &Options ..."));
+  actionShowPlotDialog->setText(tr("&Plot ..."));
+  actionShowScaleDialog->setText(tr("&Scales..."));
+  actionShowAxisDialog->setText(tr("&Axes..."));
+  actionShowGridDialog->setText(tr("&Grid ..."));
+  actionShowTitleDialog->setText(tr("&Title ..."));
+  actionShowColumnOptionsDialog->setText(tr("Column &Options ..."));
   actionShowColumnOptionsDialog->setShortcut(tr("Ctrl+Alt+O"));
-  actionShowColumnValuesDialog->setMenuText(
+  actionShowColumnValuesDialog->setText(
       tr("Set Column &Values ...")); // Removed JZ May 3, 2011
   actionShowColumnValuesDialog->setShortcut(tr("Alt+Q"));
-  actionTableRecalculate->setMenuText(tr("Recalculate"));
+  actionTableRecalculate->setText(tr("Recalculate"));
   actionTableRecalculate->setShortcut(tr("Ctrl+Return"));
-  actionHideSelectedColumns->setMenuText(tr("&Hide Selected"));
+  actionHideSelectedColumns->setText(tr("&Hide Selected"));
   actionHideSelectedColumns->setToolTip(tr("Hide selected columns"));
-  actionShowAllColumns->setMenuText(tr("Sho&w All Columns"));
+  actionShowAllColumns->setText(tr("Sho&w All Columns"));
   actionHideSelectedColumns->setToolTip(tr("Show all table columns"));
-  actionSwapColumns->setMenuText(tr("&Swap columns"));
+  actionSwapColumns->setText(tr("&Swap columns"));
   actionSwapColumns->setToolTip(tr("Swap selected columns"));
-  actionMoveColRight->setMenuText(tr("Move &Right"));
+  actionMoveColRight->setText(tr("Move &Right"));
   actionMoveColRight->setToolTip(tr("Move Right"));
-  actionMoveColLeft->setMenuText(tr("Move &Left"));
+  actionMoveColLeft->setText(tr("Move &Left"));
   actionMoveColLeft->setToolTip(tr("Move Left"));
-  actionMoveColFirst->setMenuText(tr("Move to F&irst"));
+  actionMoveColFirst->setText(tr("Move to F&irst"));
   actionMoveColFirst->setToolTip(tr("Move to First"));
-  actionMoveColLast->setMenuText(tr("Move to Las&t"));
+  actionMoveColLast->setText(tr("Move to Las&t"));
   actionMoveColLast->setToolTip(tr("Move to Last"));
-  actionShowColsDialog->setMenuText(tr("&Columns..."));
-  actionShowRowsDialog->setMenuText(tr("&Rows..."));
-  actionDeleteRows->setMenuText(tr("&Delete Rows Interval..."));
+  actionShowColsDialog->setText(tr("&Columns..."));
+  actionShowRowsDialog->setText(tr("&Rows..."));
+  actionDeleteRows->setText(tr("&Delete Rows Interval..."));
 
-  actionAbout->setMenuText(tr("&About MantidPlot")); // Mantid
+  actionAbout->setText(tr("&About MantidPlot")); // Mantid
   actionAbout->setShortcut(tr("F1"));
 
-  // actionShowHelp->setMenuText(tr("&Help"));
-  // actionShowHelp->setShortcut(tr("Ctrl+H"));
+  actionMantidConcepts->setText(tr("&Mantid Concepts"));
 
-  actionMantidConcepts->setMenuText(tr("&Mantid Concepts"));
+  actionMantidAlgorithms->setText("&Algorithm Descriptions");
 
-  actionMantidAlgorithms->setMenuText("&Algorithm Descriptions");
+  actionmantidplotHelp->setText("&MantidPlot Help");
 
-  actionmantidplotHelp->setMenuText("&MantidPlot Help");
-
-  // actionChooseHelpFolder->setMenuText(tr("&Choose Help Folder..."));
-  // actionRename->setMenuText(tr("&Rename Window"));
-
-  actionCloseWindow->setMenuText(tr("Close &Window"));
+  actionCloseWindow->setText(tr("Close &Window"));
   actionCloseWindow->setShortcut(tr("Ctrl+W"));
 
-  actionAddColToTable->setMenuText(tr("Add Column"));
+  actionAddColToTable->setText(tr("Add Column"));
   actionAddColToTable->setToolTip(tr("Add Column"));
 
-  actionClearTable->setMenuText(tr("Clear"));
+  actionClearTable->setText(tr("Clear"));
   actionGoToRow->setMenuText(tr("&Go to Row..."));
   actionGoToRow->setShortcut(tr("Ctrl+Alt+G"));
 
-  actionGoToColumn->setMenuText(tr("Go to Colum&n..."));
+  actionGoToColumn->setText(tr("Go to Colum&n..."));
   actionGoToColumn->setShortcut(tr("Ctrl+Alt+C"));
 
-  actionDeleteLayer->setMenuText(tr("&Remove Layer"));
+  actionDeleteLayer->setText(tr("&Remove Layer"));
   actionDeleteLayer->setShortcut(tr("Alt+R"));
 
-  actionResizeActiveWindow->setMenuText(tr("Window &Geometry..."));
-  actionHideActiveWindow->setMenuText(tr("&Hide Window"));
-  actionShowMoreWindows->setMenuText(tr("More Windows..."));
-  actionPixelLineProfile->setMenuText(tr("&View Pixel Line Profile"));
-  actionIntensityTable->setMenuText(tr("&Intensity Table"));
-  actionShowLineDialog->setMenuText(tr("&Properties"));
-  actionShowImageDialog->setMenuText(tr("&Properties"));
-  actionShowTextDialog->setMenuText(tr("&Properties"));
-  actionActivateWindow->setMenuText(tr("&Activate Window"));
-  actionMinimizeWindow->setMenuText(tr("Mi&nimize Window"));
-  actionMaximizeWindow->setMenuText(tr("Ma&ximize Window"));
-  actionHideWindow->setMenuText(tr("&Hide Window"));
-  actionResizeWindow->setMenuText(tr("Re&size Window..."));
-  actionEditSurfacePlot->setMenuText(tr("&Surface..."));
-  actionAdd3DData->setMenuText(tr("&Data Set..."));
-  actionSetMatrixProperties->setMenuText(tr("Set &Properties..."));
-  actionSetMatrixDimensions->setMenuText(tr("Set &Dimensions..."));
+  actionResizeActiveWindow->setText(tr("Window &Geometry..."));
+  actionHideActiveWindow->setText(tr("&Hide Window"));
+  actionShowMoreWindows->setText(tr("More Windows..."));
+  actionPixelLineProfile->setText(tr("&View Pixel Line Profile"));
+  actionIntensityTable->setText(tr("&Intensity Table"));
+  actionShowLineDialog->setText(tr("&Properties"));
+  actionShowImageDialog->setText(tr("&Properties"));
+  actionShowTextDialog->setText(tr("&Properties"));
+  actionActivateWindow->setText(tr("&Activate Window"));
+  actionMinimizeWindow->setText(tr("Mi&nimize Window"));
+  actionMaximizeWindow->setText(tr("Ma&ximize Window"));
+  actionHideWindow->setText(tr("&Hide Window"));
+  actionResizeWindow->setText(tr("Re&size Window..."));
+  actionEditSurfacePlot->setText(tr("&Surface..."));
+  actionAdd3DData->setText(tr("&Data Set..."));
+  actionSetMatrixProperties->setText(tr("Set &Properties..."));
+  actionSetMatrixDimensions->setText(tr("Set &Dimensions..."));
+
   actionSetMatrixDimensions->setShortcut(tr("Ctrl+D"));
-  actionSetMatrixValues->setMenuText(tr("Set &Values..."));
+  actionSetMatrixValues->setText(tr("Set &Values..."));
   actionSetMatrixValues->setToolTip(tr("Set Matrix Values"));
   actionSetMatrixValues->setShortcut(tr("Alt+Q"));
-  actionImagePlot->setMenuText(tr("&Image Plot"));
+  actionImagePlot->setText(tr("&Image Plot"));
   actionImagePlot->setToolTip(tr("Image Plot"));
-  actionTransposeMatrix->setMenuText(tr("&Transpose"));
-  actionRotateMatrix->setMenuText(tr("R&otate 90"));
+  actionTransposeMatrix->setText(tr("&Transpose"));
+  actionRotateMatrix->setText(tr("R&otate 90"));
   actionRotateMatrix->setToolTip(tr("Rotate 90° Clockwise"));
-  actionRotateMatrixMinus->setMenuText(tr("Rotate &-90"));
+  actionRotateMatrixMinus->setText(tr("Rotate &-90"));
   actionRotateMatrixMinus->setToolTip(tr("Rotate 90° Counterclockwise"));
-  actionFlipMatrixVertically->setMenuText(tr("Flip &V"));
+  actionFlipMatrixVertically->setText(tr("Flip &V"));
   actionFlipMatrixVertically->setToolTip(tr("Flip Vertically"));
-  actionFlipMatrixHorizontally->setMenuText(tr("Flip &H"));
+  actionFlipMatrixHorizontally->setText(tr("Flip &H"));
   actionFlipMatrixHorizontally->setToolTip(tr("Flip Horizontally"));
 
-  actionMatrixXY->setMenuText(tr("Show &X/Y"));
-  actionMatrixColumnRow->setMenuText(tr("Show &Column/Row"));
-  actionViewMatrix->setMenuText(tr("&Data mode"));
-  actionViewMatrixImage->setMenuText(tr("&Image mode"));
-  actionMatrixGrayScale->setMenuText(tr("&Gray Scale"));
-  actionMatrixRainbowScale->setMenuText(tr("&Rainbow"));
-  actionMatrixCustomScale->setMenuText(tr("&Custom"));
-  actionInvertMatrix->setMenuText(tr("&Invert"));
-  actionMatrixDeterminant->setMenuText(tr("&Determinant"));
-  actionConvertMatrixDirect->setMenuText(tr("&Direct"));
-  actionConvertMatrixXYZ->setMenuText(tr("&XYZ Columns"));
-  actionConvertMatrixYXZ->setMenuText(tr("&YXZ Columns"));
-  actionExportMatrix->setMenuText(tr("&Export Image ..."));
+  actionMatrixXY->setText(tr("Show &X/Y"));
+  actionMatrixColumnRow->setText(tr("Show &Column/Row"));
+  actionViewMatrix->setText(tr("&Data mode"));
+  actionViewMatrixImage->setText(tr("&Image mode"));
+  actionMatrixGrayScale->setText(tr("&Gray Scale"));
+  actionMatrixRainbowScale->setText(tr("&Rainbow"));
+  actionMatrixCustomScale->setText(tr("&Custom"));
+  actionInvertMatrix->setText(tr("&Invert"));
+  actionMatrixDeterminant->setText(tr("&Determinant"));
+  actionConvertMatrixDirect->setText(tr("&Direct"));
+  actionConvertMatrixXYZ->setText(tr("&XYZ Columns"));
+  actionConvertMatrixYXZ->setText(tr("&YXZ Columns"));
+  actionExportMatrix->setText(tr("&Export Image ..."));
 
-  actionConvertTable->setMenuText(tr("Convert to &Matrix"));
-  actionConvertTableToWorkspace->setMenuText(tr("Convert to Table&Workspace"));
-  actionConvertTableToMatrixWorkspace->setMenuText(
+  actionConvertTable->setText(tr("Convert to &Matrix"));
+  actionConvertTableToWorkspace->setText(tr("Convert to Table&Workspace"));
+  actionConvertTableToMatrixWorkspace->setText(
       tr("Convert to MatrixWorkspace"));
   actionPlot3DWireFrame->setMenuText(tr("3D &Wire Frame"));
   actionPlot3DHiddenLine->setMenuText(tr("3D &Hidden Line"));
@@ -13522,103 +13391,87 @@ void ApplicationWindow::translateActionsStrings() {
   actionAutoCorrelate->setMenuText(tr("&Autocorrelate"));
   actionConvolute->setMenuText(tr("&Convolute"));
   actionDeconvolute->setMenuText(tr("&Deconvolute"));
-  actionTranslateHor->setMenuText(tr("&Horizontal"));
-  actionTranslateVert->setMenuText(tr("&Vertical"));
   actionSetAscValues->setMenuText(tr("Ro&w Numbers"));
   actionSetAscValues->setToolTip(tr("Fill selected columns with row numbers"));
-  actionSetRandomValues->setMenuText(tr("&Random Values"));
+  actionSetRandomValues->setText(tr("&Random Values"));
   actionSetRandomValues->setToolTip(
       tr("Fill selected columns with random numbers"));
-  actionSetXCol->setMenuText(tr("&X"));
+  actionSetXCol->setText(tr("&X"));
   actionSetXCol->setToolTip(tr("Set column as X"));
-  actionSetYCol->setMenuText(tr("&Y"));
+  actionSetYCol->setText(tr("&Y"));
   actionSetYCol->setToolTip(tr("Set column as Y"));
-  actionSetZCol->setMenuText(tr("&Z"));
+  actionSetZCol->setText(tr("&Z"));
   actionSetZCol->setToolTip(tr("Set column as Z"));
-  actionSetXErrCol->setMenuText(tr("X E&rror"));
-  actionSetYErrCol->setMenuText(tr("Y &Error"));
+  actionSetXErrCol->setText(tr("X E&rror"));
+  actionSetYErrCol->setText(tr("Y &Error"));
   actionSetYErrCol->setToolTip(tr("Set as Y Error Bars"));
-  actionSetLabelCol->setMenuText(tr("&Label"));
+  actionSetLabelCol->setText(tr("&Label"));
   actionSetLabelCol->setToolTip(tr("Set as Labels"));
-  actionDisregardCol->setMenuText(tr("&Disregard"));
+  actionDisregardCol->setText(tr("&Disregard"));
   actionDisregardCol->setToolTip(tr("Disregard Columns"));
-  actionReadOnlyCol->setMenuText(tr("&Read Only"));
+  actionReadOnlyCol->setText(tr("&Read Only"));
 
-  actionBoxPlot->setMenuText(tr("&Box Plot"));
+  actionBoxPlot->setText(tr("&Box Plot"));
   actionBoxPlot->setToolTip(tr("Box and whiskers plot"));
 
-  actionMultiPeakGauss->setMenuText(tr("&Gaussian..."));
-  actionMultiPeakLorentz->setMenuText(tr("&Lorentzian..."));
   actionHomePage->setMenuText(tr("&Mantid Homepage")); // Mantid change
-  // actionCheckUpdates->setMenuText(tr("Search for &Updates")); //Mantid change
-  // - commented out
-  // actionHelpForums->setText(tr("Visit QtiPlot &Forums"));
   actionHelpBugReports->setText(tr("Report a &Bug"));
   actionAskHelp->setText(tr("Ask for Help"));
-  // actionDownloadManual->setMenuText(tr("Download &Manual"));//Mantid change -
-  // commented out
-  // actionTranslations->setMenuText(tr("&Translations"));//Mantid change -
-  // commented out
-  // actionDonate->setMenuText(tr("Make a &Donation"));
-  // actionTechnicalSupport->setMenuText(tr("Technical &Support"));
 
-  btnPointer->setMenuText(tr("Selection &Tools"));
+  btnPointer->setText(tr("Selection &Tools"));
   btnPointer->setToolTip(tr("Selection Tools"));
 
-  btnZoomIn->setMenuText(tr("&Zoom In"));
+  btnZoomIn->setText(tr("&Zoom In"));
   btnZoomIn->setShortcut(tr("Ctrl++"));
   btnZoomIn->setToolTip(tr("Zoom In"));
 
-  btnZoomOut->setMenuText(tr("Zoom &Out"));
+  btnZoomOut->setText(tr("Zoom &Out"));
   btnZoomOut->setShortcut(tr("Ctrl+-"));
   btnZoomOut->setToolTip(tr("Zoom Out"));
 
-  actionPanPlot->setMenuText(tr("Panning Tool (zoom with mouse wheel)"));
+  actionPanPlot->setText(tr("Panning Tool (zoom with mouse wheel)"));
   actionPanPlot->setToolTip(tr("Panning Tool (zoom with mouse wheel)"));
 
-  btnCursor->setMenuText(tr("&Data Reader"));
+  btnCursor->setText(tr("&Data Reader"));
   btnCursor->setShortcut(tr("CTRL+D"));
   btnCursor->setToolTip(tr("Data Reader"));
 
-  btnPicker->setMenuText(tr("S&creen Reader"));
+  btnPicker->setText(tr("S&creen Reader"));
   btnPicker->setToolTip(tr("Screen reader"));
 
-  btnLabel->setMenuText(tr("Add &Label"));
+  btnLabel->setText(tr("Add &Label"));
   btnLabel->setToolTip(tr("Add Label"));
 
-  actionDrawPoints->setMenuText(tr("&Draw Data Points"));
+  actionDrawPoints->setText(tr("&Draw Data Points"));
   actionDrawPoints->setToolTip(tr("Draw Data Points"));
 
-  btnMovePoints->setMenuText(tr("&Move Data Points..."));
+  btnMovePoints->setText(tr("&Move Data Points..."));
   btnMovePoints->setShortcut(tr("Ctrl+ALT+M"));
   btnMovePoints->setToolTip(tr("Move data points"));
 
-  btnRemovePoints->setMenuText(tr("Remove &Bad Data Points..."));
+  btnRemovePoints->setText(tr("Remove &Bad Data Points..."));
   btnRemovePoints->setShortcut(tr("Alt+B"));
   btnRemovePoints->setToolTip(tr("Remove data points"));
 
-  btnArrow->setMenuText(tr("Draw &Arrow"));
+  btnArrow->setText(tr("Draw &Arrow"));
   btnArrow->setShortcut(tr("Ctrl+Alt+A"));
   btnArrow->setToolTip(tr("Draw Arrow"));
 
-  btnLine->setMenuText(tr("Draw Li&ne"));
+  btnLine->setText(tr("Draw Li&ne"));
   btnLine->setShortcut(tr("CtrL+Alt+N"));
   btnLine->setToolTip(tr("Draw Line"));
 
   // FIXME: is setText necessary for action groups?
-  //	coord->setText( tr( "Coordinates" ) );
-  //	coord->setMenuText( tr( "&Coord" ) );
-  //  coord->setStatusTip( tr( "Coordinates" ) );
   Box->setText(tr("Box"));
-  Box->setMenuText(tr("Box"));
+  Box->setText(tr("Box"));
   Box->setToolTip(tr("Box"));
   Box->setStatusTip(tr("Box"));
   Frame->setText(tr("Frame"));
-  Frame->setMenuText(tr("&Frame"));
+  Frame->setText(tr("&Frame"));
   Frame->setToolTip(tr("Frame"));
   Frame->setStatusTip(tr("Frame"));
   None->setText(tr("No Axes"));
-  None->setMenuText(tr("No Axes"));
+  None->setText(tr("No Axes"));
   None->setToolTip(tr("No axes"));
   None->setStatusTip(tr("No axes"));
 
@@ -13630,40 +13483,37 @@ void ApplicationWindow::translateActionsStrings() {
   floor->setToolTip(tr("Floor grid"));
 
   wireframe->setText(tr("Wireframe"));
-  wireframe->setMenuText(tr("Wireframe"));
+  wireframe->setText(tr("Wireframe"));
   wireframe->setToolTip(tr("Wireframe"));
   wireframe->setStatusTip(tr("Wireframe"));
   hiddenline->setText(tr("Hidden Line"));
-  hiddenline->setMenuText(tr("Hidden Line"));
+  hiddenline->setText(tr("Hidden Line"));
   hiddenline->setToolTip(tr("Hidden line"));
   hiddenline->setStatusTip(tr("Hidden line"));
   polygon->setText(tr("Polygon Only"));
-  polygon->setMenuText(tr("Polygon Only"));
+  polygon->setText(tr("Polygon Only"));
   polygon->setToolTip(tr("Polygon only"));
   polygon->setStatusTip(tr("Polygon only"));
   filledmesh->setText(tr("Mesh & Filled Polygons"));
-  filledmesh->setMenuText(tr("Mesh & Filled Polygons"));
+  filledmesh->setText(tr("Mesh & Filled Polygons"));
   filledmesh->setToolTip(tr("Mesh & filled Polygons"));
   filledmesh->setStatusTip(tr("Mesh & filled Polygons"));
   pointstyle->setText(tr("Dots"));
-  pointstyle->setMenuText(tr("Dots"));
+  pointstyle->setText(tr("Dots"));
   pointstyle->setToolTip(tr("Dots"));
   pointstyle->setStatusTip(tr("Dots"));
   barstyle->setText(tr("Bars"));
-  barstyle->setMenuText(tr("Bars"));
+  barstyle->setText(tr("Bars"));
   barstyle->setToolTip(tr("Bars"));
   barstyle->setStatusTip(tr("Bars"));
   conestyle->setText(tr("Cones"));
-  conestyle->setMenuText(tr("Cones"));
+  conestyle->setText(tr("Cones"));
   conestyle->setToolTip(tr("Cones"));
   conestyle->setStatusTip(tr("Cones"));
   crossHairStyle->setText(tr("Crosshairs"));
   crossHairStyle->setToolTip(tr("Crosshairs"));
   crossHairStyle->setStatusTip(tr("Crosshairs"));
 
-  // floorstyle->setText( tr( "Floor Style" ) );
-  // floorstyle->setMenuText( tr( "Floor Style" ) );
-  // floorstyle->setStatusTip( tr( "Floor Style" ) );
   floordata->setText(tr("Floor Data Projection"));
   floordata->setToolTip(tr("Floor data projection"));
   floordata->setStatusTip(tr("Floor data projection"));
@@ -14059,72 +13909,6 @@ void ApplicationWindow::updateRecentFilesList(QString fname) {
   }
 }
 
-void ApplicationWindow::translateCurveHor() {
-  MultiLayer *plot = dynamic_cast<MultiLayer *>(activeWindow(MultiLayerWindow));
-  if (!plot)
-    return;
-  if (plot->isEmpty()) {
-    QMessageBox::warning(
-        this, tr("MantidPlot - Warning"), // Mantid
-        tr("<h4>There are no plot layers available in this window.</h4>"
-           "<p><h4>Please add a layer and try again!</h4>"));
-    btnPointer->setChecked(true);
-    return;
-  }
-
-  Graph *g = dynamic_cast<Graph *>(plot->activeGraph());
-  if (!g)
-    return;
-
-  if (g->isPiePlot()) {
-    QMessageBox::warning(
-        this, tr("MantidPlot - Warning"), // Mantid
-        tr("This functionality is not available for pie plots!"));
-
-    btnPointer->setChecked(true);
-    return;
-  } else if (g->validCurvesDataSize()) {
-    btnPointer->setChecked(true);
-    g->setActiveTool(
-        new TranslateCurveTool(g, this, TranslateCurveTool::Horizontal, info,
-                               SLOT(setText(const QString &))));
-    displayBar->show();
-  }
-}
-
-void ApplicationWindow::translateCurveVert() {
-  MultiLayer *plot = dynamic_cast<MultiLayer *>(activeWindow(MultiLayerWindow));
-  if (!plot)
-    return;
-  if (plot->isEmpty()) {
-    QMessageBox::warning(
-        this, tr("MantidPlot - Warning"), // Mantid
-        tr("<h4>There are no plot layers available in this window.</h4>"
-           "<p><h4>Please add a layer and try again!</h4>"));
-    btnPointer->setChecked(true);
-    return;
-  }
-
-  Graph *g = dynamic_cast<Graph *>(plot->activeGraph());
-  if (!g)
-    return;
-
-  if (g->isPiePlot()) {
-    QMessageBox::warning(
-        this, tr("MantidPlot - Warning"), // Mantid
-        tr("This functionality is not available for pie plots!"));
-
-    btnPointer->setChecked(true);
-    return;
-  } else if (g->validCurvesDataSize()) {
-    btnPointer->setChecked(true);
-    g->setActiveTool(new TranslateCurveTool(g, this,
-                                            TranslateCurveTool::Vertical, info,
-                                            SLOT(setText(const QString &))));
-    displayBar->show();
-  }
-}
-
 void ApplicationWindow::setReadOnlyCol() {
   Table *t = dynamic_cast<Table *>(activeWindow(TableWindow));
   if (!t)
@@ -14224,57 +14008,10 @@ void ApplicationWindow::disregardCol() {
   t->setPlotDesignation(Table::None);
 }
 
-void ApplicationWindow::fitMultiPeakGauss() {
-  fitMultiPeak((int)MultiPeakFit::Gauss);
-}
-
-void ApplicationWindow::fitMultiPeakLorentz() {
-  fitMultiPeak((int)MultiPeakFit::Lorentz);
-}
-
-void ApplicationWindow::fitMultiPeak(int profile) {
-  MultiLayer *plot = dynamic_cast<MultiLayer *>(activeWindow(MultiLayerWindow));
-  if (!plot)
-    return;
-  if (plot->isEmpty()) {
-    QMessageBox::warning(
-        this, tr("MantidPlot - Warning"), // Mantid
-        tr("<h4>There are no plot layers available in this window.</h4>"
-           "<p><h4>Please add a layer and try again!</h4>"));
-    btnPointer->setChecked(true);
-    return;
-  }
-
-  Graph *g = dynamic_cast<Graph *>(plot->activeGraph());
-  if (!g || !g->validCurvesDataSize())
-    return;
-
-  if (g->isPiePlot()) {
-    QMessageBox::warning(
-        this, tr("MantidPlot - Warning"), // Mantid
-        tr("This functionality is not available for pie plots!"));
-    return;
-  } else {
-    bool ok;
-    int peaks = QInputDialog::getInteger(this,
-        tr("MantidPlot - Enter the number of peaks"), // Mantid
-        tr("Peaks"), 2, 2, 1000000, 1, &ok);
-    if (ok && peaks) {
-      g->setActiveTool(
-          new MultiPeakFitTool(g, this, (MultiPeakFit::PeakProfile)profile,
-                               peaks, info, SLOT(setText(const QString &))));
-      displayBar->show();
-    }
-  }
-}
-
 void ApplicationWindow::showHomePage() {
   QDesktopServices::openUrl(QUrl("http://www.mantidproject.org"));
 }
-void ApplicationWindow::showMantidConcepts() {
-  // QDesktopServices::openUrl(QUrl("http://www.mantidproject.org/Category:Concepts"));
-  HelpWindow::showConcept(this);
-}
+void ApplicationWindow::showMantidConcepts() { HelpWindow::showConcept(this); }
 void ApplicationWindow::showalgorithmDescriptions() {
   HelpWindow::showAlgorithm(this);
 }
@@ -14650,7 +14387,8 @@ void ApplicationWindow::saveProjectFile(Folder *folder, const QString &fn,
   text += saveProjectFolder(folder, windowCount, true);
 
   text.prepend("<windows>\t" + QString::number(windowCount) + "\n");
-  text.prepend("<scripting-lang>\t" + QString(scriptingEnv()->objectName()) + "\n");
+  text.prepend("<scripting-lang>\t" + QString(scriptingEnv()->objectName()) +
+               "\n");
   text.prepend("MantidPlot " + QString::number(maj_version) + "." +
                QString::number(min_version) + "." +
                QString::number(patch_version) + " project file\n");
@@ -14694,8 +14432,8 @@ void ApplicationWindow::showFolderPopupMenu(const QPoint &p) {
   showFolderPopupMenu(item, p, true);
 }
 
-void ApplicationWindow::showFolderPopupMenu(QTreeWidgetItem *it, const QPoint &p,
-                                            bool fromFolders) {
+void ApplicationWindow::showFolderPopupMenu(QTreeWidgetItem *it,
+                                            const QPoint &p, bool fromFolders) {
 
   QMenu cm(this);
   QMenu window(this);
@@ -14805,7 +14543,6 @@ void ApplicationWindow::hideAllFolderWindows() {
 
   if ((currentFolder()->children()).isEmpty())
     return;
-
 }
 
 void ApplicationWindow::projectProperties() {
@@ -14838,7 +14575,6 @@ void ApplicationWindow::projectProperties() {
       new QMessageBox(tr("Properties"), s, QMessageBox::NoIcon, QMessageBox::Ok,
                       QMessageBox::NoButton, QMessageBox::NoButton, this);
 
-  // mbox->setIconPixmap(QPixmap( qtiplot_logo_xpm ));
   mbox->show();
 }
 
@@ -14858,9 +14594,7 @@ void ApplicationWindow::folderProperties() {
        tr("windows");
   s += ", " + QString::number(currentFolder()->subfolders().count()) + " " +
        tr("folders") + "\n\n";
-  // s += "\n\n\n";
   s += tr("Created") + ": " + currentFolder()->birthDate() + "\n\n";
-  // s += tr("Modified") + ": " + currentFolder()->modificationDate() + "\n\n";
 
   QMessageBox *mbox =
       new QMessageBox(tr("Properties"), s, QMessageBox::NoIcon, QMessageBox::Ok,
@@ -15001,7 +14735,8 @@ void ApplicationWindow::folderItemDoubleClicked(QTreeWidgetItem *it) {
   folders->setCurrentItem(item);
 }
 
-void ApplicationWindow::folderItemChanged(QTreeWidgetItem *it, QTreeWidgetItem *) {
+void ApplicationWindow::folderItemChanged(QTreeWidgetItem *it,
+                                          QTreeWidgetItem *) {
   if (!it)
     return;
 
@@ -15084,8 +14819,6 @@ bool ApplicationWindow::changeFolder(Folder *newFolder, bool force) {
       else if (w->status() == MdiSubWindow::Maximized)
         w->setMaximized();
     }
-    // else
-    //  w->setStatus(MdiSubWindow::Hidden);
 
     addListViewItem(w);
   }
@@ -15238,8 +14971,8 @@ void ApplicationWindow::addFolderListViewItem(Folder *f) {
 }
 
 void ApplicationWindow::find(const QString &s, bool windowNames, bool labels,
-                             bool , bool caseSensitive,
-                             bool partialMatch, bool) {
+                             bool, bool caseSensitive, bool partialMatch,
+                             bool) {
   if (windowNames || labels) {
     MdiSubWindow *w = currentFolder()->findWindow(s, windowNames, labels,
                                                   caseSensitive, partialMatch);
@@ -15310,7 +15043,8 @@ void ApplicationWindow::goToRow() {
   if (!w)
     return;
 
-  if (w->inherits("Table") || QString(w->metaObject()->className()) == "Matrix") {
+  if (w->inherits("Table") ||
+      QString(w->metaObject()->className()) == "Matrix") {
     bool ok;
     int row = QInputDialog::getInteger(
         this, tr("MantidPlot - Enter row number"), tr("Row"), // Mantid
@@ -15335,7 +15069,8 @@ void ApplicationWindow::goToColumn() {
   if (!w)
     return;
 
-  if (w->inherits("Table") || QString(w->metaObject()->className()) == "Matrix") {
+  if (w->inherits("Table") ||
+      QString(w->metaObject()->className()) == "Matrix") {
     bool ok;
     int col = QInputDialog::getInteger(
         this, tr("MantidPlot - Enter column number"), tr("Column"), // Mantid
@@ -15801,16 +15536,9 @@ void ApplicationWindow::restoreApplicationGeometry() {
 
 void ApplicationWindow::scriptsDirPathChanged(const QString &path) {
   scriptsDirPath = path;
-
-  //  QList<MdiSubWindow*> windows = windowsList();
-  //  foreach(MdiSubWindow *w, windows){
-  //    if (w->isA("Note"))
-  //      dynamic_cast<Note*>(w)->setDirPath(path);
-  //  }
 }
 
-void ApplicationWindow::makeToolbarsMenu()
-{
+void ApplicationWindow::makeToolbarsMenu() {
   // cppcheck-suppress publicAllocationError
   actionFileTools = new QAction(standardTools->windowTitle(), toolbarsMenu);
   actionFileTools->setCheckable(true);
@@ -15853,7 +15581,8 @@ void ApplicationWindow::setToolbars() {
   plotTools->setVisible(d_plot_tool_bar);
   displayBar->setVisible(d_display_tool_bar);
   formatToolBar->setVisible(d_format_tool_bar);
-  plotTools->setEnabled(w && QString(w->metaObject()->className()) == "MultiLayer");
+  plotTools->setEnabled(w &&
+                        QString(w->metaObject()->className()) == "MultiLayer");
 }
 
 void ApplicationWindow::saveFitFunctions(const QStringList &lst) {
@@ -16314,7 +16043,8 @@ void ApplicationWindow::addUserMenuAction(const QString &parentMenu,
       return;
   }
 
-  QAction *scriptAction = new QAction(tr(niceName.toAscii().constData()), topMenu);
+  QAction *scriptAction =
+      new QAction(tr(niceName.toAscii().constData()), topMenu);
   scriptAction->setData(itemData);
   topMenu->addAction(scriptAction);
   d_user_actions.append(scriptAction);
@@ -16578,14 +16308,14 @@ void ApplicationWindow::CatalogLogin() {
 }
 
 void ApplicationWindow::CatalogSearch() {
-    // Only one ICAT GUI will appear, and that the previous one will be
-    // overridden.
-    // E.g. if a user opens the ICAT GUI without being logged into ICAT they
-    // will need to
-    // login in and then click "Search" again.
-    catalogSearch.reset(new MantidQt::MantidWidgets::CatalogSearch());
-    catalogSearch->show();
-    catalogSearch->raise();
+  // Only one ICAT GUI will appear, and that the previous one will be
+  // overridden.
+  // E.g. if a user opens the ICAT GUI without being logged into ICAT they
+  // will need to
+  // login in and then click "Search" again.
+  catalogSearch.reset(new MantidQt::MantidWidgets::CatalogSearch());
+  catalogSearch->show();
+  catalogSearch->raise();
 }
 
 void ApplicationWindow::CatalogPublish() {
@@ -16915,8 +16645,8 @@ void ApplicationWindow::detachMdiSubwindow(MdiSubWindow *w) {
     currentFolder()->removeWindow(w);
   }
   removeWindowFromLists(w);
-  auto found = lv->findItems(
-      w->objectName(), Qt::MatchExactly | Qt::MatchCaseSensitive, 0);
+  auto found = lv->findItems(w->objectName(),
+                             Qt::MatchExactly | Qt::MatchCaseSensitive, 0);
   if (!found.isEmpty())
     lv->takeTopLevelItem(lv->indexOfTopLevelItem(found[0]));
 
@@ -17276,8 +17006,7 @@ QString ApplicationWindow::saveProjectFolder(Folder *folder, int &windowCount,
   return text;
 }
 
-bool ApplicationWindow::isOfType(const QObject* obj, const char* toCompare) const {
+bool ApplicationWindow::isOfType(const QObject *obj,
+                                 const char *toCompare) const {
   return strcmp(obj->metaObject()->className(), toCompare) == 0;
 }
-
-

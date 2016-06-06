@@ -15,7 +15,8 @@ using DataProcessorCommand_uptr = std::unique_ptr<DataProcessorCommand>;
 
 /** @class DataProcessorCommandAdapter
 
-DataProcessorCommandAdapter is an adapter that allows DataProcessorCommands to be treated as
+DataProcessorCommandAdapter is an adapter that allows DataProcessorCommands to
+be treated as
 QObjects for signals.
 
 Copyright &copy; 2011-14 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
@@ -54,8 +55,9 @@ public:
       // Add the actions
       auto &child = m_adaptee->getChild();
       for (auto &ch : child) {
-        m_adapter.push_back(Mantid::Kernel::make_unique<DataProcessorCommandAdapter>(
-            submenu, std::move(ch)));
+        m_adapter.push_back(
+            Mantid::Kernel::make_unique<DataProcessorCommandAdapter>(
+                submenu, std::move(ch)));
       }
     } else {
       // We are dealing with an action
@@ -77,7 +79,8 @@ private:
   std::vector<std::unique_ptr<DataProcessorCommandAdapter>> m_adapter;
 };
 
-typedef std::unique_ptr<DataProcessorCommandAdapter> DataProcessorCommandAdapter_uptr;
+typedef std::unique_ptr<DataProcessorCommandAdapter>
+    DataProcessorCommandAdapter_uptr;
 }
 }
 #endif /*MANTID_CUSTOMINTERFACES_DATAPROCESSORCOMMANDADAPTER_H*/

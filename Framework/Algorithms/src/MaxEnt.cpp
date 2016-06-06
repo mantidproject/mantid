@@ -99,7 +99,7 @@ void MaxEnt::init() {
   auto mustBePositive = boost::make_shared<BoundedValidator<size_t>>();
   mustBePositive->setLower(0);
   declareProperty(make_unique<PropertyWithValue<size_t>>(
-                      "DensityFactor", 1, mustBePositive, Direction::Input),
+                      "ResolutionFactor", 1, mustBePositive, Direction::Input),
                   "An integer number indicating the factor by which the number "
                   "of points will be increased in the image and reconstructed "
                   "data");
@@ -172,7 +172,7 @@ std::map<std::string, std::string> MaxEnt::validateInputs() {
     // Average spacing
     const MantidVec &X = inWS->readX(0);
     const double dx =
-        (X[X.size() - 1] - X[0]) / static_cast<double>(X.size() - 1);
+        (X.back() - X.front()) / static_cast<double>(X.size() - 1);
     for (size_t i = 1; i < X.size() - 1; i++) {
       // 1% accuracy exceeded, but data still usable
       if (std::abs(X[i] - X[0] - static_cast<double>(i) * dx) / dx >
@@ -219,7 +219,7 @@ void MaxEnt::exec() {
   // Autoshift
   bool autoShift = getProperty("AutoShift");
   // Increase the number of points in the image by this factor
-  size_t densityFactor = getProperty("DensityFactor");
+  size_t resolutionFactor = getProperty("ResolutionFactor");
   // Background (default level, sky background, etc)
   double background = getProperty("A");
   // Chi target
@@ -240,7 +240,7 @@ void MaxEnt::exec() {
   // Number of spectra
   size_t nspec = inWS->getNumberHistograms();
   // Number of data points
-  size_t npoints = inWS->blocksize() * densityFactor;
+  size_t npoints = inWS->blocksize() * resolutionFactor;
   // Number of X bins
   size_t npointsX = inWS->isHistogramData() ? npoints + 1 : npoints;
 

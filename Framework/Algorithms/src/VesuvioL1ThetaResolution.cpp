@@ -441,10 +441,8 @@ VesuvioL1ThetaResolution::processDistribution(MatrixWorkspace_sptr ws,
   double xMax(DBL_MIN);
   for (size_t i = 0; i < numHist; i++) {
     const std::vector<double> &x = ws->readX(i);
-    if (x[0] < xMin)
-      xMin = x[0];
-    if (x[x.size() - 1] > xMax)
-      xMax = x[x.size() - 1];
+    xMin = std::min(xMin, x.front());
+    xMax = std::max(xMax, x.back());
   }
 
   std::stringstream binParams;

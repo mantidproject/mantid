@@ -165,7 +165,7 @@ public:
   class CancelException : public std::exception {
   public:
     /// Returns the message string.
-    const char *what() const throw() override { return outMessage.c_str(); }
+    const char *what() const noexcept override { return outMessage.c_str(); }
 
   private:
     /// The message returned by what()

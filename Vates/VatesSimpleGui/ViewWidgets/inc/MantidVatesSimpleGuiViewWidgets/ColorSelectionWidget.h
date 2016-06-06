@@ -15,12 +15,9 @@ namespace Json {
 class Value;
 }
 
-namespace Mantid
-{
-namespace Vates
-{
-namespace SimpleGui
-{
+namespace Mantid {
+namespace Vates {
+namespace SimpleGui {
 /**
  *
   This class controls the color scale for the main level program viewed
@@ -28,7 +25,8 @@ namespace SimpleGui
 
   @date 07/06/2011
 
-  Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+  Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+ National Laboratory & European Spallation Source
 
   This file is part of Mantid.
 
@@ -48,8 +46,8 @@ namespace SimpleGui
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class EXPORT_OPT_MANTIDVATES_SIMPLEGUI_VIEWWIDGETS ColorSelectionWidget : public QWidget
-{
+class EXPORT_OPT_MANTIDVATES_SIMPLEGUI_VIEWWIDGETS ColorSelectionWidget
+    : public QWidget {
   Q_OBJECT
 
 public:
@@ -71,14 +69,17 @@ public:
   /// Programmatically enable/disable auto scaling of color range
   void setAutoScale(bool autoScale);
   /// Set min smaller max, can be used to programmatically set the widgets
-  void setMinMax(double& min, double& max);
-  /// Others need to know if this widget is in the process of updating colors at user's request
-  bool inProcessUserRequestedAutoScale() { return m_inProcessUserRequestedAutoScale; };
+  void setMinMax(double &min, double &max);
+  /// Others need to know if this widget is in the process of updating colors at
+  /// user's request
+  bool inProcessUserRequestedAutoScale() {
+    return m_inProcessUserRequestedAutoScale;
+  };
   /// To effectively block callbacks from external (Paraview) color changes
   void ignoreColorChangeCallbacks(bool ignore);
   bool isIgnoringColorCallbacks();
   /// Set the color scale lock
-  void setColorScaleLock(Mantid::VATES::ColorScaleLock* lock);
+  void setColorScaleLock(Mantid::VATES::ColorScaleLock *lock);
   /// Is the color scale locked
   bool isColorScaleLocked() const;
 
@@ -98,7 +99,7 @@ signals:
   /**
    * Signal to let views know that autoscaling is on.
    */
-  void autoScale(ColorSelectionWidget*);
+  void autoScale(ColorSelectionWidget *);
   /**
    * Signal to pass on information about a change to the color map.
    * @param model the color map to send
@@ -137,10 +138,10 @@ private:
   /// Set up the behaviour for with or without log scale.
   void setupLogScale(int state);
   /// Set min smaller max, can be used to programmatically set the widgets
-  void setMinSmallerMax(double& min, double& max);
+  void setMinSmallerMax(double &min, double &max);
 
-  QDoubleValidator* m_minValidator;
-  QDoubleValidator* m_maxValidator;
+  QDoubleValidator *m_minValidator;
+  QDoubleValidator *m_maxValidator;
   double m_minHistoric;
   double m_maxHistoric;
 
@@ -148,12 +149,13 @@ private:
   MantidQt::API::MdSettings m_mdSettings;
 
   Ui::ColorSelectionWidgetClass m_ui; ///< The mode control widget's UI form
-  bool m_ignoreColorChangeCallbacks; ///< Effectively blocks/disables callbacks
+  bool m_ignoreColorChangeCallbacks;  ///< Effectively blocks/disables callbacks
 
-  /// this is a flag that is set while updating the color scale triggered by the user clicking on the auto-scale box
+  /// this is a flag that is set while updating the color scale triggered by the
+  /// user clicking on the auto-scale box
   bool m_inProcessUserRequestedAutoScale;
 
-  Mantid::VATES::ColorScaleLock* m_colorScaleLock;
+  Mantid::VATES::ColorScaleLock *m_colorScaleLock;
 };
 
 } // SimpleGui
