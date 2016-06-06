@@ -34,15 +34,17 @@
 #include "PlotCurve.h"
 #include "QwtErrorPlotCurve.h"
 #include "ApplicationWindow.h"
-#include <QClipboard>
 
-#include <qwt_symbol.h>
-#include <qwt_plot_picker.h>
-#include <qwt_plot_curve.h>
-#include <QMessageBox>
-#include <QLocale>
 #include <QApplication>
+#include <QClipboard>
+#include <QLocale>
+#include <QMessageBox>
+#include <QMouseEvent>
 #include <QTextStream>
+
+#include <qwt_plot_curve.h>
+#include <qwt_plot_picker.h>
+#include <qwt_symbol.h>
 
 DataPickerTool::DataPickerTool(Graph *graph, ApplicationWindow *app, Mode mode, const QObject *status_target, const char *status_slot) :
 	QwtPlotPicker(graph->plotWidget()->canvas()),
@@ -59,7 +61,7 @@ DataPickerTool::DataPickerTool(Graph *graph, ApplicationWindow *app, Mode mode, 
 	setTrackerMode(QwtPicker::AlwaysOn);
 	if (d_mode == Move) {
 		setSelectionFlags(QwtPicker::PointSelection | QwtPicker::DragSelection);
-		d_graph->plotWidget()->canvas()->setCursor(Qt::pointingHandCursor);
+		d_graph->plotWidget()->canvas()->setCursor(Qt::PointingHandCursor);
 	} else {
 		setSelectionFlags(QwtPicker::PointSelection | QwtPicker::ClickSelection);
 		d_graph->plotWidget()->canvas()->setCursor(QCursor(getQPixmap("vizor_xpm"), -1, -1));
@@ -121,7 +123,7 @@ void DataPickerTool::setSelection(QwtPlotCurve *curve, int point_index)
   d_restricted_move_pos = QPoint(plot()->transform(xAxis(), d_selected_curve->x(d_selected_point)),
     plot()->transform(yAxis(), d_selected_curve->y(d_selected_point)));
 
-  if (plotCurve && plotCurve->type() == Graph::Function) 
+  if (plotCurve && plotCurve->type() == Graph::Function)
   {
     QLocale locale = d_app->locale();
     emit statusText(QString("%1[%2]: x=%3; y=%4")
@@ -158,7 +160,7 @@ bool DataPickerTool::eventFilter(QObject *obj, QEvent *event)
   {
     return QwtPlotPicker::eventFilter(obj, event);
   }
-  switch(event->type()) 
+  switch(event->type())
   {
   case QEvent::MouseButtonDblClick:
     if (d_selected_curve)
@@ -166,7 +168,7 @@ bool DataPickerTool::eventFilter(QObject *obj, QEvent *event)
     event->accept();
     return true;
 
-  case QEvent::MouseMove: 
+  case QEvent::MouseMove:
     if (auto mouseEvent = dynamic_cast<QMouseEvent *>(event))
     {
       if ( mouseEvent->modifiers() == Qt::ControlModifier )
@@ -183,4 +185,3 @@ bool DataPickerTool::eventFilter(QObject *obj, QEvent *event)
   }
 	return QwtPlotPicker::eventFilter(obj, event);
 }
-

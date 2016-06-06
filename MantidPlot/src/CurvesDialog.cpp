@@ -41,6 +41,8 @@
 #include <QLabel>
 #include <QComboBox>
 #include <QCheckBox>
+#include <QCloseEvent>
+#include <QContextMenuEvent>
 #include <QLayout>
 #include <QListWidget>
 #include <QGroupBox>
@@ -160,7 +162,7 @@ CurvesDialog::CurvesDialog( ApplicationWindow* app, Graph* g, Qt::WFlags fl )
   connect(btnEditFunction, SIGNAL(clicked()),this, SLOT(showFunctionDialog()));
   connect(btnAdd, SIGNAL(clicked()),this, SLOT(addCurves()));
   connect(btnRemove, SIGNAL(clicked()),this, SLOT(removeCurves()));
-  connect(btnOK, SIGNAL(clicked()),this, SLOT(close())); 
+  connect(btnOK, SIGNAL(clicked()),this, SLOT(close()));
   connect(btnCancel, SIGNAL(clicked()),this, SLOT(close()));
   connect(contents, SIGNAL(itemSelectionChanged()), this, SLOT(enableBtnOK()));
   connect(contents, SIGNAL(currentRowChanged(int)), this, SLOT(showCurveBtn(int)));
@@ -273,7 +275,7 @@ void CurvesDialog::contextMenuEvent(QContextMenuEvent *e)
   {
     QMenu contextMenu(this);
     QList<QListWidgetItem *> lst = contents->selectedItems();
-    
+
 	if (lst.size() > 1)
       contextMenu.addAction(tr("&Delete Selection"), this, SLOT(removeCurves()));
     else if (lst.size() > 0)
@@ -459,16 +461,16 @@ void CurvesDialog::removeCurves()
 {
   int count = contents->count();
   QList<QListWidgetItem *> lst = contents->selectedItems();
-  
+
   //disables user from deleting last graph from the graph
   if(count == 1 || count == lst.size()) {
-  QMessageBox::warning( 
-    this, 
-    tr("Cannot Delete"), 
+  QMessageBox::warning(
+    this,
+    tr("Cannot Delete"),
     tr("There should be at least one graph plotted in the graph contents ") );
-	return; 
+	return;
   }
-  
+
   for (int i = 0; i < lst.size(); ++i){
     QListWidgetItem *it = lst.at(i);
     QString s = it->text();
@@ -483,7 +485,7 @@ void CurvesDialog::removeCurves()
   d_graph->updatePlot();
 }
 
-/** Enable Disable buttons function 
+/** Enable Disable buttons function
 *
 */
 void CurvesDialog::enableAddBtn()
@@ -495,7 +497,7 @@ void CurvesDialog::enableAddBtn()
 *
 */
 void CurvesDialog::enableRemoveBtn()
-{ 
+{
   btnRemove->setEnabled (contents->count()>1 && !contents->selectedItems().isEmpty());
 }
 

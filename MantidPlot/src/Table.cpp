@@ -441,7 +441,7 @@ void Table::setColWidths(const QStringList &widths) {
 }
 
 void Table::setColumnTypes(const QStringList &ctl) {
-  int n = QMIN((int)ctl.count(), numCols());
+  int n = qMin((int)ctl.count(), numCols());
   for (int i = 0; i < n; i++) {
     QStringList l = ctl[i].split(";");
     colTypes[i] = l[0].toInt();
@@ -1030,8 +1030,8 @@ void Table::deleteRows(int startRow, int endRow) {
     }
   }
 
-  int start = QMIN(startRow, endRow);
-  int end = QMAX(startRow, endRow);
+  int start = qMin(startRow, endRow);
+  int end = qMax(startRow, endRow);
 
   start--;
   end--;

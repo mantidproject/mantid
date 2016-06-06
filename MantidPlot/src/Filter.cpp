@@ -319,8 +319,8 @@ int Filter::curveRange(QwtPlotCurve *c, double start, double end, int *iStart, i
 		}
 	}
 
-	*iStart = QMIN(i_start, i_end);
-	*iEnd = QMAX(i_start, i_end);
+	*iStart = qMin(i_start, i_end);
+	*iEnd = qMax(i_start, i_end);
     n = abs(i_end - i_start) + 1;
     return n;
 }
@@ -403,8 +403,8 @@ bool Filter::setDataFromTable(Table *t, const QString& xColName, const QString& 
 	if (endRow < 0 || endRow >= t->numRows())
 		endRow = t->numRows() - 1;
 
-    int from = QMIN(startRow, endRow);
-    int to = QMAX(startRow, endRow);
+    int from = qMin(startRow, endRow);
+    int to = qMax(startRow, endRow);
 
 	int r = abs(to - from) + 1;
     QVector<double> X(r), Y(r);

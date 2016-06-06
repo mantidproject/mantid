@@ -136,6 +136,7 @@
 #include <cassert>
 
 #include <qwt_scale_engine.h>
+#include <QColorGroup>
 #include <QFileDialog>
 #include <QInputDialog>
 #include <QProgressDialog>
@@ -159,6 +160,7 @@
 #include <QDateTime>
 #include <QShortcut>
 #include <QDockWidget>
+#include <QTextCodec>
 #include <QTextStream>
 #include <QVarLengthArray>
 #include <QList>
@@ -1579,7 +1581,7 @@ void ApplicationWindow::customMenu(MdiSubWindow *w) {
   while (mIter.hasNext()) {
     QMenu *item = mIter.next();
     auto itemMenuAction = myMenuBar()->addMenu(item);
-    itemMenuAction->setText(tr(item->title()));
+    itemMenuAction->setText(item->title());
   }
 
   auto catalogMenuAction = myMenuBar()->addMenu(icat);
@@ -2969,13 +2971,9 @@ void ApplicationWindow::setAutoUpdateTableValues(bool on) {
 }
 
 void ApplicationWindow::customTable(Table *w) {
-  QColorGroup cg;
-  cg.setColor(QColorGroup::Base, QColor(tableBkgdColor));
-  cg.setColor(QColorGroup::Text, QColor(tableTextColor));
   QPalette palette;
-  palette.setActive(cg);
-  palette.setDisabled(cg);
-  palette.setInactive(cg);
+  palette.setColor(QPalette::Base, QColor(tableBkgdColor));
+  palette.setColor(QPalette::Text, QColor(tableTextColor));
   w->setPalette(palette);
 
   w->setHeaderColor(tableHeaderColor);
@@ -4561,7 +4559,7 @@ void ApplicationWindow::openRecentProject(QAction* action) {
            "<p>It will be removed from the list of recent projects.")
             .arg(fn));
 
-    recentProjects.remove(fn);
+    recentProjects.removeAll(fn);
     updateRecentProjectsList();
     return;
   }
@@ -6242,7 +6240,7 @@ void ApplicationWindow::saveProjectAs(const QString &fileName, bool compress) {
   QString fn = fileName;
   if (fileName.isEmpty()) {
     QString filter = tr("MantidPlot project") +
-                     " (*.mantid);;"; 
+                     " (*.mantid);;";
     filter += tr("Compressed MantidPlot project") + " (*.mantid.gz)";
 
     QString selectedFilter;
@@ -8180,7 +8178,7 @@ void ApplicationWindow::showCursor() {
 
 /**  Switch on the multi-peak selecting tool for fitting
  * with the Fit algorithm of multiple peaks on a single background
- */ 
+ */
 void ApplicationWindow::selectMultiPeak(bool showFitPropertyBrowser) {
   MultiLayer *plot = dynamic_cast<MultiLayer *>(activeWindow(MultiLayerWindow));
   if (!plot)
@@ -9548,7 +9546,7 @@ void ApplicationWindow::interfaceMenuAboutToShow() {
     QMenu *categoryMenu = new QMenu(interfaceMenu);
     categoryMenu->setObjectName(category + "Menu");
     auto categoryMenuAction = interfaceMenu->addMenu(categoryMenu);
-    categoryMenuAction->setText(tr(category));
+    categoryMenuAction->setText(category);
     categoryMenus[category] = categoryMenu;
   }
 
@@ -9565,8 +9563,8 @@ void ApplicationWindow::interfaceMenuAboutToShow() {
       if (!categoryMenus.contains(category))
         continue;
       QAction *openInterface = new QAction(interfaceMenu);
-      openInterface->setObjectName(tr(name));
-      openInterface->setText(tr(name));
+      openInterface->setObjectName(name);
+      openInterface->setText(name);
       openInterface->setData(data);
       categoryMenus[category]->addAction(openInterface);
 
@@ -9651,7 +9649,7 @@ void ApplicationWindow::windowsMenuActivated() {
   QList<MdiSubWindow *> windows = currentFolder()->windowsList();
   auto obj = sender();
   auto action = qobject_cast<QAction*>(obj);
-  auto id = action->data().asInt();
+  auto id = action->data().toInt();
   MdiSubWindow *w = windows.at(id);
   if (w) {
     this->activateWindow(w);
@@ -13330,7 +13328,7 @@ void ApplicationWindow::translateActionsStrings() {
   actionAddColToTable->setToolTip(tr("Add Column"));
 
   actionClearTable->setText(tr("Clear"));
-  actionGoToRow->setMenuText(tr("&Go to Row..."));
+  actionGoToRow->setText(tr("&Go to Row..."));
   actionGoToRow->setShortcut(tr("Ctrl+Alt+G"));
 
   actionGoToColumn->setText(tr("Go to Colum&n..."));
@@ -13391,19 +13389,19 @@ void ApplicationWindow::translateActionsStrings() {
   actionConvertTableToWorkspace->setText(tr("Convert to Table&Workspace"));
   actionConvertTableToMatrixWorkspace->setText(
       tr("Convert to MatrixWorkspace"));
-  actionPlot3DWireFrame->setMenuText(tr("3D &Wire Frame"));
-  actionPlot3DHiddenLine->setMenuText(tr("3D &Hidden Line"));
-  actionPlot3DPolygons->setMenuText(tr("3D &Polygons"));
-  actionPlot3DWireSurface->setMenuText(tr("3D Wire &Surface"));
-  actionSortTable->setMenuText(tr("Sort Ta&ble"));
-  actionSortSelection->setMenuText(tr("Sort Columns"));
-  actionNormalizeTable->setMenuText(tr("&Table"));
-  actionNormalizeSelection->setMenuText(tr("&Columns"));
-  actionCorrelate->setMenuText(tr("Co&rrelate"));
-  actionAutoCorrelate->setMenuText(tr("&Autocorrelate"));
-  actionConvolute->setMenuText(tr("&Convolute"));
-  actionDeconvolute->setMenuText(tr("&Deconvolute"));
-  actionSetAscValues->setMenuText(tr("Ro&w Numbers"));
+  actionPlot3DWireFrame->setText(tr("3D &Wire Frame"));
+  actionPlot3DHiddenLine->setText(tr("3D &Hidden Line"));
+  actionPlot3DPolygons->setText(tr("3D &Polygons"));
+  actionPlot3DWireSurface->setText(tr("3D Wire &Surface"));
+  actionSortTable->setText(tr("Sort Ta&ble"));
+  actionSortSelection->setText(tr("Sort Columns"));
+  actionNormalizeTable->setText(tr("&Table"));
+  actionNormalizeSelection->setText(tr("&Columns"));
+  actionCorrelate->setText(tr("Co&rrelate"));
+  actionAutoCorrelate->setText(tr("&Autocorrelate"));
+  actionConvolute->setText(tr("&Convolute"));
+  actionDeconvolute->setText(tr("&Deconvolute"));
+  actionSetAscValues->setText(tr("Ro&w Numbers"));
   actionSetAscValues->setToolTip(tr("Fill selected columns with row numbers"));
   actionSetRandomValues->setText(tr("&Random Values"));
   actionSetRandomValues->setToolTip(
@@ -13426,7 +13424,7 @@ void ApplicationWindow::translateActionsStrings() {
   actionBoxPlot->setText(tr("&Box Plot"));
   actionBoxPlot->setToolTip(tr("Box and whiskers plot"));
 
-  actionHomePage->setMenuText(tr("&Mantid Homepage")); // Mantid change
+  actionHomePage->setText(tr("&Mantid Homepage")); // Mantid change
   actionHelpBugReports->setText(tr("Report a &Bug"));
   actionAskHelp->setText(tr("Ask for Help"));
 
@@ -13687,10 +13685,10 @@ MultiLayer *ApplicationWindow::plotImage(Matrix *m) {
       return 0;
     }
     s->setAxis(QwtPlot::xTop, QwtPlot::yLeft);
-    plot->setScale(QwtPlot::xTop, QMIN(m->xStart(), m->xEnd()),
-                   QMAX(m->xStart(), m->xEnd()));
-    plot->setScale(QwtPlot::yLeft, QMIN(m->yStart(), m->yEnd()),
-                   QMAX(m->yStart(), m->yEnd()), 0.0, 5, 5,
+    plot->setScale(QwtPlot::xTop, qMin(m->xStart(), m->xEnd()),
+                   qMax(m->xStart(), m->xEnd()));
+    plot->setScale(QwtPlot::yLeft, qMin(m->yStart(), m->yEnd()),
+                   qMax(m->yStart(), m->yEnd()), 0.0, 5, 5,
                    GraphOptions::Linear, true);
   } else {
     g = mantidUI->plotSpectrogram(Graph::GrayScale);
@@ -13879,7 +13877,7 @@ void ApplicationWindow::updateRecentProjectsList() {
 
 void ApplicationWindow::updateRecentFilesList(QString fname) {
   if (!fname.isEmpty()) {
-    recentFiles.remove(fname);
+    recentFiles.removeAll(fname);
     recentFiles.push_front(fname);
   }
   while ((int)recentFiles.size() > MaxRecentFiles)
@@ -14080,7 +14078,7 @@ void ApplicationWindow::parseCommandLineArguments(const QStringList &args) {
         (str == "-r" || str == "--revision") ||
         (str == "-a" || str == "--about") || (str == "-h" || str == "--help")) {
       g_log.warning()
-          << str.latin1()
+          << str.toLatin1().constData()
           << ": This command line option must be used without other arguments!";
     } else if ((str == "-d" || str == "--default-settings")) {
       default_settings = true;
@@ -14098,7 +14096,7 @@ void ApplicationWindow::parseCommandLineArguments(const QStringList &args) {
     else if (file_name.isEmpty() &&
              (str.startsWith("-") || str.startsWith("--"))) {
       g_log.warning()
-          << "'" << str.latin1() << "' unknown command line option!\n"
+          << "'" << str.toLatin1().constData() << "' unknown command line option!\n"
           << "Type 'MantidPlot -h'' to see the list of the valid options.";
       unknown_opt_found = true;
       break;
@@ -14412,7 +14410,7 @@ void ApplicationWindow::saveProjectFile(Folder *folder, const QString &fn,
   f.close();
 
   if (compress) {
-    file_compress(fn.latin1(), "w9");
+    file_compress(fn.toLatin1().constData(), "w9");
   }
 
   QApplication::restoreOverrideCursor();
@@ -14452,8 +14450,8 @@ void ApplicationWindow::showFolderPopupMenu(QTreeWidgetItem *it, const QPoint &p
   QMenu window(this);
   QMenu viewWindowsMenu(this);
 
-  cm.insertItem(tr("&Find..."), this, SLOT(showFindDialogue()));
-  cm.insertSeparator();
+  cm.addAction(tr("&Find..."), this, SLOT(showFindDialogue()));
+  cm.addSeparator();
   cm.addAction(tr("App&end Project..."), this, SLOT(appendProject()));
 
   auto fli = dynamic_cast<FolderListItem *>(it);
@@ -15923,7 +15921,7 @@ void ApplicationWindow::performCustomAction(QAction *action) {
   QString action_data = action->data().toString();
   if (QFileInfo(action_data).exists()) {
     QFile script_file(action_data);
-    if (!script_file.open(IO_ReadOnly)) {
+    if (!script_file.open(QIODevice::ReadOnly)) {
       QMessageBox::information(this, "MantidPlot",
                                "Error: There was a problem reading\n" +
                                    action_data);
@@ -16033,7 +16031,6 @@ void ApplicationWindow::addUserMenu(const QString &topMenu) {
   connect(customMenu, SIGNAL(triggered(QAction *)), this,
           SLOT(performCustomAction(QAction *)));
   d_user_menus.append(customMenu);
-  myMenuBar()->insertItem(tr(topMenu), customMenu);
   myMenuBar()->addMenu(customMenu)->setText(tr(topMenu.toAscii().constData()));
 }
 
@@ -16153,7 +16150,7 @@ void ApplicationWindow::setMatrixUndoStackSize(int size) {
   while (f) {
     QList<MdiSubWindow *> folderWindows = f->windowsList();
     foreach (MdiSubWindow *w, folderWindows) {
-      if (w->isA("Matrix")) {
+      if (this->isOfType(w, "Matrix")) {
         auto matrix = dynamic_cast<Matrix *>(w);
         if (!matrix)
           continue;
@@ -17019,5 +17016,3 @@ QString ApplicationWindow::saveProjectFolder(Folder *folder, int &windowCount,
 bool ApplicationWindow::isOfType(const QObject* obj, const char* toCompare) const {
   return strcmp(obj->metaObject()->className(), toCompare) == 0;
 }
-
-

@@ -332,7 +332,7 @@ std::string ImggFormatsConvertViewQtWidget::grabUserBrowseDir(
   }
 
   QString path(QFileDialog::getExistingDirectory(
-      this, tr(QString::fromStdString(userMsg)), prev));
+      this, tr(userMsg.c_str()), prev));
 
   if (!path.isEmpty()) {
     le->setText(path);

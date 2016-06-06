@@ -151,8 +151,8 @@ void ColorMapEditor::setColorMap(const QwtLinearColorMap& map)
 
 void ColorMapEditor::setRange(double min, double max)
 {
-  min_val = QMIN(min, max);
-  max_val = QMAX(min, max);
+  min_val = qMin(min, max);
+  max_val = qMax(min, max);
 }
 
 void ColorMapEditor::insertLevel()

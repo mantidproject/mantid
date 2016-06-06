@@ -73,7 +73,7 @@ AssociationsDialog::AssociationsDialog( Graph* g, Qt::WFlags fl )
   vl->addWidget(table);
 
   connect(table, SIGNAL(itemClicked(QTableWidgetItem*)), this, SLOT(processStateChange(QTableWidgetItem*)));
-  
+
   associations = new QListWidget();
   associations->setSelectionMode ( QListWidget::SingleSelection );
   vl->addWidget(associations);
@@ -114,7 +114,7 @@ void AssociationsDialog::updateCurves()
   if (!graph)
     return;
 
-  QApplication::setOverrideCursor(Qt::waitCursor);
+  QApplication::setOverrideCursor(Qt::WaitCursor);
 
   for (int i = 0; i < associations->count(); i++)
     changePlotAssociation(i, plotAssociation(associations->item(i)->text()));

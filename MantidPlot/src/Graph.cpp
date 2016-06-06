@@ -1067,8 +1067,8 @@ void Graph::initScaleLimits() { // We call this function the first time we add
  */
 void Graph::niceLogScales(QwtPlot::Axis axis) {
   const QwtScaleDiv *scDiv = d_plot->axisScaleDiv(axis);
-  double start = QMIN(scDiv->lBound(), scDiv->hBound());
-  double end = QMAX(scDiv->lBound(), scDiv->hBound());
+  double start = qMin(scDiv->lBound(), scDiv->hBound());
+  double end = qMax(scDiv->lBound(), scDiv->hBound());
 
   // log scales can't represent zero or negative values, 1e-10 as a
   // low range is enough to display all data but still be plottable on
@@ -1156,8 +1156,8 @@ void Graph::setScale(QwtPlot::Axis axis, ScaleTransformation::Type scaleType) {
   }
 
   const QwtScaleDiv *scDiv = d_plot->axisScaleDiv(axis);
-  double start = QMIN(scDiv->lBound(), scDiv->hBound());
-  double end = QMAX(scDiv->lBound(), scDiv->hBound());
+  double start = qMin(scDiv->lBound(), scDiv->hBound());
+  double end = qMax(scDiv->lBound(), scDiv->hBound());
 
   ScaleEngine *scaleEng =
       dynamic_cast<ScaleEngine *>(d_plot->axisScaleEngine(axis));
@@ -1371,7 +1371,7 @@ void Graph::setAxisScale(int axis, double start, double end, int scaleType,
     max_min_intervals = 3;
   if (minorTicks > 1)
     max_min_intervals = minorTicks + 1;
-  QwtScaleDiv div = sc_engine->divideScale(QMIN(start, end), QMAX(start, end),
+  QwtScaleDiv div = sc_engine->divideScale(qMin(start, end), qMax(start, end),
                                            majorTicks, max_min_intervals, step);
   d_plot->setAxisMaxMajor(axis, majorTicks);
   d_plot->setAxisMaxMinor(axis, minorTicks);
@@ -4329,8 +4329,8 @@ void Graph::copy(Graph *g) {
 
     sc_engine->clone(se);
     const QwtScaleDiv *sd = plot->axisScaleDiv(i);
-    QwtScaleDiv div = sc_engine->divideScale(QMIN(sd->lBound(), sd->hBound()),
-                                             QMAX(sd->lBound(), sd->hBound()),
+    QwtScaleDiv div = sc_engine->divideScale(qMin(sd->lBound(), sd->hBound()),
+                                             qMax(sd->lBound(), sd->hBound()),
                                              majorTicks, minorTicks, step);
 
     if (se->testAttribute(QwtScaleEngine::Inverted))
@@ -6637,8 +6637,8 @@ std::string Graph::saveScale() {
     if (!scDiv)
       return "";
 
-    tsv << QString::number(QMIN(scDiv->lBound(), scDiv->hBound()), 'g', 15);
-    tsv << QString::number(QMAX(scDiv->lBound(), scDiv->hBound()), 'g', 15);
+    tsv << QString::number(qMin(scDiv->lBound(), scDiv->hBound()), 'g', 15);
+    tsv << QString::number(qMax(scDiv->lBound(), scDiv->hBound()), 'g', 15);
 
     tsv << QString::number(d_user_step[i], 'g', 15);
     tsv << d_plot->axisMaxMajor(i);

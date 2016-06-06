@@ -55,8 +55,8 @@ class RangeSelectorTool : public QwtPlotPicker, public PlotToolInterface
 	public:
 		RangeSelectorTool(Graph *graph, const QObject *status_target=NULL, const char *status_slot="");
                 ~RangeSelectorTool() override;
-                double minXValue() const { return QMIN(d_active_marker.xValue(), d_inactive_marker.xValue()); }
-		double maxXValue() const { return QMAX(d_active_marker.xValue(), d_inactive_marker.xValue()); }
+                double minXValue() const { return qMin(d_active_marker.xValue(), d_inactive_marker.xValue()); }
+		double maxXValue() const { return qMax(d_active_marker.xValue(), d_inactive_marker.xValue()); }
 		int dataSize() const { return qAbs(d_active_point - d_inactive_point); }
                 bool eventFilter(QObject *obj, QEvent *event) override;
                 bool keyEventFilter(QKeyEvent *ke);
@@ -102,4 +102,3 @@ class RangeSelectorTool : public QwtPlotPicker, public PlotToolInterface
 };
 
 #endif // ifndef RANGE_SELECTOR_TOOL_H
-
