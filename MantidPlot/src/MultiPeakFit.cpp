@@ -98,15 +98,15 @@ void MultiPeakFit::setNumPeaks(int n)
 
 QStringList MultiPeakFit::generateParameterList(int peaks)
 {
-	if (peaks == 1)
-    return {"A","xc","w","y0"};
+  if (peaks == 1)
+    return {"A", "xc", "w", "y0"};
 
-	QStringList lst;
-	for (int i = 0; i<peaks; i++){
-		QString index = QString::number(i+1);
-		lst << "A" + index;
-		lst << "xc" + index;
-		lst << "w" + index;
+  QStringList lst;
+  for (int i = 0; i < peaks; i++) {
+    QString index = QString::number(i + 1);
+    lst << "A" + index;
+    lst << "xc" + index;
+    lst << "w" + index;
 	}
 	lst << "y0";
 	return lst;
@@ -115,9 +115,9 @@ QStringList MultiPeakFit::generateParameterList(int peaks)
 QStringList MultiPeakFit::generateExplanationList(int peaks)
 {
 	if (peaks == 1)
-    return {tr("area"),tr("center"),tr("width"),tr("offset")};
+          return {tr("area"), tr("center"), tr("width"), tr("offset")};
 
-	QStringList lst;
+        QStringList lst;
 	for (int i = 0; i<peaks; i++){
 		QString index = QString::number(i+1);
 		lst << tr("area") + " " + index;
@@ -303,8 +303,8 @@ void MultiPeakFit::generateFitCurve()
 		QString label = d_explanation + " " + tr("fit of") + " " + dataSet;
 
 		d_result_table = app->newHiddenTable(tableName, label, d_points, peaks_aux + 2);
-    QStringList header{"1"};
-		for (i = 0; i<peaks_aux; i++)
+                QStringList header{"1"};
+                for (i = 0; i<peaks_aux; i++)
 			header << tr("peak") + QString::number(i+1);
 		header << "2";
 		d_result_table->setHeader(header);

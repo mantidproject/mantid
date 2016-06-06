@@ -67,9 +67,9 @@ public:
 	void setFormulas(const QStringList& lst){d_formulas = lst;};
 
 	//! Provided for convenience when dealing with normal functions
-  void setFormula(const QString& s){d_formulas = {s};};
+        void setFormula(const QString &s) { d_formulas = {s}; };
 
-	QString variable(){return d_variable;};
+        QString variable(){return d_variable;};
 	void setVariable(const QString& s){d_variable = s;};
 
 	FunctionType functionType(){return d_function_type;};

@@ -71,9 +71,9 @@ ContourLinesEditor::ContourLinesEditor(const QLocale& locale, int precision, QWi
 	table->horizontalHeader()->setClickable( false );
 	table->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
 	table->viewport()->setMouseTracking(true);
-	table->viewport()->installEventFilter(this);
-  table->setHorizontalHeaderLabels({tr("Level"),tr("Pen")});
-	table->setMinimumHeight(6*table->horizontalHeader()->height() + 2);
+        table->viewport()->installEventFilter(this);
+        table->setHorizontalHeaderLabels({tr("Level"), tr("Pen")});
+        table->setMinimumHeight(6*table->horizontalHeader()->height() + 2);
 	table->installEventFilter(this);
 
 	connect(table, SIGNAL(cellClicked (int, int)), this, SLOT(showPenDialog(int, int)));
