@@ -1,4 +1,5 @@
 #include "MantidAlgorithms/MaxEnt/MaxentCalculator.h"
+#include <cmath>
 
 namespace Mantid {
 namespace Algorithms {
@@ -13,8 +14,8 @@ namespace Algorithms {
 MaxentCalculator::MaxentCalculator(MaxentEntropy_sptr entropy,
                                    MaxentTransform_sptr transform)
     : m_data(), m_errors(), m_image(), m_dataCalc(), m_background(1.0),
-      m_angle(-1.), m_chisq(-1.), m_entropy(entropy), m_transform(transform),
-      m_directionsIm(), m_coeffs() {}
+      m_angle(-1.), m_chisq(-1.), m_directionsIm(), m_coeffs(),
+      m_entropy(entropy), m_transform(transform) {}
 
 /**
 * Calculates the gradient of chi-square using the experimental data, calculated
