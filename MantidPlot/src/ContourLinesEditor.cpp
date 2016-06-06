@@ -72,7 +72,7 @@ ContourLinesEditor::ContourLinesEditor(const QLocale& locale, int precision, QWi
 	table->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
 	table->viewport()->setMouseTracking(true);
 	table->viewport()->installEventFilter(this);
-	table->setHorizontalHeaderLabels(QStringList() << tr("Level") << tr("Pen"));
+  table->setHorizontalHeaderLabels({tr("Level"),tr("Pen")});
 	table->setMinimumHeight(6*table->horizontalHeader()->height() + 2);
 	table->installEventFilter(this);
 

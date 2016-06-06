@@ -2431,7 +2431,7 @@ void ConfigDialog::apply()
   app->settings.setValue("/General/FloatingWindows/MdiSubWindow",boxFloatingCustomInterfaces->isChecked());
   app->settings.setValue("/General/FloatingWindows/TiledWindow",boxFloatingTiledWindows->isChecked());
   // 3D plots page
-  QStringList plot3DColors = QStringList() << btnToColor->color().name() << btnLabels->color().name();
+  QStringList plot3DColors{btnToColor->color().name(),btnLabels->color().name()};
   plot3DColors << btnMesh->color().name() << btnGrid->color().name() << btnFromColor->color().name();
   plot3DColors << btnNumbers->color().name() << btnAxes->color().name() << btnBackground3D->color().name();
   app->plot3DColors = plot3DColors;

@@ -515,8 +515,7 @@ Table *Fit::parametersTable(const QString &tableName) {
         app->newTable(app->generateUniqueName(tableName, false), d_p, 3);
   }
 
-  d_param_table->setHeader(QStringList() << tr("Parameter") << tr("Value")
-                                         << tr("Error"));
+  d_param_table->setHeader({tr("Parameter"),tr("Value"),tr("Error")});
   d_param_table->setColPlotDesignation(2, Table::yErr);
   d_param_table->setHeaderColType();
 

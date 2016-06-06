@@ -669,7 +669,7 @@ void Graph::setLabelsTextFormat(int axis, int type,
   if (type != ScaleDraw::Text && type != ScaleDraw::ColHeader)
     return;
 
-  QStringList list = QStringList();
+  QStringList list;
   if (type == ScaleDraw::Text) {
     if (!table)
       return;

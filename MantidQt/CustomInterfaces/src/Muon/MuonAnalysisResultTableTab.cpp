@@ -39,9 +39,7 @@ using namespace MantidQt::MantidWidgets;
 const std::string MuonAnalysisResultTableTab::WORKSPACE_POSTFIX("_Workspace");
 const std::string MuonAnalysisResultTableTab::PARAMS_POSTFIX("_Parameters");
 const QString MuonAnalysisResultTableTab::RUN_NUMBER_LOG("run_number");
-const QStringList MuonAnalysisResultTableTab::NON_TIMESERIES_LOGS =
-    QStringList() << MuonAnalysisResultTableTab::RUN_NUMBER_LOG << "sample_temp"
-                  << "sample_magn_field";
+const QStringList MuonAnalysisResultTableTab::NON_TIMESERIES_LOGS{MuonAnalysisResultTableTab::RUN_NUMBER_LOG,"sample_temp","sample_magn_field"};
 
 /**
 * Constructor

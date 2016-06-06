@@ -10555,11 +10555,7 @@ void ApplicationWindow::showStandAloneHelp() {
     exit(0);
   }
 
-  QStringList cmdLst = QStringList() << "-profile" << profilePath;
-  //  QAssistantClient *assist = new QAssistantClient( QString(), 0);
-  //  assist->setArguments( cmdLst );
-  //  assist->showPage(helpPath);
-  //  connect(assist, SIGNAL(assistantClosed()), qApp, SLOT(quit()) );
+  QStringList cmdLst{"-profile",profilePath};
 }
 
 void ApplicationWindow::showHelp() {
@@ -10599,9 +10595,7 @@ void ApplicationWindow::showHelp() {
     return;
   }
 
-  QStringList cmdLst = QStringList() << "-profile" << profilePath;
-  //  assistant->setArguments( cmdLst );
-  //  assistant->showPage(helpFilePath);
+  QStringList cmdLst{"-profile",profilePath};
 }
 
 void ApplicationWindow::showPlotWizard() {

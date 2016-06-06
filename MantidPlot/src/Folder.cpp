@@ -50,7 +50,7 @@ QList<Folder *> Folder::folders() {
 }
 
 QStringList Folder::subfolders() {
-  QStringList list = QStringList();
+  QStringList list;
   QObjectList folderList = children();
   if (!folderList.isEmpty()) {
     QObject *f;
