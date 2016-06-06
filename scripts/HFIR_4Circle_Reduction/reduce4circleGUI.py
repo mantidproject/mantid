@@ -24,7 +24,6 @@ else:
 
 import reduce4circleControl as r4c
 import guiutility as gutil
-# from peakprocesshelper import PeakProcessHelper
 import fourcircle_utility as hb3a
 import plot3dwindow
 
@@ -1773,7 +1772,30 @@ class MainWindow(QtGui.QMainWindow):
         """ Apply k-shift to selected reflections
         :return:
         """
-        # TODO/NOW - Implement ASAP
+        # get the selected scans
+        scan_list = list()
+        selected_row_numbers = self.ui.tableWidget_mergeScans.get_selected_rows(True)
+        for row_index in selected_row_numbers:
+            scan_number = self.ui.tableWidget_mergeScans.get_scan_number(row_index)
+            scan_list.append(scan_list)
+
+        # parse the k-vector
+        kshift_str_vec = str(self.ui.lineEdit_K.text()).split(',')
+        if len(kshift_str_vec) != 3:
+            error_message = 'K-shift vector must be in format kx, ky, kz. ' \
+                            'Present input %s does not meet the format.' % kshift_str_vec
+            self.pop_one_button_dialog(error_message)
+            return
+        k_x = float(kshift_str_vec[0])
+        k_y = float(kshift_str_vec[1])
+        k_z = float(kshift_str_vec[2])
+
+        # get experiment
+        exp_number = int(self.ui.lineEdit_exp.text())
+
+        # form the set up
+        self._myControl.set_k_shift(exp_number, scan_list, (k_x, k_y, k_z))
+
         return
 
     def do_apply_roi(self):
@@ -1860,12 +1882,12 @@ class MainWindow(QtGui.QMainWindow):
         return
 
     def do_select_merged_scans(self):
-        """
+        """ Select or deselect all rows in the merged scan table
         :return:
         """
-        # TODO/NOW - Doc & implement!
         curr_state = self.ui.checkBox_selectAllScans2Merge.isChecked()
-        print '[DB...BAT] current state is changed to ', curr_state
+        for row_index in range(self.ui.tableWidget_mergeScans.rowCount()):
+            self.ui.tableWidget_mergeScans.set_status_by_row(row_index, curr_state)
 
         return
 
@@ -2272,6 +2294,9 @@ class MainWindow(QtGui.QMainWindow):
         Apply Lorentz corrections to the integrated peak intensities of all the selected peaks.
         :return:
         """
+        # get experiment number
+        exp_number = int(self.ui.lineEdit_exp.text())
+
         # select rows
         selected_rows = self.ui.tableWidget_mergeScans.get_selected_rows(True)
 
@@ -2280,7 +2305,7 @@ class MainWindow(QtGui.QMainWindow):
             scan_number = self.ui.tableWidget_mergeScans.get_scan_number(row_number)
             peak_intensity = self.ui.tableWidget_mergeScans.get_intensity(row_number)
             q = self._myControl.calculate_Q(self.ui.tableWidget_mergeScans.get_peak_center(q=True))
-            wavelength = self._myControl.get_wavelength(exp_number, scan_number)
+            wavelength = self._myControl.get_wave_length(exp_number, [scan_number])
             step_omega = self._myControl.get_motor_step(exp_number, scan_number)
             corrected = self._myControl.apply_lorentz_correction(peak_intensity, q, wavelength, step_omega)
             self.ui.tableWidget_mergeScans.set_peak_intensity(row_number, corrected, lorentz_corrected=True)
@@ -2307,7 +2332,7 @@ class MainWindow(QtGui.QMainWindow):
         # Setup
         save_dict['lineEdit_localSpiceDir'] = str(self.ui.lineEdit_localSpiceDir.text())
         save_dict['lineEdit_url'] = str(self.ui.lineEdit_url.text())
-        save_dict['lineEdit_workDir']= str(self.ui.lineEdit_workDir.text())
+        save_dict['lineEdit_workDir'] = str(self.ui.lineEdit_workDir.text())
 
         # Experiment
         save_dict['lineEdit_exp'] = str(self.ui.lineEdit_exp.text())
@@ -2506,8 +2531,8 @@ class MainWindow(QtGui.QMainWindow):
             self.ui.lineEdit_beta.setText(str(lattice_beta))
             lattice_gamma = settings.value('gamma')
             self.ui.lineEdit_gamma.setText(str(lattice_gamma))
-        except TypeError as e:
-            self.pop_one_button_dialog(str(e))
+        except TypeError as err:
+            self.pop_one_button_dialog(str(err))
             return
 
         return

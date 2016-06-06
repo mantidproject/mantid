@@ -11,7 +11,6 @@
 import csv
 import math
 import random
-import numpy
 
 from fourcircle_utility import *
 from peakprocesshelper import PeakProcessHelper
@@ -84,6 +83,10 @@ class CWSCDReductionControl(object):
 
         # Region of interest: key = (experiment, scan), value = 2-tuple of 2-tuple: ( (lx, ly), (ux, uy))
         self._roiDict = dict()
+
+        # About K-shift for output of integrated peak
+        self._kVectorIndex = 1
+        self._kShiftDict = dict()
 
         # A dictionary to manage all loaded and processed MDEventWorkspaces
         # self._expDataDict = {}
@@ -476,6 +479,32 @@ class CWSCDReductionControl(object):
             raise RuntimeError('There are more than 1 (%s) wave length found in scans.' % str(wave_length_set))
 
         return wave_length_set.pop()
+
+    def get_motor_step(self, exp_number, scan_number):
+        """ For omega/phi scan, get the average step of the motor
+        :param exp_number:
+        :param scan_number:
+        :return:
+        """
+        # check
+        assert isinstance(exp_number, int)
+        assert isinstance(scan_number, int)
+
+        # get SPICE table
+        spice_table_name = get_spice_table_name(exp_number, scan_number)
+        spice_table = AnalysisDataService.retrieve(spice_table_name)
+
+        # get the motors values
+        omega_vec = get_log_data(spice_table, 'omega')
+        omega_step = get_statistics(omega_vec)
+
+        phi_vec = get_log_data(spice_table, 'phi')
+        phi_step = get_statistics(phi_vec)
+
+        motor_step = max(abs(omega_step), abs(phi_step))
+
+        return motor_step
+
 
     def export_to_fullprof(self, exp_number, scan_number_list, scan_kindex_dict, k_shift_dict, user_header,
                            fullprof_file_name):
@@ -1850,6 +1879,23 @@ class CWSCDReductionControl(object):
 
         return True, (m_h, m_k, m_l)
 
+    def set_k_shift(self, scan_number_list, k_shift_vector):
+        """ Set k-shift vector
+        :param exp_number:
+        :param scan_number_list:
+        :param k_shift_vector:
+        :return:
+        """
+        # check
+        assert isinstance(scan_number_list, list) and len(scan_number_list) > 0
+        assert len(k_shift_vector) == 3
+
+        # get the k-shift index
+        self._kShiftDict[self._kVectorIndex] = (k_shift_vector, scan_number_list)
+        self._kVectorIndex += 1
+
+        return
+
     def _add_raw_workspace(self, exp_no, scan_no, pt_no, raw_ws):
         """ Add raw Pt.'s workspace
         :param exp_no:
@@ -1950,21 +1996,32 @@ class CWSCDReductionControl(object):
 
     def set_peak_intensity(self, exp_number, scan_number, intensity):
         """
-
+        Set peak intensity to a scan
         :param exp_number:
         :param scan_number:
         :param intensity:
         :return:
         """
-        # TODO/NOW: Implement ASAP
+        # check
+        assert isinstance(exp_number, int)
+        assert isinstance(scan_number, int)
+        assert isinstance(intensity, float)
 
         # get dictionary item
+        err_msg = 'Exp %d Scan %d does not exist in peak information' \
+                  ' dictionary.' % (exp_number, scan_number)
+        assert (exp_number, scan_number) in self._myPeakInfoDict, err_msg
+        peak_info = self._myPeakInfoDict[(exp_number, scan_number)]
 
         # set intensity
+        peak_info.set_intensity(intensity)
 
-        # calculate sigma
-
-        blabla
+        # calculate sigma by simple square root
+        if intensity > 0:
+            sigma = math.sqrt(intensity)
+        else:
+            sigma = 1.
+        peak_info.set_sigma(sigma)
 
         return
 

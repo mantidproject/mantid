@@ -18,7 +18,7 @@ def write_scd_fullprof_kvector(user_header, wave_length, k_vector_dict, peak_dic
     # check
     assert isinstance(user_header, str), 'User header must be a string.'
     assert isinstance(wave_length, float), 'Neutron wave length must be a float.'
-    assert isinstance(k_vector_list, list), 'K-vector list must be a list.'
+    assert isinstance(k_vector_dict, dict), 'K-vector list must be a dictionary.'
     assert isinstance(peak_dict_list, list), 'Peak-dictionary list must be a list.'
 
     # set up all lines

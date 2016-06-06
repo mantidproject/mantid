@@ -4,6 +4,8 @@ import urllib2
 import socket
 import numpy
 
+from mantid.api import AnalysisDataService
+
 __author__ = 'wzz'
 
 
@@ -545,6 +547,29 @@ def get_single_pt_md_name(exp_number, scan_number, pt_number):
     ws_name = 'HB3A_Exp%d_Scan%d_Pt%d_MD' % (exp_number, scan_number, pt_number)
 
     return ws_name
+
+
+def get_wave_length(spice_table_name):
+    """ Get wave length from a SPICE table workspace for HB3A (4-circle)
+    Assumption: in a scan (all Pt. are in a same SPICE table), all m1 value should be same.
+    :param spice_table_name: name of the table workspace
+    :return: wave length
+    """
+    # check
+    assert isinstance(spice_table_name, str), 'Input SPICE table workspace name must be a string.'
+    assert AnalysisDataService.doesexist(spice_table_name)
+
+    spice_table_ws = AnalysisDataService.retrieve(spice_table_name)
+
+    # get the column
+    column_name_list = spice_table_ws.getColumnNames()
+    col_index_m1 = column_name_list.index('m1')
+    assert col_index_m1 < len(column_name_list), 'Column m1 cannot be found.'
+
+    m1 = float(spice_table_ws.cell(0, col_index_m1))
+    wave_length = convert_to_wave_length(m1)
+
+    return wave_length
 
 
 def load_hb3a_md_data(file_name):
