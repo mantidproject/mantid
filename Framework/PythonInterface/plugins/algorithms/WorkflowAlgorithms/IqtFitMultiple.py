@@ -184,27 +184,28 @@ class IqtFitMultiple(PythonAlgorithm):
         #convert parameters to matrix workspace
         parameter_names = 'A0,Intensity,Tau,Beta'
         conclusion_prog.report('Processing indirect fit parameters')
-        self._result_name = ProcessIndirectFitParameters(InputWorkspace=self._parameter_name,
+        result_workspace = ProcessIndirectFitParameters(InputWorkspace=self._parameter_name,
                                                          ColumnX="axis-1", XAxisUnit="MomentumTransfer",
-                                                         ParameterNames=parameter_names)
+                                                         ParameterNames=parameter_names,
+                                                         OutputWorkspace=self._result_name)
 
         # create and add sample logs
         sample_logs  = {'start_x': self._start_x, 'end_x': self._end_x, 'fit_type': self._fit_type[:-2],
                         'intensities_constrained': self._intensities_constrained, 'beta_constrained': True}
 
         conclusion_prog.report('Copying sample logs')
-        CopyLogs(InputWorkspace=self._input_ws, OutputWorkspace=self._result_name)
+        CopyLogs(InputWorkspace=self._input_ws, OutputWorkspace=result_workspace)
         CopyLogs(InputWorkspace=self._input_ws, OutputWorkspace=self._fit_group_name)
 
         log_names = [item for item in sample_logs]
         log_values = [sample_logs[item] for item in sample_logs]
         conclusion_prog.report('Adding sample logs')
-        AddSampleLogMultiple(Workspace=self._result_name, LogNames=log_names, LogValues=log_values)
+        AddSampleLogMultiple(Workspace=result_workspace, LogNames=log_names, LogValues=log_values)
         AddSampleLogMultiple(Workspace=self._fit_group_name, LogNames=log_names, LogValues=log_values)
 
         DeleteWorkspace(tmp_fit_workspace)
 
-        self.setProperty('OutputResultWorkspace', self._result_name)
+        self.setProperty('OutputResultWorkspace', result_workspace)
         self.setProperty('OutputParameterWorkspace', self._parameter_name)
         self.setProperty('OutputWorkspaceGroup', self._fit_group_name)
         conclusion_prog.report('Algorithm complete')
