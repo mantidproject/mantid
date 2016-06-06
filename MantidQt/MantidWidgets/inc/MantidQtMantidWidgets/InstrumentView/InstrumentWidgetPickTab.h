@@ -83,6 +83,7 @@ public:
   bool addToDisplayContextMenu(QMenu &) const override;
   void selectTool(const ToolType tool);
   boost::shared_ptr<ProjectionSurface> getSurface() const;
+  int get_currentPickID(); //for live data prototype
 
 public slots:
   void setTubeXUnits(int units);
@@ -172,6 +173,8 @@ public:
   /// Constructor.
   ComponentInfoController(InstrumentWidgetPickTab *tab,
                           InstrumentActor *instrActor, QTextEdit *infoDisplay);
+
+  int get_currentPickID(); //for live instrumentdet, actually detid
 public slots:
   void displayInfo(size_t pickID);
   void clear();
@@ -185,9 +188,9 @@ private:
   InstrumentWidgetPickTab *m_tab;
   InstrumentActor *m_instrActor;
   QTextEdit *m_selectionInfoDisplay;
-
   bool m_freezePlot;
   bool m_instrWidgetBlocked;
+  int m_liveDataDetID;
   size_t m_currentPickID;
   QString m_xUnits;
 };
@@ -195,6 +198,7 @@ private:
 /**
 * Class contining the logic of plotting the data in detectors/tubes.
 */
+
 class DetectorPlotController : public QObject {
   Q_OBJECT
 

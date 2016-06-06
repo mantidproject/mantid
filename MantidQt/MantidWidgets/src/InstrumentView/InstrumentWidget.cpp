@@ -255,7 +255,7 @@ namespace MantidQt
 				updateInfoText();
 			}
 		}
-
+		
 		/**
 		* Deletes instrument actor before re-initializing.
 		* @param resetGeometry
