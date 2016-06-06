@@ -63,7 +63,7 @@ void Iqt::setup() {
 
   m_furTree->setFactoryForManager(m_dblManager, m_dblEdFac);
 
-  auto xRangeSelector = m_uiForm.ppPlot->addRangeSelector("FuryRange");
+  auto xRangeSelector = m_uiForm.ppPlot->addRangeSelector("IqtRange");
 
   // signals / slots & validators
   connect(xRangeSelector, SIGNAL(selectionChangedLazy(double, double)), this,
@@ -97,21 +97,21 @@ void Iqt::run() {
   double energyMax = m_dblManager->value(m_properties["EHigh"]);
   double numBins = m_dblManager->value(m_properties["SampleBinning"]);
 
-  IAlgorithm_sptr furyAlg =
+  IAlgorithm_sptr IqtAlg =
       AlgorithmManager::Instance().create("TransformToIqt");
-  furyAlg->initialize();
+  IqtAlg->initialize();
 
-  furyAlg->setProperty("SampleWorkspace", wsName.toStdString());
-  furyAlg->setProperty("ResolutionWorkspace", resName.toStdString());
+  IqtAlg->setProperty("SampleWorkspace", wsName.toStdString());
+  IqtAlg->setProperty("ResolutionWorkspace", resName.toStdString());
 
-  furyAlg->setProperty("EnergyMin", energyMin);
-  furyAlg->setProperty("EnergyMax", energyMax);
-  furyAlg->setProperty("BinReductionFactor", numBins);
-  furyAlg->setProperty("OutputWorkspace", m_pythonExportWsName);
+  IqtAlg->setProperty("EnergyMin", energyMin);
+  IqtAlg->setProperty("EnergyMax", energyMax);
+  IqtAlg->setProperty("BinReductionFactor", numBins);
+  IqtAlg->setProperty("OutputWorkspace", m_pythonExportWsName);
 
-  furyAlg->setProperty("DryRun", false);
+  IqtAlg->setProperty("DryRun", false);
 
-  m_batchAlgoRunner->addAlgorithm(furyAlg);
+  m_batchAlgoRunner->addAlgorithm(IqtAlg);
 
   // Add save step
   if (m_uiForm.ckSave->isChecked())
@@ -271,26 +271,26 @@ void Iqt::calculateBinning() {
   if (energyMin == 0 && energyMax == 0)
     return;
 
-  IAlgorithm_sptr furyAlg =
+  IAlgorithm_sptr IqtAlg =
       AlgorithmManager::Instance().create("TransformToIqt");
-  furyAlg->initialize();
+  IqtAlg->initialize();
 
-  furyAlg->setProperty("SampleWorkspace", wsName.toStdString());
-  furyAlg->setProperty("ResolutionWorkspace", resName.toStdString());
-  furyAlg->setProperty("ParameterWorkspace", "__FuryProperties_temp");
+  IqtAlg->setProperty("SampleWorkspace", wsName.toStdString());
+  IqtAlg->setProperty("ResolutionWorkspace", resName.toStdString());
+  IqtAlg->setProperty("ParameterWorkspace", "__IqtProperties_temp");
 
-  furyAlg->setProperty("EnergyMin", energyMin);
-  furyAlg->setProperty("EnergyMax", energyMax);
-  furyAlg->setProperty("BinReductionFactor", numBins);
+  IqtAlg->setProperty("EnergyMin", energyMin);
+  IqtAlg->setProperty("EnergyMax", energyMax);
+  IqtAlg->setProperty("BinReductionFactor", numBins);
 
-  furyAlg->setProperty("DryRun", true);
+  IqtAlg->setProperty("DryRun", true);
 
-  furyAlg->execute();
+  IqtAlg->execute();
 
   // Get property table from algorithm
   ITableWorkspace_sptr propsTable =
       AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(
-          "__FuryProperties_temp");
+          "__IqtProperties_temp");
 
   // Get data from property table
   double energyWidth = propsTable->getColumn("EnergyWidth")->cell<float>(0);
@@ -334,7 +334,7 @@ void Iqt::plotInput(const QString &wsname) {
   m_uiForm.ppPlot->clear();
   m_uiForm.ppPlot->addSpectrum("Sample", workspace, 0);
 
-  auto xRangeSelector = m_uiForm.ppPlot->getRangeSelector("FuryRange");
+  auto xRangeSelector = m_uiForm.ppPlot->getRangeSelector("IqtRange");
 
   try {
     QPair<double, double> range = m_uiForm.ppPlot->getCurveRange("Sample");
@@ -398,7 +398,7 @@ void Iqt::rsRangeChangedLazy(double min, double max) {
 }
 
 void Iqt::updateRS(QtProperty *prop, double val) {
-  auto xRangeSelector = m_uiForm.ppPlot->getRangeSelector("FuryRange");
+  auto xRangeSelector = m_uiForm.ppPlot->getRangeSelector("IqtRange");
 
   if (prop == m_properties["ELow"])
     xRangeSelector->setMinimum(val);
