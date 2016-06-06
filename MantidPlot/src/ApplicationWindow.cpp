@@ -910,8 +910,6 @@ QMenuBar *ApplicationWindow::myMenuBar() {
 
 void ApplicationWindow::initToolBars() {
   initPlot3DToolBar();
-
-  //	setWindowIcon(QIcon(getQPixmap("logo_xpm")));
   setWindowIcon(QIcon(":/MantidPlot_Icon_32offset.png"));
   QPixmap openIcon, saveIcon;
 
@@ -3872,7 +3870,6 @@ void ApplicationWindow::defineErrorBars(const QString &name, int type,
     ycol = t->colIndex(xColName);
 
   QVarLengthArray<double> Y(t->col(ycol));
-  // Y=t->col(ycol);
   QString errColName = t->colName(c);
 
   double prc = percent.toDouble();
@@ -7412,7 +7409,6 @@ void ApplicationWindow::showPlotDialog(int curveKey) {
   PlotDialog *pd = new PlotDialog(d_extended_plot_dialog, this, w);
   pd->setAttribute(Qt::WA_DeleteOnClose);
   pd->insertColumnsList(columnsList(Table::All));
-  // pd->setMultiLayer(w);
   if (curveKey >= 0) {
     Graph *g = w->activeGraph();
     if (g)
@@ -11899,8 +11895,6 @@ void ApplicationWindow::connectMultilayerPlot(MultiLayer *g) {
   connect(g, SIGNAL(createTable(const QString &, int, int, const QString &)),
           this, SLOT(newTable(const QString &, int, int, const QString &)));
   connect(g, SIGNAL(viewTitleDialog()), this, SLOT(showTitleDialog()));
-  // connect
-  // (g,SIGNAL(modifiedWindow(MdiSubWindow*)),this,SLOT(modifiedProject(MdiSubWindow*)));
   connect(g, SIGNAL(modifiedPlot()), this, SLOT(modifiedProject()));
   connect(g, SIGNAL(showLineDialog()), this, SLOT(showLineDialog()));
   connect(g, SIGNAL(pasteMarker()), this, SLOT(pasteSelection()));
@@ -12479,7 +12473,6 @@ void ApplicationWindow::createActions() {
   connect(actionShowColumnOptionsDialog, SIGNAL(activated()), this,
           SLOT(showColumnOptionsDialog()));
 
-  // JZ May 3, 2011: Removed this because it segfaults.
   actionShowColumnValuesDialog = new QAction(
       QIcon(getQPixmap("formula_xpm")), tr("Set Column &Values ..."), this);
   connect(actionShowColumnValuesDialog, SIGNAL(activated()), this,

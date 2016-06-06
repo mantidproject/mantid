@@ -1403,7 +1403,7 @@ private:
   QAction *actionNormalizeTable, *actionConvolute, *actionDeconvolute, *actionCorrelate, *actionAutoCorrelate;
   QAction *actionSetAscValues, *actionSetRandomValues;
   QAction *actionSetXCol, *actionSetYCol, *actionSetZCol, *actionSetLabelCol, *actionDisregardCol, *actionSetXErrCol, *actionSetYErrCol;
-  QAction *actionBoxPlot, /**actionMultiPeakGauss, *actionMultiPeakLorentz,*/ *actionCheckUpdates;
+  QAction *actionBoxPlot, *actionCheckUpdates;
   QAction *actionDonate, *actionHomePage, *actionDownloadManual, *actionTechnicalSupport, *actionTranslations;
   QAction *actionHelpForums, *actionHelpBugReports, *actionAskHelp;
   QAction *actionShowPlotDialog, *actionShowScaleDialog;
@@ -1413,7 +1413,7 @@ private:
   QAction *actionShowScriptWindow, *actionShowScriptInterpreter;
   QAction *actionAnimate, *actionPerspective, *actionFitFrame, *actionResetRotation;
   QAction *actionDeleteRows, *actionDrawPoints;
-  QAction *btnCursor, /* *btnSelect,*/ *btnPicker, *btnRemovePoints, *btnMovePoints, /* *btnPeakPick,*/ *btnMultiPeakPick;
+  QAction *btnCursor, *btnPicker, *btnRemovePoints, *btnMovePoints, *btnMultiPeakPick;
   QAction *btnZoomIn, *btnZoomOut, *btnPointer, *btnLine, *btnArrow, *btnLabel;
   QAction *actionFlipMatrixVertically, *actionFlipMatrixHorizontally, *actionRotateMatrix;
   QAction *actionViewMatrixImage, *actionViewMatrix, *actionExportMatrix;
