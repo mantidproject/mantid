@@ -313,7 +313,7 @@ typedef std::function<void(int &status, int n, int m,
 //  end interface
 typedef std::function<void(int &status, int n, int m,
                            const DoubleFortranVector &x,
-                           const DoubleFortranVector &f, DoubleFortranVector &h,
+                           const DoubleFortranVector &f, DoubleFortranMatrix &h,
                            params_base_type params)> eval_hf_type;
 
 //  ! define types for workspace arrays.
@@ -428,7 +428,7 @@ struct NLLS_workspace {
   DoubleFortranMatrix fNewton, JNewton, XNewton;
   DoubleFortranVector J;
   DoubleFortranVector f, fnew;
-  DoubleFortranVector hf, hf_temp;
+  DoubleFortranMatrix hf, hf_temp;
   DoubleFortranVector d, g, Xnew;
   DoubleFortranVector y, y_sharp, g_old, g_mixed;
   DoubleFortranVector ysharpSks, Sks;
@@ -441,6 +441,14 @@ struct NLLS_workspace {
   integer  tr_p = 3;
 };
 
+void more_sorensen( const DoubleFortranMatrix& J, const DoubleFortranVector& f, const DoubleFortranMatrix& hf,
+  int n, int m, double Delta, DoubleFortranVector& d, double& nd, const nlls_options& options, nlls_inform& inform,
+  more_sorensen_work& w);
+
+void solve_dtrs(const DoubleFortranMatrix& J, const DoubleFortranVector& f, const DoubleFortranMatrix& hf,
+  int n, int m, double Delta, DoubleFortranVector& d, double& normd, const nlls_options& options, nlls_inform& inform,
+  solve_dtrs_work& w);
+
 //! -------------------------------------------------------
 //! calculate_step, find the next step in the optimization
 //! -------------------------------------------------------
@@ -449,10 +457,10 @@ void calculate_step(const DoubleFortranMatrix& J, const DoubleFortranVector& f, 
 
      switch(options.nlls_method) {
      case 1: //! Powell's dogleg
-        dogleg(J,f,hf,g,n,m,Delta,d,normd,options,inform,w.dogleg_ws);
+        throw std::logic_error("Dog leg method isn't implemented.");
         break;
      case 2: //! The AINT method
-        aint_tr(J,f,hf,n,m,Delta,d,normd,options,inform,w.AINT_tr_ws);
+       throw std::logic_error("AINT method isn't implemented.");;
         break;
      case 3: //! More-Sorensen
         more_sorensen(J,f,hf,n,m,Delta,d,normd,options,inform,w.more_sorensen_ws);
@@ -466,6 +474,13 @@ void calculate_step(const DoubleFortranMatrix& J, const DoubleFortranVector& f, 
 
 } //   END SUBROUTINE calculate_step
    
+  //       ! return the (ii,jj)th entry of a matrix 
+  //       ! J held by columns....
+void get_element_of_matrix(const DoubleFortranMatrix& J, int m, int ii, int jj, double& Jij) {
+  //       Jij = J(ii + (jj-1)*m)
+  Jij = J(ii, jj);
+}
+
 ///     !-------------------------------
 ///     ! apply_scaling
 ///     ! input  Jacobian matrix, J
@@ -488,7 +503,8 @@ void apply_scaling(const DoubleFortranMatrix& J, int n, int m, DoubleFortranMatr
               //! use the scaling present in gsl:
               //! scale by W, W_ii = ||J(i,:)||_2^2
               for_do(jj, 1,m)
-                 get_element_of_matrix(J,m,jj,ii,Jij);
+                 //get_element_of_matrix(J,m,jj,ii,Jij);
+                 Jij = J(ii, jj);
                  temp = temp + pow(Jij, 2);
               end_do
            }else if ( options.scale == 2) then 
@@ -564,13 +580,6 @@ void mult_Jt(const DoubleFortranMatrix& J, int n, int m, const DoubleFortranVect
 
 }
 
-//       ! return the (ii,jj)th entry of a matrix 
-//       ! J held by columns....
-void get_element_of_matrix(const DoubleFortranMatrix& J, int m, int ii, int jj, double& Jij) {
-//       Jij = J(ii + (jj-1)*m)
-  Jij = J(ii, jj);
-}
-
 double norm2(const DoubleFortranVector &v) {
   if (v.size() == 0)
     return 0.0;
@@ -623,361 +632,51 @@ void outer_product(const DoubleFortranVector& x, int n, DoubleFortranMatrix& xtx
 void matrix_norm(const DoubleFortranVector& x, const DoubleFortranMatrix& A, double &norm_A_x) {
        norm_A_x = sqrt(dot_product(x,matmul(A,x)));
 }
+void shift_matrix(const DoubleFortranMatrix &A, double sigma, DoubleFortranMatrix& AplusSigma, int n) {
 
-//! -----------------------------------------
-//! dogleg, implement Powell's dogleg method
-//! -----------------------------------------
-void dogleg(const DoubleFortranMatrix& J, const DoubleFortranVector& f, const DoubleFortranMatrix& hf, const DoubleFortranVector& g, 
-  int n, int m, double Delta, DoubleFortranVector& d, double& normd, const nlls_options& options, nlls_inform& inform, dogleg_work& w) {
+  //real, intent(in)   A(:,:), sigma
+  //real, intent(out)  AplusSigma(:,:)
+  //integer, intent(in)  n 
 
-  //     !     Jg = J * g
-     mult_J(J,n,m,g,w.Jg);
+  //! calculate AplusSigma = A + sigma * I
 
-     double alpha = pow(norm2(g), 2) / pow(norm2( w.Jg ), 2);
+  AplusSigma = A;
+  for_do(i,1,n) 
+    AplusSigma(i,i) = AplusSigma(i,i) + sigma;
+  }
 
-     w.d_sd = g;
-     w.d_sd *= alpha;
+} // subroutine shift_matrix
 
-//     ! Solve the linear problem...
-     switch(options.model) {
-     case 1:
-        //! linear model...
-        solve_LLS(J,f,n,m,w.d_gn,inform,w.solve_LLS_ws);
-        if ( inform.status != NLLS_ERROR::OK ) return; // ? goto 1000
-     default:
-        inform.status = NLLS_ERROR::DOGLEG_MODEL;
-        return;
-     }
-     
-     if (norm2(w.d_gn) <= Delta) then
-        d = w.d_gn;
-     }else if (alpha * norm2( w.d_sd ) >= Delta) then
-        d = w.d_sd;
-        d *= (Delta / norm2(w.d_sd) );
-     }else{
-        w.d_sd *= alpha;
-        // w.ghat = w.d_gn - w.d_sd; =>
-        w.ghat = w.d_gn;
-        w.ghat -= w.d_sd;
-        double beta;
-        findbeta(w.d_sd,w.ghat,Delta,beta,inform);
-        if ( inform.status != NLLS_ERROR::OK ) return; // goto 1000
-        // d = w.d_sd + beta * w.ghat; =>
-        d = w.ghat;
-        d *= beta;
-        d += w.d_sd;
-     end_if
+void solve_spd(const DoubleFortranMatrix& A, const DoubleFortranVector& b, 
+  DoubleFortranMatrix& LtL, DoubleFortranVector& x, int n, nlls_inform& inform) {
+  //       REAL, intent(in)  A(:,:)
+  //       REAL, intent(in)  b(:)
+  //       REAL, intent(out)  LtL(:,:)
+  //       REAL, intent(out)  x(:)
+  //       integer, intent(in)  n
+  //       type( nlls_inform), intent(inout)  inform
+  //
+  //       ! A wrapper for the lapack subroutine dposv.f
+  //       ! get workspace for the factors....
+  LtL = A;
+  //x = b;
+  //       call dposv('L', n, 1, LtL, n, x, n, inform.external_return)
+  //       if (inform.external_return .ne. 0) then
+  //          inform.status = ERROR.FROM_EXTERNAL
+  //          inform.external_name = 'lapack_dposv'
+  //          return
+  //       end if
+  LtL.solve(b, x);
+} //     end subroutine solve_spd
 
-     normd = norm2(d);
-     
-//     return
-//1000 continue 
-//     ! bad error return from solve_LLS
-//     return
-} //   END SUBROUTINE dogleg
+void all_eig_symm(const DoubleFortranMatrix& A, int n, DoubleFortranVector& ew, 
+  DoubleFortranMatrix& ev,all_eig_symm_work& w,nlls_inform& inform) {
+  //       ! calculate all the eigenvalues of A (symmetric)
+  auto M = A;
+  M.eigenSystem(ew, ev);
+} //     end subroutine all_eig_symm
 
-///     ! -----------------------------------------
-///     ! AINT_tr
-///     ! Solve the trust-region subproblem using 
-///     ! the method of ADACHI, IWATA, NAKATSUKASA and TAKEDA
-///     ! -----------------------------------------
-void aint_tr(const DoubleFortranMatrix& J, const DoubleFortranVector& f, const DoubleFortranMatrix& hf,
-  int n, int m, double Delta, DoubleFortranVector& d, double& normd, const nlls_options options, nlls_inform& inform, AINT_tr_work& w) {
-
-   double keep_p0 = 0;
-   double tau = 1e-4;
-   double obj_p0 = HUGE;
-
-//     ! The code finds 
-//     !  min_p   v^T p + 0.5 * p^T A p
-//     !       s.t. ||p||_B \leq Delta
-//     !
-//     ! set A and v for the model being considered here...
-
-     matmult_inner(J,n,m,w.A);
-
-//     ! add any second order information...
-     //w.A = w.A + reshape(hf,(/n,n/))
-     w.A += hf;
-     mult_Jt(J,n,m,f,w.v);
-
-//     ! Set B to I by hand  
-//     ! todo: make this an option
-     w.B.zero();
-     for_do(i, 1,n)
-        w.B(i,i) = 1.0;
-     end_do
-     
-     auto nv = w.v;
-     nv *= -1.0;
-     switch(options.model) {
-     case 1:
-       solve_spd(w.A,nv,w.LtL,w.p0,n,inform);
-       if (inform.status != NLLS_ERROR::OK) return; //goto 1000
-     default:
-       auto nv = w.v;
-       nv *= -1.0;
-       solve_general(w.A,nv,w.p0,n,inform,w.solve_general_ws);
-       if (inform.status != NLLS_ERROR::OK) return; //goto 1000
-     }
-          
-     double norm_p0 = 0.0;
-     matrix_norm(w.p0,w.B,norm_p0);
-     
-     if (norm_p0 < Delta) then
-        keep_p0 = 1;
-        //! get obj_p0 : the value of the model at p0
-        evaluate_model(f,J,hf,w.p0,obj_p0,m,n,options,w.evaluate_model_ws);
-     end_if
-
-     outer_product(w.v,n,w.gtg); // ! gtg = Jtg * Jtg^T
-     double factor = (-1.0 / pow(Delta, 2));
-     w.M0.allocate(2*n, 2*n);
-     for_do(i,1,n)
-       for_do(j,1,n)
-         w.M0(i,j) = -w.B(i,j);                 // w.M0(1:n,1:n) = -w.B
-         w.M0(n+i, j) = w.A(i, j);              // w.M0(n+1:2*n,1:n) = w.A
-         w.M0(i, n+j) = w.A(i, j);              // w.M0(1:n,n+1:2*n) = w.A
-         w.M0(n+i, n+j) = factor * w.gtg(i, j); // w.M0(n+1:2*n,n+1:2*n) = (-1.0 / Delta**2) * w.gtg
-       end_do
-     end_do
-
-     w.M1.allocate(2*n, 2*n);
-     w.M1.zero();
-     for_do(i,1,n)
-       for_do(j,1,n)
-         double tmp = -w.B(i, j);
-         w.M1(n+i, j) = tmp;
-         w.M1(i, n+j) = tmp;
-       end_do
-     end_do
-
-     double lam = 0.0;
-     max_eig(w.M0,w.M1,2*n,lam, w.y, w.y_hardcase, options, inform, w.max_eig_ws);
-     if ( inform.status != NLLS_ERROR::OK ) return; // goto 1000
-
-     if (norm2(w.y) < tau) then
-        //! Hard case
-        //! overwrite H onto M0, and the outer prod onto M1...
-        matmult_outer( matmul(w.B,w.y_hardcase), w.y_hardcase.size2(), n, w.M1_small);
-        // w.M0_small = w.A(:,:) + lam*w.B(:,:) + w.M1_small;
-        {
-          DoubleFortranMatrix tmp = w.B;
-          tmp *= lam;
-          tmp += w.A;
-          w.M0_small += tmp;
-        }
-        //! solve Hq + g = 0 for q
-        DoubleFortranVector nv = w.v;
-        nv *= -1;
-        switch(options.model) {
-        case 1:
-           solve_spd(w.M0_small,nv,w.LtL,w.q,n,inform);
-           if (inform.status != NLLS_ERROR::OK) return; // goto 1000
-        default:
-          solve_general(w.M0_small,nv,w.q,n,inform,w.solve_general_ws);
-          if (inform.status != NLLS_ERROR::OK) return; // goto 1000
-        }
-        //! note -- a copy of the matrix is taken on entry to the solve routines
-        //! (I think..) and inside...fix
-
-        //! find max eta st ||q + eta v(:,1)||_B = Delta
-        DoubleFortranVector y_hardcase = getColumn(w.y_hardcase,1);
-        double eta = 0.0;
-        findbeta(w.q, y_hardcase, Delta, eta, inform);
-        if (inform.status != NLLS_ERROR::OK) return; // goto 1000
-
-        //!!!!!      ^^TODO^^    !!!!!
-        //! currently assumes B = I !!
-        //!!!!       fixme!!      !!!!
-        
-        //w.p1(:) = w.q(:) + eta * w.y_hardcase(:,1)
-        w.p1 = y_hardcase;
-        w.p1 *= eta;
-        w.p1 += w.q;
-        
-     }else{
-        DoubleFortranMatrix AlamB = w.B;
-        AlamB *= lam;
-        AlamB += w.A;
-        DoubleFortranVector negv = w.v;
-        negv *= -1.0;
-        switch(options.model) {
-        case 1:
-           solve_spd(AlamB,negv,w.LtL,w.p1,n,inform);
-           if (inform.status != NLLS_ERROR::OK) return; // goto 1000
-        default:
-           solve_general(AlamB,negv,w.p1,n,inform,w.solve_general_ws);
-           if (inform.status != NLLS_ERROR::OK) return; // goto 1000
-        }
-        //! note -- a copy of the matrix is taken on entry to the solve routines
-        //! and inside...fix
-     end_if
-     
-//     ! get obj_p1 : the value of the model at p1
-     double obj_p1 = 0.0;
-     evaluate_model(f,J,hf,w.p1,obj_p1,m,n,options,w.evaluate_model_ws);
-//
-//     ! what gives the smallest objective: p0 or p1?
-     if (obj_p0 < obj_p1) then
-        d = w.p0;
-     }else{
-        d = w.p1;
-     end_if
-
-     normd = norm2(d);
-//1000 continue 
-//     ! bad error return from external package
-//     return
-} //   END SUBROUTINE AINT_tr
-
-///! -----------------------------------------
-///! more_sorensen
-///! Solve the trust-region subproblem using 
-///! the method of More and Sorensen
-///!
-///! Using the implementation as in Algorithm 7.3.6
-///! of Trust Region Methods
-///! 
-///! main output  d, the soln to the TR subproblem
-///! -----------------------------------------
-void more_sorensen( const DoubleFortranMatrix& J, const DoubleFortranVector& f, const DoubleFortranMatrix& hf,
-  int n, int m, double Delta, DoubleFortranVector& d, double& nd, const nlls_options& options, nlls_inform& inform,
-  more_sorensen_work& w) {
-
-//     ! The code finds 
-//     !  d = arg min_p   v^T p + 0.5 * p^T A p
-//     !       s.t. ||p|| \leq Delta
-//     !
-//     ! set A and v for the model being considered here...
-
-//     ! Set A = J^T J
-     matmult_inner(J,n,m,w.A);
-//     ! add any second order information...
-//     ! so A = J^T J + HF
-//     w.A = w.A + reshape(hf,(/n,n/))
-     w.A += hf;
-//     ! now form v = J^T f 
-     mult_Jt(J,n,m,f,w.v);
-
-//     ! if scaling needed, do it
-     if ( options.scale != 0) then
-        apply_scaling(J,n,m,w.A,w.v,w.apply_scaling_ws,options,inform);
-     end_if
-     
-     auto local_ms_shift = options.more_sorensen_shift;
-
-//     ! d = -A\v
-     DoubleFortranVector negv = w.v;
-     negv *= -1.0;
-     solve_spd(w.A,negv,w.LtL,d,n,inform);
-     double sigma = 0.0;
-     if (inform.status == NLLS_ERROR::OK) then
-        //! A is symmetric positive definite....
-        sigma = zero;
-     }else{
-        //! reset the error calls -- handled in the code....
-        inform.status = NLLS_ERROR::OK;
-        inform.external_return = 0;
-        inform.external_name = "";
-        min_eig_symm(w.A,n,sigma,w.y1,options,inform,w.min_eig_symm_ws);
-        if (inform.status != NLLS_ERROR::OK) goto L1000;
-        sigma = -(sigma - local_ms_shift);
-        //! find a shift that makes (A + sigma I) positive definite
-        get_pd_shift(n,sigma,d,options,inform,w);
-        if (inform.status != NLLS_ERROR::OK) goto L4000;
-     end_if
-     
-     nd = norm2(d);
-     
-//     ! now, we're not in the trust region initally, so iterate....
-     auto sigma_shift = zero;
-     int no_restarts = 0;
-//     ! set 'small' in the context of the algorithm
-     double epsilon = std::max( options.more_sorensen_tol * Delta, options.more_sorensen_tiny );
-     for_do(i, 1, options.more_sorensen_maxits)
-                
-        if (nd <= Delta + epsilon) then
-           //! we're within the tr radius
-           if ( abs(sigma) < options.more_sorensen_tiny ) then
-              //! we're good....exit
-              goto L1020;
-           }else if ( abs( nd - Delta ) < epsilon ) then
-              //! also good...exit
-              goto L1020;
-           end_if
-           double alpha = 0.0;
-           findbeta(d,w.y1,Delta,alpha,inform);
-           if (inform.status != NLLS_ERROR::OK ) goto L1000;
-           DoubleFortranVector tmp = w.y1;
-           tmp *= alpha;
-           d += tmp;
-           //! also good....exit
-           goto L1020;
-        end_if
-
-        w.q = d; //! w.q = R'\d
-        DTRSM( "Left", "Lower", "No Transpose", "Non-unit", n, 1, one, w.LtL, n, w.q, n );
-        
-        auto nq = norm2(w.q);
-        
-        sigma_shift = ( pow((nd/nq), 2) ) * ( (nd - Delta) / Delta );
-        if (abs(sigma_shift) < options.more_sorensen_tiny * abs(sigma) ) then
-           if (no_restarts < 1) then 
-              //! find a shift that makes (A + sigma I) positive definite
-              get_pd_shift(n,sigma,d,options,inform,w);
-              if (inform.status != NLLS_ERROR::OK) goto L4000;
-              no_restarts = no_restarts + 1;
-           }else{
-              //! we're not going to make progress...jump out 
-              inform.status = NLLS_ERROR::MS_NO_PROGRESS;
-              goto L4000;
-           end_if
-        }else{ 
-           sigma = sigma + sigma_shift;
-        end_if
-
-        shift_matrix(w.A,sigma,w.AplusSigma,n);
-        DoubleFortranVector negv = w.v;
-        negv *= -1.0;
-        solve_spd(w.AplusSigma,negv,w.LtL,d,n,inform);
-        if (inform.status != NLLS_ERROR::OK) goto L1000;
-        
-        nd = norm2(d);
-
-     end_do
-
-     goto L1040;
-     
-L1000:
-//     ! bad error return from external package
-     goto L4000;
-//     
-L1020:
-//     ! inital point was successful
-     goto L4000;
-
-L1040:
-//     ! maxits reached, not converged
-     inform.status = NLLS_ERROR::MS_MAXITS;
-     goto L4000;
-
-L3000:
-//     ! too many shifts
-     inform.status = NLLS_ERROR::MS_TOO_MANY_SHIFTS;
-     goto L4000;
-//     
-L4000:
-//     ! exit the routine
-     if (options.scale != 0 ) then 
-        for_do(i, 1, n)
-           d(i) = d(i) / w.apply_scaling_ws.diag(i);
-        end_do
-     end_if
-//     return 
-} //   end subroutine more_sorensen
-
-///     !--------------------------------------------------
+  ///     !--------------------------------------------------
 ///     ! get_pd_shift
 ///     !
 ///     ! Given an indefinite matrix w.A, find a shift sigma
@@ -1111,44 +810,6 @@ void solve_dtrs(const DoubleFortranMatrix& J, const DoubleFortranVector& f, cons
 //     
 } //   end subroutine solve_dtrs
 
-
-//!  -----------------------------------------------------------------
-//!  solve_LLS, a subroutine to solve a linear least squares problem
-//!  -----------------------------------------------------------------
-void solve_LLS( const DoubleFortranMatrix& J, const DoubleFortranVector& f,
-  int n, int m, DoubleFortranVector& d_gn, nlls_inform& inform, solve_LLS_work w) {
-//
-//       REAL, DIMENSION(:), INTENT(IN)  J
-//       REAL, DIMENSION(:), INTENT(IN)  f
-//       INTEGER, INTENT(IN)  n, m
-//       REAL, DIMENSION(:), INTENT(OUT)  d_gn
-//       type(NLLS_inform), INTENT(INOUT)  inform
-//
-//       character(1)  trans = 'N'
-//       integer  nrhs = 1, lwork, lda, ldb
-//       type( solve_LLS_work )  w
-       
-       
-       auto lda = m;
-       auto ldb = std::max(m,n);
-       w.temp = f;
-       auto lwork = int(w.work.size());
-       int nrhs = 1;
-       
-       w.Jlls = J;
-       
-       dgels(trans, m, n, nrhs, w.Jlls, lda, w.temp, ldb, w.work, lwork,
-            inform.external_return);
-       if (inform.external_return != 0 ) then
-          inform.status = NLLS_ERROR::FROM_EXTERNAL;
-          inform.external_name = "lapack_dgels";
-          return;
-       end_if
-
-       d_gn = negative(w.temp);
-              
-} //     END SUBROUTINE solve_LLS
-     
 //!  -----------------------------------------------------------------
 //!  findbeta, a subroutine to find the optimal beta such that 
 //!   || d || = Delta, where d = a + beta * b
@@ -1181,7 +842,7 @@ void findbeta(const DoubleFortranVector& a, const DoubleFortranVector& b, double
      if (c <= 0) then
         beta = (-c + sqrt(discrim) ) / normb2;
      }else{
-        beta = (Delta**2 - norma2) / ( c + sqrt(discrim) );
+        beta = (pow(Delta,2) - norma2) / ( c + sqrt(discrim) );
      end_if
 
 } //     END SUBROUTINE findbeta
@@ -1246,28 +907,6 @@ void calculate_rho(double normf, double normfnew,double md, double& rho, const n
 
 } //     end subroutine calculate_rho
 
-void apply_second_order_info(int n, int m, const DoubleFortranVector& X,
-  NLLS_workspace& w, eval_hf_type eval_Hf, params_base_type params, 
-  const nlls_options& options, nlls_inform& inform, const DoubleFortranVector* weights) {
-
-       if (options.exact_second_derivatives) then
-          if ( weights ) then
-            DoubleFortranVector temp(m);
-            for_do(i,1,m)
-              temp(i) = (*weights)(i) * w.f(i);
-            end_do
-             eval_HF(inform.external_return, n, m, X, temp, w.hf, params);
-          }else{
-             eval_HF(inform.external_return, n, m, X, w.f, w.hf, params);
-          end_if
-          inform.h_eval = inform.h_eval + 1;
-       }else{
-          //! use the rank-one approximation...
-          rank_one_update(w.hf,w,n);
-       end_if
-
-} //     end subroutine apply_second_order_info
-
 
 void rank_one_update(DoubleFortranMatrix& hf, NLLS_workspace w, int n) {
 
@@ -1310,6 +949,28 @@ void rank_one_update(DoubleFortranMatrix& hf, NLLS_workspace w, int n) {
 
 } //     end subroutine rank_one_update
 
+void apply_second_order_info(int n, int m, const DoubleFortranVector& X,
+  NLLS_workspace& w, eval_hf_type eval_HF, params_base_type params, 
+  const nlls_options& options, nlls_inform& inform, const DoubleFortranVector* weights) {
+
+  if (options.exact_second_derivatives) then
+    if ( weights ) then
+      DoubleFortranVector temp(m);
+  for_do(i,1,m)
+    temp(i) = (*weights)(i) * w.f(i);
+  end_do
+    eval_HF(inform.external_return, n, m, X, temp, w.hf, params);
+}else{
+  eval_HF(inform.external_return, n, m, X, w.f, w.hf, params);
+  end_if
+    inform.h_eval = inform.h_eval + 1;
+}else{
+  //! use the rank-one approximation...
+  rank_one_update(w.hf,w,n);
+  end_if
+
+} //     end subroutine apply_second_order_info
+
 
 void update_trust_region_radius(double& rho, const nlls_options& options, nlls_inform& inform, NLLS_workspace& w) {
 //
@@ -1320,42 +981,42 @@ void update_trust_region_radius(double& rho, const nlls_options& options, nlls_i
 
        switch(options.tr_update_strategy) {
        case 1: //! default, step-function
-          if (rho < options.eta_success_but_reduce) then
+          if (rho < options.eta_success_but_reduce) {
 //             ! unsuccessful....reduce Delta
              w.Delta = std::max( options.radius_reduce, options.radius_reduce_max) * w.Delta;
-          }else if (rho < options.eta_very_successful) then 
+          }else if (rho < options.eta_very_successful) { 
 //             ! doing ok...retain status quo
-          }else if (rho < options.eta_too_successful ) then
+          }else if (rho < options.eta_too_successful ) {
 //             ! more than very successful -- increase delta
              w.Delta = std::min(options.maximum_radius,  options.radius_increase * w.normd);
 //             ! increase based on normd = ||d||_D
 //             ! if d is on the tr boundary, this is Delta
 //             ! otherwise, point was within the tr, and there's no point increasing 
 //             ! the radius
-          }else if (rho >= options.eta_too_successful) then
+          }else if (rho >= options.eta_too_successful) {
 //             ! too successful....accept step, but don't change w.Delta
           }else{
 //             ! just incase (NaNs and the like...)
              w.Delta = std::max( options.radius_reduce, options.radius_reduce_max) * w.Delta;
              rho = -one; //! set to be negative, so that the logic works....
-          end_if
+          }
        case 2: // ! Continuous method
 //          ! Based on that proposed by Hans Bruun Nielsen, TR IMM-REP-1999-05
 //          ! http://www2.imm.dtu.dk/documents/ftp/tr99/tr05_99.pdf
-          if (rho >= options.eta_too_successful) then
+          if (rho >= options.eta_too_successful) {
 //             ! too successful....accept step, but don't change w.Delta
-          }else if (rho > options.eta_successful) then 
+          }else if (rho > options.eta_successful) { 
              w.Delta = w.Delta * std::min(options.radius_increase, std::max(options.radius_reduce,
                   1 - ( (options.radius_increase - 1) * (pow((1 - 2*rho), w.tr_p))) ));
              w.tr_nu = options.radius_reduce;
-          }else if ( rho <= options.eta_successful ) then 
+          }else if ( rho <= options.eta_successful ) {
              w.Delta = w.Delta * w.tr_nu;
              w.tr_nu =  w.tr_nu * 0.5;
           }else{
 //             ! just incase (NaNs and the like...)
              w.Delta = std::max( options.radius_reduce, options.radius_reduce_max) * w.Delta;
              rho = -one; // ! set to be negative, so that the logic works....
-          end_if
+          }
        default:
           inform.status = NLLS_ERROR::BAD_TR_STRATEGY;
        }
@@ -1378,28 +1039,6 @@ void test_convergence(double normF, double normJF, double normF0, double normJF0
 
 } //     end subroutine test_convergence
 
-void solve_spd(const DoubleFortranMatrix& A, const DoubleFortranVector& b, 
-  DoubleFortranMatrix& LtL, DoubleFortranVector& x, int n, nlls_inform& inform) {
-//       REAL, intent(in)  A(:,:)
-//       REAL, intent(in)  b(:)
-//       REAL, intent(out)  LtL(:,:)
-//       REAL, intent(out)  x(:)
-//       integer, intent(in)  n
-//       type( nlls_inform), intent(inout)  inform
-//
-//       ! A wrapper for the lapack subroutine dposv.f
-//       ! get workspace for the factors....
-       LtL = A;
-       //x = b;
-//       call dposv('L', n, 1, LtL, n, x, n, inform.external_return)
-//       if (inform.external_return .ne. 0) then
-//          inform.status = ERROR.FROM_EXTERNAL
-//          inform.external_name = 'lapack_dposv'
-//          return
-//       end if
-       LtL.solve(b, x);
-} //     end subroutine solve_spd
-
 void solve_general(const DoubleFortranMatrix& A, const DoubleFortranVector& b,
    DoubleFortranVector& x, int n, nlls_inform& inform, solve_general_work& w) {
 //       ! A wrapper for the lapack subroutine dposv.f
@@ -1410,125 +1049,27 @@ void solve_general(const DoubleFortranMatrix& A, const DoubleFortranVector& b,
 //       call dgesv( n, 1, w.A, n, w.ipiv, x, n, inform.external_return)
 } //     end subroutine solve_general
 
-void all_eig_symm(const DoubleFortranMatrix& A, int n, DoubleFortranVector& ew, 
-  DoubleFortranMatrix& ev,all_eig_symm_work& w,nlls_inform& inform) {
-//       ! calculate all the eigenvalues of A (symmetric)
-  auto M = A;
-  M.eigenSystem(ew, ev);
-} //     end subroutine all_eig_symm
-
 //       ! calculate the leftmost eigenvalue of A
-void min_eig_symm(const DoubleFortranMatrix& A, int n, DoubleFortranVector& ew,
-  DoubleFortranMatrix& ev,const nlls_options& options,nlls_inform& inform,min_eig_symm_work& w) {
+void min_eig_symm(const DoubleFortranMatrix& A, double& sigma,
+  DoubleFortranVector& y) {
   auto M = A;
+  DoubleFortranVector ew;
+  DoubleFortranMatrix ev;
   M.eigenSystem(ew, ev);
+  auto ind = ew.sortIndices();
+  int imin = static_cast<int>(ind[0]);
+  sigma = ew(imin);
+  int n = static_cast<int>(A.size1());
+  y.allocate(n);
+  for(int i = 1; i <= n; ++i) {
+    y(i) = ev(i, imin);
+  }
 } //     end subroutine min_eig_symm
 
-//     subroutine max_eig(A,B,n,ew,ev,nullevs,options,inform,w)
-//
-//       real, intent(inout)  A(:,:), B(:,:)
-//       integer, intent(in)  n 
-//       real, intent(out)  ew, ev(:)
-//       real, intent(inout), allocatable  nullevs(:,:)
-//       type( nlls_options ), intent(in)  options
-//       type( nlls_inform ), intent(inout)  inform
-//       type( max_eig_work )  w
-//
-//       integer  lwork, maxindex(1), no_null, halfn
-//       real tau
-//       integer  i 
-//
-//       ! Find the max eigenvalue/vector of the generalized eigenproblem
-//       !     A * y = lam * B * y
-//       ! further, if ||y(1:n/2)|| \approx 0, find and return the 
-//       ! eigenvectors y(n/2+1:n) associated with this
-//
-//       ! check that n is even (important for hard case -- see below)
-//       if (modulo(n,2).ne.0) goto 1010
-//
-//       halfn = n/2
-//       lwork = size(w.work)
-//       call dggev('N', & ! No left eigenvectors
-//            'V', &! Yes right eigenvectors
-//            n, A, n, B, n, &
-//            w.alphaR, w.alphaI, w.beta, & ! eigenvalue data
-//            w.vr, n, & ! not referenced
-//            w.vr, n, & ! right eigenvectors
-//            w.work, lwork, inform.external_return)
-//       if (inform.external_return .ne. 0) then
-//          inform.status = ERROR.FROM_EXTERNAL
-//          inform.external_name = 'lapack_dggev'
-//          return
-//       end if
-//
-//       ! now find the rightmost real eigenvalue
-//       w.vecisreal = .true.
-//       where ( abs(w.alphaI) > 1e-8 ) w.vecisreal = .false.
-//
-//       w.ew_array(:) = w.alphaR(:)/w.beta(:)
-//       maxindex = maxloc(w.ew_array,w.vecisreal)
-//       if (maxindex(1) == 0) goto 1000
-//
-//       tau = 1e-4 ! todo -- pass this through from above...
-//       ! note n/2 always even -- validated by test on entry
-//       if (norm2( w.vr(1:halfn,maxindex(1)) ) < tau) then 
-//          ! hard case
-//          ! let's find which ev's are null...
-//          w.nullindex = 0
-//          no_null = 0
-//          do i = 1,n
-//             if (norm2( w.vr(1:halfn,i)) < 1e-4 ) then
-//                no_null = no_null + 1 
-//                w.nullindex(no_null) = i
-//             end if
-//          end do
-//!          allocate(nullevs(halfn,no_null))
-//          if (no_null > size(nullevs,2)) then
-//             ! increase the size of the allocated array only if we need to
-//             if(allocated(nullevs)) deallocate( nullevs )
-//             allocate( nullevs(halfn,no_null) , stat = inform.alloc_status)
-//             if (inform.alloc_status > 0) goto 2000
-//          end if 
-//          nullevs(1:halfn,1:no_null) = w.vr(halfn+1 : n,w.nullindex(1:no_null))
-//       end if
-//
-//       ew = w.alphaR(maxindex(1))/w.beta(maxindex(1))
-//       ev(:) = w.vr(:,maxindex(1))
-//
-//       return 
-//
-//1000   continue 
-//       inform.status = ERROR.AINT_EIG_IMAG ! Eigs imaginary error
-//       return
-//
-//1010   continue
-//       inform.status = ERROR.AINT_EIG_ODD
-//       return
-//       
-//2000   continue
-//       inform.status = ERROR.ALLOCATION
-//       inform.bad_alloc = "max_eig"
-//       return
-//
-//     end subroutine max_eig
-//
-//     subroutine shift_matrix(A,sigma,AplusSigma,n)
-//
-//       real, intent(in)   A(:,:), sigma
-//       real, intent(out)  AplusSigma(:,:)
-//       integer, intent(in)  n 
-//
-//       integer  i 
-//       ! calculate AplusSigma = A + sigma * I
-//
-//       AplusSigma(:,:) = A(:,:)
-//       do i = 1,n
-//          AplusSigma(i,i) = AplusSigma(i,i) + sigma
-//       end do
-//
-//     end subroutine shift_matrix
-//
-//     subroutine get_svd_J(n,m,J,s1,sn,options,status,w)
+///  Given an (m x n)  matrix J held by columns as a vector,
+///  this routine returns the largest and smallest singular values
+///  of J.
+//void get_svd_J(int n, int m, const DoubleFortranMatrix& J, double &s1, double &sn, const nlls_options& options, int &status, get_svd_J_work& w) {
 //       integer, intent(in)  n,m 
 //       real, intent(in)  J(:)
 //       real, intent(out)  s1, sn
@@ -1536,9 +1077,6 @@ void min_eig_symm(const DoubleFortranMatrix& A, int n, DoubleFortranVector& ew,
 //       integer, intent(out)  status
 //       type( get_svd_J_work )  w
 //
-//       !  Given an (m x n)  matrix J held by columns as a vector,
-//       !  this routine returns the largest and smallest singular values
-//       !  of J.
 //
 //       character  jobu(1), jobvt(1)
 //       integer  lwork
@@ -1567,9 +1105,155 @@ void min_eig_symm(const DoubleFortranMatrix& A, int n, DoubleFortranVector& ew,
 //          end if
 //       end if
 //
-//     end subroutine get_svd_J
-//
-//
+//} // subroutine get_svd_J
+
+///! -----------------------------------------
+///! more_sorensen
+///! Solve the trust-region subproblem using 
+///! the method of More and Sorensen
+///!
+///! Using the implementation as in Algorithm 7.3.6
+///! of Trust Region Methods
+///! 
+///! main output  d, the soln to the TR subproblem
+///! -----------------------------------------
+void more_sorensen( const DoubleFortranMatrix& J, const DoubleFortranVector& f, const DoubleFortranMatrix& hf,
+int n, int m, double Delta, DoubleFortranVector& d, double& nd, const nlls_options& options, nlls_inform& inform,
+more_sorensen_work& w) {
+
+  //     ! The code finds 
+  //     !  d = arg min_p   v^T p + 0.5 * p^T A p
+  //     !       s.t. ||p|| \leq Delta
+  //     !
+  //     ! set A and v for the model being considered here...
+
+  //     ! Set A = J^T J
+  matmult_inner(J,n,m,w.A);
+  //     ! add any second order information...
+  //     ! so A = J^T J + HF
+  //     w.A = w.A + reshape(hf,(/n,n/))
+  w.A += hf;
+  //     ! now form v = J^T f 
+  mult_Jt(J,n,m,f,w.v);
+
+  //     ! if scaling needed, do it
+  if ( options.scale != 0) {
+    apply_scaling(J,n,m,w.A,w.v,w.apply_scaling_ws,options,inform);
+  }
+
+  auto local_ms_shift = options.more_sorensen_shift;
+
+  //     ! d = -A\v
+  DoubleFortranVector negv = w.v;
+  negv *= -1.0;
+  solve_spd(w.A,negv,w.LtL,d,n,inform);
+  double sigma = 0.0;
+  if (inform.status == NLLS_ERROR::OK) {
+    //! A is symmetric positive definite....
+    sigma = zero;
+  }else{
+    //! reset the error calls -- handled in the code....
+    inform.status = NLLS_ERROR::OK;
+    inform.external_return = 0;
+    inform.external_name = "";
+    min_eig_symm(w.A,sigma,w.y1);
+    if (inform.status != NLLS_ERROR::OK) goto L1000;
+    sigma = -(sigma - local_ms_shift);
+    //! find a shift that makes (A + sigma I) positive definite
+    get_pd_shift(n,sigma,d,options,inform,w);
+    if (inform.status != NLLS_ERROR::OK) goto L4000;
+  }
+
+  nd = norm2(d);
+
+  //     ! now, we're not in the trust region initally, so iterate....
+  auto sigma_shift = zero;
+  int no_restarts = 0;
+  //     ! set 'small' in the context of the algorithm
+  double epsilon = std::max( options.more_sorensen_tol * Delta, options.more_sorensen_tiny );
+  for(int i = 1; i <= options.more_sorensen_maxits; ++i) {
+
+    if (nd <= Delta + epsilon) {
+      //! we're within the tr radius
+      if ( abs(sigma) < options.more_sorensen_tiny ) {
+        //! we're good....exit
+        goto L1020;
+      }else if ( abs( nd - Delta ) < epsilon ) {
+        //! also good...exit
+        goto L1020;
+      }
+      double alpha = 0.0;
+      findbeta(d,w.y1,Delta,alpha,inform);
+      if (inform.status != NLLS_ERROR::OK ) goto L1000;
+      DoubleFortranVector tmp = w.y1;
+      tmp *= alpha;
+      d += tmp;
+      //! also good....exit
+      goto L1020;
+    }
+
+    //w.q = d; //! w.q = R'\d
+    //DTRSM( "Left", "Lower", "No Transpose", "Non-unit", n, 1, one, w.LtL, n, w.q, n );
+    w.LtL.solve(d, w.q);
+
+    auto nq = norm2(w.q);
+
+    sigma_shift = ( pow((nd/nq), 2) ) * ( (nd - Delta) / Delta );
+    if (abs(sigma_shift) < options.more_sorensen_tiny * abs(sigma) ) {
+      if (no_restarts < 1) { 
+        //! find a shift that makes (A + sigma I) positive definite
+        get_pd_shift(n,sigma,d,options,inform,w);
+        if (inform.status != NLLS_ERROR::OK) goto L4000;
+        no_restarts = no_restarts + 1;
+      }else{
+        //! we're not going to make progress...jump out 
+        inform.status = NLLS_ERROR::MS_NO_PROGRESS;
+        goto L4000;
+      }
+    }else{ 
+      sigma = sigma + sigma_shift;
+    }
+
+    shift_matrix(w.A,sigma,w.AplusSigma,n);
+    DoubleFortranVector negv = w.v;
+    negv *= -1.0;
+    solve_spd(w.AplusSigma,negv,w.LtL,d,n,inform);
+    if (inform.status != NLLS_ERROR::OK) goto L1000;
+
+    nd = norm2(d);
+  }
+
+  goto L1040;
+
+  L1000:
+  //     ! bad error return from external package
+  goto L4000;
+  //     
+  L1020:
+  //     ! inital point was successful
+  goto L4000;
+
+  L1040:
+  //     ! maxits reached, not converged
+  inform.status = NLLS_ERROR::MS_MAXITS;
+  goto L4000;
+
+  L3000:
+  //     ! too many shifts
+  inform.status = NLLS_ERROR::MS_TOO_MANY_SHIFTS;
+  goto L4000;
+  //     
+  L4000:
+  //     ! exit the routine
+  if (options.scale != 0 ) {
+    for(int i = 1; i <= n; ++i) {
+      d(i) = d(i) / w.apply_scaling_ws.diag(i);
+    }
+  }
+} //   end subroutine more_sorensen
+
+
+
 //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 //     !!                                                       !!
 //     !! W O R K S P A C E   S E T U P   S U B R O U T I N E S !!
