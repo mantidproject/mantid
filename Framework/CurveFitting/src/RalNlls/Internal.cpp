@@ -1,5 +1,6 @@
 #include "MantidCurveFitting/FortranDefs.h"
 #include "MantidCurveFitting/RalNlls/DTRS.h"
+#include "MantidCurveFitting/RalNlls/Internal.h"
 
 #include <algorithm>
 #include <limits>
@@ -7,6 +8,7 @@
 #include <string>
 
 #include <gsl/gsl_blas.h>
+#include <gsl/gsl_linalg.h>
 
 #define for_do(i, a, n) for(int i=a; i <=n; ++i) {
 #define then {
@@ -16,430 +18,6 @@
 namespace Mantid {
 namespace CurveFitting {
 namespace RalNlls {
-
-typedef double real;
-typedef double REAL;
-typedef int integer;
-typedef int INTEGER;
-typedef bool logical;
-typedef bool LOGICAL;
-
-namespace {
-
-const double tenm3 = 1.0e-3;
-const double tenm5 = 1.0e-5;
-const double tenm8 = 1.0e-8;
-const double hundred = 100.0;
-const double ten = 10.0;
-const double point9 = 0.9;
-const double zero = 0.0;
-const double one = 1.0;
-const double two = 2.0;
-const double half = 0.5;
-const double sixteenth = 0.0625;
-
-}
-
-enum class NLLS_ERROR {
-  OK = 0,
-  MAXITS = -1,
-  EVALUATION = -2,
-  UNSUPPORTED_MODEL = -3,
-  FROM_EXTERNAL = -4,
-  UNSUPPORTED_METHOD = -5,
-  ALLOCATION = -6,
-  MAX_TR_REDUCTIONS = -7,
-  X_NO_PROGRESS = -8,
-  N_GT_M = -9,
-  BAD_TR_STRATEGY = -10,
-  FIND_BETA = -11,
-  BAD_SCALING = -12,
-  //     ! dogleg errors
-  DOGLEG_MODEL = -101,
-  //     ! AINT errors
-  AINT_EIG_IMAG = -201,
-  AINT_EIG_ODD = -202,
-  //     ! More-Sorensen errors
-  MS_MAXITS = -301,
-  MS_TOO_MANY_SHIFTS = -302,
-  MS_NO_PROGRESS = -303
-  //     ! DTRS errors
-};
-
-struct nlls_options {
-
-  //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  //!!! M A I N   R O U T I N E   C O N T R O L S !!!
-  //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-  //!   the maximum number of iterations performed
-  int maxit = 100;
-
-  //!   specify the model used. Possible values are
-  //!
-  //!      0  dynamic (*not yet implemented*)
-  //!      1  Gauss-Newton (no 2nd derivatives)
-  //!      2  second-order (exact Hessian)
-  //!      3  hybrid (using Madsen, Nielsen and Tingleff's method)    
-  int model = 3;
-
-  //!   specify the method used to solve the trust-region sub problem
-  //!      1 Powell's dogleg
-  //!      2 AINT method (of Yuji Nat.)
-  //!      3 More-Sorensen
-  //!      4 Galahad's DTRS
-  int nlls_method = 4;
-
-  //!  which linear least squares solver should we use?
-  int lls_solver = 1;
-
-  //!   overall convergence tolerances. The iteration will terminate when the
-  //!     norm of the gradient of the objective function is smaller than 
-  //!       MAX( .stop_g_absolute, .stop_g_relative * norm of the initial gradient
-  //!     or if the step is less than .stop_s
-  double stop_g_absolute = tenm5;
-  double stop_g_relative = tenm8;
-
-  //!   should we scale the initial trust region radius?
-  int relative_tr_radius = 0;
-
-  //!   if relative_tr_radius == 1, then pick a scaling parameter
-  //!   Madsen, Nielsen and Tingleff say pick this to be 1e-6, say, if x_0 is good,
-  //!   otherwise 1e-3 or even 1 would be good starts...
-  double initial_radius_scale = 1.0;
-
-  //!   if relative_tr_radius /= 1, then set the 
-  //!   initial value for the trust-region radius (-ve => ||g_0||)
-  double initial_radius = hundred;
-
-  //!   maximum permitted trust-region radius
-  double maximum_radius = 1.0e8; //ten ** 8
-
-  //!   a potential iterate will only be accepted if the actual decrease
-  //!    f - f(x_new) is larger than .eta_successful times that predicted
-  //!    by a quadratic model of the decrease. The trust-region radius will be
-  //!    increased if this relative decrease is greater than .eta_very_successful
-  //!    but smaller than .eta_too_successful
-  double eta_successful = 1.0e-8; // ten ** ( - 8 )
-  double eta_success_but_reduce = 1.0e-8; // ten ** ( - 8 )
-  double eta_very_successful = point9;
-  double eta_too_successful = two;
-
-  //!   on very successful iterations, the trust-region radius will be increased by
-  //!    the factor .radius_increase, while if the iteration is unsuccessful, the 
-  //!    radius will be decreased by a factor .radius_reduce but no more than
-  //!    .radius_reduce_max
-  double radius_increase = two;
-  double radius_reduce = half;
-  double radius_reduce_max = sixteenth;
-
-  //! Trust region update strategy
-  //!    1 - usual step function
-  //!    2 - continuous method of Hans Bruun Nielsen (IMM-REP-1999-05)
-  int tr_update_strategy = 1;
-
-  //!   if model=7, then the value with which we switch on second derivatives
-  double hybrid_switch = 0.1;
-
-  //!   shall we use explicit second derivatives, or approximate using a secant 
-  //!   method
-  bool exact_second_derivatives = false;
-
-  //!   use a factorization (dsyev) to find the smallest eigenvalue for the subproblem
-  //!    solve? (alternative is an iterative method (dsyevx)
-  bool subproblem_eig_fact = false; //! undocumented....
-
-  //!   scale the variables?
-  //!   0 - no scaling
-  //!   1 - use the scaling in GSL (W s.t. W_ii = ||J(i,:)||_2^2)
-  //!       tiny values get set to one       
-  //!   2 - scale using the approx to the Hessian (W s.t. W = ||H(i,:)||_2^2
-  int scale = 1;
-  double scale_max = 1e11;
-  double scale_min = 1e-11;
-  bool scale_trim_min = true;
-  bool scale_trim_max = true;
-  bool scale_require_increase = false;
-  bool calculate_svd_J = true;
-
-  //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  //!!! M O R E - S O R E N S E N   C O N T R O L S !!!
-  //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!     
-  int more_sorensen_maxits = 500;
-  real more_sorensen_shift = 1e-13;
-  real  more_sorensen_tiny = 10.0 * epsmch;
-  real  more_sorensen_tol = 1e-3;
-
-  //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  //!!! H Y B R I D   C O N T R O L S !!!
-  //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-  //! what's the tolerance such that ||J^T f || < tol * 0.5 ||f||^2 triggers a switch
-  real  hybrid_tol = 2.0;
-
-  //! how many successive iterations does the above condition need to hold before we switch?
-  integer   hybrid_switch_its = 1;
-
-  //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  //!!! O U T P U T   C O N T R O L S !!!
-  //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-  //! Shall we output progess vectors at termination of the routine?
-  logical  output_progress_vectors = false;
-
-}; // struct nlls_options
-
-//!  - - - - - - - - - - - - - - - - - - - - - - - 
-//!   inform derived type with component defaults
-//!  - - - - - - - - - - - - - - - - - - - - - - - 
-struct  nlls_inform {
-
-  //!  return status
-  //!  (see ERROR type for descriptions)
-  NLLS_ERROR  status = NLLS_ERROR::OK;
-
-  //! error message     
-  //     CHARACTER ( LEN = 80 )  error_message = REPEAT( ' ', 80 )
-  std::string error_message;
-
-  //!  the status of the last attempted allocation/deallocation
-  INTEGER  alloc_status = 0;
-
-  //!  the name of the array for which an allocation/deallocation error ocurred
-  //     CHARACTER ( LEN = 80 )  bad_alloc = REPEAT( ' ', 80 )
-  std::string bad_alloc;
-
-  //!  the total number of iterations performed
-  INTEGER  iter;
-
-  //!  the total number of CG iterations performed
-  //!$$     INTEGER  cg_iter = 0
-
-  //!  the total number of evaluations of the objective function
-  INTEGER  f_eval = 0;
-
-  //!  the total number of evaluations of the gradient of the objective function
-  INTEGER  g_eval = 0;
-
-  //!  the total number of evaluations of the Hessian of the objective function
-  INTEGER  h_eval = 0;
-
-  //!  test on the size of f satisfied?
-  integer  convergence_normf = 0;
-
-  //!  test on the size of the gradient satisfied?
-  integer  convergence_normg = 0;
-
-  //!  vector of residuals 
-  //     real, allocatable  resvec(:)
-  DoubleFortranVector resvec;
-
-  //!  vector of gradients 
-  //     real, allocatable  gradvec(:)
-  DoubleFortranVector gradvec;
-
-  //!  vector of smallest singular values
-  //     real, allocatable  smallest_sv(:)
-  DoubleFortranVector smallest_sv;
-
-  //!  vector of largest singular values
-  //     real, allocatable  largest_sv(:)
-  DoubleFortranVector largest_sv;
-
-  //!  the value of the objective function at the best estimate of the solution 
-  //!   determined by NLLS_solve
-  REAL obj = HUGE;
-
-  //!  the norm of the gradient of the objective function at the best estimate 
-  //!   of the solution determined by NLLS_solve
-  REAL norm_g = HUGE;
-
-  //! the norm of the gradient, scaled by the norm of the residual
-  REAL scaled_g = HUGE;
-
-  //! error returns from external subroutines 
-  INTEGER  external_return = 0;
-
-  //! name of external program that threw and error
-  //     CHARACTER ( LEN = 80 )  external_name = REPEAT( ' ', 80 )
-  std::string external_name;
-
-}; //  END TYPE nlls_inform
- 
-// deliberately empty
-typedef void* params_base_type;
-  
-//  abstract interface
-//     subroutine eval_f_type(status, n, m, x, f, params)
-//       import  params_base_type
-//       implicit none
-//       integer, intent(out)  status
-//       integer, intent(in)  n,m 
-//       double precision, dimension(*), intent(in)   x
-//       double precision, dimension(*), intent(out)  f
-//       class(params_base_type), intent(in)  params
-//     end subroutine eval_f_type
-//  end interface
-typedef std::function<void(int &status, int n, int m,
-                           const DoubleFortranVector &x, DoubleFortranVector &f,
-                           params_base_type params)> eval_f_type;
-
-//  abstract interface
-//     subroutine eval_j_type(status, n, m, x, J, params)
-//       import  params_base_type
-//       implicit none
-//       integer, intent(out)  status
-//       integer, intent(in)  n,m 
-//       double precision, dimension(*), intent(in)   x
-//       double precision, dimension(*), intent(out)  J
-//       class(params_base_type), intent(in)  params
-//     end subroutine eval_j_type
-//  end interface
-typedef std::function<void(int &status, int n, int m,
-                           const DoubleFortranVector &x, DoubleFortranVector &J,
-                           params_base_type params)> eval_j_type;
-
-//  abstract interface
-//     subroutine eval_hf_type(status, n, m, x, f, h, params)
-//       import  params_base_type
-//       implicit none
-//       integer, intent(out)  status
-//       integer, intent(in)  n,m 
-//       double precision, dimension(*), intent(in)   x
-//       double precision, dimension(*), intent(in)   f
-//       double precision, dimension(*), intent(out)  h
-//       class(params_base_type), intent(in)  params
-//     end subroutine eval_hf_type
-//  end interface
-typedef std::function<void(int &status, int n, int m,
-                           const DoubleFortranVector &x,
-                           const DoubleFortranVector &f, DoubleFortranMatrix &h,
-                           params_base_type params)> eval_hf_type;
-
-//  ! define types for workspace arrays.
-
-//! workspace for subroutine max_eig
-struct max_eig_work {
-  DoubleFortranVector alphaR, alphaI, beta;
-  DoubleFortranMatrix vr;
-  DoubleFortranVector work, ew_array;
-  IntFortranVector nullindex;
-  IntFortranVector vecisreal;  // logical, allocatable  vecisreal(:)
-  integer nullevs_cols;
-  DoubleFortranMatrix nullevs;
-};
-
-// ! workspace for subroutine solve_general
-struct solve_general_work {
-  DoubleFortranMatrix A;
-  IntFortranVector ipiv;
-};
-
-//! workspace for subroutine evaluate_model
-struct evaluate_model_work {
-  DoubleFortranVector Jd, Hd;
-};
-
-//! workspace for subroutine solve_LLS
-struct solve_LLS_work {
-  DoubleFortranVector temp, work;
-  DoubleFortranMatrix Jlls;
-};
-
-//! workspace for subroutine min_eig_work
-struct min_eig_symm_work {
-  DoubleFortranMatrix A;
-  DoubleFortranVector work, ew;
-  IntFortranVector iwork, ifail;
-};
-
-//! workspace for subroutine all_eig_symm
-struct all_eig_symm_work {
-  DoubleFortranVector work;
-};
-
-//! workspace for subrouine apply_scaling
-struct apply_scaling_work {
-  DoubleFortranVector diag;
-  DoubleFortranMatrix ev;
-  DoubleFortranVector tempvec;
-  all_eig_symm_work all_eig_symm_ws;
-};
-
-//! workspace for subroutine dtrs_work
-struct solve_dtrs_work {
-  DoubleFortranMatrix A, ev;
-  DoubleFortranVector ew, v, v_trans, d_trans;
-  all_eig_symm_work all_eig_symm_ws;
-  apply_scaling_work apply_scaling_ws;
-};
-
-//! workspace for subroutine more_sorensen
-struct more_sorensen_work {
-  //!      type( solve_spd_work )  solve_spd_ws
-  DoubleFortranMatrix A, LtL, AplusSigma;
-  DoubleFortranVector v, q, y1;
-  //!       type( solve_general_work )  solve_general_ws
-  min_eig_symm_work min_eig_symm_ws;
-  apply_scaling_work apply_scaling_ws;
-};
-
-//! workspace for subroutine AINT_tr
-struct AINT_tr_work {
-  max_eig_work max_eig_ws;
-  evaluate_model_work evaluate_model_ws;
-  solve_general_work solve_general_ws;
-  //!       type( solve_spd_work )  solve_spd_ws
-  DoubleFortranMatrix A, LtL, B, M0, M1, gtg, M0_small, M1_small, y_hardcase;
-  DoubleFortranVector v, p0, p1, y, q;
-};
-
-//! workspace for subroutine dogleg
-struct dogleg_work {
-  solve_LLS_work solve_LLS_ws;
-  evaluate_model_work evaluate_model_ws;
-  DoubleFortranVector d_sd, d_gn, ghat, Jg;
-};
-
-//! workspace for subroutine calculate_step
-struct calculate_step_work {
-  AINT_tr_work AINT_tr_ws;
-  dogleg_work dogleg_ws;
-  more_sorensen_work more_sorensen_ws;
-  solve_dtrs_work solve_dtrs_ws;
-};
-
-//! workspace for subroutine get_svd_J
-struct get_svd_J_work {
-  DoubleFortranVector Jcopy, S, work;       
-};
-
-//! all workspaces called from the top level
-struct NLLS_workspace {
-  integer  first_call = 1;
-  integer  iter = 0;
-  real  normF0, normJF0, normF, normJF;
-  real  normJFold, normJF_Newton;
-  real  Delta;
-  real  normd;
-  logical  use_second_derivatives = false;
-  integer  hybrid_count = 0;
-  real  hybrid_tol = 1.0;
-  DoubleFortranMatrix fNewton, JNewton, XNewton;
-  DoubleFortranVector J;
-  DoubleFortranVector f, fnew;
-  DoubleFortranMatrix hf, hf_temp;
-  DoubleFortranVector d, g, Xnew;
-  DoubleFortranVector y, y_sharp, g_old, g_mixed;
-  DoubleFortranVector ysharpSks, Sks;
-  DoubleFortranVector resvec, gradvec;
-  DoubleFortranVector largest_sv, smallest_sv;
-  calculate_step_work calculate_step_ws;
-  evaluate_model_work evaluate_model_ws;
-  get_svd_J_work get_svd_J_ws;
-  real  tr_nu = 2.0;
-  integer  tr_p = 3;
-};
 
 void more_sorensen( const DoubleFortranMatrix& J, const DoubleFortranVector& f, const DoubleFortranMatrix& hf,
   int n, int m, double Delta, DoubleFortranVector& d, double& nd, const nlls_options& options, nlls_inform& inform,
@@ -568,13 +146,13 @@ DoubleFortranVector negative(const DoubleFortranVector& v) {
   return neg;
 }
 
-void mult_J(const DoubleFortranMatrix& J, int n, int m, const DoubleFortranVector& x, DoubleFortranVector& Jx) {
+void mult_J(const DoubleFortranMatrix& J, const DoubleFortranVector& x, DoubleFortranVector& Jx) {
        //dgemv('N',m,n,alpha,J,m,x,1,beta,Jx,1);
   gsl_blas_dgemv(CblasNoTrans, 1.0, J.gsl(), x.gsl(), 0.0, Jx.gsl());
 
 }
 
-void mult_Jt(const DoubleFortranMatrix& J, int n, int m, const DoubleFortranVector& x, DoubleFortranVector& Jtx) {
+void mult_Jt(const DoubleFortranMatrix& J, const DoubleFortranVector& x, DoubleFortranVector& Jtx) {
 //       call dgemv('T',m,n,alpha,J,m,x,1,beta,Jtx,1)
   gsl_blas_dgemv(CblasTrans, 1.0, J.gsl(), x.gsl(), 0.0, Jtx.gsl());
 
@@ -951,24 +529,17 @@ void rank_one_update(DoubleFortranMatrix& hf, NLLS_workspace w, int n) {
 
 void apply_second_order_info(int n, int m, const DoubleFortranVector& X,
   NLLS_workspace& w, eval_hf_type eval_HF, params_base_type params, 
-  const nlls_options& options, nlls_inform& inform, const DoubleFortranVector* weights) {
+  const nlls_options& options, nlls_inform& inform, const DoubleFortranVector& weights) {
 
-  if (options.exact_second_derivatives) then
-    if ( weights ) then
-      DoubleFortranVector temp(m);
-  for_do(i,1,m)
-    temp(i) = (*weights)(i) * w.f(i);
-  end_do
+  if (options.exact_second_derivatives) {
+    DoubleFortranVector temp = w.f;
+    temp *= weights;
     eval_HF(inform.external_return, n, m, X, temp, w.hf, params);
-}else{
-  eval_HF(inform.external_return, n, m, X, w.f, w.hf, params);
-  end_if
     inform.h_eval = inform.h_eval + 1;
-}else{
-  //! use the rank-one approximation...
-  rank_one_update(w.hf,w,n);
-  end_if
-
+  }else{
+    //! use the rank-one approximation...
+    rank_one_update(w.hf,w,n);
+  }
 } //     end subroutine apply_second_order_info
 
 
@@ -1069,43 +640,23 @@ void min_eig_symm(const DoubleFortranMatrix& A, double& sigma,
 ///  Given an (m x n)  matrix J held by columns as a vector,
 ///  this routine returns the largest and smallest singular values
 ///  of J.
-//void get_svd_J(int n, int m, const DoubleFortranMatrix& J, double &s1, double &sn, const nlls_options& options, int &status, get_svd_J_work& w) {
+void get_svd_J(const DoubleFortranMatrix& J, double &s1, double &sn) {
 //       integer, intent(in)  n,m 
 //       real, intent(in)  J(:)
 //       real, intent(out)  s1, sn
 //       type( nlls_options )  options
 //       integer, intent(out)  status
 //       type( get_svd_J_work )  w
-//
-//
-//       character  jobu(1), jobvt(1)
-//       integer  lwork
-//
-//       w.Jcopy(:) = J(:)
-//
-//       jobu  = 'N' ! calculate no left singular vectors
-//       jobvt = 'N' ! calculate no right singular vectors
-//
-//       lwork = size(w.work)
-//
-//       call dgesvd( JOBU, JOBVT, n, m, w.Jcopy, n, w.S, w.S, 1, w.S, 1, & 
-//            w.work, lwork, status )
-//       if ( (status .ne. 0) .and. (options.print_level > 3) ) then 
-//          write(options.error,'(a,i0)') 'Error when calculating svd, dgesvd returned', &
-//               status
-//          s1 = -1.0
-//          sn = -1.0
-//          ! allow to continue, but warn user and return zero singular values
-//       else
-//          s1 = w.S(1)
-//          sn = w.S(n)
-//          if (options.print_level > 2) then 
-//             write(options.out,'(a,es12.4,a,es12.4)') 's1 = ', s1, '    sn = ', sn
-//             write(options.out,'(a,es12.4)') 'k(J) = ', s1/sn
-//          end if
-//       end if
-//
-//} // subroutine get_svd_J
+
+  auto n = J.len2();
+  DoubleFortranMatrix U = J;
+  DoubleFortranMatrix V(n, n);
+  DoubleFortranVector S(n);
+  DoubleFortranVector work(n);
+  gsl_linalg_SV_decomp(U.gsl(), V.gsl(), S.gsl(), work.gsl());
+  s1 = S(1);
+  sn = S(n);
+} // subroutine get_svd_J
 
 ///! -----------------------------------------
 ///! more_sorensen
@@ -1259,322 +810,128 @@ more_sorensen_work& w) {
 //     !! W O R K S P A C E   S E T U P   S U B R O U T I N E S !!
 //     !!                                                       !!
 //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-//     subroutine setup_workspaces(workspace,n,m,options,inform)
+
+//get_svd_J_work::get_svd_J_work(int n, int m, bool calculate_svd_J)
+//{
+//  if (calculate_svd_J) {
+//    Jcopy.allocate(n*m);
+//    S.allocate(n);
+//  }
+//}
+
+//void setup_workspace_more_sorensen(n,m,w,options,inform) {
+//       integer, intent(in)  n,m
+//       type( more_sorensen_work )  w
+//       type( nlls_options ), intent(in)  options
+//       type( nlls_inform ), intent(out)  inform
+//
+//       allocate(w.A(n,n),stat = inform.alloc_status)
+//       if (inform.alloc_status > 0) goto 9000
+//       allocate(w.LtL(n,n),stat = inform.alloc_status)
+//       if (inform.alloc_status > 0) goto 9000
+//       allocate(w.v(n),stat = inform.alloc_status)
+//       if (inform.alloc_status > 0) goto 9000
+//       allocate(w.q(n),stat = inform.alloc_status)
+//       if (inform.alloc_status > 0) goto 9000
+//       allocate(w.y1(n),stat = inform.alloc_status)
+//       if (inform.alloc_status > 0) goto 9000
+//       allocate(w.AplusSigma(n,n),stat = inform.alloc_status)
+//       if (inform.alloc_status > 0) goto 9000
+//
+//       call setup_workspace_min_eig_symm(n,m,w.min_eig_symm_ws,options,inform)
+//       if (inform.status > 0) goto 9010
+//
+//       if (options.scale > 0) then
+//          call setup_workspace_apply_scaling(n,m,w.apply_scaling_ws,options,inform)
+//          if (inform.status > 0) goto 9010
+//       end if
+//
+//       return
+//
+//9000   continue ! allocation error here
+//       inform.status = ERROR.ALLOCATION
+//       inform.bad_alloc = "more_sorenesen"
+//       return
+//
+//9010   continue ! error from called subroutine
+//       return
+//
+//} // setup_workspace_more_sorensen
+
+//calculate_step_work::calculate_step_work(int n, int m, int nlls_method) {
+//  if (nlls_method == 3) { //! More-Sorensen 
+//    setup_workspace_more_sorensen(n,m, more_sorensen_ws,options,inform);
+//  } //else if (options.nlls_method == 4) { //! dtrs (Galahad)
+//  //   setup_workspace_solve_dtrs(n,m, 
+//  //        calculate_step_ws.solve_dtrs_ws, options, inform);
+//  //} else {
+//  //  throw std::logic_error("Initialization: method not implemented.");
+//  //}
+//}
+
+NLLS_workspace::NLLS_workspace(int n, int m,const nlls_options& options, nlls_inform& inform) :
+ first_call(0),
+ iter(0),
+ normF0(), normJF0(), normF(), normJF(),
+ normJFold(), normJF_Newton(),
+ Delta(),
+ normd(),
+ use_second_derivatives(false),
+ hybrid_count(0),
+ hybrid_tol(1.0),
+ tr_nu(options.radius_increase),
+ tr_p(7),
+ /* DoubleFortranMatrix */ fNewton(), JNewton(), XNewton(),
+ /* DoubleFortranVector */ J(m, n),
+ /* DoubleFortranVector */ f(m), fnew(m),
+ /* DoubleFortranMatrix */ hf(n,n), //hf_temp(),
+ /* DoubleFortranVector */ d(n), g(n), Xnew(n),
+ /* DoubleFortranVector */ y(n), y_sharp(n),// g_old(), g_mixed(),
+ /* DoubleFortranVector */ //ysharpSks(), Sks(),
+ /* DoubleFortranVector */ //resvec(), gradvec(),
+ /* DoubleFortranVector */ largest_sv(), smallest_sv()
+{
 //
 //       type( NLLS_workspace ), intent(out)  workspace
 //       type( nlls_options ), intent(in)  options
 //       integer, intent(in)  n,m
 //       type( NLLS_inform ), intent(out)  inform
-//
-//       workspace.first_call = 0
-//
-//       workspace.tr_nu = options.radius_increase
-//       workspace.tr_p = 7
-//
-//       if (.not. allocated(workspace.y)) then
-//          allocate(workspace.y(n), stat = inform.alloc_status)
-//          if (inform.alloc_status .ne. 0) goto 1000
-//          workspace.y = zero
-//       end if
-//       if (.not. allocated(workspace.y_sharp)) then
-//          allocate(workspace.y_sharp(n), stat = inform.alloc_status)
-//          if (inform.alloc_status .ne. 0) goto 1000
-//          workspace.y_sharp = zero
-//       end if
-//
-//       if (.not. options.exact_second_derivatives) then
-//          if (.not. allocated(workspace.g_old)) then
-//             allocate(workspace.g_old(n), stat = inform.alloc_status)
-//             if (inform.alloc_status > 0) goto 1000
-//          end if
-//          if (.not. allocated(workspace.g_mixed)) then
-//             allocate(workspace.g_mixed(n), stat = inform.alloc_status)
-//             if (inform.alloc_status > 0) goto 1000
-//          end if
-//          if (.not. allocated(workspace.Sks)) then
-//             allocate(workspace.Sks(n), stat = inform.alloc_status)
-//             if (inform.alloc_status > 0) goto 1000
-//          end if
-//          if (.not. allocated(workspace.ysharpSks)) then
-//             allocate(workspace.ysharpSks(n), stat = inform.alloc_status)
-//             if (inform.alloc_status > 0) goto 1000
-//          end if
-//
-//       end if
-//
-//       if( options.output_progress_vectors ) then 
-//          if (.not. allocated(workspace.resvec)) then
-//             allocate(workspace.resvec(options.maxit+1), stat = inform.alloc_status)
-//             if (inform.alloc_status > 0) goto 1000
-//          end if
-//          if (.not. allocated(workspace.gradvec)) then
-//             allocate(workspace.gradvec(options.maxit+1), stat = inform.alloc_status)
-//             if (inform.alloc_status > 0) goto 1000
-//          end if
-//       end if
-//
-//       if( options.calculate_svd_J ) then
-//          if (.not. allocated(workspace.largest_sv)) then
-//             allocate(workspace.largest_sv(options.maxit + 1), &
-//                  stat = inform.alloc_status)
-//             if (inform.alloc_status > 0) goto 1000
-//          end if
-//          if (.not. allocated(workspace.smallest_sv)) then
-//             allocate(workspace.smallest_sv(options.maxit + 1), &
-//                  stat = inform.alloc_status)
-//             if (inform.alloc_status > 0) goto 1000
-//          end if
-//          call setup_workspace_get_svd_J(n,m,workspace.get_svd_J_ws, & 
-//               options, inform)
-//          if (inform.alloc_status > 0) goto 1010
-//       end if
-//
-//       if( .not. allocated(workspace.J)) then
-//          allocate(workspace.J(n*m), stat = inform.alloc_status)
-//          if (inform.alloc_status > 0) goto 1000
-//       end if
-//       if( .not. allocated(workspace.f)) then
-//          allocate(workspace.f(m), stat = inform.alloc_status)
-//          if (inform.alloc_status > 0) goto 1000
-//       end if
-//       if( .not. allocated(workspace.fnew)) then 
-//          allocate(workspace.fnew(m), stat = inform.alloc_status)
-//          if (inform.alloc_status > 0) goto 1000
-//       end if
-//       if( .not. allocated(workspace.hf)) then
-//          allocate(workspace.hf(n*n), stat = inform.alloc_status)
-//          if (inform.alloc_status > 0) goto 1000
-//       end if
-//       if( options.model == 3 ) then
-//          if( .not. allocated(workspace.hf_temp)) then 
-//             allocate(workspace.hf_temp(n*n), stat = inform.alloc_status)
-//             if (inform.alloc_status > 0) goto 1000
-//          end if
-//       end if
-//       if( .not. allocated(workspace.d)) then
-//          allocate(workspace.d(n), stat = inform.alloc_status)
-//          if (inform.alloc_status > 0) goto 1000
-//       end if
-//       if( .not. allocated(workspace.g)) then
-//          allocate(workspace.g(n), stat = inform.alloc_status)
-//          if (inform.alloc_status > 0) goto 1000
-//       end if
-//       if( .not. allocated(workspace.Xnew)) then
-//          allocate(workspace.Xnew(n), stat = inform.alloc_status)
-//          if (inform.alloc_status > 0) goto 1000
-//       end if
-//
-//
-//       select case (options.nlls_method)
-//
-//       case (1) ! use the dogleg method
-//          call setup_workspace_dogleg(n,m,workspace.calculate_step_ws.dogleg_ws, & 
-//               options, inform)
-//          if (inform.alloc_status > 0) goto 1010
-//
-//       case(2) ! use the AINT method
-//          call setup_workspace_AINT_tr(n,m,workspace.calculate_step_ws.AINT_tr_ws, & 
-//               options, inform)
-//          if (inform.alloc_status > 0) goto 1010
-//
-//       case(3) ! More-Sorensen 
-//          call setup_workspace_more_sorensen(n,m,&
-//               workspace.calculate_step_ws.more_sorensen_ws,options,inform)
-//          if (inform.alloc_status > 0) goto 1010
-//
-//       case (4) ! dtrs (Galahad)
-//          call setup_workspace_solve_dtrs(n,m, & 
-//               workspace.calculate_step_ws.solve_dtrs_ws, options, inform)
-//          if (inform.alloc_status > 0) goto 1010
-//       end select
+
+       y.zero();
+       y_sharp.zero();
+
+       if (! options.exact_second_derivatives) then
+         g_old.allocate(n);
+         g_mixed.allocate(n);
+         Sks.allocate(n);
+         ysharpSks.allocate(n);
+       end_if
+
+       if( options.output_progress_vectors ) then 
+         resvec.allocate(options.maxit+1);
+         gradvec.allocate(options.maxit+1);
+       end_if
+
+       if( options.calculate_svd_J ) then
+         largest_sv.allocate(options.maxit + 1);
+         smallest_sv.allocate(options.maxit + 1);
+       end_if
+
+       if( options.model == 3 ) then
+          hf_temp.allocate(n, n);
+       end_if
+
+
 //
 //       ! evaluate model in the main routine...       
 //       call setup_workspace_evaluate_model(n,m,workspace.evaluate_model_ws,options,inform)
-//       if (inform.alloc_status > 0) goto 1010
-//
-//       return
-//
-//       ! Error statements
-//1000   continue ! bad allocation from this subroutine
-//       inform.bad_alloc = 'setup_workspaces'
-//       inform.status = ERROR.ALLOCATION
-//       return
-//
-//1010   continue ! bad allocation from called subroutine
-//       return
-//
-//     end subroutine setup_workspaces
-//
-//     subroutine remove_workspaces(workspace,options)
-//
-//       type( NLLS_workspace ), intent(out)  workspace
-//       type( nlls_options ), intent(in)  options
-//
-//       workspace.first_call = 0
-//
-//       if(allocated(workspace.y)) deallocate(workspace.y)
-//       if(allocated(workspace.y_sharp)) deallocate(workspace.y_sharp)
-//       if(allocated(workspace.g_old)) deallocate(workspace.g_old)
-//       if(allocated(workspace.g_mixed)) deallocate(workspace.g_mixed)
-//
-//       if(allocated(workspace.resvec)) deallocate(workspace.resvec)
-//       if(allocated(workspace.gradvec)) deallocate(workspace.gradvec)
-//
-//       if(allocated(workspace.largest_sv)) deallocate(workspace.largest_sv)
-//       if(allocated(workspace.smallest_sv)) deallocate(workspace.smallest_sv)
-//
-//       if(allocated(workspace.fNewton)) deallocate(workspace.fNewton )
-//       if(allocated(workspace.JNewton)) deallocate(workspace.JNewton )
-//       if(allocated(workspace.XNewton)) deallocate(workspace.XNewton ) 
-//
-//       if( options.calculate_svd_J ) then
-//          if (allocated(workspace.largest_sv)) deallocate(workspace.largest_sv)
-//          if (allocated(workspace.smallest_sv)) deallocate(workspace.smallest_sv)
-//          call remove_workspace_get_svd_J(workspace.get_svd_J_ws, options)
-//       end if
-//
-//       if(allocated(workspace.J)) deallocate(workspace.J ) 
-//       if(allocated(workspace.f)) deallocate(workspace.f ) 
-//       if(allocated(workspace.fnew)) deallocate(workspace.fnew ) 
-//       if(allocated(workspace.hf)) deallocate(workspace.hf ) 
-//       if(allocated(workspace.hf_temp)) deallocate(workspace.hf_temp) 
-//       if(allocated(workspace.d)) deallocate(workspace.d ) 
-//       if(allocated(workspace.g)) deallocate(workspace.g ) 
-//       if(allocated(workspace.Xnew)) deallocate(workspace.Xnew ) 
-//
-//       select case (options.nlls_method)
-//
-//       case (1) ! use the dogleg method
-//          call remove_workspace_dogleg(workspace.calculate_step_ws.dogleg_ws, & 
-//               options)
-//
-//       case(2) ! use the AINT method
-//          call remove_workspace_AINT_tr(workspace.calculate_step_ws.AINT_tr_ws, & 
-//               options)
-//
-//       case(3) ! More-Sorensen 
-//          call remove_workspace_more_sorensen(&
-//               workspace.calculate_step_ws.more_sorensen_ws,options)
-//
-//       case (4) ! dtrs (Galahad)
-//          call remove_workspace_solve_dtrs(& 
-//               workspace.calculate_step_ws.solve_dtrs_ws, options)
-//
-//       end select
-//
-//       ! evaluate model in the main routine...       
-//       call remove_workspace_evaluate_model(workspace.evaluate_model_ws,options)
-//
-//       return
-//
-//     end subroutine remove_workspaces
-//
-//     subroutine setup_workspace_get_svd_J(n,m,w,options,inform)
-//       integer, intent(in)  n, m 
-//       type( get_svd_J_work ), intent(out)  w
-//       type( nlls_options ), intent(in)  options
-//       type( nlls_inform ), intent(out)  inform
-//
-//       integer  lwork
-//       character  jobu(1), jobvt(1)
-//
-//       allocate( w.Jcopy(n*m), stat = inform.alloc_status)
-//       if (inform.alloc_status .ne. 0) goto 9000
-//
-//       allocate( w.S(n), stat = inform.alloc_status)
-//       if (inform.alloc_status .ne. 0) goto 9000
-//
-//       allocate(w.work(1))
-//       jobu  = 'N' ! calculate no left singular vectors
-//       jobvt = 'N' ! calculate no right singular vectors
-//
-//       ! make a workspace query....
-//       call dgesvd( jobu, jobvt, n, m, w.Jcopy, n, w.S, w.S, 1, w.S, 1, & 
-//            w.work, -1, inform.alloc_status )
-//       if ( inform.alloc_status .ne. 0 ) goto 9000
-//
-//       lwork = int(w.work(1))
-//       deallocate(w.work)
-//       allocate(w.work(lwork))     
-//
-//       return
-//
-//       ! Error statements
-//9000   continue  ! bad allocations in this subroutine
-//       inform.bad_alloc = 'setup_workspace_get_svd_J'
-//       inform.status = ERROR.ALLOCATION
-//       return
-//
-//     end subroutine setup_workspace_get_svd_J
-//
-//     subroutine remove_workspace_get_svd_J(w,options)
-//       type( get_svd_J_work )  w
-//       type( nlls_options )  options
-//
-//       if( allocated(w.Jcopy) ) deallocate( w.Jcopy )
-//       if( allocated(w.S) ) deallocate( w.S )
-//       if( allocated(w.work) ) deallocate( w.work )
-//
-//       return
-//
-//     end subroutine remove_workspace_get_svd_J
-//
-//     subroutine setup_workspace_dogleg(n,m,w,options,inform)
-//       integer, intent(in)  n, m 
-//       type( dogleg_work ), intent(out)  w
-//       type( nlls_options ), intent(in)  options
-//       type( nlls_inform ), intent(out)  inform
-//
-//       allocate(w.d_sd(n),stat = inform.alloc_status)
-//       if (inform.alloc_status > 0) goto 9000
-//       allocate(w.d_gn(n),stat = inform.alloc_status)
-//       if (inform.alloc_status > 0) goto 9000           
-//       allocate(w.ghat(n),stat = inform.alloc_status)
-//       if (inform.alloc_status > 0) goto 9000
-//       allocate(w.Jg(m),stat = inform.alloc_status)
-//       if (inform.alloc_status > 0) goto 9000
-//       ! setup space for 
-//       !   solve_LLS
-//       call setup_workspace_solve_LLS(n,m,w.solve_LLS_ws,options,inform)
-//       if (inform.status > 0 ) goto 9010
-//       ! setup space for 
-//       !   evaluate_model
-//       call setup_workspace_evaluate_model(n,m,w.evaluate_model_ws,options,inform)
-//       if (inform.status > 0 ) goto 9010
-//
-//       return
-//
-//       ! Error statements
-//9000   continue  ! bad allocations in this subroutine
-//       inform.bad_alloc = 'setup_workspace_dogleg'
-//       inform.status = ERROR.ALLOCATION
-//       return
-//
-//9010   continue  ! bad allocations from dependent subroutine
-//       return
-//
-//
-//     end subroutine setup_workspace_dogleg
-//
-//     subroutine remove_workspace_dogleg(w,options)
-//       type( dogleg_work ), intent(out)  w
-//       type( nlls_options ), intent(in)  options
-//
-//       if(allocated( w.d_sd )) deallocate(w.d_sd ) 
-//       if(allocated( w.d_gn )) deallocate(w.d_gn )
-//       if(allocated( w.ghat )) deallocate(w.ghat )
-//       if(allocated( w.Jg )) deallocate(w.Jg )
-//
-//       ! deallocate space for 
-//       !   solve_LLS
-//       call remove_workspace_solve_LLS(w.solve_LLS_ws,options)
-//       ! deallocate space for 
-//       !   evaluate_model
-//       call remove_workspace_evaluate_model(w.evaluate_model_ws,options)
-//
-//       return
-//
-//     end subroutine remove_workspace_dogleg
+} // setup_workspaces
+
+/// Calculate the 2-norm of a vector: sqrt(||V||^2)
+double norm2(const DoubleFortranVector& v) {
+  return v.norm();
+}
+
 //
 //     subroutine setup_workspace_solve_LLS(n,m,w,options,inform)
 //       integer, intent(in)  n, m 
@@ -1600,17 +957,6 @@ more_sorensen_work& w) {
 //
 //     end subroutine setup_workspace_solve_LLS
 //
-//     subroutine remove_workspace_solve_LLS(w,options)
-//       type( solve_LLS_work )  w 
-//       type( nlls_options ), intent(in)  options
-//
-//       if(allocated( w.temp )) deallocate( w.temp)
-//       if(allocated( w.work )) deallocate( w.work ) 
-//       if(allocated( w.Jlls )) deallocate( w.Jlls ) 
-//
-//       return
-//
-//     end subroutine remove_workspace_solve_LLS
 //
 //     subroutine setup_workspace_evaluate_model(n,m,w,options,inform)
 //       integer, intent(in)  n, m        
@@ -1631,104 +977,7 @@ more_sorensen_work& w) {
 //       return
 //     end subroutine setup_workspace_evaluate_model
 //
-//     subroutine remove_workspace_evaluate_model(w,options)
-//       type( evaluate_model_work )  w
-//       type( nlls_options ), intent(in)  options
-//
-//       if(allocated( w.Jd )) deallocate( w.Jd ) 
-//       if(allocated( w.Hd )) deallocate( w.Hd ) 
-//
-//       return
-//
-//     end subroutine remove_workspace_evaluate_model
-//
-//     subroutine setup_workspace_AINT_tr(n,m,w,options,inform)
-//       integer, intent(in)  n, m 
-//       type( AINT_tr_work )  w
-//       type( nlls_options ), intent(in)  options
-//       type( nlls_inform ), intent(out)  inform
-//
-//       allocate(w.A(n,n),stat = inform.alloc_status)
-//       if (inform.alloc_status > 0) goto 9000
-//       allocate(w.v(n),stat = inform.alloc_status)
-//       if (inform.alloc_status > 0) goto 9000
-//       allocate(w.B(n,n),stat = inform.alloc_status)
-//       if (inform.alloc_status > 0) goto 9000
-//       allocate(w.p0(n),stat = inform.alloc_status)
-//       if (inform.alloc_status > 0) goto 9000
-//       allocate(w.p1(n),stat = inform.alloc_status)
-//       if (inform.alloc_status > 0) goto 9000
-//       allocate(w.M0(2*n,2*n),stat = inform.alloc_status)
-//       if (inform.alloc_status > 0) goto 9000
-//       allocate(w.M1(2*n,2*n),stat = inform.alloc_status)
-//       if (inform.alloc_status > 0) goto 9000
-//       allocate(w.M0_small(n,n),stat = inform.alloc_status)
-//       if (inform.alloc_status > 0) goto 9000
-//       allocate(w.M1_small(n,n),stat = inform.alloc_status)
-//       if (inform.alloc_status > 0) goto 9000
-//       allocate(w.y(2*n),stat = inform.alloc_status)
-//       if (inform.alloc_status > 0) goto 9000
-//       allocate(w.gtg(n,n),stat = inform.alloc_status)
-//       if (inform.alloc_status > 0) goto 9000
-//       allocate(w.q(n),stat = inform.alloc_status)
-//       if (inform.alloc_status > 0) goto 9000
-//       allocate(w.LtL(n,n),stat = inform.alloc_status)
-//       if (inform.alloc_status > 0) goto 9000
-//       allocate(w.y_hardcase(n,2), stat = inform.alloc_status)
-//       if (inform.alloc_status > 0) goto 9000
-//       ! setup space for max_eig
-//       call setup_workspace_max_eig(n,m,w.max_eig_ws,options,inform)
-//       if (inform.status > 0) goto 9010
-//       call setup_workspace_evaluate_model(n,m,w.evaluate_model_ws,options,inform)
-//       if (inform.status > 0) goto 9010
-//       ! setup space for the solve routine
-//       if ((options.model .ne. 1)) then
-//          call setup_workspace_solve_general(n,m,w.solve_general_ws,options,inform)
-//          if (inform.status > 0 ) goto 9010
-//       end if
-//
-//       return
-//
-//9000   continue ! local allocation error
-//       inform.status = ERROR.ALLOCATION
-//       inform.bad_alloc = "AINT_tr"
-//       !call allocation_error(options,'AINT_tr')
-//       return
-//
-//9010   continue ! allocation error from called subroutine
-//       return
-//
-//     end subroutine setup_workspace_AINT_tr
-//
-//     subroutine remove_workspace_AINT_tr(w,options)
-//       type( AINT_tr_work )  w
-//       type( nlls_options ), intent(in)  options
-//
-//       if(allocated( w.A )) deallocate(w.A)
-//       if(allocated( w.v )) deallocate(w.v)
-//       if(allocated( w.B )) deallocate(w.B)
-//       if(allocated( w.p0 )) deallocate(w.p0)
-//       if(allocated( w.p1 )) deallocate(w.p1)
-//       if(allocated( w.M0 )) deallocate(w.M0)
-//       if(allocated( w.M1 )) deallocate(w.M1)
-//       if(allocated( w.M0_small )) deallocate(w.M0_small)
-//       if(allocated( w.M1_small )) deallocate(w.M1_small)
-//       if(allocated( w.y )) deallocate(w.y)
-//       if(allocated( w.gtg )) deallocate(w.gtg)
-//       if(allocated( w.q )) deallocate(w.q)
-//       if(allocated( w.LtL )) deallocate(w.LtL)
-//       if(allocated( w.y_hardcase )) deallocate(w.y_hardcase)
-//       ! setup space for max_eig
-//       call remove_workspace_max_eig(w.max_eig_ws,options)
-//       call remove_workspace_evaluate_model(w.evaluate_model_ws,options)
-//       ! setup space for the solve routine
-//       if (options.model .ne. 1) then
-//          call remove_workspace_solve_general(w.solve_general_ws,options)
-//       end if
-//
-//       return
-//
-//     end subroutine remove_workspace_AINT_tr
+
 //
 //     subroutine setup_workspace_min_eig_symm(n,m,w,options,inform)
 //       integer, intent(in)  n, m 
@@ -2020,75 +1269,10 @@ more_sorensen_work& w) {
 //       return
 //
 //     end subroutine setup_workspace_all_eig_symm
-//
-//     subroutine remove_workspace_all_eig_symm(w,options)
-//       type( all_eig_symm_work )  w
-//       type( nlls_options ), intent(in)  options
-//
-//       if(allocated( w.work )) deallocate( w.work ) 
-//
-//     end subroutine remove_workspace_all_eig_symm
-//
-//     subroutine setup_workspace_more_sorensen(n,m,w,options,inform)
-//       integer, intent(in)  n,m
-//       type( more_sorensen_work )  w
-//       type( nlls_options ), intent(in)  options
-//       type( nlls_inform ), intent(out)  inform
-//
-//       allocate(w.A(n,n),stat = inform.alloc_status)
-//       if (inform.alloc_status > 0) goto 9000
-//       allocate(w.LtL(n,n),stat = inform.alloc_status)
-//       if (inform.alloc_status > 0) goto 9000
-//       allocate(w.v(n),stat = inform.alloc_status)
-//       if (inform.alloc_status > 0) goto 9000
-//       allocate(w.q(n),stat = inform.alloc_status)
-//       if (inform.alloc_status > 0) goto 9000
-//       allocate(w.y1(n),stat = inform.alloc_status)
-//       if (inform.alloc_status > 0) goto 9000
-//       allocate(w.AplusSigma(n,n),stat = inform.alloc_status)
-//       if (inform.alloc_status > 0) goto 9000
-//
-//       call setup_workspace_min_eig_symm(n,m,w.min_eig_symm_ws,options,inform)
-//       if (inform.status > 0) goto 9010
-//
-//       if (options.scale > 0) then
-//          call setup_workspace_apply_scaling(n,m,w.apply_scaling_ws,options,inform)
-//          if (inform.status > 0) goto 9010
-//       end if
-//
-//       return
-//
-//9000   continue ! allocation error here
-//       inform.status = ERROR.ALLOCATION
-//       inform.bad_alloc = "more_sorenesen"
-//       return
-//
-//9010   continue ! error from called subroutine
-//       return
-//
-//     end subroutine setup_workspace_more_sorensen
-//
-//     subroutine remove_workspace_more_sorensen(w,options)
-//       type( more_sorensen_work )  w
-//       type( nlls_options ), intent(in)  options
-//
-//       if(allocated( w.A )) deallocate(w.A)
-//       if(allocated( w.LtL )) deallocate(w.LtL)
-//       if(allocated( w.v )) deallocate(w.v)
-//       if(allocated( w.q )) deallocate(w.q)
-//       if(allocated( w.y1 )) deallocate(w.y1)
-//       if(allocated( w.AplusSigma )) deallocate(w.AplusSigma)
-//
-//       call remove_workspace_min_eig_symm(w.min_eig_symm_ws,options)
-//       if (options.scale > 0) then
-//          call remove_workspace_apply_scaling(w.apply_scaling_ws,options)
-//       end if
-//
-//       return
-//
-//     end subroutine remove_workspace_more_sorensen
-//
-//
+
+
+
+
 //     subroutine setup_workspace_apply_scaling(n,m,w,options,inform)
 //
 //       integer, intent(in)  n,m
@@ -2119,21 +1303,6 @@ more_sorensen_work& w) {
 //       return
 //
 //     end subroutine setup_workspace_apply_scaling
-//
-//     subroutine remove_workspace_apply_scaling(w,options)
-//       type( apply_scaling_work )  w
-//       type( nlls_options ), intent(in)  options
-//
-//       if(allocated( w.diag )) deallocate( w.diag )
-//       if(allocated( w.ev )) deallocate( w.ev ) 
-//
-//       return 
-//
-//     end subroutine remove_workspace_apply_scaling
-//
-//
-//
-//   end module ral_nlls_internal
 //
 
 

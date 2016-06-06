@@ -100,6 +100,8 @@ public:
   GSLVector &operator+=(const GSLVector &v);
   /// Subtract a vector
   GSLVector &operator-=(const GSLVector &v);
+  /// Multiply by a vector (per element)
+  GSLVector &operator*=(const GSLVector &v);
   /// Multiply by a number
   GSLVector &operator*=(const double d);
   /// Add a number

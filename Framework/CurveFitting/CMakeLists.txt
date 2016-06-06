@@ -121,6 +121,7 @@ set ( SRC_FILES
 	src/ParameterEstimator.cpp
 	src/RalNlls/DTRS.cpp
 	src/RalNlls/Internal.cpp
+	src/RalNlls/NLLS.cpp
 	src/SeqDomain.cpp
 	src/SeqDomainSpectrumCreator.cpp
 	src/SpecialFunctionHelper.cpp
@@ -243,6 +244,7 @@ set ( INC_FILES
 	inc/MantidCurveFitting/Functions/VesuvioResolution.h
 	inc/MantidCurveFitting/Functions/Voigt.h
 	inc/MantidCurveFitting/RalNlls/DTRS.h
+	inc/MantidCurveFitting/RalNlls/Internal.h
 	inc/MantidCurveFitting/GSLFunctions.h
 	inc/MantidCurveFitting/GSLJacobian.h
 	inc/MantidCurveFitting/GSLMatrix.h

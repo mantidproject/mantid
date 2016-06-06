@@ -134,6 +134,15 @@ GSLVector &GSLVector::operator-=(const GSLVector &v) {
   return *this;
 }
 
+/// Multiply by a vector (per element)
+GSLVector &GSLVector::operator*=(const GSLVector &v) {
+  if (size() != v.size()) {
+    throw std::runtime_error("GSLVectors have different sizes.");
+  }
+  gsl_vector_mul(gsl(), v.gsl());
+  return *this;
+}
+
 /// Multiply by a number
 /// @param d :: The number
 GSLVector &GSLVector::operator*=(const double d) {
