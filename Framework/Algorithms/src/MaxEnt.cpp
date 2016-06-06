@@ -722,7 +722,6 @@ void MaxEnt::populateImageWS(const MatrixWorkspace_sptr &inWS, size_t spec,
 
   // X values
   for (int i = 0; i < npoints; i++) {
-    int j = (npoints / 2 + i + isOdd) % npoints;
     X[i] = delta * (-npoints / 2 + i);
   }
   if (npointsX == npoints + 1)
