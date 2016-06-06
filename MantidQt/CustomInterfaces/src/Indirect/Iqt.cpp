@@ -22,13 +22,13 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 Iqt::Iqt(QWidget *parent)
-    : IndirectDataAnalysisTab(parent), m_furTree(NULL), m_furyResFileType() {
+    : IndirectDataAnalysisTab(parent), m_iqtTree(NULL), m_iqtResFileType() {
   m_uiForm.setupUi(parent);
 }
 
 void Iqt::setup() {
-  m_furTree = new QtTreePropertyBrowser();
-  m_uiForm.properties->addWidget(m_furTree);
+  m_iqtTree = new QtTreePropertyBrowser();
+  m_uiForm.properties->addWidget(m_iqtTree);
 
   // Create and configure properties
   m_properties["ELow"] = m_dblManager->addProperty("ELow");
@@ -52,16 +52,16 @@ void Iqt::setup() {
   m_dblManager->setDecimals(m_properties["ResolutionBins"], 0);
   m_properties["ResolutionBins"]->setEnabled(false);
 
-  m_furTree->addProperty(m_properties["ELow"]);
-  m_furTree->addProperty(m_properties["EWidth"]);
-  m_furTree->addProperty(m_properties["EHigh"]);
-  m_furTree->addProperty(m_properties["SampleBinning"]);
-  m_furTree->addProperty(m_properties["SampleBins"]);
-  m_furTree->addProperty(m_properties["ResolutionBins"]);
+  m_iqtTree->addProperty(m_properties["ELow"]);
+  m_iqtTree->addProperty(m_properties["EWidth"]);
+  m_iqtTree->addProperty(m_properties["EHigh"]);
+  m_iqtTree->addProperty(m_properties["SampleBinning"]);
+  m_iqtTree->addProperty(m_properties["SampleBins"]);
+  m_iqtTree->addProperty(m_properties["ResolutionBins"]);
 
   m_dblManager->setValue(m_properties["SampleBinning"], 10);
 
-  m_furTree->setFactoryForManager(m_dblManager, m_dblEdFac);
+  m_iqtTree->setFactoryForManager(m_dblManager, m_dblEdFac);
 
   auto xRangeSelector = m_uiForm.ppPlot->addRangeSelector("IqtRange");
 
