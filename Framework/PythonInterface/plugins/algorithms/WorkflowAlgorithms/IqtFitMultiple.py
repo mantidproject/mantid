@@ -118,7 +118,6 @@ class IqtFitMultiple(PythonAlgorithm):
 
     def PyExec(self):
         from IndirectDataAnalysis import (convertToElasticQ,
-                                          createFuryMultiDomainFunction,
                                           transposeFitParametersTable)
 
         setup_prog = Progress(self, start=0.0, end=0.1, nreports=4)
@@ -152,7 +151,7 @@ class IqtFitMultiple(PythonAlgorithm):
 
         #fit multi-domian functino to workspace
         fit_prog = Progress(self, start=0.1, end=0.8, nreports=2)
-        multi_domain_func, kwargs = createFuryMultiDomainFunction(self._function, tmp_fit_workspace)
+        multi_domain_func, kwargs = self._create_iqt_multi_domain_function(self._function, tmp_fit_workspace)
         fit_prog.report('Fitting...')
         Fit(Function=multi_domain_func,
             InputWorkspace=tmp_fit_workspace,
@@ -208,6 +207,30 @@ class IqtFitMultiple(PythonAlgorithm):
         self.setProperty('OutputParameterWorkspace', self._parameter_name)
         self.setProperty('OutputWorkspaceGroup', self._fit_group_name)
         conclusion_prog.report('Algorithm complete')
+
+
+    def _create_iqt_multi_domain_function(self, function, input_ws):
+        multi= 'composite=MultiDomainFunction,NumDeriv=true;'
+        comp = '(composite=CompositeFunction,NumDeriv=true,$domains=i;' + function + ');'
+
+        ties = []
+        kwargs = {}
+        num_spectra = mtd[input_ws].getNumberHistograms()
+        for i in range(0, num_spectra):
+            multi += comp
+            kwargs['WorkspaceIndex_' + str(i)] = i
+
+            if i > 0:
+                kwargs['InputWorkspace_' + str(i)] = input_ws
+
+                #tie beta for every spectrum
+                tie = 'f%d.f1.Beta=f0.f1.Beta' % i
+                ties.append(tie)
+
+        ties = ','.join(ties)
+        multi += 'ties=(' + ties + ')'
+
+    return multi, kwargs
 
 
 AlgorithmFactory.subscribe(IqtFitMultiple)
