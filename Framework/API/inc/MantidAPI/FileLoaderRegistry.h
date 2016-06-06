@@ -154,7 +154,7 @@ template class MANTID_API_DLL
 #endif /* _WIN32 */
 
 /// Type for the actual singleton instance
-typedef MANTID_API_DLL Mantid::Kernel::SingletonHolder<FileLoaderRegistryImpl>
+typedef Mantid::Kernel::SingletonHolder<FileLoaderRegistryImpl>
     FileLoaderRegistry;
 
 } // namespace API

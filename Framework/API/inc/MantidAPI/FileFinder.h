@@ -101,8 +101,7 @@ private:
 template class MANTID_API_DLL Mantid::Kernel::SingletonHolder<FileFinderImpl>;
 #endif /* _WIN32 */
 
-typedef MANTID_API_DLL Mantid::Kernel::SingletonHolder<FileFinderImpl>
-    FileFinder;
+typedef Mantid::Kernel::SingletonHolder<FileFinderImpl> FileFinder;
 }
 }
 

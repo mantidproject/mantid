@@ -79,7 +79,7 @@ private:
 template class MANTID_API_DLL
     Mantid::Kernel::SingletonHolder<ConstraintFactoryImpl>;
 #endif /* _WIN32 */
-typedef MANTID_API_DLL Mantid::Kernel::SingletonHolder<ConstraintFactoryImpl>
+typedef Mantid::Kernel::SingletonHolder<ConstraintFactoryImpl>
     ConstraintFactory;
 
 } // namespace API

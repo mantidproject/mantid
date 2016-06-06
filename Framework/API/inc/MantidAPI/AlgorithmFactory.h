@@ -176,8 +176,7 @@ template class MANTID_API_DLL
     Mantid::Kernel::SingletonHolder<AlgorithmFactoryImpl>;
 #endif /* _WIN32 */
 
-typedef MANTID_API_DLL Mantid::Kernel::SingletonHolder<AlgorithmFactoryImpl>
-    AlgorithmFactory;
+typedef Mantid::Kernel::SingletonHolder<AlgorithmFactoryImpl> AlgorithmFactory;
 
 /// Convenient typedef for an UpdateNotification
 typedef Mantid::Kernel::DynamicFactory<Algorithm>::UpdateNotification

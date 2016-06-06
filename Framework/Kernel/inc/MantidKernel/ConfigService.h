@@ -359,8 +359,7 @@ inline
 #endif
     template class MANTID_KERNEL_DLL
         Mantid::Kernel::SingletonHolder<ConfigServiceImpl>;
-typedef MANTID_KERNEL_DLL Mantid::Kernel::SingletonHolder<ConfigServiceImpl>
-    ConfigService;
+typedef Mantid::Kernel::SingletonHolder<ConfigServiceImpl> ConfigService;
 
 typedef Mantid::Kernel::ConfigServiceImpl::ValueChanged
     ConfigValChangeNotification;

@@ -142,8 +142,7 @@ private:
 template class MANTID_API_DLL
     Mantid::Kernel::SingletonHolder<FrameworkManagerImpl>;
 #endif /* _WIN32 */
-typedef MANTID_API_DLL Mantid::Kernel::SingletonHolder<FrameworkManagerImpl>
-    FrameworkManager;
+typedef Mantid::Kernel::SingletonHolder<FrameworkManagerImpl> FrameworkManager;
 
 } // namespace Kernel
 } // namespace Mantid

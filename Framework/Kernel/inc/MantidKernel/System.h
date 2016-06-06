@@ -60,6 +60,9 @@
 // Export/Import declarations
 #define DLLExport __declspec(dllexport)
 #define DLLImport __declspec(dllimport)
+#elif defined(__GNUC__)
+#define DLLExport __attribute__((visibility("default")))
+#define DLLImport
 #else
 #define DLLExport
 #define DLLImport

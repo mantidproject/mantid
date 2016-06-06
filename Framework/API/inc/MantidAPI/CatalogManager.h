@@ -70,8 +70,7 @@ private:
 #ifdef _WIN32
 template class MANTID_API_DLL Kernel::SingletonHolder<CatalogManagerImpl>;
 #endif
-typedef MANTID_API_DLL Kernel::SingletonHolder<CatalogManagerImpl>
-    CatalogManager;
+typedef Kernel::SingletonHolder<CatalogManagerImpl> CatalogManager;
 }
 }
 #endif /* MANTID_ICAT_CATALOGMANAGERIMPL_H_ */

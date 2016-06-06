@@ -76,7 +76,7 @@ private:
 template class MANTID_API_DLL
     Mantid::Kernel::SingletonHolder<DomainCreatorFactoryImpl>;
 #endif /* _WIN32 */
-typedef MANTID_API_DLL Mantid::Kernel::SingletonHolder<DomainCreatorFactoryImpl>
+typedef Mantid::Kernel::SingletonHolder<DomainCreatorFactoryImpl>
     DomainCreatorFactory;
 
 } // namespace API

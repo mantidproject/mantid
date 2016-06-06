@@ -76,8 +76,7 @@ inline
 #endif
     template class MANTID_KERNEL_DLL
         Mantid::Kernel::SingletonHolder<LibraryManagerImpl>;
-typedef MANTID_KERNEL_DLL Mantid::Kernel::SingletonHolder<LibraryManagerImpl>
-    LibraryManager;
+typedef Mantid::Kernel::SingletonHolder<LibraryManagerImpl> LibraryManager;
 
 } // namespace Kernel
 } // namespace Mantid
