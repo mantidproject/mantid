@@ -62,13 +62,13 @@ DECLARE_ALGORITHM(GatherWorkspaces)
 void GatherWorkspaces::init() {
   // Input workspace is optional, except for the root process
   if (mpi::communicator().rank())
-    declareProperty(new WorkspaceProperty<>(
+    declareProperty(make_unique<WorkspaceProperty<>>(
         "InputWorkspace", "", Direction::Input, PropertyMode::Optional));
   else
-    declareProperty(new WorkspaceProperty<>(
+    declareProperty(make_unique<WorkspaceProperty<>>(
         "InputWorkspace", "", Direction::Input, PropertyMode::Mandatory));
   // Output is optional - only the root process will output a workspace
-  declareProperty(new WorkspaceProperty<>(
+  declareProperty(make_unique<WorkspaceProperty<>>(
       "OutputWorkspace", "", Direction::Output, PropertyMode::Optional));
   declareProperty(
       "PreserveEvents", false,
