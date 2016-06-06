@@ -271,13 +271,15 @@ void Iqt::calculateBinning() {
   if (energyMin == 0 && energyMax == 0)
     return;
 
+  const auto paramTableName = "__IqtProperties_temp";
+
   IAlgorithm_sptr IqtAlg =
       AlgorithmManager::Instance().create("TransformToIqt");
   IqtAlg->initialize();
-
+  IqtAlg->setChild(true);
   IqtAlg->setProperty("SampleWorkspace", wsName.toStdString());
   IqtAlg->setProperty("ResolutionWorkspace", resName.toStdString());
-  IqtAlg->setProperty("ParameterWorkspace", "__IqtProperties_temp");
+  IqtAlg->setProperty("ParameterWorkspace", paramTableName);
 
   IqtAlg->setProperty("EnergyMin", energyMin);
   IqtAlg->setProperty("EnergyMax", energyMax);
@@ -288,14 +290,12 @@ void Iqt::calculateBinning() {
   IqtAlg->execute();
 
   // Get property table from algorithm
-  ITableWorkspace_sptr propsTable =
-      AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(
-          "__IqtProperties_temp");
+  ITableWorkspace_sptr propsTable = IqtAlg->getProperty("ParameterWorkspace");
 
   // Get data from property table
-  double energyWidth = propsTable->getColumn("EnergyWidth")->cell<float>(0);
-  int sampleBins = propsTable->getColumn("SampleOutputBins")->cell<int>(0);
-  int resolutionBins = propsTable->getColumn("ResolutionBins")->cell<int>(0);
+  const auto energyWidth = propsTable->getColumn("EnergyWidth")->cell<float>(0);
+  const auto sampleBins = propsTable->getColumn("SampleOutputBins")->cell<int>(0);
+  const auto resolutionBins = propsTable->getColumn("ResolutionBins")->cell<int>(0);
 
   disconnect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
 	  SLOT(updatePropertyValues(QtProperty *, double)));
@@ -314,6 +314,7 @@ void Iqt::calculateBinning() {
   if (numResolutionBins < 5)
     showMessageBox("Number of resolution bins is less than 5.\nResults may be "
                    "inaccurate.");
+
 }
 
 void Iqt::loadSettings(const QSettings &settings) {
