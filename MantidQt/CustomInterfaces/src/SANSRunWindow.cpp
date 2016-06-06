@@ -1,57 +1,43 @@
 //----------------------
 // Includes
 //----------------------
+#include "MantidQtCustomInterfaces/SANSRunWindow.h"
+
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/PropertyWithValue.h"
+#include "MantidKernel/Exception.h"
+#include "MantidKernel/PropertyManagerDataService.h"
+#include "MantidKernel/Logger.h"
+#include "MantidKernel/V3D.h"
+#include "MantidGeometry/IComponent.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/IDetector.h"
+#include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/IAlgorithm.h"
+#include "MantidAPI/IEventWorkspace.h"
+#include "MantidAPI/Run.h"
+#include "MantidAPI/WorkspaceGroup.h"
+
 #include "MantidQtAPI/FileDialogHandler.h"
 #include "MantidQtAPI/ManageUserDirectories.h"
 #include "MantidQtCustomInterfaces/SANSAddFiles.h"
 #include "MantidQtCustomInterfaces/SANSBackgroundCorrectionSettings.h"
-#include "MantidQtCustomInterfaces/SANSRunWindow.h"
+#include "MantidQtCustomInterfaces/SANSEventSlicing.h"
 
-#include "MantidAPI/AlgorithmManager.h"
-#include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/FrameworkManager.h"
-#include "MantidAPI/IAlgorithm.h"
-#include "MantidAPI/IEventWorkspace.h"
-#include "MantidKernel/PropertyManagerDataService.h"
-#include "MantidAPI/Run.h"
-#include "MantidAPI/WorkspaceGroup.h"
-#include "MantidGeometry/IComponent.h"
-#include "MantidGeometry/Instrument.h"
-#include "MantidKernel/Exception.h"
-#include "MantidKernel/Exception.h"
-#include "MantidKernel/Logger.h"
-#include "MantidKernel/V3D.h"
-
-#include <QApplication>
 #include <QClipboard>
-#include <QDateTime>
 #include <QDesktopServices>
-#include <QHash>
-#include <QHeaderView>
-#include <QInputDialog>
-#include <QLineEdit>
-#include <QMessageBox>
-#include <QSignalMapper>
 #include <QTemporaryFile>
 #include <QTextStream>
-#include <QTreeWidgetItem>
 #include <QUrl>
 
 #include <Poco/StringTokenizer.h>
 #include <Poco/Message.h>
 
 #include <boost/lexical_cast.hpp>
-
-#include "MantidGeometry/IDetector.h"
-
-#include "MantidQtCustomInterfaces/SANSEventSlicing.h"
-
 #include <boost/foreach.hpp>
-#include <boost/function.hpp>
 #include <boost/tuple/tuple.hpp>
+
 #include <cmath>
 
 using Mantid::detid_t;
@@ -410,7 +396,7 @@ void SANSRunWindow::makeValidator(QLabel *const newValid, QWidget *control,
   newValid->setPalette(pal);
   newValid->setToolTip(errorMsg);
 
-  // regester the validator       and say      where it's control is
+  // register the validator       and say      where it's control is
   m_validators[newValid] = std::pair<QWidget *, QWidget *>(control, tab);
 }
 
@@ -559,12 +545,12 @@ void SANSRunWindow::connectAnalysDetSignals() {
           SLOT(updateTransInfo(int)));
   connect(m_uiForm.transFit_ck_can, SIGNAL(stateChanged(int)), this,
           SLOT(updateTransInfo(int)));
-  updateTransInfo(m_uiForm.transFit_ck->state());
+  updateTransInfo(m_uiForm.transFit_ck->checkState());
   m_uiForm.transFit_ck_can->toggle();
 
   connect(m_uiForm.frontDetQrangeOnOff, SIGNAL(stateChanged(int)), this,
           SLOT(updateFrontDetQrange(int)));
-  updateFrontDetQrange(m_uiForm.frontDetQrangeOnOff->state());
+  updateFrontDetQrange(m_uiForm.frontDetQrangeOnOff->checkState());
 
   connect(m_uiForm.enableRearFlood_ck, SIGNAL(stateChanged(int)), this,
           SLOT(prepareFlood(int)));
@@ -1133,7 +1119,7 @@ bool SANSRunWindow::loadCSVFile() {
     if (!line.isEmpty()) {
       // if first line of batch contain string MANTID_BATCH_FILE this is a
       // 'metadata' line
-      if (!line.upper().contains("MANTID_BATCH_FILE"))
+      if (!line.toUpper().contains("MANTID_BATCH_FILE"))
         errors += addBatchLine(line, ",");
     }
   }
