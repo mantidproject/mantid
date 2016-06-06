@@ -1,4 +1,5 @@
 #include "MantidAlgorithms/MaxEnt/MaxentSpaceReal.h"
+#include <stdexcept>
 
 namespace Mantid {
 namespace Algorithms {

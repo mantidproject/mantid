@@ -39,8 +39,6 @@ public:
     MaxentEntropyPositiveValues entropy;
     // Some values
     std::vector<double> values = {1., 10., -100., M_E};
-    // Background
-    double background = 1.;
     // Metric
     std::vector<double> result = entropy.secondDerivative(values);
     TS_ASSERT_EQUALS(result, values);
