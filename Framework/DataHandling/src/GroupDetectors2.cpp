@@ -815,12 +815,11 @@ void GroupDetectors2::readFile(spec2index_map &specs2index, std::istream &File,
              numberOfSpectra);
     if (static_cast<int>(m_GroupWsInds[spectrumNo].size()) !=
         numberOfSpectra) { // it makes no sense to continue reading the file,
-                           // we'll stop here
-                           throw std::invalid_argument(
-                               std::string("Bad number of spectra "
-                                           "specification or spectra list "
-                                           "near line number ") +
-                               std::to_string(lineNum));
+      // we'll stop here
+      throw std::invalid_argument(std::string("Bad number of spectra "
+                                              "specification or spectra list "
+                                              "near line number ") +
+                                  std::to_string(lineNum));
     }
     // make regular progress reports and check for a cancellation notification
     if ((m_GroupWsInds.size() % INTERVAL) == 1) {
