@@ -652,9 +652,9 @@ public slots:
   void fitSigmoidal();
   void fitGauss();
   void fitLorentz();
-  void fitMultiPeak(int profile);
-  void fitMultiPeakGauss();
-  void fitMultiPeakLorentz();
+  //void fitMultiPeak(int profile);
+  //void fitMultiPeakGauss();
+  //void fitMultiPeakLorentz();
   //@}
 
   //! \name Calculus
@@ -737,7 +737,6 @@ public slots:
   void showMoreWindows();
   void showMarkerPopupMenu();
   void showHelp();
-  static void showStandAloneHelp();
   void chooseHelpFolder();
   void showPlotWizard();
   void showFitPolynomDialog();
@@ -769,9 +768,6 @@ public slots:
   void showFFTDialog();
   void showColorMapDialog();
   //@}
-
-  void translateCurveHor();
-  void translateCurveVert();
 
   //! Removes the curve identified by a key stored in the data() of actionRemoveCurve.
   void removeCurve();
@@ -839,29 +835,12 @@ public slots:
 
   //! Updates the recent projects list and menu (but doesn't insert anything)
   void updateRecentProjectsList();
-
   //! Inserts file name in the list of recent files (if fname not empty) and updates the "recent files" menu
   void updateRecentFilesList(QString fname="");
-
-  //!  connected to the done(bool) signal of the http object
-  //void receivedVersionFile(bool error);
-  //!  called when the user presses the actionCheckUpdates
-  //void searchForUpdates();
-
-  //! Open support page in external browser
-  //void showSupportPage();
-  //! Open donation page in external browser
-  //void showDonationsPage();
   //! Open QtiPlot homepage in external browser
   void showHomePage();
-  //! Open forums page at berliOS in external browser
-  //void showForums();
   //! Open bug tracking system at berliOS in external browser
   void showBugTracker();
-  //! Show download page in external browser
-  //void downloadManual();
-  //! Show translations page in external browser
-  //void downloadTranslation();
 
   void parseCommandLineArguments(const QStringList& args);
   void createLanguagesList();
@@ -1039,7 +1018,6 @@ public slots:
 signals:
   void modified();
   void shutting_down();
-  //void changeToMDI(MdiSubWindow*);
 
 protected:
   bool event(QEvent *e) override;
@@ -1423,9 +1401,9 @@ private:
   QAction *actionLowPassFilter, *actionHighPassFilter, *actionBandPassFilter, *actionBandBlockFilter;
   QAction *actionSortTable, *actionSortSelection, *actionNormalizeSelection;
   QAction *actionNormalizeTable, *actionConvolute, *actionDeconvolute, *actionCorrelate, *actionAutoCorrelate;
-  QAction *actionTranslateHor, *actionTranslateVert, *actionSetAscValues, *actionSetRandomValues;
+  QAction *actionSetAscValues, *actionSetRandomValues;
   QAction *actionSetXCol, *actionSetYCol, *actionSetZCol, *actionSetLabelCol, *actionDisregardCol, *actionSetXErrCol, *actionSetYErrCol;
-  QAction *actionBoxPlot, *actionMultiPeakGauss, *actionMultiPeakLorentz, *actionCheckUpdates;
+  QAction *actionBoxPlot, *actionCheckUpdates;
   QAction *actionDonate, *actionHomePage, *actionDownloadManual, *actionTechnicalSupport, *actionTranslations;
   QAction *actionHelpForums, *actionHelpBugReports, *actionAskHelp;
   QAction *actionShowPlotDialog, *actionShowScaleDialog;
@@ -1435,7 +1413,7 @@ private:
   QAction *actionShowScriptWindow, *actionShowScriptInterpreter;
   QAction *actionAnimate, *actionPerspective, *actionFitFrame, *actionResetRotation;
   QAction *actionDeleteRows, *actionDrawPoints;
-  QAction *btnCursor, /* *btnSelect,*/ *btnPicker, *btnRemovePoints, *btnMovePoints, /* *btnPeakPick,*/ *btnMultiPeakPick;
+  QAction *btnCursor, *btnPicker, *btnRemovePoints, *btnMovePoints, *btnMultiPeakPick;
   QAction *btnZoomIn, *btnZoomOut, *btnPointer, *btnLine, *btnArrow, *btnLabel;
   QAction *actionFlipMatrixVertically, *actionFlipMatrixHorizontally, *actionRotateMatrix;
   QAction *actionViewMatrixImage, *actionViewMatrix, *actionExportMatrix;
