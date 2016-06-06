@@ -34,7 +34,7 @@ DECLARE_FUNCTION(SCDPanelErrors)
 // UB ified q's are below.
 
 namespace { // anonymous namespace
-static const double ONE_OVER_TWO_PI = 1. / M_2_PI;
+// static const double ONE_OVER_TWO_PI = 1. / M_2_PI;
 const string LATTICE_A("a");
 const string LATTICE_B("b");
 const string LATTICE_C("c");
@@ -494,41 +494,6 @@ void SCDPanelErrors::function1D(double *out, const double *xValues,
     g_log.debug() << out[i] << "  ";
 
   g_log.debug() << std::endl;
-}
-
-Matrix<double> SCDPanelErrors::CalcDiffDerivFromdQ(
-    Matrix<double> const &DerivQ, Matrix<double> const &Mhkl,
-    Matrix<double> const &MhklT, Matrix<double> const &InvhklThkl,
-    Matrix<double> const &UB) const {
-  try {
-    Matrix<double> dUB = DerivQ * Mhkl * InvhklThkl * ONE_OVER_TWO_PI;
-
-    Geometry::OrientedLattice lat;
-    lat.setUB(Matrix<double>(UB) + dUB * .001);
-    const Kernel::DblMatrix U2 = lat.getU();
-
-    Kernel::DblMatrix U2A(U2);
-    lat.setUB(Matrix<double>(UB) - dUB * .001);
-    const Kernel::DblMatrix U1 = lat.getU();
-
-    Kernel::DblMatrix dU = (U2A - U1) * (1 / .002);
-    if (dU == Kernel::DblMatrix())
-      std::cout << "zero dU in CalcDiffDerivFromdQ" << std::endl;
-    Kernel::DblMatrix dUB0 = dU * m_unitCell->getB();
-
-    Kernel::DblMatrix dQtheor = dUB0 * MhklT;
-    Kernel::DblMatrix Deriv = Matrix<double>(DerivQ) - dQtheor * M_2_PI;
-
-    return Deriv;
-  } catch (...) {
-
-    for (size_t i = 0; i < nParams(); ++i)
-      g_log.debug() << getParameter(i) << ",";
-
-    g_log.debug() << "\n";
-
-    throw std::invalid_argument(" Invalid initial data ");
-  }
 }
 
 double SCDPanelErrors::checkForNonsenseParameters() const {

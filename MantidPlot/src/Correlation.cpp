@@ -167,7 +167,7 @@ void Correlation::addResultCurve()
 		d_table->setText(i, cols2, locale.toString(y, 'g', app->d_decimal_digits));
 	}
 
-	QStringList l = d_table->colNames().grep(tr("Lag"));
+	QStringList l = d_table->colNames().filter(tr("Lag"));
 	QString id = QString::number((int)l.size()+1);
 	QString label = objectName() + id;
 

@@ -570,7 +570,7 @@ protected:
     }
     if (m_value.size() > 2) {
       // check if the value is in barckets (...)
-      if (m_value[0] == '(' && m_value[m_value.size() - 1] == ')') {
+      if (m_value.front() == '(' && m_value.back() == ')') {
         m_value.erase(0, 1);
         m_value.erase(m_value.size() - 1);
       }

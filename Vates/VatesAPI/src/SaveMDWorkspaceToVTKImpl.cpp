@@ -28,7 +28,7 @@ namespace {
 // This progress object gets called by PV (and is used by the plugins),
 // it does not have much use here.
 class NullProgressAction : public Mantid::VATES::ProgressAction {
-  virtual void eventRaised(double) {}
+  void eventRaised(double) override {}
 };
 
 bool has_suffix(const std::string &stringToCheck, const std::string &suffix) {

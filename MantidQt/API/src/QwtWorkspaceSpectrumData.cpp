@@ -75,9 +75,9 @@ Return the y value of data point i
 @return y Y value of data point i
 */
 double QwtWorkspaceSpectrumData::getY(size_t i) const {
-  double tmp = i < m_Y.size() ? m_Y[i] : m_Y[m_Y.size() - 1];
+  double tmp = i < m_Y.size() ? m_Y[i] : m_Y.back();
   if (m_isDistribution) {
-    tmp /= (m_X[i + 1] - m_X[i]);
+    tmp /= fabs(m_X[i + 1] - m_X[i]);
   }
   return tmp;
 }
@@ -87,9 +87,9 @@ double QwtWorkspaceSpectrumData::getEX(size_t i) const {
 }
 
 double QwtWorkspaceSpectrumData::getE(size_t i) const {
-  double ei = (i < m_E.size()) ? m_E[i] : m_E[m_E.size() - 1];
+  double ei = (i < m_E.size()) ? m_E[i] : m_E.back();
   if (m_isDistribution) {
-    ei /= (m_X[i + 1] - m_X[i]);
+    ei /= fabs(m_X[i + 1] - m_X[i]);
   }
   return ei;
 }

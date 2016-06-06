@@ -30,16 +30,11 @@
 #include "ApplicationWindow.h"
 #include "Table.h"
 
-#include <QPushButton>
 #include <QGroupBox>
 #include <QLineEdit>
-#include <QTextEdit>
 #include <QRadioButton>
 #include <QMessageBox>
 #include <QButtonGroup>
-#include <QRegExp>
-#include <QHBoxLayout>
-#include <QGridLayout>
 
 RenameWindowDialog::RenameWindowDialog(QWidget* parent, Qt::WFlags fl )
     : QDialog( parent, fl )
@@ -130,7 +125,7 @@ void RenameWindowDialog::accept()
 {
 	QString name = window->name();
 	QString text = boxNameLine->text().remove("=").remove(QRegExp("\\s"));
-	QString label = boxLabelEdit->text();
+	QString label = boxLabelEdit->toPlainText();
 
 	MdiSubWindow::CaptionPolicy policy = getCaptionPolicy();
 	if (text == name && label == window->windowLabel() && window->captionPolicy() == policy)

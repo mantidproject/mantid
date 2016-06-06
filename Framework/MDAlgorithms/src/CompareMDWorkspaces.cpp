@@ -20,7 +20,6 @@ class CompareFailsException : public std::runtime_error {
 public:
   explicit CompareFailsException(const std::string &msg)
       : std::runtime_error(msg) {}
-  ~CompareFailsException() throw() override {}
   std::string getMessage() const { return this->what(); }
 };
 

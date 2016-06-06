@@ -29,8 +29,6 @@
 #include "Script.h"
 #include "ScriptingEnv.h"
 
-#include "MantidAPI/MemoryManager.h"
-
 #include <QRegExp>
 #include <stdexcept>
 
@@ -101,8 +99,6 @@ Script::Script(ScriptingEnv *env, const QString &name,
    * This can be very confusing to users so force a call to release
    * the memory.
    */
-  connect(this, SIGNAL(finished(const QString &)), this, SLOT(releaseFreeMemory()));
-  connect(this, SIGNAL(error(const QString &, const QString &, int)), this, SLOT(releaseFreeMemory()));
   connect(this, SIGNAL(finished(const QString &)), this, SLOT(setNotExecuting()));
   connect(this, SIGNAL(error(const QString &, const QString &, int)), this, SLOT(setNotExecuting()));
 }
@@ -162,14 +158,6 @@ QFuture<bool> Script::executeAsync(const ScriptCode & code)
 void Script::abort()
 {
   if(isExecuting()) this->abortImpl();
-}
-
-/**
- * Asks Mantid to release all free memory.
- */
-void Script::releaseFreeMemory()
-{
-  Mantid::API::MemoryManager::Instance().releaseFreeMemory();
 }
 
 /// Sets the execution mode to NotExecuting

@@ -88,14 +88,21 @@ const std::string ExperimentInfo::toString() const {
   std::ostringstream out;
 
   Geometry::Instrument_const_sptr inst = this->getInstrument();
-  out << "Instrument: " << inst->getName() << " ("
-      << inst->getValidFromDate().toFormattedString("%Y-%b-%d") << " to "
-      << inst->getValidToDate().toFormattedString("%Y-%b-%d") << ")";
-  out << "\n";
-  if (!inst->getFilename().empty()) {
-    out << "Instrument from: " << inst->getFilename();
-    out << "\n";
+  const auto instName = inst->getName();
+  out << "Instrument: ";
+  if (!instName.empty()) {
+    out << instName << " ("
+        << inst->getValidFromDate().toFormattedString("%Y-%b-%d") << " to "
+        << inst->getValidToDate().toFormattedString("%Y-%b-%d") << ")";
+    const auto instFilename = inst->getFilename();
+    if (!instFilename.empty()) {
+      out << "Instrument from: " << instFilename;
+      out << "\n";
+    }
+  } else {
+    out << "None";
   }
+  out << "\n";
 
   // parameter files loaded
   auto paramFileVector = this->instrumentParameters().getParameterFilenames();

@@ -8,8 +8,6 @@
 #include "MantidQtMantidWidgets/RangeSelector.h"
 
 #include <QLineEdit>
-#include <QDesktopServices>
-#include <QUrl>
 #include "qwt_plot_curve.h"
 
 namespace MantidQt
@@ -941,7 +939,7 @@ std::vector<double> SANSPlotSpecial::Transform::functionConstants()
 
   foreach ( QWidget* item, m_yWidgets )
   {
-    if ( item->isA("QLineEdit") )
+    if ( strcmp(item->metaObject()->className(), "QLineEdit") == 0 )
     {
       item->setMaximumSize(25,20);
       QString le = dynamic_cast<QLineEdit*>(item)->text();
@@ -951,7 +949,7 @@ std::vector<double> SANSPlotSpecial::Transform::functionConstants()
 
   foreach ( QWidget* item, m_xWidgets )
   {
-    if ( item->isA("QLineEdit") )
+    if (strcmp(item->metaObject()->className(), "QLineEdit") == 0 )
     {
       item->setMaximumSize(25,20);
       QString le = dynamic_cast<QLineEdit*>(item)->text();
@@ -994,7 +992,7 @@ void SANSPlotSpecial::Transform::tidyGeneral()
   foreach ( QWidget* item, m_xWidgets )
   {
     item->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Maximum);
-    if ( item->isA("QLineEdit") )
+    if (strcmp(item->metaObject()->className(), "QLineEdit") == 0)
     {
       item->setMaximumSize(25,20);
     }
@@ -1003,7 +1001,7 @@ void SANSPlotSpecial::Transform::tidyGeneral()
   foreach ( QWidget* item, m_yWidgets )
   {
     item->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Maximum);
-    if ( item->isA("QLineEdit") )
+    if (strcmp(item->metaObject()->className(), "QLineEdit") == 0)
     {
       item->setMaximumSize(25,20);
     }

@@ -33,19 +33,14 @@
 #include "PolynomialFit.h"
 
 #include <QSpinBox>
-#include <QCheckBox>
 #include <QMessageBox>
-#include <QLayout>
 #include <QGroupBox>
-#include <QPushButton>
-#include <QLabel>
 #include <QLineEdit>
-#include <QComboBox>
 
 PolynomFitDialog::PolynomFitDialog( QWidget* parent, Qt::WFlags fl )
   : QDialog( parent, fl ), graph(NULL)
 {
-    setName( "PolynomFitDialog" );
+    setObjectName( "PolynomFitDialog" );
     setWindowTitle(tr("MantidPlot - Polynomial Fit Options"));
     setSizeGripEnabled( true );
 
@@ -115,7 +110,7 @@ void PolynomFitDialog::fit()
 		QMessageBox::critical(this, tr("MantidPlot - Warning"),
 				tr("The curve <b> %1 </b> doesn't exist anymore! Operation aborted!").arg(curveName));
 		boxName->clear();
-		boxName->insertStringList(curvesList);
+		boxName->addItems(curvesList);
 		return;
 	}
 
@@ -123,7 +118,7 @@ void PolynomFitDialog::fit()
     PolynomialFit *fitter = new PolynomialFit(app, graph, boxOrder->value(), boxShowFormula->isChecked());
     if (fitter->setDataFromCurve(curveName, boxStart->text().toDouble(), boxEnd->text().toDouble()))
     {
-        fitter->setColor(boxColor->currentItem());
+        fitter->setColor(boxColor->currentIndex());
         fitter->setOutputPrecision(app->fit_output_precision);
 	fitter->generateFunction(app->generateUniformFitPoints, app->fitPoints);
         fitter->fit();
@@ -140,7 +135,7 @@ void PolynomFitDialog::setGraph(Graph *g)
 	if (!selectedCurve.isEmpty())
 	{
 	    int index = boxName->findText (selectedCurve);
-		boxName->setCurrentItem(index);
+		boxName->setCurrentIndex(index);
 	}
     activateCurve(boxName->currentText());
 

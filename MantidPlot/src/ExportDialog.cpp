@@ -223,9 +223,9 @@ void ExportDialog::updateOptions(const QString & name)
 
     boxComments->setEnabled(w->inherits("Table"));
     boxNames->setEnabled(w->inherits("Table"));
-	boxSelection->setEnabled(!w->isA("MantidMatrix"));
-	boxSeparator->setEnabled(!w->isA("MantidMatrix"));
-	boxAllTables->setEnabled(!w->isA("MantidMatrix"));
-	sepText->setEnabled(!w->isA("MantidMatrix"));
+	boxSelection->setEnabled(qstrcmp("MantidMatrix", w->metaObject()->className()) != 0);
+	boxSeparator->setEnabled(qstrcmp("MantidMatrix", w->metaObject()->className()) != 0);
+	boxAllTables->setEnabled(qstrcmp("MantidMatrix", w->metaObject()->className()) != 0);
+	sepText->setEnabled(qstrcmp("MantidMatrix", w->metaObject()->className()) != 0);
 
 }

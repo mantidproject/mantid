@@ -42,6 +42,8 @@ StartAndEndTime getStartAndEndTimesFromRawFile(std::string filename) {
       Mantid::DataHandling::LoadRawHelper::extractStartTime(&isisRaw);
   startAndEndTime.endTime =
       Mantid::DataHandling::LoadRawHelper::extractEndTime(&isisRaw);
+
+  fclose(rawFile);
   return startAndEndTime;
 }
 

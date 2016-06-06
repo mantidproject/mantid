@@ -59,18 +59,19 @@ GeneralDomainCreator::GeneralDomainCreator(
 void GeneralDomainCreator::declareDatasetProperties(const std::string &suffix,
                                                     bool addProp) {
   UNUSED_ARG(suffix);
-  UNUSED_ARG(addProp);
-  for (auto &propName : m_domainColumnNames) {
-    declareProperty(new Kernel::PropertyWithValue<std::string>(propName, ""),
-                    "A name of a domain column.");
-  }
-  for (auto &propName : m_dataColumnNames) {
-    declareProperty(new Kernel::PropertyWithValue<std::string>(propName, ""),
-                    "A name of a fitting data column.");
-  }
-  for (auto &propName : m_weightsColumnNames) {
-    declareProperty(new Kernel::PropertyWithValue<std::string>(propName, ""),
-                    "A name of a fitting weights column.");
+  if (addProp) {
+    for (auto &propName : m_domainColumnNames) {
+      declareProperty(new Kernel::PropertyWithValue<std::string>(propName, ""),
+                      "A name of a domain column.");
+    }
+    for (auto &propName : m_dataColumnNames) {
+      declareProperty(new Kernel::PropertyWithValue<std::string>(propName, ""),
+                      "A name of a fitting data column.");
+    }
+    for (auto &propName : m_weightsColumnNames) {
+      declareProperty(new Kernel::PropertyWithValue<std::string>(propName, ""),
+                      "A name of a fitting weights column.");
+    }
   }
 }
 

@@ -1,20 +1,20 @@
-.. _v3.7.0:
-
 ==========================
-Mantid 3.7.0 Release Notes
+Mantid 3.8.0 Release Notes
 ==========================
 
-.. figure:: ../../images/VSIEllipses.png
+.. figure:: ../../images/ReleaseUnderConstruction.jpg
    :class: screenshot
+   :width: 550px
    :align: right
 
-   Splatter plot views using translucent spheres and clearer sphere and ellipse wireframes
+   Release image
 
 .. contents:: Table of Contents
    :local:
 
-We are proud to announce version 3.7 of Mantid, this release contains
-several improvements to the advanced visualisation and the CLI for multidimensional data.
+.. warning:: This release is still under construction. The changes can be found in the nightly builds on the `download page`_.
+
+**TODO: Add paragraph summarizing big changes**
 
 This is just one of many improvements in this release, so please take a
 look at the release notes, which are filled with details of the
@@ -37,7 +37,7 @@ Citation
 
 Please cite any usage of Mantid as follows:
 
-- *Mantid 3.7: Manipulation and Analysis Toolkit for Instrument Data.; Mantid Project*. doi: http://dx.doi.org/10.5286/SOFTWARE/MANTID3.7
+- *Mantid 3.8: Manipulation and Analysis Toolkit for Instrument Data.; Mantid Project*. doi: http://dx.doi.org/10.5286/SOFTWARE/MANTID3.8
 
 Changes
 -------
@@ -45,8 +45,8 @@ Changes
 .. toctree::
    :titlesonly:
 
-   User Interface & Usability <ui>
    Framework <framework>
+   User Interface & Usability <ui>
    Direct Inelastic <direct_inelastic>
    Indirect Inelastic <indirect_inelastic>
    SANS <sans>
@@ -63,6 +63,6 @@ For a full list of all issues addressed during this release please see the `GitH
 
 .. _forum: http://forum.mantidproject.org
 
-.. _GitHub milestone: http://github.com/mantidproject/mantid/pulls?utf8=%E2%9C%93&q=is%3Apr+milestone%3A%22Release+3.7%22+is%3Aclosed
+.. _GitHub milestone: http://github.com/mantidproject/mantid/pulls?utf8=%E2%9C%93&q=is%3Apr+milestone%3A%22Release+3.8%22+is%3Aclosed
 
-.. _GitHub release page: https://github.com/mantidproject/mantid/releases/tag/v3.7.0
+.. _GitHub release page: https://github.com/mantidproject/mantid/releases/tag/v3.8.0

@@ -69,7 +69,7 @@ bool MDTransfNoQ::calcYDepCoordinates(std::vector<coord_t> &Coord, size_t i) {
     Coord[1] = static_cast<coord_t>(m_YAxis->operator()(i));
     return !(Coord[1] < m_DimMin[1] || Coord[1] >= m_DimMax[1]);
   }
-  return false;
+  return true;
 }
 bool MDTransfNoQ::calcMatrixCoord(const double &X, std::vector<coord_t> &Coord,
                                   double & /*s*/, double & /*errSq*/) const {

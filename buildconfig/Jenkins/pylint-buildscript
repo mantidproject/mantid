@@ -54,6 +54,9 @@ cd $BUILD_DIR
 # Clean some artifacts
 ###############################################################################
 rm -rf $BUILD_DIR/bin
+# legacy file
+rm -fr $BUILD_DIR/pylint.log
+
 
 ###############################################################################
 ## Build configuration
@@ -75,7 +78,9 @@ fi
 
 # Need this because some strange control sequences when using default TERM=xterm
 export TERM="linux"
-$SCL_ON_RHEL6 "cmake ${CMAKE_GENERATOR} -DCMAKE_BUILD_TYPE=${BUILD_CONFIG} -DENABLE_CPACK=OFF -DMAKE_VATES=OFF -DPYLINT_OUTPUT_FORMAT=parseable .."
+PYLINT_OUTPUT_DIR=$BUILD_DIR/pylint
+PYLINT_FORMAT="parseable"
+$SCL_ON_RHEL6 "cmake ${CMAKE_GENERATOR} -DCMAKE_BUILD_TYPE=${BUILD_CONFIG} -DENABLE_CPACK=OFF -DMAKE_VATES=OFF -DPYLINT_MSG_TEMPLATE=\"${PYLINT_FORMAT}\" -DPYLINT_NTHREADS=$BUILD_THREADS -DPYLINT_OUTPUT_DIR=${PYLINT_OUTPUT_DIR} .."
 
 ###############################################################################
 # Build step (we only need the framework)
@@ -83,6 +88,6 @@ $SCL_ON_RHEL6 "cmake ${CMAKE_GENERATOR} -DCMAKE_BUILD_TYPE=${BUILD_CONFIG} -DENA
 $SCL_ON_RHEL6 "cmake --build . --target Framework -- -j$BUILD_THREADS"
 
 ###############################################################################
-# Run plint check 
+# Run plint check
 ###############################################################################
-$SCL_ON_RHEL6 "cmake --build . --target pylintcheck" > pylint.log
+$SCL_ON_RHEL6 "cmake --build . --target pylintcheck"

@@ -7,7 +7,6 @@
 #include "MantidDataObjects/MDEventFactory.h"
 #include "MantidDataObjects/BoxControllerNeXusIO.h"
 #include "MantidMDAlgorithms/MergeMDFiles.h"
-#include "MantidAPI/MemoryManager.h"
 
 #include <boost/scoped_ptr.hpp>
 #include <Poco/File.h>

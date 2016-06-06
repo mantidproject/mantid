@@ -338,8 +338,8 @@ void RingProfile::checkInputsForNumericWorkspace(
   const MantidVec &refX = inputWS->readX(inputWS->getNumberHistograms() / 2);
   // get the limits of the axis 0 (X)
   double min_v_x, max_v_x;
-  min_v_x = std::min(refX[0], refX[refX.size() - 1]);
-  max_v_x = std::max(refX[0], refX[refX.size() - 1]);
+  min_v_x = std::min(refX[0], refX.back());
+  max_v_x = std::max(refX[0], refX.back());
   g_log.notice() << "Limits X = " << min_v_x << " " << max_v_x << std::endl;
   // check centre is inside the X domain
   if (centre_x < min_v_x || centre_x > max_v_x) {

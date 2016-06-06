@@ -2331,7 +2331,7 @@ void MuonAnalysis::setAppendingRun(int inc) {
   // Increment is positive (next button)
   if (inc < 0) {
     // Add the file to the beginning of mwRunFiles text box.
-    QString lastName = m_previousFilenames[m_previousFilenames.size() - 1];
+    QString lastName = m_previousFilenames.back();
     separateMuonFile(filePath, lastName, run, runSize);
     getFullCode(runSize, run);
     m_uiForm.mwRunFiles->setUserInput(newRun + '-' + run);

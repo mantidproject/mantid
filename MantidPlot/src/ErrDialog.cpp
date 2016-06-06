@@ -174,7 +174,7 @@ void ErrDialog::setSrcTables(QList<MdiSubWindow *> tables)
   tableNamesBox->clear();
 
   foreach(MdiSubWindow *w, tables)
-    tableNamesBox->insertItem(w->objectName());
+    tableNamesBox->addItem(w->objectName());
 
   if (!nameLabel->currentText().contains("="))
     tableNamesBox->setCurrentIndex(tableNamesBox->findText(nameLabel->currentText().split("_", QString::SkipEmptyParts)[0]));

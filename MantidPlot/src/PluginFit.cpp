@@ -106,7 +106,6 @@ bool PluginFit::load(const QString& pluginName)
 	}
 
 	QLibrary lib(pluginName);
-	lib.setAutoUnload(false);
 
 	simplex_union simplex;
         simplex.ptr = lib.resolve( "function_d" );
