@@ -117,8 +117,8 @@ class IqtFitMultiple(PythonAlgorithm):
         self._fit_group_name = self.getPropertyValue('OutputWorkspaceGroup')
 
     def PyExec(self):
-        from IndirectDataAnalysis import (convertToElasticQ,
-                                          transposeFitParametersTable)
+        from IndirectCommon import (convertToElasticQ,
+                                    transposeFitParametersTable)
 
         setup_prog = Progress(self, start=0.0, end=0.1, nreports=4)
         setup_prog.report('generating output name')
@@ -230,7 +230,7 @@ class IqtFitMultiple(PythonAlgorithm):
         ties = ','.join(ties)
         multi += 'ties=(' + ties + ')'
 
-    return multi, kwargs
+        return multi, kwargs
 
 
 AlgorithmFactory.subscribe(IqtFitMultiple)
