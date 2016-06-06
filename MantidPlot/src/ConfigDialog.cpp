@@ -2470,9 +2470,11 @@ void ConfigDialog::apply() {
   app->settings.setValue("/General/FloatingWindows/TiledWindow",
                          boxFloatingTiledWindows->isChecked());
   // 3D plots page
-    app->plot3DColors = {btnToColor->color().name(),btnLabels->color().name(),btnMesh->color().name(),
-                         mbtnGrid->color().name(),btnFromColor->color().name(),btnNumbers->color().name(),
-                         btnAxes->color().name(),btnBackground3D->color().name() };
+  app->plot3DColors = {
+      btnToColor->color().name(),   btnLabels->color().name(),
+      btnMesh->color().name(),      mbtnGrid->color().name(),
+      btnFromColor->color().name(), btnNumbers->color().name(),
+      btnAxes->color().name(),      btnBackground3D->color().name()};
   app->showPlot3DLegend = boxShowLegend->isChecked();
   app->showPlot3DProjection = boxShowProjection->isChecked();
   app->plot3DResolution = boxResolution->value();

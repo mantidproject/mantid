@@ -144,7 +144,8 @@ void FitDialog::initFitPage() {
   boxParams->horizontalHeader()->setResizeMode(3, QHeaderView::Stretch);
   boxParams->horizontalHeader()->setResizeMode(4,
                                                QHeaderView::ResizeToContents);
-  QStringList header{tr("Parameter"),tr("From"),tr("Value"),tr("To"),tr("Constant")};
+  QStringList header{tr("Parameter"), tr("From"), tr("Value"), tr("To"),
+                     tr("Constant")};
   boxParams->setHorizontalHeaderLabels(header);
   boxParams->verticalHeader()->setResizeMode(QHeaderView::ResizeToContents);
   boxParams->verticalHeader()->hide();

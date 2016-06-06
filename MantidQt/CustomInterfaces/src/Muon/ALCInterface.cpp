@@ -21,7 +21,8 @@ namespace MantidQt {
 namespace CustomInterfaces {
 DECLARE_SUBWINDOW(ALCInterface)
 
-const QStringList ALCInterface::STEP_NAMES{"Data loading","Baseline modelling","Peak fitting"};
+const QStringList ALCInterface::STEP_NAMES{"Data loading", "Baseline modelling",
+                                           "Peak fitting"};
 
 // %1 - current step no., %2 - total no. of steps, %3 - current step label
 const QString ALCInterface::LABEL_FORMAT = "Step %1/%2 - %3";

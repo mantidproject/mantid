@@ -41,9 +41,10 @@ void ConvFit::setup() {
   m_runMax = 0;
 
   // Initialise fitTypeStrings
-  m_fitStrings = {"","1L","2L","IDS","IDC","EDS", "EDC","SFT"};
+  m_fitStrings = {"", "1L", "2L", "IDS", "IDC", "EDS", "EDC", "SFT"};
   // All Parameters in tree that should be defaulting to 1
-  m_defaultParams = {"Amplitude","Beta","Decay","Diffusion","Height","Intensity","Radius","Tau"};
+  m_defaultParams = {"Amplitude", "Beta",      "Decay",  "Diffusion",
+                     "Height",    "Intensity", "Radius", "Tau"};
 
   // Create TreeProperty Widget
   m_cfTree = new QtTreePropertyBrowser();

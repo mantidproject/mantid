@@ -169,13 +169,13 @@ ScaleDetails::ScaleDetails(ApplicationWindow *app, Graph *graph, int mappedaxis,
   breaksLayout->addWidget(new QLabel(tr("Minor Ticks Before")), 3, 3);
   m_cmbMinorTicksBeforeBreak = new QComboBox();
   m_cmbMinorTicksBeforeBreak->setEditable(true);
-  m_cmbMinorTicksBeforeBreak->addItems({"0","1","4","9","14","19"});
+  m_cmbMinorTicksBeforeBreak->addItems({"0", "1", "4", "9", "14", "19"});
   breaksLayout->addWidget(m_cmbMinorTicksBeforeBreak, 3, 4);
 
   breaksLayout->addWidget(new QLabel(tr("Minor Ticks After")), 4, 3);
   m_cmbMinorTicksAfterBreak = new QComboBox();
   m_cmbMinorTicksAfterBreak->setEditable(true);
-  m_cmbMinorTicksAfterBreak->addItems({"0","1","4","9","14","19"});
+  m_cmbMinorTicksAfterBreak->addItems({"0", "1", "4", "9", "14", "19"});
   breaksLayout->addWidget(m_cmbMinorTicksAfterBreak, 4, 4);
 
   QGroupBox *rightBox = new QGroupBox(QString());
@@ -216,7 +216,7 @@ ScaleDetails::ScaleDetails(ApplicationWindow *app, Graph *graph, int mappedaxis,
 
   m_cmbMinorValue = new QComboBox();
   m_cmbMinorValue->setEditable(true);
-  m_cmbMinorValue->addItems({"0","1","4","9","14","19"});
+  m_cmbMinorValue->addItems({"0", "1", "4", "9", "14", "19"});
   m_cmbMinorValue->setToolTip("Maximum number of minor ticks which will be "
                               "added to the axis.\nNote that less ticks may be "
                               "added to preserve readability.");
@@ -343,13 +343,10 @@ void ScaleDetails::initWidgets() {
 
       ScaleTransformation::Type scale_type = sc_engine->type();
       m_cmbMinorTicksBeforeBreak->clear();
-      if (scale_type == ScaleTransformation::Log10)
-      {
-        m_cmbMinorTicksBeforeBreak->addItems({"0","2","4","8"});
-      }
-      else
-      {
-        m_cmbMinorTicksBeforeBreak->addItems({"0","1","4","9","14","19"});
+      if (scale_type == ScaleTransformation::Log10) {
+        m_cmbMinorTicksBeforeBreak->addItems({"0", "2", "4", "8"});
+      } else {
+        m_cmbMinorTicksBeforeBreak->addItems({"0", "1", "4", "9", "14", "19"});
       }
       m_cmbMinorTicksBeforeBreak->setEditText(
           QString::number(sc_engine->minTicksBeforeBreak()));
@@ -363,15 +360,13 @@ void ScaleDetails::initWidgets() {
       m_cmbScaleType->setCurrentIndex(scale_type);
       m_dspnN->setValue(sc_engine->nthPower());
       m_cmbMinorValue->clear();
-      if (scale_type == ScaleTransformation::Log10)
-      {
-        m_cmbMinorValue->addItems({"0","2","4","8"});
+      if (scale_type == ScaleTransformation::Log10) {
+        m_cmbMinorValue->addItems({"0", "2", "4", "8"});
+      } else {
+        m_cmbMinorValue->addItems({"0", "1", "4", "9", "14", "19"});
       }
-      else
-      {
-        m_cmbMinorValue->addItems({"0","1","4","9","14","19"});
-      }
-      m_cmbMinorValue->setEditText(QString::number(d_plot->axisMaxMinor(m_mappedaxis)));
+      m_cmbMinorValue->setEditText(
+          QString::number(d_plot->axisMaxMinor(m_mappedaxis)));
 
       bool isColorMap = m_graph->isColorBarEnabled(m_mappedaxis);
       m_grpAxesBreaks->setEnabled(!isColorMap);
