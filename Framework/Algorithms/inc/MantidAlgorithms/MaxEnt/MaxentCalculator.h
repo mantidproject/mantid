@@ -13,9 +13,11 @@ namespace Algorithms {
 using MaxentEntropy_sptr = std::shared_ptr<MaxentEntropy>;
 using MaxentTransform_sptr = std::shared_ptr<MaxentTransform>;
 
-/** MaxentCalculator : TODO: Search directions and
-  quadratic coefficients are calculated following J. Skilling and R. K. Bryan:
-  "Maximum entropy image reconstruction: general algorithm" (1984), section 3.6.
+/** MaxentCalculator : This class performs one maxent iteration and calculates
+  chi-sq, angle between gradient of S and gradient of chi-sq,  search directions
+  and quadratic coefficients. Calculations are based on J. Skilling and R. K.
+  Bryan: "Maximum entropy image reconstruction: general algorithm" (1984),
+  section 3.6.
 
   Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source

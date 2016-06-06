@@ -32,13 +32,13 @@ namespace Algorithms {
 class MANTID_ALGORITHMS_DLL MaxentSpaceReal : public MaxentSpace {
 public:
   // Constructor
-	MaxentSpaceReal() = default;
+  MaxentSpaceReal() = default;
   // Destructor
   virtual ~MaxentSpaceReal() = default;
-	// Converts a real vector to a complex vector
+  // Converts a real vector to a complex vector
   std::vector<double> toComplex(const std::vector<double> &values) override;
-	// Converts a complex vector to a real vector
-	std::vector<double> fromComplex(const std::vector<double> &values) override;
+  // Converts a complex vector to a real vector
+  std::vector<double> fromComplex(const std::vector<double> &values) override;
 };
 
 } // namespace Algorithms

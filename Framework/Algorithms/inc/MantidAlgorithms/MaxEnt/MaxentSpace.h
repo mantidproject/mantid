@@ -36,13 +36,14 @@ namespace Algorithms {
 class MANTID_ALGORITHMS_DLL MaxentSpace {
 public:
   // Constructor
-	MaxentSpace() = default;
+  MaxentSpace() = default;
   // Destructor
   virtual ~MaxentSpace() = default;
-	// Converts a given vector to a complex vector
+  // Converts a given vector to a complex vector
   virtual std::vector<double> toComplex(const std::vector<double> &values) = 0;
-	// Converts to a complex vector
-	virtual std::vector<double> fromComplex(const std::vector<double> &values) = 0;
+  // Converts to a complex vector
+  virtual std::vector<double>
+  fromComplex(const std::vector<double> &values) = 0;
 };
 
 } // namespace Algorithms
