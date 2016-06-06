@@ -329,8 +329,8 @@ RadiusSum::getBoundariesOfNumericImage(API::MatrixWorkspace_sptr inWS) {
 
   double min_x, max_x;
 
-  const double &first_x(refX[0]);
-  const double &last_x(refX[refX.size() - 1]);
+  const double &first_x = refX.front();
+  const double &last_x = refX.back();
   if (first_x < last_x) {
     min_x = first_x;
     max_x = last_x;
@@ -651,7 +651,7 @@ void RadiusSum::setUpOutputWorkspace(std::vector<double> &values) {
 
   for (int i = 0; i < (static_cast<int>(refX.size())) - 1; i++)
     refX[i] = min_radius + i * bin_size;
-  refX[refX.size() - 1] = max_radius;
+  refX.back() = max_radius;
 
   // configure the axis:
   // for numeric images, the axis are the same as the input workspace, and are
