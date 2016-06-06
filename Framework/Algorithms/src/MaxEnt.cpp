@@ -132,10 +132,10 @@ void MaxEnt::init() {
                       "ChiEps", 0.001, mustBeNonNegative, Direction::Input),
                   "Required precision for Chi-square");
 
-  declareProperty(make_unique<PropertyWithValue<double>>("DistancePenalty", 0.1,
-                                                         mustBeNonNegative,
-                                                         Direction::Input),
-                  "Distance penalty applied to the current image at each iteration.");
+  declareProperty(
+      make_unique<PropertyWithValue<double>>(
+          "DistancePenalty", 0.1, mustBeNonNegative, Direction::Input),
+      "Distance penalty applied to the current image at each iteration.");
 
   declareProperty(make_unique<PropertyWithValue<double>>(
                       "MaxAngle", 0.05, mustBeNonNegative, Direction::Input),

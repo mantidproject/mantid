@@ -19,7 +19,7 @@ MaxentTransformFourier::MaxentTransformFourier(MaxentSpace_sptr dataSpace,
 std::vector<double>
 MaxentTransformFourier::imageToData(const std::vector<double> &image) {
 
-	std::vector<double> complexImage = m_imageSpace->toComplex(image);
+  std::vector<double> complexImage = m_imageSpace->toComplex(image);
 
   /* Performs backward Fourier transform */
 
@@ -59,7 +59,7 @@ MaxentTransformFourier::imageToData(const std::vector<double> &image) {
 std::vector<double>
 MaxentTransformFourier::dataToImage(const std::vector<double> &data) {
 
-	std::vector<double> complexData = m_dataSpace->toComplex(data);
+  std::vector<double> complexData = m_dataSpace->toComplex(data);
 
   /* Performs forward Fourier transform */
 

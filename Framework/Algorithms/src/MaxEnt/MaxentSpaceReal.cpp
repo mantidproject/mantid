@@ -8,7 +8,8 @@ namespace Algorithms {
 * @param values : [input] The real values as a vector
 * @return : The input as a vector of complex numbers
 */
-std::vector<double> MaxentSpaceReal::toComplex(const std::vector<double> &values) {
+std::vector<double>
+MaxentSpaceReal::toComplex(const std::vector<double> &values) {
 
   // The output has 2*N values
   std::vector<double> result(values.size() * 2);
@@ -24,19 +25,20 @@ std::vector<double> MaxentSpaceReal::toComplex(const std::vector<double> &values
 * @param values : [input] The complex values as a vector
 * @return : The input as a vector of real numbers
 */
-std::vector<double> MaxentSpaceReal::fromComplex(const std::vector<double> &values) {
+std::vector<double>
+MaxentSpaceReal::fromComplex(const std::vector<double> &values) {
 
-	if (values.size() % 2) {
-		throw std::invalid_argument("Cannot convert to real vector");
-	}
+  if (values.size() % 2) {
+    throw std::invalid_argument("Cannot convert to real vector");
+  }
 
-	// The output has N/2 values
-	std::vector<double> result(values.size() / 2);
+  // The output has N/2 values
+  std::vector<double> result(values.size() / 2);
 
-	for (size_t i = 0; i < result.size(); i++) {
-		result[i] = values[2 * i];
-	}
-	return result;
+  for (size_t i = 0; i < result.size(); i++) {
+    result[i] = values[2 * i];
+  }
+  return result;
 }
 
 } // namespace Algorithms

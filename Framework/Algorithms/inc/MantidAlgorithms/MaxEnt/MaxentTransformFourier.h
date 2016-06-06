@@ -37,9 +37,10 @@ using MaxentSpace_sptr = std::shared_ptr<MaxentSpace>;
 class MANTID_ALGORITHMS_DLL MaxentTransformFourier : public MaxentTransform {
 public:
   // Deleted default constructor
-	MaxentTransformFourier() = delete;
-	// Constructor
-	MaxentTransformFourier(MaxentSpace_sptr dataSpace, MaxentSpace_sptr imageSpace);
+  MaxentTransformFourier() = delete;
+  // Constructor
+  MaxentTransformFourier(MaxentSpace_sptr dataSpace,
+                         MaxentSpace_sptr imageSpace);
   // Destructor
   virtual ~MaxentTransformFourier() = default;
   // Transfoms form image space to data space
@@ -48,8 +49,8 @@ public:
   std::vector<double> dataToImage(const std::vector<double> &data) override;
 
 private:
-	MaxentSpace_sptr m_dataSpace;
-	MaxentSpace_sptr m_imageSpace;
+  MaxentSpace_sptr m_dataSpace;
+  MaxentSpace_sptr m_imageSpace;
 };
 
 } // namespace Algorithms
