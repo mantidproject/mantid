@@ -256,6 +256,40 @@ public:
     TS_ASSERT_DELTA(data->readY(1)[37], 0.8074, 0.0001);
   }
 
+  void test_sine_cosine_real_image() {
+    // Complex signal: cos(w * x) + i sin(w * x)
+    // Test real image (property ComplexImage set to False)
+
+    auto ws = createWorkspaceComplex();
+
+    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("MaxEnt");
+    alg->initialize();
+    alg->setChild(true);
+    alg->setProperty("InputWorkspace", ws);
+    alg->setProperty("ComplexData", true);
+    alg->setProperty("ComplexImage", false);
+    alg->setProperty("A", 1.0);
+    alg->setProperty("ChiTarget", 102.);
+    alg->setPropertyValue("ReconstructedImage", "image");
+    alg->setPropertyValue("ReconstructedData", "data");
+    alg->setPropertyValue("EvolChi", "evolChi");
+    alg->setPropertyValue("EvolAngle", "evolAngle");
+
+    TS_ASSERT_THROWS_NOTHING(alg->execute());
+
+    MatrixWorkspace_sptr data = alg->getProperty("ReconstructedData");
+    TS_ASSERT(data);
+
+    // Test some values (should be close to those obtained in the previous two
+    // tests)
+    TS_ASSERT_DELTA(data->readY(0)[35], 0.8071, 0.0001);
+    TS_ASSERT_DELTA(data->readY(0)[36], 0.6858, 0.0001);
+    TS_ASSERT_DELTA(data->readY(0)[37], 0.4156, 0.0001);
+    TS_ASSERT_DELTA(data->readY(1)[35], 0.3305, 0.0001);
+    TS_ASSERT_DELTA(data->readY(1)[36], 0.6008, 0.0001);
+    TS_ASSERT_DELTA(data->readY(1)[37], 0.7955, 0.0001);
+  }
+
   void test_resolution_factor() {
     // Real signal: cos(w * x)
 
