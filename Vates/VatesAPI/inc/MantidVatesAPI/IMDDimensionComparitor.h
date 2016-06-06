@@ -3,67 +3,63 @@
 
 #include "MantidAPI/IMDWorkspace.h"
 
-namespace Mantid
-{
-  namespace VATES
-  {
-    
-    /** Dimension comparitor specifically for use with visualisation layer. Given an arrangement of dimensions in an MDImage, this type
-allow the utilising code to ask wheter some dimension maps to the x, y, or z dimensions.
+namespace Mantid {
+namespace VATES {
 
- @author Owen Arnold, Tessella plc
- @date 25/03/2011
+/** Dimension comparitor specifically for use with visualisation layer. Given an
+arrangement of dimensions in an MDImage, this type
+allow the utilising code to ask wheter some dimension maps to the x, y, or z
+dimensions.
 
- Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+@author Owen Arnold, Tessella plc
+@date 25/03/2011
 
- This file is part of Mantid.
+Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+National Laboratory & European Spallation Source
 
- Mantid is free software; you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation; either version 3 of the License, or
- (at your option) any later version.
+This file is part of Mantid.
 
- Mantid is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
+Mantid is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 3 of the License, or
+(at your option) any later version.
 
- You should have received a copy of the GNU General Public License
- along with this program.  If not, see <http://www.gnu.org/licenses/>.
+Mantid is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
 
- File change history is stored at: <https://github.com/mantidproject/mantid>
- Code Documentation is available at: <http://doxygen.mantidproject.org>
- */
-    class IMDDimensionComparitor
-    {
-    public:
-     
-    /// Constructor
-    IMDDimensionComparitor(Mantid::API::IMDWorkspace_sptr workspace);
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-    /// Destructor
-    ~IMDDimensionComparitor();
+File change history is stored at: <https://github.com/mantidproject/mantid>
+Code Documentation is available at: <http://doxygen.mantidproject.org>
+*/
+class IMDDimensionComparitor {
+public:
+  /// Constructor
+  IMDDimensionComparitor(Mantid::API::IMDWorkspace_sptr workspace);
 
-    bool isXDimension(Mantid::Geometry::IMDDimension_const_sptr  queryDimension);
-    
-    bool isYDimension(Mantid::Geometry::IMDDimension_const_sptr  queryDimension);
+  /// Destructor
+  ~IMDDimensionComparitor();
 
-    bool isZDimension(Mantid::Geometry::IMDDimension_const_sptr  queryDimension);
+  bool isXDimension(Mantid::Geometry::IMDDimension_const_sptr queryDimension);
 
-    bool istDimension(Mantid::Geometry::IMDDimension_const_sptr  queryDimension);
+  bool isYDimension(Mantid::Geometry::IMDDimension_const_sptr queryDimension);
 
-    private:
-      
-    /// imd workspace shared ptr.
-    Mantid::API::IMDWorkspace_sptr m_workspace;
-     
-    IMDDimensionComparitor operator=(IMDDimensionComparitor&);
-      
-    IMDDimensionComparitor(IMDDimensionComparitor&);
+  bool isZDimension(Mantid::Geometry::IMDDimension_const_sptr queryDimension);
 
-    };
+  bool istDimension(Mantid::Geometry::IMDDimension_const_sptr queryDimension);
 
-  }
+private:
+  /// imd workspace shared ptr.
+  Mantid::API::IMDWorkspace_sptr m_workspace;
+
+  IMDDimensionComparitor operator=(IMDDimensionComparitor &);
+
+  IMDDimensionComparitor(IMDDimensionComparitor &);
+};
+}
 }
 
 #endif

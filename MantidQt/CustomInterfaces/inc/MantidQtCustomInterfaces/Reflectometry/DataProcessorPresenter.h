@@ -84,7 +84,7 @@ public:
   virtual std::vector<DataProcessorCommand_uptr> publishCommands() = 0;
   virtual void accept(WorkspaceReceiver *workspaceReceiver) = 0;
   virtual void acceptViews(DataProcessorView *tableView,
-                          ProgressableView *progressView) = 0;
+                           ProgressableView *progressView) = 0;
   virtual void setModel(std::string name) = 0;
 };
 }

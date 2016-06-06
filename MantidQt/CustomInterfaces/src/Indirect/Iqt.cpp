@@ -298,7 +298,7 @@ void Iqt::calculateBinning() {
   int resolutionBins = propsTable->getColumn("ResolutionBins")->cell<int>(0);
 
   disconnect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
-	  SLOT(updatePropertyValues(QtProperty *, double)));
+             SLOT(updatePropertyValues(QtProperty *, double)));
 
   // Update data in property editor
   m_dblManager->setValue(m_properties["EWidth"], energyWidth);

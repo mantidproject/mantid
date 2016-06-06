@@ -107,8 +107,10 @@ public:
   void plotFitPeaksCurves();
 
   void runEvaluateFunctionAlg(const std::string &bk2BkExpFunction,
-                              const std::string &InputName, const std::string &OutputName,
-                              const std::string &startX, const std::string &endX);
+                              const std::string &InputName,
+                              const std::string &OutputName,
+                              const std::string &startX,
+                              const std::string &endX);
 
   void runCropWorkspaceAlg(std::string workspaceName);
 
