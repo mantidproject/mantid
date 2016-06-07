@@ -44,7 +44,6 @@ class MANTID_API_DLL HistoryItem {
 public:
   HistoryItem(AlgorithmHistory_const_sptr algHist);
   virtual ~HistoryItem() = default;
-  ;
   bool isUnrolled() const { return m_unrolled; }
   void unrolled(bool unrolled) { m_unrolled = unrolled; }
   AlgorithmHistory_const_sptr getAlgorithmHistory() const {

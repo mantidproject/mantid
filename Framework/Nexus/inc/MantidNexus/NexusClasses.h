@@ -114,7 +114,6 @@ public:
   NXObject(const NXhandle fileID, const NXClass *parent,
            const std::string &name);
   virtual ~NXObject() = default;
-  ;
   /// Return the NX class name for a class (HDF group) or "SDS" for a data set;
   virtual std::string NX_class() const = 0;
   // True if complies with our understanding of the www.nexusformat.org

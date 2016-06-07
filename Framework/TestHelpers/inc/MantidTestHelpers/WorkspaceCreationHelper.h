@@ -52,7 +52,6 @@ class MockAlgorithm : public Mantid::API::Algorithm {
 public:
   MockAlgorithm(size_t nSteps = 100);
   ~MockAlgorithm() override = default;
-  ;
 
   /// Algorithm's name for identification
   const std::string name() const override { return "MockAlgorithm"; };
