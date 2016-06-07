@@ -3,20 +3,15 @@
 #include "MantidQtSpectrumViewer/SliderHandler.h"
 #include "MantidQtSpectrumViewer/SVUtils.h"
 
-namespace MantidQt
-{
-namespace SpectrumView
-{
+namespace MantidQt {
+namespace SpectrumView {
 
 /**
  *  Construct a SliderHandler object to manage the image scrollbars from the
  *  specified UI.
  */
-SliderHandler::SliderHandler( Ui_SpectrumViewer* svUI )
-  : ISliderHandler(), m_svUI(svUI)
-{
-}
-
+SliderHandler::SliderHandler(Ui_SpectrumViewer *svUI)
+    : ISliderHandler(), m_svUI(svUI) {}
 
 /**
  * Reconfigure the image scrollbars for the specified data and drawing area.
@@ -27,20 +22,18 @@ SliderHandler::SliderHandler( Ui_SpectrumViewer* svUI )
  *                    be drawn
  * @param dataSource  SpectrumDataSource that provides the data to be drawn
  */
-void SliderHandler::reConfigureSliders( QRect drawArea,
-                                        SpectrumDataSource_sptr dataSource )
-{
-  QScrollBar* vScroll = m_svUI->imageVerticalScrollBar;
+void SliderHandler::reConfigureSliders(QRect drawArea,
+                                       SpectrumDataSource_sptr dataSource) {
+  QScrollBar *vScroll = m_svUI->imageVerticalScrollBar;
 
   int oldVValue = vScroll->value();
   int numRows = (int)dataSource->getNRows();
-  int step  = vScroll->pageStep();
+  int step = vScroll->pageStep();
 
-  configureSlider( vScroll, numRows, drawArea.height(), oldVValue );
+  configureSlider(vScroll, numRows, drawArea.height(), oldVValue);
 
   vScroll->setValue(oldVValue + (step / 2));
 }
-
 
 /**
  * Configure the image scrollbars for the specified data and drawing area.
@@ -49,16 +42,14 @@ void SliderHandler::reConfigureSliders( QRect drawArea,
  *                    be drawn
  * @param dataSource  SpectrumDataSource that provides the data to be drawn
  */
-void SliderHandler::configureSliders( QRect drawArea,
-                                      SpectrumDataSource_sptr dataSource )
-{
-  QScrollBar* vScroll = m_svUI->imageVerticalScrollBar;
+void SliderHandler::configureSliders(QRect drawArea,
+                                     SpectrumDataSource_sptr dataSource) {
+  QScrollBar *vScroll = m_svUI->imageVerticalScrollBar;
   int numRows = (int)dataSource->getNRows();
-  configureSlider( vScroll, numRows, drawArea.height(), numRows );
+  configureSlider(vScroll, numRows, drawArea.height(), numRows);
 
-  configureHSlider( 2000, drawArea.width() );   // initial default, 2000 bins
+  configureHSlider(2000, drawArea.width()); // initial default, 2000 bins
 }
-
 
 /**
  *  Public method to configure the horizontal scrollbar to cover the
@@ -69,13 +60,10 @@ void SliderHandler::configureSliders( QRect drawArea,
  *                       displayed
  *  @param numPixels      The number of pixels avaliable to show the data
  */
-void SliderHandler::configureHSlider( int numDataSetps,
-                                      int numPixels )
-{
-  QScrollBar* hScroll = m_svUI->imageHorizontalScrollBar;
-  configureSlider( hScroll, numDataSetps, numPixels, 0 );
+void SliderHandler::configureHSlider(int numDataSetps, int numPixels) {
+  QScrollBar *hScroll = m_svUI->imageHorizontalScrollBar;
+  configureSlider(hScroll, numDataSetps, numPixels, 0);
 }
-
 
 /**
  *  Configure the specified scrollbar to cover the specified range of data
@@ -88,52 +76,44 @@ void SliderHandler::configureHSlider( int numDataSetps,
  *  @param val           The initial position of the scrollbar, between 0 and
  *                       numDataSetps.
  */
-void SliderHandler::configureSlider( QScrollBar* scrollBar,
-                                     int         numDataSetps,
-                                     int         numPixels,
-                                     int         val )
-{
+void SliderHandler::configureSlider(QScrollBar *scrollBar, int numDataSetps,
+                                    int numPixels, int val) {
   int step = numPixels;
-  if ( step > numDataSetps )
+  if (step > numDataSetps)
     step = numDataSetps;
 
-  if ( step <= 0 )
+  if (step <= 0)
     step = 1;
 
-  int max  = numDataSetps - step;
-  if ( max <= 0 )
+  int max = numDataSetps - step;
+  if (max <= 0)
     max = 0;
 
-  if ( val < 0 )
+  if (val < 0)
     val = 0;
 
-  if ( val > max )
+  if (val > max)
     val = max;
 
-  scrollBar->setMinimum( 0 );
-  scrollBar->setMaximum( max );
-  scrollBar->setPageStep( step );
-  scrollBar->setValue( val );
+  scrollBar->setMinimum(0);
+  scrollBar->setMaximum(max);
+  scrollBar->setPageStep(step);
+  scrollBar->setValue(val);
 }
-
 
 /**
  * Return true if the image horizontal scrollbar is enabled.
  */
-bool SliderHandler::hSliderOn()
-{
+bool SliderHandler::hSliderOn() {
   return m_svUI->imageHorizontalScrollBar->isEnabled();
 }
-
 
 /**
  * Return true if the image vertical scrollbar is enabled.
  */
-bool SliderHandler::vSliderOn()
-{
+bool SliderHandler::vSliderOn() {
   return m_svUI->imageVerticalScrollBar->isEnabled();
 }
-
 
 /**
  * Get the range of columns to display in the image.  NOTE: x_min will be
@@ -145,16 +125,14 @@ bool SliderHandler::vSliderOn()
  * @param x_max   This will be set to the last bin number to display in the
  *                x direction
  */
-void SliderHandler::getHSliderInterval( int &x_min, int &x_max )
-{
-  QScrollBar* hScroll = m_svUI->imageHorizontalScrollBar;
-  int step  = hScroll->pageStep();
+void SliderHandler::getHSliderInterval(int &x_min, int &x_max) {
+  QScrollBar *hScroll = m_svUI->imageHorizontalScrollBar;
+  int step = hScroll->pageStep();
   int value = hScroll->value();
 
   x_min = value;
   x_max = x_min + step;
 }
-
 
 /**
  * Get the range of rows to display in the image.  NOTE: y_min will be
@@ -166,18 +144,16 @@ void SliderHandler::getHSliderInterval( int &x_min, int &x_max )
  * @param y_max   This will be set to the last bin number to display in the
  *                y direction
  */
-void SliderHandler::getVSliderInterval( int &y_min, int &y_max )
-{
-  QScrollBar* vScroll = m_svUI->imageVerticalScrollBar;
-  int max   = vScroll->maximum();
-  int step  = vScroll->pageStep();
+void SliderHandler::getVSliderInterval(int &y_min, int &y_max) {
+  QScrollBar *vScroll = m_svUI->imageVerticalScrollBar;
+  int max = vScroll->maximum();
+  int step = vScroll->pageStep();
   int value = vScroll->value();
 
-  y_min = max - value;        // invert value since scale increases from
-  y_max = y_min + step;       // bottom to top, but scroll bar increases
-                              // the other way.
+  y_min = max - value;  // invert value since scale increases from
+  y_max = y_min + step; // bottom to top, but scroll bar increases
+                        // the other way.
 }
-
 
 } // namespace SpectrumView
 } // namespace MantidQt

@@ -1,10 +1,10 @@
 /***************************************************************************
-	File                 : CollapsiveGroupBox.cpp
+        File                 : CollapsiveGroupBox.cpp
     Project              : QtiPlot
     --------------------------------------------------------------------
-	Copyright            : (C) 2010 by Ion Vasilief
+        Copyright            : (C) 2010 by Ion Vasilief
     Email (use @ for *)  : ion_vasilief*yahoo.fr
-	Description          : A collapsive QGroupBox
+        Description          : A collapsive QGroupBox
 
  ***************************************************************************/
 
@@ -28,15 +28,14 @@
  ***************************************************************************/
 #include "CollapsiveGroupBox.h"
 
-CollapsiveGroupBox::CollapsiveGroupBox(const QString & title, QWidget *parent) : QGroupBox(title, parent)
-{
+CollapsiveGroupBox::CollapsiveGroupBox(const QString &title, QWidget *parent)
+    : QGroupBox(title, parent) {
   setCheckable(true);
   connect(this, SIGNAL(toggled(bool)), this, SLOT(setExpanded(bool)));
 }
 
-void CollapsiveGroupBox::setCollapsed(bool collapsed)
-{
-  foreach (QObject *o, children()){
+void CollapsiveGroupBox::setCollapsed(bool collapsed) {
+  foreach (QObject *o, children()) {
     if (o->isWidgetType())
       ((QWidget *)o)->setVisible(collapsed);
   }
@@ -44,9 +43,8 @@ void CollapsiveGroupBox::setCollapsed(bool collapsed)
   setFlat(collapsed);
 }
 
-void CollapsiveGroupBox::setExpanded(bool expanded)
-{
-  foreach (QObject *o, children()){
+void CollapsiveGroupBox::setExpanded(bool expanded) {
+  foreach (QObject *o, children()) {
     if (o->isWidgetType())
       ((QWidget *)o)->setVisible(expanded);
   }

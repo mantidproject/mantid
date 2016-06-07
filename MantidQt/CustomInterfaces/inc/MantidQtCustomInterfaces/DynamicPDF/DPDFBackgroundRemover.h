@@ -1,27 +1,27 @@
 #ifndef MANTIDQTCUSTOMINTERFACES_DYNAMICPDF_BACKGROUNDREMOVER_H_
 #define MANTIDQTCUSTOMINTERFACES_DYNAMICPDF_BACKGROUNDREMOVER_H_
 
-//Mantid Coding standars <http://www.mantidproject.org/Coding_Standards>
-//Mantid Headers from the same project
+// Mantid Coding standars <http://www.mantidproject.org/Coding_Standards>
+// Mantid Headers from the same project
 #include "ui_DPDFBackgroundRemover.h"
-//Mantid headers from other projects
+// Mantid headers from other projects
 #include "MantidQtCustomInterfaces/DllConfig.h"
 #include "MantidQtAPI/UserSubWindow.h"
-//3rd party library headers
+// 3rd party library headers
 #include <QDialog>
 #include <boost/shared_ptr.hpp>
 
 // Class forward declarations
 namespace MantidQt {
-  namespace CustomInterfaces {
-    namespace DynamicPDF {
-      class InputDataControl;
-      class SliceSelector;
-      class DisplayControl;
-      class FitControl;
-      class FourierTrasform;
-    }
-  }
+namespace CustomInterfaces {
+namespace DynamicPDF {
+class InputDataControl;
+class SliceSelector;
+class DisplayControl;
+class FitControl;
+class FourierTrasform;
+}
+}
 }
 
 namespace MantidQt {
@@ -53,8 +53,8 @@ namespace DynamicPDF {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTIDQT_CUSTOMINTERFACES_DLL BackgroundRemover: public MantidQt::API::UserSubWindow
-{
+class MANTIDQT_CUSTOMINTERFACES_DLL BackgroundRemover
+    : public MantidQt::API::UserSubWindow {
   Q_OBJECT
 
 public:
@@ -83,7 +83,6 @@ private:
   FitControl *m_fitControl;
   FourierTransform *m_fourierTransform;
 };
-
 }
 }
 }

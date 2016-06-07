@@ -1,4 +1,4 @@
-#ifndef VTK_DATASET_TO_WS_LOCATION_TEST 
+#ifndef VTK_DATASET_TO_WS_LOCATION_TEST
 #define VTK_DATASET_TO_WS_LOCATION_TEST
 
 #include <cxxtest/TestSuite.h>
@@ -10,34 +10,28 @@
 
 using namespace Mantid::VATES;
 
-
 //=====================================================================================
 // Functional tests
 //=====================================================================================
-class vtkDataSetToWsLocationTest : public CxxTest::TestSuite
-{
+class vtkDataSetToWsLocationTest : public CxxTest::TestSuite {
 
 private:
-
-  // Helper method. Create xml. Notice this is a subset of the full xml-schema, see Architectural design document.
-  static std::string constructXML()
-  {
+  // Helper method. Create xml. Notice this is a subset of the full xml-schema,
+  // see Architectural design document.
+  static std::string constructXML() {
     return std::string("<?xml version=\"1.0\" encoding=\"utf-8\"?>") +
-      "<MDInstruction>" +
-      "<MDWorkspaceLocation>WS_LOCATION</MDWorkspaceLocation>"
-      "</MDInstruction>";
+           "<MDInstruction>" +
+           "<MDWorkspaceLocation>WS_LOCATION</MDWorkspaceLocation>"
+           "</MDInstruction>";
   }
 
 public:
-
-  void testThrowIfvtkDataSetNull()
-  {
-    vtkDataSet* nullArg = NULL;
+  void testThrowIfvtkDataSetNull() {
+    vtkDataSet *nullArg = NULL;
     TS_ASSERT_THROWS(vtkDataSetToWsLocation temp(nullArg), std::runtime_error);
   }
 
-  void testExecution()
-  {
+  void testExecution() {
     vtkNew<vtkStructuredGrid> ds;
     ds->SetFieldData(createFieldDataWithCharArray(constructXML()));
 
@@ -45,8 +39,7 @@ public:
     TS_ASSERT_EQUALS("WS_LOCATION", extractor.execute());
   }
 
-  void testStaticUsage()
-  {
+  void testStaticUsage() {
     vtkNew<vtkStructuredGrid> ds;
     ds->SetFieldData(createFieldDataWithCharArray(constructXML()));
 

@@ -194,7 +194,7 @@ void ProcessDasNexusLog::exportErrorLog(
     std::vector<Kernel::DateAndTime> pulsetimes,
     std::vector<double> orderedtofs, double dts) {
   std::string outputdir = getProperty("OutputDirectory");
-  if (outputdir[outputdir.size() - 1] != '/')
+  if (outputdir.back() != '/')
     outputdir += "/";
 
   std::string ofilename = outputdir + "errordeltatime.txt";
@@ -274,8 +274,8 @@ void ProcessDasNexusLog::calDistributions(
   std::vector<size_t> y2;
 
   size_t numperiods = 100;
-  int64_t spanns = timevec[timevec.size() - 1].totalNanoseconds() -
-                   timevec[0].totalNanoseconds();
+  int64_t spanns =
+      timevec.back().totalNanoseconds() - timevec.front().totalNanoseconds();
   double timestepsec =
       static_cast<double>(spanns) * 1.0E-9 / static_cast<double>(numperiods);
 
@@ -354,8 +354,8 @@ void ProcessDasNexusLog::checkLog(API::MatrixWorkspace_sptr ws,
 
   // 3. Output
   Kernel::DateAndTime t0(ws->run().getProperty("run_start")->value());
-  Kernel::time_duration dts = times[0] - t0;
-  Kernel::time_duration dtf = times[times.size() - 1] - t0;
+  Kernel::time_duration dts = times.front() - t0;
+  Kernel::time_duration dtf = times.back() - t0;
   size_t f = times.size() - 1;
 
   g_log.information() << "Number of Equal Time Stamps    = " << countsame

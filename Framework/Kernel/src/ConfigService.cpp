@@ -1658,7 +1658,7 @@ ConfigServiceImpl::getInstrumentDirectories() const {
  * @returns a last entry of getInstrumentDirectories
  */
 const std::string ConfigServiceImpl::getInstrumentDirectory() const {
-  return m_InstrumentDirs[m_InstrumentDirs.size() - 1];
+  return m_InstrumentDirs.back();
 }
 /**
  * Return the search directory for vtp files

@@ -2,7 +2,8 @@
     File                 : VectorCurve.h
     Project              : QtiPlot
     --------------------------------------------------------------------
-    Copyright            : (C) 2006 by Ion Vasilief, Tilman Hoener zu Siederdissen
+    Copyright            : (C) 2006 by Ion Vasilief, Tilman Hoener zu
+ Siederdissen
     Email (use @ for *)  : ion_vasilief*yahoo.fr, thzs*gmx.net
     Description          : Vector curve class
 
@@ -35,72 +36,73 @@
 class QwtPlot;
 
 //! Vector curve class
-class VectorCurve: public DataCurve
-{
+class VectorCurve : public DataCurve {
 public:
-	enum VectorStyle{XYXY, XYAM};
+  enum VectorStyle { XYXY, XYAM };
 
-	VectorCurve(VectorStyle style, Table *t, const QString& xColName, const char *name,
-				const QString& endCol1, const QString& endCol2, int startRow, int endRow);
-        ~VectorCurve() override;
+  VectorCurve(VectorStyle style, Table *t, const QString &xColName,
+              const char *name, const QString &endCol1, const QString &endCol2,
+              int startRow, int endRow);
+  ~VectorCurve() override;
 
-        enum Position{Tail, Middle, Head};
+  enum Position { Tail, Middle, Head };
 
-	void copy(const VectorCurve *vc);
+  void copy(const VectorCurve *vc);
 
-        QwtDoubleRect boundingRect() const override;
+  QwtDoubleRect boundingRect() const override;
 
-        using DataCurve::draw; // Unhide base class method (avoids Intel compiler warning)
-        void draw(QPainter *painter, const QwtScaleMap &xMap,
-                  const QwtScaleMap &yMap, int from, int to) const override;
+  using DataCurve::draw; // Unhide base class method (avoids Intel compiler
+                         // warning)
+  void draw(QPainter *painter, const QwtScaleMap &xMap, const QwtScaleMap &yMap,
+            int from, int to) const override;
 
-        void drawVector(QPainter *painter, const QwtScaleMap &xMap,
-		const QwtScaleMap &yMap, int from, int to) const;
+  void drawVector(QPainter *painter, const QwtScaleMap &xMap,
+                  const QwtScaleMap &yMap, int from, int to) const;
 
-	void drawArrowHead(QPainter *p, int xs, int ys, int xe, int ye) const;
-	double theta(int x0, int y0, int x1, int y1) const;
+  void drawArrowHead(QPainter *p, int xs, int ys, int xe, int ye) const;
+  double theta(int x0, int y0, int x1, int y1) const;
 
-	QString vectorEndXAColName(){return d_end_x_a;};
-	QString vectorEndYMColName(){return d_end_y_m;};
-	void setVectorEnd(const QString& xColName, const QString& yColName);
-	void setVectorEnd(const QwtArray<double>&x, const QwtArray<double>&y);
+  QString vectorEndXAColName() { return d_end_x_a; };
+  QString vectorEndYMColName() { return d_end_y_m; };
+  void setVectorEnd(const QString &xColName, const QString &yColName);
+  void setVectorEnd(const QwtArray<double> &x, const QwtArray<double> &y);
 
-	double width();
-	void setWidth(double w);
+  double width();
+  void setWidth(double w);
 
-	QColor color();
-	void setColor(const QColor& c);
+  QColor color();
+  void setColor(const QColor &c);
 
-	int headLength(){return d_headLength;};
-	void setHeadLength(int l);
+  int headLength() { return d_headLength; };
+  void setHeadLength(int l);
 
-	int headAngle(){return d_headAngle;};
-	void setHeadAngle(int a);
+  int headAngle() { return d_headAngle; };
+  void setHeadAngle(int a);
 
-	bool filledArrowHead(){return filledArrow;};
-	void fillArrowHead(bool fill);
+  bool filledArrowHead() { return filledArrow; };
+  void fillArrowHead(bool fill);
 
-	int position(){return d_position;};
-	void setPosition(int pos){d_position = pos;};
+  int position() { return d_position; };
+  void setPosition(int pos) { d_position = pos; };
 
-	int vectorStyle(){return d_style;};
-	void setVectorStyle(int style){d_style = style;};
+  int vectorStyle() { return d_style; };
+  void setVectorStyle(int style) { d_style = style; };
 
-        bool updateData(Table *t, const QString &colName) override;
-        void loadData() override;
+  bool updateData(Table *t, const QString &colName) override;
+  void loadData() override;
 
-        QString plotAssociation() const override;
-        void updateColumnNames(const QString &oldName, const QString &newName,
-                               bool updateTableName) override;
+  QString plotAssociation() const override;
+  void updateColumnNames(const QString &oldName, const QString &newName,
+                         bool updateTableName) override;
 
 protected:
-	QwtArrayData *vectorEnd;
-	QPen pen;
-	bool filledArrow;
-	int d_style, d_headLength, d_headAngle, d_position;
+  QwtArrayData *vectorEnd;
+  QPen pen;
+  bool filledArrow;
+  int d_style, d_headLength, d_headAngle, d_position;
 
-	QString d_end_x_a;
-	QString d_end_y_m;
+  QString d_end_x_a;
+  QString d_end_y_m;
 };
 
 #endif

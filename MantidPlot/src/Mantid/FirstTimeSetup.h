@@ -9,8 +9,7 @@
 *
 */
 
-class FirstTimeSetup : public QDialog
-{
+class FirstTimeSetup : public QDialog {
   Q_OBJECT
 
 public:
@@ -32,9 +31,8 @@ private slots:
   void openPythonInMantid();
   void openExtendingMantid();
 
-  void facilitySelected(const QString& facility);
+  void facilitySelected(const QString &facility);
   void openManageUserDirectories();
-
 
 private:
   Ui::FirstTimeSetup m_uiForm;

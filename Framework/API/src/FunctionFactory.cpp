@@ -290,7 +290,7 @@ void FunctionFactoryImpl::addTies(IFunction_sptr fun,
 void FunctionFactoryImpl::addTie(IFunction_sptr fun,
                                  const Expression &expr) const {
   if (expr.size() > 1) { // if size > 2 it is interpreted as setting a tie (last
-                         // expr.term) to multiple parameters, e.g
+    // expr.term) to multiple parameters, e.g
     // f1.alpha = f2.alpha = f3.alpha = f0.beta^2/2
     const std::string value = expr[expr.size() - 1].str();
     for (size_t i = expr.size() - 1; i != 0;) {
