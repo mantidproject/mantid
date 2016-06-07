@@ -47,7 +47,6 @@ public:
 private:
   void init() override;
   void exec() override;
-  std::vector<std::string> listToVector(std::string &);
   std::vector<std::string> searchForFitParams(const std::string &,
                                               const std::vector<std::string> &);
   std::vector<std::vector<std::string>>

@@ -7,6 +7,7 @@
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/VectorHelper.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -86,7 +87,9 @@ void ProcessIndirectFitParameters::exec() {
   ITableWorkspace_sptr inputWs = getProperty("InputWorkspace");
   std::string xColumn = getProperty("ColumnX");
   std::string parameterNamesProp = getProperty("ParameterNames");
-  auto parameterNames = listToVector(parameterNamesProp);
+  auto parameterNames =
+      Kernel::VectorHelper::splitStringIntoVector<std::string>(
+          parameterNamesProp);
   std::string xUnit = getProperty("XAxisUnit");
   MatrixWorkspace_sptr outputWs = getProperty("OutputWorkspace");
   const std::string outputWsName = getPropertyValue("OutputWorkspace");
@@ -189,27 +192,6 @@ void ProcessIndirectFitParameters::exec() {
   }
 
   setProperty("OutputWorkspace", outputWs);
-}
-
-/**
- * Transforms a comma separated list into a vector of strings
- * @param commaList - The comma separated list to be separated
- * @return - The vector of string composed of the elements of the comma list
- */
-std::vector<std::string>
-ProcessIndirectFitParameters::listToVector(std::string &commaList) {
-  auto listVector = std::vector<std::string>();
-  auto pos = commaList.find(',');
-  while (pos != std::string::npos) {
-    std::string nextItem = commaList.substr(0, pos);
-    listVector.push_back(nextItem);
-    commaList = commaList.substr(pos + 1, commaList.size());
-    pos = commaList.find(',');
-  }
-  if (commaList.compare("") != 0) {
-    listVector.push_back(commaList);
-  }
-  return listVector;
 }
 
 /**
