@@ -151,8 +151,9 @@ class LoadCASTEP:
         @return dictionary with the frequencies for each k_point (frequencies),
                 weights of k_points (weights),
                 k_vectors (k_vectors),
-                amplitudes of atom distortions for each k-point (eigenvectors)
-                and hash of the phonon file (hash)
+                amplitudes of atom distortions for each k-point (eigenvectors),
+                hash of the phonon file (hash) and
+                whether we have Gamma point calculations or calculations for the whole Brillouin Zone ("gamma_calculations")
         """
         file_data = {}
 
@@ -198,11 +199,17 @@ class LoadCASTEP:
         eigenvectors = np.asarray(eigenvectors)
         warray = np.asarray(weights)
         hash_filename = self._calculateHash()
+        # in the future it will be evaluated basing on the number of k-points:
+        # one k-point => gamma_point_calculations=True
+        # more then one k-point gamma_point_calculations=False
+        # in this phase it is fixed to True so that only Gamma point is supported
+        gamma_point_calculations = True
 
         file_data.update({"frequencies": frequencies,
                           "weights": warray,
                           "k_vectors": k_vectors,
                           "eigenvectors": eigenvectors,
-                          "hash": hash_filename})
+                          "hash": hash_filename,
+                          "gamma_calculations":gamma_point_calculations})
 
         return file_data
