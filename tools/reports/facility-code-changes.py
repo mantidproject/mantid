@@ -97,7 +97,7 @@ if __name__ == '__main__':
                'psi.ch': 'PSI',
                'ansto.gov.au': 'ANSTO',
                'ansto': 'ANSTO',
-               'mantidproject.org': 'OTHER', 
+               'mantidproject.org': 'OTHERS', 
                'MichaelWedel@users.noreply.github.com': 'PSI',
                'stuart.i.campbell@gmail.com': 'ORNL',
                'uwstout.edu': 'ORNL',
