@@ -641,11 +641,25 @@ public:
                     "IB22=0,IB41=0,IB42=0,IB43=0,IB44=0,IB61=0,IB62=0,IB63="
                     "0,IB64=0,IB65=0,IB66=0,IntensityScaling=1");
 
+    fit.setProperty("Ties", "BmolX=0,BmolY=0,BmolZ=0,BextX=0,BextY=0,BextZ="
+                            "0,B21=0,B41=0,B43=0,B60=0,B61=0,B62=0,B63=0,"
+                            "B64=0,B65=0,B66=0,IB21=0,IB22=0,IB41=0,IB42=0,"
+                            "IB43=0,IB44=0,IB61=0,IB62=0,IB63=0,IB64=0,"
+                            "IB65=0,IB66=0,IntensityScaling=1");
+
     fit.setProperty("InputWorkspace", data);
     fit.setProperty("DataColumn", "Energy");
     fit.setProperty("DataColumn_1", "Intensity");
     fit.setProperty("Output", "out");
     fit.execute();
+
+    Mantid::API::IFunction_sptr outF = fit.getProperty("Function");
+
+    TS_ASSERT_DELTA(outF->getParameter("B20"), 0.366336, 0.0001);
+    TS_ASSERT_DELTA(outF->getParameter("B22"), 3.98132, 0.0001);
+    TS_ASSERT_DELTA(outF->getParameter("B40"), -0.0304001, 0.0001);
+    TS_ASSERT_DELTA(outF->getParameter("B42"), -0.119605, 0.0001);
+    TS_ASSERT_DELTA(outF->getParameter("B44"), -0.130124, 0.0001);
 
     ITableWorkspace_sptr output =
         AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(
@@ -671,7 +685,6 @@ public:
       TS_ASSERT_DELTA(column->toDouble(1), 0.7204, 0.0001);
       TS_ASSERT_DELTA(column->toDouble(2), 0.429809, 0.0001);
     }
-
   }
 };
 
