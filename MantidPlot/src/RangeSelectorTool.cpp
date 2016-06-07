@@ -36,6 +36,7 @@
 #include <QPoint>
 #include <QApplication>
 #include <QClipboard>
+#include <QKeyEvent>
 #include <QMessageBox>
 #include <QEvent>
 #include <QLocale>

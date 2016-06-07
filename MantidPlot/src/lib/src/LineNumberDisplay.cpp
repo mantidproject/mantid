@@ -30,6 +30,7 @@
 #include <QScrollBar>
 #include <QShowEvent>
 #include <QPainter>
+#include <QTextBlock>
 
 LineNumberDisplay::LineNumberDisplay(QTextEdit *te, QWidget *parent)
     : QTextEdit(parent), d_text_edit(te) {
@@ -65,14 +66,9 @@ void LineNumberDisplay::updateDocumentSelection() {
     return;
 
   QTextCursor c = textCursor();
-#if QT_VERSION >= 0x040500
   int selectionStart =
       document()->findBlock(c.selectionStart()).firstLineNumber();
   int selectionEnd = document()->findBlock(c.selectionEnd()).firstLineNumber();
-#else
-  int selectionStart = document()->findBlock(c.selectionStart()).blockNumber();
-  int selectionEnd = document()->findBlock(c.selectionEnd()).blockNumber();
-#endif
   int selectedLines = abs(selectionEnd - selectionStart);
 
   QTextCursor cursor(d_text_edit->textCursor());

@@ -2370,7 +2370,7 @@ bool PlotDialog::acceptParams() {
     // Update axes page
     boxXAxis->setCurrentIndex(sp->xAxis() - 2);
     boxYAxis->setCurrentIndex(sp->yAxis());
-  } else if (privateTabWidget->currentPage() == contourLinesPage) {
+  } else if (privateTabWidget->currentWidget() == contourLinesPage) {
     Spectrogram *sp = dynamic_cast<Spectrogram *>(plotItem);
 
     if (!sp || sp->rtti() != QwtPlotItem::Rtti_PlotSpectrogram) {

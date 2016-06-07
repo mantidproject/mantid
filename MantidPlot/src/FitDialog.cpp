@@ -43,6 +43,7 @@
 #include "MantidQtMantidWidgets/DoubleSpinBox.h"
 
 #include <QListWidget>
+#include <QCloseEvent>
 #include <QTableWidget>
 #include <QHeaderView>
 #include <QLineEdit>
@@ -514,9 +515,11 @@ void FitDialog::applyChanges() {
   app->fitPoints = generatePointsBox->value();
   app->generateUniformFitPoints = generatePointsBtn->isChecked();
   if (d_current_fit &&
-      !(qstrcmp("PolynomialFit", d_current_fit->className()) == 0) &&
-      !(qstrcmp("LinearFit", d_current_fit->className()) == 0) &&
-      !(qstrcmp("LinearSlopeFit", d_current_fit->className()) == 0))
+      !(strcmp("PolynomialFit", d_current_fit->metaObject()->className()) ==
+        0) &&
+      !(strcmp("LinearFit", d_current_fit->metaObject()->className()) == 0) &&
+      !(strcmp("LinearSlopeFit", d_current_fit->metaObject()->className()) ==
+        0))
     app->fit_scale_errors = scaleErrorsBox->isChecked();
   app->saveSettings();
   btnApply->setEnabled(false);

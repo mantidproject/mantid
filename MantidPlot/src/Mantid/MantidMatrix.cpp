@@ -247,7 +247,7 @@ void MantidMatrix::connectTableView(QTableView *view,
   view->setFocusPolicy(Qt::StrongFocus);
 
   QPalette pal = view->palette();
-  pal.setColor(QColorGroup::Base, m_bk_color);
+  pal.setColor(QPalette::Base, m_bk_color);
   view->setPalette(pal);
 
   // set header properties

@@ -599,10 +599,10 @@ void Graph::showAxis(int axis, int type, const QString &formatInfo,
 
   scale->setMargin(baselineDist);
   QPalette pal = scale->palette();
-  if (pal.color(QPalette::Active, QColorGroup::Foreground) != c)
-    pal.setColor(QColorGroup::Foreground, c);
-  if (pal.color(QPalette::Active, QColorGroup::Text) != labelsColor)
-    pal.setColor(QColorGroup::Text, labelsColor);
+  if (pal.color(QPalette::Active, QPalette::Foreground) != c)
+    pal.setColor(QPalette::Foreground, c);
+  if (pal.color(QPalette::Active, QPalette::Text) != labelsColor)
+    pal.setColor(QPalette::Text, labelsColor);
   scale->setPalette(pal);
 
   if (!labelsOn)
@@ -777,7 +777,7 @@ void Graph::setAxisLabelsColor(int axis, const QColor &color) {
       dynamic_cast<QwtScaleWidget *>(d_plot->axisWidget(axis));
   if (scale) {
     QPalette pal = scale->palette();
-    pal.setColor(QColorGroup::Text, color);
+    pal.setColor(QPalette::Text, color);
     scale->setPalette(pal);
   }
 }
@@ -787,7 +787,7 @@ void Graph::setAxisColor(int axis, const QColor &color) {
       dynamic_cast<QwtScaleWidget *>(d_plot->axisWidget(axis));
   if (scale) {
     QPalette pal = scale->palette();
-    pal.setColor(QColorGroup::Foreground, color);
+    pal.setColor(QPalette::Foreground, color);
     scale->setPalette(pal);
   }
 }
@@ -796,7 +796,7 @@ QColor Graph::axisColor(int axis) {
   QwtScaleWidget *scale =
       dynamic_cast<QwtScaleWidget *>(d_plot->axisWidget(axis));
   if (scale)
-    return scale->palette().color(QPalette::Active, QColorGroup::Foreground);
+    return scale->palette().color(QPalette::Active, QPalette::Foreground);
   else
     return QColor(Qt::black);
 }
@@ -805,7 +805,7 @@ QColor Graph::axisLabelsColor(int axis) {
   QwtScaleWidget *scale =
       dynamic_cast<QwtScaleWidget *>(d_plot->axisWidget(axis));
   if (scale)
-    return scale->palette().color(QPalette::Active, QColorGroup::Text);
+    return scale->palette().color(QPalette::Active, QPalette::Text);
   else
     return QColor(Qt::black);
 }
@@ -1844,7 +1844,7 @@ void Graph::updateCurvesData(Table *w, const QString &yColName) {
 QColor Graph::canvasFrameColor() {
   QwtPlotCanvas *canvas = (QwtPlotCanvas *)d_plot->canvas();
   QPalette pal = canvas->palette();
-  return pal.color(QPalette::Active, QColorGroup::Foreground);
+  return pal.color(QPalette::Active, QPalette::Foreground);
 }
 
 int Graph::canvasFrameWidth() {
@@ -1857,11 +1857,11 @@ void Graph::setCanvasFrame(int width, const QColor &color) {
   QPalette pal = canvas->palette();
 
   if (canvas->lineWidth() == width &&
-      pal.color(QPalette::Active, QColorGroup::Foreground) == color)
+      pal.color(QPalette::Active, QPalette::Foreground) == color)
     return;
 
   canvas->setLineWidth(width);
-  pal.setColor(QColorGroup::Foreground, color);
+  pal.setColor(QPalette::Foreground, color);
   canvas->setPalette(pal);
   emit modifiedGraph();
 }
@@ -3358,7 +3358,7 @@ void Graph::zoom(bool on) {
   if (on)
     d_plot->canvas()->setCursor(cursor);
   else
-    d_plot->canvas()->setCursor(Qt::arrowCursor);
+    d_plot->canvas()->setCursor(Qt::ArrowCursor);
 }
 
 void Graph::zoomOut() {
@@ -3379,8 +3379,8 @@ void Graph::drawText(bool on) {
     d_plot->canvas()->setCursor(c);
     // d_plot->setCursor(c);
   } else {
-    d_plot->canvas()->setCursor(Qt::arrowCursor);
-    // d_plot->setCursor(Qt::arrowCursor);
+    d_plot->canvas()->setCursor(Qt::ArrowCursor);
+    // d_plot->setCursor(Qt::ArrowCursor);
   }
   drawTextOn = on;
 }
@@ -3768,16 +3768,15 @@ void Graph::setFrame(int width, const QColor &color) {
     return;
 
   QPalette pal = d_plot->palette();
-  pal.setColor(QColorGroup::Foreground, color);
+  pal.setColor(QPalette::Foreground, color);
   d_plot->setPalette(pal);
 
   d_plot->setLineWidth(width);
 }
 
 void Graph::setBackgroundColor(const QColor &color) {
-  QColorGroup cg;
   QPalette p = d_plot->palette();
-  p.setColor(QColorGroup::Window, color);
+  p.setColor(QPalette::Window, color);
   d_plot->setPalette(p);
 
   d_plot->setAutoFillBackground(true);
@@ -3935,7 +3934,6 @@ void Graph::showAxisTitleMenu() {
 
 void Graph::showAxisContextMenu(int axis) {
   QMenu menu(this);
-  menu.isCheckable();
 
   menu.addAction(getQPixmap("unzoom_xpm"), tr("&Rescale to show all"), this,
                  SLOT(setAutoScale()), tr("Ctrl+Shift+R"));
@@ -4025,8 +4023,8 @@ void Graph::copy(Graph *g) {
       if (scale) {
         scale->setMargin(plot->axisWidget(i)->margin());
         QPalette pal = scale->palette();
-        pal.setColor(QColorGroup::Foreground, g->axisColor(i));
-        pal.setColor(QColorGroup::Text, g->axisLabelsColor(i));
+        pal.setColor(QPalette::Foreground, g->axisColor(i));
+        pal.setColor(QPalette::Text, g->axisLabelsColor(i));
         scale->setPalette(pal);
         d_plot->setAxisFont(i, plot->axisFont(i));
 
@@ -5327,7 +5325,7 @@ void Graph::enablePanningMagnifier(bool on) {
 
   QwtPlotCanvas *cnvs = d_plot->canvas(); // canvas();
   if (on) {
-    cnvs->setCursor(Qt::pointingHandCursor);
+    cnvs->setCursor(Qt::PointingHandCursor);
     d_magnifier = new QwtPlotMagnifier(cnvs);
     // Disable the mouse button as it causes issues with the context menu
     d_magnifier->setMouseButton(Qt::NoButton);
@@ -5339,7 +5337,7 @@ void Graph::enablePanningMagnifier(bool on) {
     connect(d_panner, SIGNAL(panned(int, int)), multiLayer(),
             SLOT(notifyChanges()));
   } else {
-    cnvs->setCursor(Qt::arrowCursor);
+    cnvs->setCursor(Qt::ArrowCursor);
     d_magnifier = NULL;
     d_panner = NULL;
   }
@@ -6392,9 +6390,8 @@ std::string Graph::saveToProject() {
     QwtScaleWidget *scale =
         dynamic_cast<QwtScaleWidget *>(d_plot->axisWidget(i));
     QColor col =
-        scale
-            ? scale->palette().color(QPalette::Active, QColorGroup::Foreground)
-            : QColor(Qt::black);
+        scale ? scale->palette().color(QPalette::Active, QPalette::Foreground)
+              : QColor(Qt::black);
     tsv << col.name();
   }
 
@@ -6402,9 +6399,9 @@ std::string Graph::saveToProject() {
   for (int i = 0; i < 4; ++i) {
     QwtScaleWidget *scale =
         dynamic_cast<QwtScaleWidget *>(d_plot->axisWidget(i));
-    QColor col =
-        scale ? scale->palette().color(QPalette::Active, QColorGroup::Text)
-              : QColor(Qt::black);
+    QColor col = scale
+                     ? scale->palette().color(QPalette::Active, QPalette::Text)
+                     : QColor(Qt::black);
     tsv << col.name();
   }
 

@@ -35,6 +35,7 @@
 #include "PlotCurve.h"
 #include "pixmaps.h"
 #include <qwt_symbol.h>
+#include <QKeyEvent>
 
 ScreenPickerTool::ScreenPickerTool(Graph *graph, const QObject *status_target,
                                    const char *status_slot)

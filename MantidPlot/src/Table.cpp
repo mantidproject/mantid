@@ -37,6 +37,7 @@
 #include "pixmaps.h"
 #include "TSVSerialiser.h"
 
+#include <QContextMenuEvent>
 #include <QMessageBox>
 #include <QDateTime>
 #include <QTextStream>
@@ -2240,7 +2241,7 @@ void Table::importASCII(const QString &fname, const QString &sep,
         line = s.split(sep, QString::SkipEmptyParts);
         for (int i = 0; i < line.size(); i++)
           comments[startCol + i] = line[i];
-        qApp->processEvents(QEventLoop::ExcludeUserInput);
+        qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
       }
     } else if (rows > 0) { // put values in the first line of the table
       for (int i = 0; i < cols; i++)
@@ -3132,7 +3133,7 @@ void Table::loadFromProject(const std::string &lines, ApplicationWindow *app,
       }
     }
 
-    QApplication::processEvents(QEventLoop::ExcludeUserInput);
+    QApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
     QApplication::restoreOverrideCursor();
     table()->blockSignals(false);
   }

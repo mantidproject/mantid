@@ -737,7 +737,7 @@ bool ImportOPJ::importGraphs(const OPJFile &opj) {
           case 1: // Rect
             cl.sType = 2;
             break;
-          case 2: // Ellipse
+          case 2:  // Ellipse
           case 20: // Sphere
             cl.sType = 1;
             break;
@@ -796,7 +796,7 @@ bool ImportOPJ::importGraphs(const OPJFile &opj) {
             if ((style == Graph::Scatter || style == Graph::LineSymbols ||
                  style == Graph::Area) &&
                 color == 0xF7) // 0xF7 -Automatic color
-              color = 17; // depend on Origin settings - not stored in file
+              color = 17;      // depend on Origin settings - not stored in file
             cl.fillCol = color;
             break;
           default:
