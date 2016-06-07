@@ -18,7 +18,7 @@ EqualToMD::EqualToMD() {}
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-EqualToMD::~EqualToMD() {}
+EqualToMD::~EqualToMD() = default;
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name

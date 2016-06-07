@@ -34,7 +34,7 @@ CreateMDWorkspace::CreateMDWorkspace() {}
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-CreateMDWorkspace::~CreateMDWorkspace() {}
+CreateMDWorkspace::~CreateMDWorkspace() = default;
 
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.

@@ -24,7 +24,7 @@ MuonGroupCountsCalculator::MuonGroupCountsCalculator(
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-MuonGroupCountsCalculator::~MuonGroupCountsCalculator() {}
+MuonGroupCountsCalculator::~MuonGroupCountsCalculator() = default;
 
 /**
  * Calculates raw counts according to period arithmetic

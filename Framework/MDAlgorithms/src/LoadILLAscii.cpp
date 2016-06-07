@@ -52,7 +52,7 @@ LoadILLAscii::LoadILLAscii() : m_instrumentName(""), m_wavelength(0) {
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-LoadILLAscii::~LoadILLAscii() {}
+LoadILLAscii::~LoadILLAscii() = default;
 
 /**
  * Return the confidence with with this algorithm can load the file

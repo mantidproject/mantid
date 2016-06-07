@@ -32,7 +32,7 @@ MuonPairAsymmetryCalculator::MuonPairAsymmetryCalculator(
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-MuonPairAsymmetryCalculator::~MuonPairAsymmetryCalculator() {}
+MuonPairAsymmetryCalculator::~MuonPairAsymmetryCalculator() = default;
 
 /**
 * Calculates asymmetry for the given pair of groups, using the alpha value

@@ -45,7 +45,7 @@ IntegratePeaksMD2::IntegratePeaksMD2() {}
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-IntegratePeaksMD2::~IntegratePeaksMD2() {}
+IntegratePeaksMD2::~IntegratePeaksMD2() = default;
 
 //----------------------------------------------------------------------------------------------
 

@@ -18,7 +18,7 @@ GreaterThanMD::GreaterThanMD() {}
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-GreaterThanMD::~GreaterThanMD() {}
+GreaterThanMD::~GreaterThanMD() = default;
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name

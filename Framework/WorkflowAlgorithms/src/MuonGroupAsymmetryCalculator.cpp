@@ -26,7 +26,7 @@ MuonGroupAsymmetryCalculator::MuonGroupAsymmetryCalculator(
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-MuonGroupAsymmetryCalculator::~MuonGroupAsymmetryCalculator() {}
+MuonGroupAsymmetryCalculator::~MuonGroupAsymmetryCalculator() = default;
 
 /**
 * Calculates asymmetry between given group (specified via group index) and Muon

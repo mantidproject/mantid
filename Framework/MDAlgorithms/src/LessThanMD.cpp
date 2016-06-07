@@ -18,7 +18,7 @@ LessThanMD::LessThanMD() {}
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-LessThanMD::~LessThanMD() {}
+LessThanMD::~LessThanMD() = default;
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name

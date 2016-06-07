@@ -41,7 +41,7 @@ MuonProcess::MuonProcess() {}
 /**
  * Destructor
  */
-MuonProcess::~MuonProcess() {}
+MuonProcess::~MuonProcess() = default;
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name

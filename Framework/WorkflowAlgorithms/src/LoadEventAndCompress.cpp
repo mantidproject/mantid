@@ -28,7 +28,7 @@ LoadEventAndCompress::LoadEventAndCompress() {}
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-LoadEventAndCompress::~LoadEventAndCompress() {}
+LoadEventAndCompress::~LoadEventAndCompress() = default;
 
 //----------------------------------------------------------------------------------------------
 

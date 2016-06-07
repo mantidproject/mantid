@@ -249,7 +249,7 @@ IntegrateMDHistoWorkspace::IntegrateMDHistoWorkspace() {}
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-IntegrateMDHistoWorkspace::~IntegrateMDHistoWorkspace() {}
+IntegrateMDHistoWorkspace::~IntegrateMDHistoWorkspace() = default;
 
 //----------------------------------------------------------------------------------------------
 

@@ -80,7 +80,7 @@ ImportMDEventWorkspace::ImportMDEventWorkspace()
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-ImportMDEventWorkspace::~ImportMDEventWorkspace() {}
+ImportMDEventWorkspace::~ImportMDEventWorkspace() = default;
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name

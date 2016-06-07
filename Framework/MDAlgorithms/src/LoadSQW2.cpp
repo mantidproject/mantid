@@ -63,7 +63,7 @@ LoadSQW2::LoadSQW2()
       m_outputWS(), m_nspe(0), m_uToRLU(), m_outputFrame() {}
 
 /// Default destructor
-LoadSQW2::~LoadSQW2() {}
+LoadSQW2::~LoadSQW2() = default;
 
 /// Algorithms name for identification. @see Algorithm::name
 const std::string LoadSQW2::name() const { return "LoadSQW"; }

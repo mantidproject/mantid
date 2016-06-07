@@ -21,7 +21,7 @@ UnaryOperationMD::UnaryOperationMD() {}
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-UnaryOperationMD::~UnaryOperationMD() {}
+UnaryOperationMD::~UnaryOperationMD() = default;
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name

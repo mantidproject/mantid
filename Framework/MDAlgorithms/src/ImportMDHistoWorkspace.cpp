@@ -25,7 +25,7 @@ ImportMDHistoWorkspace::ImportMDHistoWorkspace()
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-ImportMDHistoWorkspace::~ImportMDHistoWorkspace() {}
+ImportMDHistoWorkspace::~ImportMDHistoWorkspace() = default;
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name

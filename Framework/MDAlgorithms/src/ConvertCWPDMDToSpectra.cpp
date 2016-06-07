@@ -30,7 +30,7 @@ ConvertCWPDMDToSpectra::ConvertCWPDMDToSpectra() : m_infitesimal(1.0E-10) {}
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-ConvertCWPDMDToSpectra::~ConvertCWPDMDToSpectra() {}
+ConvertCWPDMDToSpectra::~ConvertCWPDMDToSpectra() = default;
 
 //----------------------------------------------------------------------------------------------
 void ConvertCWPDMDToSpectra::init() {

@@ -23,7 +23,7 @@ MultiplyMD::MultiplyMD() {}
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-MultiplyMD::~MultiplyMD() {}
+MultiplyMD::~MultiplyMD() = default;
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name

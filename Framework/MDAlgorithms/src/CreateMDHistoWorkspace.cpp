@@ -29,7 +29,7 @@ CreateMDHistoWorkspace::CreateMDHistoWorkspace() {}
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-CreateMDHistoWorkspace::~CreateMDHistoWorkspace() {}
+CreateMDHistoWorkspace::~CreateMDHistoWorkspace() = default;
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name

@@ -52,7 +52,7 @@ LoadMD::LoadMD()
 //----------------------------------------------------------------------------------------------
 /** Destructor
 */
-LoadMD::~LoadMD() {}
+LoadMD::~LoadMD() = default;
 
 /**
 * Return the confidence with which this algorithm can load the file

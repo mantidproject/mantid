@@ -27,7 +27,7 @@ IMuonAsymmetryCalculator::IMuonAsymmetryCalculator(
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-IMuonAsymmetryCalculator::~IMuonAsymmetryCalculator() {}
+IMuonAsymmetryCalculator::~IMuonAsymmetryCalculator() = default;
 
 /**
 * Sums the specified periods of the input workspace group

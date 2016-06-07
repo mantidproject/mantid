@@ -16,7 +16,7 @@ using namespace API;
 StepScan::StepScan() {}
 
 /// Destructor
-StepScan::~StepScan() {}
+StepScan::~StepScan() = default;
 
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string StepScan::name() const { return "StepScan"; }

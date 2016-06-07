@@ -18,7 +18,7 @@ LogarithmMD::LogarithmMD() {}
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-LogarithmMD::~LogarithmMD() {}
+LogarithmMD::~LogarithmMD() = default;
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name

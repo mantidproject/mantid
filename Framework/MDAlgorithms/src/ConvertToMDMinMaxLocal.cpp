@@ -25,7 +25,7 @@ ConvertToMDMinMaxLocal::ConvertToMDMinMaxLocal() {}
 //----------------------------------------------------------------------------------------------
 /** Destructor
 */
-ConvertToMDMinMaxLocal::~ConvertToMDMinMaxLocal() {}
+ConvertToMDMinMaxLocal::~ConvertToMDMinMaxLocal() = default;
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name

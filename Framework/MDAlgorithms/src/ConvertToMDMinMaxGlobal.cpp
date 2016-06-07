@@ -33,7 +33,7 @@ ConvertToMDMinMaxGlobal::ConvertToMDMinMaxGlobal() {}
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-ConvertToMDMinMaxGlobal::~ConvertToMDMinMaxGlobal() {}
+ConvertToMDMinMaxGlobal::~ConvertToMDMinMaxGlobal() = default;
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name

@@ -204,7 +204,7 @@ AccumulateMD::AccumulateMD() {}
 /*
  * Destructor
 */
-AccumulateMD::~AccumulateMD() {}
+AccumulateMD::~AccumulateMD() = default;
 
 /// Algorithms name for identification. @see Algorithm::name
 const std::string AccumulateMD::name() const { return "AccumulateMD"; }

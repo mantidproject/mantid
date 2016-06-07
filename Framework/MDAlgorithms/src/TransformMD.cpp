@@ -26,7 +26,7 @@ TransformMD::TransformMD() {}
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-TransformMD::~TransformMD() {}
+TransformMD::~TransformMD() = default;
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name

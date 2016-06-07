@@ -18,7 +18,7 @@ BoxControllerSettingsAlgorithm::BoxControllerSettingsAlgorithm() {}
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-BoxControllerSettingsAlgorithm::~BoxControllerSettingsAlgorithm() {}
+BoxControllerSettingsAlgorithm::~BoxControllerSettingsAlgorithm() = default;
 
 //----------------------------------------------------------------------------------------------
 /** Add Box-controller-specific properties to this algorithm

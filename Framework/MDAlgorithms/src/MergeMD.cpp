@@ -24,7 +24,7 @@ MergeMD::MergeMD() {}
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-MergeMD::~MergeMD() {}
+MergeMD::~MergeMD() = default;
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name

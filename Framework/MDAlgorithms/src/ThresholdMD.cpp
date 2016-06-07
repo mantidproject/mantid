@@ -30,7 +30,7 @@ ThresholdMD::ThresholdMD() {}
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-ThresholdMD::~ThresholdMD() {}
+ThresholdMD::~ThresholdMD() = default;
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name

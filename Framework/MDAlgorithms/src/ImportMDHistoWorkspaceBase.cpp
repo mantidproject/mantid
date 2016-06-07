@@ -37,7 +37,7 @@ ImportMDHistoWorkspaceBase::ImportMDHistoWorkspaceBase() : m_bin_product(0) {}
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-ImportMDHistoWorkspaceBase::~ImportMDHistoWorkspaceBase() {}
+ImportMDHistoWorkspaceBase::~ImportMDHistoWorkspaceBase() = default;
 
 //----------------------------------------------------------------------------------------------
 /** Initalise generic importing properties.

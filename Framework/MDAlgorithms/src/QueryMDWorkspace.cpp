@@ -66,7 +66,7 @@ QueryMDWorkspace::QueryMDWorkspace() {}
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-QueryMDWorkspace::~QueryMDWorkspace() {}
+QueryMDWorkspace::~QueryMDWorkspace() = default;
 
 /// Initialise the properties
 void QueryMDWorkspace::init() {

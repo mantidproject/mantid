@@ -30,7 +30,7 @@ SplineSmoothing::SplineSmoothing()
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-SplineSmoothing::~SplineSmoothing() {}
+SplineSmoothing::~SplineSmoothing() = default;
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name

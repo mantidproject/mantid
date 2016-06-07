@@ -24,7 +24,7 @@ SaveZODS::SaveZODS() {}
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-SaveZODS::~SaveZODS() {}
+SaveZODS::~SaveZODS() = default;
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name

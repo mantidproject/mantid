@@ -29,7 +29,7 @@ CentroidPeaksMD2::CentroidPeaksMD2() {}
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-CentroidPeaksMD2::~CentroidPeaksMD2() {}
+CentroidPeaksMD2::~CentroidPeaksMD2() = default;
 
 //----------------------------------------------------------------------------------------------
 

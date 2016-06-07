@@ -37,7 +37,7 @@ SaveIsawQvector::SaveIsawQvector() {}
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-SaveIsawQvector::~SaveIsawQvector() {}
+SaveIsawQvector::~SaveIsawQvector() = default;
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name

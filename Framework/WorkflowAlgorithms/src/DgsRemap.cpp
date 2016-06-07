@@ -20,7 +20,7 @@ DgsRemap::DgsRemap() {}
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-DgsRemap::~DgsRemap() {}
+DgsRemap::~DgsRemap() = default;
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name

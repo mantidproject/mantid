@@ -26,7 +26,7 @@ DgsDiagnose::DgsDiagnose() {}
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-DgsDiagnose::~DgsDiagnose() {}
+DgsDiagnose::~DgsDiagnose() = default;
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name

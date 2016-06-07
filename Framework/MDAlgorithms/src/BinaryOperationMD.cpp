@@ -26,7 +26,7 @@ BinaryOperationMD::BinaryOperationMD() {}
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-BinaryOperationMD::~BinaryOperationMD() {}
+BinaryOperationMD::~BinaryOperationMD() = default;
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name

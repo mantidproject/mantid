@@ -35,7 +35,7 @@ ChangeQConvention::ChangeQConvention() {}
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-ChangeQConvention::~ChangeQConvention() {}
+ChangeQConvention::~ChangeQConvention() = default;
 
 //----------------------------------------------------------------------------------------------
 

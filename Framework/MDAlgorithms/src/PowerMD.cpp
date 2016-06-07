@@ -18,7 +18,7 @@ PowerMD::PowerMD() {}
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-PowerMD::~PowerMD() {}
+PowerMD::~PowerMD() = default;
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name

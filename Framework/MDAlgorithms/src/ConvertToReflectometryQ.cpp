@@ -155,7 +155,7 @@ ConvertToReflectometryQ::ConvertToReflectometryQ() {}
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-ConvertToReflectometryQ::~ConvertToReflectometryQ() {}
+ConvertToReflectometryQ::~ConvertToReflectometryQ() = default;
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name

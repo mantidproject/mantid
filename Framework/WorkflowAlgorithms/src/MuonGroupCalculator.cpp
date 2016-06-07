@@ -22,7 +22,7 @@ MuonGroupCalculator::MuonGroupCalculator(
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-MuonGroupCalculator::~MuonGroupCalculator() {}
+MuonGroupCalculator::~MuonGroupCalculator() = default;
 
 } // namespace WorkflowAlgorithms
 } // namespace Mantid

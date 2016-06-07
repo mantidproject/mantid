@@ -16,7 +16,7 @@ BooleanBinaryOperationMD::BooleanBinaryOperationMD() {}
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-BooleanBinaryOperationMD::~BooleanBinaryOperationMD() {}
+BooleanBinaryOperationMD::~BooleanBinaryOperationMD() = default;
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name

@@ -33,7 +33,7 @@ SlicingAlgorithm::SlicingAlgorithm()
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-SlicingAlgorithm::~SlicingAlgorithm() {}
+SlicingAlgorithm::~SlicingAlgorithm() = default;
 
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.

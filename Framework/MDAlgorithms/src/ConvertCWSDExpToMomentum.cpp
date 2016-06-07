@@ -31,7 +31,7 @@ ConvertCWSDExpToMomentum::ConvertCWSDExpToMomentum()
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-ConvertCWSDExpToMomentum::~ConvertCWSDExpToMomentum() {}
+ConvertCWSDExpToMomentum::~ConvertCWSDExpToMomentum() = default;
 
 //----------------------------------------------------------------------------------------------
 /** Init to declare property

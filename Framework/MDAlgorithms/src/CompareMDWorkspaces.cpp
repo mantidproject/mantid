@@ -39,7 +39,7 @@ CompareMDWorkspaces::CompareMDWorkspaces()
 //----------------------------------------------------------------------------------------------
 /** Destructor
 */
-CompareMDWorkspaces::~CompareMDWorkspaces() {}
+CompareMDWorkspaces::~CompareMDWorkspaces() = default;
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name

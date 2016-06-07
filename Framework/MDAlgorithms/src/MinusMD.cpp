@@ -23,7 +23,7 @@ MinusMD::MinusMD() {}
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-MinusMD::~MinusMD() {}
+MinusMD::~MinusMD() = default;
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name

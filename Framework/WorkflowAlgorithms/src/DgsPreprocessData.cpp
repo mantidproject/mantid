@@ -34,7 +34,7 @@ DgsPreprocessData::DgsPreprocessData() {}
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-DgsPreprocessData::~DgsPreprocessData() {}
+DgsPreprocessData::~DgsPreprocessData() = default;
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name

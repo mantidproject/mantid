@@ -18,7 +18,7 @@ WeightedMeanMD::WeightedMeanMD() {}
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-WeightedMeanMD::~WeightedMeanMD() {}
+WeightedMeanMD::~WeightedMeanMD() = default;
 
 //----------------------------------------------------------------------------------------------
 

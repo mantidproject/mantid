@@ -23,7 +23,7 @@ EvaluateMDFunction::EvaluateMDFunction() { useAlgorithm("EvaluateFunction"); }
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-EvaluateMDFunction::~EvaluateMDFunction() {}
+EvaluateMDFunction::~EvaluateMDFunction() = default;
 
 //----------------------------------------------------------------------------------------------
 

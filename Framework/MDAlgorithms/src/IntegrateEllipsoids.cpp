@@ -204,7 +204,7 @@ IntegrateEllipsoids::IntegrateEllipsoids() {}
 //---------------------------------------------------------------------
 /** Destructor
  */
-IntegrateEllipsoids::~IntegrateEllipsoids() {}
+IntegrateEllipsoids::~IntegrateEllipsoids() = default;
 
 //---------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name

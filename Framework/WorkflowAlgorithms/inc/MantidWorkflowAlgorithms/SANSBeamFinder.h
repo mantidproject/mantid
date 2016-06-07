@@ -36,10 +36,6 @@ namespace WorkflowAlgorithms {
 
 class DLLExport SANSBeamFinder : public API::Algorithm {
 public:
-  /// (Empty) Constructor
-  SANSBeamFinder() : API::Algorithm() {}
-  /// Virtual destructor
-  ~SANSBeamFinder() override {}
   /// Algorithm's name
   const std::string name() const override { return "SANSBeamFinder"; }
   /// Summary of algorithms purpose

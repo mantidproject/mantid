@@ -41,7 +41,7 @@ ConvertCWSDMDtoHKL::ConvertCWSDMDtoHKL() {}
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-ConvertCWSDMDtoHKL::~ConvertCWSDMDtoHKL() {}
+ConvertCWSDMDtoHKL::~ConvertCWSDMDtoHKL() = default;
 
 //----------------------------------------------------------------------------------------------
 /** Init

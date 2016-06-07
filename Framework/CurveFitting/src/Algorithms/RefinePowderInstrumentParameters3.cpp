@@ -31,7 +31,8 @@ RefinePowderInstrumentParameters3::RefinePowderInstrumentParameters3()
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-RefinePowderInstrumentParameters3::~RefinePowderInstrumentParameters3() {}
+RefinePowderInstrumentParameters3::~RefinePowderInstrumentParameters3() =
+    default;
 
 //----------------------------------------------------------------------------------------------
 /** Declare properties

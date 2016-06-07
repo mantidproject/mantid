@@ -26,7 +26,7 @@ SplineInterpolation::SplineInterpolation()
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-SplineInterpolation::~SplineInterpolation() {}
+SplineInterpolation::~SplineInterpolation() = default;
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name

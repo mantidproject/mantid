@@ -23,7 +23,7 @@ DivideMD::DivideMD() {}
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-DivideMD::~DivideMD() {}
+DivideMD::~DivideMD() = default;
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name

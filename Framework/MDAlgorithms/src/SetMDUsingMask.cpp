@@ -23,7 +23,7 @@ SetMDUsingMask::SetMDUsingMask() {}
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-SetMDUsingMask::~SetMDUsingMask() {}
+SetMDUsingMask::~SetMDUsingMask() = default;
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name

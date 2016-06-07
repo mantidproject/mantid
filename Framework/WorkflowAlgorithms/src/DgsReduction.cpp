@@ -35,7 +35,7 @@ DgsReduction::DgsReduction() {}
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-DgsReduction::~DgsReduction() {}
+DgsReduction::~DgsReduction() = default;
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name

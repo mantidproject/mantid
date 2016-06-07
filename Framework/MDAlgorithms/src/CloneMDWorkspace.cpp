@@ -25,7 +25,7 @@ CloneMDWorkspace::CloneMDWorkspace() {}
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-CloneMDWorkspace::~CloneMDWorkspace() {}
+CloneMDWorkspace::~CloneMDWorkspace() = default;
 
 //----------------------------------------------------------------------------------------------
 
