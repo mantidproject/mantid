@@ -85,7 +85,6 @@ public:
     }
     return outWS;
   }
-
 };
 
 /**
@@ -171,7 +170,6 @@ private:
  */
 class AdditionParserRange : public CommandParserBase<AdditionCommand> {
 public:
-
 private:
   boost::regex getRegex() const override {
     return boost::regex("^\\s*[0-9]+\\s*\\-\\s*[0-9]+\\s*$");
@@ -184,7 +182,6 @@ private:
  */
 class AdditionParser : public CommandParser {
 public:
-
   Command *interpret(const std::string &instruction) const override {
     Command *command = nullptr;
     boost::regex ex("^\\s*[0-9]+\\s*\\+\\s*[0-9]+\\s*$");
@@ -211,7 +208,6 @@ public:
  */
 class CropParserRange : public CommandParserBase<CropCommand> {
 public:
-
 private:
   boost::regex getRegex() const override {
     return boost::regex("^\\s*[0-9]+\\s*:\\s*[0-9]+\\s*$");
