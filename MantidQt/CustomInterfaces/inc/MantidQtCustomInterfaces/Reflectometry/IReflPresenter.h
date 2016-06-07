@@ -33,7 +33,7 @@ class IReflPresenter {
 public:
   virtual ~IReflPresenter(){};
 
-  enum Flag { SearchFlag, ICATSearchCompleteFlag, TransferFlag };
+  enum Flag { SearchFlag, ICATSearchCompleteFlag, TransferFlag, ExitFlag };
 
   // Tell the presenter something happened
   virtual void notify(IReflPresenter::Flag flag) = 0;

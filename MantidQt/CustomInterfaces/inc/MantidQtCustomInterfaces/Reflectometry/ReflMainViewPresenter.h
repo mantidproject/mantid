@@ -73,6 +73,7 @@ protected:
   void populateSearch(Mantid::API::IAlgorithm_sptr searchAlg);
   void transfer();
   void pushCommands();
+  void checkForUnsavedChangesOnExit();
 
 private:
   static const std::string LegacyTransferMethod;

@@ -64,8 +64,8 @@ namespace CustomInterfaces {
 */
 GenericDataProcessorPresenter::GenericDataProcessorPresenter(
     const DataProcessorWhiteList &whitelist,
-    const std::map<std::string, DataProcessorPreprocessingAlgorithm> &
-        preprocessMap,
+    const std::map<std::string, DataProcessorPreprocessingAlgorithm>
+        &preprocessMap,
     const DataProcessorProcessingAlgorithm &processor,
     const DataProcessorPostprocessingAlgorithm &postprocessor)
     : WorkspaceObserver(), m_view(nullptr), m_progressView(nullptr),
@@ -983,6 +983,9 @@ void GenericDataProcessorPresenter::notify(DataProcessorPresenter::Flag flag) {
   case DataProcessorPresenter::PlotGroupFlag:
     plotGroup();
     break;
+  case DataProcessorPresenter::CheckUnsavedChangesOnExitFlag:
+    checkForUnsavedChanges();
+    break;
   }
   // Not having a 'default' case is deliberate. gcc issues a warning if there's
   // a flag we aren't handling.
@@ -1010,6 +1013,17 @@ void GenericDataProcessorPresenter::saveTableAs() {
   if (!userString.empty()) {
     m_wsName = userString;
     saveTable();
+  }
+}
+
+void GenericDataProcessorPresenter::checkForUnsavedChanges() {
+  if (m_tableDirty && m_options["WarnDiscardChanges"].toBool()) {
+    if (m_view->askUserYesNo("Your current table has unsaved changes. Are you "
+                             "sure you want to discard them?",
+                             "Start New Table?"))
+      return;
+    else
+      exportTable();
   }
 }
 

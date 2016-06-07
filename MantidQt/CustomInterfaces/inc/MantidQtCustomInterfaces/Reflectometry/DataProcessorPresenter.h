@@ -70,7 +70,8 @@ public:
     ImportTableFlag,
     ExportTableFlag,
     PlotRowFlag,
-    PlotGroupFlag
+    PlotGroupFlag,
+    CheckUnsavedChangesOnExitFlag
   };
 
   // Tell the presenter something happened

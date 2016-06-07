@@ -38,13 +38,11 @@ Initialise the Interface
 */
 void QtReflMainView::initLayout() {
   ui.setupUi(this);
-
   ui.buttonTransfer->setDefaultAction(ui.actionTransfer);
 
   // Expand the process runs column at the expense of the search column
   ui.splitterTables->setStretchFactor(0, 0);
   ui.splitterTables->setStretchFactor(1, 1);
-
   ReflGenericDataProcessorPresenterFactory presenterFactory;
 
   boost::shared_ptr<DataProcessorPresenter> processorPresenter =
@@ -75,12 +73,31 @@ void QtReflMainView::initLayout() {
   connect(qDataProcessorWidget,
           SIGNAL(runAsPythonScript(const QString &, bool)), this,
           SIGNAL(runAsPythonScript(const QString &, bool)));
-
+  connect(this, SIGNAL(closeWindow()), this,
+          SLOT(checkUnsavedChangesBeforeExit()));
   m_presenter = boost::make_shared<ReflMainViewPresenter>(
       this /*main view*/,
       this /*currently this concrete view is also responsibile for prog reporting*/,
       processorPresenter /*the table presenter*/);
   m_algoRunner = boost::make_shared<MantidQt::API::AlgorithmRunner>(this);
+}
+
+/**
+* Overriden from QWidget's closeEvent
+* @param event : type of Close event that needs to be handled
+*
+*/
+void QtReflMainView::closeEvent(QCloseEvent *event) {
+  emit closeWindow();
+  event->accept();
+}
+
+/**
+* Notifying m_presenter that user wishes to close the window
+* so we need to check for any unsaved changes in the processing table.
+*/
+void QtReflMainView::checkUnsavedChangesBeforeExit() {
+  m_presenter->notify(IReflPresenter::ExitFlag);
 }
 
 /**

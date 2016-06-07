@@ -122,6 +122,8 @@ protected:
   size_t numRowsInGroup(int groupId) const;
   // Validate rows
   bool rowsValid(std::set<int> rows);
+  // Check for unsaved changes
+  void checkForUnsavedChanges();
   // Validate a row
   void validateRow(int rowNo) const;
   // insert a row in the model before the given index

@@ -87,6 +87,14 @@ public:
   boost::shared_ptr<MantidQt::API::AlgorithmRunner>
   getAlgorithmRunner() const override;
 
+  // signal emitted when interface is closed
+signals:
+  void closeWindow();
+  // override of QWidget's closeEvent() as we want
+  // to check for unsaved changes before exiting the interface.
+protected:
+  void closeEvent(QCloseEvent *event) override;
+
 private:
   // initialise the interface
   void initLayout() override;
@@ -105,15 +113,15 @@ private:
   MantidWidgets::SlitCalculator *m_calculator;
   // Command adapters
   std::vector<DataProcessorCommandAdapter_uptr> m_commands;
-
 private slots:
   void on_actionSearch_triggered();
-  void on_actionTransfer_triggered();
   void on_actionHelp_triggered();
+  void on_actionTransfer_triggered();
   void slitCalculatorTriggered();
   void icatSearchComplete();
   void instrumentChanged(int index);
   void showSearchContextMenu(const QPoint &pos);
+  void checkUnsavedChangesBeforeExit();
 };
 
 } // namespace Mantid
