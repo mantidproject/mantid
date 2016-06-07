@@ -8,13 +8,16 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/FuncMinimizerFactory.h"
 #include "MantidAPI/IFuncMinimizer.h"
+#include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidCurveFitting/Algorithms/Fit.h"
+#include "MantidDataObjects/TableWorkspace.h"
 
 using namespace Mantid;
 using namespace Mantid::CurveFitting;
 using namespace Mantid::CurveFitting::Algorithms;
 using namespace Mantid::API;
+using namespace Mantid::DataObjects;
 
 namespace {
 class TestMinimizer : public API::IFuncMinimizer {
@@ -614,6 +617,62 @@ public:
 	  TS_ASSERT_DELTA(out->getParameter("f1.w"), 0.5, 0.0001);
   }
 
+  void test_function_crystal_field_peaks_fit() {
+
+    auto data = TableWorkspace_sptr(new TableWorkspace);
+    data->addColumn("double", "Energy");
+    data->addColumn("double", "Intensity");
+
+    TableRow row = data->appendRow();
+    row << 0.0 << 2.74937;
+    row = data->appendRow();
+    row << 29.3261 << 0.7204;
+    row = data->appendRow();
+    row << 44.3412 << 0.429809;
+
+    Fit fit;
+    fit.initialize();
+    fit.setProperty("Function",
+                    "name=CrystalFieldPeaks,Ion=Ce,Symmetry=Ci,Temperature="
+                    "44,ToleranceEnergy=1e-10,ToleranceIntensity=0.001,"
+                    "BmolX=0,BmolY=0,BmolZ=0,BextX=0,BextY=0,BextZ=0,B20=0."
+                    "37,B21=0,B22=3.9,B40=-0.03,B41=0,B42=-0.11,B43=0,B44=-"
+                    "0.12,B60=0,B61=0,B62=0,B63=0,B64=0,B65=0,B66=0,IB21=0,"
+                    "IB22=0,IB41=0,IB42=0,IB43=0,IB44=0,IB61=0,IB62=0,IB63="
+                    "0,IB64=0,IB65=0,IB66=0,IntensityScaling=1");
+
+    fit.setProperty("InputWorkspace", data);
+    fit.setProperty("DataColumn", "Energy");
+    fit.setProperty("DataColumn_1", "Intensity");
+    fit.setProperty("Output", "out");
+    fit.execute();
+
+    ITableWorkspace_sptr output =
+        AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(
+            "out_Workspace");
+    TS_ASSERT(output);
+    if (output) {
+      TS_ASSERT_EQUALS(output->rowCount(), 3);
+      TS_ASSERT_EQUALS(output->columnCount(), 4);
+      auto column = output->getColumn("Energy");
+      TS_ASSERT_DELTA(column->toDouble(0), 0.0, 0.0001);
+      TS_ASSERT_DELTA(column->toDouble(1), 29.3261, 0.0001);
+      TS_ASSERT_DELTA(column->toDouble(2), 44.3412, 0.0001);
+      column = output->getColumn("Intensity");
+      TS_ASSERT_DELTA(column->toDouble(0), 2.74937, 0.0001);
+      TS_ASSERT_DELTA(column->toDouble(1), 0.7204, 0.0001);
+      TS_ASSERT_DELTA(column->toDouble(2), 0.429809, 0.0001);
+      column = output->getColumn("Energy_calc");
+      TS_ASSERT_DELTA(column->toDouble(0), 0.0, 0.0001);
+      TS_ASSERT_DELTA(column->toDouble(1), 29.3261, 0.0001);
+      TS_ASSERT_DELTA(column->toDouble(2), 44.3412, 0.0001);
+      column = output->getColumn("Intensity_calc");
+      TS_ASSERT_DELTA(column->toDouble(0), 2.74937, 0.0001);
+      TS_ASSERT_DELTA(column->toDouble(1), 0.7204, 0.0001);
+      TS_ASSERT_DELTA(column->toDouble(2), 0.429809, 0.0001);
+    }
+
+  }
 };
 
 class FitTestPerformance : public CxxTest::TestSuite {
