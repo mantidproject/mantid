@@ -8,6 +8,7 @@
 #include "MantidKernel/ArrayBoundedValidator.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidAPI/WorkspaceFactory.h"
 
 namespace mpi = boost::mpi;
 
