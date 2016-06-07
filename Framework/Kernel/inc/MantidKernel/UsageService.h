@@ -143,7 +143,7 @@ EXTERN_MANTID_KERNEL template class MANTID_KERNEL_DLL
 typedef Mantid::Kernel::SingletonHolder<UsageServiceImpl>
     UsageService;
 
-} // namespace API
+} // namespace Kernel
 } // namespace Mantid
 
 #endif /* MANTID_KERNEL_USAGESERVICE_H_ */
