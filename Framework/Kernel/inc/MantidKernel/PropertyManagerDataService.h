@@ -46,7 +46,6 @@ private:
   ~PropertyManagerDataServiceImpl() override = default;
 };
 
-
 EXTERN_MANTID_KERNEL template class MANTID_KERNEL_DLL Mantid::Kernel::SingletonHolder<PropertyManagerDataServiceImpl>;
 typedef  Mantid::Kernel::SingletonHolder<
     PropertyManagerDataServiceImpl> PropertyManagerDataService;

@@ -303,5 +303,5 @@ int UsageServiceImpl::sendReport(const std::string &message,
 }
 
 template class Mantid::Kernel::SingletonHolder<UsageServiceImpl>;
-} // namespace API
+} // namespace Kernel
 } // namespace Mantid

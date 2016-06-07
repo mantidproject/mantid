@@ -27,3 +27,9 @@ MDTransfFactoryImpl::create(const std::string &className) const {
 
 } // namespace MDAlgorithms
 } // namespace Mantid
+
+namespace Mantid {
+namespace Kernel {
+template class Mantid::Kernel::SingletonHolder<Mantid::MDAlgorithms::MDTransfFactoryImpl>;
+}
+}

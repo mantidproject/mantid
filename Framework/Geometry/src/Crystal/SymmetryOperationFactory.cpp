@@ -89,3 +89,9 @@ SymmetryOperationFactoryImpl::SymmetryOperationFactoryImpl() : m_prototypes() {
 
 } // namespace Geometry
 } // namespace Mantid
+
+namespace Mantid {
+namespace Kernel {
+template class Mantid::Kernel::SingletonHolder<Mantid::Geometry::SymmetryOperationFactoryImpl>;
+}
+}
