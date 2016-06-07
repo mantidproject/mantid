@@ -700,8 +700,8 @@ void SCDCalibratePanels::exec() {
   if (!GoodStart(peaksWs, a, b, c, alpha, beta, gamma, tolerance)) {
     g_log.warning() << "**** Indexing is NOT compatible with given lattice "
                        "parameters******\n";
-    g_log.warning() << "        Index with conventional orientation matrix???"
-                    << '\n';
+    g_log.warning()
+        << "        Index with conventional orientation matrix???\n";
   }
 
   //----------- Initialize peaksWorkspace, initial parameter values

@@ -122,8 +122,7 @@ std::vector<double> RadiusSum::processInstrumentRadiusSum() {
   std::vector<double> accumulator(num_bins, 0);
 
   g_log.debug() << "For every detector in the image get its position "
-                << " and sum up all the counts inside the related spectrum"
-                << '\n';
+                << " and sum up all the counts inside the related spectrum\n";
   for (size_t i = 0; i < inputWS->getNumberHistograms(); i++) {
     try {
       auto det = inputWS->getDetector(i);
@@ -179,8 +178,7 @@ std::vector<double> RadiusSum::processNumericImageRadiusSum() {
       x_pos[ind] = (refX[ind] + refX[ind + 1]) / 2.0;
   }
 
-  g_log.debug() << "For every pixel define its bin position and sum them up"
-                << '\n';
+  g_log.debug() << "For every pixel define its bin position and sum them up\n";
   // for each row in the image
   for (size_t i = 0; i < inputWS->getNumberHistograms(); i++) {
 
@@ -233,8 +231,7 @@ void RadiusSum::cacheInputPropertyValues() {
     centre = V3D(centre_aux[0], centre_aux[1], centre_aux[2]);
 
   g_log.debug()
-      << "Copy the remaning properties: MinRadius, MaxRadius and NumBins"
-      << '\n';
+      << "Copy the remaning properties: MinRadius, MaxRadius and NumBins\n";
   min_radius = getProperty("MinRadius");
   max_radius = getProperty("MaxRadius");
   num_bins = getProperty("NumBins");
@@ -262,7 +259,7 @@ void RadiusSum::inputValidationSanityCheck() {
                    "image or instrument\n";
   centerIsInsideLimits(getProperty("centre"), boundary_limits);
 
-  g_log.debug() << "Recalculate MaxRadius if default value is given" << '\n';
+  g_log.debug() << "Recalculate MaxRadius if default value is given\n";
   if (max_radius > 0.9 * std::numeric_limits<double>::max()) {
     max_radius = getMaxDistance(centre, boundary_limits);
     g_log.notice() << "RadiusMax automatically calculated and set to "
@@ -270,8 +267,7 @@ void RadiusSum::inputValidationSanityCheck() {
   }
 
   g_log.debug()
-      << "Check number of bins to alert user if many bins will end up empty"
-      << '\n';
+      << "Check number of bins to alert user if many bins will end up empty\n";
   numBinsIsReasonable();
 }
 
@@ -585,8 +581,7 @@ double RadiusSum::getMinBinSizeForNumericImage(API::MatrixWorkspace_sptr inWS) {
 void RadiusSum::normalizeOutputByRadius(std::vector<double> &values,
                                         double exp_power) {
   g_log.debug()
-      << "Normalization of the output in relation to the 'radius' (distance)"
-      << '\n';
+      << "Normalization of the output in relation to the 'radius' (distance)\n";
 
   // the radius can be defined as:
   // radius_min + bin_size/2 + n * bin_size ; for 0<= n <= num_bins
@@ -634,7 +629,7 @@ double RadiusSum::getMaxDistance(const V3D &centre,
 
 void RadiusSum::setUpOutputWorkspace(std::vector<double> &values) {
 
-  g_log.debug() << "Output calculated, setting up the output workspace" << '\n';
+  g_log.debug() << "Output calculated, setting up the output workspace\n";
 
   API::MatrixWorkspace_sptr outputWS = API::WorkspaceFactory::Instance().create(
       inputWS, 1, values.size() + 1, values.size());

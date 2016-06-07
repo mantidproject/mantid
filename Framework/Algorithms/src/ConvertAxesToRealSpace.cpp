@@ -186,7 +186,7 @@ void ConvertAxesToRealSpace::exec() {
   }
 
   g_log.warning() << "Could not find detector for " << failedCount
-                  << " spectra, see the debug log for more details." << '\n';
+                  << " spectra, see the debug log for more details.\n";
 
   // set up the axes on the output workspace
   MantidVecPtr x, y;

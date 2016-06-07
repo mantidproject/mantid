@@ -627,14 +627,13 @@ bool ApplicationWindow::shouldWeShowFirstTimeSetup(
       const Mantid::Kernel::InstrumentInfo &instrumentInfo =
           config.getInstrument(instrument);
       g_log.information() << "Default facility '" << facilityInfo.name()
-                          << "', instrument '" << instrumentInfo.name() << "'"
-                          << '\n';
+                          << "', instrument '" << instrumentInfo.name()
+                          << "'\n";
     } catch (Mantid::Kernel::Exception::NotFoundError &) {
       // failed to find the facility or instrument
       g_log.error() << "Could not find your default facility '" << facility
                     << "' or instrument '" << instrument
-                    << "' in facilities.xml, showing please select again."
-                    << '\n';
+                    << "' in facilities.xml, showing please select again.\n";
       return true;
     }
   }

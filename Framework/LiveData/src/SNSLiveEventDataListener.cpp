@@ -140,16 +140,15 @@ bool SNSLiveEventDataListener::connect(const Poco::Net::SocketAddress &address)
     try {
       m_socket.connect(tempAddress); // BLOCKING connect
     } catch (...) {
-      g_log.error() << "Connection to " << tempAddress.toString() << " failed."
-                    << '\n';
+      g_log.error() << "Connection to " << tempAddress.toString()
+                    << " failed.\n";
       return false;
     }
   } else {
     try {
       m_socket.connect(address); // BLOCKING connect
     } catch (...) {
-      g_log.debug() << "Connection to " << address.toString() << " failed."
-                    << '\n';
+      g_log.debug() << "Connection to " << address.toString() << " failed.\n";
       return false;
     }
   }
@@ -478,11 +477,11 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::BeamMonitorPkt &pkt) {
     if (monitorID > 5) {
       // Currently, we only handle monitors 0-5.  At the present time, that's
       // sufficient.
-      g_log.error() << "Mantid cannot handle monitor ID's higher than 5.  If "
-                    << monitorID << " is actually valid, then an appropriate "
-                                    "entry must be made to the "
-                    << " ADDABLE list at the top of Framework/API/src/Run.cpp"
-                    << '\n';
+      g_log.error()
+          << "Mantid cannot handle monitor ID's higher than 5.  If "
+          << monitorID << " is actually valid, then an appropriate "
+                          "entry must be made to the "
+          << " ADDABLE list at the top of Framework/API/src/Run.cpp\n";
     } else {
       std::string monName("monitor");
       monName += static_cast<char>(
@@ -860,11 +859,10 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::VariableU32Pkt &pkt) {
         m_nameMap.find(std::make_pair(devId, pvId));
 
     if (it == m_nameMap.end()) {
-      g_log.error()
-          << "Ignoring variable value packet for device " << devId
-          << ", variable " << pvId
-          << " because we haven't received a device descriptor packet for it."
-          << '\n';
+      g_log.error() << "Ignoring variable value packet for device " << devId
+                    << ", variable " << pvId
+                    << " because we haven't received a device descriptor "
+                       "packet for it.\n";
     } else {
       {
         std::lock_guard<std::mutex> scopedLock(m_mutex);
@@ -911,11 +909,10 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::VariableDoublePkt &pkt) {
         m_nameMap.find(std::make_pair(devId, pvId));
 
     if (it == m_nameMap.end()) {
-      g_log.error()
-          << "Ignoring variable value packet for device " << devId
-          << ", variable " << pvId
-          << " because we haven't received a device descriptor packet for it."
-          << '\n';
+      g_log.error() << "Ignoring variable value packet for device " << devId
+                    << ", variable " << pvId
+                    << " because we haven't received a device descriptor "
+                       "packet for it.\n";
     } else {
       {
         std::lock_guard<std::mutex> scopedLock(m_mutex);
@@ -965,11 +962,10 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::VariableStringPkt &pkt) {
         m_nameMap.find(std::make_pair(devId, pvId));
 
     if (it == m_nameMap.end()) {
-      g_log.error()
-          << "Ignoring variable value packet for device " << devId
-          << ", variable " << pvId
-          << " because we haven't received a device descriptor packet for it."
-          << '\n';
+      g_log.error() << "Ignoring variable value packet for device " << devId
+                    << ", variable " << pvId
+                    << " because we haven't received a device descriptor "
+                       "packet for it.\n";
     } else {
       {
         std::lock_guard<std::mutex> scopedLock(m_mutex);
@@ -1076,7 +1072,7 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::DeviceDescriptorPkt &pkt) {
           pvName = "<UNKNOWN>";
         }
         g_log.warning() << "Ignoring process variable " << pvName
-                        << " because it was missing required fields." << '\n';
+                        << " because it was missing required fields.\n";
       } else {
         // Check the nameMap - we may have already received a description for
         // this

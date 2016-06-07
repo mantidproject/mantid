@@ -91,7 +91,7 @@ public:
       // Check it's a valid workspace
       TS_ASSERT(buffer)
     }
-    std::cout << tim << " to call extactData() " << num << " times" << '\n';
+    std::cout << tim << " to call extactData() " << num << " times\n";
   }
 
 private:

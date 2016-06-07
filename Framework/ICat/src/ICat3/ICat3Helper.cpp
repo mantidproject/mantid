@@ -45,8 +45,8 @@ int CICatHelper::doSearch(ICATPortBindingProxy &icat,
   }
   clock_t end = clock();
   float diff = float(end - start) / CLOCKS_PER_SEC;
-  g_log.information() << " Time taken to do  search is " << diff << "  seconds "
-                      << '\n';
+  g_log.information() << " Time taken to do  search is " << diff
+                      << "  seconds \n";
   return ret_advsearch;
 }
 
@@ -395,8 +395,7 @@ void CICatHelper::doMyDataSearch(API::ITableWorkspace_sptr &ws_sptr) {
   }
   if (response.return_.empty()) {
     g_log.information()
-        << "ICat Mydata search is complete.There are no results to display"
-        << '\n';
+        << "ICat Mydata search is complete.There are no results to display\n";
     return;
   }
   // save response to a table workspace

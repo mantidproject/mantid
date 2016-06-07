@@ -217,8 +217,7 @@ bool TOPAZLiveEventDataListener::connect(
   try {
     m_tcpSocket.connect(address); // BLOCKING connect
   } catch (...) {
-    g_log.error() << "Connection to " << address.toString() << " failed."
-                  << '\n';
+    g_log.error() << "Connection to " << address.toString() << " failed.\n";
     return false;
   }
 
@@ -348,8 +347,8 @@ void TOPAZLiveEventDataListener::run() {
           (hdr->iTotalBytes - hdr->Spare1) / sizeof(NEUTRON_EVENT);
 
       g_log.debug() << "Received UDP Packet.  " << bytesRead << " bytes  "
-                    << num_pulse_ids << " pulses  " << num_events << " events"
-                    << '\n';
+                    << num_pulse_ids << " pulses  " << num_events
+                    << " events\n";
 
       PULSE_ID_PTR pid =
           reinterpret_cast<PULSE_ID_PTR>(m_udpBuf + sizeof(COMMAND_HEADER));

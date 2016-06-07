@@ -152,8 +152,8 @@ public:
         TS_ASSERT_DELTA(y, 0.0, 1.0E-5);
         if (fabs(y) > 1.0E-5) {
           errorcounts++;
-          std::cout << "Workspace Index " << iws << " has a wrong set on masks"
-                    << '\n';
+          std::cout << "Workspace Index " << iws
+                    << " has a wrong set on masks\n";
         }
       }
     }

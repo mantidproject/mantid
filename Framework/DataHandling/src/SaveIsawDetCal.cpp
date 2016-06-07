@@ -136,9 +136,9 @@ void SaveIsawDetCal::exec() {
     out.open(filename.c_str(), std::ios::app);
   } else {
     out.open(filename.c_str());
-    out << "# NEW CALIBRATION FILE FORMAT (in NeXus/SNS coordinates):" << '\n';
+    out << "# NEW CALIBRATION FILE FORMAT (in NeXus/SNS coordinates):\n";
     out << "# Lengths are in centimeters.\n";
-    out << "# Base and up give directions of unit vectors for a local " << '\n';
+    out << "# Base and up give directions of unit vectors for a local \n";
     out << "# x,y coordinate system on the face of the detector.\n";
     out << "#\n";
     out << "#\n";

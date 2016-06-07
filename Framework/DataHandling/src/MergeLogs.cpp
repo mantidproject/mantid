@@ -56,8 +56,8 @@ void Merge2WorkspaceLogs::exec() {
   }
 
   if (resetlogvalue && fabs(logvalue1 - logvalue2) < 1.0E-9) {
-    g_log.warning() << "User re-defined log values of two logs are very close!"
-                    << '\n';
+    g_log.warning()
+        << "User re-defined log values of two logs are very close!\n";
   }
 
   // 3. Merge log
@@ -162,9 +162,8 @@ void Merge2WorkspaceLogs::mergeLogs(std::string ilogname1,
   // 3. Check and add new log
   int newlogsize = rp->size();
   if (size_t(newlogsize) != (times1.size() + times2.size())) {
-    g_log.error()
-        << "Resulted log size is not equal to the sum of two source log sizes"
-        << '\n';
+    g_log.error() << "Resulted log size is not equal to the sum of two source "
+                     "log sizes\n";
     throw;
   }
 

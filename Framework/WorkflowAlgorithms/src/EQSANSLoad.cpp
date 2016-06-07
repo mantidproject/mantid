@@ -451,7 +451,7 @@ void EQSANSLoad::exec() {
                              "or an input workspace must be provided");
   } else if (fileName.size() > 0 && inputEventWS) {
     g_log.error() << "EQSANSLoad input error: Either a valid file path or an "
-                     "input workspace must be provided, but not both" << '\n';
+                     "input workspace must be provided, but not both\n";
     throw std::runtime_error("EQSANSLoad input error: Either a valid file path "
                              "or an input workspace must be provided, but not "
                              "both");
@@ -553,10 +553,10 @@ void EQSANSLoad::exec() {
     sdd = sample_det_dist;
   } else {
     if (!dataWS->run().hasProperty("detectorZ")) {
-      g_log.error() << "Could not determine Z position: the "
-                       "SampleDetectorDistance property was not set "
-                       "and the run logs do not contain the detectorZ property"
-                    << '\n';
+      g_log.error()
+          << "Could not determine Z position: the "
+             "SampleDetectorDistance property was not set "
+             "and the run logs do not contain the detectorZ property\n";
       throw std::invalid_argument(
           "Could not determine Z position: stopping execution");
     }
@@ -588,8 +588,7 @@ void EQSANSLoad::exec() {
   mvAlg->setProperty("Z", sdd / 1000.0);
   mvAlg->setProperty("RelativePosition", false);
   mvAlg->executeAsChildAlg();
-  g_log.information() << "Moving detector to " << sdd / 1000.0 << " meters"
-                      << '\n';
+  g_log.information() << "Moving detector to " << sdd / 1000.0 << " meters\n";
   m_output_message += "   Detector position: " +
                       Poco::NumberFormatter::format(sdd / 1000.0, 3) + " m\n";
 
@@ -631,8 +630,7 @@ void EQSANSLoad::exec() {
   if (use_config) {
     if (m_moderator_position > -13.0)
       g_log.error()
-          << "Moderator position seems close to the sample, please check"
-          << '\n';
+          << "Moderator position seems close to the sample, please check\n";
     g_log.information() << "Moving moderator to " << m_moderator_position
                         << '\n';
     m_output_message += "   Moderator position: " +

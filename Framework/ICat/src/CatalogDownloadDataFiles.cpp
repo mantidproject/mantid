@@ -107,7 +107,7 @@ void CatalogDownloadDataFiles::exec() {
     } else {
       g_log.information()
           << "Unable to open file (" << *fileName
-          << ") from archive. Beginning to download over Internet." << '\n';
+          << ") from archive. Beginning to download over Internet.\n";
       progress(prog / 2, "getting the url ....");
       // Obtain URL for related file to download from net.
       const std::string url = catalogInfoService->getDownloadURL(*fileID);

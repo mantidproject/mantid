@@ -324,7 +324,7 @@ public:
       spec->setDetectorID(detid_t(i));
     }
     std::cout << tim << " to set all detector IDs for " << nhist
-              << " spectra, using the ISpectrum method (in parallel)." << '\n';
+              << " spectra, using the ISpectrum method (in parallel).\n";
   }
 };
 

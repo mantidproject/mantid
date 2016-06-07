@@ -329,7 +329,7 @@ void LoadFITS::loadHeader(const std::string &filePath, FITSInfo &header) {
                  "offset (" +
                      m_headerOffsetKey + " = " +
                      header.headerKeys[m_headerOffsetKey] +
-                     ") has a fractional part, and it will be ignored!" << '\n';
+                     ") has a fractional part, and it will be ignored!\n";
         }
         header.offset = static_cast<int>(doff);
       } catch (std::exception &e) {

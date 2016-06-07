@@ -151,8 +151,7 @@ void CentroidPeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
                             << CoordinatesToUse << '\n';
       } else {
         g_log.information() << "Peak " << i << " at " << pos
-                            << " had no signal, and could not be centroided."
-                            << '\n';
+                            << " had no signal, and could not be centroided.\n";
       }
     }
 

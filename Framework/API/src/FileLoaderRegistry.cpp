@@ -99,7 +99,7 @@ FileLoaderRegistryImpl::chooseLoader(const std::string &filename) const {
   using Kernel::FileDescriptor;
   using Kernel::NexusDescriptor;
 
-  m_log.debug() << "Trying to find loader for '" << filename << "'" << '\n';
+  m_log.debug() << "Trying to find loader for '" << filename << "'\n";
 
   IAlgorithm_sptr bestLoader;
   if (NexusDescriptor::isHDF(filename)) {

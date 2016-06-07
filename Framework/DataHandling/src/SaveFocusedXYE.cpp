@@ -89,7 +89,7 @@ void SaveFocusedXYE::exec() {
 
   int startingbank = getProperty("StartAtBankNumber");
   if (startingbank < 0) {
-    g_log.error() << "Starting bank number cannot be less than 0. " << '\n';
+    g_log.error() << "Starting bank number cannot be less than 0. \n";
     throw std::invalid_argument("Incorrect starting bank number");
   }
   bool split = getProperty("SplitFiles");
@@ -286,8 +286,7 @@ void SaveFocusedXYE::writeXYESpectraHeader(std::ostream &os, size_t index1,
   UNUSED_ARG(flightPath);
   UNUSED_ARG(tth);
   os << m_comment << " Data for spectra :" << index1 << '\n';
-  os << m_comment << " " << caption << "              Y                 E"
-     << '\n';
+  os << m_comment << " " << caption << "              Y                 E\n";
 }
 
 /// Write spectra MAUD header

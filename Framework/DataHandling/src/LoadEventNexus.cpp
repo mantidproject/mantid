@@ -1274,9 +1274,8 @@ void LoadEventNexus::setTopEntryName() {
       }
     }
   } catch (const std::exception &) {
-    g_log.error()
-        << "Unable to determine name of top level NXentry - assuming \"entry\"."
-        << '\n';
+    g_log.error() << "Unable to determine name of top level NXentry - assuming "
+                     "\"entry\".\n";
     m_top_entry_name = "entry";
   }
 }
@@ -1370,9 +1369,9 @@ void LoadEventNexus::exec() {
     const bool monitorsAsEvents = getProperty("MonitorsAsEvents");
 
     if (monitorsAsEvents && !this->hasEventMonitors()) {
-      g_log.warning() << "The property MonitorsAsEvents has been enabled but "
-                         "this file does not seem to have monitors with events."
-                      << '\n';
+      g_log.warning()
+          << "The property MonitorsAsEvents has been enabled but "
+             "this file does not seem to have monitors with events.\n";
     }
     if (monitorsAsEvents) {
       // no matter whether the file has events or not, the user has requested to

@@ -40,7 +40,7 @@ public:
       status = WEXITSTATUS(status);
 
     if (status != 0) {
-      std::cout << "Skipping test since '" << cmdstring << "' FAILED!" << '\n';
+      std::cout << "Skipping test since '" << cmdstring << "' FAILED!\n";
       return true;
     }
     return false;
@@ -93,7 +93,7 @@ public:
                                                  "download_time.txt");
     }
     ofs << "Time taken to  download files with investigation id 12576918 is "
-        << std::fixed << std::setprecision(2) << diff << " seconds" << '\n';
+        << std::fixed << std::setprecision(2) << diff << " seconds\n";
 
     ICatTestHelper::logout();
 
@@ -151,7 +151,7 @@ public:
                                                  "download_time.txt");
     }
     ofs << "Time taken to download files with investigation id 24070400 is "
-        << std::fixed << std::setprecision(2) << diff << " seconds" << '\n';
+        << std::fixed << std::setprecision(2) << diff << " seconds\n";
     // ofs.close();
 
     ICatTestHelper::logout();
@@ -209,7 +209,7 @@ public:
                                                  "download_time.txt");
     }
     ofs << "Time taken to download files with investigation id 24022007 is "
-        << std::fixed << std::setprecision(2) << diff << " seconds" << '\n';
+        << std::fixed << std::setprecision(2) << diff << " seconds\n";
 
     ICatTestHelper::logout();
 

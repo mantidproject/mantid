@@ -633,8 +633,8 @@ std::pair<double, double> LoadILLSANS::calculateQMaxQMin() {
                     << '\n';
   }
 
-  g_log.debug() << "Calculating Qmin Qmax. Done : [" << min << "," << max << "]"
-                << '\n';
+  g_log.debug() << "Calculating Qmin Qmax. Done : [" << min << "," << max
+                << "]\n";
 
   return std::pair<double, double>(min, max);
 }

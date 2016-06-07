@@ -3113,8 +3113,8 @@ MultiLayer *MantidUI::plot1D(const QMultiMap<QString, int> &toPlot,
         g->setDistribution(firstCurve->isDistribution());
       }
     } catch (Mantid::Kernel::Exception::NotFoundError &) {
-      g_log.warning() << "Workspace " << it.key().toStdString() << " not found"
-                      << '\n';
+      g_log.warning() << "Workspace " << it.key().toStdString()
+                      << " not found\n";
     } catch (std::exception &ex) {
       g_log.warning() << ex.what() << '\n';
     }

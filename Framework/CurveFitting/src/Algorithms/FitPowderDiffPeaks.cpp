@@ -246,10 +246,9 @@ void FitPowderDiffPeaks::exec() {
     g_log.information() << "Fit (Single) Peaks In Robust Mode.\n";
     fitPeaksRobust();
   } else if (m_fitMode == TRUSTINPUTFIT) {
-    g_log.information()
-        << "Fit Peaks In Trust Mode.  Possible to fit overlapped peaks."
-        << '\n';
-    fitPeaksWithGoodStartingValues();
+    g_log.information() << "Fit Peaks In Trust Mode.  Possible to fit "
+                           "overlapped "
+                           "peaks.\n" fitPeaksWithGoodStartingValues();
   } else {
     g_log.error("Unsupported fit mode!");
     throw runtime_error("Unsupported fit mode.");
@@ -577,8 +576,7 @@ void FitPowderDiffPeaks::observePeakRange(BackToBackExponential_sptr thispeak,
     peakrightbound = rightpeakleftbound;
     if (peakrightbound < 2.0 * rightfwhm + peakcentre)
       g_log.warning() << "Peak @ " << peakcentre
-                      << "'s right boundary is too close to its right peak!"
-                      << '\n';
+                      << "'s right boundary is too close to its right peak!\n";
   }
 
   return;
@@ -664,8 +662,8 @@ bool FitPowderDiffPeaks::fitSinglePeakRobust(
   } else if (height < m_minPeakHeight) {
     g_log.notice() << "[FLAGx409] Peak proposed @ TOF = " << peak->centre()
                    << " has a trivial "
-                   << "peak height = " << height << " by observation.  Skipped."
-                   << '\n';
+                   << "peak height = " << height
+                   << " by observation.  Skipped.\n";
     return false;
   } else {
     g_log.information() << "[DBx201] Peak Predicted @ TOF = " << peak->centre()

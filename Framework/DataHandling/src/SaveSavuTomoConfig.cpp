@@ -142,7 +142,7 @@ void SaveSavuTomoConfig::saveFile(
   // If file exists, delete it.
   Poco::File f(fileName);
   if (f.exists()) {
-    g_log.notice() << "Overwriting existing file: '" << fileName << "'" << '\n';
+    g_log.notice() << "Overwriting existing file: '" << fileName << "'\n";
     f.remove();
   } else {
     g_log.notice() << "Creating file: '" << fileName << ";\n";

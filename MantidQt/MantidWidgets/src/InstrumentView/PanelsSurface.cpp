@@ -398,8 +398,8 @@ void PanelsSurface::addObjCompAssemblies(ComponentID bankId) {
                                    objCompAssembly->getChild(1)->getPos();
       vector.normalize();
       if (fabs(vector.scalar_prod(normal)) > Mantid::Kernel::Tolerance) {
-        g_log.warning() << "Assembly " << assembly->getName() << " isn't flat."
-                        << '\n';
+        g_log.warning() << "Assembly " << assembly->getName()
+                        << " isn't flat.\n";
         return;
       }
     }
@@ -455,8 +455,8 @@ void PanelsSurface::addCompAssembly(ComponentID bankId) {
         x = y.cross_prod(normal);
         normalFound = true;
       } else {
-        g_log.warning() << "Assembly " << assembly->getName() << " isn't flat."
-                        << '\n';
+        g_log.warning() << "Assembly " << assembly->getName()
+                        << " isn't flat.\n";
         return;
       }
     }

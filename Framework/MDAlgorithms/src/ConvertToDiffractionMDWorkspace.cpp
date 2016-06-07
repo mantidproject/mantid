@@ -338,9 +338,9 @@ void ConvertToDiffractionMDWorkspace::exec() {
       bool lorentzDone = boost::lexical_cast<bool, std::string>(prop->value());
       if (lorentzDone) {
         LorentzCorrection = false;
-        g_log.warning() << "Lorentz Correction was already done for this "
-                           "workspace.  LorentzCorrection was changed to false."
-                        << '\n';
+        g_log.warning()
+            << "Lorentz Correction was already done for this "
+               "workspace.  LorentzCorrection was changed to false.\n";
       }
     }
   }

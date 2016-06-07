@@ -195,8 +195,8 @@ DataObjects::Workspace2D_sptr PoldiAutoCorrelationCore::calculate(
     double sumOfCorrelatedIntensities = std::accumulate(
         rawCorrelatedIntensities.begin(), rawCorrelatedIntensities.end(), 0.0);
     double sumOfCounts = getSumOfCounts(m_timeBinCount, m_detectorElements);
-    m_logger.information() << "  Summing intensities (" << sumOfCounts << ")..."
-                           << '\n';
+    m_logger.information() << "  Summing intensities (" << sumOfCounts
+                           << ")...\n";
 
     m_correlationBackground =
         calculateCorrelationBackground(sumOfCorrelatedIntensities, sumOfCounts);

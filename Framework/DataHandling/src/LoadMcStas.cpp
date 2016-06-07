@@ -281,8 +281,7 @@ void LoadMcStas::readEventData(
     int64_t nNeutrons = id_info.dims[0];
     int64_t numberOfDataColumn = id_info.dims[1];
     if (nNeutrons && numberOfDataColumn != 6) {
-      g_log.error() << "Event data in McStas nexus file expecting 6 columns"
-                    << '\n';
+      g_log.error() << "Event data in McStas nexus file expecting 6 columns\n";
       return;
     }
     if (!isAnyNeutrons && nNeutrons > 0)

@@ -254,8 +254,7 @@ ScriptRepositoryImpl::ScriptRepositoryImpl(const std::string &local_rep,
     }
   } catch (Poco::FileNotFoundException & /*ex*/) {
     g_log.error()
-        << "Testing the existence of repository.json and local.json failed"
-        << '\n';
+        << "Testing the existence of repository.json and local.json failed\n";
     return;
   }
 
@@ -325,13 +324,13 @@ void ScriptRepositoryImpl::install(const std::string &path) {
   // download the repository json
   doDownloadFile(std::string(remote_url).append("repository.json"),
                  rep_json_file);
-  g_log.debug() << "ScriptRepository downloaded repository information" << '\n';
+  g_log.debug() << "ScriptRepository downloaded repository information\n";
   // creation of the instance of local_json file
   if (!fileExists(local_json_file)) {
     writeStringFile(local_json_file, "{\n}",
                     "ScriptRepository failed to create local repository");
-    g_log.debug() << "ScriptRepository created the local repository information"
-                  << '\n';
+    g_log.debug()
+        << "ScriptRepository created the local repository information\n";
   }
 
 #if defined(_WIN32) || defined(_WIN64)
@@ -767,8 +766,7 @@ void ScriptRepositoryImpl::download_file(const std::string &file_path,
   }
 
   updateLocalJson(file_path, entry); /// FIXME: performance!
-  g_log.debug() << "ScriptRepository download " << local_path << " success!"
-                << '\n';
+  g_log.debug() << "ScriptRepository download " << local_path << " success!\n";
 }
 
 /**
@@ -817,8 +815,7 @@ void ScriptRepositoryImpl::upload(const std::string &file_path,
 {
   using namespace Poco::Net;
   try {
-    g_log.notice() << "ScriptRepository uploading " << file_path << " ..."
-                   << '\n';
+    g_log.notice() << "ScriptRepository uploading " << file_path << " ...\n";
 
     Kernel::InternetHelper inetHelper;
 
@@ -887,8 +884,7 @@ void ScriptRepositoryImpl::upload(const std::string &file_path,
       detail.append("\nFrom Command: ").append(cmd);
 
     if (info == "success") {
-      g_log.notice() << "ScriptRepository:" << file_path << " uploaded!"
-                     << '\n';
+      g_log.notice() << "ScriptRepository:" << file_path << " uploaded!\n";
 
       // update the file
       RepositoryEntry &entry = repo.at(file_path);
@@ -916,7 +912,7 @@ void ScriptRepositoryImpl::upload(const std::string &file_path,
       if (!published_date.empty())
         remote_entry.pub_date = DateAndTime(published_date);
       remote_entry.status = BOTH_UNCHANGED;
-      g_log.debug() << "ScriptRepository updating repository json " << '\n';
+      g_log.debug() << "ScriptRepository updating repository json \n";
       updateRepositoryJson(file_path, remote_entry);
 
     } else
@@ -1041,8 +1037,7 @@ void ScriptRepositoryImpl::remove(const std::string &file_path,
   if (raise_exc)
     throw ScriptRepoException(ss.str());
 
-  g_log.information() << "ScriptRepository deleting " << file_path << " ..."
-                      << '\n';
+  g_log.information() << "ScriptRepository deleting " << file_path << " ...\n";
 
   {
     // request to remove the file from the central repository
@@ -1228,8 +1223,8 @@ std::vector<std::string> ScriptRepositoryImpl::check4Update() {
     f.moveTo(backup);
   }
   try {
-    g_log.debug() << "Download information from the Central Repository status"
-                  << '\n';
+    g_log.debug()
+        << "Download information from the Central Repository status\n";
     doDownloadFile(std::string(remote_url).append("repository.json"),
                    rep_json_file);
   } catch (...) {

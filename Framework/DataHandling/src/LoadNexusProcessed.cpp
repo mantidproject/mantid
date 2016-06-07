@@ -131,7 +131,7 @@ SpectraInfo extractMappingInfo(NXEntry &mtd_entry, Logger &logger) {
     detectorList = detlist_group.sharedBuffer();
   } catch (std::runtime_error &) {
     logger.information() << "detector_list block not found. The workspace will "
-                            "not contain any detector information." << '\n';
+                            "not contain any detector information.\n";
     return SpectraInfo();
   }
 
@@ -290,10 +290,8 @@ Workspace_sptr LoadNexusProcessed::doAccelleratedMultiPeriodLoading(
   NXData wsEntry(mtdEntry, "workspace");
   if (!wsEntry.openLocal()) {
     std::stringstream buffer;
-    buffer
-        << "Group entry " << p - 1
-        << " is not a workspace 2D. Retry with FastMultiPeriod option set off."
-        << '\n';
+    buffer << "Group entry " << p - 1 << " is not a workspace 2D. Retry with "
+                                         "FastMultiPeriod option set off.\n";
     throw std::runtime_error(buffer.str());
   }
 

@@ -268,8 +268,7 @@ std::vector<std::string> MatrixWSDataSource::getInfoList(double x, double y) {
 
     auto det = m_matWs->getDetector(row);
     if (det == 0) {
-      g_log.debug() << "No DETECTOR for row " << row << " in MatrixWorkspace"
-                    << '\n';
+      g_log.debug() << "No DETECTOR for row " << row << " in MatrixWorkspace\n";
       return list;
     }
 
@@ -341,7 +340,7 @@ std::vector<std::string> MatrixWSDataSource::getInfoList(double x, double y) {
           }
         } catch (std::runtime_error &) {
           g_log.debug() << "Failed to get Efixed from detector ID: "
-                        << det->getID() << " in MatrixWSDataSource" << '\n';
+                        << det->getID() << " in MatrixWSDataSource\n";
           efixed = 0;
         }
       }

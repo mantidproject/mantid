@@ -814,7 +814,7 @@ ExperimentInfo::getInstrumentFilename(const std::string &instrumentName,
                                       const std::string &date) {
   if (date.empty()) {
     // Just use the current date
-    g_log.debug() << "No date specified, using current date and time." << '\n';
+    g_log.debug() << "No date specified, using current date and time.\n";
     const std::string now =
         Kernel::DateAndTime::getCurrentTime().toISO8601String();
     // Recursively call this method, but with both parameters.

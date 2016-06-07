@@ -243,8 +243,8 @@ void LoadDetectorsGroupingFile::setByComponents() {
             size_t wsindex = itx->second;
             m_groupWS->dataY(wsindex)[0] = componentMap.first;
           } else {
-            g_log.error() << "Pixel w/ ID = " << detid << " Cannot Be Located"
-                          << '\n';
+            g_log.error() << "Pixel w/ ID = " << detid
+                          << " Cannot Be Located\n";
           }
         } // ENDIF Detector
 
@@ -295,8 +295,7 @@ void LoadDetectorsGroupingFile::setByDetectors() {
         size_t wsindex = itx->second;
         m_groupWS->dataY(wsindex)[0] = detectorMap.first;
       } else {
-        g_log.error() << "Pixel w/ ID = " << detid << " Cannot Be Located"
-                      << '\n';
+        g_log.error() << "Pixel w/ ID = " << detid << " Cannot Be Located\n";
       }
     } // ENDFOR detid (in range)
   }   // ENDFOR each group ID
@@ -323,8 +322,7 @@ void LoadDetectorsGroupingFile::setBySpectrumNos() {
       if (s2iter == s2imap.end()) {
         g_log.error()
             << "Spectrum " << specNo
-            << " does not have an entry in GroupWorkspace's spec2index map"
-            << '\n';
+            << " does not have an entry in GroupWorkspace's spec2index map\n";
         throw std::runtime_error("Logic error");
       } else {
         size_t wsindex = s2iter->second;
@@ -382,8 +380,7 @@ void LoadDetectorsGroupingFile::generateNoInstrumentGroupWorkspace() {
   std::sort(specids.begin(), specids.end());
 
   if (specids.size() != spectrumidgroupmap.size()) {
-    g_log.warning() << "Duplicate spectrum No is defined in input XML file!"
-                    << '\n';
+    g_log.warning() << "Duplicate spectrum No is defined in input XML file!\n";
   }
 
   // 2. Initialize group workspace and set the spectrum workspace map

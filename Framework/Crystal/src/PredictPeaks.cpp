@@ -142,8 +142,7 @@ void PredictPeaks::exec() {
       g_log.error() << "Error getting the goniometer rotation matrix from the "
                        "InputWorkspace." << std::endl
                     << e.what() << '\n';
-      g_log.warning() << "Using identity goniometer rotation matrix instead."
-                      << '\n';
+      g_log.warning() << "Using identity goniometer rotation matrix instead.\n";
     }
   } else if (peaksWS) {
     // Sort peaks by run number so that peaks with equal goniometer matrices are
@@ -187,8 +186,8 @@ void PredictPeaks::exec() {
             << "Error getting the goniometer rotation matrix from the "
                "InputWorkspace." << std::endl
             << e.what() << '\n';
-        g_log.warning() << "Using identity goniometer rotation matrix instead."
-                        << '\n';
+        g_log.warning()
+            << "Using identity goniometer rotation matrix instead.\n";
       }
     }
   }

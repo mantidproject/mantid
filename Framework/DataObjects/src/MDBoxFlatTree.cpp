@@ -430,8 +430,7 @@ void MDBoxFlatTree::loadExperimentInfos(
         std::string groupName = "experiment" + Kernel::Strings::toString(i);
         g_log.warning() << "NXS file is missing a ExperimentInfo block "
                         << groupName
-                        << ". Workspace will be missing ExperimentInfo."
-                        << '\n';
+                        << ". Workspace will be missing ExperimentInfo.\n";
       }
     }
     ic++;

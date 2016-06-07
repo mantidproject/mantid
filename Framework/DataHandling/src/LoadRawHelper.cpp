@@ -282,9 +282,9 @@ void LoadRawHelper::createMonitorWorkspace(
     }
 
   } catch (std::out_of_range &) {
-    pAlg->getLogger().debug() << "Error in creating monitor workspace" << '\n';
+    pAlg->getLogger().debug() << "Error in creating monitor workspace\n";
   } catch (std::runtime_error &) {
-    pAlg->getLogger().debug() << "Error in creating monitor workspace" << '\n';
+    pAlg->getLogger().debug() << "Error in creating monitor workspace\n";
   }
 }
 
@@ -438,8 +438,7 @@ LoadRawHelper::getmonitorSpectrumList(const SpectrumDetectorMapping &mapping) {
     }
   } else {
     g_log.error()
-        << "monitor detector id list is empty  for the selected workspace"
-        << '\n';
+        << "monitor detector id list is empty  for the selected workspace\n";
   }
 
   return spectrumIndices;

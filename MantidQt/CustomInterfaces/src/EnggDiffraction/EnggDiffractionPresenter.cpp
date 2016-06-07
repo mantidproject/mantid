@@ -425,8 +425,7 @@ void EnggDiffractionPresenter::processFocusBasic() {
 
   int focusMode = m_view->currentMultiRunMode();
   if (focusMode == 0) {
-    g_log.debug() << " focus mode selected Individual Run Files Separately "
-                  << '\n';
+    g_log.debug() << " focus mode selected Individual Run Files Separately \n";
 
     // start focusing
     startFocusing(multi_RunNo, banks, "", "");
@@ -466,8 +465,7 @@ void EnggDiffractionPresenter::processFocusCropped() {
 
   int focusMode = m_view->currentMultiRunMode();
   if (focusMode == 0) {
-    g_log.debug() << " focus mode selected Individual Run Files Separately "
-                  << '\n';
+    g_log.debug() << " focus mode selected Individual Run Files Separately \n";
 
     startFocusing(multi_RunNo, banks, specNos, "");
 
@@ -504,8 +502,7 @@ void EnggDiffractionPresenter::processFocusTexture() {
 
   int focusMode = m_view->currentMultiRunMode();
   if (focusMode == 0) {
-    g_log.debug() << " focus mode selected Individual Run Files Separately "
-                  << '\n';
+    g_log.debug() << " focus mode selected Individual Run Files Separately \n";
     startFocusing(multi_RunNo, std::vector<bool>(), "", dgFile);
 
   } else if (focusMode == 1) {
@@ -946,7 +943,7 @@ void EnggDiffractionPresenter::setDifcTzero(MatrixWorkspace_sptr wks) const {
 void EnggDiffractionPresenter::doFitting(const std::string &focusedRunNo,
                                          const std::string &ExpectedPeaks) {
   g_log.notice() << "EnggDiffraction GUI: starting new fitting with file "
-                 << focusedRunNo << ". This may take a few seconds... " << '\n';
+                 << focusedRunNo << ". This may take a few seconds... \n";
 
   MatrixWorkspace_sptr focusedWS;
   m_fittingFinishedOK = false;
@@ -1001,8 +998,7 @@ void EnggDiffractionPresenter::doFitting(const std::string &focusedRunNo,
                      // bank name
                      "Error description: " +
                          static_cast<std::string>(re.what()) +
-                         " Please check also the log message for detail."
-                  << '\n';
+                         " Please check also the log message for detail.\n";
   }
 
   try {
@@ -1403,9 +1399,9 @@ void EnggDiffractionPresenter::plotFitPeaksCurves() {
       m_view->showStatus("Peaks fitted successfully");
 
     } else {
-      g_log.notice() << "Focused workspace has been plotted to the "
-                        "graph; further peaks can be adding using Peak Tools."
-                     << '\n';
+      g_log.notice()
+          << "Focused workspace has been plotted to the "
+             "graph; further peaks can be adding using Peak Tools.\n";
       g_log.warning() << "Peaks could not be plotted as the fitting process "
                          "did not finish correctly.\n";
       m_view->showStatus("No peaks could be fitted");
@@ -1427,8 +1423,7 @@ void EnggDiffractionPresenter::fittingFinished() {
     return;
 
   if (!m_fittingFinishedOK) {
-    g_log.warning() << "The single peak fitting did not finish correctly."
-                    << '\n';
+    g_log.warning() << "The single peak fitting did not finish correctly.\n";
     if (m_workerThread) {
       delete m_workerThread;
       m_workerThread = NULL;
@@ -1507,8 +1502,7 @@ void EnggDiffractionPresenter::processStopFocus() {
 
       g_abortThread = true;
       g_log.warning() << "Focus Stop has been clicked, please wait until "
-                         "current focus run process has been completed. "
-                      << '\n';
+                         "current focus run process has been completed. \n";
     }
   }
 }
@@ -1877,8 +1871,8 @@ void EnggDiffractionPresenter::calibrationFinished() {
     const std::string ceriaNo = isValidRunNumber(m_view->newCeriaNo());
     updateCalibParmsTable();
     m_view->newCalibLoaded(vanNo, ceriaNo, m_calibFullPath);
-    g_log.notice() << "Calibration finished and ready as 'current calibration'."
-                   << '\n';
+    g_log.notice()
+        << "Calibration finished and ready as 'current calibration'.\n";
     m_view->showStatus("Calibration finished succesfully. Ready");
   }
   if (m_workerThread) {
@@ -2489,7 +2483,7 @@ void EnggDiffractionPresenter::focusingFinished() {
                        "log messages for details\n";
     m_view->showStatus("Focusing didn't finish succesfully. Ready");
   } else {
-    g_log.notice() << "Focusing finished - focused run(s) are ready." << '\n';
+    g_log.notice() << "Focusing finished - focused run(s) are ready.\n";
     m_view->showStatus("Focusing finished succesfully. Ready");
   }
   if (m_workerThread) {
@@ -2592,8 +2586,7 @@ void EnggDiffractionPresenter::doFocusing(const EnggDiffCalibSettings &cs,
                         "cannot not be processed\n";
     } else {
       g_log.notice()
-          << "Load alogirthm has successfully merged the files provided"
-          << '\n';
+          << "Load alogirthm has successfully merged the files provided\n";
     }
 
   } else {
@@ -3023,8 +3016,8 @@ void EnggDiffractionPresenter::doRebinningTime(const std::string &runNo,
   m_rebinningFinishedOK = false;
   const Workspace_sptr inWS = loadToPreproc(runNo);
   if (!inWS)
-    g_log.error() << "Error: could not load the input workspace for rebinning."
-                  << '\n';
+    g_log.error()
+        << "Error: could not load the input workspace for rebinning.\n";
 
   const std::string rebinName = "Rebin";
   try {
@@ -3126,8 +3119,8 @@ void EnggDiffractionPresenter::doRebinningPulses(const std::string &runNo,
   m_rebinningFinishedOK = false;
   const Workspace_sptr inWS = loadToPreproc(runNo);
   if (!inWS)
-    g_log.error() << "Error: could not load the input workspace for rebinning."
-                  << '\n';
+    g_log.error()
+        << "Error: could not load the input workspace for rebinning.\n";
 
   const std::string rebinName = "RebinByPulseTimes";
   try {
@@ -3198,8 +3191,7 @@ void EnggDiffractionPresenter::rebinningFinished() {
 
   if (!m_rebinningFinishedOK) {
     g_log.warning() << "The pre-processing (re-binning) did not finish "
-                       "correctly. Check previous log messages for details"
-                    << '\n';
+                       "correctly. Check previous log messages for details\n";
     m_view->showStatus("Rebinning didn't finish succesfully. Ready");
   } else {
     g_log.notice() << "Pre-processing (re-binning) finished - the output "
@@ -3809,8 +3801,7 @@ void EnggDiffractionPresenter::copyToUser(const Poco::Path &source,
   Poco::File file(source);
   if (!file.exists() || !file.canRead()) {
     g_log.warning() << "Cannot copy the file " << source.toString()
-                    << " to the user directories because it cannot be read."
-                    << '\n';
+                    << " to the user directories because it cannot be read.\n";
     return;
   }
 

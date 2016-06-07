@@ -137,7 +137,7 @@ void EQSANSTofStructure::execEvent(
       det = inputWS->getDetector(ispec);
     } catch (Exception::NotFoundError &) {
       g_log.warning() << "Workspace index " << ispec
-                      << " has no detector assigned to it - discarding" << '\n';
+                      << " has no detector assigned to it - discarding\n";
       // 'continue' statement moved outside catch block because Mac Intel
       // compiler has a problem with it being here in an openmp block.
     }
@@ -453,8 +453,7 @@ double EQSANSTofStructure::getTofOffset(EventWorkspace_const_sptr inputWS,
   frame_tof0 = frame_srcpulse_wl_1 / 3.9560346 * source_to_detector;
 
   g_log.information() << "Frame width " << tmp_frame_width << '\n';
-  g_log.information() << "TOF offset = " << frame_tof0 << " microseconds"
-                      << '\n';
+  g_log.information() << "TOF offset = " << frame_tof0 << " microseconds\n";
   g_log.information() << "Band defined by T1-T4 " << frame_wl_1 << " "
                       << frame_wl_2;
   if (frame_skipping)
@@ -462,8 +461,7 @@ double EQSANSTofStructure::getTofOffset(EventWorkspace_const_sptr inputWS,
                         << '\n';
   else
     g_log.information() << '\n';
-  g_log.information() << "Chopper    Actual Phase    Lambda1    Lambda2"
-                      << '\n';
+  g_log.information() << "Chopper    Actual Phase    Lambda1    Lambda2\n";
   for (int i = 0; i < 4; i++)
     g_log.information() << i << "    " << chopper_actual_phase[i] << "  "
                         << chopper_wl_1[i] << "  " << chopper_wl_2[i] << '\n';

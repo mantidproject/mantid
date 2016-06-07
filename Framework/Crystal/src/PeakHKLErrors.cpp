@@ -452,8 +452,7 @@ void PeakHKLErrors::functionDeriv1D(Jacobian *out, const double *xValues,
   getRun2MatMap(Peaks, OptRuns, RunNums2GonMatrix);
 
   g_log.debug()
-      << "----------------------------Derivative------------------------"
-      << '\n';
+      << "----------------------------Derivative------------------------\n";
 
   V3D samplePosition = instNew->getSample()->getPos();
   IPeak &ppeak = Peaks->getPeak(0);

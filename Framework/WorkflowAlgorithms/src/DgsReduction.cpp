@@ -695,7 +695,7 @@ void DgsReduction::exec() {
   const std::string reductionManagerName =
       this->getProperty("ReductionProperties");
   if (reductionManagerName.empty()) {
-    g_log.error() << "ERROR: Reduction Property Manager name is empty" << '\n';
+    g_log.error() << "ERROR: Reduction Property Manager name is empty\n";
     return;
   }
   this->reductionManager = boost::make_shared<PropertyManager>();

@@ -261,7 +261,7 @@ void setBackToBackExponential(API::IFunction &function,
     sigma = 1e-06;
   function.setParameter("S", sigma);
 
-  g_log.debug() << "Estimating parameters of BackToBackExponential" << '\n';
+  g_log.debug() << "Estimating parameters of BackToBackExponential\n";
   g_log.debug() << "centre= " << centre << '\n';
   g_log.debug() << "sigma = " << sigma << '\n';
 

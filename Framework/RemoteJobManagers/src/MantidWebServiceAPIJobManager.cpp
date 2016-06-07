@@ -354,7 +354,7 @@ std::string MantidWebServiceAPIJobManager::startRemoteTransaction() {
   }
   std::string transId;
   resp["TransID"].getValue(transId);
-  g_log.information() << "Transaction ID " << transId << " started." << '\n';
+  g_log.information() << "Transaction ID " << transId << " started.\n";
 
   return transId;
 }
@@ -375,7 +375,7 @@ void MantidWebServiceAPIJobManager::stopRemoteTransaction(
       httpGet("/transaction", std::string("Action=Stop&TransID=") + transId);
 
   if (lastStatus() == Poco::Net::HTTPResponse::HTTP_OK) {
-    g_log.information() << "Transaction ID " << transId << " stopped." << '\n';
+    g_log.information() << "Transaction ID " << transId << " stopped.\n";
   } else {
     JSONObject resp;
     initFromStream(resp, respStream);

@@ -112,8 +112,7 @@ void SaveDetectorsGrouping::createGroupDetectorIDMap(
     auto detids = mspec->getDetectorIDs();
     if (detids.size() != 1) {
       g_log.error() << "Spectrum " << mspec->getSpectrumNo() << " has "
-                    << detids.size() << " detectors.  Not allowed situation!"
-                    << '\n';
+                    << detids.size() << " detectors.  Not allowed situation!\n";
       throw;
     }
     it->second.insert(it->second.end(), detids.begin(), detids.end());

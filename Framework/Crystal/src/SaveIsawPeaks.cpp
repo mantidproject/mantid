@@ -268,7 +268,7 @@ void SaveIsawPeaks::exec() {
 
       if (!ids.empty()) {
         // Write the bank header
-        out << "0  NRUN DETNUM     CHI      PHI    OMEGA       MONCNT" << '\n';
+        out << "0  NRUN DETNUM     CHI      PHI    OMEGA       MONCNT\n";
         out << "1 " << std::setw(5) << run << std::setw(7) << std::right
             << bank;
 

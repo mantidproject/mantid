@@ -134,8 +134,8 @@ void MaskDetectors::exec() {
         g_log.error() << "Input workspace has " << WS->getNumberHistograms()
                       << " histograms   vs. "
                       << "Input masking workspace has "
-                      << prevMasking->getNumberHistograms() << " histograms. "
-                      << '\n';
+                      << prevMasking->getNumberHistograms()
+                      << " histograms. \n";
         throw std::runtime_error("Size mismatch between two input workspaces.");
       }
       appendToIndexListFromWS(indexList, prevMasking);
@@ -158,8 +158,7 @@ void MaskDetectors::exec() {
           pmap.addBool(det, "masked", true);
         }
       } catch (Kernel::Exception::NotFoundError &e) {
-        g_log.warning() << e.what() << " Found while running MaskDetectors"
-                        << '\n';
+        g_log.warning() << e.what() << " Found while running MaskDetectors\n";
       }
     }
   }
@@ -253,8 +252,7 @@ void MaskDetectors::execPeaks(PeaksWorkspace_sptr WS) {
               detectorList.push_back(detID);
           }
         } catch (Kernel::Exception::NotFoundError &e) {
-          g_log.warning() << e.what() << " Found while running MaskDetectors"
-                          << '\n';
+          g_log.warning() << e.what() << " Found while running MaskDetectors\n";
         }
       }
     }
@@ -272,8 +270,7 @@ void MaskDetectors::execPeaks(PeaksWorkspace_sptr WS) {
           pmap.addBool(det, "masked", true);
         }
       } catch (Kernel::Exception::NotFoundError &e) {
-        g_log.warning() << e.what() << " Found while running MaskDetectors"
-                        << '\n';
+        g_log.warning() << e.what() << " Found while running MaskDetectors\n";
       }
     }
   }
@@ -353,7 +350,7 @@ void MaskDetectors::appendToIndexListFromMaskWS(
 
     if (maskedWorkspace->dataY(i - startIndex)[0] > 0.5 &&
         existingIndices.count(i) == 0) {
-      g_log.debug() << "Adding WorkspaceIndex " << i << " to mask." << '\n';
+      g_log.debug() << "Adding WorkspaceIndex " << i << " to mask.\n";
       indexList.push_back(i);
     }
   }

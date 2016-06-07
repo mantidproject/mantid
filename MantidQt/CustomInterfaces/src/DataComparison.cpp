@@ -140,8 +140,7 @@ void DataComparison::addDataItem(Workspace_const_sptr ws) {
   MatrixWorkspace_const_sptr matrixWs =
       boost::dynamic_pointer_cast<const MatrixWorkspace>(ws);
   if (!matrixWs) {
-    g_log.error() << "Workspace " << ws->name() << "is of incorrect type!"
-                  << '\n';
+    g_log.error() << "Workspace " << ws->name() << "is of incorrect type!\n";
     return;
   }
 

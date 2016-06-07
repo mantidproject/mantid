@@ -360,11 +360,11 @@ std::vector<int> ILLParser::parseFieldISpec(int fieldWith) {
  * Just for debug purposes.
  */
 void ILLParser::showHeader() {
-  std::cout << "* Global header" << '\n';
+  std::cout << "* Global header\n";
   for (auto &value : header)
     std::cout << value.first << " => " << value.second << '\n';
 
-  std::cout << "* Spectrum header" << '\n';
+  std::cout << "* Spectrum header\n";
   int i = 0;
   std::vector<std::map<std::string, std::string>>::const_iterator s;
   for (s = spectraHeaders.begin(); s != spectraHeaders.end(); ++s) {
@@ -376,7 +376,7 @@ void ILLParser::showHeader() {
     i++;
   }
 
-  std::cout << "* Spectrum list" << '\n';
+  std::cout << "* Spectrum list\n";
   std::vector<std::vector<int>>::const_iterator l;
   for (l = spectraList.begin(); l != spectraList.end(); ++l) {
     std::cout << "From " << (*l)[0] << " to " << (*l)[l->size() - 1] << " => "

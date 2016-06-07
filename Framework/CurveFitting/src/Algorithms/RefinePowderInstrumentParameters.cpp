@@ -225,8 +225,7 @@ void RefinePowderInstrumentParameters::exec() {
 /** Fit instrument parameters.  It is a straight forward fitting to
  */
 void RefinePowderInstrumentParameters::fitInstrumentParameters() {
-  cout << "=========== Method [FitInstrumentParameters] ==============="
-       << '\n';
+  cout << "=========== Method [FitInstrumentParameters] ===============\n";
 
   // 1. Initialize the fitting function
   ThermalNeutronDtoTOFFunction rawfunc;
@@ -313,7 +312,7 @@ void RefinePowderInstrumentParameters::fitInstrumentParameters() {
   bool successfulfit = fitalg->execute();
   if (!fitalg->isExecuted() || !successfulfit) {
     // Early return due to bad fit
-    g_log.error() << "Fitting to instrument geometry function failed. " << '\n';
+    g_log.error() << "Fitting to instrument geometry function failed. \n";
     throw std::runtime_error("Fitting failed.");
   }
 
@@ -400,7 +399,7 @@ bool RefinePowderInstrumentParameters::fitFunction(IFunction_sptr func,
   bool successfulfit = fitalg->execute();
   if (!fitalg->isExecuted() || !successfulfit) {
     // Early return due to bad fit
-    g_log.error() << "Fitting to instrument geometry function failed. " << '\n';
+    g_log.error() << "Fitting to instrument geometry function failed. \n";
     throw std::runtime_error("Fitting failed.");
   }
 
@@ -441,7 +440,7 @@ double RefinePowderInstrumentParameters::calculateFunctionStatistic(
   bool successfulfit = fitalg->execute();
   if (!fitalg->isExecuted() || !successfulfit) {
     // Early return due to bad fit
-    g_log.error() << "Fitting to instrument geometry function failed. " << '\n';
+    g_log.error() << "Fitting to instrument geometry function failed. \n";
     throw std::runtime_error("Fitting failed.");
   }
 
@@ -861,8 +860,7 @@ void RefinePowderInstrumentParameters::genPeaksFromTable(
     DataObjects::TableWorkspace_sptr peakparamws) {
   // 1. Check and clear input and output
   if (!peakparamws) {
-    g_log.error() << "Input tableworkspace for peak parameters is invalid!"
-                  << '\n';
+    g_log.error() << "Input tableworkspace for peak parameters is invalid!\n";
     throw std::invalid_argument(
         "Invalid input table workspace for peak parameters");
   }
@@ -985,8 +983,7 @@ void RefinePowderInstrumentParameters::importParametersFromTable(
     } catch (runtime_error &) {
       g_log.error() << "Import table workspace " << parameterWS->name()
                     << " error in line " << ir << ".  "
-                    << " Requires [string, double] in the first 2 columns."
-                    << '\n';
+                    << " Requires [string, double] in the first 2 columns.\n";
       throw;
     }
   }
@@ -1076,8 +1073,7 @@ void RefinePowderInstrumentParameters::importMonteCarloParametersFromTable(
       stringstream errss;
       errss << "Input instrument parameter workspace does not have parameter "
             << parname
-            << ".  Information is incomplete for Monte Carlo simulation."
-            << '\n';
+            << ".  Information is incomplete for Monte Carlo simulation.\n";
       g_log.error(errss.str());
       throw runtime_error(errss.str());
     }

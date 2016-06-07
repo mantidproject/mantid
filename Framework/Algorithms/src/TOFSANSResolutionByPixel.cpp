@@ -142,8 +142,7 @@ void TOFSANSResolutionByPixel::exec() {
       det = inWS->getDetector(i);
     } catch (Exception::NotFoundError &) {
       g_log.information() << "Workspace index " << i
-                          << " has no detector assigned to it - discarding"
-                          << '\n';
+                          << " has no detector assigned to it - discarding\n";
     }
     // If no detector found or if it's masked or a monitor, skip onto the next
     // spectrum

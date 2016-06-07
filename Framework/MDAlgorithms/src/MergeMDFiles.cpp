@@ -311,7 +311,7 @@ void MergeMDFiles::finalizeOutput(const std::string &outputFile) {
   g_log.information() << overallTime << " to run refreshCache().\n";
 
   if (!outputFile.empty()) {
-    g_log.notice() << "Starting SaveMD to update the file back-end." << '\n';
+    g_log.notice() << "Starting SaveMD to update the file back-end.\n";
     // create or open WS group and put there additional information about WS and
     // its dimensions
     bool old_data_there;
@@ -336,7 +336,7 @@ void MergeMDFiles::finalizeOutput(const std::string &outputFile) {
     // Save box structure;
     m_BoxStruct.saveBoxStructure(outputFile);
 
-    g_log.information() << overallTime << " to run SaveMD structure" << '\n';
+    g_log.information() << overallTime << " to run SaveMD structure\n";
   }
 }
 

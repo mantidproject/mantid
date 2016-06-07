@@ -326,7 +326,7 @@ WienerSmooth::smoothSingleSpectrum(API::MatrixWorkspace_sptr inputWS,
     // cut-off index
     double ri1 = floor((dblev / 4 - b1) / a1);
     if (ri1 < static_cast<double>(i0)) {
-      g_log.warning() << "Failed to build Wiener filter: no smoothing." << '\n';
+      g_log.warning() << "Failed to build Wiener filter: no smoothing.\n";
       ri1 = static_cast<double>(i0);
     }
     size_t i1 = static_cast<size_t>(ri1);
@@ -340,8 +340,7 @@ WienerSmooth::smoothSingleSpectrum(API::MatrixWorkspace_sptr inputWS,
 
     g_log.debug() << "Cut-off index " << i1 << '\n';
   } else {
-    g_log.warning() << "Power spectrum has an unexpected shape: no smoothing"
-                    << '\n';
+    g_log.warning() << "Power spectrum has an unexpected shape: no smoothing\n";
     return copyInput(inputWS, wsIndex);
   }
 

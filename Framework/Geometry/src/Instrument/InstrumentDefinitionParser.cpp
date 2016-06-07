@@ -2304,8 +2304,8 @@ void InstrumentDefinitionParser::setComponentLinks(
         if (!detector) {
           g_log.error() << "Error whilst loading parameters. No detector "
                            "found with id '" << detid << "'\n";
-          g_log.error() << "Please check that your detectors' ids are correct."
-                        << '\n';
+          g_log.error()
+              << "Please check that your detectors' ids are correct.\n";
           throw Kernel::Exception::InstrumentDefinitionError(
               "Invalid detector id in component-link tag.");
         }
@@ -2326,7 +2326,7 @@ void InstrumentDefinitionParser::setComponentLinks(
                               << "'.\n";
               g_log.warning()
                   << "Parameters have been applied to detector with id '"
-                  << detid << "'. Please check the name is correct." << '\n';
+                  << detid << "'. Please check the name is correct.\n";
             }
           }
         }

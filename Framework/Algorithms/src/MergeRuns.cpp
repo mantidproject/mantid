@@ -427,8 +427,8 @@ MergeRuns::validateInputs(const std::vector<std::string> &inputWorkspaces) {
       }
       inWS.push_back(ws);
     } catch (Exception::NotFoundError &) {
-      g_log.error() << "Input workspace " << inputWorkspaces[i] << " not found."
-                    << '\n';
+      g_log.error() << "Input workspace " << inputWorkspaces[i]
+                    << " not found.\n";
       throw;
     }
     // Check that it has common binning

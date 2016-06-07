@@ -159,8 +159,7 @@ void LoadMLZ::maskDetectors(NeXus::NXEntry &entry) {
           pmap.addBool(det, "masked", true);
         }
       } catch (Kernel::Exception::NotFoundError &e) {
-        g_log.warning() << e.what() << " Found while running MaskDetectors"
-                        << '\n';
+        g_log.warning() << e.what() << " Found while running MaskDetectors\n";
       }
     }
   }

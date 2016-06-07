@@ -131,23 +131,21 @@ void PoldiAutoCorrelation5::logConfigurationInformation(
       for (size_t i = 0; i < chopper->slitPositions().size(); ++i) {
         g_log.information() << "_Poldi -     Slits: " << i
                             << ": Position = " << chopper->slitPositions()[i]
-                            << "\t Time = " << chopper->slitTimes()[i] << " µs"
-                            << '\n';
+                            << "\t Time = " << chopper->slitTimes()[i]
+                            << " µs\n";
       }
     }
 
     g_log.information()
-        << "_Poldi  detector conf ------------------------------  " << '\n';
+        << "_Poldi  detector conf ------------------------------  \n";
     g_log.information() << "_Poldi -     Element count:     "
                         << cleanDetector->elementCount() << '\n';
     g_log.information() << "_Poldi -     Central element:   "
                         << cleanDetector->centralElement() << '\n';
     g_log.information() << "_Poldi -     2Theta(central):   "
-                        << cleanDetector->twoTheta(199) / M_PI * 180.0 << "°"
-                        << '\n';
+                        << cleanDetector->twoTheta(199) / M_PI * 180.0 << "°\n";
     g_log.information() << "_Poldi -     Distance(central): "
-                        << cleanDetector->distanceFromSample(199) << " mm"
-                        << '\n';
+                        << cleanDetector->distanceFromSample(199) << " mm\n";
 
     std::set<int> deadWires = cleanDetector->deadWires();
     g_log.information() << "_Poldi -     Number of dead wires: "

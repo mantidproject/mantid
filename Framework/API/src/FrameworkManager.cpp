@@ -93,9 +93,8 @@ void FrameworkManagerImpl::AsynchronousStartupTasks() {
   if ((retVal == 1) && (updateInstrumentDefinitions == 1)) {
     UpdateInstrumentDefinitions();
   } else {
-    g_log.information()
-        << "Instrument updates disabled - cannot update instrument definitions."
-        << '\n';
+    g_log.information() << "Instrument updates disabled - cannot update "
+                           "instrument definitions.\n";
   }
 
   int checkIfNewerVersionIsAvailable = 0;
@@ -402,7 +401,7 @@ bool FrameworkManagerImpl::deleteWorkspace(const std::string &wsName) {
     retVal = true;
   } catch (Kernel::Exception::NotFoundError &) {
     // workspace was not found
-    g_log.error() << "Workspace " << wsName << " could not be found." << '\n';
+    g_log.error() << "Workspace " << wsName << " could not be found.\n";
     retVal = false;
   }
   return retVal;

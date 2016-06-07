@@ -518,8 +518,8 @@ void ConvertUnits::convertViaTOF(Kernel::Unit_const_sptr fromUnit,
 
   if (failedDetectorCount != 0) {
     g_log.information() << "Unable to calculate sample-detector distance for "
-                        << failedDetectorCount << " spectra. Masking spectrum."
-                        << '\n';
+                        << failedDetectorCount
+                        << " spectra. Masking spectrum.\n";
   }
   if (m_inputEvents)
     eventWS->clearMRU();

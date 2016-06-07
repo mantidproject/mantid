@@ -194,7 +194,7 @@ const InstrumentInfo &FacilityInfo::instrument(std::string iName) const {
     if (boost::iequals(instrument.name(), iName)) // Case-insensitive search
     {
       g_log.debug() << "Instrument '" << iName << "' found as "
-                    << instrument.name() << " at " << name() << "." << '\n';
+                    << instrument.name() << " at " << name() << ".\n";
       return instrument;
     }
   }
@@ -205,7 +205,7 @@ const InstrumentInfo &FacilityInfo::instrument(std::string iName) const {
                        iName)) // Case-insensitive search
     {
       g_log.debug() << "Instrument '" << iName << "' found as "
-                    << instrument.name() << " at " << name() << "." << '\n';
+                    << instrument.name() << " at " << name() << ".\n";
       return instrument;
     }
   }

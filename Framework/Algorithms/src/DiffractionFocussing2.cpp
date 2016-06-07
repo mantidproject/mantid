@@ -107,8 +107,7 @@ void DiffractionFocussing2::exec() {
   Axis *axis = m_matrixInputW->getAxis(0);
   std::string unitid = axis->unit()->unitID();
   if (unitid != "dSpacing" && unitid != "MomentumTransfer" && unitid != "TOF") {
-    g_log.error() << "UnitID " << unitid << " is not a supported spacing"
-                  << '\n';
+    g_log.error() << "UnitID " << unitid << " is not a supported spacing\n";
     throw new std::invalid_argument("Workspace Invalid Spacing/UnitID");
   }
   // --- Do we need to read the grouping workspace? ----

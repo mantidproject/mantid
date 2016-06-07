@@ -88,7 +88,7 @@ public:
     TS_ASSERT(log1.getEnabled());
     TS_ASSERT_THROWS_NOTHING(log1.fatal("you are allowed to see this"));
     TS_ASSERT_THROWS_NOTHING(
-        log1.fatal() << "you are allowed to see this via a stream" << '\n';);
+        log1.fatal() << "you are allowed to see this via a stream\n";);
   }
 
   void testLogLevelOffset() {

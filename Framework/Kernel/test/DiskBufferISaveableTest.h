@@ -439,8 +439,7 @@ public:
       dbuf.toWrite(data[i]);
       data[i]->setBusy(false);
     }
-    std::cout << " Elapsed : " << tim << " to load " << num << " into MRU."
-              << '\n';
+    std::cout << " Elapsed : " << tim << " to load " << num << " into MRU.\n";
   }
   //
   void test_smallCache_no_writeBuffer() {

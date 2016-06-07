@@ -205,7 +205,7 @@ bool MantidEVWorker::loadAndConvertToMD(
     g_log.error() << "Error:" << e.what() << '\n';
     return false;
   } catch (...) {
-    g_log.error() << "Error: Could Not load file and convert to MD" << '\n';
+    g_log.error() << "Error: Could Not load file and convert to MD\n";
     return false;
   }
   return true;
@@ -822,8 +822,7 @@ bool MantidEVWorker::sphereIntegrate(
     g_log.error() << "Error:" << e.what() << '\n';
     return false;
   } catch (...) {
-    g_log.error() << "Error: Could Not Integrated temporary MD workspace"
-                  << '\n';
+    g_log.error() << "Error: Could Not Integrated temporary MD workspace\n";
     return false;
   }
 }
@@ -896,8 +895,7 @@ bool MantidEVWorker::fitIntegrate(const std::string &peaks_ws_name,
     g_log.error() << "Error:" << e.what() << '\n';
     return false;
   } catch (...) {
-    g_log.error() << "Error: Could Not Integrated temporary FIT workspace"
-                  << '\n';
+    g_log.error() << "Error: Could Not Integrated temporary FIT workspace\n";
     return false;
   }
   return false;

@@ -192,7 +192,7 @@ int LoadILL::getEPPFromVanadium(const std::string &filenameVanadium,
   }
   if (calculatedDetectorElasticPeakPosition == -1 && filenameVanadium != "") {
     g_log.information()
-        << "Calculating the elastic peak position from the Vanadium." << '\n';
+        << "Calculating the elastic peak position from the Vanadium.\n";
     calculatedDetectorElasticPeakPosition = validateVanadium(filenameVanadium);
   }
   return calculatedDetectorElasticPeakPosition;
@@ -512,8 +512,7 @@ void LoadILL::loadDataIntoTheWorkSpace(
   g_log.information()
       << " ::  Calculated bin = ["
       << detectorTofBins[calculatedDetectorElasticPeakPosition] << ","
-      << detectorTofBins[calculatedDetectorElasticPeakPosition + 1] << "]"
-      << '\n';
+      << detectorTofBins[calculatedDetectorElasticPeakPosition + 1] << "]\n";
 
   // The binning for monitors is considered the same as for detectors
   size_t spec = 0;
@@ -564,7 +563,7 @@ void LoadILL::loadDataIntoTheWorkSpace(
    * IN4 Low angle and high angle have been split!
    */
   if (m_instrumentName == "IN4") {
-    g_log.debug() << "Loading data into the workspace: IN4 Rosace!" << '\n';
+    g_log.debug() << "Loading data into the workspace: IN4 Rosace!\n";
     // read in the data
     NXData dataGroup = entry.openNXData("instrument/Detector_Rosace/data");
     NXInt data = dataGroup.openIntData();

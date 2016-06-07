@@ -99,8 +99,7 @@ LoadLiveData::runProcessing(Mantid::API::Workspace_sptr inputWS,
     // What is the name of the input workspace property
     if (alg->existsProperty("InputWorkspace")) {
       g_log.debug()
-          << "Using InputWorkspace as the input workspace property name."
-          << '\n';
+          << "Using InputWorkspace as the input workspace property name.\n";
       alg->setPropertyValue("InputWorkspace", inputName);
     } else {
       // Look for the first Workspace property that is marked INPUT.

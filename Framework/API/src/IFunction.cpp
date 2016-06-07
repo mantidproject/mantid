@@ -832,7 +832,7 @@ void IFunction::setMatrixWorkspace(
                     paramValue *= p.Eval();
                     g_log.debug() << "The FitParameter " << parameterName(i)
                                   << " = " << paramValue
-                                  << " after result-unit convertion" << '\n';
+                                  << " after result-unit convertion\n";
                   } catch (mu::Parser::exception_type &e) {
                     g_log.error()
                         << "Cannot convert formula unit to workspace unit"

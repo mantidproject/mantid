@@ -107,7 +107,7 @@ void SANSDirectBeamScaling::exec() {
       det = inputWS->getDetector(i);
     } catch (Exception::NotFoundError &) {
       g_log.warning() << "Workspace index " << i
-                      << " has no detector assigned to it - discarding" << '\n';
+                      << " has no detector assigned to it - discarding\n";
       continue;
     }
 

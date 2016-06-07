@@ -537,7 +537,7 @@ PoldiIndexKnownCompounds::getAllIndexCandidatePairs(
 
     g_log.information() << "    Peak at d="
                         << static_cast<double>(currentPeak->d()) << " has "
-                        << currentCandidates.size() << " candidates." << '\n';
+                        << currentCandidates.size() << " candidates.\n";
   }
 
   return candidates;
@@ -675,8 +675,7 @@ void PoldiIndexKnownCompounds::assignCandidates(
       if (inPeakSet(usedExpectedPeaks, expectedPeak)) {
         unassignedMeasuredPeaks.insert(measuredPeak);
         g_log.information()
-            << "      Candidate rejected: Candidate has been already used."
-            << '\n';
+            << "      Candidate rejected: Candidate has been already used.\n";
       } else {
         /* Otherwise, the indexed candidate is accepted and the measured peak
          * is removed from the set of peaks that are waiting for another
@@ -695,7 +694,7 @@ void PoldiIndexKnownCompounds::assignCandidates(
     } else {
       g_log.information()
           << "      Candidate rejected: peak has already been indexed: ["
-          << MillerIndicesIO::toString(measuredPeak->hkl()) << "]." << '\n';
+          << MillerIndicesIO::toString(measuredPeak->hkl()) << "].\n";
     }
   }
 

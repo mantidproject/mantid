@@ -155,8 +155,7 @@ void FindCenterOfMassPosition2::exec() {
         det = inputWS->getDetector(i);
       } catch (Exception::NotFoundError &) {
         g_log.warning() << "Workspace index " << i
-                        << " has no detector assigned to it - discarding"
-                        << '\n';
+                        << " has no detector assigned to it - discarding\n";
         continue;
       }
       // If this detector is masked, skip to the next one
@@ -207,10 +206,8 @@ void FindCenterOfMassPosition2::exec() {
     double radius_y = std::min((position_y - ymin0), (ymax0 - position_y));
 
     if (!direct_beam && (radius_x <= beam_radius || radius_y <= beam_radius)) {
-      g_log.error()
-          << "Center of mass falls within the beam center area: stopping here"
-          << '\n';
-      break;
+      g_log.error() << "Center of mass falls within the beam center area: "
+                       "stopping here\n" break;
     }
 
     center_x = position_x;
@@ -239,8 +236,7 @@ void FindCenterOfMassPosition2::exec() {
     // Quit if we haven't converged after the maximum number of iterations.
     if (++n_iteration > max_iteration) {
       g_log.warning() << "More than " << max_iteration
-                      << " iteration to find beam center: stopping here"
-                      << '\n';
+                      << " iteration to find beam center: stopping here\n";
       break;
     }
 

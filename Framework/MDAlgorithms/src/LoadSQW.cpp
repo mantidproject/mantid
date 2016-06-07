@@ -140,8 +140,7 @@ void LoadSQW::exec() {
     if ((m_nDataPoints * sizeof(MDEvent<4>) * 2 / 1024) < stat.availMem())
       g_log.notice() << "You have enough memory available to load the "
                      << m_nDataPoints << " points into memory; this would be "
-                                         "faster than using a file back-end."
-                     << '\n';
+                                         "faster than using a file back-end.\n";
 
     IAlgorithm_sptr saver =
         this->createChildAlgorithm("SaveMD", 0.01, 0.05, true);
@@ -167,8 +166,7 @@ void LoadSQW::exec() {
       g_log.warning()
           << "You may not have enough physical memory available to load the "
           << m_nDataPoints << " points into memory. You can cancel and specify "
-                              "OutputFilename to load to a file back-end."
-          << '\n';
+                              "OutputFilename to load to a file back-end.\n";
   }
 
   if (bc->isFileBacked()) {
@@ -195,7 +193,7 @@ void LoadSQW::exec() {
   pWs->refreshCache();
 
   if (!m_outputFile.empty()) {
-    g_log.notice() << "Starting SaveMD to update the file back-end." << '\n';
+    g_log.notice() << "Starting SaveMD to update the file back-end.\n";
     IAlgorithm_sptr saver = this->createChildAlgorithm("SaveMD", 0.76, 1.00);
     saver->setProperty("InputWorkspace", ws);
     saver->setProperty("UpdateFileBackEnd", true);
@@ -227,8 +225,7 @@ void LoadSQW::readEvents(
 
   const size_t pixel_width = ncolumns * column_size;
   const size_t data_buffer_size = pixel_width * m_nDataPoints;
-  g_log.information() << m_nDataPoints << " data points in this SQW file."
-                      << '\n';
+  g_log.information() << m_nDataPoints << " data points in this SQW file.\n";
 
   // Load from the input file is smallish blocks
   size_t blockSize = pixel_width * 1000000;

@@ -291,7 +291,7 @@ void ImggAggregateWavelengths::exec() {
     aggToFBands(inputPath, outputPath, tofRanges);
 
   g_log.notice() << "Saved output aggregated images into: " << outputPath
-                 << ". They are now ready for further processing. " << '\n';
+                 << ". They are now ready for further processing. \n";
 }
 
 void ImggAggregateWavelengths::aggUniformBands(const std::string &inputPath,
@@ -330,8 +330,7 @@ void ImggAggregateWavelengths::aggIndexBands(const std::string &inputPath,
   if (inputSubDirs.empty()) {
     g_log.warning() << "Could not find any input files or directories in "
                     << inputPath << " when looking for input bands. Nothing "
-                                    "will be produced in the output path."
-                    << '\n';
+                                    "will be produced in the output path.\n";
   }
 
   auto outRanges = rangesFromStringProperty(rangesSpec, PROP_INDEX_RANGES);

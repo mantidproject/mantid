@@ -239,7 +239,7 @@ void SpecialWorkspace2D::binaryOperation(const unsigned int operatortype) {
     break;
   default:
     g_log.error() << "Operator " << operatortype
-                  << " Is Not Valid In BinaryOperation(operatortype)" << '\n';
+                  << " Is Not Valid In BinaryOperation(operatortype)\n";
     throw std::invalid_argument("Invalid Operator");
     break;
   }

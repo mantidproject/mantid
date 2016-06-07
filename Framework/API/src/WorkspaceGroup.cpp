@@ -110,7 +110,7 @@ void WorkspaceGroup::addWorkspace(Workspace_sptr workspace) {
   if (it == m_workspaces.end()) {
     m_workspaces.push_back(workspace);
   } else {
-    g_log.warning() << "Workspace already exists in a WorkspaceGroup" << '\n';
+    g_log.warning() << "Workspace already exists in a WorkspaceGroup\n";
     ;
   }
 }

@@ -257,7 +257,8 @@ void SCARFTomoReconstruction::exec() {
       jobId = getPropertyValue("CancelJobID");
     } catch (std::runtime_error & /*e*/) {
       g_log.error() << "To cancel a job you need to give the ID of a job "
-                       "running on " << m_SCARFComputeResource << "." << '\n';
+                       "running on "
+                    << m_SCARFComputeResource << ".\n";
       throw;
     }
     doCancel(username, jobId);
@@ -274,7 +275,8 @@ void SCARFTomoReconstruction::exec() {
       destDir = getPropertyValue("DestinationDirectory");
     } catch (std::runtime_error & /*e*/) {
       g_log.error() << "To upload a file you need to provide a destination "
-                       "directory on " << m_SCARFComputeResource << "." << '\n';
+                       "directory on "
+                    << m_SCARFComputeResource << ".\n";
       throw;
     }
     doUploadFile(username, destDir, filename);
@@ -284,7 +286,8 @@ void SCARFTomoReconstruction::exec() {
       jobId = getPropertyValue("DownloadJobID");
     } catch (std::runtime_error & /*e*/) {
       g_log.error() << "To download a file you need to give the ID of a job "
-                       "running on " << m_SCARFComputeResource << "." << '\n';
+                       "running on "
+                    << m_SCARFComputeResource << ".\n";
       throw;
     }
     try {
@@ -453,7 +456,7 @@ void SCARFTomoReconstruction::doSubmit(const std::string &username) {
     g_log.error() << "You did not specify a the path to the parameter file "
                      "which is required to create a new reconstruction job. "
                      "Please provide "
-                     "a valid tomography reconstruction parameter file" << '\n';
+                     "a valid tomography reconstruction parameter file\n";
     throw;
   }
 

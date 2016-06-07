@@ -404,8 +404,7 @@ public:
     default:
       stringstream errss;
       errss << "Option " << option
-            << " is not supported by createInstrumentParameterWorkspace."
-            << '\n';
+            << " is not supported by createInstrumentParameterWorkspace.\n";
       errss << "Supported options are 1 (PG3 bank1). ";
       throw invalid_argument(errss.str());
       break;

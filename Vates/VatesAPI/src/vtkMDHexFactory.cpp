@@ -190,8 +190,7 @@ void vtkMDHexFactory::doCreate(
     }
 
     if (VERBOSE)
-      std::cout << tim << " to create " << imageSizeActual << " hexahedrons."
-                << '\n';
+      std::cout << tim << " to create " << imageSizeActual << " hexahedrons.\n";
 }
 
 //-------------------------------------------------------------------------------------------------

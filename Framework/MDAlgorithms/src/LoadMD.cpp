@@ -564,7 +564,7 @@ void LoadMD::doLoad(typename MDEventWorkspace<MDE, nd>::sptr ws) {
       bc->getFileIO()->setWriteBufferSize(cacheMemory);
 
       g_log.information() << "Setting a DiskBuffer cache size of " << mb
-                          << " MB, or " << cacheMemory << " events." << '\n';
+                          << " MB, or " << cacheMemory << " events.\n";
     }
   } // Not file back end
   else if (!m_BoxStructureAndMethadata) {
@@ -599,8 +599,8 @@ void LoadMD::doLoad(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   } else // box structure and metadata only
   {
   }
-  g_log.debug() << tim << " to create all the boxes and fill them with events."
-                << '\n';
+  g_log.debug() << tim
+                << " to create all the boxes and fill them with events.\n";
 
   // Box of ID 0 is the head box.
   ws->setBox(boxTree[0]);

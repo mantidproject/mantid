@@ -177,7 +177,7 @@ void IndirectInstrumentConfig::setInstrument(const QString &instrumentName) {
     m_instrumentSelector->setCurrentIndex(index);
   } else {
     g_log.information() << "Instrument " << instrumentName.toStdString()
-                        << " not found in current list, using default" << '\n';
+                        << " not found in current list, using default\n";
   }
 }
 
@@ -203,7 +203,7 @@ void IndirectInstrumentConfig::setAnalyser(const QString &analyserName) {
     m_uiForm.cbAnalyser->setCurrentIndex(index);
   } else {
     g_log.information() << "Analyser " << analyserName.toStdString()
-                        << " not found in current list, using default" << '\n';
+                        << " not found in current list, using default\n";
   }
 }
 
@@ -229,7 +229,7 @@ void IndirectInstrumentConfig::setReflection(const QString &reflectionName) {
     m_uiForm.cbReflection->setCurrentIndex(index);
   } else {
     g_log.information() << "Reflection " << reflectionName.toStdString()
-                        << " not found in current list, using default" << '\n';
+                        << " not found in current list, using default\n";
   }
 }
 

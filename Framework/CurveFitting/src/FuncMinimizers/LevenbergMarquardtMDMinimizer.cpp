@@ -92,8 +92,7 @@ bool LevenbergMarquardtMDMinimizer::iterate(size_t) {
 
   if (debug) {
     g_log.warning()
-        << "==========================================================="
-        << '\n';
+        << "===========================================================\n";
     g_log.warning() << "mu=" << m_mu << std::endl
                     << '\n';
   }
@@ -165,8 +164,7 @@ bool LevenbergMarquardtMDMinimizer::iterate(size_t) {
     for (size_t j = 0; j < n; ++j) {
       g_log.warning() << dx.get(j) << ' ';
     }
-    g_log.warning() << std::endl
-                    << '\n';
+    g_log.warning() << "\n\n";
   }
 
   // restore scaling
@@ -225,8 +223,7 @@ bool LevenbergMarquardtMDMinimizer::iterate(size_t) {
         g_log.warning() << m_errorString << '\n';
       }
       if (debug) {
-        g_log.warning() << "Successful fit, cost function didn't change."
-                        << '\n';
+        g_log.warning() << "Successful fit, cost function didn't change.\n";
       }
       return false;
     }
@@ -273,8 +270,7 @@ bool LevenbergMarquardtMDMinimizer::iterate(size_t) {
     m_F = m_leastSquares->val();
     if (debug) {
       g_log.warning()
-          << "Bad iteration, increase mu and revert changes to parameters."
-          << '\n';
+          << "Bad iteration, increase mu and revert changes to parameters.\n";
     }
   }
 

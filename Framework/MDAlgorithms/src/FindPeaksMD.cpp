@@ -367,7 +367,7 @@ void FindPeaksMD::findPeaks(typename MDEventWorkspace<MDE, nd>::sptr ws) {
       if (!badBox) {
         if (numBoxesFound++ >= m_maxPeaks) {
           g_log.notice() << "Number of peaks found exceeded the limit of "
-                         << m_maxPeaks << ". Stopping peak finding." << '\n';
+                         << m_maxPeaks << ". Stopping peak finding.\n";
           break;
         }
 
@@ -533,7 +533,7 @@ void FindPeaksMD::findPeaksHisto(
       if (!badBox) {
         if (numBoxesFound++ >= m_maxPeaks) {
           g_log.notice() << "Number of peaks found exceeded the limit of "
-                         << m_maxPeaks << ". Stopping peak finding." << '\n';
+                         << m_maxPeaks << ". Stopping peak finding.\n";
           break;
         }
 

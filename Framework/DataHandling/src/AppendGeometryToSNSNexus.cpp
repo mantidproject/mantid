@@ -79,8 +79,7 @@ void AppendGeometryToSNSNexus::exec() {
   g_log.warning() << "This is intended as a proof of principle and not a long "
                      "term implementation.\n";
   g_log.warning()
-      << "(the created arrays in the NeXus file will have the '_new' suffix)"
-      << '\n';
+      << "(the created arrays in the NeXus file will have the '_new' suffix)\n";
 
   // Retrieve filename from the properties
   m_filename = getPropertyValue("Filename");
@@ -269,8 +268,8 @@ void AppendGeometryToSNSNexus::exec() {
         }
         // Look for monitors
         else if (entry_iter->second == "NXmonitor") {
-          g_log.debug() << "Monitor called '" << entry_iter->first << "' found."
-                        << '\n';
+          g_log.debug() << "Monitor called '" << entry_iter->first
+                        << "' found.\n";
           nxfile.openGroup(entry_iter->first, "NXmonitor");
 
           Geometry::IComponent_const_sptr monitor =
@@ -298,8 +297,8 @@ void AppendGeometryToSNSNexus::exec() {
       }
 
     } else {
-      g_log.error() << "There are no NXentry nodes in the specified NeXus file."
-                    << '\n';
+      g_log.error()
+          << "There are no NXentry nodes in the specified NeXus file.\n";
     }
   }
 }
@@ -399,8 +398,7 @@ bool AppendGeometryToSNSNexus::runLoadNexusLogs(
   // Execute the Child Algorithm, catching errors without stopping.
   bool executionSuccessful(true);
   try {
-    alg->getLogger().information() << "Loading logs from the NeXus file..."
-                                   << '\n';
+    alg->getLogger().information() << "Loading logs from the NeXus file...\n";
     loadLogs->setPropertyValue("Filename", nexusFileName);
     loadLogs->setProperty<MatrixWorkspace_sptr>("Workspace", localWorkspace);
     loadLogs->executeAsChildAlg();

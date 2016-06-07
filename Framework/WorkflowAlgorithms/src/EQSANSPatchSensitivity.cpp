@@ -122,8 +122,7 @@ void EQSANSPatchSensitivity::exec() {
             pmap.addBool(det, "masked", false);
           }
         } catch (Kernel::Exception::NotFoundError &e) {
-          g_log.warning() << e.what() << " Found while setting mask bit"
-                          << '\n';
+          g_log.warning() << e.what() << " Found while setting mask bit\n";
         }
       }
     }

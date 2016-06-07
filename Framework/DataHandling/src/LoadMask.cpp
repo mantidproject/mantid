@@ -108,8 +108,7 @@ void LoadMask::exec() {
     loadISISMaskFile(filename);
     m_defaultToUse = true;
   } else {
-    g_log.error() << "File " << filename << " is not in supported format. "
-                  << '\n';
+    g_log.error() << "File " << filename << " is not in supported format. \n";
     return;
   }
 
@@ -189,8 +188,7 @@ void LoadMask::processMaskOnDetectors(bool tomask,
       else
         m_maskWS->dataY(index)[0] = 0;
     } else {
-      g_log.error() << "Pixel w/ ID = " << detid << " Cannot Be Located"
-                    << '\n';
+      g_log.error() << "Pixel w/ ID = " << detid << " Cannot Be Located\n";
     }
   }
 
@@ -221,8 +219,7 @@ void LoadMask::componentToDetectors(std::vector<std::string> componentnames,
       g_log.debug() << "Component ID = " << component->getComponentID() << '\n';
     else {
       // A non-exiting component.  Ignore
-      g_log.warning() << "Component " << componentname << " does not exist!"
-                      << '\n';
+      g_log.warning() << "Component " << componentname << " does not exist!\n";
       continue;
     }
 
@@ -344,8 +341,7 @@ void LoadMask::processMaskOnWorkspaceIndex(bool mask,
         // spectrum not found.  bad branch
         g_log.error()
             << "Spectrum " << specNo
-            << " does not have an entry in GroupWorkspace's spec2index map"
-            << '\n';
+            << " does not have an entry in GroupWorkspace's spec2index map\n";
         throw std::runtime_error("Logic error");
       } else {
         size_t wsindex = s2iter->second;
@@ -669,8 +665,7 @@ void LoadMask::parseRangeText(std::string inputstr,
     std::vector<std::string> ptemp;
     this->splitString(strpair, ptemp, "-");
     if (ptemp.size() != 2) {
-      g_log.error() << "Range string " << strpair << " has a wrong format!"
-                    << '\n';
+      g_log.error() << "Range string " << strpair << " has a wrong format!\n";
       throw std::invalid_argument("Wrong format");
     }
 
@@ -678,8 +673,7 @@ void LoadMask::parseRangeText(std::string inputstr,
     int32_t intstart = atoi(ptemp[0].c_str());
     int32_t intend = atoi(ptemp[1].c_str());
     if (intstart >= intend) {
-      g_log.error() << "Range string " << strpair << " has a reversed order"
-                    << '\n';
+      g_log.error() << "Range string " << strpair << " has a reversed order\n";
       throw std::invalid_argument("Wrong format");
     }
     pairs.push_back(intstart);

@@ -219,7 +219,7 @@ void Rebin::exec() {
   { //------- Workspace2D or other MatrixWorkspace ---------------------------
 
     if (!isHist) {
-      g_log.information() << "Rebin: Converting Data to Histogram." << '\n';
+      g_log.information() << "Rebin: Converting Data to Histogram.\n";
       Mantid::API::Algorithm_sptr ChildAlg =
           createChildAlgorithm("ConvertToHistogram");
       ChildAlg->initialize();
@@ -287,8 +287,7 @@ void Rebin::exec() {
     }
 
     if (!isHist) {
-      g_log.information() << "Rebin: Converting Data back to Data Points."
-                          << '\n';
+      g_log.information() << "Rebin: Converting Data back to Data Points.\n";
       Mantid::API::Algorithm_sptr ChildAlg =
           createChildAlgorithm("ConvertToPointData");
       ChildAlg->initialize();

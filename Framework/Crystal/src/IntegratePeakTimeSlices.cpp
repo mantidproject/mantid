@@ -2301,8 +2301,8 @@ bool IntegratePeakTimeSlices::isGoodFit(std::vector<double> const &params,
     std::string obj = " parameter ";
     if (!paramBad)
       obj = " error ";
-    g_log.debug() << "   Bad Slice." << obj << BadParamNum << " is not a number"
-                  << '\n';
+    g_log.debug() << "   Bad Slice." << obj << BadParamNum
+                  << " is not a number\n";
   }
 
   if (!GoodNums)
@@ -2371,7 +2371,7 @@ bool IntegratePeakTimeSlices::isGoodFit(std::vector<double> const &params,
   // intensity center
   if (params[IVXX] + params[IVYY] >
       2.6 * (params[IVXX] * params[IVYY] - params[IVXY] * params[IVXY])) {
-    g_log.debug() << "      Bad Slice. Too steep of an exponential" << '\n';
+    g_log.debug() << "      Bad Slice. Too steep of an exponential\n";
     return false;
   }
 

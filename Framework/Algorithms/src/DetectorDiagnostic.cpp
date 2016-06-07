@@ -504,8 +504,7 @@ MatrixWorkspace_sptr DetectorDiagnostic::integrateSpectra(
   MatrixWorkspace_sptr finalOutputW = outputW;
   if (outputWorkspace2D &&
       boost::dynamic_pointer_cast<EventWorkspace>(outputW)) {
-    g_log.debug() << "Converting output Event Workspace into a Workspace2D."
-                  << '\n';
+    g_log.debug() << "Converting output Event Workspace into a Workspace2D.\n";
     childAlg = createChildAlgorithm("ConvertToMatrixWorkspace", t0, t1);
     childAlg->setProperty("InputWorkspace", outputW);
     childAlg->executeAsChildAlg();

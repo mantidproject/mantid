@@ -77,7 +77,7 @@ void ProcessDasNexusLog::exec() {
   Kernel::TimeSeriesProperty<double> *tslog =
       dynamic_cast<Kernel::TimeSeriesProperty<double> *>(log);
   if (!tslog) {
-    g_log.error() << "Log " << inlogname << " is not time series log" << '\n';
+    g_log.error() << "Log " << inlogname << " is not time series log\n";
     throw std::invalid_argument("Log type error!");
   }
 
@@ -332,7 +332,7 @@ void ProcessDasNexusLog::checkLog(API::MatrixWorkspace_sptr ws,
   Kernel::TimeSeriesProperty<double> *tslog =
       dynamic_cast<Kernel::TimeSeriesProperty<double> *>(log);
   if (!tslog) {
-    g_log.error() << "Log " << logname << " is not time series log" << '\n';
+    g_log.error() << "Log " << logname << " is not time series log\n";
     throw std::invalid_argument("Log type error!");
   }
 
@@ -453,8 +453,7 @@ void ProcessDasNexusLog::writeLogtoFile(API::MatrixWorkspace_sptr ws,
   // 2. Write out
   std::ofstream ofs;
   ofs.open(outputfilename.c_str(), std::ios::out);
-  ofs << "# Absolute Time (nanosecond)\tPulse Time (nanosecond)\tTOF (ms)"
-      << '\n';
+  ofs << "# Absolute Time (nanosecond)\tPulse Time (nanosecond)\tTOF (ms)\n";
 
   Kernel::DateAndTime prevtime(0);
   std::vector<double> tofs;

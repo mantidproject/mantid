@@ -243,8 +243,8 @@ const std::string ParameterMap::diff(const ParameterMap &rhs,
         strOutput << "No matching RHS component name\n";
       }
       if (componentWithSameNameRHS && !parameterWithSameNameRHS) {
-        strOutput << "Found matching RHS component name but not parameter name"
-                  << '\n';
+        strOutput
+            << "Found matching RHS component name but not parameter name\n";
       }
       if (firstDiffOnly)
         return strOutput.str();

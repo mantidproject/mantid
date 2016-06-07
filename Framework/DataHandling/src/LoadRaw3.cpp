@@ -224,14 +224,12 @@ void LoadRaw3::exec() {
                                              m_lengthIn, m_lengthIn - 1);
         } catch (std::out_of_range &) {
           g_log.information() << "Separate Monitors option is selected and no "
-                                 "monitors in the selected specra range."
-                              << '\n';
+                                 "monitors in the selected specra range.\n";
           g_log.information()
               << "Error in creating one of the output workspaces\n";
         } catch (std::runtime_error &) {
           g_log.information() << "Separate Monitors option is selected,Error "
-                                 "in creating one of the output workspaces"
-                              << '\n';
+                                 "in creating one of the output workspaces\n";
         }
       } // end of separate Monitors
 

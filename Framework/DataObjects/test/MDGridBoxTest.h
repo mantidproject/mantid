@@ -87,17 +87,13 @@ public:
     BoxController *const bcc = b->getBoxController();
     delete b;
     if (DODEBUG) {
-      std::cout << sizeof(MDLeanEvent<3>) << " bytes per MDLeanEvent(3)"
-                << '\n';
-      std::cout << sizeof(MDLeanEvent<4>) << " bytes per MDLeanEvent(4)"
-                << '\n';
+      std::cout << sizeof(MDLeanEvent<3>) << " bytes per MDLeanEvent(3)\n";
+      std::cout << sizeof(MDLeanEvent<4>) << " bytes per MDLeanEvent(4)\n";
       std::cout << sizeof(std::mutex) << " bytes per Mutex\n";
       std::cout << sizeof(MDDimensionExtents<coord_t>)
                 << " bytes per MDDimensionExtents\n";
-      std::cout << sizeof(MDBox<MDLeanEvent<3>, 3>) << " bytes per MDBox(3)"
-                << '\n';
-      std::cout << sizeof(MDBox<MDLeanEvent<4>, 4>) << " bytes per MDBox(4)"
-                << '\n';
+      std::cout << sizeof(MDBox<MDLeanEvent<3>, 3>) << " bytes per MDBox(3)\n";
+      std::cout << sizeof(MDBox<MDLeanEvent<4>, 4>) << " bytes per MDBox(4)\n";
       std::cout << sizeof(MDGridBox<MDLeanEvent<3>, 3>)
                 << " bytes per MDGridBox(3)\n";
       std::cout << sizeof(MDGridBox<MDLeanEvent<4>, 4>)

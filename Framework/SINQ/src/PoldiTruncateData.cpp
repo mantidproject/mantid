@@ -167,8 +167,7 @@ void PoldiTruncateData::exec() {
     }
   } catch (std::invalid_argument) {
     m_log.error()
-        << "Cannot crop workspace. Please check the timing information."
-        << '\n';
+        << "Cannot crop workspace. Please check the timing information.\n";
     m_log.error() << "  Calculated bin count: " << getCalculatedBinCount()
                   << '\n';
     m_log.error() << "  Bin count in the workspace: " << getActualBinCount()

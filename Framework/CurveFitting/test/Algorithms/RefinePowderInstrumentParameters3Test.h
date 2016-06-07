@@ -176,8 +176,8 @@ public:
 
       for (mapiter = fitparamvalues.begin(); mapiter != fitparamvalues.end();
            ++mapiter) {
-        cout << "[P] " << mapiter->first << "\t = \t" << mapiter->second << "\t"
-             << '\n';
+        cout << "[P] " << mapiter->first << "\t = \t" << mapiter->second
+             << "\t\n";
       }
     }
 
@@ -460,11 +460,10 @@ public:
     ins.open(filename.c_str());
 
     if (!ins.is_open()) {
-      std::cout << "Data file " << filename << " cannot be opened. " << '\n';
+      std::cout << "Data file " << filename << " cannot be opened. \n";
       throw std::invalid_argument("Unable to open data fiile. ");
     } else {
-      std::cout << "Data file " << filename << " is opened for parsing. "
-                << '\n';
+      std::cout << "Data file " << filename << " is opened for parsing. \n";
     }
 
     char line[256];

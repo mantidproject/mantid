@@ -146,8 +146,7 @@ void SaveMask::exec() {
 
     for (size_t i = 0; i < idx0sts.size(); i++) {
       g_log.information() << "Section " << i << " : " << idx0sts[i] << "  ,  "
-                          << idx0eds[i] << " to be masked and recorded."
-                          << '\n';
+                          << idx0eds[i] << " to be masked and recorded.\n";
     }
   } // Only work for detid > 0
 

@@ -783,8 +783,7 @@ void GenerateEventsFilter::processMultipleValueFilters(double minvalue,
           << " with interval size = " << valueinterval << "; Log "
           << m_dblLog->name() << " has range " << minlogvalue << " to "
           << maxlogvalue
-          << ".  Therefore some workgroup index may not have any splitter."
-          << '\n';
+          << ".  Therefore some workgroup index may not have any splitter.\n";
     }
   }
 

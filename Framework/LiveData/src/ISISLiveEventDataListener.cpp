@@ -84,16 +84,15 @@ bool ISISLiveEventDataListener::connect(
     try {
       m_socket.connect(tempAddress); // BLOCKING connect
     } catch (...) {
-      g_log.error() << "Connection to " << tempAddress.toString() << " failed."
-                    << '\n';
+      g_log.error() << "Connection to " << tempAddress.toString()
+                    << " failed.\n";
       return false;
     }
   } else {
     try {
       m_socket.connect(address); // BLOCKING connect
     } catch (...) {
-      g_log.debug() << "Connection to " << address.toString() << " failed."
-                    << '\n';
+      g_log.debug() << "Connection to " << address.toString() << " failed.\n";
       return false;
     }
   }
@@ -421,7 +420,7 @@ void ISISLiveEventDataListener::loadInstrument(const std::string &instrName) {
   }
   const char *warningMessage = "Failed to load instrument ";
   try {
-    g_log.notice() << "Loading instrument " << instrName << " ... " << '\n';
+    g_log.notice() << "Loading instrument " << instrName << " ... \n";
     API::Algorithm_sptr alg =
         API::AlgorithmFactory::Instance().create("LoadInstrument", -1);
     alg->initialize();

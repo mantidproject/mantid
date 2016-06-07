@@ -143,8 +143,7 @@ void NexusTester::exec() {
     file.close();
     double seconds = tim.elapsedWallClock(false);
     double MBperSec = dataSizeMB / seconds;
-    g_log.notice() << tim << " to save the file = " << MBperSec << " MB/sec"
-                   << '\n';
+    g_log.notice() << tim << " to save the file = " << MBperSec << " MB/sec\n";
     this->setProperty("SaveSpeed", MBperSec);
   }
 

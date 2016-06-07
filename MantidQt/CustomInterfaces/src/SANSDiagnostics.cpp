@@ -408,18 +408,16 @@ void SANSDiagnostics::getSpectraList(
   } catch (std::out_of_range &) {
     if (detNum == 0) {
       g_log.error()
-          << "Error : The instrument does not have any RectangularDetectors "
-          << '\n';
+          << "Error : The instrument does not have any RectangularDetectors \n";
     } else if (detNum == 1) {
       g_log.error()
-          << "Error : The instrument  have only one  RectangularDetector"
-          << '\n';
+          << "Error : The instrument  have only one  RectangularDetector\n";
     }
     return;
   }
   if (!rectDet) {
-    g_log.error() << "Error when accessing the details of rectangular detector"
-                  << '\n';
+    g_log.error()
+        << "Error when accessing the details of rectangular detector\n";
     return;
   }
 
@@ -588,8 +586,7 @@ bool SANSDiagnostics::isValidSpectra(const QString &specMin,
     spec_max = boost::lexical_cast<int>(specMax.toStdString());
   } catch (boost::bad_lexical_cast &) {
     g_log.error()
-        << "Inavlid spectrum number found in  the selected detector bank "
-        << '\n';
+        << "Inavlid spectrum number found in  the selected detector bank \n";
     return false;
   }
   if (spec_min < 1) {
@@ -1230,7 +1227,7 @@ bool SANSDiagnostics::runsumRowColumn(const QString ipwsName,
 
   } catch (Exception::NotFoundError &) {
     g_log.error() << "Error when  trying to access the workspace "
-                  << ipwsName.toStdString() << " which is not loaded" << '\n';
+                  << ipwsName.toStdString() << " which is not loaded\n";
     return false;
   }
   if (opwsName.isEmpty()) {

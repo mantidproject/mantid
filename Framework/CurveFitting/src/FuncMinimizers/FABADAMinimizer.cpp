@@ -308,8 +308,7 @@ bool FABADAMinimizer::iterate(size_t) {
         API::IFunction_sptr fun = m_leastSquares->getFittingFunction();
         g_log.warning()
             << "Wrong convergence for parameter " + fun->parameterName(i) +
-                   ". Try to set a proper initial value for this parameter"
-            << '\n';
+                   ". Try to set a proper initial value for this parameter\n";
       }
     }
 

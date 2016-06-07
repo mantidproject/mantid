@@ -117,7 +117,7 @@ void ImggFormatsConvertPresenter::processConvert() {
     } else {
       std::stringstream msg;
       msg << "No images could be found in input path: " << inPS
-          << " with format " << inFormat << ". 0 images converted." << '\n';
+          << " with format " << inFormat << ". 0 images converted.\n";
       g_log.notice() << msg.str();
       m_view->userWarning("No images could be found", msg.str());
     }

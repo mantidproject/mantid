@@ -161,7 +161,7 @@ void LoadPreNexusMonitors::exec() {
     pNode = it.nextNode();
   }
 
-  g_log.information() << "Found " << nMonitors << " beam monitors." << '\n';
+  g_log.information() << "Found " << nMonitors << " beam monitors.\n";
 
   g_log.information() << "Number of Time Channels = " << tchannels << '\n';
 

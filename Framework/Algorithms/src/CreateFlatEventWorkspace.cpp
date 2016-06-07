@@ -76,8 +76,7 @@ void CreateFlatEventWorkspace::exec() {
   double dataMin, dataMax;
   inputWS->getEventXMinMax(dataMin, dataMax);
 
-  g_log.debug() << "Data Range (" << dataMin << " < x < " << dataMax << ")"
-                << '\n';
+  g_log.debug() << "Data Range (" << dataMin << " < x < " << dataMax << ")\n";
 
   // How many times do we need to replicate the extracted background region in
   // order to fill up

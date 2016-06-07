@@ -81,8 +81,7 @@ void HFIRLoad::moveToBeamCenter(API::MatrixWorkspace_sptr &dataWS,
     center_y = default_ctr_y_pix;
     g_log.information() << "Setting beam center to ["
                         << Poco::NumberFormatter::format(center_x, 1) << ", "
-                        << Poco::NumberFormatter::format(center_y, 1) << "]"
-                        << '\n';
+                        << Poco::NumberFormatter::format(center_y, 1) << "]\n";
     return;
   }
 

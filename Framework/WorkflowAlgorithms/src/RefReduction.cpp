@@ -175,8 +175,7 @@ MatrixWorkspace_sptr RefReduction::processData(const std::string polarization) {
   const std::vector<int> peakRange = getProperty("SignalPeakPixelRange");
   if (peakRange.size() < 2) {
     g_log.error()
-        << "SignalPeakPixelRange parameter should be a vector of two values"
-        << '\n';
+        << "SignalPeakPixelRange parameter should be a vector of two values\n";
     throw std::invalid_argument(
         "SignalPeakPixelRange parameter should be a vector of two values");
   }
@@ -671,9 +670,8 @@ double RefReduction::calculateAngleREFM(MatrixWorkspace_sptr workspace) {
   if (ref_pix == 0 || isEmpty(ref_pix)) {
     const std::vector<int> peakRange = getProperty("SignalPeakPixelRange");
     if (peakRange.size() < 2) {
-      g_log.error()
-          << "SignalPeakPixelRange parameter should be a vector of two values"
-          << '\n';
+      g_log.error() << "SignalPeakPixelRange parameter should be a vector of "
+                       "two values\n";
       throw std::invalid_argument(
           "SignalPeakPixelRange parameter should be a vector of two values");
     }

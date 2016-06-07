@@ -414,8 +414,7 @@ void ConfigServiceImpl::configureLogging() {
         if (fp == nullptr) {
           std::cerr
               << "Error writing to log file path given in properties file: \""
-              << m_logFilePath << "\". Will use a default path instead."
-              << '\n';
+              << m_logFilePath << "\". Will use a default path instead.\n";
           // Clear the path; this will make it use the default
           m_logFilePath = "";
         } else
@@ -423,7 +422,7 @@ void ConfigServiceImpl::configureLogging() {
       } catch (std::exception &) {
         std::cerr
             << "Error writing to log file path given in properties file: \""
-            << m_logFilePath << "\". Will use a default path instead." << '\n';
+            << m_logFilePath << "\". Will use a default path instead.\n";
         // ERROR! Maybe the file is not writable!
         // Clear the path; this will make it use the default
         m_logFilePath = "";
@@ -648,40 +647,31 @@ void ConfigServiceImpl::createUserPropertiesFile() const {
                "found in the Mantid.Properties file\n";
     filestr << "# As this file will not be replaced with futher installations "
                "of Mantid it is a safe place to put \n";
-    filestr << "# properties that suit your particular installation." << '\n';
+    filestr << "# properties that suit your particular installation.\n";
     filestr << "#\n";
     filestr << "# See here for a list of possible options:\n";
     filestr << "# "
                "http://www.mantidproject.org/"
-               "Properties_File#Mantid.User.Properties\n";
-    filestr << '\n';
+               "Properties_File#Mantid.User.Properties\n\n";
     filestr << "##\n";
     filestr << "## GENERAL\n";
-    filestr << "##\n";
-    filestr << '\n';
-    filestr << "## Set the number of algorithm properties to retain" << '\n';
-    filestr << "#algorithms.retained=90\n";
-    filestr << '\n';
-    filestr << "## Hides catagories from the algorithm list in MantidPlot"
-            << '\n';
-    filestr << "#algorithms.catagories.hidden=Muons,Inelastic\n";
-    filestr << '\n';
-    filestr << "## Set the maximum number of coures used to run algorithms over"
-            << '\n';
-    filestr << "#MultiThreaded.MaxCores=4\n";
-    filestr << '\n';
+    filestr << "##\n\n";
+    filestr << "## Set the number of algorithm properties to retain\n";
+    filestr << "#algorithms.retained=90\n\n";
+    filestr << "## Hides catagories from the algorithm list in MantidPlot\n";
+    filestr << "#algorithms.catagories.hidden=Muons,Inelastic\n\n";
+    filestr
+        << "## Set the maximum number of coures used to run algorithms over\n";
+    filestr << "#MultiThreaded.MaxCores=4\n\n";
     filestr << "##\n";
     filestr << "## FACILITY AND INSTRUMENT\n";
-    filestr << "##\n";
-    filestr << '\n';
+    filestr << "##\n\n";
     filestr << "## Sets the default facility\n";
     filestr << "## e.g.: ISIS, SNS, ILL\n";
-    filestr << "default.facility=\n";
-    filestr << '\n';
+    filestr << "default.facility=\n\n";
     filestr << "## Sets the default instrument\n";
     filestr << "## e.g. IRIS, HET, NIMROD\n";
-    filestr << "default.instrument=\n";
-    filestr << '\n';
+    filestr << "default.instrument=\n\n";
     filestr << '\n';
     filestr << "## Sets the Q.convention\n";
     filestr << "## Set to Crystallography for kf-ki instead of default "
@@ -689,52 +679,39 @@ void ConfigServiceImpl::createUserPropertiesFile() const {
     filestr << "#Q.convention=Crystallography\n";
     filestr << "##\n";
     filestr << "## DIRECTORIES\n";
-    filestr << "##\n";
-    filestr << '\n';
+    filestr << "##\n\n";
     filestr << "## Sets a list of directories (separated by semi colons) to "
                "search for data\n";
-    filestr << "#datasearch.directories=../data;../isis/data\n";
-    filestr << '\n';
+    filestr << "#datasearch.directories=../data;../isis/data\n\n";
     filestr << "## Set a list (separated by semi colons) of directories to "
                "look for additional Python scripts\n";
-    filestr << "#pythonscripts.directories=../scripts;../docs/MyScripts"
-            << '\n';
-    filestr << '\n';
-    filestr << "## Uncomment to enable archive search - ICat and Orbiter"
-            << '\n';
-    filestr << "#datasearch.searcharchive=On\n";
-    filestr << '\n';
+    filestr << "#pythonscripts.directories=../scripts;../docs/MyScripts\n\n";
+    filestr << "## Uncomment to enable archive search - ICat and Orbiter\n";
+    filestr << "#datasearch.searcharchive=On\n\n";
     filestr << "## Sets default save directory\n";
-    filestr << "#defaultsave.directory=../data\n";
-    filestr << '\n';
+    filestr << "#defaultsave.directory=../data\n\n";
     filestr << "##\n";
     filestr << "## LOGGING\n";
-    filestr << "##\n";
-    filestr << '\n';
+    filestr << "##\n\n";
     filestr << "## Uncomment to change logging level\n";
     filestr << "## Default is information\n";
-    filestr << "## Valid values are: error, warning, notice, information, debug"
-            << '\n';
-    filestr << "#logging.loggers.root.level=information\n";
-    filestr << '\n';
-    filestr << "## Sets the lowest level messages to be logged to file" << '\n';
+    filestr
+        << "## Valid values are: error, warning, notice, information, debug\n";
+    filestr << "#logging.loggers.root.level=information\n\n";
+    filestr << "## Sets the lowest level messages to be logged to file\n";
     filestr << "## Default is warning\n";
-    filestr << "## Valid values are: error, warning, notice, information, debug"
-            << '\n';
-    filestr << "#logging.channels.fileFilterChannel.level=debug\n";
-    filestr << '\n';
+    filestr
+        << "## Valid values are: error, warning, notice, information, debug\n";
+    filestr << "#logging.channels.fileFilterChannel.level=debug\n\n";
     filestr << "## Sets the file to write logs to\n";
-    filestr << "#logging.channels.fileChannel.path=../mantid.log\n";
-    filestr << '\n';
+    filestr << "#logging.channels.fileChannel.path=../mantid.log\n\n";
     filestr << "##\n";
     filestr << "## MantidPlot\n";
-    filestr << "##\n";
-    filestr << '\n';
+    filestr << "##\n\n";
     filestr << "## Show invisible workspaces\n";
     filestr << "#MantidOptions.InvisibleWorkspaces=0\n";
     filestr << "## Re-use plot instances for different plot types\n";
-    filestr << "#MantidOptions.ReusePlotInstances=Off\n";
-    filestr << '\n';
+    filestr << "#MantidOptions.ReusePlotInstances=Off\n\n";
     filestr << "## Uncomment to disable use of OpenGL to render unwrapped "
                "instrument views\n";
     filestr << "#MantidOptions.InstrumentView.UseOpenGL=Off\n";

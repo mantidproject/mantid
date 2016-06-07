@@ -209,8 +209,8 @@ LoadIsawPeaks::ApplyCalibInfo(std::ifstream &in, std::string startChar,
         getCachedBankByName(bankName, instr_old);
 
     if (!bank) {
-      g_log.error() << "There is no bank " << bankName << " in the instrument"
-                    << '\n';
+      g_log.error() << "There is no bank " << bankName
+                    << " in the instrument\n";
       throw std::length_error("There is no bank " + bankName +
                               " in the instrument");
     }

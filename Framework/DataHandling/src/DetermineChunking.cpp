@@ -195,9 +195,8 @@ void DetermineChunking::exec() {
             file.closeData();
             file.closeGroup();
           } catch (::NeXus::Exception &) {
-            g_log.error()
-                << "Unable to find total counts to determine chunking strategy."
-                << '\n';
+            g_log.error() << "Unable to find total counts to determine "
+                             "chunking strategy.\n";
           }
         }
       }
@@ -222,8 +221,7 @@ void DetermineChunking::exec() {
 
     // Read in the number of spectra in the RAW file
     m_numberOfSpectra = iraw.t_nsp1;
-    g_log.notice() << "Spectra size is " << m_numberOfSpectra << " spectra"
-                   << '\n';
+    g_log.notice() << "Spectra size is " << m_numberOfSpectra << " spectra\n";
     fclose(file);
   }
   // Histo Nexus
@@ -239,8 +237,7 @@ void DetermineChunking::exec() {
     std::vector<std::string> bankNames;
     lp.countPixels(filename, entry_name, bankNames);
     m_numberOfSpectra = static_cast<int>(lp.m_numPixels);
-    g_log.notice() << "Spectra size is " << m_numberOfSpectra << " spectra"
-                   << '\n';
+    g_log.notice() << "Spectra size is " << m_numberOfSpectra << " spectra\n";
   } else {
     throw(std::invalid_argument("unsupported file type"));
   }
@@ -313,9 +310,8 @@ std::string DetermineChunking::setTopEntryName(std::string filename) {
       }
     }
   } catch (const std::exception &) {
-    g_log.error()
-        << "Unable to determine name of top level NXentry - assuming \"entry\"."
-        << '\n';
+    g_log.error() << "Unable to determine name of top level NXentry - assuming "
+                     "\"entry\".\n";
     top_entry_name = "entry";
   }
   return top_entry_name;

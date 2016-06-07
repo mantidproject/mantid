@@ -564,13 +564,12 @@ void PoldiPeakSearch::exec() {
 
   if (xUnit->caption() == "") {
     g_log.information()
-        << "   Workspace does not have unit, defaulting to MomentumTransfer."
-        << '\n';
+        << "   Workspace does not have unit, defaulting to MomentumTransfer.\n";
 
     xUnit = UnitFactory::Instance().create("MomentumTransfer");
   } else {
-    g_log.information() << "   Unit of workspace is " << xUnit->caption() << "."
-                        << '\n';
+    g_log.information() << "   Unit of workspace is " << xUnit->caption()
+                        << ".\n";
   }
 
   setMinimumDistance(getProperty("MinimumPeakSeparation"));
@@ -586,7 +585,7 @@ void PoldiPeakSearch::exec() {
 
   MantidVec summedNeighborCounts = getNeighborSums(correlatedCounts);
   g_log.information() << "   Neighboring counts summed, contains "
-                      << summedNeighborCounts.size() << " data points." << '\n';
+                      << summedNeighborCounts.size() << " data points.\n";
 
   std::list<MantidVec::const_iterator> peakPositionsSummed =
       findPeaks(summedNeighborCounts.begin(), summedNeighborCounts.end());
@@ -603,8 +602,8 @@ void PoldiPeakSearch::exec() {
       mapPeakPositionsToCorrelationData(peakPositionsSummed,
                                         summedNeighborCounts.begin(),
                                         correlatedCounts.begin());
-  g_log.information() << "   Peak positions transformed to original spectrum."
-                      << '\n';
+  g_log.information()
+      << "   Peak positions transformed to original spectrum.\n";
 
   /* Since intensities are required for filtering, they are extracted from the
    * original count data,

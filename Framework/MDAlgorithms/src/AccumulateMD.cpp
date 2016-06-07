@@ -354,8 +354,8 @@ void AccumulateMD::exec() {
     IMDEventWorkspace_sptr out_ws = createMDWorkspace(
         input_data, psi, gl, gs, efix, out_filename, filebackend);
     this->setProperty("OutputWorkspace", out_ws);
-    g_log.notice() << this->name() << " successfully created a clean workspace"
-                   << '\n';
+    g_log.notice() << this->name()
+                   << " successfully created a clean workspace\n";
     this->progress(1.0);
     return; // POSSIBLE EXIT POINT
   }
