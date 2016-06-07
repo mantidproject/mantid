@@ -131,8 +131,7 @@ SpectraInfo extractMappingInfo(NXEntry &mtd_entry, Logger &logger) {
     detectorList = detlist_group.sharedBuffer();
   } catch (std::runtime_error &) {
     logger.information() << "detector_list block not found. The workspace will "
-                            "not contain any detector information."
-                         << '\n';
+                            "not contain any detector information." << '\n';
     return SpectraInfo();
   }
 

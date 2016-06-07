@@ -589,8 +589,7 @@ CICatHelper::getNumberOfSearchResults(const CatalogSearchParam &inputs) {
   }
 
   g_log.debug() << "CICatHelper::getNumberOfSearchResults -> Number of results "
-                   "returned is: { "
-                << numOfResults << " }\n";
+                   "returned is: { " << numOfResults << " }\n";
 
   return numOfResults;
 }

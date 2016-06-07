@@ -226,24 +226,20 @@ std::vector<size_t> GetEi::getMonitorWsIndexs(
   auto wsInds = WS->getIndicesFromSpectra(specNumTemp);
 
   if (wsInds.size() != 1) { // the monitor spectrum isn't present in the
-                            // workspace, we can't continue from here
-                            g_log.error() << "Couldn't find the first monitor "
-                                             "spectrum, number "
-                                          << specNum1 << '\n';
-                            throw Exception::NotFoundError(
-                                "GetEi::getMonitorWsIndexs()", specNum1);
+    // workspace, we can't continue from here
+    g_log.error() << "Couldn't find the first monitor "
+                     "spectrum, number " << specNum1 << '\n';
+    throw Exception::NotFoundError("GetEi::getMonitorWsIndexs()", specNum1);
   }
 
   // nowe the second monitor
   specNumTemp[0] = specNum2;
   auto wsIndexTemp = WS->getIndicesFromSpectra(specNumTemp);
   if (wsIndexTemp.size() != 1) { // the monitor spectrum isn't present in the
-                                 // workspace, we can't continue from here
-                                 g_log.error() << "Couldn't find the second "
-                                                  "monitor spectrum, number "
-                                               << specNum2 << '\n';
-                                 throw Exception::NotFoundError(
-                                     "GetEi::getMonitorWsIndexs()", specNum2);
+    // workspace, we can't continue from here
+    g_log.error() << "Couldn't find the second "
+                     "monitor spectrum, number " << specNum2 << '\n';
+    throw Exception::NotFoundError("GetEi::getMonitorWsIndexs()", specNum2);
   }
 
   wsInds.push_back(wsIndexTemp[0]);

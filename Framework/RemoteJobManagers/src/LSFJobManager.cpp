@@ -87,16 +87,15 @@ void LSFJobManager::abortRemoteJob(const std::string &jobID) {
     if (std::string::npos != resp.find("<errMsg>")) {
       g_log.warning() << "Killed job with Id " << jobID
                       << " but got what looks like an "
-                         "error message as response: "
-                      << extractPACErrMsg(resp) << '\n';
+                         "error message as response: " << extractPACErrMsg(resp)
+                      << '\n';
     } else if (std::string::npos != resp.find("<actionMsg>")) {
       g_log.notice() << "Killed job with Id" << jobID << ".\n";
       g_log.debug() << "Response from server: " << resp << '\n';
     } else {
       g_log.warning() << "Killed job with Id" << jobID
                       << " but got what a response "
-                         "that I do not recognize: "
-                      << resp << '\n';
+                         "that I do not recognize: " << resp << '\n';
     }
   } else {
     throw std::runtime_error(
@@ -202,8 +201,7 @@ LSFJobManager::queryAllRemoteJobs() const {
                         "information in output properties.\n";
     } else {
       g_log.warning() << "Queried the status of jobs but got what looks "
-                         "like an error message as response: "
-                      << resp << '\n';
+                         "like an error message as response: " << resp << '\n';
     }
     g_log.notice() << "Queried job status successfully.\n";
     g_log.debug() << "Response from server: " << resp << '\n';
@@ -360,8 +358,8 @@ LSFJobManager::queryRemoteJob(const std::string &jobID) const {
     } else {
       g_log.warning() << "Queried job status (Id " << jobID
                       << " ) but got what "
-                         "looks like an error message as response: "
-                      << resp << '\n';
+                         "looks like an error message as response: " << resp
+                      << '\n';
     }
   } else {
     throw std::runtime_error("Failed to obtain job (Id:" + jobID +
@@ -544,8 +542,7 @@ std::string LSFJobManager::submitRemoteJob(const std::string &transactionID,
     if (std::string::npos != resp.find("<errMsg>")) {
       g_log.warning()
           << "Submitted job but got a a response that seems to contain "
-             "an error message : "
-          << extractPACErrMsg(ss.str()) << '\n';
+             "an error message : " << extractPACErrMsg(ss.str()) << '\n';
     } else {
       // get job id number
       const std::string idTag = "<id>";
@@ -580,8 +577,7 @@ std::string LSFJobManager::submitRemoteJob(const std::string &transactionID,
            "not seem well formed. Job ID string from server: '" +
                jobID + "'. Detailed error when tryint to interpret the code "
                        "returned as an integer: " +
-               e.what()
-        << '\n';
+               e.what() << '\n';
   }
 
   return jobID;
@@ -1165,8 +1161,7 @@ void LSFJobManager::getOneJobFile(const std::string &jobId,
       // log an error but potentially continue with other files
       g_log.error()
           << "Download failed. You may not have the required permissions "
-             "or the file may not be available: "
-          << remotePath << '\n';
+             "or the file may not be available: " << remotePath << '\n';
     }
   } else {
     throw std::runtime_error(

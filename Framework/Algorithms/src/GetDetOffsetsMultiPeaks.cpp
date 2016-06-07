@@ -1328,8 +1328,7 @@ void GetDetOffsetsMultiPeaks::makeFitSummary() {
   if (0 == numunmasked) {
     g_log.warning()
         << "Found 0 unmasked rows in the spectra info table. "
-           "Cannot calculate Chi-sq sensibly. it's value will be NaN"
-        << '\n';
+           "Cannot calculate Chi-sq sensibly. it's value will be NaN" << '\n';
     avgchi2 = NAN;
   } else {
     avgchi2 = sumchi2 / static_cast<double>(numunmasked);

@@ -2259,8 +2259,7 @@ bool IntegratePeakTimeSlices::isGoodFit(std::vector<double> const &params,
 
     g_log.debug() << "   Bad Slice. Negative Counts= "
                   << m_AttributeValues->StatBaseVals(IIntensities) -
-                         params[Ibk] * ncells
-                  << '\n';
+                         params[Ibk] * ncells << '\n';
     ;
     return false;
   }
@@ -2275,8 +2274,7 @@ bool IntegratePeakTimeSlices::isGoodFit(std::vector<double> const &params,
                    // background
   {
     g_log.debug() << "   Bad Slice. Fitted Intensity & Observed "
-                     "Intensity(-back) too different. ratio="
-                  << x << '\n';
+                     "Intensity(-back) too different. ratio=" << x << '\n';
 
     return false;
   }

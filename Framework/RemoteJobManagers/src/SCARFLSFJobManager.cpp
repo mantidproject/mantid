@@ -129,8 +129,7 @@ bool SCARFLSFJobManager::ping() {
       ok = true;
     } else {
       g_log.warning() << "Pinged compute resource but got what looks like an "
-                         "error message: "
-                      << resp << '\n';
+                         "error message: " << resp << '\n';
     }
   } else {
     throw std::runtime_error(

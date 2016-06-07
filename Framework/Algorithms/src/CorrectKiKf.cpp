@@ -299,9 +299,8 @@ void CorrectKiKf::execEvent() {
   if (inputWS->getNumberEvents() != outputWS->getNumberEvents()) {
     g_log.information() << "Ef <= 0 or Ei <= 0 for "
                         << inputWS->getNumberEvents() -
-                               outputWS->getNumberEvents()
-                        << " events, out of " << inputWS->getNumberEvents()
-                        << '\n';
+                               outputWS->getNumberEvents() << " events, out of "
+                        << inputWS->getNumberEvents() << '\n';
     if (efixedProp == EMPTY_DBL())
       g_log.information() << "Try to set fixed energy\n";
   }

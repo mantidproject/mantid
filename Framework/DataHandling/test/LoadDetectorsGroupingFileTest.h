@@ -316,8 +316,7 @@ public:
        << "# Group 3\n"
        << "333\n"
        << "2\n"
-       << " 6   -7\n"
-       << '\n';
+       << " 6   -7\n" << '\n';
 
     ScopedFile file(ss.str(), "test_mapfile_ranges.map");
 

@@ -2303,8 +2303,7 @@ void InstrumentDefinitionParser::setComponentLinks(
         // user, and throw an exception.
         if (!detector) {
           g_log.error() << "Error whilst loading parameters. No detector "
-                           "found with id '"
-                        << detid << "'\n";
+                           "found with id '" << detid << "'\n";
           g_log.error() << "Please check that your detectors' ids are correct."
                         << '\n';
           throw Kernel::Exception::InstrumentDefinitionError(

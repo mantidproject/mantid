@@ -179,8 +179,7 @@ void LoadNexusMonitors2::exec() {
     if (!m_allMonitorsHaveHistoData) {
       g_log.information() << "Cannot load monitors as histogram data. Loading "
                              "as events even if the opposite was requested by "
-                             "disabling the property MonitorsAsEvents"
-                          << '\n';
+                             "disabling the property MonitorsAsEvents" << '\n';
       monitorsAsEvents = true;
     }
 

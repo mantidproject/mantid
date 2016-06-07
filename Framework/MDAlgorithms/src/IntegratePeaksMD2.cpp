@@ -316,8 +316,8 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
                             std::max(BackgroundOuterRadius, PeakRadius));
     if (edge < std::max(BackgroundOuterRadius, PeakRadius)) {
       g_log.warning() << "Warning: sphere/cylinder for integration is off edge "
-                         "of detector for peak "
-                      << i << "; radius of edge =  " << edge << '\n';
+                         "of detector for peak " << i
+                      << "; radius of edge =  " << edge << '\n';
       if (!integrateEdge) {
         if (replaceIntensity) {
           p.setIntensity(0.0);

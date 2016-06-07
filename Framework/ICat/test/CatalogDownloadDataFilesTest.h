@@ -254,8 +254,8 @@ public:
     float diff = float(end - start) / CLOCKS_PER_SEC;
 
     ofs << "Time taken for http download from mantidwebserver over internet "
-           "for a small file of size 1KB is "
-        << std::fixed << std::setprecision(2) << diff << " seconds\n";
+           "for a small file of size 1KB is " << std::fixed
+        << std::setprecision(2) << diff << " seconds\n";
 
     ICatTestHelper::logout();
 

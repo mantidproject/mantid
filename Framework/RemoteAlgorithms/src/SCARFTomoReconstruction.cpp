@@ -211,8 +211,7 @@ void SCARFTomoReconstruction::exec() {
     g_log.error()
         << "To use this algorithm to perform the requested action "
            "you need to give a valid username on the compute resource" +
-               m_SCARFComputeResource
-        << '\n';
+               m_SCARFComputeResource << '\n';
     throw;
   }
   // all actions that require at least a username
@@ -258,8 +257,7 @@ void SCARFTomoReconstruction::exec() {
       jobId = getPropertyValue("CancelJobID");
     } catch (std::runtime_error & /*e*/) {
       g_log.error() << "To cancel a job you need to give the ID of a job "
-                       "running on "
-                    << m_SCARFComputeResource << "." << '\n';
+                       "running on " << m_SCARFComputeResource << "." << '\n';
       throw;
     }
     doCancel(username, jobId);
@@ -276,8 +274,7 @@ void SCARFTomoReconstruction::exec() {
       destDir = getPropertyValue("DestinationDirectory");
     } catch (std::runtime_error & /*e*/) {
       g_log.error() << "To upload a file you need to provide a destination "
-                       "directory on "
-                    << m_SCARFComputeResource << "." << '\n';
+                       "directory on " << m_SCARFComputeResource << "." << '\n';
       throw;
     }
     doUploadFile(username, destDir, filename);
@@ -287,8 +284,7 @@ void SCARFTomoReconstruction::exec() {
       jobId = getPropertyValue("DownloadJobID");
     } catch (std::runtime_error & /*e*/) {
       g_log.error() << "To download a file you need to give the ID of a job "
-                       "running on "
-                    << m_SCARFComputeResource << "." << '\n';
+                       "running on " << m_SCARFComputeResource << "." << '\n';
       throw;
     }
     try {
@@ -457,8 +453,7 @@ void SCARFTomoReconstruction::doSubmit(const std::string &username) {
     g_log.error() << "You did not specify a the path to the parameter file "
                      "which is required to create a new reconstruction job. "
                      "Please provide "
-                     "a valid tomography reconstruction parameter file"
-                  << '\n';
+                     "a valid tomography reconstruction parameter file" << '\n';
     throw;
   }
 
@@ -524,9 +519,8 @@ void SCARFTomoReconstruction::doSubmit(const std::string &username) {
     if (std::string::npos != resp.find("<errMsg>")) {
       g_log.warning()
           << "Submitted job but got a a response that seems to contain "
-             "an error message from "
-          << m_SCARFComputeResource << ": " << extractPACErrMsg(ss.str())
-          << '\n';
+             "an error message from " << m_SCARFComputeResource << ": "
+          << extractPACErrMsg(ss.str()) << '\n';
     } else {
       g_log.notice() << "Submitted job successfully.\n";
       g_log.debug() << "Response from server: " << resp << '\n';
@@ -589,8 +583,7 @@ void SCARFTomoReconstruction::doQueryStatus(const std::string &username) {
                         "information in output properties.\n";
     } else {
       g_log.warning() << "Queried the status of jobs but got what looks "
-                         "like an error message as response: "
-                      << resp << '\n';
+                         "like an error message as response: " << resp << '\n';
     }
     g_log.notice() << "Queried job status successfully.\n";
     g_log.debug() << "Response from server: " << resp << '\n';
@@ -659,8 +652,8 @@ void SCARFTomoReconstruction::doQueryStatusById(const std::string &username,
     } else {
       g_log.warning() << "Queried job status (Id " << jobId
                       << " ) but got what "
-                         "looks like an error message as response: "
-                      << resp << '\n';
+                         "looks like an error message as response: " << resp
+                      << '\n';
     }
   } else {
     throw std::runtime_error("Failed to obtain job (Id:" + jobId +
@@ -712,8 +705,7 @@ bool SCARFTomoReconstruction::doPing() {
       ok = true;
     } else {
       g_log.warning() << "Pinged compute resource but got what looks like an "
-                         "error message: "
-                      << resp << '\n';
+                         "error message: " << resp << '\n';
     }
   } else {
     throw std::runtime_error(
@@ -773,16 +765,15 @@ void SCARFTomoReconstruction::doCancel(const std::string &username,
     if (std::string::npos != resp.find("<errMsg>")) {
       g_log.warning() << "Killed job with Id" << jobId
                       << " but got what looks like an "
-                         "error message as response: "
-                      << extractPACErrMsg(resp) << '\n';
+                         "error message as response: " << extractPACErrMsg(resp)
+                      << '\n';
     } else if (std::string::npos != resp.find("<actionMsg>")) {
       g_log.notice() << "Killed job with Id" << jobId << ".\n";
       g_log.debug() << "Response from server: " << resp << '\n';
     } else {
       g_log.warning() << "Killed job with Id" << jobId
                       << " but got what a response "
-                         "that I do not recognize: "
-                      << resp << '\n';
+                         "that I do not recognize: " << resp << '\n';
     }
   } else {
     throw std::runtime_error(
@@ -1392,8 +1383,8 @@ void SCARFTomoReconstruction::getOneJobFile(const std::string &jobId,
       // log an error but potentially continue with other files
       g_log.error()
           << "Download failed. You may not have the required permissions "
-             "or the file may not be available on "
-          << m_SCARFComputeResource << ": " << remotePath << '\n';
+             "or the file may not be available on " << m_SCARFComputeResource
+          << ": " << remotePath << '\n';
     }
   } else {
     throw std::runtime_error(

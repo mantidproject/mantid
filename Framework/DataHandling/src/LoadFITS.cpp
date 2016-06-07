@@ -329,8 +329,7 @@ void LoadFITS::loadHeader(const std::string &filePath, FITSInfo &header) {
                  "offset (" +
                      m_headerOffsetKey + " = " +
                      header.headerKeys[m_headerOffsetKey] +
-                     ") has a fractional part, and it will be ignored!"
-              << '\n';
+                     ") has a fractional part, and it will be ignored!" << '\n';
         }
         header.offset = static_cast<int>(doff);
       } catch (std::exception &e) {
@@ -379,16 +378,16 @@ void LoadFITS::headerSanityCheck(const FITSInfo &hdr,
     valid = false;
     g_log.error() << "File " << hdr.filePath
                   << ": the number of pixels in the first dimension differs "
-                     "from the first file loaded ("
-                  << hdrFirst.filePath << "): " << hdr.axisPixelLengths[0]
+                     "from the first file loaded (" << hdrFirst.filePath
+                  << "): " << hdr.axisPixelLengths[0]
                   << " != " << hdrFirst.axisPixelLengths[0] << '\n';
   }
   if (hdr.axisPixelLengths[1] != hdrFirst.axisPixelLengths[1]) {
     valid = false;
     g_log.error() << "File " << hdr.filePath
                   << ": the number of pixels in the second dimension differs"
-                     "from the first file loaded ("
-                  << hdrFirst.filePath << "): " << hdr.axisPixelLengths[0]
+                     "from the first file loaded (" << hdrFirst.filePath
+                  << "): " << hdr.axisPixelLengths[0]
                   << " != " << hdrFirst.axisPixelLengths[0] << '\n';
   }
 

@@ -175,13 +175,11 @@ void IntegratePeaksMD::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   if (CoordinatesToUse == Kernel::QLab &&
       CoordinatesToUseStr != "Q (lab frame)")
     g_log.warning() << "Warning: used Q (lab frame) coordinates for MD "
-                       "workspace, not CoordinatesToUse from input "
-                    << '\n';
+                       "workspace, not CoordinatesToUse from input " << '\n';
   else if (CoordinatesToUse == Kernel::QSample &&
            CoordinatesToUseStr != "Q (sample frame)")
     g_log.warning() << "Warning: used Q (sample frame) coordinates for MD "
-                       "workspace, not CoordinatesToUse from input "
-                    << '\n';
+                       "workspace, not CoordinatesToUse from input " << '\n';
   else if (CoordinatesToUse == Kernel::HKL && CoordinatesToUseStr != "HKL")
     g_log.warning() << "Warning: used HKL coordinates for MD workspace, not "
                        "CoordinatesToUse from input \n";
@@ -294,16 +292,14 @@ void IntegratePeaksMD::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
     if (BackgroundOuterRadius > PeakRadius) {
       if (!detectorQ(p.getQLabFrame(), BackgroundOuterRadius)) {
         g_log.warning() << "Warning: sphere/cylinder for integration is off "
-                           "edge of detector for peak "
-                        << i << '\n';
+                           "edge of detector for peak " << i << '\n';
         if (!integrateEdge)
           continue;
       }
     } else {
       if (!detectorQ(p.getQLabFrame(), PeakRadius)) {
         g_log.warning() << "Warning: sphere/cylinder for integration is off "
-                           "edge of detector for peak "
-                        << i << '\n';
+                           "edge of detector for peak " << i << '\n';
         if (!integrateEdge)
           continue;
       }

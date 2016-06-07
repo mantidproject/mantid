@@ -562,8 +562,7 @@ bool GetAllEi::peakGuess(const API::MatrixWorkspace_sptr &inputWS, size_t index,
                                boost::lexical_cast<std::string>(
                                    stay_still_count) +
                                " Wrong energy or noisy peak at Ei=" +
-                               boost::lexical_cast<std::string>(Ei)
-                        << '\n';
+                               boost::lexical_cast<std::string>(Ei) << '\n';
   }
   g_log.debug() << "*Performed: " + boost::lexical_cast<std::string>(ic) +
                        " averages for spectra " +
@@ -661,8 +660,7 @@ bool GetAllEi::findMonitorPeak(const API::MatrixWorkspace_sptr &inputWS,
                  boost::lexical_cast<std::string>(peak1TwoSigma) +
                  "\n and Peak at mon2: Ei= " +
                  boost::lexical_cast<std::string>(peak2Pos) + "and height: " +
-                 boost::lexical_cast<std::string>(peak1Height)
-          << '\n';
+                 boost::lexical_cast<std::string>(peak1Height) << '\n';
 
       return false;
     }

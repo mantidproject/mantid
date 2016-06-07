@@ -1743,7 +1743,8 @@ bool FitPowderDiffPeaks::doFit1PeakSimple(
     // Debug information output
     API::ITableWorkspace_sptr paramws = fitalg->getProperty("OutputParameters");
     std::string infofit = parseFitParameterWorkspace(paramws);
-    g_log.information() << "Fitted Parameters: " << endl << infofit << '\n';
+    g_log.information() << "Fitted Parameters: " << endl
+                        << infofit << '\n';
   } else {
     g_log.error() << "[DBx128B] Failed to execute fitting peak @ "
                   << peakfunction->centre() << '\n';
@@ -1880,8 +1881,7 @@ bool FitPowderDiffPeaks::doFitGaussianPeak(DataObjects::Workspace2D_sptr dataws,
   bool fitsuccess;
   std::string fitresult = parseFitResult(fitalg, chi2, fitsuccess);
   g_log.information() << "[Fit Gaussian Peak] Successful = " << fitsuccess
-                      << ", Result:\n"
-                      << fitresult << '\n';
+                      << ", Result:\n" << fitresult << '\n';
 
   // 4. Get result
   center = gaussianpeak->centre();

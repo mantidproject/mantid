@@ -209,8 +209,7 @@ QString SANSDiagnostics::getMemberWorkspace(int period) {
 
   } catch (Exception::NotFoundError &) {
     g_log.error() << "Error when accessing the Workspace " +
-                         m_outws_load.toStdString()
-                  << '\n';
+                         m_outws_load.toStdString() << '\n';
     return "";
   }
   if (Mantid::API::WorkspaceGroup_sptr wsgrp_sptr =
@@ -279,8 +278,7 @@ void SANSDiagnostics::displayRectangularDetectors(const QString &wsName) {
 
   } catch (Exception::NotFoundError &) {
     g_log.error() << "Error when accessing the Workspace " +
-                         wsName.toStdString()
-                  << '\n';
+                         wsName.toStdString() << '\n';
   }
   if (!ws_sptr) {
     return;
@@ -620,8 +618,7 @@ void SANSDiagnostics::firstDetectorHorizontalIntegralClicked() {
 
   } catch (Exception::NotFoundError &) {
     g_log.error() << "Error when accessing the Workspace " +
-                         ipwsName.toStdString()
-                  << '\n';
+                         ipwsName.toStdString() << '\n';
     return;
   }
   Mantid::API::MatrixWorkspace_sptr mws_sptr =
@@ -663,8 +660,7 @@ void SANSDiagnostics::firstDetectorVerticalIntegralClicked() {
 
   } catch (Exception::NotFoundError &) {
     g_log.error() << "Error when accessing the Workspace " +
-                         ipwsName.toStdString()
-                  << '\n';
+                         ipwsName.toStdString() << '\n';
     return;
   }
   Mantid::API::MatrixWorkspace_sptr mws_sptr =
@@ -705,8 +701,7 @@ void SANSDiagnostics::firstDetectorTimeIntegralClicked() {
 
   } catch (Exception::NotFoundError &) {
     g_log.error() << "Error when accessing the Workspace " +
-                         ipwsName.toStdString()
-                  << '\n';
+                         ipwsName.toStdString() << '\n';
     return;
   }
   Mantid::API::MatrixWorkspace_sptr mws_sptr =
@@ -893,8 +888,7 @@ void SANSDiagnostics::TimeIntegralClicked(const QString &range,
         loadedws.toStdString());
   } catch (Exception::NotFoundError &) {
     g_log.error() << "Error when accessing the Workspace " +
-                         loadedws.toStdString()
-                  << '\n';
+                         loadedws.toStdString() << '\n';
     return;
   }
 
@@ -1015,8 +1009,7 @@ void SANSDiagnostics::secondDetectorHorizontalIntegralClicked() {
 
   } catch (Exception::NotFoundError &) {
     g_log.error() << "Error when accessing the Workspace " +
-                         ipwsName.toStdString()
-                  << '\n';
+                         ipwsName.toStdString() << '\n';
     return;
   }
   Mantid::API::MatrixWorkspace_sptr mws_sptr =
@@ -1056,8 +1049,7 @@ void SANSDiagnostics::secondDetectorVerticalIntegralClicked() {
 
   } catch (Exception::NotFoundError &) {
     g_log.error() << "Error when accessing the Workspace " +
-                         ipwsName.toStdString()
-                  << '\n';
+                         ipwsName.toStdString() << '\n';
     return;
   }
   Mantid::API::MatrixWorkspace_sptr mws_sptr =
@@ -1097,8 +1089,7 @@ void SANSDiagnostics::secondDetectorTimeIntegralClicked() {
         initialwsName.toStdString());
   } catch (Exception::NotFoundError &) {
     g_log.error() << "Error when accessing the Workspace " +
-                         initialwsName.toStdString()
-                  << '\n';
+                         initialwsName.toStdString() << '\n';
     return;
   }
   Mantid::API::MatrixWorkspace_sptr mws_sptr =
@@ -1445,8 +1436,7 @@ QString SANSDiagnostics::createOutputWorkspaceName(
   } catch (...) {
     g_log.error()
         << "Error when extracting the run number from the Workspace " +
-               originalWorkspaceName.toStdString()
-        << '\n';
+               originalWorkspaceName.toStdString() << '\n';
   }
 
   // Build the output name

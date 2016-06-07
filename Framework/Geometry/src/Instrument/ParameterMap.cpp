@@ -222,8 +222,8 @@ const std::string ParameterMap::diff(const ParameterMap &rhs,
     if (!match) {
       // output some information that helps with understanding the mismatch
       strOutput << "Parameter mismatch LHS=RHS for LHS parameter in component "
-                   "with name: "
-                << fullName << ". Parameter name is: " << (*param).name()
+                   "with name: " << fullName
+                << ". Parameter name is: " << (*param).name()
                 << " and value: " << (*param).asString() << '\n';
       bool componentWithSameNameRHS = false;
       bool parameterWithSameNameRHS = false;

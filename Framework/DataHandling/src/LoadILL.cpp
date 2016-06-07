@@ -398,8 +398,8 @@ int LoadILL::getDetectorElasticPeakPosition(const NeXus::NXInt &data) {
   int calculatedDetectorElasticPeakPosition;
   if (it == cumulatedSumOfSpectras.end()) {
     g_log.warning() << "No Elastic peak position found! Assuming the EPP in "
-                       "the Nexus file: "
-                    << m_monitorElasticPeakPosition << '\n';
+                       "the Nexus file: " << m_monitorElasticPeakPosition
+                    << '\n';
     calculatedDetectorElasticPeakPosition = m_monitorElasticPeakPosition;
 
   } else {
@@ -408,8 +408,8 @@ int LoadILL::getDetectorElasticPeakPosition(const NeXus::NXInt &data) {
 
     if (calculatedDetectorElasticPeakPosition == 0) {
       g_log.warning() << "Elastic peak position is ZERO Assuming the EPP in "
-                         "the Nexus file: "
-                      << m_monitorElasticPeakPosition << '\n';
+                         "the Nexus file: " << m_monitorElasticPeakPosition
+                      << '\n';
       calculatedDetectorElasticPeakPosition = m_monitorElasticPeakPosition;
 
     } else {

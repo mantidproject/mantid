@@ -347,8 +347,7 @@ void FindDetectorsPar::calcDetPar(const Geometry::IDetector_const_sptr &spDet,
         boost::dynamic_pointer_cast<const Geometry::DetectorGroup>(spDet);
     if (!spDetGroup) {
       g_log.error() << "calc_cylDetPar: can not downcast IDetector_sptr to "
-                       "detector group for det->ID: "
-                    << spDet->getID() << '\n';
+                       "detector group for det->ID: " << spDet->getID() << '\n';
       throw(std::bad_cast());
     }
     auto detectors = spDetGroup->getDetectors();

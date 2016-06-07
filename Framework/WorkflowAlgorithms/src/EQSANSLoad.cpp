@@ -451,8 +451,7 @@ void EQSANSLoad::exec() {
                              "or an input workspace must be provided");
   } else if (fileName.size() > 0 && inputEventWS) {
     g_log.error() << "EQSANSLoad input error: Either a valid file path or an "
-                     "input workspace must be provided, but not both"
-                  << '\n';
+                     "input workspace must be provided, but not both" << '\n';
     throw std::runtime_error("EQSANSLoad input error: Either a valid file path "
                              "or an input workspace must be provided, but not "
                              "both");

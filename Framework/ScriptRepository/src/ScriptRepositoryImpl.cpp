@@ -465,12 +465,11 @@ std::vector<std::string> ScriptRepositoryImpl::listFiles() {
     // it will proceed in this situation.
   } catch (Poco::Exception &ex) {
     g_log.error() << "ScriptRepository failed to list all entries inside the "
-                     "repository. Details: "
-                  << ex.className() << ":> " << ex.displayText() << '\n';
+                     "repository. Details: " << ex.className() << ":> "
+                  << ex.displayText() << '\n';
   } catch (std::exception &ex) {
     g_log.error() << "ScriptRepository failed to list all entries inside the "
-                     "repository. Details: "
-                  << ex.what() << '\n';
+                     "repository. Details: " << ex.what() << '\n';
   }
   std::vector<std::string> out(repo.size());
   size_t i = repo.size();

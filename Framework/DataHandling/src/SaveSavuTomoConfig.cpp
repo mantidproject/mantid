@@ -53,8 +53,7 @@ void SaveSavuTomoConfig::exec() {
   } catch (std::exception &e) {
     g_log.error()
         << "Failed to save savu tomography reconstruction parameterization "
-           "file, error description: "
-        << e.what() << '\n';
+           "file, error description: " << e.what() << '\n';
     return;
   }
 

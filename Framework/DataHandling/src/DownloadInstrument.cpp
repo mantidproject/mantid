@@ -282,8 +282,7 @@ size_t DownloadInstrument::removeOrphanedFiles(
       if (filenamesToKeep.find(entryPath.getFileName()) ==
           filenamesToKeep.end()) {
         g_log.debug() << "File not found in remote instrument repository, will "
-                         "be deleted: "
-                      << entryPath.getFileName() << '\n';
+                         "be deleted: " << entryPath.getFileName() << '\n';
         filesToDelete.push_back(it->path());
       }
     }

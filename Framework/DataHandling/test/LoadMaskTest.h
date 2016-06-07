@@ -316,7 +316,8 @@ public:
     }
 
     // 4. End of file
-    ss << "  </group>" << std::endl << "</detector-masking>\n";
+    ss << "  </group>" << std::endl
+       << "</detector-masking>\n";
 
     return ScopedFileHelper::ScopedFile(ss.str(), maskfilename);
   }

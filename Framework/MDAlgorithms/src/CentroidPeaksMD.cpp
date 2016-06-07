@@ -89,12 +89,10 @@ void CentroidPeaksMD::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   int CoordinatesToUse = ws->getSpecialCoordinateSystem();
   if (CoordinatesToUse == 1 && CoordinatesToUseStr != "Q (lab frame)")
     g_log.warning() << "Warning: used Q (lab frame) coordinates for MD "
-                       "workspace, not CoordinatesToUse from input "
-                    << '\n';
+                       "workspace, not CoordinatesToUse from input " << '\n';
   else if (CoordinatesToUse == 2 && CoordinatesToUseStr != "Q (sample frame)")
     g_log.warning() << "Warning: used Q (sample frame) coordinates for MD "
-                       "workspace, not CoordinatesToUse from input "
-                    << '\n';
+                       "workspace, not CoordinatesToUse from input " << '\n';
   else if (CoordinatesToUse == 3 && CoordinatesToUseStr != "HKL")
     g_log.warning() << "Warning: used HKL coordinates for MD workspace, not "
                        "CoordinatesToUse from input \n";
