@@ -27,7 +27,7 @@ using DataObjects::EventWorkspace_const_sptr;
 FilterByTime::FilterByTime() {}
 
 /// Destructor
-FilterByTime::~FilterByTime() {}
+FilterByTime::~FilterByTime() = default;
 
 //-----------------------------------------------------------------------
 void FilterByTime::init() {

@@ -28,7 +28,7 @@ CalculateZscore::CalculateZscore() {}
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-CalculateZscore::~CalculateZscore() {}
+CalculateZscore::~CalculateZscore() = default;
 
 //----------------------------------------------------------------------------------------------
 /** Define properties

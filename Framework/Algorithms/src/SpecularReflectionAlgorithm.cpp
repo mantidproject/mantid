@@ -65,7 +65,7 @@ SpecularReflectionAlgorithm::SpecularReflectionAlgorithm() {}
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-SpecularReflectionAlgorithm::~SpecularReflectionAlgorithm() {}
+SpecularReflectionAlgorithm::~SpecularReflectionAlgorithm() = default;
 
 /**
  * Initialize common properties

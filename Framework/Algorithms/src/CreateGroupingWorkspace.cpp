@@ -35,7 +35,7 @@ CreateGroupingWorkspace::CreateGroupingWorkspace() {}
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-CreateGroupingWorkspace::~CreateGroupingWorkspace() {}
+CreateGroupingWorkspace::~CreateGroupingWorkspace() = default;
 
 const std::string CreateGroupingWorkspace::name() const {
   return "CreateGroupingWorkspace";

@@ -59,8 +59,6 @@ class DLLExport SumSpectra : public API::Algorithm {
 public:
   /// Default constructor
   SumSpectra();
-  /// Destructor
-  ~SumSpectra() override{};
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "SumSpectra"; }
   /// Summary of algorithms purpose

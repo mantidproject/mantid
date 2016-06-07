@@ -27,7 +27,7 @@ EditInstrumentGeometry::EditInstrumentGeometry() {}
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-EditInstrumentGeometry::~EditInstrumentGeometry() {}
+EditInstrumentGeometry::~EditInstrumentGeometry() = default;
 
 const std::string EditInstrumentGeometry::name() const {
   return "EditInstrumentGeometry";

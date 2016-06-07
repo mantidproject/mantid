@@ -34,7 +34,7 @@ ExtractSpectra::ExtractSpectra()
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-ExtractSpectra::~ExtractSpectra() {}
+ExtractSpectra::~ExtractSpectra() = default;
 
 //----------------------------------------------------------------------------------------------
 

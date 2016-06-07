@@ -28,7 +28,7 @@ using std::size_t;
 CorrectKiKf::CorrectKiKf() : Algorithm() {}
 
 /// Destructor
-CorrectKiKf::~CorrectKiKf() {}
+CorrectKiKf::~CorrectKiKf() = default;
 
 /// Initialisation method
 void CorrectKiKf::init() {

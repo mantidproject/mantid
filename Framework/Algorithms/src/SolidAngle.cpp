@@ -26,7 +26,7 @@ using namespace API;
 SolidAngle::SolidAngle() : Algorithm() {}
 
 /// Destructor
-SolidAngle::~SolidAngle() {}
+SolidAngle::~SolidAngle() = default;
 
 /// Initialisation method
 void SolidAngle::init() {

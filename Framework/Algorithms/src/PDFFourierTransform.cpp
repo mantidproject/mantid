@@ -45,7 +45,7 @@ PDFFourierTransform::PDFFourierTransform() {}
 //----------------------------------------------------------------------------------------------
 /** Destructor
 */
-PDFFourierTransform::~PDFFourierTransform() {}
+PDFFourierTransform::~PDFFourierTransform() = default;
 
 const std::string PDFFourierTransform::name() const {
   return "PDFFourierTransform";

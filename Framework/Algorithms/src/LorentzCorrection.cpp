@@ -26,7 +26,7 @@ LorentzCorrection::LorentzCorrection() {}
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-LorentzCorrection::~LorentzCorrection() {}
+LorentzCorrection::~LorentzCorrection() = default;
 
 //----------------------------------------------------------------------------------------------
 

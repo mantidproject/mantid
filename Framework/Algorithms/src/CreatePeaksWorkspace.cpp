@@ -21,7 +21,7 @@ CreatePeaksWorkspace::CreatePeaksWorkspace() {}
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-CreatePeaksWorkspace::~CreatePeaksWorkspace() {}
+CreatePeaksWorkspace::~CreatePeaksWorkspace() = default;
 
 //----------------------------------------------------------------------------------------------
 

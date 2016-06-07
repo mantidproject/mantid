@@ -31,7 +31,7 @@ FindPeakBackground::FindPeakBackground() {}
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-FindPeakBackground::~FindPeakBackground() {}
+FindPeakBackground::~FindPeakBackground() = default;
 
 //----------------------------------------------------------------------------------------------
 /** Define properties

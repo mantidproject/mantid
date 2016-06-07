@@ -20,7 +20,7 @@ AppendSpectra::AppendSpectra() : WorkspaceJoiners() {}
 
 /** Destructor
  */
-AppendSpectra::~AppendSpectra() {}
+AppendSpectra::~AppendSpectra() = default;
 
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string AppendSpectra::name() const { return "AppendSpectra"; }

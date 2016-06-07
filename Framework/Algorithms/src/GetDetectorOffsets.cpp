@@ -29,7 +29,7 @@ GetDetectorOffsets::GetDetectorOffsets()
       m_dreference(0.), m_dideal(0.), m_step(0.) {}
 
 /// Destructor
-GetDetectorOffsets::~GetDetectorOffsets() {}
+GetDetectorOffsets::~GetDetectorOffsets() = default;
 
 //-----------------------------------------------------------------------------------------
 /** Initialisation method. Declares properties to be used in algorithm.

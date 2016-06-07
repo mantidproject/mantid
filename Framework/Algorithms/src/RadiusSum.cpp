@@ -34,7 +34,7 @@ RadiusSum::RadiusSum()
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-RadiusSum::~RadiusSum() {}
+RadiusSum::~RadiusSum() = default;
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification.

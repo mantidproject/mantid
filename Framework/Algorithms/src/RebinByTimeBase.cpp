@@ -41,7 +41,7 @@ RebinByTimeBase::RebinByTimeBase() {}
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-RebinByTimeBase::~RebinByTimeBase() {}
+RebinByTimeBase::~RebinByTimeBase() = default;
 
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.

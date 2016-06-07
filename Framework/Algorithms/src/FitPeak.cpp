@@ -52,7 +52,7 @@ FitOneSinglePeak::FitOneSinglePeak()
 //----------------------------------------------------------------------------------------------
 /** Destructor for FitOneSinglePeak
   */
-FitOneSinglePeak::~FitOneSinglePeak() {}
+FitOneSinglePeak::~FitOneSinglePeak() = default;
 
 //----------------------------------------------------------------------------------------------
 /** Set workspaces
@@ -1085,7 +1085,7 @@ FitPeak::FitPeak()
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-FitPeak::~FitPeak() {}
+FitPeak::~FitPeak() = default;
 
 //----------------------------------------------------------------------------------------------
 /** Declare properties

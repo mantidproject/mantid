@@ -22,7 +22,7 @@ CopyLogs::CopyLogs() {}
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-CopyLogs::~CopyLogs() {}
+CopyLogs::~CopyLogs() = default;
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name

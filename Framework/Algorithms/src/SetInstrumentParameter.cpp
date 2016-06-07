@@ -25,7 +25,7 @@ SetInstrumentParameter::SetInstrumentParameter() {}
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-SetInstrumentParameter::~SetInstrumentParameter() {}
+SetInstrumentParameter::~SetInstrumentParameter() = default;
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name

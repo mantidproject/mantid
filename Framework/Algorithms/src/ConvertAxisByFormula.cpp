@@ -27,7 +27,7 @@ ConvertAxisByFormula::ConvertAxisByFormula() {}
 //----------------------------------------------------------------------------------------------
 /** Destructor
 */
-ConvertAxisByFormula::~ConvertAxisByFormula() {}
+ConvertAxisByFormula::~ConvertAxisByFormula() = default;
 
 const std::string ConvertAxisByFormula::name() const {
   return ("ConvertAxisByFormula");

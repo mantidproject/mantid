@@ -67,7 +67,8 @@ static const double COEFF5 = -0.8667;
 MultipleScatteringCylinderAbsorption::MultipleScatteringCylinderAbsorption()
     : API::Algorithm() {}
 
-MultipleScatteringCylinderAbsorption::~MultipleScatteringCylinderAbsorption() {}
+MultipleScatteringCylinderAbsorption::~MultipleScatteringCylinderAbsorption() =
+    default;
 
 const std::string MultipleScatteringCylinderAbsorption::name() const {
   return "MultipleScatteringCylinderAbsorption";

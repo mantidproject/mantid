@@ -32,7 +32,7 @@ DiffractionFocussing2::DiffractionFocussing2()
       group2wgtvector(), nGroups(0), nHist(0), nPoints(0) {}
 
 /// Destructor
-DiffractionFocussing2::~DiffractionFocussing2() {}
+DiffractionFocussing2::~DiffractionFocussing2() = default;
 
 /** Initialisation method. Declares properties to be used in algorithm.
  *

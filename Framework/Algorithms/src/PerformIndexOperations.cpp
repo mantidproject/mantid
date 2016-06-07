@@ -41,7 +41,7 @@ public:
     }
   }
 
-  virtual ~Command() {}
+  virtual ~Command() = default;
 };
 
 /// Helper typedef
@@ -56,7 +56,6 @@ class NullCommand : public Command {
     throw std::runtime_error(
         "Should not be attempting ::execute on a NullCommand");
   }
-  ~NullCommand() override {}
 };
 
 /**
@@ -87,7 +86,6 @@ public:
     return outWS;
   }
 
-  ~AdditionCommand() override {}
 };
 
 /**
@@ -130,7 +128,6 @@ public:
     }
     return outWS;
   }
-  ~CropCommand() override {}
 };
 
 /**
@@ -140,7 +137,7 @@ class CommandParser {
 public:
   virtual Command *interpret(const std::string &instruction) const = 0;
 
-  virtual ~CommandParser() {}
+  virtual ~CommandParser() = default;
 };
 
 /// Helper typedef for vector of command parsers
@@ -163,7 +160,6 @@ public:
     }
     return command;
   }
-  ~CommandParserBase() override {}
 
 private:
   virtual std::string getSeparator() const = 0;
@@ -175,7 +171,6 @@ private:
  */
 class AdditionParserRange : public CommandParserBase<AdditionCommand> {
 public:
-  ~AdditionParserRange() override {}
 
 private:
   boost::regex getRegex() const override {
@@ -189,7 +184,6 @@ private:
  */
 class AdditionParser : public CommandParser {
 public:
-  ~AdditionParser() override {}
 
   Command *interpret(const std::string &instruction) const override {
     Command *command = nullptr;
@@ -217,7 +211,6 @@ public:
  */
 class CropParserRange : public CommandParserBase<CropCommand> {
 public:
-  ~CropParserRange() override {}
 
 private:
   boost::regex getRegex() const override {
@@ -231,8 +224,6 @@ private:
  */
 class CropParserIndex : public CommandParser {
 public:
-  ~CropParserIndex() override {}
-
   Command *interpret(const std::string &instruction) const override {
     Command *command = nullptr;
     boost::regex ex("^\\s*[0-9]+\\s*$");
@@ -263,7 +254,7 @@ PerformIndexOperations::PerformIndexOperations() {}
 //------------------------------------------------------------------------------
 /** Destructor
  */
-PerformIndexOperations::~PerformIndexOperations() {}
+PerformIndexOperations::~PerformIndexOperations() = default;
 
 //------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name

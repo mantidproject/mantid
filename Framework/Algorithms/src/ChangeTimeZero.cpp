@@ -48,7 +48,7 @@ ChangeTimeZero::ChangeTimeZero()
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-ChangeTimeZero::~ChangeTimeZero() {}
+ChangeTimeZero::~ChangeTimeZero() = default;
 
 //----------------------------------------------------------------------------------------------
 

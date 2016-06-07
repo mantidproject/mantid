@@ -103,7 +103,7 @@ ReflectometryReductionOne::ReflectometryReductionOne() {}
 //----------------------------------------------------------------------------------------------
 /** Destructor
 */
-ReflectometryReductionOne::~ReflectometryReductionOne() {}
+ReflectometryReductionOne::~ReflectometryReductionOne() = default;
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name

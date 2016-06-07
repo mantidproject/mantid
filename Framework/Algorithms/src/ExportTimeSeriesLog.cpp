@@ -35,7 +35,7 @@ ExportTimeSeriesLog::ExportTimeSeriesLog() {}
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-ExportTimeSeriesLog::~ExportTimeSeriesLog() {}
+ExportTimeSeriesLog::~ExportTimeSeriesLog() = default;
 
 //----------------------------------------------------------------------------------------------
 /** Definition of all input arguments

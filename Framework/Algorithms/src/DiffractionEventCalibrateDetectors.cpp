@@ -42,7 +42,8 @@ DiffractionEventCalibrateDetectors::DiffractionEventCalibrateDetectors()
     : API::Algorithm() {}
 
 /// Destructor
-DiffractionEventCalibrateDetectors::~DiffractionEventCalibrateDetectors() {}
+DiffractionEventCalibrateDetectors::~DiffractionEventCalibrateDetectors() =
+    default;
 
 /**
  * The gsl_costFunction is optimized by GSL simplex

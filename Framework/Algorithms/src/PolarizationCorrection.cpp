@@ -116,7 +116,7 @@ PolarizationCorrection::PolarizationCorrection() {}
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-PolarizationCorrection::~PolarizationCorrection() {}
+PolarizationCorrection::~PolarizationCorrection() = default;
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name

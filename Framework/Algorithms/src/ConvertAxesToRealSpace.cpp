@@ -26,7 +26,7 @@ ConvertAxesToRealSpace::ConvertAxesToRealSpace() {}
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-ConvertAxesToRealSpace::~ConvertAxesToRealSpace() {}
+ConvertAxesToRealSpace::~ConvertAxesToRealSpace() = default;
 
 //----------------------------------------------------------------------------------------------
 

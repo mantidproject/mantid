@@ -23,7 +23,7 @@ ConjoinWorkspaces::ConjoinWorkspaces()
 
 //----------------------------------------------------------------------------------------------
 /// Destructor
-ConjoinWorkspaces::~ConjoinWorkspaces() {}
+ConjoinWorkspaces::~ConjoinWorkspaces() = default;
 
 //----------------------------------------------------------------------------------------------
 /** Initialize the properties */

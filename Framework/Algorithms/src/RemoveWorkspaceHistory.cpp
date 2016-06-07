@@ -18,7 +18,7 @@ RemoveWorkspaceHistory::RemoveWorkspaceHistory() {}
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-RemoveWorkspaceHistory::~RemoveWorkspaceHistory() {}
+RemoveWorkspaceHistory::~RemoveWorkspaceHistory() = default;
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name

@@ -28,7 +28,7 @@ RayTracerTester::RayTracerTester() {}
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-RayTracerTester::~RayTracerTester() {}
+RayTracerTester::~RayTracerTester() = default;
 
 //----------------------------------------------------------------------------------------------
 

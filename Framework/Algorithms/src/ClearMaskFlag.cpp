@@ -20,7 +20,7 @@ ClearMaskFlag::ClearMaskFlag() {}
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-ClearMaskFlag::~ClearMaskFlag() {}
+ClearMaskFlag::~ClearMaskFlag() = default;
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name

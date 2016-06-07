@@ -22,7 +22,7 @@ RemoveMaskedSpectra::RemoveMaskedSpectra() {}
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-RemoveMaskedSpectra::~RemoveMaskedSpectra() {}
+RemoveMaskedSpectra::~RemoveMaskedSpectra() = default;
 
 //----------------------------------------------------------------------------------------------
 

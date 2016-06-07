@@ -27,7 +27,7 @@ CalculateResolution::CalculateResolution() {}
 //----------------------------------------------------------------------------------------------
 /** Destructor
 */
-CalculateResolution::~CalculateResolution() {}
+CalculateResolution::~CalculateResolution() = default;
 
 //----------------------------------------------------------------------------------------------
 

@@ -19,7 +19,7 @@ FilterByTime2::FilterByTime2() {}
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-FilterByTime2::~FilterByTime2() {}
+FilterByTime2::~FilterByTime2() = default;
 
 //-----------------------------------------------------------------------
 void FilterByTime2::init() {

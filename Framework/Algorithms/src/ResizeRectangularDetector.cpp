@@ -25,7 +25,7 @@ ResizeRectangularDetector::ResizeRectangularDetector() {}
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-ResizeRectangularDetector::~ResizeRectangularDetector() {}
+ResizeRectangularDetector::~ResizeRectangularDetector() = default;
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name

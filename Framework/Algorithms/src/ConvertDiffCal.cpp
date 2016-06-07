@@ -33,7 +33,7 @@ ConvertDiffCal::ConvertDiffCal() {}
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-ConvertDiffCal::~ConvertDiffCal() {}
+ConvertDiffCal::~ConvertDiffCal() = default;
 
 //----------------------------------------------------------------------------------------------
 

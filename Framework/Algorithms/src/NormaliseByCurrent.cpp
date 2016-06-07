@@ -20,7 +20,7 @@ using namespace DataObjects;
 NormaliseByCurrent::NormaliseByCurrent() : Algorithm() {}
 
 // Destructor
-NormaliseByCurrent::~NormaliseByCurrent() {}
+NormaliseByCurrent::~NormaliseByCurrent() = default;
 
 void NormaliseByCurrent::init() {
   declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(

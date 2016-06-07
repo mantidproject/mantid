@@ -28,8 +28,6 @@ using namespace Kernel;
 using namespace API;
 using namespace Geometry;
 
-ConvertSpectrumAxis2::ConvertSpectrumAxis2() : API::Algorithm(), m_indexMap() {}
-
 void ConvertSpectrumAxis2::init() {
   // Validator for Input Workspace
   auto wsVal = boost::make_shared<CompositeValidator>();

@@ -32,7 +32,7 @@ ResampleX::ResampleX()
 
 //----------------------------------------------------------------------------------------------
 /// Destructor
-ResampleX::~ResampleX() {}
+ResampleX::~ResampleX() = default;
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name

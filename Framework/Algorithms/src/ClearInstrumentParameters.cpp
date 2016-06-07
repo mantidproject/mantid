@@ -24,7 +24,7 @@ ClearInstrumentParameters::ClearInstrumentParameters() {}
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-ClearInstrumentParameters::~ClearInstrumentParameters() {}
+ClearInstrumentParameters::~ClearInstrumentParameters() = default;
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name

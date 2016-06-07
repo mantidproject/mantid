@@ -15,7 +15,7 @@ using namespace DataObjects;
 FilterByXValue::FilterByXValue() {}
 
 /// Destructor
-FilterByXValue::~FilterByXValue() {}
+FilterByXValue::~FilterByXValue() = default;
 
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string FilterByXValue::name() const { return "FilterByXValue"; }

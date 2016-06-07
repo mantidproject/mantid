@@ -20,7 +20,7 @@ ResetNegatives::ResetNegatives() {}
 
 //----------------------------------------------------------------------------------------------
 /// Destructor
-ResetNegatives::~ResetNegatives() {}
+ResetNegatives::~ResetNegatives() = default;
 
 //----------------------------------------------------------------------------------------------
 /// @copydoc Mantid::API::IAlgorithm::name()

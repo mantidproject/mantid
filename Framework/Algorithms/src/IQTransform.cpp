@@ -44,7 +44,7 @@ IQTransform::IQTransform() : API::Algorithm(), m_label(new Units::Label) {
   m_transforms["General"] = &IQTransform::general;
 }
 
-IQTransform::~IQTransform() {}
+IQTransform::~IQTransform() = default;
 
 void IQTransform::init() {
   auto wsValidator = boost::make_shared<CompositeValidator>();

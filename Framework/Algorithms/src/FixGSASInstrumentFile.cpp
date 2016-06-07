@@ -34,7 +34,7 @@ FixGSASInstrumentFile::FixGSASInstrumentFile() {}
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-FixGSASInstrumentFile::~FixGSASInstrumentFile() {}
+FixGSASInstrumentFile::~FixGSASInstrumentFile() = default;
 
 //----------------------------------------------------------------------------------------------
 /** Implement abstract Algorithm methods

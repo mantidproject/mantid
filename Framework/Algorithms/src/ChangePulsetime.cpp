@@ -23,7 +23,7 @@ ChangePulsetime::ChangePulsetime() {}
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-ChangePulsetime::~ChangePulsetime() {}
+ChangePulsetime::~ChangePulsetime() = default;
 
 //----------------------------------------------------------------------------------------------
 

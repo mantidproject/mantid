@@ -21,7 +21,7 @@ StripVanadiumPeaks2::StripVanadiumPeaks2() {}
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-StripVanadiumPeaks2::~StripVanadiumPeaks2() {}
+StripVanadiumPeaks2::~StripVanadiumPeaks2() = default;
 
 void StripVanadiumPeaks2::init() {
   // Declare inputs and output.  Copied from StripPeaks

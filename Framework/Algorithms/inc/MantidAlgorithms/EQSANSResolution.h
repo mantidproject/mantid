@@ -35,10 +35,6 @@ namespace Algorithms {
 */
 class DLLExport EQSANSResolution : public Algorithms::TOFSANSResolution {
 public:
-  /// (Empty) Constructor
-  EQSANSResolution() : Algorithms::TOFSANSResolution() {}
-  /// Virtual destructor
-  ~EQSANSResolution() override {}
   /// Algorithm's name
   const std::string name() const override { return "EQSANSResolution"; }
   /// Summary of algorithms purpose

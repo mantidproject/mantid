@@ -25,7 +25,7 @@ CopyInstrumentParameters::CopyInstrumentParameters()
     : Algorithm(), m_different_instrument_sp(false) {}
 
 /// Destructor
-CopyInstrumentParameters::~CopyInstrumentParameters() {}
+CopyInstrumentParameters::~CopyInstrumentParameters() = default;
 
 void CopyInstrumentParameters::init() {
   declareProperty(

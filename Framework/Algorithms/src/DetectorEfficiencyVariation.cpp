@@ -22,11 +22,6 @@ using namespace API;
 using DataObjects::MaskWorkspace_sptr;
 using Geometry::IDetector_const_sptr;
 
-/// Default constructor initialises all data members and runs the base class
-/// constructor
-DetectorEfficiencyVariation::DetectorEfficiencyVariation()
-    : DetectorDiagnostic() {}
-
 /// Initialize the algorithm
 void DetectorEfficiencyVariation::init() {
   auto val = boost::make_shared<HistogramValidator>();

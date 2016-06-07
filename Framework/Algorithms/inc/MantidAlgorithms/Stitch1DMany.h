@@ -37,8 +37,6 @@ public:
   Stitch1DMany()
       : m_numWorkspaces(0), m_manualScaleFactor(1.0), m_scaleRHSWorkspace(true),
         m_useManualScaleFactor(false){};
-  /// Destructor
-  ~Stitch1DMany() override{};
   /// Algorithm's name for identification. @see Algorithm::name
   const std::string name() const override { return "Stitch1DMany"; }
   /// Algorithm's version for identification. @see Algorithm::version

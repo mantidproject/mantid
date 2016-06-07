@@ -31,7 +31,7 @@ CreateLogTimeCorrection::CreateLogTimeCorrection()
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-CreateLogTimeCorrection::~CreateLogTimeCorrection() {}
+CreateLogTimeCorrection::~CreateLogTimeCorrection() = default;
 
 //----------------------------------------------------------------------------------------------
 /** Declare properties

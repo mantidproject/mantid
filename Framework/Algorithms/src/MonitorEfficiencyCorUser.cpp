@@ -25,7 +25,7 @@ MonitorEfficiencyCorUser::MonitorEfficiencyCorUser()
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-MonitorEfficiencyCorUser::~MonitorEfficiencyCorUser() {}
+MonitorEfficiencyCorUser::~MonitorEfficiencyCorUser() = default;
 
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.

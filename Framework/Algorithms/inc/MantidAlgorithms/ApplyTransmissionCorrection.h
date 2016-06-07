@@ -46,8 +46,6 @@ class DLLExport ApplyTransmissionCorrection : public API::Algorithm {
 public:
   /// (Empty) Constructor
   ApplyTransmissionCorrection() : API::Algorithm() {}
-  /// Virtual destructor
-  ~ApplyTransmissionCorrection() override {}
   /// Algorithm's name
   const std::string name() const override {
     return "ApplyTransmissionCorrection";

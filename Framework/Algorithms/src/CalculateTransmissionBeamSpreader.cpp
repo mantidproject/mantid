@@ -25,7 +25,8 @@ using std::size_t;
 CalculateTransmissionBeamSpreader::CalculateTransmissionBeamSpreader()
     : API::Algorithm(), logFit(false) {}
 
-CalculateTransmissionBeamSpreader::~CalculateTransmissionBeamSpreader() {}
+CalculateTransmissionBeamSpreader::~CalculateTransmissionBeamSpreader() =
+    default;
 
 void CalculateTransmissionBeamSpreader::init() {
   auto wsValidator = boost::make_shared<CompositeValidator>();

@@ -19,7 +19,7 @@ AverageLogData::AverageLogData() {}
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-AverageLogData::~AverageLogData() {}
+AverageLogData::~AverageLogData() = default;
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name

@@ -30,7 +30,7 @@ std::string LEFT("Left");
 FilterByLogValue::FilterByLogValue() {}
 
 /// Destructor
-FilterByLogValue::~FilterByLogValue() {}
+FilterByLogValue::~FilterByLogValue() = default;
 
 //-----------------------------------------------------------------------
 void FilterByLogValue::init() {

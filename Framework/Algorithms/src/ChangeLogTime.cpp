@@ -20,7 +20,7 @@ using namespace Mantid::Kernel;
 ChangeLogTime::ChangeLogTime() {}
 
 /// Empty destructor deallocates no resources.
-ChangeLogTime::~ChangeLogTime() {}
+ChangeLogTime::~ChangeLogTime() = default;
 
 /// Algorithm's name for identification
 const string ChangeLogTime::name() const { return "ChangeLogTime"; }

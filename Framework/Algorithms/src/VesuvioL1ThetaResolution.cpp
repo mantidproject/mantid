@@ -45,7 +45,7 @@ VesuvioL1ThetaResolution::VesuvioL1ThetaResolution() {}
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-VesuvioL1ThetaResolution::~VesuvioL1ThetaResolution() {}
+VesuvioL1ThetaResolution::~VesuvioL1ThetaResolution() = default;
 
 //----------------------------------------------------------------------------------------------
 

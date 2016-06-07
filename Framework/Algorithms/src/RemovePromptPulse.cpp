@@ -22,7 +22,7 @@ RemovePromptPulse::RemovePromptPulse() {}
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-RemovePromptPulse::~RemovePromptPulse() {}
+RemovePromptPulse::~RemovePromptPulse() = default;
 
 const string RemovePromptPulse::name() const { return "RemovePromptPulse"; }
 

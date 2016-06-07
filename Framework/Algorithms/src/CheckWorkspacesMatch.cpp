@@ -31,7 +31,7 @@ CheckWorkspacesMatch::CheckWorkspacesMatch()
 }
 
 /// Virtual destructor
-CheckWorkspacesMatch::~CheckWorkspacesMatch() {}
+CheckWorkspacesMatch::~CheckWorkspacesMatch() = default;
 
 using namespace Kernel;
 using namespace API;

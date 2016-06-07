@@ -49,7 +49,7 @@ FilterEvents::FilterEvents()
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-FilterEvents::~FilterEvents() {}
+FilterEvents::~FilterEvents() = default;
 
 //----------------------------------------------------------------------------------------------
 /** Declare Inputs

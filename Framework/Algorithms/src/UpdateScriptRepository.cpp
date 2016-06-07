@@ -16,7 +16,7 @@ UpdateScriptRepository::UpdateScriptRepository() {}
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-UpdateScriptRepository::~UpdateScriptRepository() {}
+UpdateScriptRepository::~UpdateScriptRepository() = default;
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name

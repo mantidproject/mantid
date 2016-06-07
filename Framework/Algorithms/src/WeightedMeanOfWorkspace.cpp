@@ -23,7 +23,7 @@ WeightedMeanOfWorkspace::WeightedMeanOfWorkspace() {}
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-WeightedMeanOfWorkspace::~WeightedMeanOfWorkspace() {}
+WeightedMeanOfWorkspace::~WeightedMeanOfWorkspace() = default;
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name

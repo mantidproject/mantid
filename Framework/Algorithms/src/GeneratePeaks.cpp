@@ -43,7 +43,7 @@ GeneratePeaks::GeneratePeaks()
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-GeneratePeaks::~GeneratePeaks() {}
+GeneratePeaks::~GeneratePeaks() = default;
 
 //----------------------------------------------------------------------------------------------
 /** Define algorithm's properties

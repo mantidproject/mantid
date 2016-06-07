@@ -19,7 +19,7 @@ CreateFlatEventWorkspace::CreateFlatEventWorkspace() {}
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-CreateFlatEventWorkspace::~CreateFlatEventWorkspace() {}
+CreateFlatEventWorkspace::~CreateFlatEventWorkspace() = default;
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name

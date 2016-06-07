@@ -32,7 +32,7 @@ CreateTransmissionWorkspaceAuto::CreateTransmissionWorkspaceAuto() {}
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-CreateTransmissionWorkspaceAuto::~CreateTransmissionWorkspaceAuto() {}
+CreateTransmissionWorkspaceAuto::~CreateTransmissionWorkspaceAuto() = default;
 
 //----------------------------------------------------------------------------------------------
 /// Sets documentation strings for this algorithm

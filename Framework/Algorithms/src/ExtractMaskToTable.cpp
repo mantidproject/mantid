@@ -25,7 +25,7 @@ ExtractMaskToTable::ExtractMaskToTable() {}
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-ExtractMaskToTable::~ExtractMaskToTable() {}
+ExtractMaskToTable::~ExtractMaskToTable() = default;
 
 //----------------------------------------------------------------------------------------------
 /** Declare properties

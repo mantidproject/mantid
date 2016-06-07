@@ -24,7 +24,7 @@ DECLARE_ALGORITHM(CreateWorkspace)
 CreateWorkspace::CreateWorkspace() : Algorithm() {}
 
 /// Default (empty) destructor
-CreateWorkspace::~CreateWorkspace() {}
+CreateWorkspace::~CreateWorkspace() = default;
 
 /// Init function
 void CreateWorkspace::init() {

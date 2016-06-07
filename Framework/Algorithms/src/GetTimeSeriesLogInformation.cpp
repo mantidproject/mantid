@@ -37,7 +37,7 @@ GetTimeSeriesLogInformation::GetTimeSeriesLogInformation()
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-GetTimeSeriesLogInformation::~GetTimeSeriesLogInformation() {}
+GetTimeSeriesLogInformation::~GetTimeSeriesLogInformation() = default;
 
 /** Definition of all input arguments
  */

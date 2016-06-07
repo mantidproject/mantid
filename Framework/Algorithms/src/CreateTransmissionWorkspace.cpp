@@ -20,7 +20,7 @@ CreateTransmissionWorkspace::CreateTransmissionWorkspace() {}
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-CreateTransmissionWorkspace::~CreateTransmissionWorkspace() {}
+CreateTransmissionWorkspace::~CreateTransmissionWorkspace() = default;
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name

@@ -42,7 +42,7 @@ ReflectometryReductionOneAuto::ReflectometryReductionOneAuto() {}
 //----------------------------------------------------------------------------------------------
 /** Destructor
 */
-ReflectometryReductionOneAuto::~ReflectometryReductionOneAuto() {}
+ReflectometryReductionOneAuto::~ReflectometryReductionOneAuto() = default;
 
 //----------------------------------------------------------------------------------------------
 

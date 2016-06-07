@@ -38,8 +38,7 @@ class DLLExport ApplyDeadTimeCorr : public API::Algorithm {
 public:
   /// Default constructor
   ApplyDeadTimeCorr() : API::Algorithm(){};
-  /// Destructor
-  ~ApplyDeadTimeCorr() override{};
+  ;
   /// Algorithm's name for identification
   const std::string name() const override { return "ApplyDeadTimeCorr"; };
   /// Summary of algorithms purpose

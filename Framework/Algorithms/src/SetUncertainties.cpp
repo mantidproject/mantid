@@ -63,7 +63,7 @@ struct sqrterror {
 SetUncertainties::SetUncertainties() : API::Algorithm() {}
 
 /// Virtual destructor
-SetUncertainties::~SetUncertainties() {}
+SetUncertainties::~SetUncertainties() = default;
 
 /// Algorithm's name
 const std::string SetUncertainties::name() const { return "SetUncertainties"; }

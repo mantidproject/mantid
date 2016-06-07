@@ -19,7 +19,7 @@ ExtractUnmaskedSpectra::ExtractUnmaskedSpectra() {}
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-ExtractUnmaskedSpectra::~ExtractUnmaskedSpectra() {}
+ExtractUnmaskedSpectra::~ExtractUnmaskedSpectra() = default;
 
 //----------------------------------------------------------------------------------------------
 

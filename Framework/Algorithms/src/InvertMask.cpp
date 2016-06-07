@@ -19,7 +19,7 @@ InvertMask::InvertMask() {}
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-InvertMask::~InvertMask() {}
+InvertMask::~InvertMask() = default;
 
 void InvertMask::init() {
   this->declareProperty(

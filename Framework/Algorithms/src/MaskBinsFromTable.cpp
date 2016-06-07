@@ -31,7 +31,7 @@ MaskBinsFromTable::MaskBinsFromTable()
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-MaskBinsFromTable::~MaskBinsFromTable() {}
+MaskBinsFromTable::~MaskBinsFromTable() = default;
 
 //----------------------------------------------------------------------------------------------
 

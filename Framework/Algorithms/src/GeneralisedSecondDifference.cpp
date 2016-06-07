@@ -25,7 +25,7 @@ GeneralisedSecondDifference::GeneralisedSecondDifference()
     : Algorithm(), m_Cij(0), m_Cij2(0), m_z(0), m_m(0) {}
 
 /// Destructor
-GeneralisedSecondDifference::~GeneralisedSecondDifference() {}
+GeneralisedSecondDifference::~GeneralisedSecondDifference() = default;
 
 /// Initialisation method.
 void GeneralisedSecondDifference::init() {

@@ -21,7 +21,7 @@ MaskDetectorsIf::MaskDetectorsIf()
     : API::Algorithm(), value(0.), select_on(false) {}
 
 /// Destructor
-MaskDetectorsIf::~MaskDetectorsIf() {}
+MaskDetectorsIf::~MaskDetectorsIf() = default;
 
 /** Initialisation method. Declares properties to be used in algorithm.
  *

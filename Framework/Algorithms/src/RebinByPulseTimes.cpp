@@ -23,7 +23,7 @@ RebinByPulseTimes::RebinByPulseTimes() {}
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-RebinByPulseTimes::~RebinByPulseTimes() {}
+RebinByPulseTimes::~RebinByPulseTimes() = default;
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name

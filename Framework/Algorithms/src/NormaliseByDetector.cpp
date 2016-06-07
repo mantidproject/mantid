@@ -33,7 +33,7 @@ NormaliseByDetector::NormaliseByDetector(bool parallelExecution)
 //----------------------------------------------------------------------------------------------
 /** Destructor
 */
-NormaliseByDetector::~NormaliseByDetector() {}
+NormaliseByDetector::~NormaliseByDetector() = default;
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name

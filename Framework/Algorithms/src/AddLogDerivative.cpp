@@ -23,7 +23,7 @@ AddLogDerivative::AddLogDerivative() {}
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-AddLogDerivative::~AddLogDerivative() {}
+AddLogDerivative::~AddLogDerivative() = default;
 
 //----------------------------------------------------------------------------------------------
 

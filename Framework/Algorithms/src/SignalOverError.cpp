@@ -21,7 +21,7 @@ SignalOverError::SignalOverError() : UnaryOperation() {
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-SignalOverError::~SignalOverError() {}
+SignalOverError::~SignalOverError() = default;
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name

@@ -48,7 +48,7 @@ ConvertUnitsUsingDetectorTable::ConvertUnitsUsingDetectorTable()
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-ConvertUnitsUsingDetectorTable::~ConvertUnitsUsingDetectorTable() {}
+ConvertUnitsUsingDetectorTable::~ConvertUnitsUsingDetectorTable() = default;
 
 //----------------------------------------------------------------------------------------------
 
