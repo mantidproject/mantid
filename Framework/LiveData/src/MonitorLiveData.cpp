@@ -234,9 +234,8 @@ void MonitorLiveData::exec() {
     seconds = DateAndTime::secondsFromDuration(now - lastTime);
     if (seconds > UpdateEvery)
       g_log.warning() << "Cannot process live data as quickly as requested: "
-                         "requested every "
-                      << UpdateEvery << " seconds but it takes " << seconds
-                      << " seconds!\n";
+                         "requested every " << UpdateEvery
+                      << " seconds but it takes " << seconds << " seconds!\n";
   } // loop until aborted
 
   // Set the outputs (only applicable when RunTransitionBehavior is "Stop")

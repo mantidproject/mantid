@@ -427,12 +427,10 @@ double EQSANSMonitorTOF::getTofOffset(MatrixWorkspace_const_sptr inputWS,
                         << '\n';
   else
     g_log.information() << '\n';
-  g_log.information()
-      << "Chopper    Actual Phase    Lambda1    Lambda2\n" for (int i = 0;
-                                                                i < 4; i++)
-             g_log.information()
-      << i << "    " << chopper_actual_phase[i] << "  " << chopper_wl_1[i]
-      << "  " << chopper_wl_2[i] << '\n';
+  g_log.information() << "Chopper    Actual Phase    Lambda1    Lambda2\n" for (
+                             int i = 0; i < 4; i++) g_log.information() << i
+                      << "    " << chopper_actual_phase[i] << "  "
+                      << chopper_wl_1[i] << "  " << chopper_wl_2[i] << '\n';
 
   setProperty("FrameSkipping", frame_skipping);
 
