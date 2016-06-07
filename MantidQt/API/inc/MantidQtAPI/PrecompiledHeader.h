@@ -6,11 +6,10 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AnalysisDataService.h"
 
-//STL
+// STL
 #include <vector>
 #include <map>
 #include <set>
 #include <string>
-
 
 #endif // MANTIDQT_API_PRECOMPILEDHEADER_H_

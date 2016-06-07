@@ -49,8 +49,6 @@ protected:
 private:
   void setTimeRange(vtkInformationVector *outputVector);
 
-
-
   /// File name from which to read.
   char *FileName;
 

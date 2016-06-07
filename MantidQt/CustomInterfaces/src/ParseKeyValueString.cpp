@@ -22,9 +22,6 @@ std::map<std::string, std::string> parseKeyValueString(const std::string &str) {
     separators is not
     yet possible with Mantid::Kernel::StringTokenizer.
   */
-
-  // Tokenise, using '\' as an escape character, ',' as a delimiter and " and '
-  // as quote characters
   boost::tokenizer<boost::escaped_list_separator<char>> tok(
       str, boost::escaped_list_separator<char>("\\", ",", "\"'"));
   std::map<std::string, std::string> kvp;

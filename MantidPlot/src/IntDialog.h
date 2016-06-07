@@ -40,29 +40,28 @@ class DoubleSpinBox;
 class Graph;
 
 //! Integration options dialog
-class IntDialog : public QDialog
-{
-    Q_OBJECT
+class IntDialog : public QDialog {
+  Q_OBJECT
 
 public:
-    IntDialog(QWidget* parent = 0, Graph *g = 0, Qt::WFlags fl = 0 );
+  IntDialog(QWidget *parent = 0, Graph *g = 0, Qt::WFlags fl = 0);
 
 public slots:
   void accept() override;
 
 private:
-	Graph *d_graph;
+  Graph *d_graph;
 
-    QPushButton* buttonOk;
-	QPushButton* buttonCancel;
-    QCheckBox* boxPlot;
-	QTextEdit* boxName;
-	QLineEdit* boxVariable;
-	QSpinBox* boxOrder;
-	QSpinBox* boxSteps;
-	DoubleSpinBox* boxStart;
-	DoubleSpinBox* boxEnd;
-	DoubleSpinBox* boxTol;
+  QPushButton *buttonOk;
+  QPushButton *buttonCancel;
+  QCheckBox *boxPlot;
+  QTextEdit *boxName;
+  QLineEdit *boxVariable;
+  QSpinBox *boxOrder;
+  QSpinBox *boxSteps;
+  DoubleSpinBox *boxStart;
+  DoubleSpinBox *boxEnd;
+  DoubleSpinBox *boxTol;
 };
 
 #endif

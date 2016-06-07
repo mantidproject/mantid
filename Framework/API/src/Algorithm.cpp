@@ -1,13 +1,9 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AlgorithmHistory.h"
 #include "MantidAPI/AlgorithmProxy.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/DeprecatedAlgorithm.h"
 #include "MantidAPI/AlgorithmManager.h"
-#include "MantidAPI/MemoryManager.h"
 #include "MantidAPI/IWorkspaceProperty.h"
 #include "MantidAPI/WorkspaceGroup.h"
 
@@ -100,9 +96,6 @@ Algorithm::~Algorithm() {
   delete m_notificationCenter;
   delete m_executeAsync;
   delete m_progressObserver;
-
-  // Free up any memory available.
-  Mantid::API::MemoryManager::Instance().releaseFreeMemory();
 }
 
 //=============================================================================================
@@ -433,8 +426,6 @@ bool Algorithm::execute() {
     if (depo != nullptr)
       getLogger().error(depo->deprecationMsg(this));
   }
-  // Start by freeing up any memory available.
-  Mantid::API::MemoryManager::Instance().releaseFreeMemory();
 
   notificationCenter().postNotification(new StartedNotification(this));
   Mantid::Kernel::DateAndTime start_time;
@@ -662,8 +653,6 @@ bool Algorithm::execute() {
   notificationCenter().postNotification(
       new FinishedNotification(this, isExecuted()));
   // Only gets to here if algorithm ended normally
-  // Free up any memory available.
-  Mantid::API::MemoryManager::Instance().releaseFreeMemory();
   return isExecuted();
 }
 

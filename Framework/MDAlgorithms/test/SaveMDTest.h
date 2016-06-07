@@ -3,6 +3,7 @@
 
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidDataObjects/MDEventFactory.h"
 #include "MantidMDAlgorithms/BinMD.h"
 #include "MantidMDAlgorithms/SaveMD.h"
@@ -38,9 +39,13 @@ public:
     do_test_exec(23, "SaveMDTest_updating.nxs", true, true);
   }
 
+  void test_MakeFileBacked_then_save_under_other_file_name() {
+    do_test_exec(23, "SaveMDTest_other_file_name_test.nxs", true, false, true);
+  }
+
   void do_test_exec(size_t numPerBox, std::string filename,
-                    bool MakeFileBacked = false,
-                    bool UpdateFileBackEnd = false) {
+                    bool MakeFileBacked = false, bool UpdateFileBackEnd = false,
+                    bool OtherFileName = false) {
 
     // Make a 1D MDEventWorkspace
     MDEventWorkspace1Lean::sptr ws =
@@ -84,10 +89,11 @@ public:
     }
 
     // Continue the test
-    if (UpdateFileBackEnd)
+    if (UpdateFileBackEnd) {
       do_test_UpdateFileBackEnd(ws, filename);
-    else {
-
+    } else if (OtherFileName) {
+      do_test_OtherFileName(ws, this_filename);
+    } else {
       ws->clearFileBacked(false);
       if (Poco::File(this_filename).exists())
         Poco::File(this_filename).remove();
@@ -135,6 +141,62 @@ public:
     std::string fullPath = alg.getPropertyValue("Filename");
     if (Poco::File(fullPath).exists())
       Poco::File(fullPath).remove();
+  }
+
+  void do_test_OtherFileName(MDEventWorkspace1Lean::sptr ws,
+                             std::string originalFileName) {
+    const std::string otherFileName = "SaveMD_other_file_name.nxs";
+
+    auto algSave = AlgorithmManager::Instance().createUnmanaged("SaveMD");
+    algSave->initialize();
+    algSave->setChild(true);
+    algSave->setProperty("InputWorkspace", ws);
+    algSave->setProperty("Filename", otherFileName);
+    algSave->execute();
+    TS_ASSERT(algSave->isExecuted());
+
+    // Now reload into another workspace
+    {
+      auto load_alg = AlgorithmManager::Instance().createUnmanaged("LoadMD");
+      load_alg->initialize();
+      load_alg->setChild(true);
+      load_alg->setProperty("Filename", otherFileName);
+      load_alg->setProperty("FileBackEnd", true);
+      load_alg->setProperty("OutputWorkspace", "blank");
+      TS_ASSERT_THROWS_NOTHING(load_alg->execute());
+      Mantid::API::IMDWorkspace_sptr reference_out_ws =
+          load_alg->getProperty("OutputWorkspace");
+      // Make sure that the output workspaces exist
+      TS_ASSERT(ws);
+      TS_ASSERT(reference_out_ws);
+      auto ws_cast =
+          boost::dynamic_pointer_cast<Mantid::API::IMDHistoWorkspace_sptr>(
+              reference_out_ws);
+
+      // Compare the loaded and original workspace
+      auto compare_alg =
+          Mantid::API::AlgorithmManager::Instance().createUnmanaged(
+              "CompareMDWorkspaces");
+      compare_alg->setChild(true);
+      compare_alg->initialize();
+      compare_alg->setProperty("Workspace1", ws);
+      compare_alg->setProperty("Workspace2", reference_out_ws);
+      compare_alg->setProperty("Tolerance", 0.00001);
+      compare_alg->setProperty("CheckEvents", true);
+      compare_alg->setProperty("IgnoreBoxID", true);
+      TS_ASSERT_THROWS_NOTHING(compare_alg->execute());
+      bool is_equal = compare_alg->getProperty("Equals");
+      TS_ASSERT(is_equal);
+    }
+
+    // Clean up file and other file
+    ws->clearFileBacked(false);
+    std::string fullPath = algSave->getProperty("Filename");
+    if (Poco::File(fullPath).exists())
+      Poco::File(fullPath).remove();
+
+    if (Poco::File(originalFileName).exists())
+      Poco::File(originalFileName).remove();
   }
 
   void test_saveExpInfo() {

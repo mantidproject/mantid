@@ -261,7 +261,7 @@ void IFittingAlgorithm::addWorkspaces() {
   if (!m_domainCreator) {
     IDomainCreator *creator =
         createDomainCreator(m_function.get(), "", this, m_domainType);
-    creator->declareDatasetProperties("", false);
+    creator->declareDatasetProperties("", true);
     m_domainCreator.reset(creator);
     m_workspacePropertyNames.clear();
   }

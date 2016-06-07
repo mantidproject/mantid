@@ -7,25 +7,20 @@
 class QTableWidget;
 
 // Forward declaration
-namespace Mantid
-{
-namespace API
-{
+namespace Mantid {
+namespace API {
 class MatrixWorkspace;
 }
 }
 
-namespace MantidQt
-{
+namespace MantidQt {
 
-namespace CustomInterfaces
-{
+namespace CustomInterfaces {
 
 // Forward declaration
 class MultiDatasetFit;
 
-namespace MDF
-{
+namespace MDF {
 
 /**
   * A class for controlling a table widget containing a list of
@@ -40,8 +35,7 @@ namespace MDF
   * This controller has a pointer to the table widget and controls
   * its behaviour but not its position on the parent widget.
   */
-class DataController: public QObject
-{
+class DataController : public QObject {
   Q_OBJECT
 public:
   DataController(MultiDatasetFit *parent, QTableWidget *dataTable);
@@ -49,7 +43,7 @@ public:
   int getWorkspaceIndex(int i) const;
   int getNumberOfSpectra() const;
   void checkSpectra();
-  std::pair<double,double> getFittingRange(int i) const;
+  std::pair<double, double> getFittingRange(int i) const;
 
 signals:
   void dataTableUpdated();
@@ -70,7 +64,8 @@ private slots:
 
 private:
   MultiDatasetFit *owner() const;
-  void addWorkspaceSpectrum(const QString &wsName, int wsIndex, const Mantid::API::MatrixWorkspace& ws);
+  void addWorkspaceSpectrum(const QString &wsName, int wsIndex,
+                            const Mantid::API::MatrixWorkspace &ws);
   void removeSpectra(QList<int> rows);
 
   /// Table with data set names and other data.
@@ -82,6 +77,5 @@ private:
 } // MDF
 } // CustomInterfaces
 } // MantidQt
-
 
 #endif /*MDFDATACONTROLLER_H_*/
