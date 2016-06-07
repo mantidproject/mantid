@@ -96,8 +96,8 @@ void MDNormDirectSC::init() {
       "An input workspace containing integrated vanadium (a measure of the "
       "solid angle).");
 
-  declareProperty(make_unique<PropertyWithValue<bool>>(
-                      "SkipSafetyCheck", false, Direction::Input),
+  declareProperty(make_unique<PropertyWithValue<bool>>("SkipSafetyCheck", false,
+                                                       Direction::Input),
                   "If set to true, the algorithm does "
                   "not check history if the workspace was modified since the"
                   "ConvertToMD algorithm was run, and assume that the direct "
