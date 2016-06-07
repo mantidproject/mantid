@@ -60,3 +60,9 @@ FuncMinimizerFactoryImpl::createMinimizer(const std::string &str) const {
 
 } // namespace API
 } // namespace Mantid
+
+namespace Mantid {
+namespace Kernel {
+  template class Mantid::Kernel::SingletonHolder<Mantid::API::FuncMinimizerFactoryImpl>;
+}
+}

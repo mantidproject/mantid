@@ -109,4 +109,5 @@ UserSubWindow * UserSubWindowFactoryImpl::createFromAlias(const std::string & na
   }
 }	
 
-
+template class Mantid::Kernel::SingletonHolder<AlgorithmDialogFactoryImpl>;
+template class Mantid::Kernel::SingletonHolder<UserSubWindowFactoryImpl>;

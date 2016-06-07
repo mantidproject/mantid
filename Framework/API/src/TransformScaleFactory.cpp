@@ -43,5 +43,12 @@ TransformScaleFactoryImpl::createUnwrapped(const std::string &className) const {
   throw Kernel::Exception::NotImplementedError(
       "Don't use this method - use the safe one!!!");
 }
+
 } // namespace Mantid
 } // namespace API
+
+namespace Mantid {
+namespace Kernel {
+  template class Mantid::Kernel::SingletonHolder<Mantid::API::TransformScaleFactoryImpl>;
+}
+}

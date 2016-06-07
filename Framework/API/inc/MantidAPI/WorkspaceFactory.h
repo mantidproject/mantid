@@ -98,17 +98,17 @@ private:
   using Kernel::DynamicFactory<Workspace>::create;
 };
 
-/// Forward declaration of a specialisation of SingletonHolder for
-/// AlgorithmFactoryImpl (needed for dllexport/dllimport) and a typedef for it.
-#ifdef _WIN32
-// this breaks new namespace declaraion rules; need to find a better fix
-template class MANTID_API_DLL
-    Mantid::Kernel::SingletonHolder<WorkspaceFactoryImpl>;
-#endif /* _WIN32 */
 typedef Mantid::Kernel::SingletonHolder<WorkspaceFactoryImpl>
     WorkspaceFactory;
 
-} // namespace Kernel
+} // namespace API
 } // namespace Mantid
+
+namespace Mantid {
+namespace Kernel {
+  EXTERN_MANTID_API template class MANTID_API_DLL
+      Mantid::Kernel::SingletonHolder<Mantid::API::WorkspaceFactoryImpl>;
+}
+}
 
 #endif /*MANTID_KERNEL_WORKSPACEFACTORY_H_*/

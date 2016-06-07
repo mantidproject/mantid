@@ -82,3 +82,9 @@ RemoteJobManagerFactoryImpl::create(const std::string baseURL,
 
 } // namespace API
 } // Namespace Mantid
+
+namespace Mantid {
+namespace Kernel {
+  template class Mantid::Kernel::SingletonHolder<Mantid::API::RemoteJobManagerFactoryImpl>;
+}
+}

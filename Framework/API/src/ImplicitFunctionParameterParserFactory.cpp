@@ -41,5 +41,12 @@ ImplicitFunctionParameterParser *ImplicitFunctionParameterParserFactoryImpl::
   }
   return paramParser;
 }
+
+}
+}
+
+namespace Mantid{
+namespace Kernel{
+template class Mantid::Kernel::SingletonHolder<Mantid::API::ImplicitFunctionParameterParserFactoryImpl>;
 }
 }

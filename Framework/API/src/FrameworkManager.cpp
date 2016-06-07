@@ -434,3 +434,9 @@ void FrameworkManagerImpl::setupUsageReporting() {
 
 } // namespace API
 } // Namespace Mantid
+
+namespace Mantid {
+namespace Kernel {
+  template class Mantid::Kernel::SingletonHolder<Mantid::API::FrameworkManagerImpl>;
+}
+}

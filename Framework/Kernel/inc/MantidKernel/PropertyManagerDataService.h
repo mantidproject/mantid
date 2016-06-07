@@ -46,14 +46,8 @@ private:
   ~PropertyManagerDataServiceImpl() override = default;
 };
 
-/// Forward declaration of a specialisation of SingletonHolder for
-/// PropertyManagerDataServiceImpl (needed for dllexport/dllimport) and a
-/// typedef for it.
-#ifdef _WIN32
-// this breaks new namespace declaraion rules; need to find a better fix
-template class MANTID_KERNEL_DLL
-    Mantid::Kernel::SingletonHolder<PropertyManagerDataServiceImpl>;
-#endif /* _WIN32 */
+
+EXTERN_MANTID_KERNEL template class MANTID_KERNEL_DLL Mantid::Kernel::SingletonHolder<PropertyManagerDataServiceImpl>;
 typedef  Mantid::Kernel::SingletonHolder<
     PropertyManagerDataServiceImpl> PropertyManagerDataService;
 

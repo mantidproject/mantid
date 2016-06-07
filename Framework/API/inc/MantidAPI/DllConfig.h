@@ -32,8 +32,10 @@
 
 #ifdef IN_MANTID_API
 #define MANTID_API_DLL DLLExport
+#define EXTERN_MANTID_API extern
 #else
 #define MANTID_API_DLL DLLImport
+#define EXTERN_MANTID_API extern
 #endif /* IN_MANTID_API*/
 
 #endif // MANTID_API_DLLCONFIG_H_

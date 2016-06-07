@@ -137,12 +137,8 @@ private:
   Poco::ActiveMethod<int, std::string, UsageServiceImpl> m_featureActiveMethod;
 };
 
-/// Forward declaration of a specialisation of SingletonHolder for
-/// AlgorithmFactoryImpl (needed for dllexport/dllimport) and a typedef for it.
-#if defined(__APPLE__) && defined(__INTEL_COMPILER)
-inline
-#endif
-    template class MANTID_KERNEL_DLL
+
+EXTERN_MANTID_KERNEL template class MANTID_KERNEL_DLL
         Mantid::Kernel::SingletonHolder<UsageServiceImpl>;
 typedef Mantid::Kernel::SingletonHolder<UsageServiceImpl>
     UsageService;

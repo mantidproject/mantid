@@ -26,5 +26,12 @@ MDResolutionConvolution *MDResolutionConvolutionFactoryImpl::createConvolution(
   convolution->initialize();
   return convolution;
 }
+
+}
+}
+
+namespace Mantid {
+namespace Kernel {
+  template class Kernel::SingletonHolder<Mantid::MDAlgorithms::MDResolutionConvolutionFactoryImpl>;
 }
 }

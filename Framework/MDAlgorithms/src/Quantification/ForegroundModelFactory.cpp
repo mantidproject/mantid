@@ -25,5 +25,12 @@ ForegroundModelFactoryImpl::createModel(const std::string &name,
   fgModel->setFunctionUnderMinimization(fitFunction);
   return fgModel;
 }
+
+}
+}
+
+namespace Mantid {
+namespace Kernel {
+  template class Kernel::SingletonHolder<Mantid::MDAlgorithms::ForegroundModelFactoryImpl>;
 }
 }

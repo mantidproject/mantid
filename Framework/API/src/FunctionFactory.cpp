@@ -317,3 +317,9 @@ void FunctionFactoryImpl::unsubscribe(const std::string &className) {
 
 } // namespace API
 } // namespace Mantid
+
+namespace Mantid {
+namespace Kernel {
+  template class Mantid::Kernel::SingletonHolder<Mantid::API::FunctionFactoryImpl>;
+}
+}

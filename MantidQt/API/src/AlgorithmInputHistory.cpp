@@ -149,3 +149,5 @@ void AbstractAlgorithmInputHistory::load()
   
   settings.endGroup();
 }
+
+template class Mantid::Kernel::SingletonHolder<AlgorithmInputHistoryImpl>;

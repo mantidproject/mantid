@@ -108,5 +108,12 @@ std::vector<CatalogSession_sptr> CatalogManagerImpl::getActiveSessions() {
 size_t CatalogManagerImpl::numberActiveSessions() const {
   return m_activeCatalogs.size();
 }
+
+}
+}
+
+namespace Mantid {
+namespace Kernel {
+  template class Kernel::SingletonHolder<Mantid::API::CatalogManagerImpl>;
 }
 }

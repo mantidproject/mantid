@@ -325,3 +325,9 @@ void AnalysisDataServiceImpl::verifyName(const std::string &name) {
 
 } // Namespace API
 } // Namespace Mantid
+
+namespace Mantid {
+namespace Kernel {
+  template class Mantid::Kernel::SingletonHolder<Mantid::API::AnalysisDataServiceImpl>;
+}
+}

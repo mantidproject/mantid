@@ -11,3 +11,10 @@ InstrumentDataServiceImpl::InstrumentDataServiceImpl()
 
 } // Namespace API
 } // Namespace Mantid
+
+namespace Mantid {
+namespace Kernel {
+  template class Mantid::Kernel::SingletonHolder<Mantid::API::InstrumentDataServiceImpl>;
+}
+}
+

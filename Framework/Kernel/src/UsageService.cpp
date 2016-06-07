@@ -302,5 +302,6 @@ int UsageServiceImpl::sendReport(const std::string &message,
   return status;
 }
 
+template class Mantid::Kernel::SingletonHolder<UsageServiceImpl>;
 } // namespace API
 } // namespace Mantid

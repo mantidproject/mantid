@@ -168,14 +168,6 @@ private:
   VersionMap m_vmap;
 };
 
-/// Forward declaration of a specialisation of SingletonHolder for
-/// AlgorithmFactoryImpl (needed for dllexport/dllimport) and a typedef for it.
-#ifdef _WIN32
-// this breaks new namespace declaraion rules; need to find a better fix
-template class MANTID_API_DLL
-    Mantid::Kernel::SingletonHolder<AlgorithmFactoryImpl>;
-#endif /* _WIN32 */
-
 typedef Mantid::Kernel::SingletonHolder<AlgorithmFactoryImpl>
     AlgorithmFactory;
 
@@ -187,5 +179,11 @@ typedef const Poco::AutoPtr<Mantid::Kernel::DynamicFactory<
 
 } // namespace API
 } // namespace Mantid
+
+namespace Mantid {
+namespace Kernel {
+  EXTERN_MANTID_API template class MANTID_API_DLL Mantid::Kernel::SingletonHolder<Mantid::API::AlgorithmFactoryImpl>;
+}
+}
 
 #endif /*MANTID_API_ALGORITHMFACTORY_H_*/

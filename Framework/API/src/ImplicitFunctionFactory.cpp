@@ -49,5 +49,12 @@ ImplicitFunctionFactoryImpl::createUnwrapped(
       funcParser->createFunctionBuilder(pInstructionsXML));
   return functionBuilder->create();
 }
+
+}
+}
+
+namespace Mantid {
+namespace Kernel {
+  template class Mantid::Kernel::SingletonHolder<Mantid::API::ImplicitFunctionFactoryImpl>;
 }
 }

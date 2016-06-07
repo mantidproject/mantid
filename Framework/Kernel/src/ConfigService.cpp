@@ -2040,6 +2040,10 @@ int ConfigServiceImpl::FindLowestFilterLevel() const {
 
   return lowestPriority;
 }
+
+
+template class Mantid::Kernel::SingletonHolder<ConfigServiceImpl>;
+
 /// \cond TEMPLATE
 template DLLExport int ConfigServiceImpl::getValue(const std::string &,
                                                    double &);
