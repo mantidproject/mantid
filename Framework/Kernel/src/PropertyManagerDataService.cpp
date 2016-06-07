@@ -9,7 +9,5 @@ namespace Kernel {
 PropertyManagerDataServiceImpl::PropertyManagerDataServiceImpl()
     : DataService<PropertyManager>("PropertyManagerDataService") {}
 
-template class Mantid::Kernel::SingletonHolder<PropertyManagerDataServiceImpl>;
-
 } // Namespace Kernel
 } // Namespace Mantid

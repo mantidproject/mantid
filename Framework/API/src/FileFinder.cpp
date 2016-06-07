@@ -785,9 +785,3 @@ std::string FileFinderImpl::toUpper(const std::string &src) const {
 
 } // API
 } // Mantid
-
-namespace Mantid {
-namespace Kernel {
-  template class Mantid::Kernel::SingletonHolder<Mantid::API::FileFinderImpl>;
-}
-}

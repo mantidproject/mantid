@@ -124,9 +124,3 @@ CenteringGroupCreatorImpl::CenteringGroupCreatorImpl()
 
 } // namespace Geometry
 } // namespace Mantid
-
-namespace Mantid {
-namespace Kernel {
-template class Mantid::Kernel::SingletonHolder<Mantid::Geometry::CenteringGroupCreatorImpl>;
-}
-}

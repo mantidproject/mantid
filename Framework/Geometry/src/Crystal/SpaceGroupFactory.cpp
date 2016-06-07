@@ -996,9 +996,3 @@ DECLARE_GENERATED_SPACE_GROUP(
 
 } // namespace Geometry
 } // namespace Mantid
-
-namespace Mantid {
-namespace Kernel {
-  template class Mantid::Kernel::SingletonHolder<Mantid::Geometry::SpaceGroupFactoryImpl>;
-}
-}

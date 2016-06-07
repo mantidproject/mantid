@@ -33,4 +33,3 @@ void SelectionNotificationServiceImpl::sendQPointSelection(bool lab_coords,
   //  std::cout << "QPointSelection_signal emitted" << std::endl;
 }
 
-template class Mantid::Kernel::SingletonHolder<SelectionNotificationServiceImpl>;

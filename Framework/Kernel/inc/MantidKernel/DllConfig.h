@@ -32,7 +32,7 @@
 
 #ifdef IN_MANTID_KERNEL
 #define MANTID_KERNEL_DLL DLLExport
-#define EXTERN_MANTID_KERNEL extern
+#define EXTERN_MANTID_KERNEL
 #else
 #define MANTID_KERNEL_DLL DLLImport
 #define EXTERN_MANTID_KERNEL extern

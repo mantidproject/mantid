@@ -134,7 +134,5 @@ bool LibraryManagerImpl::loadLibrary(const std::string &filepath) {
   return false;
 }
 
-template class Mantid::Kernel::SingletonHolder<LibraryManagerImpl>;
-
 } // namespace Kernel
 } // namespace Mantid

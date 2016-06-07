@@ -46,9 +46,3 @@ TransformScaleFactoryImpl::createUnwrapped(const std::string &className) const {
 
 } // namespace Mantid
 } // namespace API
-
-namespace Mantid {
-namespace Kernel {
-  template class Mantid::Kernel::SingletonHolder<Mantid::API::TransformScaleFactoryImpl>;
-}
-}

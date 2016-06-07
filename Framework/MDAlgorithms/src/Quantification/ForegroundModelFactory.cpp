@@ -28,9 +28,3 @@ ForegroundModelFactoryImpl::createModel(const std::string &name,
 
 }
 }
-
-namespace Mantid {
-namespace Kernel {
-  template class Kernel::SingletonHolder<Mantid::MDAlgorithms::ForegroundModelFactoryImpl>;
-}
-}

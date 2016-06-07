@@ -430,8 +430,3 @@ AlgorithmFactoryImpl::createAlgorithm(const std::string &name,
 } // namespace API
 } // namespace Mantid
 
-namespace Mantid {
-namespace Kernel {
-  template class Mantid::Kernel::SingletonHolder<Mantid::API::AlgorithmFactoryImpl>;
-}
-}

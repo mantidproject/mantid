@@ -407,9 +407,3 @@ DECLARE_SYMMETRY_ELEMENT_GENERATOR(SymmetryElementMirrorGenerator)
 
 } // namespace Geometry
 } // namespace Mantid
-
-namespace Mantid {
-namespace Kernel {
-template class Mantid::Kernel::SingletonHolder<Mantid::Geometry::SymmetryElementFactoryImpl>;
-}
-}

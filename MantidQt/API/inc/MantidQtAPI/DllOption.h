@@ -5,7 +5,7 @@
 
 #ifdef IN_MANTIDQT_API
 #define EXPORT_OPT_MANTIDQT_API DLLExport
-#define EXTERN_MANTIDQT_API extern
+#define EXTERN_MANTIDQT_API
 #else
 #define EXPORT_OPT_MANTIDQT_API DLLImport
 #define EXTERN_MANTIDQT_API extern

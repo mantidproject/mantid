@@ -100,7 +100,6 @@ typedef Mantid::Kernel::SingletonHolder<AlgorithmInputHistoryImpl> AlgorithmInpu
 }
 }
 
-    AlgorithmInputHistoryImpl> AlgorithmInputHistory;
 namespace Mantid {
 namespace Kernel {
   EXTERN_MANTIDQT_API template class EXPORT_OPT_MANTIDQT_API Mantid::Kernel::SingletonHolder<MantidQt::API::AlgorithmInputHistoryImpl>;

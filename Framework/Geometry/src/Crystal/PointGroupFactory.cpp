@@ -252,9 +252,3 @@ DECLARE_POINTGROUP("m-3m", "-z,-x,-y; -y,x,z; y,x,-z", "Cubic")
 } // namespace Geometry
 } // namespace Mantid
 
-
-namespace Mantid {
-namespace Kernel {
-  template class Mantid::Kernel::SingletonHolder<Mantid::Geometry::PointGroupFactoryImpl>;
-}
-}
