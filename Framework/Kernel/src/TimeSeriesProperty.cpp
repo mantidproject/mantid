@@ -2094,8 +2094,7 @@ TimeSeriesProperty<TYPE>::setValueFromProperty(const Property &right) {
 /// @cond
 // -------------------------- Macro to instantiation concrete types
 // --------------------------------
-#define INSTANTIATE(TYPE)                                                      \
-  template class TimeSeriesProperty<TYPE>;
+#define INSTANTIATE(TYPE) template class TimeSeriesProperty<TYPE>;
 
 // -------------------------- Concrete instantiation
 // -----------------------------------------------

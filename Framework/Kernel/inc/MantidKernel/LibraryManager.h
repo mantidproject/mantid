@@ -69,10 +69,9 @@ private:
       OpenLibs;
 };
 
-
-EXTERN_MANTID_KERNEL template class MANTID_KERNEL_DLL Mantid::Kernel::SingletonHolder<LibraryManagerImpl>;
-typedef Mantid::Kernel::SingletonHolder<LibraryManagerImpl>
-    LibraryManager;
+EXTERN_MANTID_KERNEL template class MANTID_KERNEL_DLL
+    Mantid::Kernel::SingletonHolder<LibraryManagerImpl>;
+typedef Mantid::Kernel::SingletonHolder<LibraryManagerImpl> LibraryManager;
 
 } // namespace Kernel
 } // namespace Mantid

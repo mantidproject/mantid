@@ -87,16 +87,16 @@ private:
 };
 
 // The factory is just a specialisation of SingletonHolder
-typedef Mantid::Kernel::SingletonHolder<
-    RemoteJobManagerFactoryImpl> RemoteJobManagerFactory;
+typedef Mantid::Kernel::SingletonHolder<RemoteJobManagerFactoryImpl>
+    RemoteJobManagerFactory;
 
 } // namespace API
 } // namespace Mantid
 
 namespace Mantid {
 namespace Kernel {
-  EXTERN_MANTID_API template class MANTID_API_DLL
-      Mantid::Kernel::SingletonHolder<Mantid::API::RemoteJobManagerFactoryImpl>;
+EXTERN_MANTID_API template class MANTID_API_DLL
+    Mantid::Kernel::SingletonHolder<Mantid::API::RemoteJobManagerFactoryImpl>;
 }
 }
 

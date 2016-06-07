@@ -26,6 +26,5 @@ MDResolutionConvolution *MDResolutionConvolutionFactoryImpl::createConvolution(
   convolution->initialize();
   return convolution;
 }
-
 }
 }

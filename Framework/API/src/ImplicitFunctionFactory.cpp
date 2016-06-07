@@ -49,6 +49,5 @@ ImplicitFunctionFactoryImpl::createUnwrapped(
       funcParser->createFunctionBuilder(pInstructionsXML));
   return functionBuilder->create();
 }
-
 }
 }

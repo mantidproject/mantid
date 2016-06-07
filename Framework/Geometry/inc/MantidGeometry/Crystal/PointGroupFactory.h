@@ -120,7 +120,6 @@ private:
   boost::regex m_originChoiceRegex;
 };
 
-
 typedef Mantid::Kernel::SingletonHolder<PointGroupFactoryImpl>
     PointGroupFactory;
 
@@ -129,7 +128,8 @@ typedef Mantid::Kernel::SingletonHolder<PointGroupFactoryImpl>
 
 namespace Mantid {
 namespace Kernel {
-  EXTERN_MANTID_GEOMETRY template class MANTID_GEOMETRY_DLL Mantid::Kernel::SingletonHolder<Mantid::Geometry::PointGroupFactoryImpl>;
+EXTERN_MANTID_GEOMETRY template class MANTID_GEOMETRY_DLL
+    Mantid::Kernel::SingletonHolder<Mantid::Geometry::PointGroupFactoryImpl>;
 }
 }
 

@@ -426,7 +426,5 @@ AlgorithmFactoryImpl::createAlgorithm(const std::string &name,
   return Kernel::DynamicFactory<Algorithm>::create(createName(name, version));
 }
 
-
 } // namespace API
 } // namespace Mantid
-

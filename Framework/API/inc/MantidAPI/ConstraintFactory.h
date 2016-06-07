@@ -80,7 +80,8 @@ typedef Mantid::Kernel::SingletonHolder<ConstraintFactoryImpl>
 
 namespace Mantid {
 namespace Kernel {
-  EXTERN_MANTID_API template class MANTID_API_DLL Mantid::Kernel::SingletonHolder<Mantid::API::ConstraintFactoryImpl>;
+EXTERN_MANTID_API template class MANTID_API_DLL
+    Mantid::Kernel::SingletonHolder<Mantid::API::ConstraintFactoryImpl>;
 }
 }
 

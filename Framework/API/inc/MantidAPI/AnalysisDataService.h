@@ -178,7 +178,6 @@ private:
   std::string m_illegalChars;
 };
 
-
 typedef Mantid::Kernel::SingletonHolder<AnalysisDataServiceImpl>
     AnalysisDataService;
 
@@ -244,7 +243,8 @@ typedef const Poco::AutoPtr<AnalysisDataServiceImpl::GroupUpdatedNotification> &
 
 namespace Mantid {
 namespace Kernel {
-  EXTERN_MANTID_API template class MANTID_API_DLL Mantid::Kernel::SingletonHolder<Mantid::API::AnalysisDataServiceImpl>;
+EXTERN_MANTID_API template class MANTID_API_DLL
+    Mantid::Kernel::SingletonHolder<Mantid::API::AnalysisDataServiceImpl>;
 }
 }
 

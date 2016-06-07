@@ -38,4 +38,3 @@ BraggScattererFactoryImpl::BraggScattererFactoryImpl() {
 
 } // namespace Geometry
 } // namespace Mantid
-

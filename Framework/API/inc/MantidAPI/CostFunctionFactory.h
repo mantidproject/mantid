@@ -69,10 +69,10 @@ typedef Mantid::Kernel::SingletonHolder<CostFunctionFactoryImpl>
 } // namespace API
 } // namespace Mantid
 
-
 namespace Mantid {
 namespace Kernel {
-  EXTERN_MANTID_API template class MANTID_API_DLL Mantid::Kernel::SingletonHolder<Mantid::API::CostFunctionFactoryImpl>;
+EXTERN_MANTID_API template class MANTID_API_DLL
+    Mantid::Kernel::SingletonHolder<Mantid::API::CostFunctionFactoryImpl>;
 }
 }
 

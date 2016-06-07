@@ -135,15 +135,15 @@ private:
 #endif
 };
 
-typedef Mantid::Kernel::SingletonHolder<FrameworkManagerImpl>
-    FrameworkManager;
+typedef Mantid::Kernel::SingletonHolder<FrameworkManagerImpl> FrameworkManager;
 
 } // namespace Kernel
 } // namespace Mantid
 
 namespace Mantid {
 namespace Kernel {
-  EXTERN_MANTID_API template class MANTID_API_DLL Mantid::Kernel::SingletonHolder<Mantid::API::FrameworkManagerImpl>;
+EXTERN_MANTID_API template class MANTID_API_DLL
+    Mantid::Kernel::SingletonHolder<Mantid::API::FrameworkManagerImpl>;
 }
 }
 

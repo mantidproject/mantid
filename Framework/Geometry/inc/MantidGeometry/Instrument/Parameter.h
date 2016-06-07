@@ -243,7 +243,7 @@ typedef ParameterType<double> ParameterDouble;
 /// Parameter of type bool
 typedef ParameterType<bool> ParameterBool;
 /// Parameter of type std::string
-typedef ParameterType<std::string>  ParameterString;
+typedef ParameterType<std::string> ParameterString;
 /// Parameter of type V3D
 typedef ParameterType<Kernel::V3D> ParameterV3D;
 /// Parameter of type Quat

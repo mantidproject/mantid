@@ -69,10 +69,9 @@ private:
   ~AlgorithmDialogFactoryImpl() override = default;
 };
 
-
 /// The specific instantiation of the templated type
-typedef Mantid::Kernel::SingletonHolder<
-    AlgorithmDialogFactoryImpl> AlgorithmDialogFactory;
+typedef Mantid::Kernel::SingletonHolder<AlgorithmDialogFactoryImpl>
+    AlgorithmDialogFactory;
 
 /**
     The UserSubWindowFactory is responsible for creating concrete instances of
@@ -181,17 +180,17 @@ void UserSubWindowFactoryImpl::saveAliasNames(const std::string &realName) {
 }
 
 /// The specific instantiation of the templated type
-typedef Mantid::Kernel::SingletonHolder<
-    UserSubWindowFactoryImpl> UserSubWindowFactory;
+typedef Mantid::Kernel::SingletonHolder<UserSubWindowFactoryImpl>
+    UserSubWindowFactory;
 }
 }
 
 namespace Mantid {
 namespace Kernel {
-  EXTERN_MANTIDQT_API template class EXPORT_OPT_MANTIDQT_API
-      Mantid::Kernel::SingletonHolder<MantidQt::API::AlgorithmDialogFactoryImpl>;
-  EXTERN_MANTIDQT_API template class EXPORT_OPT_MANTIDQT_API
-      Mantid::Kernel::SingletonHolder<MantidQt::API::UserSubWindowFactoryImpl>;
+EXTERN_MANTIDQT_API template class EXPORT_OPT_MANTIDQT_API
+    Mantid::Kernel::SingletonHolder<MantidQt::API::AlgorithmDialogFactoryImpl>;
+EXTERN_MANTIDQT_API template class EXPORT_OPT_MANTIDQT_API
+    Mantid::Kernel::SingletonHolder<MantidQt::API::UserSubWindowFactoryImpl>;
 }
 }
 

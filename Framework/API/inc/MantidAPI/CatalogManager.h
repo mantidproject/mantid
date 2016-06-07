@@ -67,14 +67,14 @@ private:
   std::map<CatalogSession_sptr, ICatalog_sptr> m_activeCatalogs;
 };
 
-typedef Kernel::SingletonHolder<CatalogManagerImpl>
-    CatalogManager;
+typedef Kernel::SingletonHolder<CatalogManagerImpl> CatalogManager;
 }
 }
 
 namespace Mantid {
 namespace Kernel {
-  EXTERN_MANTID_API template class MANTID_API_DLL Kernel::SingletonHolder<Mantid::API::CatalogManagerImpl>;
+EXTERN_MANTID_API template class MANTID_API_DLL
+    Kernel::SingletonHolder<Mantid::API::CatalogManagerImpl>;
 }
 }
 #endif /* MANTID_ICAT_CATALOGMANAGERIMPL_H_ */

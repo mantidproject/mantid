@@ -63,7 +63,8 @@ typedef Mantid::Kernel::SingletonHolder<ArchiveSearchFactoryImpl>
 
 namespace Mantid {
 namespace Kernel {
-  EXTERN_MANTID_API template class MANTID_API_DLL Mantid::Kernel::SingletonHolder<Mantid::API::ArchiveSearchFactoryImpl>;
+EXTERN_MANTID_API template class MANTID_API_DLL
+    Mantid::Kernel::SingletonHolder<Mantid::API::ArchiveSearchFactoryImpl>;
 }
 }
 

@@ -93,8 +93,8 @@ typedef Mantid::Kernel::SingletonHolder<BraggScattererFactoryImpl>
 
 namespace Mantid {
 namespace Kernel {
-EXTERN_MANTID_GEOMETRY template class MANTID_GEOMETRY_DLL
-      Mantid::Kernel::SingletonHolder<Mantid::Geometry::BraggScattererFactoryImpl>;
+EXTERN_MANTID_GEOMETRY template class MANTID_GEOMETRY_DLL Mantid::Kernel::
+    SingletonHolder<Mantid::Geometry::BraggScattererFactoryImpl>;
 }
 }
 

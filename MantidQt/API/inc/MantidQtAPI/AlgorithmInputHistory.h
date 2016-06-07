@@ -96,13 +96,15 @@ private:
   friend struct Mantid::Kernel::CreateUsingNew<AlgorithmInputHistoryImpl>;
 };
 
-typedef Mantid::Kernel::SingletonHolder<AlgorithmInputHistoryImpl> AlgorithmInputHistory;
+typedef Mantid::Kernel::SingletonHolder<AlgorithmInputHistoryImpl>
+    AlgorithmInputHistory;
 }
 }
 
 namespace Mantid {
 namespace Kernel {
-  EXTERN_MANTIDQT_API template class EXPORT_OPT_MANTIDQT_API Mantid::Kernel::SingletonHolder<MantidQt::API::AlgorithmInputHistoryImpl>;
+EXTERN_MANTIDQT_API template class EXPORT_OPT_MANTIDQT_API
+    Mantid::Kernel::SingletonHolder<MantidQt::API::AlgorithmInputHistoryImpl>;
 }
 }
 

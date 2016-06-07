@@ -83,8 +83,8 @@ private:
   ~UnitFactoryImpl() override = default;
 };
 
-
-EXTERN_MANTID_KERNEL template class MANTID_KERNEL_DLL Mantid::Kernel::SingletonHolder<UnitFactoryImpl>;
+EXTERN_MANTID_KERNEL template class MANTID_KERNEL_DLL
+    Mantid::Kernel::SingletonHolder<UnitFactoryImpl>;
 
 typedef SingletonHolder<UnitFactoryImpl> UnitFactory;
 

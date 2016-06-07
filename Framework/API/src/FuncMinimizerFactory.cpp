@@ -60,4 +60,3 @@ FuncMinimizerFactoryImpl::createMinimizer(const std::string &str) const {
 
 } // namespace API
 } // namespace Mantid
-

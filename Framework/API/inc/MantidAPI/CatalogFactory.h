@@ -78,15 +78,15 @@ private:
 
 /// The specialisation of the SingletonHolder class that holds the
 /// CatalogFactory
-typedef Mantid::Kernel::SingletonHolder<CatalogFactoryImpl>
-    CatalogFactory;
+typedef Mantid::Kernel::SingletonHolder<CatalogFactoryImpl> CatalogFactory;
 
 } // namespace API
 } // namespace Mantid
 
 namespace Mantid {
 namespace Kernel {
-  EXTERN_MANTID_API template class MANTID_API_DLL Mantid::Kernel::SingletonHolder<Mantid::API::CatalogFactoryImpl>;
+EXTERN_MANTID_API template class MANTID_API_DLL
+    Mantid::Kernel::SingletonHolder<Mantid::API::CatalogFactoryImpl>;
 }
 }
 

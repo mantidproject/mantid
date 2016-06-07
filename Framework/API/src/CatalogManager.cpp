@@ -108,6 +108,5 @@ std::vector<CatalogSession_sptr> CatalogManagerImpl::getActiveSessions() {
 size_t CatalogManagerImpl::numberActiveSessions() const {
   return m_activeCatalogs.size();
 }
-
 }
 }

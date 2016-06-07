@@ -142,8 +142,7 @@ const std::vector<std::string> &FunctionFactoryImpl::getFunctionNames() const {
   return typeNames;
 }
 
-typedef Mantid::Kernel::SingletonHolder<FunctionFactoryImpl>
-    FunctionFactory;
+typedef Mantid::Kernel::SingletonHolder<FunctionFactoryImpl> FunctionFactory;
 
 /// Convenient typedef for an UpdateNotification
 typedef FunctionFactoryImpl::UpdateNotification
@@ -156,7 +155,8 @@ typedef const Poco::AutoPtr<FunctionFactoryUpdateNotification> &
 
 namespace Mantid {
 namespace Kernel {
-  EXTERN_MANTID_API template class MANTID_API_DLL Mantid::Kernel::SingletonHolder<Mantid::API::FunctionFactoryImpl>;
+EXTERN_MANTID_API template class MANTID_API_DLL
+    Mantid::Kernel::SingletonHolder<Mantid::API::FunctionFactoryImpl>;
 }
 }
 

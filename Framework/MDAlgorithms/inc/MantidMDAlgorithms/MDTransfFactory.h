@@ -118,7 +118,7 @@ typedef Kernel::SingletonHolder<MDTransfFactoryImpl> MDTransfFactory;
 namespace Mantid {
 namespace Kernel {
 EXTERN_MANTID_MDALGORITHMS template class MANTID_MDALGORITHMS_DLL
-      Mantid::Kernel::SingletonHolder<Mantid::MDAlgorithms::MDTransfFactoryImpl>;
+    Mantid::Kernel::SingletonHolder<Mantid::MDAlgorithms::MDTransfFactoryImpl>;
 }
 }
 

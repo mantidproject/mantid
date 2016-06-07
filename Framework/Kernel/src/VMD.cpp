@@ -5,7 +5,6 @@ using namespace Mantid::Kernel;
 namespace Mantid {
 namespace Kernel {
 
-
 //-------------------------------------------------------------------------------------------------
 /** Make an orthogonal system with 2 input 3D vectors.
  * Currently only works in 3D!
@@ -120,7 +119,6 @@ VMDBase<TYPE>::getNormalVector(const std::vector<VMDBase<TYPE>> &vectors) {
 /// Instantiate VMDBase classes
 template class MANTID_KERNEL_DLL VMDBase<double>;
 template class MANTID_KERNEL_DLL VMDBase<float>;
-
 
 /**
   Prints a text representation of itself

@@ -65,14 +65,15 @@ private:
 };
 
 /// Typedef singleton instance to ForegroundFactory
-typedef Kernel::SingletonHolder<ForegroundModelFactoryImpl> ForegroundModelFactory;
+typedef Kernel::SingletonHolder<ForegroundModelFactoryImpl>
+    ForegroundModelFactory;
 }
 }
 
 namespace Mantid {
 namespace Kernel {
-  EXTERN_MANTID_MDALGORITHMS template class MANTID_MDALGORITHMS_DLL
-      Kernel::SingletonHolder<Mantid::MDAlgorithms::ForegroundModelFactoryImpl>;
+EXTERN_MANTID_MDALGORITHMS template class MANTID_MDALGORITHMS_DLL
+    Kernel::SingletonHolder<Mantid::MDAlgorithms::ForegroundModelFactoryImpl>;
 }
 }
 

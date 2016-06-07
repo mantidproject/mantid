@@ -257,7 +257,6 @@ private:
   friend struct Mantid::Kernel::CreateUsingNew<SymmetryElementFactoryImpl>;
 };
 
-
 typedef Mantid::Kernel::SingletonHolder<SymmetryElementFactoryImpl>
     SymmetryElementFactory;
 
@@ -266,8 +265,8 @@ typedef Mantid::Kernel::SingletonHolder<SymmetryElementFactoryImpl>
 
 namespace Mantid {
 namespace Kernel {
-EXTERN_MANTID_GEOMETRY template class MANTID_GEOMETRY_DLL
-      Mantid::Kernel::SingletonHolder<Mantid::Geometry::SymmetryElementFactoryImpl>;
+EXTERN_MANTID_GEOMETRY template class MANTID_GEOMETRY_DLL Mantid::Kernel::
+    SingletonHolder<Mantid::Geometry::SymmetryElementFactoryImpl>;
 }
 }
 

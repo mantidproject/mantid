@@ -64,15 +64,15 @@ private:
 };
 
 /// Typedef singleton instance to MDResolutionConvolutionFactory
-typedef Kernel::SingletonHolder<
-    MDResolutionConvolutionFactoryImpl> MDResolutionConvolutionFactory;
+typedef Kernel::SingletonHolder<MDResolutionConvolutionFactoryImpl>
+    MDResolutionConvolutionFactory;
 }
 }
 
 namespace Mantid {
 namespace Kernel {
-  EXTERN_MANTID_MDALGORITHMS template class MANTID_MDALGORITHMS_DLL
-      Kernel::SingletonHolder<Mantid::MDAlgorithms::MDResolutionConvolutionFactoryImpl>;
+EXTERN_MANTID_MDALGORITHMS template class MANTID_MDALGORITHMS_DLL Kernel::
+    SingletonHolder<Mantid::MDAlgorithms::MDResolutionConvolutionFactoryImpl>;
 }
 }
 

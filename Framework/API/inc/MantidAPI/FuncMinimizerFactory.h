@@ -69,7 +69,8 @@ typedef Mantid::Kernel::SingletonHolder<FuncMinimizerFactoryImpl>
 
 namespace Mantid {
 namespace Kernel {
-  EXTERN_MANTID_API template class MANTID_API_DLL Mantid::Kernel::SingletonHolder<Mantid::API::FuncMinimizerFactoryImpl>;
+EXTERN_MANTID_API template class MANTID_API_DLL
+    Mantid::Kernel::SingletonHolder<Mantid::API::FuncMinimizerFactoryImpl>;
 }
 }
 

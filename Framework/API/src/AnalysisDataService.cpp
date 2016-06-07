@@ -325,4 +325,3 @@ void AnalysisDataServiceImpl::verifyName(const std::string &name) {
 
 } // Namespace API
 } // Namespace Mantid
-

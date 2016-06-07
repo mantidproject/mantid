@@ -25,6 +25,5 @@ ForegroundModelFactoryImpl::createModel(const std::string &name,
   fgModel->setFunctionUnderMinimization(fitFunction);
   return fgModel;
 }
-
 }
 }

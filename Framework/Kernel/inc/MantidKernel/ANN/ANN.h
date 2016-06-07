@@ -98,7 +98,7 @@
 #endif
 #elif defined(__GNUC__)
 #ifdef IN_MANTID_KERNEL
-#define DLL_API __attribute__ ((visibility ("default")))
+#define DLL_API __attribute__((visibility("default")))
 #else
 #define DLL_API
 #endif

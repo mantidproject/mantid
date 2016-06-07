@@ -168,8 +168,7 @@ private:
   VersionMap m_vmap;
 };
 
-typedef Mantid::Kernel::SingletonHolder<AlgorithmFactoryImpl>
-    AlgorithmFactory;
+typedef Mantid::Kernel::SingletonHolder<AlgorithmFactoryImpl> AlgorithmFactory;
 
 /// Convenient typedef for an UpdateNotification
 typedef Mantid::Kernel::DynamicFactory<Algorithm>::UpdateNotification
@@ -182,7 +181,8 @@ typedef const Poco::AutoPtr<Mantid::Kernel::DynamicFactory<
 
 namespace Mantid {
 namespace Kernel {
-  EXTERN_MANTID_API template class MANTID_API_DLL Mantid::Kernel::SingletonHolder<Mantid::API::AlgorithmFactoryImpl>;
+EXTERN_MANTID_API template class MANTID_API_DLL
+    Mantid::Kernel::SingletonHolder<Mantid::API::AlgorithmFactoryImpl>;
 }
 }
 

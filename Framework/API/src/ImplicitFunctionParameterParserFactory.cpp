@@ -41,6 +41,5 @@ ImplicitFunctionParameterParser *ImplicitFunctionParameterParserFactoryImpl::
   }
   return paramParser;
 }
-
 }
 }

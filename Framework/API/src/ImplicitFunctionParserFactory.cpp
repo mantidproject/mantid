@@ -71,6 +71,5 @@ ImplicitFunctionParserFactoryImpl::createImplicitFunctionParserFromXML(
 
   return createImplicitFunctionParserFromXML(pRootElem);
 }
-
 }
 }

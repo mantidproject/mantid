@@ -137,11 +137,9 @@ private:
   Poco::ActiveMethod<int, std::string, UsageServiceImpl> m_featureActiveMethod;
 };
 
-
 EXTERN_MANTID_KERNEL template class MANTID_KERNEL_DLL
-        Mantid::Kernel::SingletonHolder<UsageServiceImpl>;
-typedef Mantid::Kernel::SingletonHolder<UsageServiceImpl>
-    UsageService;
+    Mantid::Kernel::SingletonHolder<UsageServiceImpl>;
+typedef Mantid::Kernel::SingletonHolder<UsageServiceImpl> UsageService;
 
 } // namespace Kernel
 } // namespace Mantid

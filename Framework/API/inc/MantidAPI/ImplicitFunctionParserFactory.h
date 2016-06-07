@@ -66,16 +66,15 @@ private:
   ~ImplicitFunctionParserFactoryImpl() override = default;
 };
 
-
-typedef Mantid::Kernel::SingletonHolder<
-    ImplicitFunctionParserFactoryImpl> ImplicitFunctionParserFactory;
+typedef Mantid::Kernel::SingletonHolder<ImplicitFunctionParserFactoryImpl>
+    ImplicitFunctionParserFactory;
 }
 }
 
 namespace Mantid {
 namespace Kernel {
-  EXTERN_MANTID_API template class MANTID_API_DLL
-      Mantid::Kernel::SingletonHolder<Mantid::API::ImplicitFunctionParserFactoryImpl>;
+EXTERN_MANTID_API template class MANTID_API_DLL Mantid::Kernel::SingletonHolder<
+    Mantid::API::ImplicitFunctionParserFactoryImpl>;
 }
 }
 

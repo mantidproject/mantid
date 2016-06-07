@@ -352,9 +352,9 @@ private:
   std::vector<std::string> m_filterChannels;
 };
 
-EXTERN_MANTID_KERNEL template class MANTID_KERNEL_DLL  Mantid::Kernel::SingletonHolder<ConfigServiceImpl>;
-typedef Mantid::Kernel::SingletonHolder<ConfigServiceImpl>
-    ConfigService;
+EXTERN_MANTID_KERNEL template class MANTID_KERNEL_DLL
+    Mantid::Kernel::SingletonHolder<ConfigServiceImpl>;
+typedef Mantid::Kernel::SingletonHolder<ConfigServiceImpl> ConfigService;
 
 typedef Mantid::Kernel::ConfigServiceImpl::ValueChanged
     ConfigValChangeNotification;

@@ -98,16 +98,15 @@ private:
   using Kernel::DynamicFactory<Workspace>::create;
 };
 
-typedef Mantid::Kernel::SingletonHolder<WorkspaceFactoryImpl>
-    WorkspaceFactory;
+typedef Mantid::Kernel::SingletonHolder<WorkspaceFactoryImpl> WorkspaceFactory;
 
 } // namespace API
 } // namespace Mantid
 
 namespace Mantid {
 namespace Kernel {
-  EXTERN_MANTID_API template class MANTID_API_DLL
-      Mantid::Kernel::SingletonHolder<Mantid::API::WorkspaceFactoryImpl>;
+EXTERN_MANTID_API template class MANTID_API_DLL
+    Mantid::Kernel::SingletonHolder<Mantid::API::WorkspaceFactoryImpl>;
 }
 }
 

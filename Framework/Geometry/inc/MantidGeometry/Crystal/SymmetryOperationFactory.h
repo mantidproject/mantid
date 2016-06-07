@@ -86,8 +86,8 @@ typedef Mantid::Kernel::SingletonHolder<SymmetryOperationFactoryImpl>
 
 namespace Mantid {
 namespace Kernel {
-EXTERN_MANTID_GEOMETRY template class MANTID_GEOMETRY_DLL
-      Mantid::Kernel::SingletonHolder<Mantid::Geometry::SymmetryOperationFactoryImpl>;
+EXTERN_MANTID_GEOMETRY template class MANTID_GEOMETRY_DLL Mantid::Kernel::
+    SingletonHolder<Mantid::Geometry::SymmetryOperationFactoryImpl>;
 }
 }
 

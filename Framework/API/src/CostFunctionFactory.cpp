@@ -15,9 +15,3 @@ CostFunctionFactoryImpl::CostFunctionFactoryImpl()
 
 } // namespace API
 } // namespace Mantid
-
-
-
-
-
-

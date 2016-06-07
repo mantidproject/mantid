@@ -67,19 +67,18 @@ private:
   ~ScriptRepositoryFactoryImpl() override = default;
 };
 
-typedef Mantid::Kernel::SingletonHolder<
-    ScriptRepositoryFactoryImpl> ScriptRepositoryFactory;
+typedef Mantid::Kernel::SingletonHolder<ScriptRepositoryFactoryImpl>
+    ScriptRepositoryFactory;
 
 } // namespace API
 } // namespace Mantid
 
 namespace Mantid {
 namespace Kernel {
-  EXTERN_MANTID_API template class MANTID_API_DLL
-      Mantid::Kernel::SingletonHolder<Mantid::API::ScriptRepositoryFactoryImpl>;
+EXTERN_MANTID_API template class MANTID_API_DLL
+    Mantid::Kernel::SingletonHolder<Mantid::API::ScriptRepositoryFactoryImpl>;
 }
 }
-
 
 /**
  * Macro for declaring a new type of function to be used with the

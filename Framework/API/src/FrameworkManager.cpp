@@ -425,4 +425,3 @@ void FrameworkManagerImpl::setupUsageReporting() {
 
 } // namespace API
 } // Namespace Mantid
-

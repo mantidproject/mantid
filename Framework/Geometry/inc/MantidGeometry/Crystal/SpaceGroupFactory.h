@@ -273,10 +273,10 @@ typedef Mantid::Kernel::SingletonHolder<SpaceGroupFactoryImpl>
 
 namespace Mantid {
 namespace Kernel {
-EXTERN_MANTID_GEOMETRY template class MANTID_GEOMETRY_DLL Mantid::Kernel::SingletonHolder<Mantid::Geometry::SpaceGroupFactoryImpl>;
+EXTERN_MANTID_GEOMETRY template class MANTID_GEOMETRY_DLL
+    Mantid::Kernel::SingletonHolder<Mantid::Geometry::SpaceGroupFactoryImpl>;
 }
 }
-
 
 /* Macros for compile time space group registration
  *

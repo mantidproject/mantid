@@ -153,7 +153,8 @@ typedef Mantid::Kernel::SingletonHolder<FileLoaderRegistryImpl>
 
 namespace Mantid {
 namespace Kernel {
-  EXTERN_MANTID_API template class MANTID_API_DLL Mantid::Kernel::SingletonHolder<Mantid::API::FileLoaderRegistryImpl>;
+EXTERN_MANTID_API template class MANTID_API_DLL
+    Mantid::Kernel::SingletonHolder<Mantid::API::FileLoaderRegistryImpl>;
 }
 }
 

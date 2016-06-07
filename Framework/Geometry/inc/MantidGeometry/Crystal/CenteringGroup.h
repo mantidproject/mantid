@@ -102,8 +102,8 @@ typedef Mantid::Kernel::SingletonHolder<CenteringGroupCreatorImpl>
 
 namespace Mantid {
 namespace Kernel {
-EXTERN_MANTID_GEOMETRY template class MANTID_GEOMETRY_DLL
-      Mantid::Kernel::SingletonHolder<Mantid::Geometry::CenteringGroupCreatorImpl>;
+EXTERN_MANTID_GEOMETRY template class MANTID_GEOMETRY_DLL Mantid::Kernel::
+    SingletonHolder<Mantid::Geometry::CenteringGroupCreatorImpl>;
 }
 }
 

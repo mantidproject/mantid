@@ -94,14 +94,14 @@ private:
   int m_globOption;
 };
 
-typedef Mantid::Kernel::SingletonHolder<FileFinderImpl>
-    FileFinder;
+typedef Mantid::Kernel::SingletonHolder<FileFinderImpl> FileFinder;
 }
 }
 
 namespace Mantid {
 namespace Kernel {
-  EXTERN_MANTID_API template class MANTID_API_DLL Mantid::Kernel::SingletonHolder<Mantid::API::FileFinderImpl>;
+EXTERN_MANTID_API template class MANTID_API_DLL
+    Mantid::Kernel::SingletonHolder<Mantid::API::FileFinderImpl>;
 }
 }
 

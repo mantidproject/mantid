@@ -32,153 +32,147 @@ namespace DataObjects {
  */
 
 // Instantiations for MDLeanEvent
- template class DLLExport MDLeanEvent<1>;
- template class DLLExport MDLeanEvent<2>;
- template class DLLExport MDLeanEvent<3>;
- template class DLLExport MDLeanEvent<4>;
- template class DLLExport MDLeanEvent<5>;
- template class DLLExport MDLeanEvent<6>;
- template class DLLExport MDLeanEvent<7>;
- template class DLLExport MDLeanEvent<8>;
- template class DLLExport MDLeanEvent<9>;
+template class DLLExport MDLeanEvent<1>;
+template class DLLExport MDLeanEvent<2>;
+template class DLLExport MDLeanEvent<3>;
+template class DLLExport MDLeanEvent<4>;
+template class DLLExport MDLeanEvent<5>;
+template class DLLExport MDLeanEvent<6>;
+template class DLLExport MDLeanEvent<7>;
+template class DLLExport MDLeanEvent<8>;
+template class DLLExport MDLeanEvent<9>;
 // Instantiations for MDEvent
- template class DLLExport MDEvent<1>;
- template class DLLExport MDEvent<2>;
- template class DLLExport MDEvent<3>;
- template class DLLExport MDEvent<4>;
- template class DLLExport MDEvent<5>;
- template class DLLExport MDEvent<6>;
- template class DLLExport MDEvent<7>;
- template class DLLExport MDEvent<8>;
- template class DLLExport MDEvent<9>;
+template class DLLExport MDEvent<1>;
+template class DLLExport MDEvent<2>;
+template class DLLExport MDEvent<3>;
+template class DLLExport MDEvent<4>;
+template class DLLExport MDEvent<5>;
+template class DLLExport MDEvent<6>;
+template class DLLExport MDEvent<7>;
+template class DLLExport MDEvent<8>;
+template class DLLExport MDEvent<9>;
 // Instantiations for MDBoxBase
- template class DLLExport MDBoxBase<MDLeanEvent<1>, 1>;
- template class DLLExport MDBoxBase<MDLeanEvent<2>, 2>;
- template class DLLExport MDBoxBase<MDLeanEvent<3>, 3>;
- template class DLLExport MDBoxBase<MDLeanEvent<4>, 4>;
- template class DLLExport MDBoxBase<MDLeanEvent<5>, 5>;
- template class DLLExport MDBoxBase<MDLeanEvent<6>, 6>;
- template class DLLExport MDBoxBase<MDLeanEvent<7>, 7>;
- template class DLLExport MDBoxBase<MDLeanEvent<8>, 8>;
- template class DLLExport MDBoxBase<MDLeanEvent<9>, 9>;
- template class DLLExport MDBoxBase<MDEvent<1>, 1>;
- template class DLLExport MDBoxBase<MDEvent<2>, 2>;
- template class DLLExport MDBoxBase<MDEvent<3>, 3>;
- template class DLLExport MDBoxBase<MDEvent<4>, 4>;
- template class DLLExport MDBoxBase<MDEvent<5>, 5>;
- template class DLLExport MDBoxBase<MDEvent<6>, 6>;
- template class DLLExport MDBoxBase<MDEvent<7>, 7>;
- template class DLLExport MDBoxBase<MDEvent<8>, 8>;
- template class DLLExport MDBoxBase<MDEvent<9>, 9>;
+template class DLLExport MDBoxBase<MDLeanEvent<1>, 1>;
+template class DLLExport MDBoxBase<MDLeanEvent<2>, 2>;
+template class DLLExport MDBoxBase<MDLeanEvent<3>, 3>;
+template class DLLExport MDBoxBase<MDLeanEvent<4>, 4>;
+template class DLLExport MDBoxBase<MDLeanEvent<5>, 5>;
+template class DLLExport MDBoxBase<MDLeanEvent<6>, 6>;
+template class DLLExport MDBoxBase<MDLeanEvent<7>, 7>;
+template class DLLExport MDBoxBase<MDLeanEvent<8>, 8>;
+template class DLLExport MDBoxBase<MDLeanEvent<9>, 9>;
+template class DLLExport MDBoxBase<MDEvent<1>, 1>;
+template class DLLExport MDBoxBase<MDEvent<2>, 2>;
+template class DLLExport MDBoxBase<MDEvent<3>, 3>;
+template class DLLExport MDBoxBase<MDEvent<4>, 4>;
+template class DLLExport MDBoxBase<MDEvent<5>, 5>;
+template class DLLExport MDBoxBase<MDEvent<6>, 6>;
+template class DLLExport MDBoxBase<MDEvent<7>, 7>;
+template class DLLExport MDBoxBase<MDEvent<8>, 8>;
+template class DLLExport MDBoxBase<MDEvent<9>, 9>;
 
- 
 // Instantiations for MDBox
- template class DLLExport MDBox<MDLeanEvent<1>, 1>;
- template class DLLExport MDBox<MDLeanEvent<2>, 2>;
- template class DLLExport MDBox<MDLeanEvent<3>, 3>;
- template class DLLExport MDBox<MDLeanEvent<4>, 4>;
- template class DLLExport MDBox<MDLeanEvent<5>, 5>;
- template class DLLExport MDBox<MDLeanEvent<6>, 6>;
- template class DLLExport MDBox<MDLeanEvent<7>, 7>;
- template class DLLExport MDBox<MDLeanEvent<8>, 8>;
- template class DLLExport MDBox<MDLeanEvent<9>, 9>;
- template class DLLExport MDBox<MDEvent<1>, 1>;
- template class DLLExport MDBox<MDEvent<2>, 2>;
- template class DLLExport MDBox<MDEvent<3>, 3>;
- template class DLLExport MDBox<MDEvent<4>, 4>;
- template class DLLExport MDBox<MDEvent<5>, 5>;
- template class DLLExport MDBox<MDEvent<6>, 6>;
- template class DLLExport MDBox<MDEvent<7>, 7>;
- template class DLLExport MDBox<MDEvent<8>, 8>;
- template class DLLExport MDBox<MDEvent<9>, 9>;
+template class DLLExport MDBox<MDLeanEvent<1>, 1>;
+template class DLLExport MDBox<MDLeanEvent<2>, 2>;
+template class DLLExport MDBox<MDLeanEvent<3>, 3>;
+template class DLLExport MDBox<MDLeanEvent<4>, 4>;
+template class DLLExport MDBox<MDLeanEvent<5>, 5>;
+template class DLLExport MDBox<MDLeanEvent<6>, 6>;
+template class DLLExport MDBox<MDLeanEvent<7>, 7>;
+template class DLLExport MDBox<MDLeanEvent<8>, 8>;
+template class DLLExport MDBox<MDLeanEvent<9>, 9>;
+template class DLLExport MDBox<MDEvent<1>, 1>;
+template class DLLExport MDBox<MDEvent<2>, 2>;
+template class DLLExport MDBox<MDEvent<3>, 3>;
+template class DLLExport MDBox<MDEvent<4>, 4>;
+template class DLLExport MDBox<MDEvent<5>, 5>;
+template class DLLExport MDBox<MDEvent<6>, 6>;
+template class DLLExport MDBox<MDEvent<7>, 7>;
+template class DLLExport MDBox<MDEvent<8>, 8>;
+template class DLLExport MDBox<MDEvent<9>, 9>;
 
- 
 // Instantiations for MDEventWorkspace
- template class DLLExport MDEventWorkspace<MDLeanEvent<1>, 1>;
- template class DLLExport MDEventWorkspace<MDLeanEvent<2>, 2>;
- template class DLLExport MDEventWorkspace<MDLeanEvent<3>, 3>;
- template class DLLExport MDEventWorkspace<MDLeanEvent<4>, 4>;
- template class DLLExport MDEventWorkspace<MDLeanEvent<5>, 5>;
- template class DLLExport MDEventWorkspace<MDLeanEvent<6>, 6>;
- template class DLLExport MDEventWorkspace<MDLeanEvent<7>, 7>;
- template class DLLExport MDEventWorkspace<MDLeanEvent<8>, 8>;
- template class DLLExport MDEventWorkspace<MDLeanEvent<9>, 9>;
- template class DLLExport MDEventWorkspace<MDEvent<1>, 1>;
- template class DLLExport MDEventWorkspace<MDEvent<2>, 2>;
- template class DLLExport MDEventWorkspace<MDEvent<3>, 3>;
- template class DLLExport MDEventWorkspace<MDEvent<4>, 4>;
- template class DLLExport MDEventWorkspace<MDEvent<5>, 5>;
- template class DLLExport MDEventWorkspace<MDEvent<6>, 6>;
- template class DLLExport MDEventWorkspace<MDEvent<7>, 7>;
- template class DLLExport MDEventWorkspace<MDEvent<8>, 8>;
- template class DLLExport MDEventWorkspace<MDEvent<9>, 9>;
+template class DLLExport MDEventWorkspace<MDLeanEvent<1>, 1>;
+template class DLLExport MDEventWorkspace<MDLeanEvent<2>, 2>;
+template class DLLExport MDEventWorkspace<MDLeanEvent<3>, 3>;
+template class DLLExport MDEventWorkspace<MDLeanEvent<4>, 4>;
+template class DLLExport MDEventWorkspace<MDLeanEvent<5>, 5>;
+template class DLLExport MDEventWorkspace<MDLeanEvent<6>, 6>;
+template class DLLExport MDEventWorkspace<MDLeanEvent<7>, 7>;
+template class DLLExport MDEventWorkspace<MDLeanEvent<8>, 8>;
+template class DLLExport MDEventWorkspace<MDLeanEvent<9>, 9>;
+template class DLLExport MDEventWorkspace<MDEvent<1>, 1>;
+template class DLLExport MDEventWorkspace<MDEvent<2>, 2>;
+template class DLLExport MDEventWorkspace<MDEvent<3>, 3>;
+template class DLLExport MDEventWorkspace<MDEvent<4>, 4>;
+template class DLLExport MDEventWorkspace<MDEvent<5>, 5>;
+template class DLLExport MDEventWorkspace<MDEvent<6>, 6>;
+template class DLLExport MDEventWorkspace<MDEvent<7>, 7>;
+template class DLLExport MDEventWorkspace<MDEvent<8>, 8>;
+template class DLLExport MDEventWorkspace<MDEvent<9>, 9>;
 
- 
 // Instantiations for MDGridBox
- template class DLLExport MDGridBox<MDLeanEvent<1>, 1>;
- template class DLLExport MDGridBox<MDLeanEvent<2>, 2>;
- template class DLLExport MDGridBox<MDLeanEvent<3>, 3>;
- template class DLLExport MDGridBox<MDLeanEvent<4>, 4>;
- template class DLLExport MDGridBox<MDLeanEvent<5>, 5>;
- template class DLLExport MDGridBox<MDLeanEvent<6>, 6>;
- template class DLLExport MDGridBox<MDLeanEvent<7>, 7>;
- template class DLLExport MDGridBox<MDLeanEvent<8>, 8>;
- template class DLLExport MDGridBox<MDLeanEvent<9>, 9>;
- template class DLLExport MDGridBox<MDEvent<1>, 1>;
- template class DLLExport MDGridBox<MDEvent<2>, 2>;
- template class DLLExport MDGridBox<MDEvent<3>, 3>;
- template class DLLExport MDGridBox<MDEvent<4>, 4>;
- template class DLLExport MDGridBox<MDEvent<5>, 5>;
- template class DLLExport MDGridBox<MDEvent<6>, 6>;
- template class DLLExport MDGridBox<MDEvent<7>, 7>;
- template class DLLExport MDGridBox<MDEvent<8>, 8>;
- template class DLLExport MDGridBox<MDEvent<9>, 9>;
+template class DLLExport MDGridBox<MDLeanEvent<1>, 1>;
+template class DLLExport MDGridBox<MDLeanEvent<2>, 2>;
+template class DLLExport MDGridBox<MDLeanEvent<3>, 3>;
+template class DLLExport MDGridBox<MDLeanEvent<4>, 4>;
+template class DLLExport MDGridBox<MDLeanEvent<5>, 5>;
+template class DLLExport MDGridBox<MDLeanEvent<6>, 6>;
+template class DLLExport MDGridBox<MDLeanEvent<7>, 7>;
+template class DLLExport MDGridBox<MDLeanEvent<8>, 8>;
+template class DLLExport MDGridBox<MDLeanEvent<9>, 9>;
+template class DLLExport MDGridBox<MDEvent<1>, 1>;
+template class DLLExport MDGridBox<MDEvent<2>, 2>;
+template class DLLExport MDGridBox<MDEvent<3>, 3>;
+template class DLLExport MDGridBox<MDEvent<4>, 4>;
+template class DLLExport MDGridBox<MDEvent<5>, 5>;
+template class DLLExport MDGridBox<MDEvent<6>, 6>;
+template class DLLExport MDGridBox<MDEvent<7>, 7>;
+template class DLLExport MDGridBox<MDEvent<8>, 8>;
+template class DLLExport MDGridBox<MDEvent<9>, 9>;
 
- 
 // Instantiations for MDBin
- template class DLLExport MDBin<MDLeanEvent<1>, 1>;
- template class DLLExport MDBin<MDLeanEvent<2>, 2>;
- template class DLLExport MDBin<MDLeanEvent<3>, 3>;
- template class DLLExport MDBin<MDLeanEvent<4>, 4>;
- template class DLLExport MDBin<MDLeanEvent<5>, 5>;
- template class DLLExport MDBin<MDLeanEvent<6>, 6>;
- template class DLLExport MDBin<MDLeanEvent<7>, 7>;
- template class DLLExport MDBin<MDLeanEvent<8>, 8>;
- template class DLLExport MDBin<MDLeanEvent<9>, 9>;
- template class DLLExport MDBin<MDEvent<1>, 1>;
- template class DLLExport MDBin<MDEvent<2>, 2>;
- template class DLLExport MDBin<MDEvent<3>, 3>;
- template class DLLExport MDBin<MDEvent<4>, 4>;
- template class DLLExport MDBin<MDEvent<5>, 5>;
- template class DLLExport MDBin<MDEvent<6>, 6>;
- template class DLLExport MDBin<MDEvent<7>, 7>;
- template class DLLExport MDBin<MDEvent<8>, 8>;
- template class DLLExport MDBin<MDEvent<9>, 9>;
+template class DLLExport MDBin<MDLeanEvent<1>, 1>;
+template class DLLExport MDBin<MDLeanEvent<2>, 2>;
+template class DLLExport MDBin<MDLeanEvent<3>, 3>;
+template class DLLExport MDBin<MDLeanEvent<4>, 4>;
+template class DLLExport MDBin<MDLeanEvent<5>, 5>;
+template class DLLExport MDBin<MDLeanEvent<6>, 6>;
+template class DLLExport MDBin<MDLeanEvent<7>, 7>;
+template class DLLExport MDBin<MDLeanEvent<8>, 8>;
+template class DLLExport MDBin<MDLeanEvent<9>, 9>;
+template class DLLExport MDBin<MDEvent<1>, 1>;
+template class DLLExport MDBin<MDEvent<2>, 2>;
+template class DLLExport MDBin<MDEvent<3>, 3>;
+template class DLLExport MDBin<MDEvent<4>, 4>;
+template class DLLExport MDBin<MDEvent<5>, 5>;
+template class DLLExport MDBin<MDEvent<6>, 6>;
+template class DLLExport MDBin<MDEvent<7>, 7>;
+template class DLLExport MDBin<MDEvent<8>, 8>;
+template class DLLExport MDBin<MDEvent<9>, 9>;
 
- 
 // Instantiations for MDBoxIterator
- template class DLLExport MDBoxIterator<MDLeanEvent<1>, 1>;
- template class DLLExport MDBoxIterator<MDLeanEvent<2>, 2>;
- template class DLLExport MDBoxIterator<MDLeanEvent<3>, 3>;
- template class DLLExport MDBoxIterator<MDLeanEvent<4>, 4>;
- template class DLLExport MDBoxIterator<MDLeanEvent<5>, 5>;
- template class DLLExport MDBoxIterator<MDLeanEvent<6>, 6>;
- template class DLLExport MDBoxIterator<MDLeanEvent<7>, 7>;
- template class DLLExport MDBoxIterator<MDLeanEvent<8>, 8>;
- template class DLLExport MDBoxIterator<MDLeanEvent<9>, 9>;
- template class DLLExport MDBoxIterator<MDEvent<1>, 1>;
- template class DLLExport MDBoxIterator<MDEvent<2>, 2>;
- template class DLLExport MDBoxIterator<MDEvent<3>, 3>;
- template class DLLExport MDBoxIterator<MDEvent<4>, 4>;
- template class DLLExport MDBoxIterator<MDEvent<5>, 5>;
- template class DLLExport MDBoxIterator<MDEvent<6>, 6>;
- template class DLLExport MDBoxIterator<MDEvent<7>, 7>;
- template class DLLExport MDBoxIterator<MDEvent<8>, 8>;
- template class DLLExport MDBoxIterator<MDEvent<9>, 9>;
+template class DLLExport MDBoxIterator<MDLeanEvent<1>, 1>;
+template class DLLExport MDBoxIterator<MDLeanEvent<2>, 2>;
+template class DLLExport MDBoxIterator<MDLeanEvent<3>, 3>;
+template class DLLExport MDBoxIterator<MDLeanEvent<4>, 4>;
+template class DLLExport MDBoxIterator<MDLeanEvent<5>, 5>;
+template class DLLExport MDBoxIterator<MDLeanEvent<6>, 6>;
+template class DLLExport MDBoxIterator<MDLeanEvent<7>, 7>;
+template class DLLExport MDBoxIterator<MDLeanEvent<8>, 8>;
+template class DLLExport MDBoxIterator<MDLeanEvent<9>, 9>;
+template class DLLExport MDBoxIterator<MDEvent<1>, 1>;
+template class DLLExport MDBoxIterator<MDEvent<2>, 2>;
+template class DLLExport MDBoxIterator<MDEvent<3>, 3>;
+template class DLLExport MDBoxIterator<MDEvent<4>, 4>;
+template class DLLExport MDBoxIterator<MDEvent<5>, 5>;
+template class DLLExport MDBoxIterator<MDEvent<6>, 6>;
+template class DLLExport MDBoxIterator<MDEvent<7>, 7>;
+template class DLLExport MDBoxIterator<MDEvent<8>, 8>;
+template class DLLExport MDBoxIterator<MDEvent<9>, 9>;
 
- 
-
-/* CODE ABOWE WAS AUTO-GENERATED BY generate_mdevent_declarations.py - DO NOT EDIT! */
+/* CODE ABOWE WAS AUTO-GENERATED BY generate_mdevent_declarations.py - DO NOT
+ * EDIT! */
 
 //### END AUTO-GENERATED CODE
 //##################################################################
@@ -444,5 +438,3 @@ LOOP<MDEventFactory::MAX_MD_DIMENSIONS_NUM> MDEventFactory::CODE_GENERATOR;
 
 } // namespace Mantid
 } // namespace DataObjects
-
-
