@@ -539,7 +539,7 @@ public:
     TS_ASSERT_DELTA(func->getParameter("Beta"), 0.5, 0.05);
   }
 
-    void testConvolution_fit_resolution() {
+    void test_function_convolution_fit_resolution() {
 
 	  boost::shared_ptr<WorkspaceTester> data =
 		  boost::make_shared<WorkspaceTester>();
@@ -576,6 +576,42 @@ public:
 
 	  e.assign(y.size(), 1);
 
+	  Algorithms::Fit fit;
+	  fit.initialize();
+	  // fit.setPropertyValue("Function", conv->asString());
+
+	  fit.setPropertyValue(
+		  "Function", "composite=Convolution,FixResolution=true,NumDeriv="
+		  "true;name=ConvolutionTest_Gauss,c=0,h=0.5,s=0.5;"
+		  "name=ConvolutionTest_Lorentz,c=0,h=1,w=1");
+	  fit.setProperty("InputWorkspace", data);
+	  fit.setProperty("WorkspaceIndex", 0);
+	  fit.execute();
+
+	  IFunction_sptr out = fit.getProperty("Function");
+	  // by default convolution keeps parameters of the resolution (function
+	  // #0)
+	  // fixed
+	  TS_ASSERT_EQUALS(out->getParameter("f0.h"), 0.5);
+	  TS_ASSERT_EQUALS(out->getParameter("f0.s"), 0.5);
+	  // fit is not very good
+	  TS_ASSERT_LESS_THAN(0.1, fabs(out->getParameter("f1.w") - 1));
+
+	  Algorithms::Fit fit1;
+	  fit1.initialize();
+	  fit1.setProperty("Function",
+		  "composite=Convolution,FixResolution=false,NumDeriv="
+		  "true;name=ConvolutionTest_Gauss,c=0,h=0.5,s=0.5;"
+		  "name=ConvolutionTest_Lorentz,c=0,h=1,w=1");
+	  fit1.setProperty("InputWorkspace", data);
+	  fit1.setProperty("WorkspaceIndex", 0);
+	  fit1.execute();
+
+	  out = fit1.getProperty("Function");
+	  // resolution parameters change and close to the initial values
+
+	  TS_ASSERT_DELTA(out->getParameter("f0.s"), 2.0, 0.0001);
+	  TS_ASSERT_DELTA(out->getParameter("f1.w"), 0.5, 0.0001);
   }
 
 };
