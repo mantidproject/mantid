@@ -104,6 +104,6 @@ void InstrumentWindow::setViewType(const QString &type) {
 }
 
 void InstrumentWindow::closeSafely() {
-	confirmClose(false);
-	close();
+  confirmClose(false);
+  close();
 }

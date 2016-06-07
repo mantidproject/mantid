@@ -80,11 +80,10 @@ namespace VATES {
  */
 void vtkDataSetToNonOrthogonalDataSet::exec(
     vtkDataSet *dataset, std::string name,
-    std::unique_ptr<WorkspaceProvider> workspaceProvider)
-{
-    vtkDataSetToNonOrthogonalDataSet temp(dataset, name,
-                                          std::move(workspaceProvider));
-    temp.execute();
+    std::unique_ptr<WorkspaceProvider> workspaceProvider) {
+  vtkDataSetToNonOrthogonalDataSet temp(dataset, name,
+                                        std::move(workspaceProvider));
+  temp.execute();
 }
 
 /**
@@ -99,19 +98,17 @@ vtkDataSetToNonOrthogonalDataSet::vtkDataSetToNonOrthogonalDataSet(
     : m_dataSet(dataset), m_wsName(name), m_numDims(3), m_skewMat(),
       m_basisNorm(), m_basisX(1, 0, 0), m_basisY(0, 1, 0), m_basisZ(0, 0, 1),
       m_coordType(Kernel::HKL),
-      m_workspaceProvider(std::move(workspaceProvider))
-{
-    if (NULL == m_dataSet) {
-        throw std::runtime_error(
-            "Cannot construct "
-            "vtkDataSetToNonOrthogonalDataSet with null VTK "
-            "dataset");
-    }
-    if (name.empty()) {
-        throw std::runtime_error("Cannot construct "
-                                 "vtkDataSetToNonOrthogonalDataSet without "
-                                 "associated workspace name");
-    }
+      m_workspaceProvider(std::move(workspaceProvider)) {
+  if (NULL == m_dataSet) {
+    throw std::runtime_error("Cannot construct "
+                             "vtkDataSetToNonOrthogonalDataSet with null VTK "
+                             "dataset");
+  }
+  if (name.empty()) {
+    throw std::runtime_error("Cannot construct "
+                             "vtkDataSetToNonOrthogonalDataSet without "
+                             "associated workspace name");
+  }
 }
 
 /**

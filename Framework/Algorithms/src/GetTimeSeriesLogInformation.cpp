@@ -310,7 +310,7 @@ void GetTimeSeriesLogInformation::exportErrorLog(MatrixWorkspace_sptr ws,
                                                  vector<DateAndTime> abstimevec,
                                                  double dts) {
   std::string outputdir = getProperty("OutputDirectory");
-  if (!outputdir.empty() && outputdir[outputdir.size() - 1] != '/')
+  if (!outputdir.empty() && outputdir.back() != '/')
     outputdir += "/";
 
   std::string ofilename = outputdir + "errordeltatime.txt";

@@ -13,18 +13,14 @@
 #include "MantidKernel/Exception.h"
 
 using namespace MantidQt::API;
-class InterfaceManagerTest : public CxxTest::TestSuite
-{
+class InterfaceManagerTest : public CxxTest::TestSuite {
 
 public:
-
-  void testCreateManyInstances()
-  {
+  void testCreateManyInstances() {
     InterfaceManager objA;
     InterfaceManager objB;
     TS_ASSERT_DIFFERS(&objA, &objB);
   }
-
 };
 
 #endif /* INTERFACEMANAGERTEST_H_ */

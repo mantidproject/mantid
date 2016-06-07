@@ -79,8 +79,7 @@
  *
  */
 
-namespace
-{
+namespace {
 
 /**
  * Calcualtes the origin of the ellipse.  The originis defined by -A^(-1)*B/2.
@@ -92,30 +91,28 @@ namespace
  */
 Mantid::Kernel::V3D getOrigin(Mantid::Kernel::DblMatrix AInverse,
                               Mantid::Kernel::DblMatrix B,
-                              Mantid::Kernel::V3D originEllipsoid, double zVal)
-{
-    const auto multiplied = AInverse * B;
+                              Mantid::Kernel::V3D originEllipsoid,
+                              double zVal) {
+  const auto multiplied = AInverse * B;
 
-    // Apply the -0.5 factor and shift back into the ellipsoid frame
-    const auto x = -0.5 * multiplied[0][0] + originEllipsoid.X();
-    const auto y = -0.5 * multiplied[1][0] + originEllipsoid.Y();
-    const auto z = zVal + originEllipsoid.Z();
-    return Mantid::Kernel::V3D(x, y, z);
+  // Apply the -0.5 factor and shift back into the ellipsoid frame
+  const auto x = -0.5 * multiplied[0][0] + originEllipsoid.X();
+  const auto y = -0.5 * multiplied[1][0] + originEllipsoid.Y();
+  const auto z = zVal + originEllipsoid.Z();
+  return Mantid::Kernel::V3D(x, y, z);
 }
 
 struct EigenSystemEllipse {
-    EigenSystemEllipse(Mantid::Kernel::V2D majorAxis,
-                       Mantid::Kernel::V2D minorAxis, double majorRadius,
-                       double minorRadius)
-        : majorAxis(majorAxis), minorAxis(minorAxis), majorRadius(majorRadius),
-          minorRadius(minorRadius)
-    {
-    }
+  EigenSystemEllipse(Mantid::Kernel::V2D majorAxis,
+                     Mantid::Kernel::V2D minorAxis, double majorRadius,
+                     double minorRadius)
+      : majorAxis(majorAxis), minorAxis(minorAxis), majorRadius(majorRadius),
+        minorRadius(minorRadius) {}
 
-    const Mantid::Kernel::V2D majorAxis;
-    const Mantid::Kernel::V2D minorAxis;
-    const double majorRadius;
-    const double minorRadius;
+  const Mantid::Kernel::V2D majorAxis;
+  const Mantid::Kernel::V2D minorAxis;
+  const double majorRadius;
+  const double minorRadius;
 };
 
 /**
@@ -128,33 +125,32 @@ struct EigenSystemEllipse {
  *http://www.geometrictools.com/Documentation/InformationAboutEllipses.pdf.
  */
 std::pair<Mantid::Kernel::V2D, Mantid::Kernel::V2D>
-getEigenVectorsForEllipse(const Mantid::Kernel::DblMatrix &MM, double eigenValueMinor)
-{
-    auto isM00LargerThanM11 = MM[0][0] >= MM[1][1];
+getEigenVectorsForEllipse(const Mantid::Kernel::DblMatrix &MM,
+                          double eigenValueMinor) {
+  auto isM00LargerThanM11 = MM[0][0] >= MM[1][1];
 
-    // Create minor axis
-    double minorX = 0.0;
-    double minorY = 1.0;
-    double norm = 1.0;
-    if (isM00LargerThanM11) {
-        minorX = eigenValueMinor - MM[1][1];
-        minorY = MM[0][1];
-        norm = std::sqrt(std::pow(minorX, 2) + std::pow(minorY, 2));
-    } else {
-        minorX = MM[0][1];
-        minorY = eigenValueMinor - MM[0][0];
-        norm = std::sqrt(std::pow(minorX, 2) + std::pow(minorY, 2));
-    }
-    minorX /= norm;
-    minorY /= norm;
-    Mantid::Kernel::V2D minorAxis(minorX, minorY);
+  // Create minor axis
+  double minorX = 0.0;
+  double minorY = 1.0;
+  double norm = 1.0;
+  if (isM00LargerThanM11) {
+    minorX = eigenValueMinor - MM[1][1];
+    minorY = MM[0][1];
+    norm = std::sqrt(std::pow(minorX, 2) + std::pow(minorY, 2));
+  } else {
+    minorX = MM[0][1];
+    minorY = eigenValueMinor - MM[0][0];
+    norm = std::sqrt(std::pow(minorX, 2) + std::pow(minorY, 2));
+  }
+  minorX /= norm;
+  minorY /= norm;
+  Mantid::Kernel::V2D minorAxis(minorX, minorY);
 
-    // Set the major axis
-    Mantid::Kernel::V2D majorAxis(-minorAxis[1], minorAxis[0]);
+  // Set the major axis
+  Mantid::Kernel::V2D majorAxis(-minorAxis[1], minorAxis[0]);
 
-    return std::make_pair(majorAxis, minorAxis);
+  return std::make_pair(majorAxis, minorAxis);
 }
-
 
 /**
  * Calculates the Radii and the directions of th
@@ -168,40 +164,38 @@ getEigenVectorsForEllipse(const Mantid::Kernel::DblMatrix &MM, double eigenValue
 EigenSystemEllipse getAxesInformation(Mantid::Kernel::DblMatrix A,
                                       Mantid::Kernel::DblMatrix AInverse,
                                       Mantid::Kernel::DblMatrix B,
-                                      Mantid::Kernel::DblMatrix BT, double c)
-{
-    // Calculate the denominator: (Transpose[B]*A^(-1)*B/4 - (c-1))
-    const auto temp1 = AInverse * B;
-    const auto temp2 = BT * temp1;
-    const auto denominator = 0.25 * temp2[0][0] - c + 1;
+                                      Mantid::Kernel::DblMatrix BT, double c) {
+  // Calculate the denominator: (Transpose[B]*A^(-1)*B/4 - (c-1))
+  const auto temp1 = AInverse * B;
+  const auto temp2 = BT * temp1;
+  const auto denominator = 0.25 * temp2[0][0] - c + 1;
 
-    // Calculate the MM matrix: A/(Transpose[B]*A^(-1)*B/4 - (c-1))
-    auto MM = A;
-    MM /= denominator;
+  // Calculate the MM matrix: A/(Transpose[B]*A^(-1)*B/4 - (c-1))
+  auto MM = A;
+  MM /= denominator;
 
-    // Calculate the Eigenvalues: since we are dealing with EVs of a
-    // 2x2, symmetric and positive semi-definite matrix we can
-    // just write down the result of the EV calculation and save time
-    // EV = (MM00 + MM11 +/- Sqrt[(MM00-M11)^2 + 4(MM01)^2])/2
-    const auto evPart1 = MM[0][0] + MM[1][1];
-    const auto evPart2 = std::sqrt(std::pow(MM[0][0] - MM[1][1], 2)
-                                   + 4 * std::pow(MM[0][1], 2));
+  // Calculate the Eigenvalues: since we are dealing with EVs of a
+  // 2x2, symmetric and positive semi-definite matrix we can
+  // just write down the result of the EV calculation and save time
+  // EV = (MM00 + MM11 +/- Sqrt[(MM00-M11)^2 + 4(MM01)^2])/2
+  const auto evPart1 = MM[0][0] + MM[1][1];
+  const auto evPart2 =
+      std::sqrt(std::pow(MM[0][0] - MM[1][1], 2) + 4 * std::pow(MM[0][1], 2));
 
-    const auto evMinorAxis = (evPart1 + evPart2) * 0.5;
-    const auto evMajorAxis = (evPart1 - evPart2) * 0.5;
+  const auto evMinorAxis = (evPart1 + evPart2) * 0.5;
+  const auto evMajorAxis = (evPart1 - evPart2) * 0.5;
 
-    auto eigenVectors = getEigenVectorsForEllipse(MM, evMinorAxis);
+  auto eigenVectors = getEigenVectorsForEllipse(MM, evMinorAxis);
 
-    // Get the radii: they are just the squareroot of the inverse of teh EV
-    const auto radiusMinorAxis = 1 / std::sqrt(evMinorAxis);
-    const auto radiusMajorAxis = 1 / std::sqrt(evMajorAxis);
+  // Get the radii: they are just the squareroot of the inverse of teh EV
+  const auto radiusMinorAxis = 1 / std::sqrt(evMinorAxis);
+  const auto radiusMajorAxis = 1 / std::sqrt(evMajorAxis);
 
-    // Note that we don't have to perform any transformations on the radius, as
-    // they will not be affected by a translation
-    return EigenSystemEllipse(eigenVectors.first, eigenVectors.second,
-                              radiusMajorAxis, radiusMinorAxis);
+  // Note that we don't have to perform any transformations on the radius, as
+  // they will not be affected by a translation
+  return EigenSystemEllipse(eigenVectors.first, eigenVectors.second,
+                            radiusMajorAxis, radiusMinorAxis);
 }
-
 
 /**
  * Angle which is required to rotate an axis aligned-ellipse (major axis along
@@ -216,41 +210,36 @@ EigenSystemEllipse getAxesInformation(Mantid::Kernel::DblMatrix A,
  * calculate the eigenvectors and get the angle from the components of the
  *eigenvectors.
  */
-double getAngle(Mantid::Kernel::V2D majorAxis)
-{
-    return std::atan2(majorAxis.Y(), majorAxis.X());
+double getAngle(Mantid::Kernel::V2D majorAxis) {
+  return std::atan2(majorAxis.Y(), majorAxis.X());
 }
 
-bool isBetweenEndpoints(double endpoint1, double endpoint2, double z)
-{
-    const auto isBetween1And2 = (endpoint1 < z) && (z < endpoint2);
-    const auto isBetween2And1 = (endpoint2 < z) && (z < endpoint1);
+bool isBetweenEndpoints(double endpoint1, double endpoint2, double z) {
+  const auto isBetween1And2 = (endpoint1 < z) && (z < endpoint2);
+  const auto isBetween2And1 = (endpoint2 < z) && (z < endpoint1);
 
-    return isBetween1And2 || isBetween2And1;
+  return isBetween1And2 || isBetween2And1;
 }
 }
 
-namespace Mantid
-{
-namespace SliceViewer
-{
+namespace Mantid {
+namespace SliceViewer {
 
 SliceEllipseInfo EllipsoidPlaneSliceCalculator::getSlicePlaneInfo(
     std::vector<Mantid::Kernel::V3D> directions, std::vector<double> radii,
-    Mantid::Kernel::V3D originEllipsoid, double zPlane) const
-{
-    // Setup the Ellipsoid Matrix
-    auto m = createEllipsoidMatrixInXYZFrame(directions, radii);
+    Mantid::Kernel::V3D originEllipsoid, double zPlane) const {
+  // Setup the Ellipsoid Matrix
+  auto m = createEllipsoidMatrixInXYZFrame(directions, radii);
 
-    auto isEllipsoid = checkIfIsEllipse(m);
+  auto isEllipsoid = checkIfIsEllipse(m);
 
-    if (isEllipsoid) {
-        return getSolutionForEllipsoid(m, zPlane, originEllipsoid);
-    } else {
-        throw std::runtime_error("EllipsoidPlaneSliceCalcualtor: The peak does "
-                                 "not seem to create an elliptical or "
-                                 "spherical cut.");
-    }
+  if (isEllipsoid) {
+    return getSolutionForEllipsoid(m, zPlane, originEllipsoid);
+  } else {
+    throw std::runtime_error("EllipsoidPlaneSliceCalcualtor: The peak does "
+                             "not seem to create an elliptical or "
+                             "spherical cut.");
+  }
 }
 
 /**
@@ -260,10 +249,9 @@ SliceEllipseInfo EllipsoidPlaneSliceCalculator::getSlicePlaneInfo(
  * @return true if we are dealing with a true ellipsoid
  */
 bool EllipsoidPlaneSliceCalculator::checkIfIsEllipse(
-    const Kernel::Matrix<double> &m) const
-{
-    auto isEllipse = (m[0][0] * m[1][1] - std::pow(m[0][1], 2)) > 0;
-    return isEllipse;
+    const Kernel::Matrix<double> &m) const {
+  auto isEllipse = (m[0][0] * m[1][1] - std::pow(m[0][1], 2)) > 0;
+  return isEllipse;
 }
 
 /**
@@ -272,67 +260,65 @@ bool EllipsoidPlaneSliceCalculator::checkIfIsEllipse(
  * @return true if we are dealing with circle
  */
 bool EllipsoidPlaneSliceCalculator::checkIfIsCircle(
-    const Mantid::Kernel::Matrix<double> &m) const
-{
-    auto isM00EqualM11 = Mantid::SliceViewer::almost_equal(m[0][0], m[1][1]);
-    auto isM01Zero = Mantid::SliceViewer::almost_equal(m[0][1], 0.0);
-    return isM00EqualM11 && isM01Zero;
+    const Mantid::Kernel::Matrix<double> &m) const {
+  auto isM00EqualM11 = Mantid::SliceViewer::almost_equal(m[0][0], m[1][1]);
+  auto isM01Zero = Mantid::SliceViewer::almost_equal(m[0][1], 0.0);
+  return isM00EqualM11 && isM01Zero;
 }
 
 SliceEllipseInfo EllipsoidPlaneSliceCalculator::getSolutionForEllipsoid(
     const Kernel::Matrix<double> &m, double zPlane,
-    Mantid::Kernel::V3D originEllipsoid) const
-{
-    // Shift the z value into a suitable frame
-    const double z = zPlane - originEllipsoid.Z();
+    Mantid::Kernel::V3D originEllipsoid) const {
+  // Shift the z value into a suitable frame
+  const double z = zPlane - originEllipsoid.Z();
 
-    // Setup the A matrix
-    Mantid::Kernel::DblMatrix A;
-    A.setMem(2, 2);
-    const std::vector<double> ARow0 = {m[0][0], m[0][1]};
-    const std::vector<double> ARow1 = {m[0][1], m[1][1]};
-    A.setRow(0, ARow0);
-    A.setRow(1, ARow1);
+  // Setup the A matrix
+  Mantid::Kernel::DblMatrix A;
+  A.setMem(2, 2);
+  const std::vector<double> ARow0 = {m[0][0], m[0][1]};
+  const std::vector<double> ARow1 = {m[0][1], m[1][1]};
+  A.setRow(0, ARow0);
+  A.setRow(1, ARow1);
 
-    // Setup the inverse Matrix of A
-    Mantid::Kernel::DblMatrix AInverse;
-    const double detA = A.determinant();
-    AInverse.setMem(2, 2);
-    const std::vector<double> AInverseRow0 = {m[1][1] / detA, -m[0][1] / detA};
-    const std::vector<double> AInverseRow1 = {-m[0][1] / detA, m[0][0] / detA};
-    AInverse.setRow(0, AInverseRow0);
-    AInverse.setRow(1, AInverseRow1);
+  // Setup the inverse Matrix of A
+  Mantid::Kernel::DblMatrix AInverse;
+  const double detA = A.determinant();
+  AInverse.setMem(2, 2);
+  const std::vector<double> AInverseRow0 = {m[1][1] / detA, -m[0][1] / detA};
+  const std::vector<double> AInverseRow1 = {-m[0][1] / detA, m[0][0] / detA};
+  AInverse.setRow(0, AInverseRow0);
+  AInverse.setRow(1, AInverseRow1);
 
-    // Setup the B vector
-    Mantid::Kernel::DblMatrix B;
-    std::vector<double> BColumn = {m[0][2], m[1][2]};
-    B.setMem(2, 1);
-    B.setColumn(0, BColumn);
-    B *= 2 * z;
+  // Setup the B vector
+  Mantid::Kernel::DblMatrix B;
+  std::vector<double> BColumn = {m[0][2], m[1][2]};
+  B.setMem(2, 1);
+  B.setColumn(0, BColumn);
+  B *= 2 * z;
 
-    // Setip the Transpose B vector
-    Mantid::Kernel::DblMatrix BT;
-    std::vector<double> BTRow = {m[0][2], m[1][2]};
-    BT.setMem(1, 2);
-    BT.setRow(0, BTRow);
-    BT *= 2 * z;
+  // Setip the Transpose B vector
+  Mantid::Kernel::DblMatrix BT;
+  std::vector<double> BTRow = {m[0][2], m[1][2]};
+  BT.setMem(1, 2);
+  BT.setRow(0, BTRow);
+  BT *= 2 * z;
 
-    // Setup the C factor
-    const double c = m[2][2] * std::pow(z, 2);
+  // Setup the C factor
+  const double c = m[2][2] * std::pow(z, 2);
 
-    // Get the origin
-    const auto origin = getOrigin(AInverse, B, originEllipsoid, z);
+  // Get the origin
+  const auto origin = getOrigin(AInverse, B, originEllipsoid, z);
 
-    // Get the radii + directions
-    const auto eigenSystem = getAxesInformation(A, AInverse, B, BT, c);
+  // Get the radii + directions
+  const auto eigenSystem = getAxesInformation(A, AInverse, B, BT, c);
 
-    // Get angle. If we have a circle then the angle is 0 (we want to avoid a
-    // divergence here)
-    const auto isCircle = checkIfIsCircle(m);
-    const double angle = isCircle ? 0.0 : getAngle(eigenSystem.majorAxis);
+  // Get angle. If we have a circle then the angle is 0 (we want to avoid a
+  // divergence here)
+  const auto isCircle = checkIfIsCircle(m);
+  const double angle = isCircle ? 0.0 : getAngle(eigenSystem.majorAxis);
 
-    return SliceEllipseInfo(origin, eigenSystem.majorRadius,
-                            eigenSystem.minorRadius, angle);
+  return SliceEllipseInfo(origin, eigenSystem.majorRadius,
+                          eigenSystem.minorRadius, angle);
 }
 
 /**
@@ -362,42 +348,41 @@ SliceEllipseInfo EllipsoidPlaneSliceCalculator::getSolutionForEllipsoid(
  */
 Mantid::Kernel::Matrix<double>
 createEllipsoidMatrixInXYZFrame(std::vector<Mantid::Kernel::V3D> directions,
-                                std::vector<double> radii)
-{
-    // Setup the transform matrix from the xyz system to the eigen vector
-    // system, ie the directions
-    auto vec0 = std::vector<double>(directions[0]);
-    auto vec1 = std::vector<double>(directions[1]);
-    auto vec2 = std::vector<double>(directions[2]);
+                                std::vector<double> radii) {
+  // Setup the transform matrix from the xyz system to the eigen vector
+  // system, ie the directions
+  auto vec0 = std::vector<double>(directions[0]);
+  auto vec1 = std::vector<double>(directions[1]);
+  auto vec2 = std::vector<double>(directions[2]);
 
-    Mantid::Kernel::Matrix<double> s;
-    Mantid::Kernel::Matrix<double> sTransposed;
+  Mantid::Kernel::Matrix<double> s;
+  Mantid::Kernel::Matrix<double> sTransposed;
 
-    s.setMem(3, 3);
-    sTransposed.setMem(3, 3);
+  s.setMem(3, 3);
+  sTransposed.setMem(3, 3);
 
-    // The eigenvector is the column of the transformation matrix
-    s.setColumn(0, vec0);
-    s.setColumn(1, vec1);
-    s.setColumn(2, vec2);
+  // The eigenvector is the column of the transformation matrix
+  s.setColumn(0, vec0);
+  s.setColumn(1, vec1);
+  s.setColumn(2, vec2);
 
-    sTransposed.setRow(0, vec0);
-    sTransposed.setRow(1, vec1);
-    sTransposed.setRow(2, vec2);
+  sTransposed.setRow(0, vec0);
+  sTransposed.setRow(1, vec1);
+  sTransposed.setRow(2, vec2);
 
-    // Setup the ellipsoid matrix in the eigenvector system, ie a unit matrix
-    // with 1/ri^2 on the diagonal
-    Mantid::Kernel::Matrix<double> e;
-    e.setMem(3, 3);
-    std::vector<double> e0 = {1 / pow(radii[0], 2), 0.0, 0.0};
-    std::vector<double> e1 = {0.0, 1 / pow(radii[1], 2), 0.0};
-    std::vector<double> e2 = {0.0, 0.0, 1 / pow(radii[2], 2)};
+  // Setup the ellipsoid matrix in the eigenvector system, ie a unit matrix
+  // with 1/ri^2 on the diagonal
+  Mantid::Kernel::Matrix<double> e;
+  e.setMem(3, 3);
+  std::vector<double> e0 = {1 / pow(radii[0], 2), 0.0, 0.0};
+  std::vector<double> e1 = {0.0, 1 / pow(radii[1], 2), 0.0};
+  std::vector<double> e2 = {0.0, 0.0, 1 / pow(radii[2], 2)};
 
-    e.setRow(0, e0);
-    e.setRow(1, e1);
-    e.setRow(2, e2);
-    // Now mulitply s*e*Transpose[s]
-    return s * e * sTransposed;
+  e.setRow(0, e0);
+  e.setRow(1, e1);
+  e.setRow(2, e2);
+  // Now mulitply s*e*Transpose[s]
+  return s * e * sTransposed;
 }
 
 /**
@@ -410,27 +395,27 @@ createEllipsoidMatrixInXYZFrame(std::vector<Mantid::Kernel::V3D> directions,
  */
 bool checkIfCutExists(const std::vector<Mantid::Kernel::V3D> &directions,
                       const std::vector<double> &radii,
-                      const Mantid::Kernel::V3D &originEllipsoid, double zPlane)
-{
-    // Translate into ellipsoid
-    const double z = zPlane - originEllipsoid.Z();
+                      const Mantid::Kernel::V3D &originEllipsoid,
+                      double zPlane) {
+  // Translate into ellipsoid
+  const double z = zPlane - originEllipsoid.Z();
 
-    bool hasCut = false;
-    // For each axis check if the z point is between the z values of the
-    // axis endpoints
-    int counter = 0;
-    for (const auto &direction : directions) {
-        const auto endpoint1 = direction[2] * radii[counter];
-        const auto endpoint2 = -1 * direction[2] * radii[counter];
+  bool hasCut = false;
+  // For each axis check if the z point is between the z values of the
+  // axis endpoints
+  int counter = 0;
+  for (const auto &direction : directions) {
+    const auto endpoint1 = direction[2] * radii[counter];
+    const auto endpoint2 = -1 * direction[2] * radii[counter];
 
-        if (isBetweenEndpoints(endpoint1, endpoint2, z)) {
-            hasCut = true;
-            break;
-        }
-        ++counter;
+    if (isBetweenEndpoints(endpoint1, endpoint2, z)) {
+      hasCut = true;
+      break;
     }
+    ++counter;
+  }
 
-    return hasCut;
+  return hasCut;
 }
 
 /**
@@ -441,57 +426,54 @@ bool checkIfCutExists(const std::vector<Mantid::Kernel::V3D> &directions,
  */
 std::vector<double>
 getProjectionLengths(const std::vector<Mantid::Kernel::V3D> &directions,
-                     std::vector<double> radii)
-{
-    std::vector<Mantid::Kernel::V3D> directionsScaled;
+                     std::vector<double> radii) {
+  std::vector<Mantid::Kernel::V3D> directionsScaled;
 
-    for (int index = 0; index < 3; ++index) {
-        directionsScaled.emplace_back(directions[index] * radii[index]);
-    }
+  for (int index = 0; index < 3; ++index) {
+    directionsScaled.emplace_back(directions[index] * radii[index]);
+  }
 
-    // We group the magnitudes of the x, y and z components
-    std::vector<double> x
-        = {std::abs(directionsScaled[0].X()), std::abs(directionsScaled[1].X()),
-           std::abs(directionsScaled[2].X())};
-    std::vector<double> y
-        = {std::abs(directionsScaled[0].Y()), std::abs(directionsScaled[1].Y()),
-           std::abs(directionsScaled[2].Y())};
-    std::vector<double> z
-        = {std::abs(directionsScaled[0].Z()), std::abs(directionsScaled[1].Z()),
-           std::abs(directionsScaled[2].Z())};
+  // We group the magnitudes of the x, y and z components
+  std::vector<double> x = {std::abs(directionsScaled[0].X()),
+                           std::abs(directionsScaled[1].X()),
+                           std::abs(directionsScaled[2].X())};
+  std::vector<double> y = {std::abs(directionsScaled[0].Y()),
+                           std::abs(directionsScaled[1].Y()),
+                           std::abs(directionsScaled[2].Y())};
+  std::vector<double> z = {std::abs(directionsScaled[0].Z()),
+                           std::abs(directionsScaled[1].Z()),
+                           std::abs(directionsScaled[2].Z())};
 
-    // Pick the largest element for each component
-    auto xMax = std::max_element(std::begin(x), std::end(x));
-    auto yMax = std::max_element(std::begin(y), std::end(y));
-    auto zMax = std::max_element(std::begin(z), std::end(z));
+  // Pick the largest element for each component
+  auto xMax = std::max_element(std::begin(x), std::end(x));
+  auto yMax = std::max_element(std::begin(y), std::end(y));
+  auto zMax = std::max_element(std::begin(z), std::end(z));
 
-    return std::vector<double>{*xMax, *yMax, *zMax};
+  return std::vector<double>{*xMax, *yMax, *zMax};
 }
 
 MantidQt::SliceViewer::PeakBoundingBox getPeakBoundingBoxForEllipsoid(
     const std::vector<Mantid::Kernel::V3D> &directions,
     const std::vector<double> &radii,
-    const Mantid::Kernel::V3D &originEllipsoid)
-{
-    // Get the length of largest projection onto x,y,z
-    auto projectionLengths = getProjectionLengths(directions, radii);
+    const Mantid::Kernel::V3D &originEllipsoid) {
+  // Get the length of largest projection onto x,y,z
+  auto projectionLengths = getProjectionLengths(directions, radii);
 
-    // Corners
-    const double leftValue = originEllipsoid.X() - projectionLengths[0];
-    const double rightValue = originEllipsoid.X() + projectionLengths[0];
-    const double bottomValue = originEllipsoid.Y() - projectionLengths[1];
-    const double topValue = originEllipsoid.Y() + projectionLengths[1];
+  // Corners
+  const double leftValue = originEllipsoid.X() - projectionLengths[0];
+  const double rightValue = originEllipsoid.X() + projectionLengths[0];
+  const double bottomValue = originEllipsoid.Y() - projectionLengths[1];
+  const double topValue = originEllipsoid.Y() + projectionLengths[1];
 
-    using namespace MantidQt::SliceViewer;
+  using namespace MantidQt::SliceViewer;
 
-    Left left(leftValue);
-    Right right(rightValue);
-    Bottom bottom(bottomValue);
-    Top top(topValue);
-    SlicePoint slicePoint(originEllipsoid.Z());
+  Left left(leftValue);
+  Right right(rightValue);
+  Bottom bottom(bottomValue);
+  Top top(topValue);
+  SlicePoint slicePoint(originEllipsoid.Z());
 
-    return PeakBoundingBox(left, right, top, bottom, slicePoint);
+  return PeakBoundingBox(left, right, top, bottom, slicePoint);
 }
-
 }
 }

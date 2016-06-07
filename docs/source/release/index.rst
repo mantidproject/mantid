@@ -7,7 +7,7 @@ Release Notes
    :titlesonly:
 
    v3.8.0 <v3.8.0/index>
-   v3.7.0 <v3.7.0/index>
+   v3.7.1 <v3.7.1/index>
    v3.6.1 <v3.6.1/index>
    v3.6.0 <v3.6.0/index>
    v3.5.2 <v3.5.2/index>

@@ -15,10 +15,6 @@
 
 #include <cstdarg>
 
-#ifdef MAKE_VATES
-#include "vtkPVDisplayInformation.h"
-#endif
-
 #ifdef _WIN32
 #include <winsock2.h>
 #endif
@@ -79,11 +75,6 @@ FrameworkManagerImpl::FrameworkManagerImpl()
 #ifdef MPI_BUILD
   g_log.notice() << "This MPI process is rank: "
                  << boost::mpi::communicator().rank() << std::endl;
-#endif
-
-#ifdef MAKE_VATES
-  if (!vtkPVDisplayInformation::SupportsOpenGLLocally())
-    g_log.error() << "The OpenGL configuration does not support the VSI.\n";
 #endif
 
   g_log.debug() << "FrameworkManager created." << std::endl;

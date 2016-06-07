@@ -23,7 +23,7 @@ void removeLayout(QWidget *widget) {
   QLayout *layout = widget->layout();
   if (layout != 0) {
     QLayoutItem *item;
-    while ((item = layout->takeAt(0)) != 0){
+    while ((item = layout->takeAt(0)) != 0) {
       layout->removeItem(item);
       delete item->widget();
     }
@@ -49,25 +49,34 @@ void PeaksViewer::setPresenter(
   if (layout()) {
     removeLayout(this);
   }
-  QVBoxLayout* masterLayout = new QVBoxLayout;
+  QVBoxLayout *masterLayout = new QVBoxLayout;
   this->setLayout(masterLayout);
 
   auto it = workspaces.begin();
   while (it != workspaces.end()) {
     Mantid::API::IPeaksWorkspace_const_sptr ws = *it;
 
-    const auto backgroundPeakViewColor = m_presenter->getBackgroundPeakViewColor(ws);
-    const auto foregroundPeakViewColor = m_presenter->getForegroundPeakViewColor(ws);
+    const auto backgroundPeakViewColor =
+        m_presenter->getBackgroundPeakViewColor(ws);
+    const auto foregroundPeakViewColor =
+        m_presenter->getForegroundPeakViewColor(ws);
 
     bool canAddPeaks = m_presenter->hasPeakAddModeFor(ws);
 
-    auto widget = new PeaksWorkspaceWidget(ws, coordinateSystem, foregroundPeakViewColor,
-                                backgroundPeakViewColor, canAddPeaks, this);
+    auto widget =
+        new PeaksWorkspaceWidget(ws, coordinateSystem, foregroundPeakViewColor,
+                                 backgroundPeakViewColor, canAddPeaks, this);
 
-    connect(widget, SIGNAL(peakColorchanged(Mantid::API::IPeaksWorkspace_const_sptr,PeakViewColor)),
-            this, SLOT(onPeakColorChanged(Mantid::API::IPeaksWorkspace_const_sptr, PeakViewColor)));
-    connect(widget, SIGNAL(backgroundColorChanged(Mantid::API::IPeaksWorkspace_const_sptr,PeakViewColor)),
-            this, SLOT(onBackgroundColorChanged(Mantid::API::IPeaksWorkspace_const_sptr, PeakViewColor)));
+    connect(widget,
+            SIGNAL(peakColorchanged(Mantid::API::IPeaksWorkspace_const_sptr,
+                                    PeakViewColor)),
+            this, SLOT(onPeakColorChanged(
+                      Mantid::API::IPeaksWorkspace_const_sptr, PeakViewColor)));
+    connect(widget,
+            SIGNAL(backgroundColorChanged(
+                Mantid::API::IPeaksWorkspace_const_sptr, PeakViewColor)),
+            this, SLOT(onBackgroundColorChanged(
+                      Mantid::API::IPeaksWorkspace_const_sptr, PeakViewColor)));
 
     connect(widget, SIGNAL(backgroundRadiusShown(
                         Mantid::API::IPeaksWorkspace_const_sptr, bool)),
@@ -146,37 +155,38 @@ void PeaksViewer::clearPeaksModeRequest(
   m_presenter->editCommand(mode, originWidget->getPeaksWorkspace());
 }
 
-void PeaksViewer::addPeaksModeRequest(const PeaksWorkspaceWidget * const originWidget, const bool on)
-{
-    EditMode mode = None;
-    if(on) {
+void PeaksViewer::addPeaksModeRequest(
+    const PeaksWorkspaceWidget *const originWidget, const bool on) {
+  EditMode mode = None;
+  if (on) {
     QList<PeaksWorkspaceWidget *> children =
         qFindChildren<PeaksWorkspaceWidget *>(this);
     for (int i = 0; i < children.size(); ++i) {
       PeaksWorkspaceWidget *candidateWidget = children.at(i);
-      // For all but the most recently selected peaks workspace. Exit clear mode.
-      if(candidateWidget != originWidget){
-          // Exit Add mode on others.
-          candidateWidget->exitAddPeaksMode();
+      // For all but the most recently selected peaks workspace. Exit clear
+      // mode.
+      if (candidateWidget != originWidget) {
+        // Exit Add mode on others.
+        candidateWidget->exitAddPeaksMode();
       }
-      // One mode, and One Workspace at a time. Cannot be in Clear mode for any Workspace while clearing peaks.
+      // One mode, and One Workspace at a time. Cannot be in Clear mode for any
+      // Workspace while clearing peaks.
       candidateWidget->exitClearPeaksMode();
       mode = AddPeaks;
-
     }
-    } else {
-        mode = None;
-    }
-    m_presenter->editCommand(mode, originWidget->getPeaksWorkspace());
+  } else {
+    mode = None;
+  }
+  m_presenter->editCommand(mode, originWidget->getPeaksWorkspace());
 }
-
 
 /**
  * Handler for changing the peak  color.
  * @param peaksWS : Peaks workspace to change the foreground color on.
  * @param newColor : New color to apply.
  */
-void PeaksViewer::onPeakColorChanged(Mantid::API::IPeaksWorkspace_const_sptr peaksWS, PeakViewColor newColor) {
+void PeaksViewer::onPeakColorChanged(
+    Mantid::API::IPeaksWorkspace_const_sptr peaksWS, PeakViewColor newColor) {
   m_presenter->setForegroundColor(peaksWS, newColor);
 }
 
@@ -185,7 +195,8 @@ void PeaksViewer::onPeakColorChanged(Mantid::API::IPeaksWorkspace_const_sptr pea
  * @param peaksWS : Peaks workspace to change the background colors on.
  * @param newColor : New color to apply to the background.
  */
-void PeaksViewer::onBackgroundColorChanged(Mantid::API::IPeaksWorkspace_const_sptr peaksWS, PeakViewColor newColor) {
+void PeaksViewer::onBackgroundColorChanged(
+    Mantid::API::IPeaksWorkspace_const_sptr peaksWS, PeakViewColor newColor) {
   m_presenter->setBackgroundColor(peaksWS, newColor);
 }
 
@@ -234,10 +245,9 @@ void PeaksViewer::onZoomToPeak(Mantid::API::IPeaksWorkspace_const_sptr peaksWS,
  * @param sortedAscending : Sort direction
  * @param peaksWS : Workspace to be sorted
  */
-void
-PeaksViewer::onPeaksSorted(const std::string &columnToSortBy,
-                           const bool sortedAscending,
-                           Mantid::API::IPeaksWorkspace_const_sptr peaksWS) {
+void PeaksViewer::onPeaksSorted(
+    const std::string &columnToSortBy, const bool sortedAscending,
+    Mantid::API::IPeaksWorkspace_const_sptr peaksWS) {
   m_presenter->sortPeaksWorkspace(peaksWS, columnToSortBy, sortedAscending);
 }
 
@@ -278,7 +288,8 @@ void PeaksViewer::performUpdate() {
           }
         }
       }
-      // We also update the widget in case the workspace has changed for added/deleted peaks
+      // We also update the widget in case the workspace has changed for
+      // added/deleted peaks
       candidateWidget->workspaceUpdate();
     }
   }
@@ -351,8 +362,7 @@ bool PeaksViewer::removePeaksWorkspace(
   return somethingToRemove;
 }
 
-bool PeaksViewer::removePeaksWorkspace(const
-    std::string& toRemove) {
+bool PeaksViewer::removePeaksWorkspace(const std::string &toRemove) {
   bool somethingToRemove = false;
 
   if (m_presenter) {
@@ -362,8 +372,7 @@ bool PeaksViewer::removePeaksWorkspace(const
 
     for (int i = 0; i < children.size(); ++i) {
       PeaksWorkspaceWidget *candidateWidget = children.at(i);
-      const std::string candidateWorkspaceName =
-          candidateWidget->getWSName();
+      const std::string candidateWorkspaceName = candidateWidget->getWSName();
       somethingToRemove = (candidateWorkspaceName == toRemove);
       if (somethingToRemove) {
         // We have the right widget to update. Workspace is the same, just
@@ -375,7 +384,6 @@ bool PeaksViewer::removePeaksWorkspace(const
         break;
       }
     }
-
   }
   return somethingToRemove;
 }

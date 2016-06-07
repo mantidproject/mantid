@@ -31,23 +31,22 @@
 class QwtPlot;
 class QwtTextLabel;
 
-class TitlePicker: public QObject
-{
-    Q_OBJECT
+class TitlePicker : public QObject {
+  Q_OBJECT
 
 public:
   explicit TitlePicker(QwtPlot *plot);
-    void setSelected(bool select = true);
-	bool selected(){return d_selected;};
+  void setSelected(bool select = true);
+  bool selected() { return d_selected; };
 
 signals:
-	void clicked();
-	void doubleClicked();
-	void removeTitle();
-	void showTitleMenu();
+  void clicked();
+  void doubleClicked();
+  void removeTitle();
+  void showTitleMenu();
 
 private:
   bool eventFilter(QObject *, QEvent *) override;
-        QwtTextLabel *title;
-	bool d_selected;
+  QwtTextLabel *title;
+  bool d_selected;
 };

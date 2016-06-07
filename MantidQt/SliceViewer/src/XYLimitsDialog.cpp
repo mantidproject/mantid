@@ -2,10 +2,8 @@
 #include "MantidKernel/UnitLabel.h"
 #include <QIntValidator>
 
-XYLimitsDialog::XYLimitsDialog(QWidget *parent)
-    : QDialog(parent)
-{
-	ui.setupUi(this);
+XYLimitsDialog::XYLimitsDialog(QWidget *parent) : QDialog(parent) {
+  ui.setupUi(this);
   ui.textXMax->setValidator(new QDoubleValidator(ui.textXMax));
   ui.textYMax->setValidator(new QDoubleValidator(ui.textYMax));
   ui.textXMin->setValidator(new QDoubleValidator(ui.textXMin));
@@ -13,29 +11,23 @@ XYLimitsDialog::XYLimitsDialog(QWidget *parent)
 
   QObject::connect(ui.btnOK, SIGNAL(clicked()), this, SLOT(accept()));
   QObject::connect(ui.btnCancel, SIGNAL(clicked()), this, SLOT(reject()));
-
 }
 
-XYLimitsDialog::~XYLimitsDialog()
-{
-
-}
+XYLimitsDialog::~XYLimitsDialog() {}
 
 //------------------------------------------------------------------------------------------
 /** Set the labels for the X dimensions
  * @param dim : IMDDimension */
-void XYLimitsDialog::setXDim(Mantid::Geometry::IMDDimension_const_sptr dim)
-{
-  ui.lblXName->setText( QString::fromStdString(dim->getName()) );
-  ui.lblXUnits->setText( QString::fromStdWString(dim->getUnits().utf8()) );
+void XYLimitsDialog::setXDim(Mantid::Geometry::IMDDimension_const_sptr dim) {
+  ui.lblXName->setText(QString::fromStdString(dim->getName()));
+  ui.lblXUnits->setText(QString::fromStdWString(dim->getUnits().utf8()));
 }
 
 /** Set the labels for the Y dimensions
  * @param dim : IMDDimension */
-void XYLimitsDialog::setYDim(Mantid::Geometry::IMDDimension_const_sptr dim)
-{
-  ui.lblYName->setText( QString::fromStdString(dim->getName()) );
-  ui.lblYUnits->setText( QString::fromStdWString(dim->getUnits().utf8()) );
+void XYLimitsDialog::setYDim(Mantid::Geometry::IMDDimension_const_sptr dim) {
+  ui.lblYName->setText(QString::fromStdString(dim->getName()));
+  ui.lblYUnits->setText(QString::fromStdWString(dim->getUnits().utf8()));
 }
 
 //------------------------------------------------------------------------------------------
@@ -46,36 +38,22 @@ void XYLimitsDialog::setYDim(Mantid::Geometry::IMDDimension_const_sptr dim)
  * @param y0 :: y min
  * @param y1 :: y max
  */
-void XYLimitsDialog::setLimits(double x0, double x1, double y0, double y1)
-{
-  ui.textXMin->setText( QString::number(x0) );
-  ui.textXMax->setText( QString::number(x1) );
-  ui.textYMin->setText( QString::number(y0) );
-  ui.textYMax->setText( QString::number(y1) );
+void XYLimitsDialog::setLimits(double x0, double x1, double y0, double y1) {
+  ui.textXMin->setText(QString::number(x0));
+  ui.textXMax->setText(QString::number(x1));
+  ui.textYMin->setText(QString::number(y0));
+  ui.textYMax->setText(QString::number(y1));
 }
-
 
 //------------------------------------------------------------------------------------------
 /// @return the X min value in the gui
-double XYLimitsDialog::getXMin()
-{
-  return ui.textXMin->text().toDouble();
-}
+double XYLimitsDialog::getXMin() { return ui.textXMin->text().toDouble(); }
 
 /// @return the X Max  value in the gui
-double XYLimitsDialog::getXMax ()
-{
-  return ui.textXMax ->text().toDouble();
-}
+double XYLimitsDialog::getXMax() { return ui.textXMax->text().toDouble(); }
 
 /// @return the X min value in the gui
-double XYLimitsDialog::getYMin()
-{
-  return ui.textYMin->text().toDouble();
-}
+double XYLimitsDialog::getYMin() { return ui.textYMin->text().toDouble(); }
 
 /// @return the X Max  value in the gui
-double XYLimitsDialog::getYMax ()
-{
-  return ui.textYMax ->text().toDouble();
-}
+double XYLimitsDialog::getYMax() { return ui.textYMax->text().toDouble(); }

@@ -674,8 +674,8 @@ string readUntilCloseChar(istream &istr) {
   }
 
   // Strip any whitespace off the end of the value string
-  while (isspace(value[value.size() - 1])) {
-    value.resize(value.size() - 1);
+  while (isspace(value.back())) {
+    value.pop_back();
   }
 
   return value;

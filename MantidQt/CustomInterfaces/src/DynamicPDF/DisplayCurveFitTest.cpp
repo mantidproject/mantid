@@ -60,13 +60,14 @@ void DisplayCurveFitTest::loadSpectra(const QString &workspaceName) {
                            workspaceName.toStdString());
   if (!workspace) {
     auto title = QString::fromStdString(this->name());
-    auto error = QString::fromStdString("Workspace must be of type MatrixWorkspace");
+    auto error =
+        QString::fromStdString("Workspace must be of type MatrixWorkspace");
     QMessageBox::warning(this, title, error);
     return;
   }
   if (workspace->getNumberHistograms() < 4) {
     auto title = QString::fromStdString(this->name());
-    auto error= QString("Not enough number of histograms in the workspace");
+    auto error = QString("Not enough number of histograms in the workspace");
     QMessageBox::warning(this, title, error);
     return;
   }

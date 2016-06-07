@@ -190,7 +190,7 @@ void OptimizeLatticeForCellType::exec() {
     AnalysisDataService::Instance().remove("_peaks");
     if (perRun) {
       std::string outputdir = getProperty("OutputDirectory");
-      if (outputdir[outputdir.size() - 1] != '/')
+      if (outputdir.back() != '/')
         outputdir += "/";
       // Save Peaks
       Mantid::API::IAlgorithm_sptr savePks_alg =
