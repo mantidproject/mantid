@@ -37,7 +37,6 @@ namespace DataHandling {
   */
 class DLLExport LoadGSS : public API::IFileLoader<Kernel::FileDescriptor> {
 public:
-
   /// Algorithm's name
   const std::string name() const override { return "LoadGSS"; }
 
