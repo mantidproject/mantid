@@ -2288,33 +2288,33 @@ class MainWindow(QtGui.QMainWindow):
         Apply Lorentz corrections to the integrated peak intensities of all the selected peaks.
         :return:
         """
-        # TODO/NOW - better documentation!
-
         # get experiment number
         exp_number = int(self.ui.lineEdit_exp.text())
 
         # select rows
         selected_rows = self.ui.tableWidget_mergeScans.get_selected_rows(True)
 
-        # apply for each
+        # apply for each row selected for Lorentz correction
         for row_number in selected_rows:
             # get scan number
             scan_number = self.ui.tableWidget_mergeScans.get_scan_number(row_number)
             # get peak information object
             peak_info_obj = self._myControl.get_peak_info(exp_number, scan_number)
-            # ... ...
+            # get intensity
             peak_intensity = peak_info_obj.get_intensity()
-            # ... ...
+            # get Q-vector of the peak center and calculate |Q| from it
             q = peak_info_obj.get_peak_centre_v3d().norm()
+            # get wave length
             wavelength = self._myControl.get_wave_length(exp_number, [scan_number])
             self.ui.tableWidget_mergeScans.set_wave_length(row_number, wavelength)
-            # ... ...
+            # get motor step (choose from omega, phi and chi)
             motor_move_tup = self._myControl.get_motor_step(exp_number, scan_number)
             self.ui.tableWidget_mergeScans.set_motor_info(row_number, motor_move_tup)
             motor_step = motor_move_tup[1]
-            # .. ...
+            # apply the Lorentz correction to the intensity
             corrected = self._myControl.apply_lorentz_correction(peak_intensity, q, wavelength, motor_step)
             self.ui.tableWidget_mergeScans.set_peak_intensity(row_number, None, corrected, lorentz_corrected=True)
+        # END-FOR (row_number)
 
         return
 

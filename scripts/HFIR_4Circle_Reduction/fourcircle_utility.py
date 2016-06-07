@@ -465,12 +465,13 @@ def get_integrated_peak_ws_name(exp_number, scan_number, pt_list, mask=False,
 
 def get_log_data(spice_table, log_name):
     """
-
-    :param spice_table:
-    :param log_name:
+    Purpose: Get the sample log data of a scan, which contains a few of Pt.
+    Requirements: SPICE table workspace and a valid log name (a column's name) in the table workspace
+    Guarantee: a numpy array is created and returned.  Each item is the log value for a Pt.
+    :param spice_table: SPICE TableWorkspace
+    :param log_name: the name of the log to get retrieve.
     :return:
     """
-    # TODO/NOW - Doc
     assert isinstance(log_name, str), 'Log name must be a string.'
 
     col_names = spice_table.getColumnNames()
@@ -488,11 +489,14 @@ def get_log_data(spice_table, log_name):
 
 def get_step_motor_parameters(log_value_vector):
     """
-    Get motor log value statistics
+    Calculate some statistic parameters of a motor log (motor position) of a scan containing Pt.
+    Requirements: input is a numpy array
+    Guarantee: the standard deviation of motor position, increment of motor position and standard deviation
+               of the increment of motor positions are calculated
     :param log_value_vector:
-    :return:
+    :return: 3-tuple as (1) standard deviation of motor position, (2) average increment of the motor position,
+                    and (3) standard deviation of the increment of motor position.
     """
-    # TODO/NOW - check and doc!
     std_dev = numpy.std(log_value_vector)
 
     step_vector = log_value_vector[1:] - log_value_vector[:-1]

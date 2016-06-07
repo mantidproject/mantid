@@ -418,7 +418,11 @@ class ProcessTableWidget(tableBase.NTableWidget):
         :param ws_name
         :return:
         """
-        # TODO/NOW - Doc and check
+        # check inputs
+        assert isinstance(scan_number, int)
+        assert isinstance(num_pt, int) or num_pt is None
+        assert isinstance(status, str)
+
         intensity = None
         corr_int = None
         total_counts = 0
@@ -582,14 +586,18 @@ class ProcessTableWidget(tableBase.NTableWidget):
 
     def set_motor_info(self, row_number, motor_move_tup):
         """
-
+        Set the motor step information to the 'Motor' cell
         :param motor_move_tup:
         :return:
         """
-        # TODO/NOW - Doc and check
+        # check
+        assert isinstance(row_number, int) and 0 <= row_number < self.rowCount(), 'Input row number is out of range.'
+        assert len(motor_move_tup) == 3
 
+        # get motor information and construct the string
         motor_info = '%s: %.5f (%.5f)' % (motor_move_tup[0], motor_move_tup[1], motor_move_tup[2])
 
+        # set motor step information string to the table cell.
         motor_col_index = self.TableSetup.index(('Motor', 'str'))
         self.update_cell_value(row_number, motor_col_index, motor_info)
 
@@ -693,12 +701,16 @@ class ProcessTableWidget(tableBase.NTableWidget):
         return
 
     def set_wave_length(self, row_number, wave_length):
-        """ Set wave length to n
+        """ Set wave length to a row
         :param row_number:
         :param wave_length:
         :return:
         """
-        # TODO/NOW - check and doc
+        # check
+        assert isinstance(row_number, int) and 0 <= row_number < self.rowCount(), 'Input row number is out of range.'
+        assert isinstance(wave_length, float) and wave_length >= 0.
+
+        # set
         col_index = self.TableSetup.index(('Wavelength', 'float'))
         self.update_cell_value(row_number, col_index, wave_length)
 

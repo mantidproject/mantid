@@ -561,7 +561,7 @@ class CWSCDReductionControl(object):
         no_shift = len(scan_kindex_dict) == 0
         for scan_number in scan_number_list:
             peak_dict = dict()
-            peak_dict['hkl'] = self._myPeakInfoDict[(exp_number, scan_number)].get_hkl()
+            peak_dict['hkl'] = self._myPeakInfoDict[(exp_number, scan_number)]. get_peak_ws_hkl()
             peak_dict['intensity'] = self._myPeakInfoDict[(exp_number, scan_number)].get_intensity()
             peak_dict['sigma'] = self._myPeakInfoDict[(exp_number, scan_number)].get_sigma()
             if no_shift:
