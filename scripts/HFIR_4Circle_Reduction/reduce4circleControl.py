@@ -1010,7 +1010,6 @@ class CWSCDReductionControl(object):
         """ Index peaks in a Pt.
         :param ub_matrix: numpy.ndarray (3, 3)
         :param scan_number:
-        :param pt_number:
         :return: boolean, object (list of HKL or error message)
         """
         # Check

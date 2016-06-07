@@ -2218,46 +2218,8 @@ p, li { white-space: pre-wrap; }
                   <item row="3" column="4">
                    <widget class="QLineEdit" name="lineEdit_minD"/>
                   </item>
-                  <item row="1" column="10">
-                   <widget class="QPushButton" name="pushButton_calUB">
-                    <property name="minimumSize">
-                     <size>
-                      <width>100</width>
-                      <height>0</height>
-                     </size>
-                    </property>
-                    <property name="maximumSize">
-                     <size>
-                      <width>100</width>
-                      <height>16777215</height>
-                     </size>
-                    </property>
-                    <property name="text">
-                     <string>Calculate UB</string>
-                    </property>
-                   </widget>
-                  </item>
                   <item row="3" column="6">
                    <widget class="QLineEdit" name="lineEdit_maxD"/>
-                  </item>
-                  <item row="2" column="10">
-                   <widget class="QPushButton" name="pushButton_indexUBPeaks">
-                    <property name="minimumSize">
-                     <size>
-                      <width>100</width>
-                      <height>0</height>
-                     </size>
-                    </property>
-                    <property name="maximumSize">
-                     <size>
-                      <width>100</width>
-                      <height>16777215</height>
-                     </size>
-                    </property>
-                    <property name="text">
-                     <string>Index Peaks</string>
-                    </property>
-                   </widget>
                   </item>
                   <item row="0" column="8">
                    <widget class="QLabel" name="label_44">
@@ -2265,17 +2227,7 @@ p, li { white-space: pre-wrap; }
                      <enum>Qt::LeftToRight</enum>
                     </property>
                     <property name="text">
-                     <string>Refine UB</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="1" column="8">
-                   <widget class="QPushButton" name="pushButton_findUBLattice">
-                    <property name="enabled">
-                     <bool>false</bool>
-                    </property>
-                    <property name="text">
-                     <string>Find Lattice</string>
+                     <string>Caculate/Refine UB</string>
                     </property>
                    </widget>
                   </item>
@@ -2288,25 +2240,6 @@ p, li { white-space: pre-wrap; }
                     </property>
                     <property name="text">
                      <string>Refine FFT</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="3" column="10">
-                   <widget class="QPushButton" name="pushButton_acceptUB">
-                    <property name="minimumSize">
-                     <size>
-                      <width>100</width>
-                      <height>0</height>
-                     </size>
-                    </property>
-                    <property name="maximumSize">
-                     <size>
-                      <width>100</width>
-                      <height>16777215</height>
-                     </size>
-                    </property>
-                    <property name="text">
-                     <string>Accept</string>
                     </property>
                    </widget>
                   </item>
@@ -2331,6 +2264,71 @@ p, li { white-space: pre-wrap; }
                     </property>
                     <property name="text">
                      <string>calculated</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="1" column="8">
+                   <widget class="QPushButton" name="pushButton_calUB">
+                    <property name="minimumSize">
+                     <size>
+                      <width>0</width>
+                      <height>0</height>
+                     </size>
+                    </property>
+                    <property name="maximumSize">
+                     <size>
+                      <width>200</width>
+                      <height>16777215</height>
+                     </size>
+                    </property>
+                    <property name="font">
+                     <font>
+                      <pointsize>9</pointsize>
+                     </font>
+                    </property>
+                    <property name="toolTip">
+                     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Calculate UB matrix with 2 or 3 reflections and lattice pameters&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                    </property>
+                    <property name="text">
+                     <string>Calculate</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="3" column="10">
+                   <widget class="QPushButton" name="pushButton_indexUBPeaks">
+                    <property name="minimumSize">
+                     <size>
+                      <width>100</width>
+                      <height>0</height>
+                     </size>
+                    </property>
+                    <property name="maximumSize">
+                     <size>
+                      <width>100</width>
+                      <height>16777215</height>
+                     </size>
+                    </property>
+                    <property name="text">
+                     <string>Index Peaks</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="1" column="10">
+                   <widget class="QPushButton" name="pushButton_acceptUB">
+                    <property name="minimumSize">
+                     <size>
+                      <width>100</width>
+                      <height>0</height>
+                     </size>
+                    </property>
+                    <property name="maximumSize">
+                     <size>
+                      <width>100</width>
+                      <height>16777215</height>
+                     </size>
+                    </property>
+                    <property name="text">
+                     <string>Accept</string>
                     </property>
                    </widget>
                   </item>
@@ -2846,7 +2844,7 @@ p, li { white-space: pre-wrap; }
                  <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Apply k-vector to the selected reflections, i.e., shift HKL by kx, ky, kz&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                 </property>
                 <property name="text">
-                 <string>Apply</string>
+                 <string>Apply K-Shift</string>
                 </property>
                </widget>
               </item>
@@ -3022,20 +3020,18 @@ p, li { white-space: pre-wrap; }
                </widget>
               </item>
               <item>
-               <widget class="QLabel" name="label_37">
+               <widget class="QLabel" name="label_merge">
                 <property name="font">
                  <font>
-                  <pointsize>9</pointsize>
                   <weight>75</weight>
-                  <italic>true</italic>
+                  <italic>false</italic>
                   <bold>true</bold>
+                  <strikeout>false</strikeout>
+                  <kerning>false</kerning>
                  </font>
                 </property>
                 <property name="text">
                  <string>Merge</string>
-                </property>
-                <property name="alignment">
-                 <set>Qt::AlignCenter</set>
                 </property>
                </widget>
               </item>
@@ -3063,32 +3059,97 @@ p, li { white-space: pre-wrap; }
                </widget>
               </item>
               <item>
-               <widget class="QPushButton" name="pushButton_saveMergedResult">
-                <property name="maximumSize">
-                 <size>
-                  <width>130</width>
-                  <height>16777215</height>
-                 </size>
-                </property>
-                <property name="text">
-                 <string>Save</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QPushButton" name="pushButton_plotMergedScans">
-                <property name="text">
-                 <string>Plot</string>
-                </property>
-               </widget>
-              </item>
-              <item>
                <spacer name="verticalSpacer_23">
                 <property name="orientation">
                  <enum>Qt::Vertical</enum>
                 </property>
                 <property name="sizeType">
                  <enum>QSizePolicy::Preferred</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>20</width>
+                  <height>40</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+              <item>
+               <widget class="Line" name="line">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLabel" name="label_index">
+                <property name="font">
+                 <font>
+                  <weight>75</weight>
+                  <bold>true</bold>
+                 </font>
+                </property>
+                <property name="text">
+                 <string>Index Peaks</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="pushButton_indexMergedScans">
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Integrate peak&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+                <property name="text">
+                 <string>Index Peaks</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QCheckBox" name="checkBox_roundHKL">
+                <property name="font">
+                 <font>
+                  <pointsize>9</pointsize>
+                  <italic>true</italic>
+                 </font>
+                </property>
+                <property name="text">
+                 <string>rounding</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QRadioButton" name="radioButton_hklFromSPICE">
+                <property name="font">
+                 <font>
+                  <pointsize>8</pointsize>
+                  <weight>75</weight>
+                  <italic>false</italic>
+                  <bold>true</bold>
+                 </font>
+                </property>
+                <property name="text">
+                 <string>From SPICE</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QRadioButton" name="radioButton_indexFromCalUB">
+                <property name="font">
+                 <font>
+                  <pointsize>8</pointsize>
+                  <weight>75</weight>
+                  <bold>true</bold>
+                 </font>
+                </property>
+                <property name="text">
+                 <string>From calculation</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <spacer name="verticalSpacer_24">
+                <property name="orientation">
+                 <enum>Qt::Vertical</enum>
                 </property>
                 <property name="sizeHint" stdset="0">
                  <size>
@@ -3109,9 +3170,9 @@ p, li { white-space: pre-wrap; }
                <widget class="QLabel" name="label_45">
                 <property name="font">
                  <font>
-                  <pointsize>9</pointsize>
+                  <pointsize>11</pointsize>
                   <weight>75</weight>
-                  <italic>true</italic>
+                  <italic>false</italic>
                   <bold>true</bold>
                  </font>
                 </property>
@@ -3119,17 +3180,22 @@ p, li { white-space: pre-wrap; }
                  <string>Advanced</string>
                 </property>
                 <property name="alignment">
-                 <set>Qt::AlignCenter</set>
+                 <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
                 </property>
                </widget>
               </item>
               <item>
                <widget class="QPushButton" name="pushButton_multipleScans">
+                <property name="font">
+                 <font>
+                  <pointsize>8</pointsize>
+                 </font>
+                </property>
                 <property name="toolTip">
                  <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Merge multiple scans, which are selected from the table, to a single MDEventsWorkspace&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                 </property>
                 <property name="text">
-                 <string>Merge Scans</string>
+                 <string>Merge Multiple Scans</string>
                 </property>
                </widget>
               </item>
@@ -3148,6 +3214,26 @@ p, li { white-space: pre-wrap; }
                  </size>
                 </property>
                </spacer>
+              </item>
+              <item>
+               <widget class="QPushButton" name="pushButton_plotMergedScans">
+                <property name="text">
+                 <string>Plot</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="pushButton_saveMergedResult">
+                <property name="maximumSize">
+                 <size>
+                  <width>130</width>
+                  <height>16777215</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>Save</string>
+                </property>
+               </widget>
               </item>
               <item>
                <widget class="QPushButton" name="pushButton_4">
@@ -3181,11 +3267,18 @@ p, li { white-space: pre-wrap; }
                   <height>16777215</height>
                  </size>
                 </property>
+                <property name="font">
+                 <font>
+                  <pointsize>10</pointsize>
+                  <weight>75</weight>
+                  <bold>true</bold>
+                 </font>
+                </property>
                 <property name="toolTip">
-                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Select the scan that are to be merged,&lt;/p&gt;&lt;p&gt;Then it will jump to tab 'Peak Integrate' to integrate peaks&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Integrate selected scans regardless that they are merged or not.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                 </property>
                 <property name="text">
-                 <string>Integrate</string>
+                 <string>Integrate Peaks</string>
                 </property>
                </widget>
               </item>
