@@ -166,15 +166,6 @@ void ProcessIndirectFitParameters::exec() {
 	outputWs = conjoin->getProperty("InputWorkspace1");
   }
 
-  // Rename the workspace to the specified outputName
-  workflowProg.report("Renaming Workspace");
-  auto renamer = createChildAlgorithm("RenameWorkspace", -1, -1, true);
-  renamer->setProperty("InputWorkspace", tempWorkspace);
-  renamer->setProperty("OutputWorkspace", outputWsName);
-  renamer->execute();
-  Workspace_sptr renameWs = renamer->getProperty("OutputWorkspace");
-  outputWs = boost::dynamic_pointer_cast<MatrixWorkspace>(renameWs);
-
   // Replace axis on workspaces with text axis
   workflowProg.report("Converting text axis");
   auto axis = new TextAxis(outputWs->getNumberHistograms());
