@@ -37,8 +37,7 @@
  * This is a simple hack on top of the QComboBox class.
  \image html images/symbol_box.png
  */
-class SymbolBox : public QComboBox
-{
+class SymbolBox : public QComboBox {
   Q_OBJECT
 public:
   //! Constructor.
@@ -47,11 +46,11 @@ public:
    */
   SymbolBox(bool showNoSymbol = true, QWidget *parent = 0);
 
-  void setStyle(const QwtSymbol::Style& c);
+  void setStyle(const QwtSymbol::Style &c);
   QwtSymbol::Style selectedSymbol() const;
 
   static QwtSymbol::Style style(int index);
-  static int symbolIndex(const QwtSymbol::Style& style);
+  static int symbolIndex(const QwtSymbol::Style &style);
   static QList<int> defaultSymbols();
 
 signals:

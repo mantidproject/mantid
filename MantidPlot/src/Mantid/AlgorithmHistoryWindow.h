@@ -1,4 +1,4 @@
-#ifndef ALGORITHMHISTORYWINDOW_H 
+#ifndef ALGORITHMHISTORYWINDOW_H
 #define ALGORITHMHISTORYWINDOW_H
 
 #include "MantidAPI/HistoryItem.h"
@@ -29,95 +29,95 @@ class QFileDialog;
 // Mantid Forward declarations
 //------------------------------------------------------------------------------
 
-namespace Mantid 
-{
-  namespace API 
-  {
-    class Workspace;
-  }
+namespace Mantid {
+namespace API {
+class Workspace;
+}
 }
 
-
-class AlgHistoryItem : public QTreeWidgetItem, public Mantid::API::HistoryItem
-{
-  public:
-    AlgHistoryItem(const QStringList & names, Mantid::API::AlgorithmHistory_const_sptr algHistory, AlgHistoryItem* parent = 0)
-      : QTreeWidgetItem(parent, names, UserType), Mantid::API::HistoryItem(algHistory) {}
+class AlgHistoryItem : public QTreeWidgetItem, public Mantid::API::HistoryItem {
+public:
+  AlgHistoryItem(const QStringList &names,
+                 Mantid::API::AlgorithmHistory_const_sptr algHistory,
+                 AlgHistoryItem *parent = 0)
+      : QTreeWidgetItem(parent, names, UserType),
+        Mantid::API::HistoryItem(algHistory) {}
 };
 
-
-class AlgHistoryTreeWidget:public QTreeWidget
-{
+class AlgHistoryTreeWidget : public QTreeWidget {
   Q_OBJECT
 
 signals:
-  void updateAlgorithmHistoryWindow(Mantid::API::AlgorithmHistory_const_sptr algHistory);
-  void unrollAlgorithmHistory(const std::vector<int>& indicies);
+  void updateAlgorithmHistoryWindow(
+      Mantid::API::AlgorithmHistory_const_sptr algHistory);
+  void unrollAlgorithmHistory(const std::vector<int> &indicies);
   void rollAlgorithmHistory(int index);
 
 public:
   /// Constructor
   explicit AlgHistoryTreeWidget(QWidget *w)
       : QTreeWidget(w), m_algName(""), m_nVersion(0) {
-    connect(this, SIGNAL(itemChanged(QTreeWidgetItem*,int)),SLOT(onItemChanged(QTreeWidgetItem*,int)));
+    connect(this, SIGNAL(itemChanged(QTreeWidgetItem *, int)),
+            SLOT(onItemChanged(QTreeWidgetItem *, int)));
   }
-  void populateAlgHistoryTreeWidget(const Mantid::API::WorkspaceHistory& wsHist);
+  void
+  populateAlgHistoryTreeWidget(const Mantid::API::WorkspaceHistory &wsHist);
 
 protected:
   void selectionChanged(const QItemSelection &selected,
                         const QItemSelection &deselected) override;
 
 private slots:
-  void onItemChanged(QTreeWidgetItem* item, int index);
+  void onItemChanged(QTreeWidgetItem *item, int index);
 
 private:
   void treeSelectionChanged();
-  void itemChecked(QTreeWidgetItem* item, int index);
-  void itemUnchecked(QTreeWidgetItem* item, int index);
-  void populateNestedHistory(AlgHistoryItem* parentWidget, Mantid::API::AlgorithmHistory_sptr history);
-  void uncheckAllChildren(QTreeWidgetItem* item, int index);
-  QString concatVersionwithName(const std::string& name,const int version);
-  
+  void itemChecked(QTreeWidgetItem *item, int index);
+  void itemUnchecked(QTreeWidgetItem *item, int index);
+  void populateNestedHistory(AlgHistoryItem *parentWidget,
+                             Mantid::API::AlgorithmHistory_sptr history);
+  void uncheckAllChildren(QTreeWidgetItem *item, int index);
+  QString concatVersionwithName(const std::string &name, const int version);
+
   const static int UNROLL_COLUMN_INDEX = 1;
   QString m_algName;
   int m_nVersion;
 };
 
-
-
-class AlgExecSummaryGrpBox: public QGroupBox
-{
+class AlgExecSummaryGrpBox : public QGroupBox {
   Q_OBJECT
-  public:
-    explicit AlgExecSummaryGrpBox(QWidget *w);
-  AlgExecSummaryGrpBox(QString,QWidget*w);
+public:
+  explicit AlgExecSummaryGrpBox(QWidget *w);
+  AlgExecSummaryGrpBox(QString, QWidget *w);
   ~AlgExecSummaryGrpBox() override;
-  void setData(const double execDuration,const Mantid::Kernel::DateAndTime execDate);
+  void setData(const double execDuration,
+               const Mantid::Kernel::DateAndTime execDate);
+
 private:
-  QLineEdit* getAlgExecDurationCtrl()const {return m_execDurationEdit;}
-  QLineEdit* getAlgExecDateCtrl() const{ return m_execDateTimeEdit;}
+  QLineEdit *getAlgExecDurationCtrl() const { return m_execDurationEdit; }
+  QLineEdit *getAlgExecDateCtrl() const { return m_execDateTimeEdit; }
+
 private:
   QLabel *m_execDurationlabel;
   QLineEdit *m_execDurationEdit;
   QLabel *m_Datelabel;
-  QLineEdit*m_execDateTimeEdit;
-  QString m_algexecDuration;  
+  QLineEdit *m_execDateTimeEdit;
+  QString m_algexecDuration;
 };
 
-
-
-class AlgEnvHistoryGrpBox: public QGroupBox
-{
+class AlgEnvHistoryGrpBox : public QGroupBox {
   Q_OBJECT
-  public:
-    explicit AlgEnvHistoryGrpBox(QWidget *w);
-  AlgEnvHistoryGrpBox(QString,QWidget*w);
+public:
+  explicit AlgEnvHistoryGrpBox(QWidget *w);
+  AlgEnvHistoryGrpBox(QString, QWidget *w);
   ~AlgEnvHistoryGrpBox() override;
 
-  QLineEdit* getosNameEdit()const {return m_osNameEdit;}
-  QLineEdit* getosVersionEdit()const {return m_osVersionEdit;}
-  QLineEdit* getfrmworkVersionEdit()const {return m_frmwkVersnEdit;}
-  void fillEnvHistoryGroupBox(const Mantid::Kernel::EnvironmentHistory& envHist);
+  QLineEdit *getosNameEdit() const { return m_osNameEdit; }
+  QLineEdit *getosVersionEdit() const { return m_osVersionEdit; }
+  QLineEdit *getfrmworkVersionEdit() const { return m_frmwkVersnEdit; }
+  void
+  fillEnvHistoryGroupBox(const Mantid::Kernel::EnvironmentHistory &envHist);
+
 private:
   QLabel *m_osNameLabel;
   QLineEdit *m_osNameEdit;
@@ -127,50 +127,51 @@ private:
   QLineEdit *m_frmwkVersnEdit;
 };
 
-
-
 class AlgHistoryProperties;
-class AlgorithmHistoryWindow: public MantidQt::API::MantidDialog
-{
+class AlgorithmHistoryWindow : public MantidQt::API::MantidDialog {
   Q_OBJECT
-  signals:
+signals:
   void updateAlgorithmHistoryWindow(QString algName);
 
 public:
-  AlgorithmHistoryWindow(QWidget *parent,const boost::shared_ptr<const Mantid::API::Workspace>);
+  AlgorithmHistoryWindow(QWidget *parent,
+                         const boost::shared_ptr<const Mantid::API::Workspace>);
   ~AlgorithmHistoryWindow() override;
 public slots:
   void updateAll(Mantid::API::AlgorithmHistory_const_sptr algHistmakeory);
-  void doUnroll(const std::vector<int>& unrollIndicies );
-  void doRoll( int index );
-  
+  void doUnroll(const std::vector<int> &unrollIndicies);
+  void doRoll(int index);
+
   void copytoClipboard();
   void writeToScriptFile();
-private:
-  AlgExecSummaryGrpBox* createExecSummaryGrpBox();
-  AlgEnvHistoryGrpBox* createEnvHistGrpBox(const Mantid::Kernel::EnvironmentHistory& envHistory);
-  AlgHistoryProperties * createAlgHistoryPropWindow();
 
-  QFileDialog* createScriptDialog(const QString& algName);
-  void updateExecSummaryGrpBox(Mantid::API::AlgorithmHistory_const_sptr algHistory);
-  void updateAlgHistoryProperties(Mantid::API::AlgorithmHistory_const_sptr algHistory);
+private:
+  AlgExecSummaryGrpBox *createExecSummaryGrpBox();
+  AlgEnvHistoryGrpBox *
+  createEnvHistGrpBox(const Mantid::Kernel::EnvironmentHistory &envHistory);
+  AlgHistoryProperties *createAlgHistoryPropWindow();
+
+  QFileDialog *createScriptDialog(const QString &algName);
+  void
+  updateExecSummaryGrpBox(Mantid::API::AlgorithmHistory_const_sptr algHistory);
+  void updateAlgHistoryProperties(
+      Mantid::API::AlgorithmHistory_const_sptr algHistory);
 
   std::string getScriptVersionMode();
 
 private:
-  const Mantid::API::WorkspaceHistory & m_algHist;
+  const Mantid::API::WorkspaceHistory &m_algHist;
   QLabel *m_scriptVersionLabel;
   QComboBox *m_scriptComboMode;
   QPushButton *m_scriptButtonFile;
   QPushButton *m_scriptButtonClipboard;
   AlgHistoryTreeWidget *m_Historytree;
-  AlgHistoryProperties * m_histPropWindow; 
-  AlgExecSummaryGrpBox *m_execSumGrpBox ;
-  AlgEnvHistoryGrpBox * m_envHistGrpBox;
+  AlgHistoryProperties *m_histPropWindow;
+  AlgExecSummaryGrpBox *m_execSumGrpBox;
+  AlgEnvHistoryGrpBox *m_envHistGrpBox;
   QString m_wsName;
   boost::shared_ptr<Mantid::API::HistoryView> m_view;
 };
-
 
 class AlgHistoryProperties : public QObject {
   Q_OBJECT

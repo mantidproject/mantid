@@ -9,25 +9,20 @@
 
 using Mantid::VATES::FieldDataToMetadata;
 
-class FieldDataToMetadataTest : public CxxTest::TestSuite
-{
+class FieldDataToMetadataTest : public CxxTest::TestSuite {
 
 private:
-
-  //Helper method
-  static vtkFieldData* createFieldDataWithCharArray(std::string testData, std::string id)
-  {
-    vtkFieldData* fieldData = vtkFieldData::New();
+  // Helper method
+  static vtkFieldData *createFieldDataWithCharArray(std::string testData,
+                                                    std::string id) {
+    vtkFieldData *fieldData = vtkFieldData::New();
     auto charArray = vtkSmartPointer<vtkCharArray>::New();
     charArray->SetName(id.c_str());
     charArray->Allocate(100);
-    for(unsigned int i = 0; i < testData.size(); i++)
-    {
+    for (unsigned int i = 0; i < testData.size(); i++) {
       char cNextVal = testData.at(i);
-      if(int(cNextVal) > 1)
-      {
+      if (int(cNextVal) > 1) {
         charArray->InsertNextValue(cNextVal);
-
       }
     }
     fieldData->AddArray(charArray.GetPointer());
@@ -35,9 +30,7 @@ private:
   }
 
 public:
-
-  void testExecute()
-  {
+  void testExecute() {
     const std::string id = "1";
     const std::string testData = "abc";
     vtkSmartPointer<vtkFieldData> fieldData =
@@ -46,40 +39,39 @@ public:
     FieldDataToMetadata function;
     std::string metadata = function.execute(fieldData, id);
 
-    TSM_ASSERT_EQUALS("The Function failed to properly convert field data to metadata", testData, metadata);
+    TSM_ASSERT_EQUALS(
+        "The Function failed to properly convert field data to metadata",
+        testData, metadata);
   }
 
-  void testOperatorOverload()
-  {
+  void testOperatorOverload() {
     const std::string id = "1";
     const std::string testData = "abc";
     vtkSmartPointer<vtkFieldData> fieldData =
         createFieldDataWithCharArray(testData, id);
 
     FieldDataToMetadata function;
-    TSM_ASSERT_EQUALS("Results from two equivalent methods differ.", function(fieldData, id), function.execute(fieldData, id));
+    TSM_ASSERT_EQUALS("Results from two equivalent methods differ.",
+                      function(fieldData, id), function.execute(fieldData, id));
   }
 
-  void testThrowsIfNotFound()
-  {
+  void testThrowsIfNotFound() {
     const std::string id = "1";
     const std::string testData = "abc";
     vtkSmartPointer<vtkFieldData> fieldData =
         createFieldDataWithCharArray(testData, id);
 
     FieldDataToMetadata function;
-    TSM_ASSERT_THROWS("Unknown id requested. Should have thrown.", function.execute(fieldData, "x"), std::runtime_error );
+    TSM_ASSERT_THROWS("Unknown id requested. Should have thrown.",
+                      function.execute(fieldData, "x"), std::runtime_error);
   }
 
-  void testThrowsIfNullFieldData()
-  {
-    vtkFieldData* nullFieldData = NULL;
+  void testThrowsIfNullFieldData() {
+    vtkFieldData *nullFieldData = NULL;
     FieldDataToMetadata function;
-    TSM_ASSERT_THROWS("Should not be able to execute with null field data.", function.execute(nullFieldData, "x"), std::runtime_error );
+    TSM_ASSERT_THROWS("Should not be able to execute with null field data.",
+                      function.execute(nullFieldData, "x"), std::runtime_error);
   }
-
-
 };
-
 
 #endif

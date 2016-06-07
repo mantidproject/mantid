@@ -1116,21 +1116,24 @@ void MultiLayer::wheelEvent(QWheelEvent *e) {
       }
     }
   }
-  if (resize &&
-      (e->modifiers() & Qt::AltModifier || e->modifiers() & Qt::ControlModifier ||
-       e->modifiers() & Qt::ShiftModifier)) {
+  if (resize && (e->modifiers() & Qt::AltModifier ||
+                 e->modifiers() & Qt::ControlModifier ||
+                 e->modifiers() & Qt::ShiftModifier)) {
     intSize = resize_graph->plotWidget()->size();
-    if (e->modifiers() & Qt::AltModifier) { // If alt is pressed then change the width
+    if (e->modifiers() &
+        Qt::AltModifier) { // If alt is pressed then change the width
       if (e->delta() > 0)
         intSize.rwidth() += 5;
       else if (e->delta() < 0)
         intSize.rwidth() -= 5;
-    } else if (e->modifiers() & Qt::ControlModifier) { // If crt is pressed then changed the height
+    } else if (e->modifiers() & Qt::ControlModifier) { // If crt is pressed then
+                                                       // changed the height
       if (e->delta() > 0)
         intSize.rheight() += 5;
       else if (e->delta() < 0)
         intSize.rheight() -= 5;
-    } else if (e->modifiers() & Qt::ShiftModifier) { // If shift is pressed then resize
+    } else if (e->modifiers() &
+               Qt::ShiftModifier) { // If shift is pressed then resize
       if (e->delta() > 0) {
         intSize.rwidth() += 5;
         intSize.rheight() += 5;
@@ -1744,22 +1747,19 @@ void MultiLayer::loadFromProject(const std::string &lines,
     setMargins(left, right, top, bottom);
   }
 
-  if(tsv.selectLine("Spacing"))
-  {
+  if (tsv.selectLine("Spacing")) {
     int rowSpace = 0, colSpace = 0;
     tsv >> rowSpace >> colSpace;
     setSpacing(rowSpace, colSpace);
   }
 
-  if(tsv.selectLine("LayerCanvasSize"))
-  {
+  if (tsv.selectLine("LayerCanvasSize")) {
     int width = 0, height = 0;
     tsv >> width >> height;
     setLayerCanvasSize(width, height);
   }
 
-  if(tsv.selectLine("Alignement"))
-  {
+  if (tsv.selectLine("Alignement")) {
     int hor = 0, vert = 0;
     tsv >> hor >> vert;
     setAlignement(hor, vert);
@@ -1781,8 +1781,7 @@ void MultiLayer::loadFromProject(const std::string &lines,
 
       TSVSerialiser gtsv(graphLines);
 
-      if(gtsv.selectLine("ggeometry"))
-      {
+      if (gtsv.selectLine("ggeometry")) {
         int x = 0, y = 0, w = 0, h = 0;
         gtsv >> x >> y >> w >> h;
 

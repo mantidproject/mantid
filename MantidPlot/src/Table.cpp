@@ -472,9 +472,9 @@ void Table::setCommands(const QString &com) {
 
 bool Table::calculate() {
   bool success = true;
-  for (int col=leftSelectedColumn(); col<=rightSelectedColumn(); col++)
-   if (!calculate(col, topSelectedRow(), bottomSelectedRow()))
-     success = false;
+  for (int col = leftSelectedColumn(); col <= rightSelectedColumn(); col++)
+    if (!calculate(col, topSelectedRow(), bottomSelectedRow()))
+      success = false;
   return success;
 }
 
@@ -753,9 +753,9 @@ void Table::setColName(int col, const QString &text, bool enumerateRight) {
       newLabel += QString::number(n);
 
     if (col_label.contains(newLabel) > 0) {
-      auto msg = "There is already a column called : <b>" +
-        newLabel + "</b> in table <b>" + caption +
-        "</b>!<p>Please choose another name!";
+      auto msg = "There is already a column called : <b>" + newLabel +
+                 "</b> in table <b>" + caption +
+                 "</b>!<p>Please choose another name!";
       QMessageBox::critical(0, tr("MantidPlot - Error"),
                             tr(msg.toAscii().constData()));
       return;
@@ -1603,8 +1603,7 @@ void Table::setText(int row, int col, const QString &text) {
   d_table->setText(row, col, text);
 }
 
-void Table::saveToMemory()
-{
+void Table::saveToMemory() {
   // clear d_saved_cells, if any
   freeMemory();
   d_saved_cells = new double *[d_table->columnCount()];
@@ -2233,7 +2232,7 @@ void Table::importASCII(const QString &fname, const QString &sep,
       }
 
       if (importComments) { // import comments
-        s = t.readLine(); // read 2nd line
+        s = t.readLine();   // read 2nd line
         if (simplifySpaces)
           s = s.simplified();
         else if (stripSpaces)
@@ -2320,8 +2319,8 @@ bool Table::exportASCII(const QString &fname, const QString &separator,
   if (!f.open(QIODevice::WriteOnly)) {
     QApplication::restoreOverrideCursor();
     auto msg = "Could not write to file: <br><h4>" + fname +
-      "</h4><p>Please verify that you have the right to "
-      "write to this location!";
+               "</h4><p>Please verify that you have the right to "
+               "write to this location!";
     QMessageBox::critical(0, tr("MantidPlot - ASCII Export Error"),
                           tr(msg.toAscii().constData()).arg(fname));
     return false;
@@ -2499,7 +2498,7 @@ void Table::restore(QString &spec) {
       d_table->setText(i, j, "");
   }
 
-  t.readLine(); // table geometry useless info when restoring
+  t.readLine();     // table geometry useless info when restoring
   s = t.readLine(); // header line
 
   list = s.split("\t");

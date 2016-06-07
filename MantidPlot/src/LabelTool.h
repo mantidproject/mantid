@@ -10,7 +10,7 @@
 #include "PlotCurve.h"
 #include "PlotToolInterface.h"
 
-#include "Mantid/MantidMatrixCurve.h" 
+#include "Mantid/MantidMatrixCurve.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidQtAPI/MantidQwtWorkspaceData.h"
 #include "MantidKernel/TimeSeriesProperty.h"
@@ -42,32 +42,34 @@ class QwtPlot;
 class QAction;
 class QMenu;
 
-/// Labelling tool for graphs, which can also read points on a graph, as well as the axis.
-class LabelTool : public QObject, public QVector<QPoint>, public PlotToolInterface
-{
+/// Labelling tool for graphs, which can also read points on a graph, as well as
+/// the axis.
+class LabelTool : public QObject,
+                  public QVector<QPoint>,
+                  public PlotToolInterface {
   Q_OBJECT
 public:
   explicit LabelTool(Graph *graph);
   ~LabelTool() override;
   int rtti() const override { return PlotToolInterface::Rtti_LabelTool; };
 
- void removeTextBox();
+  void removeTextBox();
 
 protected:
-
 private:
   QwtPicker *m_canvasPicker;
   QwtPicker *m_xAxisPicker;
   QwtPicker *m_yAxisPicker;
-  
+
   QSet<QString> workspaceNames();
   // Future idea to display in the drop-down menu: QString workspaceTitle();
-  // Future idea to display in the drop-down menu: QString workspaceInstrument();
+  // Future idea to display in the drop-down menu: QString
+  // workspaceInstrument();
   QSet<QString> logValues();
-  
+
   void populateMantidCurves();
   void blankRegionClicked();
-  void dataPointClicked(); 
+  void dataPointClicked();
 
   /// Member variables relating to the point where the canvas is clicked.
   double m_xPos;
@@ -92,13 +94,12 @@ private slots:
   void xAxisClicked(const QwtPolygon &);
   void yAxisClicked(const QwtPolygon &);
 
-	void insertLegend();
-	void insertTextBox();
+  void insertLegend();
+  void insertTextBox();
   void insertXCoord();
   void insertYCoord();
   void insertDataCoord();
   void insertErrorValue();
 };
-
 
 #endif // ifndef LABEL_TOOL_H

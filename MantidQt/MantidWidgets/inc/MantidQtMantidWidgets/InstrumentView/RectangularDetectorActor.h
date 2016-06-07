@@ -15,7 +15,8 @@
 
   This class is used to render a RectangularDetector as a bitmap and plot it.
 
-  Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+  Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+  National Laboratory & European Spallation Source
 
   This file is part of Mantid.
 
@@ -34,88 +35,80 @@
 
   File change history is stored at: <https://github.com/mantidproject/mantid>
 */
-namespace Mantid
-{
-namespace Kernel
-{
-  class V3D;
+namespace Mantid {
+namespace Kernel {
+class V3D;
 }
-namespace Geometry
-{
-  class ICompAssembly;
-  class Object;
+namespace Geometry {
+class ICompAssembly;
+class Object;
+}
 }
 
-}
+namespace MantidQt {
+namespace MantidWidgets {
+class ObjComponentActor;
 
-namespace MantidQt
-{
-	namespace MantidWidgets
-	{
-		class ObjComponentActor;
+class RectangularDetectorActor : public ICompAssemblyActor {
+public:
+  /// Constructor
+  RectangularDetectorActor(const InstrumentActor &instrActor,
+                           const Mantid::Geometry::ComponentID &compID);
+  /// Destructor
+  ~RectangularDetectorActor() override;
 
-		class RectangularDetectorActor : public ICompAssemblyActor
-		{
-		public:
-			/// Constructor
-			RectangularDetectorActor(const InstrumentActor& instrActor, const Mantid::Geometry::ComponentID& compID);
-			/// Destructor
-                        ~RectangularDetectorActor() override;
+private:
+  void AppendBoundingBox(const Mantid::Kernel::V3D &minBound,
+                         const Mantid::Kernel::V3D &maxBound);
 
-                private:
-			void AppendBoundingBox(const Mantid::Kernel::V3D& minBound, const Mantid::Kernel::V3D& maxBound);
+protected:
+  /// The rectangular detector
+  boost::shared_ptr<const Mantid::Geometry::RectangularDetector> mDet;
 
-		protected:
-			/// The rectangular detector
-			boost::shared_ptr<const Mantid::Geometry::RectangularDetector> mDet;
+  void init() const;
+  void redraw();
+  int findDetectorIDUsingColor(int rgb);
+  virtual void initChilds(bool) {}
 
-			void init()const;
-			void redraw();
-			int findDetectorIDUsingColor(int rgb);
-			virtual void initChilds(bool) {}
+public:
+  std::string type() const override {
+    return "RectangularDetectorActor";
+  } ///< Type of the GL object
 
-		public:
-                  std::string type() const override {
-                    return "RectangularDetectorActor";
-                  } ///< Type of the GL object
+  void draw(bool picking = false) const override; ///< Method that
+  /// defines
+  /// ObjComponent
+  /// geometry. Calls
+  /// ObjComponent
+  /// draw method
+  void getBoundingBox(Mantid::Kernel::V3D &minBound,
+                      Mantid::Kernel::V3D &maxBound) const override;
+  bool accept(GLActorVisitor &visitor,
+              VisitorAcceptRule rule = VisitAll) override;
+  bool accept(GLActorConstVisitor &visitor,
+              VisitorAcceptRule rule = VisitAll) const override;
+  bool isChildDetector(const Mantid::Geometry::ComponentID &id) const;
+  void setColors() override;
 
-                  void
-                  draw(bool picking = false) const override; ///< Method that
-                                                             ///defines
-                                                             ///ObjComponent
-                                                             ///geometry. Calls
-                                                             ///ObjComponent
-                                                             ///draw method
-                  void
-                  getBoundingBox(Mantid::Kernel::V3D &minBound,
-                                 Mantid::Kernel::V3D &maxBound) const override;
-                  bool accept(GLActorVisitor &visitor,
-                              VisitorAcceptRule rule = VisitAll) override;
-                  bool accept(GLActorConstVisitor &visitor,
-                              VisitorAcceptRule rule = VisitAll) const override;
-                        bool isChildDetector(const Mantid::Geometry::ComponentID& id) const;
-                        void setColors() override;
+  int genTexture(char *&image_data, std::vector<GLColor> &list,
+                 bool useDetectorIDs);
+  void uploadTexture(char *&image_data) const;
 
-                        int genTexture(char * & image_data, std::vector<GLColor>& list, bool useDetectorIDs);
-			void uploadTexture(char * & image_data)const;
+private:
+  /// Texture ID that holds the texture.
+  mutable unsigned int mTextureID;
 
-		private:
-			/// Texture ID that holds the texture.
-			mutable unsigned int mTextureID;
+  /// Pointer to the array holding the texture color data
+  mutable char *image_data;
 
-			/// Pointer to the array holding the texture color data
-			mutable char * image_data;
+  /// Pointer to the array holding the color data for picking the scene
+  mutable char *pick_data;
 
-			/// Pointer to the array holding the color data for picking the scene
-			mutable char * pick_data;
+  /// pick ids
+  std::vector<size_t> m_pickIDs;
+};
 
-			/// pick ids
-			std::vector<size_t> m_pickIDs;
-		};
-
-	}//MantidWidgets
-}//MantidQt
-
+} // MantidWidgets
+} // MantidQt
 
 #endif /*RECTANGULAR_DETECTOR_ACTOR__H_*/
-
