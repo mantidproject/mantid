@@ -52,8 +52,6 @@ RefinedRange::RefinedRange(double xStart, double xEnd,
   setRangeBorders(xStart, xEnd);
 }
 
-RefinedRange::RefinedRange(const RefinedRange &other) = default;
-
 double RefinedRange::getWidth() const { return m_width; }
 
 bool RefinedRange::operator<(const RefinedRange &other) const {

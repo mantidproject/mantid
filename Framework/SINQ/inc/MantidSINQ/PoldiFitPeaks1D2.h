@@ -19,8 +19,6 @@ public:
   RefinedRange(const PoldiPeak_sptr &peak, double fwhmMultiples);
   RefinedRange(double xStart, double xEnd,
                const std::vector<PoldiPeak_sptr> &peaks);
-  RefinedRange(const RefinedRange &other);
-
   double getWidth() const;
 
   bool operator<(const RefinedRange &other) const;
