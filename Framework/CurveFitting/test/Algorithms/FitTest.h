@@ -725,8 +725,9 @@ public:
          0.41148132, 0.38092026, 0.35384241, 0.32968143, 0.30799199,
          0.28841799, 0.27067057, 0.25451242, 0.2397465,  0.22620756};
 
-    std::transform(y.begin(), y.end(), e.begin(),
-                   std::bind(std::multiplies<double>(), 0.1));
+    std::transform(
+        y.begin(), y.end(), e.begin(),
+        std::bind(std::multiplies<double>(), std::placeholders::_1, 0.1));
   }
 
   void test_function_StretchExp_Against_MockData() {
