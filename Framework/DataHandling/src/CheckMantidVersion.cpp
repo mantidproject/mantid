@@ -30,7 +30,7 @@ CheckMantidVersion::CheckMantidVersion() {}
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-CheckMantidVersion::~CheckMantidVersion() {}
+CheckMantidVersion::~CheckMantidVersion() = default;
 
 //----------------------------------------------------------------------------------------------
 

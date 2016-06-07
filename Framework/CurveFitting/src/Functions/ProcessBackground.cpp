@@ -47,7 +47,7 @@ ProcessBackground::ProcessBackground()
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-ProcessBackground::~ProcessBackground() {}
+ProcessBackground::~ProcessBackground() = default;
 
 //----------------------------------------------------------------------------------------------
 /** Define parameters
@@ -924,7 +924,7 @@ RemovePeaks::RemovePeaks() {}
 //----------------------------------------------------------------------------------------------
 /** Destructor
   */
-RemovePeaks::~RemovePeaks() {}
+RemovePeaks::~RemovePeaks() = default;
 
 //----------------------------------------------------------------------------------------------
 /** Set up: parse peak workspace to vectors

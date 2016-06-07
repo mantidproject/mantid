@@ -58,7 +58,7 @@ GSLMatrix::GSLMatrix(std::vector<double> &&data, size_t nx, size_t ny)
       m_view(gsl_matrix_view_array(m_data.data(), nx, ny)) {}
 
 /// Destructor.
-GSLMatrix::~GSLMatrix() {}
+GSLMatrix::~GSLMatrix() = default;
 
 /// Copy assignment operator
 GSLMatrix &GSLMatrix::operator=(const GSLMatrix &M) {

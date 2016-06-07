@@ -34,7 +34,7 @@ LoadILLIndirect::LoadILLIndirect()
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-LoadILLIndirect::~LoadILLIndirect() {}
+LoadILLIndirect::~LoadILLIndirect() = default;
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name

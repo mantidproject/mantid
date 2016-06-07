@@ -47,7 +47,7 @@ LoadFullprofResolution::LoadFullprofResolution() {}
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-LoadFullprofResolution::~LoadFullprofResolution() {}
+LoadFullprofResolution::~LoadFullprofResolution() = default;
 
 //----------------------------------------------------------------------------------------------
 /** Implement abstract Algorithm methods

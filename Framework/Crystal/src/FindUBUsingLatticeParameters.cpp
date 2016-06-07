@@ -22,7 +22,7 @@ FindUBUsingLatticeParameters::FindUBUsingLatticeParameters() {}
 //--------------------------------------------------------------------------
 /** Destructor
  */
-FindUBUsingLatticeParameters::~FindUBUsingLatticeParameters() {}
+FindUBUsingLatticeParameters::~FindUBUsingLatticeParameters() = default;
 
 //--------------------------------------------------------------------------
 /** Initialize the algorithm's properties.

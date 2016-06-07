@@ -23,7 +23,7 @@ ShowPossibleCells::ShowPossibleCells() {}
 //--------------------------------------------------------------------------
 /** Destructor
  */
-ShowPossibleCells::~ShowPossibleCells() {}
+ShowPossibleCells::~ShowPossibleCells() = default;
 
 //--------------------------------------------------------------------------
 /** Initialize the algorithm's properties.

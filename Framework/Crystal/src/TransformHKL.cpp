@@ -25,7 +25,7 @@ TransformHKL::TransformHKL() {}
 //--------------------------------------------------------------------------
 /** Destructor
  */
-TransformHKL::~TransformHKL() {}
+TransformHKL::~TransformHKL() = default;
 
 const std::string TransformHKL::name() const { return "TransformHKL"; }
 

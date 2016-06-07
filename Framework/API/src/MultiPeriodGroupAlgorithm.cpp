@@ -15,7 +15,7 @@ MultiPeriodGroupAlgorithm::MultiPeriodGroupAlgorithm()
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-MultiPeriodGroupAlgorithm::~MultiPeriodGroupAlgorithm() {}
+MultiPeriodGroupAlgorithm::~MultiPeriodGroupAlgorithm() = default;
 
 /** Check the input workspace properties for groups.
  *

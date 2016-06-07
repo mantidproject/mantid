@@ -69,7 +69,7 @@ IndexCandidatePair::IndexCandidatePair(const PoldiPeak_sptr &measuredPeak,
 PoldiIndexKnownCompounds::PoldiIndexKnownCompounds() {}
 
 /// Destructor
-PoldiIndexKnownCompounds::~PoldiIndexKnownCompounds() {}
+PoldiIndexKnownCompounds::~PoldiIndexKnownCompounds() = default;
 
 /// Returns the algorithm name
 const std::string PoldiIndexKnownCompounds::name() const {

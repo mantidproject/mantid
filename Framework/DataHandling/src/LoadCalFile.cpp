@@ -29,7 +29,7 @@ LoadCalFile::LoadCalFile() {}
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-LoadCalFile::~LoadCalFile() {}
+LoadCalFile::~LoadCalFile() = default;
 
 //----------------------------------------------------------------------------------------------
 /** For use by getInstrument3Ways, initializes the properties

@@ -22,7 +22,7 @@ FindUBUsingFFT::FindUBUsingFFT() {}
 //--------------------------------------------------------------------------
 /** Destructor
  */
-FindUBUsingFFT::~FindUBUsingFFT() {}
+FindUBUsingFFT::~FindUBUsingFFT() = default;
 
 const std::string FindUBUsingFFT::name() const { return "FindUBUsingFFT"; }
 

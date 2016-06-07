@@ -26,7 +26,7 @@ PeakIntensityVsRadius::PeakIntensityVsRadius() {}
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-PeakIntensityVsRadius::~PeakIntensityVsRadius() {}
+PeakIntensityVsRadius::~PeakIntensityVsRadius() = default;
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name

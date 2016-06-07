@@ -40,7 +40,7 @@ Progress::Progress(Algorithm *alg, double start, double end, size_t numSteps)
     : ProgressBase(start, end, int64_t(numSteps)), m_alg(alg) {}
 
 /** Destructor */
-Progress::~Progress() {}
+Progress::~Progress() = default;
 
 /** Actually do the reporting, without changing the loop counter.
  * This is called by report(), and can be called directly in

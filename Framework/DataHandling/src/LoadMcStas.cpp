@@ -34,7 +34,7 @@ LoadMcStas::LoadMcStas() : m_countNumWorkspaceAdded(1) {}
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-LoadMcStas::~LoadMcStas() {}
+LoadMcStas::~LoadMcStas() = default;
 
 //----------------------------------------------------------------------------------------------
 // Algorithm's name for identification. @see Algorithm::name

@@ -29,7 +29,7 @@ using namespace DataObjects;
 PeakIntegration::PeakIntegration() : API::Algorithm(), m_IC(false) {}
 
 /// Destructor
-PeakIntegration::~PeakIntegration() {}
+PeakIntegration::~PeakIntegration() = default;
 
 /** Initialisation method. Declares properties to be used in algorithm.
  *

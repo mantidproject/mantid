@@ -42,7 +42,7 @@ LoadPreNexus::LoadPreNexus() {}
 
 //----------------------------------------------------------------------------------------------
 /// Destructor
-LoadPreNexus::~LoadPreNexus() {}
+LoadPreNexus::~LoadPreNexus() = default;
 
 //----------------------------------------------------------------------------------------------
 /// @copydoc Mantid::API::IAlgorithm::name()

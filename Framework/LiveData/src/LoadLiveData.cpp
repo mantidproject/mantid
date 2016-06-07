@@ -30,7 +30,7 @@ LoadLiveData::LoadLiveData() : LiveDataAlgorithm() {}
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-LoadLiveData::~LoadLiveData() {}
+LoadLiveData::~LoadLiveData() = default;
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name

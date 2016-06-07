@@ -24,7 +24,7 @@ SelectCellOfType::SelectCellOfType() {}
 //--------------------------------------------------------------------------
 /** Destructor
  */
-SelectCellOfType::~SelectCellOfType() {}
+SelectCellOfType::~SelectCellOfType() = default;
 
 //--------------------------------------------------------------------------
 /** Initialize the algorithm's properties.

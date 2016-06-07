@@ -32,7 +32,7 @@ SaveParameterFile::SaveParameterFile() {}
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-SaveParameterFile::~SaveParameterFile() {}
+SaveParameterFile::~SaveParameterFile() = default;
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name

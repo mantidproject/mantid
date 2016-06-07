@@ -44,7 +44,7 @@ AlgorithmProperty &AlgorithmProperty::operator=(const AlgorithmProperty &rhs) {
 /**
  * Destructor
  */
-AlgorithmProperty::~AlgorithmProperty() {}
+AlgorithmProperty::~AlgorithmProperty() = default;
 
 /**
  * Return the algorithm as string

@@ -26,7 +26,7 @@ ProcessDasNexusLog::ProcessDasNexusLog() : Algorithm(), DeprecatedAlgorithm() {}
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-ProcessDasNexusLog::~ProcessDasNexusLog() {}
+ProcessDasNexusLog::~ProcessDasNexusLog() = default;
 
 void ProcessDasNexusLog::init() {
   this->declareProperty(

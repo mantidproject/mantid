@@ -30,7 +30,7 @@ MaskPeaksWorkspace::MaskPeaksWorkspace()
       m_tofMax(0) {}
 
 /// Destructor
-MaskPeaksWorkspace::~MaskPeaksWorkspace() {}
+MaskPeaksWorkspace::~MaskPeaksWorkspace() = default;
 
 /** Initialisation method. Declares properties to be used in algorithm.
  *

@@ -25,7 +25,7 @@ namespace DataHandling {
 DECLARE_ALGORITHM(SetSampleMaterial)
 
 SetSampleMaterial::SetSampleMaterial() : Mantid::API::Algorithm() {}
-SetSampleMaterial::~SetSampleMaterial() {}
+SetSampleMaterial::~SetSampleMaterial() = default;
 const std::string SetSampleMaterial::name() const {
   return "SetSampleMaterial";
 }

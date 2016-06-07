@@ -37,7 +37,7 @@ SCDCalibratePanels::SCDCalibratePanels() : API::Algorithm() {
   // g_log.setLevel(7);
 }
 
-SCDCalibratePanels::~SCDCalibratePanels() {}
+SCDCalibratePanels::~SCDCalibratePanels() = default;
 
 const std::string SCDCalibratePanels::name() const {
   return "SCDCalibratePanels";

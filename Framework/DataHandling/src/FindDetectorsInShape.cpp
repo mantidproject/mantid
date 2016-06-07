@@ -28,7 +28,7 @@ using namespace Geometry;
 FindDetectorsInShape::FindDetectorsInShape() {}
 
 /// Destructor
-FindDetectorsInShape::~FindDetectorsInShape() {}
+FindDetectorsInShape::~FindDetectorsInShape() = default;
 
 void FindDetectorsInShape::init() {
   declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(

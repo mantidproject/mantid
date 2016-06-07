@@ -69,7 +69,7 @@ private:
 };
 
 OptimizeCrystalPlacement::OptimizeCrystalPlacement() : Algorithm() {}
-OptimizeCrystalPlacement::~OptimizeCrystalPlacement() {}
+OptimizeCrystalPlacement::~OptimizeCrystalPlacement() = default;
 
 void OptimizeCrystalPlacement::init() {
   declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(

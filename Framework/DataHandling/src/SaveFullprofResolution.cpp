@@ -32,7 +32,7 @@ SaveFullprofResolution::SaveFullprofResolution()
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-SaveFullprofResolution::~SaveFullprofResolution() {}
+SaveFullprofResolution::~SaveFullprofResolution() = default;
 
 //----------------------------------------------------------------------------------------------
 /** Init to define parameters

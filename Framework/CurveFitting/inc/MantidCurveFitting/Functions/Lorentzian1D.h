@@ -53,8 +53,6 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class DLLExport Lorentzian1D : public Algorithms::Fit1D {
 public:
-  /// Destructor
-  ~Lorentzian1D() override{};
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "Lorentzian1D"; }
   /// Summary of algorithms purpose

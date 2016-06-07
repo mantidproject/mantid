@@ -52,9 +52,7 @@ RefinedRange::RefinedRange(double xStart, double xEnd,
   setRangeBorders(xStart, xEnd);
 }
 
-RefinedRange::RefinedRange(const RefinedRange &other)
-    : m_peaks(other.m_peaks), m_xStart(other.m_xStart), m_xEnd(other.m_xEnd),
-      m_width(other.m_width) {}
+RefinedRange::RefinedRange(const RefinedRange &other) = default;
 
 double RefinedRange::getWidth() const { return m_width; }
 
@@ -120,7 +118,7 @@ PoldiFitPeaks1D2::PoldiFitPeaks1D2()
     : m_peaks(), m_profileTemplate(), m_fitplots(new WorkspaceGroup),
       m_fwhmMultiples(1.0), m_maxRelativeFwhm(0.02) {}
 
-PoldiFitPeaks1D2::~PoldiFitPeaks1D2() {}
+PoldiFitPeaks1D2::~PoldiFitPeaks1D2() = default;
 
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string PoldiFitPeaks1D2::name() const { return "PoldiFitPeaks1D"; }

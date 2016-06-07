@@ -21,7 +21,7 @@ CombinePeaksWorkspaces::CombinePeaksWorkspaces() {}
 
 /** Destructor
  */
-CombinePeaksWorkspaces::~CombinePeaksWorkspaces() {}
+CombinePeaksWorkspaces::~CombinePeaksWorkspaces() = default;
 
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string CombinePeaksWorkspaces::name() const {

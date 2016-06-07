@@ -24,7 +24,7 @@ using namespace API;
 SaveRKH::SaveRKH() : API::Algorithm(), m_workspace(), m_2d(false), m_outRKH() {}
 
 /// Virtual destructor
-SaveRKH::~SaveRKH() {}
+SaveRKH::~SaveRKH() = default;
 
 //---------------------------------------------------
 // Private member functions

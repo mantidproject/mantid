@@ -40,7 +40,7 @@ LoadDetectorsGroupingFile::LoadDetectorsGroupingFile()
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-LoadDetectorsGroupingFile::~LoadDetectorsGroupingFile() {}
+LoadDetectorsGroupingFile::~LoadDetectorsGroupingFile() = default;
 
 void LoadDetectorsGroupingFile::init() {
   /// Initialise the properties

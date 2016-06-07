@@ -54,7 +54,7 @@ CreateChunkingFromInstrument::CreateChunkingFromInstrument() {}
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-CreateChunkingFromInstrument::~CreateChunkingFromInstrument() {}
+CreateChunkingFromInstrument::~CreateChunkingFromInstrument() = default;
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name

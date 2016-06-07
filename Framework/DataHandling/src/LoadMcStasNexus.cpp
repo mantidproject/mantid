@@ -26,7 +26,7 @@ LoadMcStasNexus::LoadMcStasNexus() {}
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-LoadMcStasNexus::~LoadMcStasNexus() {}
+LoadMcStasNexus::~LoadMcStasNexus() = default;
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name

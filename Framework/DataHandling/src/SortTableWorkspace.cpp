@@ -19,7 +19,7 @@ SortTableWorkspace::SortTableWorkspace() {}
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-SortTableWorkspace::~SortTableWorkspace() {}
+SortTableWorkspace::~SortTableWorkspace() = default;
 
 //----------------------------------------------------------------------------------------------
 

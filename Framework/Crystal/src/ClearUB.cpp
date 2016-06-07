@@ -19,7 +19,7 @@ ClearUB::ClearUB() {}
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-ClearUB::~ClearUB() {}
+ClearUB::~ClearUB() = default;
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name

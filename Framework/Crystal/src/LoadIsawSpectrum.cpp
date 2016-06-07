@@ -32,7 +32,7 @@ LoadIsawSpectrum::LoadIsawSpectrum() {}
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-LoadIsawSpectrum::~LoadIsawSpectrum() {}
+LoadIsawSpectrum::~LoadIsawSpectrum() = default;
 
 //----------------------------------------------------------------------------------------------
 

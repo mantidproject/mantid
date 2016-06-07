@@ -34,7 +34,7 @@ IntegratePeaksUsingClusters::IntegratePeaksUsingClusters() {}
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-IntegratePeaksUsingClusters::~IntegratePeaksUsingClusters() {}
+IntegratePeaksUsingClusters::~IntegratePeaksUsingClusters() = default;
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name

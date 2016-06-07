@@ -25,7 +25,7 @@ FindUBUsingMinMaxD::FindUBUsingMinMaxD() {
 //--------------------------------------------------------------------------
 /** Destructor
  */
-FindUBUsingMinMaxD::~FindUBUsingMinMaxD() {}
+FindUBUsingMinMaxD::~FindUBUsingMinMaxD() = default;
 
 const std::string FindUBUsingMinMaxD::name() const {
   return "FindUBUsingMinMaxD";

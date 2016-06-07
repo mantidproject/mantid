@@ -25,7 +25,7 @@ AlgorithmFactoryImpl::AlgorithmFactoryImpl()
   g_log.debug() << "Algorithm Factory created." << std::endl;
 }
 
-AlgorithmFactoryImpl::~AlgorithmFactoryImpl() {}
+AlgorithmFactoryImpl::~AlgorithmFactoryImpl() = default;
 
 /** Creates an instance of an algorithm
 * @param name :: the name of the Algrorithm to create

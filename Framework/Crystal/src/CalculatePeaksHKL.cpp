@@ -22,7 +22,7 @@ CalculatePeaksHKL::CalculatePeaksHKL() {}
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-CalculatePeaksHKL::~CalculatePeaksHKL() {}
+CalculatePeaksHKL::~CalculatePeaksHKL() = default;
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name

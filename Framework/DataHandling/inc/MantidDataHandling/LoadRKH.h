@@ -49,8 +49,6 @@ class DLLExport LoadRKH : public API::IFileLoader<Kernel::FileDescriptor> {
 public:
   /// Constructor
   LoadRKH() : m_unitKeys(), m_RKHKeys() {}
-  /// Virtual destructor
-  ~LoadRKH() override {}
   /// Algorithm's name
   const std::string name() const override { return "LoadRKH"; }
   /// Summary of algorithms purpose

@@ -19,7 +19,7 @@ SortPeaksWorkspace::SortPeaksWorkspace() {}
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-SortPeaksWorkspace::~SortPeaksWorkspace() {}
+SortPeaksWorkspace::~SortPeaksWorkspace() = default;
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name

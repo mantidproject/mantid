@@ -36,7 +36,7 @@ LoadLLB::LoadLLB()
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-LoadLLB::~LoadLLB() {}
+LoadLLB::~LoadLLB() = default;
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name

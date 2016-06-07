@@ -28,7 +28,7 @@ using namespace Mantid::Geometry;
 GoniometerAnglesFromPhiRotation::GoniometerAnglesFromPhiRotation()
     : Algorithm() {}
 
-GoniometerAnglesFromPhiRotation::~GoniometerAnglesFromPhiRotation() {}
+GoniometerAnglesFromPhiRotation::~GoniometerAnglesFromPhiRotation() = default;
 
 void GoniometerAnglesFromPhiRotation::init() {
   declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(

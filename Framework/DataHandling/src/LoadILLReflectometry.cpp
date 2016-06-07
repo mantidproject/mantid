@@ -43,7 +43,7 @@ LoadILLReflectometry::LoadILLReflectometry() {
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-LoadILLReflectometry::~LoadILLReflectometry() {}
+LoadILLReflectometry::~LoadILLReflectometry() = default;
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name

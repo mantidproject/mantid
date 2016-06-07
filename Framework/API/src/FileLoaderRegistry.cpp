@@ -174,7 +174,7 @@ FileLoaderRegistryImpl::FileLoaderRegistryImpl()
 
 /**
  */
-FileLoaderRegistryImpl::~FileLoaderRegistryImpl() {}
+FileLoaderRegistryImpl::~FileLoaderRegistryImpl() = default;
 
 /**
  * @param name A string containing the algorithm name

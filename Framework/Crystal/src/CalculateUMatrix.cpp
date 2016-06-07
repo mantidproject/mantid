@@ -22,7 +22,7 @@ CalculateUMatrix::CalculateUMatrix() {}
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-CalculateUMatrix::~CalculateUMatrix() {}
+CalculateUMatrix::~CalculateUMatrix() = default;
 
 //----------------------------------------------------------------------------------------------
 

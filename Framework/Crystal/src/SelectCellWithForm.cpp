@@ -22,7 +22,7 @@ SelectCellWithForm::SelectCellWithForm() {}
 //--------------------------------------------------------------------------
 /** Destructor
  */
-SelectCellWithForm::~SelectCellWithForm() {}
+SelectCellWithForm::~SelectCellWithForm() = default;
 
 //--------------------------------------------------------------------------
 /** Initialize the algorithm's properties.

@@ -25,7 +25,7 @@ PoldiAnalyseResiduals::PoldiAnalyseResiduals() : Algorithm() {}
 //----------------------------------------------------------------------------------------------
 /** Destructor
    */
-PoldiAnalyseResiduals::~PoldiAnalyseResiduals() {}
+PoldiAnalyseResiduals::~PoldiAnalyseResiduals() = default;
 
 //----------------------------------------------------------------------------------------------
 

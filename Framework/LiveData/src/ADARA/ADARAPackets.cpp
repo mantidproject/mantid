@@ -556,10 +556,6 @@ BeamlineInfoPkt::BeamlineInfoPkt(const uint8_t *data, uint32_t len)
   m_longName.assign(info, longName_len);
 }
 
-BeamlineInfoPkt::BeamlineInfoPkt(const BeamlineInfoPkt &pkt)
-    : Packet(pkt), m_targetStationNumber(pkt.m_targetStationNumber),
-      m_id(pkt.m_id), m_shortName(pkt.m_shortName), m_longName(pkt.m_longName) {
-}
 /* ------------------------------------------------------------------------ */
 
 BeamMonitorConfigPkt::BeamMonitorConfigPkt(const uint8_t *data, uint32_t len)

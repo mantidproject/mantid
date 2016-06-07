@@ -28,7 +28,7 @@ MultiPeriodGroupWorker::MultiPeriodGroupWorker(
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-MultiPeriodGroupWorker::~MultiPeriodGroupWorker() {}
+MultiPeriodGroupWorker::~MultiPeriodGroupWorker() = default;
 
 /**
  * Try to add the input workspace to the multiperiod input group list.

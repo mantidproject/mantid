@@ -45,7 +45,7 @@ SaveDetectorsGrouping::SaveDetectorsGrouping() {}
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-SaveDetectorsGrouping::~SaveDetectorsGrouping() {}
+SaveDetectorsGrouping::~SaveDetectorsGrouping() = default;
 
 /// Define input parameters
 void SaveDetectorsGrouping::init() {

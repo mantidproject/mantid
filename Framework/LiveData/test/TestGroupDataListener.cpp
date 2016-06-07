@@ -23,7 +23,7 @@ TestGroupDataListener::TestGroupDataListener() : ILiveListener(), m_buffer() {
 }
 
 /// Destructor
-TestGroupDataListener::~TestGroupDataListener() {}
+TestGroupDataListener::~TestGroupDataListener() = default;
 
 bool TestGroupDataListener::connect(const Poco::Net::SocketAddress &) {
   // Do nothing.

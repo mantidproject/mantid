@@ -19,7 +19,7 @@ Merge2WorkspaceLogs::Merge2WorkspaceLogs() {}
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-Merge2WorkspaceLogs::~Merge2WorkspaceLogs() {}
+Merge2WorkspaceLogs::~Merge2WorkspaceLogs() = default;
 
 void Merge2WorkspaceLogs::init() {
 

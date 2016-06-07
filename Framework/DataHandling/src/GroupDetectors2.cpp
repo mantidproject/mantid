@@ -29,7 +29,7 @@ using std::size_t;
 GroupDetectors2::GroupDetectors2() : m_FracCompl(0.0) {}
 
 /// Destructor
-GroupDetectors2::~GroupDetectors2() {}
+GroupDetectors2::~GroupDetectors2() = default;
 
 // progress estimates
 const double GroupDetectors2::CHECKBINS = 0.10;

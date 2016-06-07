@@ -253,7 +253,7 @@ FindClusterFaces::FindClusterFaces() {}
 //----------------------------------------------------------------------------------------------
 /** Destructor
 */
-FindClusterFaces::~FindClusterFaces() {}
+FindClusterFaces::~FindClusterFaces() = default;
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name

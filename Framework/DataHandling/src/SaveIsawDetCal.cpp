@@ -29,7 +29,7 @@ SaveIsawDetCal::SaveIsawDetCal() {}
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-SaveIsawDetCal::~SaveIsawDetCal() {}
+SaveIsawDetCal::~SaveIsawDetCal() = default;
 
 //----------------------------------------------------------------------------------------------
 

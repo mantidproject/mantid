@@ -283,7 +283,7 @@ SaveGSASInstrumentFile::SaveGSASInstrumentFile()
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-SaveGSASInstrumentFile::~SaveGSASInstrumentFile() {}
+SaveGSASInstrumentFile::~SaveGSASInstrumentFile() = default;
 
 //----------------------------------------------------------------------------------------------
 

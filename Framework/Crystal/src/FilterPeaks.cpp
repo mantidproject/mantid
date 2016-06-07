@@ -42,7 +42,7 @@ FilterPeaks::FilterPeaks() {}
 
 /** Destructor
  */
-FilterPeaks::~FilterPeaks() {}
+FilterPeaks::~FilterPeaks() = default;
 
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string FilterPeaks::name() const { return "FilterPeaks"; }

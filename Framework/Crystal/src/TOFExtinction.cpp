@@ -28,7 +28,7 @@ TOFExtinction::TOFExtinction() : m_smu(0.), m_amu(0.), m_radius(0.) {}
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-TOFExtinction::~TOFExtinction() {}
+TOFExtinction::~TOFExtinction() = default;
 
 //----------------------------------------------------------------------------------------------
 

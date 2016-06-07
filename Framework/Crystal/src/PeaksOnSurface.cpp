@@ -19,7 +19,7 @@ PeaksOnSurface::PeaksOnSurface() : m_extents(6) {}
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-PeaksOnSurface::~PeaksOnSurface() {}
+PeaksOnSurface::~PeaksOnSurface() = default;
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name

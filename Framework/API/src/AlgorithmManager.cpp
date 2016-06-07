@@ -29,7 +29,7 @@ AlgorithmManagerImpl::AlgorithmManagerImpl() : m_managed_algs() {
 *  Prevents client from calling 'delete' on the pointer handed
 *  out by Instance
 */
-AlgorithmManagerImpl::~AlgorithmManagerImpl() {}
+AlgorithmManagerImpl::~AlgorithmManagerImpl() = default;
 
 /** Creates an instance of an algorithm, but does not own that instance
 *

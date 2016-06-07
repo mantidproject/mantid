@@ -39,7 +39,7 @@ using namespace DataObjects;
 LoadIsawDetCal::LoadIsawDetCal() : API::Algorithm() {}
 
 /// Destructor
-LoadIsawDetCal::~LoadIsawDetCal() {}
+LoadIsawDetCal::~LoadIsawDetCal() = default;
 
 /** Initialisation method
 */

@@ -39,7 +39,7 @@ DECLARE_FILELOADER_ALGORITHM(LoadCanSAS1D)
 LoadCanSAS1D::LoadCanSAS1D() : m_groupNumber(0) {}
 
 /// destructor
-LoadCanSAS1D::~LoadCanSAS1D() {}
+LoadCanSAS1D::~LoadCanSAS1D() = default;
 
 /**
  * Return the confidence with with this algorithm can load the file

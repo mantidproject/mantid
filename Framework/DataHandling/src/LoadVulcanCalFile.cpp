@@ -46,7 +46,7 @@ LoadVulcanCalFile::LoadVulcanCalFile()
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-LoadVulcanCalFile::~LoadVulcanCalFile() {}
+LoadVulcanCalFile::~LoadVulcanCalFile() = default;
 
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.

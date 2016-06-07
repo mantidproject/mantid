@@ -15,7 +15,7 @@ DECLARE_ALGORITHM(LoadNexusMonitors)
 
 LoadNexusMonitors::LoadNexusMonitors() : Algorithm() {}
 
-LoadNexusMonitors::~LoadNexusMonitors() {}
+LoadNexusMonitors::~LoadNexusMonitors() = default;
 
 /// Initialization method.
 void LoadNexusMonitors::init() {

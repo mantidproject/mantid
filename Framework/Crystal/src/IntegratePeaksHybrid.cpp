@@ -89,7 +89,7 @@ IntegratePeaksHybrid::IntegratePeaksHybrid() {}
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-IntegratePeaksHybrid::~IntegratePeaksHybrid() {}
+IntegratePeaksHybrid::~IntegratePeaksHybrid() = default;
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name

@@ -47,7 +47,7 @@ LoadGSASInstrumentFile::LoadGSASInstrumentFile() {}
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-LoadGSASInstrumentFile::~LoadGSASInstrumentFile() {}
+LoadGSASInstrumentFile::~LoadGSASInstrumentFile() = default;
 
 //----------------------------------------------------------------------------------------------
 /** Implement abstract Algorithm methods

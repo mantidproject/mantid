@@ -45,7 +45,7 @@ public:
   /// Virtual destructor
   /// (avoids warnings about non-trivial move assignment in virtually inheriting
   /// classes)
-  ~IFunctionWithLocation() override {}
+  ~IFunctionWithLocation() override = default;
 
   /// Returns the centre of the function, which may be something as simple as
   /// the centre of

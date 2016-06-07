@@ -43,7 +43,7 @@ PoldiFitPeaks2D::PoldiFitPeaks2D()
 
 /** Destructor
  */
-PoldiFitPeaks2D::~PoldiFitPeaks2D() {}
+PoldiFitPeaks2D::~PoldiFitPeaks2D() = default;
 
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string PoldiFitPeaks2D::name() const { return "PoldiFitPeaks2D"; }

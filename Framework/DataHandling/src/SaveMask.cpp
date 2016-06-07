@@ -49,7 +49,7 @@ SaveMask::SaveMask() {}
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-SaveMask::~SaveMask() {}
+SaveMask::~SaveMask() = default;
 
 /// Define input parameters
 void SaveMask::init() {

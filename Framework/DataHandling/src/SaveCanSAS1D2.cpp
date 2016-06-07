@@ -26,7 +26,7 @@ DECLARE_ALGORITHM(SaveCanSAS1D2)
 SaveCanSAS1D2::SaveCanSAS1D2() {}
 
 /// destructor
-SaveCanSAS1D2::~SaveCanSAS1D2() {}
+SaveCanSAS1D2::~SaveCanSAS1D2() = default;
 
 /// Overwrites Algorithm method.
 void SaveCanSAS1D2::init() {

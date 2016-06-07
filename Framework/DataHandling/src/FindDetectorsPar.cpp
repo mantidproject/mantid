@@ -30,7 +30,7 @@ using namespace API;
 FindDetectorsPar::FindDetectorsPar()
     : m_SizesAreLinear(false), m_nDetectors(0) {}
 
-FindDetectorsPar::~FindDetectorsPar() {}
+FindDetectorsPar::~FindDetectorsPar() = default;
 
 void FindDetectorsPar::init() {
   auto wsValidator = boost::make_shared<CompositeValidator>();

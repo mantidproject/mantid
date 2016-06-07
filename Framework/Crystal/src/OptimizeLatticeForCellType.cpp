@@ -28,7 +28,7 @@ using namespace DataObjects;
 OptimizeLatticeForCellType::OptimizeLatticeForCellType() {}
 
 /// Destructor
-OptimizeLatticeForCellType::~OptimizeLatticeForCellType() {}
+OptimizeLatticeForCellType::~OptimizeLatticeForCellType() = default;
 
 //-----------------------------------------------------------------------------------------
 /** Initialisation method. Declares properties to be used in algorithm.

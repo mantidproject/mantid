@@ -111,7 +111,7 @@ public:
 
   /// (Empty) Constructor.
   /// prevent Warning C4436
-  IDetector() {}
+  IDetector() = default;
 };
 
 /// Shared pointer to IDetector

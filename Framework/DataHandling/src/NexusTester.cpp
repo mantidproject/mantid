@@ -26,7 +26,7 @@ NexusTester::NexusTester() {}
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-NexusTester::~NexusTester() {}
+NexusTester::~NexusTester() = default;
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name

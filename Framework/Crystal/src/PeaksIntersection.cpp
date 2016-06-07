@@ -27,7 +27,7 @@ PeaksIntersection::PeaksIntersection() : m_peakRadius(0.) {}
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-PeaksIntersection::~PeaksIntersection() {}
+PeaksIntersection::~PeaksIntersection() = default;
 
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.

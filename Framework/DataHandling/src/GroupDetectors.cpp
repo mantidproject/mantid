@@ -20,7 +20,7 @@ using namespace API;
 GroupDetectors::GroupDetectors() {}
 
 /// Destructor
-GroupDetectors::~GroupDetectors() {}
+GroupDetectors::~GroupDetectors() = default;
 
 void GroupDetectors::init() {
   declareProperty(

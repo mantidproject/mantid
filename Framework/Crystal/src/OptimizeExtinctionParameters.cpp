@@ -29,7 +29,7 @@ OptimizeExtinctionParameters::OptimizeExtinctionParameters() {
 }
 
 /// Destructor
-OptimizeExtinctionParameters::~OptimizeExtinctionParameters() {}
+OptimizeExtinctionParameters::~OptimizeExtinctionParameters() = default;
 
 static double gsl_costFunction(const gsl_vector *v, void *params) {
   std::string *p = reinterpret_cast<std::string *>(params);

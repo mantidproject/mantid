@@ -98,7 +98,7 @@ SCDPanelErrors::SCDPanelErrors()
   SampleOffsets = false;
 }
 
-SCDPanelErrors::~SCDPanelErrors() {}
+SCDPanelErrors::~SCDPanelErrors() = default;
 
 size_t SCDPanelErrors::nAttributes() const { return m_attrNames.size(); }
 

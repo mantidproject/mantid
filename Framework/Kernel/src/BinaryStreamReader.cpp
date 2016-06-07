@@ -102,7 +102,7 @@ BinaryStreamReader::BinaryStreamReader(std::istream &istrm)
  * The stream state is left as it was in the last call to a read operation.
  * It is up to the caller to close it.
  */
-BinaryStreamReader::~BinaryStreamReader() {}
+BinaryStreamReader::~BinaryStreamReader() = default;
 
 /**
  * Read a int32_t from the stream

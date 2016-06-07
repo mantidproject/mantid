@@ -27,7 +27,7 @@ using namespace DataObjects;
 MaskDetectors::MaskDetectors() {}
 
 /// Destructor
-MaskDetectors::~MaskDetectors() {}
+MaskDetectors::~MaskDetectors() = default;
 
 /*
  * Define input arguments

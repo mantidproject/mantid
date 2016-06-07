@@ -72,7 +72,7 @@ LoadNexusMonitors2::LoadNexusMonitors2()
     : Algorithm(), m_monitor_count(0), m_allMonitorsHaveHistoData(false) {}
 
 //------------------------------------------------------------------------------
-LoadNexusMonitors2::~LoadNexusMonitors2() {}
+LoadNexusMonitors2::~LoadNexusMonitors2() = default;
 
 //------------------------------------------------------------------------------
 /// Initialization method.

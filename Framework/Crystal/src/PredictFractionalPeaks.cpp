@@ -24,7 +24,7 @@ namespace Crystal {
 
 DECLARE_ALGORITHM(PredictFractionalPeaks)
 
-PredictFractionalPeaks::~PredictFractionalPeaks() {}
+PredictFractionalPeaks::~PredictFractionalPeaks() = default;
 
 PredictFractionalPeaks::PredictFractionalPeaks() : Algorithm() {}
 

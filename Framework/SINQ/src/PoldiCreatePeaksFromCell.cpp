@@ -29,7 +29,7 @@ PoldiCreatePeaksFromCell::PoldiCreatePeaksFromCell() {}
 //----------------------------------------------------------------------------------------------
 /** Destructor
    */
-PoldiCreatePeaksFromCell::~PoldiCreatePeaksFromCell() {}
+PoldiCreatePeaksFromCell::~PoldiCreatePeaksFromCell() = default;
 
 const std::string PoldiCreatePeaksFromCell::name() const {
   return "PoldiCreatePeaksFromCell";

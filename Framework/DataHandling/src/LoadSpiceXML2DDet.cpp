@@ -48,7 +48,7 @@ SpiceXMLNode::SpiceXMLNode(const std::string &nodename)
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-SpiceXMLNode::~SpiceXMLNode() {}
+SpiceXMLNode::~SpiceXMLNode() = default;
 
 //----------------------------------------------------------------------------------------------
 /** Set node value in string format
@@ -160,7 +160,7 @@ LoadSpiceXML2DDet::LoadSpiceXML2DDet()
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-LoadSpiceXML2DDet::~LoadSpiceXML2DDet() {}
+LoadSpiceXML2DDet::~LoadSpiceXML2DDet() = default;
 
 //----------------------------------------------------------------------------------------------
 const std::string LoadSpiceXML2DDet::name() const {

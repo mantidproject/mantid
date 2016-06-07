@@ -43,8 +43,6 @@ class DLLExport AsciiPointBase : public API::Algorithm {
 public:
   /// Default constructor
   AsciiPointBase() : m_qres(0), m_xlength(0), m_ws() {}
-  /// Destructor
-  ~AsciiPointBase() override {}
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override = 0;
   /// Algorithm's version for identification overriding a virtual method

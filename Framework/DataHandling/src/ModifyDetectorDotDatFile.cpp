@@ -26,7 +26,7 @@ ModifyDetectorDotDatFile::ModifyDetectorDotDatFile() {}
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-ModifyDetectorDotDatFile::~ModifyDetectorDotDatFile() {}
+ModifyDetectorDotDatFile::~ModifyDetectorDotDatFile() = default;
 
 //----------------------------------------------------------------------------------------------
 

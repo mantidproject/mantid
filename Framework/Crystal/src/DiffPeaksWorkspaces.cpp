@@ -20,7 +20,7 @@ DiffPeaksWorkspaces::DiffPeaksWorkspaces() {}
 
 /** Destructor
  */
-DiffPeaksWorkspaces::~DiffPeaksWorkspaces() {}
+DiffPeaksWorkspaces::~DiffPeaksWorkspaces() = default;
 
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string DiffPeaksWorkspaces::name() const {

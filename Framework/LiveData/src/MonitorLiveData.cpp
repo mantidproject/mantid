@@ -25,7 +25,7 @@ MonitorLiveData::MonitorLiveData() : m_chunkNumber(0) {}
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-MonitorLiveData::~MonitorLiveData() {}
+MonitorLiveData::~MonitorLiveData() = default;
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name

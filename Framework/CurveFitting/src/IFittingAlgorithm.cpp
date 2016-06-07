@@ -58,7 +58,7 @@ IFittingAlgorithm::IFittingAlgorithm()
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-IFittingAlgorithm::~IFittingAlgorithm() {}
+IFittingAlgorithm::~IFittingAlgorithm() = default;
 
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string IFittingAlgorithm::category() const { return "Optimization"; }

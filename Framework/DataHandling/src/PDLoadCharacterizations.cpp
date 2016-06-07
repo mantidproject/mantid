@@ -36,7 +36,7 @@ PDLoadCharacterizations::PDLoadCharacterizations() {}
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-PDLoadCharacterizations::~PDLoadCharacterizations() {}
+PDLoadCharacterizations::~PDLoadCharacterizations() = default;
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name

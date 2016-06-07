@@ -27,7 +27,7 @@ LoadRawSpectrum0::LoadRawSpectrum0()
     : isisRaw(), m_filename(), m_numberOfSpectra(0), m_cache_options(),
       m_specTimeRegimes(), m_prog(0.0), m_lengthIn(0), m_noTimeRegimes(0) {}
 
-LoadRawSpectrum0::~LoadRawSpectrum0() {}
+LoadRawSpectrum0::~LoadRawSpectrum0() = default;
 
 /// Initialisation method.
 void LoadRawSpectrum0::init() { LoadRawHelper::init(); }

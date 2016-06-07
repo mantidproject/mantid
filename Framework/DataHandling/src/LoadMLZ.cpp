@@ -47,7 +47,7 @@ LoadMLZ::LoadMLZ()
 //---------------------------------------------------------------------------
 /** Destructor
  */
-LoadMLZ::~LoadMLZ() {}
+LoadMLZ::~LoadMLZ() = default;
 
 //---------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name

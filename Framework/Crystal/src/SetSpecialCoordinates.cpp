@@ -51,7 +51,7 @@ SetSpecialCoordinates::SetSpecialCoordinates() {
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-SetSpecialCoordinates::~SetSpecialCoordinates() {}
+SetSpecialCoordinates::~SetSpecialCoordinates() = default;
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name

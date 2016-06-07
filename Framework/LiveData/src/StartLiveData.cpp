@@ -33,7 +33,7 @@ StartLiveData::StartLiveData() {}
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-StartLiveData::~StartLiveData() {}
+StartLiveData::~StartLiveData() = default;
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name

@@ -141,7 +141,8 @@ private:
   private:
     /// this class can't be constructed it is just a holder for some static
     /// things
-    RangeHelper(){};
+    RangeHelper() = default;
+    ;
     /// give an enum from poco a better name here
     enum {
       IGNORE_SPACES =
