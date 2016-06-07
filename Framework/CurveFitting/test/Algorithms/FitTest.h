@@ -642,8 +642,7 @@ public:
       double x = X0 + i * dX;
       double y = resH * exp(-x * x * resS);
       double err = fabs(y - y0) / 10;
-      if (err > yErr)
-        yErr = err;
+      yErr = std::max(err, yErr);
       fil << x << ' ' << y << " 0\n";
       y0 = y;
     }
@@ -727,7 +726,7 @@ public:
          0.28841799, 0.27067057, 0.25451242, 0.2397465,  0.22620756};
 
     std::transform(y.begin(), y.end(), e.begin(),
-                   std::bind2nd(std::multiplies<double>(), 0.1));
+                   std::bind(std::multiplies<double>(), 0.1));
   }
 
   void test_function_StretchExp_Against_MockData() {
