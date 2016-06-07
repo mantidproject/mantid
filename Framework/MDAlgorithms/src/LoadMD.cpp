@@ -238,10 +238,10 @@ void LoadMD::exec() {
     g_log.information() << "Convention for Q in Preferences is "
                         << pref_QConvention
                         << "; Convention of Q in NeXus file is "
-                        << m_QConvention << std::endl;
+                        << m_QConvention << '\n';
 
     if (pref_QConvention != m_QConvention) {
-      g_log.information() << "Transforming Q" << std::endl;
+      g_log.information() << "Transforming Q\n";
       Algorithm_sptr transform_alg = createChildAlgorithm("TransformMD");
       transform_alg->setProperty("InputWorkspace",
                                  boost::dynamic_pointer_cast<IMDWorkspace>(ws));
@@ -289,7 +289,7 @@ void LoadMD::loadSlab(std::string name, void *data, MDHistoWorkspace_sptr ws,
   try {
     m_file->getSlab(data, start, size);
   } catch (...) {
-    std::cout << " start: " << start[0] << " size: " << size[0] << std::endl;
+    std::cout << " start: " << start[0] << " size: " << size[0] << '\n';
   }
   m_file->closeData();
 }
@@ -347,10 +347,10 @@ void LoadMD::loadHisto() {
   g_log.information() << "Convention for Q in Preferences is "
                       << pref_QConvention
                       << "; Convention of Q in NeXus file is " << m_QConvention
-                      << std::endl;
+                      << '\n';
 
   if (pref_QConvention != m_QConvention) {
-    g_log.information() << "Transforming Q" << std::endl;
+    g_log.information() << "Transforming Q\n";
     Algorithm_sptr transform_alg = createChildAlgorithm("TransformMD");
     transform_alg->setProperty("InputWorkspace",
                                boost::dynamic_pointer_cast<IMDWorkspace>(ws));
@@ -564,8 +564,7 @@ void LoadMD::doLoad(typename MDEventWorkspace<MDE, nd>::sptr ws) {
       bc->getFileIO()->setWriteBufferSize(cacheMemory);
 
       g_log.information() << "Setting a DiskBuffer cache size of " << mb
-                          << " MB, or " << cacheMemory << " events."
-                          << std::endl;
+                          << " MB, or " << cacheMemory << " events." << '\n';
     }
   } // Not file back end
   else if (!m_BoxStructureAndMethadata) {
@@ -601,7 +600,7 @@ void LoadMD::doLoad(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   {
   }
   g_log.debug() << tim << " to create all the boxes and fill them with events."
-                << std::endl;
+                << '\n';
 
   // Box of ID 0 is the head box.
   ws->setBox(boxTree[0]);
@@ -613,9 +612,9 @@ void LoadMD::doLoad(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   // TODO:if(!fileBackEnd)ws->refreshCache();
   ws->refreshCache();
   g_log.debug() << tim << " to refreshCache(). " << ws->getNPoints()
-                << " points after refresh." << std::endl;
+                << " points after refresh.\n";
 
-  g_log.debug() << tim << " to finish up." << std::endl;
+  g_log.debug() << tim << " to finish up.\n";
   delete prog;
 }
 
@@ -681,7 +680,7 @@ void LoadMD::setMDFrameOnWorkspaceFromLegacyFile(API::IMDWorkspace_sptr ws) {
   g_log.information()
       << "LoadMD: Encountered a legacy file which has a mismatch between "
          "its MDFrames and its Special Coordinate System. "
-         "Attempting to convert MDFrames." << std::endl;
+         "Attempting to convert MDFrames.\n";
   auto numberOfDimensions = ws->getNumDims();
 
   // Select an MDFrame based on the special coordinates.
@@ -732,7 +731,7 @@ void LoadMD::setMDFrameOnWorkspaceFromLegacyFile(API::IMDWorkspace_sptr ws) {
     }
   } catch (...) {
     g_log.warning() << "LoadMD: An issue occured while trying to correct "
-                       "MDFrames. Trying to revert to original." << std::endl;
+                       "MDFrames. Trying to revert to original.\n";
     // Revert to the old frames.
     Algorithm_sptr setMDFrameAlg = this->createChildAlgorithm("SetMDFrame");
     int axesCounter = 0;

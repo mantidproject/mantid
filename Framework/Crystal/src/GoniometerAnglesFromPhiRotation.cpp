@@ -246,7 +246,7 @@ void GoniometerAnglesFromPhiRotation::exec() {
 
   g_log.debug() << "Best direction unOptimized is ("
                 << (MinData[1] * MinData[2]) << "," << (MinData[1] * MinData[3])
-                << "," << (MinData[1] * MinData[4]) << ")" << std::endl;
+                << "," << (MinData[1] * MinData[4]) << ")\n";
 
   //----------------------- Optimize around best
   //-------------------------------------------
@@ -357,22 +357,21 @@ void GoniometerAnglesFromPhiRotation::exec() {
 
   g_log.notice()
       << "============================ Results ============================"
-      << std::endl;
+      << '\n';
   g_log.notice() << "     phi,chi, and omega= (" << phi2 << "," << chi2 << ","
-                 << omega2 << ")" << std::endl;
-  g_log.notice() << "     #indexed =" << Nindexed << std::endl;
+                 << omega2 << ")\n";
+  g_log.notice() << "     #indexed =" << Nindexed << '\n';
   g_log.notice()
-      << "              =============================================="
-      << std::endl;
+      << "              ==============================================" << '\n';
 
   // std::cout << "============================ Results
-  // ============================" << std::endl;
+  // ============================\n";
   // std::cout << "     phi,chi, and omega= (" << phi2 << "," << chi2 << "," <<
   // omega2 << ")"
-  //     << std::endl;
-  // std::cout << "     #indexed =" << Nindexed << std::endl;
+  //     << '\n';
+  // std::cout << "     #indexed =" << Nindexed << '\n';
   // std::cout << "              =============================================="
-  // << std::endl;
+  // << '\n';
 
   setProperty("Phi2", phi2);
   setProperty("Chi2", chi2);

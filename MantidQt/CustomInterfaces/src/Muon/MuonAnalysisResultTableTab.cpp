@@ -827,7 +827,7 @@ void MuonAnalysisResultTableTab::createTable() {
          << "  if w.windowLabel() == '" << tableName << "':" << std::endl
          << "    found = True; w.show(); w.setFocus()" << std::endl
          << "if not found:" << std::endl
-         << "  importTableWorkspace('" << tableName << "', True)" << std::endl;
+         << "  importTableWorkspace('" << tableName << "', True)\n";
 
     emit runPythonCode(QString::fromStdString(code.str()), false);
   } else {

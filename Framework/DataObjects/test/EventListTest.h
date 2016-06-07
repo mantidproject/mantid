@@ -2540,16 +2540,14 @@ public:
     CPUTimer tim;
     EventList out_el;
     el_sorted.compressEvents(10.0, &out_el);
-    std::cout << std::endl
-              << tim << " to compress events. " << std::endl;
+    std::cout << std::endl << tim << " to compress events. \n";
   }
 
   void test_compressEvents_Parallel() {
     CPUTimer tim;
     EventList out_el;
     el_sorted.compressEvents(10.0, &out_el, true);
-    std::cout << std::endl
-              << tim << " to compress events in parallel. " << std::endl;
+    std::cout << std::endl << tim << " to compress events in parallel. \n";
   }
 
   void test_multiply() { el_random *= 2.345; }

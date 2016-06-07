@@ -278,7 +278,7 @@ void LoadFITS::loadHeader(const std::string &filePath, FITSInfo &header) {
       // only debug level, when loading multiple files this is very verbose
       g_log.debug() << "Found axis length header entry: "
                     << m_headerAxisNameKeys[j] << " = "
-                    << header.axisPixelLengths.back() << std::endl;
+                    << header.axisPixelLengths.back() << '\n';
     }
 
     // Various extensions to the FITS format are used elsewhere, and
@@ -330,7 +330,7 @@ void LoadFITS::loadHeader(const std::string &filePath, FITSInfo &header) {
                      m_headerOffsetKey + " = " +
                      header.headerKeys[m_headerOffsetKey] +
                      ") has a fractional part, and it will be ignored!"
-              << std::endl;
+              << '\n';
         }
         header.offset = static_cast<int>(doff);
       } catch (std::exception &e) {
@@ -365,13 +365,13 @@ void LoadFITS::headerSanityCheck(const FITSInfo &hdr,
   if (hdr.extension != "") {
     valid = false;
     g_log.error() << "File " << hdr.filePath
-                  << ": extensions found in the header." << std::endl;
+                  << ": extensions found in the header.\n";
   }
   if (hdr.numberOfAxis != 2) {
     valid = false;
     g_log.error() << "File " << hdr.filePath
                   << ": the number of axes is not 2 but: " << hdr.numberOfAxis
-                  << std::endl;
+                  << '\n';
   }
 
   // Test current item has same axis values as first item.
@@ -379,17 +379,17 @@ void LoadFITS::headerSanityCheck(const FITSInfo &hdr,
     valid = false;
     g_log.error() << "File " << hdr.filePath
                   << ": the number of pixels in the first dimension differs "
-                     "from the first file loaded (" << hdrFirst.filePath
-                  << "): " << hdr.axisPixelLengths[0]
-                  << " != " << hdrFirst.axisPixelLengths[0] << std::endl;
+                     "from the first file loaded ("
+                  << hdrFirst.filePath << "): " << hdr.axisPixelLengths[0]
+                  << " != " << hdrFirst.axisPixelLengths[0] << '\n';
   }
   if (hdr.axisPixelLengths[1] != hdrFirst.axisPixelLengths[1]) {
     valid = false;
     g_log.error() << "File " << hdr.filePath
                   << ": the number of pixels in the second dimension differs"
-                     "from the first file loaded (" << hdrFirst.filePath
-                  << "): " << hdr.axisPixelLengths[0]
-                  << " != " << hdrFirst.axisPixelLengths[0] << std::endl;
+                     "from the first file loaded ("
+                  << hdrFirst.filePath << "): " << hdr.axisPixelLengths[0]
+                  << " != " << hdrFirst.axisPixelLengths[0] << '\n';
   }
 
   // Check the format is correct and create the Workspace
@@ -1111,7 +1111,7 @@ bool LoadFITS::isInstrOtherThanIMAT(const FITSInfo &hdr) {
         << ". This file seems to come from a Starlight camera, "
            "as used for calibration of the instruments HiFi and EMU (and"
            "possibly others). Note: not "
-           "loading instrument definition." << std::endl;
+           "loading instrument definition.\n";
   }
 
   return res;

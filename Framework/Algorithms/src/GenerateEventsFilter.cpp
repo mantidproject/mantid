@@ -784,7 +784,7 @@ void GenerateEventsFilter::processMultipleValueFilters(double minvalue,
           << m_dblLog->name() << " has range " << minlogvalue << " to "
           << maxlogvalue
           << ".  Therefore some workgroup index may not have any splitter."
-          << std::endl;
+          << '\n';
     }
   }
 
@@ -986,7 +986,7 @@ void GenerateEventsFilter::makeMultipleFiltersByValues(
   int logsize = m_dblLog->size();
   if (logsize == 0) {
     g_log.warning() << "There is no entry in this property " << m_dblLog->name()
-                    << std::endl;
+                    << '\n';
     return;
   }
 
@@ -1042,7 +1042,7 @@ void GenerateEventsFilter::makeMultipleFiltersByValuesParallel(
   int logsize = m_dblLog->size();
   if (logsize == 0) {
     g_log.warning() << "There is no entry in this property " << m_dblLog->name()
-                    << std::endl;
+                    << '\n';
     return;
   }
 

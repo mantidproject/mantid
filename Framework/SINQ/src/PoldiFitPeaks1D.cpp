@@ -149,7 +149,7 @@ void PoldiFitPeaks1D::exec() {
   TableWorkspace_sptr poldiPeakTable = getProperty("PoldiPeakTable");
   m_peaks = getInitializedPeakCollection(poldiPeakTable);
 
-  g_log.information() << "Peaks to fit: " << m_peaks->peakCount() << std::endl;
+  g_log.information() << "Peaks to fit: " << m_peaks->peakCount() << '\n';
 
   Workspace2D_sptr dataWorkspace = getProperty("InputWorkspace");
 

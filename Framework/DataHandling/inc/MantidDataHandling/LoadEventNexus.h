@@ -338,7 +338,7 @@ bool LoadEventNexus::runLoadInstrument(const std::string &nexusfilename,
     nxfile.openData("name");
     instrument = nxfile.getStrData();
     alg->getLogger().debug() << "Instrument name read from NeXus file is "
-                             << instrument << std::endl;
+                             << instrument << '\n';
   } catch (::NeXus::Exception &) {
     // Try to fall back to isis compatibility options
     nxfile.closeGroup();
@@ -391,7 +391,7 @@ bool LoadEventNexus::runLoadInstrument(const std::string &nexusfilename,
   } catch (std::invalid_argument &e) {
     alg->getLogger().information()
         << "Invalid argument to LoadInstrument Child Algorithm : " << e.what()
-        << std::endl;
+        << '\n';
     executionSuccessful = false;
   } catch (std::runtime_error &e) {
     alg->getLogger().information(

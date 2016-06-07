@@ -176,14 +176,13 @@ int main(int argc, char **argv) {
     QString str(argv[1]);
     if (str == "-v" || str == "--version") {
       std::cout << Mantid::Kernel::MantidVersion::version() << " ("
-                << Mantid::Kernel::MantidVersion::releaseDate() << ")"
-                << std::endl;
+                << Mantid::Kernel::MantidVersion::releaseDate() << ")" << '\n';
       exit(0);
     } else if (str == "-r" ||
                str == "--revision") // Print abbreviated git SHA-1
     {
       QString revision(Mantid::Kernel::MantidVersion::revision());
-      std::cout << revision.toStdString() << std::endl;
+      std::cout << revision.toStdString() << '\n';
       exit(0);
     } else if (str == "-a" || str == "--about") {
       MantidApplication app(argc, argv); // Needed to avoid an error

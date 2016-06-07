@@ -83,7 +83,7 @@ void EQSANSDarkCurrentSubtraction2::exec() {
     g_log.error() << "To use this version of EQSANSDarkCurrentSubtraction, "
                   << "you need to make sure EQSANSLoad produces histograms. "
                   << "You can also turn the dark current subtraction off."
-                  << std::endl;
+                  << '\n';
     throw std::invalid_argument(
         "EQSANSDarkCurrentSubtraction-v2 only works on histograms.");
   }
@@ -171,7 +171,7 @@ void EQSANSDarkCurrentSubtraction2::exec() {
         "\n   Could not find proton charge or duration in sample logs";
     g_log.error()
         << "ERROR: Could not find proton charge or duration in sample logs"
-        << std::endl;
+        << '\n';
   };
   // The scaling factor should account for the TOF cuts on each side of a frame
   // The EQSANSLoad algorithm cuts the beginning and end of the TOF distribution
@@ -204,13 +204,13 @@ void EQSANSDarkCurrentSubtraction2::exec() {
   if (numberOfSpectra != numberOfDarkSpectra) {
     g_log.error()
         << "Incompatible number of pixels between sample run and dark current"
-        << std::endl;
+        << '\n';
   }
   const int nBins = static_cast<int>(inputWS->readY(0).size());
   const int xLength = static_cast<int>(inputWS->readX(0).size());
   if (xLength != nBins + 1) {
     g_log.error() << "The input workspaces are expected to be histograms"
-                  << std::endl;
+                  << '\n';
   }
 
   progress.report("Subtracting dark current");

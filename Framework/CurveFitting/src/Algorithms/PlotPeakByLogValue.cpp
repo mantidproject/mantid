@@ -259,8 +259,8 @@ void PlotPeakByLogValue::exec() {
         }
 
         g_log.debug() << "Fitting " << data.ws->name() << " index " << j
-                      << " with " << std::endl;
-        g_log.debug() << ifun->asString() << std::endl;
+                      << " with \n";
+        g_log.debug() << ifun->asString() << '\n';
 
         const std::string spectrum_index = boost::lexical_cast<std::string>(j);
         std::string wsBaseName = "";
@@ -305,7 +305,7 @@ void PlotPeakByLogValue::exec() {
         }
 
         g_log.debug() << "Fit result " << fit->getPropertyValue("OutputStatus")
-                      << ' ' << chi2 << std::endl;
+                      << ' ' << chi2 << '\n';
 
       } catch (...) {
         g_log.error("Error in Fit ChildAlgorithm");

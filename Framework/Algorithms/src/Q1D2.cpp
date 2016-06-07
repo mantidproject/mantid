@@ -163,7 +163,7 @@ void Q1D2::exec() {
       g_log.warning() << "Workspace index " << i << " (SpectrumIndex = "
                       << m_dataWS->getSpectrum(i)->getSpectrumNo()
                       << ") has no detector assigned to it - discarding"
-                      << std::endl;
+                      << '\n';
       // Catch if no detector. Next line tests whether this happened - test
       // placed
       // outside here because Mac Intel compiler doesn't like 'continue' in a

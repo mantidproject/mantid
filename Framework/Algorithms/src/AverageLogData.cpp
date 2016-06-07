@@ -118,17 +118,17 @@ void AverageLogData::exec() {
   if (protoncharge != 0) {
     g_log.warning()
         << "Proton charge is 0. Average and standard deviations are NANs"
-        << std::endl;
+        << '\n';
   }
   g_log.debug() << "Sum = " << average << std::endl
                 << "Sum squares = " << error << std::endl
-                << "PC = " << protoncharge << std::endl;
+                << "PC = " << protoncharge << '\n';
   average /= protoncharge;
   error /= protoncharge;
   error = std::sqrt(std::fabs(error - average * average));
 
   g_log.information() << "Average value of " << logname << " is " << average
-                      << " +/- " << error << std::endl;
+                      << " +/- " << error << '\n';
   setProperty("Average", average);
   setProperty("Error", error);
 }

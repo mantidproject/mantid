@@ -124,8 +124,7 @@ void DiffractionFocussing::exec() {
       ++discarded;
     }
   g_log.warning() << "Discarded " << discarded
-                  << " spectra that were not assigned to any group"
-                  << std::endl;
+                  << " spectra that were not assigned to any group" << '\n';
 
   // Running GroupDetectors leads to a load of redundant spectra
   // Create a new workspace that's the right size for the meaningful spectra and
@@ -247,7 +246,7 @@ DiffractionFocussing::readGroupingFile(std::string groupingFileName) {
   std::ifstream grFile(groupingFileName.c_str());
   if (!grFile) {
     g_log.error() << "Unable to open grouping file " << groupingFileName
-                  << std::endl;
+                  << '\n';
     throw Exception::FileError("Error reading .cal file", groupingFileName);
   }
 

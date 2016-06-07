@@ -372,7 +372,7 @@ void ILLParser::showHeader() {
     std::map<std::string, std::string>::const_iterator it;
     for (it = s->begin(); it != s->end(); ++it)
       std::cout << it->first << " => " << it->second << ',';
-    std::cout << std::endl;
+    std::cout << '\n';
     i++;
   }
 

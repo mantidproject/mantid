@@ -421,14 +421,14 @@ MergeRuns::validateInputs(const std::vector<std::string> &inputWorkspaces) {
           inputWorkspaces[i]);
       if (!ws) {
         g_log.error() << "Input workspace " << inputWorkspaces[i]
-                      << " not found." << std::endl;
+                      << " not found.\n";
         throw Kernel::Exception::NotFoundError("Data Object",
                                                inputWorkspaces[i]);
       }
       inWS.push_back(ws);
     } catch (Exception::NotFoundError &) {
       g_log.error() << "Input workspace " << inputWorkspaces[i] << " not found."
-                    << std::endl;
+                    << '\n';
       throw;
     }
     // Check that it has common binning

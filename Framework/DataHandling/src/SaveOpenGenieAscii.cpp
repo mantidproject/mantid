@@ -150,7 +150,7 @@ void SaveOpenGenieAscii::writeFileHeader(std::ofstream &outfile) {
           << "# label " << std::endl
           << "GXWorkspace" << std::endl
           // number of entries
-          << samplenumber << std::endl;
+          << samplenumber << '\n';
 }
 
 //------------------------------------------------------------------------------

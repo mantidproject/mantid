@@ -253,7 +253,7 @@ void SaveAscii2::exec() {
     if (m_writeDX) {
       file << " " << m_sep << " DX";
     }
-    file << std::endl;
+    file << '\n';
   }
   // populate the meta data map
   if (m_metaData.size() > 0) {
@@ -294,7 +294,7 @@ void SaveAscii2::writeSpectra(const std::set<int>::const_iterator &spectraItr,
       file << " " << m_sep << " ";
     }
   }
-  file << std::endl;
+  file << '\n';
 
   for (int bin = 0; bin < m_nBins; bin++) {
     if (!m_isCommonBins) // checking for ragged workspace
@@ -328,7 +328,7 @@ void SaveAscii2::writeSpectra(const std::set<int>::const_iterator &spectraItr,
         file << m_ws->readDx(0)[bin];
       }
     }
-    file << std::endl;
+    file << '\n';
   }
 }
 
@@ -347,7 +347,7 @@ void SaveAscii2::writeSpectra(const int &spectraIndex, std::ofstream &file) {
       file << " " << m_sep << " ";
     }
   }
-  file << std::endl;
+  file << '\n';
 
   for (int bin = 0; bin < m_nBins; bin++) {
     if (m_isHistogram & m_isCommonBins) // bin centres,
@@ -378,7 +378,7 @@ void SaveAscii2::writeSpectra(const int &spectraIndex, std::ofstream &file) {
         file << m_ws->readDx(0)[bin];
       }
     }
-    file << std::endl;
+    file << '\n';
   }
 }
 

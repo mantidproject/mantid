@@ -31,7 +31,7 @@ void PropertyHistory::printSelf(std::ostream &os, const int indent) const {
   os << std::string(indent, ' ') << "Name: " << m_name;
   os << ", Value: " << m_value;
   os << ", Default?: " << (m_isDefault ? "Yes" : "No");
-  os << ", Direction: " << Kernel::Direction::asText(m_direction) << std::endl;
+  os << ", Direction: " << Kernel::Direction::asText(m_direction) << '\n';
 }
 
 /** Prints a text representation

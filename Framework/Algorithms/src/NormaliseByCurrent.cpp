@@ -113,7 +113,7 @@ void NormaliseByCurrent::exec() {
   double charge = extractCharge(inputWS);
 
   g_log.information() << "Normalisation current: " << charge << " uamps"
-                      << std::endl;
+                      << '\n';
 
   double invcharge = 1.0 / charge; // Inverse of the charge to be multiplied by
 

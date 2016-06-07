@@ -109,7 +109,7 @@ public:
         E[i] = sqrt(Y[i]);
       }
 
-      // std::cout << X[i] << "   " << Y[i] << std::endl;
+      // std::cout << X[i] << "   " << Y[i] << '\n';
     }
 
     AnalysisDataService::Instance().add("ChebyshevTest_ws", ws);

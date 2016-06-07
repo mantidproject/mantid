@@ -223,7 +223,7 @@ void MWView::checkRangeLimits() {
         boost::math::isnan(max) || boost::math::isinf(max)) {
       mess << "Dimension " << m_workspace->getDimension(d)->getName()
            << " has a bad range: (";
-      mess << min << ", " << max << ")" << std::endl;
+      mess << min << ", " << max << ")\n";
     }
   }
   if (!mess.str().empty()) {

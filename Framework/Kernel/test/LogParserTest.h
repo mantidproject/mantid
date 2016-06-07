@@ -845,33 +845,33 @@ private:
 
   void mkStrContinuations() {
     std::ofstream f(log_str_continuations.path().c_str());
-    f << "2000-09-05T12:22:31   First line" << std::endl;
-    f << "Second line" << std::endl;
-    f << "2000-09-05T12:22:34   First line" << std::endl;
-    f << "2000-09-05T12:22:34   Second line" << std::endl;
-    f << "Third line" << std::endl;
+    f << "2000-09-05T12:22:31   First line\n";
+    f << "Second line\n";
+    f << "2000-09-05T12:22:34   First line\n";
+    f << "2000-09-05T12:22:34   Second line\n";
+    f << "Third line\n";
     f.close();
   }
 
   void mkStrRepeat() {
     std::ofstream f(log_str_repeat.path().c_str());
-    f << "2000-09-05T12:22:34   First line" << std::endl;
-    f << "2000-09-05T12:22:34   Second line" << std::endl;
-    f << "2000-09-05T12:23:33   First line" << std::endl;
-    f << "2000-09-05T12:23:33   Second line" << std::endl;
-    f << "2000-09-05T12:23:33   Third line" << std::endl;
-    f << "2000-09-05T12:23:33   Fourth line" << std::endl;
+    f << "2000-09-05T12:22:34   First line\n";
+    f << "2000-09-05T12:22:34   Second line\n";
+    f << "2000-09-05T12:23:33   First line\n";
+    f << "2000-09-05T12:23:33   Second line\n";
+    f << "2000-09-05T12:23:33   Third line\n";
+    f << "2000-09-05T12:23:33   Fourth line\n";
     f.close();
   }
 
   void mkNumRepeat() {
     std::ofstream f(log_str_repeat.path().c_str());
-    f << "2000-09-05T12:22:34   1" << std::endl;
-    f << "2000-09-05T12:22:34   2" << std::endl;
-    f << "2000-09-05T12:23:33   3" << std::endl;
-    f << "2000-09-05T12:23:33   4" << std::endl;
-    f << "2000-09-05T12:23:33   5" << std::endl;
-    f << "2000-09-05T12:23:33   6" << std::endl;
+    f << "2000-09-05T12:22:34   1\n";
+    f << "2000-09-05T12:22:34   2\n";
+    f << "2000-09-05T12:23:33   3\n";
+    f << "2000-09-05T12:23:33   4\n";
+    f << "2000-09-05T12:23:33   5\n";
+    f << "2000-09-05T12:23:33   6\n";
     f.close();
   }
 

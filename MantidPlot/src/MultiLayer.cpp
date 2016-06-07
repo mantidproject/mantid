@@ -1341,7 +1341,7 @@ void MultiLayer::dropOntoMDCurve(Graph *g, MantidMDCurve *originalCurve,
       } catch (std::invalid_argument &ex) {
         // Handle case when workspace does not have only one non-integrated
         // dimension.
-        g_log.warning() << ex.what() << std::endl;
+        g_log.warning() << ex.what() << '\n';
       }
     }
   }

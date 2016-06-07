@@ -225,13 +225,13 @@ void LoadRaw3::exec() {
         } catch (std::out_of_range &) {
           g_log.information() << "Separate Monitors option is selected and no "
                                  "monitors in the selected specra range."
-                              << std::endl;
+                              << '\n';
           g_log.information()
-              << "Error in creating one of the output workspaces" << std::endl;
+              << "Error in creating one of the output workspaces\n";
         } catch (std::runtime_error &) {
           g_log.information() << "Separate Monitors option is selected,Error "
                                  "in creating one of the output workspaces"
-                              << std::endl;
+                              << '\n';
         }
       } // end of separate Monitors
 

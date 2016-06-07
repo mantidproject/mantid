@@ -114,7 +114,7 @@ void FABADAMinimizer::initialize(API::ICostFunction_sptr function,
   if (m_numberIterations > maxIterations) {
     g_log.warning()
         << "MaxIterations property reduces the required number of iterations ("
-        << m_numberIterations << ")." << std::endl;
+        << m_numberIterations << ").\n";
     m_numberIterations = maxIterations;
   }
 
@@ -309,7 +309,7 @@ bool FABADAMinimizer::iterate(size_t) {
         g_log.warning()
             << "Wrong convergence for parameter " + fun->parameterName(i) +
                    ". Try to set a proper initial value for this parameter"
-            << std::endl;
+            << '\n';
       }
     }
 

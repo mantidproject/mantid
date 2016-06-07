@@ -88,7 +88,7 @@ void MultiDomainCreator::initFunction(API::IFunction_sptr function) {
         m_creators[index]->initFunction(mdFunction->getFunction(iFun));
       } else {
         g_log.warning() << "Function #" << iFun
-                        << " doesn't apply to any domain" << std::endl;
+                        << " doesn't apply to any domain\n";
       }
     }
   } else {

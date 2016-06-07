@@ -70,7 +70,7 @@ void SaveZODS::exec() {
   if (ws->getDimension(0)->getName() != "[H,0,0]")
     g_log.warning()
         << "SaveZODS expects the workspace to be in HKL space! Saving anyway..."
-        << std::endl;
+        << '\n';
 
   // Create a HDF5 file
   auto file = new ::NeXus::File(Filename, NXACC_CREATE5);

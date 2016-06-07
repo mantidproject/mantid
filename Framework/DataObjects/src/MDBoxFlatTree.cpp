@@ -376,9 +376,9 @@ void MDBoxFlatTree::saveExperimentInfos(::NeXus::File *const file,
         g_log.warning() << "This instrument (" << ei->getInstrument()->getName()
                         << ") has detector IDs that are higher than can be "
                            "saved in the .NXS file as single-precision floats."
-                        << std::endl;
+                        << '\n';
         g_log.warning() << "Detector IDs above 16777216 will not be precise. "
-                           "Please contact the developers." << std::endl;
+                           "Please contact the developers.\n";
       }
     }
   }
@@ -431,7 +431,7 @@ void MDBoxFlatTree::loadExperimentInfos(
         g_log.warning() << "NXS file is missing a ExperimentInfo block "
                         << groupName
                         << ". Workspace will be missing ExperimentInfo."
-                        << std::endl;
+                        << '\n';
       }
     }
     ic++;
@@ -580,7 +580,7 @@ uint64_t MDBoxFlatTree::restoreBoxTree(std::vector<API::IMDNode *> &Boxes,
       g_log.debug() << " Accuracy warning for box N " << i
                     << " as stored inverse volume is : " << m_InverseVolume[i]
                     << " and calculated from extents: "
-                    << ibox->getInverseVolume() << std::endl;
+                    << ibox->getInverseVolume() << '\n';
       ibox->setInverseVolume(coord_t(m_InverseVolume[i]));
     }
 
@@ -809,7 +809,7 @@ void MDBoxFlatTree::saveAffineTransformMatrix(
   if (!transform)
     return;
   Kernel::Matrix<coord_t> matrix = transform->makeAffineMatrix();
-  g_log.debug() << "TRFM: " << matrix.str() << std::endl;
+  g_log.debug() << "TRFM: " << matrix.str() << '\n';
   saveMatrix<coord_t>(file, entry_name, matrix, ::NeXus::FLOAT32,
                       transform->id());
 }

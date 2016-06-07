@@ -738,10 +738,10 @@ public:
     VMD start(0.9, 0.5);
     VMD end(1.9, 1.5);
     auto line = ws->getLineData(start, end, NoNormalization);
-    std::cout << "X\n" << Strings::join(line.x.begin(), line.x.end(), ",")
-              << std::endl;
-    std::cout << "Y\n" << Strings::join(line.y.begin(), line.y.end(), ",")
-              << std::endl;
+    std::cout << "X\n"
+              << Strings::join(line.x.begin(), line.x.end(), ",") << '\n';
+    std::cout << "Y\n"
+              << Strings::join(line.y.begin(), line.y.end(), ",") << '\n';
 
     TS_ASSERT_EQUALS(line.x.size(), 4);
     TS_ASSERT_DELTA(line.x[0], 0.0, 1e-5);

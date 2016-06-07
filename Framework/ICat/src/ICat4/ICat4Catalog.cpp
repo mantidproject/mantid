@@ -616,7 +616,7 @@ const std::string ICat4Catalog::getDownloadURL(const long long &fileID) {
   // Add all the REST pieces to the URL.
   url += ("getData?" + session + datafile + outname + "&zip=false");
   g_log.debug() << "The download URL in ICat4Catalog::getDownloadURL is: "
-                << url << std::endl;
+                << url << '\n';
   return url;
 }
 
@@ -650,7 +650,7 @@ ICat4Catalog::getUploadURL(const std::string &investigationID,
   url += ("put?" + session + name + datasetId + description +
           "&datafileFormatId=1");
   g_log.debug() << "The upload URL in ICat4Catalog::getUploadURL is: " << url
-                << std::endl;
+                << '\n';
   return url;
 }
 
@@ -908,8 +908,7 @@ ICat4Catalog::performSearch(ICATPortBindingProxy &icat, std::string query) {
   request.sessionId = &sessionID;
   request.query = &query;
 
-  g_log.debug() << "The search query sent to ICAT was: \n" << query
-                << std::endl;
+  g_log.debug() << "The search query sent to ICAT was: \n" << query << '\n';
 
   std::vector<xsd__anyType *> searchResults;
 

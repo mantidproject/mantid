@@ -36,7 +36,7 @@ public:
     AnalysisDataService::Instance().addOrReplace("OriginalMask", ws1);
 
     std::cout << "Input MaskWorkspace Size = " << ws1->getNumberHistograms()
-              << std::endl;
+              << '\n';
 
     ws1->setValue(1, 0);
     ws1->setValue(3, 1);

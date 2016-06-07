@@ -134,7 +134,7 @@ void CopyInstrumentParameters::checkProperties() {
     m_different_instrument_sp = true;
     g_log.warning() << "The base instrument in the output workspace is not the "
                        "same as the base instrument in the input workspace."
-                    << std::endl;
+                    << '\n';
   }
 }
 

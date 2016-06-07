@@ -125,7 +125,7 @@ void MaskDetectors::exec() {
       }
 
       g_log.debug() << "Extracting mask from MaskWorkspace (" << maskWS->name()
-                    << ")" << std::endl;
+                    << ")\n";
       appendToIndexListFromMaskWS(indexList, maskWS);
     } else {
       // Check the provided workspace has the same number of spectra as the
@@ -135,7 +135,7 @@ void MaskDetectors::exec() {
                       << " histograms   vs. "
                       << "Input masking workspace has "
                       << prevMasking->getNumberHistograms() << " histograms. "
-                      << std::endl;
+                      << '\n';
         throw std::runtime_error("Size mismatch between two input workspaces.");
       }
       appendToIndexListFromWS(indexList, prevMasking);
@@ -159,7 +159,7 @@ void MaskDetectors::exec() {
         }
       } catch (Kernel::Exception::NotFoundError &e) {
         g_log.warning() << e.what() << " Found while running MaskDetectors"
-                        << std::endl;
+                        << '\n';
       }
     }
   }
@@ -239,7 +239,7 @@ void MaskDetectors::execPeaks(PeaksWorkspace_sptr WS) {
       }
 
       g_log.debug() << "Extracting mask from MaskWorkspace (" << maskWS->name()
-                    << ")" << std::endl;
+                    << ")\n";
       std::vector<detid_t> detectorIDs = maskInstrument->getDetectorIDs();
       std::vector<detid_t>::const_iterator it;
       for (it = detectorIDs.begin(); it != detectorIDs.end(); ++it) {
@@ -254,7 +254,7 @@ void MaskDetectors::execPeaks(PeaksWorkspace_sptr WS) {
           }
         } catch (Kernel::Exception::NotFoundError &e) {
           g_log.warning() << e.what() << " Found while running MaskDetectors"
-                          << std::endl;
+                          << '\n';
         }
       }
     }
@@ -273,7 +273,7 @@ void MaskDetectors::execPeaks(PeaksWorkspace_sptr WS) {
         }
       } catch (Kernel::Exception::NotFoundError &e) {
         g_log.warning() << e.what() << " Found while running MaskDetectors"
-                        << std::endl;
+                        << '\n';
       }
     }
   }
@@ -353,8 +353,7 @@ void MaskDetectors::appendToIndexListFromMaskWS(
 
     if (maskedWorkspace->dataY(i - startIndex)[0] > 0.5 &&
         existingIndices.count(i) == 0) {
-      g_log.debug() << "Adding WorkspaceIndex " << i << " to mask."
-                    << std::endl;
+      g_log.debug() << "Adding WorkspaceIndex " << i << " to mask." << '\n';
       indexList.push_back(i);
     }
   }

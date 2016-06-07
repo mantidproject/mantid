@@ -197,7 +197,7 @@ void BinaryOperation::exec() {
     std::ostringstream ostr;
     ostr << "The two workspaces are not compatible for algorithm "
          << this->name();
-    g_log.error() << ostr.str() << std::endl;
+    g_log.error() << ostr.str() << '\n';
     throw std::invalid_argument(ostr.str());
   }
 

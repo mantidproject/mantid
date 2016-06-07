@@ -100,7 +100,7 @@ void SolidAngle::exec() {
         "Sample location not found, aborting algorithm SoildAngle");
   }
   Kernel::V3D samplePos = sample->getPos();
-  g_log.debug() << "Sample position is " << samplePos << std::endl;
+  g_log.debug() << "Sample position is " << samplePos << '\n';
 
   int loopIterations = m_MaxSpec - m_MinSpec;
   int failCount = 0;
@@ -138,7 +138,7 @@ void SolidAngle::exec() {
 
   if (failCount != 0) {
     g_log.information() << "Unable to calculate solid angle for " << failCount
-                        << " spectra. Zeroing spectrum." << std::endl;
+                        << " spectra. Zeroing spectrum.\n";
   }
 }
 

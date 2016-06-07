@@ -70,14 +70,14 @@ void CreateFlatEventWorkspace::exec() {
   double end = getProperty("RangeEnd");
 
   double sampleRange = end - start;
-  g_log.debug() << "Total Range = " << sampleRange << std::endl;
+  g_log.debug() << "Total Range = " << sampleRange << '\n';
 
   // What are the min/max values for the experimental data ?
   double dataMin, dataMax;
   inputWS->getEventXMinMax(dataMin, dataMax);
 
   g_log.debug() << "Data Range (" << dataMin << " < x < " << dataMax << ")"
-                << std::endl;
+                << '\n';
 
   // How many times do we need to replicate the extracted background region in
   // order to fill up
@@ -85,7 +85,7 @@ void CreateFlatEventWorkspace::exec() {
   int nRegions = static_cast<int>((dataMax - dataMin) / sampleRange);
 
   g_log.debug() << "We will need to replicate the selected region " << nRegions
-                << " times." << std::endl;
+                << " times.\n";
 
   // Extract the region we are using for the background
   IAlgorithm_sptr crop_alg = this->createChildAlgorithm("CropWorkspace");

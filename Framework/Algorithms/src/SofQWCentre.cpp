@@ -120,7 +120,7 @@ void SofQWCentre::exec() {
 
   try {
     double l1 = source->getDistance(*sample);
-    g_log.debug() << "Source-sample distance: " << l1 << std::endl;
+    g_log.debug() << "Source-sample distance: " << l1 << '\n';
   } catch (Exception::NotFoundError &) {
     g_log.error("Unable to calculate source-sample distance");
     throw Exception::InstrumentDefinitionError(

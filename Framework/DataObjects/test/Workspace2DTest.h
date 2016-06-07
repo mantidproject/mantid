@@ -306,7 +306,7 @@ public:
       UNUSED_ARG(oneDetId)
     }
     std::cout << tim << " to get detector ID's for " << nhist
-              << " spectra using the ISpectrum method." << std::endl;
+              << " spectra using the ISpectrum method.\n";
   }
 
   void test_ISpectrum_changeDetectorIDs() {
@@ -316,7 +316,7 @@ public:
       spec->setDetectorID(detid_t(i));
     }
     std::cout << tim << " to set all detector IDs for " << nhist
-              << " spectra, using the ISpectrum method (serial)." << std::endl;
+              << " spectra, using the ISpectrum method (serial).\n";
 
     PARALLEL_FOR_NO_WSP_CHECK()
     for (int i = 0; i < (int)ws1->getNumberHistograms(); i++) {
@@ -324,8 +324,7 @@ public:
       spec->setDetectorID(detid_t(i));
     }
     std::cout << tim << " to set all detector IDs for " << nhist
-              << " spectra, using the ISpectrum method (in parallel)."
-              << std::endl;
+              << " spectra, using the ISpectrum method (in parallel)." << '\n';
   }
 };
 

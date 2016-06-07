@@ -713,7 +713,7 @@ public:
   void test_genMultipleLogValuesFilterMatrixSplitter() {
     std::cout
         << "\n==== Test Multiple Log Value Filter (Matrix Splitter) ====\n"
-        << std::endl;
+        << '\n';
 
     // Create input
     DataObjects::EventWorkspace_sptr eventWS = createEventWorkspace();

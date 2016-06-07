@@ -915,7 +915,7 @@ void MantidDockWidget::saveWorkspacesToFolder(const QString &folder) {
     } catch (std::runtime_error &rte) {
       docklog.error() << "Error saving workspace "
                       << workspaceName.toStdString() << ": " << rte.what()
-                      << std::endl;
+                      << '\n';
     }
   }
 }
@@ -1580,17 +1580,17 @@ void MantidTreeWidget::dropEvent(QDropEvent *de) {
       treelog.error() << "Failed to Load the file "
                       << filenames[i].toStdString()
                       << " . The reason for failure is: " << error.what()
-                      << std::endl;
+                      << '\n';
     } catch (std::logic_error &error) {
       treelog.error() << "Failed to Load the file "
                       << filenames[i].toStdString()
                       << " . The reason for failure is: " << error.what()
-                      << std::endl;
+                      << '\n';
     } catch (std::exception &error) {
       treelog.error() << "Failed to Load the file "
                       << filenames[i].toStdString()
                       << " . The reason for failure is: " << error.what()
-                      << std::endl;
+                      << '\n';
     }
   }
 }

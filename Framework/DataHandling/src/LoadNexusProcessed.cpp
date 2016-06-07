@@ -132,7 +132,7 @@ SpectraInfo extractMappingInfo(NXEntry &mtd_entry, Logger &logger) {
   } catch (std::runtime_error &) {
     logger.information() << "detector_list block not found. The workspace will "
                             "not contain any detector information."
-                         << std::endl;
+                         << '\n';
     return SpectraInfo();
   }
 
@@ -294,7 +294,7 @@ Workspace_sptr LoadNexusProcessed::doAccelleratedMultiPeriodLoading(
     buffer
         << "Group entry " << p - 1
         << " is not a workspace 2D. Retry with FastMultiPeriod option set off."
-        << std::endl;
+        << '\n';
     throw std::runtime_error(buffer.str());
   }
 
@@ -302,7 +302,7 @@ Workspace_sptr LoadNexusProcessed::doAccelleratedMultiPeriodLoading(
     std::stringstream buffer;
     buffer << "Group entry " << p - 1 << " has fractional area present. Try "
                                          "reloading with FastMultiPeriod set "
-                                         "off." << std::endl;
+                                         "off.\n";
     throw std::runtime_error(buffer.str());
   }
 
@@ -1294,7 +1294,7 @@ API::MatrixWorkspace_sptr LoadNexusProcessed::loadNonEventEntry(
     local_workspace->setTitle(mtd_entry.getString("title"));
   } catch (std::runtime_error &) {
     g_log.debug() << "No title was found in the input file, "
-                  << getPropertyValue("Filename") << std::endl;
+                  << getPropertyValue("Filename") << '\n';
   }
 
   // Set the YUnit label

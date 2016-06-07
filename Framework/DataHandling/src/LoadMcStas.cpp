@@ -74,7 +74,7 @@ void LoadMcStas::init() {
 void LoadMcStas::exec() {
 
   std::string filename = getPropertyValue("Filename");
-  g_log.debug() << "Opening file " << filename << std::endl;
+  g_log.debug() << "Opening file " << filename << '\n';
 
   ::NeXus::File nxFile(filename);
   auto entries = nxFile.getEntries();
@@ -104,7 +104,7 @@ void LoadMcStas::exec() {
       if (dataName == "content_nxs" || dataType != "NXdata")
         continue; // can be removed if sure no Nexus files contains
                   // "content_nxs"
-      g_log.debug() << "Opening " << dataName << "   " << dataType << std::endl;
+      g_log.debug() << "Opening " << dataName << "   " << dataType << '\n';
 
       // open second level entry
       nxFile.openGroup(dataName, dataType);
@@ -212,7 +212,7 @@ void LoadMcStas::readEventData(
     // Loader should not stop if there is no IDF.xml
     g_log.warning()
         << "\nCould not find the instrument description in the Nexus file:"
-        << filename << " Ignore evntdata from data file" << std::endl;
+        << filename << " Ignore evntdata from data file\n";
     return;
   }
   // Finished reading Instrument. Then open new data folder again
@@ -275,14 +275,14 @@ void LoadMcStas::readEventData(
     ::NeXus::Info id_info = nxFile.getInfo();
     if (id_info.dims.size() != 2) {
       g_log.error() << "Event data in McStas nexus file not loaded. Expected "
-                       "event data block to be two dimensional" << std::endl;
+                       "event data block to be two dimensional\n";
       return;
     }
     int64_t nNeutrons = id_info.dims[0];
     int64_t numberOfDataColumn = id_info.dims[1];
     if (nNeutrons && numberOfDataColumn != 6) {
       g_log.error() << "Event data in McStas nexus file expecting 6 columns"
-                    << std::endl;
+                    << '\n';
       return;
     }
     if (!isAnyNeutrons && nNeutrons > 0)
@@ -465,7 +465,7 @@ void LoadMcStas::readHistogramData(
     const size_t axis1Length = axis1Values.size();
     const size_t axis2Length = axis2Values.size();
     g_log.debug() << "Axis lengths=" << axis1Length << " " << axis2Length
-                  << std::endl;
+                  << '\n';
 
     // Require "data" field
     std::vector<double> data;
@@ -477,7 +477,7 @@ void LoadMcStas::readHistogramData(
       nxFile.readData<double>("errors", errors);
     } catch (::NeXus::Exception &) {
       g_log.information() << "Field " << dataName
-                          << " contains no error information." << std::endl;
+                          << " contains no error information.\n";
     }
 
     // close second level entry

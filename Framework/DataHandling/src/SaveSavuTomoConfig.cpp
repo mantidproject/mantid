@@ -53,7 +53,8 @@ void SaveSavuTomoConfig::exec() {
   } catch (std::exception &e) {
     g_log.error()
         << "Failed to save savu tomography reconstruction parameterization "
-           "file, error description: " << e.what() << std::endl;
+           "file, error description: "
+        << e.what() << '\n';
     return;
   }
 
@@ -135,18 +136,17 @@ void SaveSavuTomoConfig::saveFile(
     const std::string ext = ".nxs";
     g_log.notice() << "Adding extension '" << ext
                    << "' to the output "
-                      "file name given (it is a NeXus file). " << std::endl;
+                      "file name given (it is a NeXus file). \n";
     fileName = fileName + ".nxs";
   }
 
   // If file exists, delete it.
   Poco::File f(fileName);
   if (f.exists()) {
-    g_log.notice() << "Overwriting existing file: '" << fileName << "'"
-                   << std::endl;
+    g_log.notice() << "Overwriting existing file: '" << fileName << "'" << '\n';
     f.remove();
   } else {
-    g_log.notice() << "Creating file: '" << fileName << ";" << std::endl;
+    g_log.notice() << "Creating file: '" << fileName << ";\n";
   }
 
   // Create the file handle

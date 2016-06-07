@@ -673,7 +673,7 @@ void LoadAscii2::exec() {
   if (sep.empty()) {
     g_log.notice() << "\"UserDefined\" has been selected, but no custom "
                       "separator has been entered."
-                      " Using default instead." << std::endl;
+                      " Using default instead.\n";
     sep = ",";
   }
   m_columnSep = sep;
@@ -704,7 +704,7 @@ void LoadAscii2::exec() {
     rd = readData(file);
   } catch (std::exception &e) {
     g_log.error() << "Failed to read as ASCII this file: '" << filename
-                  << ", error description: " << e.what() << std::endl;
+                  << ", error description: " << e.what() << '\n';
     throw std::runtime_error("Failed to recognize this file as an ASCII file, "
                              "cannot continue.");
   }

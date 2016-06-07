@@ -1329,7 +1329,7 @@ void GetDetOffsetsMultiPeaks::makeFitSummary() {
     g_log.warning()
         << "Found 0 unmasked rows in the spectra info table. "
            "Cannot calculate Chi-sq sensibly. it's value will be NaN"
-        << std::endl;
+        << '\n';
     avgchi2 = NAN;
   } else {
     avgchi2 = sumchi2 / static_cast<double>(numunmasked);
@@ -1338,7 +1338,7 @@ void GetDetOffsetsMultiPeaks::makeFitSummary() {
   if (0 == weight_numfittedpeaks) {
     g_log.warning() << "Found 0 fitted peaks in the spectra info table. "
                        "Cannot calculate the weighted average Chi-sq sensibly"
-                    << std::endl;
+                    << '\n';
     wtavgchi2 = NAN;
   } else {
     wtavgchi2 = weight_sumchi2 / static_cast<double>(weight_numfittedpeaks);

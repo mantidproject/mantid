@@ -46,7 +46,7 @@ int CICatHelper::doSearch(ICATPortBindingProxy &icat,
   clock_t end = clock();
   float diff = float(end - start) / CLOCKS_PER_SEC;
   g_log.information() << " Time taken to do  search is " << diff << "  seconds "
-                      << std::endl;
+                      << '\n';
   return ret_advsearch;
 }
 
@@ -396,7 +396,7 @@ void CICatHelper::doMyDataSearch(API::ITableWorkspace_sptr &ws_sptr) {
   if (response.return_.empty()) {
     g_log.information()
         << "ICat Mydata search is complete.There are no results to display"
-        << std::endl;
+        << '\n';
     return;
   }
   // save response to a table workspace
@@ -467,7 +467,7 @@ void CICatHelper::doAdvancedSearch(const CatalogSearchParam &inputs,
   }
   if (response.return_.empty()) {
     g_log.information() << "ICat investigations search is complete.There are "
-                           "no results to display" << std::endl;
+                           "no results to display\n";
     return;
   }
   // save response to a table workspace
@@ -589,7 +589,8 @@ CICatHelper::getNumberOfSearchResults(const CatalogSearchParam &inputs) {
   }
 
   g_log.debug() << "CICatHelper::getNumberOfSearchResults -> Number of results "
-                   "returned is: { " << numOfResults << " }" << std::endl;
+                   "returned is: { "
+                << numOfResults << " }\n";
 
   return numOfResults;
 }

@@ -182,7 +182,8 @@ void CreateSampleWorkspace::exec() {
     // down
     binWidth = xMax - xMin;
     g_log.warning() << "The bin width is so large that there is less than one "
-                       "bin - it has been changed to " << binWidth << std::endl;
+                       "bin - it has been changed to "
+                    << binWidth << '\n';
   }
 
   std::string functionString = "";

@@ -144,7 +144,7 @@ void RefRoi::extract2D() {
     const std::string unit = inputWS->getAxis(0)->unit()->caption();
     if (Poco::icompare(unit, "Wavelength") != 0) {
       g_log.error() << "RefRoi expects units of wavelength to convert to Q"
-                    << std::endl;
+                    << '\n';
       throw std::runtime_error(
           "RefRoi expects units of wavelength to convert to Q");
     }

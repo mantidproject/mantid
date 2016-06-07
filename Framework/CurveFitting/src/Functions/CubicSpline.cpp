@@ -97,7 +97,7 @@ void CubicSpline::setupInput(boost::scoped_array<double> &x,
   // sort the data points if necessary
   if (xSortFlag) {
     g_log.warning() << "Spline x parameters are not in ascending order. Values "
-                       "will be sorted." << std::endl;
+                       "will be sorted.\n";
     std::sort(x.get(), x.get() + n);
   }
 
@@ -166,7 +166,7 @@ void CubicSpline::calculateSpline(double *out, const double *xValues,
   if (outOfRange) {
     g_log.warning()
         << "Some x values where out of range and will not be calculated."
-        << std::endl;
+        << '\n';
   }
 }
 
@@ -235,7 +235,7 @@ void CubicSpline::calculateDerivative(double *out, const double *xValues,
   if (outOfRange) {
     g_log.warning()
         << "Some x values where out of range and will not be calculated."
-        << std::endl;
+        << '\n';
   }
 }
 

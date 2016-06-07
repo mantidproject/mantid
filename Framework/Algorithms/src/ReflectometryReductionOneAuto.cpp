@@ -447,7 +447,8 @@ void ReflectometryReductionOneAuto::exec() {
       } catch (std::runtime_error &e) {
         g_log.warning() << "Could not autodetect polynomial correction method. "
                            "Polynomial correction will not be performed. "
-                           "Reason for failure: " << e.what() << std::endl;
+                           "Reason for failure: "
+                        << e.what() << '\n';
         refRedOne->setProperty("CorrectionAlgorithm", "None");
       }
 

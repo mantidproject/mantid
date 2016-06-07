@@ -628,13 +628,13 @@ bool ApplicationWindow::shouldWeShowFirstTimeSetup(
           config.getInstrument(instrument);
       g_log.information() << "Default facility '" << facilityInfo.name()
                           << "', instrument '" << instrumentInfo.name() << "'"
-                          << std::endl;
+                          << '\n';
     } catch (Mantid::Kernel::Exception::NotFoundError &) {
       // failed to find the facility or instrument
       g_log.error() << "Could not find your default facility '" << facility
                     << "' or instrument '" << instrument
                     << "' in facilities.xml, showing please select again."
-                    << std::endl;
+                    << '\n';
       return true;
     }
   }
@@ -9986,7 +9986,7 @@ void ApplicationWindow::showWindowPopupMenu(const QPoint &p) {
         }
       }
     } else if (isOfType(w, "TiledWindow")) {
-      std::cerr << "Menu for TiledWindow" << std::endl;
+      std::cerr << "Menu for TiledWindow\n";
     }
     cm.exec(lv->mapToGlobal(p));
   }

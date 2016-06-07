@@ -59,7 +59,7 @@ void DownloadRemoteFile2::exec() {
   jobManager->downloadRemoteFile(tid, remote, local);
 
   g_log.information() << "Downloaded '" << remote << "' to '" << local << "'"
-                      << std::endl;
+                      << '\n';
 }
 
 } // end namespace RemoteAlgorithms

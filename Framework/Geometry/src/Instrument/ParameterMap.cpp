@@ -222,9 +222,9 @@ const std::string ParameterMap::diff(const ParameterMap &rhs,
     if (!match) {
       // output some information that helps with understanding the mismatch
       strOutput << "Parameter mismatch LHS=RHS for LHS parameter in component "
-                   "with name: " << fullName
-                << ". Parameter name is: " << (*param).name()
-                << " and value: " << (*param).asString() << std::endl;
+                   "with name: "
+                << fullName << ". Parameter name is: " << (*param).name()
+                << " and value: " << (*param).asString() << '\n';
       bool componentWithSameNameRHS = false;
       bool parameterWithSameNameRHS = false;
       for (auto rhsIt = rhs.m_map.cbegin(); rhsIt != rhsEnd; ++rhsIt) {
@@ -235,16 +235,16 @@ const std::string ParameterMap::diff(const ParameterMap &rhs,
           if ((*param).name() == (*rhsIt->second).name()) {
             parameterWithSameNameRHS = true;
             strOutput << "RHS param with same name has value: "
-                      << (*rhsIt->second).asString() << std::endl;
+                      << (*rhsIt->second).asString() << '\n';
           }
         }
       }
       if (!componentWithSameNameRHS) {
-        strOutput << "No matching RHS component name" << std::endl;
+        strOutput << "No matching RHS component name\n";
       }
       if (componentWithSameNameRHS && !parameterWithSameNameRHS) {
         strOutput << "Found matching RHS component name but not parameter name"
-                  << std::endl;
+                  << '\n';
       }
       if (firstDiffOnly)
         return strOutput.str();

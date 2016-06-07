@@ -121,7 +121,7 @@ void FindCenterOfMassPosition::exec() {
       } catch (Exception::NotFoundError &) {
         g_log.warning() << "Workspace index " << i
                         << " has no detector assigned to it - discarding"
-                        << std::endl;
+                        << '\n';
         continue;
       }
       // If this detector is masked, skip to the next one
@@ -166,7 +166,7 @@ void FindCenterOfMassPosition::exec() {
     if (!direct_beam && (radius_x <= beam_radius || radius_y <= beam_radius)) {
       g_log.error()
           << "Center of mass falls within the beam center area: stopping here"
-          << std::endl;
+          << '\n';
       break;
     }
 
@@ -189,7 +189,7 @@ void FindCenterOfMassPosition::exec() {
     if (n_local_minima > 5) {
       g_log.warning()
           << "Found the same or equivalent center of mass locations "
-             "more than 5 times in a row: stopping here" << std::endl;
+             "more than 5 times in a row: stopping here\n";
       break;
     }
 
@@ -197,7 +197,7 @@ void FindCenterOfMassPosition::exec() {
     if (++n_iteration > max_iteration) {
       g_log.warning() << "More than " << max_iteration
                       << " iteration to find beam center: stopping here"
-                      << std::endl;
+                      << '\n';
       break;
     }
 
@@ -242,7 +242,7 @@ void FindCenterOfMassPosition::exec() {
   }
 
   g_log.information() << "Center of Mass found at x=" << center_x
-                      << " y=" << center_y << std::endl;
+                      << " y=" << center_y << '\n';
 }
 
 } // namespace Algorithms

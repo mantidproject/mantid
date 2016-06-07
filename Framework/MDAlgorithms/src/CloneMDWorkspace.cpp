@@ -69,8 +69,7 @@ void CloneMDWorkspace::doClone(
   if (bc->isFileBacked()) {
     if (ws->fileNeedsUpdating()) {
       // Data was modified! You need to save first.
-      g_log.notice() << "InputWorkspace's file-backend being updated. "
-                     << std::endl;
+      g_log.notice() << "InputWorkspace's file-backend being updated. " << '\n';
       IAlgorithm_sptr alg = createChildAlgorithm("SaveMD", 0.0, 0.4, false);
       alg->setProperty("InputWorkspace", ws);
       alg->setPropertyValue("UpdateFileBackEnd", "1");
@@ -92,9 +91,9 @@ void CloneMDWorkspace::doClone(
 
     // Perform the copying
     g_log.notice() << "Cloned workspace file being copied to: " << outFilename
-                   << std::endl;
+                   << '\n';
     Poco::File(originalFile).copyTo(outFilename);
-    g_log.information() << "File copied successfully." << std::endl;
+    g_log.information() << "File copied successfully.\n";
 
     // Now load it back
     IAlgorithm_sptr alg = createChildAlgorithm("LoadMD", 0.5, 1.0, false);

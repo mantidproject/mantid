@@ -448,7 +448,7 @@ bool PropertyManager::validateProperties() const {
     if (!error.empty()) {
       g_log.error() << "Property \"" << property.first
                     << "\" is not set to a valid value: \"" << error << "\"."
-                    << std::endl;
+                    << '\n';
       allValid = false;
     }
   }

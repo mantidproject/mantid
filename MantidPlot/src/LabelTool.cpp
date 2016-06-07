@@ -166,7 +166,7 @@ void LabelTool::graphAreaClicked(const QwtPolygon &c) {
   int yPosition = cc.y();
 
   // std::cout << "xPosition: " << xPosition << " " << "yPosition: " <<
-  // yPosition << std::endl;
+  // yPosition << '\n';
 
   m_xPos = d_graph->plotWidget()->invTransform(QwtPlot::xBottom, xPosition);
   m_yPos = d_graph->plotWidget()->invTransform(QwtPlot::yLeft, yPosition);

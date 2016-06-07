@@ -25,7 +25,6 @@
 
 #include <functional>
 
-using std::endl;
 using std::map;
 using std::string;
 using std::vector;
@@ -389,7 +388,7 @@ public:
 
     alg->getLogger().debug()
         << entry_name << (pulsetimesincreasing ? " had " : " DID NOT have ")
-        << "monotonically increasing pulse times" << std::endl;
+        << "monotonically increasing pulse times\n";
 
     // Join back up the tof limits to the global ones
     // This is not thread safe, so only one thread at a time runs this.
@@ -863,12 +862,12 @@ public:
     } // try block
     catch (std::exception &e) {
       alg->getLogger().error() << "Error while loading bank " << entry_name
-                               << ":" << std::endl;
-      alg->getLogger().error() << e.what() << std::endl;
+                               << ":\n";
+      alg->getLogger().error() << e.what() << '\n';
       m_loadError = true;
     } catch (...) {
       alg->getLogger().error() << "Unspecified error while loading bank "
-                               << entry_name << std::endl;
+                               << entry_name << '\n';
       m_loadError = true;
     }
 
@@ -1277,7 +1276,7 @@ void LoadEventNexus::setTopEntryName() {
   } catch (const std::exception &) {
     g_log.error()
         << "Unable to determine name of top level NXentry - assuming \"entry\"."
-        << std::endl;
+        << '\n';
     m_top_entry_name = "entry";
   }
 }
@@ -1373,7 +1372,7 @@ void LoadEventNexus::exec() {
     if (monitorsAsEvents && !this->hasEventMonitors()) {
       g_log.warning() << "The property MonitorsAsEvents has been enabled but "
                          "this file does not seem to have monitors with events."
-                      << endl;
+                      << '\n';
     }
     if (monitorsAsEvents) {
       // no matter whether the file has events or not, the user has requested to
@@ -1767,7 +1766,7 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
                                                      m_top_entry_name);
   } catch (std::runtime_error &e) {
     // Missing metadata is not a fatal error. Log and go on with your life
-    g_log.error() << "Error loading metadata: " << e.what() << std::endl;
+    g_log.error() << "Error loading metadata: " << e.what() << '\n';
   }
 
   // --------------------------- Time filtering
@@ -1995,15 +1994,15 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
   g_log.information() << "Read " << eventsLoaded << " events"
                       << ". Shortest TOF: " << shortest_tof
                       << " microsec; longest TOF: " << longest_tof
-                      << " microsec." << std::endl;
+                      << " microsec.\n";
 
   if (shortest_tof < 0)
     g_log.warning() << "The shortest TOF was negative! At least 1 event has an "
-                       "invalid time-of-flight." << std::endl;
+                       "invalid time-of-flight.\n";
   if (bad_tofs > 0)
     g_log.warning() << "Found " << bad_tofs << " events with TOF > 2e8. This "
                                                "may indicate errors in the raw "
-                                               "TOF data." << std::endl;
+                                               "TOF data.\n";
 
   // Use T0 offset from TOPAZ Parameter file if it exists
   if (m_ws->getInstrument()->hasParameter("T0")) {
@@ -2330,7 +2329,7 @@ void LoadEventNexus::runLoadMonitorsAsEvents(API::Progress *const prog) {
     if (m_instrument_loaded_correctly) {
       m_ws->setInstrument(dataWS->getInstrument());
       g_log.information() << "Instrument data copied into monitors workspace "
-                             " from the data workspace." << std::endl;
+                             " from the data workspace.\n";
     }
 
     // Perform the load (only events from monitor)
@@ -2342,17 +2341,17 @@ void LoadEventNexus::runLoadMonitorsAsEvents(API::Progress *const prog) {
     if (m_logs_loaded_correctly) {
       g_log.information()
           << "Copying log data into monitors workspace from the "
-          << "data workspace." << std::endl;
+          << "data workspace.\n";
       try {
         auto to = m_ws->getSingleHeldWorkspace();
         auto from = dataWS;
         copyLogs(from, to);
-        g_log.information() << "Log data copied." << std::endl;
+        g_log.information() << "Log data copied.\n";
       } catch (std::runtime_error &) {
         g_log.error()
             << "Could not copy log data into monitors workspace. Some "
                " logs may be wrong and/or missing in the output "
-               "monitors workspace." << std::endl;
+               "monitors workspace.\n";
       }
     }
 
@@ -2371,7 +2370,7 @@ void LoadEventNexus::runLoadMonitorsAsEvents(API::Progress *const prog) {
     filterDuringPause(m_ws);
   } catch (const std::exception &e) {
     g_log.error() << "Error while loading monitors as events from file: ";
-    g_log.error() << e.what() << std::endl;
+    g_log.error() << e.what() << '\n';
   }
 }
 
@@ -2394,7 +2393,7 @@ void LoadEventNexus::runLoadMonitors() {
     g_log.information("Loading monitors from NeXus file...");
     loadMonitors->setPropertyValue("Filename", m_filename);
     g_log.information() << "New workspace name for monitors: " << mon_wsname
-                        << std::endl;
+                        << '\n';
     loadMonitors->setPropertyValue("OutputWorkspace", mon_wsname);
     loadMonitors->setPropertyValue("MonitorsAsEvents",
                                    this->getProperty("MonitorsAsEvents"));

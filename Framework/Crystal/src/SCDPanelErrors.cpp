@@ -419,7 +419,7 @@ void SCDPanelErrors::function1D(double *out, const double *xValues,
   Check(m_peaks, xValues, nData, StartX, EndX);
 
   g_log.debug() << "BankNames " << BankNames << "   Number of peaks"
-                << (EndX - StartX + 1) / 3 << std::endl;
+                << (EndX - StartX + 1) / 3 << '\n';
 
   // some pointers for the updated instrument
   boost::shared_ptr<Geometry::Instrument> instChange =
@@ -479,21 +479,21 @@ void SCDPanelErrors::function1D(double *out, const double *xValues,
   for (size_t i = EndX; i < nData; ++i)
     out[i] = 0.;
 
-  g_log.debug() << "Parameters" << std::endl;
+  g_log.debug() << "Parameters\n";
 
   for (size_t i = 0; i < this->nParams(); ++i)
     g_log.debug() << setw(20) << parameterName(i) << setw(20) << getParameter(i)
-                  << std::endl;
+                  << '\n';
 
   g_log.debug() << "      chi Squared=" << std::setprecision(12) << chiSq
-                << std::endl;
+                << '\n';
 
   // Get values for test program. TODO eliminate
   g_log.debug() << "  out[evenxx]=";
   for (size_t i = 0; i < std::min<size_t>(nData, 30); ++i)
     g_log.debug() << out[i] << "  ";
 
-  g_log.debug() << std::endl;
+  g_log.debug() << '\n';
 }
 
 double SCDPanelErrors::checkForNonsenseParameters() const {

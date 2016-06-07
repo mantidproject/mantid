@@ -100,7 +100,7 @@ const std::string AlgorithmAdapter<BaseAlgorithm>::category() const {
         << "Python Algorithm " << name << " v" << version
         << " does not have a category defined. See "
            "http://www.mantidproject.org/Basic_PythonAlgorithm_Structure"
-        << std::endl;
+        << '\n';
   }
   return algCategory;
 }

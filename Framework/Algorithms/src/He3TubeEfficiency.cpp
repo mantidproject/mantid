@@ -375,7 +375,7 @@ void He3TubeEfficiency::logErrors() const {
     for (size_t i = 0; i < nspecs; ++i) {
       this->g_log.debug() << this->spectraSkipped[i] << " ";
     }
-    this->g_log.debug() << std::endl;
+    this->g_log.debug() << '\n';
   }
 }
 

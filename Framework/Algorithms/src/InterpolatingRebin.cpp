@@ -158,7 +158,7 @@ void InterpolatingRebin::outputYandEValues(
       cubicInterpolation(XValues, YValues, YErrors, *XValues_new, YValues_new,
                          Errors_new);
     } catch (std::exception &ex) {
-      g_log.error() << "Error in rebin function: " << ex.what() << std::endl;
+      g_log.error() << "Error in rebin function: " << ex.what() << '\n';
       throw;
     }
 

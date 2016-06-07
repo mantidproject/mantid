@@ -221,10 +221,10 @@ bool PythonScripting::start() {
       d_initialized = false;
     }
   } catch (std::exception &ex) {
-    std::cerr << "Exception in PythonScripting.cpp: " << ex.what() << std::endl;
+    std::cerr << "Exception in PythonScripting.cpp: " << ex.what() << '\n';
     d_initialized = false;
   } catch (...) {
-    std::cerr << "Exception in PythonScripting.cpp" << std::endl;
+    std::cerr << "Exception in PythonScripting.cpp\n";
     d_initialized = false;
   }
   if (d_initialized) {

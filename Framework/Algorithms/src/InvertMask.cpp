@@ -52,7 +52,7 @@ void InvertMask::exec() {
 
   if (!invert->isExecuted()) {
     g_log.error() << "ChildAlgorithm BinaryOperateMask() cannot be executed. "
-                  << std::endl;
+                  << '\n';
     throw std::runtime_error(
         "ChildAlgorithm BinaryOperateMask() cannot be executed. ");
   }

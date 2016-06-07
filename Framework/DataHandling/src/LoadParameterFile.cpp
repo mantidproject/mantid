@@ -123,7 +123,7 @@ void LoadParameterFile::exec() {
                 .setFileName(filePath.getFileName())
                 .toString();
       }
-      g_log.information() << "Parsing from XML file: " << filename << std::endl;
+      g_log.information() << "Parsing from XML file: " << filename << '\n';
       pDoc = pParser.parse(filename);
     } catch (Poco::Exception &exc) {
       throw Kernel::Exception::FileError(

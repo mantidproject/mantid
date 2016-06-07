@@ -421,7 +421,7 @@ void LoadISISNexus2::exec() {
       }
     } else {
       g_log.information() << " no monitors to load for workspace: " << wsName
-                          << std::endl;
+                          << '\n';
     }
   }
 
@@ -846,7 +846,7 @@ void LoadISISNexus2::loadPeriodData(
     local_workspace->mutableRun().addProperty("run_title", title, true);
   } catch (std::runtime_error &) {
     g_log.debug() << "No title was found in the input file, "
-                  << getPropertyValue("Filename") << std::endl;
+                  << getPropertyValue("Filename") << '\n';
   }
 }
 

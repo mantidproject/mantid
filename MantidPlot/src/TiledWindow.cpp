@@ -39,7 +39,7 @@ Tile::Tile(QWidget *parent)
  * Destructor.
  */
 Tile::~Tile() {
-  // std::cerr << "Tile deleted." << std::endl;
+  // std::cerr << "Tile deleted.\n";
 }
 
 /**

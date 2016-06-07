@@ -113,10 +113,10 @@ void CheckMantidVersion::exec() {
       // formatting issues like missing quotes or brackets.
       g_log.warning() << "Error found when parsing version information "
                          "retrieved from GitHub as a JSON string. "
-                         "Error trying to parse this JSON string: " << json
-                      << std::endl
+                         "Error trying to parse this JSON string: "
+                      << json << std::endl
                       << ". Parsing error details: "
-                      << r.getFormattedErrorMessages() << std::endl;
+                      << r.getFormattedErrorMessages() << '\n';
     }
 
     std::string gitHubVersionTag;
@@ -127,7 +127,7 @@ void CheckMantidVersion::exec() {
           << "Error while trying to get the field 'tag_name' from "
              "the version information retrieved from GitHub. This "
              "algorithm cannot continue and will stop now. Error details: "
-          << re.what() << std::endl;
+          << re.what() << '\n';
 
       mostRecentVersion = "Could not get information from GitHub";
       setProperty("MostRecentVersion", mostRecentVersion);

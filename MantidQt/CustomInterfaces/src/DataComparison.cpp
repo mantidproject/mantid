@@ -141,14 +141,14 @@ void DataComparison::addDataItem(Workspace_const_sptr ws) {
       boost::dynamic_pointer_cast<const MatrixWorkspace>(ws);
   if (!matrixWs) {
     g_log.error() << "Workspace " << ws->name() << "is of incorrect type!"
-                  << std::endl;
+                  << '\n';
     return;
   }
 
   // Check that the workspace does not already exist in the comparison
   if (containsWorkspace(matrixWs)) {
     g_log.information() << "Workspace " << matrixWs->name()
-                        << " already shown in comparison." << std::endl;
+                        << " already shown in comparison.\n";
     return;
   }
 
@@ -338,7 +338,7 @@ void DataComparison::plotWorkspaces() {
     int wsIndex = globalWsIndex - specOffset;
     g_log.debug() << "Workspace index for workspace "
                   << workspaceName.toStdString() << " is " << wsIndex
-                  << ", with offset " << specOffset << std::endl;
+                  << ", with offset " << specOffset << '\n';
 
     // See if this workspace extends the reach of the global spectrum selector
     int maxGlobalWsIndexForWs = numSpec + specOffset - 1;
@@ -348,7 +348,7 @@ void DataComparison::plotWorkspaces() {
     // Check the workspace index is in range
     if (wsIndex >= numSpec || wsIndex < 0) {
       g_log.debug() << "Workspace " << workspaceName.toStdString()
-                    << ", workspace index out of range." << std::endl;
+                    << ", workspace index out of range.\n";
       ;
 
       // Give "n/a" in current spectrum display
@@ -586,7 +586,7 @@ void DataComparison::diffSelected() {
   if (selectedRows.size() != 2) {
     g_log.error()
         << "Need to have exactly 2 workspaces selected for diff (have "
-        << selectedRows.size() << ")" << std::endl;
+        << selectedRows.size() << ")\n";
     return;
   }
 
@@ -623,7 +623,7 @@ void DataComparison::togglePan(bool enabled) {
   if (enabled && m_uiForm.pbZoom->isChecked())
     m_uiForm.pbZoom->setChecked(false);
 
-  g_log.debug() << "Pan tool enabled: " << enabled << std::endl;
+  g_log.debug() << "Pan tool enabled: " << enabled << '\n';
 
   m_panTool->setEnabled(enabled);
   m_magnifyTool->setEnabled(enabled);
@@ -639,7 +639,7 @@ void DataComparison::toggleZoom(bool enabled) {
   if (enabled && m_uiForm.pbPan->isChecked())
     m_uiForm.pbPan->setChecked(false);
 
-  g_log.debug() << "Zoom tool enabled: " << enabled << std::endl;
+  g_log.debug() << "Zoom tool enabled: " << enabled << '\n';
 
   m_zoomTool->setEnabled(enabled);
   m_magnifyTool->setEnabled(enabled);
