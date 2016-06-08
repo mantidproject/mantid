@@ -92,7 +92,6 @@ void ProcessIndirectFitParameters::exec() {
           parameterNamesProp);
   std::string xUnit = getProperty("XAxisUnit");
   MatrixWorkspace_sptr outputWs = getProperty("OutputWorkspace");
-  const std::string outputWsName = getPropertyValue("OutputWorkspace");
   // list of all the column names to be put into the output workspace
   auto allOutputColumns = std::vector<std::string>();
 
