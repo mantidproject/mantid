@@ -120,7 +120,13 @@ void UsageServiceImpl::setEnabled(const bool enabled) {
   m_isEnabled = enabled;
 }
 
-void UsageServiceImpl::flush() {
+  void UsageServiceImpl::clear()
+  {
+    std::queue<FeatureUsage> empty;
+    std::swap(m_FeatureQueue, empty);
+  }
+
+  void UsageServiceImpl::flush() {
   if (isEnabled()) {
     sendFeatureUsageReport(true);
   }

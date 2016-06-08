@@ -39,6 +39,7 @@ public:
 private:
   void init() override final;
   void exec() override final;
+  int deleteFiles(const std::string &path, const std::string &pattern) const;
 };
 
 } // namespace Algorithms
