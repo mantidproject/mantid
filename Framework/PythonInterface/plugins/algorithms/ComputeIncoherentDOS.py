@@ -34,7 +34,7 @@ class ComputeIncoherentDOS(PythonAlgorithm):
     # Based on code in PySlice by Jon Taylor
 
     def category(self):
-        return 'Inelastic;PythonAlgorithms'
+        return 'Inelastic'
 
     def name(self):
         return 'ComputeIncoherentDOS'
