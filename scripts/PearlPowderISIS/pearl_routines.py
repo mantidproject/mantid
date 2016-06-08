@@ -1035,24 +1035,29 @@ def PEARL_createvan(van, empty, ext="raw", fmode="all", ttmode="TT88",
             print "Not in debug mode so will delete all temporary workspaces"
 
         ConvertUnits(InputWorkspace="vanstrip", OutputWorkspace="vanstrip", Target="TOF")
-        SplineBackground(InputWorkspace="vanstrip", OutputWorkspace="spline1", WorkspaceIndex=0, NCoeff=100)
-        SplineBackground(InputWorkspace="vanstrip", OutputWorkspace="spline2", WorkspaceIndex=1, NCoeff=80)
-        SplineBackground(InputWorkspace="vanstrip", OutputWorkspace="spline3", WorkspaceIndex=2, NCoeff=100)
-        SplineBackground(InputWorkspace="vanstrip", OutputWorkspace="spline4", WorkspaceIndex=3, NCoeff=100)
+
+        for i in range(0, 4):
+            coeff = 100
+            if(i == 1):
+                coeff = 80
+            SplineBackground(InputWorkspace="vanstrip", OutputWorkspace="spline" + str(i+1), WorkspaceIndex=i,
+                             NCoeff=coeff)
+
+
         # ConvertUnits("spline1","spline1","TOF")
         # ConvertUnits("spline2","spline2","TOF")
         # ConvertUnits("spline3","spline3","TOF")
         # ConvertUnits("spline4","spline4","TOF")
+
         SaveNexus(Filename=nvanfile, InputWorkspace="spline1", Append=False)
-        SaveNexus(Filename=nvanfile, InputWorkspace="spline2", Append=True)
-        SaveNexus(Filename=nvanfile, InputWorkspace="spline3", Append=True)
-        SaveNexus(Filename=nvanfile, InputWorkspace="spline4", Append=True)
+        for i in range(1, 4):
+            SaveNexus(Filename=nvanfile, InputWorkspace="spline" + str(i), Append=True)
+
         if (debug != True):
             mtd.remove("vanstrip")
-            mtd.remove("spline1")
-            mtd.remove("spline2")
-            mtd.remove("spline3")
-            mtd.remove("spline4")
+            for i in range(1, 5):
+                mtd.remove("spline" + str(i))
+
     else:
         print "Sorry I don't know that mode"
         return
