@@ -207,7 +207,8 @@ void FindCenterOfMassPosition2::exec() {
 
     if (!direct_beam && (radius_x <= beam_radius || radius_y <= beam_radius)) {
       g_log.error() << "Center of mass falls within the beam center area: "
-                       "stopping here\n" break;
+                       "stopping here\n";
+      break;
     }
 
     center_x = position_x;
