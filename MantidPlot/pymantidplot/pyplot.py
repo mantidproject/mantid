@@ -459,8 +459,13 @@ from PyQt4 import Qt, QtGui, QtCore
 from mantid.api import (IMDWorkspace as IMDWorkspace, MatrixWorkspace as MatrixWorkspace, AlgorithmManager as AlgorithmManager, AnalysisDataService as ADS)
 from mantid.api import mtd
 #    return __is_workspace(arg) or (mantid.api.mtd.doesExist(arg) and isinstance(mantid.api.mtd[arg], mantid.api.IMDWorkspace))
-from mantid.simpleapi import CreateWorkspace as CreateWorkspace
-import mantidplot  
+try:
+    from mantid.simpleapi import CreateWorkspace
+except ImportError:
+    def CreateWorkspace(*args, **kwargs):
+        raise RuntimeError("CreateWorkspace function not available")
+
+import mantidplot
 import mantidqtpython
 
 class Line2D():
