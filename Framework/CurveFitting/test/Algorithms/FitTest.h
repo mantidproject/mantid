@@ -776,10 +776,19 @@ public:
     fit.initialize();
     fit.setProperty("Function", "name=LatticeFunction,LatticeSystem=Cubic,"
                                 "ProfileFunction=Gaussian,a=5,ZeroShift=0");
+    fit.setProperty("Ties", "ZeroShift=0.0");
     fit.setProperty("InputWorkspace", table);
     fit.setProperty("CostFunction", "Unweighted least squares");
     fit.setProperty("CreateOutput", true);
     fit.execute();
+
+    TS_ASSERT(fit.isExecuted());
+
+    // test the output from fit is what you expect
+    IFunction_sptr out = fit.getProperty("Function");
+
+    TS_ASSERT_DELTA(out->getParameter("a"), 5.4311946, 1e-6);
+    TS_ASSERT_LESS_THAN(out->getError(0), 1e-6);
   }
 };
 
