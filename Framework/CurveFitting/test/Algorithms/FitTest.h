@@ -715,6 +715,8 @@ public:
 
   void test_function_exp_decay_fit() {
     Algorithms::Fit alg2;
+    TS_ASSERT_THROWS_NOTHING(alg2.initialize());
+    TS_ASSERT(alg2.isInitialized());
 
     // create mock data to test against
     std::string wsName = "ExpDecayMockData";
@@ -741,6 +743,24 @@ public:
     alg2.setPropertyValue("WorkspaceIndex", "0");
     alg2.setPropertyValue("StartX", "0");
     alg2.setPropertyValue("EndX", "20");
+
+    // execute fit
+    TS_ASSERT_THROWS_NOTHING(TS_ASSERT(alg2.execute()))
+
+    TS_ASSERT(alg2.isExecuted());
+
+    // test the output from fit is what you expect
+    double dummy = alg2.getProperty("OutputChi2overDoF");
+    TS_ASSERT_DELTA(dummy, 0.0001, 0.0001);
+
+    IFunction_sptr out = alg2.getProperty("Function");
+    TS_ASSERT_DELTA(out->getParameter("Height"), 5, 0.0001);
+    TS_ASSERT_DELTA(out->getParameter("Lifetime"), 3, 0.001);
+
+    // check it categories
+    const std::vector<std::string> categories = out->categories();
+    TS_ASSERT(categories.size() == 1);
+    TS_ASSERT(categories[0] == "General");
   }
 };
 
