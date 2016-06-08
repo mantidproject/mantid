@@ -327,7 +327,8 @@ std::vector<int> LoadSpice2D::getData(const std::string &dataXpath = "//Data") {
     // Horrible hack:
     // Some old files had a: //Data/DetectorWing with dimensions:
     // 16 x 256 = 4096. This must be igored as it is not in the IDF.
-    if (detectorXpath.find("DetectorWing") != std::string::npos && dims.first * dims.second <= 4096)
+    if (detectorXpath.find("DetectorWing") != std::string::npos &&
+        dims.first * dims.second <= 4096)
       break;
 
     totalDataSize += dims.first * dims.second;
