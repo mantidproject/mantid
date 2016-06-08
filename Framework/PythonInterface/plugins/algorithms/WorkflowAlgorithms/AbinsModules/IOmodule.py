@@ -18,7 +18,7 @@ class IOmodule(object):
         """
         Set up hdf file.
         """
-        core_name = file_name[0:self._filename.find(".")]
+        core_name = file_name[0:file_name.find(".")]
         self._hdf_filename = core_name + ".hdf5"
         self._group_name = group_name
         self._attributes = {}
