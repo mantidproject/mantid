@@ -1,8 +1,11 @@
 #pylint: disable=no-init, too-many-instance-attributes
 from mantid import logger, AlgorithmFactory
-from mantid.api import *
 from mantid.kernel import *
+from mantid.api import (PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty,
+                        ITableWorkspaceProperty, WorkspaceGroupProperty, Progress)
 from mantid.simpleapi import *
+
+
 import os.path
 
 class IqtFitMultiple(PythonAlgorithm):
@@ -185,9 +188,9 @@ class IqtFitMultiple(PythonAlgorithm):
         parameter_names = 'A0,Intensity,Tau,Beta'
         conclusion_prog.report('Processing indirect fit parameters')
         result_workspace = ProcessIndirectFitParameters(InputWorkspace=self._parameter_name,
-                                                         ColumnX="axis-1", XAxisUnit="MomentumTransfer",
-                                                         ParameterNames=parameter_names,
-                                                         OutputWorkspace=self._result_name)
+                                                        ColumnX="axis-1", XAxisUnit="MomentumTransfer",
+                                                        ParameterNames=parameter_names,
+                                                        OutputWorkspace=self._result_name)
 
         # create and add sample logs
         sample_logs  = {'start_x': self._start_x, 'end_x': self._end_x, 'fit_type': self._fit_type[:-2],
