@@ -11,6 +11,7 @@ Algorithms
 New
 ###
 
+-  :ref:`ClearCache <algm-ClearCache>` an algorithm to simplify the clearance of several in memory or disk caches used in Mantid.
 
 Improved
 ########
