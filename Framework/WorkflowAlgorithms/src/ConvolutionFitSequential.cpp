@@ -120,7 +120,9 @@ void ConvolutionFitSequential::init() {
                   "The maximum number of iterations permitted",
                   Direction::Input);
 
-  declareProperty("OutputWorkspace", "", Direction::Output);
+  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                   Direction::Output),
+                  "The OutputWorkspace containing the results of the fit.");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -287,6 +289,7 @@ void ConvolutionFitSequential::exec() {
   pifp->executeAsChildAlg();
 
   MatrixWorkspace_sptr resultWs = pifp->getProperty("OutputWorkspace");
+  AnalysisDataService::Instance().addOrReplace(resultWsName, resultWs);
 
   // Handle sample logs
   auto logCopier = createChildAlgorithm("CopyLogs");
@@ -328,6 +331,7 @@ void ConvolutionFitSequential::exec() {
     logAdder->executeAsChildAlg();
     logAdderProg.report("Adding Numerical logs");
   }
+
   // Copy Logs to GroupWorkspace
   logCopier = createChildAlgorithm("CopyLogs", 0.97, 0.98, true);
   logCopier->setProperty("InputWorkspace", resultWs);
@@ -352,8 +356,7 @@ void ConvolutionFitSequential::exec() {
     renamerProg.report("Renaming group workspaces");
   }
 
-  AnalysisDataService::Instance().addOrReplace(resultWsName, resultWs);
-  setProperty("OutputWorkspace", resultWsName);
+  setProperty("OutputWorkspace", resultWs);
 }
 
 /**
