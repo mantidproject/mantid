@@ -1,22 +1,30 @@
 import numpy as np
 import re
 import hashlib
+from IOmodule import IOmodule
 
-class LoadCASTEP:
+class LoadCASTEP(IOmodule):
     """
     Class which handles loading files from foo.phonon output CASTEP files.
+    Functions to read phonon file taken from SimulatedDensityOfStates (credits for Elliot Oram.).
     """
 
-    # Functions to read phonon file taken from
-    # SimulatedDensityOfStates. All credits for those methods to Elliot Oram.
-
-    # ----------------------------------------------------------------------------------------
-
     def __init__(self, filename):
+        super(IOmodule, self).__init__()
+        self._filename = filename
 
-        self.filename = filename+".phonon"
         # Regex pattern for a floating point number
         self._float_regex = r'\-?(?:\d+\.?\d*|\d*\.?\d+)'
+
+        # set hdf file
+        core_name =  self._filename[0:self._filename.find(".")]
+        self._hdf_filename = core_name + ".hdf5"
+        self._group_name = "PhononAB" # stuff from ab-initio calculations is stored in this group.
+        self.setHdfFile()
+
+        # initialize data which will be saved to hdf file
+        self._attributes = {}
+        self._datasets = {}
 
     # noinspection PyMethodMayBeStatic
     def _parse_block_header(self, header_match, block_count):
@@ -135,7 +143,7 @@ class LoadCASTEP:
         buf = 65536  # chop content of phonon file into 64kb chunks to minimize memory consumption for hash creation
         sha = hashlib.sha512()
 
-        with open(self.filename, 'rU') as f:
+        with open(self._filename, 'rU') as f:
             while True:
                 data = f.read(buf)
                 if not data:
@@ -146,13 +154,12 @@ class LoadCASTEP:
 
     def readPhononFile(self):
         """
-        Read frequencies from a <>.phonon file
+        Read frequencies from a <>.phonon file. Save hash of the phonon file (hash) to <>.hdf5
 
         @return dictionary with the frequencies for each k_point (frequencies),
                 weights of k_points (weights),
                 k_vectors (k_vectors),
-                amplitudes of atom distortions for each k-point (eigenvectors),
-                hash of the phonon file (hash) and
+                amplitudes of atom distortions for each k-point (eigenvectors) and
                 whether we have Gamma point calculations or calculations for the whole Brillouin Zone ("gamma_calculations")
         """
         file_data = {}
@@ -166,7 +173,7 @@ class LoadCASTEP:
 
         frequencies, ir_intensities, raman_intensities, weights, k_vectors, eigenvectors = [], [], [], [], [], []
         data_lists = (frequencies, ir_intensities, raman_intensities)
-        with open(self.filename, 'rU') as f_handle:
+        with open(self._filename, 'rU') as f_handle:
             file_data.update(self._parse_phonon_file_header(f_handle))
 
             while True:
@@ -209,7 +216,16 @@ class LoadCASTEP:
                           "weights": warray,
                           "k_vectors": k_vectors,
                           "eigenvectors": eigenvectors,
-                          "hash": hash_filename,
-                          "gamma_calculations":gamma_point_calculations})
+                          "gamma_calculations":gamma_point_calculations,
+                          "hash":hash_filename})
+
+        # save stuff to hdf file
+        self.addDataset("frequencies", frequencies)
+        self.addDataset("weights", warray)
+        self.addDataset("k_vectors", k_vectors)
+        self.addDataset("eigenvectors", eigenvectors)
+        self.addAttribute("gamma_calculations", gamma_point_calculations)
+        self.addAttribute("hash", hash_filename)
+        self.save()
 
         return file_data

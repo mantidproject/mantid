@@ -16,4 +16,7 @@ algorithms and data objects that are:
       Implementing Algorithms, Virtual Instrument Geometry.
 
 """
+
 from LoadCASTEP import LoadCASTEP
+from IOmodule import IOmodule
+
