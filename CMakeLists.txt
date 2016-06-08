@@ -58,11 +58,6 @@ if ( ${CMAKE_SYSTEM_NAME} MATCHES "Darwin" )
 endif ()
 
 ###########################################################################
-# Set working Python versions
-###########################################################################
-set ( Python_ADDITIONAL_VERSIONS 2.7 2.6 )
-
-###########################################################################
 # Cross-platform setup
 ###########################################################################
 include ( CommonSetup )
@@ -137,6 +132,16 @@ set( DOCS_BUILDDIR ${CMAKE_BINARY_DIR}/docs )
 set ( CXXTEST_SINGLE_LOGFILE CACHE BOOL "Switch to have the tests for each package run together")
 set ( CXXTEST_ADD_PERFORMANCE OFF CACHE BOOL "Switch to add Performance tests to the list of tests run by ctest?")
 
+
+# VATES flag. Requires ParaView
+set ( MAKE_VATES OFF CACHE BOOL "Switch for compiling the Vates project")
+if (MAKE_VATES)
+  find_package(ParaView)
+  if(ParaView_FOUND)
+    add_definitions ( -DMAKE_VATES )
+  endif()
+endif()
+
 add_subdirectory ( Framework )
 
 include_directories ( Framework/Kernel/inc )
@@ -158,15 +163,8 @@ if ( UNIX )
   set ( UNITY_BUILD OFF CACHE BOOL "Switch for utilising unity builds. Faster builds for selected components.")
 endif ( UNIX )
 
-# VATES flag. Requires ParaView
-set ( MAKE_VATES OFF CACHE BOOL "Switch for compiling the Vates project")
-
 if ( MAKE_VATES )
-  find_package( ParaView )
   add_subdirectory ( Vates )
-  if(ParaView_FOUND)
-    add_definitions ( -DMAKE_VATES )
-  endif()
   if (NOT APPLE)
     LIST( APPEND CPACK_INSTALL_CMAKE_PROJECTS
           "${ParaView_DIR}" "ParaView Runtime Libs" "Runtime" "${INBUNDLE}/"

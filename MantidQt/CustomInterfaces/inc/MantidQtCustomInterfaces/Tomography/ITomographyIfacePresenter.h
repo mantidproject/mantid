@@ -43,7 +43,7 @@ public:
     ToolChanged,      ///< 'current' tomographic reconstruction tool changed
     TomoPathsChanged, ///< user selects tomography data paths
     TomoPathsEditedByUser, ///< user edits manually paths that may modify other
-                           ///paths
+    /// paths
     LogInRequested,        ///< user hits 'log in' or similar
     LogOutRequested,       ///< user hits 'log out' or similar
     SetupReconTool,        ///< To start the setup (open dialog, etc.)

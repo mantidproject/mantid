@@ -1,24 +1,24 @@
 #ifndef MANTIDQTCUSTOMINTERFACES_DYNAMICPDF_DISPLAYCONTROL_H_
 #define MANTIDQTCUSTOMINTERFACES_DYNAMICPDF_DISPLAYCONTROL_H_
 
-//Mantid Coding standars <http://www.mantidproject.org/Coding_Standards>
-//Mantid Headers from the same project
-//Mantid headers from other projects
+// Mantid Coding standars <http://www.mantidproject.org/Coding_Standards>
+// Mantid Headers from the same project
+// Mantid headers from other projects
 #include "MantidQtCustomInterfaces/DllConfig.h"
 #include "MantidAPI/MatrixWorkspace.h"
-//3rd party library headers
+// 3rd party library headers
 #include <QObject>
-//system headers
+// system headers
 
 // Class forward declarations
 namespace MantidQt {
 namespace MantidWidgets {
-  class DisplayCurveFit;
-  class RangeSelector;
+class DisplayCurveFit;
+class RangeSelector;
 }
 namespace CustomInterfaces {
 namespace DynamicPDF {
-  class InputDataControl;
+class InputDataControl;
 }
 }
 }
@@ -57,10 +57,10 @@ class MANTIDQT_CUSTOMINTERFACES_DLL DisplayControl : public QObject {
 
 public:
   DisplayControl(InputDataControl *inputDataControl,
-    MantidQt::MantidWidgets::DisplayCurveFit *displayModelFit);
+                 MantidQt::MantidWidgets::DisplayCurveFit *displayModelFit);
   ~DisplayControl();
   void init();
-  std::pair<double,double> getFitMinMax();
+  std::pair<double, double> getFitMinMax();
   void setFitMin(const double &);
   void setFitMax(const double &);
 
@@ -85,12 +85,8 @@ private:
   const std::string m_dataShownName;
 
 }; // class DisplayControl
-
-
-
 }
 }
 }
-
 
 #endif // MANTIDQTCUSTOMINTERFACES_DYNAMICPDF_INPUTDATACONTROL_H_

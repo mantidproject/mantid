@@ -65,7 +65,9 @@ if( MSVC )
   unset ( _tmp_dir )
 
   # Print out where we are looking for 3rd party stuff
-  set ( THIRD_PARTY_BIN "${THIRD_PARTY_DIR}/bin;${THIRD_PARTY_DIR}/lib/qt4/bin;${THIRD_PARTY_DIR}/lib/python2.7" )
+  set ( PYTHON_MAJOR_VERSION 2 )
+  set ( PYTHON_MINOR_VERSION 7 )
+  set ( THIRD_PARTY_BIN "${THIRD_PARTY_DIR}/bin;${THIRD_PARTY_DIR}/lib/qt4/bin;${THIRD_PARTY_DIR}/lib/python${PYTHON_MAJOR_VERSION}.${PYTHON_MINOR_VERSION}" )
   message ( STATUS "Third party dependencies are in ${THIRD_PARTY_DIR}" )
   # Add to the path so that cmake can configure correctly without the user having to do it
   set ( ENV{PATH} "${THIRD_PARTY_BIN};$ENV{PATH}" )

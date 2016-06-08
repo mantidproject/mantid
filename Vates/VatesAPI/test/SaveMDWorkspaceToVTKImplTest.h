@@ -12,279 +12,250 @@
 
 using namespace Mantid::DataObjects;
 
-class SaveMDWorkspaceToVTKImplTest : public CxxTest::TestSuite
-{
+class SaveMDWorkspaceToVTKImplTest : public CxxTest::TestSuite {
 public:
-    void test_that_vector_of_normalization_strings_has_all_values()
-    {
-        // Arrange
-        Mantid::VATES::SaveMDWorkspaceToVTKImpl saveMDToVTK;
+  void test_that_vector_of_normalization_strings_has_all_values() {
+    // Arrange
+    Mantid::VATES::SaveMDWorkspaceToVTKImpl saveMDToVTK;
 
-        // Act
-        const auto normalizations
-            = saveMDToVTK.getAllowedNormalizationsInStringRepresentation();
+    // Act
+    const auto normalizations =
+        saveMDToVTK.getAllowedNormalizationsInStringRepresentation();
 
-        // Assert
-        TSM_ASSERT_EQUALS("There should be 4 normalization options.",
-                          normalizations.size(), 4);
-        TSM_ASSERT_EQUALS("First normalization should be AutoSelect.",
-                          normalizations[0], "AutoSelect");
-        TSM_ASSERT_EQUALS("First normalization should be NoNormalization.",
-                          normalizations[1], "NoNormalization");
-        TSM_ASSERT_EQUALS(
-            "First normalization should be NumEventsNormalization.",
-            normalizations[2], "NumEventsNormalization");
-        TSM_ASSERT_EQUALS("First normalization should be VolumeNormalization.",
-                          normalizations[3], "VolumeNormalization");
-    }
+    // Assert
+    TSM_ASSERT_EQUALS("There should be 4 normalization options.",
+                      normalizations.size(), 4);
+    TSM_ASSERT_EQUALS("First normalization should be AutoSelect.",
+                      normalizations[0], "AutoSelect");
+    TSM_ASSERT_EQUALS("First normalization should be NoNormalization.",
+                      normalizations[1], "NoNormalization");
+    TSM_ASSERT_EQUALS("First normalization should be NumEventsNormalization.",
+                      normalizations[2], "NumEventsNormalization");
+    TSM_ASSERT_EQUALS("First normalization should be VolumeNormalization.",
+                      normalizations[3], "VolumeNormalization");
+  }
 
-    void test_string_representation_converts_to_visual_normalization()
-    {
-        // Arrange
-        Mantid::VATES::SaveMDWorkspaceToVTKImpl saveMDToVTK;
-        const auto normalizations
-            = saveMDToVTK.getAllowedNormalizationsInStringRepresentation();
+  void test_string_representation_converts_to_visual_normalization() {
+    // Arrange
+    Mantid::VATES::SaveMDWorkspaceToVTKImpl saveMDToVTK;
+    const auto normalizations =
+        saveMDToVTK.getAllowedNormalizationsInStringRepresentation();
 
-        // Act
-        const auto autoSelect
-            = saveMDToVTK.translateStringToVisualNormalization(
-                normalizations[0]);
-        const auto noNormalization
-            = saveMDToVTK.translateStringToVisualNormalization(
-                normalizations[1]);
-        const auto numEventsNormalization
-            = saveMDToVTK.translateStringToVisualNormalization(
-                normalizations[2]);
-        const auto volumeNormalization
-            = saveMDToVTK.translateStringToVisualNormalization(
-                normalizations[3]);
+    // Act
+    const auto autoSelect =
+        saveMDToVTK.translateStringToVisualNormalization(normalizations[0]);
+    const auto noNormalization =
+        saveMDToVTK.translateStringToVisualNormalization(normalizations[1]);
+    const auto numEventsNormalization =
+        saveMDToVTK.translateStringToVisualNormalization(normalizations[2]);
+    const auto volumeNormalization =
+        saveMDToVTK.translateStringToVisualNormalization(normalizations[3]);
 
-        // Assert
-        TSM_ASSERT_EQUALS("The visual normalization should be AutoSelect.",
-                          autoSelect, Mantid::VATES::AutoSelect);
-        TSM_ASSERT_EQUALS("The visual normalization should be NoNormalization.",
-                          noNormalization, Mantid::VATES::NoNormalization);
-        TSM_ASSERT_EQUALS(
-            "The visual normalization should be NumEventsNormalization.",
-            numEventsNormalization, Mantid::VATES::NumEventsNormalization);
-        TSM_ASSERT_EQUALS(
-            "The visual normalization should be VolumeNormalization.",
-            volumeNormalization, Mantid::VATES::VolumeNormalization);
-    }
+    // Assert
+    TSM_ASSERT_EQUALS("The visual normalization should be AutoSelect.",
+                      autoSelect, Mantid::VATES::AutoSelect);
+    TSM_ASSERT_EQUALS("The visual normalization should be NoNormalization.",
+                      noNormalization, Mantid::VATES::NoNormalization);
+    TSM_ASSERT_EQUALS(
+        "The visual normalization should be NumEventsNormalization.",
+        numEventsNormalization, Mantid::VATES::NumEventsNormalization);
+    TSM_ASSERT_EQUALS("The visual normalization should be VolumeNormalization.",
+                      volumeNormalization, Mantid::VATES::VolumeNormalization);
+  }
 
-    void test_that_vector_of_threshold_strings_has_all_values()
-    {
-        // Arrange
-        Mantid::VATES::SaveMDWorkspaceToVTKImpl saveMDToVTK;
+  void test_that_vector_of_threshold_strings_has_all_values() {
+    // Arrange
+    Mantid::VATES::SaveMDWorkspaceToVTKImpl saveMDToVTK;
 
-        // Act
-        const auto thresholds
-            = saveMDToVTK.getAllowedThresholdsInStringRepresentation();
+    // Act
+    const auto thresholds =
+        saveMDToVTK.getAllowedThresholdsInStringRepresentation();
 
-        // Assert
-        TSM_ASSERT_EQUALS("There should be 2 normalization options",
-                          thresholds.size(), 2);
-        TSM_ASSERT_EQUALS(
-            "First normalization should be IgnoreZerosThresholdRange.",
-            thresholds[0], "IgnoreZerosThresholdRange");
-        TSM_ASSERT_EQUALS("Second normalization should be NoThresholdRange.",
-                          thresholds[1], "NoThresholdRange");
-    }
+    // Assert
+    TSM_ASSERT_EQUALS("There should be 2 normalization options",
+                      thresholds.size(), 2);
+    TSM_ASSERT_EQUALS(
+        "First normalization should be IgnoreZerosThresholdRange.",
+        thresholds[0], "IgnoreZerosThresholdRange");
+    TSM_ASSERT_EQUALS("Second normalization should be NoThresholdRange.",
+                      thresholds[1], "NoThresholdRange");
+  }
 
-    void test_string_representation_converts_to_TresholdRange()
-    {
-        // Arrange
-        Mantid::VATES::SaveMDWorkspaceToVTKImpl saveMDToVTK;
-        auto thresholds
-            = saveMDToVTK.getAllowedThresholdsInStringRepresentation();
-        // Act
-        auto ignoreZerosThresholdRange
-            = saveMDToVTK.translateStringToThresholdRange(thresholds[0]);
-        auto noThresholdRange
-            = saveMDToVTK.translateStringToThresholdRange(thresholds[1]);
-        // Assert
-        TSM_ASSERT(
-            "Should be a IgnoreZerosTresholdRange",
-            boost::
-                dynamic_pointer_cast<Mantid::VATES::IgnoreZerosThresholdRange>(
-                    ignoreZerosThresholdRange));
-        TSM_ASSERT("Should be a NoTresholdRange",
-                   boost::dynamic_pointer_cast<Mantid::VATES::ThresholdRange>(
-                       noThresholdRange));
-    }
+  void test_string_representation_converts_to_TresholdRange() {
+    // Arrange
+    Mantid::VATES::SaveMDWorkspaceToVTKImpl saveMDToVTK;
+    auto thresholds = saveMDToVTK.getAllowedThresholdsInStringRepresentation();
+    // Act
+    auto ignoreZerosThresholdRange =
+        saveMDToVTK.translateStringToThresholdRange(thresholds[0]);
+    auto noThresholdRange =
+        saveMDToVTK.translateStringToThresholdRange(thresholds[1]);
+    // Assert
+    TSM_ASSERT(
+        "Should be a IgnoreZerosTresholdRange",
+        boost::dynamic_pointer_cast<Mantid::VATES::IgnoreZerosThresholdRange>(
+            ignoreZerosThresholdRange));
+    TSM_ASSERT("Should be a NoTresholdRange",
+               boost::dynamic_pointer_cast<Mantid::VATES::ThresholdRange>(
+                   noThresholdRange));
+  }
 
-    void test_detects_when_not_3D_workspace()
-    {
-        // Arrange
-        Mantid::VATES::SaveMDWorkspaceToVTKImpl saveMDToVTK;
-        size_t numDims = 4;
-        auto workspace
-            = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, numDims);
+  void test_detects_when_not_3D_workspace() {
+    // Arrange
+    Mantid::VATES::SaveMDWorkspaceToVTKImpl saveMDToVTK;
+    size_t numDims = 4;
+    auto workspace = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, numDims);
 
-        // Act
-        const auto is3D = saveMDToVTK.is3DWorkspace(workspace);
+    // Act
+    const auto is3D = saveMDToVTK.is3DWorkspace(workspace);
 
-        // Assert
-        TSM_ASSERT("Detects a non-3D MD workspace", !is3D);
-    }
+    // Assert
+    TSM_ASSERT("Detects a non-3D MD workspace", !is3D);
+  }
 
-    void test_detects_when_3D_workspace()
-    {
-        // Arrange
-        Mantid::VATES::SaveMDWorkspaceToVTKImpl saveMDToVTK;
-        const size_t numDims = 3;
-        auto workspace
-            = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, numDims);
+  void test_detects_when_3D_workspace() {
+    // Arrange
+    Mantid::VATES::SaveMDWorkspaceToVTKImpl saveMDToVTK;
+    const size_t numDims = 3;
+    auto workspace = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, numDims);
 
-        // Act
-        const auto is3D = saveMDToVTK.is3DWorkspace(workspace);
+    // Act
+    const auto is3D = saveMDToVTK.is3DWorkspace(workspace);
 
-        // Assert
-        TSM_ASSERT("Detects that a 3D MD workspace", is3D);
-    }
+    // Assert
+    TSM_ASSERT("Detects that a 3D MD workspace", is3D);
+  }
 
-    void
-    test_that_saves_MD_Event_workspace_to_vts_file_without_extension_in_path_name()
-    {
-        // Arrange
-        auto workspace = getTestWorkspace("MDEvent");
+  void
+  test_that_saves_MD_Event_workspace_to_vts_file_without_extension_in_path_name() {
+    // Arrange
+    auto workspace = getTestWorkspace("MDEvent");
 
-        const std::string filenameBare = "SaveMDWorkspaceToVTKImplTestFile";
-        const std::string filenameWithExtension = filenameBare + ".vtu";
+    const std::string filenameBare = "SaveMDWorkspaceToVTKImplTestFile";
+    const std::string filenameWithExtension = filenameBare + ".vtu";
 
-        auto filenameExpected = getTemporaryFilename(filenameWithExtension);
-        removeTemporaryFile(filenameExpected);
+    auto filenameExpected = getTemporaryFilename(filenameWithExtension);
+    removeTemporaryFile(filenameExpected);
 
-        auto filename = getTemporaryFilename(filenameBare);
+    auto filename = getTemporaryFilename(filenameBare);
 
-        // Act
-        do_test_saving_to_vtk_file(workspace, filename);
+    // Act
+    do_test_saving_to_vtk_file(workspace, filename);
 
-        // Assert
-        verify_file_creation(filenameExpected);
-    }
+    // Assert
+    verify_file_creation(filenameExpected);
+  }
 
-    void
-    test_that_saves_MD_Event_workspace_to_vts_file_with_extension_in_path_name()
-    {
-        // Arrange
-        auto workspace = getTestWorkspace("MDEvent");
+  void
+  test_that_saves_MD_Event_workspace_to_vts_file_with_extension_in_path_name() {
+    // Arrange
+    auto workspace = getTestWorkspace("MDEvent");
 
-        const std::string filename = "SaveMDWorkspaceToVTKImplTestFile.vtu";
-        removeTemporaryFile(filename);
+    const std::string filename = "SaveMDWorkspaceToVTKImplTestFile.vtu";
+    removeTemporaryFile(filename);
 
-        // Act
-        do_test_saving_to_vtk_file(workspace, filename);
+    // Act
+    do_test_saving_to_vtk_file(workspace, filename);
 
-        // Assert
-        verify_file_creation(filename);
-    }
+    // Assert
+    verify_file_creation(filename);
+  }
 
-    void
-    test_that_saves_MD_Histo_workspace_to_vts_file_without_extension_in_path_name()
-    {
-        // Arrange
-        auto workspace = getTestWorkspace("MDHisto");
+  void
+  test_that_saves_MD_Histo_workspace_to_vts_file_without_extension_in_path_name() {
+    // Arrange
+    auto workspace = getTestWorkspace("MDHisto");
 
-        const std::string filenameBare = "SaveMDWorkspaceToVTKImplTestFile";
-        const std::string filenameWithExtension = filenameBare + ".vts";
+    const std::string filenameBare = "SaveMDWorkspaceToVTKImplTestFile";
+    const std::string filenameWithExtension = filenameBare + ".vts";
 
-        auto filenameExpected = getTemporaryFilename(filenameWithExtension);
-        removeTemporaryFile(filenameExpected);
+    auto filenameExpected = getTemporaryFilename(filenameWithExtension);
+    removeTemporaryFile(filenameExpected);
 
-        auto filename = getTemporaryFilename(filenameBare);
+    auto filename = getTemporaryFilename(filenameBare);
 
-        // Act
-        do_test_saving_to_vtk_file(workspace, filename);
+    // Act
+    do_test_saving_to_vtk_file(workspace, filename);
 
-        // Assert
-        verify_file_creation(filenameExpected);
-    }
+    // Assert
+    verify_file_creation(filenameExpected);
+  }
 
-    void
-    test_that_saves_MD_Histo_workspace_to_vts_file_with_extension_in_path_name()
-    {
-        // Arrange
-        auto workspace = getTestWorkspace("MDHisto");
+  void
+  test_that_saves_MD_Histo_workspace_to_vts_file_with_extension_in_path_name() {
+    // Arrange
+    auto workspace = getTestWorkspace("MDHisto");
 
-        std::string filename = "SaveMDWorkspaceToVTKImplTestFile.vts";
-        filename = getTemporaryFilename(filename);
-        removeTemporaryFile(filename);
+    std::string filename = "SaveMDWorkspaceToVTKImplTestFile.vts";
+    filename = getTemporaryFilename(filename);
+    removeTemporaryFile(filename);
 
-        // Act
-        do_test_saving_to_vtk_file(workspace, filename);
+    // Act
+    do_test_saving_to_vtk_file(workspace, filename);
 
-        // Assert
-        verify_file_creation(filename);
-    }
+    // Assert
+    verify_file_creation(filename);
+  }
 
 private:
-    void do_test_saving_to_vtk_file(Mantid::API::IMDWorkspace_sptr workspace,
-                                    std::string filename)
-    {
-        const int recursionDepth = 5;
+  void do_test_saving_to_vtk_file(Mantid::API::IMDWorkspace_sptr workspace,
+                                  std::string filename) {
+    const int recursionDepth = 5;
 
-        Mantid::VATES::SaveMDWorkspaceToVTKImpl saveMDToVTK;
+    Mantid::VATES::SaveMDWorkspaceToVTKImpl saveMDToVTK;
 
-        const auto normalizations
-            = saveMDToVTK.getAllowedNormalizationsInStringRepresentation();
-        const auto normalization
-            = saveMDToVTK.translateStringToVisualNormalization(
-                normalizations[0]);
+    const auto normalizations =
+        saveMDToVTK.getAllowedNormalizationsInStringRepresentation();
+    const auto normalization =
+        saveMDToVTK.translateStringToVisualNormalization(normalizations[0]);
 
-        const auto thresholds
-            = saveMDToVTK.getAllowedThresholdsInStringRepresentation();
-        const auto threshold
-            = saveMDToVTK.translateStringToThresholdRange(thresholds[0]);
+    const auto thresholds =
+        saveMDToVTK.getAllowedThresholdsInStringRepresentation();
+    const auto threshold =
+        saveMDToVTK.translateStringToThresholdRange(thresholds[0]);
 
-        saveMDToVTK.saveMDWorkspace(workspace, filename, normalization,
-                                    threshold, recursionDepth);
+    saveMDToVTK.saveMDWorkspace(workspace, filename, normalization, threshold,
+                                recursionDepth);
+  }
+
+  Mantid::API::IMDWorkspace_sptr getTestWorkspace(std::string workspaceType) {
+    Mantid::API::IMDWorkspace_sptr workspace;
+    if (workspaceType == "MDEvent") {
+      const std::string name = "SaveMDEventToVTKTestWorkspace";
+      workspace = MDEventsTestHelper::makeFakeMDEventWorkspace(name);
+    } else {
+      const size_t numDims = 3;
+      const size_t numBins = 5;
+      workspace =
+          MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, numDims, numBins);
     }
+    return workspace;
+  }
 
-    Mantid::API::IMDWorkspace_sptr getTestWorkspace(std::string workspaceType)
-    {
-        Mantid::API::IMDWorkspace_sptr workspace;
-        if (workspaceType == "MDEvent") {
-            const std::string name = "SaveMDEventToVTKTestWorkspace";
-            workspace = MDEventsTestHelper::makeFakeMDEventWorkspace(name);
-        } else {
-            const size_t numDims = 3;
-            const size_t numBins = 5;
-            workspace = MDEventsTestHelper::makeFakeMDHistoWorkspace(
-                1.0, numDims, numBins);
-        }
-        return workspace;
-    }
+  void verify_file_creation(std::string filename) {
+    // Assert
+    auto fileExists = doesFileExist(filename);
+    TSM_ASSERT("The according file should have been saved out", fileExists);
+    // Cleanup
+    removeTemporaryFile(filename);
+  }
 
-    void verify_file_creation(std::string filename)
-    {
-        // Assert
-        auto fileExists = doesFileExist(filename);
-        TSM_ASSERT("The according file should have been saved out", fileExists);
-        // Cleanup
-        removeTemporaryFile(filename);
-    }
+  std::string getTemporaryFilename(std::string filenameWithoutPath) const {
+    auto default_save_directory =
+        Mantid::Kernel::ConfigService::Instance().getString(
+            "defaultsave.directory");
+    std::string filenameWithPath(default_save_directory + filenameWithoutPath);
+    return filenameWithPath;
+  }
 
-    std::string getTemporaryFilename(std::string filenameWithoutPath) const
-    {
-        auto default_save_directory
-            = Mantid::Kernel::ConfigService::Instance().getString(
-                "defaultsave.directory");
-        std::string filenameWithPath(default_save_directory
-                                     + filenameWithoutPath);
-        return filenameWithPath;
+  void removeTemporaryFile(std::string fileNameWithPath) const {
+    if (Poco::File(fileNameWithPath).exists()) {
+      Poco::File(fileNameWithPath).remove();
     }
+  }
 
-    void removeTemporaryFile(std::string fileNameWithPath) const
-    {
-        if (Poco::File(fileNameWithPath).exists()) {
-            Poco::File(fileNameWithPath).remove();
-        }
-    }
-
-    bool doesFileExist(std::string filename)
-    {
-        return Poco::File(filename).exists();
-    }
+  bool doesFileExist(std::string filename) {
+    return Poco::File(filename).exists();
+  }
 };
 #endif

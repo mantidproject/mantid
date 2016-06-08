@@ -8,69 +8,63 @@
 
 #include <boost/shared_ptr.hpp>
 
-namespace MantidQt
-{
-	namespace MantidWidgets
-	{
-			class ProjectionSurface;
+namespace MantidQt {
+namespace MantidWidgets {
+class ProjectionSurface;
 
-			/**
-			\class  MantidGLWidget
-			\brief  OpenGL Qt Widget which renders Mantid Geometry ObjComponents
-			*/
+/**
+\class  MantidGLWidget
+\brief  OpenGL Qt Widget which renders Mantid Geometry ObjComponents
+*/
 
-			class MantidGLWidget : public QGLWidget
-			{
-				Q_OBJECT
-			public:
-				explicit MantidGLWidget(QWidget *parent = 0); ///< Constructor
-                                ~MantidGLWidget() override; ///< Destructor
-                                void setSurface(boost::shared_ptr<ProjectionSurface> surface);
-				boost::shared_ptr<ProjectionSurface> getSurface() { return m_surface; }
+class MantidGLWidget : public QGLWidget {
+  Q_OBJECT
+public:
+  explicit MantidGLWidget(QWidget *parent = 0); ///< Constructor
+  ~MantidGLWidget() override;                   ///< Destructor
+  void setSurface(boost::shared_ptr<ProjectionSurface> surface);
+  boost::shared_ptr<ProjectionSurface> getSurface() { return m_surface; }
 
-				void setBackgroundColor(QColor);
-				QColor currentBackgroundColor() const;
-				void saveToFile(const QString & filename);
-				//int getLightingState() const {return m_lightingState;}
+  void setBackgroundColor(QColor);
+  QColor currentBackgroundColor() const;
+  void saveToFile(const QString &filename);
+  // int getLightingState() const {return m_lightingState;}
 
-				public slots:
-				void enableLighting(bool);
-				void updateView(bool picking = true);
-				void updateDetectors();
-				void componentSelected(Mantid::Geometry::ComponentID id);
+public slots:
+  void enableLighting(bool);
+  void updateView(bool picking = true);
+  void updateDetectors();
+  void componentSelected(Mantid::Geometry::ComponentID id);
 
-			protected:
-                          void initializeGL() override;
-                                void resetWidget();
-				void MakeObject();
-                                void paintEvent(QPaintEvent *event) override;
-                                void resizeGL(int, int) override;
-                                void
-                                contextMenuEvent(QContextMenuEvent *) override;
-                                void mousePressEvent(QMouseEvent *) override;
-                                void mouseMoveEvent(QMouseEvent *) override;
-                                void mouseReleaseEvent(QMouseEvent *) override;
-                                void wheelEvent(QWheelEvent *) override;
-                                void keyPressEvent(QKeyEvent *) override;
-                                void keyReleaseEvent(QKeyEvent *) override;
-                                void enterEvent(QEvent *) override;
-                                void leaveEvent(QEvent *) override;
-                                void draw();
-				void checkGLError(const QString& funName);
-			private:
-				void setRenderingOptions();
+protected:
+  void initializeGL() override;
+  void resetWidget();
+  void MakeObject();
+  void paintEvent(QPaintEvent *event) override;
+  void resizeGL(int, int) override;
+  void contextMenuEvent(QContextMenuEvent *) override;
+  void mousePressEvent(QMouseEvent *) override;
+  void mouseMoveEvent(QMouseEvent *) override;
+  void mouseReleaseEvent(QMouseEvent *) override;
+  void wheelEvent(QWheelEvent *) override;
+  void keyPressEvent(QKeyEvent *) override;
+  void keyReleaseEvent(QKeyEvent *) override;
+  void enterEvent(QEvent *) override;
+  void leaveEvent(QEvent *) override;
+  void draw();
+  void checkGLError(const QString &funName);
 
-				//int m_lightingState;           ///< 0 = light off; 2 = light on
-				bool m_isKeyPressed;
-				bool m_firstFrame;
+private:
+  void setRenderingOptions();
 
-				/// Surface
-				boost::shared_ptr<ProjectionSurface> m_surface;
+  // int m_lightingState;           ///< 0 = light off; 2 = light on
+  bool m_isKeyPressed;
+  bool m_firstFrame;
 
-			};
-	}//MantidWidgets
-}//MantidQt
-
+  /// Surface
+  boost::shared_ptr<ProjectionSurface> m_surface;
+};
+} // MantidWidgets
+} // MantidQt
 
 #endif /*MANTIDGLWIDGET_H_*/
-

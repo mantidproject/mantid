@@ -1488,7 +1488,7 @@ void EnggDiffractionViewQtGUI::addBankItems(
             splitFittingDirectory(strVecFile);
 
         // get the last split in vector which will be bank
-        std::string bankID = (vecFileSplit[vecFileSplit.size() - 1]);
+        std::string bankID = (vecFileSplit.back());
 
         bool digit = isDigit(bankID);
 
@@ -1585,7 +1585,7 @@ void EnggDiffractionViewQtGUI::setDefaultBank(
 
   if (!splittedBaseName.empty()) {
 
-    std::string bankID = (splittedBaseName[splittedBaseName.size() - 1]);
+    std::string bankID = (splittedBaseName.back());
     auto combo_data =
         m_uiTabFitting.comboBox_bank->findText(QString::fromStdString(bankID));
 

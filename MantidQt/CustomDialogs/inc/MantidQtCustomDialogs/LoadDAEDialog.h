@@ -16,18 +16,17 @@ class QString;
 class QVBoxLayout;
 class QCheckBox;
 
-namespace MantidQt
-{
-namespace CustomDialogs
-{
+namespace MantidQt {
+namespace CustomDialogs {
 
-/** 
+/**
     This class gives specialised dialog for the LoadDAE algorithm.
 
     @author Roman Tolchenov, Tessella Support Services plc
     @date 14/07/2010
 
-    Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+    Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+   National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -45,14 +44,12 @@ namespace CustomDialogs
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
     File change history is stored at: <https://github.com/mantidproject/mantid>
-    Code Documentation is available at: <http://doxygen.mantidproject.org>    
+    Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class LoadDAEDialog : public MantidQt::API::AlgorithmDialog
-{
+class LoadDAEDialog : public MantidQt::API::AlgorithmDialog {
   Q_OBJECT
 
 public:
-
   /// Constructor
   LoadDAEDialog(QWidget *parent = 0);
   /// Destruktor
@@ -70,9 +67,7 @@ private:
   QLineEdit *maxSpLineEdit;
   QLineEdit *listSpLineEdit;
   QLineEdit *updateLineEdit;
-
 };
-
 }
 }
 

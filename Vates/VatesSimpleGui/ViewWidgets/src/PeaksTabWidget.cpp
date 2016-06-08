@@ -66,9 +66,9 @@ void PeaksTabWidget::addNewTab(Mantid::API::IPeaksWorkspace_sptr peaksWorkspace,
 
   // Connect to the sort functionality of the widget
   QObject::connect(widget, SIGNAL(sortPeaks(const std::string &, const bool,
-                                           Mantid::API::IPeaksWorkspace_sptr)),
+                                            Mantid::API::IPeaksWorkspace_sptr)),
                    this, SIGNAL(sortPeaks(const std::string &, const bool,
-                                         Mantid::API::IPeaksWorkspace_sptr)));
+                                          Mantid::API::IPeaksWorkspace_sptr)));
 
   // Add as a new tab
   m_tabWidget->addTab(widget, QString(tabName.c_str()));
@@ -90,15 +90,18 @@ void PeaksTabWidget::onZoomToPeak(Mantid::API::IPeaksWorkspace_sptr ws,
  * @param colors The color of the tabs
  */
 void PeaksTabWidget::updateTabs(
-    std::map<std::string, std::vector<bool>> visiblePeaks, std::map<std::string, QColor> colors) {
+    std::map<std::string, std::vector<bool>> visiblePeaks,
+    std::map<std::string, QColor> colors) {
   // Iterate over all tabs
   for (int i = 0; i < m_tabWidget->count(); i++) {
-    QString label = m_tabWidget->label(i);
+    QString label = m_tabWidget->tabText(i);
 
     // Check if the peaks workspace still exists, if it does update, else delete
     // the tab.
-    if (visiblePeaks.count(label.toStdString()) > 0 && colors.count(label.toStdString()) > 0) {
-      updateTab(visiblePeaks[label.toStdString()], colors[label.toStdString()], i);
+    if (visiblePeaks.count(label.toStdString()) > 0 &&
+        colors.count(label.toStdString()) > 0) {
+      updateTab(visiblePeaks[label.toStdString()], colors[label.toStdString()],
+                i);
     } else {
       m_tabWidget->removeTab(i);
     }
@@ -111,9 +114,9 @@ void PeaksTabWidget::updateTabs(
  * @param color
  * @param index The tab index.
  */
-void PeaksTabWidget::updateTab(std::vector<bool> visiblePeaks, QColor color, int index) {
-  PeaksWidget *widget =
-      qobject_cast<PeaksWidget *>(m_tabWidget->widget(index));
+void PeaksTabWidget::updateTab(std::vector<bool> visiblePeaks, QColor color,
+                               int index) {
+  PeaksWidget *widget = qobject_cast<PeaksWidget *>(m_tabWidget->widget(index));
   widget->updateModel(visiblePeaks);
   m_tabWidget->tabBar()->setTabTextColor(index, color);
 }

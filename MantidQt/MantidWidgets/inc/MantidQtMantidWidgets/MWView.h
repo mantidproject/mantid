@@ -66,9 +66,9 @@ using MWDimension_const_sptr =
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS MWView :
-  public QWidget,
-  public MantidQt::API::WorkspaceObserver {
+class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS MWView
+    : public QWidget,
+      public MantidQt::API::WorkspaceObserver {
   Q_OBJECT
 
 public:
@@ -77,7 +77,7 @@ public:
   void loadColorMap(QString filename = QString());
   void setWorkspace(Mantid::API::MatrixWorkspace_sptr ws);
   void updateDisplay();
-  SafeQwtPlot* getPlot2D();
+  SafeQwtPlot *getPlot2D();
 
 public slots:
   void colorRangeChangedSlot();
@@ -85,8 +85,9 @@ public slots:
   void setTransparentZerosSlot(bool transparent);
 
 protected:
-  void preDeleteHandle(const std::string &workspaceName,
-    const boost::shared_ptr<Mantid::API::Workspace> workspace) override;
+  void preDeleteHandle(
+      const std::string &workspaceName,
+      const boost::shared_ptr<Mantid::API::Workspace> workspace) override;
 
 private:
   void initLayout();

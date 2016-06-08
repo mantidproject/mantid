@@ -448,7 +448,7 @@ void ProcessBackground::addRegion() {
     m_outputWS->dataE(0)[i] = ve[i];
   }
   if (vx.size() > vy.size())
-    m_outputWS->dataX(0)[vx.size() - 1] = vx.back();
+    m_outputWS->dataX(0).back() = vx.back();
 
   // Write out dummy output workspaces
   setupDummyOutputWSes();

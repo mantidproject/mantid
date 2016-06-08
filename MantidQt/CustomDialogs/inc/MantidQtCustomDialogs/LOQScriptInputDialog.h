@@ -7,18 +7,17 @@
 #include "ui_LOQScriptInputDialog.h"
 #include "MantidQtAPI/AlgorithmDialog.h"
 
-namespace MantidQt
-{
-namespace CustomDialogs
-{
+namespace MantidQt {
+namespace CustomDialogs {
 
-/** 
+/**
     This class gives specialised dialog for the LOQ input algorithm.
 
     @author Martyn Gigg, Tessella Support Services plc
     @date 05/03/2009
 
-    Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+    Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+   National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -36,36 +35,32 @@ namespace CustomDialogs
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
     File change history is stored at: <https://github.com/mantidproject/mantid>
-    Code Documentation is available at: <http://doxygen.mantidproject.org>    
+    Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class LOQScriptInputDialog : public MantidQt::API::AlgorithmDialog
-{
+class LOQScriptInputDialog : public MantidQt::API::AlgorithmDialog {
   Q_OBJECT
 
-  public:
-  
+public:
   /// Default constructor
   LOQScriptInputDialog(QWidget *parent = 0);
 
-  private:
-
+private:
   /// Initialize the layout
-    void initLayout() override;
+  void initLayout() override;
 
-    /// Get the input out of the dialog
-    void parseInput() override;
+  /// Get the input out of the dialog
+  void parseInput() override;
 
-  private slots:
+private slots:
 
-    /// browse clicked method
-    void browseClicked();
+  /// browse clicked method
+  void browseClicked();
 
-  private:
+private:
   // The form generated with Qt Designer
   Ui::LOQScriptInputDialog m_uiForm;
 };
-
 }
 }
 
-#endif //MANTIDQT_CUSTOMDIALOGS_LOQSCRIPTINPUTDIALOG_H_
+#endif // MANTIDQT_CUSTOMDIALOGS_LOQSCRIPTINPUTDIALOG_H_

@@ -1,20 +1,20 @@
 #ifndef MANTIDQTCUSTOMINTERFACES_DYNAMICPDF_INPUTDATACONTROL_H_
 #define MANTIDQTCUSTOMINTERFACES_DYNAMICPDF_INPUTDATACONTROL_H_
 
-//Mantid Coding standars <http://www.mantidproject.org/Coding_Standards>
-//Mantid Headers from the same project
-//Mantid headers from other projects
+// Mantid Coding standars <http://www.mantidproject.org/Coding_Standards>
+// Mantid Headers from the same project
+// Mantid headers from other projects
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidQtCustomInterfaces/DllConfig.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidQtAPI/WorkspaceObserver.h"
-//3rd party library headers
+// 3rd party library headers
 #include <QObject>
-//system headers
+// system headers
 
 // Class forward declarations
 namespace MantidAPI {
-  class MatrixWorkspace;
+class MatrixWorkspace;
 }
 
 namespace MantidQt {
@@ -48,9 +48,9 @@ namespace DynamicPDF {
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
-class MANTIDQT_CUSTOMINTERFACES_DLL InputDataControl :
-  public QObject,
-  public MantidQt::API::WorkspaceObserver {
+class MANTIDQT_CUSTOMINTERFACES_DLL InputDataControl
+    : public QObject,
+      public MantidQt::API::WorkspaceObserver {
   Q_OBJECT
 
 public:
@@ -63,11 +63,12 @@ public:
   std::string getWorkspaceName();
   size_t getWorkspaceIndex();
   bool isSliceSelectedForFitting();
-  std::pair<double,double> getCurrentRange();
-    
+  std::pair<double, double> getCurrentRange();
+
 protected:
-  void preDeleteHandle(const std::string &workspaceName,
-    const boost::shared_ptr<Mantid::API::Workspace> workspace) override;
+  void preDeleteHandle(
+      const std::string &workspaceName,
+      const boost::shared_ptr<Mantid::API::Workspace> workspace) override;
 
 signals:
   void signalWorkspaceUpdated();
@@ -85,13 +86,11 @@ private:
   size_t m_selectedWorkspaceIndex;
   /// energy range for each slice with non-zero signal. We use the
   /// the indexes along the Energy range
-  std::vector<std::pair<int,int>> m_domain;
+  std::vector<std::pair<int, int>> m_domain;
 
 }; // class InputDataControl
-
 }
 }
 }
-
 
 #endif // MANTIDQTCUSTOMINTERFACES_DYNAMICPDF_INPUTDATACONTROL_H_

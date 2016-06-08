@@ -50,8 +50,7 @@ using namespace Mantid::API;
 
 PlotCurve::PlotCurve(const QString &name)
     : QwtPlotCurve(name), d_type(0), d_x_offset(0.0), d_y_offset(0.0),
-      d_side_lines(false),
-      d_skip_symbols(1), m_isDistribution(false) {}
+      d_side_lines(false), d_skip_symbols(1), m_isDistribution(false) {}
 
 PlotCurve::PlotCurve(const PlotCurve &c)
     : QObject(), QwtPlotCurve(c.title().text()), d_type(c.d_type),
@@ -129,7 +128,7 @@ void PlotCurve::restoreCurveLayout(const QStringList &lst) {
     if (s == "<Pen>") {
       QPen pen;
       while (s != "</Pen>") {
-        s = (*(++line)).stripWhiteSpace();
+        s = (*(++line)).trimmed();
         if (s.contains("<Color>"))
           pen.setColor(QColor(s.remove("<Color>").remove("</Color>")));
         else if (s.contains("<Style>"))
@@ -142,7 +141,7 @@ void PlotCurve::restoreCurveLayout(const QStringList &lst) {
     } else if (s == "<Brush>") {
       QBrush brush;
       while (s != "</Brush>") {
-        s = (*(++line)).stripWhiteSpace();
+        s = (*(++line)).trimmed();
         if (s.contains("<Color>"))
           brush.setColor(QColor(s.remove("<Color>").remove("</Color>")));
         else if (s.contains("<Style>"))
@@ -153,7 +152,7 @@ void PlotCurve::restoreCurveLayout(const QStringList &lst) {
     } else if (s == "<Symbol>") {
       QwtSymbol symbol;
       while (s != "</Symbol>") {
-        s = (*(++line)).stripWhiteSpace();
+        s = (*(++line)).trimmed();
         if (s.contains("<Style>"))
           symbol.setStyle(
               SymbolBox::style(s.remove("<Style>").remove("</Style>").toInt()));
@@ -163,7 +162,7 @@ void PlotCurve::restoreCurveLayout(const QStringList &lst) {
         else if (s == "<SymbolPen>") {
           QPen pen;
           while (s != "</SymbolPen>") {
-            s = (*(++line)).stripWhiteSpace();
+            s = (*(++line)).trimmed();
             if (s.contains("<Color>"))
               pen.setColor(QColor(s.remove("<Color>").remove("</Color>")));
             else if (s.contains("<Style>"))
@@ -176,7 +175,7 @@ void PlotCurve::restoreCurveLayout(const QStringList &lst) {
         } else if (s == "<SymbolBrush>") {
           QBrush brush;
           while (s != "</SymbolBrush>") {
-            s = (*(++line)).stripWhiteSpace();
+            s = (*(++line)).trimmed();
             if (s.contains("<Color>"))
               brush.setColor(QColor(s.remove("<Color>").remove("</Color>")));
             else if (s.contains("<Style>"))
@@ -308,10 +307,10 @@ void PlotCurve::computeWaterfallOffsets(double &xDataOffset,
       double yRange = plot->axisScaleDiv(Plot::yLeft)->range();
 
       // First compute offsets in a linear scale
-      xDataOffset = index * g->waterfallXOffset() * 0.01 *
-                    xRange / (double)(curves - 1);
-      yDataOffset = index * g->waterfallYOffset() * 0.01 *
-                    yRange / (double)(curves - 1);
+      xDataOffset =
+          index * g->waterfallXOffset() * 0.01 * xRange / (double)(curves - 1);
+      yDataOffset =
+          index * g->waterfallYOffset() * 0.01 * yRange / (double)(curves - 1);
 
       // Corresponding offset on the screen in pixels
       d_x_offset = plot->canvas()->width() * xDataOffset / xRange;

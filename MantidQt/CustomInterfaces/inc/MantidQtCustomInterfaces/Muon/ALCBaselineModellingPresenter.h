@@ -9,79 +9,79 @@
 
 #include <QObject>
 
-namespace MantidQt
-{
-namespace CustomInterfaces
-{
+namespace MantidQt {
+namespace CustomInterfaces {
 
-  /** ALCBaselineModellingPresenter : Presenter for ALC Baseline Modelling step
-    
-    Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+/** ALCBaselineModellingPresenter : Presenter for ALC Baseline Modelling step
 
-    This file is part of Mantid.
+  Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+  National Laboratory & European Spallation Source
 
-    Mantid is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 3 of the License, or
-    (at your option) any later version.
+  This file is part of Mantid.
 
-    Mantid is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+  Mantid is free software; you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation; either version 3 of the License, or
+  (at your option) any later version.
 
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  Mantid is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
 
-    File change history is stored at: <https://github.com/mantidproject/mantid>
-    Code Documentation is available at: <http://doxygen.mantidproject.org>
-  */
-  class MANTIDQT_CUSTOMINTERFACES_DLL ALCBaselineModellingPresenter : public QObject
-  {
-    Q_OBJECT
+  You should have received a copy of the GNU General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-  public:
-    ALCBaselineModellingPresenter(IALCBaselineModellingView* view, IALCBaselineModellingModel* model);
+  File change history is stored at: <https://github.com/mantidproject/mantid>
+  Code Documentation is available at: <http://doxygen.mantidproject.org>
+*/
+class MANTIDQT_CUSTOMINTERFACES_DLL ALCBaselineModellingPresenter
+    : public QObject {
+  Q_OBJECT
 
-    void initialize();
+public:
+  ALCBaselineModellingPresenter(IALCBaselineModellingView *view,
+                                IALCBaselineModellingModel *model);
 
-  private slots:
-    /// Perform a fit
-    void fit();
+  void initialize();
 
-    /// Add a new section
-    void addSection();
+private slots:
+  /// Perform a fit
+  void fit();
 
-    /// Remove existing section
-    void removeSection(int row);
+  /// Add a new section
+  void addSection();
 
-    /// Called when one of sections is modified
-    void onSectionRowModified(int row);
+  /// Remove existing section
+  void removeSection(int row);
 
-    /// Called when on of section selectors is modified
-    void onSectionSelectorModified(int index);
+  /// Called when one of sections is modified
+  void onSectionRowModified(int row);
 
-    /// Updates data curve from the model
-    void updateDataCurve();
+  /// Called when on of section selectors is modified
+  void onSectionSelectorModified(int index);
 
-    /// Updates corrected data curve from the model
-    void updateCorrectedCurve();
+  /// Updates data curve from the model
+  void updateDataCurve();
 
-    /// Updated baseline curve from the model
-    void updateBaselineCurve();
+  /// Updates corrected data curve from the model
+  void updateCorrectedCurve();
 
-    /// Updates function in the view from the model
-    void updateFunction();
+  /// Updated baseline curve from the model
+  void updateBaselineCurve();
 
-  private:
-    /// Associated view
-    IALCBaselineModellingView* const m_view;
+  /// Updates function in the view from the model
+  void updateFunction();
 
-    /// Associated model
-    IALCBaselineModellingModel* const m_model;
-  };
+private:
+  /// Associated view
+  IALCBaselineModellingView *const m_view;
+
+  /// Associated model
+  IALCBaselineModellingModel *const m_model;
+};
 
 } // namespace CustomInterfaces
 } // namespace MantidQt
 
-#endif  /* MANTIDQT_CUSTOMINTERFACES_ALCBASELINEMODELLINGPRESENTER_H_ */
+#endif /* MANTIDQT_CUSTOMINTERFACES_ALCBASELINEMODELLINGPRESENTER_H_ */

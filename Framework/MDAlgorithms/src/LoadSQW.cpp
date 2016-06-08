@@ -1,6 +1,5 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/IMDEventWorkspace.h"
-#include "MantidAPI/MemoryManager.h"
 #include "MantidAPI/Progress.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimensionBuilder.h"
@@ -307,7 +306,6 @@ void LoadSQW::readEvents(
     if (eventsAdded > 19000000) {
       g_log.information() << "Splitting boxes after " << eventsAdded
                           << " events added." << std::endl;
-      Mantid::API::MemoryManager::Instance().releaseFreeMemory();
 
       // This splits up all the boxes according to split thresholds and sizes.
       Kernel::ThreadScheduler *ts = new ThreadSchedulerFIFO();
@@ -318,8 +316,6 @@ void LoadSQW::readEvents(
       // Flush the cache - this will save things out to disk
       if (dbuf)
         dbuf->flushCache();
-      // Flush memory
-      Mantid::API::MemoryManager::Instance().releaseFreeMemory();
       eventsAdded = 0;
     }
 
@@ -370,8 +366,6 @@ void LoadSQW::readEvents(
   // Flush the cache - this will save things out to disk
   if (dbuf)
     dbuf->flushCache();
-  // Flush memory
-  Mantid::API::MemoryManager::Instance().releaseFreeMemory();
 }
 
 /**

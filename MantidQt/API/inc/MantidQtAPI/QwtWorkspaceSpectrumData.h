@@ -51,8 +51,8 @@ public:
   /// Number of error bars to plot
   size_t esize() const override;
 
-  //double getYMin() const override;
-  //double getYMax() const override;
+  // double getYMin() const override;
+  // double getYMax() const override;
   /// Return the label to use for the X axis
   QString getXAxisLabel() const override;
   /// Return the label to use for the Y axis
@@ -62,15 +62,15 @@ public:
   bool dataIsNormalized() const { return m_dataIsNormalized; }
 
   ///// Inform the data that it is to be plotted on a log y scale
-  //void setLogScale(bool on) override;
-  //bool logScaleY() const override { return m_logScaleY; }
-  //void saveLowestPositiveValue(const double v) override;
+  // void setLogScale(bool on) override;
+  // bool logScaleY() const override { return m_logScaleY; }
+  // void saveLowestPositiveValue(const double v) override;
   bool setAsDistribution(bool on = true);
 
   //// Sets offsets for and enables waterfall plots
-  //void setXOffset(const double x) override;
-  //void setYOffset(const double y) override;
-  //void setWaterfallPlot(bool on) override;
+  // void setXOffset(const double x) override;
+  // void setYOffset(const double y) override;
+  // void setWaterfallPlot(bool on) override;
 
 protected:
   // Assignment operator (virtualized). MSVC not happy with compiler generated
@@ -102,23 +102,23 @@ private:
   /// returns (X[i]+X[i+1])/2
   bool m_binCentres;
   ///// Indicates that the data is plotted on a log y scale
-  //bool m_logScaleY;
+  // bool m_logScaleY;
   ///// lowest y value
-  //double m_minY;
+  // double m_minY;
   ///// lowest positive y value
-  //double m_minPositive;
+  // double m_minPositive;
   ///// higest y value
-  //double m_maxY;
+  // double m_maxY;
   /// Is plotting as distribution
   bool m_isDistribution;
 
   ///// Indicates whether or not waterfall plots are enabled
-  //bool m_isWaterfall;
+  // bool m_isWaterfall;
 
   ///// x-axis offset for waterfall plots
-  //double m_offsetX;
+  // double m_offsetX;
 
   ///// y-axis offset for waterfall plots
-  //double m_offsetY;
+  // double m_offsetY;
 };
 #endif
