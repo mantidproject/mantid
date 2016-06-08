@@ -747,15 +747,8 @@ void ApplicationWindow::initGlobalConstants() {
   tableTextColor = QColor("#000000");
   tableHeaderColor = QColor("#000000");
 
-  plot3DColors = QStringList();
-  plot3DColors << "blue";
-  plot3DColors << "#000000";
-  plot3DColors << "#000000";
-  plot3DColors << "#000000";
-  plot3DColors << "red";
-  plot3DColors << "#000000";
-  plot3DColors << "#000000";
-  plot3DColors << "#ffffff";
+  plot3DColors = {"blue", "#000000", "#000000", "#000000",
+                  "red",  "#000000", "#000000", "#ffffff"};
 
   d_graph_tick_labels_dist = 4;
   d_graph_axes_labels_dist = 2;
@@ -5302,23 +5295,15 @@ void ApplicationWindow::readSettings() {
   }
 
   settings.beginGroup("/Colors");
-  plot3DColors = QStringList();
-  plot3DColors << QColor(settings.value("/MaxData", "blue").value<QColor>())
-                      .name();
-  plot3DColors << QColor(settings.value("/Labels", "#000000").value<QColor>())
-                      .name();
-  plot3DColors << QColor(settings.value("/Mesh", "#000000").value<QColor>())
-                      .name();
-  plot3DColors << QColor(settings.value("/Grid", "#000000").value<QColor>())
-                      .name();
-  plot3DColors << QColor(settings.value("/MinData", "red").value<QColor>())
-                      .name();
-  plot3DColors << QColor(settings.value("/Numbers", "#000000").value<QColor>())
-                      .name();
-  plot3DColors << QColor(settings.value("/Axes", "#000000").value<QColor>())
-                      .name();
-  plot3DColors << QColor(settings.value("/Background", "#ffffff")
-                             .value<QColor>()).name();
+  plot3DColors = {
+      QColor(settings.value("/MaxData", "blue").value<QColor>()).name(),
+      QColor(settings.value("/Labels", "#000000").value<QColor>()).name(),
+      QColor(settings.value("/Mesh", "#000000").value<QColor>()).name(),
+      QColor(settings.value("/Grid", "#000000").value<QColor>()).name(),
+      QColor(settings.value("/MinData", "red").value<QColor>()).name(),
+      QColor(settings.value("/Numbers", "#000000").value<QColor>()).name(),
+      QColor(settings.value("/Axes", "#000000").value<QColor>()).name(),
+      QColor(settings.value("/Background", "#ffffff").value<QColor>()).name()};
   settings.endGroup(); // Colors
   settings.endGroup();
   /* ----------------- end group 3D Plots --------------------------- */

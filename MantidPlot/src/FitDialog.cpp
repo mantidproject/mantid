@@ -144,9 +144,8 @@ void FitDialog::initFitPage() {
   boxParams->horizontalHeader()->setResizeMode(3, QHeaderView::Stretch);
   boxParams->horizontalHeader()->setResizeMode(4,
                                                QHeaderView::ResizeToContents);
-  QStringList header = QStringList() << tr("Parameter") << tr("From")
-                                     << tr("Value") << tr("To")
-                                     << tr("Constant");
+  QStringList header{tr("Parameter"), tr("From"), tr("Value"), tr("To"),
+                     tr("Constant")};
   boxParams->setHorizontalHeaderLabels(header);
   boxParams->verticalHeader()->setResizeMode(QHeaderView::ResizeToContents);
   boxParams->verticalHeader()->hide();
@@ -1093,7 +1092,7 @@ void FitDialog::accept() {
   } else
     n = rows;
 
-  QStringList parameters = QStringList();
+  QStringList parameters;
   MyParser parser;
   bool error = false;
   QVarLengthArray<double> paramsInit(n);
