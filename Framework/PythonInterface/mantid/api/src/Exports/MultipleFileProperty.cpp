@@ -1,11 +1,15 @@
 #include "MantidAPI/MultipleFileProperty.h"
+#include "MantidPythonInterface/kernel/Converters/PySequenceToVector.h"
+#include "MantidPythonInterface/kernel/IsNone.h"
 #include "MantidPythonInterface/kernel/PropertyWithValueExporter.h"
 #include <boost/python/class.hpp>
 #include <boost/python/list.hpp>
+#include <boost/python/make_constructor.hpp>
 #include <boost/python/str.hpp>
 
 using Mantid::API::MultipleFileProperty;
 using Mantid::Kernel::PropertyWithValue;
+using Mantid::PythonInterface::Converters::PySequenceToVector;
 using Mantid::PythonInterface::PropertyWithValueExporter;
 using namespace boost::python;
 
@@ -22,29 +26,37 @@ typedef std::vector<std::vector<std::string>> HeldType;
  */
 boost::python::object valueAsPyObject(MultipleFileProperty &self) {
   const HeldType &propValue = self();
-  boost::python::object result;
-  if (propValue.size() == 1 &&
-      propValue[0].size() == 1) // Special case, unwrap the vector
-  {
-    result = boost::python::str(propValue[0][0]);
-  } else {
-    // Build a list of lists to mimic the behaviour of MultipleFileProperty
-    boost::python::list fileList;
-    for (const auto &filenames : propValue) {
-      if (filenames.size() == 1) {
-        fileList.append(filenames.front());
-      } else {
-        boost::python::list groupList;
-        for (const auto &filename : filenames) {
-          groupList.append(filename);
-        }
-        fileList.append(groupList);
+
+  // Build a list of lists to mimic the behaviour of MultipleFileProperty
+  boost::python::list fileList;
+  for (const auto &filenames : propValue) {
+    if (filenames.size() == 1) {
+      fileList.append(filenames.front());
+    } else {
+      boost::python::list groupList;
+      for (const auto &filename : filenames) {
+        groupList.append(filename);
       }
+      fileList.append(groupList);
     }
-    result = fileList;
   }
 
-  return result;
+  return fileList;
+}
+
+MultipleFileProperty *
+createMultipleFileProperty(const std::string &name,
+                           const object &extensions = object()) {
+  std::vector<std::string> extsAsVector;
+  if (!Mantid::PythonInterface::isNone(extensions)) {
+    extract<std::string> extractor(extensions);
+    if (extractor.check()) {
+      extsAsVector = std::vector<std::string>(1, extractor());
+    } else {
+      extsAsVector = PySequenceToVector<std::string>(extensions)();
+    }
+  }
+  return new MultipleFileProperty(name, extsAsVector);
 }
 }
 
@@ -55,6 +67,9 @@ void export_MultipleFileProperty() {
 
   class_<MultipleFileProperty, bases<BaseClass>, boost::noncopyable>(
       "MultipleFileProperty", no_init)
+      .def("__init__", make_constructor(
+                           &createMultipleFileProperty, default_call_policies(),
+                           (arg("name"), arg("extensions") = object())))
       // Override the base class one to do something more appropriate
       .add_property("value", &valueAsPyObject);
 }

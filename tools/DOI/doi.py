@@ -352,8 +352,14 @@ def get_urls_for_doi(version_str,  shortened_version_str,
             else:
                 prev_destination = sphinx_rel_notes_url.format('nightly', 'v'+ prev_version_str)
         elif minor == 6:
-            destination = sphinx_rel_notes_url.format('nightly', 'v'+ version_str)
-            prev_destination = sphinx_rel_notes_url.format('nightly', 'v'+ prev_version_str)
+            if patch >= 1:
+                destination = sphinx_rel_notes_url.format('v' + version_str, 'v'+ version_str)
+            else:
+                destination = sphinx_rel_notes_url.format('nightly', 'v'+ version_str)
+            if patch >= 2:
+                prev_destination = sphinx_rel_notes_url.format('v' + prev_version_str, 'v'+ prev_version_str)
+            else:
+                prev_destination = sphinx_rel_notes_url.format('nightly', 'v'+ prev_version_str)
         else:
             destination = wiki_rel_notes_url.format(shortened_version_str)
             prev_destination = wiki_rel_notes_url.format(shortened_prev_version_str)

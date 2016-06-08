@@ -10,48 +10,49 @@
 #include "MantidQtAPI/GraphOptions.h"
 #include "DllOption.h"
 
-
 /**
-   The class inherits from QwtColorMap and implements reading a color color map from a file. 
-   There is also a mode which indicates the scale type. 
+   The class inherits from QwtColorMap and implements reading a color color map
+   from a file.
+   There is also a mode which indicates the scale type.
 
-   Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
-   
+   Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+   National Laboratory & European Spallation Source
+
    This file is part of Mantid.
-   
+
    Mantid is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
    the Free Software Foundation; either version 3 of the License, or
    (at your option) any later version.
-   
+
    Mantid is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU General Public License for more details.
-   
+
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-   
+
    File change history is stored at: <https://github.com/mantidproject/mantid>
 */
-class EXPORT_OPT_MANTIDQT_API MantidColorMap : public QwtColorMap
-{
+class EXPORT_OPT_MANTIDQT_API MantidColorMap : public QwtColorMap {
 
 public:
   MantidColorMap();
-  explicit MantidColorMap(const QString & filename, GraphOptions::ScaleType type);
+  explicit MantidColorMap(const QString &filename,
+                          GraphOptions::ScaleType type);
   ~MantidColorMap() override;
   QwtColorMap *copy() const override;
 
   void changeScaleType(GraphOptions::ScaleType type);
 
-  void setNthPower(double nth_power){m_nth_power = nth_power;};
+  void setNthPower(double nth_power) { m_nth_power = nth_power; };
 
-  double getNthPower() const {return m_nth_power;};
+  double getNthPower() const { return m_nth_power; };
 
-  bool loadMap(const QString & filename);
-  
-  static QString loadMapDialog(QString previousFile, QWidget * parent);
+  bool loadMap(const QString &filename);
+
+  static QString loadMapDialog(QString previousFile, QWidget *parent);
 
   void setNanColor(int r, int g, int b);
 
@@ -70,52 +71,42 @@ public:
    * Retrieve the scale type
    * @returns the current scale type
    */
-  GraphOptions::ScaleType getScaleType() const
-  {
-    return m_scale_type;
-  }
+  GraphOptions::ScaleType getScaleType() const { return m_scale_type; }
 
-   /**
-   * Retrieve the map name
-   * @returns the map name
-   */
-  QString getName() const
-  {
-    return m_name;
-  }
+  /**
+  * Retrieve the map name
+  * @returns the map name
+  */
+  QString getName() const { return m_name; }
 
   /**
    * Retrieve the map name
    * @returns the map name
    */
-  QString getFilePath() const
-  {
-    return m_path;
-  }
+  QString getFilePath() const { return m_path; }
 
   /**
    * Get the number of colors in this map
    */
-  inline unsigned char getTopCIndex() const
-  {
+  inline unsigned char getTopCIndex() const {
     return static_cast<unsigned char>(m_num_colors - 1);
   }
-  
-  /** 
+
+  /**
    * The maximum number of colors that any color map is allowed to use
    */
-  static unsigned char getLargestAllowedCIndex()
-  {
+  static unsigned char getLargestAllowedCIndex() {
     return static_cast<unsigned char>(255);
   }
 
 private:
-
   /// The scale choice
   mutable GraphOptions::ScaleType m_scale_type;
 
-  /// An array of shared pointers to objects that define how the color should be painted on
-  /// an OpenGL surface. QVector objects are implicitly shared so offer better performance than
+  /// An array of shared pointers to objects that define how the color should be
+  /// painted on
+  /// an OpenGL surface. QVector objects are implicitly shared so offer better
+  /// performance than
   /// standard vectors
   QVector<QRgb> m_colors;
 
@@ -128,16 +119,13 @@ private:
   /// Cached NAN value
   double m_nan;
 
-  ///the name of the color map
+  /// the name of the color map
   QString m_name;
 
-  ///the path to the map file
+  /// the path to the map file
   QString m_path;
 
   double m_nth_power;
-
 };
 
-
-
-#endif //MANTIDCOLORMAP_H_
+#endif // MANTIDCOLORMAP_H_

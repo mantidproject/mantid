@@ -115,15 +115,15 @@ private:
   QPushButton *m_peak; ///< Button switching on peak creation mode
   QPushButton *m_peakSelect; ///< Button switching on peak selection mode
   QPushButton *m_rectangle;  ///< Button switching on drawing a rectangular
-                             ///selection region
-  QPushButton
-      *m_ellipse; ///< Button switching on drawing a elliptical selection region
-  QPushButton *m_ring_ellipse;   ///< Button switching on drawing a elliptical
-                                 ///ring selection region
+  /// selection region
+  QPushButton *
+      m_ellipse; ///< Button switching on drawing a elliptical selection region
+  QPushButton *m_ring_ellipse; ///< Button switching on drawing a elliptical
+  /// ring selection region
   QPushButton *m_ring_rectangle; ///< Button switching on drawing a rectangular
-                                 ///ring selection region
-  QPushButton
-      *m_free_draw; ///< Button switching on drawing a region of arbitrary shape
+  /// ring selection region
+  QPushButton *
+      m_free_draw; ///< Button switching on drawing a region of arbitrary shape
   QPushButton *m_edit; ///< Button switching on edditing the selection region
   bool m_plotSum;
 
@@ -141,13 +141,13 @@ private:
 
   // Instrument display context menu actions
   QAction *m_storeCurve; ///< add the current curve to the list of permanently
-                         ///displayed curves
+  /// displayed curves
   QAction *m_savePlotToWorkspace; ///< Save data plotted on the miniplot into a
-                                  ///MatrixWorkspace
+  /// MatrixWorkspace
 
   CollapsiblePanel *m_plotPanel;
   QTextEdit *m_selectionInfoDisplay; ///< Text control for displaying selection
-                                     ///information
+  /// information
   CollapsiblePanel *m_infoPanel;
   SelectionType m_selectionType;
   mutable bool m_freezePlot;

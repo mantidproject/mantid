@@ -123,8 +123,7 @@ void Expression::parse(const std::string &str) {
   m_expr = str;
   trim(m_expr);
 
-  if (m_expr.size() > 1 && m_expr[0] == '(' &&
-      m_expr[m_expr.size() - 1] == ')') {
+  if (m_expr.size() > 1 && m_expr.front() == '(' && m_expr.back() == ')') {
     if (m_expr.find('(', 1) == std::string::npos) {
       m_expr.erase(0, 1);
       m_expr.erase(m_expr.size() - 1, 1);

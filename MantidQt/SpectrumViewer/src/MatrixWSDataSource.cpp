@@ -44,7 +44,7 @@ MatrixWSDataSource::MatrixWSDataSource(MatrixWorkspace_const_sptr matWs)
   m_totalXMin = matWs->getXMin();
   m_totalXMax = matWs->getXMax();
 
-  m_totalYMin = 0;  // Y direction is workspace index
+  m_totalYMin = 0; // Y direction is workspace index
   m_totalYMax = (double)matWs->getNumberHistograms();
 
   m_totalRows = matWs->getNumberHistograms();

@@ -7,8 +7,8 @@
    All rights reserved.
 
    ParaView is a free software; you can redistribute it and/or modify it
-   under the terms of the ParaView license version 1.2. 
-   
+   under the terms of the ParaView license version 1.2.
+
    See License_v1.2.txt for the full ParaView license.
    A copy of this license can be obtained by contacting
    Kitware Inc.
@@ -29,7 +29,7 @@ NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ========================================================================*/
-#ifndef __pqHelpWindow_h 
+#ifndef __pqHelpWindow_h
 #define __pqHelpWindow_h
 
 #include <QMainWindow>
@@ -43,44 +43,45 @@ class QWebView;
 
 /// pqHelpWindow provides a assistant-like window  for showing help provided by
 /// a QHelpEngine.
-class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS pqHelpWindow : public QMainWindow
-{
+class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS pqHelpWindow : public QMainWindow {
   Q_OBJECT
   typedef QMainWindow Superclass;
+
 public:
-  pqHelpWindow(QHelpEngine* engine,
-    QWidget* parent=0, Qt::WindowFlags flags=0);
+  pqHelpWindow(QHelpEngine *engine, QWidget *parent = 0,
+               Qt::WindowFlags flags = 0);
   ~pqHelpWindow() override;
 
 public slots:
   /// Requests showing of a particular page. The url must begin with "qthelp:"
   /// scheme when referring to pages from the help files.
-  virtual void showPage(const QString& url);
-  virtual void showPage(const QUrl& url);
+  virtual void showPage(const QString &url);
+  virtual void showPage(const QUrl &url);
 
   /// Tires to locate a file name index.html in the given namespace and then
   /// shows that page.
-  virtual void showHomePage(const QString& namespace_name);
+  virtual void showHomePage(const QString &namespace_name);
   virtual void showHomePage();
 
 signals:
   /// fired to relay warning messages from the help system.
-  void helpWarnings(const QString&);
+  void helpWarnings(const QString &);
 
 protected slots:
   void search();
-  void linkHovered(const QString & link, const QString & title, const QString & textContent);
+  void linkHovered(const QString &link, const QString &title,
+                   const QString &textContent);
   void updateNavButtons();
 
 protected:
-  QHelpEngine* m_helpEngine;
-  QWebView* m_browser;
-  QToolButton* m_forward;
-  QToolButton* m_backward;
+  QHelpEngine *m_helpEngine;
+  QWebView *m_browser;
+  QToolButton *m_forward;
+  QToolButton *m_backward;
 
 private:
   Q_DISABLE_COPY(pqHelpWindow)
-  void errorMissingPage(const QUrl& url);
+  void errorMissingPage(const QUrl &url);
 
   class pqNetworkAccessManager;
   friend class pqNetworkAccessManager;
