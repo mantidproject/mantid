@@ -323,12 +323,11 @@ std::vector<int> LoadSpice2D::getData(const std::string &dataXpath = "//Data") {
     std::map<std::string, std::string> attributes =
         m_xmlHandler.get_attributes_from_tag(detectorXpath);
     std::pair<int, int> dims = parseDetectorDimensions(attributes["type"]);
-    /** Horrible hack:
-         * Some old files had a: //Data/DetectorWing with dimensions: 16 x 256 =
-     * 4096
-         * This must be igored as it is not in the IDF
-         */
-    if (detectorXpath.find("DetectorWing") && dims.first * dims.second <= 4096)
+
+    // Horrible hack:
+    // Some old files had a: //Data/DetectorWing with dimensions:
+    // 16 x 256 = 4096. This must be igored as it is not in the IDF.
+    if (detectorXpath.find("DetectorWing") != std::string::npos && dims.first * dims.second <= 4096)
       break;
 
     totalDataSize += dims.first * dims.second;
