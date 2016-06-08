@@ -440,8 +440,7 @@ void FitPowderDiffPeaks::fitPeaksRobust() {
         robmsgss << parname << " = " << thispeak->getParameter(parname) << '\n';
       }
       g_log.information() << "[DB1151] Robust Fit Result:   Chi^2 = " << chi2
-                          << '\n'
-                          << robmsgss.str();
+                          << '\n' << robmsgss.str();
 
       rightpeak = thispeak;
       isrightmost = false;
@@ -1887,8 +1886,8 @@ bool FitPowderDiffPeaks::doFitGaussianPeak(DataObjects::Workspace2D_sptr dataws,
   // 5. Debug output
   API::ITableWorkspace_sptr paramws = fitalg->getProperty("OutputParameters");
   std::string infofit = parseFitParameterWorkspace(paramws);
-  g_log.information() << "[DBx133] Fitted Gaussian Parameters: \n"
-                      << infofit << '\n';
+  g_log.information() << "[DBx133] Fitted Gaussian Parameters: \n" << infofit
+                      << '\n';
 
   // DB output for data
   /*
