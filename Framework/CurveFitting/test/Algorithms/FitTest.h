@@ -757,10 +757,29 @@ public:
     TS_ASSERT_DELTA(out->getParameter("Height"), 5, 0.0001);
     TS_ASSERT_DELTA(out->getParameter("Lifetime"), 3, 0.001);
 
-    // check it categories
-    const std::vector<std::string> categories = out->categories();
-    TS_ASSERT(categories.size() == 1);
-    TS_ASSERT(categories[0] == "General");
+  }
+
+  void test_function_lattice_fit() {
+    // Fit Silicon lattice with three peaks.
+    ITableWorkspace_sptr table = WorkspaceFactory::Instance().createTable();
+    table->addColumn("V3D", "HKL");
+    table->addColumn("double", "d");
+
+    TableRow newRow = table->appendRow();
+    newRow << V3D(1, 1, 1) << 3.135702;
+    newRow = table->appendRow();
+    newRow << V3D(2, 2, 0) << 1.920217;
+    newRow = table->appendRow();
+    newRow << V3D(3, 1, 1) << 1.637567;
+
+    Fit fit;
+    fit.initialize();
+    fit.setProperty("Function", "name=LatticeFunction,LatticeSystem=Cubic,"
+                                "ProfileFunction=Gaussian,a=5,ZeroShift=0");
+    fit.setProperty("InputWorkspace", table);
+    fit.setProperty("CostFunction", "Unweighted least squares");
+    fit.setProperty("CreateOutput", true);
+    fit.execute();
   }
 };
 
