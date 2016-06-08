@@ -911,38 +911,18 @@ def PEARL_createvan(van, empty, ext="raw", fmode="all", ttmode="TT88",
 
         print "About to strip Work=0"
         StripPeaks(InputWorkspace="vanmask", OutputWorkspace="vanstrip", FWHM=15, Tolerance=8, WorkspaceIndex=0)
-        print "About to strip Work=1"
-        StripPeaks(InputWorkspace="vanstrip", OutputWorkspace="vanstrip", FWHM=15, Tolerance=8, WorkspaceIndex=1)
-        print "About to strip Work=2"
-        StripPeaks(InputWorkspace="vanstrip", OutputWorkspace="vanstrip", FWHM=15, Tolerance=8, WorkspaceIndex=2)
-        print "About to strip Work=3"
-        StripPeaks(InputWorkspace="vanstrip", OutputWorkspace="vanstrip", FWHM=15, Tolerance=8, WorkspaceIndex=3)
-        print "About to strip Work=4"
-        StripPeaks(InputWorkspace="vanstrip", OutputWorkspace="vanstrip", FWHM=15, Tolerance=8, WorkspaceIndex=4)
-        print "About to strip Work=5"
-        StripPeaks(InputWorkspace="vanstrip", OutputWorkspace="vanstrip", FWHM=15, Tolerance=8, WorkspaceIndex=5)
-        print "About to strip Work=6"
-        StripPeaks(InputWorkspace="vanstrip", OutputWorkspace="vanstrip", FWHM=15, Tolerance=8, WorkspaceIndex=6)
-        print "About to strip Work=7"
-        StripPeaks(InputWorkspace="vanstrip", OutputWorkspace="vanstrip", FWHM=15, Tolerance=8, WorkspaceIndex=7)
-        print "About to strip Work=8"
-        StripPeaks(InputWorkspace="vanstrip", OutputWorkspace="vanstrip", FWHM=15, Tolerance=8, WorkspaceIndex=8)
-        print "About to strip Work=9"
-        StripPeaks(InputWorkspace="vanstrip", OutputWorkspace="vanstrip", FWHM=15, Tolerance=8, WorkspaceIndex=9)
-        print "About to strip Work=10"
-        StripPeaks(InputWorkspace="vanstrip", OutputWorkspace="vanstrip", FWHM=15, Tolerance=8, WorkspaceIndex=10)
-        print "About to strip Work=11"
-        StripPeaks(InputWorkspace="vanstrip", OutputWorkspace="vanstrip", FWHM=15, Tolerance=8, WorkspaceIndex=11)
-        print "About to strip Work=12"
-        StripPeaks(InputWorkspace="vanstrip", OutputWorkspace="vanstrip", FWHM=100, Tolerance=10, WorkspaceIndex=12)
-        print "About to strip Work=13"
-        StripPeaks(InputWorkspace="vanstrip", OutputWorkspace="vanstrip", FWHM=60, Tolerance=10, WorkspaceIndex=13)
+
+        for i in range(1, 12):
+            print "About to strip Work=" + str(i)
+            StripPeaks(InputWorkspace="vanstrip", OutputWorkspace="vanstrip", FWHM=15, Tolerance=8, WorkspaceIndex=i)
 
         # run twice on low angle as peaks are very broad
-        print "About to strip Work=12 (again)"
-        StripPeaks(InputWorkspace="vanstrip", OutputWorkspace="vanstrip", FWHM=100, Tolerance=10, WorkspaceIndex=12)
-        print "About to strip Work=13 (again)"
-        StripPeaks(InputWorkspace="vanstrip", OutputWorkspace="vanstrip", FWHM=60, Tolerance=10, WorkspaceIndex=13)
+        print("About to strip work=12 and work=13 twice")
+        for i in range(0, 2):
+            print "About to strip Work=12"
+            StripPeaks(InputWorkspace="vanstrip", OutputWorkspace="vanstrip", FWHM=100, Tolerance=10, WorkspaceIndex=12)
+            print "About to strip Work=13"
+            StripPeaks(InputWorkspace="vanstrip", OutputWorkspace="vanstrip", FWHM=60, Tolerance=10, WorkspaceIndex=13)
 
         print "Finished striping-out peaks..."
 
@@ -956,20 +936,9 @@ def PEARL_createvan(van, empty, ext="raw", fmode="all", ttmode="TT88",
 
         print "Starting splines..."
 
-        SplineBackground(InputWorkspace="vanstrip", OutputWorkspace="spline1", WorkspaceIndex=0, NCoeff=nspline)
-        SplineBackground(InputWorkspace="vanstrip", OutputWorkspace="spline2", WorkspaceIndex=1, NCoeff=nspline)
-        SplineBackground(InputWorkspace="vanstrip", OutputWorkspace="spline3", WorkspaceIndex=2, NCoeff=nspline)
-        SplineBackground(InputWorkspace="vanstrip", OutputWorkspace="spline4", WorkspaceIndex=3, NCoeff=nspline)
-        SplineBackground(InputWorkspace="vanstrip", OutputWorkspace="spline5", WorkspaceIndex=4, NCoeff=nspline)
-        SplineBackground(InputWorkspace="vanstrip", OutputWorkspace="spline6", WorkspaceIndex=5, NCoeff=nspline)
-        SplineBackground(InputWorkspace="vanstrip", OutputWorkspace="spline7", WorkspaceIndex=6, NCoeff=nspline)
-        SplineBackground(InputWorkspace="vanstrip", OutputWorkspace="spline8", WorkspaceIndex=7, NCoeff=nspline)
-        SplineBackground(InputWorkspace="vanstrip", OutputWorkspace="spline9", WorkspaceIndex=8, NCoeff=nspline)
-        SplineBackground(InputWorkspace="vanstrip", OutputWorkspace="spline10", WorkspaceIndex=9, NCoeff=nspline)
-        SplineBackground(InputWorkspace="vanstrip", OutputWorkspace="spline11", WorkspaceIndex=10, NCoeff=nspline)
-        SplineBackground(InputWorkspace="vanstrip", OutputWorkspace="spline12", WorkspaceIndex=11, NCoeff=nspline)
-        SplineBackground(InputWorkspace="vanstrip", OutputWorkspace="spline13", WorkspaceIndex=12, NCoeff=nspline)
-        SplineBackground(InputWorkspace="vanstrip", OutputWorkspace="spline14", WorkspaceIndex=13, NCoeff=nspline)
+        for i in range(0, 14):
+            SplineBackground(InputWorkspace="vanstrip", OutputWorkspace="spline" + str(i+1), WorkspaceIndex=i,
+                             NCoeff=nspline)
 
         # ConvertUnits("spline1","spline1","TOF")
         # ConvertUnits("spline2","spline2","TOF")
