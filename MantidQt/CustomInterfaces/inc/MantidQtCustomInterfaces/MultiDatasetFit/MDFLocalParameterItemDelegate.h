@@ -3,12 +3,9 @@
 
 #include <QStyledItemDelegate>
 
-namespace MantidQt
-{
-namespace CustomInterfaces
-{
-namespace MDF
-{
+namespace MantidQt {
+namespace CustomInterfaces {
+namespace MDF {
 
 // Forward declarations.
 class EditLocalParameterDialog;
@@ -22,8 +19,7 @@ class LocalParameterEditor;
  *  - paint(...) method shows which parameters are fixed.
  *  - createEditor(...) method creates a custom editor for parameter values.
  */
-class LocalParameterItemDelegate: public QStyledItemDelegate
-{
+class LocalParameterItemDelegate : public QStyledItemDelegate {
   Q_OBJECT
 public:
   LocalParameterItemDelegate(EditLocalParameterDialog *parent = NULL);
@@ -34,10 +30,11 @@ public:
                     const QModelIndex &index) const override;
 signals:
   void setAllValues(double);
-  void fixParameter(int,bool);
+  void fixParameter(int, bool);
   void setAllFixed(bool);
-  void setTie(int,QString);
+  void setTie(int, QString);
   void setTieAll(QString);
+
 protected:
   void paint(QPainter *painter, const QStyleOptionViewItem &option,
              const QModelIndex &index) const override;
@@ -45,13 +42,11 @@ protected:
 private:
   bool eventFilter(QObject *obj, QEvent *ev) override;
   EditLocalParameterDialog *owner() const;
-  mutable LocalParameterEditor* m_currentEditor;
+  mutable LocalParameterEditor *m_currentEditor;
 };
-
 
 } // MDF
 } // CustomInterfaces
 } // MantidQt
-
 
 #endif /*MDFLOCALPARAMETERITEMDELEGATE_H_*/

@@ -349,7 +349,7 @@ public:
     }
     // Check that the last directory matches that returned by
     // getInstrumentDirectory
-    TS_ASSERT_EQUALS(directories[directories.size() - 1],
+    TS_ASSERT_EQUALS(directories.back(),
                      ConfigService::Instance().getInstrumentDirectory());
 
     // check all of the directory entries actually exist

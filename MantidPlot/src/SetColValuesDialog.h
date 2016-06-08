@@ -48,41 +48,39 @@ class Table;
 class ScriptingEnv;
 class ScriptEditor;
 
-
 //! Set column values dialog
-class SetColValuesDialog : public QDialog, public Scripted
-{
-    Q_OBJECT
+class SetColValuesDialog : public QDialog, public Scripted {
+  Q_OBJECT
 
 public:
-    SetColValuesDialog( ScriptingEnv *env, Table* t, Qt::WFlags fl = 0 );
+  SetColValuesDialog(ScriptingEnv *env, Table *t, Qt::WFlags fl = 0);
 
 private slots:
-	bool apply();
-	void prevColumn();
-	void nextColumn();
-	void insertCol();
-	void insertCell();
-	void updateColumn(int sc);
+  bool apply();
+  void prevColumn();
+  void nextColumn();
+  void insertCol();
+  void insertCell();
+  void updateColumn(int sc);
 
 private:
-	Table* table;
-	
-	void setTable(Table* w);
-        QSize sizeHint() const override;
-        void customEvent(QEvent *e) override;
+  Table *table;
 
-    QComboBox* boxColumn;
-    QPushButton* btnAddCol;
-    QPushButton* btnCancel;
-    QPushButton *buttonPrev;
-    QPushButton *buttonNext;
-    QPushButton *addCellButton;
-    QPushButton *btnApply;
-    ScriptEditor* commands;
-    QTextEdit* explain;
-	QSpinBox* start, *end;
-	QLabel *colNameLabel;
+  void setTable(Table *w);
+  QSize sizeHint() const override;
+  void customEvent(QEvent *e) override;
+
+  QComboBox *boxColumn;
+  QPushButton *btnAddCol;
+  QPushButton *btnCancel;
+  QPushButton *buttonPrev;
+  QPushButton *buttonNext;
+  QPushButton *addCellButton;
+  QPushButton *btnApply;
+  ScriptEditor *commands;
+  QTextEdit *explain;
+  QSpinBox *start, *end;
+  QLabel *colNameLabel;
 };
 
 #endif //

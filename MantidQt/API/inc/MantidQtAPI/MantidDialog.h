@@ -13,16 +13,15 @@
 // Qt Forward declarations
 //----------------------------------
 
-//Top-level namespace for this library
-namespace MantidQt
-{
+// Top-level namespace for this library
+namespace MantidQt {
 
-namespace API 
-{
+namespace API {
 
-/** 
-    Dialog derived from this class can capture and handle exceptions raised in 
-    its event handlers. To be able to do this override QAplication::notify method:
+/**
+    Dialog derived from this class can capture and handle exceptions raised in
+    its event handlers. To be able to do this override QAplication::notify
+   method:
 
         bool MyApplication::notify( QObject * receiver, QEvent * event )
         {
@@ -36,7 +35,7 @@ namespace API
                 if (MantidQt::API::MantidDialog::handle(receiver,e))
                     return true; // stops event propagation
                 else
-                   // do somethig else ... 
+                   // do somethig else ...
             }
 
             return res;
@@ -47,7 +46,8 @@ namespace API
     @author Roman Tolchenov, Tessella plc
     @date 24/04/2009
 
-    Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+    Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+   National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -65,40 +65,38 @@ namespace API
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
     File change history is stored at: <https://github.com/mantidproject/mantid>
-    Code Documentation is available at: <http://doxygen.mantidproject.org>    
+    Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class EXPORT_OPT_MANTIDQT_API MantidDialog : public QDialog
-{
-  
+class EXPORT_OPT_MANTIDQT_API MantidDialog : public QDialog {
+
   Q_OBJECT
 
 public:
-
   /// DefaultConstructor
-  MantidDialog(QWidget* parent = 0);
+  MantidDialog(QWidget *parent = 0);
   /// Destructor
   ~MantidDialog() override;
 
   /// Handles the exception caught in an event handler.
-  static bool handle( QObject* receiver, const std::exception& e );
-
+  static bool handle(QObject *receiver, const std::exception &e);
 
 signals:
-  void runAsPythonScript(const QString& code, bool);
+  void runAsPythonScript(const QString &code, bool);
 
 protected:
-  /// Run python code that is passed to it and, optionally, return anything it wrote to standard output as a string
-  QString runPythonCode(const QString & code, bool no_output = false);
+  /// Run python code that is passed to it and, optionally, return anything it
+  /// wrote to standard output as a string
+  QString runPythonCode(const QString &code, bool no_output = false);
 
   /// Override this method to handle an exception in a derived class.
-  virtual void handleException( const std::exception& e );
+  virtual void handleException(const std::exception &e);
 
 private:
-  /// This object implements the runPythonCode() function, by emitting the code as a runAsPythonScript signal
+  /// This object implements the runPythonCode() function, by emitting the code
+  /// as a runAsPythonScript signal
   PythonRunner m_pyRunner;
 };
-
 }
 }
 
-#endif //MANTIDQT_API_MANTIDDIALOG_H_
+#endif // MANTIDQT_API_MANTIDDIALOG_H_

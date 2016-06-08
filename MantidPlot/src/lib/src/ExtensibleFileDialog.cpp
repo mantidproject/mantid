@@ -2,8 +2,9 @@
     File                 : ExtensibleFileDialog.cpp
     Project              : QtiPlot
     --------------------------------------------------------------------
-	Copyright            : (C) 2007 by Knut Franke
-						   (C) 2007 - 2010 by Ion Vasilief
+        Copyright            : (C) 2007 by Knut Franke
+                                                   (C) 2007 - 2010 by Ion
+ Vasilief
     Email (use @ for *)  : knut.franke*gmx.de, ion_vasilief*yahoo.fr
     Description          : QFileDialog plus generic extension support
 
@@ -34,9 +35,9 @@
 #include <QUrl>
 #include <QComboBox>
 
-ExtensibleFileDialog::ExtensibleFileDialog(QWidget *parent, bool extended, Qt::WFlags flags)
-  : QFileDialog(parent, flags)
-{
+ExtensibleFileDialog::ExtensibleFileDialog(QWidget *parent, bool extended,
+                                           Qt::WFlags flags)
+    : QFileDialog(parent, flags) {
   d_extension = 0;
   d_extension_row = 0;
 
@@ -45,15 +46,18 @@ ExtensibleFileDialog::ExtensibleFileDialog(QWidget *parent, bool extended, Qt::W
   d_extension_toggle->hide(); // show only for d_extension != 0
   setExtended(extended);
 
-  QGridLayout *main_layout = qobject_cast<QGridLayout*>(layout());
+  QGridLayout *main_layout = qobject_cast<QGridLayout *>(layout());
   if (main_layout) {
     d_extension_row = main_layout->rowCount();
-    main_layout->addWidget(d_extension_toggle, d_extension_row, main_layout->columnCount()-1);
+    main_layout->addWidget(d_extension_toggle, d_extension_row,
+                           main_layout->columnCount() - 1);
     main_layout->setRowStretch(d_extension_row, 0);
-    main_layout->setRowStretch(d_extension_row+1, 0);
+    main_layout->setRowStretch(d_extension_row + 1, 0);
   } else {
-    // fallback in case QFileDialog uses a different layout in the future (=> main_layout==0)
-    // would probably look a mess, but at least all functions would be accessible
+    // fallback in case QFileDialog uses a different layout in the future (=>
+    // main_layout==0)
+    // would probably look a mess, but at least all functions would be
+    // accessible
     layout()->addWidget(d_extension_toggle);
   }
 
@@ -61,8 +65,7 @@ ExtensibleFileDialog::ExtensibleFileDialog(QWidget *parent, bool extended, Qt::W
   connect(this, SIGNAL(rejected()), this, SLOT(close()));
 }
 
-void ExtensibleFileDialog::setExtensionWidget(QWidget *extension)
-{
+void ExtensibleFileDialog::setExtensionWidget(QWidget *extension) {
   if (d_extension == extension)
     return;
   if (d_extension) {
@@ -76,39 +79,40 @@ void ExtensibleFileDialog::setExtensionWidget(QWidget *extension)
   }
   d_extension_toggle->show();
 
-  QGridLayout *main_layout = qobject_cast<QGridLayout*>(layout());
+  QGridLayout *main_layout = qobject_cast<QGridLayout *>(layout());
   if (main_layout)
-    main_layout->addWidget(d_extension, d_extension_row, 0, 2, main_layout->columnCount()-1);
+    main_layout->addWidget(d_extension, d_extension_row, 0, 2,
+                           main_layout->columnCount() - 1);
   else
     layout()->addWidget(d_extension);
 
   d_extension->setVisible(d_extension_toggle->isChecked());
-  connect(d_extension_toggle, SIGNAL(toggled(bool)), d_extension, SLOT(setVisible(bool)));
-  connect(d_extension_toggle, SIGNAL(toggled(bool)), this, SLOT(updateToggleButtonText(bool)));
+  connect(d_extension_toggle, SIGNAL(toggled(bool)), d_extension,
+          SLOT(setVisible(bool)));
+  connect(d_extension_toggle, SIGNAL(toggled(bool)), this,
+          SLOT(updateToggleButtonText(bool)));
 }
 
-void ExtensibleFileDialog::setEditableFilter(bool on)
-{
+void ExtensibleFileDialog::setEditableFilter(bool on) {
   QLayout *main_layout = layout();
   if (!main_layout)
     return;
 
-  for (int i = 0; i < main_layout->count(); i++){
+  for (int i = 0; i < main_layout->count(); i++) {
     QLayoutItem *item = main_layout->itemAt(i);
     if (!item)
       continue;
-    QComboBox *filterBox = qobject_cast<QComboBox*>(item->widget());
-    if (filterBox){
+    QComboBox *filterBox = qobject_cast<QComboBox *>(item->widget());
+    if (filterBox) {
       filterBox->setEditable(on);
-      connect(filterBox, SIGNAL(editTextChanged(const QString &)),
-          this, SIGNAL(filterSelected(const QString &)));
+      connect(filterBox, SIGNAL(editTextChanged(const QString &)), this,
+              SIGNAL(filterSelected(const QString &)));
       return;
     }
   }
 }
 
-void ExtensibleFileDialog::updateToggleButtonText(bool toggled)
-{
+void ExtensibleFileDialog::updateToggleButtonText(bool toggled) {
   QString s = tr("&Advanced");
   if (toggled)
     s += " >>";
@@ -117,8 +121,7 @@ void ExtensibleFileDialog::updateToggleButtonText(bool toggled)
   d_extension_toggle->setText(s);
 }
 
-void ExtensibleFileDialog::setExtended(bool extended)
-{
+void ExtensibleFileDialog::setExtended(bool extended) {
   updateToggleButtonText(extended);
   if (extended)
     d_extension_toggle->toggle();

@@ -8,7 +8,6 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-
 /** ReflMeasurementSource : Repository pattern abstracting data mapping from
  domain. Specifically for accessing
  * measurement information from some data map/repository.
@@ -38,7 +37,7 @@ class MANTIDQT_CUSTOMINTERFACES_DLL ReflMeasurementItemSource {
 public:
   /// Get the measurement somehow using location, or fuzzy path
   virtual MeasurementItem obtain(const std::string &definedPath,
-                             const std::string &fuzzyName) const = 0;
+                                 const std::string &fuzzyName) const = 0;
   /// Virtual destructor
   virtual ReflMeasurementItemSource *clone() const = 0;
   /// Destructor
