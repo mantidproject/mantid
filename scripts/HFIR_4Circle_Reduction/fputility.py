@@ -10,7 +10,7 @@ def write_scd_fullprof_kvector(user_header, wave_length, k_vector_dict, peak_dic
       1. peak parameter dictionary: keys are 'hkl', 'kindex', 'intensity', and 'sigma'
     :param user_header: user defined header (information)
     :param wave_length: wavelength
-    :param k_vector_list:
+    :param k_vector_dict:
     :param peak_dict_list: a list of peak parameters stored in dictionaries.
     :param fp_file_name:
     :return:
@@ -39,7 +39,8 @@ def write_scd_fullprof_kvector(user_header, wave_length, k_vector_dict, peak_dic
         # number of k vectors
         kline = '%d' % num_k_vectors
 
-        for k_index, k_vector in enumerate(k_vector_dict):
+        for k_index in k_vector_dict.keys():
+            k_vector = k_vector_dict[k_index]
             # write k_x, k_y, k_z
             kline += '\n%d %.3f    %.3f    %.3f' % (k_index, k_vector[0], k_vector[1], k_vector[2])
 

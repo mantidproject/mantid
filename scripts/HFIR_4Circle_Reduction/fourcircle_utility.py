@@ -650,3 +650,18 @@ def load_hb3a_md_data(file_name):
     return xyz_points, intensities
 
 
+def round_hkl(hkl):
+    """
+    Round HKL to nearest integer
+    :param hkl:
+    :return:
+    """
+    print type(hkl)
+
+    h = int(hkl[0] + 0.5)
+    k = int(hkl[1] + 0.5)
+    l = int(hkl[2] + 0.5)
+
+    return h, k, l
+
+

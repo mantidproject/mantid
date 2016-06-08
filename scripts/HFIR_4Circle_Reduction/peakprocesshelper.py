@@ -37,6 +37,8 @@ class PeakProcessHelper(object):
 
         # Define class variable
         self._userHKL = None
+        self._currHKL = None
+
         self._calculatedHKL = numpy.array([0., 0., 0.])
         self._avgPeakCenter = None
 
@@ -134,16 +136,25 @@ class PeakProcessHelper(object):
         """ Get user's last setup HKL
         :return:
         """
+        if self._userHKL is None:
+            raise RuntimeError('Exp %d Scan %d does not have CURRENT HKL set up yet.' % (self._myExpNumber,
+                                                                                         self._myScanNumber))
+
         return self._currHKL
 
-    def get_user_hkl(self):
+    def get_spice_hkl(self):
         """
         Get HKL set to this object by client
         :return: 3-tuple of float as (H, K, L)
         """
-        hkl = self._userHKL
+        # get HKL from SPICE table if not set up yet.
+        if self._userHKL is None:
+            self.retrieve_hkl_from_spice_table()
 
-        return hkl[0], hkl[1], hkl[2]
+        # check
+        assert self._userHKL is not None, 'Spice/user HKL has not been set.'
+
+        return self._userHKL[0], self._userHKL[1], self._userHKL[2]
 
     def get_weighted_peak_centres(self):
         """ Get the peak centers found in peak workspace.
@@ -217,6 +228,7 @@ class PeakProcessHelper(object):
         # TODO/NOW - check and doc
 
         self._currHKL = hkl
+
         return
 
     def set_indexed_hkl(self, hkl):

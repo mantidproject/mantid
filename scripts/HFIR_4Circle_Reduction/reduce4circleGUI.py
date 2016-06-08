@@ -874,7 +874,7 @@ class MainWindow(QtGui.QMainWindow):
 
         # Set up correct values to table tableWidget_peaksCalUB
         peak_info = self._myControl.get_peak_info(exp_no, scan_no)
-        h, k, l = peak_info.get_user_hkl()
+        h, k, l = peak_info.get_spice_hkl()
         self.ui.lineEdit_H.setText('%.2f' % h)
         self.ui.lineEdit_K.setText('%.2f' % k)
         self.ui.lineEdit_L.setText('%.2f' % l)
@@ -1736,7 +1736,7 @@ class MainWindow(QtGui.QMainWindow):
             if pt < 0:
                 pt = None
             peak_info = self._myControl.get_peak_info(exp_number, scan, pt)
-            h, k, l = peak_info.get_user_hkl()
+            h, k, l = peak_info.get_spice_hkl()
             self.ui.tableWidget_peaksCalUB.update_hkl(i_row, h, k, l)
         # END-FOR
 
@@ -2506,7 +2506,7 @@ class MainWindow(QtGui.QMainWindow):
 
         # Get data
         exp_number, scan_number = peak_info.get_experiment_info()
-        h, k, l = peak_info.get_user_hkl()
+        h, k, l = peak_info.get_spice_hkl()
         q_x, q_y, q_z = peak_info.get_peak_centre()
         m1 = self._myControl.get_sample_log_value(exp_number, scan_number, 1, '_m1')
         wave_length = hb3a.convert_to_wave_length(m1=m1)

@@ -554,7 +554,8 @@ class CWSCDReductionControl(object):
         # form k-shift and peak intensity information
         scan_kindex_dict = dict()
         k_shift_dict = dict()
-        for k_index, tup_value in enumerate(self._kShiftDict):
+        for k_index in self._kShiftDict.keys():
+            tup_value = self._kShiftDict[k_index]
             k_shift_dict[k_index] = tup_value[0]
             for scan_number in tup_value[1]:
                 scan_kindex_dict[scan_number] = k_index
@@ -1802,7 +1803,7 @@ class CWSCDReductionControl(object):
             if zero_hkl is True:
                 h = k = l = 0.
             else:
-                h, k, l = peak_info_i.get_user_hkl()
+                h, k, l = peak_info_i.get_spice_hkl()
                 if hkl_to_int:
                     # convert hkl to integer
                     h = float(math.copysign(1, h)*int(abs(h)+0.5))

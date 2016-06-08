@@ -601,7 +601,7 @@ class ProcessTableWidget(tableBase.NTableWidget):
         # blabla... ...
 
         # set
-        hkl_str = '%s of %s' % (str(hkl), str(type(hkl)))
+        hkl_str = '%.3f, %.3f, %.3f' % (hkl[0], hkl[1], hkl[2])
         self.update_cell_value(row_number, col_hkl_index, hkl_str)
 
         return
