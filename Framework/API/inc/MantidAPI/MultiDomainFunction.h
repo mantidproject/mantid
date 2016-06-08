@@ -85,6 +85,9 @@ public:
   std::vector<std::string> getLocalAttributeNames() const override {
     return std::vector<std::string>(1, "domains");
   }
+  /// Return a value of attribute attName
+  Attribute getLocalAttribute(size_t i,
+                              const std::string &attName) const override;
   /// Set a value to attribute attName
   void setLocalAttribute(size_t i, const std::string &attName,
                          const Attribute &) override;
