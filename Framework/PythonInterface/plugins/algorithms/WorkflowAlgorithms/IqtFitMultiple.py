@@ -1,11 +1,9 @@
 #pylint: disable=no-init, too-many-instance-attributes
-from mantid import logger, AlgorithmFactory
+from mantid import logger, AlgorithmFactory, mtd
 from mantid.kernel import *
 from mantid.api import (PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty,
                         ITableWorkspaceProperty, WorkspaceGroupProperty, Progress)
-from mantid.simpleapi import *
-
-
+import mantid.simpleapi as ms
 import os.path
 
 class IqtFitMultiple(PythonAlgorithm):
@@ -140,16 +138,16 @@ class IqtFitMultiple(PythonAlgorithm):
         #prepare input workspace for fitting
         tmp_fit_workspace = "__Iqtfit_fit_ws"
         if self._spec_max is None:
-            CropWorkspace(InputWorkspace=self._input_ws, OutputWorkspace=tmp_fit_workspace,
-                          XMin=self._start_x, XMax=self._end_x,
-                          StartWorkspaceIndex=self._spec_min)
+            ms.CropWorkspace(InputWorkspace=self._input_ws, OutputWorkspace=tmp_fit_workspace,
+                             XMin=self._start_x, XMax=self._end_x,
+                             StartWorkspaceIndex=self._spec_min)
         else:
-            CropWorkspace(InputWorkspace=self._input_ws, OutputWorkspace=tmp_fit_workspace,
-                          XMin=self._start_x, XMax=self._end_x,
-                          StartWorkspaceIndex=self._spec_min, EndWorkspaceIndex=self._spec_max)
+            ms.CropWorkspace(InputWorkspace=self._input_ws, OutputWorkspace=tmp_fit_workspace,
+                             XMin=self._start_x, XMax=self._end_x,
+                             StartWorkspaceIndex=self._spec_min, EndWorkspaceIndex=self._spec_max)
 
         setup_prog.report('Converting to Histogram')
-        ConvertToHistogram(tmp_fit_workspace, OutputWorkspace=tmp_fit_workspace)
+        ms.ConvertToHistogram(tmp_fit_workspace, OutputWorkspace=tmp_fit_workspace)
         setup_prog.report('Convert to Elastic Q')
         convertToElasticQ(tmp_fit_workspace)
 
@@ -157,23 +155,25 @@ class IqtFitMultiple(PythonAlgorithm):
         fit_prog = Progress(self, start=0.1, end=0.8, nreports=2)
         multi_domain_func, kwargs = createFuryMultiDomainFunction(self._function, tmp_fit_workspace)
         fit_prog.report('Fitting...')
-        Fit(Function=multi_domain_func,
-            InputWorkspace=tmp_fit_workspace,
-            WorkspaceIndex=0,
-            Output=output_workspace,
-            CreateOutput=True,
-            Minimizer=self._minimizer,
-            MaxIterations=self._max_iterations,
-            **kwargs)
+        ms.Fit(Function=multi_domain_func,
+               InputWorkspace=tmp_fit_workspace,
+               WorkspaceIndex=0,
+               Output=output_workspace,
+               CreateOutput=True,
+               Minimizer=self._minimizer,
+               MaxIterations=self._max_iterations,
+               **kwargs)
         fit_prog.report('Fitting complete')
 
         conclusion_prog = Progress(self, start=0.8, end=1.0, nreports=5)
         conclusion_prog.report('Renaming workspaces')
         # rename workspaces to match user input
         if output_workspace + "_Workspaces" != self._fit_group_name:
-            RenameWorkspace(InputWorkspace=output_workspace + "_Workspaces", OutputWorkspace=self._fit_group_name)
+            ms.RenameWorkspace(InputWorkspace=output_workspace + "_Workspaces",
+                               OutputWorkspace=self._fit_group_name)
         if output_workspace + "_Parameters" != self._parameter_name:
-            RenameWorkspace(InputWorkspace=output_workspace + "_Parameters", OutputWorkspace=self._parameter_name)
+            ms.RenameWorkspace(InputWorkspace=output_workspace + "_Parameters",
+                               OutputWorkspace=self._parameter_name)
 
         conclusion_prog.report('Tansposing parameter table')
         transposeFitParametersTable(self._parameter_name)
@@ -187,26 +187,26 @@ class IqtFitMultiple(PythonAlgorithm):
         #convert parameters to matrix workspace
         parameter_names = 'A0,Intensity,Tau,Beta'
         conclusion_prog.report('Processing indirect fit parameters')
-        result_workspace = ProcessIndirectFitParameters(InputWorkspace=self._parameter_name,
-                                                        ColumnX="axis-1", XAxisUnit="MomentumTransfer",
-                                                        ParameterNames=parameter_names,
-                                                        OutputWorkspace=self._result_name)
+        result_workspace = ms.ProcessIndirectFitParameters(InputWorkspace=self._parameter_name,
+                                                           ColumnX="axis-1", XAxisUnit="MomentumTransfer",
+                                                           ParameterNames=parameter_names,
+                                                           OutputWorkspace=self._result_name)
 
         # create and add sample logs
         sample_logs  = {'start_x': self._start_x, 'end_x': self._end_x, 'fit_type': self._fit_type[:-2],
                         'intensities_constrained': self._intensities_constrained, 'beta_constrained': True}
 
         conclusion_prog.report('Copying sample logs')
-        CopyLogs(InputWorkspace=self._input_ws, OutputWorkspace=result_workspace)
-        CopyLogs(InputWorkspace=self._input_ws, OutputWorkspace=self._fit_group_name)
+        ms.CopyLogs(InputWorkspace=self._input_ws, OutputWorkspace=result_workspace)
+        ms.CopyLogs(InputWorkspace=self._input_ws, OutputWorkspace=self._fit_group_name)
 
         log_names = [item for item in sample_logs]
         log_values = [sample_logs[item] for item in sample_logs]
         conclusion_prog.report('Adding sample logs')
-        AddSampleLogMultiple(Workspace=result_workspace, LogNames=log_names, LogValues=log_values)
-        AddSampleLogMultiple(Workspace=self._fit_group_name, LogNames=log_names, LogValues=log_values)
+        ms.AddSampleLogMultiple(Workspace=result_workspace, LogNames=log_names, LogValues=log_values)
+        ms.AddSampleLogMultiple(Workspace=self._fit_group_name, LogNames=log_names, LogValues=log_values)
 
-        DeleteWorkspace(tmp_fit_workspace)
+        ms.DeleteWorkspace(tmp_fit_workspace)
 
         self.setProperty('OutputResultWorkspace', result_workspace)
         self.setProperty('OutputParameterWorkspace', self._parameter_name)
