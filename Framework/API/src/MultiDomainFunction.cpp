@@ -190,32 +190,6 @@ void MultiDomainFunction::iterationFinished() {
   }
 }
 
-/// Return a value of attribute attName
-IFunction::Attribute
-MultiDomainFunction::getLocalAttribute(size_t i,
-                                       const std::string &attName) const {
-  if (attName != "domains") {
-    throw std::invalid_argument("MultiDomainFunction does not have attribute " +
-                                attName);
-  }
-  if (i >= nFunctions()) {
-    throw std::out_of_range("Function index is out of range.");
-  }
-  auto it = m_domains.find(i);
-  if (it == m_domains.end()) {
-    return IFunction::Attribute("All");
-  } else if (it->second.size() == 1 && it->second.front() == i) {
-    return IFunction::Attribute("i");
-  } else if (!it->second.empty()) {
-    std::string out(boost::lexical_cast<std::string>(it->second.front()));
-    for (auto i = it->second.begin() + 1; i != it->second.end(); ++it) {
-      out += "," + boost::lexical_cast<std::string>(*i);
-    }
-    return IFunction::Attribute(out);
-  }
-  return IFunction::Attribute("");
-}
-
 /**
  * Set a value to a "local" attribute, ie an attribute related to a member
  *function.

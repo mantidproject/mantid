@@ -192,13 +192,6 @@ public:
   virtual std::vector<std::string> getLocalAttributeNames() const {
     return std::vector<std::string>();
   }
-  /// Return a value of attribute attName
-  virtual Attribute getLocalAttribute(size_t i,
-                                      const std::string &attName) const {
-    (void)i;
-    throw std::invalid_argument("Attribute " + attName +
-                                " not found in function " + this->name());
-  }
   /// Set a value to attribute attName
   virtual void setLocalAttribute(size_t i, const std::string &attName,
                                  const Attribute &) {
