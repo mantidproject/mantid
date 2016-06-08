@@ -21,7 +21,6 @@ void eval_r(int status, int n, int m, const DoubleFortranVector &x, DoubleFortra
 
   double x1, x2;
 
-  std::cerr << "fun" << std::endl;
   x1 = x(1);
   x2 = x(2);
   auto aparams = reinterpret_cast<params_type*>(params);
@@ -33,21 +32,18 @@ void eval_r(int status, int n, int m, const DoubleFortranVector &x, DoubleFortra
 
 void eval_J(int status, int n, int m, const DoubleFortranVector& x, DoubleFortranMatrix& J, params_base_type p) {
 
-  std::cerr << "grad" << std::endl;
   double x1 = x(1);
   double x2 = x(2);
   auto params = reinterpret_cast<params_type*>(p);
   for(int i = 1; i <= m; ++i) {
     J(i, 1) = exp(x2*params->t(i));
     J(i, 2) = params->t(i) * x1 * exp(x2*params->t(i));
-    std::cerr << "J(" << i << ",1)=" << J(i,1) << "    J(" << i << ",2)=" << J(i,2) << std::endl;
   }
   status = 0; // ! Success
 }
 
 void eval_HF(int status, int n, int m, const DoubleFortranVector& x, const DoubleFortranVector& r, DoubleFortranMatrix& HF, params_base_type p) {
 
-  std::cerr << "Hess" << std::endl;
   double x1 = x(1);
   double x2 = x(2);
   auto params = reinterpret_cast<params_type*>(p);
@@ -103,9 +99,10 @@ public:
     weights(4) = 1.0;
     weights(5) = 1.0;
 
+    options.nlls_method = 3;
     nlls_solve(n, m, x, eval_r, eval_J, eval_HF, &params, options, inform, weights);
 
-    std::cerr << x(1) << ' ' << x(2) << std::endl;
+    std::cerr << std::endl << x(1) << ' ' << x(2) << std::endl;
 
   }
 
