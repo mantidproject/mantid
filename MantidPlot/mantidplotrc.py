@@ -9,7 +9,12 @@
 # Author: Martyn Gigg, Tessella Support Services plc
 #
 #----------------------------------------------
+from __future__ import (absolute_import, division,
+                        print_function, unicode_literals)
+
 if __name__ == '__main__':
+    from six import iteritems as _iteritems
+
     # Import MantidPlot python commands
     import mantidplot
     from mantidplot import *
@@ -32,7 +37,7 @@ if __name__ == '__main__':
             return []
         from mantid.simpleapi import _get_function_spec
         keywords = []
-        for name,obj in definitions.iteritems():
+        for name,obj in _iteritems(definitions):
             if name.startswith('_') : continue
             if inspect.isclass(obj) or inspect.ismodule(obj):
                 continue
@@ -58,7 +63,5 @@ if __name__ == '__main__':
 
     import sys
     sys.path.insert(0,'')
-
-
 else:
     raise ImportError("mantidplotrc.py is an initialization file for MantidPlot not an importable module")

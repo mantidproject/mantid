@@ -448,6 +448,8 @@ included in this module.
 #
 # File change history is stored at: <https://github.com/mantidproject/mantid>.
 # Code Documentation is available at: <http://doxygen.mantidproject.org>
+from __future__ import (absolute_import, division,
+                        print_function, unicode_literals)
 
 try:
     import _qti
@@ -1566,7 +1568,7 @@ def grid(opt='on'):
         l.showGrid()
     elif 'off' == opt:
         # TODO is there support for a 'hideGrid' in qti? Apparently not.
-        print "Sorry, hiding/disabling grids is currenlty not supported"
+        print("Sorry, hiding/disabling grids is currenlty not supported")
 
 def figure(num=None):
     """
