@@ -248,7 +248,8 @@ void FitPowderDiffPeaks::exec() {
   } else if (m_fitMode == TRUSTINPUTFIT) {
     g_log.information() << "Fit Peaks In Trust Mode.  Possible to fit "
                            "overlapped "
-                           "peaks.\n" fitPeaksWithGoodStartingValues();
+                           "peaks.\n";
+    fitPeaksWithGoodStartingValues();
   } else {
     g_log.error("Unsupported fit mode!");
     throw runtime_error("Unsupported fit mode.");

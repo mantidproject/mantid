@@ -712,10 +712,10 @@ public:
    */
   void test_genMultipleLogValuesFilterMatrixSplitter() {
     std::cout
-        << "\n==== Test Multiple Log Value Filter (Matrix Splitter) ====\n\n"
+        << "\n==== Test Multiple Log Value Filter (Matrix Splitter) ====\n\n";
 
-        // Create input
-        DataObjects::EventWorkspace_sptr eventWS = createEventWorkspace();
+    // Create input
+    DataObjects::EventWorkspace_sptr eventWS = createEventWorkspace();
     AnalysisDataService::Instance().addOrReplace("TestEventWS04B", eventWS);
 
     // Init and set property

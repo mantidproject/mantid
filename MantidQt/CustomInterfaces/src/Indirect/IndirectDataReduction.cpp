@@ -239,7 +239,8 @@ IndirectDataReduction::loadInstrumentIfNotExist(std::string instrumentName,
   } catch (std::exception &ex) {
     g_log.warning() << "Failed to load instrument with error: " << ex.what()
                     << ". The current facility may not be fully "
-                       "supported.\n" return MatrixWorkspace_sptr();
+                       "supported.\n";
+    return MatrixWorkspace_sptr();
   }
 }
 
