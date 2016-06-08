@@ -252,7 +252,8 @@ void MantidUI::init() {
   } catch (...) {
     m_defaultFitFunction = NULL;
     m_fitFunction = NULL;
-    showCritical("The curve fitting plugin is missing");
+    g_log.warning("Curve fitting plugin not loaded. Some functionality will be "
+                  "unavailable.");
   }
 }
 
