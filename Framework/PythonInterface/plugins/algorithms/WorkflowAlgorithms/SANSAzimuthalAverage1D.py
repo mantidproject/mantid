@@ -94,18 +94,13 @@ class SANSAzimuthalAverage1D(PythonAlgorithm):
                 binning_prop = "%g, %g, %g" % (qmin, qstep, qmax)
                 workspace.getRun().addProperty("qstep",float(qstep), True)
             self.setPropertyValue("Binning", binning_prop)
-            
-            
         else:
             qmin = binning[0]
-            qmax = binning[2]
-        
+            qmax = binning[2]        
         logger.debug("Qmin = %s"%qmin)
         logger.debug("Qmax = %s"%qmax)
-                
         workspace.getRun().addProperty("qmin",float(qmin), True)
         workspace.getRun().addProperty("qmax",float(qmax), True)
-
         # If we kept the events this far, we need to convert the input workspace
         # to a histogram here
         if workspace.id()=="EventWorkspace":
