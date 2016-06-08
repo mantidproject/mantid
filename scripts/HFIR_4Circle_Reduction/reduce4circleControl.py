@@ -459,6 +459,15 @@ class CWSCDReductionControl(object):
 
         return avg_bg
 
+    def get_ub_matrix(self, exp_number):
+        """ Get UB matrix
+        :param exp_number:
+        :return:
+        """
+        # TODO/NOW - Doc and test
+
+        return self._myUBMatrixDict[exp_number]
+
     @staticmethod
     def get_wave_length(exp_number, scan_number_list):
         """
@@ -561,7 +570,7 @@ class CWSCDReductionControl(object):
         no_shift = len(scan_kindex_dict) == 0
         for scan_number in scan_number_list:
             peak_dict = dict()
-            peak_dict['hkl'] = self._myPeakInfoDict[(exp_number, scan_number)]. get_peak_ws_hkl()
+            peak_dict['hkl'] = self._myPeakInfoDict[(exp_number, scan_number)]. get_current_hkl()
             peak_dict['intensity'] = self._myPeakInfoDict[(exp_number, scan_number)].get_intensity()
             peak_dict['sigma'] = self._myPeakInfoDict[(exp_number, scan_number)].get_sigma()
             if no_shift:
@@ -1007,7 +1016,7 @@ class CWSCDReductionControl(object):
         return p_key in self._myPeakInfoDict
 
     def index_peak(self, ub_matrix, scan_number):
-        """ Index peaks in a Pt.
+        """ Index peaks in a Pt. by create a temporary PeaksWorkspace which contains only 1 peak
         :param ub_matrix: numpy.ndarray (3, 3)
         :param scan_number:
         :return: boolean, object (list of HKL or error message)

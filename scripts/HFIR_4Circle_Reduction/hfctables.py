@@ -392,7 +392,8 @@ class ProcessTableWidget(tableBase.NTableWidget):
                   ('Intensity', 'float'),
                   ('Corrected Intensity', 'float'),
                   ('Status', 'str'),
-                  ('Pt Size', 'int'),
+                  ('Peak Centre', 'str'),
+                  ('HKL', 'str'),
                   ('Total Counts', 'float'),
                   ('Motor', 'str'),
                   ('Wavelength', 'float'),
@@ -428,8 +429,10 @@ class ProcessTableWidget(tableBase.NTableWidget):
         total_counts = 0
         motor_info = ''
         wave_length = 0
+        centre = ''
+        hkl = ''
 
-        new_row = [scan_number, intensity, corr_int, status, num_pt, total_counts,
+        new_row = [scan_number, intensity, corr_int, status, centre, hkl, total_counts,
                    motor_info, wave_length, ws_name, False]
 
         return new_row
@@ -583,6 +586,25 @@ class ProcessTableWidget(tableBase.NTableWidget):
             return 'Unable to find scan %d in table.' % scan_no
 
         return ''
+
+    def set_hkl(self, row_number, hkl):
+        """
+        :param hkl:
+        :return:
+        """
+        # TODO/NOW - check and doc
+
+        # get column index
+        col_hkl_index = self.TableSetup.index(('HKL', 'str'))
+
+        # check
+        # blabla... ...
+
+        # set
+        hkl_str = '%s of %s' % (str(hkl), str(type(hkl)))
+        self.update_cell_value(row_number, col_hkl_index, hkl_str)
+
+        return
 
     def set_motor_info(self, row_number, motor_move_tup):
         """

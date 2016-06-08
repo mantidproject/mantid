@@ -60,6 +60,8 @@ class MainWindow(QtGui.QMainWindow):
             self._scrollbars = MantidQt.API.WidgetScrollbarDecorator(self)
             self._scrollbars.setEnabled(True) # Must follow after setupUi(self)!
 
+        self._init_widgets()
+
         # Mantid configuration
         self._instrument = str(self.ui.comboBox_instrument.currentText())
         # config = ConfigService.Instance()
@@ -180,6 +182,8 @@ class MainWindow(QtGui.QMainWindow):
                      self.do_export_to_fp)
         self.connect(self.ui.checkBox_selectAllScans2Merge, QtCore.SIGNAL('stateChanged(int)'),
                      self.do_select_merged_scans)
+        self.connect(self.ui.pushButton_indexMergedScans, QtCore.SIGNAL('clicked()'),
+                     self.do_set_peaks_hkl)
         self.connect(self.ui.pushButton_applyKShift, QtCore.SIGNAL('clicked()'),
                      self.do_apply_k_shift)
 
@@ -243,9 +247,31 @@ class MainWindow(QtGui.QMainWindow):
         # Sub window
         self._my3DWindow = None
 
-        # Initial setup
+        # QSettings
+        self.load_settings()
+
+        return
+
+    def _init_widgets(self):
+        """ Initialize the table widgets
+        :return:
+        """
+        # Table widgets
+        self.ui.tableWidget_peaksCalUB.setup()
+        self.ui.tableWidget_ubMatrix.setup()
+        self.ui.tableWidget_surveyTable.setup()
+        self.ui.tableWidget_peakIntegration.setup()
+        self.ui.tableWidget_mergeScans.setup()
+        self.ui.tableWidget_ubInUse.setup()
+
+        # Radio buttons
+        self.ui.radioButton_hklFromSPICE.setChecked(True)
+        self.ui.radioButton_indexFromCalUB.setChecked(False)
+
+
+        # tab
         self.ui.tabWidget.setCurrentIndex(0)
-        self._init_table_widgets()
+
         self.ui.radioButton_ubMantidStyle.setChecked(True)
         self.ui.lineEdit_numSurveyOutput.setText('50')
         self.ui.checkBox_loadHKLfromFile.setChecked(True)
@@ -258,24 +284,6 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.lineEdit_localSpiceDir.setEnabled(True)
         self.ui.pushButton_browseLocalDataDir.setEnabled(True)
 
-        # QSettings
-        self.load_settings()
-
-        return
-
-    def _init_table_widgets(self):
-        """ Initialize the table widgets
-        :return:
-        """
-        # UB-peak table
-        # NOTE: have to call this because pyqt set column and row to 0 after __init__
-        #       thus a 2-step initialization has to been adopted
-        self.ui.tableWidget_peaksCalUB.setup()
-        self.ui.tableWidget_ubMatrix.setup()
-        self.ui.tableWidget_surveyTable.setup()
-        self.ui.tableWidget_peakIntegration.setup()
-        self.ui.tableWidget_mergeScans.setup()
-        self.ui.tableWidget_ubInUse.setup()
 
         return
 
@@ -1904,6 +1912,44 @@ class MainWindow(QtGui.QMainWindow):
             self.ui.lineEdit_exp.setStyleSheet('color: red')
 
         self.ui.tabWidget.setCurrentIndex(0)
+
+        return
+
+    def do_set_peaks_hkl(self):
+        """ Set all peaks' HKL value in the merged-peak tab
+        :return:
+        """
+        # get the parameters
+        exp_number = int(self.ui.lineEdit_exp.text())
+        hkl_from_spice = self.ui.radioButton_hklFromSPICE.isChecked()
+        round_hkl = self.ui.checkBox_roundHKL.isChecked()
+
+        # loop through all rows
+        num_rows = self.ui.tableWidget_mergeScans.rowCount()
+        for row_index in range(num_rows):
+            # get scan number
+            scan_i = self.ui.tableWidget_mergeScans.get_scan_number(row_index)
+
+            # get or calculate HKL
+            if hkl_from_spice:
+                # get HKL from SPICE
+                hkl_i = self._myControl.get_peak_info(exp_number, scan_number=scan_i).get_spice_hkl()
+            else:
+                # calculate HKL from SPICE
+                ub_matrix = self._myControl.get_ub_matrix(exp_number)
+                index_status, ret_tup = self._myControl.index_peak(ub_matrix, scan_i)
+                assert index_status
+                hkl_i = ret_tup[0]
+            # END-IF-ELSE (hkl_from_spice)
+
+            # round
+            if round_hkl:
+                hkl_i = hb3a.round_hkl(hkl_i)
+
+            # set & show
+            self._myControl.get_peak_info(exp_number, scan_i).set_hkl(hkl_i)
+            self.ui.tableWidget_mergeScans.set_hkl(row_index, hkl_i)
+        # END-FOR
 
         return
 

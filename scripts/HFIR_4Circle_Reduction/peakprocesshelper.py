@@ -130,14 +130,11 @@ class PeakProcessHelper(object):
         assert peak_ws
         return peak_ws
 
-    def get_peak_ws_hkl(self):
-        """ Get HKL from PeakWorkspace
+    def get_current_hkl(self):
+        """ Get user's last setup HKL
         :return:
         """
-        peak_ws = AnalysisDataService.retrieve(self._myPeakWorkspaceName)
-        hkl = peak_ws.getHKL()
-
-        return hkl.getX(), hkl.getY(), hkl.getZ()
+        return self._currHKL
 
     def get_user_hkl(self):
         """
@@ -210,6 +207,16 @@ class PeakProcessHelper(object):
 
         self._myDataMDWorkspaceName = md_ws_name
 
+        return
+
+    def set_hkl(self, hkl):
+        """ Set current HKL
+        :param hkl:
+        :return:
+        """
+        # TODO/NOW - check and doc
+
+        self._currHKL = hkl
         return
 
     def set_indexed_hkl(self, hkl):
