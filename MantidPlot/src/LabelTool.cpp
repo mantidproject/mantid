@@ -1,4 +1,17 @@
 #include "LabelTool.h"
+// MantidPlot
+#include "Graph.h"
+#include "LegendWidget.h"
+#include "Mantid/MantidMatrixCurve.h"
+#include "TextDialog.h"
+// Mantid
+#include "MantidKernel/TimeSeriesProperty.h"
+// Qwt
+#include <qwt_picker.h>
+#include <qwt_plot_canvas.h>
+#include <qwt_scale_widget.h>
+// Qt
+#include <QMenu>
 
 LabelTool::LabelTool(Graph *graph)
     : QObject(graph->plotWidget()->canvas()), PlotToolInterface(graph),
@@ -8,8 +21,8 @@ LabelTool::LabelTool(Graph *graph)
           new QwtPicker(graph->plotWidget()->axisWidget(Plot::xBottom))),
       m_yAxisPicker(
           new QwtPicker(graph->plotWidget()->axisWidget(Plot::yLeft))),
-      m_xPos(), m_yPos(), m_axisCoordsX(), m_axisCoordsY(), m_xPosSigFigs(),
-      m_yPosSigFigs(), m_error(), m_dataCoords(), m_curveWsName() {
+      m_xPos(), m_yPos(), m_xPosSigFigs(), m_yPosSigFigs(), m_error(),
+      m_dataCoords(), m_curveWsName() {
   connect(m_xAxisPicker, SIGNAL(selected(const QwtPolygon &)), this,
           SLOT(xAxisClicked(const QwtPolygon &)));
   connect(m_yAxisPicker, SIGNAL(selected(const QwtPolygon &)), this,
@@ -65,15 +78,11 @@ void LabelTool::xAxisClicked(const QwtPolygon &x) {
   if (xPos < 0) {
     return;
   }
-
-  std::stringstream precisionValue;
-  precisionValue.precision(6);
-  precisionValue << xPos;
-  m_xPosSigFigs = precisionValue.str();
+  m_xPosSigFigs.setNum(xPos, 'f', 6);
 
   QMenu *clickMenu = new QMenu(d_graph);
 
-  QAction *addXAxisLabel = new QAction(tr(m_xPosSigFigs.c_str()), this);
+  QAction *addXAxisLabel = new QAction(m_xPosSigFigs, this);
   clickMenu->addAction(addXAxisLabel);
   connect(addXAxisLabel, SIGNAL(triggered()), this, SLOT(insertXCoord()));
 
@@ -114,15 +123,11 @@ void LabelTool::yAxisClicked(const QwtPolygon &y) {
   if (yPos < 0) {
     return;
   }
-
-  std::stringstream precisionValue;
-  precisionValue.precision(6);
-  precisionValue << yPos;
-  m_yPosSigFigs = precisionValue.str();
+  m_yPosSigFigs.setNum(yPos, 'f', 6);
 
   QMenu *clickMenu = new QMenu(d_graph);
 
-  QAction *addYAxisLabel = new QAction(tr(m_yPosSigFigs.c_str()), this);
+  QAction *addYAxisLabel = new QAction(m_yPosSigFigs, this);
   clickMenu->addAction(addYAxisLabel);
   connect(addYAxisLabel, SIGNAL(triggered()), this, SLOT(insertYCoord()));
 
@@ -250,22 +255,10 @@ void LabelTool::graphAreaClicked(const QwtPolygon &c) {
       double nearestPointXCoord = mwd->x(nearestPointIndex);
       double nearestPointYCoord = mwd->y(nearestPointIndex);
       double errorOfNearestPoint = mwd->e(nearestPointIndex);
-
-      std::stringstream precisionValueX;
-      precisionValueX.precision(6);
-      precisionValueX << nearestPointXCoord;
-      m_xPosSigFigs = precisionValueX.str();
-
-      std::stringstream precisionValueY;
-      precisionValueY.precision(6);
-      precisionValueY << nearestPointYCoord;
-      m_yPosSigFigs = precisionValueY.str();
-
-      std::stringstream error;
-      error.precision(6);
-      error << errorOfNearestPoint;
-      std::string errorSigFigs = error.str();
-
+      m_xPosSigFigs.setNum(nearestPointXCoord, 'f', 6);
+      m_yPosSigFigs.setNum(nearestPointYCoord, 'f', 6);
+      QString errorSigFigs;
+      errorSigFigs.setNum(errorOfNearestPoint, 'f', 6);
       m_dataCoords = "(" + m_xPosSigFigs + ", " + m_yPosSigFigs + ")";
       m_error = m_yPosSigFigs + "+/-" + errorSigFigs;
 
@@ -329,12 +322,12 @@ void LabelTool::dataPointClicked() {
 
   // For displaying data coordinates.
 
-  QAction *addCoordinateLabel = new QAction(tr(m_dataCoords.c_str()), this);
+  QAction *addCoordinateLabel = new QAction(m_dataCoords, this);
   clickMenu->addAction(addCoordinateLabel);
   connect(addCoordinateLabel, SIGNAL(triggered()), this,
           SLOT(insertDataCoord()));
 
-  QAction *addErrorLabel = new QAction(tr(m_error.c_str()), this);
+  QAction *addErrorLabel = new QAction(m_error, this);
   clickMenu->addAction(addErrorLabel);
   connect(addErrorLabel, SIGNAL(triggered()), this, SLOT(insertErrorValue()));
 
@@ -354,7 +347,7 @@ void LabelTool::dataPointClicked() {
   QMenu *workspaces = info->addMenu(tr("Workspaces"));
 
   foreach (QString wsName, workspaceNames()) {
-    QAction *qa = new QAction(tr(wsName), this);
+    QAction *qa = new QAction(wsName, this);
     workspaces->addAction(qa);
     connect(qa, SIGNAL(triggered()), this, SLOT(insertLegend()));
   }
@@ -363,7 +356,7 @@ void LabelTool::dataPointClicked() {
   QMenu *logVals = info->addMenu(tr("Log values"));
 
   foreach (QString logProperty, logValues()) {
-    QAction *qa = new QAction(tr(logProperty), this);
+    QAction *qa = new QAction(logProperty, this);
     logVals->addAction(qa);
     connect(qa, SIGNAL(triggered()), this, SLOT(insertLegend()));
   }
@@ -420,90 +413,81 @@ QSet<QString> LabelTool::workspaceNames() {
  * @return A set of log properties for each workspace.
  */
 QSet<QString> LabelTool::logValues() {
+  using Mantid::API::AnalysisDataService;
+  using Mantid::API::MatrixWorkspace;
+  using Mantid::Kernel::TimeSeriesProperty;
+
   QSet<QString> logProperties;
-
+  const auto &ads = AnalysisDataService::Instance();
   foreach (QString workspaceName, workspaceNames()) {
-    Mantid::API::MatrixWorkspace_sptr matrixWs =
-        Mantid::API::AnalysisDataService::Instance()
-            .retrieveWS<Mantid::API::MatrixWorkspace>(
-                workspaceName.toStdString());
-    std::vector<Mantid::Kernel::Property *> properties =
-        matrixWs->run().getProperties();
+    auto matrixWs =
+        ads.retrieveWS<MatrixWorkspace>(workspaceName.toStdString());
+    const auto &properties = matrixWs->run().getProperties();
 
-    for (std::vector<Mantid::Kernel::Property *>::iterator prop =
-             properties.begin();
-         prop != properties.end(); ++prop) {
-      auto timeSeriesProp =
-          dynamic_cast<Mantid::Kernel::TimeSeriesProperty<double> *>(*prop);
-
+    for (const auto &prop : properties) {
+      auto timeSeriesProp = dynamic_cast<TimeSeriesProperty<double> *>(prop);
+      QString logValue("None");
       if (timeSeriesProp) {
-        double medianValue = timeSeriesProp->getStatistics().median;
-        std::string medianValue_str =
-            boost::lexical_cast<std::string>(medianValue);
-        logProperties.insert(
-            QString::fromStdString((*prop)->name() + " : " + medianValue_str));
+        logValue.setNum(timeSeriesProp->getStatistics().median, 'f', 6);
+      } else {
+        logValue = QString::fromStdString(prop->value());
       }
-
-      else
-
-        logProperties.insert(
-            QString::fromStdString((*prop)->name() + " : " + (*prop)->value()));
+      logProperties.insert(QString::fromStdString(prop->name()) + " : " +
+                           logValue);
     }
   }
   return logProperties;
 }
 
-/// Sets the coordinates for where the label showing the x-position value is to
+/// Sets the coordinates for where the label showing the x-position value is
+/// to
 /// be located.
 void LabelTool::insertXCoord() {
   LegendWidget *xCoordLabel = new LegendWidget(d_graph->plotWidget());
 
-  // Calculates the value, in pixel coordinates, where the y-axis intersects the
+  // Calculates the value, in pixel coordinates, where the y-axis intersects
+  // the
   // x-axis.
   int yAxisOriginInPixCoords =
       d_graph->plotWidget()->transform(QwtPlot::yLeft, 0.0);
 
   double yAxisLabelPosition = d_graph->plotWidget()->invTransform(
       QwtPlot::yLeft, (yAxisOriginInPixCoords - 30));
-  double xPosSigFigs = boost::lexical_cast<double>(m_xPosSigFigs);
+  double xPosSigFigs = m_xPosSigFigs.toDouble();
 
   xCoordLabel->setOriginCoord(xPosSigFigs, yAxisLabelPosition);
-  xCoordLabel->setText(QString::fromStdString(m_xPosSigFigs));
-
-  /*
-
-  QwtText *xCoordLabel = new QwtText();
-  xCoordLabel->draw();
-    (d_graph->plotWidget());
-  */
+  xCoordLabel->setText(m_xPosSigFigs);
 }
 
-/// Sets the coordinates for where the label showing the y-position value is to
+/// Sets the coordinates for where the label showing the y-position value is
+/// to
 /// be located.
 void LabelTool::insertYCoord() {
   LegendWidget *yCoordLabel = new LegendWidget(d_graph->plotWidget());
 
-  // Calculates the value, in pixel coordinates, where the x-axis intersects the
+  // Calculates the value, in pixel coordinates, where the x-axis intersects
+  // the
   // y-axis.
   int xAxisOriginInPixCoords =
       d_graph->plotWidget()->transform(QwtPlot::xBottom, 0.0);
 
   double xAxisLabelPosition = d_graph->plotWidget()->invTransform(
       QwtPlot::xBottom, (xAxisOriginInPixCoords + 2));
-  double yPosSigFigs = boost::lexical_cast<double>(m_yPosSigFigs);
+  double yPosSigFigs = m_yPosSigFigs.toDouble();
 
   yCoordLabel->setOriginCoord(xAxisLabelPosition, yPosSigFigs);
-  yCoordLabel->setText(QString::fromStdString(m_yPosSigFigs));
+  yCoordLabel->setText(m_yPosSigFigs);
 }
 
-/// Sets the coordinates for where the label showing the coordinates of the data
+/// Sets the coordinates for where the label showing the coordinates of the
+/// data
 /// point is to be located.
 void LabelTool::insertDataCoord() {
   LegendWidget *dataPointLabel = new LegendWidget(d_graph->plotWidget());
 
   // x and y pixel coordinates.
-  double xGraphCoordOfDataPoint = boost::lexical_cast<double>(m_xPosSigFigs);
-  double yGraphCoordOfDataPoint = boost::lexical_cast<double>(m_yPosSigFigs);
+  double xGraphCoordOfDataPoint = m_xPosSigFigs.toDouble();
+  double yGraphCoordOfDataPoint = m_yPosSigFigs.toDouble();
 
   int xPixCoordOfDataPoint = d_graph->plotWidget()->transform(
       QwtPlot::xBottom, xGraphCoordOfDataPoint);
@@ -521,7 +505,8 @@ void LabelTool::insertDataCoord() {
 
   double labelCoordinateY;
 
-  // Minimum pixel difference allowed between the y-coordinate of click and the
+  // Minimum pixel difference allowed between the y-coordinate of click and
+  // the
   // x-axis.
   int minDistFromAxis = 25;
 
@@ -529,7 +514,8 @@ void LabelTool::insertDataCoord() {
     int deltaPositionFromAxis = xAxisOriginInPixCoords - yPixCoordOfDataPoint;
     int shiftValueY = minDistFromAxis - deltaPositionFromAxis;
 
-    // Remember, pixel values in the y direction increase downward from the top
+    // Remember, pixel values in the y direction increase downward from the
+    // top
     // of the screen.
     int labelYPixCoord = yPixCoordOfDataPoint - shiftValueY;
 
@@ -543,7 +529,7 @@ void LabelTool::insertDataCoord() {
   }
 
   dataPointLabel->setOriginCoord(labelCoordinateX, labelCoordinateY);
-  dataPointLabel->setText(QString::fromStdString(m_dataCoords));
+  dataPointLabel->setText(m_dataCoords);
 }
 
 /// Attaches a label close to a data point, showing the error associated with
@@ -552,8 +538,8 @@ void LabelTool::insertErrorValue() {
   LegendWidget *errorPointLabel = new LegendWidget(d_graph->plotWidget());
 
   // x and y pixel coordinates.
-  double xGraphCoordOfDataPoint = boost::lexical_cast<double>(m_xPosSigFigs);
-  double yGraphCoordOfDataPoint = boost::lexical_cast<double>(m_yPosSigFigs);
+  double xGraphCoordOfDataPoint = m_xPosSigFigs.toDouble();
+  double yGraphCoordOfDataPoint = m_yPosSigFigs.toDouble();
 
   int xPixCoordOfDataPoint = d_graph->plotWidget()->transform(
       QwtPlot::xBottom, xGraphCoordOfDataPoint);
@@ -571,7 +557,8 @@ void LabelTool::insertErrorValue() {
 
   double labelCoordinateY;
 
-  // Minimum pixel difference allowed between the y-coordinate of click and the
+  // Minimum pixel difference allowed between the y-coordinate of click and
+  // the
   // x-axis.
   int minDistFromAxis = 25;
 
@@ -579,7 +566,8 @@ void LabelTool::insertErrorValue() {
     int deltaPositionFromAxis = xAxisOriginInPixCoords - yPixCoordOfDataPoint;
     int shiftValueY = minDistFromAxis - deltaPositionFromAxis;
 
-    // Remember, pixel values in the y direction increase downward from the top
+    // Remember, pixel values in the y direction increase downward from the
+    // top
     // of the screen.
     int labelYPixCoord = yPixCoordOfDataPoint - shiftValueY;
 
@@ -593,5 +581,5 @@ void LabelTool::insertErrorValue() {
   }
 
   errorPointLabel->setOriginCoord(labelCoordinateX, labelCoordinateY);
-  errorPointLabel->setText(QString::fromStdString(m_error));
+  errorPointLabel->setText(m_error);
 }

@@ -283,7 +283,7 @@ void MultiLayer::resizeLayers(QResizeEvent *re) {
     scaleLayerFonts = true;
   }
 
-  QApplication::setOverrideCursor(Qt::waitCursor);
+  QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
   double w_ratio = (double)size.width() / (double)oldSize.width();
   double h_ratio = (double)(size.height()) / (double)(oldSize.height());
@@ -616,7 +616,7 @@ void MultiLayer::arrangeLayers(bool fit, bool userSize) {
   if (graphsList.size() == 0)
     return;
 
-  QApplication::setOverrideCursor(Qt::waitCursor);
+  QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
   if (d_layers_selector) {
     removeLayerSelectionFrame();
@@ -1096,7 +1096,7 @@ void MultiLayer::closeEvent(QCloseEvent *e) {
 }
 
 void MultiLayer::wheelEvent(QWheelEvent *e) {
-  QApplication::setOverrideCursor(Qt::waitCursor);
+  QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
   bool resize = false;
   QPoint aux;

@@ -34,15 +34,17 @@
 #include "PlotCurve.h"
 #include "QwtErrorPlotCurve.h"
 #include "ApplicationWindow.h"
-#include <QClipboard>
 
-#include <qwt_symbol.h>
-#include <qwt_plot_picker.h>
-#include <qwt_plot_curve.h>
-#include <QMessageBox>
-#include <QLocale>
 #include <QApplication>
+#include <QClipboard>
+#include <QLocale>
+#include <QMessageBox>
+#include <QMouseEvent>
 #include <QTextStream>
+
+#include <qwt_plot_curve.h>
+#include <qwt_plot_picker.h>
+#include <qwt_symbol.h>
 
 DataPickerTool::DataPickerTool(Graph *graph, ApplicationWindow *app, Mode mode,
                                const QObject *status_target,
@@ -57,11 +59,26 @@ DataPickerTool::DataPickerTool(Graph *graph, ApplicationWindow *app, Mode mode,
   setTrackerMode(QwtPicker::AlwaysOn);
   if (d_mode == Move) {
     setSelectionFlags(QwtPicker::PointSelection | QwtPicker::DragSelection);
-    d_graph->plotWidget()->canvas()->setCursor(Qt::pointingHandCursor);
+    d_graph->plotWidget()->canvas()->setCursor(Qt::PointingHandCursor);
   } else {
     setSelectionFlags(QwtPicker::PointSelection | QwtPicker::ClickSelection);
     d_graph->plotWidget()->canvas()->setCursor(
         QCursor(getQPixmap("vizor_xpm"), -1, -1));
+  }
+
+  if (status_target)
+    connect(this, SIGNAL(statusText(const QString &)), status_target,
+            status_slot);
+  switch (d_mode) {
+  case Display:
+    emit statusText(tr("Click on plot or move cursor to display coordinates!"));
+    break;
+  case Move:
+    emit statusText(tr("Please, click on plot and move cursor!"));
+    break;
+  case Remove:
+    emit statusText(tr("Select point and double click to remove it!"));
+    break;
   }
 
   if (status_target)

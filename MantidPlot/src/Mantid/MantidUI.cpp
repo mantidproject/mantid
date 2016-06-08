@@ -2321,7 +2321,7 @@ void MantidUI::importString(const QString &logName, const QString &data,
 
   // Show table
   t->resize(2 * t->table()->horizontalHeader()->sectionSize(0) + 55,
-            (QMIN(10, 1) + 1) * t->table()->verticalHeader()->sectionSize(0) +
+            (qMin(10, 1) + 1) * t->table()->verticalHeader()->sectionSize(0) +
                 100);
   t->setAttribute(Qt::WA_DeleteOnClose);
   t->showNormal();
@@ -2369,7 +2369,7 @@ void MantidUI::importStrSeriesLog(const QString &logName, const QString &data,
 
   // Show table
   t->resize(2 * t->table()->horizontalHeader()->sectionSize(0) + 55,
-            (QMIN(10, rowcount) + 1) *
+            (qMin(10, rowcount) + 1) *
                     t->table()->verticalHeader()->sectionSize(0) +
                 100);
   t->setAttribute(Qt::WA_DeleteOnClose);
@@ -2625,7 +2625,7 @@ void MantidUI::importNumSeriesLog(const QString &wsName, const QString &logName,
   // Show table
 
   t->resize(2 * t->table()->horizontalHeader()->sectionSize(0) + 55,
-            (QMIN(10, t->numRows()) + 1) *
+            (qMin(10, t->numRows()) + 1) *
                     t->table()->verticalHeader()->sectionSize(0) +
                 100);
   // t->askOnCloseEvent(false);

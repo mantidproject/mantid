@@ -114,7 +114,7 @@ void AssociationsDialog::updateCurves() {
   if (!graph)
     return;
 
-  QApplication::setOverrideCursor(Qt::waitCursor);
+  QApplication::setOverrideCursor(Qt::WaitCursor);
 
   for (int i = 0; i < associations->count(); i++)
     changePlotAssociation(i, plotAssociation(associations->item(i)->text()));
