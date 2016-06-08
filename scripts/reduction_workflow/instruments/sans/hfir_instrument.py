@@ -47,9 +47,10 @@ def get_coordinate_from_pixel(x, y, workspace):
     return [(x - nx_pixels / 2.0 + 0.5) * pixel_size_x / 1000.0,
             (y - ny_pixels / 2.0 + 0.5) * pixel_size_y / 1000.0]
 
-def get_masked_pixels(nx_low, nx_high, ny_low, ny_high, workspace, component_name=None):
+
+def get_masked_ids(nx_low, nx_high, ny_low, ny_high, workspace, component_name=None):
     """
-        Generate a list of masked pixels.
+        Generate a list of masked IDs.
         @param nx_low: number of pixels to mask on the lower-x side of the detector
         @param nx_high: number of pixels to mask on the higher-x side of the detector
         @param ny_low: number of pixels to mask on the lower-y side of the detector
@@ -114,6 +115,28 @@ def get_masked_pixels(nx_low, nx_high, ny_low, ny_high, workspace, component_nam
         Logger("hfir_instrument").error("get_masked_pixels not applied. Component not valid: %s of type %s." % (component.getName(), component.type()))
 
     return IDs
+
+def get_masked_pixels(nx_low, nx_high, ny_low, ny_high, workspace, component_name=None):
+    """
+        Generate a list of masked pixels.
+        @param nx_low: number of pixels to mask on the lower-x side of the detector
+        @param nx_high: number of pixels to mask on the higher-x side of the detector
+        @param ny_low: number of pixels to mask on the lower-y side of the detector
+        @param ny_high: number of pixels to mask on the higher-y side of the detector
+        @param workspace: the pixel number and size info will be taken from the workspace
+    """
+    id_list = get_masked_ids(nx_low, nx_high, ny_low, ny_high, workspace, component_name)
+    
+    nx_pixels = int(workspace.getInstrument().getNumberParameter("number-of-x-pixels")[0])
+    ny_pixels = int(workspace.getInstrument().getNumberParameter("number-of-y-pixels")[0])
+    
+    pixel_list = [] 
+    current_det_id = 3 # First ID (Need to get this from somewhere!!)
+    for i in ny_pixels:
+        for j in nx_pixels:
+            if current_det_id in id_list:
+                pixel_list.append([i,j])                
+    return pixel_list;
 
 
 def _get_ids_for_assembly(component):
