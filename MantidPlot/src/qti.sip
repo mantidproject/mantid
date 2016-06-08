@@ -51,7 +51,7 @@ public:
 
   SIP_PYOBJECT windowLabel();
 %MethodCode
-  sipRes = PyString_FromString(sipCpp->windowLabel());
+  sipRes = FROM_CSTRING(sipCpp->windowLabel());
 %End
   void setWindowLabel(const QString&);
 
@@ -87,8 +87,8 @@ class Table: MdiSubWindow
 #include <QMessageBox>
 #define CHECK_TABLE_COL(arg)\
     int col;\
-    if (PyInt_Check(arg)) {\
-      col = (int)PyInt_AsLong(arg) - 1;\
+    if (INT_CHECK(arg)) {\
+      col = (int)TO_LONG(arg) - 1;\
 		if (col < 0 || col >= sipCpp->numCols()) {\
 			sipIsErr = 1;\
 			PyErr_Format(PyExc_ValueError, "There's no column %d in table %s!", col+1, sipCpp->name().ascii());\
@@ -99,10 +99,10 @@ class Table: MdiSubWindow
 			sipIsErr = 1;\
 			PyErr_Format(PyExc_TypeError, "Column argument must be either int or string.");\
 		} else {\
-			col = sipCpp->colNames().findIndex(PyString_AsString(tmp));\
+			col = sipCpp->colNames().findIndex(TO_CSTRING(tmp));\
 			if (col < 0) {\
 				sipIsErr = 1;\
-				PyErr_Format(PyExc_ValueError, "There's no column named %s in table %s!", PyString_AsString(tmp),\
+				PyErr_Format(PyExc_ValueError, "There's no column named %s in table %s!", TO_CSTRING(tmp),\
 						sipCpp->name().ascii());\
 				Py_DECREF(tmp);\
 			}\
@@ -130,11 +130,12 @@ public:
 
   SIP_PYOBJECT text(SIP_PYOBJECT, int);
 %MethodCode
+  
   sipIsErr = 0;
   CHECK_TABLE_COL(a0);
   CHECK_TABLE_ROW(a1);
   if (sipIsErr == 0) {
-		PyObject *encstr = PyString_FromString(sipCpp->text(row, col).utf8());
+		PyObject *encstr = FROM_CSTRING(sipCpp->text(row, col).utf8());
 		if (encstr) {
 			sipRes = PyUnicode_FromEncodedObject(encstr, "utf8", 0);
 			Py_DECREF(encstr);
@@ -181,7 +182,7 @@ public:
 		sipIsErr = 1;\
 		PyErr_SetString(PyExc_ValueError, "Invalid column argument");\
 	} else
-		sipRes = PyString_FromString(sipCpp->colLabel(a0-1));
+		sipRes = FROM_CSTRING(sipCpp->colLabel(a0-1));
 %End
   void setColName(SIP_PYOBJECT, const QString&, bool=false);
 %MethodCode
@@ -220,7 +221,7 @@ public:
   for (int i=0; i<n; i++) {
     PyObject *str = PyObject_Str(PyTuple_GET_ITEM(a0,i));
     if (str) {
-      l << PyString_AsString(str);
+      l << TO_CSTRING(str);
 		Py_DECREF(str);
 	 } else {
       sipIsErr = 1;
@@ -318,7 +319,7 @@ public:
 	CHECK_MATRIX_ROW(a0);
 	CHECK_MATRIX_COL(a1);
 	if (sipIsErr == 0)
-		sipRes = PyString_FromString(sipCpp->text(row, col));
+		sipRes = FROM_CSTRING(sipCpp->text(row, col));
 %End
   double cell(int, int);
 %MethodCode
@@ -707,7 +708,7 @@ public:
   bool isPiePlot();
   SIP_PYOBJECT pieLegendText() /PyName=pieLegend/;
 %MethodCode
-  sipRes = PyString_FromString(sipCpp->pieLegendText());
+  sipRes = FROM_CSTRING(sipCpp->pieLegendText());
 %End
 
   bool insertCurve(Table*, const QString&, int style = 1, int startRow = 0, int endRow = -1);
@@ -721,7 +722,7 @@ public:
   for (int i=0; i<n; i++) {
     PyObject *str = PyObject_Str(PyTuple_GET_ITEM(a1,i));
     if (str) {
-      l << PyString_AsString(str);
+      l << TO_CSTRING(str);
 		Py_DECREF(str);
 	 } else {
       sipIsErr = 1;
@@ -1154,7 +1155,7 @@ public:
   for (int i=0; i<n; i++) {
     PyObject *str = PyObject_Str(PyTuple_GET_ITEM(a1,i));
     if (str) {
-      l << PyString_AsString(str);
+      l << TO_CSTRING(str);
 		Py_DECREF(str);
 	 } else {
       sipIsErr = 1;
@@ -1181,7 +1182,7 @@ public:
     for (int i=0; i<n; i++) {
     PyObject *str = PyObject_Str(PyTuple_GET_ITEM(a1,i));
     if (str) {
-      l << PyString_AsString(str);
+      l << TO_CSTRING(str);
       Py_DECREF(str);
      } else {
       sipIsErr = 1;

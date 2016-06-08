@@ -57,7 +57,11 @@
 // Function is defined in a sip object file that is linked in later. There is no
 // header file
 // so this is necessary
-extern "C" void init_qti();
+#if defined(IS_PY3K)
+  extern "C" void PyInit__qti();
+#else
+  extern "C" void init_qti();
+#endif
 
 // Factory function
 ScriptingEnv *PythonScripting::constructor(ApplicationWindow *parent) {
@@ -194,8 +198,11 @@ bool PythonScripting::start() {
         "import sip\nsip.setapi('QString',2)\nsip.setapi('QVariant',2)");
     // Embedded qti module needs sip definitions initializing before it can be
     // used
+#if defined(IS_PY3K)
+    PyInit__qti();
+#else
     init_qti();
-
+#endif
     PyObject *qtimod = PyImport_ImportModule("_qti");
     if (qtimod) {
       PyDict_SetItemString(m_globals, "_qti", qtimod);
@@ -271,7 +278,7 @@ QString PythonScripting::toString(PyObject *object, bool decref) {
   }
   if (!repr)
     return ret;
-  ret = PyString_AsString(repr);
+  ret = TO_CSTRING(repr);
   Py_DECREF(repr);
   return ret;
 }
@@ -282,8 +289,8 @@ QStringList PythonScripting::toStringList(PyObject *py_seq) {
     Py_ssize_t nitems = PyList_Size(py_seq);
     for (Py_ssize_t i = 0; i < nitems; ++i) {
       PyObject *item = PyList_GetItem(py_seq, i);
-      if (PyString_Check(item)) {
-        elements << PyString_AsString(item);
+      if (STR_CHECK(item)) {
+        elements << TO_CSTRING(item);
       }
     }
   }
@@ -301,7 +308,7 @@ PyObject *PythonScripting::toPyList(const QStringList &items) {
   PyObject *pylist = PyList_New((length));
   for (Py_ssize_t i = 0; i < length; ++i) {
     QString item = items.at(static_cast<int>(i));
-    PyList_SetItem(pylist, i, PyString_FromString(item.ascii()));
+    PyList_SetItem(pylist, i, FROM_CSTRING(item.ascii()));
   }
   return pylist;
 }
@@ -316,7 +323,7 @@ PyObject *PythonScripting::toPyList(const QStringList &items) {
  */
 long PythonScripting::toLong(PyObject *object, bool decref) {
   assert(object);
-  long cvalue = PyInt_AsLong(object);
+  long cvalue = TO_LONG(object);
   if (decref) {
     Py_DECREF(object);
   }
@@ -398,7 +405,7 @@ const QStringList PythonScripting::mathFunctions() const {
   Py_ssize_t i = 0;
   while (PyDict_Next(m_math, &i, &key, &value))
     if (PyCallable_Check(value))
-      flist << PyString_AsString(key);
+      flist << TO_CSTRING(key);
   flist.sort();
   return flist;
 }
@@ -408,7 +415,7 @@ const QString PythonScripting::mathFunctionDoc(const QString &name) const {
   if (!mathf)
     return "";
   PyObject *pydocstr = PyObject_GetAttrString(mathf, "__doc__"); // new
-  QString qdocstr = PyString_AsString(pydocstr);
+  QString qdocstr = TO_CSTRING(pydocstr);
   Py_XDECREF(pydocstr);
   return qdocstr;
 }
