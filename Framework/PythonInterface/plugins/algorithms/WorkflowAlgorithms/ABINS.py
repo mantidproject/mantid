@@ -1,5 +1,7 @@
 from mantid.kernel import logger, StringListValidator, Direction
-from mantid.api import AlgorithmFactory,  FileAction, FileProperty, PythonAlgorithm
+from mantid.api import AlgorithmFactory,  FileAction, FileProperty, PythonAlgorithm, Progress
+from AbinsModules import LoadCASTEP
+import multiprocessing
 
 class ABINS(PythonAlgorithm):
 
@@ -9,6 +11,7 @@ class ABINS(PythonAlgorithm):
     _sampleForm = None
     _Qvectors = None
     _intrinsicBroadening = None
+    _instrument=None
     _instrumentalBroadening = None
     _structureFactorMode = None
     _structureFactorUnrefined = None
@@ -85,11 +88,42 @@ class ABINS(PythonAlgorithm):
 
 
     def validateInputs(self):
-        pass
+        """
+        Performs input validation.
+
+        Used to ensure the user is requesting a valid mode.
+        """
+        issues = dict()
+
+        temperature = self.getPropertyValue("Temperature")
+        if temperature < 0:
+            issues["Temperature"]="Temperature must be positive!"
+
+        tot_num_cpu=multiprocessing.cpu_count()
+        num_cpu=self.getPropertyValue("Number of threads")
+        if num_cpu<1:
+            issues["Number of threads"] = "Number of threads cannot be smaller than 1!"
+        elif num_cpu>tot_num_cpu:
+            issues["Number of threads"] = "Number of threads cannot be larger than available number of threads!"
+
+        return issues
+
 
     def PyExec(self):
 
+        steps = 10
+        begin = 0
+        end = 1.0
+        prog_reporter = Progress(self, begin, end, steps)
+
         self._get_properties()
+        prog_reporter.report("Input data from the user has been collected.")
+
+        castep_reader=LoadCASTEP(self._phononFile)
+        castep_data=castep_reader.readPhononFile()
+        prog_reporter.report("Phonon file has been read.")
+
+
 
     def _get_properties(self):
 
@@ -97,9 +131,8 @@ class ABINS(PythonAlgorithm):
         self._experimentalFile = self.getProperty("Experimental File").value
         self._temperature = self.getProperty("Temperature").value
         self._sampleForm = self.getProperty("Sample Form").value
-        self._Qvectors = self.getProperty("Q vectors").value
         self._intrinsicBroadening = self.getProperty("Intrinsic Broadening").value
-        self._instrumentalBroadening = self.getProperty("Instrumental Broadening").value
+        self._instrument=self.getProperty("Instrument").value
         self._structureFactorMode = self.getProperty("Dynamical Structure Factor").value
         self._threadsNumber = self.getProperty("Number of threads")
         self._saveS = self.getProperty("Save S")
