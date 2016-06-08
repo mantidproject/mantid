@@ -10,6 +10,14 @@ class MockEnggDiffractionView
     : public MantidQt::CustomInterfaces::IEnggDiffractionView {
 
 public:
+  // virtual void splashMessage(bool visible, const std::string &shortMsg,
+  // const std::string &description);
+  MOCK_METHOD3(splashMessage, void(bool visible, const std::string &shortMsg,
+                                   const std::string &description));
+
+  // virtual void showStatus(const std::string &sts);
+  MOCK_METHOD1(showStatus, void(const std::string &sts));
+
   // virtual void userWarning(const std::string &warn, const std::string
   // &description);
   MOCK_METHOD2(userWarning,
@@ -199,8 +207,8 @@ public:
 
   // virtual void setDataVector
   MOCK_METHOD3(setDataVector,
-               void(std::vector<boost::shared_ptr<QwtData>> &data,
-                    bool focused, bool plotSinglePeaks));
+               void(std::vector<boost::shared_ptr<QwtData>> &data, bool focused,
+                    bool plotSinglePeaks));
 
   // virtual void plotCalibOutput();
   MOCK_METHOD1(plotCalibOutput, void(const std::string &pyCode));

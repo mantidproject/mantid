@@ -5,70 +5,80 @@
 #include "ui_SANSPlotSpecial.h"
 
 // Forward Declarations
-namespace MantidQt
-{
-namespace MantidWidgets
-{
-  class RangeSelector;
+namespace MantidQt {
+namespace MantidWidgets {
+class RangeSelector;
 }
 }
-namespace Mantid
-{
-namespace API
-{
-  class MatrixWorkspace;
+namespace Mantid {
+namespace API {
+class MatrixWorkspace;
 }
 }
 class QwtPlotCurve;
 // End of forward declarations
 
-namespace MantidQt
-{
-namespace CustomInterfaces
-{
+namespace MantidQt {
+namespace CustomInterfaces {
 
-class SANSPlotSpecial : public QFrame
-{
+class SANSPlotSpecial : public QFrame {
   Q_OBJECT
 
 public:
   /**
   * Small utility class to hold information about the different functions.
   */
-  class Transform
-  {
+  class Transform {
   public:
-    enum TransformType { GuinierSpheres, GuinierRods, GuinierSheets, Zimm, DebyeBueche,
-      Holtzer, Kratky, Porod, LogLog, General };
+    enum TransformType {
+      GuinierSpheres,
+      GuinierRods,
+      GuinierSheets,
+      Zimm,
+      DebyeBueche,
+      Holtzer,
+      Kratky,
+      Porod,
+      LogLog,
+      General
+    };
     Transform(TransformType type);
     ~Transform();
     void init();
     std::vector<double> functionConstants();
-    QPair<QStringList, QList<QPair<int, int> > > derivatives();
-    QList<QWidget*> xWidgets() { return m_xWidgets; }
-    QList<QWidget*> yWidgets() { return m_yWidgets; }
+    QPair<QStringList, QList<QPair<int, int>>> derivatives();
+    QList<QWidget *> xWidgets() { return m_xWidgets; }
+    QList<QWidget *> yWidgets() { return m_yWidgets; }
     TransformType type() { return m_type; }
     QStringList interceptDerivatives();
     void tidyGeneral();
-    
+
   private:
     TransformType m_type;
-    QList<QWidget*> m_xWidgets;
-    QList<QWidget*> m_yWidgets;
+    QList<QWidget *> m_xWidgets;
+    QList<QWidget *> m_yWidgets;
     QString m_gDeriv;
     QString m_iDeriv;
   };
 
 public:
-  enum Column { FitInformation, FitInformationValues, GradientLabels, GradientDerived, GradientUnits,
-    InterceptLabels, InterceptDerived, InterceptUnits };
+  enum Column {
+    FitInformation,
+    FitInformationValues,
+    GradientLabels,
+    GradientDerived,
+    GradientUnits,
+    InterceptLabels,
+    InterceptDerived,
+    InterceptUnits
+  };
   SANSPlotSpecial(QWidget *parent = 0);
   ~SANSPlotSpecial() override;
 
 public slots:
   void rangeChanged(double, double);
   void plot();
-  void updateAxisLabels(const QString&);
+  void updateAxisLabels(const QString &);
   void clearTable();
   void calculateDerivatives();
   void tableUpdated(int row, int column);
@@ -79,13 +89,14 @@ public slots:
 private:
   void initLayout();
   boost::shared_ptr<Mantid::API::MatrixWorkspace> runIQTransform();
-  void tableDisplay(QStringList properties, QList<QPair<int, int> > positions);
+  void tableDisplay(QStringList properties, QList<QPair<int, int>> positions);
   bool validatePlotOptions();
   void setupTable();
   void createTransforms();
-  QwtPlotCurve* plotMiniplot(QwtPlotCurve* curve, 
-    boost::shared_ptr<Mantid::API::MatrixWorkspace> workspace,
-    size_t workspaceIndex=0);
+  QwtPlotCurve *
+  plotMiniplot(QwtPlotCurve *curve,
+               boost::shared_ptr<Mantid::API::MatrixWorkspace> workspace,
+               size_t workspaceIndex = 0);
 
   void deriveGuinierSpheres();
   void deriveGuinierRods();
@@ -93,24 +104,24 @@ private:
   void deriveKratky();
   void derivePorod();
 
-  double getValue(QTableWidgetItem*);
-  QPair<QStringList, QMap<QString, double> > getProperties(const QString & transform);
-  
+  double getValue(QTableWidgetItem *);
+  QPair<QStringList, QMap<QString, double>>
+  getProperties(const QString &transform);
+
 private:
   Ui::SANSPlotSpecial m_uiForm;
-  MantidWidgets::RangeSelector* m_rangeSelector;
-  QMap<QString, Transform*> m_transforms;
-  QMap<QString, QTableWidgetItem*> m_derivatives;
+  MantidWidgets::RangeSelector *m_rangeSelector;
+  QMap<QString, Transform *> m_transforms;
+  QMap<QString, QTableWidgetItem *> m_derivatives;
   QMap<QString, QString> m_units;
   QString m_current;
-  QwtPlotCurve* m_dataCurve;
-  QwtPlotCurve* m_linearCurve;
+  QwtPlotCurve *m_dataCurve;
+  QwtPlotCurve *m_linearCurve;
   boost::shared_ptr<Mantid::API::MatrixWorkspace> m_workspaceIQT;
   boost::shared_ptr<Mantid::API::MatrixWorkspace> m_workspaceLinear;
   bool m_rearrangingTable;
-  QTableWidgetItem* m_emptyCell;
+  QTableWidgetItem *m_emptyCell;
 };
-
 }
 }
 

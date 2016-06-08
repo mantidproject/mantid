@@ -1,6 +1,6 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/MemoryManager.h"
+#include "MantidKernel/Memory.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/WriteLock.h"
 #include "MantidLiveData/LoadLiveData.h"
@@ -63,8 +63,7 @@ void MonitorLiveData::doClone(const std::string &originalName,
     Workspace_sptr original = ads.retrieveWS<Workspace>(originalName);
     if (original) {
       size_t bytesUsed = original->getMemorySize();
-      size_t bytesAvail =
-          MemoryManager::Instance().getMemoryInfo().availMemory * size_t(1024);
+      size_t bytesAvail = MemoryStats().availMem() * size_t(1024);
       // Give a buffer of 3 times the size of the workspace
       if (size_t(3) * bytesUsed < bytesAvail) {
         WriteLock _lock(*original);

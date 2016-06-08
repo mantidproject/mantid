@@ -2,6 +2,8 @@
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidKernel/Strings.h"
+#include "MantidGeometry/Instrument.h"
 
 #include "MantidQtCustomInterfaces/Muon/ALCHelper.h"
 #include "MantidQtCustomInterfaces/Muon/MuonAnalysisHelper.h"
@@ -24,7 +26,7 @@ using namespace MantidQt::API;
 namespace MantidQt {
 namespace CustomInterfaces {
 ALCDataLoadingPresenter::ALCDataLoadingPresenter(IALCDataLoadingView *view)
-    : m_view(view), m_directoryChanged(false), m_timerID() {}
+    : m_view(view), m_directoryChanged(false), m_timerID(), m_numDetectors(0) {}
 
 void ALCDataLoadingPresenter::initialize() {
   m_view->initialize();
@@ -129,6 +131,16 @@ void ALCDataLoadingPresenter::load(const std::string &lastFile) {
   // Use Path.toString() to ensure both are in same (native) format
   Poco::Path firstRun(m_view->firstRun());
   Poco::Path lastRun(lastFile);
+
+  // Before loading, check custom grouping (if used) is sensible
+  const bool groupingOK = checkCustomGrouping();
+  if (!groupingOK) {
+    m_view->displayError(
+        "Custom grouping not valid (bad format or detector numbers)");
+    m_view->enableAll();
+    return;
+  }
+
   try {
     IAlgorithm_sptr alg =
         AlgorithmManager::Instance().create("PlotAsymmetryByLogValue");
@@ -260,6 +272,9 @@ void ALCDataLoadingPresenter::updateAvailableInfo() {
       m_view->setTimeLimits(firstGoodData - timeZero, ws->readX(0).back());
     }
   }
+
+  // Update number of detectors for this new first run
+  m_numDetectors = ws->getInstrument()->getNumberDetectors();
 }
 
 MatrixWorkspace_sptr ALCDataLoadingPresenter::exportWorkspace() {
@@ -285,6 +300,28 @@ void ALCDataLoadingPresenter::setData(MatrixWorkspace_const_sptr data) {
   } else {
     std::invalid_argument("Cannot load an empty workspace");
   }
+}
+
+/**
+ * If custom grouping is supplied, check all detector numbers are valid
+ * @returns :: True if grouping OK, false if bad
+ */
+bool ALCDataLoadingPresenter::checkCustomGrouping() {
+  bool groupingOK = true;
+  if (m_view->detectorGroupingType() == "Custom") {
+    auto detectors =
+        Mantid::Kernel::Strings::parseRange(m_view->getForwardGrouping());
+    const auto backward =
+        Mantid::Kernel::Strings::parseRange(m_view->getBackwardGrouping());
+    detectors.insert(detectors.end(), backward.begin(), backward.end());
+    for (const int det : detectors) {
+      if (det < 0 || det > static_cast<int>(m_numDetectors)) {
+        groupingOK = false;
+        break;
+      }
+    }
+  }
+  return groupingOK;
 }
 } // namespace CustomInterfaces
 } // namespace MantidQt

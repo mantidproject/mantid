@@ -55,8 +55,8 @@ public:
 
     // test X
     TS_ASSERT_EQUALS(X.size(), 200);
-    TS_ASSERT_DELTA(X[0], -100, .1);
-    TS_ASSERT_DELTA(X[X.size() - 1], 99, .1);
+    TS_ASSERT_DELTA(X.front(), -100, .1);
+    TS_ASSERT_DELTA(X.back(), 99, .1);
 
     std::string tst = data->getTitle();
     size_t found = tst.find("Hugo");

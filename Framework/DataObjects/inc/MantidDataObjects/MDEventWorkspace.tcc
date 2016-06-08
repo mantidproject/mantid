@@ -823,7 +823,7 @@ TMDE(void MDEventWorkspace)::getBoundariesInDimension(
   for (size_t i = 1; i <= num_boundaries; i++) {
     size_t current_id = std::numeric_limits<size_t>::max();
     // Position along the line
-    coord_t this_x = i * box_size;
+    coord_t this_x = static_cast<coord_t>(i) * box_size;
     auto linePos = static_cast<coord_t>(this_x / fabs(dir_current_dim));
     // Full position
     auto pos = start + (dir * linePos);

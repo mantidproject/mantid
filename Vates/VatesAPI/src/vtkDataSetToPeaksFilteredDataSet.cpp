@@ -32,15 +32,13 @@
 #include <string>
 #include <vector>
 
-namespace Mantid
-{
-namespace VATES
-{
-  /**
-    * Standard constructor for object.
-    * @param input : The dataset to peaks filter
-    * @param output : The resulting peaks filtered dataset
-    */
+namespace Mantid {
+namespace VATES {
+/**
+  * Standard constructor for object.
+  * @param input : The dataset to peaks filter
+  * @param output : The resulting peaks filtered dataset
+  */
 vtkDataSetToPeaksFilteredDataSet::vtkDataSetToPeaksFilteredDataSet(
     vtkSmartPointer<vtkUnstructuredGrid> input,
     vtkSmartPointer<vtkUnstructuredGrid> output)
@@ -178,7 +176,9 @@ vtkDataSetToPeaksFilteredDataSet::getPeaksInfo(
   return peaksInfo;
 }
 
+// clang-format off
 GCC_DIAG_OFF(strict-aliasing)
+// clang-format on
 /**
  * Get the radius from a PeakShape object.
  * @param shape The PeakShape from which the information will be extracted.
@@ -245,4 +245,3 @@ double vtkDataSetToPeaksFilteredDataSet::getRadiusFactor() {
 }
 }
 }
-

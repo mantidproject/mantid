@@ -217,8 +217,7 @@ QString IndirectTab::getWorkspaceBasename(const QString &wsName) {
  * @param workspaceNames List of names of workspaces to plot
  * @param wsIndex Index of spectrum from each workspace to plot
  */
-void IndirectTab::plotSpectrum(const QStringList &workspaceNames,
-                               int wsIndex) {
+void IndirectTab::plotSpectrum(const QStringList &workspaceNames, int wsIndex) {
   if (workspaceNames.isEmpty())
     return;
 
@@ -326,8 +325,7 @@ void IndirectTab::plot2D(const QString &workspaceName) {
  * @param workspaceNames List of names of workspaces to plot
  * @param binIndex Index of spectrum from each workspace to plot
  */
-void IndirectTab::plotTimeBin(const QStringList &workspaceNames,
-                              int binIndex) {
+void IndirectTab::plotTimeBin(const QStringList &workspaceNames, int binIndex) {
   if (workspaceNames.isEmpty())
     return;
 

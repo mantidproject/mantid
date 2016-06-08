@@ -348,7 +348,7 @@ void ConvertToMD::copyMetaData(API::IMDEventWorkspace_sptr &mdEventWS) const {
       }
     }
     // sort bin boundaries in case if unit transformation have swapped them.
-    if (binBoundaries[0] > binBoundaries[binBoundaries.size() - 1]) {
+    if (binBoundaries[0] > binBoundaries.back()) {
       g_log.information() << "Bin boundaries are not arranged monotonously. "
                              "Sorting performed\n";
       std::sort(binBoundaries.begin(), binBoundaries.end());

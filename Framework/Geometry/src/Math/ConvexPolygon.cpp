@@ -7,6 +7,7 @@
 #include "MantidKernel/V2D.h"
 #include <cfloat>
 #include <sstream>
+#include <algorithm>
 
 namespace Mantid {
 namespace Geometry {

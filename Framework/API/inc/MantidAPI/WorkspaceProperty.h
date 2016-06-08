@@ -338,7 +338,9 @@ public:
         } else
           ++it;
       }
-      return std::vector<std::string>(vals.begin(), vals.end());
+      auto values = std::vector<std::string>(vals.begin(), vals.end());
+      std::sort(values.begin(), values.end());
+      return values;
     } else {
       // For output workspaces, just return an empty set
       return std::vector<std::string>();

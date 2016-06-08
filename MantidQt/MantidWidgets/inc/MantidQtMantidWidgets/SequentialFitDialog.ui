@@ -200,6 +200,9 @@
        <layout class="QHBoxLayout" name="horizontalLayout_3">
         <item>
          <widget class="QTableWidget" name="tWorkspaces">
+          <property name="toolTip">
+           <string/>
+          </property>
           <column>
            <property name="text">
             <string>Workspace/File</string>
@@ -214,15 +217,24 @@
            <property name="text">
             <string>Spectrum</string>
            </property>
+           <property name="toolTip">
+            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Sets a spectrum to fit. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+           </property>
           </column>
           <column>
            <property name="text">
             <string>WS Index</string>
            </property>
+           <property name="toolTip">
+            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Set a workspace-index to fit (alternative option to Spectrum)&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+           </property>
           </column>
           <column>
            <property name="text">
             <string>Range</string>
+           </property>
+           <property name="toolTip">
+            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Sets a range of values on the numeric axis associated with the workspace index. The range is specfied by a start value and an end value and separated by a colon e.g. 2:5&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
            </property>
           </column>
          </widget>

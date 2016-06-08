@@ -7,33 +7,31 @@
 #include <QSignalMapper>
 #include <QGridLayout>
 
-namespace MantidQt
-{
-  namespace MantidWidgets
-  {
+namespace MantidQt {
+namespace MantidWidgets {
 
-    class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS DiagResults : public API::MantidDialog
-    {
-      Q_OBJECT
+class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS DiagResults : public API::MantidDialog {
+  Q_OBJECT
 
-    public:
-      DiagResults(QWidget *parent);
-      void updateResults(const QString & testSummary);
+public:
+  DiagResults(QWidget *parent);
+  void updateResults(const QString &testSummary);
 
-    signals:
-      /// is emitted just before the window dies to let the window that created this know the pointer it has is invalid
-      void died();
+signals:
+  /// is emitted just before the window dies to let the window that created this
+  /// know the pointer it has is invalid
+  void died();
 
-    private:
-      void updateRow(int row, QString text);
-      int addRow(QString firstColumn, QString secondColumn);
-      void closeEvent(QCloseEvent *event) override;
+private:
+  void updateRow(int row, QString text);
+  int addRow(QString firstColumn, QString secondColumn);
+  void closeEvent(QCloseEvent *event) override;
 
-    private:
-      /// the layout that widgets are added to
-      QGridLayout *m_Grid;
-    };
-  }
+private:
+  /// the layout that widgets are added to
+  QGridLayout *m_Grid;
+};
+}
 }
 
-#endif //MANTIDQTCUSTOMINTERFACES_EXCITATIONSDIAGRESULTS_H_
+#endif // MANTIDQTCUSTOMINTERFACES_EXCITATIONSDIAGRESULTS_H_

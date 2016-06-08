@@ -361,7 +361,7 @@ bool FFT::areBinWidthsUneven(const MantidVec &xValues) const {
   const double dx = [&] {
     if (acceptXRoundingErrors) {
       // use average bin width
-      return (xValues[xValues.size() - 1] - xValues[0]) /
+      return (xValues.back() - xValues.front()) /
              static_cast<double>(xValues.size() - 1);
     } else {
       // use first bin width

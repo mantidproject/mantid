@@ -8,12 +8,9 @@
 #include "MantidAPI/GroupingLoader.h"
 #include "MantidQtCustomInterfaces/DllConfig.h"
 
-namespace MantidQt
-{
-namespace CustomInterfaces
-{
-namespace Muon
-{
+namespace MantidQt {
+namespace CustomInterfaces {
+namespace Muon {
 
 /**
 This is a collection of helper functions for MuonAnalysis.h. In particular
@@ -79,4 +76,4 @@ private:
 }
 }
 
-#endif //MANTIDQTCUSTOMINTERFACES_MUONANALYSIS_IO_GROUPING_H_
+#endif // MANTIDQTCUSTOMINTERFACES_MUONANALYSIS_IO_GROUPING_H_

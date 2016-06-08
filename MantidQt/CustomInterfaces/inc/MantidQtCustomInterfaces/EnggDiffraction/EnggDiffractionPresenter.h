@@ -12,14 +12,18 @@
 
 #include <boost/scoped_ptr.hpp>
 
-#include <Poco/Path.h>
-
 #include <QObject>
+
+namespace Poco {
+class Path;
+}
 
 class QThread;
 
 namespace MantidQt {
 namespace CustomInterfaces {
+
+struct GSASCalibrationParms;
 
 /**
 Presenter for the Enggineering Diffraction GUI (presenter as in the
@@ -102,9 +106,11 @@ public:
 
   void plotFitPeaksCurves();
 
-  void runEvaluateFunctionAlg(std::string bk2BkExpFunction,
-                              std::string InputName, std::string OutputName,
-                              std::string startX, std::string endX);
+  void runEvaluateFunctionAlg(const std::string &bk2BkExpFunction,
+                              const std::string &InputName,
+                              const std::string &OutputName,
+                              const std::string &startX,
+                              const std::string &endX);
 
   void runCropWorkspaceAlg(std::string workspaceName);
 
@@ -113,7 +119,13 @@ public:
 
   void runRebinToWorkspaceAlg(std::string workspaceName);
 
-  void runConvetUnitsAlg(std::string workspaceName);
+  void convertUnits(std::string workspaceName);
+  void runConvertUnitsAlg(std::string workspaceName);
+  void runAlignDetectorsAlg(std::string workspaceName);
+
+  void setDifcTzero(Mantid::API::MatrixWorkspace_sptr wks) const;
+  void getDifcTzero(Mantid::API::MatrixWorkspace_const_sptr wks, double &difc,
+                    double &difa, double &tzero) const;
 
   void runCloneWorkspaceAlg(std::string inputWorkspace,
                             const std::string &outputWorkspace);
@@ -162,8 +174,14 @@ private:
                                   const std::string &ceriaNo,
                                   const std::string &bankName = "");
 
+  void updateNewCalib(const std::string &fname);
+
   void parseCalibrateFilename(const std::string &path, std::string &instName,
                               std::string &vanNo, std::string &ceriaNo);
+
+  void grabCalibParms(const std::string &fname);
+
+  void updateCalibParmsTable();
 
   // this may need to be mocked up in tests
   virtual void startAsyncCalibWorker(const std::string &outFilename,
@@ -302,8 +320,16 @@ private:
   std::string outFileNameFactory(std::string inputWorkspace, std::string runNo,
                                  std::string bank, std::string format);
 
-  // generates a directory if not found and handles the path
-  Poco::Path outFilesDir(std::string addToDir);
+  // returns a directory as a path, creating it if not found, and checking
+  // errors
+  Poco::Path outFilesUserDir(const std::string &addToDir);
+  Poco::Path outFilesGeneralDir(const std::string &addComponent);
+  Poco::Path outFilesRootDir();
+
+  /// convenience methods to copy files to different destinations
+  void copyToGeneral(const Poco::Path &source, const std::string &pathComp);
+  void copyToUser(const Poco::Path &source, const std::string &pathComp);
+  void copyFocusedToUserAndAll(const std::string &fullFilename);
 
   // generates appropriate names for table workspaces
   std::string outFitParamsTblNameGenerator(const std::string specNos,
@@ -323,6 +349,7 @@ private:
                          const std::vector<double> &difc,
                          const std::vector<double> &tzero,
                          const std::vector<std::string> &bankNames,
+                         const std::string &ceriaNo, const std::string &vanNo,
                          const std::string &templateFile = "");
 
   /// keep track of the paths the user "browses to", to add them in
@@ -335,6 +362,10 @@ private:
   /// string to use for ENGINX file names (as a prefix, etc.)
   const static std::string g_enginxStr;
 
+  /// The message to tell the user that an RB number is needed
+  const static std::string g_shortMsgRBNumberRequired;
+  const static std::string g_msgRBNumberRequired;
+
   /// string to use for invalid run number error message
   const static std::string g_runNumberErrorStr;
 
@@ -343,6 +374,12 @@ private:
 
   // name of the workspace with the vanadium (smoothed) curves
   static const std::string g_vanCurvesWSName;
+
+  // name of the workspace with the focused ws being used for fitting
+  static const std::string g_focusedFittingWSName;
+
+  // for the GSAS parameters (difc, difa, tzero) of the banks
+  static const std::string g_calibBanksParms;
 
   /// whether to allow users to give the output calibration filename
   const static bool g_askUserCalibFilename;
@@ -366,12 +403,19 @@ private:
   /// path where the calibration has been produced (par/prm file)
   std::string m_calibFullPath;
 
+  /// The current calibration parameters (used for units conversion). It should
+  /// be updated when a new calibration is done or re-loading an existing one
+  std::vector<GSASCalibrationParms> m_currentCalibParms;
+
   /// true if the last focusing completed successfully
   bool m_focusFinishedOK;
   /// true if the last pre-processing/re-binning completed successfully
   bool m_rebinningFinishedOK;
   /// true if the last fitting completed successfully
   bool m_fittingFinishedOK;
+
+  // whether to use AlignDetectors to convert units
+  static bool g_useAlignDetectors;
 
   /// Counter for the cropped output files
   static int g_croppedCounter;

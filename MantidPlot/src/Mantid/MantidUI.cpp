@@ -77,7 +77,6 @@
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidQtSliceViewer/SliceViewerWindow.h"
 #include "MantidQtFactory/WidgetFactory.h"
-#include "MantidAPI/MemoryManager.h"
 
 #include "MantidQtSpectrumViewer/SpectrumView.h"
 #include <typeinfo>
@@ -98,7 +97,7 @@ size_t DET_TABLE_NDETS_GROUP = 10;
 // Initialize logger
 Mantid::Kernel::Logger g_log("MantidUI");
 
-bool isOfType(const QObject* obj, const char* toCompare) {
+bool isOfType(const QObject *obj, const char *toCompare) {
   return strcmp(obj->metaObject()->className(), toCompare) == 0;
 }
 }
@@ -434,13 +433,15 @@ MantidUI::getWorkspace(const QString &workspaceName) {
 bool MantidUI::menuAboutToShow(MdiSubWindow *w) {
 
   if (w && isOfType(w, "MantidMatrix")) {
-    auto plotMenuAction = appWindow()->myMenuBar()->addMenu(appWindow()->plot3DMenu);
+    auto plotMenuAction =
+        appWindow()->myMenuBar()->addMenu(appWindow()->plot3DMenu);
     plotMenuAction->setText(tr("3D &Plot"));
     appWindow()->actionCopySelection->setEnabled(true);
     appWindow()->actionPasteSelection->setEnabled(false);
     appWindow()->actionClearSelection->setEnabled(false);
 
-    auto menuMantidMatrixAction = appWindow()->myMenuBar()->addMenu(menuMantidMatrix);
+    auto menuMantidMatrixAction =
+        appWindow()->myMenuBar()->addMenu(menuMantidMatrix);
     menuMantidMatrixAction->setText(tr("&Workspace"));
     return true;
   }
@@ -1277,10 +1278,10 @@ Table *MantidUI::createDetectorTable(
         colValues << QVariant(dataY0) << QVariant(dataE0); // data
       }
       colValues << QVariant("0") << QVariant("0") // rt
-                << QVariant("0")    // efixed
-                << QVariant("0")    // rtp
-                << QVariant("n/a"); // monitor
-    }                               // End catch for no spectrum
+                << QVariant("0")                  // efixed
+                << QVariant("0")                  // rtp
+                << QVariant("n/a");               // monitor
+    }                                             // End catch for no spectrum
   }
 
   // This modifies widgets, so it needs to run in the Qt GUI thread: no openmp
@@ -1718,8 +1719,9 @@ void MantidUI::groupWorkspaces() {
   } catch (std::invalid_argument &) {
     QMessageBox::critical(appWindow(), "MantidPlot - Algorithm error",
                           " Error in GroupWorkspaces algorithm");
-  } catch (Mantid::Kernel::Exception::NotFoundError
-               &) // if not a valid object in analysis data service
+  } catch (Mantid::Kernel::Exception::NotFoundError &) // if not a valid object
+                                                       // in analysis data
+                                                       // service
   {
     QMessageBox::critical(appWindow(), "MantidPlot - Algorithm error",
                           " Error in GroupWorkspaces algorithm");
@@ -2065,12 +2067,6 @@ void MantidUI::clearAllMemory(const bool prompt) {
   Mantid::API::FrameworkManager::Instance().clear();
 }
 
-/** Release any free memory back to the system */
-void MantidUI::releaseFreeMemory() {
-  // This only does something if TCMalloc is used
-  Mantid::API::MemoryManager::Instance().releaseFreeMemory();
-}
-
 void MantidUI::saveProject(bool saved) {
   if (!saved) {
     QString savemsg =
@@ -2151,7 +2147,7 @@ void MantidUI::menuMantidMatrixAboutToShow() {
   menuMantidMatrix->addAction(actionCopyDetectorsToTable);
   menuMantidMatrix->addSeparator();
   menuMantidMatrix->addAction(tr("Set &Properties..."), w,
-                               SLOT(setMatrixProperties()));
+                              SLOT(setMatrixProperties()));
 
   ///
   menuMantidMatrix->addSeparator();
