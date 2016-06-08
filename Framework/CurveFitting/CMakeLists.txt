@@ -245,6 +245,7 @@ set ( INC_FILES
 	inc/MantidCurveFitting/Functions/Voigt.h
 	inc/MantidCurveFitting/RalNlls/DTRS.h
 	inc/MantidCurveFitting/RalNlls/Internal.h
+	inc/MantidCurveFitting/RalNlls/NLLS.h
 	inc/MantidCurveFitting/GSLFunctions.h
 	inc/MantidCurveFitting/GSLJacobian.h
 	inc/MantidCurveFitting/GSLMatrix.h
@@ -378,6 +379,7 @@ set ( TEST_FILES
 	Functions/VesuvioResolutionTest.h
 	Functions/VoigtTest.h
 	RalNlls/DTRSTest.h
+	RalNlls/NLLSTest.h
 	GSLMatrixTest.h
 	GSLVectorTest.h
 	GeneralDomainCreatorTest.h

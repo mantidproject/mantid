@@ -6,6 +6,7 @@
 #include <limits>
 #include <functional>
 #include <string>
+#include <iostream>
 
 #include <gsl/gsl_blas.h>
 #include <gsl/gsl_linalg.h>
@@ -71,6 +72,10 @@ void get_element_of_matrix(const DoubleFortranMatrix& J, int m, int ii, int jj, 
 void apply_scaling(const DoubleFortranMatrix& J, int n, int m, DoubleFortranMatrix& A, 
   DoubleFortranVector& v, apply_scaling_work& w, const nlls_options options, nlls_inform inform) {
 
+  if (w.diag.len() != n) {
+    w.diag.allocate(n);
+  }
+
      switch (options.scale) {
      case 1:
      case 2:
@@ -82,7 +87,7 @@ void apply_scaling(const DoubleFortranMatrix& J, int n, int m, DoubleFortranMatr
               //! scale by W, W_ii = ||J(i,:)||_2^2
               for_do(jj, 1,m)
                  //get_element_of_matrix(J,m,jj,ii,Jij);
-                 Jij = J(ii, jj);
+                 Jij = J(jj, ii);
                  temp = temp + pow(Jij, 2);
               end_do
            }else if ( options.scale == 2) then 
@@ -111,6 +116,7 @@ void apply_scaling(const DoubleFortranMatrix& J, int n, int m, DoubleFortranMatr
               w.diag(ii) = temp;
            end_if
         }
+        break;
      default:
         inform.status = NLLS_ERROR::BAD_SCALING;
         return;
@@ -148,12 +154,18 @@ DoubleFortranVector negative(const DoubleFortranVector& v) {
 
 void mult_J(const DoubleFortranMatrix& J, const DoubleFortranVector& x, DoubleFortranVector& Jx) {
        //dgemv('N',m,n,alpha,J,m,x,1,beta,Jx,1);
+  if (Jx.len() != J.len1()) {
+    Jx.allocate(J.len1());
+  }
   gsl_blas_dgemv(CblasNoTrans, 1.0, J.gsl(), x.gsl(), 0.0, Jx.gsl());
 
 }
 
 void mult_Jt(const DoubleFortranMatrix& J, const DoubleFortranVector& x, DoubleFortranVector& Jtx) {
 //       call dgemv('T',m,n,alpha,J,m,x,1,beta,Jtx,1)
+  if (Jtx.len() != J.len2()) {
+    Jtx.allocate(J.len2());
+  }
   gsl_blas_dgemv(CblasTrans, 1.0, J.gsl(), x.gsl(), 0.0, Jtx.gsl());
 
 }
@@ -327,7 +339,7 @@ void solve_dtrs(const DoubleFortranMatrix& J, const DoubleFortranVector& f, cons
      w.A += hf;
 
 //     ! now form v = J^T f 
-     mult_Jt(J,n,m,f,w.v);
+     mult_Jt(J,f,w.v);
 
 //     ! if scaling needed, do it
      if ( options.scale != 0) then
@@ -349,10 +361,14 @@ void solve_dtrs(const DoubleFortranMatrix& J, const DoubleFortranVector& f, cons
 //     ! <=>
 
 //     ! we need to get the transformed vector v
-     mult_Jt(w.ev,n,n,w.v,w.v_trans);
+     mult_Jt(w.ev,w.v,w.v_trans);
 
 //     ! we've now got the vectors we need, pass to dtrs_solve
      dtrs_initialize( dtrs_options, dtrs_inform );
+
+     if (w.v_trans.len() != n) {
+       w.v_trans.allocate(n);
+     }
 
      for_do(ii, 1,n)
         if (abs(w.v_trans(ii)) < epsmch) then
@@ -372,7 +388,7 @@ void solve_dtrs(const DoubleFortranMatrix& J, const DoubleFortranVector& f, cons
      end_if
      
 //     ! and return the un-transformed vector
-     mult_J(w.ev,n,n,w.d_trans,d);
+     mult_J(w.ev,w.d_trans,d);
 
      normd = norm2(d); // ! ||d||_D
      
@@ -442,7 +458,7 @@ void evaluate_model(const DoubleFortranVector& f, const DoubleFortranMatrix& J, 
 
        
 //       !Jd = J*d
-       mult_J(J,n,m,d,w.Jd);
+       mult_J(J,d,w.Jd);
 
 //       ! First, get the base 
 //       ! 0.5 (f^T f + f^T J d + d^T' J ^T J d )
@@ -456,7 +472,7 @@ void evaluate_model(const DoubleFortranVector& f, const DoubleFortranMatrix& J, 
        default:
           //! these have a dynamic H -- recalculate
           //! H = J^T J + HF, HF is (an approx?) to the Hessian
-          mult_J(hf,n,n,d,w.Hd);
+          mult_J(hf,d,w.Hd);
           md = md + 0.5 * dot_product(d,w.Hd);
        }
 
@@ -500,7 +516,7 @@ void rank_one_update(DoubleFortranMatrix& hf, NLLS_workspace w, int n) {
           return;
        end_if
 
-       mult_J(hf,n,n,w.d,w.Sks); // ! hfs = S_k * d
+       mult_J(hf,w.d,w.Sks); // ! hfs = S_k * d
 
        w.ysharpSks = w.y_sharp;
        w.ysharpSks -= w.Sks;
@@ -571,6 +587,7 @@ void update_trust_region_radius(double& rho, const nlls_options& options, nlls_i
              w.Delta = std::max( options.radius_reduce, options.radius_reduce_max) * w.Delta;
              rho = -one; //! set to be negative, so that the logic works....
           }
+          break;
        case 2: // ! Continuous method
 //          ! Based on that proposed by Hans Bruun Nielsen, TR IMM-REP-1999-05
 //          ! http://www2.imm.dtu.dk/documents/ftp/tr99/tr05_99.pdf
@@ -588,6 +605,7 @@ void update_trust_region_radius(double& rho, const nlls_options& options, nlls_i
              w.Delta = std::max( options.radius_reduce, options.radius_reduce_max) * w.Delta;
              rho = -one; // ! set to be negative, so that the logic works....
           }
+          break;
        default:
           inform.status = NLLS_ERROR::BAD_TR_STRATEGY;
        }
@@ -656,6 +674,7 @@ void get_svd_J(const DoubleFortranMatrix& J, double &s1, double &sn) {
   gsl_linalg_SV_decomp(U.gsl(), V.gsl(), S.gsl(), work.gsl());
   s1 = S(1);
   sn = S(n);
+  std::cerr << "J=" << J << '\n';
 } // subroutine get_svd_J
 
 ///! -----------------------------------------
@@ -685,7 +704,7 @@ more_sorensen_work& w) {
   //     w.A = w.A + reshape(hf,(/n,n/))
   w.A += hf;
   //     ! now form v = J^T f 
-  mult_Jt(J,n,m,f,w.v);
+  mult_Jt(J,f,w.v);
 
   //     ! if scaling needed, do it
   if ( options.scale != 0) {
@@ -928,9 +947,9 @@ NLLS_workspace::NLLS_workspace(int n, int m,const nlls_options& options, nlls_in
 } // setup_workspaces
 
 /// Calculate the 2-norm of a vector: sqrt(||V||^2)
-double norm2(const DoubleFortranVector& v) {
-  return v.norm();
-}
+//double norm2(const DoubleFortranVector& v) {
+//  return v.norm();
+//}
 
 //
 //     subroutine setup_workspace_solve_LLS(n,m,w,options,inform)

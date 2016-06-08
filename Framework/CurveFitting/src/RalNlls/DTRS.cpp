@@ -870,6 +870,9 @@ void dtrs_solve_main(int n, double radius, double f,
 
   //!  set initial values
 
+  if (x.len() != n) {
+    x.allocate(n);
+  }
   x.zero();
   inform.x_norm = zero;
   inform.obj = f;

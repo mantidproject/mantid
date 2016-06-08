@@ -3,6 +3,7 @@
 #include "MantidCurveFitting/RalNlls/Internal.h"
 
 #include <functional>
+#include <iostream>
 
 #define for_do(i, a, n) for(int i=a; i <=n; ++i) {
 #define then {
@@ -41,7 +42,7 @@ void nlls_iterate(int n, int m, DoubleFortranVector& X,
 //    ! todo: make max_tr_decrease a control variable
 //
 //    
-    if (w.first_call == 1) {
+    if (w.first_call == 0) {
 //       !!~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~!!
 //       !! This is the first call...allocate arrays, and get initial !!
 //       !! function evaluations                                      !!
@@ -50,6 +51,8 @@ void nlls_iterate(int n, int m, DoubleFortranVector& X,
        if (n > m) {
          throw std::runtime_error("More parameters than data.");
        }
+
+       w.first_call = 1; // ?
        
 //       ! allocate space for vectors that will be used throughout the algorithm
 //       call setup_workspaces(w,n,m,options,inform)
@@ -212,7 +215,7 @@ void nlls_iterate(int n, int m, DoubleFortranVector& X,
        
        if (! success) then
 //          ! finally, check d makes progress
-          if ( norm2(w.d) < epsmch * norm2(w.Xnew) ) goto L4060;
+          if ( norm2(w.d) < std::numeric_limits<double>::epsilon() * norm2(w.Xnew) ) goto L4060;
        end_if
     end_do
 //    ! if we reach here, a successful step has been found
@@ -350,27 +353,27 @@ L4000:
     //end_if
     return;
 
-L4010:
-    //! Error in eval_J
-    inform.external_name = "eval_J";
-    inform.status = NLLS_ERROR::EVALUATION;
-    goto L4000;
+//L4010:
+//    //! Error in eval_J
+//    inform.external_name = "eval_J";
+//    inform.status = NLLS_ERROR::EVALUATION;
+//    goto L4000;
 
-L4020:
-    //! Error in eval_F
-    inform.external_name = "eval_F";
-    inform.status = NLLS_ERROR::EVALUATION;
-    goto L4000;
+//L4020:
+//    //! Error in eval_F
+//    inform.external_name = "eval_F";
+//    inform.status = NLLS_ERROR::EVALUATION;
+//    goto L4000;
 
-L4030:
-    //! Error in eval_HF
-    inform.external_name = "eval_HF";
-    inform.status = NLLS_ERROR::EVALUATION;
-    goto L4000;
+//L4030:
+//    //! Error in eval_HF
+//    inform.external_name = "eval_HF";
+//    inform.status = NLLS_ERROR::EVALUATION;
+//    goto L4000;
 
-L4040:
-    inform.status = NLLS_ERROR::UNSUPPORTED_MODEL;
-    goto L4000;
+//L4040:
+//    inform.status = NLLS_ERROR::UNSUPPORTED_MODEL;
+//    goto L4000;
 
 L4050:
     //! max tr reductions exceeded
@@ -382,16 +385,16 @@ L4060:
     inform.status = NLLS_ERROR::X_NO_PROGRESS;
     goto L4000;
 
-L4070:
-//    ! n > m on entry
-    inform.status = NLLS_ERROR::N_GT_M;
-    goto L4000;
+//L4070:
+////    ! n > m on entry
+//    inform.status = NLLS_ERROR::N_GT_M;
+//    goto L4000;
 
-L4080:
-    //! bad allocation
-    inform.status = NLLS_ERROR::ALLOCATION;
-    inform.bad_alloc = "nlls_iterate";
-    goto L4000;
+//L4080:
+//    //! bad allocation
+//    inform.status = NLLS_ERROR::ALLOCATION;
+//    inform.bad_alloc = "nlls_iterate";
+//    goto L4000;
 
 //! convergence 
 L5000:
@@ -476,10 +479,12 @@ L5010:
 ///!  Authors: RAL NA Group (Iain Duff, Nick Gould, Jonathan Hogg, Tyrone Rees, 
 ///!                         Jennifer Scott)
 ///!  -----------------------------------------------------------------------------
-void NLLS_SOLVE(int n, int m, DoubleFortranVector& X,
+void nlls_solve(int n, int m, DoubleFortranVector& X,
   eval_f_type eval_F, eval_j_type eval_J, eval_hf_type eval_HF,
   params_base_type params,
   const nlls_options &options, nlls_inform &inform, const DoubleFortranVector& weights ) {
+
+  gsl_set_error_handler_off();
 
 
   //INTEGER, INTENT( IN ) :: n, m
@@ -544,7 +549,8 @@ void NLLS_SOLVE(int n, int m, DoubleFortranVector& X,
   //! If we reach here, then we're over maxits     
   inform.status = NLLS_ERROR::MAXITS;
 
-  L1000:
+L1000:
+  std::cerr << "NLLS_SOLVE finished" << std::endl;
   //nlls_finalize(w,options);
 
 } //   END SUBROUTINE NLLS_SOLVE
