@@ -9,11 +9,9 @@
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidAPI/FunctionFactory.h"
 
-
 using namespace Mantid;
 using namespace Mantid::API;
 using namespace Mantid::CurveFitting::Functions;
-
 
 class ConvolutionExpression {
 public:

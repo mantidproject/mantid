@@ -545,111 +545,115 @@ public:
 
   void test_function_EndErfc() {
 
-	  // Mock data
-	  int ndata = 13;
-	  API::MatrixWorkspace_sptr ws = API::WorkspaceFactory::Instance().create(
-		  "Workspace2D", 1, ndata, ndata);
-	  Mantid::MantidVec &x = ws->dataX(0);
-	  Mantid::MantidVec &y = ws->dataY(0);
-	  Mantid::MantidVec &e = ws->dataE(0);
-	  // values extracted from y(x)=2*exp(-(x/4)^0.5)
-	  y = { 1, 3, 4, 28, 221, 872, 1495, 1832, 1830, 1917, 2045, 1996, 0 };
-	  for (int i = 0; i < ndata; i++) {
-		  x[i] = static_cast<double>(5 * i);
-		  e[i] = 1.0;
-	  }
+    // Mock data
+    int ndata = 13;
+    API::MatrixWorkspace_sptr ws = API::WorkspaceFactory::Instance().create(
+        "Workspace2D", 1, ndata, ndata);
+    Mantid::MantidVec &x = ws->dataX(0);
+    Mantid::MantidVec &y = ws->dataY(0);
+    Mantid::MantidVec &e = ws->dataE(0);
+    // values extracted from y(x)=2*exp(-(x/4)^0.5)
+    y = {1, 3, 4, 28, 221, 872, 1495, 1832, 1830, 1917, 2045, 1996, 0};
+    for (int i = 0; i < ndata; i++) {
+      x[i] = static_cast<double>(5 * i);
+      e[i] = 1.0;
+    }
 
-	  Fit fit;
-	  fit.initialize();
-	  fit.setProperty("Function", "name=EndErfc, A=2000, B=50, C=6, D=0");
-	  fit.setProperty("InputWorkspace", ws);
-	  fit.setPropertyValue("StartX", "5");
-	  fit.setPropertyValue("EndX", "55");
-	  fit.execute();
+    Fit fit;
+    fit.initialize();
+    fit.setProperty("Function", "name=EndErfc, A=2000, B=50, C=6, D=0");
+    fit.setProperty("InputWorkspace", ws);
+    fit.setPropertyValue("StartX", "5");
+    fit.setPropertyValue("EndX", "55");
+    fit.execute();
 
-	  double dummy = fit.getProperty("OutputChi2overDoF");
-	  TS_ASSERT_DELTA(dummy, 0.0001, 20000);
+    double dummy = fit.getProperty("OutputChi2overDoF");
+    TS_ASSERT_DELTA(dummy, 0.0001, 20000);
 
-	  IFunction_sptr out = fit.getProperty("Function");
-	  TS_ASSERT_DELTA(out->getParameter("A"), 1000, 30.0);
-	  TS_ASSERT_DELTA(out->getParameter("B"), 26, 0.1);
-	  TS_ASSERT_DELTA(out->getParameter("C"), 7.7, 0.1);
-	  TS_ASSERT_DELTA(out->getParameter("D"), 0, 0.1);
+    IFunction_sptr out = fit.getProperty("Function");
+    TS_ASSERT_DELTA(out->getParameter("A"), 1000, 30.0);
+    TS_ASSERT_DELTA(out->getParameter("B"), 26, 0.1);
+    TS_ASSERT_DELTA(out->getParameter("C"), 7.7, 0.1);
+    TS_ASSERT_DELTA(out->getParameter("D"), 0, 0.1);
   }
 
-    void test_function_convolution_fit_resolution() {
+  void test_function_convolution_fit_resolution() {
 
-	  boost::shared_ptr<WorkspaceTester> data =
-		  boost::make_shared<WorkspaceTester>();
-	  data->init(1, 100, 100);
+    boost::shared_ptr<WorkspaceTester> data =
+        boost::make_shared<WorkspaceTester>();
+    data->init(1, 100, 100);
 
-	  auto &x = data->dataX(0);
-	  auto &y = data->dataY(0);
-	  auto &e = data->dataE(0);
+    auto &x = data->dataX(0);
+    auto &y = data->dataY(0);
+    auto &e = data->dataE(0);
 
+    y = {0, -1.77636e-16, -1.77636e-16, 0, -1.77636e-16, -8.88178e-17,
+         -1.33227e-16, 0, 0, 8.88178e-17, 3.33067e-17, 1.11022e-17, 1.27676e-16,
+         6.66134e-17, 8.32667e-17, 3.88578e-17, 9.4369e-17, 1.44329e-16,
+         2.66454e-16, 5.10703e-15, 9.80105e-14, 1.63027e-12, 2.31485e-11,
+         2.80779e-10, 2.91067e-09, 2.58027e-08, 1.9575e-07, 1.27204e-06,
+         7.08849e-06, 3.39231e-05, 0.000139678, 0.000496012, 0.00152387,
+         0.0040672, 0.00948273, 0.0194574, 0.0354878, 0.0583005, 0.0877657,
+         0.123662, 0.167048, 0.221547, 0.293962, 0.393859, 0.531629, 0.714256,
+         0.938713, 1.18531, 1.41603, 1.58257, 1.64355, 1.58257, 1.41603,
+         1.18531, 0.938713, 0.714256, 0.531629, 0.393859, 0.293962, 0.221547,
+         0.167048, 0.123662, 0.0877657, 0.0583005, 0.0354878, 0.0194574,
+         0.00948273, 0.0040672, 0.00152387, 0.000496012, 0.000139678,
+         3.39231e-05, 7.08849e-06, 1.27204e-06, 1.9575e-07, 2.58027e-08,
+         2.91067e-09, 2.80779e-10, 2.31486e-11, 1.63033e-12, 9.80771e-14,
+         5.09592e-15, 2.77556e-16, 3.88578e-17, 2.22045e-17, -1.66533e-17,
+         -1.11022e-17, 0, -7.21645e-17, -8.88178e-17, -1.11022e-16,
+         -1.33227e-16, -4.44089e-17, -1.77636e-16, -1.33227e-16, -8.88178e-17,
+         -3.55271e-16, -8.88178e-17, -1.77636e-16, -1.77636e-16};
 
-	  y = { 0,-1.77636e-16,-1.77636e-16,0,-1.77636e-16,-8.88178e-17,-1.33227e-16,
-		  0,0,8.88178e-17,3.33067e-17,1.11022e-17,1.27676e-16,6.66134e-17,
-		  8.32667e-17,3.88578e-17,9.4369e-17,1.44329e-16,2.66454e-16,5.10703e-15,
-		  9.80105e-14,1.63027e-12,2.31485e-11,2.80779e-10,2.91067e-09,2.58027e-08,
-		  1.9575e-07,1.27204e-06,7.08849e-06,3.39231e-05,0.000139678,0.000496012,
-		  0.00152387,0.0040672,0.00948273,0.0194574,0.0354878,0.0583005,0.0877657,
-		  0.123662,0.167048,0.221547,0.293962,0.393859,0.531629,0.714256,0.938713,
-		  1.18531,1.41603,1.58257,1.64355,1.58257,1.41603,1.18531,0.938713,
-		  0.714256,0.531629,0.393859,0.293962,0.221547,0.167048,0.123662,0.0877657,
-		  0.0583005,0.0354878,0.0194574,0.00948273,0.0040672,0.00152387,0.000496012,
-		  0.000139678,3.39231e-05,7.08849e-06,1.27204e-06,1.9575e-07,2.58027e-08,
-		  2.91067e-09,2.80779e-10,2.31486e-11,1.63033e-12,9.80771e-14,5.09592e-15,
-		  2.77556e-16,3.88578e-17,2.22045e-17,-1.66533e-17,-1.11022e-17,0,
-		  -7.21645e-17,-8.88178e-17,-1.11022e-16,-1.33227e-16,-4.44089e-17,
-		  -1.77636e-16,-1.33227e-16,-8.88178e-17,-3.55271e-16,-8.88178e-17,
-		  -1.77636e-16,-1.77636e-16 };
+    x = {-10,  -9.8, -9.6, -9.4, -9.2, -9,   -8.8, -8.6, -8.4, -8.2, -8,   -7.8,
+         -7.6, -7.4, -7.2, -7,   -6.8, -6.6, -6.4, -6.2, -6,   -5.8, -5.6, -5.4,
+         -5.2, -5,   -4.8, -4.6, -4.4, -4.2, -4,   -3.8, -3.6, -3.4, -3.2, -3,
+         -2.8, -2.6, -2.4, -2.2, -2,   -1.8, -1.6, -1.4, -1.2, -1,   -0.8, -0.6,
+         -0.4, -0.2, 0,    0.2,  0.4,  0.6,  0.8,  1,    1.2,  1.4,  1.6,  1.8,
+         2,    2.2,  2.4,  2.6,  2.8,  3,    3.2,  3.4,  3.6,  3.8,  4,    4.2,
+         4.4,  4.6,  4.8,  5,    5.2,  5.4,  5.6,  5.8,  6,    6.2,  6.4,  6.6,
+         6.8,  7,    7.2,  7.4,  7.6,  7.8,  8,    8.2,  8.4,  8.6,  8.8,  9,
+         9.2,  9.4,  9.6,  9.8};
 
-	  x = { -10,-9.8,-9.6,-9.4,-9.2,-9,-8.8,-8.6,-8.4,-8.2,-8,-7.8,-7.6,-7.4,-7.2,-7,
-		  -6.8,-6.6,-6.4,-6.2,-6,-5.8,-5.6,-5.4,-5.2,-5,-4.8,-4.6,-4.4,-4.2,-4,-3.8,
-		  -3.6,-3.4,-3.2,-3,-2.8,-2.6,-2.4,-2.2,-2,-1.8,-1.6,-1.4,-1.2,-1,-0.8,
-		  -0.6,-0.4,-0.2,0,0.2,0.4,0.6,0.8,1,1.2,1.4,1.6,1.8,2,2.2,2.4,2.6,2.8,3,
-		  3.2,3.4,3.6,3.8,4,4.2,4.4,4.6,4.8,5,5.2,5.4,5.6,5.8,6,6.2,6.4,6.6,
-		  6.8,7,7.2,7.4,7.6,7.8,8,8.2,8.4,8.6,8.8,9,9.2,9.4,9.6,9.8 };
+    e.assign(y.size(), 1);
 
-	  e.assign(y.size(), 1);
+    Algorithms::Fit fit;
+    fit.initialize();
+    // fit.setPropertyValue("Function", conv->asString());
 
-	  Algorithms::Fit fit;
-	  fit.initialize();
-	  // fit.setPropertyValue("Function", conv->asString());
+    fit.setPropertyValue("Function",
+                         "composite=Convolution,FixResolution=true,NumDeriv="
+                         "true;name=ConvolutionTest_Gauss,c=0,h=0.5,s=0.5;"
+                         "name=ConvolutionTest_Lorentz,c=0,h=1,w=1");
+    fit.setProperty("InputWorkspace", data);
+    fit.setProperty("WorkspaceIndex", 0);
+    fit.execute();
 
-	  fit.setPropertyValue(
-		  "Function", "composite=Convolution,FixResolution=true,NumDeriv="
-		  "true;name=ConvolutionTest_Gauss,c=0,h=0.5,s=0.5;"
-		  "name=ConvolutionTest_Lorentz,c=0,h=1,w=1");
-	  fit.setProperty("InputWorkspace", data);
-	  fit.setProperty("WorkspaceIndex", 0);
-	  fit.execute();
+    IFunction_sptr out = fit.getProperty("Function");
+    // by default convolution keeps parameters of the resolution (function
+    // #0)
+    // fixed
+    TS_ASSERT_EQUALS(out->getParameter("f0.h"), 0.5);
+    TS_ASSERT_EQUALS(out->getParameter("f0.s"), 0.5);
+    // fit is not very good
+    TS_ASSERT_LESS_THAN(0.1, fabs(out->getParameter("f1.w") - 1));
 
-	  IFunction_sptr out = fit.getProperty("Function");
-	  // by default convolution keeps parameters of the resolution (function
-	  // #0)
-	  // fixed
-	  TS_ASSERT_EQUALS(out->getParameter("f0.h"), 0.5);
-	  TS_ASSERT_EQUALS(out->getParameter("f0.s"), 0.5);
-	  // fit is not very good
-	  TS_ASSERT_LESS_THAN(0.1, fabs(out->getParameter("f1.w") - 1));
+    Algorithms::Fit fit1;
+    fit1.initialize();
+    fit1.setProperty("Function",
+                     "composite=Convolution,FixResolution=false,NumDeriv="
+                     "true;name=ConvolutionTest_Gauss,c=0,h=0.5,s=0.5;"
+                     "name=ConvolutionTest_Lorentz,c=0,h=1,w=1");
+    fit1.setProperty("InputWorkspace", data);
+    fit1.setProperty("WorkspaceIndex", 0);
+    fit1.execute();
 
-	  Algorithms::Fit fit1;
-	  fit1.initialize();
-	  fit1.setProperty("Function",
-		  "composite=Convolution,FixResolution=false,NumDeriv="
-		  "true;name=ConvolutionTest_Gauss,c=0,h=0.5,s=0.5;"
-		  "name=ConvolutionTest_Lorentz,c=0,h=1,w=1");
-	  fit1.setProperty("InputWorkspace", data);
-	  fit1.setProperty("WorkspaceIndex", 0);
-	  fit1.execute();
+    out = fit1.getProperty("Function");
+    // resolution parameters change and close to the initial values
 
-	  out = fit1.getProperty("Function");
-	  // resolution parameters change and close to the initial values
-
-	  TS_ASSERT_DELTA(out->getParameter("f0.s"), 2.0, 0.0001);
-	  TS_ASSERT_DELTA(out->getParameter("f1.w"), 0.5, 0.0001);
+    TS_ASSERT_DELTA(out->getParameter("f0.s"), 2.0, 0.0001);
+    TS_ASSERT_DELTA(out->getParameter("f1.w"), 0.5, 0.0001);
   }
 
   void test_function_crystal_field_peaks_fit() {
@@ -790,7 +794,6 @@ public:
     IFunction_sptr out = alg2.getProperty("Function");
     TS_ASSERT_DELTA(out->getParameter("Height"), 5, 0.0001);
     TS_ASSERT_DELTA(out->getParameter("Lifetime"), 3, 0.001);
-
   }
 
   void test_function_lattice_fit() {
