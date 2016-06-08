@@ -440,7 +440,7 @@ void FitPowderDiffPeaks::fitPeaksRobust() {
         robmsgss << parname << " = " << thispeak->getParameter(parname) << '\n';
       }
       g_log.information() << "[DB1151] Robust Fit Result:   Chi^2 = " << chi2
-                          << endl
+                          << '\n'
                           << robmsgss.str();
 
       rightpeak = thispeak;
@@ -469,12 +469,11 @@ void FitPowderDiffPeaks::fitPeaksRobust() {
       stringstream dbxss;
       dbxss << '\n';
       for (int i = 0; i < 10; ++i)
-        dbxss << "==";
-      dbxss << endl
-            << "[DBx323] Peak (" << peakhkl[0] << ", " << peakhkl[1] << ","
-            << peakhkl[2] << ").  Centre predicted @ TOF = " << predictcentre
-            << ".  Observed range = " << peakleftbound << ", "
-            << peakrightbound;
+        dbxss << "==\n[DBx323] Peak (" << peakhkl[0] << ", " << peakhkl[1]
+              << "," << peakhkl[2]
+              << ").  Centre predicted @ TOF = " << predictcentre
+              << ".  Observed range = " << peakleftbound << ", "
+              << peakrightbound;
       g_log.notice(dbxss.str());
 
       // 3. Fit peak
@@ -706,9 +705,9 @@ bool FitPowderDiffPeaks::fitSinglePeakRobust(
   // a) Fit by using input peak parameters
   string peakinfoa0 =
       getFunctionInfo(boost::dynamic_pointer_cast<IFunction>(peak));
-  g_log.notice() << "[DBx533A] Approach A: Starting Peak Function Information: "
-                 << endl
-                 << peakinfoa0 << '\n';
+  g_log.notice()
+      << "[DBx533A] Approach A: Starting Peak Function Information: \n"
+      << peakinfoa0 << '\n';
 
   double chi2a;
   bool fitgooda = doFit1PeakSequential(peakws, peak_wsindex, peak, minimizers,
@@ -723,8 +722,7 @@ bool FitPowderDiffPeaks::fitSinglePeakRobust(
   string peakinfoa1 =
       getFunctionInfo(boost::dynamic_pointer_cast<IFunction>(peak));
   g_log.notice() << "[DBx533A] Approach A:  Fit Successful = " << fitgooda
-                 << ", Chi2 = " << chi2a
-                 << ", Peak Function Information: " << endl
+                 << ", Chi2 = " << chi2a << ", Peak Function Information: \n"
                  << peakinfoa1 << '\n';
 
   // b) Fit by using Gaussian result (Sigma)
@@ -733,9 +731,9 @@ bool FitPowderDiffPeaks::fitSinglePeakRobust(
 
   string peakinfob0 =
       getFunctionInfo(boost::dynamic_pointer_cast<IFunction>(peak));
-  g_log.notice() << "[DBx533B] Approach B: Starting Peak Function Information: "
-                 << endl
-                 << peakinfob0 << '\n';
+  g_log.notice()
+      << "[DBx533B] Approach B: Starting Peak Function Information: \n"
+      << peakinfob0 << '\n';
 
   double chi2b;
   bool fitgoodb = doFit1PeakSequential(peakws, peak_wsindex, peak, minimizers,
@@ -751,8 +749,7 @@ bool FitPowderDiffPeaks::fitSinglePeakRobust(
   string peakinfob1 =
       getFunctionInfo(boost::dynamic_pointer_cast<IFunction>(peak));
   g_log.notice() << "[DBx533B] Approach 2: Fit Successful = " << fitgoodb
-                 << ", Chi2 = " << chi2b
-                 << ", Peak Function Information: " << endl
+                 << ", Chi2 = " << chi2b << ", Peak Function Information: \n"
                  << peakinfob1 << '\n';
 
   // c) Fit peak parameters by the value from right peak
@@ -764,7 +761,7 @@ bool FitPowderDiffPeaks::fitSinglePeakRobust(
     string peakinfoc0 =
         getFunctionInfo(boost::dynamic_pointer_cast<IFunction>(peak));
     g_log.notice()
-        << "[DBx533C] Approach C: Starting Peak Function Information: " << endl
+        << "[DBx533C] Approach C: Starting Peak Function Information: \n"
         << peakinfoc0 << '\n';
 
     double chi2c;
@@ -780,8 +777,7 @@ bool FitPowderDiffPeaks::fitSinglePeakRobust(
     string peakinfoc1 =
         getFunctionInfo(boost::dynamic_pointer_cast<IFunction>(peak));
     g_log.notice() << "[DBx533C] Approach C:  Fit Successful = " << fitgoodc
-                   << ", Chi2 = " << chi2c
-                   << ", Peak Function Information: " << endl
+                   << ", Chi2 = " << chi2c << ", Peak Function Information: \n"
                    << peakinfoc1 << '\n';
   } else {
     // No right peak information: set a error entry
@@ -877,10 +873,9 @@ bool FitPowderDiffPeaks::doFit1PeakBackground(
 
   // 3. Fit
   string cominfoa = getFunctionInfo(compfunc);
-  g_log.notice() << "[DBx533X-0] Fit All: Starting Peak Function Information: "
-                 << endl
-                 << cominfoa << "Fit range = " << startx << ", " << endx
-                 << '\n';
+  g_log.notice()
+      << "[DBx533X-0] Fit All: Starting Peak Function Information: \n"
+      << cominfoa << "Fit range = " << startx << ", " << endx << '\n';
 
   // 3. Set
   IAlgorithm_sptr fitalg = createChildAlgorithm("Fit", -1, -1, true);
@@ -1185,8 +1180,7 @@ void FitPowderDiffPeaks::fitPeaksWithGoodStartingValues() {
       calculatePeakFitBoundary(ipeak, ipeak, peakfitleftbound,
                                peakfitrightbound);
 
-      g_log.information() << endl
-                          << "[T] Fit Peak Indexed " << ipeak << " ("
+      g_log.information() << "\n[T] Fit Peak Indexed " << ipeak << " ("
                           << m_vecPeakFunctions.size() - 1 - ipeak
                           << ")\t----------------------------------\n";
 
@@ -1742,8 +1736,7 @@ bool FitPowderDiffPeaks::doFit1PeakSimple(
     // Debug information output
     API::ITableWorkspace_sptr paramws = fitalg->getProperty("OutputParameters");
     std::string infofit = parseFitParameterWorkspace(paramws);
-    g_log.information() << "Fitted Parameters: " << endl
-                        << infofit << '\n';
+    g_log.information() << "Fitted Parameters: \n" << infofit << '\n';
   } else {
     g_log.error() << "[DBx128B] Failed to execute fitting peak @ "
                   << peakfunction->centre() << '\n';
@@ -1894,7 +1887,7 @@ bool FitPowderDiffPeaks::doFitGaussianPeak(DataObjects::Workspace2D_sptr dataws,
   // 5. Debug output
   API::ITableWorkspace_sptr paramws = fitalg->getProperty("OutputParameters");
   std::string infofit = parseFitParameterWorkspace(paramws);
-  g_log.information() << "[DBx133] Fitted Gaussian Parameters: " << endl
+  g_log.information() << "[DBx133] Fitted Gaussian Parameters: \n"
                       << infofit << '\n';
 
   // DB output for data
@@ -2105,8 +2098,7 @@ bool FitPowderDiffPeaks::doFitMultiplePeaks(
   stringstream rss;
   for (size_t i = 0; i < domain.size(); ++i)
     rss << domain[i] << "\t\t" << values[i] << '\n';
-  g_log.information() << "[T] Multiple peak fitting pattern:" << endl
-                      << rss.str();
+  g_log.information() << "[T] Multiple peak fitting pattern:\n" << rss.str();
 
   return evergood;
 }
@@ -2236,8 +2228,7 @@ bool FitPowderDiffPeaks::doFitNPeaksSimple(
     // Debug information output
     API::ITableWorkspace_sptr paramws = fitalg->getProperty("OutputParameters");
     std::string infofit = parseFitParameterWorkspace(paramws);
-    g_log.information() << "[DBx149B] Fitted Parameters: " << endl
-                        << infofit << '\n';
+    g_log.information() << "[DBx149B] Fitted Parameters: \n" << infofit << '\n';
   } else {
     dbss << ": Failed ";
     g_log.error() << "[DBx149C] " << dbss.str() << '\n';

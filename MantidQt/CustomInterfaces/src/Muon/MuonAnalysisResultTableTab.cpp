@@ -822,11 +822,11 @@ void MuonAnalysisResultTableTab::createTable() {
 
     // Python code to show a table on the screen
     std::stringstream code;
-    code << "found = False" << std::endl
-         << "for w in windows():" << std::endl
-         << "  if w.windowLabel() == '" << tableName << "':" << std::endl
-         << "    found = True; w.show(); w.setFocus()" << std::endl
-         << "if not found:" << std::endl
+    code << "found = False\n"
+         << "for w in windows():\n"
+         << "  if w.windowLabel() == '" << tableName << "':\n"
+         << "    found = True; w.show(); w.setFocus()\n"
+         << "if not found:\n"
          << "  importTableWorkspace('" << tableName << "', True)\n";
 
     emit runPythonCode(QString::fromStdString(code.str()), false);

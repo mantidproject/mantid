@@ -146,9 +146,7 @@ void SaveOpenGenieAscii::writeFileHeader(std::ofstream &outfile) {
   auto samplenumber = (&log)->size();
   samplenumber += 3; // x, y, e
 
-  outfile << "# Open Genie ASCII File #" << std::endl
-          << "# label " << std::endl
-          << "GXWorkspace" << std::endl
+  outfile << "# Open Genie ASCII File #\n# label \nGXWorkspace\n"
           // number of entries
           << samplenumber << '\n';
 }

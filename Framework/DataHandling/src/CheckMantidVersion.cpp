@@ -113,9 +113,8 @@ void CheckMantidVersion::exec() {
       // formatting issues like missing quotes or brackets.
       g_log.warning() << "Error found when parsing version information "
                          "retrieved from GitHub as a JSON string. "
-                         "Error trying to parse this JSON string: " << json
-                      << std::endl
-                      << ". Parsing error details: "
+                         "Error trying to parse this JSON string: "
+                      << json << "\n. Parsing error details: "
                       << r.getFormattedErrorMessages() << '\n';
     }
 

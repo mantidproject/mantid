@@ -295,8 +295,7 @@ void RefinePowderInstrumentParameters::fitInstrumentParameters() {
   for (size_t i = 0; i < m_dataWS->readX(0).size(); ++i)
     outss << m_dataWS->readX(0)[i] << "\t\t" << m_dataWS->readY(0)[i] << "\t\t"
           << m_dataWS->readE(0)[i] << '\n';
-  cout << "Input Peak Position Workspace To Fit: " << endl
-       << outss.str() << '\n';
+  cout << "Input Peak Position Workspace To Fit: \n" << outss.str() << '\n';
 
   API::IAlgorithm_sptr fitalg = createChildAlgorithm("Fit", 0.0, 0.2, true);
   fitalg->initialize();
@@ -375,8 +374,7 @@ void RefinePowderInstrumentParameters::fitInstrumentParameters() {
     zss << setw(20) << d_h << setw(20) << zdatay << setw(20) << zmodely
         << setw(20) << zdiffy << setw(20) << diffy << '\n';
   }
-  cout << "Zscore Survey: " << endl
-       << zss.str();
+  cout << "Zscore Survey: \b" << zss.str();
 
   return;
 }
@@ -473,8 +471,7 @@ void RefinePowderInstrumentParameters::refineInstrumentParametersMC(
          << ", Step Size = " << setw(15) << setprecision(6) << stepsizes[i]
          << '\n';
   }
-  g_log.notice() << "Monte Carlo Parameters: " << endl
-                 << dbss.str();
+  g_log.notice() << "Monte Carlo Parameters: \n" << dbss.str();
 
   // 3. Maximum step size
   size_t maxsteps;

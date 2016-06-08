@@ -495,8 +495,7 @@ void PoldiIndexKnownCompounds::indexPeaks(
       getAllIndexCandidatePairs(measured, knownCompoundPeaks);
 
   g_log.information() << "  Number of candidate pairs: " << candidates.size()
-                      << std::endl
-                      << "  Assigning most likely candidates...\n";
+                      << "\n  Assigning most likely candidates...\n";
   assignCandidates(candidates);
 }
 

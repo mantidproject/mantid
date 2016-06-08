@@ -283,8 +283,8 @@ void ISISLiveEventDataListener::run() {
   } catch (std::runtime_error &
                e) { // exception handler for generic runtime exceptions
 
-    g_log.error() << "Caught a runtime exception." << std::endl
-                  << "Exception message: " << e.what() << '\n';
+    g_log.error() << "Caught a runtime exception.\nException message: "
+                  << e.what() << '\n';
     m_isConnected = false;
 
     m_backgroundException = boost::make_shared<std::runtime_error>(e);
@@ -292,8 +292,9 @@ void ISISLiveEventDataListener::run() {
   } catch (std::invalid_argument &
                e) { // TimeSeriesProperty (and possibly some other things) can
     // can throw these errors
-    g_log.error() << "Caught an invalid argument exception." << std::endl
-                  << "Exception message: " << e.what() << '\n';
+    g_log.error()
+        << "Caught an invalid argument exception.\nException message: "
+        << e.what() << '\n';
     m_isConnected = false;
     std::string newMsg("Invalid argument exception thrown from "
                        "the background thread: ");

@@ -205,8 +205,7 @@ void VesuvioL1ThetaResolution::exec() {
 
     g_log.information() << "l0: mean=" << l1Stats.mean
                         << ", std.dev.=" << l1Stats.standard_deviation
-                        << std::endl
-                        << "theta: mean=" << thetaStats.mean
+                        << "\ntheta: mean=" << thetaStats.mean
                         << ", std.dev.=" << thetaStats.standard_deviation
                         << '\n';
 
@@ -382,8 +381,8 @@ void VesuvioL1ThetaResolution::calculateDetector(
   const double detWidth = detBoxWidth.X() * 100;
   const double detHeight = detBoxWidth.Y() * 100;
 
-  g_log.debug() << "detWidth=" << detWidth << std::endl
-                << "detHeight=" << detHeight << '\n';
+  g_log.debug() << "detWidth=" << detWidth << "\ndetHeight=" << detHeight
+                << '\n';
 
   // Scattering angle in rad
   const double theta = m_instWorkspace->detectorTwoTheta(*detector);

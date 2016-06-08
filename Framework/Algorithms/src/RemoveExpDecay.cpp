@@ -255,9 +255,9 @@ double MuonRemoveExpDecay::calNormalisationConst(API::MatrixWorkspace_sptr ws,
       retVal = A0;
     }
   } else {
-    g_log.warning() << "Fit falled. Status = " << fitStatus << std::endl
-                    << "For workspace index " << wsIndex << std::endl
-                    << "Asym norm constant set to 1.0\n";
+    g_log.warning() << "Fit falled. Status = " << fitStatus
+                    << "\nFor workspace index " << wsIndex
+                    << "\nAsym norm constant set to 1.0\n";
   }
 
   return retVal;

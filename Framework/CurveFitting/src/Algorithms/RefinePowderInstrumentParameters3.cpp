@@ -994,8 +994,8 @@ bool RefinePowderInstrumentParameters3::doFitFunction(
     string minimizer, int numiters, double &chi2, string &fitstatus) {
   // 0. Debug output
   stringstream outss;
-  outss << "Fit function: " << m_positionFunc->asString() << endl
-        << "Data To Fit: \n";
+  outss << "Fit function: " << m_positionFunc->asString()
+        << "\nData To Fit: \n";
   for (size_t i = 0; i < dataws->readX(0).size(); ++i)
     outss << dataws->readX(wsindex)[i] << "\t\t" << dataws->readY(wsindex)[i]
           << "\t\t" << dataws->readE(wsindex)[i] << "\n";

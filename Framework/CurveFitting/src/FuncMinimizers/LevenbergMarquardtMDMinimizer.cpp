@@ -93,8 +93,7 @@ bool LevenbergMarquardtMDMinimizer::iterate(size_t) {
   if (debug) {
     g_log.warning()
         << "===========================================================\n";
-    g_log.warning() << "mu=" << m_mu << std::endl
-                    << '\n';
+    g_log.warning() << "mu=" << m_mu << "\n\n";
   }
 
   if (m_D.empty()) {

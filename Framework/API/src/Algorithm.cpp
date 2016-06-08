@@ -591,7 +591,7 @@ bool Algorithm::execute() {
         throw;
       else {
         getLogger().error() << "Error in execution of algorithm "
-                            << this->name() << std::endl
+                            << this->name() << '\n'
                             << ex.what() << '\n';
       }
       notificationCenter().postNotification(
@@ -603,7 +603,7 @@ bool Algorithm::execute() {
         throw;
       else {
         getLogger().error() << "Logic Error in execution of algorithm "
-                            << this->name() << std::endl
+                            << this->name() << '\n'
                             << ex.what() << '\n';
       }
       notificationCenter().postNotification(
