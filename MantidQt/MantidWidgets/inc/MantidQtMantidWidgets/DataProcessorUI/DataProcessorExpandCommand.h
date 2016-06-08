@@ -1,14 +1,13 @@
-#ifndef MANTID_CUSTOMINTERFACES_REFLGENERICDATAPROCESSORPRESENTERFACTORY_H
-#define MANTID_CUSTOMINTERFACES_REFLGENERICDATAPROCESSORPRESENTERFACTORY_H
+#ifndef MANTIDQTMANTIDWIDGETS_DATAPROCESSOREXPANDCOMMAND_H
+#define MANTIDQTMANTIDWIDGETS_DATAPROCESSOREXPANDCOMMAND_H
 
-#include "MantidQtMantidWidgets/DataProcessorUI/GenericDataProcessorPresenterFactory.h"
+#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorCommandBase.h"
 
 namespace MantidQt {
-namespace CustomInterfaces {
-/** @class ReflGenericDataProcessorPresenterFactory
+namespace MantidWidgets {
+/** @class DataProcessorExpandCommand
 
-ReflGenericDataProcessorPresenterFactory creates a Reflectometry
-GenericDataProcessorPresenter
+DataProcessorExpandCommand defines the action "Expand Selection"
 
 Copyright &copy; 2011-14 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
 National Laboratory & European Spallation Source
@@ -31,18 +30,18 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class ReflGenericDataProcessorPresenterFactory
-    : public MantidQt::MantidWidgets::GenericDataProcessorPresenterFactory {
+class DataProcessorExpandCommand : public DataProcessorCommandBase {
 public:
-  ReflGenericDataProcessorPresenterFactory() = default;
-  virtual ~ReflGenericDataProcessorPresenterFactory() = default;
+  DataProcessorExpandCommand(DataProcessorPresenter *tablePresenter)
+      : DataProcessorCommandBase(tablePresenter){};
+  virtual ~DataProcessorExpandCommand(){};
 
-  /**
-  * Creates a Reflectometry Data Processor Presenter
-  */
-  boost::shared_ptr<MantidQt::MantidWidgets::GenericDataProcessorPresenter>
-  create() override;
+  void execute() override {
+    m_presenter->notify(DataProcessorPresenter::ExpandSelectionFlag);
+  };
+  std::string name() override { return std::string("Expand Selection"); }
+  std::string icon() override { return std::string("://fit_frame.png"); }
 };
 }
 }
-#endif /*MANTID_CUSTOMINTERFACES_REFLGENERICDATAPROCESSORPRESENTERFACTORY_H*/
+#endif /*MANTIDQTMANTIDWIDGETS_DATAPROCESSOREXPANDCOMMAND_H*/

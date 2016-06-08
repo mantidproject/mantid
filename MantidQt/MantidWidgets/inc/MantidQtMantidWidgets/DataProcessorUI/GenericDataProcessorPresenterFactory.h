@@ -1,14 +1,14 @@
-#ifndef MANTID_CUSTOMINTERFACES_REFLGENERICDATAPROCESSORPRESENTERFACTORY_H
-#define MANTID_CUSTOMINTERFACES_REFLGENERICDATAPROCESSORPRESENTERFACTORY_H
+#ifndef MANTIDQTMANTIDWIDGETS_GENERICDATAPROCESSORPRESENTERFACTORY_H
+#define MANTIDQTMANTIDWIDGETS_GENERICDATAPROCESSORPRESENTERFACTORY_H
 
-#include "MantidQtMantidWidgets/DataProcessorUI/GenericDataProcessorPresenterFactory.h"
+#include "GenericDataProcessorPresenter.h"
 
 namespace MantidQt {
-namespace CustomInterfaces {
-/** @class ReflGenericDataProcessorPresenterFactory
+namespace MantidWidgets {
+/** @class GenericDataProcessorPresenterFactory
 
-ReflGenericDataProcessorPresenterFactory creates a Reflectometry
-GenericDataProcessorPresenter
+GenericDataProcessorPresenterFactory provides a common interface to
+concrete factories creating a GenericDataProcessorPresenter.
 
 Copyright &copy; 2011-14 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
 National Laboratory & European Spallation Source
@@ -31,18 +31,18 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class ReflGenericDataProcessorPresenterFactory
-    : public MantidQt::MantidWidgets::GenericDataProcessorPresenterFactory {
+class GenericDataProcessorPresenterFactory {
 public:
-  ReflGenericDataProcessorPresenterFactory() = default;
-  virtual ~ReflGenericDataProcessorPresenterFactory() = default;
-
   /**
-  * Creates a Reflectometry Data Processor Presenter
+  Constructor
   */
-  boost::shared_ptr<MantidQt::MantidWidgets::GenericDataProcessorPresenter>
-  create() override;
+  GenericDataProcessorPresenterFactory() = default;
+  virtual ~GenericDataProcessorPresenterFactory() = default;
+  /**
+  Creates a GenericDataProcessorPresenter
+  */
+  virtual boost::shared_ptr<GenericDataProcessorPresenter> create() = 0;
 };
 }
 }
-#endif /*MANTID_CUSTOMINTERFACES_REFLGENERICDATAPROCESSORPRESENTERFACTORY_H*/
+#endif /*MANTIDQTMANTIDWIDGETS_GENERICDATAPROCESSORPRESENTERFACTORY_H*/

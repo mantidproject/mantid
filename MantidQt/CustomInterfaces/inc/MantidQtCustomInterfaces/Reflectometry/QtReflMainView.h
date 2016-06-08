@@ -4,19 +4,22 @@
 #include "MantidKernel/System.h"
 #include "MantidQtAPI/UserSubWindow.h"
 #include "MantidQtCustomInterfaces/DllConfig.h"
-#include "MantidQtCustomInterfaces/ProgressableView.h"
 #include "MantidQtCustomInterfaces/Reflectometry/IReflPresenter.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflMainView.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflSearchModel.h"
+#include "MantidQtMantidWidgets/ProgressableView.h"
 #include "MantidQtMantidWidgets/SlitCalculator.h"
 #include "ui_ReflMainWidget.h"
 
+#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorCommandAdapter.h"
+
 namespace MantidQt {
 namespace CustomInterfaces {
-// Forward dec
-class DataProcessorCommandAdapter;
+
+//	// Forward dec
+//class DataProcessorCommandAdapter;
 using DataProcessorCommandAdapter_uptr =
-    std::unique_ptr<DataProcessorCommandAdapter>;
+    std::unique_ptr<MantidQt::MantidWidgets::DataProcessorCommandAdapter>;
 
 /** QtReflMainView : Provides an interface for processing reflectometry data.
 
@@ -41,9 +44,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport QtReflMainView : public MantidQt::API::UserSubWindow,
-                                 public ReflMainView,
-                                 public ProgressableView {
+class MANTIDQT_CUSTOMINTERFACES_DLL QtReflMainView
+    : public MantidQt::API::UserSubWindow,
+      public ReflMainView,
+      public MantidQt::MantidWidgets::ProgressableView {
   Q_OBJECT
 public:
   QtReflMainView(QWidget *parent = 0);

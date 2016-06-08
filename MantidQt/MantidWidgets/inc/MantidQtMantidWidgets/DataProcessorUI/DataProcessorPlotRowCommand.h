@@ -1,14 +1,13 @@
-#ifndef MANTID_CUSTOMINTERFACES_REFLGENERICDATAPROCESSORPRESENTERFACTORY_H
-#define MANTID_CUSTOMINTERFACES_REFLGENERICDATAPROCESSORPRESENTERFACTORY_H
+#ifndef MANTIDQTMANTIDWIDGETS_DATAPROCESSORPLOTROWCOMMAND_H
+#define MANTIDQTMANTIDWIDGETS_DATAPROCESSORPLOTROWCOMMAND_H
 
-#include "MantidQtMantidWidgets/DataProcessorUI/GenericDataProcessorPresenterFactory.h"
+#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorCommandBase.h"
 
 namespace MantidQt {
-namespace CustomInterfaces {
-/** @class ReflGenericDataProcessorPresenterFactory
+namespace MantidWidgets {
+/** @class DataProcessorPlotRowCommand
 
-ReflGenericDataProcessorPresenterFactory creates a Reflectometry
-GenericDataProcessorPresenter
+DataProcessorPlotRowCommand defines the action "Plot Selected Rows"
 
 Copyright &copy; 2011-14 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
 National Laboratory & European Spallation Source
@@ -31,18 +30,18 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class ReflGenericDataProcessorPresenterFactory
-    : public MantidQt::MantidWidgets::GenericDataProcessorPresenterFactory {
+class DataProcessorPlotRowCommand : public DataProcessorCommandBase {
 public:
-  ReflGenericDataProcessorPresenterFactory() = default;
-  virtual ~ReflGenericDataProcessorPresenterFactory() = default;
+  DataProcessorPlotRowCommand(DataProcessorPresenter *tablePresenter)
+      : DataProcessorCommandBase(tablePresenter){};
+  virtual ~DataProcessorPlotRowCommand(){};
 
-  /**
-  * Creates a Reflectometry Data Processor Presenter
-  */
-  boost::shared_ptr<MantidQt::MantidWidgets::GenericDataProcessorPresenter>
-  create() override;
+  void execute() override {
+    m_presenter->notify(DataProcessorPresenter::PlotRowFlag);
+  };
+  std::string name() override { return std::string("Plot Selected Rows"); }
+  std::string icon() override { return std::string("://graph.png"); }
 };
 }
 }
-#endif /*MANTID_CUSTOMINTERFACES_REFLGENERICDATAPROCESSORPRESENTERFACTORY_H*/
+#endif /*MANTIDQTMANTIDWIDGETS_DATAPROCESSORPLOTROWCOMMAND_H*/

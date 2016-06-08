@@ -1,14 +1,13 @@
-#ifndef MANTID_CUSTOMINTERFACES_REFLGENERICDATAPROCESSORPRESENTERFACTORY_H
-#define MANTID_CUSTOMINTERFACES_REFLGENERICDATAPROCESSORPRESENTERFACTORY_H
+#ifndef MANTIDQTMANTIDWIDGETS_DATAPROCESSORPREPENDROWCOMMAND_H
+#define MANTIDQTMANTIDWIDGETS_DATAPROCESSORPREPENDROWCOMMAND_H
 
-#include "MantidQtMantidWidgets/DataProcessorUI/GenericDataProcessorPresenterFactory.h"
+#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorCommandBase.h"
 
 namespace MantidQt {
-namespace CustomInterfaces {
-/** @class ReflGenericDataProcessorPresenterFactory
+namespace MantidWidgets {
+/** @class DataProcessorPrependRowCommand
 
-ReflGenericDataProcessorPresenterFactory creates a Reflectometry
-GenericDataProcessorPresenter
+DataProcessorPrependRowCommand defines the action "Insert Row Before"
 
 Copyright &copy; 2011-14 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
 National Laboratory & European Spallation Source
@@ -31,18 +30,18 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class ReflGenericDataProcessorPresenterFactory
-    : public MantidQt::MantidWidgets::GenericDataProcessorPresenterFactory {
+class DataProcessorPrependRowCommand : public DataProcessorCommandBase {
 public:
-  ReflGenericDataProcessorPresenterFactory() = default;
-  virtual ~ReflGenericDataProcessorPresenterFactory() = default;
+  DataProcessorPrependRowCommand(DataProcessorPresenter *tablePresenter)
+      : DataProcessorCommandBase(tablePresenter){};
+  virtual ~DataProcessorPrependRowCommand(){};
 
-  /**
-  * Creates a Reflectometry Data Processor Presenter
-  */
-  boost::shared_ptr<MantidQt::MantidWidgets::GenericDataProcessorPresenter>
-  create() override;
+  void execute() override {
+    m_presenter->notify(DataProcessorPresenter::PrependRowFlag);
+  };
+  std::string name() override { return std::string("Insert Row Before"); }
+  std::string icon() override { return std::string("://insert_row.png"); }
 };
 }
 }
-#endif /*MANTID_CUSTOMINTERFACES_REFLGENERICDATAPROCESSORPRESENTERFACTORY_H*/
+#endif /*MANTIDQTMANTIDWIDGETS_DATAPROCESSORPREPENDROWCOMMAND_H*/

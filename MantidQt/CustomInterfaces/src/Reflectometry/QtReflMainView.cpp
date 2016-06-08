@@ -3,10 +3,10 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidQtAPI/FileDialogHandler.h"
 #include "MantidQtAPI/HelpWindow.h"
-#include "MantidQtCustomInterfaces/Reflectometry/DataProcessorCommandAdapter.h"
-#include "MantidQtCustomInterfaces/Reflectometry/QDataProcessorWidget.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflGenericDataProcessorPresenterFactory.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflMainViewPresenter.h"
+#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorCommandAdapter.h"
+#include "MantidQtMantidWidgets/DataProcessorUI/QDataProcessorWidget.h"
 #include "MantidQtMantidWidgets/HintingLineEditFactory.h"
 #include <qinputdialog.h>
 #include <qmessagebox.h>
@@ -18,6 +18,8 @@ const QString ReflSettingsGroup = "Mantid/CustomInterfaces/ISISReflectometry";
 namespace MantidQt {
 namespace CustomInterfaces {
 using namespace Mantid::API;
+
+using namespace MantidQt::MantidWidgets;
 
 DECLARE_SUBWINDOW(QtReflMainView)
 
@@ -50,8 +52,9 @@ void QtReflMainView::initLayout() {
   boost::shared_ptr<DataProcessorPresenter> processorPresenter =
       presenterFactory.create();
 
-  QDataProcessorWidget *qDataProcessorWidget =
-      new QDataProcessorWidget(processorPresenter, this);
+  MantidQt::MantidWidgets::QDataProcessorWidget *qDataProcessorWidget =
+      new MantidQt::MantidWidgets::QDataProcessorWidget(processorPresenter,
+                                                        this);
   ui.layoutProcessPane->addWidget(qDataProcessorWidget);
 
   // Custom context menu for table

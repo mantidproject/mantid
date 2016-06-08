@@ -6,15 +6,13 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/UserCatalogInfo.h"
-#include "MantidQtCustomInterfaces/ProgressableView.h"
-#include "MantidQtCustomInterfaces/Reflectometry/DataProcessorPresenter.h"
-#include "MantidQtCustomInterfaces/Reflectometry/ProgressPresenter.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflCatalogSearcher.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflLegacyTransferStrategy.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflMainView.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflMeasureTransferStrategy.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflNexusMeasurementItemSource.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflSearchModel.h"
+#include "MantidQtMantidWidgets/ProgressPresenter.h"
 
 #include <boost/regex.hpp>
 #include <boost/tokenizer.hpp>
@@ -28,8 +26,8 @@ using namespace Mantid::Kernel;
 namespace MantidQt {
 namespace CustomInterfaces {
 ReflMainViewPresenter::ReflMainViewPresenter(
-    ReflMainView *mainView, ProgressableView *progressView,
-    boost::shared_ptr<DataProcessorPresenter> tablePresenter,
+    ReflMainView *mainView, MantidQt::MantidWidgets::ProgressableView *progressView,
+    boost::shared_ptr<MantidQt::MantidWidgets::DataProcessorPresenter> tablePresenter,
     boost::shared_ptr<IReflSearcher> searcher)
     : m_view(mainView), m_tablePresenter(tablePresenter),
       m_progressView(progressView), m_searcher(searcher) {

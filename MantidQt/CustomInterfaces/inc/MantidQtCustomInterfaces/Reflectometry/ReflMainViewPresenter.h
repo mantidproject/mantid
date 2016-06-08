@@ -7,16 +7,24 @@
 #include "MantidQtCustomInterfaces/Reflectometry/IReflSearcher.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflMainView.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflTransferStrategy.h"
-#include "MantidQtCustomInterfaces/Reflectometry/WorkspaceReceiver.h"
+#include "MantidQtMantidWidgets/DataProcessorUI/WorkspaceReceiver.h"
+
+#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorPresenter.h"
+#include "MantidQtMantidWidgets/ProgressableView.h"
+
 
 #include <Poco/AutoPtr.h>
 #include <memory>
 
 namespace MantidQt {
+
+//namespace MantidWidgets {
+//// Forward decs
+//class ProgressableView;
+//class DataProcessorPresenter;
+//}
+
 namespace CustomInterfaces {
-// Forward decs
-class ProgressableView;
-class DataProcessorPresenter;
 
 /** @class ReflMainViewPresenter
 
@@ -46,11 +54,11 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class MANTIDQT_CUSTOMINTERFACES_DLL ReflMainViewPresenter
     : public IReflPresenter,
-      public WorkspaceReceiver {
+      public MantidQt::MantidWidgets::WorkspaceReceiver {
 public:
   ReflMainViewPresenter(
-      ReflMainView *mainView, ProgressableView *progressView,
-      boost::shared_ptr<DataProcessorPresenter> tablePresenter,
+      ReflMainView *mainView, MantidQt::MantidWidgets::ProgressableView *progressView,
+      boost::shared_ptr<MantidQt::MantidWidgets::DataProcessorPresenter> tablePresenter,
       boost::shared_ptr<IReflSearcher> searcher =
           boost::shared_ptr<IReflSearcher>());
   ~ReflMainViewPresenter() override;
@@ -63,9 +71,9 @@ protected:
   // the main view we're managing
   ReflMainView *m_view;
   // The table view's presenter
-  boost::shared_ptr<DataProcessorPresenter> m_tablePresenter;
+  boost::shared_ptr<MantidQt::MantidWidgets::DataProcessorPresenter> m_tablePresenter;
   // The progress view
-  ProgressableView *m_progressView;
+	MantidQt::MantidWidgets::ProgressableView *m_progressView;
   // the search implementation
   boost::shared_ptr<IReflSearcher> m_searcher;
   // searching

@@ -279,9 +279,9 @@
  </tabstops>
   <customwidgets>
     <customwidget>
-      <class>MantidQt:CustomInterfaces::QDataProcessorWidget</class>
+      <class>MantidQt:MantidWidgets::QDataProcessorWidget</class>
       <extends>QWidget</extends>
-      <header>MantidQtCustomInterfaces/Reflectometry/QDataProcessorWidget.h</header>
+      <header>MantidQtMantidWidgets/DataProcessorUI/QDataProcessorWidget.h</header>
     </customwidget>
   </customwidgets>
   <resources>

@@ -1,14 +1,15 @@
-#ifndef MANTID_CUSTOMINTERFACES_REFLGENERICDATAPROCESSORPRESENTERFACTORY_H
-#define MANTID_CUSTOMINTERFACES_REFLGENERICDATAPROCESSORPRESENTERFACTORY_H
+#ifndef MANTIDQTMANTIDWIDGETS_DATAPROCESSORCOMMANDBASE_H
+#define MANTIDQTMANTIDWIDGETS_DATAPROCESSORCOMMANDBASE_H
 
-#include "MantidQtMantidWidgets/DataProcessorUI/GenericDataProcessorPresenterFactory.h"
+#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorCommand.h"
 
 namespace MantidQt {
-namespace CustomInterfaces {
-/** @class ReflGenericDataProcessorPresenterFactory
+namespace MantidWidgets {
+class DataProcessorPresenter;
+/** @class ReflCommandBase
 
-ReflGenericDataProcessorPresenterFactory creates a Reflectometry
-GenericDataProcessorPresenter
+ReflCommandBase is an interface which defines the functions any data processor
+action needs to support. Defines a IReflTablePresenter that will be notified.
 
 Copyright &copy; 2011-14 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
 National Laboratory & European Spallation Source
@@ -31,18 +32,18 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class ReflGenericDataProcessorPresenterFactory
-    : public MantidQt::MantidWidgets::GenericDataProcessorPresenterFactory {
+class DataProcessorCommandBase : public DataProcessorCommand {
 public:
-  ReflGenericDataProcessorPresenterFactory() = default;
-  virtual ~ReflGenericDataProcessorPresenterFactory() = default;
+  DataProcessorCommandBase(DataProcessorPresenter *tablePresenter)
+      : m_presenter(tablePresenter) {
+    if (!tablePresenter) {
+      throw std::invalid_argument("Invalid abstract presenter");
+    }
+  };
 
-  /**
-  * Creates a Reflectometry Data Processor Presenter
-  */
-  boost::shared_ptr<MantidQt::MantidWidgets::GenericDataProcessorPresenter>
-  create() override;
+protected:
+  DataProcessorPresenter *const m_presenter;
 };
 }
 }
-#endif /*MANTID_CUSTOMINTERFACES_REFLGENERICDATAPROCESSORPRESENTERFACTORY_H*/
+#endif /*MANTIDQTMANTIDWIDGETS_DATAPROCESSORCOMMANDBASE_H*/

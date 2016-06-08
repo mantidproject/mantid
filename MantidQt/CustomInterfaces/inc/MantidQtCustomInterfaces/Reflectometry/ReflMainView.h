@@ -6,14 +6,17 @@
 #include "MantidQtCustomInterfaces/Reflectometry/IReflPresenter.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflSearchModel.h"
 
+#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorCommand.h"
+
 #include <set>
 #include <string>
 
 namespace MantidQt {
 namespace CustomInterfaces {
-// Forward decs
-class DataProcessorCommand;
-using DataProcessorCommand_uptr = std::unique_ptr<DataProcessorCommand>;
+
+//	// Forward decs
+//class DataProcessorCommand;
+using DataProcessorCommand_uptr = std::unique_ptr<MantidQt::MantidWidgets::DataProcessorCommand>;
 
 /** @class ReflMainView
 

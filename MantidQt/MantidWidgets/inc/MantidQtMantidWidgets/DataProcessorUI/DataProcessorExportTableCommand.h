@@ -1,14 +1,15 @@
-#ifndef MANTID_CUSTOMINTERFACES_REFLGENERICDATAPROCESSORPRESENTERFACTORY_H
-#define MANTID_CUSTOMINTERFACES_REFLGENERICDATAPROCESSORPRESENTERFACTORY_H
+#ifndef MANTIDQTMANTIDWIDGETS_DATAPROCESSOREXPORTTABLECOMMAND_H
+#define MANTIDQTMANTIDWIDGETS_DATAPROCESSOREXPORTTABLECOMMAND_H
 
-#include "MantidQtMantidWidgets/DataProcessorUI/GenericDataProcessorPresenterFactory.h"
+#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorCommandBase.h"
 
 namespace MantidQt {
-namespace CustomInterfaces {
-/** @class ReflGenericDataProcessorPresenterFactory
+namespace MantidWidgets {
+/** @class DataProcessorExportTableCommand
 
-ReflGenericDataProcessorPresenterFactory creates a Reflectometry
-GenericDataProcessorPresenter
+DataProcessorExportTableCommand defines the action "Export .TBL"
+
+processor interface presenter needs to support.
 
 Copyright &copy; 2011-14 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
 National Laboratory & European Spallation Source
@@ -31,18 +32,18 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class ReflGenericDataProcessorPresenterFactory
-    : public MantidQt::MantidWidgets::GenericDataProcessorPresenterFactory {
+class DataProcessorExportTableCommand : public DataProcessorCommandBase {
 public:
-  ReflGenericDataProcessorPresenterFactory() = default;
-  virtual ~ReflGenericDataProcessorPresenterFactory() = default;
+  DataProcessorExportTableCommand(DataProcessorPresenter *tablePresenter)
+      : DataProcessorCommandBase(tablePresenter){};
+  virtual ~DataProcessorExportTableCommand(){};
 
-  /**
-  * Creates a Reflectometry Data Processor Presenter
-  */
-  boost::shared_ptr<MantidQt::MantidWidgets::GenericDataProcessorPresenter>
-  create() override;
+  void execute() override {
+    m_presenter->notify(DataProcessorPresenter::ExportTableFlag);
+  };
+  std::string name() override { return std::string("Export .TBL"); }
+  std::string icon() override { return std::string("://save_template.png"); }
 };
 }
 }
-#endif /*MANTID_CUSTOMINTERFACES_REFLGENERICDATAPROCESSORPRESENTERFACTORY_H*/
+#endif /*MANTIDQTMANTIDWIDGETS_DATAPROCESSOREXPORTTABLECOMMAND_H*/
