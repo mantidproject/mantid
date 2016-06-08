@@ -952,36 +952,17 @@ def PEARL_createvan(van, empty, ext="raw", fmode="all", ttmode="TT88",
         # ConvertUnits("spline10","spline10","TOF")
         # ConvertUnits("spline11","spline11","TOF")
         # ConvertUnits("spline12","spline12","TOF")
+
         SaveNexus(Filename=nvanfile, InputWorkspace="spline1", Append=False)
-        SaveNexus(Filename=nvanfile, InputWorkspace="spline2", Append=True)
-        SaveNexus(Filename=nvanfile, InputWorkspace="spline3", Append=True)
-        SaveNexus(Filename=nvanfile, InputWorkspace="spline4", Append=True)
-        SaveNexus(Filename=nvanfile, InputWorkspace="spline5", Append=True)
-        SaveNexus(Filename=nvanfile, InputWorkspace="spline6", Append=True)
-        SaveNexus(Filename=nvanfile, InputWorkspace="spline7", Append=True)
-        SaveNexus(Filename=nvanfile, InputWorkspace="spline8", Append=True)
-        SaveNexus(Filename=nvanfile, InputWorkspace="spline9", Append=True)
-        SaveNexus(Filename=nvanfile, InputWorkspace="spline10", Append=True)
-        SaveNexus(Filename=nvanfile, InputWorkspace="spline11", Append=True)
-        SaveNexus(Filename=nvanfile, InputWorkspace="spline12", Append=True)
-        SaveNexus(Filename=nvanfile, InputWorkspace="spline13", Append=True)
-        SaveNexus(Filename=nvanfile, InputWorkspace="spline14", Append=True)
+
+        for i in range(2, 15):
+            SaveNexus(Filename=nvanfile, InputWorkspace="spline" + str(i), Append=True)
+
         if (debug != True):
             mtd.remove("vanstrip")
-            mtd.remove("spline1")
-            mtd.remove("spline2")
-            mtd.remove("spline3")
-            mtd.remove("spline4")
-            mtd.remove("spline5")
-            mtd.remove("spline6")
-            mtd.remove("spline7")
-            mtd.remove("spline8")
-            mtd.remove("spline9")
-            mtd.remove("spline10")
-            mtd.remove("spline11")
-            mtd.remove("spline12")
-            mtd.remove("spline13")
-            mtd.remove("spline14")
+            for i in range(1, 15):
+                mtd.remove("spline" + str(i))
+
     elif (instver == "new"):
         ConvertUnits(InputWorkspace=vanfoc, OutputWorkspace="vanmask", Target="dSpacing")
         if (debug != True):
@@ -989,37 +970,21 @@ def PEARL_createvan(van, empty, ext="raw", fmode="all", ttmode="TT88",
 
         # remove bragg peaks before spline
         StripPeaks(InputWorkspace="vanmask", OutputWorkspace="vanstrip", FWHM=15, Tolerance=8, WorkspaceIndex=0)
-        StripPeaks(InputWorkspace="vanstrip", OutputWorkspace="vanstrip", FWHM=15, Tolerance=8, WorkspaceIndex=1)
-        StripPeaks(InputWorkspace="vanstrip", OutputWorkspace="vanstrip", FWHM=15, Tolerance=8, WorkspaceIndex=2)
-        StripPeaks(InputWorkspace="vanstrip", OutputWorkspace="vanstrip", FWHM=15, Tolerance=8, WorkspaceIndex=3)
-        StripPeaks(InputWorkspace="vanstrip", OutputWorkspace="vanstrip", FWHM=15, Tolerance=8, WorkspaceIndex=4)
-        StripPeaks(InputWorkspace="vanstrip", OutputWorkspace="vanstrip", FWHM=15, Tolerance=8, WorkspaceIndex=5)
-        StripPeaks(InputWorkspace="vanstrip", OutputWorkspace="vanstrip", FWHM=15, Tolerance=8, WorkspaceIndex=6)
-        StripPeaks(InputWorkspace="vanstrip", OutputWorkspace="vanstrip", FWHM=15, Tolerance=8, WorkspaceIndex=7)
-        StripPeaks(InputWorkspace="vanstrip", OutputWorkspace="vanstrip", FWHM=15, Tolerance=8, WorkspaceIndex=8)
-        StripPeaks(InputWorkspace="vanstrip", OutputWorkspace="vanstrip", FWHM=15, Tolerance=8, WorkspaceIndex=9)
-        StripPeaks(InputWorkspace="vanstrip", OutputWorkspace="vanstrip", FWHM=15, Tolerance=8, WorkspaceIndex=10)
-        StripPeaks(InputWorkspace="vanstrip", OutputWorkspace="vanstrip", FWHM=15, Tolerance=8, WorkspaceIndex=11)
+
+        for i in range(1, 12):
+            StripPeaks(InputWorkspace="vanstrip", OutputWorkspace="vanstrip", FWHM=15, Tolerance=8, WorkspaceIndex=i)
 
         if (debug != True):
             mtd.remove("vanmask")
 
         if (debug != True):
             print "Not in debug mode so will delete all temporary workspaces"
-
         ConvertUnits(InputWorkspace="vanstrip", OutputWorkspace="vanstrip", Target="TOF")
-        SplineBackground(InputWorkspace="vanstrip", OutputWorkspace="spline1", WorkspaceIndex=0, NCoeff=nspline)
-        SplineBackground(InputWorkspace="vanstrip", OutputWorkspace="spline2", WorkspaceIndex=1, NCoeff=nspline)
-        SplineBackground(InputWorkspace="vanstrip", OutputWorkspace="spline3", WorkspaceIndex=2, NCoeff=nspline)
-        SplineBackground(InputWorkspace="vanstrip", OutputWorkspace="spline4", WorkspaceIndex=3, NCoeff=nspline)
-        SplineBackground(InputWorkspace="vanstrip", OutputWorkspace="spline5", WorkspaceIndex=4, NCoeff=nspline)
-        SplineBackground(InputWorkspace="vanstrip", OutputWorkspace="spline6", WorkspaceIndex=5, NCoeff=nspline)
-        SplineBackground(InputWorkspace="vanstrip", OutputWorkspace="spline7", WorkspaceIndex=6, NCoeff=nspline)
-        SplineBackground(InputWorkspace="vanstrip", OutputWorkspace="spline8", WorkspaceIndex=7, NCoeff=nspline)
-        SplineBackground(InputWorkspace="vanstrip", OutputWorkspace="spline9", WorkspaceIndex=8, NCoeff=nspline)
-        SplineBackground(InputWorkspace="vanstrip", OutputWorkspace="spline10", WorkspaceIndex=9, NCoeff=nspline)
-        SplineBackground(InputWorkspace="vanstrip", OutputWorkspace="spline11", WorkspaceIndex=10, NCoeff=nspline)
-        SplineBackground(InputWorkspace="vanstrip", OutputWorkspace="spline12", WorkspaceIndex=11, NCoeff=nspline)
+
+        for i in range(0, 12):
+            SplineBackground(InputWorkspace="vanstrip", OutputWorkspace="spline"+str(i+1), WorkspaceIndex=i,
+                             NCoeff=nspline)
+
         # ConvertUnits("spline1","spline1","TOF")
         # ConvertUnits("spline2","spline2","TOF")
         # ConvertUnits("spline3","spline3","TOF")
@@ -1032,32 +997,18 @@ def PEARL_createvan(van, empty, ext="raw", fmode="all", ttmode="TT88",
         # ConvertUnits("spline10","spline10","TOF")
         # ConvertUnits("spline11","spline11","TOF")
         # ConvertUnits("spline12","spline12","TOF")
+
         SaveNexus(Filename=nvanfile, InputWorkspace="spline1", Append=False)
-        SaveNexus(Filename=nvanfile, InputWorkspace="spline2", Append=True)
-        SaveNexus(Filename=nvanfile, InputWorkspace="spline3", Append=True)
-        SaveNexus(Filename=nvanfile, InputWorkspace="spline4", Append=True)
-        SaveNexus(Filename=nvanfile, InputWorkspace="spline5", Append=True)
-        SaveNexus(Filename=nvanfile, InputWorkspace="spline6", Append=True)
-        SaveNexus(Filename=nvanfile, InputWorkspace="spline7", Append=True)
-        SaveNexus(Filename=nvanfile, InputWorkspace="spline8", Append=True)
-        SaveNexus(Filename=nvanfile, InputWorkspace="spline9", Append=True)
-        SaveNexus(Filename=nvanfile, InputWorkspace="spline10", Append=True)
-        SaveNexus(Filename=nvanfile, InputWorkspace="spline11", Append=True)
-        SaveNexus(Filename=nvanfile, InputWorkspace="spline12", Append=True)
+
+        for i in range(2, 13):
+            SaveNexus(Filename=nvanfile, InputWorkspace="spline" + str(i), Append=True)
+
         if (debug != True):
             mtd.remove("vanstrip")
-            mtd.remove("spline1")
-            mtd.remove("spline2")
-            mtd.remove("spline3")
-            mtd.remove("spline4")
-            mtd.remove("spline5")
-            mtd.remove("spline6")
-            mtd.remove("spline7")
-            mtd.remove("spline8")
-            mtd.remove("spline9")
-            mtd.remove("spline10")
-            mtd.remove("spline11")
-            mtd.remove("spline12")
+
+            for i in range(1, 13):
+                mtd.remove("spline" + str(i))
+
     elif (instver == "old"):
         ConvertUnits(InputWorkspace=vanfoc, OutputWorkspace="vanmask", Target="dSpacing")
         if (debug != True):
