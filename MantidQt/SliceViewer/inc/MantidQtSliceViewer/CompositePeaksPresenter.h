@@ -105,11 +105,11 @@ public:
   void peakEditMode(EditMode mode) override;
   void
   setForegroundColor(boost::shared_ptr<const Mantid::API::IPeaksWorkspace> ws,
-                      const PeakViewColor);
+                     const PeakViewColor);
   /// Change the background representation for the peaks of this workspace
   void
   setBackgroundColor(boost::shared_ptr<const Mantid::API::IPeaksWorkspace> ws,
-                      const PeakViewColor);
+                     const PeakViewColor);
   /// Get the foreground colour corresponding to the workspace
   PeakViewColor getForegroundPeakViewColor(
       boost::shared_ptr<const Mantid::API::IPeaksWorkspace> ws) const;
@@ -162,9 +162,11 @@ public:
   /// Determine if the presenter contents are different.
   bool contentsDifferent(PeaksPresenter const *other) const override;
   /// Enter the requested edit mode for the peaks workspace.
-  void editCommand(EditMode editMode, boost::weak_ptr<const Mantid::API::IPeaksWorkspace> target);
+  void editCommand(EditMode editMode,
+                   boost::weak_ptr<const Mantid::API::IPeaksWorkspace> target);
   /// Can we add peaks to this peaks workspace.
-  bool hasPeakAddModeFor(boost::weak_ptr<const Mantid::API::IPeaksWorkspace> target);
+  bool
+  hasPeakAddModeFor(boost::weak_ptr<const Mantid::API::IPeaksWorkspace> target);
   /// Can we add peaks
   bool hasPeakAddMode() const override;
 
@@ -201,7 +203,6 @@ private:
   /// index of peak zoomed in on.
   int m_zoomedPeakIndex;
 };
-
 }
 }
 

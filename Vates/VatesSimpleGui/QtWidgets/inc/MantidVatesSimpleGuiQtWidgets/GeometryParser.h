@@ -8,12 +8,9 @@
 
 #include <string>
 
-namespace Mantid
-{
-namespace Vates
-{
-namespace SimpleGui
-{
+namespace Mantid {
+namespace Vates {
+namespace SimpleGui {
 
 class AxisInformation;
 
@@ -27,7 +24,8 @@ class AxisInformation;
   @author Michael Reuter
   @date 24/05/2011
 
-  Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+  Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+ National Laboratory & European Spallation Source
 
   This file is part of Mantid.
 
@@ -55,7 +53,7 @@ public:
    */
   GeometryParser(const char *xml);
   /// Default destructor.
-  virtual ~GeometryParser() {};
+  virtual ~GeometryParser(){};
 
   /// Insert a value into the time dimension XML.
   std::string addTDimValue(double time);
@@ -76,7 +74,6 @@ private:
 
   Poco::AutoPtr<Poco::XML::Document> pDoc; ///< A XML document handle
 };
-
 }
 }
 }

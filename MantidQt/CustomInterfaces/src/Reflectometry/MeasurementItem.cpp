@@ -14,10 +14,10 @@ namespace CustomInterfaces {
  * @param angle
  * @param run
  */
-MeasurementItem::MeasurementItem(const MeasurementItem::IDType &measurementItemId,
-                         const MeasurementItem::IDType &subId,
-                         const std::string &label, const std::string &type,
-                         const double angle, const std::string &run)
+MeasurementItem::MeasurementItem(
+    const MeasurementItem::IDType &measurementItemId,
+    const MeasurementItem::IDType &subId, const std::string &label,
+    const std::string &type, const double angle, const std::string &run)
     : m_measurementItemId(measurementItemId), m_subId(subId), m_label(label),
       m_type(type), m_angle(angle), m_run(run) {
 
@@ -54,13 +54,16 @@ MeasurementItem::~MeasurementItem() {}
  * InvalidMeasurement static creational method
  * @return Invalid measurement
  */
-MeasurementItem MeasurementItem::InvalidMeasurementItem(const std::string &why) {
+MeasurementItem
+MeasurementItem::InvalidMeasurementItem(const std::string &why) {
   return MeasurementItem(why);
 }
 
 bool MeasurementItem::isUseable() const { return m_whyUnuseable.empty(); }
 
-MeasurementItem::IDType MeasurementItem::id() const { return m_measurementItemId; }
+MeasurementItem::IDType MeasurementItem::id() const {
+  return m_measurementItemId;
+}
 
 MeasurementItem::IDType MeasurementItem::subId() const { return m_subId; }
 

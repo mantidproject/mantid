@@ -669,7 +669,7 @@ void Graph::setLabelsTextFormat(int axis, int type,
   if (type != ScaleDraw::Text && type != ScaleDraw::ColHeader)
     return;
 
-  QStringList list = QStringList();
+  QStringList list;
   if (type == ScaleDraw::Text) {
     if (!table)
       return;
@@ -5667,27 +5667,24 @@ void Graph::loadFromProject(const std::string &lines, ApplicationWindow *app,
   }
 
   if (tsv.selectLine("AxesNumberColors")) {
-    QStringList sl =
-        QString::fromUtf8(tsv.lineAsString("AxesNumberColors").c_str())
-            .split("\t");
+    QStringList sl = QString::fromUtf8(tsv.lineAsString("AxesNumberColors")
+                                           .c_str()).split("\t");
     sl.pop_front();
     for (int i = 0; i < sl.count(); ++i)
       setAxisLabelsColor(i, QColor(sl[i]));
   }
 
   if (tsv.selectLine("AxesTitleColors")) {
-    QStringList sl =
-        QString::fromUtf8(tsv.lineAsString("AxesTitleColors").c_str())
-            .split("\t");
+    QStringList sl = QString::fromUtf8(tsv.lineAsString("AxesTitleColors")
+                                           .c_str()).split("\t");
     sl.pop_front();
     for (int i = 0; i < sl.count(); ++i)
       setAxisTitleColor(i, QColor(sl[i]));
   }
 
   if (tsv.selectLine("AxesTitleAlignment")) {
-    QStringList sl =
-        QString::fromUtf8(tsv.lineAsString("AxesTitleAlignment").c_str())
-            .split("\t");
+    QStringList sl = QString::fromUtf8(tsv.lineAsString("AxesTitleAlignment")
+                                           .c_str()).split("\t");
     sl.pop_front();
     for (int i = 0; i < sl.count(); ++i)
       setAxisTitleAlignment(i, sl[i].toInt());
@@ -5814,9 +5811,8 @@ void Graph::loadFromProject(const std::string &lines, ApplicationWindow *app,
   }
 
   if (tsv.selectLine("EnabledTickLabels")) {
-    QStringList sl =
-        QString::fromUtf8(tsv.lineAsString("EnabledTickLabels").c_str())
-            .split("\t");
+    QStringList sl = QString::fromUtf8(tsv.lineAsString("EnabledTickLabels")
+                                           .c_str()).split("\t");
     sl.pop_front();
     for (int i = 0; i < sl.count(); ++i)
       enableAxisLabels(i, sl[i].toInt());
@@ -5828,9 +5824,8 @@ void Graph::loadFromProject(const std::string &lines, ApplicationWindow *app,
   }
 
   for (int i = 0; tsv.selectLine("ImageMarker", i); ++i) {
-    QStringList sl =
-        QString::fromUtf8(tsv.lineAsString("ImageMarker", i).c_str())
-            .split("\t");
+    QStringList sl = QString::fromUtf8(tsv.lineAsString("ImageMarker", i)
+                                           .c_str()).split("\t");
     insertImageMarker(sl, fileVersion);
   }
 
@@ -5848,9 +5843,8 @@ void Graph::loadFromProject(const std::string &lines, ApplicationWindow *app,
   }
 
   if (tsv.selectLine("LabelsRotation")) {
-    QStringList sl =
-        QString::fromUtf8(tsv.lineAsString("LabelsRotation").c_str())
-            .split("\t");
+    QStringList sl = QString::fromUtf8(tsv.lineAsString("LabelsRotation")
+                                           .c_str()).split("\t");
     setAxisLabelRotation(QwtPlot::xBottom, sl[1].toInt());
     setAxisLabelRotation(QwtPlot::xTop, sl[2].toInt());
   }

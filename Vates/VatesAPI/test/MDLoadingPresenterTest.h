@@ -8,7 +8,6 @@
 #include "MantidVatesAPI/vtkDataSetFactory.h"
 #include "MantidVatesAPI/vtkMDHexFactory.h"
 
-
 #include <cxxtest/TestSuite.h>
 #include "MockObjects.h"
 #include "vtkPVChangeOfBasisHelper.h"
@@ -21,12 +20,12 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::VATES;
 
 namespace {
-  std::string MOCK_GEOMETRY_XML_MD_LOADING_PRESENTER = "geometry";
-  std::string MOCK_INSTRUMENT_MD_LOADING_PRESENTER = "instrument";
+std::string MOCK_GEOMETRY_XML_MD_LOADING_PRESENTER = "geometry";
+std::string MOCK_INSTRUMENT_MD_LOADING_PRESENTER = "instrument";
 
 class MOCKMDLoadingPresenter : public Mantid::VATES::MDLoadingPresenter {
 public:
-  MOCKMDLoadingPresenter(){}
+  MOCKMDLoadingPresenter() {}
   ~MOCKMDLoadingPresenter() override {}
   vtkSmartPointer<vtkDataSet>
   execute(Mantid::VATES::vtkDataSetFactory *, Mantid::VATES::ProgressAction &,
@@ -50,20 +49,20 @@ public:
 };
 }
 
-
 class MDLoadingPresenterTest : public CxxTest::TestSuite {
 private:
   vtkSmartPointer<vtkUnstructuredGrid> makeDataSet() {
     FakeProgressAction progressUpdate;
     MDEventWorkspace3Lean::sptr ws =
         MDEventsTestHelper::makeMDEW<3>(8, -10.0, 10.0, 1);
-    Mantid::VATES::vtkMDHexFactory factory(ThresholdRange_scptr(new NoThresholdRange),
-                            VolumeNormalization);
+    Mantid::VATES::vtkMDHexFactory factory(
+        ThresholdRange_scptr(new NoThresholdRange), VolumeNormalization);
     factory.initialize(ws);
     auto dataset = factory.create(progressUpdate);
     auto grid = vtkUnstructuredGrid::SafeDownCast(dataset.Get());
     return vtkSmartPointer<vtkUnstructuredGrid>(grid);
   }
+
 public:
   void test_that_non_default_cob_is_created() {
     // Arrange

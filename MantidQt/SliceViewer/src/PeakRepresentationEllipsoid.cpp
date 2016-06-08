@@ -218,15 +218,13 @@ std::shared_ptr<PeakPrimitives>
   if (this->m_showBackgroundRadii) {
     if (m_radiiEllipseBackgroundOuter.size() > 0) {
       drawingInformation->backgroundOuterRadiusMajorAxis =
-        m_radiiEllipseBackgroundOuter[0];
+          m_radiiEllipseBackgroundOuter[0];
       drawingInformation->backgroundOuterRadiusMinorAxis =
-        m_radiiEllipseBackgroundOuter[1];
-    }
-    else {
+          m_radiiEllipseBackgroundOuter[1];
+    } else {
       drawingInformation->backgroundOuterRadiusMajorAxis = zeroRadius;
       drawingInformation->backgroundOuterRadiusMinorAxis = zeroRadius;
     }
-
 
     // Add inner backgroudn radius if it is available. It might be that only a
     // cut through the outer
@@ -295,33 +293,37 @@ void PeakRepresentationEllipsoid::doDraw(
   }
 
   if (m_showBackgroundRadii) {
-    if (drawingInformationEllipse->backgroundOuterRadiusMajorAxis != zeroRadius &&
-        drawingInformationEllipse->backgroundOuterRadiusMinorAxis != zeroRadius &&
-        drawingInformationEllipse->backgroundInnerRadiusMajorAxis != zeroRadius &&
-        drawingInformationEllipse->backgroundInnerRadiusMinorAxis != zeroRadius) {
+    if (drawingInformationEllipse->backgroundOuterRadiusMajorAxis !=
+            zeroRadius &&
+        drawingInformationEllipse->backgroundOuterRadiusMinorAxis !=
+            zeroRadius &&
+        drawingInformationEllipse->backgroundInnerRadiusMajorAxis !=
+            zeroRadius &&
+        drawingInformationEllipse->backgroundInnerRadiusMinorAxis !=
+            zeroRadius) {
       // Outer demarcation of the fill
       QPainterPath backgroundOuterPath;
       backgroundOuterPath.setFillRule(Qt::WindingFill);
       backgroundOuterPath.addEllipse(
-        zeroPoint, drawingInformationEllipse->backgroundOuterRadiusMajorAxis,
-        drawingInformationEllipse->backgroundOuterRadiusMinorAxis);
+          zeroPoint, drawingInformationEllipse->backgroundOuterRadiusMajorAxis,
+          drawingInformationEllipse->backgroundOuterRadiusMinorAxis);
       auto transformedBackgroundOuterPath = getTransformedPainterPath(
-        drawingInformationEllipse->angle, viewInformation.xOriginWindow,
-        viewInformation.yOriginWindow, scaleX, scaleY, backgroundOuterPath);
+          drawingInformationEllipse->angle, viewInformation.xOriginWindow,
+          viewInformation.yOriginWindow, scaleX, scaleY, backgroundOuterPath);
 
       // Inner demarcation of the fill
       QPainterPath backgroundInnerPath;
       backgroundInnerPath.addEllipse(
-        zeroPoint, drawingInformationEllipse->backgroundInnerRadiusMajorAxis,
-        drawingInformationEllipse->backgroundInnerRadiusMinorAxis);
+          zeroPoint, drawingInformationEllipse->backgroundInnerRadiusMajorAxis,
+          drawingInformationEllipse->backgroundInnerRadiusMinorAxis);
       auto transformedBackgroundInnerPath = getTransformedPainterPath(
-        drawingInformationEllipse->angle, viewInformation.xOriginWindow,
-        viewInformation.yOriginWindow, scaleX, scaleY, backgroundInnerPath);
+          drawingInformationEllipse->angle, viewInformation.xOriginWindow,
+          viewInformation.yOriginWindow, scaleX, scaleY, backgroundInnerPath);
 
       // Subtract inner fill from outer fill
       QPainterPath backgroundRadiusFill =
-        transformedBackgroundOuterPath.subtracted(
-          transformedBackgroundInnerPath);
+          transformedBackgroundOuterPath.subtracted(
+              transformedBackgroundInnerPath);
 
       painter.fillPath(backgroundRadiusFill, backgroundColor.colorEllipsoid);
     }

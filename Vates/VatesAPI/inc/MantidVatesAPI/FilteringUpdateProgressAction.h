@@ -4,12 +4,14 @@
 #include "MantidKernel/System.h"
 #include "MantidVatesAPI/ProgressAction.h"
 
-/** Adapter for action specific to ParaView RebinningCutter filter. Handles progress actions raised by underlying Mantid Algorithms.
+/** Adapter for action specific to ParaView RebinningCutter filter. Handles
+ progress actions raised by underlying Mantid Algorithms.
 
  @author Owen Arnold, Tessella plc
  @date 14/03/2011
 
- Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+ Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+ National Laboratory & European Spallation Source
 
  This file is part of Mantid.
 
@@ -30,43 +32,34 @@
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
 
+namespace Mantid {
+namespace VATES {
 
-namespace Mantid
-{
-namespace VATES
-{
-
-/// Template argument is the exact filter/source/reader providing the public UpdateAlgorithmProgress method.
-template<typename Filter>
-class DLLExport FilterUpdateProgressAction : public ProgressAction
-{
+/// Template argument is the exact filter/source/reader providing the public
+/// UpdateAlgorithmProgress method.
+template <typename Filter>
+class DLLExport FilterUpdateProgressAction : public ProgressAction {
 
 public:
-
-  FilterUpdateProgressAction(Filter* filter, const std::string& message) : m_filter(filter), m_message(message)
-  {
-  }
+  FilterUpdateProgressAction(Filter *filter, const std::string &message)
+      : m_filter(filter), m_message(message) {}
 
   void eventRaised(double progress) override {
     m_filter->updateAlgorithmProgress(progress, m_message);
   }
 
-  ~FilterUpdateProgressAction()
-  {
-  }
+  ~FilterUpdateProgressAction() {}
 
 private:
+  FilterUpdateProgressAction &operator=(FilterUpdateProgressAction &);
 
-  FilterUpdateProgressAction& operator=(FilterUpdateProgressAction&);
+  FilterUpdateProgressAction(FilterUpdateProgressAction &);
 
-  FilterUpdateProgressAction(FilterUpdateProgressAction&);
-
-  Filter* m_filter;
+  Filter *m_filter;
 
   /// Message associated with the progress action
   std::string m_message;
 };
-
 }
 }
 

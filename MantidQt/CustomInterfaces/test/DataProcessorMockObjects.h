@@ -93,7 +93,7 @@ private:
     for (size_t i = 0; i < 26; i++)
       commands.push_back(
           Mantid::Kernel::make_unique<DataProcessorAppendRowCommand>(this));
-		return commands;
+    return commands;
   };
   std::set<std::string> getTableList() const {
     return std::set<std::string>();

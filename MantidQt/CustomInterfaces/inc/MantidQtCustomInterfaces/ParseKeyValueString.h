@@ -3,9 +3,11 @@
 
 /** parseKeyValueString
 
-Parses a string in the format `a = 1,b=2, c = "1,2,3,4", d = 5.0, e='a,b,c'` into a map of key/value pairs.
+Parses a string in the format `a = 1,b=2, c = "1,2,3,4", d = 5.0, e='a,b,c'`
+into a map of key/value pairs.
 
-Copyright &copy; 2011-14 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+Copyright &copy; 2011-14 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+National Laboratory & European Spallation Source
 
 This file is part of Mantid.
 
@@ -31,13 +33,12 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 #include <string>
 #include <map>
 
-
 namespace MantidQt {
-  namespace CustomInterfaces {
+namespace CustomInterfaces {
 
-    std::map<std::string,std::string> DLLExport parseKeyValueString(const std::string& str);
-
-  }
+std::map<std::string, std::string> DLLExport
+parseKeyValueString(const std::string &str);
+}
 }
 
-#endif //MANTID_CUSTOMINTERFACES_PARSEKEYVALUESTRING_H
+#endif // MANTID_CUSTOMINTERFACES_PARSEKEYVALUESTRING_H
