@@ -54,13 +54,11 @@
 // under clang
 #define STR_LITERAL(str) const_cast<char *>(str)
 
-// Function is defined in a sip object file that is linked in later. There is no
-// header file
-// so this is necessary
+// The init functions are defined in the generated sip_qtipart0.cpp
 #if defined(IS_PY3K)
-  extern "C" void PyInit__qti();
+PyMODINIT_FUNC PyInit__qti();
 #else
-  extern "C" void init_qti();
+PyMODINIT_FUNC init_qti();
 #endif
 
 // Factory function
@@ -158,6 +156,12 @@ bool PythonScripting::start() {
   try {
     if (Py_IsInitialized())
       return true;
+// This must be called before initialize
+#if defined(IS_PY3K)
+    PyImport_AppendInittab("_qti", &PyInit__qti);
+#else
+    PyImport_AppendInittab("_qti", &init_qti);
+#endif
     Py_Initialize();
     // Assume this is called at startup by the the main thread so no GIL
     // required...yet
@@ -191,18 +195,10 @@ bool PythonScripting::start() {
     Py_DECREF(sysmod);
 
     // Our use of the IPython console requires that we use the v2 api for these
-    // PyQt types
-    // This has to be set before the very first import of PyQt (which happens in
-    // init_qti)
+    // PyQt types. This has to be set before the very first import of PyQt
+    // which happens on importing _qti
     PyRun_SimpleString(
         "import sip\nsip.setapi('QString',2)\nsip.setapi('QVariant',2)");
-    // Embedded qti module needs sip definitions initializing before it can be
-    // used
-#if defined(IS_PY3K)
-    PyInit__qti();
-#else
-    init_qti();
-#endif
     PyObject *qtimod = PyImport_ImportModule("_qti");
     if (qtimod) {
       PyDict_SetItemString(m_globals, "_qti", qtimod);
