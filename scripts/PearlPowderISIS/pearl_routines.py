@@ -450,15 +450,22 @@ def PEARL_focus_v1(number, ext="raw", fmode="trans", ttmode="TT70", atten=True, 
 
     elif (mode == "groups"):
 
+        name = []
+        name.extend((outwork + "_mods1-3", outwork + "_mods4-6",
+                     outwork + "_mods7-9", outwork + "_mods4-9"))
+
         name1 = outwork + "_mods1-3"
         name2 = outwork + "_mods4-6"
         name3 = outwork + "_mods7-9"
         name4 = outwork + "_mods4-9"
 
+        input = []
+        input.extend((outwork + "_mod1", outwork + "_mod4", outwork + "_mod7"))
+
         input1 = outwork + "_mod1"
         input2 = outwork + "_mod4"
         input3 = outwork + "_mod7"
-
+        
         CloneWorkspace(InputWorkspace=input1, OutputWorkspace=name1)
         CloneWorkspace(InputWorkspace=input2, OutputWorkspace=name2)
         CloneWorkspace(InputWorkspace=input3, OutputWorkspace=name3)
@@ -486,21 +493,14 @@ def PEARL_focus_v1(number, ext="raw", fmode="trans", ttmode="TT70", atten=True, 
         Plus(LHSWorkspace=name2, RHSWorkspace=name3, OutputWorkspace=name4)
         Scale(InputWorkspace=name4, OutputWorkspace=name4, Factor=0.5)
 
-        SaveGSS(InputWorkspace=name1, Filename=gssfile, Append=False, Bank=1)
-        ConvertUnits(InputWorkspace=name1, OutputWorkspace=name1, Target="dSpacing")
-        SaveNexus(Filename=outfile, InputWorkspace=name1, Append=False)
+        for i in range(0, 4):
+            append = True
+            if i is 0:
+                append = False
 
-        SaveGSS(InputWorkspace=name2, Filename=gssfile, Append=True, Bank=2)
-        ConvertUnits(InputWorkspace=name2, OutputWorkspace=name2, Target="dSpacing")
-        SaveNexus(Filename=outfile, InputWorkspace=name2, Append=True)
-
-        SaveGSS(InputWorkspace=name3, Filename=gssfile, Append=True, Bank=3)
-        ConvertUnits(InputWorkspace=name3, OutputWorkspace=name3, Target="dSpacing")
-        SaveNexus(Filename=outfile, InputWorkspace=name3, Append=True)
-
-        SaveGSS(InputWorkspace=name4, Filename=gssfile, Append=True, Bank=4)
-        ConvertUnits(InputWorkspace=name4, OutputWorkspace=name4, Target="dSpacing")
-        SaveNexus(Filename=outfile, InputWorkspace=name4, Append=True)
+            SaveGSS(InputWorkspace=name[i], Filename=gssfile, Append=append, Bank=i+1)
+            ConvertUnits(InputWorkspace=name[i], OutputWorkspace=name[i], Target="dSpacing")
+            SaveNexus(Filename=outfile, InputWorkspace=name[i], Append=append)
 
         for i in range(0, 3):
             tosave = outwork + "_mod" + str(i + 10)
@@ -521,10 +521,8 @@ def PEARL_focus_v1(number, ext="raw", fmode="trans", ttmode="TT70", atten=True, 
                 mtd.remove(van)
                 mtd.remove(output)
 
-            mtd.remove(name1)
-            mtd.remove(name2)
-            mtd.remove(name3)
-            mtd.remove(name4)
+            for i in range(1, 4):
+                mtd.remove(name[i])
 
     elif (mode == "trans"):
 
