@@ -16,15 +16,8 @@ class LoadCASTEP(IOmodule):
         # Regex pattern for a floating point number
         self._float_regex = r'\-?(?:\d+\.?\d*|\d*\.?\d+)'
 
-        # set hdf file
-        core_name =  self._filename[0:self._filename.find(".")]
-        self._hdf_filename = core_name + ".hdf5"
-        self._group_name = "PhononAB" # stuff from ab-initio calculations is stored in this group.
-        self.setHdfFile()
-
-        # initialize data which will be saved to hdf file
-        self._attributes = {}
-        self._datasets = {}
+        # prepare hdf file
+        self._prepare_HDF_file(file_name=filename, group_name="PhononAB")
 
     # noinspection PyMethodMayBeStatic
     def _parse_block_header(self, header_match, block_count):
