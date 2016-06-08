@@ -6,7 +6,6 @@
 #include <map>
 #include <json/value.h>
 
-
 #if (IN_MANTID_SCRIPTREPO)
 #define SCRIPT_DLL_EXPORT DLLExport
 #else
