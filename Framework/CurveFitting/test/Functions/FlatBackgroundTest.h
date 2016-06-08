@@ -19,6 +19,18 @@ public:
   static FlatBackgroundTest *createSuite() { return new FlatBackgroundTest(); }
   static void destroySuite(FlatBackgroundTest *suite) { delete suite; }
 
+  void test_category() {
+    FlatBackground cfn;
+    cfn.initialize();
+
+    std::vector<std::string> cats;
+    TS_ASSERT_THROWS_NOTHING(cats = cfn.categories());
+    TS_ASSERT_LESS_THAN_EQUALS(1, cats.size());
+    TS_ASSERT_EQUALS(cats.front(), "Background");
+    // This would enfonce one and only one category:
+    // TS_ASSERT(cfn.category() == "Background");
+  }
+
   void testFunctionMW() {
     std::size_t numPoints = 100;
     double expValue = 10.;

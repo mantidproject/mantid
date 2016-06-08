@@ -20,6 +20,18 @@ using namespace Mantid::CurveFitting::Functions;
 
 class ChebyshevTest : public CxxTest::TestSuite {
 public:
+  void test_category() {
+    Chebyshev cfn;
+    cfn.initialize();
+
+    std::vector<std::string> cats;
+    TS_ASSERT_THROWS_NOTHING(cats = cfn.categories());
+    TS_ASSERT_LESS_THAN_EQUALS(1, cats.size());
+    TS_ASSERT_EQUALS(cats.front(), "Background");
+    // This would enfonce one and only one category:
+    // TS_ASSERT(cfn.category() == "Background");
+  }
+
   void testValues() {
     const int N = 11;
     double y[N], x[N];

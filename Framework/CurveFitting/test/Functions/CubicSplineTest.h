@@ -21,6 +21,23 @@ using namespace Mantid::CurveFitting::Functions;
 
 class CubicSplineTest : public CxxTest::TestSuite {
 public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static CubicSplineTest *createSuite() { return new CubicSplineTest(); }
+  static void destroySuite(CubicSplineTest *suite) { delete suite; }
+
+  void test_category() {
+    CubicSpline cfn;
+    cfn.initialize();
+
+    std::vector<std::string> cats;
+    TS_ASSERT_THROWS_NOTHING(cats = cfn.categories());
+    TS_ASSERT_LESS_THAN_EQUALS(1, cats.size());
+    TS_ASSERT_EQUALS(cats.front(), "Background");
+    // This would enfonce one and only one category:
+    // TS_ASSERT(cfn.category() == "Background");
+  }
+
   void testSetNAttribute() {
     CubicSpline cspline;
 

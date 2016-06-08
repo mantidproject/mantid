@@ -28,11 +28,16 @@ public:
   }
   static void destroySuite(FullprofPolynomialTest *suite) { delete suite; }
 
-  void testForCategories() {
-    FullprofPolynomial forCat;
-    const std::vector<std::string> categories = forCat.categories();
-    TS_ASSERT(categories.size() == 1);
-    TS_ASSERT(categories[0] == "Background");
+  void test_category() {
+    FullprofPolynomial cfn;
+    cfn.initialize();
+
+    std::vector<std::string> cats;
+    TS_ASSERT_THROWS_NOTHING(cats = cfn.categories());
+    TS_ASSERT_LESS_THAN_EQUALS(1, cats.size());
+    TS_ASSERT_EQUALS(cats.front(), "Background");
+    // This would enfonce one and only one category:
+    // TS_ASSERT(cfn.category() == "Background");
   }
 
   /** Test function on a Fullprof polynomial function

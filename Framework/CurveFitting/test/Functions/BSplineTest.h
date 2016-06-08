@@ -20,6 +20,23 @@ using namespace Mantid::CurveFitting::CostFunctions;
 
 class BSplineTest : public CxxTest::TestSuite {
 public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static BSplineTest *createSuite() { return new BSplineTest(); }
+  static void destroySuite(BSplineTest *suite) { delete suite; }
+
+  void test_category() {
+    BSpline cfn;
+    cfn.initialize();
+
+    std::vector<std::string> cats;
+    TS_ASSERT_THROWS_NOTHING(cats = cfn.categories());
+    TS_ASSERT_LESS_THAN_EQUALS(1, cats.size());
+    TS_ASSERT_EQUALS(cats.front(), "Background");
+    // This would enfonce one and only one category:
+    // TS_ASSERT(cfn.category() == "Background");
+  }
+
   void test_defaults() {
     BSpline bsp;
     int order = bsp.getAttribute("Order").asInt();
