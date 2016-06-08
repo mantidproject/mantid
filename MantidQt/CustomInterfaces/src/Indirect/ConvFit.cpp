@@ -300,6 +300,7 @@ void ConvFit::run() {
   cfs->setProperty("Minimizer",
                    minimizerString("$outputname_$wsindex").toStdString());
   cfs->setProperty("MaxIterations", maxIterations);
+  cfs->setProperty("OutputWorkspace", (m_baseName.toStdString() + "_Result"));
   m_batchAlgoRunner->addAlgorithm(cfs);
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
           SLOT(algorithmComplete(bool)));
