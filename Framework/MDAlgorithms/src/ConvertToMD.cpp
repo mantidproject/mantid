@@ -246,6 +246,15 @@ void ConvertToMD::exec() {
   // Set the normalization of the event workspace
   m_Convertor->setDisplayNormalization(spws, m_InWS2D);
 
+  if (fileBackEnd) {
+    auto savemd = this->createChildAlgorithm("SaveMD");
+    savemd->setProperty("InputWorkspace", spws);
+    savemd->setPropertyValue("Filename", out_filename);
+    savemd->setProperty("UpdateFileBackEnd", true);
+    savemd->setProperty("MakeFileBacked", false);
+    savemd->executeAsChildAlg();
+  }
+
   // JOB COMPLETED:
   setProperty("OutputWorkspace",
               boost::dynamic_pointer_cast<IMDEventWorkspace>(spws));
@@ -339,7 +348,7 @@ void ConvertToMD::copyMetaData(API::IMDEventWorkspace_sptr &mdEventWS) const {
       }
     }
     // sort bin boundaries in case if unit transformation have swapped them.
-    if (binBoundaries[0] > binBoundaries[binBoundaries.size() - 1]) {
+    if (binBoundaries[0] > binBoundaries.back()) {
       g_log.information() << "Bin boundaries are not arranged monotonously. "
                              "Sorting performed\n";
       std::sort(binBoundaries.begin(), binBoundaries.end());

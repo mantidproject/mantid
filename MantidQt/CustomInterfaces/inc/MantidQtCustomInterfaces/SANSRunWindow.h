@@ -493,11 +493,12 @@ private:
                                   bool w1W2Disabled);
   /// Initialize the QResolution settings
   void initQResolutionSettings();
-  
+
   /// Gets the BackgroundCorrection settings
   void retrieveBackgroundCorrection();
   /// Get Background runner
-  SANSBackgroundCorrectionSettings retrieveBackgroundCorrectionSetting(bool isTime, bool isMon);
+  SANSBackgroundCorrectionSettings
+  retrieveBackgroundCorrectionSetting(bool isTime, bool isMon);
   /// Initialize the background correction
   void initializeBackgroundCorrection();
   /// Sets the BackgroundCorrection settings
@@ -514,7 +515,6 @@ private:
   /// Update IDF file path
   void updateIDFFilePath();
 
-      
   UserSubWindow *slicingWindow;
 };
 }

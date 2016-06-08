@@ -173,6 +173,10 @@ public:
     eval.removeProperty("InputWorkspace");
     eval.setProperty("OutputWorkspace", "out");
     eval.execute();
+    TS_ASSERT(eval.isExecuted());
+    if (!eval.isExecuted()) {
+      return;
+    }
 
     ITableWorkspace_sptr output =
         AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("out");

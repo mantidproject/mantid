@@ -393,15 +393,19 @@ def write_ENGINX_GSAS_iparam_file(output_file, difc, tzero, bank_names=None,
     # - instrument constants/parameters (ICONS)
     # - instrument calibration comment with run numbers (CALIB)
     output_lines = []
-    for b_idx, bank_name in enumerate(bank_names):
-        patterns = ["INS  %d ICONS"%(b_idx + 1),
-                    "INS    CALIB"]
+    for b_idx, _bank_name in enumerate(bank_names):
+        patterns = ["INS  %d ICONS"%(b_idx + 1), # bank calibration parameters: DIFC, DIFA, TZERO
+                    "INS    CALIB", # calibration run numbers (Vanadium and Ceria)
+                    "INS    INCBM"  # A his file for open genie (with ceria run number in the name)
+                   ]
         difa = 0.0
         # the ljust(80) ensures a length of 80 characters for the lines (GSAS rules...)
-        replacements = [ ("INS  %d ICONS  %.2f    %.2f    %.2f" %
-                          (b_idx + 1, difc[b_idx], difa, tzero[b_idx])).ljust(80) + '\r\n',
-                         ("INS    CALIB   %d   %d ceo2" %
-                          (ceria_run, vanadium_run)).ljust(80) + '\r\n']
+        replacements = [ ("INS  {0} ICONS  {1:.2f}    {2:.2f}    {3:.2f}".
+                          format(b_idx + 1, difc[b_idx], difa, tzero[b_idx])).ljust(80) + '\n',
+                         ("INS    CALIB   {0}   {1} ceo2".
+                          format(ceria_run, vanadium_run)).ljust(80) + '\n',
+                         ("INS    INCBM  ob+mon_{0}_North_and_South_banks.his".
+                          format(ceria_run)).ljust(80) + '\n' ]
 
         output_lines = [ replace_patterns(line, patterns, replacements) for line in temp_lines]
 

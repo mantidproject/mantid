@@ -242,8 +242,7 @@ QPair<double, double> PreviewPlot::getCurveRange(const QString &curveName) {
  */
 void PreviewPlot::addSpectrum(const QString &curveName,
                               const MatrixWorkspace_sptr ws,
-                              const size_t wsIndex,
-                              const QColor &curveColour) {
+                              const size_t wsIndex, const QColor &curveColour) {
   if (curveName.isEmpty()) {
     g_log.warning("Cannot plot with empty curve name");
     return;
@@ -299,8 +298,7 @@ void PreviewPlot::addSpectrum(const QString &curveName,
  * @param curveColour Colour of curve to plot
  */
 void PreviewPlot::addSpectrum(const QString &curveName, const QString &wsName,
-                              const size_t wsIndex,
-                              const QColor &curveColour) {
+                              const size_t wsIndex, const QColor &curveColour) {
   if (wsName.isEmpty()) {
     g_log.error("Cannot plot with empty workspace name");
     return;
@@ -355,7 +353,7 @@ void PreviewPlot::removeSpectrum(const QString &curveName) {
     removeCurve(m_curves[curveName].errorCurve);
     m_uiForm.loLegend->removeWidget(m_curves[curveName].label);
     m_errorBarOptionCache[curveName] =
-    m_curves[curveName].showErrorsAction->isChecked();
+        m_curves[curveName].showErrorsAction->isChecked();
     m_showErrorsMenu->removeAction(m_curves[curveName].showErrorsAction);
     delete m_curves[curveName].showErrorsAction;
     delete m_curves[curveName].label;
@@ -597,8 +595,8 @@ void PreviewPlot::handleRemoveEvent(WorkspacePreDeleteNotification_ptr pNf) {
  *
  * @param pNf Poco notification
  */
-void
-PreviewPlot::handleReplaceEvent(WorkspaceAfterReplaceNotification_ptr pNf) {
+void PreviewPlot::handleReplaceEvent(
+    WorkspaceAfterReplaceNotification_ptr pNf) {
   MatrixWorkspace_sptr ws =
       boost::dynamic_pointer_cast<MatrixWorkspace>(pNf->object());
 
@@ -666,11 +664,10 @@ void PreviewPlot::addCurve(PlotCurveConfiguration &curveConfig,
 
   // Create the Qwt data
   std::vector<double> X;
-  if (ws->isHistogramData()){
+  if (ws->isHistogramData()) {
     Mantid::Kernel::VectorHelper::convertToBinCentre(ws->readX(wsIndex), X);
-  }
-  else{
-    X=ws->readX(wsIndex);
+  } else {
+    X = ws->readX(wsIndex);
   }
   QwtArray<double> dataX = QVector<double>::fromStdVector(X);
   QwtArray<double> dataY = QVector<double>::fromStdVector(wsDataY);

@@ -19,6 +19,7 @@
 #include <qwt_plot_zoomer.h>
 
 // Qt classes forward declarations
+class QMessageBox;
 class QMutex;
 
 namespace MantidQt {
@@ -68,6 +69,11 @@ public:
   static std::string name() { return "Engineering Diffraction"; }
   /// This interface's categories.
   static QString categoryInfo() { return "Diffraction"; }
+
+  void splashMessage(bool visible, const std::string &shortMsg,
+                     const std::string &description) override;
+
+  void showStatus(const std::string &sts) override;
 
   void userWarning(const std::string &warn,
                    const std::string &description) override;
@@ -161,7 +167,7 @@ public:
   std::string getFocusDir() override;
 
   void setDataVector(std::vector<boost::shared_ptr<QwtData>> &data,
-                     bool focused) override;
+                     bool focused, bool plotSinglePeaks) override;
 
   void addBankItems(std::vector<std::string> splittedBaseName,
                     QString selectedFile) override;
@@ -210,9 +216,7 @@ public:
                            const std::string &spectrum,
                            const std::string &type) override;
 
-  void plotVanCurvesCalibOutput() override;
-
-  void plotDifcZeroCalibOutput(const std::string &pyCode) override;
+  void plotCalibOutput(const std::string &pyCode) override;
 
   bool saveFocusedOutputFiles() const override;
 
@@ -277,8 +281,10 @@ private slots:
   void setPeakPick();
   void addPeakToList();
   void savePeakList();
+  void clearPeakList();
   void fitClicked();
   void FittingRunNo();
+  void plotSeparateWindow();
   void setBankDir(int idx);
   void listViewFittingRun();
 
@@ -289,6 +295,7 @@ private:
   /// Setup the interface (tab UI)
   void initLayout() override;
   void doSetupGeneralWidgets();
+  void doSetupSplashMsg();
   void doSetupTabCalib();
   void doSetupTabFocus();
   void doSetupTabPreproc();
@@ -356,6 +363,9 @@ private:
   /// calibration settings - from/to the 'settings' tab
   EnggDiffCalibSettings m_calibSettings;
   std::string m_outCalibFilename;
+
+  /// To show important non-modal messages
+  QMessageBox *m_splashMsg;
 
   /// This is in principle the only settings for 'focus'
   std::string m_focusDir;

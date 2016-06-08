@@ -4,12 +4,10 @@ import mantid.simpleapi as api
 from mantid.kernel import StringListValidator
 import numpy as np
 
-import platform
-if platform.linux_distribution()[2] != 'Santiago':
-    try:
-        import h5py  # http://www.h5py.org/
-    except ImportError:
-        pass
+try:
+    import h5py  # http://www.h5py.org/
+except ImportError:
+    pass
 
 class SaveNexusPD(mantid.api.PythonAlgorithm):
     NX_CLASS = 'NX_class'

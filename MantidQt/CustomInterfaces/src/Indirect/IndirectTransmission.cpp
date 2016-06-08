@@ -4,135 +4,134 @@
 
 using namespace Mantid::API;
 
-namespace MantidQt
-{
-namespace CustomInterfaces
-{
+namespace MantidQt {
+namespace CustomInterfaces {
 
-  //----------------------------------------------------------------------------------------------
-  /** Constructor
-   */
-  IndirectTransmission::IndirectTransmission(IndirectDataReduction * idrUI, QWidget * parent) :
-    IndirectDataReductionTab(idrUI, parent)
-  {
-    m_uiForm.setupUi(parent);
+//----------------------------------------------------------------------------------------------
+/** Constructor
+ */
+IndirectTransmission::IndirectTransmission(IndirectDataReduction *idrUI,
+                                           QWidget *parent)
+    : IndirectDataReductionTab(idrUI, parent) {
+  m_uiForm.setupUi(parent);
 
-    connect(this, SIGNAL(newInstrumentConfiguration()), this, SLOT(instrumentSet()));
+  connect(this, SIGNAL(newInstrumentConfiguration()), this,
+          SLOT(instrumentSet()));
 
-    // Update the preview plot when the algorithm is complete
-    connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(transAlgDone(bool)));
-    connect(m_uiForm.dsSampleInput, SIGNAL(dataReady(QString)), this, SLOT(dataLoaded()));
-    connect(m_uiForm.dsCanInput, SIGNAL(dataReady(QString)), this, SLOT(dataLoaded()));
-  }
+  // Update the preview plot when the algorithm is complete
+  connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
+          SLOT(transAlgDone(bool)));
+  connect(m_uiForm.dsSampleInput, SIGNAL(dataReady(QString)), this,
+          SLOT(dataLoaded()));
+  connect(m_uiForm.dsCanInput, SIGNAL(dataReady(QString)), this,
+          SLOT(dataLoaded()));
+}
 
-  //----------------------------------------------------------------------------------------------
-  /** Destructor
-   */
-  IndirectTransmission::~IndirectTransmission()
-  {
-  }
+//----------------------------------------------------------------------------------------------
+/** Destructor
+ */
+IndirectTransmission::~IndirectTransmission() {}
 
-  void IndirectTransmission::setup()
-  {
-  }
+void IndirectTransmission::setup() {}
 
-  void IndirectTransmission::run()
-  {
-    QString sampleWsName = m_uiForm.dsSampleInput->getCurrentDataName();
-    QString canWsName = m_uiForm.dsCanInput->getCurrentDataName();
-    QString outWsName = sampleWsName + "_trans";
+void IndirectTransmission::run() {
+  QString sampleWsName = m_uiForm.dsSampleInput->getCurrentDataName();
+  QString canWsName = m_uiForm.dsCanInput->getCurrentDataName();
+  QString outWsName = sampleWsName + "_trans";
 
-    IAlgorithm_sptr transAlg = AlgorithmManager::Instance().create("IndirectTransmissionMonitor", -1);
-    transAlg->initialize();
+  IAlgorithm_sptr transAlg =
+      AlgorithmManager::Instance().create("IndirectTransmissionMonitor", -1);
+  transAlg->initialize();
 
-    transAlg->setProperty("SampleWorkspace", sampleWsName.toStdString());
-    transAlg->setProperty("CanWorkspace", canWsName.toStdString());
-    transAlg->setProperty("OutputWorkspace", outWsName.toStdString());
+  transAlg->setProperty("SampleWorkspace", sampleWsName.toStdString());
+  transAlg->setProperty("CanWorkspace", canWsName.toStdString());
+  transAlg->setProperty("OutputWorkspace", outWsName.toStdString());
 
-    m_batchAlgoRunner->addAlgorithm(transAlg);
+  m_batchAlgoRunner->addAlgorithm(transAlg);
 
-    if(m_uiForm.ckSave->isChecked())
-      addSaveWorkspaceToQueue(outWsName);
+  if (m_uiForm.ckSave->isChecked())
+    addSaveWorkspaceToQueue(outWsName);
 
-    m_batchAlgoRunner->executeBatchAsync();
-  }
+  m_batchAlgoRunner->executeBatchAsync();
+}
 
-  bool IndirectTransmission::validate()
-  {
-    // Check if we have an appropriate instrument
-    QString currentInst = getInstrumentConfiguration()->getInstrumentName();
-    if(currentInst != "IRIS" && currentInst != "OSIRIS")
-      return false;
+bool IndirectTransmission::validate() {
+  // Check if we have an appropriate instrument
+  QString currentInst = getInstrumentConfiguration()->getInstrumentName();
+  if (currentInst != "IRIS" && currentInst != "OSIRIS")
+    return false;
 
-    // Check for an invalid sample input
-    if(!m_uiForm.dsSampleInput->isValid())
-      return false;
+  // Check for an invalid sample input
+  if (!m_uiForm.dsSampleInput->isValid())
+    return false;
 
-    // Check for an invalid can input
-    if(!m_uiForm.dsCanInput->isValid())
-      return false;
+  // Check for an invalid can input
+  if (!m_uiForm.dsCanInput->isValid())
+    return false;
 
-    return true;
-  }
+  return true;
+}
 
-  void IndirectTransmission::dataLoaded()
-  {
-    if(validate())
-      previewPlot();
-  }
+void IndirectTransmission::dataLoaded() {
+  if (validate())
+    previewPlot();
+}
 
-  void IndirectTransmission::previewPlot()
-  {
-    QString sampleWsName = m_uiForm.dsSampleInput->getCurrentDataName();
-    QString canWsName = m_uiForm.dsCanInput->getCurrentDataName();
-    QString outWsName = sampleWsName + "_trans";
+void IndirectTransmission::previewPlot() {
+  QString sampleWsName = m_uiForm.dsSampleInput->getCurrentDataName();
+  QString canWsName = m_uiForm.dsCanInput->getCurrentDataName();
+  QString outWsName = sampleWsName + "_trans";
 
-    IAlgorithm_sptr transAlg = AlgorithmManager::Instance().create("IndirectTransmissionMonitor", -1);
-    transAlg->initialize();
+  IAlgorithm_sptr transAlg =
+      AlgorithmManager::Instance().create("IndirectTransmissionMonitor", -1);
+  transAlg->initialize();
 
-    transAlg->setProperty("SampleWorkspace", sampleWsName.toStdString());
-    transAlg->setProperty("CanWorkspace", canWsName.toStdString());
-    transAlg->setProperty("OutputWorkspace", outWsName.toStdString());
+  transAlg->setProperty("SampleWorkspace", sampleWsName.toStdString());
+  transAlg->setProperty("CanWorkspace", canWsName.toStdString());
+  transAlg->setProperty("OutputWorkspace", outWsName.toStdString());
 
-    // Set the workspace name for Python script export
-    m_pythonExportWsName = sampleWsName.toStdString() + "_Trans";
+  // Set the workspace name for Python script export
+  m_pythonExportWsName = sampleWsName.toStdString() + "_Trans";
 
-    runAlgorithm(transAlg);
-  }
+  runAlgorithm(transAlg);
+}
 
-  void IndirectTransmission::transAlgDone(bool error)
-  {
-    if(error)
-      return;
+void IndirectTransmission::transAlgDone(bool error) {
+  if (error)
+    return;
 
-    QString sampleWsName = m_uiForm.dsSampleInput->getCurrentDataName();
-    QString outWsName = sampleWsName + "_trans";
+  QString sampleWsName = m_uiForm.dsSampleInput->getCurrentDataName();
+  QString outWsName = sampleWsName + "_trans";
 
-    if(m_uiForm.ckPlot->isChecked())
-      plotSpectrum(outWsName);
+  if (m_uiForm.ckPlot->isChecked())
+    plotSpectrum(outWsName);
 
-    WorkspaceGroup_sptr resultWsGroup = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(outWsName.toStdString());
-    std::vector<std::string> resultWsNames = resultWsGroup->getNames();
+  WorkspaceGroup_sptr resultWsGroup =
+      AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
+          outWsName.toStdString());
+  std::vector<std::string> resultWsNames = resultWsGroup->getNames();
 
-    if(resultWsNames.size() < 3)
-      return;
+  if (resultWsNames.size() < 3)
+    return;
 
-    // Do plotting
-    m_uiForm.ppPlot->clear();
-    m_uiForm.ppPlot->addSpectrum("Can", QString::fromStdString(resultWsNames[0]), 0, Qt::red);
-    m_uiForm.ppPlot->addSpectrum("Sample", QString::fromStdString(resultWsNames[1]), 0, Qt::black);
-    m_uiForm.ppPlot->addSpectrum("Transmission", QString::fromStdString(resultWsNames[2]), 0, Qt::green);
-    m_uiForm.ppPlot->resizeX();
-  }
+  // Do plotting
+  m_uiForm.ppPlot->clear();
+  m_uiForm.ppPlot->addSpectrum("Can", QString::fromStdString(resultWsNames[0]),
+                               0, Qt::red);
+  m_uiForm.ppPlot->addSpectrum(
+      "Sample", QString::fromStdString(resultWsNames[1]), 0, Qt::black);
+  m_uiForm.ppPlot->addSpectrum(
+      "Transmission", QString::fromStdString(resultWsNames[2]), 0, Qt::green);
+  m_uiForm.ppPlot->resizeX();
+}
 
-  void IndirectTransmission::instrumentSet()
-  {
-    QMap<QString, QString> instDetails = getInstrumentDetails();
+void IndirectTransmission::instrumentSet() {
+  QMap<QString, QString> instDetails = getInstrumentDetails();
 
-    // Set the search instrument for runs
-    m_uiForm.dsSampleInput->setInstrumentOverride(instDetails["instrument"]);
-    m_uiForm.dsCanInput->setInstrumentOverride(instDetails["instrument"]);
-  }
+  // Set the search instrument for runs
+  m_uiForm.dsSampleInput->setInstrumentOverride(instDetails["instrument"]);
+  m_uiForm.dsCanInput->setInstrumentOverride(instDetails["instrument"]);
+}
 
 } // namespace CustomInterfaces
 } // namespace Mantid

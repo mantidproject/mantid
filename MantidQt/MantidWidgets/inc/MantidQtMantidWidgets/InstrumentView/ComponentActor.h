@@ -12,9 +12,11 @@
   \date   March 2009
   \version 1.0
 
-   This class has the implementation for rendering ObjComponents in OpenGL and it inherits from the GLActor
+   This class has the implementation for rendering ObjComponents in OpenGL and
+  it inherits from the GLActor
 
-  Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+  Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+  National Laboratory & European Spallation Source
 
   This file is part of Mantid.
 
@@ -33,49 +35,48 @@
 
   File change history is stored at: <https://github.com/mantidproject/mantid>
 */
-namespace Mantid
-{
-  namespace Geometry
-  {
-    class IObjComponent;
-    class IDetector;
-    class ObjCompAssembly;
-    class CompAssembly;
-  }
+namespace Mantid {
+namespace Geometry {
+class IObjComponent;
+class IDetector;
+class ObjCompAssembly;
+class CompAssembly;
+}
 }
 
-namespace MantidQt
-{
-	namespace MantidWidgets
-	{
-		class InstrumentActor;
+namespace MantidQt {
+namespace MantidWidgets {
+class InstrumentActor;
 
-		class ComponentActor : public GLActor
-		{
-		public:
-			ComponentActor(const InstrumentActor &instrActor, const Mantid::Geometry::ComponentID &compID); ///< Default Constructor
-			virtual std::string type()const { return "ComponentActor"; } ///< Type of the GL object
-                        bool accept(GLActorVisitor &visitor,
-                                    VisitorAcceptRule rule = VisitAll) override;
-                        bool accept(
-                            GLActorConstVisitor &visitor,
-                            VisitorAcceptRule rule = VisitAll) const override;
-                        boost::shared_ptr<const Mantid::Geometry::IComponent> getComponent() const;
-			boost::shared_ptr<const Mantid::Geometry::IObjComponent> getObjComponent() const;
-			boost::shared_ptr<const Mantid::Geometry::IDetector> getDetector() const;
-			boost::shared_ptr<const Mantid::Geometry::ObjCompAssembly> getObjCompAssembly() const;
-			boost::shared_ptr<const Mantid::Geometry::CompAssembly> getCompAssembly() const;
-			virtual void setColors() {}
-			/// Check if the component is a non-detector.
-			bool isNonDetector() const;
-		protected:
-			const InstrumentActor& m_instrActor;
-			Mantid::Geometry::ComponentID m_id; ///< Component ID
-		};
-	}//MantidWidgets
-}//MantidQt
+class ComponentActor : public GLActor {
+public:
+  ComponentActor(
+      const InstrumentActor &instrActor,
+      const Mantid::Geometry::ComponentID &compID); ///< Default Constructor
+  virtual std::string type() const {
+    return "ComponentActor";
+  } ///< Type of the GL object
+  bool accept(GLActorVisitor &visitor,
+              VisitorAcceptRule rule = VisitAll) override;
+  bool accept(GLActorConstVisitor &visitor,
+              VisitorAcceptRule rule = VisitAll) const override;
+  boost::shared_ptr<const Mantid::Geometry::IComponent> getComponent() const;
+  boost::shared_ptr<const Mantid::Geometry::IObjComponent>
+  getObjComponent() const;
+  boost::shared_ptr<const Mantid::Geometry::IDetector> getDetector() const;
+  boost::shared_ptr<const Mantid::Geometry::ObjCompAssembly>
+  getObjCompAssembly() const;
+  boost::shared_ptr<const Mantid::Geometry::CompAssembly>
+  getCompAssembly() const;
+  virtual void setColors() {}
+  /// Check if the component is a non-detector.
+  bool isNonDetector() const;
 
-
+protected:
+  const InstrumentActor &m_instrActor;
+  Mantid::Geometry::ComponentID m_id; ///< Component ID
+};
+} // MantidWidgets
+} // MantidQt
 
 #endif /*COMPONENT_ACTOR_H_*/
-

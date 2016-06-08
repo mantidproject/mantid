@@ -25,7 +25,7 @@ public:
 
   void test_fail() {
     auto ws = boost::make_shared<WorkspaceTester>();
-    ws->isDistribution(true);
+    ws->setDistribution(true);
     RawCountValidator validator;
     TS_ASSERT_EQUALS(
         validator.isValid(ws),

@@ -9,9 +9,9 @@
 /// Constructor
 QwtWorkspaceBinData::QwtWorkspaceBinData(
     const Mantid::API::MatrixWorkspace &workspace, int binIndex,
-    const bool logScale)
-    : m_binIndex(binIndex), m_X(), m_Y(), m_E(), m_xTitle(), m_yTitle(),
-      m_logScale(logScale), m_isWaterfall(false), m_offsetX(0), m_offsetY(0) {
+    const bool logScaleY)
+    : MantidQwtMatrixWorkspaceData(logScaleY), m_binIndex(binIndex), m_X(),
+      m_Y(), m_E(), m_xTitle(), m_yTitle() {
   init(workspace);
 }
 
@@ -26,7 +26,7 @@ QwtWorkspaceBinData *QwtWorkspaceBinData::copy() const {
  */
 QwtWorkspaceBinData *QwtWorkspaceBinData::copyWithNewSource(
     const Mantid::API::MatrixWorkspace &workspace) const {
-  return new QwtWorkspaceBinData(workspace, m_binIndex, m_logScale);
+  return new QwtWorkspaceBinData(workspace, m_binIndex, logScaleY());
 }
 
 /** Size of the data set
@@ -38,62 +38,20 @@ Return the x value of data point i
 @param i :: Index
 @return x X value of data point i
 */
-double QwtWorkspaceBinData::x(size_t i) const {
-  double val = m_isWaterfall ? m_X[i] + m_offsetX : m_X[i];
-  return val;
-}
+double QwtWorkspaceBinData::getX(size_t i) const { return m_X[i]; }
 
 /**
 Return the y value of data point i
 @param i :: Index
 @return y Y value of data point i
 */
-double QwtWorkspaceBinData::y(size_t i) const {
-  Mantid::signal_t val = m_Y[i];
-  if (m_logScale && val <= 0.)
-    return m_isWaterfall ? m_minPositive + m_offsetY : m_minPositive;
-  else
-    return m_isWaterfall ? val + m_offsetY : val;
-}
+double QwtWorkspaceBinData::getY(size_t i) const { return m_Y[i]; }
 
-double QwtWorkspaceBinData::ex(size_t i) const {
-  double err = m_isWaterfall ? m_X[i] + m_offsetX : m_X[i];
-  return err;
-}
+double QwtWorkspaceBinData::getEX(size_t i) const { return m_X[i]; }
 
-double QwtWorkspaceBinData::e(size_t i) const {
-  if (m_logScale) {
-    if (m_Y[i] <= 0.0)
-      return 0;
-    else
-      return m_E[i];
-  } else
-    return m_E[i];
-}
+double QwtWorkspaceBinData::getE(size_t i) const { return m_E[i]; }
 
-size_t QwtWorkspaceBinData::esize() const { return this->size(); }
-
-/**
- * Depending upon whether the log options have been set.
- * @return the lowest y value.
- */
-double QwtWorkspaceBinData::getYMin() const {
-  if (m_logScale)
-    return m_isWaterfall ? m_minPositive + m_offsetY : m_minPositive;
-  else
-    return m_isWaterfall ? m_minY + m_offsetY : m_minY;
-}
-
-/**
- * Depending upon whether the log options have been set.
- * @return the highest y value.
- */
-double QwtWorkspaceBinData::getYMax() const {
-  if (m_logScale && m_maxY <= 0)
-    return m_isWaterfall ? m_minPositive + m_offsetY : m_minPositive;
-  else
-    return m_isWaterfall ? m_maxY + m_offsetY : m_maxY;
-}
+// size_t QwtWorkspaceBinData::esize() const { return this->size(); }
 
 /**
  * @return A string containin the text to use as an X axis label
@@ -105,19 +63,6 @@ QString QwtWorkspaceBinData::getXAxisLabel() const { return m_xTitle; }
  */
 QString QwtWorkspaceBinData::getYAxisLabel() const { return m_yTitle; }
 
-void QwtWorkspaceBinData::setLogScale(bool on) { m_logScale = on; }
-
-void QwtWorkspaceBinData::saveLowestPositiveValue(const double v) {
-  if (v > 0)
-    m_minPositive = v;
-}
-
-void QwtWorkspaceBinData::setXOffset(const double x) { m_offsetX = x; }
-
-void QwtWorkspaceBinData::setYOffset(const double y) { m_offsetY = y; }
-
-void QwtWorkspaceBinData::setWaterfallPlot(bool on) { m_isWaterfall = on; }
-
 /**
  * @param rhs A source object whose state is copied here
  * @return A reference to this object
@@ -125,17 +70,13 @@ void QwtWorkspaceBinData::setWaterfallPlot(bool on) { m_isWaterfall = on; }
 QwtWorkspaceBinData &QwtWorkspaceBinData::
 operator=(const QwtWorkspaceBinData &rhs) {
   if (this != &rhs) {
+    static_cast<MantidQwtMatrixWorkspaceData &>(*this) = rhs;
     m_binIndex = rhs.m_binIndex;
     m_X = rhs.m_X;
     m_Y = rhs.m_Y;
     m_E = rhs.m_E;
     m_xTitle = rhs.m_xTitle;
     m_yTitle = rhs.m_yTitle;
-    m_logScale = rhs.m_logScale;
-    m_minPositive = rhs.m_minPositive;
-    m_offsetX = rhs.m_offsetX;
-    m_offsetY = rhs.m_offsetY;
-    m_isWaterfall = rhs.m_isWaterfall;
   }
   return *this;
 }
@@ -179,5 +120,5 @@ void QwtWorkspaceBinData::init(const Mantid::API::MatrixWorkspace &workspace) {
   m_yTitle = MantidQt::API::PlotAxis(false, workspace).title();
 
   // Calculate the min and max values
-  calculateYMinAndMax(m_Y, m_minY, m_maxY, m_minPositive);
+  calculateYMinAndMax();
 }

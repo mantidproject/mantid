@@ -61,9 +61,11 @@ Levenberg-Marquardt,
 which is a strictly downhill mimimizer. Mantid has a plug-in mechanism for added
 minimizers and hence the number of minimizers which Mantid supports is not static.
 For example recently a minimizer called FABADA was added which 
-is aimed at fitting for Bayesian data analysis. New fitting minimizers can be added 
-through the plug-in mechanism or as is demonstrated in the section entitled
-'Global fitting' can be scripted from minimizers that already exist. 
+is aimed at fitting for Bayesian data analysis. The minimizers supported in Mantid
+perform differently in terms of accuracy and run time requirements. For a
+comparison of different minimizers see :ref:`<FittingMinimizers`>. New fitting
+minimizers can be added through the plug-in mechanism or as is demonstrated in the
+section entitled 'Global fitting' can be scripted from minimizers that already exist.
 
 Fitting in Mantid is more than just selecting a cost functions and minimizer. 
 The Mantid fitting framework it is a pluggable framework that at a top level 

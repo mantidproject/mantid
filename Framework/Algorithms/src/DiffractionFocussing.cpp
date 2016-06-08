@@ -153,7 +153,7 @@ void DiffractionFocussing::exec() {
 
   progress(1.);
 
-  outputW->isDistribution(dist);
+  outputW->setDistribution(dist);
 
   // Assign it to the output workspace property
   setProperty("OutputWorkspace", outputW);
@@ -219,14 +219,12 @@ void DiffractionFocussing::calculateRebinParams(
   int64_t length = workspace->getNumberHistograms();
   for (int64_t i = 0; i < length; i++) {
     const MantidVec &xVec = workspace->readX(i);
-    const double &localMin = xVec[0];
-    const double &localMax = xVec[xVec.size() - 1];
+    const double &localMin = xVec.front();
+    const double &localMax = xVec.back();
     if (localMin != std::numeric_limits<double>::infinity() &&
         localMax != std::numeric_limits<double>::infinity()) {
-      if (localMin < min)
-        min = localMin;
-      if (localMax > max)
-        max = localMax;
+      min = std::min(min, localMin);
+      max = std::max(max, localMax);
     }
   }
 

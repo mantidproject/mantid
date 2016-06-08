@@ -288,8 +288,8 @@ void LoadMask::bankToDetectors(std::vector<std::string> singlebanks,
 
     // a) get information
     size_t numdets = idetectors.size();
-    detid_t detid_first = idetectors[0]->getID();
-    detid_t detid_last = idetectors[idetectors.size() - 1]->getID();
+    detid_t detid_first = idetectors.front()->getID();
+    detid_t detid_last = idetectors.back()->getID();
 
     // b) set detectors
     if (detid_first + int32_t(numdets) == detid_last + 1 && false) {

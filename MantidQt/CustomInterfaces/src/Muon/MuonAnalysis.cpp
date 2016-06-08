@@ -667,8 +667,7 @@ void MuonAnalysis::runSaveGroupButton() {
   QString prevPath =
       prevValues.value("dir", QString::fromStdString(
                                   ConfigService::Instance().getString(
-                                      "defaultsave.directory")))
-          .toString();
+                                      "defaultsave.directory"))).toString();
 
   QString filter;
   filter.append("Files (*.xml *.XML)");
@@ -707,8 +706,7 @@ void MuonAnalysis::runLoadGroupButton() {
   QString prevPath =
       prevValues.value("dir", QString::fromStdString(
                                   ConfigService::Instance().getString(
-                                      "defaultload.directory")))
-          .toString();
+                                      "defaultload.directory"))).toString();
 
   QString filter;
   filter.append("Files (*.xml *.XML)");
@@ -1202,7 +1200,9 @@ MuonAnalysis::load(const QStringList &files) const {
 
     if (f == files.constBegin()) {
       // These are only needed for the first file
-      load->setPropertyValue("DeadTimeTable", "__NotUsed");
+      if (m_uiForm.deadTimeType->currentText() == "From Data File") {
+        load->setPropertyValue("DeadTimeTable", "__NotUsed");
+      }
       load->setPropertyValue("DetectorGroupingTable", "__NotUsed");
     }
 
@@ -1215,10 +1215,18 @@ MuonAnalysis::load(const QStringList &files) const {
 
       // Check that is a valid Muon instrument
       if (m_uiForm.instrSelector->findText(QString::fromStdString(instrName)) ==
-          -1)
-        throw std::runtime_error("Instrument is not recognized: " + instrName);
+          -1) {
+        if (0 !=
+            instrName.compare(
+                "DEVA")) { // special case - no IDF but let it load anyway
+          throw std::runtime_error("Instrument is not recognized: " +
+                                   instrName);
+        }
+      }
 
-      result->loadedDeadTimes = load->getProperty("DeadTimeTable");
+      if (m_uiForm.deadTimeType->currentText() == "From Data File") {
+        result->loadedDeadTimes = load->getProperty("DeadTimeTable");
+      }
       result->loadedGrouping = load->getProperty("DetectorGroupingTable");
       result->mainFieldDirection =
           static_cast<std::string>(load->getProperty("MainFieldDirection"));
@@ -1274,30 +1282,21 @@ MuonAnalysis::getGrouping(boost::shared_ptr<LoadResult> loadResult) const {
   auto result = boost::make_shared<GroupResult>();
 
   boost::shared_ptr<Mantid::API::Grouping> groupingToUse;
-
   Instrument_const_sptr instr =
       firstPeriod(loadResult->loadedWorkspace)->getInstrument();
 
-  // Check whether the instrument was changed
-  int instrIndex = m_uiForm.instrSelector->findText(
-      QString::fromStdString(instr->getName()));
-  bool instrChanged = m_uiForm.instrSelector->currentIndex() != instrIndex;
-
-  // Check whether the number of spectra was changed
-  bool noSpectraChanged(true);
-
+  Workspace_sptr currentWS;
   if (AnalysisDataService::Instance().doesExist(m_workspace_name)) {
-    auto currentWs =
+    currentWS =
         AnalysisDataService::Instance().retrieveWS<Workspace>(m_workspace_name);
-    size_t currentNoSpectra = firstPeriod(currentWs)->getNumberHistograms();
-
-    size_t loadedNoSpectra =
-        firstPeriod(loadResult->loadedWorkspace)->getNumberHistograms();
-
-    noSpectraChanged = (currentNoSpectra != loadedNoSpectra);
+  } else {
+    currentWS = nullptr;
   }
 
-  if (!noSpectraChanged && !instrChanged && isGroupingSet()) {
+  const bool reloadNecessary =
+      isReloadGroupingNecessary(currentWS, loadResult->loadedWorkspace);
+
+  if (!reloadNecessary && isGroupingSet()) {
     // Use grouping currently set
     result->usedExistGrouping = true;
     groupingToUse = boost::make_shared<Mantid::API::Grouping>(
@@ -2330,7 +2329,7 @@ void MuonAnalysis::setAppendingRun(int inc) {
   // Increment is positive (next button)
   if (inc < 0) {
     // Add the file to the beginning of mwRunFiles text box.
-    QString lastName = m_previousFilenames[m_previousFilenames.size() - 1];
+    QString lastName = m_previousFilenames.back();
     separateMuonFile(filePath, lastName, run, runSize);
     getFullCode(runSize, run);
     m_uiForm.mwRunFiles->setUserInput(newRun + '-' + run);
@@ -3170,7 +3169,7 @@ void MuonAnalysis::fillGroupingTable(const Grouping &grouping) {
  */
 std::string MuonAnalysis::getSummedPeriods() const {
   auto summed = m_uiForm.homePeriodBox1->text().toStdString();
-  summed.erase(std::remove(summed.begin(), summed.end(), ' '));
+  summed.erase(std::remove(summed.begin(), summed.end(), ' '), summed.end());
   return summed;
 }
 
@@ -3180,7 +3179,8 @@ std::string MuonAnalysis::getSummedPeriods() const {
  */
 std::string MuonAnalysis::getSubtractedPeriods() const {
   auto subtracted = m_uiForm.homePeriodBox2->text().toStdString();
-  subtracted.erase(std::remove(subtracted.begin(), subtracted.end(), ' '));
+  subtracted.erase(std::remove(subtracted.begin(), subtracted.end(), ' '),
+                   subtracted.end());
   return subtracted;
 }
 

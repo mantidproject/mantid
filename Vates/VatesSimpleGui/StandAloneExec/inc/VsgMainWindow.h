@@ -3,12 +3,9 @@
 
 #include <QMainWindow>
 
-namespace Mantid
-{
-namespace Vates
-{
-namespace SimpleGui
-{
+namespace Mantid {
+namespace Vates {
+namespace SimpleGui {
 class MdViewerWidget;
 }
 }
@@ -23,7 +20,8 @@ class QMenu;
   @author Michael Reuter
   @date 24/05/2011
 
-  Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+  Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+ National Laboratory & European Spallation Source
 
   This file is part of Mantid.
 
@@ -43,8 +41,7 @@ class QMenu;
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class VsgMainWindow : public QMainWindow
-{
+class VsgMainWindow : public QMainWindow {
   Q_OBJECT
 
 public:
@@ -64,7 +61,7 @@ private:
 
   QAction *openAction; ///< Action for opening files
   QAction *exitAction; ///< Action for exiting the program
-  QMenu *fileMenu; ///< File actions menu
+  QMenu *fileMenu;     ///< File actions menu
   Mantid::Vates::SimpleGui::MdViewerWidget *mdViewer; ///< The VATES viz widget
 };
 

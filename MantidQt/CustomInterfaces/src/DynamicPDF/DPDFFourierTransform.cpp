@@ -1,9 +1,9 @@
-//Mantid Coding standars <http://www.mantidproject.org/Coding_Standards>
-//Mantid Headers from the same project
+// Mantid Coding standars <http://www.mantidproject.org/Coding_Standards>
+// Mantid Headers from the same project
 #include "MantidQtCustomInterfaces/DynamicPDF/DPDFFourierTransform.h"
 #include "MantidQtCustomInterfaces/DynamicPDF/DPDFInputDataControl.h"
 #include "MantidQtCustomInterfaces/DynamicPDF/DPDFFitControl.h"
-//Mantid headers from other projects
+// Mantid headers from other projects
 #include "MantidKernel/Logger.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceFactory.h"
@@ -12,13 +12,13 @@
 #include "MantidQtMantidWidgets/RangeSelector.h"
 #include "qttreepropertybrowser.h"
 #include "qtpropertymanager.h"
-//3rd party library headers
+// 3rd party library headers
 #include <QMessageBox>
-//System headers
-#include<iostream>
+// System headers
+#include <iostream>
 
 namespace {
-  Mantid::Kernel::Logger g_log("DynamicPDF");
+Mantid::Kernel::Logger g_log("DynamicPDF");
 }
 
 namespace MantidQt {
@@ -32,29 +32,22 @@ namespace DynamicPDF {
 /**
  * @brief Constructor
  */
-FourierTransform::FourierTransform(QWidget *parent):
-  QWidget(parent),
-  m_inputDataControl{nullptr},
-  m_propertyTree(new QtTreePropertyBrowser()),
-  m_properties(),
-  m_decimals(6),
-  m_residualsName{"DPDFResiduals"},
-  m_fourierName{"DPDFFourierTransform"},
-  m_colors(),
-  m_doubleManager(new QtDoublePropertyManager(this)),
-  m_boolManager(new QtBoolPropertyManager(this)),
-  m_enumManager(new QtEnumPropertyManager(this)),
-  m_groupManager(new QtGroupPropertyManager(this)),
-  m_algorithmRunner() {
+FourierTransform::FourierTransform(QWidget *parent)
+    : QWidget(parent), m_inputDataControl{nullptr},
+      m_propertyTree(new QtTreePropertyBrowser()), m_properties(),
+      m_decimals(6), m_residualsName{"DPDFResiduals"},
+      m_fourierName{"DPDFFourierTransform"}, m_colors(),
+      m_doubleManager(new QtDoublePropertyManager(this)),
+      m_boolManager(new QtBoolPropertyManager(this)),
+      m_enumManager(new QtEnumPropertyManager(this)),
+      m_groupManager(new QtGroupPropertyManager(this)), m_algorithmRunner() {
   this->initLayout();
 }
 
 /**
  * @brief Destructor
  */
-FourierTransform::~FourierTransform() {
-  delete m_propertyTree;
-}
+FourierTransform::~FourierTransform() { delete m_propertyTree; }
 
 /*                *********************
  *                **  Private Slots  **
@@ -63,26 +56,24 @@ FourierTransform::~FourierTransform() {
 /**
  * @brief reset actions after user selects a new slice for fitting
 */
-void FourierTransform::resetAfterSliceSelected(){
+void FourierTransform::resetAfterSliceSelected() {
   // clear previewplot
   m_uiForm.previewPlotFourier->clear();
   // remove residuals and fourier workspaces
-  if(Mantid::API::AnalysisDataService::Instance()
-     .doesExist(m_residualsName)) {
+  if (Mantid::API::AnalysisDataService::Instance().doesExist(m_residualsName)) {
     Mantid::API::AnalysisDataService::Instance().remove(m_residualsName);
   }
-  if(Mantid::API::AnalysisDataService::Instance()
-     .doesExist(m_fourierName)) {
+  if (Mantid::API::AnalysisDataService::Instance().doesExist(m_fourierName)) {
     Mantid::API::AnalysisDataService::Instance().remove(m_fourierName);
   }
   // update [Qmin, Qmax] range but do not emit any signal
-  disconnect(m_doubleManager, SIGNAL(propertyChanged(QtProperty *)),
-    this, SLOT(transformAfterPropertyChanged(QtProperty *)));
+  disconnect(m_doubleManager, SIGNAL(propertyChanged(QtProperty *)), this,
+             SLOT(transformAfterPropertyChanged(QtProperty *)));
   auto range = m_inputDataControl->getCurrentRange();
   m_doubleManager->setValue(m_properties["Qmin"], range.first);
   m_doubleManager->setValue(m_properties["Qmax"], range.second);
-  connect(m_doubleManager, SIGNAL(propertyChanged(QtProperty *)),
-    this, SLOT(transformAfterPropertyChanged(QtProperty *)));
+  connect(m_doubleManager, SIGNAL(propertyChanged(QtProperty *)), this,
+          SLOT(transformAfterPropertyChanged(QtProperty *)));
 }
 
 /**
@@ -92,28 +83,35 @@ void FourierTransform::resetAfterSliceSelected(){
  *  data, model evaluation, and residuals
 */
 void FourierTransform::extractResidualsHistogram(
-  const QString &modelWorkspaceName){
+    const QString &modelWorkspaceName) {
   try {
 
     auto modelWorkspace = Mantid::API::AnalysisDataService::Instance()
-      .retrieveWS<Mantid::API::MatrixWorkspace>(modelWorkspaceName.toStdString());
-    if(!modelWorkspace) { std::cout << "Empty modelWorkspace\n";}
+                              .retrieveWS<Mantid::API::MatrixWorkspace>(
+                                  modelWorkspaceName.toStdString());
+    if (!modelWorkspace) {
+      std::cout << "Empty modelWorkspace\n";
+    }
     // use modelWorkspace as template for the residuals workspace
-    auto residualsWorkspace = Mantid::API::WorkspaceFactory::Instance().create(modelWorkspace, 1);
+    auto residualsWorkspace =
+        Mantid::API::WorkspaceFactory::Instance().create(modelWorkspace, 1);
     residualsWorkspace->dataX(0) = modelWorkspace->dataX(0);
-    residualsWorkspace->dataY(0) = modelWorkspace->dataY(2); // residuals is the third spectrum
-    residualsWorkspace->dataE(0) = modelWorkspace->dataE(0); // errors are coming from experiment
-    Mantid::API::AnalysisDataService::Instance().addOrReplace(m_residualsName, residualsWorkspace);
-  }
-  catch(std::exception& e) {
+    residualsWorkspace->dataY(0) =
+        modelWorkspace->dataY(2); // residuals is the third spectrum
+    residualsWorkspace->dataE(0) =
+        modelWorkspace->dataE(0); // errors are coming from experiment
+    Mantid::API::AnalysisDataService::Instance().addOrReplace(
+        m_residualsName, residualsWorkspace);
+  } catch (std::exception &e) {
     QString mess(e.what());
     const int maxSize = 500;
-     if ( mess.size() > maxSize )  {
-      mess = mess.mid(0,maxSize);
+    if (mess.size() > maxSize) {
+      mess = mess.mid(0, maxSize);
       mess += "...";
     }
-    QMessageBox::critical( this, "DynamicPDF - Error",
-      QString("extractModelHistogram failed:\n\n  %1").arg(mess) );
+    QMessageBox::critical(
+        this, "DynamicPDF - Error",
+        QString("extractModelHistogram failed:\n\n  %1").arg(mess));
   }
   emit signalExtractResidualsHistogramFinished();
 }
@@ -124,13 +122,13 @@ void FourierTransform::extractResidualsHistogram(
 */
 void FourierTransform::transform() {
   try {
-    if(!Mantid::API::AnalysisDataService::Instance()
-       .doesExist(m_residualsName)) {
+    if (!Mantid::API::AnalysisDataService::Instance().doesExist(
+            m_residualsName)) {
       throw std::runtime_error("No residuals found from any model evaluation");
     }
     // set up the PDFFourierTransform algorithm
-    auto fourier = Mantid::API::AlgorithmManager::Instance().
-      create("PDFFourierTransform");
+    auto fourier =
+        Mantid::API::AlgorithmManager::Instance().create("PDFFourierTransform");
     fourier->initialize();
     fourier->setPropertyValue("InputWorkspace", m_residualsName);
     fourier->setPropertyValue("OutputWorkspace", m_fourierName);
@@ -154,28 +152,28 @@ void FourierTransform::transform() {
     fourier->setProperty("rho0", rho0);
     // Asynchronous execution of the algorithm, so that we can keep on
     // working with the interface
-    m_algorithmRunner.reset( new API::AlgorithmRunner() );
-    connect( m_algorithmRunner.get(),SIGNAL(algorithmComplete(bool)),
-      this, SLOT(finishTransform(bool)), Qt::QueuedConnection );
+    m_algorithmRunner.reset(new API::AlgorithmRunner());
+    connect(m_algorithmRunner.get(), SIGNAL(algorithmComplete(bool)), this,
+            SLOT(finishTransform(bool)), Qt::QueuedConnection);
     m_algorithmRunner->startAlgorithm(fourier);
-  }
-  catch(std::exception& e) {
+  } catch (std::exception &e) {
     QString mess(e.what());
     const int maxSize = 500;
-    if ( mess.size() > maxSize ) {
-      mess = mess.mid(0,maxSize);
+    if (mess.size() > maxSize) {
+      mess = mess.mid(0, maxSize);
       mess += "...";
     }
-    QMessageBox::critical( this, "DynamicPDF - Error",
-      QString("FourierTransform::transform failed:\n\n  %1").arg(mess) );
+    QMessageBox::critical(
+        this, "DynamicPDF - Error",
+        QString("FourierTransform::transform failed:\n\n  %1").arg(mess));
   }
 }
 
 /**
  * @brief Just signal that the residuals extraction finished
  */
-  void FourierTransform::finishTransform(bool error) {
-  if(error) {
+void FourierTransform::finishTransform(bool error) {
+  if (error) {
     return;
   }
   this->updatePlot();
@@ -228,14 +226,16 @@ void FourierTransform::createPropertyTree() {
 
   // properties for "Reciprocal Space" group of algorithm PDFFourierTransform
   m_properties["Reciprocal Space"] =
-    m_groupManager->addProperty("Reciprocal Space");
+      m_groupManager->addProperty("Reciprocal Space");
   // insert type of structure factor
   QStringList sOfQTypes;
-  sOfQTypes << "S(Q)-1" << "S(Q)" << "Q[S(Q)-1]";
+  sOfQTypes << "S(Q)-1"
+            << "S(Q)"
+            << "Q[S(Q)-1]";
   m_properties["InputSofQType"] = m_enumManager->addProperty("InputSofQType");
   m_enumManager->setEnumNames(m_properties["InputSofQType"], sOfQTypes);
-  m_properties["Reciprocal Space"]->
-    addSubProperty(m_properties["InputSofQType"]);
+  m_properties["Reciprocal Space"]->addSubProperty(
+      m_properties["InputSofQType"]);
   // insert Qmin property
   m_properties["Qmin"] = m_doubleManager->addProperty("Qmin");
   m_doubleManager->setDecimals(m_properties["Qmin"], m_decimals);
@@ -251,15 +251,15 @@ void FourierTransform::createPropertyTree() {
   m_properties["Reciprocal Space"]->addSubProperty(m_properties["Filter"]);
 
   // properties for "Real Space" group of algorithm PDFFourierTransform
-  m_properties["Real Space"] =
-    m_groupManager->addProperty("Real Space");
+  m_properties["Real Space"] = m_groupManager->addProperty("Real Space");
   // insert type of PDF
   QStringList pdfTypes;
-  pdfTypes << "G(r)" << "g(r)" << "RDF(r)";
+  pdfTypes << "G(r)"
+           << "g(r)"
+           << "RDF(r)";
   m_properties["PDFType"] = m_enumManager->addProperty("PDFType");
   m_enumManager->setEnumNames(m_properties["PDFType"], pdfTypes);
-  m_properties["Real Space"]->
-    addSubProperty(m_properties["PDFType"]);
+  m_properties["Real Space"]->addSubProperty(m_properties["PDFType"]);
   // insert DeltaR property
   m_properties["DeltaR"] = m_doubleManager->addProperty("DeltaR");
   m_doubleManager->setDecimals(m_properties["DeltaR"], m_decimals);
@@ -287,7 +287,7 @@ void FourierTransform::createPropertyTree() {
 
   // insert the widget tree in the UI form
   m_uiForm.verticalLayoutProperties->addWidget(m_propertyTree);
-  m_uiForm.verticalLayoutProperties->setContentsMargins(0,0,0,0);
+  m_uiForm.verticalLayoutProperties->setContentsMargins(0, 0, 0, 0);
 }
 
 /*
@@ -297,27 +297,26 @@ void FourierTransform::createPropertyTree() {
  * algorithm PDFFourierTransform
  */
 void FourierTransform::setConnections() {
-  connect(m_inputDataControl, SIGNAL(signalSliceForFittingUpdated()),
-    this, SLOT(resetAfterSliceSelected()));
+  connect(m_inputDataControl, SIGNAL(signalSliceForFittingUpdated()), this,
+          SLOT(resetAfterSliceSelected()));
   connect(m_fitControl, SIGNAL(signalModelEvaluationFinished(const QString &)),
-    this, SLOT(extractResidualsHistogram(const QString &)));
-  connect(this, SIGNAL(signalExtractResidualsHistogramFinished()),
-    this, SLOT(transform()));
-  connect(m_doubleManager, SIGNAL(propertyChanged(QtProperty *)),
-    this, SLOT(transformAfterPropertyChanged(QtProperty *)));
- }
+          this, SLOT(extractResidualsHistogram(const QString &)));
+  connect(this, SIGNAL(signalExtractResidualsHistogramFinished()), this,
+          SLOT(transform()));
+  connect(m_doubleManager, SIGNAL(propertyChanged(QtProperty *)), this,
+          SLOT(transformAfterPropertyChanged(QtProperty *)));
+}
 
 /*
  * @brief Insert a dashed line at Y=0 and show legends
  */
 void FourierTransform::setupPlotDisplay() {
   m_uiForm.previewPlotFourier->showLegend(true);
-  if(m_uiForm.previewPlotFourier->hasRangeSelector(QString("zeroLine"))){
+  if (m_uiForm.previewPlotFourier->hasRangeSelector(QString("zeroLine"))) {
     return; // do nothing
   }
-  auto zeroLine = m_uiForm.previewPlotFourier->
-    addRangeSelector(QString("zeroLine"),
-    MantidQt::MantidWidgets::RangeSelector::YSINGLE);
+  auto zeroLine = m_uiForm.previewPlotFourier->addRangeSelector(
+      QString("zeroLine"), MantidQt::MantidWidgets::RangeSelector::YSINGLE);
   zeroLine->setColour(QColor(Qt::darkGreen));
   zeroLine->setMinimum(0.0);
 }
@@ -357,12 +356,11 @@ void FourierTransform::updatePlot() {
   auto i = m_enumManager->value(m_properties["PDFType"]);
   auto name = names[i];
   if (plotter->hasCurve(name)) {
-      plotter->removeSpectrum(name);
+    plotter->removeSpectrum(name);
   }
-  plotter->addSpectrum(name,
-    QString::fromStdString(m_fourierName), 0, m_colors[name]);
+  plotter->addSpectrum(name, QString::fromStdString(m_fourierName), 0,
+                       m_colors[name]);
 }
-
 }
 }
 }

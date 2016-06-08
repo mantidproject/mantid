@@ -30,49 +30,31 @@ public:
 
   //! @return Size of the data set
   size_t size() const override;
-
-  /**
-  Return the x value of data point i
-  @param i :: Index
-  @return x X value of data point i
-  */
-  double x(size_t i) const override;
-  /**
-  Return the y value of data point i
-  @param i :: Index
-  @return y Y value of data point i
-  */
-  double y(size_t i) const override;
-
-  /// Returns the error of the i-th data point
-  double e(size_t i) const override;
-  /// Returns the x position of the error bar for the i-th data point (bin)
-  double ex(size_t i) const override;
-  /// Number of error bars to plot
-  size_t esize() const override;
-
-  double getYMin() const override;
-  double getYMax() const override;
   /// Return the label to use for the X axis
   QString getXAxisLabel() const override;
   /// Return the label to use for the Y axis
   QString getYAxisLabel() const override;
 
-  /// Inform the data that it is to be plotted on a log y scale
-  void setLogScale(bool on) override;
-  bool logScale() const override { return m_logScale; }
-  void saveLowestPositiveValue(const double v) override;
-
-  // Set offsets for and enables waterfall plots
-  void setXOffset(const double x) override;
-  void setYOffset(const double y) override;
-  void setWaterfallPlot(bool on) override;
-
 protected:
-  // Assignment operator (virtualized). MSVC not happy with compiler generated
-  // one
-  QwtWorkspaceBinData &
-  operator=(const QwtWorkspaceBinData &); // required by QwtData base class
+  // Assignment operator.
+  QwtWorkspaceBinData &operator=(const QwtWorkspaceBinData &);
+  /**
+  Return the x value of data point i
+  @param i :: Index
+  @return x X value of data point i
+  */
+  double getX(size_t i) const override;
+  /**
+  Return the y value of data point i
+  @param i :: Index
+  @return y Y value of data point i
+  */
+  double getY(size_t i) const override;
+
+  /// Returns the error of the i-th data point
+  double getE(size_t i) const override;
+  /// Returns the x position of the error bar for the i-th data point (bin)
+  double getEX(size_t i) const override;
 
 private:
   /// Initialize the object
@@ -91,26 +73,5 @@ private:
   QString m_xTitle;
   /// A title for the Y axis
   QString m_yTitle;
-
-  /// Indicates that the data is plotted on a log y scale
-  bool m_logScale;
-
-  /// lowest y value
-  double m_minY;
-
-  /// lowest positive y value
-  double m_minPositive;
-
-  /// highest y value
-  double m_maxY;
-
-  /// Indicates whether or not waterfall plots are enabled
-  bool m_isWaterfall;
-
-  /// x-axis offset for waterfall plots
-  double m_offsetX;
-
-  /// y-axis offset for waterfall plots
-  double m_offsetY;
 };
 #endif

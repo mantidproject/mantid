@@ -64,6 +64,9 @@ namespace {
 Kernel::Logger g_log("ScriptRepositoryImpl");
 }
 
+/// Default timeout
+int DEFAULT_TIMEOUT_SEC = 30;
+
 const char *timeformat = "%Y-%b-%d %H:%M:%S";
 
 const char *emptyURL =
@@ -188,14 +191,14 @@ ScriptRepositoryImpl::ScriptRepositoryImpl(const std::string &local_rep,
     throw ScriptRepoException(emptyURL, "Constructor Failed: remote_url.empty");
   }
 
-  if (remote_url[remote_url.size() - 1] != '/')
+  if (remote_url.back() != '/')
     remote_url.append("/");
 
   // if no folder is given, the repository is invalid.
   if (local_repository.empty())
     return;
 
-  if (local_repository[local_repository.size() - 1] != '/')
+  if (local_repository.back() != '/')
     local_repository.append("/");
 
   g_log.debug() << "ScriptRepository creation pointing to " << local_repository
@@ -259,7 +262,7 @@ ScriptRepositoryImpl::ScriptRepositoryImpl(const std::string &local_rep,
   // this is necessary because in windows, the absolute path is given
   // with \ slash.
   boost::replace_all(local_repository, "\\", "/");
-  if (local_repository[local_repository.size() - 1] != '/')
+  if (local_repository.back() != '/')
     local_repository.append("/");
 
   repo.clear();
@@ -351,7 +354,7 @@ void ScriptRepositoryImpl::install(const std::string &path) {
   // this is necessary because in windows, the absolute path is given
   // with \ slash.
   boost::replace_all(local_repository, "\\", "/");
-  if (local_repository[local_repository.size() - 1] != '/')
+  if (local_repository.back() != '/')
     local_repository.append("/");
 
   valid = true;
@@ -834,7 +837,7 @@ void ScriptRepositoryImpl::upload(const std::string &file_path,
     size_t pos = relative_path.rfind('/');
     if (pos != std::string::npos)
       folder += std::string(relative_path.begin(), relative_path.begin() + pos);
-    if (folder[folder.size() - 1] != '/')
+    if (folder.back() != '/')
       folder += "/";
     g_log.information() << "Uploading to folder: " << folder << std::endl;
     form.add("path", folder);
@@ -1394,7 +1397,7 @@ void ScriptRepositoryImpl::doDownloadFile(const std::string &url_file,
     int timeout;
     if (!ConfigService::Instance().getValue("network.scriptrepo.timeout",
                                             timeout)) {
-      timeout = 5; // the default value if the key is not found
+      timeout = DEFAULT_TIMEOUT_SEC;
     }
     inetHelper.setTimeout(timeout);
 

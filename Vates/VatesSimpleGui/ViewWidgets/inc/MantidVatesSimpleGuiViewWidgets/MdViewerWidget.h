@@ -153,24 +153,24 @@ private:
   SaveScreenshotReaction *screenShot;  ///< Holder for the screen shot reaction
   Ui::MdViewerWidgetClass ui;          ///< The MD viewer's UI form
   QHBoxLayout *viewLayout;             ///< Layout manager for the view widget
-  pqApplicationSettingsReaction
-      *viewSettings; ///< Holder for the view settings reaction
+  pqApplicationSettingsReaction *
+      viewSettings; ///< Holder for the view settings reaction
   bool useCurrentColorSettings;
   ModeControlWidget::Views initialView; ///< Holds the initial view
   MantidQt::API::MdSettings
       mdSettings; ///<Holds the MD settings which are used to persist data
   MantidQt::API::MdConstants mdConstants; /// < Holds the MD constants
   RebinAlgorithmDialogProvider m_rebinAlgorithmDialogProvider; ///<Provides
-                                                               ///dialogs to
-                                                               ///execute rebin
-                                                               ///algorithms
+  /// dialogs to
+  /// execute rebin
+  /// algorithms
   RebinnedSourcesManager
       m_rebinnedSourcesManager;          ///<Holds the rebinned sources manager
   QString m_rebinnedWorkspaceIdentifier; ///< Holds the identifier for temporary
-                                         ///workspaces
-  ColorMapEditorPanel
-      *m_colorMapEditorPanel; ///< Holder for the color map editor panel.
-  bool m_gridAxesStartUpOn;   /// flag for the initial grid axes setting
+  /// workspaces
+  ColorMapEditorPanel *
+      m_colorMapEditorPanel; ///< Holder for the color map editor panel.
+  bool m_gridAxesStartUpOn;  /// flag for the initial grid axes setting
   Mantid::VATES::ColorScaleLock
       m_colorScaleLock; ///< Holds a color scale lock object
 

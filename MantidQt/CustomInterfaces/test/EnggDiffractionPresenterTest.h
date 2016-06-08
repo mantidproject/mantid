@@ -129,15 +129,20 @@ public:
     testing::NiceMock<MockEnggDiffractionView> mockView;
     MantidQt::CustomInterfaces::EnggDiffractionPresenter pres(&mockView);
 
-    std::vector<std::string> sv;
-    sv.emplace_back("dummy msg");
-    EXPECT_CALL(mockView, logMsgs()).Times(1).WillOnce(Return(sv));
+    // needs basic calibration settings from the user
+    EnggDiffCalibSettings calibSettings;
+    EXPECT_CALL(mockView, currentCalibSettings())
+        .Times(1)
+        .WillOnce(Return(calibSettings));
+
+    // should set a ready or similar status
+    EXPECT_CALL(mockView, showStatus(testing::_)).Times(1);
 
     // No errors/warnings
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
     EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(0);
 
-    pres.notify(IEnggDiffractionPresenter::LogMsg);
+    pres.notify(IEnggDiffractionPresenter::Start);
     TSM_ASSERT(
         "Mock not used as expected. Some EXPECT_CALL conditions were not "
         "satisfied.",
@@ -329,8 +334,7 @@ public:
     // plots peaks and curves
     // the test doesnt get to here as it finishes at EnggCalibrate algo
     EXPECT_CALL(mockView, plotCalibWorkspace()).Times(0);
-    EXPECT_CALL(mockView, plotVanCurvesCalibOutput()).Times(0);
-    EXPECT_CALL(mockView, plotDifcZeroCalibOutput(testing::_)).Times(0);
+    EXPECT_CALL(mockView, plotCalibOutput(testing::_)).Times(0);
 
     // A warning about the vanadium number, and what it should look like
     EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(1);
@@ -366,8 +370,8 @@ public:
     // plots peaks and curves
     // the test doesnt get to here as it finishes at EnggCalibrate algo
     EXPECT_CALL(mockView, plotCalibWorkspace()).Times(0);
-    EXPECT_CALL(mockView, plotVanCurvesCalibOutput()).Times(0);
-    EXPECT_CALL(mockView, plotDifcZeroCalibOutput(testing::_)).Times(0);
+    EXPECT_CALL(mockView, plotCalibOutput(testing::_)).Times(0);
+    EXPECT_CALL(mockView, showStatus(testing::_)).Times(1);
 
     // No errors/warnings
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
@@ -541,8 +545,7 @@ public:
 
     // tests whether the plot functions have been called
     EXPECT_CALL(mockView, plotCalibWorkspace()).Times(0);
-    EXPECT_CALL(mockView, plotVanCurvesCalibOutput()).Times(0);
-    EXPECT_CALL(mockView, plotDifcZeroCalibOutput(testing::_)).Times(0);
+    EXPECT_CALL(mockView, plotCalibOutput(testing::_)).Times(0);
 
     // A warning about the vanadium run number
     EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(1);
@@ -654,6 +657,8 @@ public:
 
     EXPECT_CALL(mockView, currentCalibCustomisedBankName()).Times(0);
 
+    EXPECT_CALL(mockView, showStatus(testing::_)).Times(1);
+
     // No errors/warnings
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
     EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(0);
@@ -688,6 +693,9 @@ public:
     EXPECT_CALL(mockView, currentInstrument()).Times(0);
     EXPECT_CALL(mockView, currentCalibSettings()).Times(0);
 
+    // should not get to the point where the status is updated
+    EXPECT_CALL(mockView, showStatus(testing::_)).Times(0);
+
     // 1 warning pop-up to user, 0 errors
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
     EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(1);
@@ -718,6 +726,9 @@ public:
     EXPECT_CALL(mockView, currentInstrument()).Times(0);
     EXPECT_CALL(mockView, focusedOutWorkspace()).Times(0);
     EXPECT_CALL(mockView, plotFocusedSpectrum(testing::_)).Times(0);
+
+    // should not get to the point where the status is updated
+    EXPECT_CALL(mockView, showStatus(testing::_)).Times(0);
 
     // 1 warning pop-up to user, 0 errors
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
@@ -759,6 +770,9 @@ public:
     // it should not get there
     EXPECT_CALL(mockView, enableCalibrateAndFocusActions(false)).Times(0);
     EXPECT_CALL(mockView, enableCalibrateAndFocusActions(true)).Times(0);
+
+    // should not get to the point where the status is updated
+    EXPECT_CALL(mockView, showStatus(testing::_)).Times(0);
 
     // 0 errors, 1 warning error pop-up to user
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
@@ -810,6 +824,9 @@ public:
     EXPECT_CALL(mockView, focusingTextureRunNo()).Times(0);
     EXPECT_CALL(mockView, focusingCroppedSpectrumNos()).Times(0);
     EXPECT_CALL(mockView, focusingTextureGroupingFile()).Times(0);
+
+    // should not get to the point where the status is updated
+    EXPECT_CALL(mockView, showStatus(testing::_)).Times(0);
 
     // 0 errors/ 0 warnings
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
@@ -879,6 +896,9 @@ public:
     EXPECT_CALL(mockView, focusedOutWorkspace()).Times(0);
     EXPECT_CALL(mockView, plotFocusedSpectrum(testing::_)).Times(0);
 
+    // should not get to the point where the status is updated
+    EXPECT_CALL(mockView, showStatus(testing::_)).Times(0);
+
     // 1 warning pop-up to user, 0 errors
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
     EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(1);
@@ -915,6 +935,9 @@ public:
     // should not get that far that it tries to get these parameters
     EXPECT_CALL(mockView, currentInstrument()).Times(0);
     EXPECT_CALL(mockView, currentCalibSettings()).Times(0);
+
+    // should not get to the point where the status is updated
+    EXPECT_CALL(mockView, showStatus(testing::_)).Times(0);
 
     // 1 warning pop-up to user, 0 errors
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
@@ -953,6 +976,9 @@ public:
     EXPECT_CALL(mockView, currentInstrument()).Times(0);
     EXPECT_CALL(mockView, currentCalibSettings()).Times(0);
 
+    // should not get to the point where the status is updated
+    EXPECT_CALL(mockView, showStatus(testing::_)).Times(0);
+
     // 1 warning pop-up to user, 0 errors
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
     EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(1);
@@ -985,6 +1011,9 @@ public:
 
     EXPECT_CALL(mockView, focusedOutWorkspace()).Times(0);
     EXPECT_CALL(mockView, plotFocusedSpectrum(testing::_)).Times(0);
+
+    // should not get to the point where the status is updated
+    EXPECT_CALL(mockView, showStatus(testing::_)).Times(0);
 
     // 1 warning pop-up to user, 0 errors
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
@@ -1019,6 +1048,9 @@ public:
     EXPECT_CALL(mockView, focusedOutWorkspace()).Times(0);
     EXPECT_CALL(mockView, plotFocusedSpectrum(testing::_)).Times(0);
 
+    // should not get to the point where the status is updated
+    EXPECT_CALL(mockView, showStatus(testing::_)).Times(0);
+
     // 1 warning pop-up to user, 0 errors
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
     EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(1);
@@ -1051,6 +1083,9 @@ public:
 
     EXPECT_CALL(mockView, focusedOutWorkspace()).Times(0);
     EXPECT_CALL(mockView, plotFocusedSpectrum(testing::_)).Times(0);
+
+    // should not get to the point where the status is updated
+    EXPECT_CALL(mockView, showStatus(testing::_)).Times(0);
 
     // 1 warning pop-up to user, 0 errors
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
@@ -1102,6 +1137,9 @@ public:
     EXPECT_CALL(mockView, currentInstrument()).Times(0);
     EXPECT_CALL(mockView, currentCalibSettings()).Times(0);
 
+    // should not get to the point where the status is updated
+    EXPECT_CALL(mockView, showStatus(testing::_)).Times(0);
+
     // Now one error shown as a warning-pop-up cause inputs and options are
     // empty
     EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(1);
@@ -1144,7 +1182,10 @@ public:
         .WillOnce(Return(g_rebinRunNo));
     EXPECT_CALL(mockView, rebinningTimeBin()).Times(1).WillOnce(Return(0));
 
-    // No errors/warnings
+    // should not get to the point where the status is updated
+    EXPECT_CALL(mockView, showStatus(testing::_)).Times(0);
+
+    // An error, no warnings
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
     EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(1);
 
@@ -1167,6 +1208,9 @@ public:
     EXPECT_CALL(mockView, rebinningTimeBin())
         .Times(1)
         .WillRepeatedly(Return(0.100000));
+
+    // doesn't effectively finish the processing
+    EXPECT_CALL(mockView, showStatus(testing::_)).Times(0);
 
     // A warning complaining about the run number / path Because the
     // real QtView uses MWRunFile::getFilenames, if we give a run
@@ -1196,6 +1240,9 @@ public:
     // should not even call this one when the run number is obviously wrong
     EXPECT_CALL(mockView, rebinningTimeBin()).Times(0);
 
+    // should not get to the point where the status is updated
+    EXPECT_CALL(mockView, showStatus(testing::_)).Times(0);
+
     pres.notify(IEnggDiffractionPresenter::RebinMultiperiod);
     TSM_ASSERT(
         "Mock not used as expected. Some EXPECT_CALL conditions were not "
@@ -1215,6 +1262,9 @@ public:
         .Times(1)
         .WillOnce(Return(1));
     EXPECT_CALL(mockView, rebinningPulsesTime()).Times(1).WillOnce(Return(0));
+
+    // should not get to the point where the status is updated
+    EXPECT_CALL(mockView, showStatus(testing::_)).Times(0);
 
     // No errors, warning because of wrong bin
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
@@ -1243,6 +1293,9 @@ public:
     // 1s is big enough
     EXPECT_CALL(mockView, rebinningPulsesTime()).Times(1).WillOnce(Return(1));
 
+    // should not get to the point where the status is updated
+    EXPECT_CALL(mockView, showStatus(testing::_)).Times(0);
+
     // No errors/warnings. There will be an error log from the algorithms
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
     EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(1);
@@ -1260,6 +1313,9 @@ public:
 
     EXPECT_CALL(mockView, getFittingRunNo()).Times(1).WillOnce(Return(""));
     EXPECT_CALL(mockView, fittingPeaksData()).Times(1).WillOnce(Return(""));
+
+    // should not get to the point where the status is updated
+    EXPECT_CALL(mockView, showStatus(testing::_)).Times(0);
 
     // No errors/1 warnings. There will be an error log from the algorithms
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
@@ -1287,6 +1343,9 @@ public:
         .Times(1)
         .WillOnce(Return("2.57,4.88,5.78"));
 
+    // should not get to the point where the status is updated
+    EXPECT_CALL(mockView, showStatus(testing::_)).Times(0);
+
     // No errors/1 warnings. There will be an error log from the algorithms
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
     EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(1);
@@ -1311,6 +1370,9 @@ public:
     EXPECT_CALL(mockView, fittingPeaksData())
         .Times(1)
         .WillOnce(Return(",3.5,7.78,r43d"));
+
+    // should not get to the point where the status is updated
+    EXPECT_CALL(mockView, showStatus(testing::_)).Times(0);
 
     // No errors/1 warnings. There will be an error log from the algorithms
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
@@ -1341,6 +1403,9 @@ public:
         .Times(1)
         .WillOnce(Return(m_ex_run_number));
 
+    // should not get to the point where the status is updated
+    EXPECT_CALL(mockView, showStatus(testing::_)).Times(0);
+
     // No errors/0 warnings. There will be no errors or warnings
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
     EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(1);
@@ -1364,6 +1429,9 @@ public:
     EXPECT_CALL(mockView, splitFittingDirectory(testing::_))
         .Times(1)
         .WillOnce(Return(m_ex_run_number));
+
+    // should not get to the point where the status is updated
+    EXPECT_CALL(mockView, showStatus(testing::_)).Times(0);
 
     // No errors/1 warnings. There will be an warning for invalid run number
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
@@ -1403,8 +1471,10 @@ public:
         .WillRepeatedly(Return(true));
 
     // could possibly feature to create unique path
-
     EXPECT_CALL(mockView, getFocusDir()).Times(1);
+
+    // should not get to the point where the status is updated
+    EXPECT_CALL(mockView, showStatus(testing::_)).Times(0);
 
     // No errors/1 warnings. The warning will be produced because there
     // is no focus output directory within the settings tab
@@ -1449,6 +1519,9 @@ public:
     EXPECT_CALL(mockView, addRunNoItem(testing::_, testing::_)).Times(1);
 
     EXPECT_CALL(mockView, addBankItems(testing::_, testing::_)).Times(1);
+
+    // should not get to the point where the status is updated
+    EXPECT_CALL(mockView, showStatus(testing::_)).Times(0);
 
     // No errors/0 warnings.
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
@@ -1507,6 +1580,9 @@ public:
     sv.emplace_back("dummy log");
     EXPECT_CALL(mockView, logMsgs()).Times(1).WillOnce(Return(sv));
 
+    // should not change status
+    EXPECT_CALL(mockView, showStatus(testing::_)).Times(0);
+
     // No errors/warnings
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
     EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(0);
@@ -1525,6 +1601,9 @@ public:
     // as if the user has set an empty RB Number that looks correct
     EXPECT_CALL(mockView, getRBNumber()).Times(1).WillOnce(Return("RB000xxxx"));
     EXPECT_CALL(mockView, enableTabs(true)).Times(1);
+
+    // should update status
+    EXPECT_CALL(mockView, showStatus(testing::_)).Times(1);
 
     // no errors/ warnings
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
@@ -1545,6 +1624,9 @@ public:
     EXPECT_CALL(mockView, getRBNumber()).Times(1).WillOnce(Return(""));
     EXPECT_CALL(mockView, enableTabs(false)).Times(1);
 
+    // should update status / invalid
+    EXPECT_CALL(mockView, showStatus(testing::_)).Times(1);
+
     // no errors/ warnings
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
     EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(0);
@@ -1564,6 +1646,9 @@ public:
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(1);
     EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(0);
 
+    // should not change status
+    EXPECT_CALL(mockView, showStatus(testing::_)).Times(0);
+
     pres.notify(IEnggDiffractionPresenter::InstrumentChange);
     TSM_ASSERT(
         "Mock not used as expected. Some EXPECT_CALL conditions were not "
@@ -1574,6 +1659,8 @@ public:
   void test_shutDown() {
     testing::NiceMock<MockEnggDiffractionView> mockView;
     MantidQt::CustomInterfaces::EnggDiffractionPresenter pres(&mockView);
+
+    EXPECT_CALL(mockView, showStatus(testing::_)).Times(1);
 
     EXPECT_CALL(mockView, saveSettings()).Times(1);
     // No errors, no warnings

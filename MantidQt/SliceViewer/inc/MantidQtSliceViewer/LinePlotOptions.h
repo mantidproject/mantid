@@ -7,12 +7,11 @@
 #include "MantidAPI/IMDWorkspace.h"
 #include "DllOption.h"
 
-class EXPORT_OPT_MANTIDQT_SLICEVIEWER LinePlotOptions : public QWidget
-{
+class EXPORT_OPT_MANTIDQT_SLICEVIEWER LinePlotOptions : public QWidget {
   Q_OBJECT
 
 public:
-  LinePlotOptions(QWidget *parent = 0, bool logScaleOption=false);
+  LinePlotOptions(QWidget *parent = 0, bool logScaleOption = false);
   ~LinePlotOptions() override;
 
   void setOriginalWorkspace(Mantid::API::IMDWorkspace_sptr ws);
@@ -38,8 +37,8 @@ signals:
   void changedYLogScaling();
 
 private:
-
-  void addPlotRadioButton(const std::string & text, const std::string & tooltip, const bool bIntegrated = false);
+  void addPlotRadioButton(const std::string &text, const std::string &tooltip,
+                          const bool bIntegrated = false);
 
   Ui::LinePlotOptionsClass ui;
 

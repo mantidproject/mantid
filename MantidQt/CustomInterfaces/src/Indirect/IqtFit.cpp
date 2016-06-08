@@ -133,6 +133,10 @@ void IqtFit::setup() {
           SLOT(specMinChanged(int)));
   connect(m_uiForm.spSpectraMax, SIGNAL(valueChanged(int)), this,
           SLOT(specMaxChanged(int)));
+  connect(m_uiForm.ckPlotGuess, SIGNAL(toggled(bool)), this,
+          SLOT(plotGuessChanged(bool)));
+  connect(m_uiForm.cbPlotType, SIGNAL(currentIndexChanged(QString)), this,
+          SLOT(updateCurrentPlotOption(QString)));
 
   // Set a custom handler for the QTreePropertyBrowser's ContextMenu event
   m_ffTree->setContextMenuPolicy(Qt::CustomContextMenu);
@@ -300,7 +304,7 @@ std::string IqtFit::constructBaseName(const std::string &inputName,
 
   QString baseName = QString::fromStdString(inputName);
   baseName = baseName.left(baseName.lastIndexOf("_"));
-  baseName += "_Iqt_";
+  baseName += "_IqtFit_";
   baseName += functionType;
   baseName += QString::number(specMin);
   baseName += "_to_";
@@ -466,6 +470,8 @@ QString IqtFit::fitTypeString() const {
 }
 
 void IqtFit::typeSelection(int index) {
+  disconnect(m_uiForm.cbPlotType, SIGNAL(currentIndexChanged(QString)), this,
+             SLOT(updateCurrentPlotOption(QString)));
   m_ffTree->clear();
 
   m_ffTree->addProperty(m_properties["StartX"]);
@@ -521,10 +527,26 @@ void IqtFit::typeSelection(int index) {
 
     break;
   }
+  const auto optionIndex =
+      m_uiForm.cbPlotType->findText(QString::fromStdString(m_plotOption));
+  if (optionIndex != -1) {
+    m_uiForm.cbPlotType->setCurrentIndex(optionIndex);
+  } else {
+    m_uiForm.cbPlotType->setCurrentIndex(0);
+  }
 
   plotGuess(NULL);
   m_uiForm.ppPlot->removeSpectrum("Fit");
   m_uiForm.ppPlot->removeSpectrum("Diff");
+  connect(m_uiForm.cbPlotType, SIGNAL(currentIndexChanged(QString)), this,
+          SLOT(updateCurrentPlotOption(QString)));
+}
+
+/**
+ * Update the current plot option selected
+ */
+void IqtFit::updateCurrentPlotOption(QString newOption) {
+  m_plotOption = newOption.toStdString();
 }
 
 void IqtFit::updatePlot() {
@@ -569,7 +591,7 @@ void IqtFit::updatePlot() {
         outputGroup->getItem(specNo));
     if (ws) {
       if (m_uiForm.ckPlotGuess->isChecked()) {
-        m_uiForm.ppPlot->removeSpectrum("Guess");
+        m_uiForm.ckPlotGuess->setChecked(false);
       }
       m_uiForm.ppPlot->addSpectrum("Fit", ws, 1, Qt::red);
       m_uiForm.ppPlot->addSpectrum("Diff", ws, 2, Qt::blue);
@@ -651,6 +673,16 @@ void IqtFit::propertyChanged(QtProperty *prop, double val) {
     m_dblManager->setValue(m_properties["Exponential1.Intensity"], val);
     m_dblManager->setValue(m_properties["Exponential2.Intensity"], val);
     m_dblManager->setValue(m_properties["StretchedExp.Intensity"], val);
+  }
+}
+
+void IqtFit::plotGuessChanged(bool checked) {
+  if (!checked) {
+    m_uiForm.ppPlot->removeSpectrum("Guess");
+  } else {
+    m_uiForm.ppPlot->removeSpectrum("Fit");
+    m_uiForm.ppPlot->removeSpectrum("Diff");
+    plotGuess(NULL);
   }
 }
 

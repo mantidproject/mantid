@@ -1,11 +1,7 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/MemoryManager.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/TextAxis.h"
@@ -103,7 +99,7 @@ void WorkspaceFactoryImpl::initializeFromParent(
   child->m_run = parent->m_run;
   child->setYUnit(parent->m_YUnit);
   child->setYUnitLabel(parent->m_YUnitLabel);
-  child->isDistribution(parent->isDistribution());
+  child->setDistribution(parent->isDistribution());
 
   // Only copy the axes over if new sizes are not given
   if (!differentSize) {

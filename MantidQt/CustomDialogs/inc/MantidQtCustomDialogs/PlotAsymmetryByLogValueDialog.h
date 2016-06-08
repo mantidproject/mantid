@@ -18,18 +18,17 @@ class QLineEdit;
 class QComboBox;
 class QPushButton;
 
-namespace MantidQt
-{
-namespace CustomDialogs
-{
+namespace MantidQt {
+namespace CustomDialogs {
 
-/** 
+/**
     This class gives specialised dialog for the LoadRaw algorithm.
 
     @author Martyn Gigg, Tessella Support Services plc
     @date 24/02/2009
 
-    Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+    Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+   National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -47,47 +46,44 @@ namespace CustomDialogs
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
     File change history is stored at: <https://github.com/mantidproject/mantid>
-    Code Documentation is available at: <http://doxygen.mantidproject.org>    
+    Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class PlotAsymmetryByLogValueDialog : public MantidQt::API::AlgorithmDialog
-{
+class PlotAsymmetryByLogValueDialog : public MantidQt::API::AlgorithmDialog {
 
   Q_OBJECT
-	
-public:
 
+public:
   /// Constructor
   PlotAsymmetryByLogValueDialog(QWidget *parent = 0);
-  ///Destructor
+  /// Destructor
   ~PlotAsymmetryByLogValueDialog() override;
 
 private:
-
   /** @name Virtual functions. */
   //@{
   /// Create the layout
   void initLayout() override;
   //@}
-	
+
 private slots:
 
-  /// Opens a file dialog. Updates the QLineEdit provided when the dialog is closed.
-  void openFileDialog(const QString& filePropName);
-  void fillLogBox(const QString&);
+  /// Opens a file dialog. Updates the QLineEdit provided when the dialog is
+  /// closed.
+  void openFileDialog(const QString &filePropName);
+  void fillLogBox(const QString &);
 
-  /// Show or hide Dead Time file widget depending on which Dead Time type is selected.
+  /// Show or hide Dead Time file widget depending on which Dead Time type is
+  /// selected.
   void showHideDeadTimeFileWidget(int deadTimeTypeIndex);
 
 private:
-
   // The form generated with Qt Designer
   Ui::PlotAsymmetryByLogValueDialog m_uiForm;
 
   /// Maps Browse buttons to file properties
-  QSignalMapper* browseButtonMapper;
+  QSignalMapper *browseButtonMapper;
 };
-
 }
 }
 
-#endif //MANTIDQT_CUSTOM_DIALOGSLPLOTASYMMETRYBYLOGVALUEDIALOG_H
+#endif // MANTIDQT_CUSTOM_DIALOGSLPLOTASYMMETRYBYLOGVALUEDIALOG_H

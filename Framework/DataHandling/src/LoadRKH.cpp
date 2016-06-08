@@ -188,7 +188,7 @@ void LoadRKH::exec() {
   MatrixWorkspace_sptr result = is2D(line) ? read2D(line) : read1D();
 
   // all RKH files contain distribution data
-  result->isDistribution(true);
+  result->setDistribution(true);
   // Set the output workspace
   setProperty("OutputWorkspace", result);
 }

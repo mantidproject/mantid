@@ -42,7 +42,7 @@ public:
     TS_ASSERT_DELTA(1.06797501e-02, factor, 1e-8);
   }
 
-  void test_Absorption_In_Sample_With_Hole_Can_Scatter_In_All_Segments() {
+  void test_Absorption_In_Sample_With_Hole_Container_Scatter_In_All_Segments() {
     using Mantid::Kernel::V3D;
     using namespace MonteCarloTesting;
     using namespace ::testing;
@@ -73,7 +73,8 @@ public:
     Mock::VerifyAndClearExpectations(&rng);
   }
 
-  void test_Absorption_In_Sample_And_Environment_Can_Scatter_In_All_Segments() {
+  void
+  test_Absorption_In_Sample_And_Environment_Container_Scatter_In_All_Segments() {
     using Mantid::Kernel::V3D;
     using namespace MonteCarloTesting;
     using namespace ::testing;
@@ -83,16 +84,16 @@ public:
         endPos(2.0, 0.0, 0.0);
     const double lambdaBefore(2.5), lambdaAfter(3.5);
 
-    auto sample = createTestSample(TestSampleType::SamplePlusCan);
+    auto sample = createTestSample(TestSampleType::SamplePlusContainer);
     MockRNG rng;
     // force scatter in segment can
     EXPECT_CALL(rng, nextInt(1, 3)).Times(Exactly(1)).WillOnce(Return(1));
     EXPECT_CALL(rng, nextValue()).Times(Exactly(1)).WillOnce(Return(0.3));
 
     MCInteractionVolume interactor(sample);
-    const double factorCan = interactor.calculateAbsorption(
+    const double factorContainer = interactor.calculateAbsorption(
         rng, startPos, direc, endPos, lambdaBefore, lambdaAfter);
-    TS_ASSERT_DELTA(6.919239804e-01, factorCan, 1e-8);
+    TS_ASSERT_DELTA(6.919239804e-01, factorContainer, 1e-8);
     Mock::VerifyAndClearExpectations(&rng);
 
     // force scatter in sample
@@ -137,16 +138,6 @@ public:
     // valid shape
     sample.setShape(*ComponentCreationHelper::createSphere(1));
     TS_ASSERT_THROWS_NOTHING(MCInteractionVolume mcv(sample));
-  }
-
-  void test_Construction_With_Invalid_Environment_Throws_Error() {
-    using Mantid::API::Sample;
-    using Mantid::API::SampleEnvironment;
-
-    Sample sample;
-    sample.setShape(*ComponentCreationHelper::createSphere(1));
-    sample.setEnvironment(new SampleEnvironment("Empty"));
-    TS_ASSERT_THROWS(MCInteractionVolume mcv(sample), std::invalid_argument);
   }
 };
 

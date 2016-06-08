@@ -39,6 +39,8 @@ private slots:
   void backgroundSelected(double val);
   void propertyChanged(QtProperty *, double);
   void checkBoxUpdate(QtProperty *prop, bool checked);
+  void plotGuessChanged(bool);
+  void updateCurrentPlotOption(QString newOption);
   void singleFit();
   void plotGuess(QtProperty *);
   void fitContextMenu(const QPoint &);

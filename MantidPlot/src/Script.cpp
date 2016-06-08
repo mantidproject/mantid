@@ -29,8 +29,6 @@
 #include "Script.h"
 #include "ScriptingEnv.h"
 
-#include "MantidAPI/MemoryManager.h"
-
 #include <QRegExp>
 #include <stdexcept>
 
@@ -40,15 +38,12 @@
 /**
  * Constructor taking a script reference
  */
-Script::ScriptTask::ScriptTask(Script & script)
-  : QFutureInterface<bool>(), QRunnable(), m_script(script)
-{
-}
+Script::ScriptTask::ScriptTask(Script &script)
+    : QFutureInterface<bool>(), QRunnable(), m_script(script) {}
 
 /// Starts a thread/or uses the current thread
 /// by using the script thread pool to start this job
-QFuture<bool> Script::ScriptTask::start()
-{
+QFuture<bool> Script::ScriptTask::start() {
   this->setRunnable(this);
   this->reportStarted();
   QFuture<bool> future = this->future();
@@ -57,8 +52,7 @@ QFuture<bool> Script::ScriptTask::start()
 }
 
 /// Runs the task in the thread
-void Script::ScriptTask::run()
-{
+void Script::ScriptTask::run() {
   const bool result = m_script.execute(m_script.scriptCode());
 
   this->reportResult(result);
@@ -71,8 +65,7 @@ void Script::ScriptTask::run()
 /**
  * Constructor. Allows only a single thread that does not expire
  */
-Script::ScriptThreadPool::ScriptThreadPool() : QThreadPool()
-{
+Script::ScriptThreadPool::ScriptThreadPool() : QThreadPool() {
   this->setMaxThreadCount(1);
   this->setExpiryTimeout(-1);
 }
@@ -83,13 +76,11 @@ Script::ScriptThreadPool::ScriptThreadPool() : QThreadPool()
 
 #include <QtConcurrentRun>
 
-
 Script::Script(ScriptingEnv *env, const QString &name,
-               const InteractionType interact, QObject * context)
-  : QObject(), m_env(env), m_name(name.toStdString()) , m_context(context),
-    m_redirectOutput(true), m_reportProgress(false), m_interactMode(interact),
-    m_execMode(NotExecuting), m_thread(new ScriptThreadPool)
-{
+               const InteractionType interact, QObject *context)
+    : QObject(), m_env(env), m_name(name.toStdString()), m_context(context),
+      m_redirectOutput(true), m_reportProgress(false), m_interactMode(interact),
+      m_execMode(NotExecuting), m_thread(new ScriptThreadPool) {
   m_env->incref();
 
   connect(this, SIGNAL(started(const QString &)), this, SLOT(setIsRunning()));
@@ -101,14 +92,13 @@ Script::Script(ScriptingEnv *env, const QString &name,
    * This can be very confusing to users so force a call to release
    * the memory.
    */
-  connect(this, SIGNAL(finished(const QString &)), this, SLOT(releaseFreeMemory()));
-  connect(this, SIGNAL(error(const QString &, const QString &, int)), this, SLOT(releaseFreeMemory()));
-  connect(this, SIGNAL(finished(const QString &)), this, SLOT(setNotExecuting()));
-  connect(this, SIGNAL(error(const QString &, const QString &, int)), this, SLOT(setNotExecuting()));
+  connect(this, SIGNAL(finished(const QString &)), this,
+          SLOT(setNotExecuting()));
+  connect(this, SIGNAL(error(const QString &, const QString &, int)), this,
+          SLOT(setNotExecuting()));
 }
 
-Script::~Script()
-{
+Script::~Script() {
   delete m_thread;
   m_env->decref();
 }
@@ -116,18 +106,14 @@ Script::~Script()
 /**
  * Sets a new name for the script
  */
-void Script::setIdentifier(const QString & name)
-{
-  m_name = name.toStdString();
-}
+void Script::setIdentifier(const QString &name) { m_name = name.toStdString(); }
 
 /**
  * Compile the code, returning true/false depending on the status
  * @param code Code to compile
  * @return True/false depending on success
  */
-bool Script::compile(const ScriptCode & code)
-{
+bool Script::compile(const ScriptCode &code) {
   setupCode(code);
   return this->compileImpl();
 }
@@ -137,67 +123,48 @@ bool Script::compile(const ScriptCode & code)
  * @param code Code to evaluate
  * @return The result as a QVariant
  */
-QVariant Script::evaluate(const ScriptCode & code)
-{
+QVariant Script::evaluate(const ScriptCode &code) {
   setupCode(code);
   return this->evaluateImpl();
 }
 
 /// Execute the Code, returning false on an error / exception.
-bool Script::execute(const ScriptCode & code)
-{
+bool Script::execute(const ScriptCode &code) {
   setupCode(code);
   return this->executeImpl();
 }
 
-/// Execute the code asynchronously, returning immediately after the execution has started
-QFuture<bool> Script::executeAsync(const ScriptCode & code)
-{
+/// Execute the code asynchronously, returning immediately after the execution
+/// has started
+QFuture<bool> Script::executeAsync(const ScriptCode &code) {
   setupCode(code);
   ScriptTask *asyncScript = new ScriptTask(*this);
   return asyncScript->start();
 }
 
 /// Request that this script be aborted
-void Script::abort()
-{
-  if(isExecuting()) this->abortImpl();
-}
-
-/**
- * Asks Mantid to release all free memory.
- */
-void Script::releaseFreeMemory()
-{
-  Mantid::API::MemoryManager::Instance().releaseFreeMemory();
+void Script::abort() {
+  if (isExecuting())
+    this->abortImpl();
 }
 
 /// Sets the execution mode to NotExecuting
-void Script::setNotExecuting()
-{
-  m_execMode = NotExecuting;
-}
+void Script::setNotExecuting() { m_execMode = NotExecuting; }
 
 /// Sets the execution mode to Running to indicate something is running
-void Script::setIsRunning()
-{
-  m_execMode = Running;
-}
+void Script::setIsRunning() { m_execMode = Running; }
 
 /**
  * Sets the offset & code string
  */
-void Script::setupCode(const ScriptCode & code)
-{
-  m_code = code;
-}
+void Script::setupCode(const ScriptCode &code) { m_code = code; }
 
 /**
- * Ensure that any line endings are converted to single '\n' so that the Python C API is happy
+ * Ensure that any line endings are converted to single '\n' so that the Python
+ * C API is happy
  * @param text :: The text to check and convert
  */
-QString Script::normaliseLineEndings(QString text) const
-{
+QString Script::normaliseLineEndings(QString text) const {
   text = text.replace(QRegExp("\\r\\n"), QString("\n"));
   text = text.replace(QRegExp("\\r"), QString("\n"));
   return text;

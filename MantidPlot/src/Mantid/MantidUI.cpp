@@ -77,7 +77,6 @@
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidQtSliceViewer/SliceViewerWindow.h"
 #include "MantidQtFactory/WidgetFactory.h"
-#include "MantidAPI/MemoryManager.h"
 
 #include "MantidQtSpectrumViewer/SpectrumView.h"
 #include <typeinfo>
@@ -97,6 +96,10 @@ size_t DET_TABLE_NDETS_GROUP = 10;
 
 // Initialize logger
 Mantid::Kernel::Logger g_log("MantidUI");
+
+bool isOfType(const QObject *obj, const char *toCompare) {
+  return strcmp(obj->metaObject()->className(), toCompare) == 0;
+}
 }
 
 MantidUI::MantidUI(ApplicationWindow *aw)
@@ -429,14 +432,17 @@ MantidUI::getWorkspace(const QString &workspaceName) {
 */
 bool MantidUI::menuAboutToShow(MdiSubWindow *w) {
 
-  if (w && w->isA("MantidMatrix")) {
-    appWindow()->myMenuBar()->insertItem(tr("3D &Plot"),
-                                         appWindow()->plot3DMenu);
+  if (w && isOfType(w, "MantidMatrix")) {
+    auto plotMenuAction =
+        appWindow()->myMenuBar()->addMenu(appWindow()->plot3DMenu);
+    plotMenuAction->setText(tr("3D &Plot"));
     appWindow()->actionCopySelection->setEnabled(true);
     appWindow()->actionPasteSelection->setEnabled(false);
     appWindow()->actionClearSelection->setEnabled(false);
 
-    appWindow()->myMenuBar()->insertItem(tr("&Workspace"), menuMantidMatrix);
+    auto menuMantidMatrixAction =
+        appWindow()->myMenuBar()->addMenu(menuMantidMatrix);
+    menuMantidMatrixAction->setText(tr("&Workspace"));
     return true;
   }
 
@@ -445,7 +451,7 @@ bool MantidUI::menuAboutToShow(MdiSubWindow *w) {
 
 Graph3D *MantidUI::plot3DMatrix(int style) {
   MdiSubWindow *w = appWindow()->activeWindow();
-  if (w->isA("MantidMatrix")) {
+  if (isOfType(w, "MantidMatrix")) {
     return static_cast<MantidMatrix *>(w)->plotGraph3D(style);
   }
 
@@ -979,7 +985,7 @@ void MantidUI::showContextMenu(QMenu &cm, MdiSubWindow *w) {
 
 void MantidUI::copyRowToTable() {
   MantidMatrix *m = dynamic_cast<MantidMatrix *>(appWindow()->activeWindow());
-  if (!m || !m->isA("MantidMatrix"))
+  if (!m || !isOfType(m, "MantidMatrix"))
     return;
   Table *t = createTableFromSelectedRows(m, true, true);
   t->showNormal();
@@ -987,7 +993,7 @@ void MantidUI::copyRowToTable() {
 
 void MantidUI::copyColumnToTable() {
   MantidMatrix *m = dynamic_cast<MantidMatrix *>(appWindow()->activeWindow());
-  if (!m || !m->isA("MantidMatrix"))
+  if (!m || !isOfType(m, "MantidMatrix"))
     return;
   Table *t = createTableFromSelectedColumns(m, true);
   t->showNormal();
@@ -995,28 +1001,28 @@ void MantidUI::copyColumnToTable() {
 
 void MantidUI::copyRowToGraph() {
   MantidMatrix *m = dynamic_cast<MantidMatrix *>(appWindow()->activeWindow());
-  if (!m || !m->isA("MantidMatrix"))
+  if (!m || !isOfType(m, "MantidMatrix"))
     return;
   plotSelectedRows(m, MantidQt::DistributionDefault, false);
 }
 
 void MantidUI::copyColumnToGraph() {
   MantidMatrix *m = dynamic_cast<MantidMatrix *>(appWindow()->activeWindow());
-  if (!m || !m->isA("MantidMatrix"))
+  if (!m || !isOfType(m, "MantidMatrix"))
     return;
   plotSelectedColumns(m, false);
 }
 
 void MantidUI::copyColumnToGraphErr() {
   MantidMatrix *m = dynamic_cast<MantidMatrix *>(appWindow()->activeWindow());
-  if (!m || !m->isA("MantidMatrix"))
+  if (!m || !isOfType(m, "MantidMatrix"))
     return;
   plotSelectedColumns(m, true);
 }
 
 void MantidUI::copyRowToGraphErr() {
   MantidMatrix *m = dynamic_cast<MantidMatrix *>(appWindow()->activeWindow());
-  if (!m || !m->isA("MantidMatrix"))
+  if (!m || !isOfType(m, "MantidMatrix"))
     return;
   plotSelectedRows(m, MantidQt::DistributionDefault, true);
 }
@@ -1024,7 +1030,7 @@ void MantidUI::copyRowToGraphErr() {
 void MantidUI::copyRowsToWaterfall() {
   const MantidMatrix *const m =
       dynamic_cast<MantidMatrix *>(appWindow()->activeWindow());
-  if (!m || !m->isA("MantidMatrix"))
+  if (!m || !isOfType(m, "MantidMatrix"))
     return;
   MultiLayer *ml = plotSelectedRows(m, MantidQt::DistributionDefault, false);
   if (ml)
@@ -1034,7 +1040,7 @@ void MantidUI::copyRowsToWaterfall() {
 void MantidUI::plotWholeAsWaterfall() {
   const MantidMatrix *const m =
       dynamic_cast<MantidMatrix *>(appWindow()->activeWindow());
-  if (!m || !m->isA("MantidMatrix"))
+  if (!m || !isOfType(m, "MantidMatrix"))
     return;
   MultiLayer *ml = plotSpectraRange(m->workspaceName(), 0, m->numRows() - 1,
                                     MantidQt::DistributionDefault, false);
@@ -1055,14 +1061,14 @@ void MantidUI::convertToWaterfall(MultiLayer *ml) {
 
 void MantidUI::copyDetectorsToTable() {
   MantidMatrix *m = dynamic_cast<MantidMatrix *>(appWindow()->activeWindow());
-  if (!m || !m->isA("MantidMatrix"))
+  if (!m || !isOfType(m, "MantidMatrix"))
     return;
   createTableDetectors(m);
 }
 
 void MantidUI::copyValues() {
   MantidMatrix *m = dynamic_cast<MantidMatrix *>(appWindow()->activeWindow());
-  if (!m || !m->isA("MantidMatrix"))
+  if (!m || !isOfType(m, "MantidMatrix"))
     return;
   m->copySelection();
 }
@@ -1272,10 +1278,10 @@ Table *MantidUI::createDetectorTable(
         colValues << QVariant(dataY0) << QVariant(dataE0); // data
       }
       colValues << QVariant("0") << QVariant("0") // rt
-                << QVariant("0")    // efixed
-                << QVariant("0")    // rtp
-                << QVariant("n/a"); // monitor
-    }                               // End catch for no spectrum
+                << QVariant("0")                  // efixed
+                << QVariant("0")                  // rtp
+                << QVariant("n/a");               // monitor
+    }                                             // End catch for no spectrum
   }
 
   // This modifies widgets, so it needs to run in the Qt GUI thread: no openmp
@@ -1402,7 +1408,7 @@ QStringList MantidUI::extractPyFiles(const QList<QUrl> &urlList) const {
     if (fName.size() > 0) {
       QFileInfo fi(fName);
 
-      if (fi.suffix().upper() == "PY") {
+      if (fi.suffix().toUpper() == "PY") {
         filenames.append(fName);
       }
     }
@@ -1713,8 +1719,9 @@ void MantidUI::groupWorkspaces() {
   } catch (std::invalid_argument &) {
     QMessageBox::critical(appWindow(), "MantidPlot - Algorithm error",
                           " Error in GroupWorkspaces algorithm");
-  } catch (Mantid::Kernel::Exception::NotFoundError
-               &) // if not a valid object in analysis data service
+  } catch (Mantid::Kernel::Exception::NotFoundError &) // if not a valid object
+                                                       // in analysis data
+                                                       // service
   {
     QMessageBox::critical(appWindow(), "MantidPlot - Algorithm error",
                           " Error in GroupWorkspaces algorithm");
@@ -2006,7 +2013,7 @@ void MantidUI::showMantidInstrument(const QString &wsName) {
 
 void MantidUI::showMantidInstrument() {
   MantidMatrix *m = dynamic_cast<MantidMatrix *>(appWindow()->activeWindow());
-  if (!m || !m->isA("MantidMatrix"))
+  if (!m || !isOfType(m, "MantidMatrix"))
     return;
   if (!m->workspaceName().isEmpty()) {
     showMantidInstrument(m->workspaceName());
@@ -2037,7 +2044,8 @@ void MantidUI::mantidMenuAboutToShow() {
 }
 
 void MantidUI::insertMenu() {
-  appWindow()->myMenuBar()->insertItem(tr("Man&tid"), mantidMenu);
+  auto mantidMenuAction = appWindow()->myMenuBar()->addMenu(mantidMenu);
+  mantidMenuAction->setText(tr("Man&tid"));
 }
 
 void MantidUI::clearAllMemory(const bool prompt) {
@@ -2057,12 +2065,6 @@ void MantidUI::clearAllMemory(const bool prompt) {
   // Relevant notifications are connected to signals that will close all
   // dependent windows
   Mantid::API::FrameworkManager::Instance().clear();
-}
-
-/** Release any free memory back to the system */
-void MantidUI::releaseFreeMemory() {
-  // This only does something if TCMalloc is used
-  Mantid::API::MemoryManager::Instance().releaseFreeMemory();
 }
 
 void MantidUI::saveProject(bool saved) {
@@ -2144,8 +2146,8 @@ void MantidUI::menuMantidMatrixAboutToShow() {
   // menuMantidMatrix->addAction(actionCopyValues);
   menuMantidMatrix->addAction(actionCopyDetectorsToTable);
   menuMantidMatrix->addSeparator();
-  menuMantidMatrix->insertItem(tr("Set &Properties..."), w,
-                               SLOT(setMatrixProperties()));
+  menuMantidMatrix->addAction(tr("Set &Properties..."), w,
+                              SLOT(setMatrixProperties()));
 
   ///
   menuMantidMatrix->addSeparator();
@@ -2238,7 +2240,7 @@ MantidMatrix *MantidUI::getMantidMatrix(const QString &wsName) {
   MantidMatrix *m(0);
   while (itr.hasNext()) {
     MdiSubWindow *w = itr.next();
-    if (w->isA("MantidMatrix") && w->name() == wsName) {
+    if (isOfType(w, "MantidMatrix") && w->name() == wsName) {
       m = qobject_cast<MantidMatrix *>(w);
     }
   }

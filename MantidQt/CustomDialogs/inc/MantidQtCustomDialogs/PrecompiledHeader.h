@@ -11,7 +11,7 @@
 #include <QDialog>
 #include <QString>
 
-//STL
+// STL
 #include <vector>
 #include <map>
 #include <set>

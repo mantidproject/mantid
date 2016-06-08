@@ -92,7 +92,6 @@ set ( SRC_FILES
 	src/MatrixWSIndexCalculator.cpp
 	src/MatrixWorkspace.cpp
 	src/MatrixWorkspaceMDIterator.cpp
-	src/MemoryManager.cpp
 	src/ModeratorModel.cpp
 	src/MultiDomainFunction.cpp
 	src/MultiPeriodGroupAlgorithm.cpp
@@ -116,7 +115,6 @@ set ( SRC_FILES
 	src/RemoteJobManagerFactory.cpp
 	src/Run.cpp
 	src/Sample.cpp
-	src/SampleEnvironment.cpp
 	src/SampleShapeValidator.cpp
 	src/SampleValidator.cpp
 	src/ScopedWorkspace.cpp
@@ -276,7 +274,6 @@ set ( INC_FILES
 	inc/MantidAPI/MatrixWorkspaceMDIterator.h
 	inc/MantidAPI/MatrixWorkspaceValidator.h
 	inc/MantidAPI/MatrixWorkspace_fwd.h
-	inc/MantidAPI/MemoryManager.h
 	inc/MantidAPI/ModeratorModel.h
 	inc/MantidAPI/MultiDomainFunction.h
 	inc/MantidAPI/MultiPeriodGroupAlgorithm.h
@@ -300,7 +297,6 @@ set ( INC_FILES
 	inc/MantidAPI/RemoteJobManagerFactory.h
 	inc/MantidAPI/Run.h
 	inc/MantidAPI/Sample.h
-	inc/MantidAPI/SampleEnvironment.h
 	inc/MantidAPI/SampleShapeValidator.h
 	inc/MantidAPI/SampleValidator.h
 	inc/MantidAPI/ScopedWorkspace.h
@@ -388,7 +384,6 @@ set ( TEST_FILES
 	LogManagerTest.h
 	MDGeometryTest.h
 	MatrixWorkspaceMDIteratorTest.h
-	MemoryManagerTest.h
 	ModeratorModelTest.h
 	MultiDomainFunctionTest.h
 	MultiPeriodGroupAlgorithmTest.h
@@ -408,7 +403,6 @@ set ( TEST_FILES
 	RawCountValidatorTest.h
 	RemoteJobManagerFactoryTest.h
 	RunTest.h
-	SampleEnvironmentTest.h
 	SampleShapeValidatorTest.h
 	SampleTest.h
 	SampleValidatorTest.h

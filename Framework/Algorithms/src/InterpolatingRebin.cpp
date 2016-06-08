@@ -73,7 +73,7 @@ void InterpolatingRebin::exec() {
   // Copy over the 'vertical' axis
   if (inputW->axes() > 1)
     outputW->replaceAxis(1, inputW->getAxis(1)->clone(outputW.get()));
-  outputW->isDistribution(true);
+  outputW->setDistribution(true);
 
   // this calculation requires a distribution workspace but deal with the
   // situation when we don't get this
@@ -105,7 +105,7 @@ void InterpolatingRebin::exec() {
     // non-distribution workspace they maybe not expect it, so convert back to
     // the same form that was given
     WorkspaceHelpers::makeDistribution(outputW, false);
-    outputW->isDistribution(false);
+    outputW->setDistribution(false);
   }
 
   // Now propagate any masking correctly to the output workspace
@@ -287,11 +287,12 @@ void InterpolatingRebin::cubicInterpolation(
       throw std::invalid_argument(
           std::string("At least one x-value to interpolate to is outside the "
                       "range of the original data.\n") +
-          "original data range: " + boost::lexical_cast<std::string>(xOld[0]) +
-          " to " + boost::lexical_cast<std::string>(xOld[xOld.size() - 1]) +
-          "\n" + "range to try to interpolate to " +
-          boost::lexical_cast<std::string>(xNew[0]) + " to " +
-          boost::lexical_cast<std::string>(xNew[xNew.size() - 1]));
+          "original data range: " +
+          boost::lexical_cast<std::string>(xOld.front()) + " to " +
+          boost::lexical_cast<std::string>(xOld.back()) + "\n" +
+          "range to try to interpolate to " +
+          boost::lexical_cast<std::string>(xNew.front()) + " to " +
+          boost::lexical_cast<std::string>(xNew.back()));
     }
   }
 

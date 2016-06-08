@@ -47,8 +47,31 @@ public:
   IEnggDiffractionView(){};
   virtual ~IEnggDiffractionView(){};
 
-  /// @name Direct (and usually modal) user interaction
+  /// @name Direct (and usually modal, or at least top/pop-up level) user
+  /// interaction
   //@{
+  /**
+   * To display important messages that need maximum visibility
+   * (normally a dialog on top of the interface). This can be used to
+   * control the visibility and content of the message. An example use
+   * case is to inform the user that certain inputs are absolutely
+   * needed to use the interface functionality.
+   *
+   * @param visible whether the "splash"/important message should be visible
+   * @param shortMsg short/one line message summary
+   * @param description message with full details
+   */
+  virtual void splashMessage(bool visible, const std::string &shortMsg,
+                             const std::string &description) = 0;
+
+  /**
+   * Display the current status (running some algorithms, finished,
+   * ready, etc.), in a status bar or similar.
+   *
+   * @param sts status message which should be concise
+   */
+  virtual void showStatus(const std::string &sts) = 0;
+
   /**
    * Display a warning to the user (for example as a pop-up window).
    *
@@ -457,10 +480,11 @@ public:
   * generates and sets the curves on the fitting tab
   * @param data of the workspace to be passed as QwtData
   * @param focused to check whether focused workspace
+  * @param plotSinglePeaks whether to plot single peak fitting ws
   *
   */
   virtual void setDataVector(std::vector<boost::shared_ptr<QwtData>> &data,
-                             bool focused) = 0;
+                             bool focused, bool plotSinglePeaks) = 0;
   //@}
 
   /**
@@ -479,19 +503,12 @@ public:
   virtual bool saveFocusedOutputFiles() const = 0;
 
   /**
-  * Produces vanadium curves graph with three spectrum for calib
-  * output.
-  *
-  */
-  virtual void plotVanCurvesCalibOutput() = 0;
-
-  /**
-  * Produces ceria peaks graph with two spectrum for calib
-  * output.
+  * Produces vanadium curves graph with three spectrum and
+  * ceria peaks graph with two spectrum for calib output.
   *
   * @param pyCode string which is passed to Mantid via pyScript
   */
-  virtual void plotDifcZeroCalibOutput(const std::string &pyCode) = 0;
+  virtual void plotCalibOutput(const std::string &pyCode) = 0;
 
   /**
   * Produces a single spectrum graph for focused output.
