@@ -43,44 +43,43 @@ class ArrowMarker;
 class DoubleSpinBox;
 
 //! Line options dialog
-class LineDialog : public QDialog
-{
-    Q_OBJECT
+class LineDialog : public QDialog {
+  Q_OBJECT
 
 public:
-    LineDialog(ArrowMarker *line, QWidget* parent = 0, Qt::WFlags fl = 0);
+  LineDialog(ArrowMarker *line, QWidget *parent = 0, Qt::WFlags fl = 0);
 
-    enum Unit{ScaleCoordinates, Pixels};
+  enum Unit { ScaleCoordinates, Pixels };
 
-	void initGeometryTab();
-	void enableHeadTab();
-	void setCoordinates(int unit);
+  void initGeometryTab();
+  void enableHeadTab();
+  void setCoordinates(int unit);
 
 public slots:
-	void enableButtonDefault(QWidget *w);
-	void setDefaultValues();
-	void displayCoordinates(int unit);
-	void setLineStyle(Qt::PenStyle style);
-        void accept() override;
-        void apply();
+  void enableButtonDefault(QWidget *w);
+  void setDefaultValues();
+  void displayCoordinates(int unit);
+  void setLineStyle(Qt::PenStyle style);
+  void accept() override;
+  void apply();
 
 private:
-	ArrowMarker *lm;
+  ArrowMarker *lm;
 
-    ColorButton* colorBox;
-    QComboBox* styleBox;
-    DoubleSpinBox* widthBox;
-	QComboBox* unitBox;
-    QPushButton* btnOk;
-    QPushButton* btnApply;
-	QPushButton* buttonDefault;
-    QCheckBox* endBox;
-    QCheckBox* startBox,  *filledBox;
-	QTabWidget* tw;
-	QWidget *options, *geometry, *head;
-	DoubleSpinBox *xStartBox, *yStartBox, *xEndBox, *yEndBox;
-	QSpinBox *xStartPixelBox, *yStartPixelBox, *xEndPixelBox, *yEndPixelBox;
-	QSpinBox *boxHeadAngle, *boxHeadLength;
+  ColorButton *colorBox;
+  QComboBox *styleBox;
+  DoubleSpinBox *widthBox;
+  QComboBox *unitBox;
+  QPushButton *btnOk;
+  QPushButton *btnApply;
+  QPushButton *buttonDefault;
+  QCheckBox *endBox;
+  QCheckBox *startBox, *filledBox;
+  QTabWidget *tw;
+  QWidget *options, *geometry, *head;
+  DoubleSpinBox *xStartBox, *yStartBox, *xEndBox, *yEndBox;
+  QSpinBox *xStartPixelBox, *yStartPixelBox, *xEndPixelBox, *yEndPixelBox;
+  QSpinBox *boxHeadAngle, *boxHeadLength;
 };
 
 #endif // LINEDIALOG_H

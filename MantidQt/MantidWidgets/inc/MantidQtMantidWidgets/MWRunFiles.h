@@ -137,9 +137,9 @@ public:
   };
   /// Options for the live button
   enum LiveButtonOpts {
-    Hide,            ///< Don't use the live button
-    AlwaysShow,      ///< Show whether a connection is possible or not (will be
-                     ///disabled)
+    Hide,       ///< Don't use the live button
+    AlwaysShow, ///< Show whether a connection is possible or not (will be
+    /// disabled)
     ShowIfCanConnect ///< Only show if able to connect to the live data server
   };
 

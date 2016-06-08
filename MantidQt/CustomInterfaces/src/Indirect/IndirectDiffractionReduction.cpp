@@ -361,7 +361,8 @@ void IndirectDiffractionReduction::runOSIRISdiffonlyReduction() {
 
   if (m_uiForm.ckUseCan->isChecked()) {
     osirisDiffReduction->setProperty(
-        "Container", m_uiForm.rfCanFiles->getFilenames().join(",").toStdString());
+        "Container",
+        m_uiForm.rfCanFiles->getFilenames().join(",").toStdString());
     if (m_uiForm.ckCanScale->isChecked())
       osirisDiffReduction->setProperty("ContainerScaleFactor",
                                        m_uiForm.spCanScale->value());
@@ -555,8 +556,7 @@ void IndirectDiffractionReduction::loadSettings() {
   QSettings settings;
   QString dataDir = QString::fromStdString(
                         Mantid::Kernel::ConfigService::Instance().getString(
-                            "datasearch.directories"))
-                        .split(";")[0];
+                            "datasearch.directories")).split(";")[0];
 
   settings.beginGroup(m_settingsGroup);
   settings.setValue("last_directory", dataDir);

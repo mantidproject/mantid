@@ -36,31 +36,25 @@
                  <http://doxygen.mantidproject.org>
  */
 
-namespace MantidQt
-{
-namespace RefDetectorViewer
-{
+namespace MantidQt {
+namespace RefDetectorViewer {
 class RefIVConnections;
 
-class EXPORT_OPT_MANTIDQT_REFDETECTORVIEWER RefMatrixWSImageView
-{
+class EXPORT_OPT_MANTIDQT_REFDETECTORVIEWER RefMatrixWSImageView {
 
 public:
   /// Construct an image viewer for the specifed MatrixWorkspace
-  RefMatrixWSImageView ( Mantid::API::MatrixWorkspace_sptr /*mat_ws*/ );
+  RefMatrixWSImageView(Mantid::API::MatrixWorkspace_sptr /*mat_ws*/);
 
-  RefMatrixWSImageView( QString wpsName,
-                        int peakMin, int peakMax,
-                        int backMin, int backMax,
-                        int tofMin,  int tofMax);
+  RefMatrixWSImageView(QString wpsName, int peakMin, int peakMax, int backMin,
+                       int backMax, int tofMin, int tofMax);
 
-  RefIVConnections* getConnections();
+  RefIVConnections *getConnections();
 
   ~RefMatrixWSImageView();
 
 private:
   RefImageView *m_imageView;
-
 };
 
 } // namespace RefDetectorViewer

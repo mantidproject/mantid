@@ -30,15 +30,14 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace MantidQt::API;
 
-
-void showAlgo(IAlgorithm_sptr alg, QStringList enabled, QStringList disabled, QApplication & app)
-{
-  GenericDialog * dlg = new GenericDialog(NULL);
+void showAlgo(IAlgorithm_sptr alg, QStringList enabled, QStringList disabled,
+              QApplication &app) {
+  GenericDialog *dlg = new GenericDialog(NULL);
 
   // Set the content
   dlg->setAlgorithm(alg.get());
-  //dlg->setPresetValues(preset_values);
-  //dlg->isForScript(forScript);
+  // dlg->setPresetValues(preset_values);
+  // dlg->isForScript(forScript);
   dlg->setOptionalMessage(QString::fromStdString(alg->getOptionalMessage()));
 
   dlg->addEnabledAndDisableLists(enabled, disabled);
@@ -51,47 +50,43 @@ void showAlgo(IAlgorithm_sptr alg, QStringList enabled, QStringList disabled, QA
   app.exec();
   dlg->close();
   delete dlg;
-
 }
 
 /** This application will be used for debugging and testing the
  * GenericDialog and the AlgorithmPropertiesWidget.
  */
-int main( int argc, char ** argv )
-{
+int main(int argc, char **argv) {
   QApplication app(argc, argv);
   app.setApplicationName("PropertyWidgets demo");
 
   FrameworkManager::Instance();
 
   QStringList enabled;
-  if (argc > 2) enabled = QStringList::split(",", argv[2], false);
+  if (argc > 2)
+    enabled = QStringList::split(",", argv[2], false);
   QStringList disabled;
-  if (argc > 3) disabled = QStringList::split(",", argv[3], false);
+  if (argc > 3)
+    disabled = QStringList::split(",", argv[3], false);
 
   // Create the algorithm using the argument, with a default
   std::string algo = "LoadEventNexus";
   if (argc > 1)
     algo = std::string(argv[1]);
-  if (algo=="ALL")
-  {
+  if (algo == "ALL") {
     std::vector<std::string> names = AlgorithmFactory::Instance().getKeys();
     std::cout << names.size() << " algos.\n";
-    for(auto it = names.begin(); it != names.end(); it++)
-    {
-      std::pair<std::string,int> decoded = AlgorithmFactory::Instance().decodeName(*it);
+    for (auto it = names.begin(); it != names.end(); it++) {
+      std::pair<std::string, int> decoded =
+          AlgorithmFactory::Instance().decodeName(*it);
       std::string name = decoded.first;
       std::cout << name << std::endl;
       IAlgorithm_sptr alg = AlgorithmManager::Instance().create(name);
       showAlgo(alg, enabled, disabled, app);
     }
-  }
-  else
-  {
+  } else {
     IAlgorithm_sptr alg = AlgorithmManager::Instance().create(algo);
     showAlgo(alg, enabled, disabled, app);
   }
-
 
   return 0;
 }

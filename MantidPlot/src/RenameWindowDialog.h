@@ -2,10 +2,11 @@
     File                 : RenameWindowDialog.h
     Project              : QtiPlot
     --------------------------------------------------------------------
-    Copyright            : (C) 2006 by Ion Vasilief, Tilman Hoener zu Siederdissen
+    Copyright            : (C) 2006 by Ion Vasilief, Tilman Hoener zu
+ Siederdissen
     Email (use @ for *)  : ion_vasilief*yahoo.fr, thzs*gmx.net
     Description          : Rename window dialog
-                           
+
  ***************************************************************************/
 
 /***************************************************************************
@@ -43,33 +44,32 @@ class MdiSubWindow;
 class QButtonGroup;
 
 //! Rename window dialog
-class RenameWindowDialog : public QDialog
-{
-    Q_OBJECT
+class RenameWindowDialog : public QDialog {
+  Q_OBJECT
 
 public:
-    RenameWindowDialog(QWidget* parent = 0, Qt::WFlags fl = 0 );
+  RenameWindowDialog(QWidget *parent = 0, Qt::WFlags fl = 0);
 
 private:
-    QPushButton * buttonOk;
-	QPushButton * buttonCancel;
-    QGroupBox * groupBox1;
-	QButtonGroup * buttons;
-	QRadioButton * boxName;
-	QRadioButton * boxLabel;
-	QRadioButton * boxBoth;
-	QLineEdit * boxNameLine;
-	QTextEdit * boxLabelEdit;
+  QPushButton *buttonOk;
+  QPushButton *buttonCancel;
+  QGroupBox *groupBox1;
+  QButtonGroup *buttons;
+  QRadioButton *boxName;
+  QRadioButton *boxLabel;
+  QRadioButton *boxBoth;
+  QLineEdit *boxNameLine;
+  QTextEdit *boxLabelEdit;
 
 public slots:
-	void setWidget(MdiSubWindow *w);
-	MdiSubWindow::CaptionPolicy getCaptionPolicy();
-        void accept() override;
+  void setWidget(MdiSubWindow *w);
+  MdiSubWindow::CaptionPolicy getCaptionPolicy();
+  void accept() override;
 
 signals:
 
 private:
-	MdiSubWindow *window;
+  MdiSubWindow *window;
 };
 
 #endif // EXPORTDIALOG_H

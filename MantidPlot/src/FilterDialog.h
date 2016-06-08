@@ -2,7 +2,8 @@
     File                 : FilterDialog.h
     Project              : QtiPlot
     --------------------------------------------------------------------
-    Copyright            : (C) 2006 by Ion Vasilief, Tilman Hoener zu Siederdissen
+    Copyright            : (C) 2006 by Ion Vasilief, Tilman Hoener zu
+ Siederdissen
     Email (use @ for *)  : ion_vasilief*yahoo.fr, thzs*gmx.net
     Description          : Filter options dialog
 
@@ -39,31 +40,27 @@ class Graph;
 class ColorBox;
 
 //! Filter options dialog
-class FilterDialog : public QDialog
-{
-    Q_OBJECT
+class FilterDialog : public QDialog {
+  Q_OBJECT
 
 public:
-    FilterDialog(int type, QWidget* parent = 0, Qt::WFlags fl = 0 );
+  FilterDialog(int type, QWidget *parent = 0, Qt::WFlags fl = 0);
 
 public slots:
-	void setGraph(Graph *g);
-	void filter();
+  void setGraph(Graph *g);
+  void filter();
 
 private:
-	Graph *graph;
-	int filter_type;
+  Graph *graph;
+  int filter_type;
 
-    QPushButton* buttonFilter;
-	QPushButton* buttonCancel;
-	QComboBox* boxName;
-	QCheckBox* boxOffset;
-	QLineEdit* boxStart;
-	QLineEdit* boxEnd;
-	ColorBox* boxColor;
+  QPushButton *buttonFilter;
+  QPushButton *buttonCancel;
+  QComboBox *boxName;
+  QCheckBox *boxOffset;
+  QLineEdit *boxStart;
+  QLineEdit *boxEnd;
+  ColorBox *boxColor;
 };
 
 #endif
-
-
-
