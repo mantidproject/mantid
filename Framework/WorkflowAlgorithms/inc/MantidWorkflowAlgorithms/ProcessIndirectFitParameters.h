@@ -51,7 +51,8 @@ private:
   void exec() override;
   std::vector<std::string> searchForFitParams(const std::string &,
                                               const std::vector<std::string> &);
-  std::vector<std::vector<API::MatrixWorkspace_sptr>> reorder2DVector(std::vector<std::vector<API::MatrixWorkspace_sptr>> &);
+  std::vector<std::vector<API::MatrixWorkspace_sptr>>
+  reorder2DVector(std::vector<std::vector<API::MatrixWorkspace_sptr>> &);
 };
 } // namespace Algorithms
 } // namespace Mantid

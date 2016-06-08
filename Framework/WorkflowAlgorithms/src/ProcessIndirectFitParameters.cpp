@@ -105,7 +105,8 @@ void ProcessIndirectFitParameters::exec() {
     tblSearchProg.report("Splitting table into relevant columns");
     auto const allColumnNames = inputWs->getColumnNames();
     auto columns = searchForFitParams(parameterNames.at(i), allColumnNames);
-	allOutputColumns.insert(allOutputColumns.end(), columns.begin(), columns.end());
+    allOutputColumns.insert(allOutputColumns.end(), columns.begin(),
+                            columns.end());
     auto errColumns =
         searchForFitParams((parameterNames.at(i) + "_Err"), allColumnNames);
 
@@ -124,10 +125,11 @@ void ProcessIndirectFitParameters::exec() {
       convertToMatrix->setProperty("ColumnE", errColumns.at(j));
       convertToMatrix->setProperty("OutputWorkspace", columns.at(j));
       convertToMatrix->executeAsChildAlg();
-	  MatrixWorkspace_sptr matrixFromTable = convertToMatrix->getProperty("OutputWorkspace");
-	  paramWorkspaces.push_back(matrixFromTable);
+      MatrixWorkspace_sptr matrixFromTable =
+          convertToMatrix->getProperty("OutputWorkspace");
+      paramWorkspaces.push_back(matrixFromTable);
     }
-	workspaces.push_back(paramWorkspaces);
+    workspaces.push_back(paramWorkspaces);
   }
 
   Progress workflowProg = Progress(this, 0.5, 1.0, 10);
@@ -151,7 +153,7 @@ void ProcessIndirectFitParameters::exec() {
       conjoin->setProperty("InputWorkspace1", tempPeakWs);
       conjoin->setProperty("InputWorkspace2", paramWs);
       conjoin->executeAsChildAlg();
-	  tempPeakWs = conjoin->getProperty("InputWorkspace1");
+      tempPeakWs = conjoin->getProperty("InputWorkspace1");
     }
     tempWorkspaces.push_back(tempPeakWs);
   }
@@ -163,7 +165,7 @@ void ProcessIndirectFitParameters::exec() {
     conjoin->setProperty("InputWorkspace1", outputWs);
     conjoin->setProperty("InputWorkspace2", *it);
     conjoin->executeAsChildAlg();
-	outputWs = conjoin->getProperty("InputWorkspace1");
+    outputWs = conjoin->getProperty("InputWorkspace1");
   }
 
   // Replace axis on workspaces with text axis
@@ -220,7 +222,9 @@ std::vector<std::string> ProcessIndirectFitParameters::searchForFitParams(
  * @param original - The original vector to be transformed
  * @return - The vector after it has been transformed
  */
-std::vector<std::vector<MatrixWorkspace_sptr>> ProcessIndirectFitParameters::reorder2DVector(std::vector<std::vector<MatrixWorkspace_sptr>> &original) {
+std::vector<std::vector<MatrixWorkspace_sptr>>
+ProcessIndirectFitParameters::reorder2DVector(
+    std::vector<std::vector<MatrixWorkspace_sptr>> &original) {
   size_t maximumLength = original.at(0).size();
   for (size_t i = 1; i < original.size(); i++) {
     if (original.at(i).size() > maximumLength) {
