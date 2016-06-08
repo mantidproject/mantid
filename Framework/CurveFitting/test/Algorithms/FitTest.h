@@ -12,6 +12,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidCurveFitting/Algorithms/Fit.h"
 #include "MantidDataObjects/TableWorkspace.h"
+#include "MantidDataObjects/Workspace2D.h"
 
 using namespace Mantid;
 using namespace Mantid::CurveFitting;
@@ -710,6 +711,36 @@ public:
     y[18] = 0.01239376088333;
 
     e.assign(19, 1.0);
+  }
+
+  void test_function_exp_decay_fit() {
+    Algorithms::Fit alg2;
+
+    // create mock data to test against
+    std::string wsName = "ExpDecayMockData";
+    int histogramNumber = 1;
+    int timechannels = 20;
+    Workspace_sptr ws = WorkspaceFactory::Instance().create(
+        "Workspace2D", histogramNumber, timechannels, timechannels);
+    Workspace2D_sptr ws2D = boost::dynamic_pointer_cast<Workspace2D>(ws);
+    for (int i = 0; i < 20; i++)
+      ws2D->dataX(0)[i] = i;
+    Mantid::MantidVec &y = ws2D->dataY(0); // y-values (counts)
+    Mantid::MantidVec &e = ws2D->dataE(0); // error values of counts
+    getExpDecayMockData(y, e);
+
+    // put this workspace in the data service
+    TS_ASSERT_THROWS_NOTHING(
+        AnalysisDataService::Instance().addOrReplace(wsName, ws2D));
+
+    // alg2.setFunction(fn);
+    alg2.setPropertyValue("Function", "name=ExpDecay,Height=1,Lifetime=1");
+
+    // Set which spectrum to fit against and initial starting values
+    alg2.setPropertyValue("InputWorkspace", wsName);
+    alg2.setPropertyValue("WorkspaceIndex", "0");
+    alg2.setPropertyValue("StartX", "0");
+    alg2.setPropertyValue("EndX", "20");
   }
 };
 
