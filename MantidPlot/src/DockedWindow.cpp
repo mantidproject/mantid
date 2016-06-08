@@ -3,6 +3,9 @@
 #include "ApplicationWindow.h"
 
 #include <QApplication>
+#include <QDrag>
+#include <QMimeData>
+#include <QMoveEvent>
 
 /**
  * Constructor.

@@ -1016,14 +1016,14 @@ void MantidDockWidget::deleteWorkspaces() {
 void MantidDockWidget::sortAscending() {
   if (isTreeUpdating())
     return;
-  m_tree->setSortOrder(Qt::Ascending);
+  m_tree->setSortOrder(Qt::AscendingOrder);
   m_tree->sort();
 }
 
 void MantidDockWidget::sortDescending() {
   if (isTreeUpdating())
     return;
-  m_tree->setSortOrder(Qt::Descending);
+  m_tree->setSortOrder(Qt::DescendingOrder);
   m_tree->sort();
 }
 
@@ -1874,17 +1874,17 @@ bool MantidTreeWidgetItem::operator<(const QTreeWidgetItem &other) const {
     return false;
 
   if (!thisShouldBeSorted && !otherShouldBeSorted) {
-    if (m_parent->getSortOrder() == Qt::Ascending)
+    if (m_parent->getSortOrder() == Qt::AscendingOrder)
       return m_sortPos < otherSortPos;
     else
       return m_sortPos >= otherSortPos;
   } else if (thisShouldBeSorted && !otherShouldBeSorted) {
-    if (m_parent->getSortOrder() == Qt::Ascending)
+    if (m_parent->getSortOrder() == Qt::AscendingOrder)
       return false;
     else
       return true;
   } else if (!thisShouldBeSorted && otherShouldBeSorted) {
-    if (m_parent->getSortOrder() == Qt::Ascending)
+    if (m_parent->getSortOrder() == Qt::AscendingOrder)
       return true;
     else
       return false;

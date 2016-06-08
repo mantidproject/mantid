@@ -35,6 +35,7 @@
 
 #include <QFileDialog>
 #include <QMessageBox>
+#include <QTextCodec>
 #include <QTextStream>
 #include <Qsci/qsciprinter.h>
 #include <QPrintDialog>
@@ -114,7 +115,7 @@ QString Note::exportASCII(const QString &filename) {
     }
 
     QFile f(fn);
-    if (!f.open(IO_WriteOnly)) {
+    if (!f.open(QIODevice::WriteOnly)) {
       QMessageBox::critical(
           0, tr("MantidPlot - File Save Error"),
           tr("Could not write to file: <br><h4> %1 </h4><p>Please verify that "

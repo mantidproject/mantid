@@ -21,6 +21,7 @@
 #include <QMenuBar>
 #include <QMenu>
 #include <QAction>
+#include <QCloseEvent>
 #include <QSettings>
 #include <QPrintDialog>
 #include <QPrinter>
@@ -324,7 +325,7 @@ void ScriptingWindow::setMenuStates(int ntabs) {
 void ScriptingWindow::setEditActionsDisabled(bool off) {
   auto actions = m_editMenu->actions();
   foreach (QAction *action, actions) {
-    if (strcmp("Find", action->objectName()) != 0) {
+    if (strcmp("Find", action->objectName().toAscii().constData()) != 0) {
       action->setDisabled(off);
     }
   }
