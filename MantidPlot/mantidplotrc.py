@@ -60,8 +60,5 @@ if __name__ == '__main__':
                     keywords.append(name + '.' + att + _get_function_spec(fattr))
 
         return keywords;
-
-    import sys
-    sys.path.insert(0,'')
 else:
     raise ImportError("mantidplotrc.py is an initialization file for MantidPlot not an importable module")

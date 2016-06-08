@@ -120,6 +120,10 @@ private:
   bool start() override;
   /// Shutdown the environment
   void shutdown() override;
+  /// Configure python path
+  void setupPythonPath();
+  /// Configure sip
+  void setupSip();
   /// Run execfile on a given file
   bool loadInitFile(const QString &path);
 
