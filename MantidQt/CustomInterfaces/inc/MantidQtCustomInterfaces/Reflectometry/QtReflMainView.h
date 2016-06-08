@@ -87,7 +87,7 @@ public:
   boost::shared_ptr<MantidQt::API::AlgorithmRunner>
   getAlgorithmRunner() const override;
 
-  // signal emitted when interface is closed
+// signal emitted when interface is closed
 signals:
   void closeWindow();
   // override of QWidget's closeEvent() as we want
