@@ -45,6 +45,5 @@ void ADSWorkspaceProvider<Workspace_Type>::disposeWorkspace(
 template class DLLExport ADSWorkspaceProvider<Mantid::API::IMDWorkspace>;
 template class DLLExport ADSWorkspaceProvider<Mantid::API::IMDEventWorkspace>;
 template class DLLExport ADSWorkspaceProvider<Mantid::API::IMDHistoWorkspace>;
-
 }
 }
