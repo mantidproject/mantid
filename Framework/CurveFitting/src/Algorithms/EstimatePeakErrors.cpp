@@ -152,7 +152,7 @@ void EstimatePeakErrors::exec() {
         size_t np = fun->nParams();
         IPeakFunction *peak = dynamic_cast<IPeakFunction *>(fun);
         if (peak) {
-          std::string prefix = "f" + boost::lexical_cast<std::string>(i) + ".";
+          std::string prefix = "f" + std::to_string(i) + ".";
           GSLMatrix covariance(*matrix, ip, ip, np, np);
           calculatePeakValues(*peak, *results, covariance, prefix);
         }

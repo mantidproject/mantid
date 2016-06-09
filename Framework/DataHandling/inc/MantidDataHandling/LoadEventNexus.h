@@ -484,7 +484,7 @@ void LoadEventNexus::loadEntryMetadata(const std::string &nexusfilename, T WS,
     std::vector<int> value;
     file.getData(value);
     if (!value.empty())
-      run = boost::lexical_cast<std::string>(value[0]);
+      run = std::to_string(value[0]);
   }
   if (!run.empty()) {
     WS->mutableRun().addProperty("run_number", run);

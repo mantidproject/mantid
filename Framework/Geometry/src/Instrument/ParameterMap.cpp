@@ -193,8 +193,8 @@ const std::string ParameterMap::diff(const ParameterMap &rhs,
   // Quick size check
   if (this->size() != rhs.size()) {
     return std::string("Number of parameters does not match: ") +
-           boost::lexical_cast<std::string>(this->size()) + " not equal to " +
-           boost::lexical_cast<std::string>(rhs.size());
+           std::to_string(this->size()) + " not equal to " +
+           std::to_string(rhs.size());
   }
 
   // Run this same loops as in operator==

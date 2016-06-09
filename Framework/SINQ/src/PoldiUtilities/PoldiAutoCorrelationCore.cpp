@@ -386,11 +386,10 @@ UncertainValue PoldiAutoCorrelationCore::getCMessAndCSigma(
       m_logger.warning() << "Inconsistency foun while calculating correlation "
                             "intensity and error for d-value: "
                          << boost::lexical_cast<std::string>(dValue)
-                         << ", with detector index: "
-                         << boost::lexical_cast<std::string>(index)
+                         << ", with detector index: " << std::to_string(index)
                          << ", got middle index: "
-                         << boost::lexical_cast<std::string>(middleIndex)
-                         << ", ignoring it." << std::endl;
+                         << std::to_string(middleIndex) << ", ignoring it."
+                         << std::endl;
       break;
     }
 

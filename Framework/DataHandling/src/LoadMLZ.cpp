@@ -313,8 +313,7 @@ void LoadMLZ::loadRunDetails(NXEntry &entry) {
   double ei = m_mlzloader.calculateEnergy(m_wavelength);
   runDetails.addProperty<double>("Ei", ei, true); // overwrite
 
-  std::string duration =
-      boost::lexical_cast<std::string>(entry.getInt("duration"));
+  std::string duration = std::to_string(entry.getInt("duration"));
   runDetails.addProperty("duration", duration);
 
   std::string mode = entry.getString("mode");
@@ -331,13 +330,13 @@ void LoadMLZ::loadRunDetails(NXEntry &entry) {
     runDetails.addProperty("temperature", temperature);
   }
 
-  std::string monitorCounts = boost::lexical_cast<std::string>(m_monitorCounts);
+  std::string monitorCounts = std::to_string(m_monitorCounts);
   runDetails.addProperty("monitor_counts", monitorCounts);
 
   std::string chopper_speed = boost::lexical_cast<std::string>(m_chopper_speed);
   runDetails.addProperty("chopper_speed", chopper_speed);
 
-  std::string chopper_ratio = boost::lexical_cast<std::string>(m_chopper_ratio);
+  std::string chopper_ratio = std::to_string(m_chopper_ratio);
   runDetails.addProperty("chopper_ratio", chopper_ratio);
 
   std::string channel_width = boost::lexical_cast<std::string>(m_channelWidth);

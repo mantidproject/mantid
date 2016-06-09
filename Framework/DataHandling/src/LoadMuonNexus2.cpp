@@ -349,8 +349,7 @@ void LoadMuonNexus2::loadLogs(API::MatrixWorkspace_sptr ws, NXEntry &entry,
     ws->setComment(entry.getString("notes"));
   }
 
-  std::string run_num =
-      boost::lexical_cast<std::string>(entry.getInt("run_number"));
+  std::string run_num = std::to_string(entry.getInt("run_number"));
   // The sample is left to delete the property
   ws->mutableRun().addLogData(
       new PropertyWithValue<std::string>("run_number", run_num));

@@ -400,7 +400,7 @@ void LoadILLIndirect::moveSingleDetectors() {
   std::string prefix("single_tube_");
 
   for (int i = 1; i <= 8; i++) {
-    std::string componentName = prefix + boost::lexical_cast<std::string>(i);
+    std::string componentName = prefix + std::to_string(i);
 
     moveComponent(componentName, i * 20.0, 2.0 + i / 10.0);
   }

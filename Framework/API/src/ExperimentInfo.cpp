@@ -352,7 +352,7 @@ ExperimentInfo::getGroupMembers(const detid_t detID) const {
   } else {
     throw std::runtime_error(
         "ExperimentInfo::getGroupMembers - Unable to find ID " +
-        boost::lexical_cast<std::string>(detID) + " in lookup");
+        std::to_string(detID) + " in lookup");
   }
 }
 

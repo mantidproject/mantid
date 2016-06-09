@@ -546,7 +546,7 @@ std::string LoadNexusProcessed::buildWorkspaceName(const std::string &name,
                                                    int64_t wsIndex,
                                                    bool commonStem) {
   std::string wsName;
-  std::string index = boost::lexical_cast<std::string>(wsIndex);
+  std::string index = std::to_string(wsIndex);
 
   // if we don't have a common stem then use name tag
   if (!commonStem) {
@@ -587,7 +587,7 @@ void LoadNexusProcessed::correctForWorkspaceNameClash(std::string &wsName) {
     std::string wsIndex = ""; // dont use an index if there is no other
                               // workspace
     if (i > 0) {
-      wsIndex = "_" + boost::lexical_cast<std::string>(i);
+      wsIndex = "_" + std::to_string(i);
     }
 
     bool wsExists = AnalysisDataService::Instance().doesExist(wsName + wsIndex);
@@ -831,8 +831,7 @@ API::Workspace_sptr LoadNexusProcessed::loadTableEntry(NXEntry &entry) {
 
   int columnNumber = 1;
   do {
-    std::string dataSetName =
-        "column_" + boost::lexical_cast<std::string>(columnNumber);
+    std::string dataSetName = "column_" + std::to_string(columnNumber);
 
     NXInfo info = nx_tw.getDataSetInfo(dataSetName.c_str());
     if (info.stat == NX_ERROR) {
@@ -861,7 +860,7 @@ API::Workspace_sptr LoadNexusProcessed::loadTableEntry(NXEntry &entry) {
         loadNumericColumn<bool, bool>(nx_tw, dataSetName, workspace, "bool");
       } else {
         throw std::logic_error("Column with Nexus data type " +
-                               boost::lexical_cast<std::string>(info.type) +
+                               std::to_string(info.type) +
                                " cannot be loaded.");
       }
     } else if (info.rank == 2) {
@@ -997,8 +996,7 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(NXEntry &entry) {
   int numberPeaks = 0;
   std::vector<std::string> columnNames;
   do {
-    std::string str =
-        "column_" + boost::lexical_cast<std::string>(columnNumber);
+    std::string str = "column_" + std::to_string(columnNumber);
 
     NXInfo info = nx_tw.getDataSetInfo(str.c_str());
     if (info.stat == NX_ERROR) {

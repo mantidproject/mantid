@@ -2678,8 +2678,8 @@ void LoadEventNexus::loadTimeOfFlight(EventWorkspaceCollection_sptr WS,
       }
       if (time_channels_number > 0) // the numbers start with 1
       {
-        m_file->openGroup("time_channels_" + boost::lexical_cast<std::string>(
-                                                 time_channels_number),
+        m_file->openGroup("time_channels_" +
+                              std::to_string(time_channels_number),
                           "IXtime_channels");
         entries = m_file->getEntries();
         for (string_map_t::const_iterator it = entries.begin();
