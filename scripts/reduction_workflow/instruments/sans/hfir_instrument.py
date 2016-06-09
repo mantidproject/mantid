@@ -1,4 +1,4 @@
-# pylint: disable=invalid-name
+# pylint: disable=invalid-name,disable-msg=too-many-arguments
 import sys
 from mantid.kernel import Logger
 
