@@ -1,5 +1,6 @@
 from IOmodule import IOmodule
 import numpy
+import Constants
 
 class CalculateQ(IOmodule):
     """
@@ -48,11 +49,10 @@ class CalculateQ(IOmodule):
         """
         Calculate squared Q vectors for TOSCA and TOSCA-like instruments.
         """
-        _tosca_constant = 1/16.0 # magic number for TOSCA....
         _freq_squared = self._frequencies * self._frequencies
 
         if self._sample_form == "Powder":
-            self._Qvectors[self._sample_form] = _freq_squared * _tosca_constant
+            self._Qvectors[self._sample_form] = _freq_squared * Constants.TOSCA_constant
         else:
             raise ValueError("SingleCrystal user case is not implemented!")
 
