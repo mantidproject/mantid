@@ -12,7 +12,7 @@ class CreateCacheFilename(PythonAlgorithm):
     def category(self):
         """
         """
-        return "Workflow\DataHandling"
+        return "Workflow\\DataHandling"
 
     def name(self):
         """
