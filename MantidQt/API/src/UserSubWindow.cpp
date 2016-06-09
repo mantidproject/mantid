@@ -55,7 +55,7 @@ void UserSubWindow::initializeLayout() {
 
   m_bIsInitialized = true;
 
-  Mantid::Kernel::UsageService::Instance().registerFeatureUsage("Interface", name(), false);
+  Mantid::Kernel::UsageService::Instance().registerFeatureUsage("Interface", m_ifacename.toStdString(), false);
 }
 
 /**
