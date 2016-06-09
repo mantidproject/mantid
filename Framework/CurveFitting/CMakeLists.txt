@@ -38,6 +38,7 @@ set ( SRC_FILES
 	src/FuncMinimizers/LevenbergMarquardtMinimizer.cpp
 	src/FuncMinimizers/PRConjugateGradientMinimizer.cpp
 	src/FuncMinimizers/SimplexMinimizer.cpp
+	src/FuncMinimizers/TrustRegionMinimizer.cpp
 	src/FuncMinimizers/SteepestDescentMinimizer.cpp
 	src/FunctionDomain1DSpectrumCreator.cpp
 	src/Functions/Abragam.cpp
@@ -122,6 +123,8 @@ set ( SRC_FILES
 	src/RalNlls/DTRS.cpp
 	src/RalNlls/Internal.cpp
 	src/RalNlls/NLLS.cpp
+	src/RalNlls/TrustRegion.cpp
+	src/RalNlls/Workspaces.cpp
 	src/SeqDomain.cpp
 	src/SeqDomainSpectrumCreator.cpp
 	src/SpecialFunctionHelper.cpp
@@ -174,6 +177,7 @@ set ( INC_FILES
 	inc/MantidCurveFitting/FuncMinimizers/PRConjugateGradientMinimizer.h
 	inc/MantidCurveFitting/FuncMinimizers/SimplexMinimizer.h
 	inc/MantidCurveFitting/FuncMinimizers/SteepestDescentMinimizer.h
+	inc/MantidCurveFitting/FuncMinimizers/TrustRegionMinimizer.h
 	inc/MantidCurveFitting/FunctionDomain1DSpectrumCreator.h
 	inc/MantidCurveFitting/Functions/Abragam.h
 	inc/MantidCurveFitting/Functions/BSpline.h
@@ -246,6 +250,8 @@ set ( INC_FILES
 	inc/MantidCurveFitting/RalNlls/DTRS.h
 	inc/MantidCurveFitting/RalNlls/Internal.h
 	inc/MantidCurveFitting/RalNlls/NLLS.h
+	inc/MantidCurveFitting/RalNlls/TrustRegion.h
+	inc/MantidCurveFitting/RalNlls/Workspaces.h
 	inc/MantidCurveFitting/GSLFunctions.h
 	inc/MantidCurveFitting/GSLJacobian.h
 	inc/MantidCurveFitting/GSLMatrix.h
