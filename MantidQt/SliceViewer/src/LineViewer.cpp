@@ -6,6 +6,7 @@
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
 #include "MantidKernel/VMD.h"
+#include "MantidKernel/UsageService.h"
 #include "MantidQtSliceViewer/LineViewer.h"
 #include <QIntValidator>
 #include <qwt_plot_curve.h>
@@ -142,6 +143,9 @@ LineViewer::LineViewer(QWidget *parent)
                    SLOT(refreshPlot()));
   QObject::connect(m_lineOptions, SIGNAL(changedYLogScaling()), this,
                    SLOT(onToggleLogYAxis()));
+
+  Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
+    "Feature", "SliceViewer->LineViewer", false);
 }
 
 LineViewer::~LineViewer() {}
