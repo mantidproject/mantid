@@ -294,8 +294,10 @@ void Iqt::calculateBinning() {
 
   // Get data from property table
   const auto energyWidth = propsTable->getColumn("EnergyWidth")->cell<float>(0);
-  const auto sampleBins = propsTable->getColumn("SampleOutputBins")->cell<int>(0);
-  const auto resolutionBins = propsTable->getColumn("ResolutionBins")->cell<int>(0);
+  const auto sampleBins =
+      propsTable->getColumn("SampleOutputBins")->cell<int>(0);
+  const auto resolutionBins =
+      propsTable->getColumn("ResolutionBins")->cell<int>(0);
 
   disconnect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
              SLOT(updatePropertyValues(QtProperty *, double)));
@@ -315,12 +317,12 @@ void Iqt::calculateBinning() {
     showMessageBox("Number of resolution bins is less than 5.\nResults may be "
                    "inaccurate.");
 
-  IAlgorithm_sptr deleteAlg = AlgorithmManager::Instance().create("DeleteWorkspace");
+  IAlgorithm_sptr deleteAlg =
+      AlgorithmManager::Instance().create("DeleteWorkspace");
   deleteAlg->initialize();
   deleteAlg->setChild(true);
   deleteAlg->setProperty("Workspace", paramTableName);
   deleteAlg->execute();
-
 }
 
 void Iqt::loadSettings(const QSettings &settings) {

@@ -26,8 +26,8 @@ namespace CustomInterfaces {
 namespace IDA {
 IqtFit::IqtFit(QWidget *parent)
     : IndirectDataAnalysisTab(parent), m_stringManager(NULL), m_iqtFTree(NULL),
-      m_iqtFRangeManager(NULL), m_fixedProps(), m_iqtFInputWS(), m_iqtFOutputWS(),
-      m_iqtFInputWSName(), m_ties() {
+      m_iqtFRangeManager(NULL), m_fixedProps(), m_iqtFInputWS(),
+      m_iqtFOutputWS(), m_iqtFInputWSName(), m_ties() {
   m_uiForm.setupUi(parent);
 }
 
@@ -205,8 +205,8 @@ void IqtFit::run() {
     m_batchAlgoRunner->executeBatchAsync();
 
   } else {
-    m_baseName = constructBaseName(m_iqtFInputWSName.toStdString(), fitType, true,
-                                   specMin, specMax);
+    m_baseName = constructBaseName(m_iqtFInputWSName.toStdString(), fitType,
+                                   true, specMin, specMax);
     auto iqtFitMultiple = AlgorithmManager::Instance().create("IqtFitMultiple");
     iqtFitMultiple->initialize();
     iqtFitMultiple->setProperty("InputWorkspace",
@@ -567,8 +567,9 @@ void IqtFit::updatePlot() {
     m_uiForm.ppPlot->getRangeSelector("IqtFitRange")
         ->setRange(range.first, range.second);
     m_iqtFRangeManager->setRange(m_properties["StartX"], range.first,
-                               range.second);
-    m_iqtFRangeManager->setRange(m_properties["EndX"], range.first, range.second);
+                                 range.second);
+    m_iqtFRangeManager->setRange(m_properties["EndX"], range.first,
+                                 range.second);
 
     setDefaultParameters("Exponential1");
     setDefaultParameters("Exponential2");
@@ -822,8 +823,8 @@ void IqtFit::singleFit() {
                                    m_iqtFInputWSName.toStdString());
   m_singleFitAlg->setProperty("WorkspaceIndex",
                               m_uiForm.spPlotSpectrum->text().toInt());
-  m_singleFitAlg->setProperty("StartX",
-                              m_iqtFRangeManager->value(m_properties["StartX"]));
+  m_singleFitAlg->setProperty(
+      "StartX", m_iqtFRangeManager->value(m_properties["StartX"]));
   m_singleFitAlg->setProperty("EndX",
                               m_iqtFRangeManager->value(m_properties["EndX"]));
   m_singleFitAlg->setProperty(
@@ -867,7 +868,8 @@ void IqtFit::singleFitComplete(bool error) {
   for (size_t i = 0; i < parNames.size(); ++i)
     parameters[QString(parNames[i].c_str())] = parVals[i];
 
-  m_iqtFRangeManager->setValue(m_properties["BackgroundA0"], parameters["f0.A0"]);
+  m_iqtFRangeManager->setValue(m_properties["BackgroundA0"],
+                               parameters["f0.A0"]);
 
   const int fitType = m_uiForm.cbFitType->currentIndex();
   if (fitType != 2) {
@@ -924,10 +926,10 @@ void IqtFit::plotGuess(QtProperty *) {
   CompositeFunction_sptr function = createFunction(true);
 
   // Create the double* array from the input workspace
-  const size_t binIndxLow =
-      m_iqtFInputWS->binIndexOf(m_iqtFRangeManager->value(m_properties["StartX"]));
-  const size_t binIndxHigh =
-      m_iqtFInputWS->binIndexOf(m_iqtFRangeManager->value(m_properties["EndX"]));
+  const size_t binIndxLow = m_iqtFInputWS->binIndexOf(
+      m_iqtFRangeManager->value(m_properties["StartX"]));
+  const size_t binIndxHigh = m_iqtFInputWS->binIndexOf(
+      m_iqtFRangeManager->value(m_properties["EndX"]));
   const size_t nData = binIndxHigh - binIndxLow;
 
   std::vector<double> inputXData(nData);
