@@ -23,13 +23,15 @@ where :math:`d_m` are the experimental data, :math:`\sigma_m` the associated err
 the calculated or reconstructed data. The image is a set of numbers
 :math:`\{x_0, x_1, \dots, x_N\}` related to the measured data via a 1D Fourier transform:
 
-.. math:: d_m = \frac{1}{N} \sum_{j=0}^{N-1} x_j e^{i 2\pi m j / N}
+.. math:: d_m = \sum_{j=0}^{N-1} x_j e^{i 2\pi m j / N}
 
-Note that even for real input data the reconstructed image can be complex, which means that both real and
+Note that even for real input data the reconstructed image can be complex, which means that both the real and
 imaginary parts will be taken into account for the calculations. This is the default behaviour, which can be
 changed by setting the input property *ComplexImage* to *False*. Note that the algorithm will fail to converge
-if the image is complex and this option is set to *False*. For this reason, it is recomended to use the default
-when no prior knowledge is available. The entropy is defined on the image :math:`\{x_j\}` as:
+if the image is complex (i.e. the data does not satisfy Friedel's law) and this option is set to *False*. 
+For this reason, it is recomended to use the default when no prior knowledge is available. 
+
+The entropy is defined on the image :math:`\{x_j\}` as:
 
 .. math:: S = \sum_j \left(x_j/A\right) \sinh^{-1} \left(x_j/A\right)
 
@@ -37,7 +39,7 @@ or
 
 .. math:: S = -\sum_j x_j \left(\log(x_j/A)-1\right)
 
-where :math:`A` is a constant and the formula to use depends on the input property *PositiveImage*: when it is
+where :math:`A` is a constant and the formula which is used depends on the input property *PositiveImage*: when it is
 set to *False* the first equation will be applied, whereas the latter expresion will be used if this property
 is set to *True*. The sensitive of the reconstructed image to reconstructed
 image will vary depending on the data. In general a smaller value would preduce a
