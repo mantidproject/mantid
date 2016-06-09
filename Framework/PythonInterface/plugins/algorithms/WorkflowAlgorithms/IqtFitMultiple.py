@@ -2,10 +2,7 @@
 from mantid.api import (PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty,
                         ITableWorkspaceProperty, WorkspaceGroupProperty, Progress)
 from mantid.kernel import Direction, FloatBoundedValidator, IntBoundedValidator, logger
-from mantid.simpleapi import (CropWorkspace, ConvertToHistogram, Fit, RenameWorkspace,
-                              ProcessIndirectFitParameters, CopyLogs, AddSampleLogMultiple,
-                              DeleteWorkspace, mtd)
-import os.path
+from mantid.simpleapi import *
 
 class IqtFitMultiple(PythonAlgorithm):
 
