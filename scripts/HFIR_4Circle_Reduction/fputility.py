@@ -57,7 +57,7 @@ def write_scd_fullprof_kvector(user_header, wave_length, k_vector_dict, peak_dic
 
         # miller index
         m_h, m_k, m_l = peak_dict['hkl']
-        part1 = '%4d%4d%4d' % (m_h, m_k, m_l)
+        part1 = '%4d%4d%4d' % (round(m_h), round(m_k), round(m_l))
 
         # k index
         if num_k_vectors > 0:

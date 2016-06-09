@@ -951,8 +951,14 @@ class MainWindow(QtGui.QMainWindow):
             scan_number_list.append(self.ui.tableWidget_mergeScans.get_scan_number(i_row))
 
         # write
-        user_header = 'blablabla'
-        self._myControl.export_to_fullprof(exp_number, scan_number_list, user_header, fp_name)
+        user_header = str(self.ui.lineEdit_fpHeader.text())
+        print '[DB...BAT] user header: ', user_header
+        try:
+            self._myControl.export_to_fullprof(exp_number, scan_number_list, user_header, fp_name)
+        except AssertionError as a_error:
+            self.pop_one_button_dialog(str(a_error))
+        except RuntimeError as r_error:
+            self.pop_one_button_dialog(str(r_error))
 
         return
 
@@ -1821,8 +1827,12 @@ class MainWindow(QtGui.QMainWindow):
         k_shift_message = str(self.ui.comboBox_kVectors.currentText())
         k_index = int(k_shift_message.split(':')[0])
 
-        # form the set up
+        # set to controller
         self._myControl.set_k_shift(scan_list, k_index)
+
+        # set to table
+        for row_index in selected_row_numbers:
+            self.ui.tableWidget_mergeScans.set_k_shift_index(row_index, k_index)
 
         return
 

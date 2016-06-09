@@ -658,9 +658,9 @@ def round_hkl(hkl):
     """
     print type(hkl)
 
-    h = int(hkl[0] + 0.5)
-    k = int(hkl[1] + 0.5)
-    l = int(hkl[2] + 0.5)
+    h = round(hkl[0])
+    k = round(hkl[1])
+    l = round(hkl[2])
 
     return h, k, l
 

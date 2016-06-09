@@ -1934,21 +1934,36 @@ class CWSCDReductionControl(object):
 
         return True, (m_h, m_k, m_l)
 
-
     def set_k_shift(self, scan_number_list, k_index):
         """ Set k-shift vector
         :param scan_number_list:
-        :param k_shift_vector:
+        :param k_index:
         :return:
         """
         # check
         assert isinstance(scan_number_list, list) and len(scan_number_list) > 0
         assert isinstance(k_index, int)
-        assert k_index in self._kShiftDict, 'K-index %d is not in K-shift dictionary (' \
-                                            '%s).' % (k_index, str(self._kShiftDict.keys()))
+        assert k_index == 0 or k_index in self._kShiftDict, \
+            'K-index %d is not in K-shift dictionary (%s).' % (k_index, str(self._kShiftDict.keys()))
 
-        # get the k-shift index
-        self._kShiftDict[self._kVectorIndex][1] = scan_number_list
+        # add to the new and remove from the previous placeholder
+        for scan_number in scan_number_list:
+            # add to the target k-index list
+            if k_index > 0 and scan_number not in self._kShiftDict[k_index][1]:
+                self._kShiftDict[k_index][1].append(scan_number)
+
+            # remove from the previous placeholder
+            for k_i in self._kShiftDict.keys():
+                # skip current one
+                if k_i == k_index:
+                    continue
+
+                # check whether scan number is in this list
+                if scan_number in self._kShiftDict[k_i][1]:
+                    self._kShiftDict[k_i][1].remove(scan_number)
+                    break
+            # END-FOR (k_i)
+        # END-FOR (scan_number)
 
         return
 

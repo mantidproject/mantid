@@ -136,7 +136,7 @@ class PeakProcessHelper(object):
         """ Get user's last setup HKL
         :return:
         """
-        if self._userHKL is None:
+        if self._currHKL is None:
             raise RuntimeError('Exp %d Scan %d does not have CURRENT HKL set up yet.' % (self._myExpNumber,
                                                                                          self._myScanNumber))
 
