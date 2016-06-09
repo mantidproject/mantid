@@ -6,9 +6,9 @@
 #include <gtest/gtest.h>
 
 #include "MantidAPI/FrameworkManager.h"
-#include "MantidQtCustomInterfaces/Reflectometry/DataProcessorPreprocessingAlgorithm.h"
+#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorPreprocessingAlgorithm.h"
 
-using namespace MantidQt::CustomInterfaces;
+using namespace MantidQt::MantidWidgets;
 using namespace Mantid::API;
 using namespace testing;
 

@@ -4,11 +4,11 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/FrameworkManager.h"
-#include "MantidQtCustomInterfaces/Reflectometry/DataProcessorProcessingAlgorithmBase.h"
+#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorProcessingAlgorithmBase.h"
 
 using namespace Mantid::API;
 
-using MantidQt::CustomInterfaces::DataProcessorProcessingAlgorithmBase;
+using MantidQt::MantidWidgets::DataProcessorProcessingAlgorithmBase;
 
 class DataProcessorProcessingAlgorithmBaseTest : public CxxTest::TestSuite {
 public:

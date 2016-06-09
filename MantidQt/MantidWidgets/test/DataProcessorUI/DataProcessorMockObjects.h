@@ -2,12 +2,12 @@
 #define MANTID_CUSTOMINTERFACES_DATAPROCESSORVIEWMOCKOBJECTS_H
 
 #include "MantidKernel/make_unique.h"
-#include "MantidQtCustomInterfaces/Reflectometry/DataProcessorAppendRowCommand.h"
-#include "MantidQtCustomInterfaces/Reflectometry/DataProcessorView.h"
-#include "MantidQtCustomInterfaces/Reflectometry/QDataProcessorTableModel.h"
+#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorAppendRowCommand.h"
+#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorView.h"
+#include "MantidQtMantidWidgets/DataProcessorUI/QDataProcessorTableModel.h"
 #include <gmock/gmock.h>
 
-using namespace MantidQt::CustomInterfaces;
+using namespace MantidQt::MantidWidgets;
 using namespace Mantid::API;
 
 // Clean column ids for use within tests

@@ -2,6 +2,7 @@
 #define MANTIDQTMANTIDWIDGETS_DATAPROCESSORALGORITHMBASE_H
 
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidQtMantidWidgets/WidgetDllOption.h"
 
 #include <set>
 #include <string>
@@ -36,7 +37,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DataProcessorProcessingAlgorithmBase {
+class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS DataProcessorProcessingAlgorithmBase {
 public:
   // Constructor
   DataProcessorProcessingAlgorithmBase(

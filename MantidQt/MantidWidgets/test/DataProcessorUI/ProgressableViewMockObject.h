@@ -1,10 +1,10 @@
 #ifndef MANTID_CUSTOMINTERFACES_PROGRESSABLEVIEWMOCKOBJECT_H
 #define MANTID_CUSTOMINTERFACES_PROGRESSABLEVIEWMOCKOBJECT_H
 
-#include "MantidQtCustomInterfaces/ProgressableView.h"
+#include "MantidQtMantidWidgets/ProgressableView.h"
 #include <gmock/gmock.h>
 
-using namespace MantidQt::CustomInterfaces;
+using namespace MantidQt::MantidWidgets;
 
 class MockProgressableView : public ProgressableView {
 public:

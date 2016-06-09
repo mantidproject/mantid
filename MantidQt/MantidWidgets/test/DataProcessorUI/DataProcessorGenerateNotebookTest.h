@@ -8,12 +8,12 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h"
-#include "MantidQtCustomInterfaces/Reflectometry/DataProcessorGenerateNotebook.h"
-#include "MantidQtCustomInterfaces/Reflectometry/DataProcessorVectorString.h"
-#include "MantidQtCustomInterfaces/Reflectometry/QDataProcessorTableModel.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorGenerateNotebook.h"
+#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorVectorString.h"
+#include "MantidQtMantidWidgets/DataProcessorUI/QDataProcessorTableModel.h"
 
-using namespace MantidQt::CustomInterfaces;
+using namespace MantidQt::MantidWidgets;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace testing;

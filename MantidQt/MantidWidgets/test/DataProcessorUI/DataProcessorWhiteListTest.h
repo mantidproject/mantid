@@ -5,9 +5,9 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
-#include "MantidQtCustomInterfaces/Reflectometry/DataProcessorWhiteList.h"
+#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorWhiteList.h"
 
-using namespace MantidQt::CustomInterfaces;
+using namespace MantidQt::MantidWidgets;
 using namespace testing;
 
 //=====================================================================================

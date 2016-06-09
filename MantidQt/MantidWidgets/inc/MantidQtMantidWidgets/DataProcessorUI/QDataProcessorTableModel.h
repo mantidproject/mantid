@@ -3,6 +3,7 @@
 
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorWhiteList.h"
+#include "MantidQtMantidWidgets/WidgetDllOption.h"
 #include <QAbstractTableModel>
 #include <boost/shared_ptr.hpp>
 #include <map>
@@ -35,7 +36,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class QDataProcessorTableModel : public QAbstractTableModel {
+class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS QDataProcessorTableModel
+    : public QAbstractTableModel {
   Q_OBJECT
 public:
   QDataProcessorTableModel(Mantid::API::ITableWorkspace_sptr tableWorkspace,
