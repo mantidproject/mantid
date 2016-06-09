@@ -22,7 +22,6 @@
 #include "MantidKernel/VisibleWhenProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
-#include "MantidAPI/MemoryManager.h"
 
 #include <algorithm>
 #include <sstream>
@@ -594,9 +593,6 @@ void LoadEventPreNexus::procEvents(
     PARALLEL_START_INTERUPT_REGION
     prog->resetNumSteps(workspace->getNumberHistograms(), 0.8, 0.95);
 
-    size_t memoryCleared = 0;
-    MemoryManager::Instance().releaseFreeMemory();
-
     // Merge all workspaces, index by index.
     PARALLEL_FOR_NO_WSP_CHECK()
     for (int iwi = 0; iwi < int(workspace->getNumberHistograms()); iwi++) {
@@ -620,20 +616,8 @@ void LoadEventPreNexus::procEvents(
         // Free up memory as you go along.
         partEl.clear(false);
       }
-
-      // With TCMalloc, release memory when you accumulate enough to make sense
-      PARALLEL_CRITICAL(LoadEventPreNexus_trackMemory) {
-        memoryCleared += numEvents;
-        if (memoryCleared > 10000000) // ten million events = about 160 MB
-        {
-          MemoryManager::Instance().releaseFreeMemory();
-          memoryCleared = 0;
-        }
-      }
       prog->report("Merging Workspaces");
     }
-    // Final memory release
-    MemoryManager::Instance().releaseFreeMemory();
     g_log.debug() << tim << " to merge workspaces together." << std::endl;
     PARALLEL_END_INTERUPT_REGION
   }

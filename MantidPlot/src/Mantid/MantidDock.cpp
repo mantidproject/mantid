@@ -20,6 +20,10 @@
 
 #include <Poco/Path.h>
 
+#ifdef MAKE_VATES
+#include "vtkPVDisplayInformation.h"
+#endif
+
 #include <algorithm>
 #include <sstream>
 
@@ -592,6 +596,10 @@ void MantidDockWidget::addMDEventWorkspaceMenuItems(
   menu->addAction(m_showVatesGui); // Show the Vates simple interface
   if (!MantidQt::API::InterfaceManager::hasVatesLibraries()) {
     m_showVatesGui->setEnabled(false);
+#ifdef MAKE_VATES
+  } else if (!vtkPVDisplayInformation::SupportsOpenGLLocally()) {
+    m_showVatesGui->setEnabled(false);
+#endif
   } else {
     std::size_t nDim = WS->getNonIntegratedDimensions().size();
     m_showVatesGui->setEnabled(nDim >= 3 && nDim < 5);
@@ -609,6 +617,10 @@ void MantidDockWidget::addMDHistoWorkspaceMenuItems(
   menu->addAction(m_showVatesGui); // Show the Vates simple interface
   if (!MantidQt::API::InterfaceManager::hasVatesLibraries()) {
     m_showVatesGui->setEnabled(false);
+#ifdef MAKE_VATES
+  } else if (!vtkPVDisplayInformation::SupportsOpenGLLocally()) {
+    m_showVatesGui->setEnabled(false);
+#endif
   } else {
     std::size_t nDim = WS->getNonIntegratedDimensions().size();
     m_showVatesGui->setEnabled(nDim >= 3 && nDim < 5);
@@ -1004,14 +1016,14 @@ void MantidDockWidget::deleteWorkspaces() {
 void MantidDockWidget::sortAscending() {
   if (isTreeUpdating())
     return;
-  m_tree->setSortOrder(Qt::Ascending);
+  m_tree->setSortOrder(Qt::AscendingOrder);
   m_tree->sort();
 }
 
 void MantidDockWidget::sortDescending() {
   if (isTreeUpdating())
     return;
-  m_tree->setSortOrder(Qt::Descending);
+  m_tree->setSortOrder(Qt::DescendingOrder);
   m_tree->sort();
 }
 
@@ -1862,17 +1874,17 @@ bool MantidTreeWidgetItem::operator<(const QTreeWidgetItem &other) const {
     return false;
 
   if (!thisShouldBeSorted && !otherShouldBeSorted) {
-    if (m_parent->getSortOrder() == Qt::Ascending)
+    if (m_parent->getSortOrder() == Qt::AscendingOrder)
       return m_sortPos < otherSortPos;
     else
       return m_sortPos >= otherSortPos;
   } else if (thisShouldBeSorted && !otherShouldBeSorted) {
-    if (m_parent->getSortOrder() == Qt::Ascending)
+    if (m_parent->getSortOrder() == Qt::AscendingOrder)
       return false;
     else
       return true;
   } else if (!thisShouldBeSorted && otherShouldBeSorted) {
-    if (m_parent->getSortOrder() == Qt::Ascending)
+    if (m_parent->getSortOrder() == Qt::AscendingOrder)
       return true;
     else
       return false;

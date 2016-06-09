@@ -1,11 +1,7 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/InstrumentDataService.h"
-#include "MantidAPI/MemoryManager.h"
 #include "MantidAPI/WorkspaceGroup.h"
 
 #include "MantidKernel/Exception.h"
@@ -236,7 +232,6 @@ void FrameworkManagerImpl::clearAlgorithms() {
  */
 void FrameworkManagerImpl::clearData() {
   AnalysisDataService::Instance().clear();
-  Mantid::API::MemoryManager::Instance().releaseFreeMemory();
 }
 
 /**
@@ -411,7 +406,6 @@ bool FrameworkManagerImpl::deleteWorkspace(const std::string &wsName) {
                   << std::endl;
     retVal = false;
   }
-  Mantid::API::MemoryManager::Instance().releaseFreeMemory();
   return retVal;
 }
 

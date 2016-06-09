@@ -1,13 +1,12 @@
 #ifndef BIN_INPUT_WIDGET_H_
-#define BIN_INPUT_WIDGET_H_ 
+#define BIN_INPUT_WIDGET_H_
 
 #include <QWidget>
 
 /**
 Abstract bin widget
 */
-class BinInputWidget : public QWidget
-{
+class BinInputWidget : public QWidget {
   Q_OBJECT
 public:
   /// Getter for the number of bins

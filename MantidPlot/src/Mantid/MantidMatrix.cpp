@@ -139,10 +139,10 @@ MantidMatrix::MantidMatrix(Mantid::API::MatrixWorkspace_const_sptr ws,
   connect(m_tabs, SIGNAL(currentChanged(int)), this, SLOT(viewChanged(int)));
 
   setGeometry(50, 50,
-              QMIN(5, numCols()) *
+              qMin(5, numCols()) *
                       m_table_viewY->horizontalHeader()->sectionSize(0) +
                   55,
-              (QMIN(10, numRows()) + 1) *
+              (qMin(10, numRows()) + 1) *
                       m_table_viewY->verticalHeader()->sectionSize(0) +
                   100);
 
@@ -247,7 +247,7 @@ void MantidMatrix::connectTableView(QTableView *view,
   view->setFocusPolicy(Qt::StrongFocus);
 
   QPalette pal = view->palette();
-  pal.setColor(QColorGroup::Base, m_bk_color);
+  pal.setColor(QPalette::Base, m_bk_color);
   view->setPalette(pal);
 
   // set header properties
@@ -637,17 +637,15 @@ QwtDoubleRect MantidMatrix::boundingRect() {
       } else {
         m_spectrogramCols = numCols() > 100 ? numCols() : 100;
       }
-      m_boundingRect =
-          QwtDoubleRect(QMIN(x_start, x_end) - 0.5 * dx,
-                        QMIN(y_start, y_end) - 0.5 * dy,
-                        fabs(x_end - x_start) + dx, fabs(y_end - y_start) + dy)
-              .normalized();
+      m_boundingRect = QwtDoubleRect(qMin(x_start, x_end) - 0.5 * dx,
+                                     qMin(y_start, y_end) - 0.5 * dy,
+                                     fabs(x_end - x_start) + dx,
+                                     fabs(y_end - y_start) + dy).normalized();
 
     } else {
       m_spectrogramCols = 0;
-      m_boundingRect = QwtDoubleRect(0, QMIN(y_start, y_end) - 0.5 * dy, 1,
-                                     fabs(y_end - y_start) + dy)
-                           .normalized();
+      m_boundingRect = QwtDoubleRect(0, qMin(y_start, y_end) - 0.5 * dy, 1,
+                                     fabs(y_end - y_start) + dy).normalized();
     }
   } // Define the spectrogram bounding box
   return m_boundingRect;

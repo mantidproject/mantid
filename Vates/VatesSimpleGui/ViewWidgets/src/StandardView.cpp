@@ -2,7 +2,7 @@
 #include "MantidVatesSimpleGuiViewWidgets/RebinnedSourcesManager.h"
 // Have to deal with ParaView warnings and Intel compiler the hard way.
 #if defined(__INTEL_COMPILER)
-  #pragma warning disable 1170
+#pragma warning disable 1170
 #endif
 
 #include <pqActiveObjects.h>
@@ -21,7 +21,7 @@
 #include <vtkSMPVRepresentationProxy.h>
 
 #if defined(__INTEL_COMPILER)
-  #pragma warning enable 1170
+#pragma warning enable 1170
 #endif
 
 #include <QAction>
@@ -32,28 +32,25 @@
 #include <QString>
 #include <QToolTip>
 
-namespace Mantid
-{
-namespace Vates
-{
-namespace SimpleGui
-{
+namespace Mantid {
+namespace Vates {
+namespace SimpleGui {
 
 /**
  * Simple class for a QMenu where the actions do show their tool tip
  * strings (this does not happen by default with standard QMenu).
  */
-class QMenuWithToolTip: public QMenu {
+class QMenuWithToolTip : public QMenu {
 public:
   explicit QMenuWithToolTip(QWidget *parent) : QMenu(parent) {}
 
-  bool event(QEvent* e) {
+  bool event(QEvent *e) override {
     if (QEvent::ToolTip == e->type()) {
       // grab the action specific tooltip
-      QHelpEvent *he = dynamic_cast<QHelpEvent*>(e);
+      QHelpEvent *he = dynamic_cast<QHelpEvent *>(e);
       if (!he)
         return false;
-      QAction* a = actionAt(he->pos());
+      QAction *a = actionAt(he->pos());
       if (a && a->toolTip() != a->text()) {
         QToolTip::showText(he->globalPos(), a->toolTip(), this);
         return true;
@@ -74,12 +71,14 @@ QString StandardView::g_sliceMDLbl = "Complete (" + g_sliceMDName + ")";
 QString StandardView::g_cutMDLbl = "Horace style (" + g_cutMDName + ")";
 
 const QString tipBefore = "Run the ";
-const QString tipAfter = " Mantid algorithm (the algorithm dialog will show up)";
+const QString tipAfter =
+    " Mantid algorithm (the algorithm dialog will show up)";
 QString StandardView::g_binMDToolTipTxt = tipBefore + g_binMDName + tipAfter;
-QString StandardView::g_sliceMDToolTipTxt = tipBefore + g_sliceMDName + tipAfter;
+QString StandardView::g_sliceMDToolTipTxt =
+    tipBefore + g_sliceMDName + tipAfter;
 QString StandardView::g_cutMDToolTipTxt = tipBefore + g_cutMDName + tipAfter;
-const std::string StandardView::SurfaceRepresentation  = "Surface";
-const std::string StandardView::WireFrameRepresentation  = "Wireframe";
+const std::string StandardView::SurfaceRepresentation = "Surface";
+const std::string StandardView::WireFrameRepresentation = "Wireframe";
 
 // To map action labels to algorithm names
 QMap<QString, QString> StandardView::g_actionToAlgName;
@@ -90,12 +89,10 @@ QMap<QString, QString> StandardView::g_actionToAlgName;
  * @param parent the parent widget for the standard view
  * @param rebinnedSourcesManager Pointer to a RebinnedSourcesManager
  */
-  StandardView::StandardView(QWidget *parent, RebinnedSourcesManager* rebinnedSourcesManager) : ViewBase(parent, rebinnedSourcesManager),
-                                                                 m_binMDAction(NULL),
-                                                                 m_sliceMDAction(NULL),
-                                                                 m_cutMDAction(NULL),
-                                                                 m_unbinAction(NULL)
-{
+StandardView::StandardView(QWidget *parent,
+                           RebinnedSourcesManager *rebinnedSourcesManager)
+    : ViewBase(parent, rebinnedSourcesManager), m_binMDAction(NULL),
+      m_sliceMDAction(NULL), m_cutMDAction(NULL), m_unbinAction(NULL) {
   this->m_ui.setupUi(this);
   this->m_cameraReset = false;
 
@@ -114,35 +111,32 @@ QMap<QString, QString> StandardView::g_actionToAlgName;
                    SLOT(onCutButtonClicked()));
 
   // Listen to a change in the active source, to adapt our rebin buttons
-  QObject::connect(&pqActiveObjects::instance(), SIGNAL(sourceChanged(pqPipelineSource*)),
-                   this, SLOT(activeSourceChangeListener(pqPipelineSource*)));
+  QObject::connect(&pqActiveObjects::instance(),
+                   SIGNAL(sourceChanged(pqPipelineSource *)), this,
+                   SLOT(activeSourceChangeListener(pqPipelineSource *)));
 
   // Set the scale button to create the ScaleWorkspace operator
-  QObject::connect(this->m_ui.scaleButton, SIGNAL(clicked()),
-                   this, SLOT(onScaleButtonClicked()));
+  QObject::connect(this->m_ui.scaleButton, SIGNAL(clicked()), this,
+                   SLOT(onScaleButtonClicked()));
 
   this->m_view = this->createRenderView(this->m_ui.renderFrame);
 
-  QObject::connect(this->m_view.data(), SIGNAL(endRender()),
-                   this, SLOT(onRenderDone()));
-
-
+  QObject::connect(this->m_view.data(), SIGNAL(endRender()), this,
+                   SLOT(onRenderDone()));
 }
 
-StandardView::~StandardView()
-{
-}
+StandardView::~StandardView() {}
 
-void StandardView::setupViewButtons()
-{
+void StandardView::setupViewButtons() {
 
   // Populate the rebin button
-  QMenuWithToolTip* rebinMenu = new QMenuWithToolTip(this->m_ui.rebinToolButton);
+  QMenuWithToolTip *rebinMenu =
+      new QMenuWithToolTip(this->m_ui.rebinToolButton);
 
   m_binMDAction = new QAction(g_binMDLbl, rebinMenu);
   m_binMDAction->setToolTip(g_binMDToolTipTxt);
   m_binMDAction->setIconVisibleInMenu(false);
-  
+
   m_sliceMDAction = new QAction(g_sliceMDLbl, rebinMenu);
   m_sliceMDAction->setToolTip(g_sliceMDToolTipTxt);
   m_sliceMDAction->setIconVisibleInMenu(false);
@@ -162,63 +156,53 @@ void StandardView::setupViewButtons()
   this->m_ui.rebinToolButton->setPopupMode(QToolButton::InstantPopup);
   this->m_ui.rebinToolButton->setMenu(rebinMenu);
 
-  QObject::connect(m_binMDAction, SIGNAL(triggered()),
-                   this, SLOT(onRebin()), Qt::QueuedConnection);
-  QObject::connect(m_sliceMDAction, SIGNAL(triggered()),
-                   this, SLOT(onRebin()), Qt::QueuedConnection);
-  QObject::connect(m_cutMDAction, SIGNAL(triggered()),
-                   this, SLOT(onRebin()), Qt::QueuedConnection);
+  QObject::connect(m_binMDAction, SIGNAL(triggered()), this, SLOT(onRebin()),
+                   Qt::QueuedConnection);
+  QObject::connect(m_sliceMDAction, SIGNAL(triggered()), this, SLOT(onRebin()),
+                   Qt::QueuedConnection);
+  QObject::connect(m_cutMDAction, SIGNAL(triggered()), this, SLOT(onRebin()),
+                   Qt::QueuedConnection);
   // Set the unbinbutton to remove the rebinning on a workspace
   // which was binned in the VSI
-  QObject::connect(m_unbinAction, SIGNAL(triggered()),
-                   this, SIGNAL(unbin()), Qt::QueuedConnection);
-
+  QObject::connect(m_unbinAction, SIGNAL(triggered()), this, SIGNAL(unbin()),
+                   Qt::QueuedConnection);
 }
 
-void StandardView::destroyView()
-{
+void StandardView::destroyView() {
   pqObjectBuilder *builder = pqApplicationCore::instance()->getObjectBuilder();
   this->destroyFilter(QString("Slice"));
   builder->destroy(this->m_view);
 }
 
-pqRenderView* StandardView::getView()
-{
-  return this->m_view.data();
-}
+pqRenderView *StandardView::getView() { return this->m_view.data(); }
 
-void StandardView::render()
-{
+void StandardView::render() {
   this->origSrc = pqActiveObjects::instance().activeSource();
-  if (NULL == this->origSrc)
-  {
+  if (NULL == this->origSrc) {
     return;
   }
-  pqObjectBuilder* builder = pqApplicationCore::instance()->getObjectBuilder();
+  pqObjectBuilder *builder = pqApplicationCore::instance()->getObjectBuilder();
   activeSourceChangeListener(this->origSrc);
 
-  if (this->isPeaksWorkspace(this->origSrc))
-  {
+  if (this->isPeaksWorkspace(this->origSrc)) {
     this->m_ui.cutButton->setEnabled(false);
   }
 
   // Show the data
-  pqDataRepresentation *drep = builder->createDataRepresentation(\
-        this->origSrc->getOutputPort(0), this->m_view);
+  pqDataRepresentation *drep = builder->createDataRepresentation(
+      this->origSrc->getOutputPort(0), this->m_view);
   std::string reptype = StandardView::SurfaceRepresentation;
-  if (this->isPeaksWorkspace(this->origSrc))
-  {
+  if (this->isPeaksWorkspace(this->origSrc)) {
     reptype = StandardView::WireFrameRepresentation;
   }
   vtkSMPropertyHelper(drep->getProxy(), "Representation").Set(reptype.c_str());
   drep->getProxy()->UpdateVTKObjects();
-  this->origRep = qobject_cast<pqPipelineRepresentation*>(drep);
-  if (!this->isPeaksWorkspace(this->origSrc))
-  {
-    vtkSMPVRepresentationProxy::SetScalarColoring(drep->getProxy(), "signal",
-                                                  vtkDataObject::FIELD_ASSOCIATION_CELLS);
-    //drep->getProxy()->UpdateVTKObjects();
-    //vtkSMPVRepresentationProxy::RescaleTransferFunctionToDataRange(drep->getProxy(),
+  this->origRep = qobject_cast<pqPipelineRepresentation *>(drep);
+  if (!this->isPeaksWorkspace(this->origSrc)) {
+    vtkSMPVRepresentationProxy::SetScalarColoring(
+        drep->getProxy(), "signal", vtkDataObject::FIELD_ASSOCIATION_CELLS);
+    // drep->getProxy()->UpdateVTKObjects();
+    // vtkSMPVRepresentationProxy::RescaleTransferFunctionToDataRange(drep->getProxy(),
     //                                                               "signal",
     //                                                               vtkDataObject::FIELD_ASSOCIATION_CELLS);
     drep->getProxy()->UpdateVTKObjects();
@@ -275,28 +259,21 @@ void StandardView::onScaleButtonClicked() {
  * This function is responsible for calling resetCamera if the internal
  * variable cameraReset has been set to true.
  */
-void StandardView::onRenderDone()
-{
-  if (this->m_cameraReset)
-  {
+void StandardView::onRenderDone() {
+  if (this->m_cameraReset) {
     this->resetCamera();
     this->m_cameraReset = false;
   }
 }
 
-void StandardView::renderAll()
-{
-  this->m_view->render();
-}
+void StandardView::renderAll() { this->m_view->render(); }
 
-void StandardView::resetDisplay()
-{
+void StandardView::resetDisplay() {
   this->m_view->resetDisplay();
   this->m_view->forceRender();
 }
 
-void StandardView::resetCamera()
-{
+void StandardView::resetCamera() {
   this->m_view->resetCamera();
   this->m_view->forceRender();
 }
@@ -304,35 +281,26 @@ void StandardView::resetCamera()
 /**
  * This function enables the cut button for the standard view.
  */
-void StandardView::updateUI()
-{
-  this->m_ui.cutButton->setEnabled(true);
-}
+void StandardView::updateUI() { this->m_ui.cutButton->setEnabled(true); }
 
-void StandardView::updateView()
-{
-  this->m_cameraReset = true;
-}
+void StandardView::updateView() { this->m_cameraReset = true; }
 
-void StandardView::closeSubWindows()
-{
-}
-
+void StandardView::closeSubWindows() {}
 
 /**
  * Check if the rebin and unbin buttons should be visible
  * Note that for a rebin button to be visible there may be no
- * MDHisto workspaces present, yet  MDHisto workspaces which result from 
+ * MDHisto workspaces present, yet  MDHisto workspaces which result from
  * rebinning within the VSI are allowed.
  */
-void StandardView::setRebinAndUnbinButtons()
-{
+void StandardView::setRebinAndUnbinButtons() {
   unsigned int numberOfInternallyRebinnedWorkspaces = 0;
   unsigned int numberOfTrueMDHistoWorkspaces = 0;
   unsigned int numberOfPeakWorkspaces = 0;
 
   pqServer *server = pqActiveObjects::instance().activeServer();
-  pqServerManagerModel *smModel = pqApplicationCore::instance()->getServerManagerModel();
+  pqServerManagerModel *smModel =
+      pqApplicationCore::instance()->getServerManagerModel();
   const QList<pqPipelineSource *> sources =
       smModel->findItems<pqPipelineSource *>(server);
 
@@ -346,21 +314,22 @@ void StandardView::setRebinAndUnbinButtons()
     }
   }
 
-  // If there are any true MDHisto workspaces then the rebin button should be disabled
-  bool allowRebinning = numberOfTrueMDHistoWorkspaces > 0 || numberOfPeakWorkspaces > 0;
+  // If there are any true MDHisto workspaces then the rebin button should be
+  // disabled
+  bool allowRebinning =
+      numberOfTrueMDHistoWorkspaces > 0 || numberOfPeakWorkspaces > 0;
   this->allowRebinningOptions(allowRebinning);
 
-  // If there are no internally rebinned workspaces the button should be disabled.
+  // If there are no internally rebinned workspaces the button should be
+  // disabled.
   allowUnbinOption(numberOfInternallyRebinnedWorkspaces > 0);
 }
 
-
 /**
  * Reacts to the user selecting the BinMD algorithm
- */ 
-void StandardView::onRebin()
-{
-  if(QAction* action = dynamic_cast<QAction*>(sender())) {
+ */
+void StandardView::onRebin() {
+  if (QAction *action = dynamic_cast<QAction *>(sender())) {
     // split always returns a list of at least one element
     QString algName = getAlgNameFromMenuLabel(action->text());
     emit rebin(algName.toStdString());
@@ -368,21 +337,23 @@ void StandardView::onRebin()
 }
 
 /**
- * react to the addition of the representation and change it's type to be Surface
+ * react to the addition of the representation and change it's type to be
+ * Surface
  * @param representation : representation to modify
  */
-void StandardView::onScaleRepresentationAdded(pqPipelineSource *, pqDataRepresentation * representation, int)
-{
-    vtkSMPropertyHelper(representation->getProxy(), "Representation").Set(StandardView::SurfaceRepresentation.c_str());
+void StandardView::onScaleRepresentationAdded(
+    pqPipelineSource *, pqDataRepresentation *representation, int) {
+  vtkSMPropertyHelper(representation->getProxy(), "Representation")
+      .Set(StandardView::SurfaceRepresentation.c_str());
 }
 
 /**
 Disable rebinning options
 */
 void StandardView::allowRebinningOptions(bool allow) {
-    this->m_binMDAction->setEnabled(allow);
-    this->m_sliceMDAction->setEnabled(allow);
-    this->m_cutMDAction->setEnabled(allow);
+  this->m_binMDAction->setEnabled(allow);
+  this->m_sliceMDAction->setEnabled(allow);
+  this->m_cutMDAction->setEnabled(allow);
 }
 
 /**
@@ -392,53 +363,49 @@ void StandardView::allowUnbinOption(bool allow) {
   this->m_unbinAction->setEnabled(allow);
 }
 
-
 /**
   * Listen for a change of the active source in order to check if the
   * active source is an MDEventSource for which we allow rebinning.
   */
-void StandardView::activeSourceChangeListener(pqPipelineSource* source)
-{
+void StandardView::activeSourceChangeListener(pqPipelineSource *source) {
   // If there is no active source, then we do not allow rebinning
-  if (!source)
-  {
+  if (!source) {
     this->allowRebinningOptions(false);
     this->m_unbinAction->setEnabled(false);
     return;
   }
 
   // If it is a filter work your way down
-  pqPipelineSource* localSource = source;
-  pqPipelineFilter* filter = qobject_cast<pqPipelineFilter*>(localSource);
+  pqPipelineSource *localSource = source;
+  pqPipelineFilter *filter = qobject_cast<pqPipelineFilter *>(localSource);
 
-  while(filter)
-  {
+  while (filter) {
     localSource = filter->getInput(0);
-    filter = qobject_cast<pqPipelineFilter*>(localSource);
+    filter = qobject_cast<pqPipelineFilter *>(localSource);
   }
 
-  // Important to first check for an internally rebinned source, then for MDEvent source, 
+  // Important to first check for an internally rebinned source, then for
+  // MDEvent source,
   // since the internally rebinned source may be an MDEventSource.
   std::string workspaceType(localSource->getProxy()->GetXMLName());
 
-  // Check if the source is associated with a workspace which was internally rebinned by the VSI.
+  // Check if the source is associated with a workspace which was internally
+  // rebinned by the VSI.
   // In this case the user can further rebin or unbin the source.
-  if (isInternallyRebinnedWorkspace(localSource))
-  {
+  if (isInternallyRebinnedWorkspace(localSource)) {
     this->allowRebinningOptions(true);
     this->allowUnbinOption(true);
   }
-  // Check if we are dealing with a MDEvent workspace. In this case we allow rebinning, but 
+  // Check if we are dealing with a MDEvent workspace. In this case we allow
+  // rebinning, but
   // unbinning will not make a lot of sense.
-  else if (workspaceType.find("MDEW Source") != std::string::npos)
-  {
+  else if (workspaceType.find("MDEW Source") != std::string::npos) {
     this->allowRebinningOptions(true);
     this->allowUnbinOption(false);
   }
   // Otherwise we must be dealing with either a MDHIsto or PeaksWorkspace
   // which cannot be neither rebinned nor unbinned.
-  else
-  {
+  else {
     this->allowRebinningOptions(false);
     this->allowUnbinOption(false);
   }
@@ -452,15 +419,13 @@ void StandardView::activeSourceChangeListener(pqPipelineSource* source)
  * @param menuLbl label (what is shown in the action)
  * @return Name of the corresponding Mantid algorithm
  */
-QString StandardView::getAlgNameFromMenuLabel(const QString &menuLbl)
-{
+QString StandardView::getAlgNameFromMenuLabel(const QString &menuLbl) {
   QString res;
-  if (g_actionToAlgName.contains(menuLbl))
-  {
+  if (g_actionToAlgName.contains(menuLbl)) {
     res = g_actionToAlgName.value(menuLbl);
-  }
-  else {
-    // ideally an informative error would be given here but there doesn't seem to be
+  } else {
+    // ideally an informative error would be given here but there doesn't seem
+    // to be
     // a convnient way to do that in these view classes
   }
   return res;
