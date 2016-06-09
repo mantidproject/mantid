@@ -48,6 +48,14 @@ void TrustRegionMinimizer::initialize(
   m_workspace.initialize(n, m, m_options, m_inform);
   m_x.allocate(n);
   m_leastSquares->getParameters(m_x);
+  int j = 0;
+  for (size_t i = 0; i < m_function->nParams(); ++i) {
+    if (m_function->isActive(i)) {
+      m_J.m_index.push_back(j);
+      j++;
+    } else
+      m_J.m_index.push_back(-1);
+  }
 }
 
 /// Evaluate the fitting function and calculate the residuals.
@@ -78,11 +86,10 @@ void TrustRegionMinimizer::eval_J(const DoubleFortranVector &x, DoubleFortranMat
   if (J.len1() != m || J.len2() != n) {
     J.allocate(m, n);
   }
-  JacobianImpl1 Jac;
-  Jac.setJ(J.gsl());
-  m_function->functionDeriv(domain, Jac);
+  m_J.setJ(J.gsl());
+  m_function->functionDeriv(domain, m_J);
   for(int i = 1; i <= m; ++i) {
-    double w = values.getFitWeight(i);
+    double w = values.getFitWeight(i - 1);
     for(int j = 1; j <= n; ++j) {
       J(i, j) *= w;
     }

@@ -78,6 +78,8 @@ private:
   DoubleFortranVector m_weights;
   /// Fitting parameters
   DoubleFortranVector m_x;
+  /// The Jacobian
+  mutable JacobianImpl1 m_J;
   /// Options
   NLLS::nlls_options m_options;
   /// Information about the fitting

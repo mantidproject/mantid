@@ -47,7 +47,8 @@ enum class NLLS_ERROR {
   //     ! More-Sorensen errors
   MS_MAXITS = -301,
   MS_TOO_MANY_SHIFTS = -302,
-  MS_NO_PROGRESS = -303
+  MS_NO_PROGRESS = -303,
+  MS_NOT_PO = -304 // Matrix is not positive-definite
   //     ! DTRS errors
 };
 

@@ -39,6 +39,7 @@ set ( SRC_FILES
 	src/FuncMinimizers/PRConjugateGradientMinimizer.cpp
 	src/FuncMinimizers/SimplexMinimizer.cpp
 	src/FuncMinimizers/TrustRegionMinimizer.cpp
+	src/FuncMinimizers/MoreSorensenMinimizer.cpp
 	src/FuncMinimizers/SteepestDescentMinimizer.cpp
 	src/FunctionDomain1DSpectrumCreator.cpp
 	src/Functions/Abragam.cpp
@@ -178,6 +179,7 @@ set ( INC_FILES
 	inc/MantidCurveFitting/FuncMinimizers/SimplexMinimizer.h
 	inc/MantidCurveFitting/FuncMinimizers/SteepestDescentMinimizer.h
 	inc/MantidCurveFitting/FuncMinimizers/TrustRegionMinimizer.h
+	inc/MantidCurveFitting/FuncMinimizers/MoreSorensenMinimizer.h
 	inc/MantidCurveFitting/FunctionDomain1DSpectrumCreator.h
 	inc/MantidCurveFitting/Functions/Abragam.h
 	inc/MantidCurveFitting/Functions/BSpline.h

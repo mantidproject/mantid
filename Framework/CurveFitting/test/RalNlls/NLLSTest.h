@@ -5,11 +5,13 @@
 
 #include "MantidCurveFitting/RalNlls/Internal.h"
 #include "MantidCurveFitting/RalNlls/NLLS.h"
+#include "MantidCurveFitting/FuncMinimizers/MoreSorensenMinimizer.h"
 
 #include <iostream>
 
 using namespace Mantid::CurveFitting::RalNlls;
 using namespace Mantid::CurveFitting;
+using namespace Mantid::CurveFitting::FuncMinimisers;
 
 namespace {
   struct params_type {
@@ -104,6 +106,10 @@ public:
 
     std::cerr << std::endl << x(1) << ' ' << x(2) << std::endl;
 
+  }
+
+  void test_MoreSorensen() {
+    MoreSorensenMinimizer minimizer;
   }
 
 };
