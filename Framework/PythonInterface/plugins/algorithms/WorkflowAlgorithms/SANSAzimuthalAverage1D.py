@@ -96,7 +96,7 @@ class SANSAzimuthalAverage1D(PythonAlgorithm):
             self.setPropertyValue("Binning", binning_prop)
         else:
             qmin = binning[0]
-            qmax = binning[2]        
+            qmax = binning[2]
         logger.debug("Qmin = %s"%qmin)
         logger.debug("Qmax = %s"%qmax)
         workspace.getRun().addProperty("qmin",float(qmin), True)

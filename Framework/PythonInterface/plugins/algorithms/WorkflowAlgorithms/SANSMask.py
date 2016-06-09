@@ -84,7 +84,7 @@ class SANSMask(PythonAlgorithm):
             if facility.upper() == "HFIR":
                 masked_ids = hfir_instrument.get_masked_ids(
                     edges[0], edges[1], edges[2], edges[3], workspace, component_name)
-                self._mask_ids(masked_ids, workspace, facility)
+                self._mask_ids(masked_ids, workspace)
             else:
                 masked_pixels = sns_instrument.get_masked_pixels(
                     edges[0], edges[1], edges[2], edges[3], workspace)
@@ -119,7 +119,7 @@ class SANSMask(PythonAlgorithm):
                 Workspace=workspace,
                 DetectorList=masked_detectors)
 
-    def _mask_ids(self, id_list, workspace, facility):
+    def _mask_ids(self, id_list, workspace):
         api.MaskDetectors(Workspace=workspace, DetectorList=id_list)
 
     def _apply_saved_mask(self, workspace, facility):
@@ -128,7 +128,7 @@ class SANSMask(PythonAlgorithm):
             mask_str = workspace.getRun().getProperty("rectangular_masks").value
             try:
                 rectangular_masks = pickle.loads(mask_str)
-            except:
+            except pickle.PickleError:
                 rectangular_masks = []
                 toks = mask_str.split(',')
                 for item in toks:
