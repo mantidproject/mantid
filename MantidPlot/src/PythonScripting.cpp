@@ -35,6 +35,7 @@
 #include "ApplicationWindow.h"
 #include "Mantid/MantidUI.h"
 
+#include <QApplication>
 #include <Qsci/qscilexerpython.h>
 #include "MantidKernel/ConfigService.h"
 
