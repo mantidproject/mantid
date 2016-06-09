@@ -340,7 +340,14 @@ def PEARL_focus(number, ext="raw", fmode="trans", ttmode="TT70", atten=True, van
     return outwork
 
 
-def PEARL_focus_v1(number, ext="raw", fmode="trans", ttmode="TT70", atten=True, van_norm=True, debug=False):
+def pearl_run_focus(number, ext="raw", fmode="trans", ttmode="TT70", atten=True, van_norm=True, debug=False,
+                    focus_mode=1):
+    alg_range = 12
+    save_range = 3
+    if focus_mode == 2:
+        alg_range = 14
+        save_range = 5
+
     global mode
     global tt_mode
     tt_mode = ttmode
@@ -376,7 +383,7 @@ def PEARL_focus_v1(number, ext="raw", fmode="trans", ttmode="TT70", atten=True, 
     if (debug != True):
         mtd.remove(work)
 
-    for i in range(0, 12):
+    for i in range(0, alg_range):
 
         output = outwork + "_mod" + str(i + 1)
         van = "van" + str(i + 1)
@@ -437,7 +444,7 @@ def PEARL_focus_v1(number, ext="raw", fmode="trans", ttmode="TT70", atten=True, 
 
         if (debug != True):
 
-            for i in range(0, 12):
+            for i in range(0, alg_range):
                 output = outwork + "_mod" + str(i + 1)
                 van = "van" + str(i + 1)
                 rdata = "rdata" + str(i + 1)
@@ -487,11 +494,15 @@ def PEARL_focus_v1(number, ext="raw", fmode="trans", ttmode="TT70", atten=True, 
             if i is 0:
                 append = False
 
-            SaveGSS(InputWorkspace=name[i], Filename=gssfile, Append=append, Bank=i + 1)
+            if focus_mode == 1:
+                SaveGSS(InputWorkspace=name[i], Filename=gssfile, Append=append, Bank=i + 1)
+            elif focus_mode == 2:
+                SaveGSS(InputWorkspace=name[i], Filename=gssfile, Append=False, Bank=i + 1)
+
             ConvertUnits(InputWorkspace=name[i], OutputWorkspace=name[i], Target="dSpacing")
             SaveNexus(Filename=outfile, InputWorkspace=name[i], Append=append)
 
-        for i in range(0, 3):
+        for i in range(0, save_range):
             tosave = outwork + "_mod" + str(i + 10)
 
             SaveGSS(InputWorkspace=tosave, Filename=gssfile, Append=True, Bank=i + 5)
@@ -502,7 +513,7 @@ def PEARL_focus_v1(number, ext="raw", fmode="trans", ttmode="TT70", atten=True, 
 
         if (debug != True):
 
-            for i in range(0, 12):
+            for i in range(0, alg_range):
                 output = outwork + "_mod" + str(i + 1)
                 van = "van" + str(i + 1)
                 rdata = "rdata" + str(i + 1)
@@ -552,7 +563,7 @@ def PEARL_focus_v1(number, ext="raw", fmode="trans", ttmode="TT70", atten=True, 
             SaveNexus(Filename=outfile, InputWorkspace=tosave, Append=True)
 
         if (debug != True):
-            for i in range(0, 12):
+            for i in range(0, alg_range):
                 output = outwork + "_mod" + str(i + 1)
                 van = "van" + str(i + 1)
                 rdata = "rdata" + str(i + 1)
@@ -563,7 +574,7 @@ def PEARL_focus_v1(number, ext="raw", fmode="trans", ttmode="TT70", atten=True, 
 
     elif (mode == "mods"):
 
-        for i in range(0, 12):
+        for i in range(0, alg_range):
 
             output = outwork + "_mod" + str(i + 1)
 
@@ -593,253 +604,18 @@ def PEARL_focus_v1(number, ext="raw", fmode="trans", ttmode="TT70", atten=True, 
 
     LoadNexus(Filename=outfile, OutputWorkspace=outwork)
     return outwork
+
+
+def PEARL_focus_v1(number, ext="raw", fmode="trans", ttmode="TT70", atten=True, van_norm=True, debug=False):
+
+    pearl_run_focus(number, ext=ext, fmode=fmode, ttmode=ttmode, atten=atten, van_norm=van_norm, debug=debug,
+                    focus_mode=1)
 
 
 def PEARL_focus_v2(number, ext="raw", fmode="trans", ttmode="TT70", atten=True, van_norm=True, debug=False):
-    global mode
-    global tt_mode
-    tt_mode = ttmode
-    mode = fmode
-    PEARL_getcycle(number)
-    PEARL_getcalibfiles()
-    print "Focussing mode is:", mode
-    print "Two theta mode is:", tt_mode
-    print "Group file is", groupfile
-    print "Calibration file is", calfile
-    print "Tof binning", tofbinning
-    work = "work"
-    focus = "focus"
-    if type(number) is int:
-        outfile = userdataprocessed + "PRL" + str(number) + ".nxs"
-        gssfile = userdataprocessed + "PRL" + str(number) + ".gss"
-        tof_xye_file = userdataprocessed + "PRL" + str(number) + "_tof_xye.dat"
-        d_xye_file = userdataprocessed + "PRL" + str(number) + "_d_xye.dat"
-        outwork = "PRL" + str(number)
-    else:
-        outfile = userdataprocessed + "PRL" + number + ".nxs"
-        gssfile = userdataprocessed + "PRL" + number + ".gss"
-        tof_xye_file = userdataprocessed + "PRL" + number + "_tof_xye.dat"
-        d_xye_file = userdataprocessed + "PRL" + number + "_d_xye.dat"
-        outwork = "PRL" + number
 
-    PEARL_read(number, ext, work)
-    Rebin(InputWorkspace=work, OutputWorkspace=work, Params=tofbinning)
-    AlignDetectors(InputWorkspace=work, OutputWorkspace=work, CalibrationFile=calfile)
-    DiffractionFocussing(InputWorkspace=work, OutputWorkspace=focus, GroupingFileName=groupfile)
-
-    if (debug != True):
-        mtd.remove(work)
-
-    for i in range(0, 14):
-
-        output = outwork + "_mod" + str(i + 1)
-        van = "van" + str(i + 1)
-        rdata = "rdata" + str(i + 1)
-
-        if (van_norm):
-            print "Using vanadium file", vanfile
-            LoadNexus(Filename=vanfile, OutputWorkspace=van, EntryNumber=i + 1)
-            ExtractSingleSpectrum(InputWorkspace=focus, OutputWorkspace=rdata, WorkspaceIndex=i)
-            # ConvertUnits(van,van,"TOF")
-            Rebin(InputWorkspace=van, OutputWorkspace=van, Params=tofbinning)
-            ConvertUnits(InputWorkspace=rdata, OutputWorkspace=rdata, Target="TOF")
-            Rebin(InputWorkspace=rdata, OutputWorkspace=rdata, Params=tofbinning)
-            Divide(LHSWorkspace=rdata, RHSWorkspace=van, OutputWorkspace=output)
-            CropWorkspace(InputWorkspace=output, OutputWorkspace=output, XMin=0.1)
-            Scale(InputWorkspace=output, OutputWorkspace=output, Factor=10)
-        else:
-            print "Not Using vanadium file"
-            # LoadNexus(Filename=vanfile,OutputWorkspace=van,EntryNumber=i+1)
-            ExtractSingleSpectrum(InputWorkspace=focus, OutputWorkspace=rdata, WorkspaceIndex=i)
-            # ConvertUnits(van,van,"TOF")
-            # Rebin(van,van,tofbinning)
-            ConvertUnits(InputWorkspace=rdata, OutputWorkspace=rdata, Target="TOF")
-            Rebin(InputWorkspace=rdata, OutputWorkspace=output, Params=tofbinning)
-            # Divide(rdata,van,output)
-            CropWorkspace(InputWorkspace=output, OutputWorkspace=output, XMin=0.1)
-    if (debug != True):
-        mtd.remove(focus)
-
-    if (mode == "all"):
-
-        name = outwork + "_mods1-9"
-
-        input = outwork + "_mod1"
-
-        CloneWorkspace(InputWorkspace=input, OutputWorkspace=name)
-
-        for i in range(1, 9):
-            toadd = outwork + "_mod" + str(i + 1)
-            Plus(LHSWorkspace=name, RHSWorkspace=toadd, OutputWorkspace=name)
-
-        Scale(InputWorkspace=name, OutputWorkspace=name, Factor=0.111111111111111)
-        SaveGSS(InputWorkspace=name, Filename=gssfile, Append=False, Bank=1)
-        ConvertUnits(InputWorkspace=name, OutputWorkspace=name, Target="dSpacing")
-
-        SaveNexus(Filename=outfile, InputWorkspace=name, Append=False)
-
-        for i in range(0, 5):
-            tosave = outwork + "_mod" + str(i + 10)
-
-            SaveGSS(InputWorkspace=tosave, Filename=gssfile, Append=True, Bank=i + 2)
-            ConvertUnits(InputWorkspace=tosave, OutputWorkspace=tosave, Target="dSpacing")
-
-            SaveNexus(Filename=outfile, InputWorkspace=tosave, Append=True)
-
-        if (debug != True):
-            for i in range(0, 14):
-                output = outwork + "_mod" + str(i + 1)
-                van = "van" + str(i + 1)
-                rdata = "rdata" + str(i + 1)
-                mtd.remove(rdata)
-                mtd.remove(van)
-                mtd.remove(output)
-            mtd.remove(name)
-
-    elif (mode == "groups"):
-
-        name = []
-        name.extend((outwork + "_mods1-3", outwork + "_mods4-6",
-                     outwork + "_mods7-9", outwork + "_mods4-9"))
-
-        input = []
-        input.extend((outwork + "_mod1", outwork + "_mod4", outwork + "_mod7"))
-
-        for i in range(0, 3):
-            CloneWorkspace(InputWorkspace=input[i], OutputWorkspace=name[i])
-
-        for i in range(1, 3):
-            toadd = outwork + "_mod" + str(i + 1)
-            Plus(LHSWorkspace=name[0], RHSWorkspace=toadd, OutputWorkspace=name[0])
-
-        Scale(InputWorkspace=name[0], OutputWorkspace=name[0], Factor=0.333333333333)
-
-        for i in range(1, 3):
-            toadd = outwork + "_mod" + str(i + 4)
-            Plus(LHSWorkspace=name[1], RHSWorkspace=toadd, OutputWorkspace=name[1])
-
-        Scale(InputWorkspace=name[1], OutputWorkspace=name[1], Factor=0.333333333333)
-
-        for i in range(1, 3):
-            toadd = outwork + "_mod" + str(i + 7)
-            Plus(LHSWorkspace=name[2], RHSWorkspace=toadd, OutputWorkspace=name[2])
-
-        Scale(InputWorkspace=name[2], OutputWorkspace=name[2], Factor=0.333333333333)
-        #
-        #       Sum left and right 90degree bank modules, i.e. modules 4-9...
-        #
-        Plus(LHSWorkspace=name[1], RHSWorkspace=name[2], OutputWorkspace=name[3])
-        Scale(InputWorkspace=name[3], OutputWorkspace=name[3], Factor=0.5)
-
-        for i in range(0, 4):
-            append = True
-            if i is 0:
-                append = False
-
-            SaveGSS(InputWorkspace=name[i], Filename=gssfile, Append=False, Bank=i + 1)
-            ConvertUnits(InputWorkspace=name[i], OutputWorkspace=name[i], Target="dSpacing")
-            SaveNexus(Filename=outfile, InputWorkspace=name[i], Append=append)
-
-        for i in range(0, 3):
-            tosave = outwork + "_mod" + str(i + 10)
-            SaveGSS(InputWorkspace=tosave, Filename=gssfile, Append=True, Bank=i + 5)
-            ConvertUnits(InputWorkspace=tosave, OutputWorkspace=tosave, Target="dSpacing")
-            SaveNexus(Filename=outfile, InputWorkspace=tosave, Append=True)
-
-        if (debug != True):
-
-            for i in range(0, 14):
-                output = outwork + "_mod" + str(i + 1)
-                van = "van" + str(i + 1)
-                rdata = "rdata" + str(i + 1)
-
-                mtd.remove(rdata)
-                mtd.remove(van)
-                mtd.remove(output)
-
-            for i in range(1, 4):
-                mtd.remove(name[i])
-
-    elif (mode == "trans"):
-
-        name = outwork + "_mods1-9"
-
-        input = outwork + "_mod1"
-
-        CloneWorkspace(InputWorkspace=input, OutputWorkspace=name)
-
-        for i in range(1, 9):
-            toadd = outwork + "_mod" + str(i + 1)
-            Plus(LHSWorkspace=name, RHSWorkspace=toadd, OutputWorkspace=name)
-
-        Scale(InputWorkspace=name, OutputWorkspace=name, Factor=0.111111111111111)
-
-        if (atten):
-            no_att = outwork + "_noatten"
-
-            ConvertUnits(InputWorkspace=name, OutputWorkspace=name, Target="dSpacing")
-            CloneWorkspace(InputWorkspace=name, OutputWorkspace=no_att)
-
-            PEARL_atten(name, name)
-
-            ConvertUnits(InputWorkspace=name, OutputWorkspace=name, Target="TOF")
-
-        SaveGSS(InputWorkspace=name, Filename=gssfile, Append=False, Bank=1)
-        SaveFocusedXYE(InputWorkspace=name, Filename=tof_xye_file, Append=False, IncludeHeader=False)
-
-        ConvertUnits(InputWorkspace=name, OutputWorkspace=name, Target="dSpacing")
-
-        SaveFocusedXYE(InputWorkspace=name, Filename=d_xye_file, Append=False, IncludeHeader=False)
-        SaveNexus(Filename=outfile, InputWorkspace=name, Append=False)
-
-        for i in range(0, 9):
-            tosave = outwork + "_mod" + str(i + 1)
-            # SaveGSS(tosave,Filename=gssfile,Append=True,Bank=i+2)
-            ConvertUnits(InputWorkspace=tosave, OutputWorkspace=tosave, Target="dSpacing")
-            SaveNexus(Filename=outfile, InputWorkspace=tosave, Append=True)
-
-        if (debug != True):
-            for i in range(0, 14):
-                output = outwork + "_mod" + str(i + 1)
-                van = "van" + str(i + 1)
-                rdata = "rdata" + str(i + 1)
-                mtd.remove(rdata)
-                mtd.remove(van)
-                mtd.remove(output)
-            mtd.remove(name)
-
-    elif (mode == "mods"):
-
-        for i in range(0, 14):
-
-            output = outwork + "_mod" + str(i + 1)
-
-            van = "van" + str(i + 1)
-
-            rdata = "rdata" + str(i + 1)
-
-            status = True
-
-            if (i == 0):
-                status = False
-
-            SaveGSS(InputWorkspace=output, Filename=gssfile, Append=status, Bank=i + 1)
-
-            ConvertUnits(InputWorkspace=output, OutputWorkspace=output, Target="dSpacing")
-
-            SaveNexus(Filename=outfile, InputWorkspace=output, Append=status)
-
-            if (debug != True):
-                mtd.remove(rdata)
-                mtd.remove(van)
-                mtd.remove(output)
-
-    else:
-        print "Sorry I don't know that mode", mode
-        return
-
-    LoadNexus(Filename=outfile, OutputWorkspace=outwork)
-    return outwork
+    pearl_run_focus(number, ext=ext, fmode=fmode, ttmode=ttmode, atten=atten, van_norm=van_norm, debug=debug,
+                    focus_mode=2)
 
 
 def PEARL_createvan(van, empty, ext="raw", fmode="all", ttmode="TT88",
@@ -1115,12 +891,10 @@ def PEARL_createcal_Si(calruns, noffsetfile="C:\PEARL\\pearl_offset_11_2.cal"):
         Rebin(InputWorkspace="cal_inD", OutputWorkspace="cal_Drebin", Params="1.71,0.002,2.1")
         CrossCorrelate(InputWorkspace="cal_Drebin", OutputWorkspace="crosscor", ReferenceSpectra=20,
                        WorkspaceIndexMin=9, WorkspaceIndexMax=1063, XMin=1.71, XMax=2.1)
-
     elif instver == "new":
         Rebin(InputWorkspace="cal_inD", OutputWorkspace="cal_Drebin", Params="1.85,0.002,2.05")
         CrossCorrelate(InputWorkspace="cal_Drebin", OutputWorkspace="crosscor", ReferenceSpectra=20,
                        WorkspaceIndexMin=9, WorkspaceIndexMax=943, XMin=1.85, XMax=2.05)
-
     else:
         Rebin(InputWorkspace="cal_inD", OutputWorkspace="cal_Drebin", Params="3,0.002,3.2")
         CrossCorrelate(InputWorkspace="cal_Drebin", OutputWorkspace="crosscor", ReferenceSpectra=500,
