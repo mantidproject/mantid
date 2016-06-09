@@ -2386,6 +2386,7 @@ class MainWindow(QtGui.QMainWindow):
             # apply the Lorentz correction to the intensity
             corrected = self._myControl.apply_lorentz_correction(peak_intensity, q, wavelength, motor_step)
             self.ui.tableWidget_mergeScans.set_peak_intensity(row_number, None, corrected, lorentz_corrected=True)
+            self._myControl.set_peak_intensity(exp_number, scan_number, corrected)
         # END-FOR (row_number)
 
         return

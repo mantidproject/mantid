@@ -2052,7 +2052,7 @@ class CWSCDReductionControl(object):
 
     def set_peak_intensity(self, exp_number, scan_number, intensity):
         """
-        Set peak intensity to a scan
+        Set peak intensity to a scan and set to PeakInfo
         :param exp_number:
         :param scan_number:
         :param intensity:
