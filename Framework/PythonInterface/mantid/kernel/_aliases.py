@@ -2,7 +2,8 @@
     Defines a set of aliases for the kernel module to make
     accessing certain objects easier.
 """
-from __future__ import absolute_import
+from __future__ import (absolute_import, division,
+                        print_function, unicode_literals)
 
 from ._kernel import (ConfigServiceImpl, Logger, UnitFactoryImpl,
                       UsageServiceImpl, PropertyManagerDataServiceImpl)

@@ -1,7 +1,8 @@
 """
     Defines a set of aliases to make accessing certain objects easier
 """
-from __future__ import absolute_import
+from __future__ import (absolute_import, division,
+                        print_function, unicode_literals)
 
 from ._api import (FrameworkManagerImpl, AnalysisDataServiceImpl,
                    AlgorithmFactoryImpl, AlgorithmManagerImpl,

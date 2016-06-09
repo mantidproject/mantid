@@ -4,7 +4,8 @@
     Handles set up of aspects related to extra Python packages e.g. adding
     any required paths to sys.path, setting environment variables etc.
 """
-from __future__ import absolute_import
+from __future__ import (absolute_import, division,
+                        print_function, unicode_literals)
 import os as _os
 import sys as _sys
 ###############################################################################

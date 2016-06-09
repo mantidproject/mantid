@@ -4,7 +4,8 @@ Defines functions to dynamically load Python modules.
 These modules may define extensions to C++ types, e.g.
 algorithms, fit functions etc.
 """
-from __future__ import absolute_import
+from __future__ import (absolute_import, division,
+                        print_function, unicode_literals)
 
 import os as _os
 try:
