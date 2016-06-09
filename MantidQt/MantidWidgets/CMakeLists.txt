@@ -205,7 +205,6 @@ set ( INC_FILES
 	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorAppendRowCommand.h
 	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorClearSelectedCommand.h
 	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorCommand.h
-	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorCommandAdapter.h
 	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorCommandBase.h
 	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorCopySelectedCommand.h
 	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorCutSelectedCommand.h
@@ -233,9 +232,6 @@ set ( INC_FILES
 	inc/MantidQtMantidWidgets/DataProcessorUI/GenericDataProcessorPresenter.h
 	inc/MantidQtMantidWidgets/DataProcessorUI/GenericDataProcessorPresenterFactory.h
 	inc/MantidQtMantidWidgets/DataProcessorUI/ParseKeyValueString.h
-	inc/MantidQtMantidWidgets/DataProcessorUI/QDataProcessorTableModel.h
-	inc/MantidQtMantidWidgets/DataProcessorUI/QDataProcessorWidget.h
-	inc/MantidQtMantidWidgets/DataProcessorUI/QtDataProcessorOptionsDialog.h
 	inc/MantidQtMantidWidgets/DataProcessorUI/WorkspaceReceiver.h
     inc/MantidQtMantidWidgets/ErrorCurve.h
     inc/MantidQtMantidWidgets/WidgetDllOption.h
