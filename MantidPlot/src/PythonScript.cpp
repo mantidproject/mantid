@@ -532,11 +532,11 @@ QVariant PythonScript::evaluateImpl() {
   /* fallback: try to convert to (unicode) string */
   if (!qret.isValid()) {
 #if defined(IS_PY3K)
-  // In 3 everything is unicode
-  PyObject *pystring = PyObject_Str(pyret);
-  if(pystring) {
-    qret = QVariant(QString::fromUtf8(_PyUnicode_AsString(pystring)));
-  }
+    // In 3 everything is unicode
+    PyObject *pystring = PyObject_Str(pyret);
+    if (pystring) {
+      qret = QVariant(QString::fromUtf8(_PyUnicode_AsString(pystring)));
+    }
 #else
     PyObject *pystring = PyObject_Unicode(pyret);
     if (pystring) {
@@ -871,8 +871,7 @@ void PythonScript::addPythonReference(const std::string &wsName,
   PyObject *codeObj =
       Py_CompileString(code, "PythonScript::addPythonReference", Py_file_input);
   if (codeObj) {
-    PyObject *ret =
-        PyEval_EvalCode(CODE_OBJECT(codeObj), localDict, localDict);
+    PyObject *ret = PyEval_EvalCode(CODE_OBJECT(codeObj), localDict, localDict);
     Py_XDECREF(ret);
   }
   if (PyErr_Occurred()) {
@@ -896,8 +895,7 @@ void PythonScript::deletePythonReference(const std::string &wsName) {
   PyObject *codeObj =
       Py_CompileString(code, "PythonScript::deleteHandle", Py_file_input);
   if (codeObj) {
-    PyObject *ret =
-        PyEval_EvalCode(CODE_OBJECT(codeObj), localDict, localDict);
+    PyObject *ret = PyEval_EvalCode(CODE_OBJECT(codeObj), localDict, localDict);
     Py_XDECREF(ret);
   }
   if (PyErr_Occurred()) {

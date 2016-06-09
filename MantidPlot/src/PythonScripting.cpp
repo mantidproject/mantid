@@ -55,7 +55,7 @@ PyMODINIT_FUNC init_qti();
 #endif
 
 namespace {
-  QString INIT_RCFILE = "mantidplotrc.py";
+QString INIT_RCFILE = "mantidplotrc.py";
 }
 
 // Factory function
