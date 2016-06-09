@@ -305,10 +305,10 @@ void FitPropertyBrowser::initLayout(QWidget *w) {
   m_fitMapper->setMapping(m_fitActionSeqFit, "SeqFit");
   m_fitMapper->setMapping(m_fitActionUndoFit, "UndoFit");
   m_fitMapper->setMapping(m_fitActionEvaluate, "Evaluate");
-  connect(m_fitActionFit, SIGNAL(activated()), m_fitMapper, SLOT(map()));
-  connect(m_fitActionSeqFit, SIGNAL(activated()), m_fitMapper, SLOT(map()));
-  connect(m_fitActionUndoFit, SIGNAL(activated()), m_fitMapper, SLOT(map()));
-  connect(m_fitActionEvaluate, SIGNAL(activated()), m_fitMapper, SLOT(map()));
+  connect(m_fitActionFit, SIGNAL(triggered()), m_fitMapper, SLOT(map()));
+  connect(m_fitActionSeqFit, SIGNAL(triggered()), m_fitMapper, SLOT(map()));
+  connect(m_fitActionUndoFit, SIGNAL(triggered()), m_fitMapper, SLOT(map()));
+  connect(m_fitActionEvaluate, SIGNAL(triggered()), m_fitMapper, SLOT(map()));
   connect(m_fitMapper, SIGNAL(mapped(const QString &)), this,
           SLOT(executeFitMenu(const QString &)));
   m_fitMenu->addAction(m_fitActionFit);
@@ -331,11 +331,11 @@ void FitPropertyBrowser::initLayout(QWidget *w) {
   displayMapper->setMapping(m_displayActionPlotGuess, "PlotGuess");
   displayMapper->setMapping(m_displayActionQuality, "Quality");
   displayMapper->setMapping(m_displayActionClearAll, "ClearAll");
-  connect(m_displayActionPlotGuess, SIGNAL(activated()), displayMapper,
+  connect(m_displayActionPlotGuess, SIGNAL(triggered()), displayMapper,
           SLOT(map()));
-  connect(m_displayActionQuality, SIGNAL(activated()), displayMapper,
+  connect(m_displayActionQuality, SIGNAL(triggered()), displayMapper,
           SLOT(map()));
-  connect(m_displayActionClearAll, SIGNAL(activated()), displayMapper,
+  connect(m_displayActionClearAll, SIGNAL(triggered()), displayMapper,
           SLOT(map()));
   connect(displayMapper, SIGNAL(mapped(const QString &)), this,
           SLOT(executeDisplayMenu(const QString &)));
