@@ -5,6 +5,7 @@
 #include <boost/make_shared.hpp>
 #include <boost/math/special_functions/fpclassify.hpp>
 
+#include "MantidKernel/UsageService.h"
 #include "MantidAPI/CoordTransform.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/IMDIterator.h"
@@ -170,6 +171,9 @@ SliceViewer::SliceViewer(QWidget *parent)
 
   // --------- Rescaler --------------------
   m_rescaler = new QwtPlotRescaler(m_plot->canvas());
+
+  Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
+    "Interface", "SliceViewer", false);
 }
 
 void SliceViewer::updateAspectRatios() {
