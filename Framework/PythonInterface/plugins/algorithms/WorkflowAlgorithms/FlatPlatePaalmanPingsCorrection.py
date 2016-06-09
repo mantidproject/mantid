@@ -60,7 +60,7 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
                              doc='Sample number density in atoms/Angstrom3')
         self.declareProperty(name='SampleMassDensity', defaultValue=1.0,
                              validator=FloatBoundedValidator(0.0),
-                             doc='Sample mass density in atoms/Angstrom3')
+                             doc='Sample mass density in ag/cm3')
         self.declareProperty(name='UseSampleMassDensity', defaultValue=False,
                              doc='Use Sample Mass or Sample Number for Density.')
         self.declareProperty(name='SampleThickness', defaultValue=0.0,
@@ -82,7 +82,7 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
                              doc='Container number density in atoms/Angstrom3')
         self.declareProperty(name='CanMassDensity', defaultValue=1.0,
                              validator=FloatBoundedValidator(0.0),
-                             doc='Container number density in atoms/Angstrom3')
+                             doc='Container number density in g/cm3')
         self.declareProperty(name='UseContainerMassDensity', defaultValue=False,
                              doc='Use Container Mass or Container Number for Density.')
         self.declareProperty(name='CanFrontThickness', defaultValue=0.0,
@@ -141,6 +141,8 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
         else:
             set_material_alg.setProperty('SampleNumberDensity', self._sample_number_density)
         set_material_alg.execute()
+        if self._use_sample_mass_density:
+            self._sample_number_density = set_material_alg.getProperty('SampleNumberDensityResult').value
 
         # If using a can, set sample material using chemical formula
         if self._use_can:
@@ -153,6 +155,8 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
             else:
                 set_material_alg.setProperty('SampleNumberDensity', self._can_number_density)
             set_material_alg.execute()
+            if self._use_can_mass_density:
+                self._can_number_density = set_material_alg.getProperty('SampleNumberDensityResult').value
 
         # Holders for the corrected data
         data_ass = []
