@@ -1379,6 +1379,34 @@ void EnggDiffractionPresenter::setDataToClonedWS(std::string &current_WS,
       ->setData(currentPeakWS->readY(0), currentPeakWS->readE(0));
 }
 
+void EnggDiffractionPresenter::setDefaultBank(
+	std::vector<std::string> splittedBaseName, QString selectedFile) {
+
+	if (!splittedBaseName.empty()) {
+
+		std::string bankID = (splittedBaseName.back());
+		auto combo_data = m_view->getFittingComboText(bankID);
+
+		if (combo_data > -1) {
+			m_view->setBankIdComboBox(combo_data);
+		}
+		else {
+			m_view->setFittingRunNo(selectedFile);
+		}
+	}
+	// check if the vector is not empty so that the first directory
+	// can be assigned to text-field when number is given
+	else if (!m_view->getFittingRunNumVec().empty()) {
+		auto firstDir = m_view->getFittingRunNumVec().at(0);
+		auto intialDir = QString::fromStdString(firstDir);
+		m_view->setFittingRunNo(intialDir);
+	}
+	// if nothing found related to text-field input
+	else if (!m_view->getFittingRunNo().empty())
+		m_view->setFittingRunNo(selectedFile);
+}
+
+
 void EnggDiffractionPresenter::plotFitPeaksCurves() {
   AnalysisDataServiceImpl &ADS = Mantid::API::AnalysisDataService::Instance();
   std::string singlePeaksWs = "engggui_fitting_single_peaks";
