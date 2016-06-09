@@ -80,7 +80,8 @@ typedef Kernel::SingletonHolder<LiveListenerFactoryImpl> LiveListenerFactory;
 
 namespace Mantid {
 namespace Kernel {
-EXTERN_MANTID_API template class MANTID_API_DLL Kernel::SingletonHolder<Mantid::API::LiveListenerFactoryImpl>;
+EXTERN_MANTID_API template class MANTID_API_DLL
+    Kernel::SingletonHolder<Mantid::API::LiveListenerFactoryImpl>;
 }
 }
 
