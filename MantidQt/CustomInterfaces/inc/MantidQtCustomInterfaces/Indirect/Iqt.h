@@ -31,8 +31,8 @@ private:
   void PlotTiled();
 
   Ui::Iqt m_uiForm;
-  QtTreePropertyBrowser *m_furTree;
-  bool m_furyResFileType;
+  QtTreePropertyBrowser *m_iqtTree;
+  bool m_iqtResFileType;
 };
 } // namespace IDA
 } // namespace CustomInterfaces
