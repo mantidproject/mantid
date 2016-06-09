@@ -17,6 +17,7 @@
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorExportTableCommand.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorGroupRowsCommand.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorImportTableCommand.h"
+#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorMockObjects.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorNewTableCommand.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorOpenTableCommand.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorOptionsCommand.h"
@@ -29,9 +30,8 @@
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorSaveTableCommand.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorSeparatorCommand.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/GenericDataProcessorPresenter.h"
+#include "MantidQtMantidWidgets/DataProcessorUI/ProgressableViewMockObject.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "ProgressableViewMockObject.h"
-#include "DataProcessorMockObjects.h"
 
 using namespace MantidQt::MantidWidgets;
 using namespace Mantid::API;

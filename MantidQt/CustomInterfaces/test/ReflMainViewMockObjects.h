@@ -3,7 +3,6 @@
 
 #include "MantidKernel/ICatalogInfo.h"
 #include "MantidKernel/ProgressBase.h"
-#include "MantidQtCustomInterfaces/Reflectometry/DataProcessorCommand.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflMainView.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflSearchModel.h"
 #include <gmock/gmock.h>
@@ -23,12 +22,15 @@ public:
   // of the vector of unique pointers
   // I will mock a proxy method, setTableCommandsProxy, I just want to test that
   // this method is invoked by the presenter's constructor
-  virtual void
-      setTableCommands(std::vector<DataProcessorCommand_uptr>) override {
+  virtual void setTableCommands(
+      std::vector<MantidQt::CustomInterfaces::DataProcessorCommand_uptr>)
+      override {
     setTableCommandsProxy();
   }
   // The same happens for setRowCommands
-  virtual void setRowCommands(std::vector<DataProcessorCommand_uptr>) override {
+  virtual void setRowCommands(
+      std::vector<MantidQt::CustomInterfaces::DataProcessorCommand_uptr>)
+      override {
     setRowCommandsProxy();
   }
 

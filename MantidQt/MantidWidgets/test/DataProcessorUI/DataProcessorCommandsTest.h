@@ -28,7 +28,7 @@
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorSaveTableCommand.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorSeparatorCommand.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorWorkspaceCommand.h"
-#include "DataProcessorMockObjects.h"
+#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorMockObjects.h"
 
 using namespace MantidQt::MantidWidgets;
 // using namespace Mantid::API;
