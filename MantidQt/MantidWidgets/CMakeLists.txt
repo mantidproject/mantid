@@ -358,10 +358,12 @@ add_definitions ( -DQSCINTILLA_DLL )     # Will only have an effect on Windows (
 
 
 # For Windows:
-add_definitions ( -DIN_MANTIDQT_MANTIDWIDGETS -DQT_QTPROPERTYBROWSER_IMPORT )
+add_definitions ( -DQT_QTPROPERTYBROWSER_IMPORT )
 # Use a precompiled header where they are supported
 enable_precompiled_headers( inc/MantidQtMantidWidgets/PrecompiledHeader.h ALL_SRC )
 add_library ( MantidWidgets ${ALL_SRC} ${INC_FILES} ${UI_HDRS} ${RES_FILES} )
+
+set_target_properties ( MantidWidgets PROPERTIES COMPILE_DEFINITIONS "IN_MANTIDQT_MANTIDWIDGETS")
 
 if (OSX_VERSION VERSION_GREATER 10.8)
   set_target_properties ( MantidWidgets PROPERTIES INSTALL_RPATH "@loader_path/../MacOS")
