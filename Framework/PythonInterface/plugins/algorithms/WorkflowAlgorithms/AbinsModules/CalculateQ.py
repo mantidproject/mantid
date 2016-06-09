@@ -3,13 +3,13 @@ import numpy
 
 class CalculateQ(IOmodule):
     """
-    Class for calculating of Q vectors for instrument of choice.
+    Class for calculating Q vectors for instrument of choice.
     """
     def __init__(self, filename=None, instrument=None, sample_form=None):
         """
-        @param filename: name of input filename
+        @param filename: name of input filename (foo.phonon)
         @param instrument: name of instrument
-        @param sample_form: from in which sample is (Powder or SingleCrystal)
+        @param sample_form: form in which sample is (Powder or SingleCrystal)
         """
         super(IOmodule, self).__init__()
         self._filename = filename
@@ -47,7 +47,6 @@ class CalculateQ(IOmodule):
     def _calculate_Qvectors_Tosca(self):
         """
         Calculate squared Q vectors for TOSCA and TOSCA-like instruments.
-        @return:
         """
         _tosca_constant = 1/16.0 # magic number for TOSCA....
         _freq_squared = self._frequencies * self._frequencies
@@ -55,12 +54,11 @@ class CalculateQ(IOmodule):
         if self._sample_form == "Powder":
             self._Qvectors[self._sample_form] = _freq_squared * _tosca_constant
         else:
-            raise ValueError("SingleCrystal user case is not supported!")
+            raise ValueError("SingleCrystal user case is not implemented!")
 
     def _calculate_Qvectors(self):
         """
         Calculate Q vectors for the given instrument.
-        @return:
         """
         self._functions[self._instrument]()
 

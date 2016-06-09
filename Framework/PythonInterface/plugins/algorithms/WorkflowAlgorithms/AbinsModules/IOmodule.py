@@ -17,6 +17,8 @@ class IOmodule(object):
     def _prepare_HDF_file(self, file_name=None, group_name=None):
         """
         Set up hdf file.
+        @param file_name: name of input file from ab-initio calculations (CASTEP: foo.phonon)
+        @param group_name: name of directory in which data in hdf file will be saved
         """
         core_name = file_name[0:file_name.find(".")]
         self._hdf_filename = core_name + ".hdf5"
@@ -32,19 +34,24 @@ class IOmodule(object):
     def addAttribute(self, name=None, value=None):
         """
         Add attribute to the dictionary with other attributes.
+        @param name: name of the attribute
+        @param value: value of the attribute. More about attributes at: http://docs.h5py.org/en/latest/high/attr.html
         """
         self._attributes[name] = value
 
     def addDataset(self, name=None, value=None):
         """
         Add dataset to the dictionary with other datasets.
+        @param name: name of dataset
+        @param value: value of dataset. Numpy array is expected. More about dataset at:
+        http://docs.h5py.org/en/latest/high/dataset.html
         """
         self._datasets[name] = value
 
     def _save_attributes(self, group=None):
         """
         Save attributes to hdf file.
-        @param group - group to which attributes should be saved.
+        @param group: group to which attributes should be saved.
         """
         for name in self._attributes:
             group.attrs[name] = self._attributes[name]
@@ -52,7 +59,7 @@ class IOmodule(object):
     def _save_datasets(self, group=None):
         """
         Save datasets to hdf file.
-        @param group - group to which datasets should be saved.
+        @param group: group to which datasets should be saved.
         """
         for name in self._datasets:
             if name in group:
@@ -74,8 +81,9 @@ class IOmodule(object):
     def _load_attribute(self, name=None, group=None):
         """
         Load attribute.
-        @param name - name of attribute
-        @return -  value of attribute
+        @param group: group in hdf file
+        @param name: name of attribute
+        @return:  value of attribute
         """
         if not name in group.attrs:
             raise ValueError("Attribute %s in not present in %s file!" % (name, self._hdf_filename))
@@ -85,6 +93,7 @@ class IOmodule(object):
     def _load_dataset(self, name=None, group=None):
         """
         Load dataset.
+        @param group: group in hdf file
         @param name: name of dataset
         @return: value of dataset
         """
@@ -94,6 +103,12 @@ class IOmodule(object):
             return numpy.copy(group[name])
 
     def load(self, list_of_attributes=None, list_of_datasets=None):
+        """
+
+        @param list_of_attributes: list of attributes to load (list of strings with names of attributes)
+        @param list_of_datasets: list of datasets to load (list of strings with names of datasets)
+        @return: dictionary with both datasets and attributes
+        """
         hdf_file = h5py.File(self._hdf_filename, 'a')
 
         # check if input parameters  are valid

@@ -10,6 +10,10 @@ class LoadCASTEP(IOmodule):
     """
 
     def __init__(self, filename):
+        """
+
+        @param filename: name of file with phonon data (foo.phonon)
+        """
         super(IOmodule, self).__init__()
         self._filename = filename
 
@@ -24,8 +28,8 @@ class LoadCASTEP(IOmodule):
         """
         Parse the header of a block of frequencies and intensities
 
-        @param header_match - the regex match to the header
-        @param block_count - the count of blocks found so far
+        @param header_match: the regex match to the header
+        @param block_count: the count of blocks found so far
         @return weight for this block of values
         """
         # Found header block at start of frequencies
@@ -41,7 +45,7 @@ class LoadCASTEP(IOmodule):
         """
         Read information from the header of a <>.phonon file
 
-        @param f_handle - handle to the file.
+        @param f_handle: handle to the file.
         @return List of ions in file as list of tuple of (ion, mode number)
         """
         file_data = {'ions': []}
@@ -86,7 +90,7 @@ class LoadCASTEP(IOmodule):
         """
         Iterator to parse a block of frequencies from a .phonon file.
 
-        @param f_handle - handle to the file.
+        @param f_handle: handle to the file.
         """
 
         for _ in xrange(self._num_branches):
@@ -100,7 +104,7 @@ class LoadCASTEP(IOmodule):
         """
         Parses the unit cell vectors in a .phonon file.
 
-        @param f_handle Handle to the file
+        @param f_handle: Handle to the file
         @return Numpy array of unit vectors
         """
         data = []
@@ -113,6 +117,11 @@ class LoadCASTEP(IOmodule):
         return np.array(data)
 
     def _parse_phonon_eigenvectors(self, f_handle):
+        """
+
+        @param f_handle: file object to read
+        @return: eigenvectors (atomic displacements) for all k-points
+        """
         vectors = []
         for _ in xrange(self._num_ions * self._num_branches):
             line = f_handle.readline()
@@ -129,7 +138,7 @@ class LoadCASTEP(IOmodule):
 
     def _calculateHash(self):
         """
-        Calculates hash of the phonon file according to SHA-2 alghoritm from hashlib library: sha512.
+        Calculates hash of the phonon file according to SHA-2 algorithm from hashlib library: sha512.
         @return: string representation of hash for phonon file which contains only hexadecimal digits
         """
 
@@ -147,7 +156,9 @@ class LoadCASTEP(IOmodule):
 
     def readPhononFile(self):
         """
-        Read frequencies from a <>.phonon file. Save hash of the phonon file (hash) to <>.hdf5
+        Read frequencies, weights of k-point vectors, k-point vectors, amplitudes of atomic displacements
+        from a <>.phonon file. Save frequencies, weights of k-point vectors, k-point vectors, amplitudes of atomic
+        displacements, information about Gamma-[pint calculation (True/False) hash of the phonon file (hash) to <>.hdf5
 
         @return dictionary with the frequencies for each k_point (frequencies),
                 weights of k_points (weights),
