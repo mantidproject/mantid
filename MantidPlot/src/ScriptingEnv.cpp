@@ -44,9 +44,10 @@
 #include <cstring>
 
 ScriptingEnv::ScriptingEnv(ApplicationWindow *parent, const QString &langName)
-    : QObject(0, langName.toAscii().constData()), d_initialized(false),
-      d_parent(parent), m_is_running(false), d_refcount(0),
-      m_languageName(langName) {}
+    : QObject(nullptr), d_initialized(false), d_parent(parent),
+      m_is_running(false), d_refcount(0), m_languageName(langName) {
+  setObjectName(langName.toAscii().constData());
+}
 
 ScriptingEnv::~ScriptingEnv() {}
 

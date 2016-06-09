@@ -60,10 +60,10 @@ public:
                     const char *status_slot = "");
   ~RangeSelectorTool() override;
   double minXValue() const {
-    return QMIN(d_active_marker.xValue(), d_inactive_marker.xValue());
+    return qMin(d_active_marker.xValue(), d_inactive_marker.xValue());
   }
   double maxXValue() const {
-    return QMAX(d_active_marker.xValue(), d_inactive_marker.xValue());
+    return qMax(d_active_marker.xValue(), d_inactive_marker.xValue());
   }
   int dataSize() const { return qAbs(d_active_point - d_inactive_point); }
   bool eventFilter(QObject *obj, QEvent *event) override;
