@@ -160,7 +160,7 @@ void FacilityInfo::fillComputeResources(const Poco::XML::Element *elem) {
         ComputeResourceInfo cr(this, elem);
         m_computeResInfos.push_back(cr);
 
-        g_log.debug() << "Compute resource found: " << cr << std::endl;
+        g_log.debug() << "Compute resource found: " << cr << '\n';
       } catch (...) { // next resource...
       }
 
@@ -184,7 +184,7 @@ const InstrumentInfo &FacilityInfo::instrument(std::string iName) const {
   if (iName.empty()) {
     iName = ConfigService::Instance().getString("default.instrument");
     g_log.debug() << "Blank instrument specified, using default instrument of "
-                  << iName << "." << std::endl;
+                  << iName << ".\n";
     if (iName.empty()) {
       return m_instruments.front();
     }
@@ -194,8 +194,7 @@ const InstrumentInfo &FacilityInfo::instrument(std::string iName) const {
     if (boost::iequals(instrument.name(), iName)) // Case-insensitive search
     {
       g_log.debug() << "Instrument '" << iName << "' found as "
-                    << instrument.name() << " at " << name() << "."
-                    << std::endl;
+                    << instrument.name() << " at " << name() << ".\n";
       return instrument;
     }
   }
@@ -206,8 +205,7 @@ const InstrumentInfo &FacilityInfo::instrument(std::string iName) const {
                        iName)) // Case-insensitive search
     {
       g_log.debug() << "Instrument '" << iName << "' found as "
-                    << instrument.name() << " at " << name() << "."
-                    << std::endl;
+                    << instrument.name() << " at " << name() << ".\n";
       return instrument;
     }
   }
@@ -278,13 +276,13 @@ FacilityInfo::computeResource(const std::string &name) const {
   for (; it != m_computeResInfos.end(); ++it) {
     if (it->name() == name) {
       g_log.debug() << "Compute resource '" << name << "' found at facility "
-                    << this->name() << "." << std::endl;
+                    << this->name() << ".\n";
       return *it;
     }
   }
 
   g_log.debug() << "Could not find requested compute resource: " << name
-                << " in facility " << this->name() << "." << std::endl;
+                << " in facility " << this->name() << ".\n";
   throw Exception::NotFoundError(
       "FacilityInfo, missing compute resource, it does not seem to be defined "
       "in the facility '" +

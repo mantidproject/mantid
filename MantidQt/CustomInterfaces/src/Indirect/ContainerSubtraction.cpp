@@ -221,10 +221,9 @@ bool ContainerSubtraction::validate() {
     const QString containerType = containerName.right(
         containerName.length() - containerName.lastIndexOf("_"));
 
-    g_log.debug() << "Sample type is: " << sampleType.toStdString()
-                  << std::endl;
+    g_log.debug() << "Sample type is: " << sampleType.toStdString() << '\n';
     g_log.debug() << "Container type is: " << containerType.toStdString()
-                  << std::endl;
+                  << '\n';
 
     if (containerType != sampleType)
       uiv.addErrorMessage(

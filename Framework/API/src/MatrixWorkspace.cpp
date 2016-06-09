@@ -526,7 +526,7 @@ std::vector<size_t> MatrixWorkspace::getDetectorIDToWorkspaceIndexVector(
         g_log.debug() << "MatrixWorkspace::getDetectorIDToWorkspaceIndexVector("
                          "): detector ID found (" << det
                       << " at workspace index " << workspaceIndex
-                      << ") is invalid." << std::endl;
+                      << ") is invalid.\n";
       } else
         // Save it at that point.
         out[index] = workspaceIndex;

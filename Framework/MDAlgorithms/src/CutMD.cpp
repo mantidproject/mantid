@@ -217,7 +217,7 @@ std::vector<std::string> findOriginalQUnits(IMDWorkspace_const_sptr inws,
     unitMarkers[i] = unitMarker;
     logger.debug() << "In dimension with index " << i << " and units "
                    << units.ascii() << " taken to be of type " << unitMarker
-                   << std::endl;
+                   << '\n';
   }
   return unitMarkers;
 }

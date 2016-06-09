@@ -271,11 +271,11 @@ void GroupDetectors2::getGroups(API::MatrixWorkspace_const_sptr workspace,
             groupingWS_sptr);
     if (groupWS) {
       g_log.debug() << "Extracting grouping from GroupingWorkspace ("
-                    << groupWS->name() << ")" << std::endl;
+                    << groupWS->name() << ")\n";
       processGroupingWorkspace(groupWS, workspace, unUsedSpec);
     } else {
       g_log.debug() << "Extracting grouping from MatrixWorkspace ("
-                    << groupingWS_sptr->name() << ")" << std::endl;
+                    << groupingWS_sptr->name() << ")\n";
       processMatrixWorkspace(groupingWS_sptr, workspace, unUsedSpec);
     }
     return;
@@ -299,7 +299,7 @@ void GroupDetectors2::getGroups(API::MatrixWorkspace_const_sptr workspace,
       }
     } catch (std::exception &) {
       g_log.error() << name() << ": Error reading input file " << filename
-                    << std::endl;
+                    << '\n';
       throw;
     }
     return;
@@ -359,7 +359,7 @@ void GroupDetectors2::getGroups(API::MatrixWorkspace_const_sptr workspace,
       if (*it > maxIn) {
         g_log.error() << "Spectra index " << *it
                       << " doesn't exist in the input workspace, the highest "
-                         "possible index is " << maxIn << std::endl;
+                         "possible index is " << maxIn << '\n';
         throw std::out_of_range("One of the spectra requested to group does "
                                 "not exist in the input workspace");
       }
@@ -413,7 +413,7 @@ void GroupDetectors2::processFile(std::string fname,
     g_log.debug() << " file state failbit set after read attempt\n";
     throw Exception::FileError("Couldn't read file", fname);
   }
-  g_log.debug() << " success opening input file " << fname << std::endl;
+  g_log.debug() << " success opening input file " << fname << '\n';
   progress(m_FracCompl += OPENINGFILE);
   // check for a (user) cancel message
   interruption_point();
@@ -454,7 +454,7 @@ void GroupDetectors2::processFile(std::string fname,
   // help users correct their files. These problems should cause the algorithm
   // to stop
   catch (std::invalid_argument &e) {
-    g_log.debug() << "Exception thrown: " << e.what() << std::endl;
+    g_log.debug() << "Exception thrown: " << e.what() << '\n';
     File.close();
     std::string error(e.what() + std::string(" near line number ") +
                       std::to_string(lineNum));
@@ -463,7 +463,7 @@ void GroupDetectors2::processFile(std::string fname,
     }
     throw Exception::FileError(error, fname);
   } catch (boost::bad_lexical_cast &e) {
-    g_log.debug() << "Exception thrown: " << e.what() << std::endl;
+    g_log.debug() << "Exception thrown: " << e.what() << '\n';
     File.close();
     std::string error(std::string("Problem reading integer value \"") +
                       e.what() + std::string("\" near line number ") +
@@ -537,7 +537,7 @@ void GroupDetectors2::processXMLFile(std::string fname,
         }
       } else {
         g_log.error() << "Detector with ID " << detid
-                      << " is not found in instrument " << std::endl;
+                      << " is not found in instrument \n";
       }
     } // for index
   }   // for group
@@ -565,7 +565,7 @@ void GroupDetectors2::processXMLFile(std::string fname,
         }
       } else {
         g_log.error() << "Spectrum with ID " << specNum
-                      << " is not found in instrument " << std::endl;
+                      << " is not found in instrument \n";
       }
     } // for index
   }   // for group
@@ -732,7 +732,7 @@ int GroupDetectors2::readInt(std::string line) {
         try {
           return boost::lexical_cast<int>(data[0]);
         } catch (boost::bad_lexical_cast &e) {
-          g_log.debug() << "Exception thrown: " << e.what() << std::endl;
+          g_log.debug() << "Exception thrown: " << e.what() << '\n';
           throw std::invalid_argument("Error reading file, integer expected");
         }
       }
@@ -743,7 +743,7 @@ int GroupDetectors2::readInt(std::string line) {
       // we expected an integer but there were more things on the line, before
       // any #
       g_log.debug() << "Error: found " << data.count()
-                    << " strings the first string is " << data[0] << std::endl;
+                    << " strings the first string is " << data[0] << '\n';
       throw std::invalid_argument(
           "Problem reading file, a singe integer expected");
     }
@@ -1120,7 +1120,7 @@ void GroupDetectors2::moveOthers(const std::set<int64_t> &unGroupedSet,
                                  API::MatrixWorkspace_const_sptr inputWS,
                                  API::MatrixWorkspace_sptr outputWS,
                                  size_t outIndex) {
-  g_log.debug() << "Starting to copy the ungrouped spectra" << std::endl;
+  g_log.debug() << "Starting to copy the ungrouped spectra\n";
   double prog4Copy = (1. - 1. * static_cast<double>(m_FracCompl)) /
                      static_cast<double>(unGroupedSet.size());
 
@@ -1177,7 +1177,7 @@ void GroupDetectors2::moveOthersEvent(
     const std::set<int64_t> &unGroupedSet,
     DataObjects::EventWorkspace_const_sptr inputWS,
     DataObjects::EventWorkspace_sptr outputWS, size_t outIndex) {
-  g_log.debug() << "Starting to copy the ungrouped spectra" << std::endl;
+  g_log.debug() << "Starting to copy the ungrouped spectra\n";
   double prog4Copy = (1. - 1. * static_cast<double>(m_FracCompl)) /
                      static_cast<double>(unGroupedSet.size());
 

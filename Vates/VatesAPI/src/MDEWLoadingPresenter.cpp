@@ -52,7 +52,7 @@ void MDEWLoadingPresenter::extractMetadata(
       min = 0.0;
       max = 1.0;
     }
-    // std::cout << "dim " << d << min << " to " <<  max << std::endl;
+    // std::cout << "dim " << d << min << " to " <<  max << '\n';
     axisLabels.push_back(makeAxisTitle(*inDim));
     dimensions.push_back(boost::make_shared<MDHistoDimension>(
         inDim->getName(), inDim->getName(), inDim->getMDFrame(), min, max,

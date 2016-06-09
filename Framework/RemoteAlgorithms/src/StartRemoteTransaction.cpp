@@ -57,8 +57,7 @@ void StartRemoteTransaction::exec() {
     std::string transId;
     resp["TransID"].getValue(transId);
     setPropertyValue("TransactionID", transId);
-    g_log.information() << "Transaction ID " << transId << " started."
-                        << std::endl;
+    g_log.information() << "Transaction ID " << transId << " started.\n";
   } else {
     std::string errMsg;
     resp["Err_Msg"].getValue(errMsg);

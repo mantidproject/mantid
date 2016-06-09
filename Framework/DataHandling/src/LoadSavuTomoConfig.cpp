@@ -63,7 +63,7 @@ void LoadSavuTomoConfig::exec() {
     }
   } catch (std::exception &e) {
     g_log.error() << "Failed to load savu tomography reconstruction "
-                     "parameterization file: " << e.what() << std::endl;
+                     "parameterization file: " << e.what() << '\n';
     return;
   }
 
@@ -87,7 +87,7 @@ bool LoadSavuTomoConfig::checkOpenFile(std::string fname,
       f->getEntries();
   } catch (NeXus::Exception &e) {
     g_log.error() << "Failed to open as a NeXus file: '" << fname
-                  << "', error description: " << e.what() << std::endl;
+                  << "', error description: " << e.what() << '\n';
     return false;
   }
   return true;
@@ -166,8 +166,7 @@ ITableWorkspace_sptr LoadSavuTomoConfig::loadFile(std::string &fname,
       // detailed NeXus error message and throw...
       g_log.error() << "Failed to load plugin '" << j
                     << "' from"
-                       "NeXus file. Error description: " << e.what()
-                    << std::endl;
+                       "NeXus file. Error description: " << e.what() << '\n';
       throw std::runtime_error(
           "Could not load one or more plugin "
           "entries from the tomographic reconstruction parameterization "
@@ -195,7 +194,7 @@ ITableWorkspace_sptr LoadSavuTomoConfig::loadFile(std::string &fname,
       g_log.warning()
           << "Failed to read some fields in tomographic "
              "reconstruction plugin line. The file seems to be wrong. Error "
-             "description: " << e.what() << std::endl;
+             "description: " << e.what() << '\n';
     }
 
     table << id << params << name << cite;

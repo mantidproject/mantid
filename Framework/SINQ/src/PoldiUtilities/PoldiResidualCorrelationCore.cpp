@@ -104,7 +104,7 @@ void PoldiResidualCorrelationCore::distributeCorrelationCounts(
                    "correlation counts for d-value with index "
                 << std::to_string(k)
                 << ", got middle index: " << std::to_string(middleIndex)
-                << ", ignoring it." << std::endl;
+                << ", ignoring it.\n";
             break;
           }
           addToCountData(locator.detectorElement, middleIndex, deltaForD);

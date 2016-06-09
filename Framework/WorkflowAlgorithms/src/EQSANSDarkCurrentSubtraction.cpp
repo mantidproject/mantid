@@ -148,8 +148,7 @@ void EQSANSDarkCurrentSubtraction::exec() {
     output_message +=
         "\n   Could not find proton charge or duration in sample logs";
     g_log.error()
-        << "ERROR: Could not find proton charge or duration in sample logs"
-        << std::endl;
+        << "ERROR: Could not find proton charge or duration in sample logs\n";
   };
 
   progress.report("Scaling dark current");

@@ -157,7 +157,7 @@ double DiffractionEventCalibrateDetectors::intensity(
 
   movedetector(x, y, z, rotx, roty, rotz, detname, inputW);
   if (debug)
-    std::cout << tim << " to movedetector()" << std::endl;
+    std::cout << tim << " to movedetector()\n";
 
   IAlgorithm_sptr alg3 = createChildAlgorithm("ConvertUnits");
   alg3->setProperty<EventWorkspace_sptr>("InputWorkspace", inputW);
@@ -167,7 +167,7 @@ double DiffractionEventCalibrateDetectors::intensity(
   MatrixWorkspace_sptr outputW = alg3->getProperty("OutputWorkspace");
 
   if (debug)
-    std::cout << tim << " to ConvertUnits" << std::endl;
+    std::cout << tim << " to ConvertUnits\n";
 
   IAlgorithm_sptr alg4 = createChildAlgorithm("DiffractionFocussing");
   alg4->setProperty<MatrixWorkspace_sptr>("InputWorkspace", outputW);
@@ -179,7 +179,7 @@ double DiffractionEventCalibrateDetectors::intensity(
 
   // Remove file
   if (debug)
-    std::cout << tim << " to DiffractionFocussing" << std::endl;
+    std::cout << tim << " to DiffractionFocussing\n";
 
   IAlgorithm_sptr alg5 = createChildAlgorithm("Rebin");
   alg5->setProperty<MatrixWorkspace_sptr>("InputWorkspace", outputW);
@@ -189,7 +189,7 @@ double DiffractionEventCalibrateDetectors::intensity(
   outputW = alg5->getProperty("OutputWorkspace");
 
   if (debug)
-    std::cout << tim << " to Rebin" << std::endl;
+    std::cout << tim << " to Rebin\n";
 
   // Find point of peak centre
   const MantidVec &yValues = outputW->readY(0);
@@ -220,7 +220,7 @@ double DiffractionEventCalibrateDetectors::intensity(
   fit_alg->executeAsChildAlg();
 
   if (debug)
-    std::cout << tim << " to Fit" << std::endl;
+    std::cout << tim << " to Fit\n";
 
   std::vector<double> params; // = fit_alg->getProperty("Parameters");
   Mantid::API::IFunction_sptr fun_res = fit_alg->getProperty("Function");
@@ -233,7 +233,7 @@ double DiffractionEventCalibrateDetectors::intensity(
   movedetector(-x, -y, -z, -rotx, -roty, -rotz, detname, inputW);
 
   if (debug)
-    std::cout << tim << " to movedetector()" << std::endl;
+    std::cout << tim << " to movedetector()\n";
 
   // Optimize C/peakheight + |peakLoc-peakOpt|  where C is scaled by number of
   // events
@@ -416,7 +416,7 @@ void DiffractionEventCalibrateDetectors::exec() {
     alg2->setPropertyValue("OutputWorkspace", groupWSName);
     alg2->executeAsChildAlg();
     par[5] = groupWSName;
-    std::cout << tim << " to CreateGroupingWorkspace" << std::endl;
+    std::cout << tim << " to CreateGroupingWorkspace\n";
 
     const gsl_multimin_fminimizer_type *T = gsl_multimin_fminimizer_nmsimplex;
     gsl_multimin_fminimizer *s = nullptr;

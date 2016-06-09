@@ -365,7 +365,7 @@ must not contain a toplevel +
   std::string Bexpress; // bracket expression
   int blevel = 0;       // this should already be zero!!
   // find first Component to add
-  //  std::cerr<<"Process Inter:"<<Ln<<std::endl;
+  //  std::cerr<<"Process Inter:"<<Ln<<'\n';
   int numItem(0);
   for (unsigned int iu = 0; iu < Ln.length(); iu++) {
     if (blevel) // we are in a bracket then...
@@ -382,7 +382,7 @@ must not contain a toplevel +
         try {
           AX.setString(Bexpress);
         } catch (...) {
-          std::cerr << "Error in string creation" << std::endl;
+          std::cerr << "Error in string creation\n";
         }
         Bexpress.erase(); // reset string
         addComp(AX);      // add components
@@ -432,7 +432,7 @@ Units are sorted after this function is returned.
   int blevel = 0;
   int bextra = 0;
   // find first Component to add
-  //  std::cerr<<"Process Union:"<<Ln<<std::endl;
+  //  std::cerr<<"Process Union:"<<Ln<<'\n';
   for (char iu : Ln) {
     if (blevel) // we are in a bracket then...
     {
@@ -448,7 +448,7 @@ Units are sorted after this function is returned.
         try {
           AX.setString(Express);
         } catch (...) {
-          std::cerr << "Error in string " << std::endl;
+          std::cerr << "Error in string \n";
           throw;
         }
         Express.erase(); // reset string
@@ -469,7 +469,7 @@ Units are sorted after this function is returned.
     try {
       AX.setString(Express);
     } catch (...) {
-      std::cerr << "Error in bracket ::" << std::endl;
+      std::cerr << "Error in bracket ::\n";
       throw;
     }
     addComp(AX); // add component
@@ -580,7 +580,7 @@ A. This will make the form DNF.
   std::vector<BnId>::const_iterator vc;
   for (vc = A.begin(); vc != A.end(); ++vc) {
     Acomp Px(0); // Union
-    // std::cout<<"Item == "<<*vc<<std::endl;
+    // std::cout<<"Item == "<<*vc<<'\n';
     BnId X = *vc;
     X.reverse();
     Px.addUnit(Index, X);
@@ -913,11 +913,11 @@ It is set on exit (to the EPI)
       }
     }
     if (DNFscore[ic] == 0) {
-      std::cerr << "PIForm:" << std::endl;
+      std::cerr << "PIForm:\n";
       copy(PIform.begin(), PIform.end(),
            std::ostream_iterator<BnId>(std::cerr, "\n"));
-      std::cerr << "Error with DNF / EPI determination at " << ic << std::endl;
-      std::cerr << " Items " << DNFobj[ic] << std::endl;
+      std::cerr << "Error with DNF / EPI determination at " << ic << '\n';
+      std::cerr << " Items " << DNFobj[ic] << '\n';
       return 0;
     }
   }
@@ -963,9 +963,9 @@ It is set on exit (to the EPI)
       std::cerr << PIform[*px] << ":";
       for (ddx = DNFactive.begin(); ddx != DNFactive.end(); ++ddx)
         std::cerr << ((Grid[*px][*ddx]) ? " 1" : " 0");
-      std::cerr << std::endl;
+      std::cerr << '\n';
     }
-    std::cerr << "END OF TABLE " << std::endl;
+    std::cerr << "END OF TABLE \n";
   }
 
   // Ok -- now the hard work...
@@ -1288,10 +1288,10 @@ Carries out algebraic division
   /*
   std::cerr<<"U == ";
   copy(U.begin(),U.end(),std::ostream_iterator<Acomp>(std::cerr,":"));
-  std::cerr<<std::endl;
+  std::cerr<<'\n';
   std::cerr<<"V == ";
   copy(V.begin(),V.end(),std::ostream_iterator<Acomp>(std::cerr,":"));
-  std::cerr<<std::endl;
+  std::cerr<<'\n';
   */
   for (cc = Glist.begin(); cc != Glist.end(); ++cc) {
     std::vector<Acomp>::const_iterator ux, vx;
@@ -1541,10 +1541,10 @@ Real pretty print out statement  :-)
   for (int i = 0; i < Indent; i++)
     OXF << " ";
   OXF << ((Intersect == 1) ? "Inter" : "Union");
-  OXF << " " << Units.size() << " " << Comp.size() << std::endl;
+  OXF << " " << Units.size() << " " << Comp.size() << '\n';
   for (int i = 0; i < Indent; i++)
     OXF << " ";
-  OXF << display() << std::endl;
+  OXF << display() << '\n';
   std::vector<Acomp>::const_iterator vc;
   for (vc = Comp.begin(); vc != Comp.end(); ++vc) {
     vc->writeFull(OXF, Indent + 2);
@@ -1640,7 +1640,7 @@ PI and Grid :
     std::cerr << PIform[pc] << ":";
     for (size_t ic = 0; ic != RX.second; ic++)
       std::cerr << ((Grid[pc][ic]) ? " 1" : " 0");
-    std::cerr << std::endl;
+    std::cerr << '\n';
   }
   return;
 }

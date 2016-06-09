@@ -774,12 +774,12 @@ void IFunction::setMatrixWorkspace(
                 g_log.debug()
                     << "For FitParameter " << parameterName(i)
                     << " centre of peak before any unit convertion is "
-                    << centreValue << std::endl;
+                    << centreValue << '\n';
                 centreValue =
                     convertValue(centreValue, centreUnit, workspace, wi);
                 g_log.debug() << "For FitParameter " << parameterName(i)
                               << " centre of peak after any unit convertion is "
-                              << centreValue << std::endl;
+                              << centreValue << '\n';
               }
 
               double paramValue = fitParam.getValue(centreValue);
@@ -795,11 +795,11 @@ void IFunction::setMatrixWorkspace(
                     fitParam.getLookUpTable().getYUnit(); // from table
                 g_log.debug() << "The FitParameter " << parameterName(i)
                               << " = " << paramValue
-                              << " before y-unit convertion" << std::endl;
+                              << " before y-unit convertion\n";
                 paramValue /= convertValue(1.0, resultUnit, workspace, wi);
                 g_log.debug() << "The FitParameter " << parameterName(i)
                               << " = " << paramValue
-                              << " after y-unit convertion" << std::endl;
+                              << " after y-unit convertion\n";
               } else {
                 // so from formula
 
@@ -826,19 +826,18 @@ void IFunction::setMatrixWorkspace(
                     g_log.debug() << "The FitParameter " << parameterName(i)
                                   << " = " << paramValue
                                   << " before result-unit convertion (using "
-                                  << resultUnitStr << ")" << std::endl;
+                                  << resultUnitStr << ")\n";
                     paramValue *= p.Eval();
                     g_log.debug() << "The FitParameter " << parameterName(i)
                                   << " = " << paramValue
-                                  << " after result-unit convertion"
-                                  << std::endl;
+                                  << " after result-unit convertion\n";
                   } catch (mu::Parser::exception_type &e) {
                     g_log.error()
                         << "Cannot convert formula unit to workspace unit"
                         << " Formula unit which cannot be passed is "
                         << resultUnitStr
                         << ". Muparser error message is: " << e.GetMsg()
-                        << std::endl;
+                        << '\n';
                   }
                 } // end if
               } // end trying to convert result-unit from formula or y-unit for

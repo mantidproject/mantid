@@ -112,8 +112,7 @@ void NormaliseByCurrent::exec() {
   // Get the good proton charge and check it's valid
   double charge = extractCharge(inputWS);
 
-  g_log.information() << "Normalisation current: " << charge << " uamps"
-                      << std::endl;
+  g_log.information() << "Normalisation current: " << charge << " uamps\n";
 
   double invcharge = 1.0 / charge; // Inverse of the charge to be multiplied by
 

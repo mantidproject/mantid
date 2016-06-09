@@ -62,7 +62,7 @@ void Shape2DCollection::draw(QPainter &painter) const {
     painter.restore();
   }
   // std::cerr << m_transform.m11() << ' ' << m_transform.m22() << ' ' <<
-  // m_transform.m33() << std::endl;
+  // m_transform.m33() << '\n';
 }
 
 /**

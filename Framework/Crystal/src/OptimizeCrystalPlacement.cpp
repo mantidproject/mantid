@@ -218,12 +218,12 @@ void OptimizeCrystalPlacement::exec() {
   }
 
   g_log.notice() << "Number initially indexed = " << nPeaksUsed
-                 << " at tolerance = " << HKLintOffsetMax << std::endl;
+                 << " at tolerance = " << HKLintOffsetMax << '\n';
   MatrixWorkspace_sptr mwkspc;
 
   if (nPeaksUsed < 1) {
     g_log.error() << "Error in UB too large. 0 peaks indexed at "
-                  << HKLintOffsetMax << std::endl;
+                  << HKLintOffsetMax << '\n';
     throw std::invalid_argument("Error in UB too large. 0 peaks indexed ");
   }
 
@@ -327,8 +327,8 @@ void OptimizeCrystalPlacement::exec() {
   FuncArg += oss.str();
   std::string Constr = oss1.str();
 
-  g_log.debug() << "Function argument=" << FuncArg << std::endl;
-  g_log.debug() << "Constraint argument=" << Constr << std::endl;
+  g_log.debug() << "Function argument=" << FuncArg << '\n';
+  g_log.debug() << "Constraint argument=" << Constr << '\n';
 
   //--------------------- set up Fit algorithm call-----------------
 
@@ -374,7 +374,7 @@ void OptimizeCrystalPlacement::exec() {
 
   double chisq = fit_alg->getProperty("OutputChi2overDoF");
   std::cout << "Fit finished. Status="
-            << (std::string)fit_alg->getProperty("OutputStatus") << std::endl;
+            << (std::string)fit_alg->getProperty("OutputStatus") << '\n';
 
   setProperty("Chi2overDoF", chisq);
 
@@ -383,14 +383,14 @@ void OptimizeCrystalPlacement::exec() {
 
   g_log.debug() << "Chi2overDof=" << chisq << "    # Peaks used=" << nPeaksUsed
                 << "# fitting parameters =" << nParams
-                << "   dof=" << (nPeaksUsed - nParams) << std::endl;
+                << "   dof=" << (nPeaksUsed - nParams) << '\n';
 
   ITableWorkspace_sptr RRes = fit_alg->getProperty("OutputParameters");
 
   double sigma = sqrt(chisq);
 
   std::string OutputStatus = fit_alg->getProperty("OutputStatus");
-  g_log.notice() << "Output Status=" << OutputStatus << std::endl;
+  g_log.notice() << "Output Status=" << OutputStatus << '\n';
 
   //------------------ Fix up Covariance output --------------------
   declareProperty(make_unique<WorkspaceProperty<ITableWorkspace>>(
@@ -518,7 +518,7 @@ void OptimizeCrystalPlacement::exec() {
   setProperty("ModifiedPeaksWorkspace", OutPeaks);
   setProperty("nIndexed", nIndexed);
   g_log.notice() << "Number indexed after optimization= " << nIndexed
-                 << " at tolerance = " << HKLintOffsetMax << std::endl;
+                 << " at tolerance = " << HKLintOffsetMax << '\n';
 
 } // exec
 
