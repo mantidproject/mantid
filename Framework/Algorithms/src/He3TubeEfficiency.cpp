@@ -257,7 +257,7 @@ void He3TubeEfficiency::getDetectorGeometry(
   if (!shape_sptr) {
     throw std::runtime_error(
         "Detector geometry error: detector with id: " +
-        boost::lexical_cast<std::string>(det->getID()) +
+        std::to_string(det->getID()) +
         " does not have shape. Is this a detectors group?\n"
         "The algorithm works for instruments with one-to-one "
         "spectra-to-detector maps only!");

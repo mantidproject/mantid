@@ -285,7 +285,7 @@ void GetAllEi::exec() {
     }
   }
   g_log.debug() << "*From all chopper opening only: " +
-                       boost::lexical_cast<std::string>(guess_ei.size()) +
+                       std::to_string(guess_ei.size()) +
                        " fell within both monitor's recording energy range\n";
   g_log.debug() << " Guess Energies are:\n";
   for (double ei : guess_ei) {
@@ -323,7 +323,7 @@ void GetAllEi::exec() {
     irange1_max.assign(irange_max.begin(), irange_max.end());
   }
   g_log.debug()
-      << "*Identified: " + boost::lexical_cast<std::string>(guess_ei.size()) +
+      << "*Identified: " + std::to_string(guess_ei.size()) +
              " peaks with sufficient signal around guess chopper opening\n";
 
   std::vector<peakKeeper> peaks;
@@ -557,21 +557,18 @@ bool GetAllEi::peakGuess(const API::MatrixWorkspace_sptr &inputWS, size_t index,
   }
   if (iterations_fail) {
     g_log.information() << "*No peak search convergence after " +
-                               boost::lexical_cast<std::string>(ic) +
+                               std::to_string(ic) +
                                " smoothing iterations at still_count: " +
-                               boost::lexical_cast<std::string>(
-                                   stay_still_count) +
+                               std::to_string(stay_still_count) +
                                " Wrong energy or noisy peak at Ei=" +
                                boost::lexical_cast<std::string>(Ei)
                         << std::endl;
   }
-  g_log.debug() << "*Performed: " + boost::lexical_cast<std::string>(ic) +
-                       " averages for spectra " +
-                       boost::lexical_cast<std::string>(index) +
+  g_log.debug() << "*Performed: " + std::to_string(ic) +
+                       " averages for spectra " + std::to_string(index) +
                        " at energy: " + boost::lexical_cast<std::string>(Ei) +
-                       "\n and found: " +
-                       boost::lexical_cast<std::string>(nPeaks) + "peaks and " +
-                       boost::lexical_cast<std::string>(nHills) + " hills\n";
+                       "\n and found: " + std::to_string(nPeaks) +
+                       "peaks and " + std::to_string(nHills) + " hills\n";
   if (nPeaks != 1) {
     g_log.debug() << "*Peak rejected as n-peaks !=1 after averaging\n";
     return false;
@@ -586,10 +583,8 @@ bool GetAllEi::peakGuess(const API::MatrixWorkspace_sptr &inputWS, size_t index,
       peakTwoSigma = hillsPos[1] - hillsPos[0];
     } else {
       g_log.debug() << "*Peak rejected as averaging gives: " +
-                           boost::lexical_cast<std::string>(nPeaks) +
-                           " peaks and " +
-                           boost::lexical_cast<std::string>(nHills) +
-                           " heals\n";
+                           std::to_string(nPeaks) + " peaks and " +
+                           std::to_string(nHills) + " heals\n";
 
       return false;
     }
@@ -1249,7 +1244,7 @@ std::map<std::string, std::string> GetAllEi::validateInputs() {
   } catch (std::runtime_error &) {
     result["Monitor1SpecID"] =
         "Input workspace does not contain spectra with ID: " +
-        boost::lexical_cast<std::string>(specNum1);
+        std::to_string(specNum1);
   }
   specnum_t specNum2 = getProperty("Monitor2SpecID");
   try {
@@ -1257,7 +1252,7 @@ std::map<std::string, std::string> GetAllEi::validateInputs() {
   } catch (std::runtime_error &) {
     result["Monitor2SpecID"] =
         "Input workspace does not contain spectra with ID: " +
-        boost::lexical_cast<std::string>(specNum2);
+        std::to_string(specNum2);
   }
   // check chopper and initiate it if present (for debugging)
   m_chopper = inputWS->getInstrument()->getComponentByName("chopper-position");

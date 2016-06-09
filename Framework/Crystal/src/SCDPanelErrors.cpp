@@ -324,7 +324,7 @@ SCDPanelErrors::getNewInstrument(const Geometry::IPeak &peak) const {
   boost::split(GroupBanks, BankNames, boost::is_any_of("!"));
 
   for (size_t group = 0; group < (size_t)GroupBanks.size(); ++group) {
-    string prefix = "f" + boost::lexical_cast<std::string>(group) + "_";
+    string prefix = "f" + std::to_string(group) + "_";
 
     std::vector<std::string> bankNames;
     Quat rot = Quat(getParameter(prefix + "Xrot"), Kernel::V3D(1.0, 0.0, 0.0)) *
@@ -657,7 +657,7 @@ void SCDPanelErrors::setAttribute(const std::string &attName,
     }
     NGroups = value.asInt();
     for (int k = 1; k < NGroups; ++k) {
-      std::string prefix = "f" + boost::lexical_cast<std::string>(k) + "_";
+      std::string prefix = "f" + std::to_string(k) + "_";
       declareParameter(prefix + "detWidthScale", 1.0, "panel Width");
       declareParameter(prefix + "detHeightScale", 1.0, "panelHeight");
 

@@ -1040,8 +1040,7 @@ std::string SCARFTomoReconstruction::buildSubmitBody(
     // <AppParam><id>JOB_NAME</id><value>foo</value><type></type></AppParam>
     std::string name;
     if (jobName.empty()) {
-      name =
-          "Mantid_tomography_" + boost::lexical_cast<std::string>(jobSeqNo());
+      name = "Mantid_tomography_" + std::to_string(jobSeqNo());
     } else {
       name = jobName;
     }
@@ -1183,7 +1182,7 @@ void SCARFTomoReconstruction::genOutputStatusInfo(
         jobs->item(static_cast<unsigned long>(i)));
     if (!el)
       throw std::runtime_error("Error while trying to parse job with index " +
-                               boost::lexical_cast<std::string>(i) +
+                               std::to_string(i) +
                                "could not produce a complete table workspace.");
 
     Poco::XML::Element *id = el->getChildElement("id");
@@ -1464,8 +1463,7 @@ void SCARFTomoReconstruction::getAllJobFiles(const std::string &jobId,
                    "existing jobs, username, and parameters.");
   }
 
-  progress(1.0, "Download  of " +
-                    boost::lexical_cast<std::string>(filePACNames.size()) +
+  progress(1.0, "Download  of " + std::to_string(filePACNames.size()) +
                     " file(s) completed in " + localDir);
 }
 

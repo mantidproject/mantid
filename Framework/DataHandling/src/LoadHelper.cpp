@@ -347,9 +347,9 @@ void LoadHelper::recurseAndAddNexusFieldsToWsRun(NXhandle nxfileID,
                     property_double_value =
                         (reinterpret_cast<double *>(dataBuffer))[dim_index];
                   }
-                  std::string indexed_property_name =
-                      property_name + std::string("_") +
-                      boost::lexical_cast<std::string>(dim_index);
+                  std::string indexed_property_name = property_name +
+                                                      std::string("_") +
+                                                      std::to_string(dim_index);
                   if (units_status != NX_ERROR)
                     runDetails.addProperty(indexed_property_name,
                                            property_double_value,

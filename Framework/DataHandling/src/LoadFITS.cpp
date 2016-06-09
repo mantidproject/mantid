@@ -245,7 +245,7 @@ void LoadFITS::loadHeader(const std::string &filePath, FITSInfo &header) {
           "bits per pixel as allowed in the FITS standard. The header of "
           "file '" +
           filePath + "' says that its bit depth is: " +
-          boost::lexical_cast<std::string>(header.bitsPerPixel));
+          std::to_string(header.bitsPerPixel));
   } catch (std::exception &e) {
     throw std::runtime_error(
         "Failed to process the '" + m_headerBitDepthKey +
@@ -445,12 +445,11 @@ void LoadFITS::doLoadFiles(const std::vector<std::string> &paths,
   for (int i = 0; i < headers[0].numberOfAxis; ++i) {
     if (0 != (headers[0].axisPixelLengths[i] % binSize)) {
       throw std::runtime_error(
-          "Cannot rebin this image in blocks of " +
-          boost::lexical_cast<std::string>(binSize) + " x " +
-          boost::lexical_cast<std::string>(binSize) +
+          "Cannot rebin this image in blocks of " + std::to_string(binSize) +
+          " x " + std::to_string(binSize) +
           " pixels as requested because the size of dimension " +
-          boost::lexical_cast<std::string>(i + 1) + " (" +
-          boost::lexical_cast<std::string>(headers[0].axisPixelLengths[i]) +
+          std::to_string(i + 1) + " (" +
+          std::to_string(headers[0].axisPixelLengths[i]) +
           ") is not a multiple of the bin size.");
     }
   }
@@ -467,7 +466,7 @@ void LoadFITS::doLoadFiles(const std::vector<std::string> &paths,
   } catch (std::exception &) {
     throw std::runtime_error(
         "Could not allocate enough memory to run when trying to allocate " +
-        boost::lexical_cast<std::string>(bytes) + " bytes.");
+        std::to_string(bytes) + " bytes.");
   }
 
   // Create a group for these new workspaces, if the group already exists, add
@@ -536,8 +535,8 @@ void LoadFITS::doLoadFiles(const std::vector<std::string> &paths,
 
     imgWS = makeWorkspace(headers[i], fileNumberInGroup, buffer, imageY, imageE,
                           imgWS, loadAsRectImg, binSize, noiseThresh);
-    progress.report("Loaded file " + boost::lexical_cast<std::string>(i + 1) +
-                    " of " + boost::lexical_cast<std::string>(totalWS));
+    progress.report("Loaded file " + std::to_string(i + 1) + " of " +
+                    std::to_string(totalWS));
     wsGroup->addWorkspace(imgWS);
   }
 
@@ -979,8 +978,8 @@ void LoadFITS::readInBuffer(const FITSInfo &fileInfo, std::vector<char> &buffer,
   if (!file) {
     throw std::runtime_error(
         "Error while reading file: " + filename + ". Tried to read " +
-        boost::lexical_cast<std::string>(len) + " bytes but got " +
-        boost::lexical_cast<std::string>(file.gcount()) +
+        std::to_string(len) + " bytes but got " +
+        std::to_string(file.gcount()) +
         " bytes. The file and/or its headers may be wrong.");
   }
   // all is loaded

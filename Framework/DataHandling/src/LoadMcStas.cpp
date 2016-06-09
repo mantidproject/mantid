@@ -392,8 +392,7 @@ void LoadMcStas::readEventData(
   std::string nameOfGroupWS = getProperty("OutputWorkspace");
   std::string nameUserSee = std::string("EventData_") + nameOfGroupWS;
   std::string extraProperty =
-      "Outputworkspace_dummy_" +
-      boost::lexical_cast<std::string>(m_countNumWorkspaceAdded);
+      "Outputworkspace_dummy_" + std::to_string(m_countNumWorkspaceAdded);
   declareProperty(Kernel::make_unique<WorkspaceProperty<Workspace>>(
       extraProperty, nameUserSee, Direction::Output));
   setProperty(extraProperty, boost::static_pointer_cast<Workspace>(eventWS));
@@ -532,8 +531,7 @@ void LoadMcStas::readHistogramData(
     std::string nameOfGroupWS = getProperty("OutputWorkspace");
     std::string nameUserSee = nameAttrValueTITLE + "_" + nameOfGroupWS;
     std::string extraProperty =
-        "Outputworkspace_dummy_" +
-        boost::lexical_cast<std::string>(m_countNumWorkspaceAdded);
+        "Outputworkspace_dummy_" + std::to_string(m_countNumWorkspaceAdded);
     declareProperty(Kernel::make_unique<WorkspaceProperty<Workspace>>(
         extraProperty, nameUserSee, Direction::Output));
     setProperty(extraProperty, boost::static_pointer_cast<Workspace>(ws));

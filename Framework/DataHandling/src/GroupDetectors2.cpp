@@ -457,7 +457,7 @@ void GroupDetectors2::processFile(std::string fname,
     g_log.debug() << "Exception thrown: " << e.what() << std::endl;
     File.close();
     std::string error(e.what() + std::string(" near line number ") +
-                      boost::lexical_cast<std::string>(lineNum));
+                      std::to_string(lineNum));
     if (File.fail()) {
       error = "Input output error while reading file ";
     }
@@ -467,7 +467,7 @@ void GroupDetectors2::processFile(std::string fname,
     File.close();
     std::string error(std::string("Problem reading integer value \"") +
                       e.what() + std::string("\" near line number ") +
-                      boost::lexical_cast<std::string>(lineNum));
+                      std::to_string(lineNum));
     if (File.fail()) {
       error = "Input output error while reading file ";
     }
@@ -815,11 +815,11 @@ void GroupDetectors2::readFile(spec2index_map &specs2index, std::istream &File,
              numberOfSpectra);
     if (static_cast<int>(m_GroupWsInds[spectrumNo].size()) !=
         numberOfSpectra) { // it makes no sense to continue reading the file,
-                           // we'll stop here
-      throw std::invalid_argument(
-          std::string("Bad number of spectra specification or spectra list "
-                      "near line number ") +
-          boost::lexical_cast<std::string>(lineNum));
+      // we'll stop here
+      throw std::invalid_argument(std::string("Bad number of spectra "
+                                              "specification or spectra list "
+                                              "near line number ") +
+                                  std::to_string(lineNum));
     }
     // make regular progress reports and check for a cancellation notification
     if ((m_GroupWsInds.size() % INTERVAL) == 1) {
@@ -861,9 +861,8 @@ void GroupDetectors2::readSpectraIndexes(std::string line,
         g_log.debug() << name() << ": spectrum number " << spectrumNum
                       << " refered to in the input file was not found in the "
                          "input workspace\n";
-        throw std::invalid_argument(
-            "Spectrum number " + boost::lexical_cast<std::string>(spectrumNum) +
-            " not found");
+        throw std::invalid_argument("Spectrum number " +
+                                    std::to_string(spectrumNum) + " not found");
       }
       if (unUsedSpec[ind->second] != USED) { // this array is used when the user
                                              // sets KeepUngroupedSpectra, as

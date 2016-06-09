@@ -160,7 +160,7 @@ void LoadRawHelper::setProtonCharge(API::Run &run) {
  *  @param run :: the workspace's run object
  */
 void LoadRawHelper::setRunNumber(API::Run &run) {
-  std::string run_num = boost::lexical_cast<std::string>(isisRaw->r_number);
+  std::string run_num = std::to_string(isisRaw->r_number);
   run.addLogData(new PropertyWithValue<std::string>("run_number", run_num));
 }
 /**reads workspace dimensions,number of periods etc from raw data

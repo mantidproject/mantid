@@ -343,7 +343,7 @@ void ISISLiveEventDataListener::initEventBuffer(
 
   // Set the run number
   m_runNumber = setup.head_setup.run_number;
-  std::string run_num = boost::lexical_cast<std::string>(m_runNumber);
+  std::string run_num = std::to_string(m_runNumber);
   m_eventBuffer[0]->mutableRun().addLogData(
       new Mantid::Kernel::PropertyWithValue<std::string>(RUN_NUMBER_PROPERTY,
                                                          run_num));

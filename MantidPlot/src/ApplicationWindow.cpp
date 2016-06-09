@@ -15981,7 +15981,7 @@ void ApplicationWindow::loadCustomActions() {
 QList<QMenu *> ApplicationWindow::customizableMenusList() {
   QList<QMenu *> lst;
   lst << windowsMenu << view << graph << fileMenu << format << edit;
-  lst << help << plot2DMenu << analysisMenu << multiPeakMenu;
+  lst << help << plot2DMenu << analysisMenu;
   lst << matrixMenu << plot3DMenu << plotDataMenu; // scriptingMenu;
   lst << tableMenu << fillMenu << normMenu << newMenu << exportPlotMenu
       << smoothMenu;

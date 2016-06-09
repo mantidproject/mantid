@@ -314,9 +314,7 @@ protected:
     return (m_quoteString) ? std::string("\"" + str + "\"") : str;
   }
   /// Apply if int
-  std::string apply(const int &i) const override {
-    return boost::lexical_cast<std::string>(i);
-  }
+  std::string apply(const int &i) const override { return std::to_string(i); }
   /// Apply if double
   std::string apply(const double &d) const override {
     return boost::lexical_cast<std::string>(d);

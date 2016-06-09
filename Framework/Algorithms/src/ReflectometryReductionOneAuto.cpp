@@ -319,11 +319,11 @@ void ReflectometryReductionOneAuto::exec() {
       if (detStart == detStop) {
         // If the range given only specifies one detector, we pass along just
         // that one detector
-        processing_commands = boost::lexical_cast<std::string>(detStart);
+        processing_commands = std::to_string(detStart);
       } else {
         // Otherwise, we create a range.
-        processing_commands = boost::lexical_cast<std::string>(detStart) + ":" +
-                              boost::lexical_cast<std::string>(detStop);
+        processing_commands =
+            std::to_string(detStart) + ":" + std::to_string(detStop);
       }
     } else {
       std::vector<double> multiStart =
@@ -334,10 +334,9 @@ void ReflectometryReductionOneAuto::exec() {
             "must exist as an instrument parameter.\n"
             "Please check if you meant to enter ProcessingInstructions or "
             "if your instrument parameter file is correct.");
-      processing_commands =
-          boost::lexical_cast<std::string>(static_cast<int>(multiStart[0])) +
-          ":" +
-          boost::lexical_cast<std::string>(in_ws->getNumberHistograms() - 1);
+      processing_commands = std::to_string(static_cast<int>(multiStart[0])) +
+                            ":" +
+                            std::to_string(in_ws->getNumberHistograms() - 1);
     }
   } else {
     std::string processing_commands_temp =
@@ -733,10 +732,8 @@ bool ReflectometryReductionOneAuto::processGroups() {
   // multiperiod)
   size_t numMembers = group->size();
   for (size_t i = 0; i < numMembers; ++i) {
-    const std::string IvsQName =
-        outputIvsQ + "_" + boost::lexical_cast<std::string>(i + 1);
-    const std::string IvsLamName =
-        outputIvsLam + "_" + boost::lexical_cast<std::string>(i + 1);
+    const std::string IvsQName = outputIvsQ + "_" + std::to_string(i + 1);
+    const std::string IvsLamName = outputIvsLam + "_" + std::to_string(i + 1);
 
     // If our transmission run is a group and PolarizationCorrection is on
     // then we sum our transmission group members.
@@ -816,10 +813,9 @@ bool ReflectometryReductionOneAuto::processGroups() {
       alg->setProperty("FirstTransmissionRun", "");
       alg->setProperty("SecondTransmissionRun", "");
       for (size_t i = 0; i < numMembers; ++i) {
-        const std::string IvsQName =
-            outputIvsQ + "_" + boost::lexical_cast<std::string>(i + 1);
+        const std::string IvsQName = outputIvsQ + "_" + std::to_string(i + 1);
         const std::string IvsLamName =
-            outputIvsLam + "_" + boost::lexical_cast<std::string>(i + 1);
+            outputIvsLam + "_" + std::to_string(i + 1);
         alg->setProperty("InputWorkspace", IvsLamName);
         alg->setProperty("OutputWorkspace", IvsQName);
         alg->setProperty("CorrectionAlgorithm", "None");
