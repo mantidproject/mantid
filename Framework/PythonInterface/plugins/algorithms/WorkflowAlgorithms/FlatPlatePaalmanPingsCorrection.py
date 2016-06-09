@@ -60,9 +60,9 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
                              doc='Sample number density in atoms/Angstrom3')
         self.declareProperty(name='SampleMassDensity', defaultValue=1.0,
                              validator=FloatBoundedValidator(0.0),
-                             doc='Sample mass density in ag/cm3')
+                             doc='Sample mass density in g/cm3')
         self.declareProperty(name='UseSampleMassDensity', defaultValue=False,
-                             doc='Use Sample Mass or Sample Number for Density.')
+                             doc='Use Sample Mass Density (True) or Sample Number Density (False)')
         self.declareProperty(name='SampleThickness', defaultValue=0.0,
                              validator=FloatBoundedValidator(0.0),
                              doc='Sample thickness in cm')
@@ -84,7 +84,7 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
                              validator=FloatBoundedValidator(0.0),
                              doc='Container number density in g/cm3')
         self.declareProperty(name='UseContainerMassDensity', defaultValue=False,
-                             doc='Use Container Mass or Container Number for Density.')
+                             doc='Use Container Mass Density (True) or Container Number Density (False).')
         self.declareProperty(name='CanFrontThickness', defaultValue=0.0,
                              validator=FloatBoundedValidator(0.0),
                              doc='Container front thickness in cm')
