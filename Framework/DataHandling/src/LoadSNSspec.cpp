@@ -164,8 +164,7 @@ void LoadSNSspec::exec() {
           spectra[working_with_spectrum_nbr].dataE().push_back(input[j]);
           nBins = j / 3;
         }
-        spectra[working_with_spectrum_nbr].dataX().push_back(
-            input[input.size() - 1]);
+        spectra[working_with_spectrum_nbr].dataX().push_back(input.back());
       }
       working_with_spectrum_nbr++;
       input.clear();
@@ -186,8 +185,7 @@ void LoadSNSspec::exec() {
         spectra[working_with_spectrum_nbr].dataE().push_back(input[j]);
         nBins = j / 3;
       }
-      spectra[working_with_spectrum_nbr].dataX().push_back(
-          input[input.size() - 1]);
+      spectra[working_with_spectrum_nbr].dataX().push_back(input.back());
     }
   } catch (...) {
   }

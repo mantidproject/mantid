@@ -547,7 +547,7 @@ bool MatrixModel::importASCII(const QString &fname, const QString &sep,
     }
   }
 
-  qApp->processEvents(QEventLoop::ExcludeUserInput);
+  qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
   for (int i = startRow; i < d_rows; i++) {
     s = t.readLine();
     if (simplifySpaces)
@@ -818,13 +818,13 @@ bool MatrixModel::muParserCalculate(int startRow, int endRow, int startCol,
       double r = row + 1.0;
       *ri = r;
       *rr = r;
-      *y = y_start + row * dy;
+      *y = y_start + row *dy;
       int aux = row * d_cols + startCol;
       for (int col = startCol; col <= endCol; col++) {
         double c = col + 1.0;
         *cj = c;
         *cc = c;
-        *x = x_start + col * dx;
+        *x = x_start + col *dx;
         d_data[aux++] = mup->evalSingleLine();
       }
     }
@@ -834,13 +834,13 @@ bool MatrixModel::muParserCalculate(int startRow, int endRow, int startCol,
       double r = row + 1.0;
       *ri = r;
       *rr = r;
-      *y = y_start + row * dy;
+      *y = y_start + row *dy;
       int aux = row * d_cols + startCol;
       for (int col = startCol; col <= endCol; col++) {
         double c = col + 1.0;
         *cj = c;
         *cc = c;
-        *x = x_start + col * dx;
+        *x = x_start + col *dx;
         res = mup->evaluate(ScriptCode(d_matrix->formula()));
         if (res.canConvert(QVariant::Double))
           d_data[aux++] = res.toDouble();

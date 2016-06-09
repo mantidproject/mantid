@@ -14,7 +14,7 @@
 #include <iostream>
 
 namespace {
-  Mantid::Kernel::Logger g_log("DynamicPDF");
+Mantid::Kernel::Logger g_log("DynamicPDF");
 }
 
 namespace MantidQt {
@@ -33,13 +33,12 @@ using dcRange = MantidQt::MantidWidgets::DisplayCurveFit::dcRange;
  * @param inputDataControl to handle the input data
  * @param displayModelFit to handle displaying the curves
  */
-DisplayControl::DisplayControl(InputDataControl *inputDataControl,
-    MantidQt::MantidWidgets::DisplayCurveFit *displayModelFit) :
-  m_inputDataControl{inputDataControl},
-  m_displayModelFit{displayModelFit},
-  m_fitRangeSelector{nullptr},
-  m_dataShown(),
-  m_dataShownName{"__DPDFDataShown"} {
+DisplayControl::DisplayControl(
+    InputDataControl *inputDataControl,
+    MantidQt::MantidWidgets::DisplayCurveFit *displayModelFit)
+    : m_inputDataControl{inputDataControl}, m_displayModelFit{displayModelFit},
+      m_fitRangeSelector{nullptr}, m_dataShown(),
+      m_dataShownName{"__DPDFDataShown"} {
   // nothing in the body
 }
 
@@ -53,10 +52,10 @@ void DisplayControl::init() {
 
   // SIGNAL/SLOT connections
   // user manipulated the fit-range selector
-  connect(m_fitRangeSelector, SIGNAL(minValueChanged(double)),
-    this, SLOT(rangeSelectorFitUpdated(double)));
-  connect(m_fitRangeSelector, SIGNAL(maxValueChanged(double)),
-    this, SLOT(rangeSelectorFitUpdated(double)));
+  connect(m_fitRangeSelector, SIGNAL(minValueChanged(double)), this,
+          SLOT(rangeSelectorFitUpdated(double)));
+  connect(m_fitRangeSelector, SIGNAL(maxValueChanged(double)), this,
+          SLOT(rangeSelectorFitUpdated(double)));
 }
 
 /**
@@ -67,9 +66,9 @@ DisplayControl::~DisplayControl() = default;
 /**
  * @brief get the current boundaries of the rangeSelectorFit
  */
-std::pair<double,double> DisplayControl::getFitMinMax() {
-  return std::pair<double,double>(m_fitRangeSelector->getMinimum(),
-    m_fitRangeSelector->getMaximum());
+std::pair<double, double> DisplayControl::getFitMinMax() {
+  return std::pair<double, double>(m_fitRangeSelector->getMinimum(),
+                                   m_fitRangeSelector->getMaximum());
 }
 
 /**
@@ -94,19 +93,22 @@ void DisplayControl::setFitMax(const double &boundary) {
  * @brief Reset the data to be displayed. Remove model evaluation curves
  */
 void DisplayControl::updateSliceForFitting() {
-  try{
-    //check the workspace is registered in the Analysis Data Service
-    auto workspace = Mantid::API::AnalysisDataService::Instance().retrieveWS
-    <Mantid::API::MatrixWorkspace>(m_dataShownName);
+  try {
+    // check the workspace is registered in the Analysis Data Service
+    auto workspace =
+        Mantid::API::AnalysisDataService::Instance()
+            .retrieveWS<Mantid::API::MatrixWorkspace>(m_dataShownName);
     // delete the workspace being shown
-    auto deleteWsAlg = Mantid::API::AlgorithmManager::Instance().create("DeleteWorkspace");
+    auto deleteWsAlg =
+        Mantid::API::AlgorithmManager::Instance().create("DeleteWorkspace");
     deleteWsAlg->initialize();
     deleteWsAlg->setChild(true);
     deleteWsAlg->setLogging(false);
     deleteWsAlg->setProperty("Workspace", m_dataShownName);
     deleteWsAlg->execute();
-  }catch (Mantid::Kernel::Exception::NotFoundError &) {}
-  if(m_displayModelFit->hasCurve(curveType::fit)) {
+  } catch (Mantid::Kernel::Exception::NotFoundError &) {
+  }
+  if (m_displayModelFit->hasCurve(curveType::fit)) {
     m_displayModelFit->removeSpectrum(curveType::fit);
     m_displayModelFit->removeSpectrum(curveType::residuals);
   }
@@ -117,8 +119,9 @@ void DisplayControl::updateSliceForFitting() {
   auto energy = m_inputDataControl->getSelectedEnergy();
   std::ostringstream energyLabelStream;
   energyLabelStream << energy;
-  //create internal workspace containing the non-zero signal
-  auto createWsAlg = Mantid::API::AlgorithmManager::Instance().create("CreateWorkspace");
+  // create internal workspace containing the non-zero signal
+  auto createWsAlg =
+      Mantid::API::AlgorithmManager::Instance().create("CreateWorkspace");
   createWsAlg->initialize();
   createWsAlg->setChild(true);
   createWsAlg->setLogging(false);
@@ -132,9 +135,9 @@ void DisplayControl::updateSliceForFitting() {
   createWsAlg->setProperty("VerticalAxisValues", energyLabelStream.str());
   createWsAlg->execute();
   Mantid::API::MatrixWorkspace_sptr m_dataShown =
-    createWsAlg->getProperty("OutputWorkspace");
-  Mantid::API::AnalysisDataService::Instance()
-    .add(m_dataShownName, m_dataShown);
+      createWsAlg->getProperty("OutputWorkspace");
+  Mantid::API::AnalysisDataService::Instance().add(m_dataShownName,
+                                                   m_dataShown);
   // show the workspace with appropriate range selector
   m_displayModelFit->addSpectrum(curveType::data, m_dataShown);
   auto curveRange = m_displayModelFit->getCurveRange(curveType::data);
@@ -142,7 +145,7 @@ void DisplayControl::updateSliceForFitting() {
   rangeSelectorFit->setRange(curveRange.first, curveRange.second);
   rangeSelectorFit->setMinimum(curveRange.first);
   rangeSelectorFit->setMaximum(curveRange.second);
-  //emit signalRangeSelectorFitUpdated();
+  // emit signalRangeSelectorFitUpdated();
 }
 
 /**
@@ -158,13 +161,14 @@ void DisplayControl::rangeSelectorFitUpdated(const double &boundary) {
  * @param workspaceName workspace name containing the evaluation of the model
  */
 void DisplayControl::updateModelEvaluationDisplay(
-  const QString &workspaceName) {
+    const QString &workspaceName) {
   auto modelWorkspace = Mantid::API::AnalysisDataService::Instance()
-    .retrieveWS<Mantid::API::MatrixWorkspace>(workspaceName.toStdString());
-  if(!modelWorkspace) {
+                            .retrieveWS<Mantid::API::MatrixWorkspace>(
+                                workspaceName.toStdString());
+  if (!modelWorkspace) {
     throw std::runtime_error("Unfound workspace containing model evaluation");
   }
-  if(m_displayModelFit->hasCurve(curveType::fit)) {
+  if (m_displayModelFit->hasCurve(curveType::fit)) {
     m_displayModelFit->removeSpectrum(curveType::fit);
     m_displayModelFit->removeSpectrum(curveType::residuals);
   }
@@ -172,9 +176,6 @@ void DisplayControl::updateModelEvaluationDisplay(
   m_displayModelFit->addSpectrum(curveType::fit, modelWorkspace, 1);
   m_displayModelFit->addSpectrum(curveType::residuals, modelWorkspace, 2);
 }
-
-
-
 }
 }
 }

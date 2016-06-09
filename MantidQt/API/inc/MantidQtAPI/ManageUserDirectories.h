@@ -5,25 +5,22 @@
 #include "ui_ManageUserDirectories.h"
 #include "DllOption.h"
 
-namespace MantidQt
-{
-namespace API
-{
+namespace MantidQt {
+namespace API {
 
-class EXPORT_OPT_MANTIDQT_API ManageUserDirectories : public QDialog
-{
+class EXPORT_OPT_MANTIDQT_API ManageUserDirectories : public QDialog {
   Q_OBJECT
 
 public:
   ManageUserDirectories(QWidget *parent = 0);
   ~ManageUserDirectories() override;
-  static void openUserDirsDialog(QWidget * parent);
+  static void openUserDirsDialog(QWidget *parent);
 
 private:
   virtual void initLayout();
   void loadProperties();
   void saveProperties();
-  QListWidget* listWidget();
+  QListWidget *listWidget();
 
 private slots:
   void helpClicked();

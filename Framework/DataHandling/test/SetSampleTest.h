@@ -393,6 +393,7 @@ private:
     using namespace Mantid::Kernel;
     using DoubleArrayProperty = ArrayProperty<double>;
     using DoubleProperty = PropertyWithValue<double>;
+    using IntProperty = PropertyWithValue<long>;
     using StringProperty = PropertyWithValue<std::string>;
 
     auto props = boost::make_shared<PropertyManager>();
@@ -405,8 +406,8 @@ private:
     std::vector<double> center{0, 0, 1};
     props->declareProperty(
         Mantid::Kernel::make_unique<DoubleArrayProperty>("Center", center), "");
-    props->declareProperty(
-        Mantid::Kernel::make_unique<DoubleProperty>("Axis", 1), "");
+    props->declareProperty(Mantid::Kernel::make_unique<IntProperty>("Axis", 1),
+                           "");
 
     return props;
   }
@@ -415,6 +416,7 @@ private:
     using namespace Mantid::Kernel;
     using DoubleArrayProperty = ArrayProperty<double>;
     using DoubleProperty = PropertyWithValue<double>;
+    using IntProperty = PropertyWithValue<long>;
     using StringProperty = PropertyWithValue<std::string>;
 
     auto props = boost::make_shared<PropertyManager>();
@@ -430,8 +432,8 @@ private:
     std::vector<double> center{0, 0, 1};
     props->declareProperty(
         Mantid::Kernel::make_unique<DoubleArrayProperty>("Center", center), "");
-    props->declareProperty(
-        Mantid::Kernel::make_unique<DoubleProperty>("Axis", 1), "");
+    props->declareProperty(Mantid::Kernel::make_unique<IntProperty>("Axis", 1),
+                           "");
 
     return props;
   }

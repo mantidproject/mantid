@@ -10,8 +10,8 @@
 QwtWorkspaceBinData::QwtWorkspaceBinData(
     const Mantid::API::MatrixWorkspace &workspace, int binIndex,
     const bool logScaleY)
-    : MantidQwtMatrixWorkspaceData(logScaleY), m_binIndex(binIndex), m_X(), m_Y(), m_E(), m_xTitle(), m_yTitle()
-       {
+    : MantidQwtMatrixWorkspaceData(logScaleY), m_binIndex(binIndex), m_X(),
+      m_Y(), m_E(), m_xTitle(), m_yTitle() {
   init(workspace);
 }
 
@@ -38,28 +38,20 @@ Return the x value of data point i
 @param i :: Index
 @return x X value of data point i
 */
-double QwtWorkspaceBinData::getX(size_t i) const {
-  return m_X[i];
-}
+double QwtWorkspaceBinData::getX(size_t i) const { return m_X[i]; }
 
 /**
 Return the y value of data point i
 @param i :: Index
 @return y Y value of data point i
 */
-double QwtWorkspaceBinData::getY(size_t i) const {
-  return m_Y[i];
-}
+double QwtWorkspaceBinData::getY(size_t i) const { return m_Y[i]; }
 
-double QwtWorkspaceBinData::getEX(size_t i) const {
-  return m_X[i];
-}
+double QwtWorkspaceBinData::getEX(size_t i) const { return m_X[i]; }
 
-double QwtWorkspaceBinData::getE(size_t i) const {
-  return m_E[i];
-}
+double QwtWorkspaceBinData::getE(size_t i) const { return m_E[i]; }
 
-//size_t QwtWorkspaceBinData::esize() const { return this->size(); }
+// size_t QwtWorkspaceBinData::esize() const { return this->size(); }
 
 /**
  * @return A string containin the text to use as an X axis label
@@ -78,7 +70,7 @@ QString QwtWorkspaceBinData::getYAxisLabel() const { return m_yTitle; }
 QwtWorkspaceBinData &QwtWorkspaceBinData::
 operator=(const QwtWorkspaceBinData &rhs) {
   if (this != &rhs) {
-    static_cast<MantidQwtMatrixWorkspaceData&>(*this) = rhs;
+    static_cast<MantidQwtMatrixWorkspaceData &>(*this) = rhs;
     m_binIndex = rhs.m_binIndex;
     m_X = rhs.m_X;
     m_Y = rhs.m_Y;

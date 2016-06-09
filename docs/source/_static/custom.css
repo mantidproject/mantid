@@ -109,3 +109,20 @@ td, th {
 .green {
     color:green;
 }
+
+/*-------Introduced here for colors in table cells, for the comparisons of minimizers-----*/
+.ranking-top-1 {
+    background-color: #fef0d9;
+}
+.ranking-top-2 {
+    background-color: #fdcc8a;
+}
+.ranking-med-3 {
+    background-color: #fc8d59;
+}
+.ranking-low-4 {
+    background-color: #e34a33;
+}
+.ranking-low-5 {
+    background-color: #b30000;
+}

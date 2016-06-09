@@ -186,7 +186,7 @@ std::map<std::string, std::string> MaxEnt::validateInputs() {
     // Average spacing
     const MantidVec &X = inWS->readX(0);
     const double dx =
-        (X[X.size() - 1] - X[0]) / static_cast<double>(X.size() - 1);
+        (X.back() - X.front()) / static_cast<double>(X.size() - 1);
     for (size_t i = 1; i < X.size() - 1; i++) {
       // 1% accuracy exceeded, but data still usable
       if (std::abs(X[i] - X[0] - static_cast<double>(i) * dx) / dx >

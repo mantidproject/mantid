@@ -249,8 +249,7 @@ void LayerDialog::update() {
   if (cols > graphs && !fitBox->isChecked()) {
     QMessageBox::about(this, tr("MantidPlot - Columns input error"),
                        tr("The number of columns you've entered is greater "
-                          "than the number of graphs (%1)!")
-                           .arg(graphs));
+                          "than the number of graphs (%1)!").arg(graphs));
     boxX->setFocus();
     return;
   }
@@ -258,8 +257,7 @@ void LayerDialog::update() {
   if (rows > graphs && !fitBox->isChecked()) {
     QMessageBox::about(this, tr("MantidPlot - Rows input error"),
                        tr("The number of rows you've entered is greater than "
-                          "the number of graphs (%1)!")
-                           .arg(graphs));
+                          "the number of graphs (%1)!").arg(graphs));
     boxY->setFocus();
     return;
   }

@@ -14,6 +14,31 @@
 namespace Mantid {
 namespace DataHandling {
 
+namespace {
+
+/**
+ * Retrieve "Axis" property value. The most commmon use case is calling
+ * this algorithm from Python where Axis is input as a C long. The
+ * definition of long varies across platforms and long v = args.getProperty()
+ * is currently unable to cope so we go via the long route to retrieve
+ * the value.
+ * @param args Dictionary-type containing the argument
+ */
+long getAxisIndex(const Kernel::PropertyManager &args) {
+  using Kernel::Property;
+  using Kernel::PropertyWithValue;
+  long axisIdx(1);
+  if (args.existsProperty("Axis")) {
+    Kernel::Property *axisProp = args.getProperty("Axis");
+    axisIdx = static_cast<PropertyWithValue<long> *>(axisProp)->operator()();
+    if (axisIdx < 0 || axisIdx > 2)
+      throw std::invalid_argument(
+          "Geometry.Axis value must be either 0,1,2 (X,Y,Z)");
+  }
+  return axisIdx;
+}
+}
+
 using Geometry::SampleEnvironment;
 
 // Register the algorithm into the AlgorithmFactory
@@ -305,14 +330,9 @@ SetSample::createCylinderXML(const Kernel::PropertyManager &args) const {
   double height = args.getProperty("Height");
   double radius = args.getProperty("Radius");
   std::vector<double> center = args.getProperty("Center");
-  double axisDbl(1.0); // Default Axis is Y
-  if (args.existsProperty("Axis")) {
-    axisDbl = args.getProperty("Axis");
-    if (axisDbl < 0 || axisDbl > 2)
-      throw std::invalid_argument(
-          "Geometry.Axis value must be either 0,1,2 (X,Y,Z)");
-  }
-  size_t axisIdx = static_cast<size_t>(axisDbl);
+  // Expected to be a long so that the mapping from Python is simple
+  // Expected to be a long so that the mapping from Python is simple
+  long axisIdx = getAxisIndex(args);
   // convert to metres
   height *= 0.01;
   radius *= 0.01;
@@ -354,14 +374,8 @@ SetSample::createHollowCylinderXML(const Kernel::PropertyManager &args) const {
   double innerRadius = args.getProperty("InnerRadius");
   double outerRadius = args.getProperty("OuterRadius");
   std::vector<double> center = args.getProperty("Center");
-  double axisDbl(1.0); // Default Axis is Y
-  if (args.existsProperty("Axis")) {
-    axisDbl = args.getProperty("Axis");
-    if (axisDbl < 0 || axisDbl > 2)
-      throw std::invalid_argument(
-          "Geometry.Axis value must be either 0,1,2 (X,Y,Z)");
-  }
-  size_t axisIdx = static_cast<size_t>(axisDbl);
+  // Expected to be a long so that the mapping from Python is simple
+  long axisIdx = getAxisIndex(args);
   // convert to metres
   height *= 0.01;
   innerRadius *= 0.01;
