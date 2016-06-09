@@ -221,11 +221,12 @@ class PeakProcessHelper(object):
         return
 
     def set_hkl(self, hkl):
-        """ Set current HKL
-        :param hkl:
+        """ Set current HKL which may come from any source, such as user, spice or calculation
+        :param hkl: 3-item-list or 3-tuple for HKL
         :return:
         """
-        # TODO/NOW - check and doc
+        # check
+        assert len(hkl) == 3
 
         self._currHKL = hkl
 

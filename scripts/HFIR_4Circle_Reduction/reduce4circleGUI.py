@@ -221,6 +221,10 @@ class MainWindow(QtGui.QMainWindow):
         self.connect(self.ui.pushButton_clearSurvey, QtCore.SIGNAL('clicked()'),
                      self.do_clear_survey)
 
+        # Tab k-shift vector
+        self.connect(self.ui.pushButton_addKShift, QtCore.SIGNAL('clicked()'),
+                     self.do_add_k_shift_vector)
+
         # Menu
         self.connect(self.ui.actionExit, QtCore.SIGNAL('triggered()'),
                      self.menu_quit)
@@ -263,11 +267,15 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.tableWidget_peakIntegration.setup()
         self.ui.tableWidget_mergeScans.setup()
         self.ui.tableWidget_ubInUse.setup()
+        self.ui.tableWidget_kShift.setup()
 
         # Radio buttons
         self.ui.radioButton_hklFromSPICE.setChecked(True)
         self.ui.radioButton_indexFromCalUB.setChecked(False)
 
+        # combo-box
+        self.ui.comboBox_kVectors.clear()
+        self.ui.comboBox_kVectors.addItem('0: (0, 0, 0)')
 
         # tab
         self.ui.tabWidget.setCurrentIndex(0)
@@ -1773,6 +1781,31 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
+    def do_add_k_shift_vector(self):
+        """ Add a k-shift vector
+        :return:
+        """
+        # parse the k-vector
+        status, ret_obj = gutil.parse_float_editors([self.ui.lineEdit_kX, self.ui.lineEdit_kY, self.ui.lineEdit_kZ],
+                                                    allow_blank=False)
+        if status is False:
+            error_message = ret_obj
+            self.pop_one_button_dialog(error_message)
+            return
+        else:
+            k_x, k_y, k_z = ret_obj
+
+        # add to controller
+        k_index = self._myControl.add_k_shift_vector(k_x, k_y, k_z)
+
+        # add to table and combo-box
+        self.ui.tableWidget_kShift.add_k_vector(k_index, k_x, k_y, k_z)
+
+        combo_message = '%d: (%.5f, %.5f, %.5f)' % (k_index, k_x, k_y, k_z)
+        self.ui.comboBox_kVectors.addItem(combo_message)
+
+        return
+
     def do_apply_k_shift(self):
         """ Apply k-shift to selected reflections
         :return:
@@ -1784,19 +1817,12 @@ class MainWindow(QtGui.QMainWindow):
             scan_number = self.ui.tableWidget_mergeScans.get_scan_number(row_index)
             scan_list.append(scan_number)
 
-        # parse the k-vector
-        kshift_str_vec = str(self.ui.lineEdit_kShiftVector.text()).split(',')
-        if len(kshift_str_vec) != 3:
-            error_message = 'K-shift vector must be in format kx, ky, kz. ' \
-                            'Present input %s does not meet the format.' % kshift_str_vec
-            self.pop_one_button_dialog(error_message)
-            return
-        k_x = float(kshift_str_vec[0])
-        k_y = float(kshift_str_vec[1])
-        k_z = float(kshift_str_vec[2])
+        # get the k-vector
+        k_shift_message = str(self.ui.comboBox_kVectors.currentText())
+        k_index = int(k_shift_message.split(':')[0])
 
         # form the set up
-        self._myControl.set_k_shift(scan_list, (k_x, k_y, k_z))
+        self._myControl.set_k_shift(scan_list, k_index)
 
         return
 

@@ -5,6 +5,77 @@ import sys
 import NTableWidget as tableBase
 
 
+class KShiftTableWidget(tableBase.NTableWidget):
+    """ Extended table widget for show the K-shift vectors set to the output Fullprof file
+    """
+    # Table set up
+    TableSetup = [('Index', 'int'),
+                  ('Kx', 'float'),
+                  ('Ky', 'float'),
+                  ('Kz', 'float'),
+                  ('Selected', 'checkbox')]
+
+    def __init__(self, parent):
+        """
+        Initialization
+        :param parent::
+        :return:
+        """
+        tableBase.NTableWidget.__init__(self, parent)
+
+        # column index of k-index
+        self._iColKIndex = None
+
+        return
+
+    def add_k_vector(self, k_index, kx, ky, kz):
+        """
+        Add K-vector to the table
+        :param k_index:
+        :param kx:
+        :param ky:
+        :param kz:
+        :return:
+        """
+        # check
+        assert isinstance(k_index, int) and k_index >= 0
+        assert isinstance(kx, float) and isinstance(ky, float) and isinstance(kz, float)
+
+        new_row = [k_index, kx, ky, kz, False]
+
+        self.append_row(new_row)
+
+        return
+
+    def delete_k_vector(self, k_index):
+        """ Delete a row
+        :param k_index:
+        :return:
+        """
+        # check
+        assert isinstance(k_index, int)
+
+        # find and delete
+        found_and_delete = False
+        for i_row in range(self.rowCount()):
+            k_index_i = self.get_cell_value(i_row, self._iColKIndex)
+            if k_index == k_index_i:
+                self.delete_rows([i_row])
+                found_and_delete = True
+
+        return found_and_delete
+
+    def setup(self):
+        """ Set up the table
+        :return:
+        """
+        self.init_setup(self.TableSetup)
+
+        self._iColKIndex = self.TableSetup.index(('Index', 'int'))
+
+        return
+
+
 class PeakIntegrationTableWidget(tableBase.NTableWidget):
     """
     Extended table widget for studying peak integration of scan on various Pts.
@@ -398,6 +469,7 @@ class ProcessTableWidget(tableBase.NTableWidget):
                   ('Motor', 'str'),
                   ('Wavelength', 'float'),
                   ('Merged Workspace', 'str'),
+                  ('K-Index', 'int'),
                   ('Select', 'checkbox')]
 
     def __init__(self, parent):
@@ -407,6 +479,10 @@ class ProcessTableWidget(tableBase.NTableWidget):
         :return:
         """
         tableBase.NTableWidget.__init__(self, parent)
+
+        # some commonly used column index
+        self._colIndexKIndex = None
+        self._colIndexHKL = None
 
         return
 
@@ -433,7 +509,7 @@ class ProcessTableWidget(tableBase.NTableWidget):
         hkl = ''
 
         new_row = [scan_number, intensity, corr_int, status, centre, hkl, total_counts,
-                   motor_info, wave_length, ws_name, False]
+                   motor_info, wave_length, ws_name, 0, False]
 
         return new_row
 
@@ -561,6 +637,10 @@ class ProcessTableWidget(tableBase.NTableWidget):
         self.init_setup(self.TableSetup)
         self._statusColName = 'Select'
 
+        # set up column index
+        self._colIndexKIndex = self.TableSetup.index(('K-Index', 'int'))
+        self._colIndexHKL = self.TableSetup.index(('HKL', 'str'))
+
         return
 
     def set_scan_pt(self, scan_no, pt_list):
@@ -588,21 +668,29 @@ class ProcessTableWidget(tableBase.NTableWidget):
         return ''
 
     def set_hkl(self, row_number, hkl):
-        """
+        """ Set Miller index HKL to a row
         :param hkl:
         :return:
         """
-        # TODO/NOW - check and doc
-
-        # get column index
-        col_hkl_index = self.TableSetup.index(('HKL', 'str'))
-
         # check
-        # blabla... ...
+        assert isinstance(row_number, int) and 0 <= row_number < self.rowCount()
+        assert len(hkl) == 3
 
-        # set
+        # update the cell
         hkl_str = '%.3f, %.3f, %.3f' % (hkl[0], hkl[1], hkl[2])
-        self.update_cell_value(row_number, col_hkl_index, hkl_str)
+        self.update_cell_value(row_number, self._colIndexHKL, hkl_str)
+
+        return
+
+    def set_k_shift_index(self, row_number, k_index):
+        """ Set k-shift index to a row
+        :param row_number:
+        :param k_index:
+        :return:
+        """
+        assert isinstance(k_index, int)
+
+        self.update_cell_value(row_number, self._colIndexKIndex, k_index)
 
         return
 

@@ -114,6 +114,28 @@ class CWSCDReductionControl(object):
 
         return
 
+    def add_k_shift_vector(self, k_x, k_y, k_z):
+        """
+        Add a k-shift vector
+        :param k_x:
+        :param k_y:
+        :param k_z:
+        :return: k_index of the (k_x, k_y, k_z)
+        """
+        # check
+        assert isinstance(k_x, float)
+        assert isinstance(k_y, float)
+        assert isinstance(k_z, float)
+
+        k_shift_vector = (k_x, k_y, k_z)
+        self._kShiftDict[self._kVectorIndex] = [k_shift_vector, []]
+
+        # make progress
+        return_k_index = self._kVectorIndex
+        self._kVectorIndex += 1
+
+        return return_k_index
+
     @staticmethod
     def apply_mask(exp_number, scan_number, pt_number):
         """
@@ -460,11 +482,15 @@ class CWSCDReductionControl(object):
         return avg_bg
 
     def get_ub_matrix(self, exp_number):
-        """ Get UB matrix
+        """ Get UB matrix assigned to an experiment
         :param exp_number:
         :return:
         """
-        # TODO/NOW - Doc and test
+        # check
+        assert isinstance(exp_number, int), 'Experiment number must be an integer but not %s.' % str(type(exp_number))
+        assert exp_number in self._myUBMatrixDict, 'Experiment number %d has no UB matrix set up. Here ' \
+                                                   'are list of experiments that have UB matrix set up: ' \
+                                                   '%s.' % (exp_number, str(self._myUBMatrixDict.keys()))
 
         return self._myUBMatrixDict[exp_number]
 
@@ -1908,7 +1934,8 @@ class CWSCDReductionControl(object):
 
         return True, (m_h, m_k, m_l)
 
-    def set_k_shift(self, scan_number_list, k_shift_vector):
+
+    def set_k_shift(self, scan_number_list, k_index):
         """ Set k-shift vector
         :param scan_number_list:
         :param k_shift_vector:
@@ -1916,11 +1943,12 @@ class CWSCDReductionControl(object):
         """
         # check
         assert isinstance(scan_number_list, list) and len(scan_number_list) > 0
-        assert len(k_shift_vector) == 3
+        assert isinstance(k_index, int)
+        assert k_index in self._kShiftDict, 'K-index %d is not in K-shift dictionary (' \
+                                            '%s).' % (k_index, str(self._kShiftDict.keys()))
 
         # get the k-shift index
-        self._kShiftDict[self._kVectorIndex] = (k_shift_vector, scan_number_list)
-        self._kVectorIndex += 1
+        self._kShiftDict[self._kVectorIndex][1] = scan_number_list
 
         return
 
