@@ -89,8 +89,8 @@ void SCARFLSFJobManager::authenticate(const std::string &username,
   } else {
     throw std::runtime_error("Login failed. Please check your username and "
                              "password. Got status code " +
-                             boost::lexical_cast<std::string>(code) +
-                             ", with this response: " + resp);
+                             std::to_string(code) + ", with this response: " +
+                             resp);
   }
 }
 

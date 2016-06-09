@@ -135,7 +135,7 @@ void LoadAscii2::parseLine(const std::string &line,
       // there were more separators than there should have been, which isn't
       // right, or something went rather wrong
       throw std::runtime_error(
-          "Line " + boost::lexical_cast<std::string>(m_lineNo) +
+          "Line " + std::to_string(m_lineNo) +
           ": Sets of values must have between 1 and 3 delimiters");
     } else if (cols == 1) {
       // a size of 1 is a spectra ID as long as there are no alphabetic
@@ -151,7 +151,7 @@ void LoadAscii2::parseLine(const std::string &line,
         // if not then they've ommitted IDs in the the file previously and just
         // decided to include one (which is wrong and confuses everything)
         throw std::runtime_error(
-            "Line " + boost::lexical_cast<std::string>(m_lineNo) +
+            "Line " + std::to_string(m_lineNo) +
             ": Inconsistent inclusion of spectra IDs. All spectra must have "
             "IDs or all spectra must not have IDs. "
             "Check for blank lines, as they symbolize the end of one spectra "
@@ -168,7 +168,7 @@ void LoadAscii2::parseLine(const std::string &line,
     }
   } else if (badLine(line)) {
     throw std::runtime_error(
-        "Line " + boost::lexical_cast<std::string>(m_lineNo) +
+        "Line " + std::to_string(m_lineNo) +
         ": Unexpected character found at beginning of line. Lines must either "
         "be a single integer, a list of numeric values, blank, or a text line "
         "beginning with the specified comment indicator: " +
@@ -176,7 +176,7 @@ void LoadAscii2::parseLine(const std::string &line,
   } else {
     // strictly speaking this should never be hit, but just being sure
     throw std::runtime_error(
-        "Line " + boost::lexical_cast<std::string>(m_lineNo) +
+        "Line " + std::to_string(m_lineNo) +
         ": Unknown format at line. Lines must either be a single integer, a "
         "list of numeric values, blank, or a text line beginning with the "
         "specified comment indicator: " +
@@ -257,7 +257,7 @@ void LoadAscii2::setcolumns(std::ifstream &file, std::string &line,
             // isn't right, or something went rather wrong
             throw std::runtime_error(
                 "Sets of values must have between 1 and 3 delimiters. Found " +
-                boost::lexical_cast<std::string>(cols) + ".");
+                std::to_string(cols) + ".");
           } else if (cols != 1) {
             try {
               fillInputValues(values, columns);

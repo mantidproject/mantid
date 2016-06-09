@@ -156,8 +156,7 @@ calculateSteps(const std::vector<MinMax> &inExtents,
       outExtents[i].first = dimMin;
 
     } else {
-      throw std::runtime_error("Cannot handle " +
-                               boost::lexical_cast<std::string>(nArgs) +
+      throw std::runtime_error("Cannot handle " + std::to_string(nArgs) +
                                " bins.");
     }
     if (outBin < 0)
@@ -340,14 +339,14 @@ void CutMD::exec() {
     for (size_t i = 0; i < 5; ++i) {
       if (i < numDims && pbins[i].empty())
         throw std::runtime_error(
-            "P" + boost::lexical_cast<std::string>(i + 1) +
+            "P" + std::to_string(i + 1) +
             "Bin must be set when processing a workspace with " +
-            boost::lexical_cast<std::string>(numDims) + " dimensions.");
+            std::to_string(numDims) + " dimensions.");
       if (i >= numDims && !pbins[i].empty())
         throw std::runtime_error(
-            "P" + boost::lexical_cast<std::string>(i + 1) +
+            "P" + std::to_string(i + 1) +
             "Bin must NOT be set when processing a workspace with " +
-            boost::lexical_cast<std::string>(numDims) + " dimensions.");
+            std::to_string(numDims) + " dimensions.");
     }
 
     // Get extents in projection
@@ -456,8 +455,7 @@ void CutMD::exec() {
       }
 
       const std::string value = label + ", " + unit + ", " + vecStr;
-      cutAlg->setProperty("BasisVector" + boost::lexical_cast<std::string>(i),
-                          value);
+      cutAlg->setProperty("BasisVector" + std::to_string(i), value);
     }
 
     // Translate extents into a single vector

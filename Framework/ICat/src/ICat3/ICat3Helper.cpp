@@ -83,7 +83,7 @@ void CICatHelper::saveInvestigations(
     for (citr = investigations.begin(); citr != investigations.end(); ++citr) {
       API::TableRow t = outputws->appendRow();
 
-      std::string id = boost::lexical_cast<std::string>(*(*citr)->id);
+      std::string id = std::to_string(*(*citr)->id);
 
       savetoTableWorkspace(&id, t);
       savetoTableWorkspace((*citr)->facility, t);
@@ -91,12 +91,10 @@ void CICatHelper::saveInvestigations(
       savetoTableWorkspace((*citr)->instrument, t);
       savetoTableWorkspace((*citr)->invParamValue, t);
 
-      std::string startDate =
-          boost::lexical_cast<std::string>(*(*citr)->invStartDate);
+      std::string startDate = std::to_string(*(*citr)->invStartDate);
       savetoTableWorkspace(&startDate, t);
 
-      std::string endDate =
-          boost::lexical_cast<std::string>(*(*citr)->invEndDate);
+      std::string endDate = std::to_string(*(*citr)->invEndDate);
       savetoTableWorkspace(&endDate, t);
 
       std::string sessionID = m_session->getSessionId();

@@ -530,7 +530,7 @@ void LoadILLSANS::loadMetaData(const NeXus::NXEntry &entry,
   API::Run &runDetails = m_localWorkspace->mutableRun();
 
   int runNum = entry.getInt("run_number");
-  std::string run_num = boost::lexical_cast<std::string>(runNum);
+  std::string run_num = std::to_string(runNum);
   runDetails.addProperty("run_number", run_num);
 
   if (entry.getFloat("mode") == 0.0) { // Not TOF

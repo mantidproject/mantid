@@ -1597,7 +1597,7 @@ void IntegratePeakTimeSlices::SetUpData1(
       workspaceIndex = m_wi_to_detid_map.find(DetID)->second;
     else {
       throw std::runtime_error("No workspaceIndex for detID=" +
-                               boost::lexical_cast<std::string>(DetID));
+                               std::to_string(DetID));
     }
 
     IDetector_const_sptr Det = inpWkSpace->getDetector(workspaceIndex);
@@ -1610,7 +1610,7 @@ void IntegratePeakTimeSlices::SetUpData1(
     if (dist.scalar_prod(dist) < Radius * Radius)
 
     {
-      spec_idList += boost::lexical_cast<std::string>(
+      spec_idList += std::to_string(
           inpWkSpace->getSpectrum(workspaceIndex)->getSpectrumNo());
 
       double R1 = dist.scalar_prod(m_yvec);

@@ -44,7 +44,7 @@ ResolutionParams VesuvioResolution::getResolutionParameters(
   } catch (Kernel::Exception::NotFoundError &) {
     throw std::invalid_argument("VesuvioResolution - Workspace has no detector "
                                 "attached to histogram at index " +
-                                boost::lexical_cast<std::string>(index));
+                                std::to_string(index));
   }
 
   ResolutionParams respar;

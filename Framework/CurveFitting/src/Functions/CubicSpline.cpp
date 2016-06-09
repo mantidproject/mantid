@@ -79,7 +79,7 @@ void CubicSpline::setupInput(boost::scoped_array<double> &x,
   bool xSortFlag = false;
 
   for (int i = 0; i < n; ++i) {
-    std::string num = boost::lexical_cast<std::string>(i);
+    std::string num = std::to_string(i);
 
     std::string xName = "x" + num;
     std::string yName = "y" + num;
@@ -268,7 +268,7 @@ void CubicSpline::setAttribute(const std::string &attName,
     // check that the number of data points is in a valid range
     if (n > oldN) {
       // get the name of the last x data point
-      std::string oldXName = "x" + boost::lexical_cast<std::string>(oldN - 1);
+      std::string oldXName = "x" + std::to_string(oldN - 1);
       double oldX = getAttribute(oldXName).asDouble();
 
       // reallocate gsl object to new size
@@ -276,7 +276,7 @@ void CubicSpline::setAttribute(const std::string &attName,
 
       // create blank a number of new blank parameters and attributes
       for (int i = oldN; i < n; ++i) {
-        std::string num = boost::lexical_cast<std::string>(i);
+        std::string num = std::to_string(i);
 
         std::string newXName = "x" + num;
         std::string newYName = "y" + num;
@@ -307,7 +307,7 @@ void CubicSpline::setXAttribute(const size_t index, double x) {
 
   // check that setting the x attribute is within our range
   if (index < n) {
-    std::string xName = "x" + boost::lexical_cast<std::string>(index);
+    std::string xName = "x" + std::to_string(index);
     setAttributeValue(xName, x);
 
     // attributes updated, flag for recalculation

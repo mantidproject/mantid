@@ -415,8 +415,7 @@ std::string LSFJobManager::startRemoteTransaction() {
   }
 
   size_t idx = g_transactions.size();
-  std::string tid =
-      std::string("LSFTrans_") + boost::lexical_cast<std::string>(idx + 1);
+  std::string tid = std::string("LSFTrans_") + std::to_string(idx + 1);
 
   auto ret = g_transactions.insert(
       std::pair<std::string, Transaction>(tid, LSFJobManager::Transaction()));
@@ -791,7 +790,7 @@ LSFJobManager::genOutputStatusInfo(const std::string &resp,
         jobs->item(static_cast<unsigned long>(i)));
     if (!el)
       throw std::runtime_error("Error while trying to parse job with index " +
-                               boost::lexical_cast<std::string>(i) +
+                               std::to_string(i) +
                                "could not produce a complete table workspace.");
 
     info.push_back(RemoteJobInfo());
@@ -947,7 +946,7 @@ std::string LSFJobManager::buildSubmitBody(
     // <AppParam><id>JOB_NAME</id><value>foo</value><type></type></AppParam>
     std::string name;
     if (jobName.empty()) {
-      name = "Mantid_job_" + boost::lexical_cast<std::string>(seqNo());
+      name = "Mantid_job_" + std::to_string(seqNo());
     } else {
       name = jobName;
     }
@@ -974,12 +973,11 @@ std::string LSFJobManager::buildSubmitBody(
     // <AppParam><id>MIN_NUM_CPU</id><value>1</value><type></type></AppParam>
     if (0 != numNodes) {
       encodeParam(body, boundaryInner, "MIN_NUM_CPU", "1");
-      encodeParam(body, boundaryInner, "MAX_NUM_CPU",
-                  boost::lexical_cast<std::string>(numNodes));
+      encodeParam(body, boundaryInner, "MAX_NUM_CPU", std::to_string(numNodes));
     }
     if (0 != coresPerNode) {
       encodeParam(body, boundaryInner, "PROC_PRE_HOST",
-                  boost::lexical_cast<std::string>(coresPerNode));
+                  std::to_string(coresPerNode));
     }
   }
 

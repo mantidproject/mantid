@@ -368,8 +368,7 @@ bool FABADAMinimizer::iterate(size_t) {
       }
       failed.replace(failed.end() - 2, failed.end(), ".");
       throw std::runtime_error(
-          "Convegence NOT reached after " +
-          boost::lexical_cast<std::string>(m_max_iter) +
+          "Convegence NOT reached after " + std::to_string(m_max_iter) +
           " iterations.\n   Try to set better initial values for parameters: " +
           failed);
     }

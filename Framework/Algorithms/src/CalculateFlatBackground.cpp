@@ -154,7 +154,7 @@ void CalculateFlatBackground::exec() {
           // not every spectra is the monitor or detector, some spectra have no
           // instrument components attached.
           g_log.information(" Can not find detector for spectra N: " +
-                            boost::lexical_cast<std::string>(currentSpec) +
+                            std::to_string(currentSpec) +
                             " Processing background anyway\n");
         }
       }

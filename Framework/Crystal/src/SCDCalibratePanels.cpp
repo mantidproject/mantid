@@ -846,7 +846,7 @@ void SCDCalibratePanels::exec() {
         g_log.error() << "Bank Group " << BankNameString
                       << " does not have enough peaks for fitting\n";
         saveIsawDetCal(instrument, MyBankNames, T0_bank,
-                       DetCalFileName + boost::lexical_cast<std::string>(iGr));
+                       DetCalFileName + std::to_string(iGr));
         continue;
       }
 
@@ -1062,7 +1062,7 @@ void SCDCalibratePanels::exec() {
         //---------------------- Save new instrument to DetCal--------------
         this->progress(.94, "Saving detcal file");
         saveIsawDetCal(NewInstrument, MyBankNames, result["t0"],
-                       DetCalFileName + boost::lexical_cast<std::string>(iGr));
+                       DetCalFileName + std::to_string(iGr));
       }
       PARALLEL_END_INTERUPT_REGION
     }
@@ -1070,8 +1070,7 @@ void SCDCalibratePanels::exec() {
     std::vector<double> l0vec, t0vec;
     std::string line, seven;
     for (int iGr = 0; iGr < nGroups; iGr++) {
-      std::ifstream infile(DetCalFileName +
-                           boost::lexical_cast<std::string>(iGr));
+      std::ifstream infile(DetCalFileName + std::to_string(iGr));
       while (std::getline(infile, line)) {
         if (iGr == 0 && iIter == nIter - 1) {
           if (line[0] == '#' || line[0] == '6')
@@ -1086,10 +1085,8 @@ void SCDCalibratePanels::exec() {
           detcal.push_back(line);
       }
       infile.close();
-      if (Poco::File(DetCalFileName + boost::lexical_cast<std::string>(iGr))
-              .exists())
-        Poco::File(DetCalFileName + boost::lexical_cast<std::string>(iGr))
-            .remove();
+      if (Poco::File(DetCalFileName + std::to_string(iGr)).exists())
+        Poco::File(DetCalFileName + std::to_string(iGr)).remove();
     }
     if (useL0) {
       removeOutliers(l0vec);
@@ -1341,7 +1338,7 @@ void SCDCalibratePanels::LoadISawDetCal(
         depth >> detd >> x >> y >> z >> base_x >> base_y >> base_z >> up_x >>
         up_y >> up_z;
 
-    string bankName = bankPrefixName + boost::lexical_cast<string>(id);
+    string bankName = bankPrefixName + std::to_string(id);
 
     if (!AllBankName.empty() && AllBankName.find(bankName) == AllBankName.end())
       continue;
@@ -1449,7 +1446,7 @@ void SCDCalibratePanels::createResultWorkspace(const int numGroups,
     Result->addColumn("str", "Field");
     // and one for each group
     for (int g = 0; g < numGroups; ++g) {
-      string GroupName = string("Group") + boost::lexical_cast<string>(g);
+      string GroupName = string("Group") + std::to_string(g);
       Result->addColumn("double", GroupName);
     }
     Result->setRowCount(2 * (10 + nn));

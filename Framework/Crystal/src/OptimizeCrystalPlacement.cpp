@@ -248,7 +248,7 @@ void OptimizeCrystalPlacement::exec() {
     }
 
     if (it1 == NOoptimizeRuns.end()) {
-      std::string runNumStr = boost::lexical_cast<std::string>(runNum);
+      std::string runNumStr = std::to_string(runNum);
       OptRunNums += predChar + runNumStr;
       predChar = "/";
       ChRunNumList.push_back(runNumStr);
@@ -474,7 +474,7 @@ void OptimizeCrystalPlacement::exec() {
   for (int i = 0; i < OutPeaks->getNumberPeaks(); ++i) {
 
     int RunNum = OutPeaks->getPeak(i).getRunNumber();
-    std::string RunNumStr = boost::lexical_cast<std::string>(RunNum);
+    std::string RunNumStr = std::to_string(RunNum);
     Matrix<double> GonMatrix;
     if (RunNum == prevRunNum ||
         MapRunNum2GonMat.find(RunNum) != MapRunNum2GonMat.end())

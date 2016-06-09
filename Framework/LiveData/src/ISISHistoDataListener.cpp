@@ -308,9 +308,8 @@ void ISISHistoDataListener::setPeriods(
     m_periodList = periodList;
     if (*std::max_element(m_periodList.begin(), m_periodList.end()) >
         m_numberOfPeriods) {
-      throw std::invalid_argument(
-          "Invalid period(s) specified. Maximum " +
-          boost::lexical_cast<std::string>(m_numberOfPeriods));
+      throw std::invalid_argument("Invalid period(s) specified. Maximum " +
+                                  std::to_string(m_numberOfPeriods));
     }
   }
 }
@@ -509,7 +508,7 @@ void ISISHistoDataListener::loadTimeRegimes() {
   // If there is nonzero number of time channels for the second one then we have
   // two regimes.
   for (size_t tr = 0; tr < 2; ++tr) {
-    const std::string regime = boost::lexical_cast<std::string>(tr + 1);
+    const std::string regime = std::to_string(tr + 1);
     // get number of bins in this regime
     int nbins = getInt(ntcPrefix + regime);
     if (nbins == 0) {
@@ -559,8 +558,7 @@ void ISISHistoDataListener::loadTimeRegimes() {
         }
 
         const std::string detRTCB =
-            rtcbPrefix + "_" +
-            boost::lexical_cast<std::string>(m_monitorSpectra.front());
+            rtcbPrefix + "_" + std::to_string(m_monitorSpectra.front());
         // read in the bin boundaries
         getFloatArray(detRTCB, floatBuffer, nbins + 1);
       }
@@ -609,7 +607,7 @@ int ISISHistoDataListener::getTimeRegimeToLoad() const {
           m_monitorSpectra.end();
       if (!isMonitor && specIt > m_totalNumberOfSpectra)
         throw std::invalid_argument("Invalid spectra index is found: " +
-                                    boost::lexical_cast<std::string>(specIt));
+                                    std::to_string(specIt));
       int specRegime = isMonitor ? 1 : 0;
       if (regime < 0) {
         regime = specRegime;

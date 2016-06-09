@@ -236,7 +236,7 @@ PoldiFitPeaks1D2::getRangeProfile(const RefinedRange_sptr &range, int n) const {
   }
 
   totalProfile->addFunction(FunctionFactory::Instance().createInitialized(
-      "name=Chebyshev,n=" + boost::lexical_cast<std::string>(n) + ",StartX=" +
+      "name=Chebyshev,n=" + std::to_string(n) + ",StartX=" +
       boost::lexical_cast<std::string>(range->getXStart()) + ",EndX=" +
       boost::lexical_cast<std::string>(range->getXEnd())));
 

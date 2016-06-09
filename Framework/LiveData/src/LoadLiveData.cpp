@@ -558,8 +558,8 @@ void LoadLiveData::exec() {
     for (size_t i = 0; i < n; ++i) {
       auto ws = out_gws->getItem(i);
       std::string itemName = ws->name();
-      std::string wsName = getPropertyValue("OutputWorkspace") + "_" +
-                           boost::lexical_cast<std::string>(i + 1);
+      std::string wsName =
+          getPropertyValue("OutputWorkspace") + "_" + std::to_string(i + 1);
       if (wsName != itemName) {
         if (AnalysisDataService::Instance().doesExist(itemName)) {
           // replace the temporary name with the proper one
