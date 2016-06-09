@@ -192,6 +192,7 @@ PropertyWidget::PropertyWidget(Mantid::Kernel::Property *prop, QWidget *parent,
   if (!prop)
     throw std::runtime_error(
         "NULL Property passed to the PropertyWidget constructor.");
+    setObjectName(QString::fromStdString(prop->name()));
 
   if (!m_gridLayout) {
     // Create a LOCAL grid layout
