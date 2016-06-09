@@ -1,44 +1,56 @@
-# import copy
-# from SANSStateBase import SANSStateBase
-# from SANSStateData import SANSStateData
-#
-#
-# # -----------------------------------------------
-# # SANSState class
-# # -----------------------------------------------
-# class SANSState(object, SANSStateBase):
-#     def __init__(self):
-#         super(SANSState, self).__init__()
-#         self._data = None
-#         self._mask = None
-#
-#     def copy(self):
-#         return copy.copy(self)
-#
-#     @property
-#     def property_manager(self):
-#         pass
-#
-#     @property_manager.setter
-#     def property_manager(self, value):
-#         pass
-#
-#     def validate(self):
-#         pass
-#
-#     def set_state(self, data):
-#         if SANSState._sub_state_is_of_correct_type(data, SANSStateData):
-#             self._data = data
-#
-#     @property
-#     def data(self):
-#         pass
-#
-#     @staticmethod
-#     def _sub_state_is_of_correct_type(value, expected_type):
-#         if value is None or not isinstance(value, expected_type):
-#             raise ValueError("SANSState: Expected a {} object, instead received a {} object".format(type(expected_type),
-#                                                                                                     type(value)))
-#
-#     def get_property_manager(self):
-#         pass
+import json
+import pickle
+import inspect
+from mantid.kernel import PropertyManager
+from State.SANSStateBase import (SANSStateBase, TypedParameter, convert_state_to_dict,
+                                 set_state_from_property_manager)
+from SANSStateData import SANSStateData
+
+
+# -----------------------------------------------
+# Validator for sub states
+# -----------------------------------------------
+def validator_sub_state(sub_state):
+    is_valid = True
+    try:
+        sub_state.validate()
+    except ValueError:
+        is_valid = False
+    return is_valid
+
+
+# ------------------------------------------------
+# SANSState
+# ------------------------------------------------
+class SANSState(object):
+    pass
+
+
+# -----------------------------------------------
+# SANSState class
+# -----------------------------------------------
+class SANSStateISIS(SANSStateBase, SANSState):
+    data = TypedParameter("data", SANSStateData, validator_sub_state)
+
+    def __init__(self):
+        super(SANSStateISIS, self).__init__()
+
+    def validate(self):
+        is_invalid = dict()
+        for descriptor_name, descriptor_object in inspect.getmembers(type(self)):
+            if inspect.isdatadescriptor(descriptor_object) and isinstance(descriptor_object, TypedParameter):
+                try:
+                    attr = getattr(self, descriptor_name)
+                    attr.validate()
+                except ValueError as e:
+                    is_invalid.update(descriptor_name, pickle.dumps(e.message))
+        if is_invalid:
+            raise ValueError("SANSState: There is an issue with your in put. See: {}".format(json.dumps(is_invalid)))
+
+    @property
+    def property_manager(self):
+        return convert_state_to_dict(self)
+
+    @property_manager.setter
+    def property_manager(self, value):
+        set_state_from_property_manager(self, value)

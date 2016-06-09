@@ -1,4 +1,4 @@
-# #pylint: disable=no-init
+﻿# #pylint: disable=no-init
 # from mantid.simpleapi import *
 # from mantid.kernel import *
 # from mantid.api import *
@@ -50,6 +50,8 @@
 #
 #     def PyExec(self):
 #         # Read the file names
+#         sans_state_in = self.getProperty("SANSState").value
+#
 #
 #         # Get the correct SANSLoader from the SANSLoaderFactory
 #
@@ -66,4 +68,4 @@
 #
 #
 # # Register algorithm with Mantid
-# AlgorithmFactory.subscribe(SANSLoad)
+# AlgorithmFactory.subscribe(SANSLoadData)
