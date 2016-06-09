@@ -4,6 +4,7 @@ from mantid.api import *
 from mantid.kernel import *
 from mantid import config
 import os
+import sys
 
 MICROEV_TO_MILLIEV = 1000.0
 DEFAULT_BINS = [-740, 1.6, 740]
@@ -12,13 +13,14 @@ DEFAULT_WRANGE = [6.24, 6.30]
 DEFAULT_MASK_GROUP_DIR = "/SNS/BSS/shared/autoreduce/new_masks_08_12_2015"
 DEFAULT_MASK_FILE = "BASIS_Mask_OneQuarterRemains_SouthBottom.xml"
 DEFAULT_CONFIG_DIR = config["instrumentDefinition.directory"]
+
 DEFAULT_ENERGY = 7.6368
 
 class BASISReduction311(PythonAlgorithm):
 
     _short_inst = None
     _long_inst = None
-    _extension = None
+    _extension = None_
     _doIndiv = None
     _etBins = None
     _qBins = None
@@ -241,17 +243,15 @@ class BASISReduction311(PythonAlgorithm):
 
     def _calibData(self, sam_ws, mon_ws):
         api.LoadInstrument(Workspace=sam_ws,
-                           Filename=os.path.join(DEFAULT_CONFIG_DIR,
-                                                 'BASIS_Definition_311.xml'),
+                           Filename=os.path.join(DEFAULT_CONFIG_DIR,"BASIS_Definition311_20140101-.xml"),
                            RewriteSpectraMap=True)
-        api.MaskDetectors(Workspace=sam_ws,
-                          DetectorList=self._dMask)
-                          #MaskedWorkspace='BASIS_MASK')
-        api.ModeratorTzeroLinear(InputWorkspace=sam_ws,\
-                           OutputWorkspace=sam_ws)
         api.LoadParameterFile(Workspace=sam_ws,
                               Filename=os.path.join(DEFAULT_CONFIG_DIR,
                                                     'BASIS_silicon_311_Parameters.xml'))
+        api.MaskDetectors(Workspace=sam_ws,
+                          DetectorList=self._dMask)
+                          #MaskedWorkspace='BASIS_MASK')
+        api.ModeratorTzeroLinear(InputWorkspace=sam_ws, OutputWorkspace=sam_ws)        
         api.ConvertUnits(InputWorkspace=sam_ws,
                          OutputWorkspace=sam_ws,
                          Target='Wavelength', EMode='Indirect')
