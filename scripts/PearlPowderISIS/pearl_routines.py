@@ -1,4 +1,4 @@
-# pylint: disable=anomalous-backslash-in-string, global-variable-undefined, global-variable-not-assigned, too-many-lines
+# pylint: disable=anomalous-backslash-in-string, global-variable-undefined, global-variable-not-assigned
 # pylint: disable=invalid-name, too-many-arguments, superfluous-parens, too-many-branches, redefined-builtin
 
 import os.path
@@ -607,15 +607,15 @@ def pearl_run_focus(number, ext="raw", fmode="trans", ttmode="TT70", atten=True,
 
 
 def PEARL_focus_v1(number, ext="raw", fmode="trans", ttmode="TT70", atten=True, van_norm=True, debug=False):
-
-    pearl_run_focus(number, ext=ext, fmode=fmode, ttmode=ttmode, atten=atten, van_norm=van_norm, debug=debug,
-                    focus_mode=1)
+    outwork = pearl_run_focus(number, ext=ext, fmode=fmode, ttmode=ttmode, atten=atten, van_norm=van_norm, debug=debug,
+                              focus_mode=1)
+    return outwork
 
 
 def PEARL_focus_v2(number, ext="raw", fmode="trans", ttmode="TT70", atten=True, van_norm=True, debug=False):
-
-    pearl_run_focus(number, ext=ext, fmode=fmode, ttmode=ttmode, atten=atten, van_norm=van_norm, debug=debug,
-                    focus_mode=2)
+    outwork = pearl_run_focus(number, ext=ext, fmode=fmode, ttmode=ttmode, atten=atten, van_norm=van_norm, debug=debug,
+                              focus_mode=2)
+    return outwork
 
 
 def PEARL_createvan(van, empty, ext="raw", fmode="all", ttmode="TT88",
