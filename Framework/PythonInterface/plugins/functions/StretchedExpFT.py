@@ -1,4 +1,5 @@
-# pylint: disable=invalid-name
+# pylint: disable=invalid-name, anomalous-backslash-in-string, attribute-defined-outside-init
+
 '''
 @author Jose Borreguero, NScD
 @date October 06, 2013
@@ -25,7 +26,6 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 '''
 
 from mantid.api import IFunction1D, FunctionFactory
-from mantid import logger
 from numpy import interp
 import numpy as np
 import copy
@@ -64,7 +64,7 @@ class StretchedExpFT(IFunction1D):
         tau = self.getParameterValue('Tau')
         beta = self.getParameterValue('Beta')
         Centre = self.getParameterValue('Centre')
-        for name, value in {'Height': height, 'Tau': tau, 'Beta': beta}.items():
+        for _, value in {'Height': height, 'Tau': tau, 'Beta': beta}.items():
             if value <= 0:
                 return None
         return {'Height': height, 'Tau': tau, 'Beta': beta, 'Centre': Centre}
