@@ -34,6 +34,11 @@ class ABINS(PythonAlgorithm):
     def PyInit(self):
 
         # Declare all properties
+        self.declareProperty(name="DFT program",
+                             direction=Direction.Input,
+                             defaultValue="CASTEP",
+                             validator=StringListValidator(["CASTEP", "CRYSTAL"]),
+                             doc="DFT program which was used for phonon calculation.")
 
         self.declareProperty(FileProperty("Phonon File", "",
                              action=FileAction.Load,
