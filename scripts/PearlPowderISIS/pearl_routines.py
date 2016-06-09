@@ -937,7 +937,7 @@ def PEARL_createvan(van, empty, ext="raw", fmode="all", ttmode="TT88",
         print "Starting splines..."
 
         for i in range(0, 14):
-            SplineBackground(InputWorkspace="vanstrip", OutputWorkspace="spline" + str(i+1), WorkspaceIndex=i,
+            SplineBackground(InputWorkspace="vanstrip", OutputWorkspace="spline" + str(i + 1), WorkspaceIndex=i,
                              NCoeff=nspline)
 
         # ConvertUnits("spline1","spline1","TOF")
@@ -982,7 +982,7 @@ def PEARL_createvan(van, empty, ext="raw", fmode="all", ttmode="TT88",
         ConvertUnits(InputWorkspace="vanstrip", OutputWorkspace="vanstrip", Target="TOF")
 
         for i in range(0, 12):
-            SplineBackground(InputWorkspace="vanstrip", OutputWorkspace="spline"+str(i+1), WorkspaceIndex=i,
+            SplineBackground(InputWorkspace="vanstrip", OutputWorkspace="spline" + str(i + 1), WorkspaceIndex=i,
                              NCoeff=nspline)
 
         # ConvertUnits("spline1","spline1","TOF")
@@ -1038,11 +1038,10 @@ def PEARL_createvan(van, empty, ext="raw", fmode="all", ttmode="TT88",
 
         for i in range(0, 4):
             coeff = 100
-            if(i == 1):
+            if (i == 1):
                 coeff = 80
-            SplineBackground(InputWorkspace="vanstrip", OutputWorkspace="spline" + str(i+1), WorkspaceIndex=i,
+            SplineBackground(InputWorkspace="vanstrip", OutputWorkspace="spline" + str(i + 1), WorkspaceIndex=i,
                              NCoeff=coeff)
-
 
         # ConvertUnits("spline1","spline1","TOF")
         # ConvertUnits("spline2","spline2","TOF")
@@ -1073,44 +1072,30 @@ def PEARL_createcal(calruns, noffsetfile="C:\PEARL\\pearl_offset_11_2.cal",
 
     print "Instrument version is ", instver
 
-    if (instver == "new2"):
-        wcal = "cal_raw"
-        PEARL_read(calruns, "raw", wcal)
+    wcal = "cal_raw"
+    PEARL_read(calruns, "raw", wcal)
+
+    if instver == "new" or instver == "new2":
         Rebin(InputWorkspace=wcal, OutputWorkspace=wcal, Params="100,-0.0006,19950")
-        ConvertUnits(InputWorkspace=wcal, OutputWorkspace="cal_inD", Target="dSpacing")
-        Rebin(InputWorkspace="cal_inD", OutputWorkspace="cal_Drebin", Params="1.8,0.002,2.1")
+
+    ConvertUnits(InputWorkspace=wcal, OutputWorkspace="cal_inD", Target="dSpacing")
+    Rebin(InputWorkspace="cal_inD", OutputWorkspace="cal_Drebin", Params="1.8,0.002,2.1")
+
+    if instver == "new2":
         CrossCorrelate(InputWorkspace="cal_Drebin", OutputWorkspace="crosscor", ReferenceSpectra=20,
                        WorkspaceIndexMin=9, WorkspaceIndexMax=1063, XMin=1.8, XMax=2.1)
-        # Ceo Cell refeined to 5.4102(3) so 220 is 1.912795
-        GetDetectorOffsets(InputWorkspace="crosscor", OutputWorkspace="OutputOffsets", Step=0.002, DReference=1.912795,
-                           XMin=-200, XMax=200, GroupingFileName=noffsetfile)
-        AlignDetectors(InputWorkspace=wcal, OutputWorkspace="cal_aligned", CalibrationFile=noffsetfile)
-        DiffractionFocussing(InputWorkspace="cal_aligned", OutputWorkspace="cal_grouped", GroupingFileName=groupfile)
-    elif (instver == "new"):
-        wcal = "cal_raw"
-        PEARL_read(calruns, "raw", wcal)
-        Rebin(InputWorkspace=wcal, OutputWorkspace=wcal, Params="100,-0.0006,19950")
-        ConvertUnits(InputWorkspace=wcal, OutputWorkspace="cal_inD", Target="dSpacing")
-        Rebin(InputWorkspace="cal_inD", OutputWorkspace="cal_Drebin", Params="1.8,0.002,2.1")
+    elif instver == "new":
         CrossCorrelate(InputWorkspace="cal_Drebin", OutputWorkspace="crosscor", ReferenceSpectra=20,
                        WorkspaceIndexMin=9, WorkspaceIndexMax=943, XMin=1.8, XMax=2.1)
-        # Ceo Cell refeined to 5.4102(3) so 220 is 1.912795
-        GetDetectorOffsets(InputWorkspace="crosscor", OutputWorkspace="OutputOffsets", Step=0.002, DReference=1.912795,
-                           XMin=-200, XMax=200, GroupingFileName=noffsetfile)
-        AlignDetectors(InputWorkspace=wcal, OutputWorkspace="cal_aligned", CalibrationFile=noffsetfile)
-        DiffractionFocussing(InputWorkspace="cal_aligned", OutputWorkspace="cal_grouped", GroupingFileName=groupfile)
     else:
-        wcal = "cal_raw"
-        PEARL_read(calruns, "raw", wcal)
-        ConvertUnits(InputWorkspace=wcal, OutputWorkspace="cal_inD", Target="dSpacing")
-        Rebin(InputWorkspace="cal_inD", OutputWorkspace="cal_Drebin", Params="1.8,0.002,2.1")
         CrossCorrelate(InputWorkspace="cal_Drebin", OutputWorkspace="crosscor", ReferenceSpectra=500,
                        WorkspaceIndexMin=1, WorkspaceIndexMax=1440, XMin=1.8, XMax=2.1)
-        # Ceo Cell refeined to 5.4102(3) so 220 is 1.912795
-        GetDetectorOffsets(InputWorkspace="crosscor", OutputWorkspace="OutputOffsets", Step=0.002, DReference=1.912795,
-                           XMin=-200, XMax=200, GroupingFileName=noffsetfile)
-        AlignDetectors(InputWorkspace=wcal, OutputWorkspace="cal_aligned", CalibrationFile=noffsetfile)
-        DiffractionFocussing(InputWorkspace="cal_aligned", OutputWorkspace="cal_grouped", GroupingFileName=groupfile)
+
+    # Ceo Cell refeined to 5.4102(3) so 220 is 1.912795
+    GetDetectorOffsets(InputWorkspace="crosscor", OutputWorkspace="OutputOffsets", Step=0.002, DReference=1.912795,
+                       XMin=-200, XMax=200, GroupingFileName=noffsetfile)
+    AlignDetectors(InputWorkspace=wcal, OutputWorkspace="cal_aligned", CalibrationFile=noffsetfile)
+    DiffractionFocussing(InputWorkspace="cal_aligned", OutputWorkspace="cal_grouped", GroupingFileName=groupfile)
 
     return
 
