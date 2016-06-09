@@ -500,7 +500,6 @@ public slots:
 
   // Clear all Mantid related memory
   void clearAllMemory(const bool prompt = true);
-  void releaseFreeMemory();
   // Ticket #672
   void saveNexusWorkspace();
   QString saveToString(const std::string &workingDir);
@@ -605,8 +604,8 @@ private:
   ApplicationWindow *m_appWindow;    // QtiPlot main ApplicationWindow
   MantidDockWidget *m_exploreMantid; // Dock window for manipulating workspaces
   AlgorithmDockWidget *m_exploreAlgorithms; // Dock window for using algorithms
-  RemoteClusterDockWidget
-      *m_exploreRemoteTasks; // Dock window for using remote tasks
+  RemoteClusterDockWidget *
+      m_exploreRemoteTasks; // Dock window for using remote tasks
   /// Current fit property browser being used
   MantidQt::MantidWidgets::FitPropertyBrowser *m_fitFunction;
   /// Default fit property browser (the one docked on the left)
@@ -647,8 +646,8 @@ private:
   // Stores dependent mdi windows. If the 'key' window closes, all 'value' ones
   // must be closed as well.
   std::unordered_multimap<MdiSubWindow *, MdiSubWindow *> m_mdiDependency;
-  QMdiSubWindow
-      *m_vatesSubWindow; ///< Holder for the Vates interface sub-window
+  QMdiSubWindow *
+      m_vatesSubWindow; ///< Holder for the Vates interface sub-window
 
   // prevents some repeated code realtating to log names
   void formatLogName(QString &label, const QString &wsName);

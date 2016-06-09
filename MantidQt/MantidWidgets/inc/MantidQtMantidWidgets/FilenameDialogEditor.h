@@ -3,20 +3,17 @@
 
 #include "MantidQtMantidWidgets/StringDialogEditor.h"
 
-namespace MantidQt
-{
-namespace MantidWidgets
-{
+namespace MantidQt {
+namespace MantidWidgets {
 
 /**
  * A stringDialogEditor for editing file names.
  */
-class FilenameDialogEditor: public StringDialogEditor
-{
+class FilenameDialogEditor : public StringDialogEditor {
   Q_OBJECT
 public:
   FilenameDialogEditor(QtProperty *property, QWidget *parent)
-    :StringDialogEditor(property,parent){}
+      : StringDialogEditor(property, parent) {}
 protected slots:
   void runDialog() override;
 };
@@ -24,21 +21,22 @@ protected slots:
 /**
  * The factory for the FilenameDialogEditor.
  */
-class FilenameDialogEditorFactory: public StringDialogEditorFactory
-{
+class FilenameDialogEditorFactory : public StringDialogEditorFactory {
   Q_OBJECT
 public:
-  FilenameDialogEditorFactory(QObject* parent):StringDialogEditorFactory(parent){}
+  FilenameDialogEditorFactory(QObject *parent)
+      : StringDialogEditorFactory(parent) {}
+
 protected:
-  using QtAbstractEditorFactoryBase::createEditor; // Avoid Intel compiler warning
+  using QtAbstractEditorFactoryBase::createEditor; // Avoid Intel compiler
+                                                   // warning
   QWidget *createEditorForManager(QtStringPropertyManager *manager,
                                   QtProperty *property,
                                   QWidget *parent) override {
-    (void) manager; //Avoid unused warning
-    return new FilenameDialogEditor(property,parent);
+    (void)manager; // Avoid unused warning
+    return new FilenameDialogEditor(property, parent);
   }
 };
-
 }
 }
 

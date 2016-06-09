@@ -1,7 +1,3 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
-#include "MantidAPI/MemoryManager.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/FunctionFactory.h"
@@ -328,7 +324,6 @@ int PeakIntegration::fitneighbours(int ipeak, std::string det_name, int x0,
 
   slice_alg->setProperty("NBadEdgePixels", nPixels);
   slice_alg->executeAsChildAlg();
-  Mantid::API::MemoryManager::Instance().releaseFreeMemory();
 
   MantidVec &Xout = outputW->dataX(idet);
   MantidVec &Yout = outputW->dataY(idet);

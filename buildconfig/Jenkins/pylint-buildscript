@@ -1,4 +1,17 @@
 #!/bin/bash -ex
+###############################################################################
+# Setup the build directory
+###############################################################################
+BUILD_DIR=$WORKSPACE/build
+if [ -z "$BUILD_DIR" ]; then
+  echo "Build directory not set. Cannot continue"
+  exit 1
+fi
+
+###############################################################################
+# Purge old logs
+###############################################################################
+rm -f $BUILD_DIR/pylint/PYLINT-*
 
 ###############################################################################
 # Check if python files have changed
@@ -28,14 +41,6 @@ else
   SCL_ON_RHEL6="eval"
 fi
 
-###############################################################################
-# Setup the build directory
-###############################################################################
-BUILD_DIR=$WORKSPACE/build
-if [ -z "$BUILD_DIR" ]; then
-  echo "Build directory not set. Cannot continue"
-  exit 1
-fi
 ###############################################################################
 # Clean build if requested
 ###############################################################################
@@ -79,7 +84,7 @@ fi
 # Need this because some strange control sequences when using default TERM=xterm
 export TERM="linux"
 PYLINT_OUTPUT_DIR=$BUILD_DIR/pylint
-PYLINT_FORMAT="{path}:{line}: [{msg_id}({symbol}), {obj}] {msg}"
+PYLINT_FORMAT="parseable"
 $SCL_ON_RHEL6 "cmake ${CMAKE_GENERATOR} -DCMAKE_BUILD_TYPE=${BUILD_CONFIG} -DENABLE_CPACK=OFF -DMAKE_VATES=OFF -DPYLINT_MSG_TEMPLATE=\"${PYLINT_FORMAT}\" -DPYLINT_NTHREADS=$BUILD_THREADS -DPYLINT_OUTPUT_DIR=${PYLINT_OUTPUT_DIR} .."
 
 ###############################################################################

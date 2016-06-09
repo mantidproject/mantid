@@ -42,12 +42,16 @@ public:
   void hide();
   ~PeaksViewer() override;
   bool hasThingsToShow() const;
-  void clearPeaksModeRequest(PeaksWorkspaceWidget const * const originWidget, const bool on);
-  void addPeaksModeRequest(PeaksWorkspaceWidget const * const originWidget, const bool on);
+  void clearPeaksModeRequest(PeaksWorkspaceWidget const *const originWidget,
+                             const bool on);
+  void addPeaksModeRequest(PeaksWorkspaceWidget const *const originWidget,
+                           const bool on);
 
 public slots:
-  void onPeakColorChanged(Mantid::API::IPeaksWorkspace_const_sptr, PeakViewColor);
-  void onBackgroundColorChanged(Mantid::API::IPeaksWorkspace_const_sptr, PeakViewColor);
+  void onPeakColorChanged(Mantid::API::IPeaksWorkspace_const_sptr,
+                          PeakViewColor);
+  void onBackgroundColorChanged(Mantid::API::IPeaksWorkspace_const_sptr,
+                                PeakViewColor);
   void onBackgroundRadiusShown(Mantid::API::IPeaksWorkspace_const_sptr, bool);
   void onRemoveWorkspace(Mantid::API::IPeaksWorkspace_const_sptr);
   void onHideInPlot(Mantid::API::IPeaksWorkspace_const_sptr peaksWS, bool);

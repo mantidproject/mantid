@@ -10,18 +10,20 @@
 #include "vtkUnstructuredGrid.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
 
-namespace Mantid
-{
-  namespace VATES
-  {
+namespace Mantid {
+namespace VATES {
 
-/** Quad Factory. This type is responsible for rendering IMDWorkspaces as surfaces with two spatial dimensions. Ideally this would be done as a polydata type rather than a unstructuredgrid type,
-however, some visualisation frameworks won't be able to treat these factories in a covarient fashion. 
+/** Quad Factory. This type is responsible for rendering IMDWorkspaces as
+surfaces with two spatial dimensions. Ideally this would be done as a polydata
+type rather than a unstructuredgrid type,
+however, some visualisation frameworks won't be able to treat these factories in
+a covarient fashion.
 
  @author Owen Arnold, Tessella plc
  @date 03/05/2011
 
- Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+ Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+National Laboratory & European Spallation Source
 
  This file is part of Mantid.
 
@@ -41,48 +43,45 @@ however, some visualisation frameworks won't be able to treat these factories in
  File change history is stored at: <https://github.com/mantidproject/mantid>
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-    class DLLExport vtkMDHistoQuadFactory : public vtkDataSetFactory
-    {
-    public:
+class DLLExport vtkMDHistoQuadFactory : public vtkDataSetFactory {
+public:
+  /// Constructor
+  vtkMDHistoQuadFactory(ThresholdRange_scptr thresholdRange,
+                        const VisualNormalization normalizationOption);
 
-      /// Constructor
-      vtkMDHistoQuadFactory(ThresholdRange_scptr thresholdRange, const VisualNormalization normalizationOption);
+  /// Assignment operator
+  vtkMDHistoQuadFactory &operator=(const vtkMDHistoQuadFactory &other);
 
-      /// Assignment operator
-      vtkMDHistoQuadFactory& operator=(const vtkMDHistoQuadFactory& other);
+  /// Copy constructor.
+  vtkMDHistoQuadFactory(const vtkMDHistoQuadFactory &other);
 
-      /// Copy constructor.
-      vtkMDHistoQuadFactory(const vtkMDHistoQuadFactory& other);
+  /// Destructor
+  ~vtkMDHistoQuadFactory() override;
 
-      /// Destructor
-      ~vtkMDHistoQuadFactory() override;
+  /// Factory Method.
+  vtkSmartPointer<vtkDataSet>
+  create(ProgressAction &progressUpdating) const override;
 
-      /// Factory Method.
-      vtkSmartPointer<vtkDataSet>
-      create(ProgressAction &progressUpdating) const override;
+  void initialize(Mantid::API::Workspace_sptr) override;
 
-      void initialize(Mantid::API::Workspace_sptr) override;
+  typedef std::vector<std::vector<UnstructuredPoint>> Plane;
 
-      typedef std::vector<std::vector<UnstructuredPoint> > Plane;
+  typedef std::vector<UnstructuredPoint> Column;
 
-      typedef std::vector<UnstructuredPoint> Column;
-
-      std::string getFactoryTypeName() const override {
-        return "vtkMDHistoQuadFactory";
-      }
-
-    protected:
-      void validate() const override;
-
-    private:
-      Mantid::DataObjects::MDHistoWorkspace_sptr m_workspace;
-
-      VisualNormalization m_normalizationOption;
-
-      mutable ThresholdRange_scptr m_thresholdRange;
-    
-    };
-    
+  std::string getFactoryTypeName() const override {
+    return "vtkMDHistoQuadFactory";
   }
+
+protected:
+  void validate() const override;
+
+private:
+  Mantid::DataObjects::MDHistoWorkspace_sptr m_workspace;
+
+  VisualNormalization m_normalizationOption;
+
+  mutable ThresholdRange_scptr m_thresholdRange;
+};
+}
 }
 #endif

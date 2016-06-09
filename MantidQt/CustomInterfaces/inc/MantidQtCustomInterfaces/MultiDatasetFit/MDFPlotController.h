@@ -16,28 +16,22 @@ class QComboBox;
 class QPushButton;
 class QwtPlotCurve;
 
-namespace Mantid
-{
-namespace API
-{
-  class IFunction;
+namespace Mantid {
+namespace API {
+class IFunction;
 }
 }
 
-namespace MantidQt
-{
-namespace MantidWidgets
-{
+namespace MantidQt {
+namespace MantidWidgets {
 class RangeSelector;
 }
 
-namespace CustomInterfaces
-{
+namespace CustomInterfaces {
 
 class MultiDatasetFit;
 
-namespace MDF
-{
+namespace MDF {
 
 class DatasetPlotData;
 class MDFFunctionPlotData;
@@ -50,20 +44,20 @@ class MDFFunctionPlotData;
   *
   * Manages the plot tools.
   */
-class PlotController: public QObject
-{
+class PlotController : public QObject {
   Q_OBJECT
 public:
-  PlotController(MultiDatasetFit *parent, QwtPlot *plot, QTableWidget *table, QComboBox *plotSelector, QPushButton *prev, QPushButton *next);
+  PlotController(MultiDatasetFit *parent, QwtPlot *plot, QTableWidget *table,
+                 QComboBox *plotSelector, QPushButton *prev, QPushButton *next);
   ~PlotController() override;
   void clear(bool clearGuess = false);
   void update();
-  int getCurrentIndex() const {return m_currentIndex;}
+  int getCurrentIndex() const { return m_currentIndex; }
   bool isZoomEnabled() const;
   bool isPanEnabled() const;
   bool isRangeSelectorEnabled() const;
-  void setGuessFunction(const QString& funStr);
-  void updateGuessFunction(const Mantid::API::IFunction& fun);
+  void setGuessFunction(const QString &funStr);
+  void updateGuessFunction(const Mantid::API::IFunction &fun);
 signals:
   void currentIndexChanged(int);
   void fittingRangeChanged(int, double, double);
@@ -85,11 +79,11 @@ private slots:
   void plotDataSet(int);
   void updateFittingRange(double startX, double endX);
   void updateGuessPlot();
+
 private:
   MultiDatasetFit *owner() const;
   void disableAllTools();
-  template<class Tool>
-  void enableTool(Tool* tool, int cursor);
+  template <class Tool> void enableTool(Tool *tool, int cursor);
   boost::shared_ptr<DatasetPlotData> getData(int i);
   void exportPlot(int index);
   QString makePyPlotSource(int index) const;
@@ -108,7 +102,7 @@ private:
   /// The magnifier
   QwtPlotMagnifier *m_magnifier;
   /// The fitting range selector
-  MantidWidgets::RangeSelector* m_rangeSelector;
+  MantidWidgets::RangeSelector *m_rangeSelector;
   ///@}
 
   /// The workspace table
@@ -116,7 +110,7 @@ private:
   QComboBox *m_plotSelector;
   QPushButton *m_prevPlot;
   QPushButton *m_nextPlot;
-  QMap<int,boost::shared_ptr<DatasetPlotData>> m_plotData;
+  QMap<int, boost::shared_ptr<DatasetPlotData>> m_plotData;
   int m_currentIndex;
   bool m_showDataErrors;
 
@@ -128,6 +122,5 @@ private:
 } // MDF
 } // CustomInterfaces
 } // MantidQt
-
 
 #endif /*MDFPLOTCONTROLLER_H_*/

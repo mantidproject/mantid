@@ -40,16 +40,14 @@
 #include <qwt_text_label.h>
 #include <qwt_plot_canvas.h>
 
-CanvasPicker::CanvasPicker(Graph *graph):
-	QObject(graph)
-{
-	pointSelected = false;
-	d_editing_marker = 0;
+CanvasPicker::CanvasPicker(Graph *graph) : QObject(graph) {
+  pointSelected = false;
+  d_editing_marker = 0;
 
-	plotWidget = graph->plotWidget();
+  plotWidget = graph->plotWidget();
 
-	QwtPlotCanvas *canvas = plotWidget->canvas();
-	canvas->installEventFilter(this);
+  QwtPlotCanvas *canvas = plotWidget->canvas();
+  canvas->installEventFilter(this);
 }
 
 bool CanvasPicker::eventFilter(QObject *object, QEvent *e) {
@@ -209,97 +207,94 @@ bool CanvasPicker::eventFilter(QObject *object, QEvent *e) {
   return QObject::eventFilter(object, e);
 }
 
-void CanvasPicker::disableEditing()
-{
-	if (d_editing_marker) {
-		d_editing_marker->setEditable(false);
-		d_editing_marker = 0;
-	}
+void CanvasPicker::disableEditing() {
+  if (d_editing_marker) {
+    d_editing_marker->setEditable(false);
+    d_editing_marker = 0;
+  }
 }
 
-void CanvasPicker::drawTextMarker(const QPoint& point)
-{
-	LegendWidget t(plotWidget);
-	t.move(point);
-	t.setText(tr("enter your text here"));
+void CanvasPicker::drawTextMarker(const QPoint &point) {
+  LegendWidget t(plotWidget);
+  t.move(point);
+  t.setText(tr("enter your text here"));
 
-	ApplicationWindow *app = plot()->multiLayer()->applicationWindow();
-	if (app){		
-		t.setFrameStyle(app->legendFrameStyle);
-		t.setFont(app->plotLegendFont);
-		t.setTextColor(app->legendTextColor);
-		t.setBackgroundColor(app->legendBackground);
-	}
+  ApplicationWindow *app = plot()->multiLayer()->applicationWindow();
+  if (app) {
+    t.setFrameStyle(app->legendFrameStyle);
+    t.setFont(app->plotLegendFont);
+    t.setTextColor(app->legendTextColor);
+    t.setBackgroundColor(app->legendBackground);
+  }
 
-	LegendWidget *l = plot()->insertText(&t);
-	l->setSelected();
-	l->showTextDialog();
+  LegendWidget *l = plot()->insertText(&t);
+  l->setSelected();
+  l->showTextDialog();
 
-	plot()->drawText(FALSE);
-	emit drawTextOff();
+  plot()->drawText(FALSE);
+  emit drawTextOff();
 }
 
-void CanvasPicker::drawLineMarker(const QPoint& point, bool endArrow)
-{
-	plot()->plotWidget()->canvas()->repaint();
-	ArrowMarker mrk;
-	mrk.attach(plotWidget);
+void CanvasPicker::drawLineMarker(const QPoint &point, bool endArrow) {
+  plot()->plotWidget()->canvas()->repaint();
+  ArrowMarker mrk;
+  mrk.attach(plotWidget);
 
-	int clw = plotWidget->canvas()->lineWidth();
-	mrk.setStartPoint(QPoint(startLinePoint.x() + clw, startLinePoint.y() + clw));
-	mrk.setEndPoint(QPoint(point.x() + clw,point.y() + clw));
-	mrk.setWidth(1);
-	mrk.setStyle(Qt::SolidLine);
-	mrk.drawEndArrow(endArrow);
-	mrk.drawStartArrow(false);
+  int clw = plotWidget->canvas()->lineWidth();
+  mrk.setStartPoint(QPoint(startLinePoint.x() + clw, startLinePoint.y() + clw));
+  mrk.setEndPoint(QPoint(point.x() + clw, point.y() + clw));
+  mrk.setWidth(1);
+  mrk.setStyle(Qt::SolidLine);
+  mrk.drawEndArrow(endArrow);
+  mrk.drawStartArrow(false);
 
-	if (plot()->drawLineActive())
-		mrk.setColor(Qt::black);
-	else
-		mrk.setColor(Qt::red);
+  if (plot()->drawLineActive())
+    mrk.setColor(Qt::black);
+  else
+    mrk.setColor(Qt::red);
 
-	plotWidget->replot();
-	mrk.detach();
+  plotWidget->replot();
+  mrk.detach();
 }
 
-bool CanvasPicker::selectMarker(const QMouseEvent *e)
-{
-	const QPoint point = e->pos();
-	foreach(int i, plot()->imageMarkerKeys()) {
-    ImageMarker* m=dynamic_cast<ImageMarker*>(plotWidget->marker(i));
-		if (!m) return false;
-		if (m->rect().contains(point)) {
-			disableEditing();
-			plot()->setSelectedMarker(i, e->modifiers() & Qt::ShiftModifier);
-			return true;
-		}
-	}
-	foreach(int i, plot()->lineMarkerKeys()) {
-    ArrowMarker* mrkL=dynamic_cast<ArrowMarker*>(plotWidget->marker(i));
-		if (!mrkL)
-			return false;
-		int d = qRound(mrkL->width() + floor(mrkL->headLength()*tan(M_PI*mrkL->headAngle()/180.0)+0.5));
-		double dist = mrkL->dist(point.x(),point.y());
-		if (dist <= d){
-			disableEditing();
-			if (e->modifiers() & Qt::ShiftModifier) {
-				plot()->setSelectedMarker(i, true);
-				return true;
-			} else if (e->button() == Qt::RightButton) {
-				mrkL->setEditable(false);
-				plot()->setSelectedMarker(i, false);
-				return true;
-			}
-			plot()->deselectMarker();
-			mrkL->setEditable(true);
-			d_editing_marker = mrkL;
-			return true;
-		}
-	}
-	return false;
+bool CanvasPicker::selectMarker(const QMouseEvent *e) {
+  const QPoint point = e->pos();
+  foreach (int i, plot()->imageMarkerKeys()) {
+    ImageMarker *m = dynamic_cast<ImageMarker *>(plotWidget->marker(i));
+    if (!m)
+      return false;
+    if (m->rect().contains(point)) {
+      disableEditing();
+      plot()->setSelectedMarker(i, e->modifiers() & Qt::ShiftModifier);
+      return true;
+    }
+  }
+  foreach (int i, plot()->lineMarkerKeys()) {
+    ArrowMarker *mrkL = dynamic_cast<ArrowMarker *>(plotWidget->marker(i));
+    if (!mrkL)
+      return false;
+    int d =
+        qRound(mrkL->width() + floor(mrkL->headLength() *
+                                         tan(M_PI * mrkL->headAngle() / 180.0) +
+                                     0.5));
+    double dist = mrkL->dist(point.x(), point.y());
+    if (dist <= d) {
+      disableEditing();
+      if (e->modifiers() & Qt::ShiftModifier) {
+        plot()->setSelectedMarker(i, true);
+        return true;
+      } else if (e->button() == Qt::RightButton) {
+        mrkL->setEditable(false);
+        plot()->setSelectedMarker(i, false);
+        return true;
+      }
+      plot()->deselectMarker();
+      mrkL->setEditable(true);
+      d_editing_marker = mrkL;
+      return true;
+    }
+  }
+  return false;
 }
 
-Graph *CanvasPicker::plot()
-{
-	return dynamic_cast<Graph *>(parent());
-}
+Graph *CanvasPicker::plot() { return dynamic_cast<Graph *>(parent()); }

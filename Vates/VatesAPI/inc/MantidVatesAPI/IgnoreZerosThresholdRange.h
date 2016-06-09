@@ -8,7 +8,8 @@
  @author Owen Arnold, Tessella plc
  @date 07/07/2011
 
- Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+ Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+ National Laboratory & European Spallation Source
 
  This file is part of Mantid.
 
@@ -29,15 +30,11 @@
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
 
-namespace Mantid
-{
-namespace VATES
-{
-class DLLExport IgnoreZerosThresholdRange : public ThresholdRange
-{
+namespace Mantid {
+namespace VATES {
+class DLLExport IgnoreZerosThresholdRange : public ThresholdRange {
 
 public:
-
   IgnoreZerosThresholdRange(signal_t min, signal_t max);
 
   IgnoreZerosThresholdRange();
@@ -57,9 +54,8 @@ public:
   bool inRange(const signal_t &signal) override;
 
 private:
-
   signal_t m_min;
-  
+
   signal_t m_max;
 };
 }

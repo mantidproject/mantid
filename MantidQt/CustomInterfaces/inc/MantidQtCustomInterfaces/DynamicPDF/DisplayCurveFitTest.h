@@ -54,7 +54,8 @@ private slots:
 
 private:
   void initLayout() override;
-  /// The object containing the widgets defined in the form created in Qt Designer
+  /// The object containing the widgets defined in the form created in Qt
+  /// Designer
   Ui::DisplayCurveFitTest m_uiForm;
 
 }; // class DisplayCurveFitTest

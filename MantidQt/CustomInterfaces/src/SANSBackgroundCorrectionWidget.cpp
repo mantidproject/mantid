@@ -85,22 +85,21 @@ void SANSBackgroundCorrectionWidget::setDarkRunSettingForTimeMonitors(
   m_ui.bckgnd_cor_mon_time_mon_num_line_edit->setText(setting.getMonNumber());
 }
 
-
 /**
 * Set the dark run settings for uamp-based subtractions for detectors
 * @param setting: the dark run settings for uamp-based subtractions, ie when we
 * want
 */
 void SANSBackgroundCorrectionWidget::setDarkRunSettingForUampDetectors(
-  SANSBackgroundCorrectionSettings setting) {
+    SANSBackgroundCorrectionSettings setting) {
   if (!hasRunNumber(setting)) {
     return;
   }
 
   if (setting.getUseMon()) {
     g_log.warning("SANSBackgroundCorrectionWidget: Trying to pass a background "
-      "correction "
-      "setting of a monitor to a detector display.");
+                  "correction "
+                  "setting of a monitor to a detector display.");
     return;
   }
   m_ui.bckgnd_cor_det_uamp_use_check_box->setChecked(true);
@@ -148,9 +147,8 @@ SANSBackgroundCorrectionWidget::getDarkRunSettingForTimeDetectors() {
     useMean = m_ui.bckgnd_cor_det_mean_check_box->isChecked();
   }
   return SANSBackgroundCorrectionSettings(runNumber, useMean, useMon,
-    monNumber);
+                                          monNumber);
 }
-
 
 /**
 * Get the dark run settings for time-based subtractions for detectors
@@ -169,7 +167,7 @@ SANSBackgroundCorrectionWidget::getDarkRunSettingForTimeMonitors() {
     monNumber = m_ui.bckgnd_cor_mon_time_mon_num_line_edit->text();
   }
   return SANSBackgroundCorrectionSettings(runNumber, useMean, useMon,
-    monNumber);
+                                          monNumber);
 }
 
 /**
@@ -187,7 +185,7 @@ SANSBackgroundCorrectionWidget::getDarkRunSettingForUampDetectors() {
     runNumber = m_ui.bckgnd_cor_det_uamp_run_line_edit->text();
   }
   return SANSBackgroundCorrectionSettings(runNumber, useMean, useMon,
-    monNumber);
+                                          monNumber);
 }
 
 /**

@@ -444,7 +444,6 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                 if self._scaleFactor != 1.:
                     sam_ws = api.Scale(sam_ws_name, Factor=self._scaleFactor, OutputWorkspace=sam_ws_name)
                 self._save(sam_ws_name, self._info, normalized, False)
-            #mtd.releaseFreeMemory()
 
         # ENDFOR
 

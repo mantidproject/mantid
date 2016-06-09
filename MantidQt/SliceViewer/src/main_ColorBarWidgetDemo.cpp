@@ -20,23 +20,22 @@ using namespace MantidQt::SliceViewer;
  * @param argv :: ignored
  * @return return code
  */
-int main( int argc, char ** argv )
-{
-  double min=0;
-  double max=100;
+int main(int argc, char **argv) {
+  double min = 0;
+  double max = 100;
 
   QApplication app(argc, argv);
   app.setOrganizationName("MantidProject");
   app.setApplicationName("Color Bar Widget Example");
-  QMainWindow * mainWin = new QMainWindow();
+  QMainWindow *mainWin = new QMainWindow();
 
-  QFrame * frame = new QFrame(mainWin);
+  QFrame *frame = new QFrame(mainWin);
   mainWin->setCentralWidget(frame);
 
-  QLayout * layout = new QVBoxLayout(frame);
+  QLayout *layout = new QVBoxLayout(frame);
   frame->setLayout(layout);
 
-  MantidQt::MantidWidgets::ColorBarWidget * widget = new ColorBarWidget(frame);
+  MantidQt::MantidWidgets::ColorBarWidget *widget = new ColorBarWidget(frame);
 
   widget->setViewRange(min, max);
   widget->setLog(false);
