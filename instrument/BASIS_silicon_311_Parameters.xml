@@ -40,10 +40,6 @@
     <value val="311" />
   </parameter>
   
-  <parameter name="refl-silicon" type="string">
-    <value val="311" />
-  </parameter>
-
 </component-link>
 
 <component-link name="silicon">

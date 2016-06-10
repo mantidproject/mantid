@@ -19,7 +19,7 @@ class BASISReduction311(PythonAlgorithm):
 
     _short_inst = None
     _long_inst = None
-    _extension = None_
+    _extension = None
     _doIndiv = None
     _etBins = None
     _qBins = None

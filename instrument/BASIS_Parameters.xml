@@ -24,6 +24,10 @@
     <value val="diffonly,diffspec" />
   </parameter>
 
+  <parameter name="refl-silicon" type="string">
+    <value val="111,311" />
+  </parameter>
+
   <!-- Reduction workflow parameters under this line -->
   <parameter name="Workflow.Monitor.RebinStep" >
     <!-- This is the step size to optionally rebin the monitor to"-->
