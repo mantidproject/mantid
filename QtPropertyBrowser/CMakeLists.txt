@@ -133,7 +133,13 @@ endif ()
 
 target_link_libraries ( ${PROJECT_NAME} LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} ${QT_LIBRARIES} )
 
-add_definitions ( -DQT_QTPROPERTYBROWSER_EXPORT )
+
+if(WIN32)
+  add_definitions ( -DQT_QTPROPERTYBROWSER_EXPORT )
+elseif(CMAKE_COMPILER_IS_GNUCXX)
+  add_definitions ( -DQT_QTPROPERTYBROWSER_EXPORT )
+endif()
+
 
 # This is, for the most part, not our code so disable an Intel compiler
 # warning that crops up a lot in this package

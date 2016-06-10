@@ -107,7 +107,7 @@ QT_BEGIN_NAMESPACE
 #    undef QT_QTPROPERTYBROWSER_EXPORT
 #    define QT_QTPROPERTYBROWSER_EXPORT __declspec(dllexport)
 #  endif
-#elif defined(Q_OS_LINUX) || defined(Q_OS_MAC)
+#elif defined(Q_OS_LINUX)
 #  if !defined(QT_QTPROPERTYBROWSER_EXPORT) && !defined(QT_QTPROPERTYBROWSER_IMPORT)
 #    define QT_QTPROPERTYBROWSER_EXPORT
 #  elif defined(QT_QTPROPERTYBROWSER_IMPORT)

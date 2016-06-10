@@ -314,7 +314,9 @@ endif()
 ###########################################################################
 # Visibility Setting
 ###########################################################################
-set(CMAKE_CXX_VISIBILITY_PRESET hidden CACHE STRING "")
+if ( CMAKE_COMPILER_IS_GNUCXX )
+  set(CMAKE_CXX_VISIBILITY_PRESET hidden CACHE STRING "")
+endif()
 
 ###########################################################################
 # Set a flag to indicate that this script has been called
