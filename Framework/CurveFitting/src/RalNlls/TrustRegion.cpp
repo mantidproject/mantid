@@ -13,7 +13,7 @@ namespace Mantid {
 namespace CurveFitting {
 namespace NLLS {
 
-const double epsmch = std::numeric_limits<double>::epsilon();
+const double epsmch = 1e-6; // std::numeric_limits<double>::epsilon();
 
 ///  Given an (m x n)  matrix J held by columns as a vector,
 ///  this routine returns the largest and smallest singular values
@@ -95,8 +95,8 @@ void evaluate_model(const DoubleFortranVector &f, const DoubleFortranMatrix &J,
 }
 
 /// Calculate the quantity
-///   rho = 0.5||f||^2 - 0.5||fnew||^2 =   actual_reduction
-///         --------------------------   -------------------
+///         0.5||f||^2 - 0.5||fnew||^2     actual_reduction
+///   rho = -------------------------- = -------------------
 ///             m_k(0)  - m_k(d)         predicted_reduction
 ///
 /// if model is good, rho should be close to one
@@ -156,12 +156,14 @@ void update_trust_region_radius(double &rho, const nlls_options &options,
   case 1: // default, step-function
     if (rho < options.eta_success_but_reduce) {
       // unsuccessful....reduce Delta
+      std::cerr << "Delta 1:1" << std::endl;
       w.Delta =
           std::max(options.radius_reduce, options.radius_reduce_max) * w.Delta;
     } else if (rho < options.eta_very_successful) {
       //  doing ok...retain status quo
     } else if (rho < options.eta_too_successful) {
       // more than very successful -- increase delta
+      std::cerr << "Delta 1:2" << std::endl;
       w.Delta =
           std::min(options.maximum_radius, options.radius_increase * w.normd);
       // increase based on normd = ||d||_D
@@ -172,6 +174,7 @@ void update_trust_region_radius(double &rho, const nlls_options &options,
       // too successful....accept step, but don't change w.Delta
     } else {
       // just incase (NaNs and the like...)
+      std::cerr << "Delta 1:3" << std::endl;
       w.Delta =
           std::max(options.radius_reduce, options.radius_reduce_max) * w.Delta;
       rho = -one; // set to be negative, so that the logic works....
@@ -184,6 +187,7 @@ void update_trust_region_radius(double &rho, const nlls_options &options,
     if (rho >= options.eta_too_successful) {
       // too successful....accept step, but don't change w.Delta
     } else if (rho > options.eta_successful) {
+      std::cerr << "Delta 2:1" << std::endl;
       w.Delta =
           w.Delta * std::min(options.radius_increase,
                              std::max(options.radius_reduce,
@@ -191,10 +195,12 @@ void update_trust_region_radius(double &rho, const nlls_options &options,
                                            (pow((1 - 2 * rho), w.tr_p)))));
       w.tr_nu = options.radius_reduce;
     } else if (rho <= options.eta_successful) {
+      std::cerr << "Delta 2:2" << std::endl;
       w.Delta = w.Delta * w.tr_nu;
       w.tr_nu = w.tr_nu * 0.5;
     } else {
       // just incase (NaNs and the like...)
+      std::cerr << "Delta 2:3" << std::endl;
       w.Delta =
           std::max(options.radius_reduce, options.radius_reduce_max) * w.Delta;
       rho = -one; // set to be negative, so that the logic works....

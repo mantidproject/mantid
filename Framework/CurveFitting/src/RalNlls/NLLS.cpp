@@ -9,7 +9,7 @@ namespace CurveFitting {
 namespace RalNlls {
 
 ///    ! Perform a single iteration of the RAL_NLLS loop
-void nlls_iterate(int n, int m, DoubleFortranVector &X, NLLS_workspace w,
+void nlls_iterate(int n, int m, DoubleFortranVector &X, NLLS_workspace& w,
                   eval_f_type eval_F, eval_j_type eval_J, eval_hf_type eval_HF,
                   params_base_type params, nlls_inform &inform,
                   const nlls_options &options,
@@ -143,9 +143,12 @@ void nlls_iterate(int n, int m, DoubleFortranVector &X, NLLS_workspace w,
       inform.status = NLLS_ERROR::MAX_TR_REDUCTIONS;
       return;
     }
+    std::cerr << "w.Delta=" << w.Delta << std::endl;
     // Calculate the step d that the model thinks we should take next
     calculate_step(w.J, w.f, w.hf, w.g, n, m, w.Delta, w.d, w.normd, options,
                    inform, w.calculate_step_ws);
+
+    std::cerr << "Corrections: " << w.d << std::endl;
 
     // Accept the step?
     w.Xnew = X;
@@ -170,6 +173,7 @@ void nlls_iterate(int n, int m, DoubleFortranVector &X, NLLS_workspace w,
     if (rho > options.eta_successful) {
       success = true;
     }
+    std::cerr << "rho: " << w.normF << ' ' << normFnew << ' ' << md << ' ' << rho << std::endl;
 
     // Update the TR radius
     update_trust_region_radius(rho, options, inform, w);
