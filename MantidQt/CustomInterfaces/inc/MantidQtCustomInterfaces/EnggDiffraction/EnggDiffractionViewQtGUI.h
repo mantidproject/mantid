@@ -159,6 +159,8 @@ public:
 
   void clearFittingComboBox() const override;
 
+  void enableFittingComboBox(bool enable) const override;
+
   int getFittingComboIdx(std::string bank) const override;
 
   std::string fittingPeaksData() const override;
@@ -185,8 +187,6 @@ public:
   bool getFittingMultiRunMode() override;
 
   void setFittingMultiRunMode(bool mode) override;
-
-  bool isDigit(std::string text) override;
 
   std::string fittingRunNoFactory(std::string bank, std::string fileName,
                                   std::string &bankDir, std::string fileDir);

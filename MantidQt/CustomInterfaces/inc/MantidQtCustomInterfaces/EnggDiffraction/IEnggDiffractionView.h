@@ -1,10 +1,10 @@
 #ifndef MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_IENGGDIFFRACTIONVIEW_H_
 #define MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_IENGGDIFFRACTIONVIEW_H_
 
+#include <QStringList>
+#include <qwt_plot_curve.h>
 #include <string>
 #include <vector>
-#include <qwt_plot_curve.h>
-#include <QStringList>
 
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
@@ -416,16 +416,6 @@ public:
                             bool multiRun) = 0;
 
   /**
-  * checks if the text-inputted is a valid run
-  *
-  * @param text the run number as text
-  *
-  * @return bool if each char in string is a digit/int
-  */
-  virtual bool isDigit(std::string text) = 0;
-
-
-  /**
   * emits the signal within view when run number/bank changed
   */
   virtual void setBankEmit() = 0;
@@ -436,6 +426,18 @@ public:
   * @param idx as int of the bank to set
   */
   virtual void setBankIdComboBox(int idx) = 0;
+
+  /**
+  * Delete all items from the fitting combo-box widget
+  */
+  virtual void clearFittingComboBox() const = 0;
+
+  /**
+  * Enables or disables the fitting combo-box
+  *
+  * @param enable or disable the fitting combo-box widget
+  */
+  virtual void enableFittingComboBox(bool enable) const = 0;
 
   /**
   * gets the index of the bank according to text found

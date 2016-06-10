@@ -1552,17 +1552,6 @@ bool EnggDiffractionViewQtGUI::getFittingMultiRunMode() {
   return m_fittingMutliRunMode;
 }
 
-bool MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::isDigit(
-    std::string text) {
-  for (size_t i = 0; i < text.size(); i++) {
-    char *str = &text[i];
-    if (std::isdigit(*str)) {
-      return true;
-    }
-  }
-  return false;
-}
-
 void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::setPeakPick() {
   auto bk2bk =
       FunctionFactory::Instance().createFunction("BackToBackExponential");
