@@ -92,8 +92,6 @@ void ProcessIndirectFitParameters::exec() {
           parameterNamesProp);
   std::string xUnit = getProperty("XAxisUnit");
   MatrixWorkspace_sptr outputWs = getProperty("OutputWorkspace");
-  // list of all the column names to be put into the output workspace
-  auto allOutputColumns = std::vector<std::string>();
 
   // Search for any parameters in the table with the given parameter names,
   // ignoring their function index and output them to a workspace
@@ -104,8 +102,6 @@ void ProcessIndirectFitParameters::exec() {
     tblSearchProg.report("Splitting table into relevant columns");
     auto const allColumnNames = inputWs->getColumnNames();
     auto columns = searchForFitParams(parameterNames.at(i), allColumnNames);
-    allOutputColumns.insert(allOutputColumns.end(), columns.begin(),
-                            columns.end());
     auto errColumns =
         searchForFitParams((parameterNames.at(i) + "_Err"), allColumnNames);
 
@@ -138,6 +134,14 @@ void ProcessIndirectFitParameters::exec() {
   workflowProg.report("Reordering workspace vector");
   workspaces = reorder2DVector(workspaces);
 
+  // Get output workspace columns
+  auto outputSpectraNames = std::vector<std::string>();
+  for (int i = 0; i < workspaces.size(); i++) {
+    for (int j = 0; j < workspaces[i].size(); j++) {
+      outputSpectraNames.push_back(workspaces[i][j]->YUnitLabel());
+    }
+  }
+
   // Join all the parameters for each peak into a single workspace per peak
   auto tempWorkspaces = std::vector<MatrixWorkspace_sptr>();
   auto conjoin = createChildAlgorithm("ConjoinWorkspaces", -1, -1, true);
@@ -169,13 +173,11 @@ void ProcessIndirectFitParameters::exec() {
 
   // Replace axis on workspaces with text axis
   workflowProg.report("Converting text axis");
-  auto axis = new TextAxis(outputWs->getNumberHistograms());
+  const auto numberOfHist = outputWs->getNumberHistograms();
+  auto axis = new TextAxis(numberOfHist);
   size_t offset = 0;
-  for (auto peakWs : workspaces) {
-    for (size_t k = 0; k < peakWs.size(); k++) {
-      axis->setLabel((k + offset), allOutputColumns[k]);
-    }
-    offset += peakWs.size();
+    for (size_t k = 0; k < numberOfHist; k++) {
+      axis->setLabel(k , outputSpectraNames[k]);
   }
   outputWs->replaceAxis(1, axis);
 
