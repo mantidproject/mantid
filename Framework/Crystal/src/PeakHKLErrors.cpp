@@ -403,13 +403,13 @@ void PeakHKLErrors::function1D(double *out, const double *xValues,
   }
 
   g_log.debug() << "------------------------Function---------------------------"
-                   "--------------------" << std::endl;
+                   "--------------------\n";
   for (size_t p = 0; p < nParams(); p++) {
     g_log.debug() << parameterName(p) << "(" << getParameter(p) << "),";
     if ((p + 1) % 6 == 0)
-      g_log.debug() << std::endl;
+      g_log.debug() << '\n';
   }
-  g_log.debug() << std::endl;
+  g_log.debug() << '\n';
   g_log.debug() << "Off constraints=";
   for (size_t p = 0; p < nParams(); p++) {
     IConstraint *constr = getConstraint(p);
@@ -418,10 +418,10 @@ void PeakHKLErrors::function1D(double *out, const double *xValues,
         g_log.debug() << "(" << parameterName(p) << "=" << constr->check()
                       << ");";
   }
-  g_log.debug() << std::endl;
+  g_log.debug() << '\n';
 
   g_log.debug() << "    Chi**2 = " << ChiSqTot << "     nData = " << nData
-                << std::endl;
+                << '\n';
 }
 
 void PeakHKLErrors::functionDeriv1D(Jacobian *out, const double *xValues,
@@ -452,8 +452,7 @@ void PeakHKLErrors::functionDeriv1D(Jacobian *out, const double *xValues,
   getRun2MatMap(Peaks, OptRuns, RunNums2GonMatrix);
 
   g_log.debug()
-      << "----------------------------Derivative------------------------"
-      << std::endl;
+      << "----------------------------Derivative------------------------\n";
 
   V3D samplePosition = instNew->getSample()->getPos();
   IPeak &ppeak = Peaks->getPeak(0);

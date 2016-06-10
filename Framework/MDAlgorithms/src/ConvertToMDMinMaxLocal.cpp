@@ -106,7 +106,7 @@ void ConvertToMDMinMaxLocal::exec() {
     MsliceProj.setUVvectors(ut, vt, wt);
   } catch (std::invalid_argument &) {
     g_log.error() << "The projections are coplanar. Will use defaults "
-                     "[1,0,0],[0,1,0] and [0,0,1]" << std::endl;
+                     "[1,0,0],[0,1,0] and [0,0,1]\n";
   }
 
   // set up target coordinate system and identify/set the (multi) dimension's

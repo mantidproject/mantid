@@ -264,7 +264,7 @@ inline std::ostream &operator<<(std::ostream &ostr, const GSLMatrix &m) {
     for (size_t j = 0; j < m.size2(); ++j) {
       ostr << std::setw(13) << m.get(i, j) << ' ';
     }
-    ostr << std::endl;
+    ostr << '\n';
   }
   ostr.flags(fflags);
   return ostr;

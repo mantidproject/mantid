@@ -697,7 +697,7 @@ void SmoothNeighbours::setupNewInstrument(MatrixWorkspace_sptr outws) {
     ISpectrum *outSpec = outws->getSpectrum(outWIi);
     /*
     g_log.notice() << "[DBx555] Original spectrum number for wsindex " << outWIi
-                   << " = " << outSpec->getSpectrumNo() << std::endl;
+                   << " = " << outSpec->getSpectrumNo() << '\n';
     outSpec->setSpectrumNo(outWIi+1);
     */
 

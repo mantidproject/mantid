@@ -103,7 +103,7 @@ public:
     AnalysisDataService::Instance().remove("SmoothedWS");
     AnalysisDataService::Instance().remove("ZeroingGoldWS");
 
-    //  std::cout<< "RUNNING FFTSmooth2 testZeroing() DONE!" << std::endl;
+    //  std::cout<< "RUNNING FFTSmooth2 testZeroing() DONE!\n";
   }
 
   void testButterworth() { // load input and "Gold" result workspaces
@@ -160,7 +160,7 @@ public:
     AnalysisDataService::Instance().remove("SmoothedWS");
     AnalysisDataService::Instance().remove("ZeroingGoldWS");
 
-    //  std::cout<< "RUNNING FFTSmooth2 testZeroing() DONE!" << std::endl;
+    //  std::cout<< "RUNNING FFTSmooth2 testZeroing() DONE!\n";
   }
 
   //-------------------------------------------------------------------------------------------------

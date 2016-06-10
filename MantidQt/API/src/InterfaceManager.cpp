@@ -59,13 +59,13 @@ AlgorithmDialog *InterfaceManager::createDialog(
   AlgorithmDialog *dlg = NULL;
   if (AlgorithmDialogFactory::Instance().exists(alg->name() + "Dialog")) {
     g_log.debug() << "Creating a specialised dialog for " << alg->name()
-                  << std::endl;
+                  << '\n';
     dlg = AlgorithmDialogFactory::Instance().createUnwrapped(alg->name() +
                                                              "Dialog");
   } else {
     dlg = new GenericDialog;
     g_log.debug() << "No specialised dialog exists for the " << alg->name()
-                  << " algorithm: a generic one has been created" << std::endl;
+                  << " algorithm: a generic one has been created\n";
   }
 
   // The parent so that the dialog appears on top of it
@@ -135,8 +135,7 @@ UserSubWindow *InterfaceManager::createSubWindow(const QString &interface_name,
     user_win = NULL;
   }
   if (user_win) {
-    g_log.debug() << "Created a specialised interface for " << iname
-                  << std::endl;
+    g_log.debug() << "Created a specialised interface for " << iname << '\n';
     user_win->setParent(parent);
     user_win->setInterfaceName(interface_name);
     user_win->initializeLayout();
@@ -182,7 +181,7 @@ InterfaceManager::InterfaceManager() {
         g_log.warning() << "Unable to load Qt plugin libraries.\n"
                         << "Please check that the 'mantidqt.plugins.directory' "
                            "variable in the .properties file points to "
-                        << "the correct location." << std::endl;
+                        << "the correct location.\n";
       }
       isLoaded = true;
     }
@@ -206,14 +205,14 @@ bool InterfaceManager::hasVatesLibraries() { return NULL != m_vatesGuiFactory; }
 VatesViewerInterface *InterfaceManager::createVatesSimpleGui() const {
   if (m_vatesGuiFactory == NULL) {
     g_log.error() << "InterfaceManager::createVatesSimpleGui is null. Mantid "
-                     "Vates package is probably not installed." << std::endl;
+                     "Vates package is probably not installed.\n";
     throw Mantid::Kernel::Exception::NullPointerException(
         "InterfaceManager::createVatesSimpleGui", "m_vatesGuiFactory");
   } else {
     VatesViewerInterface *vsg =
         this->m_vatesGuiFactory->createUnwrappedInstance();
     if (!vsg) {
-      g_log.error() << "Error creating Vates Simple GUI" << std::endl;
+      g_log.error() << "Error creating Vates Simple GUI\n";
     }
     return vsg;
   }

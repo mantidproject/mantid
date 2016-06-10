@@ -257,7 +257,7 @@ int SaveToSNSHistogramNexus::WriteOutDataOrErrors(
     //      strcpy(link->targetPath, targetPath.c_str());
     //      if (NXmakelink(outId,link) != NX_OK)
     //        g_log.debug() << "Error while making link to " << targetPath <<
-    //        std::endl;
+    //        '\n';
 
     if (WriteAttributes(is_definition) != NX_OK)
       return NX_ERROR;

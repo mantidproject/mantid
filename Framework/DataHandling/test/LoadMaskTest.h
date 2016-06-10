@@ -152,12 +152,12 @@ public:
         TS_ASSERT_DELTA(y, 0.0, 1.0E-5);
         if (fabs(y) > 1.0E-5) {
           errorcounts++;
-          std::cout << "Workspace Index " << iws << " has a wrong set on masks"
-                    << std::endl;
+          std::cout << "Workspace Index " << iws
+                    << " has a wrong set on masks\n";
         }
       }
     }
-    std::cout << "Total " << errorcounts << " errors " << std::endl;
+    std::cout << "Total " << errorcounts << " errors \n";
   }
 
   /*
@@ -295,9 +295,9 @@ public:
     std::stringstream ss;
 
     // 1. Header
-    ss << "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>" << std::endl;
-    ss << "  <detector-masking>" << std::endl;
-    ss << "    <group>" << std::endl;
+    ss << "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n";
+    ss << "  <detector-masking>\n";
+    ss << "    <group>\n";
 
     // 2. "detids" & component
     if (detids.size() > 0) {
@@ -308,16 +308,15 @@ public:
         else
           ss << detids[i];
       }
-      ss << "</detids>" << std::endl;
+      ss << "</detids>\n";
     }
 
     for (size_t i = 0; i < banks.size(); i++) {
-      ss << "<component>bank" << banks[i] << "</component>" << std::endl;
+      ss << "<component>bank" << banks[i] << "</component>\n";
     }
 
     // 4. End of file
-    ss << "  </group>" << std::endl
-       << "</detector-masking>" << std::endl;
+    ss << "  </group>\n</detector-masking>\n";
 
     return ScopedFileHelper::ScopedFile(ss.str(), maskfilename);
   }
@@ -335,7 +334,7 @@ public:
     for (size_t i = 0; i < singlespectra.size(); i++) {
       ss << singlespectra[i] << " ";
     }
-    ss << std::endl;
+    ss << '\n';
 
     // 2. Spectra pair
     // a) Make the list really has complete pairs
@@ -345,7 +344,7 @@ public:
     for (size_t i = 0; i < pairspectra.size(); i += 2) {
       ss << pairspectra[i] << "-" << pairspectra[i + 1] << "  ";
     }
-    ss << std::endl;
+    ss << '\n';
 
     return ScopedFileHelper::ScopedFile(ss.str(), maskfilename);
   }

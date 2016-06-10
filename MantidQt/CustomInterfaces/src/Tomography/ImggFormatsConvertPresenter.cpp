@@ -69,8 +69,7 @@ void ImggFormatsConvertPresenter::processConvert() {
   size_t depth = m_view->maxSearchDepth();
 
   g_log.information() << "Trying to convert images from path: " << inPS
-                      << " into " << outPS << ", with depth " << depth
-                      << std::endl;
+                      << " into " << outPS << ", with depth " << depth << '\n';
 
   const std::string emptyMsg = "Please specify an input and and output path.";
   if (inPS.empty()) {
@@ -112,14 +111,13 @@ void ImggFormatsConvertPresenter::processConvert() {
       msg << "Finished converstion of images from path: " << inPS << " into "
           << outPS << ", with depth " << depth << ". Converted " << count
           << " images from format " << inFormat << " to format " << outFormat
-          << std::endl;
+          << '\n';
       g_log.notice() << msg.str();
       m_view->userWarning("Conversion finished successfully", msg.str());
     } else {
       std::stringstream msg;
       msg << "No images could be found in input path: " << inPS
-          << " with format " << inFormat << ". 0 images converted."
-          << std::endl;
+          << " with format " << inFormat << ". 0 images converted.\n";
       g_log.notice() << msg.str();
       m_view->userWarning("No images could be found", msg.str());
     }
@@ -354,7 +352,7 @@ void ImggFormatsConvertPresenter::saveNXTomo(
 
   g_log.information()
       << "Save NXTomo file (overwriting if the file already existed: "
-      << outputName << std::endl;
+      << outputName << '\n';
 }
 
 } // namespace CustomInterfaces

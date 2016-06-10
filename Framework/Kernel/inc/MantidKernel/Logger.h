@@ -39,7 +39,7 @@ class ThreadSafeLogStream;
         Usage example:
             Logger ls(someLogger);
             ls.error("Some informational message");
-            ls.error() << "Some error message" << std::endl;
+            ls.error() << "Some error message\n";
 
     @author Nicholas Draper, Tessella Support Services plc
     @date 12/10/2007

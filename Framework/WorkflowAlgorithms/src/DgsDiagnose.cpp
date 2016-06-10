@@ -87,7 +87,7 @@ void DgsDiagnose::init() {
 /** Execute the algorithm.
  */
 void DgsDiagnose::exec() {
-  g_log.notice() << "Starting DgsDiagnose" << std::endl;
+  g_log.notice() << "Starting DgsDiagnose\n";
   // Get the reduction property manager
   const std::string reductionManagerName =
       this->getProperty("ReductionProperties");
@@ -311,7 +311,7 @@ void DgsDiagnose::exec() {
       int endIndex = boost::lexical_cast<int>(*tok_iter);
       endIndex -= 1;
       g_log.information() << "Pixel range: (" << startIndex << ", " << endIndex
-                          << ")" << std::endl;
+                          << ")\n";
       diag->setProperty("StartWorkspaceIndex", startIndex);
       diag->setProperty("EndWorkspaceIndex", endIndex);
       diag->execute();
@@ -351,7 +351,7 @@ void DgsDiagnose::exec() {
 
   MaskWorkspace_sptr m = boost::dynamic_pointer_cast<MaskWorkspace>(maskWS);
   g_log.information() << "Number of masked pixels = " << m->getNumberMasked()
-                      << std::endl;
+                      << '\n';
 
   this->setProperty("OutputWorkspace", maskWS);
 }

@@ -36,7 +36,7 @@ private:
                              const std::vector<bool> &banks,
                              const std::string &specNos,
                              const std::string &dgFile) override {
-    std::cerr << "focus run " << std::endl;
+    std::cerr << "focus run \n";
 
     std::string runNo = multi_RunNo[0];
 

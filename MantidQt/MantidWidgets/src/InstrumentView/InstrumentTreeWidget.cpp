@@ -62,7 +62,7 @@ void InstrumentTreeWidget::getSelectedBoundingBox(const QModelIndex &index,
     if (tmpObj) {
       try {
         // std::cerr << int(tmpObj->getComponentID()) << ' ' <<
-        // int(instrument->getSample()->getComponentID()) << std::endl;
+        // int(instrument->getSample()->getComponentID()) << '\n';
         if (tmpObj->getComponentID() ==
             instrument->getSample()->getComponentID()) {
           boundBox = m_instrActor->getWorkspace()

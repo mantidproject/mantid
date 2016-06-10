@@ -136,7 +136,7 @@ void LoadInstrumentFromRaw::exec() {
         monIndex + numMonitors) {
       instrument->markAsMonitor(detector);
       g_log.information() << "Detector with ID " << detID[i]
-                          << " marked as a monitor." << std::endl;
+                          << " marked as a monitor.\n";
     }
     // otherwise mark as a detector
     else {
