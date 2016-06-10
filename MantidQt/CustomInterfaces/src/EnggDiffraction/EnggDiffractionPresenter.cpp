@@ -666,7 +666,7 @@ void MantidQt::CustomInterfaces::EnggDiffractionPresenter::
           runNoVec.push_back(splitBaseName[1]);
           auto fittingMultiRunMode = m_view->getFittingMultiRunMode();
           if (!fittingMultiRunMode)
-            m_view->addRunNoItem(runNoVec, false);
+            setRunNoItems(runNoVec, false);
         }
       }
       // assuming that no directory is found so look for number
@@ -709,7 +709,7 @@ void MantidQt::CustomInterfaces::EnggDiffractionPresenter::
 
           auto fittingMultiRunMode = m_view->getFittingMultiRunMode();
           if (!fittingMultiRunMode)
-            m_view->addRunNoItem(runNoVec, false);
+            setRunNoItems(runNoVec, false);
         }
       }
     }
@@ -806,7 +806,7 @@ void EnggDiffractionPresenter::enableMultiRun(
         auto global_vec_size = fittingRunNoDirVec.size();
         if (size_t(diff) == global_vec_size) {
 
-          m_view->addRunNoItem(RunNumberVec, true);
+			setRunNoItems(RunNumberVec, true);
 
           m_view->setBankEmit();
         }
@@ -1403,9 +1403,9 @@ void EnggDiffractionPresenter::setBankItems() {
         bool digit = isDigit(bankID);
 
         if (digit || bankID == "cropped") {
-          m_view->addBankItems(QString::fromStdString(bankID));
+          m_view->addBankItem(QString::fromStdString(bankID));
         } else {
-          m_view->addBankItems(QString("Bank %1").arg(i + 1));
+          m_view->addBankItem(QString("Bank %1").arg(i + 1));
         }
       }
 
@@ -1422,6 +1422,49 @@ void EnggDiffractionPresenter::setBankItems() {
     m_view->userWarning("Unable to insert items: ",
                         "Could not add banks to "
                         "combo-box or list widget; " +
+                            static_cast<std::string>(re.what()) +
+                            ". Please try again");
+  }
+}
+
+void EnggDiffractionPresenter::setRunNoItems(
+    std::vector<std::string> runNumVector, bool multiRun) {
+  try {
+    if (!runNumVector.empty()) {
+
+      // delete previous bank added to the list
+      m_view->clearFittingListWidget();
+
+      for (size_t i = 0; i < runNumVector.size(); i++) {
+
+        // get the last split in vector which will be bank
+        std::string currentRun = (runNumVector[i]);
+
+        m_view->addRunNoItem(QString::fromStdString(currentRun));
+      }
+
+      if (multiRun) {
+        m_view->enableFittingListWidget(true);
+
+        auto currentIndex = m_view->getFittingListWidgetCurrentRow();
+        if (currentIndex == -1)
+          m_view->setFittingListWidgetCurrentRow(0);
+      } else {
+        m_view->enableFittingListWidget(false);
+      }
+    }
+
+    else {
+      // upon invalid file
+      // disable the widgets when only one related file found
+      m_view->enableFittingListWidget(false);
+
+      m_view->clearFittingListWidget();
+    }
+
+  } catch (std::runtime_error &re) {
+    m_view->userWarning("Unable to insert items: ",
+                        "Could not add list widget; " +
                             static_cast<std::string>(re.what()) +
                             ". Please try again");
   }

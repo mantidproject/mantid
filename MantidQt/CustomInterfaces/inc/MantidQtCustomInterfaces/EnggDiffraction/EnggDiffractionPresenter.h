@@ -134,6 +134,8 @@ public:
 
   void setBankItems();
 
+  void setRunNoItems(std::vector<std::string> runNumVector, bool multiRun);
+
   void setDefaultBank(std::vector<std::string> splittedBaseName,
 	  QString selectedFile);
 
