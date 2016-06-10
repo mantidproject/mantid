@@ -366,10 +366,10 @@ void FitPropertyBrowser::initLayout(QWidget *w) {
   setupManageMapper->setMapping(setupActionSave, "SaveSetup");
   setupManageMapper->setMapping(setupActionCopyToClipboard, "CopyToClipboard");
   setupManageMapper->setMapping(setupActionLoadFromString, "LoadFromString");
-  connect(setupActionSave, SIGNAL(activated()), setupManageMapper, SLOT(map()));
-  connect(setupActionCopyToClipboard, SIGNAL(activated()), setupManageMapper,
+  connect(setupActionSave, SIGNAL(triggered()), setupManageMapper, SLOT(map()));
+  connect(setupActionCopyToClipboard, SIGNAL(triggered()), setupManageMapper,
           SLOT(map()));
-  connect(setupActionLoadFromString, SIGNAL(activated()), setupManageMapper,
+  connect(setupActionLoadFromString, SIGNAL(triggered()), setupManageMapper,
           SLOT(map()));
   connect(setupManageMapper, SIGNAL(mapped(const QString &)), this,
           SLOT(executeSetupManageMenu(const QString &)));
@@ -387,8 +387,8 @@ void FitPropertyBrowser::initLayout(QWidget *w) {
   QSignalMapper *setupMapper = new QSignalMapper(this);
   setupMapper->setMapping(setupActionClearFit, "ClearFit");
   setupMapper->setMapping(setupActionFindPeaks, "FindPeaks");
-  connect(setupActionClearFit, SIGNAL(activated()), setupMapper, SLOT(map()));
-  connect(setupActionFindPeaks, SIGNAL(activated()), setupMapper, SLOT(map()));
+  connect(setupActionClearFit, SIGNAL(triggered()), setupMapper, SLOT(map()));
+  connect(setupActionFindPeaks, SIGNAL(triggered()), setupMapper, SLOT(map()));
   connect(setupMapper, SIGNAL(mapped(const QString &)), this,
           SLOT(executeSetupMenu(const QString &)));
 
@@ -492,8 +492,8 @@ void FitPropertyBrowser::updateSetupMenus() {
     QAction *itemRemove = new QAction(names.at(i), this);
     mapperLoad->setMapping(itemLoad, names.at(i));
     mapperRemove->setMapping(itemRemove, names.at(i));
-    connect(itemLoad, SIGNAL(activated()), mapperLoad, SLOT(map()));
-    connect(itemRemove, SIGNAL(activated()), mapperRemove, SLOT(map()));
+    connect(itemLoad, SIGNAL(triggered()), mapperLoad, SLOT(map()));
+    connect(itemRemove, SIGNAL(triggered()), mapperRemove, SLOT(map()));
     menuLoad->addAction(itemLoad);
     menuRemove->addAction(itemRemove);
   }
