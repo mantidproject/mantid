@@ -660,7 +660,7 @@ void MantidQt::CustomInterfaces::EnggDiffractionPresenter::
           m_view->setFittingRunNumVec(runnoDirVector);
 
           // add bank to the combo-box and list view
-          m_view->addBankItems(splitBaseName, focusedFile);
+		  setBankItems();
           setDefaultBank(splitBaseName, focusedFile);
           runNoVec.clear();
           runNoVec.push_back(splitBaseName[1]);
@@ -702,7 +702,7 @@ void MantidQt::CustomInterfaces::EnggDiffractionPresenter::
           m_view->setFittingRunNumVec(runnoDirVector);
 
           // add bank to the combo-box and list view
-          m_view->addBankItems(splitBaseName, focusedFile);
+		  setBankItems();
           setDefaultBank(splitBaseName, focusedFile);
           runNoVec.clear();
           runNoVec.push_back(strFocusedFile);
@@ -767,8 +767,8 @@ void EnggDiffractionPresenter::enableMultiRun(
     std::string firstRun, std::string lastRun,
     std::vector<std::string> &fittingRunNoDirVec) {
 
-  bool firstDig = m_view->isDigit(firstRun);
-  bool lastDig = m_view->isDigit(lastRun);
+  bool firstDig = isDigit(firstRun);
+  bool lastDig = isDigit(lastRun);
 
   std::vector<std::string> RunNumberVec;
   if (firstDig && lastDig) {
@@ -1382,52 +1382,50 @@ void EnggDiffractionPresenter::setDataToClonedWS(std::string &current_WS,
 }
 
 void EnggDiffractionPresenter::setBankItems() {
-	try {
-		auto fitting_runno_vector = m_view->getFittingRunNumVec();
+  try {
+    auto fitting_runno_vector = m_view->getFittingRunNumVec();
 
-		if (!fitting_runno_vector.empty()) {
+    if (!fitting_runno_vector.empty()) {
 
-			// delete previous bank added to the list
-			m_view->clearFittingComboBox();
+      // delete previous bank added to the list
+      m_view->clearFittingComboBox();
 
-			for (size_t i = 0; i < fitting_runno_vector.size(); i++) {
-				Poco::Path vecFile(fitting_runno_vector[i]);
-				std::string strVecFile = vecFile.toString();
-				// split the directory from m_fitting_runno_dir_vec
-				std::vector<std::string> vecFileSplit =
-					m_view->splitFittingDirectory(strVecFile);
+      for (size_t i = 0; i < fitting_runno_vector.size(); i++) {
+        Poco::Path vecFile(fitting_runno_vector[i]);
+        std::string strVecFile = vecFile.toString();
+        // split the directory from m_fitting_runno_dir_vec
+        std::vector<std::string> vecFileSplit =
+            m_view->splitFittingDirectory(strVecFile);
 
-				// get the last split in vector which will be bank
-				std::string bankID = (vecFileSplit.back());
+        // get the last split in vector which will be bank
+        std::string bankID = (vecFileSplit.back());
 
-				bool digit = isDigit(bankID);
+        bool digit = isDigit(bankID);
 
-				if (digit)
-					m_uiTabFitting.comboBox_bank->addItem(QString::fromStdString(bankID));
-				else
-					m_uiTabFitting.comboBox_bank->addItem(QString("Bank %1").arg(i + 1));
+        if (digit || bankID == "cropped") {
+          m_view->addBankItems(QString::fromStdString(bankID));
+        } else {
+          m_view->addBankItems(QString("Bank %1").arg(i + 1));
+        }
+      }
 
-			}
+      m_view->enableFittingComboBox(true);
+    } else {
+      // upon invalid file
+      // disable the widgets when only one related file found
+      m_view->enableFittingComboBox(false);
 
-			m_uiTabFitting.comboBox_bank->setEnabled(true);
-		}
-		else {
-			// upon invalid file
-			// disable the widgets when only one related file found
-			m_uiTabFitting.comboBox_bank->setEnabled(false);
+      m_view->clearFittingComboBox();
+    }
 
-			m_uiTabFitting.comboBox_bank->clear();
-		}
-
-	}
-	catch (std::runtime_error &re) {
-		userWarning("Unable to insert items: ",
-			"Could not add banks to "
-			"combo-box or list widget; " +
-			static_cast<std::string>(re.what()) + ". Please try again");
-	}
+  } catch (std::runtime_error &re) {
+    m_view->userWarning("Unable to insert items: ",
+                        "Could not add banks to "
+                        "combo-box or list widget; " +
+                            static_cast<std::string>(re.what()) +
+                            ". Please try again");
+  }
 }
-
 
 void EnggDiffractionPresenter::setDefaultBank(
 	std::vector<std::string> splittedBaseName, QString selectedFile) {

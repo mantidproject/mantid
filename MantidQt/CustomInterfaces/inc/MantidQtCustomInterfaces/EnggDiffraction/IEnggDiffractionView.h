@@ -401,11 +401,9 @@ public:
   /**
   * adds the number of banks to the combo-box widget on the interface
   *
-  * @param splittedBaseName contains the bank number and run number
-  * @param selectedFile path of the selected file
+  * @param bankID the bank number to add to combo-box
   */
-  virtual void addBankItems(std::vector<std::string> splittedBaseName,
-                            QString selectedFile) = 0;
+  virtual void addBankItems(QString bankID) = 0;
 
   /**
   * adds the run number to the list view widget on the interface

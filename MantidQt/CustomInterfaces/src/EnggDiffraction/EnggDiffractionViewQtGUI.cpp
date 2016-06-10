@@ -1410,6 +1410,11 @@ void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::clearFittingComboBox(
 	m_uiTabFitting.comboBox_bank->clear();
 }
 
+void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::enableFittingComboBox(bool enable) const
+{
+	m_uiTabFitting.comboBox_bank->setEnabled(enable);
+}
+
 int EnggDiffractionViewQtGUI::getFittingComboIdx(std::string bank) const {
 	return m_uiTabFitting.comboBox_bank->findText(QString::fromStdString(bank));
 }
@@ -1481,11 +1486,9 @@ MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::getFocusDir() {
   return m_focusDir;
 }
 
-void EnggDiffractionViewQtGUI::addBankItems(std::string bankID) {
+void EnggDiffractionViewQtGUI::addBankItems(QString bankID) {
 
-	auto QBankID = QString::fromStdString(bankID);
-	m_uiTabFitting.comboBox_bank->addItem(QBankID);
-
+	m_uiTabFitting.comboBox_bank->addItem(bankID);
 }
 
 void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::addRunNoItem(

@@ -173,8 +173,7 @@ public:
   void setDataVector(std::vector<boost::shared_ptr<QwtData>> &data,
                      bool focused, bool plotSinglePeaks) override;
 
-  void addBankItems(std::vector<std::string> splittedBaseName,
-                    QString selectedFile) override;
+  void addBankItems(QString bankID) override;
 
   void addRunNoItem(std::vector<std::string> runNumVector,
                     bool multiRun) override;

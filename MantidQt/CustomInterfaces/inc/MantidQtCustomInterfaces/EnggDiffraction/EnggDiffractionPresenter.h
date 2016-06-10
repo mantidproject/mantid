@@ -137,6 +137,8 @@ public:
   void setDefaultBank(std::vector<std::string> splittedBaseName,
 	  QString selectedFile);
 
+  bool isDigit(std::string text);
+
 protected:
   void initialize();
 
