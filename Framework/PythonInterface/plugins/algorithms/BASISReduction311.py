@@ -4,7 +4,6 @@ from mantid.api import *
 from mantid.kernel import *
 from mantid import config
 import os
-import sys
 
 MICROEV_TO_MILLIEV = 1000.0
 DEFAULT_BINS = [-740, 1.6, 740]
@@ -251,7 +250,7 @@ class BASISReduction311(PythonAlgorithm):
         api.MaskDetectors(Workspace=sam_ws,
                           DetectorList=self._dMask)
                           #MaskedWorkspace='BASIS_MASK')
-        api.ModeratorTzeroLinear(InputWorkspace=sam_ws, OutputWorkspace=sam_ws)        
+        api.ModeratorTzeroLinear(InputWorkspace=sam_ws, OutputWorkspace=sam_ws)
         api.ConvertUnits(InputWorkspace=sam_ws,
                          OutputWorkspace=sam_ws,
                          Target='Wavelength', EMode='Indirect')
