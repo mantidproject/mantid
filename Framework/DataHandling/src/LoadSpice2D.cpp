@@ -496,29 +496,63 @@ void LoadSpice2D::setMetadataAsRunProperties(
 /**
  * Calculates the detector distances and sets them as Run properties
  * Here fog starts:
- * BioSANS: distance = sample_det_dist + offset!
- * GPSANS: distance = sample_det_dist + offset + sample_to_flange!
+ * GPSANS: distance = sample_det_dist + offset!
+ * BioSANS: distance = sample_det_dist + offset + sample_to_flange!
  * Mathieu is using sample_det_dist to move the detector later
  * So I'll do the same (Ricardo)
+ * June 14th 2016:
+ * New changes:
+ * sample_det_dist is not available
+ * flange_det_dist is new = old sample_det_dist + offset
+ * offset is not used
+ * GPSANS: distance = flange_det_dist! (sample_to_flange is 0 for GPSANS)
+ * BioSANS: distance = flange_det_dist + sample_to_flange!
+ * For back compatibility I'm subracting the offset to flange_det_dist
  * @return : sample_detector_distance
  */
 double
 LoadSpice2D::detectorDistance(std::map<std::string, std::string> &metadata) {
 
-  // sample_detector_distances
   double sample_detector_distance = 0;
-  from_string<double>(sample_detector_distance,
-                      metadata["Motor_Positions/sample_det_dist"], std::dec);
-  sample_detector_distance *= 1000.0;
-  addRunProperty<double>("sample-detector-distance", sample_detector_distance,
-                         "mm");
+  double sample_detector_distance_offset, sample_si_window_distance;
 
-  double sample_detector_distance_offset =
-      addRunProperty<double>(metadata, "Header/tank_internal_offset",
-                             "sample-detector-distance-offset", "mm");
+  // check if it's the new format
+  if (metadata.find("Motor_Positions/sample_det_dist") != metadata.end()) {
+    // Old Format
 
-  double sample_si_window_distance = addRunProperty<double>(
-      metadata, "Header/sample_to_flange", "sample-si-window-distance", "mm");
+    from_string<double>(sample_detector_distance,
+                        metadata["Motor_Positions/sample_det_dist"], std::dec);
+    sample_detector_distance *= 1000.0;
+    addRunProperty<double>("sample-detector-distance", sample_detector_distance,
+                           "mm");
+
+    sample_detector_distance_offset =
+        addRunProperty<double>(metadata, "Header/tank_internal_offset",
+                               "sample-detector-distance-offset", "mm");
+
+    sample_si_window_distance = addRunProperty<double>(
+        metadata, "Header/sample_to_flange", "sample-si-window-distance", "mm");
+
+  } else {
+    // New format:
+    from_string<double>(sample_detector_distance,
+                        metadata["Motor_Positions/flange_det_dist"], std::dec);
+    sample_detector_distance *= 1000.0;
+
+    sample_detector_distance_offset =
+        addRunProperty<double>(metadata, "Header/tank_internal_offset",
+                               "sample-detector-distance-offset", "mm");
+
+    sample_detector_distance -= sample_detector_distance_offset;
+
+    addRunProperty<double>("sample-detector-distance", sample_detector_distance,
+                           "mm");
+
+    sample_si_window_distance = addRunProperty<double>(
+        metadata, "Header/sample_to_flange", "sample-si-window-distance", "mm");
+  }
+
+  // sample_detector_distances
 
   double total_sample_detector_distance = sample_detector_distance +
                                           sample_detector_distance_offset +
