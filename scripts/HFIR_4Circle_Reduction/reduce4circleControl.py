@@ -221,7 +221,7 @@ class CWSCDReductionControl(object):
 
         #register startup
         mantid.UsageService.registerFeatureUsage("Interface","4-Circle Reduction",False)
-        
+
         return
 
     def add_peak_info(self, exp_number, scan_number, pt_number):

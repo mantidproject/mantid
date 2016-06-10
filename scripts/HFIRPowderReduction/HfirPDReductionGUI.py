@@ -418,7 +418,7 @@ class MainWindow(QtGui.QMainWindow):
             self.ui.radioButton_useServer.setChecked(True)
             self.ui.radioButton_useLocal.setChecked(False)
         # ENDIF
-        
+
         #register startup
         mantid.UsageService.registerFeatureUsage("Interface","HfirPowderReduction",False)
 

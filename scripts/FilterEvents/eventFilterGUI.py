@@ -244,7 +244,7 @@ class MainWindow(QtGui.QMainWindow):
         # self.setInstrumentInputs()
 
         ##defaults
-        
+
         #register startup
         mantid.UsageService.registerFeatureUsage("Interface","EventFilter",False)
 

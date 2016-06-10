@@ -101,7 +101,7 @@ class DGSPlannerGUI(QtGui.QWidget):
         #control for cancel button
         self.iterations=0
         self.progress_canceled=False
-        
+
         #register startup
         mantid.UsageService.registerFeatureUsage("Interface","DGSPlanner",False)
 

@@ -60,11 +60,11 @@ class MainWindow(QtGui.QMainWindow):
         self.flightpath = -1.0
         self.Theta = -1.0
         self.output = 0.0
-        
+
         try:
-           import mantid
-           #register startup
-           mantid.UsageService.registerFeatureUsage("Interface","TofConverter",False)
+            import mantid
+            #register startup
+            mantid.UsageService.registerFeatureUsage("Interface","TofConverter",False)
         except ImportError:
             pass
 

@@ -596,7 +596,7 @@ class BaseReductionScripter(object):
         else:
             Logger("scripter").error("Mantid is unavailable to submit a reduction job")
 
-# Disable warning about the use of exec, which we knowingly use to 
+# Disable warning about the use of exec, which we knowingly use to
 # execute generated code.
 # pylint: disable=W0122
     def execute_script(self, script):
