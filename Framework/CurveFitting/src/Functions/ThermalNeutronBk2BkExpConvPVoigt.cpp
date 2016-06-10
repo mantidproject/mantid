@@ -357,7 +357,7 @@ void ThermalNeutronBk2BkExpConvPVoigt::functionLocal(double *out,
 
   double peakrange = m_fwhm * PEAKRANGE;
 
-  // cout << "DBx212:  eta = " << eta << ", gamma = " << gamma << endl;
+  // cout << "DBx212:  eta = " << eta << ", gamma = " << gamma << '\n';
 
   double invert_sqrt2sigma = 1.0 / sqrt(2.0 * m_Sigma2);
 
@@ -589,7 +589,7 @@ double ThermalNeutronBk2BkExpConvPVoigt::calOmega(
     }
   }
 
-  // cout << "[DB] Final Value = " << omega << endl;
+  // cout << "[DB] Final Value = " << omega << '\n';
   return omega;
 }
 

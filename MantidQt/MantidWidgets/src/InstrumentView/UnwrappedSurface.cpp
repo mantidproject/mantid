@@ -346,7 +346,7 @@ void UnwrappedSurface::componentSelected(Mantid::Geometry::ComponentID id) {
     if (assRect != m_assemblies.end())
       zoom(*assRect);
     else {
-      // std::cout << "Assembly not found " << std::endl;
+      // std::cout << "Assembly not found \n";
     }
   }
 }
@@ -529,7 +529,7 @@ void UnwrappedSurface::drawSimpleToImage(QImage *image, bool picking) const {
   const double dh = fabs(m_viewRect.height() / vheight);
 
   // std::cerr << m_viewRect.left() << ' ' << m_viewRect.right() << " : " <<
-  // m_viewRect.bottom() << ' ' << m_viewRect.top() << std::endl;
+  // m_viewRect.bottom() << ' ' << m_viewRect.top() << '\n';
 
   if (m_startPeakShapes) {
     createPeakShapes(image->rect());

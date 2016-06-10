@@ -94,7 +94,7 @@ void CheckWorkspacesMatch::exec() {
 
   // Output as per previous behaviour
   if (result != successString()) {
-    g_log.notice() << "The workspaces did not match: " << result << std::endl;
+    g_log.notice() << "The workspaces did not match: " << result << '\n';
   }
 
   setProperty("Result", result);

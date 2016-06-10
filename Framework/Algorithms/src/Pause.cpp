@@ -59,7 +59,7 @@ void Pause::exec() {
     } catch (CancelException &) {
       // Break out of the lo
       breakOut = true;
-      g_log.notice() << "User stopped the Pause." << std::endl;
+      g_log.notice() << "User stopped the Pause.\n";
     }
     if (breakOut)
       break;

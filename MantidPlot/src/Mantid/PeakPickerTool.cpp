@@ -552,7 +552,7 @@ void PeakPickerTool::algorithmFinished(const QString &out) {
       }
     } catch (Mantid::Kernel::Exception::NotFoundError &) {
       g_log.warning() << "PeakPicker cannot find output workspace '" +
-                             out.toStdString() + "'" << std::endl;
+                             out.toStdString() + "'\n";
     }
   }
 

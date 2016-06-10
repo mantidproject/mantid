@@ -255,7 +255,7 @@ public:
     /*  for (size_t i = 0; i < table->rowCount(); ++i)
        {
        std::string nm = table->String(i, 0);
-       std::cout<<nm<<","<<table->Double(i,1)<<","<<table->Double(i,2)<<std::endl;
+       std::cout<<nm<<","<<table->Double(i,1)<<","<<table->Double(i,2)<<'\n';
        }
   */
   }

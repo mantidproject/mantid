@@ -50,8 +50,8 @@ public:
 
     //		for (int i=0; i < Xnew.size(); ++i)
     //		{
-    //		    std::cout << "old value: " << Xold[i] << std::endl;
-    //		    std::cout << "new value: " << Xnew[i] << std::endl;
+    //		    std::cout << "old value: " << Xold[i] << '\n';
+    //		    std::cout << "new value: " << Xnew[i] << '\n';
     //		}
 
     TS_ASSERT(Xold[0] + offset == Xnew[0]);

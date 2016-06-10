@@ -44,11 +44,11 @@ void MDHistoToWorkspace2D::exec() {
 
   m_rank = inWS->getNumDims();
   size_t nSpectra = calculateNSpectra(inWS);
-  std::cout << "nSpectra = " << nSpectra << std::endl;
+  std::cout << "nSpectra = " << nSpectra << '\n';
 
   boost::shared_ptr<const IMDDimension> lastDim =
       inWS->getDimension(m_rank - 1);
-  std::cout << "spectraLength = " << lastDim->getNBins() << std::endl;
+  std::cout << "spectraLength = " << lastDim->getNBins() << '\n';
 
   Mantid::DataObjects::Workspace2D_sptr outWS;
   outWS = boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(

@@ -173,7 +173,7 @@ void LoadMuonNexus2::doExec() {
   // Set y axis unit
   localWorkspace->setYUnit("Counts");
 
-  // g_log.error()<<" number of perioids= "<<m_numberOfPeriods<<std::endl;
+  // g_log.error()<<" number of perioids= "<<m_numberOfPeriods<<'\n';
   WorkspaceGroup_sptr wsGrpSptr = WorkspaceGroup_sptr(new WorkspaceGroup);
   if (entry.containsDataSet("title")) {
     wsGrpSptr->setTitle(entry.getString("title"));

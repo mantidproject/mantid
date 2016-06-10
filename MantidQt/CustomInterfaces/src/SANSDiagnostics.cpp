@@ -209,7 +209,7 @@ QString SANSDiagnostics::getMemberWorkspace(int period) {
 
   } catch (Exception::NotFoundError &) {
     g_log.error() << "Error when accessing the Workspace " +
-                         m_outws_load.toStdString() << std::endl;
+                         m_outws_load.toStdString() << '\n';
     return "";
   }
   if (Mantid::API::WorkspaceGroup_sptr wsgrp_sptr =
@@ -278,7 +278,7 @@ void SANSDiagnostics::displayRectangularDetectors(const QString &wsName) {
 
   } catch (Exception::NotFoundError &) {
     g_log.error() << "Error when accessing the Workspace " +
-                         wsName.toStdString() << std::endl;
+                         wsName.toStdString() << '\n';
   }
   if (!ws_sptr) {
     return;
@@ -291,7 +291,7 @@ void SANSDiagnostics::displayRectangularDetectors(const QString &wsName) {
   if (rectDetectors.empty()) {
     g_log.error() << "The instrument associated to the file " +
                          m_fileName.toStdString()
-                  << " does not have any RectangularDetectors " << std::endl;
+                  << " does not have any RectangularDetectors \n";
     disableDetectorGroupBoxes(true);
     return;
   }
@@ -408,18 +408,16 @@ void SANSDiagnostics::getSpectraList(
   } catch (std::out_of_range &) {
     if (detNum == 0) {
       g_log.error()
-          << "Error : The instrument does not have any RectangularDetectors "
-          << std::endl;
+          << "Error : The instrument does not have any RectangularDetectors \n";
     } else if (detNum == 1) {
       g_log.error()
-          << "Error : The instrument  have only one  RectangularDetector"
-          << std::endl;
+          << "Error : The instrument  have only one  RectangularDetector\n";
     }
     return;
   }
   if (!rectDet) {
-    g_log.error() << "Error when accessing the details of rectangular detector"
-                  << std::endl;
+    g_log.error()
+        << "Error when accessing the details of rectangular detector\n";
     return;
   }
 
@@ -448,7 +446,7 @@ void SANSDiagnostics::getSpectraList(
   if (min_spec_index == ULONG_MAX || max_spec_index == 0) {
     g_log.error() << "Error : The instrument does not have data associated to "
                      "the RectangularDetector "
-                  << rectDet->getDetectorName().toStdString() << std::endl;
+                  << rectDet->getDetectorName().toStdString() << '\n';
   }
   // as long the spectrum index is the workspace index + 1
   specList.clear();
@@ -506,9 +504,9 @@ void SANSDiagnostics::getWorkspaceIndexes(
     wsStart = boost::lexical_cast<std::string>(wsindexList.at(0));
     wsEnd = boost::lexical_cast<std::string>(wsindexList.at(1));
   } catch (boost::bad_lexical_cast &) {
-    g_log.error() << "Error: Invalid start / end workspace index" << std::endl;
+    g_log.error() << "Error: Invalid start / end workspace index\n";
   } catch (std::out_of_range &) {
-    g_log.error() << "Error: Invalid start / end workspace index" << std::endl;
+    g_log.error() << "Error: Invalid start / end workspace index\n";
   }
 
   startWSIndex = QString::fromStdString(wsStart);
@@ -588,17 +586,16 @@ bool SANSDiagnostics::isValidSpectra(const QString &specMin,
     spec_max = boost::lexical_cast<int>(specMax.toStdString());
   } catch (boost::bad_lexical_cast &) {
     g_log.error()
-        << "Inavlid spectrum number found in  the selected detector bank "
-        << std::endl;
+        << "Inavlid spectrum number found in  the selected detector bank \n";
     return false;
   }
   if (spec_min < 1) {
     g_log.error() << "Inavlid spectrum minimum " + specMin.toStdString() +
-                         " found in  the selected detector bank " << std::endl;
+                         " found in  the selected detector bank \n";
   }
   if (spec_max > Mantid::EMPTY_INT()) {
     g_log.error() << "Inavlid spectrum maximum " + specMax.toStdString() +
-                         " found in  the selected detector bank  " << std::endl;
+                         " found in  the selected detector bank  \n";
   }
   return ((spec_min >= 1 && spec_max <= Mantid::EMPTY_INT()) ? true : false);
 }
@@ -618,7 +615,7 @@ void SANSDiagnostics::firstDetectorHorizontalIntegralClicked() {
 
   } catch (Exception::NotFoundError &) {
     g_log.error() << "Error when accessing the Workspace " +
-                         ipwsName.toStdString() << std::endl;
+                         ipwsName.toStdString() << '\n';
     return;
   }
   Mantid::API::MatrixWorkspace_sptr mws_sptr =
@@ -660,7 +657,7 @@ void SANSDiagnostics::firstDetectorVerticalIntegralClicked() {
 
   } catch (Exception::NotFoundError &) {
     g_log.error() << "Error when accessing the Workspace " +
-                         ipwsName.toStdString() << std::endl;
+                         ipwsName.toStdString() << '\n';
     return;
   }
   Mantid::API::MatrixWorkspace_sptr mws_sptr =
@@ -701,7 +698,7 @@ void SANSDiagnostics::firstDetectorTimeIntegralClicked() {
 
   } catch (Exception::NotFoundError &) {
     g_log.error() << "Error when accessing the Workspace " +
-                         ipwsName.toStdString() << std::endl;
+                         ipwsName.toStdString() << '\n';
     return;
   }
   Mantid::API::MatrixWorkspace_sptr mws_sptr =
@@ -888,7 +885,7 @@ void SANSDiagnostics::TimeIntegralClicked(const QString &range,
         loadedws.toStdString());
   } catch (Exception::NotFoundError &) {
     g_log.error() << "Error when accessing the Workspace " +
-                         loadedws.toStdString() << std::endl;
+                         loadedws.toStdString() << '\n';
     return;
   }
 
@@ -1009,7 +1006,7 @@ void SANSDiagnostics::secondDetectorHorizontalIntegralClicked() {
 
   } catch (Exception::NotFoundError &) {
     g_log.error() << "Error when accessing the Workspace " +
-                         ipwsName.toStdString() << std::endl;
+                         ipwsName.toStdString() << '\n';
     return;
   }
   Mantid::API::MatrixWorkspace_sptr mws_sptr =
@@ -1049,7 +1046,7 @@ void SANSDiagnostics::secondDetectorVerticalIntegralClicked() {
 
   } catch (Exception::NotFoundError &) {
     g_log.error() << "Error when accessing the Workspace " +
-                         ipwsName.toStdString() << std::endl;
+                         ipwsName.toStdString() << '\n';
     return;
   }
   Mantid::API::MatrixWorkspace_sptr mws_sptr =
@@ -1089,7 +1086,7 @@ void SANSDiagnostics::secondDetectorTimeIntegralClicked() {
         initialwsName.toStdString());
   } catch (Exception::NotFoundError &) {
     g_log.error() << "Error when accessing the Workspace " +
-                         initialwsName.toStdString() << std::endl;
+                         initialwsName.toStdString() << '\n';
     return;
   }
   Mantid::API::MatrixWorkspace_sptr mws_sptr =
@@ -1128,7 +1125,7 @@ int SANSDiagnostics::getTotalNumberofPeriods() {
 
   } catch (Exception::NotFoundError &) {
     g_log.error() << "Error: when accessing the workspace "
-                  << m_outws_load.toStdString() << std::endl;
+                  << m_outws_load.toStdString() << '\n';
     return 0;
   }
   if (Mantid::API::WorkspaceGroup_sptr wsgrp_sptr =
@@ -1230,23 +1227,22 @@ bool SANSDiagnostics::runsumRowColumn(const QString ipwsName,
 
   } catch (Exception::NotFoundError &) {
     g_log.error() << "Error when  trying to access the workspace "
-                  << ipwsName.toStdString() << " which is not loaded"
-                  << std::endl;
+                  << ipwsName.toStdString() << " which is not loaded\n";
     return false;
   }
   if (opwsName.isEmpty()) {
     g_log.error() << "Output workspace name is empty , can't create workspace "
-                     "with empty name" << std::endl;
+                     "with empty name\n";
     return false;
   }
   if (hvMin.isEmpty()) {
     g_log.error() << "Error when executing SumRowColumn algorithm :Empty "
-                     "H/V_Min String value " << std::endl;
+                     "H/V_Min String value \n";
     return false;
   }
   if (hvMax.isEmpty()) {
     g_log.error() << "Error when executing SumRowColumn algorithm :Empty "
-                     "H/V_Max String value " << std::endl;
+                     "H/V_Max String value \n";
     return false;
   }
 
@@ -1270,7 +1266,7 @@ bool SANSDiagnostics::runsumRowColumn(const QString ipwsName,
   QString ret = runPythonCode(code.trimmed());
   if (!ret.isEmpty()) {
     g_log.error() << "Error when executing the SumRowColumn algorithm "
-                  << ret.toStdString() << std::endl;
+                  << ret.toStdString() << '\n';
     return false;
   }
   return true;
@@ -1290,16 +1286,16 @@ bool SANSDiagnostics::runsumSpectra(const QString &ipwsName,
 
   if (opwsName.isEmpty()) {
     g_log.error() << "Output workspace name is empty , can't create workspace "
-                     "with empty name" << std::endl;
+                     "with empty name\n";
     return false;
   }
 
   if (wsStartIndex.isEmpty()) {
-    g_log.error() << "Error: Invalid StartWorkspaceIndex" << std::endl;
+    g_log.error() << "Error: Invalid StartWorkspaceIndex\n";
     return false;
   }
   if (wsEndIndex.isEmpty()) {
-    g_log.error() << "Error Invalid EndWorkspaceIndex" << std::endl;
+    g_log.error() << "Error Invalid EndWorkspaceIndex\n";
     return false;
   }
 
@@ -1319,7 +1315,7 @@ bool SANSDiagnostics::runsumSpectra(const QString &ipwsName,
   QString ret = runPythonCode(code.trimmed());
   if (!ret.isEmpty()) {
     g_log.error() << "Error when executing the SumSpectra algorithm "
-                  << ret.toStdString() << std::endl;
+                  << ret.toStdString() << '\n';
     return false;
   }
   return true;
@@ -1340,7 +1336,7 @@ bool SANSDiagnostics::runLoadAlgorithm(const QString &fileName,
   m_outws_load = getWorkspaceNameFileName(fileName);
   if (m_outws_load.isEmpty()) {
     g_log.error() << "Output workspace name is empty , can't create workspace "
-                     "with empty name" << std::endl;
+                     "with empty name\n";
     return false;
   }
 
@@ -1370,7 +1366,7 @@ bool SANSDiagnostics::runLoadAlgorithm(const QString &fileName,
 
   QString ret = runPythonCode(load.trimmed());
   if (!ret.isEmpty()) {
-    g_log.error() << "Error when executing the Load algorithm " << std::endl;
+    g_log.error() << "Error when executing the Load algorithm \n";
     return false;
   }
   return true;
@@ -1437,7 +1433,7 @@ QString SANSDiagnostics::createOutputWorkspaceName(
   } catch (...) {
     g_log.error()
         << "Error when extracting the run number from the Workspace " +
-               originalWorkspaceName.toStdString() << std::endl;
+               originalWorkspaceName.toStdString() << '\n';
   }
 
   // Build the output name
@@ -1447,7 +1443,7 @@ QString SANSDiagnostics::createOutputWorkspaceName(
   } else {
     g_log.error() << "Error: It seems that workspace " +
                          originalWorkspaceName.toStdString()
-                  << " does not have a run number." << std::endl;
+                  << " does not have a run number.\n";
     outputWorkspaceName = "xxxxx";
   }
 

@@ -121,7 +121,7 @@ int LoadSpice2D::confidence(Kernel::FileDescriptor &descriptor) const {
                                          e.displayText());
 
     } catch (...) {
-      throw Kernel::Exception::FileError("Unable to parse File",
+      throw Kernel::Exception::FileError("Unable to parse File:",
                                          descriptor.filename());
     }
     // Get pointer to root element
@@ -238,7 +238,7 @@ LoadSpice2D::parseDetectorDimensions(const std::string &dims_str) {
     Kernel::Strings::convert(match[2], dims.second);
   }
   if (dims.first == 0 || dims.second == 0)
-    g_log.notice() << "Could not read in the number of pixels!" << std::endl;
+    g_log.notice() << "Could not read in the number of pixels!" << '\n';
   return dims;
 }
 
@@ -265,8 +265,7 @@ void LoadSpice2D::setInputPropertiesAsMemberProperties() {
   m_wavelength_spread_input = getProperty("WavelengthSpread");
 
   g_log.debug() << "setInputPropertiesAsMemberProperties: "
-                << m_wavelength_input << " , " << m_wavelength_input
-                << std::endl;
+                << m_wavelength_input << " , " << m_wavelength_input << '\n';
 
   std::string fileName = getPropertyValue("Filename");
   // Set up the XmlHandler handler and parse xml file
@@ -285,7 +284,7 @@ void LoadSpice2D::setWavelength(std::map<std::string, std::string> &metadata) {
   // Read in wavelength and wavelength spread
 
   g_log.debug() << "setWavelength: " << m_wavelength_input << " , "
-                << m_wavelength_input << std::endl;
+                << m_wavelength_input << '\n';
 
   if (isEmpty(m_wavelength_input)) {
     std::string s = metadata["Header/wavelength"];
@@ -294,7 +293,7 @@ void LoadSpice2D::setWavelength(std::map<std::string, std::string> &metadata) {
     from_string<double>(m_dwavelength, s, std::dec);
 
     g_log.debug() << "setWavelength: " << m_wavelength << " , " << m_dwavelength
-                  << std::endl;
+                  << '\n';
 
   } else {
     m_wavelength = m_wavelength_input;
@@ -314,7 +313,7 @@ std::vector<int> LoadSpice2D::getData(const std::string &dataXpath = "//Data") {
   // let's see how many detectors we have
   std::vector<std::string> detectors = m_xmlHandler.get_subnodes(dataXpath);
   g_log.debug() << "Number the detectors found in Xpath " << dataXpath << " = "
-                << detectors.size() << std::endl;
+                << detectors.size() << '\n';
 
   // iterate every detector in the xml file
   for (const auto detector : detectors) {
@@ -334,11 +333,11 @@ std::vector<int> LoadSpice2D::getData(const std::string &dataXpath = "//Data") {
     totalDataSize += dims.first * dims.second;
     g_log.debug() << "Parsing detector XPath " << detectorXpath
                   << " with dimensions: " << dims.first << " x " << dims.second
-                  << " = " << dims.first * dims.second << std::endl;
+                  << " = " << dims.first * dims.second << '\n';
 
     std::string data_str = m_xmlHandler.get_text_from_tag(detectorXpath);
     g_log.debug() << "The size of detector contents (xpath = " << detectorXpath
-                  << ") is " << data_str.size() << " bytes." << std::endl;
+                  << ") is " << data_str.size() << " bytes." << '\n';
 
     // convert string data into a vector<int>
     std::stringstream iss(data_str);
@@ -349,12 +348,12 @@ std::vector<int> LoadSpice2D::getData(const std::string &dataXpath = "//Data") {
     g_log.debug() << "Detector XPath: " << detectorXpath
                   << " parsed. Total size of data processed up to now = "
                   << data.size() << " from a total of " << totalDataSize
-                  << std::endl;
+                  << '\n';
   }
 
   if (data.size() != totalDataSize) {
     g_log.error() << "Total data size = " << totalDataSize
-                  << ". Parsed data size = " << data.size() << std::endl;
+                  << ". Parsed data size = " << data.size() << '\n';
     throw Kernel::Exception::NotImplementedError(
         "Inconsistent data set: There were more data pixels found than "
         "declared in the Spice XML meta-data.");
@@ -578,7 +577,7 @@ LoadSpice2D::detectorTranslation(std::map<std::string, std::string> &metadata) {
   detectorTranslation /= 1000.0; // mm to meters conversion
 
   g_log.debug() << "Detector Translation = " << detectorTranslation
-                << " meters." << std::endl;
+                << " meters." << '\n';
   return detectorTranslation;
 }
 
@@ -664,8 +663,7 @@ void LoadSpice2D::throwException(Poco::XML::Element *elem,
  */
 void LoadSpice2D::rotateDetector(const double &angle) {
 
-  g_log.notice() << "Rotating Wing Detector " << angle << " degrees."
-                 << std::endl;
+  g_log.notice() << "Rotating Wing Detector " << angle << " degrees." << '\n';
 
   API::Run &runDetails = m_workspace->mutableRun();
   auto *p = new Mantid::Kernel::TimeSeriesProperty<double>("rotangle");

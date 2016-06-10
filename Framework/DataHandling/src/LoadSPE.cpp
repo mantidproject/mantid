@@ -197,7 +197,7 @@ void LoadSPE::readHistogram(FILE *speFile, API::MatrixWorkspace_sptr workspace,
   int retval;
   for (size_t i = 0; i < nbins; ++i) {
     retval = fscanf(speFile, "%10le", &Y[i]);
-    // g_log.error() << Y[i] << std::endl;
+    // g_log.error() << Y[i] << '\n';
     if (retval != 1) {
       std::stringstream ss;
       ss << "Reading data value" << i << " of histogram " << index;

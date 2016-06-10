@@ -56,8 +56,7 @@ size_t SplittersWorkspace::getNumberSplitters() const {
 bool SplittersWorkspace::removeSplitter(size_t index) {
   bool removed;
   if (index >= this->rowCount()) {
-    g_log.error() << "Try to delete a non-existing splitter " << index
-                  << std::endl;
+    g_log.error() << "Try to delete a non-existing splitter " << index << '\n';
     removed = false;
   } else {
     this->removeRow(index);

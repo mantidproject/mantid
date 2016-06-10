@@ -261,23 +261,22 @@ void setBackToBackExponential(API::IFunction &function,
     sigma = 1e-06;
   function.setParameter("S", sigma);
 
-  g_log.debug() << "Estimating parameters of BackToBackExponential"
-                << std::endl;
-  g_log.debug() << "centre= " << centre << std::endl;
-  g_log.debug() << "sigma = " << sigma << std::endl;
+  g_log.debug() << "Estimating parameters of BackToBackExponential\n";
+  g_log.debug() << "centre= " << centre << '\n';
+  g_log.debug() << "sigma = " << sigma << '\n';
 
   // Estimate the background level
   auto xlr = getPeakLeftRightExtent(centre, der2);
   g_log.debug() << "extent: " << xlr.first - centre << ' '
-                << xlr.second - centre << std::endl;
+                << xlr.second - centre << '\n';
   double yl = fun(xlr.first);
   double yr = fun(xlr.second);
   double slope = (yr - yl) / (xlr.second - xlr.first);
   double background = yl + slope * (centre - xlr.first);
   double height = fun(centre) - background;
-  g_log.debug() << "height= " << height << std::endl;
-  g_log.debug() << "background= " << background << std::endl;
-  g_log.debug() << "slope= " << slope << std::endl;
+  g_log.debug() << "height= " << height << '\n';
+  g_log.debug() << "background= " << background << '\n';
+  g_log.debug() << "slope= " << slope << '\n';
 
   // Remove the background as it affects A and B parameters.
   LinearFunction bg(-yl + slope * xlr.first, -slope);
@@ -285,7 +284,7 @@ void setBackToBackExponential(API::IFunction &function,
   fun1 += bg;
   // Find left and right "HWHM".
   auto hwhm = getPeakHWHM(centre, height, fun1);
-  g_log.debug() << "HWHM: " << hwhm.first << ' ' << hwhm.second << std::endl;
+  g_log.debug() << "HWHM: " << hwhm.first << ' ' << hwhm.second << '\n';
 
   // Find the extent of the default fitting function (with new S set)
   // to be able to make an approximation with a SimpleChebfun.
@@ -311,8 +310,7 @@ void setBackToBackExponential(API::IFunction &function,
 
     double height1 = b2b(centre1);
     auto hwhm1 = getPeakHWHM(centre1, height1, b2b);
-    g_log.debug() << "new HWHM: " << hwhm1.first << ' ' << hwhm1.second
-                  << std::endl;
+    g_log.debug() << "new HWHM: " << hwhm1.first << ' ' << hwhm1.second << '\n';
 
     double denom = hwhm.first + sigma;
     double aCorr = denom > 0 ? (hwhm1.first + sigma) / denom : 100.0;
@@ -326,7 +324,7 @@ void setBackToBackExponential(API::IFunction &function,
       bCorr = 100.0;
       function.fix(3);
     }
-    g_log.debug() << "corrections: " << aCorr << ' ' << bCorr << std::endl;
+    g_log.debug() << "corrections: " << aCorr << ' ' << bCorr << '\n';
     double a = function.getParameter("A") * aCorr;
     double b = function.getParameter("B") * bCorr;
     function.setParameter("A", a);
@@ -345,12 +343,12 @@ void setBackToBackExponential(API::IFunction &function,
     function.setParameter("I", height / height1);
   }
 
-  g_log.debug() << "Parameters:" << std::endl;
-  g_log.debug() << "I  " << function.getParameter("I") << std::endl;
-  g_log.debug() << "X0 " << function.getParameter("X0") << std::endl;
-  g_log.debug() << "A  " << function.getParameter("A") << std::endl;
-  g_log.debug() << "B  " << function.getParameter("B") << std::endl;
-  g_log.debug() << "S  " << function.getParameter("S") << std::endl;
+  g_log.debug() << "Parameters:\n";
+  g_log.debug() << "I  " << function.getParameter("I") << '\n';
+  g_log.debug() << "X0 " << function.getParameter("X0") << '\n';
+  g_log.debug() << "A  " << function.getParameter("A") << '\n';
+  g_log.debug() << "B  " << function.getParameter("B") << '\n';
+  g_log.debug() << "S  " << function.getParameter("S") << '\n';
 }
 
 //----------------------------------------------------------------------------------------------

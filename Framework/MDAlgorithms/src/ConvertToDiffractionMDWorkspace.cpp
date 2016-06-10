@@ -254,11 +254,11 @@ void ConvertToDiffractionMDWorkspace::convertEventList(int workspaceIndex,
     // PARALLEL_CRITICAL( convert_tester_output ) { std::cout << "Spectrum " <<
     // el.getSpectrumNo() << " beamDir = " << beamDir << " detDir = " << detDir
     // << " Q_dir = " << Q_dir << " conversion factor " <<
-    // wavenumber_in_angstrom_times_tof_in_microsec << std::endl;  }
+    // wavenumber_in_angstrom_times_tof_in_microsec << '\n';  }
 
     // g_log.information() << wi << " : " << el.getNumberEvents() << " events.
-    // Pos is " << detPos << std::endl;
-    // g_log.information() << Q_dir.norm() << " Qdir norm" << std::endl;
+    // Pos is " << detPos << '\n';
+    // g_log.information() << Q_dir.norm() << " Qdir norm\n";
 
     // This little dance makes the getting vector of events more general (since
     // you can't overload by return type).
@@ -338,9 +338,9 @@ void ConvertToDiffractionMDWorkspace::exec() {
       bool lorentzDone = boost::lexical_cast<bool, std::string>(prop->value());
       if (lorentzDone) {
         LorentzCorrection = false;
-        g_log.warning() << "Lorentz Correction was already done for this "
-                           "workspace.  LorentzCorrection was changed to false."
-                        << std::endl;
+        g_log.warning()
+            << "Lorentz Correction was already done for this "
+               "workspace.  LorentzCorrection was changed to false.\n";
       }
     }
   }
@@ -549,7 +549,7 @@ void ConvertToDiffractionMDWorkspace::exec() {
     if (bc->shouldSplitBoxes(approxEventsInOutput, eventsAdded, lastNumBoxes)) {
       if (DODEBUG)
         g_log.information() << cputim << ": Added tasks worth " << eventsAdded
-                            << " events. WorkspaceIndex " << wi << std::endl;
+                            << " events. WorkspaceIndex " << wi << '\n';
       // Do all the adding tasks
       tp.joinAll();
       if (DODEBUG)
@@ -576,11 +576,11 @@ void ConvertToDiffractionMDWorkspace::exec() {
     if (this->failedDetectorLookupCount == 1)
       g_log.warning() << "Unable to find a detector for "
                       << this->failedDetectorLookupCount
-                      << " spectrum. It has been skipped." << std::endl;
+                      << " spectrum. It has been skipped.\n";
     else
       g_log.warning() << "Unable to find detectors for "
                       << this->failedDetectorLookupCount
-                      << " spectra. They have been skipped." << std::endl;
+                      << " spectra. They have been skipped.\n";
   }
 
   if (DODEBUG)
@@ -618,7 +618,7 @@ void ConvertToDiffractionMDWorkspace::exec() {
     std::vector<std::string> stats = ws->getBoxControllerStats();
     for (auto &stat : stats)
       g_log.information() << stat << "\n";
-    g_log.information() << std::endl;
+    g_log.information() << '\n';
   }
 
   // Set the special coordinate system.

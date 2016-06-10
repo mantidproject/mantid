@@ -18,6 +18,7 @@ else:
 
 
 EVENT_WORKSPACE_ID = "EventWorkspace"
+EXTENSIONS_NXS = ["_event.nxs", ".nxs.h5"]
 
 def noRunSpecified(runs):
     """ Check whether any run is specified
@@ -30,15 +31,16 @@ def noRunSpecified(runs):
     :param runs:
     :return:
     """
-    assert isinstance(runs, numpy.ndarray)
-
     # return True if runs is of size zero
-    if runs.size <= 0:
+    if len(runs) <= 0:
         return True
 
     # return True if there is one and only one run in runs and it is not greater than 0.
-    if runs.size == 1:
-        return runs[0] <= 0
+    if len(runs) == 1:
+        # break off the instrument part
+        value = int(runs[0].split('_')[-1])
+        # -1 turns off the runnumber
+        return value <= 0
 
     return False
 
@@ -63,6 +65,12 @@ def allEventWorkspaces(*args):
         result = result and (workspace.id() == EVENT_WORKSPACE_ID)
 
     return result
+
+def getBasename(filename):
+    name = os.path.split(filename)[-1]
+    for extension in EXTENSIONS_NXS:
+        name = name.replace(extension, '')
+    return name
 
 #pylint: disable=too-many-instance-attributes
 class SNSPowderReduction(DataProcessorAlgorithm):
@@ -105,18 +113,14 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         return "The algorithm used for reduction of powder diffraction data obtained on SNS instruments (e.g. PG3) "
 
     def PyInit(self):
-        sns = ConfigService.getFacility("SNS")
-        instruments = []
-        for item in sns.instruments("Neutron Diffraction"):
-            instruments.append(item.shortName())
-        self.declareProperty("Instrument", "PG3", StringListValidator(instruments), "Powder diffractometer's name")
-        arrvalidator = IntArrayBoundedValidator()
-        arrvalidator.setLower(0)
-        self.declareProperty(IntArrayProperty("RunNumber", values=[0], validator=arrvalidator,\
-                             direction=Direction.Input), "Number of sample run or 0 for only Vanadium and/or Background")
-        extensions = [ "_histo.nxs", "_event.nxs", "_runinfo.xml", ".nxs.h5"]
-        self.declareProperty("Extension", "_event.nxs",
-                             StringListValidator(extensions))
+        self.declareProperty(MultipleFileProperty(name="Filename",
+                                                  extensions=EXTENSIONS_NXS),
+                             "Event file")
+        self.declareProperty(FileProperty(name="LogFilename",
+                                          defaultValue="", action=FileAction.OptionalLoad,
+                                          extensions=EXTENSIONS_NXS),
+                             "Optional file to copy logs from")
+
         self.declareProperty("PreserveEvents", True,
                              "Argument to supply to algorithms that can change from events to histograms.")
         self.declareProperty("Sum", False,
@@ -125,15 +129,15 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                              StringListValidator(["None", "ResetToZero", "AddMinimum"]),
                              "Add a constant to the data that makes it positive over the whole range.")
         arrvalidatorBack = IntArrayBoundedValidator()
-        arrvalidator.setLower(-1)
+        arrvalidatorBack.setLower(-1)
         self.declareProperty(IntArrayProperty("BackgroundNumber", values=[0], validator=arrvalidatorBack),
                              doc="If specified overrides value in CharacterizationRunsFile If -1 turns off correction.")
         arrvalidatorVan = IntArrayBoundedValidator()
-        arrvalidator.setLower(-1)
+        arrvalidatorVan.setLower(-1)
         self.declareProperty(IntArrayProperty("VanadiumNumber", values=[0], validator=arrvalidatorVan),
                              doc="If specified overrides value in CharacterizationRunsFile. If -1 turns off correction.")
         arrvalidatorVanBack = IntArrayBoundedValidator()
-        arrvalidator.setLower(-1)
+        arrvalidatorVanBack.setLower(-1)
         self.declareProperty(IntArrayProperty("VanadiumBackgroundNumber", values=[0], validator=arrvalidatorVanBack),
                              doc="If specified overrides value in CharacterizationRunsFile. If -1 turns off correction.")
         self.declareProperty(FileProperty(name="CalibrationFile",defaultValue="",action=FileAction.Load,\
@@ -209,7 +213,6 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         """ Main execution body
         """
         # get generic information
-        SUFFIX = self.getProperty("Extension").value
         self._loadCharacterizations()
         self._resampleX = self.getProperty("ResampleX").value
         if self._resampleX != 0.:
@@ -222,9 +225,6 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                 if self._binning[0] == 0. and self._binning[1] == 0. and self._binning[2] == 0.:
                     raise RuntimeError("Failed to specify the binning")
         self._bin_in_dspace = self.getProperty("BinInDspace").value
-        self._instrument = self.getProperty("Instrument").value
-        config['default.facility'] = "SNS"
-        config['default.instrument'] = self._instrument
         self._filterBadPulses = self.getProperty("FilterBadPulses").value
         self._removePromptPulseWidth = self.getProperty("RemovePromptPulseWidth").value
         self._LRef = self.getProperty("UnwrapRef").value
@@ -239,7 +239,10 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         self._outDir = self.getProperty("OutputDirectory").value
         self._outPrefix = self.getProperty("OutputFilePrefix").value.strip()
         self._outTypes = self.getProperty("SaveAs").value.lower()
-        samRuns = self.getProperty("RunNumber").value
+
+        samRuns = self.getProperty("Filename").value
+        self._determineInstrument(samRuns[0])
+
         preserveEvents = self.getProperty("PreserveEvents").value
         if HAVE_MPI and preserveEvents == True:
             self.log().warning("preserveEvents set to False for MPI tasks.")
@@ -252,7 +255,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
             self.log().information("SplittersWorkspace is %s" % (str(self._splitws)))
             if len(samRuns) != 1:
                 raise NotImplementedError("Reducing data with splitting cannot happen when there are more than 1 sample run.")
-            timeFilterWall = self._getTimeFilterWall(self._splitws, samRuns[0], SUFFIX)
+            timeFilterWall = self._getTimeFilterWall(self._splitws, samRuns[0])
             self.log().information("The time filter wall is %s" %(str(timeFilterWall)))
         else:
             timeFilterWall = (0.0, 0.0)
@@ -300,7 +303,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
             if self._splitws is not None:
                 raise NotImplementedError("Summing spectra and filtering events are not supported simultaneously.")
 
-            sam_ws_name = self._focusAndSum(samRuns, SUFFIX, timeFilterWall, calib,
+            sam_ws_name = self._focusAndSum(samRuns, timeFilterWall, calib,
                                             preserveEvents=preserveEvents)
             assert isinstance(sam_ws_name, str), 'Returned from _focusAndSum() must be a string but not' \
                                                  '%s. ' % str(type(sam_ws_name))
@@ -312,17 +315,9 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         else:
             # Process each sample run
             for sam_run_number in samRuns:
-                # check
-                err_msg = 'sample run number %s must be either int or numpy.int32, ' \
-                          'but not %s' % (str(sam_run_number), str(type(sam_run_number)))
-                assert isinstance(sam_run_number, int) or isinstance(sam_run_number, numpy.int32), err_msg
-                if sam_run_number <= 0:
-                    self.log().warning('Sample run number %d is less and equal to zero!' % sam_run_number)
-                    continue
-
                 # first round of processing the sample
                 self._info = None
-                returned = self._focusChunks(sam_run_number, SUFFIX, timeFilterWall, calib, splitwksp=self._splitws,
+                returned = self._focusChunks(sam_run_number, timeFilterWall, calib, splitwksp=self._splitws,
                                              normalisebycurrent=self._normalisebycurrent,
                                              preserveEvents=preserveEvents)
 
@@ -357,13 +352,15 @@ class SNSPowderReduction(DataProcessorAlgorithm):
 
             # process the container
             can_run_numbers = self._info["container"].value
-            can_run_ws_name = self._process_container_runs(can_run_numbers, timeFilterWall, samRunIndex, SUFFIX, calib,
-                                                           preserveEvents)
+            can_run_numbers = ['%s_%d' % (self._instrument, value) for value in can_run_numbers]
+            can_run_ws_name = self._process_container_runs(can_run_numbers, timeFilterWall,
+                                                           samRunIndex, calib, preserveEvents)
             if can_run_ws_name is not None:
                 workspacelist.append(can_run_ws_name)
 
             # process the vanadium run
             van_run_number_list = self._info["vanadium"].value
+            van_run_number_list = ['%s_%d' % (self._instrument, value) for value in van_run_number_list]
             van_specified = not noRunSpecified(van_run_number_list)
             if van_specified:
                 van_run_ws_name = self._process_vanadium_runs(van_run_number_list, timeFilterWall, samRunIndex, calib)
@@ -456,6 +453,11 @@ class SNSPowderReduction(DataProcessorAlgorithm):
 
         return
 
+    def _determineInstrument(self, filename):
+        name = getBasename(filename)
+        parts = name.split('_')
+        self._instrument = ConfigService.getInstrument(parts[0]).shortName()  # only works for instruments without '_'
+
     def _loadCharacterizations(self):
         self._focusPos = {}
         charFilename = self.getProperty("CharacterizationRunsFile").value
@@ -482,7 +484,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         self._focusPos['Azimuthal'] = results[6]
 
     #pylint: disable=too-many-branches
-    def _loadData(self, run_number, extension, filterWall=None, out_ws_name=None, **chunk):
+    def _loadData(self, filename, filterWall=None, out_ws_name=None, **chunk):
         """ Load data optionally by chunk strategy
         Purpose:
             Load a complete or partial run, filter bad pulses.
@@ -494,21 +496,18 @@ class SNSPowderReduction(DataProcessorAlgorithm):
             1. run number is integer and larger than 0
         Guarantees:
             A workspace is created with name described above
-        :param run_number:
-        :param extension: file extension
+        :param filename:
         :param filterWall:
         :param out_ws_name: name of output workspace specified by user. it will override the automatic name
         :param chunk:
         :return:
         """
         # Check requirements
-        assert isinstance(run_number, int) or isinstance(run_number, numpy.int32), 'Input run number must be integer ' \
-                                                                                   'but not %s.' % str(type(run_number))
-        assert run_number > 0, 'Input run number must be larger than 0 but not %d.' % run_number
+        assert len(filename) > 0, "Input file '%s' does not exist" % filename
         assert (chunk is None) or isinstance(chunk, dict), 'Input chunk must be either a dictionary or None.'
 
-        base_name = "%s_%d" % (self._instrument, int(run_number))
-        filename = base_name + extension
+        base_name = getBasename(filename)
+
         # give out the default output workspace name
         if out_ws_name is None:
             if chunk:
@@ -522,7 +521,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         # END-IF
 
         # Specify the other chunk information including Precount, FilterByTimeStart and FilterByTimeStop.
-        if extension.endswith("_event.nxs") or extension.endswith(".nxs.h5"):
+        if filename.endswith("_event.nxs") or filename.endswith(".nxs.h5"):
             chunk["Precount"] = True
             if filterWall is not None:
                 if filterWall[0] > 0.:
@@ -536,7 +535,8 @@ class SNSPowderReduction(DataProcessorAlgorithm):
 
         # Log output
         if wksp.id() == EVENT_WORKSPACE_ID:
-            self.log().debug("Load run %d: number of events = %d. " % (run_number, wksp.getNumberEvents()))
+            self.log().debug("Load run %s: number of events = %d. " % (os.path.split(filename)[-1],
+                                                                       wksp.getNumberEvents()))
         if HAVE_MPI:
             msg = "MPI Task = %s ;" % (str(mpiRank))
             if wksp.id() == EVENT_WORKSPACE_ID:
@@ -566,25 +566,30 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                 self.log().information(message)
         # END-IF (filter bad pulse)
 
+        # this if block is only for sample runs and only for testing new adara files
+        if filename in self.getProperty("Filename").value:
+            donorLogfilename = self.getProperty("LogFilename").value
+            if donorLogfilename is not None and len(donorLogfilename) > 0:
+                api.Load(Filename=donorLogfilename, MetaDataOnly=True, OutputWorkspace='temp_log_donor')
+                api.CopyLogs(InputWorkspace='temp_log_donor', OutputWorkspace=wksp,
+                                    MergeStrategy='MergeKeepExisting')
+                api.DeleteWorkspace('temp_log_donor')
+                wksp = mtd[str(wksp)]  # convert back to a pointer
+                print wksp
+
         return wksp
 
-    def _getStrategy(self, runnumber, extension):
+    def _getStrategy(self, filename):
         """
         Get chunking strategy by calling mantid algorithm 'DetermineChunking'
-        :param runnumber:
-        :param extension:
+        :param filename:
         :return: a list of dictionary.  Each dictionary is a row in table workspace
         """
-        # generate the workspace name
-        assert isinstance(runnumber, int) or isinstance(runnumber, numpy.int32), \
-            'Expected run number %s to be either integer or numpy.int32, but not %s' % (
-                str(runnumber), str(type(runnumber)))
-        file_name = "%s_%d" % (self._instrument, int(runnumber)) + extension
-
         # Determine chunk strategy can search in archive.
         # Therefore this will fail: assert os.path.exists(file_name), 'NeXus file %s does not exist.' % file_name
-        self.log().debug("[Fx116] Run file Name : %s,\t\tMax chunk size: %s" % (file_name, str(self._chunks)))
-        chunks = api.DetermineChunking(Filename=file_name, MaxChunkSize=self._chunks)
+        self.log().debug("[Fx116] Run file Name : %s,\t\tMax chunk size: %s" %
+                         (filename, str(self._chunks)))
+        chunks = api.DetermineChunking(Filename=filename, MaxChunkSize=self._chunks)
 
         strategy = []
         for row in chunks:
@@ -617,7 +622,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
             raise RuntimeError("Cannot add incompatible wavelengths (%f != %f)" \
                                % (left["wavelength"].value, right["wavelength"].value))
 
-    def _loadAndSum(self, run_number_list, outName, **filterWall):
+    def _loadAndSum(self, filename_list, outName, **filterWall):
         """
         Load and sum
         Purpose:
@@ -632,35 +637,27 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         :return:
         """
         # Check requirements
-        assert isinstance(run_number_list, list) or isinstance(run_number_list, numpy.ndarray),\
+        assert isinstance(filename_list, list), \
             'Run number list is not a list but of type %s' % str(type(run_number_list))
-        for run_number in run_number_list:
-            assert isinstance(run_number, int) or isinstance(run_number, numpy.int32), \
-                'Run number %s must be an integer but not a %s.' % (str(run_number), str(type(run_number)))
-            assert run_number > 0, 'Run number %s must be larger than 0.' % run_number
 
         # Form output workspaces' names
-        file_number_list = ['%s_%d' % (self._instrument, runNum) for runNum in run_number_list]
-        out_ws_name_list = ['%s_%d_loadsum' % (self._instrument, runNum) for runNum in run_number_list]
+        out_ws_name_list = ['%s_loadsum' % getBasename(filename) for filename in filename_list]
 
         sample_ws_name = None
         info = None
-        SUFFIX = self.getProperty("Extension").value
 
         # for ws_name in out_ws_name_list:
-        for i_run in xrange(len(run_number_list)):
-            run_number = file_number_list[i_run]
-            ws_name = out_ws_name_list[i_run]
-            self.log().debug("[Sum] processing %s" % run_number)
-            temp_ws = api.LoadEventAndCompress(Filename=run_number+SUFFIX,
+        for (filename, ws_name) in zip(filename_list, out_ws_name_list):
+            self.log().debug("[Sum] processing %s" % filename)
+            temp_ws = api.LoadEventAndCompress(Filename=filename,
                                                OutputWorkspace=ws_name,
                                                MaxChunkSize=self._chunks,
                                                FilterBadPulses=self._filterBadPulses,
                                                CompressTOFTolerance=self.COMPRESS_TOL_TOF, **filterWall)
             assert temp_ws is not None
             if temp_ws.id() == EVENT_WORKSPACE_ID:
-                self.log().warning('Load event file %s, compress it and get %d events.' % (run_number+SUFFIX,
-                                                                                           temp_ws.getNumberEvents()))
+                self.log().warning('Load event file %s, compress it and get %d events.' %
+                                   (filename, temp_ws.getNumberEvents()))
 
             tempinfo = self._getinfo(ws_name)
             if sample_ws_name is None:
@@ -706,7 +703,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         return outName
 
     #pylint: disable=too-many-arguments
-    def _focusAndSum(self, run_number_list, extension, filterWall, calib, preserveEvents=True):
+    def _focusAndSum(self, filenames, filterWall, calib, preserveEvents=True):
         """Load, sum, and focus data in chunks
         Purpose:
             Load, sum and focus data in chunks;
@@ -721,21 +718,14 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         @param preserveEvents:
         @return: string as the summed workspace's name
         """
-        # Check requirements
-        assert isinstance(run_number_list, numpy.ndarray) or isinstance(run_number_list, list)
-
         sumRun = None
         info = None
 
-        for run_number in run_number_list:
-            # check
-            error_message = 'Run number %s should be integer or numpy.int32. But it is %s.' % (str(run_number),
-                                                                                               str(type(run_number)))
-            assert isinstance(run_number, int) or isinstance(run_number, numpy.int32), error_message
-            self.log().information("[Sum] Process run number %d. " % run_number)
+        for filename in filenames:
+            self.log().information("[Sum] Process run number %s. " % filename)
 
             # focus one run
-            out_ws_name = self._focusChunks(run_number, extension, filterWall, calib,
+            out_ws_name = self._focusChunks(filename, filterWall, calib,
                                             normalisebycurrent=False,
                                             preserveEvents=preserveEvents)
             assert isinstance(out_ws_name, str), 'Output from _focusChunks() should be a string but' \
@@ -772,12 +762,11 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         return sumRun
 
     #pylint: disable=too-many-arguments,too-many-locals,too-many-branches
-    def _focusChunks(self, runnumber, extension, filterWall, calib,
+    def _focusChunks(self, filename, filterWall, calib,
                      normalisebycurrent, splitwksp=None, preserveEvents=True):
         """
         Load, (optional) split and focus data in chunks
         @param runnumber: integer for run number
-        @param extension:
         @param filterWall:  Enabled if splitwksp is defined
         @param calib:
         @param normalisebycurrent: Set to False if summing runs for correct math
@@ -787,10 +776,10 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                  in the case that split workspace is used.
         """
         # generate the workspace name
-        self.log().information("_focusChunks(): runnumber = %d, extension = %s" % (runnumber, extension))
+        self.log().information("_focusChunks(): run = %s" % (filename))
 
         # get chunk strategy for parallel processing (MPI)
-        strategy = self._getStrategy(runnumber, extension)
+        strategy = self._getStrategy(filename)
 
         # determine event splitting by checking filterWall and number of output workspaces from _focusChunk
         do_split_raw_wksp, num_out_wksp = self._determine_workspace_splitting(splitwksp, filterWall)
@@ -803,13 +792,12 @@ class SNSPowderReduction(DataProcessorAlgorithm):
 
         # reduce data by chunks
         chunk_index = -1
-        # FIXME/TODO/Now: there are 2 places that determine the base name
-        base_name = '%s_%d' % (self._instrument, runnumber)
+        base_name = getBasename(filename)
         for chunk in strategy:
             # progress on chunk index
             chunk_index += 1
             # Load chunk, i.e., partial data into Mantid
-            raw_ws_chunk = self._loadData(runnumber, extension, filterWall, **chunk)
+            raw_ws_chunk = self._loadData(filename, filterWall, **chunk)
             raw_ws_name_chunk = raw_ws_chunk.name()
 
             if self._info is None:
@@ -1044,7 +1032,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
 
         return
 
-    def _getTimeFilterWall(self, splitws, samrun, extension):
+    def _getTimeFilterWall(self, splitws, filename):
         """ Get filter wall from splitter workspace, i.e.,
         get the earlies and latest TIME stamp in input splitter workspace
 
@@ -1061,9 +1049,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
             return (0.0, 0.0)
 
         # Load data
-        name = "%s_%d" % (self._instrument, samrun)
-        filename = name + extension
-        metawsname = "temp_"+name
+        metawsname = "temp_" + getBasename(filename)
 
         metawksp = api.Load(Filename=str(filename), OutputWorkspace=str(metawsname), MetaDataOnly=True)
         if metawksp is None:
@@ -1167,7 +1153,8 @@ class SNSPowderReduction(DataProcessorAlgorithm):
 
         return do_split_raw_wksp, num_out_wksp
 
-    def _process_container_runs(self, can_run_numbers, timeFilterWall, samRunIndex, SUFFIX, calib, preserveEvents):
+    def _process_container_runs(self, can_run_numbers, timeFilterWall, samRunIndex, calib,
+                                preserveEvents):
         """ Process container runs
         :param can_run_numbers:
         :return:
@@ -1197,7 +1184,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                 can_run_number = can_run_numbers[samRunIndex]
 
             # get reference to container run
-            can_run_ws_name = '%s_%d' % (self._instrument, can_run_number)
+            can_run_ws_name = getBasename(can_run_number)
             if self.does_workspace_exist(can_run_ws_name) is True:
                 # container run exists to get reference from mantid
                 can_run_ws = api.ConvertUnits(InputWorkspace=can_run_ws_name,
@@ -1207,10 +1194,10 @@ class SNSPowderReduction(DataProcessorAlgorithm):
             else:
                 # load the container run
                 if self.getProperty("Sum").value:
-                    can_run_ws_name = self._focusAndSum(can_run_numbers, SUFFIX, canFilterWall, calib,
+                    can_run_ws_name = self._focusAndSum(can_run_numbers, canFilterWall, calib,
                                                         preserveEvents=preserveEvents)
                 else:
-                    can_run_ws_name = self._focusChunks(can_run_number, SUFFIX, canFilterWall, calib,
+                    can_run_ws_name = self._focusChunks(can_run_number, canFilterWall, calib,
                                                         normalisebycurrent=self._normalisebycurrent,
                                                         preserveEvents=preserveEvents)
                 can_run_ws = self.get_workspace(can_run_ws_name)
@@ -1255,9 +1242,9 @@ class SNSPowderReduction(DataProcessorAlgorithm):
             van_run_number = van_run_number_list[samRunIndex]
 
         # get handle on workspace of this van run and make sure its unit is T.O.F
-        if "%s_%d" % (self._instrument, van_run_number) in mtd:
+        if van_run_number in mtd:
             # use the existing vanadium
-            van_run_ws_name = "%s_%d" % (self._instrument, van_run_number)
+            van_run_ws_name = getBasename(van_run_number)
             van_run_ws = mtd[van_run_ws_name]
             assert van_run_ws is not None
             van_run_ws = api.ConvertUnits(InputWorkspace=van_run_ws_name,
@@ -1274,7 +1261,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                 vanFilterWall = {'FilterByTimeStart': Property.EMPTY_DBL, 'FilterByTimeStop': Property.EMPTY_DBL}
 
             # load the vanadium
-            van_run_ws_name = "%s_%d" % (self._instrument, van_run_number)
+            van_run_ws_name = getBasename(van_run_number)
             if self.getProperty("Sum").value:
                 van_run_ws_name = self._loadAndSum(van_run_number_list, van_run_ws_name, **vanFilterWall)
             else:
@@ -1282,13 +1269,15 @@ class SNSPowderReduction(DataProcessorAlgorithm):
 
             # load the vanadium background (if appropriate)
             van_bkgd_run_number_list = self._info["empty"].value
+            van_bkgd_run_number_list = ['%s_%d' % (self._instrument, value)
+                                        for value in van_bkgd_run_number_list]
             if not noRunSpecified(van_bkgd_run_number_list):
                 # determine the van background workspace name
                 if len(van_bkgd_run_number_list) == 1:
                     van_bkgd_run_number = van_bkgd_run_number_list[0]
                 else:
                     van_bkgd_run_number = van_bkgd_run_number_list[samRunIndex]
-                van_bkgd_ws_name = "%s_%d_vb" % (self._instrument, van_bkgd_run_number)
+                van_bkgd_ws_name = getBasename(van_bkgd_run_number)
 
                 # load background runs and sum if necessary
                 if self.getProperty("Sum").value:

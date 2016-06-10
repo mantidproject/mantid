@@ -1,5 +1,6 @@
 #include "MantidGeometry/Crystal/UnitCell.h"
 #include "MantidKernel/V3D.h"
+#include "MantidKernel/StringTokenizer.h"
 #include "MantidKernel/System.h"
 #include <stdexcept>
 #include <iomanip>
@@ -7,7 +8,6 @@
 #include <iostream>
 #include <cfloat>
 
-#include <boost/tokenizer.hpp>
 #include <boost/lexical_cast.hpp>
 
 namespace Mantid {
@@ -629,16 +629,14 @@ std::string unitCellToStr(const UnitCell &unitCell) {
 }
 
 UnitCell strToUnitCell(const std::string &unitCellString) {
-  boost::char_separator<char> separator(" ");
-  boost::tokenizer<boost::char_separator<char>> cellTokens(unitCellString,
-                                                           separator);
+
+  Mantid::Kernel::StringTokenizer cellTokens(
+      unitCellString, " ", Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
 
   std::vector<double> components;
 
-  for (boost::tokenizer<boost::char_separator<char>>::iterator token =
-           cellTokens.begin();
-       token != cellTokens.end(); ++token) {
-    components.push_back(boost::lexical_cast<double>(*token));
+  for (const auto &token : cellTokens) {
+    components.push_back(boost::lexical_cast<double>(token));
   }
 
   switch (components.size()) {

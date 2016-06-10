@@ -189,7 +189,7 @@ void SaveAscii::exec() {
         if (write_dx)
           file << " , DX" << spec;
       }
-    file << std::endl;
+    file << '\n';
   }
 
   bool isHistogram = ws->isHistogramData();
@@ -235,7 +235,7 @@ void SaveAscii::exec() {
         file << ws->readDx(0)[bin];
       }
     }
-    file << std::endl;
+    file << '\n';
     progress.report();
   }
 }

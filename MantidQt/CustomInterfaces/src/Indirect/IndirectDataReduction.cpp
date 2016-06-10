@@ -238,8 +238,8 @@ IndirectDataReduction::loadInstrumentIfNotExist(std::string instrumentName,
     return instWorkspace;
   } catch (std::exception &ex) {
     g_log.warning() << "Failed to load instrument with error: " << ex.what()
-                    << ". The current facility may not be fully supported."
-                    << std::endl;
+                    << ". The current facility may not be fully "
+                       "supported.\n";
     return MatrixWorkspace_sptr();
   }
 }
@@ -305,7 +305,7 @@ QMap<QString, QString> IndirectDataReduction::getInstrumentDetails() {
     catch (Mantid::Kernel::Exception::NotFoundError &nfe) {
       UNUSED_ARG(nfe);
       g_log.warning() << "Could not find parameter " << *it << " in instrument "
-                      << instrumentName << std::endl;
+                      << instrumentName << '\n';
     }
   }
 
@@ -325,7 +325,7 @@ QString IndirectDataReduction::getInstrumentParameterFrom(
 
   if (!comp->hasParameter(param)) {
     g_log.debug() << "Component " << comp->getName() << " has no parameter "
-                  << param << std::endl;
+                  << param << '\n';
     return "";
   }
 
@@ -466,7 +466,7 @@ void IndirectDataReduction::saveSettings() {
  */
 void IndirectDataReduction::filterUiForFacility(QString facility) {
   g_log.information() << "Facility selected: " << facility.toStdString()
-                      << std::endl;
+                      << '\n';
 
   QStringList enabledTabs;
   QStringList disabledInstruments;
@@ -500,7 +500,7 @@ void IndirectDataReduction::filterUiForFacility(QString facility) {
     // Remove the tab
     m_uiForm.twIDRTabs->removeTab(0);
 
-    g_log.debug() << "Removing tab " << tabName.toStdString() << std::endl;
+    g_log.debug() << "Removing tab " << tabName.toStdString() << '\n';
   }
 
   // Add the required tabs
@@ -512,7 +512,7 @@ void IndirectDataReduction::filterUiForFacility(QString facility) {
     // Add the tab
     m_uiForm.twIDRTabs->addTab(m_tabs[*it].first, *it);
 
-    g_log.debug() << "Adding tab " << (*it).toStdString() << std::endl;
+    g_log.debug() << "Adding tab " << (*it).toStdString() << '\n';
   }
 
   // Disable instruments as required

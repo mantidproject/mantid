@@ -85,7 +85,7 @@ double UserFunctionMD::functionMD(const API::IMDIterator &r) const {
       m_vars[i] = center[i];
     }
     // std::cerr << m_vars[0] << ',' << m_vars[1] << ' ' << m_parser.Eval() <<
-    // std::endl;
+    // '\n';
     try {
       val = m_parser.Eval();
     } catch (mu::Parser::exception_type &e) {
