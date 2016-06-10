@@ -5,7 +5,7 @@
     any required paths to sys.path, setting environment variables etc.
 """
 from __future__ import (absolute_import, division,
-                        print_function, unicode_literals)
+                        print_function)
 import os as _os
 import sys as _sys
 ###############################################################################

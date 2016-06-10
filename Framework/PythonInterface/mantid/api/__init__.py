@@ -6,7 +6,7 @@ Defines Python objects that wrap the C++ API namespace.
 
 """
 from __future__ import (absolute_import, division,
-                        print_function, unicode_literals)
+                        print_function)
 
 # Load the C++ library
 from . import _api

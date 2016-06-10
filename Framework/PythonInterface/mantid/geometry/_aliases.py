@@ -3,7 +3,7 @@
     like in mantid.api.
 """
 from __future__ import (absolute_import, division,
-                        print_function, unicode_literals)
+                        print_function)
 
 from ._geometry import (SpaceGroupFactoryImpl, SymmetryOperationFactoryImpl,
                         SymmetryElementFactoryImpl, PointGroupFactoryImpl)

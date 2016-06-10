@@ -14,7 +14,7 @@ The names from the library are not imported by default as it is best if the inte
 are used for checks such as isinstance()
 """
 from __future__ import (absolute_import, division,
-                        print_function, unicode_literals)
+                        print_function)
 
 ###############################################################################
 # Load the C++ library and register the C++ class exports
