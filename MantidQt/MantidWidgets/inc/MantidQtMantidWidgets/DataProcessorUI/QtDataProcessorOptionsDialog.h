@@ -2,8 +2,6 @@
 #define MANTIDQTMANTIDWIDGETS_QTDATAPROCESSOROPTIONSDIALOG_H
 
 #include "MantidKernel/System.h"
-#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorView.h"
-#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorPresenter.h"
 
 #include <QDialog>
 
@@ -11,6 +9,9 @@
 
 namespace MantidQt {
 namespace MantidWidgets {
+
+class DataProcessorView;
+class DataProcessorPresenter;
 
 /** QtDataProcessorOptionsDialog : Provides a dialog for setting DataProcessorUI
 UI

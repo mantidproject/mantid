@@ -2,13 +2,8 @@
 #define MANTIDQTMANTIDWIDGETS_DATAPROCESSORPRESENTER_H
 
 #include <map>
-#include <set>
 #include <string>
 #include <vector>
-
-#include "MantidKernel/System.h"
-#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorCommand.h"
-
 #include <QVariant>
 
 namespace MantidQt {
@@ -18,7 +13,6 @@ class WorkspaceReceiver;
 class DataProcessorCommand;
 class DataProcessorView;
 class ProgressableView;
-using DataProcessorCommand_uptr = std::unique_ptr<DataProcessorCommand>;
 
 /** @class DataProcessorPresenter
 
@@ -81,7 +75,8 @@ public:
   transfer(const std::vector<std::map<std::string, std::string>> &runs) = 0;
   virtual void setInstrumentList(const std::vector<std::string> &instruments,
                                  const std::string &defaultInstrument) = 0;
-  virtual std::vector<DataProcessorCommand_uptr> publishCommands() = 0;
+  virtual std::vector<std::unique_ptr<DataProcessorCommand>>
+  publishCommands() = 0;
   virtual void accept(WorkspaceReceiver *workspaceReceiver) = 0;
   virtual void acceptViews(DataProcessorView *tableView,
                            ProgressableView *progressView) = 0;

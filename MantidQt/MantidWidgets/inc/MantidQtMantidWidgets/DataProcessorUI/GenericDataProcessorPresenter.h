@@ -3,19 +3,20 @@
 
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidQtAPI/WorkspaceObserver.h"
-#include "MantidQtMantidWidgets/WidgetDllOption.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorPostprocessingAlgorithm.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorPreprocessingAlgorithm.h"
-#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorProcessingAlgorithm.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorPresenter.h"
+#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorProcessingAlgorithm.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorWhiteList.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/QDataProcessorTableModel.h"
+#include "MantidQtMantidWidgets/WidgetDllOption.h"
 
 namespace MantidQt {
 namespace MantidWidgets {
 // Forward decs
 class ProgressableView;
 class DataProcessorView;
+class DataProcessorCommand;
 
 /** @class GenericDataProcessorPresenter
 
@@ -50,8 +51,8 @@ class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS GenericDataProcessorPresenter
 public:
   GenericDataProcessorPresenter(
       const DataProcessorWhiteList &whitelist,
-      const std::map<std::string, DataProcessorPreprocessingAlgorithm> &
-          preprocessMap,
+      const std::map<std::string, DataProcessorPreprocessingAlgorithm>
+          &preprocessMap,
       const DataProcessorProcessingAlgorithm &processor,
       const DataProcessorPostprocessingAlgorithm &postprocessor);
   ~GenericDataProcessorPresenter() override;
@@ -62,7 +63,7 @@ public:
       const std::vector<std::map<std::string, std::string>> &runs) override;
   void setInstrumentList(const std::vector<std::string> &instruments,
                          const std::string &defaultInstrument) override;
-  std::vector<DataProcessorCommand_uptr> publishCommands() override;
+  std::vector<std::unique_ptr<DataProcessorCommand>> publishCommands() override;
   void acceptViews(DataProcessorView *tableView,
                    ProgressableView *progressView) override;
   void setModel(std::string name) override;
@@ -174,7 +175,7 @@ protected:
                           Mantid::API::Workspace_sptr workspace) override;
   void saveNotebook(std::map<int, std::set<int>> groups, std::set<int> rows);
   void accept(WorkspaceReceiver *workspaceReceiver) override;
-  std::vector<DataProcessorCommand_uptr> getTableList();
+  std::vector<std::unique_ptr<DataProcessorCommand>> getTableList();
 
   void validateModel(Mantid::API::ITableWorkspace_sptr model);
   bool isValidModel(Mantid::API::Workspace_sptr model);

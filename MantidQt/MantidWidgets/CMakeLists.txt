@@ -5,17 +5,17 @@ set ( SRC_FILES
     src/CatalogSelector.cpp
     src/CheckboxHeader.cpp
     src/ColorBarWidget.cpp
-	src/DataProcessorUI/DataProcessorPostprocessingAlgorithm.cpp
-	src/DataProcessorUI/DataProcessorPreprocessingAlgorithm.cpp
-	src/DataProcessorUI/DataProcessorProcessingAlgorithm.cpp
-	src/DataProcessorUI/DataProcessorProcessingAlgorithmBase.cpp
-	src/DataProcessorUI/DataProcessorGenerateNotebook.cpp
-	src/DataProcessorUI/DataProcessorWhiteList.cpp
-	src/DataProcessorUI/GenericDataProcessorPresenter.cpp
-	src/DataProcessorUI/ParseKeyValueString.cpp
-	src/DataProcessorUI/QDataProcessorTableModel.cpp
-	src/DataProcessorUI/QDataProcessorWidget.cpp
-	src/DataProcessorUI/QtDataProcessorOptionsDialog.cpp
+    src/DataProcessorUI/DataProcessorGenerateNotebook.cpp
+    src/DataProcessorUI/DataProcessorPostprocessingAlgorithm.cpp
+    src/DataProcessorUI/DataProcessorPreprocessingAlgorithm.cpp
+    src/DataProcessorUI/DataProcessorProcessingAlgorithm.cpp
+    src/DataProcessorUI/DataProcessorProcessingAlgorithmBase.cpp
+    src/DataProcessorUI/DataProcessorWhiteList.cpp
+    src/DataProcessorUI/GenericDataProcessorPresenter.cpp
+    src/DataProcessorUI/ParseKeyValueString.cpp
+    src/DataProcessorUI/QDataProcessorTableModel.cpp
+    src/DataProcessorUI/QDataProcessorWidget.cpp
+    src/DataProcessorUI/QtDataProcessorOptionsDialog.cpp
     src/DataSelector.cpp
     src/DiagResults.cpp
     src/DisplayCurveFit.cpp
@@ -198,41 +198,41 @@ set ( INC_FILES
     ${MOC_FILES}
     inc/MantidQtMantidWidgets/AlgorithmHintStrategy.h
     inc/MantidQtMantidWidgets/CatalogHelper.h
-	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorPostprocessingAlgorithm.h
-	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorPreprocessingAlgorithm.h
-	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorProcessingAlgorithm.h
-	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorProcessingAlgorithmBase.h
-	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorAppendRowCommand.h
-	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorClearSelectedCommand.h
-	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorCommand.h
-	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorCommandBase.h
-	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorCopySelectedCommand.h
-	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorCutSelectedCommand.h
-	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorDeleteRowCommand.h
-	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorExpandCommand.h
-	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorExportTableCommand.h
-	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorGenerateNotebook.h
-	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorGroupRowsCommand.h
-	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorImportTableCommand.h
-	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorNewTableCommand.h
-	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorOpenTableCommand.h
-	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorOptionsCommand.h
-	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorPasteSelectedCommand.h
-	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorPlotGroupCommand.h
-	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorPlotRowCommand.h
-	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorPrependRowCommand.h
-	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorPresenter.h
-	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorProcessCommand.h
-	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorSaveTableAsCommand.h
-	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorSaveTableCommand.h
-	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorVectorString.h
-	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorView.h
-	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorWhiteList.h
-	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorWorkspaceCommand.h
-	inc/MantidQtMantidWidgets/DataProcessorUI/GenericDataProcessorPresenter.h
-	inc/MantidQtMantidWidgets/DataProcessorUI/GenericDataProcessorPresenterFactory.h
-	inc/MantidQtMantidWidgets/DataProcessorUI/ParseKeyValueString.h
-	inc/MantidQtMantidWidgets/DataProcessorUI/WorkspaceReceiver.h
+    inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorAppendRowCommand.h
+    inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorClearSelectedCommand.h
+    inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorCommand.h
+    inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorCommandBase.h
+    inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorCopySelectedCommand.h
+    inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorCutSelectedCommand.h
+    inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorDeleteRowCommand.h
+    inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorExpandCommand.h
+    inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorExportTableCommand.h
+    inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorGenerateNotebook.h
+    inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorGroupRowsCommand.h
+    inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorImportTableCommand.h
+    inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorNewTableCommand.h
+    inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorOpenTableCommand.h
+    inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorOptionsCommand.h
+    inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorPasteSelectedCommand.h
+    inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorPlotGroupCommand.h
+    inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorPlotRowCommand.h
+    inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorPostprocessingAlgorithm.h
+    inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorPrependRowCommand.h
+    inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorPreprocessingAlgorithm.h
+    inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorPresenter.h
+    inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorProcessingAlgorithm.h
+    inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorProcessingAlgorithmBase.h
+    inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorProcessCommand.h
+    inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorSaveTableAsCommand.h
+    inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorSaveTableCommand.h
+    inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorVectorString.h
+    inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorView.h
+    inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorWhiteList.h
+    inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorWorkspaceCommand.h
+    inc/MantidQtMantidWidgets/DataProcessorUI/GenericDataProcessorPresenter.h
+    inc/MantidQtMantidWidgets/DataProcessorUI/GenericDataProcessorPresenterFactory.h
+    inc/MantidQtMantidWidgets/DataProcessorUI/ParseKeyValueString.h
+    inc/MantidQtMantidWidgets/DataProcessorUI/WorkspaceReceiver.h
     inc/MantidQtMantidWidgets/ErrorCurve.h
     inc/MantidQtMantidWidgets/WidgetDllOption.h
     inc/MantidQtMantidWidgets/HintStrategy.h

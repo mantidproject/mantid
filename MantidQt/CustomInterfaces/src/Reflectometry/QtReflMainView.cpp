@@ -28,7 +28,7 @@ DECLARE_SUBWINDOW(QtReflMainView)
 */
 QtReflMainView::QtReflMainView(QWidget *parent)
     : UserSubWindow(parent),
-      m_calculator(new MantidWidgets::SlitCalculator(this)) {}
+      m_calculator(new SlitCalculator(this)) {}
 
 //----------------------------------------------------------------------------------------------
 /** Destructor
@@ -52,9 +52,8 @@ void QtReflMainView::initLayout() {
   boost::shared_ptr<DataProcessorPresenter> processorPresenter =
       presenterFactory.create();
 
-  MantidQt::MantidWidgets::QDataProcessorWidget *qDataProcessorWidget =
-      new MantidQt::MantidWidgets::QDataProcessorWidget(processorPresenter,
-                                                        this);
+  QDataProcessorWidget *qDataProcessorWidget =
+      new QDataProcessorWidget(processorPresenter, this);
   ui.layoutProcessPane->addWidget(qDataProcessorWidget);
 
   // Custom context menu for table

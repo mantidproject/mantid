@@ -2,6 +2,7 @@
 #include "MantidQtAPI/FileDialogHandler.h"
 #include "MantidQtAPI/HelpWindow.h"
 #include "MantidQtAPI/MantidWidget.h"
+#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorPresenter.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/QDataProcessorTableModel.h"
 #include "MantidQtMantidWidgets/HintingLineEditFactory.h"
 

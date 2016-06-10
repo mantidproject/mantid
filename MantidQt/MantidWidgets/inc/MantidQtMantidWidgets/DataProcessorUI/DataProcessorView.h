@@ -2,7 +2,6 @@
 #define MANTIDQTMANTIDWIDGETS_DATAPROCESSORVIEW_H
 
 #include "MantidKernel/System.h"
-#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorPresenter.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/QDataProcessorTableModel.h"
 
 #include <set>
@@ -12,6 +11,7 @@ namespace MantidQt {
 namespace MantidWidgets {
 // Forward dec
 class HintStrategy;
+class DataProcessorPresenter;
 
 /** @class DataProcessorView
 

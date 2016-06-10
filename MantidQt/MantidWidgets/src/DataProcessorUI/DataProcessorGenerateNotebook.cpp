@@ -102,7 +102,7 @@ std::string DataProcessorGenerateNotebook::generateNotebook(
     // The python code
     std::ostringstream code_string;
     // A vector to store the output ws produced during the reduction process
-    // In the case of DataProcessorUI those will be the IvsQ_ and IvsLam
+    // In the case of Reflectometry those will be the IvsQ_ and IvsLam
     // workspaces
     std::vector<std::string> output_ws;
 
@@ -173,7 +173,7 @@ std::string plotsString(const std::vector<std::string> &output_ws,
   // First, we have to parse 'output_ws'
   // This is a vector containing all the output workspace produced during the
   // reduction for a specific group
-  // For example, in the DataProcessorUI case, assuming the following table (only
+  // For example, in the Reflectometry case, assuming the following table (only
   // relevant information is shown below):
   // Run(s), Group
   // 13460,  0
@@ -183,7 +183,7 @@ std::string plotsString(const std::vector<std::string> &output_ws,
   // output_ws [0] = 'IvsQ_TOF_13460, IvsLam_TOF_13460'
   // output_ws [1] = 'IvsQ_TOF_13462, IvsLam_TOF_13462'
   // output_ws [3] = 'IvsQ_TOF_13463, IvsLam_TOF_13463'
-  // As the reduction algorithm, DataProcessorUIReductionOneAuto, produces two
+  // As the reduction algorithm, ReflectometryReductionOneAuto, produces two
   // output workspaces
   // We need to group the 'IvsQ_' workspaces and the 'IvsLam_' workspaces
 
@@ -649,7 +649,7 @@ std::string completeOutputProperties(const std::string &algName,
 
   // In addition to output ws properties, our reduction and post-processing
   // algorithms could return other types of properties, for instance,
-  // DataProcessorUIReductionOneAuto also returns a number called 'ThetaOut'
+  // ReflectometryReductionOneAuto also returns a number called 'ThetaOut'
   // We need to specify those too in our python code
 
   Mantid::API::IAlgorithm_sptr alg =
