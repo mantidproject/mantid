@@ -117,8 +117,8 @@ void throwIfSizeIncorrect(IMDHistoWorkspace &self, const numeric::array &signal,
     int arrDim = extract<int>(arrShape[i])();
     if (wsShape[i] != arrDim) {
       std::ostringstream os;
-      os << fnLabel << ": The dimension size for the "
-         << boost::lexical_cast<std::string>(i) << "th dimension do not match. "
+      os << fnLabel << ": The dimension size for the " << std::to_string(i)
+         << "th dimension do not match. "
          << "Workspace dimension size=" << wsShape[i]
          << ", array size=" << arrDim;
       throw std::invalid_argument(os.str());

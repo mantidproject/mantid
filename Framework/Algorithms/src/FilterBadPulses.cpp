@@ -115,7 +115,7 @@ void FilterBadPulses::exec() {
         "proton_charge window filters out all of the data");
   }
   this->g_log.information() << "Filtering pcharge outside of " << min_pcharge
-                            << " to " << max_pcharge << std::endl;
+                            << " to " << max_pcharge << '\n';
   size_t inputNumEvents = inputWS->getNumberEvents();
 
   // Child Algorithme does all of the actual work - do not set the output

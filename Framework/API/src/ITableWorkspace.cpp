@@ -16,8 +16,8 @@ ITableWorkspace::clone(const std::vector<std::string> &colNames) const {
 const std::string ITableWorkspace::toString() const {
   std::ostringstream os;
   os << id() << "\n";
-  os << "Columns: " << boost::lexical_cast<std::string>(columnCount()) << "\n";
-  os << "Rows: " << boost::lexical_cast<std::string>(rowCount()) << "\n";
+  os << "Columns: " << std::to_string(columnCount()) << "\n";
+  os << "Rows: " << std::to_string(rowCount()) << "\n";
   os << getMemorySizeAsStr();
   return os.str();
 }

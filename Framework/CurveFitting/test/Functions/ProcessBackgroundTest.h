@@ -322,7 +322,7 @@ public:
     }
 
     std::cout << "DBT505  dataX range: " << vecx[0] << ", " << vecx.back()
-              << " sized " << vecx.size() << std::endl;
+              << " sized " << vecx.size() << '\n';
 
     return dataws;
   }
@@ -336,7 +336,7 @@ public:
     std::ifstream ins;
     ins.open(filename.c_str());
     if (!ins.is_open()) {
-      std::cout << "File " << filename << " cannot be opened. " << std::endl;
+      std::cout << "File " << filename << " cannot be opened. \n";
       throw std::invalid_argument("Unable to open data file. ");
     }
 

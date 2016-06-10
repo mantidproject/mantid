@@ -90,7 +90,7 @@ void UploadRemoteFile::exec() {
     {
       g_log.information() << "Uploaded '" << getPropertyValue("RemoteFileName")
                           << "' to '" << getPropertyValue("LocalFileName")
-                          << "'" << std::endl;
+                          << "'\n";
     } else {
       JSONObject resp;
       initFromStream(resp, respStream);

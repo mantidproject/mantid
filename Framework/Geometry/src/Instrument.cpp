@@ -1053,7 +1053,7 @@ void Instrument::saveNexus(::NeXus::File *file,
     g_log.warning() << "Saving Instrument with no XML data. If this was "
                        "instrument data you may not be able to load this data "
                        "back into Mantid, for fitted/analysed data this "
-                       "warning can be ignored." << std::endl;
+                       "warning can be ignored.\n";
   file->writeData("data", xmlText);
   file->writeData("type", "text/xml"); // mimetype
   file->writeData("description", "XML contents of the instrument IDF file.");
@@ -1197,7 +1197,7 @@ void Instrument::setDefaultView(const std::string &type) {
     g_log.warning()
         << type
         << " is not allowed as an instrument view type. Default to \"3D\""
-        << std::endl;
+        << '\n';
   }
 }
 

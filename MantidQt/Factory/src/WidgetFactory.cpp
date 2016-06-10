@@ -17,14 +17,14 @@ WidgetFactory *WidgetFactory::m_pInstance = NULL;
  * instead.
  */
 WidgetFactory::WidgetFactory() {
-  //    std::cout << "WidgetFactory constructor called" << std::endl;
+  //    std::cout << "WidgetFactory constructor called\n";
 }
 
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
 WidgetFactory::~WidgetFactory() {
-  //    std::cout << "WidgetFactory destructor called" << std::endl;
+  //    std::cout << "WidgetFactory destructor called\n";
   //    for (size_t i=0; i<m_windows.size(); i++)
   //      delete m_windows[i];
   //    m_windows.clear();

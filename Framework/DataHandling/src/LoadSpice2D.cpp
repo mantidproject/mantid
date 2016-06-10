@@ -225,8 +225,7 @@ void LoadSpice2D::setInputPropertiesAsMemberProperties() {
   m_wavelength_spread_input = getProperty("WavelengthSpread");
 
   g_log.debug() << "setInputPropertiesAsMemberProperties: "
-                << m_wavelength_input << " , " << m_wavelength_input
-                << std::endl;
+                << m_wavelength_input << " , " << m_wavelength_input << '\n';
 
   std::string fileName = getPropertyValue("Filename");
   // Set up the XmlHandler handler and parse xml file
@@ -245,7 +244,7 @@ void LoadSpice2D::setWavelength(std::map<std::string, std::string> &metadata) {
   // Read in wavelength and wavelength spread
 
   g_log.debug() << "setWavelength: " << m_wavelength_input << " , "
-                << m_wavelength_input << std::endl;
+                << m_wavelength_input << '\n';
 
   if (isEmpty(m_wavelength_input)) {
     std::string s = metadata["Header/wavelength"];
@@ -254,7 +253,7 @@ void LoadSpice2D::setWavelength(std::map<std::string, std::string> &metadata) {
     from_string<double>(m_dwavelength, s, std::dec);
 
     g_log.debug() << "setWavelength: " << m_wavelength << " , " << m_dwavelength
-                  << std::endl;
+                  << '\n';
 
   } else {
     m_wavelength = m_wavelength_input;
@@ -272,7 +271,7 @@ LoadSpice2D::getData(const std::string &dataXpath = "//Data/Detector") {
       m_xmlHandler.get_attributes_from_tag(dataXpath);
   parseDetectorDimensions(attributes["type"]);
   if (m_numberXPixels == 0 || m_numberYPixels == 0)
-    g_log.notice() << "Could not read in the number of pixels!" << std::endl;
+    g_log.notice() << "Could not read in the number of pixels!\n";
 
   std::string data_str = m_xmlHandler.get_text_from_tag(dataXpath);
   // convert string data into a vector<int>

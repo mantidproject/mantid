@@ -151,7 +151,7 @@ public:
 
     NormalFit.function1D(out.data(), xx, nCells);
 
-    //  std::cout<<"-------------------------------------"<<std::endl;
+    //  std::cout<<"-------------------------------------"<<'\n';
     for (int i = 0; i < nCells; i++) {
 
       double x = xvals.access()[i];
@@ -160,7 +160,7 @@ public:
 
       TS_ASSERT_DELTA(d, out[i], .001);
     }
-    // std::cout<<"\n-------------------------------------"<<std::endl;
+    // std::cout<<"\n-------------------------------------"<<'\n';
 
     double Res[5][7] = {
         {1, 0.0410131, -1.21055, 5.93517, -3.04761, -4.03279, 3.79245},

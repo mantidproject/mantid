@@ -620,8 +620,7 @@ void SetupHFIRReduction::exec() {
   // Reduction property manager
   const std::string reductionManagerName = getProperty("ReductionProperties");
   if (reductionManagerName.size() == 0) {
-    g_log.error() << "ERROR: Reduction Property Manager name is empty"
-                  << std::endl;
+    g_log.error() << "ERROR: Reduction Property Manager name is empty\n";
     return;
   }
   boost::shared_ptr<PropertyManager> reductionManager =
@@ -698,7 +697,7 @@ void SetupHFIRReduction::exec() {
       reductionManager->declareProperty(std::move(beamFinderAlgProp));
     } else {
       g_log.error() << "ERROR: Beam center determination was required"
-                       " but no file was provided" << std::endl;
+                       " but no file was provided\n";
     }
   }
 
@@ -924,7 +923,7 @@ void SetupHFIRReduction::setupSensitivity(
       } else {
         g_log.error()
             << "ERROR: Sensitivity beam center determination was required"
-               " but no file was provided" << std::endl;
+               " but no file was provided\n";
       }
     }
 
@@ -1013,7 +1012,7 @@ void SetupHFIRReduction::setupBackground(
         reductionManager->declareProperty(std::move(backBeamCentreAlgProp));
       } else {
         g_log.error() << "ERROR: Beam center determination was required"
-                         " but no file was provided" << std::endl;
+                         " but no file was provided\n";
       }
     }
     transAlg->setProperty("DarkCurrentFilename", darkCurrent);
@@ -1127,7 +1126,7 @@ void SetupHFIRReduction::setupTransmission(
       } else {
         g_log.error()
             << "ERROR: Transmission beam center determination was required"
-               " but no file was provided" << std::endl;
+               " but no file was provided\n";
       }
     }
     transAlg->setProperty("ThetaDependent", thetaDependentTrans);

@@ -394,7 +394,7 @@ void writeMCNPX(const std::string &Line, std::ostream &OX) {
     if (!isEmpty(Out)) {
       if (spc)
         OX << std::string(spc, ' ');
-      OX << X.substr(0, posB) << std::endl;
+      OX << X.substr(0, posB) << '\n';
     }
     spc = 8;
     X = Line.substr(pos, MaxLine - spc);
@@ -403,7 +403,7 @@ void writeMCNPX(const std::string &Line, std::ostream &OX) {
   if (!isEmpty(X)) {
     if (spc)
       OX << std::string(spc, ' ');
-    OX << X << std::endl;
+    OX << X << '\n';
   }
   return;
 }
@@ -769,7 +769,7 @@ int writeFile(const std::string &Fname, const V<T, A> &X, const V<T, A> &Y,
   if (!FX.good())
     return -1;
 
-  FX << "# " << Npts << " " << Epts << std::endl;
+  FX << "# " << Npts << " " << Epts << '\n';
   FX.precision(10);
   FX.setf(std::ios::scientific, std::ios::floatfield);
   auto xPt = X.cbegin();
@@ -779,13 +779,13 @@ int writeFile(const std::string &Fname, const V<T, A> &X, const V<T, A> &Y,
   // Double loop to include/exclude a short error stack
   size_t eCount = 0;
   for (; eCount < Epts; eCount++) {
-    FX << (*xPt) << " " << (*yPt) << " " << (*ePt) << std::endl;
+    FX << (*xPt) << " " << (*yPt) << " " << (*ePt) << '\n';
     ++xPt;
     ++yPt;
     ++ePt;
   }
   for (; eCount < Npts; eCount++) {
-    FX << (*xPt) << " " << (*yPt) << " 0.0" << std::endl;
+    FX << (*xPt) << " " << (*yPt) << " 0.0\n";
     ++xPt;
     ++yPt;
   }

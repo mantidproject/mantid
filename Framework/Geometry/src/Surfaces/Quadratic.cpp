@@ -135,7 +135,7 @@ double Quadratic::distance(const Kernel::V3D &Pt) const
   Kernel::Matrix<double> D(3, 3);
   Kernel::Matrix<double> R(3, 3);
   if (!A.Diagonalise(R, D)) {
-    std::cerr << "Problem with matrix :: distance now guessed at" << std::endl;
+    std::cerr << "Problem with matrix :: distance now guessed at\n";
     return distance(Pt);
   }
 
@@ -333,7 +333,7 @@ void Quadratic::print() const
   Surface::print();
   for (int i = 0; i < 10; i++)
     std::cout << BaseEqn[i] << " ";
-  std::cout << std::endl;
+  std::cout << '\n';
   return;
 }
 

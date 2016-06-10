@@ -278,7 +278,7 @@ void Line::print() const
 Print statement for debugging
 */
 {
-  std::cout << "Line == " << Origin << " :: " << Direct << std::endl;
+  std::cout << "Line == " << Origin << " :: " << Direct << '\n';
   return;
 }
 
