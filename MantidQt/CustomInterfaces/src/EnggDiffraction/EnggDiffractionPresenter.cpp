@@ -1381,6 +1381,54 @@ void EnggDiffractionPresenter::setDataToClonedWS(std::string &current_WS,
       ->setData(currentPeakWS->readY(0), currentPeakWS->readE(0));
 }
 
+void EnggDiffractionPresenter::setBankItems() {
+	try {
+		auto fitting_runno_vector = m_view->getFittingRunNumVec();
+
+		if (!fitting_runno_vector.empty()) {
+
+			// delete previous bank added to the list
+			m_view->clearFittingComboBox();
+
+			for (size_t i = 0; i < fitting_runno_vector.size(); i++) {
+				Poco::Path vecFile(fitting_runno_vector[i]);
+				std::string strVecFile = vecFile.toString();
+				// split the directory from m_fitting_runno_dir_vec
+				std::vector<std::string> vecFileSplit =
+					m_view->splitFittingDirectory(strVecFile);
+
+				// get the last split in vector which will be bank
+				std::string bankID = (vecFileSplit.back());
+
+				bool digit = isDigit(bankID);
+
+				if (digit)
+					m_uiTabFitting.comboBox_bank->addItem(QString::fromStdString(bankID));
+				else
+					m_uiTabFitting.comboBox_bank->addItem(QString("Bank %1").arg(i + 1));
+
+			}
+
+			m_uiTabFitting.comboBox_bank->setEnabled(true);
+		}
+		else {
+			// upon invalid file
+			// disable the widgets when only one related file found
+			m_uiTabFitting.comboBox_bank->setEnabled(false);
+
+			m_uiTabFitting.comboBox_bank->clear();
+		}
+
+	}
+	catch (std::runtime_error &re) {
+		userWarning("Unable to insert items: ",
+			"Could not add banks to "
+			"combo-box or list widget; " +
+			static_cast<std::string>(re.what()) + ". Please try again");
+	}
+}
+
+
 void EnggDiffractionPresenter::setDefaultBank(
 	std::vector<std::string> splittedBaseName, QString selectedFile) {
 
@@ -1406,6 +1454,17 @@ void EnggDiffractionPresenter::setDefaultBank(
 	// if nothing found related to text-field input
 	else if (!m_view->getFittingRunNo().empty())
 		m_view->setFittingRunNo(selectedFile);
+}
+
+bool EnggDiffractionPresenter::isDigit(std::string text)
+{
+	for (size_t i = 0; i < text.size(); i++) {
+		char *str = &text[i];
+		if (std::isdigit(*str)) {
+			return true;
+		}
+	}
+	return false;
 }
 
 
