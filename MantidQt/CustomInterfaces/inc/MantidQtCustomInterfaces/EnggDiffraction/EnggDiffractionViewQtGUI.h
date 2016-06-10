@@ -157,6 +157,10 @@ public:
 
   std::string getFittingRunNo() const override;
 
+  void clearFittingComboBox() const override;
+
+  int getFittingComboIdx(std::string bank) const override;
+
   std::string fittingPeaksData() const override;
 
   std::vector<std::string>
@@ -184,9 +188,6 @@ public:
   void setFittingMultiRunMode(bool mode) override;
 
   bool isDigit(std::string text) override;
-
-  void setDefaultBank(std::vector<std::string> splittedBaseName,
-                      QString selectedFile);
 
   std::string fittingRunNoFactory(std::string bank, std::string fileName,
                                   std::string &bankDir, std::string fileDir);
@@ -276,7 +277,7 @@ private slots:
   // slot of the fitting peaks per part of the interface
   void browseFitFocusedRun();
   void resetFittingMultiMode();
-  void setBankIdComboBox(int idx);
+  void setBankIdComboBox(int idx) override;
   void browsePeaksToFit();
   void setPeakPick();
   void addPeakToList();

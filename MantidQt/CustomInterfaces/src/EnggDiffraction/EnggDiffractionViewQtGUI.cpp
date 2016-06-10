@@ -1405,6 +1405,11 @@ std::string EnggDiffractionViewQtGUI::getFittingRunNo() const {
   return m_uiTabFitting.lineEdit_pushButton_run_num->text().toStdString();
 }
 
+void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::clearFittingComboBox() const
+{
+	m_uiTabFitting.comboBox_bank->clear();
+}
+
 int EnggDiffractionViewQtGUI::getFittingComboIdx(std::string bank) const {
 	return m_uiTabFitting.comboBox_bank->findText(QString::fromStdString(bank));
 }
@@ -1486,7 +1491,7 @@ void EnggDiffractionViewQtGUI::addBankItems(
 
       for (size_t i = 0; i < m_fitting_runno_dir_vec.size(); i++) {
         Poco::Path vecFile(m_fitting_runno_dir_vec[i]);
-        std::string strVecFile = vecFile.toString();
+		std::string strVecFile = vecFile.toString();
         // split the directory from m_fitting_runno_dir_vec
         std::vector<std::string> vecFileSplit =
             splitFittingDirectory(strVecFile);
@@ -1496,12 +1501,10 @@ void EnggDiffractionViewQtGUI::addBankItems(
 
         bool digit = isDigit(bankID);
 
-        if (digit) {
+        if (digit)
           m_uiTabFitting.comboBox_bank->addItem(QString::fromStdString(bankID));
-
-        } else {
+        else
           m_uiTabFitting.comboBox_bank->addItem(QString("Bank %1").arg(i + 1));
-        }
       }
 
       m_uiTabFitting.comboBox_bank->setEnabled(true);

@@ -132,6 +132,8 @@ public:
 
   void setDataToClonedWS(std::string &current_WS, const std::string &cloned_WS);
 
+  void setBankItems();
+
   void setDefaultBank(std::vector<std::string> splittedBaseName,
 	  QString selectedFile);
 
