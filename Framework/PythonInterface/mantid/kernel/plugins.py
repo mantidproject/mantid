@@ -5,7 +5,7 @@ These modules may define extensions to C++ types, e.g.
 algorithms, fit functions etc.
 """
 from __future__ import (absolute_import, division,
-                        print_function, unicode_literals)
+                        print_function)
 
 import os as _os
 try:
@@ -98,14 +98,13 @@ def find_plugins(top_dir):
     if not _os.path.isdir(top_dir):
         raise ValueError("Cannot search given path for plugins, path is not a directory: '%s' " % str(top_dir))
     all_plugins = []
-    algs = []
     for root, dirs, files in _os.walk(top_dir):
         for f in files:
             if f.endswith(PluginLoader.extension):
                 filename = _os.path.join(root, f)
                 all_plugins.append(filename)
 
-    return all_plugins, algs
+    return all_plugins
 
 #======================================================================================================================
 
@@ -202,26 +201,5 @@ def load_plugin(plugin_path):
     loader = PluginLoader(plugin_path)
     module = loader.run()
     return module.__name__, module
-
-#======================================================================================================================
-
-def sync_attrs(source_module, attrs, clients):
-    """
-        Syncs the attribute definitions between the
-        given list from the source module & list of client modules such
-        that the function defintions point to the same
-        one
-
-        @param source_module :: The module containing the "correct"
-                                definitions
-        @param attrs :: The list of attributes to change in the client modules
-        @param clients :: A list of modules whose attribute definitions
-                          should be taken from source
-    """
-    for func_name in attrs:
-        attr = getattr(source_module, func_name)
-        for plugin in clients:
-            if hasattr(plugin, func_name):
-                setattr(plugin, func_name, attr)
 
 #======================================================================================================================

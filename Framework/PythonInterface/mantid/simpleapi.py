@@ -20,9 +20,9 @@
 
 """
 from __future__ import (absolute_import, division,
-                        print_function, unicode_literals)
+                        print_function)
 
-import os, string
+import os
 from six import iteritems
 
 from . import api as _api
@@ -461,7 +461,7 @@ def RenameWorkspace(*args, **kwargs):
         workspace attached to current workspace.
     """
     arguments = {}
-    lhs = _kernel.funcreturns.lhs_info()
+    lhs = _kernel.funcinspect.lhs_info()
     if lhs[0]>0:
         if 'OutputWorkspace' not in kwargs:
             arguments['OutputWorkspace'] = lhs[1][0]
@@ -481,14 +481,16 @@ def RenameWorkspace(*args, **kwargs):
               "RenameWorkspace to a variable or use the OutputWorkspace keyword.")
 
     # Create and execute
-    algm = _create_algorithm_object(function_name)
+    (_startProgress, _endProgress, kwargs) = extract_progress_kwargs(kwargs)
+    algm = _create_algorithm_object('RenameWorkspace', startProgress=_startProgress,
+                                    endProgress=_endProgress)
     _set_logging_option(algm, kwargs)
     for key, val in arguments.items():
         algm.setProperty(key, val)
 
     algm.execute()
 
-    return _gather_returns(function_name, lhs, algm)
+    return _gather_returns("RenameWorkspace", lhs, algm)
 #enddef
 _replace_signature(RenameWorkspace,
                   ("\bInputWorkspace,[OutputWorkspace],[True||False]", "**kwargs"))
@@ -812,7 +814,7 @@ def set_properties(alg_object, *args, **kwargs):
             alg_object.setProperty(key, value)
 
 
-def _create_algorithm_function(algorithm, version, algm_object):
+def _create_algorithm_function(name, version, algm_object):
     """
         Create a function that will set up and execute an algorithm.
         The help that will be displayed is that of the most recent version.
@@ -840,11 +842,11 @@ def _create_algorithm_function(algorithm, version, algm_object):
             _endProgress = kwargs['endProgress']
             del kwargs['endProgress']
 
-        algm = _create_algorithm_object(algorithm, _version, _startProgress, _endProgress)
+        algm = _create_algorithm_object(name, _version, _startProgress, _endProgress)
         _set_logging_option(algm, kwargs)
 
         # Temporary removal of unneeded parameter from user's python scripts
-        if "CoordinatesToUse" in kwargs and algorithm in __MDCOORD_FUNCTIONS__:
+        if "CoordinatesToUse" in kwargs and name in __MDCOORD_FUNCTIONS__:
             del kwargs["CoordinatesToUse"]
 
         try:
@@ -853,7 +855,7 @@ def _create_algorithm_function(algorithm, version, algm_object):
         except KeyError:
             frame = None
 
-        lhs = _kernel.funcreturns.lhs_info(frame=frame)
+        lhs = _kernel.funcinspect.lhs_info(frame=frame)
         lhs_args = _get_args_from_lhs(lhs, algm)
         final_keywords = _merge_keywords_with_lhs(kwargs, lhs_args)
         set_properties(algm, *args, **final_keywords)
@@ -862,17 +864,17 @@ def _create_algorithm_function(algorithm, version, algm_object):
         except RuntimeError as e:
             if e.args[0] == 'Some invalid Properties found':
                 # Check for missing mandatory parameters
-                _check_mandatory_args(algorithm, algm, e, *args, **kwargs)
+                _check_mandatory_args(name, algm, e, *args, **kwargs)
             else:
                 raise
 
-        return _gather_returns(algorithm, lhs, algm)
+        return _gather_returns(name, lhs, algm)
     #enddef
     # Insert definition in to global dict
-    algm_wrapper = _customise_func(algorithm_wrapper, algorithm,
-                                      _create_generic_signature(algm_object),
-                                      algm_object.docString())
-    globals()[algorithm] = algm_wrapper
+    algm_wrapper = _customise_func(algorithm_wrapper, name,
+                                   _create_generic_signature(algm_object),
+                                   algm_object.docString())
+    globals()[name] = algm_wrapper
     # Register aliases
     for alias in algm_object.alias().strip().split(' '):
         alias = alias.strip()
@@ -1049,77 +1051,30 @@ def _create_algorithm_dialog(algorithm, version, _algm_object):
 
 #--------------------------------------------------------------------------------------------------
 
-def _mockup(plugins):
+def _create_fake_function(name):
+    """Create fake functions for the given name
     """
-        Creates fake, error-raising functions for all loaded algorithms plus
-        any plugins given.
-        The function name for the Python algorithms are taken from the filename
-        so this mechanism requires the algorithm name to match the filename.
-
-        This mechanism solves the "chicken-and-egg" problem with Python algorithms trying
-        to use other Python algorithms through the simple API functions. The issue
-        occurs when a python algorithm tries to import the simple API function of another
-        Python algorithm that has not been loaded yet, usually when it is further along
-        in the alphabet. The first algorithm stops with an import error as that function
-        is not yet known. By having a pre-loading step all of the necessary functions
-        on this module can be created and after the plugins are loaded the correct
-        function definitions can overwrite the "fake" ones.
-
-        :param plugins: A list of  modules that have been loaded
-    """
-    #--------------------------------------------------------------------------------------------------------
-    def create_fake_function(name):
-        """Create fake functions for the given name
-        """
-        #------------------------------------------------------------------------------------------------
-        def fake_function(*args, **kwargs):
-            raise RuntimeError("Mantid import error. The mock simple API functions have not been replaced!" +
-                               " This is an error in the core setup logic of the mantid module, please contact the development team.")
-        #------------------------------------------------------------------------------------------------
-        if "." in name:
-            name = name.rstrip('.py')
-        if specialization_exists(name):
-            return
-        fake_function.__name__ = name
-        _replace_signature(fake_function, ("",""))
-        globals()[name] = fake_function
-    #--------------------------------------------------------
-    def create_fake_functions(alg_names):
-        """Create fake functions for all of the listed names
-        """
-        for alg_name in alg_names:
-            create_fake_function(alg_name)
-    #-------------------------------------
-
-    # Start with the loaded C++ algorithms
-    from mantid.api import AlgorithmFactory
-    import os
-    cppalgs = AlgorithmFactory.getRegisteredAlgorithms(True)
-    create_fake_functions(cppalgs.keys())
-
-    # Now the plugins
-    for plugin in plugins:
-        name = os.path.basename(plugin)
-        name = os.path.splitext(name)[0]
-        create_fake_function(name)
+    #------------------------------------------------------------------------------------------------
+    def fake_function(*args, **kwargs):
+        raise RuntimeError("Mantid import error. The mock simple API functions have not been replaced!" +
+                           " This is an error in the core setup logic of the mantid module, please contact the development team.")
+    #------------------------------------------------------------------------------------------------
+    fake_function.__name__ = name
+    _replace_signature(fake_function, ("",""))
+    globals()[name] = fake_function
 
 #------------------------------------------------------------------------------------------------------------
 
-def _translate():
-    """
-        Loop through the algorithms and register a function call
-        for each of them
-
-        :returns: a list of new function calls
+def _translate_all(plugins):
+    """Create the module dictionary of algorithm functions for the C++ algorithms
+    and the given set of plugins.
     """
     from mantid.api import AlgorithmFactory, AlgorithmManager
 
-    new_functions = [] # Names of new functions added to the global namespace
     new_methods = {} # Method names mapped to their algorithm names. Used to detect multiple copies of same method name
                      # on different algorithms, which is an error
-
     algs = AlgorithmFactory.getRegisteredAlgorithms(True)
-    algorithm_mgr = AlgorithmManager
+    algorithm_mgr = AlgorithmManager.Instance()
     for name, versions in iteritems(algs):
         if specialization_exists(name):
             continue
@@ -1142,12 +1097,41 @@ def _translate():
                                    "Please check and update one of the algorithms accordingly." % (method_name,algm_object.name(),other_alg))
             _attach_algorithm_func_as_method(method_name, algorithm_wrapper, algm_object)
             new_methods[method_name] = algm_object.name()
-
         # Dialog variant
         _create_algorithm_dialog(name, max(versions), algm_object)
-        new_functions.append(name)
 
-    return new_functions
+    # -- Plugins --
+    # Python plugins are currently allowed to import from this module during
+    # there own import. This creates a chicken-and-egg problem as the plugins
+    # need to be imported to create the function definitions but then the
+    # defintion must exist at that point! We 'solve' this by creating a fake
+    # set of functions first and then overwrite them with the real definitions
+    # after import
+    for plugin in plugins:
+        name = os.path.splitext(os.path.basename(plugin))[0]
+        _create_fake_function(name)
+    #endfor
+    plugin_modules = _kernel.plugins.load(plugins)
+    real_functions = []
+    for module in plugin_modules:
+        name = module.__name__
+        try:
+            # Create the algorithm object
+            algm_object = algorithm_mgr.createUnmanaged(name)
+            algm_object.initialize()
+        except Exception as exc:
+            continue
+        version = algm_object.version()
+        alg_func = _create_algorithm_function(name, version, algm_object)
+        real_functions.append((name, alg_func))
+        _create_algorithm_dialog(name, version, algm_object)
+    #endfor
+    # Overwrite the fake functions on the loaded modules
+    for name, real_func in real_functions:
+      for module in plugin_modules:
+          if hasattr(module, name):
+              setattr(module, name, real_func)
+    #endfor
 
 #-------------------------------------------------------------------------------------------------------------
 
@@ -1171,3 +1155,5 @@ def _attach_algorithm_func_as_method(method_name, algorithm_wrapper, algm_object
 
     _api._workspaceops.attach_func_as_method(method_name, algorithm_wrapper, input_prop,
                                                   algm_object.workspaceMethodOn())
+
+#-------------------------------------------------------------------------------------------------------------
