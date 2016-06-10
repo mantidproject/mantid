@@ -8,7 +8,8 @@
 
 #include <QWidget>
 namespace {
-const QString DataProcessorSettingsGroup = "Mantid/MantidWidgets/ISISDataProcessorUI";
+const QString DataProcessorSettingsGroup =
+    "Mantid/MantidWidgets/ISISDataProcessorUI";
 }
 
 namespace MantidQt {

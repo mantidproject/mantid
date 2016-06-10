@@ -27,8 +27,7 @@ DECLARE_SUBWINDOW(QtReflMainView)
 /** Constructor
 */
 QtReflMainView::QtReflMainView(QWidget *parent)
-    : UserSubWindow(parent),
-      m_calculator(new SlitCalculator(this)) {}
+    : UserSubWindow(parent), m_calculator(new SlitCalculator(this)) {}
 
 //----------------------------------------------------------------------------------------------
 /** Destructor

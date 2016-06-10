@@ -23,9 +23,9 @@ public:
     TS_ASSERT_THROWS(
         MantidQt::MantidWidgets::parseKeyValueString("a = 1, b = 2, c = 3,"),
         std::runtime_error);
-    TS_ASSERT_THROWS(MantidQt::MantidWidgets::parseKeyValueString(
-                         "a = 1, b = 2, c = 3,d"),
-                     std::runtime_error);
+    TS_ASSERT_THROWS(
+        MantidQt::MantidWidgets::parseKeyValueString("a = 1, b = 2, c = 3,d"),
+        std::runtime_error);
     TS_ASSERT_THROWS(MantidQt::MantidWidgets::parseKeyValueString(",a = 1"),
                      std::runtime_error);
     TS_ASSERT_THROWS(

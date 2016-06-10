@@ -51,8 +51,8 @@ class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS GenericDataProcessorPresenter
 public:
   GenericDataProcessorPresenter(
       const DataProcessorWhiteList &whitelist,
-      const std::map<std::string, DataProcessorPreprocessingAlgorithm>
-          &preprocessMap,
+      const std::map<std::string, DataProcessorPreprocessingAlgorithm> &
+          preprocessMap,
       const DataProcessorProcessingAlgorithm &processor,
       const DataProcessorPostprocessingAlgorithm &postprocessor);
   ~GenericDataProcessorPresenter() override;
