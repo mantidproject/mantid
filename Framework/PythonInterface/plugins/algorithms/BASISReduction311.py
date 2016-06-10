@@ -224,8 +224,8 @@ class BASISReduction311(PythonAlgorithm):
                 ws_name += extra_ext
             mon_ws_name = ws_name  + "_monitors"
             run_file = self._makeRunFile(run)
-
-            api.Load(Filename=run_file, OutputWorkspace=ws_name)
+            # Reflection 311 is restricted to bank with name "bank2"
+            api.LoadEventNexus(Filename=run_file, BankName="bank2", OutputWorkspace=ws_name)
 
             if not self._noMonNorm:
                 api.LoadNexusMonitors(Filename=run_file,
@@ -241,9 +241,6 @@ class BASISReduction311(PythonAlgorithm):
                 api.DeleteWorkspace(mon_ws_name)
 
     def _calibData(self, sam_ws, mon_ws):
-        api.LoadInstrument(Workspace=sam_ws,
-                           Filename=os.path.join(DEFAULT_CONFIG_DIR,"BASIS_Definition311_20140101-.xml"),
-                           RewriteSpectraMap=True)
         api.LoadParameterFile(Workspace=sam_ws,
                               Filename=os.path.join(DEFAULT_CONFIG_DIR,
                                                     'BASIS_silicon_311_Parameters.xml'))
