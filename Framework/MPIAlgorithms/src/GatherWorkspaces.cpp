@@ -21,7 +21,34 @@ using namespace DataObjects;
 
 // Anonymous namespace for locally-used functors
 namespace {
-/// Sum for boostmpi MantidVec
+
+/// Functor used for computing the sum of the square values of a vector
+// Used by the eplus templates below
+template <class T> struct SumGaussError : public std::binary_function<T, T, T> {
+  SumGaussError() {}
+  /// Sums the arguments in quadrature
+  inline T operator()(const T &l, const T &r) const {
+    return std::sqrt(l * l + r * r);
+  }
+};
+
+
+// Newer versions of boost::mpi::reduce (>=v1.55) will recognize std::vector
+// as a collection of individual elements and operate on a per-element
+// basis.  Older versions treat vectors as a single object.  Thus we need
+// two different versions of the sum operators that we pass into reduce().
+// This is explained in more detail at:
+// http://stackoverflow.com/questions/28845847/custom-reduce-operation-in-boost-mpi
+#if (BOOST_VERSION / 100 % 1000) >= 55 // is the boost version >= 1.55?
+
+struct vplus : public std::plus<double> { };
+
+struct eplus : public SumGaussError<double> { };
+        
+#else // older version of Boost that passes the entire MantidVec
+      // the operator
+
+/// Sum for boostmpi MantidVec 
 struct vplus : public std::binary_function<MantidVec, MantidVec,
                                            MantidVec> { // functor for operator+
   MantidVec
@@ -31,15 +58,6 @@ struct vplus : public std::binary_function<MantidVec, MantidVec,
     std::transform(_Left.begin(), _Left.end(), _Right.begin(), v.begin(),
                    std::plus<double>());
     return (v);
-  }
-};
-
-/// Functor used for computing the sum of the square values of a vector
-template <class T> struct SumGaussError : public std::binary_function<T, T, T> {
-  SumGaussError() {}
-  /// Sums the arguments in quadrature
-  inline T operator()(const T &l, const T &r) const {
-    return std::sqrt(l * l + r * r);
   }
 };
 
@@ -55,6 +73,9 @@ struct eplus : public std::binary_function<MantidVec, MantidVec,
     return (v);
   }
 };
+
+#endif // boost version
+
 }
 
 // Register the algorithm into the AlgorithmFactory
