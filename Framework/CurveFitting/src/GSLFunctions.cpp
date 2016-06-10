@@ -66,7 +66,7 @@ int gsl_f(const gsl_vector *x, void *params, gsl_vector *f) {
     f->data[i] = (values->getCalculated(i) - values->getFitData(i)) *
                  values->getFitWeight(i);
     // std::cerr << values.getCalculated(i) << ' ' << values.getFitData(i) << '
-    // ' << values.getFitWeight(i) << std::endl;
+    // ' << values.getFitWeight(i) << '\n';
   }
 
   return GSL_SUCCESS;
@@ -136,7 +136,7 @@ int gsl_df(const gsl_vector *x, void *params, gsl_matrix *J) {
     for (size_t iP = 0; iP < p->p; iP++) {
       J->data[iY * p->p + iP] *= values->getFitWeight(iY);
       // std::cerr << iY << ' ' << iP << ' ' << J->data[iY*p->p + iP] <<
-      // std::endl;
+      // '\n';
     }
 
   return GSL_SUCCESS;

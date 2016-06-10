@@ -171,8 +171,7 @@ void SaveISISNexus::exec() {
   saveChar("title", m_isisRaw->r_title, 80);
   saveInt("good_frames", &m_isisRaw->rpb.r_goodfrm);
 
-  std::string experiment_identifier =
-      boost::lexical_cast<std::string>(m_isisRaw->rpb.r_prop);
+  std::string experiment_identifier = std::to_string(m_isisRaw->rpb.r_prop);
   saveChar("experiment_identifier", &experiment_identifier[0],
            static_cast<int>(experiment_identifier.size()));
   int tmp_int(0);

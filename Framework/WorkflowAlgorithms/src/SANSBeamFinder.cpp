@@ -189,7 +189,7 @@ void SANSBeamFinder::exec() {
           beamCenterWS->getInstrument()->getNumberParameter("x-pixel-size");
       if (pars.empty()) {
         g_log.error() << "Could not read pixel size from instrument "
-                         "parameters: using default" << std::endl;
+                         "parameters: using default\n";
       } else {
         ctrAlg->setProperty("BeamRadius", beamRadius * pars[0] / 1000.0);
       }

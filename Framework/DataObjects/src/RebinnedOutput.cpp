@@ -85,9 +85,9 @@ void RebinnedOutput::setF(const std::size_t index, const MantidVecPtr &F) {
  * @param hasSqrdErrs :: does the workspace have squared errors?
  */
 void RebinnedOutput::finalize(bool hasSqrdErrs) {
-  g_log.debug() << "Starting finalize procedure." << std::endl;
+  g_log.debug() << "Starting finalize procedure.\n";
   std::size_t nHist = this->getNumberHistograms();
-  g_log.debug() << "Number of histograms: " << nHist << std::endl;
+  g_log.debug() << "Number of histograms: " << nHist << '\n';
   for (std::size_t i = 0; i < nHist; ++i) {
     MantidVec &data = this->dataY(i);
     MantidVec &err = this->dataE(i);
@@ -96,7 +96,7 @@ void RebinnedOutput::finalize(bool hasSqrdErrs) {
     g_log.debug() << "Data (" << i << "): ";
     std::copy(data.begin(), data.end(),
               std::ostream_iterator<double>(g_log.debug(), " "));
-    g_log.debug() << std::endl;
+    g_log.debug() << '\n';
 
     std::transform(data.begin(), data.end(), frac.begin(), data.begin(),
                    std::divides<double>());
@@ -113,11 +113,11 @@ void RebinnedOutput::finalize(bool hasSqrdErrs) {
     g_log.debug() << "Data Final(" << i << "): ";
     std::copy(data.begin(), data.end(),
               std::ostream_iterator<double>(g_log.debug(), " "));
-    g_log.debug() << std::endl;
+    g_log.debug() << '\n';
     g_log.debug() << "FArea (" << i << "): ";
     std::copy(frac.begin(), frac.end(),
               std::ostream_iterator<double>(g_log.debug(), " "));
-    g_log.debug() << std::endl;
+    g_log.debug() << '\n';
   }
 }
 

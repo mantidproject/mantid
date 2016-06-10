@@ -33,8 +33,7 @@ bool IFuncMinimizer::minimize(size_t maxIterations) {
       m_errorString += '\n';
     }
     m_errorString += "Failed to converge after " +
-                     boost::lexical_cast<std::string>(maxIterations) +
-                     " iterations.";
+                     std::to_string(maxIterations) + " iterations.";
   }
 
   return success;

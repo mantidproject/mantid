@@ -35,10 +35,10 @@ public:
     alg.setOptions(numBins, false, false);
     delta = alg.determineBinning(xValues, 0., 300.);
     //    std::cout << "**** " << numBins << " **** " << xValues.front() << ", "
-    //    << delta << ", " << xValues.back() << " ****" << std::endl;
-    //    std::cout << "000> " << xValues.size() << std::endl;
+    //    << delta << ", " << xValues.back() << " ****\n";
+    //    std::cout << "000> " << xValues.size() << '\n';
     //    std::cout << "001> " << xValues[0] << ", " << xValues[1] << ", ..., "
-    //    << xValues.back() << std::endl;
+    //    << xValues.back() << '\n';
     TS_ASSERT_EQUALS(numBins, xValues.size() - 1);
     TS_ASSERT_DELTA(0.1, delta, .001);
     TS_ASSERT_EQUALS(0.0, xValues[0]);
@@ -59,10 +59,10 @@ public:
     alg.setOptions(numBins, false, true);
     delta = alg.determineBinning(xValues, 0.1, 300);
     //    std::cout << "**** " << numBins << " **** " << xValues.front() << ", "
-    //    << delta << ", " << xValues.back() << " ****" << std::endl;
-    //    std::cout << "000> " << xValues.size() << std::endl;
+    //    << delta << ", " << xValues.back() << " ****\n";
+    //    std::cout << "000> " << xValues.size() << '\n';
     //    std::cout << "001> " << xValues[0] << ", " << xValues[1] << ", ..., "
-    //    << xValues.back() << std::endl;
+    //    << xValues.back() << '\n';
     TS_ASSERT_EQUALS(numBins, xValues.size());
     TS_ASSERT_DELTA(0.1, delta, .001);
     TS_ASSERT_EQUALS(0.1, xValues[0]);
@@ -89,10 +89,10 @@ public:
     // do an actual run
     delta = alg.determineBinning(xValues, 0.1, 1.0);
     //    std::cout << "**** " << numBins << " **** " << xValues.front() << ", "
-    //    << delta << ", " << xValues.back() << " ****" << std::endl;
-    //    std::cout << "000> " << xValues.size() << std::endl;
+    //    << delta << ", " << xValues.back() << " ****\n";
+    //    std::cout << "000> " << xValues.size() << '\n';
     //    std::cout << "001> " << xValues[0] << ", " << xValues[1] << ", ..., "
-    //    << xValues.back() << std::endl;
+    //    << xValues.back() << '\n';
     TS_ASSERT_EQUALS(numBins, xValues.size() - 1);
     TS_ASSERT_EQUALS(0.1, xValues[0]);
     TS_ASSERT_EQUALS(1., xValues[3000]);
@@ -118,10 +118,10 @@ public:
     // do an actual run
     delta = alg.determineBinning(xValues, 0.1, 1.0);
     //    std::cout << "**** " << numBins << " **** " << xValues.front() << ", "
-    //    << delta << ", " << xValues.back() << " ****" << std::endl;
-    //    std::cout << "000> " << xValues.size() << std::endl;
+    //    << delta << ", " << xValues.back() << " ****\n";
+    //    std::cout << "000> " << xValues.size() << '\n';
     //    std::cout << "001> " << xValues[0] << ", " << xValues[1] << ", ..., "
-    //    << xValues.back() << std::endl;
+    //    << xValues.back() << '\n';
     TS_ASSERT_EQUALS(numBins, xValues.size());
     TS_ASSERT_EQUALS(0.1, xValues[0]);
     TS_ASSERT_EQUALS(1., xValues[2999]);

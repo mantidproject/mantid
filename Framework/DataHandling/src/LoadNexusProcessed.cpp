@@ -131,8 +131,7 @@ SpectraInfo extractMappingInfo(NXEntry &mtd_entry, Logger &logger) {
     detectorList = detlist_group.sharedBuffer();
   } catch (std::runtime_error &) {
     logger.information() << "detector_list block not found. The workspace will "
-                            "not contain any detector information."
-                         << std::endl;
+                            "not contain any detector information.\n";
     return SpectraInfo();
   }
 
@@ -291,10 +290,8 @@ Workspace_sptr LoadNexusProcessed::doAccelleratedMultiPeriodLoading(
   NXData wsEntry(mtdEntry, "workspace");
   if (!wsEntry.openLocal()) {
     std::stringstream buffer;
-    buffer
-        << "Group entry " << p - 1
-        << " is not a workspace 2D. Retry with FastMultiPeriod option set off."
-        << std::endl;
+    buffer << "Group entry " << p - 1 << " is not a workspace 2D. Retry with "
+                                         "FastMultiPeriod option set off.\n";
     throw std::runtime_error(buffer.str());
   }
 
@@ -302,7 +299,7 @@ Workspace_sptr LoadNexusProcessed::doAccelleratedMultiPeriodLoading(
     std::stringstream buffer;
     buffer << "Group entry " << p - 1 << " has fractional area present. Try "
                                          "reloading with FastMultiPeriod set "
-                                         "off." << std::endl;
+                                         "off.\n";
     throw std::runtime_error(buffer.str());
   }
 
@@ -546,7 +543,7 @@ std::string LoadNexusProcessed::buildWorkspaceName(const std::string &name,
                                                    int64_t wsIndex,
                                                    bool commonStem) {
   std::string wsName;
-  std::string index = boost::lexical_cast<std::string>(wsIndex);
+  std::string index = std::to_string(wsIndex);
 
   // if we don't have a common stem then use name tag
   if (!commonStem) {
@@ -587,7 +584,7 @@ void LoadNexusProcessed::correctForWorkspaceNameClash(std::string &wsName) {
     std::string wsIndex = ""; // dont use an index if there is no other
                               // workspace
     if (i > 0) {
-      wsIndex = "_" + boost::lexical_cast<std::string>(i);
+      wsIndex = "_" + std::to_string(i);
     }
 
     bool wsExists = AnalysisDataService::Instance().doesExist(wsName + wsIndex);
@@ -831,8 +828,7 @@ API::Workspace_sptr LoadNexusProcessed::loadTableEntry(NXEntry &entry) {
 
   int columnNumber = 1;
   do {
-    std::string dataSetName =
-        "column_" + boost::lexical_cast<std::string>(columnNumber);
+    std::string dataSetName = "column_" + std::to_string(columnNumber);
 
     NXInfo info = nx_tw.getDataSetInfo(dataSetName.c_str());
     if (info.stat == NX_ERROR) {
@@ -861,7 +857,7 @@ API::Workspace_sptr LoadNexusProcessed::loadTableEntry(NXEntry &entry) {
         loadNumericColumn<bool, bool>(nx_tw, dataSetName, workspace, "bool");
       } else {
         throw std::logic_error("Column with Nexus data type " +
-                               boost::lexical_cast<std::string>(info.type) +
+                               std::to_string(info.type) +
                                " cannot be loaded.");
       }
     } else if (info.rank == 2) {
@@ -997,8 +993,7 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(NXEntry &entry) {
   int numberPeaks = 0;
   std::vector<std::string> columnNames;
   do {
-    std::string str =
-        "column_" + boost::lexical_cast<std::string>(columnNumber);
+    std::string str = "column_" + std::to_string(columnNumber);
 
     NXInfo info = nx_tw.getDataSetInfo(str.c_str());
     if (info.stat == NX_ERROR) {
@@ -1294,7 +1289,7 @@ API::MatrixWorkspace_sptr LoadNexusProcessed::loadNonEventEntry(
     local_workspace->setTitle(mtd_entry.getString("title"));
   } catch (std::runtime_error &) {
     g_log.debug() << "No title was found in the input file, "
-                  << getPropertyValue("Filename") << std::endl;
+                  << getPropertyValue("Filename") << '\n';
   }
 
   // Set the YUnit label

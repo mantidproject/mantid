@@ -780,7 +780,7 @@ void DisplayDataY(const MatrixWorkspace_sptr ws) {
     for (size_t j = 0; j < ws->blocksize(); ++j) {
       std::cout << ws->readY(i)[j] << " ";
     }
-    std::cout << std::endl;
+    std::cout << '\n';
   }
 }
 void DisplayData(const MatrixWorkspace_sptr ws) { DisplayDataX(ws); }
@@ -794,7 +794,7 @@ void DisplayDataX(const MatrixWorkspace_sptr ws) {
     for (size_t j = 0; j < ws->blocksize(); ++j) {
       std::cout << ws->readX(i)[j] << " ";
     }
-    std::cout << std::endl;
+    std::cout << '\n';
   }
 }
 
@@ -807,7 +807,7 @@ void DisplayDataE(const MatrixWorkspace_sptr ws) {
     for (size_t j = 0; j < ws->blocksize(); ++j) {
       std::cout << ws->readE(i)[j] << " ";
     }
-    std::cout << std::endl;
+    std::cout << '\n';
   }
 }
 

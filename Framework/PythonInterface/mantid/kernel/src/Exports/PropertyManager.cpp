@@ -17,6 +17,7 @@ using namespace boost::python;
 
 void export_PropertyManager() {
   typedef boost::shared_ptr<PropertyManager> PropertyManager_sptr;
+  register_ptr_to_python<PropertyManager_sptr>();
 
   // The second argument defines the actual type held within the Python object.
   // This means that when a PropertyManager is constructed in Python it actually

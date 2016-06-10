@@ -191,7 +191,7 @@ public:
       ld.setPropertyValue("Filename", filename);
     } catch (...) {
       std::cout << "Test not completed due to missing data file " << filename
-                << std::endl;
+                << '\n';
       return Mantid::API::MatrixWorkspace_sptr();
     }
     ld.setProperty("Signal", signal);

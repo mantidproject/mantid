@@ -629,14 +629,13 @@ bool ApplicationWindow::shouldWeShowFirstTimeSetup(
       const Mantid::Kernel::InstrumentInfo &instrumentInfo =
           config.getInstrument(instrument);
       g_log.information() << "Default facility '" << facilityInfo.name()
-                          << "', instrument '" << instrumentInfo.name() << "'"
-                          << std::endl;
+                          << "', instrument '" << instrumentInfo.name()
+                          << "'\n";
     } catch (Mantid::Kernel::Exception::NotFoundError &) {
       // failed to find the facility or instrument
       g_log.error() << "Could not find your default facility '" << facility
                     << "' or instrument '" << instrument
-                    << "' in facilities.xml, showing please select again."
-                    << std::endl;
+                    << "' in facilities.xml, showing please select again.\n";
       return true;
     }
   }
@@ -9969,7 +9968,7 @@ void ApplicationWindow::showWindowPopupMenu(const QPoint &p) {
         }
       }
     } else if (isOfType(w, "TiledWindow")) {
-      std::cerr << "Menu for TiledWindow" << std::endl;
+      std::cerr << "Menu for TiledWindow\n";
     }
     cm.exec(lv->mapToGlobal(p));
   }
@@ -15981,7 +15980,7 @@ void ApplicationWindow::loadCustomActions() {
 QList<QMenu *> ApplicationWindow::customizableMenusList() {
   QList<QMenu *> lst;
   lst << windowsMenu << view << graph << fileMenu << format << edit;
-  lst << help << plot2DMenu << analysisMenu << multiPeakMenu;
+  lst << help << plot2DMenu << analysisMenu;
   lst << matrixMenu << plot3DMenu << plotDataMenu; // scriptingMenu;
   lst << tableMenu << fillMenu << normMenu << newMenu << exportPlotMenu
       << smoothMenu;

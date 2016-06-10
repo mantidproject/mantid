@@ -710,7 +710,7 @@ void SliceViewer::setWorkspace(Mantid::API::IMDWorkspace_sptr ws) {
         boost::math::isnan(max) || boost::math::isinf(max)) {
       mess << "Dimension " << m_ws->getDimension(d)->getName()
            << " has a bad range: (";
-      mess << min << ", " << max << ")" << std::endl;
+      mess << min << ", " << max << ")\n";
     }
     size_t numBins = static_cast<size_t>((max - min) / binSizes[d]);
     MDHistoDimension_sptr dim(
@@ -721,9 +721,8 @@ void SliceViewer::setWorkspace(Mantid::API::IMDWorkspace_sptr ws) {
 
   if (!mess.str().empty()) {
     mess << "Bad ranges could cause memory allocation errors. Please fix the "
-            "workspace.";
-    mess << std::endl
-         << "You can continue using Mantid.";
+            "workspace.\n"
+            "You can continue using Mantid.";
     throw std::out_of_range(mess.str());
   }
 

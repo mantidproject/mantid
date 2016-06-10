@@ -51,7 +51,7 @@ size_t getIndexFromDetectorID(MatrixWorkspace_sptr ws, detid_t detid) {
   if (result.empty())
     throw std::invalid_argument(
         "Could not find the spectra corresponding to detector ID " +
-        boost::lexical_cast<std::string>(detid));
+        std::to_string(detid));
 
   return result[0];
 }
@@ -192,10 +192,10 @@ void CalculateTransmission::exec() {
 
     BOOST_FOREACH (size_t transmissionIndex, transmissionIndices)
       if (transmissionIndex == beamMonitorIndex)
-        throw std::invalid_argument(
-            "The IncidentBeamMonitor UDET (" +
-            boost::lexical_cast<std::string>(transmissionIndex) +
-            ") matches a UDET given in " + transPropName + ".");
+        throw std::invalid_argument("The IncidentBeamMonitor UDET (" +
+                                    std::to_string(transmissionIndex) +
+                                    ") matches a UDET given in " +
+                                    transPropName + ".");
   }
 
   MatrixWorkspace_sptr sampleInc;
@@ -495,8 +495,7 @@ CalculateTransmission::rebin(std::vector<double> &binParams,
 void CalculateTransmission::logIfNotMonitor(API::MatrixWorkspace_sptr sampleWS,
                                             API::MatrixWorkspace_sptr directWS,
                                             size_t index) {
-  const std::string message = "The detector at index " +
-                              boost::lexical_cast<std::string>(index) +
+  const std::string message = "The detector at index " + std::to_string(index) +
                               " is not a monitor in the ";
   if (!sampleWS->getDetector(index)->isMonitor())
     g_log.information(message + "sample workspace.");

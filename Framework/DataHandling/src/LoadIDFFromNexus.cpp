@@ -303,7 +303,7 @@ void LoadIDFFromNexus::LoadParameters(
     }
   } else { // We do have parameters from the Nexus file
     g_log.notice() << "Found Instrument parameter map entry in Nexus file, "
-                      "which is loaded.\n" << std::endl;
+                      "which is loaded.\n\n";
     // process parameterString into parameters in workspace
     localWorkspace->readParameterMap(parameterString);
   }
@@ -323,7 +323,7 @@ bool LoadIDFFromNexus::loadParameterFile(
     loadParamAlg->setProperty("Workspace", localWorkspace);
     loadParamAlg->execute();
     g_log.notice() << "Instrument parameter file: " << fullPathName
-                   << " has been loaded.\n" << std::endl;
+                   << " has been loaded.\n\n";
     return true; // Success
   } catch (std::runtime_error &) {
     g_log.debug() << "Instrument parameter file: " << fullPathName
