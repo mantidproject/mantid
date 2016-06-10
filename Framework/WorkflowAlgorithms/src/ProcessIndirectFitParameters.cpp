@@ -176,8 +176,8 @@ void ProcessIndirectFitParameters::exec() {
   const auto numberOfHist = outputWs->getNumberHistograms();
   auto axis = new TextAxis(numberOfHist);
   size_t offset = 0;
-    for (size_t k = 0; k < numberOfHist; k++) {
-      axis->setLabel(k , outputSpectraNames[k]);
+  for (size_t k = 0; k < numberOfHist; k++) {
+    axis->setLabel(k, outputSpectraNames[k]);
   }
   outputWs->replaceAxis(1, axis);
 
