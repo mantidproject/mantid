@@ -13,7 +13,7 @@ namespace SliceViewer {
 PeaksViewer::PeaksViewer(QWidget *parent) : QWidget(parent) {
   this->setMinimumWidth(500);
   Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
-    "Feature", "SliceViewer->PeaksViewer", false);
+      "Feature", "SliceViewer->PeaksViewer", false);
 }
 
 void PeaksViewer::setPeaksWorkspaces(const SetPeaksWorkspaces &) {}

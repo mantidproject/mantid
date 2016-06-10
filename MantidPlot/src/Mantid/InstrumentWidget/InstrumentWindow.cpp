@@ -26,7 +26,7 @@ InstrumentWindow::InstrumentWindow(const QString &wsName, const QString &label,
   connect(m_instrumentWidget, SIGNAL(clearingHandle()), this,
           SLOT(closeSafely()));
   Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
-    "Interface", "InstrumentView", false);
+      "Interface", "InstrumentView", false);
 }
 
 InstrumentWindow::~InstrumentWindow() {}
