@@ -314,7 +314,7 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
     def _sample(self):
         sample_prog = Progress(self, start=0.01, end=0.03, nreports=2)
         sample_prog.report('Setting Sample Material for Sample') 
-        set_material_alg = self.createChildAlgorithm('SetSampleMaterial)
+        set_material_alg = self.createChildAlgorithm('SetSampleMaterial')
         set_material_alg.setProperty('InputWorkspace', self._sample_ws_name)
         set_material_alg.setProperty('ChemicalFormula', self._sample_chemical_formula)
         if self._use_sample_mass_density:
@@ -338,7 +338,7 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
 
         if self._use_can:
             sample_prog.report('Setting Sample Material for Container') 
-            set_material_alg = self.createChildAlgorithm('SetSampleMaterial)
+            set_material_alg = self.createChildAlgorithm('SetSampleMaterial')
             set_material_alg.setProperty('InputWorkspace', self._can_ws_name)
             set_material_alg.setProperty('ChemicalFormula', self._can_chemical_formula)
             if self._use_can_mass_density:

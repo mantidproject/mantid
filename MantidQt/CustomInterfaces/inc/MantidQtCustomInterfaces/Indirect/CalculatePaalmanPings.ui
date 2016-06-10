@@ -488,7 +488,7 @@
      </property>
      <layout class="QGridLayout" name="gridLayout">
       <item row="0" column="1">
-       <widget class="QDoubleSpinBox" name="spSampleNumberDensity">
+       <widget class="QDoubleSpinBox" name="spSampleDensity">
         <property name="maximum">
          <double>9999.989999999999782</double>
         </property>
@@ -563,7 +563,7 @@
      </property>
      <layout class="QGridLayout" name="gridLayout_3">
       <item row="0" column="0">
-       <widget class="QComboBox" name="cbCanNumberDensity">
+       <widget class="QComboBox" name="cbCanDensity">
          <item>
            <property name="text">
              <string>Number Density</string>
@@ -587,7 +587,7 @@
        </widget>
       </item>
       <item row="0" column="1">
-       <widget class="QDoubleSpinBox" name="spCanNumberDensity">
+       <widget class="QDoubleSpinBox" name="spCanDensity">
         <property name="maximum">
          <double>9999.989999999999782</double>
         </property>

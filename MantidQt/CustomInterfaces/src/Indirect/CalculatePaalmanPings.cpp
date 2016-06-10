@@ -67,8 +67,15 @@ void CalculatePaalmanPings::run() {
     absCorProps["SampleWorkspace"] = sampleWsName.toStdString();
   }
 
-  double sampleNumberDensity = m_uiForm.spSampleNumberDensity->value();
-  absCorAlgo->setProperty("SampleNumberDensity", sampleNumberDensity);
+  double sampleDensity = m_uiForm.spSampleDensity->value();
+  auto sampleDensityIndex = m_uiForm.cbSampleDensity->currentIndex();
+  if (sampleDensityIndex == 0) {
+    absCorAlgo->setProperty("SampleNumberDensity", sampleDensity);
+    absCorAlgo->setProperty("UseSampleMassDensity", false);
+  } else {
+    absCorAlgo->setProperty("SampleMassDensity", sampleDensity);
+    absCorAlgo->setProperty("UseSampleMassDensity", true);
+  }
 
   QString sampleChemicalFormula = m_uiForm.leSampleChemicalFormula->text();
   absCorAlgo->setProperty("SampleChemicalFormula",
@@ -94,8 +101,15 @@ void CalculatePaalmanPings::run() {
       absCorProps["CanWorkspace"] = canWsName.toStdString();
     }
 
-    double canNumberDensity = m_uiForm.spCanNumberDensity->value();
-    absCorAlgo->setProperty("CanNumberDensity", canNumberDensity);
+    double canDensity = m_uiForm.spCanDensity->value();
+    auto canDensityIndex = m_uiForm.cbCanDensity->currentIndex();
+    if (canDensityIndex == 0) {
+      absCorAlgo->setProperty("CanNumberDensity", canDensity);
+      absCorAlgo->setProperty("UseCanMassDensity", false);
+    } else {
+      absCorAlgo->setProperty("CanMassDensity", canDensity);
+      absCorAlgo->setProperty("UseCanMassDensity", true);
+    }
 
     QString canChemicalFormula = m_uiForm.leCanChemicalFormula->text();
     absCorAlgo->setProperty("CanChemicalFormula",

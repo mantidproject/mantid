@@ -83,7 +83,7 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
         self.declareProperty(name='CanMassDensity', defaultValue=1.0,
                              validator=FloatBoundedValidator(0.0),
                              doc='Container number density in g/cm3')
-        self.declareProperty(name='UseContainerMassDensity', defaultValue=False,
+        self.declareProperty(name='UseCanMassDensity', defaultValue=False,
                              doc='Use Container Mass Density (True) or Container Number Density (False).')
         self.declareProperty(name='CanFrontThickness', defaultValue=0.0,
                              validator=FloatBoundedValidator(0.0),
@@ -133,7 +133,7 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
         setup_prog = Progress(self, start=0.0, end=0.2, nreports=2)
         # Set sample material form chemical formula
         setup_prog.report('Set sample material')
-        set_material_alg = self.createChildAlgorithm('SetSampleMaterial)
+        set_material_alg = self.createChildAlgorithm('SetSampleMaterial')
         set_material_alg.setProperty('InputWorkspace', self._sample_ws_name)
         set_material_alg.setProperty('ChemicalFormula', self._sample_chemical_formula)
         if self._use_sample_mass_density:
@@ -147,7 +147,7 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
         # If using a can, set sample material using chemical formula
         if self._use_can:
             setup_prog.report('Set contianer sample material')
-            set_material_alg = self.createChildAlgorithm('SetSampleMaterial)
+            set_material_alg = self.createChildAlgorithm('SetSampleMaterial')
             set_material_alg.setProperty('InputWorkspace', self._can_ws_name)
             set_material_alg.setProperty('ChemicalFormula', self._can_chemical_formula)
             if self._use_can_mass_density:
