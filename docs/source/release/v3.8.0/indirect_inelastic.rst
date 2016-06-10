@@ -11,6 +11,8 @@ New features
 Algorithms
 ##########
 
+* Remove CylinderPaalmanPingsCorrection v1. This algorithm has been replaced by :ref:`CylinderPaalmanPingsCorrection <algm-CylinderPaalmanPingsCorrection>`
+
 Data Analysis
 #############
 
