@@ -3,11 +3,11 @@
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/Property.h"
-#include <MantidKernel/StringTokenizer.h>
 #include "MantidQtAPI/PythonRunner.h"
+#include <MantidKernel/StringTokenizer.h>
 // #include "MantidQtCustomInterfaces/EnggDiffraction/EnggDiffractionModel.h"
-#include "MantidQtCustomInterfaces/EnggDiffraction/EnggDiffractionPresenter.h"
 #include "MantidQtCustomInterfaces/EnggDiffraction/EnggDiffractionPresWorker.h"
+#include "MantidQtCustomInterfaces/EnggDiffraction/EnggDiffractionPresenter.h"
 #include "MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffractionView.h"
 #include "MantidQtCustomInterfaces/Muon/ALCHelper.h"
 
@@ -18,8 +18,8 @@
 #include "Poco/DirectoryIterator.h"
 #include <Poco/File.h>
 
-#include <QThread>
 #include <MantidAPI/AlgorithmManager.h>
+#include <QThread>
 
 using namespace Mantid::API;
 using namespace MantidQt::CustomInterfaces;
@@ -661,6 +661,7 @@ void MantidQt::CustomInterfaces::EnggDiffractionPresenter::
 
           // add bank to the combo-box and list view
           m_view->addBankItems(splitBaseName, focusedFile);
+          setDefaultBank(splitBaseName, focusedFile);
           runNoVec.clear();
           runNoVec.push_back(splitBaseName[1]);
           auto fittingMultiRunMode = m_view->getFittingMultiRunMode();
@@ -702,6 +703,7 @@ void MantidQt::CustomInterfaces::EnggDiffractionPresenter::
 
           // add bank to the combo-box and list view
           m_view->addBankItems(splitBaseName, focusedFile);
+          setDefaultBank(splitBaseName, focusedFile);
           runNoVec.clear();
           runNoVec.push_back(strFocusedFile);
 
@@ -1385,7 +1387,7 @@ void EnggDiffractionPresenter::setDefaultBank(
 	if (!splittedBaseName.empty()) {
 
 		std::string bankID = (splittedBaseName.back());
-		auto combo_data = m_view->getFittingComboText(bankID);
+		auto combo_data = m_view->getFittingComboIdx(bankID);
 
 		if (combo_data > -1) {
 			m_view->setBankIdComboBox(combo_data);
