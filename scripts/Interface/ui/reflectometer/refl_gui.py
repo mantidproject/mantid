@@ -22,6 +22,7 @@ from isis_reflectometry import load_live_runs
 from isis_reflectometry.combineMulti import *
 import mantidqtpython
 from mantid.api import Workspace, WorkspaceGroup, CatalogManager, AlgorithmManager
+from mantid import UsageService
 
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
@@ -123,6 +124,8 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
         settings.endGroup()
 
         del settings
+        #register startup
+        UsageService.registerFeatureUsage("Interface", "ISIS Reflectomety", False)
 
     def __del__(self):
         """
