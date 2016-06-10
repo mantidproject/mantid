@@ -33,8 +33,8 @@ Output:
 
 .. testoutput:: ClearCacheExample
    :options: +ELLIPSIS
-
-  ... files were removed
+   
+   ... files were removed
 
 .. categories::
 
