@@ -81,8 +81,8 @@ bool Correlation::setDataFromTable(Table *t, const QString &colName1,
   if (endRow < 0 || endRow >= t->numRows())
     endRow = t->numRows() - 1;
 
-  int from = QMIN(startRow, endRow);
-  int to = QMAX(startRow, endRow);
+  int from = qMin(startRow, endRow);
+  int to = qMax(startRow, endRow);
 
   int rows = abs(to - from) + 1;
   d_n = 16; // tmp number of points

@@ -146,7 +146,7 @@ void MaskBinsFromTable::processMaskBinWorkspace(
   if (!masktblws)
     throw std::invalid_argument("Input workspace is not a table workspace.");
   g_log.debug() << "Lines of parameters workspace = " << masktblws->rowCount()
-                << std::endl;
+                << '\n';
 
   // Check column names type and sequence
   vector<std::string> colnames = masktblws->getColumnNames();

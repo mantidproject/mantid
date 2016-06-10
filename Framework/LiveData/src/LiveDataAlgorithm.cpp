@@ -253,7 +253,7 @@ IAlgorithm_sptr LiveDataAlgorithm::makeAlgorithm(bool postProcessing) {
     if (!script.empty())
       g_log.warning() << "Running algorithm " << algoName
                       << " and ignoring the script code in "
-                      << prefix + "ProcessingScript" << std::endl;
+                      << prefix + "ProcessingScript\n";
     return alg;
   } else if (!script.empty()) {
     // Run a snippet of python

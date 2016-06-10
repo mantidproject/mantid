@@ -105,7 +105,7 @@ void StripVanadiumPeaks2::exec() {
   } else {
     g_log.error() << "Unit " << unit << " Is NOT supported by "
                                         "StripVanadiumPeaks, which only "
-                                        "supports d-spacing" << std::endl;
+                                        "supports d-spacing\n";
     throw std::invalid_argument("Not supported unit");
   }
 

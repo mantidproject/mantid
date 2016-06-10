@@ -18,6 +18,7 @@
 #include <QToolBar>
 #include <QAction>
 #include <QMenu>
+#include <QMouseEvent>
 #include <QInputDialog>
 #include <QMessageBox>
 
@@ -36,7 +37,7 @@ PeakPickerTool::PeakPickerTool(
       m_addingPeak(false), m_resetting(false), m_xMin(0.), m_xMax(0.),
       m_changingXMin(false), m_changingXMax(false),
       m_shouldBeNormalised(false) {
-  d_graph->plotWidget()->canvas()->setCursor(Qt::pointingHandCursor);
+  d_graph->plotWidget()->canvas()->setCursor(Qt::PointingHandCursor);
 
   addExistingFitsAndGuess(d_graph->curvesList());
 
@@ -243,7 +244,7 @@ bool PeakPickerTool::eventFilter(QObject *obj, QEvent *event) {
       } else if (m_addingPeak) {
         addPeakAt(p.x(), p.y());
         m_addingPeak = false;
-        d_graph->plotWidget()->canvas()->setCursor(Qt::pointingHandCursor);
+        d_graph->plotWidget()->canvas()->setCursor(Qt::PointingHandCursor);
         setToolTip("");
       } else if (mod.testFlag(Qt::ShiftModifier)) // Shift button was pressed
       {
@@ -287,7 +288,7 @@ bool PeakPickerTool::eventFilter(QObject *obj, QEvent *event) {
 
   // Mouse button up - stop all changes
   case QEvent::MouseButtonRelease:
-    d_graph->plotWidget()->canvas()->setCursor(Qt::pointingHandCursor);
+    d_graph->plotWidget()->canvas()->setCursor(Qt::PointingHandCursor);
     widthIsSet();
     if ((m_changingXMin || m_changingXMax) &&
         m_fitPropertyBrowser->isAutoBack()) {
@@ -551,7 +552,7 @@ void PeakPickerTool::algorithmFinished(const QString &out) {
       }
     } catch (Mantid::Kernel::Exception::NotFoundError &) {
       g_log.warning() << "PeakPicker cannot find output workspace '" +
-                             out.toStdString() + "'" << std::endl;
+                             out.toStdString() + "'\n";
     }
   }
 

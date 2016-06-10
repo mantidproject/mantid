@@ -703,7 +703,7 @@ void SurfPoint::setLeaf(std::unique_ptr<Rule> nR, const int)
   @param :: ignored
 */
 {
-  // std::cerr<<"Calling SurfPoint setLeaf"<<std::endl;
+  // std::cerr<<"Calling SurfPoint setLeaf"<<'\n';
 
   SurfPoint *newX = dynamic_cast<SurfPoint *>(nR.get());
   if (newX)
@@ -718,7 +718,7 @@ void SurfPoint::setLeaves(std::unique_ptr<Rule> aR, std::unique_ptr<Rule>)
   @param aR :: new rule
 */
 {
-  // std::cerr<<"Calling SurfPoint setLeaf"<<std::endl;
+  // std::cerr<<"Calling SurfPoint setLeaf"<<'\n';
   SurfPoint *newX = dynamic_cast<SurfPoint *>(aR.get());
   if (newX)
     *this = *newX;
@@ -919,7 +919,7 @@ void SurfPoint::getBoundingBox(double &xmax, double &ymax, double &zmax,
       xmax = ymax = zmax = -DBL_MAX;
       for (std::vector<V3D>::const_iterator it = listOfPoints.begin();
            it != listOfPoints.end(); ++it) {
-        //			std::cout<<(*it)<<std::endl;
+        //			std::cout<<(*it)<<'\n';
         if ((*it)[0] < xmin)
           xmin = (*it)[0];
         if ((*it)[1] < ymin)
@@ -1200,7 +1200,7 @@ void CompObj::getBoundingBox(double &xmax, double &ymax, double &zmax,
     xmax = ymax = zmax = -DBL_MAX;
     for (std::vector<V3D>::const_iterator it = listOfPoints.begin();
          it != listOfPoints.end(); ++it) {
-      //			std::cout<<(*it)<<std::endl;
+      //			std::cout<<(*it)<<'\n';
       if ((*it)[0] < xmin)
         xmin = (*it)[0];
       if ((*it)[1] < ymin)
@@ -1276,7 +1276,7 @@ void BoolValue::setLeaf(std::unique_ptr<Rule> aR, const int)
   secont argument ignored ( Null side point)
 */
 {
-  // std::cerr<<"Calling BoolValue setLeaf"<<std::endl;
+  // std::cerr<<"Calling BoolValue setLeaf"<<'\n';
   BoolValue *newX = dynamic_cast<BoolValue *>(aR.get());
   if (newX)
     *this = *newX;
@@ -1292,7 +1292,7 @@ void BoolValue::setLeaves(std::unique_ptr<Rule> aR, std::unique_ptr<Rule> oR)
 */
 {
   (void)oR; // Avoid compiler warning
-  // std::cerr<<"Calling BoolValue setLeaves"<<std::endl;
+  // std::cerr<<"Calling BoolValue setLeaves"<<'\n';
   BoolValue *newX = dynamic_cast<BoolValue *>(aR.get());
   if (newX)
     *this = *newX;
@@ -1653,7 +1653,7 @@ void CompGrp::getBoundingBox(double &xmax, double &ymax, double &zmax,
     xmax = ymax = zmax = -DBL_MAX;
     for (std::vector<V3D>::const_iterator it = listOfPoints.begin();
          it != listOfPoints.end(); ++it) {
-      //			std::cout<<(*it)<<std::endl;
+      //			std::cout<<(*it)<<'\n';
       if ((*it)[0] < xmin)
         xmin = (*it)[0];
       if ((*it)[1] < ymin)

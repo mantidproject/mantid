@@ -684,7 +684,7 @@ void SANSRunWindow::readSettings() {
                 << "\nFound previous user mask file "
                 << m_uiForm.userfile_edit->text().toStdString()
                 << "\nFound instrument definition directory "
-                << m_ins_defdir.toStdString() << std::endl;
+                << m_ins_defdir.toStdString() << '\n';
 }
 /** Sets the states of the checkboxes in the save box using those
 * in the passed QSettings object
@@ -752,7 +752,7 @@ QString SANSRunWindow::runReduceScriptFunction(const QString &pycode) {
   if (!m_have_reducemodule) {
     return QString();
   }
-  g_log.debug() << "Executing Python: " << pycode.toStdString() << std::endl;
+  g_log.debug() << "Executing Python: " << pycode.toStdString() << '\n';
 
   const static QString PYTHON_SEP("C++runReduceScriptFunctionC++");
   QString code_torun = pycode + ";print '" + PYTHON_SEP + "p'";

@@ -286,11 +286,11 @@ void ReflectivityMulf::setAttribute(const std::string &attName,
     declareParameter("Resolution", coeff[6]);
 
     for (int i = 0; i < m_nlayer; ++i) {
-      std::string parName = "SLD_Layer" + boost::lexical_cast<std::string>(i);
+      std::string parName = "SLD_Layer" + std::to_string(i);
       declareParameter(parName, coeff[7 + i * 3]);
-      parName = "d_Layer" + boost::lexical_cast<std::string>(i);
+      parName = "d_Layer" + std::to_string(i);
       declareParameter(parName, coeff[8 + i * 3]);
-      parName = "Rough_Layer" + boost::lexical_cast<std::string>(i);
+      parName = "Rough_Layer" + std::to_string(i);
       declareParameter(parName, coeff[9 + i * 3]);
     }
   }

@@ -2,6 +2,7 @@
 #include <MantidAPI/Algorithm.h>
 
 #include <QSettings>
+#include <QStringList>
 #include <vector>
 
 using namespace Mantid::API;

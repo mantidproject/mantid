@@ -3,6 +3,9 @@
 #include "ApplicationWindow.h"
 
 #include <QApplication>
+#include <QDrag>
+#include <QMimeData>
+#include <QMoveEvent>
 
 /**
  * Constructor.
@@ -40,7 +43,7 @@ void DockedWindow::setMdiSubWindow(MdiSubWindow *sw) {
  * Process state change events such as activation, minimizing or maximizing.
  */
 bool DockedWindow::event(QEvent *e) {
-  // std::cerr << "Docked event " << e->type() << std::endl;
+  // std::cerr << "Docked event " << e->type() << '\n';
   if (e->type() == QEvent::NonClientAreaMouseButtonPress) {
     // User clicked the window title bar
     m_draggingToTiledWindow = true;

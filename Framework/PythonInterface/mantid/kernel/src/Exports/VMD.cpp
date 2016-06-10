@@ -23,10 +23,9 @@ VMD_t getItem(VMD &self, const size_t index) {
   if (index < self.getNumDims()) {
     return self[index];
   } else
-    throw std::out_of_range(
-        "VMD index out of range. index=" +
-        boost::lexical_cast<std::string>(index) + ", len=" +
-        boost::lexical_cast<std::string>(self.getNumDims()));
+    throw std::out_of_range("VMD index out of range. index=" +
+                            std::to_string(index) + ", len=" +
+                            std::to_string(self.getNumDims()));
 }
 
 /**
@@ -40,10 +39,9 @@ void setItem(VMD &self, const size_t index, const VMD_t value) {
   if (index < self.getNumDims()) {
     self[index] = value;
   } else
-    throw std::out_of_range(
-        "VMD index out of range. index=" +
-        boost::lexical_cast<std::string>(index) + ", len=" +
-        boost::lexical_cast<std::string>(self.getNumDims()));
+    throw std::out_of_range("VMD index out of range. index=" +
+                            std::to_string(index) + ", len=" +
+                            std::to_string(self.getNumDims()));
 }
 }
 

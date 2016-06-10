@@ -130,7 +130,7 @@ bool RenameWorkspace::processGroups() {
       } catch (Kernel::Exception::NotFoundError &ex) {
         // Will wind up here if group has somehow got messed up and a member
         // doesn't exist. Should't be possible!
-        g_log.error() << ex.what() << std::endl;
+        g_log.error() << ex.what() << '\n';
       }
     }
   }

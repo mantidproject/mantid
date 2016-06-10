@@ -354,10 +354,10 @@ std::string Expression::GetOp(size_t i) {
 void Expression::logPrint(const std::string &pads) const {
   std::string myPads = pads + "   ";
   if (!m_terms.empty()) {
-    std::cerr << myPads << m_op << '[' << m_funct << ']' << "(" << '\n';
+    std::cerr << myPads << m_op << '[' << m_funct << ']' << "(\n";
     for (const auto &term : m_terms)
       term.logPrint(myPads);
-    std::cerr << myPads << ")" << '\n';
+    std::cerr << myPads << ")\n";
   } else
     std::cerr << myPads << m_op << m_funct << '\n';
 }

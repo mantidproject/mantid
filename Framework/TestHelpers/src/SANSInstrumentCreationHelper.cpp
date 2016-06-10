@@ -124,7 +124,7 @@ void SANSInstrumentCreationHelper::runLoadMappingTable(
 
   // Monitor: IDs start at 1 and increment by 1
   for (size_t i = 0; i < nMonitors; i++) {
-    // std::cout << "SANS instrument monitor number " << i << std::endl;
+    // std::cout << "SANS instrument monitor number " << i << '\n';
     workspace->getSpectrum(wi)->setSpectrumNo(specnum_t(wi));
     workspace->getSpectrum(wi)->setDetectorID(detid_t(wi + 1));
     wi++;

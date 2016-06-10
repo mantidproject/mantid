@@ -48,7 +48,7 @@ void CatalogLogin::exec() {
         "There is no soap end-point for the facility you have selected.");
 
   g_log.notice() << "Attempting to verify user credentials against "
-                 << catalogInfo.catalogName() << std::endl;
+                 << catalogInfo.catalogName() << '\n';
   progress(0.5, "Verifying user credentials...");
 
   // Creates a new catalog and related session if the authentication is a
