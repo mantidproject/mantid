@@ -1,9 +1,9 @@
+#include "MantidQtCustomInterfaces/EnggDiffraction/EnggDiffractionViewQtGUI.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidKernel/ConfigService.h"
-#include "MantidQtAPI/AlgorithmRunner.h"
 #include "MantidQtAPI/AlgorithmInputHistory.h"
+#include "MantidQtAPI/AlgorithmRunner.h"
 #include "MantidQtAPI/HelpWindow.h"
-#include "MantidQtCustomInterfaces/EnggDiffraction/EnggDiffractionViewQtGUI.h"
 #include "MantidQtCustomInterfaces/EnggDiffraction/EnggDiffractionPresenter.h"
 #include "MantidQtMantidWidgets/MWRunFiles.h"
 #include "Poco/DirectoryIterator.h"
@@ -15,8 +15,8 @@ using namespace MantidQt::CustomInterfaces;
 #include <fstream>
 #include <random>
 
-#include <boost/lexical_cast.hpp>
 #include <Poco/Path.h>
+#include <boost/lexical_cast.hpp>
 
 #include <QCheckBox>
 #include <QCloseEvent>
@@ -1405,38 +1405,38 @@ std::string EnggDiffractionViewQtGUI::getFittingRunNo() const {
   return m_uiTabFitting.lineEdit_pushButton_run_num->text().toStdString();
 }
 
-void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::clearFittingComboBox() const
-{
-	m_uiTabFitting.comboBox_bank->clear();
+void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::
+    clearFittingComboBox() const {
+  m_uiTabFitting.comboBox_bank->clear();
 }
 
-void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::enableFittingComboBox(bool enable) const
-{
-	m_uiTabFitting.comboBox_bank->setEnabled(enable);
+void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::
+    enableFittingComboBox(bool enable) const {
+  m_uiTabFitting.comboBox_bank->setEnabled(enable);
 }
 
-void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::clearFittingListWidget() const
-{
-	m_uiTabFitting.listWidget_fitting_run_num->clear();
+void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::
+    clearFittingListWidget() const {
+  m_uiTabFitting.listWidget_fitting_run_num->clear();
 }
 
-void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::enableFittingListWidget(bool enable) const
-{
-	m_uiTabFitting.listWidget_fitting_run_num->setEnabled(enable);
+void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::
+    enableFittingListWidget(bool enable) const {
+  m_uiTabFitting.listWidget_fitting_run_num->setEnabled(enable);
 }
 
-int MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::getFittingListWidgetCurrentRow() const
-{
-	return m_uiTabFitting.listWidget_fitting_run_num->currentRow();
+int MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::
+    getFittingListWidgetCurrentRow() const {
+  return m_uiTabFitting.listWidget_fitting_run_num->currentRow();
 }
 
-void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::setFittingListWidgetCurrentRow(int idx) const
-{
-	m_uiTabFitting.listWidget_fitting_run_num->setCurrentRow(idx);
+void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::
+    setFittingListWidgetCurrentRow(int idx) const {
+  m_uiTabFitting.listWidget_fitting_run_num->setCurrentRow(idx);
 }
 
 int EnggDiffractionViewQtGUI::getFittingComboIdx(std::string bank) const {
-	return m_uiTabFitting.comboBox_bank->findText(QString::fromStdString(bank));
+  return m_uiTabFitting.comboBox_bank->findText(QString::fromStdString(bank));
 }
 
 void EnggDiffractionViewQtGUI::plotSeparateWindow() {
@@ -1508,12 +1508,12 @@ MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::getFocusDir() {
 
 void EnggDiffractionViewQtGUI::addBankItem(QString bankID) {
 
-	m_uiTabFitting.comboBox_bank->addItem(bankID);
+  m_uiTabFitting.comboBox_bank->addItem(bankID);
 }
 
 void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::addRunNoItem(
-	QString runNo) {
-        m_uiTabFitting.listWidget_fitting_run_num->addItem(runNo);
+    QString runNo) {
+  m_uiTabFitting.listWidget_fitting_run_num->addItem(runNo);
 }
 
 std::vector<std::string> EnggDiffractionViewQtGUI::getFittingRunNumVec() {

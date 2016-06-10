@@ -1,8 +1,8 @@
 #ifndef MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_IENGGDIFFRACTIONVIEWQTGUI_H_
 #define MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_IENGGDIFFRACTIONVIEWQTGUI_H_
 
-#include "MantidQtAPI/UserSubWindow.h"
 #include "MantidAPI/IPeakFunction.h"
+#include "MantidQtAPI/UserSubWindow.h"
 #include "MantidQtCustomInterfaces/DllConfig.h"
 #include "MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffractionPresenter.h"
 #include "MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffractionView.h"
@@ -10,9 +10,9 @@
 
 #include "ui_EnggDiffractionQtGUI.h"
 #include "ui_EnggDiffractionQtTabCalib.h"
+#include "ui_EnggDiffractionQtTabFitting.h"
 #include "ui_EnggDiffractionQtTabFocus.h"
 #include "ui_EnggDiffractionQtTabPreproc.h"
-#include "ui_EnggDiffractionQtTabFitting.h"
 #include "ui_EnggDiffractionQtTabSettings.h"
 
 #include <boost/scoped_ptr.hpp>

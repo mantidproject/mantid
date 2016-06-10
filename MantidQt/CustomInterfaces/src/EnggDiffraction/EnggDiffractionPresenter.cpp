@@ -1471,43 +1471,40 @@ void EnggDiffractionPresenter::setRunNoItems(
 }
 
 void EnggDiffractionPresenter::setDefaultBank(
-	std::vector<std::string> splittedBaseName, QString selectedFile) {
+    std::vector<std::string> splittedBaseName, QString selectedFile) {
 
-	if (!splittedBaseName.empty()) {
+  if (!splittedBaseName.empty()) {
 
-		std::string bankID = (splittedBaseName.back());
-		auto combo_data = m_view->getFittingComboIdx(bankID);
+    std::string bankID = (splittedBaseName.back());
+    auto combo_data = m_view->getFittingComboIdx(bankID);
 
-		if (combo_data > -1) {
-			m_view->setBankIdComboBox(combo_data);
-		}
-		else {
-			m_view->setFittingRunNo(selectedFile);
-		}
-	}
-	// check if the vector is not empty so that the first directory
-	// can be assigned to text-field when number is given
-	else if (!m_view->getFittingRunNumVec().empty()) {
-		auto firstDir = m_view->getFittingRunNumVec().at(0);
-		auto intialDir = QString::fromStdString(firstDir);
-		m_view->setFittingRunNo(intialDir);
-	}
-	// if nothing found related to text-field input
-	else if (!m_view->getFittingRunNo().empty())
-		m_view->setFittingRunNo(selectedFile);
+    if (combo_data > -1) {
+      m_view->setBankIdComboBox(combo_data);
+    } else {
+      m_view->setFittingRunNo(selectedFile);
+    }
+  }
+  // check if the vector is not empty so that the first directory
+  // can be assigned to text-field when number is given
+  else if (!m_view->getFittingRunNumVec().empty()) {
+    auto firstDir = m_view->getFittingRunNumVec().at(0);
+    auto intialDir = QString::fromStdString(firstDir);
+    m_view->setFittingRunNo(intialDir);
+  }
+  // if nothing found related to text-field input
+  else if (!m_view->getFittingRunNo().empty())
+    m_view->setFittingRunNo(selectedFile);
 }
 
-bool EnggDiffractionPresenter::isDigit(std::string text)
-{
-	for (size_t i = 0; i < text.size(); i++) {
-		char *str = &text[i];
-		if (std::isdigit(*str)) {
-			return true;
-		}
-	}
-	return false;
+bool EnggDiffractionPresenter::isDigit(std::string text) {
+  for (size_t i = 0; i < text.size(); i++) {
+    char *str = &text[i];
+    if (std::isdigit(*str)) {
+      return true;
+    }
+  }
+  return false;
 }
-
 
 void EnggDiffractionPresenter::plotFitPeaksCurves() {
   AnalysisDataServiceImpl &ADS = Mantid::API::AnalysisDataService::Instance();
