@@ -250,7 +250,7 @@ class LRAutoReduction(PythonAlgorithm):
         return data_set, incident_medium
 
 
-    def _read_property(self, meta_data_run, key, default):
+    def _read_property(self, meta_data_run, key, default, is_string=False):
         """
             Read the value for the given key in the sample run logs
             @param meta_data_run: Run object from the Mantid workspace
@@ -258,10 +258,13 @@ class LRAutoReduction(PythonAlgorithm):
             @param default: default value to return if we don't find the key
         """
         if meta_data_run.hasProperty(key):
-            value = meta_data_run.getProperty(key).value
+            value = meta_data_run.getProperty(key).value[0]
         else:
             value = default
             logger.error("No %s value in the data logs: using %s=%s" % (key, key, default))
+        if is_string and len(value.strip()) == 0:
+            value = default
+            logger.error("Empty %s value in the data logs: using %s=%s" % (key, key, default))
         return value
 
 
@@ -293,17 +296,19 @@ class LRAutoReduction(PythonAlgorithm):
         # Get information from meta-data
         meta_data_run = self.event_data.getRun()
         _incident_medium = self.getProperty("IncidentMedium").value
-        incident_medium = self._read_property(meta_data_run, "incident_medium", _incident_medium)
+        incident_medium = self._read_property(meta_data_run, "incident_medium",
+                                              _incident_medium, is_string=True)
         
-        q_min = self._read_property(meta_data_run, "output_q_min", 0.001)[0]
-        q_step = -abs(self._read_property(meta_data_run, "output_q_step", 0.02))[0]
-        dQ_constant = self._read_property(meta_data_run, "dq_constant", 0.004)[0]
-        dQ_slope = self._read_property(meta_data_run, "dq_slope", 0.02)[0]
-        angle_offset = self._read_property(meta_data_run, "angle_offset", 0.016)[0]
-        angle_offset_err = self._read_property(meta_data_run, "angle_offset_error", 0.001)[0]
+        q_min = self._read_property(meta_data_run, "output_q_min", 0.001)
+        q_step = -abs(self._read_property(meta_data_run, "output_q_step", 0.02))
+        dQ_constant = self._read_property(meta_data_run, "dq_constant", 0.004)
+        dQ_slope = self._read_property(meta_data_run, "dq_slope", 0.02)
+        angle_offset = self._read_property(meta_data_run, "angle_offset", 0.016)
+        angle_offset_err = self._read_property(meta_data_run, "angle_offset_error", 0.001)
         
         _sf_file = self.getProperty("ScalingFactorFile").value
-        sf_file = self._read_property(meta_data_run, "scaling_factor_file", _sf_file)
+        sf_file = self._read_property(meta_data_run, "scaling_factor_file",
+                                      _sf_file, is_string=True)
 
         def _new_data_set():
             d = DataSets()
@@ -386,8 +391,12 @@ class LRAutoReduction(PythonAlgorithm):
         data_thi = self.event_data.getRun().getProperty('thi').value[0]
 
         _direct_beam_runs = self.getProperty("DirectBeamList").value
-        direct_beam_runs = self._read_property(meta_data_run, "direct_beam_runs", _direct_beam_runs)
-            
+        direct_beam_runs_str = self._read_property(meta_data_run, "direct_beam_runs",
+                                                   _direct_beam_runs, is_string=True)
+        try:
+            direct_beam_runs = [int(r.strip()) for r in direct_beam_runs_str.split(',')]
+        except ValueError:
+            direct_beam_runs = []
 
         # For each run, load and compare the wavelength
         direct_beam_found = None
@@ -539,7 +548,7 @@ class LRAutoReduction(PythonAlgorithm):
         # avoid processing runs we know will be processed later.
         read_sequence_from_file = self.getProperty("ReadSequenceFromFile").value
         if read_sequence_from_file:
-            return self._read_property(meta_data_run, "sequence_total", [default])[0]
+            return self._read_property(meta_data_run, "sequence_total", [default])
         else:
             return default
 
@@ -566,7 +575,9 @@ class LRAutoReduction(PythonAlgorithm):
             # The medium for these direct beam runs may not be what was set in the template,
             # so either use the medium in the data file or a default name
             meta_data_run = self.event_data.getRun()
-            incident_medium = self._read_property(meta_data_run, "incident_medium", "medium")
+            _incident_medium = self.getProperty("IncidentMedium").value
+            incident_medium = self._read_property(meta_data_run, "incident_medium",
+                                                  _incident_medium, is_string=True)
             file_id = incident_medium.replace("medium","")
             LRDirectBeamSort(RunList=range(first_run_of_set, first_run_of_set + sequence_number),
                              UseLowResCut=True, ComputeScalingFactors=True, TOFSteps=sf_tof_step,
