@@ -1481,47 +1481,11 @@ MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::getFocusDir() {
   return m_focusDir;
 }
 
-void EnggDiffractionViewQtGUI::addBankItems(
-    std::vector<std::string> splittedBaseName, QString selectedFile) {
-  try {
-    if (!m_fitting_runno_dir_vec.empty()) {
+void EnggDiffractionViewQtGUI::addBankItems(std::string bankID) {
 
-      // delete previous bank added to the list
-      m_uiTabFitting.comboBox_bank->clear();
+	auto QBankID = QString::fromStdString(bankID);
+	m_uiTabFitting.comboBox_bank->addItem(QBankID);
 
-      for (size_t i = 0; i < m_fitting_runno_dir_vec.size(); i++) {
-        Poco::Path vecFile(m_fitting_runno_dir_vec[i]);
-		std::string strVecFile = vecFile.toString();
-        // split the directory from m_fitting_runno_dir_vec
-        std::vector<std::string> vecFileSplit =
-            splitFittingDirectory(strVecFile);
-
-        // get the last split in vector which will be bank
-        std::string bankID = (vecFileSplit.back());
-
-        bool digit = isDigit(bankID);
-
-        if (digit)
-          m_uiTabFitting.comboBox_bank->addItem(QString::fromStdString(bankID));
-        else
-          m_uiTabFitting.comboBox_bank->addItem(QString("Bank %1").arg(i + 1));
-      }
-
-      m_uiTabFitting.comboBox_bank->setEnabled(true);
-    } else {
-      // upon invalid file
-      // disable the widgets when only one related file found
-      m_uiTabFitting.comboBox_bank->setEnabled(false);
-
-      m_uiTabFitting.comboBox_bank->clear();
-    }
-
-  } catch (std::runtime_error &re) {
-    userWarning("Unable to insert items: ",
-                "Could not add banks to "
-                "combo-box or list widget; " +
-                    static_cast<std::string>(re.what()) + ". Please try again");
-  }
 }
 
 void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::addRunNoItem(

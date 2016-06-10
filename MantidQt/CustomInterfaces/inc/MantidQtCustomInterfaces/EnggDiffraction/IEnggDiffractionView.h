@@ -426,10 +426,28 @@ public:
   */
   virtual bool isDigit(std::string text) = 0;
 
+
   /**
   * emits the signal within view when run number/bank changed
   */
   virtual void setBankEmit() = 0;
+
+  /**
+  * sets the bank combo-box according to given index
+  *
+  * @param idx as int of the bank to set
+  */
+  virtual void setBankIdComboBox(int idx) = 0;
+
+  /**
+  * gets the index of the bank according to text found
+  *
+  * @param bank as a std::string to find in widget
+  *
+  * @returns int index of the combo-box where the
+  * string is found
+  */
+  virtual int getFittingComboIdx(std::string bank) const = 0;
 
   /**
   * gets the set focus directory within the setting tab
