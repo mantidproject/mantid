@@ -163,6 +163,14 @@ public:
 
   int getFittingComboIdx(std::string bank) const override;
 
+  void clearFittingListWidget() const override;
+
+  void enableFittingListWidget(bool enable) const override;
+
+  int getFittingListWidgetCurrentRow() const override;
+
+  void setFittingListWidgetCurrentRow(int idx) const override;
+
   std::string fittingPeaksData() const override;
 
   std::vector<std::string>
@@ -175,10 +183,9 @@ public:
   void setDataVector(std::vector<boost::shared_ptr<QwtData>> &data,
                      bool focused, bool plotSinglePeaks) override;
 
-  void addBankItems(QString bankID) override;
+  void addBankItem(QString bankID) override;
 
-  void addRunNoItem(std::vector<std::string> runNumVector,
-                    bool multiRun) override;
+  void addRunNoItem(QString runNo) override;
 
   std::vector<std::string> getFittingRunNumVec() override;
 

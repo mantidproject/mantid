@@ -1415,6 +1415,26 @@ void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::enableFittingComboBox
 	m_uiTabFitting.comboBox_bank->setEnabled(enable);
 }
 
+void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::clearFittingListWidget() const
+{
+	m_uiTabFitting.listWidget_fitting_run_num->clear();
+}
+
+void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::enableFittingListWidget(bool enable) const
+{
+	m_uiTabFitting.listWidget_fitting_run_num->setEnabled(enable);
+}
+
+int MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::getFittingListWidgetCurrentRow() const
+{
+	return m_uiTabFitting.listWidget_fitting_run_num->currentRow();
+}
+
+void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::setFittingListWidgetCurrentRow(int idx) const
+{
+	m_uiTabFitting.listWidget_fitting_run_num->setCurrentRow(idx);
+}
+
 int EnggDiffractionViewQtGUI::getFittingComboIdx(std::string bank) const {
 	return m_uiTabFitting.comboBox_bank->findText(QString::fromStdString(bank));
 }
