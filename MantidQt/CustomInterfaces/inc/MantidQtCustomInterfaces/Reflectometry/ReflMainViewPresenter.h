@@ -1,30 +1,28 @@
 #ifndef MANTID_CUSTOMINTERFACES_REFLMAINVIEWPRESENTER_H
 #define MANTID_CUSTOMINTERFACES_REFLMAINVIEWPRESENTER_H
 
-#include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidQtCustomInterfaces/DllConfig.h"
 #include "MantidQtCustomInterfaces/Reflectometry/IReflPresenter.h"
-#include "MantidQtCustomInterfaces/Reflectometry/IReflSearcher.h"
-#include "MantidQtCustomInterfaces/Reflectometry/ReflMainView.h"
-#include "MantidQtCustomInterfaces/Reflectometry/ReflTransferStrategy.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/WorkspaceReceiver.h"
-
-#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorPresenter.h"
-#include "MantidQtMantidWidgets/ProgressableView.h"
-
-
-#include <Poco/AutoPtr.h>
-#include <memory>
 
 namespace MantidQt {
 
-//namespace MantidWidgets {
-//// Forward decs
-//class ProgressableView;
-//class DataProcessorPresenter;
-//}
+namespace MantidWidgets {
+// Forward decs
+class ProgressableView;
+class DataProcessorPresenter;
+}
 
 namespace CustomInterfaces {
+
+// Forward decs
+class ReflMainView;
+class ReflSearchModel;
+class IReflSearcher;
+class ReflTransferStrategy;
+
+using MantidWidgets::DataProcessorPresenter;
+using MantidWidgets::ProgressableView;
 
 /** @class ReflMainViewPresenter
 
@@ -57,8 +55,8 @@ class MANTIDQT_CUSTOMINTERFACES_DLL ReflMainViewPresenter
       public MantidQt::MantidWidgets::WorkspaceReceiver {
 public:
   ReflMainViewPresenter(
-      ReflMainView *mainView, MantidQt::MantidWidgets::ProgressableView *progressView,
-      boost::shared_ptr<MantidQt::MantidWidgets::DataProcessorPresenter> tablePresenter,
+      ReflMainView *mainView, ProgressableView *progressView,
+      boost::shared_ptr<DataProcessorPresenter> tablePresenter,
       boost::shared_ptr<IReflSearcher> searcher =
           boost::shared_ptr<IReflSearcher>());
   ~ReflMainViewPresenter() override;
@@ -67,13 +65,13 @@ public:
 
 protected:
   // the search model
-  ReflSearchModel_sptr m_searchModel;
+  boost::shared_ptr<ReflSearchModel> m_searchModel;
   // the main view we're managing
   ReflMainView *m_view;
   // The table view's presenter
-  boost::shared_ptr<MantidQt::MantidWidgets::DataProcessorPresenter> m_tablePresenter;
+  boost::shared_ptr<DataProcessorPresenter> m_tablePresenter;
   // The progress view
-	MantidQt::MantidWidgets::ProgressableView *m_progressView;
+  ProgressableView *m_progressView;
   // the search implementation
   boost::shared_ptr<IReflSearcher> m_searcher;
   // searching

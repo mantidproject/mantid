@@ -3,13 +3,6 @@
 
 #include "MantidQtMantidWidgets/WidgetDllOption.h"
 
-namespace Mantid {
-namespace Kernel {
-// Forward dec
-class ProgressBase;
-}
-}
-
 namespace MantidQt {
 namespace MantidWidgets {
 

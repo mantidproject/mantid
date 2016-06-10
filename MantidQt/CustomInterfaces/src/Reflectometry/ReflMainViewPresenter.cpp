@@ -12,6 +12,8 @@
 #include "MantidQtCustomInterfaces/Reflectometry/ReflMeasureTransferStrategy.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflNexusMeasurementItemSource.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflSearchModel.h"
+#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorPresenter.h"
+#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorCommand.h"
 #include "MantidQtMantidWidgets/ProgressPresenter.h"
 
 #include <boost/regex.hpp>
@@ -22,12 +24,13 @@
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
+using namespace MantidQt::MantidWidgets;
 
 namespace MantidQt {
 namespace CustomInterfaces {
 ReflMainViewPresenter::ReflMainViewPresenter(
-    ReflMainView *mainView, MantidQt::MantidWidgets::ProgressableView *progressView,
-    boost::shared_ptr<MantidQt::MantidWidgets::DataProcessorPresenter> tablePresenter,
+    ReflMainView *mainView, ProgressableView *progressView,
+    boost::shared_ptr<DataProcessorPresenter> tablePresenter,
     boost::shared_ptr<IReflSearcher> searcher)
     : m_view(mainView), m_tablePresenter(tablePresenter),
       m_progressView(progressView), m_searcher(searcher) {

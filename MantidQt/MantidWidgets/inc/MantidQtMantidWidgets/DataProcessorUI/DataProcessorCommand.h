@@ -55,6 +55,10 @@ public:
 protected:
   std::vector<std::unique_ptr<DataProcessorCommand>> m_child;
 };
+
+/// Typedef for a shared pointer to \c ReflSearchModel
+typedef std::unique_ptr<DataProcessorCommand> DataProcessorCommand_uptr;
+
 }
 }
 #endif /*MANTIDQTMANTIDWIDGETS_DATAPROCESSORCOMMAND_H*/

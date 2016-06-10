@@ -6,17 +6,18 @@
 #include "MantidQtCustomInterfaces/Reflectometry/IReflPresenter.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflSearchModel.h"
 
-#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorCommand.h"
-
 #include <set>
 #include <string>
 
 namespace MantidQt {
+
+namespace MantidWidgets {
+class DataProcessorCommand;
+}
+
 namespace CustomInterfaces {
 
-//	// Forward decs
-//class DataProcessorCommand;
-using DataProcessorCommand_uptr = std::unique_ptr<MantidQt::MantidWidgets::DataProcessorCommand>;
+using MantidWidgets::DataProcessorCommand;
 
 /** @class ReflMainView
 
@@ -65,10 +66,10 @@ public:
   virtual void setInstrumentList(const std::vector<std::string> &instruments,
                                  const std::string &defaultInstrument) = 0;
   virtual void setTransferMethods(const std::set<std::string> &methods) = 0;
-  virtual void
-  setTableCommands(std::vector<DataProcessorCommand_uptr> tableCommands) = 0;
-  virtual void
-  setRowCommands(std::vector<DataProcessorCommand_uptr> rowCommands) = 0;
+  virtual void setTableCommands(
+      std::vector<std::unique_ptr<DataProcessorCommand>> tableCommands) = 0;
+  virtual void setRowCommands(
+      std::vector<std::unique_ptr<DataProcessorCommand>> rowCommands) = 0;
   virtual void clearCommands() = 0;
 
   // Accessor methods

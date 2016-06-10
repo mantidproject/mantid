@@ -8,6 +8,7 @@
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorCommandAdapter.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/QDataProcessorWidget.h"
 #include "MantidQtMantidWidgets/HintingLineEditFactory.h"
+#include "MantidQtMantidWidgets/SlitCalculator.h"
 #include <qinputdialog.h>
 #include <qmessagebox.h>
 
@@ -18,7 +19,6 @@ const QString ReflSettingsGroup = "Mantid/CustomInterfaces/ISISReflectometry";
 namespace MantidQt {
 namespace CustomInterfaces {
 using namespace Mantid::API;
-
 using namespace MantidQt::MantidWidgets;
 
 DECLARE_SUBWINDOW(QtReflMainView)
