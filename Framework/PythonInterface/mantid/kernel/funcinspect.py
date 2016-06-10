@@ -6,8 +6,11 @@
                    arguments that are being assigned to a function
                    return
 """
+from __future__ import (absolute_import, division,
+                        print_function)
 import opcode
 import inspect
+import sys
 
 #-------------------------------------------------------------------------------
 def replace_signature(func, varnames):
@@ -55,6 +58,19 @@ def customise_func(func, name, signature, docstring):
     return func
 
 #-------------------------------------------------------------------------------
+
+if sys.version_info[0] >= 3:
+  def opcode_from_bytecode(bc):
+      """Return the opcode from the given single bytecode
+      """
+      return bc
+else:
+  def opcode_from_bytecode(bc):
+      """Return the opcode from the given single bytecode str
+      """
+      return ord(bc)
+
+#-------------------------------------------------------------------------------
 def decompile(code_object):
     """
     Taken from
@@ -93,10 +109,10 @@ def decompile(code_object):
     e = 0
     while i < n:
         i_offset = i
-        i_opcode = ord(code[i])
+        i_opcode = opcode_from_bytecode(code[i])
         i = i + 1
         if i_opcode >= opcode.HAVE_ARGUMENT:
-            i_argument = ord(code[i]) + (ord(code[i+1]) << (4*2)) + e
+            i_argument = opcode_from_bytecode(code[i]) + (opcode_from_bytecode(code[i+1]) << (4*2)) + e
             i = i + 2
             if i_opcode == opcode.EXTENDED_ARG:
                 e = iarg << 16

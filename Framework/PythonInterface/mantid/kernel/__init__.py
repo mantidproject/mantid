@@ -24,3 +24,7 @@ from . import packagesetup as _packagesetup
 from . import environment
 from . import funcinspect
 from ._aliases import *
+
+# module alias for backwards-compatability in user scripts
+funcreturns = funcinspect
+
