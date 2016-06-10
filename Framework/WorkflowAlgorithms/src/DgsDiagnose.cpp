@@ -1,11 +1,11 @@
 #include "MantidWorkflowAlgorithms/DgsDiagnose.h"
 #include "MantidKernel/PropertyManagerDataService.h"
+#include "MantidKernel/StringTokenizer.h"
 #include "MantidDataObjects/MaskWorkspace.h"
 #include "MantidWorkflowAlgorithms/WorkflowAlgorithmHelpers.h"
 
 #include <boost/lexical_cast.hpp>
 #include <boost/pointer_cast.hpp>
-#include <boost/tokenizer.hpp>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -300,11 +300,10 @@ void DgsDiagnose::exec() {
     diag->execute();
     maskWS = diag->getProperty("OutputWorkspace");
   } else {
-    typedef boost::tokenizer<boost::char_separator<char>> tokenizer;
-    boost::char_separator<char> sep("(,);");
-    tokenizer tokens(diag_spectra[0], sep);
-    for (tokenizer::iterator tok_iter = tokens.begin();
-         tok_iter != tokens.end();) {
+    typedef Mantid::Kernel::StringTokenizer tokenizer;
+    tokenizer tokens(diag_spectra[0], "(,);",
+                     Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
+    for (auto tok_iter = tokens.begin(); tok_iter != tokens.end();) {
       int startIndex = boost::lexical_cast<int>(*tok_iter);
       startIndex -= 1;
       ++tok_iter;
