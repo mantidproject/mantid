@@ -40,7 +40,7 @@ class LRAutoReduction(PythonAlgorithm):
         self.declareProperty(IntArrayProperty("DirectBeamList", [], direction=Direction.Input),
                              "List of direct beam run numbers (integers)")
         self.declareProperty(FileProperty("ScalingFactorFile", "", FileAction.OptionalLoad,
-                             extensions=['.cfg', '.txt']), "Scaling factor file")
+                                          extensions=['.cfg', '.txt']), "Scaling factor file")
         self.declareProperty("IncidentMedium", "medium", "Name of the incident medium")
         # ---------------------------------------------------------------------
 
@@ -268,7 +268,7 @@ class LRAutoReduction(PythonAlgorithm):
             logger.error("Empty %s value in the data logs: using %s=%s" % (key, key, default))
         return value
 
-
+    #pylint: disable=too-many-locals
     def _create_template(self, run_number, first_run_of_set, sequence_number):
         """
             Create a new template according to the meta-data
