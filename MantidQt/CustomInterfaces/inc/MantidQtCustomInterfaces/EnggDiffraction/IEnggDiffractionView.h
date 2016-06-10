@@ -403,17 +403,15 @@ public:
   *
   * @param bankID the bank number to add to combo-box
   */
-  virtual void addBankItems(QString bankID) = 0;
+  virtual void addBankItem(QString bankID) = 0;
 
   /**
   * adds the run number to the list view widget on the interface
   *
-  * @param runNumVector run number vector which have been inputted and
-  * found within focus dir
-  * @param multiRun to avoid recreating the list view widget
+  * @param runNumVector run number which needs to be added to
+  * the list widget
   */
-  virtual void addRunNoItem(std::vector<std::string> runNumVector,
-                            bool multiRun) = 0;
+  virtual void addRunNoItem(QString runNo) = 0;
 
   /**
   * emits the signal within view when run number/bank changed
@@ -428,12 +426,12 @@ public:
   virtual void setBankIdComboBox(int idx) = 0;
 
   /**
-  * Delete all items from the fitting combo-box widget
+  * deletes all items from the fitting combo-box widget
   */
   virtual void clearFittingComboBox() const = 0;
 
   /**
-  * Enables or disables the fitting combo-box
+  * enables or disables the fitting combo-box
   *
   * @param enable or disable the fitting combo-box widget
   */
@@ -448,6 +446,30 @@ public:
   * string is found
   */
   virtual int getFittingComboIdx(std::string bank) const = 0;
+
+  /*
+  * deletes all items from the fitting list widget
+  */
+  virtual void clearFittingListWidget() const = 0;
+
+  /**
+  * enables or disables the fitting list widget
+  *
+  * @param enable or disable the fitting list widget
+  */
+  virtual void enableFittingListWidget(bool enable) const = 0;
+
+  /*
+  * @return idx of current selected row of list widget
+  */
+  virtual int getFittingListWidgetCurrentRow() const = 0;
+
+  /**
+  * sets the current row of the fitting list widget
+  *
+  * @param idx number to set as for the list widget
+  */
+  virtual void setFittingListWidgetCurrentRow(int idx) const = 0;
 
   /**
   * gets the set focus directory within the setting tab

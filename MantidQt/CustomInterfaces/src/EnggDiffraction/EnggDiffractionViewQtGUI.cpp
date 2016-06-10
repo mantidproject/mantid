@@ -1506,52 +1506,14 @@ MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::getFocusDir() {
   return m_focusDir;
 }
 
-void EnggDiffractionViewQtGUI::addBankItems(QString bankID) {
+void EnggDiffractionViewQtGUI::addBankItem(QString bankID) {
 
 	m_uiTabFitting.comboBox_bank->addItem(bankID);
 }
 
 void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::addRunNoItem(
-    std::vector<std::string> runNumVector, bool multiRun) {
-  try {
-    if (!runNumVector.empty()) {
-
-      // delete previous bank added to the list
-      m_uiTabFitting.listWidget_fitting_run_num->clear();
-
-      for (size_t i = 0; i < runNumVector.size(); i++) {
-
-        // get the last split in vector which will be bank
-        std::string currentRun = (runNumVector[i]);
-
-        m_uiTabFitting.listWidget_fitting_run_num->addItem(
-            QString::fromStdString(currentRun));
-      }
-
-      if (multiRun) {
-        m_uiTabFitting.listWidget_fitting_run_num->setEnabled(true);
-        auto currentIndex =
-            m_uiTabFitting.listWidget_fitting_run_num->currentRow();
-        if (currentIndex == -1)
-          m_uiTabFitting.listWidget_fitting_run_num->setCurrentRow(0);
-      } else {
-        m_uiTabFitting.listWidget_fitting_run_num->setEnabled(false);
-      }
-    }
-
-    else {
-      // upon invalid file
-      // disable the widgets when only one related file found
-      m_uiTabFitting.listWidget_fitting_run_num->setEnabled(false);
-
-      m_uiTabFitting.listWidget_fitting_run_num->clear();
-    }
-
-  } catch (std::runtime_error &re) {
-    userWarning("Unable to insert items: ",
-                "Could not add list widget; " +
-                    static_cast<std::string>(re.what()) + ". Please try again");
-  }
+	QString runNo) {
+        m_uiTabFitting.listWidget_fitting_run_num->addItem(runNo);
 }
 
 std::vector<std::string> EnggDiffractionViewQtGUI::getFittingRunNumVec() {
