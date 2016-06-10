@@ -57,7 +57,7 @@ class PDRManager(object):
         self._vanadiumPeakPosList = []
 
         self._wavelength = None
-        
+
         #register startup
         mantid.UsageService.registerFeatureUsage("Interface","HfirPowderReduction",False)
 

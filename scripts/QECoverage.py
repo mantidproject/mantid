@@ -197,7 +197,7 @@ class QECoverageGUI(QtGui.QWidget):
         self.grid.addWidget(self.helpbtn)
         # Matplotlib does seem to rescale x-axis properly after axes.clear()
         self.xlim = 0
-        
+
         #register startup
         mantid.UsageService.registerFeatureUsage("Interface","QECoverage",False)
 
