@@ -70,10 +70,10 @@ public:
       TS_FAIL(e.what());
     }
 
-    std::cout << "\nTest I Is Completed" << std::endl;
+    std::cout << "\nTest I Is Completed\n";
 
     if (ws1 == NULL) {
-      std::cout << "\nWorkspace1 is NULL" << std::endl;
+      std::cout << "\nWorkspace1 is NULL\n";
     }
 
   } // End test_TwoInputWorkspaces
@@ -101,16 +101,16 @@ public:
                 .retrieveWS<DataObjects::MaskWorkspace>(ws4name);
 
       if (ws4 == NULL) {
-        std::cout << "Workspace4 is NULL" << std::endl;
+        std::cout << "Workspace4 is NULL\n";
       } else {
         std::cout << "Workspace4 is good at output of NOT.  Number Histogram = "
-                  << ws4->getNumberHistograms() << std::endl;
+                  << ws4->getNumberHistograms() << '\n';
       }
       if (ws1 == NULL) {
-        std::cout << "Workspace1 is NULL" << std::endl;
+        std::cout << "Workspace1 is NULL\n";
       } else {
         std::cout << "Workspace1 is good at output of NOT.  Number Histogram = "
-                  << ws1->getNumberHistograms() << std::endl;
+                  << ws1->getNumberHistograms() << '\n';
       }
 
       for (size_t ih = 0; ih < ws4->getNumberHistograms(); ih++) {
@@ -118,7 +118,7 @@ public:
         TS_ASSERT_DELTA(ws4->getValue(tempdetid), ws1->getValue(tempdetid), 1);
         // std::cout << ih << " - " << tempdetid << ": " <<
         // ws1->getValue(tempdetid) << " vs. " << ws4->getValue(tempdetid) <<
-        // std::endl;
+        // '\n';
       }
     } catch (std::runtime_error &e) {
       TS_FAIL(e.what());

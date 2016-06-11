@@ -94,7 +94,7 @@ void TransformHKL::exec() {
   std::ostringstream str_stream;
   str_stream << hkl_tran;
   std::string hkl_tran_string = str_stream.str();
-  g_log.notice() << "Applying Tranformation " << hkl_tran_string << std::endl;
+  g_log.notice() << "Applying Tranformation " << hkl_tran_string << '\n';
 
   if (hkl_tran.numRows() != 3 || hkl_tran.numCols() != 3) {
     throw std::runtime_error(
@@ -123,7 +123,7 @@ void TransformHKL::exec() {
   // Transform looks OK so update UB and
   // transform the hkls
   UB = UB * hkl_tran_inverse;
-  g_log.notice() << "Transformed UB = " << UB << std::endl;
+  g_log.notice() << "Transformed UB = " << UB << '\n';
   o_lattice.setUB(UB);
   std::vector<double> sigabc(6);
   SelectCellWithForm::DetermineErrors(sigabc, UB, ws, tolerance);

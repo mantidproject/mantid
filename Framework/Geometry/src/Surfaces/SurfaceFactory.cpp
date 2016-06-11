@@ -160,7 +160,7 @@ SurfaceFactory::processLine(const std::string &Line) const
 
   std::unique_ptr<Surface> X = createSurfaceID(key);
   if (X->setSurface(Line)) {
-    std::cerr << "X:: " << X->setSurface(Line) << std::endl;
+    std::cerr << "X:: " << X->setSurface(Line) << '\n';
     throw Kernel::Exception::NotFoundError("SurfaceFactory::processLine", Line);
   }
 

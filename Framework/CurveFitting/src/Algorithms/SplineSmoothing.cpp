@@ -180,7 +180,7 @@ SplineSmoothing::setupOutputWorkspace(API::MatrixWorkspace_const_sptr inws,
   // create labels for output workspace
   auto tAxis = new API::TextAxis(size);
   for (int i = 0; i < size; ++i) {
-    std::string index = boost::lexical_cast<std::string>(i);
+    std::string index = std::to_string(i);
     tAxis->setLabel(i, "Y" + index);
   }
   outputWorkspace->replaceAxis(1, tAxis);

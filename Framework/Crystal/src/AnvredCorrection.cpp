@@ -138,7 +138,7 @@ void AnvredCorrection::exec() {
         m_onlySphericalAbsorption = true;
         g_log.warning() << "Lorentz Correction was already done for this "
                            "workspace.  OnlySphericalAbsorption was changed to "
-                           "true." << std::endl;
+                           "true.\n";
       }
     }
   }

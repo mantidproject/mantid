@@ -521,10 +521,10 @@ QString ViewBase::getWorkspaceName() {
  * @param src pqPipelineSource to print properties from
  */
 void ViewBase::printProxyProps(pqPipelineSource *src) {
-  std::cout << src->getSMName().toStdString() << " Properties:" << std::endl;
+  std::cout << src->getSMName().toStdString() << " Properties:\n";
   vtkSMPropertyIterator *piter = src->getProxy()->NewPropertyIterator();
   while (!piter->IsAtEnd()) {
-    std::cout << piter->GetKey() << std::endl;
+    std::cout << piter->GetKey() << '\n';
     piter->Next();
   }
 }

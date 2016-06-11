@@ -289,7 +289,7 @@ void addRowFromDict(ITableWorkspace &self, const bpl::dict &rowItems) {
     throw std::invalid_argument(
         "Number of values given does not match the number of columns. "
         "Expected: " +
-        boost::lexical_cast<std::string>(self.columnCount()));
+        std::to_string(self.columnCount()));
   }
 
   // Add a new row to populate with values
@@ -349,7 +349,7 @@ void addRowFromSequence(ITableWorkspace &self, const bpl::object &rowItems) {
     throw std::invalid_argument(
         "Number of values given does not match the number of columns. "
         "Expected: " +
-        boost::lexical_cast<std::string>(self.columnCount()));
+        std::to_string(self.columnCount()));
   }
 
   // Add a new row to populate with values

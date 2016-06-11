@@ -120,7 +120,7 @@ void SubmitRemoteJob::exec() {
     resp["JobID"].getValue(jobId);
     setPropertyValue("JobID", jobId);
     g_log.information() << "Job submitted.  Job ID =  "
-                        << getPropertyValue("JobID") << std::endl;
+                        << getPropertyValue("JobID") << '\n';
   } else {
     std::string errMsg;
     resp["Err_Msg"].getValue(errMsg);

@@ -99,8 +99,7 @@ const std::string AlgorithmAdapter<BaseAlgorithm>::category() const {
     this->getLogger().warning()
         << "Python Algorithm " << name << " v" << version
         << " does not have a category defined. See "
-           "http://www.mantidproject.org/Basic_PythonAlgorithm_Structure"
-        << std::endl;
+           "http://www.mantidproject.org/Basic_PythonAlgorithm_Structure\n";
   }
   return algCategory;
 }

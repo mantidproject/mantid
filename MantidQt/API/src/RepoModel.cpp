@@ -471,7 +471,7 @@ bool RepoModel::setData(const QModelIndex &index, const QVariant &value,
         settings.setValue("UploadSaveInfo", form->saveInfo());
 
         qDebug() << "Uploading... " << QString::fromStdString(path)
-                 << form->comment() << form->author() << form->email() << endl;
+                 << form->comment() << form->author() << form->email() << '\n';
         uploading_path = QString::fromStdString(path);
         upload_index = index;
         emit executingThread(true);
@@ -749,7 +749,7 @@ QString RepoModel::author(const QModelIndex &index) {
 */
 QString RepoModel::filePath(const QModelIndex &index) {
   RepoItem *item = static_cast<RepoItem *>(index.internalPointer());
-  //   qDebug() << "Get file path from : " <<  item->path()<< endl;
+  //   qDebug() << "Get file path from : " <<  item->path()<< '\n';
   Mantid::API::SCRIPTSTATUS state =
       repo_ptr->fileStatus(item->path().toStdString());
 
@@ -897,7 +897,7 @@ void RepoModel::setupModelData(RepoItem *root) {
 void RepoModel::handleExceptions(const Mantid::API::ScriptRepoException &ex,
                                  const QString &title, bool showWarning) const {
   g_log.information() << "Download failed " << ex.what()
-                      << "\n Detail: " << ex.systemError() << std::endl;
+                      << "\n Detail: " << ex.systemError() << '\n';
   if (showWarning) {
 
     QWidget *father = qobject_cast<QWidget *>(QObject::parent());

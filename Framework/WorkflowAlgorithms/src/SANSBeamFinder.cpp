@@ -10,6 +10,7 @@
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/PropertyManager.h"
+#include "MantidGeometry/Instrument/RectangularDetector.h"
 
 #include "Poco/NumberFormatter.h"
 #include "Poco/Path.h"
@@ -173,6 +174,7 @@ void SANSBeamFinder::exec() {
 
     // HFIR reduction masks the first pixels on each edge of the detector
     if (specialMapping)
+      // int high, int low, int left, int right
       maskEdges(beamCenterWS, 1, 1, 1, 1);
 
     IAlgorithm_sptr ctrAlg = createChildAlgorithm("FindCenterOfMassPosition");
@@ -187,7 +189,7 @@ void SANSBeamFinder::exec() {
           beamCenterWS->getInstrument()->getNumberParameter("x-pixel-size");
       if (pars.empty()) {
         g_log.error() << "Could not read pixel size from instrument "
-                         "parameters: using default" << std::endl;
+                         "parameters: using default\n";
       } else {
         ctrAlg->setProperty("BeamRadius", beamRadius * pars[0] / 1000.0);
       }
@@ -236,55 +238,81 @@ void SANSBeamFinder::exec() {
  * The standard HFIR reduction masks the edges of the detector
  * This is here mostly to allow a direct comparison with old HFIR code
  * and ensure that we reproduce the same results
+ *
+ * 2016/05/06 : this only works for RectangularDetector
+ *
  */
 void SANSBeamFinder::maskEdges(MatrixWorkspace_sptr beamCenterWS, int high,
-                               int low, int left, int right) {
-  const int nx_pixels =
-      static_cast<int>(HFIRInstrument::readInstrumentParameter(
-          "number-of-x-pixels", beamCenterWS));
-  const int ny_pixels =
-      static_cast<int>(HFIRInstrument::readInstrumentParameter(
-          "number-of-y-pixels", beamCenterWS));
+                               int low, int left, int right,
+                               const std::string &componentName) {
+
+  auto instrument = beamCenterWS->getInstrument();
+
+  boost::shared_ptr<Mantid::Geometry::RectangularDetector> component;
+  try {
+    component =
+        boost::const_pointer_cast<Mantid::Geometry::RectangularDetector>(
+            boost::dynamic_pointer_cast<
+                const Mantid::Geometry::RectangularDetector>(
+                instrument->getComponentByName(componentName)));
+  } catch (std::exception &) {
+    g_log.warning("Expecting the component " + componentName +
+                  " to be a RectangularDetector. maskEdges not executed.");
+    return;
+  }
   std::vector<int> IDs;
 
-  // Lower edge
-  for (int iy = 0; iy < low; iy++) {
-    for (int ix = 0; ix < nx_pixels; ix++) {
-      // Note that ix and iy are inverted. The HFIR reference frame is flipped
-      // relative to Mantid.
-      int id = HFIRInstrument::getDetectorFromPixel(iy, ix, beamCenterWS);
-      IDs.push_back(id);
+  // right
+  for (int i = 0; i < right * component->idstep(); i++) {
+    IDs.push_back(component->idstart() + i);
+  }
+  // left
+  for (int i = component->maxDetectorID();
+       i > (component->maxDetectorID() - left * component->idstep()); i--) {
+    IDs.push_back(i);
+  }
+  // low
+  // 0,256,512,768,..,1,257,513
+  for (int row = 0; row < low; row++) { // 0,1
+    for (int i = row + component->idstart();
+         i < component->nelements() * component->idstep() -
+                 component->idstep() + low + component->idstart();
+         i += component->idstep()) {
+      IDs.push_back(i);
+    }
+  }
+  // high
+  // 255, 511, 767..
+  for (int row = 0; row < high; row++) {
+    for (int i = component->idstep() + component->idstart() - row - 1;
+         i < component->nelements() * component->idstep() +
+                 component->idstart();
+         i += component->idstep()) {
+      IDs.push_back(i);
     }
   }
 
-  // Upper edge
-  for (int iy = ny_pixels - high; iy < ny_pixels; iy++) {
-    for (int ix = 0; ix < nx_pixels; ix++) {
-      int id = HFIRInstrument::getDetectorFromPixel(iy, ix, beamCenterWS);
-      IDs.push_back(id);
-    }
+  g_log.debug() << "SANSBeamFinder::maskEdges Detector Ids to Mask:"
+                << std::endl;
+  for (auto id : IDs) {
+    g_log.debug() << id << " ";
   }
-
-  // Left edge
-  for (int iy = 0; iy < ny_pixels; iy++) {
-    for (int ix = 0; ix < left; ix++) {
-      int id = HFIRInstrument::getDetectorFromPixel(iy, ix, beamCenterWS);
-      IDs.push_back(id);
-    }
-  }
-
-  // Right edge
-  for (int iy = 0; iy < ny_pixels; iy++) {
-    for (int ix = nx_pixels - right; ix < nx_pixels; ix++) {
-      int id = HFIRInstrument::getDetectorFromPixel(iy, ix, beamCenterWS);
-      IDs.push_back(id);
-    }
-  }
+  g_log.debug() << std::endl;
 
   IAlgorithm_sptr maskAlg = createChildAlgorithm("MaskDetectors");
+  maskAlg->setChild(true);
   maskAlg->setProperty("Workspace", beamCenterWS);
   maskAlg->setProperty("DetectorList", IDs);
   maskAlg->execute();
+
+  // HAcking to mask Wing Detector when finding the beam center
+  if (instrument->getComponentByName("wing_detector")) {
+    maskAlg = createChildAlgorithm("SANSMask");
+    maskAlg->setProperty("Workspace", beamCenterWS);
+    maskAlg->setPropertyValue("Facility", "HFIR");
+    maskAlg->setProperty("MaskedFullComponent", "wing_detector");
+    maskAlg->execute();
+  }
 }
 
 } // namespace WorkflowAlgorithms
