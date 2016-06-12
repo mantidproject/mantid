@@ -209,7 +209,7 @@ class DPDFreduction(PythonAlgorithm):
 
         # Convert to energy transfer. Normalize by proton charge.
         # The output workspace is S(detector-id,E)
-        factor = 0.1  # user a finer energy bin than the one passed (self._ebins[1])
+        factor = 0.1  # use a finer energy bin than the one passed (self._ebins[1])
         Erange = '{0},{1},{2}'.format(self._ebins[0], factor * self._ebins[1], self._ebins[2])
         api.DgsReduction(SampleInputWorkspace=wn_data,
                          EnergyTransferRange=Erange, OutputWorkspace=wn_reduced)
