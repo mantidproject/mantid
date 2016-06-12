@@ -45,10 +45,11 @@ Detailed Parameters description
   + `vanadium`: vanadium events workspace
   + `reduced`: sample runs after DgsReduction algorithm
   + `ec_reduced`: empty can after :ref:`DgsReduction <algm-DgsReduction>` algorithm
-  + `S_theta_E`: reduced sample runs after :ref:`GroupDetectors <algm-GroupDetectors>` algorithm.
   + `vanadium_S_theta`: vanadium after :ref:`GroupDetectors <algm-GroupDetectors>` algorithm.
   + `ec_S_theta_E`: reduced empty can after :ref:`GroupDetectors <algm-GroupDetectors>`
-    algorithm minus empty can `ec_S_theta_E`.
+    algorithm.
+  + `S_theta_E`: reduced sample runs after :ref:`GroupDetectors <algm-GroupDetectors>`
+    algorithm and after subtraction of empty can `ec_S_theta_E`.
   + `S_theta_E_normalized`: `S_theta_E` divided by vanadium vanadium_S_theta
   + `S_theta_E_normalized_interp`: `S_theta_E_normalized` with interpolation over the
     detector gaps.
