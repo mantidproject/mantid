@@ -162,7 +162,7 @@ vtkMDHistoQuadFactory::create(ProgressAction &progressUpdating) const {
       }
     }
 
-    std::cout << tim << " to check all the signal values." << std::endl;
+    std::cout << tim << " to check all the signal values.\n";
 
     // Get the transformation that takes the points in the TRANSFORMED space
     // back into the ORIGINAL (not-rotated) space.
@@ -197,7 +197,7 @@ vtkMDHistoQuadFactory::create(ProgressAction &progressUpdating) const {
       }
     }
 
-    std::cout << tim << " to create the needed points." << std::endl;
+    std::cout << tim << " to create the needed points.\n";
 
     auto visualDataSet = vtkSmartPointer<vtkUnstructuredGrid>::New();
     visualDataSet->Allocate(imageSize);
@@ -223,7 +223,7 @@ vtkMDHistoQuadFactory::create(ProgressAction &progressUpdating) const {
       }
     }
 
-    std::cout << tim << " to create and add the quads." << std::endl;
+    std::cout << tim << " to create and add the quads.\n";
 
     visualDataSet->Squeeze();
 

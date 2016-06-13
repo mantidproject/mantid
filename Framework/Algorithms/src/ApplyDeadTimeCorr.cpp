@@ -97,7 +97,7 @@ void ApplyDeadTimeCorr::exec() {
               } else {
                 g_log.error() << "1 - MeasuredCount * (Deadtime/TimeBin width "
                                  "is currently (" << temp
-                              << "). Can't divide by this amount." << std::endl;
+                              << "). Can't divide by this amount.\n";
 
                 throw std::invalid_argument("Can't divide by 0");
               }
@@ -110,7 +110,7 @@ void ApplyDeadTimeCorr::exec() {
         }
       } else {
         g_log.error() << "The time bin width is currently (" << timeBinWidth
-                      << "). Can't divide by this amount." << std::endl;
+                      << "). Can't divide by this amount.\n";
 
         throw std::invalid_argument("Can't divide by 0");
       }
@@ -123,7 +123,7 @@ void ApplyDeadTimeCorr::exec() {
     g_log.error()
         << "Row count(" << deadTimeTable->rowCount()
         << ") of Dead time table is bigger than the Number of Histograms("
-        << inputWs->getNumberHistograms() << ")." << std::endl;
+        << inputWs->getNumberHistograms() << ").\n";
 
     throw std::invalid_argument(
         "Row count was bigger than the Number of Histograms.");
@@ -158,7 +158,7 @@ std::map<std::string, std::string> ApplyDeadTimeCorr::validateInputs() {
       for (size_t i = 1; i < xValues.size() - 2; i++) {
         if (difference(i) > tolerance) {
           g_log.error() << "dx=" << xValues[i + 1] - xValues[i] << ' ' << dx
-                        << ' ' << i << std::endl;
+                        << ' ' << i << '\n';
           errors["InputWorkspace"] = "Uneven bin widths in input workspace";
           break;
         }

@@ -100,8 +100,7 @@ class IqtFitSequential(PythonAlgorithm):
 
 
     def PyExec(self):
-        from IndirectDataAnalysis import (convertToElasticQ)
-        from IndirectCommon import (getWSprefix)
+        from IndirectCommon import (getWSprefix, convertToElasticQ)
 
         setup_prog = Progress(self, start=0.0, end=0.1, nreports=4)
         self._fit_type = self._fit_type[:-2]

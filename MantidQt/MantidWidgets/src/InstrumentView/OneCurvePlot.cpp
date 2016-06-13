@@ -474,7 +474,7 @@ void PeakLabel::draw(QPainter *painter, const QwtScaleMap &xMap,
       static_cast<int>(canvasRect.top() + m_marker->getLabelRect().height());
   painter->drawText(x, y, m_marker->getLabel());
   // std::cerr << x << ' ' << y << ' ' << m_marker->getLabel().toStdString() <<
-  // std::endl;
+  // '\n';
 }
 } // MantidWidgets
 } // MantidQt

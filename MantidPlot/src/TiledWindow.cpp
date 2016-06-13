@@ -6,6 +6,7 @@
 #include <QGridLayout>
 #include <QVBoxLayout>
 #include <QMessageBox>
+#include <QMouseEvent>
 #include <QPainter>
 #include <QMenu>
 #include <QAction>
@@ -38,9 +39,7 @@ Tile::Tile(QWidget *parent)
 /**
  * Destructor.
  */
-Tile::~Tile() {
-  // std::cerr << "Tile deleted." << std::endl;
-}
+Tile::~Tile() {}
 
 /**
  * Set a widget to this tile.

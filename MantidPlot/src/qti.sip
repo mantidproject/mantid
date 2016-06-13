@@ -51,7 +51,7 @@ public:
 
   SIP_PYOBJECT windowLabel();
 %MethodCode
-  sipRes = PyString_FromString(sipCpp->windowLabel());
+  sipRes = PyString_FromString(sipCpp->windowLabel().toAscii().constData());
 %End
   void setWindowLabel(const QString&);
 
@@ -91,7 +91,7 @@ class Table: MdiSubWindow
       col = (int)PyInt_AsLong(arg) - 1;\
 		if (col < 0 || col >= sipCpp->numCols()) {\
 			sipIsErr = 1;\
-			PyErr_Format(PyExc_ValueError, "There's no column %d in table %s!", col+1, sipCpp->name().ascii());\
+			PyErr_Format(PyExc_ValueError, "There's no column %d in table %s!", col+1, sipCpp->name().toAscii().constData());\
 		}\
 	 } else {\
       PyObject *tmp = PyObject_Str(arg);\
@@ -99,11 +99,11 @@ class Table: MdiSubWindow
 			sipIsErr = 1;\
 			PyErr_Format(PyExc_TypeError, "Column argument must be either int or string.");\
 		} else {\
-			col = sipCpp->colNames().findIndex(PyString_AsString(tmp));\
+			col = sipCpp->colNames().indexOf(PyString_AsString(tmp));\
 			if (col < 0) {\
 				sipIsErr = 1;\
 				PyErr_Format(PyExc_ValueError, "There's no column named %s in table %s!", PyString_AsString(tmp),\
-						sipCpp->name().ascii());\
+						sipCpp->name().toAscii().constData());\
 				Py_DECREF(tmp);\
 			}\
 		}\
@@ -113,7 +113,7 @@ class Table: MdiSubWindow
    int row = arg-1;\
 	if (row < 0 || row >= sipCpp->numRows()) {\
 		sipIsErr = 1;\
-		PyErr_Format(PyExc_ValueError, "There's no row %d in table %s!", row+1, sipCpp->name().ascii());\
+		PyErr_Format(PyExc_ValueError, "There's no row %d in table %s!", row+1, sipCpp->name().toAscii().constData());\
 	}
 %End
 
@@ -134,7 +134,7 @@ public:
   CHECK_TABLE_COL(a0);
   CHECK_TABLE_ROW(a1);
   if (sipIsErr == 0) {
-		PyObject *encstr = PyString_FromString(sipCpp->text(row, col).utf8());
+		PyObject *encstr = PyString_FromString(sipCpp->text(row, col).toUtf8());
 		if (encstr) {
 			sipRes = PyUnicode_FromEncodedObject(encstr, "utf8", 0);
 			Py_DECREF(encstr);
@@ -181,7 +181,7 @@ public:
 		sipIsErr = 1;\
 		PyErr_SetString(PyExc_ValueError, "Invalid column argument");\
 	} else
-		sipRes = PyString_FromString(sipCpp->colLabel(a0-1));
+		sipRes = PyString_FromString(sipCpp->colLabel(a0-1).toAscii().constData());
 %End
   void setColName(SIP_PYOBJECT, const QString&, bool=false);
 %MethodCode
@@ -292,13 +292,13 @@ class Matrix: MdiSubWindow
 	int col = arg-1;\
    if (col < 0 || col >= sipCpp->numCols()) {\
 		sipIsErr = 1;\
-		PyErr_Format(PyExc_ValueError, "There's no column %d in matrix %s!", col+1, sipCpp->name().ascii());\
+		PyErr_Format(PyExc_ValueError, "There's no column %d in matrix %s!", col+1, sipCpp->name().toAscii().constData());\
 	}
 #define CHECK_MATRIX_ROW(arg)\
    int row = arg-1;\
 	if (row < 0 || row >= sipCpp->numRows()) {\
 		sipIsErr = 1;\
-		PyErr_Format(PyExc_ValueError, "There's no row %d in matrix %s!", row+1, sipCpp->name().ascii());\
+		PyErr_Format(PyExc_ValueError, "There's no row %d in matrix %s!", row+1, sipCpp->name().toAscii().constData());\
 	}
 %End
 public:
@@ -318,7 +318,7 @@ public:
 	CHECK_MATRIX_ROW(a0);
 	CHECK_MATRIX_COL(a1);
 	if (sipIsErr == 0)
-		sipRes = PyString_FromString(sipCpp->text(row, col));
+		sipRes = PyString_FromString(sipCpp->text(row, col).toAscii().constData());
 %End
   double cell(int, int);
 %MethodCode
@@ -707,7 +707,7 @@ public:
   bool isPiePlot();
   SIP_PYOBJECT pieLegendText() /PyName=pieLegend/;
 %MethodCode
-  sipRes = PyString_FromString(sipCpp->pieLegendText());
+  sipRes = PyString_FromString(sipCpp->pieLegendText().toAscii().constData());
 %End
 
   bool insertCurve(Table*, const QString&, int style = 1, int startRow = 0, int endRow = -1);
@@ -1099,7 +1099,7 @@ class ApplicationWindow: QMainWindow
 // we have to do this to override casting in qt/qobject.sip (PyQt 3.16)
 // Russell Taylor, 4/8/09: Change needed for mac build.
 //   Taken from main qtiplot svn revision 1187.
-sipClass=sipFindClass(sipCpp->className());
+sipClass=sipFindClass(sipCpp->metaObject()->className());
 %End
 
 public:
@@ -1461,7 +1461,7 @@ class MantidUI: QObject
 // we have to do this to override casting in qt/qobject.sip (PyQt 3.16)
 // Russell Taylor, 4/8/09: Change needed for mac build.
 //   Taken from main qtiplot svn revision 1187.
-sipClass=sipFindClass(sipCpp->className());
+sipClass=sipFindClass(sipCpp->metaObject()->className());
 %End
 
 public:

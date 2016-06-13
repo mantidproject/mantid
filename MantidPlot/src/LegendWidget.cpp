@@ -33,6 +33,7 @@
 #include "ApplicationWindow.h"
 
 #include <QPainter>
+#include <QPaintEvent>
 #include <QPolygon>
 #include <QMessageBox>
 #include <QApplication>

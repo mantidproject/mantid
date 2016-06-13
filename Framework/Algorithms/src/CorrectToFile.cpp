@@ -168,7 +168,7 @@ void CorrectToFile::exec() {
 *  @throw runtime_error if load algorithm fails
 */
 MatrixWorkspace_sptr CorrectToFile::loadInFile(const std::string &corrFile) {
-  g_log.information() << "Loading file " << corrFile << std::endl;
+  g_log.information() << "Loading file " << corrFile << '\n';
   progress(0, "Loading file");
   IAlgorithm_sptr loadRKH =
       createChildAlgorithm("LoadRKH", 0, 1.0 /*LOAD_TIME*/);
@@ -194,7 +194,7 @@ void CorrectToFile::doWkspAlgebra(API::MatrixWorkspace_sptr lhs,
                                   API::MatrixWorkspace_sptr rhs,
                                   const std::string &algName,
                                   API::MatrixWorkspace_sptr &result) {
-  g_log.information() << "Initalising the algorithm " << algName << std::endl;
+  g_log.information() << "Initalising the algorithm " << algName << '\n';
   progress(LOAD_TIME, "Applying correction");
   IAlgorithm_sptr algebra = createChildAlgorithm(algName, LOAD_TIME, 1.0);
   algebra->setProperty("LHSWorkspace", lhs);
@@ -205,12 +205,12 @@ void CorrectToFile::doWkspAlgebra(API::MatrixWorkspace_sptr lhs,
     algebra->execute();
   } catch (std::runtime_error &) {
     g_log.warning() << "Error encountered while running algorithm " << algName
-                    << std::endl;
+                    << '\n';
     g_log.error() << "Correction file "
                   << getPropertyValue("Filename") +
                          " can't be used to correct workspace "
-                  << getPropertyValue("WorkspaceToCorrect") << std::endl;
-    g_log.error() << "Mismatched number of spectra?" << std::endl;
+                  << getPropertyValue("WorkspaceToCorrect") << '\n';
+    g_log.error() << "Mismatched number of spectra?\n";
     throw std::runtime_error("Correct to file failed, see log for details");
   }
 

@@ -49,7 +49,8 @@ class Folder : public QObject {
 public:
   Folder(Folder *parent, const QString &name);
 
-  QList<MdiSubWindow *> windowsList() { return lstWindows; };
+  QString name() const { return this->objectName(); }
+  QList<MdiSubWindow *> windowsList() { return lstWindows; }
 
   void addWindow(MdiSubWindow *w);
   bool hasWindow(MdiSubWindow *w) const;

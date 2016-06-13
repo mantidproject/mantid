@@ -355,7 +355,7 @@ void Algorithm::lockWorkspaces() {
                     m_writeLockedWorkspaces.end(),
                     ws) == m_writeLockedWorkspaces.end()) {
         // Write-lock it if not already
-        debugLog << "Write-locking " << ws->getName() << std::endl;
+        debugLog << "Write-locking " << ws->getName() << '\n';
         ws->getLock()->writeLock();
         m_writeLockedWorkspaces.push_back(ws);
       }
@@ -373,7 +373,7 @@ void Algorithm::lockWorkspaces() {
                     m_writeLockedWorkspaces.end(),
                     ws) == m_writeLockedWorkspaces.end()) {
         // Read-lock it if not already write-locked
-        debugLog << "Read-locking " << ws->getName() << std::endl;
+        debugLog << "Read-locking " << ws->getName() << '\n';
         ws->getLock()->readLock();
         m_readLockedWorkspaces.push_back(ws);
       }
@@ -392,13 +392,13 @@ void Algorithm::unlockWorkspaces() {
   auto &debugLog = g_log.debug();
   for (auto &ws : m_writeLockedWorkspaces) {
     if (ws) {
-      debugLog << "Unlocking " << ws->getName() << std::endl;
+      debugLog << "Unlocking " << ws->getName() << '\n';
       ws->getLock()->unlock();
     }
   }
   for (auto &ws : m_readLockedWorkspaces) {
     if (ws) {
-      debugLog << "Unlocking " << ws->getName() << std::endl;
+      debugLog << "Unlocking " << ws->getName() << '\n';
       ws->getLock()->unlock();
     }
   }
@@ -591,8 +591,7 @@ bool Algorithm::execute() {
         throw;
       else {
         getLogger().error() << "Error in execution of algorithm "
-                            << this->name() << std::endl
-                            << ex.what() << std::endl;
+                            << this->name() << '\n' << ex.what() << '\n';
       }
       notificationCenter().postNotification(
           new ErrorNotification(this, ex.what()));
@@ -603,8 +602,7 @@ bool Algorithm::execute() {
         throw;
       else {
         getLogger().error() << "Logic Error in execution of algorithm "
-                            << this->name() << std::endl
-                            << ex.what() << std::endl;
+                            << this->name() << '\n' << ex.what() << '\n';
       }
       notificationCenter().postNotification(
           new ErrorNotification(this, ex.what()));
@@ -1068,7 +1066,7 @@ void Algorithm::logAlgorithmInfo() const {
     logger.notice() << name() << " started";
     if (this->isChild())
       logger.notice() << " (child)";
-    logger.notice() << std::endl;
+    logger.notice() << '\n';
     // Make use of the AlgorithmHistory class, which holds all the info we want
     // here
     AlgorithmHistory AH(this);
@@ -1539,7 +1537,7 @@ void Algorithm::reportCompleted(const double &duration,
 
   else {
     getLogger().debug() << name() << " finished with isChild = " << isChild()
-                        << std::endl;
+                        << '\n';
   }
   m_running = false;
 }

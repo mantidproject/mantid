@@ -42,6 +42,8 @@
 #include <QLabel>
 #include <QComboBox>
 #include <QCheckBox>
+#include <QCloseEvent>
+#include <QContextMenuEvent>
 #include <QLayout>
 #include <QListWidget>
 #include <QGroupBox>
@@ -528,7 +530,7 @@ void CurvesDialog::showCurveRange(bool on) {
   int row = contents->currentRow();
   contents->clear();
   if (on) {
-    QStringList lst = QStringList();
+    QStringList lst;
     for (int i = 0; i < d_graph->curves(); i++) {
       QwtPlotItem *it = d_graph->plotItem(i);
       if (!it)

@@ -83,7 +83,7 @@ void RayTracerTester::exec() {
       IDetector_const_sptr det = tracker.getDetectorResult();
       if (det) {
         size_t wi = detTowi[det->getID()];
-        g_log.information() << "Found detector " << det->getID() << std::endl;
+        g_log.information() << "Found detector " << det->getID() << '\n';
         ws->dataY(wi)[0] = double(int(az * 57.3) * 1000 + int(iz));
       }
     }
