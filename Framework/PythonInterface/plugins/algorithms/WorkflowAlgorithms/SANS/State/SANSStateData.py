@@ -3,11 +3,49 @@ from SANSStateBase import (SANSStateBase, TypedParameter, is_not_none, is_positi
                            convert_state_to_dict, set_state_from_property_manager)
 
 
+# ------------------------------------
+# Types
+# ------------------------------------
+class SANSDataType(object):
+    class SampleScatter(object):
+        pass
+
+    class SampleTransmission(object):
+        pass
+
+    class SampleDirect(object):
+        pass
+
+    class CanScatter(object):
+        pass
+
+    class CanTransmission(object):
+        pass
+
+    class CanDirect(object):
+        pass
+
+
+def convert_to_data_type(as_string):
+    if as_string == "sample_scatter":
+        return SANSDataType.SampleScatter
+    elif as_string == "sample_transmission":
+        return SANSDataType.SampleTransmission
+    elif as_string == "sample_direct":
+        return SANSDataType.SampleDirect
+    elif as_string == "can_scatter":
+        return SANSDataType.CanScatter
+    elif as_string == "can_transmission":
+        return SANSDataType.CanTransmission
+    elif as_string == "can_direct":
+        return SANSDataType.CanDirect
+
+
 # ------------------------------------------------
 # SANSStateData
 # ------------------------------------------------
 class SANSStateData(object):
-    pass
+    ALL_PERIODS = 0
 
 
 # -----------------------------------------------
@@ -32,13 +70,13 @@ class SANSStateDataISIS(SANSStateBase, SANSStateData):
         super(SANSStateDataISIS, self).__init__()
 
         # Setup default values for periods
-        self.sample_scatter_period = 1
-        self.sample_transmission_period = 1
-        self.sample_direct_period = 1
+        self.sample_scatter_period = SANSStateData.ALL_PERIODS
+        self.sample_transmission_period = SANSStateData.ALL_PERIODS
+        self.sample_direct_period = SANSStateData.ALL_PERIODS
 
-        self.can_scatter_period = 1
-        self.can_transmission_period = 1
-        self.can_direct_period = 1
+        self.can_scatter_period = SANSStateData.ALL_PERIODS
+        self.can_transmission_period = SANSStateData.ALL_PERIODS
+        self.can_direct_period = SANSStateData.ALL_PERIODS
 
     @property
     def property_manager(self):

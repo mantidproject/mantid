@@ -12,6 +12,8 @@ class SANSStatePrototypeTest(unittest.TestCase):
         alg.setChild(True)
         alg.initialize()
         # This should accept a PropertyManager
+        import time
+        time.sleep(10)
         property_manager = state.property_manager
         alg.setProperty("Factor", 1)
         alg.setProperty("SANSStatePrototype", property_manager)

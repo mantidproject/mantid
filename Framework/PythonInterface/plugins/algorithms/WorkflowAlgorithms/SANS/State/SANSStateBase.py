@@ -19,7 +19,8 @@ def get_descriptor_values(instance):
     for key in descriptor_names:
         if hasattr(instance, key):
             value = getattr(instance, key)
-            descriptor_values.update({key: value})
+            if value is not None:
+                descriptor_values.update({key: value})
     return descriptor_values
 
 
