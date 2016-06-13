@@ -266,6 +266,7 @@ CrystalFieldPeaksBase::CrystalFieldPeaksBase()
   declareAttribute("Symmetry", Attribute("Ci"));
   declareAttribute("ToleranceEnergy", Attribute(1.0e-10));
   declareAttribute("ToleranceIntensity", Attribute(1.0e-3));
+  declareAttribute("MaxPeakCount", Attribute(0));
 
   declareParameter("BmolX", 0.0, "The x-component of the molecular field.");
   declareParameter("BmolY", 0.0, "The y-component of the molecular field.");
@@ -384,6 +385,8 @@ void CrystalFieldPeaksBase::calculateEigenSystem(DoubleFortranVector &en,
 
   ComplexFortranMatrix ham;
   calculateEigensystem(en, wf, ham, nre, bmol, bext, bkq);
+  // MaxPeakCount is a read-only "mutable" attribute.
+  const_cast<CrystalFieldPeaksBase*>(this)->setAttributeValue("MaxPeakCount", static_cast<int>(en.size()));
 }
 
 /// Perform a castom action when an attribute is set.

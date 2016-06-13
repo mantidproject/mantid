@@ -52,7 +52,8 @@ CrystalFieldMultiSpectrum::CrystalFieldMultiSpectrum()
   declareAttribute("Temperatures", Attribute(std::vector<double>(1, 1.0)));
   declareAttribute("Background", Attribute("FlatBackground"));
   declareAttribute("PeakShape", Attribute("Lorentzian"));
-  declareAttribute("FWHM", Attribute(0.0));
+  declareAttribute("FWHMs", Attribute(std::vector<double>(1, 0.0)));
+  declareAttribute("FixAllPeakParameters", Attribute(false));
 }
 
 size_t CrystalFieldMultiSpectrum::getNumberDomains() const {
@@ -89,9 +90,27 @@ void CrystalFieldMultiSpectrum::buildTargetFunction() const {
   auto &peakCalculator = dynamic_cast<Peaks &>(*m_source);
   peakCalculator.calculateEigenSystem(en, wf, nre);
 
+  // Get the temperatures from the attribute
   auto temperatures = getAttribute("Temperatures").asVector();
+  if (temperatures.empty()) {
+    throw std::runtime_error("Vector of temperatures cannot be empty.");
+  }
+  // Get the FWHMs from the attribute and check for consistency.
+  auto fwhms = getAttribute("FWHMs").asVector();
+  if (fwhms.size() != temperatures.size()) {
+    if (fwhms.empty()) {
+      throw std::runtime_error("Vector of FWHMs cannot be empty.");
+    }
+    if (fwhms.size() == 1) {
+      auto fwhm = fwhms.front();
+      fwhms.resize(temperatures.size(), fwhm);
+    } else {
+      throw std::runtime_error("Vector of FWHMs must either have same size as Temperatures or have size 1.");
+    }
+  }
+  // Create the single-spectrum functions.
   for (size_t i = 0; i < temperatures.size(); ++i) {
-    fun->addFunction(buildSpectrum(nre, en, wf, temperatures[i]));
+    fun->addFunction(buildSpectrum(nre, en, wf, temperatures[i], fwhms[i]));
     fun->setDomainIndex(i, i);
   }
 }
@@ -116,30 +135,39 @@ void CrystalFieldMultiSpectrum::calcExcitations(
 API::IFunction_sptr
 CrystalFieldMultiSpectrum::buildSpectrum(int nre, const DoubleFortranVector &en,
                                          const ComplexFortranMatrix &wf,
-                                         double temperature) const {
+                                         double temperature, double fwhm) const {
   DoubleFortranVector eExcitations;
   DoubleFortranVector iExcitations;
   calcExcitations(nre, en, wf, temperature, eExcitations, iExcitations);
   size_t nPeaks = eExcitations.size();
+  size_t maxNPeaks = nPeaks + nPeaks/2 + 1; //m_source->getAttribute("MaxPeakCount").asInt();
+  bool fixAll = getAttribute("FixAllPeakParameters").asBool();
 
   auto peakShape = IFunction::getAttribute("PeakShape").asString();
   auto bkgdShape = IFunction::getAttribute("Background").asString();
-  auto fwhm = IFunction::getAttribute("FWHM").asDouble();
 
   auto spectrum = new CompositeFunction;
   auto background = API::FunctionFactory::Instance().createFunction(bkgdShape);
   spectrum->addFunction(background);
-  for (size_t i = 0; i < nPeaks; ++i) {
+  for (size_t i = 0; i < maxNPeaks; ++i) {
     auto fun = API::FunctionFactory::Instance().createFunction(peakShape);
     auto peak = boost::dynamic_pointer_cast<API::IPeakFunction>(fun);
     if (!peak) {
       throw std::runtime_error("A peak function is expected.");
     }
-    peak->fixCentre();
-    peak->fixIntensity();
-    peak->setCentre(eExcitations.get(i));
-    peak->setIntensity(iExcitations.get(i));
-    peak->setFwhm(fwhm);
+	if (i < nPeaks) {
+		peak->fixCentre();
+		peak->fixIntensity();
+		peak->setCentre(eExcitations.get(i));
+		peak->setIntensity(iExcitations.get(i));
+		peak->setFwhm(fwhm);
+    if (fixAll) {
+      peak->fixAll();
+    }
+	} else {
+    peak->setHeight(0.0);
+    peak->fixAll();
+  }
     spectrum->addFunction(peak);
   }
   return IFunction_sptr(spectrum);
@@ -181,19 +209,26 @@ bool CrystalFieldMultiSpectrum::updateSpectrum(API::IFunction &spectrum,
   DoubleFortranVector iExcitations;
   calcExcitations(nre, en, wf, temperature, eExcitations, iExcitations);
   size_t nPeaks = eExcitations.size();
+  size_t maxNPeaks = nPeaks + nPeaks / 2 + 1; //m_source->getAttribute("MaxPeakCount").asInt();
 
   auto &composite = dynamic_cast<CompositeFunction &>(spectrum);
-  if (nPeaks + 1 != composite.nFunctions()) {
+  if (maxNPeaks + 1 != composite.nFunctions()) {
     return false;
   }
-  for (size_t i = 0; i < nPeaks; ++i) {
+  for (size_t i = 0; i < maxNPeaks; ++i) {
     auto fun = composite.getFunction(i + 1);
     auto &peak = dynamic_cast<API::IPeakFunction&>(*fun);
-    peak.setCentre(eExcitations.get(i));
-    peak.setIntensity(iExcitations.get(i));
+    if (i < nPeaks) {
+      peak.setCentre(eExcitations.get(i));
+      peak.setIntensity(iExcitations.get(i));
+    } else {
+      peak.setHeight(0.0);
+      peak.fixAll();
+    }
   }
   return true;
 }
+
 
 } // namespace Functions
 } // namespace CurveFitting

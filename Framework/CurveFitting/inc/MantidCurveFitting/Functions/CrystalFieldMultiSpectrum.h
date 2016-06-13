@@ -47,7 +47,7 @@ private:
   /// Build a function for a single spectrum.
   API::IFunction_sptr buildSpectrum(int nre, const DoubleFortranVector &en,
                                     const ComplexFortranMatrix &wf,
-                                    double temperature) const;
+                                    double temperature, double fwhm) const;
   /// Update a function for a single spectrum.
   bool updateSpectrum(API::IFunction &spectrum, int nre,
                       const DoubleFortranVector &en,

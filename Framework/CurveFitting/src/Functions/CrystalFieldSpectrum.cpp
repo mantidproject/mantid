@@ -37,28 +37,35 @@ void CrystalFieldSpectrum::buildTargetFunction() const {
   FunctionValues values;
   m_source->function(domain, values);
 
+  size_t maxNPeaks = m_source->getAttribute("MaxPeakCount").asInt();
+
   if (values.size() == 0) {
     return;
   }
 
   if (values.size() % 2 != 0) {
     throw std::runtime_error(
-        "CrystalFieldPeaks returned add number of values.");
+        "CrystalFieldPeaks returned odd number of values.");
   }
 
   auto peakShape = IFunction::getAttribute("PeakShape").asString();
   auto fwhm = IFunction::getAttribute("FWHM").asDouble();
   auto nPeaks = values.size() / 2;
-  for (size_t i = 0; i < nPeaks; ++i) {
+  for (size_t i = 0; i < maxNPeaks; ++i) {
     auto fun = API::FunctionFactory::Instance().createFunction(peakShape);
     auto peak = boost::dynamic_pointer_cast<API::IPeakFunction>(fun);
     if (!peak) {
       throw std::runtime_error("A peak function is expected.");
     }
+  if (i < nPeaks) {
     peak->fixCentre();
     peak->fixIntensity();
     peak->setCentre(values.getCalculated(i));
     peak->setIntensity(values.getCalculated(i + nPeaks));
+  } else {
+    peak->setHeight(0.0);
+    peak->fixAll();
+  }
     peak->setFwhm(fwhm);
     spectrum->addFunction(peak);
   }
@@ -76,22 +83,28 @@ void CrystalFieldSpectrum::updateTargetFunction() const {
   m_source->function(domain, values);
   auto nPeaks = values.size() / 2;
 
+  size_t maxNPeaks = m_source->getAttribute("MaxPeakCount").asInt();
   auto spectrum = dynamic_cast<CompositeFunction*>(m_target.get());
-  if (!spectrum || spectrum->nFunctions() != nPeaks) {
+  if (!spectrum || spectrum->nFunctions() != maxNPeaks) {
     buildTargetFunction();
     return;
   }
 
-  for (size_t i = 0; i < nPeaks; ++i) {
+  for (size_t i = 0; i < maxNPeaks; ++i) {
     auto fun = spectrum->getFunction(i);
     auto peak = boost::dynamic_pointer_cast<API::IPeakFunction>(fun);
     if (!peak) {
       throw std::runtime_error("A peak function is expected.");
     }
+  if (i < nPeaks) {
     auto centre = values.getCalculated(i);
     auto intensity = values.getCalculated(i + nPeaks);
     peak->setCentre(centre);
     peak->setIntensity(intensity);
+  } else {
+    peak->setHeight(0.0);
+    peak->fixAll();
+  }
   }
 }
 

@@ -200,6 +200,11 @@ void IFittingAlgorithm::addWorkspace(const std::string &workspacePropertyName,
     }
     multiCreator->setCreator(index, creator);
   }
+  auto props = this->getProperties();
+  std::cerr << "Before " << props.size() << ' ' << this << std::endl;
+  for (auto prop : props) {
+    std::cerr << "    " << prop->name() << std::endl;
+  }
 }
 
 /**
@@ -207,6 +212,11 @@ void IFittingAlgorithm::addWorkspace(const std::string &workspacePropertyName,
  * vector.
  */
 void IFittingAlgorithm::addWorkspaces() {
+  auto props0 = this->getProperties();
+  std::cerr << "After " << props0.size() << ' ' << this << std::endl;
+  for (auto prop : props0) {
+    std::cerr << "    " << prop->name() << std::endl;
+  }
   setDomainType();
   if (m_function->getNumberDomains() > 1) {
     m_domainCreator.reset(
