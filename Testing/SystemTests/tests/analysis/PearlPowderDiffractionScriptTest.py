@@ -193,6 +193,24 @@ class LoadTests(unittest.TestCase):
         self.assertAlmostEqual(files_data[1].readY(0)[3293], files_data[2].readY(0)[3293],
                                places=DIFF_PLACES)
 
+    def test_with_nexus_reference_files(self):
+        nexus_ws = "Ref_PRL92476_92479"
+        nxs_file = os.path.join(DIRS[0], "PEARL/Focus_Test/RefFile/Ref_PRL92476_92479.nxs")
+        Load(Filename=nxs_file, OutputWorkspace=nexus_ws)
+
+        mod_group_table = mtd["PRL92476_92479"]
+        return nexus_ws, mod_group_table
+
+    def test_with_gss_referenece_files(self):
+        gss_wsname = "GSSFile"
+        gss_file = os.path.join(DIRS[0], "PEARL/Focus_Test/DataOut/PRL92476_92479-0.gss")
+        LoadGSS(Filename=gss_file, OutputWorkspace=gss_wsname)
+
+        ref_gss_wsname = "Ref_GSSFile"
+        ref_gss_file = os.path.join(DIRS[0], "PEARL/Focus_Test/RefFile/Ref_PRL92476_92479-0.gss")
+        LoadGSS(Filename=gss_file, OutputWorkspace=ref_gss_wsname)
+
+        return gss_wsname, ref_gss_wsname
 
 class PearlPowderDiffractionScriptTestCalibration(stresstesting.MantidStressTest):
     def requiredFiles(self):
