@@ -240,7 +240,7 @@ void LoadVTK::execMDEvent(vtkDataSet *readDataset,
   setProperty("SignalThreshold", int(lowerBounds));
 
   std::stringstream ss;
-  ss << "Range is Min: " << min << " Max: " << max << std::endl;
+  ss << "Range is Min: " << min << " Max: " << max << '\n';
   this->g_log.debug(ss.str());
   ss.clear();
   ss << "Signal Limit is: " << lowerBounds;

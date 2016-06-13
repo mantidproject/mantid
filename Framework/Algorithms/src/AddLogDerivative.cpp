@@ -150,7 +150,7 @@ void AddLogDerivative::exec() {
   // Add the log
   run.addProperty(output, true);
 
-  g_log.notice() << "Added log named " << NewLogName << std::endl;
+  g_log.notice() << "Added log named " << NewLogName << '\n';
 }
 
 } // namespace Mantid

@@ -62,7 +62,7 @@ void Surface::print() const
   Simple print out function for surface header
 */
 {
-  std::cout << "Surf == " << Name << std::endl;
+  std::cout << "Surf == " << Name << '\n';
   return;
 }
 

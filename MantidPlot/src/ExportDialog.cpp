@@ -30,6 +30,7 @@
 #include "ExportDialog.h"
 #include "ApplicationWindow.h"
 
+#include <QCloseEvent>
 #include <QLayout>
 #include <QLabel>
 #include <QMessageBox>

@@ -104,7 +104,7 @@ public:
 
       Mantid::API::BoxController_sptr bc = ws->getBoxController();
       std::cout << bc->getFileIO()->getFreeSpaceMap().size()
-                << " entries in the free space map" << std::endl;
+                << " entries in the free space map\n";
 
       auto loader = dynamic_cast<BoxControllerNeXusIO *>(bc->getFileIO());
       TS_ASSERT(loader);

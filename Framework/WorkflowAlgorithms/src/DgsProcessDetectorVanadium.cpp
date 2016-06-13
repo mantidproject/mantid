@@ -73,7 +73,7 @@ void DgsProcessDetectorVanadium::init() {
 /** Execute the algorithm.
  */
 void DgsProcessDetectorVanadium::exec() {
-  g_log.notice() << "Starting DgsProcessDetectorVanadium" << std::endl;
+  g_log.notice() << "Starting DgsProcessDetectorVanadium\n";
   // Get the reduction property manager
   const std::string reductionManagerName =
       this->getProperty("ReductionProperties");

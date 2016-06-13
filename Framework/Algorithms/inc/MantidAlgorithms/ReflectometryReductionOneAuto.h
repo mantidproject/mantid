@@ -11,7 +11,9 @@
 namespace Mantid {
 namespace Algorithms {
 
-/** ReflectometryReductionOneAuto : TODO: DESCRIPTION
+/** ReflectometryReductionOneAuto : Algorithm to run ReflectometryReductionOne,
+attempting to pick instrument parameters for
+ * missing properties.
 
 Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
 National Laboratory & European Spallation Source
@@ -53,10 +55,6 @@ private:
   void init() override;
   void exec() override;
   template <typename T> boost::optional<T> isSet(std::string propName) const;
-
-  double checkForDefault(std::string propName,
-                         Mantid::Geometry::Instrument_const_sptr instrument,
-                         std::string idf_name = "") const;
   Mantid::API::Workspace_sptr
   sumOverTransmissionGroup(Mantid::API::WorkspaceGroup_sptr &transGroup);
 

@@ -41,9 +41,7 @@
 FunctionCurve::FunctionCurve(const QString &name)
     : PlotCurve(name), d_function_type(Normal), d_variable("x"), d_formulas(),
       d_from(0.0), d_to(0.0), m_identifier(NULL) {
-  // d_variable = "x";
   setType(Graph::Function);
-  // d_formulas = QStringList();
 }
 
 FunctionCurve::FunctionCurve(const FunctionType &t, const QString &name)

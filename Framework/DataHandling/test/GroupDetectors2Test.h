@@ -828,29 +828,27 @@ private:
     std::ofstream file(inputFile.c_str());
     file << " 2		#file format is in "
             "http://www.mantidproject.org/GroupDetectors \n"
-         << "1 " << std::endl    // group id
-         << "2" << std::endl     // number of spectra
-         << "1   3" << std::endl // the list of spectra
+         << "1 \n"    // group id
+         << "2\n"     // number of spectra
+         << "1   3\n" // the list of spectra
 
-         << "  2" << std::endl // group id
-         << std::endl
-         << "1" << std::endl // 1 spectrum
-         << "4";             // spectrum 4 is in the group
+         << "  2\n\n" // group id
+         << "1\n"     // 1 spectrum
+         << "4";      // spectrum 4 is in the group
     file.close();
   }
   void writeFileRanges() {
     std::ofstream file(inputFile.c_str());
     file << "3		#file format is in "
             "http://www.mantidproject.org/GroupDetectors, using ranges \n"
-         << "1 " << std::endl
-         << "3" << std::endl
-         << "  1-  3" << std::endl
-         << "2" << std::endl
-         << "1" << std::endl
-         << std::endl
-         << "  4" << std::endl
-         << "3" << std::endl
-         << "2" << std::endl
+         << "1 \n"
+         << "3\n"
+         << "  1-  3\n"
+         << "2\n"
+         << "1\n\n"
+         << "  4\n"
+         << "3\n"
+         << "2\n"
          << "5-6";
     file.close();
   }

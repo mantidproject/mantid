@@ -66,7 +66,7 @@ void CorrectFlightPaths::initWorkspaces() {
   m_wavelength = getRunProperty("wavelength");
   g_log.debug() << "Wavelength = " << m_wavelength;
   m_l2 = getInstrumentProperty("l2");
-  g_log.debug() << " L2 = " << m_l2 << std::endl;
+  g_log.debug() << " L2 = " << m_l2 << '\n';
 }
 
 /**
@@ -168,7 +168,7 @@ double CorrectFlightPaths::getInstrumentProperty(std::string s) {
     g_log.error(mesg);
     throw std::runtime_error(mesg);
   }
-  g_log.debug() << "prop[0] = " << prop[0] << std::endl;
+  g_log.debug() << "prop[0] = " << prop[0] << '\n';
   return boost::lexical_cast<double>(prop[0]);
 }
 

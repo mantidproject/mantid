@@ -114,7 +114,7 @@ public:
     // calib.setParameter("Yrot",90);
 
     calib.function1D(out.data(), xVals.data(), (size_t)N);
-    // std::cout<<out[0]<<","<<out[4]<<","<<out[8]<<","<<out[10]<<std::endl;
+    // std::cout<<out[0]<<","<<out[4]<<","<<out[8]<<","<<out[10]<<'\n';
     double d = .0001;
     TS_ASSERT_DELTA(out[0], -0.0027, d);
 

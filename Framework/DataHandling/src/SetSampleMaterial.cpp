@@ -235,8 +235,7 @@ void SetSampleMaterial::exec() {
     } catch (std::runtime_error &ex) {
       UNUSED_ARG(ex);
       std::stringstream msg;
-      msg << "Could not parse chemical formula: " << chemicalSymbol
-          << std::endl;
+      msg << "Could not parse chemical formula: " << chemicalSymbol << '\n';
       throw std::runtime_error(msg.str());
     }
     g_log.information() << "Found " << CF.atoms.size()

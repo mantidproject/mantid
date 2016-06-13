@@ -68,12 +68,12 @@ private:
 
   Ui::IqtFit m_uiForm;
   QtStringPropertyManager *m_stringManager;
-  QtTreePropertyBrowser *m_ffTree;           ///< IqtFit Property Browser
-  QtDoublePropertyManager *m_ffRangeManager; ///< StartX and EndX for IqtFit
+  QtTreePropertyBrowser *m_iqtFTree;           ///< IqtFit Property Browser
+  QtDoublePropertyManager *m_iqtFRangeManager; ///< StartX and EndX for IqtFit
   QMap<QtProperty *, QtProperty *> m_fixedProps;
-  Mantid::API::MatrixWorkspace_sptr m_ffInputWS;
-  Mantid::API::MatrixWorkspace_sptr m_ffOutputWS;
-  QString m_ffInputWSName;
+  Mantid::API::MatrixWorkspace_sptr m_iqtFInputWS;
+  Mantid::API::MatrixWorkspace_sptr m_iqtFOutputWS;
+  QString m_iqtFInputWSName;
   QString m_ties;
   Mantid::API::IAlgorithm_sptr m_singleFitAlg;
   QString m_singleFitOutputName;

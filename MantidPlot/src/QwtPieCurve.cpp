@@ -30,6 +30,7 @@
 #include "ColorBox.h"
 #include "Table.h"
 
+#include <QCloseEvent>
 #include <QPainter>
 #include <QMessageBox>
 #include <QApplication>

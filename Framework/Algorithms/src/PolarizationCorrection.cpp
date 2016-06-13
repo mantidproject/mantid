@@ -332,8 +332,7 @@ WorkspaceGroup_sptr PolarizationCorrection::execPA(WorkspaceGroup_sptr inWS) {
   for (size_t i = 1; i < totalGroupEntries; i++) {
     auto alg = this->createChildAlgorithm("ReplaceSpecialValues");
     alg->setProperty("InputWorkspace", dataOut->getItem(i));
-    alg->setProperty("OutputWorkspace",
-                     "dataOut_" + boost::lexical_cast<std::string>(i));
+    alg->setProperty("OutputWorkspace", "dataOut_" + std::to_string(i));
     alg->setProperty("NaNValue", 0.0);
     alg->setProperty("NaNError", 0.0);
     alg->setProperty("InfinityValue", 0.0);

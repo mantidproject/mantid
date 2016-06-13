@@ -91,25 +91,23 @@ void CatalogDownloadDataFiles::exec() {
 
     g_log.debug()
         << "CatalogDownloadDataFiles -> File location before transform is: "
-        << fileLocation << " mac path is : " << catalogInfo.macPrefix()
-        << std::endl;
+        << fileLocation << " mac path is : " << catalogInfo.macPrefix() << '\n';
     // Transform the archive path to the path of the user's operating system.
     fileLocation = catalogInfo.transformArchivePath(fileLocation);
     g_log.debug()
         << "CatalogDownloadDataFiles -> File location after transform is:  "
-        << fileLocation << std::endl;
+        << fileLocation << '\n';
 
     // Can we open the file (Hence, have access to the archives?)
     std::ifstream hasAccessToArchives(fileLocation.c_str());
     if (hasAccessToArchives) {
       g_log.information() << "File (" << *fileName << ") located in archives ("
-                          << fileLocation << ")." << std::endl;
+                          << fileLocation << ").\n";
       fileLocations.push_back(fileLocation);
     } else {
       g_log.information()
           << "Unable to open file (" << *fileName
-          << ") from archive. Beginning to download over Internet."
-          << std::endl;
+          << ") from archive. Beginning to download over Internet.\n";
       progress(prog / 2, "getting the url ....");
       // Obtain URL for related file to download from net.
       const std::string url = catalogInfoService->getDownloadURL(*fileID);
@@ -205,7 +203,7 @@ std::string CatalogDownloadDataFiles::doDownloadandSavetoLocalDrive(
     float diff = float(end - start) / CLOCKS_PER_SEC;
     g_log.information() << "Time taken to download file " << fileName << " is "
                         << std::fixed << std::setprecision(2) << diff
-                        << " seconds" << std::endl;
+                        << " seconds\n";
 
   } catch (Poco::Net::SSLException &error) {
     throw std::runtime_error(error.displayText());

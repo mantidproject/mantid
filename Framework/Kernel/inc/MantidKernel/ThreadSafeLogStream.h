@@ -109,8 +109,8 @@ protected:
 
   Usage example:
       ThreadSafeLogStream ls(somePoco::Logger);
-      ls << "Some informational message" << std::endl;
-      ls.error() << "Some error message" << std::endl;
+      ls << "Some informational message\n";
+      ls.error() << "Some error message\n";
  */
 class MANTID_KERNEL_DLL ThreadSafeLogStream : public ThreadSafeLogIOS,
                                               public std::ostream {

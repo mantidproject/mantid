@@ -4,6 +4,7 @@
 #include "MantidQtMantidWidgets/ScriptEditor.h"
 #include <QAction>
 #include <QFileInfo>
+#include <QFontDatabase>
 #include <QMenu>
 #include <QMessageBox>
 #include <QPushButton>

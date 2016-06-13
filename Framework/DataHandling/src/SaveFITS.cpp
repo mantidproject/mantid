@@ -128,7 +128,7 @@ void SaveFITS::exec() {
   g_log.information() << "Image of size " + std::to_string(ws->blocksize()) +
                              " columns by " +
                              std::to_string(ws->getNumberHistograms()) +
-                             " rows saved in '" + filename + "'" << std::endl;
+                             " rows saved in '" + filename + "'\n";
 }
 
 /**

@@ -31,7 +31,7 @@ void PropertyHistory::printSelf(std::ostream &os, const int indent) const {
   os << std::string(indent, ' ') << "Name: " << m_name;
   os << ", Value: " << m_value;
   os << ", Default?: " << (m_isDefault ? "Yes" : "No");
-  os << ", Direction: " << Kernel::Direction::asText(m_direction) << std::endl;
+  os << ", Direction: " << Kernel::Direction::asText(m_direction) << '\n';
 }
 
 /** Prints a text representation
@@ -60,9 +60,9 @@ bool PropertyHistory::isEmptyDefault() const {
   }
   // Empty values
   if (emptyValues.empty()) {
-    emptyValues.push_back(boost::lexical_cast<std::string>(EMPTY_INT()));
+    emptyValues.push_back(std::to_string(EMPTY_INT()));
     emptyValues.push_back(boost::lexical_cast<std::string>(EMPTY_DBL()));
-    emptyValues.push_back(boost::lexical_cast<std::string>(EMPTY_LONG()));
+    emptyValues.push_back(std::to_string(EMPTY_LONG()));
   }
 
   // If default, input, number type and matches empty value then return true

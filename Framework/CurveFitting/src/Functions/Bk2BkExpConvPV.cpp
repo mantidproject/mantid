@@ -111,7 +111,7 @@ void Bk2BkExpConvPV::functionLocal(double *out, const double *xValues,
   To " << xValues[nData-1]
                 << " TOF_h = " << tof_h << " Height = " << height << " alpha = "
   << alpha << " beta = "
-                << beta << " H = " << H << " eta = " << eta << std::endl;
+                << beta << " H = " << H << " eta = " << eta << '\n';
                 */
 
   // 2. Do calculation for each data point
@@ -245,7 +245,7 @@ void Bk2BkExpConvPV::calHandEta(double sigma2, double gamma, double &H,
 
   if (eta > 1 || eta < 0) {
     g_log.error() << "Bk2BkExpConvPV: Calculated eta = " << eta
-                  << " is out of range [0, 1]." << std::endl;
+                  << " is out of range [0, 1].\n";
   }
 
   return;

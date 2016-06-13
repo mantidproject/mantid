@@ -188,13 +188,13 @@ void CalMuonDeadTime::exec() {
     // Check order of names
     if (result->parameterName(0).compare("A0") != 0) {
       g_log.error() << "Parameter 0 should be A0, but is "
-                    << result->parameterName(0) << std::endl;
+                    << result->parameterName(0) << '\n';
       throw std::invalid_argument(
           "Parameters are out of order @ 0, should be A0");
     }
     if (result->parameterName(1).compare("A1") != 0) {
       g_log.error() << "Parameter 1 should be A1, but is "
-                    << result->parameterName(1) << std::endl;
+                    << result->parameterName(1) << '\n';
       throw std::invalid_argument(
           "Parameters are out of order @ 0, should be A1");
     }
@@ -210,8 +210,8 @@ void CalMuonDeadTime::exec() {
       API::TableRow t = outTable->appendRow();
       t << wsindex + 1 << -(A1 / A0) * time_bin * numGoodFrames;
     } else {
-      g_log.warning() << "Fit falled. Status = " << fitStatus << std::endl
-                      << "For workspace index " << i << std::endl;
+      g_log.warning() << "Fit falled. Status = " << fitStatus
+                      << "\nFor workspace index " << i << '\n';
     }
   }
 

@@ -6,8 +6,10 @@
 #include <QDateTime>
 #include <QMenu>
 #include <QFileDialog>
+#include <QKeyEvent>
 #include <QPrinter>
 #include <QPrintDialog>
+#include <QWheelEvent>
 
 /**
  * Constructor

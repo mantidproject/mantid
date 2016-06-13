@@ -3,15 +3,15 @@
 //------------------------------------------------------------------------------
 #include "MantidKernel/Material.h"
 #include "MantidKernel/Atom.h"
+#include "MantidKernel/StringTokenizer.h"
 #include <boost/lexical_cast.hpp>
 #include <boost/make_shared.hpp>
 #include <boost/regex.hpp>
-#include <boost/tokenizer.hpp>
 
 namespace Mantid {
 
 namespace Kernel {
-typedef boost::tokenizer<boost::char_separator<char>> tokenizer;
+typedef Mantid::Kernel::StringTokenizer tokenizer;
 typedef std::pair<std::string, std::string> str_pair;
 
 using PhysicalConstants::Atom;
@@ -175,8 +175,8 @@ Material::ChemicalFormula
 Material::parseChemicalFormula(const std::string chemicalSymbol) {
   Material::ChemicalFormula CF;
 
-  const boost::char_separator<char> ATOM_DELIM(" -");
-  tokenizer tokens(chemicalSymbol, ATOM_DELIM);
+  tokenizer tokens(chemicalSymbol, " -",
+                   Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
   for (auto atom = tokens.begin(); atom != tokens.end(); ++atom) {
     try {
       std::string name(*atom);
