@@ -110,8 +110,7 @@ void WorkspaceGroup::addWorkspace(Workspace_sptr workspace) {
   if (it == m_workspaces.end()) {
     m_workspaces.push_back(workspace);
   } else {
-    g_log.warning() << "Workspace already exists in a WorkspaceGroup"
-                    << std::endl;
+    g_log.warning() << "Workspace already exists in a WorkspaceGroup\n";
     ;
   }
 }
@@ -221,7 +220,7 @@ void WorkspaceGroup::print() const {
   std::lock_guard<std::recursive_mutex> _lock(m_mutex);
   for (const auto &workspace : m_workspaces) {
     g_log.debug() << "Workspace name in group vector =  " << (*workspace).name()
-                  << std::endl;
+                  << '\n';
   }
 }
 

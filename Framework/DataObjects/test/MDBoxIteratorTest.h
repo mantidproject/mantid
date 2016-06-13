@@ -90,7 +90,7 @@ public:
   /** Increment the iterator and return true if the next box is the expected
    * one*/
   bool nextIs(MDBoxIterator<MDLeanEvent<1>, 1> *it, ibox_t *expected) {
-    // std::cout << it->getBox()->getExtentsStr() << std::endl;
+    // std::cout << it->getBox()->getExtentsStr() << '\n';
     if (!it->next())
       return false;
     if (it->getBox() != expected)

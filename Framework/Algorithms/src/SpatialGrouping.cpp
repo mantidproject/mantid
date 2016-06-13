@@ -136,12 +136,12 @@ void SpatialGrouping::exec() {
   }
 
   if (m_groups.empty()) {
-    g_log.warning() << "No groups generated." << std::endl;
+    g_log.warning() << "No groups generated.\n";
     return;
   }
 
   // Create grouping XML file
-  g_log.information() << "Creating XML Grouping File." << std::endl;
+  g_log.information() << "Creating XML Grouping File.\n";
   std::vector<std::vector<detid_t>>::iterator grpIt;
   std::ofstream xml;
   std::string fname = getPropertyValue("Filename");
@@ -185,7 +185,7 @@ void SpatialGrouping::exec() {
 
   xml.close();
 
-  g_log.information() << "Finished creating XML Grouping File." << std::endl;
+  g_log.information() << "Finished creating XML Grouping File.\n";
 }
 
 /**

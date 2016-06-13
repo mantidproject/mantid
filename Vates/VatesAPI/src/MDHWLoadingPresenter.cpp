@@ -23,7 +23,6 @@
 #include <vtkFieldData.h>
 #include <vtkDataSet.h>
 
-
 namespace Mantid {
 namespace VATES {
 
@@ -42,8 +41,9 @@ namespace VATES {
  * @return A workspace that can be directly rendered from. Integrated dimensions
  *are always last.
  */
-void MDHWLoadingPresenter::transposeWs(Mantid::API::IMDHistoWorkspace_sptr &inHistoWs,
-                 Mantid::API::IMDHistoWorkspace_sptr &outCachedHistoWs) {
+void MDHWLoadingPresenter::transposeWs(
+    Mantid::API::IMDHistoWorkspace_sptr &inHistoWs,
+    Mantid::API::IMDHistoWorkspace_sptr &outCachedHistoWs) {
   using namespace Mantid::API;
 
   if (!outCachedHistoWs) {
@@ -122,7 +122,7 @@ void MDHWLoadingPresenter::extractMetadata(
       min = 0.0;
       max = 1.0;
     }
-    // std::cout << "dim " << d << min << " to " <<  max << std::endl;
+    // std::cout << "dim " << d << min << " to " <<  max << '\n';
     axisLabels.push_back(makeAxisTitle(*inDim));
     dimensions.push_back(boost::make_shared<MDHistoDimension>(
         inDim->getName(), inDim->getName(), inDim->getMDFrame(), min, max,
@@ -216,12 +216,12 @@ void MDHWLoadingPresenter::appendMetadata(vtkDataSet *visualDataSet,
 
   // Add metadata to dataset.
   MetadataToFieldData convert;
-  convert(outputFD.GetPointer(), xmlString, XMLDefinitions::metaDataId().c_str());
+  convert(outputFD.GetPointer(), xmlString,
+          XMLDefinitions::metaDataId().c_str());
   convert(outputFD.GetPointer(), jsonString,
           m_vatesConfigurations->getMetadataIdJson().c_str());
   visualDataSet->SetFieldData(outputFD.GetPointer());
 }
-
 
 /**
  * Set the axis labels from the current dimensions
@@ -235,7 +235,6 @@ void MDHWLoadingPresenter::setAxisLabels(vtkDataSet *visualDataSet) {
                   "the data set.\n");
   }
 }
-
 
 /**
 Gets the geometry in a string format.

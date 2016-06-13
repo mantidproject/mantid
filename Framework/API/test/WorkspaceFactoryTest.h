@@ -7,7 +7,6 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/ConfigService.h"
-#include "MantidAPI/MemoryManager.h"
 #include "MantidTestHelpers/FakeObjects.h"
 
 using Mantid::MantidVec;

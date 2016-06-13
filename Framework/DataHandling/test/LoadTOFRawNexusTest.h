@@ -8,7 +8,6 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/MemoryManager.h"
 #include "MantidGeometry/Instrument.h"
 
 #include <cxxtest/TestSuite.h>
@@ -184,7 +183,6 @@ public:
   Mantid::API::MatrixWorkspace_sptr do_test_signal(int signal,
                                                    size_t expectedXLength) {
     Mantid::API::AnalysisDataService::Instance().remove("outWS");
-    MemoryManager::Instance().releaseFreeMemory();
     std::string filename = "NOM_2011_09_15T16_17_30Z_histo.nxs";
     Mantid::API::FrameworkManager::Instance();
     Mantid::DataHandling::LoadTOFRawNexus ld;
@@ -193,7 +191,7 @@ public:
       ld.setPropertyValue("Filename", filename);
     } catch (...) {
       std::cout << "Test not completed due to missing data file " << filename
-                << std::endl;
+                << '\n';
       return Mantid::API::MatrixWorkspace_sptr();
     }
     ld.setProperty("Signal", signal);

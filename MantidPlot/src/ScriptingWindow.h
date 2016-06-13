@@ -172,8 +172,8 @@ private:
   QMenu *m_windowMenu;
   /// Window actions
   QAction *m_alwaysOnTop, *m_hide, *m_zoomIn, *m_zoomOut, *m_resetZoom,
-      *m_toggleProgress, *m_toggleFolding, *m_toggleWrapping, *m_toggleWhitespace,
-      *m_openConfigTabs, *m_selectFont;
+      *m_toggleProgress, *m_toggleFolding, *m_toggleWrapping,
+      *m_toggleWhitespace, *m_openConfigTabs, *m_selectFont;
   /// Help menu
   QMenu *m_helpMenu;
   /// Help actions

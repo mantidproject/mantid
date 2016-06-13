@@ -1,5 +1,7 @@
+.. _Dynamic PDF:
+
 Dynamic PDF
-================================
+===========
 
 .. contents:: Table of Contents
   :local:
@@ -59,10 +61,10 @@ Action Buttons
 .. categories:: Interfaces DynamicPDF
 
 Developer's Corner
-----------------
+------------------
 
 Diagrams
-~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~
 
 .. diagram:: DPDFBackgroundRemover_mainComponents.dot
 

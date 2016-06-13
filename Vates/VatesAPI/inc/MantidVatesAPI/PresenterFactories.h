@@ -46,7 +46,6 @@ public:
                                                   getWorkspaceName(workspace));
   }
 };
-
 }
 }
 #endif

@@ -28,6 +28,7 @@ set ( SRC_FILES
 	src/DeprecatedAlgorithm.cpp
 	src/DomainCreatorFactory.cpp
 	src/EnabledWhenWorkspaceIsType.cpp
+	src/EqualBinSizesValidator.cpp
 	src/ExperimentInfo.cpp
 	src/Expression.cpp
 	src/FermiChopperModel.cpp
@@ -92,7 +93,6 @@ set ( SRC_FILES
 	src/MatrixWSIndexCalculator.cpp
 	src/MatrixWorkspace.cpp
 	src/MatrixWorkspaceMDIterator.cpp
-	src/MemoryManager.cpp
 	src/ModeratorModel.cpp
 	src/MultiDomainFunction.cpp
 	src/MultiPeriodGroupAlgorithm.cpp
@@ -181,6 +181,7 @@ set ( INC_FILES
 	inc/MantidAPI/DllConfig.h
 	inc/MantidAPI/DomainCreatorFactory.h
 	inc/MantidAPI/EnabledWhenWorkspaceIsType.h
+	inc/MantidAPI/EqualBinSizesValidator.h
 	inc/MantidAPI/ExperimentInfo.h
 	inc/MantidAPI/Expression.h
 	inc/MantidAPI/FermiChopperModel.h
@@ -275,7 +276,6 @@ set ( INC_FILES
 	inc/MantidAPI/MatrixWorkspaceMDIterator.h
 	inc/MantidAPI/MatrixWorkspaceValidator.h
 	inc/MantidAPI/MatrixWorkspace_fwd.h
-	inc/MantidAPI/MemoryManager.h
 	inc/MantidAPI/ModeratorModel.h
 	inc/MantidAPI/MultiDomainFunction.h
 	inc/MantidAPI/MultiPeriodGroupAlgorithm.h
@@ -345,6 +345,7 @@ set ( TEST_FILES
 	CostFunctionFactoryTest.h
 	DataProcessorAlgorithmTest.h
 	EnabledWhenWorkspaceIsTypeTest.h
+	EqualBinSizesValidatorTest.h
 	ExperimentInfoTest.h
 	ExpressionTest.h
 	FermiChopperModelTest.h
@@ -386,7 +387,6 @@ set ( TEST_FILES
 	LogManagerTest.h
 	MDGeometryTest.h
 	MatrixWorkspaceMDIteratorTest.h
-	MemoryManagerTest.h
 	ModeratorModelTest.h
 	MultiDomainFunctionTest.h
 	MultiPeriodGroupAlgorithmTest.h

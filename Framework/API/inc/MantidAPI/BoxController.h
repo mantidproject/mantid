@@ -336,7 +336,7 @@ public:
    * */
   double getAverageDepth() const {
     double total = 0;
-    double maxNumberOfFinestBoxes = m_maxNumMDBoxes[m_maxNumMDBoxes.size() - 1];
+    double maxNumberOfFinestBoxes = m_maxNumMDBoxes.back();
     for (size_t depth = 0; depth < m_numMDBoxes.size(); depth++) {
       // Add up the number of MDBoxes at that depth, weighed by their volume in
       // units of the volume of the finest possible box.

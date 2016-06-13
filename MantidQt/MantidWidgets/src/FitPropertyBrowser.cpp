@@ -305,10 +305,10 @@ void FitPropertyBrowser::initLayout(QWidget *w) {
   m_fitMapper->setMapping(m_fitActionSeqFit, "SeqFit");
   m_fitMapper->setMapping(m_fitActionUndoFit, "UndoFit");
   m_fitMapper->setMapping(m_fitActionEvaluate, "Evaluate");
-  connect(m_fitActionFit, SIGNAL(activated()), m_fitMapper, SLOT(map()));
-  connect(m_fitActionSeqFit, SIGNAL(activated()), m_fitMapper, SLOT(map()));
-  connect(m_fitActionUndoFit, SIGNAL(activated()), m_fitMapper, SLOT(map()));
-  connect(m_fitActionEvaluate, SIGNAL(activated()), m_fitMapper, SLOT(map()));
+  connect(m_fitActionFit, SIGNAL(triggered()), m_fitMapper, SLOT(map()));
+  connect(m_fitActionSeqFit, SIGNAL(triggered()), m_fitMapper, SLOT(map()));
+  connect(m_fitActionUndoFit, SIGNAL(triggered()), m_fitMapper, SLOT(map()));
+  connect(m_fitActionEvaluate, SIGNAL(triggered()), m_fitMapper, SLOT(map()));
   connect(m_fitMapper, SIGNAL(mapped(const QString &)), this,
           SLOT(executeFitMenu(const QString &)));
   m_fitMenu->addAction(m_fitActionFit);
@@ -331,11 +331,11 @@ void FitPropertyBrowser::initLayout(QWidget *w) {
   displayMapper->setMapping(m_displayActionPlotGuess, "PlotGuess");
   displayMapper->setMapping(m_displayActionQuality, "Quality");
   displayMapper->setMapping(m_displayActionClearAll, "ClearAll");
-  connect(m_displayActionPlotGuess, SIGNAL(activated()), displayMapper,
+  connect(m_displayActionPlotGuess, SIGNAL(triggered()), displayMapper,
           SLOT(map()));
-  connect(m_displayActionQuality, SIGNAL(activated()), displayMapper,
+  connect(m_displayActionQuality, SIGNAL(triggered()), displayMapper,
           SLOT(map()));
-  connect(m_displayActionClearAll, SIGNAL(activated()), displayMapper,
+  connect(m_displayActionClearAll, SIGNAL(triggered()), displayMapper,
           SLOT(map()));
   connect(displayMapper, SIGNAL(mapped(const QString &)), this,
           SLOT(executeDisplayMenu(const QString &)));
@@ -366,10 +366,10 @@ void FitPropertyBrowser::initLayout(QWidget *w) {
   setupManageMapper->setMapping(setupActionSave, "SaveSetup");
   setupManageMapper->setMapping(setupActionCopyToClipboard, "CopyToClipboard");
   setupManageMapper->setMapping(setupActionLoadFromString, "LoadFromString");
-  connect(setupActionSave, SIGNAL(activated()), setupManageMapper, SLOT(map()));
-  connect(setupActionCopyToClipboard, SIGNAL(activated()), setupManageMapper,
+  connect(setupActionSave, SIGNAL(triggered()), setupManageMapper, SLOT(map()));
+  connect(setupActionCopyToClipboard, SIGNAL(triggered()), setupManageMapper,
           SLOT(map()));
-  connect(setupActionLoadFromString, SIGNAL(activated()), setupManageMapper,
+  connect(setupActionLoadFromString, SIGNAL(triggered()), setupManageMapper,
           SLOT(map()));
   connect(setupManageMapper, SIGNAL(mapped(const QString &)), this,
           SLOT(executeSetupManageMenu(const QString &)));
@@ -387,8 +387,8 @@ void FitPropertyBrowser::initLayout(QWidget *w) {
   QSignalMapper *setupMapper = new QSignalMapper(this);
   setupMapper->setMapping(setupActionClearFit, "ClearFit");
   setupMapper->setMapping(setupActionFindPeaks, "FindPeaks");
-  connect(setupActionClearFit, SIGNAL(activated()), setupMapper, SLOT(map()));
-  connect(setupActionFindPeaks, SIGNAL(activated()), setupMapper, SLOT(map()));
+  connect(setupActionClearFit, SIGNAL(triggered()), setupMapper, SLOT(map()));
+  connect(setupActionFindPeaks, SIGNAL(triggered()), setupMapper, SLOT(map()));
   connect(setupMapper, SIGNAL(mapped(const QString &)), this,
           SLOT(executeSetupMenu(const QString &)));
 
@@ -492,8 +492,8 @@ void FitPropertyBrowser::updateSetupMenus() {
     QAction *itemRemove = new QAction(names.at(i), this);
     mapperLoad->setMapping(itemLoad, names.at(i));
     mapperRemove->setMapping(itemRemove, names.at(i));
-    connect(itemLoad, SIGNAL(activated()), mapperLoad, SLOT(map()));
-    connect(itemRemove, SIGNAL(activated()), mapperRemove, SLOT(map()));
+    connect(itemLoad, SIGNAL(triggered()), mapperLoad, SLOT(map()));
+    connect(itemRemove, SIGNAL(triggered()), mapperRemove, SLOT(map()));
     menuLoad->addAction(itemLoad);
     menuRemove->addAction(itemRemove);
   }
@@ -1502,8 +1502,8 @@ void FitPropertyBrowser::finishHandle(const Mantid::API::IAlgorithm *alg) {
   // the fit has been done against is sent as a parameter)
   QString name(QString::fromStdString(alg->getProperty("InputWorkspace")));
   if (name.contains('_')) // Must be fitting to raw data, need to group under
-                          // name without "_Raw".
-                          emit fittingDone(name.left(name.indexOf('_')));
+    // name without "_Raw".
+    emit fittingDone(name.left(name.indexOf('_')));
   else // else fitting to current workspace, group under same name.
     emit fittingDone(name);
 
@@ -2479,10 +2479,8 @@ void FitPropertyBrowser::setPeakToolOn(bool on) {
 /**
  * @brief impose a number of decimal places on all defined Double properties
  */
-void FitPropertyBrowser::updateDecimals()
-{
-  if (m_decimals < 0)
-  {
+void FitPropertyBrowser::updateDecimals() {
+  if (m_decimals < 0) {
     QSettings settings;
     settings.beginGroup("Mantid/FitBrowser");
     m_decimals = settings.value("decimals", 6).toInt();

@@ -632,8 +632,8 @@ const boost::shared_ptr<const Object> StructuredDetector::shape() const {
 */
 std::ostream &operator<<(std::ostream &os, const StructuredDetector &ass) {
   ass.printSelf(os);
-  os << "************************" << std::endl;
-  os << "Number of children :" << ass.nelements() << std::endl;
+  os << "************************\n";
+  os << "Number of children :" << ass.nelements() << '\n';
   ass.printChildren(os);
   return os;
 }

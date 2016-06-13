@@ -59,8 +59,6 @@ private:
   void init() override;
   /// Run the algorithm
   void exec() override;
-  /// Validate the inputs
-  std::map<std::string, std::string> validateInputs() override;
 };
 
 } // namespace Algorithms

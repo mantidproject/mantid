@@ -14,15 +14,12 @@
 
 class vtkDataSet;
 
-namespace Mantid
-{
-namespace Geometry
-{
+namespace Mantid {
+namespace Geometry {
 class OrientedLattice;
 }
 
-namespace VATES
-{
+namespace VATES {
 
 /**
  * Class that handles converting a dataset from rectilinear coordinates
@@ -51,49 +48,48 @@ namespace VATES
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport vtkDataSetToNonOrthogonalDataSet
-{
+class DLLExport vtkDataSetToNonOrthogonalDataSet {
 public:
-    /// Static execution method
-    static void exec(vtkDataSet *dataset, std::string name,
-                     std::unique_ptr<WorkspaceProvider> workspaceProvider);
-    /// Constructor
-    vtkDataSetToNonOrthogonalDataSet(
-        vtkDataSet *dataset, std::string name,
-        std::unique_ptr<Mantid::VATES::WorkspaceProvider> workspaceProvider);
-    /// Class execution method
-    void execute();
-    /// Destructor
-    virtual ~vtkDataSetToNonOrthogonalDataSet();
+  /// Static execution method
+  static void exec(vtkDataSet *dataset, std::string name,
+                   std::unique_ptr<WorkspaceProvider> workspaceProvider);
+  /// Constructor
+  vtkDataSetToNonOrthogonalDataSet(
+      vtkDataSet *dataset, std::string name,
+      std::unique_ptr<Mantid::VATES::WorkspaceProvider> workspaceProvider);
+  /// Class execution method
+  void execute();
+  /// Destructor
+  virtual ~vtkDataSetToNonOrthogonalDataSet();
 
 private:
-    vtkDataSetToNonOrthogonalDataSet &
-    operator=(const vtkDataSetToNonOrthogonalDataSet &other);
-    vtkDataSetToNonOrthogonalDataSet(
-        const vtkDataSetToNonOrthogonalDataSet &other);
-    /// Calculate the skew matrix and basis.
-    void createSkewInformation(Geometry::OrientedLattice &ol,
-                               Kernel::DblMatrix &w,
-                               Kernel::Matrix<coord_t> &aff);
-    /// Calculate the skew basis vector
-    void findSkewBasis(Kernel::V3D &basis, double scale);
-    /// Reduce the dimensionality of matrix by 1
-    void stripMatrix(Kernel::DblMatrix &mat);
-    /// Add the skew basis to metadata
-    void updateMetaData(vtkDataSet *ugrid);
-    vtkDataSet *m_dataSet; ///< Pointer to VTK dataset to modify
-    std::string m_wsName;  ///< The name of the workspace to fetch
-    std::size_t m_numDims; ///< Number of dimensions in workspace
-    Kernel::DblMatrix
-        m_skewMat; ///< The skew matrix for non-orthogonal representation
-    MantidVec m_basisNorm; ///< Holder for the basis normalisation values
-    Kernel::V3D m_basisX;  ///< The X direction basis vector
-    Kernel::V3D m_basisY;  ///< The Y direction basis vector
-    Kernel::V3D m_basisZ;  ///< The Z direction basis vector
-    Kernel::SpecialCoordinateSystem
-        m_coordType; ///< The coordinate system for the workspace
-    std::array<double, 6> m_boundingBox;
-    std::unique_ptr<Mantid::VATES::WorkspaceProvider> m_workspaceProvider;
+  vtkDataSetToNonOrthogonalDataSet &
+  operator=(const vtkDataSetToNonOrthogonalDataSet &other);
+  vtkDataSetToNonOrthogonalDataSet(
+      const vtkDataSetToNonOrthogonalDataSet &other);
+  /// Calculate the skew matrix and basis.
+  void createSkewInformation(Geometry::OrientedLattice &ol,
+                             Kernel::DblMatrix &w,
+                             Kernel::Matrix<coord_t> &aff);
+  /// Calculate the skew basis vector
+  void findSkewBasis(Kernel::V3D &basis, double scale);
+  /// Reduce the dimensionality of matrix by 1
+  void stripMatrix(Kernel::DblMatrix &mat);
+  /// Add the skew basis to metadata
+  void updateMetaData(vtkDataSet *ugrid);
+  vtkDataSet *m_dataSet; ///< Pointer to VTK dataset to modify
+  std::string m_wsName;  ///< The name of the workspace to fetch
+  std::size_t m_numDims; ///< Number of dimensions in workspace
+  Kernel::DblMatrix
+      m_skewMat;         ///< The skew matrix for non-orthogonal representation
+  MantidVec m_basisNorm; ///< Holder for the basis normalisation values
+  Kernel::V3D m_basisX;  ///< The X direction basis vector
+  Kernel::V3D m_basisY;  ///< The Y direction basis vector
+  Kernel::V3D m_basisZ;  ///< The Z direction basis vector
+  Kernel::SpecialCoordinateSystem
+      m_coordType; ///< The coordinate system for the workspace
+  std::array<double, 6> m_boundingBox;
+  std::unique_ptr<Mantid::VATES::WorkspaceProvider> m_workspaceProvider;
 };
 
 } // namespace VATES

@@ -37,7 +37,7 @@ public:
     V3D family = testedPointGroup->getReflectionFamily(hkl);
 
     for (size_t j = 0; j < numEquiv; j++) {
-      // std::cout << j << std::endl;
+      // std::cout << j << '\n';
       if (!testedPointGroup->isEquivalent(hkl, equiv[j])) {
         TSM_ASSERT(name + " : " + hkl.toString() + " is not equivalent to " +
                        equiv[j].toString(),
@@ -456,7 +456,7 @@ private:
 
     float time = t.elapsed();
 
-    std::cout << "Eq: " << h << ", Time: " << time / 1000.0 << std::endl;
+    std::cout << "Eq: " << h << ", Time: " << time / 1000.0 << '\n';
   }
 };
 

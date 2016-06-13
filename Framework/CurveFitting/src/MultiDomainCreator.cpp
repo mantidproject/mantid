@@ -88,7 +88,7 @@ void MultiDomainCreator::initFunction(API::IFunction_sptr function) {
         m_creators[index]->initFunction(mdFunction->getFunction(iFun));
       } else {
         g_log.warning() << "Function #" << iFun
-                        << " doesn't apply to any domain" << std::endl;
+                        << " doesn't apply to any domain\n";
       }
     }
   } else {
@@ -136,8 +136,7 @@ boost::shared_ptr<API::Workspace> MultiDomainCreator::createOutputWorkspace(
       API::WorkspaceGroup_sptr(new API::WorkspaceGroup());
 
   for (size_t i = 0; i < functions.size(); ++i) {
-    std::string localName =
-        baseName + "Workspace_" + boost::lexical_cast<std::string>(i);
+    std::string localName = baseName + "Workspace_" + std::to_string(i);
     auto fun = functions[i];
     auto creator = m_creators[i];
     boost::shared_ptr<API::FunctionDomain> localDomain;

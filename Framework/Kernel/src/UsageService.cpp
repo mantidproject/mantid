@@ -145,7 +145,7 @@ void UsageServiceImpl::sendStartupReport() {
     // send the report
     Poco::ActiveResult<int> result = m_startupActiveMethod(message);
   } catch (std::exception &ex) {
-    g_log.debug() << "Send startup usage failure. " << ex.what() << std::endl;
+    g_log.debug() << "Send startup usage failure. " << ex.what() << '\n';
   }
 }
 
@@ -161,8 +161,7 @@ void UsageServiceImpl::sendFeatureUsageReport(const bool synchronous = false) {
     }
 
   } catch (std::exception &ex) {
-    g_log.debug() << "sendFeatureUsageReport failure. " << ex.what()
-                  << std::endl;
+    g_log.debug() << "sendFeatureUsageReport failure. " << ex.what() << '\n';
   }
 }
 

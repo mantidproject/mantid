@@ -34,7 +34,7 @@ DECLARE_FUNCTION(SCDPanelErrors)
 // UB ified q's are below.
 
 namespace { // anonymous namespace
-static const double ONE_OVER_TWO_PI = 1. / M_2_PI;
+// static const double ONE_OVER_TWO_PI = 1. / M_2_PI;
 const string LATTICE_A("a");
 const string LATTICE_B("b");
 const string LATTICE_C("c");
@@ -324,7 +324,7 @@ SCDPanelErrors::getNewInstrument(const Geometry::IPeak &peak) const {
   boost::split(GroupBanks, BankNames, boost::is_any_of("!"));
 
   for (size_t group = 0; group < (size_t)GroupBanks.size(); ++group) {
-    string prefix = "f" + boost::lexical_cast<std::string>(group) + "_";
+    string prefix = "f" + std::to_string(group) + "_";
 
     std::vector<std::string> bankNames;
     Quat rot = Quat(getParameter(prefix + "Xrot"), Kernel::V3D(1.0, 0.0, 0.0)) *
@@ -419,7 +419,7 @@ void SCDPanelErrors::function1D(double *out, const double *xValues,
   Check(m_peaks, xValues, nData, StartX, EndX);
 
   g_log.debug() << "BankNames " << BankNames << "   Number of peaks"
-                << (EndX - StartX + 1) / 3 << std::endl;
+                << (EndX - StartX + 1) / 3 << '\n';
 
   // some pointers for the updated instrument
   boost::shared_ptr<Geometry::Instrument> instChange =
@@ -479,56 +479,21 @@ void SCDPanelErrors::function1D(double *out, const double *xValues,
   for (size_t i = EndX; i < nData; ++i)
     out[i] = 0.;
 
-  g_log.debug() << "Parameters" << std::endl;
+  g_log.debug() << "Parameters\n";
 
   for (size_t i = 0; i < this->nParams(); ++i)
     g_log.debug() << setw(20) << parameterName(i) << setw(20) << getParameter(i)
-                  << std::endl;
+                  << '\n';
 
   g_log.debug() << "      chi Squared=" << std::setprecision(12) << chiSq
-                << std::endl;
+                << '\n';
 
   // Get values for test program. TODO eliminate
   g_log.debug() << "  out[evenxx]=";
   for (size_t i = 0; i < std::min<size_t>(nData, 30); ++i)
     g_log.debug() << out[i] << "  ";
 
-  g_log.debug() << std::endl;
-}
-
-Matrix<double> SCDPanelErrors::CalcDiffDerivFromdQ(
-    Matrix<double> const &DerivQ, Matrix<double> const &Mhkl,
-    Matrix<double> const &MhklT, Matrix<double> const &InvhklThkl,
-    Matrix<double> const &UB) const {
-  try {
-    Matrix<double> dUB = DerivQ * Mhkl * InvhklThkl * ONE_OVER_TWO_PI;
-
-    Geometry::OrientedLattice lat;
-    lat.setUB(Matrix<double>(UB) + dUB * .001);
-    const Kernel::DblMatrix U2 = lat.getU();
-
-    Kernel::DblMatrix U2A(U2);
-    lat.setUB(Matrix<double>(UB) - dUB * .001);
-    const Kernel::DblMatrix U1 = lat.getU();
-
-    Kernel::DblMatrix dU = (U2A - U1) * (1 / .002);
-    if (dU == Kernel::DblMatrix())
-      std::cout << "zero dU in CalcDiffDerivFromdQ" << std::endl;
-    Kernel::DblMatrix dUB0 = dU * m_unitCell->getB();
-
-    Kernel::DblMatrix dQtheor = dUB0 * MhklT;
-    Kernel::DblMatrix Deriv = Matrix<double>(DerivQ) - dQtheor * M_2_PI;
-
-    return Deriv;
-  } catch (...) {
-
-    for (size_t i = 0; i < nParams(); ++i)
-      g_log.debug() << getParameter(i) << ",";
-
-    g_log.debug() << "\n";
-
-    throw std::invalid_argument(" Invalid initial data ");
-  }
+  g_log.debug() << '\n';
 }
 
 double SCDPanelErrors::checkForNonsenseParameters() const {
@@ -692,7 +657,7 @@ void SCDPanelErrors::setAttribute(const std::string &attName,
     }
     NGroups = value.asInt();
     for (int k = 1; k < NGroups; ++k) {
-      std::string prefix = "f" + boost::lexical_cast<std::string>(k) + "_";
+      std::string prefix = "f" + std::to_string(k) + "_";
       declareParameter(prefix + "detWidthScale", 1.0, "panel Width");
       declareParameter(prefix + "detHeightScale", 1.0, "panelHeight");
 

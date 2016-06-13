@@ -104,8 +104,7 @@ size_t ConvToMDHistoWS::conversionChunk(size_t startSpectra) {
         XtargetUnits[j - 1] = 0.5 * (xm + xm1);
         xm1 = xm;
       }
-      XtargetUnits[XtargetUnits.size() - 1] =
-          xm1; // just in case, should not be used
+      XtargetUnits.back() = xm1; // just in case, should not be used
     } else
       for (size_t j = 0; j < XtargetUnits.size(); j++)
         XtargetUnits[j] = localUnitConv.convertUnits(X[j]);

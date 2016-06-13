@@ -118,10 +118,9 @@ public:
         less = false;
       }
       if (!less) {
-        std::cout << "Event " << i << "  is later than Event " << i + 1
-                  << std::endl;
+        std::cout << "Event " << i << "  is later than Event " << i + 1 << '\n';
         std::cout << "Event " << i << ": " << ve[i].pulseTime() << " + "
-                  << ve[i].tof() << std::endl;
+                  << ve[i].tof() << '\n';
       }
       TS_ASSERT(less);
     }
