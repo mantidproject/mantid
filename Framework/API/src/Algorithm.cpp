@@ -1225,11 +1225,13 @@ bool Algorithm::processGroups() {
     }
   }
 
+  double progress_proportion = 1.0 / m_groupSize;
   // Go through each entry in the input group(s)
   for (size_t entry = 0; entry < m_groupSize; entry++) {
     // use create Child Algorithm that look like this one
     Algorithm_sptr alg_sptr = this->createChildAlgorithm(
-        this->name(), -1, -1, this->isLogging(), this->version());
+        this->name(), progress_proportion*entry, progress_proportion*(1+entry),
+        this->isLogging(), this->version());
     // Don't make the new algorithm a child so that it's workspaces are stored
     // correctly
     alg_sptr->setChild(false);
