@@ -54,11 +54,6 @@ RefinePowderInstrumentParameters::RefinePowderInstrumentParameters()
       m_MaxNumberStoredParameters(0) {}
 
 //----------------------------------------------------------------------------------------------
-/** Destructor
- */
-RefinePowderInstrumentParameters::~RefinePowderInstrumentParameters() = default;
-
-//----------------------------------------------------------------------------------------------
 /** Parameter declaration
  */
 void RefinePowderInstrumentParameters::init() {

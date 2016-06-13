@@ -18,8 +18,6 @@ namespace MDAlgorithms {
  */
 class DLLExport CentroidPeaksMD : public API::Algorithm {
 public:
-  CentroidPeaksMD();
-  ~CentroidPeaksMD() override;
 
   /// Algorithm's name for identification
   const std::string name() const override { return "CentroidPeaksMD"; };

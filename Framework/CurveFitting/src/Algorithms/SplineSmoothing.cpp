@@ -28,11 +28,6 @@ SplineSmoothing::SplineSmoothing()
       m_derivativeWorkspaceGroup(new WorkspaceGroup) {}
 
 //----------------------------------------------------------------------------------------------
-/** Destructor
- */
-SplineSmoothing::~SplineSmoothing() = default;
-
-//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string SplineSmoothing::name() const { return "SplineSmoothing"; }
 

@@ -29,12 +29,6 @@ RefinePowderInstrumentParameters3::RefinePowderInstrumentParameters3()
       m_bestChiSq(0.), m_bestChiSqStep(-1), m_bestChiSqGroup(-1) {}
 
 //----------------------------------------------------------------------------------------------
-/** Destructor
- */
-RefinePowderInstrumentParameters3::~RefinePowderInstrumentParameters3() =
-    default;
-
-//----------------------------------------------------------------------------------------------
 /** Declare properties
   */
 void RefinePowderInstrumentParameters3::init() {

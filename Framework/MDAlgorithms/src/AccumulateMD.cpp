@@ -196,16 +196,6 @@ void insertDataSources(
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(AccumulateMD)
 
-/*
- * Constructor
-*/
-AccumulateMD::AccumulateMD() {}
-
-/*
- * Destructor
-*/
-AccumulateMD::~AccumulateMD() = default;
-
 /// Algorithms name for identification. @see Algorithm::name
 const std::string AccumulateMD::name() const { return "AccumulateMD"; }
 
