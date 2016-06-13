@@ -210,8 +210,9 @@ bool MultiPeriodGroupWorker::processGroups(
     const int periodNumber = static_cast<int>(i + 1);
     // use create Child Algorithm that look like this one
     Algorithm_sptr alg_sptr = sourceAlg->createChildAlgorithm(
-      sourceAlg->name(), progress_proportion*periodNumber, progress_proportion*(1 + periodNumber),
-      sourceAlg->isLogging(), sourceAlg->version());
+        sourceAlg->name(), progress_proportion * periodNumber,
+        progress_proportion * (1 + periodNumber), sourceAlg->isLogging(),
+        sourceAlg->version());
     // Don't make the new algorithm a child so that it's workspaces are stored
     // correctly
     alg_sptr->setChild(false);
