@@ -56,7 +56,7 @@ public:
 
   void test_getPropertyValue() {
     AlgorithmHistory alg = createTestHistory();
-    TS_ASSERT_EQUALS(alg.getPropertyValue("arg1_param"), "x");
+    TS_ASSERT_EQUALS(alg.getPropertyValue("arg1_param"), "y");
     TS_ASSERT_EQUALS(alg.getPropertyValue("arg2_param"), "23");
     TS_ASSERT_THROWS_ANYTHING(alg.getPropertyValue("none_existant"));
   }
