@@ -1,10 +1,13 @@
 /**
-This class holds the widgets that hold the details for each axis so the contents are only filled once and switching axis only changes a pointer.
+This class holds the widgets that hold the details for each axis so the contents
+are only filled once and switching axis only changes a pointer.
 
-@author Keith Brown, Placement Student at ISIS Rutherford Appleton Laboratory from the University of Derby
+@author Keith Brown, Placement Student at ISIS Rutherford Appleton Laboratory
+from the University of Derby
 @date 24/09/2013
 
-Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+National Laboratory & European Spallation Source
 
 This file is part of Mantid.
 
@@ -38,15 +41,15 @@ class ColorBox;
 class QComboBox;
 class DoubleSpinBox;
 class Grid;
-//The grid tab
-class GridDetails: public QWidget
-{
+// The grid tab
+class GridDetails : public QWidget {
   Q_OBJECT
 public:
-  GridDetails(ApplicationWindow* app, Graph* graph, int alignment, QWidget *parent = 0); // populate and fill in with existing data
+  GridDetails(ApplicationWindow *app, Graph *graph, int alignment,
+              QWidget *parent = 0); // populate and fill in with existing data
   ~GridDetails() override;
   void initWidgets();
-  bool modified(){return m_modified;}
+  bool modified() { return m_modified; }
   void apply(Grid *grid, bool antialias, bool multirun = false);
 public slots:
   void setModified();
@@ -62,8 +65,8 @@ private:
   QComboBox *m_cmbTypeMajor, *m_cmbTypeMinor, *m_cmbGridAxis;
   DoubleSpinBox *m_dspnWidthMajor, *m_dspnWidthMinor;
 
-  ApplicationWindow* m_app;
-  Graph* m_graph;
-  int m_alignment; //0 = horzontal, 1 = vertical, anything else sets this to 0;
+  ApplicationWindow *m_app;
+  Graph *m_graph;
+  int m_alignment; // 0 = horzontal, 1 = vertical, anything else sets this to 0;
 };
 #endif /* GRIDDETAILS_H_ */

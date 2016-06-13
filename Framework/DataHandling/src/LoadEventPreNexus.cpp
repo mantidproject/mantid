@@ -22,7 +22,6 @@
 #include "MantidKernel/VisibleWhenProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
-#include "MantidAPI/MemoryManager.h"
 
 #include <algorithm>
 #include <sstream>
@@ -49,7 +48,6 @@ using DataObjects::EventWorkspace;
 using DataObjects::EventWorkspace_sptr;
 using DataObjects::TofEvent;
 using std::cout;
-using std::endl;
 using std::ifstream;
 using std::runtime_error;
 using std::stringstream;
@@ -295,7 +293,7 @@ void LoadEventPreNexus::exec() {
     if (!pulseid_filename.empty()) {
       if (Poco::File(pulseid_filename).exists()) {
         this->g_log.information() << "Found pulseid file " << pulseid_filename
-                                  << std::endl;
+                                  << '\n';
         throwError = false;
       } else {
         pulseid_filename = "";
@@ -348,7 +346,7 @@ void LoadEventPreNexus::exec() {
     mapping_filename = generateMappingfileName(localWorkspace);
     if (!mapping_filename.empty())
       this->g_log.information() << "Found mapping file \"" << mapping_filename
-                                << "\"" << std::endl;
+                                << "\"\n";
   }
   this->loadPixelMap(mapping_filename);
 
@@ -447,7 +445,7 @@ void LoadEventPreNexus::procEvents(
     double setUpTime = double(detector_map.size()) * 10e-6;
     parallelProcessing = ((double(max_events) / 7e6) > setUpTime);
     g_log.debug() << (parallelProcessing ? "Using" : "Not using")
-                  << " parallel processing." << std::endl;
+                  << " parallel processing.\n";
   }
 
   // determine maximum pixel id
@@ -538,7 +536,7 @@ void LoadEventPreNexus::procEvents(
   }
 
   g_log.debug() << tim << " to create " << partWorkspaces.size()
-                << " workspaces for parallel loading." << std::endl;
+                << " workspaces for parallel loading.\n";
 
   prog->resetNumSteps(numBlocks, 0.1, 0.8);
 
@@ -586,16 +584,13 @@ void LoadEventPreNexus::procEvents(
     PARALLEL_END_INTERUPT_REGION
   }
   PARALLEL_CHECK_INTERUPT_REGION
-  g_log.debug() << tim << " to load the data." << std::endl;
+  g_log.debug() << tim << " to load the data.\n";
 
   // ---------------------------------- MERGE WORKSPACES BACK TOGETHER
   // --------------------------
   if (parallelProcessing) {
     PARALLEL_START_INTERUPT_REGION
     prog->resetNumSteps(workspace->getNumberHistograms(), 0.8, 0.95);
-
-    size_t memoryCleared = 0;
-    MemoryManager::Instance().releaseFreeMemory();
 
     // Merge all workspaces, index by index.
     PARALLEL_FOR_NO_WSP_CHECK()
@@ -620,21 +615,9 @@ void LoadEventPreNexus::procEvents(
         // Free up memory as you go along.
         partEl.clear(false);
       }
-
-      // With TCMalloc, release memory when you accumulate enough to make sense
-      PARALLEL_CRITICAL(LoadEventPreNexus_trackMemory) {
-        memoryCleared += numEvents;
-        if (memoryCleared > 10000000) // ten million events = about 160 MB
-        {
-          MemoryManager::Instance().releaseFreeMemory();
-          memoryCleared = 0;
-        }
-      }
       prog->report("Merging Workspaces");
     }
-    // Final memory release
-    MemoryManager::Instance().releaseFreeMemory();
-    g_log.debug() << tim << " to merge workspaces together." << std::endl;
+    g_log.debug() << tim << " to merge workspaces together.\n";
     PARALLEL_END_INTERUPT_REGION
   }
   PARALLEL_CHECK_INTERUPT_REGION
@@ -656,7 +639,7 @@ void LoadEventPreNexus::procEvents(
 
   prog->report("Setting proton charge");
   this->setProtonCharge(workspace);
-  g_log.debug() << tim << " to set the proton charge log." << std::endl;
+  g_log.debug() << tim << " to set the proton charge log.\n";
 
   // Make sure the MRU is cleared
   workspace->clearMRU();
@@ -674,7 +657,7 @@ void LoadEventPreNexus::procEvents(
                       << this->num_error_events << " errors"
                       << ". Shortest TOF: " << shortest_tof
                       << " microsec; longest TOF: " << longest_tof
-                      << " microsec." << std::endl;
+                      << " microsec.\n";
 }
 
 //-----------------------------------------------------------------------------

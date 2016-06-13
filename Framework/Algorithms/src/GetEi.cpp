@@ -114,7 +114,7 @@ void GetEi::exec() {
 
   g_log.information()
       << "Looking for a peak in the first monitor spectrum, spectra index "
-      << indexes[0] << std::endl;
+      << indexes[0] << '\n';
   double t_monitor0 = getPeakCentre(inWS, indexes[0], peakLoc0);
   g_log.notice() << "The first peak has been found at TOF = " << t_monitor0
                  << " microseconds\n";
@@ -122,7 +122,7 @@ void GetEi::exec() {
 
   g_log.information()
       << "Looking for a peak in the second monitor spectrum, spectra index "
-      << indexes[1] << std::endl;
+      << indexes[1] << '\n';
   double t_monitor1 = getPeakCentre(inWS, indexes[1], peakLoc1);
   g_log.information() << "The second peak has been found at TOF = "
                       << t_monitor1 << " microseconds\n";
@@ -168,7 +168,7 @@ void GetEi::getGeometry(API::MatrixWorkspace_const_sptr WS, specnum_t mon0Spec,
     g_log.error()
         << "Could not find the workspace index for the monitor at spectrum "
         << mon0Spec << "\n";
-    g_log.error() << "Error retrieving data for the first monitor" << std::endl;
+    g_log.error() << "Error retrieving data for the first monitor\n";
     throw std::bad_cast();
   }
   const auto &dets = WS->getSpectrum(monWI).getDetectorIDs();
@@ -177,7 +177,7 @@ void GetEi::getGeometry(API::MatrixWorkspace_const_sptr WS, specnum_t mon0Spec,
     g_log.error() << "The detector for spectrum number " << mon0Spec
                   << " was either not found or is a group, grouped monitors "
                      "are not supported by this algorithm\n";
-    g_log.error() << "Error retrieving data for the first monitor" << std::endl;
+    g_log.error() << "Error retrieving data for the first monitor\n";
     throw std::bad_cast();
   }
   IDetector_const_sptr det = WS->getInstrument()->getDetector(*dets.begin());
@@ -226,9 +226,9 @@ std::vector<size_t> GetEi::getMonitorWsIndexs(
   auto wsInds = WS->getIndicesFromSpectra(specNumTemp);
 
   if (wsInds.size() != 1) { // the monitor spectrum isn't present in the
-                            // workspace, we can't continue from here
-    g_log.error() << "Couldn't find the first monitor spectrum, number "
-                  << specNum1 << std::endl;
+    // workspace, we can't continue from here
+    g_log.error() << "Couldn't find the first monitor "
+                     "spectrum, number " << specNum1 << '\n';
     throw Exception::NotFoundError("GetEi::getMonitorWsIndexs()", specNum1);
   }
 
@@ -236,9 +236,9 @@ std::vector<size_t> GetEi::getMonitorWsIndexs(
   specNumTemp[0] = specNum2;
   auto wsIndexTemp = WS->getIndicesFromSpectra(specNumTemp);
   if (wsIndexTemp.size() != 1) { // the monitor spectrum isn't present in the
-                                 // workspace, we can't continue from here
-    g_log.error() << "Couldn't find the second monitor spectrum, number "
-                  << specNum2 << std::endl;
+    // workspace, we can't continue from here
+    g_log.error() << "Couldn't find the second "
+                     "monitor spectrum, number " << specNum2 << '\n';
     throw Exception::NotFoundError("GetEi::getMonitorWsIndexs()", specNum2);
   }
 

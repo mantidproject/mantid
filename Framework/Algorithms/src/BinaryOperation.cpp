@@ -1,10 +1,6 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAlgorithms/BinaryOperation.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/Axis.h"
-#include "MantidAPI/MemoryManager.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
@@ -201,7 +197,7 @@ void BinaryOperation::exec() {
     std::ostringstream ostr;
     ostr << "The two workspaces are not compatible for algorithm "
          << this->name();
-    g_log.error() << ostr.str() << std::endl;
+    g_log.error() << ostr.str() << '\n';
     throw std::invalid_argument(ostr.str());
   }
 

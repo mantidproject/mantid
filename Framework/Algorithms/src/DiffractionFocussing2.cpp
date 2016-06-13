@@ -1,10 +1,6 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAlgorithms/DiffractionFocussing2.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
-#include "MantidAPI/MemoryManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/ISpectrum.h"
 #include "MantidAPI/RawCountValidator.h"
@@ -111,8 +107,7 @@ void DiffractionFocussing2::exec() {
   Axis *axis = m_matrixInputW->getAxis(0);
   std::string unitid = axis->unit()->unitID();
   if (unitid != "dSpacing" && unitid != "MomentumTransfer" && unitid != "TOF") {
-    g_log.error() << "UnitID " << unitid << " is not a supported spacing"
-                  << std::endl;
+    g_log.error() << "UnitID " << unitid << " is not a supported spacing\n";
     throw new std::invalid_argument("Workspace Invalid Spacing/UnitID");
   }
   // --- Do we need to read the grouping workspace? ----
@@ -468,7 +463,6 @@ void DiffractionFocussing2::execEvent() {
           boost::const_pointer_cast<EventWorkspace>(m_eventW)
               ->getSpectrum(wi)
               .clear();
-          Mantid::API::MemoryManager::Instance().releaseFreeMemory();
         }
       }
       PARALLEL_END_INTERUPT_REGION

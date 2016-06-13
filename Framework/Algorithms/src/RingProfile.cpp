@@ -120,7 +120,7 @@ void RingProfile::exec() {
     throw std::invalid_argument(
         "RingProfile is not defined for EventWorkspaces.");
   }
-  g_log.debug() << "Get the input parameters " << std::endl;
+  g_log.debug() << "Get the input parameters \n";
   // get the algorithm parameters
   std::vector<double> centre = getProperty("Centre");
   centre_x = centre[0];
@@ -134,7 +134,7 @@ void RingProfile::exec() {
   bin_size = 360.0 / num_bins;
   clockwise = (getPropertyValue("Sense") == "ClockWise");
 
-  g_log.debug() << "Check the inputs of the algorithm" << std::endl;
+  g_log.debug() << "Check the inputs of the algorithm\n";
   // VALIDATE THE INPUTS
   if (inputWS->getAxis(1)->isSpectra()) {
     checkInputsForSpectraWorkspace(inputWS);
@@ -148,7 +148,7 @@ void RingProfile::exec() {
   // prepare the vector to hold the output
   std::vector<double> output_bins(num_bins, 0);
 
-  g_log.debug() << "Execute the ring profile calculation" << std::endl;
+  g_log.debug() << "Execute the ring profile calculation\n";
   // perform the ring profile calculation
   if (inputWS->getAxis(1)->isSpectra()) {
     processInstrumentRingProfile(inputWS, output_bins);
@@ -157,7 +157,7 @@ void RingProfile::exec() {
     processNumericImageRingProfile(inputWS, output_bins);
   }
 
-  g_log.debug() << "Prepare the output" << std::endl;
+  g_log.debug() << "Prepare the output\n";
   // create the output
   API::MatrixWorkspace_sptr outputWS = API::WorkspaceFactory::Instance().create(
       inputWS, 1, output_bins.size() + 1, output_bins.size());
@@ -267,7 +267,7 @@ void RingProfile::checkInputsForSpectraWorkspace(
     limits_s << "([" << xMin << ", " << xMax << "], [" << yMin << ", " << yMax
              << "], [" << zMin << ", " << zMax << "])";
     g_log.debug() << "The limits for the instrument is : " << limits_s.str()
-                  << std::endl;
+                  << '\n';
     int xOutside = 0, yOutside = 0, zOutside = 0;
     if (centre_x < xMin || centre_x > xMax)
       xOutside = 1;
@@ -326,7 +326,7 @@ void RingProfile::checkInputsForSpectraWorkspace(
 */
 void RingProfile::checkInputsForNumericWorkspace(
     const API::MatrixWorkspace_sptr inputWS) {
-  g_log.notice() << "CheckingInputs For Numeric Workspace" << std::endl;
+  g_log.notice() << "CheckingInputs For Numeric Workspace\n";
 
   // The Axis0 is defined by the values of readX inside the spectra of the
   // workspace.
@@ -338,9 +338,9 @@ void RingProfile::checkInputsForNumericWorkspace(
   const MantidVec &refX = inputWS->readX(inputWS->getNumberHistograms() / 2);
   // get the limits of the axis 0 (X)
   double min_v_x, max_v_x;
-  min_v_x = std::min(refX[0], refX[refX.size() - 1]);
-  max_v_x = std::max(refX[0], refX[refX.size() - 1]);
-  g_log.notice() << "Limits X = " << min_v_x << " " << max_v_x << std::endl;
+  min_v_x = std::min(refX[0], refX.back());
+  max_v_x = std::max(refX[0], refX.back());
+  g_log.notice() << "Limits X = " << min_v_x << " " << max_v_x << '\n';
   // check centre is inside the X domain
   if (centre_x < min_v_x || centre_x > max_v_x) {
     std::stringstream s;
@@ -364,7 +364,7 @@ void RingProfile::checkInputsForNumericWorkspace(
                                 "ConvertSpectrumAxis first.");
   double min_v_y = std::min(oldAxis2->getMin(), oldAxis2->getMax());
   double max_v_y = std::max(oldAxis2->getMin(), oldAxis2->getMax());
-  g_log.notice() << "Limits Y = " << min_v_y << " " << max_v_y << std::endl;
+  g_log.notice() << "Limits Y = " << min_v_y << " " << max_v_y << '\n';
   // check centre is inside the Y domain
   if (centre_y < min_v_y || centre_y > max_v_y) {
     std::stringstream s;
@@ -373,7 +373,7 @@ void RingProfile::checkInputsForNumericWorkspace(
       << max_v_y << "]";
     throw std::invalid_argument(s.str());
   }
-  g_log.notice() << "Centre: " << centre_x << "  " << centre_y << std::endl;
+  g_log.notice() << "Centre: " << centre_x << "  " << centre_y << '\n';
   // check minradius is inside the limits of the region of the instrument
   if (centre_x - min_radius > max_v_x || centre_x + min_radius < min_v_x ||
       centre_y - min_radius > max_v_y || centre_y + min_radius < min_v_y)
@@ -421,7 +421,7 @@ void RingProfile::processInstrumentRingProfile(
         continue;
 
       g_log.debug() << "Bin for the index " << i << " = " << bin_n
-                    << " Pos = " << det->getPos() << std::endl;
+                    << " Pos = " << det->getPos() << '\n';
 
       const MantidVec &refY = inputWS->getSpectrum(i).dataY();
       // accumulate the values of this spectrum inside this bin
@@ -430,7 +430,7 @@ void RingProfile::processInstrumentRingProfile(
 
     } catch (Kernel::Exception::NotFoundError &ex) {
       g_log.information() << "It found that detector for " << i
-                          << " is not valid. " << ex.what() << std::endl;
+                          << " is not valid. " << ex.what() << '\n';
       continue;
     }
   }
@@ -466,7 +466,7 @@ int RingProfile::getBinForPixel(Mantid::Geometry::IDetector_const_sptr det) {
   // sin(theta).
   double effect_distance = radio * sin(theta * M_PI / 180);
 
-  //    g_log.debug() << "effect Distance = " << effect_distance << std::endl;
+  //    g_log.debug() << "effect Distance = " << effect_distance << '\n';
 
   // check if it is inside the ring defined by min_radius, max_radius
   if (effect_distance < min_radius || effect_distance > max_radius ||
@@ -474,7 +474,7 @@ int RingProfile::getBinForPixel(Mantid::Geometry::IDetector_const_sptr det) {
     return -1;
 
   // get the angle
-  // g_log.debug() << "The real angle is " << phi << std::endl;
+  // g_log.debug() << "The real angle is " << phi << '\n';
   return fromAngleToBin(phi);
 }
 

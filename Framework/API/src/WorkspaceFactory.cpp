@@ -1,11 +1,7 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/MemoryManager.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/TextAxis.h"
@@ -24,7 +20,7 @@ using std::size_t;
 /// Private constructor for singleton class
 WorkspaceFactoryImpl::WorkspaceFactoryImpl()
     : Mantid::Kernel::DynamicFactory<Workspace>() {
-  g_log.debug() << "WorkspaceFactory created." << std::endl;
+  g_log.debug() << "WorkspaceFactory created.\n";
 }
 
 /** Create a new instance of the same type of workspace as that given as

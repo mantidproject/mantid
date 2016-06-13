@@ -99,7 +99,7 @@ void SaveMask::exec() {
 
   // d) sort
   g_log.debug() << "Number of detectors to be masked = " << detid0s.size()
-                << std::endl;
+                << '\n';
 
   // 3. Count workspace to count 1 and 0
   std::vector<detid_t> idx0sts; // starting point of the pair
@@ -134,8 +134,7 @@ void SaveMask::exec() {
 
     for (size_t i = 0; i < idx0sts.size(); i++) {
       g_log.information() << "Section " << i << " : " << idx0sts[i] << "  ,  "
-                          << idx0eds[i] << " to be masked and recorded."
-                          << std::endl;
+                          << idx0eds[i] << " to be masked and recorded.\n";
     }
   } // Only work for detid > 0
 
@@ -175,7 +174,7 @@ void SaveMask::exec() {
   } // for
   std::string textvalue = ss.str();
   g_log.debug() << "SaveMask main text:  available section = " << idx0sts.size()
-                << "\n" << textvalue << std::endl;
+                << "\n" << textvalue << '\n';
 
   // c2. Create element
   AutoPtr<Element> pDetid = pDoc->createElement("detids");

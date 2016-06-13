@@ -177,10 +177,9 @@ void CorrectKiKf::exec() {
   PARALLEL_CHECK_INTERUPT_REGION
 
   if (negativeEnergyWarning)
-    g_log.information() << "Ef <= 0 or Ei <= 0 in at least one spectrum!!!!"
-                        << std::endl;
+    g_log.information() << "Ef <= 0 or Ei <= 0 in at least one spectrum!!!!\n";
   if ((negativeEnergyWarning) && (efixedProp == EMPTY_DBL()))
-    g_log.information() << "Try to set fixed energy" << std::endl;
+    g_log.information() << "Try to set fixed energy\n";
   this->setProperty("OutputWorkspace", outputWS);
   return;
 }
@@ -300,9 +299,9 @@ void CorrectKiKf::execEvent() {
     g_log.information() << "Ef <= 0 or Ei <= 0 for "
                         << inputWS->getNumberEvents() -
                                outputWS->getNumberEvents() << " events, out of "
-                        << inputWS->getNumberEvents() << std::endl;
+                        << inputWS->getNumberEvents() << '\n';
     if (efixedProp == EMPTY_DBL())
-      g_log.information() << "Try to set fixed energy" << std::endl;
+      g_log.information() << "Try to set fixed energy\n";
   }
 }
 

@@ -110,7 +110,7 @@ void CrossCorrelate::exec() {
   }
 
   // Output message information
-  mess << "There are " << nspecs << " Workspaces in the range" << std::endl;
+  mess << "There are " << nspecs << " Workspaces in the range\n";
   g_log.information(mess.str());
   mess.str("");
 

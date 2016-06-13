@@ -695,6 +695,11 @@ void SmoothNeighbours::setupNewInstrument(MatrixWorkspace_sptr outws) {
 
   for (int outWIi = 0; outWIi < int(numberOfSpectra); outWIi++) {
     auto &outSpec = outws->getSpectrum(outWIi);
+    /*
+    g_log.notice() << "[DBx555] Original spectrum number for wsindex " << outWIi
+                   << " = " << outSpec.getSpectrumNo() << '\n';
+    outSpec.setSpectrumNo(outWIi+1);
+    */
 
     // Reset detectors
     outSpec.clearDetectorIDs();

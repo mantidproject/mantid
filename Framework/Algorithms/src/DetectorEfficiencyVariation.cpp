@@ -111,7 +111,7 @@ void DetectorEfficiencyVariation::exec() {
           .at(0); // Include zeroes
   g_log.notice() << name()
                  << ": The median of the ratio of the integrated counts is: "
-                 << average << std::endl;
+                 << average << '\n';
   //
   int numFailed = doDetectorTests(counts1, counts2, average, variation);
 

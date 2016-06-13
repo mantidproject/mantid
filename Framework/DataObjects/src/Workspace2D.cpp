@@ -206,17 +206,17 @@ void Workspace2D::setImageYAndE(const API::MantidImage &imageY,
       throw std::runtime_error(
           std::string("To load an image into a workspace with one spectrum per "
                       "row, then number of spectra (") +
-          boost::lexical_cast<std::string>(getNumberHistograms()) +
+          std::to_string(getNumberHistograms()) +
           ") needs to be equal to the height (rows) of the image (" +
-          boost::lexical_cast<std::string>(height) + ")");
+          std::to_string(height) + ")");
 
     if (width != blocksize())
       throw std::runtime_error(
           std::string("To load an image into a workspace with one spectrum per "
                       "row, then number of bins (") +
-          boost::lexical_cast<std::string>(blocksize()) +
+          std::to_string(blocksize()) +
           ") needs to be equal to the width (columns) of the image (" +
-          boost::lexical_cast<std::string>(width) + ")");
+          std::to_string(width) + ")");
 
     // one spectrum - one row
     PARALLEL_FOR_IF(parallelExecution)

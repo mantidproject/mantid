@@ -169,7 +169,7 @@ public:
       std::vector<TofEvent> events1 = WS->getSpectrum(pixelID).getEvents();
       std::vector<TofEvent> events2 = WS2->getSpectrum(pixelID).getEvents();
 
-      // std::cout << events1.size() << std::endl;
+      // std::cout << events1.size() << '\n';
       TS_ASSERT_EQUALS(events1.size(), events2.size());
       if (events1.size() == events2.size()) {
         for (size_t i = 0; i < events1.size(); i++) {
@@ -623,7 +623,7 @@ public:
             WS->getSpectrum(wi).getEvents()[0].pulseTime().totalNanoseconds();
         TS_ASSERT_DIFFERS(nanosec, 0)
         if (nanosec == 0) {
-          std::cout << "Failure at WI " << wi << std::endl;
+          std::cout << "Failure at WI " << wi << '\n';
           return;
         }
       }

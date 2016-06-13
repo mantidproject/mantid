@@ -156,7 +156,7 @@ void UnaryOperation::execEvent() {
   outputWS->clearMRU();
   auto inputWS = boost::dynamic_pointer_cast<EventWorkspace>(matrixOutputWS);
   if (inputWS->getNumberEvents() != outputWS->getNumberEvents()) {
-    g_log.information() << "Number of events has changed!!!" << std::endl;
+    g_log.information() << "Number of events has changed!!!\n";
   }
 }
 

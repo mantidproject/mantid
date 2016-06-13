@@ -334,16 +334,14 @@ void VesuvioCalculateMS::calculateMS(const size_t wsIndex,
   // Final counts averaged over all simulations
   CurveFitting::MSVesuvioHelper::SimulationAggregator accumulator(m_nruns);
   for (size_t i = 0; i < m_nruns; ++i) {
-    m_progress->report("MS calculation: idx=" +
-                       boost::lexical_cast<std::string>(wsIndex) + ", run=" +
-                       boost::lexical_cast<std::string>(i));
+    m_progress->report("MS calculation: idx=" + std::to_string(wsIndex) +
+                       ", run=" + std::to_string(i));
 
     simulate(detpar, respar,
              accumulator.newSimulation(m_nscatters, m_inputWS->blocksize()));
 
-    m_progress->report("MS calculation: idx=" +
-                       boost::lexical_cast<std::string>(wsIndex) + ", run=" +
-                       boost::lexical_cast<std::string>(i));
+    m_progress->report("MS calculation: idx=" + std::to_string(wsIndex) +
+                       ", run=" + std::to_string(i));
   }
 
   // Average over all runs and assign to output workspaces

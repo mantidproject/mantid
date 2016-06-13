@@ -1,6 +1,5 @@
 #include "MantidAlgorithms/ExtractSpectra.h"
 
-#include "MantidAPI/MemoryManager.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/TextAxis.h"
 #include "MantidAPI/WorkspaceFactory.h"
@@ -375,7 +374,6 @@ void ExtractSpectra::execEvent() {
     // When cropping in place, you can clear out old memory from the input one!
     if (inPlace) {
       eventW->getSpectrum(i).clear();
-      Mantid::API::MemoryManager::Instance().releaseFreeMemory();
     }
     prog.report();
     PARALLEL_END_INTERUPT_REGION

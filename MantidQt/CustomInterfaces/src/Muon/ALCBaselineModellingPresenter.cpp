@@ -9,215 +9,188 @@
 using namespace Mantid::API;
 
 namespace MantidQt {
-namespace CustomInterfaces
-{
+namespace CustomInterfaces {
 
-  ALCBaselineModellingPresenter::ALCBaselineModellingPresenter(IALCBaselineModellingView* view,
-                                                               IALCBaselineModellingModel* model)
-    : m_view(view), m_model(model)
-  {}
+ALCBaselineModellingPresenter::ALCBaselineModellingPresenter(
+    IALCBaselineModellingView *view, IALCBaselineModellingModel *model)
+    : m_view(view), m_model(model) {}
 
-  void ALCBaselineModellingPresenter::initialize()
-  {
-    m_view->initialize();
+void ALCBaselineModellingPresenter::initialize() {
+  m_view->initialize();
 
-    // View actions
-    connect(m_view, SIGNAL(fitRequested()), SLOT(fit()));
-    connect(m_view, SIGNAL(addSectionRequested()), SLOT(addSection()));
-    connect(m_view, SIGNAL(removeSectionRequested(int)), SLOT(removeSection(int)));
+  // View actions
+  connect(m_view, SIGNAL(fitRequested()), SLOT(fit()));
+  connect(m_view, SIGNAL(addSectionRequested()), SLOT(addSection()));
+  connect(m_view, SIGNAL(removeSectionRequested(int)),
+          SLOT(removeSection(int)));
 
-    // View events (sync)
-    connect(m_view, SIGNAL(sectionRowModified(int)), SLOT(onSectionRowModified(int)));
-    connect(m_view, SIGNAL(sectionSelectorModified(int)), SLOT(onSectionSelectorModified(int)));
+  // View events (sync)
+  connect(m_view, SIGNAL(sectionRowModified(int)),
+          SLOT(onSectionRowModified(int)));
+  connect(m_view, SIGNAL(sectionSelectorModified(int)),
+          SLOT(onSectionSelectorModified(int)));
 
-    // Model updates
-    connect(m_model, SIGNAL(dataChanged()), SLOT(updateDataCurve()));
-    connect(m_model, SIGNAL(correctedDataChanged()), SLOT(updateCorrectedCurve()));
-    connect(m_model, SIGNAL(fittedFunctionChanged()), SLOT(updateFunction()));
-    connect(m_model, SIGNAL(fittedFunctionChanged()), SLOT(updateBaselineCurve()));
+  // Model updates
+  connect(m_model, SIGNAL(dataChanged()), SLOT(updateDataCurve()));
+  connect(m_model, SIGNAL(correctedDataChanged()),
+          SLOT(updateCorrectedCurve()));
+  connect(m_model, SIGNAL(fittedFunctionChanged()), SLOT(updateFunction()));
+  connect(m_model, SIGNAL(fittedFunctionChanged()),
+          SLOT(updateBaselineCurve()));
+}
+
+/**
+ * Perform a fit and updates the view accordingly
+ */
+void ALCBaselineModellingPresenter::fit() {
+  std::vector<IALCBaselineModellingModel::Section> parsedSections;
+
+  for (int i = 0; i < m_view->noOfSectionRows(); ++i) {
+    auto sectionRow = m_view->sectionRow(i);
+
+    double min = sectionRow.first.toDouble();
+    double max = sectionRow.second.toDouble();
+
+    IALCBaselineModellingModel::Section parsedSection(min, max);
+
+    parsedSections.push_back(parsedSection);
   }
 
-  /**
-   * Perform a fit and updates the view accordingly
-   */
-  void ALCBaselineModellingPresenter::fit()
-  {
-    std::vector<IALCBaselineModellingModel::Section> parsedSections;
+  std::string funcStr = m_view->function().toStdString();
 
-    for (int i = 0; i < m_view->noOfSectionRows(); ++i)
-    {
-      auto sectionRow = m_view->sectionRow(i);
-
-      double min = sectionRow.first.toDouble();
-      double max = sectionRow.second.toDouble();
-
-      IALCBaselineModellingModel::Section parsedSection(min, max);
-
-      parsedSections.push_back(parsedSection);
-    }
-
-    std::string funcStr = m_view->function().toStdString();
-
-    if (funcStr.empty())
-    {
-      m_view->displayError("Couldn't fit an empty function");
-    }
-    else if(parsedSections.empty())
-    {
-      m_view->displayError("No sections to fit");
-    }
-    else
-    {
-      try
-      {
-        IFunction_sptr funcToFit = FunctionFactory::Instance().createInitialized(funcStr);
-        m_model->fit(funcToFit, parsedSections);
-      }
-      catch(std::exception& e)
-      {
-        m_view->displayError(QString::fromStdString(e.what()));
-      }
+  if (funcStr.empty()) {
+    m_view->displayError("Couldn't fit an empty function");
+  } else if (parsedSections.empty()) {
+    m_view->displayError("No sections to fit");
+  } else {
+    try {
+      IFunction_sptr funcToFit =
+          FunctionFactory::Instance().createInitialized(funcStr);
+      m_model->fit(funcToFit, parsedSections);
+    } catch (std::exception &e) {
+      m_view->displayError(QString::fromStdString(e.what()));
     }
   }
+}
 
-  /**
-   * Adds new section in the view
-   */
-  void ALCBaselineModellingPresenter::addSection()
-  {
-    if (MatrixWorkspace_const_sptr data = m_model->data()) {
-      double xMin = data->getXMin();
-      double xMax = data->getXMax();
+/**
+ * Adds new section in the view
+ */
+void ALCBaselineModellingPresenter::addSection() {
+  if (MatrixWorkspace_const_sptr data = m_model->data()) {
+    double xMin = data->getXMin();
+    double xMax = data->getXMax();
 
-      int noOfSections = m_view->noOfSectionRows();
+    int noOfSections = m_view->noOfSectionRows();
 
-      m_view->setNoOfSectionRows(noOfSections + 1);
+    m_view->setNoOfSectionRows(noOfSections + 1);
 
-      m_view->setSectionRow(
-          noOfSections,
-          std::make_pair(QString::number(xMin), QString::number(xMax)));
+    m_view->setSectionRow(noOfSections, std::make_pair(QString::number(xMin),
+                                                       QString::number(xMax)));
 
-      m_view->addSectionSelector(noOfSections, std::make_pair(xMin, xMax));
-    } else {
-      m_view->displayError("Please load some data first");
-    }
+    m_view->addSectionSelector(noOfSections, std::make_pair(xMin, xMax));
+  } else {
+    m_view->displayError("Please load some data first");
+  }
+}
+
+/**
+ * @param row :: Section row to remove
+ */
+void ALCBaselineModellingPresenter::removeSection(int row) {
+  // The view should make sure the row is valid
+  assert(row >= 0);
+  assert(row < m_view->noOfSectionRows());
+
+  // Delete all section selectors
+  for (int i = 0; i < m_view->noOfSectionRows(); ++i) {
+    m_view->deleteSectionSelector(i);
   }
 
-  /**
-   * @param row :: Section row to remove
-   */
-  void ALCBaselineModellingPresenter::removeSection(int row)
-  {
-    // The view should make sure the row is valid
-    assert(row >= 0);
-    assert(row < m_view->noOfSectionRows());
+  std::vector<IALCBaselineModellingView::SectionRow> allRows;
 
-    // Delete all section selectors
-    for (int i = 0; i < m_view->noOfSectionRows(); ++i)
-    {
-      m_view->deleteSectionSelector(i);
-    }
-
-    std::vector<IALCBaselineModellingView::SectionRow> allRows;
-
-    for (int i = 0; i < m_view->noOfSectionRows(); ++i)
-    {
-      allRows.push_back(m_view->sectionRow(i));
-    }
-
-    allRows.erase(allRows.begin() + row);
-
-    // Shrink sections table
-    m_view->setNoOfSectionRows(static_cast<int>(allRows.size()));
-
-    // Update row values and add sections selectors
-    for (size_t i = 0; i < allRows.size(); ++i)
-    {
-      m_view->setSectionRow(static_cast<int>(i), allRows[i]);
-
-      double startX = allRows[i].first.toDouble();
-      double endX = allRows[i].second.toDouble();
-
-      IALCBaselineModellingView::SectionSelector newSelector(startX, endX);
-      m_view->addSectionSelector(static_cast<int>(i), newSelector);
-    }
+  for (int i = 0; i < m_view->noOfSectionRows(); ++i) {
+    allRows.push_back(m_view->sectionRow(i));
   }
 
-  void ALCBaselineModellingPresenter::onSectionRowModified(int row)
-  {
-    auto sectionRow = m_view->sectionRow(row);
+  allRows.erase(allRows.begin() + row);
 
-    double startX = sectionRow.first.toDouble();
-    double endX = sectionRow.second.toDouble();
+  // Shrink sections table
+  m_view->setNoOfSectionRows(static_cast<int>(allRows.size()));
 
-    int index(row); // That's what we make sure of in addSection()
-    IALCBaselineModellingView::SectionSelector sectionSelector(startX, endX);
+  // Update row values and add sections selectors
+  for (size_t i = 0; i < allRows.size(); ++i) {
+    m_view->setSectionRow(static_cast<int>(i), allRows[i]);
 
-    m_view->updateSectionSelector(index, sectionSelector);
+    double startX = allRows[i].first.toDouble();
+    double endX = allRows[i].second.toDouble();
+
+    IALCBaselineModellingView::SectionSelector newSelector(startX, endX);
+    m_view->addSectionSelector(static_cast<int>(i), newSelector);
   }
+}
 
-  /**
-   * @param index :: Index of section selector
-   */
-  void ALCBaselineModellingPresenter::onSectionSelectorModified(int index)
-  {
-    auto selectorValues = m_view->sectionSelector(index);
+void ALCBaselineModellingPresenter::onSectionRowModified(int row) {
+  auto sectionRow = m_view->sectionRow(row);
 
-    QString startX = QString::number(selectorValues.first);
-    QString endX = QString::number(selectorValues.second);
+  double startX = sectionRow.first.toDouble();
+  double endX = sectionRow.second.toDouble();
 
-    int row(index); // That's what we make sure of in addSection()
-    IALCBaselineModellingView::SectionRow rowValues(startX, endX);
+  int index(row); // That's what we make sure of in addSection()
+  IALCBaselineModellingView::SectionSelector sectionSelector(startX, endX);
 
-    m_view->setSectionRow(row, rowValues);
+  m_view->updateSectionSelector(index, sectionSelector);
+}
+
+/**
+ * @param index :: Index of section selector
+ */
+void ALCBaselineModellingPresenter::onSectionSelectorModified(int index) {
+  auto selectorValues = m_view->sectionSelector(index);
+
+  QString startX = QString::number(selectorValues.first);
+  QString endX = QString::number(selectorValues.second);
+
+  int row(index); // That's what we make sure of in addSection()
+  IALCBaselineModellingView::SectionRow rowValues(startX, endX);
+
+  m_view->setSectionRow(row, rowValues);
+}
+
+void ALCBaselineModellingPresenter::updateDataCurve() {
+  MatrixWorkspace_const_sptr data = m_model->data();
+  assert(data);
+  m_view->setDataCurve(*(ALCHelper::curveDataFromWs(data, 0)),
+                       ALCHelper::curveErrorsFromWs(data, 0));
+}
+
+void ALCBaselineModellingPresenter::updateCorrectedCurve() {
+  if (MatrixWorkspace_const_sptr correctedData = m_model->correctedData()) {
+    m_view->setCorrectedCurve(*(ALCHelper::curveDataFromWs(correctedData, 0)),
+                              ALCHelper::curveErrorsFromWs(correctedData, 0));
+  } else {
+    m_view->setCorrectedCurve(*(ALCHelper::emptyCurveData()),
+                              std::vector<double>());
   }
+}
 
-  void ALCBaselineModellingPresenter::updateDataCurve()
-  {
-    MatrixWorkspace_const_sptr data = m_model->data();
-    assert(data);
-    m_view->setDataCurve(*(ALCHelper::curveDataFromWs(data, 0)),
-                         ALCHelper::curveErrorsFromWs(data, 0));
+void ALCBaselineModellingPresenter::updateBaselineCurve() {
+  if (IFunction_const_sptr fittedFunc = m_model->fittedFunction()) {
+    const std::vector<double> &xValues = m_model->data()->readX(0);
+    m_view->setBaselineCurve(
+        *(ALCHelper::curveDataFromFunction(fittedFunc, xValues)));
+  } else {
+    m_view->setBaselineCurve(*(ALCHelper::emptyCurveData()));
   }
+}
 
-  void ALCBaselineModellingPresenter::updateCorrectedCurve()
-  {
-    if(MatrixWorkspace_const_sptr correctedData = m_model->correctedData())
-    {
-      m_view->setCorrectedCurve(*(ALCHelper::curveDataFromWs(correctedData, 0)),
-                                ALCHelper::curveErrorsFromWs(correctedData, 0));
-    }
-    else
-    {
-      m_view->setCorrectedCurve(*(ALCHelper::emptyCurveData()),
-                                std::vector<double>());
-    }
+void ALCBaselineModellingPresenter::updateFunction() {
+  if (IFunction_const_sptr fittedFunc = m_model->fittedFunction()) {
+    m_view->setFunction(fittedFunc);
+  } else {
+    m_view->setFunction(IFunction_const_sptr());
   }
-
-  void ALCBaselineModellingPresenter::updateBaselineCurve()
-  {
-    if (IFunction_const_sptr fittedFunc = m_model->fittedFunction())
-    {
-      const std::vector<double>& xValues = m_model->data()->readX(0);
-      m_view->setBaselineCurve(*(ALCHelper::curveDataFromFunction(fittedFunc, xValues)));
-    }
-    else
-    {
-      m_view->setBaselineCurve(*(ALCHelper::emptyCurveData()));
-    }
-  }
-
-  void ALCBaselineModellingPresenter::updateFunction()
-  {
-    if (IFunction_const_sptr fittedFunc = m_model->fittedFunction())
-    {
-      m_view->setFunction(fittedFunc);
-    }
-    else
-    {
-      m_view->setFunction(IFunction_const_sptr());
-    }
-  }
+}
 
 } // namespace CustomInterfaces
 } // namespace MantidQt

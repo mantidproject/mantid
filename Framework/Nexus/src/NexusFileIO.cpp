@@ -636,7 +636,7 @@ int NexusFileIO::writeNexusTableWorkspace(
   for (size_t i = 0; i < itableworkspace->columnCount(); i++) {
     Column_const_sptr col = itableworkspace->getColumn(i);
 
-    std::string str = "column_" + boost::lexical_cast<std::string>(i + 1);
+    std::string str = "column_" + std::to_string(i + 1);
 
     if (col->isType<double>()) {
       writeTableColumn<double, double>(NX_FLOAT64, "", *col, str);

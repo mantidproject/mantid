@@ -74,7 +74,7 @@ void FindDeadDetectors::exec() {
 
   // Try and open the output file, if specified, and write a header
   std::ofstream file(getPropertyValue("OutputFile").c_str());
-  file << "Index Spectrum UDET(S)" << std::endl;
+  file << "Index Spectrum UDET(S)\n";
 
   // Get the integrated input workspace
   MatrixWorkspace_sptr integratedWorkspace = integrateWorkspace();
@@ -83,7 +83,7 @@ void FindDeadDetectors::exec() {
   int countSpec = 0, countDets = 0;
 
   // iterate over the data values setting the live and dead values
-  g_log.information() << "Marking dead detectors" << std::endl;
+  g_log.information() << "Marking dead detectors\n";
   const int64_t numSpec = integratedWorkspace->getNumberHistograms();
   const double numSpec_d = static_cast<double>(numSpec);
   int64_t iprogress_step = numSpec / 100;
@@ -111,7 +111,7 @@ void FindDeadDetectors::exec() {
         deadDets.push_back(det);
         ++countDets;
       }
-      file << std::endl;
+      file << '\n';
     }
     if (i % iprogress_step == 0) {
       progress(static_cast<double>(i) / numSpec_d);
@@ -121,7 +121,7 @@ void FindDeadDetectors::exec() {
 
   g_log.notice() << "Found a total of " << countDets
                  << " 'dead' detectors within " << countSpec
-                 << " 'dead' spectra." << std::endl;
+                 << " 'dead' spectra.\n";
 
   // Assign it to the output workspace property
   setProperty("OutputWorkspace", integratedWorkspace);
@@ -134,7 +134,7 @@ void FindDeadDetectors::exec() {
 
 /// Run Integration as a Child Algorithm
 MatrixWorkspace_sptr FindDeadDetectors::integrateWorkspace() {
-  g_log.information() << "Integrating input workspace" << std::endl;
+  g_log.information() << "Integrating input workspace\n";
 
   API::IAlgorithm_sptr childAlg = createChildAlgorithm("Integration");
   // Now execute integration.

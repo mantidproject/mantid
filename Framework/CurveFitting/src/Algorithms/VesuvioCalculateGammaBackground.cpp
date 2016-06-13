@@ -126,8 +126,7 @@ void VesuvioCalculateGammaBackground::exec() {
 
     if (!calculateBackground(inputIndex, outputIndex)) {
       g_log.information("No detector defined for index=" +
-                        boost::lexical_cast<std::string>(inputIndex) +
-                        ". Skipping correction.");
+                        std::to_string(inputIndex) + ". Skipping correction.");
     }
 
     PARALLEL_END_INTERUPT_REGION
@@ -164,8 +163,7 @@ bool VesuvioCalculateGammaBackground::calculateBackground(
         spectrumNo <= FORWARD_SCATTER_SPECMAX) {
       applyCorrection(inputIndex, outputIndex);
     } else {
-      g_log.information("Spectrum " +
-                        boost::lexical_cast<std::string>(spectrumNo) +
+      g_log.information("Spectrum " + std::to_string(spectrumNo) +
                         " not in forward scatter range. Skipping correction.");
       // Leave background at 0 and just copy data to corrected
       m_correctedWS->dataY(outputIndex) = m_inputWS->readY(inputIndex);

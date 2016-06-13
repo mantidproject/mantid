@@ -1,6 +1,5 @@
 #include "MantidAPI/RefAxis.h"
 #include "MantidAPI/SpectraAxis.h"
-#include "MantidAPI/MemoryManager.h"
 #include "MantidAPI/Progress.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/WorkspaceFactory.h"
@@ -756,10 +755,8 @@ public:
           m_WS->getSpectrum(wi).sort(m_sortType);
         } else if (m_howManyCores == 2) {
           m_WS->getSpectrum(wi).sortTof2();
-          Mantid::API::MemoryManager::Instance().releaseFreeMemory();
         } else if (m_howManyCores == 4) {
           m_WS->getSpectrum(wi).sortTof4();
-          Mantid::API::MemoryManager::Instance().releaseFreeMemory();
         }
       }
       // Report progress

@@ -240,7 +240,7 @@ ChopperConfiguration::parseStringDbl(const string &instring) const {
   }
 
   // cout << "[C]* Input: " << instring << ": size of double vector: " <<
-  // vecdouble.size() << endl;
+  // vecdouble.size() << '\n';
 
   return vecdouble;
 }
@@ -266,7 +266,7 @@ ChopperConfiguration::parseStringUnsignedInt(const string &instring) const {
   }
 
   // cout << "[C]* Input : " << instring << ": size of string vector: " <<
-  // vecinteger.size() << endl;
+  // vecinteger.size() << '\n';
 
   return vecinteger;
 }

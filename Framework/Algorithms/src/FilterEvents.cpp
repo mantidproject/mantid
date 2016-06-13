@@ -205,7 +205,7 @@ void FilterEvents::exec() {
     groupws->setProperty("OutputWorkspace", groupname);
     groupws->execute();
     if (!groupws->isExecuted()) {
-      g_log.error() << "Grouping all output workspaces fails." << std::endl;
+      g_log.error() << "Grouping all output workspaces fails.\n";
     }
   }
 
@@ -439,7 +439,7 @@ void FilterEvents::processSplittersWorkspace() {
                       << m_workGroupIndexes.size() - 1
                       << ") than input information workspaces ("
                       << m_informationWS->rowCount() << "). "
-                      << "  Information may not be accurate. " << std::endl;
+                      << "  Information may not be accurate. \n";
     }
   }
 

@@ -175,7 +175,7 @@ void Stretch::handleSampleInputReady(const QString &filename) {
                    range);
   setPlotPropertyRange(eRangeSelector, m_properties["EMin"],
                        m_properties["EMax"], range);
-  //update the current positions of the range bars
+  // update the current positions of the range bars
   eRangeSelector->setMinimum(range.first);
   eRangeSelector->setMaximum(range.second);
 }

@@ -88,7 +88,7 @@ public:
     const int lastGoodSpec = 95;
     for (int lHist = 0; lHist < Nhist; lHist++) {
       //      std::cout << "    " << lHist << " " <<
-      //      outputMat->readY(lHist).front() << std::endl;
+      //      outputMat->readY(lHist).front() << '\n';
       double expected = BAD_VAL;
       if (lHist >= firstGoodSpec && lHist <= lastGoodSpec)
         expected = GOOD_VAL;

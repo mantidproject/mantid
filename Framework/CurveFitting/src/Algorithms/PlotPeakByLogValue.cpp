@@ -259,10 +259,10 @@ void PlotPeakByLogValue::exec() {
         }
 
         g_log.debug() << "Fitting " << data.ws->name() << " index " << j
-                      << " with " << std::endl;
-        g_log.debug() << ifun->asString() << std::endl;
+                      << " with \n";
+        g_log.debug() << ifun->asString() << '\n';
 
-        const std::string spectrum_index = boost::lexical_cast<std::string>(j);
+        const std::string spectrum_index = std::to_string(j);
         std::string wsBaseName = "";
 
         if (createFitOutput)
@@ -305,7 +305,7 @@ void PlotPeakByLogValue::exec() {
         }
 
         g_log.debug() << "Fit result " << fit->getPropertyValue("OutputStatus")
-                      << ' ' << chi2 << std::endl;
+                      << ' ' << chi2 << '\n';
 
       } catch (...) {
         g_log.error("Error in Fit ChildAlgorithm");
@@ -326,7 +326,7 @@ void PlotPeakByLogValue::exec() {
       row << chi2;
 
       Prog += dProg;
-      std::string current = boost::lexical_cast<std::string>(i);
+      std::string current = std::to_string(i);
       progress(Prog, ("Fitting Workspace: (" + current + ") - "));
       interruption_point();
 
@@ -418,8 +418,7 @@ PlotPeakByLogValue::getWorkspace(const InputData &data) {
                 boost::dynamic_pointer_cast<API::WorkspaceGroup>(rws);
             if (gws) {
               std::string propName =
-                  "OUTPUTWORKSPACE_" +
-                  boost::lexical_cast<std::string>(data.period);
+                  "OUTPUTWORKSPACE_" + std::to_string(data.period);
               if (load->existsProperty(propName)) {
                 Workspace_sptr rws1 = load->getProperty(propName);
                 out.ws =
@@ -541,13 +540,30 @@ PlotPeakByLogValue::makeNames() const {
           if (range.count() < 1) {
             wi = -2; // means use the whole range
           } else if (range.count() == 1) {
-            start = boost::lexical_cast<double>(range[0]);
+            try {
+              start = boost::lexical_cast<double>(range[0]);
+            } catch (boost::bad_lexical_cast &) {
+              throw std::runtime_error(
+                  std::string("Provided incorrect range values. Range is "
+                              "specfifed by start_value:stop_value, but "
+                              "provided ") +
+                  range[0]);
+            }
+
             end = start;
             wi = -1;
             spec = -1;
           } else if (range.count() > 1) {
-            start = boost::lexical_cast<double>(range[0]);
-            end = boost::lexical_cast<double>(range[1]);
+            try {
+              start = boost::lexical_cast<double>(range[0]);
+              end = boost::lexical_cast<double>(range[1]);
+            } catch (boost::bad_lexical_cast &) {
+              throw std::runtime_error(
+                  std::string("Provided incorrect range values. Range is "
+                              "specfifed by start_value:stop_value, but "
+                              "provided ") +
+                  range[0] + std::string(" and ") + range[1]);
+            }
             if (start > end)
               std::swap(start, end);
             wi = -1;

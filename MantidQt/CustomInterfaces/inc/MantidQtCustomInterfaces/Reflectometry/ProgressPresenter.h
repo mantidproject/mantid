@@ -22,7 +22,7 @@ public:
                                          static_cast<int>(end));
   }
 
-  void doReport(const std::string &) {
+  void doReport(const std::string &) override {
     m_progressableView->setProgress(static_cast<int>(m_i));
   }
   void clear() { m_progressableView->clearProgress(); }

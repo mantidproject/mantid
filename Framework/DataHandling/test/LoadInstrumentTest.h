@@ -95,10 +95,10 @@ public:
 
     //    std::vector<detid_t> dets = ws2D->getInstrument()->getDetectorIDs();
     //    std::cout << dets.size() << " detectors in the instrument" <<
-    //    std::endl;
+    //    '\n';
     //    for (size_t i=0; i<dets.size(); i++)
     //    {
-    //      if (i % 10 == 0) std::cout << std::endl;
+    //      if (i % 10 == 0) std::cout << '\n';
     //      std::cout << dets[i] << ", ";
     //    }
 

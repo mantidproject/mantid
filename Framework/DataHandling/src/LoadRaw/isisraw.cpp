@@ -470,7 +470,7 @@ int ISISRAW::ioRAW(FILE *file, bool from_file, bool read_data) {
       std::cerr << "Error in u_len value read from file, it would be " << u_len
                 << "; where it is calculated as "
                    "u_len = ad_data - ad_user - 2, where ad_data: "
-                << add.ad_data << ", ad_user: " << add.ad_user << std::endl;
+                << add.ad_data << ", ad_user: " << add.ad_user << '\n';
       return 0;
     }
   }
@@ -551,7 +551,7 @@ int ISISRAW::ioRAW(FILE *file, bool from_file, bool read_data) {
     int zero = fgetpos(file, &keep_pos);
     if (!zero) {
       std::cerr << "Error when getting file position: " << strerror(errno)
-                << std::endl;
+                << '\n';
       return -1;
     }
 
@@ -559,7 +559,7 @@ int ISISRAW::ioRAW(FILE *file, bool from_file, bool read_data) {
     zero = fsetpos(file, &add_pos);
     if (!zero) {
       std::cerr << "Error when setting file position: " << strerror(errno)
-                << std::endl;
+                << '\n';
       return -1;
     }
 
@@ -568,7 +568,7 @@ int ISISRAW::ioRAW(FILE *file, bool from_file, bool read_data) {
     zero = fsetpos(file, &dhdr_pos);
     if (!zero) {
       std::cerr << "Error when setting file position to header: "
-                << strerror(errno) << std::endl;
+                << strerror(errno) << '\n';
       return -1;
     }
 
@@ -577,7 +577,7 @@ int ISISRAW::ioRAW(FILE *file, bool from_file, bool read_data) {
     zero = fsetpos(file, &keep_pos);
     if (!zero) {
       std::cerr << "Error when restoring file position: " << strerror(errno)
-                << std::endl;
+                << '\n';
       return -1;
     }
   }
@@ -913,7 +913,7 @@ int ISISRAW::size_check() {
       sizeof(DDES_STRUCT), 2 * 4};
   for (unsigned i = 0; i < sizeof(size_check_array) / sizeof(int); i += 2) {
     if (size_check_array[i] != size_check_array[i + 1]) {
-      std::cerr << "size check failed" << std::endl;
+      std::cerr << "size check failed\n";
     }
   }
   return 0;
@@ -963,29 +963,29 @@ int ISISRAW::readFromFile(const char *filename, bool read_data) {
 int ISISRAW::printInfo(std::ostream &os) {
   int i;
   os << "INST section at " << add.ad_inst << " 0x" << std::hex
-     << 4 * add.ad_inst << std::dec << std::endl;
+     << 4 * add.ad_inst << std::dec << '\n';
   os << "SE section at " << add.ad_se << " 0x" << std::hex << 4 * add.ad_se
-     << std::dec << std::endl;
+     << std::dec << '\n';
   os << "Dae section at " << add.ad_dae << " 0x" << std::hex << 4 * add.ad_dae
-     << std::dec << std::endl;
+     << std::dec << '\n';
   os << "Tcb section at " << add.ad_tcb << " 0x" << std::hex << 4 * add.ad_tcb
-     << std::dec << std::endl;
+     << std::dec << '\n';
   os << "User section at " << add.ad_user << " 0x" << std::hex
-     << 4 * add.ad_user << std::dec << std::endl;
+     << 4 * add.ad_user << std::dec << '\n';
   os << "Data section at " << add.ad_data << " 0x" << std::hex
-     << 4 * add.ad_data << std::dec << std::endl;
+     << 4 * add.ad_data << std::dec << '\n';
   os << "Log section at " << add.ad_log << " 0x" << std::hex << 4 * add.ad_log
-     << std::dec << std::endl;
+     << std::dec << '\n';
   os << "End section at " << add.ad_end << " 0x" << std::hex << 4 * add.ad_end
-     << std::dec << std::endl;
-  os << "User data len " << u_len << std::endl;
+     << std::dec << '\n';
+  os << "User data len " << u_len << '\n';
   os << "Compression is " << (dhdr.d_comp == 0 ? "NONE" : "BYTE-RELATIVE")
-     << std::endl;
-  os << "Compression ratio of data = " << dhdr.d_crdata << std::endl;
-  os << "Offsets of spectrum data" << std::endl;
+     << '\n';
+  os << "Compression ratio of data = " << dhdr.d_crdata << '\n';
+  os << "Offsets of spectrum data\n";
   for (i = 0; i < ((t_nsp1 + 1) * t_nper); i++) {
     os << i << " " << ddes[i].nwords << " words at offset " << ddes[i].offset
-       << std::endl;
+       << '\n';
   }
   return 0;
 }

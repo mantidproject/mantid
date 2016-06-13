@@ -160,7 +160,7 @@ bool SpectraAxis::operator==(const Axis &axis2) const {
  *  @return label of requested axis index
  */
 std::string SpectraAxis::label(const std::size_t &index) const {
-  return "sp-" + boost::lexical_cast<std::string>(spectraNo(index));
+  return "sp-" + std::to_string(spectraNo(index));
 }
 
 /// returns min value defined on axis

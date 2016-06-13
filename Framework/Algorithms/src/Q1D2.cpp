@@ -162,8 +162,7 @@ void Q1D2::exec() {
     } catch (Exception::NotFoundError &) {
       g_log.warning() << "Workspace index " << i << " (SpectrumIndex = "
                       << m_dataWS->getSpectrum(i).getSpectrumNo()
-                      << ") has no detector assigned to it - discarding"
-                      << std::endl;
+                      << ") has no detector assigned to it - discarding\n";
       // Catch if no detector. Next line tests whether this happened - test
       // placed
       // outside here because Mac Intel compiler doesn't like 'continue' in a

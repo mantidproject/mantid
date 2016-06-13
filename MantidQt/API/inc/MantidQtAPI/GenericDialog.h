@@ -19,19 +19,18 @@ class QSignalMapper;
 class QGridLayout;
 class QLineEdit;
 
-namespace MantidQt
-{
+namespace MantidQt {
 
-namespace API
-{
+namespace API {
 
-/** 
-    This class gives a basic dialog that is not tailored to a particular 
+/**
+    This class gives a basic dialog that is not tailored to a particular
     algorithm.
 
     @date 24/02/2009
 
-    Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+    Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+   National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -49,17 +48,15 @@ namespace API
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
     File change history is stored at: <https://github.com/mantidproject/mantid>
-    Code Documentation is available at: <http://doxygen.mantidproject.org>    
+    Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class GenericDialog : public AlgorithmDialog
-{
-  
+class GenericDialog : public AlgorithmDialog {
+
   Q_OBJECT
 
 public:
-
   // Constructor
-  GenericDialog(QWidget* parent = 0);
+  GenericDialog(QWidget *parent = 0);
   // Destructor
   ~GenericDialog() override;
 
@@ -72,11 +69,9 @@ private:
   void parseInput() override;
 
   /// Widget containing all the PropertyWidgets
-  AlgorithmPropertiesWidget * m_algoPropertiesWidget;
-
+  AlgorithmPropertiesWidget *m_algoPropertiesWidget;
 };
-
 }
 }
 
-#endif //MANTIDQT_API_GENERICDIALOG_H_
+#endif // MANTIDQT_API_GENERICDIALOG_H_

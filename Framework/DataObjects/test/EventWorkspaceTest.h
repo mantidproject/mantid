@@ -33,7 +33,6 @@ using std::runtime_error;
 using std::size_t;
 using std::vector;
 using std::cout;
-using std::endl;
 using namespace boost::posix_time;
 
 //==========================================================================================

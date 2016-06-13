@@ -267,7 +267,7 @@ template <class TIn, class TOut>
 void GroupDetectors2::moveOthers(const std::set<int64_t> &unGroupedSet,
                                  const TIn &inputWS, TOut &outputWS,
                                  size_t outIndex) {
-  g_log.debug() << "Starting to copy the ungrouped spectra" << std::endl;
+  g_log.debug() << "Starting to copy the ungrouped spectra\n";
   double prog4Copy = (1. - 1. * static_cast<double>(m_FracCompl)) /
                      static_cast<double>(unGroupedSet.size());
 

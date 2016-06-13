@@ -9,20 +9,20 @@
 
 class QString;
 
-namespace MantidQt
-{
-namespace API
-{
+namespace MantidQt {
+namespace API {
 
 /**
  *
-  This class is an interface for the central widget for handling VATES visualization
+  This class is an interface for the central widget for handling VATES
+ visualization
   operations. Its main use is for the plugin mode operation of the viewer.
 
   @author Michael Reuter
   @date 08/09/2011
 
-  Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+  Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+ National Laboratory & European Spallation Source
 
   This file is part of Mantid.
 
@@ -42,8 +42,7 @@ namespace API
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class EXPORT_OPT_MANTIDQT_API VatesViewerInterface : public QWidget
-{
+class EXPORT_OPT_MANTIDQT_API VatesViewerInterface : public QWidget {
   Q_OBJECT
 public:
   /// Default constructor for plugin mode.
@@ -61,7 +60,8 @@ public:
    * @param workspaceType the type of workspace being visualized
    * @param instrumentName The Name of the instrument.
    */
-  virtual void renderWorkspace(QString workspaceName, int workspaceType, std::string instrumentName);
+  virtual void renderWorkspace(QString workspaceName, int workspaceType,
+                               std::string instrumentName);
 
   /**
    * Special function of correct widget invocation for plugin mode.
@@ -79,7 +79,6 @@ public slots:
   /// Perform any clean up on main window shutdown
   virtual void shutdown();
 };
-
 }
 }
 

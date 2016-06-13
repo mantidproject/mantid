@@ -225,7 +225,7 @@ void EditInstrumentGeometry::exec() {
   // Validate
   for (size_t ib = 0; ib < l2s.size(); ib++) {
     g_log.information() << "Detector " << specids[ib] << "  L2 = " << l2s[ib]
-                        << "  2Theta = " << tths[ib] << std::endl;
+                        << "  2Theta = " << tths[ib] << '\n';
     if (specids[ib] < 0) {
       // Invalid spectrum Number : less than 0.
       stringstream errmsgss;
@@ -257,7 +257,7 @@ void EditInstrumentGeometry::exec() {
     if (it == spec2indexmap.end()) {
       stringstream errss;
       errss << "Spectrum Number " << specids[i] << " is not found. "
-            << "Instrument won't be edited for this spectrum. " << std::endl;
+            << "Instrument won't be edited for this spectrum. \n";
       g_log.error(errss.str());
       throw std::runtime_error(errss.str());
     }
@@ -272,7 +272,7 @@ void EditInstrumentGeometry::exec() {
       storDetIDs[workspaceindex] = vec_detids[i];
 
     g_log.debug() << "workspace index = " << workspaceindex
-                  << " is for Spectrum " << specids[i] << std::endl;
+                  << " is for Spectrum " << specids[i] << '\n';
   }
 
   // Generate a new instrument

@@ -35,7 +35,6 @@ using std::runtime_error;
 using std::size_t;
 using std::vector;
 using std::cout;
-using std::endl;
 
 //==========================================================================================
 class LoadEventPreNexusTest : public CxxTest::TestSuite {
@@ -115,7 +114,7 @@ public:
     struct stat filestatus;
     stat(eventfile.c_str(), &filestatus);
 
-    // std::cout << "***** executing *****" << std::endl;
+    // std::cout << "***** executing *****\n";
     TS_ASSERT(eventLoader->execute());
 
     EventWorkspace_sptr ew = boost::dynamic_pointer_cast<EventWorkspace>(
@@ -153,7 +152,7 @@ public:
     struct stat filestatus;
     stat(eventfile.c_str(), &filestatus);
 
-    // std::cout << "***** executing *****" << std::endl;
+    // std::cout << "***** executing *****\n";
     TS_ASSERT(eventLoader->execute());
 
     EventWorkspace_sptr ew = boost::dynamic_pointer_cast<EventWorkspace>(

@@ -536,7 +536,7 @@ private:
         double tm2 = t - t2;
         y[i] = (10000 * std::exp(-tm1 * tm1 / 1000.) +
                 20000 * std::exp(-tm2 * tm2 / 1000.));
-        // std::cout<<"t="<<t<<" signal="<<y[i]<<" ind="<<i<<std::endl;
+        // std::cout<<"t="<<t<<" signal="<<y[i]<<" ind="<<i<<'\n';
       }
     }
     // signal at second monitor
@@ -550,7 +550,7 @@ private:
         double tm2 = t - t2;
         y[i] = (100 * std::exp(-tm1 * tm1 / 1000.) +
                 200 * std::exp(-tm2 * tm2 / 1000.));
-        // std::cout<<"t="<<t<<" signal="<<y[i]<<" ind="<<i<<std::endl;
+        // std::cout<<"t="<<t<<" signal="<<y[i]<<" ind="<<i<<'\n';
       }
     }
 

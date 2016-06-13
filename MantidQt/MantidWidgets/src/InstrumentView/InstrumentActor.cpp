@@ -1250,10 +1250,10 @@ bool SetVisibleComponentVisitor::visit(RectangularDetectorActor *actor) {
 }
 
 bool SetVisibleComponentVisitor::visit(StructuredDetectorActor *actor) {
-	bool on = actor->getComponent()->getComponentID() == m_id ||
-		actor->isChildDetector(m_id);
-	actor->setVisibility(on);
-	return on;
+  bool on = actor->getComponent()->getComponentID() == m_id ||
+            actor->isChildDetector(m_id);
+  actor->setVisibility(on);
+  return on;
 }
 
 //-------------------------------------------------------------------------//

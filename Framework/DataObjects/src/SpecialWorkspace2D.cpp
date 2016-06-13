@@ -107,7 +107,7 @@ double SpecialWorkspace2D::getValue(const detid_t detectorID) const {
     std::ostringstream os;
     os << "SpecialWorkspace2D: " << this->getName()
        << "  Detector ID = " << detectorID
-       << "  Size(Map) = " << this->detID_to_WI.size() << std::endl;
+       << "  Size(Map) = " << this->detID_to_WI.size() << '\n';
     throw std::invalid_argument(os.str());
   } else {
     return this->dataY(it->second)[0];
@@ -239,8 +239,7 @@ void SpecialWorkspace2D::binaryOperation(const unsigned int operatortype) {
     break;
   default:
     g_log.error() << "Operator " << operatortype
-                  << " Is Not Valid In BinaryOperation(operatortype)"
-                  << std::endl;
+                  << " Is Not Valid In BinaryOperation(operatortype)\n";
     throw std::invalid_argument("Invalid Operator");
     break;
   }
@@ -347,7 +346,7 @@ bool SpecialWorkspace2D::isCompatible(
   size_t numhist2 = ws->getNumberHistograms();
   if (numhist1 != numhist2) {
     g_log.debug() << "2 Workspaces have different number of histograms:  "
-                  << numhist1 << "  vs. " << numhist2 << std::endl;
+                  << numhist1 << "  vs. " << numhist2 << '\n';
     return false;
   }
 
@@ -359,16 +358,16 @@ bool SpecialWorkspace2D::isCompatible(
     if (ids1.size() != ids2.size()) {
       g_log.debug() << "Spectra " << ispec
                     << ": 2 Workspaces have different number of detectors "
-                    << ids1.size() << " vs. " << ids2.size() << std::endl;
+                    << ids1.size() << " vs. " << ids2.size() << '\n';
       return false;
     } else if (ids1.empty()) {
       g_log.debug() << "Spectra " << ispec
-                    << ": 2 Workspaces both have 0 detectors. " << std::endl;
+                    << ": 2 Workspaces both have 0 detectors. \n";
       return false;
     } else if (*ids1.begin() != *ids2.begin()) {
       g_log.debug() << "Spectra " << ispec
                     << ": 2 Workspaces have different Detector ID "
-                    << *ids1.begin() << " vs. " << *ids2.begin() << std::endl;
+                    << *ids1.begin() << " vs. " << *ids2.begin() << '\n';
       return false;
     }
   } // false

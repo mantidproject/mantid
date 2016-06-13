@@ -192,7 +192,7 @@ void BSpline::resetParameters() {
   }
   size_t np = gsl_bspline_ncoeffs(m_bsplineWorkspace.get());
   for (size_t i = 0; i < np; ++i) {
-    std::string pname = "A" + boost::lexical_cast<std::string>(i);
+    std::string pname = "A" + std::to_string(i);
     declareParameter(pname);
   }
 }

@@ -476,7 +476,7 @@ void ResampleX::exec() {
         VectorHelper::rebin(XValues, YValues, YErrors, XValues_new, YValues_new,
                             YErrors_new, m_isDistribution);
       } catch (std::exception &ex) {
-        g_log.error() << "Error in rebin function: " << ex.what() << std::endl;
+        g_log.error() << "Error in rebin function: " << ex.what() << '\n';
         throw;
       }
 

@@ -72,10 +72,10 @@ public:
   constexpr cow_ptr(std::nullptr_t) : Data(nullptr) {}
   cow_ptr(const cow_ptr<DataType> &);
   // Move is hand-written, since std::mutex member prevents auto-generation.
-  cow_ptr(cow_ptr<DataType> &&other) : Data(std::move(other.Data)) {}
+  cow_ptr(cow_ptr<DataType> &&other) noexcept : Data(std::move(other.Data)) {}
   cow_ptr<DataType> &operator=(const cow_ptr<DataType> &);
   // Move is hand-written, since std::mutex member prevents auto-generation.
-  cow_ptr<DataType> &operator=(cow_ptr<DataType> &&rhs) {
+  cow_ptr<DataType> &operator=(cow_ptr<DataType> &&rhs) noexcept {
     Data = std::move(rhs.Data);
     return *this;
   }

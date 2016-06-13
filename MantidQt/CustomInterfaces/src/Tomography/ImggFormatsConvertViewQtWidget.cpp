@@ -222,7 +222,7 @@ void ImggFormatsConvertViewQtWidget::writeImg(
   int tableSize = 256;
   QVector<QRgb> grayscale(tableSize);
   for (int i = 0; i < grayscale.size(); i++) {
-    int level = i; qGray(i, i, i);
+    int level = i; // would be equivalent: qGray(i, i, i);
     grayscale[i] = qRgb(level, level, level);
   }
   img.setColorTable(grayscale);
@@ -331,8 +331,8 @@ std::string ImggFormatsConvertViewQtWidget::grabUserBrowseDir(
     prev = le->text();
   }
 
-  QString path(QFileDialog::getExistingDirectory(
-      this, tr(QString::fromStdString(userMsg)), prev));
+  QString path(
+      QFileDialog::getExistingDirectory(this, tr(userMsg.c_str()), prev));
 
   if (!path.isEmpty()) {
     le->setText(path);

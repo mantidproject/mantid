@@ -132,12 +132,12 @@ void CompareWorkspaces::exec() {
 
   if (!m_Result) {
     std::string message = m_Messages->cell<std::string>(0, 0);
-    g_log.notice() << "The workspaces did not match: " << message << std::endl;
+    g_log.notice() << "The workspaces did not match: " << message << '\n';
   } else {
     std::string ws1 = Workspace_const_sptr(getProperty("Workspace1"))->name();
     std::string ws2 = Workspace_const_sptr(getProperty("Workspace2"))->name();
     g_log.notice() << "The workspaces \"" << ws1 << "\" and \"" << ws2
-                   << "\" matched!" << std::endl;
+                   << "\" matched!\n";
   }
 
   setProperty("Result", m_Result);
@@ -179,7 +179,7 @@ bool CompareWorkspaces::processGroups() {
 
   if (m_Result && ws1 && ws2) {
     g_log.notice() << "All workspaces in workspace groups \"" << ws1->name()
-                   << "\" and \"" << ws2->name() << "\" matched!" << std::endl;
+                   << "\" and \"" << ws2->name() << "\" matched!\n";
   }
 
   setProperty("Result", m_Result);

@@ -61,7 +61,7 @@ void setSpectrumFromPyObject(MatrixWorkspace &self, data_modifier accessor,
   if (boost::python::len(shape) != 1) {
     throw std::invalid_argument(
         "Invalid shape for setting 1D spectrum array, array is " +
-        boost::lexical_cast<std::string>(boost::python::len(shape)) + "D");
+        std::to_string(boost::python::len(shape)) + "D");
   }
   const size_t pyArrayLength = boost::python::extract<size_t>(shape[0]);
   Mantid::MantidVec &wsArrayRef = (self.*accessor)(wsIndex);
@@ -70,8 +70,8 @@ void setSpectrumFromPyObject(MatrixWorkspace &self, data_modifier accessor,
   if (pyArrayLength != wsArrayLength) {
     throw std::invalid_argument(
         "Length mismatch between workspace array & python array. ws=" +
-        boost::lexical_cast<std::string>(wsArrayLength) + ", python=" +
-        boost::lexical_cast<std::string>(pyArrayLength));
+        std::to_string(wsArrayLength) + ", python=" +
+        std::to_string(pyArrayLength));
   }
   for (size_t i = 0; i < wsArrayLength; ++i) {
     wsArrayRef[i] = extract<double>(values[i]);

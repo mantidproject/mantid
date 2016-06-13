@@ -173,7 +173,7 @@ void LoadMuonNexus2::doExec() {
   // Set y axis unit
   localWorkspace->setYUnit("Counts");
 
-  // g_log.error()<<" number of perioids= "<<m_numberOfPeriods<<std::endl;
+  // g_log.error()<<" number of perioids= "<<m_numberOfPeriods<<'\n';
   WorkspaceGroup_sptr wsGrpSptr = WorkspaceGroup_sptr(new WorkspaceGroup);
   if (entry.containsDataSet("title")) {
     wsGrpSptr->setTitle(entry.getString("title"));
@@ -349,8 +349,7 @@ void LoadMuonNexus2::loadLogs(API::MatrixWorkspace_sptr ws, NXEntry &entry,
     ws->setComment(entry.getString("notes"));
   }
 
-  std::string run_num =
-      boost::lexical_cast<std::string>(entry.getInt("run_number"));
+  std::string run_num = std::to_string(entry.getInt("run_number"));
   // The sample is left to delete the property
   ws->mutableRun().addLogData(
       new PropertyWithValue<std::string>("run_number", run_num));

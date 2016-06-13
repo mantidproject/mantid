@@ -105,7 +105,7 @@ void ModeratorTzeroLinear::exec() {
           inputWS->getTitle());
     m_intercept = interceptParam[0]; //[intercept]=microsecond
     g_log.debug() << "Moderator Time Zero: gradient=" << m_gradient
-                  << "intercept=" << m_intercept << std::endl;
+                  << "intercept=" << m_intercept << '\n';
   } catch (Exception::NotFoundError &) {
     g_log.error("Unable to retrieve Moderator Time Zero parameters (gradient "
                 "and intercept)");
@@ -256,7 +256,7 @@ void ModeratorTzeroLinear::calculateTfLi(MatrixWorkspace_const_sptr inputWS,
         double L_f = det->getDistance(*sample);
         t_f = L_f / v_f;
         // g_log.debug() << "detector: " << i << " L_f=" << L_f << " t_f=" <<
-        // t_f << std::endl;
+        // t_f << '\n';
       } catch (Exception::NotFoundError &) {
         g_log.error("Unable to calculate detector-sample distance");
         throw Exception::InstrumentDefinitionError(
@@ -264,7 +264,7 @@ void ModeratorTzeroLinear::calculateTfLi(MatrixWorkspace_const_sptr inputWS,
             inputWS->getTitle());
       }
     } else {
-      g_log.debug() << "Efixed not found for detector " << i << std::endl;
+      g_log.debug() << "Efixed not found for detector " << i << '\n';
       t_f = TfError;
     }
   }

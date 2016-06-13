@@ -157,7 +157,7 @@ void ReadGroupsFromFile::exec() {
 void ReadGroupsFromFile::readGroupingFile(const std::string &filename) {
   std::ifstream grFile(filename.c_str());
   if (!grFile.is_open()) {
-    g_log.error() << "Unable to open grouping file " << filename << std::endl;
+    g_log.error() << "Unable to open grouping file " << filename << '\n';
     throw Exception::FileError("Error reading .cal file", filename);
   }
   calibration.clear();

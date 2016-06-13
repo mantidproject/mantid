@@ -113,7 +113,7 @@ void LoadMuonNexus1::exec() {
   }
   std::string run_num;
   try {
-    run_num = boost::lexical_cast<std::string>(nxRun.getInt("number"));
+    run_num = std::to_string(nxRun.getInt("number"));
   } catch (...) {
   }
 
