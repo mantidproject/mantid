@@ -8,7 +8,6 @@
 #include "MantidKernel/PropertyManager.h"
 
 #include <boost/python/class.hpp>
-#include <boost/python/register_ptr_to_python.hpp>
 
 using Mantid::Kernel::IPropertyManager;
 using Mantid::Kernel::PropertyManager;
@@ -17,7 +16,6 @@ using namespace boost::python;
 
 void export_PropertyManager() {
   typedef boost::shared_ptr<PropertyManager> PropertyManager_sptr;
-  register_ptr_to_python<PropertyManager_sptr>();
 
   // The second argument defines the actual type held within the Python object.
   // This means that when a PropertyManager is constructed in Python it actually
