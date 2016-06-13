@@ -1,9 +1,11 @@
 #ifndef MANTID_CUSTOMINTERFACES_REFLMAINVIEWPRESENTER_H
 #define MANTID_CUSTOMINTERFACES_REFLMAINVIEWPRESENTER_H
 
+#include "MantidAPI/IAlgorithm.h"
 #include "MantidQtCustomInterfaces/DllConfig.h"
 #include "MantidQtCustomInterfaces/Reflectometry/IReflPresenter.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/WorkspaceReceiver.h"
+#include <boost/shared_ptr.hpp>
 
 namespace MantidQt {
 
