@@ -746,7 +746,7 @@ public:
     Workspace2D_sptr ws2D = boost::dynamic_pointer_cast<Workspace2D>(ws);
     // in this case, x-values are just the running index
     auto &x = ws2D->dataX(0);
-    for (int i = 0; i < 20; i++)
+    for (int i = 0; i < timechannels; i++)
       x[i] = 1.0 * i + 0.00001;
 
     Mantid::MantidVec &y = ws2D->dataY(0); // y-values (counts)
@@ -941,31 +941,6 @@ public:
     }
   }
 
-  void getExpDecayMockData(Mantid::MantidVec &y, Mantid::MantidVec &e) {
-
-    y[0] = 5;
-    y[1] = 3.582656552869;
-    y[2] = 2.567085595163;
-    y[3] = 1.839397205857;
-    y[4] = 1.317985690579;
-    y[5] = 0.9443780141878;
-    y[6] = 0.6766764161831;
-    y[7] = 0.484859839322;
-    y[8] = 0.347417256114;
-    y[9] = 0.2489353418393;
-    y[10] = 0.1783699667363;
-    y[11] = 0.1278076660325;
-    y[12] = 0.09157819444367;
-    y[13] = 0.0656186436847;
-    y[14] = 0.04701781275748;
-    y[15] = 0.03368973499543;
-    y[16] = 0.02413974996916;
-    y[17] = 0.01729688668232;
-    y[18] = 0.01239376088333;
-
-    e.assign(19, 1.0);
-  }
-
   void test_function_exp_decay_fit() {
     Algorithms::Fit alg2;
     TS_ASSERT_THROWS_NOTHING(alg2.initialize());
@@ -982,7 +957,15 @@ public:
       ws2D->dataX(0)[i] = i;
     Mantid::MantidVec &y = ws2D->dataY(0); // y-values (counts)
     Mantid::MantidVec &e = ws2D->dataE(0); // error values of counts
-    getExpDecayMockData(y, e);
+
+	y = { 5, 3.582656552869, 2.567085595163, 1.839397205857,
+		1.317985690579, 0.9443780141878, 0.6766764161831,
+		0.484859839322, 0.347417256114, 0.2489353418393,
+		0.1783699667363, 0.1278076660325, 0.09157819444367,
+		0.0656186436847, 0.04701781275748, 0.03368973499543,
+		0.02413974996916, 0.01729688668232, 0.01239376088333, 0 };
+
+	e.assign(19, 1.0);
 
     // put this workspace in the data service
     TS_ASSERT_THROWS_NOTHING(

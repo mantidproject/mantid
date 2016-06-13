@@ -393,6 +393,13 @@ public:
                       1e-10);
     }
   }
+
+  void testForCategories() {
+    Convolution forCat;
+    const std::vector<std::string> categories = forCat.categories();
+    TS_ASSERT(categories.size() == 1);
+    TS_ASSERT(categories[0] == "General");
+  }
 };
 
 #endif /*CONVOLUTIONTEST_H_*/
