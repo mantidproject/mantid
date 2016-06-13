@@ -193,7 +193,7 @@ class LoadTests(unittest.TestCase):
         self.assertAlmostEqual(files_data[1].readY(0)[3293], files_data[2].readY(0)[3293],
                                places=DIFF_PLACES)
 
-    def test_with_nexus_reference_files(self):
+    def test_nexus_reference_files(self):
         nexus_ws = "Ref_PRL92476_92479"
         nxs_file = os.path.join(DIRS[0], "PEARL/Focus_Test/RefFile/Ref_PRL92476_92479.nxs")
         Load(Filename=nxs_file, OutputWorkspace=nexus_ws)
@@ -201,16 +201,34 @@ class LoadTests(unittest.TestCase):
         mod_group_table = mtd["PRL92476_92479"]
         return nexus_ws, mod_group_table
 
-    def test_with_gss_referenece_files(self):
+    def test_gss_referenece_files(self):
         gss_wsname = "GSSFile"
         gss_file = os.path.join(DIRS[0], "PEARL/Focus_Test/DataOut/PRL92476_92479-0.gss")
         LoadGSS(Filename=gss_file, OutputWorkspace=gss_wsname)
 
         ref_gss_wsname = "Ref_GSSFile"
         ref_gss_file = os.path.join(DIRS[0], "PEARL/Focus_Test/RefFile/Ref_PRL92476_92479-0.gss")
-        LoadGSS(Filename=gss_file, OutputWorkspace=ref_gss_wsname)
+        LoadGSS(Filename=ref_gss_file, OutputWorkspace=ref_gss_wsname)
 
         return gss_wsname, ref_gss_wsname
+
+    def test_xye_d_reference_files(self):
+        xye_dspacing_wsname = mtd["PRL92476_92479_mods1-9"]
+
+        ref_xye_dspacing_wsname = "Ref_PRL92476_92479_mods1-9_D"
+        xye_dSpacing_file = os.path.join(DIRS[0], "PEARL/Focus_Test/RefFile/Ref_PRL92476_92479_d_xye-0.dat")
+        Load(Filename=xye_dSpacing_file, OutputWorkspace=ref_xye_dspacing_wsname)
+
+        return xye_dspacing_wsname, ref_xye_dspacing_wsname
+
+    def test_xye_tof_reference_files(self):
+        xye_tof_wsname = mtd["PRL92476_92479_mods1-9"]
+
+        ref_xye_tof_wsname = "Ref_PRL92476_92479_mods1-9_TOF"
+        xye_tof_file = os.path.join(DIRS[0], "PEARL/Focus_Test/RefFile/Ref_PRL92476_92479_tof_xye-0.dat")
+        Load(Filename=xye_tof_file, OutputWorkspace=ref_xye_tof_wsname)
+
+        return xye_tof_wsname, ref_xye_tof_wsname
 
 class PearlPowderDiffractionScriptTestCalibration(stresstesting.MantidStressTest):
     def requiredFiles(self):
