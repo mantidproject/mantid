@@ -16,12 +16,6 @@ DECLARE_ALGORITHM(CropWorkspace)
 using namespace Kernel;
 using namespace API;
 
-/// Default constructor
-CropWorkspace::CropWorkspace() : Algorithm() {}
-
-/// Destructor
-CropWorkspace::~CropWorkspace() = default;
-
 void CropWorkspace::init() {
   declareProperty(
       make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),

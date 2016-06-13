@@ -24,16 +24,6 @@ namespace Algorithms {
 DECLARE_ALGORITHM(FindPeakBackground)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-FindPeakBackground::FindPeakBackground() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-FindPeakBackground::~FindPeakBackground() = default;
-
-//----------------------------------------------------------------------------------------------
 /** Define properties
   */
 void FindPeakBackground::init() {

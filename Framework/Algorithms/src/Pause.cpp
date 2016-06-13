@@ -13,16 +13,6 @@ namespace Algorithms {
 DECLARE_ALGORITHM(Pause)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-Pause::Pause() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-Pause::~Pause() = default;
-
-//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string Pause::name() const { return "Pause"; }
 

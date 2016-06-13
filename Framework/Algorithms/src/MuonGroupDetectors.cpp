@@ -14,16 +14,6 @@ using namespace DataObjects;
 DECLARE_ALGORITHM(MuonGroupDetectors)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-MuonGroupDetectors::MuonGroupDetectors() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-MuonGroupDetectors::~MuonGroupDetectors() = default;
-
-//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string MuonGroupDetectors::name() const {
   return "MuonGroupDetectors";

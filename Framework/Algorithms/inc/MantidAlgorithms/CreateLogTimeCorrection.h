@@ -42,8 +42,6 @@ namespace Algorithms {
 */
 class DLLExport CreateLogTimeCorrection : public API::Algorithm {
 public:
-  CreateLogTimeCorrection();
-  ~CreateLogTimeCorrection() override;
 
   const std::string name() const override { return "CreateLogTimeCorrection"; }
   /// Summary of algorithms purpose
@@ -80,7 +78,7 @@ private:
   Geometry::Instrument_const_sptr m_instrument;
   std::map<int, double> m_l2map;
   std::map<int, double> m_correctionMap;
-  double m_L1;
+  double m_L1 = 0.0;
 };
 
 } // namespace Algorithms

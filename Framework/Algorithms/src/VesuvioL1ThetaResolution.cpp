@@ -38,16 +38,6 @@ public:
 DECLARE_ALGORITHM(VesuvioL1ThetaResolution)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-VesuvioL1ThetaResolution::VesuvioL1ThetaResolution() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-VesuvioL1ThetaResolution::~VesuvioL1ThetaResolution() = default;
-
-//----------------------------------------------------------------------------------------------
 
 /// Algorithms name for identification. @see Algorithm::name
 const std::string VesuvioL1ThetaResolution::name() const {

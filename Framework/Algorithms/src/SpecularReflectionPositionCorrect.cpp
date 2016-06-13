@@ -57,17 +57,6 @@ bool hasCommonParent(const std::vector<IDetector_const_sptr> &detectors) {
 DECLARE_ALGORITHM(SpecularReflectionPositionCorrect)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-SpecularReflectionPositionCorrect::SpecularReflectionPositionCorrect() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-SpecularReflectionPositionCorrect::~SpecularReflectionPositionCorrect() =
-    default;
-
-//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string SpecularReflectionPositionCorrect::name() const {
   return "SpecularReflectionPositionCorrect";

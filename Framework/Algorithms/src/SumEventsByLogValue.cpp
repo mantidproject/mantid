@@ -20,14 +20,6 @@ DECLARE_ALGORITHM(SumEventsByLogValue)
 using namespace Kernel;
 using namespace API;
 
-/** Constructor
- */
-SumEventsByLogValue::SumEventsByLogValue() {}
-
-/** Destructor
- */
-SumEventsByLogValue::~SumEventsByLogValue() = default;
-
 void SumEventsByLogValue::init() {
   declareProperty(
       make_unique<WorkspaceProperty<DataObjects::EventWorkspace>>(

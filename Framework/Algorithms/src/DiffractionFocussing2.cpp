@@ -26,14 +26,6 @@ namespace Algorithms {
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(DiffractionFocussing2)
 
-/// Constructor
-DiffractionFocussing2::DiffractionFocussing2()
-    : API::Algorithm(), udet2group(), groupAtWorkspaceIndex(), group2xvector(),
-      group2wgtvector(), nGroups(0), nHist(0), nPoints(0) {}
-
-/// Destructor
-DiffractionFocussing2::~DiffractionFocussing2() = default;
-
 /** Initialisation method. Declares properties to be used in algorithm.
  *
  */

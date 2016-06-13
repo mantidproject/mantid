@@ -11,16 +11,6 @@ namespace Algorithms {
 
 DECLARE_ALGORITHM(InvertMask)
 
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-InvertMask::InvertMask() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-InvertMask::~InvertMask() = default;
-
 void InvertMask::init() {
   this->declareProperty(
       make_unique<API::WorkspaceProperty<DataObjects::MaskWorkspace>>(

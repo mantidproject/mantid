@@ -31,12 +31,7 @@ const std::string LOG_CHARGE_NAME("proton_charge");
 }
 
 //========================================================================
-//========================================================================
-/// (Empty) Constructor
-FilterBadPulses::FilterBadPulses() {}
 
-/// Destructor
-FilterBadPulses::~FilterBadPulses() = default;
 /// Algorithm's name for identification overriding a virtual method
 const std::string FilterBadPulses::name() const { return "FilterBadPulses"; }
 

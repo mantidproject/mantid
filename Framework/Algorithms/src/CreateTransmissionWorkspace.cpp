@@ -13,16 +13,6 @@ namespace Algorithms {
 DECLARE_ALGORITHM(CreateTransmissionWorkspace)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-CreateTransmissionWorkspace::CreateTransmissionWorkspace() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-CreateTransmissionWorkspace::~CreateTransmissionWorkspace() = default;
-
-//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string CreateTransmissionWorkspace::name() const {
   return "CreateTransmissionWorkspace";

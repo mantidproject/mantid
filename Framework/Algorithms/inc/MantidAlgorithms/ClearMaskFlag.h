@@ -32,8 +32,6 @@ namespace Algorithms {
 */
 class DLLExport ClearMaskFlag : public API::Algorithm {
 public:
-  ClearMaskFlag();
-  ~ClearMaskFlag() override;
 
   const std::string name() const override;
   int version() const override;

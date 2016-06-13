@@ -35,8 +35,6 @@ namespace Algorithms {
 */
 class DLLExport RayTracerTester : public API::Algorithm {
 public:
-  RayTracerTester();
-  ~RayTracerTester() override;
 
   /// Algorithm's name for identification
   const std::string name() const override { return "RayTracerTester"; };

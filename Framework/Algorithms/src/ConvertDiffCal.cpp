@@ -26,16 +26,6 @@ using Mantid::Geometry::Instrument_const_sptr;
 DECLARE_ALGORITHM(ConvertDiffCal)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-ConvertDiffCal::ConvertDiffCal() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-ConvertDiffCal::~ConvertDiffCal() = default;
-
-//----------------------------------------------------------------------------------------------
 
 /// Algorithms name for identification. @see Algorithm::name
 const std::string ConvertDiffCal::name() const { return "ConvertDiffCal"; }

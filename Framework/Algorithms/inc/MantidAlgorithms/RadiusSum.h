@@ -38,8 +38,6 @@ namespace Algorithms {
 */
 class DLLExport RadiusSum : public API::Algorithm {
 public:
-  RadiusSum();
-  ~RadiusSum() override;
 
   const std::string name() const override;
   /// Summary of algorithms purpose
@@ -82,10 +80,10 @@ private:
   int getBinForPixelPos(const Kernel::V3D &pos);
 
   Kernel::V3D centre;
-  int num_bins;
+  int num_bins = 0;
 
   API::MatrixWorkspace_sptr inputWS;
-  double min_radius, max_radius;
+  double min_radius = 0.0, max_radius = 0.0;
 
   double getMinBinSizeForInstrument(API::MatrixWorkspace_sptr);
   double getMinBinSizeForNumericImage(API::MatrixWorkspace_sptr);

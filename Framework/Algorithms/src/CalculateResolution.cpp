@@ -19,15 +19,6 @@ using namespace Mantid::Kernel;
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CalculateResolution)
 
-//----------------------------------------------------------------------------------------------
-/** Constructor
-*/
-CalculateResolution::CalculateResolution() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
-*/
-CalculateResolution::~CalculateResolution() = default;
 
 //----------------------------------------------------------------------------------------------
 

@@ -17,8 +17,6 @@ UnaryOperation::UnaryOperation() : API::Algorithm() {
   this->useHistogram = false;
 }
 
-UnaryOperation::~UnaryOperation() = default;
-
 /** Initialisation method.
  *  Defines input and output workspace properties
  */

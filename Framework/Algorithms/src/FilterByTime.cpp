@@ -21,14 +21,6 @@ using DataObjects::EventWorkspace;
 using DataObjects::EventWorkspace_sptr;
 using DataObjects::EventWorkspace_const_sptr;
 
-//========================================================================
-//========================================================================
-/// (Empty) Constructor
-FilterByTime::FilterByTime() {}
-
-/// Destructor
-FilterByTime::~FilterByTime() = default;
-
 //-----------------------------------------------------------------------
 void FilterByTime::init() {
   std::string commonHelp("\nYou can only specify the relative or absolute "

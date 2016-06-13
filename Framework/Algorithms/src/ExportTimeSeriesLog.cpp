@@ -27,15 +27,6 @@ namespace Mantid {
 namespace Algorithms {
 
 DECLARE_ALGORITHM(ExportTimeSeriesLog)
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-ExportTimeSeriesLog::ExportTimeSeriesLog() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-ExportTimeSeriesLog::~ExportTimeSeriesLog() = default;
 
 //----------------------------------------------------------------------------------------------
 /** Definition of all input arguments

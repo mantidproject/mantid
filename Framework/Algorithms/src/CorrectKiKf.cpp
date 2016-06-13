@@ -24,12 +24,6 @@ using namespace DataObjects;
 using namespace Geometry;
 using std::size_t;
 
-/// Default constructor
-CorrectKiKf::CorrectKiKf() : Algorithm() {}
-
-/// Destructor
-CorrectKiKf::~CorrectKiKf() = default;
-
 /// Initialisation method
 void CorrectKiKf::init() {
   auto wsValidator = boost::make_shared<WorkspaceUnitValidator>("DeltaE");

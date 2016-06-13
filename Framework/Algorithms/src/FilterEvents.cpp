@@ -47,11 +47,6 @@ FilterEvents::FilterEvents()
       m_filterStartTime(0) {}
 
 //----------------------------------------------------------------------------------------------
-/** Destructor
- */
-FilterEvents::~FilterEvents() = default;
-
-//----------------------------------------------------------------------------------------------
 /** Declare Inputs
  */
 void FilterEvents::init() {

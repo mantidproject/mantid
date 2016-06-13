@@ -16,16 +16,6 @@ namespace Algorithms {
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ConvertToEventWorkspace)
 
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-ConvertToEventWorkspace::ConvertToEventWorkspace() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-ConvertToEventWorkspace::~ConvertToEventWorkspace() = default;
-
 //------------------------------------------MaxEventsPerBin----------------------------------------------------
 
 //----------------------------------------------------------------------------------------------

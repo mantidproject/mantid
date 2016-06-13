@@ -11,16 +11,6 @@ using namespace Mantid::API;
 namespace Mantid {
 namespace Algorithms {
 
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-FilterByTime2::FilterByTime2() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-FilterByTime2::~FilterByTime2() = default;
-
 //-----------------------------------------------------------------------
 void FilterByTime2::init() {
   std::string commonHelp("\nYou can only specify the relative or absolute "

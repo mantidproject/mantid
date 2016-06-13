@@ -40,8 +40,6 @@ namespace Algorithms {
  */
 class DLLExport ConvertEmptyToTof : public API::Algorithm {
 public:
-  ConvertEmptyToTof();
-  ~ConvertEmptyToTof() override;
 
   const std::string name() const override;
   int version() const override;

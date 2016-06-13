@@ -20,12 +20,6 @@ using namespace API;
 
 DECLARE_ALGORITHM(CreateWorkspace)
 
-/// Default (empty) constructor
-CreateWorkspace::CreateWorkspace() : Algorithm() {}
-
-/// Default (empty) destructor
-CreateWorkspace::~CreateWorkspace() = default;
-
 /// Init function
 void CreateWorkspace::init() {
 

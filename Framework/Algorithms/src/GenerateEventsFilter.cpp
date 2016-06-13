@@ -36,11 +36,6 @@ GenerateEventsFilter::GenerateEventsFilter()
       m_useParallel(false), m_vecSplitterTimeSet(), m_vecGroupIndexSet() {}
 
 //----------------------------------------------------------------------------------------------
-/** Destructor
- */
-GenerateEventsFilter::~GenerateEventsFilter() = default;
-
-//----------------------------------------------------------------------------------------------
 /** Declare input
  */
 void GenerateEventsFilter::init() {

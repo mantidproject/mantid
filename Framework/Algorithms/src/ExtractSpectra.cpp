@@ -25,18 +25,6 @@ using namespace DataObjects;
 DECLARE_ALGORITHM(ExtractSpectra)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-ExtractSpectra::ExtractSpectra()
-    : Algorithm(), m_minX(0), m_maxX(0), m_commonBoundaries(false),
-      m_histogram(false), m_croppingInX(false) {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-ExtractSpectra::~ExtractSpectra() = default;
-
-//----------------------------------------------------------------------------------------------
 
 /// Algorithms name for identification. @see Algorithm::name
 const std::string ExtractSpectra::name() const { return "ExtractSpectra"; }

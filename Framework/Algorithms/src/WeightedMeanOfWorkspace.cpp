@@ -16,16 +16,6 @@ namespace Algorithms {
 DECLARE_ALGORITHM(WeightedMeanOfWorkspace)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-WeightedMeanOfWorkspace::WeightedMeanOfWorkspace() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-WeightedMeanOfWorkspace::~WeightedMeanOfWorkspace() = default;
-
-//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string WeightedMeanOfWorkspace::name() const {
   return "WeightedMeanOfWorkspace";

@@ -18,16 +18,6 @@ using namespace Geometry;
 using namespace API;
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-SetInstrumentParameter::SetInstrumentParameter() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-SetInstrumentParameter::~SetInstrumentParameter() = default;
-
-//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string SetInstrumentParameter::name() const {
   return "SetInstrumentParameter";

@@ -16,16 +16,6 @@ namespace Algorithms {
 DECLARE_ALGORITHM(RebinByPulseTimes)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-RebinByPulseTimes::RebinByPulseTimes() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-RebinByPulseTimes::~RebinByPulseTimes() = default;
-
-//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string RebinByPulseTimes::name() const {
   return "RebinByPulseTimes";

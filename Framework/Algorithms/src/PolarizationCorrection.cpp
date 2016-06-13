@@ -109,16 +109,6 @@ namespace Algorithms {
 DECLARE_ALGORITHM(PolarizationCorrection)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-PolarizationCorrection::PolarizationCorrection() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-PolarizationCorrection::~PolarizationCorrection() = default;
-
-//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string PolarizationCorrection::name() const {
   return "PolarizationCorrection";

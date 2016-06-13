@@ -34,11 +34,6 @@ GetTimeSeriesLogInformation::GetTimeSeriesLogInformation()
       m_intInfoMap(), m_dblInfoMap(), m_log(nullptr), m_timeVec(), m_valueVec(),
       m_starttime(), m_endtime(), m_ignoreNegativeTime(false) {}
 
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-GetTimeSeriesLogInformation::~GetTimeSeriesLogInformation() = default;
-
 /** Definition of all input arguments
  */
 void GetTimeSeriesLogInformation::init() {

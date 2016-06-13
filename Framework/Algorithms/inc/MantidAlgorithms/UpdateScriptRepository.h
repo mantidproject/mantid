@@ -36,8 +36,6 @@ namespace Algorithms {
 */
 class DLLExport UpdateScriptRepository : public API::Algorithm {
 public:
-  UpdateScriptRepository();
-  ~UpdateScriptRepository() override;
 
   const std::string name() const override;
   /// Summary of algorithms purpose

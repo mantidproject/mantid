@@ -9,16 +9,6 @@ namespace Algorithms {
 DECLARE_ALGORITHM(UpdateScriptRepository)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-UpdateScriptRepository::UpdateScriptRepository() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-UpdateScriptRepository::~UpdateScriptRepository() = default;
-
-//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string UpdateScriptRepository::name() const {
   return "UpdateScriptRepository";

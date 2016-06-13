@@ -27,16 +27,6 @@ using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace Mantid::DataObjects;
 
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-CreateGroupingWorkspace::CreateGroupingWorkspace() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-CreateGroupingWorkspace::~CreateGroupingWorkspace() = default;
-
 const std::string CreateGroupingWorkspace::name() const {
   return "CreateGroupingWorkspace";
 }

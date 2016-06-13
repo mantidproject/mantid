@@ -21,18 +21,6 @@ namespace Algorithms {
 DECLARE_ALGORITHM(RayTracerTester)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-RayTracerTester::RayTracerTester() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-RayTracerTester::~RayTracerTester() = default;
-
-//----------------------------------------------------------------------------------------------
-
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void RayTracerTester::init() {

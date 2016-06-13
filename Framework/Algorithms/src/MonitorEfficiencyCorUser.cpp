@@ -17,17 +17,6 @@ using namespace Geometry;
 DECLARE_ALGORITHM(MonitorEfficiencyCorUser)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-MonitorEfficiencyCorUser::MonitorEfficiencyCorUser()
-    : m_inputWS(), m_outputWS(), m_Ei(.0), m_monitorCounts(0) {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-MonitorEfficiencyCorUser::~MonitorEfficiencyCorUser() = default;
-
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 

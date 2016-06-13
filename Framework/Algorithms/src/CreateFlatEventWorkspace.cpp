@@ -12,16 +12,6 @@ namespace Algorithms {
 DECLARE_ALGORITHM(CreateFlatEventWorkspace)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-CreateFlatEventWorkspace::CreateFlatEventWorkspace() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-CreateFlatEventWorkspace::~CreateFlatEventWorkspace() = default;
-
-//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string CreateFlatEventWorkspace::name() const {
   return "CreateFlatEventWorkspace";

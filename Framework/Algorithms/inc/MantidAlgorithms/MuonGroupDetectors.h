@@ -33,8 +33,6 @@ namespace Algorithms {
 */
 class DLLExport MuonGroupDetectors : public API::Algorithm {
 public:
-  MuonGroupDetectors();
-  ~MuonGroupDetectors() override;
 
   const std::string name() const override;
   /// Summary of algorithms purpose

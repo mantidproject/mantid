@@ -32,8 +32,6 @@ namespace Algorithms {
 */
 class DLLExport RemoveMaskedSpectra : public API::Algorithm {
 public:
-  RemoveMaskedSpectra();
-  ~RemoveMaskedSpectra() override;
 
   const std::string name() const override;
   int version() const override;

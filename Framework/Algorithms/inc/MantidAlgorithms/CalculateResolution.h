@@ -35,8 +35,6 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 
 class DLLExport CalculateResolution : public API::DataProcessorAlgorithm {
 public:
-  CalculateResolution();
-  ~CalculateResolution() override;
 
   const std::string name() const override;
   int version() const override;

@@ -36,8 +36,6 @@ namespace Algorithms {
 */
 class DLLExport FilterByXValue : public API::Algorithm {
 public:
-  FilterByXValue();
-  ~FilterByXValue() override;
 
   const std::string name() const override;
   /// Summary of algorithms purpose

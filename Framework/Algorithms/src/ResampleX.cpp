@@ -24,15 +24,6 @@ using std::vector;
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ResampleX)
 
-//----------------------------------------------------------------------------------------------
-/// Constructor
-ResampleX::ResampleX()
-    : m_useLogBinning(true), m_preserveEvents(true), m_numBins(0),
-      m_isDistribution(false), m_isHistogram(true) {}
-
-//----------------------------------------------------------------------------------------------
-/// Destructor
-ResampleX::~ResampleX() = default;
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name

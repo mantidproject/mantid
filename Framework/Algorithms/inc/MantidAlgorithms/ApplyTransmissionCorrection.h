@@ -44,8 +44,6 @@ namespace Algorithms {
 */
 class DLLExport ApplyTransmissionCorrection : public API::Algorithm {
 public:
-  /// (Empty) Constructor
-  ApplyTransmissionCorrection() : API::Algorithm() {}
   /// Algorithm's name
   const std::string name() const override {
     return "ApplyTransmissionCorrection";

@@ -29,16 +29,6 @@ const double guessSignalToNoiseRatio = 1e15;
 }
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-WienerSmooth::WienerSmooth() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-WienerSmooth::~WienerSmooth() = default;
-
-//----------------------------------------------------------------------------------------------
 
 /// Algorithm's version for identification. @see Algorithm::version
 int WienerSmooth::version() const { return 1; }

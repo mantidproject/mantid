@@ -25,16 +25,6 @@ namespace Algorithms {
 DECLARE_ALGORITHM(CreateTransmissionWorkspaceAuto)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-CreateTransmissionWorkspaceAuto::CreateTransmissionWorkspaceAuto() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-CreateTransmissionWorkspaceAuto::~CreateTransmissionWorkspaceAuto() = default;
-
-//----------------------------------------------------------------------------------------------
 /// Sets documentation strings for this algorithm
 const std::string CreateTransmissionWorkspaceAuto::summary() const {
   return "Creates a transmission run workspace in Wavelength from input TOF "

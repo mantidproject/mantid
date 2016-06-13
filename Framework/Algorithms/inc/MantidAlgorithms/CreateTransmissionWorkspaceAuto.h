@@ -36,8 +36,6 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 class DLLExport CreateTransmissionWorkspaceAuto
     : public API::DataProcessorAlgorithm {
 public:
-  CreateTransmissionWorkspaceAuto();
-  ~CreateTransmissionWorkspaceAuto() override;
 
   //----------------------------------------------------------------------------------------------
   /// Algorithm's name for identification. @see Algorithm::name

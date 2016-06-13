@@ -51,8 +51,6 @@ namespace Algorithms {
 */
 class DLLExport FilterBadPulses : public API::Algorithm {
 public:
-  FilterBadPulses();
-  ~FilterBadPulses() override;
 
   const std::string name() const override;
   /// Summary of algorithms purpose

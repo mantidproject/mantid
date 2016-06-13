@@ -33,8 +33,6 @@ namespace Algorithms {
 */
 class DLLExport IntegrateByComponent : public API::Algorithm {
 public:
-  IntegrateByComponent();
-  ~IntegrateByComponent() override;
 
   const std::string name() const override;
   /// Summary of algorithms purpose

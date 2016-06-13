@@ -33,8 +33,6 @@ namespace Algorithms {
 */
 class DLLExport LorentzCorrection : public API::Algorithm {
 public:
-  LorentzCorrection();
-  ~LorentzCorrection() override;
 
   const std::string name() const override;
   int version() const override;

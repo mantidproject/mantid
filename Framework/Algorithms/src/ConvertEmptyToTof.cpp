@@ -29,16 +29,6 @@ using namespace API;
 DECLARE_ALGORITHM(ConvertEmptyToTof)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-ConvertEmptyToTof::ConvertEmptyToTof() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-ConvertEmptyToTof::~ConvertEmptyToTof() = default;
-
-//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string ConvertEmptyToTof::name() const {
   return "ConvertEmptyToTof";

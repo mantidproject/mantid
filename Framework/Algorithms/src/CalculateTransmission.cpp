@@ -60,11 +60,6 @@ size_t getIndexFromDetectorID(MatrixWorkspace_sptr ws, detid_t detid) {
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CalculateTransmission)
 
-CalculateTransmission::CalculateTransmission()
-    : API::Algorithm(), m_done(0.0) {}
-
-CalculateTransmission::~CalculateTransmission() = default;
-
 void CalculateTransmission::init() {
   auto wsValidator = boost::make_shared<CompositeValidator>();
   wsValidator->add<WorkspaceUnitValidator>("Wavelength");

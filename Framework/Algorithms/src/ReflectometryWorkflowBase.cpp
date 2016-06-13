@@ -22,14 +22,6 @@ bool checkNotPositive(const int value) { return value < 0; }
 }
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-ReflectometryWorkflowBase::ReflectometryWorkflowBase() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-ReflectometryWorkflowBase::~ReflectometryWorkflowBase() = default;
 
 /**
  * Init index properties.

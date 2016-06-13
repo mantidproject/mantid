@@ -22,12 +22,6 @@ using namespace Kernel;
 using namespace API;
 using std::size_t;
 
-CalculateTransmissionBeamSpreader::CalculateTransmissionBeamSpreader()
-    : API::Algorithm(), logFit(false) {}
-
-CalculateTransmissionBeamSpreader::~CalculateTransmissionBeamSpreader() =
-    default;
-
 void CalculateTransmissionBeamSpreader::init() {
   auto wsValidator = boost::make_shared<CompositeValidator>();
   wsValidator->add<WorkspaceUnitValidator>("Wavelength");

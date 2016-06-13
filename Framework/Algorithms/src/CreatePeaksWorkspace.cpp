@@ -14,18 +14,6 @@ using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-CreatePeaksWorkspace::CreatePeaksWorkspace() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-CreatePeaksWorkspace::~CreatePeaksWorkspace() = default;
-
-//----------------------------------------------------------------------------------------------
-
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void CreatePeaksWorkspace::init() {

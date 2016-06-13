@@ -30,9 +30,6 @@ CheckWorkspacesMatch::CheckWorkspacesMatch()
   deprecatedDate("2015-10-27");
 }
 
-/// Virtual destructor
-CheckWorkspacesMatch::~CheckWorkspacesMatch() = default;
-
 using namespace Kernel;
 using namespace API;
 using namespace DataObjects;

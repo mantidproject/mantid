@@ -15,16 +15,6 @@ using namespace API;
 DECLARE_ALGORITHM(RemoveMaskedSpectra)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-RemoveMaskedSpectra::RemoveMaskedSpectra() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-RemoveMaskedSpectra::~RemoveMaskedSpectra() = default;
-
-//----------------------------------------------------------------------------------------------
 
 /// Algorithms name for identification. @see Algorithm::name
 const std::string RemoveMaskedSpectra::name() const {

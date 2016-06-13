@@ -16,8 +16,6 @@ namespace Algorithms {
  */
 class DLLExport CreateGroupingWorkspace : public API::Algorithm {
 public:
-  CreateGroupingWorkspace();
-  ~CreateGroupingWorkspace() override;
 
   /// Algorithm's name for identification
   const std::string name() const override;

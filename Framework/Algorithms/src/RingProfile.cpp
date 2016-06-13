@@ -26,13 +26,6 @@ RingProfile::RingProfile()
       num_bins(-1), centre_x(-1.), centre_y(-1.), centre_z(-1), bin_size(-1) {}
 
 //----------------------------------------------------------------------------------------------
-/** Destructor
- */
-RingProfile::~RingProfile() = default;
-
-//----------------------------------------------------------------------------------------------
-
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
     It configures the algorithm to accept the following inputs:
 

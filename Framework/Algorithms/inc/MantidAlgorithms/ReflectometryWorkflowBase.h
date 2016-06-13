@@ -49,9 +49,6 @@ public:
                        Mantid::API::MatrixWorkspace_sptr>
       DetectorMonitorWorkspacePair;
 
-  ReflectometryWorkflowBase();
-  ~ReflectometryWorkflowBase() override;
-
   /// Convert the input workspace to wavelength, splitting according to the
   /// properties provided.
   DetectorMonitorWorkspacePair

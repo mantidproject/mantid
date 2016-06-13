@@ -243,16 +243,6 @@ namespace Algorithms {
 DECLARE_ALGORITHM(PerformIndexOperations)
 
 //------------------------------------------------------------------------------
-/** Constructor
- */
-PerformIndexOperations::PerformIndexOperations() {}
-
-//------------------------------------------------------------------------------
-/** Destructor
- */
-PerformIndexOperations::~PerformIndexOperations() = default;
-
-//------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string PerformIndexOperations::name() const {
   return "PerformIndexOperations";

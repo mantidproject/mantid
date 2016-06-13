@@ -33,8 +33,6 @@ namespace Algorithms {
 */
 class DLLExport CorelliCrossCorrelate : public API::Algorithm {
 public:
-  CorelliCrossCorrelate();
-  ~CorelliCrossCorrelate() override;
 
   const std::string name() const override { return "CorelliCrossCorrelate"; };
   int version() const override { return 1; };
