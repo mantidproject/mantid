@@ -42,7 +42,6 @@ namespace Algorithms {
 */
 class DLLExport CreateLogTimeCorrection : public API::Algorithm {
 public:
-
   const std::string name() const override { return "CreateLogTimeCorrection"; }
   /// Summary of algorithms purpose
   const std::string summary() const override {

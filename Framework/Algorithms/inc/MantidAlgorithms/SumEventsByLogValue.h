@@ -39,7 +39,6 @@ namespace Algorithms {
 */
 class DLLExport SumEventsByLogValue : public API::Algorithm {
 public:
-
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "SumEventsByLogValue"; }
   /// Algorithm's version for identification overriding a virtual method

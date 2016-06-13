@@ -19,7 +19,6 @@ using namespace Mantid::Kernel;
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CalculateResolution)
 
-
 //----------------------------------------------------------------------------------------------
 
 /// Algorithm's name for identification. @see Algorithm::name

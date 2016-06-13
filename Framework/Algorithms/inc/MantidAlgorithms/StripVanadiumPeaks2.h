@@ -35,7 +35,6 @@ namespace Algorithms {
 */
 class DLLExport StripVanadiumPeaks2 : public API::Algorithm {
 public:
-
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "StripVanadiumPeaks"; }
   /// Algorithm's version for identification overriding a virtual method

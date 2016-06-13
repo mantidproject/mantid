@@ -14,7 +14,6 @@ namespace Algorithms {
  */
 class DLLExport ChangePulsetime : public API::Algorithm {
 public:
-
   /// Algorithm's name for identification
   const std::string name() const override { return "ChangePulsetime"; };
   /// Summary of algorithms purpose

@@ -36,7 +36,6 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 class DLLExport CreateTransmissionWorkspaceAuto
     : public API::DataProcessorAlgorithm {
 public:
-
   //----------------------------------------------------------------------------------------------
   /// Algorithm's name for identification. @see Algorithm::name
   const std::string name() const override {

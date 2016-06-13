@@ -35,7 +35,6 @@ namespace Algorithms {
 */
 class DLLExport RemoveWorkspaceHistory : public API::Algorithm {
 public:
-
   const std::string name() const override;
   const std::string summary() const override;
   int version() const override;

@@ -35,7 +35,6 @@ namespace Algorithms {
 */
 class DLLExport FilterByLogValue : public API::Algorithm {
 public:
-
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "FilterByLogValue"; };
   /// Summary of algorithms purpose

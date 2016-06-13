@@ -34,7 +34,6 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
 class DLLExport WeightedMeanOfWorkspace : public API::Algorithm {
 public:
-
   const std::string name() const override;
   /// Summary of algorithms purpose
   const std::string summary() const override {

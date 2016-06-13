@@ -32,7 +32,6 @@ namespace Algorithms {
 */
 class DLLExport FixGSASInstrumentFile : public API::Algorithm {
 public:
-
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "FixGSASInstrumentFile"; }
   /// Summary of algorithms purpose

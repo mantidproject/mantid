@@ -24,7 +24,6 @@ using std::vector;
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ResampleX)
 
-
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string ResampleX::name() const { return "ResampleX"; }

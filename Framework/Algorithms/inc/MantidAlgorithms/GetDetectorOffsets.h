@@ -67,7 +67,7 @@ private:
 
   API::MatrixWorkspace_sptr inputW; ///< A pointer to the input workspace
   DataObjects::OffsetsWorkspace_sptr
-      outputW;         ///< A pointer to the output workspace
+      outputW;               ///< A pointer to the output workspace
   double m_Xmin = DBL_MAX;   ///< The start of the X range for fitting
   double m_Xmax = -DBL_MIN;  ///< The end of the X range for fitting
   double m_maxOffset = 0.0;  ///< The maximum absolute value of offsets

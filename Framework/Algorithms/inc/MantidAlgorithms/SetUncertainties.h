@@ -41,7 +41,6 @@ namespace Algorithms {
  */
 class DLLExport SetUncertainties : public API::Algorithm {
 public:
-
   /// Algorithm's name
   const std::string name() const override;
   /// Summary of algorithms purpose

@@ -42,7 +42,6 @@ namespace Algorithms {
 */
 class DLLExport FilterByTime : public API::Algorithm {
 public:
-
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "FilterByTime"; };
   /// Summary of algorithms purpose
