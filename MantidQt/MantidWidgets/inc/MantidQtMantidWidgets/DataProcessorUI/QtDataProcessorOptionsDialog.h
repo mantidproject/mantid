@@ -7,7 +7,6 @@
 #include <boost/shared_ptr.hpp>
 #include "ui_DataProcessorOptionsDialog.h"
 
-
 namespace MantidQt {
 namespace MantidWidgets {
 
