@@ -516,7 +516,7 @@ class RunDescriptor(PropDescriptor):
         if not noutputs:
             try:
 #pylint: disable=unused-variable
-                noutputs,r = funcreturns.lhs_info('both')
+                noutputs,r = funcinspect.lhs_info('both')
 #pylint: disable=bare-except
             except:
                 noutputs=0
