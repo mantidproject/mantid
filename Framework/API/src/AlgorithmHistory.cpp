@@ -148,7 +148,6 @@ size_t AlgorithmHistory::childHistorySize() const {
   return m_childHistories.size();
 }
 
-
 /**
   * Retrieve a child algorithm history by index
   * @param index ::  An index within the child algorithm history set
@@ -174,20 +173,21 @@ AlgorithmHistory_sptr AlgorithmHistory::operator[](const size_t index) const {
   return getChildAlgorithmHistory(index);
 }
 
-
 /**
 * Gets the value of a specified algorithm property
 * @param name ::  The property to find
 * @returns The string value of the property
 * @throw Exception::NotFoundError if the named property is unknown
 */
-const std::string& AlgorithmHistory::getPropertyValue(const std::string& name) const {
+const std::string &
+AlgorithmHistory::getPropertyValue(const std::string &name) const {
   for (auto &hist : m_properties) {
     if (hist->name() == name) {
       return hist->value();
     }
   }
-  throw Kernel::Exception::NotFoundError("Could not find the specified property", name);
+  throw Kernel::Exception::NotFoundError(
+      "Could not find the specified property", name);
 }
 
 /**

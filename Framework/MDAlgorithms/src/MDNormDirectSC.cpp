@@ -222,7 +222,7 @@ std::string MDNormDirectSC::inputEnergyMode() const {
     emode = lastAlgHist->getPropertyValue("dEAnalysisMode");
   } else if ((lastAlgHist->name() == "Load" ||
               lastAlgHist->name() == "LoadMD") &&
-              penultimateAlgHist->name() == "ConvertToMD") {
+             penultimateAlgHist->name() == "ConvertToMD") {
     // get dEAnalysisMode
     emode = penultimateAlgHist->getPropertyValue("dEAnalysisMode");
   } else {
