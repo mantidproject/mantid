@@ -51,7 +51,7 @@ void NexusErrorFunction(void *data, char *text) {
 /// Default constructor
 FrameworkManagerImpl::FrameworkManagerImpl()
 #ifdef MPI_BUILD
-    : m_mpi_environment()
+    : m_mpi_environment(argc, argv)
 #endif
 {
   // Mantid only understands English...
