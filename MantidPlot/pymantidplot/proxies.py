@@ -4,7 +4,7 @@ accessible from python. They listen for the QObject 'destroyed' signal and set t
 reference to None, thus ensuring that further attempts at access do not cause a crash.
 """
 from __future__ import (absolute_import, division,
-                        print_function, unicode_literals)
+                        print_function)
 
 from PyQt4 import QtCore, QtGui
 from PyQt4.QtCore import Qt, pyqtSlot

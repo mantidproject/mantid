@@ -3,7 +3,7 @@ MantidPlot module to gain access to plotting functions etc.
 Requires that the main script be run from within MantidPlot
 """
 from __future__ import (absolute_import, division,
-                        print_function, unicode_literals)
+                        print_function)
 # Requires MantidPlot
 try:
     import _qti
@@ -201,7 +201,7 @@ def newTiledWindow(name=None, sources = None, ncols = None):
 
     if ncols is None:
         ncols = proxy.columnCount()
- 
+
     if not sources is None:
         row = 0
         col = 0
@@ -679,7 +679,7 @@ def getMantidMatrix(name):
     """Get a handle to the named Mantid matrix"""
     return new_proxy(proxies.MantidMatrix, _qti.app.mantidUI.getMantidMatrix, name)
 
-	
+
 InstrumentWidget = mantidqtpython.MantidQt.MantidWidgets.InstrumentWidget
 InstrumentWidgetRenderTab = mantidqtpython.MantidQt.MantidWidgets.InstrumentWidgetRenderTab
 InstrumentWidgetPickTab = mantidqtpython.MantidQt.MantidWidgets.InstrumentWidgetPickTab
