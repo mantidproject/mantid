@@ -36,7 +36,6 @@ namespace MDAlgorithms {
 */
 class DLLExport AndMD : public BooleanBinaryOperationMD {
 public:
-
   const std::string name() const override;
   int version() const override;
 
