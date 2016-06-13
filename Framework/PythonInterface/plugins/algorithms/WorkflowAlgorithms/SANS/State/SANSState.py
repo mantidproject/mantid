@@ -54,3 +54,10 @@ class SANSStateISIS(SANSStateBase, SANSState):
     @property_manager.setter
     def property_manager(self, value):
         set_state_from_property_manager(self, value)
+
+
+# ----------------------------------------------------
+# SANSStateFactory method
+# ----------------------------------------------------
+def create_correct_sans_state_for_dictionary_input(input):
+    pass

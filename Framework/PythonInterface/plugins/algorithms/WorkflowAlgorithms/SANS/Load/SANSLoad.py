@@ -67,7 +67,7 @@ def is_transmission_type(to_check):
     return is_transmission
 
 
-def get_expected_workspace_names(file_information, is_transmission, period=None):
+def get_expected_workspace_names(file_information, is_transmission, period):
     suffix_file_type = get_extension_for_file_type(file_information)
     if is_transmission:
         suffix_data = "trans"
@@ -83,16 +83,20 @@ def get_expected_workspace_names(file_information, is_transmission, period=None)
     if file_information.get_number_of_periods() == 1:
         workspace_name = "{}_{}_{}".format(run_number, suffix_data, suffix_file_type)
         names = [workspace_name]
-    elif file_information.get_number_of_periods() > 1 and period is None:
+    elif file_information.get_number_of_periods() > 1 and period is SANSStateData.ALL_PERIODS:
         workspace_names = []
-        for period in range(1, file_information.get_number_of_periods()):
+        for period in range(0, file_information.get_number_of_periods()):
             workspace_names.append("{}p{}_{}_{}".format(run_number, period, suffix_data, suffix_file_type))
         names = workspace_names
-    elif file_information.get_number_of_periods() > 1 and period is not None:
+    elif file_information.get_number_of_periods() > 1 and period is not SANSStateData.ALL_PERIODS:
         workspace_name = "{}p{}_{}_{}".format(run_number, period, suffix_data, suffix_file_type)
         names = [workspace_name]
     else:
         raise RuntimeError("SANSLoad: Cannot create workspace names.")
+
+    print "]]]]]]]]]]]]]]]]"
+    print file_information.get_number_of_periods()
+
     return names
 
 
@@ -151,7 +155,7 @@ def add_workspaces_to_analysis_data_service(workspaces, workspace_names, is_moni
     # If workspace is a group workspace then we can iterate, else we cannot
     is_group_workspace = isinstance(workspaces, WorkspaceGroup)
 
-    if is_group_workspace and len(workspaces) != workspace_names:
+    if is_group_workspace and len(workspaces) != len(workspace_names):
         raise RuntimeError("SANSLoad: There is a mismatch between the generated names and the length of"
                            " the WorkspaceGroup. The workspace has {} entries and there are {} "
                            "workspace names".format(len(workspaces), len(workspace_names)))
@@ -171,6 +175,10 @@ def publish_workspaces_to_analysis_data_service(workspaces, workspace_monitors, 
     # If the workspace monitor exists, then add it to the ADS as well
     if workspace_monitors is not None:
         add_workspaces_to_analysis_data_service(workspace_monitors, workspace_names, is_monitor=True)
+
+
+def un_group_workspaces(workspace):
+    pass
 
 
 def run_loader(loader, is_transmission):
@@ -199,14 +207,17 @@ def load_isis(data_type, file_information, period, use_loaded, publish_to_ads):
     # Make potentially use of loaded workspaces. For now we can only identify them by their name
     # TODO: Add tag into sample logs
     if use_loaded:
-        pass
-        # workspace, workspace_monitors = use_loaded_workspaces_from_analysis_data_service(workspace_names)
+        pass #workspace, workspace_monitors = use_loaded_workspaces_from_analysis_data_service(workspace_names)
 
     # Load the workspace if required.
     if workspace is None or workspace_monitor is None:
         # Get the loading strategy
         loader = get_loading_strategy(file_information, period, is_transmission)
         workspace, workspace_monitor = run_loader(loader, is_transmission)
+
+    # If we are dealing with a workspace group then un-group it here
+    #workspace = ungroup_workspaces(workspace)
+    #workspace_monitor = ungroup_workspaces(workspace_monitor)
 
     # Publish to ADS if required
     if publish_to_ads:

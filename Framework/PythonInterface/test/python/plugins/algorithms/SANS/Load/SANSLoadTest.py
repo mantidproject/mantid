@@ -295,7 +295,6 @@ class SANSLoaderTest(unittest.TestCase):
         data_info = SANSStateDataISIS()
         ws_name_sample = "SANS2D00005512.nxs"
         data_info.sample_scatter = ws_name_sample
-        data_info.sample_scatter_period = 3
         loader = load_factory.create_loader(data_info)
 
         # Act
@@ -307,17 +306,26 @@ class SANSLoaderTest(unittest.TestCase):
 
         # We get a Workspace2D instead of a WorkspaceGroup
         self.assertTrue(SANSDataType.SampleScatter in workspace_monitors.keys())
-        self.assertTrue(isinstance(workspace_monitors[SANSDataType.SampleScatter], Workspace2D))
+        self.assertTrue(isinstance(workspace_monitors[SANSDataType.SampleScatter], WorkspaceGroup))
 
         # We get a Workspace2D instead of a WorkspaceGroup
         self.assertTrue(SANSDataType.SampleScatter in workspace.keys())
-        self.assertTrue(isinstance(workspace[SANSDataType.SampleScatter], Workspace2D))
+        self.assertTrue(isinstance(workspace[SANSDataType.SampleScatter], WorkspaceGroup))
 
         # Confirm the single period and its monitor are on the ADS
         workspaces_on_the_ads = AnalysisDataService.getObjectNames()
-        self.assertTrue(len(workspaces_on_the_ads) == 2)
+        self.assertTrue(len(workspaces_on_the_ads) == 26)
 
-
+        # # Confirm that the ADS workspace and the loaded workspace is the same, take a sample
+        # workspace_on_ads = AnalysisDataService.retrieve("5512p7_sans_nxs")
+        # workspace_monitor_on_ads = AnalysisDataService.retrieve("5512p7_sans_nxs_monitors")
+        # try:
+        #      compare_workspaces(workspace_on_ads, workspace[SANSDataType.SampleScatter])
+        #     compare_workspaces(workspace_monitor_on_ads, workspace_monitors[SANSDataType.SampleScatter])
+        #     match = False
+        # except RuntimeError:
+        #     match = False
+        # self.assertTrue(match)
 
         # Cleanup
         remove_all_workspaces_from_ads()

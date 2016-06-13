@@ -1,8 +1,5 @@
-﻿# #pylint: disable=no-init
-# from mantid.simpleapi import *
-# from mantid.kernel import *
-# from mantid.api import *
-#
+﻿# from mantid.kernel import Direction
+# from mantid.api import (DataProcessorAlgorithm, MatrixWorkspaceProperty)
 #
 # class SANSLoadData(DataProcessorAlgorithm):
 #
@@ -39,19 +36,31 @@
 #                              doc='The sample scatter monitor workspace. This workspace only contains monitors.')
 #
 #         # Sample Transmission Workspace
+#         self.declareProperty(MatrixWorkspaceProperty('SampleTransmissionWorkspace', '', direction=Direction.Output),
+#                              doc='The sample transmission workspace.')
 #
 #         # Sample Direct Workspace
+#         self.declareProperty(MatrixWorkspaceProperty('SampleDirectWorkspace', '', direction=Direction.Output),
+#                              doc='The sample scatter direct workspace.')
 #
 #         # Can Scatter Workspaces
+#         self.declareProperty(MatrixWorkspaceProperty('CanScatterWorkspace', '', direction=Direction.Output),
+#                              doc='The can scatter workspace. This workspace does not contain monitors.')
 #
-#         # Can Transmission Workspace
+#         self.declareProperty(MatrixWorkspaceProperty('CanScatterMonitorWorkspace', '', direction=Direction.Output),
+#                              doc='The can scatter monitor workspace. This workspace only contains monitors.')
 #
-#         # Can Direct Workspace
+#         # Sample Transmission Workspace
+#         self.declareProperty(MatrixWorkspaceProperty('CanTransmissionWorkspace', '', direction=Direction.Output),
+#                              doc='The can transmission workspace.')
+#
+#         # Sample Direct Workspace
+#         self.declareProperty(MatrixWorkspaceProperty('CanDirectWorkspace', '', direction=Direction.Output),
+#                              doc='The sample scatter direct workspace.')
 #
 #     def PyExec(self):
 #         # Read the file names
-#         sans_state_in = self.getProperty("SANSState").value
-#
+#         sans_state = self.getProperty("SANSState").value
 #
 #         # Get the correct SANSLoader from the SANSLoaderFactory
 #
@@ -63,8 +72,16 @@
 #         pass
 #
 #     def validateInputs(self):
-#         issues = dict()
-#         return issues
+#         errors = dict()
+#         # Check that the input can be converted into the right state object
+#         state_dict = self.getProperty("SANSState").value
+#         try:
+#              state = SANSStateISIS()
+#              state.property_manager = state_dict
+#              state.validate()
+#         except ValueError, e:
+#              errors.update({"SANSStatePrototype": str(e)})
+#         return errors
 #
 #
 # # Register algorithm with Mantid

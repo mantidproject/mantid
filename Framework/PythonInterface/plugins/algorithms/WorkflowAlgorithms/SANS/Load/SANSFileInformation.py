@@ -88,11 +88,14 @@ def get_isis_nexus_info(file_name):
         with h5.File(file_name) as h5_file:
             keys = h5_file.keys()
             is_isis_nexus = "raw_data_1" in keys
-            number_of_periods = len(keys)
+
+            first_entry = h5_file["raw_data_1"]
+            period_group = first_entry["periods"]
+            proton_charge_data_set = period_group["proton_charge"]
+            number_of_periods = len(proton_charge_data_set)
     except IOError:
         is_isis_nexus = False
         number_of_periods = -1
-
     return is_isis_nexus, number_of_periods
 
 
@@ -263,10 +266,8 @@ def get_date_for_raw(file_name):
     time_id = "r_endtime"
     date_id = "r_enddate"
 
-    if time_id in keys:
-        time = run_parameters.column(keys.index(time_id))
-    if date_id in keys:
-        date = run_parameters.column(keys.index(date_id))
+    time = run_parameters.column(keys.index(time_id))
+    date = run_parameters.column(keys.index(date_id))
     time = time[0]
     date = date[0]
     return get_raw_measurement_time(date, time)
