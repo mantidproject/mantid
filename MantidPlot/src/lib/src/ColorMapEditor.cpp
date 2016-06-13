@@ -1,10 +1,10 @@
 /***************************************************************************
-	File                 : ColorMapEditor.cpp
-	Project              : QtiPlot
+        File                 : ColorMapEditor.cpp
+        Project              : QtiPlot
 --------------------------------------------------------------------
-	Copyright            : (C) 2006 by Ion Vasilief
-	Email (use @ for *)  : ion_vasilief*yahoo.fr
-	Description          : A QwtLinearColorMap Editor Widget
+        Copyright            : (C) 2006 by Ion Vasilief
+        Email (use @ for *)  : ion_vasilief*yahoo.fr
+        Description          : A QwtLinearColorMap Editor Widget
  ***************************************************************************/
 
 /***************************************************************************
@@ -38,30 +38,27 @@
 #include <QMouseEvent>
 #include <QMessageBox>
 
-ColorMapEditor::ColorMapEditor(const QLocale& locale, int precision, QWidget* parent)
-: QWidget(parent),
-  color_map(QwtLinearColorMap()),
-  min_val(0),
-  max_val(1),
-  d_locale(locale),
-  d_precision(precision)
-{
+ColorMapEditor::ColorMapEditor(const QLocale &locale, int precision,
+                               QWidget *parent)
+    : QWidget(parent), color_map(QwtLinearColorMap()), min_val(0), max_val(1),
+      d_locale(locale), d_precision(precision) {
   table = new QTableWidget();
   table->setColumnCount(2);
   table->setSelectionMode(QAbstractItemView::SingleSelection);
   table->verticalHeader()->setResizeMode(QHeaderView::ResizeToContents);
   table->verticalHeader()->hide();
-  table->horizontalHeader()->setClickable( false );
+  table->horizontalHeader()->setClickable(false);
   table->horizontalHeader()->setResizeMode(0, QHeaderView::Interactive);
   table->horizontalHeader()->setResizeMode(1, QHeaderView::ResizeToContents);
   table->horizontalHeader()->setStretchLastSection(true);
   table->viewport()->setMouseTracking(true);
   table->viewport()->installEventFilter(this);
-  table->setHorizontalHeaderLabels(QStringList() << tr("Level") << tr("Color"));
-  table->setMinimumHeight(6*table->horizontalHeader()->height() + 2);
+  table->setHorizontalHeaderLabels({tr("Level"), tr("Color")});
+  table->setMinimumHeight(6 * table->horizontalHeader()->height() + 2);
   table->installEventFilter(this);
 
-  connect(table, SIGNAL(cellClicked (int, int)), this, SLOT(showColorDialog(int, int)));
+  connect(table, SIGNAL(cellClicked(int, int)), this,
+          SLOT(showColorDialog(int, int)));
 
   insertBtn = new QPushButton(tr("&Insert"));
   insertBtn->setEnabled(false);
@@ -71,15 +68,16 @@ ColorMapEditor::ColorMapEditor(const QLocale& locale, int precision, QWidget* pa
   deleteBtn->setEnabled(false);
   connect(deleteBtn, SIGNAL(clicked()), this, SLOT(deleteLevel()));
 
-  QHBoxLayout* hb = new QHBoxLayout();
+  QHBoxLayout *hb = new QHBoxLayout();
   hb->addWidget(insertBtn);
   hb->addWidget(deleteBtn);
 
   scaleColorsBox = new QCheckBox(tr("&Scale Colors"));
   scaleColorsBox->setChecked(true);
-  connect(scaleColorsBox, SIGNAL(toggled(bool)), this, SLOT(setScaledColors(bool)));
+  connect(scaleColorsBox, SIGNAL(toggled(bool)), this,
+          SLOT(setScaledColors(bool)));
 
-  QVBoxLayout* vl = new QVBoxLayout(this);
+  QVBoxLayout *vl = new QVBoxLayout(this);
   vl->setSpacing(0);
   vl->addWidget(table);
   vl->addLayout(hb);
@@ -89,33 +87,33 @@ ColorMapEditor::ColorMapEditor(const QLocale& locale, int precision, QWidget* pa
   setMaximumWidth(200);
 }
 
-void ColorMapEditor::updateColorMap()
-{
+void ColorMapEditor::updateColorMap() {
   int rows = table->rowCount();
   QColor c_min = QColor(table->item(0, 1)->text());
   QColor c_max = QColor(table->item(rows - 1, 1)->text());
   QwtLinearColorMap map(c_min, c_max);
-  for (int i = 1; i < rows-1; i++){
+  for (int i = 1; i < rows - 1; i++) {
     QwtDoubleInterval range = QwtDoubleInterval(min_val, max_val);
-    double val = (((DoubleSpinBox*)table->cellWidget(i, 0))->value() - min_val)/range.width();
-    map.addColorStop (val, QColor(table->item(i, 1)->text()));
+    double val =
+        (((DoubleSpinBox *)table->cellWidget(i, 0))->value() - min_val) /
+        range.width();
+    map.addColorStop(val, QColor(table->item(i, 1)->text()));
   }
 
   color_map = map;
   setScaledColors(scaleColorsBox->isChecked());
 }
 
-void ColorMapEditor::setColorMap(const QwtLinearColorMap& map)
-{
+void ColorMapEditor::setColorMap(const QwtLinearColorMap &map) {
   scaleColorsBox->setChecked(map.mode() == QwtLinearColorMap::ScaledColors);
 
-  QwtArray <double> colors = map.colorStops();
+  QwtArray<double> colors = map.colorStops();
   int rows = (int)colors.size();
   table->setRowCount(rows);
   table->blockSignals(true);
 
   QwtDoubleInterval range = QwtDoubleInterval(min_val, max_val);
-  for (int i = 0; i < rows; i++){
+  for (int i = 0; i < rows; i++) {
     DoubleSpinBox *sb = new DoubleSpinBox();
     sb->setLocale(d_locale);
     sb->setDecimals(d_precision);
@@ -123,23 +121,24 @@ void ColorMapEditor::setColorMap(const QwtLinearColorMap& map)
 
     if (i == 0)
       sb->setRange(min_val, min_val);
-    else if (i == rows -1)
+    else if (i == rows - 1)
       sb->setRange(max_val, max_val);
     else
       sb->setRange(min_val, max_val);
 
     connect(sb, SIGNAL(valueChanged(double)), this, SLOT(updateColorMap()));
-    connect(sb, SIGNAL(activated(DoubleSpinBox *)), this, SLOT(spinBoxActivated(DoubleSpinBox *)));
+    connect(sb, SIGNAL(activated(DoubleSpinBox *)), this,
+            SLOT(spinBoxActivated(DoubleSpinBox *)));
     table->setCellWidget(i, 0, sb);
 
     QColor c = QColor(map.rgb(QwtDoubleInterval(0, 1), colors[i]));
     QTableWidgetItem *it = new QTableWidgetItem(c.name());
-// Avoid compiler warning
-//#ifdef Q_CC_MSVC
+    // Avoid compiler warning
+    //#ifdef Q_CC_MSVC
     it->setFlags(it->flags() & (~Qt::ItemIsEditable));
-//#else
-//    it->setFlags(!Qt::ItemIsEditable);
-//#endif
+    //#else
+    //    it->setFlags(!Qt::ItemIsEditable);
+    //#endif
     it->setBackground(QBrush(c));
     it->setForeground(QBrush(c));
     table->setItem(i, 1, it);
@@ -149,28 +148,26 @@ void ColorMapEditor::setColorMap(const QwtLinearColorMap& map)
   color_map = map;
 }
 
-void ColorMapEditor::setRange(double min, double max)
-{
-  min_val = QMIN(min, max);
-  max_val = QMAX(min, max);
+void ColorMapEditor::setRange(double min, double max) {
+  min_val = qMin(min, max);
+  max_val = qMax(min, max);
 }
 
-void ColorMapEditor::insertLevel()
-{
+void ColorMapEditor::insertLevel() {
   int row = table->currentRow();
-  DoubleSpinBox *sb = (DoubleSpinBox*)table->cellWidget(row, 0);
+  DoubleSpinBox *sb = (DoubleSpinBox *)table->cellWidget(row, 0);
   if (!sb)
     return;
 
   double current_value = sb->value();
   double previous_value = min_val;
-  sb = (DoubleSpinBox*)table->cellWidget(row - 1, 0);
+  sb = (DoubleSpinBox *)table->cellWidget(row - 1, 0);
   if (sb)
     previous_value = sb->value();
 
-  double val = 0.5*(current_value + previous_value);
+  double val = 0.5 * (current_value + previous_value);
   QwtDoubleInterval range = QwtDoubleInterval(min_val, max_val);
-  double mapped_val = (val - min_val)/range.width();
+  double mapped_val = (val - min_val) / range.width();
 
   QColor c = QColor(color_map.rgb(QwtDoubleInterval(0, 1), mapped_val));
 
@@ -183,16 +180,17 @@ void ColorMapEditor::insertLevel()
   sb->setValue(val);
   sb->setRange(min_val, max_val);
   connect(sb, SIGNAL(valueChanged(double)), this, SLOT(updateColorMap()));
-  connect(sb, SIGNAL(activated(DoubleSpinBox *)), this, SLOT(spinBoxActivated(DoubleSpinBox *)));
+  connect(sb, SIGNAL(activated(DoubleSpinBox *)), this,
+          SLOT(spinBoxActivated(DoubleSpinBox *)));
   table->setCellWidget(row, 0, sb);
 
   QTableWidgetItem *it = new QTableWidgetItem(c.name());
-// Avoid compiler warning
-//#ifdef Q_CC_MSVC
+  // Avoid compiler warning
+  //#ifdef Q_CC_MSVC
   it->setFlags(it->flags() & (~Qt::ItemIsEditable));
-//#else
-//  it->setFlags(!Qt::ItemIsEditable);
-//#endif
+  //#else
+  //  it->setFlags(!Qt::ItemIsEditable);
+  //#endif
   it->setBackground(QBrush(c));
   it->setForeground(QBrush(c));
   table->setItem(row, 1, it);
@@ -202,15 +200,13 @@ void ColorMapEditor::insertLevel()
   updateColorMap();
 }
 
-void ColorMapEditor::deleteLevel()
-{
-  table->removeRow (table->currentRow());
+void ColorMapEditor::deleteLevel() {
+  table->removeRow(table->currentRow());
   enableButtons(table->currentRow());
   updateColorMap();
 }
 
-void ColorMapEditor::showColorDialog(int row, int col)
-{
+void ColorMapEditor::showColorDialog(int row, int col) {
   if (col != 1)
     return;
 
@@ -228,9 +224,8 @@ void ColorMapEditor::showColorDialog(int row, int col)
   updateColorMap();
 }
 
-bool ColorMapEditor::eventFilter(QObject *object, QEvent *e)
-{
-  if (e->type() == QEvent::MouseMove && object == table->viewport()){
+bool ColorMapEditor::eventFilter(QObject *object, QEvent *e) {
+  if (e->type() == QEvent::MouseMove && object == table->viewport()) {
     const QMouseEvent *me = (const QMouseEvent *)e;
     QPoint pos = table->viewport()->mapToParent(me->pos());
     int row = table->rowAt(pos.y() - table->horizontalHeader()->height());
@@ -239,12 +234,12 @@ bool ColorMapEditor::eventFilter(QObject *object, QEvent *e)
     else
       setCursor(QCursor(Qt::ArrowCursor));
     return true;
-  } else if (e->type() == QEvent::Leave && object == table->viewport()){
+  } else if (e->type() == QEvent::Leave && object == table->viewport()) {
     setCursor(QCursor(Qt::ArrowCursor));
     return true;
-  } else if (e->type() == QEvent::KeyPress && object == table){
+  } else if (e->type() == QEvent::KeyPress && object == table) {
     QKeyEvent *ke = (QKeyEvent *)e;
-    if (ke->key() == Qt::Key_Return && table->currentColumn() == 1){
+    if (ke->key() == Qt::Key_Return && table->currentColumn() == 1) {
       showColorDialog(table->currentRow(), 1);
       return true;
     }
@@ -253,12 +248,11 @@ bool ColorMapEditor::eventFilter(QObject *object, QEvent *e)
   return QObject::eventFilter(object, e);
 }
 
-void ColorMapEditor::enableButtons(int row)
-{
+void ColorMapEditor::enableButtons(int row) {
   if (row < 0)
     return;
 
-  if (row == 0 || row == table->rowCount()-1)
+  if (row == 0 || row == table->rowCount() - 1)
     deleteBtn->setEnabled(false);
   else
     deleteBtn->setEnabled(true);
@@ -269,8 +263,7 @@ void ColorMapEditor::enableButtons(int row)
     insertBtn->setEnabled(true);
 }
 
-void ColorMapEditor::setScaledColors(bool scale)
-{
+void ColorMapEditor::setScaledColors(bool scale) {
   if (scale)
     color_map.setMode(QwtLinearColorMap::ScaledColors);
   else
@@ -279,33 +272,30 @@ void ColorMapEditor::setScaledColors(bool scale)
   scalingChanged();
 }
 
-QString ColorMapEditor::saveToXmlString(const QwtLinearColorMap& color_map)
-{
+QString ColorMapEditor::saveToXmlString(const QwtLinearColorMap &color_map) {
   QString s = "<ColorMap>\n";
   s += "\t<Mode>" + QString::number(color_map.mode()) + "</Mode>\n";
   s += "\t<MinColor>" + color_map.color1().name() + "</MinColor>\n";
   s += "\t<MaxColor>" + color_map.color2().name() + "</MaxColor>\n";
-  QwtArray <double> colors = color_map.colorStops();
+  QwtArray<double> colors = color_map.colorStops();
   int stops = (int)colors.size();
   s += "\t<ColorStops>" + QString::number(stops - 2) + "</ColorStops>\n";
-  for (int i = 1; i < stops - 1; i++)
-  {
+  for (int i = 1; i < stops - 1; i++) {
     s += "\t<Stop>" + QString::number(colors[i]) + "\t";
-    s += QColor(color_map.rgb(QwtDoubleInterval(0,1), colors[i])).name();
+    s += QColor(color_map.rgb(QwtDoubleInterval(0, 1), colors[i])).name();
     s += "</Stop>\n";
   }
   return s += "</ColorMap>\n";
 }
 
-void ColorMapEditor::spinBoxActivated(DoubleSpinBox *sb)
-{
+void ColorMapEditor::spinBoxActivated(DoubleSpinBox *sb) {
   if (!sb)
     return;
 
   int rows = table->rowCount();
-  for (int i = 0; i < rows; i++){
-    DoubleSpinBox *box = (DoubleSpinBox*)table->cellWidget(i, 0);
-    if (box && box == sb){
+  for (int i = 0; i < rows; i++) {
+    DoubleSpinBox *box = (DoubleSpinBox *)table->cellWidget(i, 0);
+    if (box && box == sb) {
       table->setCurrentCell(i, 0);
       enableButtons(i);
       return;

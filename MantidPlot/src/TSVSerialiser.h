@@ -13,7 +13,8 @@
   @author Harry Jeffery, ISIS, RAL
   @date 23/07/2014
 
-  Copyright &copy; 2007-2014 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+  Copyright &copy; 2007-2014 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+  National Laboratory & European Spallation Source
 
   This file is part of Mantid.
 
@@ -32,55 +33,54 @@
 
   File change history is stored at: <https://github.com/mantidproject/mantid>
 */
-class TSVSerialiser
-{
+class TSVSerialiser {
 public:
-
   TSVSerialiser();
 
   explicit TSVSerialiser(const std::string &lines);
 
-  void parseLines(const std::string& lines);
+  void parseLines(const std::string &lines);
   std::string outputLines() const;
   void clear();
 
-  bool hasLine(const std::string& name) const;
-  bool hasSection(const std::string& name) const;
+  bool hasLine(const std::string &name) const;
+  bool hasSection(const std::string &name) const;
 
-  std::vector<std::string> values(const std::string& name, const size_t i = 0) const;
-  std::vector<std::string> sections(const std::string& name) const;
+  std::vector<std::string> values(const std::string &name,
+                                  const size_t i = 0) const;
+  std::vector<std::string> sections(const std::string &name) const;
 
-  std::string lineAsString(const std::string& name, const size_t i = 0) const;
+  std::string lineAsString(const std::string &name, const size_t i = 0) const;
 
-  bool selectLine(const std::string& name, const size_t i = 0);
-  bool selectSection(const std::string& name, const size_t i = 0);
+  bool selectLine(const std::string &name, const size_t i = 0);
+  bool selectSection(const std::string &name, const size_t i = 0);
 
-  int         asInt(const size_t i) const;
-  double      asDouble(const size_t i) const;
-  float       asFloat(const size_t i) const;
+  int asInt(const size_t i) const;
+  double asDouble(const size_t i) const;
+  float asFloat(const size_t i) const;
   std::string asString(const size_t i) const;
 
-  TSVSerialiser& operator>>(int& val);
-  TSVSerialiser& operator>>(double& val);
-  TSVSerialiser& operator>>(float& val);
-  TSVSerialiser& operator>>(std::string& val);
-  TSVSerialiser& operator>>(QString& val);
+  TSVSerialiser &operator>>(int &val);
+  TSVSerialiser &operator>>(double &val);
+  TSVSerialiser &operator>>(float &val);
+  TSVSerialiser &operator>>(std::string &val);
+  TSVSerialiser &operator>>(QString &val);
 
-  TSVSerialiser& writeLine(const std::string& name);
+  TSVSerialiser &writeLine(const std::string &name);
 
-  TSVSerialiser& operator<<(const std::string& val);
-  TSVSerialiser& operator<<(const char* val);
-  TSVSerialiser& operator<<(const QString& val);
-  TSVSerialiser& operator<<(const double& val);
-  TSVSerialiser& operator<<(const int& val);
+  TSVSerialiser &operator<<(const std::string &val);
+  TSVSerialiser &operator<<(const char *val);
+  TSVSerialiser &operator<<(const QString &val);
+  TSVSerialiser &operator<<(const double &val);
+  TSVSerialiser &operator<<(const int &val);
 
-  void writeRaw(const std::string& raw);
-  void writeSection(const std::string& name, const std::string& body);
-  void writeInlineSection(const std::string& name, const std::string& body);
+  void writeRaw(const std::string &raw);
+  void writeSection(const std::string &name, const std::string &body);
+  void writeInlineSection(const std::string &name, const std::string &body);
 
 private:
-  std::map<std::string,std::vector<std::string> > m_sections;
-  std::map<std::string,std::vector<std::string> > m_lines;
+  std::map<std::string, std::vector<std::string>> m_sections;
+  std::map<std::string, std::vector<std::string>> m_lines;
 
   std::vector<std::string> m_curValues;
   int m_curIndex;

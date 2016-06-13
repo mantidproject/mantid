@@ -158,7 +158,7 @@ void InterpolatingRebin::outputYandEValues(
       cubicInterpolation(XValues, YValues, YErrors, *XValues_new, YValues_new,
                          Errors_new);
     } catch (std::exception &ex) {
-      g_log.error() << "Error in rebin function: " << ex.what() << std::endl;
+      g_log.error() << "Error in rebin function: " << ex.what() << '\n';
       throw;
     }
 
@@ -287,11 +287,12 @@ void InterpolatingRebin::cubicInterpolation(
       throw std::invalid_argument(
           std::string("At least one x-value to interpolate to is outside the "
                       "range of the original data.\n") +
-          "original data range: " + boost::lexical_cast<std::string>(xOld[0]) +
-          " to " + boost::lexical_cast<std::string>(xOld[xOld.size() - 1]) +
-          "\n" + "range to try to interpolate to " +
-          boost::lexical_cast<std::string>(xNew[0]) + " to " +
-          boost::lexical_cast<std::string>(xNew[xNew.size() - 1]));
+          "original data range: " +
+          boost::lexical_cast<std::string>(xOld.front()) + " to " +
+          boost::lexical_cast<std::string>(xOld.back()) + "\n" +
+          "range to try to interpolate to " +
+          boost::lexical_cast<std::string>(xNew.front()) + " to " +
+          boost::lexical_cast<std::string>(xNew.back()));
     }
   }
 

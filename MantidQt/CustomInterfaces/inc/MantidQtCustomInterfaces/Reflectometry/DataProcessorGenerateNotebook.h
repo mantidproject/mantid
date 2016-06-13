@@ -44,8 +44,8 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-std::vector<std::string>
-    DLLExport splitByCommas(const std::string &names_string);
+std::vector<std::string> DLLExport
+splitByCommas(const std::string &names_string);
 
 std::string DLLExport plot1DString(const std::vector<std::string> &ws_names);
 
@@ -96,13 +96,12 @@ plusString(const std::string &input_name, const std::string &output_name,
            const DataProcessorPreprocessingAlgorithm &preprocessor,
            const std::string &options);
 
-boost::tuple<std::string, std::string>
-    DLLExport loadRunString(const std::string &run,
-                            const std::string &instrument,
-                            const std::string &prefix);
+boost::tuple<std::string, std::string> DLLExport
+loadRunString(const std::string &run, const std::string &instrument,
+              const std::string &prefix);
 
-std::string DLLExport completeOutputProperties(const std::string &algName,
-                                               size_t currentProperties);
+std::string DLLExport
+completeOutputProperties(const std::string &algName, size_t currentProperties);
 
 class DLLExport DataProcessorGenerateNotebook {
 

@@ -1502,8 +1502,8 @@ void FitPropertyBrowser::finishHandle(const Mantid::API::IAlgorithm *alg) {
   // the fit has been done against is sent as a parameter)
   QString name(QString::fromStdString(alg->getProperty("InputWorkspace")));
   if (name.contains('_')) // Must be fitting to raw data, need to group under
-                          // name without "_Raw".
-                          emit fittingDone(name.left(name.indexOf('_')));
+    // name without "_Raw".
+    emit fittingDone(name.left(name.indexOf('_')));
   else // else fitting to current workspace, group under same name.
     emit fittingDone(name);
 
@@ -2479,10 +2479,8 @@ void FitPropertyBrowser::setPeakToolOn(bool on) {
 /**
  * @brief impose a number of decimal places on all defined Double properties
  */
-void FitPropertyBrowser::updateDecimals()
-{
-  if (m_decimals < 0)
-  {
+void FitPropertyBrowser::updateDecimals() {
+  if (m_decimals < 0) {
     QSettings settings;
     settings.beginGroup("Mantid/FitBrowser");
     m_decimals = settings.value("decimals", 6).toInt();

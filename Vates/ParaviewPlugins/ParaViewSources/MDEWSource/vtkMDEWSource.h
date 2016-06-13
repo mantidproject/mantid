@@ -1,4 +1,4 @@
-#ifndef _vtkMDEWSource_h 
+#ifndef _vtkMDEWSource_h
 #define _vtkMDEWSource_h
 
 #include "vtkUnstructuredGridAlgorithm.h"
@@ -7,21 +7,21 @@
 #include "MantidVatesAPI/vtkDataSetFactory.h"
 #include <string>
 
-namespace Mantid
-{
-  namespace VATES
-  {
-    class MDLoadingPresenter;
-  }
+namespace Mantid {
+namespace VATES {
+class MDLoadingPresenter;
+}
 }
 
-/*  Source for fetching Multidimensional Workspace out of the Mantid Analysis Data Service
+/*  Source for fetching Multidimensional Workspace out of the Mantid Analysis
+   Data Service
     and converting them into vtkDataSets as part of the pipeline source.
 
     @author Owen Arnold @ Tessella
     @date 08/09/2011
 
-    Copyright &copy; 2007-9 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+    Copyright &copy; 2007-9 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+   National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -44,8 +44,7 @@ namespace Mantid
 */
 
 // cppcheck-suppress class_X_Y
-class VTK_EXPORT vtkMDEWSource : public vtkUnstructuredGridAlgorithm
-{
+class VTK_EXPORT vtkMDEWSource : public vtkUnstructuredGridAlgorithm {
 public:
   static vtkMDEWSource *New();
   vtkTypeMacro(vtkMDEWSource, vtkUnstructuredGridAlgorithm) void PrintSelf(
@@ -62,7 +61,7 @@ public:
   //----------------------------------------------
 
   /// Update the algorithm progress.
-  void updateAlgorithmProgress(double, const std::string& message);
+  void updateAlgorithmProgress(double, const std::string &message);
   /// Getter for the input geometry xml
   std::string GetInputGeometryXML();
   /// Getter for the special coodinate value
@@ -87,7 +86,6 @@ protected:
                   vtkInformationVector *) override;
 
 private:
-  
   /// Name of the workspace.
   std::string m_wsName;
 
@@ -103,8 +101,8 @@ private:
   /// Normalization option
   Mantid::VATES::VisualNormalization m_normalization;
 
-  vtkMDEWSource(const vtkMDEWSource&);
-  void operator = (const vtkMDEWSource&);
-  void setTimeRange(vtkInformationVector* outputVector);
+  vtkMDEWSource(const vtkMDEWSource &);
+  void operator=(const vtkMDEWSource &);
+  void setTimeRange(vtkInformationVector *outputVector);
 };
 #endif

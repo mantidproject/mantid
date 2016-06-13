@@ -55,7 +55,7 @@ std::ostream &operator<<(std::ostream &strm, const DetectorPosition &p) {
               << "shiftLeft = " << p.shiftLeft << ", "
               << "shiftRight = " << p.shiftRight << ", "
               << "shiftUp = " << p.shiftUp << ", "
-              << "shiftDown = " << p.shiftDown << std::endl;
+              << "shiftDown = " << p.shiftDown << '\n';
 }
 
 class DLLExport LoadILLSANS : public API::IFileLoader<Kernel::NexusDescriptor> {

@@ -2,7 +2,6 @@
 #include "MantidMatrixModel.h"
 #include "MantidMatrix.h"
 #include "MantidMatrixFunction.h"
-#include "MantidKernel/Timer.h"
 #include "MantidUI.h"
 #include "../Graph3D.h"
 #include "../ApplicationWindow.h"
@@ -13,41 +12,14 @@
 
 #include "TSVSerialiser.h"
 
-#include "MantidAPI/BinEdgeAxis.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/NumericAxis.h"
-#include "MantidAPI/RefAxis.h"
-#include "MantidAPI/SpectraAxis.h"
-#include "MantidAPI/TextAxis.h"
-#include "MantidKernel/ReadLock.h"
 
 #include "MantidQtAPI/PlotAxis.h"
 
-#include <QtGlobal>
-#include <QTextStream>
-#include <QList>
-#include <QEvent>
-#include <QContextMenuEvent>
-#include <QVBoxLayout>
-#include <QMouseEvent>
-#include <QHeaderView>
 #include <QApplication>
-#include <QVarLengthArray>
 #include <QClipboard>
-#include <QShortcut>
-#include <QPrinter>
-#include <QPrintDialog>
-#include <QPainter>
-#include <QLocale>
-#include <QItemDelegate>
-#include <QLabel>
-#include <QStackedWidget>
-#include <QImageWriter>
-#include <QSvgGenerator>
-#include <QFile>
-#include <QUndoStack>
-#include <QCheckBox>
-#include <QTabWidget>
+
 #include <QScrollBar>
 
 #include <stdlib.h>
@@ -167,10 +139,10 @@ MantidMatrix::MantidMatrix(Mantid::API::MatrixWorkspace_const_sptr ws,
   connect(m_tabs, SIGNAL(currentChanged(int)), this, SLOT(viewChanged(int)));
 
   setGeometry(50, 50,
-              QMIN(5, numCols()) *
+              qMin(5, numCols()) *
                       m_table_viewY->horizontalHeader()->sectionSize(0) +
                   55,
-              (QMIN(10, numRows()) + 1) *
+              (qMin(10, numRows()) + 1) *
                       m_table_viewY->verticalHeader()->sectionSize(0) +
                   100);
 
@@ -275,7 +247,7 @@ void MantidMatrix::connectTableView(QTableView *view,
   view->setFocusPolicy(Qt::StrongFocus);
 
   QPalette pal = view->palette();
-  pal.setColor(QColorGroup::Base, m_bk_color);
+  pal.setColor(QPalette::Base, m_bk_color);
   view->setPalette(pal);
 
   // set header properties
@@ -534,7 +506,7 @@ void MantidMatrix::goToRow(int row) {
     return;
 
   //	activeView()->selectRow(row - 1); //For some reason, this did not
-  //highlight the row at all, hence the stupid line below
+  // highlight the row at all, hence the stupid line below
   activeView()->selectionModel()->select(
       QItemSelection(activeModel()->index(row - 1, 0),
                      activeModel()->index(row - 1, numCols() - 1)),
@@ -549,7 +521,7 @@ void MantidMatrix::goToColumn(int col) {
     return;
 
   //	activeView()->selectColumn(col - 1); //For some reason, this did not
-  //highlight the row at all, hence the stupid line below
+  // highlight the row at all, hence the stupid line below
   activeView()->selectionModel()->select(
       QItemSelection(activeModel()->index(0, col - 1),
                      activeModel()->index(numRows() - 1, col - 1)),
@@ -665,17 +637,15 @@ QwtDoubleRect MantidMatrix::boundingRect() {
       } else {
         m_spectrogramCols = numCols() > 100 ? numCols() : 100;
       }
-      m_boundingRect =
-          QwtDoubleRect(QMIN(x_start, x_end) - 0.5 * dx,
-                        QMIN(y_start, y_end) - 0.5 * dy,
-                        fabs(x_end - x_start) + dx, fabs(y_end - y_start) + dy)
-              .normalized();
+      m_boundingRect = QwtDoubleRect(qMin(x_start, x_end) - 0.5 * dx,
+                                     qMin(y_start, y_end) - 0.5 * dy,
+                                     fabs(x_end - x_start) + dx,
+                                     fabs(y_end - y_start) + dy).normalized();
 
     } else {
       m_spectrogramCols = 0;
-      m_boundingRect = QwtDoubleRect(0, QMIN(y_start, y_end) - 0.5 * dy, 1,
-                                     fabs(y_end - y_start) + dy)
-                           .normalized();
+      m_boundingRect = QwtDoubleRect(0, qMin(y_start, y_end) - 0.5 * dy, 1,
+                                     fabs(y_end - y_start) + dy).normalized();
     }
   } // Define the spectrogram bounding box
   return m_boundingRect;
@@ -755,7 +725,7 @@ MultiLayer *MantidMatrix::plotGraph2D(Graph::CurveType type) {
   MultiLayer *g = a->multilayerPlot(a->generateUniqueName(tr("Graph")));
   attachMultilayer(g);
   //#799 fix for  multiple dialog creation on double clicking/ on right click
-  //menu scale on  2d plot
+  // menu scale on  2d plot
   //   a->connectMultilayerPlot(g);
   Graph *plot = g->activeGraph();
   plotSpectrogram(plot, a, type, false, NULL);
@@ -873,7 +843,7 @@ bool MantidMatrix::setSelectedColumns() {
 }
 
 void MantidMatrix::dependantClosed(MdiSubWindow *w) {
-  if (w->isA("Table")) {
+  if (strcmp(w->metaObject()->className(), "Table") == 0) {
     QMap<MultiLayer *, Table *>::iterator itr;
     for (itr = m_plots1D.begin(); itr != m_plots1D.end(); ++itr) {
       if (itr.value() == dynamic_cast<Table *>(w)) {
@@ -881,7 +851,7 @@ void MantidMatrix::dependantClosed(MdiSubWindow *w) {
         break;
       }
     }
-  } else if (w->isA("MultiLayer")) {
+  } else if (strcmp(w->metaObject()->className(), "MultiLayer") == 0) {
     int i = m_plots2D.indexOf(dynamic_cast<MultiLayer *>(w));
     if (i >= 0)
       m_plots2D.remove(i);

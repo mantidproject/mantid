@@ -317,7 +317,7 @@ void PDFFourierTransform::exec() {
       error += (sinus * inputDfOfQ[q_index]) * (sinus * inputDfOfQ[q_index]);
       // g_log.debug() << "q[" << i << "] = " << q << "  dq = " << deltaq << "
       // S(q) =" << s;
-      // g_log.debug() << "  d(gr) = " << temp << "  gr = " << gr << std::endl;
+      // g_log.debug() << "  d(gr) = " << temp << "  gr = " << gr << '\n';
     }
 
     // put the information into the output

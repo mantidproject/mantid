@@ -2,12 +2,14 @@
 #define AUTOSCALERANGEGENERATOR_H
 
 /**
-    Generates information for the color scale, e.g. minimum level, maximum level, 
+    Generates information for the color scale, e.g. minimum level, maximum
+   level,
     log scale.
 
     @date 18/11/2014
 
-    Copyright &copy; 2007-11 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2007-11 ISIS Rutherford Appleton Laboratory & NScD Oak
+   Ridge National Laboratory
 
     This file is part of Mantid.
 
@@ -36,15 +38,11 @@
 class pqPipelineSource;
 class pqDataRepresentation;
 
-namespace Mantid
-{
-namespace Vates
-{
-namespace SimpleGui
-{
+namespace Mantid {
+namespace Vates {
+namespace SimpleGui {
 
-typedef struct VsiColorScale
-{
+typedef struct VsiColorScale {
   double maxValue;
 
   double minValue;
@@ -52,62 +50,65 @@ typedef struct VsiColorScale
   bool useLogScale;
 } VsiColorScale;
 
-class EXPORT_OPT_MANTIDVATES_SIMPLEGUI_VIEWWIDGETS  AutoScaleRangeGenerator
-{
-  public:
-    AutoScaleRangeGenerator();
+class EXPORT_OPT_MANTIDVATES_SIMPLEGUI_VIEWWIDGETS AutoScaleRangeGenerator {
+public:
+  AutoScaleRangeGenerator();
 
-    virtual ~AutoScaleRangeGenerator() {};
+  virtual ~AutoScaleRangeGenerator(){};
 
-    /// Creates a color scale entity.
-    VsiColorScale getColorScale();
+  /// Creates a color scale entity.
+  VsiColorScale getColorScale();
 
-    /// Enum for different modes
-    typedef enum COLORSCALEMODE{STANDARD, TECHNIQUEDEPENDENT, OFFSET} COLORSCALEMODE;
+  /// Enum for different modes
+  typedef enum COLORSCALEMODE {
+    STANDARD,
+    TECHNIQUEDEPENDENT,
+    OFFSET
+  } COLORSCALEMODE;
 
-    /// Initialize the color scale
-    void initializeColorScale();
+  /// Initialize the color scale
+  void initializeColorScale();
 
-    /// Update log scale setting
-    void updateLogScaleSetting(bool logScale);
+  /// Update log scale setting
+  void updateLogScaleSetting(bool logScale);
 
-  private:
-    /// Selected color scale mode.
-    COLORSCALEMODE mode;
+private:
+  /// Selected color scale mode.
+  COLORSCALEMODE mode;
 
-    /// Default value for the color scale
-    double defaultValue;
+  /// Default value for the color scale
+  double defaultValue;
 
-    /// Get the color scale for the standard selection.
-    VsiColorScale getStandardColorScale();
+  /// Get the color scale for the standard selection.
+  VsiColorScale getStandardColorScale();
 
-    /// Get all ParaView sources from the active server.
-    QList<pqPipelineSource *> getAllPVSources();
+  /// Get all ParaView sources from the active server.
+  QList<pqPipelineSource *> getAllPVSources();
 
-    /// Make sure that the color scale is valid.
-    void sanityCheck(VsiColorScale& colorscale);
+  /// Make sure that the color scale is valid.
+  void sanityCheck(VsiColorScale &colorscale);
 
-    /// Gets the log scale setting for the mode
-    bool getLogScale();
+  /// Gets the log scale setting for the mode
+  bool getLogScale();
 
   /**
-   * Extract the min and max values of a source. If we are dealing with a filter which does not
+   * Extract the min and max values of a source. If we are dealing with a filter
+   * which does not
    * have the information then look upstream for the information
    * @param source A pointer to a source
    * @param minValue A reference to a min value.
    * @param maxValue A reference to a max value.
    */
-    void setMinBufferAndMaxBuffer(pqPipelineSource* source, double& minValue, double& maxValue);
+  void setMinBufferAndMaxBuffer(pqPipelineSource *source, double &minValue,
+                                double &maxValue);
 
-    /// Md constants
-    MantidQt::API::MdConstants m_mdConstants;
+  /// Md constants
+  MantidQt::API::MdConstants m_mdConstants;
 
-    /// Md Settings
-    MantidQt::API::MdSettings m_mdSettings;
+  /// Md Settings
+  MantidQt::API::MdSettings m_mdSettings;
 };
-
 }
 }
 }
 #endif
-

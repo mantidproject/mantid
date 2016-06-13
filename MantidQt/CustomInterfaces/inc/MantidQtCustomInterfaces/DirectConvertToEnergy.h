@@ -8,106 +8,105 @@
 #include "MantidQtAPI/AlgorithmRunner.h"
 #include "MantidQtAPI/UserSubWindow.h"
 
-namespace MantidQt
-{
-  namespace CustomInterfaces
-  {
-    //-------------------------------------------
-    // Forward declarations
-    //-------------------------------------------
-    class Homer;
+namespace MantidQt {
+namespace CustomInterfaces {
+//-------------------------------------------
+// Forward declarations
+//-------------------------------------------
+class Homer;
 
-    /** 
-    This class defines the DirectConvertToEnergy interface. It handles the overall instrument settings
-    and sets up the appropriate interface depending on the deltaE mode of the instrument. The deltaE
-    mode is defined in the instrument definition file using the "deltaE-mode".    
+/**
+This class defines the DirectConvertToEnergy interface. It handles the overall
+instrument settings
+and sets up the appropriate interface depending on the deltaE mode of the
+instrument. The deltaE
+mode is defined in the instrument definition file using the "deltaE-mode".
 
-    @author Martyn Gigg, Tessella Support Services plc
-    @author Michael Whitty
+@author Martyn Gigg, Tessella Support Services plc
+@author Michael Whitty
 
-    Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+National Laboratory & European Spallation Source
 
-    This file is part of Mantid.
+This file is part of Mantid.
 
-    Mantid is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 3 of the License, or
-    (at your option) any later version.
+Mantid is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 3 of the License, or
+(at your option) any later version.
 
-    Mantid is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+Mantid is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-    File change history is stored at: <https://github.com/mantidproject/mantid>
-    Code Documentation is available at: <http://doxygen.mantidproject.org>    
-    */
+File change history is stored at: <https://github.com/mantidproject/mantid>
+Code Documentation is available at: <http://doxygen.mantidproject.org>
+*/
 
-    class DirectConvertToEnergy : public MantidQt::API::UserSubWindow
-    {
-      Q_OBJECT
+class DirectConvertToEnergy : public MantidQt::API::UserSubWindow {
+  Q_OBJECT
 
-    public: // public constants, ennumerations and types
-      enum DeltaEMode { Direct, InDirect, Undefined};
+public: // public constants, ennumerations and types
+  enum DeltaEMode { Direct, InDirect, Undefined };
 
-    public: // public constructor, destructor and functions
-      /// Default Constructor
-      DirectConvertToEnergy(QWidget *parent = 0);
-      ///Destructor
-      ~DirectConvertToEnergy() override;
-      /// Interface name
-      static std::string name() { return "Convert To Energy (Direct)"; }
-      /// Aliases for this interface
-      static std::set<std::string> aliases()
-      { 
-        std::set<std::string> aliasList;
-        aliasList.insert("Homer");
-        return aliasList;
-      }
-      // This interface's categories.
-      static QString categoryInfo() { return "Direct"; }
-
-    private slots:
-      void helpClicked();
-      void runClicked();
-      void instrumentLoadingDone(bool error);
-
-    private: // private functions (and slots)
-      /// Initialize the layout
-      void initLayout() override;
-      void initLocalPython() override;
-      void readSettings();
-      void saveSettings();
-      void setDefaultInstrument(const QString & name);
-      void instrumentSelectChanged(const QString& name);
-      ///// Find path to instrument's _Definition.xml file (and check there is a parameter file).
-      //QString getIDFPath(const QString& prefix);
-      /// Find the DeltaEMode (Direct or Indirect) of the instrument.
-      DeltaEMode instrumentDeltaEMode(const QString& defFile);
-
-    private slots:
-      void userSelectInstrument(const QString& name);
-      void openDirectoryDialog();
-
-    private: // member variables
-      /// The .ui form generated by Qt Designer
-      Ui::DirectConvertToEnergy m_uiForm;
-      /// Direct Instruments interface object
-      Homer *m_directInstruments;
-      /// Instrument the interface is currently set for.
-      QString m_curInterfaceSetup;
-      /// "DeltaE-mode" of the current instrument.
-      DeltaEMode m_curEmodeType;
-      /// The settings group
-      QString m_settingsGroup;
-      /// Runner for insturment load algorithm
-      MantidQt::API::AlgorithmRunner* m_algRunner;
-    };
-
+public: // public constructor, destructor and functions
+  /// Default Constructor
+  DirectConvertToEnergy(QWidget *parent = 0);
+  /// Destructor
+  ~DirectConvertToEnergy() override;
+  /// Interface name
+  static std::string name() { return "Convert To Energy (Direct)"; }
+  /// Aliases for this interface
+  static std::set<std::string> aliases() {
+    std::set<std::string> aliasList;
+    aliasList.insert("Homer");
+    return aliasList;
   }
+  // This interface's categories.
+  static QString categoryInfo() { return "Direct"; }
+
+private slots:
+  void helpClicked();
+  void runClicked();
+  void instrumentLoadingDone(bool error);
+
+private: // private functions (and slots)
+  /// Initialize the layout
+  void initLayout() override;
+  void initLocalPython() override;
+  void readSettings();
+  void saveSettings();
+  void setDefaultInstrument(const QString &name);
+  void instrumentSelectChanged(const QString &name);
+  ///// Find path to instrument's _Definition.xml file (and check there is a
+  /// parameter file).
+  // QString getIDFPath(const QString& prefix);
+  /// Find the DeltaEMode (Direct or Indirect) of the instrument.
+  DeltaEMode instrumentDeltaEMode(const QString &defFile);
+
+private slots:
+  void userSelectInstrument(const QString &name);
+  void openDirectoryDialog();
+
+private: // member variables
+  /// The .ui form generated by Qt Designer
+  Ui::DirectConvertToEnergy m_uiForm;
+  /// Direct Instruments interface object
+  Homer *m_directInstruments;
+  /// Instrument the interface is currently set for.
+  QString m_curInterfaceSetup;
+  /// "DeltaE-mode" of the current instrument.
+  DeltaEMode m_curEmodeType;
+  /// The settings group
+  QString m_settingsGroup;
+  /// Runner for insturment load algorithm
+  MantidQt::API::AlgorithmRunner *m_algRunner;
+};
+}
 }
 
-#endif //MANTIDQTCUSTOMINTERFACES_CONVERTTOENERGY_H_
+#endif // MANTIDQTCUSTOMINTERFACES_CONVERTTOENERGY_H_

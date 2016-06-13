@@ -486,7 +486,7 @@ private:
 
     std::ofstream testFile(fileName);
     for (size_t i = 0; i < cont.size(); i++) {
-      testFile << cont[i] << std::endl;
+      testFile << cont[i] << '\n';
     }
     testFile.close();
   }
@@ -499,7 +499,7 @@ private:
 
     std::ofstream testFile(fileName);
     for (size_t i = 0; i < cont.size(); i++) {
-      testFile << cont[i] << std::endl;
+      testFile << cont[i] << '\n';
     }
     testFile.close();
   }
@@ -512,7 +512,7 @@ private:
 
     std::ofstream testFile(fileName);
     for (size_t i = 0; i < cont.size(); i++) {
-      testFile << cont[i] << std::endl;
+      testFile << cont[i] << '\n';
     }
     testFile.close();
   }
@@ -523,7 +523,7 @@ private:
 
     std::ofstream testFile(fileName);
     for (size_t i = 0; i < cont.size(); i++) {
-      testFile << cont[i] << std::endl;
+      testFile << cont[i] << '\n';
     }
     testFile.close();
   }

@@ -68,9 +68,8 @@ void SaveZODS::exec() {
                              "one bin in the 3rd dimension is OK).");
 
   if (ws->getDimension(0)->getName() != "[H,0,0]")
-    g_log.warning()
-        << "SaveZODS expects the workspace to be in HKL space! Saving anyway..."
-        << std::endl;
+    g_log.warning() << "SaveZODS expects the workspace to be in HKL space! "
+                       "Saving anyway...\n";
 
   // Create a HDF5 file
   auto file = new ::NeXus::File(Filename, NXACC_CREATE5);

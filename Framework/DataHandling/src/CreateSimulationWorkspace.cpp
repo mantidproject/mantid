@@ -42,6 +42,8 @@ StartAndEndTime getStartAndEndTimesFromRawFile(std::string filename) {
       Mantid::DataHandling::LoadRawHelper::extractStartTime(&isisRaw);
   startAndEndTime.endTime =
       Mantid::DataHandling::LoadRawHelper::extractEndTime(&isisRaw);
+
+  fclose(rawFile);
   return startAndEndTime;
 }
 
@@ -342,7 +344,7 @@ MantidVecPtr CreateSimulationWorkspace::createBinBoundaries() const {
   if (numBoundaries <= 2) {
     throw std::invalid_argument(
         "Error in BinParams - Gave invalid number of bin boundaries: " +
-        boost::lexical_cast<std::string>(numBoundaries));
+        std::to_string(numBoundaries));
   }
   return binsPtr;
 }

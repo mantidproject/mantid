@@ -40,55 +40,54 @@ class QSpinBox;
 class Graph3D;
 
 //! Define surface plot dialog
-class SurfaceDialog : public QDialog
-{
-    Q_OBJECT
+class SurfaceDialog : public QDialog {
+  Q_OBJECT
 
 public:
-    SurfaceDialog( QWidget* parent = 0, Qt::WFlags fl = 0 );
+  SurfaceDialog(QWidget *parent = 0, Qt::WFlags fl = 0);
 
 public slots:
   void accept() override;
-        void setFunction(Graph3D *);
-	void setParametricSurface(Graph3D *);
+  void setFunction(Graph3D *);
+  void setParametricSurface(Graph3D *);
 
 private slots:
-	void clearList();
+  void clearList();
 
 private:
-	Graph3D *d_graph;
+  Graph3D *d_graph;
 
-	void acceptParametricSurface();
-	void acceptFunction();
-	void initFunctionPage();
-	void initParametricSurfacePage();
+  void acceptParametricSurface();
+  void acceptFunction();
+  void initFunctionPage();
+  void initParametricSurfacePage();
 
-	QWidget* functionPage;
-	QWidget* parametricPage;
-	QStackedWidget* optionStack;
-    QPushButton* buttonOk;
-	QPushButton* buttonCancel;
-	QPushButton* buttonClear;
-	QComboBox* boxType;
-	QComboBox* boxFunction;
-	QLineEdit* boxXFrom;
-	QLineEdit* boxXTo;
-	QLineEdit* boxYFrom;
-	QLineEdit* boxYTo;
-	QLineEdit* boxZFrom;
-	QLineEdit* boxZTo;
+  QWidget *functionPage;
+  QWidget *parametricPage;
+  QStackedWidget *optionStack;
+  QPushButton *buttonOk;
+  QPushButton *buttonCancel;
+  QPushButton *buttonClear;
+  QComboBox *boxType;
+  QComboBox *boxFunction;
+  QLineEdit *boxXFrom;
+  QLineEdit *boxXTo;
+  QLineEdit *boxYFrom;
+  QLineEdit *boxYTo;
+  QLineEdit *boxZFrom;
+  QLineEdit *boxZTo;
 
-	QLineEdit* boxX;
-	QLineEdit* boxY;
-	QLineEdit* boxZ;
+  QLineEdit *boxX;
+  QLineEdit *boxY;
+  QLineEdit *boxZ;
 
-	QLineEdit* boxUFrom;
-	QLineEdit* boxUTo;
-	QLineEdit* boxVFrom;
-	QLineEdit* boxVTo;
+  QLineEdit *boxUFrom;
+  QLineEdit *boxUTo;
+  QLineEdit *boxVFrom;
+  QLineEdit *boxVTo;
 
-	QCheckBox *boxUPeriodic, *boxVPeriodic;
-	QSpinBox *boxColumns, *boxRows, *boxFuncColumns, *boxFuncRows;
+  QCheckBox *boxUPeriodic, *boxVPeriodic;
+  QSpinBox *boxColumns, *boxRows, *boxFuncColumns, *boxFuncRows;
 };
 
 #endif

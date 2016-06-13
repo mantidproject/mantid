@@ -269,7 +269,7 @@ void ImportMDEventWorkspace::exec() {
   if (0 == nActualColumns) {
     m_nDataObjects = 0;
     g_log.warning() << "The number of actual columns found in the file "
-                       "(exlcuding comments) is zero" << std::endl;
+                       "(exlcuding comments) is zero\n";
   } else {
     m_nDataObjects = posDiffMDEvent / nActualColumns;
   }

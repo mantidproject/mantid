@@ -69,8 +69,9 @@ const std::string EnggDiffractionViewQtGUI::m_settingsGroup =
 */
 EnggDiffractionViewQtGUI::EnggDiffractionViewQtGUI(QWidget *parent)
     : UserSubWindow(parent), IEnggDiffractionView(), m_currentInst("ENGINX"),
-      m_currentCalibFilename(""), m_focusedDataVector(), m_fittedDataVector(),
-      m_peakPicker(NULL), m_zoomTool(NULL), m_presenter(NULL) {}
+      m_currentCalibFilename(""), m_splashMsg(nullptr), m_focusedDataVector(),
+      m_fittedDataVector(), m_peakPicker(nullptr), m_zoomTool(nullptr),
+      m_presenter(nullptr) {}
 
 EnggDiffractionViewQtGUI::~EnggDiffractionViewQtGUI() {
   for (auto curves : m_focusedDataVector) {
@@ -256,6 +257,12 @@ void EnggDiffractionViewQtGUI::doSetupTabFitting() {
   connect(m_uiTabFitting.pushButton_save_peak_list, SIGNAL(released()),
           SLOT(savePeakList()));
 
+  connect(m_uiTabFitting.pushButton_clear_peak_list, SIGNAL(released()),
+          SLOT(clearPeakList()));
+
+  connect(m_uiTabFitting.pushButton_plot_separate_window, SIGNAL(released()),
+          SLOT(plotSeparateWindow()));
+
   m_uiTabFitting.dataPlot->setCanvasBackground(Qt::white);
   m_uiTabFitting.dataPlot->setAxisTitle(QwtPlot::xBottom, "d-Spacing (A)");
   m_uiTabFitting.dataPlot->setAxisTitle(QwtPlot::yLeft, "Counts (us)^-1");
@@ -313,6 +320,11 @@ void EnggDiffractionViewQtGUI::doSetupTabSettings() {
 }
 
 void EnggDiffractionViewQtGUI::doSetupGeneralWidgets() {
+  doSetupSplashMsg();
+
+  // don't show the re-size corner
+  m_ui.statusbar->setSizeGripEnabled(false);
+
   // change instrument
   connect(m_ui.comboBox_instrument, SIGNAL(currentIndexChanged(int)), this,
           SLOT(instrumentChanged(int)));
@@ -324,6 +336,21 @@ void EnggDiffractionViewQtGUI::doSetupGeneralWidgets() {
 
   connect(m_ui.lineEdit_RBNumber, SIGNAL(editingFinished()), this,
           SLOT(RBNumberChanged()));
+}
+
+void EnggDiffractionViewQtGUI::doSetupSplashMsg() {
+  if (m_splashMsg)
+    delete m_splashMsg;
+
+  m_splashMsg = new QMessageBox(this);
+  m_splashMsg->setIcon(QMessageBox::Information);
+  m_splashMsg->setStandardButtons(QMessageBox::NoButton);
+  m_splashMsg->setWindowTitle("Setting up");
+  m_splashMsg->setText("Setting up the interface!");
+  m_splashMsg->setWindowFlags(Qt::SplashScreen | Qt::FramelessWindowHint |
+                              Qt::X11BypassWindowManagerHint);
+  m_splashMsg->setWindowModality(Qt::NonModal);
+  // we don't want to show now: m_splashMsg->show();
 }
 
 void EnggDiffractionViewQtGUI::readSettings() {
@@ -593,6 +620,28 @@ std::string EnggDiffractionViewQtGUI::guessDefaultFullCalibrationPath() const {
   templ.append("ENGINX_full_pixel_calibration_vana194547_ceria193749.csv");
   return templ.toString();
 }
+
+void EnggDiffractionViewQtGUI::splashMessage(bool visible,
+                                             const std::string &shortMsg,
+                                             const std::string &description) {
+  if (!m_splashMsg)
+    return;
+
+  m_splashMsg->setWindowTitle(QString::fromStdString(shortMsg));
+  m_splashMsg->setText(QString::fromStdString(description));
+  // when showing the message, force it to show up centered
+  if (visible) {
+    const auto pos = this->mapToGlobal(rect().center());
+    m_splashMsg->move(pos.x() - m_splashMsg->width() / 2,
+                      pos.y() - m_splashMsg->height() / 2);
+  }
+  m_splashMsg->setVisible(visible);
+}
+
+void EnggDiffractionViewQtGUI::showStatus(const std::string &sts) {
+  m_ui.statusbar->showMessage(QString::fromStdString(sts));
+}
+
 void EnggDiffractionViewQtGUI::userWarning(const std::string &err,
                                            const std::string &description) {
   QMessageBox::warning(this, QString::fromStdString(err),
@@ -698,6 +747,8 @@ void EnggDiffractionViewQtGUI::enableCalibrateAndFocusActions(bool enable) {
   m_uiTabFitting.pushButton_fitting_browse_peaks->setEnabled(enable);
   m_uiTabFitting.lineEdit_fitting_peaks->setEnabled(enable);
   m_uiTabFitting.pushButton_fit->setEnabled(enable);
+  m_uiTabFitting.pushButton_clear_peak_list->setEnabled(enable);
+  m_uiTabFitting.pushButton_save_peak_list->setEnabled(enable);
   m_uiTabFitting.comboBox_bank->setEnabled(enable);
   m_uiTabFitting.groupBox_fititng_preview->setEnabled(enable);
 }
@@ -794,7 +845,26 @@ std::string EnggDiffractionViewQtGUI::readPeaksFile(std::string fileDir) {
 }
 
 void EnggDiffractionViewQtGUI::setDataVector(
-    std::vector<boost::shared_ptr<QwtData>> &data, bool focused) {
+    std::vector<boost::shared_ptr<QwtData>> &data, bool focused,
+    bool plotSinglePeaks) {
+
+  if (!plotSinglePeaks) {
+    // clear vector and detach curves to avoid plot crash
+    // when only plotting focused workspace
+    for (auto curves : m_fittedDataVector) {
+      if (curves) {
+        curves->detach();
+        delete curves;
+      }
+    }
+
+    if (m_fittedDataVector.size() > 0)
+      m_fittedDataVector.clear();
+
+    // set it as false as there will be no valid workspace to plot
+    m_uiTabFitting.pushButton_plot_separate_window->setEnabled(false);
+  }
+
   if (focused) {
     dataCurvesFactory(data, m_focusedDataVector, focused);
   } else {
@@ -818,11 +888,11 @@ void EnggDiffractionViewQtGUI::dataCurvesFactory(
     dataVector.clear();
   resetView();
 
-  // dark colours could be removed so the colored peaks stand out more
+  // dark colours could be removed so that the coloured peaks stand out more
   const std::array<QColor, 16> QPenList{
       {Qt::white, Qt::red, Qt::darkRed, Qt::green, Qt::darkGreen, Qt::blue,
        Qt::darkBlue, Qt::cyan, Qt::darkCyan, Qt::magenta, Qt::darkMagenta,
-       Qt::yellow, Qt::darkYellow, Qt::gray, Qt::darkGray, Qt::lightGray}};
+       Qt::yellow, Qt::darkYellow, Qt::gray, Qt::lightGray, Qt::black}};
 
   std::mt19937 gen;
   std::uniform_int_distribution<std::size_t> dis(0, QPenList.size() - 1);
@@ -831,10 +901,18 @@ void EnggDiffractionViewQtGUI::dataCurvesFactory(
     auto *peak = data[i].get();
 
     QwtPlotCurve *dataCurve = new QwtPlotCurve();
-    dataCurve->setStyle(QwtPlotCurve::Lines);
     if (!focused) {
+      dataCurve->setStyle(QwtPlotCurve::Lines);
       auto randIndex = dis(gen);
-      dataCurve->setPen(QPen(QPenList[randIndex], 1));
+      dataCurve->setPen(QPen(QPenList[randIndex], 2));
+
+      // only set enabled when single peak workspace plotted
+      m_uiTabFitting.pushButton_plot_separate_window->setEnabled(true);
+    } else {
+      dataCurve->setStyle(QwtPlotCurve::NoCurve);
+      // focused workspace in bg set as darkGrey crosses insted of line
+      dataCurve->setSymbol(QwtSymbol(QwtSymbol::XCross, QBrush(),
+                                     QPen(Qt::darkGray, 1), QSize(3, 3)));
     }
     dataCurve->setRenderHint(QwtPlotItem::RenderAntialiased, true);
 
@@ -1327,6 +1405,32 @@ std::string EnggDiffractionViewQtGUI::getFittingRunNo() const {
   return m_uiTabFitting.lineEdit_pushButton_run_num->text().toStdString();
 }
 
+void EnggDiffractionViewQtGUI::plotSeparateWindow() {
+  std::string pyCode =
+
+      "fitting_single_peaks_twin_ws = \"__engggui_fitting_single_peaks_twin\"\n"
+      "if (mtd.doesExist(fitting_single_peaks_twin_ws)):\n"
+      " DeleteWorkspace(fitting_single_peaks_twin_ws)\n"
+
+      "single_peak_ws = CloneWorkspace(InputWorkspace = "
+      "\"engggui_fitting_single_peaks\", OutputWorkspace = "
+      "fitting_single_peaks_twin_ws)\n"
+      "tot_spec = single_peak_ws.getNumberHistograms()\n"
+
+      "spec_list = []\n"
+      "for i in range(0, tot_spec):\n"
+      " spec_list.append(i)\n"
+
+      "fitting_plot = plotSpectrum(single_peak_ws, spec_list).activeLayer()\n"
+      "fitting_plot.setTitle(\"Engg GUI Single Peaks Fitting Workspace\")\n";
+
+  std::string status =
+      runPythonCode(QString::fromStdString(pyCode), false).toStdString();
+  m_logMsgs.emplace_back("Plotted output focused data, with status string " +
+                         status);
+  m_presenter->notify(IEnggDiffractionPresenter::LogMsg);
+}
+
 std::string EnggDiffractionViewQtGUI::fittingPeaksData() const {
   // this should be moved to Helper or could use the poco string tokenizers
   std::string exptPeaks =
@@ -1384,7 +1488,7 @@ void EnggDiffractionViewQtGUI::addBankItems(
             splitFittingDirectory(strVecFile);
 
         // get the last split in vector which will be bank
-        std::string bankID = (vecFileSplit[vecFileSplit.size() - 1]);
+        std::string bankID = (vecFileSplit.back());
 
         bool digit = isDigit(bankID);
 
@@ -1481,7 +1585,7 @@ void EnggDiffractionViewQtGUI::setDefaultBank(
 
   if (!splittedBaseName.empty()) {
 
-    std::string bankID = (splittedBaseName[splittedBaseName.size() - 1]);
+    std::string bankID = (splittedBaseName.back());
     auto combo_data =
         m_uiTabFitting.comboBox_bank->findText(QString::fromStdString(bankID));
 
@@ -1581,6 +1685,10 @@ void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::savePeakList() {
   }
 }
 
+void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::clearPeakList() {
+  m_uiTabFitting.lineEdit_fitting_peaks->clear();
+}
+
 void EnggDiffractionViewQtGUI::instrumentChanged(int /*idx*/) {
   QComboBox *inst = m_ui.comboBox_instrument;
   if (!inst)
@@ -1638,6 +1746,7 @@ void EnggDiffractionViewQtGUI::closeEvent(QCloseEvent *event) {
 
   if (answer == QMessageBox::AcceptRole && m_ui.pushButton_close->isEnabled()) {
     m_presenter->notify(IEnggDiffractionPresenter::ShutDown);
+    delete m_splashMsg;
     event->accept();
   } else {
     event->ignore();

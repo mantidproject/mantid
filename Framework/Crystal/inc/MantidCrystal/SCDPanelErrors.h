@@ -81,13 +81,6 @@ public:
   void functionDeriv1D(API::Jacobian *out, const double *xValues,
                        const size_t nData) override;
 
-  Kernel::Matrix<double>
-  CalcDiffDerivFromdQ(Kernel::Matrix<double> const &DerivQ,
-                      Kernel::Matrix<double> const &Mhkl,
-                      Kernel::Matrix<double> const &MhklT,
-                      Kernel::Matrix<double> const &InvhklThkl,
-                      Kernel::Matrix<double> const &UB) const;
-
   size_t nAttributes() const override;
 
   std::vector<std::string> getAttributeNames() const override;

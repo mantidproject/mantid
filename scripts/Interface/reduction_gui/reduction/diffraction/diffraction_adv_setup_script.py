@@ -88,7 +88,6 @@ class AdvancedSetupScript(BaseScriptElement):
         self.parnamelist.append("FilterBadPulses")
         self.parnamelist.append("BackgroundSmoothParams")
         self.parnamelist.append("PushDataPositive")
-        self.parnamelist.append("Extension")
         self.parnamelist.append("PreserveEvents")
         self.parnamelist.append("OutputFilePrefix")
         self.parnamelist.append("ScaleData")
@@ -138,7 +137,6 @@ class AdvancedSetupScript(BaseScriptElement):
         pardict["VanadiumFWHM"] = self.vanadiumfwhm
         pardict["VanadiumPeakTol"] = self.vanadiumpeaktol
         pardict["VanadiumSmoothParams"] = self.vanadiumsmoothparams
-        pardict["Extension"] = str(self.extension)
         pardict["PreserveEvents"] = str(int(self.preserveevents))
         pardict["OutputFilePrefix"] = self.outputfileprefix
         pardict["ScaleData"] = self.scaledata
@@ -253,4 +251,3 @@ class AdvancedSetupScript(BaseScriptElement):
         self.scaledata              = AdvancedSetupScript.scaledata
 
         return
-

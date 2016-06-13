@@ -67,8 +67,8 @@ void LevenbergMarquardtMinimizer::initialize(
   if (!m_gslSolver) {
     throw std::runtime_error(
         "Levenberg-Marquardt minimizer failed to initialize. \n" +
-        boost::lexical_cast<std::string>(m_data->n) + " data points, " +
-        boost::lexical_cast<std::string>(m_data->p) + " fitting parameters. ");
+        std::to_string(m_data->n) + " data points, " +
+        std::to_string(m_data->p) + " fitting parameters. ");
   }
   gsl_multifit_fdfsolver_set(m_gslSolver, &gslContainer,
                              m_data->initFuncParams);

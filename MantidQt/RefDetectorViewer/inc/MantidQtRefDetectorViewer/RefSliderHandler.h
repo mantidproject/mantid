@@ -38,47 +38,41 @@
                  <http://doxygen.mantidproject.org>
  */
 
-namespace MantidQt
-{
-namespace RefDetectorViewer
-{
+namespace MantidQt {
+namespace RefDetectorViewer {
 
+class EXPORT_OPT_MANTIDQT_REFDETECTORVIEWER RefSliderHandler
+    : public SpectrumView::ISliderHandler {
+public:
+  /// Construct object to manage image scrollbars from the specified UI
+  RefSliderHandler(Ui_RefImageViewer *ivUI);
 
-class EXPORT_OPT_MANTIDQT_REFDETECTORVIEWER RefSliderHandler : public SpectrumView::ISliderHandler
-{
-  public:
-    /// Construct object to manage image scrollbars from the specified UI
-    RefSliderHandler( Ui_RefImageViewer* ivUI );
+  /// Configure the image scrollbars for the specified data and drawing area
+  void
+  configureSliders(QRect drawArea,
+                   SpectrumView::SpectrumDataSource_sptr dataSource) override;
 
-    /// Configure the image scrollbars for the specified data and drawing area
-    void
-    configureSliders(QRect drawArea,
-                     SpectrumView::SpectrumDataSource_sptr dataSource) override;
+  /// Configure the horizontal scrollbar to cover the specified range
+  void configureHSlider(int nDataSteps, int nPixels) override;
 
-    /// Configure the horizontal scrollbar to cover the specified range
-    void configureHSlider(int nDataSteps, int nPixels) override;
+  /// Return true if the image horizontal scrollbar is enabled.
+  bool hSliderOn() override;
 
-    /// Return true if the image horizontal scrollbar is enabled.
-    bool hSliderOn() override;
+  /// Return true if the image vertical scrollbar is enabled.
+  bool vSliderOn() override;
 
-    /// Return true if the image vertical scrollbar is enabled.
-    bool vSliderOn() override;
+  /// Get the range of columns to display in the image.
+  void getHSliderInterval(int &xMin, int &xMax) override;
 
-    /// Get the range of columns to display in the image.
-    void getHSliderInterval(int &xMin, int &xMax) override;
+  /// Get the range of rows to display in the image.
+  void getVSliderInterval(int &yMin, int &yMax) override;
 
-    /// Get the range of rows to display in the image.
-    void getVSliderInterval(int &yMin, int &yMax) override;
+private:
+  /// Configure the specified scrollbar to cover the specified range
+  void configureSlider(QScrollBar *scrollBar, int nDataSteps, int nPixels,
+                       int val);
 
-  private:
-    /// Configure the specified scrollbar to cover the specified range
-    void configureSlider( QScrollBar* scrollBar,
-                          int         nDataSteps,
-                          int         nPixels,
-                          int         val );
-
-    Ui_RefImageViewer*   m_ivUI;
-
+  Ui_RefImageViewer *m_ivUI;
 };
 
 } // namespace RefDetectorViewer

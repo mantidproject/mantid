@@ -174,18 +174,17 @@ where:
   or directory is synchronized (at least partially) between the remote
   compute resource and the (local) instrument analysis machine.
 
-* *RB987654321* is the experiment reference number (or so-called RB
-number) which usually starts with the prefix "RB".
+* *RB987654321* is the experiment reference number (or so-called RB number) which usually starts with the prefix "RB".
 
 * *experiment_foo* is a name given by the user to the particular
   experiment the data comes from. This is specified in free form.
 
-* inside the path there will normally be at least three folders or
-subdirectories for the sample, flat, and dark images:
+* inside the path there will normally be at least three folders or subdirectories for the sample, flat, and dark images:
 
   - data
   - flat
   - dark
+
 
 As the files are mirrored on the remote computer cluster, if a network
 drive have been added (or mapped) in the local system, for example
@@ -364,7 +363,7 @@ Energy bands
 
 Here it is possible to aggregate stacks of images normally acquired as
 energy/wavelength selective data. This interface is based on the
-algorithm :ref:`ImggAggWavelengths <algm-ImggAggWavelengths>` which
+algorithm :ref:`ImggAggregateWavelengths <algm-ImggAggregateWavelengths>` which
 supports different ways of aggregating the input images. In the
 simplest case, a number of output bands can be produced by aggregating
 the input bands split into uniform segments. This is called "uniform
@@ -377,8 +376,8 @@ could by produced by specifying the ranges as "0-499, 250-749,
 500-999". In principle it is also possible to aggregate images by time
 of flight ranges, based on specific extension headers that must be
 included in the input (FITS) images. This option is disabled at the
-moment.  Please refer to the documentation of :ref:`ImggAggWavelengths
-<algm-ImggAggWavelengths>` for lower level details on how the
+moment.  Please refer to the documentation of :ref:`ImggAggregateWavelengths
+<algm-ImggAggregateWavelengths>` for lower level details on how the
 algorithm processes the input directories and files.
 
 .. figure:: /images/tomo_tab7_energy_bands.png

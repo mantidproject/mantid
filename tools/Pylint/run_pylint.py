@@ -2,44 +2,30 @@
     runpylint
     ~~~~~~~~~
 
-    Run pylint on selected Python files/directories. By default the output is sent to stdout
-    but there is an option to save to a file
+    Run pylint on selected Python files/directories.
 """
 from __future__ import print_function
 
-from contextlib import contextmanager
 import logging
 from optparse import OptionParser
 import os.path
 import subprocess as subp
 import sys
+import time
 
 # Default output format
-DEFAULT_PYLINT_FORMAT = 'text'
+DEFAULT_PYLINT_FORMAT = 'parseable'
 # Exe to call
 DEFAULT_PYLINT_EXE = 'pylint'
 # Default log level
 DEFAULT_LOG_LEVEL = logging.WARNING
 # Default config file
 DEFAULT_RCFILE = os.path.join(os.path.dirname(__file__), "pylint.cfg")
+# Default number of processes
+DEFAULT_NPROCS = 8
 
-#------------------------------------------------------------------------------
-
-@contextmanager
-def temp_dir_change(directory):
-    """
-    Change directory temporarily for a given context
-
-    Args:
-      directory (str): A string denoting the new directory
-    """
-    start_dir = os.getcwd()
-    if directory == start_dir:
-        yield
-    else:
-        os.chdir(directory)
-        yield
-        os.chdir(start_dir)
+# Prefix to label all result files
+OUTPUT_PREFIX = "PYLINT-"
 
 #------------------------------------------------------------------------------
 
@@ -128,11 +114,8 @@ def main(argv):
 
     options, args = parse_arguments(argv[1:])
     setup_environment(options.mantidpath)
-    serializer = get_serializer(options.output)
-
-    status = run_checks(args, serializer, options)
-    if type(serializer) == file:
-        serializer.close()
+    create_dir_if_required(options.outputdir)
+    status = run_checks(args, options)
 
     if status or options.nofail:
         return 0
@@ -158,8 +141,7 @@ def parse_arguments(argv):
                            "Default is to simply call 'pylint'")
     parser.add_option("-f", "--format", dest="format", metavar = "FORMAT",
                       help="If provided, use the given format type "\
-                           "[default=%s]. Options are: text, html, msvs, "\
-                           "parseable" % DEFAULT_PYLINT_FORMAT)
+                           "[default=%s]." % DEFAULT_PYLINT_FORMAT)
     parser.add_option("-m", "--mantidpath", dest="mantidpath", metavar="MANTIDPATH",
                       help="If provided, use this as the MANTIDPATH, overriding"
                            "anything that is currently set.")
@@ -168,15 +150,18 @@ def parse_arguments(argv):
     parser.add_option("-r", "--rcfile", dest="rcfile", metavar = "CFG_FILE",
                       help="If provided, use this configuration file "
                            "instead of the default one")
-    parser.add_option("-o", "--output", dest="output", metavar="FILE",
-                      help="If provided, store the output in the given file.")
+    parser.add_option("-o", "--output", dest="outputdir", metavar="OUTDIR",
+                      help="If provided, store the output given directory")
     parser.add_option("-x", "--exclude", dest="exclude", metavar="EXCLUDES",
                       help="If provided, a space-separated list of "
                            "files/directories to exclude. Relative paths are "
                            "taken as relative to --basedir")
+    parser.add_option("-j", "--parallel", dest="parallel", metavar="PARALLEL",
+                      help="")
 
     parser.set_defaults(format=DEFAULT_PYLINT_FORMAT, exe=DEFAULT_PYLINT_EXE, nofail=False,
-                        basedir=os.getcwd(), rcfile=DEFAULT_RCFILE, exclude="")
+                        basedir=os.getcwd(), rcfile=DEFAULT_RCFILE, exclude="",
+                        parallel=DEFAULT_NPROCS)
 
     options, args = parser.parse_args(argv)
     if len(args) < 1:
@@ -232,6 +217,18 @@ def setup_mantidpath(mantidpath):
 
 #------------------------------------------------------------------------------
 
+def create_dir_if_required(path):
+    """
+    Create the given directory if it doesn't exist
+
+    Arguments:
+      path (str): Absolute path to a directory
+    """
+    if path and not os.path.exists(path):
+        os.makedirs(path)
+
+#------------------------------------------------------------------------------
+
 def check_module_imports():
     """
     Returns an empty string if the environment variables
@@ -268,69 +265,135 @@ def get_serializer(filename):
 
 #------------------------------------------------------------------------------
 
-def run_checks(targets, serializer, options):
+def cleanup_serializer(serializer):
     """
-    Run pylint on the chosen targets
+    Close a file handle if the serializer points to one.
+
+    Arguments:
+      serializer: File-like object with a write method, can be stdout
+    """
+    if serializer != sys.stdout:
+        serializer.close()
+
+#------------------------------------------------------------------------------
+
+def run_checks(relpaths, options):
+    """
+    Run pylint on the chosen files/directories
 
     Args:
-      targets (list): A list of relative directory/file targets relative
+      relpaths (list): A list of relative directory/file targets relative
                       to options.basedir
-      serializer (file-like): An object with a write method that will receive
-                              the output
       options (object): Settings to use when running pylint
     Returns:
       bool: Success/failure
     """
-    overall_stats = Results()
     # convert to excludes absolute paths
-    def make_abs(path):
-        return os.path.join(options.basedir, path)
-    excludes = map(make_abs, options.exclude)
-
-    for target in targets:
-        # pylint will only check modules or packages so we need to do some additional work
-        # for plain directories
-        targetpath = os.path.join(options.basedir, target)
-        pkg_init = os.path.join(targetpath, "__init__.py")
-        if os.path.isfile(targetpath) or os.path.isfile(pkg_init):
-            overall_stats.add(targetpath, exec_pylint_on_importable(targetpath, serializer, options))
+    excludes = map(lambda path: os.path.join(options.basedir, path),
+                   options.exclude)
+    # Gather targets first
+    target_paths = gather_targets(options.basedir, relpaths, excludes)
+    logging.debug("Found {} targets".format(len(target_paths)))
+    max_jobs = int(options.parallel)
+    processes = []
+    results = Results()
+    logging.debug("Parallezing over {0} processes".format(options.parallel))
+    for index, target in enumerate(target_paths):
+        if options.outputdir:
+            results_path = get_results_path(options.outputdir,
+                                            os.path.relpath(target, options.basedir))
         else:
-            overall_stats.update(exec_pylint_on_all(targetpath, serializer, options, excludes))
-    ##
-    print(overall_stats.summary())
+            # indicates sys.stdout
+            results_path = None
+        if len(processes) == max_jobs:
+            logging.debug("Full processor load hit. Waiting for available slot.")
+            while True:
+                processes, child_results = get_proc_results(processes)
+                if child_results.totalchecks > 0:
+                    # Implies there is a slot available
+                    results.update(child_results)
+                    break
+                else:
+                    time.sleep(0.2)
+        #endif
+        logging.debug("Slot available. Running next check.")
+        serializer = get_serializer(results_path)
+        processes.append(start_pylint(target, serializer, options))
+    #endfor
+    # There will be a last set of processes in the list
+    _, child_results = get_proc_results(processes, wait=True)
+    results.update(child_results)
 
-    return overall_stats.success
+    # Get a summary of the failures
+    print(results.summary())
+    return results.success
 
 #------------------------------------------------------------------------------
 
-def exec_pylint_on_all(dirpath, serializer, options, excludes=[]):
+def get_proc_results(processes, wait=False):
     """
-    Executes pylint on .py files and packages from the given starting directory
+    Return a list of processed results if any are available and pops
+    the finished ones of the list
 
     Args:
-      dirpath (str): A string giving a directory to parse
-      serializer (file-like): An object with a write method that will receive
-                              the output
-      options (object): Settings to use when running pylint
-      excludes (list): A list of absolute paths to exclude from the checks
+      processes: A list of running processes
+      wait (bool): If true, wait until all processes have finished
+    Returns:
+      (Updated processes, results)
+    """
+    results = Results()
+    nprocs = len(processes)
+    running = []
+    for index, proc_info in enumerate(processes):
+        if wait:
+            proc_info[0].wait()
+        else:
+            proc_info[0].poll()
+        exitcode = proc_info[0].returncode
+        if exitcode is None:
+            running.append(proc_info)
+        else:
+            results.add(proc_info[1], (exitcode == 0))
+            cleanup_serializer(proc_info[2])
+
+    if wait:
+        assert len(running) == 0
+        return None, results
+    else:
+        return running, results
+
+#------------------------------------------------------------------------------
+
+def gather_targets(basedir, relpaths, excludes=[]):
+    """
+    Walks the given directories and finds all importable entities.
+
+    Args:
+      basedir (str): A string giving a directory to which all relative
+                     paths are based
+      relpaths (list): A list of relative paths to search for importable
+                       entities
+      excludes (list): A list of absolute paths to exclude
     Returns:
       Results: Object detailing passes and failures
     """
-    def skip_item(abspath):
-        for excluded in excludes:
-            if abspath.startswith(excluded):
-                return True
-        return False
-    logging.debug("Discovering all importable python modules/packages"
-                  " from '%s'" , dirpath)
-    targets  = find_importable_targets(dirpath)
-    stats = Results()
-    for item in targets:
-        if skip_item(item):
-            logging.debug("Skipping item '%s' by request", item)
+    logging.debug("Discovering all importable python modules/packages")
+    targets = []
+    for relpath in relpaths:
+        # pylint will only check modules or packages
+        targetpath = os.path.join(basedir, relpath)
+        pkg_init = os.path.join(targetpath, "__init__.py")
+        if os.path.isfile(targetpath) or os.path.isfile(pkg_init):
+            targets.append(targetpath)
         else:
-            stats.add(item, exec_pylint_on_importable(item, serializer, options))
-    return stats
+            targets.extend(find_importable_targets(targetpath))
+    #endfor
+    def include_target(path):
+        for exclude_path in excludes:
+            if path.startswith(exclude_path):
+                return False
+        return True
+    return filter(include_target, targets)
 
 #------------------------------------------------------------------------------
 
@@ -362,35 +425,61 @@ def find_importable_targets(dirpath):
 
 #------------------------------------------------------------------------------
 
-def exec_pylint_on_importable(srcpath, serializer, options):
+def get_results_path(dirname, target):
     """
-    Runs the pylint executable on the given file/package path to produce output
-    in the chosen format
+    Return the path to a results file for the given target.
+
+    Args:
+      dirname (str): An output directory to store the file
+      target (str): An absolute path to a target
+    Returns:
+      An absolute path to a results file
+    """
+    return os.path.join(dirname, OUTPUT_PREFIX + target.replace("/", "-") + ".log")
+
+#------------------------------------------------------------------------------
+
+def start_pylint(srcpath, serializer, options):
+    """
+    Runs pylint on the given file/package
 
     Args:
       srcpath (str): A string giving a path to a file or package to analyze
       serializer (file-like): An object with a write method that will receive
                               the output
       options (object): Settings to use when running pylint
+    Returns:
+      The (proc, srcpath, serializer)
     """
     logging.info("Running pylint on '%s'", srcpath)
+    proc = subp.Popen(build_pylint_cmd(srcpath, options), stdout=serializer,
+                      stderr=serializer,
+                      cwd=os.path.dirname(srcpath))
+    return proc, srcpath, serializer
+
+#------------------------------------------------------------------------------
+
+def build_pylint_cmd(srcpath, options):
+    """
+    Build a list defining the command to run pylint for the given target
+
+    Args:
+      srcpath (str): A string giving a path to a file or package to analyze
+      options (object): Settings to use when running pylint
+    Returns:
+      A list of args to pass to subprocess.Popen
+    """
     cmd = [options.exe]
-    cmd.extend(["-f", options.format])
+    cmd.extend(["--output-format=" + options.format])
     if options.rcfile is not None:
         cmd.extend(["--rcfile=" + options.rcfile])
     # and finally, source module
     # pylint runs by importing the modules so we strip the filepath
     # and change directory to the containing folder
     cmd.append(os.path.basename(srcpath))
-
-    logging.debug("Command '%s'" , " ".join(cmd))
-    with temp_dir_change(os.path.dirname(srcpath)):
-        status = subp.call(cmd, stdout=serializer)
-
-    return status == 0
+    return cmd
 
 #------------------------------------------------------------------------------
-
 
 if __name__ == '__main__':
     sys.exit(main(sys.argv))

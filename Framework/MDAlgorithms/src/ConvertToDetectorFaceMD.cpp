@@ -154,7 +154,7 @@ ConvertToDetectorFaceMD::getBanks() {
         int bankNum;
         if (Mantid::Kernel::Strings::convert(bank, bankNum))
           banks[bankNum] = det;
-        g_log.debug() << "Found bank " << bank << "." << std::endl;
+        g_log.debug() << "Found bank " << bank << ".\n";
       }
     }
   } else {

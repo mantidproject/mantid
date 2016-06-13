@@ -132,7 +132,7 @@ MonitorEfficiencyCorUser::calculateFormulaValue(const std::string &formula,
     p.SetExpr(formula);
     double eff = p.Eval();
     g_log.debug() << "Formula: " << formula << " with: " << energy
-                  << "evaluated to: " << eff << std::endl;
+                  << "evaluated to: " << eff << '\n';
     return eff;
 
   } catch (mu::Parser::exception_type &e) {

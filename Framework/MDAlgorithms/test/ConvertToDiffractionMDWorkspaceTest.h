@@ -173,7 +173,7 @@ public:
 
     // Add to an existing MDEW
     for (size_t i = 1; i < numTimesToAdd; i++) {
-      std::cout << "Iteration " << i << std::endl;
+      std::cout << "Iteration " << i << '\n';
       TS_ASSERT_THROWS_NOTHING(alg.initialize())
       TS_ASSERT(alg.isInitialized())
       alg.setPropertyValue("InputWorkspace", "inputWS");

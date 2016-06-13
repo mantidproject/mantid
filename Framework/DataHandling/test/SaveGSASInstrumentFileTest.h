@@ -460,12 +460,12 @@ public:
     // file2.open( filename2.c_str(), ios::binary );
 
     if (!file1) {
-      cout << "Couldn't open the file  " << filename1 << endl;
+      cout << "Couldn't open the file  " << filename1 << '\n';
       return false;
     }
 
     if (!file2) {
-      cout << "Couldn't open the file " << filename2 << endl;
+      cout << "Couldn't open the file " << filename2 << '\n';
       return false;
     }
 
@@ -508,17 +508,17 @@ public:
       file2.getline(string2, 256);
       j++;
       if (strcmp(string1, string2) != 0) {
-        cout << j << "-the strings are not equal " << endl;
-        cout << " file1   " << string1 << endl;
-        cout << " file2:  " << string2 << endl;
+        cout << j << "-the strings are not equal \n";
+        cout << " file1   " << string1 << '\n';
+        cout << " file2:  " << string2 << '\n';
         error_count++;
       }
     }
     if (error_count > 0) {
-      cout << "files are diffrent" << endl;
+      cout << "files are diffrent\n";
       return false;
     } else {
-      cout << "files are the same" << endl;
+      cout << "files are the same\n";
     }
 
     return true;

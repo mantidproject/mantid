@@ -255,7 +255,7 @@ public:
     TS_ASSERT_DELTA(data->readY(1)[37], 0.8074, 0.0001);
   }
 
-  void test_density_factor() {
+  void test_resolution_factor() {
     // Real signal: cos(w * x)
 
     size_t npoints = 50;
@@ -268,7 +268,7 @@ public:
     alg->setProperty("InputWorkspace", ws);
     alg->setProperty("A", 0.1);
     alg->setProperty("ChiTarget", 50.);
-    alg->setProperty("DensityFactor", "3");
+    alg->setProperty("ResolutionFactor", "3");
     alg->setPropertyValue("ReconstructedImage", "image");
     alg->setPropertyValue("ReconstructedData", "data");
     alg->setPropertyValue("EvolChi", "evolChi");

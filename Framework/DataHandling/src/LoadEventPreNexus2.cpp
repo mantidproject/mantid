@@ -1,7 +1,6 @@
 #include "MantidDataHandling/LoadEventPreNexus2.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileFinder.h"
-#include "MantidAPI/MemoryManager.h"
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/EventWorkspace.h"
@@ -55,7 +54,6 @@ using DataObjects::EventWorkspace;
 using DataObjects::EventWorkspace_sptr;
 using DataObjects::TofEvent;
 using std::cout;
-using std::endl;
 using std::ifstream;
 using std::runtime_error;
 using std::stringstream;
@@ -357,7 +355,7 @@ void LoadEventPreNexus2::exec() {
     if (!pulseid_filename.empty()) {
       if (Poco::File(pulseid_filename).exists()) {
         this->g_log.information() << "Found pulseid file " << pulseid_filename
-                                  << std::endl;
+                                  << '\n';
         throwError = false;
       } else {
         pulseid_filename = "";
@@ -446,7 +444,7 @@ void LoadEventPreNexus2::createOutputWorkspace(
     mapping_filename = generateMappingfileName(localWorkspace);
     if (!mapping_filename.empty())
       this->g_log.information() << "Found mapping file \"" << mapping_filename
-                                << "\"" << std::endl;
+                                << "\"\n";
   }
   this->loadPixelMap(mapping_filename);
 
@@ -537,14 +535,12 @@ void LoadEventPreNexus2::processImbedLogs() {
     const auto mit = this->wrongdetidmap.find(pid);
     size_t mindex = mit->second;
     if (mindex > this->wrongdetid_pulsetimes.size()) {
-      g_log.error() << "Wrong Index " << mindex << " for Pixel " << pid
-                    << std::endl;
+      g_log.error() << "Wrong Index " << mindex << " for Pixel " << pid << '\n';
       throw std::invalid_argument("Wrong array index for pixel from map");
     } else {
       g_log.information() << "Processing imbed log marked by Pixel " << pid
                           << " with size = "
-                          << this->wrongdetid_pulsetimes[mindex].size()
-                          << std::endl;
+                          << this->wrongdetid_pulsetimes[mindex].size() << '\n';
     }
 
     std::stringstream ssname;
@@ -694,7 +690,7 @@ void LoadEventPreNexus2::procEvents(
     double setUpTime = double(detector_map.size()) * 10e-6;
     parallelProcessing = ((double(max_events) / 7e6) > setUpTime);
     g_log.debug() << (parallelProcessing ? "Using" : "Not using")
-                  << " parallel processing." << std::endl;
+                  << " parallel processing.\n";
   }
 
   // determine maximum pixel id
@@ -842,7 +838,7 @@ void LoadEventPreNexus2::procEvents(
     }
     PARALLEL_CHECK_INTERUPT_REGION
 
-    g_log.debug() << tim << " to load the data." << std::endl;
+    g_log.debug() << tim << " to load the data.\n";
 
     //-------------------------------------------------------------------------
     // MERGE WORKSPACES BACK TOGETHER
@@ -850,9 +846,6 @@ void LoadEventPreNexus2::procEvents(
     if (parallelProcessing) {
       PARALLEL_START_INTERUPT_REGION
       prog->resetNumSteps(workspace->getNumberHistograms(), 0.8, 0.95);
-
-      size_t memoryCleared = 0;
-      MemoryManager::Instance().releaseFreeMemory();
 
       // Merge all workspaces, index by index.
       PARALLEL_FOR_NO_WSP_CHECK()
@@ -877,22 +870,9 @@ void LoadEventPreNexus2::procEvents(
           // Free up memory as you go along.
           partEl.clear(false);
         }
-
-        // With TCMalloc, release memory when you accumulate enough to make
-        // sense
-        PARALLEL_CRITICAL(LoadEventPreNexus2_trackMemory) {
-          memoryCleared += numEvents;
-          if (memoryCleared > 10000000) // ten million events = about 160 MB
-          {
-            MemoryManager::Instance().releaseFreeMemory();
-            memoryCleared = 0;
-          }
-        }
         prog->report("Merging Workspaces");
       }
-      // Final memory release
-      MemoryManager::Instance().releaseFreeMemory();
-      g_log.debug() << tim << " to merge workspaces together." << std::endl;
+      g_log.debug() << tim << " to merge workspaces together.\n";
       PARALLEL_END_INTERUPT_REGION
     }
     PARALLEL_CHECK_INTERUPT_REGION
@@ -960,7 +940,7 @@ void LoadEventPreNexus2::procEvents(
     std::set<PixelType>::iterator wit;
     for (wit = this->wrongdetids.begin(); wit != this->wrongdetids.end();
          ++wit) {
-      g_log.notice() << "Wrong Detector ID : " << *wit << std::endl;
+      g_log.notice() << "Wrong Detector ID : " << *wit << '\n';
     }
     std::map<PixelType, size_t>::iterator git;
     for (git = this->wrongdetidmap.begin(); git != this->wrongdetidmap.end();
@@ -968,7 +948,7 @@ void LoadEventPreNexus2::procEvents(
       PixelType tmpid = git->first;
       size_t vindex = git->second;
       g_log.notice() << "Pixel " << tmpid << ":  Total number of events = "
-                     << this->wrongdetid_pulsetimes[vindex].size() << std::endl;
+                     << this->wrongdetid_pulsetimes[vindex].size() << '\n';
     }
 
     return;
