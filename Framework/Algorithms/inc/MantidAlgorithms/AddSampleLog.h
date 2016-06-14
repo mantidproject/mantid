@@ -46,10 +46,6 @@ namespace Algorithms {
 */
 class DLLExport AddSampleLog : public API::Algorithm {
 public:
-  /// (Empty) Constructor
-  AddSampleLog() : API::Algorithm() {}
-  /// Virtual destructor
-  ~AddSampleLog() override {}
   /// Algorithm's name
   const std::string name() const override { return "AddSampleLog"; }
   /// Summary of algorithms purpose

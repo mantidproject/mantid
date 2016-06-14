@@ -20,13 +20,6 @@ using namespace API;
 using namespace Geometry;
 /// using namespace DataObjects;
 
-/// Default constructor
-CopyInstrumentParameters::CopyInstrumentParameters()
-    : Algorithm(), m_different_instrument_sp(false) {}
-
-/// Destructor
-CopyInstrumentParameters::~CopyInstrumentParameters() {}
-
 void CopyInstrumentParameters::init() {
   declareProperty(
       make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),

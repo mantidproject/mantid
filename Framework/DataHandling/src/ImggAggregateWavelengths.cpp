@@ -778,15 +778,10 @@ void ImggAggregateWavelengths::aggImage(API::MatrixWorkspace_sptr accum,
   }
 
   for (size_t row = 0; row < sizeY; row++) {
-    Mantid::API::ISpectrum *spectrum = accum->getSpectrum(row);
-    Mantid::API::ISpectrum *specIn = toAdd->getSpectrum(row);
-    auto &dataY = spectrum->dataY();
-    const auto &dataYIn = specIn->readY();
+    auto &dataY = accum->dataY(row);
+    const auto &dataYIn = toAdd->readY(row);
     std::transform(dataY.begin(), dataY.end(), dataYIn.cbegin(), dataY.begin(),
                    std::plus<double>());
-    // for (size_t col = 0; col < sizeX; col++) {
-    //  dataY[col] += dataYIn[col];
-    //}
   }
 }
 

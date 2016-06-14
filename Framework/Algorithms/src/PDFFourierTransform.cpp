@@ -37,16 +37,6 @@ const string S_OF_Q_MINUS_ONE("S(Q)-1");
 const string Q_S_OF_Q_MINUS_ONE("Q[S(Q)-1]");
 }
 
-//----------------------------------------------------------------------------------------------
-/** Constructor
-*/
-PDFFourierTransform::PDFFourierTransform() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
-*/
-PDFFourierTransform::~PDFFourierTransform() {}
-
 const std::string PDFFourierTransform::name() const {
   return "PDFFourierTransform";
 }

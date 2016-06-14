@@ -28,8 +28,6 @@ using API::Progress;
 using API::FileProperty;
 using Geometry::Instrument_const_sptr;
 
-CreateCalFileByNames::CreateCalFileByNames() : API::Algorithm() {}
-
 /** Initialisation method. Declares properties to be used in algorithm.
  *
  */

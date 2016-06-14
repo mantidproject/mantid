@@ -78,7 +78,7 @@ private:
     workspace->getAxis(0)->setUnit("Wavelength");
     workspace->setYUnit("Counts");
     workspace->setInstrument(instrument);
-    workspace->getSpectrum(0)->addDetectorID(det->getID());
+    workspace->getSpectrum(0).addDetectorID(det->getID());
     return workspace;
   }
 

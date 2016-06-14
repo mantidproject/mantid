@@ -291,8 +291,8 @@ void LoadMuonNexus1::exec() {
       }
       std::vector<int> specIDs, detecIDs;
       for (size_t i = 0; i < localWorkspace->getNumberHistograms(); i++) {
-        specIDs.push_back(localWorkspace->getSpectrum(i)->getSpectrumNo());
-        detecIDs.push_back(localWorkspace->getSpectrum(i)->getSpectrumNo());
+        specIDs.push_back(localWorkspace->getSpectrum(i).getSpectrumNo());
+        detecIDs.push_back(localWorkspace->getSpectrum(i).getSpectrumNo());
       }
       API::SpectrumDetectorMapping mapping(specIDs, detecIDs);
       localWorkspace->updateSpectraUsing(mapping);
@@ -675,7 +675,7 @@ void LoadMuonNexus1::loadData(size_t hist, specnum_t &i, specnum_t specNo,
       new MantidVec(timeChannels, timeChannels + lengthIn + 1));
 
   localWorkspace->setX(hist, timeChannelsVec);
-  localWorkspace->getSpectrum(hist)->setSpectrumNo(specNo);
+  localWorkspace->getSpectrum(hist).setSpectrumNo(specNo);
 
   // Clean up
   delete[] timeChannels;

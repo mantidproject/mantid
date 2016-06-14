@@ -20,14 +20,6 @@ DECLARE_ALGORITHM(SumEventsByLogValue)
 using namespace Kernel;
 using namespace API;
 
-/** Constructor
- */
-SumEventsByLogValue::SumEventsByLogValue() {}
-
-/** Destructor
- */
-SumEventsByLogValue::~SumEventsByLogValue() {}
-
 void SumEventsByLogValue::init() {
   declareProperty(
       make_unique<WorkspaceProperty<DataObjects::EventWorkspace>>(
@@ -158,7 +150,7 @@ void SumEventsByLogValue::createTableOutput(
   PARALLEL_FOR1(m_inputWorkspace)
   for (int spec = 0; spec < numSpec; ++spec) {
     PARALLEL_START_INTERUPT_REGION
-    const IEventList &eventList = m_inputWorkspace->getEventList(spec);
+    const IEventList &eventList = m_inputWorkspace->getSpectrum(spec);
     filterEventList(eventList, minVal, maxVal, log, Y);
     prog.report();
     PARALLEL_END_INTERUPT_REGION
@@ -321,7 +313,7 @@ void SumEventsByLogValue::addMonitorCounts(ITableWorkspace_sptr outputWorkspace,
       const std::string monitorName =
           monitorWorkspace->getDetector(spec)->getName();
       auto monitorCounts = outputWorkspace->addColumn("int", monitorName);
-      const IEventList &eventList = monitorWorkspace->getEventList(spec);
+      const IEventList &eventList = monitorWorkspace->getSpectrum(spec);
       // Accumulate things in a local vector before transferring to the table
       // workspace
       std::vector<int> Y(xLength);
@@ -427,7 +419,7 @@ void SumEventsByLogValue::createBinnedOutput(
   PARALLEL_FOR1(m_inputWorkspace)
   for (int spec = 0; spec < numSpec; ++spec) {
     PARALLEL_START_INTERUPT_REGION
-    const IEventList &eventList = m_inputWorkspace->getEventList(spec);
+    const IEventList &eventList = m_inputWorkspace->getSpectrum(spec);
     const auto pulseTimes = eventList.getPulseTimes();
     for (auto pulseTime : pulseTimes) {
       // Find the value of the log at the time of this event
