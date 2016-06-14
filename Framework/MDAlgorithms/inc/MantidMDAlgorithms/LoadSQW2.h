@@ -42,7 +42,6 @@ namespace MDAlgorithms {
   */
 class DLLExport LoadSQW2 : public API::IFileLoader<Kernel::FileDescriptor> {
 public:
-
   const std::string name() const override;
   int version() const override;
   const std::string category() const override;
