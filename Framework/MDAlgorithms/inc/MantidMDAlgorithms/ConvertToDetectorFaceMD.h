@@ -40,7 +40,6 @@ namespace MDAlgorithms {
 class DLLExport ConvertToDetectorFaceMD
     : public MDAlgorithms::BoxControllerSettingsAlgorithm {
 public:
-
   const std::string name() const override;
   /// Summary of algorithms purpose
   const std::string summary() const override {

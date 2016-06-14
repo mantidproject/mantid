@@ -37,7 +37,6 @@ namespace MDAlgorithms {
 */
 class DLLExport CloneMDWorkspace : public API::Algorithm {
 public:
-
   /// Algorithm's name for identification
   const std::string name() const override { return "CloneMDWorkspace"; };
   /// Summary of algorithms purpose

@@ -38,7 +38,6 @@ namespace MDAlgorithms {
 */
 class MANTID_MDALGORITHMS_DLL ConvertCWSDMDtoHKL : public API::Algorithm {
 public:
-
   /// Algorithm's name
   const std::string name() const override { return "ConvertCWSDMDtoHKL"; }
 
