@@ -3,31 +3,15 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAPI/FrameworkManager.h"
-#include "MantidAPI/AnalysisDataService.h"
 #include "MantidCurveFitting/Functions/Convolution.h"
-#include "MantidCurveFitting/Algorithms/Fit.h"
 #include "MantidCurveFitting/Functions/DeltaFunction.h"
 
-#include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/TableWorkspace.h"
-#include "MantidAPI/IPeakFunction.h"
-#include "MantidAPI/TableRow.h"
-#include "MantidAPI/FrameworkManager.h"
-#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FunctionFactory.h"
-
-#include "MantidTestHelpers/FakeObjects.h"
 
 using namespace Mantid;
 using namespace Mantid::API;
-using namespace Mantid::DataObjects;
-using namespace Mantid::CurveFitting;
-using namespace Mantid::CurveFitting::Algorithms;
 using namespace Mantid::CurveFitting::Functions;
-
-typedef Mantid::DataObjects::Workspace2D_sptr WS_type;
-typedef Mantid::DataObjects::TableWorkspace_sptr TWS_type;
 
 class ConvolutionExpression {
 public:
@@ -415,80 +399,6 @@ public:
     const std::vector<std::string> categories = forCat.categories();
     TS_ASSERT(categories.size() == 1);
     TS_ASSERT(categories[0] == "General");
-  }
-
-  void testConvolution_fit_resolution() {
-
-    boost::shared_ptr<WorkspaceTester> data =
-        boost::make_shared<WorkspaceTester>();
-    data->init(1, 100, 100);
-    for (size_t i = 0; i < data->blocksize(); i++) {
-      data->dataX(0)[i] = -10.0 + 0.2 * double(i);
-    }
-
-    boost::shared_ptr<Convolution> conv = boost::make_shared<Convolution>();
-
-    boost::shared_ptr<ConvolutionTest_Gauss> res =
-        boost::make_shared<ConvolutionTest_Gauss>();
-    res->setParameter("c", 0);
-    res->setParameter("h", 1);
-    res->setParameter("s", 2);
-
-    conv->addFunction(res);
-
-    boost::shared_ptr<ConvolutionTest_Lorentz> fun =
-        boost::make_shared<ConvolutionTest_Lorentz>();
-    fun->setParameter("c", 0);
-    fun->setParameter("h", 2);
-    fun->setParameter("w", 0.5);
-
-    conv->addFunction(fun);
-
-    auto &x = data->dataX(0);
-    auto &y = data->dataY(0);
-
-    FunctionDomain1DView xView(&x[0], x.size());
-    FunctionValues voigt(xView);
-    conv->function(xView, voigt);
-
-    for (size_t i = 0; i < x.size(); i++) {
-      y[i] = voigt.getCalculated(i);
-    }
-
-    conv->setParameter("f0.h", 0.5);
-    conv->setParameter("f0.s", 0.5);
-    conv->setParameter("f1.h", 1);
-    conv->setParameter("f1.w", 1);
-
-    Algorithms::Fit fit;
-    fit.initialize();
-
-    fit.setPropertyValue("Function", conv->asString());
-    fit.setProperty("InputWorkspace", data);
-    fit.setProperty("WorkspaceIndex", 0);
-    fit.execute();
-
-    IFunction_sptr out = fit.getProperty("Function");
-    // by default convolution keeps parameters of the resolution (function #0)
-    // fixed
-    TS_ASSERT_EQUALS(out->getParameter("f0.h"), conv->getParameter("f0.h"));
-    TS_ASSERT_EQUALS(out->getParameter("f0.s"), conv->getParameter("f0.s"));
-    // fit is not very good
-    TS_ASSERT_LESS_THAN(
-        0.1, fabs(out->getParameter("f1.w") - conv->getParameter("f1.w")));
-
-    conv->setAttributeValue("FixResolution", false);
-    Algorithms::Fit fit1;
-    fit1.initialize();
-    fit1.setProperty("Function", boost::dynamic_pointer_cast<IFunction>(conv));
-    fit1.setProperty("InputWorkspace", data);
-    fit1.setProperty("WorkspaceIndex", 0);
-    fit1.execute();
-
-    out = fit1.getProperty("Function");
-    // resolution parameters change and close to the initial values
-    TS_ASSERT_DELTA(out->getParameter("f0.s"), 2.0, 0.00001);
-    TS_ASSERT_DELTA(out->getParameter("f1.w"), 0.5, 0.00001);
   }
 };
 
