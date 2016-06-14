@@ -9,16 +9,11 @@ namespace Mantid {
 namespace CurveFitting {
 namespace NLLS {
 
-///  Given an (m x n)  matrix J, this routine returns the largest 
-///  and smallest singular values of J.
+void matmult_inner(const DoubleFortranMatrix &J, int n, int m,DoubleFortranMatrix &A);
 void get_svd_J(const DoubleFortranMatrix& J, double &s1, double &sn);
-
-/// Calculate the 2-norm of a vector: sqrt(||V||^2)
 double norm2(const DoubleFortranVector& v);
-
 void mult_J(const DoubleFortranMatrix& J, const DoubleFortranVector& x, DoubleFortranVector& Jx);
 void mult_Jt(const DoubleFortranMatrix& J, const DoubleFortranVector& x, DoubleFortranVector& Jtx);
-
 void evaluate_model(const DoubleFortranVector& f, const DoubleFortranMatrix& J, const DoubleFortranMatrix& hf,
   const DoubleFortranVector& d, double& md, int m, int n, const nlls_options options, evaluate_model_work& w);
 void calculate_rho(double normf, double normfnew,double md, double& rho, const nlls_options& options);
@@ -28,7 +23,13 @@ void rank_one_update(DoubleFortranMatrix& hf, NLLS_workspace w, int n);
 //  const nlls_options& options, nlls_inform& inform, const DoubleFortranVector& weights);
 void test_convergence(double normF, double normJF, double normF0, double normJF0,
   const nlls_options& options, nlls_inform& inform);
-
+void apply_scaling(const DoubleFortranMatrix &J, int n, int m,
+                   DoubleFortranMatrix &A, DoubleFortranVector &v,
+                   apply_scaling_work &w, const nlls_options options,
+                   nlls_inform inform);
+void all_eig_symm(const DoubleFortranMatrix &A, int n, DoubleFortranVector &ew,
+                  DoubleFortranMatrix &ev, all_eig_symm_work &w,
+                  nlls_inform &inform);
 } // NLLS
 } // CurveFitting
 } // Mantid

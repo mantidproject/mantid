@@ -153,7 +153,7 @@ public:
     x(1) = 1.0;
     x(2) = 1.0;
 
-    options.nlls_method = 3;
+    options.nlls_method = 4;
     nlls_solve(n, m, x, eval_r_ExpDecay, eval_J_ExpDecay, eval_HF, &params, options, inform, weights);
 
     std::cerr << std::endl << x(1) << ' ' << x(2) << std::endl;

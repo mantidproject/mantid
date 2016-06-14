@@ -29,7 +29,7 @@ TrustRegionMinimizer::TrustRegionMinimizer()
 }
 
 void TrustRegionMinimizer::initialize(
-    API::ICostFunction_sptr costFunction, size_t) {
+    API::ICostFunction_sptr costFunction, size_t maxIterations) {
   m_leastSquares =
       boost::dynamic_pointer_cast<CostFunctions::CostFuncLeastSquares>(
           costFunction);
@@ -45,6 +45,7 @@ void TrustRegionMinimizer::initialize(
   if (n > m) {
     throw std::runtime_error("More parameters than data.");
   }
+  m_options.maxit = static_cast<int>(maxIterations);
   m_workspace.initialize(n, m, m_options, m_inform);
   m_x.allocate(n);
   m_leastSquares->getParameters(m_x);

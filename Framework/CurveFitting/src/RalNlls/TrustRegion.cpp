@@ -15,6 +15,15 @@ namespace NLLS {
 
 const double epsmch = 1e-6; // std::numeric_limits<double>::epsilon();
 
+///  Takes an m x n matrix J and forms the
+///  n x n matrix A given by
+///  A = J' * J
+void matmult_inner(const DoubleFortranMatrix &J, int n, int m,
+                   DoubleFortranMatrix &A) {
+  A.allocate(n, n);
+  gsl_blas_dgemm(CblasTrans, CblasNoTrans, 1.0, J.gsl(), J.gsl(), 0.0, A.gsl());
+}
+
 ///  Given an (m x n)  matrix J held by columns as a vector,
 ///  this routine returns the largest and smallest singular values
 ///  of J.
@@ -228,6 +237,80 @@ void test_convergence(double normF, double normJF, double normF0,
   }
 }
 
+///  Apply_scaling
+///  input  Jacobian matrix, J
+///  ouput  scaled Hessisan, H, and J^Tf, v.
+///
+///  Calculates a diagonal scaling W, stored in w.diag
+///  updates v(i) -> (1/W_i) * v(i)
+///          A(i,j) -> (1 / (W_i * W_j)) * A(i,j)
+void apply_scaling(const DoubleFortranMatrix &J, int n, int m,
+                   DoubleFortranMatrix &A, DoubleFortranVector &v,
+                   apply_scaling_work &w, const nlls_options options,
+                   nlls_inform inform) {
+
+  if (w.diag.len() != n) {
+    w.diag.allocate(n);
+  }
+
+  switch (options.scale) {
+  case 1:
+  case 2:
+    for (int ii = 1; ii <= n; ++ii) { // do ii = 1,n
+      double temp = zero;
+      double Jij = 0.0;
+      if (options.scale == 1) {
+        //! use the scaling present in gsl:
+        //! scale by W, W_ii = ||J(i,:)||_2^2
+        for (int jj = 1; jj <= m; ++jj) { // for_do(jj, 1,m)
+          // get_element_of_matrix(J,m,jj,ii,Jij);
+          Jij = J(jj, ii);
+          temp = temp + pow(Jij, 2);
+        }
+      } else if (options.scale == 2) {
+        //! scale using the (approximate) hessian
+        for (int jj = 1; jj <= n; ++jj) { // for_do(jj, 1,n)
+          temp = temp + pow(A(ii, jj), 2);
+        }
+      }
+      if (temp < options.scale_min) {
+        if (options.scale_trim_min) {
+          temp = options.scale_min;
+        } else {
+          temp = one;
+        }
+      } else if (temp > options.scale_max) {
+        if (options.scale_trim_max) {
+          temp = options.scale_max;
+        } else {
+          temp = one;
+        }
+      }
+      temp = sqrt(temp);
+      if (options.scale_require_increase) {
+        w.diag(ii) = std::max(temp, w.diag(ii));
+      } else {
+        w.diag(ii) = temp;
+      }
+    }
+    break;
+  default:
+    inform.status = NLLS_ERROR::BAD_SCALING;
+    return;
+  }
+
+  // Now we have the w.diagonal scaling matrix, actually scale the
+  // Hessian approximation and J^Tf
+  for (int ii = 1; ii <= n; ++ii) { // for_do(ii, 1,n)
+    double temp = w.diag(ii);
+    v(ii) = v(ii) / temp;
+    for (int jj = 1; jj <= n; ++jj) { // for_do(jj,1,n)
+      A(ii, jj) = A(ii, jj) / temp;
+      A(jj, ii) = A(jj, ii) / temp;
+    }
+  }
+}
+
 ///// Copy a column from a matrix.
 //DoubleFortranVector getColumn(const DoubleFortranMatrix &A, int col) {
 //  int n = static_cast<int>(A.size1());
@@ -277,14 +360,14 @@ void test_convergence(double normF, double normJF, double normF0,
 //  norm_A_x = sqrt(dot_product(x, matmul(A, x)));
 //}
 
-///// calculate all the eigenvalues of A (symmetric)
-//void all_eig_symm(const DoubleFortranMatrix &A, int n, DoubleFortranVector &ew,
-//                  DoubleFortranMatrix &ev, all_eig_symm_work &w,
-//                  nlls_inform &inform) {
-//  auto M = A;
-//  M.eigenSystem(ew, ev);
-//}
-//
+/// calculate all the eigenvalues of A (symmetric)
+void all_eig_symm(const DoubleFortranMatrix &A, int n, DoubleFortranVector &ew,
+                  DoubleFortranMatrix &ev, all_eig_symm_work &w,
+                  nlls_inform &inform) {
+  auto M = A;
+  M.eigenSystem(ew, ev);
+}
+
 /////   Solve the trust-region subproblem using
 /////   the DTRS method from Galahad
 /////

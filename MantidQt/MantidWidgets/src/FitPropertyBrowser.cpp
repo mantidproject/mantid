@@ -170,6 +170,7 @@ void FitPropertyBrowser::init() {
   m_minimizers << "Levenberg-Marquardt"
                << "Levenberg-MarquardtMD"
                << "More-Sorensen"
+               << "Galahad"
                << "Simplex"
                << "FABADA"
                << "Conjugate gradient (Fletcher-Reeves imp.)"

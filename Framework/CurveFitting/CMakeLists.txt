@@ -34,13 +34,14 @@ set ( SRC_FILES
 	src/FuncMinimizers/DerivMinimizer.cpp
 	src/FuncMinimizers/FABADAMinimizer.cpp
 	src/FuncMinimizers/FRConjugateGradientMinimizer.cpp
+	src/FuncMinimizers/GalahadMinimizer.cpp
 	src/FuncMinimizers/LevenbergMarquardtMDMinimizer.cpp
 	src/FuncMinimizers/LevenbergMarquardtMinimizer.cpp
+	src/FuncMinimizers/MoreSorensenMinimizer.cpp
 	src/FuncMinimizers/PRConjugateGradientMinimizer.cpp
 	src/FuncMinimizers/SimplexMinimizer.cpp
-	src/FuncMinimizers/TrustRegionMinimizer.cpp
-	src/FuncMinimizers/MoreSorensenMinimizer.cpp
 	src/FuncMinimizers/SteepestDescentMinimizer.cpp
+	src/FuncMinimizers/TrustRegionMinimizer.cpp
 	src/FunctionDomain1DSpectrumCreator.cpp
 	src/Functions/Abragam.cpp
 	src/Functions/BSpline.cpp
@@ -173,13 +174,14 @@ set ( INC_FILES
 	inc/MantidCurveFitting/FuncMinimizers/DerivMinimizer.h
 	inc/MantidCurveFitting/FuncMinimizers/FABADAMinimizer.h
 	inc/MantidCurveFitting/FuncMinimizers/FRConjugateGradientMinimizer.h
+	inc/MantidCurveFitting/FuncMinimizers/GalahadMinimizer.h
 	inc/MantidCurveFitting/FuncMinimizers/LevenbergMarquardtMDMinimizer.h
 	inc/MantidCurveFitting/FuncMinimizers/LevenbergMarquardtMinimizer.h
+	inc/MantidCurveFitting/FuncMinimizers/MoreSorensenMinimizer.h
 	inc/MantidCurveFitting/FuncMinimizers/PRConjugateGradientMinimizer.h
 	inc/MantidCurveFitting/FuncMinimizers/SimplexMinimizer.h
 	inc/MantidCurveFitting/FuncMinimizers/SteepestDescentMinimizer.h
 	inc/MantidCurveFitting/FuncMinimizers/TrustRegionMinimizer.h
-	inc/MantidCurveFitting/FuncMinimizers/MoreSorensenMinimizer.h
 	inc/MantidCurveFitting/FunctionDomain1DSpectrumCreator.h
 	inc/MantidCurveFitting/Functions/Abragam.h
 	inc/MantidCurveFitting/Functions/BSpline.h
