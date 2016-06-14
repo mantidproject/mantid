@@ -1,4 +1,3 @@
-import os
 from mantid.api import *  # PythonAlgorithm, registerAlgorithm, WorkspaceProperty
 from mantid.simpleapi import *
 from mantid.kernel import *

@@ -438,7 +438,7 @@ class SampleDataWidget(BaseWidget):
             if dataproxy.sample_si_window_distance is not None:
                 self._content.sample_si_window_dist_edit.setText(str(dataproxy.sample_si_window_distance))
                 util._check_and_get_float_line_edit(self._content.sample_si_window_dist_edit, min=0.0)
-  
+
             if dataproxy.wavelength is not None:
                 self._content.wavelength_edit.setText(str(dataproxy.wavelength))
                 util._check_and_get_float_line_edit(self._content.wavelength_edit, min=0.0)

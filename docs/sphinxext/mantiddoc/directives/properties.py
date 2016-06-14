@@ -36,7 +36,7 @@ class PropertiesDirective(AlgorithmBaseDirective):
                 properties.append((ifunc.parameterName(i),
                                    str(ifunc.getParameterValue(i)),
                                    ifunc.paramDescription(i)
-                ))
+                                  ))
             self.add_rst(self.make_header("Properties (fitting parameters)"))
         else: # this is an Algorithm
             alg = self.create_mantid_algorithm(self.algorithm_name(),

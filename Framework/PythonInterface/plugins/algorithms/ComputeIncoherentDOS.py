@@ -71,7 +71,7 @@ class ComputeIncoherentDOS(PythonAlgorithm):
         QSumRange = self.getPropertyValue('QSumRange')
         EnergyBinning = self.getPropertyValue('EnergyBinning')
         cm = int(self.getPropertyValue('Wavenumbers'))
-        absunits = bool(self.getPropertyValue('StatesPerEnergy'))
+        absunits = int(self.getPropertyValue('StatesPerEnergy'))
 
         # Checks if the input workspace is valid, and which way around it is (Q along x or Q along y).
         u0 = inws.getAxis(0).getUnit().unitID()
@@ -173,9 +173,8 @@ class ComputeIncoherentDOS(PythonAlgorithm):
             y = y/mev2cm
             e = e/mev2cm
             #yunit = 'DeltaE_inWavenumber'
-        else:
+        #else:
             #yunit = 'DeltaE'
-            pass
 
         # Outputs the calculated density of states to another workspace
         dos2d = CloneWorkspace(inws)
