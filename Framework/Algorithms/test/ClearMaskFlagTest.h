@@ -47,8 +47,8 @@ public:
     for (int j = 0; j < numspec; ++j) {
       space2D->setX(j, x);
       space2D->setData(j, vec, vec);
-      space2D->getSpectrum(j)->setSpectrumNo(j);
-      space2D->getSpectrum(j)->setDetectorID(j);
+      space2D->getSpectrum(j).setSpectrumNo(j);
+      space2D->getSpectrum(j).setDetectorID(j);
     }
     space->setInstrument(instr);
 

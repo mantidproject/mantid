@@ -77,11 +77,11 @@ void RebinByTimeAtSample::doHistogramming(IEventWorkspace_sptr inWS,
 
     const double tofFactor = correction.factor;
 
-    const IEventList *el = inWS->getEventListPtr(i);
+    const auto &el = inWS->getSpectrum(i);
     MantidVec y_data, e_data;
     // The EventList takes care of histogramming.
-    el->generateHistogramTimeAtSample(*XValues_new, y_data, e_data, tofFactor,
-                                      tofOffset);
+    el.generateHistogramTimeAtSample(*XValues_new, y_data, e_data, tofFactor,
+                                     tofOffset);
 
     // Set the X axis for each output histogram
     outputWS->setX(i, OutXValues_scaled);

@@ -793,11 +793,11 @@ void LoadISISNexus2::loadPeriodData(
       if (update_spectra2det_mapping) {
         // local_workspace->getAxis(1)->setValue(hist_index,
         // static_cast<specnum_t>(it->first));
-        auto spec = local_workspace->getSpectrum(hist_index);
+        auto &spec = local_workspace->getSpectrum(hist_index);
         specnum_t specNum = m_wsInd2specNum_map.at(hist_index);
-        spec->setDetectorIDs(
+        spec.setDetectorIDs(
             m_spec2det_map.getDetectorIDsForSpectrumNo(specNum));
-        spec->setSpectrumNo(specNum);
+        spec.setSpectrumNo(specNum);
       }
 
       NXFloat timeBins = monitor.openNXFloat("time_of_flight");
@@ -893,12 +893,12 @@ void LoadISISNexus2::loadBlock(NXDataSetTyped<int> &data, int64_t blocksize,
     if (m_load_selected_spectra) {
       // local_workspace->getAxis(1)->setValue(hist,
       // static_cast<specnum_t>(spec_num));
-      auto spec = local_workspace->getSpectrum(hist);
+      auto &spec = local_workspace->getSpectrum(hist);
       specnum_t specNum = m_wsInd2specNum_map.at(hist);
       // set detectors corresponding to spectra Number
-      spec->setDetectorIDs(m_spec2det_map.getDetectorIDsForSpectrumNo(specNum));
+      spec.setDetectorIDs(m_spec2det_map.getDetectorIDsForSpectrumNo(specNum));
       // set correct spectra Number
-      spec->setSpectrumNo(specNum);
+      spec.setSpectrumNo(specNum);
     }
 
     ++hist;

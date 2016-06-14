@@ -135,7 +135,7 @@ std::vector<double> RadiusSum::processInstrumentRadiusSum() {
       if (bin_n < 0)
         continue; // not in the limits of min_radius and max_radius
 
-      auto refY = inputWS->getSpectrum(i)->readY();
+      auto &refY = inputWS->getSpectrum(i).readY();
       accumulator[bin_n] += std::accumulate(refY.begin(), refY.end(), 0.0);
 
     } catch (Kernel::Exception::NotFoundError &ex) {
@@ -167,8 +167,8 @@ std::vector<double> RadiusSum::processNumericImageRadiusSum() {
   // or the center of the bin, if it is a histogram.
 
   g_log.debug() << "Define the X positions of the pixels\n";
-  auto refX = inputWS->getSpectrum(0)->readX();
-  auto refY = inputWS->getSpectrum(0)->readY();
+  auto &refX = inputWS->getSpectrum(0).readX();
+  auto &refY = inputWS->getSpectrum(0).readY();
   std::vector<double> x_pos(refY.size());
 
   if (refY.size() == refX.size()) { // non-histogram workspace X has n values
@@ -183,7 +183,7 @@ std::vector<double> RadiusSum::processNumericImageRadiusSum() {
   for (size_t i = 0; i < inputWS->getNumberHistograms(); i++) {
 
     // pixel values
-    auto refY = inputWS->getSpectrum(i)->readY();
+    auto &refY = inputWS->getSpectrum(i).readY();
 
     // for every pixel
     for (size_t j = 0; j < refY.size(); j++) {

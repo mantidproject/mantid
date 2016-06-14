@@ -149,7 +149,7 @@ void SaveIsawQvector::exec() {
   std::vector<double> Qx_save, Qy_save, Qz_save;
   for (std::size_t i = 0; i < numSpectra; ++i) {
     // get a reference to the event list
-    const EventList &events = wksp->getEventList(i);
+    const EventList &events = wksp->getSpectrum(i);
 
     // check to see if the event list is empty
     if (events.empty()) {

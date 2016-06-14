@@ -142,7 +142,7 @@ string determineXMinMax(MatrixWorkspace_sptr inputWS, vector<double> &xmins,
   for (size_t i = 0; i < numSpectra; ++i) {
     // determine ranges if necessary
     if (updateXMins || updateXMaxs) {
-      const MantidVec &xvalues = inputWS->getSpectrum(i)->dataX();
+      const MantidVec &xvalues = inputWS->getSpectrum(i).dataX();
       if (updateXMins) {
         if (boost::math::isnan(xvalues.front())) {
           xmins.push_back(xmin_wksp);
@@ -353,7 +353,7 @@ void ResampleX::exec() {
           g_log.debug() << "delta[wkspindex=" << wkspIndex << "] = " << delta
                         << " xmin=" << xmins[wkspIndex]
                         << " xmax=" << xmaxs[wkspIndex] << "\n";
-          outputEventWS->getSpectrum(wkspIndex)->setX(xValues);
+          outputEventWS->getSpectrum(wkspIndex).setX(xValues);
           prog.report(name()); // Report progress
           PARALLEL_END_INTERUPT_REGION
         }
@@ -392,7 +392,7 @@ void ResampleX::exec() {
         outputWS->setX(wkspIndex, xValues);
 
         // Get a const event list reference. inputEventWS->dataY() doesn't work.
-        const EventList &el = inputEventWS->getEventList(wkspIndex);
+        const EventList &el = inputEventWS->getSpectrum(wkspIndex);
         MantidVec y_data, e_data;
         // The EventList takes care of histogramming.
         el.generateHistogram(xValues, y_data, e_data);

@@ -56,14 +56,14 @@ WorkspaceJoiners::execWS2D(API::MatrixWorkspace_const_sptr ws1,
   PARALLEL_FOR2(ws1, output)
   for (int64_t i = 0; i < nhist1; ++i) {
     PARALLEL_START_INTERUPT_REGION
-    ISpectrum *outSpec = output->getSpectrum(i);
-    const ISpectrum *inSpec = ws1->getSpectrum(i);
+    auto &outSpec = output->getSpectrum(i);
+    const auto &inSpec = ws1->getSpectrum(i);
 
     // Copy X,Y,E
-    outSpec->setX(XValues);
-    outSpec->setData(inSpec->dataY(), inSpec->dataE());
+    outSpec.setX(XValues);
+    outSpec.setData(inSpec.dataY(), inSpec.dataE());
     // Copy the spectrum number/detector IDs
-    outSpec->copyInfoFrom(*inSpec);
+    outSpec.copyInfoFrom(inSpec);
 
     // Propagate binmasking, if needed
     if (ws1->hasMaskedBins(i)) {
@@ -86,15 +86,15 @@ WorkspaceJoiners::execWS2D(API::MatrixWorkspace_const_sptr ws1,
   for (int64_t j = 0; j < nhist2; ++j) {
     PARALLEL_START_INTERUPT_REGION
     // The spectrum in the output workspace
-    ISpectrum *outSpec = output->getSpectrum(nhist1 + j);
+    auto &outSpec = output->getSpectrum(nhist1 + j);
     // Spectrum in the second workspace
-    const ISpectrum *inSpec = ws2->getSpectrum(j);
+    const auto &inSpec = ws2->getSpectrum(j);
 
     // Copy X,Y,E
-    outSpec->setX(XValues);
-    outSpec->setData(inSpec->dataY(), inSpec->dataE());
+    outSpec.setX(XValues);
+    outSpec.setData(inSpec.dataY(), inSpec.dataE());
     // Copy the spectrum number/detector IDs
-    outSpec->copyInfoFrom(*inSpec);
+    outSpec.copyInfoFrom(inSpec);
 
     // Propagate masking, if needed
     if (ws2->hasMaskedBins(j)) {
@@ -153,10 +153,10 @@ MatrixWorkspace_sptr WorkspaceJoiners::execEvent() {
   for (int64_t i = 0; i < nhist1; ++i) {
     // Copy the events over
     output->getOrAddEventList(i) =
-        event_ws1->getEventList(i); // Should fire the copy constructor
-    ISpectrum *outSpec = output->getSpectrum(i);
-    const ISpectrum *inSpec = event_ws1->getSpectrum(i);
-    outSpec->copyInfoFrom(*inSpec);
+        event_ws1->getSpectrum(i); // Should fire the copy constructor
+    auto &outSpec = output->getSpectrum(i);
+    const auto &inSpec = event_ws1->getSpectrum(i);
+    outSpec.copyInfoFrom(inSpec);
 
     m_progress->report();
   }
@@ -168,10 +168,10 @@ MatrixWorkspace_sptr WorkspaceJoiners::execEvent() {
     int64_t output_wi = j + nhist1;
     // Copy the events over
     output->getOrAddEventList(output_wi) =
-        event_ws2->getEventList(j); // Should fire the copy constructor
-    ISpectrum *outSpec = output->getSpectrum(output_wi);
-    const ISpectrum *inSpec = event_ws2->getSpectrum(j);
-    outSpec->copyInfoFrom(*inSpec);
+        event_ws2->getSpectrum(j); // Should fire the copy constructor
+    auto &outSpec = output->getSpectrum(output_wi);
+    const auto &inSpec = event_ws2->getSpectrum(j);
+    outSpec.copyInfoFrom(inSpec);
 
     // Propagate spectrum masking. First workspace will have been done by the
     // factory
@@ -259,9 +259,9 @@ void WorkspaceJoiners::getMinMax(MatrixWorkspace_const_sptr ws, specnum_t &min,
   specnum_t temp;
   size_t length = ws->getNumberHistograms();
   // initial values
-  min = max = ws->getSpectrum(0)->getSpectrumNo();
+  min = max = ws->getSpectrum(0).getSpectrumNo();
   for (size_t i = 0; i < length; i++) {
-    temp = ws->getSpectrum(i)->getSpectrumNo();
+    temp = ws->getSpectrum(i).getSpectrumNo();
     // Adjust min/max
     if (temp < min)
       min = temp;

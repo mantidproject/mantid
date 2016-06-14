@@ -307,7 +307,7 @@ const API::MatrixWorkspace_sptr LoadRKH::read1D() {
     // Set the appropriate values
     for (int index = 0; index < pointsToRead; ++index) {
       localworkspace->getSpectrum(index)
-          ->setSpectrumNo(static_cast<int>(columnOne[index]));
+          .setSpectrumNo(static_cast<int>(columnOne[index]));
       localworkspace->dataY(index)[0] = ydata[index];
       localworkspace->dataE(index)[0] = errdata[index];
     }

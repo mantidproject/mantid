@@ -87,7 +87,7 @@ public:
     DateAndTime run_start("2010-01-01T00:00:00");
 
     for (int pix = 0; pix < numPixels; pix++) {
-      EventList &el = retVal->getEventList(pix);
+      EventList &el = retVal->getSpectrum(pix);
       el.setSpectrumNo(pix);
       el.setDetectorID(pix);
       // Background
@@ -151,7 +151,7 @@ public:
     {
       for (size_t i =0; i<in_ws->getNumberHistograms(); i++)
       {
-        EventList & el = in_ws->getEventList(i);
+        EventList & el = in_ws->getSpectrum(i);
         el.compressEvents(0.0, &el);
       }
     }*/

@@ -210,7 +210,7 @@ void VesuvioL1ThetaResolution::exec() {
                         << '\n';
 
     // Set values in output workspace
-    const int specNo = m_instWorkspace->getSpectrum(i)->getSpectrumNo();
+    const int specNo = m_instWorkspace->getSpectrum(i).getSpectrumNo();
     m_outputWorkspace->dataX(0)[i] = specNo;
     m_outputWorkspace->dataX(1)[i] = specNo;
     m_outputWorkspace->dataX(2)[i] = specNo;
@@ -230,9 +230,9 @@ void VesuvioL1ThetaResolution::exec() {
 
       m_l1DistributionWs->dataY(i) = y;
 
-      auto spec = m_l1DistributionWs->getSpectrum(i);
-      spec->setSpectrumNo(specNo);
-      spec->addDetectorID(det->getID());
+      auto &spec = m_l1DistributionWs->getSpectrum(i);
+      spec.setSpectrumNo(specNo);
+      spec.addDetectorID(det->getID());
     }
 
     // Process data for theta distribution
@@ -245,9 +245,9 @@ void VesuvioL1ThetaResolution::exec() {
 
       m_thetaDistributionWs->dataY(i) = y;
 
-      auto spec = m_thetaDistributionWs->getSpectrum(i);
-      spec->setSpectrumNo(specNo);
-      spec->addDetectorID(det->getID());
+      auto &spec = m_thetaDistributionWs->getSpectrum(i);
+      spec.setSpectrumNo(specNo);
+      spec.addDetectorID(det->getID());
     }
   }
 

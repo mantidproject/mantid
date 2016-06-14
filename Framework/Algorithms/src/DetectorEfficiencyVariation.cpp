@@ -230,7 +230,7 @@ int DetectorEfficiencyVariation::doDetectorTests(
 
     if (checkForMask) {
       const std::set<detid_t> &detids =
-          counts1->getSpectrum(i)->getDetectorIDs();
+          counts1->getSpectrum(i).getDetectorIDs();
       if (instrument->isMonitor(detids))
         continue;
       if (instrument->isDetectorMasked(detids)) {

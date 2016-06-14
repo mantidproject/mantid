@@ -157,8 +157,7 @@ void EQSANSTofStructure::execEvent(
     PARALLEL_START_INTERUPT_REGION
 
     // Get the pointer to the output event list
-    EventList *outEL = inputWS->getEventListPtr(ispec);
-    std::vector<TofEvent> &events = outEL->getEvents();
+    std::vector<TofEvent> &events = inputWS->getSpectrum(ispec).getEvents();
     std::vector<TofEvent>::iterator it;
     std::vector<TofEvent> clean_events;
 

@@ -613,7 +613,7 @@ void NormaliseToMonitor::normaliseBinByBin(
     if (inputEvent) {
       // ----------------------------------- EventWorkspace
       // ---------------------------------------
-      EventList &outEL = outputEvent->getEventList(i);
+      EventList &outEL = outputEvent->getSpectrum(i);
       outEL.divide(X, *Y, *E);
     } else {
       // ----------------------------------- Workspace2D

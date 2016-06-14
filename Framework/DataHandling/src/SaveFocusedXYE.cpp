@@ -162,7 +162,7 @@ void SaveFocusedXYE::exec() {
 
     if (headers) {
       writeSpectraHeader(out, i + startingbank,
-                         inputWS->getSpectrum(i)->getSpectrumNo(), l1 + l2, tth,
+                         inputWS->getSpectrum(i).getSpectrumNo(), l1 + l2, tth,
                          inputWS->getAxis(0)->unit()->caption());
       // out << "# Data for spectra :" << i + startingbank << '\n';
       // out << "# " << inputWS->getAxis(0)->unit()->caption() << "

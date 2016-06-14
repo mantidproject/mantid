@@ -197,7 +197,7 @@ void ModeratorTzeroLinear::execEvent() {
   for (int i = 0; i < static_cast<int>(numHists); ++i) {
     size_t wsIndex = static_cast<size_t>(i);
     PARALLEL_START_INTERUPT_REGION
-    EventList &evlist = outputWS->getEventList(wsIndex);
+    EventList &evlist = outputWS->getSpectrum(wsIndex);
     if (evlist.getNumberEvents() > 0) // don't bother with empty lists
     {
       // Calculate the time from sample to detector 'i'

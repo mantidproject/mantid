@@ -800,7 +800,7 @@ GeneratePeaks::createDataWorkspace(std::vector<double> binparameters) {
     specnum_t wsindex = spiter->second;
     g_log.debug() << "Build WorkspaceIndex-Spectrum  " << wsindex << " , "
                   << specid << "\n";
-    ws->getSpectrum(wsindex)->setSpectrumNo(specid);
+    ws->getSpectrum(wsindex).setSpectrumNo(specid);
   }
 
   return ws;

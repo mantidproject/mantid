@@ -415,7 +415,7 @@ API::MatrixWorkspace_sptr LoadGSS::loadGSASFile(const std::string &filename,
     // Reset spectrum number if
     if (useBankAsSpectrum) {
       specnum_t specno = static_cast<specnum_t>(detectorIDs[i]);
-      outputWorkspace->getSpectrum(i)->setSpectrumNo(specno);
+      outputWorkspace->getSpectrum(i).setSpectrumNo(specno);
     }
   }
 
@@ -519,16 +519,11 @@ void LoadGSS::createInstrumentGeometry(
     detector->setPos(pos);
 
     // add copy to instrument, spectrum and mark it
-    API::ISpectrum *spec = workspace->getSpectrum(i);
-    if (spec) {
-      spec->clearDetectorIDs();
-      spec->addDetectorID(detectorids[i]);
-      instrument->add(detector);
-      instrument->markAsDetector(detector);
-    } else {
-      g_log.error() << "Workspace " << i << " has no spectrum!\n";
-      continue;
-    }
+    auto &spec = workspace->getSpectrum(i);
+    spec.clearDetectorIDs();
+    spec.addDetectorID(detectorids[i]);
+    instrument->add(detector);
+    instrument->markAsDetector(detector);
 
   } // ENDFOR (i: spectrum)
 

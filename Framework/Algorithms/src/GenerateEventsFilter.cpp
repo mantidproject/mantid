@@ -1910,7 +1910,7 @@ DateAndTime GenerateEventsFilter::findRunEnd() {
     norunendset = false;
 
     for (size_t i = 0; i < m_dataWS->getNumberHistograms(); ++i) {
-      const DataObjects::EventList &evlist = m_dataWS->getEventList(i);
+      const DataObjects::EventList &evlist = m_dataWS->getSpectrum(i);
       if (evlist.getNumberEvents() > 0) {
         // If event list is empty, the returned value may not make any sense
         DateAndTime lastpulse = evlist.getPulseTimeMax();

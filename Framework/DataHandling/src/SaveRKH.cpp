@@ -156,7 +156,7 @@ void SaveRKH::write1D() {
 
     specnum_t specid(0);
     try {
-      specid = m_workspace->getSpectrum(i)->getSpectrumNo();
+      specid = m_workspace->getSpectrum(i).getSpectrumNo();
     } catch (...) {
       specid = static_cast<specnum_t>(i + 1);
     }

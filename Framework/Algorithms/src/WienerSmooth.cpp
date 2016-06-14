@@ -136,10 +136,10 @@ void WienerSmooth::exec() {
 
     // set the axis value
     if (isSpectra) {
-      auto inSpectrum = inputWS->getSpectrum(inIndex);
-      auto outSpectrum = outputWS->getSpectrum(outIndex);
-      outSpectrum->setSpectrumNo(inSpectrum->getSpectrumNo());
-      outSpectrum->setDetectorIDs(inSpectrum->getDetectorIDs());
+      auto &inSpectrum = inputWS->getSpectrum(inIndex);
+      auto &outSpectrum = outputWS->getSpectrum(outIndex);
+      outSpectrum.setSpectrumNo(inSpectrum.getSpectrumNo());
+      outSpectrum.setDetectorIDs(inSpectrum.getDetectorIDs());
     } else if (isNumeric) {
       outAxis->setValue(outIndex, inAxis->getValue(inIndex));
     } else if (inTextAxis && outTextAxis) {

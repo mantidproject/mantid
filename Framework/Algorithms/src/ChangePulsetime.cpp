@@ -78,7 +78,7 @@ void ChangePulsetime::exec() {
       wi = workspaceIndices[i];
 
     // Call the method on the event list
-    out_ws->getEventList(wi).addPulsetime(timeOffset);
+    out_ws->getSpectrum(wi).addPulsetime(timeOffset);
 
     prog.report(name());
   }
