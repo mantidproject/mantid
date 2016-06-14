@@ -7,19 +7,12 @@ namespace DataObjects {
 
 /// Construct from ISpectrum.
 Histogram1D::Histogram1D(const ISpectrum &other)
-    : ISpectrum(other), m_histogram(HistogramData::getHistogramXMode(
-                            other.readX().size(), other.readY().size())) {
-  dataY() = other.readY();
-  dataE() = other.readE();
-}
+    : ISpectrum(other), m_histogram(other.histogram()) {}
 
 /// Assignment from ISpectrum.
 Histogram1D &Histogram1D::operator=(const ISpectrum &rhs) {
-  m_histogram = HistogramData::Histogram(
-      HistogramData::getHistogramXMode(rhs.readX().size(), rhs.readY().size()));
   ISpectrum::operator=(rhs);
-  dataY() = rhs.readY();
-  dataE() = rhs.readE();
+  m_histogram = rhs.histogram();
   return *this;
 }
 

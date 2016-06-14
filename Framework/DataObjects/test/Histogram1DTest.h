@@ -136,9 +136,11 @@ public:
     Histogram1D clone(source);
     // X is shared...
     TS_ASSERT_EQUALS(&clone.readX(), &source.readX());
-    // .. but not Y and E, since they are not part of ISpectrum.
-    TS_ASSERT_DIFFERS(&clone.readY(), &source.readY());
-    TS_ASSERT_DIFFERS(&clone.readE(), &source.readE());
+    // Y and E are in general not shared, since they are not part of ISpectrum,
+    // but in this special case ISpectrum references Histogram1D, so they
+    // should.
+    TS_ASSERT_EQUALS(&clone.readY(), &source.readY());
+    TS_ASSERT_EQUALS(&clone.readE(), &source.readE());
     TS_ASSERT_EQUALS(clone.readX()[0], 0.1);
     TS_ASSERT_EQUALS(clone.readY()[0], 0.2);
     TS_ASSERT_EQUALS(clone.readE()[0], 0.3);
@@ -176,9 +178,11 @@ public:
     clone = source;
     // X is shared...
     TS_ASSERT_EQUALS(&clone.readX(), &source.readX());
-    // .. but not Y and E, since they are not part of ISpectrum.
-    TS_ASSERT_DIFFERS(&clone.readY(), &source.readY());
-    TS_ASSERT_DIFFERS(&clone.readE(), &source.readE());
+    // Y and E are in general not shared, since they are not part of ISpectrum,
+    // but in this special case ISpectrum references Histogram1D, so they
+    // should.
+    TS_ASSERT_EQUALS(&clone.readY(), &source.readY());
+    TS_ASSERT_EQUALS(&clone.readE(), &source.readE());
     TS_ASSERT_EQUALS(clone.readX()[0], 0.1);
     TS_ASSERT_EQUALS(clone.readY()[0], 0.2);
     TS_ASSERT_EQUALS(clone.readE()[0], 0.3);
