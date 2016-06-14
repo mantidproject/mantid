@@ -1,4 +1,6 @@
 #pylint: disable=no-init,too-many-locals,too-many-instance-attributes
+import math
+import numpy as np
 
 from mantid.simpleapi import *
 from mantid.api import (PythonAlgorithm, AlgorithmFactory, PropertyMode, MatrixWorkspaceProperty,
@@ -6,9 +8,6 @@ from mantid.api import (PythonAlgorithm, AlgorithmFactory, PropertyMode, MatrixW
 from mantid.kernel import (StringListValidator, StringMandatoryValidator,
                            FloatBoundedValidator, Direction, logger, CompositeValidator)
 from mantid import config
-
-import math
-import numpy as np
 
 
 class CylinderPaalmanPingsCorrection(PythonAlgorithm):

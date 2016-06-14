@@ -175,6 +175,7 @@ class ComputeIncoherentDOS(PythonAlgorithm):
             #yunit = 'DeltaE_inWavenumber'
         else:
             #yunit = 'DeltaE'
+            pass
 
         # Outputs the calculated density of states to another workspace
         dos2d = CloneWorkspace(inws)
