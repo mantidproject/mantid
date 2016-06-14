@@ -107,7 +107,7 @@ void TSVSerialiser::parseLines(const std::string &lines) {
       // If we've made it here then we don't know what kind of line this is.
       g_log.warning()
           << "Unable to identify line in TSVSerialiser::parseLines(): '" << line
-          << "'" << std::endl;
+          << "'\n";
     }
   }
 }

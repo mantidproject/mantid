@@ -399,7 +399,7 @@ void SCDCalibratePanels::CalcInitParams(
     Xrot0 = 0;
     Yrot0 = 0;
     Zrot0 = 0;
-    g_log.notice() << "Improper PreCalibInstrument for " << bankName << endl;
+    g_log.notice() << "Improper PreCalibInstrument for " << bankName << '\n';
     return;
   }
 
@@ -699,9 +699,9 @@ void SCDCalibratePanels::exec() {
   int NDofSum = 0;
   if (!GoodStart(peaksWs, a, b, c, alpha, beta, gamma, tolerance)) {
     g_log.warning() << "**** Indexing is NOT compatible with given lattice "
-                       "parameters******" << std::endl;
-    g_log.warning() << "        Index with conventional orientation matrix???"
-                    << std::endl;
+                       "parameters******\n";
+    g_log.warning()
+        << "        Index with conventional orientation matrix???\n";
   }
 
   //----------- Initialize peaksWorkspace, initial parameter values
@@ -716,7 +716,7 @@ void SCDCalibratePanels::exec() {
     Kernel::Property *prop = run.getProperty("T0");
     T0 = boost::lexical_cast<double, std::string>(prop->value());
     if (T0 != 0) {
-      g_log.notice() << "T0 = " << T0 << std::endl;
+      g_log.notice() << "T0 = " << T0 << '\n';
     }
   }
   if ((string)getProperty("PreProcessInstrument") ==
@@ -725,7 +725,7 @@ void SCDCalibratePanels::exec() {
 
   double L0 = peaksWs->getPeak(0).getL1();
   std::ofstream outfile(DetCalFileName);
-  g_log.debug() << "Initial L0,T0=" << L0 << "," << T0 << endl;
+  g_log.debug() << "Initial L0,T0=" << L0 << "," << T0 << '\n';
   std::vector<std::string> detcal;
 
   for (auto iIter = 0; iIter != nIter; ++iIter) {
@@ -844,9 +844,9 @@ void SCDCalibratePanels::exec() {
       int endXp1 = bounds[group->size()];
       if (endXp1 - startX < 13) {
         g_log.error() << "Bank Group " << BankNameString
-                      << " does not have enough peaks for fitting" << endl;
+                      << " does not have enough peaks for fitting\n";
         saveIsawDetCal(instrument, MyBankNames, T0_bank,
-                       DetCalFileName + boost::lexical_cast<std::string>(iGr));
+                       DetCalFileName + std::to_string(iGr));
         continue;
       }
 
@@ -1004,7 +1004,7 @@ void SCDCalibratePanels::exec() {
         if (!useTimeOffset)
           nVars--;
 
-        // g_log.notice() << "      nVars=" <<nVars<< endl;
+        // g_log.notice() << "      nVars=" <<nVars<< '\n';
         int NDof = (static_cast<int>(ws->dataX(0).size()) - nVars);
         NDofSum = +NDof;
 
@@ -1062,7 +1062,7 @@ void SCDCalibratePanels::exec() {
         //---------------------- Save new instrument to DetCal--------------
         this->progress(.94, "Saving detcal file");
         saveIsawDetCal(NewInstrument, MyBankNames, result["t0"],
-                       DetCalFileName + boost::lexical_cast<std::string>(iGr));
+                       DetCalFileName + std::to_string(iGr));
       }
       PARALLEL_END_INTERUPT_REGION
     }
@@ -1070,8 +1070,7 @@ void SCDCalibratePanels::exec() {
     std::vector<double> l0vec, t0vec;
     std::string line, seven;
     for (int iGr = 0; iGr < nGroups; iGr++) {
-      std::ifstream infile(DetCalFileName +
-                           boost::lexical_cast<std::string>(iGr));
+      std::ifstream infile(DetCalFileName + std::to_string(iGr));
       while (std::getline(infile, line)) {
         if (iGr == 0 && iIter == nIter - 1) {
           if (line[0] == '#' || line[0] == '6')
@@ -1086,10 +1085,8 @@ void SCDCalibratePanels::exec() {
           detcal.push_back(line);
       }
       infile.close();
-      if (Poco::File(DetCalFileName + boost::lexical_cast<std::string>(iGr))
-              .exists())
-        Poco::File(DetCalFileName + boost::lexical_cast<std::string>(iGr))
-            .remove();
+      if (Poco::File(DetCalFileName + std::to_string(iGr)).exists())
+        Poco::File(DetCalFileName + std::to_string(iGr)).remove();
     }
     if (useL0) {
       removeOutliers(l0vec);
@@ -1109,10 +1106,10 @@ void SCDCalibratePanels::exec() {
   }
   L0 *= 100; // ISAW uses cm
   outfile << "7  " << std::setprecision(4) << std::fixed << L0;
-  outfile << std::setw(13) << std::setprecision(3) << T0 << std::endl;
+  outfile << std::setw(13) << std::setprecision(3) << T0 << '\n';
   outfile << "4 DETNUM  NROWS  NCOLS   WIDTH   HEIGHT   DEPTH   DETD   CenterX "
              "  CenterY   CenterZ    BaseX    BaseY    BaseZ      UpX      UpY "
-             "     UpZ" << std::endl;
+             "     UpZ\n";
   for (vector<std::string>::const_iterator itdet = detcal.begin();
        itdet != detcal.end(); ++itdet)
     outfile << *itdet << "\n";
@@ -1286,7 +1283,7 @@ void SCDCalibratePanels::exec() {
       TofWksp->dataY(iSpectrum)[icount] = theoretical.getTOF();
       icount++;
     } catch (...) {
-      // g_log.debug() << "Problem only in printing peaks" << std::endl;
+      // g_log.debug() << "Problem only in printing peaks\n";
     }
   }
 }
@@ -1341,7 +1338,7 @@ void SCDCalibratePanels::LoadISawDetCal(
         depth >> detd >> x >> y >> z >> base_x >> base_y >> base_z >> up_x >>
         up_y >> up_z;
 
-    string bankName = bankPrefixName + boost::lexical_cast<string>(id);
+    string bankName = bankPrefixName + std::to_string(id);
 
     if (!AllBankName.empty() && AllBankName.find(bankName) == AllBankName.end())
       continue;
@@ -1449,7 +1446,7 @@ void SCDCalibratePanels::createResultWorkspace(const int numGroups,
     Result->addColumn("str", "Field");
     // and one for each group
     for (int g = 0; g < numGroups; ++g) {
-      string GroupName = string("Group") + boost::lexical_cast<string>(g);
+      string GroupName = string("Group") + std::to_string(g);
       Result->addColumn("double", GroupName);
     }
     Result->setRowCount(2 * (10 + nn));
@@ -1762,7 +1759,7 @@ void SCDCalibratePanels::CreateFxnGetValues(
   boost::shared_ptr<IFunction1D> fit = boost::dynamic_pointer_cast<IFunction1D>(
       FunctionFactory::Instance().createFunction("SCDPanelErrors"));
   if (!fit)
-    cout << "Could not create fit function" << endl;
+    cout << "Could not create fit function\n";
   PeaksWorkspace_sptr peaksWs = getProperty("PeakWorkspace");
   OrientedLattice latt = peaksWs->mutableSample().getOrientedLattice();
   fit->setAttribute("a", IFunction::Attribute(latt.a()));
@@ -1955,14 +1952,14 @@ void SCDCalibratePanels::FixUpBankParameterMap(
 
     pmap->addDouble(bank.get(), string("scalex"), scalex);
     pmap->addDouble(bank.get(), string("scaley"), scaley);
-    // cout<<"Thru param fix for "<<bankName<<". pos="<<bank->getPos()<<endl;
+    // cout<<"Thru param fix for "<<bankName<<". pos="<<bank->getPos()<<'\n';
   } // For @ bank
 }
 
 void writeXmlParameter(ofstream &ostream, const string &name,
                        const double value) {
   ostream << "  <parameter name =\"" << name << "\"><value val=\"" << value
-          << "\" /> </parameter>" << endl;
+          << "\" /> </parameter>\n";
 }
 
 void SCDCalibratePanels::saveXmlFile(
@@ -1975,16 +1972,16 @@ void SCDCalibratePanels::saveXmlFile(
 
   // create the file and add the header
   ofstream oss3(FileName.c_str());
-  oss3 << "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>" << endl;
+  oss3 << "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n";
   oss3 << " <parameter-file instrument=\"" << instrument->getName()
        << "\" valid-from=\"" << instrument->getValidFromDate().toISO8601String()
-       << "\">" << endl;
+       << "\">\n";
   ParameterMap_sptr pmap = instrument->getParameterMap();
 
   // write out the detector banks
   for (const auto &Group : Groups) {
     for (const auto &bankName : Group) {
-      oss3 << "<component-link name=\"" << bankName << "\">" << endl;
+      oss3 << "<component-link name=\"" << bankName << "\">\n";
 
       boost::shared_ptr<const IComponent> bank =
           instrument->getComponentByName(bankName);
@@ -2020,25 +2017,25 @@ void SCDCalibratePanels::saveXmlFile(
         scaley = 1.;
 
       oss3 << "  <parameter name =\"scalex\"><value val=\"" << scalex
-           << "\" /> </parameter>" << endl;
+           << "\" /> </parameter>\n";
       oss3 << "  <parameter name =\"scaley\"><value val=\"" << scaley
-           << "\" /> </parameter>" << endl;
-      oss3 << "</component-link>" << endl;
+           << "\" /> </parameter>\n";
+      oss3 << "</component-link>\n";
     } // for each bank in the group
   }   // for each group
 
   // write out the source
   IComponent_const_sptr source = instrument->getSource();
 
-  oss3 << "<component-link name=\"" << source->getName() << "\">" << endl;
+  oss3 << "<component-link name=\"" << source->getName() << "\">\n";
   IComponent_const_sptr sample = instrument->getSample();
   V3D sourceRelPos = source->getRelativePos();
 
   writeXmlParameter(oss3, "x", sourceRelPos.X());
   writeXmlParameter(oss3, "y", sourceRelPos.Y());
   writeXmlParameter(oss3, "z", sourceRelPos.Z());
-  oss3 << "</component-link>" << endl;
-  oss3 << "</parameter-file>" << endl;
+  oss3 << "</component-link>\n";
+  oss3 << "</parameter-file>\n";
 
   // flush and close the file
   oss3.flush();

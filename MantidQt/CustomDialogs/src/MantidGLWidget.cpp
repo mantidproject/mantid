@@ -254,7 +254,7 @@ void MantidGLWidget::setOrthoProjectionMatrix(GLdouble aspect_ratio) {
   GLdouble top = +m_bb_widths[1] / 2.0;
 
   // std::cerr << "Projection volume points: " << left << " " << right << " " <<
-  // bottom << " " << top << std::endl;
+  // bottom << " " << top << '\n';
 
   // width / height ratio in world coordinates must be equal to aspect_ratio
   auto ratio = m_bb_widths[0] / m_bb_widths[1];
@@ -275,9 +275,9 @@ void MantidGLWidget::setOrthoProjectionMatrix(GLdouble aspect_ratio) {
   top += m_bb_centres[1];
 
   // std::cerr << "Projection volume points 2: " << left << " " << right << " "
-  // << bottom << " " << top << std::endl;
+  // << bottom << " " << top << '\n';
   // std::cerr << "Aspect ratio: " << aspect_ratio << " == " << (right - left) /
-  // (top - bottom) << std::endl;
+  // (top - bottom) << '\n';
 
   // Set the correct projection
   glMatrixMode(GL_PROJECTION);

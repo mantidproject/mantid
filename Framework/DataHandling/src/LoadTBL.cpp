@@ -176,10 +176,9 @@ void LoadTBL::csvParse(std::string line, std::vector<std::string> &cols,
   }
   if (cols.size() != expectedCommas + 1) {
     std::string message = "A line must contain " +
-                          boost::lexical_cast<std::string>(expectedCommas) +
+                          std::to_string(expectedCommas) +
                           " cell-delimiting commas. Found " +
-                          boost::lexical_cast<std::string>(cols.size() - 1) +
-                          ".";
+                          std::to_string(cols.size() - 1) + ".";
     throw std::length_error(message);
   }
 }
@@ -209,10 +208,9 @@ size_t LoadTBL::getCells(std::string line, std::vector<std::string> &cols,
                    boost::token_compress_off);
     } else if (found < expectedCommas) {
       // less than 16 means the line isn't properly formatted. So Throw
-      std::string message = "A line must contain " +
-                            boost::lexical_cast<std::string>(expectedCommas) +
-                            " cell-delimiting commas. Found " +
-                            boost::lexical_cast<std::string>(found) + ".";
+      std::string message =
+          "A line must contain " + std::to_string(expectedCommas) +
+          " cell-delimiting commas. Found " + std::to_string(found) + ".";
       throw std::length_error(message);
     } else {
       // More than 16 will need further checks as more is only ok when pairs of
@@ -222,10 +220,9 @@ size_t LoadTBL::getCells(std::string line, std::vector<std::string> &cols,
       // if we didn't find any quotes, then there are too many commas and we
       // definitely have too many delimiters
       if (quoteBounds.empty()) {
-        std::string message = "A line must contain " +
-                              boost::lexical_cast<std::string>(expectedCommas) +
-                              " cell-delimiting commas. Found " +
-                              boost::lexical_cast<std::string>(found) + ".";
+        std::string message =
+            "A line must contain " + std::to_string(expectedCommas) +
+            " cell-delimiting commas. Found " + std::to_string(found) + ".";
         throw std::length_error(message);
       }
       // now go through and split it up manually. Throw if we find ourselves in
@@ -243,10 +240,9 @@ size_t LoadTBL::getCells(std::string line, std::vector<std::string> &cols,
             boost::lexical_cast<std::string>("," + cols[i]));
       }
     } else if (cols.size() < expectedCommas) {
-      std::string message = "A line must contain " +
-                            boost::lexical_cast<std::string>(expectedCommas) +
-                            " cell-delimiting commas. Found " +
-                            boost::lexical_cast<std::string>(found) + ".";
+      std::string message =
+          "A line must contain " + std::to_string(expectedCommas) +
+          " cell-delimiting commas. Found " + std::to_string(found) + ".";
       throw std::length_error(message);
     }
   }

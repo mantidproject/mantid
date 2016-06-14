@@ -20,7 +20,7 @@ using std::size_t;
 /// Private constructor for singleton class
 WorkspaceFactoryImpl::WorkspaceFactoryImpl()
     : Mantid::Kernel::DynamicFactory<Workspace>() {
-  g_log.debug() << "WorkspaceFactory created." << std::endl;
+  g_log.debug() << "WorkspaceFactory created.\n";
 }
 
 /** Create a new instance of the same type of workspace as that given as

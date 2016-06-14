@@ -104,7 +104,7 @@ void CalculateResolution::exec() {
           "Value for two theta could not be found in log.");
     }
     g_log.notice() << "Found '" << twoTheta
-                   << "' as value for two theta in log." << std::endl;
+                   << "' as value for two theta in log.\n";
   }
 
   Instrument_const_sptr instrument = ws->getInstrument();

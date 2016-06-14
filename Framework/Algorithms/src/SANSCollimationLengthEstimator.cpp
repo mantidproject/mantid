@@ -131,7 +131,7 @@ double SANSCollimationLengthEstimator::getCollimationLengthWithGuides(
   // else then default
   std::vector<double> guideValues;
   for (unsigned int i = 1; i <= numberOfGuides; i++) {
-    auto guideName = "Guide" + boost::lexical_cast<std::string>(i);
+    auto guideName = "Guide" + std::to_string(i);
     if (inOutWS->run().hasProperty(guideName)) {
       auto guideValue = getGuideValue(inOutWS->run().getProperty(guideName));
       guideValues.push_back(guideValue);

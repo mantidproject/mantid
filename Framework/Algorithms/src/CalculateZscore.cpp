@@ -90,7 +90,7 @@ void CalculateZscore::exec() {
         stringstream errmsg;
         errmsg << "Input workspace index " << inpwsindex
                << " is out of input workspace range = "
-               << inpWS->getNumberHistograms() << endl;
+               << inpWS->getNumberHistograms() << '\n';
       }
     }
 

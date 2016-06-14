@@ -89,7 +89,7 @@ public:
       IMDNode *box1 = boxes[j];
       IMDNode *box2 = boxes1[j];
 
-      // std::cout << "ID: " << box1->getId() << std::endl;
+      // std::cout << "ID: " << box1->getId() << '\n';
       TS_ASSERT_EQUALS(box1->getID(), box2->getID());
       TS_ASSERT_EQUALS(box1->getDepth(), box2->getDepth());
       TS_ASSERT_EQUALS(box1->getNumChildren(), box2->getNumChildren());

@@ -63,7 +63,7 @@ void UpdateScriptRepository::exec() {
     }
     info << "Please check these files before using them. "
          << "Note: These files were configured for AutoUpdate.";
-    g_log.warning() << info.str() << std::endl;
+    g_log.warning() << info.str() << '\n';
   }
 }
 

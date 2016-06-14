@@ -73,7 +73,7 @@ LoadLiveData::runProcessing(Mantid::API::Workspace_sptr inputWS,
       g_log.notice() << "Performing post-processing";
     else
       g_log.notice() << "Performing chunk processing";
-    g_log.notice() << " using " << alg->name() << std::endl;
+    g_log.notice() << " using " << alg->name() << '\n';
 
     // Run the processing algorithm
 
@@ -94,25 +94,24 @@ LoadLiveData::runProcessing(Mantid::API::Workspace_sptr inputWS,
     if (!AnalysisDataService::Instance().doesExist(inputName))
       g_log.error() << "Something really wrong happened when adding "
                     << inputName << " to ADS. "
-                    << this->getPropertyValue("OutputWorkspace") << std::endl;
+                    << this->getPropertyValue("OutputWorkspace") << '\n';
 
     // What is the name of the input workspace property
     if (alg->existsProperty("InputWorkspace")) {
       g_log.debug()
-          << "Using InputWorkspace as the input workspace property name."
-          << std::endl;
+          << "Using InputWorkspace as the input workspace property name.\n";
       alg->setPropertyValue("InputWorkspace", inputName);
     } else {
       // Look for the first Workspace property that is marked INPUT.
       std::vector<Property *> proplist = alg->getProperties();
       g_log.debug() << "Processing algorithm (" << alg->name() << ") has "
-                    << proplist.size() << " properties." << std::endl;
+                    << proplist.size() << " properties.\n";
       bool inputPropertyWorkspaceFound = false;
       for (auto prop : proplist) {
         if ((prop->direction() == 0) && (!inputPropertyWorkspaceFound)) {
           if (boost::ends_with(prop->type(), "Workspace")) {
             g_log.information() << "Using " << prop->name()
-                                << " as the input property." << std::endl;
+                                << " as the input property.\n";
             alg->setPropertyValue(prop->name(), inputName);
             inputPropertyWorkspaceFound = true;
           }
@@ -130,7 +129,7 @@ LoadLiveData::runProcessing(Mantid::API::Workspace_sptr inputWS,
           if (alg->existsProperty("OutputWorkspace"))
           {
               g_log.debug() << "Using OutputWorkspace as the output workspace
-    property name." << std::endl;
+    property name.\n";
               alg->setPropertyValue("OutputWorkspace", outputName);
           }
           else
@@ -138,7 +137,7 @@ LoadLiveData::runProcessing(Mantid::API::Workspace_sptr inputWS,
               // Look for the first Workspace property that is marked OUTPUT.
               std::vector<Property*> proplist = alg->getProperties();
               g_log.debug() << "Processing algorithm (" << alg->name() << ") has
-    " << proplist.size() << " properties." << std::endl;
+    " << proplist.size() << " properties.\n";
               bool outputPropertyWorkspaceFound = false;
               for (size_t i=0; i<proplist.size(); ++i)
               {
@@ -147,23 +146,23 @@ LoadLiveData::runProcessing(Mantid::API::Workspace_sptr inputWS,
     == false))
                   {
                       g_log.information() << "*** " <<
-    outputPropertyWorkspaceFound << std::endl;
+    outputPropertyWorkspaceFound << '\n';
                       if (prop->type() == "MatrixWorkspace")
                       {
                           g_log.information() << "Using " << prop->name() << "
-    as the input property." << std::endl;
+    as the input property.\n";
                           alg->setPropertyValue(prop->name(), outputName);
                           outputPropertyWorkspaceFound = true;
                       }
                   }
 
-    //              g_log.debug() << "Propery #" << i << std::endl;
-    //              g_log.debug() << "\tName: " << prop->name() << std::endl;
+    //              g_log.debug() << "Propery #" << i << '\n';
+    //              g_log.debug() << "\tName: " << prop->name() << '\n';
     //              g_log.debug() << "\tDirection: " << prop->direction() <<
-    std::endl;
-    //              g_log.debug() << "\tType: " << prop->type() << std::endl;
+    '\n';
+    //              g_log.debug() << "\tType: " << prop->type() << '\n';
     //              g_log.debug() << "\tType_Info: " << prop->type_info() <<
-    std::endl;
+    '\n';
 
               }
           }
@@ -423,8 +422,7 @@ void LoadLiveData::doSortEvents(Mantid::API::Workspace_sptr ws) {
   alg->setProperty("InputWorkspace", eventWS);
   alg->setPropertyValue("SortBy", "X Value");
   alg->executeAsChildAlg();
-  g_log.debug() << tim << " to perform SortEvents on " << ws->name()
-                << std::endl;
+  g_log.debug() << tim << " to perform SortEvents on " << ws->name() << '\n';
 }
 
 //----------------------------------------------------------------------------------------------
@@ -525,7 +523,7 @@ void LoadLiveData::exec() {
   if (!m_accumWS || dataReset)
     accum = "Replace";
 
-  g_log.notice() << "Performing the " << accum << " operation." << std::endl;
+  g_log.notice() << "Performing the " << accum << " operation.\n";
 
   // Perform the accumulation and set the AccumulationWorkspace workspace
   if (accum == "Replace")
@@ -560,8 +558,8 @@ void LoadLiveData::exec() {
     for (size_t i = 0; i < n; ++i) {
       auto ws = out_gws->getItem(i);
       std::string itemName = ws->name();
-      std::string wsName = getPropertyValue("OutputWorkspace") + "_" +
-                           boost::lexical_cast<std::string>(i + 1);
+      std::string wsName =
+          getPropertyValue("OutputWorkspace") + "_" + std::to_string(i + 1);
       if (wsName != itemName) {
         if (AnalysisDataService::Instance().doesExist(itemName)) {
           // replace the temporary name with the proper one

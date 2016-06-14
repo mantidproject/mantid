@@ -48,7 +48,6 @@ using DataObjects::EventWorkspace;
 using DataObjects::EventWorkspace_sptr;
 using DataObjects::TofEvent;
 using std::cout;
-using std::endl;
 using std::ifstream;
 using std::runtime_error;
 using std::stringstream;
@@ -294,7 +293,7 @@ void LoadEventPreNexus::exec() {
     if (!pulseid_filename.empty()) {
       if (Poco::File(pulseid_filename).exists()) {
         this->g_log.information() << "Found pulseid file " << pulseid_filename
-                                  << std::endl;
+                                  << '\n';
         throwError = false;
       } else {
         pulseid_filename = "";
@@ -347,7 +346,7 @@ void LoadEventPreNexus::exec() {
     mapping_filename = generateMappingfileName(localWorkspace);
     if (!mapping_filename.empty())
       this->g_log.information() << "Found mapping file \"" << mapping_filename
-                                << "\"" << std::endl;
+                                << "\"\n";
   }
   this->loadPixelMap(mapping_filename);
 
@@ -446,7 +445,7 @@ void LoadEventPreNexus::procEvents(
     double setUpTime = double(detector_map.size()) * 10e-6;
     parallelProcessing = ((double(max_events) / 7e6) > setUpTime);
     g_log.debug() << (parallelProcessing ? "Using" : "Not using")
-                  << " parallel processing." << std::endl;
+                  << " parallel processing.\n";
   }
 
   // determine maximum pixel id
@@ -537,7 +536,7 @@ void LoadEventPreNexus::procEvents(
   }
 
   g_log.debug() << tim << " to create " << partWorkspaces.size()
-                << " workspaces for parallel loading." << std::endl;
+                << " workspaces for parallel loading.\n";
 
   prog->resetNumSteps(numBlocks, 0.1, 0.8);
 
@@ -585,7 +584,7 @@ void LoadEventPreNexus::procEvents(
     PARALLEL_END_INTERUPT_REGION
   }
   PARALLEL_CHECK_INTERUPT_REGION
-  g_log.debug() << tim << " to load the data." << std::endl;
+  g_log.debug() << tim << " to load the data.\n";
 
   // ---------------------------------- MERGE WORKSPACES BACK TOGETHER
   // --------------------------
@@ -618,7 +617,7 @@ void LoadEventPreNexus::procEvents(
       }
       prog->report("Merging Workspaces");
     }
-    g_log.debug() << tim << " to merge workspaces together." << std::endl;
+    g_log.debug() << tim << " to merge workspaces together.\n";
     PARALLEL_END_INTERUPT_REGION
   }
   PARALLEL_CHECK_INTERUPT_REGION
@@ -640,7 +639,7 @@ void LoadEventPreNexus::procEvents(
 
   prog->report("Setting proton charge");
   this->setProtonCharge(workspace);
-  g_log.debug() << tim << " to set the proton charge log." << std::endl;
+  g_log.debug() << tim << " to set the proton charge log.\n";
 
   // Make sure the MRU is cleared
   workspace->clearMRU();
@@ -658,7 +657,7 @@ void LoadEventPreNexus::procEvents(
                       << this->num_error_events << " errors"
                       << ". Shortest TOF: " << shortest_tof
                       << " microsec; longest TOF: " << longest_tof
-                      << " microsec." << std::endl;
+                      << " microsec.\n";
 }
 
 //-----------------------------------------------------------------------------

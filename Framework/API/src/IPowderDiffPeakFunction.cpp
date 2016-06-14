@@ -233,7 +233,7 @@ std::complex<double> E1(std::complex<double> z) {
     exp_e1 = r;
   } else if (az <= 10.0 || (rz < 0.0 && az < 20.0)) {
     // Some interesting region, equal to integrate to infinity, converged
-    // cout << "[DB] Type 1" << endl;
+    // cout << "[DB] Type 1\n";
 
     std::complex<double> r(1.0, 0.0);
     exp_e1 = r;

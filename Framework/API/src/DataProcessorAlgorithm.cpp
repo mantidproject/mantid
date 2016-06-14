@@ -345,7 +345,7 @@ Workspace_sptr DataProcessorAlgorithm::load(const std::string &inputData,
         // The communicator containing all processes
         boost::mpi::communicator world;
         g_log.notice() << "Chunk/Total: " << world.rank() + 1 << "/"
-                       << world.size() << std::endl;
+                       << world.size() << '\n';
         loadAlg->setPropertyValue("OutputWorkspace", outputWSName);
         loadAlg->setProperty("ChunkNumber", world.rank() + 1);
         loadAlg->setProperty("TotalChunks", world.size());
@@ -391,7 +391,7 @@ boost::shared_ptr<PropertyManager> DataProcessorAlgorithm::getProcessProperties(
     processProperties =
         PropertyManagerDataService::Instance().retrieve(propertyManagerName);
   } else {
-    getLogger().notice() << "Could not find property manager" << std::endl;
+    getLogger().notice() << "Could not find property manager\n";
     processProperties = boost::make_shared<PropertyManager>();
     PropertyManagerDataService::Instance().addOrReplace(propertyManagerName,
                                                         processProperties);

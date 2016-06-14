@@ -148,13 +148,13 @@ public:
     std::ofstream file(getTestFileName().c_str());
     m_abspath = getAbsPath();
     file << std::scientific;
-    file << "# X , Y, E, DX, Z" << std::endl;
+    file << "# X , Y, E, DX, Z\n";
     for (int i = 0; i < 5; i++) {
-      file << i << std::endl;
+      file << i << '\n';
       for (int j = 0; j < 4; j++) {
         file << 1.5 * j / 0.9 << "," << (i + 1) * (2. + 4. * (1.5 * j / 0.9))
              << "," << 1 << "," << 0 << ","
-             << (i + 5) * (6. + 3. * (1.7 * j / 0.8)) << std::endl;
+             << (i + 5) * (6. + 3. * (1.7 * j / 0.8)) << '\n';
       }
     }
     file.unsetf(std::ios_base::floatfield);
@@ -168,11 +168,11 @@ public:
     std::ofstream file(getTestFileName().c_str());
     m_abspath = getAbsPath();
     file << std::scientific;
-    file << "# X" << std::endl;
+    file << "# X\n";
     for (int i = 0; i < 5; i++) {
-      file << i << std::endl;
+      file << i << '\n';
       for (int j = 0; j < 4; j++) {
-        file << 1.5 * j / 0.9 << std::endl;
+        file << 1.5 * j / 0.9 << '\n';
       }
     }
     file.unsetf(std::ios_base::floatfield);
@@ -186,13 +186,13 @@ public:
     std::ofstream file(getTestFileName().c_str());
     m_abspath = getAbsPath();
     file << std::scientific;
-    file << "# X , Y, E, DX" << std::endl;
+    file << "# X , Y, E, DX\n";
     for (int i = 0; i < 5; i++) {
-      file << i << std::endl;
+      file << i << '\n';
       for (int j = 0; j < 4; j++) {
         if (!(i == 3 && j == 2)) {
           file << 1.5 * j / 0.9 << "," << (i + 1) * (2. + 4. * (1.5 * j / 0.9))
-               << "," << 1 << "," << 0 << std::endl;
+               << "," << 1 << "," << 0 << '\n';
         }
       }
     }
@@ -207,16 +207,16 @@ public:
     std::ofstream file(getTestFileName().c_str());
     m_abspath = getAbsPath();
     file << std::scientific;
-    file << "# X , Y, E, DX" << std::endl;
+    file << "# X , Y, E, DX\n";
     for (int i = 0; i < 5; i++) {
-      file << i << std::endl;
+      file << i << '\n';
       for (int j = 0; j < 4; j++) {
         if (!(i == 3 && j == 2)) {
           file << 1.5 * j / 0.9 << "," << (i + 1) * (2. + 4. * (1.5 * j / 0.9))
-               << "," << 1 << "," << 0 << std::endl;
+               << "," << 1 << "," << 0 << '\n';
         } else {
           file << 1.5 * j / 0.9 << "," << (i + 1) * (2. + 4. * (1.5 * j / 0.9))
-               << "," << 1 << std::endl;
+               << "," << 1 << '\n';
         }
       }
     }
@@ -231,18 +231,18 @@ public:
     std::ofstream file(getTestFileName().c_str());
     m_abspath = getAbsPath();
     file << std::scientific;
-    file << "# X , Y, E, DX" << std::endl;
+    file << "# X , Y, E, DX\n";
     for (int i = 0; i < 5; i++) {
-      file << i << std::endl;
+      file << i << '\n';
       for (int j = 0; j < 4; j++) {
         if (!(i == 3 && j == 2)) {
           file << 1.5 * j / 0.9 << "," << (i + 1) * (2. + 4. * (1.5 * j / 0.9))
-               << "," << 1 << "," << 0 << std::endl;
+               << "," << 1 << "," << 0 << '\n';
         } else {
           // used e to make sure it'd not get mistaken for a scientific index
           file << "e" << 1.5 * j / 0.9 << ","
                << (i + 1) * (2. + 4. * (1.5 * j / 0.9)) << "," << 1 << "," << 0
-               << std::endl;
+               << '\n';
         }
       }
     }
@@ -257,17 +257,17 @@ public:
     std::ofstream file(getTestFileName().c_str());
     m_abspath = getAbsPath();
     file << std::scientific;
-    file << "# X , Y, E, DX" << std::endl;
+    file << "# X , Y, E, DX\n";
     for (int i = 0; i < 5; i++) {
-      file << i << std::endl;
+      file << i << '\n';
       for (int j = 0; j < 4; j++) {
         if (!(i == 3 && j == 2)) {
           file << 1.5 * j / 0.9 << "," << (i + 1) * (2. + 4. * (1.5 * j / 0.9))
-               << "," << 1 << "," << 0 << std::endl;
+               << "," << 1 << "," << 0 << '\n';
         } else {
           file << "@" << 1.5 * j / 0.9 << ","
                << (i + 1) * (2. + 4. * (1.5 * j / 0.9)) << "," << 1 << "," << 0
-               << std::endl;
+               << '\n';
         }
       }
     }
@@ -282,18 +282,18 @@ public:
     std::ofstream file(getTestFileName().c_str());
     m_abspath = getAbsPath();
     file << std::scientific;
-    file << "# X , Y, E, DX" << std::endl;
+    file << "# X , Y, E, DX\n";
     for (int i = 0; i < 5; i++) {
-      file << i << std::endl;
+      file << i << '\n';
       for (int j = 0; j < 4; j++) {
         if (!(i == 3 && j == 2)) {
           file << 1.5 * j / 0.9 << "," << (i + 1) * (2. + 4. * (1.5 * j / 0.9))
-               << "," << 1 << "," << 0 << std::endl;
+               << "," << 1 << "," << 0 << '\n';
         } else {
           // used e to make sure it'd not get mistaken for a scientific index
           file << 1.5 * j / 0.9 << "," << (i + 1) * (2. + 4. * (1.5 * j / 0.9))
                << "e"
-               << "," << 1 << "," << 0 << std::endl;
+               << "," << 1 << "," << 0 << '\n';
         }
       }
     }
@@ -308,17 +308,17 @@ public:
     std::ofstream file(getTestFileName().c_str());
     m_abspath = getAbsPath();
     file << std::scientific;
-    file << "# X , Y, E, DX" << std::endl;
+    file << "# X , Y, E, DX\n";
     for (int i = 0; i < 5; i++) {
-      file << i << std::endl;
+      file << i << '\n';
       for (int j = 0; j < 4; j++) {
         if (!(i == 3 && j == 2)) {
           file << 1.5 * j / 0.9 << "," << (i + 1) * (2. + 4. * (1.5 * j / 0.9))
-               << "," << 1 << "," << 0 << std::endl;
+               << "," << 1 << "," << 0 << '\n';
         } else {
           file << 1.5 * j / 0.9 << "," << (i + 1) * (2. + 4. * (1.5 * j / 0.9))
                << "/"
-               << "," << 1 << "," << 0 << std::endl;
+               << "," << 1 << "," << 0 << '\n';
         }
       }
     }
@@ -334,16 +334,16 @@ public:
     m_abspath = getAbsPath();
 
     file << std::scientific;
-    file << "# X , Y, E, DX" << std::endl;
+    file << "# X , Y, E, DX\n";
     for (int i = 0; i < 5; i++) {
       if (i != 3) {
-        file << i << std::endl;
+        file << i << '\n';
       } else {
-        file << std::endl;
+        file << '\n';
       }
       for (int j = 0; j < 4; j++) {
         file << 1.5 * j / 0.9 << "," << (i + 1) * (2. + 4. * (1.5 * j / 0.9))
-             << "," << 1 << "," << 0 << std::endl;
+             << "," << 1 << "," << 0 << '\n';
       }
     }
     file.unsetf(std::ios_base::floatfield);
@@ -379,13 +379,13 @@ private:
         file << std::scientific;
       }
       if (header) {
-        file << comment << "X , Y" << std::endl;
+        file << comment << "X , Y\n";
       }
       for (int i = 0; i < 5; i++) {
-        file << i << std::endl;
+        file << i << '\n';
         for (int j = 0; j < 4; j++) {
           file << 1.5 * j / 0.9 << "," << (i + 1) * (2. + 4. * (1.5 * j / 0.9))
-               << std::endl;
+               << '\n';
         }
       }
       file.unsetf(std::ios_base::floatfield);

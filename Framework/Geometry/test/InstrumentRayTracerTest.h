@@ -150,7 +150,7 @@ public:
    */
   void doTestRectangularDetector(std::string message, Instrument_sptr inst,
                                  V3D testDir, int expectX, int expectY) {
-    //    std::cout << message << std::endl;
+    //    std::cout << message << '\n';
     InstrumentRayTracer tracker(inst);
     testDir.normalize(); // Force to be unit vector
     tracker.traceFromSample(testDir);

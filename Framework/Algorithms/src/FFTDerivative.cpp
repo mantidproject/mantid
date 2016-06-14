@@ -297,7 +297,7 @@ void FFTDerivative::execRealFFT() {
     if (x.size() != x0.size() &&
         false) // TODO: doesn't work at the moment. needs to be working
     {
-      std::cerr << "(my != x0.size()) " << x0[0] << "!=" << x[0] << std::endl;
+      std::cerr << "(my != x0.size()) " << x0[0] << "!=" << x[0] << '\n';
       dx = x0[0] - x[0];
       assert(dx > 0.0);
       double f = (x0[0] - x[0]) / (x0[1] - x0[0]);

@@ -137,8 +137,7 @@ void EQSANSTofStructure::execEvent(
       det = inputWS->getDetector(ispec);
     } catch (Exception::NotFoundError &) {
       g_log.warning() << "Workspace index " << ispec
-                      << " has no detector assigned to it - discarding"
-                      << std::endl;
+                      << " has no detector assigned to it - discarding\n";
       // 'continue' statement moved outside catch block because Mac Intel
       // compiler has a problem with it being here in an openmp block.
     }
@@ -453,22 +452,19 @@ double EQSANSTofStructure::getTofOffset(EventWorkspace_const_sptr inputWS,
   double source_to_detector = (detector_z - source_z) * 1000.0;
   frame_tof0 = frame_srcpulse_wl_1 / 3.9560346 * source_to_detector;
 
-  g_log.information() << "Frame width " << tmp_frame_width << std::endl;
-  g_log.information() << "TOF offset = " << frame_tof0 << " microseconds"
-                      << std::endl;
+  g_log.information() << "Frame width " << tmp_frame_width << '\n';
+  g_log.information() << "TOF offset = " << frame_tof0 << " microseconds\n";
   g_log.information() << "Band defined by T1-T4 " << frame_wl_1 << " "
                       << frame_wl_2;
   if (frame_skipping)
     g_log.information() << " + " << frameskip_wl_1 << " " << frameskip_wl_2
-                        << std::endl;
+                        << '\n';
   else
-    g_log.information() << std::endl;
-  g_log.information() << "Chopper    Actual Phase    Lambda1    Lambda2"
-                      << std::endl;
+    g_log.information() << '\n';
+  g_log.information() << "Chopper    Actual Phase    Lambda1    Lambda2\n";
   for (int i = 0; i < 4; i++)
     g_log.information() << i << "    " << chopper_actual_phase[i] << "  "
-                        << chopper_wl_1[i] << "  " << chopper_wl_2[i]
-                        << std::endl;
+                        << chopper_wl_1[i] << "  " << chopper_wl_2[i] << '\n';
 
   double low_wl_discard = 3.9560346 * low_tof_cut / source_to_detector;
   double high_wl_discard = 3.9560346 * high_tof_cut / source_to_detector;

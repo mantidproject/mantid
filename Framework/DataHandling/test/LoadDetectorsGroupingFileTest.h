@@ -120,19 +120,18 @@ public:
   ScopedFile generateAutoGroupIDGroupXMLFile(std::string xmlfilename) {
     std::ostringstream os;
 
-    os << "<?xml version=\"1.0\"?>" << std::endl;
-    os << "<detector-grouping instrument=\"VULCAN\">" << std::endl;
-    os << "  <group>" << std::endl;
-    os << "    <detids>26250-27481,27500-28731,28750-29981</detids>"
-       << std::endl;
-    os << "  </group>" << std::endl;
-    os << "  <group>" << std::endl;
-    os << "    <component>bank26</component>" << std::endl;
-    os << "    <component>bank27</component>" << std::endl;
-    os << "    <component>bank28</component>" << std::endl;
+    os << "<?xml version=\"1.0\"?>\n";
+    os << "<detector-grouping instrument=\"VULCAN\">\n";
+    os << "  <group>\n";
+    os << "    <detids>26250-27481,27500-28731,28750-29981</detids>\n";
+    os << "  </group>\n";
+    os << "  <group>\n";
+    os << "    <component>bank26</component>\n";
+    os << "    <component>bank27</component>\n";
+    os << "    <component>bank28</component>\n";
 
-    os << "  </group>" << std::endl;
-    os << "</detector-grouping>" << std::endl;
+    os << "  </group>\n";
+    os << "</detector-grouping>\n";
 
     return ScopedFile(os.str(), xmlfilename);
   }
@@ -170,19 +169,18 @@ public:
   ScopedFile generateSpectrumIDXMLFile(std::string xmlfilename) {
     std::ostringstream os;
 
-    os << "<?xml version=\"1.0\"?>" << std::endl;
-    os << "<detector-grouping>" << std::endl;
-    os << "  <group>" << std::endl;
-    os << "    <ids>30-36,12-16,100-111</ids>" << std::endl;
-    os << "  </group>" << std::endl;
-    os << "  <group>" << std::endl;
-    os << "    <ids>38</ids>" << std::endl;
-    os << "    <ids>291</ids>" << std::endl;
-    os << "    <ids>22-25</ids>" << std::endl;
-    os << "  </group>" << std::endl;
-    os << "  <group name=\"bwd2\"><ids val=\"333,444,555\"/>334,557</group>"
-       << std::endl;
-    os << "</detector-grouping>" << std::endl;
+    os << "<?xml version=\"1.0\"?>\n";
+    os << "<detector-grouping>\n";
+    os << "  <group>\n";
+    os << "    <ids>30-36,12-16,100-111</ids>\n";
+    os << "  </group>\n";
+    os << "  <group>\n";
+    os << "    <ids>38</ids>\n";
+    os << "    <ids>291</ids>\n";
+    os << "    <ids>22-25</ids>\n";
+    os << "  </group>\n";
+    os << "  <group name=\"bwd2\"><ids val=\"333,444,555\"/>334,557</group>\n";
+    os << "</detector-grouping>\n";
 
     return ScopedFile(os.str(), xmlfilename);
   }
@@ -220,12 +218,11 @@ public:
   ScopedFile generateOldSpectrumIDXMLFile(std::string xmlfilename) {
     std::ostringstream os;
 
-    os << "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>" << std::endl;
-    os << "<detector-grouping>" << std::endl;
-    os << "  <group name=\"fwd1\"> <ids val=\"1-32\"/> </group>" << std::endl;
-    os << "  <group name=\"bwd1\"> <ids val=\"33,36,38,60-64\"/> </group>"
-       << std::endl;
-    os << "</detector-grouping>" << std::endl;
+    os << "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n";
+    os << "<detector-grouping>\n";
+    os << "  <group name=\"fwd1\"> <ids val=\"1-32\"/> </group>\n";
+    os << "  <group name=\"bwd1\"> <ids val=\"33,36,38,60-64\"/> </group>\n";
+    os << "</detector-grouping>\n";
 
     return ScopedFile(os.str(), xmlfilename);
   }
@@ -263,24 +260,20 @@ public:
   void test_MapFile_General() {
     std::stringstream ss;
 
-    using std::endl;
-
-    ss << "3" << endl
-       << "# Group 1" << endl
-       << "111" << endl
-       << "2" << endl
-       << " 1 " << endl
-       << " 2" << endl
-       << "  # Group 2" << endl
-       << "222" << endl
-       << endl
-       << " 1  " << endl
-       << " 3  " << endl
-       << "# Group 3" << endl
-       << "333" << endl
-       << "3" << endl
-       << " 4   5   6" << endl
-       << endl;
+    ss << "3\n"
+       << "# Group 1\n"
+       << "111\n"
+       << "2\n"
+       << " 1 \n"
+       << " 2\n"
+       << "  # Group 2\n"
+       << "222\n\n"
+       << " 1  \n"
+       << " 3  \n"
+       << "# Group 3\n"
+       << "333\n"
+       << "3\n"
+       << " 4   5   6\n\n";
 
     ScopedFile file(ss.str(), "test_mapfile_general.map");
 
@@ -311,22 +304,19 @@ public:
   void test_MapFile_Ranges() {
     std::stringstream ss;
 
-    using std::endl;
-
-    ss << "3" << endl
-       << "  # Group 1" << endl
-       << "111" << endl
-       << "3" << endl
-       << " 1-   2 3  " << endl
-       << "# Group 2" << endl
-       << "222" << endl
-       << " 2  " << endl
-       << " 4 - 5 " << endl
-       << "# Group 3" << endl
-       << "333" << endl
-       << "2" << endl
-       << " 6   -7" << endl
-       << endl;
+    ss << "3\n"
+       << "  # Group 1\n"
+       << "111\n"
+       << "3\n"
+       << " 1-   2 3  \n"
+       << "# Group 2\n"
+       << "222\n"
+       << " 2  \n"
+       << " 4 - 5 \n"
+       << "# Group 3\n"
+       << "333\n"
+       << "2\n"
+       << " 6   -7\n\n";
 
     ScopedFile file(ss.str(), "test_mapfile_ranges.map");
 
@@ -358,12 +348,10 @@ public:
   void test_MapFile_BadSpectraNumber() {
     std::stringstream ss;
 
-    using std::endl;
-
-    ss << "1" << endl
-       << "111" << endl
-       << "3" << endl
-       << "1-6" << endl;
+    ss << "1\n"
+       << "111\n"
+       << "3\n"
+       << "1-6\n";
 
     ScopedFile file(ss.str(), "test_mapfile_badspectranumber.map");
 
@@ -387,11 +375,9 @@ public:
   void test_MapFile_PrematureEndOfFile() {
     std::stringstream ss;
 
-    using std::endl;
-
-    ss << "1" << endl
-       << "111" << endl
-       << "3" << endl;
+    ss << "1\n"
+       << "111\n"
+       << "3\n";
 
     ScopedFile file(ss.str(), "test_mapfile_prematureendoffile.map");
 
@@ -415,12 +401,10 @@ public:
   void test_MapFile_NotANumber() {
     std::stringstream ss;
 
-    using std::endl;
-
-    ss << "1" << endl
-       << "111" << endl
-       << "a" << endl
-       << "1-3" << endl;
+    ss << "1\n"
+       << "111\n"
+       << "a\n"
+       << "1-3\n";
 
     ScopedFile file(ss.str(), "test_mapfile_notanumber.map");
 
@@ -445,13 +429,13 @@ public:
   void test_SelectIdfUsingSpecifiedDate() {
     std::ostringstream os;
 
-    os << "<?xml version=\"1.0\"?>" << std::endl;
+    os << "<?xml version=\"1.0\"?>\n";
     os << "<detector-grouping instrument=\"EMU\" idf-date=\"2009-12-30 "
-          "00:00:00\">" << std::endl;
-    os << "  <group>" << std::endl;
-    os << "    <ids>1</ids>" << std::endl;
-    os << "  </group>" << std::endl;
-    os << "</detector-grouping>" << std::endl;
+          "00:00:00\">\n";
+    os << "  <group>\n";
+    os << "    <ids>1</ids>\n";
+    os << "  </group>\n";
+    os << "</detector-grouping>\n";
 
     ScopedFile file(os.str(), "test_SelectIdfUsingSpecifiedDate.xml");
 

@@ -223,14 +223,12 @@ void MWView::checkRangeLimits() {
         boost::math::isnan(max) || boost::math::isinf(max)) {
       mess << "Dimension " << m_workspace->getDimension(d)->getName()
            << " has a bad range: (";
-      mess << min << ", " << max << ")" << std::endl;
+      mess << min << ", " << max << ")\n";
     }
   }
   if (!mess.str().empty()) {
     mess << "Bad ranges could cause memory allocation errors. Please fix the "
-            "workspace.";
-    mess << std::endl
-         << "You can continue using Mantid.";
+            "workspace.\nYou can continue using Mantid.";
     throw std::out_of_range(mess.str());
   }
 }

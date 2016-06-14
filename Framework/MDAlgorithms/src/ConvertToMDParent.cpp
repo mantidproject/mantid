@@ -314,9 +314,8 @@ ConvertToMDParent::preprocessDetectorsPositions(
               "ActualDetectorsNum");
       for (uint32_t i = 0; i < NDetectors; i++)
         if (isNaN(*(eFixed + i)))
-          throw(
-              std::invalid_argument("Undefined eFixed energy for detector N: " +
-                                    boost::lexical_cast<std::string>(i)));
+          throw(std::invalid_argument(
+              "Undefined eFixed energy for detector N: " + std::to_string(i)));
     }
   }
 

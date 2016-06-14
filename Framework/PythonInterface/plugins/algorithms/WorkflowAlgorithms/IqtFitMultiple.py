@@ -1,9 +1,8 @@
 #pylint: disable=no-init, too-many-instance-attributes
-from mantid import logger, AlgorithmFactory
-from mantid.api import *
-from mantid.kernel import *
+from mantid.api import (PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty,
+                        ITableWorkspaceProperty, WorkspaceGroupProperty, Progress)
+from mantid.kernel import Direction, FloatBoundedValidator, IntBoundedValidator, logger
 from mantid.simpleapi import *
-import os.path
 
 class IqtFitMultiple(PythonAlgorithm):
 
@@ -151,7 +150,7 @@ class IqtFitMultiple(PythonAlgorithm):
 
         #fit multi-domian functino to workspace
         fit_prog = Progress(self, start=0.1, end=0.8, nreports=2)
-        multi_domain_func, kwargs = self._create_iqt_multi_domain_function(self._function, tmp_fit_workspace)
+        multi_domain_func, kwargs = self._create_mutli_domain_func(self._function, tmp_fit_workspace)
         fit_prog.report('Fitting...')
         Fit(Function=multi_domain_func,
             InputWorkspace=tmp_fit_workspace,
@@ -209,7 +208,7 @@ class IqtFitMultiple(PythonAlgorithm):
         conclusion_prog.report('Algorithm complete')
 
 
-    def _create_iqt_multi_domain_function(self, function, input_ws):
+    def _create_mutli_domain_func(self, function, input_ws):
         multi= 'composite=MultiDomainFunction,NumDeriv=true;'
         comp = '(composite=CompositeFunction,NumDeriv=true,$domains=i;' + function + ');'
 
