@@ -953,9 +953,9 @@ public:
     Workspace_sptr ws = WorkspaceFactory::Instance().create(
         "Workspace2D", histogramNumber, timechannels, timechannels);
     Workspace2D_sptr ws2D = boost::dynamic_pointer_cast<Workspace2D>(ws);
-	Mantid::MantidVec &x = ws2D->dataX(0); // x-values
-	for (int i = 0; i < timechannels; i++)
-		x[i] = i;
+    Mantid::MantidVec &x = ws2D->dataX(0); // x-values
+    for (int i = 0; i < timechannels; i++)
+      x[i] = i;
     Mantid::MantidVec &y = ws2D->dataY(0); // y-values (counts)
     Mantid::MantidVec &e = ws2D->dataE(0); // error values of counts
 
