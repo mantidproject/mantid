@@ -38,6 +38,7 @@
 #include <QApplication>
 #include <Qsci/qscilexerpython.h>
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/Logger.h"
 
 #include <cassert>
 
@@ -56,6 +57,7 @@ PyMODINIT_FUNC init_qti();
 
 namespace {
 QString INIT_RCFILE = "mantidplotrc.py";
+Mantid::Kernel::Logger g_log("PythonScripting");
 }
 
 // Factory function
@@ -154,9 +156,7 @@ bool PythonScripting::start() {
   // Create a new dictionary for the math functions
   m_math = PyDict_New();
   // Keep a hold of the sys dictionary for accessing stdout/stderr
-  // and attach it as an attribute to globals (tradition)
   PyObject *sysmod = PyImport_ImportModule("sys");
-  PyDict_SetItemString(m_globals, "sys", sysmod);
   m_sys = PyModule_GetDict(sysmod);
   // Configure python paths to find our modules
   setupPythonPath();
@@ -182,6 +182,8 @@ bool PythonScripting::start() {
     return false;
   }
 
+  // Capture all stdout/stderr
+  redirectStdOut(true);
   QDir appPath(QApplication::applicationDirPath());
   if (loadInitFile(appPath.absoluteFilePath(INIT_RCFILE))) {
     d_initialized = true;
@@ -189,8 +191,6 @@ bool PythonScripting::start() {
     d_initialized = false;
   }
   if (d_initialized) {
-    // Capture all stdout/stderr
-    redirectStdOut(true);
     // We will be using C threads created outside of the Python threading module
     // so we need the GIL. This creates and acquires the lock for this thread
     PyEval_InitThreads();
@@ -406,7 +406,6 @@ bool PythonScripting::loadInitFile(const QString &filename) {
   if (!filename.endsWith(".py") || !QFileInfo(filename).isReadable()) {
     return false;
   }
-  // this->write(QString("Loading init file: ") + filename + "\n");
   // MG: The Python/C PyRun_SimpleFile function crashes on Windows when trying
   // to run
   // a simple text file which is why it is not used here
@@ -415,14 +414,16 @@ bool PythonScripting::loadInitFile(const QString &filename) {
   if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
     QByteArray data = file.readAll();
     success = (PyRun_SimpleString(data.data()) == 0);
+    if (!success) {
+      g_log.error() << "Error running init file \""
+                    << filename.toAscii().constData() << "\"\n";
+      PyErr_Print();
+    }
     file.close();
   } else {
-    this->write(QString("Error: Cannot open file \"") + filename + "\"\n");
+    g_log.error() << "Error: Cannot open file \""
+                  << filename.toAscii().constData() << "\"\n";
     success = false;
   }
-  if (!success) {
-    this->write("Error running init file \"" + filename + "\"\n");
-  }
-
   return success;
 }

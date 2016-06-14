@@ -190,24 +190,16 @@ void PythonScript::sendLineChangeSignal(int lineNo, bool error) {
  */
 void PythonScript::generateAutoCompleteList() {
   ScopedPythonGIL gil;
-
-  PyObject *main_module = PyImport_AddModule("__main__");
-  PyObject *method = FROM_CSTRING("_ScopeInspector_GetFunctionAttributes");
-  PyObject *keywords(NULL);
-  if (method && main_module) {
-    keywords = PyObject_CallMethodObjArgs(main_module, method, localDict, NULL);
-  } else {
-    return;
-  }
-  QStringList keywordList;
+  PyObject *keywords = PyObject_CallFunctionObjArgs(
+      PyDict_GetItemString(m_pythonEnv->globalDict(),
+                           "_ScopeInspector_GetFunctionAttributes"),
+      localDict, NULL);
   if (PyErr_Occurred() || !keywords) {
     PyErr_Print();
     return;
   }
-
-  keywordList = pythonEnv()->toStringList(keywords);
+  QStringList keywordList = pythonEnv()->toStringList(keywords);
   Py_DECREF(keywords);
-  Py_DECREF(method);
   emit autoCompleteListGenerated(keywordList);
 }
 
