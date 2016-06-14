@@ -62,7 +62,7 @@ presenter
 */
 void QDataProcessorWidget::setModel(QString name) {
   m_toOpen = name.toStdString();
-  m_presenter->notify(DataProcessorPresenter::TableUpdatedFlag);
+  m_presenter->notify(DataProcessorPresenter::OpenTableFlag);
 }
 
 /**
