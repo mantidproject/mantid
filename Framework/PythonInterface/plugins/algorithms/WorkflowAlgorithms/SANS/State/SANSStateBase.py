@@ -130,12 +130,12 @@ class PositiveIntegerParameter(TypedParameter):
 
 class DictParameter(TypedParameter):
     def __init__(self):
-        super(DictParameter, self).__init__(int, is_not_none)
+        super(DictParameter, self).__init__(dict, is_not_none)
 
 
 class ClassTypeParameter(TypedParameter):
-    def __init__(self, pure_type):
-        super(ClassTypeParameter, self).__init__(pure_type, is_not_none)
+    def __init__(self, class_type):
+        super(ClassTypeParameter, self).__init__(class_type, is_not_none)
 
     def _type_check(self, value):
         if not issubclass(value, self.parameter_type):

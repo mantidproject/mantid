@@ -1,23 +1,15 @@
 from abc import (ABCMeta, abstractmethod)
-from mantid.api import (AlgorithmManager, WorkspaceGroup, AnalysisDataService)
+from mantid.api import (WorkspaceGroup, AnalysisDataService)
 from SANSFileInformation import (SANSInstrument, SANSFileInformationFactory, SANSFileType, get_extension_for_file_type)
 from State.SANSStateData import (SANSStateData, SANSDataType)
 from Common.SANSConstants import SANSConstants
+from Common.SANSFunctions import (create_unmanaged_algorithm)
+from SANSCalibration import apply_calibration
 
 
 # -------------------
 # Free functions
 # -------------------
-
-def create_unmanaged_algorithm(name, **kwargs):
-    alg = AlgorithmManager.createUnmanaged(name)
-    alg.initialize()
-    alg.setChild(True)
-    for key, value in kwargs.iteritems():
-        alg.setProperty(key, value)
-    return alg
-
-
 def update_file_information(file_information_dict, factory, data_type, file_name):
     info = factory.create_sans_file_information(file_name)
     file_information_dict.update({data_type: info})
@@ -66,9 +58,9 @@ def is_transmission_type(to_check):
 def get_expected_workspace_names(file_information, is_transmission, period):
     suffix_file_type = get_extension_for_file_type(file_information)
     if is_transmission:
-        suffix_data = "trans"
+        suffix_data = SANSConstants.trans_suffix
     else:
-        suffix_data = "sans"
+        suffix_data = SANSConstants.sans_suffix
 
     run_number = file_information.get_run_number()
 
@@ -311,6 +303,11 @@ class SANSLoadISIS(SANSLoad):
             workspaces.update(workspace_pack)
             if workspace_monitors_pack is not None:
                 workspace_monitors.update(workspace_monitors_pack)
+
+        # Apply the calibration if any exists.
+        if data_info.calibration is not None:
+            apply_calibration(workspaces, workspace_monitors, use_loaded, publish_to_ads)
+
         return workspaces, workspace_monitors
 
 

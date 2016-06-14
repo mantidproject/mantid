@@ -40,13 +40,17 @@ class SANSInstrument(object):
 # -----------------------------------
 # Free Functions
 # -----------------------------------
+def find_full_file_path(file_name):
+    return FileFinder.getFullPath(file_name)
+
+
 def find_sans_file(file_name):
     """
     The file can be specified as:
     1. file.ext or \path1\path2\file.ext
     2. run number
     """
-    full_path = FileFinder.getFullPath(file_name)
+    full_path = find_full_file_path(file_name)
     if not full_path:
         runs = FileFinder.findRuns(file_name)
         if runs:

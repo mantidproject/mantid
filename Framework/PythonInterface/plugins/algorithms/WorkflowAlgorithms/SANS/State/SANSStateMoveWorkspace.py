@@ -30,7 +30,7 @@ class SANSStateMoveWorkspaceISIS(SANSStateBase, SANSStateMoveWorkspace):
         self.y_translation_correction = 0.0
         self.z_translation_correction = 0.0
 
-
+@sans_parameters
 class SANSStateMoveWorkspaceLOQ(SANSStateMoveWorkspaceISIS):
     monitor_names = DictParameter()
     center_position = FloatParameter()
@@ -55,7 +55,7 @@ class SANSStateMoveWorkspaceLOQ(SANSStateMoveWorkspaceISIS):
         set_state_from_property_manager(self, value)
 
     def validate(self):
-        pass
+        return True
 
 
 # -----------------------------------------------

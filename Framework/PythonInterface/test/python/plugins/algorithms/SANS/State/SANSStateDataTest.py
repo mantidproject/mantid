@@ -46,6 +46,9 @@ class SANSStateDataTest(unittest.TestCase):
         state.can_direct_period = period
         self.assertTrue(state.can_direct_period == period)
 
+        state.calibration = ws_name
+        self.assertTrue(state.calibration == ws_name)
+
         try:
             state.validate()
             is_valid = True
@@ -70,6 +73,8 @@ class SANSStateDataTest(unittest.TestCase):
             state.can_transmission = ["sdf"]
         with self.assertRaises(TypeError):
             state.can_direct = ["sdf"]
+        with self.assertRaises(TypeError):
+            state.calibration = ["sdf"]
 
         with self.assertRaises(TypeError):
             state.sample_scatter_period = ["sdf"]

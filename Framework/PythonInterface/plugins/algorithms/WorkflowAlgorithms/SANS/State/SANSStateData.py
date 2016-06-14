@@ -25,6 +25,9 @@ class SANSDataType(object):
     class CanDirect(object):
         pass
 
+    class Calibration(object):
+        pass
+
 
 def convert_to_data_type(as_string):
     if as_string == "sample_scatter":
@@ -39,6 +42,8 @@ def convert_to_data_type(as_string):
         return SANSDataType.CanTransmission
     elif as_string == "can_direct":
         return SANSDataType.CanDirect
+    elif as_string == "calibration":
+        return SANSDataType.Calibration
 
 
 # ------------------------------------------------
@@ -66,6 +71,8 @@ class SANSStateDataISIS(SANSStateBase, SANSStateData):
     can_transmission_period = PositiveIntegerParameter()
     can_direct = StringParameter()
     can_direct_period = PositiveIntegerParameter()
+
+    calibration = StringParameter()
 
     def __init__(self):
         super(SANSStateDataISIS, self).__init__()
