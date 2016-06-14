@@ -79,8 +79,8 @@ class DirectInelaticSNSTest(stresstesting.MantidStressTest):
         # par file
         f = open(os.path.join(self.customDataDir,"group.par"),'w')
         print >>f,len(ang_list)
-        for i in ang_list:
-            print >>f,5.5,ang_list[i],0.0,1.0,1.0,1
+        for angi in ang_list:
+            print >>f,5.5,angi,0.0,1.0,1.0,1
         f.close()
         return [ang_list,detIDlist]
 

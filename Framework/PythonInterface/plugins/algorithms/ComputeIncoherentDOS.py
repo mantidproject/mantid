@@ -1,9 +1,9 @@
 #pylint: disable = no-init, invalid-name, line-too-long, eval-used, unused-argument, too-many-locals, too-many-branches, too-many-statements
+import numpy as np
+from scipy import constants
 from mantid.kernel import CompositeValidator, Direction, FloatBoundedValidator
 from mantid.api import mtd, AlgorithmFactory, CommonBinsValidator, HistogramValidator, MatrixWorkspaceProperty, PythonAlgorithm
 from mantid.simpleapi import *
-import numpy as np
-from scipy import constants
 
 def evaluateEbin(Emin, Emax, Ei, strn):
     return [eval(estr) for estr in strn.split(',')]
@@ -71,7 +71,7 @@ class ComputeIncoherentDOS(PythonAlgorithm):
         QSumRange = self.getPropertyValue('QSumRange')
         EnergyBinning = self.getPropertyValue('EnergyBinning')
         cm = int(self.getPropertyValue('Wavenumbers'))
-        absunits = int(self.getPropertyValue('StatesPerEnergy'))
+        absunits = bool(self.getPropertyValue('StatesPerEnergy'))
 
         # Checks if the input workspace is valid, and which way around it is (Q along x or Q along y).
         u0 = inws.getAxis(0).getUnit().unitID()
@@ -172,9 +172,9 @@ class ComputeIncoherentDOS(PythonAlgorithm):
         if cm:
             y = y/mev2cm
             e = e/mev2cm
-            yunit = 'DeltaE_inWavenumber'
+            #yunit = 'DeltaE_inWavenumber'
         else:
-            yunit = 'DeltaE'
+            #yunit = 'DeltaE'
 
         # Outputs the calculated density of states to another workspace
         dos2d = CloneWorkspace(inws)
