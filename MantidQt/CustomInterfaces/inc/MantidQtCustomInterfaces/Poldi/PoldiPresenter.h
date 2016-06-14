@@ -4,6 +4,7 @@
 #include "MantidQtCustomInterfaces/Poldi/IPoldiPresenter.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorPresenter.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/WorkspaceReceiver.h"
+#include <boost/shared_ptr.hpp>
 
 using MantidQt::MantidWidgets::DataProcessorPresenter;
 using MantidQt::MantidWidgets::WorkspaceReceiver;
