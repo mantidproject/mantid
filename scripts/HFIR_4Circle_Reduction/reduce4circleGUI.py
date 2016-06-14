@@ -142,6 +142,8 @@ class MainWindow(QtGui.QMainWindow):
                      self.do_refine_ub)
         self.connect(self.ui.pushButton_refineUBFFT, QtCore.SIGNAL('clicked()'),
                      self.do_refine_ub_fft)
+        self.connect(self.ui.pushButton_findUBLattice, QtCore.SIGNAL('clicked()'),
+                     self.do_cal_ub_lattice)
 
         # Tab 'Setup'
         self.connect(self.ui.pushButton_useDefaultDir, QtCore.SIGNAL('clicked()'),
@@ -180,7 +182,7 @@ class MainWindow(QtGui.QMainWindow):
                      self.evt_apply_lorentz_correction_mt)
         self.connect(self.ui.pushButton_exportPeaks, QtCore.SIGNAL('clicked()'),
                      self.do_export_to_fp)
-        self.connect(self.ui.checkBox_selectAllScans2Merge, QtCore.SIGNAL('stateChanged(int)'),
+        self.connect(self.ui.pushButton_selectAllScans2Merge, QtCore.SIGNAL('clicked()'),
                      self.do_select_merged_scans)
         self.connect(self.ui.pushButton_indexMergedScans, QtCore.SIGNAL('clicked()'),
                      self.do_set_peaks_hkl)
@@ -221,6 +223,15 @@ class MainWindow(QtGui.QMainWindow):
         self.connect(self.ui.pushButton_clearSurvey, QtCore.SIGNAL('clicked()'),
                      self.do_clear_survey)
 
+        self.connect(self.ui.lineEdit_numSurveyOutput, QtCore.SIGNAL('editingFinished()'),
+                     self.print_edit_finished)
+        self.connect(self.ui.lineEdit_numSurveyOutput, QtCore.SIGNAL('returnPressed()'),
+                     self.print_return_pressed)
+        self.connect(self.ui.lineEdit_numSurveyOutput, QtCore.SIGNAL('textChanged(const QString&)'),
+                     self.print_text_changed)
+        self.connect(self.ui.lineEdit_numSurveyOutput, QtCore.SIGNAL('textEdited(const QString&)'),
+                     self.print_text_edited)
+
         # Tab k-shift vector
         self.connect(self.ui.pushButton_addKShift, QtCore.SIGNAL('clicked()'),
                      self.do_add_k_shift_vector)
@@ -255,6 +266,15 @@ class MainWindow(QtGui.QMainWindow):
         self.load_settings()
 
         return
+
+    def print_edit_finished(self):
+        print 'Edit finished'
+    def print_return_pressed(self):
+        print 'Return pressed'
+    def print_text_changed(self):
+        print 'Text changed'
+    def print_text_edited(self):
+        print 'Text edited'
 
     def _init_widgets(self):
         """ Initialize the table widgets
@@ -952,9 +972,10 @@ class MainWindow(QtGui.QMainWindow):
 
         # write
         user_header = str(self.ui.lineEdit_fpHeader.text())
-        print '[DB...BAT] user header: ', user_header
         try:
-            self._myControl.export_to_fullprof(exp_number, scan_number_list, user_header, fp_name)
+            file_content = self._myControl.export_to_fullprof(exp_number, scan_number_list, user_header,
+                                                              fp_name)
+            self.ui.plainTextEdit_fpContent.setPlainText(file_content)
         except AssertionError as a_error:
             self.pop_one_button_dialog(str(a_error))
         except RuntimeError as r_error:
@@ -1673,6 +1694,22 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
+    def do_cal_ub_lattice(self):
+        """
+        Calculate UB matrix constrained by lattice parameters
+        :return:
+        """
+        # get peak information list
+        peak_info_list = self._build_peak_info_list()
+        set_hkl_int = self.ui.checkBox_roundHKLInt.isChecked()
+        lattice_parameters = self._get_lattice_parameters()
+
+        # refine UB matrix by constraint on lattice parameters
+        status, ret_obj = self._myControl.refine_ub_matrix_by_lattice(peak_info_list, set_hkl_int,
+                                                                     lattice_parameters)
+
+        return
+
     def do_refine_ub_fft(self):
         """
         Refine UB matrix by calling FFT method
@@ -1923,9 +1960,15 @@ class MainWindow(QtGui.QMainWindow):
         """ Select or deselect all rows in the merged scan table
         :return:
         """
-        curr_state = self.ui.checkBox_selectAllScans2Merge.isChecked()
+        # get current status
+        curr_state = str(self.ui.pushButton_selectAllScans2Merge.text()).startswith('Select')
+
+        # select/deselect all
         for row_index in range(self.ui.tableWidget_mergeScans.rowCount()):
             self.ui.tableWidget_mergeScans.select_all_rows(curr_state)
+
+        # set the text to the push button
+        self.ui.pushButton_selectAllScans2Merge.setText('Deselect All')
 
         return
 

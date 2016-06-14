@@ -608,15 +608,16 @@ class CWSCDReductionControl(object):
         # END-FOR (scan_number)
 
         try:
-            fputility.write_scd_fullprof_kvector(user_header=user_header, wave_length=exp_wave_length,
-                                                 k_vector_dict=k_shift_dict, peak_dict_list=peaks,
-                                                 fp_file_name=fullprof_file_name)
+            file_content = fputility.write_scd_fullprof_kvector(
+                user_header=user_header, wave_length=exp_wave_length,
+                k_vector_dict=k_shift_dict, peak_dict_list=peaks,
+                fp_file_name=fullprof_file_name)
         except AssertionError as error:
             return False, str(error)
         except RuntimeError as error:
             return False, str(error)
 
-        return
+        return file_content
 
     def export_md_data(self, exp_number, scan_number, base_file_name):
         """
@@ -1737,6 +1738,38 @@ class CWSCDReductionControl(object):
             return False, 'Unable to refine UB matrix due to %s.' % str(e)
 
         # Get peak workspace
+        self._refinedUBTup = self._get_refined_ub_data(ub_peak_ws_name)
+
+        return
+
+    def refine_ub_matrix_by_lattice(self, peak_info_list, set_hkl_int,  ub_matrix_str, unit_cell_type):
+        """
+
+        :param peak_info_list:
+        :param set_hkl_int:
+        :param lattice_parameters:
+        :return:
+        """
+        # check inputs
+        # ...
+        # blabla
+
+        # construct a new workspace by combining all single peaks
+        ub_peak_ws_name = 'TestUBPeakWorkspace'
+        self._build_peaks_workspace(peak_info_list, ub_peak_ws_name, False, set_hkl_int)
+
+        # set UB matrix from ...
+        api.SetUB(Workspace=ub_peak_ws_name,
+                  UB=ub_matrix_str)
+        #UB='0.0810781,0.151318,0.00908505,-0.128842,0.00755597,-0.00244917,-0.0211994,-0.0271922,0.049838')
+
+        # optimize UB matrix by contraining lattice parameter to unit cell type
+        api.OptimizeLatticeForCellType(PeaksWorkspace=ub_peak_ws_name,
+                                       CellType=unit_cell_type,
+                                       Apply=True,
+                                       OutputDirectory=self._workDir)
+
+        # get refined ub matrix
         self._refinedUBTup = self._get_refined_ub_data(ub_peak_ws_name)
 
         return

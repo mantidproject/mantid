@@ -79,8 +79,11 @@ def write_scd_fullprof_kvector(user_header, wave_length, k_vector_dict, peak_dic
     # END-FOR (peak_dict)
 
     # write to file
-    ofile = open(fp_file_name, 'w')
-    ofile.write(fp_buffer)
-    ofile.close()
+    try:
+        ofile = open(fp_file_name, 'w')
+        ofile.write(fp_buffer)
+        ofile.close()
+    except IOError as io_err:
+        raise RuntimeError('Unable to write to Fullprof single crystal file at %s.' % fp_file_name)
 
-    return
+    return fp_buffer
