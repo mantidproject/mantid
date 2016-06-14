@@ -56,13 +56,29 @@ def set_state_from_property_manager(instance, property_manager):
         setattr(instance, key, value)
 
 
+# ---------------------------------------------------------------
+# Validator functions
+# ---------------------------------------------------------------
+def is_not_none(value):
+    return value is not None
+
+
+def is_positive(value):
+    return value >= 0
+
+
 # -------------------------------------------------------
 # Parameters
 # -------------------------------------------------------
 class TypedParameter(object):
-    def __init__(self, name, parameter_type, validator=lambda x: True):
-        self._typed_parameter_name = name
-        self.name = "_" + name
+    __counter = 0
+
+    def __init__(self, parameter_type, validator=lambda x: True):
+        cls = self.__class__
+        prefix = cls.__name__
+        index = cls.__counter
+        # Name which is used to store value in the instance. Will be unique.
+        self.name = '_{}#{}'.format(prefix, index)
         self.parameter_type = parameter_type
         self.value = None
         self.validator = validator
@@ -77,10 +93,8 @@ class TypedParameter(object):
                 return None
 
     def __set__(self, instance, value):
-        if not isinstance(value, self.parameter_type):
-            raise TypeError("Trying to set {} which expects a value of type {}."
-                            " Got a value of {} which is of type: {}".format(self.name, str(self.parameter_type),
-                                                                             str(value), str(type(value))))
+        # Perform a type check
+        self._type_check(value)
 
         if self.validator(value):
             # The descriptor should be holding onto its own copy
@@ -92,16 +106,42 @@ class TypedParameter(object):
     def __delete__(self):
         raise AttributeError("Cannot delete the attribute {}".format(self.name))
 
+    def _type_check(self, value):
+        if not isinstance(value, self.parameter_type):
+            raise TypeError("Trying to set {} which expects a value of type {}."
+                            " Got a value of {} which is of type: {}".format(self.name, str(self.parameter_type),
+                                                                             str(value), str(type(value))))
 
-# ---------------------------------------------------------------
-# Validator functions
-# ---------------------------------------------------------------
-def is_not_none(value):
-    return value is not None
+
+class StringParameter(TypedParameter):
+    def __init__(self):
+        super(StringParameter, self).__init__(str, is_not_none)
 
 
-def is_positive(value):
-    return value >= 0
+class FloatParameter(TypedParameter):
+    def __init__(self):
+        super(FloatParameter, self).__init__(float, is_not_none)
+
+
+class PositiveIntegerParameter(TypedParameter):
+    def __init__(self):
+        super(PositiveIntegerParameter, self).__init__(int, is_positive)
+
+
+class DictParameter(TypedParameter):
+    def __init__(self):
+        super(DictParameter, self).__init__(int, is_not_none)
+
+
+class ClassTypeParameter(TypedParameter):
+    def __init__(self, pure_type):
+        super(ClassTypeParameter, self).__init__(pure_type, is_not_none)
+
+    def _type_check(self, value):
+        if not issubclass(value, self.parameter_type):
+            raise TypeError("Trying to set {} which expects a value of type {}."
+                            " Got a value of {} which is of type: {}".format(self.name, str(self.parameter_type),
+                                                                             str(value), str(value)))
 
 
 # ------------------------------------------------
@@ -123,3 +163,10 @@ class SANSStateBase(object):
     @abstractmethod
     def validate(self):
         pass
+
+
+def sans_parameters(cls):
+    for attribute_name, attribute_value in cls.__dict__.iteritems():
+        if isinstance(attribute_value, TypedParameter):
+            attribute_value.name = '_{}#{}'.format(type(attribute_value).__name__, attribute_name)
+    return cls

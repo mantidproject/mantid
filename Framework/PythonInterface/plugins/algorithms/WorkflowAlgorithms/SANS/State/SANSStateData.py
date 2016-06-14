@@ -1,6 +1,6 @@
 ﻿import json
-from SANSStateBase import (SANSStateBase, TypedParameter, is_not_none, is_positive,
-                           convert_state_to_dict, set_state_from_property_manager)
+from SANSStateBase import (SANSStateBase, StringParameter, PositiveIntegerParameter,
+                           convert_state_to_dict, set_state_from_property_manager, sans_parameters)
 
 
 # ------------------------------------
@@ -51,20 +51,21 @@ class SANSStateData(object):
 # -----------------------------------------------
 #  SANSStateData Setup for ISIS
 # -----------------------------------------------
+@sans_parameters
 class SANSStateDataISIS(SANSStateBase, SANSStateData):
-    sample_scatter = TypedParameter("sample_scatter", str, is_not_none)
-    sample_scatter_period = TypedParameter("sample_scatter_period", int, is_positive)
-    sample_transmission = TypedParameter("sample_transmission", str, is_not_none)
-    sample_transmission_period = TypedParameter("sample_transmission_period", int, is_positive)
-    sample_direct = TypedParameter("sample_direct", str, is_not_none)
-    sample_direct_period = TypedParameter("sample_direct_period", int, is_positive)
+    sample_scatter = StringParameter()
+    sample_scatter_period = PositiveIntegerParameter()
+    sample_transmission = StringParameter()
+    sample_transmission_period = PositiveIntegerParameter()
+    sample_direct = StringParameter()
+    sample_direct_period = PositiveIntegerParameter()
 
-    can_scatter = TypedParameter("can_scatter", str, is_not_none)
-    can_scatter_period = TypedParameter("can_scatter_period", int, is_positive)
-    can_transmission = TypedParameter("can_transmission", str, is_not_none)
-    can_transmission_period = TypedParameter("can_transmission_period", int, is_positive)
-    can_direct = TypedParameter("can_direct", str, is_not_none)
-    can_direct_period = TypedParameter("can_direct_period", int, is_positive)
+    can_scatter = StringParameter()
+    can_scatter_period = PositiveIntegerParameter()
+    can_transmission = StringParameter()
+    can_transmission_period = PositiveIntegerParameter()
+    can_direct = StringParameter()
+    can_direct_period = PositiveIntegerParameter()
 
     def __init__(self):
         super(SANSStateDataISIS, self).__init__()

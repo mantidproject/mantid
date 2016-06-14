@@ -1,10 +1,12 @@
-##
+#
 ## Tests for SANSState
 ##
 
 set ( TEST_PY_FILES
    SANSStateTest.py
    SANSStateDataTest.py
+   SANSStateReductionTest.py
+   SANSStateMoveWorkspaceTest.py
   )
 
 check_tests_valid ( ${CMAKE_CURRENT_SOURCE_DIR} ${TEST_PY_FILES} )

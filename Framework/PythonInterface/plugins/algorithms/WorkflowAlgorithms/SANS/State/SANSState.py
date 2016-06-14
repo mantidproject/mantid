@@ -3,7 +3,7 @@ import pickle
 import inspect
 from mantid.kernel import PropertyManager
 from State.SANSStateBase import (SANSStateBase, TypedParameter, convert_state_to_dict,
-                                 set_state_from_property_manager)
+                                 set_state_from_property_manager, sans_parameters)
 from SANSStateData import SANSStateData
 
 
@@ -29,8 +29,9 @@ class SANSState(object):
 # -----------------------------------------------
 # SANSState class
 # -----------------------------------------------
+@sans_parameters
 class SANSStateISIS(SANSStateBase, SANSState):
-    data = TypedParameter("data", SANSStateData, validator_sub_state)
+    data = TypedParameter(SANSStateData, validator_sub_state)
 
     def __init__(self):
         super(SANSStateISIS, self).__init__()

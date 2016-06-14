@@ -1,13 +1,14 @@
-﻿from SANSStateBase import (SANSStateBase, TypedParameter, is_not_none, is_positive,
-                           convert_state_to_dict, set_state_from_property_manager)
+﻿from SANSStateBase import (SANSStateBase, StringParameter, PositiveIntegerParameter,
+                           convert_state_to_dict, set_state_from_property_manager, sans_parameters)
 
 
 # -----------------------------------------------
 #  SANSStateData Setup for ISIS
 # -----------------------------------------------
+@sans_parameters
 class SANSStatePrototype(SANSStateBase):
-    parameter1 = TypedParameter("parameter1", str, is_not_none)
-    parameter2 = TypedParameter("parameter2", int, is_positive)
+    parameter1 = StringParameter()
+    parameter2 = PositiveIntegerParameter()
 
     def __init__(self):
         super(SANSStatePrototype, self).__init__()
