@@ -23,6 +23,10 @@ PoldiPresenter::PoldiPresenter(
   // presenter to communicate changes in the ADS
   // Without this the interface will crash
   m_presenter->accept(this);
+
+	// Set up the instrument selectors
+	std::vector<std::string> instruments = { "POLDI" };
+	m_presenter->setInstrumentList(instruments, "POLDI");
 }
 
 /** Default destructor */
