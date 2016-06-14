@@ -1,5 +1,5 @@
-#ifndef MANTID_ALGORITHMS_MAXENTENTROPY_H_
-#define MANTID_ALGORITHMS_MAXENTENTROPY_H_
+#ifndef MANTID_ALGORITHMS_MAXENTTRANSFORM_H_
+#define MANTID_ALGORITHMS_MAXENTTRANSFORM_H_
 
 #include "MantidAlgorithms/DllConfig.h"
 #include <vector>
@@ -7,8 +7,8 @@
 namespace Mantid {
 namespace Algorithms {
 
-/** MaxentEntropy : Abstract base class defining the necessary methods to
-  calculate any type of entropy to be used by MaxEnt
+/** MaxentTransform : Abstract base class defining MaxEnt transformations from
+  image space to data space and vice-versa
 
   Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
@@ -31,24 +31,19 @@ namespace Algorithms {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_ALGORITHMS_DLL MaxentEntropy {
+class MANTID_ALGORITHMS_DLL MaxentTransform {
 public:
   // Constructor
-  MaxentEntropy() = default;
+  MaxentTransform() = default;
   // Destructor
-  virtual ~MaxentEntropy() = default;
-  // First derivative of the entropy
-  virtual std::vector<double> derivative(const std::vector<double> &values,
-                                         double background) = 0;
-  // Second derivative of the entropy
-  virtual std::vector<double>
-  secondDerivative(const std::vector<double> &value) = 0;
-  // Corrects an invalid value
-  virtual std::vector<double> correctValues(const std::vector<double> &value,
-                                            double newValue) = 0;
+  virtual ~MaxentTransform() = default;
+  // Transfoms form image space to data space
+  virtual std::vector<double> imageToData(const std::vector<double> &image) = 0;
+  // Transforms from data space to image space
+  virtual std::vector<double> dataToImage(const std::vector<double> &data) = 0;
 };
 
 } // namespace Algorithms
 } // namespace Mantid
 
-#endif /* MANTID_ALGORITHMS_MAXENTENTROPY_H_ */
+#endif /* MANTID_ALGORITHMS_MAXENTTRANSFORM_H_ */

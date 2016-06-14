@@ -1,14 +1,12 @@
-#ifndef MANTID_ALGORITHMS_MAXENTENTROPY_H_
-#define MANTID_ALGORITHMS_MAXENTENTROPY_H_
+#ifndef MANTID_ALGORITHMS_MAXENTSPACEREAL_H_
+#define MANTID_ALGORITHMS_MAXENTSPACEREAL_H_
 
-#include "MantidAlgorithms/DllConfig.h"
-#include <vector>
+#include "MantidAlgorithms/MaxEnt/MaxentSpace.h"
 
 namespace Mantid {
 namespace Algorithms {
 
-/** MaxentEntropy : Abstract base class defining the necessary methods to
-  calculate any type of entropy to be used by MaxEnt
+/** MaxentSpaceReal : Defines the space of real numbers.
 
   Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
@@ -31,24 +29,19 @@ namespace Algorithms {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_ALGORITHMS_DLL MaxentEntropy {
+class MANTID_ALGORITHMS_DLL MaxentSpaceReal : public MaxentSpace {
 public:
   // Constructor
-  MaxentEntropy() = default;
+  MaxentSpaceReal() = default;
   // Destructor
-  virtual ~MaxentEntropy() = default;
-  // First derivative of the entropy
-  virtual std::vector<double> derivative(const std::vector<double> &values,
-                                         double background) = 0;
-  // Second derivative of the entropy
-  virtual std::vector<double>
-  secondDerivative(const std::vector<double> &value) = 0;
-  // Corrects an invalid value
-  virtual std::vector<double> correctValues(const std::vector<double> &value,
-                                            double newValue) = 0;
+  virtual ~MaxentSpaceReal() = default;
+  // Converts a real vector to a complex vector
+  std::vector<double> toComplex(const std::vector<double> &values) override;
+  // Converts a complex vector to a real vector
+  std::vector<double> fromComplex(const std::vector<double> &values) override;
 };
 
 } // namespace Algorithms
 } // namespace Mantid
 
-#endif /* MANTID_ALGORITHMS_MAXENTENTROPY_H_ */
+#endif /* MANTID_ALGORITHMS_MAXENTSPACEREAL_H_ */

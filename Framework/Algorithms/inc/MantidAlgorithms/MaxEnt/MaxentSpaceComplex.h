@@ -1,14 +1,12 @@
-#ifndef MANTID_ALGORITHMS_MAXENTENTROPY_H_
-#define MANTID_ALGORITHMS_MAXENTENTROPY_H_
+#ifndef MANTID_ALGORITHMS_MAXENTSPACECOMPLEX_H_
+#define MANTID_ALGORITHMS_MAXENTSPACECOMPLEX_H_
 
-#include "MantidAlgorithms/DllConfig.h"
-#include <vector>
+#include "MantidAlgorithms/MaxEnt/MaxentSpace.h"
 
 namespace Mantid {
 namespace Algorithms {
 
-/** MaxentEntropy : Abstract base class defining the necessary methods to
-  calculate any type of entropy to be used by MaxEnt
+/** MaxentSpaceComplex : Defines a space of complex numbers.
 
   Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
@@ -31,24 +29,19 @@ namespace Algorithms {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_ALGORITHMS_DLL MaxentEntropy {
+class MANTID_ALGORITHMS_DLL MaxentSpaceComplex : public MaxentSpace {
 public:
   // Constructor
-  MaxentEntropy() = default;
+  MaxentSpaceComplex() = default;
   // Destructor
-  virtual ~MaxentEntropy() = default;
-  // First derivative of the entropy
-  virtual std::vector<double> derivative(const std::vector<double> &values,
-                                         double background) = 0;
-  // Second derivative of the entropy
-  virtual std::vector<double>
-  secondDerivative(const std::vector<double> &value) = 0;
-  // Corrects an invalid value
-  virtual std::vector<double> correctValues(const std::vector<double> &value,
-                                            double newValue) = 0;
+  virtual ~MaxentSpaceComplex() = default;
+  // Converts a given vector to a complex vector
+  std::vector<double> toComplex(const std::vector<double> &values) override;
+  // Converts to a complex vector
+  std::vector<double> fromComplex(const std::vector<double> &values) override;
 };
 
 } // namespace Algorithms
 } // namespace Mantid
 
-#endif /* MANTID_ALGORITHMS_MAXENTENTROPY_H_ */
+#endif /* MANTID_ALGORITHMS_MAXENTSPACECOMPLEX_H_ */
