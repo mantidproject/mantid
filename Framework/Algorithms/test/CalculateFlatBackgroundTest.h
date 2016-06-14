@@ -473,7 +473,7 @@ private:
       physicalPixel->setPos(detXPos, ypos, 0.0);
       testInst->add(physicalPixel);
       testInst->markAsMonitor(physicalPixel);
-      WS->getSpectrum(i)->addDetectorID(physicalPixel->getID());
+      WS->getSpectrum(i).addDetectorID(physicalPixel->getID());
     }
   }
 };

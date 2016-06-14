@@ -104,9 +104,9 @@ public:
     if (outws->getNumberHistograms() != 3)
       return;
 
-    TS_ASSERT_EQUALS(outws->getSpectrum(0)->getSpectrumNo(), 1);
-    TS_ASSERT_EQUALS(outws->getSpectrum(1)->getSpectrumNo(), 3);
-    TS_ASSERT_EQUALS(outws->getSpectrum(2)->getSpectrumNo(), 5);
+    TS_ASSERT_EQUALS(outws->getSpectrum(0).getSpectrumNo(), 1);
+    TS_ASSERT_EQUALS(outws->getSpectrum(1).getSpectrumNo(), 3);
+    TS_ASSERT_EQUALS(outws->getSpectrum(2).getSpectrumNo(), 5);
 
     API::AnalysisDataService::Instance().remove("TestWS");
   }

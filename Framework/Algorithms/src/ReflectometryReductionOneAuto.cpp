@@ -36,16 +36,6 @@ using namespace Mantid::API;
 DECLARE_ALGORITHM(ReflectometryReductionOneAuto)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
-*/
-ReflectometryReductionOneAuto::ReflectometryReductionOneAuto() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
-*/
-ReflectometryReductionOneAuto::~ReflectometryReductionOneAuto() {}
-
-//----------------------------------------------------------------------------------------------
 
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string ReflectometryReductionOneAuto::name() const {

@@ -22,11 +22,6 @@ using namespace API;
 using DataObjects::MaskWorkspace_sptr;
 using Geometry::IDetector_const_sptr;
 
-/// Default constructor initialises all data members and runs the base class
-/// constructor
-DetectorEfficiencyVariation::DetectorEfficiencyVariation()
-    : DetectorDiagnostic() {}
-
 /// Initialize the algorithm
 void DetectorEfficiencyVariation::init() {
   auto val = boost::make_shared<HistogramValidator>();
@@ -230,7 +225,7 @@ int DetectorEfficiencyVariation::doDetectorTests(
 
     if (checkForMask) {
       const std::set<detid_t> &detids =
-          counts1->getSpectrum(i)->getDetectorIDs();
+          counts1->getSpectrum(i).getDetectorIDs();
       if (instrument->isMonitor(detids))
         continue;
       if (instrument->isDetectorMasked(detids)) {

@@ -22,12 +22,6 @@ DECLARE_ALGORITHM(SolidAngle)
 using namespace Kernel;
 using namespace API;
 
-/// Default constructor
-SolidAngle::SolidAngle() : Algorithm() {}
-
-/// Destructor
-SolidAngle::~SolidAngle() {}
-
 /// Initialisation method
 void SolidAngle::init() {
   declareProperty(make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
@@ -113,7 +107,7 @@ void SolidAngle::exec() {
     int i = j + m_MinSpec;
     try {
       // Copy over the spectrum number & detector IDs
-      outputWS->getSpectrum(j)->copyInfoFrom(*inputWS->getSpectrum(i));
+      outputWS->getSpectrum(j).copyInfoFrom(inputWS->getSpectrum(i));
       // Now get the detector to which this relates
       Geometry::IDetector_const_sptr det = inputWS->getDetector(i);
       // Solid angle should be zero if detector is masked ('dead')

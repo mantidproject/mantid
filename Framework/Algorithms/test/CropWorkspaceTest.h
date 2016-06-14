@@ -135,11 +135,11 @@ public:
     TS_ASSERT_EQUALS(3, ws->getNumberHistograms()); // reduced histograms
     TS_ASSERT_EQUALS(30, ws->getNumberEvents());
 
-    TS_ASSERT(40. <= ws->getEventList(0).getTofMin());
-    TS_ASSERT(50. >= ws->getEventList(0).getTofMax());
+    TS_ASSERT(40. <= ws->getSpectrum(0).getTofMin());
+    TS_ASSERT(50. >= ws->getSpectrum(0).getTofMax());
 
-    TS_ASSERT(40. <= ws->getEventList(2).getTofMin());
-    TS_ASSERT(50. >= ws->getEventList(2).getTofMax());
+    TS_ASSERT(40. <= ws->getSpectrum(2).getTofMin());
+    TS_ASSERT(50. >= ws->getSpectrum(2).getTofMax());
   }
 
   void testExec() {
@@ -181,8 +181,8 @@ public:
       TS_ASSERT_EQUALS(output->readX(i)[3], input->readX(i + 2)[4]);
       TS_ASSERT_EQUALS(output->getAxis(1)->spectraNo(i),
                        input->getAxis(1)->spectraNo(i + 2));
-      TS_ASSERT_EQUALS(output->getSpectrum(i)->getDetectorIDs(),
-                       input->getSpectrum(i + 2)->getDetectorIDs());
+      TS_ASSERT_EQUALS(output->getSpectrum(i).getDetectorIDs(),
+                       input->getSpectrum(i + 2).getDetectorIDs());
     }
   }
 
@@ -226,8 +226,8 @@ public:
     for (int i = 0; i < 5; ++i) {
       TS_ASSERT_EQUALS(output->getAxis(1)->spectraNo(i),
                        input->getAxis(1)->spectraNo(i));
-      TS_ASSERT_EQUALS(output->getSpectrum(i)->getDetectorIDs(),
-                       input->getSpectrum(i)->getDetectorIDs());
+      TS_ASSERT_EQUALS(output->getSpectrum(i).getDetectorIDs(),
+                       input->getSpectrum(i).getDetectorIDs());
     }
   }
 

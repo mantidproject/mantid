@@ -52,10 +52,6 @@ namespace Algorithms {
 */
 class DLLExport Qxy : public API::Algorithm {
 public:
-  /// (Empty) Constructor
-  Qxy() : API::Algorithm() {}
-  /// Virtual destructor
-  ~Qxy() override {}
   /// Algorithm's name
   const std::string name() const override { return "Qxy"; }
   /// Summary of algorithms purpose

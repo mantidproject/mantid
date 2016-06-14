@@ -231,7 +231,7 @@ void IndirectSymmetrise::plotRawInput(const QString &workspaceName) {
   MatrixWorkspace_sptr sampleWS =
       AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
           workspaceName.toStdString());
-  int minSpectrumRange = sampleWS->getSpectrum(0)->getSpectrumNo();
+  int minSpectrumRange = sampleWS->getSpectrum(0).getSpectrumNo();
   m_dblManager->setValue(m_properties["PreviewSpec"],
                          static_cast<double>(minSpectrumRange));
 
@@ -293,10 +293,10 @@ void IndirectSymmetrise::replotNewSpectrum(QtProperty *prop, double value) {
     MatrixWorkspace_sptr sampleWS =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
             workspaceName.toStdString());
-    int minSpectrumRange = sampleWS->getSpectrum(0)->getSpectrumNo();
+    int minSpectrumRange = sampleWS->getSpectrum(0).getSpectrumNo();
     int maxSpectrumRange =
         sampleWS->getSpectrum(sampleWS->getNumberHistograms() - 1)
-            ->getSpectrumNo();
+            .getSpectrumNo();
 
     // If entered value is lower then set spectra number to lowest valid value
     if (value < minSpectrumRange) {

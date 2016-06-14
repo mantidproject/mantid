@@ -1,8 +1,7 @@
 #ifndef MANTID_CUSTOMINTERFACES_REFLGENERICDATAPROCESSORPRESENTERFACTORY_H
 #define MANTID_CUSTOMINTERFACES_REFLGENERICDATAPROCESSORPRESENTERFACTORY_H
 
-#include "GenericDataProcessorPresenter.h"
-#include "GenericDataProcessorPresenterFactory.h"
+#include "MantidQtMantidWidgets/DataProcessorUI/GenericDataProcessorPresenterFactory.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -33,7 +32,7 @@ File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class ReflGenericDataProcessorPresenterFactory
-    : public GenericDataProcessorPresenterFactory {
+    : public MantidQt::MantidWidgets::GenericDataProcessorPresenterFactory {
 public:
   ReflGenericDataProcessorPresenterFactory() = default;
   virtual ~ReflGenericDataProcessorPresenterFactory() = default;
@@ -41,7 +40,8 @@ public:
   /**
   * Creates a Reflectometry Data Processor Presenter
   */
-  boost::shared_ptr<GenericDataProcessorPresenter> create() override;
+  boost::shared_ptr<MantidQt::MantidWidgets::GenericDataProcessorPresenter>
+  create() override;
 };
 }
 }

@@ -13,16 +13,6 @@ using Kernel::Direction;
 DECLARE_ALGORITHM(ClearMaskFlag)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-ClearMaskFlag::ClearMaskFlag() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-ClearMaskFlag::~ClearMaskFlag() {}
-
-//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string ClearMaskFlag::name() const { return "ClearMaskFlag"; }
 

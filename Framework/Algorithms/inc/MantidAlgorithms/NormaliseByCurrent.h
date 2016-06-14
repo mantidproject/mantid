@@ -52,8 +52,6 @@ namespace Algorithms {
 */
 class DLLExport NormaliseByCurrent : public API::Algorithm {
 public:
-  NormaliseByCurrent();
-  ~NormaliseByCurrent() override;
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "NormaliseByCurrent"; }
   /// Summary of algorithms purpose

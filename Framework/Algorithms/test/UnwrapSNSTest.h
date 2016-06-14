@@ -57,10 +57,10 @@ public:
     EventWorkspace_sptr ws =
         AnalysisDataService::Instance().retrieveWS<EventWorkspace>(name);
     size_t num_events = ws->getNumberEvents();
-    double min_event0 = ws->getEventList(0).getTofMin();
-    double max_event0 = ws->getEventList(0).getTofMax();
-    double min_eventN = ws->getEventList(NUMPIXELS - 1).getTofMin();
-    double max_eventN = ws->getEventList(NUMPIXELS - 1).getTofMax();
+    double min_event0 = ws->getSpectrum(0).getTofMin();
+    double max_event0 = ws->getSpectrum(0).getTofMax();
+    double min_eventN = ws->getSpectrum(NUMPIXELS - 1).getTofMin();
+    double max_eventN = ws->getSpectrum(NUMPIXELS - 1).getTofMax();
 
     // run the algorithm
     UnwrapSNS algo;
@@ -80,16 +80,16 @@ public:
                      ws->getNumberEvents()); // shouldn't drop events
 
     // pixel 0 shouldn't be adjusted
-    TS_ASSERT_EQUALS(min_event0, ws->getEventList(0).getTofMin());
-    TS_ASSERT_EQUALS(max_event0, ws->getEventList(0).getTofMax());
+    TS_ASSERT_EQUALS(min_event0, ws->getSpectrum(0).getTofMin());
+    TS_ASSERT_EQUALS(max_event0, ws->getSpectrum(0).getTofMax());
 
     // pixel NUMPIXELS - 1 should be moved
-    TS_ASSERT(min_eventN < ws->getEventList(NUMPIXELS - 1).getTofMin());
-    TS_ASSERT(max_eventN < ws->getEventList(NUMPIXELS - 1).getTofMax());
+    TS_ASSERT(min_eventN < ws->getSpectrum(NUMPIXELS - 1).getTofMin());
+    TS_ASSERT(max_eventN < ws->getSpectrum(NUMPIXELS - 1).getTofMax());
 
-    TS_ASSERT_EQUALS(ws->getEventList(0).dataX()[0], 0.0);
-    TS_ASSERT_EQUALS(ws->getEventList(0).dataX()[1], 2.0);
-    TS_ASSERT_EQUALS(ws->getEventList(0).dataX()[2], 4.0);
+    TS_ASSERT_EQUALS(ws->getSpectrum(0).dataX()[0], 0.0);
+    TS_ASSERT_EQUALS(ws->getSpectrum(0).dataX()[1], 2.0);
+    TS_ASSERT_EQUALS(ws->getSpectrum(0).dataX()[2], 4.0);
   }
 };
 

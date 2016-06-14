@@ -50,10 +50,6 @@ namespace Algorithms {
 */
 class DLLExport ConvertSpectrumAxis : public API::Algorithm {
 public:
-  /// (Empty) Constructor
-  ConvertSpectrumAxis() : API::Algorithm() {}
-  /// Virtual destructor
-  ~ConvertSpectrumAxis() override {}
   /// Algorithm's name
   const std::string name() const override { return "ConvertSpectrumAxis"; }
   /// Summary of algorithms purpose

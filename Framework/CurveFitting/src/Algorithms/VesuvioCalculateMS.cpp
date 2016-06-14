@@ -175,7 +175,7 @@ void VesuvioCalculateMS::exec() {
 
     // the output spectrum objects have references to where the data will be
     // stored
-    calculateMS(i, *totalsc->getSpectrum(i), *multsc->getSpectrum(i));
+    calculateMS(i, totalsc->getSpectrum(i), multsc->getSpectrum(i));
   }
 
   setProperty("TotalScatteringWS", totalsc);

@@ -171,7 +171,7 @@ void GetEi::getGeometry(API::MatrixWorkspace_const_sptr WS, specnum_t mon0Spec,
     g_log.error() << "Error retrieving data for the first monitor\n";
     throw std::bad_cast();
   }
-  const auto &dets = WS->getSpectrum(monWI)->getDetectorIDs();
+  const auto &dets = WS->getSpectrum(monWI).getDetectorIDs();
 
   if (dets.size() != 1) {
     g_log.error() << "The detector for spectrum number " << mon0Spec
@@ -193,7 +193,7 @@ void GetEi::getGeometry(API::MatrixWorkspace_const_sptr WS, specnum_t mon0Spec,
     g_log.error() << "Error retrieving data for the second monitor\n";
     throw std::bad_cast();
   }
-  const auto &dets2 = WS->getSpectrum(monWI)->getDetectorIDs();
+  const auto &dets2 = WS->getSpectrum(monWI).getDetectorIDs();
   if (dets2.size() != 1) {
     g_log.error() << "The detector for spectrum number " << mon1Spec
                   << " was either not found or is a group, grouped monitors "

@@ -54,10 +54,6 @@ namespace Algorithms {
  */
 class DLLExport Max : public API::Algorithm {
 public:
-  /// Default constructor
-  Max() : API::Algorithm(){};
-  /// Destructor
-  ~Max() override{};
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "Max"; }
   /// Algorithm's version for identification overriding a virtual method
