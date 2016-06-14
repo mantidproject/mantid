@@ -126,17 +126,14 @@ class SANSMask(PythonAlgorithm):
         # Check whether the workspace has mask information
         if workspace.getRun().hasProperty("rectangular_masks"):
             mask_str = workspace.getRun().getProperty("rectangular_masks").value
-            try:
-                rectangular_masks = pickle.loads(mask_str)
-            except pickle.PickleError:
-                rectangular_masks = []
-                toks = mask_str.split(',')
-                for item in toks:
-                    if len(item) > 0:
-                        c = item.strip().split(' ')
-                        if len(c) == 4:
-                            rectangular_masks.append(
-                                [int(c[0]), int(c[2]), int(c[1]), int(c[3])])
+            rectangular_masks = []
+            toks = mask_str.split(',')
+            for item in toks:
+                if len(item) > 0:
+                    c = item.strip().split(' ')
+                    if len(c) == 4:
+                        rectangular_masks.append(
+                            [int(c[0]), int(c[2]), int(c[1]), int(c[3])])
             masked_pixels = []
             for rec in rectangular_masks:
                 try:
