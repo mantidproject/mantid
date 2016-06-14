@@ -1844,7 +1844,8 @@ void MuonAnalysis::plotSpectrum(const QString &wsName, bool logScale) {
   s << "";
 
   // Remove data and difference from given plot (keep fit and guess)
-  s << "def remove_data(window):";
+  // num_to_keep: number of previous fits to keep
+  s << "def remove_data(window, num_to_keep):";
   s << "  if window is None:";
   s << "    raise ValueError('No plot to remove data from')";
   s << "  to_keep = ['Workspace-Calc', 'CompositeFunction']";
@@ -1889,7 +1890,7 @@ void MuonAnalysis::plotSpectrum(const QString &wsName, bool logScale) {
 
   // Plot the data!
   s << "win = get_window('%WSNAME%', '%PREV%', %USEPREV%)";
-  s << "remove_data(win)";
+  s << "remove_data(win, %FITSTOKEEP%)";
   s << "g = plot_data('%WSNAME%', %ERRORS%, %CONNECT%, win)";
   s << "format_graph(g, '%WSNAME%', %LOGSCALE%, %YAUTO%, '%YMIN%', '%YMAX%')";
 
@@ -1915,6 +1916,11 @@ void MuonAnalysis::plotSpectrum(const QString &wsName, bool logScale) {
   pyS.replace("%YAUTO%", params["YAxisAuto"]);
   pyS.replace("%YMIN%", params["YAxisMin"]);
   pyS.replace("%YMAX%", params["YAxisMax"]);
+  if (policy == MuonAnalysisOptionTab::PreviousWindow) {
+    pyS.replace("%FITSTOKEEP%", m_uiForm.spinBoxNPlotsToKeep->text());
+  } else {
+    pyS.replace("%FITSTOKEEP%", "-1");
+  }
 
   runPythonCode(pyS);
 }
