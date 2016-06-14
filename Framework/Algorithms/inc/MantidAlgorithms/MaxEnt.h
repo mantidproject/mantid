@@ -39,11 +39,6 @@ namespace Algorithms {
 
 class DLLExport MaxEnt : public API::Algorithm {
 public:
-  /// Constructor
-  MaxEnt();
-  /// Destructor
-  ~MaxEnt() override;
-
   /// Algorithm's name
   const std::string name() const override;
   /// Algorithm's version

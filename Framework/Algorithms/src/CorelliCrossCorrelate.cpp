@@ -22,16 +22,6 @@ using namespace DataObjects;
 DECLARE_ALGORITHM(CorelliCrossCorrelate)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-CorelliCrossCorrelate::CorelliCrossCorrelate() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-CorelliCrossCorrelate::~CorelliCrossCorrelate() {}
-
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void CorelliCrossCorrelate::init() {

@@ -68,8 +68,6 @@ namespace Algorithms {
 */
 class DLLExport CropWorkspace : public API::Algorithm {
 public:
-  CropWorkspace();
-  ~CropWorkspace() override;
   /// Algorithm's name
   const std::string name() const override { return "CropWorkspace"; }
   /// Summary of algorithms purpose

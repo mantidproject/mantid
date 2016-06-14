@@ -102,10 +102,6 @@ private:
 
 class DLLExport RemoveBackground : public API::Algorithm {
 public:
-  /// Default constructor
-  RemoveBackground() : API::Algorithm(), m_BackgroundHelper(){};
-  /// Destructor
-  ~RemoveBackground() override{};
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "RemoveBackground"; }
   /// Summary of algorithms purpose

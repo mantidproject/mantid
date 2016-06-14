@@ -24,14 +24,6 @@ using DataObjects::EventWorkspace_const_sptr;
 std::string CENTRE("Centre");
 std::string LEFT("Left");
 
-//========================================================================
-//========================================================================
-/// (Empty) Constructor
-FilterByLogValue::FilterByLogValue() {}
-
-/// Destructor
-FilterByLogValue::~FilterByLogValue() {}
-
 //-----------------------------------------------------------------------
 void FilterByLogValue::init() {
   declareProperty(make_unique<WorkspaceProperty<EventWorkspace>>(

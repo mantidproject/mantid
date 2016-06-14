@@ -47,16 +47,6 @@ std::map<std::string, std::string> inverseLabel = {{"s", "Hz"},
 }
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-MaxEnt::MaxEnt() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-MaxEnt::~MaxEnt() {}
-
-//----------------------------------------------------------------------------------------------
 
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string MaxEnt::name() const { return "MaxEnt"; }

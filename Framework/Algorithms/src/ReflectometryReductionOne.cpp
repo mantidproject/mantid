@@ -97,16 +97,6 @@ double calculateQ(double lambda, double theta) {
 DECLARE_ALGORITHM(ReflectometryReductionOne)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
-*/
-ReflectometryReductionOne::ReflectometryReductionOne() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
-*/
-ReflectometryReductionOne::~ReflectometryReductionOne() {}
-
-//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string ReflectometryReductionOne::name() const {
   return "ReflectometryReductionOne";

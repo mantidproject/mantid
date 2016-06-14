@@ -17,15 +17,6 @@ using namespace DataObjects;
 DECLARE_ALGORITHM(ConjoinWorkspaces)
 
 //----------------------------------------------------------------------------------------------
-/// Default constructor
-ConjoinWorkspaces::ConjoinWorkspaces()
-    : WorkspaceJoiners(), m_overlapChecked(false) {}
-
-//----------------------------------------------------------------------------------------------
-/// Destructor
-ConjoinWorkspaces::~ConjoinWorkspaces() {}
-
-//----------------------------------------------------------------------------------------------
 /** Initialize the properties */
 void ConjoinWorkspaces::init() {
   declareProperty(make_unique<WorkspaceProperty<>>(
