@@ -24,9 +24,9 @@ PoldiPresenter::PoldiPresenter(
   // Without this the interface will crash
   m_presenter->accept(this);
 
-	// Set up the instrument selectors
-	std::vector<std::string> instruments = { "POLDI" };
-	m_presenter->setInstrumentList(instruments, "POLDI");
+  // Set up the instrument selectors
+  std::vector<std::string> instruments = {"POLDI"};
+  m_presenter->setInstrumentList(instruments, "POLDI");
 }
 
 /** Default destructor */
@@ -72,7 +72,7 @@ void PoldiPresenter::loadDemoTable() {
   loader->setPropertyValue("LastRun", "6904");
   loader->setPropertyValue("MergeWidth", "2");
   loader->setPropertyValue("OutputWorkspace", "poldi");
-	auto resultLoader = loader->executeAsync();
+  auto resultLoader = loader->executeAsync();
 
   // Create Silicon peaks
   auto peakCreator = Mantid::API::AlgorithmManager::Instance().create(
@@ -84,10 +84,10 @@ void PoldiPresenter::loadDemoTable() {
   peakCreator->setPropertyValue("OutputWorkspace", "Si");
   auto resultPeakCreator = peakCreator->executeAsync();
 
-	while (!resultPeakCreator.available() || !resultLoader.available()) {
-		// Wait for the results
-		QApplication::processEvents();
-	}
+  while (!resultPeakCreator.available() || !resultLoader.available()) {
+    // Wait for the results
+    QApplication::processEvents();
+  }
 
   // Then populate the table
   std::map<std::string, std::string> firstRow = {
@@ -99,7 +99,7 @@ void PoldiPresenter::loadDemoTable() {
   toTransfer.push_back(firstRow);
   m_presenter->transfer(toTransfer);
 
-	m_view->giveUserInfo("Hit 'Process' to reduce the data", "Info");
+  m_view->giveUserInfo("Hit 'Process' to reduce the data", "Info");
 }
 
 } // CustomInterfaces

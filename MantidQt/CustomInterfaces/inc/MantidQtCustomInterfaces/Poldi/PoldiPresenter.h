@@ -46,12 +46,13 @@ public:
                  boost::shared_ptr<DataProcessorPresenter> presenter);
   ~PoldiPresenter() override;
   void notify(IPoldiPresenter::Flag flag) override;
-	void notify(WorkspaceReceiver::Flag flag) override;
+  void notify(WorkspaceReceiver::Flag flag) override;
+
 private:
   // Populates a demo table
   void loadDemoTable();
-	// Pushes the list of table commands
-	void updateToolBar();
+  // Pushes the list of table commands
+  void updateToolBar();
 
   // The view we're managing
   IPoldiView *m_view;
