@@ -100,7 +100,7 @@ void SaveCSV::exec() {
   m_lineSeparator = getPropertyValue("LineSeparator");
   g_log.debug() << "Parameters: Filename='" << m_filename << "' "
                 << "Seperator='" << m_separator << "' "
-                << "LineSeparator='" << m_lineSeparator << "' " << std::endl;
+                << "LineSeparator='" << m_lineSeparator << "' \n";
 
   // prepare to save to file
 

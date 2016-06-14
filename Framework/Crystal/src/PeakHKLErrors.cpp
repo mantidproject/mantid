@@ -245,7 +245,7 @@ void PeakHKLErrors::getRun2MatMap(
     Geometry::IPeak &peak_old = Peaks->getPeak(i);
 
     int runNum = peak_old.getRunNumber();
-    std::string runNumStr = boost::lexical_cast<std::string>(runNum);
+    std::string runNumStr = std::to_string(runNum);
     size_t N = OptRuns.find("/" + runNumStr + "/");
     if (N < OptRuns.size()) {
       double chi =
@@ -376,7 +376,7 @@ void PeakHKLErrors::function1D(double *out, const double *xValues,
     IPeak &peak_old = Peaks->getPeak(peakNum);
 
     int runNum = peak_old.getRunNumber();
-    std::string runNumStr = boost::lexical_cast<std::string>(runNum);
+    std::string runNumStr = std::to_string(runNum);
     Peak peak =
         SCDPanelErrors::createNewPeak(peak_old, instNew, 0, peak_old.getL1());
 
@@ -403,13 +403,13 @@ void PeakHKLErrors::function1D(double *out, const double *xValues,
   }
 
   g_log.debug() << "------------------------Function---------------------------"
-                   "--------------------" << std::endl;
+                   "--------------------\n";
   for (size_t p = 0; p < nParams(); p++) {
     g_log.debug() << parameterName(p) << "(" << getParameter(p) << "),";
     if ((p + 1) % 6 == 0)
-      g_log.debug() << std::endl;
+      g_log.debug() << '\n';
   }
-  g_log.debug() << std::endl;
+  g_log.debug() << '\n';
   g_log.debug() << "Off constraints=";
   for (size_t p = 0; p < nParams(); p++) {
     IConstraint *constr = getConstraint(p);
@@ -418,10 +418,10 @@ void PeakHKLErrors::function1D(double *out, const double *xValues,
         g_log.debug() << "(" << parameterName(p) << "=" << constr->check()
                       << ");";
   }
-  g_log.debug() << std::endl;
+  g_log.debug() << '\n';
 
   g_log.debug() << "    Chi**2 = " << ChiSqTot << "     nData = " << nData
-                << std::endl;
+                << '\n';
 }
 
 void PeakHKLErrors::functionDeriv1D(Jacobian *out, const double *xValues,
@@ -452,8 +452,7 @@ void PeakHKLErrors::functionDeriv1D(Jacobian *out, const double *xValues,
   getRun2MatMap(Peaks, OptRuns, RunNums2GonMatrix);
 
   g_log.debug()
-      << "----------------------------Derivative------------------------"
-      << std::endl;
+      << "----------------------------Derivative------------------------\n";
 
   V3D samplePosition = instNew->getSample()->getPos();
   IPeak &ppeak = Peaks->getPeak(0);
@@ -475,7 +474,7 @@ void PeakHKLErrors::functionDeriv1D(Jacobian *out, const double *xValues,
         SCDPanelErrors::createNewPeak(peak_old, instNew, 0, peak_old.getL1());
 
     int runNum = peak_old.getRunNumber();
-    std::string runNumStr = boost::lexical_cast<std::string>(runNum);
+    std::string runNumStr = std::to_string(runNum);
 
     for (int kk = 0; kk < static_cast<int>(nParams()); kk++) {
       out->set(i, kk, 0.0);

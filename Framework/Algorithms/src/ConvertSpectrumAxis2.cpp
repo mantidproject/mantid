@@ -229,7 +229,7 @@ MatrixWorkspace_sptr ConvertSpectrumAxis2::createOutputWorkspace(
     outputWorkspace->setSharedE(currentIndex, inputWS->sharedE(it->second));
     // We can keep the spectrum numbers etc.
     outputWorkspace->getSpectrum(currentIndex)
-        ->copyInfoFrom(*inputWS->getSpectrum(it->second));
+        .copyInfoFrom(inputWS->getSpectrum(it->second));
     ++currentIndex;
 
     progress.report("Creating output workspace...");

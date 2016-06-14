@@ -192,7 +192,7 @@ public:
         work_in1->setCounts(i, yDead);
         work_in1->setCountStandardDeviations(i, eDead);
       }
-      work_in1->getSpectrum(i)->setSpectrumNo(i);
+      work_in1->getSpectrum(i).setSpectrumNo(i);
       Mantid::Geometry::Detector *det =
           new Mantid::Geometry::Detector("", i, NULL);
       instr->add(det);
@@ -204,7 +204,7 @@ public:
         work_in2->setCounts(i, yDead);
         work_in2->setCountStandardDeviations(i, eDead);
       }
-      work_in2->getSpectrum(i)->setSpectrumNo(i);
+      work_in2->getSpectrum(i).setSpectrumNo(i);
     }
 
     WorkspaceGroup_sptr wsSptr = WorkspaceGroup_sptr(new WorkspaceGroup);

@@ -16,9 +16,10 @@
 QwtWorkspaceSpectrumData::QwtWorkspaceSpectrumData(
     const Mantid::API::MatrixWorkspace &workspace, int wsIndex,
     const bool logScaleY, const bool plotAsDistribution)
-    : MantidQwtMatrixWorkspaceData(logScaleY), m_wsIndex(wsIndex), m_X(workspace.readX(wsIndex)),
-      m_Y(workspace.readY(wsIndex)), m_E(workspace.readE(wsIndex)),
-      m_xTitle(), m_yTitle(), m_isHistogram(workspace.isHistogramData()),
+    : MantidQwtMatrixWorkspaceData(logScaleY), m_wsIndex(wsIndex),
+      m_X(workspace.readX(wsIndex)), m_Y(workspace.readY(wsIndex)),
+      m_E(workspace.readE(wsIndex)), m_xTitle(), m_yTitle(),
+      m_isHistogram(workspace.isHistogramData()),
       m_dataIsNormalized(workspace.isDistribution()), m_binCentres(false),
       m_isDistribution(false) {
   // Actual plotting based on what type of data we have
@@ -28,8 +29,7 @@ QwtWorkspaceSpectrumData::QwtWorkspaceSpectrumData(
 
   m_xTitle = MantidQt::API::PlotAxis(workspace, 0).title();
   m_yTitle = MantidQt::API::PlotAxis((m_dataIsNormalized || m_isDistribution),
-                                     workspace)
-                 .title();
+                                     workspace).title();
 
   // Calculate the min and max values
   calculateYMinAndMax();
@@ -75,9 +75,9 @@ Return the y value of data point i
 @return y Y value of data point i
 */
 double QwtWorkspaceSpectrumData::getY(size_t i) const {
-  double tmp = i < m_Y.size() ? m_Y[i] : m_Y[m_Y.size() - 1];
+  double tmp = i < m_Y.size() ? m_Y[i] : m_Y.back();
   if (m_isDistribution) {
-    tmp /= (m_X[i + 1] - m_X[i]);
+    tmp /= fabs(m_X[i + 1] - m_X[i]);
   }
   return tmp;
 }
@@ -87,9 +87,9 @@ double QwtWorkspaceSpectrumData::getEX(size_t i) const {
 }
 
 double QwtWorkspaceSpectrumData::getE(size_t i) const {
-  double ei = (i < m_E.size()) ? m_E[i] : m_E[m_E.size() - 1];
+  double ei = (i < m_E.size()) ? m_E[i] : m_E.back();
   if (m_isDistribution) {
-    ei /= (m_X[i + 1] - m_X[i]);
+    ei /= fabs(m_X[i + 1] - m_X[i]);
   }
   return ei;
 }
@@ -121,7 +121,7 @@ bool QwtWorkspaceSpectrumData::setAsDistribution(bool on) {
 QwtWorkspaceSpectrumData &QwtWorkspaceSpectrumData::
 operator=(const QwtWorkspaceSpectrumData &rhs) {
   if (this != &rhs) {
-    static_cast<MantidQwtMatrixWorkspaceData&>(*this) = rhs;
+    static_cast<MantidQwtMatrixWorkspaceData &>(*this) = rhs;
     m_wsIndex = rhs.m_wsIndex;
     m_X = rhs.m_X;
     m_Y = rhs.m_Y;

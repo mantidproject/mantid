@@ -291,7 +291,7 @@ void SaveGSS::writeGSASFile(const std::string &outfilename, bool append,
     // Determine bank number into GSAS file
     int bankid;
     if (m_useSpecAsBank) {
-      bankid = static_cast<int>(inputWS->getSpectrum(iws)->getSpectrumNo());
+      bankid = static_cast<int>(inputWS->getSpectrum(iws).getSpectrumNo());
     } else {
       bankid = basebanknumber + iws;
     }
@@ -535,7 +535,7 @@ void SaveGSS::writeRALFdata(const int bank, const bool MultiplyByBinWidth,
       << std::fixed << " " << std::setprecision(0) << std::setw(8) << bc2
       << std::fixed << " " << std::setprecision(0) << std::setw(8) << bc1
       << std::fixed << " " << std::setprecision(5) << std::setw(7) << bc4
-      << " FXYE" << std::endl;
+      << " FXYE\n";
 
   // Do each Y entry
   for (size_t j = 0; j < datasize; j++) {
@@ -587,13 +587,13 @@ void SaveGSS::writeSLOGdata(const int bank, const bool MultiplyByBinWidth,
                       *(X.rbegin() + 1));      // maximum TOF (in microseconds?)
   double bc3 = (*(X.begin() + 1) - bc1) / bc1; // deltaT/T
 
-  g_log.debug() << "SaveGSS(): Min TOF = " << bc1 << std::endl;
+  g_log.debug() << "SaveGSS(): Min TOF = " << bc1 << '\n';
 
   writeBankLine(out, "SLOG", bank, datasize);
   out << std::fixed << " " << std::setprecision(0) << std::setw(10) << bc1
       << std::fixed << " " << std::setprecision(0) << std::setw(10) << bc2
       << std::fixed << " " << std::setprecision(7) << std::setw(10) << bc3
-      << std::fixed << " 0 FXYE" << std::endl;
+      << std::fixed << " 0 FXYE\n";
 
   for (size_t i = 0; i < datasize; i++) {
     double y = Y[i];

@@ -100,12 +100,12 @@ QVariant MantidMatrixModel::headerData(int section, Qt::Orientation orientation,
         return QString("index %1%2spectra no %3")
             .arg(QString::number(section), toolTipSeperator,
                  QString::number(
-                     m_workspace->getSpectrum(section)->getSpectrumNo()));
+                     m_workspace->getSpectrum(section).getSpectrumNo()));
       } else {
         return QString("%1%2sp-%3")
             .arg(QString::number(section), headerSeperator,
                  QString::number(
-                     m_workspace->getSpectrum(section)->getSpectrumNo()));
+                     m_workspace->getSpectrum(section).getSpectrumNo()));
       }
     }
 

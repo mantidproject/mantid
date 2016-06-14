@@ -246,6 +246,15 @@ void ConvertToMD::exec() {
   // Set the normalization of the event workspace
   m_Convertor->setDisplayNormalization(spws, m_InWS2D);
 
+  if (fileBackEnd) {
+    auto savemd = this->createChildAlgorithm("SaveMD");
+    savemd->setProperty("InputWorkspace", spws);
+    savemd->setPropertyValue("Filename", out_filename);
+    savemd->setProperty("UpdateFileBackEnd", true);
+    savemd->setProperty("MakeFileBacked", false);
+    savemd->executeAsChildAlg();
+  }
+
   // JOB COMPLETED:
   setProperty("OutputWorkspace",
               boost::dynamic_pointer_cast<IMDEventWorkspace>(spws));
@@ -339,7 +348,7 @@ void ConvertToMD::copyMetaData(API::IMDEventWorkspace_sptr &mdEventWS) const {
       }
     }
     // sort bin boundaries in case if unit transformation have swapped them.
-    if (binBoundaries[0] > binBoundaries[binBoundaries.size() - 1]) {
+    if (binBoundaries[0] > binBoundaries.back()) {
       g_log.information() << "Bin boundaries are not arranged monotonously. "
                              "Sorting performed\n";
       std::sort(binBoundaries.begin(), binBoundaries.end());
@@ -350,7 +359,7 @@ void ConvertToMD::copyMetaData(API::IMDEventWorkspace_sptr &mdEventWS) const {
   // objects instead
   auto mapping = boost::make_shared<det2group_map>();
   for (size_t i = 0; i < m_InWS2D->getNumberHistograms(); ++i) {
-    const auto &dets = m_InWS2D->getSpectrum(i)->getDetectorIDs();
+    const auto &dets = m_InWS2D->getSpectrum(i).getDetectorIDs();
     if (!dets.empty()) {
       mapping->emplace(*dets.begin(),
                        std::vector<detid_t>(dets.begin(), dets.end()));
@@ -448,7 +457,7 @@ bool ConvertToMD::buildTargetWSDescription(
     MsliceProj.setUVvectors(ut, vt, wt);
   } catch (std::invalid_argument &) {
     g_log.error() << "The projections are coplanar. Will use defaults "
-                     "[1,0,0],[0,1,0] and [0,0,1]" << std::endl;
+                     "[1,0,0],[0,1,0] and [0,0,1]\n";
   }
 
   if (createNewTargetWs) {
@@ -617,7 +626,7 @@ void ConvertToMD::findMinMax(
       {
         g_log.information()
             << " Min Value: " << minVal[i] << " for dimension N: " << i
-            << " equal or exceeds max value:" << maxVal[i] << std::endl;
+            << " equal or exceeds max value:" << maxVal[i] << '\n';
         wellDefined = false;
         break;
       }

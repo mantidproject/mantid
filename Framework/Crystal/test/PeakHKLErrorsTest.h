@@ -50,7 +50,7 @@ public:
     API::Workspace_sptr ows = alg.getProperty("OutputWorkspace");
     DataObjects::PeaksWorkspace_sptr peaks =
         boost::dynamic_pointer_cast<DataObjects::PeaksWorkspace>(ows);
-    // std::cout<<"Peaks number="<<peaks->getNumberPeaks()<<std::endl;
+    // std::cout<<"Peaks number="<<peaks->getNumberPeaks()<<'\n';
 
     LoadIsawUB loadUB;
     loadUB.initialize();
@@ -94,7 +94,7 @@ public:
     peakErrs.function1D(out.data(), xValues.data(), (size_t)(3 * NPeaks));
 
     //       std::cout<<out[0]<<","<<out[4]<<","<<out[8]<<","<<out[12]<<","<<out[16]<<",";
-    // std::cout<<std::endl;
+    // std::cout<<'\n';
 
     TS_ASSERT_DELTA(-0.0074152, out[0], .01);
     TS_ASSERT_DELTA(-0.00969701, out[4], .01);

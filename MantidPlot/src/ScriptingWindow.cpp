@@ -21,6 +21,7 @@
 #include <QMenuBar>
 #include <QMenu>
 #include <QAction>
+#include <QCloseEvent>
 #include <QSettings>
 #include <QPrintDialog>
 #include <QPrinter>
@@ -195,18 +196,18 @@ void ScriptingWindow::populateFileMenu() {
 
   if (scriptsOpen) {
     m_fileMenu->addAction(m_openInCurTab);
-    m_fileMenu->insertSeparator();
+    m_fileMenu->addSeparator();
     m_fileMenu->addAction(m_save);
     m_fileMenu->addAction(m_saveAs);
     m_fileMenu->addAction(m_print);
   }
 
-  m_fileMenu->insertSeparator();
+  m_fileMenu->addSeparator();
   m_fileMenu->addMenu(m_recentScripts);
   m_recentScripts->setEnabled(m_manager->recentScripts().count() > 0);
 
   if (scriptsOpen) {
-    m_fileMenu->insertSeparator();
+    m_fileMenu->addSeparator();
     m_fileMenu->addAction(m_closeTab);
   }
 }
@@ -230,15 +231,15 @@ void ScriptingWindow::populateEditMenu() {
   m_editMenu->addAction(m_copy);
   m_editMenu->addAction(m_paste);
 
-  m_editMenu->insertSeparator();
+  m_editMenu->addSeparator();
   m_editMenu->addAction(m_comment);
   m_editMenu->addAction(m_uncomment);
 
-  m_editMenu->insertSeparator();
+  m_editMenu->addSeparator();
   m_editMenu->addAction(m_tabsToSpaces);
   m_editMenu->addAction(m_spacesToTabs);
 
-  m_editMenu->insertSeparator();
+  m_editMenu->addSeparator();
   m_editMenu->addAction(m_find);
 }
 
@@ -268,19 +269,19 @@ void ScriptingWindow::populateWindowMenu() {
   m_windowMenu->addAction(m_hide);
 
   if (scriptsOpen) {
-    m_windowMenu->insertSeparator();
+    m_windowMenu->addSeparator();
     m_windowMenu->addAction(m_zoomIn);
     m_windowMenu->addAction(m_zoomOut);
     m_windowMenu->addAction(m_resetZoom);
     m_windowMenu->addAction(m_selectFont);
 
-    m_windowMenu->insertSeparator();
+    m_windowMenu->addSeparator();
     m_windowMenu->addAction(m_toggleProgress);
     m_windowMenu->addAction(m_toggleFolding);
     m_windowMenu->addAction(m_toggleWrapping);
     m_windowMenu->addAction(m_toggleWhitespace);
 
-    m_windowMenu->insertSeparator();
+    m_windowMenu->addSeparator();
     m_windowMenu->addAction(m_openConfigTabs);
   }
 }
@@ -324,7 +325,7 @@ void ScriptingWindow::setMenuStates(int ntabs) {
 void ScriptingWindow::setEditActionsDisabled(bool off) {
   auto actions = m_editMenu->actions();
   foreach (QAction *action, actions) {
-    if (strcmp("Find", action->name()) != 0) {
+    if (strcmp("Find", action->objectName().toAscii().constData()) != 0) {
       action->setDisabled(off);
     }
   }
@@ -773,7 +774,7 @@ void ScriptingWindow::openUnique(QString filename) {
   auto openFiles = m_manager->fileNamesToQStringList();
   // The list of open files contains absolute paths so make sure we have one
   // here
-  filename = QFileInfo(filename).absFilePath();
+  filename = QFileInfo(filename).absoluteFilePath();
   auto position = openFiles.indexOf(filename);
   if (position < 0) {
     m_manager->newTab(openFiles.size(), filename);
@@ -829,7 +830,7 @@ QStringList ScriptingWindow::extractPyFiles(const QList<QUrl> &urlList) const {
     if (fName.size() > 0) {
       QFileInfo fi(fName);
 
-      if (fi.suffix().upper() == "PY") {
+      if (fi.suffix().toUpper() == "PY") {
         filenames.append(fName);
       }
     }

@@ -330,8 +330,8 @@ void AlignDetectors::align(const ConversionFactors &converter,
     PARALLEL_START_INTERUPT_REGION
     try {
       // Get the input spectrum number at this workspace index
-      auto spec = outputWS.getSpectrum(size_t(i));
-      auto toDspacing = converter.getConversionFunc(spec->getDetectorIDs());
+      auto &spec = outputWS.getSpectrum(size_t(i));
+      auto toDspacing = converter.getConversionFunc(spec.getDetectorIDs());
 
       auto &x = outputWS.mutableX(i);
       std::transform(x.begin(), x.end(), x.begin(), toDspacing);
@@ -354,8 +354,8 @@ void AlignDetectors::align(const ConversionFactors &converter,
     PARALLEL_START_INTERUPT_REGION
 
     auto toDspacing = converter.getConversionFunc(
-        outputWS.getSpectrum(size_t(i))->getDetectorIDs());
-    outputWS.getEventList(i).convertTof(toDspacing);
+        outputWS.getSpectrum(size_t(i)).getDetectorIDs());
+    outputWS.getSpectrum(i).convertTof(toDspacing);
 
     progress.report();
     PARALLEL_END_INTERUPT_REGION

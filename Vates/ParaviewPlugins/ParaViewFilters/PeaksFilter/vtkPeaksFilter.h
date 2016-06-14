@@ -9,8 +9,7 @@
 #include <boost/scoped_ptr.hpp>
 #include <string>
 // cppcheck-suppress class_X_Y
-class VTK_EXPORT vtkPeaksFilter : public vtkUnstructuredGridAlgorithm
-{
+class VTK_EXPORT vtkPeaksFilter : public vtkUnstructuredGridAlgorithm {
 public:
   static vtkPeaksFilter *New();
   vtkTypeMacro(vtkPeaksFilter, vtkUnstructuredGridAlgorithm) void PrintSelf(
@@ -21,10 +20,11 @@ public:
                          const std::string &delimiter);
   void SetRadiusNoShape(double radius);
   void SetRadiusType(int type);
-  void updateAlgorithmProgress(double progress, const std::string& message);
+  void updateAlgorithmProgress(double progress, const std::string &message);
   double GetMinValue();
   double GetMaxValue();
-  const char* GetInstrument();
+  const char *GetInstrument();
+
 protected:
   vtkPeaksFilter();
   ~vtkPeaksFilter() override;

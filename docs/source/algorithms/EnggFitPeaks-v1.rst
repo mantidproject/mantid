@@ -24,11 +24,16 @@ expected dSpacing values can be given as an input string or in a file
 with values separated by commas.
 
 The peaks are fitted one at a time. The dSpacing values given in the
-property ExpectedPeaks are then converted to time-of-flight (TOF) (as
-in the Mantid :ref:`ConvertUnits <algm-ConvertUnits>` algorithm).
+property ExpectedPeaks are then converted to time-of-flight (TOF).
 After the conversion of units, the algorithm tries to fit (in
 time-of-flight) a peak in the neighborhood of every expected peak
-using a peak shape or function.
+using a peak shape or function. The conversion is done as in the
+Mantid algorithm :ref:`AlignDetectors <algm-AlignDetectors>`
+(following GSAS equations) if the workspace is focused (single
+spectrum) and has a log entry named "difc", where the GSAS DIFC
+parameter is expected. Otherwise the conversion of units is done as in
+the Mantid :ref:`ConvertUnits <algm-ConvertUnits>`. See also
+:ref:`EnggFitDIFCFromPeaks <algm-EnggFitDIFCFromPeaks>`.
 
 This algorithm currently fits (single) peaks of type
 :ref:`Back2BackExponential <func-Back2BackExponential>`. Other

@@ -2,7 +2,8 @@
     File                 : ExportDialog.cpp
     Project              : QtiPlot
     --------------------------------------------------------------------
-    Copyright            : (C) 2006 by Ion Vasilief, Tilman Hoener zu Siederdissen
+    Copyright            : (C) 2006 by Ion Vasilief, Tilman Hoener zu
+ Siederdissen
     Email (use @ for *)  : ion_vasilief*yahoo.fr, thzs*gmx.net
     Description          : Export ASCII dialog
 
@@ -29,6 +30,7 @@
 #include "ExportDialog.h"
 #include "ApplicationWindow.h"
 
+#include <QCloseEvent>
 #include <QLayout>
 #include <QLabel>
 #include <QMessageBox>
@@ -36,32 +38,35 @@
 #include <QCheckBox>
 #include <QComboBox>
 
-ExportDialog::ExportDialog(const QString& tableName, QWidget* parent, Qt::WFlags fl )
-    : QDialog( parent, fl )
-{
-	setWindowTitle( tr( "MantidPlot - Export ASCII" ) );
-	setSizeGripEnabled( true );
+ExportDialog::ExportDialog(const QString &tableName, QWidget *parent,
+                           Qt::WFlags fl)
+    : QDialog(parent, fl) {
+  setWindowTitle(tr("MantidPlot - Export ASCII"));
+  setSizeGripEnabled(true);
 
   ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(parent);
   if (!app) {
-    throw std::logic_error("Parent of FFTDialog is not ApplicationWindow as expected.");
+    throw std::logic_error(
+        "Parent of FFTDialog is not ApplicationWindow as expected.");
   }
 
-	QGridLayout *gl1 = new QGridLayout();
+  QGridLayout *gl1 = new QGridLayout();
   gl1->addWidget(new QLabel(tr("Export From")), 0, 0);
-	boxTable = new QComboBox();
-	QStringList tables = app->tableNames() + app->matrixNames() + app->mantidmatrixNames();
-	boxTable->addItems(tables);
-	boxTable->setCurrentIndex(0);
+  boxTable = new QComboBox();
+  QStringList tables =
+      app->tableNames() + app->matrixNames() + app->mantidmatrixNames();
+  boxTable->addItems(tables);
+  boxTable->setCurrentIndex(0);
 
-  boxTable->setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed));
+  boxTable->setSizePolicy(
+      QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed));
   gl1->addWidget(boxTable, 0, 1);
 
-  boxAllTables = new QCheckBox(tr( "&All" ));
+  boxAllTables = new QCheckBox(tr("&All"));
   boxAllTables->setChecked(false);
   gl1->addWidget(boxAllTables, 0, 2);
 
-  sepText = new QLabel( tr( "Separator" ) );
+  sepText = new QLabel(tr("Separator"));
   gl1->addWidget(sepText, 1, 0);
 
   boxSeparator = new QComboBox();
@@ -73,159 +78,168 @@ ExportDialog::ExportDialog(const QString& tableName, QWidget* parent, Qt::WFlags
   boxSeparator->addItem("," + tr("SPACE"));
   boxSeparator->addItem(";");
   boxSeparator->addItem(",");
-  boxSeparator->setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed));
+  boxSeparator->setSizePolicy(
+      QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed));
   boxSeparator->setEditable(true);
 
   gl1->addWidget(boxSeparator, 1, 1);
   setColumnSeparator(app->d_export_col_separator);
 
-	QString help = tr("The column separator can be customized. The following special codes can be used:\n\\t for a TAB character \n\\s for a SPACE");
-	help += "\n"+tr("The separator must not contain the following characters: 0-9eE.+-");
+  QString help =
+      tr("The column separator can be customized. The following special codes "
+         "can be used:\n\\t for a TAB character \n\\s for a SPACE");
+  help +=
+      "\n" +
+      tr("The separator must not contain the following characters: 0-9eE.+-");
 
-	boxSeparator->setWhatsThis(help);
+  boxSeparator->setWhatsThis(help);
   sepText->setWhatsThis(help);
   boxSeparator->setToolTip(help);
   sepText->setToolTip(help);
 
-  boxNames = new QCheckBox(tr( "Include Column &Names" ));
-  boxNames->setChecked( app->d_export_col_names );
+  boxNames = new QCheckBox(tr("Include Column &Names"));
+  boxNames->setChecked(app->d_export_col_names);
 
-  boxComments = new QCheckBox(tr( "Include Column Co&mments" ));
-  boxComments->setChecked( app->d_export_col_comment );
+  boxComments = new QCheckBox(tr("Include Column Co&mments"));
+  boxComments->setChecked(app->d_export_col_comment);
 
-  boxSelection = new QCheckBox(tr( "Export &Selection" ));
-  boxSelection->setChecked( app->d_export_table_selection );
+  boxSelection = new QCheckBox(tr("Export &Selection"));
+  boxSelection->setChecked(app->d_export_table_selection);
 
   QVBoxLayout *vl1 = new QVBoxLayout();
-  vl1->addLayout( gl1 );
-  vl1->addWidget( boxNames );
-  vl1->addWidget( boxComments );
-  vl1->addWidget( boxSelection );
+  vl1->addLayout(gl1);
+  vl1->addWidget(boxNames);
+  vl1->addWidget(boxComments);
+  vl1->addWidget(boxSelection);
 
   QHBoxLayout *hbox3 = new QHBoxLayout();
-  buttonOk = new QPushButton(tr( "&OK" ));
-  buttonOk->setDefault( true );
-  hbox3->addWidget( buttonOk );
-  buttonCancel = new QPushButton(tr( "&Cancel" ));
-  hbox3->addWidget( buttonCancel );
-  buttonHelp = new QPushButton(tr( "&Help" ));
-  hbox3->addWidget( buttonHelp );
+  buttonOk = new QPushButton(tr("&OK"));
+  buttonOk->setDefault(true);
+  hbox3->addWidget(buttonOk);
+  buttonCancel = new QPushButton(tr("&Cancel"));
+  hbox3->addWidget(buttonCancel);
+  buttonHelp = new QPushButton(tr("&Help"));
+  hbox3->addWidget(buttonHelp);
   hbox3->addStretch();
 
-  QVBoxLayout *vl = new QVBoxLayout( this );
+  QVBoxLayout *vl = new QVBoxLayout(this);
   vl->addLayout(vl1);
   vl->addStretch();
   vl->addLayout(hbox3);
 
   // signals and slots connections
-  connect( boxTable, SIGNAL(activated(const QString &)), this, SLOT(updateOptions(const QString &)));
-  connect( buttonOk, SIGNAL( clicked() ), this, SLOT( accept() ) );
-  connect( buttonCancel, SIGNAL( clicked() ), this, SLOT( close() ) );
-  connect( buttonHelp, SIGNAL( clicked() ), this, SLOT( help() ) );
-  connect( boxAllTables, SIGNAL( toggled(bool) ), this, SLOT( enableTableName(bool) ) );
+  connect(boxTable, SIGNAL(activated(const QString &)), this,
+          SLOT(updateOptions(const QString &)));
+  connect(buttonOk, SIGNAL(clicked()), this, SLOT(accept()));
+  connect(buttonCancel, SIGNAL(clicked()), this, SLOT(close()));
+  connect(buttonHelp, SIGNAL(clicked()), this, SLOT(help()));
+  connect(boxAllTables, SIGNAL(toggled(bool)), this,
+          SLOT(enableTableName(bool)));
 
-  if (tables.contains(tableName)){
+  if (tables.contains(tableName)) {
     boxTable->setCurrentIndex(boxTable->findText(tableName));
     updateOptions(tableName);
   }
 }
 
-void ExportDialog::help()
-{
-	QString s = tr("The column separator can be customized. The following special codes can be used:\n\\t for a TAB character \n\\s for a SPACE");
-	s += "\n"+tr("The separator must not contain the following characters: 0-9eE.+-");
-	QMessageBox::about(0, tr("MantidPlot - Help"),s);
+void ExportDialog::help() {
+  QString s =
+      tr("The column separator can be customized. The following special codes "
+         "can be used:\n\\t for a TAB character \n\\s for a SPACE");
+  s += "\n" +
+       tr("The separator must not contain the following characters: 0-9eE.+-");
+  QMessageBox::about(0, tr("MantidPlot - Help"), s);
 }
 
-void ExportDialog::enableTableName(bool ok)
-{
-	boxTable->setEnabled(!ok);
+void ExportDialog::enableTableName(bool ok) { boxTable->setEnabled(!ok); }
+
+void ExportDialog::accept() {
+  ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(parent());
+  if (!app)
+    return;
+
+  QString sep = boxSeparator->currentText();
+  sep.replace(tr("TAB"), "\t", Qt::CaseInsensitive);
+  sep.replace(tr("SPACE"), " ");
+  sep.replace("\\s", " ");
+  sep.replace("\\t", "\t");
+
+  if (sep.contains(QRegExp("[0-9.eE+-]"))) {
+    QMessageBox::warning(0, tr("MantidPlot - Import options error"),
+                         tr("The separator must not contain the following "
+                            "characters: 0-9eE.+-"));
+    return;
+  }
+
+  hide();
+  if (boxAllTables->isChecked())
+    app->exportAllTables(sep, boxNames->isChecked(), boxComments->isChecked(),
+                         boxSelection->isChecked());
+  else
+    app->exportASCII(boxTable->currentText(), sep, boxNames->isChecked(),
+                     boxComments->isChecked(), boxSelection->isChecked());
+  close();
 }
 
-void ExportDialog::accept()
-{
-	ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(parent());
-	if (!app)
-		return;
-
-	QString sep = boxSeparator->currentText();
-	sep.replace(tr("TAB"), "\t", Qt::CaseInsensitive);
-	sep.replace(tr("SPACE"), " ");
-	sep.replace("\\s", " ");
-	sep.replace("\\t", "\t");
-
-	if (sep.contains(QRegExp("[0-9.eE+-]"))){
-		QMessageBox::warning(0, tr("MantidPlot - Import options error"),
-				tr("The separator must not contain the following characters: 0-9eE.+-"));
-		return;
-	}
-
-	hide();
-	if (boxAllTables->isChecked())
-		app->exportAllTables(sep, boxNames->isChecked(), boxComments->isChecked(), boxSelection->isChecked());
-	else
-		app->exportASCII(boxTable->currentText(), sep, boxNames->isChecked(), boxComments->isChecked(), boxSelection->isChecked());
-	close();
+void ExportDialog::setColumnSeparator(const QString &sep) {
+  if (sep == "\t")
+    boxSeparator->setCurrentIndex(0);
+  else if (sep == " ")
+    boxSeparator->setCurrentIndex(1);
+  else if (sep == ";\t")
+    boxSeparator->setCurrentIndex(2);
+  else if (sep == ",\t")
+    boxSeparator->setCurrentIndex(3);
+  else if (sep == "; ")
+    boxSeparator->setCurrentIndex(4);
+  else if (sep == ", ")
+    boxSeparator->setCurrentIndex(5);
+  else if (sep == ";")
+    boxSeparator->setCurrentIndex(6);
+  else if (sep == ",")
+    boxSeparator->setCurrentIndex(7);
+  else {
+    QString separator = sep;
+    boxSeparator->setEditText(
+        separator.replace(" ", "\\s").replace("\t", "\\t"));
+  }
 }
 
-void ExportDialog::setColumnSeparator(const QString& sep)
-{
-	if (sep=="\t")
-		boxSeparator->setCurrentIndex(0);
-	else if (sep==" ")
-		boxSeparator->setCurrentIndex(1);
-	else if (sep==";\t")
-		boxSeparator->setCurrentIndex(2);
-	else if (sep==",\t")
-		boxSeparator->setCurrentIndex(3);
-	else if (sep=="; ")
-		boxSeparator->setCurrentIndex(4);
-	else if (sep==", ")
-		boxSeparator->setCurrentIndex(5);
-	else if (sep==";")
-		boxSeparator->setCurrentIndex(6);
-	else if (sep==",")
-		boxSeparator->setCurrentIndex(7);
-	else {
-		QString separator = sep;
-		boxSeparator->setEditText(separator.replace(" ","\\s").replace("\t","\\t"));
-	}
+void ExportDialog::closeEvent(QCloseEvent *e) {
+  ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parent());
+  if (app) {
+    app->d_export_col_names = boxNames->isChecked();
+    app->d_export_table_selection = boxSelection->isChecked();
+    app->d_export_col_comment = boxComments->isChecked();
+
+    QString sep = boxSeparator->currentText();
+    sep.replace(tr("TAB"), "\t", Qt::CaseInsensitive);
+    sep.replace(tr("SPACE"), " ");
+    sep.replace("\\s", " ");
+    sep.replace("\\t", "\t");
+    app->d_export_col_separator = sep;
+  }
+
+  e->accept();
 }
 
-void ExportDialog::closeEvent(QCloseEvent* e)
-{
-	ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parent());
-	if (app){
-		app->d_export_col_names = boxNames->isChecked();
-		app->d_export_table_selection = boxSelection->isChecked();
-		app->d_export_col_comment = boxComments->isChecked();
+void ExportDialog::updateOptions(const QString &name) {
+  ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parent());
+  if (!app)
+    return;
 
-		QString sep = boxSeparator->currentText();
-		sep.replace(tr("TAB"), "\t", Qt::CaseInsensitive);
-		sep.replace(tr("SPACE"), " ");
-		sep.replace("\\s", " ");
-		sep.replace("\\t", "\t");
-		app->d_export_col_separator = sep;
-	}
+  MdiSubWindow *w = app->window(name);
+  if (!w)
+    return;
 
-	e->accept();
-}
-
-void ExportDialog::updateOptions(const QString & name)
-{
-		ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parent());
-	if (!app)
-        return;
-
-    MdiSubWindow* w = app->window(name);
-    if (!w)
-		return;
-
-    boxComments->setEnabled(w->inherits("Table"));
-    boxNames->setEnabled(w->inherits("Table"));
-	boxSelection->setEnabled(!w->isA("MantidMatrix"));
-	boxSeparator->setEnabled(!w->isA("MantidMatrix"));
-	boxAllTables->setEnabled(!w->isA("MantidMatrix"));
-	sepText->setEnabled(!w->isA("MantidMatrix"));
-
+  boxComments->setEnabled(w->inherits("Table"));
+  boxNames->setEnabled(w->inherits("Table"));
+  boxSelection->setEnabled(
+      qstrcmp("MantidMatrix", w->metaObject()->className()) != 0);
+  boxSeparator->setEnabled(
+      qstrcmp("MantidMatrix", w->metaObject()->className()) != 0);
+  boxAllTables->setEnabled(
+      qstrcmp("MantidMatrix", w->metaObject()->className()) != 0);
+  sepText->setEnabled(qstrcmp("MantidMatrix", w->metaObject()->className()) !=
+                      0);
 }

@@ -173,111 +173,111 @@ public:
   //----------------------------------------------------------------------
 
   /// Return the underlying ISpectrum ptr at the given workspace index.
-  virtual ISpectrum *getSpectrum(const size_t index) = 0;
+  virtual ISpectrum &getSpectrum(const size_t index) = 0;
 
   /// Return the underlying ISpectrum ptr (const version) at the given workspace
   /// index.
-  virtual const ISpectrum *getSpectrum(const size_t index) const = 0;
+  virtual const ISpectrum &getSpectrum(const size_t index) const = 0;
 
   /// Returns the Histogram at the given workspace index.
   HistogramData::Histogram histogram(const size_t index) const {
-    return getSpectrum(index)->histogram();
+    return getSpectrum(index).histogram();
   }
   HistogramData::BinEdges binEdges(const size_t index) const {
-    return getSpectrum(index)->binEdges();
+    return getSpectrum(index).binEdges();
   }
   HistogramData::BinEdgeStandardDeviations
   binEdgeStandardDeviations(const size_t index) const {
-    return getSpectrum(index)->binEdgeStandardDeviations();
+    return getSpectrum(index).binEdgeStandardDeviations();
   }
   HistogramData::Points points(const size_t index) const {
-    return getSpectrum(index)->binEdges();
+    return getSpectrum(index).binEdges();
   }
   HistogramData::PointStandardDeviations
   pointStandardDeviations(const size_t index) const {
-    return getSpectrum(index)->pointStandardDeviations();
+    return getSpectrum(index).pointStandardDeviations();
   }
   template <typename... T> void setBinEdges(const size_t index, T &&... data) {
-    getSpectrum(index)->setBinEdges(std::forward<T>(data)...);
+    getSpectrum(index).setBinEdges(std::forward<T>(data)...);
   }
   template <typename... T>
   void setBinEdgeVariances(const size_t index, T &&... data) {
-    getSpectrum(index)->setBinEdgeVariances(std::forward<T>(data)...);
+    getSpectrum(index).setBinEdgeVariances(std::forward<T>(data)...);
   }
   template <typename... T>
   void setBinEdgeStandardDeviations(const size_t index, T &&... data) {
-    getSpectrum(index)->setBinEdgeStandardDeviations(std::forward<T>(data)...);
+    getSpectrum(index).setBinEdgeStandardDeviations(std::forward<T>(data)...);
   }
   template <typename... T> void setPoints(const size_t index, T &&... data) {
-    getSpectrum(index)->setPoints(std::forward<T>(data)...);
+    getSpectrum(index).setPoints(std::forward<T>(data)...);
   }
   template <typename... T>
   void setPointVariances(const size_t index, T &&... data) {
-    getSpectrum(index)->setPointVariances(std::forward<T>(data)...);
+    getSpectrum(index).setPointVariances(std::forward<T>(data)...);
   }
   template <typename... T>
   void setPointStandardDeviations(const size_t index, T &&... data) {
-    getSpectrum(index)->setPointStandardDeviations(std::forward<T>(data)...);
+    getSpectrum(index).setPointStandardDeviations(std::forward<T>(data)...);
   }
   HistogramData::Counts counts(const size_t index) const {
-    return getSpectrum(index)->counts();
+    return getSpectrum(index).counts();
   }
   HistogramData::CountVariances countVariances(const size_t index) const {
-    return getSpectrum(index)->countVariances();
+    return getSpectrum(index).countVariances();
   }
   HistogramData::CountStandardDeviations
   countStandardDeviations(const size_t index) const {
-    return getSpectrum(index)->countStandardDeviations();
+    return getSpectrum(index).countStandardDeviations();
   }
   HistogramData::Frequencies frequencies(const size_t index) const {
-    return getSpectrum(index)->frequencies();
+    return getSpectrum(index).frequencies();
   }
   HistogramData::FrequencyVariances
   frequencyVariances(const size_t index) const {
-    return getSpectrum(index)->frequencyVariances();
+    return getSpectrum(index).frequencyVariances();
   }
   HistogramData::FrequencyStandardDeviations
   frequencyStandardDeviations(const size_t index) const {
-    return getSpectrum(index)->frequencyStandardDeviations();
+    return getSpectrum(index).frequencyStandardDeviations();
   }
   const HistogramData::HistogramX &x(const size_t index) const {
-    return getSpectrum(index)->x();
+    return getSpectrum(index).x();
   }
   const HistogramData::HistogramY &y(const size_t index) const {
-    return getSpectrum(index)->y();
+    return getSpectrum(index).y();
   }
   const HistogramData::HistogramE &e(const size_t index) const {
-    return getSpectrum(index)->e();
+    return getSpectrum(index).e();
   }
   const HistogramData::HistogramDx &dx(const size_t index) const {
-    return getSpectrum(index)->dx();
+    return getSpectrum(index).dx();
   }
   HistogramData::HistogramX &mutableX(const size_t index) {
-    return getSpectrum(index)->mutableX();
+    return getSpectrum(index).mutableX();
   }
   HistogramData::HistogramDx &mutableDx(const size_t index) {
-    return getSpectrum(index)->mutableDx();
+    return getSpectrum(index).mutableDx();
   }
   Kernel::cow_ptr<HistogramData::HistogramX> sharedX(const size_t index) const {
-    return getSpectrum(index)->sharedX();
+    return getSpectrum(index).sharedX();
   }
   Kernel::cow_ptr<HistogramData::HistogramY> sharedY(const size_t index) const {
-    return getSpectrum(index)->sharedY();
+    return getSpectrum(index).sharedY();
   }
   Kernel::cow_ptr<HistogramData::HistogramE> sharedE(const size_t index) const {
-    return getSpectrum(index)->sharedE();
+    return getSpectrum(index).sharedE();
   }
   Kernel::cow_ptr<HistogramData::HistogramDx>
   sharedDx(const size_t index) const {
-    return getSpectrum(index)->sharedDx();
+    return getSpectrum(index).sharedDx();
   }
   void setSharedX(const size_t index,
                   const Kernel::cow_ptr<HistogramData::HistogramX> &x) {
-    getSpectrum(index)->setSharedX(x);
+    getSpectrum(index).setSharedX(x);
   }
   void setSharedDx(const size_t index,
                   const Kernel::cow_ptr<HistogramData::HistogramDx> &dx) {
-    getSpectrum(index)->setSharedDx(dx);
+    getSpectrum(index).setSharedDx(dx);
   }
 
   // Methods for getting read-only access to the data.
@@ -285,57 +285,57 @@ public:
   /// Returns a read-only (i.e. const) reference to the specified X array
   /// @param index :: workspace index to retrieve.
   const MantidVec &readX(std::size_t const index) const {
-    return getSpectrum(index)->dataX();
+    return getSpectrum(index).dataX();
   }
   /// Returns a read-only (i.e. const) reference to the specified Y array
   /// @param index :: workspace index to retrieve.
   const MantidVec &readY(std::size_t const index) const {
-    return getSpectrum(index)->dataY();
+    return getSpectrum(index).dataY();
   }
   /// Returns a read-only (i.e. const) reference to the specified E array
   /// @param index :: workspace index to retrieve.
   const MantidVec &readE(std::size_t const index) const {
-    return getSpectrum(index)->dataE();
+    return getSpectrum(index).dataE();
   }
   /// Returns a read-only (i.e. const) reference to the specified X error array
   /// @param index :: workspace index to retrieve.
   const MantidVec &readDx(size_t const index) const {
-    return getSpectrum(index)->dataDx();
+    return getSpectrum(index).dataDx();
   }
 
   /// Returns the x data
   virtual MantidVec &dataX(const std::size_t index) {
     invalidateCommonBinsFlag();
-    return getSpectrum(index)->dataX();
+    return getSpectrum(index).dataX();
   }
   /// Returns the y data
   virtual MantidVec &dataY(const std::size_t index) {
-    return getSpectrum(index)->dataY();
+    return getSpectrum(index).dataY();
   }
   /// Returns the error data
   virtual MantidVec &dataE(const std::size_t index) {
-    return getSpectrum(index)->dataE();
+    return getSpectrum(index).dataE();
   }
   /// Returns the x error data
   virtual MantidVec &dataDx(const std::size_t index) {
-    return getSpectrum(index)->dataDx();
+    return getSpectrum(index).dataDx();
   }
 
   /// Returns the x data const
   virtual const MantidVec &dataX(const std::size_t index) const {
-    return getSpectrum(index)->dataX();
+    return getSpectrum(index).dataX();
   }
   /// Returns the y data const
   virtual const MantidVec &dataY(const std::size_t index) const {
-    return getSpectrum(index)->dataY();
+    return getSpectrum(index).dataY();
   }
   /// Returns the error const
   virtual const MantidVec &dataE(const std::size_t index) const {
-    return getSpectrum(index)->dataE();
+    return getSpectrum(index).dataE();
   }
   /// Returns the error const
   virtual const MantidVec &dataDx(const std::size_t index) const {
-    return getSpectrum(index)->dataDx();
+    return getSpectrum(index).dataDx();
   }
 
   virtual double getXMin() const;
@@ -345,20 +345,20 @@ public:
   /// Returns a pointer to the x data
   virtual Kernel::cow_ptr<HistogramData::HistogramX>
   refX(const std::size_t index) const {
-    return getSpectrum(index)->ptrX();
+    return getSpectrum(index).ptrX();
   }
 
   /// Set the specified X array to point to the given existing array
   virtual void setX(const std::size_t index,
                     const Kernel::cow_ptr<HistogramData::HistogramX> &X) {
-    getSpectrum(index)->setX(X);
+    getSpectrum(index).setX(X);
     invalidateCommonBinsFlag();
   }
 
   /// Set the specified X array to point to the given existing array
   virtual void setX(const std::size_t index,
                     const boost::shared_ptr<HistogramData::HistogramX> &X) {
-    getSpectrum(index)->setX(X);
+    getSpectrum(index).setX(X);
     invalidateCommonBinsFlag();
   }
 
@@ -367,7 +367,7 @@ public:
    * @param index: the workspace index
    */
   virtual bool hasDx(const std::size_t index) const {
-    return getSpectrum(index)->hasDx();
+    return getSpectrum(index).hasDx();
   }
 
   /// Generate the histogram or rebin the existing histogram.

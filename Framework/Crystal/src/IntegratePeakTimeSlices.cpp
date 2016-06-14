@@ -246,7 +246,7 @@ void IntegratePeakTimeSlices::exec() {
   FindPlane(m_center, m_xvec, m_yvec, m_ROW, m_COL, m_NROWS, m_NCOLS,
             m_cellWidth, m_cellHeight, peak);
 
-  g_log.debug() << "   Peak Index " << indx << std::endl;
+  g_log.debug() << "   Peak Index " << indx << '\n';
 
   double TotVariance = 0;
   double TotIntensity = 0;
@@ -365,7 +365,7 @@ void IntegratePeakTimeSlices::exec() {
 
     g_log.debug() << "   largest Channel,Radius,m_cellWidth,m_cellHeight = "
                   << Chan << " " << R << " " << m_cellWidth << " "
-                  << m_cellHeight << std::endl;
+                  << m_cellHeight << '\n';
 
     if (R < MinRowColSpan / 2 * max<double>(m_cellWidth, m_cellHeight) ||
         dChan < MinTimeSpan) {
@@ -425,7 +425,7 @@ void IntegratePeakTimeSlices::exec() {
 
           g_log.debug() << " A:chan=" << xchan << "  time=" << time
                         << "   Radius=" << Radius << "row= " << lastRow
-                        << "  col=" << lastCol << std::endl;
+                        << "  col=" << lastCol << '\n';
 
           SetUpData(Data, inpWkSpace, panel, xchan, xchan, lastCol, lastRow,
                     Cent, neighborRadius, Radius, spec_idList);
@@ -613,7 +613,7 @@ void IntegratePeakTimeSlices::exec() {
     }
 
   } catch (std::exception &EE1) {
-    std::cout << "Error in main reason=" << EE1.what() << std::endl;
+    std::cout << "Error in main reason=" << EE1.what() << '\n';
 
     throw std::runtime_error(" Error IntegratePeakTimeSlices:" +
                              std::string(EE1.what()));
@@ -635,11 +635,11 @@ void IntegratePeakTimeSlices::exec() {
     seconds2 = time(nullptr);
     double dif = difftime(seconds2, seconds1);
     g_log.debug() << "Finished Integr peak number " << indx << " in " << dif
-                  << " seconds" << std::endl;
+                  << " seconds\n";
 
   } catch (std::exception &ss) {
 
-    std::cout << "Error occurred XX " << ss.what() << std::endl;
+    std::cout << "Error occurred XX " << ss.what() << '\n';
     throw std::runtime_error(ss.what());
   }
 }
@@ -791,7 +791,7 @@ IntegratePeakTimeSlices::CalculatePositionSpan(Geometry::IPeak const &peak,
     return DetSpan;
 
   } catch (std::exception &s) {
-    std::cout << "err in getNRowsCols, reason=" << s.what() << std::endl;
+    std::cout << "err in getNRowsCols, reason=" << s.what() << '\n';
     return 0;
   }
 }
@@ -1591,7 +1591,7 @@ void IntegratePeakTimeSlices::SetUpData1(
       workspaceIndex = m_wi_to_detid_map.find(DetID)->second;
     else {
       throw std::runtime_error("No workspaceIndex for detID=" +
-                               boost::lexical_cast<std::string>(DetID));
+                               std::to_string(DetID));
     }
 
     IDetector_const_sptr Det = inpWkSpace->getDetector(workspaceIndex);
@@ -1604,8 +1604,8 @@ void IntegratePeakTimeSlices::SetUpData1(
     if (dist.scalar_prod(dist) < Radius * Radius)
 
     {
-      spec_idList += boost::lexical_cast<std::string>(
-          inpWkSpace->getSpectrum(workspaceIndex)->getSpectrumNo());
+      spec_idList += std::to_string(
+          inpWkSpace->getSpectrum(workspaceIndex).getSpectrumNo());
 
       double R1 = dist.scalar_prod(m_yvec);
       double R1a = R1 / m_cellHeight;
@@ -2034,7 +2034,7 @@ void IntegratePeakTimeSlices::Fit(MatrixWorkspace_sptr &Data,
   SSS += fun_str;
   g_log.debug(SSS);
   g_log.debug() << "      TotCount="
-                << m_AttributeValues->StatBase[IIntensities] << std::endl;
+                << m_AttributeValues->StatBase[IIntensities] << '\n';
 
   fit_alg->setPropertyValue("Function", fun_str);
 
@@ -2060,7 +2060,7 @@ void IntegratePeakTimeSlices::Fit(MatrixWorkspace_sptr &Data,
     chisqOverDOF = fit_alg->getProperty("OutputChi2overDoF");
     std::string outputStatus = fit_alg->getProperty("OutputStatus");
     g_log.debug() << "Chisq/OutputStatus=" << chisqOverDOF << "/"
-                  << outputStatus << std::endl;
+                  << outputStatus << '\n';
 
     names.clear();
     params.clear();
@@ -2094,19 +2094,19 @@ void IntegratePeakTimeSlices::Fit(MatrixWorkspace_sptr &Data,
     done = true;
     g_log.error() << "Bivariate Error for PeakNum="
                   << static_cast<int>(getProperty("PeakIndex")) << ":"
-                  << std::string(Ex1.what()) << std::endl;
+                  << std::string(Ex1.what()) << '\n';
   } catch (...) {
     done = true;
     g_log.error() << "Bivariate Error A for peakNum="
-                  << static_cast<int>(getProperty("PeakIndex")) << std::endl;
+                  << static_cast<int>(getProperty("PeakIndex")) << '\n';
   }
   if (!done) // Bivariate error happened
   {
 
     g_log.debug() << "   Thru Algorithm: chiSq=" << setw(7) << chisqOverDOF
-                  << endl;
+                  << '\n';
     g_log.debug() << "  Row,Col Radius=" << lastRow << "," << lastCol << ","
-                  << neighborRadius << std::endl;
+                  << neighborRadius << '\n';
 
     double sqrtChisq = -1;
     if (chisqOverDOF >= 0)
@@ -2127,11 +2127,11 @@ void IntegratePeakTimeSlices::Fit(MatrixWorkspace_sptr &Data,
         g_log.debug() << " Bounds(" << upLow.first << "," << upLow.second
                       << ")";
       }
-      g_log.debug() << endl;
+      g_log.debug() << '\n';
     }
 
     double intensity = m_AttributeValues->CalcISAWIntensity(params.data());
-    g_log.debug() << "IsawIntensity= " << intensity << std::endl;
+    g_log.debug() << "IsawIntensity= " << intensity << '\n';
   }
 }
 
@@ -2176,7 +2176,7 @@ void IntegratePeakTimeSlices::PreFit(MatrixWorkspace_sptr &Data,
     Fit(Data, chisqOverDOF, done, names, params, errs, lastRow, lastCol,
         neighborRadius);
     g_log.debug() << "-----------------------" << i
-                  << "--------------------------" << std::endl;
+                  << "--------------------------\n";
     if ((minChiSqOverDOF < 0 || chisqOverDOF < minChiSqOverDOF) &&
         (chisqOverDOF > 0) && !done) {
       for (int j = 0; j < NParams; j++) {
@@ -2235,8 +2235,7 @@ bool IntegratePeakTimeSlices::isGoodFit(std::vector<double> const &params,
 
   if (chisqOverDOF < 0) {
 
-    g_log.debug() << "   Bad Slice- negative chiSq= " << chisqOverDOF
-                  << std::endl;
+    g_log.debug() << "   Bad Slice- negative chiSq= " << chisqOverDOF << '\n';
     ;
     return false;
   }
@@ -2256,7 +2255,7 @@ bool IntegratePeakTimeSlices::isGoodFit(std::vector<double> const &params,
 
     g_log.debug() << "   Bad Slice. Negative Counts= "
                   << m_AttributeValues->StatBaseVals(IIntensities) -
-                         params[Ibk] * ncells << std::endl;
+                         params[Ibk] * ncells << '\n';
     ;
     return false;
   }
@@ -2271,7 +2270,7 @@ bool IntegratePeakTimeSlices::isGoodFit(std::vector<double> const &params,
                    // background
   {
     g_log.debug() << "   Bad Slice. Fitted Intensity & Observed "
-                     "Intensity(-back) too different. ratio=" << x << std::endl;
+                     "Intensity(-back) too different. ratio=" << x << '\n';
 
     return false;
   }
@@ -2298,8 +2297,8 @@ bool IntegratePeakTimeSlices::isGoodFit(std::vector<double> const &params,
     std::string obj = " parameter ";
     if (!paramBad)
       obj = " error ";
-    g_log.debug() << "   Bad Slice." << obj << BadParamNum << " is not a number"
-                  << std::endl;
+    g_log.debug() << "   Bad Slice." << obj << BadParamNum
+                  << " is not a number\n";
   }
 
   if (!GoodNums)
@@ -2333,7 +2332,7 @@ bool IntegratePeakTimeSlices::isGoodFit(std::vector<double> const &params,
   if (!GoodNums)
 
   {
-    g_log.debug() << Err << std::endl;
+    g_log.debug() << Err << '\n';
 
     return false;
   }
@@ -2352,7 +2351,7 @@ bool IntegratePeakTimeSlices::isGoodFit(std::vector<double> const &params,
       maxPeakHeightTheoretical < 0) {
 
     g_log.debug() << "   Bad Slice. Peak too small= "
-                  << maxPeakHeightTheoretical << "/" << AvHeight << std::endl;
+                  << maxPeakHeightTheoretical << "/" << AvHeight << '\n';
     return false;
   }
 
@@ -2360,7 +2359,7 @@ bool IntegratePeakTimeSlices::isGoodFit(std::vector<double> const &params,
                                   m_AttributeValues->StatBase[INCol]);
   if (maxPeakHeightTheoretical < 1 &&
       (params[IVXX] > Nrows * Nrows / 4 || params[IVYY] > Nrows * Nrows / 4)) {
-    g_log.debug() << "Peak is too flat " << std::endl;
+    g_log.debug() << "Peak is too flat \n";
     return false;
   }
 
@@ -2368,8 +2367,7 @@ bool IntegratePeakTimeSlices::isGoodFit(std::vector<double> const &params,
   // intensity center
   if (params[IVXX] + params[IVYY] >
       2.6 * (params[IVXX] * params[IVYY] - params[IVXY] * params[IVXY])) {
-    g_log.debug() << "      Bad Slice. Too steep of an exponential"
-                  << std::endl;
+    g_log.debug() << "      Bad Slice. Too steep of an exponential\n";
     return false;
   }
 
@@ -2626,7 +2624,7 @@ void IntegratePeakTimeSlices::updatePeakInformation(
 
   TotVariance += err;
   g_log.debug() << "TotIntensity/TotVariance=" << TotIntensity << "/"
-                << TotVariance << std::endl;
+                << TotVariance << '\n';
 }
 
 /**

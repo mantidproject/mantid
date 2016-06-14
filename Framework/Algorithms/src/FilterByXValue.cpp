@@ -95,7 +95,7 @@ void FilterByXValue::exec() {
   for (int spec = 0; spec < numSpec; ++spec) {
     PARALLEL_START_INTERUPT_REGION
 
-    EventList &events = outputWS->getEventList(spec);
+    EventList &events = outputWS->getSpectrum(spec);
     // Sort to make getting the tof min/max faster (& since maskTof will sort
     // anyway)
     events.sortTof();

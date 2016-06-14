@@ -2,9 +2,9 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/Functions/UserFunction1D.h"
-#include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/MandatoryValidator.h"
-#include <boost/tokenizer.hpp>
+#include "MantidKernel/StringTokenizer.h"
+#include "MantidKernel/UnitFactory.h"
 
 namespace Mantid {
 namespace CurveFitting {
@@ -66,16 +66,14 @@ void UserFunction1D::prepare() {
   // Set the initial values to the fit parameters
   std::string initParams = getProperty("InitialParameters");
   if (!initParams.empty()) {
-    typedef boost::tokenizer<boost::char_separator<char>> tokenizer;
-
-    boost::char_separator<char> sep(",");
-    tokenizer values(initParams, sep);
-    for (tokenizer::iterator it = values.begin(); it != values.end(); ++it) {
-      size_t ieq = it->find('=');
+    Mantid::Kernel::StringTokenizer values(
+        initParams, ",", Mantid::Kernel::StringTokenizer::TOK_TRIM);
+    for (const auto &it : values) {
+      size_t ieq = it.find('=');
       if (ieq == std::string::npos)
         throw std::invalid_argument("Property InitialParameters is malformed");
-      std::string varName = it->substr(0, ieq);
-      std::string varValue = it->substr(ieq + 1);
+      std::string varName = it.substr(0, ieq);
+      std::string varValue = it.substr(ieq + 1);
       size_t i0 = varName.find_first_not_of(" \t");
       size_t i1 = varName.find_last_not_of(" \t");
       if (i0 == std::string::npos)

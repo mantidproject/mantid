@@ -6,7 +6,6 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataObjects/Histogram1D.h"
-#include "MantidAPI/ISpectrum.h"
 
 namespace Mantid {
 
@@ -65,12 +64,8 @@ public:
   std::size_t size() const override;
   std::size_t blocksize() const override;
 
-  /// Return the underlying ISpectrum ptr at the given workspace index.
-  Mantid::API::ISpectrum *getSpectrum(const size_t index) override;
-
-  /// Return the underlying ISpectrum ptr (const version) at the given workspace
-  /// index.
-  const Mantid::API::ISpectrum *getSpectrum(const size_t index) const override;
+  Histogram1D &getSpectrum(const size_t index) override;
+  const Histogram1D &getSpectrum(const size_t index) const override;
 
   /// Generate a new histogram by rebinning the existing histogram.
   void generateHistogram(const std::size_t index, const MantidVec &X,
@@ -95,47 +90,47 @@ public:
                      bool parallelExecution = true);
 
   template <typename... T> void setCounts(const size_t index, T &&... data) & {
-    getSpectrum(index)->mutableHistogramRef().setCounts(
+    getSpectrum(index).mutableHistogramRef().setCounts(
         std::forward<T>(data)...);
   }
   template <typename... T>
   void setCountVariances(const size_t index, T &&... data) & {
-    getSpectrum(index)->mutableHistogramRef().setCountVariances(
+    getSpectrum(index).mutableHistogramRef().setCountVariances(
         std::forward<T>(data)...);
   }
   template <typename... T>
   void setCountStandardDeviations(const size_t index, T &&... data) & {
-    getSpectrum(index)->mutableHistogramRef().setCountStandardDeviations(
+    getSpectrum(index).mutableHistogramRef().setCountStandardDeviations(
         std::forward<T>(data)...);
   }
   template <typename... T>
   void setFrequencies(const size_t index, T &&... data) & {
-    getSpectrum(index)->mutableHistogramRef().setFrequencies(
+    getSpectrum(index).mutableHistogramRef().setFrequencies(
         std::forward<T>(data)...);
   }
   template <typename... T>
   void setFrequencyVariances(const size_t index, T &&... data) & {
-    getSpectrum(index)->mutableHistogramRef().setFrequencyVariances(
+    getSpectrum(index).mutableHistogramRef().setFrequencyVariances(
         std::forward<T>(data)...);
   }
   template <typename... T>
   void setFrequencyStandardDeviations(const size_t index, T &&... data) & {
-    getSpectrum(index)->mutableHistogramRef().setFrequencyStandardDeviations(
+    getSpectrum(index).mutableHistogramRef().setFrequencyStandardDeviations(
         std::forward<T>(data)...);
   }
   HistogramData::HistogramY &mutableY(const size_t index) {
-    return getSpectrum(index)->mutableHistogramRef().mutableY();
+    return getSpectrum(index).mutableHistogramRef().mutableY();
   }
   HistogramData::HistogramE &mutableE(const size_t index) {
-    return getSpectrum(index)->mutableHistogramRef().mutableE();
+    return getSpectrum(index).mutableHistogramRef().mutableE();
   }
   void setSharedY(const size_t index,
                   const Kernel::cow_ptr<HistogramData::HistogramY> &y) {
-    getSpectrum(index)->mutableHistogramRef().setSharedY(y);
+    getSpectrum(index).mutableHistogramRef().setSharedY(y);
   }
   void setSharedE(const size_t index,
                   const Kernel::cow_ptr<HistogramData::HistogramE> &e) {
-    getSpectrum(index)->mutableHistogramRef().setSharedE(e);
+    getSpectrum(index).mutableHistogramRef().setSharedE(e);
   }
 
 protected:
@@ -153,7 +148,7 @@ protected:
   std::vector<specnum_t> m_monitorList;
 
   /// A vector that holds the 1D histograms
-  std::vector<Mantid::API::ISpectrum *> data;
+  std::vector<Histogram1D *> data;
 
 private:
   Workspace2D *doClone() const override { return new Workspace2D(*this); }

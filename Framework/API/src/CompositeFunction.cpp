@@ -676,7 +676,7 @@ void CompositeFunction::setUpForFit() {
       ParameterTie *tie = getTie(i);
       if (tie && !tie->isConstant()) {
         g_log.warning() << "Numeric derivatives should be used when "
-                           "non-constant ties defined." << std::endl;
+                           "non-constant ties defined.\n";
         break;
       }
     }

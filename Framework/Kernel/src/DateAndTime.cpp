@@ -390,7 +390,7 @@ void DateAndTime::setFromISO8601(const std::string &str, bool displayLogs) {
     if (nSecondSpace != std::string::npos)
       time[nSecondSpace] = '0';
     if (displayLogs) {
-      g_log.warning() << " corrected to " << time << std::endl;
+      g_log.warning() << " corrected to " << time << '\n';
     }
   }
 

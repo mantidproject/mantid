@@ -1,6 +1,5 @@
 #include "MantidAlgorithms/ExtractSpectra.h"
 
-#include "MantidAPI/MemoryManager.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/TextAxis.h"
 #include "MantidAPI/WorkspaceFactory.h"
@@ -196,7 +195,7 @@ void ExtractSpectra::execHistogram() {
     }
     // Copy spectrum number & detectors
     outputWorkspace->getSpectrum(j)
-        ->copyInfoFrom(*m_inputWorkspace->getSpectrum(i));
+        .copyInfoFrom(m_inputWorkspace->getSpectrum(i));
 
     if (!m_commonBoundaries)
       this->cropRagged(outputWorkspace, static_cast<int>(i), j);
@@ -304,7 +303,7 @@ void ExtractSpectra::execEvent() {
   for (int j = 0; j < static_cast<int>(m_workspaceIndexList.size()); ++j) {
     PARALLEL_START_INTERUPT_REGION
     auto i = m_workspaceIndexList[j];
-    const EventList &el = eventW->getEventList(i);
+    const EventList &el = eventW->getSpectrum(i);
     // The output event list
     EventList &outEL = outputWorkspace->getOrAddEventList(j);
     //    // left side of the crop - will erase 0 -> endLeft
@@ -371,8 +370,7 @@ void ExtractSpectra::execEvent() {
     }
     // When cropping in place, you can clear out old memory from the input one!
     if (inPlace) {
-      eventW->getEventList(i).clear();
-      Mantid::API::MemoryManager::Instance().releaseFreeMemory();
+      eventW->getSpectrum(i).clear();
     }
     prog.report();
     PARALLEL_END_INTERUPT_REGION

@@ -255,7 +255,7 @@ public:
     TS_ASSERT_DELTA(data->readY(1)[37], 0.8074, 0.0001);
   }
 
-  void test_density_factor() {
+  void test_resolution_factor() {
     // Real signal: cos(w * x)
 
     size_t npoints = 50;
@@ -268,7 +268,7 @@ public:
     alg->setProperty("InputWorkspace", ws);
     alg->setProperty("A", 0.1);
     alg->setProperty("ChiTarget", 50.);
-    alg->setProperty("DensityFactor", "3");
+    alg->setProperty("ResolutionFactor", "3");
     alg->setPropertyValue("ReconstructedImage", "image");
     alg->setPropertyValue("ReconstructedData", "data");
     alg->setPropertyValue("EvolChi", "evolChi");
@@ -435,6 +435,17 @@ public:
     // outWS and outWSOffsetted are shifted by ~pi -> there should be a factor
     // ~(-1) between them
     TS_ASSERT_DELTA(outWS->readY(0)[28], -outWSOffsetted->readY(0)[28], 0.1)
+  }
+
+  void test_unevenlySpacedInputData() {
+    auto ws = createWorkspaceReal(3, 0.0);
+    Mantid::MantidVec xData{0, 1, 5};
+    ws->setX(0, xData);
+    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("MaxEnt");
+    alg->initialize();
+    alg->setChild(true);
+    TS_ASSERT_THROWS(alg->setProperty("InputWorkspace", ws),
+                     std::invalid_argument);
   }
 
   MatrixWorkspace_sptr createWorkspaceReal(size_t maxt, double phase) {

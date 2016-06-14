@@ -783,8 +783,7 @@ void GenerateEventsFilter::processMultipleValueFilters(double minvalue,
           << " with interval size = " << valueinterval << "; Log "
           << m_dblLog->name() << " has range " << minlogvalue << " to "
           << maxlogvalue
-          << ".  Therefore some workgroup index may not have any splitter."
-          << std::endl;
+          << ".  Therefore some workgroup index may not have any splitter.\n";
     }
   }
 
@@ -986,7 +985,7 @@ void GenerateEventsFilter::makeMultipleFiltersByValues(
   int logsize = m_dblLog->size();
   if (logsize == 0) {
     g_log.warning() << "There is no entry in this property " << m_dblLog->name()
-                    << std::endl;
+                    << '\n';
     return;
   }
 
@@ -1042,7 +1041,7 @@ void GenerateEventsFilter::makeMultipleFiltersByValuesParallel(
   int logsize = m_dblLog->size();
   if (logsize == 0) {
     g_log.warning() << "There is no entry in this property " << m_dblLog->name()
-                    << std::endl;
+                    << '\n';
     return;
   }
 
@@ -1911,7 +1910,7 @@ DateAndTime GenerateEventsFilter::findRunEnd() {
     norunendset = false;
 
     for (size_t i = 0; i < m_dataWS->getNumberHistograms(); ++i) {
-      const DataObjects::EventList &evlist = m_dataWS->getEventList(i);
+      const DataObjects::EventList &evlist = m_dataWS->getSpectrum(i);
       if (evlist.getNumberEvents() > 0) {
         // If event list is empty, the returned value may not make any sense
         DateAndTime lastpulse = evlist.getPulseTimeMax();

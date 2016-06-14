@@ -83,7 +83,7 @@ private:
                         size_t &numMasked, size_t &numZeros);
   /// Handle logic for Workspace2D workspaces
   void doWorkspace2D(API::MatrixWorkspace_const_sptr localworkspace,
-                     API::ISpectrum *outSpec, API::Progress &progress,
+                     API::ISpectrum &outSpec, API::Progress &progress,
                      size_t &numSpectra, size_t &numMasked, size_t &numZeros);
 
   // Overridden Algorithm methods

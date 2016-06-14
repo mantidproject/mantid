@@ -1,4 +1,5 @@
 #include "MantidAlgorithms/MaxEnt.h"
+#include "MantidAPI/EqualBinSizesValidator.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/TextAxis.h"
 #include "MantidAPI/WorkspaceFactory.h"
@@ -78,8 +79,13 @@ const std::string MaxEnt::summary() const {
  */
 void MaxEnt::init() {
 
+  // X values in input workspace must be (almost) equally spaced
+  const double warningLevel = 0.01;
+  const double errorLevel = 0.5;
   declareProperty(
-      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
+      make_unique<WorkspaceProperty<>>(
+          "InputWorkspace", "", Direction::Input,
+          boost::make_shared<EqualBinSizesValidator>(errorLevel, warningLevel)),
       "An input workspace.");
 
   declareProperty("ComplexData", false,
@@ -99,7 +105,7 @@ void MaxEnt::init() {
   auto mustBePositive = boost::make_shared<BoundedValidator<size_t>>();
   mustBePositive->setLower(0);
   declareProperty(make_unique<PropertyWithValue<size_t>>(
-                      "DensityFactor", 1, mustBePositive, Direction::Input),
+                      "ResolutionFactor", 1, mustBePositive, Direction::Input),
                   "An integer number indicating the factor by which the number "
                   "of points will be increased in the image and reconstructed "
                   "data");
@@ -163,37 +169,7 @@ std::map<std::string, std::string> MaxEnt::validateInputs() {
   MatrixWorkspace_sptr inWS = getProperty("InputWorkspace");
 
   if (inWS) {
-
-    // 1. X values in input workspace must be (almost) equally spaced
-
-    const double warningLevel = 0.01;
-    const double errorLevel = 0.5;
-    bool printWarning = false;
-    // Average spacing
-    const MantidVec &X = inWS->readX(0);
-    const double dx =
-        (X[X.size() - 1] - X[0]) / static_cast<double>(X.size() - 1);
-    for (size_t i = 1; i < X.size() - 1; i++) {
-      // 1% accuracy exceeded, but data still usable
-      if (std::abs(X[i] - X[0] - static_cast<double>(i) * dx) / dx >
-          warningLevel) {
-        printWarning = true;
-        if (std::abs(X[i] - X[0] - static_cast<double>(i) * dx) / dx >
-            errorLevel) {
-          // 50% accuracy exceeded, data not usable
-          printWarning = false;
-          result["InputWorkspace"] =
-              "X axis must be linear (all bins have same width)";
-          break;
-        }
-      }
-    }
-    if (printWarning) {
-      g_log.warning() << "Bin widths differ by more than " << warningLevel * 100
-                      << "% of average\n";
-    }
-
-    // 2. If the input signal is complex, we expect an even number of histograms
+    // If the input signal is complex, we expect an even number of histograms
     // in the input workspace
 
     size_t nhistograms = inWS->getNumberHistograms();
@@ -219,7 +195,7 @@ void MaxEnt::exec() {
   // Autoshift
   bool autoShift = getProperty("AutoShift");
   // Increase the number of points in the image by this factor
-  size_t densityFactor = getProperty("DensityFactor");
+  size_t resolutionFactor = getProperty("ResolutionFactor");
   // Background (default level, sky background, etc)
   double background = getProperty("A");
   // Chi target
@@ -240,7 +216,7 @@ void MaxEnt::exec() {
   // Number of spectra
   size_t nspec = inWS->getNumberHistograms();
   // Number of data points
-  size_t npoints = inWS->blocksize() * densityFactor;
+  size_t npoints = inWS->blocksize() * resolutionFactor;
   // Number of X bins
   size_t npointsX = inWS->isHistogramData() ? npoints + 1 : npoints;
 

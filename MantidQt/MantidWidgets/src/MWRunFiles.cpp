@@ -248,8 +248,7 @@ MWRunFiles::MWRunFiles(QWidget *parent)
     QStringList dataDirs =
         QString::fromStdString(
             Mantid::Kernel::ConfigService::Instance().getString(
-                "datasearch.directories"))
-            .split(";", QString::SkipEmptyParts);
+                "datasearch.directories")).split(";", QString::SkipEmptyParts);
 
     if (!dataDirs.isEmpty())
       m_lastDir = dataDirs[0];
@@ -736,7 +735,8 @@ void MWRunFiles::findFiles() {
       // Regex to match a selection of run numbers as defined here:
       // mantidproject.org/MultiFileLoading
       // Also allowing spaces between delimiters as this seems to work fine
-      const std::string runNumberString = "([0-9]+)([:+-] ?[0-9]+)? ?(:[0-9]+)?";
+      const std::string runNumberString =
+          "([0-9]+)([:+-] ?[0-9]+)? ?(:[0-9]+)?";
       boost::regex runNumbers(runNumberString, boost::regex::extended);
       // Regex to match a list of run numbers delimited by commas
       const std::string runListString =
@@ -794,6 +794,7 @@ void MWRunFiles::inspectThreadResult() {
 
   if (!error.empty()) {
     setFileProblem(QString::fromStdString(error));
+    emit fileInspectionFinished();
     return;
   }
 
@@ -835,8 +836,7 @@ void MWRunFiles::readSettings(const QString &group) {
     QStringList datadirs =
         QString::fromStdString(
             Mantid::Kernel::ConfigService::Instance().getString(
-                "datasearch.directories"))
-            .split(";", QString::SkipEmptyParts);
+                "datasearch.directories")).split(";", QString::SkipEmptyParts);
     if (!datadirs.isEmpty())
       m_lastDir = datadirs[0];
   }

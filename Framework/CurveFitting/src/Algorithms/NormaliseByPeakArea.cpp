@@ -258,7 +258,7 @@ double NormaliseByPeakArea::fitToMassPeak(const MatrixWorkspace_sptr &yspace,
   func->setParameter("Intensity", areaGuess);
   if (g_log.is(Logger::Priority::PRIO_DEBUG)) {
     g_log.debug() << "Starting values for peak fit on spectrum "
-                  << yspace->getSpectrum(index)->getSpectrumNo() << ":\n"
+                  << yspace->getSpectrum(index).getSpectrumNo() << ":\n"
                   << "area=" << areaGuess << "\n"
                   << "width=" << PEAK_WIDTH_GUESS << "\n"
                   << "position=" << PEAK_POS_GUESS << "\n";
@@ -276,7 +276,7 @@ double NormaliseByPeakArea::fitToMassPeak(const MatrixWorkspace_sptr &yspace,
   double area = func->getParameter("Intensity");
   if (g_log.is(Logger::Priority::PRIO_INFORMATION)) {
     g_log.information() << "Calculated peak area for spectrum "
-                        << yspace->getSpectrum(index)->getSpectrumNo() << ": "
+                        << yspace->getSpectrum(index).getSpectrumNo() << ": "
                         << area << "\n";
   }
   return area;

@@ -119,6 +119,7 @@ _translations = {
     'Michael Hart'            : 'Hart, Michael',
     'Lamar Moore'             : 'Moore, Lamar',
     'LamarMoore'              : 'Moore, Lamar',
+    'Moore'                   : 'Moore, Lamar',
     'Tom Perkins'             : 'Perkins, Tom',
     'Jan Burle'               : 'Burle, Jan',
     'Duc Le'                  : 'Le, Duc'

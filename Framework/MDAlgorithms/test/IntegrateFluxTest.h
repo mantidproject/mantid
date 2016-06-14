@@ -210,7 +210,7 @@ private:
     for (size_t i = i0; i < n; ++i) {
       TS_ASSERT_DELTA(y[i] / fun(x[i]), 1.0, tolerance);
       // std::cerr << x[i] << ' ' << fun(x[i])  << ' ' <<  y[i] << ' ' <<
-      // std::endl;
+      // '\n';
     }
 
     // Remove workspace from the data service.
@@ -401,7 +401,7 @@ private:
         auto i = std::distance(y.begin(), j);
         *j = double(2 * i) + 1.0;
       }
-      // std::cerr << std::accumulate( y.begin(), y.end(), 0.0 ) << std::endl;
+      // std::cerr << std::accumulate( y.begin(), y.end(), 0.0 ) << '\n';
     }
     ws->setDistribution(true);
     Mantid::API::AnalysisDataService::Instance().addOrReplace(wsName, ws);

@@ -385,7 +385,7 @@ void SlicingAlgorithm::createGeneralTransform() {
     g_log.information() << "Basis vectors forced to be orthogonal: ";
     for (auto &base : m_bases)
       g_log.information() << base.toString(",") << "; ";
-    g_log.information() << std::endl;
+    g_log.information() << '\n';
   }
 
   // Now, convert the original vector to the coordinates of the ORIGNAL ws, if
@@ -400,7 +400,7 @@ void SlicingAlgorithm::createGeneralTransform() {
   for (size_t d = 0; d < m_outD; d++)
     // Translate from the outCoords=(0,0,0) to outCoords=(min,min,min)
     m_inputMinPoint += (m_bases[d] * m_binDimensions[d]->getMinimum());
-  // std::cout << m_inputMinPoint << " m_inputMinPoint " << std::endl;
+  // std::cout << m_inputMinPoint << " m_inputMinPoint \n";
 
   // Create the CoordTransformAffine for BINNING with these basis vectors
   auto ct = new DataObjects::CoordTransformAffine(inD, m_outD);
@@ -691,7 +691,7 @@ void SlicingAlgorithm::createTransform() {
 
     g_log.notice() << "Performing " << this->name()
                    << " on the original workspace, '" << m_originalWS->getName()
-                   << "'" << std::endl;
+                   << "'\n";
   }
 
   // Create the coordinate transformation
@@ -747,7 +747,7 @@ void SlicingAlgorithm::createTransform() {
   //
   //      IMDWorkspace_sptr origWS = m_inWS->getOriginalWorkspace();
   //      g_log.notice() << "Performing " << this->name() << " on the original
-  //      workspace, '" << origWS->getName() << "'" << std::endl;
+  //      workspace, '" << origWS->getName() << "'\n";
   //
   //      if (origWS->getNumDims() != m_inWS->getNumDims())
   //        throw std::runtime_error("SlicingAlgorithm::createTransform():
@@ -779,11 +779,11 @@ void SlicingAlgorithm::createTransform() {
   //      coord_t out[2] = {0,0};
   //      m_transform->apply(in, out);
   //      std::cout << "0,0 gets binningTransformed to  " << VMD(2, out) <<
-  //      std::endl;
+  //      '\n';
   //      in[0] = 10; in[1] = 10;
   //      m_transform->apply(in, out);
   //      std::cout << "10,10 gets binningTransformed to  " << VMD(2, out) <<
-  //      std::endl;
+  //      '\n';
   //
   //      // Replace the input workspace
   //      m_inWS = origWS;

@@ -2,7 +2,6 @@
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileFinder.h"
 #include "MantidAPI/FileProperty.h"
-#include "MantidAPI/MemoryManager.h"
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
@@ -56,7 +55,6 @@ using DataObjects::EventWorkspace;
 using DataObjects::EventWorkspace_sptr;
 using DataObjects::TofEvent;
 using std::cout;
-using std::endl;
 using std::ifstream;
 using std::runtime_error;
 using std::stringstream;
@@ -403,8 +401,8 @@ void FilterEventsByLogValuePreNexus::exec() {
     PARALLEL_FOR_NO_WSP_CHECK()
     for (int64_t i = 0; i < numberOfSpectra; i++) {
       PARALLEL_START_INTERUPT_REGION
-      m_localWorkspace->getEventListPtr(i)
-          ->setSortOrder(DataObjects::PULSETIME_SORT);
+      m_localWorkspace->getSpectrum(i)
+          .setSortOrder(DataObjects::PULSETIME_SORT);
       PARALLEL_END_INTERUPT_REGION
     }
     PARALLEL_CHECK_INTERUPT_REGION
@@ -607,14 +605,12 @@ void FilterEventsByLogValuePreNexus::processEventLogs() {
     mit = this->wrongdetidmap.find(pid);
     size_t mindex = mit->second;
     if (mindex > this->wrongdetid_pulsetimes.size()) {
-      g_log.error() << "Wrong Index " << mindex << " for Pixel " << pid
-                    << std::endl;
+      g_log.error() << "Wrong Index " << mindex << " for Pixel " << pid << '\n';
       throw std::invalid_argument("Wrong array index for pixel from map");
     } else {
       g_log.information() << "Processing imbed log marked by Pixel " << pid
                           << " with size = "
-                          << this->wrongdetid_pulsetimes[mindex].size()
-                          << std::endl;
+                          << this->wrongdetid_pulsetimes[mindex].size() << '\n';
     }
 
     // Generate the log name
@@ -953,7 +949,7 @@ void FilterEventsByLogValuePreNexus::procEvents(
       for (detid_t j = 0; j < m_detid_max + 1; j++) {
         size_t wi = m_pixelToWkspindex[j];
         // Save a POINTER to the vector<tofEvent>
-        theseEventVectors[j] = &partWS->getEventList(wi).getEvents();
+        theseEventVectors[j] = &partWS->getSpectrum(wi).getEvents();
       }
     } // END FOR [Threads]
 
@@ -1010,7 +1006,7 @@ void FilterEventsByLogValuePreNexus::procEvents(
     }
     PARALLEL_CHECK_INTERUPT_REGION
 
-    g_log.information() << tim << " to load the data." << std::endl;
+    g_log.information() << tim << " to load the data.\n";
 
     // -------------------------------------------------------------------
     // MERGE WORKSPACES BACK TOGETHER
@@ -1019,49 +1015,33 @@ void FilterEventsByLogValuePreNexus::procEvents(
       PARALLEL_START_INTERUPT_REGION
       m_prog->resetNumSteps(workspace->getNumberHistograms(), 0.8, 0.95);
 
-      size_t memoryCleared = 0;
-      MemoryManager::Instance().releaseFreeMemory();
-
       // Merge all workspaces, index by index.
       PARALLEL_FOR_NO_WSP_CHECK()
       for (int iwi = 0; iwi < int(workspace->getNumberHistograms()); iwi++) {
         size_t wi = size_t(iwi);
 
         // The output event list.
-        EventList &el = workspace->getEventList(wi);
+        EventList &el = workspace->getSpectrum(wi);
         el.clear(false);
 
         // How many events will it have?
         size_t numEvents = 0;
         for (size_t i = 0; i < numThreads; i++)
-          numEvents += partWorkspaces[i]->getEventList(wi).getNumberEvents();
+          numEvents += partWorkspaces[i]->getSpectrum(wi).getNumberEvents();
         // This will avoid too much copying.
         el.reserve(numEvents);
 
         // Now merge the event lists
         for (size_t i = 0; i < numThreads; i++) {
-          EventList &partEl = partWorkspaces[i]->getEventList(wi);
+          EventList &partEl = partWorkspaces[i]->getSpectrum(wi);
           el += partEl.getEvents();
           // Free up memory as you go along.
           partEl.clear(false);
         }
-
-        // With TCMalloc, release memory when you accumulate enough to make
-        // sense
-        PARALLEL_CRITICAL(FilterEventsByLogValuePreNexus_trackMemory) {
-          memoryCleared += numEvents;
-          if (memoryCleared > 10000000) // ten million events = about 160 MB
-          {
-            MemoryManager::Instance().releaseFreeMemory();
-            memoryCleared = 0;
-          }
-        }
         m_prog->report("Merging Workspaces");
       }
 
-      // Final memory release
-      MemoryManager::Instance().releaseFreeMemory();
-      g_log.debug() << tim << " to merge workspaces together." << std::endl;
+      g_log.debug() << tim << " to merge workspaces together.\n";
       PARALLEL_END_INTERUPT_REGION
     }
     PARALLEL_CHECK_INTERUPT_REGION
@@ -1072,7 +1052,6 @@ void FilterEventsByLogValuePreNexus::procEvents(
       delete[] eventVectors[i];
     }
     delete[] eventVectors;
-    // delete [] pulsetimes;
 
     m_prog->resetNumSteps(3, 0.94, 1.00);
 
@@ -1083,7 +1062,7 @@ void FilterEventsByLogValuePreNexus::procEvents(
 
     m_prog->report("Setting proton charge");
     this->setProtonCharge(workspace);
-    g_log.debug() << tim << " to set the proton charge log." << std::endl;
+    g_log.debug() << tim << " to set the proton charge log.\n";
 
     // Make sure the MRU is cleared
     workspace->clearMRU();
@@ -1108,13 +1087,13 @@ void FilterEventsByLogValuePreNexus::procEvents(
                    << "\n";
 
     for (const auto pid : this->wrongdetids) {
-      g_log.notice() << "Wrong Detector ID : " << pid << std::endl;
+      g_log.notice() << "Wrong Detector ID : " << pid << '\n';
     }
     for (const auto &detidPair : wrongdetidmap) {
       PixelType tmpid = detidPair.first;
       size_t vindex = detidPair.second;
       g_log.notice() << "Pixel " << tmpid << ":  Total number of events = "
-                     << this->wrongdetid_pulsetimes[vindex].size() << std::endl;
+                     << this->wrongdetid_pulsetimes[vindex].size() << '\n';
     }
 
     return;
@@ -1283,11 +1262,11 @@ void FilterEventsByLogValuePreNexus::procEventsLinear(
 
 // The addEventQuickly method does not clear the cache, making things slightly
 // faster.
-// workspace->getEventList(this->m_pixelToWkspindex[pid]).addEventQuickly(event);
+// workspace->getSpectrum(this->m_pixelToWkspindex[pid]).addEventQuickly(event);
 
 // - Add event to data structure
 // (This is equivalent to
-// workspace->getEventList(this->m_pixelToWkspindex[pid]).addEventQuickly(event))
+// workspace->getSpectrum(this->m_pixelToWkspindex[pid]).addEventQuickly(event))
 // (But should be faster as a bunch of these calls were cached.)
 #if defined(__GNUC__) && !(defined(__INTEL_COMPILER)) && !(defined(__clang__))
         // This avoids a copy constructor call but is only available with GCC
@@ -1595,7 +1574,7 @@ void FilterEventsByLogValuePreNexus::filterEvents() {
       for (detid_t j = 0; j < m_detid_max + 1; j++) {
         size_t wi = m_pixelToWkspindex[j];
         // Save a POINTER to the vector<tofEvent>
-        theseEventVectors[j] = &partWS->getEventList(wi).getEvents();
+        theseEventVectors[j] = &partWS->getSpectrum(wi).getEvents();
       }
     } // END FOR [Threads]
 
@@ -1652,7 +1631,7 @@ void FilterEventsByLogValuePreNexus::filterEvents() {
     }
     PARALLEL_CHECK_INTERUPT_REGION
 
-    g_log.information() << tim << " to load the data." << std::endl;
+    g_log.information() << tim << " to load the data.\n";
 
     // -------------------------------------------------------------------
     // MERGE WORKSPACES BACK TOGETHER
@@ -1661,9 +1640,6 @@ void FilterEventsByLogValuePreNexus::filterEvents() {
       PARALLEL_START_INTERUPT_REGION
       m_prog->resetNumSteps(m_localWorkspace->getNumberHistograms(), 0.8, 0.95);
 
-      size_t memoryCleared = 0;
-      MemoryManager::Instance().releaseFreeMemory();
-
       // Merge all workspaces, index by index.
       PARALLEL_FOR_NO_WSP_CHECK()
       for (int iwi = 0; iwi < int(m_localWorkspace->getNumberHistograms());
@@ -1671,40 +1647,27 @@ void FilterEventsByLogValuePreNexus::filterEvents() {
         size_t wi = size_t(iwi);
 
         // The output event list.
-        EventList &el = m_localWorkspace->getEventList(wi);
+        EventList &el = m_localWorkspace->getSpectrum(wi);
         el.clear(false);
 
         // How many events will it have?
         size_t numEvents = 0;
         for (size_t i = 0; i < numThreads; i++)
-          numEvents += partWorkspaces[i]->getEventList(wi).getNumberEvents();
+          numEvents += partWorkspaces[i]->getSpectrum(wi).getNumberEvents();
         // This will avoid too much copying.
         el.reserve(numEvents);
 
         // Now merge the event lists
         for (size_t i = 0; i < numThreads; i++) {
-          EventList &partEl = partWorkspaces[i]->getEventList(wi);
+          EventList &partEl = partWorkspaces[i]->getSpectrum(wi);
           el += partEl.getEvents();
           // Free up memory as you go along.
           partEl.clear(false);
         }
-
-        // With TCMalloc, release memory when you accumulate enough to make
-        // sense
-        PARALLEL_CRITICAL(FilterEventsByLogValuePreNexus_trackMemory) {
-          memoryCleared += numEvents;
-          if (memoryCleared > 10000000) // ten million events = about 160 MB
-          {
-            MemoryManager::Instance().releaseFreeMemory();
-            memoryCleared = 0;
-          }
-        }
         m_prog->report("Merging Workspaces");
       }
 
-      // Final memory release
-      MemoryManager::Instance().releaseFreeMemory();
-      g_log.debug() << tim << " to merge workspaces together." << std::endl;
+      g_log.debug() << tim << " to merge workspaces together.\n";
       PARALLEL_END_INTERUPT_REGION
     }
     PARALLEL_CHECK_INTERUPT_REGION
@@ -1715,7 +1678,6 @@ void FilterEventsByLogValuePreNexus::filterEvents() {
       delete[] eventVectors[i];
     }
     delete[] eventVectors;
-    // delete [] pulsetimes;
 
     m_prog->resetNumSteps(3, 0.94, 1.00);
 
@@ -1726,7 +1688,7 @@ void FilterEventsByLogValuePreNexus::filterEvents() {
 
     m_prog->report("Setting proton charge");
     this->setProtonCharge(m_localWorkspace);
-    g_log.debug() << tim << " to set the proton charge log." << std::endl;
+    g_log.debug() << tim << " to set the proton charge log.\n";
 
     // Make sure the MRU is cleared
     m_localWorkspace->clearMRU();
@@ -1746,13 +1708,13 @@ void FilterEventsByLogValuePreNexus::filterEvents() {
                    << "\n";
 
     for (const auto wrongdetid : this->wrongdetids) {
-      g_log.notice() << "Wrong Detector ID : " << wrongdetid << std::endl;
+      g_log.notice() << "Wrong Detector ID : " << wrongdetid << '\n';
     }
     for (const auto &detidPair : this->wrongdetidmap) {
       PixelType tmpid = detidPair.first;
       size_t vindex = detidPair.second;
       g_log.notice() << "Pixel " << tmpid << ":  Total number of events = "
-                     << this->wrongdetid_pulsetimes[vindex].size() << std::endl;
+                     << this->wrongdetid_pulsetimes[vindex].size() << '\n';
     }
 
     return;
@@ -2065,7 +2027,7 @@ void FilterEventsByLogValuePreNexus::filterEventsLinear(
 
 // Add event to vector of events
 // (This is equivalent to
-// workspace->getEventList(this->m_pixelToWkspindex[pid]).addEventQuickly(event))
+// workspace->getSpectrum(this->m_pixelToWkspindex[pid]).addEventQuickly(event))
 // (But should be faster as a bunch of these calls were cached.)
 #if defined(__GNUC__) && !(defined(__INTEL_COMPILER)) && !(defined(__clang__))
         // This avoids a copy constructor call but is only available with GCC

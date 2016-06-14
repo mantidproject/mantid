@@ -1,5 +1,4 @@
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/MemoryManager.h"
 #include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/EventWorkspaceMRU.h"
 #include "MantidKernel/DateAndTime.h"
@@ -1124,7 +1123,6 @@ template <typename T> void parallel_sort4(std::vector<T> &vec) {
   // We can clear the incoming vector to free up memory now,
   //  because it is copied already in temp1, temp2
   vec.clear();
-  MemoryManager::Instance().releaseFreeMemory();
 
   // Final merge
   std::vector<T> temp;

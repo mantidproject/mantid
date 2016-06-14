@@ -92,7 +92,7 @@ private:
                         unsigned int &step);
   // returns true if the separator before the step string is valid
   bool isValidStepSeparator(const std::string &input,
-                            std::vector<std::string> &tokens);
+                            const std::vector<std::string> &tokens);
 };
 }
 }

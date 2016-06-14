@@ -782,7 +782,7 @@ AlignAndFocusPowder::conjoinWorkspaces(API::MatrixWorkspace_sptr ws1,
   specnum_t maxspecNo1 = 0;
   std::vector<specnum_t> origspecNos;
   for (size_t i = 0; i < nspec1; ++i) {
-    specnum_t tmpspecNo = ws1->getSpectrum(i)->getSpectrumNo();
+    specnum_t tmpspecNo = ws1->getSpectrum(i).getSpectrumNo();
     origspecNos.push_back(tmpspecNo);
     if (tmpspecNo > maxspecNo1)
       maxspecNo1 = tmpspecNo;
@@ -809,12 +809,12 @@ AlignAndFocusPowder::conjoinWorkspaces(API::MatrixWorkspace_sptr ws1,
 
   // FIXED : Restore the original spectrum Nos to spectra from ws1
   for (size_t i = 0; i < nspec1; ++i) {
-    specnum_t tmpspecNo = outws->getSpectrum(i)->getSpectrumNo();
-    outws->getSpectrum(i)->setSpectrumNo(origspecNos[i]);
+    specnum_t tmpspecNo = outws->getSpectrum(i).getSpectrumNo();
+    outws->getSpectrum(i).setSpectrumNo(origspecNos[i]);
 
     g_log.information() << "[DBx540] Conjoined spectrum " << i
                         << ": restore spectrum number to "
-                        << outws->getSpectrum(i)->getSpectrumNo()
+                        << outws->getSpectrum(i).getSpectrumNo()
                         << " from spectrum number = " << tmpspecNo << ".\n";
   }
 
@@ -822,7 +822,7 @@ AlignAndFocusPowder::conjoinWorkspaces(API::MatrixWorkspace_sptr ws1,
   if (offset >= 1) {
     for (size_t i = 0; i < nspec2; ++i) {
       specnum_t newspecid = maxspecNo1 + static_cast<specnum_t>((i) + offset);
-      outws->getSpectrum(nspec1 + i)->setSpectrumNo(newspecid);
+      outws->getSpectrum(nspec1 + i).setSpectrumNo(newspecid);
       // ISpectrum* spec = outws->getSpectrum(nspec1+i);
       // if (spec)
       // spec->setSpectrumNo(3);

@@ -49,8 +49,8 @@ public:
       space2D->setBinEdges(j, x);
       space2D->setCounts(j, y);
       space2D->setCountStandardDeviations(j, e);
-      space2D->getSpectrum(j)->setSpectrumNo(j);
-      space2D->getSpectrum(j)->setDetectorID(j);
+      space2D->getSpectrum(j).setSpectrumNo(j);
+      space2D->getSpectrum(j).setDetectorID(j);
     }
     space2D->setInstrument(instr);
 

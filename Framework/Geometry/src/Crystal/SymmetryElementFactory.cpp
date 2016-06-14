@@ -247,14 +247,14 @@ std::string SymmetryElementRotationGenerator::determineSymbol(
     symbol += "-";
   }
 
-  symbol += boost::lexical_cast<std::string>(operation.order());
+  symbol += std::to_string(operation.order());
 
   int translation =
       static_cast<int>(static_cast<double>(operation.order()) *
                        Kernel::V3D(determineTranslation(operation)).norm());
 
   if (translation != 0) {
-    symbol += boost::lexical_cast<std::string>(translation);
+    symbol += std::to_string(translation);
   }
 
   return symbol;

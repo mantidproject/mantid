@@ -186,7 +186,7 @@ void CreateSampleWorkspace::exec() {
     // down
     binWidth = xMax - xMin;
     g_log.warning() << "The bin width is so large that there is less than one "
-                       "bin - it has been changed to " << binWidth << std::endl;
+                       "bin - it has been changed to " << binWidth << '\n';
   }
 
   std::string functionString = "";
@@ -309,8 +309,8 @@ MatrixWorkspace_sptr CreateSampleWorkspace::createHistogramWorkspace(
     retVal->setBinEdges(wi, x);
     retVal->setCounts(wi, y);
     retVal->setCountStandardDeviations(wi, e);
-    retVal->getSpectrum(wi)->setDetectorID(detid_t(start_at_pixelID + wi));
-    retVal->getSpectrum(wi)->setSpectrumNo(specnum_t(wi + 1));
+    retVal->getSpectrum(wi).setDetectorID(detid_t(start_at_pixelID + wi));
+    retVal->getSpectrum(wi).setSpectrumNo(specnum_t(wi + 1));
   }
 
   return retVal;
@@ -359,7 +359,7 @@ EventWorkspace_sptr CreateSampleWorkspace::createEventWorkspace(
 
   const double hourInSeconds = 60 * 60;
   for (int wi = 0; wi < numPixels; wi++) {
-    EventList &el = retVal->getEventList(workspaceIndex);
+    EventList &el = retVal->getSpectrum(workspaceIndex);
     el.setSpectrumNo(wi + 1);
     el.setDetectorID(wi + start_at_pixelID);
 

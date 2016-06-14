@@ -636,7 +636,7 @@ int NexusFileIO::writeNexusTableWorkspace(
   for (size_t i = 0; i < itableworkspace->columnCount(); i++) {
     Column_const_sptr col = itableworkspace->getColumn(i);
 
-    std::string str = "column_" + boost::lexical_cast<std::string>(i + 1);
+    std::string str = "column_" + std::to_string(i + 1);
 
     if (col->isType<double>()) {
       writeTableColumn<double, double>(NX_FLOAT64, "", *col, str);
@@ -773,7 +773,7 @@ int NexusFileIO::writeNexusProcessedDataEvent(
   for (size_t wi = 0; wi < ws->getNumberHistograms(); wi++) {
     std::ostringstream group_name;
     group_name << "event_list_" << wi;
-    this->writeEventList(ws->getEventList(wi), group_name.str());
+    this->writeEventList(ws->getSpectrum(wi), group_name.str());
   }
 
   // Close up the overall group

@@ -42,6 +42,8 @@ StartAndEndTime getStartAndEndTimesFromRawFile(std::string filename) {
       Mantid::DataHandling::LoadRawHelper::extractStartTime(&isisRaw);
   startAndEndTime.endTime =
       Mantid::DataHandling::LoadRawHelper::extractEndTime(&isisRaw);
+
+  fclose(rawFile);
   return startAndEndTime;
 }
 
@@ -342,7 +344,7 @@ BinEdges CreateSimulationWorkspace::createBinBoundaries() const {
   if (numBoundaries <= 2) {
     throw std::invalid_argument(
         "Error in BinParams - Gave invalid number of bin boundaries: " +
-        boost::lexical_cast<std::string>(numBoundaries));
+        std::to_string(numBoundaries));
   }
   return BinEdges(std::move(newBins));
 }
@@ -353,11 +355,11 @@ BinEdges CreateSimulationWorkspace::createBinBoundaries() const {
 void CreateSimulationWorkspace::applyDetectorMapping() {
   size_t wsIndex(0);
   for (auto &detGroup : m_detGroups) {
-    ISpectrum *spectrum = m_outputWS->getSpectrum(wsIndex);
-    spectrum->setSpectrumNo(
+    auto &spectrum = m_outputWS->getSpectrum(wsIndex);
+    spectrum.setSpectrumNo(
         static_cast<specnum_t>(wsIndex + 1)); // Ensure a contiguous mapping
-    spectrum->clearDetectorIDs();
-    spectrum->addDetectorIDs(detGroup.second);
+    spectrum.clearDetectorIDs();
+    spectrum.addDetectorIDs(detGroup.second);
     ++wsIndex;
   }
 }

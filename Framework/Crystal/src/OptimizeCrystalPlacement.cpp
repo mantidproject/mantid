@@ -207,11 +207,11 @@ void OptimizeCrystalPlacement::exec() {
   }
 
   g_log.notice() << "Number initially indexed = " << nPeaksUsed
-                 << " at tolerance = " << HKLintOffsetMax << std::endl;
+                 << " at tolerance = " << HKLintOffsetMax << '\n';
 
   if (nPeaksUsed < 1) {
     g_log.error() << "Error in UB too large. 0 peaks indexed at "
-                  << HKLintOffsetMax << std::endl;
+                  << HKLintOffsetMax << '\n';
     throw std::invalid_argument("Error in UB too large. 0 peaks indexed ");
   }
 
@@ -236,7 +236,7 @@ void OptimizeCrystalPlacement::exec() {
     }
 
     if (it1 == NOoptimizeRuns.end()) {
-      std::string runNumStr = boost::lexical_cast<std::string>(runNum);
+      std::string runNumStr = std::to_string(runNum);
       OptRunNums += predChar + runNumStr;
       predChar = "/";
       ChRunNumList.push_back(runNumStr);
@@ -315,8 +315,8 @@ void OptimizeCrystalPlacement::exec() {
   FuncArg += oss.str();
   std::string Constr = oss1.str();
 
-  g_log.debug() << "Function argument=" << FuncArg << std::endl;
-  g_log.debug() << "Constraint argument=" << Constr << std::endl;
+  g_log.debug() << "Function argument=" << FuncArg << '\n';
+  g_log.debug() << "Constraint argument=" << Constr << '\n';
 
   //--------------------- set up Fit algorithm call-----------------
 
@@ -362,7 +362,7 @@ void OptimizeCrystalPlacement::exec() {
 
   double chisq = fit_alg->getProperty("OutputChi2overDoF");
   std::cout << "Fit finished. Status="
-            << (std::string)fit_alg->getProperty("OutputStatus") << std::endl;
+            << (std::string)fit_alg->getProperty("OutputStatus") << '\n';
 
   setProperty("Chi2overDoF", chisq);
 
@@ -371,14 +371,14 @@ void OptimizeCrystalPlacement::exec() {
 
   g_log.debug() << "Chi2overDof=" << chisq << "    # Peaks used=" << nPeaksUsed
                 << "# fitting parameters =" << nParams
-                << "   dof=" << (nPeaksUsed - nParams) << std::endl;
+                << "   dof=" << (nPeaksUsed - nParams) << '\n';
 
   ITableWorkspace_sptr RRes = fit_alg->getProperty("OutputParameters");
 
   double sigma = sqrt(chisq);
 
   std::string OutputStatus = fit_alg->getProperty("OutputStatus");
-  g_log.notice() << "Output Status=" << OutputStatus << std::endl;
+  g_log.notice() << "Output Status=" << OutputStatus << '\n';
 
   //------------------ Fix up Covariance output --------------------
   declareProperty(make_unique<WorkspaceProperty<ITableWorkspace>>(
@@ -462,7 +462,7 @@ void OptimizeCrystalPlacement::exec() {
   for (int i = 0; i < OutPeaks->getNumberPeaks(); ++i) {
 
     int RunNum = OutPeaks->getPeak(i).getRunNumber();
-    std::string RunNumStr = boost::lexical_cast<std::string>(RunNum);
+    std::string RunNumStr = std::to_string(RunNum);
     Matrix<double> GonMatrix;
     if (RunNum == prevRunNum ||
         MapRunNum2GonMat.find(RunNum) != MapRunNum2GonMat.end())
@@ -506,7 +506,7 @@ void OptimizeCrystalPlacement::exec() {
   setProperty("ModifiedPeaksWorkspace", OutPeaks);
   setProperty("nIndexed", nIndexed);
   g_log.notice() << "Number indexed after optimization= " << nIndexed
-                 << " at tolerance = " << HKLintOffsetMax << std::endl;
+                 << " at tolerance = " << HKLintOffsetMax << '\n';
 
 } // exec
 

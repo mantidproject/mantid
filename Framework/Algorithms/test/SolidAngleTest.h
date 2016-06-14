@@ -40,7 +40,7 @@ public:
       space2D->setCounts(j, a);
       space2D->setCountVariances(j, e);
       // Just set the spectrum number to match the index
-      space2D->getSpectrum(j)->setSpectrumNo(j + 1);
+      space2D->getSpectrum(j).setSpectrumNo(j + 1);
     }
 
     // Register the workspace in the data service

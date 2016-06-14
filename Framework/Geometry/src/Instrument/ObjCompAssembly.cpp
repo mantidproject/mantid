@@ -266,7 +266,7 @@ void ObjCompAssembly::printChildren(std::ostream &os) const {
   // std::vector<IComponent*>::const_iterator it;
   int i = 0;
   for (i = 0; i < this->nelements(); i++) {
-    os << "Component " << i << " : **********" << std::endl;
+    os << "Component " << i << " : **********\n";
     this->operator[](i)->printSelf(os);
   }
 }
@@ -285,11 +285,11 @@ void ObjCompAssembly::printTree(std::ostream &os) const {
         boost::dynamic_pointer_cast<const ObjCompAssembly>(this->operator[](i));
     os << "Element " << i << " in the assembly : ";
     if (test) {
-      os << test->getName() << std::endl;
-      os << "Children :******** " << std::endl;
+      os << test->getName() << '\n';
+      os << "Children :******** \n";
       test->printTree(os);
     } else
-      os << this->operator[](i)->getName() << std::endl;
+      os << this->operator[](i)->getName() << '\n';
   }
 }
 
@@ -615,8 +615,8 @@ void ObjCompAssembly::setOutline(boost::shared_ptr<const Object> obj) {
  */
 std::ostream &operator<<(std::ostream &os, const ObjCompAssembly &ass) {
   ass.printSelf(os);
-  os << "************************" << std::endl;
-  os << "Number of children :" << ass.nelements() << std::endl;
+  os << "************************\n";
+  os << "Number of children :" << ass.nelements() << '\n';
   ass.printChildren(os);
   return os;
 }

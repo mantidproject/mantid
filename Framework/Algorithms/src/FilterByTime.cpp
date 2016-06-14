@@ -104,7 +104,7 @@ void FilterByTime::exec() {
       stop = first + stop_dbl;
     } else {
       this->getLogger().debug()
-          << "No end filter time specified - assuming last pulse" << std::endl;
+          << "No end filter time specified - assuming last pulse\n";
       stop =
           last + 10000.0; // so we get all events - needs to be past last pulse
     }
@@ -142,9 +142,9 @@ void FilterByTime::exec() {
     PARALLEL_START_INTERUPT_REGION
 
     // Get the output event list (should be empty)
-    EventList &output_el = outputWS->getEventList(i);
+    EventList &output_el = outputWS->getSpectrum(i);
     // and this is the input event list
-    const EventList &input_el = inputWS->getEventList(i);
+    const EventList &input_el = inputWS->getSpectrum(i);
 
     // Perform the filtering
     input_el.filterByPulseTime(start, stop, output_el);

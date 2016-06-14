@@ -171,11 +171,11 @@ public:
       return;
 
     TS_ASSERT_DELTA(
-        out_ws->getEventList(0).getEvent(0).weight(),
-        std::sqrt(3. / (3. - out_ws->getEventList(0).getEvent(0).tof())), 1e-7);
+        out_ws->getSpectrum(0).getEvent(0).weight(),
+        std::sqrt(3. / (3. - out_ws->getSpectrum(0).getEvent(0).tof())), 1e-7);
     TS_ASSERT_DELTA(
-        out_ws->getEventList(0).getEvent(3).weight(),
-        std::sqrt(3. / (3. - out_ws->getEventList(0).getEvent(3).tof())), 1e-7);
+        out_ws->getSpectrum(0).getEvent(3).weight(),
+        std::sqrt(3. / (3. - out_ws->getSpectrum(0).getEvent(3).tof())), 1e-7);
     TS_ASSERT_LESS_THAN(
         out_ws->getNumberEvents(),
         in_ws->getNumberEvents()); // Check that events with Ef<0 are dropped
@@ -274,7 +274,7 @@ private:
       ws2D->setX(i, cow_xv);
       ws2D->dataY(i) = {1, 2, 3, 4, 5};
       ws2D->dataE(i) = {sqrt(1), sqrt(2), sqrt(3), sqrt(4), sqrt(5)};
-      ws2D->getSpectrum(i)->setSpectrumNo(i);
+      ws2D->getSpectrum(i).setSpectrumNo(i);
     }
 
     AnalysisDataService::Instance().add(inputWSname, ws2D);

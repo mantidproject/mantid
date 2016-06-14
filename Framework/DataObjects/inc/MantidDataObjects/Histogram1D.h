@@ -43,6 +43,14 @@ public:
     m_histogram.setCountStandardDeviations(0);
   }
 
+  Histogram1D(const Histogram1D &) = default;
+  Histogram1D(Histogram1D &&) = default;
+  Histogram1D(const ISpectrum &other);
+
+  Histogram1D &operator=(const Histogram1D &) = default;
+  Histogram1D &operator=(Histogram1D &&) = default;
+  Histogram1D &operator=(const ISpectrum &rhs);
+
   void setX(const Kernel::cow_ptr<HistogramData::HistogramX> &X) override;
   MantidVec &dataX() override;
   const MantidVec &dataX() const override;
@@ -115,6 +123,8 @@ public:
   void setSharedE(const Kernel::cow_ptr<HistogramData::HistogramE> &e) {
     mutableHistogramRef().setSharedE(e);
   }
+
+  friend class Workspace2D;
 
 private:
   const HistogramData::Histogram &histogramRef() const override {

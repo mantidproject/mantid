@@ -209,7 +209,7 @@ std::string Divide::checkSizeCompatibility(
   // If RHS only has one value (1D vertical), the number of histograms needs to
   // match.
   // Each lhs spectrum will be divided by that scalar
-  // std::cout << "rhs->blocksize() " << rhs->blocksize() << std::endl;
+  // std::cout << "rhs->blocksize() " << rhs->blocksize() << '\n';
   // Are we allowing the division by different # of spectra, using detector IDs
   // to match up?
   if (m_AllowDifferentNumberSpectra ||

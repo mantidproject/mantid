@@ -64,9 +64,9 @@ public:
       for (int j = 0; j < numspec; ++j) {
         // Just one event per pixel
         TofEvent event(1.23, int64_t(4.56));
-        spaceEvent->getEventList(j).addEventQuickly(event);
-        spaceEvent->getEventList(j).setDetectorID(j);
-        spaceEvent->getSpectrum(j)->setSpectrumNo(j);
+        spaceEvent->getSpectrum(j).addEventQuickly(event);
+        spaceEvent->getSpectrum(j).setDetectorID(j);
+        spaceEvent->getSpectrum(j).setSpectrumNo(j);
       }
       spaceEvent->setAllX(BinEdges{0.0, 10.0});
 
@@ -81,8 +81,8 @@ public:
         space2D->setBinEdges(j, x);
         space2D->setCounts(j, y);
         space2D->setCountStandardDeviations(j, e);
-        space2D->getSpectrum(j)->setSpectrumNo(j);
-        space2D->getSpectrum(j)->setDetectorID(j);
+        space2D->getSpectrum(j).setSpectrumNo(j);
+        space2D->getSpectrum(j).setDetectorID(j);
       }
     } else {
       // In case of MaskWorkspace

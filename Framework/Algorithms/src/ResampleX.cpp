@@ -142,7 +142,7 @@ string determineXMinMax(MatrixWorkspace_sptr inputWS, vector<double> &xmins,
   for (size_t i = 0; i < numSpectra; ++i) {
     // determine ranges if necessary
     if (updateXMins || updateXMaxs) {
-      const MantidVec &xvalues = inputWS->getSpectrum(i)->dataX();
+      const MantidVec &xvalues = inputWS->getSpectrum(i).dataX();
       if (updateXMins) {
         if (boost::math::isnan(xvalues.front())) {
           xmins.push_back(xmin_wksp);
@@ -392,7 +392,7 @@ void ResampleX::exec() {
         outputWS->setBinEdges(wkspIndex, xValues);
 
         // Get a const event list reference. inputEventWS->dataY() doesn't work.
-        const EventList &el = inputEventWS->getEventList(wkspIndex);
+        const EventList &el = inputEventWS->getSpectrum(wkspIndex);
         MantidVec y_data, e_data;
         // The EventList takes care of histogramming.
         el.generateHistogram(xValues, y_data, e_data);
@@ -476,7 +476,7 @@ void ResampleX::exec() {
         VectorHelper::rebin(XValues, YValues, YErrors, XValues_new, YValues_new,
                             YErrors_new, m_isDistribution);
       } catch (std::exception &ex) {
-        g_log.error() << "Error in rebin function: " << ex.what() << std::endl;
+        g_log.error() << "Error in rebin function: " << ex.what() << '\n';
         throw;
       }
 

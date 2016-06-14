@@ -251,7 +251,7 @@ void LoadBBY::exec() {
                                      numberHistograms, Progress_ReserveMemory);
 
   for (size_t i = 0; i != numberHistograms; ++i) {
-    DataObjects::EventList &eventList = eventWS->getEventList(i);
+    DataObjects::EventList &eventList = eventWS->getSpectrum(i);
 
     eventList.setSortOrder(DataObjects::PULSETIME_SORT);
     eventList.reserve(eventCounts[i]);

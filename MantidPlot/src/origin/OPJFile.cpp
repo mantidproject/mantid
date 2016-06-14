@@ -474,7 +474,7 @@ int OPJFile::ParseFormatOld() {
         size = 1000;
 
       fprintf(debug, "VALUES :\n");
-      SPREADSHEET[SPREADSHEET.size() - 1].maxRows = 1;
+      SPREADSHEET.back().maxRows = 1;
 
       double value = 0;
       for (i = 0; i < size; i++) { // read data
@@ -489,10 +489,9 @@ int OPJFile::ParseFormatOld() {
           stmp[1] = char(i / 26 % 26 + 0x41);
           stmp[2] = char(i % 26 + 0x41);
         }
-        SPREADSHEET[SPREADSHEET.size() - 1].column.push_back(stmp);
+        SPREADSHEET.back().column.push_back(stmp);
         CHECKED_FREAD(debug, &value, 8, 1, f);
-        SPREADSHEET[SPREADSHEET.size() - 1].column[i].odata.push_back(
-            originData(value));
+        SPREADSHEET.back().column[i].odata.push_back(originData(value));
 
         fprintf(debug, "%g ", value);
       }

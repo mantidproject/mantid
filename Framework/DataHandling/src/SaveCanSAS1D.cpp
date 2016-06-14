@@ -549,7 +549,7 @@ void SaveCanSAS1D::createSASDetectorElement(std::string &sasDet) {
     } else {
       g_log.notice() << "Detector with name " << detectorName
                      << " does not exist in the instrument of the workspace: "
-                     << m_workspace->name() << std::endl;
+                     << m_workspace->name() << '\n';
     }
   }
 }
