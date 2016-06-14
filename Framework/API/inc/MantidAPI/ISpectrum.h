@@ -124,6 +124,13 @@ public:
   virtual void resetHasDx();
 
 protected:
+  // Copy and move are not public since this is an abstract class, but protected
+  // such that derived classes can implement copy and move.
+  ISpectrum(const ISpectrum &) = default;
+  ISpectrum(ISpectrum &&) = default;
+  ISpectrum &operator=(const ISpectrum &) = default;
+  ISpectrum &operator=(ISpectrum &&) = default;
+
   /// The spectrum number of this spectrum
   specnum_t m_specNo;
 

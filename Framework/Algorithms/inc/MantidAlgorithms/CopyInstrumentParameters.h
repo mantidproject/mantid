@@ -57,8 +57,6 @@ namespace Algorithms {
 */
 class DLLExport CopyInstrumentParameters : public API::Algorithm {
 public:
-  CopyInstrumentParameters();
-  ~CopyInstrumentParameters() override;
   /// Algorithm's name
   const std::string name() const override { return "CopyInstrumentParameters"; }
   /// Summary of algorithms purpose
@@ -91,7 +89,7 @@ private:
   API::MatrixWorkspace_sptr m_receivingWorkspace;
   /// indicates that source workspace instrument and target workspace instrument
   /// have different share pointers.
-  bool m_different_instrument_sp;
+  bool m_different_instrument_sp = false;
 };
 
 } // namespace Algorithms

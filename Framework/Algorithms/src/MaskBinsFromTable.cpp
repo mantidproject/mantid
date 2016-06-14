@@ -29,13 +29,6 @@ MaskBinsFromTable::MaskBinsFromTable()
       m_useDetectorID(false), m_useSpectrumID(false) {}
 
 //----------------------------------------------------------------------------------------------
-/** Destructor
- */
-MaskBinsFromTable::~MaskBinsFromTable() {}
-
-//----------------------------------------------------------------------------------------------
-
-//----------------------------------------------------------------------------------------------
 void MaskBinsFromTable::init() {
   this->declareProperty(Kernel::make_unique<WorkspaceProperty<>>(
                             "InputWorkspace", "", Direction::Input,

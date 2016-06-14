@@ -36,7 +36,7 @@ public:
       inputW *= 2.0;
     if (type == WEIGHTED_NOTIME) {
       for (size_t i = 0; i < inputW->getNumberHistograms(); i++) {
-        EventList &el = inputW->getEventList(i);
+        EventList &el = inputW->getSpectrum(i);
         el.compressEvents(0.0, &el);
       }
     }
@@ -94,7 +94,7 @@ public:
     }
     if (type == WEIGHTED_NOTIME) {
       for (size_t i = 0; i < inputW->getNumberHistograms(); i++) {
-        EventList &el = inputW->getEventList(i);
+        EventList &el = inputW->getSpectrum(i);
         el.compressEvents(0.0, &el);
       }
     }

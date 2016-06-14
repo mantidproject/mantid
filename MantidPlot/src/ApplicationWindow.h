@@ -643,7 +643,7 @@ public slots:
   void updateCurves(Table *t, const QString &name);
 
   void showTable(const QString &curve);
-  void showTable(int i);
+  void showTable(QAction *action);
 
   void addColToTable();
   void cutSelection();

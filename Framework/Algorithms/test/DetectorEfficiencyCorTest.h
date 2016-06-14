@@ -76,10 +76,10 @@ public:
     auto inputWS = createTestWorkspace();
 
     // Make it point to both detectors
-    auto *spec0 = inputWS->getSpectrum(0);
-    spec0->clearDetectorIDs();
-    spec0->addDetectorID(1);
-    spec0->addDetectorID(2);
+    auto &spec0 = inputWS->getSpectrum(0);
+    spec0.clearDetectorIDs();
+    spec0.addDetectorID(1);
+    spec0.addDetectorID(2);
 
     Mantid::Algorithms::DetectorEfficiencyCor grouper;
     TS_ASSERT_THROWS_NOTHING(grouper.initialize());

@@ -16,12 +16,6 @@ using namespace Kernel;
 using namespace API;
 using namespace DataObjects;
 
-/// Default constructor
-NormaliseByCurrent::NormaliseByCurrent() : Algorithm() {}
-
-// Destructor
-NormaliseByCurrent::~NormaliseByCurrent() {}
-
 void NormaliseByCurrent::init() {
   declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input),

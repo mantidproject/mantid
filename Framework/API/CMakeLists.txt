@@ -28,6 +28,7 @@ set ( SRC_FILES
 	src/DeprecatedAlgorithm.cpp
 	src/DomainCreatorFactory.cpp
 	src/EnabledWhenWorkspaceIsType.cpp
+	src/EqualBinSizesValidator.cpp
 	src/ExperimentInfo.cpp
 	src/Expression.cpp
 	src/FermiChopperModel.cpp
@@ -180,6 +181,7 @@ set ( INC_FILES
 	inc/MantidAPI/DllConfig.h
 	inc/MantidAPI/DomainCreatorFactory.h
 	inc/MantidAPI/EnabledWhenWorkspaceIsType.h
+	inc/MantidAPI/EqualBinSizesValidator.h
 	inc/MantidAPI/ExperimentInfo.h
 	inc/MantidAPI/Expression.h
 	inc/MantidAPI/FermiChopperModel.h
@@ -343,6 +345,7 @@ set ( TEST_FILES
 	CostFunctionFactoryTest.h
 	DataProcessorAlgorithmTest.h
 	EnabledWhenWorkspaceIsTypeTest.h
+	EqualBinSizesValidatorTest.h
 	ExperimentInfoTest.h
 	ExpressionTest.h
 	FermiChopperModelTest.h

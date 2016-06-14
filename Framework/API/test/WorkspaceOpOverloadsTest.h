@@ -55,10 +55,10 @@ public:
   {
     auto ws = boost::make_shared<WorkspaceTester>();
     ws->init(2, 2, 1);
-    ws->getSpectrum(0)->dataX()[0] = -2.0;
-    ws->getSpectrum(0)->dataX()[1] = -1.0;
-    ws->getSpectrum(1)->dataX()[0] = -2.5;
-    ws->getSpectrum(1)->dataX()[1] = -1.5;
+    ws->getSpectrum(0).dataX()[0] = -2.0;
+    ws->getSpectrum(0).dataX()[1] = -1.0;
+    ws->getSpectrum(1).dataX()[0] = -2.5;
+    ws->getSpectrum(1).dataX()[1] = -1.5;
 
     TS_ASSERT(!WorkspaceHelpers::commonBoundaries(ws));
   }
@@ -119,21 +119,21 @@ public:
   {
     auto ws1 = boost::make_shared<WorkspaceTester>();
     ws1->init(2, 2, 1);
-    ws1->getSpectrum(1)->dataX()[0] = -2.5;
-    ws1->getSpectrum(1)->dataX()[1] = -1.5;
+    ws1->getSpectrum(1).dataX()[0] = -2.5;
+    ws1->getSpectrum(1).dataX()[1] = -1.5;
 
     auto ws2 = boost::make_shared<WorkspaceTester>();
     ws2->init(2, 2, 1);
-    ws2->getSpectrum(1)->dataX()[0] = -2.7;
-    ws2->getSpectrum(1)->dataX()[1] = -1.7;
+    ws2->getSpectrum(1).dataX()[0] = -2.7;
+    ws2->getSpectrum(1).dataX()[1] = -1.7;
 
     TS_ASSERT(WorkspaceHelpers::matchingBins(ws1, ws2, true));
     TS_ASSERT(!WorkspaceHelpers::matchingBins(ws1, ws2));
 
-    ws1->getSpectrum(0)->dataX()[0] = -2.0;
-    ws1->getSpectrum(0)->dataX()[1] = -1.0;
-    ws2->getSpectrum(0)->dataX()[0] = -3.0;
-    ws2->getSpectrum(0)->dataX()[1] = -4.0;
+    ws1->getSpectrum(0).dataX()[0] = -2.0;
+    ws1->getSpectrum(0).dataX()[1] = -1.0;
+    ws2->getSpectrum(0).dataX()[0] = -3.0;
+    ws2->getSpectrum(0).dataX()[1] = -4.0;
 
     TS_ASSERT(!WorkspaceHelpers::matchingBins(ws1, ws2, true));
   }
@@ -144,7 +144,7 @@ public:
     // By default the X vectors are different ones
     TS_ASSERT(!WorkspaceHelpers::sharedXData(ws));
     // Force both X spectra to point to the same underlying vector
-    ws->getSpectrum(1)->setX(ws->getSpectrum(0)->ptrX());
+    ws->getSpectrum(1).setX(ws->getSpectrum(0).ptrX());
     TS_ASSERT(WorkspaceHelpers::sharedXData(ws));
   }
 

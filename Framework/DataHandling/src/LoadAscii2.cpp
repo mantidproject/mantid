@@ -212,10 +212,10 @@ void LoadAscii2::writeToWorkspace(API::MatrixWorkspace_sptr &localWorkspace,
     }
     if (m_spectrumIDcount != 0) {
       localWorkspace->getSpectrum(i)
-          ->setSpectrumNo(m_spectra[i].getSpectrumNo());
+          .setSpectrumNo(m_spectra[i].getSpectrumNo());
     } else {
       localWorkspace->getSpectrum(i)
-          ->setSpectrumNo(static_cast<specnum_t>(i) + 1);
+          .setSpectrumNo(static_cast<specnum_t>(i) + 1);
     }
   }
 }

@@ -169,7 +169,7 @@ void GatherWorkspaces::exec() {
 
   for (size_t wi = 0; wi < totalSpec; wi++) {
     if (included.rank() == 0) {
-      const ISpectrum *inSpec = inputWorkspace->getSpectrum(wi);
+      const auto &inSpec = inputWorkspace->getSpectrum(wi);
       if (accum == "Add") {
         outputWorkspace->dataX(wi) = inputWorkspace->readX(wi);
         reduce(included, inputWorkspace->readY(wi), outputWorkspace->dataY(wi),
@@ -196,17 +196,17 @@ void GatherWorkspaces::exec() {
           reqs[j++] = included.irecv(i, 0, outputWorkspace->dataX(index));
           reqs[j++] = included.irecv(i, 1, outputWorkspace->dataY(index));
           reqs[j++] = included.irecv(i, 2, outputWorkspace->dataE(index));
-          ISpectrum *outSpec = outputWorkspace->getSpectrum(index);
-          outSpec->clearDetectorIDs();
-          outSpec->addDetectorIDs(inSpec->getDetectorIDs());
+          auto &outSpec = outputWorkspace->getSpectrum(index);
+          outSpec.clearDetectorIDs();
+          outSpec.addDetectorIDs(inSpec.getDetectorIDs());
         }
 
         // Make sure everything's been received before exiting the algorithm
         mpi::wait_all(reqs.begin(), reqs.end());
       }
-      ISpectrum *outSpec = outputWorkspace->getSpectrum(wi);
-      outSpec->clearDetectorIDs();
-      outSpec->addDetectorIDs(inSpec->getDetectorIDs());
+      auto &outSpec = outputWorkspace->getSpectrum(wi);
+      outSpec.clearDetectorIDs();
+      outSpec.addDetectorIDs(inSpec.getDetectorIDs());
     } else {
       if (accum == "Add") {
         reduce(included, inputWorkspace->readY(wi), vplus(), 0);
@@ -250,20 +250,20 @@ void GatherWorkspaces::execEvent() {
       // How do we accumulate the data?
       std::string accum = this->getPropertyValue("AccumulationMethod");
       std::vector<Mantid::DataObjects::EventList> out_values;
-      gather(included, eventW->getEventList(wi), out_values, 0);
+      gather(included, eventW->getSpectrum(wi), out_values, 0);
       for (int i = 0; i < included.size(); i++) {
         size_t index = wi; // accum == "Add"
         if (accum == "Append")
           index = wi + i * totalSpec;
         outputWorkspace->dataX(index) = eventW->readX(wi);
         outputWorkspace->getOrAddEventList(index) += out_values[i];
-        const ISpectrum *inSpec = eventW->getSpectrum(wi);
-        ISpectrum *outSpec = outputWorkspace->getSpectrum(index);
-        outSpec->clearDetectorIDs();
-        outSpec->addDetectorIDs(inSpec->getDetectorIDs());
+        const auto &inSpec = eventW->getSpectrum(wi);
+        auto &outSpec = outputWorkspace->getSpectrum(index);
+        outSpec.clearDetectorIDs();
+        outSpec.addDetectorIDs(inSpec.getDetectorIDs());
       }
     } else {
-      gather(included, eventW->getEventList(wi), 0);
+      gather(included, eventW->getSpectrum(wi), 0);
     }
   }
 }

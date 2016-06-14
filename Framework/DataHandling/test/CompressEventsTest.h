@@ -85,8 +85,8 @@ public:
     TS_ASSERT_EQUALS(output->getEventType(), WEIGHTED_NOTIME);
 
     // Check an event to see if it makes sense
-    if (output->getEventList(0).getNumberEvents() > 0) {
-      WeightedEvent ev = output->getEventList(0).getEvent(0);
+    if (output->getSpectrum(0).getNumberEvents() > 0) {
+      WeightedEvent ev = output->getSpectrum(0).getEvent(0);
       TS_ASSERT_DELTA(ev.weight(), 2.0, 1e-6);
       TS_ASSERT_DELTA(ev.errorSquared(), 2.0, 1e-6);
       TS_ASSERT_DELTA(ev.tof(), 0.5, 1e-6);

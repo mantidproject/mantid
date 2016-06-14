@@ -16,16 +16,6 @@ namespace Algorithms {
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ConvertToEventWorkspace)
 
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-ConvertToEventWorkspace::ConvertToEventWorkspace() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-ConvertToEventWorkspace::~ConvertToEventWorkspace() {}
-
 //------------------------------------------MaxEventsPerBin----------------------------------------------------
 
 //----------------------------------------------------------------------------------------------
@@ -78,13 +68,13 @@ void ConvertToEventWorkspace::exec() {
     size_t wi = size_t(iwi);
 
     // The input spectrum (a histogram)
-    const ISpectrum *inSpec = inWS->getSpectrum(wi);
+    const auto &inSpec = inWS->getSpectrum(wi);
 
     // The output event list
-    EventList &el = outWS->getEventList(wi);
+    EventList &el = outWS->getSpectrum(wi);
 
     // This method fills in the events
-    el.createFromHistogram(inSpec, GenerateZeros, GenerateMultipleEvents,
+    el.createFromHistogram(&inSpec, GenerateZeros, GenerateMultipleEvents,
                            MaxEventsPerBin);
 
     prog.report("Converting");

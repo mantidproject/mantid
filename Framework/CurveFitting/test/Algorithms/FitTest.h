@@ -8,8 +8,10 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/FuncMinimizerFactory.h"
 #include "MantidAPI/IFuncMinimizer.h"
+#include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidCurveFitting/Algorithms/Fit.h"
+#include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include <Poco/File.h>
 
@@ -744,7 +746,7 @@ public:
     Workspace2D_sptr ws2D = boost::dynamic_pointer_cast<Workspace2D>(ws);
     // in this case, x-values are just the running index
     auto &x = ws2D->dataX(0);
-    for (int i = 0; i < 20; i++)
+    for (int i = 0; i < timechannels; i++)
       x[i] = 1.0 * i + 0.00001;
 
     Mantid::MantidVec &y = ws2D->dataY(0); // y-values (counts)
@@ -788,6 +790,240 @@ public:
     TS_ASSERT(categories[0] == "General");
 
     AnalysisDataService::Instance().remove(wsName);
+  }
+
+  void test_function_convolution_fit_resolution() {
+
+    boost::shared_ptr<WorkspaceTester> data =
+        boost::make_shared<WorkspaceTester>();
+    data->init(1, 100, 100);
+
+    auto &x = data->dataX(0);
+    auto &y = data->dataY(0);
+    auto &e = data->dataE(0);
+
+    y = {0, -1.77636e-16, -1.77636e-16, 0, -1.77636e-16, -8.88178e-17,
+         -1.33227e-16, 0, 0, 8.88178e-17, 3.33067e-17, 1.11022e-17, 1.27676e-16,
+         6.66134e-17, 8.32667e-17, 3.88578e-17, 9.4369e-17, 1.44329e-16,
+         2.66454e-16, 5.10703e-15, 9.80105e-14, 1.63027e-12, 2.31485e-11,
+         2.80779e-10, 2.91067e-09, 2.58027e-08, 1.9575e-07, 1.27204e-06,
+         7.08849e-06, 3.39231e-05, 0.000139678, 0.000496012, 0.00152387,
+         0.0040672, 0.00948273, 0.0194574, 0.0354878, 0.0583005, 0.0877657,
+         0.123662, 0.167048, 0.221547, 0.293962, 0.393859, 0.531629, 0.714256,
+         0.938713, 1.18531, 1.41603, 1.58257, 1.64355, 1.58257, 1.41603,
+         1.18531, 0.938713, 0.714256, 0.531629, 0.393859, 0.293962, 0.221547,
+         0.167048, 0.123662, 0.0877657, 0.0583005, 0.0354878, 0.0194574,
+         0.00948273, 0.0040672, 0.00152387, 0.000496012, 0.000139678,
+         3.39231e-05, 7.08849e-06, 1.27204e-06, 1.9575e-07, 2.58027e-08,
+         2.91067e-09, 2.80779e-10, 2.31486e-11, 1.63033e-12, 9.80771e-14,
+         5.09592e-15, 2.77556e-16, 3.88578e-17, 2.22045e-17, -1.66533e-17,
+         -1.11022e-17, 0, -7.21645e-17, -8.88178e-17, -1.11022e-16,
+         -1.33227e-16, -4.44089e-17, -1.77636e-16, -1.33227e-16, -8.88178e-17,
+         -3.55271e-16, -8.88178e-17, -1.77636e-16, -1.77636e-16};
+
+    x = {-10,  -9.8, -9.6, -9.4, -9.2, -9,   -8.8, -8.6, -8.4, -8.2, -8,   -7.8,
+         -7.6, -7.4, -7.2, -7,   -6.8, -6.6, -6.4, -6.2, -6,   -5.8, -5.6, -5.4,
+         -5.2, -5,   -4.8, -4.6, -4.4, -4.2, -4,   -3.8, -3.6, -3.4, -3.2, -3,
+         -2.8, -2.6, -2.4, -2.2, -2,   -1.8, -1.6, -1.4, -1.2, -1,   -0.8, -0.6,
+         -0.4, -0.2, 0,    0.2,  0.4,  0.6,  0.8,  1,    1.2,  1.4,  1.6,  1.8,
+         2,    2.2,  2.4,  2.6,  2.8,  3,    3.2,  3.4,  3.6,  3.8,  4,    4.2,
+         4.4,  4.6,  4.8,  5,    5.2,  5.4,  5.6,  5.8,  6,    6.2,  6.4,  6.6,
+         6.8,  7,    7.2,  7.4,  7.6,  7.8,  8,    8.2,  8.4,  8.6,  8.8,  9,
+         9.2,  9.4,  9.6,  9.8};
+
+    e.assign(y.size(), 1);
+
+    Algorithms::Fit fit;
+    fit.initialize();
+    // fit.setPropertyValue("Function", conv->asString());
+
+    fit.setPropertyValue("Function",
+                         "composite=Convolution,FixResolution=true,NumDeriv="
+                         "true;name=ConvolutionTest_Gauss,c=0,h=0.5,s=0.5;"
+                         "name=ConvolutionTest_Lorentz,c=0,h=1,w=1");
+    fit.setProperty("InputWorkspace", data);
+    fit.setProperty("WorkspaceIndex", 0);
+    fit.execute();
+
+    IFunction_sptr out = fit.getProperty("Function");
+    // by default convolution keeps parameters of the resolution (function
+    // #0)
+    // fixed
+    TS_ASSERT_EQUALS(out->getParameter("f0.h"), 0.5);
+    TS_ASSERT_EQUALS(out->getParameter("f0.s"), 0.5);
+    // fit is not very good
+    TS_ASSERT_LESS_THAN(0.1, fabs(out->getParameter("f1.w") - 1));
+
+    Algorithms::Fit fit1;
+    fit1.initialize();
+    fit1.setProperty("Function",
+                     "composite=Convolution,FixResolution=false,NumDeriv="
+                     "true;name=ConvolutionTest_Gauss,c=0,h=0.5,s=0.5;"
+                     "name=ConvolutionTest_Lorentz,c=0,h=1,w=1");
+    fit1.setProperty("InputWorkspace", data);
+    fit1.setProperty("WorkspaceIndex", 0);
+    fit1.execute();
+
+    out = fit1.getProperty("Function");
+    // resolution parameters change and close to the initial values
+
+    TS_ASSERT_DELTA(out->getParameter("f0.s"), 2.0, 0.0001);
+    TS_ASSERT_DELTA(out->getParameter("f1.w"), 0.5, 0.0001);
+  }
+
+  void test_function_crystal_field_peaks_fit() {
+
+    auto data = TableWorkspace_sptr(new TableWorkspace);
+    data->addColumn("double", "Energy");
+    data->addColumn("double", "Intensity");
+
+    TableRow row = data->appendRow();
+    row << 0.0 << 2.74937;
+    row = data->appendRow();
+    row << 29.3261 << 0.7204;
+    row = data->appendRow();
+    row << 44.3412 << 0.429809;
+
+    Fit fit;
+    fit.initialize();
+    fit.setProperty("Function",
+                    "name=CrystalFieldPeaks,Ion=Ce,Symmetry=Ci,Temperature="
+                    "44,ToleranceEnergy=1e-10,ToleranceIntensity=0.001,"
+                    "BmolX=0,BmolY=0,BmolZ=0,BextX=0,BextY=0,BextZ=0,B20=0."
+                    "37,B21=0,B22=3.9,B40=-0.03,B41=0,B42=-0.11,B43=0,B44=-"
+                    "0.12,B60=0,B61=0,B62=0,B63=0,B64=0,B65=0,B66=0,IB21=0,"
+                    "IB22=0,IB41=0,IB42=0,IB43=0,IB44=0,IB61=0,IB62=0,IB63="
+                    "0,IB64=0,IB65=0,IB66=0,IntensityScaling=1");
+
+    fit.setProperty("Ties", "BmolX=0,BmolY=0,BmolZ=0,BextX=0,BextY=0,BextZ="
+                            "0,B21=0,B41=0,B43=0,B60=0,B61=0,B62=0,B63=0,"
+                            "B64=0,B65=0,B66=0,IB21=0,IB22=0,IB41=0,IB42=0,"
+                            "IB43=0,IB44=0,IB61=0,IB62=0,IB63=0,IB64=0,"
+                            "IB65=0,IB66=0,IntensityScaling=1");
+
+    fit.setProperty("InputWorkspace", data);
+    fit.setProperty("DataColumn", "Energy");
+    fit.setProperty("DataColumn_1", "Intensity");
+    fit.setProperty("Output", "out");
+    fit.execute();
+
+    Mantid::API::IFunction_sptr outF = fit.getProperty("Function");
+
+    TS_ASSERT_DELTA(outF->getParameter("B20"), 0.366336, 0.0001);
+    TS_ASSERT_DELTA(outF->getParameter("B22"), 3.98132, 0.0001);
+    TS_ASSERT_DELTA(outF->getParameter("B40"), -0.0304001, 0.0001);
+    TS_ASSERT_DELTA(outF->getParameter("B42"), -0.119605, 0.0001);
+    TS_ASSERT_DELTA(outF->getParameter("B44"), -0.130124, 0.0001);
+
+    ITableWorkspace_sptr output =
+        AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(
+            "out_Workspace");
+    TS_ASSERT(output);
+    if (output) {
+      TS_ASSERT_EQUALS(output->rowCount(), 3);
+      TS_ASSERT_EQUALS(output->columnCount(), 4);
+      auto column = output->getColumn("Energy");
+      TS_ASSERT_DELTA(column->toDouble(0), 0.0, 0.0001);
+      TS_ASSERT_DELTA(column->toDouble(1), 29.3261, 0.0001);
+      TS_ASSERT_DELTA(column->toDouble(2), 44.3412, 0.0001);
+      column = output->getColumn("Intensity");
+      TS_ASSERT_DELTA(column->toDouble(0), 2.74937, 0.0001);
+      TS_ASSERT_DELTA(column->toDouble(1), 0.7204, 0.0001);
+      TS_ASSERT_DELTA(column->toDouble(2), 0.429809, 0.0001);
+      column = output->getColumn("Energy_calc");
+      TS_ASSERT_DELTA(column->toDouble(0), 0.0, 0.0001);
+      TS_ASSERT_DELTA(column->toDouble(1), 29.3261, 0.0001);
+      TS_ASSERT_DELTA(column->toDouble(2), 44.3412, 0.0001);
+      column = output->getColumn("Intensity_calc");
+      TS_ASSERT_DELTA(column->toDouble(0), 2.74937, 0.0001);
+      TS_ASSERT_DELTA(column->toDouble(1), 0.7204, 0.0001);
+      TS_ASSERT_DELTA(column->toDouble(2), 0.429809, 0.0001);
+    }
+  }
+
+  void test_function_exp_decay_fit() {
+    Algorithms::Fit alg2;
+    TS_ASSERT_THROWS_NOTHING(alg2.initialize());
+    TS_ASSERT(alg2.isInitialized());
+
+    // create mock data to test against
+    std::string wsName = "ExpDecayMockData";
+    int histogramNumber = 1;
+    int timechannels = 20;
+    Workspace_sptr ws = WorkspaceFactory::Instance().create(
+        "Workspace2D", histogramNumber, timechannels, timechannels);
+    Workspace2D_sptr ws2D = boost::dynamic_pointer_cast<Workspace2D>(ws);
+    Mantid::MantidVec &x = ws2D->dataX(0); // x-values
+    for (int i = 0; i < timechannels; i++)
+      x[i] = i;
+    Mantid::MantidVec &y = ws2D->dataY(0); // y-values (counts)
+    Mantid::MantidVec &e = ws2D->dataE(0); // error values of counts
+
+    y = {5, 3.582656552869, 2.567085595163, 1.839397205857, 1.317985690579,
+         0.9443780141878, 0.6766764161831, 0.484859839322, 0.347417256114,
+         0.2489353418393, 0.1783699667363, 0.1278076660325, 0.09157819444367,
+         0.0656186436847, 0.04701781275748, 0.03368973499543, 0.02413974996916,
+         0.01729688668232, 0.01239376088333, 0};
+
+    e.assign(19, 1.0);
+
+    // put this workspace in the data service
+    TS_ASSERT_THROWS_NOTHING(
+        AnalysisDataService::Instance().addOrReplace(wsName, ws2D));
+
+    // alg2.setFunction(fn);
+    alg2.setPropertyValue("Function", "name=ExpDecay,Height=1,Lifetime=1");
+
+    // Set which spectrum to fit against and initial starting values
+    alg2.setPropertyValue("InputWorkspace", wsName);
+    alg2.setPropertyValue("WorkspaceIndex", "0");
+    alg2.setPropertyValue("StartX", "0");
+    alg2.setPropertyValue("EndX", "20");
+
+    // execute fit
+    TS_ASSERT_THROWS_NOTHING(TS_ASSERT(alg2.execute()))
+
+    TS_ASSERT(alg2.isExecuted());
+
+    // test the output from fit is what you expect
+    double dummy = alg2.getProperty("OutputChi2overDoF");
+    TS_ASSERT_DELTA(dummy, 0.0001, 0.0001);
+
+    IFunction_sptr out = alg2.getProperty("Function");
+    TS_ASSERT_DELTA(out->getParameter("Height"), 5, 0.0001);
+    TS_ASSERT_DELTA(out->getParameter("Lifetime"), 3, 0.001);
+  }
+
+  void test_function_lattice_fit() {
+    // Fit Silicon lattice with three peaks.
+    ITableWorkspace_sptr table = WorkspaceFactory::Instance().createTable();
+    table->addColumn("V3D", "HKL");
+    table->addColumn("double", "d");
+
+    TableRow newRow = table->appendRow();
+    newRow << V3D(1, 1, 1) << 3.135702;
+    newRow = table->appendRow();
+    newRow << V3D(2, 2, 0) << 1.920217;
+    newRow = table->appendRow();
+    newRow << V3D(3, 1, 1) << 1.637567;
+
+    Fit fit;
+    fit.initialize();
+    fit.setProperty("Function", "name=LatticeFunction,LatticeSystem=Cubic,"
+                                "ProfileFunction=Gaussian,a=5,ZeroShift=0");
+    fit.setProperty("Ties", "ZeroShift=0.0");
+    fit.setProperty("InputWorkspace", table);
+    fit.setProperty("CostFunction", "Unweighted least squares");
+    fit.setProperty("CreateOutput", true);
+    fit.execute();
+
+    TS_ASSERT(fit.isExecuted());
+
+    // test the output from fit is what you expect
+    IFunction_sptr out = fit.getProperty("Function");
+
+    TS_ASSERT_DELTA(out->getParameter("a"), 5.4311946, 1e-6);
+    TS_ASSERT_LESS_THAN(out->getError(0), 1e-6);
   }
 };
 
