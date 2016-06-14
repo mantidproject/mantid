@@ -2,17 +2,13 @@ from abc import (ABCMeta, abstractmethod)
 from mantid.api import (AlgorithmManager, WorkspaceGroup, AnalysisDataService)
 from SANSFileInformation import (SANSInstrument, SANSFileInformationFactory, SANSFileType, get_extension_for_file_type)
 from State.SANSStateData import (SANSStateData, SANSDataType)
-
-
-# ---------------------------------------------------------
-# GLOBALS
-# ---------------------------------------------------------
-MONITOR_SUFFIX = "_monitors"
+from Common.SANSConstants import SANSConstants
 
 
 # -------------------
 # Free functions
 # -------------------
+
 def create_unmanaged_algorithm(name, **kwargs):
     alg = AlgorithmManager.createUnmanaged(name)
     alg.initialize()
@@ -85,7 +81,7 @@ def get_expected_workspace_names(file_information, is_transmission, period):
         names = [workspace_name]
     elif file_information.get_number_of_periods() > 1 and period is SANSStateData.ALL_PERIODS:
         workspace_names = []
-        for period in range(0, file_information.get_number_of_periods()):
+        for period in range(1, file_information.get_number_of_periods() + 1):
             workspace_names.append("{}p{}_{}_{}".format(run_number, period, suffix_data, suffix_file_type))
         names = workspace_names
     elif file_information.get_number_of_periods() > 1 and period is not SANSStateData.ALL_PERIODS:
@@ -93,10 +89,6 @@ def get_expected_workspace_names(file_information, is_transmission, period):
         names = [workspace_name]
     else:
         raise RuntimeError("SANSLoad: Cannot create workspace names.")
-
-    print "]]]]]]]]]]]]]]]]"
-    print file_information.get_number_of_periods()
-
     return names
 
 
@@ -140,6 +132,8 @@ def get_loading_strategy(file_information, period, is_transmission):
     elif file_information.get_type() == SANSFileType.ISISRaw:
         loader_name, loader_options = get_loader_info_for_raw(file_information, period)
     elif file_information.get_type() == SANSFileType.ISISNexusAdded:
+        loader_name = None
+        loader_options = {}
         pass
         # TODO: Add loader for added
     else:
@@ -150,19 +144,12 @@ def get_loading_strategy(file_information, period, is_transmission):
 
 def add_workspaces_to_analysis_data_service(workspaces, workspace_names, is_monitor):
     if is_monitor:
-        workspace_names = [workspace_name + MONITOR_SUFFIX for workspace_name in workspace_names]
+        workspace_names = [workspace_name + SANSConstants.monitor_suffix for workspace_name in workspace_names]
 
-    # If workspace is a group workspace then we can iterate, else we cannot
-    is_group_workspace = isinstance(workspaces, WorkspaceGroup)
-
-    if is_group_workspace and len(workspaces) != len(workspace_names):
+    if len(workspaces) != len(workspace_names):
         raise RuntimeError("SANSLoad: There is a mismatch between the generated names and the length of"
                            " the WorkspaceGroup. The workspace has {} entries and there are {} "
                            "workspace names".format(len(workspaces), len(workspace_names)))
-
-    # If we have a single workspace we want to make it iterable
-    if not is_group_workspace:
-        workspaces = [workspaces]
 
     for index in range(0, len(workspaces)):
         if not AnalysisDataService.doesExist(workspace_names[index]):
@@ -177,22 +164,77 @@ def publish_workspaces_to_analysis_data_service(workspaces, workspace_monitors, 
         add_workspaces_to_analysis_data_service(workspace_monitors, workspace_names, is_monitor=True)
 
 
-def un_group_workspaces(workspace):
-    pass
+def has_loaded_correctly_from_ads(file_information, workspaces, period):
+    number_of_workspaces = len(workspaces)
+    number_of_periods = file_information.get_number_of_periods()
 
-
-def run_loader(loader, is_transmission):
-    loader.setProperty("OutputWorkspace", "dummy")
-    loader.execute()
-    if is_transmission:
-        workspace = loader.getProperty("OutputWorkspace").value
-        workspace_monitor = None
+    # Different cases: single-period, multi-period, multi-period with one period selected
+    if number_of_periods == 1:
+        is_valid = True if number_of_workspaces == 1 else False
+    elif number_of_periods > 1 and period is not SANSStateData.ALL_PERIODS:
+        is_valid = True if number_of_workspaces == 1 else False
+    elif number_of_periods > 1 and period is SANSStateData.ALL_PERIODS:
+        is_valid = True if number_of_workspaces == number_of_periods else False
     else:
-        workspace = loader.getProperty("OutputWorkspace").value
-        workspace_monitor = loader.getProperty("MonitorWorkspace").value
-        assert (workspace_monitor is not None)
-    assert (workspace is not None)
-    return workspace, workspace_monitor
+        raise RuntimeError("SANSLoad: Loading data from the ADS has resulted in the a mismatch between the number of "
+                           "period information and the number of loaded workspaces")
+    return is_valid
+
+
+def use_loaded_workspaces_from_ads(file_information, workspace_names, is_transmission,  period):
+    workspaces = []
+    workspace_monitors = []
+
+    for workspace_name in workspace_names:
+        if AnalysisDataService.doesExist(workspace_name):
+            workspaces.append(AnalysisDataService.retrieve(workspace_name))
+
+    if not is_transmission:
+        monitor_names = [workspace_name + SANSConstants.monitor_suffix for workspace_name in workspace_names]
+        for monitor_name in monitor_names:
+            if AnalysisDataService.doesExist(monitor_name):
+                workspace_monitors.append(AnalysisDataService.retrieve(monitor_name))
+
+    # Check if all required workspaces could be found on the ADS. For now, we allow only full loading, ie we don't
+    # allow picking up some child workspaces of a multi-period file from the ADS and having to load others. Either
+    # all are found in the ADS or we have to reload again. If we are loading a scatter workspace and the monitors
+    # are not complete, then we have to load the regular workspaces as well
+    if not has_loaded_correctly_from_ads(file_information, workspaces, period):
+        workspaces = []
+    if not has_loaded_correctly_from_ads(file_information, workspace_monitors, period):
+        workspaces = []
+        workspace_monitors = []
+
+    return workspaces, workspace_monitors
+
+
+def run_loader(loader, file_information, is_transmission, period):
+    loader.setProperty(SANSConstants.output_workspace, "dummy")
+    loader.execute()
+
+    # Get all output workspaces
+    number_of_periods = file_information.get_number_of_periods()
+    workspaces = []
+    # Either we have a single-period workspace or we want a single period from a multi-period workspace in which case
+    # we extract it via OutputWorkspace or we want all child workspaces of a multi-period workspace in which case we
+    # need to extract it via OutputWorkspace_1, OutputWorkspace_2, ...
+    if number_of_periods == 1 or (number_of_periods > 1 and period is not SANSStateData.ALL_PERIODS):
+        for index in range(1, number_of_periods + 1):
+            workspaces.append(loader.getProperty(SANSConstants.output_workspace).value)
+    else:
+        for index in range(1, number_of_periods + 1):
+            workspaces.append(loader.getProperty(SANSConstants.output_workspace_group + str(index)).value)
+
+    workspace_monitors = []
+    if not is_transmission:
+        if number_of_periods == 1 or (number_of_periods > 1 and period is not SANSStateData.ALL_PERIODS):
+            for index in range(1, number_of_periods + 1):
+                workspace_monitors.append(loader.getProperty(SANSConstants.output_monitor_workspace).value)
+        else:
+            for index in range(1, number_of_periods + 1):
+                workspace_monitors.append(loader.getProperty(SANSConstants.output_monitor_workspace_group +
+                                                             str(index)).value)
+    return workspaces, workspace_monitors
 
 
 def load_isis(data_type, file_information, period, use_loaded, publish_to_ads):
@@ -207,17 +249,14 @@ def load_isis(data_type, file_information, period, use_loaded, publish_to_ads):
     # Make potentially use of loaded workspaces. For now we can only identify them by their name
     # TODO: Add tag into sample logs
     if use_loaded:
-        pass #workspace, workspace_monitors = use_loaded_workspaces_from_analysis_data_service(workspace_names)
+        workspace, workspace_monitor = use_loaded_workspaces_from_ads(file_information, workspace_names,
+                                                                      is_transmission, period)
 
     # Load the workspace if required.
     if workspace is None or workspace_monitor is None:
         # Get the loading strategy
         loader = get_loading_strategy(file_information, period, is_transmission)
-        workspace, workspace_monitor = run_loader(loader, is_transmission)
-
-    # If we are dealing with a workspace group then un-group it here
-    #workspace = ungroup_workspaces(workspace)
-    #workspace_monitor = ungroup_workspaces(workspace_monitor)
+        workspace, workspace_monitor = run_loader(loader, file_information, is_transmission, period)
 
     # Publish to ADS if required
     if publish_to_ads:
@@ -225,7 +264,7 @@ def load_isis(data_type, file_information, period, use_loaded, publish_to_ads):
 
     # Associate the data type with the workspace
     workspace_pack = {data_type: workspace}
-    workspace_monitor_pack = {data_type: workspace_monitor} if workspace_monitor is not None else None
+    workspace_monitor_pack = {data_type: workspace_monitor} if len(workspace_monitor) > 0 else None
 
     return workspace_pack, workspace_monitor_pack
 
