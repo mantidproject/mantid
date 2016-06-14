@@ -33,9 +33,8 @@ namespace detail {
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 template <class T, class CowType, class Variances>
-class MANTID_HISTOGRAMDATA_DLL StandardDeviationVectorOf
-    : public VectorOf<T, CowType>,
-      public Iterable<T> {
+class StandardDeviationVectorOf : public VectorOf<T, CowType>,
+                                  public Iterable<T> {
 public:
   using VectorOf<T, CowType>::VectorOf;
   using VectorOf<T, CowType>::operator=;
