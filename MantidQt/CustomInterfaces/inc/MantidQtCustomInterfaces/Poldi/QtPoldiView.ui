@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>PoldiWidget</class>
+ <widget class="QMainWindow" name="PoldiWidget">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>690</width>
+    <height>346</height>
+   </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
+  <property name="windowTitle">
+   <string>Poldi Reduction Interface</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
+   </property>
+   <layout class="QVBoxLayout" name="verticalLayout">
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menuBar">
+    <property name="geometry">
+      <rect>
+        <x>0</x>
+        <y>0</y>
+        <width>959</width>
+        <height>18</height>
+      </rect>
+    </property>
+    <property name="nativeMenuBar">
+      <bool>false</bool>
+    </property>
+    <widget class="QMenu" name="menuReduction">
+      <property name="title">
+        <string>&amp;Demo</string>
+      </property>
+      <addaction name="actionDemo"/>
+    </widget>
+    <addaction name="menuReduction"/>
+  </widget>
+  <action name="actionDemo">
+    <property name="text">
+      <string>Populate Table</string>
+    </property>
+    <property name="icon">
+      <iconset resource="../../../../MantidPlot/icons/icons.qrc">
+        <normaloff>:/new.png</normaloff>:/new.png
+      </iconset>
+    </property>
+  </action>
+ </widget>
+ <resources>
+   <include location="../../../../MantidPlot/icons/icons.qrc"/>
+ </resources>
+ <customwidgets>
+  <customwidget>
+   <class>MantidQt::MantidWidgets::QDataProcessorWidget</class>
+   <extends>QWidget</extends>
+   <header>MantidQtMantidWidgets/DataProcessorUI/QDataProcessorWidget.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+</ui>
