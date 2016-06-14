@@ -36,8 +36,6 @@ namespace MDAlgorithms {
 */
 class DLLExport ConvertSpiceDataToRealSpace : public API::Algorithm {
 public:
-  ConvertSpiceDataToRealSpace();
-  ~ConvertSpiceDataToRealSpace() override;
 
   /// Algorithm's name
   const std::string name() const override {
@@ -132,7 +130,7 @@ private:
   std::string m_instrumentName;
 
   /// Number of detectors
-  size_t m_numSpec;
+  size_t m_numSpec = 0;
 
   /// x-y-z-value minimum
   std::vector<double> m_extentMins;
@@ -141,7 +139,7 @@ private:
   /// Number of bins
   std::vector<size_t> m_numBins;
   /// Dimension of the output MDEventWorkspace
-  size_t m_nDimensions;
+  size_t m_nDimensions = 3;
 };
 
 } // namespace DataHandling

@@ -40,8 +40,6 @@ namespace MDAlgorithms {
 class DLLExport ConvertToDetectorFaceMD
     : public MDAlgorithms::BoxControllerSettingsAlgorithm {
 public:
-  ConvertToDetectorFaceMD();
-  ~ConvertToDetectorFaceMD() override;
 
   const std::string name() const override;
   /// Summary of algorithms purpose
@@ -69,13 +67,13 @@ private:
   Mantid::DataObjects::EventWorkspace_sptr in_ws;
 
   /// Width in pixels of the widest detector
-  int m_numXPixels;
+  int m_numXPixels = 0;
   /// Height in pixels of the widest detector
-  int m_numYPixels;
+  int m_numYPixels = 0;
 
   // Map between the detector ID and the workspace index
   std::vector<size_t> m_detID_to_WI;
-  detid_t m_detID_to_WI_offset;
+  detid_t m_detID_to_WI_offset = 0;
 };
 
 } // namespace MDAlgorithms

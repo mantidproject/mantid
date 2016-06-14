@@ -34,16 +34,6 @@ using namespace Mantid::Geometry;
 DECLARE_ALGORITHM(ConvertCWSDMDtoHKL)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-ConvertCWSDMDtoHKL::ConvertCWSDMDtoHKL() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-ConvertCWSDMDtoHKL::~ConvertCWSDMDtoHKL() = default;
-
-//----------------------------------------------------------------------------------------------
 /** Init
  */
 void ConvertCWSDMDtoHKL::init() {

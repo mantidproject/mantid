@@ -23,16 +23,6 @@ DECLARE_ALGORITHM(ConvertCWPDMDToSpectra)
 const double BIGNUMBER = 1.0E100;
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-ConvertCWPDMDToSpectra::ConvertCWPDMDToSpectra() : m_infitesimal(1.0E-10) {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-ConvertCWPDMDToSpectra::~ConvertCWPDMDToSpectra() = default;
-
-//----------------------------------------------------------------------------------------------
 void ConvertCWPDMDToSpectra::init() {
 
   declareProperty(make_unique<WorkspaceProperty<IMDEventWorkspace>>(

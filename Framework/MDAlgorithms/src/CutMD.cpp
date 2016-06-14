@@ -233,16 +233,6 @@ const std::string CutMD::RLUMethod = "RLU";
 const std::string CutMD::InvAngstromMethod = "Q in A^-1";
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-CutMD::CutMD() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-CutMD::~CutMD() = default;
-
-//----------------------------------------------------------------------------------------------
 
 void CutMD::init() {
   declareProperty(make_unique<WorkspaceProperty<IMDWorkspace>>(

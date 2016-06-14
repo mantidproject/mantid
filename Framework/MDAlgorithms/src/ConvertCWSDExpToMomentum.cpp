@@ -29,11 +29,6 @@ ConvertCWSDExpToMomentum::ConvertCWSDExpToMomentum()
       m_isBaseName(false) {}
 
 //----------------------------------------------------------------------------------------------
-/** Destructor
- */
-ConvertCWSDExpToMomentum::~ConvertCWSDExpToMomentum() = default;
-
-//----------------------------------------------------------------------------------------------
 /** Init to declare property
  */
 void ConvertCWSDExpToMomentum::init() {
