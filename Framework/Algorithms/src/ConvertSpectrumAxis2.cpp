@@ -224,9 +224,9 @@ MatrixWorkspace_sptr ConvertSpectrumAxis2::createOutputWorkspace(
     // Set the axis value.
     newAxis->setValue(currentIndex, it->first);
     // Copy over the data.
-    outputWorkspace->setSharedX(currentIndex, inputWS->sharedX(it->second));
-    outputWorkspace->setSharedY(currentIndex, inputWS->sharedY(it->second));
-    outputWorkspace->setSharedE(currentIndex, inputWS->sharedE(it->second));
+    outputWorkspace->dataX(currentIndex) = inputWS->dataX(it->second);
+    outputWorkspace->dataY(currentIndex) = inputWS->dataY(it->second);
+    outputWorkspace->dataE(currentIndex) = inputWS->dataE(it->second);
     // We can keep the spectrum numbers etc.
     outputWorkspace->getSpectrum(currentIndex)
         .copyInfoFrom(inputWS->getSpectrum(it->second));

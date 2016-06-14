@@ -66,7 +66,7 @@ public:
                                                     // 1 + index_numbers
                                                     // because this is the
                                                     // tradition
-      space2D->getSpectrum(j)->setDetectorID(j);
+      space2D->getSpectrum(j).setDetectorID(j);
     }
 
     Instrument_sptr instr(new Instrument);

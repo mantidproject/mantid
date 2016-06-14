@@ -108,7 +108,7 @@ public:
   }
 
   void test_copy_constructor() {
-    const Histogram1D source;
+    const Histogram1D source(Histogram::XMode::Points);
     Histogram1D clone(source);
     TS_ASSERT_EQUALS(&clone.readX(), &source.readX());
     TS_ASSERT_EQUALS(&clone.readY(), &source.readY());
@@ -116,7 +116,7 @@ public:
   }
 
   void test_move_constructor() {
-    Histogram1D source;
+    Histogram1D source(Histogram::XMode::Points);
     auto oldX = &source.readX();
     auto oldY = &source.readY();
     auto oldE = &source.readE();
@@ -128,7 +128,7 @@ public:
   }
 
   void test_constructor_from_ISpectrum() {
-    Histogram1D resource;
+    Histogram1D resource(Histogram::XMode::Points);
     resource.dataX() = {0.1};
     resource.dataY() = {0.2};
     resource.dataE() = {0.3};
@@ -145,8 +145,8 @@ public:
   }
 
   void test_copy_assignment() {
-    const Histogram1D source;
-    Histogram1D clone;
+    const Histogram1D source(Histogram::XMode::Points);
+    Histogram1D clone(Histogram::XMode::Points);
     clone = source;
     TS_ASSERT_EQUALS(&clone.readX(), &source.readX());
     TS_ASSERT_EQUALS(&clone.readY(), &source.readY());
@@ -154,11 +154,11 @@ public:
   }
 
   void test_move_assignment() {
-    Histogram1D source;
+    Histogram1D source(Histogram::XMode::Points);
     auto oldX = &source.readX();
     auto oldY = &source.readY();
     auto oldE = &source.readE();
-    Histogram1D clone;
+    Histogram1D clone(Histogram::XMode::Points);
     clone = std::move(source);
     TS_ASSERT(!source.ptrX());
     TS_ASSERT_EQUALS(&clone.readX(), oldX);
@@ -167,12 +167,12 @@ public:
   }
 
   void test_assign_ISpectrum() {
-    Histogram1D resource;
+    Histogram1D resource(Histogram::XMode::Points);
     resource.dataX() = {0.1};
     resource.dataY() = {0.2};
     resource.dataE() = {0.3};
     const Mantid::API::ISpectrum &source = resource;
-    Histogram1D clone;
+    Histogram1D clone(Histogram::XMode::Points);
     clone = source;
     // X is shared...
     TS_ASSERT_EQUALS(&clone.readX(), &source.readX());

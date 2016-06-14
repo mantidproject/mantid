@@ -121,6 +121,10 @@ public:
   auto rend() const -> decltype(m_data.rend()) { return m_data.rend(); }
   auto crbegin() const -> decltype(m_data.crbegin()) { return m_data.crbegin(); }
   auto crend() const -> decltype(m_data.crend()) { return m_data.crend(); }
+  double &front() { return m_data.front(); }
+  double &back() { return m_data.back(); }
+  const double &front() const { return m_data.front(); }
+  const double &back() const { return m_data.back(); }
 };
 
 } // namespace detail

@@ -69,6 +69,22 @@ public:
     return static_cast<const T *>(this)->data().cend();
   }
 
+  /** Returns a const reference to the first element.
+   *
+   * Note: There is no non-const version of this since it requires expensive cow
+   * access. */
+  const double &front() const {
+    return static_cast<const T *>(this)->data().front();
+  }
+
+  /** Returns a const reference to the last element.
+   *
+   * Note: There is no non-const version of this since it requires expensive cow
+   * access. */
+  const double &back() const {
+    return static_cast<const T *>(this)->data().back();
+  }
+
 protected:
   ~Iterable() = default;
 };

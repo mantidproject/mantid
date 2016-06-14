@@ -66,6 +66,15 @@ public:
     TS_ASSERT_EQUALS(*(++it), 4.0);
     TS_ASSERT_EQUALS(++it, cend(testee));
   }
+
+  void test_front_back() {
+    IterableTester testee{1.0, 2.0, 4.0};
+    IterableTester clone(testee);
+    TS_ASSERT_EQUALS(testee.front(), 1.0);
+    TS_ASSERT_EQUALS(testee.back(), 4.0);
+    // Check if sharing is preserved
+    TS_ASSERT_EQUALS(&clone[0], &testee[0]);
+  }
 };
 
 #endif /* MANTID_HISTOGRAMDATA_ITERABLETEST_H_ */

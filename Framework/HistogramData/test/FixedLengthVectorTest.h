@@ -210,6 +210,20 @@ public:
     TS_ASSERT_EQUALS(data[0], 0.1);
     TS_ASSERT_EQUALS(data[1], 0.2);
   }
+
+  void test_front_back() {
+    FixedLengthVectorTester data{0.1, 0.2, 0.4};
+    data.front() += 1.0;
+    data.back() += 1.0;
+    TS_ASSERT_EQUALS(data.front(), 1.1);
+    TS_ASSERT_EQUALS(data.back(), 1.4);
+  }
+
+  void test_const_front_back() {
+    const FixedLengthVectorTester data{0.1, 0.2, 0.4};
+    TS_ASSERT_EQUALS(data.front(), 0.1);
+    TS_ASSERT_EQUALS(data.back(), 0.4);
+  }
 };
 
 #endif /* MANTID_HISTOGRAMDATA_FIXEDLENGTHVECTORTEST_H_ */
