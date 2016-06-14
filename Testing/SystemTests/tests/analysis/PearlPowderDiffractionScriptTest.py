@@ -437,3 +437,30 @@ class LoadCalibTests(unittest.TestCase):
             self.assertEqual(mtd_tt_workspace[i - 1].readY(0)[7654], vanadium_tt_file[i].readY(0)[7654])
             self.assertEqual(mtd_tt_workspace[i - 1].readX(0)[734], vanadium_tt_file[i].readX(0)[734])
             self.assertEqual(mtd_tt_workspace[i - 1].readE(0)[17], vanadium_tt_file[i].readE(0)[17])
+
+    def test_tt35_nexus_reference_files(self):
+        nexus_tt35 = mtd["van_tt35"]
+
+        ref_nexus_tt35 = "ref_van_tt35"
+        ref_nxs_tt35_file = os.path.join(DIRS[0], "PEARL/Calibration_Test/RefCalibFiles/van_spline_TT35_cycle_15_3.nxs")
+        Load(Filename=ref_nxs_tt35_file, OutputWorkspace=ref_nexus_tt35)
+
+        return nexus_tt35, ref_nexus_tt35
+
+    def test_tt70_nexus_reference_files(self):
+        nexus_tt70 = mtd["van_tt70"]
+
+        ref_nexus_tt70 = "ref_van_tt70"
+        ref_nxs_tt70_file = os.path.join(DIRS[0], "PEARL/Calibration_Test/RefCalibFiles/van_spline_TT70_cycle_15_3.nxs")
+        Load(Filename=ref_nxs_tt70_file, OutputWorkspace=ref_nexus_tt70)
+
+        return nexus_tt70, ref_nexus_tt70
+
+    def test_tt88_nexus_reference_files(self):
+        nexus_tt88 = mtd["van_tt88"]
+
+        ref_nexus_tt88 = "ref_van_tt88"
+        ref_nxs_tt88_file = os.path.join(DIRS[0], "PEARL/Calibration_Test/RefCalibFiles/van_spline_TT88_cycle_15_3.nxs")
+        Load(Filename=ref_nxs_tt88_file, OutputWorkspace=ref_nexus_tt88)
+
+        return nexus_tt88, ref_nexus_tt88
