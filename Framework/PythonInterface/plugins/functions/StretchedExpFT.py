@@ -111,7 +111,7 @@ class StretchedExpFT(IFunction1D):
         # Find corresponding energies
         energies = StretchedExpFT._planck_constant * fftfreq(2*nt, d=dt)  # standard ordering
         energies = np.concatenate([energies[nt:], energies[:nt]])  # increasing ordering
-        transform = p['Height'] * interp(xvals-p['Centre'], energies, fourier)
+        transform = p['Height'] * np.interp(xvals-p['Centre'], energies, fourier)
         return transform
 
     def fillJacobian(self, xvals, jacobian, partials):
