@@ -746,7 +746,7 @@ public:
     alg.initialize();
     alg.setPropertyValue("InputWorkspaces", a->name() + "," + b->name());
     alg.setPropertyValue("OutputWorkspace", "out");
-    TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
+    TS_ASSERT_THROWS_ANYTHING(alg.execute());
   }
 
   void test_mixed_multiperiod_group_and_non_multiperiod_group_inputs_throws() {
