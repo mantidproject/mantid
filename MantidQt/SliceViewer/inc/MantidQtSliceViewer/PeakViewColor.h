@@ -17,27 +17,24 @@
  * New peak types will need to have a color entry registered here.
  */
 struct PeakViewColor {
-    PeakViewColor(QColor colorCross = QColor(), QColor colorSphere = QColor(),
-                  QColor colorEllipsoid = QColor())
-        : colorCross(colorCross), colorSphere(colorSphere),
-          colorEllipsoid(colorEllipsoid)
-    {
-    }
+  PeakViewColor(QColor colorCross = QColor(), QColor colorSphere = QColor(),
+                QColor colorEllipsoid = QColor())
+      : colorCross(colorCross), colorSphere(colorSphere),
+        colorEllipsoid(colorEllipsoid) {}
 
-    bool operator==(const PeakViewColor &other)
-    {
-        auto sameColorCross = this->colorCross == other.colorCross;
-        auto sameColorSphere = this->colorSphere == other.colorSphere;
-        auto sameColorEllipsoid = this->colorEllipsoid == other.colorEllipsoid;
+  bool operator==(const PeakViewColor &other) {
+    auto sameColorCross = this->colorCross == other.colorCross;
+    auto sameColorSphere = this->colorSphere == other.colorSphere;
+    auto sameColorEllipsoid = this->colorEllipsoid == other.colorEllipsoid;
 
-        return sameColorCross && sameColorSphere && sameColorEllipsoid;
-    }
+    return sameColorCross && sameColorSphere && sameColorEllipsoid;
+  }
 
-    bool operator!=(const PeakViewColor &other) { return !(*this == other); }
+  bool operator!=(const PeakViewColor &other) { return !(*this == other); }
 
-    QColor colorCross;
-    QColor colorSphere;
-    QColor colorEllipsoid;
+  QColor colorCross;
+  QColor colorSphere;
+  QColor colorEllipsoid;
 };
 
 #endif

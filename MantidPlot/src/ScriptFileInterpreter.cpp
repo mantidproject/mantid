@@ -4,6 +4,7 @@
 #include "MantidQtMantidWidgets/ScriptEditor.h"
 #include <QAction>
 #include <QFileInfo>
+#include <QFontDatabase>
 #include <QMenu>
 #include <QMessageBox>
 #include <QPushButton>
@@ -223,9 +224,9 @@ inline void
 ScriptFileInterpreter::replaceSelectedText(const ScriptEditor *editor,
                                            const QString &text) {
   int UTF8_CodePage = 65001;
-  const char *b =
-      ((editor->SCI_GETCODEPAGE == UTF8_CodePage) ? text.utf8().constData()
-                                                  : text.latin1());
+  const char *b = ((editor->SCI_GETCODEPAGE == UTF8_CodePage)
+                       ? text.toUtf8().constData()
+                       : text.toLatin1().constData());
   editor->SendScintilla(editor->SCI_REPLACESEL, b);
 }
 
@@ -236,13 +237,14 @@ void ScriptFileInterpreter::showContextMenu(const QPoint &clickPoint) {
   QMenu context(this);
   context.addAction("&Save", m_editor, SLOT(saveToCurrentFile()));
 
-  context.insertSeparator();
-  context.addAction("&Copy", m_editor, SLOT(copy()));
+  auto *copyAction = context.addAction("&Copy", m_editor, SLOT(copy()));
+  context.insertSeparator(copyAction);
   context.addAction("C&ut", m_editor, SLOT(cut()));
   context.addAction("P&aste", m_editor, SLOT(paste()));
 
-  context.insertSeparator();
-  context.addAction("E&xecute Selection", this, SLOT(executeSelection()));
+  auto *execAction =
+      context.addAction("E&xecute Selection", this, SLOT(executeSelection()));
+  context.insertSeparator(execAction);
   context.addAction("Execute &All", this, SLOT(executeAll()));
 
   context.exec(this->mapToGlobal(clickPoint));

@@ -1017,7 +1017,7 @@ void LeBailFunction::setPeakHeights(std::vector<double> inheights) {
       if (inheights.size() != heights.size())
       {
         g_log.error() << "Input number of peaks (height) is not same as peaks. "
-     << std::endl;
+     << '\n';
         throw std::logic_error("Input number of peaks (height) is not same as
      peaks. ");
       }

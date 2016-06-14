@@ -98,7 +98,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(wsName, ws2D));
 
     std::cout << "Number of data points to fit = " << ws2D->readX(0).size()
-              << std::endl;
+              << '\n';
 
     // 3. Set fit
     Algorithms::Fit fitalg;
@@ -121,7 +121,7 @@ public:
     double chi2 = fitalg.getProperty("OutputChi2overDoF");
     TS_ASSERT(chi2 < 1.5);
     if (chi2 >= 1.5) {
-      std::cout << "Chi^2 = " << chi2 << std::endl;
+      std::cout << "Chi^2 = " << chi2 << '\n';
     }
 
     std::string fitStatus = fitalg.getProperty("OutputStatus");

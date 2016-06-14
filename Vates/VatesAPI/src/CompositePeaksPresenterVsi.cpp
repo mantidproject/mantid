@@ -12,7 +12,8 @@ namespace VATES {
  * Update the view frustum
  * @param frustum The view frustum
  */
-void CompositePeaksPresenterVsi::updateViewFrustum(ViewFrustum_const_sptr frustum) {
+void CompositePeaksPresenterVsi::updateViewFrustum(
+    ViewFrustum_const_sptr frustum) {
   for (const auto &presenter : m_peaksPresenters) {
     presenter->updateViewFrustum(frustum);
   }
@@ -22,7 +23,7 @@ void CompositePeaksPresenterVsi::updateViewFrustum(ViewFrustum_const_sptr frustu
 *Get the viewable peaks. Essentially copied from the slice viewer.
 *@returns A vector indicating which of the peaks are viewable.
 */
-std::vector<bool> CompositePeaksPresenterVsi::getViewablePeaks() const{
+std::vector<bool> CompositePeaksPresenterVsi::getViewablePeaks() const {
   return std::vector<bool>();
 }
 
@@ -30,7 +31,8 @@ std::vector<bool> CompositePeaksPresenterVsi::getViewablePeaks() const{
  * Get the name of all peaks workspaces as a vector
  * @returns A vector of all peaks workspace names.
  */
-std::vector<std::string> CompositePeaksPresenterVsi::getPeaksWorkspaceNames() const{
+std::vector<std::string>
+CompositePeaksPresenterVsi::getPeaksWorkspaceNames() const {
   std::vector<std::string> peaksWorkspaceNames;
   for (const auto &presenter : m_peaksPresenters) {
     peaksWorkspaceNames.push_back(presenter->getPeaksWorkspaceName());
@@ -64,7 +66,7 @@ void CompositePeaksPresenterVsi::getPeaksInfo(
  * workspace needs to be probed.
  * @returns The coordinate frame.
  */
-std::string CompositePeaksPresenterVsi::getFrame() const{
+std::string CompositePeaksPresenterVsi::getFrame() const {
   std::string frame;
   if (!m_peaksPresenters.empty())
     frame = m_peaksPresenters[0]->getFrame();
@@ -99,7 +101,7 @@ CompositePeaksPresenterVsi::getPeaksWorkspaces() const {
  * @returns A vector of bool-vectors for each peaks presenter.
  */
 std::map<std::string, std::vector<bool>>
-CompositePeaksPresenterVsi::getInitializedViewablePeaks() const{
+CompositePeaksPresenterVsi::getInitializedViewablePeaks() const {
   std::map<std::string, std::vector<bool>> viewablePeaks;
   for (const auto &presenter : m_peaksPresenters) {
     viewablePeaks.emplace(
@@ -153,7 +155,8 @@ bool CompositePeaksPresenterVsi::hasPeaks() {
 /**
  * Sort the peak workpace by the specified column
  * @param columnToSortBy The column by which the workspace is to be sorted.
- * @param sortedAscending If the column is to be sorted in ascending or descending
+ * @param sortedAscending If the column is to be sorted in ascending or
+ * descending
  * order.
  * @param peaksWS The peak workspace which is being sorted.
  */

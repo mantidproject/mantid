@@ -63,7 +63,7 @@ void PoldiAutoCorrelation5::init() {
  *to Workspace
  */
 void PoldiAutoCorrelation5::exec() {
-  g_log.information() << "_Poldi  start conf --------------  " << std::endl;
+  g_log.information() << "_Poldi  start conf --------------  \n";
 
   /* From localWorkspace three things are used:
    *      - Count data from POLDI experiment
@@ -73,7 +73,7 @@ void PoldiAutoCorrelation5::exec() {
   DataObjects::Workspace2D_sptr localWorkspace =
       this->getProperty("InputWorkspace");
 
-  g_log.information() << "_Poldi ws loaded --------------  " << std::endl;
+  g_log.information() << "_Poldi ws loaded --------------  \n";
 
   double wlen_min = this->getProperty("wlenmin");
   double wlen_max = this->getProperty("wlenmax");
@@ -113,51 +113,48 @@ void PoldiAutoCorrelation5::logConfigurationInformation(
     PoldiAbstractChopper_sptr chopper) {
   if (cleanDetector && chopper) {
     g_log.information()
-        << "____________________________________________________ " << std::endl;
+        << "____________________________________________________ \n";
     g_log.information()
-        << "_Poldi  chopper conf ------------------------------  " << std::endl;
+        << "_Poldi  chopper conf ------------------------------  \n";
     g_log.information() << "_Poldi -     Chopper speed:   "
-                        << chopper->rotationSpeed() << " rpm" << std::endl;
+                        << chopper->rotationSpeed() << " rpm\n";
     g_log.information() << "_Poldi -     Number of slits: "
-                        << chopper->slitPositions().size() << std::endl;
+                        << chopper->slitPositions().size() << '\n';
     g_log.information() << "_Poldi -     Cycle time:      "
-                        << chopper->cycleTime() << " µs" << std::endl;
+                        << chopper->cycleTime() << " µs\n";
     g_log.information() << "_Poldi -     Zero offset:     "
-                        << chopper->zeroOffset() << " µs" << std::endl;
+                        << chopper->zeroOffset() << " µs\n";
     g_log.information() << "_Poldi -     Distance:        "
-                        << chopper->distanceFromSample() << " mm" << std::endl;
+                        << chopper->distanceFromSample() << " mm\n";
 
     if (g_log.is(Poco::Message::PRIO_DEBUG)) {
       for (size_t i = 0; i < chopper->slitPositions().size(); ++i) {
         g_log.information() << "_Poldi -     Slits: " << i
                             << ": Position = " << chopper->slitPositions()[i]
-                            << "\t Time = " << chopper->slitTimes()[i] << " µs"
-                            << std::endl;
+                            << "\t Time = " << chopper->slitTimes()[i]
+                            << " µs\n";
       }
     }
 
     g_log.information()
-        << "_Poldi  detector conf ------------------------------  "
-        << std::endl;
+        << "_Poldi  detector conf ------------------------------  \n";
     g_log.information() << "_Poldi -     Element count:     "
-                        << cleanDetector->elementCount() << std::endl;
+                        << cleanDetector->elementCount() << '\n';
     g_log.information() << "_Poldi -     Central element:   "
-                        << cleanDetector->centralElement() << std::endl;
+                        << cleanDetector->centralElement() << '\n';
     g_log.information() << "_Poldi -     2Theta(central):   "
-                        << cleanDetector->twoTheta(199) / M_PI * 180.0 << "°"
-                        << std::endl;
+                        << cleanDetector->twoTheta(199) / M_PI * 180.0 << "°\n";
     g_log.information() << "_Poldi -     Distance(central): "
-                        << cleanDetector->distanceFromSample(199) << " mm"
-                        << std::endl;
+                        << cleanDetector->distanceFromSample(199) << " mm\n";
 
     std::set<int> deadWires = cleanDetector->deadWires();
     g_log.information() << "_Poldi -     Number of dead wires: "
-                        << deadWires.size() << std::endl;
+                        << deadWires.size() << '\n';
     g_log.information() << "_Poldi -     Wire indices: ";
     for (auto deadWire : deadWires) {
       g_log.information() << deadWire << " ";
     }
-    g_log.information() << std::endl;
+    g_log.information() << '\n';
   }
 }
 

@@ -27,7 +27,7 @@ int liveData(const std::string &host) {
   if (!setup.isValid()) {
     throw std::runtime_error("version wrong");
   }
-  std::cerr << "run number " << setup.head_setup.run_number << std::endl;
+  std::cerr << "run number " << setup.head_setup.run_number << '\n';
   TCPStreamEventDataNeutron events;
   while (true) {
     while (s.available() < static_cast<int>(sizeof(events.head))) {
@@ -76,10 +76,10 @@ int liveData(const std::string &host) {
     TCPStreamEventHeaderNeutron &head_n = events.head_n;
     std::cerr << "Read " << nread << " events for frame number "
               << head_n.frame_number << " time " << head_n.frame_time_zero
-              << std::endl;
+              << '\n';
     for (int i = 0; i < 10; ++i) {
       std::cerr << events.data[i].time_of_flight << " "
-                << events.data[i].spectrum << std::endl;
+                << events.data[i].spectrum << '\n';
     }
   }
   s.close();

@@ -15,215 +15,211 @@
 
 using namespace Mantid::API;
 
-namespace MantidQt
-{
-namespace CustomInterfaces
-{
+namespace MantidQt {
+namespace CustomInterfaces {
 
-  void ALCBaselineModellingModel::fit(IFunction_const_sptr function, const std::vector<Section>& sections)
-  {
-    // Create a copy of the data
-    IAlgorithm_sptr clone = AlgorithmManager::Instance().create("CloneWorkspace");
-    clone->setChild(true);
-    clone->setProperty("InputWorkspace", boost::const_pointer_cast<MatrixWorkspace>(m_data));
-    clone->setProperty("OutputWorkspace", "__NotUsed__");
-    clone->execute();
+void ALCBaselineModellingModel::fit(IFunction_const_sptr function,
+                                    const std::vector<Section> &sections) {
+  // Create a copy of the data
+  IAlgorithm_sptr clone = AlgorithmManager::Instance().create("CloneWorkspace");
+  clone->setChild(true);
+  clone->setProperty("InputWorkspace",
+                     boost::const_pointer_cast<MatrixWorkspace>(m_data));
+  clone->setProperty("OutputWorkspace", "__NotUsed__");
+  clone->execute();
 
-    Workspace_sptr cloned = clone->getProperty("OutputWorkspace");
-    MatrixWorkspace_sptr dataToFit = boost::dynamic_pointer_cast<MatrixWorkspace>(cloned);
-    assert(dataToFit); // CloneWorkspace should take care of that
+  Workspace_sptr cloned = clone->getProperty("OutputWorkspace");
+  MatrixWorkspace_sptr dataToFit =
+      boost::dynamic_pointer_cast<MatrixWorkspace>(cloned);
+  assert(dataToFit); // CloneWorkspace should take care of that
 
-    disableUnwantedPoints(dataToFit, sections);
+  disableUnwantedPoints(dataToFit, sections);
 
-    IFunction_sptr funcToFit =
-        FunctionFactory::Instance().createInitialized(function->asString());
+  IFunction_sptr funcToFit =
+      FunctionFactory::Instance().createInitialized(function->asString());
 
-    IAlgorithm_sptr fit = AlgorithmManager::Instance().create("Fit");
-    fit->setChild(true);
-    fit->setProperty("Function", funcToFit);
-    fit->setProperty("InputWorkspace", dataToFit);
-    fit->setProperty("CreateOutput", true);
+  IAlgorithm_sptr fit = AlgorithmManager::Instance().create("Fit");
+  fit->setChild(true);
+  fit->setProperty("Function", funcToFit);
+  fit->setProperty("InputWorkspace", dataToFit);
+  fit->setProperty("CreateOutput", true);
 
-    // Run async so that progress can be shown
-    Poco::ActiveResult<bool> result(fit->executeAsync());
-    while (!result.available()) {
-      QCoreApplication::processEvents();
-    }
-    if (!result.error().empty()) {
-      throw std::runtime_error(result.error());
-    }
-
-    MatrixWorkspace_sptr fitOutput = fit->getProperty("OutputWorkspace");
-    m_parameterTable = fit->getProperty("OutputParameters");
-
-    enableDisabledPoints(fitOutput,m_data);
-    setErrorsAfterFit(fitOutput);
-
-    setCorrectedData(fitOutput);
-    setFittedFunction(funcToFit);
-    m_sections = sections;
-
+  // Run async so that progress can be shown
+  Poco::ActiveResult<bool> result(fit->executeAsync());
+  while (!result.available()) {
+    QCoreApplication::processEvents();
+  }
+  if (!result.error().empty()) {
+    throw std::runtime_error(result.error());
   }
 
-  void ALCBaselineModellingModel::setData(MatrixWorkspace_const_sptr data)
-  {
-    m_data = data;
-    emit dataChanged();
-  }
+  MatrixWorkspace_sptr fitOutput = fit->getProperty("OutputWorkspace");
+  m_parameterTable = fit->getProperty("OutputParameters");
 
-  /**
-   * Disable points in the workpsace in the way that points which are not included in any of specified
-   * sections are not used when fitting given workspace
-   * @param ws :: Workspace to disable points in
-   * @param sections :: Section we want to use for fitting
-   */
-  void ALCBaselineModellingModel::disableUnwantedPoints(MatrixWorkspace_sptr ws,
-    const std::vector<IALCBaselineModellingModel::Section>& sections)
-  {
-    // Whether point with particular index should be disabled
-    std::vector<bool> toDisable(ws->blocksize(), true);
+  enableDisabledPoints(fitOutput, m_data);
+  setErrorsAfterFit(fitOutput);
 
-    // Find points which are in at least one section, and exclude them from disable list
-    for (size_t i = 0; i < ws->blocksize(); ++i)
-    {
-      for (auto it = sections.begin(); it != sections.end(); ++it)
-      {
-        if ( ws->dataX(0)[i] >= it->first && ws->dataX(0)[i] <= it->second )
-        {
-          toDisable[i] = false;
-          break; // No need to check other sections
-        }
-      }
-    }
+  setCorrectedData(fitOutput);
+  setFittedFunction(funcToFit);
+  m_sections = sections;
+}
 
-    // XXX: Points are disabled by settings their errors to very high value. This makes those
-    //      points to have very low weights during the fitting, effectively disabling them.
+void ALCBaselineModellingModel::setData(MatrixWorkspace_const_sptr data) {
+  m_data = data;
+  emit dataChanged();
+}
 
-    const double DISABLED_ERR = std::numeric_limits<double>::max();
+/**
+ * Disable points in the workpsace in the way that points which are not included
+ * in any of specified
+ * sections are not used when fitting given workspace
+ * @param ws :: Workspace to disable points in
+ * @param sections :: Section we want to use for fitting
+ */
+void ALCBaselineModellingModel::disableUnwantedPoints(
+    MatrixWorkspace_sptr ws,
+    const std::vector<IALCBaselineModellingModel::Section> &sections) {
+  // Whether point with particular index should be disabled
+  std::vector<bool> toDisable(ws->blocksize(), true);
 
-    // Disable chosen points
-    for (size_t i = 0; i < ws->blocksize(); ++i)
-    {
-      if (toDisable[i])
-      {
-        ws->dataE(0)[i] = DISABLED_ERR;
+  // Find points which are in at least one section, and exclude them from
+  // disable list
+  for (size_t i = 0; i < ws->blocksize(); ++i) {
+    for (auto it = sections.begin(); it != sections.end(); ++it) {
+      if (ws->dataX(0)[i] >= it->first && ws->dataX(0)[i] <= it->second) {
+        toDisable[i] = false;
+        break; // No need to check other sections
       }
     }
   }
 
-  /**
-   * Enable points that were disabled for fit
-   * @param destWs :: Workspace to enable points in
-   * @param sourceWs :: Workspace with original errors
-   */
-  void ALCBaselineModellingModel::enableDisabledPoints (MatrixWorkspace_sptr destWs, MatrixWorkspace_const_sptr sourceWs)
-  {
-    // Unwanted points were disabled by setting their errors to very high values.
-    // We recover here the original errors stored in sourceWs
-    destWs->dataE(0) = sourceWs->readE(0);
-  }
+  // XXX: Points are disabled by settings their errors to very high value. This
+  // makes those
+  //      points to have very low weights during the fitting, effectively
+  //      disabling them.
 
-  /**
-   * Set errors in Diff spectrum after a fit
-   * @param data :: [input/output] Workspace containing spectrum to set errors to
-   */
-  void ALCBaselineModellingModel::setErrorsAfterFit (MatrixWorkspace_sptr data) {
+  const double DISABLED_ERR = std::numeric_limits<double>::max();
 
-    data->dataE(2)=data->readE(0);
-  }
-
-  MatrixWorkspace_sptr ALCBaselineModellingModel::exportWorkspace()
-  {
-    if ( m_data && m_data->getNumberHistograms() == 3 ) {
-
-      // Export results only if data have been fit, that is,
-      // if m_data has three histograms
-      return boost::const_pointer_cast<MatrixWorkspace>(m_data);
-
-    } else {
-    
-      return MatrixWorkspace_sptr();
+  // Disable chosen points
+  for (size_t i = 0; i < ws->blocksize(); ++i) {
+    if (toDisable[i]) {
+      ws->dataE(0)[i] = DISABLED_ERR;
     }
   }
+}
 
-  ITableWorkspace_sptr ALCBaselineModellingModel::exportSections()
-  {
-    if ( !m_sections.empty() ) {
+/**
+ * Enable points that were disabled for fit
+ * @param destWs :: Workspace to enable points in
+ * @param sourceWs :: Workspace with original errors
+ */
+void ALCBaselineModellingModel::enableDisabledPoints(
+    MatrixWorkspace_sptr destWs, MatrixWorkspace_const_sptr sourceWs) {
+  // Unwanted points were disabled by setting their errors to very high values.
+  // We recover here the original errors stored in sourceWs
+  destWs->dataE(0) = sourceWs->readE(0);
+}
 
-      ITableWorkspace_sptr table = WorkspaceFactory::Instance().createTable("TableWorkspace");
+/**
+ * Set errors in Diff spectrum after a fit
+ * @param data :: [input/output] Workspace containing spectrum to set errors to
+ */
+void ALCBaselineModellingModel::setErrorsAfterFit(MatrixWorkspace_sptr data) {
 
-      table->addColumn("double", "Start X");
-      table->addColumn("double", "End X");
+  data->dataE(2) = data->readE(0);
+}
 
-      for(auto it = m_sections.begin(); it != m_sections.end(); ++it)
-      {
-        TableRow newRow = table->appendRow();
-        newRow << it->first << it->second;
-      }
+MatrixWorkspace_sptr ALCBaselineModellingModel::exportWorkspace() {
+  if (m_data && m_data->getNumberHistograms() == 3) {
 
-      return table;
+    // Export results only if data have been fit, that is,
+    // if m_data has three histograms
+    return boost::const_pointer_cast<MatrixWorkspace>(m_data);
 
-    } else {
+  } else {
 
-      return ITableWorkspace_sptr();
+    return MatrixWorkspace_sptr();
+  }
+}
+
+ITableWorkspace_sptr ALCBaselineModellingModel::exportSections() {
+  if (!m_sections.empty()) {
+
+    ITableWorkspace_sptr table =
+        WorkspaceFactory::Instance().createTable("TableWorkspace");
+
+    table->addColumn("double", "Start X");
+    table->addColumn("double", "End X");
+
+    for (auto it = m_sections.begin(); it != m_sections.end(); ++it) {
+      TableRow newRow = table->appendRow();
+      newRow << it->first << it->second;
     }
+
+    return table;
+
+  } else {
+
+    return ITableWorkspace_sptr();
   }
+}
 
-  ITableWorkspace_sptr ALCBaselineModellingModel::exportModel()
-  {
-    if ( m_parameterTable ) {
+ITableWorkspace_sptr ALCBaselineModellingModel::exportModel() {
+  if (m_parameterTable) {
 
-      return m_parameterTable;
+    return m_parameterTable;
 
-    } else {
-      
-      return ITableWorkspace_sptr();
-    }
+  } else {
+
+    return ITableWorkspace_sptr();
   }
+}
 
-  void ALCBaselineModellingModel::setCorrectedData(MatrixWorkspace_const_sptr data)
-  {
-    m_data = data;
-    emit correctedDataChanged();
-  }
+void ALCBaselineModellingModel::setCorrectedData(
+    MatrixWorkspace_const_sptr data) {
+  m_data = data;
+  emit correctedDataChanged();
+}
 
-  void ALCBaselineModellingModel::setFittedFunction(IFunction_const_sptr function)
-  {
-    m_fittedFunction = function;
-    emit fittedFunctionChanged();
-  }
+void ALCBaselineModellingModel::setFittedFunction(
+    IFunction_const_sptr function) {
+  m_fittedFunction = function;
+  emit fittedFunctionChanged();
+}
 
-  MatrixWorkspace_const_sptr ALCBaselineModellingModel::data() const
-  {
-    if (m_data) {
-      IAlgorithm_sptr extract = AlgorithmManager::Instance().create("ExtractSingleSpectrum");
-      extract->setChild(true);
-      extract->setProperty("InputWorkspace", boost::const_pointer_cast<MatrixWorkspace>(m_data));
-      extract->setProperty("WorkspaceIndex", 0);
-      extract->setProperty("OutputWorkspace", "__NotUsed__");
-      extract->execute();
-      MatrixWorkspace_const_sptr result = extract->getProperty("OutputWorkspace");
-      return result;
-    } else {
-      return MatrixWorkspace_const_sptr();
-    }
+MatrixWorkspace_const_sptr ALCBaselineModellingModel::data() const {
+  if (m_data) {
+    IAlgorithm_sptr extract =
+        AlgorithmManager::Instance().create("ExtractSingleSpectrum");
+    extract->setChild(true);
+    extract->setProperty("InputWorkspace",
+                         boost::const_pointer_cast<MatrixWorkspace>(m_data));
+    extract->setProperty("WorkspaceIndex", 0);
+    extract->setProperty("OutputWorkspace", "__NotUsed__");
+    extract->execute();
+    MatrixWorkspace_const_sptr result = extract->getProperty("OutputWorkspace");
+    return result;
+  } else {
+    return MatrixWorkspace_const_sptr();
   }
+}
 
-  MatrixWorkspace_const_sptr ALCBaselineModellingModel::correctedData() const
-  {
-    if (m_data && (m_data->getNumberHistograms()==3) ) {
-      IAlgorithm_sptr extract = AlgorithmManager::Instance().create("ExtractSingleSpectrum");
-      extract->setChild(true);
-      extract->setProperty("InputWorkspace", boost::const_pointer_cast<MatrixWorkspace>(m_data));
-      extract->setProperty("WorkspaceIndex", 2);
-      extract->setProperty("OutputWorkspace", "__NotUsed__");
-      extract->execute();
-      MatrixWorkspace_const_sptr result = extract->getProperty("OutputWorkspace");
-      return result;
-    } else {
-      return MatrixWorkspace_const_sptr();
-    }
+MatrixWorkspace_const_sptr ALCBaselineModellingModel::correctedData() const {
+  if (m_data && (m_data->getNumberHistograms() == 3)) {
+    IAlgorithm_sptr extract =
+        AlgorithmManager::Instance().create("ExtractSingleSpectrum");
+    extract->setChild(true);
+    extract->setProperty("InputWorkspace",
+                         boost::const_pointer_cast<MatrixWorkspace>(m_data));
+    extract->setProperty("WorkspaceIndex", 2);
+    extract->setProperty("OutputWorkspace", "__NotUsed__");
+    extract->execute();
+    MatrixWorkspace_const_sptr result = extract->getProperty("OutputWorkspace");
+    return result;
+  } else {
+    return MatrixWorkspace_const_sptr();
   }
+}
 
 } // namespace CustomInterfaces
 } // namespace Mantid

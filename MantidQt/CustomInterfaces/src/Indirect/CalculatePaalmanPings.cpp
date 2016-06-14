@@ -163,22 +163,20 @@ bool CalculatePaalmanPings::doValidation(bool silent) {
   uiv.checkDataSelectorIsValid("Sample", m_uiForm.dsSample);
 
   const auto sampleChem =
-	  m_uiForm.leSampleChemicalFormula->text().toStdString();
+      m_uiForm.leSampleChemicalFormula->text().toStdString();
   const auto containerChem =
-	  m_uiForm.leCanChemicalFormula->text().toStdString();
+      m_uiForm.leCanChemicalFormula->text().toStdString();
   try {
-	  Mantid::Kernel::Material::parseChemicalFormula(sampleChem);
-  }
-  catch (std::runtime_error &ex) {
-	  UNUSED_ARG(ex);
-	  uiv.addErrorMessage("Chemical Formula for Sample was not recognised.");
+    Mantid::Kernel::Material::parseChemicalFormula(sampleChem);
+  } catch (std::runtime_error &ex) {
+    UNUSED_ARG(ex);
+    uiv.addErrorMessage("Chemical Formula for Sample was not recognised.");
   }
   try {
-	  Mantid::Kernel::Material::parseChemicalFormula(containerChem);
-  }
-  catch (std::runtime_error &ex) {
-	  UNUSED_ARG(ex);
-	  uiv.addErrorMessage("Chemical Formula for Container was not recognised.");
+    Mantid::Kernel::Material::parseChemicalFormula(containerChem);
+  } catch (std::runtime_error &ex) {
+    UNUSED_ARG(ex);
+    uiv.addErrorMessage("Chemical Formula for Container was not recognised.");
   }
 
   // Validate chemical formula
@@ -209,10 +207,8 @@ bool CalculatePaalmanPings::doValidation(bool silent) {
     QString containerType = containerWsName.right(
         containerWsName.length() - containerWsName.lastIndexOf("_"));
 
-    g_log.debug() << "Sample type is: " << sampleType.toStdString()
-                  << std::endl;
-    g_log.debug() << "Can type is: " << containerType.toStdString()
-                  << std::endl;
+    g_log.debug() << "Sample type is: " << sampleType.toStdString() << '\n';
+    g_log.debug() << "Can type is: " << containerType.toStdString() << '\n';
 
     if (containerType != sampleType)
       uiv.addErrorMessage(
@@ -324,7 +320,7 @@ void CalculatePaalmanPings::getBeamWidthFromWorkspace(const QString &wsName) {
 
   if (!ws) {
     g_log.warning() << "Failed to find workspace " << wsName.toStdString()
-                    << std::endl;
+                    << '\n';
     return;
   }
 

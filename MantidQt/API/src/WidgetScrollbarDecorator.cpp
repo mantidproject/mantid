@@ -38,7 +38,7 @@ WidgetScrollbarDecorator::WidgetScrollbarDecorator(QWidget *target)
   m_scrollarea->setWidgetResizable(true);
 
   // With QMainWindows we must work on the centralWidget instead
-  auto mainwindow = dynamic_cast<QMainWindow*>(m_target);
+  auto mainwindow = dynamic_cast<QMainWindow *>(m_target);
   if (mainwindow)
     m_target = mainwindow->centralWidget();
 }
@@ -111,8 +111,7 @@ void WidgetScrollbarDecorator::setEnabled(bool enable) {
  *
  * @param width Minimum width target may shrink to before scrollbars appear
  */
-void WidgetScrollbarDecorator::setThresholdWidth(int width)
-{
+void WidgetScrollbarDecorator::setThresholdWidth(int width) {
   m_viewport->setMinimumWidth(width);
 }
 
@@ -129,8 +128,7 @@ void WidgetScrollbarDecorator::setThresholdWidth(int width)
  *
  * @param height Minimum height target may shrink to before scrollbars appear
  */
-void WidgetScrollbarDecorator::setThresholdHeight(int height)
-{
+void WidgetScrollbarDecorator::setThresholdHeight(int height) {
   m_viewport->setMinimumHeight(height);
 }
 
@@ -148,7 +146,6 @@ void WidgetScrollbarDecorator::setThresholdHeight(int height)
  * @param width Minimum width target may shrink to before scrollbars appear
  * @param height Minimum height target may shrink to before scrollbars appear
  */
-void WidgetScrollbarDecorator::setThresholdSize(int width, int height)
-{
+void WidgetScrollbarDecorator::setThresholdSize(int width, int height) {
   m_viewport->setMinimumSize(width, height);
 }

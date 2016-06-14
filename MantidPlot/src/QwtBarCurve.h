@@ -2,7 +2,8 @@
     File                 : QwtBarCurve.h
     Project              : QtiPlot
     --------------------------------------------------------------------
-    Copyright            : (C) 2006 by Ion Vasilief, Tilman Hoener zu Siederdissen
+    Copyright            : (C) 2006 by Ion Vasilief, Tilman Hoener zu
+ Siederdissen
     Email (use @ for *)  : ion_vasilief*yahoo.fr, thzs*gmx.net
     Description          : Bar curve
 
@@ -33,33 +34,34 @@
 #include <qwt_plot.h>
 
 //! Bar curve
-class QwtBarCurve: public DataCurve
-{
+class QwtBarCurve : public DataCurve {
 public:
-	enum BarStyle{Vertical = 0, Horizontal = 1};
-	QwtBarCurve(BarStyle style, Table *t, const QString& xColName, const QString& name, int startRow, int endRow);
+  enum BarStyle { Vertical = 0, Horizontal = 1 };
+  QwtBarCurve(BarStyle style, Table *t, const QString &xColName,
+              const QString &name, int startRow, int endRow);
 
-	void copy(const QwtBarCurve *b);
+  void copy(const QwtBarCurve *b);
 
-        QwtDoubleRect boundingRect() const override;
+  QwtDoubleRect boundingRect() const override;
 
-        BarStyle orientation(){return bar_style;};
+  BarStyle orientation() { return bar_style; };
 
-	void setGap (int gap);
-	int gap() const {return bar_gap;};
+  void setGap(int gap);
+  int gap() const { return bar_gap; };
 
-	void setOffset(int offset);
-	int offset() const {return bar_offset;};
+  void setOffset(int offset);
+  int offset() const { return bar_offset; };
 
-	double dataOffset();
+  double dataOffset();
 
 private:
-	using DataCurve::draw; // Unhide base class method (avoids Intel compiler warning)
-        void draw(QPainter *painter, const QwtScaleMap &xMap,
-                  const QwtScaleMap &yMap, int from, int to) const override;
+  using DataCurve::draw; // Unhide base class method (avoids Intel compiler
+                         // warning)
+  void draw(QPainter *painter, const QwtScaleMap &xMap, const QwtScaleMap &yMap,
+            int from, int to) const override;
 
-        int bar_gap, bar_offset;
-	BarStyle bar_style;
+  int bar_gap, bar_offset;
+  BarStyle bar_style;
 };
 
 #endif

@@ -236,7 +236,7 @@ bool ImggTomographicReconstruction::processGroups() {
   g_log.notice() << "Finished reconstruction of volume from workspace "
                  << wks->getTitle() << " with " << projSize
                  << " input projections, " << ysize << " rows by " << xsize
-                 << " columns." << std::endl;
+                 << " columns.\n";
 
   // This is an ugly workaround for the issue that processGroups()
   // does not fully finish the algorithm:
