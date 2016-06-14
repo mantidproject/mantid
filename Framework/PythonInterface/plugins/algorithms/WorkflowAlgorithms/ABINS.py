@@ -52,7 +52,7 @@ class ABINS(PythonAlgorithm):
                              extensions=["raw", "dat"]),
                              doc="File with the experimental inelastic spectrum to compare.")
 
-        self.declareProperty(name="Temperature",
+        self.declareProperty(name="Temperature [K]",
                              direction=Direction.Input,
                              defaultValue=10.0,
                              doc="Temperature in K for which dynamical structure factor S should be calculated.")
@@ -99,6 +99,8 @@ class ABINS(PythonAlgorithm):
         Used to ensure the user is requesting a valid mode.
         """
         issues = dict()
+
+        # TODO: check consistency between chosen DFT program and file with DFT phonon data
 
         temperature = self.getPropertyValue("Temperature")
         if temperature < 0:

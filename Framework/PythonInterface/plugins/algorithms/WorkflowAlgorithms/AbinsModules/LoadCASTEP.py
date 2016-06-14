@@ -1,9 +1,9 @@
 import numpy as np
 import re
-import hashlib
-from IOmodule import IOmodule
 
-class LoadCASTEP(IOmodule):
+from GeneralDFTProgram import GeneralDFTProgram
+
+class LoadCASTEP(GeneralDFTProgram):
     """
     Class which handles loading files from foo.phonon output CASTEP files.
     Functions to read phonon file taken from SimulatedDensityOfStates (credits for Elliot Oram.).
@@ -14,8 +14,7 @@ class LoadCASTEP(IOmodule):
 
         @param filename: name of file with phonon data (foo.phonon)
         """
-        super(IOmodule, self).__init__()
-        self._filename = filename
+        super(LoadCASTEP, self).__init__(filename=filename)
 
         # Regex pattern for a floating point number
         self._float_regex = r'\-?(?:\d+\.?\d*|\d*\.?\d+)'
@@ -136,23 +135,7 @@ class LoadCASTEP(IOmodule):
 
         return np.asarray(vectors)
 
-    def _calculateHash(self):
-        """
-        Calculates hash of the phonon file according to SHA-2 algorithm from hashlib library: sha512.
-        @return: string representation of hash for phonon file which contains only hexadecimal digits
-        """
 
-        buf = 65536  # chop content of phonon file into 64kb chunks to minimize memory consumption for hash creation
-        sha = hashlib.sha512()
-
-        with open(self._filename, 'rU') as f:
-            while True:
-                data = f.read(buf)
-                if not data:
-                    break
-                sha.update(data)
-
-        return sha.hexdigest()
 
     def readPhononFile(self):
         """
@@ -206,30 +189,22 @@ class LoadCASTEP(IOmodule):
                     vectors = self._parse_phonon_eigenvectors(f_handle)
                     eigenvectors.append(vectors)
 
-        frequencies = np.asarray(frequencies)
-        eigenvectors = np.asarray(eigenvectors)
-        warray = np.asarray(weights)
-        hash_filename = self._calculateHash()
-        # in the future it will be evaluated basing on the number of k-points:
-        # one k-point => gamma_point_calculations=True
-        # more then one k-point gamma_point_calculations=False
-        # in this phase it is fixed to True so that only Gamma point is supported
-        gamma_point_calculations = True
+        file_data.update({"frequencies": np.asarray(frequencies),
+                          "weights": np.asarray(weights),
+                          "k_vectors": np.asarray(k_vectors),
+                          "atomicDisplacements": np.asanyarray(eigenvectors)})
 
-        file_data.update({"frequencies": frequencies,
-                          "weights": warray,
-                          "k_vectors": k_vectors,
-                          "eigenvectors": eigenvectors,
-                          "gamma_calculations":gamma_point_calculations,
-                          "hash":hash_filename})
+        hash_filename = self._calculateHash()
+
+        self._recoverSymmetryPoints(data=file_data)
 
         # save stuff to hdf file
-        self.addDataset("frequencies", frequencies)
-        self.addDataset("weights", warray)
-        self.addDataset("k_vectors", k_vectors)
-        self.addDataset("eigenvectors", eigenvectors)
-        self.addAttribute("gamma_calculations", gamma_point_calculations)
+        for name in file_data:
+            self.addDataset(name,file_data[name])
         self.addAttribute("hash", hash_filename)
-        self.save()
+        # self.save()
 
-        return file_data
+        return self._rearrange_data(data=file_data)
+
+
+

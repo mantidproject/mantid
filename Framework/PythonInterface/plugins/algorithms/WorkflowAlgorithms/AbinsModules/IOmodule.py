@@ -9,8 +9,8 @@ class IOmodule(object):
 
         self._hdf_filename = None # name of hdf file
         self._group_name = None # name of group from hdf file.
-        self._attributes = None # attributes for group
-        self._datasets = None # datasets for group are expected to be numpy arrays
+        self._attributes = {} # attributes for group
+        self._datasets = {} # datasets for group are expected to be numpy arrays
 
         # All fields have to be set by inheriting class.
 
@@ -23,8 +23,6 @@ class IOmodule(object):
         core_name = file_name[0:file_name.find(".")]
         self._hdf_filename = core_name + ".hdf5"
         self._group_name = group_name
-        self._attributes = {}
-        self._datasets = {}
 
         hdf_file = h5py.File(self._hdf_filename, 'a')
         if not self._group_name in hdf_file:
@@ -73,7 +71,7 @@ class IOmodule(object):
         Save data and attributes to hdf5 file.
         """
         hdf_file = h5py.File(self._hdf_filename, 'a')
-        group=hdf_file[self._group_name]
+        group = hdf_file[self._group_name]
         self._save_attributes(group=group)
         self._save_datasets(group=group)
         hdf_file.close()

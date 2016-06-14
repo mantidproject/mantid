@@ -20,4 +20,4 @@ algorithms and data objects that are:
 from LoadCASTEP import LoadCASTEP
 from IOmodule import IOmodule
 from CalculateQ import CalculateQ
-
+from GeneralDFTProgram import GeneralDFTProgram
