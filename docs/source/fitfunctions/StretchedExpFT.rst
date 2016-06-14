@@ -15,7 +15,7 @@ Description
 
 Provides the Fourier Transform of the Symmetrized Stretched Exponential Function
 
-.. math:: S(Q,E) = Height \int_{-\infty}^{\infty} dt/h \cdot e^{-i2\pi (E-Center)t/h} \cdot e^{-|\frac{t}{Tau}|^{Beta}} )
+.. math:: S(Q,E) = Height \int_{-\infty}^{\infty} dt/h \cdot e^{-i2\pi (E-Centre)t/h} \cdot e^{-|\frac{t}{Tau}|^{Beta}} )
 
 with :math:`h` Planck's constant. If the energy units of energy are micro-eV, then tau is expressed in pico-seconds. If E-units are micro-eV then
 tau is expressed in nano-seconds.
@@ -57,7 +57,7 @@ Obtaining an initial guess close to the optimal fit is critical. For this model,
    function_string  = "(composite=Convolution,FixResolution=true,NumDeriv=true;"
    function_string += "name=TabulatedFunction,Workspace=resolution,WorkspaceIndex=0,Scaling=1,Shift=0,XScaling=1;"
    function_string += "(name=DeltaFunction,Height=1,Centre=0;"
-   function_string += "name=StretchedExpFT,Height=1.0,Tau=100,Beta=0.98,Center=0));"
+   function_string += "name=StretchedExpFT,Height=1.0,Tau=100,Beta=0.98,Centre=0));"
    function_string += "name=LinearBackground,A0=0,A1=0"
 
    # Carry out the fit. Produces workspaces  fit_results_Parameters,
