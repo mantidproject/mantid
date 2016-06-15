@@ -47,8 +47,7 @@ ISISCalibration::ISISCalibration(IndirectDataReduction *idrUI, QWidget *parent)
   calPeak->setColour(Qt::red);
   auto calBackground =
       m_uiForm.ppCalibration->addRangeSelector("CalBackground");
-  calBackground->setColour(
-      Qt::blue); // blue to be consistent with fit wizard
+  calBackground->setColour(Qt::blue); // blue to be consistent with fit wizard
 
   // RES PROPERTY TREE
   m_propTrees["ResPropTree"] = new QtTreePropertyBrowser();
