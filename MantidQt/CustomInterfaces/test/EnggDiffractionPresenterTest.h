@@ -4,8 +4,8 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidQtCustomInterfaces/EnggDiffraction/EnggDiffractionPresenter.h"
 
-#include <cxxtest/TestSuite.h>
 #include "EnggDiffractionViewMock.h"
+#include <cxxtest/TestSuite.h>
 
 using namespace MantidQt::CustomInterfaces;
 using testing::TypedEq;
@@ -310,9 +310,10 @@ public:
 
     const std::string filename =
         "UNKNOWNINST_" + vanNo + "_" + ceriaNo + "_" + "foo.prm";
-    EXPECT_CALL(mockView, askNewCalibrationFilename(
-                              "UNKNOWNINST_" + vanNo + "_" + ceriaNo +
-                              "_both_banks.prm")).Times(0);
+    EXPECT_CALL(mockView,
+                askNewCalibrationFilename("UNKNOWNINST_" + vanNo + "_" +
+                                          ceriaNo + "_both_banks.prm"))
+        .Times(0);
     //  .WillOnce(Return(filename)); // if enabled ask user output filename
 
     // Should not try to use options for focusing
@@ -530,9 +531,10 @@ public:
 
     const std::string filename =
         "UNKNOWNINST_" + vanNo + "_" + ceriaNo + "_" + "foo.prm";
-    EXPECT_CALL(mockView, askNewCalibrationFilename(
-                              "UNKNOWNINST_" + vanNo + "_" + ceriaNo +
-                              "_both_banks.prm")).Times(0);
+    EXPECT_CALL(mockView,
+                askNewCalibrationFilename("UNKNOWNINST_" + vanNo + "_" +
+                                          ceriaNo + "_both_banks.prm"))
+        .Times(0);
     //  .WillOnce(Return(filename)); // if enabled ask user output filename
 
     // with the normal thread should disable actions at the beginning
@@ -599,9 +601,10 @@ public:
 
     const std::string filename =
         "UNKNOWNINST_" + vanNo + "_" + ceriaNo + "_" + "foo.prm";
-    EXPECT_CALL(mockView, askNewCalibrationFilename(
-                              "UNKNOWNINST_" + vanNo + "_" + ceriaNo +
-                              "_both_banks.prm")).Times(0);
+    EXPECT_CALL(mockView,
+                askNewCalibrationFilename("UNKNOWNINST_" + vanNo + "_" +
+                                          ceriaNo + "_both_banks.prm"))
+        .Times(0);
     //  .WillOnce(Return(filename)); // if enabled ask user output filename
 
     // Should not try to use options for focusing
@@ -1314,6 +1317,8 @@ public:
     EXPECT_CALL(mockView, getFittingRunNo()).Times(1).WillOnce(Return(""));
     EXPECT_CALL(mockView, fittingPeaksData()).Times(1).WillOnce(Return(""));
 
+    EXPECT_CALL(mockView, setPeakList(testing::_)).Times(0);
+
     // should not get to the point where the status is updated
     EXPECT_CALL(mockView, showStatus(testing::_)).Times(0);
 
@@ -1341,7 +1346,9 @@ public:
         .WillOnce(Return(mockFname));
     EXPECT_CALL(mockView, fittingPeaksData())
         .Times(1)
-        .WillOnce(Return("2.57,4.88,5.78"));
+        .WillOnce(Return("2.57,,4.88,5.78"));
+
+    EXPECT_CALL(mockView, setPeakList(testing::_)).Times(1);
 
     // should not get to the point where the status is updated
     EXPECT_CALL(mockView, showStatus(testing::_)).Times(0);
@@ -1370,6 +1377,7 @@ public:
     EXPECT_CALL(mockView, fittingPeaksData())
         .Times(1)
         .WillOnce(Return(",3.5,7.78,r43d"));
+    EXPECT_CALL(mockView, setPeakList(testing::_)).Times(1);
 
     // should not get to the point where the status is updated
     EXPECT_CALL(mockView, showStatus(testing::_)).Times(0);
@@ -1385,7 +1393,7 @@ public:
         testing::Mock::VerifyAndClearExpectations(&mockView))
   }
 
-  // shahroz Fitting test begin here
+  // Fitting test begin here
   void test_fitting_runno_valid_single_run() {
     testing::NiceMock<MockEnggDiffractionView> mockView;
     EnggDiffPresenterNoThread pres(&mockView);
@@ -1480,7 +1488,7 @@ public:
     pres.notify(IEnggDiffractionPresenter::FittingRunNo);
   }
 
-  void disable_test_fitting_runno_single_run() {
+  void diable_test_fitting_runno_single_run() {
     testing::NiceMock<MockEnggDiffractionView> mockView;
     EnggDiffPresenterNoThread pres(&mockView);
 
@@ -1557,9 +1565,13 @@ public:
 
     EXPECT_CALL(mockView, setFittingRunNumVec(testing::_)).Times(0);
 
+    EXPECT_CALL(mockView, addBankItem(testing::_)).Times(0);
+
+    EXPECT_CALL(mockView, setBankIdComboBox(testing::_)).Times(0);
+
     EXPECT_CALL(mockView, addRunNoItem(testing::_)).Times(0);
 
-    EXPECT_CALL(mockView, addBankItem(testing::_)).Times(0);
+    EXPECT_CALL(mockView, setFittingListWidgetCurrentRow(testing::_)).Times(0);
 
     // No errors/0 warnings. File entered is not found
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
