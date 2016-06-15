@@ -1469,10 +1469,24 @@ std::string EnggDiffractionViewQtGUI::fittingPeaksData() const {
   // this should be moved to Helper or could use the poco string tokenizers
   std::string exptPeaks =
       m_uiTabFitting.lineEdit_fitting_peaks->text().toStdString();
-  size_t strLength = exptPeaks.length() - 1;
+
+  auto *comma = ",";
 
   if (!exptPeaks.empty()) {
 
+    for (size_t i = 0; i < exptPeaks.size() - 1; i++) {
+      size_t j = i + 1;
+
+      if (exptPeaks[i] == *comma && exptPeaks[i] == exptPeaks[j]) {
+        exptPeaks.erase(j, 1);
+        i--;
+
+      } else {
+        ++j;
+      }
+    }
+
+    size_t strLength = exptPeaks.length() - 1;
     if (exptPeaks.at(size_t(0)) == ',') {
       exptPeaks.erase(size_t(0), 1);
       strLength -= size_t(1);
@@ -1481,6 +1495,9 @@ std::string EnggDiffractionViewQtGUI::fittingPeaksData() const {
     if (exptPeaks.at(strLength) == ',') {
       exptPeaks.erase(strLength, 1);
     }
+
+    m_uiTabFitting.lineEdit_fitting_peaks->setText(
+        QString::fromStdString(exptPeaks));
   }
   return exptPeaks;
 }
