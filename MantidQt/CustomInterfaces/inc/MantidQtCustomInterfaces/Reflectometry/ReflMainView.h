@@ -10,10 +10,14 @@
 #include <string>
 
 namespace MantidQt {
-namespace CustomInterfaces {
-// Forward decs
+
+namespace MantidWidgets {
 class DataProcessorCommand;
-using DataProcessorCommand_uptr = std::unique_ptr<DataProcessorCommand>;
+}
+
+namespace CustomInterfaces {
+
+using MantidWidgets::DataProcessorCommand;
 
 /** @class ReflMainView
 
@@ -62,10 +66,10 @@ public:
   virtual void setInstrumentList(const std::vector<std::string> &instruments,
                                  const std::string &defaultInstrument) = 0;
   virtual void setTransferMethods(const std::set<std::string> &methods) = 0;
-  virtual void
-  setTableCommands(std::vector<DataProcessorCommand_uptr> tableCommands) = 0;
-  virtual void
-  setRowCommands(std::vector<DataProcessorCommand_uptr> rowCommands) = 0;
+  virtual void setTableCommands(
+      std::vector<std::unique_ptr<DataProcessorCommand>> tableCommands) = 0;
+  virtual void setRowCommands(
+      std::vector<std::unique_ptr<DataProcessorCommand>> rowCommands) = 0;
   virtual void clearCommands() = 0;
 
   // Accessor methods

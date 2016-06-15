@@ -277,7 +277,7 @@ void ModeratorTzero::execEvent(const std::string &emode) {
   for (int i = 0; i < static_cast<int>(numHists); ++i) {
     PARALLEL_START_INTERUPT_REGION
     size_t wsIndex = static_cast<size_t>(i);
-    EventList &evlist = outputWS->getEventList(wsIndex);
+    EventList &evlist = outputWS->getSpectrum(wsIndex);
     if (evlist.getNumberEvents() > 0) // don't bother with empty lists
     {
       IDetector_const_sptr det;

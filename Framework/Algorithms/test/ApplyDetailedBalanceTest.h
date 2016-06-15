@@ -118,7 +118,7 @@ public:
     for (size_t i = 0; i < 5; ++i) {
       double en = static_cast<double>(i) + 0.5;
       double w = M_PI * (1 - std::exp(-en * 11.604519 / temp));
-      TS_ASSERT_DELTA(evout->getEventList(0).getEvent(i).m_weight, w, w * 1e-6);
+      TS_ASSERT_DELTA(evout->getSpectrum(0).getEvent(i).m_weight, w, w * 1e-6);
     }
     AnalysisDataService::Instance().remove(outputWSname);
 
@@ -162,7 +162,7 @@ private:
     for (int i = 0; i < nspecs; i++) {
       ws2D->setX(i, xv);
       ws2D->setData(i, yv, ev);
-      ws2D->getSpectrum(i)->setSpectrumNo(i);
+      ws2D->getSpectrum(i).setSpectrumNo(i);
     }
 
     AnalysisDataService::Instance().add(inputWSname, ws2D);

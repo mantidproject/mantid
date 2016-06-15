@@ -138,7 +138,7 @@ typedef DataObjects::MDLeanEvent<3> MDE;
 void ConvertToDiffractionMDWorkspace::convertSpectrum(int workspaceIndex) {
   if (m_inEventWS && !OneEventPerBin) {
     // ---------- Convert events directly -------------------------
-    EventList &el = m_inEventWS->getEventList(workspaceIndex);
+    EventList &el = m_inEventWS->getSpectrum(workspaceIndex);
 
     // Call the right templated function
     switch (el.getEventType()) {
@@ -161,11 +161,11 @@ void ConvertToDiffractionMDWorkspace::convertSpectrum(int workspaceIndex) {
     EventList el;
 
     // Create the events using the bins
-    const ISpectrum *inSpec = m_inWS->getSpectrum(workspaceIndex);
+    const auto &inSpec = m_inWS->getSpectrum(workspaceIndex);
     // If OneEventPerBin, generate exactly 1 event per bin, including zeros.
     // If !OneEventPerBin, generate up to 10 events per bin, excluding zeros
     el.createFromHistogram(
-        inSpec, OneEventPerBin /* Generate zeros */,
+        &inSpec, OneEventPerBin /* Generate zeros */,
         !OneEventPerBin /* Multiple events */,
         (OneEventPerBin ? 1 : 10) /* Max of this many events per bin */);
 
@@ -527,7 +527,7 @@ void ConvertToDiffractionMDWorkspace::exec() {
     // Get an idea of how many events we'll be adding
     size_t eventsAdding = m_inWS->blocksize();
     if (m_inEventWS && !OneEventPerBin)
-      eventsAdding = m_inEventWS->getEventList(wi).getNumberEvents();
+      eventsAdding = m_inEventWS->getSpectrum(wi).getNumberEvents();
 
     if (MultiThreadedAdding) {
       // Equivalent to calling "this->convertSpectrum(wi)"

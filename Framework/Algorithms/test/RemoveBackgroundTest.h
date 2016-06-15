@@ -246,7 +246,7 @@ private:
     const MantidVec &Y = SourceWS->readY(0);
     const MantidVec &E = SourceWS->readE(0);
     cloneWS->setX(0, X);
-    cloneWS->getSpectrum(0)->setData(Y, E);
+    cloneWS->getSpectrum(0).setData(Y, E);
 
     return cloneWS;
   }

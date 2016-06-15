@@ -562,7 +562,7 @@ private:
       auto ws = WorkspaceCreationHelper::Create2DWorkspaceFromFunction(
           PlotPeak_Expression(iWS), 3, 0, 10, 0.005);
       for (int i = 0; i < 3; ++i) {
-        ws->getSpectrum(i)->setSpectrumNo(0);
+        ws->getSpectrum(i).setSpectrumNo(0);
       }
       Kernel::TimeSeriesProperty<double> *logd =
           new Kernel::TimeSeriesProperty<double>("var");

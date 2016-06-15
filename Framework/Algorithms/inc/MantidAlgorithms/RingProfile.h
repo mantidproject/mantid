@@ -39,7 +39,6 @@ namespace Algorithms {
 class DLLExport RingProfile : public API::Algorithm {
 public:
   RingProfile();
-  ~RingProfile() override;
 
   const std::string name() const override { return "RingProfile"; };
   /// Summary of algorithms purpose

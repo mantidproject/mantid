@@ -15,16 +15,6 @@ using namespace API;
 using namespace Kernel;
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-CopyLogs::CopyLogs() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-CopyLogs::~CopyLogs() {}
-
-//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string CopyLogs::name() const { return "CopyLogs"; }
 

@@ -69,11 +69,11 @@ public:
     TS_ASSERT_EQUALS(nhist, 12120);
 
     for (size_t i = 0; i < nhist; ++i) {
-      ISpectrum *spectrum(NULL);
-      TS_ASSERT_THROWS_NOTHING(spectrum = outputWS->getSpectrum(i));
+      TS_ASSERT_THROWS_NOTHING(outputWS->getSpectrum(i));
+      auto &spectrum = outputWS->getSpectrum(i);
 
-      TS_ASSERT_EQUALS(spectrum->getSpectrumNo(), i + 1);
-      TS_ASSERT_EQUALS(spectrum->getDetectorIDs().size(), 1);
+      TS_ASSERT_EQUALS(spectrum.getSpectrumNo(), i + 1);
+      TS_ASSERT_EQUALS(spectrum.getDetectorIDs().size(), 1);
     }
   }
 
@@ -86,10 +86,10 @@ public:
     const size_t nhist = outputWS->getNumberHistograms();
     TS_ASSERT_EQUALS(nhist, 2529);
 
-    TS_ASSERT_EQUALS(outputWS->getSpectrum(6)->getDetectorIDs().size(), 1);
-    TS_ASSERT_EQUALS(outputWS->getSpectrum(6)->getSpectrumNo(), 7);
-    TS_ASSERT_EQUALS(outputWS->getSpectrum(2083)->getDetectorIDs().size(), 10);
-    TS_ASSERT_EQUALS(outputWS->getSpectrum(2083)->getSpectrumNo(), 2084);
+    TS_ASSERT_EQUALS(outputWS->getSpectrum(6).getDetectorIDs().size(), 1);
+    TS_ASSERT_EQUALS(outputWS->getSpectrum(6).getSpectrumNo(), 7);
+    TS_ASSERT_EQUALS(outputWS->getSpectrum(2083).getDetectorIDs().size(), 10);
+    TS_ASSERT_EQUALS(outputWS->getSpectrum(2083).getSpectrumNo(), 2084);
 
     // The HET15869 data set was measured around 2005 on the HET instrument.
     // This is also the latest IDF.
@@ -118,10 +118,10 @@ public:
     const size_t nhist = outputWS->getNumberHistograms();
     TS_ASSERT_EQUALS(nhist, 17790);
 
-    TS_ASSERT_EQUALS(outputWS->getSpectrum(6)->getDetectorIDs().size(), 1);
-    TS_ASSERT_EQUALS(outputWS->getSpectrum(6)->getSpectrumNo(), 7);
-    TS_ASSERT_EQUALS(outputWS->getSpectrum(2083)->getDetectorIDs().size(), 1);
-    TS_ASSERT_EQUALS(outputWS->getSpectrum(2083)->getSpectrumNo(), 2084);
+    TS_ASSERT_EQUALS(outputWS->getSpectrum(6).getDetectorIDs().size(), 1);
+    TS_ASSERT_EQUALS(outputWS->getSpectrum(6).getSpectrumNo(), 7);
+    TS_ASSERT_EQUALS(outputWS->getSpectrum(2083).getDetectorIDs().size(), 1);
+    TS_ASSERT_EQUALS(outputWS->getSpectrum(2083).getSpectrumNo(), 2084);
 
     // The LOQ49886 data set was measured around 2009 on the LOQ instrument.
     // It does not link to the most recent version of the LOQ IDF (2012 or

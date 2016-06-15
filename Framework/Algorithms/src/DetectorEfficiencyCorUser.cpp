@@ -19,17 +19,6 @@ using namespace Geometry;
 DECLARE_ALGORITHM(DetectorEfficiencyCorUser)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-DetectorEfficiencyCorUser::DetectorEfficiencyCorUser()
-    : API::Algorithm(), m_inputWS(), m_outputWS(), m_Ei(0.) {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-DetectorEfficiencyCorUser::~DetectorEfficiencyCorUser() {}
-
-//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string DetectorEfficiencyCorUser::name() const {
   return "DetectorEfficiencyCorUser";

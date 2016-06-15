@@ -138,46 +138,46 @@ MantidUI::MantidUI(ApplicationWindow *aw)
 
   actionCopyRowToTable = new QAction(this);
   actionCopyRowToTable->setIcon(QIcon(getQPixmap("table_xpm")));
-  connect(actionCopyRowToTable, SIGNAL(activated()), this,
+  connect(actionCopyRowToTable, SIGNAL(triggered()), this,
           SLOT(copyRowToTable()));
 
   actionCopyRowToGraph = new QAction(this);
   actionCopyRowToGraph->setIcon(QIcon(getQPixmap("graph_xpm")));
-  connect(actionCopyRowToGraph, SIGNAL(activated()), this,
+  connect(actionCopyRowToGraph, SIGNAL(triggered()), this,
           SLOT(copyRowToGraph()));
 
   actionCopyRowToGraphErr = new QAction(this);
   actionCopyRowToGraphErr->setIcon(QIcon(getQPixmap("graph_xpm")));
-  connect(actionCopyRowToGraphErr, SIGNAL(activated()), this,
+  connect(actionCopyRowToGraphErr, SIGNAL(triggered()), this,
           SLOT(copyRowToGraphErr()));
 
   actionWaterfallPlot = new QAction(QIcon(":/waterfall_plot.png"),
                                     tr("Plot spectra as waterfall"), this);
-  connect(actionWaterfallPlot, SIGNAL(activated()), this,
+  connect(actionWaterfallPlot, SIGNAL(triggered()), this,
           SLOT(copyRowsToWaterfall()));
 
   actionCopyDetectorsToTable = new QAction(tr("View detectors table"), this);
   actionCopyDetectorsToTable->setIcon(QIcon(getQPixmap("table_xpm")));
-  connect(actionCopyDetectorsToTable, SIGNAL(activated()), this,
+  connect(actionCopyDetectorsToTable, SIGNAL(triggered()), this,
           SLOT(copyDetectorsToTable()));
 
   actionCopyValues = new QAction(tr("Copy"), this);
   actionCopyValues->setIcon(QIcon(getQPixmap("copy_xpm")));
-  connect(actionCopyValues, SIGNAL(activated()), this, SLOT(copyValues()));
+  connect(actionCopyValues, SIGNAL(triggered()), this, SLOT(copyValues()));
 
   actionCopyColumnToTable = new QAction(this);
   actionCopyColumnToTable->setIcon(QIcon(getQPixmap("table_xpm")));
-  connect(actionCopyColumnToTable, SIGNAL(activated()), this,
+  connect(actionCopyColumnToTable, SIGNAL(triggered()), this,
           SLOT(copyColumnToTable()));
 
   actionCopyColumnToGraph = new QAction(this);
   actionCopyColumnToGraph->setIcon(QIcon(getQPixmap("graph_xpm")));
-  connect(actionCopyColumnToGraph, SIGNAL(activated()), this,
+  connect(actionCopyColumnToGraph, SIGNAL(triggered()), this,
           SLOT(copyColumnToGraph()));
 
   actionCopyColumnToGraphErr = new QAction(this);
   actionCopyColumnToGraphErr->setIcon(QIcon(getQPixmap("graph_xpm")));
-  connect(actionCopyColumnToGraphErr, SIGNAL(activated()), this,
+  connect(actionCopyColumnToGraphErr, SIGNAL(triggered()), this,
           SLOT(copyColumnToGraphErr()));
 
   connect(this, SIGNAL(needToCreateLoadDAEMantidMatrix(const QString &)), this,
@@ -1196,10 +1196,10 @@ Table *MantidUI::createDetectorTable(
     colValues << QVariant(static_cast<double>(wsIndex));
     const double dataY0(ws->readY(wsIndex)[0]), dataE0(ws->readE(wsIndex)[0]);
     try {
-      ISpectrum *spectrum = ws->getSpectrum(wsIndex);
-      Mantid::specnum_t specNo = spectrum->getSpectrumNo();
+      auto &spectrum = ws->getSpectrum(wsIndex);
+      Mantid::specnum_t specNo = spectrum.getSpectrumNo();
       QString detIds("");
-      const auto &ids = spectrum->getDetectorIDs();
+      const auto &ids = spectrum.getDetectorIDs();
       size_t ndets = ids.size();
       auto iter = ids.begin();
       auto itEnd = ids.end();
@@ -2176,11 +2176,11 @@ void MantidUI::menuMantidMatrixAboutToShow() {
   menuMantidMatrix->addAction(action);
 
   action = new QAction("Save Nexus", this);
-  connect(action, SIGNAL(activated()), this, SLOT(saveNexusWorkspace()));
+  connect(action, SIGNAL(triggered()), this, SLOT(saveNexusWorkspace()));
   menuMantidMatrix->addAction(action);
 
   action = new QAction("Rename", this);
-  connect(action, SIGNAL(activated()), this, SLOT(renameWorkspace()));
+  connect(action, SIGNAL(triggered()), this, SLOT(renameWorkspace()));
   menuMantidMatrix->addAction(action);
 
   // separate delete
