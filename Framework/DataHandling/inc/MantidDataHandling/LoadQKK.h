@@ -39,8 +39,6 @@ namespace DataHandling {
   */
 class DLLExport LoadQKK : public API::IFileLoader<Kernel::NexusDescriptor> {
 public:
-  /// (Empty) Constructor
-  LoadQKK() {}
   /// Algorithm's name
   const std::string name() const override { return "LoadQKK"; }
   /// Summary of algorithms purpose
