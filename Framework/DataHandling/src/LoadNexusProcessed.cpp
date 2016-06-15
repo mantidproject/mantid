@@ -1287,6 +1287,13 @@ API::MatrixWorkspace_sptr LoadNexusProcessed::loadNonEventEntry(
   // although in this case it would never be used.
   auto hasXErrors = wksp_cls.isValid("xerrors");
   auto xErrors = hasXErrors ? wksp_cls.openNXDouble("xerrors") : errors;
+  if(hasXErrors) {
+    if (xErrors.dim1() == nchannels + 1)
+      g_log.warning() << "Legacy X uncertainty found in input file, i.e., "
+                         "delta-Q for each BIN EDGE. Uncertainties will be "
+                         "re-interpreted as delta-Q of the BIN CENTRE and the "
+                         "last value will be dropped.\n";
+  }
 
   int64_t blocksize(8);
   // const int fullblocks = nspectra / blocksize;

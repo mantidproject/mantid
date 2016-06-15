@@ -1039,6 +1039,10 @@ public:
     doTestLoadAndSaveHistogramWS(true);
   }
 
+  void test_SaveAndLoadOnHistogramWSwithLegacyXErrors() {
+    doTestLoadAndSaveHistogramWS(true, false, true);
+  }
+
   void test_SaveAndLoadOnPointLikeWS() { doTestLoadAndSavePointWS(false); }
 
   void test_SaveAndLoadOnPointLikeWSWithXErrors() {
@@ -1194,7 +1198,8 @@ private:
   }
 
   void doTestLoadAndSaveHistogramWS(bool useXErrors = false,
-                                    bool numericAxis = false) {
+                                    bool numericAxis = false,
+                                    bool legacyXErrors = false) {
     // Test SaveNexusProcessed/LoadNexusProcessed on a histogram workspace with
     // x errors
 
@@ -1216,6 +1221,10 @@ private:
       // Use legacy interface to create "broken" histograms. Duplicate test.
       inputWs->setPointStandardDeviations(0, dx1);
       inputWs->setPointStandardDeviations(1, dx2);
+      if (legacyXErrors) {
+        inputWs->dataDx(0).push_back(1);
+        inputWs->dataDx(1).push_back(1);
+      }
     }
     if (numericAxis) {
       auto numericAxis = new NumericAxis(2);
@@ -1258,8 +1267,8 @@ private:
     TS_ASSERT_EQUALS(inputWs->readE(1), outputWs->readE(1));
     if (useXErrors) {
       TSM_ASSERT("Should have an x error", outputWs->hasDx(0));
-      TS_ASSERT_EQUALS(inputWs->dx(0).rawData(), outputWs->dx(0).rawData());
-      TS_ASSERT_EQUALS(inputWs->dx(1).rawData(), outputWs->dx(1).rawData());
+      TS_ASSERT_EQUALS(dx1, outputWs->dx(0).rawData());
+      TS_ASSERT_EQUALS(dx2, outputWs->dx(1).rawData());
     }
 
     // Axes
