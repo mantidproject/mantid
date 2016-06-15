@@ -39,7 +39,7 @@ public:
   IMuonAsymmetryCalculator(const API::WorkspaceGroup_sptr inputWS,
                            const std::vector<int> summedPeriods,
                            const std::vector<int> subtractedPeriods);
-  virtual ~IMuonAsymmetryCalculator();
+  virtual ~IMuonAsymmetryCalculator() = default;
 
   /// Overridden in derived classes to perform asymmetry calculation
   virtual API::MatrixWorkspace_sptr calculate() const = 0;

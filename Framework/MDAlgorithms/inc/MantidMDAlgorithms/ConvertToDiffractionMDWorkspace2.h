@@ -19,11 +19,6 @@ namespace MDAlgorithms {
 class DLLExport ConvertToDiffractionMDWorkspace2
     : public MDAlgorithms::BoxControllerSettingsAlgorithm {
 public:
-  /** Constructor   */
-  ConvertToDiffractionMDWorkspace2() {}
-  /** Destructor   */
-  ~ConvertToDiffractionMDWorkspace2() override {}
-
   /// Algorithm's name for identification
   const std::string name() const override {
     return "ConvertToDiffractionMDWorkspace";
