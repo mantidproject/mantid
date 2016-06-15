@@ -5,18 +5,14 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidKernel/TypedValidator.h"
-#include "MantidKernel/StringTokenizer.h"
-#include "MantidAPI/AnalysisDataService.h"
-
-#include <vector>
-
+#include "MantidAPI/DllConfig.h"
 
 namespace Mantid {
 namespace API {
 
 using namespace Mantid::Kernel;
 
-/** ADSValidator : a validator that requires the value of a property to be 
+/** ADSValidator : a validator that requires the value of a property to be
     present in the ADS.  The  type must be std::string
 
   Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
@@ -40,70 +36,38 @@ using namespace Mantid::Kernel;
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class ADSValidator : public Kernel::TypedValidator<std::string> {
+class MANTID_API_DLL ADSValidator : public Kernel::TypedValidator<std::string> {
 public:
   /// Default constructor. Sets up an empty list of valid values.
   ADSValidator(const bool allowMultiSelection = true,
-    const bool isOptional = false) : 
-    TypedValidator<std::string>(), m_AllowMultiSelection(allowMultiSelection),
-    m_isOptional{ isOptional };
+               const bool isOptional = false);
 
   /// Clone the validator
-  IValidator_sptr clone() const override {
-    return boost::make_shared<ADSValidator>(*this);
-  }
+  IValidator_sptr clone() const override;
 
-  bool isMultiSelectionAllowed() const
-  {
-    return m_AllowMultiSelection;
-  }
+  bool isMultiSelectionAllowed() const;
 
-  void setMultiSelectionAllowed(const bool isMultiSelectionAllowed) {
-    m_AllowMultiSelection = isMultiSelectionAllowed;
-  }
+  void setMultiSelectionAllowed(const bool isMultiSelectionAllowed);
 
-  bool isOptional() const {
-    return m_isOptional;
-  }
+  bool isOptional() const;
 
-  void setOptional(const bool setOptional) {
-    m_isOptional = setOptional;
-  }
-
+  void setOptional(const bool setOptional);
 
 protected:
-  /** Checks if the string passed is in the ADS, or if all members are in the ADS
+  /** Checks if the string passed is in the ADS, or if all members are in the
+   * ADS
    *  @param value :: The value to test
-   *  @return "" if the value is on the list, or "The workspace is not in the workspace list"
+   *  @return "" if the value is on the list, or "The workspace is not in the
+   * workspace list"
    */
-  std::string checkValidity(const std::string &value) const override {
-    if (!m_isOptional && isEmpty(value))
-      return "Select a value";
-    std::vector<std::string> ws_to_validate;
-    ws_to_validate.push_back(value);
-    if (m_AllowMultiSelection)
-    {
-      StringTokenizer tokenizer(value, ",|;\t",
-        StringTokenizer::TOK_TRIM | StringTokenizer::TOK_IGNORE_EMPTY | StringTokenizer::TOK_IGNORE_FINAL_EMPTY_TOKEN);
-      ws_to_validate = tokenizer.asVector();
-    }
-    auto& ads = AnalysisDataService::Instance();
-    std::ostringstream os;
-    for (std::string wsName : ws_to_validate) {
-      if (!ads.doesExist(wsName)) {
-        os << "The workspace \"" << value
-          << "\" is not in the workspace list";
-      }
-    }
-    return os.str();
-  }
+  std::string checkValidity(const std::string &value) const override;
 
   /**
    * Is the value considered empty. Specialized string version to use empty
    * @param value :: The value to check
    * @return True if it is considered empty
    */
-  bool isEmpty(const std::string &value) const { return value.empty(); }
+  bool isEmpty(const std::string &value) const;
 
 private:
   /// if the validator should allow multiple selection
