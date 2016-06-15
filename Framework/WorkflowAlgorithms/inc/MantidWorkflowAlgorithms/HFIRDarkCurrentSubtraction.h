@@ -34,8 +34,6 @@ namespace WorkflowAlgorithms {
 */
 class DLLExport HFIRDarkCurrentSubtraction : public API::Algorithm {
 public:
-  /// (Empty) Constructor
-  HFIRDarkCurrentSubtraction() : API::Algorithm() {}
   /// Algorithm's name
   const std::string name() const override {
     return "HFIRDarkCurrentSubtraction";
