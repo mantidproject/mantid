@@ -532,18 +532,29 @@ class ProcessTableWidget(tableBase.NTableWidget):
 
         return
 
-    def append_scans(self, scans):
+    def append_scans(self, scans, allow_duplicate_scans):
         """ Append rows for merge in future
         :param scans:
+        :param allow_duplicate_scans: does not allow duplicate scan
         :return:
         """
         # Check
         assert isinstance(scans, list)
 
+        if allow_duplicate_scans is False:
+            scan_list = self.get_scan_list()
+        else:
+            scan_list = list()
+
         # set value as default
         # Append rows
         for scan in scans:
-            # set the list
+            # add a new row for the scan
+
+            if allow_duplicate_scans is False and scan in scan_list:
+                # skip is duplicate scan is not allowed
+                continue
+            # set
             new_row = self._generate_empty_row(scan_number=scan)
             status, err = self.append_row(new_row)
             if status is False:

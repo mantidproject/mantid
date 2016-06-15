@@ -224,13 +224,11 @@ class MainWindow(QtGui.QMainWindow):
                      self.do_clear_survey)
 
         self.connect(self.ui.lineEdit_numSurveyOutput, QtCore.SIGNAL('editingFinished()'),
-                     self.print_edit_finished)
+                     self.evt_show_survey)
         self.connect(self.ui.lineEdit_numSurveyOutput, QtCore.SIGNAL('returnPressed()'),
-                     self.print_return_pressed)
-        self.connect(self.ui.lineEdit_numSurveyOutput, QtCore.SIGNAL('textChanged(const QString&)'),
-                     self.print_text_changed)
+                     self.evt_show_survey)
         self.connect(self.ui.lineEdit_numSurveyOutput, QtCore.SIGNAL('textEdited(const QString&)'),
-                     self.print_text_edited)
+                     self.evt_show_survey)
 
         # Tab k-shift vector
         self.connect(self.ui.pushButton_addKShift, QtCore.SIGNAL('clicked()'),
@@ -267,14 +265,22 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
-    def print_edit_finished(self):
-        print 'Edit finished'
-    def print_return_pressed(self):
-        print 'Return pressed'
-    def print_text_changed(self):
-        print 'Text changed'
-    def print_text_edited(self):
-        print 'Text edited'
+    def evt_show_survey(self):
+        """
+        Show survey result
+        :return:
+        """
+        if self.ui.tableWidget_surveyTable.rowCount() == 0:
+            # do nothing if the table is empty
+            return
+
+        max_number = int(self.ui.lineEdit_numSurveyOutput.text())
+        if max_number != self.ui.tableWidget_surveyTable.rowCount():
+            # re-show survey
+            self.ui.tableWidget_surveyTable.remove_all_rows()
+            self.ui.tableWidget_surveyTable.show_reflections(max_number)
+
+        return
 
     def _init_widgets(self):
         """ Initialize the table widgets
@@ -502,7 +508,7 @@ class MainWindow(QtGui.QMainWindow):
             self.pop_one_button_dialog('Scan list is empty.')
 
         # Set table
-        self.ui.tableWidget_mergeScans.append_scans(scans=scan_list)
+        self.ui.tableWidget_mergeScans.append_scans(scans=scan_list, allow_duplicate_scans=False)
 
         return
 
@@ -1968,7 +1974,10 @@ class MainWindow(QtGui.QMainWindow):
             self.ui.tableWidget_mergeScans.select_all_rows(curr_state)
 
         # set the text to the push button
-        self.ui.pushButton_selectAllScans2Merge.setText('Deselect All')
+        if curr_state:
+            self.ui.pushButton_selectAllScans2Merge.setText('Deselect All')
+        else:
+            self.ui.pushButton_selectAllScans2Merge.setText('Select All')
 
         return
 
