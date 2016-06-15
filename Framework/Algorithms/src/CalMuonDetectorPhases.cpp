@@ -38,8 +38,8 @@ void CalMuonDetectorPhases::init() {
                   "Last good data point in units of micro-seconds",
                   Direction::Input);
 
-  declareProperty("Frequency", EMPTY_DBL(), "Starting hint for the frequency",
-                  Direction::Input);
+  declareProperty("Frequency", EMPTY_DBL(),
+                  "Starting hint for the frequency in MHz", Direction::Input);
 
   declareProperty(make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(
                       "DetectorTable", "", Direction::Output),
@@ -285,10 +285,12 @@ API::MatrixWorkspace_sptr CalMuonDetectorPhases::removeExpDecay(
  * Returns the frequency hint to use as a starting point for finding the
  * frequency.
  *
- * If user has provided a frequency as input, use that.
- * Otherwise, use 2*pi*g_mu*(sample_magn_field)
+ * If user has provided a frequency (MHz) as input, use that converted to
+ * Mrad/s.
+ * Otherwise, use 2*pi*g_mu*(sample_magn_field).
+ * (2*pi to convert MHz to Mrad/s)
  *
- * @return :: Frequency hint to use
+ * @return :: Frequency hint to use in Mrad/s
  */
 double CalMuonDetectorPhases::getFrequencyHint() const {
   double freq = getProperty("Frequency");
@@ -298,13 +300,17 @@ double CalMuonDetectorPhases::getFrequencyHint() const {
       // Read sample_magn_field from workspace logs
       freq = m_inputWS->run().getLogAsSingleValue("sample_magn_field");
       // Multiply by muon gyromagnetic ratio: 0.01355 MHz/G
-      freq *= 2 * M_PI * PhysicalConstants::MuonGyromagneticRatio;
+      freq *= PhysicalConstants::MuonGyromagneticRatio;
     } catch (...) {
       throw std::runtime_error(
           "Couldn't read sample_magn_field. Please provide a value for "
           "the frequency");
     }
   }
+
+  // Convert from MHz to Mrad/s
+  freq *= 2 * M_PI;
+
   return freq;
 }
 
