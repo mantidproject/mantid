@@ -220,16 +220,6 @@ void QtReflMainView::on_actionTransfer_triggered() {
 }
 
 /**
-This slot opens the documentation when the "help" button has been pressed
-*/
-void QtReflMainView::on_actionHelp_triggered() {
-  MantidQt::API::HelpWindow::showPage(
-      this,
-      QString(
-          "qthelp://org.mantidproject/doc/interfaces/ISIS_Reflectometry.html"));
-}
-
-/**
 This slot shows the slit calculator
 */
 void QtReflMainView::slitCalculatorTriggered() {
