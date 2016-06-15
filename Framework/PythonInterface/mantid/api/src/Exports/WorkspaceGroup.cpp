@@ -21,6 +21,8 @@ void export_WorkspaceGroup() {
                WorkspaceGroup::contains,
            (arg("self"), arg("workspace")),
            "Returns true if the given name is in the group")
+      .def("sortByName", &WorkspaceGroup::sortByName, (arg("self")),
+           "Sort members by name")
       .def("add", &WorkspaceGroup::add, (arg("self"), arg("workspace_name")),
            "Add a name to the group")
       .def("size", &WorkspaceGroup::size, arg("self"),

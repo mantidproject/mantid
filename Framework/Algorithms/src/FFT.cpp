@@ -7,6 +7,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/EnabledWhenProperty.h"
+#include "MantidKernel/EqualBinsChecker.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/UnitLabelTypes.h"
@@ -352,50 +353,22 @@ std::map<std::string, std::string> FFT::validateInputs() {
  * @returns :: True if unevenly spaced, False if not (or accepting errors)
  */
 bool FFT::areBinWidthsUneven(const MantidVec &xValues) const {
-  bool widthsUneven = false;
   const bool acceptXRoundingErrors = getProperty("AcceptXRoundingErrors");
   const double tolerance = acceptXRoundingErrors ? 0.5 : 1e-7;
-  const double warnValue = 0.1;
+  const double warnValue = acceptXRoundingErrors ? 0.1 : -1;
 
-  // Width to check against
-  const double dx = [&] {
-    if (acceptXRoundingErrors) {
-      // use average bin width
-      return (xValues[xValues.size() - 1] - xValues[0]) /
-             static_cast<double>(xValues.size() - 1);
-    } else {
-      // use first bin width
-      return xValues[1] - xValues[0];
-    }
-  }();
+  Kernel::EqualBinsChecker binChecker(xValues, tolerance, warnValue);
 
-  // Use cumulative errors if we are accepting rounding errors.
-  // Otherwise just compare each difference in turn to the tolerance.
-  auto difference = [&](size_t i) {
-    if (acceptXRoundingErrors) {
-      return std::abs((xValues[i] - xValues[0] - (double)i * dx) / dx);
-    } else {
-      return std::abs(dx - xValues[i + 1] + xValues[i]) / dx;
-    }
-  };
-
-  // Check each width against dx
-  for (size_t i = 1; i < xValues.size() - 2; i++) {
-    const double diff = difference(i);
-    if (diff > tolerance) {
-      // return an actual error
-      g_log.error() << "dx=" << xValues[i + 1] - xValues[i] << ' ' << dx << ' '
-                    << i << std::endl;
-      widthsUneven = true;
-      break;
-    } else if (acceptXRoundingErrors && diff > warnValue) {
-      // just warn the user
-      g_log.warning() << "Bin widths differ by more than " << warnValue * 100
-                      << "% of average." << std::endl;
-    }
+  // Compatibility with previous behaviour
+  if (!acceptXRoundingErrors) {
+    // Compare each bin width to the first (not the average)
+    binChecker.setReferenceBin(EqualBinsChecker::ReferenceBin::First);
+    // Use individual errors (not cumulative)
+    binChecker.setErrorType(EqualBinsChecker::ErrorType::Individual);
   }
 
-  return widthsUneven;
+  const std::string binError = binChecker.validate();
+  return !binError.empty();
 }
 
 /**

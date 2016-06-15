@@ -5,7 +5,7 @@
 #include "MantidAPI/FileFinder.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/PropertyManagerDataService.h"
+#include "MantidKernel/PropertyManagerDataService.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
@@ -25,16 +25,6 @@ namespace WorkflowAlgorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(DgsPreprocessData)
-
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-DgsPreprocessData::DgsPreprocessData() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-DgsPreprocessData::~DgsPreprocessData() {}
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
@@ -77,7 +67,7 @@ void DgsPreprocessData::init() {
 /** Execute the algorithm.
  */
 void DgsPreprocessData::exec() {
-  g_log.notice() << "Starting DgsPreprocessData" << std::endl;
+  g_log.notice() << "Starting DgsPreprocessData\n";
   // Get the reduction property manager
   const std::string reductionManagerName =
       this->getProperty("ReductionProperties");
@@ -98,8 +88,7 @@ void DgsPreprocessData::exec() {
 
   std::string incidentBeamNorm =
       reductionManager->getProperty("IncidentBeamNormalisation");
-  g_log.notice() << "Incident beam norm method = " << incidentBeamNorm
-                 << std::endl;
+  g_log.notice() << "Incident beam norm method = " << incidentBeamNorm << '\n';
 
   // Check to see if preprocessing has already been done.
   bool normAlreadyDone = inputWS->run().hasProperty(doneLog);
@@ -158,7 +147,7 @@ void DgsPreprocessData::exec() {
   } else {
     if (normAlreadyDone) {
       g_log.information() << "Preprocessing already done on "
-                          << inputWS->getName() << std::endl;
+                          << inputWS->getName() << '\n';
     }
     outputWS = inputWS;
   }

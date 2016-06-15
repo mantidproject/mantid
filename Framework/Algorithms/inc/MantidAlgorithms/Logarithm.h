@@ -51,7 +51,6 @@ namespace Algorithms {
 class DLLExport Logarithm : public UnaryOperation {
 public:
   Logarithm();
-  ~Logarithm(void) override{};
   /// Algorithm's name for identification
   const std::string name() const override { return "Logarithm"; }
   /// Summary of algorithms purpose

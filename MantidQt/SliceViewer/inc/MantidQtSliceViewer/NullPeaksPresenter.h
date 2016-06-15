@@ -68,7 +68,6 @@ public:
   }
   bool hasPeakAddMode() const override { return false; /*Do nothing.*/ }
 };
-
 }
 }
 

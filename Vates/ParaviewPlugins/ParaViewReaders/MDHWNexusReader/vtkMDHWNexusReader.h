@@ -12,6 +12,8 @@ class vtkImplicitFunction;
 class VTK_EXPORT vtkMDHWNexusReader : public vtkStructuredGridAlgorithm {
 public:
   static vtkMDHWNexusReader *New();
+  vtkMDHWNexusReader(const vtkMDHWNexusReader &) = delete;
+  void operator=(const vtkMDHWNexusReader &) = delete;
   vtkTypeMacro(vtkMDHWNexusReader, vtkStructuredGridAlgorithm) void PrintSelf(
       ostream &os, vtkIndent indent) override;
   vtkSetStringMacro(FileName)
@@ -29,9 +31,9 @@ public:
   void updateAlgorithmProgress(double progress, const std::string &message);
 
   /// Getter for the workspace type
-  char *GetWorkspaceTypeName();
+  std::string GetWorkspaceTypeName();
   /// Getter for the input geometry
-  const char *GetInputGeometryXML();
+  std::string GetInputGeometryXML();
   /// Setter for the normalization
   void SetNormalization(int option);
 
@@ -42,16 +44,11 @@ protected:
                          vtkInformationVector *) override;
   int RequestData(vtkInformation *, vtkInformationVector **,
                   vtkInformationVector *) override;
-  int Canreadfile(const char *fname);
   /// Handle time variation.
   unsigned long GetMTime() override;
 
 private:
   void setTimeRange(vtkInformationVector *outputVector);
-
-  vtkMDHWNexusReader(const vtkMDHWNexusReader &);
-
-  void operator=(const vtkMDHWNexusReader &);
 
   /// File name from which to read.
   char *FileName;
@@ -71,9 +68,6 @@ private:
 
   /// Time.
   double m_time;
-
-  // Cached workspace type name.
-  std::string typeName;
 
   /// Normalization Option
   Mantid::VATES::VisualNormalization m_normalizationOption;

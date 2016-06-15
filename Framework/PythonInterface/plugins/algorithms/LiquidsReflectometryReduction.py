@@ -525,7 +525,7 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
             s2h_key = keys[3]
             s2w_key = keys[5]
             if 'IncidentMedium' in data_dict \
-                and data_dict['IncidentMedium'] == incident_medium.strip() \
+                and data_dict['IncidentMedium'].lower() == incident_medium.strip().lower() \
                 and _value_check('LambdaRequested', data_dict, lr_value) \
                 and _value_check('S1H', data_dict, s1h) \
                 and _value_check(s2h_key, data_dict, s2h):
@@ -564,7 +564,7 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
             # Avoid leaving trash behind
             AnalysisDataService.remove(str(normalization))
         else:
-            logger.error("Could not find scaling factor for %s" % str(workspace))
+            logger.error("Could not find scaling factor for %s" % str(incident_medium))
         return workspace
 
 AlgorithmFactory.subscribe(LiquidsReflectometryReduction)

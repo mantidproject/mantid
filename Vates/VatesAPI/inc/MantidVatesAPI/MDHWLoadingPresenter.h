@@ -57,9 +57,9 @@ public:
   double getMaxValue() override;
 
   /// Transpose a workspace to push integrated dimensions to the last
-  static void transposeWs(
-      Mantid::API::IMDHistoWorkspace_sptr  &inHistoWs,
-      Mantid::API::IMDHistoWorkspace_sptr  &outCachedHistoWs);
+  static void
+  transposeWs(Mantid::API::IMDHistoWorkspace_sptr &inHistoWs,
+              Mantid::API::IMDHistoWorkspace_sptr &outCachedHistoWs);
 
 protected:
   /*---------------------------------------------------------------------------
@@ -74,7 +74,7 @@ protected:
   std::vector<std::string> axisLabels;
   virtual void appendMetadata(vtkDataSet *visualDataSet,
                               const std::string &wsName);
-  virtual void extractMetadata(Mantid::API::IMDHistoWorkspace_sptr histoWs);
+  virtual void extractMetadata(const Mantid::API::IMDHistoWorkspace &histoWs);
   virtual bool
   canLoadFileBasedOnExtension(const std::string &filename,
                               const std::string &expectedExtension) const;
@@ -88,8 +88,6 @@ protected:
   boost::scoped_ptr<MetaDataExtractorUtils> m_metaDataExtractor;
   boost::scoped_ptr<VatesConfigurations> m_vatesConfigurations;
 };
-
-
 }
 }
 

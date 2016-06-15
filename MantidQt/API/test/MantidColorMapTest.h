@@ -6,72 +6,65 @@
 #include <limits>
 #include <QRgb>
 
-class MantidColorMapTest : public CxxTest::TestSuite
-{
+class MantidColorMapTest : public CxxTest::TestSuite {
 public:
-
   /// Check default color map
-  void test_constructor()
-  {
+  void test_constructor() {
     MantidColorMap map;
     QRgb col;
-    col = map.rgb( QwtDoubleInterval( 0.0, 1.0 ), 0.0);
-    TSM_ASSERT_EQUALS("Default min color.", col, qRgb(0, 170, 252) );
-    col = map.rgb( QwtDoubleInterval( 0.0, 1.0 ), 1.0);
-    TSM_ASSERT_EQUALS("Default max color.", col, qRgb(255,255,255) );
-    TSM_ASSERT_EQUALS("Default map is linear", map.getScaleType(), GraphOptions::Log10 );
+    col = map.rgb(QwtDoubleInterval(0.0, 1.0), 0.0);
+    TSM_ASSERT_EQUALS("Default min color.", col, qRgb(0, 170, 252));
+    col = map.rgb(QwtDoubleInterval(0.0, 1.0), 1.0);
+    TSM_ASSERT_EQUALS("Default max color.", col, qRgb(255, 255, 255));
+    TSM_ASSERT_EQUALS("Default map is linear", map.getScaleType(),
+                      GraphOptions::Log10);
   }
 
-  void test_normalize_linear()
-  {
+  void test_normalize_linear() {
     MantidColorMap map;
     QwtDoubleInterval range(10.0, 20.0);
-    map.changeScaleType( GraphOptions::Linear );
-    TS_ASSERT_DELTA( map.normalize(range, 15.), 0.5, 1e-5);
+    map.changeScaleType(GraphOptions::Linear);
+    TS_ASSERT_DELTA(map.normalize(range, 15.), 0.5, 1e-5);
   }
 
-  void test_normalize_log()
-  {
+  void test_normalize_log() {
     MantidColorMap map;
     QwtDoubleInterval range(1.0, 10000.0);
-    map.changeScaleType( GraphOptions::Log10 );
-    TS_ASSERT_DELTA( map.normalize(range, 1000.), 0.75, 1e-5);
+    map.changeScaleType(GraphOptions::Log10);
+    TS_ASSERT_DELTA(map.normalize(range, 1000.), 0.75, 1e-5);
   }
 
-  void test_normalize_power()
-  {
+  void test_normalize_power() {
     MantidColorMap map;
     QwtDoubleInterval range(10.0, 20.0);
-    map.changeScaleType( GraphOptions::Power );
-    map.setNthPower( 2.0 );
-    TS_ASSERT_DELTA( map.normalize(range, 16.), 0.52, 1e-5);
+    map.changeScaleType(GraphOptions::Power);
+    map.setNthPower(2.0);
+    TS_ASSERT_DELTA(map.normalize(range, 16.), 0.52, 1e-5);
   }
 
   /// Setting a NAN color
-  void test_nan_color()
-  {
+  void test_nan_color() {
     MantidColorMap map;
     map.setNanColor(123, 23, 34);
     QRgb col;
     QwtDoubleInterval range(10.0, 20.0);
     double nan = std::numeric_limits<double>::quiet_NaN();
-    col = map.rgb( range, nan);
-    TSM_ASSERT_EQUALS("Passing NAN to rgb returns the set color.", col, qRgb(123, 23, 34) );
+    col = map.rgb(range, nan);
+    TSM_ASSERT_EQUALS("Passing NAN to rgb returns the set color.", col,
+                      qRgb(123, 23, 34));
   }
 
-  void test_colorIndex()
-  {
+  void test_colorIndex() {
     MantidColorMap map;
     QwtDoubleInterval range(10.0, 20.0);
     double nan = std::numeric_limits<double>::quiet_NaN();
-    TSM_ASSERT_EQUALS("Color index is 0 for NAN", map.colorIndex(range, nan), 0);
-    TSM_ASSERT_EQUALS("Color index is 1 for small numbers", map.colorIndex(range, -123.0), 1);
-    TSM_ASSERT_EQUALS("Color index is 255 for large numbers", map.colorIndex(range, +123.0), 255);
+    TSM_ASSERT_EQUALS("Color index is 0 for NAN", map.colorIndex(range, nan),
+                      0);
+    TSM_ASSERT_EQUALS("Color index is 1 for small numbers",
+                      map.colorIndex(range, -123.0), 1);
+    TSM_ASSERT_EQUALS("Color index is 255 for large numbers",
+                      map.colorIndex(range, +123.0), 255);
   }
-
-
-
 };
-
 
 #endif /* MANTIDQT_API_MANTIDCOLORMAPTEST_H_ */

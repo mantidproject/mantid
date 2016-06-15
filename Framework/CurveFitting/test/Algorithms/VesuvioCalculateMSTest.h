@@ -217,7 +217,7 @@ private:
         instrument->markAsDetector(det2);
 
         // Group the detectors
-        ws2d->getSpectrum(0)->addDetectorID(2);
+        ws2d->getSpectrum(0).addDetectorID(2);
       }
 
       ws2d->setInstrument(instrument);

@@ -79,10 +79,6 @@ class DLLExport PlotPeakByLogValue : public API::Algorithm {
   };
 
 public:
-  /// Default constructor
-  PlotPeakByLogValue() : API::Algorithm(){};
-  /// Destructor
-  ~PlotPeakByLogValue() override{};
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "PlotPeakByLogValue"; }
   /// Summary of algorithms purpose

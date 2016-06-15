@@ -16,16 +16,6 @@ namespace MDAlgorithms {
 DECLARE_ALGORITHM(DivideMD)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-DivideMD::DivideMD() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-DivideMD::~DivideMD() {}
-
-//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string DivideMD::name() const { return "DivideMD"; }
 
@@ -58,8 +48,8 @@ void DivideMD::execEventScalar(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   // Get the scalar multiplying
   float scalar = float(m_rhs_scalar->dataY(0)[0]);
   float scalarError = float(m_rhs_scalar->dataE(0)[0]);
-  float scalarRelativeErrorSquared =
-      (scalarError * scalarError) / (scalar * scalar);
+  float scalarErrorSquared = scalarError * scalarError;
+  float inverseScalarSquared = 1.f / (scalar * scalar);
 
   // Get all the MDBoxes contained
   MDBoxBase<MDE, nd> *parentBox = ws->getBox();
@@ -84,9 +74,9 @@ void DivideMD::execEventScalar(typename MDEventWorkspace<MDE, nd>::sptr ws) {
         // Multiply weight by a scalar, propagating error
         float oldSignal = it->getSignal();
         float signal = oldSignal / scalar;
-        float errorSquared =
-            signal * signal * (it->getErrorSquared() / (oldSignal * oldSignal) +
-                               scalarRelativeErrorSquared);
+        float errorSquared = it->getErrorSquared() * inverseScalarSquared +
+                             scalarErrorSquared * oldSignal * oldSignal *
+                                 inverseScalarSquared * inverseScalarSquared;
         it->setSignal(signal);
         it->setErrorSquared(errorSquared);
         ic++;

@@ -1,5 +1,7 @@
 #include "MantidMDAlgorithms/CreateMD.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidAPI/FileProperty.h"
+#include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include <Poco/Path.h>
@@ -73,16 +75,6 @@ bool all_given(const std::vector<std::vector<double>> &params) {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CreateMD)
-
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-CreateMD::CreateMD() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-CreateMD::~CreateMD() {}
 
 //----------------------------------------------------------------------------------------------
 
@@ -164,6 +156,20 @@ void CreateMD::init() {
       make_unique<PropertyWithValue<bool>>("InPlace", true, Direction::Input),
       "Execute conversions to MD and Merge in one-step. Less "
       "memory overhead.");
+
+  declareProperty(
+      make_unique<FileProperty>("Filename", "", FileProperty::OptionalSave,
+                                ".nxs"),
+      "The name of the Nexus file to write, as a full or relative path.\n"
+      "Only used if FileBackEnd is true.");
+  setPropertySettings("Filename", make_unique<EnabledWhenProperty>(
+                                      "CreateFileBackEnd", IS_EQUAL_TO, "1"));
+
+  declareProperty("FileBackEnd", false,
+                  "If true, Filename must also be specified. The algorithm "
+                  "will create the specified file in addition to an output "
+                  "workspace. The workspace will load data from the file on "
+                  "demand in order to reduce memory use.");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -183,6 +189,8 @@ void CreateMD::exec() {
   bool in_place = this->getProperty("InPlace");
   const std::vector<std::string> data_sources =
       this->getProperty("DataSources");
+  const std::string out_filename = this->getProperty("Filename");
+  const bool fileBackEnd = this->getProperty("FileBackEnd");
 
   const size_t entries = data_sources.size();
 
@@ -230,7 +238,7 @@ void CreateMD::exec() {
     bool do_in_place = in_place && (counter > 0);
     run_md = single_run(workspace, emode, efix[entry_number], psi[entry_number],
                         gl[entry_number], gs[entry_number], do_in_place, alatt,
-                        angdeg, u, v, run_md);
+                        angdeg, u, v, out_filename, fileBackEnd, run_md);
 
     to_merge_names.push_back(to_merge_name);
 
@@ -362,10 +370,10 @@ void CreateMD::setUB(Mantid::API::MatrixWorkspace_sptr workspace, double a,
  * @out_mdws :: output workspace to use if merge step is carried out
  * @returns the output converted workspace
  */
-Mantid::API::IMDEventWorkspace_sptr
-CreateMD::convertToMD(Mantid::API::Workspace_sptr workspace,
-                      const std::string &analysis_mode, bool in_place,
-                      Mantid::API::IMDEventWorkspace_sptr out_mdws) {
+Mantid::API::IMDEventWorkspace_sptr CreateMD::convertToMD(
+    Mantid::API::Workspace_sptr workspace, const std::string &analysis_mode,
+    bool in_place, const std::string &filebackend_filename,
+    const bool filebackend, Mantid::API::IMDEventWorkspace_sptr out_mdws) {
   Algorithm_sptr min_max_alg = createChildAlgorithm("ConvertToMDMinMaxGlobal");
   min_max_alg->setProperty("InputWorkspace", workspace);
   min_max_alg->setProperty("QDimensions", "Q3D");
@@ -386,6 +394,8 @@ CreateMD::convertToMD(Mantid::API::Workspace_sptr workspace,
   convert_alg->setProperty("SplitInto", SPLITINTO);
   convert_alg->setProperty("SplitThreshold", SPLITTHRESHOLD);
   convert_alg->setProperty("MaxRecursionDepth", MAXRECURSIONDEPTH);
+  convert_alg->setProperty("Filename", filebackend_filename);
+  convert_alg->setProperty("FileBackEnd", filebackend);
   // OverwriteExisting=false means events are added to the existing workspace,
   // effectively doing the merge in place  (without using MergeMD)
   convert_alg->setProperty("OverwriteExisting", !in_place);
@@ -443,6 +453,7 @@ Mantid::API::IMDEventWorkspace_sptr CreateMD::single_run(
     double efix, double psi, double gl, double gs, bool in_place,
     const std::vector<double> &alatt, const std::vector<double> &angdeg,
     const std::vector<double> &u, const std::vector<double> &v,
+    const std::string &filebackend_filename, const bool filebackend,
     Mantid::API::IMDEventWorkspace_sptr out_mdws) {
 
   std::vector<std::vector<double>> ub_params{alatt, angdeg, u, v};
@@ -453,7 +464,7 @@ Mantid::API::IMDEventWorkspace_sptr CreateMD::single_run(
   } else {
     if (input_workspace->sample().hasOrientedLattice()) {
       g_log.warning() << "Sample already has a UB. This will not be "
-                         "overwritten. Use ClearUB and re-run." << std::endl;
+                         "overwritten. Use ClearUB and re-run.\n";
     } else {
       setUB(input_workspace, alatt[0], alatt[1], alatt[2], angdeg[0], angdeg[1],
             angdeg[2], u, v);
@@ -468,7 +479,8 @@ Mantid::API::IMDEventWorkspace_sptr CreateMD::single_run(
     addSampleLog(input_workspace, "psi", psi);
     setGoniometer(input_workspace);
 
-    return convertToMD(input_workspace, emode, in_place, out_mdws);
+    return convertToMD(input_workspace, emode, in_place, filebackend_filename,
+                       filebackend, out_mdws);
   }
 }
 
@@ -493,6 +505,13 @@ std::map<std::string, std::string> CreateMD::validateInputs() {
   const std::vector<double> gl = this->getProperty("Gl");
   const std::vector<double> gs = this->getProperty("Gs");
   const std::vector<double> efix = this->getProperty("Efix");
+  const std::string filename = this->getProperty("Filename");
+  const bool fileBackEnd = this->getProperty("FileBackEnd");
+
+  if (fileBackEnd && filename.empty()) {
+    validation_output["Filename"] =
+        "Filename must be given if FileBackEnd is required.";
+  }
 
   const size_t ws_entries = data_sources.size();
   for (const auto &source : data_sources) {

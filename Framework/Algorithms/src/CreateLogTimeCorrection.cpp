@@ -22,18 +22,6 @@ namespace Algorithms {
 DECLARE_ALGORITHM(CreateLogTimeCorrection)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-CreateLogTimeCorrection::CreateLogTimeCorrection()
-    : API::Algorithm(), m_dataWS(), m_instrument(), m_l2map(),
-      m_correctionMap(), m_L1(0.) {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-CreateLogTimeCorrection::~CreateLogTimeCorrection() {}
-
-//----------------------------------------------------------------------------------------------
 /** Declare properties
  */
 void CreateLogTimeCorrection::init() {

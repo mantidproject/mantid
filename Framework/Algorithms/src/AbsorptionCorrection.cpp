@@ -102,7 +102,7 @@ void AbsorptionCorrection::exec() {
   // Create the output workspace
   MatrixWorkspace_sptr correctionFactors =
       WorkspaceFactory::Instance().create(m_inputWS);
-  correctionFactors->isDistribution(
+  correctionFactors->setDistribution(
       true);                       // The output of this is a distribution
   correctionFactors->setYUnit(""); // Need to explicitly set YUnit to nothing
   correctionFactors->setYUnitLabel("Attenuation factor");
@@ -123,7 +123,7 @@ void AbsorptionCorrection::exec() {
 
   std::ostringstream message;
   message << "Numerical integration performed every " << m_xStep
-          << " wavelength points" << std::endl;
+          << " wavelength points\n";
   g_log.information(message.str());
   message.str("");
 
@@ -222,7 +222,7 @@ void AbsorptionCorrection::exec() {
   PARALLEL_CHECK_INTERUPT_REGION
 
   g_log.information() << "Total number of elements in the integration was "
-                      << m_L1s.size() << std::endl;
+                      << m_L1s.size() << '\n';
   setProperty("OutputWorkspace", correctionFactors);
 
   // Now do some cleaning-up since destructor may not be called immediately
@@ -357,7 +357,7 @@ void AbsorptionCorrection::calculateDistances(
 
       // std::ostringstream message;
       // message << "Problem with detector at " << detectorPos << " ID:" <<
-      // detector->getID() << std::endl;
+      // detector->getID() << '\n';
       // message << "This usually means that this detector is defined inside the
       // sample cylinder";
       // g_log.error(message.str());

@@ -182,7 +182,7 @@ API::MatrixWorkspace_sptr LoadGSS::loadGSASFile(const std::string &filename,
         inputLine >> s1;
         if (s1 == "multiplied") {
           multiplybybinwidth = true;
-          g_log.information() << "Y is multiplied by bin width" << std::endl;
+          g_log.information() << "Y is multiplied by bin width\n";
         } else {
           g_log.warning() << "In line '" << currentLine << "', key word " << s1
                           << " is not allowed!\n";
@@ -192,7 +192,7 @@ API::MatrixWorkspace_sptr LoadGSS::loadGSASFile(const std::string &filename,
         std::string s1, s2;
         inputLine >> s1 >> s2;
         primaryflightpath = atof(s2.c_str()); // convertToDouble(s2);
-        g_log.information() << "L1 = " << primaryflightpath << std::endl;
+        g_log.information() << "L1 = " << primaryflightpath << '\n';
       } else if (key1 == "Total") {
         // Total flight path .... .... including total flying path, difc and
         // 2theta of 1 bank
@@ -260,7 +260,7 @@ API::MatrixWorkspace_sptr LoadGSS::loadGSASFile(const std::string &filename,
 
       inputLine >> specno >> nbin1 >> nbin2 >> filetypestring;
       g_log.debug() << "Bank: " << specno
-                    << "  filetypestring = " << filetypestring << std::endl;
+                    << "  filetypestring = " << filetypestring << '\n';
 
       detectorIDs.push_back(specno);
 
@@ -281,7 +281,7 @@ API::MatrixWorkspace_sptr LoadGSS::loadGSASFile(const std::string &filename,
       // Determine x0
       if (filetype == 'r') {
         double x0 = bc1 / 32;
-        g_log.debug() << "RALF: x0 = " << x0 << "  bc4 = " << bc4 << std::endl;
+        g_log.debug() << "RALF: x0 = " << x0 << "  bc4 = " << bc4 << '\n';
         vecX.push_back(x0);
       } else {
         // Cannot calculate x0, turn on the flag
@@ -338,13 +338,12 @@ API::MatrixWorkspace_sptr LoadGSS::loadGSASFile(const std::string &filename,
         inputLine >> xValue >> yValue >> eValue;
         if (calslogx0) {
           // calculation of x0 must use the x'[0]
-          g_log.debug() << "x'_0 = " << xValue << "  bc3 = " << bc3
-                        << std::endl;
+          g_log.debug() << "x'_0 = " << xValue << "  bc3 = " << bc3 << '\n';
 
           double x0 = 2 * xValue / (bc3 + 2.0);
           vecX.push_back(x0);
           xPrev = x0;
-          g_log.debug() << "SLOG: x0 = " << x0 << std::endl;
+          g_log.debug() << "SLOG: x0 = " << x0 << '\n';
           calslogx0 = false;
         }
 
@@ -365,7 +364,7 @@ API::MatrixWorkspace_sptr LoadGSS::loadGSASFile(const std::string &filename,
       vecE.push_back(eValue);
     } // Date Line
     else {
-      g_log.warning() << "Line not defined: " << currentLine << std::endl;
+      g_log.warning() << "Line not defined: " << currentLine << '\n';
     }
   } // ENDWHILE of readling all lines
 
@@ -416,7 +415,7 @@ API::MatrixWorkspace_sptr LoadGSS::loadGSASFile(const std::string &filename,
     // Reset spectrum number if
     if (useBankAsSpectrum) {
       specnum_t specno = static_cast<specnum_t>(detectorIDs[i]);
-      outputWorkspace->getSpectrum(i)->setSpectrumNo(specno);
+      outputWorkspace->getSpectrum(i).setSpectrumNo(specno);
     }
   }
 
@@ -520,16 +519,11 @@ void LoadGSS::createInstrumentGeometry(
     detector->setPos(pos);
 
     // add copy to instrument, spectrum and mark it
-    API::ISpectrum *spec = workspace->getSpectrum(i);
-    if (spec) {
-      spec->clearDetectorIDs();
-      spec->addDetectorID(detectorids[i]);
-      instrument->add(detector);
-      instrument->markAsDetector(detector);
-    } else {
-      g_log.error() << "Workspace " << i << " has no spectrum!" << std::endl;
-      continue;
-    }
+    auto &spec = workspace->getSpectrum(i);
+    spec.clearDetectorIDs();
+    spec.addDetectorID(detectorids[i]);
+    instrument->add(detector);
+    instrument->markAsDetector(detector);
 
   } // ENDFOR (i: spectrum)
 

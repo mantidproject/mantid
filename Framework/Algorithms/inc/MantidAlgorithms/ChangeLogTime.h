@@ -8,9 +8,6 @@ namespace Algorithms {
 
 class DLLExport ChangeLogTime : public API::Algorithm {
 public:
-  ChangeLogTime();
-  ~ChangeLogTime() override;
-
   const std::string name() const override;
   int version() const override;
   const std::string category() const override;

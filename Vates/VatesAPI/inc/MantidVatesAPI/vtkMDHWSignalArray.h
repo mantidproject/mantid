@@ -223,15 +223,13 @@ void vtkMDHWSignalArray<Scalar>::LookupValue(vtkVariant value, vtkIdList *ids) {
   bool valid = true;
   Scalar val = vtkVariantCast<Scalar>(value, &valid);
   ids->Reset();
-  if (valid)
-    {
+  if (valid) {
     vtkIdType index = 0;
-    while ((index = this->Lookup(val, index)) >= 0)
-      {
+    while ((index = this->Lookup(val, index)) >= 0) {
       ids->InsertNextId(index);
       ++index;
-      }
     }
+  }
 }
 
 //------------------------------------------------------------------------------
@@ -272,11 +270,10 @@ void vtkMDHWSignalArray<Scalar>::LookupTypedValue(Scalar value,
                                                   vtkIdList *ids) {
   ids->Reset();
   vtkIdType index = 0;
-  while ((index = this->Lookup(value, index)) >= 0)
-    {
+  while ((index = this->Lookup(value, index)) >= 0) {
     ids->InsertNextId(index);
     ++index;
-    }
+  }
 }
 
 template <class Scalar>

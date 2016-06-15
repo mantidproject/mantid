@@ -1,12 +1,11 @@
 #pylint: disable=no-init,too-many-locals,too-many-instance-attributes,too-many-arguments,invalid-name
-
+import math
+import numpy as np
 from mantid.simpleapi import *
 from mantid.api import (PythonAlgorithm, AlgorithmFactory, PropertyMode, MatrixWorkspaceProperty,
                         WorkspaceGroupProperty, InstrumentValidator, WorkspaceUnitValidator, Progress)
 from mantid.kernel import (StringListValidator, StringMandatoryValidator, IntBoundedValidator,
                            FloatBoundedValidator, Direction, logger, CompositeValidator)
-import math
-import numpy as np
 
 
 class CylinderPaalmanPingsCorrection(PythonAlgorithm):
@@ -295,7 +294,7 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
 
     def _sample(self):
         sample_prog = Progress(self, start=0.01, end=0.03, nreports=2)
-        sample_prog.report('Setting Sample Material for Sample') 
+        sample_prog.report('Setting Sample Material for Sample')
         SetSampleMaterial(self._sample_ws_name , ChemicalFormula=self._sample_chemical_formula,
                           SampleNumberDensity=self._sample_number_density)
         sample = mtd[self._sample_ws_name].sample()
@@ -311,7 +310,7 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
         self._density[0] = self._sample_number_density
 
         if self._use_can:
-            sample_prog.report('Setting Sample Material for Container') 
+            sample_prog.report('Setting Sample Material for Container')
             SetSampleMaterial(InputWorkspace=self._can_ws_name, ChemicalFormula=self._can_chemical_formula,
                               SampleNumberDensity=self._can_number_density)
             can_sample = mtd[self._can_ws_name].sample()

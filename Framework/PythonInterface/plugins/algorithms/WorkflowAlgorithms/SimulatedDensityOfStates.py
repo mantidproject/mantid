@@ -1,12 +1,12 @@
 #pylint: disable=no-init,invalid-name,too-many-locals,too-many-lines
-from mantid.kernel import *
-from mantid.api import *
-from mantid.simpleapi import *
-
 import numpy as np
 import re
 import os.path
 import math
+
+from mantid.kernel import *
+from mantid.api import *
+from mantid.simpleapi import *
 
 PEAK_WIDTH_ENERGY_FLAG = 'energy'
 
@@ -840,13 +840,13 @@ class SimulatedDensityOfStates(PythonAlgorithm):
         warray = np.repeat(weights, self._num_branches)
 
         file_data.update({
-                'frequencies': frequencies,
-                'ir_intensities': ir_intensities,
-                'raman_intensities': raman_intensities,
-                'weights': warray,
-                'q_vectors':q_vectors,
-                'eigenvectors': eigenvectors
-                })
+            'frequencies': frequencies,
+            'ir_intensities': ir_intensities,
+            'raman_intensities': raman_intensities,
+            'weights': warray,
+            'q_vectors':q_vectors,
+            'eigenvectors': eigenvectors
+            })
 
         return file_data
 
@@ -1006,12 +1006,12 @@ class SimulatedDensityOfStates(PythonAlgorithm):
         warray = np.repeat(weights, self._num_branches)
 
         file_data = {
-                'frequencies': frequencies,
-                'ir_intensities': ir_intensities,
-                'raman_intensities': raman_intensities,
-                'weights': warray,
-                'q_vectors':q_vectors
-                }
+            'frequencies': frequencies,
+            'ir_intensities': ir_intensities,
+            'raman_intensities': raman_intensities,
+            'weights': warray,
+            'q_vectors':q_vectors
+            }
 
         if len(bonds) > 0:
             file_data['bonds'] = bonds

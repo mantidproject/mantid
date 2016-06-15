@@ -66,7 +66,6 @@ set ( EXPORT_FILES
   src/Exports/IFunction1D.cpp
   src/Exports/IPeakFunction.cpp
   src/Exports/Jacobian.cpp
-  src/Exports/PropertyManagerDataService.cpp
   src/Exports/FunctionFactory.cpp
   src/Exports/Progress.cpp
   src/Exports/Projection.cpp

@@ -85,11 +85,11 @@ public:
       map<string, double>::iterator mapiter;
 
       stringstream msgss;
-      msgss << "[Unit Test]  Parameters: " << endl;
+      msgss << "[Unit Test]  Parameters: \n";
       for (mapiter = fitparamvalues.begin(); mapiter != fitparamvalues.end();
            ++mapiter) {
         msgss << "  |  " << mapiter->first << "\t = \t" << mapiter->second
-              << "\t" << endl;
+              << "\t\n";
       }
       cout << msgss.str();
     }
@@ -101,10 +101,10 @@ public:
     if (outdataws) {
       /*
       stringstream outss;
-      outss << "Difference: " << endl;
+      outss << "Difference: \n";
       for (size_t i = 0; i < outdataws->readX(0).size(); ++i)
         outss << outdataws->readX(0)[i] << "\t\t" << outdataws->readY(2)[i] <<
-      endl;
+      '\n';
       cout << outss.str();
       */
     }
@@ -176,8 +176,8 @@ public:
 
       for (mapiter = fitparamvalues.begin(); mapiter != fitparamvalues.end();
            ++mapiter) {
-        cout << "[P] " << mapiter->first << "\t = \t" << mapiter->second << "\t"
-             << endl;
+        cout << "[P] " << mapiter->first << "\t = \t" << mapiter->second
+             << "\t\n";
       }
     }
 
@@ -188,10 +188,10 @@ public:
     if (outdataws) {
       /*
       stringstream outss;
-      outss << "Difference: " << endl;
+      outss << "Difference: \n";
       for (size_t i = 0; i < outdataws->readX(0).size(); ++i)
         outss << outdataws->readX(0)[i] << "\t\t" << outdataws->readY(2)[i] <<
-      endl;
+      '\n';
       cout << outss.str();
       */
     }
@@ -307,10 +307,10 @@ public:
              << stepsize;
 
       /*
-      cout << "newrow = geomws->appendRow();" << endl;
+      cout << "newrow = geomws->appendRow();\n";
       cout << "newrow << \"" <<  parname << "\" << " << parvalue << " << \"" <<
       fitstr << "\" << " << minvalue << " << "
-           << maxvalue << " << " << stepsize << "; " << endl;
+           << maxvalue << " << " << stepsize << "; \n";
       */
     }
 
@@ -341,10 +341,10 @@ public:
     std::ifstream ins;
     ins.open(filename.c_str());
     if (!ins.is_open()) {
-      std::cout << "File " << filename << " cannot be opened. " << std::endl;
+      std::cout << "File " << filename << " cannot be opened. \n";
       throw std::invalid_argument("Cannot open Reflection-Text-File.");
     } else {
-      std::cout << "Importing tabulized text file " << filename << std::endl;
+      std::cout << "Importing tabulized text file " << filename << '\n';
     }
 
     if (numcols <= 0) {
@@ -460,12 +460,10 @@ public:
     ins.open(filename.c_str());
 
     if (!ins.is_open()) {
-      std::cout << "Data file " << filename << " cannot be opened. "
-                << std::endl;
+      std::cout << "Data file " << filename << " cannot be opened. \n";
       throw std::invalid_argument("Unable to open data fiile. ");
     } else {
-      std::cout << "Data file " << filename << " is opened for parsing. "
-                << std::endl;
+      std::cout << "Data file " << filename << " is opened for parsing. \n";
     }
 
     char line[256];

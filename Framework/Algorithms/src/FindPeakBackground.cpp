@@ -24,16 +24,6 @@ namespace Algorithms {
 DECLARE_ALGORITHM(FindPeakBackground)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-FindPeakBackground::FindPeakBackground() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-FindPeakBackground::~FindPeakBackground() {}
-
-//----------------------------------------------------------------------------------------------
 /** Define properties
   */
 void FindPeakBackground::init() {
@@ -187,12 +177,12 @@ void FindPeakBackground::exec() {
     vector<cont_peak> peaks;
     if (mask[0] == 1) {
       peaks.push_back(cont_peak());
-      peaks[peaks.size() - 1].start = l0;
+      peaks.back().start = l0;
     }
     for (size_t l = 1; l < n - l0; ++l) {
       if (mask[l] != mask[l - 1] && mask[l] == 1) {
         peaks.push_back(cont_peak());
-        peaks[peaks.size() - 1].start = l + l0;
+        peaks.back().start = l + l0;
       } else if (!peaks.empty()) {
         size_t ipeak = peaks.size() - 1;
         if (mask[l] != mask[l - 1] && mask[l] == 0) {
@@ -208,8 +198,8 @@ void FindPeakBackground::exec() {
     if (!peaks.empty()) {
       g_log.debug() << "Peaks' size = " << peaks.size()
                     << " -> esitmate background. \n";
-      if (peaks[peaks.size() - 1].stop == 0)
-        peaks[peaks.size() - 1].stop = n - 1;
+      if (peaks.back().stop == 0)
+        peaks.back().stop = n - 1;
       std::sort(peaks.begin(), peaks.end(), by_len());
 
       // save endpoints

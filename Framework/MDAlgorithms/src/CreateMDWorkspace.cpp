@@ -1,20 +1,20 @@
+#include "MantidMDAlgorithms/CreateMDWorkspace.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/IMDEventWorkspace.h"
-#include "MantidGeometry/MDGeometry/MDHistoDimension.h"
-#include "MantidGeometry/MDGeometry/MDFrame.h"
-#include "MantidGeometry/MDGeometry/QSample.h"
-#include "MantidGeometry/MDGeometry/QLab.h"
-#include "MantidGeometry/MDGeometry/HKL.h"
-#include "MantidGeometry/MDGeometry/GeneralFrame.h"
-#include "MantidGeometry/MDGeometry/MDFrameFactory.h"
-#include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/System.h"
-#include "MantidMDAlgorithms/CreateMDWorkspace.h"
 #include "MantidDataObjects/MDEventFactory.h"
-#include "MantidKernel/Memory.h"
-#include <math.h>
+#include "MantidGeometry/MDGeometry/GeneralFrame.h"
+#include "MantidGeometry/MDGeometry/HKL.h"
+#include "MantidGeometry/MDGeometry/MDFrame.h"
+#include "MantidGeometry/MDGeometry/MDFrameFactory.h"
+#include "MantidGeometry/MDGeometry/MDHistoDimension.h"
+#include "MantidGeometry/MDGeometry/QLab.h"
+#include "MantidGeometry/MDGeometry/QSample.h"
+#include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/Memory.h"
+#include "MantidKernel/System.h"
+#include <cmath>
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -25,16 +25,6 @@ using namespace Mantid::DataObjects;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CreateMDWorkspace)
-
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-CreateMDWorkspace::CreateMDWorkspace() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-CreateMDWorkspace::~CreateMDWorkspace() {}
 
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
@@ -191,14 +181,14 @@ void CreateMDWorkspace::exec() {
   std::string filename = getProperty("Filename");
   if (!filename.empty()) {
     // First save to the NXS file
-    g_log.notice() << "Running SaveMD" << std::endl;
+    g_log.notice() << "Running SaveMD\n";
     IAlgorithm_sptr alg = createChildAlgorithm("SaveMD");
     alg->setPropertyValue("Filename", filename);
     alg->setProperty("InputWorkspace",
                      boost::dynamic_pointer_cast<IMDWorkspace>(out));
     alg->executeAsChildAlg();
     // And now re-load it with this file as the backing.
-    g_log.notice() << "Running LoadMD" << std::endl;
+    g_log.notice() << "Running LoadMD\n";
     alg = createChildAlgorithm("LoadMD");
     alg->setPropertyValue("Filename", filename);
     alg->setProperty("FileBackEnd", true);

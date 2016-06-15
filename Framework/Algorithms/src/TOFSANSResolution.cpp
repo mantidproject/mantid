@@ -113,7 +113,7 @@ void TOFSANSResolution::exec() {
 
   // Initialize Dq
   MantidVec &DxOut = iqWS->dataDx(0);
-  for (int i = 0; i < xLength - 1; i++)
+  for (int i = 0; i < xLength; i++)
     DxOut[i] = 0.0;
 
   const V3D samplePos = reducedWS->getInstrument()->getSample()->getPos();
@@ -133,8 +133,7 @@ void TOFSANSResolution::exec() {
       det = reducedWS->getDetector(i);
     } catch (Exception::NotFoundError &) {
       g_log.warning() << "Workspace index " << i
-                      << " has no detector assigned to it - discarding"
-                      << std::endl;
+                      << " has no detector assigned to it - discarding\n";
       // Catch if no detector. Next line tests whether this happened - test
       // placed
       // outside here because Mac Intel compiler doesn't like 'continue' in a
@@ -202,8 +201,8 @@ void TOFSANSResolution::exec() {
                     wl_bin_over_wl * wl_bin_over_wl);
 
       // By using only events with a positive weight, we use only the data
-      // distribution and
-      // leave out the background events
+      // distribution and leave out the background events.
+      // Note: we are looping over bins, therefore the xLength-1.
       if (iq >= 0 && iq < xLength - 1 && !boost::math::isnan(dq_over_q) &&
           dq_over_q > 0 && YIn[j] > 0) {
         _dx[iq] += q * dq_over_q * YIn[j];
@@ -214,6 +213,7 @@ void TOFSANSResolution::exec() {
     }
 
     // Move over the distributions for that pixel
+    // Note: we are looping over bins, therefore the xLength-1.
     PARALLEL_CRITICAL(iq) /* Write to shared memory - must protect */
     for (int iq = 0; iq < xLength - 1; iq++) {
       DxOut[iq] += _dx[iq];
@@ -226,7 +226,9 @@ void TOFSANSResolution::exec() {
     PARALLEL_END_INTERUPT_REGION
   }
   PARALLEL_CHECK_INTERUPT_REGION
+
   // Normalize according to the chosen weighting scheme
+  // Note: we are looping over bins, therefore the xLength-1.
   for (int i = 0; i < xLength - 1; i++) {
     if (XNorm[i] == 0)
       continue;

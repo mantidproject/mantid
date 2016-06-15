@@ -82,7 +82,7 @@ public:
   }
   /// Destructor.
   ~TestServerConnection() override {
-    // std::cerr << "Test connection deleted" << std::endl;
+    // std::cerr << "Test connection deleted\n";
   }
   /// Sends an OK message when there is nothing to send or an error occured
   void sendOK() {

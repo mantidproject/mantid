@@ -250,6 +250,9 @@ private:
                              const std::vector<std::string> &names,
                              const std::vector<double> &params,
                              const std::vector<double> &errs);
+  /// Function to find peaks near detector edge
+  bool edgePixel(DataObjects::PeaksWorkspace_sptr ws, std::string bankName,
+                 int col, int row, int Edge);
 
   void exec() override;
 
@@ -349,6 +352,7 @@ private:
   void saveXmlFile(std::string const FileName,
                    std::vector<std::vector<std::string>> const Groups,
                    Geometry::Instrument_const_sptr const instrument) const;
+  void removeOutliers(std::vector<double> &intensities);
 };
 
 } // namespace Crystal

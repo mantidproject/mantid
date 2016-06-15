@@ -133,8 +133,7 @@ void Qxy::exec() {
       det = inputWorkspace->getDetector(i);
     } catch (Exception::NotFoundError &) {
       g_log.warning() << "Workspace index " << i
-                      << " has no detector assigned to it - discarding"
-                      << std::endl;
+                      << " has no detector assigned to it - discarding\n";
       // Catch if no detector. Next line tests whether this happened - test
       // placed
       // outside here because Mac Intel compiler doesn't like 'continue' in a
@@ -321,7 +320,7 @@ void Qxy::exec() {
 
   // Divide the output data by the solid angles
   outputWorkspace /= weights;
-  outputWorkspace->isDistribution(true);
+  outputWorkspace->setDistribution(true);
 
   // Count of the number of empty cells
   const size_t nhist = outputWorkspace->getNumberHistograms();

@@ -36,23 +36,23 @@ public:
   @param i :: Index
   @return x X value of data point i
   */
-  double x(size_t i) const override;
+  double getX(size_t i) const override;
   /**
   Return the y value of data point i
   @param i :: Index
   @return y Y value of data point i
   */
-  double y(size_t i) const override;
+  double getY(size_t i) const override;
 
   /// Returns the error of the i-th data point
-  double e(size_t i) const override;
+  double getE(size_t i) const override;
   /// Returns the x position of the error bar for the i-th data point (bin)
-  double ex(size_t i) const override;
+  double getEX(size_t i) const override;
   /// Number of error bars to plot
   size_t esize() const override;
 
-  double getYMin() const override;
-  double getYMax() const override;
+  // double getYMin() const override;
+  // double getYMax() const override;
   /// Return the label to use for the X axis
   QString getXAxisLabel() const override;
   /// Return the label to use for the Y axis
@@ -61,16 +61,16 @@ public:
   bool isHistogram() const { return m_isHistogram; }
   bool dataIsNormalized() const { return m_dataIsNormalized; }
 
-  /// Inform the data that it is to be plotted on a log y scale
-  void setLogScale(bool on) override;
-  bool logScale() const override { return m_logScale; }
-  void saveLowestPositiveValue(const double v) override;
+  ///// Inform the data that it is to be plotted on a log y scale
+  // void setLogScale(bool on) override;
+  // bool logScaleY() const override { return m_logScaleY; }
+  // void saveLowestPositiveValue(const double v) override;
   bool setAsDistribution(bool on = true);
 
-  // Sets offsets for and enables waterfall plots
-  void setXOffset(const double x) override;
-  void setYOffset(const double y) override;
-  void setWaterfallPlot(bool on) override;
+  //// Sets offsets for and enables waterfall plots
+  // void setXOffset(const double x) override;
+  // void setYOffset(const double y) override;
+  // void setWaterfallPlot(bool on) override;
 
 protected:
   // Assignment operator (virtualized). MSVC not happy with compiler generated
@@ -101,24 +101,24 @@ private:
   /// This field can be set true for a histogram workspace. If it's true x(i)
   /// returns (X[i]+X[i+1])/2
   bool m_binCentres;
-  /// Indicates that the data is plotted on a log y scale
-  bool m_logScale;
-  /// lowest y value
-  double m_minY;
-  /// lowest positive y value
-  double m_minPositive;
-  /// higest y value
-  double m_maxY;
+  ///// Indicates that the data is plotted on a log y scale
+  // bool m_logScaleY;
+  ///// lowest y value
+  // double m_minY;
+  ///// lowest positive y value
+  // double m_minPositive;
+  ///// higest y value
+  // double m_maxY;
   /// Is plotting as distribution
   bool m_isDistribution;
 
-  /// Indicates whether or not waterfall plots are enabled
-  bool m_isWaterfall;
+  ///// Indicates whether or not waterfall plots are enabled
+  // bool m_isWaterfall;
 
-  /// x-axis offset for waterfall plots
-  double m_offsetX;
+  ///// x-axis offset for waterfall plots
+  // double m_offsetX;
 
-  /// y-axis offset for waterfall plots
-  double m_offsetY;
+  ///// y-axis offset for waterfall plots
+  // double m_offsetY;
 };
 #endif

@@ -135,7 +135,7 @@ public:
             Mantid::API::AnalysisDataService::Instance().retrieve(outputWS)))
     /*    for (int i = 0 ; i < 30; i ++)
         {
-        std::cout << i << std::endl;
+        std::cout << i << '\n';
         for (int j = 0 ; j < 30; j ++)
         {
         std::cout << result->readY(i)[j] << " ";

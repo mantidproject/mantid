@@ -595,7 +595,7 @@ void SaveHKL::exec() {
           out << std::setw(9) << std::fixed << std::setprecision(4) << dsp;
         }
 
-        out << std::endl;
+        out << '\n';
       }
     }
   }
@@ -615,12 +615,11 @@ void SaveHKL::exec() {
     out << "    0.00    0.00   0  0.0000 0.0000      0      0 0.0000 "
            "  0  0.00000   0.0000";
   }
-  out << std::endl;
+  out << '\n';
   out.flush();
   out.close();
   // delete banned peaks
-  for (std::set<size_t>::const_reverse_iterator it = banned.rbegin();
-       it != banned.rend(); ++it) {
+  for (auto it = banned.crbegin(); it != banned.crend(); ++it) {
     peaksW->removePeak(static_cast<int>(*it));
   }
   setProperty("OutputWorkspace", peaksW);

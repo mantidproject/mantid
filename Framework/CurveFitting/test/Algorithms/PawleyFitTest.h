@@ -133,7 +133,7 @@ public:
     // Error of 'c' should also be small
     TS_ASSERT_LESS_THAN(fabs(cellWs->cell<double>(2, 2)), 1e-4);
     // b should be almost equal to 4.06
-    TS_ASSERT_DELTA(cellWs->cell<double>(2, 1), 4.06, 2e-3);
+    TS_ASSERT_DELTA(cellWs->cell<double>(2, 1), 4.06, 3e-3);
 
     // Check number of peak parameters.
     ITableWorkspace_sptr peakWs =
@@ -223,7 +223,7 @@ private:
       double center = useQ ? (2.0 * M_PI) / d : d;
       double fwhmAbs = row.Double(2) * center;
       fn << "name=Gaussian,PeakCentre=" << center
-         << ",Sigma=" << fwhmAbs / (2.0 * sqrt(2.0 * log(2.0)))
+         << ",Sigma=" << fwhmAbs / (2.0 * sqrt(2.0 * M_LN2))
          << ",Height=" << row.String(3);
 
       functionStrings.push_back(fn.str());

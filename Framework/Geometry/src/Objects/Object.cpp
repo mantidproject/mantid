@@ -1,23 +1,24 @@
 #include "MantidGeometry/Objects/Object.h"
-#include "MantidKernel/Strings.h"
-#include "MantidKernel/Exception.h"
-#include "MantidKernel/MultiThreaded.h"
 #include "MantidGeometry/Objects/Rules.h"
 #include "MantidGeometry/Objects/Track.h"
+#include "MantidKernel/Exception.h"
+#include "MantidKernel/MultiThreaded.h"
+#include "MantidKernel/Strings.h"
 
-#include "MantidGeometry/Surfaces/Surface.h"
-#include "MantidGeometry/Surfaces/LineIntersectVisit.h"
-#include "MantidGeometry/Surfaces/Cylinder.h"
 #include "MantidGeometry/Surfaces/Cone.h"
+#include "MantidGeometry/Surfaces/Cylinder.h"
+#include "MantidGeometry/Surfaces/LineIntersectVisit.h"
+#include "MantidGeometry/Surfaces/Surface.h"
 
-#include "MantidGeometry/Rendering/GeometryHandler.h"
 #include "MantidGeometry/Rendering/CacheGeometryHandler.h"
+#include "MantidGeometry/Rendering/GeometryHandler.h"
+#include "MantidGeometry/Rendering/GluGeometryHandler.h"
 #include "MantidGeometry/Rendering/vtkGeometryCacheReader.h"
 #include "MantidGeometry/Rendering/vtkGeometryCacheWriter.h"
-#include "MantidKernel/make_unique.h"
 #include "MantidKernel/Quat.h"
 #include "MantidKernel/RegexStrings.h"
 #include "MantidKernel/Tolerance.h"
+#include "MantidKernel/make_unique.h"
 
 #include <boost/make_shared.hpp>
 
@@ -34,28 +35,19 @@ using Kernel::Quat;
 /**
 *  Default constuctor
 */
-Object::Object()
-    : ObjName(0), TopRule(), m_boundingBox(), AABBxMax(0), AABByMax(0),
-      AABBzMax(0), AABBxMin(0), AABByMin(0), AABBzMin(0), boolBounded(false),
-      handle(), bGeometryCaching(false),
-      vtkCacheReader(boost::shared_ptr<vtkGeometryCacheReader>()),
-      vtkCacheWriter(boost::shared_ptr<vtkGeometryCacheWriter>()),
-      m_material() // empty by default
-{
-  handle = boost::make_shared<CacheGeometryHandler>(this);
-}
+Object::Object() : Object("") {}
 
 /**
 *  Construct with original shape xml knowledge.
 *  @param shapeXML : string with original shape xml.
 */
 Object::Object(const std::string &shapeXML)
-    : ObjName(0), TopRule(), m_boundingBox(), AABBxMax(0), AABByMax(0),
-      AABBzMax(0), AABBxMin(0), AABByMin(0), AABBzMin(0), boolBounded(false),
+    : TopRule(nullptr), m_boundingBox(), AABBxMax(0), AABByMax(0), AABBzMax(0),
+      AABBxMin(0), AABByMin(0), AABBzMin(0), boolBounded(false), ObjNum(0),
       handle(), bGeometryCaching(false),
       vtkCacheReader(boost::shared_ptr<vtkGeometryCacheReader>()),
       vtkCacheWriter(boost::shared_ptr<vtkGeometryCacheWriter>()),
-      m_shapeXML(shapeXML), m_material() // empty by default
+      m_shapeXML(shapeXML), m_id(), m_material() // empty by default
 {
   handle = boost::make_shared<CacheGeometryHandler>(this);
 }
@@ -64,17 +56,7 @@ Object::Object(const std::string &shapeXML)
 * Copy constructor
 * @param A :: The object to initialise this copy from
 */
-Object::Object(const Object &A)
-    : ObjName(A.ObjName), TopRule((A.TopRule) ? A.TopRule->clone() : nullptr),
-      m_boundingBox(A.m_boundingBox), AABBxMax(A.AABBxMax),
-      AABByMax(A.AABByMax), AABBzMax(A.AABBzMax), AABBxMin(A.AABBxMin),
-      AABByMin(A.AABByMin), AABBzMin(A.AABBzMin), boolBounded(A.boolBounded),
-      handle(A.handle->clone()), bGeometryCaching(A.bGeometryCaching),
-      vtkCacheReader(A.vtkCacheReader), vtkCacheWriter(A.vtkCacheWriter),
-      m_shapeXML(A.m_shapeXML), m_material(A.m_material) {
-  if (TopRule)
-    createSurfaceList();
-}
+Object::Object(const Object &A) : Object() { *this = A; }
 
 /**
 * Assignment operator
@@ -83,7 +65,6 @@ Object::Object(const Object &A)
 */
 Object &Object::operator=(const Object &A) {
   if (this != &A) {
-    ObjName = A.ObjName;
     TopRule = (A.TopRule) ? A.TopRule->clone() : nullptr;
     AABBxMax = A.AABBxMax;
     AABByMax = A.AABByMax;
@@ -92,11 +73,13 @@ Object &Object::operator=(const Object &A) {
     AABByMin = A.AABByMin;
     AABBzMin = A.AABBzMin;
     boolBounded = A.boolBounded;
+    ObjNum = A.ObjNum;
     handle = A.handle->clone();
     bGeometryCaching = A.bGeometryCaching;
     vtkCacheReader = A.vtkCacheReader;
     vtkCacheWriter = A.vtkCacheWriter;
     m_shapeXML = A.m_shapeXML;
+    m_id = A.m_id;
     m_material = A.m_material;
 
     if (TopRule)
@@ -145,7 +128,7 @@ int Object::setObject(const int ON, const std::string &Ln) {
   if (procString(Ln)) // this currently does not fail:
   {
     SurList.clear();
-    ObjName = ON;
+    ObjNum = ON;
     return 1;
   }
 
@@ -235,7 +218,7 @@ int Object::complementaryObject(const int Cnum, std::string &Ln) {
 
   std::string Part = Ln.substr(posA, posB - (posA + 1));
 
-  ObjName = Cnum;
+  ObjNum = Cnum;
   if (procString(Part)) {
     SurList.clear();
     Ln.erase(posA - 1, posB + 1); // Delete brackets ( Part ) .
@@ -341,9 +324,11 @@ int Object::procPair(std::string &Ln,
   }
   if (Rend == Ln.size() ||
       !Mantid::Kernel::Strings::convert(Ln.c_str() + Rend + 1, Rb) ||
-      Rlist.find(Rb) == Rlist.end())
+      Rlist.find(Rb) == Rlist.end()) {
+    // No second rule but we did find the first one
+    compUnit = Ra;
     return 0;
-
+  }
   // Get end of number (digital)
   for (Rend++; Rend < Ln.size() && Ln[Rend] >= '0' && Ln[Rend] <= '9'; Rend++)
     ;
@@ -509,12 +494,18 @@ int Object::createSurfaceList(const int outFlag) {
       }
     }
   }
+  // Remove duplicates
+  sort(SurList.begin(), SurList.end());
+  auto sc = unique(SurList.begin(), SurList.end());
+  if (sc != SurList.end()) {
+    SurList.erase(sc, SurList.end());
+  }
   if (outFlag) {
 
     std::vector<const Surface *>::const_iterator vc;
     for (vc = SurList.begin(); vc != SurList.end(); ++vc) {
-      std::cerr << "Point == " << *vc << std::endl;
-      std::cerr << (*vc)->getName() << std::endl;
+      std::cerr << "Point == " << *vc << '\n';
+      std::cerr << (*vc)->getName() << '\n';
     }
   }
   return 1;
@@ -594,14 +585,14 @@ void Object::print() const {
     }
   }
 
-  std::cout << "Name == " << ObjName << std::endl;
-  std::cout << "Rules == " << Rcount << std::endl;
+  std::cout << "Name == " << ObjNum << '\n';
+  std::cout << "Rules == " << Rcount << '\n';
   std::vector<int>::const_iterator mc;
   std::cout << "Surface included == ";
   for (mc = Cells.begin(); mc < Cells.end(); ++mc) {
     std::cout << (*mc) << " ";
   }
-  std::cout << std::endl;
+  std::cout << '\n';
   return;
 }
 
@@ -618,8 +609,8 @@ void Object::makeComplement() {
 * Displays the rule tree
 */
 void Object::printTree() const {
-  std::cout << "Name == " << ObjName << std::endl;
-  std::cout << TopRule->display() << std::endl;
+  std::cout << "Name == " << ObjNum << '\n';
+  std::cout << TopRule->display() << '\n';
   return;
 }
 
@@ -643,7 +634,7 @@ std::string Object::cellCompStr() const {
 std::string Object::str() const {
   std::ostringstream cx;
   if (TopRule) {
-    cx << ObjName << " ";
+    cx << ObjNum << " ";
     cx << TopRule->display();
   }
   return cx.str();
@@ -738,8 +729,8 @@ int Object::procString(const std::string &Line) {
     ;
 
   if (RuleList.size() != 1) {
-    std::cerr << "Map size not equal to 1 == " << RuleList.size() << std::endl;
-    std::cerr << "Error Object::ProcString : " << Ln << std::endl;
+    std::cerr << "Map size not equal to 1 == " << RuleList.size() << '\n';
+    std::cerr << "Error Object::ProcString : " << Ln << '\n';
     exit(1);
     return 0;
   }
@@ -1013,41 +1004,49 @@ double Object::triangleSolidAngle(const V3D &observer) const {
   this->GetObjectGeom(type, geometry_vectors, radius, height);
   int nTri = this->NumberOfTriangles();
   // Cylinders are by far the most frequently used
-  if (type == 3)
+  GluGeometryHandler::GeometryType gluType =
+      static_cast<GluGeometryHandler::GeometryType>(type);
+
+  switch (gluType) {
+  case GluGeometryHandler::GeometryType::CUBOID:
+    return CuboidSolidAngle(observer, geometry_vectors);
+    break;
+  case GluGeometryHandler::GeometryType::SPHERE:
+    return SphereSolidAngle(observer, geometry_vectors, radius);
+    break;
+  case GluGeometryHandler::GeometryType::CYLINDER:
     return CylinderSolidAngle(observer, geometry_vectors[0],
                               geometry_vectors[1], radius, height);
-  else if (type == 1)
-    return CuboidSolidAngle(observer, geometry_vectors);
-  else if (type == 2)
-    return SphereSolidAngle(observer, geometry_vectors, radius);
-  else if (type == 4)
+    break;
+  case GluGeometryHandler::GeometryType::CONE:
     return ConeSolidAngle(observer, geometry_vectors[0], geometry_vectors[1],
                           radius, height);
-  else if (nTri == 0) // Fall back to raytracing if there are no triangles
-  {
-    return rayTraceSolidAngle(observer);
-  }
-  // Compute a generic shape that has been triangulated
-  else {
-    double *vertices = this->getTriangleVertices();
-    int *faces = this->getTriangleFaces();
-    double sangle(0.0), sneg(0.0);
-    for (int i = 0; i < nTri; i++) {
-      int p1 = faces[i * 3], p2 = faces[i * 3 + 1], p3 = faces[i * 3 + 2];
-      V3D vp1 =
-          V3D(vertices[3 * p1], vertices[3 * p1 + 1], vertices[3 * p1 + 2]);
-      V3D vp2 =
-          V3D(vertices[3 * p2], vertices[3 * p2 + 1], vertices[3 * p2 + 2]);
-      V3D vp3 =
-          V3D(vertices[3 * p3], vertices[3 * p3 + 1], vertices[3 * p3 + 2]);
-      double sa = getTriangleSolidAngle(vp1, vp2, vp3, observer);
-      if (sa > 0.0) {
-        sangle += sa;
-      } else {
-        sneg += sa;
+    break;
+  default:
+    if (nTri == 0) // Fall back to raytracing if there are no triangles
+    {
+      return rayTraceSolidAngle(observer);
+    } else { // Compute a generic shape that has been triangulated
+      double *vertices = this->getTriangleVertices();
+      int *faces = this->getTriangleFaces();
+      double sangle(0.0), sneg(0.0);
+      for (int i = 0; i < nTri; i++) {
+        int p1 = faces[i * 3], p2 = faces[i * 3 + 1], p3 = faces[i * 3 + 2];
+        V3D vp1 =
+            V3D(vertices[3 * p1], vertices[3 * p1 + 1], vertices[3 * p1 + 2]);
+        V3D vp2 =
+            V3D(vertices[3 * p2], vertices[3 * p2 + 1], vertices[3 * p2 + 2]);
+        V3D vp3 =
+            V3D(vertices[3 * p3], vertices[3 * p3 + 1], vertices[3 * p3 + 2]);
+        double sa = getTriangleSolidAngle(vp1, vp2, vp3, observer);
+        if (sa > 0.0) {
+          sangle += sa;
+        } else {
+          sneg += sa;
+        }
       }
+      return 0.5 * (sangle - sneg);
     }
-    return 0.5 * (sangle - sneg);
   }
 }
 /**
@@ -1091,12 +1090,22 @@ double Object::triangleSolidAngle(const V3D &observer,
     int type;
     std::vector<Kernel::V3D> vectors;
     this->GetObjectGeom(type, vectors, radius, height);
-    if (type == 1) {
+    GluGeometryHandler::GeometryType gluType =
+        static_cast<GluGeometryHandler::GeometryType>(type);
+
+    switch (gluType) {
+    case GluGeometryHandler::GeometryType::CUBOID:
       for (auto &vector : vectors)
         vector *= scaleFactor;
       return CuboidSolidAngle(observer, vectors);
-    } else if (type == 2) // this is wrong for scaled objects
+      break;
+    case GluGeometryHandler::GeometryType::SPHERE:
       return SphereSolidAngle(observer, vectors, radius);
+      break;
+    default:
+      break;
+    }
+
     //
     // No special case, do the ray trace.
     //
@@ -1599,11 +1608,12 @@ void Object::calcBoundingBoxByGeometry() {
 
   // Will only work for shapes handled by GluGeometryHandler
   handle->GetObjectGeom(type, vectors, radius, height);
+  GluGeometryHandler::GeometryType gluType =
+      static_cast<GluGeometryHandler::GeometryType>(type);
 
   // Type of shape is given as a simple integer
-  switch (type) {
-  case 1: // CUBOID
-  {
+  switch (gluType) {
+  case GluGeometryHandler::GeometryType::CUBOID: {
     // Points as defined in IDF XML
     auto &lfb = vectors[0]; // Left-Front-Bottom
     auto &lft = vectors[1]; // Left-Front-Top
@@ -1636,10 +1646,24 @@ void Object::calcBoundingBoxByGeometry() {
       maxZ = std::max(maxZ, vector.Z());
     }
   } break;
+  case GluGeometryHandler::GeometryType::HEXAHEDRON: {
+    // Vectors are in the same order as the following webpage:
+    // http://docs.mantidproject.org/nightly/concepts/HowToDefineGeometricShape.html#hexahedron
+    auto &lf = vectors[1];
+    auto &lb = vectors[0];
+    auto &rb = vectors[3];
+    auto &rf = vectors[2];
+    auto dz = vectors[4] - lf;
 
-  case 3: // CYLINDER
-  case 5: // SEGMENTED_CYLINDER
-  {
+    minX = std::min(lf.X(), lb.X());
+    maxX = std::max(rb.X(), rf.X());
+    minY = lb.Y();
+    maxY = rf.Y();
+    minZ = 0;
+    maxZ = dz.Z();
+  } break;
+  case GluGeometryHandler::GeometryType::CYLINDER:
+  case GluGeometryHandler::GeometryType::SEGMENTED_CYLINDER: {
     // Center-point of base and normalized axis based on IDF XML
     auto &base = vectors[0];
     auto &axis = vectors[1];
@@ -1662,8 +1686,7 @@ void Object::calcBoundingBoxByGeometry() {
     maxZ = std::max(base.Z(), top.Z()) + rz;
   } break;
 
-  case 4: // CONE
-  {
+  case GluGeometryHandler::GeometryType::CONE: {
     auto &tip = vectors[0];            // Tip-point of cone
     auto &axis = vectors[1];           // Normalized axis
     auto base = tip + (axis * height); // Center of base

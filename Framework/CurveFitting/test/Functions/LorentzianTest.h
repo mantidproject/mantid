@@ -76,6 +76,7 @@ public:
     lor.function1D(y.data(), x.data(), 1);
 
     TS_ASSERT_EQUALS(y[0], lor.height());
+    TS_ASSERT_DELTA(2.0, lor.height(), 1e-10);
   }
 
   void test_height_zero_width() {
@@ -99,11 +100,23 @@ public:
   void testIntensity() {
     Lorentzian lor;
     lor.initialize();
+    // height set after fwhm - normal case
+    lor.setFwhm(1.0);
+    lor.setHeight(2.0);
+    lor.setCentre(3.0);
+
+    TS_ASSERT_DELTA(lor.intensity(), M_PI, 1e-10);
+  }
+
+  void testIntensity_special_case() {
+    Lorentzian lor;
+    lor.initialize();
+    // height set before fwhm - special case
     lor.setHeight(2.0);
     lor.setCentre(3.0);
     lor.setFwhm(1.0);
 
-    TS_ASSERT_DELTA(lor.intensity(), 1.873097930277787, 1e-10);
+    TS_ASSERT_DELTA(lor.intensity(), M_PI, 1e-10);
     TS_ASSERT_THROWS_NOTHING(lor.setIntensity(2.0));
 
     TS_ASSERT_DELTA(lor.intensity(), 2.0, 1e-10);

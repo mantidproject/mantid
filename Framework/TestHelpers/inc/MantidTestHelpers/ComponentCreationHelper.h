@@ -55,6 +55,14 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 
 //----------------------------------------------------------------------------------------------
 /**
+ * Return the appropriate XML for the requested cylinder
+ */
+std::string cappedCylinderXML(double radius, double height,
+                              const Mantid::Kernel::V3D &baseCentre,
+                              const Mantid::Kernel::V3D &axis,
+                              const std::string &id);
+
+/**
  * Create a capped cylinder object
  */
 Mantid::Geometry::Object_sptr

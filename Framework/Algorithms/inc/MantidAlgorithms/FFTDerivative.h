@@ -35,10 +35,6 @@ namespace Algorithms {
  */
 class FFTDerivative : public Mantid::API::Algorithm {
 public:
-  /// (Empty) Constructor
-  FFTDerivative() : Mantid::API::Algorithm() {}
-  /// Virtual destructor
-  ~FFTDerivative() override {}
   /// Algorithm's name
   const std::string name() const override { return "FFTDerivative"; }
   /// Summary of algorithms purpose

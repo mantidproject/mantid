@@ -739,15 +739,15 @@ public:
     VMD end(1.9, 1.5);
     auto line = ws->getLineData(start, end, NoNormalization);
     std::cout << "X\n" << Strings::join(line.x.begin(), line.x.end(), ",")
-              << std::endl;
+              << '\n';
     std::cout << "Y\n" << Strings::join(line.y.begin(), line.y.end(), ",")
-              << std::endl;
+              << '\n';
 
     TS_ASSERT_EQUALS(line.x.size(), 4);
     TS_ASSERT_DELTA(line.x[0], 0.0, 1e-5);
-    TS_ASSERT_DELTA(line.x[1], 0.1 * sqrt(2.0), 1e-5);
-    TS_ASSERT_DELTA(line.x[2], 0.5 * sqrt(2.0), 1e-5);
-    TS_ASSERT_DELTA(line.x[3], 1.0 * sqrt(2.0), 1e-5);
+    TS_ASSERT_DELTA(line.x[1], 0.1 * M_SQRT2, 1e-5);
+    TS_ASSERT_DELTA(line.x[2], 0.5 * M_SQRT2, 1e-5);
+    TS_ASSERT_DELTA(line.x[3], M_SQRT2, 1e-5);
 
     TS_ASSERT_EQUALS(line.y.size(), 3);
     TS_ASSERT_DELTA(line.y[0], 0.0, 1e-5);
@@ -866,7 +866,7 @@ public:
   void test_divide_scalar() {
     MDHistoWorkspace_sptr a = MDEventsTestHelper::makeFakeMDHistoWorkspace(
         3.0, 2, 5, 10.0, 3.0 /*errorSquared*/);
-    a->divide(2.0, sqrt(2.0));
+    a->divide(2.0, M_SQRT2);
     checkWorkspace(a, 1.5, 1.5 * 1.5 * (.5 + 1. / 3.), 1.0);
   }
 

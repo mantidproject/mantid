@@ -1243,6 +1243,217 @@ public:
     delete itIn;
     delete itOut;
   }
+
+  void test_neighbours_1d_with_width_including_out_of_bounds() {
+
+    // This is the width to use
+    const int width = 5;
+
+    const size_t nd = 1;
+    MDHistoWorkspace_sptr ws =
+        MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, nd, 10);
+    /*
+     1D MDHistoWorkspace
+
+     0 - 1 - 2 - 3 - 4 - 5 - 6 - 7 - 8 - 9
+
+     */
+
+    MDHistoWorkspaceIterator *it = new MDHistoWorkspaceIterator(ws);
+
+    // At first position
+    /*
+     0 - 1 - 2 - 3 - 4 - 5 - 6 - 7 - 8 - 9
+     ^
+     |
+     */
+
+    std::pair<std::vector<size_t>, std::vector<bool>> indexesAndValidity =
+        it->findNeighbourIndexesByWidth1D(width, 0);
+    std::vector<size_t> neighbourIndexes = std::get<0>(indexesAndValidity);
+    std::vector<bool> indexValidity = std::get<1>(indexesAndValidity);
+
+    TSM_ASSERT_EQUALS(" Function should always return a list of indexes equal "
+                      "to the product of the widths",
+                      width, neighbourIndexes.size());
+    TSM_ASSERT_EQUALS(
+        "Three of the indexes should be valid", 3,
+        std::accumulate(indexValidity.cbegin(), indexValidity.cend(), 0));
+    // should be on edge
+    TSM_ASSERT("Neighbours include -2",
+               doesContainIndex(neighbourIndexes, -2)); // Invalid
+    TSM_ASSERT("Neighbours include -1",
+               doesContainIndex(neighbourIndexes, -1)); // Invalid
+    TSM_ASSERT("Neighbours include 0",
+               doesContainIndex(neighbourIndexes, 0)); // Valid
+    TSM_ASSERT("Neighbours include 1",
+               doesContainIndex(neighbourIndexes, 1)); // Valid
+    TSM_ASSERT("Neighbours include 2",
+               doesContainIndex(neighbourIndexes, 2)); // Valid
+
+    // Go to intermediate position
+    /*
+     0 - 1 - 2 - 3 - 4 - 5 - 6 - 7 - 8 - 9
+         ^
+         |
+         */
+    it->next();
+    indexesAndValidity = it->findNeighbourIndexesByWidth1D(width, 0);
+    neighbourIndexes = std::get<0>(indexesAndValidity);
+    indexValidity = std::get<1>(indexesAndValidity);
+
+    TSM_ASSERT_EQUALS(" Function should always return a list of indexes equal "
+                      "to the product of the widths",
+                      width, neighbourIndexes.size());
+    TSM_ASSERT_EQUALS(
+        "Four of the indexes should be valid", 4,
+        std::accumulate(indexValidity.cbegin(), indexValidity.cend(), 0));
+    // should be on edge
+    TSM_ASSERT("Neighbours include -1",
+               doesContainIndex(neighbourIndexes, -1)); // Invalid
+    TSM_ASSERT("Neighbours include 0",
+               doesContainIndex(neighbourIndexes, 0)); // Valid
+    TSM_ASSERT("Neighbours include 1",
+               doesContainIndex(neighbourIndexes, 1)); // Valid
+    TSM_ASSERT("Neighbours include 2",
+               doesContainIndex(neighbourIndexes, 2)); // Valid
+    TSM_ASSERT("Neighbours include 3",
+               doesContainIndex(neighbourIndexes, 3)); // Valid
+
+    // Go to last position
+    /*
+     0 - 1 - 2 - 3 - 4 - 5 - 6 - 7 - 8 - 9
+                                         ^
+                                         |
+                                         */
+    it->jumpTo(9);
+    indexesAndValidity = it->findNeighbourIndexesByWidth1D(width, 0);
+    neighbourIndexes = std::get<0>(indexesAndValidity);
+    indexValidity = std::get<1>(indexesAndValidity);
+
+    TSM_ASSERT_EQUALS(" Function should always return a list of indexes equal "
+                      "to the product of the widths",
+                      width, neighbourIndexes.size());
+    TSM_ASSERT_EQUALS(
+        "Three of the indexes should be valid", 3,
+        std::accumulate(indexValidity.cbegin(), indexValidity.cend(), 0));
+    // should be on edge
+    TSM_ASSERT("Neighbours include -1",
+               doesContainIndex(neighbourIndexes, 7)); // Valid
+    TSM_ASSERT("Neighbours include 0",
+               doesContainIndex(neighbourIndexes, 8)); // Valid
+    TSM_ASSERT("Neighbours include 1",
+               doesContainIndex(neighbourIndexes, 9)); // Valid
+    TSM_ASSERT("Neighbours include 2",
+               doesContainIndex(neighbourIndexes, 10)); // Invalid
+    TSM_ASSERT("Neighbours include 3",
+               doesContainIndex(neighbourIndexes, 11)); // Invalid
+
+    delete it;
+  }
+
+  void test_neighbours_2d_vertex_touching_by_width_including_out_of_bounds() {
+    const size_t nd = 2;
+    const int width = 5;
+
+    MDHistoWorkspace_sptr ws =
+        MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, nd, 4);
+    /*
+     2D MDHistoWorkspace
+
+     0 - 1 - 2 - 3
+     4 - 5 - 6 - 7
+     8 - 9 -10 -11
+     12-13 -14 -15
+     */
+    MDHistoWorkspaceIterator *it = new MDHistoWorkspaceIterator(ws);
+
+    // At initial position
+    /*
+     |0| - 1 - 2 - 3
+     4 - 5 - 6 - 7
+     8 - 9 -10 -11
+     12-13 -14 -15
+     */
+    std::pair<std::vector<size_t>, std::vector<bool>> indexesAndValidity =
+        it->findNeighbourIndexesByWidth1D(width, 1);
+    std::vector<size_t> neighbourIndexes = std::get<0>(indexesAndValidity);
+    std::vector<bool> indexValidity = std::get<1>(indexesAndValidity);
+
+    TSM_ASSERT_EQUALS(
+        "Three of the indexes should be valid", 3,
+        std::accumulate(indexValidity.cbegin(), indexValidity.cend(), 0));
+
+    // Is on an edge
+    TSM_ASSERT("Neighbour at index is -8",
+               doesContainIndex(neighbourIndexes, -8)); // Invalid
+    TSM_ASSERT("Neighbours include -4",
+               doesContainIndex(neighbourIndexes, -4)); // Invalid
+    TSM_ASSERT("Neighbour at index is 0",
+               doesContainIndex(neighbourIndexes, 0)); // Valid
+    TSM_ASSERT("Neighbour at index is 4",
+               doesContainIndex(neighbourIndexes, 4)); // Valid
+    TSM_ASSERT("Neighbour at index is 8",
+               doesContainIndex(neighbourIndexes, 8)); // Valid
+
+    // At centreish position
+    /*
+     0 - 1 - 2 - 3
+     4 - |5| - 6 - 7
+     8 - 9 -10 -11
+     12-13 -14 -15
+     */
+    it->jumpTo(5);
+    indexesAndValidity = it->findNeighbourIndexesByWidth1D(width, 1);
+    neighbourIndexes = std::get<0>(indexesAndValidity);
+    indexValidity = std::get<1>(indexesAndValidity);
+
+    TSM_ASSERT_EQUALS(
+        "Four of the indexes should be valid", 4,
+        std::accumulate(indexValidity.cbegin(), indexValidity.cend(), 0));
+
+    // Is on an edge
+    TSM_ASSERT("Neighbour at index is -3",
+               doesContainIndex(neighbourIndexes, -3)); // Invalid
+    TSM_ASSERT("Neighbours include 1",
+               doesContainIndex(neighbourIndexes, 1)); // Valid
+    TSM_ASSERT("Neighbour at index is 5",
+               doesContainIndex(neighbourIndexes, 5)); // Valid
+    TSM_ASSERT("Neighbour at index is 9",
+               doesContainIndex(neighbourIndexes, 9)); // Valid
+    TSM_ASSERT("Neighbour at index is 13",
+               doesContainIndex(neighbourIndexes, 13)); // Valid
+
+    // At end position
+    /*
+     0 - 1 - 2 - 3
+     4 - 5 - 6 - 7
+     8 - 9 -10 -11
+     12-13 -14 -|15|
+     */
+    it->jumpTo(15);
+    indexesAndValidity = it->findNeighbourIndexesByWidth1D(width, 1);
+    neighbourIndexes = std::get<0>(indexesAndValidity);
+    indexValidity = std::get<1>(indexesAndValidity);
+
+    TSM_ASSERT_EQUALS(
+        "Three of the indexes should be valid", 3,
+        std::accumulate(indexValidity.cbegin(), indexValidity.cend(), 0));
+
+    // Is on an edge
+    TSM_ASSERT("Neighbour at index is 7",
+               doesContainIndex(neighbourIndexes, 7)); // Valid
+    TSM_ASSERT("Neighbours include 11",
+               doesContainIndex(neighbourIndexes, 11)); // Valid
+    TSM_ASSERT("Neighbour at index is 15",
+               doesContainIndex(neighbourIndexes, 15)); // Valid
+    TSM_ASSERT("Neighbour at index is 19",
+               doesContainIndex(neighbourIndexes, 19)); // Invalid
+    TSM_ASSERT("Neighbour at index is 23",
+               doesContainIndex(neighbourIndexes, 23)); // Invalid
+
+    delete it;
+  }
 };
 
 class MDHistoWorkspaceIteratorTestPerformance : public CxxTest::TestSuite {

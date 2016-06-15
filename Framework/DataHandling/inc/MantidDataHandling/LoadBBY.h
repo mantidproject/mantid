@@ -13,7 +13,7 @@
 
 namespace Mantid {
 namespace DataHandling {
-/**
+/*
 Loads a Bilby data file. Implements API::IFileLoader and its file check methods
 to recognise a file as the one containing Bilby data.
 
@@ -49,6 +49,8 @@ class DLLExport LoadBBY : public API::IFileLoader<Kernel::FileDescriptor> {
     //
     int32_t bm_counts;
     int32_t att_pos;
+    bool is_tof; // tof or wavelength data
+    double wavelength;
     //
     double period_master;
     double period_slave;
@@ -96,13 +98,15 @@ private:
   static std::vector<bool> createRoiVector(const std::string &maskfile);
 
   // instrument creation
-  Geometry::Instrument_sptr createInstrument(ANSTO::Tar::File &tarFile,
-                                             InstrumentInfo &instrumentInfo);
+  void createInstrument(ANSTO::Tar::File &tarFile,
+                        InstrumentInfo &instrumentInfo);
 
   // load nx dataset
   template <class T>
   static bool loadNXDataSet(NeXus::NXEntry &entry, const std::string &path,
                             T &value);
+  static bool loadNXString(NeXus::NXEntry &entry, const std::string &path,
+                           std::string &value);
 
   // binary file access
   template <class EventProcessor>

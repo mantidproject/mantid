@@ -10,7 +10,7 @@ class SortDetectorsTest(unittest.TestCase):
     def testSortDetectors(self):
         w=WorkspaceCreationHelper.create2DWorkspaceWithFullInstrument(10,2,False,False)
         AnalysisDataService.add('w',w)
-        MoveInstrumentComponent(w,DetectorID=3,X=-7.,Y=0,Z=0,RelativePosition=0)
+        MoveInstrumentComponent(w,DetectorID=3,X=0.,Y=0,Z=-7.,RelativePosition=0)
         x=SortDetectors(w)
         DeleteWorkspace(w)
         self.assertTrue(array_equal(x[0],array([2])))

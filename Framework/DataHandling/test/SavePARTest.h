@@ -152,7 +152,7 @@ private:
     // the following is largely about associating detectors with the workspace
     for (int j = 0; j < NHIST; ++j) {
       // Just set the spectrum number to match the index
-      inputWS->getSpectrum(j)->setSpectrumNo(j + 1);
+      inputWS->getSpectrum(j).setSpectrumNo(j + 1);
     }
     // we do not need to deal with analysisi data service here in test to avoid
     // holding the workspace there after the test
@@ -176,7 +176,7 @@ private:
     m_Pmap->addBool(toMask.get(), "masked", true);
 
     // required to get it passed the algorthms validator
-    inputWS->isDistribution(true);
+    inputWS->setDistribution(true);
 
     return inputWS;
   }

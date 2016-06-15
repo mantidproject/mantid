@@ -150,7 +150,7 @@ LoadCanSAS1D2::loadEntry(Poco::XML::Node *const workspaceData,
       workspaceElem->getElementsByTagName("SAStransmission_spectrum");
   if (!sasTransList->length()) {
     g_log.warning() << "There is no transmission data for this file "
-                    << getPropertyValue("Filename") << std::endl;
+                    << getPropertyValue("Filename") << '\n';
     return main_out;
   }
 
@@ -179,7 +179,7 @@ LoadCanSAS1D2::loadEntry(Poco::XML::Node *const workspaceData,
     title += ":trans";
     title += sasTrasElem->getAttribute("name");
     dataWS->setTitle(title);
-    dataWS->isDistribution(true);
+    dataWS->setDistribution(true);
     dataWS->setYUnit("");
 
     // load workspace data

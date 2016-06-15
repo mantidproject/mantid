@@ -79,7 +79,7 @@ public:
     // moved in the output workspace
     IDetector_const_sptr deto = ws2->getDetector(0);
     V3D newPos = deto->getPos();
-    TS_ASSERT_DELTA(newPos.X(), 5.0, 0.0001);
+    TS_ASSERT_DELTA(newPos.Z(), 5.0, 0.0001);
 
     // Execute Algorithm
     TS_ASSERT_THROWS_NOTHING(copyInstParam.execute());
@@ -187,9 +187,9 @@ public:
     int id2 = deto2->getID();
     V3D newPos2 = deto2->getPos();
     TS_ASSERT_EQUALS(id2, 2);
-    TS_ASSERT_DELTA(newPos2.X(), -9.0, 0.0001);
+    TS_ASSERT_DELTA(newPos2.X(), 0.0, 0.0001);
     TS_ASSERT_DELTA(newPos2.Y(), 0.0, 0.0001);
-    TS_ASSERT_DELTA(newPos2.Z(), 0.0, 0.0001);
+    TS_ASSERT_DELTA(newPos2.Z(), -9.0, 0.0001);
 
     dataStore.remove(wsName1);
     dataStore.remove(wsName2);

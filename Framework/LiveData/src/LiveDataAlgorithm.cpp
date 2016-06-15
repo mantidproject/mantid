@@ -7,13 +7,11 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/Strings.h"
 
-#include "boost/tokenizer.hpp"
 #include <boost/algorithm/string/trim.hpp>
 #include <unordered_set>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
-using boost::tokenizer;
 
 namespace Mantid {
 namespace LiveData {
@@ -247,13 +245,13 @@ IAlgorithm_sptr LiveDataAlgorithm::makeAlgorithm(bool postProcessing) {
     ignoreProps.insert("OutputWorkspace");
 
     // ...and pass it the properties
-    alg->setPropertiesWithSimpleString(props, ignoreProps);
+    alg->setPropertiesWithString(props, ignoreProps);
 
     // Warn if someone put both values.
     if (!script.empty())
       g_log.warning() << "Running algorithm " << algoName
                       << " and ignoring the script code in "
-                      << prefix + "ProcessingScript" << std::endl;
+                      << prefix + "ProcessingScript\n";
     return alg;
   } else if (!script.empty()) {
     // Run a snippet of python

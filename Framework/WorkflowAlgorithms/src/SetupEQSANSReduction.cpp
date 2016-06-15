@@ -10,7 +10,7 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidAPI/AlgorithmProperty.h"
-#include "MantidAPI/PropertyManagerDataService.h"
+#include "MantidKernel/PropertyManagerDataService.h"
 #include "MantidKernel/PropertyManager.h"
 #include "Poco/NumberFormatter.h"
 
@@ -581,8 +581,7 @@ void SetupEQSANSReduction::exec() {
   // Reduction property manager
   const std::string reductionManagerName = getProperty("ReductionProperties");
   if (reductionManagerName.size() == 0) {
-    g_log.error() << "ERROR: Reduction Property Manager name is empty"
-                  << std::endl;
+    g_log.error() << "ERROR: Reduction Property Manager name is empty\n";
     return;
   }
   boost::shared_ptr<PropertyManager> reductionManager =
@@ -622,7 +621,7 @@ void SetupEQSANSReduction::exec() {
     loadMonitors = true;
     if (monitorRefFile.size() == 0) {
       g_log.error() << "ERROR: normalize-to-monitor was turned ON but no "
-                       "reference data was selected" << std::endl;
+                       "reference data was selected\n";
     }
     normAlg->setProperty("NormaliseToMonitor", true);
     normAlg->setProperty("BeamSpectrumFile", monitorRefFile);
@@ -739,7 +738,7 @@ void SetupEQSANSReduction::exec() {
       reductionManager->declareProperty(std::move(ctrAlgProp));
     } else {
       g_log.error() << "ERROR: Beam center determination was required"
-                       " but no file was provided" << std::endl;
+                       " but no file was provided\n";
     }
   }
 
@@ -904,7 +903,7 @@ void SetupEQSANSReduction::setupSensitivity(
       } else {
         g_log.error()
             << "ERROR: Sensitivity beam center determination was required"
-               " but no file was provided" << std::endl;
+               " but no file was provided\n";
       }
     }
 
@@ -990,7 +989,7 @@ void SetupEQSANSReduction::setupTransmission(
       } else {
         g_log.error()
             << "ERROR: Transmission beam center determination was required"
-               " but no file was provided" << std::endl;
+               " but no file was provided\n";
       }
     }
     transAlg->setProperty("ThetaDependent", thetaDependentTrans);
@@ -1080,7 +1079,7 @@ void SetupEQSANSReduction::setupBackground(
         reductionManager->declareProperty(std::move(algProp));
       } else {
         g_log.error() << "ERROR: Beam center determination was required"
-                         " but no file was provided" << std::endl;
+                         " but no file was provided\n";
       }
     }
     transAlg->setProperty("DarkCurrentFilename", darkCurrent);

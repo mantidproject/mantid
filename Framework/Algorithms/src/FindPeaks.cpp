@@ -202,7 +202,7 @@ void FindPeaks::exec() {
 
   // Set output properties
   g_log.information() << "Total " << m_outPeakTableWS->rowCount()
-                      << " peaks found and successfully fitted." << std::endl;
+                      << " peaks found and successfully fitted.\n";
   setProperty("PeaksList", m_outPeakTableWS);
 
   return;
@@ -374,7 +374,7 @@ void FindPeaks::findPeaksGivenStartingPoints(
       }
       g_log.debug()
           << "Finding peaks from giving starting point, with interval i_min = "
-          << i_min << " i_max = " << i_max << std::endl;
+          << i_min << " i_max = " << i_max << '\n';
       practical_x_max = vecX[i_max];
     }
     g_log.information() << "practical x-range = [" << practical_x_min << " -> "
@@ -593,7 +593,7 @@ void FindPeaks::findPeaksUsingMariscotti() {
         g_log.debug() << "Spectrum=" << k << " i0=" << i0
                       << " X=" << m_dataWS->readX(k)[i0] << " i1=" << i1
                       << " i2=" << i2 << " i3=" << i3 << " i4=" << i4
-                      << " i5=" << i5 << std::endl;
+                      << " i5=" << i5 << '\n';
 
         // Use i0, i2 and i4 to find out i_min and i_max, i0: right, i2: left,
         // i4: centre
@@ -1087,6 +1087,8 @@ int FindPeaks::findPeakBackground(const MatrixWorkspace_sptr &input,
         "No 7th column for use FindPeakBackground result or not. ");
 
   if (peaklisttablews->rowCount() > 0) {
+    // setting fitresult currently breaks several tests
+    // see issues ##13667, 13950 and 15978
     int fitresult = peaklisttablews->Int(0, 6);
     g_log.information() << "fitresult=" << fitresult << "\n";
   }

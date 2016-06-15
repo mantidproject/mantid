@@ -242,16 +242,6 @@ using Mantid::API::WorkspaceProperty;
 DECLARE_ALGORITHM(IntegrateMDHistoWorkspace)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-IntegrateMDHistoWorkspace::IntegrateMDHistoWorkspace() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-IntegrateMDHistoWorkspace::~IntegrateMDHistoWorkspace() {}
-
-//----------------------------------------------------------------------------------------------
 
 /// Algorithms name for identification. @see Algorithm::name
 const std::string IntegrateMDHistoWorkspace::name() const {
@@ -409,7 +399,6 @@ void IntegrateMDHistoWorkspace::exec() {
         performWeightedSum(inIterator.get(), box, sumSignal, sumSQErrors,
                            sumNEvents); // Use the present position. neighbours
                                         // below exclude the current position.
-
         // Look at all of the neighbours of our position. We previously
         // calculated what the width vector would need to be.
         auto neighbourIndexes =

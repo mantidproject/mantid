@@ -268,7 +268,7 @@ public:
   void testRotate() {
     V3D direc(1, 1, 1);
     const double theta = 45.0 * M_PI / 180.0;
-    const double invRt2(1.0 / sqrt(2.0));
+    const double invRt2(M_SQRT1_2);
 
     // rotate around X
     Mantid::Kernel::Matrix<double> rx(3, 3);
@@ -330,7 +330,7 @@ public:
     TS_ASSERT_DELTA(d, r, 0.0001);
     TS_ASSERT_DELTA(b.X(), 1.5, 0.0001);
     TS_ASSERT_DELTA(b.Y(), 1.5, 0.0001);
-    TS_ASSERT_DELTA(b.Z(), 3.0 / sqrt(2.0), 0.0001);
+    TS_ASSERT_DELTA(b.Z(), 3.0 * M_SQRT1_2, 0.0001);
     // Test getSpherical returns the original values
     TS_ASSERT_THROWS_NOTHING(b.getSpherical(r, theta, phi));
     TS_ASSERT_DELTA(r, 3.0, 1e-12);
@@ -349,7 +349,7 @@ public:
     a.spherical_rad(1, M_PI, 0);
     TS_ASSERT(a == V3D(0, 0, -1));
     a.spherical_rad(2, M_PI / 4, 0);
-    TS_ASSERT(a == V3D(sqrt(2.0), 0, sqrt(2.0)));
+    TS_ASSERT(a == V3D(M_SQRT2, 0, M_SQRT2));
   }
 
   void test_azimuth_polar_SNS() {
@@ -363,7 +363,7 @@ public:
     a.azimuth_polar_SNS(2, 0, M_PI);
     TS_ASSERT(a == V3D(0, -2, 0));
     a.azimuth_polar_SNS(2, 0, M_PI / 4);
-    TS_ASSERT(a == V3D(sqrt(2.0), sqrt(2.0), 0));
+    TS_ASSERT(a == V3D(M_SQRT2, M_SQRT2, 0));
   }
 
   /** Round each component to the nearest integer */

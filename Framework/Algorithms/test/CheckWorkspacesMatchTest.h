@@ -577,7 +577,7 @@ public:
 
     Mantid::API::MatrixWorkspace_sptr ws2 =
         WorkspaceCreationHelper::Create2DWorkspace123(2, 2);
-    ws2->isDistribution(true);
+    ws2->setDistribution(true);
 
     TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace1", ws1));
     TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace2", ws2));
@@ -706,7 +706,7 @@ public:
 
     Mantid::API::MatrixWorkspace_sptr ws2 =
         WorkspaceCreationHelper::Create2DWorkspace123(2, 2);
-    ws2->getSpectrum(0)->setSpectrumNo(1234);
+    ws2->getSpectrum(0).setSpectrumNo(1234);
     TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace1", ws1));
     TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace2", ws2));
     TS_ASSERT(checker.execute());
@@ -714,8 +714,8 @@ public:
                      "Spectrum number mismatch");
 
     ws2 = WorkspaceCreationHelper::Create2DWorkspace123(2, 2);
-    ws2->getSpectrum(0)->setDetectorID(99);
-    ws2->getSpectrum(1)->setDetectorID(98);
+    ws2->getSpectrum(0).setDetectorID(99);
+    ws2->getSpectrum(1).setDetectorID(98);
     TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace1", ws1));
     TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace2", ws2));
     TS_ASSERT(checker.execute());

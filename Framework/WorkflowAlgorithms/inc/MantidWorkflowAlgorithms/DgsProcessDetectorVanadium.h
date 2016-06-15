@@ -38,9 +38,6 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
 class DLLExport DgsProcessDetectorVanadium : public API::Algorithm {
 public:
-  DgsProcessDetectorVanadium();
-  ~DgsProcessDetectorVanadium() override;
-
   const std::string name() const override;
   /// Summary of algorithms purpose
   const std::string summary() const override {

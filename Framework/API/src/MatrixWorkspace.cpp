@@ -34,7 +34,6 @@ namespace {
 Kernel::Logger g_log("MatrixWorkspace");
 constexpr double rad2deg = 180. / M_PI;
 }
-
 const std::string MatrixWorkspace::xDimensionId = "xDimension";
 const std::string MatrixWorkspace::yDimensionId = "yDimension";
 
@@ -184,18 +183,18 @@ const std::string MatrixWorkspace::getTitle() const {
 
 void MatrixWorkspace::updateSpectraUsing(const SpectrumDetectorMapping &map) {
   for (size_t j = 0; j < getNumberHistograms(); ++j) {
-    auto spec = getSpectrum(j);
+    auto &spec = getSpectrum(j);
     try {
       if (map.indexIsSpecNumber())
-        spec->setDetectorIDs(
-            map.getDetectorIDsForSpectrumNo(spec->getSpectrumNo()));
+        spec.setDetectorIDs(
+            map.getDetectorIDsForSpectrumNo(spec.getSpectrumNo()));
       else
-        spec->setDetectorIDs(map.getDetectorIDsForSpectrumIndex(j));
+        spec.setDetectorIDs(map.getDetectorIDsForSpectrumIndex(j));
     } catch (std::out_of_range &e) {
       // Get here if the spectrum number is not in the map.
-      spec->clearDetectorIDs();
+      spec.clearDetectorIDs();
       g_log.debug(e.what());
-      g_log.debug() << "Spectrum number " << spec->getSpectrumNo()
+      g_log.debug() << "Spectrum number " << spec.getSpectrumNo()
                     << " not in map.\n";
     }
   }
@@ -228,9 +227,9 @@ void MatrixWorkspace::rebuildSpectraMapping(const bool includeMonitors) {
       const specnum_t specNo = specnum_t(index + 1);
 
       if (index < this->getNumberHistograms()) {
-        ISpectrum *spec = getSpectrum(index);
-        spec->setSpectrumNo(specNo);
-        spec->setDetectorID(detId);
+        auto &spec = getSpectrum(index);
+        spec.setSpectrumNo(specNo);
+        spec.setDetectorID(detId);
       }
 
       index++;
@@ -429,7 +428,7 @@ bool MatrixWorkspace::hasGroupedDetectors() const {
   // Loop through the workspace index
   for (size_t workspaceIndex = 0; workspaceIndex < this->getNumberHistograms();
        workspaceIndex++) {
-    auto detList = getSpectrum(workspaceIndex)->getDetectorIDs();
+    auto detList = getSpectrum(workspaceIndex).getDetectorIDs();
     if (detList.size() > 1) {
       retVal = true;
       break;
@@ -457,7 +456,7 @@ detid2index_map MatrixWorkspace::getDetectorIDToWorkspaceIndexMap(
   // Loop through the workspace index
   for (size_t workspaceIndex = 0; workspaceIndex < this->getNumberHistograms();
        ++workspaceIndex) {
-    auto detList = getSpectrum(workspaceIndex)->getDetectorIDs();
+    auto detList = getSpectrum(workspaceIndex).getDetectorIDs();
 
     if (throwIfMultipleDets) {
       if (detList.size() > 1) {
@@ -510,8 +509,7 @@ std::vector<size_t> MatrixWorkspace::getDetectorIDToWorkspaceIndexVector(
   for (size_t workspaceIndex = 0; workspaceIndex < getNumberHistograms();
        ++workspaceIndex) {
     // Get the list of detectors from the WS index
-    const std::set<detid_t> &detList =
-        this->getSpectrum(workspaceIndex)->getDetectorIDs();
+    const auto &detList = this->getSpectrum(workspaceIndex).getDetectorIDs();
 
     if (throwIfMultipleDets && (detList.size() > 1))
       throw std::runtime_error(
@@ -527,7 +525,7 @@ std::vector<size_t> MatrixWorkspace::getDetectorIDToWorkspaceIndexVector(
         g_log.debug() << "MatrixWorkspace::getDetectorIDToWorkspaceIndexVector("
                          "): detector ID found (" << det
                       << " at workspace index " << workspaceIndex
-                      << ") is invalid." << std::endl;
+                      << ") is invalid.\n";
       } else
         // Save it at that point.
         out[index] = workspaceIndex;
@@ -553,7 +551,7 @@ std::vector<size_t> MatrixWorkspace::getIndicesFromSpectra(
   auto iter = spectraList.cbegin();
   while (iter != spectraList.cend()) {
     for (size_t i = 0; i < this->getNumberHistograms(); ++i) {
-      if (this->getSpectrum(i)->getSpectrumNo() == *iter) {
+      if (this->getSpectrum(i).getSpectrumNo() == *iter) {
         indexList.push_back(i);
         break;
       }
@@ -573,7 +571,7 @@ std::vector<size_t> MatrixWorkspace::getIndicesFromSpectra(
 size_t
 MatrixWorkspace::getIndexFromSpectrumNumber(const specnum_t specNo) const {
   for (size_t i = 0; i < this->getNumberHistograms(); ++i) {
-    if (this->getSpectrum(i)->getSpectrumNo() == specNo)
+    if (this->getSpectrum(i).getSpectrumNo() == specNo)
       return i;
   }
   throw std::runtime_error("Could not find spectrum number in any spectrum.");
@@ -595,7 +593,7 @@ std::vector<size_t> MatrixWorkspace::getIndicesFromDetectorIDs(
     const std::vector<detid_t> &detIdList) const {
   std::map<detid_t, std::set<size_t>> detectorIDtoWSIndices;
   for (size_t i = 0; i < getNumberHistograms(); ++i) {
-    auto detIDs = getSpectrum(i)->getDetectorIDs();
+    auto detIDs = getSpectrum(i).getDetectorIDs();
     for (auto detID : detIDs) {
       detectorIDtoWSIndices[detID].insert(i);
     }
@@ -633,9 +631,9 @@ std::vector<specnum_t> MatrixWorkspace::getSpectraFromDetectorIDs(
 
     // Go through every histogram
     for (size_t i = 0; i < this->getNumberHistograms(); i++) {
-      if (this->getSpectrum(i)->hasDetectorID(detId)) {
+      if (this->getSpectrum(i).hasDetectorID(detId)) {
         foundDet = true;
-        foundSpecNum = this->getSpectrum(i)->getSpectrumNo();
+        foundSpecNum = this->getSpectrum(i).getSpectrumNo();
         break;
       }
     }
@@ -753,14 +751,7 @@ requested workspace index does not have any associated detectors
 */
 Geometry::IDetector_const_sptr
 MatrixWorkspace::getDetector(const size_t workspaceIndex) const {
-  const ISpectrum *spec = this->getSpectrum(workspaceIndex);
-  if (!spec)
-    throw Kernel::Exception::NotFoundError("MatrixWorkspace::getDetector(): "
-                                           "NULL spectrum found at the given "
-                                           "workspace index.",
-                                           "");
-
-  const auto &dets = spec->getDetectorIDs();
+  const auto &dets = getSpectrum(workspaceIndex).getDetectorIDs();
   Instrument_const_sptr localInstrument = getInstrument();
   if (!localInstrument) {
     g_log.debug() << "No instrument defined.\n";
@@ -778,10 +769,8 @@ MatrixWorkspace::getDetector(const size_t workspaceIndex) const {
                                            "");
   }
   // Else need to construct a DetectorGroup and return that
-  std::vector<Geometry::IDetector_const_sptr> dets_ptr =
-      localInstrument->getDetectors(dets);
-  return Geometry::IDetector_const_sptr(
-      new Geometry::DetectorGroup(dets_ptr, false));
+  auto dets_ptr = localInstrument->getDetectors(dets);
+  return boost::make_shared<Geometry::DetectorGroup>(dets_ptr, false);
 }
 
 /** Returns the signed 2Theta scattering angle for a detector
@@ -942,9 +931,8 @@ const bool &MatrixWorkspace::isDistribution() const { return m_isDistribution; }
 /** Set the flag for whether the Y-values are dimensioned
 *  @return whether workspace is now a distribution
 */
-bool &MatrixWorkspace::isDistribution(bool newValue) {
+void MatrixWorkspace::setDistribution(bool newValue) {
   m_isDistribution = newValue;
-  return m_isDistribution;
 }
 
 /**
@@ -1003,15 +991,12 @@ void MatrixWorkspace::maskWorkspaceIndex(const std::size_t index) {
         "MatrixWorkspace::maskWorkspaceIndex,index");
   }
 
-  ISpectrum *spec = this->getSpectrum(index);
-  if (!spec)
-    throw std::invalid_argument(
-        "MatrixWorkspace::maskWorkspaceIndex() got a null Spectrum.");
+  auto &spec = this->getSpectrum(index);
 
   // Virtual method clears the spectrum as appropriate
-  spec->clearData();
+  spec.clearData();
 
-  const auto dets = spec->getDetectorIDs();
+  const auto dets = spec.getDetectorIDs();
   for (auto detId : dets) {
     try {
       if (const Geometry::Detector *det =
@@ -1278,8 +1263,8 @@ public:
   MWDimension(const Axis *axis, const std::string &dimensionId)
       : m_axis(*axis), m_dimensionId(dimensionId),
         m_haveEdges(dynamic_cast<const BinEdgeAxis *>(&m_axis) != nullptr),
-        m_frame(new Geometry::GeneralFrame(m_axis.unit()->label(),
-                                           m_axis.unit()->label())) {}
+        m_frame(Kernel::make_unique<Geometry::GeneralFrame>(
+            m_axis.unit()->label(), m_axis.unit()->label())) {}
 
   /// the name of the dimennlsion as can be displayed along the axis
   std::string getName() const override {
@@ -1361,8 +1346,9 @@ class MWXDimension : public Mantid::Geometry::IMDDimension {
 public:
   MWXDimension(const MatrixWorkspace *ws, const std::string &dimensionId)
       : m_ws(ws), m_dimensionId(dimensionId),
-        m_frame(new Geometry::GeneralFrame(m_ws->getAxis(0)->unit()->label(),
-                                           m_ws->getAxis(0)->unit()->label())) {
+        m_frame(Kernel::make_unique<Geometry::GeneralFrame>(
+            m_ws->getAxis(0)->unit()->label(),
+            m_ws->getAxis(0)->unit()->label())) {
     m_X = ws->readX(0);
   }
 
@@ -1432,12 +1418,10 @@ private:
 boost::shared_ptr<const Mantid::Geometry::IMDDimension>
 MatrixWorkspace::getDimension(size_t index) const {
   if (index == 0) {
-    auto dimension = new MWXDimension(this, xDimensionId);
-    return boost::shared_ptr<const Mantid::Geometry::IMDDimension>(dimension);
+    return boost::make_shared<MWXDimension>(this, xDimensionId);
   } else if (index == 1) {
     Axis *yAxis = this->getAxis(1);
-    auto dimension = new MWDimension(yAxis, yDimensionId);
-    return boost::shared_ptr<const Mantid::Geometry::IMDDimension>(dimension);
+    return boost::make_shared<MWDimension>(yAxis, yDimensionId);
   } else
     throw std::invalid_argument("MatrixWorkspace only has 2 dimensions.");
 }
@@ -1445,20 +1429,20 @@ MatrixWorkspace::getDimension(size_t index) const {
 boost::shared_ptr<const Mantid::Geometry::IMDDimension>
 MatrixWorkspace::getDimensionWithId(std::string id) const {
   int nAxes = this->axes();
-  IMDDimension *dim = nullptr;
+  boost::shared_ptr<IMDDimension> dim;
   for (int i = 0; i < nAxes; i++) {
-    Axis *xAxis = this->getAxis(i);
-    const std::string &knownId = getDimensionIdFromAxis(i);
+    const std::string knownId = getDimensionIdFromAxis(i);
     if (knownId == id) {
-      dim = new MWDimension(xAxis, id);
+      dim = boost::make_shared<MWDimension>(this->getAxis(i), id);
       break;
     }
   }
+
   if (nullptr == dim) {
     std::string message = "Cannot find id : " + id;
     throw std::overflow_error(message);
   }
-  return boost::shared_ptr<const Mantid::Geometry::IMDDimension>(dim);
+  return dim;
 }
 
 //--------------------------------------------------------------------------------------------
@@ -1528,7 +1512,7 @@ signal_t MatrixWorkspace::getSignalAtCoord(
   if (this->axes() != 2)
     throw std::invalid_argument("MatrixWorkspace::getSignalAtCoord() - "
                                 "Workspace can only have 2 axes, found " +
-                                boost::lexical_cast<std::string>(this->axes()));
+                                std::to_string(this->axes()));
 
   coord_t x = coords[0];
   coord_t y = coords[1];
@@ -1618,7 +1602,7 @@ void MatrixWorkspace::saveSpectraMapNexus(
   std::size_t nDetectors = 0;
   for (auto index : spec) {
     nDetectors +=
-        this->getSpectrum(static_cast<size_t>(index))->getDetectorIDs().size();
+        this->getSpectrum(static_cast<size_t>(index)).getDetectorIDs().size();
   }
 
   if (nDetectors < 1) {
@@ -1648,11 +1632,11 @@ void MatrixWorkspace::saveSpectraMapNexus(
     // Workspace index
     int si = spec[i];
     // Spectrum there
-    const ISpectrum *spectrum = this->getSpectrum(si);
-    spectra[i] = int32_t(spectrum->getSpectrumNo());
+    const auto &spectrum = this->getSpectrum(si);
+    spectra[i] = int32_t(spectrum.getSpectrumNo());
 
     // The detectors in this spectrum
-    const auto &detectorgroup = spectrum->getDetectorIDs();
+    const auto &detectorgroup = spectrum.getDetectorIDs();
     const int ndet1 = static_cast<int>(detectorgroup.size());
 
     detector_index[i + 1] = int32_t(

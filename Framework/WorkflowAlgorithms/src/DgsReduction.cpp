@@ -1,7 +1,7 @@
 #include "MantidWorkflowAlgorithms/DgsReduction.h"
 
 #include "MantidAPI/FileProperty.h"
-#include "MantidAPI/PropertyManagerDataService.h"
+#include "MantidKernel/PropertyManagerDataService.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ConfigService.h"
@@ -26,16 +26,6 @@ namespace WorkflowAlgorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(DgsReduction)
-
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-DgsReduction::DgsReduction() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-DgsReduction::~DgsReduction() {}
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
@@ -573,7 +563,7 @@ void DgsReduction::init() {
  */
 Workspace_sptr DgsReduction::loadInputData(const std::string prop,
                                            const bool mustLoad) {
-  g_log.debug() << "MustLoad = " << mustLoad << std::endl;
+  g_log.debug() << "MustLoad = " << mustLoad << '\n';
   Workspace_sptr inputWS;
 
   const std::string inFileProp = prop + "InputFile";
@@ -668,7 +658,7 @@ MatrixWorkspace_sptr DgsReduction::loadGroupingFile(const std::string prop) {
     } catch (...) {
       // This must be an old format grouping file.
       // Set a property to use later.
-      g_log.warning() << "Old format grouping file in use." << std::endl;
+      g_log.warning() << "Old format grouping file in use.\n";
       this->reductionManager->declareProperty(
           Kernel::make_unique<PropertyWithValue<std::string>>(
               prop + "OldGroupingFilename", groupFile));
@@ -695,8 +685,7 @@ void DgsReduction::exec() {
   const std::string reductionManagerName =
       this->getProperty("ReductionProperties");
   if (reductionManagerName.empty()) {
-    g_log.error() << "ERROR: Reduction Property Manager name is empty"
-                  << std::endl;
+    g_log.error() << "ERROR: Reduction Property Manager name is empty\n";
     return;
   }
   this->reductionManager = boost::make_shared<PropertyManager>();
@@ -919,7 +908,7 @@ void DgsReduction::exec() {
   // Convert from DeltaE to powder S(Q,W)
   const bool doPowderConvert = this->getProperty("DoPowderDataConversion");
   if (doPowderConvert) {
-    g_log.notice() << "Converting to powder S(Q,W)" << std::endl;
+    g_log.notice() << "Converting to powder S(Q,W)\n";
     // Collect information
     std::string sqwWsName = outputWsName + "_pd_sqw";
     std::vector<double> qBinning = this->getProperty("PowderMomTransferRange");

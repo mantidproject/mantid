@@ -164,7 +164,7 @@ public:
     if (it2 == track2.cend())
       return;
     TS_ASSERT_DELTA(it2->distFromStart, sqrt(2 * 10.5 * 10.5), 0.0001);
-    TS_ASSERT_DELTA(it2->distInsideObject, sqrt(2.0), 0.0001);
+    TS_ASSERT_DELTA(it2->distInsideObject, M_SQRT2, 0.0001);
     TS_ASSERT_EQUALS(it2->entryPoint, V3D(0, 9.5, -9.5));
     TS_ASSERT_EQUALS(it2->exitPoint, V3D(0, 10.5, -10.5));
 

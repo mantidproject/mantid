@@ -25,7 +25,7 @@ public:
   void test_histo() {
     MDHistoWorkspace_sptr out;
     out = UnaryOperationMDTestHelper::doTest("LogarithmMD", "histo", "out");
-    TS_ASSERT_DELTA(out->getSignalAt(0), std::log(2.0), 1e-5);
+    TS_ASSERT_DELTA(out->getSignalAt(0), M_LN2, 1e-5);
   }
 
   void test_histo_with_not_Natural() {

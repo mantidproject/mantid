@@ -67,14 +67,16 @@ public:
         run.getProperty("start_time")->value().compare("2000-01-01T00:00:00") ==
         0)
     TS_ASSERT(
-        run.getProperty("end_time")->value().compare("2000-01-01T00:00:00") ==
+        run.getProperty("end_time")->value().find("2000-01-01T00:00:00.08") ==
         0)
 
     // test data properties
     TS_ASSERT_EQUALS(run.getPropertyValueAsType<int>("att_pos"), 1);
     TS_ASSERT_EQUALS(run.getPropertyValueAsType<int>("frame_count"), 4);
-    TS_ASSERT_DELTA(run.getPropertyValueAsType<double>("period"), 0, 1.0e-5);
-    TS_ASSERT_DELTA(run.getPropertyValueAsType<double>("bm_counts"), 0, 1.0e-5);
+    TS_ASSERT_DELTA(run.getPropertyValueAsType<double>("period"), 20000.0,
+                    1.0e-5);
+    TS_ASSERT_DELTA(run.getPropertyValueAsType<double>("bm_counts"), 0.0800,
+                    1.0e-5);
 
     // test instrument setup
     TS_ASSERT_DELTA(dynamic_cast<TimeSeriesProperty<double> *>(

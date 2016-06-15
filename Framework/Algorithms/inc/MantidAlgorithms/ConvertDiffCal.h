@@ -31,9 +31,6 @@ namespace Algorithms {
 */
 class DLLExport ConvertDiffCal : public API::Algorithm {
 public:
-  ConvertDiffCal();
-  ~ConvertDiffCal() override;
-
   const std::string name() const override;
   int version() const override;
   const std::string category() const override;

@@ -58,9 +58,9 @@ public:
     auto ptrS1 = S1.get();
     auto ptrS2 = S2.get();
     Intersection A(std::move(S1), std::move(S2));
-    TS_ASSERT_EQUALS(A.leaf(0), ptrS2);
-    TS_ASSERT_EQUALS(A.leaf(1), ptrS1);
-    TS_ASSERT_EQUALS(A.display(), "-11 10");
+    TS_ASSERT_EQUALS(A.leaf(0), ptrS1);
+    TS_ASSERT_EQUALS(A.leaf(1), ptrS2);
+    TS_ASSERT_EQUALS(A.display(), "10 -11");
   }
 
   void testThreeRuleConstructor() {

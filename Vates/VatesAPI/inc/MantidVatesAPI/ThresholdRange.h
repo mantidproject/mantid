@@ -6,12 +6,14 @@
 #include "MantidGeometry/MDGeometry/MDTypes.h"
 #include "MantidAPI/Workspace_fwd.h"
 
-/** Abstract type promises to supply a minimum and maximum set of threshold range values.
+/** Abstract type promises to supply a minimum and maximum set of threshold
+ range values.
 
  @author Owen Arnold, Tessella plc
  @date 30/06/2011
 
- Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+ Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+ National Laboratory & European Spallation Source
 
  This file is part of Mantid.
 
@@ -32,15 +34,11 @@
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
 
-namespace Mantid
-{
-namespace VATES
-{
-class DLLExport ThresholdRange 
-{
+namespace Mantid {
+namespace VATES {
+class DLLExport ThresholdRange {
 
 public:
-  
   /// Calculate the threshold range.
   virtual void calculate() = 0;
 
@@ -54,20 +52,16 @@ public:
   virtual signal_t getMaximum() const = 0;
 
   /// Virtual constructor method.
-  virtual ThresholdRange* clone() const = 0;
+  virtual ThresholdRange *clone() const = 0;
 
   /// Determine wheter the given value is within the range.
-  virtual bool inRange(const signal_t& signal) = 0;
+  virtual bool inRange(const signal_t &signal) = 0;
 
   /// Destructor
-  virtual ~ThresholdRange()
-  {
-  }
+  virtual ~ThresholdRange() {}
 
   /// Interface allows the threshold range to accept a workspace.
-  virtual void setWorkspace(Mantid::API::Workspace_sptr)
-  {
-  }
+  virtual void setWorkspace(Mantid::API::Workspace_sptr) {}
 };
 
 /// ThresholdRange as a scoped pointer.

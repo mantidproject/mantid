@@ -1,17 +1,17 @@
 #include "MantidCurveFitting/Functions/BivariateNormal.h"
-#include "MantidCurveFitting/Constraints/BoundaryConstraint.h"
-#include "MantidAPI/MatrixWorkspace.h"
-#include "MantidKernel/PhysicalConstants.h"
-#include "MantidAPI/ParameterTie.h"
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/ParameterTie.h"
+#include "MantidCurveFitting/Constraints/BoundaryConstraint.h"
+#include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/System.h"
-#include <boost/shared_ptr.hpp>
-#include <fstream>
 #include <algorithm>
-#include <math.h>
+#include <boost/shared_ptr.hpp>
+#include <cmath>
+#include <cstdio>
+#include <fstream>
 #include <sstream>
 #include <string>
-#include <cstdio>
 
 using namespace Mantid::API;
 
@@ -104,7 +104,7 @@ void BivariateNormal::function1D(double *out, const double *xValues,
     inf << "," << getParameter(k);
   if (nParams() < 6)
     inf << "," << Varxx << "," << Varyy << "," << Varxy;
-  inf << std::endl;
+  inf << '\n';
 
   NCells = std::min<int>(static_cast<int>(nData), NCells);
 
@@ -153,9 +153,7 @@ void BivariateNormal::function1D(double *out, const double *xValues,
     if (constr)
       inf << i << "=" << constr->check() << ";";
   }
-  inf << std::endl;
-  inf << std::endl
-      << "    chiSq =" << chiSq << "     nData " << nData << std::endl;
+  inf << "\n\n    chiSq =" << chiSq << "     nData " << nData << '\n';
   g_log.debug(inf.str());
 }
 
@@ -171,7 +169,7 @@ void BivariateNormal::functionDeriv1D(API::Jacobian *out, const double *xValues,
   inf << "***penalty(" << penDeriv << "),Parameters=";
   for (size_t k = 0; k < 7; k++)
     inf << "," << LastParams[k];
-  inf << std::endl;
+  inf << '\n';
   g_log.debug(inf.str());
 
   std::vector<double> outf(nData, 0.0);
