@@ -43,15 +43,15 @@ public:
     this->wkspIndex = wkspIndex;
 
     // convert workspace index into detector id
-    const auto spectrum = wksp->getSpectrum(wkspIndex);
-    const auto detIds = spectrum->getDetectorIDs();
+    const auto &spectrum = wksp->getSpectrum(wkspIndex);
+    const auto detIds = spectrum.getDetectorIDs();
     if (detIds.size() != 1) {
       throw std::runtime_error("Summed pixels is not currently supported");
     }
     this->detid = *(detIds.begin());
 
-    const MantidVec &X = spectrum->readX();
-    const MantidVec &Y = spectrum->readY();
+    const MantidVec &X = spectrum.readX();
+    const MantidVec &Y = spectrum.readY();
     tofMin = X.front();
     tofMax = X.back();
 
@@ -219,7 +219,7 @@ void PDCalibration::exec() {
   PRAGMA_OMP(parallel for schedule(dynamic, 1) )
   for (std::size_t wkspIndex = 0; wkspIndex < NUMHIST; ++wkspIndex) {
     PARALLEL_START_INTERUPT_REGION
-    if (isEvent && uncalibratedEWS->getEventList(wkspIndex).empty()) {
+    if (isEvent && uncalibratedEWS->getSpectrum(wkspIndex).empty()) {
       // std::cout << "Empty event list at wkspIndex = " << wkspIndex <<
       // std::endl;
       continue;
