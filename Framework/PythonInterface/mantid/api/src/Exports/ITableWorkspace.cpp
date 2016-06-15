@@ -31,6 +31,22 @@ namespace {
 namespace bpl = boost::python;
 namespace Converters = Mantid::PythonInterface::Converters;
 
+// Numpy PyArray_IsIntegerScalar is broken for Python 3 for numpy < 1.11
+#if PY_MAJOR_VERSION >= 3
+#define TO_LONG PyLong_AsLong
+#define STR_CHECK PyUnicode_Check
+#if NPY_API_VERSION < 0x0000000a //(1.11)
+#define IS_ARRAY_INTEGER(obj)                                                  \
+  (PyLong_Check(obj) || PyArray_IsScalar((obj), Integer))
+#else
+#define IS_ARRAY_INTEGER PyArray_IsIntegerScalar
+#endif
+#else // Python 2
+#define IS_ARRAY_INTEGER PyArray_IsIntegerScalar
+#define TO_LONG PyInt_AsLong
+#define STR_CHECK PyString_Check
+#endif
+
 /// Boost macro for "looping" over builtin types
 #define BUILTIN_TYPES                                                          \
   BOOST_PP_TUPLE_TO_LIST(                                                      \
@@ -105,19 +121,11 @@ void setValue(const Column_sptr column, const int row,
     return;
   }
 
-// Special case: Boost has issues with NumPy ints, so use Python API instead
-// to check this first
-// Numpy PyArray_IsIntegerScalar is broken for Python 3 for numpy < 1.11
-#if PY_MAJOR_VERSION >= 3 && NPY_API_VERSION < 0x0000000a //(1.11)
-#define IsArrayInteger(obj)                                                    \
-  (PyLong_Check(obj) || PyArray_IsScalar((obj), Integer))
-#else
-#define IsArrayInteger PyArray_IsIntegerScalar
-#endif
-
+  // Special case: Boost has issues with NumPy ints, so use Python API instead
+  // to check this first
   if (typeID.hash_code() == typeid(int).hash_code() &&
-      IsArrayInteger(value.ptr())) {
-    column->cell<int>(row) = static_cast<int>(PyLong_AsLong(value.ptr()));
+      IS_ARRAY_INTEGER(value.ptr())) {
+    column->cell<int>(row) = static_cast<int>(TO_LONG(value.ptr()));
     return;
   }
 
@@ -192,7 +200,7 @@ bool addColumnSimple(ITableWorkspace &self, const std::string &type,
 int getPlotType(ITableWorkspace &self, const bpl::object &column) {
   // Find the column
   Mantid::API::Column_const_sptr colptr;
-  if (PyBytes_Check(column.ptr())) {
+  if (STR_CHECK(column.ptr())) {
     colptr = self.getColumn(extract<std::string>(column)());
   } else {
     colptr = self.getColumn(extract<int>(column)());
@@ -210,7 +218,7 @@ int getPlotType(ITableWorkspace &self, const bpl::object &column) {
 void setPlotType(ITableWorkspace &self, const bpl::object &column, int ptype) {
   // Find the column
   Mantid::API::Column_sptr colptr;
-  if (PyBytes_Check(column.ptr())) {
+  if (STR_CHECK(column.ptr())) {
     colptr = self.getColumn(extract<std::string>(column)());
   } else {
     colptr = self.getColumn(extract<int>(column)());
@@ -228,7 +236,7 @@ void setPlotType(ITableWorkspace &self, const bpl::object &column, int ptype) {
 PyObject *column(ITableWorkspace &self, const bpl::object &value) {
   // Find the column and row
   Mantid::API::Column_const_sptr column;
-  if (PyBytes_Check(value.ptr())) {
+  if (STR_CHECK(value.ptr())) {
     column = self.getColumn(extract<std::string>(value)());
   } else {
     column = self.getColumn(extract<int>(value)());
@@ -393,7 +401,7 @@ void addRowFromSequence(ITableWorkspace &self, const bpl::object &rowItems) {
  */
 void getCellLoc(ITableWorkspace &self, const bpl::object &col_or_row,
                 const int row_or_col, Column_sptr &column, int &rowIndex) {
-  if (PyBytes_Check(col_or_row.ptr())) {
+  if (STR_CHECK(col_or_row.ptr())) {
     column = self.getColumn(extract<std::string>(col_or_row)());
     rowIndex = row_or_col;
   } else {
