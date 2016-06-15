@@ -193,8 +193,8 @@ const std::string ParameterMap::diff(const ParameterMap &rhs,
   // Quick size check
   if (this->size() != rhs.size()) {
     return std::string("Number of parameters does not match: ") +
-           boost::lexical_cast<std::string>(this->size()) + " not equal to " +
-           boost::lexical_cast<std::string>(rhs.size());
+           std::to_string(this->size()) + " not equal to " +
+           std::to_string(rhs.size());
   }
 
   // Run this same loops as in operator==
@@ -224,7 +224,7 @@ const std::string ParameterMap::diff(const ParameterMap &rhs,
       strOutput << "Parameter mismatch LHS=RHS for LHS parameter in component "
                    "with name: " << fullName
                 << ". Parameter name is: " << (*param).name()
-                << " and value: " << (*param).asString() << std::endl;
+                << " and value: " << (*param).asString() << '\n';
       bool componentWithSameNameRHS = false;
       bool parameterWithSameNameRHS = false;
       for (auto rhsIt = rhs.m_map.cbegin(); rhsIt != rhsEnd; ++rhsIt) {
@@ -235,16 +235,16 @@ const std::string ParameterMap::diff(const ParameterMap &rhs,
           if ((*param).name() == (*rhsIt->second).name()) {
             parameterWithSameNameRHS = true;
             strOutput << "RHS param with same name has value: "
-                      << (*rhsIt->second).asString() << std::endl;
+                      << (*rhsIt->second).asString() << '\n';
           }
         }
       }
       if (!componentWithSameNameRHS) {
-        strOutput << "No matching RHS component name" << std::endl;
+        strOutput << "No matching RHS component name\n";
       }
       if (componentWithSameNameRHS && !parameterWithSameNameRHS) {
-        strOutput << "Found matching RHS component name but not parameter name"
-                  << std::endl;
+        strOutput
+            << "Found matching RHS component name but not parameter name\n";
       }
       if (firstDiffOnly)
         return strOutput.str();

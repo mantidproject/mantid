@@ -121,7 +121,7 @@ void StatisticsOfPeaksWorkspace::exec() {
     else
       oldSequence = "0.5 - 0.0";
   } else if (sortType.compare(0, 2, "Ru") == 0)
-    oldSequence = boost::lexical_cast<std::string>(peaks[0].getRunNumber());
+    oldSequence = std::to_string(peaks[0].getRunNumber());
   else
     oldSequence = peaks[0].getBankName();
   // Go through each peak at this run / bank
@@ -146,7 +146,7 @@ void StatisticsOfPeaksWorkspace::exec() {
       else
         sequence = "0.5 - 0.0";
     } else if (sortType.compare(0, 2, "Ru") == 0)
-      sequence = boost::lexical_cast<std::string>(p.getRunNumber());
+      sequence = std::to_string(p.getRunNumber());
     else
       sequence = p.getBankName();
 

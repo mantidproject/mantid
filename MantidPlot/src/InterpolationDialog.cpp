@@ -183,9 +183,9 @@ void InterpolationDialog::activateCurve(const QString &curveName) {
   double start, end;
   graph->range(graph->curveIndex(curveName), &start, &end);
   boxStart->setText(
-      QString::number(QMIN(start, end), 'g', app->d_decimal_digits));
+      QString::number(qMin(start, end), 'g', app->d_decimal_digits));
   boxEnd->setText(
-      QString::number(QMAX(start, end), 'g', app->d_decimal_digits));
+      QString::number(qMax(start, end), 'g', app->d_decimal_digits));
 }
 
 void InterpolationDialog::changeDataRange() {
@@ -196,7 +196,7 @@ void InterpolationDialog::changeDataRange() {
   double start = graph->selectedXStartValue();
   double end = graph->selectedXEndValue();
   boxStart->setText(
-      QString::number(QMIN(start, end), 'g', app->d_decimal_digits));
+      QString::number(qMin(start, end), 'g', app->d_decimal_digits));
   boxEnd->setText(
-      QString::number(QMAX(start, end), 'g', app->d_decimal_digits));
+      QString::number(qMax(start, end), 'g', app->d_decimal_digits));
 }

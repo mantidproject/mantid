@@ -179,8 +179,7 @@ void LoadNexusMonitors2::exec() {
     if (!m_allMonitorsHaveHistoData) {
       g_log.information() << "Cannot load monitors as histogram data. Loading "
                              "as events even if the opposite was requested by "
-                             "disabling the property MonitorsAsEvents"
-                          << std::endl;
+                             "disabling the property MonitorsAsEvents\n";
       monitorsAsEvents = true;
     }
 
@@ -246,8 +245,8 @@ void LoadNexusMonitors2::exec() {
       // Use the default as matching the workspace index
     }
 
-    g_log.debug() << "monIndex = " << monIndex << std::endl;
-    g_log.debug() << "spectrumNo = " << spectrumNo << std::endl;
+    g_log.debug() << "monIndex = " << monIndex << '\n';
+    g_log.debug() << "spectrumNo = " << spectrumNo << '\n';
 
     spectra_numbers[ws_index] = spectrumNo;
     detector_numbers[ws_index] = monIndex;
@@ -296,7 +295,7 @@ void LoadNexusMonitors2::exec() {
   // spectrum numbers
   // @todo: Find out if there is a better (i.e. more generic) way to do this
   try {
-    g_log.debug() << "Load Sample data isis" << std::endl;
+    g_log.debug() << "Load Sample data isis\n";
     loadSampleDataISIScompatibilityInfo(file, m_workspace);
   } catch (::NeXus::Exception &) {
   }
@@ -322,7 +321,7 @@ void LoadNexusMonitors2::exec() {
   }
 
   g_log.debug() << "Instrument name read from NeXus file is " << instrumentName
-                << std::endl;
+                << '\n';
 
   m_workspace->getAxis(0)->unit() =
       Kernel::UnitFactory::Instance().create("TOF");
@@ -347,13 +346,12 @@ void LoadNexusMonitors2::exec() {
                                  this);
 
   // Load the meta data, but don't stop on errors
-  g_log.debug() << "Loading metadata" << std::endl;
+  g_log.debug() << "Loading metadata\n";
   try {
     LoadEventNexus::loadEntryMetadata<API::MatrixWorkspace_sptr>(
         m_filename, m_workspace, m_top_entry_name);
   } catch (std::exception &e) {
-    g_log.warning() << "Error while loading meta data: " << e.what()
-                    << std::endl;
+    g_log.warning() << "Error while loading meta data: " << e.what() << '\n';
   }
 
   // Fix the detector IDs/spectrum numbers
@@ -454,14 +452,14 @@ void LoadNexusMonitors2::runLoadLogs(const std::string filename,
 
   // Now execute the Child Algorithm. Catch and log any error, but don't stop.
   try {
-    g_log.information() << "Loading logs from NeXus file..." << std::endl;
+    g_log.information() << "Loading logs from NeXus file...\n";
     loadLogs->setPropertyValue("Filename", filename);
     loadLogs->setProperty<API::MatrixWorkspace_sptr>("Workspace",
                                                      localWorkspace);
     loadLogs->execute();
   } catch (...) {
     g_log.error() << "Error while loading Logs from Nexus. Some sample logs "
-                     "may be missing." << std::endl;
+                     "may be missing.\n";
   }
 }
 
@@ -481,7 +479,7 @@ bool LoadNexusMonitors2::canOpenAsNeXus(const std::string &fname) {
       f->getEntries();
   } catch (::NeXus::Exception &e) {
     g_log.error() << "Failed to open as a NeXus file: '" << fname
-                  << "', error description: " << e.what() << std::endl;
+                  << "', error description: " << e.what() << '\n';
     res = false;
   }
   if (f)
@@ -503,7 +501,7 @@ void LoadNexusMonitors2::splitMutiPeriodHistrogramData(
   if (numPeriods < 2) {
     g_log.warning()
         << "Attempted to split multiperiod histogram workspace with "
-        << numPeriods << "periods, aborted." << std::endl;
+        << numPeriods << "periods, aborted.\n";
     return;
   }
 
@@ -513,7 +511,7 @@ void LoadNexusMonitors2::splitMutiPeriodHistrogramData(
         << "Attempted to split multiperiod histogram workspace with "
         << m_workspace->blocksize() << "data entries, into " << numPeriods
         << "periods."
-           " Aborted." << std::endl;
+           " Aborted.\n";
     return;
   }
 

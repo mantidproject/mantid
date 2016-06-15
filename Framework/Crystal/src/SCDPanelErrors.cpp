@@ -324,7 +324,7 @@ SCDPanelErrors::getNewInstrument(const Geometry::IPeak &peak) const {
   boost::split(GroupBanks, BankNames, boost::is_any_of("!"));
 
   for (size_t group = 0; group < (size_t)GroupBanks.size(); ++group) {
-    string prefix = "f" + boost::lexical_cast<std::string>(group) + "_";
+    string prefix = "f" + std::to_string(group) + "_";
 
     std::vector<std::string> bankNames;
     Quat rot = Quat(getParameter(prefix + "Xrot"), Kernel::V3D(1.0, 0.0, 0.0)) *
@@ -419,7 +419,7 @@ void SCDPanelErrors::function1D(double *out, const double *xValues,
   Check(m_peaks, xValues, nData, StartX, EndX);
 
   g_log.debug() << "BankNames " << BankNames << "   Number of peaks"
-                << (EndX - StartX + 1) / 3 << std::endl;
+                << (EndX - StartX + 1) / 3 << '\n';
 
   // some pointers for the updated instrument
   boost::shared_ptr<Geometry::Instrument> instChange =
@@ -479,21 +479,21 @@ void SCDPanelErrors::function1D(double *out, const double *xValues,
   for (size_t i = EndX; i < nData; ++i)
     out[i] = 0.;
 
-  g_log.debug() << "Parameters" << std::endl;
+  g_log.debug() << "Parameters\n";
 
   for (size_t i = 0; i < this->nParams(); ++i)
     g_log.debug() << setw(20) << parameterName(i) << setw(20) << getParameter(i)
-                  << std::endl;
+                  << '\n';
 
   g_log.debug() << "      chi Squared=" << std::setprecision(12) << chiSq
-                << std::endl;
+                << '\n';
 
   // Get values for test program. TODO eliminate
   g_log.debug() << "  out[evenxx]=";
   for (size_t i = 0; i < std::min<size_t>(nData, 30); ++i)
     g_log.debug() << out[i] << "  ";
 
-  g_log.debug() << std::endl;
+  g_log.debug() << '\n';
 }
 
 double SCDPanelErrors::checkForNonsenseParameters() const {
@@ -657,7 +657,7 @@ void SCDPanelErrors::setAttribute(const std::string &attName,
     }
     NGroups = value.asInt();
     for (int k = 1; k < NGroups; ++k) {
-      std::string prefix = "f" + boost::lexical_cast<std::string>(k) + "_";
+      std::string prefix = "f" + std::to_string(k) + "_";
       declareParameter(prefix + "detWidthScale", 1.0, "panel Width");
       declareParameter(prefix + "detHeightScale", 1.0, "panelHeight");
 

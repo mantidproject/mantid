@@ -230,8 +230,7 @@ void DetectorDiagnostic::exec() {
       numTests += 1;
     if (sampleWS)
       numTests += 1;
-    g_log.information() << "Number of tests requested: " << numTests
-                        << std::endl;
+    g_log.information() << "Number of tests requested: " << numTests << '\n';
     m_progStepWidth = (1. - m_fracDone) / static_cast<double>(numTests);
   }
 
@@ -505,8 +504,7 @@ MatrixWorkspace_sptr DetectorDiagnostic::integrateSpectra(
   MatrixWorkspace_sptr finalOutputW = outputW;
   if (outputWorkspace2D &&
       boost::dynamic_pointer_cast<EventWorkspace>(outputW)) {
-    g_log.debug() << "Converting output Event Workspace into a Workspace2D."
-                  << std::endl;
+    g_log.debug() << "Converting output Event Workspace into a Workspace2D.\n";
     childAlg = createChildAlgorithm("ConvertToMatrixWorkspace", t0, t1);
     childAlg->setProperty("InputWorkspace", outputW);
     childAlg->executeAsChildAlg();

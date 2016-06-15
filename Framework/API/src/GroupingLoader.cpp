@@ -251,7 +251,7 @@ Grouping::Grouping(ITableWorkspace_sptr table) {
     // Convert to a range string, i.e. 1-5,6-8,9
     std::string detectorRange = Kernel::Strings::toString(detectors);
 
-    this->groupNames.push_back(boost::lexical_cast<std::string>(row + 1));
+    this->groupNames.push_back(std::to_string(row + 1));
     this->groups.push_back(detectorRange);
   }
 

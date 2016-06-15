@@ -67,17 +67,17 @@ FrameworkManagerImpl::FrameworkManagerImpl()
   _set_output_format(_TWO_DIGIT_EXPONENT);
 #endif
 
-  g_log.notice() << Mantid::welcomeMessage() << std::endl;
+  g_log.notice() << Mantid::welcomeMessage() << '\n';
   loadPluginsUsingKey(PLUGINS_DIR_KEY);
   disableNexusOutput();
   setNumOMPThreadsToConfigValue();
 
 #ifdef MPI_BUILD
   g_log.notice() << "This MPI process is rank: "
-                 << boost::mpi::communicator().rank() << std::endl;
+                 << boost::mpi::communicator().rank() << '\n';
 #endif
 
-  g_log.debug() << "FrameworkManager created." << std::endl;
+  g_log.debug() << "FrameworkManager created.\n";
 
   AsynchronousStartupTasks();
 }
@@ -93,9 +93,8 @@ void FrameworkManagerImpl::AsynchronousStartupTasks() {
   if ((retVal == 1) && (updateInstrumentDefinitions == 1)) {
     UpdateInstrumentDefinitions();
   } else {
-    g_log.information()
-        << "Instrument updates disabled - cannot update instrument definitions."
-        << std::endl;
+    g_log.information() << "Instrument updates disabled - cannot update "
+                           "instrument definitions.\n";
   }
 
   int checkIfNewerVersionIsAvailable = 0;
@@ -104,7 +103,7 @@ void FrameworkManagerImpl::AsynchronousStartupTasks() {
   if ((retValVersionCheck == 1) && (checkIfNewerVersionIsAvailable == 1)) {
     CheckIfNewerVersionIsAvailable();
   } else {
-    g_log.information() << "Version check disabled." << std::endl;
+    g_log.information() << "Version check disabled.\n";
   }
 
   setupUsageReporting();
@@ -119,7 +118,7 @@ void FrameworkManagerImpl::UpdateInstrumentDefinitions() {
     Poco::ActiveResult<bool> result = algDownloadInstrument->executeAsync();
   } catch (Kernel::Exception::NotFoundError &) {
     g_log.debug() << "DowndloadInstrument algorithm is not available - cannot "
-                     "update instrument definitions." << std::endl;
+                     "update instrument definitions.\n";
   }
 }
 
@@ -131,7 +130,7 @@ void FrameworkManagerImpl::CheckIfNewerVersionIsAvailable() {
     Poco::ActiveResult<bool> result = algCheckVersion->executeAsync();
   } catch (Kernel::Exception::NotFoundError &) {
     g_log.debug() << "CheckMantidVersion algorithm is not available - cannot "
-                     "check if a newer version is available." << std::endl;
+                     "check if a newer version is available.\n";
   }
 }
 
@@ -383,7 +382,7 @@ bool FrameworkManagerImpl::deleteWorkspace(const std::string &wsName) {
   try {
     ws_sptr = AnalysisDataService::Instance().retrieve(wsName);
   } catch (Kernel::Exception::NotFoundError &ex) {
-    g_log.error() << ex.what() << std::endl;
+    g_log.error() << ex.what() << '\n';
     return false;
   }
 
@@ -402,8 +401,7 @@ bool FrameworkManagerImpl::deleteWorkspace(const std::string &wsName) {
     retVal = true;
   } catch (Kernel::Exception::NotFoundError &) {
     // workspace was not found
-    g_log.error() << "Workspace " << wsName << " could not be found."
-                  << std::endl;
+    g_log.error() << "Workspace " << wsName << " could not be found.\n";
     retVal = false;
   }
   return retVal;

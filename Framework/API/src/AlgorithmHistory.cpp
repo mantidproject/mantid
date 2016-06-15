@@ -190,15 +190,14 @@ AlgorithmHistory::getChildAlgorithm(const size_t index) const {
  */
 void AlgorithmHistory::printSelf(std::ostream &os, const int indent) const {
   os << std::string(indent, ' ') << "Algorithm: " << m_name;
-  os << std::string(indent, ' ') << " v" << m_version << std::endl;
+  os << std::string(indent, ' ') << " v" << m_version << '\n';
 
   os << std::string(indent, ' ')
-     << "Execution Date: " << m_executionDate.toFormattedString() << std::endl;
+     << "Execution Date: " << m_executionDate.toFormattedString() << '\n';
   os << std::string(indent, ' ')
-     << "Execution Duration: " << m_executionDuration << " seconds"
-     << std::endl;
+     << "Execution Duration: " << m_executionDuration << " seconds\n";
 
-  os << std::string(indent, ' ') << "Parameters:" << std::endl;
+  os << std::string(indent, ' ') << "Parameters:\n";
 
   for (const auto &property : m_properties) {
     property->printSelf(os, indent + 2);

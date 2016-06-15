@@ -173,13 +173,13 @@ void EditLocalParameterDialog::showContextMenu() {
   {
     QAction *action = new QAction("Copy", this);
     action->setToolTip("Copy data to clipboard.");
-    connect(action, SIGNAL(activated()), this, SLOT(copy()));
+    connect(action, SIGNAL(triggered()), this, SLOT(copy()));
     menu->addAction(action);
   }
   {
     QAction *action = new QAction("Paste", this);
     action->setToolTip("Paste data from clipboard.");
-    connect(action, SIGNAL(activated()), this, SLOT(paste()));
+    connect(action, SIGNAL(triggered()), this, SLOT(paste()));
     auto text = QApplication::clipboard()->text();
     action->setEnabled(!text.isEmpty());
     menu->addAction(action);

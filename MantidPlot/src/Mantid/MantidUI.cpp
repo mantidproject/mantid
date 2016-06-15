@@ -138,46 +138,46 @@ MantidUI::MantidUI(ApplicationWindow *aw)
 
   actionCopyRowToTable = new QAction(this);
   actionCopyRowToTable->setIcon(QIcon(getQPixmap("table_xpm")));
-  connect(actionCopyRowToTable, SIGNAL(activated()), this,
+  connect(actionCopyRowToTable, SIGNAL(triggered()), this,
           SLOT(copyRowToTable()));
 
   actionCopyRowToGraph = new QAction(this);
   actionCopyRowToGraph->setIcon(QIcon(getQPixmap("graph_xpm")));
-  connect(actionCopyRowToGraph, SIGNAL(activated()), this,
+  connect(actionCopyRowToGraph, SIGNAL(triggered()), this,
           SLOT(copyRowToGraph()));
 
   actionCopyRowToGraphErr = new QAction(this);
   actionCopyRowToGraphErr->setIcon(QIcon(getQPixmap("graph_xpm")));
-  connect(actionCopyRowToGraphErr, SIGNAL(activated()), this,
+  connect(actionCopyRowToGraphErr, SIGNAL(triggered()), this,
           SLOT(copyRowToGraphErr()));
 
   actionWaterfallPlot = new QAction(QIcon(":/waterfall_plot.png"),
                                     tr("Plot spectra as waterfall"), this);
-  connect(actionWaterfallPlot, SIGNAL(activated()), this,
+  connect(actionWaterfallPlot, SIGNAL(triggered()), this,
           SLOT(copyRowsToWaterfall()));
 
   actionCopyDetectorsToTable = new QAction(tr("View detectors table"), this);
   actionCopyDetectorsToTable->setIcon(QIcon(getQPixmap("table_xpm")));
-  connect(actionCopyDetectorsToTable, SIGNAL(activated()), this,
+  connect(actionCopyDetectorsToTable, SIGNAL(triggered()), this,
           SLOT(copyDetectorsToTable()));
 
   actionCopyValues = new QAction(tr("Copy"), this);
   actionCopyValues->setIcon(QIcon(getQPixmap("copy_xpm")));
-  connect(actionCopyValues, SIGNAL(activated()), this, SLOT(copyValues()));
+  connect(actionCopyValues, SIGNAL(triggered()), this, SLOT(copyValues()));
 
   actionCopyColumnToTable = new QAction(this);
   actionCopyColumnToTable->setIcon(QIcon(getQPixmap("table_xpm")));
-  connect(actionCopyColumnToTable, SIGNAL(activated()), this,
+  connect(actionCopyColumnToTable, SIGNAL(triggered()), this,
           SLOT(copyColumnToTable()));
 
   actionCopyColumnToGraph = new QAction(this);
   actionCopyColumnToGraph->setIcon(QIcon(getQPixmap("graph_xpm")));
-  connect(actionCopyColumnToGraph, SIGNAL(activated()), this,
+  connect(actionCopyColumnToGraph, SIGNAL(triggered()), this,
           SLOT(copyColumnToGraph()));
 
   actionCopyColumnToGraphErr = new QAction(this);
   actionCopyColumnToGraphErr->setIcon(QIcon(getQPixmap("graph_xpm")));
-  connect(actionCopyColumnToGraphErr, SIGNAL(activated()), this,
+  connect(actionCopyColumnToGraphErr, SIGNAL(triggered()), this,
           SLOT(copyColumnToGraphErr()));
 
   connect(this, SIGNAL(needToCreateLoadDAEMantidMatrix(const QString &)), this,
@@ -562,7 +562,7 @@ void MantidUI::importTransposed() {
 /**  Create a TableWorkspace of box data from the MDEventWorkspace
 */
 void MantidUI::importBoxDataTable() {
-  std::cout << "MantidUI::importBoxDataTable()" << std::endl;
+  std::cout << "MantidUI::importBoxDataTable()\n";
   QString wsName = getSelectedWorkspaceName();
   try {
     // Get the MD event table
@@ -648,9 +648,9 @@ MantidUI::plotMDList(const QStringList &wsNames, const int plotAxis,
     }
 
   } catch (std::invalid_argument &e) {
-    g_log.warning() << e.what() << std::endl;
+    g_log.warning() << e.what() << '\n';
   } catch (std::runtime_error &e) {
-    g_log.warning() << e.what() << std::endl;
+    g_log.warning() << e.what() << '\n';
   } catch (...) {
   }
 
@@ -1373,11 +1373,11 @@ bool MantidUI::drop(QDropEvent *e) {
       } catch (std::runtime_error &error) {
         g_log.error()
             << "Failed to Load the python files. The reason for failure is: "
-            << error.what() << std::endl;
+            << error.what() << '\n';
       } catch (std::logic_error &error) {
         g_log.error()
             << "Failed to Load the python files. The reason for failure is: "
-            << error.what() << std::endl;
+            << error.what() << '\n';
       }
     } else {
       // pass to Loading of mantid workspaces
@@ -1806,7 +1806,7 @@ bool MantidUI::executeAlgorithmAsync(Mantid::API::IAlgorithm_sptr alg,
       alg->executeAsync();
     } catch (Poco::NoThreadAvailableException &) {
       g_log.error() << "No thread was available to run the " << alg->name()
-                    << " algorithm in the background." << std::endl;
+                    << " algorithm in the background.\n";
       return false;
     }
     return true;
@@ -2176,11 +2176,11 @@ void MantidUI::menuMantidMatrixAboutToShow() {
   menuMantidMatrix->addAction(action);
 
   action = new QAction("Save Nexus", this);
-  connect(action, SIGNAL(activated()), this, SLOT(saveNexusWorkspace()));
+  connect(action, SIGNAL(triggered()), this, SLOT(saveNexusWorkspace()));
   menuMantidMatrix->addAction(action);
 
   action = new QAction("Rename", this);
-  connect(action, SIGNAL(activated()), this, SLOT(renameWorkspace()));
+  connect(action, SIGNAL(triggered()), this, SLOT(renameWorkspace()));
   menuMantidMatrix->addAction(action);
 
   // separate delete
@@ -2321,7 +2321,7 @@ void MantidUI::importString(const QString &logName, const QString &data,
 
   // Show table
   t->resize(2 * t->table()->horizontalHeader()->sectionSize(0) + 55,
-            (QMIN(10, 1) + 1) * t->table()->verticalHeader()->sectionSize(0) +
+            (qMin(10, 1) + 1) * t->table()->verticalHeader()->sectionSize(0) +
                 100);
   t->setAttribute(Qt::WA_DeleteOnClose);
   t->showNormal();
@@ -2369,7 +2369,7 @@ void MantidUI::importStrSeriesLog(const QString &logName, const QString &data,
 
   // Show table
   t->resize(2 * t->table()->horizontalHeader()->sectionSize(0) + 55,
-            (QMIN(10, rowcount) + 1) *
+            (qMin(10, rowcount) + 1) *
                     t->table()->verticalHeader()->sectionSize(0) +
                 100);
   t->setAttribute(Qt::WA_DeleteOnClose);
@@ -2625,7 +2625,7 @@ void MantidUI::importNumSeriesLog(const QString &wsName, const QString &logName,
   // Show table
 
   t->resize(2 * t->table()->horizontalHeader()->sectionSize(0) + 55,
-            (QMIN(10, t->numRows()) + 1) *
+            (qMin(10, t->numRows()) + 1) *
                     t->table()->verticalHeader()->sectionSize(0) +
                 100);
   // t->askOnCloseEvent(false);
@@ -3113,10 +3113,10 @@ MultiLayer *MantidUI::plot1D(const QMultiMap<QString, int> &toPlot,
         g->setDistribution(firstCurve->isDistribution());
       }
     } catch (Mantid::Kernel::Exception::NotFoundError &) {
-      g_log.warning() << "Workspace " << it.key().toStdString() << " not found"
-                      << std::endl;
+      g_log.warning() << "Workspace " << it.key().toStdString()
+                      << " not found\n";
     } catch (std::exception &ex) {
-      g_log.warning() << ex.what() << std::endl;
+      g_log.warning() << ex.what() << '\n';
     }
   }
 

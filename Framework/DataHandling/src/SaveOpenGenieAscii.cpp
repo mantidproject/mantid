@@ -146,11 +146,9 @@ void SaveOpenGenieAscii::writeFileHeader(std::ofstream &outfile) {
   auto samplenumber = (&log)->size();
   samplenumber += 3; // x, y, e
 
-  outfile << "# Open Genie ASCII File #" << std::endl
-          << "# label " << std::endl
-          << "GXWorkspace" << std::endl
+  outfile << "# Open Genie ASCII File #\n# label \nGXWorkspace\n"
           // number of entries
-          << samplenumber << std::endl;
+          << samplenumber << '\n';
 }
 
 //------------------------------------------------------------------------------
@@ -173,7 +171,7 @@ std::string SaveOpenGenieAscii::getAxisHeader(const std::string alpha,
   outStr += twospc + singleSpc + alpha + "\n";
   outStr += fourspc + GXR + "\n";
   outStr += fourspc + banknum + "\n";
-  outStr += fourspc + boost::lexical_cast<std::string>(nBins) + "\n";
+  outStr += fourspc + std::to_string(nBins) + "\n";
 
   return outStr;
 }
@@ -332,7 +330,7 @@ void SaveOpenGenieAscii::addNtc(const std::string fourspc, int nBins) {
   std::string ntc = "ntc";
 
   outStr += ("  \"" + ntc + "\"" + "\n" + fourspc + "Integer" + "\n" + fourspc +
-             boost::lexical_cast<std::string>(nBins) + "\n");
+             std::to_string(nBins) + "\n");
 
   logVector.push_back(outStr);
 }

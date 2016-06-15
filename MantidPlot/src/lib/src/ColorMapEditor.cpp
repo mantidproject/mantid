@@ -53,7 +53,7 @@ ColorMapEditor::ColorMapEditor(const QLocale &locale, int precision,
   table->horizontalHeader()->setStretchLastSection(true);
   table->viewport()->setMouseTracking(true);
   table->viewport()->installEventFilter(this);
-  table->setHorizontalHeaderLabels(QStringList() << tr("Level") << tr("Color"));
+  table->setHorizontalHeaderLabels({tr("Level"), tr("Color")});
   table->setMinimumHeight(6 * table->horizontalHeader()->height() + 2);
   table->installEventFilter(this);
 
@@ -149,8 +149,8 @@ void ColorMapEditor::setColorMap(const QwtLinearColorMap &map) {
 }
 
 void ColorMapEditor::setRange(double min, double max) {
-  min_val = QMIN(min, max);
-  max_val = QMAX(min, max);
+  min_val = qMin(min, max);
+  max_val = qMax(min, max);
 }
 
 void ColorMapEditor::insertLevel() {

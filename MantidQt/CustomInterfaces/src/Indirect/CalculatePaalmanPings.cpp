@@ -207,10 +207,8 @@ bool CalculatePaalmanPings::doValidation(bool silent) {
     QString containerType = containerWsName.right(
         containerWsName.length() - containerWsName.lastIndexOf("_"));
 
-    g_log.debug() << "Sample type is: " << sampleType.toStdString()
-                  << std::endl;
-    g_log.debug() << "Can type is: " << containerType.toStdString()
-                  << std::endl;
+    g_log.debug() << "Sample type is: " << sampleType.toStdString() << '\n';
+    g_log.debug() << "Can type is: " << containerType.toStdString() << '\n';
 
     if (containerType != sampleType)
       uiv.addErrorMessage(
@@ -322,7 +320,7 @@ void CalculatePaalmanPings::getBeamWidthFromWorkspace(const QString &wsName) {
 
   if (!ws) {
     g_log.warning() << "Failed to find workspace " << wsName.toStdString()
-                    << std::endl;
+                    << '\n';
     return;
   }
 

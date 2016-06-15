@@ -76,8 +76,8 @@ void FindUBUsingFFT::exec() {
   double error = IndexingUtils::Find_UB(UB, q_vectors, min_d, max_d, tolerance,
                                         degrees_per_step);
 
-  g_log.notice() << "Error = " << error << std::endl;
-  g_log.notice() << "UB = " << UB << std::endl;
+  g_log.notice() << "Error = " << error << '\n';
+  g_log.notice() << "UB = " << UB << '\n';
 
   if (!IndexingUtils::CheckUB(UB)) // UB not found correctly
   {

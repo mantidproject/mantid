@@ -100,7 +100,7 @@ void MonitorLiveData::doClone(const std::string &originalName,
       } else {
         std::cout << "Not cloning\n";
         g_log.warning() << "Not enough spare memory to clone " << originalName
-                        << ". Workspace will be reset." << std::endl;
+                        << ". Workspace will be reset.\n";
       }
     }
   }
@@ -149,7 +149,7 @@ void MonitorLiveData::exec() {
     if (seconds > UpdateEvery) {
       lastTime = now;
       g_log.notice() << "Loading live data chunk " << m_chunkNumber << " at "
-                     << now.toFormattedString("%H:%M:%S") << std::endl;
+                     << now.toFormattedString("%H:%M:%S") << '\n';
 
       // Time to run LoadLiveData again
       Algorithm_sptr alg = createChildAlgorithm("LoadLiveData");
@@ -177,7 +177,7 @@ void MonitorLiveData::exec() {
 
       if (runNumber == 0) {
         runNumber = listener->runNumber();
-        g_log.debug() << "Run number set to " << runNumber << std::endl;
+        g_log.debug() << "Run number set to " << runNumber << '\n';
       }
 
       // Did we just hit a run transition?
@@ -235,8 +235,7 @@ void MonitorLiveData::exec() {
     if (seconds > UpdateEvery)
       g_log.warning() << "Cannot process live data as quickly as requested: "
                          "requested every " << UpdateEvery
-                      << " seconds but it takes " << seconds << " seconds!"
-                      << std::endl;
+                      << " seconds but it takes " << seconds << " seconds!\n";
   } // loop until aborted
 
   // Set the outputs (only applicable when RunTransitionBehavior is "Stop")

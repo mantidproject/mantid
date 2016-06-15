@@ -151,7 +151,7 @@ void SANSSensitivityCorrection::exec() {
         // Reset pointer
         floodWS.reset();
         g_log.error() << "A processed Mantid workspace was loaded but it "
-                         "wasn't a sensitivity file!" << std::endl;
+                         "wasn't a sensitivity file!\n";
       }
     }
 
@@ -260,7 +260,7 @@ void SANSSensitivityCorrection::exec() {
             // We are running out of options
             g_log.error() << "No dark current algorithm provided to load ["
                           << getPropertyValue("DarkCurrentFile")
-                          << "]: skipped!" << std::endl;
+                          << "]: skipped!\n";
             dark_result = "   No dark current algorithm provided: skipped\n";
           }
         }

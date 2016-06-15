@@ -211,7 +211,7 @@ void SaveRKH::write2D() {
   }
   const Axis *const Y = m_workspace->getAxis(1);
   const size_t Ybins = Y->length();
-  m_outRKH << "\n  " << Ybins << std::endl;
+  m_outRKH << "\n  " << Ybins << '\n';
   for (size_t i = 0; i < Ybins; ++i) {
     m_outRKH << std::setw(14) << std::scientific << std::setprecision(6)
              << (*Y)(i);

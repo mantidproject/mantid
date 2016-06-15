@@ -144,8 +144,7 @@ void IFittingAlgorithm::setFunction() {
     m_workspacePropertyNames.resize(ndom);
     m_workspacePropertyNames[0] = "InputWorkspace";
     for (size_t i = 1; i < ndom; ++i) {
-      std::string workspacePropertyName =
-          "InputWorkspace_" + boost::lexical_cast<std::string>(i);
+      std::string workspacePropertyName = "InputWorkspace_" + std::to_string(i);
       m_workspacePropertyNames[i] = workspacePropertyName;
       if (!existsProperty(workspacePropertyName)) {
         declareProperty(

@@ -141,7 +141,7 @@ void SelectCellWithForm::exec() {
   Kernel::Matrix<double> T(UB);
   T.Invert();
   T = newUB * T;
-  g_log.notice() << "Transformation Matrix =  " << T.str() << std::endl;
+  g_log.notice() << "Transformation Matrix =  " << T.str() << '\n';
 
   if (apply) {
     //----------------------------------- Try to optimize(LSQ) to find lattice
@@ -178,10 +178,10 @@ void SelectCellWithForm::exec() {
     }
 
     // Tell the user what happened.
-    g_log.notice() << "Re-indexed the peaks with the new UB. " << std::endl;
+    g_log.notice() << "Re-indexed the peaks with the new UB. \n";
     g_log.notice() << "Now, " << num_indexed
                    << " are indexed with average error " << average_error
-                   << std::endl;
+                   << '\n';
 
     // Save output properties
 

@@ -68,7 +68,7 @@ bool EventNexusLoadingPresenter::canReadFile() const {
   } catch (std::exception &e) {
     std::cerr << "Could not open " << this->m_filename
               << " as an EventNexus file because of exception: " << e.what()
-              << std::endl;
+              << '\n';
     // Clean up, if possible
     if (file)
       file->close();

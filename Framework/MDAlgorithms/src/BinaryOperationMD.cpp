@@ -176,7 +176,7 @@ void BinaryOperationMD::exec() {
           g_log.warning() << "Dimension " << d << " (" << dimA->getName()
                           << ") has different extents in the two "
                              "MDHistoWorkspaces. The operation may not make "
-                             "sense!" << std::endl;
+                             "sense!\n";
       }
       this->execHistoHisto(m_out_histo, m_operand_histo);
     } else if (m_operand_scalar)

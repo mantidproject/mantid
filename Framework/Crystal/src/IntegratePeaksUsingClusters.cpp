@@ -169,13 +169,13 @@ void IntegratePeaksUsingClusters::exec() {
     if (boost::math::isnan(signalValue)) {
       g_log.warning()
           << "Warning: image for integration is off edge of detector for peak "
-          << i << std::endl;
+          << i << '\n';
     } else if (signalValue <
                static_cast<Mantid::signal_t>(analysis.getStartLabelId())) {
       g_log.information() << "Peak: " << i
                           << " Has no corresponding cluster/blob detected on "
                              "the image. This could be down to your Threshold "
-                             "settings." << std::endl;
+                             "settings.\n";
     } else {
       const size_t labelIdAtPeak = static_cast<size_t>(signalValue);
       ICluster *const cluster = clusterMap[labelIdAtPeak].get();
@@ -189,7 +189,7 @@ void IntegratePeaksUsingClusters::exec() {
         if (it != labelsTakenByPeaks.end()) {
           g_log.warning() << "Overlapping Peaks. Peak: " << i
                           << " overlaps with another Peak: " << it->second
-                          << " and shares label id: " << it->first << std::endl;
+                          << " and shares label id: " << it->first << '\n';
         }
         labelsTakenByPeaks.emplace(labelIdAtPeak, i);
       }

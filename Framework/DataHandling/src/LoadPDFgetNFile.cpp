@@ -121,10 +121,10 @@ void LoadPDFgetNFile::parseDataFile(std::string filename) {
   if (!ifile.is_open()) {
     stringstream errmsg;
     errmsg << "Unable to open file " << filename << ".  Quit!";
-    g_log.error() << errmsg.str() << std::endl;
+    g_log.error() << errmsg.str() << '\n';
     throw std::runtime_error(errmsg.str());
   } else {
-    g_log.notice() << "Open PDFgetN File " << filename << std::endl;
+    g_log.notice() << "Open PDFgetN File " << filename << '\n';
   }
 
   // 2. Parse
@@ -159,7 +159,7 @@ void LoadPDFgetNFile::parseDataFile(std::string filename) {
     stringstream errmsg;
     errmsg << "Unable to find a line staring with #L as the indicator of data "
               "segment. ";
-    g_log.error() << errmsg.str() << std::endl;
+    g_log.error() << errmsg.str() << '\n';
     throw std::runtime_error(errmsg.str());
   }
 
@@ -207,7 +207,7 @@ void LoadPDFgetNFile::parseColumnNameLine(std::string line) {
     stringstream errmsg;
     errmsg << "Expecting header as #L.  Input line has header as " << header
            << ". Unable to proceed. ";
-    g_log.error() << errmsg.str() << endl;
+    g_log.error() << errmsg.str() << '\n';
     throw std::runtime_error(errmsg.str());
   }
 
@@ -219,7 +219,7 @@ void LoadPDFgetNFile::parseColumnNameLine(std::string line) {
     this->mColumnNames.push_back(terms[i + 1]);
     msgss << setw(-3) << i << ": " << setw(-10) << mColumnNames[i];
   }
-  g_log.information() << msgss.str() << endl;
+  g_log.information() << msgss.str() << '\n';
 
   return;
 }
@@ -285,8 +285,8 @@ void LoadPDFgetNFile::setUnit(Workspace2D_sptr ws) {
     label->setLabel("AtomicDistance", "Angstrom");
   } else {
     stringstream errss;
-    errss << "X axis " << xcolname << " is not supported for unit. " << endl;
-    g_log.warning() << errss.str() << endl;
+    errss << "X axis " << xcolname << " is not supported for unit. \n";
+    g_log.warning() << errss.str() << '\n';
   }
 
   // 2. Set Y
@@ -357,15 +357,14 @@ void LoadPDFgetNFile::generateDataWorkspace() {
       }
     }
     g_log.information() << "Set " << i
-                        << ":  Number of Points = " << numptsvec[i]
-                        << std::endl;
+                        << ":  Number of Points = " << numptsvec[i] << '\n';
   }
   if (!samesize) {
     stringstream errmsg;
     errmsg << "Multiple bank (number of banks = " << numsets
            << ") have different size of data array.  Unable to handle this "
               "situation.";
-    g_log.error() << errmsg.str() << std::endl;
+    g_log.error() << errmsg.str() << '\n';
     throw std::runtime_error(errmsg.str());
   }
   size_t size = numptsvec[0];

@@ -1,6 +1,7 @@
 #pylint: disable=no-init,too-many-instance-attributes
 from mantid.simpleapi import *
-from mantid.api import PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty, PropertyMode, Progress
+from mantid.api import (PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty,
+                        ITableWorkspaceProperty, PropertyMode, Progress)
 from mantid.kernel import Direction, logger
 from mantid import config
 import math
@@ -47,7 +48,7 @@ class TransformToIqt(PythonAlgorithm):
                              doc='Decrease total number of spectrum points by this ratio through merging of '
                                  'intensities from neighbouring bins. Default=1')
 
-        self.declareProperty(MatrixWorkspaceProperty('ParameterWorkspace', '',
+        self.declareProperty(ITableWorkspaceProperty('ParameterWorkspace', '',
                                                      direction=Direction.Output,
                                                      optional=PropertyMode.Optional),
                              doc='Table workspace for saving TransformToIqt properties')

@@ -81,7 +81,7 @@ void AnalysisDataServiceImpl::add(
     std::string wsName = ws->name();
     // if anonymous make up a name and add
     if (wsName.empty()) {
-      wsName = name + "_" + boost::lexical_cast<std::string>(i + 1);
+      wsName = name + "_" + std::to_string(i + 1);
     } else if (doesExist(wsName)) { // if ws is already there do nothing
       wsName.clear();
     }
@@ -120,7 +120,7 @@ void AnalysisDataServiceImpl::addOrReplace(
     std::string wsName = ws->name();
     // make up a name for an anonymous workspace
     if (wsName.empty()) {
-      wsName = name + "_" + boost::lexical_cast<std::string>(i + 1);
+      wsName = name + "_" + std::to_string(i + 1);
     } else if (doesExist(wsName)) { // if ws is already there do nothing
       wsName.clear();
     }

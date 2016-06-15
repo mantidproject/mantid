@@ -69,9 +69,8 @@ AssociationsDialog::AssociationsDialog(Graph *g, Qt::WFlags fl)
   table->verticalHeader()->hide();
   table->verticalHeader()->setResizeMode(QHeaderView::ResizeToContents);
   table->setMaximumHeight(8 * table->rowHeight(0));
-  table->setHorizontalHeaderLabels(QStringList() << tr("Column") << tr("X")
-                                                 << tr("Y") << tr("xErr")
-                                                 << tr("yErr"));
+  table->setHorizontalHeaderLabels(
+      {tr("Column"), tr("X"), tr("Y"), tr("xErr"), tr("yErr")});
   vl->addWidget(table);
 
   connect(table, SIGNAL(itemClicked(QTableWidgetItem *)), this,
@@ -115,7 +114,7 @@ void AssociationsDialog::updateCurves() {
   if (!graph)
     return;
 
-  QApplication::setOverrideCursor(Qt::waitCursor);
+  QApplication::setOverrideCursor(Qt::WaitCursor);
 
   for (int i = 0; i < associations->count(); i++)
     changePlotAssociation(i, plotAssociation(associations->item(i)->text()));

@@ -859,7 +859,7 @@ public:
         if (fileEnd > maxFilePos)
           maxFilePos = fileEnd;
         // std::cout << mdbox->getFilePosition() << " file pos " << i <<
-        // std::endl;
+        // '\n';
       }
     }
     TSM_ASSERT_EQUALS(
@@ -881,7 +881,7 @@ public:
     TSM_ASSERT_LESS_THAN(
         "And the events were properly saved sequentially in the files.",
         minimumSaved, maxFilePos);
-    std::cout << dbuf->getMemoryStr() << std::endl;
+    std::cout << dbuf->getMemoryStr() << '\n';
 
     delete b;
     const std::string filename = fbc->getFileName();

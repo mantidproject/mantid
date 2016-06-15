@@ -177,7 +177,7 @@ void GenerateGroupingPowder::exec() {
     throw Exception::FileError("Unable to create file: ", PARfilename);
   }
   // Write the number of detectors to the file.
-  outPAR_file << " " << goodGroups << std::endl;
+  outPAR_file << " " << goodGroups << '\n';
 
   for (size_t i = 0; i < numSteps; ++i) {
     size_t gSize = groups.at(i).size();
@@ -195,7 +195,7 @@ void GenerateGroupingPowder::exec() {
       outPAR_file.width(10);
       outPAR_file << 0.01;
       outPAR_file.width(10);
-      outPAR_file << (groups.at(i)).at(0) << std::endl;
+      outPAR_file << (groups.at(i)).at(0) << '\n';
     }
   }
 
