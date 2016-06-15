@@ -14,7 +14,6 @@ namespace Crystal {
  */
 class DLLExport SavePeaksFile : public API::Algorithm {
 public:
-
   /// Algorithm's name for identification
   const std::string name() const override { return "SavePeaksFile"; };
   /// Summary of algorithms purpose

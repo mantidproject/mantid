@@ -48,7 +48,6 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class DLLExport OptimizeCrystalPlacement : public API::Algorithm {
 public:
-
   const std::string name() const override {
     return "OptimizeCrystalPlacement";
   };

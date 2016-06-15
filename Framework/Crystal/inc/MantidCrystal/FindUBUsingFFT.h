@@ -35,7 +35,6 @@ namespace Crystal {
   */
 class DLLExport FindUBUsingFFT : public API::Algorithm {
 public:
-
   /// Algorithm's name for identification
   const std::string name() const override;
 

@@ -38,7 +38,6 @@ namespace Crystal {
   */
 class DLLExport ShowPossibleCells : public API::Algorithm {
 public:
-
   /// Algorithm's name for identification
   const std::string name() const override { return "ShowPossibleCells"; };
 

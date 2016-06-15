@@ -36,7 +36,6 @@ namespace Crystal {
   */
 class DLLExport IndexPeaks : public API::Algorithm {
 public:
-
   /// Algorithm's name for identification
   const std::string name() const override { return "IndexPeaks"; };
   /// Summary of algorithms purpose

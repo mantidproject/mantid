@@ -18,7 +18,6 @@ namespace Crystal {
 class DLLExport LoadIsawPeaks
     : public API::IFileLoader<Kernel::FileDescriptor> {
 public:
-
   /// Algorithm's name for identification
   const std::string name() const override { return "LoadIsawPeaks"; }
 

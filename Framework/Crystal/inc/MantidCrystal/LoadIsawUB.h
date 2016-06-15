@@ -16,7 +16,6 @@ namespace Crystal {
  */
 class DLLExport LoadIsawUB : public API::Algorithm {
 public:
-
   /// Algorithm's name for identification
   const std::string name() const override { return "LoadIsawUB"; };
   /// Summary of algorithms purpose
