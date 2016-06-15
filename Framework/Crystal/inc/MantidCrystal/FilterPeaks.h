@@ -33,8 +33,6 @@ namespace Crystal {
 */
 class DLLExport FilterPeaks : public API::Algorithm {
 public:
-  FilterPeaks();
-  ~FilterPeaks() override;
 
   const std::string name() const override;
   /// Summary of algorithms purpose

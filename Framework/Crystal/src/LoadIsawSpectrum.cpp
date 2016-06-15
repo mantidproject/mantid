@@ -25,18 +25,6 @@ namespace Crystal {
 DECLARE_ALGORITHM(LoadIsawSpectrum)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-LoadIsawSpectrum::LoadIsawSpectrum() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-LoadIsawSpectrum::~LoadIsawSpectrum() = default;
-
-//----------------------------------------------------------------------------------------------
-
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void LoadIsawSpectrum::init() {

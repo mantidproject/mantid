@@ -10,12 +10,6 @@ using namespace Mantid::Kernel;
 namespace Mantid {
 namespace API {
 
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-MultiPeriodGroupWorker::MultiPeriodGroupWorker()
-    : m_workspacePropertyName("") {}
-
 /**
  * Constructor
  * @param workspacePropertyName : Property name to treat as source of
@@ -24,11 +18,6 @@ MultiPeriodGroupWorker::MultiPeriodGroupWorker()
 MultiPeriodGroupWorker::MultiPeriodGroupWorker(
     const std::string &workspacePropertyName)
     : m_workspacePropertyName(workspacePropertyName) {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-MultiPeriodGroupWorker::~MultiPeriodGroupWorker() = default;
 
 /**
  * Try to add the input workspace to the multiperiod input group list.

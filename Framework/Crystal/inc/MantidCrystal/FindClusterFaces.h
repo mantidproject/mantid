@@ -33,8 +33,6 @@ namespace Crystal {
 */
 class DLLExport FindClusterFaces : public API::Algorithm {
 public:
-  FindClusterFaces();
-  ~FindClusterFaces() override;
 
   const std::string name() const override;
   /// Summary of algorithms purpose

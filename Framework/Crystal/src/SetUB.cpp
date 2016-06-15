@@ -16,16 +16,6 @@ namespace Crystal {
 DECLARE_ALGORITHM(SetUB)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-SetUB::SetUB() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-SetUB::~SetUB() = default;
-
-//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string SetUB::name() const { return "SetUB"; }
 

@@ -158,7 +158,7 @@ private:
 
   /// An estimate of the percentage of the algorithm runtimes that has been
   /// completed
-  double m_FracCompl;
+  double m_FracCompl = 0.0;
   /// stores lists of spectra indexes to group, although we never do an index
   /// search on it
   storage_map m_GroupWsInds;

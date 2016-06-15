@@ -16,16 +16,6 @@ using namespace Mantid::API;
 DECLARE_ALGORITHM(AddPeakHKL)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-AddPeakHKL::AddPeakHKL() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-AddPeakHKL::~AddPeakHKL() = default;
-
-//----------------------------------------------------------------------------------------------
 
 /// Algorithms name for identification. @see Algorithm::name
 const std::string AddPeakHKL::name() const { return "AddPeakHKL"; }

@@ -54,8 +54,6 @@ class LoadDataSet
 
 class DLLExport LoadSassena : public API::IFileLoader<Kernel::NexusDescriptor> {
 public:
-  /// Constructor
-  LoadSassena() : API::IFileLoader<Kernel::NexusDescriptor>(), m_filename(""){};
   /// Algorithm's name
   const std::string name() const override { return "LoadSassena"; }
   /// Summary of algorithms purpose

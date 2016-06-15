@@ -50,7 +50,6 @@ namespace CurveFitting {
 class DLLExport IFittingAlgorithm : public API::Algorithm {
 public:
   IFittingAlgorithm();
-  ~IFittingAlgorithm() override;
 
   const std::string category() const override;
 
@@ -73,7 +72,7 @@ protected:
   void addWorkspaces();
 
   /// Keep the domain type
-  API::IDomainCreator::DomainType m_domainType;
+  API::IDomainCreator::DomainType m_domainType{API::IDomainCreator::Simple};
   /// Pointer to the fitting function
   boost::shared_ptr<API::IFunction> m_function;
   /// Pointer to a domain creator

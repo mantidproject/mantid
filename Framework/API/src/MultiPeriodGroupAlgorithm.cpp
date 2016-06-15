@@ -12,11 +12,6 @@ namespace API {
 MultiPeriodGroupAlgorithm::MultiPeriodGroupAlgorithm()
     : m_worker(new MultiPeriodGroupWorker) {}
 
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-MultiPeriodGroupAlgorithm::~MultiPeriodGroupAlgorithm() = default;
-
 /** Check the input workspace properties for groups.
  *
  * Overriden from base Algorithm class.

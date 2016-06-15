@@ -78,7 +78,7 @@ private:
                                const Mantid::Kernel::V3D &faceVertex) const = 0;
 
   // The peak radius.
-  double m_peakRadius;
+  double m_peakRadius = 0.0;
 };
 
 } // namespace Crystal

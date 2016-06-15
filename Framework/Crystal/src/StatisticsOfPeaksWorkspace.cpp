@@ -29,13 +29,6 @@ StatisticsOfPeaksWorkspace::StatisticsOfPeaksWorkspace() {
 }
 
 //----------------------------------------------------------------------------------------------
-/** Destructor
- */
-StatisticsOfPeaksWorkspace::~StatisticsOfPeaksWorkspace() = default;
-
-//----------------------------------------------------------------------------------------------
-
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void StatisticsOfPeaksWorkspace::init() {

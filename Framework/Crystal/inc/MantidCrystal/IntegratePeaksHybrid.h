@@ -32,8 +32,6 @@ namespace Crystal {
 */
 class DLLExport IntegratePeaksHybrid : public API::Algorithm {
 public:
-  IntegratePeaksHybrid();
-  ~IntegratePeaksHybrid() override;
 
   const std::string name() const override;
   int version() const override;

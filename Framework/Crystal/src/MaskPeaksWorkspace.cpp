@@ -29,9 +29,6 @@ MaskPeaksWorkspace::MaskPeaksWorkspace()
     : m_inputW(), m_xMin(0), m_xMax(0), m_yMin(0), m_yMax(0), m_tofMin(0),
       m_tofMax(0) {}
 
-/// Destructor
-MaskPeaksWorkspace::~MaskPeaksWorkspace() = default;
-
 /** Initialisation method. Declares properties to be used in algorithm.
  *
  */

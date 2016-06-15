@@ -24,10 +24,6 @@ namespace Crystal {
 
 DECLARE_ALGORITHM(PredictFractionalPeaks)
 
-PredictFractionalPeaks::~PredictFractionalPeaks() = default;
-
-PredictFractionalPeaks::PredictFractionalPeaks() : Algorithm() {}
-
 /// Initialise the properties
 void PredictFractionalPeaks::init() {
   declareProperty(

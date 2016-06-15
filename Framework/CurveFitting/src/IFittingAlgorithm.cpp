@@ -50,15 +50,6 @@ IDomainCreator *createDomainCreator(const IFunction *fun,
 }
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-IFittingAlgorithm::IFittingAlgorithm()
-    : API::Algorithm(), m_domainType(API::IDomainCreator::Simple) {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-IFittingAlgorithm::~IFittingAlgorithm() = default;
 
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string IFittingAlgorithm::category() const { return "Optimization"; }

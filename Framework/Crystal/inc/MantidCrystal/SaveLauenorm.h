@@ -17,8 +17,6 @@ namespace Crystal {
 
 class DLLExport SaveLauenorm : public API::Algorithm {
 public:
-  SaveLauenorm();
-  ~SaveLauenorm() override;
 
   /// Algorithm's name for identification
   const std::string name() const override { return "SaveLauenorm"; };

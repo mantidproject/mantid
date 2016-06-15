@@ -33,8 +33,6 @@ namespace Crystal {
 */
 class DLLExport DiffPeaksWorkspaces : public API::Algorithm {
 public:
-  DiffPeaksWorkspaces();
-  ~DiffPeaksWorkspaces() override;
 
   const std::string name() const override;
   /// Summary of algorithms purpose
