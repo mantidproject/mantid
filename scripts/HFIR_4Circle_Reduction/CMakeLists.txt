@@ -4,6 +4,7 @@ include(UiToPy)
 set( UI_FILES
   MainWindow.ui 
   View3DWidget.ui
+  OptimizeLattice.ui
 )
 
 UiToPy( UI_FILES CompileUIHFIR_4Circle_Reduction)
