@@ -6,6 +6,25 @@
 
 namespace Mantid {
 namespace HistogramData {
+class BinEdgeVariances;
+class BinEdgeStandardDeviations;
+class PointVariances;
+class PointStandardDeviations;
+class HistogramDx;
+namespace detail {
+template <class BinEdgeVariances, class HistogramDx,
+          class BinEdgeStandardDeviations>
+class VarianceVectorOf;
+template <class BinEdgeStandardDeviations, class HistogramDx,
+          class BinEdgeVariances>
+class StandardDeviationVectorOf;
+template <class PointVariances, class HistogramDx,
+          class PointStandardDeviations>
+class VarianceVectorOf;
+template <class PointStandardDeviations, class HistogramDx,
+          class PointVariances>
+class StandardDeviationVectorOf;
+}
 
 /** HistogramDx
 
@@ -45,6 +64,14 @@ public:
 
   // The classes are friends, such that they can modify the length.
   friend class Histogram;
+  friend class detail::VarianceVectorOf<BinEdgeVariances, HistogramDx,
+                                        BinEdgeStandardDeviations>;
+  friend class detail::StandardDeviationVectorOf<BinEdgeStandardDeviations,
+                                                 HistogramDx, BinEdgeVariances>;
+  friend class detail::VarianceVectorOf<PointVariances, HistogramDx,
+                                        PointStandardDeviations>;
+  friend class detail::StandardDeviationVectorOf<PointStandardDeviations,
+                                                 HistogramDx, PointVariances>;
 };
 
 } // namespace HistogramData
