@@ -24,7 +24,7 @@ Mantid::Kernel::Logger g_log("HelpWindow");
  */
 void connectParent(MantidHelpInterface *gui, QWidget *parent) {
   if (parent) {
-    if(parent->metaObject()->indexOfSignal("shutting_down") > 0 ) {
+    if (parent->metaObject()->indexOfSignal("shutting_down") > 0) {
       QObject::connect(parent, SIGNAL(shutting_down()), gui, SLOT(shutdown()));
     }
     gui->setParent(parent);

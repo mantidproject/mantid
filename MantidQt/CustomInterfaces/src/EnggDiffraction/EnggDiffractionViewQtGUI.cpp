@@ -331,7 +331,7 @@ void EnggDiffractionViewQtGUI::doSetupGeneralWidgets() {
   connect(m_ui.pushButton_help, SIGNAL(released()), this, SLOT(openHelpWin()));
   // note connection to the parent window, otherwise an empty frame window
   // may remain open and visible after this close
-  if(this->parent()) {
+  if (this->parent()) {
     connect(m_ui.pushButton_close, SIGNAL(released()), this->parent(),
             SLOT(close()));
   }
