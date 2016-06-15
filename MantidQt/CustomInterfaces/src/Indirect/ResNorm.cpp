@@ -173,8 +173,11 @@ void ResNorm::handleAlgorithmComplete(bool error) {
   if (plotOptions == "Fit" || plotOptions == "All")
     plotSpectrum(fitWsName, 0, 1);
 
-  loadFile(m_uiForm.dsResolution->getFullFilePath(),
-           m_uiForm.dsResolution->getCurrentDataName());
+  if (!AnalysisDataService::Instance().doesExist(
+          m_uiForm.dsResolution->getCurrentDataName().toStdString())) {
+    loadFile(m_uiForm.dsResolution->getFullFilePath(),
+             m_uiForm.dsResolution->getCurrentDataName());
+  }
 
   // Update preview plot
   previewSpecChanged(m_previewSpec);
