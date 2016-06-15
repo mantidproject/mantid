@@ -18,11 +18,15 @@ import time
 import mantid.api
 import mantidqtpython
 from mantidqtpython import GraphOptions
+# historical names in MantidPlot
+from mantidqtpython import MantidQt as _MantidQt
+InstrumentViewMaskTab = _MantidQt.MantidWidgets.InstrumentWidgetMaskTab
+InstrumentViewPickTab = _MantidQt.MantidWidgets.InstrumentWidgetPickTab
 
 # Import into the global namespace qti classes that:
 #   (a) don't need a proxy & (b) can be constructed from python or (c) have enumerations within them
 from _qti import (PlotSymbol, ImageSymbol, ArrowMarker, ImageMarker, InstrumentView)
-				  
+
 # Make the ApplicationWindow instance accessible from the mantidplot namespace
 from _qti import app
 
@@ -199,7 +203,7 @@ def newTiledWindow(name=None, sources = None, ncols = None):
 
     if ncols is None:
         ncols = proxy.columnCount()
- 
+
     if not sources is None:
         row = 0
         col = 0
@@ -677,7 +681,7 @@ def getMantidMatrix(name):
     """Get a handle to the named Mantid matrix"""
     return new_proxy(proxies.MantidMatrix, _qti.app.mantidUI.getMantidMatrix, name)
 
-	
+
 InstrumentWidget = mantidqtpython.MantidQt.MantidWidgets.InstrumentWidget
 InstrumentWidgetRenderTab = mantidqtpython.MantidQt.MantidWidgets.InstrumentWidgetRenderTab
 InstrumentWidgetPickTab = mantidqtpython.MantidQt.MantidWidgets.InstrumentWidgetPickTab
