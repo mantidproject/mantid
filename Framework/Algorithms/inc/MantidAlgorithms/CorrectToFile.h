@@ -44,10 +44,6 @@ namespace Algorithms {
 */
 class DLLExport CorrectToFile : public Mantid::API::Algorithm {
 public:
-  /// (Empty) Constructor
-  CorrectToFile() : Mantid::API::Algorithm() {}
-  /// Virtual destructor
-  ~CorrectToFile() override {}
   /// Algorithm's name
   const std::string name() const override { return "CorrectToFile"; }
   /// Summary of algorithms purpose

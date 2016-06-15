@@ -48,10 +48,6 @@ namespace Algorithms {
 */
 class DLLExport Scale : public API::Algorithm {
 public:
-  /// (Empty) Constructor
-  Scale() : API::Algorithm() {}
-  /// Virtual destructor
-  ~Scale() override {}
   /// Algorithm's name
   const std::string name() const override { return "Scale"; }
   /// Summary of algorithms purpose

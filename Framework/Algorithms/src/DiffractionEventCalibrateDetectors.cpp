@@ -37,13 +37,6 @@ using namespace API;
 using namespace Geometry;
 using namespace DataObjects;
 
-/// Constructor
-DiffractionEventCalibrateDetectors::DiffractionEventCalibrateDetectors()
-    : API::Algorithm() {}
-
-/// Destructor
-DiffractionEventCalibrateDetectors::~DiffractionEventCalibrateDetectors() {}
-
 /**
  * The gsl_costFunction is optimized by GSL simplex
  * @param v :: vector containing center position and rotations

@@ -14,14 +14,6 @@ namespace Algorithms {
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(AppendSpectra)
 
-/** Constructor
- */
-AppendSpectra::AppendSpectra() : WorkspaceJoiners() {}
-
-/** Destructor
- */
-AppendSpectra::~AppendSpectra() {}
-
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string AppendSpectra::name() const { return "AppendSpectra"; }
 

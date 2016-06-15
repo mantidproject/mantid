@@ -22,12 +22,6 @@ DECLARE_ALGORITHM(SolidAngle)
 using namespace Kernel;
 using namespace API;
 
-/// Default constructor
-SolidAngle::SolidAngle() : Algorithm() {}
-
-/// Destructor
-SolidAngle::~SolidAngle() {}
-
 /// Initialisation method
 void SolidAngle::init() {
   declareProperty(make_unique<WorkspaceProperty<API::MatrixWorkspace>>(

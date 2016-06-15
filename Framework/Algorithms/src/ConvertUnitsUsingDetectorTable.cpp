@@ -39,18 +39,6 @@ using boost::bind;
 DECLARE_ALGORITHM(ConvertUnitsUsingDetectorTable)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-ConvertUnitsUsingDetectorTable::ConvertUnitsUsingDetectorTable()
-    : Algorithm(), m_numberOfSpectra(0), m_distribution(false),
-      m_inputEvents(false) {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-ConvertUnitsUsingDetectorTable::~ConvertUnitsUsingDetectorTable() {}
-
-//----------------------------------------------------------------------------------------------
 
 /// Algorithms name for identification. @see Algorithm::name
 const std::string ConvertUnitsUsingDetectorTable::name() const {

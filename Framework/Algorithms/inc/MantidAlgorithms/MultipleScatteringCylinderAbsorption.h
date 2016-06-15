@@ -41,12 +41,6 @@ namespace Algorithms {
  */
 class DLLExport MultipleScatteringCylinderAbsorption : public API::Algorithm {
 public:
-  /// Default constructor
-  MultipleScatteringCylinderAbsorption();
-
-  /// Destructor
-  ~MultipleScatteringCylinderAbsorption() override;
-
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override;
 
