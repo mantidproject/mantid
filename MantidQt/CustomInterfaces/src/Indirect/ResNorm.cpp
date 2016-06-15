@@ -111,13 +111,13 @@ bool ResNorm::validate() {
  * Run the ResNorm v2 algorithm.
  */
 void ResNorm::run() {
-  QString vanWsName(m_uiForm.dsVanadium->getCurrentDataName());
-  QString resWsName(m_uiForm.dsResolution->getCurrentDataName());
+  const auto vanWsName(m_uiForm.dsVanadium->getCurrentDataName());
+  const auto resWsName(m_uiForm.dsResolution->getCurrentDataName());
 
-  double eMin(m_dblManager->value(m_properties["EMin"]));
-  double eMax(m_dblManager->value(m_properties["EMax"]));
+  const auto eMin(m_dblManager->value(m_properties["EMin"]));
+  const auto eMax(m_dblManager->value(m_properties["EMax"]));
 
-  QString outputWsName = getWorkspaceBasename(resWsName) + "_ResNorm";
+  const auto outputWsName = getWorkspaceBasename(resWsName) + "_ResNorm";
 
   IAlgorithm_sptr resNorm = AlgorithmManager::Instance().create("ResNorm", 2);
   resNorm->initialize();
@@ -132,7 +132,7 @@ void ResNorm::run() {
   m_batchAlgoRunner->addAlgorithm(resNorm);
 
   // Handle saving
-  bool save(m_uiForm.ckSave->isChecked());
+  const auto save(m_uiForm.ckSave->isChecked());
   if (save)
     addSaveWorkspaceToQueue(outputWsName);
 
