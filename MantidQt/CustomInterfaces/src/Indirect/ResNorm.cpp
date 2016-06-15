@@ -313,7 +313,7 @@ void ResNorm::previewSpecChanged(int value) {
 
       MatrixWorkspace_sptr fit = WorkspaceFactory::Instance().create(fitWs, 1);
       fit->setX(0, fitWs->readX(1));
-      fit->getSpectrum(0)->setData(fitWs->readY(1), fitWs->readE(1));
+      fit->getSpectrum(0).setData(fitWs->readY(1), fitWs->readE(1));
 
       for (size_t i = 0; i < fit->blocksize(); i++)
         fit->dataY(0)[i] /= scaleFactors->cell<double>(m_previewSpec);

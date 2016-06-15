@@ -40,7 +40,6 @@ namespace Algorithms {
 class DLLExport GetTimeSeriesLogInformation : public API::Algorithm {
 public:
   GetTimeSeriesLogInformation();
-  ~GetTimeSeriesLogInformation() override;
 
   const std::string name() const override {
     return "GetTimeSeriesLogInformation";

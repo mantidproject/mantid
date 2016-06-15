@@ -19,16 +19,6 @@ using namespace API;
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(ConvertAxisByFormula)
 
-//----------------------------------------------------------------------------------------------
-/** Constructor
-*/
-ConvertAxisByFormula::ConvertAxisByFormula() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
-*/
-ConvertAxisByFormula::~ConvertAxisByFormula() {}
-
 const std::string ConvertAxisByFormula::name() const {
   return ("ConvertAxisByFormula");
 }

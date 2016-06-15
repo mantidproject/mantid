@@ -1282,10 +1282,8 @@ void EnggDiffractionPresenter::runAlignDetectorsAlg(std::string workspaceName) {
     difcTable->addColumn("double", "difa");
     difcTable->addColumn("double", "tzero");
     TableRow row = difcTable->appendRow();
-    auto spec = inputWS->getSpectrum(0);
-    if (!spec)
-      return;
-    Mantid::detid_t detID = *(spec->getDetectorIDs().cbegin());
+    auto &spec = inputWS->getSpectrum(0);
+    Mantid::detid_t detID = *(spec.getDetectorIDs().cbegin());
 
     row << detID << difc << difa << tzero;
   } catch (std::runtime_error &rexc) {
@@ -1370,7 +1368,7 @@ void EnggDiffractionPresenter::setDataToClonedWS(std::string &current_WS,
   auto currentPeakWS = ADS.retrieveWS<MatrixWorkspace>(current_WS);
   auto currentClonedWS = ADS.retrieveWS<MatrixWorkspace>(cloned_WS);
   currentClonedWS->getSpectrum(0)
-      ->setData(currentPeakWS->readY(0), currentPeakWS->readE(0));
+      .setData(currentPeakWS->readY(0), currentPeakWS->readE(0));
 }
 
 void EnggDiffractionPresenter::plotFitPeaksCurves() {

@@ -58,8 +58,6 @@ class DLLExport RemoveBins : public API::Algorithm {
 public:
   /// Default constructor
   RemoveBins();
-  /// Destructor
-  ~RemoveBins() override{};
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "RemoveBins"; }
   /// Summary of algorithms purpose

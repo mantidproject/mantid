@@ -39,9 +39,6 @@ namespace Algorithms {
  */
 class DLLExport DetectorEfficiencyCorUser : public API::Algorithm {
 public:
-  DetectorEfficiencyCorUser();
-  ~DetectorEfficiencyCorUser() override;
-
   const std::string name() const override;
   /// Summary of algorithms purpose
   const std::string summary() const override {
@@ -70,7 +67,7 @@ private:
   /// The output workspace, maybe the same as the input one
   API::MatrixWorkspace_sptr m_outputWS;
   /// stores the user selected value for incidient energy of the neutrons
-  double m_Ei;
+  double m_Ei = 0.0;
 };
 
 } // namespace Algorithms

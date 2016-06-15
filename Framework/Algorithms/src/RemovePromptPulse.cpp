@@ -15,14 +15,6 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-RemovePromptPulse::RemovePromptPulse() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-RemovePromptPulse::~RemovePromptPulse() {}
 
 const string RemovePromptPulse::name() const { return "RemovePromptPulse"; }
 

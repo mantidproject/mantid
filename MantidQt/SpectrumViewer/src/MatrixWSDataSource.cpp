@@ -234,9 +234,9 @@ std::vector<std::string> MatrixWSDataSource::getInfoList(double x, double y) {
   int row = (int)y;
   restrictRow(row);
 
-  const ISpectrum *spec = m_matWs->getSpectrum(row);
+  const auto &spec = m_matWs->getSpectrum(row);
 
-  double spec_num = spec->getSpectrumNo();
+  double spec_num = spec.getSpectrumNo();
   SVUtils::PushNameValue("Spec Num", 8, 0, spec_num, list);
 
   std::string x_label = "";
@@ -246,7 +246,7 @@ std::vector<std::string> MatrixWSDataSource::getInfoList(double x, double y) {
     SVUtils::PushNameValue(x_label, 8, 3, x, list);
   }
 
-  auto ids = spec->getDetectorIDs();
+  auto ids = spec.getDetectorIDs();
   if (!ids.empty()) {
     list.emplace_back("Det ID");
     const int64_t id = static_cast<int64_t>(*(ids.begin()));

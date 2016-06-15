@@ -39,9 +39,6 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 class DLLExport ReflectometryReductionOneAuto
     : public API::DataProcessorAlgorithm {
 public:
-  ReflectometryReductionOneAuto();
-  ~ReflectometryReductionOneAuto() override;
-
   const std::string name() const override;
   int version() const override;
   const std::string category() const override;

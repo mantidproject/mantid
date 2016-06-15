@@ -31,11 +31,6 @@ NormaliseByDetector::NormaliseByDetector(bool parallelExecution)
     : m_parallelExecution(parallelExecution) {}
 
 //----------------------------------------------------------------------------------------------
-/** Destructor
-*/
-NormaliseByDetector::~NormaliseByDetector() {}
-
-//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string NormaliseByDetector::name() const {
   return "NormaliseByDetector";
