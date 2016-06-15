@@ -18,6 +18,10 @@ Algorithms
 to *False* when the imaginary part of the image should not be taken into account for the
 calculations.
 
+- :ref:`CalMuonDetectorPhases <algm-CalMuonDetectorPhases>`: the *Frequency* parameter is now supplied in MHz rather than megaradians per second.
+
+- :ref:`CalMuonDetectorPhases <algm-CalMuonDetectorPhases>`: "Detector" column of the output phase table now shows detector IDs rather than workspace indices.
+
 Fit Functions
 -------------
 
