@@ -46,8 +46,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(DataProcessorPostprocessingAlgorithm());
     // GroupWorkspaces
     TS_ASSERT_THROWS_NOTHING(
-        DataProcessorPostprocessingAlgorithm("GroupWorkspaces"),
-        std::invalid_argument);
+        DataProcessorPostprocessingAlgorithm("GroupWorkspaces"));
   }
   void test_Stitch1DMany() {
 
