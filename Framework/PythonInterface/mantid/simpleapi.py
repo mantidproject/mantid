@@ -1065,16 +1065,73 @@ def _create_fake_function(name):
 
 #------------------------------------------------------------------------------------------------------------
 
-def _translate_all(plugins):
-    """Create the module dictionary of algorithm functions for the C++ algorithms
-    and the given set of plugins.
+def _mockup(plugins):
+    """
+        Creates fake, error-raising functions for all loaded algorithms plus
+        any plugins given.
+        The function name for the Python algorithms are taken from the filename
+        so this mechanism requires the algorithm name to match the filename.
+        This mechanism solves the "chicken-and-egg" problem with Python algorithms trying
+        to use other Python algorithms through the simple API functions. The issue
+        occurs when a python algorithm tries to import the simple API function of another
+        Python algorithm that has not been loaded yet, usually when it is further along
+        in the alphabet. The first algorithm stops with an import error as that function
+        is not yet known. By having a pre-loading step all of the necessary functions
+        on this module can be created and after the plugins are loaded the correct
+        function definitions can overwrite the "fake" ones.
+        :param plugins: A list of  modules that have been loaded
+    """
+    #--------------------------------------------------------------------------------------------------------
+    def create_fake_function(name):
+        """Create fake functions for the given name
+        """
+        #------------------------------------------------------------------------------------------------
+        def fake_function(*args, **kwargs):
+            raise RuntimeError("Mantid import error. The mock simple API functions have not been replaced!" +
+                               " This is an error in the core setup logic of the mantid module, please contact the development team.")
+        #------------------------------------------------------------------------------------------------
+        if "." in name:
+            name = name.rstrip('.py')
+        if specialization_exists(name):
+            return
+        fake_function.__name__ = name
+        globals()[name] = fake_function
+    #--------------------------------------------------------
+    def create_fake_functions(alg_names):
+        """Create fake functions for all of the listed names
+        """
+        for alg_name in alg_names:
+            create_fake_function(alg_name)
+    #-------------------------------------
+
+    # Start with the loaded C++ algorithms
+    from mantid.api import AlgorithmFactory
+    import os
+    cppalgs = AlgorithmFactory.getRegisteredAlgorithms(True)
+    create_fake_functions(cppalgs.keys())
+
+    # Now the plugins
+    for plugin in plugins:
+        name = os.path.basename(plugin)
+        name = os.path.splitext(name)[0]
+        create_fake_function(name)
+
+#------------------------------------------------------------------------------------------------------------
+
+def _translate():
+    """
+        Loop through the algorithms and register a function call
+        for each of them
+        :returns: a list of new function calls
     """
     from mantid.api import AlgorithmFactory, AlgorithmManager
 
+    new_functions = [] # Names of new functions added to the global namespace
     new_methods = {} # Method names mapped to their algorithm names. Used to detect multiple copies of same method name
                      # on different algorithms, which is an error
+
     algs = AlgorithmFactory.getRegisteredAlgorithms(True)
-    algorithm_mgr = AlgorithmManager.Instance()
+    algorithm_mgr = AlgorithmManager
     for name, versions in iteritems(algs):
         if specialization_exists(name):
             continue
@@ -1085,8 +1142,7 @@ def _translate_all(plugins):
         except Exception:
             continue
 
-        algorithm_wrapper = _create_algorithm_function(name, max(versions),
-                                                       algm_object)
+        algorithm_wrapper = _create_algorithm_function(name, max(versions), algm_object)
         method_name = algm_object.workspaceMethodName()
         if len(method_name) > 0:
             if method_name in new_methods:
@@ -1097,41 +1153,12 @@ def _translate_all(plugins):
                                    "Please check and update one of the algorithms accordingly." % (method_name,algm_object.name(),other_alg))
             _attach_algorithm_func_as_method(method_name, algorithm_wrapper, algm_object)
             new_methods[method_name] = algm_object.name()
+
         # Dialog variant
         _create_algorithm_dialog(name, max(versions), algm_object)
+        new_functions.append(name)
 
-    # -- Plugins --
-    # Python plugins are currently allowed to import from this module during
-    # there own import. This creates a chicken-and-egg problem as the plugins
-    # need to be imported to create the function definitions but then the
-    # defintion must exist at that point! We 'solve' this by creating a fake
-    # set of functions first and then overwrite them with the real definitions
-    # after import
-    for plugin in plugins:
-        name = os.path.splitext(os.path.basename(plugin))[0]
-        _create_fake_function(name)
-    #endfor
-    plugin_modules = _kernel.plugins.load(plugins)
-    real_functions = []
-    for module in plugin_modules:
-        name = module.__name__
-        try:
-            # Create the algorithm object
-            algm_object = algorithm_mgr.createUnmanaged(name)
-            algm_object.initialize()
-        except Exception as exc:
-            continue
-        version = algm_object.version()
-        alg_func = _create_algorithm_function(name, version, algm_object)
-        real_functions.append((name, alg_func))
-        _create_algorithm_dialog(name, version, algm_object)
-    #endfor
-    # Overwrite the fake functions on the loaded modules
-    for name, real_func in real_functions:
-      for module in plugin_modules:
-          if hasattr(module, name):
-              setattr(module, name, real_func)
-    #endfor
+    return new_functions
 
 #-------------------------------------------------------------------------------------------------------------
 

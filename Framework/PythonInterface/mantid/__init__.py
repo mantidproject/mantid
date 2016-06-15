@@ -87,6 +87,16 @@ __version__ = kernel.version_str()
 
 ###############################################################################
 # Load the Python plugins now everything has started.
+#
+# Before the plugins are loaded the simpleapi module is called to create
+# fake error-raising functions for all of the plugins. After the plugins have been
+# loaded the correction translation is applied to create the "real" simple
+# API functions.
+#
+# Although this seems odd it is necessary so that any PythonAlgorithm
+# can call any other PythonAlgorithm through the simple API mechanism. If left
+# to the simple import mechanism then plugins that are loaded later cannot
+# be seen by the earlier ones (chicken & the egg essentially).
 ################################################################################
 from . import simpleapi as _simpleapi
 from mantid.kernel import plugins as _plugins
@@ -98,17 +108,25 @@ plugin_dirs = _plugins.get_plugin_paths_as_set(_plugins_key)
 plugin_dirs.update(_plugins.get_plugin_paths_as_set(_user_key))
 _update_sys_paths(plugin_dirs, recursive=True)
 
-# discovery
+# Load
 plugin_files = []
+alg_files = []
 for directory in plugin_dirs:
     try:
-        all_plugins = _plugins.find_plugins(directory)
+        all_plugins, algs = _plugins.find_plugins(directory)
         plugin_files += all_plugins
+        alg_files += algs
     except ValueError as exc:
-        logger.warning(str(exc))
+        logger.warning('Exception encountered during plugin discovery: {0}'.format(str(exc)))
         continue
-#endfor
 
-# load
-_simpleapi._translate_all(plugin_files)
+# Mockup the full API first so that any Python algorithm module has something to import
+_simpleapi._mockup(alg_files)
+# Load the plugins.
+plugin_modules = _plugins.load(plugin_files)
+# Create the proper algorithm definitions in the module
+new_attrs = _simpleapi._translate()
+# Finally, overwrite the mocked function definitions in the loaded modules with the real ones
+_plugins.sync_attrs(_simpleapi, new_attrs, plugin_modules)
+
 ################################################################################

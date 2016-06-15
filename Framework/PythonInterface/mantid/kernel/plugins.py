@@ -8,6 +8,7 @@ from __future__ import (absolute_import, division,
                         print_function)
 
 import os as _os
+import sys as _sys
 try:
     from importlib.machinery import SourceFileLoader
 except ImportError:
@@ -90,6 +91,7 @@ def check_for_plugins(top_dir):
 
     return False
 
+
 def find_plugins(top_dir):
     """
        Searches recursively from the given directory to find the list of plugins that should be loaded
@@ -98,13 +100,16 @@ def find_plugins(top_dir):
     if not _os.path.isdir(top_dir):
         raise ValueError("Cannot search given path for plugins, path is not a directory: '%s' " % str(top_dir))
     all_plugins = []
+    algs = []
     for root, dirs, files in _os.walk(top_dir):
         for f in files:
             if f.endswith(PluginLoader.extension):
                 filename = _os.path.join(root, f)
                 all_plugins.append(filename)
+                if contains_algorithm(filename):
+                    algs.append(filename)
 
-    return all_plugins
+    return all_plugins, algs
 
 #======================================================================================================================
 
@@ -203,3 +208,48 @@ def load_plugin(plugin_path):
     return module.__name__, module
 
 #======================================================================================================================
+
+def sync_attrs(source_module, attrs, clients):
+    """
+        Syncs the attribute definitions between the
+        given list from the source module & list of client modules such
+        that the function defintions point to the same
+        one
+        @param source_module :: The module containing the "correct"
+                                definitions
+        @param attrs :: The list of attributes to change in the client modules
+        @param clients :: A list of modules whose attribute definitions
+                          should be taken from source
+    """
+    for func_name in attrs:
+        attr = getattr(source_module, func_name)
+        for plugin in clients:
+            if hasattr(plugin, func_name):
+                setattr(plugin, func_name, attr)
+
+#======================================================================================================================
+
+def contains_algorithm(filename):
+    """
+        Inspects the file to look for an algorithm registration line
+    """
+    if _sys.version_info[0] < 3:
+        def readlines_reversed(f):
+            return reversed(f.readlines())
+    else:
+        def readlines_reversed(f):
+            return reversed(list(f.readlines()))
+    #endif
+    alg_found = True
+    try:
+        with open(filename,'r') as plugin_file:
+            for line in readlines_reversed(plugin_file):
+                if 'AlgorithmFactory.subscribe' in line:
+                    alg_found = True
+                    break
+    except Exception as exc:
+        # something wrong with reading the file
+        logger.warning("Error checking plugin content in '{0}'\n{1}".format(filename,str(exc)))
+        alg_found = False
+
+    return alg_found
