@@ -828,7 +828,9 @@ void EnggDiffractionPresenter::enableMultiRun(
 
 void EnggDiffractionPresenter::processFitPeaks() {
   const std::string focusedRunNo = m_view->getFittingRunNo();
-  const std::string fitPeaksData = m_view->fittingPeaksData();
+  std::string fittingPeaks = m_view->fittingPeaksData();
+
+  const std::string fitPeaksData = validateFittingexpectedPeaks(fittingPeaks);
 
   g_log.debug() << "the expected peaks are: " << fitPeaksData << std::endl;
 
@@ -843,7 +845,8 @@ void EnggDiffractionPresenter::processFitPeaks() {
   g_log.notice() << "EnggDiffraction GUI: starting new "
                     "single peak fits into workspace '" +
                         outWSName + "'. This "
-                                    "may take some seconds... " << std::endl;
+                                    "may take some seconds... "
+                 << std::endl;
 
   m_view->showStatus("Fitting single peaks...");
   // disable GUI to avoid any double threads
@@ -854,7 +857,7 @@ void EnggDiffractionPresenter::processFitPeaks() {
 }
 
 void EnggDiffractionPresenter::inputChecksBeforeFitting(
-    const std::string &focusedRunNo, const std::string &ExpectedPeaks) {
+    const std::string &focusedRunNo, const std::string &expectedPeaks) {
   if (focusedRunNo.size() == 0) {
     throw std::invalid_argument(
         "Focused Run "
@@ -868,27 +871,68 @@ void EnggDiffractionPresenter::inputChecksBeforeFitting(
                                 focusedRunNo);
   }
 
-  if (ExpectedPeaks.empty()) {
+  if (expectedPeaks.empty()) {
     g_log.warning() << "Expected peaks were not passed, via fitting interface, "
                        "the default list of "
-                       "expected peaks will be utilised instead." << std::endl;
+                       "expected peaks will be utilised instead."
+                    << std::endl;
   }
   bool contains_non_digits =
-      ExpectedPeaks.find_first_not_of("0123456789,. ") != std::string::npos;
+      expectedPeaks.find_first_not_of("0123456789,. ") != std::string::npos;
   if (contains_non_digits) {
-    throw std::invalid_argument("The expected peaks provided " + ExpectedPeaks +
+    throw std::invalid_argument("The expected peaks provided " + expectedPeaks +
                                 " is invalid, "
                                 "fitting process failed. Please try again!");
   }
 }
 
+std::string EnggDiffractionPresenter::validateFittingexpectedPeaks(
+    std::string &expectedPeaks) const {
+
+  if (!expectedPeaks.empty()) {
+
+    g_log.debug() << "Validating the expected peak list" << std::endl;
+
+    auto *comma = ",";
+
+    for (size_t i = 0; i < expectedPeaks.size() - 1; i++) {
+      size_t j = i + 1;
+
+      if (expectedPeaks[i] == *comma && expectedPeaks[i] == expectedPeaks[j]) {
+        expectedPeaks.erase(j, 1);
+        i--;
+
+      } else {
+        ++j;
+      }
+    }
+  }
+
+  // check if empty again as list is modified above
+  if (!expectedPeaks.empty()) {
+    size_t strLength = expectedPeaks.length() - 1;
+    if (expectedPeaks.at(size_t(0)) == ',') {
+      expectedPeaks.erase(size_t(0), 1);
+      strLength -= size_t(1);
+    }
+
+    if (expectedPeaks.at(strLength) == ',') {
+      expectedPeaks.erase(strLength, 1);
+    }
+
+    m_view->setPeakList(QString::fromStdString(expectedPeaks));
+  }
+
+  return expectedPeaks;
+}
+
 void EnggDiffractionPresenter::startAsyncFittingWorker(
-    const std::string &focusedRunNo, const std::string &ExpectedPeaks) {
+    const std::string &focusedRunNo, const std::string &expectedPeaks) {
 
   delete m_workerThread;
   m_workerThread = new QThread(this);
   EnggDiffWorker *worker =
-      new EnggDiffWorker(this, focusedRunNo, ExpectedPeaks);
+      new EnggDiffWorker(this, focusedRunNo, expectedPeaks);
   worker->moveToThread(m_workerThread);
 
   connect(m_workerThread, SIGNAL(started()), worker, SLOT(fitting()));
@@ -946,7 +990,7 @@ void EnggDiffractionPresenter::setDifcTzero(MatrixWorkspace_sptr wks) const {
 }
 
 void EnggDiffractionPresenter::doFitting(const std::string &focusedRunNo,
-                                         const std::string &ExpectedPeaks) {
+                                         const std::string &expectedPeaks) {
   g_log.notice() << "EnggDiffraction GUI: starting new fitting with file "
                  << focusedRunNo << ". This may take a few seconds... "
                  << std::endl;
@@ -993,8 +1037,8 @@ void EnggDiffractionPresenter::doFitting(const std::string &focusedRunNo,
   try {
     enggFitPeaks->initialize();
     enggFitPeaks->setProperty("InputWorkspace", focusedWS);
-    if (!ExpectedPeaks.empty()) {
-      enggFitPeaks->setProperty("ExpectedPeaks", ExpectedPeaks);
+    if (!expectedPeaks.empty()) {
+      enggFitPeaks->setProperty("expectedPeaks", expectedPeaks);
     }
     enggFitPeaks->setProperty("FittedPeaks", focusedFitPeaksTableName);
     enggFitPeaks->execute();

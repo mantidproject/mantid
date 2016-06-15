@@ -94,7 +94,7 @@ public:
 
   /// the fitting hard work that a worker / thread will run
   void doFitting(const std::string &focusedRunNo,
-                 const std::string &ExpectedPeaks);
+                 const std::string &expectedPeaks);
 
   void runFittingAlgs(std::string FocusedFitPeaksTableName,
                       std::string FocusedWSName);
@@ -300,10 +300,12 @@ private:
 
   // Methods related single peak fits
   virtual void startAsyncFittingWorker(const std::string &focusedRunNo,
-                                       const std::string &ExpectedPeaks);
+                                       const std::string &expectedPeaks);
+
+  std::string validateFittingexpectedPeaks(std::string &expectedPeaks) const;
 
   void inputChecksBeforeFitting(const std::string &focusedRunNo,
-                                const std::string &ExpectedPeaks);
+                                const std::string &expectedPeaks);
 
   void updateFittingDirVec(const std::string &bankDir,
                            const std::string &focusedFile, const bool multi_run,

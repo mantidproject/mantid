@@ -173,6 +173,8 @@ public:
 
   std::string fittingPeaksData() const override;
 
+  void setPeakList(QString peakList) const override;
+
   std::vector<std::string>
   splitFittingDirectory(std::string &selectedfPath) override;
 
