@@ -123,12 +123,9 @@ bool TrustRegionMinimizer::iterate(size_t iter) {
   int n = m_x.len();
   int m = static_cast<int>(m_leastSquares->getValues()->size());
 
-  std::cerr << "Iteration " << iter << std::endl;
-
   if (w.first_call == 0) {
 
     w.first_call = 1; // ?
-    std::cerr << "First call" << std::endl;
 
     // evaluate the residual
     eval_F(X, w.f);
@@ -139,7 +136,6 @@ bool TrustRegionMinimizer::iterate(size_t iter) {
     inform.g_eval = inform.g_eval + 1;
 
     if (options.relative_tr_radius == 1) {
-      std::cerr << "Relative radius is 1" << std::endl;
       // first, let's get diag(J^TJ)
       Jmax = 0.0;
       for (int i = 1; i <= n; ++i) {
@@ -159,7 +155,6 @@ bool TrustRegionMinimizer::iterate(size_t iter) {
     }
 
     if (options.calculate_svd_J) {
-      std::cerr << "Calculate SVD" << std::endl;
       // calculate the svd of J (if needed)
       get_svd_J(w.J, w.smallest_sv(1), w.largest_sv(1));
     }
@@ -190,7 +185,6 @@ bool TrustRegionMinimizer::iterate(size_t iter) {
     switch (options.model) {
     case 1: // first-order
     {
-      std::cerr << "First order" << std::endl;
       w.hf.zero();
       w.use_second_derivatives = false;
       break;
@@ -198,20 +192,17 @@ bool TrustRegionMinimizer::iterate(size_t iter) {
     case 2: // second order
     {
       if (options.exact_second_derivatives) {
-        std::cerr << "Exact second order derivatives" << std::endl;
         eval_HF(X, w.f, w.hf);
         inform.h_eval = inform.h_eval + 1;
       } else {
         // S_0 = 0 (see Dennis, Gay and Welsch)
         w.hf.zero();
-        std::cerr << "non-Exact second order derivatives" << std::endl;
       }
       w.use_second_derivatives = true;
       break;
     }
     case 3: // hybrid (MNT)
     {
-      std::cerr << "Hybrid" << std::endl;
       // set the tolerance :: make this relative
       w.hybrid_tol =
           options.hybrid_tol * (w.normJF / (0.5 * (pow(w.normF, 2))));
@@ -242,12 +233,9 @@ bool TrustRegionMinimizer::iterate(size_t iter) {
       inform.status = NLLS_ERROR::MAX_TR_REDUCTIONS;
       return true;
     }
-    std::cerr << "w.Delta=" << w.Delta << std::endl;
     // Calculate the step d that the model thinks we should take next
     calculate_step(w.J, w.f, w.hf, w.g, n, m, w.Delta, w.d, w.normd, options,
                    inform, w.calculate_step_ws);
-
-    std::cerr << "Corrections: " << w.d << std::endl;
 
     // Accept the step?
     w.Xnew = X;
@@ -271,7 +259,6 @@ bool TrustRegionMinimizer::iterate(size_t iter) {
     if (rho > options.eta_successful) {
       success = true;
     }
-    std::cerr << "rho: " << w.normF << ' ' << normFnew << ' ' << md << ' ' << rho << std::endl;
 
     // Update the TR radius
     update_trust_region_radius(rho, options, inform, w);

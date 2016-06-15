@@ -517,14 +517,12 @@ void update_trust_region_radius(double &rho, const nlls_options &options,
   case 1: // default, step-function
     if (rho < options.eta_success_but_reduce) {
       // unsuccessful....reduce Delta
-      std::cerr << "Delta 1:1" << std::endl;
       w.Delta =
           std::max(options.radius_reduce, options.radius_reduce_max) * w.Delta;
     } else if (rho < options.eta_very_successful) {
       //  doing ok...retain status quo
     } else if (rho < options.eta_too_successful) {
       // more than very successful -- increase delta
-      std::cerr << "Delta 1:2" << std::endl;
       w.Delta =
           std::min(options.maximum_radius, options.radius_increase * w.normd);
       // increase based on normd = ||d||_D
@@ -535,7 +533,6 @@ void update_trust_region_radius(double &rho, const nlls_options &options,
       // too successful....accept step, but don't change w.Delta
     } else {
       // just incase (NaNs and the like...)
-      std::cerr << "Delta 1:3" << std::endl;
       w.Delta =
           std::max(options.radius_reduce, options.radius_reduce_max) * w.Delta;
       rho = -one; // set to be negative, so that the logic works....
@@ -548,7 +545,6 @@ void update_trust_region_radius(double &rho, const nlls_options &options,
     if (rho >= options.eta_too_successful) {
       // too successful....accept step, but don't change w.Delta
     } else if (rho > options.eta_successful) {
-      std::cerr << "Delta 2:1" << std::endl;
       w.Delta =
           w.Delta * std::min(options.radius_increase,
                              std::max(options.radius_reduce,
@@ -556,12 +552,10 @@ void update_trust_region_radius(double &rho, const nlls_options &options,
                                            (pow((1 - 2 * rho), w.tr_p)))));
       w.tr_nu = options.radius_reduce;
     } else if (rho <= options.eta_successful) {
-      std::cerr << "Delta 2:2" << std::endl;
       w.Delta = w.Delta * w.tr_nu;
       w.tr_nu = w.tr_nu * 0.5;
     } else {
       // just incase (NaNs and the like...)
-      std::cerr << "Delta 2:3" << std::endl;
       w.Delta =
           std::max(options.radius_reduce, options.radius_reduce_max) * w.Delta;
       rho = -one; // set to be negative, so that the logic works....
@@ -723,6 +717,11 @@ void more_sorensen(const DoubleFortranMatrix &J, const DoubleFortranVector &f,
     // w.q = R'\d
     // DTRSM( "Left", "Lower", "No Transpose", "Non-unit", n, 1, one, w.LtL, n,
     // w.q, n );
+    for(int j=1; j <= w.LtL.len1(); ++j) {
+      for(int k=j + 1; k <= w.LtL.len1(); ++k) {
+        w.LtL(j, k) = 0.0;
+      }
+    }
     w.LtL.solve(d, w.q);
 
     auto nq = norm2(w.q);

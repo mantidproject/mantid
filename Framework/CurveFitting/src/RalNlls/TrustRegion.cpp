@@ -165,14 +165,12 @@ void update_trust_region_radius(double &rho, const nlls_options &options,
   case 1: // default, step-function
     if (rho < options.eta_success_but_reduce) {
       // unsuccessful....reduce Delta
-      std::cerr << "Delta 1:1" << std::endl;
       w.Delta =
           std::max(options.radius_reduce, options.radius_reduce_max) * w.Delta;
     } else if (rho < options.eta_very_successful) {
       //  doing ok...retain status quo
     } else if (rho < options.eta_too_successful) {
       // more than very successful -- increase delta
-      std::cerr << "Delta 1:2" << std::endl;
       w.Delta =
           std::min(options.maximum_radius, options.radius_increase * w.normd);
       // increase based on normd = ||d||_D
@@ -183,7 +181,6 @@ void update_trust_region_radius(double &rho, const nlls_options &options,
       // too successful....accept step, but don't change w.Delta
     } else {
       // just incase (NaNs and the like...)
-      std::cerr << "Delta 1:3" << std::endl;
       w.Delta =
           std::max(options.radius_reduce, options.radius_reduce_max) * w.Delta;
       rho = -one; // set to be negative, so that the logic works....
@@ -196,7 +193,6 @@ void update_trust_region_radius(double &rho, const nlls_options &options,
     if (rho >= options.eta_too_successful) {
       // too successful....accept step, but don't change w.Delta
     } else if (rho > options.eta_successful) {
-      std::cerr << "Delta 2:1" << std::endl;
       w.Delta =
           w.Delta * std::min(options.radius_increase,
                              std::max(options.radius_reduce,
@@ -204,12 +200,10 @@ void update_trust_region_radius(double &rho, const nlls_options &options,
                                            (pow((1 - 2 * rho), w.tr_p)))));
       w.tr_nu = options.radius_reduce;
     } else if (rho <= options.eta_successful) {
-      std::cerr << "Delta 2:2" << std::endl;
       w.Delta = w.Delta * w.tr_nu;
       w.tr_nu = w.tr_nu * 0.5;
     } else {
       // just incase (NaNs and the like...)
-      std::cerr << "Delta 2:3" << std::endl;
       w.Delta =
           std::max(options.radius_reduce, options.radius_reduce_max) * w.Delta;
       rho = -one; // set to be negative, so that the logic works....
@@ -311,55 +305,6 @@ void apply_scaling(const DoubleFortranMatrix &J, int n, int m,
   }
 }
 
-///// Copy a column from a matrix.
-//DoubleFortranVector getColumn(const DoubleFortranMatrix &A, int col) {
-//  int n = static_cast<int>(A.size1());
-//  DoubleFortranVector column(n);
-//  for (int i = 1; i <= n; ++i) { // for_do(i,1,n)
-//    column(i) = A(i, col);
-//  }
-//  return column;
-//}
-//
-/////  Takes an m x n matrix J and forms the
-/////  m x m matrix A given by
-/////  A = J * J'
-//void matmult_outer(const DoubleFortranMatrix &J, int n, int m,
-//                   DoubleFortranMatrix &A) {
-//  gsl_blas_dgemm(CblasNoTrans, CblasTrans, 1.0, J.gsl(), J.gsl(), 0.0, A.gsl());
-//}
-//
-//DoubleFortranVector matmul(const DoubleFortranMatrix &J,
-//                           const DoubleFortranVector &x) {
-//  DoubleFortranVector y(int(x.size()));
-//  gsl_blas_dgemv(CblasNoTrans, 1.0, J.gsl(), x.gsl(), 0.0, y.gsl());
-//  return y;
-//}
-//
-//DoubleFortranMatrix matmul(const DoubleFortranMatrix &A,
-//                           const DoubleFortranMatrix &B) {
-//  int n = static_cast<int>(A.size1());
-//  int m = static_cast<int>(B.size2());
-//  DoubleFortranMatrix C(n, m);
-//  gsl_blas_dgemm(CblasNoTrans, CblasNoTrans, 1.0, A.gsl(), B.gsl(), 0.0,
-//                 C.gsl());
-//  return C;
-//}
-/////  Takes an n vector x and forms the
-/////  n x n matrix xtx given by
-/////  xtx = x * x'
-//void outer_product(const DoubleFortranVector &x, int n,
-//                   DoubleFortranMatrix &xtx) {
-//  xtx.allocate(n, n);
-//  gsl_blas_dger(1.0, x.gsl(), x.gsl(), xtx.gsl());
-//}
-//
-/////   Calculates norm_A_x = ||x||_A = sqrt(x'*A*x)
-//void matrix_norm(const DoubleFortranVector &x, const DoubleFortranMatrix &A,
-//                 double &norm_A_x) {
-//  norm_A_x = sqrt(dot_product(x, matmul(A, x)));
-//}
-
 /// calculate all the eigenvalues of A (symmetric)
 void all_eig_symm(const DoubleFortranMatrix &A, int n, DoubleFortranVector &ew,
                   DoubleFortranMatrix &ev, all_eig_symm_work &w,
@@ -368,105 +313,9 @@ void all_eig_symm(const DoubleFortranMatrix &A, int n, DoubleFortranVector &ew,
   M.eigenSystem(ew, ev);
 }
 
-/////   Solve the trust-region subproblem using
-/////   the DTRS method from Galahad
-/////
-/////   This method needs H to be diagonal, so we need to
-/////   pre-process
-/////
-/////   main output  d, the soln to the TR subproblem
-//void solve_dtrs(const DoubleFortranMatrix &J, const DoubleFortranVector &f,
-//                const DoubleFortranMatrix &hf, int n, int m, double Delta,
-//                DoubleFortranVector &d, double &normd,
-//                const nlls_options &options, nlls_inform &inform,
-//                solve_dtrs_work &w) {
+// This isn't used because we don't calculate second derivatives in Mantid
+// If we start using them the method should be un-commented and used here
 //
-//  dtrs_control_type dtrs_options;
-//  dtrs_inform_type dtrs_inform;
-//
-//  //  The code finds
-//  //   d = arg min_p   w^T p + 0.5 * p^T D p
-//  //        s.t. ||p|| \leq Delta
-//  //
-//  //  where D is diagonal
-//  //
-//  //  our probem in naturally in the form
-//  //
-//  //  d = arg min_p   v^T p + 0.5 * p^T H p
-//  //        s.t. ||p|| \leq Delta
-//  //
-//  //  first, find the matrix H and vector v
-//  //  Set A = J^T J
-//  matmult_inner(J, n, m, w.A);
-//  // add any second order information...
-//  // so A = J^T J + HF
-//  w.A += hf;
-//
-//  // now form v = J^T f
-//  mult_Jt(J, f, w.v);
-//
-//  // if scaling needed, do it
-//  if (options.scale != 0) {
-//    apply_scaling(J, n, m, w.A, w.v, w.apply_scaling_ws, options, inform);
-//  }
-//
-//  // Now that we have the unprocessed matrices, we need to get an
-//  // eigendecomposition to make A diagonal
-//  //
-//  all_eig_symm(w.A, n, w.ew, w.ev, w.all_eig_symm_ws, inform);
-//  if (inform.status != NLLS_ERROR::OK) {
-//    return; // goto 1000
-//  }
-//
-//  // We can now change variables, setting y = Vp, getting
-//  // Vd = arg min_(Vx) v^T p + 0.5 * (Vp)^T D (Vp)
-//  //       s.t.  ||x|| \leq Delta
-//  // <=>
-//  // Vd = arg min_(Vx) V^Tv^T (Vp) + 0.5 * (Vp)^T D (Vp)
-//  //       s.t.  ||x|| \leq Delta
-//  // <=>
-//  // we need to get the transformed vector v
-//  mult_Jt(w.ev, w.v, w.v_trans);
-//
-//  // we've now got the vectors we need, pass to dtrs_solve
-//  dtrs_initialize(dtrs_options, dtrs_inform);
-//
-//  if (w.v_trans.len() != n) {
-//    w.v_trans.allocate(n);
-//  }
-//
-//  for (int ii = 1; ii <= n; ++ii) { // for_do(ii, 1,n)
-//    if (abs(w.v_trans(ii)) < epsmch) {
-//      w.v_trans(ii) = zero;
-//    }
-//    if (abs(w.ew(ii)) < epsmch) {
-//      w.ew(ii) = zero;
-//    }
-//  }
-//
-//  dtrs_solve(n, Delta, zero, w.v_trans, w.ew, w.d_trans, dtrs_options,
-//             dtrs_inform);
-//  if (dtrs_inform.status != ErrorCode::ral_nlls_ok) {
-//    inform.external_return = int(dtrs_inform.status);
-//    inform.external_name = "galahad_dtrs";
-//    inform.status = NLLS_ERROR::FROM_EXTERNAL;
-//    return; // goto 1000
-//  }
-//
-//  // and return the un-transformed vector
-//  mult_J(w.ev, w.d_trans, d);
-//
-//  normd = norm2(d); // ! ||d||_D
-//
-//  if (options.scale != 0) {
-//    for (int ii = 1; ii <= n; ++ii) { // for_do(ii, 1, n)
-//      d(ii) = d(ii) / w.apply_scaling_ws.diag(ii);
-//    }
-//  }
-//
-//} // solve_dtrs
-//
-
 //void apply_second_order_info(int n, int m, const DoubleFortranVector &X,
 //                             NLLS_workspace &w, eval_hf_type eval_HF,
 //                             params_base_type params,
@@ -481,57 +330,6 @@ void all_eig_symm(const DoubleFortranMatrix &A, int n, DoubleFortranVector &ew,
 //  } else {
 //    // use the rank-one approximation...
 //    rank_one_update(w.hf, w, n);
-//  }
-//}
-
-//void solve_general(const DoubleFortranMatrix &A, const DoubleFortranVector &b,
-//                   DoubleFortranVector &x, int n, nlls_inform &inform,
-//                   solve_general_work &w) {
-//  // A wrapper for the lapack subroutine dposv.f
-//  // NOTE: A would be destroyed
-//  w.A = A;
-//  w.A.solve(b, x);
-//  // x(1:n) = b(1:n)
-//  // call dgesv( n, 1, w.A, n, w.ipiv, x, n, inform.external_return)
-//}
-
-//void more_sorensen(const DoubleFortranMatrix &J, const DoubleFortranVector &f,
-//                   const DoubleFortranMatrix &hf, int n, int m, double Delta,
-//                   DoubleFortranVector &d, double &nd,
-//                   const nlls_options &options, nlls_inform &inform,
-//                   more_sorensen_work &w);
-//
-//void solve_dtrs(const DoubleFortranMatrix &J, const DoubleFortranVector &f,
-//                const DoubleFortranMatrix &hf, int n, int m, double Delta,
-//                DoubleFortranVector &d, double &normd,
-//                const nlls_options &options, nlls_inform &inform,
-//                solve_dtrs_work &w);
-//
-//// calculate_step, find the next step in the optimization
-//void calculate_step(const DoubleFortranMatrix &J, const DoubleFortranVector &f,
-//                    const DoubleFortranMatrix &hf, const DoubleFortranVector &g,
-//                    int n, int m, double Delta, DoubleFortranVector &d,
-//                    double &normd, const nlls_options &options,
-//                    nlls_inform &inform, calculate_step_work &w) {
-//
-//  switch (options.nlls_method) {
-//  case 1: //! Powell's dogleg
-//    throw std::logic_error("Dog leg method isn't implemented.");
-//    break;
-//  case 2: //! The AINT method
-//    throw std::logic_error("AINT method isn't implemented.");
-//    ;
-//    break;
-//  case 3: //! More-Sorensen
-//    more_sorensen(J, f, hf, n, m, Delta, d, normd, options, inform,
-//                  w.more_sorensen_ws);
-//    break;
-//  case 4: //! Galahad
-//    solve_dtrs(J, f, hf, n, m, Delta, d, normd, options, inform,
-//               w.solve_dtrs_ws);
-//    break;
-//  default:
-//    inform.status = NLLS_ERROR::UNSUPPORTED_METHOD;
 //  }
 //}
 

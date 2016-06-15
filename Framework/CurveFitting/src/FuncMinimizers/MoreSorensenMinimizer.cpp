@@ -56,7 +56,7 @@ void min_eig_symm(const DoubleFortranMatrix &A, double &sigma,
   DoubleFortranMatrix ev;
   M.eigenSystem(ew, ev);
   auto ind = ew.sortIndices();
-  int imin = static_cast<int>(ind[0]);
+  int imin = static_cast<int>(ind[0]) + 1;
   sigma = ew(imin);
   int n = static_cast<int>(A.size1());
   y.allocate(n);
@@ -214,13 +214,15 @@ void more_sorensen(const DoubleFortranMatrix &J, const DoubleFortranVector &f,
         // also good...exit
         goto L1020;
       }
-      double alpha = 0.0;
-      findbeta(d, w.y1, Delta, alpha, inform);
-      if (inform.status != NLLS_ERROR::OK)
-        goto L1000;
-      DoubleFortranVector tmp = w.y1;
-      tmp *= alpha;
-      d += tmp;
+      if (w.y1.len() == n) {
+        double alpha = 0.0;
+        findbeta(d, w.y1, Delta, alpha, inform);
+        if (inform.status != NLLS_ERROR::OK)
+          goto L1000;
+        DoubleFortranVector tmp = w.y1;
+        tmp *= alpha;
+        d += tmp;
+      }
       // also good....exit
       goto L1020;
     }
@@ -228,6 +230,11 @@ void more_sorensen(const DoubleFortranMatrix &J, const DoubleFortranVector &f,
     // w.q = R'\d
     // DTRSM( "Left", "Lower", "No Transpose", "Non-unit", n, 1, one, w.LtL, n,
     // w.q, n );
+    for(int j=1; j <= w.LtL.len1(); ++j) {
+      for(int k=j + 1; k <= w.LtL.len1(); ++k) {
+        w.LtL(j, k) = 0.0;
+      }
+    }
     w.LtL.solve(d, w.q);
 
     auto nq = norm2(w.q);
