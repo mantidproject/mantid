@@ -417,7 +417,7 @@ void SaveCanSAS1D::createSASDataElement(std::string &sasData) {
   for (size_t i = 0; i < m_workspace->getNumberHistograms(); ++i) {
     auto intensities = m_workspace->points(i);
     auto intensityDeltas = m_workspace->pointStandardDeviations(i);
-    if(!intensityDeltas)
+    if (!intensityDeltas)
       intensityDeltas =
           HistogramData::PointStandardDeviations(intensities.size(), 0.0);
     const MantidVec &ydata = m_workspace->readY(i);

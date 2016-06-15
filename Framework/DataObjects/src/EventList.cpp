@@ -1554,7 +1554,8 @@ HistogramData::CountVariances EventList::countVariances() const {
   return HistogramData::CountVariances(countStandardDeviations());
 }
 
-HistogramData::CountStandardDeviations EventList::countStandardDeviations() const {
+HistogramData::CountStandardDeviations
+EventList::countStandardDeviations() const {
   if (!mru)
     throw std::runtime_error("'EventList::countStandardDeviations()' called "
                              "with no MRU set. This is not allowed.");

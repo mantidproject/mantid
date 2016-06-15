@@ -141,17 +141,17 @@ public:
   // Temporary legacy interface to Dx. Note that accessors mimic the current
   // behavior which always has Dx allocated.
   MantidVec &dataDx() & {
-    if(!m_dx)
+    if (!m_dx)
       m_dx = Kernel::make_cow<HistogramDx>(m_x->size(), 0.0);
     return m_dx.access().mutableRawData();
   }
   const MantidVec &dataDx() const & {
-    if(!m_dx)
+    if (!m_dx)
       m_dx = Kernel::make_cow<HistogramDx>(m_x->size(), 0.0);
     return m_dx->rawData();
   }
   const MantidVec &readDx() const {
-    if(!m_dx)
+    if (!m_dx)
       m_dx = Kernel::make_cow<HistogramDx>(m_x->size(), 0.0);
     return m_dx->rawData();
   }
@@ -187,11 +187,11 @@ template <typename... T> void Histogram::setBinEdges(T &&... data) & {
 
 /// Sets the Histogram's bin edge variances.
 template <typename... T> void Histogram::setBinEdgeVariances(T &&... data) & {
-  if(m_xMode != XMode::BinEdges)
+  if (m_xMode != XMode::BinEdges)
     throw std::logic_error("Histogram::setBinEdgeVariances: XMode is not "
                            "BinEdges, cannot set bin-edge variances.");
   BinEdgeVariances edges(std::forward<T>(data)...);
-  if(edges.size() != m_x->size())
+  if (edges.size() != m_x->size())
     throw std::logic_error("Histogram::setBinEdgeVariances: size mismatch.");
   // No sensible self assignment is possible, we do not store variances, so if
   // anyone tries to set our current data as variances it must be an error.
@@ -205,12 +205,12 @@ template <typename... T> void Histogram::setBinEdgeVariances(T &&... data) & {
 /// Sets the Histogram's bin edge standard deviations.
 template <typename... T>
 void Histogram::setBinEdgeStandardDeviations(T &&... data) & {
-  if(m_xMode != XMode::BinEdges)
+  if (m_xMode != XMode::BinEdges)
     throw std::logic_error(
         "Histogram::setBinEdgeStandardDeviations: XMode is "
         "not BinEdges, cannot set bin-edge standard deviations.");
   BinEdgeStandardDeviations edges(std::forward<T>(data)...);
-  if(edges.size() != m_x->size())
+  if (edges.size() != m_x->size())
     throw std::logic_error(
         "Histogram::setBinEdgeStandardDeviations: size mismatch.");
   if (selfAssignmentDx(data...))
@@ -255,11 +255,11 @@ template <typename... T> void Histogram::setPointVariances(T &&... data) & {
 /// Sets the Histogram's point standard deviations.
 template <typename... T>
 void Histogram::setPointStandardDeviations(T &&... data) & {
-  if(m_xMode != XMode::Points)
+  if (m_xMode != XMode::Points)
     throw std::logic_error("Histogram::setPointStandardDeviations: XMode is "
                            "not Points, cannot set point standard deviations.");
   PointStandardDeviations points(std::forward<T>(data)...);
-  if(points.size() != m_x->size())
+  if (points.size() != m_x->size())
     throw std::logic_error(
         "Histogram::setPointStandardDeviations: size mismatch.");
   if (selfAssignmentDx(data...))

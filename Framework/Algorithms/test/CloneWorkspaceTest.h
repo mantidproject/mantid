@@ -53,8 +53,7 @@ public:
     for (size_t i = 0; i < in->getNumberHistograms(); ++i)
       in->setBinEdgeStandardDeviations(i, dx);
 
-        TS_ASSERT_THROWS_NOTHING(
-            cloner.setPropertyValue("InputWorkspace", "in"));
+    TS_ASSERT_THROWS_NOTHING(cloner.setPropertyValue("InputWorkspace", "in"));
     TS_ASSERT_THROWS_NOTHING(cloner.setPropertyValue("OutputWorkspace", "out"));
 
     TS_ASSERT(cloner.execute());

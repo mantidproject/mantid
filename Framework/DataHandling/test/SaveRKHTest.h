@@ -254,8 +254,7 @@ private:
   std::string outputFile;
 
   /// Provides a workpace with a x error value
-  MatrixWorkspace_sptr
-  createInputWorkspaceHistoWithXerror() const {
+  MatrixWorkspace_sptr createInputWorkspaceHistoWithXerror() const {
     size_t nSpec = 1;
     const size_t x_length = 11;
     const size_t y_length = x_length - 1;

@@ -68,7 +68,8 @@ PointVariances Histogram::pointVariances() const {
     return PointVariances(PointStandardDeviations(m_dx));
 }
 
-/// Returns the standard deviations of the points (or bin centers) of the Histogram.
+/// Returns the standard deviations of the points (or bin centers) of the
+/// Histogram.
 PointStandardDeviations Histogram::pointStandardDeviations() const {
   if (xMode() == XMode::BinEdges)
     return PointStandardDeviations(BinEdgeStandardDeviations(m_dx));

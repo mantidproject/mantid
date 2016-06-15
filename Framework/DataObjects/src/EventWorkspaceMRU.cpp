@@ -105,7 +105,7 @@ HistogramData::Counts EventWorkspaceMRU::findY(size_t thread_num,
                                                size_t index) {
   std::lock_guard<std::mutex> _lock(m_changeMruListsMutexY);
   auto result = m_bufferedDataY[thread_num]->find(index);
-  if(result)
+  if (result)
     return result->m_data;
   return HistogramData::Counts();
 }
@@ -120,7 +120,7 @@ HistogramData::CountStandardDeviations
 EventWorkspaceMRU::findE(size_t thread_num, size_t index) {
   std::lock_guard<std::mutex> _lock(m_changeMruListsMutexE);
   auto result = m_bufferedDataE[thread_num]->find(index);
-  if(result)
+  if (result)
     return result->m_data;
   return HistogramData::CountStandardDeviations();
 }

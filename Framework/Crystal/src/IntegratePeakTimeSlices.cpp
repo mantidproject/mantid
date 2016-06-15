@@ -1233,9 +1233,9 @@ void DataModeHandler::setHeightHalfWidthInfo(const MantidVec &xvals,
                                              const MantidVec &yvals,
                                              const MantidVec &counts) {
   double minCount, maxCount;
-  const auto & X = xvals;
-  const auto & Y = yvals;
-  const auto & C = counts;
+  const auto &X = xvals;
+  const auto &Y = yvals;
+  const auto &C = counts;
   VarxHW = -1;
   VaryHW = -1;
   int N = static_cast<int>(X.size());

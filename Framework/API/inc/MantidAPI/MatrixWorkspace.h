@@ -276,7 +276,7 @@ public:
     getSpectrum(index).setSharedX(x);
   }
   void setSharedDx(const size_t index,
-                  const Kernel::cow_ptr<HistogramData::HistogramDx> &dx) {
+                   const Kernel::cow_ptr<HistogramData::HistogramDx> &dx) {
     getSpectrum(index).setSharedDx(dx);
   }
 

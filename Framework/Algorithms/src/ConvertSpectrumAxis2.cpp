@@ -91,8 +91,8 @@ void ConvertSpectrumAxis2::exec() {
   }
 
   // Create an output workspace and set the property for it.
-  MatrixWorkspace_sptr outputWS = createOutputWorkspace(
-      progress, unitTarget, inputWS, nHist);
+  MatrixWorkspace_sptr outputWS =
+      createOutputWorkspace(progress, unitTarget, inputWS, nHist);
   setProperty("OutputWorkspace", outputWS);
 }
 

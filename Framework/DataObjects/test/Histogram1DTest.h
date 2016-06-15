@@ -21,6 +21,7 @@ private:
   MantidVec x1, y1, e1; // vectors
   boost::shared_ptr<HistogramY> pa;
   boost::shared_ptr<HistogramE> pb;
+
 public:
   void setUp() override {
     nel = 100;

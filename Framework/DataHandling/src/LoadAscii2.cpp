@@ -500,7 +500,7 @@ void LoadAscii2::newSpectra() {
     if (m_curSpectra) {
       size_t specSize = m_curSpectra->size();
       if (specSize > 0 && specSize == m_lastBins) {
-        if(m_curSpectra->readX().size() == m_curDx.size())
+        if (m_curSpectra->readX().size() == m_curDx.size())
           m_curSpectra->setPointStandardDeviations(std::move(m_curDx));
         m_spectra.push_back(*m_curSpectra);
       }

@@ -114,7 +114,7 @@ public:
     const FrequencyStandardDeviations frequencies(counts, edges);
     TS_ASSERT_EQUALS(frequencies.size(), 2);
     TS_ASSERT_DELTA(frequencies[0], 10.0, 1e-14);
-    TS_ASSERT_DELTA(frequencies[1], M_SQRT2*5.0, 1e-14);
+    TS_ASSERT_DELTA(frequencies[1], M_SQRT2 * 5.0, 1e-14);
   }
 
   void test_move_construct_from_CountVariances() {
