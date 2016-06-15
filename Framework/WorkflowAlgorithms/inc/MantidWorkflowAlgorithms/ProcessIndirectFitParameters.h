@@ -36,8 +36,6 @@ namespace Algorithms {
 */
 class DLLExport ProcessIndirectFitParameters : public API::Algorithm {
 public:
-  ProcessIndirectFitParameters();
-  ~ProcessIndirectFitParameters() override;
 
   const std::string name() const override;
   int version() const override;

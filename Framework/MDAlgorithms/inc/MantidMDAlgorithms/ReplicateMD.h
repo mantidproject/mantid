@@ -43,8 +43,6 @@ namespace MDAlgorithms {
 */
 class MANTID_MDALGORITHMS_DLL ReplicateMD : public API::Algorithm {
 public:
-  ReplicateMD();
-  ~ReplicateMD() override;
 
   const std::string name() const override;
   int version() const override;

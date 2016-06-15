@@ -35,8 +35,6 @@ namespace MDAlgorithms {
 */
 class DLLExport NotMD : public UnaryOperationMD {
 public:
-  NotMD();
-  ~NotMD() override;
 
   const std::string name() const override;
   /// Summary of algorithms purpose

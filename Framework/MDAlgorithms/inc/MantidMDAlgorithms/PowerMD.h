@@ -35,8 +35,6 @@ namespace MDAlgorithms {
 */
 class DLLExport PowerMD : public UnaryOperationMD {
 public:
-  PowerMD();
-  ~PowerMD() override;
 
   const std::string name() const override;
   /// Summary of algorithms purpose

@@ -32,8 +32,6 @@ namespace WorkflowAlgorithms {
 */
 class DLLExport MuonProcess : public API::DataProcessorAlgorithm {
 public:
-  MuonProcess();
-  ~MuonProcess() override;
 
   const std::string name() const override;
   /// Summary of algorithms purpose

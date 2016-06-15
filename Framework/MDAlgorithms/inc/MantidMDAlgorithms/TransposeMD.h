@@ -33,8 +33,6 @@ namespace MDAlgorithms {
 */
 class MANTID_MDALGORITHMS_DLL TransposeMD : public API::Algorithm {
 public:
-  TransposeMD();
-  ~TransposeMD() override;
 
   const std::string name() const override;
   int version() const override;

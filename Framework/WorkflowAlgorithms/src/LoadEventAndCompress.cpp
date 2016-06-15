@@ -20,15 +20,6 @@ using namespace DataObjects;
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(LoadEventAndCompress)
 
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-LoadEventAndCompress::LoadEventAndCompress() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-LoadEventAndCompress::~LoadEventAndCompress() = default;
 
 //----------------------------------------------------------------------------------------------
 

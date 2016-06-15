@@ -11,18 +11,6 @@ namespace MDAlgorithms {
 DECLARE_ALGORITHM(WeightedMeanMD)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-WeightedMeanMD::WeightedMeanMD() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-WeightedMeanMD::~WeightedMeanMD() = default;
-
-//----------------------------------------------------------------------------------------------
-
-//----------------------------------------------------------------------------------------------
 /// Is the operation commutative?
 bool WeightedMeanMD::commutative() const { return true; }
 

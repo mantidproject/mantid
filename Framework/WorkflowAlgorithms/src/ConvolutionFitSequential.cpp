@@ -32,16 +32,6 @@ using namespace Kernel;
 DECLARE_ALGORITHM(ConvolutionFitSequential)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-ConvolutionFitSequential::ConvolutionFitSequential() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-ConvolutionFitSequential::~ConvolutionFitSequential() = default;
-
-//----------------------------------------------------------------------------------------------
 
 /// Algorithms name for identification. @see Algorithm::name
 const std::string ConvolutionFitSequential::name() const {

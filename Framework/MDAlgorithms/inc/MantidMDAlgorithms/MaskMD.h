@@ -40,8 +40,6 @@ parseDimensionNames(const std::string &names_string);
 */
 class MANTID_MDALGORITHMS_DLL MaskMD : public API::Algorithm {
 public:
-  MaskMD();
-  ~MaskMD() override;
 
   const std::string name() const override;
   /// Summary of algorithms purpose

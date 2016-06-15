@@ -36,8 +36,6 @@ namespace WorkflowAlgorithms {
 */
 class DLLExport DgsRemap : public API::Algorithm {
 public:
-  DgsRemap();
-  ~DgsRemap() override;
 
   const std::string name() const override;
   /// Summary of algorithms purpose
