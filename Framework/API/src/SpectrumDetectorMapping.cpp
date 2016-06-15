@@ -16,15 +16,15 @@ SpectrumDetectorMapping::SpectrumDetectorMapping(
   }
 
   for (size_t i = 0; i < workspace->getNumberHistograms(); ++i) {
-    auto spectrum = workspace->getSpectrum(i);
+    auto &spectrum = workspace->getSpectrum(i);
 
     int index;
     if (m_indexIsSpecNo)
-      index = spectrum->getSpectrumNo();
+      index = spectrum.getSpectrumNo();
     else
       index = static_cast<int>(i);
 
-    m_mapping[index] = spectrum->getDetectorIDs();
+    m_mapping[index] = spectrum.getDetectorIDs();
   }
 }
 

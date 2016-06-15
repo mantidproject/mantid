@@ -154,7 +154,7 @@ void CalculateFlatBackground::exec() {
           // not every spectra is the monitor or detector, some spectra have no
           // instrument components attached.
           g_log.information(" Can not find detector for spectra N: " +
-                            boost::lexical_cast<std::string>(currentSpec) +
+                            std::to_string(currentSpec) +
                             " Processing background anyway\n");
         }
       }
@@ -173,7 +173,7 @@ void CalculateFlatBackground::exec() {
                            "counts spectrum with index " << currentSpec
                         << ". The spectrum has been left unchanged.\n";
         g_log.debug() << "The background for spectra index " << currentSpec
-                      << "was calculated to be " << background << std::endl;
+                      << "was calculated to be " << background << '\n';
         continue;
       } else { // only used for the logging that gets done at the end
         backgroundTotal += background;
@@ -208,7 +208,7 @@ void CalculateFlatBackground::exec() {
       }
     } catch (std::exception &) {
       g_log.error() << "Error processing the spectrum with index "
-                    << currentSpec << std::endl;
+                    << currentSpec << '\n';
       throw;
     }
 

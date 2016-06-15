@@ -95,7 +95,7 @@ void MaxMin::exec() {
     int newindex = i - MinSpec;
     // Copy over spectrum and detector number info
     outputWorkspace->getSpectrum(newindex)
-        ->copyInfoFrom(*localworkspace->getSpectrum(i));
+        .copyInfoFrom(localworkspace->getSpectrum(i));
 
     // Retrieve the spectrum into a vector
     const MantidVec &X = localworkspace->readX(i);

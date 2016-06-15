@@ -41,11 +41,6 @@ GeneratePeaks::GeneratePeaks()
       i_a1(-1), i_a2(-1), m_useFuncParamWS(false), m_wsIndex(-1) {}
 
 //----------------------------------------------------------------------------------------------
-/** Destructor
- */
-GeneratePeaks::~GeneratePeaks() {}
-
-//----------------------------------------------------------------------------------------------
 /** Define algorithm's properties
  */
 void GeneratePeaks::init() {
@@ -800,7 +795,7 @@ GeneratePeaks::createDataWorkspace(std::vector<double> binparameters) {
     specnum_t wsindex = spiter->second;
     g_log.debug() << "Build WorkspaceIndex-Spectrum  " << wsindex << " , "
                   << specid << "\n";
-    ws->getSpectrum(wsindex)->setSpectrumNo(specid);
+    ws->getSpectrum(wsindex).setSpectrumNo(specid);
   }
 
   return ws;

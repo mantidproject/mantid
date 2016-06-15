@@ -126,7 +126,7 @@ void SaveTBL::writeVal(T &val, std::ofstream &file, bool endsep, bool endline) {
     file << m_sep;
   }
   if (endline) {
-    file << std::endl;
+    file << '\n';
   }
 }
 } // namespace DataHandling

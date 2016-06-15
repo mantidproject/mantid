@@ -118,7 +118,7 @@ void SofQWPolygon::exec() {
         // Add this spectra-detector pair to the mapping
         PARALLEL_CRITICAL(SofQWPolygon_spectramap) {
           specNumberMapping.push_back(
-              outputWS->getSpectrum(qIndex - 1)->getSpectrumNo());
+              outputWS->getSpectrum(qIndex - 1).getSpectrumNo());
           detIDMapping.push_back(det->getID());
         }
       }

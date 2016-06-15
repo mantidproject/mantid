@@ -199,10 +199,10 @@ std::map<std::string, double> IndirectDataReductionTab::getRangesFromInstrument(
   Mantid::specnum_t spectraMin =
       boost::lexical_cast<Mantid::specnum_t>(spectraMinDbl);
 
-  auto spectrum = energyWs->getSpectrum(0);
-  spectrum->setSpectrumNo(spectraMin);
-  spectrum->clearDetectorIDs();
-  spectrum->addDetectorID(spectraMin);
+  auto &spectrum = energyWs->getSpectrum(0);
+  spectrum.setSpectrumNo(spectraMin);
+  spectrum.clearDetectorIDs();
+  spectrum.addDetectorID(spectraMin);
 
   IAlgorithm_sptr convUnitsAlg =
       AlgorithmManager::Instance().create("ConvertUnits");

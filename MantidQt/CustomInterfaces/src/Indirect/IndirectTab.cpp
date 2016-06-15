@@ -74,7 +74,7 @@ bool IndirectTab::validateTab() { return validate(); }
 void IndirectTab::exportPythonScript() {
   g_log.information() << "Python export for workspace: " << m_pythonExportWsName
                       << ", between " << m_tabStartTime << " and "
-                      << m_tabEndTime << std::endl;
+                      << m_tabEndTime << '\n';
 
   // Take the search times to be a second either side of the actual times, just
   // in case
@@ -405,7 +405,7 @@ std::string IndirectTab::getEMode(Mantid::API::MatrixWorkspace_sptr ws) {
   Mantid::Kernel::Unit_sptr xUnit = ws->getAxis(0)->unit();
   std::string xUnitName = xUnit->caption();
 
-  g_log.debug() << "X unit name is: " << xUnitName << std::endl;
+  g_log.debug() << "X unit name is: " << xUnitName << '\n';
 
   if (boost::algorithm::find_first(xUnitName, "d-Spacing"))
     return "Elastic";
@@ -498,7 +498,7 @@ void IndirectTab::runAlgorithm(const Mantid::API::IAlgorithm_sptr algorithm) {
   size_t batchQueueLength = m_batchAlgoRunner->queueLength();
   if (batchQueueLength > 0)
     g_log.warning() << "Batch queue already contains " << batchQueueLength
-                    << " algorithms!" << std::endl;
+                    << " algorithms!\n";
 
   m_batchAlgoRunner->addAlgorithm(algorithm);
   m_batchAlgoRunner->executeBatchAsync();

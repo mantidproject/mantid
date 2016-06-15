@@ -146,14 +146,14 @@ void SumSpectra::exec() {
     Progress progress(this, 0, 1, this->m_indices.size());
 
     // This is the (only) output spectrum
-    ISpectrum *outSpec = outputWorkspace->getSpectrum(0);
+    auto &outSpec = outputWorkspace->getSpectrum(0);
 
     // Copy over the bin boundaries
-    outSpec->dataX() = localworkspace->readX(0);
+    outSpec.dataX() = localworkspace->readX(0);
 
     // Build a new spectra map
-    outSpec->setSpectrumNo(m_outSpecNum);
-    outSpec->clearDetectorIDs();
+    outSpec.setSpectrumNo(m_outSpecNum);
+    outSpec.clearDetectorIDs();
 
     if (localworkspace->id() == "RebinnedOutput") {
       this->doRebinnedOutput(outputWorkspace, progress, numSpectra, numMasked,
@@ -164,7 +164,7 @@ void SumSpectra::exec() {
     }
 
     // Pointer to sqrt function
-    MantidVec &YError = outSpec->dataE();
+    MantidVec &YError = outSpec.dataE();
     typedef double (*uf)(double);
     uf rs = std::sqrt;
     // take the square root of all the accumulated squared errors - Assumes
@@ -194,7 +194,7 @@ specnum_t
 SumSpectra::getOutputSpecNo(MatrixWorkspace_const_sptr localworkspace) {
   // initial value
   specnum_t specId =
-      localworkspace->getSpectrum(*(this->m_indices.begin()))->getSpectrumNo();
+      localworkspace->getSpectrum(*(this->m_indices.begin())).getSpectrumNo();
 
   // the total number of spectra
   int totalSpec = static_cast<int>(localworkspace->getNumberHistograms());
@@ -202,7 +202,7 @@ SumSpectra::getOutputSpecNo(MatrixWorkspace_const_sptr localworkspace) {
   specnum_t temp;
   for (const auto index : this->m_indices) {
     if (index < totalSpec) {
-      temp = localworkspace->getSpectrum(index)->getSpectrumNo();
+      temp = localworkspace->getSpectrum(index).getSpectrumNo();
       if (temp < specId)
         specId = temp;
     }
@@ -223,12 +223,12 @@ SumSpectra::getOutputSpecNo(MatrixWorkspace_const_sptr localworkspace) {
  * spectra for event workspace.
  */
 void SumSpectra::doWorkspace2D(MatrixWorkspace_const_sptr localworkspace,
-                               ISpectrum *outSpec, Progress &progress,
+                               ISpectrum &outSpec, Progress &progress,
                                size_t &numSpectra, size_t &numMasked,
                                size_t &numZeros) {
   // Get references to the output workspaces's data vectors
-  MantidVec &YSum = outSpec->dataY();
-  MantidVec &YError = outSpec->dataE();
+  MantidVec &YSum = outSpec.dataY();
+  MantidVec &YError = outSpec.dataE();
 
   MantidVec Weight;
   std::vector<size_t> nZeros;
@@ -287,7 +287,7 @@ void SumSpectra::doWorkspace2D(MatrixWorkspace_const_sptr localworkspace,
     }
 
     // Map all the detectors onto the spectrum of the output
-    outSpec->addDetectorIDs(localworkspace->getSpectrum(i)->getDetectorIDs());
+    outSpec.addDetectorIDs(localworkspace->getSpectrum(i).getDetectorIDs());
 
     progress.report();
   }
@@ -338,9 +338,9 @@ void SumSpectra::doRebinnedOutput(MatrixWorkspace_sptr outputWorkspace,
       boost::dynamic_pointer_cast<RebinnedOutput>(outputWorkspace);
 
   // Get references to the output workspaces's data vectors
-  ISpectrum *outSpec = outputWorkspace->getSpectrum(0);
-  MantidVec &YSum = outSpec->dataY();
-  MantidVec &YError = outSpec->dataE();
+  auto &outSpec = outputWorkspace->getSpectrum(0);
+  MantidVec &YSum = outSpec.dataY();
+  MantidVec &YError = outSpec.dataE();
   MantidVec &FracSum = outWS->dataF(0);
   MantidVec Weight;
   std::vector<size_t> nZeros;
@@ -404,7 +404,7 @@ void SumSpectra::doRebinnedOutput(MatrixWorkspace_sptr outputWorkspace,
     }
 
     // Map all the detectors onto the spectrum of the output
-    outSpec->addDetectorIDs(localworkspace->getSpectrum(i)->getDetectorIDs());
+    outSpec.addDetectorIDs(localworkspace->getSpectrum(i).getDetectorIDs());
 
     progress.report();
   }
@@ -440,7 +440,7 @@ void SumSpectra::execEvent(EventWorkspace_const_sptr localworkspace,
   Progress progress(this, 0, 1, indices.size());
 
   // Get the pointer to the output event list
-  EventList &outEL = outputWorkspace->getEventList(0);
+  EventList &outEL = outputWorkspace->getSpectrum(0);
   outEL.setSpectrumNo(m_outSpecNum);
   outEL.clearDetectorIDs();
 
@@ -473,7 +473,7 @@ void SumSpectra::execEvent(EventWorkspace_const_sptr localworkspace,
     numSpectra++;
 
     // Add the event lists with the operator
-    const EventList &tOutEL = localworkspace->getEventList(i);
+    const EventList &tOutEL = localworkspace->getSpectrum(i);
     if (tOutEL.empty()) {
       ++numZeros;
     }

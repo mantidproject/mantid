@@ -6,7 +6,7 @@ bool skipTests() {
   Mantid::Kernel::ConfigService::Instance().setString("default.facility",
                                                       "ISIS");
   if (!login()) {
-    std::cerr << "ICat server seems to be down. Skipping tests" << std::endl;
+    std::cerr << "ICat server seems to be down. Skipping tests\n";
     return true;
   } else {
     logout();

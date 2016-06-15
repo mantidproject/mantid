@@ -52,9 +52,6 @@ public:
                    Mantid::API::MatrixWorkspace_sptr>;
   using OptionalInteger = boost::optional<int>;
 
-  ReflectometryWorkflowBase();
-  ~ReflectometryWorkflowBase() override;
-
   /// Convert the input workspace to wavelength, splitting according to the
   /// properties provided.
   DetectorMonitorWorkspacePair

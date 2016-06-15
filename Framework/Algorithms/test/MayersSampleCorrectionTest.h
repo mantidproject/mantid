@@ -124,9 +124,9 @@ private:
 
     // Spectrum-detector mapping
     for (int i = 0; i < nhist; ++i) {
-      auto *spectrum = testWS->getSpectrum(i);
-      spectrum->clearDetectorIDs();
-      spectrum->addDetectorID(i + 1);
+      auto &spectrum = testWS->getSpectrum(i);
+      spectrum.clearDetectorIDs();
+      spectrum.addDetectorID(i + 1);
     }
 
     // Sample properties - cylinder of vanadium

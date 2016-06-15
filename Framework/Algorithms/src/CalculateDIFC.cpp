@@ -18,16 +18,6 @@ using Mantid::Kernel::Direction;
 DECLARE_ALGORITHM(CalculateDIFC)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-CalculateDIFC::CalculateDIFC() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-CalculateDIFC::~CalculateDIFC() {}
-
-//----------------------------------------------------------------------------------------------
 
 /// Algorithms name for identification. @see Algorithm::name
 const std::string CalculateDIFC::name() const { return "CalculateDIFC"; }

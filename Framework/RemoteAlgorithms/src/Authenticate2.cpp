@@ -50,7 +50,7 @@ void Authenticate2::exec() {
   jobManager->authenticate(user, getPropertyValue("Password"));
 
   g_log.information() << "Authenticate as user " << user
-                      << " in the compute resource " << comp << std::endl;
+                      << " in the compute resource " << comp << '\n';
 }
 
 } // end namespace RemoteAlgorithms

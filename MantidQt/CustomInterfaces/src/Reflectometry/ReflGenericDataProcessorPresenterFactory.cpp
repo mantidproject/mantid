@@ -1,11 +1,10 @@
 #include "MantidQtCustomInterfaces/Reflectometry/ReflGenericDataProcessorPresenterFactory.h"
-#include "MantidQtCustomInterfaces/Reflectometry/DataProcessorPostprocessingAlgorithm.h"
-#include "MantidQtCustomInterfaces/Reflectometry/DataProcessorPreprocessingAlgorithm.h"
-#include "MantidQtCustomInterfaces/Reflectometry/DataProcessorProcessingAlgorithm.h"
-#include "MantidQtCustomInterfaces/Reflectometry/DataProcessorWhiteList.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
+
+using namespace MantidQt::MantidWidgets;
+
 /**
 * Creates a Reflectometry Data Processor Presenter
 */

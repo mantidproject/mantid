@@ -187,7 +187,7 @@ void CreatePSDBleedMask::exec() {
         << " The " << numSpectraMasked
         << " spectra have been masked on the output workspace.\n";
   } else {
-    g_log.information() << std::endl;
+    g_log.information() << '\n';
   }
 
   setProperty("NumberOfFailures", numSpectraMasked);

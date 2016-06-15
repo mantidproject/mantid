@@ -63,19 +63,19 @@ std::string det_phi[] = {"-105", "-110", "-115", "-120", "-125", "-130"};
 void writeSmallDatFile(const std::string &filename) {
   std::ofstream file(filename.c_str());
   const int NOTUSED = -123456;
-  file << "DETECTOR.DAT writen by LoadDetectorInfoTest" << std::endl;
-  file << 165888 << " " << 14 << std::endl;
+  file << "DETECTOR.DAT writen by LoadDetectorInfoTest\n";
+  file << 165888 << " " << 14 << '\n';
   file << "det no.  offset    l2     code     theta        phi         w_x     "
           "    w_y         w_z         f_x         f_y         f_z         a_x "
           "        a_y         a_z        det_1       det_2       det_3       "
-          "det4" << std::endl;
+          "det4\n";
   for (int i = 0; i < SmallTestDatFile::NDETECTS; ++i) {
     file << i << "\t" << delta[i] << "\t" << det_l2[i] << "\t" << code[i]
          << "\t" << det_theta[i] << "\t" << det_phi[i] << "\t" << NOTUSED
          << "\t" << NOTUSED << "\t" << NOTUSED << "\t" << NOTUSED << "\t"
          << NOTUSED << "\t" << NOTUSED << "\t" << NOTUSED << "\t" << NOTUSED
          << "\t" << NOTUSED << "\t" << NOTUSED << "\t" << pressure[i] << "\t"
-         << wallThick[i] << "\t" << NOTUSED << std::endl;
+         << wallThick[i] << "\t" << NOTUSED << '\n';
   }
   file.close();
 }
@@ -183,19 +183,19 @@ void writeLargeTestDatFile(const std::string &filename, const int ndets) {
 
   std::ofstream file(filename.c_str());
   const int NOTUSED = -123456;
-  file << "DETECTOR.DAT writen by LoadDetectorInfoTest" << std::endl;
-  file << 165888 << " " << 14 << std::endl;
+  file << "DETECTOR.DAT writen by LoadDetectorInfoTest\n";
+  file << 165888 << " " << 14 << '\n';
   file << "det no.  offset    l2     code     theta        phi         w_x     "
           "    w_y         w_z         f_x         f_y         f_z         a_x "
           "        a_y         a_z        det_1       det_2       det_3       "
-          "det4" << std::endl;
+          "det4\n";
   for (int i = 0; i < ndets; ++i) {
     file << i << "\t" << delta[0] << "\t" << det_l2[0] << "\t" << code[0]
          << "\t" << det_theta[0] << "\t" << det_phi[0] << "\t" << NOTUSED
          << "\t" << NOTUSED << "\t" << NOTUSED << "\t" << NOTUSED << "\t"
          << NOTUSED << "\t" << NOTUSED << "\t" << NOTUSED << "\t" << NOTUSED
          << "\t" << NOTUSED << "\t" << NOTUSED << "\t" << pressure[0] << "\t"
-         << wallThick[0] << "\t" << NOTUSED << std::endl;
+         << wallThick[0] << "\t" << NOTUSED << '\n';
   }
   file.close();
 }
@@ -217,9 +217,9 @@ void makeTestWorkspace(const int ndets, const int nbins,
                                            // each spectra (1+index_number) but
                                            // the same for each bin
     space2D->setData(j, data[j], errors);
-    ISpectrum *spec = space2D->getSpectrum(j);
-    spec->setSpectrumNo(j + 1);
-    spec->setDetectorID(j);
+    auto &spec = space2D->getSpectrum(j);
+    spec.setSpectrumNo(j + 1);
+    spec.setDetectorID(j);
   }
 
   Instrument_sptr instr(new Instrument);

@@ -27,9 +27,9 @@ public:
     auto ws = boost::make_shared<WorkspaceTester>();
     ws->init(3, 1, 1);
     // Override some of the default detector numbers to make it more interesting
-    ws->getSpectrum(0)->setDetectorIDs(std::set<detid_t>());
+    ws->getSpectrum(0).setDetectorIDs(std::set<detid_t>());
     int detids[] = {10, 20};
-    ws->getSpectrum(2)->setDetectorIDs(std::set<detid_t>(detids, detids + 2));
+    ws->getSpectrum(2).setDetectorIDs(std::set<detid_t>(detids, detids + 2));
     SpectrumDetectorMapping map(ws.get());
 
     TS_ASSERT(map.getDetectorIDsForSpectrumNo(1).empty());

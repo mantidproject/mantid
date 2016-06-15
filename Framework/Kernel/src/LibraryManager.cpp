@@ -21,7 +21,7 @@ Logger g_log("LibraryManager");
 
 /// Constructor
 LibraryManagerImpl::LibraryManagerImpl() {
-  g_log.debug() << "LibraryManager created." << std::endl;
+  g_log.debug() << "LibraryManager created.\n";
 }
 
 /** Opens all suitable DLLs on a given path.

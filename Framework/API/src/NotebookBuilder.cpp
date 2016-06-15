@@ -173,7 +173,7 @@ NotebookBuilder::buildPropertyString(PropertyHistory_const_sptr propHistory) {
              propHistory->type()) != nonWorkspaceTypes.end() &&
         propHistory->direction() == Direction::Output) {
       g_log.debug() << "Ignoring property " << propHistory->name()
-                    << " of type " << propHistory->type() << std::endl;
+                    << " of type " << propHistory->type() << '\n';
       // Handle numerical properties
     } else if (propHistory->type() == "number") {
       prop = propHistory->name() + "=" + propHistory->value();

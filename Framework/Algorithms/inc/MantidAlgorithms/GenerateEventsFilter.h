@@ -62,7 +62,6 @@ namespace Algorithms {
 class DLLExport GenerateEventsFilter : public API::Algorithm {
 public:
   explicit GenerateEventsFilter();
-  ~GenerateEventsFilter() override;
 
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "GenerateEventsFilter"; }

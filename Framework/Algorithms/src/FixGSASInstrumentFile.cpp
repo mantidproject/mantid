@@ -27,16 +27,6 @@ DECLARE_ALGORITHM(FixGSASInstrumentFile)
 const size_t LINESIZE = 80;
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-FixGSASInstrumentFile::FixGSASInstrumentFile() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-FixGSASInstrumentFile::~FixGSASInstrumentFile() {}
-
-//----------------------------------------------------------------------------------------------
 /** Implement abstract Algorithm methods
  */
 void FixGSASInstrumentFile::init() {

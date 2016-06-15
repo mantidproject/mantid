@@ -166,13 +166,12 @@ public:
       else
         factor = instFactor;
 
-      auto inEvents = resultEventWS->getEventListPtr(i);
-      auto outEvents = resultEventWS->getEventListPtr(i);
-      TS_ASSERT_EQUALS(outEvents->getNumberEvents(),
-                       inEvents->getNumberEvents());
+      auto &inEvents = resultEventWS->getSpectrum(i);
+      auto &outEvents = resultEventWS->getSpectrum(i);
+      TS_ASSERT_EQUALS(outEvents.getNumberEvents(), inEvents.getNumberEvents());
 
-      auto inTOFs = inEvents->getTofs();
-      auto outTOFs = outEvents->getTofs();
+      auto inTOFs = inEvents.getTofs();
+      auto outTOFs = outEvents.getTofs();
       TS_ASSERT_EQUALS(inTOFs.size(), outTOFs.size());
       for (size_t j = 0; i < inTOFs.size(); ++j) {
         TS_ASSERT_DELTA(outTOFs[j], factor * inTOFs[j], 1e-12);
