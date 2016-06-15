@@ -4,16 +4,23 @@ namespace MantidQt {
 namespace MantidWidgets {
 
 /** Adds an element to the whitelist
-    @param colName : the name of the column to be added
-    @param algProperty : the name of the property linked to this column
-    @param description : a description of this column
+* @param colName : the name of the column to be added
+* @param algProperty : the name of the property linked to this column
+* @param showPrefix : true if we want to use what's in this column to generate
+* the output ws name
+* @param prefix : the prefix to be added to the value of this column
+* @param description : a description of this column
 */
 void DataProcessorWhiteList::addElement(const std::string &colName,
                                         const std::string &algProperty,
-                                        const std::string &description) {
+                                        const std::string &description,
+                                        bool showPrefix,
+                                        const std::string &prefix) {
 
   m_colIndexToColName.push_back(colName);
   m_colIndexToAlgProp.push_back(algProperty);
+  m_showPrefix.push_back(showPrefix);
+  m_prefix.push_back(prefix);
   m_description.push_back(description);
   m_colNameToColIndex[colName] = m_lastIndex++;
 }
@@ -51,6 +58,22 @@ std::string DataProcessorWhiteList::description(int index) const {
 */
 size_t DataProcessorWhiteList::size() const {
   return m_colNameToColIndex.size();
+}
+
+/** Returns true if this column should be used to generate the name of the
+ * output ws
+ * @param index : The column index
+*/
+bool DataProcessorWhiteList::showPrefix(int index) const {
+  return m_showPrefix.at(index);
+}
+
+/** Returns the column prefix used to generate the name of the output ws (will
+* only be used if shosPrefix is true for this column
+* @param index : The column index
+*/
+std::string DataProcessorWhiteList::prefix(int index) const {
+  return m_prefix.at(index);
 }
 }
 }

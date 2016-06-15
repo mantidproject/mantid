@@ -47,13 +47,13 @@ private:
   DataProcessorWhiteList createReflectometryWhiteList() {
 
     DataProcessorWhiteList whitelist;
-    whitelist.addElement("Run(s)", "InputWorkspace");
-    whitelist.addElement("Angle", "ThetaIn");
-    whitelist.addElement("Transmission Run(s)", "FirstTransmissionRun");
-    whitelist.addElement("Q min", "MomentumTransferMinimum");
-    whitelist.addElement("Q max", "MomentumTransferMaximum");
-    whitelist.addElement("dQ/Q", "MomentumTransferStep");
-    whitelist.addElement("Scale", "ScaleFactor");
+    whitelist.addElement("Run(s)", "InputWorkspace", "");
+    whitelist.addElement("Angle", "ThetaIn", "");
+    whitelist.addElement("Transmission Run(s)", "FirstTransmissionRun", "");
+    whitelist.addElement("Q min", "MomentumTransferMinimum", "");
+    whitelist.addElement("Q max", "MomentumTransferMaximum", "");
+    whitelist.addElement("dQ/Q", "MomentumTransferStep", "");
+    whitelist.addElement("Scale", "ScaleFactor", "");
     return whitelist;
   }
 

@@ -25,15 +25,16 @@ private:
 
     // Reflectometry white list
     DataProcessorWhiteList whitelist;
-    whitelist.addElement("Run(s)", "InputWorkspace");
-    whitelist.addElement("Angle", "ThetaIn");
-    whitelist.addElement("Transmission Run(s)", "FirstTransmissionRun");
-    whitelist.addElement("Q min", "MomentumTransferMinimum");
-    whitelist.addElement("Q max", "MomentumTransferMaximum");
-    whitelist.addElement("dQ/Q", "MomentumTransferStep");
-    whitelist.addElement("Scale", "ScaleFactor");
-    whitelist.addElement("Group", "Group");
-    whitelist.addElement("Options", "Options");
+    whitelist.addElement("Run(s)", "InputWorkspace", "", true, "TOF_");
+    whitelist.addElement("Angle", "ThetaIn", "");
+    whitelist.addElement("Transmission Run(s)", "FirstTransmissionRun", "",
+                         true, "TRANS_");
+    whitelist.addElement("Q min", "MomentumTransferMinimum", "");
+    whitelist.addElement("Q max", "MomentumTransferMaximum", "");
+    whitelist.addElement("dQ/Q", "MomentumTransferStep", "");
+    whitelist.addElement("Scale", "ScaleFactor", "");
+    whitelist.addElement("Group", "Group", "");
+    whitelist.addElement("Options", "Options", "");
     return whitelist;
   }
   std::map<std::string, DataProcessorPreprocessingAlgorithm>
