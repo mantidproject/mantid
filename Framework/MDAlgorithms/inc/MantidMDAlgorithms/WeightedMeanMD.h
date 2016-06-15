@@ -35,7 +35,6 @@ namespace MDAlgorithms {
 */
 class DLLExport WeightedMeanMD : public BinaryOperationMD {
 public:
-
   /// Algorithm's name for identification
   const std::string name() const override { return "WeightedMeanMD"; };
   /// Summary of algorithms purpose

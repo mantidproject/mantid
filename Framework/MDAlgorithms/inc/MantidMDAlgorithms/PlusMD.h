@@ -37,7 +37,6 @@ namespace MDAlgorithms {
 */
 class DLLExport PlusMD : public BinaryOperationMD {
 public:
-
   /// Algorithm's name for identification
   const std::string name() const override { return "PlusMD"; };
   /// Summary of algorithms purpose

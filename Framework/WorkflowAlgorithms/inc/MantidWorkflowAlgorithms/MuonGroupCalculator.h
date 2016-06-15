@@ -35,6 +35,7 @@ public:
                       const std::vector<int> summedPeriods,
                       const std::vector<int> subtractedPeriods,
                       const int groupIndex);
+
 protected:
   /// Workspace index of the group to analyse
   const int m_groupIndex;

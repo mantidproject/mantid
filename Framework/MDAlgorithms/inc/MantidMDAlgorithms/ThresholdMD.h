@@ -32,7 +32,6 @@ namespace MDAlgorithms {
 */
 class DLLExport ThresholdMD : public API::Algorithm {
 public:
-
   const std::string name() const override;
   /// Summary of algorithms purpose
   const std::string summary() const override {
