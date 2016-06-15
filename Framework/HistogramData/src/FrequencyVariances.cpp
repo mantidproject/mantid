@@ -1,6 +1,7 @@
 #include "MantidHistogramData/BinEdges.h"
 #include "MantidHistogramData/CountVariances.h"
 #include "MantidHistogramData/FrequencyVariances.h"
+#include "MantidHistogramData/FrequencyStandardDeviations.h"
 
 namespace Mantid {
 namespace HistogramData {
