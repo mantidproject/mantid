@@ -4,6 +4,7 @@
 #include "MantidMPIAlgorithms/GatherWorkspaces.h"
 #include "MantidMPIAlgorithms/MPISerialization.h"
 #include <boost/mpi.hpp>
+#include <boost/version.hpp>
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ArrayBoundedValidator.h"
 #include "MantidDataObjects/EventWorkspace.h"
@@ -39,6 +40,9 @@ template <class T> struct SumGaussError : public std::binary_function<T, T, T> {
 // two different versions of the sum operators that we pass into reduce().
 // This is explained in more detail at:
 // http://stackoverflow.com/questions/28845847/custom-reduce-operation-in-boost-mpi
+#ifndef BOOST_VERSION
+#error BOOST_VERSION macro is not defined!
+#endif
 #if (BOOST_VERSION / 100 % 1000) >= 55 // is the boost version >= 1.55?
 
 struct vplus : public std::plus<double> { };
