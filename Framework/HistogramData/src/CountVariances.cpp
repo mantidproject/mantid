@@ -2,6 +2,7 @@
 #include "MantidHistogramData/CountVariances.h"
 #include "MantidHistogramData/CountStandardDeviations.h"
 #include "MantidHistogramData/FrequencyVariances.h"
+#include "MantidHistogramData/FrequencyStandardDeviations.h"
 
 namespace Mantid {
 namespace HistogramData {
