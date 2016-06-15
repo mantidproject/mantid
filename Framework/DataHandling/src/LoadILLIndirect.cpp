@@ -62,10 +62,8 @@ int LoadILLIndirect::confidence(Kernel::NexusDescriptor &descriptor) const {
   if (descriptor.pathExists("/entry0/wavelength")               // ILL
       && descriptor.pathExists("/entry0/experiment_identifier") // ILL
       && descriptor.pathExists("/entry0/mode")                  // ILL
-      && descriptor.pathExists("/entry0/dataSD/dataSD")         // IN16B
-      &&
-      descriptor.pathExists(
-          "/entry0/instrument/Doppler/doppler_frequency") // IN16B
+      && (descriptor.pathExists("/entry0/dataSD/dataSD") ||     // IN16B
+          descriptor.pathExists("/entry0/dataSD/SingleD_data")) // IN16B New format
       ) {
     return 80;
   } else {
