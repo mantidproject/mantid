@@ -13,6 +13,7 @@
 
 #include <Poco/ActiveResult.h>
 
+#include <clocale>
 #include <cstdarg>
 
 #ifdef _WIN32
@@ -159,7 +160,7 @@ void FrameworkManagerImpl::setGlobalNumericLocaleToC() {
   //
   // The following tells all numerical extraction operations to use classic
   // C as the locale.
-  std::setlocale(LC_NUMERIC, "C");
+  setlocale(LC_NUMERIC, "C");
 }
 
 /// Silence NeXus output
