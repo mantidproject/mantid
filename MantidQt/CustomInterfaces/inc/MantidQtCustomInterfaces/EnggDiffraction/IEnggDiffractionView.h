@@ -389,9 +389,9 @@ public:
   /**
   * Sets the peak list according to the QString given
   *
-  * @param peakList list of expected peaks to be fitted as QString
+  * @param peakList list of expected peaks to be fitted as std::string
   */
-  virtual void setPeakList(QString peakList) const = 0;
+  virtual void setPeakList(std::string peakList) const = 0;
 
   /**
   * Splits the file name in to sections of '_' and 'ENGINX' text
@@ -410,15 +410,15 @@ public:
   *
   * @param bankID the bank number to add to combo-box
   */
-  virtual void addBankItem(QString bankID) = 0;
+  virtual void addBankItem(std::string bankID) = 0;
 
   /**
   * adds the run number to the list view widget on the interface
   *
-  * @param runNumVector run number which needs to be added to
+  * @param runNo run number which needs to be added to
   * the list widget
   */
-  virtual void addRunNoItem(QString runNo) = 0;
+  virtual void addRunNoItem(std::string runNo) = 0;
 
   /**
   * emits the signal within view when run number/bank changed

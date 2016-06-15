@@ -1471,8 +1471,9 @@ std::string EnggDiffractionViewQtGUI::fittingPeaksData() const {
 }
 
 void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::setPeakList(
-    QString peakList) const {
-  m_uiTabFitting.lineEdit_fitting_peaks->setText(peakList);
+    std::string peakList) const {
+  m_uiTabFitting.lineEdit_fitting_peaks->setText(
+      QString::fromStdString(peakList));
 }
 
 std::vector<std::string>
@@ -1496,14 +1497,15 @@ MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::getFocusDir() {
   return m_focusDir;
 }
 
-void EnggDiffractionViewQtGUI::addBankItem(QString bankID) {
+void EnggDiffractionViewQtGUI::addBankItem(std::string bankID) {
 
-  m_uiTabFitting.comboBox_bank->addItem(bankID);
+  m_uiTabFitting.comboBox_bank->addItem(QString::fromStdString(bankID));
 }
 
 void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::addRunNoItem(
-    QString runNo) {
-  m_uiTabFitting.listWidget_fitting_run_num->addItem(runNo);
+    std::string runNo) {
+  m_uiTabFitting.listWidget_fitting_run_num->addItem(
+      QString::fromStdString(runNo));
 }
 
 std::vector<std::string> EnggDiffractionViewQtGUI::getFittingRunNumVec() {

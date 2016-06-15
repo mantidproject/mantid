@@ -912,7 +912,7 @@ std::string EnggDiffractionPresenter::validateFittingexpectedPeaks(
       expectedPeaks.erase(strLength, 1);
     }
 
-    m_view->setPeakList(QString::fromStdString(expectedPeaks));
+    m_view->setPeakList(expectedPeaks);
   }
 
   return expectedPeaks;
@@ -1434,9 +1434,10 @@ void EnggDiffractionPresenter::setBankItems() {
         bool digit = isDigit(bankID);
 
         if (digit || bankID == "cropped") {
-          m_view->addBankItem(QString::fromStdString(bankID));
+          m_view->addBankItem(bankID);
         } else {
-          m_view->addBankItem(QString("Bank %1").arg(i + 1));
+          QString qBank = QString("Bank %1").arg(i + 1);
+          m_view->addBankItem(qBank.toStdString());
         }
       }
 
@@ -1471,7 +1472,7 @@ void EnggDiffractionPresenter::setRunNoItems(
         // get the last split in vector which will be bank
         std::string currentRun = (runNumVector[i]);
 
-        m_view->addRunNoItem(QString::fromStdString(currentRun));
+        m_view->addRunNoItem(currentRun);
       }
 
       if (multiRun) {

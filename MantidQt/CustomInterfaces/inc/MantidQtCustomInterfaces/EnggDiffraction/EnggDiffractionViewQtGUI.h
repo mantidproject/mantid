@@ -173,7 +173,7 @@ public:
 
   std::string fittingPeaksData() const override;
 
-  void setPeakList(QString peakList) const override;
+  void setPeakList(std::string peakList) const override;
 
   std::vector<std::string>
   splitFittingDirectory(std::string &selectedfPath) override;
@@ -185,9 +185,9 @@ public:
   void setDataVector(std::vector<boost::shared_ptr<QwtData>> &data,
                      bool focused, bool plotSinglePeaks) override;
 
-  void addBankItem(QString bankID) override;
+  void addBankItem(std::string bankID) override;
 
-  void addRunNoItem(QString runNo) override;
+  void addRunNoItem(std::string runNo) override;
 
   std::vector<std::string> getFittingRunNumVec() override;
 

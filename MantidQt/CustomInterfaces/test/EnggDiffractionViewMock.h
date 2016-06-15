@@ -146,10 +146,10 @@ public:
                std::vector<std::string>(std::string &selectedfPath));
 
   // adds the number of banks to the combo-box widget on the interface
-  MOCK_METHOD1(addBankItem, void(QString bankID));
+  MOCK_METHOD1(addBankItem, void(std::string bankID));
 
   // adds the run number to the list view widget on the interface
-  MOCK_METHOD1(addRunNoItem, void(QString runNo));
+  MOCK_METHOD1(addRunNoItem, void(std::string runNo));
 
   // emits the signal within view when run number / bank changed
   MOCK_METHOD0(setBankEmit, void());
@@ -179,7 +179,7 @@ public:
   MOCK_CONST_METHOD1(setFittingListWidgetCurrentRow, void(int idx));
 
   // sets the peak list according to the QString given
-  MOCK_CONST_METHOD1(setPeakList, void(QString peakList));
+  MOCK_CONST_METHOD1(setPeakList, void(std::string peakList));
 
   // gets the set focus directory within the setting tab
   MOCK_METHOD0(getFocusDir, std::string());
