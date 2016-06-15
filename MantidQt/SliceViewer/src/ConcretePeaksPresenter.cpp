@@ -104,7 +104,7 @@ void ConcretePeaksPresenter::checkWorkspaceCompatibilities(
     // Check that the MDWorkspace is self-consistent.
     if (coordSystMD != coordSystDim) {
       std::stringstream ss;
-      ss << std::endl;
+      ss << '\n';
       ss << "According to the dimension names in your MDWorkspace, this "
             "work-space is determined to be in: ";
       ss << m_transform->getFriendlyName() << " in the PeaksViewer. ";
@@ -118,7 +118,7 @@ void ConcretePeaksPresenter::checkWorkspaceCompatibilities(
     // compatibility.
     if (coordSystDim != coordSystPK && m_peaksWS->hasIntegratedPeaks()) {
       std::stringstream ss;
-      ss << std::endl;
+      ss << '\n';
       ss << "You appear to be plotting your PeaksWorkspace in a different "
             "coordinate system from the one in which integration was "
             "performed. ";

@@ -34,9 +34,6 @@ namespace Algorithms {
 */
 class DLLExport WienerSmooth : public API::Algorithm {
 public:
-  WienerSmooth();
-  ~WienerSmooth() override;
-
   const std::string name() const override { return "WienerSmooth"; }
   int version() const override;
   const std::string category() const override;

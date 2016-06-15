@@ -142,17 +142,16 @@ void CentroidPeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
             p.setHKL(vecCentroid);
           }
         } catch (std::exception &e) {
-          g_log.warning() << "Error setting Q or HKL" << std::endl;
-          g_log.warning() << e.what() << std::endl;
+          g_log.warning() << "Error setting Q or HKL\n";
+          g_log.warning() << e.what() << '\n';
         }
 
         g_log.information() << "Peak " << i << " at " << pos << ": signal "
                             << signal << ", centroid " << vecCentroid << " in "
-                            << CoordinatesToUse << std::endl;
+                            << CoordinatesToUse << '\n';
       } else {
         g_log.information() << "Peak " << i << " at " << pos
-                            << " had no signal, and could not be centroided."
-                            << std::endl;
+                            << " had no signal, and could not be centroided.\n";
       }
     }
 

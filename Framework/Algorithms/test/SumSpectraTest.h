@@ -80,11 +80,11 @@ public:
     }
 
     // Check the detectors mapped to the single spectra
-    const ISpectrum *spec = output2D->getSpectrum(0);
-    TS_ASSERT_EQUALS(spec->getSpectrumNo(), 2);
-    TS_ASSERT_EQUALS(spec->getDetectorIDs().size(), 2);
-    TS_ASSERT(spec->hasDetectorID(3));
-    TS_ASSERT(spec->hasDetectorID(4));
+    const auto &spec = output2D->getSpectrum(0);
+    TS_ASSERT_EQUALS(spec.getSpectrumNo(), 2);
+    TS_ASSERT_EQUALS(spec.getDetectorIDs().size(), 2);
+    TS_ASSERT(spec.hasDetectorID(3));
+    TS_ASSERT(spec.hasDetectorID(4));
 
     TS_ASSERT(output2D->run().hasProperty("NumAllSpectra"))
     TS_ASSERT(output2D->run().hasProperty("NumMaskSpectra"))
@@ -144,16 +144,16 @@ public:
     TS_ASSERT_DELTA(e[99], std::sqrt(y[99]), 0.00001);
 
     // Check the detectors mapped to the single spectra
-    const ISpectrum *spec = output2D->getSpectrum(0);
-    TS_ASSERT_EQUALS(spec->getSpectrumNo(), 1);
+    const auto &spec = output2D->getSpectrum(0);
+    TS_ASSERT_EQUALS(spec.getSpectrumNo(), 1);
     // Spectra at workspace index 1 is masked, 8 & 9 are monitors
-    TS_ASSERT_EQUALS(spec->getDetectorIDs().size(), 7);
-    TS_ASSERT(spec->hasDetectorID(1));
-    TS_ASSERT(spec->hasDetectorID(3));
-    TS_ASSERT(spec->hasDetectorID(4));
-    TS_ASSERT(spec->hasDetectorID(5));
-    TS_ASSERT(spec->hasDetectorID(6));
-    TS_ASSERT(spec->hasDetectorID(7));
+    TS_ASSERT_EQUALS(spec.getDetectorIDs().size(), 7);
+    TS_ASSERT(spec.hasDetectorID(1));
+    TS_ASSERT(spec.hasDetectorID(3));
+    TS_ASSERT(spec.hasDetectorID(4));
+    TS_ASSERT(spec.hasDetectorID(5));
+    TS_ASSERT(spec.hasDetectorID(6));
+    TS_ASSERT(spec.hasDetectorID(7));
 
     TS_ASSERT(output2D->run().hasProperty("NumAllSpectra"))
     TS_ASSERT(output2D->run().hasProperty("NumMaskSpectra"))
@@ -325,16 +325,16 @@ public:
     TS_ASSERT_DELTA(e[99], std::sqrt(double(nSignals)) * e0[99], 0.00001);
 
     // Check the detectors mapped to the single spectra
-    const ISpectrum *spec = output2D->getSpectrum(0);
-    TS_ASSERT_EQUALS(spec->getSpectrumNo(), 1);
+    const auto &spec = output2D->getSpectrum(0);
+    TS_ASSERT_EQUALS(spec.getSpectrumNo(), 1);
     // Spectra at workspace index 1 is masked, 8 & 9 are monitors
-    TS_ASSERT_EQUALS(spec->getDetectorIDs().size(), 7);
-    TS_ASSERT(spec->hasDetectorID(1));
-    TS_ASSERT(spec->hasDetectorID(3));
-    TS_ASSERT(spec->hasDetectorID(4));
-    TS_ASSERT(spec->hasDetectorID(5));
-    TS_ASSERT(spec->hasDetectorID(6));
-    TS_ASSERT(spec->hasDetectorID(7));
+    TS_ASSERT_EQUALS(spec.getDetectorIDs().size(), 7);
+    TS_ASSERT(spec.hasDetectorID(1));
+    TS_ASSERT(spec.hasDetectorID(3));
+    TS_ASSERT(spec.hasDetectorID(4));
+    TS_ASSERT(spec.hasDetectorID(5));
+    TS_ASSERT(spec.hasDetectorID(6));
+    TS_ASSERT(spec.hasDetectorID(7));
   }
 
   void testExecNoLimitsSpecialWeighted() {

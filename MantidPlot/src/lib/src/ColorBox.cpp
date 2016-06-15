@@ -169,33 +169,14 @@ bool ColorBox::isValidColor(const QColor &color) {
 int ColorBox::numPredefinedColors() { return colors_count; }
 
 QStringList ColorBox::defaultColorNames() {
-  QStringList color_names = QStringList();
-  color_names << tr("black");
-  color_names << tr("red");
-  color_names << tr("green");
-  color_names << tr("blue");
-  color_names << tr("cyan");
-  color_names << tr("magenta");
-  color_names << tr("orange");
-  color_names << tr("purple");
-  color_names << tr("olive");
-  color_names << tr("navy");
-  color_names << tr("wine");
-  color_names << tr("dark cyan");
-  color_names << tr("royal");
-  color_names << tr("violet");
-  color_names << tr("pink");
-  color_names << tr("white");
-  color_names << tr("light gray");
-  color_names << tr("gray");
-  color_names << tr("light yellow");
-  color_names << tr("light cyan");
-  color_names << tr("light magenta");
-  color_names << tr("dark gray");
-  color_names << tr("yellow");
-  color_names << tr("dark yellow");
-
-  return color_names;
+  return {tr("black"),        tr("red"),        tr("green"),
+          tr("blue"),         tr("cyan"),       tr("magenta"),
+          tr("orange"),       tr("purple"),     tr("olive"),
+          tr("navy"),         tr("wine"),       tr("dark cyan"),
+          tr("royal"),        tr("violet"),     tr("pink"),
+          tr("white"),        tr("light gray"), tr("gray"),
+          tr("light yellow"), tr("light cyan"), tr("light magenta"),
+          tr("dark gray"),    tr("yellow"),     tr("dark yellow")};
 }
 
 QList<QColor> ColorBox::defaultColors() {

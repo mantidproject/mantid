@@ -98,10 +98,7 @@ void MultiPeakFit::setNumPeaks(int n) {
 
 QStringList MultiPeakFit::generateParameterList(int peaks) {
   if (peaks == 1)
-    return QStringList() << "A"
-                         << "xc"
-                         << "w"
-                         << "y0";
+    return {"A", "xc", "w", "y0"};
 
   QStringList lst;
   for (int i = 0; i < peaks; i++) {
@@ -116,8 +113,7 @@ QStringList MultiPeakFit::generateParameterList(int peaks) {
 
 QStringList MultiPeakFit::generateExplanationList(int peaks) {
   if (peaks == 1)
-    return QStringList() << tr("area") << tr("center") << tr("width")
-                         << tr("offset");
+    return {tr("area"), tr("center"), tr("width"), tr("offset")};
 
   QStringList lst;
   for (int i = 0; i < peaks; i++) {
@@ -313,7 +309,7 @@ void MultiPeakFit::generateFitCurve() {
 
     d_result_table =
         app->newHiddenTable(tableName, label, d_points, peaks_aux + 2);
-    QStringList header = QStringList() << "1";
+    QStringList header{"1"};
     for (i = 0; i < peaks_aux; i++)
       header << tr("peak") + QString::number(i + 1);
     header << "2";

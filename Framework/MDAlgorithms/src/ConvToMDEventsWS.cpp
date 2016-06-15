@@ -10,7 +10,7 @@ template <class T>
 size_t ConvToMDEventsWS::convertEventList(size_t workspaceIndex) {
 
   const Mantid::DataObjects::EventList &el =
-      m_EventWS->getEventList(workspaceIndex);
+      m_EventWS->getSpectrum(workspaceIndex);
   size_t numEvents = el.getNumberEvents();
   if (numEvents == 0)
     return 0;
@@ -72,7 +72,7 @@ size_t ConvToMDEventsWS::convertEventList(size_t workspaceIndex) {
  * particular workspace index */
 size_t ConvToMDEventsWS::conversionChunk(size_t workspaceIndex) {
 
-  switch (m_EventWS->getEventList(workspaceIndex).getEventType()) {
+  switch (m_EventWS->getSpectrum(workspaceIndex).getEventType()) {
   case Mantid::API::TOF:
     return this->convertEventList<Mantid::DataObjects::TofEvent>(
         workspaceIndex);

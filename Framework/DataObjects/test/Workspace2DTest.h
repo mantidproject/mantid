@@ -230,12 +230,9 @@ public:
   void testGetSpectrum() {
     boost::shared_ptr<MatrixWorkspace> ws = boost::make_shared<Workspace2D>();
     ws->initialize(4, 1, 1);
-    ISpectrum *spec = NULL;
-    TS_ASSERT_THROWS_NOTHING(spec = ws->getSpectrum(0));
-    TS_ASSERT(spec);
-    TS_ASSERT_THROWS_NOTHING(spec = ws->getSpectrum(3));
-    TS_ASSERT(spec);
-    TS_ASSERT_THROWS_ANYTHING(spec = ws->getSpectrum(4));
+    TS_ASSERT_THROWS_NOTHING(ws->getSpectrum(0));
+    TS_ASSERT_THROWS_NOTHING(ws->getSpectrum(3));
+    TS_ASSERT_THROWS_ANYTHING(ws->getSpectrum(4));
   }
 
   /**
@@ -290,9 +287,9 @@ public:
     ws1 = WorkspaceCreationHelper::Create2DWorkspaceBinned(nhist, 5);
     ws2 = WorkspaceCreationHelper::Create2DWorkspaceBinned(10, 5);
     for (size_t i = 0; i < 10; i++) {
-      ISpectrum *spec = ws2->getSpectrum(i);
+      auto &spec = ws2->getSpectrum(i);
       for (detid_t j = detid_t(i) * 100000; j < detid_t(i + 1) * 100000; j++) {
-        spec->addDetectorID(j);
+        spec.addDetectorID(j);
       }
     }
   }
@@ -300,32 +297,31 @@ public:
   void test_ISpectrum_getDetectorIDs() {
     CPUTimer tim;
     for (size_t i = 0; i < ws1->getNumberHistograms(); i++) {
-      const ISpectrum *spec = ws1->getSpectrum(i);
-      const auto &detIDs = spec->getDetectorIDs();
+      const auto &spec = ws1->getSpectrum(i);
+      const auto &detIDs = spec.getDetectorIDs();
       detid_t oneDetId = *detIDs.begin();
       UNUSED_ARG(oneDetId)
     }
     std::cout << tim << " to get detector ID's for " << nhist
-              << " spectra using the ISpectrum method." << std::endl;
+              << " spectra using the ISpectrum method.\n";
   }
 
   void test_ISpectrum_changeDetectorIDs() {
     CPUTimer tim;
     for (size_t i = 0; i < ws1->getNumberHistograms(); i++) {
-      ISpectrum *spec = ws1->getSpectrum(i);
-      spec->setDetectorID(detid_t(i));
+      auto &spec = ws1->getSpectrum(i);
+      spec.setDetectorID(detid_t(i));
     }
     std::cout << tim << " to set all detector IDs for " << nhist
-              << " spectra, using the ISpectrum method (serial)." << std::endl;
+              << " spectra, using the ISpectrum method (serial).\n";
 
     PARALLEL_FOR_NO_WSP_CHECK()
     for (int i = 0; i < (int)ws1->getNumberHistograms(); i++) {
-      ISpectrum *spec = ws1->getSpectrum(i);
-      spec->setDetectorID(detid_t(i));
+      auto &spec = ws1->getSpectrum(i);
+      spec.setDetectorID(detid_t(i));
     }
     std::cout << tim << " to set all detector IDs for " << nhist
-              << " spectra, using the ISpectrum method (in parallel)."
-              << std::endl;
+              << " spectra, using the ISpectrum method (in parallel).\n";
   }
 };
 

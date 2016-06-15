@@ -161,9 +161,8 @@ void Q1D2::exec() {
       det = m_dataWS->getDetector(i);
     } catch (Exception::NotFoundError &) {
       g_log.warning() << "Workspace index " << i << " (SpectrumIndex = "
-                      << m_dataWS->getSpectrum(i)->getSpectrumNo()
-                      << ") has no detector assigned to it - discarding"
-                      << std::endl;
+                      << m_dataWS->getSpectrum(i).getSpectrumNo()
+                      << ") has no detector assigned to it - discarding\n";
       // Catch if no detector. Next line tests whether this happened - test
       // placed
       // outside here because Mac Intel compiler doesn't like 'continue' in a
@@ -260,9 +259,9 @@ void Q1D2::exec() {
     PARALLEL_CRITICAL(q1d_spectra_map) {
       progress.report("Computing I(Q)");
       // Add up the detector IDs in the output spectrum at workspace index 0
-      const ISpectrum *inSpec = m_dataWS->getSpectrum(i);
-      ISpectrum *outSpec = outputWS->getSpectrum(0);
-      outSpec->addDetectorIDs(inSpec->getDetectorIDs());
+      const auto &inSpec = m_dataWS->getSpectrum(i);
+      auto &outSpec = outputWS->getSpectrum(0);
+      outSpec.addDetectorIDs(inSpec.getDetectorIDs());
     }
 
     PARALLEL_END_INTERUPT_REGION
@@ -347,8 +346,8 @@ Q1D2::setUpOutputWorkspace(const std::vector<double> &binParams) const {
   outputWS->setX(0, XOut);
   outputWS->setDistribution(true);
 
-  outputWS->getSpectrum(0)->clearDetectorIDs();
-  outputWS->getSpectrum(0)->setSpectrumNo(1);
+  outputWS->getSpectrum(0).clearDetectorIDs();
+  outputWS->getSpectrum(0).setSpectrumNo(1);
 
   return outputWS;
 }

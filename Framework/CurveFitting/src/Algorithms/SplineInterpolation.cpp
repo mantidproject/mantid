@@ -90,7 +90,7 @@ void SplineInterpolation::exec() {
   if (mws->getNumberHistograms() > 1) {
     g_log.warning()
         << "Algorithm can only interpolate against a single data set. "
-           "Only the first data set will be used." << std::endl;
+           "Only the first data set will be used.\n";
   }
 
   // convert data to binned data as required

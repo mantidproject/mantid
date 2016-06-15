@@ -42,7 +42,7 @@ void addFullInstrumentToWorkspace(MatrixWorkspace &workspace,
     physicalPixel->setPos(0.0, ypos, detZPos);
     instrument->add(physicalPixel);
     instrument->markAsDetector(physicalPixel);
-    workspace.getSpectrum(i)->setDetectorID(physicalPixel->getID());
+    workspace.getSpectrum(i).setDetectorID(physicalPixel->getID());
   }
 
   // Monitors last
@@ -54,7 +54,7 @@ void addFullInstrumentToWorkspace(MatrixWorkspace &workspace,
     monitor1->setPos(0.0, 0.0, -9.0);
     instrument->add(monitor1);
     instrument->markAsMonitor(monitor1);
-    workspace.getSpectrum(ndets)->setDetectorID(ndets + 1);
+    workspace.getSpectrum(ndets).setDetectorID(ndets + 1);
 
     Detector *monitor2 =
         new Detector("mon2", workspace.getAxis(1)->spectraNo(ndets) + 1,
@@ -62,7 +62,7 @@ void addFullInstrumentToWorkspace(MatrixWorkspace &workspace,
     monitor2->setPos(0.0, 0.0, -2.0);
     instrument->add(monitor2);
     instrument->markAsMonitor(monitor2);
-    workspace.getSpectrum(ndets + 1)->setDetectorID(ndets + 2);
+    workspace.getSpectrum(ndets + 1).setDetectorID(ndets + 2);
   }
 
   // Define a source and sample position

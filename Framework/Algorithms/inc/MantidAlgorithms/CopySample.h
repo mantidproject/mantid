@@ -47,9 +47,6 @@ National Laboratory & European Spallation Source
 */
 class DLLExport CopySample : public API::Algorithm {
 public:
-  CopySample();
-  ~CopySample() override;
-
   /// Algorithm's name for identification
   const std::string name() const override { return "CopySample"; };
   /// Summary of algorithms purpose

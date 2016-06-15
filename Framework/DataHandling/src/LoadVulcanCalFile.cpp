@@ -519,7 +519,7 @@ void LoadVulcanCalFile::alignEventWorkspace() {
     double factor = m_tofOffsetsWS->readY(i)[0];
 
     // Perform the multiplication on all events
-    m_eventWS->getEventList(i).convertTof(1. / factor);
+    m_eventWS->getSpectrum(i).convertTof(1. / factor);
 
     PARALLEL_END_INTERUPT_REGION
   }

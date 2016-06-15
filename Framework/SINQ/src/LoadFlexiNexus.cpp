@@ -45,7 +45,7 @@ void LoadFlexiNexus::exec() {
   std::string filename = getProperty("Filename");
   std::string dictname = getProperty("Dictionary");
   g_log.information() << "Running FlexiNexus for " << filename << " with  "
-                      << dictname << std::endl;
+                      << dictname << '\n';
 
   loadDictionary(getProperty("Dictionary"));
 
@@ -53,7 +53,7 @@ void LoadFlexiNexus::exec() {
   for(std::map<std::string, std::string>::const_iterator it =
   dictionary.begin();
   it!= dictionary.end(); it++){
-  std::cout << it->first << "\t" << it->second << std::endl;
+  std::cout << it->first << "\t" << it->second << '\n';
   }
   */
 
@@ -126,7 +126,7 @@ void LoadFlexiNexus::load2DWorkspace(NeXus::File *fin) {
   }
 
   g_log.debug() << "Reading " << nSpectra << " spectra of length "
-                << spectraLength << "." << std::endl;
+                << spectraLength << ".\n";
 
   // need to locate x-axis data too.....
   std::map<std::string, std::string>::const_iterator it;
@@ -170,9 +170,9 @@ void LoadFlexiNexus::load2DWorkspace(NeXus::File *fin) {
     ws->setX(wsIndex, xData);
     // Xtof		ws->getAxis(1)->spectraNo(i)= i;
     ws->getSpectrum(wsIndex)
-        ->setSpectrumNo(static_cast<specnum_t>(yData[wsIndex]));
+        .setSpectrumNo(static_cast<specnum_t>(yData[wsIndex]));
     ws->getSpectrum(wsIndex)
-        ->setDetectorID(static_cast<detid_t>(yData[wsIndex]));
+        .setDetectorID(static_cast<detid_t>(yData[wsIndex]));
   }
 
   ws->setYUnit("Counts");
@@ -185,7 +185,7 @@ void LoadFlexiNexus::load2DWorkspace(NeXus::File *fin) {
     const std::string xname(it->second);
     ws->getAxis(0)->title() = xname;
     if (xname.compare("TOF") == 0) {
-      g_log.debug() << "Setting X-unit to be TOF" << std::endl;
+      g_log.debug() << "Setting X-unit to be TOF\n";
       ws->getAxis(0)->setUnit("TOF");
     }
   }

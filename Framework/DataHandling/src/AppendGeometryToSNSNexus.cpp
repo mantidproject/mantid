@@ -77,10 +77,9 @@ void AppendGeometryToSNSNexus::init() {
 void AppendGeometryToSNSNexus::exec() {
   // TODO: rename the created arrays before moving to production
   g_log.warning() << "This is intended as a proof of principle and not a long "
-                     "term implementation." << std::endl;
+                     "term implementation.\n";
   g_log.warning()
-      << "(the created arrays in the NeXus file will have the '_new' suffix)"
-      << std::endl;
+      << "(the created arrays in the NeXus file will have the '_new' suffix)\n";
 
   // Retrieve filename from the properties
   m_filename = getPropertyValue("Filename");
@@ -99,7 +98,7 @@ void AppendGeometryToSNSNexus::exec() {
       try {
         originalFile.copyTo(destinationFile.path());
         g_log.notice() << "Copied " << m_filename << " to "
-                       << destinationFile.path() << "." << std::endl;
+                       << destinationFile.path() << ".\n";
         m_filename = destinationFile.path();
       } catch (Poco::FileAccessDeniedException &) {
         throw std::runtime_error("A Problem occurred in making a copy of the "
@@ -110,7 +109,7 @@ void AppendGeometryToSNSNexus::exec() {
       }
     } else {
       g_log.error() << "Cannot copy a file that doesn't exist! ("
-                    << originalFile.path() << ")." << std::endl;
+                    << originalFile.path() << ").\n";
     }
   }
 
@@ -138,7 +137,7 @@ void AppendGeometryToSNSNexus::exec() {
   // establishing a way to maintain ADARA Geometry Packet
   m_idf_filename = ExperimentInfo::getInstrumentFilename(m_instrument);
   g_log.debug() << "Loading instrument definition from " << m_idf_filename
-                << "." << std::endl;
+                << ".\n";
 
   // Modified to call LoadInstrument directly as a Child Algorithm
   ws = WorkspaceFactory::Instance().create("Workspace2D", 1, 2, 1);
@@ -146,14 +145,14 @@ void AppendGeometryToSNSNexus::exec() {
   // Load NeXus logs for HYSPEC, HYSPECA(testing), and SNAP
   if (m_instrument == "HYSPEC" || m_instrument == "HYSPECA" ||
       m_instrument == "SNAP") {
-    g_log.debug() << "Run LoadNexusLogs Child Algorithm." << std::endl;
+    g_log.debug() << "Run LoadNexusLogs Child Algorithm.\n";
     m_logsLoadedCorrectly = runLoadNexusLogs(m_filename, ws, this);
 
     if (!m_logsLoadedCorrectly)
       throw std::runtime_error("Failed to run LoadNexusLogs Child Algorithm.");
   }
 
-  g_log.debug() << "Run LoadInstrument Child Algorithm." << std::endl;
+  g_log.debug() << "Run LoadInstrument Child Algorithm.\n";
   m_instrumentLoadedCorrectly = runLoadInstrument(m_idf_filename, ws, this);
 
   if (!m_instrumentLoadedCorrectly)
@@ -203,7 +202,7 @@ void AppendGeometryToSNSNexus::exec() {
             // Look for NXdetectors
             if (instr_iter->second == "NXdetector") {
               g_log.debug() << "Detector called '" << instr_iter->first
-                            << "' found." << std::endl;
+                            << "' found.\n";
               std::string bankName = instr_iter->first;
               std::vector<Geometry::IDetector_const_sptr> dets;
               ws->getInstrument()->getDetectorsInBank(dets, bankName);
@@ -269,8 +268,8 @@ void AppendGeometryToSNSNexus::exec() {
         }
         // Look for monitors
         else if (entry_iter->second == "NXmonitor") {
-          g_log.debug() << "Monitor called '" << entry_iter->first << "' found."
-                        << std::endl;
+          g_log.debug() << "Monitor called '" << entry_iter->first
+                        << "' found.\n";
           nxfile.openGroup(entry_iter->first, "NXmonitor");
 
           Geometry::IComponent_const_sptr monitor =
@@ -282,10 +281,10 @@ void AppendGeometryToSNSNexus::exec() {
           double source_monitor = source->getDistance(*monitor);
           double source_sample = source->getDistance(*sample);
 
-          g_log.debug() << "source->monitor=" << source_monitor << std::endl;
-          g_log.debug() << "source->sample=" << source_sample << std::endl;
+          g_log.debug() << "source->monitor=" << source_monitor << '\n';
+          g_log.debug() << "source->sample=" << source_sample << '\n';
           g_log.debug() << "sample->monitor="
-                        << (source_monitor - source_sample) << std::endl;
+                        << (source_monitor - source_sample) << '\n';
 
           // Distance
           nxfile.writeData("distance_new", (source_monitor - source_sample));
@@ -298,8 +297,8 @@ void AppendGeometryToSNSNexus::exec() {
       }
 
     } else {
-      g_log.error() << "There are no NXentry nodes in the specified NeXus file."
-                    << std::endl;
+      g_log.error()
+          << "There are no NXentry nodes in the specified NeXus file.\n";
     }
   }
 }
@@ -322,7 +321,7 @@ AppendGeometryToSNSNexus::getInstrumentName(const std::string &nxfilename) {
   // For now, let's just open the first entry
   nxfile.openGroup(entries.begin()->first, "NXentry");
   g_log.debug() << "Using entry '" << entries.begin()->first
-                << "' to determine instrument name." << std::endl;
+                << "' to determine instrument name.\n";
 
   nxfile.openGroup("instrument", "NXinstrument");
   try {
@@ -336,7 +335,7 @@ AppendGeometryToSNSNexus::getInstrumentName(const std::string &nxfilename) {
   }
 
   g_log.debug() << " Instrument name read from NeXus file is " << instrument
-                << std::endl;
+                << '\n';
 
   return instrument;
 }
@@ -399,8 +398,7 @@ bool AppendGeometryToSNSNexus::runLoadNexusLogs(
   // Execute the Child Algorithm, catching errors without stopping.
   bool executionSuccessful(true);
   try {
-    alg->getLogger().information() << "Loading logs from the NeXus file..."
-                                   << std::endl;
+    alg->getLogger().information() << "Loading logs from the NeXus file...\n";
     loadLogs->setPropertyValue("Filename", nexusFileName);
     loadLogs->setProperty<MatrixWorkspace_sptr>("Workspace", localWorkspace);
     loadLogs->executeAsChildAlg();

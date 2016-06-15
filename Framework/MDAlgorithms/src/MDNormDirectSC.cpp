@@ -96,6 +96,13 @@ void MDNormDirectSC::init() {
       "An input workspace containing integrated vanadium (a measure of the "
       "solid angle).");
 
+  declareProperty(make_unique<PropertyWithValue<bool>>("SkipSafetyCheck", false,
+                                                       Direction::Input),
+                  "If set to true, the algorithm does "
+                  "not check history if the workspace was modified since the"
+                  "ConvertToMD algorithm was run, and assume that the direct "
+                  "geometry inelastic mode is used.");
+
   declareProperty(make_unique<WorkspaceProperty<Workspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "A name for the output data MDHistoWorkspace.");
@@ -141,7 +148,8 @@ void MDNormDirectSC::exec() {
  */
 void MDNormDirectSC::cacheInputs() {
   m_inputWS = getProperty("InputWorkspace");
-  if (inputEnergyMode() != "Direct") {
+  bool skipCheck = getProperty("SkipSafetyCheck");
+  if (!skipCheck && (inputEnergyMode() != "Direct")) {
     throw std::invalid_argument("Invalid energy transfer mode. Algorithm only "
                                 "supports direct geometry spectrometers.");
   }
@@ -242,7 +250,8 @@ MDHistoWorkspace_sptr MDNormDirectSC::binInputWS() {
   for (auto prop : props) {
     const auto &propName = prop->name();
     if (propName != "SolidAngleWorkspace" &&
-        propName != "OutputNormalizationWorkspace") {
+        propName != "OutputNormalizationWorkspace" &&
+        propName != "SkipSafetyCheck") {
       binMD->setPropertyValue(propName, prop->value());
     }
   }

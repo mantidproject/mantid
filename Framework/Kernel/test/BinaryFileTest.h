@@ -13,7 +13,6 @@ using std::runtime_error;
 using std::size_t;
 using std::vector;
 using std::cout;
-using std::endl;
 
 //==========================================================================================
 /// Make the code clearer by having this an explicit type

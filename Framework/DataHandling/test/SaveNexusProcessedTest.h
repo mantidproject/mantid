@@ -247,16 +247,16 @@ public:
     EventWorkspace_sptr WS =
         WorkspaceCreationHelper::CreateGroupedEventWorkspace(groups, 100, 1.0,
                                                              1.0);
-    WS->getEventList(3).clear(false);
+    WS->getSpectrum(3).clear(false);
     // Switch the event type
     if (makeDifferentTypes) {
-      WS->getEventList(0).switchTo(TOF);
-      WS->getEventList(1).switchTo(WEIGHTED);
-      WS->getEventList(2).switchTo(WEIGHTED_NOTIME);
-      WS->getEventList(4).switchTo(WEIGHTED);
+      WS->getSpectrum(0).switchTo(TOF);
+      WS->getSpectrum(1).switchTo(WEIGHTED);
+      WS->getSpectrum(2).switchTo(WEIGHTED_NOTIME);
+      WS->getSpectrum(4).switchTo(WEIGHTED);
     } else {
       for (size_t wi = 0; wi < WS->getNumberHistograms(); wi++)
-        WS->getEventList(wi).switchTo(type);
+        WS->getSpectrum(wi).switchTo(type);
     }
 
     SaveNexusProcessed alg;

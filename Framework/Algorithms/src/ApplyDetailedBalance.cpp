@@ -20,18 +20,6 @@ namespace Algorithms {
 DECLARE_ALGORITHM(ApplyDetailedBalance)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-ApplyDetailedBalance::ApplyDetailedBalance() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-ApplyDetailedBalance::~ApplyDetailedBalance() {}
-
-//----------------------------------------------------------------------------------------------
-
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void ApplyDetailedBalance::init() {

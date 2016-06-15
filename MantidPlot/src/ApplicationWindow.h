@@ -643,7 +643,7 @@ public slots:
   void updateCurves(Table *t, const QString &name);
 
   void showTable(const QString &curve);
-  void showTable(int i);
+  void showTable(QAction *action);
 
   void addColToTable();
   void cutSelection();
@@ -1464,7 +1464,7 @@ private:
   QMenu *windowsMenu, *view, *graph, *fileMenu, *format, *edit;
   QMenu *recentProjectsMenu, *recentFilesMenu, *interfaceMenu;
 
-  QMenu *help, *plot2DMenu, *analysisMenu, *multiPeakMenu, *icat;
+  QMenu *help, *plot2DMenu, *analysisMenu, *icat;
   QMenu *matrixMenu, *plot3DMenu, *plotDataMenu, *tablesDepend, *scriptingMenu;
   QMenu *tableMenu, *fillMenu, *normMenu, *newMenu, *exportPlotMenu,
       *smoothMenu, *filterMenu, *decayMenu, *saveMenu, *openMenu, *toolbarsMenu;

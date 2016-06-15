@@ -127,7 +127,7 @@ private:
       QString code = "if r'%1' not in sys.path:\n"
                      "    sys.path.append(r'%1')";
       code = code.arg(path);
-      PyRun_SimpleString(code);
+      PyRun_SimpleString(code.toAscii().constData());
     }
     void removePath(const QString &path) {
       ScopedPythonGIL pythonLock;

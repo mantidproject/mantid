@@ -30,6 +30,7 @@
 #include "OpenProjectDialog.h"
 #include "ApplicationWindow.h"
 
+#include <QCloseEvent>
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QPushButton>

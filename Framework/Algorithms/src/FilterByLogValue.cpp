@@ -24,14 +24,6 @@ using DataObjects::EventWorkspace_const_sptr;
 std::string CENTRE("Centre");
 std::string LEFT("Left");
 
-//========================================================================
-//========================================================================
-/// (Empty) Constructor
-FilterByLogValue::FilterByLogValue() {}
-
-/// Destructor
-FilterByLogValue::~FilterByLogValue() {}
-
 //-----------------------------------------------------------------------
 void FilterByLogValue::init() {
   declareProperty(make_unique<WorkspaceProperty<EventWorkspace>>(
@@ -194,7 +186,7 @@ void FilterByLogValue::exec() {
       PARALLEL_START_INTERUPT_REGION
 
       // this is the input event list
-      EventList &input_el = inputWS->getEventList(i);
+      EventList &input_el = inputWS->getSpectrum(i);
 
       // Perform the filtering in place.
       input_el.filterInPlace(splitter);
@@ -233,12 +225,10 @@ void FilterByLogValue::exec() {
       PARALLEL_START_INTERUPT_REGION
 
       // Get the output event list (should be empty)
-      EventList *output_el = outputWS->getEventListPtr(i);
-      std::vector<EventList *> outputs;
-      outputs.push_back(output_el);
+      std::vector<EventList *> outputs{&outputWS->getSpectrum(i)};
 
       // and this is the input event list
-      const EventList &input_el = inputWS->getEventList(i);
+      const EventList &input_el = inputWS->getSpectrum(i);
 
       // Perform the filtering (using the splitting function and just one
       // output)

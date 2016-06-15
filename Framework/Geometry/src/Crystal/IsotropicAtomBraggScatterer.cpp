@@ -4,10 +4,10 @@
 
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
+#include "MantidKernel/StringTokenizer.h"
 
 #include "MantidGeometry/Crystal/BraggScattererFactory.h"
 
-#include <boost/tokenizer.hpp>
 #include <boost/algorithm/string.hpp>
 
 #include <json/json.h>
@@ -152,9 +152,8 @@ IsotropicAtomBraggScattererParser::IsotropicAtomBraggScattererParser(
 /// Operator that returns vector of IsotropicAtomBraggScatterers.
 std::vector<BraggScatterer_sptr> IsotropicAtomBraggScattererParser::
 operator()() const {
-  boost::char_separator<char> atomSep(";");
-  boost::tokenizer<boost::char_separator<char>> tokens(m_scattererString,
-                                                       atomSep);
+  Mantid::Kernel::StringTokenizer tokens(
+      m_scattererString, ";", Mantid::Kernel::StringTokenizer::TOK_TRIM);
   std::vector<BraggScatterer_sptr> scatterers;
 
   for (auto it = tokens.begin(); it != tokens.end(); ++it) {

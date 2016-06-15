@@ -355,7 +355,7 @@ void CompareMDWorkspaces::exec() {
   this->doComparison();
 
   if (m_result != "") {
-    g_log.notice() << "The workspaces did not match: " << m_result << std::endl;
+    g_log.notice() << "The workspaces did not match: " << m_result << '\n';
     this->setProperty("Equals", false);
   } else {
     m_result = "Success!";

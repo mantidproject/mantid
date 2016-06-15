@@ -38,11 +38,6 @@ namespace Algorithms {
  */
 class DLLExport ReflectometryReductionOne : public ReflectometryWorkflowBase {
 public:
-  /// Constructor
-  ReflectometryReductionOne();
-  /// Destructor
-  ~ReflectometryReductionOne() override;
-
   const std::string name() const override;
   /// Summary of algorithms purpose
   const std::string summary() const override {
@@ -89,9 +84,10 @@ private:
   /// Perform a transmission correction on the input IvsLam workspace
   API::MatrixWorkspace_sptr transmissonCorrection(
       API::MatrixWorkspace_sptr IvsLam, const MinMax &wavelengthInterval,
-      const MinMax &wavelengthMonitorBackgroundInterval,
-      const MinMax &wavelengthMonitorIntegrationInterval,
-      const int &i0MonitorIndex, API::MatrixWorkspace_sptr firstTransmissionRun,
+      const OptionalMinMax &wavelengthMonitorBackgroundInterval,
+      const OptionalMinMax &wavelengthMonitorIntegrationInterval,
+      const OptionalInteger &i0MonitorIndex,
+      API::MatrixWorkspace_sptr firstTransmissionRun,
       OptionalMatrixWorkspace_sptr secondTransmissionRun,
       const OptionalDouble &stitchingStart,
       const OptionalDouble &stitchingDelta, const OptionalDouble &stitchingEnd,
