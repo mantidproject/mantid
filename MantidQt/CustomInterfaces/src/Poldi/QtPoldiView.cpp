@@ -48,7 +48,7 @@ void QtPoldiView::initLayout() {
           SLOT(loadDemoTriggered()));
 
   // Create the presenter
-  m_presenter = std::make_unique<PoldiPresenter>(this, presenter);
+  m_presenter = Mantid::Kernel::make_unique<PoldiPresenter>(this, presenter);
 }
 
 /**

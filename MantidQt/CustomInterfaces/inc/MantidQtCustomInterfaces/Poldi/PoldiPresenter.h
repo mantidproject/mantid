@@ -5,6 +5,7 @@
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorPresenter.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/WorkspaceReceiver.h"
 #include <boost/shared_ptr.hpp>
+#include <memory>
 
 using MantidQt::MantidWidgets::DataProcessorPresenter;
 using MantidQt::MantidWidgets::WorkspaceReceiver;

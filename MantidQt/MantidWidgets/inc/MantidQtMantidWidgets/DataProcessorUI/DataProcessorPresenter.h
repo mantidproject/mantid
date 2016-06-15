@@ -5,6 +5,7 @@
 #include <string>
 #include <vector>
 #include <QVariant>
+#include <memory>
 
 namespace MantidQt {
 namespace MantidWidgets {
