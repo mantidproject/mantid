@@ -5,6 +5,7 @@
 
 #include <map>
 #include <string>
+#include <vector>
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -49,9 +50,9 @@ public:
 private:
   int m_lastIndex;
   std::map<std::string, int> m_colNameToColIndex;
-  std::map<int, std::string> m_colIndexToColName;
-  std::map<int, std::string> m_colIndexToAlgProp;
-  std::map<int, std::string> m_description;
+  std::vector<std::string> m_colIndexToColName;
+  std::vector<std::string> m_colIndexToAlgProp;
+  std::vector<std::string> m_description;
 };
 }
 }

@@ -11,9 +11,10 @@ namespace MantidWidgets {
 void DataProcessorWhiteList::addElement(const std::string &colName,
                                         const std::string &algProperty,
                                         const std::string &description) {
-  m_colIndexToColName[m_lastIndex] = colName;
-  m_colIndexToAlgProp[m_lastIndex] = algProperty;
-  m_description[m_lastIndex] = description;
+
+  m_colIndexToColName.push_back(colName);
+  m_colIndexToAlgProp.push_back(algProperty);
+  m_description.push_back(description);
   m_colNameToColIndex[colName] = m_lastIndex++;
 }
 
