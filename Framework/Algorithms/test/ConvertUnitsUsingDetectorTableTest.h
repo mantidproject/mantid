@@ -86,7 +86,7 @@ public:
     //      for (int j=0; j < outWS->getNumberHistograms(); ++j) {
     //          for (int i=0; i < outWS->blocksize(); ++i) {
     //              std::cout << "dataX[" << j << "]["<< i << "] = " <<
-    //              outWS->dataX(j)[i] << std::endl;
+    //              outWS->dataX(j)[i] << '\n';
     //          }
     //      }
 

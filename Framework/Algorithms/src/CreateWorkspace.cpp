@@ -20,12 +20,6 @@ using namespace API;
 
 DECLARE_ALGORITHM(CreateWorkspace)
 
-/// Default (empty) constructor
-CreateWorkspace::CreateWorkspace() : Algorithm() {}
-
-/// Default (empty) destructor
-CreateWorkspace::~CreateWorkspace() {}
-
 /// Init function
 void CreateWorkspace::init() {
 
@@ -236,7 +230,7 @@ void CreateWorkspace::exec() {
   }
 
   // Set distribution flag
-  outputWS->isDistribution(getProperty("Distribution"));
+  outputWS->setDistribution(getProperty("Distribution"));
 
   // Set Y Unit label
   if (!parentWS || !getPropertyValue("YUnitLabel").empty()) {

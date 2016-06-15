@@ -56,7 +56,8 @@ class BayesQuasi(PythonAlgorithm):
                              doc='Name of the resolution input Workspace')
 
         self.declareProperty(WorkspaceGroupProperty('ResNormWorkspace', '',
-                             optional=PropertyMode.Optional, direction=Direction.Input),
+                                                    optional=PropertyMode.Optional,
+                                                    direction=Direction.Input),
                              doc='Name of the ResNorm input Workspace')
 
         self.declareProperty(name='MinRange', defaultValue=-0.2,
@@ -98,8 +99,9 @@ class BayesQuasi(PythonAlgorithm):
         self.declareProperty(MatrixWorkspaceProperty('OutputWorkspaceResult', '', direction=Direction.Output),
                              doc='The name of the result output workspaces')
 
-        self.declareProperty(MatrixWorkspaceProperty('OutputWorkspaceProb', '', optional=PropertyMode.Optional,
-                             direction=Direction.Output),
+        self.declareProperty(MatrixWorkspaceProperty('OutputWorkspaceProb', '',
+                                                     optional=PropertyMode.Optional,
+                                                     direction=Direction.Output),
                              doc='The name of the probability output workspaces')
 
 
@@ -134,9 +136,13 @@ class BayesQuasi(PythonAlgorithm):
 
     #pylint: disable=too-many-locals,too-many-statements
     def PyExec(self):
-        #from IndirectImport import run_f2py_compatibility_test, is_supported_f2py_platform
 
-        run_f2py_compatibility_test()
+        # Check for platform support
+        if not is_supported_f2py_platform():
+            unsupported_msg = "This algorithm can only be run on valid platforms." \
+                              + " please view the algorithm documentation to see" \
+                              + " what platforms are currently supported"
+            raise RuntimeError(unsupported_msg)
 
         from IndirectBayes import (CalcErange, GetXYE, ReadNormFile,
                                    ReadWidthFile, QLAddSampleLogs, C2Fw,
@@ -400,6 +406,6 @@ class BayesQuasi(PythonAlgorithm):
             self.setProperty('OutputWorkspaceProb', probWS)
 
 
-if is_supported_f2py_platform():
-    # Register algorithm with Mantid
-    AlgorithmFactory.subscribe(BayesQuasi)
+
+# Register algorithm with Mantid
+AlgorithmFactory.subscribe(BayesQuasi)

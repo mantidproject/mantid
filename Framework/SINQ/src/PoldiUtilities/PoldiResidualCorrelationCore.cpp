@@ -102,9 +102,9 @@ void PoldiResidualCorrelationCore::distributeCorrelationCounts(
             m_logger.warning()
                 << "Inconsistency foun while calculating distribute "
                    "correlation counts for d-value with index "
-                << boost::lexical_cast<std::string>(k) << ", got middle index: "
-                << boost::lexical_cast<std::string>(middleIndex)
-                << ", ignoring it." << std::endl;
+                << std::to_string(k)
+                << ", got middle index: " << std::to_string(middleIndex)
+                << ", ignoring it.\n";
             break;
           }
           addToCountData(locator.detectorElement, middleIndex, deltaForD);

@@ -60,6 +60,15 @@ public:
                              algorithmVersion);
 
     TS_ASSERT_EQUALS(radius, shape.radius());
+    TS_ASSERT_EQUALS(
+        radius, shape.radius(Mantid::Geometry::PeakShape::RadiusType::Radius));
+    TS_ASSERT_EQUALS(
+        backgroundInnerRadius,
+        shape.radius(Mantid::Geometry::PeakShape::RadiusType::InnerRadius));
+    TS_ASSERT_EQUALS(
+        backgroundOuterRadius,
+        shape.radius(Mantid::Geometry::PeakShape::RadiusType::OuterRadius));
+
     TS_ASSERT_EQUALS(frame, shape.frame());
     TS_ASSERT_EQUALS(algorithmName, shape.algorithmName());
     TS_ASSERT_EQUALS(algorithmVersion, shape.algorithmVersion());

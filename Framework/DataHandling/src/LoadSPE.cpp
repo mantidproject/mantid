@@ -155,7 +155,7 @@ void LoadSPE::exec() {
   MatrixWorkspace_sptr workspace = WorkspaceFactory::Instance().create(
       "Workspace2D", nhist, nbins + 1, nbins);
   workspace->getAxis(0)->unit() = UnitFactory::Instance().create("DeltaE");
-  workspace->isDistribution(true); // It should be a distribution
+  workspace->setDistribution(true); // It should be a distribution
   workspace->setYUnitLabel("S(Phi,Energy)");
   // Replace the default spectrum axis with the phi values one
   workspace->replaceAxis(1, phiAxis);
@@ -197,7 +197,7 @@ void LoadSPE::readHistogram(FILE *speFile, API::MatrixWorkspace_sptr workspace,
   int retval;
   for (size_t i = 0; i < nbins; ++i) {
     retval = fscanf(speFile, "%10le", &Y[i]);
-    // g_log.error() << Y[i] << std::endl;
+    // g_log.error() << Y[i] << '\n';
     if (retval != 1) {
       std::stringstream ss;
       ss << "Reading data value" << i << " of histogram " << index;

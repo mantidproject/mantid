@@ -128,12 +128,12 @@ private:
                            uint32_t *det_id, coord_t *Coord,
                            size_t data_size) const;
 
-  template <size_t nd> void calcCentroidND(void);
+  template <size_t nd> void calcCentroidND();
 
   template <size_t nd>
   void createEmptyEventWS(const MDWSDescription &description);
 
-  template <size_t nd> void splitBoxList(void); // for the time being
+  template <size_t nd> void splitBoxList(); // for the time being
   // void splitBoxList(Kernel::ThreadScheduler * ts);
 
   // the variable, which informs the user of MD Event WS wrapper that there are

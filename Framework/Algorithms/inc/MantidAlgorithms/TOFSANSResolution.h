@@ -37,8 +37,6 @@ class DLLExport TOFSANSResolution : public API::Algorithm {
 public:
   /// Defatult constructor
   TOFSANSResolution();
-  /// Virtual destructor
-  ~TOFSANSResolution() override {}
   /// Algorithm's name
   const std::string name() const override { return "TOFSANSResolution"; }
   /// Summary of algorithms purpose

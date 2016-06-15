@@ -69,17 +69,17 @@ public:
       case 1:
         TS_ASSERT_DELTA(x, 1.5, m_tol);
         TS_ASSERT_DELTA(y, 2.0, m_tol);
-        TS_ASSERT_DELTA(e, sqrt(2.0), m_tol);
+        TS_ASSERT_DELTA(e, M_SQRT2, m_tol);
         break;
       case 2:
         TS_ASSERT_DELTA(x, 2.5, m_tol);
         TS_ASSERT_DELTA(y, 2.0, m_tol);
-        TS_ASSERT_DELTA(e, sqrt(2.0), m_tol);
+        TS_ASSERT_DELTA(e, M_SQRT2, m_tol);
         break;
       case 3:
         TS_ASSERT_DELTA(x, 3.5, m_tol);
         TS_ASSERT_DELTA(y, 2.0, m_tol);
-        TS_ASSERT_DELTA(e, sqrt(2.0), m_tol);
+        TS_ASSERT_DELTA(e, M_SQRT2, m_tol);
         break;
       default:
         TS_ASSERT(false);
@@ -158,17 +158,17 @@ public:
       case 1:
         TS_ASSERT_DELTA(x, 1.5, m_tol);
         TS_ASSERT_DELTA(y, 2.0, m_tol);
-        TS_ASSERT_DELTA(e, sqrt(2.0), m_tol);
+        TS_ASSERT_DELTA(e, M_SQRT2, m_tol);
         break;
       case 2:
         TS_ASSERT_DELTA(x, 2.5, m_tol);
         TS_ASSERT_DELTA(y, 2.0, m_tol);
-        TS_ASSERT_DELTA(e, sqrt(2.0), m_tol);
+        TS_ASSERT_DELTA(e, M_SQRT2, m_tol);
         break;
       case 3:
         TS_ASSERT_DELTA(x, 3.5, m_tol);
         TS_ASSERT_DELTA(y, 2.0, m_tol);
-        TS_ASSERT_DELTA(e, sqrt(2.0), m_tol);
+        TS_ASSERT_DELTA(e, M_SQRT2, m_tol);
         break;
       default:
         TS_ASSERT(false);
@@ -428,8 +428,7 @@ public:
     Workspace2D_sptr workspace =
         WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(3, 3);
     // Remove detectors from one spectrum
-    auto *spec = workspace->getSpectrum(1);
-    spec->clearDetectorIDs();
+    workspace->getSpectrum(1).clearDetectorIDs();
 
     std::string createdWS("ws");
     AnalysisDataService::Instance().add(createdWS, workspace);

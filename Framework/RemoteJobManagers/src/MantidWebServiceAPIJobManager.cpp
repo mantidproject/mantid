@@ -110,7 +110,7 @@ void MantidWebServiceAPIJobManager::downloadRemoteFile(
       outfile << respStream.rdbuf();
       outfile.close();
       g_log.information() << "Downloaded '" << remoteFileName << "' to '"
-                          << localFileName << "'" << std::endl;
+                          << localFileName << "'\n";
     } else {
       throw(std::runtime_error(std::string("Failed to open " + localFileName)));
     }
@@ -354,8 +354,7 @@ std::string MantidWebServiceAPIJobManager::startRemoteTransaction() {
   }
   std::string transId;
   resp["TransID"].getValue(transId);
-  g_log.information() << "Transaction ID " << transId << " started."
-                      << std::endl;
+  g_log.information() << "Transaction ID " << transId << " started.\n";
 
   return transId;
 }
@@ -376,8 +375,7 @@ void MantidWebServiceAPIJobManager::stopRemoteTransaction(
       httpGet("/transaction", std::string("Action=Stop&TransID=") + transId);
 
   if (lastStatus() == Poco::Net::HTTPResponse::HTTP_OK) {
-    g_log.information() << "Transaction ID " << transId << " stopped."
-                        << std::endl;
+    g_log.information() << "Transaction ID " << transId << " stopped.\n";
   } else {
     JSONObject resp;
     initFromStream(resp, respStream);
@@ -415,8 +413,8 @@ std::string MantidWebServiceAPIJobManager::submitRemoteJob(
   MantidWebServiceAPIHelper::PostDataMap postData;
 
   postData["TransID"] = transactionID;
-  postData["NumNodes"] = boost::lexical_cast<std::string>(numNodes);
-  postData["CoresPerNode"] = boost::lexical_cast<std::string>(coresPerNode);
+  postData["NumNodes"] = std::to_string(numNodes);
+  postData["CoresPerNode"] = std::to_string(coresPerNode);
 
   postData["ScriptName"] = runnable;
   postData[runnable] = param;
@@ -438,7 +436,7 @@ std::string MantidWebServiceAPIJobManager::submitRemoteJob(
 
   std::string jobId;
   resp["JobID"].getValue(jobId);
-  g_log.information() << "Job submitted.  Job ID =  " << jobId << std::endl;
+  g_log.information() << "Job submitted.  Job ID =  " << jobId << '\n';
 
   return jobId;
 }
@@ -480,7 +478,7 @@ void MantidWebServiceAPIJobManager::uploadRemoteFile(
                                                // Created" code on success
     {
       g_log.information() << "Uploaded '" << remoteFileName << "' to '"
-                          << localFileName << "'" << std::endl;
+                          << localFileName << "'\n";
     } else {
       JSONObject resp;
       initFromStream(resp, respStream);

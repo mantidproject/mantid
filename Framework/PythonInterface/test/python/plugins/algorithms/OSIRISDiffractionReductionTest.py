@@ -50,7 +50,7 @@ class OSIRISDiffractionReductionTest(unittest.TestCase):
         wks = OSIRISDiffractionReduction(Sample=['OSI10203.raw'],
                                          CalFile='osiris_041_RES10.cal',
                                          Vanadium=['OSI10156.raw'],
-                                         Container='OSI10241.raw',
+                                         Container=['OSI10241.raw'],
                                          SpectraMin=3,
                                          SpectraMax=361,
                                          DetectDRange=False,
@@ -69,13 +69,46 @@ class OSIRISDiffractionReductionTest(unittest.TestCase):
         wks = OSIRISDiffractionReduction(Sample=['OSI10203.raw'],
                                          CalFile='osiris_041_RES10.cal',
                                          Vanadium=['OSI10156.raw'],
-                                         Container='OSI10241.raw',
+                                         Container=['OSI10241.raw'],
                                          ContainerScaleFactor=0.5,
                                          SpectraMin=3,
                                          SpectraMax=361,
                                          DetectDRange=False,
                                          DRange=4)
 
+        self.assertTrue(isinstance(wks, MatrixWorkspace), 'Result workspace should be a matrix workspace.')
+        self.assertEqual(wks.getAxis(0).getUnit().unitID(), 'dSpacing')
+        self.assertEqual(wks.getNumberHistograms(), 1)
+
+
+    def test_reduction_with_multiple_runs(self):
+        """
+        Test reduction with multiple sample and vanadium runs
+        """
+        wks = OSIRISDiffractionReduction(Sample=['OSI10203.raw','OSI10204.RAW'],
+                                         CalFile='osiris_041_RES10.cal',
+                                         Vanadium=['OSI10156.raw','OSI10157.RAW'],
+                                         ContainerScaleFactor=0.5,
+                                         SpectraMin=3,
+                                         SpectraMax=361,
+                                         DetectDRange=True)
+        self.assertTrue(isinstance(wks, MatrixWorkspace), 'Result workspace should be a matrix workspace.')
+        self.assertEqual(wks.getAxis(0).getUnit().unitID(), 'dSpacing')
+        self.assertEqual(wks.getNumberHistograms(), 1)
+
+
+    def test_reduction_with_mulitple_sample_and_multiple_can(self):
+        """
+        Test reduction with multiple sample, vanadium and container runs
+        """
+        wks = OSIRISDiffractionReduction(Sample=['OSI10203.raw','OSI10204.RAW'],
+                                         CalFile='osiris_041_RES10.cal',
+                                         Vanadium=['OSI10156.raw','OSI10157.RAW'],
+                                         Container=['OSI10241.raw','OSI10242.RAW'],
+                                         ContainerScaleFactor=0.5,
+                                         SpectraMin=3,
+                                         SpectraMax=361,
+                                         DetectDRange=True)
         self.assertTrue(isinstance(wks, MatrixWorkspace), 'Result workspace should be a matrix workspace.')
         self.assertEqual(wks.getAxis(0).getUnit().unitID(), 'dSpacing')
         self.assertEqual(wks.getNumberHistograms(), 1)
@@ -91,7 +124,7 @@ class OSIRISDiffractionReductionTest(unittest.TestCase):
                           Sample=['OSI10203.raw'],
                           CalFile='osiris_041_RES10.cal',
                           Vanadium=['OSI10156.raw'],
-                          Container='OSI10241.raw',
+                          Container=['OSI10241.raw'],
                           SpectraMin=16,
                           SpectraMax=17)
 
@@ -104,7 +137,34 @@ class OSIRISDiffractionReductionTest(unittest.TestCase):
                           OSIRISDiffractionReduction,
                           Sample=['OSI89813.raw'],
                           CalFile='osiris_041_RES10.cal',
-                          Vanadium=['osi89757.raw'],
+                          Vanadium=['OSI10156.raw'],
+                          SpectraMin=3,
+                          SpectraMax=361)
+
+
+    def test_mismatch_sample_vanadium_numbers(self):
+        """
+        Test error handling when number of samples is not equal to number of vanadium
+        """
+        self.assertRaises(RuntimeError,
+                          OSIRISDiffractionReduction,
+                          Sample=['OSI89813.raw', 'OSI89814.RAW'],
+                          CalFile='osiris_041_RES10.cal',
+                          Vanadium=['OSI10156.raw'],
+                          SpectraMin=3,
+                          SpectraMax=361)
+
+
+    def test_mismatch_sample_contianer_numbers(self):
+        """
+        Test error handling when number of samples is not equal to number of containers
+        """
+        self.assertRaises(RuntimeError,
+                          OSIRISDiffractionReduction,
+                          Sample=['OSI89813.raw', 'OSI89814.RAW'],
+                          CalFile='osiris_041_RES10.cal',
+                          Vanadium=['OSI10156.raw', 'OSI10157.RAW'],
+                          Container=['OSI10241.raw'],
                           SpectraMin=3,
                           SpectraMax=361)
 

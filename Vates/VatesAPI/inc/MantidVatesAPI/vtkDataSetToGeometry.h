@@ -1,64 +1,62 @@
 #ifndef VTKDATASET_TO_GEOMETRY_H_
-#define VTKDATASET_TO_GEOMETRY_H_ 
+#define VTKDATASET_TO_GEOMETRY_H_
 
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidKernel/System.h"
 #include "MantidGeometry/MDGeometry/MDGeometryXMLParser.h"
 
 class vtkDataSet;
-namespace Mantid
-{
-  namespace VATES
-  {
- 
- /** @class vtkDataSetToGeometry 
+namespace Mantid {
+namespace VATES {
 
- Handles the extraction of dimensions from a vtkDataSet by getting at the field data and then processing the xml contained within to determine how mappings have been formed. 
+/** @class vtkDataSetToGeometry
 
- @author Owen Arnold, Tessella Support Services plc
- @date 13/05/2011
+Handles the extraction of dimensions from a vtkDataSet by getting at the field
+data and then processing the xml contained within to determine how mappings have
+been formed.
 
- Copyright &copy; 2007-8 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+@author Owen Arnold, Tessella Support Services plc
+@date 13/05/2011
 
- This file is part of Mantid.
+Copyright &copy; 2007-8 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+National Laboratory & European Spallation Source
 
- Mantid is free software; you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation; either version 3 of the License, or
- (at your option) any later version.
+This file is part of Mantid.
 
- Mantid is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
+Mantid is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 3 of the License, or
+(at your option) any later version.
 
- You should have received a copy of the GNU General Public License
- along with this program.  If not, see <http://www.gnu.org/licenses/>.
+Mantid is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
 
- File change history is stored at: <https://github.com/mantidproject/mantid>.
- Code Documentation is available at: <http://doxygen.mantidproject.org>
- */
-    class DLLExport vtkDataSetToGeometry : public Mantid::Geometry::MDGeometryXMLParser
-    {
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-    private:
+File change history is stored at: <https://github.com/mantidproject/mantid>.
+Code Documentation is available at: <http://doxygen.mantidproject.org>
+*/
+class DLLExport vtkDataSetToGeometry
+    : public Mantid::Geometry::MDGeometryXMLParser {
 
-      vtkDataSet* m_dataSet;
+private:
+  vtkDataSet *m_dataSet;
 
-    public:
+public:
+  explicit vtkDataSetToGeometry(vtkDataSet *dataSet);
 
-      explicit vtkDataSetToGeometry(vtkDataSet* dataSet);
+  ~vtkDataSetToGeometry() override;
 
-      ~vtkDataSetToGeometry() override;
+  void execute() override;
 
-      void execute() override;
+  vtkDataSetToGeometry(const vtkDataSetToGeometry &other);
 
-      vtkDataSetToGeometry(const vtkDataSetToGeometry& other);
-
-      vtkDataSetToGeometry& operator=(const vtkDataSetToGeometry& other);
-
-    };
-  }
+  vtkDataSetToGeometry &operator=(const vtkDataSetToGeometry &other);
+};
+}
 }
 
 #endif

@@ -205,7 +205,7 @@ protected:
 
   // functions inherited from IComponent
   Component *clone() const override { return nullptr; }
-  ComponentID getComponentID(void) const override { return nullptr; }
+  ComponentID getComponentID() const override { return nullptr; }
   boost::shared_ptr<const IComponent> getParent() const override {
     return boost::shared_ptr<const IComponent>();
   }

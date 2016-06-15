@@ -45,7 +45,7 @@ namespace Poco {
 /// channels simultaneously.
 class MANTID_KERNEL_DLL FilterChannel : public Channel {
 public:
-  /// Creates the SplitterChannel.
+  /// Creates the FilterChannel.
   FilterChannel();
 
   /// destructor

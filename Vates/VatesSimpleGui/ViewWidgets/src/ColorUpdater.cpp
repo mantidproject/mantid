@@ -27,42 +27,33 @@
 #include <QColor>
 #include <QList>
 
-namespace Mantid
-{
-  // static logger
-  Kernel::Logger g_log("ColorUpdater");
+namespace Mantid {
+// static logger
+Kernel::Logger g_log("ColorUpdater");
 
-namespace Vates
-{
-namespace SimpleGui
-{
-  
-ColorUpdater::ColorUpdater() :
-  m_autoScaleState(true),
-  m_logScaleState(false),
-  m_minScale(std::numeric_limits<double>::min()),
-  m_maxScale(std::numeric_limits<double>::max())
-{
-}
+namespace Vates {
+namespace SimpleGui {
 
-ColorUpdater::~ColorUpdater()
-{
-}
+ColorUpdater::ColorUpdater()
+    : m_autoScaleState(true), m_logScaleState(false),
+      m_minScale(std::numeric_limits<double>::min()),
+      m_maxScale(std::numeric_limits<double>::max()) {}
+
+ColorUpdater::~ColorUpdater() {}
 
 /**
  * Set the lookup table to the autoscale values.
  * @returns A struct which contains the parameters of the looup table.
  */
-VsiColorScale ColorUpdater::autoScale()
-{
+VsiColorScale ColorUpdater::autoScale() {
   // Get the custom auto scale.
-  VsiColorScale vsiColorScale =  this->m_autoScaleRangeGenerator.getColorScale();
+  VsiColorScale vsiColorScale = this->m_autoScaleRangeGenerator.getColorScale();
 
   // Set the color scale for all sources
   this->m_minScale = vsiColorScale.minValue;
   this->m_maxScale = vsiColorScale.maxValue;
 
-  // If the view 
+  // If the view
 
   this->m_logScaleState = vsiColorScale.useLogScale;
 
@@ -88,16 +79,15 @@ void ColorUpdater::colorMapChange(pqPipelineRepresentation *repr,
  * @param min The lower end of the color scale.
  * @param max The upper end of the color scale.
  */
-void ColorUpdater::colorScaleChange(double min, double max)
-{
+void ColorUpdater::colorScaleChange(double min, double max) {
   this->m_minScale = min;
   this->m_maxScale = max;
 
-  try
-  {
+  try {
     // Update for all sources and all reps
     pqServer *server = pqActiveObjects::instance().activeServer();
-    pqServerManagerModel *smModel = pqApplicationCore::instance()->getServerManagerModel();
+    pqServerManagerModel *smModel =
+        pqApplicationCore::instance()->getServerManagerModel();
     const QList<pqPipelineSource *> sources =
         smModel->findItems<pqPipelineSource *>(server);
 
@@ -114,44 +104,46 @@ void ColorUpdater::colorScaleChange(double min, double max)
         }
       }
     }
-  }
-  catch(std::invalid_argument &)
-  {
+  } catch (std::invalid_argument &) {
     return;
   }
 }
 
 /**
  * Update the lookup table.
- * @param representation The representation for which the lookup table is updated.
+ * @param representation The representation for which the lookup table is
+ * updated.
  */
-void ColorUpdater::updateLookupTable(pqDataRepresentation* representation)
-{
-  pqScalarsToColors* lookupTable = representation->getLookupTable();
+void ColorUpdater::updateLookupTable(pqDataRepresentation *representation) {
+  pqScalarsToColors *lookupTable = representation->getLookupTable();
 
-  if (NULL != lookupTable)
-  {
+  if (NULL != lookupTable) {
     // Set the scalar range values
     lookupTable->setScalarRange(this->m_minScale, this->m_maxScale);
 
-    vtkSMProxy* proxy = representation->getProxy();
-    vtkSMProxy* lutProxy = pqSMAdaptor::getProxyProperty(proxy->GetProperty("LookupTable"));
-    vtkSMProxy* scalarOpacityFunctionProxy = lutProxy?pqSMAdaptor::getProxyProperty(lutProxy->GetProperty("ScalarOpacityFunction")) : NULL;
+    vtkSMProxy *proxy = representation->getProxy();
+    vtkSMProxy *lutProxy =
+        pqSMAdaptor::getProxyProperty(proxy->GetProperty("LookupTable"));
+    vtkSMProxy *scalarOpacityFunctionProxy =
+        lutProxy ? pqSMAdaptor::getProxyProperty(
+                       lutProxy->GetProperty("ScalarOpacityFunction"))
+                 : NULL;
 
-    if (scalarOpacityFunctionProxy)
-    {
-      vtkSMTransferFunctionProxy::RescaleTransferFunction(scalarOpacityFunctionProxy, this->m_minScale, this->m_maxScale);
+    if (scalarOpacityFunctionProxy) {
+      vtkSMTransferFunctionProxy::RescaleTransferFunction(
+          scalarOpacityFunctionProxy, this->m_minScale, this->m_maxScale);
     }
 
-    // Need to set a lookup table lock here. This does not affect setScalarRange, 
-    // but blocks setWholeScalarRange which gets called by ParaView overrides our
+    // Need to set a lookup table lock here. This does not affect
+    // setScalarRange,
+    // but blocks setWholeScalarRange which gets called by ParaView overrides
+    // our
     // setting when a workspace is loaded for the first time.
     lookupTable->setScalarRangeLock(true);
 
     representation->getProxy()->UpdateVTKObjects();
     representation->renderViewEventually();
-  } else
-  {
+  } else {
     throw std::invalid_argument("Cannot get LUT for representation");
   }
 }
@@ -160,8 +152,7 @@ void ColorUpdater::updateLookupTable(pqDataRepresentation* representation)
  * React to changing the log scale option
  * @param state The state to which the log scale is being changed.
  */
-void ColorUpdater::logScale(int state)
-{
+void ColorUpdater::logScale(int state) {
   this->m_logScaleState = state;
 
   // Update for all sources and all reps
@@ -206,8 +197,7 @@ void ColorUpdater::logScale(int state)
  * sets it into the internal state variables.
  * @param cs : Reference to the color selection widget
  */
-void ColorUpdater::updateState(ColorSelectionWidget *cs)
-{
+void ColorUpdater::updateState(ColorSelectionWidget *cs) {
   this->m_autoScaleState = cs->getAutoScaleState();
   this->m_logScaleState = cs->getLogScaleState();
   this->m_minScale = cs->getMinRange();
@@ -218,52 +208,38 @@ void ColorUpdater::updateState(ColorSelectionWidget *cs)
 /**
  * @return  the current auto scaling state
  */
-bool ColorUpdater::isAutoScale()
-{
-  return this->m_autoScaleState;
-}
+bool ColorUpdater::isAutoScale() { return this->m_autoScaleState; }
 
 /**
  * @return the current logarithmic scaling state
  */
-bool ColorUpdater::isLogScale()
-{
-  return this->m_logScaleState;
-}
+bool ColorUpdater::isLogScale() { return this->m_logScaleState; }
 
 /**
  * @return the current maximum range for the color scaling
  */
-double ColorUpdater::getMaximumRange()
-{
-  return this->m_maxScale;
-}
+double ColorUpdater::getMaximumRange() { return this->m_maxScale; }
 
 /**
  * @return the current minimum range for the color scaling
  */
-double ColorUpdater::getMinimumRange()
-{
-  return this->m_minScale;
-}
+double ColorUpdater::getMinimumRange() { return this->m_minScale; }
 
 /**
  * This function prints out the values of the current state of the
  * color updater.
  */
-void ColorUpdater::print()
-{
-  std::cout << "Auto Scale: " << this->m_autoScaleState << std::endl;
-  std::cout << "Log Scale: " << this->m_logScaleState << std::endl;
-  std::cout << "Min Range: " << this->m_minScale << std::endl;
-  std::cout << "Max Range: " << this->m_maxScale << std::endl;
+void ColorUpdater::print() {
+  std::cout << "Auto Scale: " << this->m_autoScaleState << '\n';
+  std::cout << "Log Scale: " << this->m_logScaleState << '\n';
+  std::cout << "Min Range: " << this->m_minScale << '\n';
+  std::cout << "Max Range: " << this->m_maxScale << '\n';
 }
 
 /**
  * Initializes the color scale
  */
-void ColorUpdater::initializeColorScale()
-{
+void ColorUpdater::initializeColorScale() {
   m_autoScaleRangeGenerator.initializeColorScale();
 }
 
@@ -274,8 +250,8 @@ void ColorUpdater::initializeColorScale()
  * (update the min/max values).
  */
 struct ColorCallbackData {
-  ColorUpdater* colorUpdater;
-  ColorSelectionWidget* csel;
+  ColorUpdater *colorUpdater;
+  ColorSelectionWidget *csel;
 };
 ColorCallbackData ccdata;
 
@@ -288,8 +264,8 @@ ColorCallbackData ccdata;
  * @param repr Paraview representation whose color editor we have to observe
  * @param cs The simple color selection widget (the VSI one, not the ParaQ one)
  */
-void ColorUpdater::observeColorScaleEdited(pqPipelineRepresentation *repr, ColorSelectionWidget *cs)
-{
+void ColorUpdater::observeColorScaleEdited(pqPipelineRepresentation *repr,
+                                           ColorSelectionWidget *cs) {
   if (!repr)
     return;
 
@@ -302,27 +278,31 @@ void ColorUpdater::observeColorScaleEdited(pqPipelineRepresentation *repr, Color
     return;
 
   // User updates the color scale (normally the range)
-  // Prepare the callback. Vtk callbacks: http://www.vtk.org/Wiki/VTK/Tutorials/Callbacks
-  vtkSmartPointer<vtkCallbackCommand> CRChangeCallback = vtkSmartPointer<vtkCallbackCommand>::New();
+  // Prepare the callback. Vtk callbacks:
+  // http://www.vtk.org/Wiki/VTK/Tutorials/Callbacks
+  vtkSmartPointer<vtkCallbackCommand> CRChangeCallback =
+      vtkSmartPointer<vtkCallbackCommand>::New();
   CRChangeCallback->SetCallback(colorScaleEditedCallbackFunc);
-  // note this uses the same ccdata which would misbehave if we wanted multiple VSI instances
+  // note this uses the same ccdata which would misbehave if we wanted multiple
+  // VSI instances
   ccdata.colorUpdater = this;
   ccdata.csel = cs;
   CRChangeCallback->SetClientData(&ccdata);
   // install callback
-  vtkSMDoubleVectorProperty *points =
-    vtkSMDoubleVectorProperty::SafeDownCast(lutProxy->GetProperty("RGBPoints"));
+  vtkSMDoubleVectorProperty *points = vtkSMDoubleVectorProperty::SafeDownCast(
+      lutProxy->GetProperty("RGBPoints"));
 
   if (points) {
     points->AddObserver(vtkCommand::ModifiedEvent, CRChangeCallback);
   }
 
   // User clicks on the log-scale tick box
-  vtkSmartPointer<vtkCallbackCommand> LogScaleCallback = vtkSmartPointer<vtkCallbackCommand>::New();
+  vtkSmartPointer<vtkCallbackCommand> LogScaleCallback =
+      vtkSmartPointer<vtkCallbackCommand>::New();
   LogScaleCallback->SetCallback(logScaleClickedCallbackFunc);
   LogScaleCallback->SetClientData(&ccdata);
-  vtkSMIntVectorProperty *logScaleProp =
-    vtkSMIntVectorProperty::SafeDownCast(lutProxy->GetProperty("UseLogScale"));
+  vtkSMIntVectorProperty *logScaleProp = vtkSMIntVectorProperty::SafeDownCast(
+      lutProxy->GetProperty("UseLogScale"));
   if (logScaleProp)
     logScaleProp->AddObserver(vtkCommand::ModifiedEvent, LogScaleCallback);
 }
@@ -334,54 +314,68 @@ void ColorUpdater::observeColorScaleEdited(pqPipelineRepresentation *repr, Color
  * lookup table. Note that this goes in the opposite direction than
  * most if not all of the updates made by the ColorUpdater.
  *
- * @param caller the proxy object that calls this (or the callback has been set to it with AddObserver
+ * @param caller the proxy object that calls this (or the callback has been set
+ *to it with AddObserver
  * @param eventID vtkCommand event ID for callbacks, not used here
  *
- * @param clientData expects a ColorCallBackData struct that has the ColorUpdater object which set 
- * the callback, and ColorSelectionWidget object of this VSI window. Never use this method with
+ * @param clientData expects a ColorCallBackData struct that has the
+ *ColorUpdater object which set
+ * the callback, and ColorSelectionWidget object of this VSI window. Never use
+ *this method with
  * different data.
  *
  * @param callData callback specific data which takes different forms
  * depending on events, not used here.
  */
-void ColorUpdater::colorScaleEditedCallbackFunc(vtkObject *caller, long unsigned int eventID,
-                                                void *clientData, void *callData)
-{
+void ColorUpdater::colorScaleEditedCallbackFunc(vtkObject *caller,
+                                                long unsigned int eventID,
+                                                void *clientData,
+                                                void *callData) {
   UNUSED_ARG(eventID);
   UNUSED_ARG(callData);
 
-  // this won't help much. You must make sure that clientData is a proper ColorCallBackData struct
-  ColorCallbackData *data = static_cast<ColorCallbackData*>(clientData);
-  if (!data){
+  // this won't help much. You must make sure that clientData is a proper
+  // ColorCallBackData struct
+  ColorCallbackData *data = static_cast<ColorCallbackData *>(clientData);
+  if (!data) {
     return;
   }
 
   // a pseudo-this
   ColorUpdater *pThis = data->colorUpdater;
-  if (!pThis){
+  if (!pThis) {
     return;
   }
 
   ColorSelectionWidget *csel = data->csel;
-  if (!csel){
+  if (!csel) {
     return;
   }
 
   // This means that either
   //
-  // A) the user clicked on the auto-scale check box of the ColorSelectionWidget.
-  // That will change color properties of the ParaQ and trigger this callback. This condition
-  // prevents the callback from ruining the state of the ColorSelectionWidget (which is just
-  // being set by the user and we do not want to update programmatically in this case).
+  // A) the user clicked on the auto-scale check box of the
+  // ColorSelectionWidget.
+  // That will change color properties of the ParaQ and trigger this callback.
+  // This condition
+  // prevents the callback from ruining the state of the ColorSelectionWidget
+  // (which is just
+  // being set by the user and we do not want to update programmatically in this
+  // case).
   //
-  // B) We are in the middle of an operation where we don't want callbacks to update the
-  // color map (for example when switching views or doing several view updates in a row)
-  if (csel->inProcessUserRequestedAutoScale() || csel->isIgnoringColorCallbacks() || csel->isColorScaleLocked() ) {
+  // B) We are in the middle of an operation where we don't want callbacks to
+  // update the
+  // color map (for example when switching views or doing several view updates
+  // in a row)
+  if (csel->inProcessUserRequestedAutoScale() ||
+      csel->isIgnoringColorCallbacks() || csel->isColorScaleLocked()) {
     return;
   }
 
-  // This vector has 4 values per color definition: data value (bin limit) + 3 R-G-B coordinates
-  vtkSMDoubleVectorProperty *RGBPoints = vtkSMDoubleVectorProperty::SafeDownCast(caller);
+  // This vector has 4 values per color definition: data value (bin limit) + 3
+  // R-G-B coordinates
+  vtkSMDoubleVectorProperty *RGBPoints =
+      vtkSMDoubleVectorProperty::SafeDownCast(caller);
   if (!RGBPoints)
     return;
 
@@ -394,11 +388,10 @@ void ColorUpdater::colorScaleEditedCallbackFunc(vtkObject *caller, long unsigned
     return;
 
   double newMin = elems[0];
-  double newMax = elems[noe-subtract];
+  double newMax = elems[noe - subtract];
 
   if ((std::fabs(newMin - csel->getMinRange()) > 1e-14) ||
-      (std::fabs(csel->getMaxRange() - newMax) > 1e-14)
-      ) {
+      (std::fabs(csel->getMaxRange() - newMax) > 1e-14)) {
     pThis->m_minScale = newMin;
     pThis->m_maxScale = newMax;
     csel->setMinMax(pThis->m_minScale, pThis->m_maxScale);
@@ -431,31 +424,33 @@ void ColorUpdater::colorScaleEditedCallbackFunc(vtkObject *caller, long unsigned
  * @param callData callback specific data which takes different forms
  * depending on events, not used here.
  */
-void ColorUpdater::logScaleClickedCallbackFunc(vtkObject *caller, long unsigned int eventID,
-                                                void *clientData, void *callData)
-{
+void ColorUpdater::logScaleClickedCallbackFunc(vtkObject *caller,
+                                               long unsigned int eventID,
+                                               void *clientData,
+                                               void *callData) {
   UNUSED_ARG(eventID);
   UNUSED_ARG(callData);
 
   // this won't help much if you pass a wrong type.
-  ColorCallbackData *data = static_cast<ColorCallbackData*>(clientData);
-  if (!data){
+  ColorCallbackData *data = static_cast<ColorCallbackData *>(clientData);
+  if (!data) {
     return;
   }
 
   // pseudo-this
   ColorUpdater *pThis = data->colorUpdater;
-  if (!pThis){
+  if (!pThis) {
     return;
   }
 
   ColorSelectionWidget *csel = data->csel;
-  if (!csel){
+  if (!csel) {
     return;
   }
 
   // A single element int vector which actually contains a 0/1 value
-  vtkSMIntVectorProperty *useLogProp = vtkSMIntVectorProperty::SafeDownCast(caller);
+  vtkSMIntVectorProperty *useLogProp =
+      vtkSMIntVectorProperty::SafeDownCast(caller);
   if (!useLogProp)
     return;
 
@@ -472,4 +467,3 @@ void ColorUpdater::logScaleClickedCallbackFunc(vtkObject *caller, long unsigned 
 } // SimpleGui
 } // Vates
 } // Mantid
-

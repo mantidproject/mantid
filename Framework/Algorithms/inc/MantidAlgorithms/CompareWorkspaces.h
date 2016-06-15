@@ -108,8 +108,8 @@ private:
   void doTableComparison(API::ITableWorkspace_const_sptr tws1,
                          API::ITableWorkspace_const_sptr tws2);
   void doMDComparison(API::Workspace_sptr w1, API::Workspace_sptr w2);
-  bool compareEventWorkspaces(DataObjects::EventWorkspace_const_sptr ews1,
-                              DataObjects::EventWorkspace_const_sptr ews2);
+  bool compareEventWorkspaces(const DataObjects::EventWorkspace &ews1,
+                              const DataObjects::EventWorkspace &ews2);
   bool checkData(API::MatrixWorkspace_const_sptr ws1,
                  API::MatrixWorkspace_const_sptr ws2);
   bool checkAxes(API::MatrixWorkspace_const_sptr ws1,

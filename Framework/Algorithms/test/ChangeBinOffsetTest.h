@@ -27,7 +27,7 @@ public:
     offsetStr << offset;
 
     Workspace2D_sptr input = makeDummyWorkspace2D();
-    input->isDistribution(true);
+    input->setDistribution(true);
     AnalysisDataService::Instance().add("input2D", input);
 
     ChangeBinOffset alg2D;
@@ -50,8 +50,8 @@ public:
 
     //		for (int i=0; i < Xnew.size(); ++i)
     //		{
-    //		    std::cout << "old value: " << Xold[i] << std::endl;
-    //		    std::cout << "new value: " << Xnew[i] << std::endl;
+    //		    std::cout << "old value: " << Xold[i] << '\n';
+    //		    std::cout << "new value: " << Xnew[i] << '\n';
     //		}
 
     TS_ASSERT(Xold[0] + offset == Xnew[0]);
@@ -136,10 +136,10 @@ public:
     TS_ASSERT(WSO);
 
     std::size_t wkspIndex = 4348; // a good workspace index (with events)
-    TS_ASSERT_DELTA(WSI->getEventList(wkspIndex).getEvents()[0].tof() + 100,
-                    WSO->getEventList(wkspIndex).getEvents()[0].tof(), 0.001);
-    TS_ASSERT_DELTA(WSI->getEventList(wkspIndex).dataX()[1] + 100.,
-                    WSO->getEventList(wkspIndex).dataX()[1], 0.001);
+    TS_ASSERT_DELTA(WSI->getSpectrum(wkspIndex).getEvents()[0].tof() + 100,
+                    WSO->getSpectrum(wkspIndex).getEvents()[0].tof(), 0.001);
+    TS_ASSERT_DELTA(WSI->getSpectrum(wkspIndex).dataX()[1] + 100.,
+                    WSO->getSpectrum(wkspIndex).dataX()[1], 0.001);
 
     alg.setPropertyValue("IndexMin", "4349");
     alg.setPropertyValue("IndexMax", "4350");
@@ -148,17 +148,17 @@ public:
     WSO =
         AnalysisDataService::Instance().retrieveWS<EventWorkspace>(outputSpace);
     TS_ASSERT(WSO);
-    TS_ASSERT_DELTA(WSI->getEventList(wkspIndex).getEvents()[0].tof(),
-                    WSO->getEventList(wkspIndex).getEvents()[0].tof(),
+    TS_ASSERT_DELTA(WSI->getSpectrum(wkspIndex).getEvents()[0].tof(),
+                    WSO->getSpectrum(wkspIndex).getEvents()[0].tof(),
                     0.001); // should be unchanged
-    TS_ASSERT_DELTA(WSI->getEventList(wkspIndex).dataX()[1],
-                    WSO->getEventList(wkspIndex).dataX()[1],
+    TS_ASSERT_DELTA(WSI->getSpectrum(wkspIndex).dataX()[1],
+                    WSO->getSpectrum(wkspIndex).dataX()[1],
                     0.001); // should be unchanged
-    TS_ASSERT_DELTA(WSI->getEventList(wkspIndex + 1).getEvents()[0].tof() + 100,
-                    WSO->getEventList(wkspIndex + 1).getEvents()[0].tof(),
+    TS_ASSERT_DELTA(WSI->getSpectrum(wkspIndex + 1).getEvents()[0].tof() + 100,
+                    WSO->getSpectrum(wkspIndex + 1).getEvents()[0].tof(),
                     0.001); // should change
-    TS_ASSERT_DELTA(WSI->getEventList(wkspIndex + 1).dataX()[1] + 100.,
-                    WSO->getEventList(wkspIndex + 1).dataX()[1],
+    TS_ASSERT_DELTA(WSI->getSpectrum(wkspIndex + 1).dataX()[1] + 100.,
+                    WSO->getSpectrum(wkspIndex + 1).dataX()[1],
                     0.001); // should change
   }
 

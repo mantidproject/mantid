@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>184</width>
+    <width>108</width>
     <height>306</height>
    </rect>
   </property>
@@ -17,16 +17,7 @@
    <property name="spacing">
     <number>0</number>
    </property>
-   <property name="leftMargin">
-    <number>0</number>
-   </property>
-   <property name="topMargin">
-    <number>0</number>
-   </property>
-   <property name="rightMargin">
-    <number>0</number>
-   </property>
-   <property name="bottomMargin">
+   <property name="margin">
     <number>0</number>
    </property>
    <item>
@@ -86,7 +77,8 @@
         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;When this is checked the color scale range will be automatically set to the current slice whenever the user zooms to a new peak, pans through the view or changes the slice with the slider control&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
        </property>
        <property name="text">
-        <string>Autoscale to current slice</string>
+        <string>Autoscale to
+current slice</string>
        </property>
       </widget>
      </item>
@@ -96,7 +88,8 @@
         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;This flag signals that the color scale range should be set automatically to the current slice range when a workspace is loaded. Note that auto scaling will be applied when a workspace is loaded for the very first time. This option is mainly relevant for live data workspaces, which are continuously being updated and reloaded.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
        </property>
        <property name="text">
-        <string>Autoscale on load</string>
+        <string>Autoscale
+on load</string>
        </property>
       </widget>
      </item>

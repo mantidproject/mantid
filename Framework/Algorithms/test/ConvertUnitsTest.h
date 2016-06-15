@@ -49,8 +49,8 @@ public:
       space2D->setX(j, x);
       space2D->setData(j, a, e);
       // Just set the spectrum number to match the index
-      space2D->getSpectrum(j)->setSpectrumNo(j);
-      space2D->getSpectrum(j)->setDetectorID(j);
+      space2D->getSpectrum(j).setSpectrumNo(j);
+      space2D->getSpectrum(j).setDetectorID(j);
     }
     space2D->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
 
@@ -223,6 +223,8 @@ public:
             "quickOut2"));
     TS_ASSERT_EQUALS(output->getAxis(0)->unit()->unitID(), "Energy");
     TS_ASSERT_DELTA(output->dataX(1)[1], 10.10, 0.01);
+    // Check EMode has been set
+    TS_ASSERT_EQUALS(Mantid::Kernel::DeltaEMode::Elastic, output->getEMode());
 
     AnalysisDataService::Instance().remove("quickOut2");
   }
@@ -366,7 +368,7 @@ public:
     physicalPixel->setPos(-0.34732, -3.28797, -2.29022);
     testInst->add(physicalPixel);
     testInst->markAsDetector(physicalPixel);
-    ws->getSpectrum(0)->addDetectorID(physicalPixel->getID());
+    ws->getSpectrum(0).addDetectorID(physicalPixel->getID());
 
     ConvertUnits conv;
     conv.initialize();
@@ -384,6 +386,8 @@ public:
             outputSpace));
     TS_ASSERT_EQUALS(output->getAxis(0)->unit()->unitID(), "DeltaE");
     TS_ASSERT_EQUALS(output->blocksize(), 1669);
+    // Check EMode has been set
+    TS_ASSERT_EQUALS(Mantid::Kernel::DeltaEMode::Direct, output->getEMode());
 
     ConvertUnits conv2;
     conv2.initialize();
@@ -400,6 +404,8 @@ public:
     TS_ASSERT_EQUALS(output->getAxis(0)->unit()->unitID(),
                      "DeltaE_inWavenumber");
     TS_ASSERT_EQUALS(output->blocksize(), 2275);
+    // Check EMode has been set
+    TS_ASSERT_EQUALS(Mantid::Kernel::DeltaEMode::Indirect, output->getEMode());
 
     AnalysisDataService::Instance().remove(outputSpace);
   }
@@ -422,7 +428,7 @@ public:
     TS_ASSERT(WS); // workspace is loaded
     size_t start_blocksize = WS->blocksize();
     size_t num_events = WS->getNumberEvents();
-    EventList el = WS->getEventList(wkspIndex);
+    EventList el = WS->getSpectrum(wkspIndex);
     double a_tof = el.getEvents()[0].tof();
     double a_x = el.dataX()[1];
 
@@ -445,9 +451,11 @@ public:
     TS_ASSERT_EQUALS(start_blocksize, WS->blocksize());
     TS_ASSERT_EQUALS(num_events, WS->getNumberEvents());
     // But a TOF changed.
-    TS_ASSERT_DIFFERS(a_tof, WS->getEventList(wkspIndex).getEvents()[0].tof());
+    TS_ASSERT_DIFFERS(a_tof, WS->getSpectrum(wkspIndex).getEvents()[0].tof());
     // and a X changed
-    TS_ASSERT_DIFFERS(a_x, WS->getEventList(wkspIndex).dataX()[1]);
+    TS_ASSERT_DIFFERS(a_x, WS->getSpectrum(wkspIndex).dataX()[1]);
+    // Check EMode has been set
+    TS_ASSERT_EQUALS(Mantid::Kernel::DeltaEMode::Direct, WS->getEMode());
   }
 
   void testExecEvent_TwoStepConversionWithDeltaE() {
@@ -509,7 +517,7 @@ public:
       return;
     TS_ASSERT_EQUALS(out->getNumberEvents(), 100 * 200);
 
-    EventList &el = out->getEventList(0);
+    EventList &el = out->getSpectrum(0);
     TS_ASSERT(el.getSortType() == sortType);
 
     if (sortType == TOF_SORT) {

@@ -54,6 +54,7 @@ set ( SRC_FILES
 	src/Functions/Convolution.cpp
 	src/Functions/CrystalElectricField.cpp
 	src/Functions/CrystalFieldPeaks.cpp
+	src/Functions/CrystalFieldSpectrum.cpp
 	src/Functions/CubicSpline.cpp
 	src/Functions/DeltaFunction.cpp
 	src/Functions/DiffRotDiscreteCircle.cpp
@@ -71,6 +72,7 @@ set ( SRC_FILES
 	src/Functions/GaussianComptonProfile.cpp
 	src/Functions/GramCharlierComptonProfile.cpp
 	src/Functions/IkedaCarpenterPV.cpp
+    src/Functions/Keren.cpp
 	src/Functions/LinearBackground.cpp
 	src/Functions/LogNormal.cpp
 	src/Functions/Lorentzian.cpp
@@ -184,6 +186,7 @@ set ( INC_FILES
 	inc/MantidCurveFitting/Functions/Convolution.h
 	inc/MantidCurveFitting/Functions/CrystalElectricField.h
 	inc/MantidCurveFitting/Functions/CrystalFieldPeaks.h
+	inc/MantidCurveFitting/Functions/CrystalFieldSpectrum.h
 	inc/MantidCurveFitting/Functions/CubicSpline.h
 	inc/MantidCurveFitting/Functions/DeltaFunction.h
 	inc/MantidCurveFitting/Functions/DiffRotDiscreteCircle.h
@@ -201,6 +204,7 @@ set ( INC_FILES
 	inc/MantidCurveFitting/Functions/GaussianComptonProfile.h
 	inc/MantidCurveFitting/Functions/GramCharlierComptonProfile.h
 	inc/MantidCurveFitting/Functions/IkedaCarpenterPV.h
+    inc/MantidCurveFitting/Functions/Keren.h
 	inc/MantidCurveFitting/Functions/LinearBackground.h
 	inc/MantidCurveFitting/Functions/LogNormal.h
 	inc/MantidCurveFitting/Functions/Lorentzian.h
@@ -286,8 +290,6 @@ set ( TEST_FILES
 	Constraints/BoundaryConstraintTest.h
 	CostFunctions/CostFuncUnweightedLeastSquaresTest.h
 	CostFunctions/LeastSquaresTest.h
-	CrystalFieldEnergiesTest.h
-	CrystalFieldPeaksTest.h
 	FitMWTest.h
 	FortranMatrixTest.h
 	FortranVectorTest.h
@@ -313,7 +315,10 @@ set ( TEST_FILES
 	Functions/ComptonProfileTest.h
 	Functions/ComptonScatteringCountRateTest.h
 	Functions/ConvolutionTest.h
+	Functions/CrystalFieldEnergiesTest.h
+	Functions/CrystalFieldPeaksTest.h
 	Functions/CrystalFieldTest.h
+	Functions/CrystalFieldSpectrumTest.h
 	Functions/CubicSplineTest.h
 	Functions/DeltaFunctionTest.h
 	Functions/DiffRotDiscreteCircleTest.h
@@ -331,6 +336,7 @@ set ( TEST_FILES
 	Functions/GaussianTest.h
 	Functions/GramCharlierComptonProfileTest.h
 	Functions/IkedaCarpenterPVTest.h
+    Functions/KerenTest.h
 	Functions/LinearBackgroundTest.h
 	Functions/LogNormalTest.h
 	Functions/Lorentzian1DTest.h

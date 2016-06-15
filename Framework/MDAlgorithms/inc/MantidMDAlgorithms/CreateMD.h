@@ -75,6 +75,7 @@ private:
   Mantid::API::IMDEventWorkspace_sptr
   convertToMD(Mantid::API::Workspace_sptr workspace,
               const std::string &analysis_mode, bool in_place,
+              const std::string &filebackend_filename, const bool filebackend,
               Mantid::API::IMDEventWorkspace_sptr out_mdws);
 
   /// Merge input workspaces
@@ -88,6 +89,7 @@ private:
              double gs, bool in_place, const std::vector<double> &alatt,
              const std::vector<double> &angdeg, const std::vector<double> &u,
              const std::vector<double> &v,
+             const std::string &filebackend_filename, const bool filebackend,
              Mantid::API::IMDEventWorkspace_sptr out_mdws);
 
   /// Validate the algorithm's input properties

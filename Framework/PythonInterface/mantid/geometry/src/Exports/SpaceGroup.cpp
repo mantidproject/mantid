@@ -63,6 +63,9 @@ void export_SpaceGroup() {
            (arg("self"), arg("hkl")),
            "Returns True if the supplied reflection is allowed with respect to "
            "space group symmetry operations.")
+      .def("isAllowedUnitCell", &SpaceGroup::isAllowedUnitCell,
+           (arg("self"), arg("cell")), "Returns true if the metric of the cell "
+                                       "is compatible with the space group.")
       .def("getPointGroup", &SpaceGroup::getPointGroup, arg("self"),
            "Returns the point group of the space group.")
       .def("getSiteSymmetryGroup", &getSiteSymmetryGroup,

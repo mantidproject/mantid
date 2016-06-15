@@ -17,16 +17,6 @@ using namespace API;
 using namespace Geometry;
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-ClearInstrumentParameters::ClearInstrumentParameters() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-ClearInstrumentParameters::~ClearInstrumentParameters() {}
-
-//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string ClearInstrumentParameters::name() const {
   return "ClearInstrumentParameters";

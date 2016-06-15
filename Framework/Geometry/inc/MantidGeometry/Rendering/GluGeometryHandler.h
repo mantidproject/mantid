@@ -46,8 +46,10 @@ class Object;
    File change history is stored at: <https://github.com/mantidproject/mantid>
 */
 class MANTID_GEOMETRY_DLL GluGeometryHandler : public GeometryHandler {
+public:
   /// the type of the geometry eg CUBOID,CYLINDER,CONE,SPHERE
-  enum GEOMETRY_TYPE {
+  enum class GeometryType {
+    NOSHAPE = 0,
     CUBOID,            ///< CUBOID
     HEXAHEDRON,        ///< HEXAHEDRON
     SPHERE,            ///< SPHERE
@@ -58,25 +60,17 @@ class MANTID_GEOMETRY_DLL GluGeometryHandler : public GeometryHandler {
   };
 
 private:
-  static Kernel::Logger &PLog;   ///< The official logger
-  GluGeometryRenderer *Renderer; ///< Geometry renderer variable used for
-  /// rendering Object/ObjComponent
-
-  Kernel::V3D center; ///<Center for sphere,cone and cylinder
-  Kernel::V3D Point1; ///<cube/hexahedron coordinates
-  Kernel::V3D Point2; ///<cube/hexahedron coordinates
-  Kernel::V3D Point3; ///<cube/hexahedron coordinates
-  Kernel::V3D Point4; ///<cube/hexahedron coordinates
-  Kernel::V3D Point5; ///<hexahedron coordinates
-  Kernel::V3D Point6; ///<hexahedron coordinates
-  Kernel::V3D Point7; ///<hexahedron coordinates
-  Kernel::V3D Point8; ///<hexahedron coordinates
-  double radius;      ///<Radius for the sphere, cone and cylinder
-  double height;      ///<height for cone and cylinder;
-  Kernel::V3D axis;   ///<  Axis
-  GEOMETRY_TYPE
-  type; ///< the type of the geometry eg CUBOID,CYLINDER,CONE,SPHERE
+  static Kernel::Logger &PLog;                   ///< The official logger
+  std::unique_ptr<GluGeometryRenderer> Renderer; ///< Geometry renderer variable
+                                                 /// used for rendering
+  /// Object/ObjComponent
+  std::vector<Kernel::V3D> m_points;
+  double radius; ///<Radius for the sphere, cone and cylinder
+  double height; ///<height for cone and cylinder;
+  GeometryType
+      type; ///< the type of the geometry eg CUBOID,CYLINDER,CONE,SPHERE
 public:
+  GluGeometryHandler(const GluGeometryHandler &other);
   GluGeometryHandler(IObjComponent *comp);           ///< Constructor
   GluGeometryHandler(boost::shared_ptr<Object> obj); ///< Constructor
   GluGeometryHandler(Object *obj);                   ///< Constructor

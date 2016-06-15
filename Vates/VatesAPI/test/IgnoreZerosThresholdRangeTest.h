@@ -7,26 +7,21 @@
 using namespace Mantid;
 using namespace Mantid::VATES;
 
-
 //=====================================================================================
 // Functional tests
 //=====================================================================================
-class IgnoreZerosThresholdRangeTest: public CxxTest::TestSuite
-{
+class IgnoreZerosThresholdRangeTest : public CxxTest::TestSuite {
 
-public :
-
-  void testIgnoreEmptyCells()
-  {
+public:
+  void testIgnoreEmptyCells() {
     IgnoreZerosThresholdRange range;
-    
+
     TS_ASSERT_EQUALS(true, range.inRange(0.001));
     TS_ASSERT_EQUALS(true, range.inRange(-0.001));
     TS_ASSERT_EQUALS(false, range.inRange(0));
   }
 
-  void testGetMinMax()
-  {
+  void testGetMinMax() {
     IgnoreZerosThresholdRange range;
 
     range.inRange(1);
@@ -37,8 +32,7 @@ public :
     TSM_ASSERT_EQUALS("Wrong min found", -2, range.getMinimum());
   }
 
-  void testMinIsNeverZero()
-  {
+  void testMinIsNeverZero() {
     IgnoreZerosThresholdRange range;
 
     range.inRange(0);
@@ -46,7 +40,6 @@ public :
     range.inRange(2);
     TSM_ASSERT_EQUALS("Wrong min found", 0.5, range.getMinimum());
   }
-
 };
 
 #endif

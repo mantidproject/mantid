@@ -12,7 +12,7 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/V3D.h"
 
-#include <math.h>
+#include <cmath>
 
 using namespace Mantid;
 using namespace Mantid::API;
@@ -35,17 +35,6 @@ const double WAVELENGTH_TO_VELOCITY =
 /// This is an absurd number for even ultra cold neutrons
 const double WAVELENGTH_MAX = 1000.;
 }
-
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-EstimateResolutionDiffraction::EstimateResolutionDiffraction()
-    : m_inputWS(), m_outputWS(), m_centreVelocity(0.), m_L1(0.), m_deltaT(0.) {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-EstimateResolutionDiffraction::~EstimateResolutionDiffraction() {}
 
 const std::string EstimateResolutionDiffraction::name() const {
   return "EstimateResolutionDiffraction";

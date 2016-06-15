@@ -424,7 +424,7 @@
   <component type="slit1">
     <location z="7.3025"/>
      <!-- This log file stores the vertical opening of slit -->
-    <parameter name="opening height"> 
+    <parameter name="vertical gap"> 
       <logfile id="s1" extract-single-value-as="position 1" />
     </parameter>
   </component>
@@ -434,7 +434,7 @@
     <!-- This log file stores the vertical opening of this. Note this
      slit can also be translated in the z. However this info not stored
      in log file since it is not used in the data analysis process. -->
-    <parameter name="opening height"> 
+    <parameter name="vertical gap"> 
       <logfile id="s2" extract-single-value-as="position 1" />
     </parameter>
   </component>    
@@ -442,7 +442,7 @@
   <component type="slit3">   
     <location z="10.651"/>
     <!-- This log file stores the vertical opening of slit -->  
-    <parameter name="opening height">
+    <parameter name="vertical gap">
       <logfile id="s3" extract-single-value-as="position 1" />
     </parameter>
   </component>    
@@ -451,7 +451,7 @@
     <location z="11.983"/>     
     <!-- This log file stores the vertical opening of slit. Note this slit
      is fixed to the point detector. -->
-    <parameter name="opening height"> 
+    <parameter name="vertical gap"> 
       <logfile id="s4" extract-single-value-as="position 1" />    
     </parameter>
   </component>

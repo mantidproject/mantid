@@ -19,9 +19,12 @@
 #include "PropertyManagerHelper.h"
 
 #include <cxxtest/TestSuite.h>
+
+#include <boost/make_shared.hpp>
+
 #include <algorithm>
 #include <functional>
-#include <boost/make_shared.hpp>
+#include <numeric>
 
 using std::size_t;
 using namespace Mantid::Kernel;
@@ -43,7 +46,7 @@ boost::shared_ptr<MatrixWorkspace> makeWorkspaceWithDetectors(size_t numSpectra,
       boost::make_shared<WorkspaceTester>();
   ws2->initialize(numSpectra, numBins, numBins);
 
-  Instrument_sptr inst(new Instrument("TestInstrument"));
+  auto inst = boost::make_shared<Instrument>("TestInstrument");
   ws2->setInstrument(inst);
   // We get a 1:1 map by default so the detector ID should match the spectrum
   // number
@@ -52,7 +55,7 @@ boost::shared_ptr<MatrixWorkspace> makeWorkspaceWithDetectors(size_t numSpectra,
     Detector *det = new Detector("pixel", static_cast<detid_t>(i), inst.get());
     inst->add(det);
     inst->markAsDetector(det);
-    ws2->getSpectrum(i)->addDetectorID(static_cast<detid_t>(i));
+    ws2->getSpectrum(i).addDetectorID(static_cast<detid_t>(i));
   }
   return ws2;
 }
@@ -66,7 +69,9 @@ public:
   }
   static void destroySuite(MatrixWorkspaceTest *suite) { delete suite; }
 
-  MatrixWorkspaceTest() : ws(new WorkspaceTester) { ws->initialize(1, 1, 1); }
+  MatrixWorkspaceTest() : ws(boost::make_shared<WorkspaceTester>()) {
+    ws->initialize(1, 1, 1);
+  }
 
   void test_toString_Produces_Expected_Contents() {
     auto testWS = boost::make_shared<WorkspaceTester>();
@@ -83,7 +88,7 @@ public:
                            "X axis: Time-of-flight / microsecond\n"
                            "Y axis: Counts\n"
                            "Distribution: False\n"
-                           "Instrument:  (1990-Jan-01 to 1990-Jan-01)\n"
+                           "Instrument: None\n"
                            "Run start: not available\n"
                            "Run end:  not available\n";
 
@@ -108,7 +113,7 @@ public:
     WorkspaceTester ws;
     ws.initialize(10, 1, 1);
     for (size_t i = 0; i < 10; i++)
-      ws.getSpectrum(i)->setDetectorID(detid_t(i * 10));
+      ws.getSpectrum(i).setDetectorID(detid_t(i * 10));
     std::vector<detid_t> dets;
     dets.push_back(60);
     dets.push_back(20);
@@ -126,9 +131,8 @@ public:
     const size_t nhist(10);
     testWS.initialize(nhist, 1, 1);
     for (size_t i = 0; i < testWS.getNumberHistograms(); i++) {
-      TS_ASSERT_EQUALS(testWS.getSpectrum(i)->getSpectrumNo(),
-                       specnum_t(i + 1));
-      TS_ASSERT(testWS.getSpectrum(i)->hasDetectorID(detid_t(i)));
+      TS_ASSERT_EQUALS(testWS.getSpectrum(i).getSpectrumNo(), specnum_t(i + 1));
+      TS_ASSERT(testWS.getSpectrum(i).hasDetectorID(detid_t(i)));
     }
   }
 
@@ -141,23 +145,23 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         testWS.updateSpectraUsing(SpectrumDetectorMapping(specs, detids, 4)));
 
-    TS_ASSERT(testWS.getSpectrum(0)->hasDetectorID(10));
-    TS_ASSERT(testWS.getSpectrum(1)->hasDetectorID(20));
-    TS_ASSERT(testWS.getSpectrum(1)->hasDetectorID(99));
-    TS_ASSERT(testWS.getSpectrum(2)->hasDetectorID(30));
+    TS_ASSERT(testWS.getSpectrum(0).hasDetectorID(10));
+    TS_ASSERT(testWS.getSpectrum(1).hasDetectorID(20));
+    TS_ASSERT(testWS.getSpectrum(1).hasDetectorID(99));
+    TS_ASSERT(testWS.getSpectrum(2).hasDetectorID(30));
   }
 
   void testDetectorMappingCopiedWhenAWorkspaceIsCopied() {
     boost::shared_ptr<MatrixWorkspace> parent =
         boost::make_shared<WorkspaceTester>();
     parent->initialize(1, 1, 1);
-    parent->getSpectrum(0)->setSpectrumNo(99);
-    parent->getSpectrum(0)->setDetectorID(999);
+    parent->getSpectrum(0).setSpectrumNo(99);
+    parent->getSpectrum(0).setDetectorID(999);
 
     MatrixWorkspace_sptr copied = WorkspaceFactory::Instance().create(parent);
     // Has it been copied?
-    TS_ASSERT_EQUALS(copied->getSpectrum(0)->getSpectrumNo(), 99);
-    TS_ASSERT(copied->getSpectrum(0)->hasDetectorID(999));
+    TS_ASSERT_EQUALS(copied->getSpectrum(0).getSpectrumNo(), 99);
+    TS_ASSERT(copied->getSpectrum(0).hasDetectorID(999));
   }
 
   void testGetMemorySize() { TS_ASSERT_THROWS_NOTHING(ws->getMemorySize()); }
@@ -183,7 +187,7 @@ public:
 
   void testIsDistribution() {
     TS_ASSERT(!ws->isDistribution());
-    TS_ASSERT(ws->isDistribution(true));
+    ws->setDistribution(true);
     TS_ASSERT(ws->isDistribution());
   }
 
@@ -196,11 +200,8 @@ public:
   void testGetSpectrum() {
     WorkspaceTester ws;
     ws.initialize(4, 1, 1);
-    ISpectrum *spec = NULL;
-    TS_ASSERT_THROWS_NOTHING(spec = ws.getSpectrum(0));
-    TS_ASSERT(spec);
-    TS_ASSERT_THROWS_NOTHING(spec = ws.getSpectrum(3));
-    TS_ASSERT(spec);
+    TS_ASSERT_THROWS_NOTHING(ws.getSpectrum(0));
+    TS_ASSERT_THROWS_NOTHING(ws.getSpectrum(3));
   }
 
   /** Get a detector sptr for each spectrum */
@@ -222,16 +223,16 @@ public:
     }
 
     // Now a detector group
-    ISpectrum *spec = workspace->getSpectrum(0);
-    spec->addDetectorID(1);
-    spec->addDetectorID(2);
+    auto &spec = workspace->getSpectrum(0);
+    spec.addDetectorID(1);
+    spec.addDetectorID(2);
     IDetector_const_sptr det;
     TS_ASSERT_THROWS_NOTHING(det = workspace->getDetector(0));
     TS_ASSERT(det);
 
     // Now an empty (no detector) pixel
-    spec = workspace->getSpectrum(1);
-    spec->clearDetectorIDs();
+    auto &spec2 = workspace->getSpectrum(1);
+    spec2.clearDetectorIDs();
     IDetector_const_sptr det2;
     TS_ASSERT_THROWS_ANYTHING(det2 = workspace->getDetector(1));
     TS_ASSERT(!det2);
@@ -391,8 +392,8 @@ public:
     std::vector<int> spec;
     for (int i = 0; i < 100; i++) {
       // Give some funny numbers, so it is not the default
-      ws->getSpectrum(size_t(i))->setSpectrumNo(i * 11);
-      ws->getSpectrum(size_t(i))->setDetectorID(99 - i);
+      ws->getSpectrum(size_t(i)).setSpectrumNo(i * 11);
+      ws->getSpectrum(size_t(i)).setDetectorID(99 - i);
       spec.push_back(i);
     }
     // Save that to the NXS file
@@ -524,7 +525,7 @@ public:
     TS_ASSERT(!inst->isDetectorMasked(1));
     TS_ASSERT(!inst->isDetectorMasked(19));
     // Mask then check that it returns as masked
-    TS_ASSERT(ws->getSpectrum(19)->hasDetectorID(19));
+    TS_ASSERT(ws->getSpectrum(19).hasDetectorID(19));
     ws->maskWorkspaceIndex(19);
     TS_ASSERT(inst->isDetectorMasked(19));
   }
@@ -566,7 +567,7 @@ public:
     auto ws = makeWorkspaceWithDetectors(5, 1);
     TS_ASSERT_EQUALS(ws->hasGroupedDetectors(), false);
 
-    ws->getSpectrum(0)->addDetectorID(3);
+    ws->getSpectrum(0).addDetectorID(3);
     TS_ASSERT_EQUALS(ws->hasGroupedDetectors(), true);
   }
 
@@ -596,7 +597,7 @@ public:
       TS_ASSERT_EQUALS(idmap[i], i);
     }
 
-    ws->getSpectrum(2)->addDetectorID(99); // Set a second ID on one spectrum
+    ws->getSpectrum(2).addDetectorID(99); // Set a second ID on one spectrum
     TS_ASSERT_THROWS(ws->getDetectorIDToWorkspaceIndexMap(true),
                      std::runtime_error);
     detid2index_map idmap2 = ws->getDetectorIDToWorkspaceIndexMap();
@@ -633,9 +634,9 @@ public:
       Detector *det = new Detector("pixel", detid, inst.get());
       inst->add(det);
       inst->markAsDetector(det);
-      ws->getSpectrum(i)->addDetectorID(detid);
+      ws->getSpectrum(i).addDetectorID(detid);
     }
-    ws->getSpectrum(66)->clearDetectorIDs();
+    ws->getSpectrum(66).clearDetectorIDs();
 
     TS_ASSERT_THROWS_NOTHING(
         out = ws->getDetectorIDToWorkspaceIndexVector(offset));
@@ -1268,7 +1269,7 @@ public:
   */
   void testGetProperty_const_sptr() {
     const std::string wsName = "InputWorkspace";
-    MatrixWorkspace_sptr wsInput(new WorkspaceTester());
+    MatrixWorkspace_sptr wsInput = boost::make_shared<WorkspaceTester>();
     PropertyManagerHelper manager;
     manager.declareProperty(wsName, wsInput, Direction::Input);
 
@@ -1349,17 +1350,16 @@ public:
   }
 
 private:
-  Mantid::API::MantidImage_sptr createImage(size_t width, size_t height) {
-    auto image = new Mantid::API::MantidImage(height);
-    double value = 1.0;
-    for (auto row = image->begin(); row != image->end(); ++row) {
-      row->resize(width);
-      for (auto pixel = row->begin(); pixel != row->end();
-           ++pixel, value += 1.0) {
-        *pixel = value;
-      }
+  Mantid::API::MantidImage_sptr createImage(const size_t width,
+                                            const size_t height) {
+    auto image =
+        boost::make_shared<Mantid::API::MantidImage>(height, MantidVec(width));
+    double startingValue = 1.0;
+    for (auto &row : *image) {
+      std::iota(row.begin(), row.end(), startingValue);
+      startingValue += static_cast<double>(width);
     }
-    return Mantid::API::MantidImage_sptr(image);
+    return image;
   }
 
   boost::shared_ptr<MatrixWorkspace> ws;

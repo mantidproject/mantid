@@ -650,7 +650,7 @@ QLayout *AlgorithmDialog::createDefaultButtonLayout(
   m_okButton->setDefault(true);
 
   m_exitButton = new QPushButton(cancelText);
-  connect(m_exitButton, SIGNAL(clicked()), this, SLOT(close()));
+  connect(m_exitButton, SIGNAL(clicked()), this, SLOT(reject()));
 
   QHBoxLayout *buttonRowLayout = new QHBoxLayout;
   buttonRowLayout->addWidget(createHelpButton(helpText));
@@ -783,7 +783,7 @@ void AlgorithmDialog::executeAlgorithmAsync() {
     }
   } catch (Poco::NoThreadAvailableException &) {
     g_log.error() << "No thread was available to run the " << algToExec->name()
-                  << " algorithm in the background." << std::endl;
+                  << " algorithm in the background.\n";
   }
 }
 

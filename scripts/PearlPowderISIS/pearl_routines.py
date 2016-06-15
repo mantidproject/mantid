@@ -40,16 +40,16 @@ def PEARL_startup(usern="matt", thiscycle='11_1'):
     # currentdatadir="X:\data\cycle_11_1\\"
 
     # directory where the files are going to be found
-    pearl_file_dir = "P:\Mantid\\"
+    pearl_file_dir = "P:\Mantid\\Calibration\\"
     currentdatadir = "I:\\"
     livedatadir = "I:\\"
     # calfile="C:\PEARL\\pearl_offset_11_2.cal"
-    calfile = pearl_file_dir + "Calibration\\pearl_offset_11_2.cal"
-    groupfile = pearl_file_dir + "Calibration\\pearl_group_11_2_TT88.cal"
-    # groupfile=pearl_file_dir + "Calibration\\test_cal_group_mods_11_1.cal"
-    vabsorbfile = pearl_file_dir + "Calibration\\pearl_absorp_sphere_10mm_newinst_long.nxs"
-    vanfile = pearl_file_dir + "Calibration\\van_spline_all_cycle_11_1.nxs"
-    attenfile = pearl_file_dir + "Attentuation\\PRL985_WC_HOYBIDE_NK_10MM_FF.OUT"
+    calfile = pearl_file_dir + "pearl_offset_11_2.cal"
+    groupfile = pearl_file_dir + "pearl_group_11_2_TT88.cal"
+    # groupfile=pearl_file_dir + "test_cal_group_mods_11_1.cal"
+    vabsorbfile = pearl_file_dir + "pearl_absorp_sphere_10mm_newinst_long.nxs"
+    vanfile = pearl_file_dir + "van_spline_all_cycle_11_1.nxs"
+    attenfile = "P:\Mantid\\Attentuation\\PRL985_WC_HOYBIDE_NK_10MM_FF.OUT"
     mode = "all"
     tt_mode = "TT88"
     tofbinning = "1500,-0.0006,19900"
@@ -875,6 +875,9 @@ def PEARL_createvan(van, empty, ext="raw", fmode="all", ttmode="TT88",
     mode = fmode
     tt_mode = ttmode
 
+    # tt_mode set here will not be used within the function but instead when the PEARL_calibfiles()
+    # is called it will return the correct tt_mode files.
+
     PEARL_getcycle(van)
     PEARL_getcalibfiles()
     wvan = "wvan"
@@ -1164,7 +1167,8 @@ def PEARL_createvan(van, empty, ext="raw", fmode="all", ttmode="TT88",
     return
 
 
-def PEARL_createcal(calruns, noffsetfile="C:\PEARL\\pearl_offset_11_2.cal"):
+def PEARL_createcal(calruns, noffsetfile="C:\PEARL\\pearl_offset_11_2.cal",
+                    groupfile="P:\Mantid\\Calibration\\pearl_group_11_2_TT88.cal"):
     PEARL_getcycle(calruns)
 
     print "Instrument version is ", instver
@@ -1254,6 +1258,8 @@ def PEARL_createcal_Si(calruns, noffsetfile="C:\PEARL\\pearl_offset_11_2.cal"):
 
 
 def PEARL_creategroup(calruns, ngroupfile="C:\PEARL\\test_cal_group_11_1.cal", ngroup="bank1,bank2,bank3,bank4"):
+    PEARL_getcycle(calruns)
+
     wcal = "cal_raw"
     PEARL_read(calruns, "raw", wcal)
     ConvertUnits(InputWorkspace=wcal, OutputWorkspace="cal_inD", Target="dSpacing")

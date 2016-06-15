@@ -10,6 +10,7 @@
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 #include "MantidAPI/AlgorithmManager.h"
+#include <Poco/File.h>
 #include <cxxtest/TestSuite.h>
 
 using namespace Mantid;
@@ -17,6 +18,35 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::MDAlgorithms;
+
+namespace {
+Mantid::API::MatrixWorkspace_sptr createTestWorkspaces() {
+  auto sim_alg = Mantid::API::AlgorithmManager::Instance().createUnmanaged(
+      "CreateSimulationWorkspace");
+  sim_alg->initialize();
+  sim_alg->setChild(true);
+  sim_alg->setPropertyValue("Instrument", "MAR");
+  sim_alg->setPropertyValue("BinParams", "-3,1,3");
+  sim_alg->setPropertyValue("UnitX", "DeltaE");
+  sim_alg->setPropertyValue("OutputWorkspace", "data_source_1");
+  sim_alg->execute();
+
+  Mantid::API::MatrixWorkspace_sptr ws =
+      sim_alg->getProperty("OutputWorkspace");
+
+  auto log_alg =
+      Mantid::API::AlgorithmManager::Instance().create("AddSampleLog");
+  log_alg->initialize();
+  log_alg->setChild(true);
+  log_alg->setProperty("Workspace", ws);
+  log_alg->setPropertyValue("LogName", "Ei");
+  log_alg->setPropertyValue("LogText", "3.0");
+  log_alg->setPropertyValue("LogType", "Number");
+  log_alg->execute();
+
+  return ws;
+}
+}
 
 class Convert2AnyTestHelper : public ConvertToMD {
 public:
@@ -52,7 +82,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(pAlg->initialize())
     TS_ASSERT(pAlg->isInitialized())
 
-    TSM_ASSERT_EQUALS("algorithm should have 23 properties", 23,
+    TSM_ASSERT_EQUALS("algorithm should have 25 properties", 25,
                       (size_t)(pAlg->getProperties().size()));
   }
 
@@ -412,6 +442,84 @@ public:
   }
   ~ConvertToMDTest() override {
     AnalysisDataService::Instance().remove("testWSProcessed");
+  }
+
+  void test_execute_filebackend() {
+    // Arrange
+    std::string file_name = "convert_to_md_test_file.nxs";
+    if (Poco::File(file_name).exists())
+      Poco::File(file_name).remove();
+    {
+      auto test_workspace = createTestWorkspaces();
+      Algorithm_sptr min_max_alg = AlgorithmManager::Instance().createUnmanaged(
+          "ConvertToMDMinMaxGlobal");
+      min_max_alg->initialize();
+      min_max_alg->setChild(true);
+      min_max_alg->setProperty("InputWorkspace", test_workspace);
+      min_max_alg->setProperty("QDimensions", "Q3D");
+      min_max_alg->setProperty("dEAnalysisMode", "Direct");
+      min_max_alg->executeAsChildAlg();
+      std::string min_values = min_max_alg->getPropertyValue("MinValues");
+      std::string max_values = min_max_alg->getPropertyValue("MaxValues");
+
+      Algorithm_sptr convert_alg =
+          AlgorithmManager::Instance().createUnmanaged("ConvertToMD");
+      convert_alg->initialize();
+      convert_alg->setChild(true);
+      convert_alg->setProperty("InputWorkspace", test_workspace);
+      convert_alg->setProperty("QDimensions", "Q3D");
+      convert_alg->setProperty("QConversionScales", "HKL");
+      convert_alg->setProperty("dEAnalysisMode", "Direct");
+      convert_alg->setPropertyValue("MinValues", min_values);
+      convert_alg->setPropertyValue("MaxValues", max_values);
+
+      // Act
+      convert_alg->setProperty("Filename", file_name);
+      convert_alg->setProperty("FileBackEnd", true);
+      convert_alg->setProperty("OutputWorkspace", "blank");
+      TS_ASSERT_THROWS_NOTHING(convert_alg->execute());
+      Mantid::API::IMDEventWorkspace_sptr out_ws =
+          convert_alg->getProperty("OutputWorkspace");
+
+      // Asssert
+      file_name = out_ws->getBoxController()->getFilename();
+
+      auto load_alg = AlgorithmManager::Instance().createUnmanaged("LoadMD");
+      load_alg->initialize();
+      load_alg->setChild(true);
+      load_alg->setProperty("Filename", file_name);
+      load_alg->setProperty("FileBackEnd", true);
+      load_alg->setProperty("OutputWorkspace", "blank");
+      TS_ASSERT_THROWS_NOTHING(load_alg->execute());
+      Mantid::API::IMDWorkspace_sptr reference_out_ws =
+          load_alg->getProperty("OutputWorkspace");
+      // Make sure that the output workspaces exist
+      TS_ASSERT(out_ws);
+      TS_ASSERT(reference_out_ws);
+      auto ws_cast =
+          boost::dynamic_pointer_cast<Mantid::API::IMDHistoWorkspace_sptr>(
+              reference_out_ws);
+
+      // Compare the loaded and original workspace
+      auto compare_alg =
+          Mantid::API::AlgorithmManager::Instance().createUnmanaged(
+              "CompareMDWorkspaces");
+      compare_alg->setChild(true);
+      compare_alg->initialize();
+      compare_alg->setProperty("Workspace1", out_ws);
+      compare_alg->setProperty("Workspace2", reference_out_ws);
+      compare_alg->setProperty("Tolerance", 0.00001);
+      compare_alg->setProperty("CheckEvents", true);
+      compare_alg->setProperty("IgnoreBoxID", true);
+      TS_ASSERT_THROWS_NOTHING(compare_alg->execute());
+      bool is_equal = compare_alg->getProperty("Equals");
+      TS_ASSERT(is_equal);
+    }
+
+    // Remove the file
+    if (Poco::File(file_name).exists()) {
+      Poco::File(file_name).remove();
+    }
   }
 
 private:

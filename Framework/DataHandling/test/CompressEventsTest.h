@@ -85,8 +85,8 @@ public:
     TS_ASSERT_EQUALS(output->getEventType(), WEIGHTED_NOTIME);
 
     // Check an event to see if it makes sense
-    if (output->getEventList(0).getNumberEvents() > 0) {
-      WeightedEvent ev = output->getEventList(0).getEvent(0);
+    if (output->getSpectrum(0).getNumberEvents() > 0) {
+      WeightedEvent ev = output->getSpectrum(0).getEvent(0);
       TS_ASSERT_DELTA(ev.weight(), 2.0, 1e-6);
       TS_ASSERT_DELTA(ev.errorSquared(), 2.0, 1e-6);
       TS_ASSERT_DELTA(ev.tof(), 0.5, 1e-6);
@@ -96,7 +96,7 @@ public:
     TS_ASSERT_EQUALS(output->readX(0).size(), 101);
     // Y and E values are the same
     TS_ASSERT_DELTA(output->readY(0)[1], 2.0, 1e-5);
-    TS_ASSERT_DELTA(output->readE(0)[1], sqrt(2.0), 1e-5);
+    TS_ASSERT_DELTA(output->readE(0)[1], M_SQRT2, 1e-5);
     TS_ASSERT_EQUALS(output->YUnit(), input->YUnit());
     TS_ASSERT_EQUALS(output->getAxis(0)->unit(), input->getAxis(0)->unit());
     TS_ASSERT_EQUALS(output->getAxis(1)->unit(), input->getAxis(1)->unit());

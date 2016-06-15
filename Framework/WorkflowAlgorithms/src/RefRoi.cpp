@@ -143,8 +143,7 @@ void RefRoi::extract2D() {
     // Check that the X-axis is in wavelength units
     const std::string unit = inputWS->getAxis(0)->unit()->caption();
     if (Poco::icompare(unit, "Wavelength") != 0) {
-      g_log.error() << "RefRoi expects units of wavelength to convert to Q"
-                    << std::endl;
+      g_log.error() << "RefRoi expects units of wavelength to convert to Q\n";
       throw std::runtime_error(
           "RefRoi expects units of wavelength to convert to Q");
     }
@@ -156,7 +155,7 @@ void RefRoi::extract2D() {
     outputWS->getAxis(0)->unit() =
         UnitFactory::Instance().create("MomentumTransfer");
     outputWS->setYUnitLabel("Reflectivity");
-    outputWS->isDistribution(true);
+    outputWS->setDistribution(true);
   } else {
     XOut0 = inputWS->readX(0);
   }

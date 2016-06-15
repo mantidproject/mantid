@@ -47,14 +47,14 @@ public:
         "CorelliCrossCorrelateTest_OutputWS");
 
     DateAndTime startTime("2007-11-30T16:17:00");
-    EventList *evlist = ws->getEventListPtr(0);
+    auto &evlist = ws->getSpectrum(0);
 
     // Add some events to the workspace.
-    evlist->addEventQuickly(TofEvent(10.0, startTime + 0.007));
-    evlist->addEventQuickly(TofEvent(100.0, startTime + 0.012));
-    evlist->addEventQuickly(TofEvent(1000.0, startTime + 0.012));
-    evlist->addEventQuickly(TofEvent(10000.0, startTime + 0.012));
-    evlist->addEventQuickly(TofEvent(1222.0, startTime + 0.03));
+    evlist.addEventQuickly(TofEvent(10.0, startTime + 0.007));
+    evlist.addEventQuickly(TofEvent(100.0, startTime + 0.012));
+    evlist.addEventQuickly(TofEvent(1000.0, startTime + 0.012));
+    evlist.addEventQuickly(TofEvent(10000.0, startTime + 0.012));
+    evlist.addEventQuickly(TofEvent(1222.0, startTime + 0.03));
 
     ws->getAxis(0)->setUnit("TOF");
 
@@ -94,7 +94,7 @@ public:
     if (!ws)
       return;
 
-    std::vector<WeightedEvent> &events = evlist->getWeightedEvents();
+    std::vector<WeightedEvent> &events = evlist.getWeightedEvents();
 
     TS_ASSERT_DELTA(events[0].weight(), -1.99392, 0.00001)
     TS_ASSERT_DELTA(events[1].weight(), -1.99392, 0.00001)

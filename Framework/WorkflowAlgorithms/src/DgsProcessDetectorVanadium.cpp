@@ -1,7 +1,7 @@
 #include "MantidWorkflowAlgorithms/DgsProcessDetectorVanadium.h"
 #include "MantidWorkflowAlgorithms/WorkflowAlgorithmHelpers.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/PropertyManagerDataService.h"
+#include "MantidKernel/PropertyManagerDataService.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
@@ -73,7 +73,7 @@ void DgsProcessDetectorVanadium::init() {
 /** Execute the algorithm.
  */
 void DgsProcessDetectorVanadium::exec() {
-  g_log.notice() << "Starting DgsProcessDetectorVanadium" << std::endl;
+  g_log.notice() << "Starting DgsProcessDetectorVanadium\n";
   // Get the reduction property manager
   const std::string reductionManagerName =
       this->getProperty("ReductionProperties");

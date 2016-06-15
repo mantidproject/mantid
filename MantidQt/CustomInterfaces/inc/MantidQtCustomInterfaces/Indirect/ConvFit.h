@@ -46,7 +46,6 @@ private slots:
   void fitFunctionSelected(const QString &);
   void algorithmComplete(bool error);
 
-
 private:
   boost::shared_ptr<Mantid::API::CompositeFunction>
   createFunction(bool tieCentres = false);
@@ -83,7 +82,6 @@ private:
 
   // Used in auto generating defaults for parameters
   QStringList m_defaultParams;
-
 };
 } // namespace IDA
 } // namespace CustomInterfaces

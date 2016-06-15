@@ -41,7 +41,7 @@ void addPropertyWithUnit(Run &self, const std::string &name,
       Mantid::PythonInterface::Registry::PropertyWithValueFactory::create(
           name, value, Mantid::Kernel::Direction::Input);
   property->setUnits(units);
-  self.addProperty(property, replace);
+  self.addProperty(std::move(property), replace);
 }
 
 /**

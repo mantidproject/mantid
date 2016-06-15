@@ -1,4 +1,4 @@
-.. _Facilities File:
+.. _Reduction for ORNL SANS:
 
 .. role:: xml(literal)
    :class: highlight
@@ -41,6 +41,7 @@ Reduction script
 ----------------
 
 .. code-block:: python
+
   import mantid
   from mantid.simpleapi import *
   from reduction_workflow.instruments.sans.hfir_command_interface import *
@@ -187,8 +188,9 @@ Dark current subtraction
 Pixel masking
 ^^^^^^^^^^^^^
 
-``Mask(nx_low=0, nx_high=0, ny_low=0, ny_high=0)``
+``Mask(nx_low=0, nx_high=0, ny_low=0, ny_high=0, component_name=None)``
     A band of pixels on each side of the detector is masked according to the input parameters.
+    By default this is done only for the main detector (See IDF tag 'detector-name'). For Biosans one can specify 'component_name="wing_detector"'.
 
 ``MaskRectangle(x_min, x_max, y_min, y_max)``
     Masks a rectangular region on the detector defined by the given pixel numbers.
@@ -198,6 +200,9 @@ Pixel masking
 
 ``MaskDetectorSide(side_to_mask=None)``
     Masks a detector plane. Choices are 'Front', 'Back', and 'None'. 
+
+``MaskComponent(component_name)``
+    Masks the given component_name. See the instrument IDF for the correct component name. Useful for BIOSANS to mask the 'wing_detector'.
 
 
 .. _`Sensitivity correction`:
@@ -241,7 +246,7 @@ Sensitivity correction
 Solid angle correction
 ^^^^^^^^^^^^^^^^^^^^^^
 
-``SolidAngle(detector_tubes=False)``
+``SolidAngle(detector_tubes=False, detector_wing=False)``
     Tells the reducer to apply the solid angle correction. The solid angle correction is applied as follows:
 
         :math:`I'(x,y) = \frac{I(x,y)}{\cos^3(2\theta)}`
@@ -253,6 +258,8 @@ Solid angle correction
         :math:`\cos^3(2\theta) \rightarrow \cos^2(2\theta) \cos(\alpha)`
 
     where :math:`\alpha`: is the angle between the sample-to-pixel vector and its projection on the X-Z plane.
+
+    ``detector_wing=True`` is used only for BioSANS wing detector.
     
 .. figure:: /images/sans_solid_angle_correction.png
    :figwidth: 10 cm

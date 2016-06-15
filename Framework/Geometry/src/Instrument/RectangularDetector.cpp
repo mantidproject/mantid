@@ -76,9 +76,8 @@ RectangularDetector::RectangularDetector(const std::string &n,
 }
 
 bool RectangularDetector::compareName(const std::string &proposedMatch) {
-  boost::regex exp(
-      "(RectangularDetector)|(rectangularDetector)|(rectangulardetector)|"
-      "(rectangular_detector)");
+  static const boost::regex exp("RectangularDetector|rectangularDetector|"
+                                "rectangulardetector|rectangular_detector");
 
   return boost::regex_match(proposedMatch, exp);
 }
@@ -736,8 +735,8 @@ const boost::shared_ptr<const Object> RectangularDetector::shape() const {
  */
 std::ostream &operator<<(std::ostream &os, const RectangularDetector &ass) {
   ass.printSelf(os);
-  os << "************************" << std::endl;
-  os << "Number of children :" << ass.nelements() << std::endl;
+  os << "************************\n";
+  os << "Number of children :" << ass.nelements() << '\n';
   ass.printChildren(os);
   return os;
 }

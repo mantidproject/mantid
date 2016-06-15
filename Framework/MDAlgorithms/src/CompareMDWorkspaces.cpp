@@ -20,7 +20,6 @@ class CompareFailsException : public std::runtime_error {
 public:
   explicit CompareFailsException(const std::string &msg)
       : std::runtime_error(msg) {}
-  ~CompareFailsException() throw() override {}
   std::string getMessage() const { return this->what(); }
 };
 
@@ -356,7 +355,7 @@ void CompareMDWorkspaces::exec() {
   this->doComparison();
 
   if (m_result != "") {
-    g_log.notice() << "The workspaces did not match: " << m_result << std::endl;
+    g_log.notice() << "The workspaces did not match: " << m_result << '\n';
     this->setProperty("Equals", false);
   } else {
     m_result = "Success!";

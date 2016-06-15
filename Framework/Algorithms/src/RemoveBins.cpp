@@ -259,7 +259,7 @@ void RemoveBins::transformRangeUnit(const int &index, double &startX,
   }
 
   g_log.debug() << "For index " << index << ", X range given corresponds to "
-                << startX << "-" << endX << " in workspace's unit" << std::endl;
+                << startX << "-" << endX << " in workspace's unit\n";
   return;
 }
 
@@ -297,7 +297,7 @@ void RemoveBins::calculateDetectorPosition(const int &index, double &l1,
     twoTheta = 0.0;
   }
   g_log.debug() << "Detector for index " << index << " has L1+L2=" << l1 + l2
-                << " & 2theta= " << twoTheta << std::endl;
+                << " & 2theta= " << twoTheta << '\n';
   return;
 }
 

@@ -2,9 +2,9 @@
 #include "MantidCurveFitting/CostFunctions/CostFuncLeastSquares.h"
 #include "MantidCurveFitting//Constraints/BoundaryConstraint.h"
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <time.h>
+#include <cstdio>
+#include <cstdlib>
+#include <ctime>
 
 #include "MantidAPI/CostFunctionFactory.h"
 #include "MantidAPI/FuncMinimizerFactory.h"
@@ -22,6 +22,7 @@
 
 #include <boost/random/normal_distribution.hpp>
 #include <boost/random/uniform_real.hpp>
+#include <boost/random/variate_generator.hpp>
 #include <boost/random/mersenne_twister.hpp>
 #include <boost/version.hpp>
 #include <boost/math/special_functions/fpclassify.hpp>
@@ -113,7 +114,7 @@ void FABADAMinimizer::initialize(API::ICostFunction_sptr function,
   if (m_numberIterations > maxIterations) {
     g_log.warning()
         << "MaxIterations property reduces the required number of iterations ("
-        << m_numberIterations << ")." << std::endl;
+        << m_numberIterations << ").\n";
     m_numberIterations = maxIterations;
   }
 
@@ -307,8 +308,7 @@ bool FABADAMinimizer::iterate(size_t) {
         API::IFunction_sptr fun = m_leastSquares->getFittingFunction();
         g_log.warning()
             << "Wrong convergence for parameter " + fun->parameterName(i) +
-                   ". Try to set a proper initial value for this parameter"
-            << std::endl;
+                   ". Try to set a proper initial value for this parameter\n";
       }
     }
 
@@ -368,8 +368,7 @@ bool FABADAMinimizer::iterate(size_t) {
       }
       failed.replace(failed.end() - 2, failed.end(), ".");
       throw std::runtime_error(
-          "Convegence NOT reached after " +
-          boost::lexical_cast<std::string>(m_max_iter) +
+          "Convegence NOT reached after " + std::to_string(m_max_iter) +
           " iterations.\n   Try to set better initial values for parameters: " +
           failed);
     }

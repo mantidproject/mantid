@@ -17,7 +17,7 @@ namespace CustomInterfaces {
 namespace IDA {
 
 JumpFit::JumpFit(QWidget *parent)
-    : IndirectDataAnalysisTab(parent), m_jfTree(NULL) {
+    : IndirectDataAnalysisTab(parent), m_jfTree(nullptr), m_plotResult(false) {
   m_uiForm.setupUi(parent);
 }
 

@@ -198,7 +198,7 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
     _output_ws_name = None
     _sample_runs = None
     _vanadium_runs = None
-    _container_file = None
+    _container_files = None
     _container_scale_factor = None
     _sam_ws_map = None
     _van_ws_map = None
@@ -227,8 +227,8 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
         self.declareProperty(StringArrayProperty('Vanadium'),
                              doc=runs_desc)
 
-        self.declareProperty('Container', '',
-                             doc='Run for the container')
+        self.declareProperty(StringArrayProperty('Container'),
+                             doc=runs_desc)
 
         self.declareProperty('ContainerScaleFactor', 1.0,
                              doc='Factor by which to scale the container')
@@ -263,7 +263,7 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
         self._van_ws_map = DRangeToWorkspaceMap()
 
 
-    def PyExec(self):
+    def _get_properties(self):
         self._load_logs = self.getProperty('LoadLogFiles').value
         self._cal = self.getProperty("CalFile").value
         self._output_ws_name = self.getPropertyValue("OutputWorkspace")
@@ -271,11 +271,11 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
         self._sample_runs = self._find_runs(self.getProperty("Sample").value)
         self._vanadium_runs = self._find_runs(self.getProperty("Vanadium").value)
 
-        self._container_file = self.getPropertyValue("Container")
+        self._container_files = self.getProperty("Container").value
         self._container_scale_factor = self.getProperty("ContainerScaleFactor").value
 
-        if self._container_file != '':
-            self._container_file = self._find_runs([self._container_file])[0]
+        if self._container_files:
+            self._container_files = self._find_runs(self._container_files)
 
         self._spec_min = self.getPropertyValue("SpectraMin")
         self._spec_max = self.getPropertyValue("SpectraMax")
@@ -284,11 +284,27 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
         if not self.getProperty("DetectDRange").value:
             self._man_d_range = self.getProperty("DRange").value - 1
 
-        self.execDiffOnly()
+
+    def validateInputs(self):
+        self._get_properties()
+        issues = dict()
+
+        num_samples = len(self._sample_runs)
+        num_vanadium = len(self._vanadium_runs)
+        if num_samples != num_vanadium:
+            run_num_mismatch = 'You must input the same number of sample and vanadium runs'
+            issues['Sample'] = run_num_mismatch
+            issues['Vanadium'] = run_num_mismatch
+        if self._container_files:
+            num_containers = len(self._container_files)
+            if num_samples != num_containers:
+                issues['Container'] = 'You must input the same number of sample and container runs'
+
+        return issues
 
 
     #pylint: disable=too-many-branches
-    def execDiffOnly(self):
+    def PyExec(self):
         """
         Execute the algorithm in diffraction-only mode
         """
@@ -301,36 +317,38 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
                  LoadLogFiles=self._load_logs)
 
         # Load the container run
-        if self._container_file != '':
-            container = Load(Filename=self._container_file,
-                             OutputWorkspace='__container',
-                             SpectrumMin=self._spec_min,
-                             SpectrumMax=self._spec_max,
-                             LoadLogFiles=self._load_logs)
+        if self._container_files:
+            for container in self._container_files:
+                Load(Filename=container,
+                     OutputWorkspace=container,
+                     SpectrumMin=self._spec_min,
+                     SpectrumMax=self._spec_max,
+                     LoadLogFiles=self._load_logs)
 
-            # Scale the container run if required
-            if self._container_scale_factor != 1.0:
-                Scale(InputWorkspace=container,
-                      OutputWorkspace=container,
-                      Factor=self._container_scale_factor,
-                      Operation='Multiply')
+                # Scale the container run if required
+                if self._container_scale_factor != 1.0:
+                    Scale(InputWorkspace=container,
+                          OutputWorkspace=container,
+                          Factor=self._container_scale_factor,
+                          Operation='Multiply')
 
         # Add the sample workspaces to the dRange to sample map
-        for sam in self._sample_runs:
-            if self._container_file != '':
-                Minus(LHSWorkspace=sam,
-                      RHSWorkspace=container,
-                      OutputWorkspace=sam)
+        for idx in range(len(self._sample_runs)):
+            if self._container_files:
+                Minus(LHSWorkspace=self._sample_runs[idx],
+                      RHSWorkspace=self._container_files[idx],
+                      OutputWorkspace=self._sample_runs[idx])
 
-            self._sam_ws_map.addWs(sam)
+            self._sam_ws_map.addWs(self._sample_runs[idx])
 
         # Add the vanadium workspaces to the dRange to vanadium map
         for van in self._vanadium_runs:
             self._van_ws_map.addWs(van)
 
         # Finished with container now so delete it
-        if self._container_file != '':
-            DeleteWorkspace(container)
+        if self._container_files:
+            for container in self._container_files:
+                DeleteWorkspace(container)
 
         # Check to make sure that there are corresponding vanadium files with the same DRange for each sample file.
         for d_range in self._sam_ws_map.getMap().iterkeys():

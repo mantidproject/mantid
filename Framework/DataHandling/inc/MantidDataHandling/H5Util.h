@@ -5,6 +5,7 @@
 
 #include <string>
 #include <vector>
+#include <map>
 
 // forward declarations
 namespace H5 {
@@ -69,12 +70,17 @@ MANTID_DATAHANDLING_DLL H5::Group createGroupNXS(H5::Group &group,
 MANTID_DATAHANDLING_DLL H5::DSetCreatPropList
 setCompressionAttributes(const std::size_t length, const int deflateLevel = 6);
 
-MANTID_DATAHANDLING_DLL void writeStrAttribute(H5::Group &location,
-                                               const std::string &name,
-                                               const std::string &value);
+template <typename LocationType>
+void writeStrAttribute(LocationType &location, const std::string &name,
+                       const std::string &value);
 
 MANTID_DATAHANDLING_DLL void write(H5::Group &group, const std::string &name,
                                    const std::string &value);
+
+MANTID_DATAHANDLING_DLL void
+writeWithStrAttributes(H5::Group &group, const std::string &name,
+                       const std::string &value,
+                       const std::map<std::string, std::string> &attributes);
 
 template <typename NumT>
 void writeArray1D(H5::Group &group, const std::string &name,
@@ -87,6 +93,10 @@ MANTID_DATAHANDLING_DLL std::string readString(H5::Group &group,
                                                const std::string &name);
 
 MANTID_DATAHANDLING_DLL std::string readString(H5::DataSet &dataset);
+
+template <typename LocationType>
+std::string readAttributeAsString(LocationType &dataset,
+                                  const std::string &attributeName);
 
 template <typename NumT>
 std::vector<NumT> readArray1DCoerce(H5::Group &group, const std::string &name);

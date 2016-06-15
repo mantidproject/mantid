@@ -6,8 +6,8 @@
 //-----------------------------------------------------------------------------
 #include "MantidGeometry/DllConfig.h"
 #include "MantidKernel/V2D.h"
-#include <deque>
 #include <iosfwd>
+#include <vector>
 
 namespace Mantid {
 namespace Geometry {
@@ -53,7 +53,7 @@ class MANTID_GEOMETRY_DLL ConvexPolygon {
 
 public:
   /// Type of the point list
-  typedef std::deque<Kernel::V2D> Vertices;
+  using Vertices = std::vector<Kernel::V2D>;
 
   //-----------------------------------------------------------------
   // Forward directional iterator inner class
@@ -86,13 +86,8 @@ public:
   ConvexPolygon();
   /// Construct a polygon from a collection of points
   ConvexPolygon(const Vertices &vertices);
-  /// Copy constructor
-  ConvexPolygon(const ConvexPolygon &rhs);
-  /// Copy-assignment operator
-  ConvexPolygon &operator=(const ConvexPolygon &rhs);
   /// Destructor
   virtual ~ConvexPolygon() = default;
-
   /// Check if polygon is valid
   bool isValid() const;
   /// Clears all points
@@ -133,9 +128,6 @@ private:
   /// Compute the area of a triangle given by 3 points
   double triangleArea(const Kernel::V2D &a, const Kernel::V2D &b,
                       const Kernel::V2D &c) const;
-
-  // Points of the polygon
-  Vertices m_vertices;
   /// Lowest X value
   double m_minX;
   /// Highest X value
@@ -144,6 +136,8 @@ private:
   double m_minY;
   /// Highest Y value
   double m_maxY;
+  // Points of the polygon
+  Vertices m_vertices;
 };
 
 /// Print a polygon to a stream

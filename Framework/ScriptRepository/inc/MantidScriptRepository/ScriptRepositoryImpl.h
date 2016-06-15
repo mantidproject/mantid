@@ -108,13 +108,13 @@ public:
               const std::string &author, const std::string &email) override;
 
   /* Return true if there is a local repository installed*/
-  bool isValid(void) override;
+  bool isValid() override;
 
-  std::vector<std::string> check4Update(void) override;
+  std::vector<std::string> check4Update() override;
 
   void setIgnorePatterns(const std::string &patterns) override;
 
-  std::string ignorePatterns(void) override;
+  std::string ignorePatterns() override;
 
   int setAutoUpdate(const std::string &input_path, bool option = true) override;
 
