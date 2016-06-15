@@ -387,6 +387,13 @@ public:
   virtual std::string fittingPeaksData() const = 0;
 
   /**
+  * Sets the peak list according to the QString given
+  *
+  * @param peakList list of expected peaks to be fitted as QString
+  */
+  virtual void setPeakList(QString peakList) const = 0;
+
+  /**
   * Splits the file name in to sections of '_' and 'ENGINX' text
   * within the filename
   *
@@ -574,6 +581,7 @@ public:
   virtual void plotReplacingWindow(const std::string &wsName,
                                    const std::string &spectrum,
                                    const std::string &type) = 0;
+
 };
 
 } // namespace CustomInterfaces

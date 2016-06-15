@@ -906,10 +906,7 @@ std::string EnggDiffractionPresenter::validateFittingexpectedPeaks(
         ++j;
       }
     }
-  }
 
-  // check if empty again as list is modified above
-  if (!expectedPeaks.empty()) {
     size_t strLength = expectedPeaks.length() - 1;
     if (expectedPeaks.at(size_t(0)) == ',') {
       expectedPeaks.erase(size_t(0), 1);
