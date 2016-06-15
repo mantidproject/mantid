@@ -339,8 +339,8 @@ void ExtractSpectra::execEvent() {
       outEL.setX(XValues_new.cowData());
       if (hasDx) {
         auto &oldDx = m_inputWorkspace->dx(i);
-        outEL.setBinEdgeStandardDeviations(
-            oldDx.begin() + m_minX, oldDx.begin() + m_maxX - m_histogram);
+        outEL.setCountStandardDeviations(oldDx.begin() + m_minX,
+                                         oldDx.begin() + m_maxX - m_histogram);
       }
     }
 

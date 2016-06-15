@@ -110,22 +110,12 @@ public:
   }
 
   HistogramData::BinEdges binEdges() const { return histogramRef().binEdges(); }
-  HistogramData::BinEdgeStandardDeviations binEdgeStandardDeviations() const {
-    return histogramRef().binEdgeStandardDeviations();
-  }
   HistogramData::Points points() const { return histogramRef().points(); }
   HistogramData::PointStandardDeviations pointStandardDeviations() const {
     return histogramRef().pointStandardDeviations();
   }
   template <typename... T> void setBinEdges(T &&... data) & {
     mutableHistogramRef().setBinEdges(std::forward<T>(data)...);
-  }
-  template <typename... T> void setBinEdgeVariances(T &&... data) & {
-    mutableHistogramRef().setBinEdgeVariances(std::forward<T>(data)...);
-  }
-  template <typename... T> void setBinEdgeStandardDeviations(T &&... data) & {
-    mutableHistogramRef().setBinEdgeStandardDeviations(
-        std::forward<T>(data)...);
   }
   template <typename... T> void setPoints(T &&... data) & {
     // Check for the special case EventList, it only works with BinEdges.
