@@ -22,6 +22,7 @@ Jump Fit
 Improvements
 ------------
 
+* :ref:`LoadVesuvio <algm-LoadVesuvio>` now uses the whole TOF range for loaded monitor data (0-20000)
 
 Bugfixes
 --------
