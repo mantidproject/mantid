@@ -581,7 +581,6 @@ public:
   virtual void plotReplacingWindow(const std::string &wsName,
                                    const std::string &spectrum,
                                    const std::string &type) = 0;
-
 };
 
 } // namespace CustomInterfaces

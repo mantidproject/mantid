@@ -1467,7 +1467,7 @@ void EnggDiffractionViewQtGUI::plotSeparateWindow() {
 
 std::string EnggDiffractionViewQtGUI::fittingPeaksData() const {
 
-   return m_uiTabFitting.lineEdit_fitting_peaks->text().toStdString();
+  return m_uiTabFitting.lineEdit_fitting_peaks->text().toStdString();
 }
 
 void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::setPeakList(
