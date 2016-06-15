@@ -13,8 +13,10 @@ using Mantid::HistogramData::getHistogramXMode;
 using Mantid::HistogramData::Points;
 using Mantid::HistogramData::BinEdges;
 using Mantid::HistogramData::Counts;
+using Mantid::HistogramData::CountVariances;
 using Mantid::HistogramData::CountStandardDeviations;
 using Mantid::HistogramData::Frequencies;
+using Mantid::HistogramData::FrequencyVariances;
 using Mantid::HistogramData::FrequencyStandardDeviations;
 
 class HistogramTest : public CxxTest::TestSuite {
@@ -45,6 +47,48 @@ public:
   void test_construct_from_invalid_BinEdges() {
     BinEdges binEdges(1);
     TS_ASSERT_THROWS(Histogram{binEdges}, std::logic_error);
+  }
+
+  void test_construct_Points_Counts() {
+    TS_ASSERT_THROWS_NOTHING(
+        Histogram src(Points{0.1, 0.2, 0.4}, Counts{1, 2, 4}));
+  }
+
+  void test_construct_Points_Counts_CountVariances() {
+    TS_ASSERT_THROWS_NOTHING(
+        Histogram src(Points(2), Counts(2), CountVariances(2)));
+  }
+
+  void test_construct_Points_null_Counts_CountVariances() {
+    TS_ASSERT_THROWS_NOTHING(
+        Histogram src(Points(2), Counts(), CountVariances()));
+  }
+
+  void test_construct_values_size_mismatch() {
+    TS_ASSERT_THROWS(Histogram(Points(1), Counts(2)), std::logic_error);
+    TS_ASSERT_THROWS(Histogram(BinEdges(2), Counts(2)), std::logic_error);
+    TS_ASSERT_THROWS(Histogram(Points(1), Frequencies(2)), std::logic_error);
+    TS_ASSERT_THROWS(Histogram(BinEdges(2), Frequencies(2)), std::logic_error);
+  }
+
+  void test_construct_values_uncertainties_size_mismatch() {
+    TS_ASSERT_THROWS(Histogram(Points(2), Counts(2), CountVariances(1)),
+                     std::logic_error);
+    TS_ASSERT_THROWS(
+        Histogram(Points(2), Frequencies(2), FrequencyVariances(1)),
+        std::logic_error);
+  }
+
+  void test_construct_null_values_but_uncertainties_fail() {
+    TS_ASSERT_THROWS(Histogram(Points(2), Counts(), CountVariances(2)),
+                     std::logic_error);
+  }
+
+  void test_construct_Counts_automatic_errors() {
+    Histogram histogram(BinEdges(3), Counts{4.0, 9.0});
+    TS_ASSERT(histogram.sharedE());
+    TS_ASSERT_EQUALS(histogram.e()[0], 2.0);
+    TS_ASSERT_EQUALS(histogram.e()[1], 3.0);
   }
 
   void test_copy_constructor() {

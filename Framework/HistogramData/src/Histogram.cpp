@@ -137,6 +137,51 @@ void Histogram::setSharedDx(const Kernel::cow_ptr<HistogramDx> &Dx) & {
   m_dx = Dx;
 }
 
+template <> void Histogram::initX(const Points &x) {
+  m_xMode = XMode::Points;
+  m_x = x.cowData();
+}
+
+template <> void Histogram::initX(const BinEdges &x) {
+  m_xMode = XMode::BinEdges;
+  m_x = x.cowData();
+  if (m_x->size() == 1)
+    throw std::logic_error("Histogram: BinEdges size cannot be 1");
+}
+
+template <> void Histogram::initY(const Counts &y) {
+  if (y)
+    setCounts(y);
+}
+
+template <> void Histogram::initY(const Frequencies &y) {
+  if (y)
+    setFrequencies(y);
+}
+
+template <> void Histogram::setValues(const Counts &y) { setCounts(y); }
+
+template <> void Histogram::setValues(const Frequencies &y) {
+  setFrequencies(y);
+}
+
+template <> void Histogram::setUncertainties(const CountVariances &e) {
+  setCountVariances(e);
+}
+
+template <> void Histogram::setUncertainties(const CountStandardDeviations &e) {
+  setCountStandardDeviations(e);
+}
+
+template <> void Histogram::setUncertainties(const FrequencyVariances &e) {
+  setFrequencyVariances(e);
+}
+
+template <>
+void Histogram::setUncertainties(const FrequencyStandardDeviations &e) {
+  setFrequencyStandardDeviations(e);
+}
+
 template <> void Histogram::checkSize(const BinEdges &binEdges) const {
   size_t target = m_x->size();
   // 0 points -> 0 edges, otherwise edges are 1 more than points.

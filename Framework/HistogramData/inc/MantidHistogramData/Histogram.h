@@ -56,13 +56,10 @@ public:
   enum class XMode { BinEdges, Points };
   explicit Histogram(XMode mode)
       : m_x(Kernel::make_cow<HistogramX>(0)), m_xMode(mode) {}
-  explicit Histogram(const Points &points)
-      : m_x(points.cowData()), m_xMode(XMode::Points) {}
-  explicit Histogram(const BinEdges &edges)
-      : m_x(edges.cowData()), m_xMode(XMode::BinEdges) {
-    if (m_x->size() == 1)
-      throw std::logic_error("Histogram: BinEdges size cannot be 1");
-  }
+
+  template <class TX, class TY = Counts, class TE = CountVariances>
+  explicit Histogram(const TX &x, const TY &y = Counts(),
+                     const TE &e = CountVariances());
 
   // Copy and move need to be declared and defaulted, since we need to have the
   // lvalue reference qualifier on the assignment operators.
@@ -157,6 +154,11 @@ public:
   }
 
 private:
+  template <class TX> void initX(const TX &x);
+  template <class TY> void initY(const TY &y);
+  template <class TE> void initE(const TE &e);
+  template <class TY> void setValues(const TY &y);
+  template <class TE> void setUncertainties(const TE &e);
   template <class T> void checkSize(const T &data) const;
   template <class... T> bool selfAssignmentX(const T &...) { return false; }
   template <class... T> bool selfAssignmentDx(const T &...) { return false; }
@@ -167,6 +169,40 @@ private:
 
   XMode m_xMode;
 };
+
+template <class TX, class TY, class TE>
+Histogram::Histogram(const TX &x, const TY &y, const TE &e) {
+  initX(x);
+  initY(y);
+  initE(e);
+}
+
+template <> void Histogram::initX(const Points &x);
+template <> void Histogram::initX(const BinEdges &x);
+
+template <class TY> void Histogram::initY(const TY &y) {
+  if (y)
+    setValues(y);
+}
+
+template <class TE> void Histogram::initE(const TE &e) {
+  if (e) {
+    if (!m_y)
+      throw std::logic_error("Histogram: attempted to set uncertainties for "
+                             "histogram without data");
+    setUncertainties(e);
+  } else if (m_y) {
+    setCountVariances(m_y->rawData());
+  }
+}
+
+template <> void Histogram::setValues(const Counts &y);
+template <> void Histogram::setValues(const Frequencies &y);
+template <> void Histogram::setUncertainties(const CountVariances &e);
+template <> void Histogram::setUncertainties(const CountStandardDeviations &e);
+template <> void Histogram::setUncertainties(const FrequencyVariances &e);
+template <>
+void Histogram::setUncertainties(const FrequencyStandardDeviations &e);
 
 /** Sets the Histogram's bin edges.
 
