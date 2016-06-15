@@ -126,7 +126,6 @@ private:
 
 private slots:
   void on_actionSearch_triggered();
-  void on_actionHelp_triggered();
   void on_actionTransfer_triggered();
   void slitCalculatorTriggered();
   void icatSearchComplete();
