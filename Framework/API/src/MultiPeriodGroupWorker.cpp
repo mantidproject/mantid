@@ -203,7 +203,7 @@ bool MultiPeriodGroupWorker::processGroups(
   WorkspaceGroup_sptr outputWS = boost::make_shared<WorkspaceGroup>();
   AnalysisDataService::Instance().addOrReplace(outName, outputWS);
 
-  double progress_proportion = 1.0 / nPeriods;
+  double progress_proportion = 1.0 / static_cast<double>(nPeriods);
   // Loop through all the periods. Create spawned algorithms of the same type as
   // this to process pairs from the input groups.
   for (size_t i = 0; i < nPeriods; ++i) {
