@@ -6,6 +6,7 @@
 
 namespace Mantid {
 namespace HistogramData {
+class Histogram;
 class BinEdgeVariances;
 class BinEdgeStandardDeviations;
 class PointVariances;
