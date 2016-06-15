@@ -5,7 +5,6 @@ from mantid.kernel import *
 from mantid import config
 import os
 
-MICROEV_TO_MILLIEV = 1000.0
 DEFAULT_BINS = [-740, 1.6, 740]
 DEFAULT_QBINS = [0.4, 0.2, 3.8]
 DEFAULT_WRANGE = [6.24, 6.30]
@@ -81,7 +80,7 @@ class BASISReduction311(PythonAlgorithm):
         config['default.facility'] = "SNS"
         config['default.instrument'] = self._long_inst
         self._doIndiv = self.getProperty("DoIndividual").value
-        self._etBins = self.getProperty("EnergyBins").value / MICROEV_TO_MILLIEV
+        self._etBins = 1.E-03 * self.getProperty("EnergyBins").value  # micro-eV to mili-eV
         self._qBins = self.getProperty("MomentumTransferBins").value
         self._noMonNorm = self.getProperty("NoMonitorNorm").value
         self._maskFile = self.getProperty("MaskFile").value
