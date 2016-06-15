@@ -834,6 +834,7 @@ public:
     Histogram hist{BinEdges(0)};
     hist.setCountStandardDeviations(data1);
     TS_ASSERT_THROWS(hist.setSharedE(data2), std::logic_error);
+  }
 
   void test_setPointStandardDeviations_point_data() {
     Histogram hist(Points(2));

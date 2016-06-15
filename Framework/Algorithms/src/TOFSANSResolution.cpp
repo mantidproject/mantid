@@ -248,7 +248,7 @@ void TOFSANSResolution::exec() {
     TOFY[i] /= XNorm[i];
     ThetaY[i] /= XNorm[i];
   }
-  iqWS->histogram(0).setPointStandardDeviations(std::move(DxOut));
+  iqWS->setPointStandardDeviations(0, std::move(DxOut));
 }
 } // namespace Algorithms
 } // namespace Mantid
