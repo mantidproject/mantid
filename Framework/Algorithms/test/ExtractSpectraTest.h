@@ -458,7 +458,7 @@ private:
     ws->setInstrument(
         ComponentCreationHelper::createTestInstrumentCylindrical(1));
     for (size_t i = 0; i < ws->getNumberHistograms(); ++i) {
-      ws->getSpectrum(i)->setDetectorID(detid_t(i + 1));
+      ws->getSpectrum(i).setDetectorID(detid_t(i + 1));
     }
     return ws;
   }
@@ -487,7 +487,7 @@ private:
       ws = createInputWorkspaceHisto();
       for (size_t i = 0; i < ws->getNumberHistograms(); ++i) {
         // Create a detector for each spectra
-        ws->getSpectrum(i)->setDetectorID(static_cast<detid_t>(i + 1));
+        ws->getSpectrum(i).setDetectorID(static_cast<detid_t>(i + 1));
       }
     } else if (workspaceType == "event") {
       ws = createInputWorkspaceEvent();

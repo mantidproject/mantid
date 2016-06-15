@@ -18,17 +18,6 @@ namespace Algorithms {
 
 DECLARE_ALGORITHM(EditInstrumentGeometry)
 
-//----------------------------------------------
-//------------------------------------------------
-/** Constructor
- */
-EditInstrumentGeometry::EditInstrumentGeometry() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-EditInstrumentGeometry::~EditInstrumentGeometry() {}
-
 const std::string EditInstrumentGeometry::name() const {
   return "EditInstrumentGeometry";
 }
@@ -194,10 +183,9 @@ void EditInstrumentGeometry::exec() {
   {
     size_t numHist = workspace->getNumberHistograms();
     for (size_t i = 0; i < numHist; ++i) {
-      specids.push_back(workspace->getSpectrum(i)->getSpectrumNo());
+      specids.push_back(workspace->getSpectrum(i).getSpectrumNo());
       g_log.information() << "Add spectrum "
-                          << workspace->getSpectrum(i)->getSpectrumNo()
-                          << ".\n";
+                          << workspace->getSpectrum(i).getSpectrumNo() << ".\n";
     }
   }
 
@@ -338,27 +326,13 @@ void EditInstrumentGeometry::exec() {
     detector->setPos(pos);
 
     // Add new detector to spectrum and instrument
-    API::ISpectrum *spectrum = workspace->getSpectrum(i);
-    if (!spectrum) {
-      // Error!
-      delete detector;
+    auto &spectrum = workspace->getSpectrum(i);
+    // Good and do some debug output
+    g_log.debug() << "Orignal spectrum " << spectrum.getSpectrumNo() << "has "
+                  << spectrum.getDetectorIDs().size() << " detectors. \n";
 
-      stringstream errss;
-      errss << "Spectrum Number " << specids[i]
-            << " does not exist!  Skip setting "
-               "detector parameters to this "
-               "spectrum. ";
-      g_log.error(errss.str());
-      throw runtime_error(errss.str());
-    } else {
-      // Good and do some debug output
-      g_log.debug() << "Orignal spectrum " << spectrum->getSpectrumNo()
-                    << "has " << spectrum->getDetectorIDs().size()
-                    << " detectors. \n";
-    }
-
-    spectrum->clearDetectorIDs();
-    spectrum->addDetectorID(newdetid);
+    spectrum.clearDetectorIDs();
+    spectrum.addDetectorID(newdetid);
     instrument->add(detector);
     instrument->markAsDetector(detector);
 

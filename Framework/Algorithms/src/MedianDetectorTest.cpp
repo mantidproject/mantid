@@ -255,8 +255,7 @@ int MedianDetectorTest::maskOutliers(
     for (int j = 0; j < static_cast<int>(hists.size()); ++j) { // NOLINT
       const double value = countsWS->readY(hists[j])[0];
       if ((value == 0.) && checkForMask) {
-        const std::set<detid_t> &detids =
-            countsWS->getSpectrum(hists[j])->getDetectorIDs();
+        const auto &detids = countsWS->getSpectrum(hists[j]).getDetectorIDs();
         if (instrument->isDetectorMasked(detids)) {
           numFailed -= 1; // it was already masked
         }
@@ -333,8 +332,8 @@ int MedianDetectorTest::doDetectorTests(
       }
 
       if (checkForMask) {
-        const std::set<detid_t> &detids =
-            countsWS->getSpectrum(hists.at(i))->getDetectorIDs();
+        const auto &detids =
+            countsWS->getSpectrum(hists.at(i)).getDetectorIDs();
         if (instrument->isDetectorMasked(detids)) {
           maskWS->dataY(hists.at(i))[0] = deadValue;
           continue;

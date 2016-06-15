@@ -70,8 +70,6 @@ class DLLExport ConvertUnits : public API::Algorithm {
 public:
   /// Default constructor
   ConvertUnits();
-  /// Virtual destructor
-  ~ConvertUnits() override;
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "ConvertUnits"; }
   /// Summary of algorithms purpose

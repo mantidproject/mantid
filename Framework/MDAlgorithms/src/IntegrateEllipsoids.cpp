@@ -68,7 +68,7 @@ void IntegrateEllipsoids::qListFromEventWS(Integrate3DEvents &integrator,
 
     std::vector<double> buffer(DIMS);
     // get a reference to the event list
-    EventList &events = wksp->getEventList(i);
+    EventList &events = wksp->getSpectrum(i);
 
     events.switchTo(WEIGHTED_NOTIME);
     events.compressEvents(1e-5, &events);

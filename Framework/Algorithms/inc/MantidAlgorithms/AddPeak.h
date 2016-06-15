@@ -35,9 +35,6 @@ namespace Algorithms {
  */
 class DLLExport AddPeak : public API::Algorithm {
 public:
-  AddPeak();
-  ~AddPeak() override;
-
   /// Algorithm's name for identification
   const std::string name() const override { return "AddPeak"; };
   /// Summary of algorithms purpose

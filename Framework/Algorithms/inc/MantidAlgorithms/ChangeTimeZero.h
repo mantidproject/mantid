@@ -13,9 +13,6 @@ namespace Algorithms {
 
 class DLLExport ChangeTimeZero : public API::Algorithm {
 public:
-  ChangeTimeZero();
-  ~ChangeTimeZero() override;
-
   /// Algorithm's name for identification
   const std::string name() const override { return "ChangeTimeZero"; };
   /// Summary of algorithms purpose
@@ -68,7 +65,7 @@ private:
   bool isRelativeTimeShift(double offset) const;
   bool isAbsoluteTimeShift(const std::string &offset) const;
 
-  const double m_defaultTimeShift;
+  const double m_defaultTimeShift = 0.0;
   const std::string m_defaultAbsoluteTimeShift;
 };
 

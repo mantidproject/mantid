@@ -189,7 +189,7 @@ public:
       if (i % 2 == 0) {
         work_in1->setData(i, yDead, yDead);
       }
-      work_in1->getSpectrum(i)->setSpectrumNo(i);
+      work_in1->getSpectrum(i).setSpectrumNo(i);
       Mantid::Geometry::Detector *det =
           new Mantid::Geometry::Detector("", i, NULL);
       instr->add(det);
@@ -200,7 +200,7 @@ public:
       if (i % 2 == 0) {
         work_in2->setData(i, yDead, yDead);
       }
-      work_in2->getSpectrum(i)->setSpectrumNo(i);
+      work_in2->getSpectrum(i).setSpectrumNo(i);
     }
 
     WorkspaceGroup_sptr wsSptr = WorkspaceGroup_sptr(new WorkspaceGroup);

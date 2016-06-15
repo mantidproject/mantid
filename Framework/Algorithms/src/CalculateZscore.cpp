@@ -21,16 +21,6 @@ namespace Algorithms {
 DECLARE_ALGORITHM(CalculateZscore)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-CalculateZscore::CalculateZscore() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-CalculateZscore::~CalculateZscore() {}
-
-//----------------------------------------------------------------------------------------------
 /** Define properties
   */
 void CalculateZscore::init() {

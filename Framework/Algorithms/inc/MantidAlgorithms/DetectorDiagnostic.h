@@ -46,9 +46,6 @@ class DLLExport DetectorDiagnostic : public API::Algorithm {
 public:
   /// Default constructor
   DetectorDiagnostic();
-  /// Virtual destructor
-  ~DetectorDiagnostic() override{};
-
   /// Algorithm's category for identification
   const std::string category() const override;
   /// Algorithm's name for identification overriding a virtual method
