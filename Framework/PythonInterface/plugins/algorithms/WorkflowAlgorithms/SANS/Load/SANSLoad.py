@@ -1,8 +1,8 @@
 from abc import (ABCMeta, abstractmethod)
 from mantid.api import (WorkspaceGroup, AnalysisDataService)
-from SANSFileInformation import (SANSInstrument, SANSFileInformationFactory, SANSFileType, get_extension_for_file_type)
+from SANSFileInformation import (SANSFileInformationFactory, SANSFileType, get_extension_for_file_type)
 from State.SANSStateData import (SANSStateData, SANSDataType)
-from Common.SANSConstants import SANSConstants
+from Common.SANSConstants import (SANSConstants, SANSInstrument)
 from Common.SANSFunctions import (create_unmanaged_algorithm)
 from SANSCalibration import apply_calibration
 

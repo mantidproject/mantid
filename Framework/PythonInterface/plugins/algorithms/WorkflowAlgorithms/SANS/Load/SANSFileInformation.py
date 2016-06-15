@@ -4,7 +4,7 @@ from mantid.api import AlgorithmManager
 
 import h5py as h5
 from abc import (ABCMeta, abstractmethod)
-
+from Common.SANSConstants import SANSInstrument
 
 # ------------------------------------
 # Types
@@ -20,20 +20,6 @@ class SANSFileType(object):
         pass
 
     class NoFileType(object):
-        pass
-
-
-class SANSInstrument(object):
-    class LOQ(object):
-        pass
-
-    class LARMOR(object):
-        pass
-
-    class SANS2D(object):
-        pass
-
-    class NoInstrument(object):
         pass
 
 

@@ -123,6 +123,11 @@ class FloatParameter(TypedParameter):
         super(FloatParameter, self).__init__(float, is_not_none)
 
 
+class PositiveFloatParameter(TypedParameter):
+    def __init__(self):
+        super(PositiveFloatParameter, self).__init__(float, is_positive)
+
+
 class PositiveIntegerParameter(TypedParameter):
     def __init__(self):
         super(PositiveIntegerParameter, self).__init__(int, is_positive)

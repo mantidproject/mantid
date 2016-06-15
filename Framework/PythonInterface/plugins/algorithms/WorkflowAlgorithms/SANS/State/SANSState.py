@@ -5,6 +5,7 @@ from mantid.kernel import PropertyManager
 from State.SANSStateBase import (SANSStateBase, TypedParameter, convert_state_to_dict,
                                  set_state_from_property_manager, sans_parameters)
 from SANSStateData import SANSStateData
+from SANSStateMoveWorkspace import SANSStateMoveWorkspace
 
 
 # -----------------------------------------------
@@ -32,12 +33,26 @@ class SANSState(object):
 @sans_parameters
 class SANSStateISIS(SANSStateBase, SANSState):
     data = TypedParameter(SANSStateData, validator_sub_state)
+    move = TypedParameter(SANSStateMoveWorkspace, validator_sub_state)
 
     def __init__(self):
         super(SANSStateISIS, self).__init__()
 
     def validate(self):
         is_invalid = dict()
+
+        # Make sure that the substates are contained
+        if not self.data:
+            is_invalid.update("SANSStateISIS: The state object needs to include a SANSStateData object.")
+        if not self.move:
+            is_invalid.update("SANSStateISIS: The state object needs to include a SANSStateMoveWorkspace object.")
+
+        if is_invalid:
+            raise ValueError("SANSState: There is an issue with your in put. See: {}".format(json.dumps(is_invalid)))
+
+
+        # Check the attributes themselves
+        is_invalid = {}
         for descriptor_name, descriptor_object in inspect.getmembers(type(self)):
             if inspect.isdatadescriptor(descriptor_object) and isinstance(descriptor_object, TypedParameter):
                 try:
@@ -45,8 +60,10 @@ class SANSStateISIS(SANSStateBase, SANSState):
                     attr.validate()
                 except ValueError as e:
                     is_invalid.update(descriptor_name, pickle.dumps(e.message))
+
         if is_invalid:
             raise ValueError("SANSState: There is an issue with your in put. See: {}".format(json.dumps(is_invalid)))
+
 
     @property
     def property_manager(self):

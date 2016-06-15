@@ -3,7 +3,8 @@ import mantid
 
 from State.SANSState import (SANSStateISIS, SANSState)
 from State.SANSStateData import (SANSStateDataISIS, SANSStateData)
-
+from State.SANSStateMoveWorkspace import (SANSStateMoveWorkspaceLOQ)
+from Common.SANSConstants import SANSConstants
 
 class SANSStateTest(unittest.TestCase):
     def test_that_is_sans_state_object(self):
@@ -18,6 +19,13 @@ class SANSStateTest(unittest.TestCase):
         data = SANSStateDataISIS()
         data.sample_scatter = "sample_scat"
         state.data = data
+
+        move = SANSStateMoveWorkspaceLOQ()
+        move.detectors[SANSConstants.high_angle_bank].detector_name = "test"
+        move.detectors[SANSConstants.high_angle_bank].detector_name_short = "test"
+        move.detectors[SANSConstants.low_angle_bank].detector_name = "test"
+        move.detectors[SANSConstants.low_angle_bank].detector_name_short = "test"
+        state.move = move
 
         # Assert
         try:

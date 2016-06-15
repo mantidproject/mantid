@@ -262,5 +262,14 @@ class SANSLoaderTest(unittest.TestCase):
         workspaces_on_the_ads = AnalysisDataService.getObjectNames()
         self.assertTrue(len(workspaces_on_the_ads) == 0)
 
+    def test_that_calibration_workspace_is_applied_to_scatter_workspaces(self):
+        pass
+
+    def test_that_calibration_workspace_is_applied_to_scatter_workspaces(self):
+        pass
+
+    def test_that_calibration_workspace_is_applied_to_scatter_workspaces_and_can_make_use_of_ads(self):
+        pass
+
 if __name__ == '__main__':
     unittest.main()
