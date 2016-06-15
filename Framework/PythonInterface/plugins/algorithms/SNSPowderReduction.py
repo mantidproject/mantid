@@ -1,6 +1,5 @@
 #pylint: disable=invalid-name,no-init,too-many-lines
 import os
-import numpy
 
 import mantid
 import mantid.api
@@ -244,7 +243,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         self._determineInstrument(samRuns[0])
 
         preserveEvents = self.getProperty("PreserveEvents").value
-        if HAVE_MPI and preserveEvents == True:
+        if HAVE_MPI and preserveEvents:
             self.log().warning("preserveEvents set to False for MPI tasks.")
             preserveEvents = False
         self._info = None
@@ -572,7 +571,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
             if donorLogfilename is not None and len(donorLogfilename) > 0:
                 api.Load(Filename=donorLogfilename, MetaDataOnly=True, OutputWorkspace='temp_log_donor')
                 api.CopyLogs(InputWorkspace='temp_log_donor', OutputWorkspace=wksp,
-                                    MergeStrategy='MergeKeepExisting')
+                             MergeStrategy='MergeKeepExisting')
                 api.DeleteWorkspace('temp_log_donor')
                 wksp = mtd[str(wksp)]  # convert back to a pointer
                 print wksp
@@ -1222,7 +1221,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
 
         return can_run_ws_name
 
-    def _process_vanadium_runs(self, van_run_number_list, timeFilterWall, samRunIndex, calib, **focuspos):
+    def _process_vanadium_runs(self, van_run_number_list, timeFilterWall, samRunIndex, calib, **dummy_focuspos):
         """
         Purpose: process vanadium runs
         Requirements: if more than 1 run in given run number list, then samRunIndex must be given.
@@ -1403,7 +1402,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
 
         # Splitting workspace
         self.log().information("SplitterWorkspace = %s, Information Workspace = %s. " % (
-                split_ws_name, str(self._splitinfotablews)))
+            split_ws_name, str(self._splitinfotablews)))
 
         base_name = raw_ws_name
         if self._splitinfotablews is None:
