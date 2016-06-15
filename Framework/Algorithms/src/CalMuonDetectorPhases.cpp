@@ -182,7 +182,7 @@ void CalMuonDetectorPhases::fitWorkspace(const API::MatrixWorkspace_sptr &ws,
     // Now we have our fitting results stored in tab
     // but we need to extract the relevant information, i.e.
     // the detector phases (parameter 'p') and asymmetries ('A')
-    extractDetectorInfo(tab, resTab, ispec);
+    extractDetectorInfo(tab, resTab, getDetectorIDFromSpectrumIndex(ws, ispec));
   }
 }
 
@@ -190,11 +190,11 @@ void CalMuonDetectorPhases::fitWorkspace(const API::MatrixWorkspace_sptr &ws,
 * and adds a new row to the results table with them
 * @param paramTab :: [input] Output parameter table resulting from the fit
 * @param resultsTab :: [input] Results table to update with a new row
-* @param ispec :: [input] Spectrum number
+* @param detid :: [input] Detector ID
 */
 void CalMuonDetectorPhases::extractDetectorInfo(
     const API::ITableWorkspace_sptr &paramTab,
-    const API::ITableWorkspace_sptr &resultsTab, const int ispec) {
+    const API::ITableWorkspace_sptr &resultsTab, const size_t detid) {
 
   double asym = paramTab->Double(0, 1);
   double phase = paramTab->Double(2, 1);
@@ -211,7 +211,7 @@ void CalMuonDetectorPhases::extractDetectorInfo(
   }
   // Copy parameters to new row in results table
   API::TableRow row = resultsTab->appendRow();
-  row << ispec << asym << phase;
+  row << static_cast<int>(detid) << asym << phase;
 }
 
 /** Creates the fitting function f(x) = A * sin( w*x + p) + B as string
@@ -537,6 +537,28 @@ void CalMuonDetectorPhases::reportProgress(const int thisSpectrum,
   std::ostringstream progMessage;
   progMessage << "Fitting " << thisSpectrum + 1 << " of " << totalSpectra;
   this->progress(proportionDone, progMessage.str());
+}
+
+/**
+ * Given a spectrum index, find the corresponding detector ID
+ * @param ws :: [input] Workspace to look in
+ * @param spectrumIndex :: [input] Spectrum index to look up
+ * @returns :: detector ID corresponding to spectrum index
+ * @throws std::runtime_error if it can't find the detector ID
+ */
+size_t CalMuonDetectorPhases::getDetectorIDFromSpectrumIndex(
+    const API::MatrixWorkspace_sptr &ws, const int spectrumIndex) {
+  const auto detidMap = ws->getDetectorIDToWorkspaceIndexMap();
+  for (const auto &entry : detidMap) {
+    if (static_cast<int>(entry.second) == spectrumIndex) {
+      return entry.first;
+    }
+  }
+  // Couldn't find it
+  std::ostringstream error;
+  error << "Could not find detector ID corresponding to spectrum "
+        << spectrumIndex;
+  throw std::runtime_error(error.str());
 }
 
 } // namespace Algorithms
