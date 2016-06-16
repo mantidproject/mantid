@@ -25,6 +25,8 @@ calculations.
 Fit Functions
 -------------
 
+- :ref:`Keren <func-Keren>`: A bug was fixed so that the field comes out in the correct units.
+
 |
 
 `Full list of changes <http://github.com/mantidproject/mantid/pulls?q=is%3Apr+milestone%3A%22Release+3.8%22+is%3Amerged+label%3A%22Component%3A+Muon%22>`_
