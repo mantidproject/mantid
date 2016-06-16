@@ -51,8 +51,8 @@ class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS GenericDataProcessorPresenter
 public:
   GenericDataProcessorPresenter(
       const DataProcessorWhiteList &whitelist,
-      const std::map<std::string, DataProcessorPreprocessingAlgorithm> &
-          preprocessMap,
+      const std::map<std::string, DataProcessorPreprocessingAlgorithm>
+          &preprocessMap,
       const DataProcessorProcessingAlgorithm &processor,
       const DataProcessorPostprocessingAlgorithm &postprocessor);
   ~GenericDataProcessorPresenter() override;
@@ -68,8 +68,14 @@ public:
                    ProgressableView *progressView) override;
   void setModel(std::string name) override;
 
-  // Only for testing purposes
+  // The following methods are public only for testing purposes
+  // Get the whitelist
   DataProcessorWhiteList getWhiteList() const { return m_whitelist; };
+  // Get the name of the reduced workspace for a given row
+  std::string getReducedWorkspaceName(int row, const std::string &prefix = "");
+  // Get the name of a post-processed workspace
+  std::string getPostprocessedWorkspaceName(const std::set<int> &rows,
+                                            const std::string &prefix = "");
 
 protected:
   // the workspace the model is currently representing
@@ -111,8 +117,6 @@ protected:
   prepareRunWorkspace(const std::string &run,
                       const DataProcessorPreprocessingAlgorithm &alg,
                       const std::map<std::string, std::string> &optionsMap);
-  // Get the workspace name for a given row
-  std::string getWorkspaceName(int row, bool prefix = true);
   // load a run into the ADS, or re-use one in the ADS if possible
   Mantid::API::Workspace_sptr loadRun(const std::string &run,
                                       const std::string &instrument,
