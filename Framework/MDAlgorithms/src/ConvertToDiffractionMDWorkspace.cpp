@@ -522,7 +522,7 @@ void ConvertToDiffractionMDWorkspace::exec() {
 
   for (size_t wi = 0; wi < m_inWS->getNumberHistograms();) {
     // 1. Determine next chunk of spectra to process
-    size_t start = wi;
+    int start = static_cast<int>(wi);
     for (; wi < m_inWS->getNumberHistograms(); ++wi) {
       // Get an idea of how many events we'll be adding
       size_t eventsAdding = m_inWS->blocksize();
@@ -539,7 +539,7 @@ void ConvertToDiffractionMDWorkspace::exec() {
 
     // 2. Process next chunk of spectra (threaded)
     PARALLEL_FOR1(m_inWS)
-    for (size_t i = start; i < wi; ++i) {
+    for (int i = start; i < static_cast<int>(wi); ++i) {
       PARALLEL_START_INTERUPT_REGION
       this->convertSpectrum(static_cast<int>(i));
       PARALLEL_END_INTERUPT_REGION
