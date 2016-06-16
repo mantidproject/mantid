@@ -3,9 +3,9 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidDataHandling/LoadILLIndirect.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidDataHandling/LoadILLIndirect.h"
 
 using namespace Mantid::API;
 using Mantid::DataHandling::LoadILLIndirect;
@@ -19,7 +19,9 @@ public:
   }
   static void destroySuite(LoadILLIndirectTest *suite) { delete suite; }
 
-  LoadILLIndirectTest() : m_dataFile2013("ILLIN16B_034745.nxs"), m_dataFile2015("ILLIN16B_127500.nxs") {}
+  LoadILLIndirectTest()
+      : m_dataFile2013("ILLIN16B_034745.nxs"),
+        m_dataFile2015("ILLIN16B_127500.nxs") {}
 
   void test_Init() {
     LoadILLIndirect loader;
@@ -37,32 +39,24 @@ public:
     TS_ASSERT_EQUALS(loader.version(), 1);
   }
 
-  void test_Load_2013_Format() {
-      doExecTest(m_dataFile2013);
+  void test_Load_2013_Format() { doExecTest(m_dataFile2013); }
+
+  void test_Load_2015_Format() { doExecTest(m_dataFile2015); }
+
+  void test_Confidence_2013_Format() { doConfidenceTest(m_dataFile2013); }
+
+  void test_Confidence_2015_Format() { doConfidenceTest(m_dataFile2015); }
+
+  void doConfidenceTest(const std::string &file) {
+    LoadILLIndirect alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+
+    alg.setPropertyValue("Filename", file);
+    Mantid::Kernel::NexusDescriptor descr(alg.getPropertyValue("Filename"));
+    TS_ASSERT_EQUALS(alg.confidence(descr), 80);
   }
 
-  void test_Load_2015_Format() {
-      doExecTest(m_dataFile2015);
-  }
-
-  void test_Confidence_2013_Format() {
-      doConfidenceTest(m_dataFile2013);
-  }
-
-  void test_Confidence_2015_Format() {
-      doConfidenceTest(m_dataFile2015);
-  }
-
-  void doConfidenceTest(const std::string & file) {
-     LoadILLIndirect alg;
-     TS_ASSERT_THROWS_NOTHING(alg.initialize());
-
-     alg.setPropertyValue("Filename", file);
-     Mantid::Kernel::NexusDescriptor descr(alg.getPropertyValue("Filename"));
-     TS_ASSERT_EQUALS(alg.confidence(descr), 80);
-  }
-
-  void doExecTest(const std::string & file) {
+  void doExecTest(const std::string &file) {
     // Name of the output workspace.
     std::string outWSName("LoadILLIndirectTest_OutputWS");
 
