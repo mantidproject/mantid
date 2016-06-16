@@ -65,8 +65,7 @@ public:
     TS_ASSERT_EQUALS(plus.rhsProperty(), "");
     TS_ASSERT_EQUALS(plus.outputProperty(), "");
     TS_ASSERT_EQUALS(plus.prefix(), "");
-    std::set<std::string> blacklist = {};
-    TS_ASSERT_EQUALS(plus.blacklist(), blacklist);
+    TS_ASSERT_EQUALS(plus.blacklist().size(), 0);
   }
 
   void test_WeightedMean() {

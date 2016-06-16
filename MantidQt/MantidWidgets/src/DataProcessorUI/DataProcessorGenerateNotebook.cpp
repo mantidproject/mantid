@@ -278,7 +278,6 @@ std::string tableString(QDataProcessorTableModel_sptr model,
   @param rows : rows in the group
   @param model : table model containing details of runs and processing settings
   @param whitelist : the whitelist
-  @param preprocessMap : pre-processing instructions as a map
   @param processor : the reduction algorithm
   @param postprocessor : the algorithm responsible for post-processing
   groups
@@ -356,8 +355,6 @@ std::string plot1DString(const std::vector<std::string> &ws_names) {
  @param rowNo : the row
  @param model : tablemodel for the full table
  @param whitelist : the whitelist
- @param preprocessMap : the pre-processing instructions as a map
- @param processor : the processing (reduction) algorithm
  @param prefix : wheter to return the name with the prefix or not
  @return : the workspace name
 */
