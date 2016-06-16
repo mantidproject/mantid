@@ -71,11 +71,6 @@ LeBailFit::LeBailFit()
       m_roundBkgd(0), m_bkgdParameterStepVec(), m_peakCentreTol(0.) {}
 
 //----------------------------------------------------------------------------------------------
-/** Destructor
- */
-LeBailFit::~LeBailFit() {}
-
-//----------------------------------------------------------------------------------------------
 /** Declare the input properties for this algorithm
 */
 void LeBailFit::init() {

@@ -439,14 +439,14 @@ class CWSCDReductionControl(object):
         """
         # Check spice file
         spice_file_name = '%s_exp%04d_scan%04d.dat'%(self._instrumentName,
-                                                   self._expNumber, scanno)
+                                                     self._expNumber, scanno)
         spice_file_name = os.path.join(self._dataDir, spice_file_name)
         if os.path.exists(spice_file_name) is False:
             return False, 'Spice data file %s cannot be found.'% spice_file_name
 
         # Check xml file
         xmlfilename = '%s_exp%d_scan%04d_%04d.xml'%(self._instrumentName, self._expNumber,
-                scanno, ptno)
+                                                    scanno, ptno)
         xmlfilename = os.path.join(self._dataDir, xmlfilename)
         if os.path.exists(xmlfilename) is False:
             return (False, "Pt. XML file %s cannot be found."%(xmlfilename))
