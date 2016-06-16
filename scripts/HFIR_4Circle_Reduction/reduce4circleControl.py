@@ -1744,26 +1744,32 @@ class CWSCDReductionControl(object):
 
     def refine_ub_matrix_by_lattice(self, peak_info_list, set_hkl_int,  ub_matrix_str, unit_cell_type):
         """
-
+        Refine UB matrix by fixing unit cell type
         :param peak_info_list:
         :param set_hkl_int:
-        :param lattice_parameters:
+        :param ub_matrix_str:
+        :param unit_cell_type:
         :return:
         """
-        # check inputs
-        # ...
-        # blabla
+        # check inputs and return if not good
+        assert isinstance(peak_info_list, list)
+        if len(peak_info_list) < 6:
+            return False, 'There must be at least 6 peaks for refining UB. Now only %d is given.' % len(peak_info_list)
+        assert isinstance(ub_matrix_str, str)
+        if len(ub_matrix_str.split(',')) != 9:
+            return False, 'UB matrix string must have 9 values. Now given %d as %s.' % (len(ub_matrix_str.split(',')),
+                                                                                        ub_matrix_str)
+        assert isinstance(unit_cell_type, str) and len(unit_cell_type) >= 5
 
         # construct a new workspace by combining all single peaks
-        ub_peak_ws_name = 'TestUBPeakWorkspace'
+        ub_peak_ws_name = 'TempRefineUBLatticePeaks'
         self._build_peaks_workspace(peak_info_list, ub_peak_ws_name, False, set_hkl_int)
 
-        # set UB matrix from ...
+        # set UB matrix from input string. It is UB(0, 0), UB(0, 1), UB(0, 2), UB(1, 0), ..., UB(3, 3)
         api.SetUB(Workspace=ub_peak_ws_name,
                   UB=ub_matrix_str)
-        #UB='0.0810781,0.151318,0.00908505,-0.128842,0.00755597,-0.00244917,-0.0211994,-0.0271922,0.049838')
 
-        # optimize UB matrix by contraining lattice parameter to unit cell type
+        # optimize UB matrix by constraining lattice parameter to unit cell type
         api.OptimizeLatticeForCellType(PeaksWorkspace=ub_peak_ws_name,
                                        CellType=unit_cell_type,
                                        Apply=True,
@@ -1772,7 +1778,7 @@ class CWSCDReductionControl(object):
         # get refined ub matrix
         self._refinedUBTup = self._get_refined_ub_data(ub_peak_ws_name)
 
-        return
+        return True, ''
 
     def refine_ub_matrix_least_info(self, peak_info_list, d_min, d_max):
         """

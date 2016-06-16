@@ -263,6 +263,22 @@ class UBMatrixTable(tableBase.NTableWidget):
         # print '[DB] MatrixTable: _Matrix = ', self._matrix
         return self._matrix.copy()
 
+    def get_matrix_str(self):
+        """
+        Get the 3 x 3 matrix and format it to a 9 float strings from (0, 0) to (2, 2)
+        :return: a string
+        """
+        matrix_string = ''
+        for i in range(3):
+            for j in range(3):
+                matrix_string += '%.10f' % self._matrix[i][j]
+                if not (i == 2 and j == 2):
+                    matrix_string += ','
+            # END-FOR (j)
+        # END-FOR (i)
+
+        return matrix_string
+
     def set_from_list(self, element_array):
         """
         Set table value including holder and QTable from a 1D numpy array

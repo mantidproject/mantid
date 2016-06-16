@@ -1705,14 +1705,33 @@ class MainWindow(QtGui.QMainWindow):
         Calculate UB matrix constrained by lattice parameters
         :return:
         """
+        import optimizelatticewindow as ol_window
+
         # get peak information list
         peak_info_list = self._build_peak_info_list()
         set_hkl_int = self.ui.checkBox_roundHKLInt.isChecked()
-        lattice_parameters = self._get_lattice_parameters()
+
+        # launch the set up window
+        self.refine_window = ol_window.OptimizeLatticeWindow(self)
+        self.refine_window.show()
+
+        # it is supposed to get the information back from the window
+        unit_cell_type = self.refine_window.get_unit_cell_type()
+        print '[DB...BAT] Unit cell is %s.' % unit_cell_type
+
+        # get the UB matrix value
+        ub_src_tab = self.refine_window.get_ub_source()
+        if ub_src_tab == 3:
+            ub_matrix = self.ui.tableWidget_ubMatrix.get_matrix_str()
+        elif ub_src_tab == 4:
+            ub_matrix = self.ui.tableWidget_ubInUse.get_matrix_str()
+        else:
+            self.pop_one_button_dialog('UB source tab %s is not supported.' % str(ub_src_tab))
+            return
 
         # refine UB matrix by constraint on lattice parameters
         status, error_message = self._myControl.refine_ub_matrix_by_lattice(peak_info_list, set_hkl_int,
-                                                                            lattice_parameters)
+                                                                            ub_matrix, unit_cell_type)
         if status:
             # successfully refine the lattice and UB matrix
             self._show_refined_ub_result()

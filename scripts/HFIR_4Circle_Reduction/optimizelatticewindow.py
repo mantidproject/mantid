@@ -30,30 +30,80 @@ class OptimizeLatticeWindow(QtGui.QMainWindow):
                                                  'Monoclinic',
                                                  'Triclinic'])
 
+        self.ui.comboBox_ubSource.addItems(['Tab - Calculate UB Matrix',
+                                           'Tab - Accepted UB Matrix'])
+
+        self.ui.lineEdit_tolerance.setText('0.12')
+
         self.ui.lineEdit_tolerance.setText()
 
         # define event handling
-        blabla
+        self.connect(self.ui.pushButton_Ok, QtCore.SIGNAL('clicked()'),
+                     self.do_ok)
+
+        self.connect(self.ui.pushButton_cancel, QtCore.SIGNAL('clicked()'),
+                     self.do_quit)
+
+        return
+
+    def do_ok(self):
+        """
+        User decide to go on and then send a signal to parent
+        :return:
+        """
+
+        tolerance = self.get_tolerance()
+        if tolerance is None:
+            raise RuntimeError('Tolerance cannot be left blank!')
+
+        # quit
+        self.do_quit()
+
+        return
+
+    def do_quit(self):
+        """
+        Quit the window
+        :return:
+        """
+        self.close()
 
         return
 
     def get_unit_cell_type(self):
         """
-
+        Get the tolerance
         :return:
         """
-        return
+        unit_cell_type = str(self.ui.comboBox_unitCellTypes.currentText())
+
+        return unit_cell_type
 
     def get_tolerance(self):
         """
-
+        Get the tolerance for refining UB matrix with unit cell type.
         :return:
         """
-        return
+        tol_str = str(self.ui.lineEdit_tolerance.text()).strip()
+
+        if len(tol_str) == 0:
+            # blank: return None
+            tol = None
+        else:
+            tol = float(tol_str)
+
+        return tol
 
     def get_ub_source(self):
         """
-
+        Get the index of the tab where the UB matrix comes from
         :return:
         """
-        return tabX
+        source = str(self.ui.comboBox_ubSource.currentText())
+
+        if source == 'Tab - Calculate UB Matrix':
+            tab_index = 3
+        else:
+            tab_index = 4
+
+        return tab_index
