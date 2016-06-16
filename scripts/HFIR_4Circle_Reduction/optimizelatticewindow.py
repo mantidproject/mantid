@@ -9,6 +9,10 @@ class OptimizeLatticeWindow(QtGui.QMainWindow):
     """
     Main window widget to set up parameters to optimize
     """
+
+    # establish signal for communicating from App2 to App1 - must be defined before the constructor
+    mySignal = QtCore.pyqtSignal(int)
+
     def __init__(self, parent=None):
         """
         Initialization
@@ -35,14 +39,15 @@ class OptimizeLatticeWindow(QtGui.QMainWindow):
 
         self.ui.lineEdit_tolerance.setText('0.12')
 
-        self.ui.lineEdit_tolerance.setText()
-
         # define event handling
         self.connect(self.ui.pushButton_Ok, QtCore.SIGNAL('clicked()'),
                      self.do_ok)
 
         self.connect(self.ui.pushButton_cancel, QtCore.SIGNAL('clicked()'),
                      self.do_quit)
+
+        if parent is not None:
+            self.mySignal.connect(parent.refine_ub_lattice)  # connect to the updateTextEdit slot defined in app1.py
 
         return
 
@@ -55,6 +60,9 @@ class OptimizeLatticeWindow(QtGui.QMainWindow):
         tolerance = self.get_tolerance()
         if tolerance is None:
             raise RuntimeError('Tolerance cannot be left blank!')
+
+        sigVal = 1000
+        self.mySignal.emit(sigVal)
 
         # quit
         self.do_quit()

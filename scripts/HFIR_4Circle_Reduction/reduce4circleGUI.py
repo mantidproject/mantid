@@ -143,7 +143,7 @@ class MainWindow(QtGui.QMainWindow):
         self.connect(self.ui.pushButton_refineUBFFT, QtCore.SIGNAL('clicked()'),
                      self.do_refine_ub_fft)
         self.connect(self.ui.pushButton_findUBLattice, QtCore.SIGNAL('clicked()'),
-                     self.do_cal_ub_lattice)
+                     self.do_refine_ub_lattice)
 
         # Tab 'Setup'
         self.connect(self.ui.pushButton_useDefaultDir, QtCore.SIGNAL('clicked()'),
@@ -259,6 +259,7 @@ class MainWindow(QtGui.QMainWindow):
 
         # Sub window
         self._my3DWindow = None
+        self._refineConfigWindow = None
 
         # QSettings
         self.load_settings()
@@ -1218,6 +1219,7 @@ class MainWindow(QtGui.QMainWindow):
         assert status and num_bg_pt > 0, 'Number of Pt number for background must be larger than 0!'
 
         # integrate peak
+        grand_error_message = ''
         for row_number in row_number_list:
             scan_number = self.ui.tableWidget_mergeScans.get_scan_number(row_number)
             status, pt_number_list = self._myControl.get_pt_numbers(exp_number, scan_number)
@@ -1265,11 +1267,18 @@ class MainWindow(QtGui.QMainWindow):
             avg_bg_value = self._myControl.estimate_background(pt_dict, background_pt_list)
             intensity_i = self._myControl.simple_integrate_peak(pt_dict, avg_bg_value)
             # set the calculated peak intensity to _peakInfoDict
-            self._myControl.set_peak_intensity(exp_number, scan_number, intensity_i)
+            status, error_msg = self._myControl.set_peak_intensity(exp_number, scan_number, intensity_i)
+            if status is False:
+                grand_error_message += error_msg + '\n'
+                continue
 
             # set the value to table
             self.ui.tableWidget_mergeScans.set_peak_intensity(row_number, None, intensity_i)
         # END-FOR
+
+        # pop error message if there is any
+        if len(grand_error_message) > 0:
+            self.pop_one_button_dialog(grand_error_message)
 
         return
 
@@ -1631,7 +1640,7 @@ class MainWindow(QtGui.QMainWindow):
         self.pop_one_button_dialog('Data processing is long. Be patient!')
 
         # Process
-        scan_row_list = self.ui.tableWidget_mergeScans.get_scan_list()
+        scan_row_list = self.ui.tableWidget_mergeScans.get_selected_scans()
         print '[DB] %d scans have been selected to merge.' % len(scan_row_list)
         frame = str(self.ui.comboBox_mergeScanFrame.currentText())
         for tup2 in scan_row_list:
@@ -1700,27 +1709,37 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
-    def do_cal_ub_lattice(self):
+    def do_refine_ub_lattice(self):
         """
         Calculate UB matrix constrained by lattice parameters
         :return:
         """
         import optimizelatticewindow as ol_window
 
+        # launch the set up window
+        self._refineConfigWindow = ol_window.OptimizeLatticeWindow(self)
+        self._refineConfigWindow.show()
+
+        return
+
+    # add slot for UB refinement configuration window's signal to connect to
+    @QtCore.pyqtSlot(dict)
+    def refine_ub_lattice(self, val):
+        """
+        :param val:
+        :return:
+        """
+        assert val == 1000, 'It is not an authorized signal.'
+
+        # it is supposed to get the information back from the window
+        unit_cell_type = self._refineConfigWindow.get_unit_cell_type()
+
         # get peak information list
         peak_info_list = self._build_peak_info_list()
         set_hkl_int = self.ui.checkBox_roundHKLInt.isChecked()
 
-        # launch the set up window
-        self.refine_window = ol_window.OptimizeLatticeWindow(self)
-        self.refine_window.show()
-
-        # it is supposed to get the information back from the window
-        unit_cell_type = self.refine_window.get_unit_cell_type()
-        print '[DB...BAT] Unit cell is %s.' % unit_cell_type
-
         # get the UB matrix value
-        ub_src_tab = self.refine_window.get_ub_source()
+        ub_src_tab = self._refineConfigWindow.get_ub_source()
         if ub_src_tab == 3:
             ub_matrix = self.ui.tableWidget_ubMatrix.get_matrix_str()
         elif ub_src_tab == 4:
@@ -1784,7 +1803,7 @@ class MainWindow(QtGui.QMainWindow):
         scan_info_tup_list = self._myControl.get_merged_scans()
 
         # get existing scan numbers
-        existing_scan_number_list = self.ui.tableWidget_mergeScans.get_scan_list()
+        existing_scan_number_list = self.ui.tableWidget_mergeScans.get_selected_scans()
 
         # append the row to the merged scan table
         for scan_info_tup in scan_info_tup_list:
@@ -2207,7 +2226,7 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.tabWidget.setCurrentIndex(MainWindow.TabPage['Peak Integration'])
 
         # set up value
-        selected_scans = self.ui.tableWidget_mergeScans.get_scan_list()
+        selected_scans = self.ui.tableWidget_mergeScans.get_selected_scans()
         if len(selected_scans) > 0:
             # set the first one.  remember that the return is a list of tuple
             self.ui.lineEdit_scanIntegratePeak.setText(str(selected_scans[0][0]))

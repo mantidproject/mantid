@@ -2124,7 +2124,10 @@ class CWSCDReductionControl(object):
         peak_info = self._myPeakInfoDict[(exp_number, scan_number)]
 
         # set intensity
-        peak_info.set_intensity(intensity)
+        try:
+            peak_info.set_intensity(intensity)
+        except AssertionError as ass_error:
+            return False, 'Unable to set peak intensity due to %s.' % str(ass_error)
 
         # calculate sigma by simple square root
         if intensity > 0:
@@ -2133,7 +2136,7 @@ class CWSCDReductionControl(object):
             sigma = 1.
         peak_info.set_sigma(sigma)
 
-        return
+        return True, ''
 
     @staticmethod
     def simple_integrate_peak(pt_intensity_dict, bg_value):

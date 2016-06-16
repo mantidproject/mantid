@@ -562,6 +562,8 @@ class ProcessTableWidget(tableBase.NTableWidget):
         else:
             scan_list = list()
 
+        print '[DB...BAT] <append scans> in-table scans: ' % scan_list
+
         # set value as default
         # Append rows
         for scan in scans:
@@ -570,7 +572,8 @@ class ProcessTableWidget(tableBase.NTableWidget):
             if allow_duplicate_scans is False and scan in scan_list:
                 # skip is duplicate scan is not allowed
                 continue
-            # set
+
+            # add scans to new row
             new_row = self._generate_empty_row(scan_number=scan)
             status, err = self.append_row(new_row)
             if status is False:
@@ -631,6 +634,21 @@ class ProcessTableWidget(tableBase.NTableWidget):
         return self.get_cell_value(i_row, j_col_merged)
 
     def get_scan_list(self):
+        """
+        Get all scans that are already listed in the table.
+        :return:
+        """
+        scan_list = list()
+        num_rows = self.rowCount()
+        col_scan_index = self._myColumnNameList.index('Scan')
+
+        for i_row in xrange(num_rows):
+            scan_num = self.get_cell_value(i_row, col_scan_index)
+            scan_list.append((scan_num, i_row))
+
+        return scan_list
+
+    def get_selected_scans(self):
         """ Get list of selected scans to merge from table
         :return: list of 2-tuples (scan number, row number)
         """
