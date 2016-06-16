@@ -15,8 +15,7 @@ DataProcessorProcessingAlgorithmBase::DataProcessorProcessingAlgorithmBase(
 /** Default constructor (nothing to do) */
 DataProcessorProcessingAlgorithmBase::DataProcessorProcessingAlgorithmBase()
     : m_algName(), m_blacklist(), m_inputWsProperties(),
-      m_inputStrListProperties(), m_OutputWsProperties() {
-}
+      m_inputStrListProperties(), m_OutputWsProperties() {}
 
 /** Destructor */
 DataProcessorProcessingAlgorithmBase::~DataProcessorProcessingAlgorithmBase() {}

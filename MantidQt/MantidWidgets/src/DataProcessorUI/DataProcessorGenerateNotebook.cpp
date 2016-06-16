@@ -52,8 +52,8 @@ specified via the corresponding hinting line edit in the view
 DataProcessorGenerateNotebook::DataProcessorGenerateNotebook(
     std::string name, QDataProcessorTableModel_sptr model,
     const std::string instrument, const DataProcessorWhiteList &whitelist,
-    const std::map<std::string, DataProcessorPreprocessingAlgorithm>
-        &preprocessMap,
+    const std::map<std::string, DataProcessorPreprocessingAlgorithm> &
+        preprocessMap,
     const DataProcessorProcessingAlgorithm &processor,
     const DataProcessorPostprocessingAlgorithm &postprocessor,
     const std::map<std::string, std::string> preprocessingOptionsMap,
@@ -323,8 +323,7 @@ boost::tuple<std::string, std::string> postprocessGroupString(
   stitch_string << outputWSName;
   stitch_string << completeOutputProperties(
                        postprocessor.name(),
-                       postprocessor.numberOfOutputProperties())
-                << " = ";
+                       postprocessor.numberOfOutputProperties()) << " = ";
   stitch_string << postprocessor.name() << "(";
   stitch_string << postprocessor.inputProperty() << " = '";
   stitch_string << boost::algorithm::join(inputNames, ", ") << "'";
@@ -419,8 +418,8 @@ boost::tuple<std::string, std::string> reduceRowString(
     const int rowNo, const std::string &instrument,
     QDataProcessorTableModel_sptr model,
     const DataProcessorWhiteList &whitelist,
-    const std::map<std::string, DataProcessorPreprocessingAlgorithm>
-        &preprocessMap,
+    const std::map<std::string, DataProcessorPreprocessingAlgorithm> &
+        preprocessMap,
     const DataProcessorProcessingAlgorithm &processor,
     const std::map<std::string, std::string> &preprocessingOptionsMap,
     const std::string &processingOptions) {
