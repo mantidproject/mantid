@@ -51,22 +51,22 @@ def check_url(url, read_lines=False):
     return url_good, error_message
 
 
-def convert_to_wave_length(m1):
+def convert_to_wave_length(m1_position):
     """ Convert motor m1's position to HB3A's neutron wave length
     Mapping:
     m1 = -25.87 --> 1.0030
        = -39.17 --> 1.5424
-    :param m1: float, m1's position
+    :param m1_position: float, m1's position
     :return: wave length
     """
-    assert isinstance(m1, float)
+    assert isinstance(m1_position, float)
 
-    if abs(m1 - (-25.870000)) < 0.2:
+    if abs(m1_position - (-25.870000)) < 0.2:
         wave_length = 1.003
-    elif abs(m1 - (-39.17)) < 0.2:
+    elif abs(m1_position - (-39.17)) < 0.2:
         wave_length = 1.5424
     else:
-        raise RuntimeError('m1 position %f is not a recognized position for wave length.' % m1)
+        raise RuntimeError('m1 position %f is not a recognized position for wave length.' % m1_position)
 
     return wave_length
 
@@ -609,8 +609,8 @@ def get_wave_length(spice_table_name):
     col_index_m1 = column_name_list.index('m1')
     assert col_index_m1 < len(column_name_list), 'Column m1 cannot be found.'
 
-    m1 = float(spice_table_ws.cell(0, col_index_m1))
-    wave_length = convert_to_wave_length(m1)
+    m1_position = float(spice_table_ws.cell(0, col_index_m1))
+    wave_length = convert_to_wave_length(m1_position)
 
     return wave_length
 
@@ -658,10 +658,10 @@ def round_hkl(hkl):
     """
     print type(hkl)
 
-    h = round(hkl[0])
-    k = round(hkl[1])
-    l = round(hkl[2])
+    mi_h = round(hkl[0])
+    mi_k = round(hkl[1])
+    mi_l = round(hkl[2])
 
-    return h, k, l
+    return mi_h, mi_k, mi_l
 
 

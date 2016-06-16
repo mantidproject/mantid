@@ -1,18 +1,18 @@
-#pylint: disable=invalid-name,too-many-public-methods,too-many-arguments,non-parent-init-called,R0902,too-many-branches,C0302
+#pylint: disable=invalid-name,too-many-public-methods,too-many-arguments,non-parent-init-called,R0902,too-many-branches,C0302,W0231
 import os
 import numpy as np
 
 from PyQt4 import QtGui
 
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
-try: 
+try:
     from matplotlib.backends.backend_qt4agg import NavigationToolbar2QTAgg as NavigationToolbar2
 except ImportError:
     from matplotlib.backends.backend_qt4agg import NavigationToolbar2QT as NavigationToolbar2
 from matplotlib.figure import Figure
 import matplotlib.image
 
-MplLineStyles = ['-' , '--' , '-.' , ':' , 'None' , ' ' , '']
+MplLineStyles = ['-', '--', '-.', ':', 'None', ' ', '']
 MplLineMarkers = [
     ". (point         )",
     "* (star          )",

@@ -1,4 +1,4 @@
-#pylint: disable=W0403,C0103,R0901,R0904,R0913
+#pylint: disable=W0403,C0103,R0901,R0904,R0913,C0302
 import numpy
 import sys
 

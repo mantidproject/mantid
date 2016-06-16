@@ -1711,8 +1711,13 @@ class MainWindow(QtGui.QMainWindow):
         lattice_parameters = self._get_lattice_parameters()
 
         # refine UB matrix by constraint on lattice parameters
-        status, ret_obj = self._myControl.refine_ub_matrix_by_lattice(peak_info_list, set_hkl_int,
-                                                                     lattice_parameters)
+        status, error_message = self._myControl.refine_ub_matrix_by_lattice(peak_info_list, set_hkl_int,
+                                                                            lattice_parameters)
+        if status:
+            # successfully refine the lattice and UB matrix
+            self._show_refined_ub_result()
+        else:
+            self.pop_one_button_dialog(error_message)
 
         return
 
@@ -1970,8 +1975,7 @@ class MainWindow(QtGui.QMainWindow):
         curr_state = str(self.ui.pushButton_selectAllScans2Merge.text()).startswith('Select')
 
         # select/deselect all
-        for row_index in range(self.ui.tableWidget_mergeScans.rowCount()):
-            self.ui.tableWidget_mergeScans.select_all_rows(curr_state)
+        self.ui.tableWidget_mergeScans.select_all_rows(curr_state)
 
         # set the text to the push button
         if curr_state:
@@ -2598,7 +2602,7 @@ class MainWindow(QtGui.QMainWindow):
         h, k, l = peak_info.get_spice_hkl()
         q_x, q_y, q_z = peak_info.get_peak_centre()
         m1 = self._myControl.get_sample_log_value(exp_number, scan_number, 1, '_m1')
-        wave_length = hb3a.convert_to_wave_length(m1=m1)
+        wave_length = hb3a.convert_to_wave_length(m1_position=m1)
 
         # Set to table
         status, err_msg = self.ui.tableWidget_peaksCalUB.append_row(
