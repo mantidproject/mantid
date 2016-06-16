@@ -136,8 +136,8 @@ void ProcessIndirectFitParameters::exec() {
 
   // Get output workspace columns
   auto outputSpectraNames = std::vector<std::string>();
-  for (auto i = 0; i < workspaces.size(); i++) {
-    for (auto j = 0; j < workspaces[i].size(); j++) {
+  for (size_t i = 0; i < workspaces.size(); i++) {
+    for (size_t j = 0; j < workspaces[i].size(); j++) {
       outputSpectraNames.push_back(workspaces[i][j]->YUnitLabel());
     }
   }
