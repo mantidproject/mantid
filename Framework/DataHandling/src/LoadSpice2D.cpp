@@ -515,8 +515,8 @@ void LoadSpice2D::setMetadataAsRunProperties(
 double
 LoadSpice2D::detectorDistance(std::map<std::string, std::string> &metadata) {
 
-  double sample_detector_distance = 0;
-  double sample_detector_distance_offset, sample_si_window_distance;
+  double sample_detector_distance = 0, sample_detector_distance_offset = 0,
+         sample_si_window_distance = 0;
 
   // check if it's the new format
   if (metadata.find("Motor_Positions/sample_det_dist") != metadata.end()) {
