@@ -16,9 +16,10 @@
 QwtWorkspaceSpectrumData::QwtWorkspaceSpectrumData(
     const Mantid::API::MatrixWorkspace &workspace, int wsIndex,
     const bool logScaleY, const bool plotAsDistribution)
-    : MantidQwtMatrixWorkspaceData(logScaleY), m_wsIndex(wsIndex), m_X(workspace.readX(wsIndex)),
-      m_Y(workspace.readY(wsIndex)), m_E(workspace.readE(wsIndex)),
-      m_xTitle(), m_yTitle(), m_isHistogram(workspace.isHistogramData()),
+    : MantidQwtMatrixWorkspaceData(logScaleY), m_wsIndex(wsIndex),
+      m_X(workspace.readX(wsIndex)), m_Y(workspace.readY(wsIndex)),
+      m_E(workspace.readE(wsIndex)), m_xTitle(), m_yTitle(),
+      m_isHistogram(workspace.isHistogramData()),
       m_dataIsNormalized(workspace.isDistribution()), m_binCentres(false),
       m_isDistribution(false) {
   // Actual plotting based on what type of data we have
@@ -28,8 +29,7 @@ QwtWorkspaceSpectrumData::QwtWorkspaceSpectrumData(
 
   m_xTitle = MantidQt::API::PlotAxis(workspace, 0).title();
   m_yTitle = MantidQt::API::PlotAxis((m_dataIsNormalized || m_isDistribution),
-                                     workspace)
-                 .title();
+                                     workspace).title();
 
   // Calculate the min and max values
   calculateYMinAndMax();
@@ -121,7 +121,7 @@ bool QwtWorkspaceSpectrumData::setAsDistribution(bool on) {
 QwtWorkspaceSpectrumData &QwtWorkspaceSpectrumData::
 operator=(const QwtWorkspaceSpectrumData &rhs) {
   if (this != &rhs) {
-    static_cast<MantidQwtMatrixWorkspaceData&>(*this) = rhs;
+    static_cast<MantidQwtMatrixWorkspaceData &>(*this) = rhs;
     m_wsIndex = rhs.m_wsIndex;
     m_X = rhs.m_X;
     m_Y = rhs.m_Y;

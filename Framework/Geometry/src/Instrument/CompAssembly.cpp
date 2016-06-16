@@ -427,7 +427,7 @@ void CompAssembly::testIntersectionWithChildren(
 void CompAssembly::printChildren(std::ostream &os) const {
   for (int i = 0; i < nelements(); i++) {
     boost::shared_ptr<IComponent> it = (*this)[i];
-    os << "Component " << i << " : **********" << std::endl;
+    os << "Component " << i << " : **********\n";
     it->printSelf(os);
   }
 }
@@ -444,11 +444,11 @@ void CompAssembly::printTree(std::ostream &os) const {
     const CompAssembly *test = dynamic_cast<CompAssembly *>(it.get());
     os << "Element " << i << " from " << nelements() << " in the assembly : ";
     if (test) {
-      os << test->getName() << std::endl;
-      os << "Children :******** " << std::endl;
+      os << test->getName() << '\n';
+      os << "Children :******** \n";
       test->printTree(os);
     } else
-      os << it->getName() << std::endl;
+      os << it->getName() << '\n';
   }
 }
 
@@ -500,8 +500,8 @@ const Quat CompAssembly::getRotation() const {
  */
 std::ostream &operator<<(std::ostream &os, const CompAssembly &ass) {
   ass.printSelf(os);
-  os << "************************" << std::endl;
-  os << "Number of children :" << ass.nelements() << std::endl;
+  os << "************************\n";
+  os << "Number of children :" << ass.nelements() << '\n';
   ass.printChildren(os);
   return os;
 }

@@ -14,6 +14,10 @@ Muon Analysis
 Algorithms
 ----------
 
+- :ref:`MaxEnt <algm-MaxEnt>`: MaxEnt has a new property, *ComplexImage*, which can be set
+to *False* when the imaginary part of the image should not be taken into account for the
+calculations.
+
 Fit Functions
 -------------
 

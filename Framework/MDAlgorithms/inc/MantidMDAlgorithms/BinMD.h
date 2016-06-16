@@ -33,7 +33,6 @@ namespace MDAlgorithms {
 class DLLExport BinMD : public SlicingAlgorithm {
 public:
   BinMD();
-  ~BinMD() override;
 
   /// Algorithm's name for identification
   const std::string name() const override { return "BinMD"; }

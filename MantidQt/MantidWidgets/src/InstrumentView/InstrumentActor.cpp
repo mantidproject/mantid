@@ -644,7 +644,7 @@ void InstrumentActor::resetColors() {
     double integratedValue = m_specIntegrs[wi];
     try {
       // Find if the detector is masked
-      const auto &dets = sharedWorkspace->getSpectrum(wi)->getDetectorIDs();
+      const auto &dets = sharedWorkspace->getSpectrum(wi).getDetectorIDs();
       bool masked = false;
 
       if (mask) {
@@ -1250,10 +1250,10 @@ bool SetVisibleComponentVisitor::visit(RectangularDetectorActor *actor) {
 }
 
 bool SetVisibleComponentVisitor::visit(StructuredDetectorActor *actor) {
-	bool on = actor->getComponent()->getComponentID() == m_id ||
-		actor->isChildDetector(m_id);
-	actor->setVisibility(on);
-	return on;
+  bool on = actor->getComponent()->getComponentID() == m_id ||
+            actor->isChildDetector(m_id);
+  actor->setVisibility(on);
+  return on;
 }
 
 //-------------------------------------------------------------------------//

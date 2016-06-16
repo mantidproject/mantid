@@ -3,13 +3,10 @@
 
 #include <QString>
 
-namespace MantidQt
-{
-namespace CustomInterfaces
-{
+namespace MantidQt {
+namespace CustomInterfaces {
 
-class SANSConstants
-{
+class SANSConstants {
 public:
   SANSConstants();
   ~SANSConstants();
@@ -24,14 +21,13 @@ public:
   static QString getQResolutionH2ToolTipText();
   static QString getQResolutionA1ToolTipText();
   static QString getQResolutionA2ToolTipText();
-  
+
   // Input related
   static double getMaxDoubleValue();
   static int getMaxIntValue();
   static int getDecimals();
 };
-
 }
 }
 
-#endif  //MANTIDQTCUSTOMINTERFACES_SANSADDFILES_H_
+#endif // MANTIDQTCUSTOMINTERFACES_SANSADDFILES_H_

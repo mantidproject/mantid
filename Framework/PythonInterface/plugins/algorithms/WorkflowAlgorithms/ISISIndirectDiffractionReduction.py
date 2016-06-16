@@ -1,11 +1,10 @@
 #pylint: disable=no-init,too-many-instance-attributes
+import os
 
 from mantid.simpleapi import *
 from mantid.api import *
 from mantid.kernel import *
 from mantid import config
-
-import os
 
 
 class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
@@ -72,7 +71,7 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
                              doc='Selects the type of detector grouping to be used.')
 
         self.declareProperty(WorkspaceGroupProperty('OutputWorkspace', '',
-                             direction=Direction.Output),
+                                                    direction=Direction.Output),
                              doc='Group name for the result workspaces.')
 
 #------------------------------------------------------------------------------
@@ -120,12 +119,12 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
             load_opts['Mode'] = 'FoilOut'
 
         self._workspace_names, self._chopped_data = load_files(self._data_files,
-                                                              self._ipf_filename,
-                                                              self._spectra_range[0],
-                                                              self._spectra_range[1],
-                                                              sum_files=self._sum_files,
-                                                              load_logs=self._load_logs,
-                                                              load_opts=load_opts)
+                                                               self._ipf_filename,
+                                                               self._spectra_range[0],
+                                                               self._spectra_range[1],
+                                                               sum_files=self._sum_files,
+                                                               load_logs=self._load_logs,
+                                                               load_opts=load_opts)
 
         # Load container if run is given
         if self._container_data_files is not None:

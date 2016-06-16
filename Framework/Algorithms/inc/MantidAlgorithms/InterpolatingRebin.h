@@ -66,10 +66,6 @@ namespace Algorithms {
  */
 class DLLExport InterpolatingRebin : public Rebin {
 public:
-  /// Default constructor
-  InterpolatingRebin() : Rebin() {}
-  /// Destructor
-  ~InterpolatingRebin() override {}
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "InterpolatingRebin"; }
   /// Summary of algorithms purpose

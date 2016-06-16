@@ -11,16 +11,6 @@ namespace MDAlgorithms {
 DECLARE_ALGORITHM(LessThanMD)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-LessThanMD::LessThanMD() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-LessThanMD::~LessThanMD() {}
-
-//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string LessThanMD::name() const { return "LessThanMD"; }
 

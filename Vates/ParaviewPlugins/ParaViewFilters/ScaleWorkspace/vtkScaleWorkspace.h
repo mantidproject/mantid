@@ -6,8 +6,7 @@
 #include <boost/scoped_ptr.hpp>
 
 // cppcheck-suppress class_X_Y
-class VTK_EXPORT vtkScaleWorkspace : public vtkPointSetAlgorithm
-{
+class VTK_EXPORT vtkScaleWorkspace : public vtkPointSetAlgorithm {
 public:
   static vtkScaleWorkspace *New();
   vtkTypeMacro(vtkScaleWorkspace,
@@ -18,19 +17,21 @@ public:
   void SetZScaling(double zScaling);
   double GetMinValue();
   double GetMaxValue();
-  const char* GetInstrument();
+  const char *GetInstrument();
   int GetSpecialCoordinates();
+
 protected:
   vtkScaleWorkspace();
   ~vtkScaleWorkspace() override;
-  int RequestInformation(vtkInformation *, vtkInformationVector **, vtkInformationVector *);
+  int RequestInformation(vtkInformation *, vtkInformationVector **,
+                         vtkInformationVector *);
   int RequestData(vtkInformation *, vtkInformationVector **,
                   vtkInformationVector *) override;
   int FillInputPortInformation(int port, vtkInformation *info) override;
 
 private:
-  vtkScaleWorkspace(const vtkScaleWorkspace&);
-  void operator = (const vtkScaleWorkspace&);
+  vtkScaleWorkspace(const vtkScaleWorkspace &);
+  void operator=(const vtkScaleWorkspace &);
   void updateMetaData(vtkPointSet *inputDataSet);
   double m_xScaling;
   double m_yScaling;

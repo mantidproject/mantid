@@ -167,7 +167,7 @@ double MantidQwtIMDWorkspaceData::getX(size_t i) const {
     x = originalCoord[m_currentPlotAxis];
     // std::cout << wsCoord << " -> " << originalCoord << " at index " << i << "
     // is read as " << x << ". m_dimensionIndex is " << m_dimensionIndex <<
-    // std::endl;
+    // '\n';
   }
   return x;
 }

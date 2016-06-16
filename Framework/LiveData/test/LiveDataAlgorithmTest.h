@@ -108,7 +108,7 @@ public:
       std::string prefix = "";
       if (post > 0)
         prefix = "Post";
-      std::cout << prefix << "Processing algo" << std::endl;
+      std::cout << prefix << "Processing algo\n";
 
       LiveDataAlgorithmImpl alg;
       TS_ASSERT_THROWS_NOTHING(alg.initialize())

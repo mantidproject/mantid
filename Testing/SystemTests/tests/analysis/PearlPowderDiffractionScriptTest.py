@@ -23,10 +23,19 @@ class PearlPowderDiffractionScriptTest(stresstesting.MantidStressTest):
         filenames.extend(('PEARL/Focus_Test/Calibration/pearl_group_12_1_TT70.cal',
                           'PEARL/Focus_Test/Calibration/pearl_offset_15_3.cal',
                           'PEARL/Focus_Test/Calibration/van_spline_TT70_cycle_15_4.nxs',
-                          'PEARL/Focus_Test/Attentuation/PRL112_DC25_10MM_FF.OUT'))
+                          'PEARL/Focus_Test/Attentuation/PRL112_DC25_10MM_FF.OUT',
+                          # reference files
+                          'PEARL/Focus_Test/RefFiles/Ref_PRL92476_92479.nxs',
+                          'PEARL/Focus_Test/RefFiles/Ref_PRL92476_92479-0.gss',
+                          'PEARL/Focus_Test/RefFiles/Ref_PRL92476_92479_d_xye-0.dat',
+                          'PEARL/Focus_Test/RefFiles/Ref_PRL92476_92479_tof_xye-0.dat'
+                          ))
         # raw files / run numbers 92476-92479
         for i in range(6, 10):
             filenames.append('PEARL/Focus_Test/RawFiles/PEARL0009247' + str(i))
+        # reference files
+
+
 
         return filenames
 
@@ -193,6 +202,43 @@ class LoadTests(unittest.TestCase):
         self.assertAlmostEqual(files_data[1].readY(0)[3293], files_data[2].readY(0)[3293],
                                places=DIFF_PLACES)
 
+    def test_nexus_reference_files(self):
+        nexus_ws = "Ref_PRL92476_92479"
+        nxs_file = os.path.join(DIRS[0], "PEARL/Focus_Test/RefFiles/Ref_PRL92476_92479.nxs")
+        Load(Filename=nxs_file, OutputWorkspace=nexus_ws)
+
+        mod_group_table = mtd["PRL92476_92479"]
+        return nexus_ws, mod_group_table
+
+    def test_gss_referenece_files(self):
+        gss_wsname = "GSSFile"
+        gss_file = os.path.join(DIRS[0], "PEARL/Focus_Test/DataOut/PRL92476_92479-0.gss")
+        LoadGSS(Filename=gss_file, OutputWorkspace=gss_wsname)
+
+        ref_gss_wsname = "Ref_GSSFile"
+        ref_gss_file = os.path.join(DIRS[0], "PEARL/Focus_Test/RefFiles/Ref_PRL92476_92479-0.gss")
+        LoadGSS(Filename=ref_gss_file, OutputWorkspace=ref_gss_wsname)
+
+        return gss_wsname, ref_gss_wsname
+
+    def test_xye_d_reference_files(self):
+        xye_dspacing_wsname = mtd["PRL92476_92479_mods1-9"]
+
+        ref_xye_dspacing_wsname = "Ref_PRL92476_92479_mods1-9_D"
+        xye_dSpacing_file = os.path.join(DIRS[0], "PEARL/Focus_Test/RefFiles/Ref_PRL92476_92479_d_xye-0.dat")
+        Load(Filename=xye_dSpacing_file, OutputWorkspace=ref_xye_dspacing_wsname)
+
+        return xye_dspacing_wsname, ref_xye_dspacing_wsname
+
+    def test_xye_tof_reference_files(self):
+        xye_tof_wsname = mtd["PRL92476_92479_mods1-9"]
+
+        ref_xye_tof_wsname = "Ref_PRL92476_92479_mods1-9_TOF"
+        xye_tof_file = os.path.join(DIRS[0], "PEARL/Focus_Test/RefFiles/Ref_PRL92476_92479_tof_xye-0.dat")
+        Load(Filename=xye_tof_file, OutputWorkspace=ref_xye_tof_wsname)
+
+        return xye_tof_wsname, ref_xye_tof_wsname
+
 
 class PearlPowderDiffractionScriptTestCalibration(stresstesting.MantidStressTest):
     def requiredFiles(self):
@@ -202,7 +248,13 @@ class PearlPowderDiffractionScriptTestCalibration(stresstesting.MantidStressTest
         filenames.extend(('PEARL/Calibration_Test/Calibration/pearl_absorp_sphere_10mm_newinst2_long.nxs',
                           'PEARL/Calibration_Test/Calibration/pearl_group_12_1_TT35.cal',
                           'PEARL/Calibration_Test/Calibration/pearl_group_12_1_TT70.cal',
-                          'PEARL/Calibration_Test/Calibration/pearl_group_12_1_TT88.cal'))
+                          'PEARL/Calibration_Test/Calibration/pearl_group_12_1_TT88.cal',
+                          # reference files
+                          'PEARL/Calibration_Test/RefFiles/van_spline_TT35_cycle_15_3.nxs',
+                          'PEARL/Calibration_Test/RefFiles/van_spline_TT70_cycle_15_3.nxs',
+                          'PEARL/Calibration_Test/RefFiles/van_spline_TT88_cycle_15_3.nxs',
+
+                          ))
 
         # raw files / run numbers 92476-92479
         for i in range(0, 2):
@@ -401,3 +453,19 @@ class LoadCalibTests(unittest.TestCase):
             self.assertEqual(mtd_tt_workspace[i - 1].readY(0)[7654], vanadium_tt_file[i].readY(0)[7654])
             self.assertEqual(mtd_tt_workspace[i - 1].readX(0)[734], vanadium_tt_file[i].readX(0)[734])
             self.assertEqual(mtd_tt_workspace[i - 1].readE(0)[17], vanadium_tt_file[i].readE(0)[17])
+
+    def test_ttmode_nexus_ref_files(self, tt_mode="35"):
+        nexus_ws = mtd["van_tt" + tt_mode]
+
+        ref_nexus_ws = "ref_van_tt" + tt_mode
+        ref_nxs_file = os.path.join(DIRS[0], "PEARL/Calibration_Test/RefFiles/van_spline_TT" +
+                                    tt_mode + "_cycle_15_3.nxs")
+        Load(Filename=ref_nxs_file, OutputWorkspace=ref_nexus_ws)
+
+        return nexus_ws, ref_nexus_ws
+
+    def test_nexus_reference_files(self):
+        # testing different tt mode files
+        self.test_ttmode_nexus_ref_files("35")
+        self.test_ttmode_nexus_ref_files("70")
+        self.test_ttmode_nexus_ref_files("88")

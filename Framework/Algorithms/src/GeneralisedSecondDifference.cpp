@@ -20,13 +20,6 @@ DECLARE_ALGORITHM(GeneralisedSecondDifference)
 using namespace Kernel;
 using namespace API;
 
-/// Constructor
-GeneralisedSecondDifference::GeneralisedSecondDifference()
-    : Algorithm(), m_Cij(0), m_Cij2(0), m_z(0), m_m(0) {}
-
-/// Destructor
-GeneralisedSecondDifference::~GeneralisedSecondDifference() {}
-
 /// Initialisation method.
 void GeneralisedSecondDifference::init() {
 
@@ -106,7 +99,7 @@ void GeneralisedSecondDifference::exec() {
   for (int i = spec_min; i <= spec_max; i++) {
     int out_index = i - spec_min;
     out->getSpectrum(out_index)
-        ->setSpectrumNo(inputWS->getSpectrum(i)->getSpectrumNo());
+        .setSpectrumNo(inputWS->getSpectrum(i).getSpectrumNo());
     const MantidVec &refX = inputWS->readX(i);
     const MantidVec &refY = inputWS->readY(i);
     const MantidVec &refE = inputWS->readE(i);

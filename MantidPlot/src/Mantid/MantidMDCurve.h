@@ -9,12 +9,13 @@
 // Forward definitions
 class MantidUI;
 
-/** 
+/**
     This class is for plotting IMDWorkspaces
 
     @date 17/11/2011
 
-    Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+    Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+   National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -32,20 +33,19 @@ class MantidUI;
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
     File change history is stored at: <https://github.com/mantidproject/mantid>
-    Code Documentation is available at: <http://doxygen.mantidproject.org>    
+    Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
-class MantidMDCurve : public MantidCurve
-{
+class MantidMDCurve : public MantidCurve {
   Q_OBJECT
 public:
-
   /// More complex constructor setting some defaults for the curve
-  MantidMDCurve(const QString& wsName,Graph* g,
-              bool err=false,bool distr = false, Graph::CurveType style = Graph::HorizontalSteps);
+  MantidMDCurve(const QString &wsName, Graph *g, bool err = false,
+                bool distr = false,
+                Graph::CurveType style = Graph::HorizontalSteps);
 
-  /// Copy constructor 
-  MantidMDCurve(const MantidMDCurve& c);
+  /// Copy constructor
+  MantidMDCurve(const MantidMDCurve &c);
 
   ~MantidMDCurve() override;
 
@@ -55,9 +55,10 @@ public:
   int rtti() const override { return Rtti_PlotUserItem; }
 
   /// Used for waterfall plots: updates the data curves with an offset
-  //void loadData();
+  // void loadData();
 
-  /// Overrides qwt_plot_curve::setData to make sure only data of QwtWorkspaceSpectrumData type can  be set
+  /// Overrides qwt_plot_curve::setData to make sure only data of
+  /// QwtWorkspaceSpectrumData type can  be set
   void setData(const QwtData &data);
 
   /// Overrides qwt_plot_curve::boundingRect
@@ -66,11 +67,15 @@ public:
   /// Return pointer to the data if it of the right type or 0 otherwise
   MantidQwtIMDWorkspaceData *mantidData() override;
 
-  /// Return pointer to the data if it of the right type or 0 otherwise, const version
+  /// Return pointer to the data if it of the right type or 0 otherwise, const
+  /// version
   const MantidQwtIMDWorkspaceData *mantidData() const override;
 
   /// Enables/disables drawing of error bars
-  void setErrorBars(bool yes=true,bool drawAll = false){m_drawErrorBars = yes;m_drawAllErrorBars = drawAll;}
+  void setErrorBars(bool yes = true, bool drawAll = false) {
+    m_drawErrorBars = yes;
+    m_drawAllErrorBars = drawAll;
+  }
 
   void draw(QPainter *p, const QwtScaleMap &xMap, const QwtScaleMap &yMap,
             const QRect &) const override;
@@ -79,10 +84,9 @@ public:
   QString saveToString();
 
   /// The workspace name
-  QString workspaceName()const{return m_wsName;}
+  QString workspaceName() const { return m_wsName; }
 
 private:
-
   using PlotCurve::draw; // Avoid Intel compiler warning
 
   /// Init the curve
@@ -90,8 +94,7 @@ private:
 
   /// Handles delete notification
   void postDeleteHandle(const std::string &wsName) override {
-    if (wsName == m_wsName.toStdString())
-    {
+    if (wsName == m_wsName.toStdString()) {
       observePostDelete(false);
       emit removeMe(this);
     }
@@ -106,15 +109,15 @@ private:
 
 signals:
 
-  void resetData(const QString&);
+  void resetData(const QString &);
 
 private slots:
 
-  void dataReset(const QString&);
+  void dataReset(const QString &);
 
 private:
-
-  QString m_wsName;///< Workspace name. If empty the ws isn't in the data service
+  QString
+      m_wsName; ///< Workspace name. If empty the ws isn't in the data service
 };
 
 #endif // MANTID_CURVE_H

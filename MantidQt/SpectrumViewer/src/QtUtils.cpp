@@ -1,10 +1,8 @@
 #include "MantidQtSpectrumViewer/QtUtils.h"
 #include "MantidQtSpectrumViewer/SVUtils.h"
 
-namespace MantidQt
-{
-namespace SpectrumView
-{
+namespace MantidQt {
+namespace SpectrumView {
 
 /**
  * Set the specified string as the entry at the specified row and col of
@@ -15,16 +13,12 @@ namespace SpectrumView
  * @param string  The string that will be placed in the table.
  * @param table   Pointer to the table
  */
-void QtUtils::SetTableEntry(       int           row,
-                                   int           col,
-                             const std::string & string,
-                                   QTableWidget* table )
-{
-  QString qString = QString::fromStdString( string ).simplified();
-  QTableWidgetItem *item = new QTableWidgetItem( qString );
-  table->setItem( row, col, item );
+void QtUtils::SetTableEntry(int row, int col, const std::string &string,
+                            QTableWidget *table) {
+  QString qString = QString::fromStdString(string).simplified();
+  QTableWidgetItem *item = new QTableWidgetItem(qString);
+  table->setItem(row, col, item);
 }
-
 
 /**
  * Format and set the specified double as the entry at the specified row
@@ -38,18 +32,12 @@ void QtUtils::SetTableEntry(       int           row,
  * @param value     The number to be formatted and placed in the table.
  * @param table     Pointer to the table
  */
-void  QtUtils::SetTableEntry( int           row,
-                              int           col,
-                              int           width,
-                              int           precision,
-                              double        value,
-                              QTableWidget* table )
-{
+void QtUtils::SetTableEntry(int row, int col, int width, int precision,
+                            double value, QTableWidget *table) {
   std::string str;
-  SVUtils::Format( width, precision, value, str );
-  SetTableEntry( row, col, str, table );
+  SVUtils::Format(width, precision, value, str);
+  SetTableEntry(row, col, str, table);
 }
-
 
 /**
  * Set the specified string into the specified QLineEdit widget.
@@ -57,13 +45,10 @@ void  QtUtils::SetTableEntry( int           row,
  * @param string    The string that will be placed in the widget.
  * @param lineEdit  Pointer to the QLineEdit widget.
  */
-void  QtUtils::SetText( const std::string & string,
-                              QLineEdit*    lineEdit )
-{
-  QString qString = QString::fromStdString( string );
-  lineEdit->setText( qString.trimmed() );
+void QtUtils::SetText(const std::string &string, QLineEdit *lineEdit) {
+  QString qString = QString::fromStdString(string);
+  lineEdit->setText(qString.trimmed());
 }
-
 
 /**
  * Format and set the specified double as the text in the specified
@@ -75,14 +60,11 @@ void  QtUtils::SetText( const std::string & string,
  * @param value      The number to be formatted and placed in the table.
  * @param lineEdit   Pointer to the QLineEdit widget.
  */
-void  QtUtils::SetText( int        width,
-                        int        precision,
-                        double     value,
-                        QLineEdit* lineEdit )
-{
+void QtUtils::SetText(int width, int precision, double value,
+                      QLineEdit *lineEdit) {
   std::string str;
-  SVUtils::Format( width, precision, value, str );
-  SetText( str, lineEdit );
+  SVUtils::Format(width, precision, value, str);
+  SetText(str, lineEdit);
 }
 
 } // namespace SpectrumView

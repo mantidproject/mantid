@@ -1,7 +1,7 @@
 #include "MantidVatesSimpleGuiViewWidgets/SaveScreenshotReaction.h"
 
 #if defined(__INTEL_COMPILER)
-  #pragma warning disable 1170
+#pragma warning disable 1170
 #endif
 
 #include <pqActiveObjects.h>
@@ -21,47 +21,41 @@
 #include <vtkPVConfig.h>
 
 #if defined(__INTEL_COMPILER)
-  #pragma warning enable 1170
+#pragma warning enable 1170
 #endif
 
 #include <QDebug>
 #include <QFileInfo>
 
-namespace Mantid
-{
-namespace Vates
-{
-namespace SimpleGui
-{
+namespace Mantid {
+namespace Vates {
+namespace SimpleGui {
 
 //-----------------------------------------------------------------------------
-SaveScreenshotReaction::SaveScreenshotReaction(QAction* parentObject)
-  : Superclass(parentObject)
-{
+SaveScreenshotReaction::SaveScreenshotReaction(QAction *parentObject)
+    : Superclass(parentObject) {
   // load state enable state depends on whether we are connected to an active
   // server or not and whether
-  pqActiveObjects* activeObjects = &pqActiveObjects::instance();
-  QObject::connect(activeObjects, SIGNAL(serverChanged(pqServer*)),
-                   this, SLOT(updateEnableState()));
-  QObject::connect(activeObjects, SIGNAL(viewChanged(pqView*)),
-                   this, SLOT(updateEnableState()));
+  pqActiveObjects *activeObjects = &pqActiveObjects::instance();
+  QObject::connect(activeObjects, SIGNAL(serverChanged(pqServer *)), this,
+                   SLOT(updateEnableState()));
+  QObject::connect(activeObjects, SIGNAL(viewChanged(pqView *)), this,
+                   SLOT(updateEnableState()));
   this->updateEnableState();
 }
 
 //-----------------------------------------------------------------------------
-void SaveScreenshotReaction::updateEnableState()
-{
-  pqActiveObjects* activeObjects = &pqActiveObjects::instance();
-  bool is_enabled = (activeObjects->activeView() && activeObjects->activeServer());
+void SaveScreenshotReaction::updateEnableState() {
+  pqActiveObjects *activeObjects = &pqActiveObjects::instance();
+  bool is_enabled =
+      (activeObjects->activeView() && activeObjects->activeServer());
   this->parentAction()->setEnabled(is_enabled);
 }
 
 //-----------------------------------------------------------------------------
-void SaveScreenshotReaction::saveScreenshot()
-{
-  pqView* view = pqActiveObjects::instance().activeView();
-  if (!view)
-  {
+void SaveScreenshotReaction::saveScreenshot() {
+  pqView *view = pqActiveObjects::instance().activeView();
+  if (!view) {
     qDebug() << "Cannnot save image. No active view.";
     return;
   }
@@ -69,18 +63,15 @@ void SaveScreenshotReaction::saveScreenshot()
   pqSaveSnapshotDialog ssDialog(pqCoreUtilities::mainWidget());
   ssDialog.setViewSize(view->getSize());
 
-  if (ssDialog.exec() != QDialog::Accepted)
-  {
+  if (ssDialog.exec() != QDialog::Accepted) {
     return;
   }
 
   QString lastUsedExt;
   // Load the most recently used file extensions from QSettings, if available.
-  pqSettings* settings = pqApplicationCore::instance()->settings();
-  if (settings->contains("extensions/ScreenshotExtension"))
-  {
-    lastUsedExt =
-        settings->value("extensions/ScreenshotExtension").toString();
+  pqSettings *settings = pqApplicationCore::instance()->settings();
+  if (settings->contains("extensions/ScreenshotExtension")) {
+    lastUsedExt = settings->value("extensions/ScreenshotExtension").toString();
   }
 
   QString filters;
@@ -90,19 +81,17 @@ void SaveScreenshotReaction::saveScreenshot()
   filters += ";;PPM image (*.ppm)";
   filters += ";;JPG image (*.jpg)";
   filters += ";;PDF file (*.pdf)";
-  pqFileDialog file_dialog(NULL,
-                           pqCoreUtilities::mainWidget(),
+  pqFileDialog file_dialog(NULL, pqCoreUtilities::mainWidget(),
                            tr("Save Screenshot:"), QString(), filters);
   file_dialog.setRecentlyUsedExtension(lastUsedExt);
   file_dialog.setObjectName("FileSaveScreenshotDialog");
   file_dialog.setFileMode(pqFileDialog::AnyFile);
-  if (file_dialog.exec() != QDialog::Accepted)
-  {
+  if (file_dialog.exec() != QDialog::Accepted) {
     return;
   }
 
   QString file = file_dialog.getSelectedFiles()[0];
-  QFileInfo fileInfo = QFileInfo( file );
+  QFileInfo fileInfo = QFileInfo(file);
   lastUsedExt = QString("*.") + fileInfo.suffix();
   settings->setValue("extensions/ScreenshotExtension", lastUsedExt);
 
@@ -113,11 +102,10 @@ void SaveScreenshotReaction::saveScreenshot()
       pqActiveObjects::instance().activeServer()->proxyManager();
   vtkSMProxy *colorPalette = pxm->GetProxy("global_properties", "ColorPalette");
   vtkSmartPointer<vtkSMProxy> clone;
-  if (colorPalette && !palette.isEmpty())
-  {
+  if (colorPalette && !palette.isEmpty()) {
     // save current property values
-    clone.TakeReference(pxm->NewProxy(colorPalette->GetXMLGroup(),
-                                      colorPalette->GetXMLName()));
+    clone.TakeReference(
+        pxm->NewProxy(colorPalette->GetXMLGroup(), colorPalette->GetXMLName()));
     clone->Copy(colorPalette);
 
     auto chosenPalette = vtkSmartPointer<vtkSMProxy>::Take(
@@ -126,54 +114,44 @@ void SaveScreenshotReaction::saveScreenshot()
   }
 
   int stereo = ssDialog.getStereoMode();
-  if (stereo)
-  {
+  if (stereo) {
     pqRenderViewBase::setStereo(stereo);
   }
 
   SaveScreenshotReaction::saveScreenshot(file, size, ssDialog.quality());
 
   // restore color palette.
-  if (clone)
-  {
+  if (clone) {
     colorPalette->Copy(clone);
   }
 
   // restore stereo
-  if (stereo)
-  {
+  if (stereo) {
     pqRenderViewBase::setStereo(0);
   }
 
   // check if need to render to clear the changes we did
   // while saving the screenshot.
-  if (clone || stereo)
-  {
+  if (clone || stereo) {
     pqApplicationCore::instance()->render();
   }
 }
 
 //-----------------------------------------------------------------------------
-void SaveScreenshotReaction::saveScreenshot(const QString& filename,
-                                            const QSize& size, int quality)
-{
-  pqView* view = pqActiveObjects::instance().activeView();
+void SaveScreenshotReaction::saveScreenshot(const QString &filename,
+                                            const QSize &size, int quality) {
+  pqView *view = pqActiveObjects::instance().activeView();
   vtkSmartPointer<vtkImageData> img;
-  if (view)
-  {
+  if (view) {
     img.TakeReference(view->captureImage(size));
   }
 
-  if (img.GetPointer() == NULL)
-  {
+  if (img.GetPointer() == NULL) {
     qCritical() << "Save Image failed.";
-  }
-  else
-  {
+  } else {
     pqImageUtil::saveImage(img, filename, quality);
   }
 }
-
 }
 }
 }

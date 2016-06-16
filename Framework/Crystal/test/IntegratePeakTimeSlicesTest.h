@@ -223,11 +223,11 @@ public:
                           10);
 
     } catch (char *s) {
-      std::cout << "Error= " << s << std::endl;
+      std::cout << "Error= " << s << '\n';
     } catch (std::exception &es) {
-      std::cout << "Error1=" << es.what() << std::endl;
+      std::cout << "Error1=" << es.what() << '\n';
     } catch (...) {
-      std::cout << "Some Error Happened" << std::endl;
+      std::cout << "Some Error Happened\n";
     }
   }
 

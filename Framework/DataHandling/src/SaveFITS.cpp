@@ -128,7 +128,7 @@ void SaveFITS::exec() {
   g_log.information() << "Image of size " + std::to_string(ws->blocksize()) +
                              " columns by " +
                              std::to_string(ws->getNumberHistograms()) +
-                             " rows saved in '" + filename + "'" << std::endl;
+                             " rows saved in '" + filename + "'\n";
 }
 
 /**
@@ -172,8 +172,7 @@ void SaveFITS::writeFITSImageMatrix(const API::MatrixWorkspace_sptr img,
   const size_t bytespp = static_cast<size_t>(bitDepth) / 8;
 
   for (size_t row = 0; row < sizeY; ++row) {
-    Mantid::API::ISpectrum *spectrum = img->getSpectrum(row);
-    const auto &dataY = spectrum->readY();
+    const auto &dataY = img->readY(row);
     for (size_t col = 0; col < sizeX; ++col) {
       int32_t pixelVal;
       if (8 == bitDepth) {

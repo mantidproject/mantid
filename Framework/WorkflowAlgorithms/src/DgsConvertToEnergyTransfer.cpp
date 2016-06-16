@@ -31,16 +31,6 @@ namespace WorkflowAlgorithms {
 DECLARE_ALGORITHM(DgsConvertToEnergyTransfer)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-DgsConvertToEnergyTransfer::DgsConvertToEnergyTransfer() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-DgsConvertToEnergyTransfer::~DgsConvertToEnergyTransfer() {}
-
-//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string DgsConvertToEnergyTransfer::name() const {
   return "DgsConvertToEnergyTransfer";
@@ -101,7 +91,7 @@ void DgsConvertToEnergyTransfer::init() {
 /** Execute the algorithm.
  */
 void DgsConvertToEnergyTransfer::exec() {
-  g_log.notice() << "Starting DgsConvertToEnergyTransfer" << std::endl;
+  g_log.notice() << "Starting DgsConvertToEnergyTransfer\n";
   // Get the reduction property manager
   const std::string reductionManagerName =
       this->getProperty("ReductionProperties");
@@ -124,7 +114,7 @@ void DgsConvertToEnergyTransfer::exec() {
 
   // Calculate the initial energy and time zero
   const std::string facility = ConfigService::Instance().getFacility().name();
-  g_log.notice() << "Processing for " << facility << std::endl;
+  g_log.notice() << "Processing for " << facility << '\n';
   double eiGuess = this->getProperty("IncidentEnergyGuess");
   if (EMPTY_DBL() == eiGuess) {
     // SNS has a log called EnergyRequest that can be used to get the
@@ -171,7 +161,7 @@ void DgsConvertToEnergyTransfer::exec() {
       }
     } else {
       if (!monWS) {
-        g_log.notice() << "Trying to determine file name" << std::endl;
+        g_log.notice() << "Trying to determine file name\n";
         std::string runFileName =
             inputWS->run().getProperty("Filename")->value();
         if (runFileName.empty()) {
@@ -184,13 +174,13 @@ void DgsConvertToEnergyTransfer::exec() {
         if (boost::ends_with(runFileName, "_event.nxs") ||
             boost::ends_with(runFileName, ".nxs.h5") ||
             boost::ends_with(runFileName, ".nxs")) {
-          g_log.notice() << "Loading NeXus monitors" << std::endl;
+          g_log.notice() << "Loading NeXus monitors\n";
           loadAlgName = "LoadNexusMonitors";
           fileProp = "Filename";
         }
 
         if (boost::ends_with(runFileName, "_neutron_event.dat")) {
-          g_log.notice() << "Loading PreNeXus monitors" << std::endl;
+          g_log.notice() << "Loading PreNeXus monitors\n";
           loadAlgName = "LoadPreNexusMonitors";
           boost::replace_first(runFileName, "_neutron_event.dat",
                                "_runinfo.xml");
@@ -226,7 +216,7 @@ void DgsConvertToEnergyTransfer::exec() {
       tZero = getei->getProperty("Tzero");
     }
 
-    g_log.notice() << "Adjusting for T0" << std::endl;
+    g_log.notice() << "Adjusting for T0\n";
     IAlgorithm_sptr alg = this->createChildAlgorithm("ChangeBinOffset");
     alg->setProperty("InputWorkspace", inputWS);
     alg->setProperty("OutputWorkspace", outputWS);
@@ -465,7 +455,7 @@ void DgsConvertToEnergyTransfer::exec() {
   outputWS = norm->getProperty("OutputWorkspace");
 
   // Convert to energy transfer
-  g_log.notice() << "Converting to energy transfer." << std::endl;
+  g_log.notice() << "Converting to energy transfer.\n";
   IAlgorithm_sptr cnvun = this->createChildAlgorithm("ConvertUnits");
   cnvun->setProperty("InputWorkspace", outputWS);
   cnvun->setProperty("OutputWorkspace", outputWS);
@@ -475,7 +465,7 @@ void DgsConvertToEnergyTransfer::exec() {
   cnvun->executeAsChildAlg();
   outputWS = cnvun->getProperty("OutputWorkspace");
 
-  g_log.notice() << "Rebinning data" << std::endl;
+  g_log.notice() << "Rebinning data\n";
   IAlgorithm_sptr rebin = this->createChildAlgorithm("Rebin");
   rebin->setProperty("InputWorkspace", outputWS);
   rebin->setProperty("OutputWorkspace", outputWS);
@@ -531,7 +521,7 @@ void DgsConvertToEnergyTransfer::exec() {
   const bool sofphieIsDistribution =
       reductionManager->getProperty("SofPhiEIsDistribution");
 
-  g_log.notice() << "Rebinning data" << std::endl;
+  g_log.notice() << "Rebinning data\n";
   rebin->setProperty("InputWorkspace", outputWS);
   rebin->setProperty("OutputWorkspace", outputWS);
   if (sofphieIsDistribution) {
@@ -541,7 +531,7 @@ void DgsConvertToEnergyTransfer::exec() {
   outputWS = rebin->getProperty("OutputWorkspace");
 
   if (sofphieIsDistribution) {
-    g_log.notice() << "Making distribution" << std::endl;
+    g_log.notice() << "Making distribution\n";
     IAlgorithm_sptr distrib =
         this->createChildAlgorithm("ConvertToDistribution");
     distrib->setProperty("Workspace", outputWS);

@@ -32,16 +32,6 @@ using namespace Kernel;
 DECLARE_ALGORITHM(ConvolutionFitSequential)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-ConvolutionFitSequential::ConvolutionFitSequential() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-ConvolutionFitSequential::~ConvolutionFitSequential() {}
-
-//----------------------------------------------------------------------------------------------
 
 /// Algorithms name for identification. @see Algorithm::name
 const std::string ConvolutionFitSequential::name() const {
@@ -176,9 +166,9 @@ void ConvolutionFitSequential::exec() {
     outputWsName += convertFuncToShort(funcName);
   }
   outputWsName += backType + "_s";
-  outputWsName += boost::lexical_cast<std::string>(specMin);
+  outputWsName += std::to_string(specMin);
   outputWsName += "_to_";
-  outputWsName += boost::lexical_cast<std::string>(specMax);
+  outputWsName += std::to_string(specMax);
 
   // Convert input workspace to get Q axis
   const std::string tempFitWsName = "__convfit_fit_ws";
@@ -189,7 +179,7 @@ void ConvolutionFitSequential::exec() {
   std::string plotPeakInput = "";
   for (int i = specMin; i < specMax + 1; i++) {
     std::string nextWs = tempFitWsName + ",i";
-    nextWs += boost::lexical_cast<std::string>(i);
+    nextWs += std::to_string(i);
     plotPeakInput += nextWs + ";";
     plotPeakStringProg.report("Constructing PlotPeak name");
   }
@@ -345,7 +335,7 @@ void ConvolutionFitSequential::exec() {
   for (int i = specMin; i < specMax + 1; i++) {
     renamer->setProperty("InputWorkspace", groupWsNames.at(i - specMin));
     std::string outName = outputWsName + "_";
-    outName += boost::lexical_cast<std::string>(i);
+    outName += std::to_string(i);
     outName += "_Workspace";
     renamer->setProperty("OutputWorkspace", outName);
     renamer->executeAsChildAlg();

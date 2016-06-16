@@ -36,10 +36,6 @@ namespace WorkflowAlgorithms {
 
 class DLLExport SANSBeamFinder : public API::Algorithm {
 public:
-  /// (Empty) Constructor
-  SANSBeamFinder() : API::Algorithm() {}
-  /// Virtual destructor
-  ~SANSBeamFinder() override {}
   /// Algorithm's name
   const std::string name() const override { return "SANSBeamFinder"; }
   /// Summary of algorithms purpose
@@ -61,7 +57,8 @@ private:
   API::MatrixWorkspace_sptr
   loadBeamFinderFile(const std::string &beamCenterFile);
   void maskEdges(API::MatrixWorkspace_sptr beamCenterWS, int high, int low,
-                 int left, int right);
+                 int left, int right,
+                 const std::string &componentName = "detector1");
 
   boost::shared_ptr<Kernel::PropertyManager> m_reductionManager;
   std::string m_output_message;

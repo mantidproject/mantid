@@ -199,7 +199,7 @@ void SaveLauenorm::exec() {
       out << std::setw(10) << Utils::round(p.getSigmaIntensity());
     }
 
-    out << std::endl;
+    out << '\n';
   }
 
   out.flush();

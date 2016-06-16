@@ -1,5 +1,7 @@
+.. _Dynamic PDF:
+
 Dynamic PDF
-================================
+===========
 
 .. contents:: Table of Contents
   :local:

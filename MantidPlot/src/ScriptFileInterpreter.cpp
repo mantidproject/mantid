@@ -4,6 +4,7 @@
 #include "MantidQtMantidWidgets/ScriptEditor.h"
 #include <QAction>
 #include <QFileInfo>
+#include <QFontDatabase>
 #include <QMenu>
 #include <QMessageBox>
 #include <QPushButton>
@@ -223,9 +224,9 @@ inline void
 ScriptFileInterpreter::replaceSelectedText(const ScriptEditor *editor,
                                            const QString &text) {
   int UTF8_CodePage = 65001;
-  const char *b =
-      ((editor->SCI_GETCODEPAGE == UTF8_CodePage) ? text.toUtf8().constData()
-                                                  : text.toLatin1().constData());
+  const char *b = ((editor->SCI_GETCODEPAGE == UTF8_CodePage)
+                       ? text.toUtf8().constData()
+                       : text.toLatin1().constData());
   editor->SendScintilla(editor->SCI_REPLACESEL, b);
 }
 

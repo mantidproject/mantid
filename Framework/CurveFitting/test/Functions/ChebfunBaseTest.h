@@ -137,7 +137,7 @@ private:
         TS_ASSERT_EQUALS(y[i], 0.0);
       } else {
         // std::cerr << xi << ' ' << y[i] << ' ' << sin(xi) + cos(xi) <<
-        // std::endl;
+        // '\n';
         TS_ASSERT_DELTA(y[i], sin(xi) + cos(xi), 1e-4);
       }
     }
@@ -171,7 +171,7 @@ private:
     auto x = base->linspace(2 * base->size());
     for (size_t i = 0; i < x.size(); ++i) {
       double xi = x[i];
-      // std::cerr << xi << ' ' << base->eval(xi,dp) - Cos(xi) << std::endl;
+      // std::cerr << xi << ' ' << base->eval(xi,dp) - Cos(xi) << '\n';
       TS_ASSERT_DELTA(base->eval(xi, dp), deriv(xi), 1e-13);
     }
   }

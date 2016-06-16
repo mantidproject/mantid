@@ -35,8 +35,7 @@
 /**
  * It contains a list of 24 predefined colors.
  */
-class ColorBox : public QComboBox
-{
+class ColorBox : public QComboBox {
   Q_OBJECT
 
 public:
@@ -46,7 +45,7 @@ public:
    */
   ColorBox(QWidget *parent = 0);
   //! Set the current color
-  void setColor(const QColor& c);
+  void setColor(const QColor &c);
   //! Return the current color
   QColor color() const;
   //! Return the list of colors
@@ -54,13 +53,14 @@ public:
   //! Returns the color names
   static QStringList colorNames();
   //! Return the index for a given color
-  static int colorIndex(const QColor& c);
+  static int colorIndex(const QColor &c);
   //! Return the color at index 'colorIndex'
   static QColor color(int colorIndex);
   //! Return the default color at index 'colorIndex'
   static QColor defaultColor(int colorIndex);
-  //! Returns TRUE if the color is included in the color box, otherwise returns FALSE.
-  static bool isValidColor(const QColor& color);
+  //! Returns TRUE if the color is included in the color box, otherwise returns
+  // FALSE.
+  static bool isValidColor(const QColor &color);
   //! Returns the number of predefined colors
   static int numPredefinedColors();
   //! Returns the color name for the predefined colors

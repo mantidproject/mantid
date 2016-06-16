@@ -65,13 +65,13 @@ public:
       if (i == 19) {
         work_in->setData(i, yStrange, yTooDead);
       }
-      work_in->getSpectrum(i)->setSpectrumNo(i);
+      work_in->getSpectrum(i).setSpectrumNo(i);
 
       Mantid::Geometry::Detector *det =
           new Mantid::Geometry::Detector("", i, NULL);
       instr->add(det);
       instr->markAsDetector(det);
-      work_in->getSpectrum(i)->setDetectorID(i);
+      work_in->getSpectrum(i).setDetectorID(i);
     }
 
     FindDeadDetectors alg;
