@@ -89,15 +89,15 @@ public:
     TS_ASSERT_EQUALS(whitelist.description(4), "Description5");
   }
 
-  void test_column_showPrefix() {
+  void test_column_showValue() {
     DataProcessorWhiteList whitelist;
     whitelist.addElement("Column1", "Property1", "Description1");
     whitelist.addElement("Column3", "Property3", "Description3", true);
 
     TS_ASSERT_EQUALS(whitelist.size(), 2);
     // Descriptions
-    TS_ASSERT_EQUALS(whitelist.showPrefix(0), false);
-    TS_ASSERT_EQUALS(whitelist.showPrefix(1), true);
+    TS_ASSERT_EQUALS(whitelist.showValue(0), false);
+    TS_ASSERT_EQUALS(whitelist.showValue(1), true);
   }
 
   void test_column_prefix() {

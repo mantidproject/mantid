@@ -377,7 +377,7 @@ std::string getReducedWorkspaceName(int rowNo,
   for (int col = 0; col < ncols; col++) {
 
     // Do we want to use this column to generate the name of the output ws?
-    if (whitelist.showPrefix(col)) {
+    if (whitelist.showValue(col)) {
 
       // Get what's in the column
       const std::string valueStr =

@@ -660,7 +660,7 @@ std::string GenericDataProcessorPresenter::getReducedWorkspaceName(
   for (int col = 0; col < m_columns; col++) {
 
     // Do we want to use this column to generate the name of the output ws?
-    if (m_whitelist.showPrefix(col)) {
+    if (m_whitelist.showValue(col)) {
 
       // Get what's in the column
       const std::string valueStr =
