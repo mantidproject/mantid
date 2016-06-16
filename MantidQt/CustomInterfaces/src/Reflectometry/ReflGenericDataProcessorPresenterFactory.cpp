@@ -81,19 +81,18 @@ ReflGenericDataProcessorPresenterFactory::create() {
 
   // Pre-processing instructions as a map:
   // Keys are the column names
-  // Values are the associated pre-processing algorithms
+  // Values are the pre-processing algorithms that will be applied to columns
   std::map<std::string, DataProcessorPreprocessingAlgorithm> preprocessMap = {
-      /*This pre-processor will be applied to column 'Run(s)'*/
-      {/*The name of the column*/ "Run(s)",
-       /*The pre-processor algorithm, 'Plus' by default*/ DataProcessorPreprocessingAlgorithm()},
-      /*This pre-processor will be applied to column 'Transmission Run(s)'*/
-      {/*The name of the column*/ "Transmission Run(s)",
-       /*The pre-processor algorithm: CreateTransmissionWorkspaceAuto*/
+      /* 'Plus' will be applied to column 'Run(s)'*/
+      {"Run(s)",
        DataProcessorPreprocessingAlgorithm(
-           "CreateTransmissionWorkspaceAuto",
-           /*Prefix for the output workspace*/
-           "TRANS_",
-           /*Blacklist of properties we don't want to show*/
+           "Plus", "TOF_", std::set<std::string>{"LHSWorkspace", "RHSWorkspace",
+                                                 "OutputWorkspace"})},
+      /* 'CreateTransmissionWorkspaceAuto' will be applied to column
+         'Transmission Run(s)'*/
+      {"Transmission Run(s)",
+       DataProcessorPreprocessingAlgorithm(
+           "CreateTransmissionWorkspaceAuto", "TRANS_",
            std::set<std::string>{"FirstTransmissionRun",
                                  "SecondTransmissionRun", "OutputWorkspace"})}};
 

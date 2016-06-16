@@ -1,8 +1,8 @@
 #ifndef MANTIDQTMANTIDWIDGETS_DATAPROCESSORPREPROCESSINGALGORITHM_H
 #define MANTIDQTMANTIDWIDGETS_DATAPROCESSORPREPROCESSINGALGORITHM_H
 
-#include "MantidQtMantidWidgets/WidgetDllOption.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorProcessingAlgorithmBase.h"
+#include "MantidQtMantidWidgets/WidgetDllOption.h"
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -53,8 +53,6 @@ public:
   std::string outputProperty() const;
   // The prefix to add to the output property
   std::string prefix() const;
-  // If we want to show the info associated with this pre-processor
-  bool show() const;
 
 private:
   // A prefix to the name of the pre-processed output ws

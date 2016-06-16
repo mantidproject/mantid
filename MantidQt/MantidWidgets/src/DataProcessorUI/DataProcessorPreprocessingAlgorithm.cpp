@@ -34,12 +34,10 @@ DataProcessorPreprocessingAlgorithm::DataProcessorPreprocessingAlgorithm(
   m_outProperty = outputWsProperties.at(0);
 }
 
-/** Default constructor: use 'Plus' as the default pre-processor algorithm
+/** Default constructor: do nothing
 */
 DataProcessorPreprocessingAlgorithm::DataProcessorPreprocessingAlgorithm()
-    : DataProcessorPreprocessingAlgorithm(
-          "Plus", "TOF_", std::set<std::string>{"LHSWorkspace", "RHSWorkspace",
-                                                "OutputWorkspace"}) {}
+    : m_prefix(), m_lhs(), m_rhs(), m_outProperty() {}
 
 // Destructor
 DataProcessorPreprocessingAlgorithm::~DataProcessorPreprocessingAlgorithm() {}
@@ -63,6 +61,5 @@ std::string DataProcessorPreprocessingAlgorithm::outputProperty() const {
 std::string DataProcessorPreprocessingAlgorithm::prefix() const {
   return m_prefix;
 }
-
 }
 }
