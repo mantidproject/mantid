@@ -22,7 +22,8 @@ Jump Fit
 Improvements
 ------------
 
-* :ref:`LoadVesuvio <algm-LoadVesuvio>` now uses the whole TOF range for loaded monitor data (0-20000)
+- :ref:`LoadVesuvio <algm-LoadVesuvio>` now uses the whole TOF range for loaded monitor data (0-20000)
+- Physical positions were included to the 311 reflection of BASIS instrument for improved instrument view.
 
 Bugfixes
 --------

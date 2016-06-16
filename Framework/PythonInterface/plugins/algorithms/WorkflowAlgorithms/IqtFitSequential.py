@@ -122,8 +122,8 @@ class IqtFitSequential(PythonAlgorithm):
 
         # Name stem for generated workspace
         output_workspace = '%sIqtFit_%s_s%d_to_%d' % (getWSprefix(self._input_ws.getName()),
-                                                  self._fit_type, self._spec_min,
-                                                  self._spec_max)
+                                                      self._fit_type, self._spec_min,
+                                                      self._spec_max)
 
         setup_prog.report('Converting to Histogram')
         convert_to_hist_alg = self.createChildAlgorithm("ConvertToHistogram")
