@@ -1,5 +1,6 @@
 #include "MantidHistogramData/BinEdgeStandardDeviations.h"
 #include "MantidHistogramData/BinEdgeVariances.h"
+#include "MantidHistogramData/PointStandardDeviations.h"
 #include "MantidHistogramData/PointVariances.h"
 
 namespace Mantid {
