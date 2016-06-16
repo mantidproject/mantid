@@ -133,7 +133,7 @@ private:
    */
   boost::mpi::environment m_mpi_environment;
   int argc = 0;
-  char** argv;
+  char **argv;
 #endif
 };
 

@@ -33,7 +33,6 @@ template <class T> struct SumGaussError : public std::binary_function<T, T, T> {
   }
 };
 
-
 // Newer versions of boost::mpi::reduce (>=v1.55) will recognize std::vector
 // as a collection of individual elements and operate on a per-element
 // basis.  Older versions treat vectors as a single object.  Thus we need
@@ -45,14 +44,14 @@ template <class T> struct SumGaussError : public std::binary_function<T, T, T> {
 #endif
 #if (BOOST_VERSION / 100 % 1000) >= 55 // is the boost version >= 1.55?
 
-struct vplus : public std::plus<double> { };
+struct vplus : public std::plus<double> {};
 
-struct eplus : public SumGaussError<double> { };
-        
+struct eplus : public SumGaussError<double> {};
+
 #else // older version of Boost that passes the entire MantidVec
-      // the operator
+// the operator
 
-/// Sum for boostmpi MantidVec 
+/// Sum for boostmpi MantidVec
 struct vplus : public std::binary_function<MantidVec, MantidVec,
                                            MantidVec> { // functor for operator+
   MantidVec
@@ -79,7 +78,6 @@ struct eplus : public std::binary_function<MantidVec, MantidVec,
 };
 
 #endif // boost version
-
 }
 
 // Register the algorithm into the AlgorithmFactory

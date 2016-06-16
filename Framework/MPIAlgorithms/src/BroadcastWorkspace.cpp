@@ -25,8 +25,8 @@ void BroadcastWorkspace::init() {
   // input workspace
   declareProperty(make_unique<WorkspaceProperty<>>(
       "InputWorkspace", "", Direction::Input, PropertyMode::Optional));
-  declareProperty(
-      make_unique<WorkspaceProperty<>>("OutputWorkspace", "", Direction::Output));
+  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                   Direction::Output));
 
   declareProperty("BroadcasterRank", 0,
                   boost::make_shared<BoundedValidator<int>>(
