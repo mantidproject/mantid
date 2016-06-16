@@ -26,7 +26,8 @@ ReflGenericDataProcessorPresenterFactory::create() {
                        "/><i>required</i><br />Runs may be given as run "
                        "numbers or workspace names. Multiple runs may be "
                        "added together by separating them with a '+'. <br "
-                       "/><br /><b>Example:</b> <samp>1234+1235+1236</samp>");
+                       "/><br /><b>Example:</b> <samp>1234+1235+1236</samp>",
+                       true);
   whitelist.addElement(
       "Angle", "ThetaIn",
       "<b>Angle used during the run.< / b><br / ><i>optional</i><br />Unit: "
@@ -94,10 +95,7 @@ ReflGenericDataProcessorPresenterFactory::create() {
            "TRANS_",
            /*Blacklist of properties we don't want to show*/
            std::set<std::string>{"FirstTransmissionRun",
-                                 "SecondTransmissionRun", "OutputWorkspace"},
-           /*I don't want to show the transmission runs in the output ws
-              name*/
-           false)}};
+                                 "SecondTransmissionRun", "OutputWorkspace"})}};
 
   // The post-processor algorithm's name, 'Stitch1DMany' by default
   DataProcessorPostprocessingAlgorithm postprocessor;
