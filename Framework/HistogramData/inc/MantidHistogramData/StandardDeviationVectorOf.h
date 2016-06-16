@@ -5,6 +5,8 @@
 #include "MantidHistogramData/VectorOf.h"
 #include "MantidHistogramData/Iterable.h"
 
+#include <cmath>
+
 namespace Mantid {
 namespace HistogramData {
 namespace detail {
