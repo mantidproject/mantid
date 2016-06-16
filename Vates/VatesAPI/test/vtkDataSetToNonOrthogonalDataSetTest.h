@@ -15,14 +15,15 @@
 #include "MantidGeometry/MDGeometry/HKL.h"
 #include "MantidKernel/MDUnit.h"
 
+#include "MantidVatesAPI/vtkRectilinearGrid_Silent.h"
 #include <vtkDataArray.h>
 #include <vtkFieldData.h>
 #include <vtkFloatArray.h>
-#include <vtkPoints.h>
-#include "MantidVatesAPI/vtkRectilinearGrid_Silent.h"
-#include <vtkUnstructuredGrid.h>
 #include <vtkNew.h>
+#include <vtkPoints.h>
 #include <vtkSmartPointer.h>
+#include <vtkTypedDataArray.h>
+#include <vtkUnstructuredGrid.h>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -130,7 +131,7 @@ private:
     vtkDataArray *arr = ds->GetFieldData()->GetArray(fieldname.c_str());
     vtkTypedDataArray<T> *tarr = vtkTypedDataArray<T>::FastDownCast(arr);
     std::vector<T> vals(size);
-    tarr->GetTupleValue(0, &vals[0]);
+    tarr->GetTypedTuple(0, &vals[0]);
     return vals;
   }
 
