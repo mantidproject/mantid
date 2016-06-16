@@ -4,6 +4,7 @@
 #include "MantidHistogramData/DllConfig.h"
 
 #include <algorithm>
+#include <type_traits>
 
 namespace Mantid {
 namespace HistogramData {
@@ -51,7 +52,9 @@ protected:
 };
 
 /// Offsets each element in lhs by rhs.
-template <class T> inline T operator+(T lhs, const double rhs) {
+template <class T, class = typename std::enable_if<
+                       std::is_base_of<Offsetable<T>, T>::value>::type>
+inline T operator+(T lhs, const double rhs) {
   return lhs += rhs;
 }
 

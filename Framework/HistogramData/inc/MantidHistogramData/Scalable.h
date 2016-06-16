@@ -4,6 +4,7 @@
 #include "MantidHistogramData/DllConfig.h"
 
 #include <algorithm>
+#include <type_traits>
 
 namespace Mantid {
 namespace HistogramData {
@@ -51,12 +52,16 @@ protected:
 };
 
 /// Scales each element in lhs by the factor given by rhs.
-template <class T> inline T operator*(T lhs, const double rhs) {
+template <class T, class = typename std::enable_if<
+                       std::is_base_of<Scalable<T>, T>::value>::type>
+inline T operator*(T lhs, const double rhs) {
   return lhs *= rhs;
 }
 
 /// Scales each element in rhs by the factor given by lhs.
-template <class T> inline T operator*(const double lhs, T rhs) {
+template <class T, class = typename std::enable_if<
+                       std::is_base_of<Scalable<T>, T>::value>::type>
+inline T operator*(const double lhs, T rhs) {
   return rhs *= lhs;
 }
 
