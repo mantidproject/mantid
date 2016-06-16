@@ -54,7 +54,6 @@ public:
   double costFunctionVal() override;
 
 private:
-  void calCovarianceMatrix(double epsrel, gsl_matrix *covar);
   /// Evaluate the fitting function and calculate the residuals.
   void eval_F(const DoubleFortranVector &x, DoubleFortranVector &f) const;
   /// Evaluate the Jacobian

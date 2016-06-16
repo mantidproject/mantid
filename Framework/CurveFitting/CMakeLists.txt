@@ -122,9 +122,6 @@ set ( SRC_FILES
 	src/MultiDomainCreator.cpp
 	src/ParDomain.cpp
 	src/ParameterEstimator.cpp
-	src/RalNlls/DTRS.cpp
-	src/RalNlls/Internal.cpp
-	src/RalNlls/NLLS.cpp
 	src/RalNlls/TrustRegion.cpp
 	src/RalNlls/Workspaces.cpp
 	src/SeqDomain.cpp
@@ -251,9 +248,6 @@ set ( INC_FILES
 	inc/MantidCurveFitting/Functions/UserFunction1D.h
 	inc/MantidCurveFitting/Functions/VesuvioResolution.h
 	inc/MantidCurveFitting/Functions/Voigt.h
-	inc/MantidCurveFitting/RalNlls/DTRS.h
-	inc/MantidCurveFitting/RalNlls/Internal.h
-	inc/MantidCurveFitting/RalNlls/NLLS.h
 	inc/MantidCurveFitting/RalNlls/TrustRegion.h
 	inc/MantidCurveFitting/RalNlls/Workspaces.h
 	inc/MantidCurveFitting/GSLFunctions.h
@@ -388,7 +382,6 @@ set ( TEST_FILES
 	Functions/UserFunctionTest.h
 	Functions/VesuvioResolutionTest.h
 	Functions/VoigtTest.h
-	RalNlls/DTRSTest.h
 	RalNlls/NLLSTest.h
 	GSLMatrixTest.h
 	GSLVectorTest.h

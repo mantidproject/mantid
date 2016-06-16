@@ -23,9 +23,6 @@ using namespace NLLS;
 
 TrustRegionMinimizer::TrustRegionMinimizer()
     : m_function(){
-  //declareProperty("AbsError", m_absError, "Absolute error allowed for "
-  //                                        "parameters - a stopping parameter "
-  //                                        "in success.");
 }
 
 void TrustRegionMinimizer::initialize(
@@ -384,24 +381,7 @@ bool TrustRegionMinimizer::iterate(size_t iter) {
 }
 
 double TrustRegionMinimizer::costFunctionVal() {
-  return 0.0;
-}
-
-/* Calculates covariance matrix
- *
- * @param epsrel :: Is used to remove linear-dependent columns
- * @param covar :: Returned covariance matrix, here as
- */
-void TrustRegionMinimizer::calCovarianceMatrix(double epsrel,
-                                                      gsl_matrix *covar) {
-//#if GSL_MAJOR_VERSION < 2
-//  gsl_multifit_covar(m_gslSolver->J, epsrel, covar);
-//#else
-//  gsl_matrix *J = gsl_matrix_alloc(gslContainer.n, gslContainer.p);
-//  gsl_multifit_fdfsolver_jac(m_gslSolver, J);
-//  gsl_multifit_covar(J, epsrel, covar);
-//  gsl_matrix_free(J);
-//#endif
+  return m_leastSquares->val();
 }
 
 } // namespace FuncMinimisers
