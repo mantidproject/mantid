@@ -2,8 +2,8 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/NotebookWriter.h"
 #include "MantidKernel/make_unique.h"
-#include "MantidQtMantidWidgets/DataProcessorUI/ParseKeyValueString.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorVectorString.h"
+#include "MantidQtMantidWidgets/DataProcessorUI/ParseKeyValueString.h"
 
 #include <boost/algorithm/string.hpp>
 #include <boost/foreach.hpp>
@@ -52,8 +52,8 @@ specified via the corresponding hinting line edit in the view
 DataProcessorGenerateNotebook::DataProcessorGenerateNotebook(
     std::string name, QDataProcessorTableModel_sptr model,
     const std::string instrument, const DataProcessorWhiteList &whitelist,
-    const std::map<std::string, DataProcessorPreprocessingAlgorithm> &
-        preprocessMap,
+    const std::map<std::string, DataProcessorPreprocessingAlgorithm>
+        &preprocessMap,
     const DataProcessorProcessingAlgorithm &processor,
     const DataProcessorPostprocessingAlgorithm &postprocessor,
     const std::map<std::string, std::string> preprocessingOptionsMap,
@@ -290,8 +290,8 @@ std::string tableString(QDataProcessorTableModel_sptr model,
 boost::tuple<std::string, std::string> postprocessGroupString(
     const std::set<int> &rows, QDataProcessorTableModel_sptr model,
     const DataProcessorWhiteList &whitelist,
-    const std::map<std::string, DataProcessorPreprocessingAlgorithm> &
-        preprocessMap,
+    const std::map<std::string, DataProcessorPreprocessingAlgorithm>
+        &preprocessMap,
     const DataProcessorProcessingAlgorithm &processor,
     const DataProcessorPostprocessingAlgorithm &postprocessor,
     const std::string &postprocessingOptions) {
@@ -313,8 +313,7 @@ boost::tuple<std::string, std::string> postprocessGroupString(
   for (auto rowIt = rows.begin(); rowIt != rows.end(); ++rowIt) {
 
     // The reduced ws name without prefix (for example 'TOF_13460_13462')
-    auto suffix = getWorkspaceName(*rowIt, model, whitelist, preprocessMap,
-                                   processor, false);
+    auto suffix = getReducedWorkspaceName(*rowIt, model, whitelist);
 
     // The reduced ws name: 'IvsQ_TOF_13460_13462'
     inputNames.emplace_back(processor.prefix(0) + suffix);
@@ -327,7 +326,8 @@ boost::tuple<std::string, std::string> postprocessGroupString(
   stitch_string << outputWSName;
   stitch_string << completeOutputProperties(
                        postprocessor.name(),
-                       postprocessor.numberOfOutputProperties()) << " = ";
+                       postprocessor.numberOfOutputProperties())
+                << " = ";
   stitch_string << postprocessor.name() << "(";
   stitch_string << postprocessor.inputProperty() << " = '";
   stitch_string << boost::algorithm::join(inputNames, ", ") << "'";
@@ -365,49 +365,41 @@ std::string plot1DString(const std::vector<std::string> &ws_names) {
  @param prefix : wheter to return the name with the prefix or not
  @return : the workspace name
 */
-std::string getWorkspaceName(
-    int rowNo, QDataProcessorTableModel_sptr model,
-    const DataProcessorWhiteList &whitelist,
-    const std::map<std::string, DataProcessorPreprocessingAlgorithm> &
-        preprocessMap,
-    const DataProcessorProcessingAlgorithm &processor, bool prefix) {
+std::string getReducedWorkspaceName(int rowNo,
+                                    QDataProcessorTableModel_sptr model,
+                                    const DataProcessorWhiteList &whitelist,
+                                    const std::string &prefix) {
 
-  // The name of the output workspaces, e.g. 'TOF_13462', 'TRANS_13463', etc
-  std::vector<std::string> workspaceNames;
+  std::vector<std::string> names;
 
   int ncols = static_cast<int>(whitelist.size());
 
-  // Run through columns, excluding 'Group' and 'Options'
-  for (int col = 0; col < ncols - 2; col++) {
+  for (int col = 0; col < ncols; col++) {
 
-    const std::string colName = whitelist.colNameFromColIndex(col);
+    // Do we want to use this column to generate the name of the output ws?
+    if (whitelist.showPrefix(col)) {
 
-    // We only included in the ws name pre-processed columns
-    if (preprocessMap.count(colName)) {
+      // Get what's in the column
+      const std::string valueStr =
+          model->data(model->index(rowNo, col)).toString().toStdString();
 
-      auto preprocessor = preprocessMap.at(colName);
+      // If it's not empty, use it
+      if (!valueStr.empty()) {
 
-      // Did we include this bit in the output ws name?
-      if (preprocessor.show()) {
-        // The runs
-        const std::string runStr =
-            model->data(model->index(rowNo, col)).toString().toStdString();
+        // But we may have things like '1+2' which we want to replace with '1_2'
+        std::vector<std::string> value;
+        boost::split(value, valueStr, boost::is_any_of("+"));
 
-        if (!runStr.empty()) {
-
-          std::vector<std::string> runs;
-          boost::split(runs, runStr, boost::is_any_of("+"));
-
-          workspaceNames.emplace_back(preprocessor.prefix() +
-                                      boost::algorithm::join(runs, "_"));
-        }
+        names.push_back(whitelist.prefix(col) +
+                        boost::algorithm::join(value, "_"));
       }
     }
-  }
-  if (prefix)
-    return processor.prefix(0) + boost::algorithm::join(workspaceNames, "_");
-  else
-    return boost::algorithm::join(workspaceNames, "_");
+  } // Columns
+
+  std::string wsname = prefix;
+  wsname += boost::algorithm::join(names, "_");
+
+  return wsname;
 }
 
 /**
@@ -430,8 +422,8 @@ boost::tuple<std::string, std::string> reduceRowString(
     const int rowNo, const std::string &instrument,
     QDataProcessorTableModel_sptr model,
     const DataProcessorWhiteList &whitelist,
-    const std::map<std::string, DataProcessorPreprocessingAlgorithm> &
-        preprocessMap,
+    const std::map<std::string, DataProcessorPreprocessingAlgorithm>
+        &preprocessMap,
     const DataProcessorProcessingAlgorithm &processor,
     const std::map<std::string, std::string> &preprocessingOptionsMap,
     const std::string &processingOptions) {
@@ -507,11 +499,7 @@ boost::tuple<std::string, std::string> reduceRowString(
     algProperties.push_back(kvp->first + " = " + kvp->second);
   }
 
-  /* Now construct the output workspace names */
-
-  // The output ws suffix, for example 'TOF_13460_13462'
-  const std::string outputName = getWorkspaceName(
-      rowNo, model, whitelist, preprocessMap, processor, false);
+  /* Now construct the names of the reduced workspaces*/
 
   // Vector containing the output ws names
   // For example
@@ -519,7 +507,8 @@ boost::tuple<std::string, std::string> reduceRowString(
   // 'IvsLam_TOF_13460_13462
   std::vector<std::string> output_properties;
   for (size_t prop = 0; prop < processor.numberOfOutputProperties(); prop++) {
-    output_properties.push_back(processor.prefix(prop) + outputName);
+    output_properties.push_back(getReducedWorkspaceName(
+        rowNo, model, whitelist, processor.prefix(prop)));
   }
 
   std::string outputPropertiesStr =
@@ -559,7 +548,7 @@ loadWorkspaceString(const std::string &runStr, const std::string &instrument,
                     const std::string &options) {
 
   std::vector<std::string> runs;
-  boost::split(runs, runStr, boost::is_any_of("+"));
+  boost::split(runs, runStr, boost::is_any_of("+,"));
 
   std::ostringstream load_strings;
 

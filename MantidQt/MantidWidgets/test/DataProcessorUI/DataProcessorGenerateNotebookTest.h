@@ -48,8 +48,8 @@ private:
          DataProcessorPreprocessingAlgorithm(
              "CreateTransmissionWorkspaceAuto", "TRANS_",
              std::set<std::string>{"FirstTransmissionRun",
-                                   "SecondTransmissionRun", "OutputWorkspace"},
-             false)}};
+                                   "SecondTransmissionRun",
+                                   "OutputWorkspace"})}};
   }
 
   DataProcessorProcessingAlgorithm createReflectometryProcessor() {
@@ -183,10 +183,17 @@ public:
     std::vector<std::string> notebookLines;
     boost::split(notebookLines, generatedNotebook, boost::is_any_of("\n"));
     const std::string result[] = {
-        "{", "   \"metadata\" : {", "      \"name\" : \"Mantid Notebook\"",
-        "   },", "   \"nbformat\" : 3,", "   \"nbformat_minor\" : 0,",
-        "   \"worksheets\" : [", "      {", "         \"cells\" : [",
-        "            {", "               \"cell_type\" : \"markdown\",",
+        "{",
+        "   \"metadata\" : {",
+        "      \"name\" : \"Mantid Notebook\"",
+        "   },",
+        "   \"nbformat\" : 3,",
+        "   \"nbformat_minor\" : 0,",
+        "   \"worksheets\" : [",
+        "      {",
+        "         \"cells\" : [",
+        "            {",
+        "               \"cell_type\" : \"markdown\",",
     };
 
     // Check that the first 10 lines are output as expected
@@ -291,10 +298,21 @@ public:
     std::string userOptions = "Params = '0.1, -0.04, 2.9', StartOverlaps = "
                               "'1.4, 0.1, 1.4', EndOverlaps = '1.6, 2.9, 1.6'";
 
+    DataProcessorWhiteList whitelist;
+    whitelist.addElement("Run(s)", "InputWorkspace", "", true);
+    whitelist.addElement("Angle", "ThetaIn", "");
+    whitelist.addElement("Transmission Run(s)", "FirstTransmissionRun", "");
+    whitelist.addElement("Q min", "MomentumTransferMinimum", "");
+    whitelist.addElement("Q max", "MomentumTransferMaximum", "");
+    whitelist.addElement("dQ/Q", "MomentumTransferStep", "");
+    whitelist.addElement("Scale", "ScaleFactor", "");
+    whitelist.addElement("Group", "Group", "");
+    whitelist.addElement("Options", "Options", "");
+
     boost::tuple<std::string, std::string> output = postprocessGroupString(
-        m_rows, m_model, createReflectometryWhiteList(),
-        createReflectometryPreprocessMap(), createReflectometryProcessor(),
-        DataProcessorPostprocessingAlgorithm(), userOptions);
+        m_rows, m_model, whitelist, createReflectometryPreprocessMap(),
+        createReflectometryProcessor(), DataProcessorPostprocessingAlgorithm(),
+        userOptions);
 
     const std::string result[] = {
         "#Post-process workspaces",
