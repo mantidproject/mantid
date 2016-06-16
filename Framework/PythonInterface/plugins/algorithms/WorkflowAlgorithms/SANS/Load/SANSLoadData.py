@@ -64,9 +64,11 @@
 #
 #         # Get the correct SANSLoader from the SANSLoaderFactory
 #
-#         # Run the appropriate SANSLoader for scatter files
+#         # Run the appropriate SANSLoader for all files
 #
-#         # Run the appropriate SANSLoader for the transmission/direct files
+#         # Reset the workspaces to a zero position
+#
+#         # Check if a move has been requested and perform it
 #
 #         # Set output
 #         pass

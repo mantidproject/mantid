@@ -2,7 +2,27 @@ import unittest
 import mantid
 
 from Move.SANSMove import SANSMoveFactory
-from State.SANSStateMoveWorkspace import SANSStateMoveWorkspace
+from State.SANSState import SANSStateISIS
+from State.SANSStateData import SANSStateDataISIS
+from State.SANSStateMoveWorkspace import (SANSStateMoveWorkspaceLOQ)
+
+
+def create_valid_LOQ_state():
+    state = SANSStateISIS()
+
+    # Add the different descriptors of the SANSState here:
+    data = SANSStateDataISIS()
+    data.sample_scatter = "sample_scat"
+    state.data = data
+
+    # Add the move
+    move = SANSStateMoveWorkspaceLOQ()
+    move.detectors[SANSConstants.high_angle_bank].detector_name = "high-angle"
+    move.detectors[SANSConstants.high_angle_bank].detector_name_short = "test"
+    move.detectors[SANSConstants.low_angle_bank].detector_name = "test"
+    move.detectors[SANSConstants.low_angle_bank].detector_name_short = "test"
+    state.move = move
+
 
 
 class SANSMoveFactoryTest(unittest.TestCase):

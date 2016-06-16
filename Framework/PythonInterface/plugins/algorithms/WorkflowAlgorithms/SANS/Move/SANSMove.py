@@ -55,6 +55,15 @@ def move_sample_holder(workspace, sample_offset, sample_offset_direction):
     move_component(workspace, offset, 'some-sample-holder')
 
 
+def apply_standard_displacement(move_info, workspace, coordinates, component):
+    # Get the detector name
+    component_name = move_info.detectors[component].detector_name
+    # Offset
+    offset = {CanonicalCoordinates.X: coordinates[0],
+              CanonicalCoordinates.Y: coordinates[1]}
+    move_component(workspace, offset, component_name)
+
+
 # -------------------------------------------------
 # Move classes
 # -------------------------------------------------
@@ -234,6 +243,7 @@ class SANSMoveSANS2D(SANSMove):
     def do_move_with_elementary_displacement(self, move_info, workspace, coordinates, component):
         # For LOQ we only have to coordinates
         assert(len(coordinates) == 2)
+        apply_standard_displacement(move_info, workspace, coordinates, component)
 
     @staticmethod
     def is_correct(instrument_type, run_number, **kwargs):
@@ -274,18 +284,107 @@ class SANSMoveLOQ(SANSMove):
     def do_move_with_elementary_displacement(self, move_info, workspace, coordinates, component):
         # For LOQ we only have to coordinates
         assert(len(coordinates) == 2)
-
-        # Get the detector name
-        component_name = move_info.detectors[component].detector_name
-
-        # Offset
-        offset = {CanonicalCoordinates.X: coordinates[0],
-                  CanonicalCoordinates.Y: coordinates[1]}
-        move_component(workspace, offset, component_name)
+        apply_standard_displacement(move_info, workspace, coordinates, component)
 
     @staticmethod
     def is_correct(instrument_type, run_number, **kwargs):
         return True if instrument_type is SANSInstrument.LOQ else False
+
+
+class SANSMoveLARMOROldStyle(SANSMove):
+    def __init__(self):
+        super(SANSMoveLARMOROldStyle, self).__init__()
+
+    def do_move_initial(self, move_info, workspace, coordinates, component):
+        # For LOQ we only have to coordinates
+        assert(len(coordinates) == 2)
+
+        # Move the sample holder
+        move_sample_holder(workspace, move_info.sample_offset, move_info.sample_offset_direction)
+
+        # Shift the low-angle bank detector in the y direction
+        y_shift = -coordinates[1]
+        coordinates_for_only_y = [0.0, y_shift]
+        apply_standard_displacement(move_info, workspace, coordinates_for_only_y, SANSConstants.low_angle_bank)
+
+        # Shift the low-angle bank detector in the x direction
+        x_shift = -coordinates[0]
+        coordinates_for_only_x = [x_shift, 0.0]
+        apply_standard_displacement(move_info, workspace, coordinates_for_only_x, SANSConstants.low_angle_bank)
+
+    def do_move_with_elementary_displacement(self, move_info, workspace, coordinates, component):
+        # For LOQ we only have to coordinates
+        assert(len(coordinates) == 2)
+
+        # Shift component along the y direction
+        # Shift the low-angle bank detector in the y direction
+        y_shift = -coordinates[1]
+        coordinates_for_only_y = [0.0, y_shift]
+        apply_standard_displacement(move_info, workspace, coordinates_for_only_y, component)
+
+        # Shift component along the x direction
+        x_shift = -coordinates[0]
+        coordinates_for_only_x = [x_shift, 0.0]
+        apply_standard_displacement(move_info, workspace, coordinates_for_only_x, component)
+
+    @staticmethod
+    def is_correct(instrument_type, run_number, **kwargs):
+        is_correct_instrument = instrument_type is SANSInstrument.LARMOR
+        is_correct_run_number = run_number < 2217
+        return True if is_correct_instrument and is_correct_run_number else False
+
+
+class SANSMoveLARMORNewStyle(SANSMove):
+    def __init__(self):
+        super(SANSMoveLARMORNewStyle, self).__init__()
+
+    @staticmethod
+    def _rotate_around_y_axis(move_info, workspace, angle, component, bench_rotation):
+        detector = move_info.detectors[component]
+        detector_name = detector.detector_name
+        # Note that the angle definition for the bench in LARMOR and in Mantid seem to have a different handedness
+        total_angle = bench_rotation - angle
+        direction = {CanonicalCoordinates.X: 0.0,
+                     CanonicalCoordinates.Y: 1.0,
+                     CanonicalCoordinates.Z: 0.0}
+        rotate_component(workspace, total_angle, direction, detector_name)
+
+    def do_move_initial(self, move_info, workspace, coordinates, component):
+        # For LOQ we only have to coordinates
+        assert(len(coordinates) == 2)
+
+        # Move the sample holder
+        move_sample_holder(workspace, move_info.sample_offset, move_info.sample_offset_direction)
+
+        # Shift the low-angle bank detector in the y direction
+        y_shift = -coordinates[1]
+        coordinates_for_only_y = [0.0, y_shift]
+        apply_standard_displacement(move_info, workspace, coordinates_for_only_y, SANSConstants.low_angle_bank)
+
+        # Shift the low-angle bank detector in the x direction
+        angle = -coordinates[0]
+        bench_rotation = move_info.bench_rotation
+        self._rotate_around_y_axis(move_info, workspace, angle, SANSConstants.low_angle_bank, bench_rotation)
+
+    def do_move_with_elementary_displacement(self, move_info, workspace, coordinates, component):
+        # For LOQ we only have to coordinates
+        assert(len(coordinates) == 2)
+
+        # Shift component along the y direction
+        # Shift the low-angle bank detector in the y direction
+        y_shift = -coordinates[1]
+        coordinates_for_only_y = [0.0, y_shift]
+        apply_standard_displacement(move_info, workspace, coordinates_for_only_y, component)
+
+        # Shift component along the x direction; not that we don't want to perform a bench rotation again
+        angle = coordinates[0]
+        self._rotate_around_y_axis(move_info, workspace, angle, component, 0.0)
+
+    @staticmethod
+    def is_correct(instrument_type, run_number, **kwargs):
+        is_correct_instrument = instrument_type is SANSInstrument.LARMOR
+        is_correct_run_number = run_number >= 2217
+        return True if is_correct_instrument and is_correct_run_number else False
 
 
 class SANSMoveFactory(object):
@@ -298,9 +397,14 @@ class SANSMoveFactory(object):
         run_number = workspace.getRunNumber()
         instrument = workspace.getInstrument()
         instrument_type = convert_string_to_sans_instrument(instrument.getName())
-
         if SANSMoveLOQ.is_correct(instrument_type, run_number):
             mover = SANSMoveLOQ()
+        elif SANSMoveSANS2D.is_correct(instrument_type, run_number):
+            mover = SANSMoveSANS2D()
+        elif SANSMoveLARMOROldStyle.is_correct(instrument_type, run_number):
+            mover = SANSMoveLARMOROldStyle()
+        elif SANSMoveLARMORNewStyle.is_correct(instrument_type, run_number):
+            mover = SANSMoveLARMORNewStyle()
         else:
             mover = None
             NotImplementedError("SANSLoaderFactory: Other instruments are not implemented yet.")
