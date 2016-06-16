@@ -219,8 +219,6 @@ public:
   void test_MINITOPAZ_fromWorkspace2D() {
     do_test_MINITOPAZ(TOF, 100, 400, 1, false, true);
   }
-
-  void test_MINITOPAZ_long() { do_test_MINITOPAZ(TOF, 10000, 10000); }
 };
 
 #endif /* MANTID_MDEVENTS_MAKEDIFFRACTIONMDEVENTWORKSPACETEST_H_ */
