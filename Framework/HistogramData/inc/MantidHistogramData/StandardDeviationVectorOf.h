@@ -44,12 +44,11 @@ public:
   StandardDeviationVectorOf() = default;
   // The copy and move constructor and assignment are not captured properly by
   // the using declaration above, so we need them here explicitly.
-  StandardDeviationVectorOf(const StandardDeviationVectorOf &other) = default;
-  StandardDeviationVectorOf(StandardDeviationVectorOf &&other) = default;
+  StandardDeviationVectorOf(const StandardDeviationVectorOf &) = default;
+  StandardDeviationVectorOf(StandardDeviationVectorOf &&) = default;
   StandardDeviationVectorOf &
-  operator=(const StandardDeviationVectorOf &other) = default;
-  StandardDeviationVectorOf &
-  operator=(StandardDeviationVectorOf &&other) = default;
+  operator=(const StandardDeviationVectorOf &) = default;
+  StandardDeviationVectorOf &operator=(StandardDeviationVectorOf &&) = default;
 
   StandardDeviationVectorOf(const Variances &variances);
   StandardDeviationVectorOf(Variances &&variances);

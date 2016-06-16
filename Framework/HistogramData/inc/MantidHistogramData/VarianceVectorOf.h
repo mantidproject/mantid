@@ -41,10 +41,10 @@ public:
   VarianceVectorOf() = default;
   // The copy and move constructor and assignment are not captured properly by
   // the using declaration above, so we need them here explicitly.
-  VarianceVectorOf(const VarianceVectorOf &other) = default;
-  VarianceVectorOf(VarianceVectorOf &&other) = default;
-  VarianceVectorOf &operator=(const VarianceVectorOf &other) = default;
-  VarianceVectorOf &operator=(VarianceVectorOf &&other) = default;
+  VarianceVectorOf(const VarianceVectorOf &) = default;
+  VarianceVectorOf(VarianceVectorOf &&) = default;
+  VarianceVectorOf &operator=(const VarianceVectorOf &) = default;
+  VarianceVectorOf &operator=(VarianceVectorOf &&) = default;
 
   VarianceVectorOf(const Sigmas &sigmas);
   VarianceVectorOf(Sigmas &&sigmas);
