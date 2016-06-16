@@ -310,9 +310,8 @@ public:
     whitelist.addElement("Options", "Options", "");
 
     boost::tuple<std::string, std::string> output = postprocessGroupString(
-        m_rows, m_model, whitelist, createReflectometryPreprocessMap(),
-        createReflectometryProcessor(), DataProcessorPostprocessingAlgorithm(),
-        userOptions);
+        m_rows, m_model, whitelist, createReflectometryProcessor(),
+        DataProcessorPostprocessingAlgorithm(), userOptions);
 
     const std::string result[] = {
         "#Post-process workspaces",

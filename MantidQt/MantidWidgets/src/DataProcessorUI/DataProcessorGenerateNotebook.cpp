@@ -122,9 +122,8 @@ std::string DataProcessorGenerateNotebook::generateNotebook(
     /** Post-process group **/
 
     boost::tuple<std::string, std::string> postprocess_string =
-        postprocessGroupString(groupRows, m_model, m_whitelist, m_preprocessMap,
-                               m_processor, m_postprocessor,
-                               m_postprocessingOptions);
+        postprocessGroupString(groupRows, m_model, m_whitelist, m_processor,
+                               m_postprocessor, m_postprocessingOptions);
     notebook->codeCell(boost::get<0>(postprocess_string));
 
     /** Draw plots **/
@@ -290,8 +289,6 @@ std::string tableString(QDataProcessorTableModel_sptr model,
 boost::tuple<std::string, std::string> postprocessGroupString(
     const std::set<int> &rows, QDataProcessorTableModel_sptr model,
     const DataProcessorWhiteList &whitelist,
-    const std::map<std::string, DataProcessorPreprocessingAlgorithm>
-        &preprocessMap,
     const DataProcessorProcessingAlgorithm &processor,
     const DataProcessorPostprocessingAlgorithm &postprocessor,
     const std::string &postprocessingOptions) {
