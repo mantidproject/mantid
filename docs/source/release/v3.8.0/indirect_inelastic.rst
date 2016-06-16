@@ -16,6 +16,11 @@ Algorithms
 Data Analysis
 #############
 
+Elwin
+~~~~~
+
+- Additional option to ungroup Elwin output
+
 Jump Fit
 ~~~~~~~~
 
