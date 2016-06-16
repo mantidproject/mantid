@@ -22,6 +22,7 @@ Jump Fit
 Improvements
 ------------
 
+- Physical positions were included to the 311 reflection of BASIS instrument for improved instrument view.
 
 Bugfixes
 --------
