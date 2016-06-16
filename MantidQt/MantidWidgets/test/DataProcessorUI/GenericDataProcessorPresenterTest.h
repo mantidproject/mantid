@@ -62,7 +62,10 @@ private:
   createReflectometryPreprocessMap() {
 
     return std::map<std::string, DataProcessorPreprocessingAlgorithm>{
-        {"Run(s)", DataProcessorPreprocessingAlgorithm()},
+        {"Run(s)", DataProcessorPreprocessingAlgorithm(
+                       "Plus", "TOF_",
+                       std::set<std::string>{"LHSWorkspace", "RHSWorkspace",
+                                             "OutputWorkspace"})},
         {"Transmission Run(s)",
          DataProcessorPreprocessingAlgorithm(
              "CreateTransmissionWorkspaceAuto", "TRANS_",
