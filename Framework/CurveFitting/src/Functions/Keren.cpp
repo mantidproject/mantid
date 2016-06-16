@@ -18,9 +18,10 @@ DECLARE_FUNCTION(Keren)
  */
 void Keren::init() {
   declareParameter("A", 1.0, "Polarization at time zero");
-  declareParameter("Delta", 0.2, "Distribution width of local fields");
-  declareParameter("Field", 50.0, "Longitudinal field");
-  declareParameter("Fluct", 0.2, "Hopping rate (inverse correlation time)");
+  declareParameter("Delta", 0.2, "Distribution width of local fields (MHz)");
+  declareParameter("Field", 50.0, "Longitudinal field (Gauss)");
+  declareParameter("Fluct", 0.2,
+                   "Hopping rate (inverse correlation time, MHz)");
 }
 
 /**
