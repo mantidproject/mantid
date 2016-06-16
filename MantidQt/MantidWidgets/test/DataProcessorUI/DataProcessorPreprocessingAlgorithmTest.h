@@ -65,7 +65,6 @@ public:
     TS_ASSERT_EQUALS(plus.rhsProperty(), "RHSWorkspace");
     TS_ASSERT_EQUALS(plus.outputProperty(), "OutputWorkspace");
     TS_ASSERT_EQUALS(plus.prefix(), "TOF_");
-    TS_ASSERT_EQUALS(plus.show(), true);
     std::set<std::string> blacklist = {"LHSWorkspace", "RHSWorkspace",
                                        "OutputWorkspace"};
     TS_ASSERT_EQUALS(plus.blacklist(), blacklist);

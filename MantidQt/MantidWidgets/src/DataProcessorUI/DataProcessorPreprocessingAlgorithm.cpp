@@ -5,16 +5,14 @@ namespace MantidWidgets {
 
 /** Constructor
  * @param name : The name of the pre-processing algorithm
- * @param prefix : The prefix that will added to the output workspace name
+ * @param prefix : A prefix that will added to the output workspace name
  * @param blacklist : The list of properties we don't want to show
- * @param show : Whether or not to show the prefix of this pre-processing
  * algorithm in the processed workspace's name
  */
 DataProcessorPreprocessingAlgorithm::DataProcessorPreprocessingAlgorithm(
     const std::string &name, const std::string &prefix,
-    const std::set<std::string> &blacklist, bool show)
-    : DataProcessorProcessingAlgorithmBase(name, blacklist), m_prefix(prefix),
-      m_show(show) {
+    const std::set<std::string> &blacklist)
+    : DataProcessorProcessingAlgorithmBase(name, blacklist), m_prefix(prefix) {
 
   auto inputWsProperties = getInputWsProperties();
 
@@ -66,8 +64,5 @@ std::string DataProcessorPreprocessingAlgorithm::prefix() const {
   return m_prefix;
 }
 
-// Returns a boolean indicating whether or not we want to add the prefix
-// associated to this pre-processor to the output workspace name
-bool DataProcessorPreprocessingAlgorithm::show() const { return m_show; }
 }
 }
