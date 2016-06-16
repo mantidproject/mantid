@@ -46,6 +46,7 @@ using Mantid::MantidVec;
 using Mantid::MantidVecPtr;
 using HistogramData::Counts;
 using HistogramData::CountStandardDeviations;
+using HistogramData::PointStandardDeviations;
 
 MockAlgorithm::MockAlgorithm(size_t nSteps) {
   m_Progress = Mantid::Kernel::make_unique<API::Progress>(this, 0, 1, nSteps);
@@ -177,10 +178,9 @@ Workspace2D_sptr Create2DWorkspaceWithValuesAndXerror(
     const std::set<int64_t> &maskedWorkspaceIndices) {
   auto ws = Create2DWorkspaceWithValues(
       nHist, nBins, isHist, maskedWorkspaceIndices, xVal, yVal, eVal);
-  auto dx1 = Kernel::make_cow<HistogramData::HistogramDx>(
-      isHist ? nBins + 1 : nBins, dxVal);
+  PointStandardDeviations dx1(nBins, dxVal);
   for (int i = 0; i < nHist; i++) {
-    ws->setSharedDx(i, dx1);
+    ws->setPointStandardDeviations(i, dx1);
   }
   return ws;
 }
