@@ -170,15 +170,22 @@ private:
   XMode m_xMode;
 };
 
+template <> void Histogram::initX(const Points &x);
+template <> void Histogram::initX(const BinEdges &x);
+template <> void Histogram::setValues(const Counts &y);
+template <> void Histogram::setValues(const Frequencies &y);
+template <> void Histogram::setUncertainties(const CountVariances &e);
+template <> void Histogram::setUncertainties(const CountStandardDeviations &e);
+template <> void Histogram::setUncertainties(const FrequencyVariances &e);
+template <>
+void Histogram::setUncertainties(const FrequencyStandardDeviations &e);
+
 template <class TX, class TY, class TE>
 Histogram::Histogram(const TX &x, const TY &y, const TE &e) {
   initX(x);
   initY(y);
   initE(e);
 }
-
-template <> void Histogram::initX(const Points &x);
-template <> void Histogram::initX(const BinEdges &x);
 
 template <class TY> void Histogram::initY(const TY &y) {
   if (y)
@@ -195,14 +202,6 @@ template <class TE> void Histogram::initE(const TE &e) {
     setCountVariances(m_y->rawData());
   }
 }
-
-template <> void Histogram::setValues(const Counts &y);
-template <> void Histogram::setValues(const Frequencies &y);
-template <> void Histogram::setUncertainties(const CountVariances &e);
-template <> void Histogram::setUncertainties(const CountStandardDeviations &e);
-template <> void Histogram::setUncertainties(const FrequencyVariances &e);
-template <>
-void Histogram::setUncertainties(const FrequencyStandardDeviations &e);
 
 /** Sets the Histogram's bin edges.
 
