@@ -191,7 +191,7 @@ public:
   MOCK_METHOD1(setFittingRunNumVec, void(std::vector<std::string> assignVec));
 
   // sets the fitting run number according to path
-  MOCK_METHOD1(setFittingRunNo, void(QString path));
+  MOCK_METHOD1(setFittingRunNo, void(const std::string &path));
 
   // To determine whether the current loop is multi-run or single to avoid
   // regenerating the list - view widget when not required

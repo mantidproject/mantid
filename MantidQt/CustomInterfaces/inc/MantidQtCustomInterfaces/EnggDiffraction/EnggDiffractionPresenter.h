@@ -136,8 +136,8 @@ public:
 
   void setRunNoItems(std::vector<std::string> runNumVector, bool multiRun);
 
-  void setDefaultBank(std::vector<std::string> splittedBaseName,
-                      QString selectedFile);
+  void setDefaultBank(const std::vector<std::string> &splittedBaseName,
+                      const std::string &selectedFile);
 
   bool isDigit(std::string text);
 

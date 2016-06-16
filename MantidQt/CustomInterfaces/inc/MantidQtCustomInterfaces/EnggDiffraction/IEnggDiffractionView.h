@@ -1,14 +1,13 @@
 #ifndef MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_IENGGDIFFRACTIONVIEW_H_
 #define MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_IENGGDIFFRACTIONVIEW_H_
 
-#include <QStringList>
-#include <qwt_plot_curve.h>
 #include <string>
 #include <vector>
 
-#include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidQtCustomInterfaces/EnggDiffraction/EnggDiffCalibSettings.h"
+
+class QwtData;
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -387,7 +386,7 @@ public:
   virtual std::string fittingPeaksData() const = 0;
 
   /**
-  * Sets the peak list according to the QString given
+  * Sets the peak list according to the string given
   *
   * @param peakList list of expected peaks to be fitted as std::string
   */
@@ -490,7 +489,7 @@ public:
   *
   * @param path of the selected focused run file
   */
-  virtual void setFittingRunNo(QString path) = 0;
+  virtual void setFittingRunNo(const std::string &path) = 0;
 
   /**
   * gets the global vector in view containing focused file directory

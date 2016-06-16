@@ -1,4 +1,5 @@
 #include "MantidQtCustomInterfaces/EnggDiffraction/EnggDiffractionViewQtGUI.h"
+#include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidQtAPI/AlgorithmInputHistory.h"
@@ -6,17 +7,15 @@
 #include "MantidQtAPI/HelpWindow.h"
 #include "MantidQtCustomInterfaces/EnggDiffraction/EnggDiffractionPresenter.h"
 #include "MantidQtMantidWidgets/MWRunFiles.h"
-#include "Poco/DirectoryIterator.h"
-
-using namespace Mantid::API;
-using namespace MantidQt::CustomInterfaces;
 
 #include <array>
 #include <fstream>
 #include <random>
 
-#include <Poco/Path.h>
 #include <boost/lexical_cast.hpp>
+
+#include <Poco/DirectoryIterator.h>
+#include <Poco/Path.h>
 
 #include <QCheckBox>
 #include <QCloseEvent>
@@ -24,7 +23,12 @@ using namespace MantidQt::CustomInterfaces;
 #include <QMessageBox>
 #include <QSettings>
 
+#include <qwt_plot_curve.h>
+#include <qwt_plot_zoomer.h>
 #include <qwt_symbol.h>
+
+using namespace Mantid::API;
+using namespace MantidQt::CustomInterfaces;
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -784,7 +788,7 @@ void EnggDiffractionViewQtGUI::setBankDir(int idx) {
     std::string bankDir = m_fitting_runno_dir_vec[idx];
     Poco::Path fpath(bankDir);
 
-    setFittingRunNo(QString::fromUtf8(bankDir.c_str()));
+    setFittingRunNo(bankDir);
   }
 }
 
@@ -797,7 +801,7 @@ void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::
     auto item = listView->item(currentRow);
     QString itemText = item->text();
 
-    setFittingRunNo(itemText);
+    setFittingRunNo(itemText.toStdString());
     FittingRunNo();
   }
 }
@@ -1251,7 +1255,7 @@ void EnggDiffractionViewQtGUI::browseFitFocusedRun() {
   }
 
   MantidQt::API::AlgorithmInputHistory::Instance().setPreviousDirectory(path);
-  setFittingRunNo(path);
+  setFittingRunNo(path.toStdString());
   getBanks();
 }
 
@@ -1397,8 +1401,9 @@ void EnggDiffractionViewQtGUI::setBankIdComboBox(int idx) {
   bankName->setCurrentIndex(idx);
 }
 
-void EnggDiffractionViewQtGUI::setFittingRunNo(QString path) {
-  m_uiTabFitting.lineEdit_pushButton_run_num->setText(path);
+void EnggDiffractionViewQtGUI::setFittingRunNo(const std::string &path) {
+  m_uiTabFitting.lineEdit_pushButton_run_num->setText(
+      QString::fromStdString(path));
 }
 
 std::string EnggDiffractionViewQtGUI::getFittingRunNo() const {

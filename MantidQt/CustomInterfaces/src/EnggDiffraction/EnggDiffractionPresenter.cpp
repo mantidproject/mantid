@@ -1,10 +1,11 @@
+#include <MantidAPI/AlgorithmManager.h>
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/Property.h"
-#include "MantidQtAPI/PythonRunner.h"
 #include <MantidKernel/StringTokenizer.h>
+#include "MantidQtAPI/PythonRunner.h"
 // #include "MantidQtCustomInterfaces/EnggDiffraction/EnggDiffractionModel.h"
 #include "MantidQtCustomInterfaces/EnggDiffraction/EnggDiffractionPresWorker.h"
 #include "MantidQtCustomInterfaces/EnggDiffraction/EnggDiffractionPresenter.h"
@@ -15,10 +16,9 @@
 
 #include <boost/lexical_cast.hpp>
 
-#include "Poco/DirectoryIterator.h"
+#include <Poco/DirectoryIterator.h>
 #include <Poco/File.h>
 
-#include <MantidAPI/AlgorithmManager.h>
 #include <QThread>
 
 using namespace Mantid::API;
@@ -615,8 +615,8 @@ void MantidQt::CustomInterfaces::EnggDiffractionPresenter::
     fittingRunNoChanged() {
 
   try {
-    std::string strFocusedFile = m_view->getFittingRunNo();
-    QString focusedFile = QString::fromStdString(strFocusedFile);
+    auto strFocusedFile = m_view->getFittingRunNo();
+    auto focusedFile = strFocusedFile;
     // file name
     Poco::Path selectedfPath(strFocusedFile);
     Poco::Path bankDir;
@@ -668,7 +668,7 @@ void MantidQt::CustomInterfaces::EnggDiffractionPresenter::
       }
       // assuming that no directory is found so look for number
       // if run number length greater
-    } else if (focusedFile.count() > 4) {
+    } else if (focusedFile.size() > 4) {
       if (strFocusedFile.find("-") != std::string::npos) {
         std::vector<std::string> firstLastRunNoVec;
         boost::split(firstLastRunNoVec, strFocusedFile, boost::is_any_of("-"));
@@ -712,7 +712,7 @@ void MantidQt::CustomInterfaces::EnggDiffractionPresenter::
     }
     // set the directory here to the first in the vector if its not empty
     if (!runnoDirVector.empty() && !selectedfPath.isFile()) {
-      QString firstDir = QString::fromStdString(runnoDirVector[0]);
+      auto firstDir = runnoDirVector[0];
       m_view->setFittingRunNo(firstDir);
 
     } else if (m_view->getFittingRunNo().empty()) {
@@ -1503,7 +1503,8 @@ void EnggDiffractionPresenter::setRunNoItems(
 }
 
 void EnggDiffractionPresenter::setDefaultBank(
-    std::vector<std::string> splittedBaseName, QString selectedFile) {
+    const std::vector<std::string> &splittedBaseName,
+    const std::string &selectedFile) {
 
   if (!splittedBaseName.empty()) {
 
@@ -1520,7 +1521,7 @@ void EnggDiffractionPresenter::setDefaultBank(
   // can be assigned to text-field when number is given
   else if (!m_view->getFittingRunNumVec().empty()) {
     auto firstDir = m_view->getFittingRunNumVec().at(0);
-    auto intialDir = QString::fromStdString(firstDir);
+    auto intialDir = firstDir;
     m_view->setFittingRunNo(intialDir);
   }
   // if nothing found related to text-field input

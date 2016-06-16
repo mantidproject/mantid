@@ -16,11 +16,13 @@
 #include "ui_EnggDiffractionQtTabSettings.h"
 
 #include <boost/scoped_ptr.hpp>
-#include <qwt_plot_zoomer.h>
 
 // Qt classes forward declarations
 class QMessageBox;
 class QMutex;
+
+class QwtPlotCurve;
+class QwtPlotZoomer;
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -153,7 +155,7 @@ public:
 
   double rebinningPulsesTime() const override;
 
-  void setFittingRunNo(QString path) override;
+  void setFittingRunNo(const std::string &path) override;
 
   std::string getFittingRunNo() const override;
 
