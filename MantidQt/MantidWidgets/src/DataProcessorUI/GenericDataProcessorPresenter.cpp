@@ -97,6 +97,22 @@ GenericDataProcessorPresenter::GenericDataProcessorPresenter(
 }
 
 /**
+* Delegating constructor (no pre-processing needed)
+* @param whitelist : The set of properties we want to show as columns
+* @param processor : A DataProcessorProcessingAlgorithm
+* @param postprocessor : A DataProcessorPostprocessingAlgorithm
+* workspaces
+*/
+GenericDataProcessorPresenter::GenericDataProcessorPresenter(
+    const DataProcessorWhiteList &whitelist,
+    const DataProcessorProcessingAlgorithm &processor,
+    const DataProcessorPostprocessingAlgorithm &postprocessor)
+    : GenericDataProcessorPresenter(
+          whitelist,
+          std::map<std::string, DataProcessorPreprocessingAlgorithm>(),
+          processor, postprocessor) {}
+
+/**
 * Destructor
 */
 GenericDataProcessorPresenter::~GenericDataProcessorPresenter() {}
