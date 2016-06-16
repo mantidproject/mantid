@@ -129,8 +129,8 @@ EventWorkspaceMRU::findE(size_t thread_num, size_t index) {
  *
  * @param thread_num :: thread being accessed
  * @param data :: the new data
- * @return a TypeWithMarker * that needs to be deleted, or NULL if nothing needs
- * to be deleted.
+ * @param index :: index of the data to insert
+ * @param locked :: locking status of the data
  */
 void EventWorkspaceMRU::insertY(size_t thread_num, HistogramData::Counts data,
                                 const size_t index, bool &locked) {
@@ -152,8 +152,8 @@ void EventWorkspaceMRU::insertY(size_t thread_num, HistogramData::Counts data,
  *
  * @param thread_num :: thread being accessed
  * @param data :: the new data
- * @return a TypeWithMarker * that needs to be deleted, or NULL if nothing needs
- * to be deleted.
+ * @param index :: index of the data to insert
+ * @param locked :: locking status of the data
  */
 void EventWorkspaceMRU::insertE(size_t thread_num,
                                 HistogramData::CountStandardDeviations data,
