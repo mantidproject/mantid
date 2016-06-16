@@ -1,21 +1,8 @@
 ###########################################################################
 # CMake version check.
-# Require >= 3.3 for Windows as previous versions contained a bug that
-# prevented external data from working correctly. Other systems require
-# 2.8.12 to avoid recompiling system packages
+# Require CMake 3.5, required by ParaView 5.1.0
 ###########################################################################
-if (CMAKE_HOST_WIN32)
-  cmake_minimum_required ( VERSION 3.3.0 )
-else()
-  cmake_minimum_required ( VERSION 2.8.12 )
-endif()
-
-if(POLICY CMP0053)
-  #Simplify variable reference and escape sequence evaluation.
-  #Claims to dramatically improve CMake configure and generate time
-  #requires CMake 3.1 or later
-  cmake_policy(SET CMP0053 NEW)
-endif()
+cmake_minimum_required ( VERSION 3.5 )
 
 # Define the project name.
 project ( Mantid )
