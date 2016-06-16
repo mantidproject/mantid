@@ -323,12 +323,9 @@ public:
     Mantid::MantidVec &x = ws->dataX(0);
     Mantid::MantidVec &y = ws->dataY(0);
     Mantid::MantidVec &e = ws->dataE(0);
-    x = {0,       0.922276, 1.84455, 2.76683, 3.68911, 4.61138, 5.53366,
-         6.45594, 7.37821,  8.30049, 9.22276, 10.145,  11.0673, 11.9896,
-         12.9119, 13.8341,  14.7564, 15.6787, 16.601,  17.5233, 18.4455,
-         19.3678, 20.2901,  21.2124, 22.1346, 23.0569, 23.9792, 24.9015,
-         25.8237, 26.746,   27.6683, 28.5906, 29.5128, 30.4351, 31.3574,
-         32.2797, 33.202,   34.1242, 35.0465, 35.9688, 36.8911};
+    for (int i = 0; i < ndata; i++) {
+      x[i] = 0.146785 * static_cast<double>(i);
+    }
     y = {1,        0.950342, 0.875263, 0.848565, 0.859885, 0.8632,   0.839704,
          0.808929, 0.790497, 0.782535, 0.772859, 0.75648,  0.738228, 0.723282,
          0.711316, 0.69916,  0.685455, 0.671399, 0.658356, 0.646277, 0.634338,
@@ -353,8 +350,8 @@ public:
 
     // check the output
     const double field = 100;
-    const double delta =
-        Mantid::PhysicalConstants::MuonGyromagneticRatio * field * 0.2;
+    const double delta = Mantid::PhysicalConstants::MuonGyromagneticRatio *
+                         field * 2.0 * M_PI * 0.2;
     const double fluct = delta;
     IFunction_sptr out = fit.getProperty("Function");
     TS_ASSERT_DELTA(out->getParameter("Field"), field, 0.001);
