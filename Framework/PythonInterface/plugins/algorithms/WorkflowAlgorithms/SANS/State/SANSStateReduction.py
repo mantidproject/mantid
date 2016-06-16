@@ -24,6 +24,14 @@ class SANSReductionType(object):
         pass
 
 
+class ReductionDimensionality(object):
+    class OneDim(object):
+        pass
+
+    class TwoDim(object):
+        pass
+
+
 # ------------------------------------------------
 # SANSStateReduction
 # ------------------------------------------------
@@ -37,6 +45,7 @@ class SANSStateReduction(object):
 @sans_parameters
 class SANSStateReductionISIS(SANSStateReduction, SANSStateBase):
     reduction_type = ClassTypeParameter(ReductionType)
+    dimensionality = ClassTypeParameter(ReductionDimensionality)
 
     def __init__(self):
         super(SANSStateReductionISIS, self).__init__()

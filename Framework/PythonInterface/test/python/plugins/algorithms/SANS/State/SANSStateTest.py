@@ -6,6 +6,7 @@ from State.SANSStateData import (SANSStateDataISIS, SANSStateData)
 from State.SANSStateMoveWorkspace import (SANSStateMoveWorkspaceLOQ)
 from Common.SANSConstants import SANSConstants
 
+
 class SANSStateTest(unittest.TestCase):
     def test_that_is_sans_state_object(self):
         state = SANSStateISIS()

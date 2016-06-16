@@ -1,10 +1,13 @@
-from mantid.api import FileFinder
-from mantid.kernel import DateAndTime
-from mantid.api import AlgorithmManager
-
+import os
 import h5py as h5
 from abc import (ABCMeta, abstractmethod)
-from Common.SANSConstants import SANSInstrument
+
+from mantid.api import FileFinder
+from mantid.kernel import (DateAndTime, ConfigService)
+from mantid.api import (AlgorithmManager, ExperimentInfo)
+
+from Common.SANSConstants import (SANSInstrument, convert_sans_instrument_to_string)
+
 
 # ------------------------------------
 # Types
@@ -70,6 +73,84 @@ def is_single_period(func, file_name):
 def is_multi_period(func, file_name):
     is_file_type, number_of_periods = func(file_name)
     return is_file_type and number_of_periods >= 1
+
+
+def get_instrument_paths_for_sans_file(file_name):
+    def get_file_location(path):
+        return os.path.dirname(path)
+
+    def get_ipf_equivalent_name(path):
+        # If XXX_Definition_Yyy.xml is the IDF name, then the equivalent  IPF name is: XXX_Parameters_Yyy.xml
+        base_file_name = os.path.basename(path)
+        return base_file_name.replace("Definition", "Parameters")
+
+    def get_ipf_standard_name(path):
+        # If XXX_Definition_Yyy.xml is the IDF name, then the standard IPF name is: XXX_Parameters.xml
+        base_file_name = os.path.basename(path)
+        elements = base_file_name.split("_")
+        return elements[0] + "_Parameters.xml"
+
+    def check_for_files(directory, path):
+        # Check if XXX_Parameters_Yyy.xml exists in the same folder
+        ipf_equivalent_name = get_ipf_equivalent_name(path)
+        ipf_equivalent = os.path.join(directory, ipf_equivalent_name)
+        if os.path.exists(ipf_equivalent):
+            return ipf_equivalent
+
+        # Check if XXX_Parameters.xml exists in the same folder
+        ipf_standard_name = get_ipf_standard_name(path)
+        ipf_standard = os.path.join(directory, ipf_standard_name)
+        if os.path.exists(ipf_standard):
+            return ipf_standard
+        # Does not seem to be in the folder
+        return None
+
+    def get_ipf_for_rule_1(path):
+        # Check if can be found in the same folder
+        directory = get_file_location(path)
+        return check_for_files(directory, path)
+
+    def get_ipf_for_rule_2(path):
+        # Check if can be found in the instrument folder
+        directory = ConfigService.getInstrumentDirectory()
+        return check_for_files(directory, path)
+
+    # Get the measurement date
+    file_information_factory = SANSFileInformationFactory()
+    file_information = file_information_factory.create_sans_file_information(file_name)
+    measurement_time = file_information.get_date()
+
+    # Get the instrument
+    instrument = file_information.get_instrument()
+    instrument_as_string = convert_sans_instrument_to_string(instrument)
+
+    # Get the idf file path
+    idf_path = ExperimentInfo.getInstrumentFilename(instrument_as_string, measurement_time)
+    idf_path = os.path.normpath(idf_path)
+
+    if not os.path.exists(idf_path):
+        raise RuntimeError("SANSFileInformation: The instrument definition file {} does not seem to "
+                           "exist.".format(str(idf_path)))
+
+    # Get the ipf path. This is slightly more complicated. See the Mantid documentation for the naming rules. Currently
+    # they are:
+    # 1. If the IDF is not in the instrument folder and there is another XXX_Parameters.xml in the same folder,
+    #    this one in the same folder will be used instead of any parameter file in the instrument folder.
+    # 2. If you want one parameter file for your IDF file, name your IDF file XXX_Definition_Yyy.xml and the parameter
+    #    file XXX_Parameters_Yyy.xml , where Yyy is any combination a characters you find appropriate. If your IDF
+    #    file is not in the instrument folder, the parameter file can be in either the same folder or in the instrument
+    #    folder, but it can only be in the instrument folder, if the same folder has no XXX_Parameters.xml or
+    #    XXX_Parameters_Yyy.xml file. If there is no XXX_Parameters_Yyy.xml file, XXX_Parameters.xml would be used.
+    ipf_rule1 = get_ipf_for_rule_1(idf_path)
+    if ipf_rule1:
+        return idf_path, ipf_rule1
+
+    ipf_rule2 = get_ipf_for_rule_2(idf_path)
+    if ipf_rule2:
+        return idf_path, ipf_rule2
+
+    raise RuntimeError("SANSFileInformation: There does not seem to be a corresponding instrument parameter file "
+                       "available for {}".format(str(idf_path)))
 
 
 # ISIS Nexus

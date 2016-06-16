@@ -39,6 +39,14 @@ class SANSInstrument(object):
         pass
 
 
+class SANSFacility(object):
+    class ISIS(object):
+        pass
+
+    class NoFacility(object):
+        pass
+
+
 def convert_string_to_sans_instrument(to_convert):
     to_convert_cap = to_convert.upper()
     if to_convert_cap == SANSConstants.sans2d:
@@ -49,6 +57,18 @@ def convert_string_to_sans_instrument(to_convert):
         selected_instrument = SANSInstrument.LARMOR
     else:
         selected_instrument = SANSInstrument.NoInstrument
+    return selected_instrument
+
+
+def convert_sans_instrument_to_string(to_convert):
+    if to_convert is SANSInstrument.SANS2D:
+        selected_instrument = SANSConstants.sans2d
+    elif to_convert is SANSInstrument.LOQ:
+        selected_instrument = SANSConstants.loq
+    elif to_convert == SANSInstrument.LARMOR:
+        selected_instrument = SANSConstants.larmor
+    else:
+        selected_instrument = ""
     return selected_instrument
 
 

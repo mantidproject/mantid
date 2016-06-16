@@ -3,7 +3,6 @@
 ##
 
 set ( TEST_PY_FILES
-    SANSFileInformationTest.py
     SANSStatePrototypeTest.py
     SANSLoadTest.py
   )

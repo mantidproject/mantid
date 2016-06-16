@@ -1,7 +1,7 @@
 from os.path import (basename, splitext, isfile)
 from mantid.api import (AnalysisDataService)
 
-from SANSFileInformation import find_full_file_path
+from Common.SANSFileInformation import find_full_file_path
 from Common.SANSConstants import SANSConstants
 from Common.SANSLogTagger import (has_tag, get_tag, set_tag)
 from Common.SANSFunctions import (create_unmanaged_algorithm)
