@@ -170,15 +170,23 @@ private:
   XMode m_xMode;
 };
 
-template <> void Histogram::initX(const Points &x);
-template <> void Histogram::initX(const BinEdges &x);
-template <> void Histogram::setValues(const Counts &y);
-template <> void Histogram::setValues(const Frequencies &y);
-template <> void Histogram::setUncertainties(const CountVariances &e);
-template <> void Histogram::setUncertainties(const CountStandardDeviations &e);
-template <> void Histogram::setUncertainties(const FrequencyVariances &e);
+template <> MANTID_HISTOGRAMDATA_DLL void Histogram::initX(const Points &x);
+template <> MANTID_HISTOGRAMDATA_DLL void Histogram::initX(const BinEdges &x);
+template <> MANTID_HISTOGRAMDATA_DLL void Histogram::setValues(const Counts &y);
 template <>
-void Histogram::setUncertainties(const FrequencyStandardDeviations &e);
+MANTID_HISTOGRAMDATA_DLL void Histogram::setValues(const Frequencies &y);
+template <>
+MANTID_HISTOGRAMDATA_DLL void
+Histogram::setUncertainties(const CountVariances &e);
+template <>
+MANTID_HISTOGRAMDATA_DLL void
+Histogram::setUncertainties(const CountStandardDeviations &e);
+template <>
+MANTID_HISTOGRAMDATA_DLL void
+Histogram::setUncertainties(const FrequencyVariances &e);
+template <>
+void MANTID_HISTOGRAMDATA_DLL
+Histogram::setUncertainties(const FrequencyStandardDeviations &e);
 
 template <class TX, class TY, class TE>
 Histogram::Histogram(const TX &x, const TY &y, const TE &e) {
@@ -379,7 +387,8 @@ void Histogram::setFrequencyStandardDeviations(T &&... data) & {
   m_e = CountStandardDeviations(frequencies, binEdges()).cowData();
 }
 
-template <> void Histogram::checkSize(const BinEdges &data) const;
+template <>
+MANTID_HISTOGRAMDATA_DLL void Histogram::checkSize(const BinEdges &data) const;
 
 template <class T> void Histogram::checkSize(const T &data) const {
   size_t target = m_x->size();
