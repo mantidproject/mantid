@@ -236,7 +236,7 @@ vtkPeakMarkerFactory::create(ProgressAction &progressUpdating) const {
       auto tensor = getTransformTensor(
           dynamic_cast<const Mantid::DataObjects::PeakShapeEllipsoid &>(shape),
           peak);
-      transformSignal->InsertNextTupleValue(tensor.data());
+      transformSignal->SetTypedTuple(0, tensor.data());
       peakDataSet->GetPointData()->SetTensors(transformSignal.GetPointer());
 
       vtkNew<vtkRegularPolygonSource> polygonSource;
