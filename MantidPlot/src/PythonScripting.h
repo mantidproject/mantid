@@ -124,8 +124,8 @@ private:
   void setupPythonPath();
   /// Configure sip
   void setupSip();
-  /// Run execfile on a given file
-  bool loadInitFile(const QString &path);
+  /// Exec the mantidplotrc file
+  bool loadInitRCFile();
 
 private:
   /// The global dictionary

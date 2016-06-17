@@ -56,7 +56,6 @@ PyMODINIT_FUNC init_qti();
 #endif
 
 namespace {
-QString INIT_RCFILE = "mantidplotrc.py";
 Mantid::Kernel::Logger g_log("PythonScripting");
 }
 
@@ -184,8 +183,7 @@ bool PythonScripting::start() {
 
   // Capture all stdout/stderr
   redirectStdOut(true);
-  QDir appPath(QApplication::applicationDirPath());
-  if (loadInitFile(appPath.absoluteFilePath(INIT_RCFILE))) {
+  if (loadInitRCFile()) {
     d_initialized = true;
   } else {
     d_initialized = false;
@@ -402,13 +400,15 @@ const QStringList PythonScripting::fileExtensions() const {
 // Private member functions
 //------------------------------------------------------------
 
-bool PythonScripting::loadInitFile(const QString &filename) {
-  if (!filename.endsWith(".py") || !QFileInfo(filename).isReadable()) {
-    return false;
-  }
-  // MG: The Python/C PyRun_SimpleFile function crashes on Windows when trying
-  // to run
-  // a simple text file which is why it is not used here
+bool PythonScripting::loadInitRCFile() {
+  using Mantid::Kernel::ConfigService;
+  // The file is expected to be next to the Mantid.properties file
+  QDir propDir(
+      QString::fromStdString(ConfigService::Instance().getPropertiesDir()));
+  QString filename = propDir.absoluteFilePath("mantidplotrc.py");
+
+  // The Python/C PyRun_SimpleFile function crashes on Windows when trying
+  // to run a simple text so we read it manually and execute the string
   QFile file(filename);
   bool success(false);
   if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
