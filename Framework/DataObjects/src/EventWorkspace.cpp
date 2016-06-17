@@ -54,6 +54,8 @@ EventWorkspace::~EventWorkspace() {
 
 //-----------------------------------------------------------------------------
 /** Returns true if the EventWorkspace is safe for multithreaded operations.
+ * WARNING: This is only true for OpenMP threading. EventWorkspace is NOT thread
+ * safe with Poco threads or other threading mechanisms.
  */
 bool EventWorkspace::threadSafe() const {
   // Since there is a mutex lock around sorting, EventWorkspaces are always

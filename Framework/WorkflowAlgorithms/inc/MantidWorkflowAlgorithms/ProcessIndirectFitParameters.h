@@ -3,6 +3,8 @@
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/MatrixWorkspace.h"
+
 namespace Mantid {
 namespace Algorithms {
 
@@ -44,11 +46,10 @@ public:
 private:
   void init() override;
   void exec() override;
-  std::vector<std::string> listToVector(std::string &);
   std::vector<std::string> searchForFitParams(const std::string &,
                                               const std::vector<std::string> &);
-  std::vector<std::vector<std::string>>
-  reorder2DVector(const std::vector<std::vector<std::string>> &);
+  std::vector<std::vector<API::MatrixWorkspace_sptr>>
+  reorder2DVector(std::vector<std::vector<API::MatrixWorkspace_sptr>> &);
 };
 } // namespace Algorithms
 } // namespace Mantid
