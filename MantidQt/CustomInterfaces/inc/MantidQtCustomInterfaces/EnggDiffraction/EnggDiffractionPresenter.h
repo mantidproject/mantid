@@ -349,9 +349,6 @@ private:
   /// true if the last pre-processing/re-binning completed successfully
   bool m_rebinningFinishedOK;
 
-  // whether to use AlignDetectors to convert units
-  static bool g_useAlignDetectors;
-
   /// Counter for the cropped output files
   static int g_croppedCounter;
 

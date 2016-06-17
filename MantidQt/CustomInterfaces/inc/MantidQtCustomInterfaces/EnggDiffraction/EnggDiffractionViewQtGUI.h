@@ -245,7 +245,7 @@ private:
   void closeEvent(QCloseEvent *ev) override;
 
   // path/name for the persistent settings group of this interface
-  const static std::string m_settingsGroup;
+  const static std::string g_settingsGroup;
 
   // here the view puts messages before notifying the presenter to show them
   std::vector<std::string> m_logMsgs;

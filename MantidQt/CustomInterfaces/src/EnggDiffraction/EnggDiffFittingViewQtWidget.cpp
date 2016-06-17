@@ -1,5 +1,8 @@
 #include "MantidQtCustomInterfaces/EnggDiffraction/EnggDiffFittingViewQtWidget.h"
+#include "MantidAPI/IPeakFunction.h"
+#include "MantidAPI/FunctionFactory.h"
 #include "MantidQtAPI/AlgorithmInputHistory.h"
+#include "MantidQtCustomInterfaces/EnggDiffraction/EnggDiffFittingPresenter.h"
 #include "MantidQtMantidWidgets/PeakPicker.h"
 
 #include <fstream>
@@ -22,10 +25,19 @@ using namespace MantidQt::CustomInterfaces;
 namespace MantidQt {
 namespace CustomInterfaces {
 
-std::vector<std::string> EnggDiffFittingViewQtWidget::m_fitting_runno_dir_vec;
-bool EnggDiffFittingViewQtWidget::m_fittingMutliRunMode = false;
+const std::string EnggDiffFittingViewQtWidget::g_settingsGroup =
+    "CustomInterfaces/EnggDiffraction/FittingView";
 
-EnggDiffFittingViewQtWidget::EnggDiffFittingViewQtWidget()
+const std::string
+    EnggDiffFittingViewQtWidget::EnggDiffractionViewQtWidget::g_peaksListExt =
+        "Peaks list File: CSV "
+        "(*.csv *.txt);;"
+        "Other extensions/all files (*.*)";
+
+bool EnggDiffFittingViewQtWidget::m_fittingMutliRunMode = false;
+std::vector<std::string> EnggDiffFittingViewQtWidget::m_fitting_runno_dir_vec;
+
+EnggDiffFittingViewQtWidget::EnggDiffFittingViewQtWidget(QWidget *parent = 0)
     : IEnggDiffFittingView(), m_fittedDataVector(), m_peakPicker(nullptr),
       m_zoomTool(nullptr), m_presenter(nullptr) {
   initLayout();
@@ -43,7 +55,7 @@ EnggDiffFittingViewQtWidget::~EnggDiffFittingViewQtWidget() {
   }
 }
 
-EnggDiffFittingViewQtWidget::initLayout() {
+void EnggDiffFittingViewQtWidget::initLayout() {
   m_ui.setupUi(this);
 
   readSettings();
@@ -117,19 +129,29 @@ void EnggDiffFittingViewQtWidget::doSetup() {
 }
 
 void EnggDiffFittingViewQtWidget::readSettings() {
+  QSettings qs;
+  qs.beginGroup(QString::fromStdString(g_settingsGroup));
+
   // user params
   m_ui.lineEdit_pushButton_run_num->setText(
       qs.value("user-params-fitting-focused-file", "").toString());
   m_ui.comboBox_bank->setCurrentIndex(0);
   m_ui.lineEdit_fitting_peaks->setText(
       qs.value("user-params-fitting-peaks-to-fit", "").toString());
+
+  qs.endGroup();
 }
 
-void EnggDiffFittingViewQtWidget::saveSettings() {
+void EnggDiffFittingViewQtWidget::saveSettings() const {
+  QSettings qs;
+  qs.beginGroup(QString::fromStdString(g_settingsGroup));
+
   qs.setValue("user-params-fitting-focused-file",
               m_ui.lineEdit_pushButton_run_num->text());
   qs.setValue("user-params-fitting-peaks-to-fit",
               m_ui.lineEdit_fitting_peaks->text());
+
+  qs.endGroup();
 }
 
 void EnggDiffFittingViewQtWidget::enable(bool enable) {
@@ -144,11 +166,11 @@ void EnggDiffFittingViewQtWidget::enable(bool enable) {
   m_ui.groupBox_fititng_preview->setEnabled(enable);
 }
 
-void EnggDiffractionViewQtGUI::fitClicked() {
+void EnggDiffFittingViewQtWidget::fitClicked() {
   m_presenter->notify(IEnggDiffFittingPresenter::FitPeaks);
 }
 
-void EnggDiffractionViewQtGUI::FittingRunNo() {
+void EnggDiffFittingViewQtWidget::FittingRunNo() {
   m_presenter->notify(IEnggDiffFittingPresenter::FittingRunNo);
 }
 
@@ -361,7 +383,7 @@ void EnggDiffFittingViewQtWidget::browsePeaksToFit() {
 
     QString path(
         QFileDialog::getOpenFileName(this, tr("Open Peaks To Fit"), prevPath,
-                                     QString::fromStdString(g_DetGrpExtStr)));
+                                     QString::fromStdString(g_peaksListExt)));
 
     if (path.isEmpty()) {
       return;
@@ -379,7 +401,7 @@ void EnggDiffFittingViewQtWidget::browsePeaksToFit() {
   }
 }
 
-void EnggDiffractionViewQtGUI::browseFitFocusedRun() {
+void EnggDiffFittingViewQtWidget::browseFitFocusedRun() {
   resetFittingMultiMode();
   QString prevPath = QString::fromStdString(m_focusDir);
   if (prevPath.isEmpty()) {
@@ -470,7 +492,8 @@ std::string EnggDiffFittingViewQtWidget::fittingPeaksData() const {
   return m_ui.lineEdit_fitting_peaks->text().toStdString();
 }
 
-void EnggDiffFittingViewQtWidget::setPeakList(std::string peakList) const {
+void EnggDiffFittingViewQtWidget::setPeakList(
+    const std::string &peakList) const {
   m_ui.lineEdit_fitting_peaks->setText(QString::fromStdString(peakList));
 }
 
@@ -575,7 +598,7 @@ void EnggDiffFittingViewQtWidget::savePeakList() {
 
     QString path(QFileDialog::getSaveFileName(
         this, tr("Save Expected Peaks List"), prevPath,
-        QString::fromStdString(g_DetGrpExtStr)));
+        QString::fromStdString(g_peaksListExt)));
 
     if (path.isEmpty()) {
       return;

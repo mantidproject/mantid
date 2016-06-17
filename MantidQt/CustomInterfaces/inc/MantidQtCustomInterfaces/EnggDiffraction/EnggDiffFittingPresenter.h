@@ -1,8 +1,11 @@
 #ifndef MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_ENGGDIFFFITTINGPRESENTER_H_
 #define MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_ENGGDIFFFITTINGPRESENTER_H_
 
+#include "MantidAPI/ITableWorkspace_fwd.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidQtCustomInterfaces/DllConfig.h"
 #include "MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffFittingPresenter.h"
+#include "MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffFittingView.h"
 
 #include <string>
 #include <vector>
@@ -47,6 +50,11 @@ class MANTIDQT_CUSTOMINTERFACES_DLL EnggDiffFittingPresenter
   Q_OBJECT
 
 public:
+  EnggDiffFittingPresenter(IEnggDiffFittingView *view);
+  ~EnggDiffFittingPresenter() override;
+
+  void notify(IEnggDiffFittingPresenter::Notification notif) override;
+
   /// the fitting hard work that a worker / thread will run
   void doFitting(const std::string &focusedRunNo,
                  const std::string &expectedPeaks);
@@ -95,14 +103,18 @@ public:
                       const std::string &selectedFile);
 
 protected:
-
+  void processStart();
   void processFitPeaks();
+  void processShutdown();
+
+  /// clean shut down of model, view, etc.
+  void cleanup();
 
 protected slots:
 
   void fittingFinished();
   void fittingRunNoChanged();
-  
+
 private:
   bool isDigit(std::string text);
 
@@ -122,12 +134,19 @@ private:
   void enableMultiRun(std::string firstRun, std::string lastRun,
                       std::vector<std::string> &fittingRunNoDirVec);
 
-    // name of the workspace with the focused ws being used for fitting
+  // whether to use AlignDetectors to convert units
+  static const bool g_useAlignDetectors;
+
+  // name of the workspace with the focused ws being used for fitting
   static const std::string g_focusedFittingWSName;
+
   /// true if the last fitting completed successfully
   bool m_fittingFinishedOK;
 
   QThread *m_workerThread;
+
+  /// Associated view for this presenter (MVP pattern)
+  IEnggDiffFittingView *const m_view;
 };
 
 } // namespace CustomInterfaces

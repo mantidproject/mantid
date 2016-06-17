@@ -130,7 +130,7 @@ public:
 
   void resetView();
 
- protected:
+protected:
   void initLayout();
 
 signals:
@@ -171,11 +171,16 @@ private:
   std::vector<std::string> qListToVector(QStringList list,
                                          bool validator) const;
 
+  // path/name for the persistent settings group of this interface
+  const static std::string g_settingsGroup;
+
+  static std::string g_peaksListExt;
+
   /// indentifier for fitting multi-run or single run input
-  bool static m_fittingMutliRunMode;
+  static bool m_fittingMutliRunMode;
 
   // vector holding directory of focused bank file
-  std::vector<std::string> static m_fitting_runno_dir_vec;
+  static std::vector<std::string> m_fitting_runno_dir_vec;
 
   /// Loaded focused workspace
   std::vector<QwtPlotCurve *> m_focusedDataVector;

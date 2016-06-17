@@ -39,9 +39,9 @@ class EnggDiffFittingWorker : public QObject {
 
 public:
   // for fitting (single peak fits)
-  EnggDiffWorker(EnggDiffractionPresenter *pres,
-                 const std::string &focusedRunNo,
-                 const std::string &ExpectedPeaks)
+  EnggDiffFittingWorker(EnggDiffFittingPresenter *pres,
+                        const std::string &focusedRunNo,
+                        const std::string &ExpectedPeaks)
       : m_pres(pres), m_runNo(focusedRunNo), m_expectedPeaks(ExpectedPeaks) {}
 
 private slots:
@@ -59,7 +59,8 @@ private:
 
   /// sample run to process
   const std::string m_runNo;
-  // parameters for fitting
+  // parameters for fitting, list of peaks
+  const std::string m_expectedPeaks;
 };
 
 } // namespace CustomInterfaces

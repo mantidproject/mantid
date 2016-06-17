@@ -1,5 +1,16 @@
 #include "MantidQtCustomInterfaces/EnggDiffraction/EnggDiffFittingPresenter.h"
+#include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/TableRow.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidQtCustomInterfaces/EnggDiffraction/EnggDiffFittingPresWorker.h"
+#include "MantidQtCustomInterfaces/Muon/ALCHelper.h"
+
+#include <boost/lexical_cast.hpp>
+
+#include <Poco/DirectoryIterator.h>
+#include <Poco/File.h>
 
 using namespace Mantid::API;
 using namespace MantidQt::CustomInterfaces;
@@ -7,15 +18,46 @@ using namespace MantidQt::CustomInterfaces;
 namespace MantidQt {
 namespace CustomInterfaces {
 
+namespace {
+Mantid::Kernel::Logger g_log("EngineeringDiffractionGUI");
+}
+
+const bool EnggDiffFittingPresenter::g_useAlignDetectors = true;
+
 const std::string EnggDiffFittingPresenter::g_focusedFittingWSName =
     "engggui_fitting_focused_ws";
 
-  EnggDiffFittingPresenter::EnggDiffractionPresenter(IEnggDiffractionView *view): 
-    m_fittingFinishedOK(false), m_view(view) {  }
-  
+EnggDiffFittingPresenter::EnggDiffFittingPresenter(IEnggDiffFittingView *view)
+    : m_fittingFinishedOK(false), m_view(view) {}
+
+EnggDiffFittingPresenter::~EnggDiffFittingPresenter() { cleanup(); }
+
+/**
+* Close open sessions, kill threads etc., for a graceful window
+* close/destruction
+*/
+void EnggDiffFittingPresenter::cleanup() {
+  // m_model->cleanup();
+
+  // this may still be running
+  if (m_workerThread) {
+    if (m_workerThread->isRunning()) {
+      g_log.notice() << "A fitting process is currently running, shutting "
+                        "it down immediately...\n";
+      m_workerThread->wait(10);
+    }
+    delete m_workerThread;
+    m_workerThread = NULL;
+  }
+}
+
 void EnggDiffFittingPresenter::notify(
     IEnggDiffFittingPresenter::Notification notif) {
   switch (notif) {
+
+  case IEnggDiffFittingPresenter::Start:
+    processStart();
+    break;
 
   case IEnggDiffFittingPresenter::FittingRunNo:
     fittingRunNoChanged();
@@ -23,19 +65,21 @@ void EnggDiffFittingPresenter::notify(
 
   case IEnggDiffFittingPresenter::FitPeaks:
     processFitPeaks();
-
     break;
 
+  case IEnggDiffFittingPresenter::Shutdown:
+    processShutdown();
+    break;
   }
 }
-  
+
 void EnggDiffFittingPresenter::startAsyncFittingWorker(
     const std::string &focusedRunNo, const std::string &expectedPeaks) {
 
   delete m_workerThread;
   m_workerThread = new QThread(this);
   EnggDiffFittingWorker *worker =
-      new EnggDiffWorker(this, focusedRunNo, expectedPeaks);
+      new EnggDiffFittingWorker(this, focusedRunNo, expectedPeaks);
   worker->moveToThread(m_workerThread);
 
   connect(m_workerThread, SIGNAL(started()), worker, SLOT(fitting()));
@@ -299,6 +343,13 @@ void EnggDiffFittingPresenter::enableMultiRun(
                         "The specfied range of run number "
                         "entered is invalid. Please try again");
   }
+}
+
+void EnggDiffFittingPresenter::processStart() {}
+
+void EnggDiffFittingPresenter::processShutdown() {
+  m_view->saveSettings();
+  cleanup();
 }
 
 void EnggDiffFittingPresenter::processFitPeaks() {

@@ -1,6 +1,4 @@
 #include "MantidQtCustomInterfaces/EnggDiffraction/EnggDiffractionViewQtGUI.h"
-#include "MantidAPI/IPeakFunction.h"
-#include "MantidAPI/FunctionFactory.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidQtAPI/AlgorithmInputHistory.h"
 #include "MantidQtAPI/AlgorithmRunner.h"
@@ -57,7 +55,7 @@ const std::string EnggDiffractionViewQtGUI::g_DetGrpExtStr =
     "(*.csv *.txt);;"
     "Other extensions/all files (*.*)";
 
-const std::string EnggDiffractionViewQtGUI::m_settingsGroup =
+const std::string EnggDiffractionViewQtGUI::g_settingsGroup =
     "CustomInterfaces/EnggDiffractionView";
 
 /**
@@ -270,7 +268,7 @@ void EnggDiffractionViewQtGUI::doSetupSplashMsg() {
 
 void EnggDiffractionViewQtGUI::readSettings() {
   QSettings qs;
-  qs.beginGroup(QString::fromStdString(m_settingsGroup));
+  qs.beginGroup(QString::fromStdString(g_settingsGroup));
 
   m_ui.lineEdit_RBNumber->setText(
       qs.value("user-params-RBNumber", "").toString());
@@ -396,7 +394,7 @@ void EnggDiffractionViewQtGUI::readSettings() {
 
 void EnggDiffractionViewQtGUI::saveSettings() const {
   QSettings qs;
-  qs.beginGroup(QString::fromStdString(m_settingsGroup));
+  qs.beginGroup(QString::fromStdString(g_settingsGroup));
 
   qs.setValue("user-params-RBNumber", m_ui.lineEdit_RBNumber->text());
 

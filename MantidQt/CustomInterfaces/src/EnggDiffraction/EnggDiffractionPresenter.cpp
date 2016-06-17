@@ -2,7 +2,6 @@
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/TableRow.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/Property.h"
 #include "MantidKernel/StringTokenizer.h"
 #include "MantidQtAPI/PythonRunner.h"
@@ -10,14 +9,13 @@
 #include "MantidQtCustomInterfaces/EnggDiffraction/EnggDiffractionPresWorker.h"
 #include "MantidQtCustomInterfaces/EnggDiffraction/EnggDiffractionPresenter.h"
 #include "MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffractionView.h"
-#include "MantidQtCustomInterfaces/Muon/ALCHelper.h"
 
 #include <fstream>
 
 #include <boost/lexical_cast.hpp>
 
-#include <Poco/DirectoryIterator.h>
 #include <Poco/File.h>
+#include <Poco/Path.h>
 
 #include <QThread>
 
@@ -73,7 +71,6 @@ const std::string EnggDiffractionPresenter::g_vanCurvesWSName =
 const std::string EnggDiffractionPresenter::g_calibBanksParms =
     "engggui_calibration_banks_parameters";
 
-bool EnggDiffractionPresenter::g_useAlignDetectors = true;
 int EnggDiffractionPresenter::g_croppedCounter = 0;
 int EnggDiffractionPresenter::g_plottingCounter = 0;
 bool EnggDiffractionPresenter::g_abortThread = false;
