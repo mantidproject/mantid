@@ -3215,7 +3215,9 @@ void MuonAnalysis::dataPropsChanged() {
  */
 void MuonAnalysis::dataGroupsChanged() {
   if (m_fitDataHelper) {
-    m_fitDataHelper->handleSelectedGroupsChanged();
+    m_fitDataHelper->handleSelectedDataChanged(
+        m_groupingHelper.parseGroupingTable(),
+        parsePlotType(m_uiForm.frontPlotFuncs), isOverwriteEnabled());
   }
 }
 
@@ -3225,7 +3227,9 @@ void MuonAnalysis::dataGroupsChanged() {
  */
 void MuonAnalysis::dataPeriodsChanged() {
   if (m_fitDataHelper) {
-    m_fitDataHelper->handleSelectedPeriodsChanged();
+    m_fitDataHelper->handleSelectedDataChanged(
+        m_groupingHelper.parseGroupingTable(),
+        parsePlotType(m_uiForm.frontPlotFuncs), isOverwriteEnabled());
   }
 }
 
@@ -3247,7 +3251,9 @@ void MuonAnalysis::fitRangeChangedManually(double start, double end) {
  */
 void MuonAnalysis::dataWorkspaceChanged() {
   if (m_fitDataHelper) {
-    m_fitDataHelper->handleDataWorkspaceChanged();
+    m_fitDataHelper->handleSelectedDataChanged(
+        m_groupingHelper.parseGroupingTable(),
+        parsePlotType(m_uiForm.frontPlotFuncs), isOverwriteEnabled());
   }
 }
 

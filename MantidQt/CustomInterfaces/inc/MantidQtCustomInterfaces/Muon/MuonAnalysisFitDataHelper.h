@@ -2,8 +2,15 @@
 #define MANTID_CUSTOMINTERFACES_MUONANALYSISFITDATAHELPER_H_
 
 #include "MantidQtCustomInterfaces/DllConfig.h"
+#include "MantidQtCustomInterfaces/Muon/MuonAnalysisHelper.h"
 #include "MantidQtMantidWidgets/IMuonFitDataSelector.h"
 #include "MantidQtMantidWidgets/IWorkspaceFitControl.h"
+
+namespace Mantid {
+namespace API {
+class Grouping;
+}
+}
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -43,22 +50,26 @@ public:
       MantidQt::MantidWidgets::IMuonFitDataSelector *dataSelector);
   /// Handles "data properties changed"
   void handleDataPropertiesChanged();
-  /// Handles "selected groups changed"
-  void handleSelectedGroupsChanged();
-  /// Handles "selected periods changed"
-  void handleSelectedPeriodsChanged();
+  /// Handles "selected data changed"
+  void handleSelectedDataChanged(
+      const Mantid::API::Grouping &grouping,
+      const MantidQt::CustomInterfaces::Muon::PlotType &plotType,
+      bool overwrite);
   /// Handles user changing X range by dragging lines
   void handleXRangeChangedGraphically(double start, double end);
   /// Handles peak picker being reassigned to a new graph
   void setAssignedFirstRun(const QString &wsName);
   /// Get the workspace the peak picker is currently assigned to
   QString getAssignedFirstRun() const { return m_PPAssignedFirstRun; };
-  /// Handles workspace being changed
-  void handleDataWorkspaceChanged();
 
 private:
   /// Create workspaces to fit and update fit browser (model)
-  void createWorkspacesToFit();
+  void createWorkspacesToFit(const std::vector<std::string> &names);
+  /// Generate names of workspaces to be created
+  std::vector<std::string> generateWorkspaceNames(
+      const Mantid::API::Grouping &grouping,
+      const MantidQt::CustomInterfaces::Muon::PlotType &plotType,
+      bool overwrite);
   /// Fit browser to update (non-owning pointer)
   MantidQt::MantidWidgets::IWorkspaceFitControl *m_fitBrowser;
   /// Data selector to get input from (non-owning pointer)

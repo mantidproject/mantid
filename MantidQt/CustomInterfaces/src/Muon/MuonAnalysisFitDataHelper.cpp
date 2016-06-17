@@ -1,6 +1,6 @@
 #include "MantidQtCustomInterfaces/Muon/MuonAnalysisFitDataHelper.h"
-#include "MantidQtCustomInterfaces/Muon/MuonAnalysisHelper.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/GroupingLoader.h"
 
 using MantidQt::MantidWidgets::IMuonFitDataSelector;
 using MantidQt::MantidWidgets::IWorkspaceFitControl;
@@ -35,17 +35,16 @@ void MuonAnalysisFitDataHelper::handleDataPropertiesChanged() {
 }
 
 /**
- * Called when data selector reports "selected groups changed"
+ * Called when data selector reports "selected data changed"
+ * @param grouping :: [input] Grouping table from interface
+ * @param plotType :: [input] Type of plot currently selected in interface
+ * @param overwrite :: [input] Whether overwrite is on or off in interface
  */
-void MuonAnalysisFitDataHelper::handleSelectedGroupsChanged() {
-  createWorkspacesToFit();
-}
-
-/**
- * Called when data selector reports "selected periods changed"
- */
-void MuonAnalysisFitDataHelper::handleSelectedPeriodsChanged() {
-  createWorkspacesToFit();
+void MuonAnalysisFitDataHelper::handleSelectedDataChanged(
+    const Mantid::API::Grouping &grouping, const Muon::PlotType &plotType,
+    bool overwrite) {
+  const auto names = generateWorkspaceNames(grouping, plotType, overwrite);
+  createWorkspacesToFit(names);
 }
 
 /**
@@ -95,24 +94,57 @@ void MuonAnalysisFitDataHelper::setAssignedFirstRun(const QString &wsName) {
 }
 
 /**
- * Called when runs are changed in data selector
- * Creates workspace and sets it in the fit browser
- * The signal from that will set peak picker and UI properties
+ * Creates all workspaces that don't
+ * yet exist in the ADS and adds them. Sets the workspace name, which
+ * sends a signal to update the peak picker.
+ * @param names :: [input] Names of workspaces to create
  */
-void MuonAnalysisFitDataHelper::handleDataWorkspaceChanged() {
-  createWorkspacesToFit();
+void MuonAnalysisFitDataHelper::createWorkspacesToFit(
+    const std::vector<std::string> &names) {
+
+  // We need to know if the runs are sequential/single (loop over selectedRuns)
+  // or
+  // co-added (use whole run string at once)
+  const auto fitType = m_dataSelector->getFitType();
+
+  // For each name, if not in the ADS, create it
+  for (const auto &name : names) {
+    if (AnalysisDataService::Instance().doesExist(name)) {
+      // We already have it! Just retrieve it
+    } else {
+      // Create here
+    }
+  }
+
+  if (fitType == IMuonFitDataSelector::FitType::CoAdd) {
+    // deal with this
+    // MuonAnalysisHelper::sumWorkspaces()...
+  } else {
+    // otherwise add them all to the ADS
+    // AnalysisDataService::Instance().add(workspace, ...)
+  }
+
+  // Update model with these
+  // m_fitBrowser->... (m_workspacesToFit)
+
+  // NB This is necessary to set peak picker, UI properties via signal!
+  if (!names.empty()) {
+    m_fitBrowser->setWorkspaceName(QString::fromStdString(names.front()));
+  }
 }
 
 /**
- * Gets names of all workspaces needed from the view and updates the
- * model (fit browser) with these. Creates all workspaces that don't
- * yet exist in the ADS and adds them. Sets the workspace name, which
- * sends a signal to update the peak picker.
+ * Gets names of all workspaces required by asking the view
+ * @param grouping :: [input] Grouping table from interface
+ * @param plotType :: [input] Type of plot currently selected in interface
+ * @param overwrite :: [input] Whether overwrite is on or off in interface
+ * @returns :: list of workspace names
  */
-void MuonAnalysisFitDataHelper::createWorkspacesToFit() {
+std::vector<std::string> MuonAnalysisFitDataHelper::generateWorkspaceNames(
+    const Mantid::API::Grouping &grouping, const Muon::PlotType &plotType,
+    bool overwrite) {
   // From view, get names of all workspaces needed
-  std::vector<std::string> workspaces;
-  const auto filenames = m_dataSelector->getFilenames();
+  std::vector<std::string> workspaceNames;
   const auto groups = m_dataSelector->getChosenGroups();
   const auto periods = m_dataSelector->getPeriodSelections();
 
@@ -122,40 +154,49 @@ void MuonAnalysisFitDataHelper::createWorkspacesToFit() {
   std::vector<int> selectedRuns;
   MuonAnalysisHelper::parseRunLabel(instRuns.toStdString(), params.instrument,
                                     selectedRuns);
+  params.version = 1;
+  params.plotType = plotType;
 
-  // We need to know if the runs are sequential (loop over selectedRuns) or
-  // co-added (use whole run string at once)
+  // Find if given name is a group or a pair - defaults to group.
+  // If it is not in the groups or pairs list, we will produce a workspace name
+  // with "Group" in it rather than throwing.
+  const auto getItemType = [&grouping](const std::string &name) {
+    if (std::find(grouping.pairNames.begin(), grouping.pairNames.end(), name) !=
+        grouping.pairNames.end()) {
+      return Muon::ItemType::Pair;
+    } else { // If it's not a pair, assume it's a group
+      return Muon::ItemType::Group;
+    }
+  };
 
-  params.version = 1; // ???
-  //params.plotType =  // ???
+  // Generate a unique name from the given parameters
+  const auto getUniqueName = [](Muon::DatasetParams &params) {
+    std::string workspaceName =
+        MuonAnalysisHelper::generateWorkspaceName(params);
+    while (AnalysisDataService::Instance().doesExist(workspaceName)) {
+      params.version++;
+      workspaceName = MuonAnalysisHelper::generateWorkspaceName(params);
+    }
+    return workspaceName;
+  };
 
   // generate workspace names
-  //for (const int run : selectedRuns) {
+  for (const int run : selectedRuns) {
+    params.runs = {run};
     for (const auto &group : groups) {
-      //params.itemType = group? pair? how to tell?
+
+      params.itemType = getItemType(group.toStdString());
       params.itemName = group.toStdString();
       for (const auto &period : periods) {
         params.periods = period.toStdString();
-        workspaces.push_back(MuonAnalysisHelper::generateWorkspaceName(params));
+        const std::string wsName =
+            overwrite ? MuonAnalysisHelper::generateWorkspaceName(params)
+                      : getUniqueName(params);
+        workspaceNames.push_back(wsName);
       }
     }
-  //}
-
-
-  // Update model with these
-  //m_fitBrowser->... (m_workspacesToFit)
-
-  // For each name, if not in the ADS, create and add it
-  for (const auto &workspace : workspaces) {
-    if (!AnalysisDataService::Instance().doesExist(workspace)) {
-      //AnalysisDataService::Instance().add(workspace, ...)
-    }
   }
-   
-  // NB This is necessary to set peak picker, UI properties via signal!
-  if (!workspaces.empty()) {
-    m_fitBrowser->setWorkspaceName(QString::fromStdString(workspaces.front()));
-  }
+  return workspaceNames;
 }
 
 } // namespace CustomInterfaces
