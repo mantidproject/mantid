@@ -20,8 +20,8 @@ ListPropertyWidget::~ListPropertyWidget() {}
 /** Constructor
  */
 ListPropertyWidget::ListPropertyWidget(Mantid::Kernel::Property *prop,
-                                             QWidget *parent,
-                                             QGridLayout *layout, int row)
+                                       QWidget *parent, QGridLayout *layout,
+                                       int row)
     : PropertyWidget(prop, parent, layout, row) {
   // Label at column 0
   m_label = new QLabel(QString::fromStdString(prop->name()), m_parent);
@@ -31,7 +31,7 @@ ListPropertyWidget::ListPropertyWidget(Mantid::Kernel::Property *prop,
 
   // It is a choice of certain allowed values and can use a list box
   // Check if this is the row that matches the one that we want to link to the
-  // output box 
+  // output box
   m_list = new QListWidget(this);
   m_list->setToolTip(m_doc);
   m_list->setSortingEnabled(false);
@@ -75,9 +75,8 @@ void ListPropertyWidget::setValueImpl(const QString &value) {
   const QString temp =
       value.isEmpty() ? QString::fromStdString(m_prop->getDefault()) : value;
 
-  auto items = m_list->findItems(temp,Qt::MatchWildcard);
-  for (auto item : items)
-  {
+  auto items = m_list->findItems(temp, Qt::MatchWildcard);
+  for (auto item : items) {
     item->setSelected(true);
     m_list->setCurrentItem(item);
     m_list->scrollToItem(item);

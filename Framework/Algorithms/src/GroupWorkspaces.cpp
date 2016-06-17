@@ -17,11 +17,9 @@ GroupWorkspaces::GroupWorkspaces() : API::Algorithm(), m_group() {}
 /// Initialisation method
 void GroupWorkspaces::init() {
 
-  declareProperty(
-      Kernel::make_unique<ArrayProperty<std::string>>(
-          "InputWorkspaces",
-          boost::make_shared<ADSValidator>()),
-      "Name of the Input Workspaces to Group");
+  declareProperty(Kernel::make_unique<ArrayProperty<std::string>>(
+                      "InputWorkspaces", boost::make_shared<ADSValidator>()),
+                  "Name of the Input Workspaces to Group");
   declareProperty(
       make_unique<WorkspaceProperty<WorkspaceGroup>>("OutputWorkspace", "",
                                                      Direction::Output),

@@ -57,7 +57,7 @@ public:
     TS_ASSERT_EQUALS(adsValidator.isValid(sv), "");
     sv.push_back(wsName);
     TS_ASSERT_DIFFERS(adsValidator.isValid(sv), "");
- 
+
     ads.remove(wsName);
   }
 
@@ -82,7 +82,6 @@ public:
     sv.push_back(ws3Name);
     TS_ASSERT_EQUALS(adsValidator.isValid(sv), "");
 
-
     // invalid ws in string
     sv.push_back(wsInvalidName);
     TS_ASSERT_DIFFERS(adsValidator.isValid(sv), "");
@@ -105,16 +104,19 @@ public:
     ADSValidator adsValidator(true);
 
     auto allowedList = adsValidator.allowedValues();
-    TS_ASSERT(std::find(allowedList.cbegin(), allowedList.cend(), ws1Name) != allowedList.cend());
-    TS_ASSERT(std::find(allowedList.cbegin(), allowedList.cend(), ws2Name) != allowedList.cend());
-    TS_ASSERT(std::find(allowedList.cbegin(), allowedList.cend(), ws3Name) != allowedList.cend());
-    TS_ASSERT(std::find(allowedList.cbegin(), allowedList.cend(), wsInvalidName) == allowedList.cend());
-    
+    TS_ASSERT(std::find(allowedList.cbegin(), allowedList.cend(), ws1Name) !=
+              allowedList.cend());
+    TS_ASSERT(std::find(allowedList.cbegin(), allowedList.cend(), ws2Name) !=
+              allowedList.cend());
+    TS_ASSERT(std::find(allowedList.cbegin(), allowedList.cend(), ws3Name) !=
+              allowedList.cend());
+    TS_ASSERT(std::find(allowedList.cbegin(), allowedList.cend(),
+                        wsInvalidName) == allowedList.cend());
+
     ads.remove(ws1Name);
     ads.remove(ws2Name);
     ads.remove(ws3Name);
   }
-
 };
 
 #endif /* MANTID_API_ADSVALIDATORTEST_H_ */

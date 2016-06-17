@@ -143,7 +143,6 @@ public:
   /// initialised with
   virtual std::string getDefault() const = 0;
 
-
   /** Is Multiple Selection Allowed
   *  @return true if multiple selection is allowed
   */
