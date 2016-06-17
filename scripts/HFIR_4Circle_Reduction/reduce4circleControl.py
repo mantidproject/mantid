@@ -560,7 +560,7 @@ class CWSCDReductionControl(object):
         :param k_shift_dict:
         :param user_header:
         :param fullprof_file_name:
-        :return:
+        :return: 2-tuples. status and return object (file content or error message)
         """
         # check
         assert isinstance(exp_number, int), 'Experiment number must be an integer.'
@@ -617,7 +617,7 @@ class CWSCDReductionControl(object):
         except RuntimeError as error:
             return False, str(error)
 
-        return file_content
+        return True, file_content
 
     def export_md_data(self, exp_number, scan_number, base_file_name):
         """

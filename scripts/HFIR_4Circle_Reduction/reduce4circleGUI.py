@@ -980,13 +980,13 @@ class MainWindow(QtGui.QMainWindow):
         # write
         user_header = str(self.ui.lineEdit_fpHeader.text())
         try:
-            file_content = self._myControl.export_to_fullprof(exp_number, scan_number_list, user_header,
-                                                              fp_name)
+            status, file_content = self._myControl.export_to_fullprof(exp_number, scan_number_list, user_header, fp_name)
             self.ui.plainTextEdit_fpContent.setPlainText(file_content)
-        except AssertionError as a_error:
-            self.pop_one_button_dialog(str(a_error))
-        except RuntimeError as r_error:
-            self.pop_one_button_dialog(str(r_error))
+            if status is False:
+                self.pop_one_button_dialog(file_content)
+        except AssertionError as a_err:
+            self.pop_one_button_dialog(str(a_err))
+            return
 
         return
 
