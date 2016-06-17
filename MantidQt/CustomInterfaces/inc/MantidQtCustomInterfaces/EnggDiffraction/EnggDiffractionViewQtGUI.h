@@ -4,13 +4,13 @@
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidQtAPI/UserSubWindow.h"
 #include "MantidQtCustomInterfaces/DllConfig.h"
+#include "MantidQtCustomInterfaces/EnggDiffraction/EnggDiffFittingViewQtWidget.h"
 #include "MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffractionPresenter.h"
 #include "MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffractionView.h"
 #include "MantidQtMantidWidgets/PeakPicker.h"
 
 #include "ui_EnggDiffractionQtGUI.h"
 #include "ui_EnggDiffractionQtTabCalib.h"
-#include "ui_EnggDiffractionQtTabFitting.h"
 #include "ui_EnggDiffractionQtTabFocus.h"
 #include "ui_EnggDiffractionQtTabPreproc.h"
 #include "ui_EnggDiffractionQtTabSettings.h"
@@ -155,70 +155,6 @@ public:
 
   double rebinningPulsesTime() const override;
 
-  void setFittingRunNo(const std::string &path) override;
-
-  std::string getFittingRunNo() const override;
-
-  void clearFittingComboBox() const override;
-
-  void enableFittingComboBox(bool enable) const override;
-
-  int getFittingComboIdx(std::string bank) const override;
-
-  void clearFittingListWidget() const override;
-
-  void enableFittingListWidget(bool enable) const override;
-
-  int getFittingListWidgetCurrentRow() const override;
-
-  void setFittingListWidgetCurrentRow(int idx) const override;
-
-  std::string fittingPeaksData() const override;
-
-  void setPeakList(std::string peakList) const override;
-
-  std::vector<std::string>
-  splitFittingDirectory(std::string &selectedfPath) override;
-
-  void setBankEmit() override;
-
-  std::string getFocusDir() override;
-
-  void setDataVector(std::vector<boost::shared_ptr<QwtData>> &data,
-                     bool focused, bool plotSinglePeaks) override;
-
-  void addBankItem(std::string bankID) override;
-
-  void addRunNoItem(std::string runNo) override;
-
-  std::vector<std::string> getFittingRunNumVec() override;
-
-  void setFittingRunNumVec(std::vector<std::string> assignVec) override;
-
-  bool getFittingMultiRunMode() override;
-
-  void setFittingMultiRunMode(bool mode) override;
-
-  std::string fittingRunNoFactory(std::string bank, std::string fileName,
-                                  std::string &bankDir, std::string fileDir);
-
-  std::string readPeaksFile(std::string fileDir);
-
-  void dataCurvesFactory(std::vector<boost::shared_ptr<QwtData>> &data,
-                         std::vector<QwtPlotCurve *> &dataVector, bool focused);
-
-  void setPeakPickerEnabled(bool enabled);
-
-  void setPeakPicker(const Mantid::API::IPeakFunction_const_sptr &peak);
-
-  double getPeakCentre() const;
-
-  void fittingWriteFile(const std::string &fileDir);
-
-  void setZoomTool(bool enabled);
-
-  void resetView();
-
   void plotFocusedSpectrum(const std::string &wsName) override;
 
   void plotWaterfallSpectrum(const std::string &wsName) override;
@@ -284,21 +220,6 @@ private slots:
   // enables the text field when appropriate bank name is selected
   void enableSpecNos();
 
-  // slot of the fitting peaks per part of the interface
-  void browseFitFocusedRun();
-  void resetFittingMultiMode();
-  void setBankIdComboBox(int idx) override;
-  void browsePeaksToFit();
-  void setPeakPick();
-  void addPeakToList();
-  void savePeakList();
-  void clearPeakList();
-  void fitClicked();
-  void FittingRunNo();
-  void plotSeparateWindow();
-  void setBankDir(int idx);
-  void listViewFittingRun();
-
   // show the standard Mantid help window with this interface's help
   void openHelpWin();
 
@@ -310,7 +231,6 @@ private:
   void doSetupTabCalib();
   void doSetupTabFocus();
   void doSetupTabPreproc();
-  void doSetupTabFitting();
   void doSetupTabSettings();
 
   std::string guessGSASTemplatePath() const;
@@ -338,7 +258,8 @@ private:
   Ui::EnggDiffractionQtTabCalib m_uiTabCalib;
   Ui::EnggDiffractionQtTabFocus m_uiTabFocus;
   Ui::EnggDiffractionQtTabPreproc m_uiTabPreproc;
-  Ui::EnggDiffractionQtTabFitting m_uiTabFitting;
+  // Ui::EnggDiffractionQtTabFitting m_uiTabFitting;
+  EnggDiffFittingViewQtWidget* m_fittingWidget;
   Ui::EnggDiffractionQtTabSettings m_uiTabSettings;
 
   /// converts QList to a vector
@@ -363,12 +284,6 @@ private:
   // multi-run focus mode type selected
   int static m_currentRunMode;
 
-  /// indentifier for fitting multi-run or single run input
-  bool static m_fittingMutliRunMode;
-
-  // vector holding directory of focused bank file
-  std::vector<std::string> static m_fitting_runno_dir_vec;
-
   /// current calibration produced in the 'Calibration' tab
   std::string m_currentCalibFilename;
   /// calibration settings - from/to the 'settings' tab
@@ -392,18 +307,6 @@ private:
   /// supported/suggested file extensions for the detector groups file
   /// (focusing)
   static const std::string g_DetGrpExtStr;
-
-  /// Loaded focused workspace
-  std::vector<QwtPlotCurve *> m_focusedDataVector;
-
-  /// Loaded data curves
-  std::vector<QwtPlotCurve *> m_fittedDataVector;
-
-  /// Peak picker tool for fitting - only one on the plot at any given moment
-  MantidWidgets::PeakPicker *m_peakPicker;
-
-  /// zoom-in/zoom-out tool for fitting
-  QwtPlotZoomer *m_zoomTool;
 
   /// presenter as in the model-view-presenter
   boost::scoped_ptr<IEnggDiffractionPresenter> m_presenter;
