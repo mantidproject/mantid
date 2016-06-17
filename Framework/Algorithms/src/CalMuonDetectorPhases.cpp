@@ -151,7 +151,7 @@ void CalMuonDetectorPhases::fitWorkspace(const API::MatrixWorkspace_sptr &ws,
   std::string funcStr = createFittingFunction(freq, true);
 
   // Set up results table
-  resTab->addColumn("int", "Detector");
+  resTab->addColumn("int", "Spectrum number");
   resTab->addColumn("double", "Asymmetry");
   resTab->addColumn("double", "Phase");
 
