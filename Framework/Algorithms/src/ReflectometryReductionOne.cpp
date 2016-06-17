@@ -177,7 +177,7 @@ void ReflectometryReductionOne::init() {
                   "Normalize by dividing by the integrated monitors.");
 
   declareProperty(make_unique<PropertyWithValue<bool>>(
-                      "CorrectDetectorPositions", true, Direction::Input),
+                      "CorrectDetectorPositions", false, Direction::Input),
                   "Correct detector positions using ThetaIn (if given)");
 
   declareProperty(

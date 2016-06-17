@@ -171,7 +171,7 @@ void ReflectometryReductionOneAuto::init() {
   declareProperty("NormalizeByIntegratedMonitors", true,
                   "Normalize by dividing by the integrated monitors.");
 
-  declareProperty("CorrectDetectorPositions", true,
+  declareProperty("CorrectDetectorPositions", false,
                   "Correct detector positions using ThetaIn (if given)");
 
   declareProperty("StrictSpectrumChecking", true,
