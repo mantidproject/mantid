@@ -21,16 +21,6 @@ using namespace DataObjects;
 DECLARE_ALGORITHM(LoadEventAndCompress)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-LoadEventAndCompress::LoadEventAndCompress() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-LoadEventAndCompress::~LoadEventAndCompress() {}
-
-//----------------------------------------------------------------------------------------------
 
 /// Algorithms name for identification. @see Algorithm::name
 const string LoadEventAndCompress::name() const {

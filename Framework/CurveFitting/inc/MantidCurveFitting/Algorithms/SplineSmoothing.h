@@ -41,7 +41,6 @@ namespace Algorithms {
 class DLLExport SplineSmoothing : public API::Algorithm {
 public:
   SplineSmoothing();
-  ~SplineSmoothing() override;
 
   const std::string name() const override;
   int version() const override;

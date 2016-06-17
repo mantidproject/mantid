@@ -11,16 +11,6 @@ namespace MDAlgorithms {
 DECLARE_ALGORITHM(GreaterThanMD)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-GreaterThanMD::GreaterThanMD() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-GreaterThanMD::~GreaterThanMD() {}
-
-//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string GreaterThanMD::name() const { return "GreaterThanMD"; }
 

@@ -27,16 +27,6 @@ namespace WorkflowAlgorithms {
 DECLARE_ALGORITHM(DgsPreprocessData)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-DgsPreprocessData::DgsPreprocessData() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-DgsPreprocessData::~DgsPreprocessData() {}
-
-//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string DgsPreprocessData::name() const {
   return "DgsPreprocessData";

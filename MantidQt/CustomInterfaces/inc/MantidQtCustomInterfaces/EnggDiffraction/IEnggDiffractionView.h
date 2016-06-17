@@ -1,10 +1,10 @@
 #ifndef MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_IENGGDIFFRACTIONVIEW_H_
 #define MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_IENGGDIFFRACTIONVIEW_H_
 
+#include <QStringList>
+#include <qwt_plot_curve.h>
 #include <string>
 #include <vector>
-#include <qwt_plot_curve.h>
-#include <QStringList>
 
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
@@ -387,6 +387,13 @@ public:
   virtual std::string fittingPeaksData() const = 0;
 
   /**
+  * Sets the peak list according to the QString given
+  *
+  * @param peakList list of expected peaks to be fitted as std::string
+  */
+  virtual void setPeakList(std::string peakList) const = 0;
+
+  /**
   * Splits the file name in to sections of '_' and 'ENGINX' text
   * within the filename
   *
@@ -401,35 +408,75 @@ public:
   /**
   * adds the number of banks to the combo-box widget on the interface
   *
-  * @param splittedBaseName contains the bank number and run number
-  * @param selectedFile path of the selected file
+  * @param bankID the bank number to add to combo-box
   */
-  virtual void addBankItems(std::vector<std::string> splittedBaseName,
-                            QString selectedFile) = 0;
+  virtual void addBankItem(std::string bankID) = 0;
 
   /**
   * adds the run number to the list view widget on the interface
   *
-  * @param runNumVector run number vector which have been inputted and
-  * found within focus dir
-  * @param multiRun to avoid recreating the list view widget
+  * @param runNo run number which needs to be added to
+  * the list widget
   */
-  virtual void addRunNoItem(std::vector<std::string> runNumVector,
-                            bool multiRun) = 0;
-
-  /**
-  * checks if the text-inputted is a valid run
-  *
-  * @param text the run number as text
-  *
-  * @return bool if each char in string is a digit/int
-  */
-  virtual bool isDigit(std::string text) = 0;
+  virtual void addRunNoItem(std::string runNo) = 0;
 
   /**
   * emits the signal within view when run number/bank changed
   */
   virtual void setBankEmit() = 0;
+
+  /**
+  * sets the bank combo-box according to given index
+  *
+  * @param idx as int of the bank to set
+  */
+  virtual void setBankIdComboBox(int idx) = 0;
+
+  /**
+  * deletes all items from the fitting combo-box widget
+  */
+  virtual void clearFittingComboBox() const = 0;
+
+  /**
+  * enables or disables the fitting combo-box
+  *
+  * @param enable or disable the fitting combo-box widget
+  */
+  virtual void enableFittingComboBox(bool enable) const = 0;
+
+  /**
+  * gets the index of the bank according to text found
+  *
+  * @param bank as a std::string to find in widget
+  *
+  * @returns int index of the combo-box where the
+  * string is found
+  */
+  virtual int getFittingComboIdx(std::string bank) const = 0;
+
+  /*
+  * deletes all items from the fitting list widget
+  */
+  virtual void clearFittingListWidget() const = 0;
+
+  /**
+  * enables or disables the fitting list widget
+  *
+  * @param enable or disable the fitting list widget
+  */
+  virtual void enableFittingListWidget(bool enable) const = 0;
+
+  /*
+  * @return idx of current selected row of list widget
+  */
+  virtual int getFittingListWidgetCurrentRow() const = 0;
+
+  /**
+  * sets the current row of the fitting list widget
+  *
+  * @param idx number to set as for the list widget
+  */
+  virtual void setFittingListWidgetCurrentRow(int idx) const = 0;
 
   /**
   * gets the set focus directory within the setting tab
