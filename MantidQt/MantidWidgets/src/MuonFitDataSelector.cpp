@@ -66,13 +66,13 @@ void MuonFitDataSelector::setUpConnections() {
  */
 void MuonFitDataSelector::userChangedRuns() {
   // check for single run and enable/disable radio buttons
-  const auto runs = getFilenames();
-  if (runs.size() < 2) {
-    setFitType(FitType::Single);
-  } else {
+  const auto runs = getRuns();
+  if (runs.contains(',') || runs.contains('-')) {
     // if buttons are disabled, enable them
     m_ui.rbCoAdd->setEnabled(true);
     m_ui.rbSimultaneous->setEnabled(true);
+  } else {
+    setFitType(FitType::Single);
   }
   emit workspaceChanged();
 }
@@ -190,18 +190,21 @@ void MuonFitDataSelector::setUpValidators() {
  */
 void MuonFitDataSelector::setWorkspaceDetails(const QString &runNumbers,
                                               const QString &instName) {
-  // Set initial run to be run number of the workspace loaded in Home tab
+  // Set the file finder to the correct instrument (not Mantid's default)
+  m_ui.runs->setInstrumentOverride(instName);
+
   QString runs(runNumbers);
   runs.remove(QRegExp("^[0]*")); // remove leading zeros, if any
-  m_ui.runs->setText(runs);
   // Set fit type - co-add (as this comes from Home tab) or single
   if (runs.contains('-') || runs.contains(',')) {
     setFitType(FitType::CoAdd);
   } else {
     setFitType(FitType::Single);
   }
-  // Set the file finder to the correct instrument (not Mantid's default)
-  m_ui.runs->setInstrumentOverride(instName);
+
+  // Set initial run to be run number of the workspace loaded in Home tab
+  // and search for filenames
+  m_ui.runs->setFileTextWithSearch(runs);
 }
 
 /**
@@ -413,7 +416,7 @@ QVariant MuonFitDataSelector::getUserInput() const {
   map.insert("Workspace index", getWorkspaceIndex());
   map.insert("Start", getStartTime());
   map.insert("End", getEndTime());
-  map.insert("Runs", getFilenames());
+  map.insert("Runs", getRuns());
   map.insert("Groups", getChosenGroups());
   map.insert("Periods", getPeriodSelections());
   return map;
