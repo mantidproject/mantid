@@ -55,7 +55,7 @@ class PythonAlgorithmChildAlgCallTest(unittest.TestCase):
         api.CreateWorkspace(DataX=data,DataY=data,NSpec=1,UnitX='Wavelength', OutputWorkspace=self._ws_name)
         try:
             run_algorithm('PythonAlgorithmChildAlgCallTestAlg', InputWorkspace=self._ws_name, OutputWorkspace=self._ws_name)
-        except Exception,exc:
+        except Exception as exc:
             self.fail("Algorithm call failed: %s" % str(exc))
 
         self.assertTrue(self._ws_name in mtd)
@@ -67,7 +67,7 @@ class PythonAlgorithmChildAlgCallTest(unittest.TestCase):
 
         try:
             run_algorithm('PythonAlgorithmChildAlgCallTestAlg', InputWorkspace=self._ws_name, OutputWorkspace=self._ws_name2)
-        except Exception,exc:
+        except Exception as exc:
             self.fail("Algorithm call failed: %s" % str(exc))
 
         self.assertTrue(self._ws_name2 in mtd)

@@ -42,7 +42,7 @@ class Example1DFunctionTest(unittest.TestCase):
     def test_function_has_been_registered(self):
         try:
             FunctionFactory.createFunction("ExamplePeakFunction")
-        except RuntimeError, exc:
+        except RuntimeError as exc:
             self.fail("Could not create ExamplePeakFunction function: %s" % str(exc))
 
     def test_fit_succeeds_with_expected_answer(self):

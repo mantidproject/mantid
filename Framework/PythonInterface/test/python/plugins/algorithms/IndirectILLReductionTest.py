@@ -22,7 +22,7 @@ class IndirectILLReductionTest(unittest.TestCase):
             if (os.path.isfile(path)):
                 try:
                     os.remove(path)
-                except IOError, e:
+                except IOError as e:
                     continue
 
         #reset output workspaces list
