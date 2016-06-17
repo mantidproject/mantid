@@ -60,6 +60,7 @@ void MuonAnalysisFitDataTab::makeRawWorkspace(const std::string &wsName) {
 */
 void MuonAnalysisFitDataTab::groupFittedWorkspaces(
     const QString &workspaceName) {
+  std::string wsNormalised =
       workspaceName.toStdString() + "_NormalisedCovarianceMatrix";
   std::string wsParameters = workspaceName.toStdString() + "_Parameters";
   std::string wsWorkspace = workspaceName.toStdString() + "_Workspace";

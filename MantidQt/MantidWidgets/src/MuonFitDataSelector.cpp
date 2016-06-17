@@ -235,7 +235,7 @@ void MuonFitDataSelector::addGroupCheckbox(const QString &name) {
   auto checkBox = new QCheckBox(name);
   m_groupBoxes.insert(name, checkBox);
   checkBox->setChecked(true);
-  m_ui.verticalLayoutGroups->add(checkBox);
+  m_ui.verticalLayoutGroups->addWidget(checkBox);
   connect(checkBox, SIGNAL(clicked(bool)), this,
           SIGNAL(selectedGroupsChanged()));
 }
@@ -246,7 +246,7 @@ void MuonFitDataSelector::addGroupCheckbox(const QString &name) {
  */
 void MuonFitDataSelector::clearGroupCheckboxes() {
   for (const auto &checkbox : m_groupBoxes) {
-    m_ui.verticalLayoutGroups->remove(checkbox);
+    m_ui.verticalLayoutGroups->removeWidget(checkbox);
     checkbox->deleteLater(); // will disconnect signal automatically
   }
   m_groupBoxes.clear();
@@ -266,7 +266,7 @@ void MuonFitDataSelector::setNumPeriods(size_t numPeriods) {
       QString name = QString::number(i + 1);
       auto checkbox = new QCheckBox(name);
       m_periodBoxes.insert(name, checkbox);
-      m_ui.verticalLayoutPeriods->add(checkbox);
+      m_ui.verticalLayoutPeriods->addWidget(checkbox);
       connect(checkbox, SIGNAL(clicked()), this,
               SIGNAL(selectedPeriodsChanged()));
     }
@@ -276,7 +276,7 @@ void MuonFitDataSelector::setNumPeriods(size_t numPeriods) {
     for (const QString name : m_periodBoxes.keys()) {
       const size_t periodNum = static_cast<size_t>(name.toInt());
       if (periodNum > numPeriods) {
-        m_ui.verticalLayoutPeriods->remove(m_periodBoxes.value(name));
+        m_ui.verticalLayoutPeriods->removeWidget(m_periodBoxes.value(name));
         m_periodBoxes.value(name)->deleteLater(); // will disconnect signal
         toRemove.append(name);
       }
@@ -408,8 +408,8 @@ void MuonFitDataSelector::setChosenPeriod(const QString &period) {
 *@returns :: QVariant containing a QVariantMap
 */
 QVariant MuonFitDataSelector::getUserInput() const {
-  QVariant ret;
-  auto map = ret.asMap();
+  QVariant ret(QVariant::Map);
+  auto map = ret.toMap();
   map.insert("Workspace index", getWorkspaceIndex());
   map.insert("Start", getStartTime());
   map.insert("End", getEndTime());

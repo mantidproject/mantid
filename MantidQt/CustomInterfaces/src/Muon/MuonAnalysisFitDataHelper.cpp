@@ -135,7 +135,7 @@ void MuonAnalysisFitDataHelper::createWorkspacesToFit() {
       //params.itemType = group? pair? how to tell?
       params.itemName = group.toStdString();
       for (const auto &period : periods) {
-        params.periods = period;
+        params.periods = period.toStdString();
         workspaces.push_back(MuonAnalysisHelper::generateWorkspaceName(params));
       }
     }
