@@ -22,9 +22,12 @@ Before the spectra are fitted, :math:`\omega` is determined by grouping the dete
 calculating the asymmetry and fitting this to get the frequency. This value of :math:`\omega`
 is then treated as a fixed constant when fitting the spectra to the function above.
 
-The algorithm outputs a table workspace containing the detector ID, the asymmetry and the phase.
+The algorithm outputs a table workspace containing the spectrum number, the asymmetry and the phase.
 This table is intended to be used as the input
-*PhaseTable* to :ref:`PhaseQuad <algm-PhaseQuad>`. In addition, the fitting results are returned
+*PhaseTable* to :ref:`PhaseQuad <algm-PhaseQuad>`. 
+Usually for muon instruments, each spectrum will correspond to one detector (spectrum number = detector ID).
+
+In addition, the fitting results are returned
 in a workspace group, where each of the items stores the original data (after removing the
 exponential decay), the data simulated with the fitting function and the difference between data
 and fit as spectra 0, 1 and 2 respectively.
@@ -50,7 +53,7 @@ Usage
 
    # Load four spectra from a muon nexus file
    ws = Load(Filename='MUSR00022725.nxs', SpectrumMin=1, SpectrumMax=4)
-   # Calibrate the phases and amplituds
+   # Calibrate the phases and amplitudes
    detectorTable, fittingResults = CalMuonDetectorPhases(InputWorkspace='ws', LastGoodData=4, ForwardSpectra="1,2", BackwardSpectra="3,4")
 
    # Print the result

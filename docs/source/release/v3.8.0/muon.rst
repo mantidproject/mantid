@@ -20,7 +20,7 @@ calculations.
 
 - :ref:`CalMuonDetectorPhases <algm-CalMuonDetectorPhases>`: the *Frequency* parameter is now supplied in MHz rather than megaradians per second.
 
-- :ref:`CalMuonDetectorPhases <algm-CalMuonDetectorPhases>`: "Detector" column of the output phase table now shows detector IDs rather than workspace indices.
+- :ref:`CalMuonDetectorPhases <algm-CalMuonDetectorPhases>`: The first column of the output phase table now shows spectrum numbers rather than workspace indices.
 
 Fit Functions
 -------------
