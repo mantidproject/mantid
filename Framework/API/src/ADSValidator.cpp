@@ -10,7 +10,7 @@ namespace API {
 ADSValidator::ADSValidator(const bool allowMultiSelection,
                            const bool isOptional)
     : TypedValidator<std::vector<std::string>>(),
-      m_AllowMultiSelection(allowMultiSelection), m_isOptional(isOptional){};
+      m_AllowMultiSelection(allowMultiSelection), m_isOptional(isOptional) {}
 
 /// Clone the validator
 IValidator_sptr ADSValidator::clone() const {
