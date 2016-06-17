@@ -17,11 +17,11 @@ void export_ADSValidator() {
     boost::noncopyable>("ADSValidator", init<>("Default constructor"))
     .def(init<const bool, const bool>(
       "Constructor setting allowMultiple and isOptional.",
-      args("allowMultiSelection", "isOptional")))
+      args("allowMultipleSelection", "isOptional")))
 
-    .def("isMultiSelectionAllowed", &ADSValidator::isMultiSelectionAllowed,
+    .def("isMultipleSelectionAllowed", &ADSValidator::isMultipleSelectionAllowed,
       (arg("self")), "Are multiple workspaces allowed")
-    .def("setMultiSelectionAllowed", &ADSValidator::setMultiSelectionAllowed,
+    .def("setMultiSelectionAllowed", &ADSValidator::setMultipleSelectionAllowed,
       (arg("self"), arg("isMultiSelectionAllowed")), "Set if multiple workspaces are allowed")
     .def("isOptional", &ADSValidator::isOptional,
       (arg("self")), "Is this optional")

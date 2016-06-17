@@ -86,6 +86,30 @@ public:
     ads.remove(ws2Name);
     ads.remove(ws3Name);
   }
+
+  void test_AllowedValues() {
+    const std::string ws1Name = "ADSValidatorTest_w1";
+    const std::string ws2Name = "ADSValidatorTest_w2";
+    const std::string ws3Name = "ADSValidatorTest_w3";
+    const std::string wsInvalidName = "ADSValidatorTest_wInvalid";
+    auto &ads = AnalysisDataService::Instance();
+    ads.addOrReplace(ws1Name, boost::make_shared<MockWorkspace>());
+    ads.addOrReplace(ws2Name, boost::make_shared<MockWorkspace>());
+    ads.addOrReplace(ws3Name, boost::make_shared<MockWorkspace>());
+
+    ADSValidator adsValidator(true);
+
+    auto allowedList = adsValidator.allowedValues();
+    TS_ASSERT(std::find(allowedList.cbegin(), allowedList.cend(), ws1Name) != allowedList.cend());
+    TS_ASSERT(std::find(allowedList.cbegin(), allowedList.cend(), ws2Name) != allowedList.cend());
+    TS_ASSERT(std::find(allowedList.cbegin(), allowedList.cend(), ws3Name) != allowedList.cend());
+    TS_ASSERT(std::find(allowedList.cbegin(), allowedList.cend(), wsInvalidName) == allowedList.cend());
+    
+    ads.remove(ws1Name);
+    ads.remove(ws2Name);
+    ads.remove(ws3Name);
+  }
+
 };
 
 #endif /* MANTID_API_ADSVALIDATORTEST_H_ */

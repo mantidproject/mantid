@@ -45,11 +45,13 @@ public:
   /// Clone the validator
   IValidator_sptr clone() const override;
 
-  bool isMultiSelectionAllowed() const;
+  bool isMultipleSelectionAllowed() override;
 
-  void setMultiSelectionAllowed(const bool isMultiSelectionAllowed);
+  void setMultipleSelectionAllowed(const bool isMultiSelectionAllowed);
 
   bool isOptional() const;
+
+  std::vector<std::string> allowedValues() const override;
 
   void setOptional(const bool setOptional);
 

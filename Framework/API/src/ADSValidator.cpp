@@ -17,11 +17,11 @@ IValidator_sptr ADSValidator::clone() const {
   return boost::make_shared<ADSValidator>(*this);
 }
 
-bool ADSValidator::isMultiSelectionAllowed() const {
+bool ADSValidator::isMultipleSelectionAllowed() {
   return m_AllowMultiSelection;
 }
 
-void ADSValidator::setMultiSelectionAllowed(
+void ADSValidator::setMultipleSelectionAllowed(
     const bool isMultiSelectionAllowed) {
   m_AllowMultiSelection = isMultiSelectionAllowed;
 }
@@ -57,6 +57,23 @@ std::string ADSValidator::checkValidity(const std::string &value) const {
     }
   }
   return os.str();
+}
+
+/** Returns the current contents of the AnalysisDataService for input
+* workspaces.
+*  For output workspaces, an empty set is returned
+*  @return set of objects in AnalysisDataService
+*/
+std::vector<std::string> ADSValidator::allowedValues() const {
+  // Get the list of workspaces currently in the ADS
+  auto vals = AnalysisDataService::Instance().getObjectNames();
+  if (isOptional()) // Insert an empty option
+  {
+    vals.insert("");
+  }
+  auto values = std::vector<std::string>(vals.begin(), vals.end());
+  std::sort(values.begin(), values.end());
+  return values;
 }
 
 /**

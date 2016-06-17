@@ -143,6 +143,12 @@ public:
   /// initialised with
   virtual std::string getDefault() const = 0;
 
+
+  /** Is Multiple Selection Allowed
+  *  @return true if multiple selection is allowed
+  */
+  virtual bool isMultipleSelectionAllowed() { return false; };
+
   virtual std::vector<std::string> allowedValues() const;
 
   virtual const PropertyHistory createHistory() const;
