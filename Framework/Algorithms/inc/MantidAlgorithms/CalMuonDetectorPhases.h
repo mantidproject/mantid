@@ -71,7 +71,7 @@ private:
   /// Extract asymmetry and phase from fitting results
   void extractDetectorInfo(const API::ITableWorkspace_sptr &paramTab,
                            const API::ITableWorkspace_sptr &resultsTab,
-                           const size_t detid);
+                           const specnum_t spectrumNumber);
   /// Find frequency to use in sequential fit
   double getFrequency(const API::MatrixWorkspace_sptr &ws);
   /// Get frequency hint to use when finding frequency
@@ -97,9 +97,6 @@ private:
                                  std::vector<int> &backward);
   /// Report progress in GUI
   void reportProgress(const int thisSpectrum, const int totalSpectra);
-  /// Get detector ID given spectrum index
-  size_t getDetectorIDFromSpectrumIndex(const API::MatrixWorkspace_sptr &ws,
-                                        const int spectrumIndex);
   /// Pointer to input workspace
   API::MatrixWorkspace_sptr m_inputWS;
 };

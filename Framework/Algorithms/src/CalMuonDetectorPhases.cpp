@@ -144,7 +144,7 @@ void CalMuonDetectorPhases::fitWorkspace(const API::MatrixWorkspace_sptr &ws,
                                          API::ITableWorkspace_sptr &resTab,
                                          API::WorkspaceGroup_sptr &resGroup) {
 
-  int nspec = static_cast<int>(ws->getNumberHistograms());
+  int nhist = static_cast<int>(ws->getNumberHistograms());
 
   // Create the fitting function f(x) = A * sin ( w * x + p )
   // The same function and initial parameters are used for each fit
@@ -157,13 +157,13 @@ void CalMuonDetectorPhases::fitWorkspace(const API::MatrixWorkspace_sptr &ws,
 
   // Loop through fitting all spectra individually
   const static std::string success = "success";
-  for (int ispec = 0; ispec < nspec; ispec++) {
-    reportProgress(ispec, nspec);
+  for (int wsIndex = 0; wsIndex < nhist; wsIndex++) {
+    reportProgress(wsIndex, nhist);
     auto fit = createChildAlgorithm("Fit");
     fit->initialize();
     fit->setPropertyValue("Function", funcStr);
     fit->setProperty("InputWorkspace", ws);
-    fit->setProperty("WorkspaceIndex", ispec);
+    fit->setProperty("WorkspaceIndex", wsIndex);
     fit->setProperty("CreateOutput", true);
     fit->setPropertyValue("Output", groupName);
     fit->execute();
@@ -171,7 +171,7 @@ void CalMuonDetectorPhases::fitWorkspace(const API::MatrixWorkspace_sptr &ws,
     std::string status = fit->getProperty("OutputStatus");
     if (!fit->isExecuted() || status != success) {
       std::ostringstream error;
-      error << "Fit failed for spectrum " << ispec;
+      error << "Fit failed for spectrum at workspace index " << wsIndex;
       error << ": " << status;
       throw std::runtime_error(error.str());
     }
@@ -182,7 +182,8 @@ void CalMuonDetectorPhases::fitWorkspace(const API::MatrixWorkspace_sptr &ws,
     // Now we have our fitting results stored in tab
     // but we need to extract the relevant information, i.e.
     // the detector phases (parameter 'p') and asymmetries ('A')
-    extractDetectorInfo(tab, resTab, getDetectorIDFromSpectrumIndex(ws, ispec));
+    const auto &spectrum = ws->getSpectrum(static_cast<size_t>(wsIndex));
+    extractDetectorInfo(tab, resTab, spectrum.getSpectrumNo());
   }
 }
 
@@ -190,11 +191,12 @@ void CalMuonDetectorPhases::fitWorkspace(const API::MatrixWorkspace_sptr &ws,
 * and adds a new row to the results table with them
 * @param paramTab :: [input] Output parameter table resulting from the fit
 * @param resultsTab :: [input] Results table to update with a new row
-* @param detid :: [input] Detector ID
+* @param spectrumNumber :: [input] Spectrum number
 */
 void CalMuonDetectorPhases::extractDetectorInfo(
     const API::ITableWorkspace_sptr &paramTab,
-    const API::ITableWorkspace_sptr &resultsTab, const size_t detid) {
+    const API::ITableWorkspace_sptr &resultsTab,
+    const specnum_t spectrumNumber) {
 
   double asym = paramTab->Double(0, 1);
   double phase = paramTab->Double(2, 1);
@@ -211,7 +213,7 @@ void CalMuonDetectorPhases::extractDetectorInfo(
   }
   // Copy parameters to new row in results table
   API::TableRow row = resultsTab->appendRow();
-  row << static_cast<int>(detid) << asym << phase;
+  row << static_cast<int>(spectrumNumber) << asym << phase;
 }
 
 /** Creates the fitting function f(x) = A * sin( w*x + p) + B as string
@@ -543,28 +545,6 @@ void CalMuonDetectorPhases::reportProgress(const int thisSpectrum,
   std::ostringstream progMessage;
   progMessage << "Fitting " << thisSpectrum + 1 << " of " << totalSpectra;
   this->progress(proportionDone, progMessage.str());
-}
-
-/**
- * Given a spectrum index, find the corresponding detector ID
- * @param ws :: [input] Workspace to look in
- * @param spectrumIndex :: [input] Spectrum index to look up
- * @returns :: detector ID corresponding to spectrum index
- * @throws std::runtime_error if it can't find the detector ID
- */
-size_t CalMuonDetectorPhases::getDetectorIDFromSpectrumIndex(
-    const API::MatrixWorkspace_sptr &ws, const int spectrumIndex) {
-  const auto detidMap = ws->getDetectorIDToWorkspaceIndexMap();
-  for (const auto &entry : detidMap) {
-    if (static_cast<int>(entry.second) == spectrumIndex) {
-      return entry.first;
-    }
-  }
-  // Couldn't find it
-  std::ostringstream error;
-  error << "Could not find detector ID corresponding to spectrum "
-        << spectrumIndex;
-  throw std::runtime_error(error.str());
 }
 
 } // namespace Algorithms
