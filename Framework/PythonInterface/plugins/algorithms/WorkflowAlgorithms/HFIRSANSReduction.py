@@ -1,9 +1,9 @@
 #pylint: disable=no-init,invalid-name,too-many-branches
+import os
 import mantid.simpleapi as api
 from mantid.api import *
 from mantid.kernel import *
 from reduction_workflow.find_data import find_data
-import os
 
 class HFIRSANSReduction(PythonAlgorithm):
 

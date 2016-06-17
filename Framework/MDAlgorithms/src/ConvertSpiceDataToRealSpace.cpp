@@ -33,17 +33,6 @@ using namespace Mantid::DataObjects;
 DECLARE_ALGORITHM(ConvertSpiceDataToRealSpace)
 
 //------------------------------------------------------------------------------------------------
-/** Constructor
- */
-ConvertSpiceDataToRealSpace::ConvertSpiceDataToRealSpace()
-    : m_instrumentName(""), m_numSpec(0), m_nDimensions(3) {}
-
-//------------------------------------------------------------------------------------------------
-/** Destructor
- */
-ConvertSpiceDataToRealSpace::~ConvertSpiceDataToRealSpace() {}
-
-//------------------------------------------------------------------------------------------------
 /** Init
  */
 void ConvertSpiceDataToRealSpace::init() {

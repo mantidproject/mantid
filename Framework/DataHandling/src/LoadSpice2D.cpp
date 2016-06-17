@@ -92,7 +92,7 @@ void store_value(DataObjects::Workspace2D_sptr ws, int specID, double value,
   X[1] = wavelength + dwavelength / 2.0;
   Y[0] = value;
   E[0] = error;
-  ws->getSpectrum(specID)->setSpectrumNo(specID);
+  ws->getSpectrum(specID).setSpectrumNo(specID);
 }
 
 /**

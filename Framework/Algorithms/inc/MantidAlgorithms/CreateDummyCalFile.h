@@ -58,10 +58,6 @@ namespace Algorithms {
 */
 class DLLExport CreateDummyCalFile : public API::Algorithm {
 public:
-  /// (Empty) Constructor
-  CreateDummyCalFile();
-  /// Virtual destructor
-  ~CreateDummyCalFile() override {}
   /// Algorithm's name
   const std::string name() const override { return "CreateDummyCalFile"; }
   /// Summary of algorithms purpose

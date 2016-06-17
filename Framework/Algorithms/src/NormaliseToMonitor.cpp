@@ -160,16 +160,6 @@ using namespace Kernel;
 using namespace API;
 using std::size_t;
 
-/// Default constructor
-NormaliseToMonitor::NormaliseToMonitor()
-    : Algorithm(), m_monitor(), m_commonBins(false),
-      m_integrationMin(EMPTY_DBL()), // EMPTY_DBL() is a tag to say that the
-                                     // value hasn't been set
-      m_integrationMax(EMPTY_DBL()) {}
-
-/// Destructor
-NormaliseToMonitor::~NormaliseToMonitor() {}
-
 void NormaliseToMonitor::init() {
   auto val = boost::make_shared<CompositeValidator>();
   val->add<HistogramValidator>();
@@ -613,7 +603,7 @@ void NormaliseToMonitor::normaliseBinByBin(
     if (inputEvent) {
       // ----------------------------------- EventWorkspace
       // ---------------------------------------
-      EventList &outEL = outputEvent->getEventList(i);
+      EventList &outEL = outputEvent->getSpectrum(i);
       outEL.divide(X, *Y, *E);
     } else {
       // ----------------------------------- Workspace2D

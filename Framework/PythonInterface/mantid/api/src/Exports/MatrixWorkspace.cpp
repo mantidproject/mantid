@@ -202,7 +202,7 @@ void export_MatrixWorkspace() {
       .def("detectorSignedTwoTheta", &MatrixWorkspace::detectorSignedTwoTheta,
            (arg("self"), arg("det")),
            "Returns the signed two theta value for given detector")
-      .def("getSpectrum", (ISpectrum * (MatrixWorkspace::*)(const size_t)) &
+      .def("getSpectrum", (ISpectrum & (MatrixWorkspace::*)(const size_t)) &
                               MatrixWorkspace::getSpectrum,
            (arg("self"), arg("workspaceIndex")), return_internal_reference<>(),
            "Return the spectra at the given workspace index.")

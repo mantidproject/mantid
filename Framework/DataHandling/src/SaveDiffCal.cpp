@@ -142,8 +142,7 @@ void SaveDiffCal::writeIntFieldFromSVWS(
 
   int32_t value;
   for (size_t i = 0; i < m_numValues; ++i) {
-    auto spectrum = ws->getSpectrum(i);
-    auto ids = spectrum->getDetectorIDs();
+    auto &ids = ws->getSpectrum(i).getDetectorIDs();
     auto found = m_detidToIndex.find(*(ids.begin()));
     if (found != m_detidToIndex.end()) {
       value = static_cast<int32_t>(ws->getValue(found->first));

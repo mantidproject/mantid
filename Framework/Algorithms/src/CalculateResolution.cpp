@@ -20,16 +20,6 @@ using namespace Mantid::Kernel;
 DECLARE_ALGORITHM(CalculateResolution)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
-*/
-CalculateResolution::CalculateResolution() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
-*/
-CalculateResolution::~CalculateResolution() {}
-
-//----------------------------------------------------------------------------------------------
 
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string CalculateResolution::name() const {

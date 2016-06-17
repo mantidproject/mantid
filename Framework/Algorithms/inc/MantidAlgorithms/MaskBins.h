@@ -55,8 +55,6 @@ class DLLExport MaskBins : public API::Algorithm {
 public:
   /// Constructor
   MaskBins();
-  /// Virtual destructor
-  ~MaskBins() override {}
   /// Algorithm's name
   const std::string name() const override { return "MaskBins"; }
   /// Summary of algorithms purpose

@@ -156,16 +156,6 @@ KernelVector normaliseKernel(KernelVector kernel) {
 DECLARE_ALGORITHM(SmoothMD)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-SmoothMD::SmoothMD() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-SmoothMD::~SmoothMD() {}
-
-//----------------------------------------------------------------------------------------------
 
 /// Algorithms name for identification. @see Algorithm::name
 const std::string SmoothMD::name() const { return "SmoothMD"; }

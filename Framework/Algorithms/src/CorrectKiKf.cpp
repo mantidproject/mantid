@@ -24,12 +24,6 @@ using namespace DataObjects;
 using namespace Geometry;
 using std::size_t;
 
-/// Default constructor
-CorrectKiKf::CorrectKiKf() : Algorithm() {}
-
-/// Destructor
-CorrectKiKf::~CorrectKiKf() {}
-
 /// Initialisation method
 void CorrectKiKf::init() {
   auto wsValidator = boost::make_shared<WorkspaceUnitValidator>("DeltaE");
@@ -271,20 +265,20 @@ void CorrectKiKf::execEvent() {
       efixed = efixedProp;
 
     // Do the correction
-    EventList *evlist = outputWS->getEventListPtr(i);
-    switch (evlist->getEventType()) {
+    auto &evlist = outputWS->getSpectrum(i);
+    switch (evlist.getEventType()) {
     case TOF:
       // Switch to weights if needed.
-      evlist->switchTo(WEIGHTED);
+      evlist.switchTo(WEIGHTED);
     /* no break */
     // Fall through
 
     case WEIGHTED:
-      correctKiKfEventHelper(evlist->getWeightedEvents(), efixed, emodeStr);
+      correctKiKfEventHelper(evlist.getWeightedEvents(), efixed, emodeStr);
       break;
 
     case WEIGHTED_NOTIME:
-      correctKiKfEventHelper(evlist->getWeightedEventsNoTime(), efixed,
+      correctKiKfEventHelper(evlist.getWeightedEventsNoTime(), efixed,
                              emodeStr);
       break;
     }

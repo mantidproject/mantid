@@ -59,7 +59,7 @@ public:
     TS_ASSERT_EQUALS(ws->dataY(1)[3424], 858);
 
     for (int i = 0; i < 3; ++i) {
-      TS_ASSERT_EQUALS(*ws->getSpectrum(i)->getDetectorIDs().begin(),
+      TS_ASSERT_EQUALS(*ws->getSpectrum(i).getDetectorIDs().begin(),
                        -1 * (i + 1));
     }
 

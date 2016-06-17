@@ -36,9 +36,6 @@ namespace Algorithms {
 */
 class DLLExport ExtractMaskToTable : public API::Algorithm {
 public:
-  ExtractMaskToTable();
-  ~ExtractMaskToTable() override;
-
   /// Algorithm's name
   const std::string name() const override { return "ExtractMaskToTable"; }
   /// Summary of algorithms purpose

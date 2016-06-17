@@ -3,11 +3,11 @@
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/Property.h"
-#include <MantidKernel/StringTokenizer.h>
 #include "MantidQtAPI/PythonRunner.h"
+#include <MantidKernel/StringTokenizer.h>
 // #include "MantidQtCustomInterfaces/EnggDiffraction/EnggDiffractionModel.h"
-#include "MantidQtCustomInterfaces/EnggDiffraction/EnggDiffractionPresenter.h"
 #include "MantidQtCustomInterfaces/EnggDiffraction/EnggDiffractionPresWorker.h"
+#include "MantidQtCustomInterfaces/EnggDiffraction/EnggDiffractionPresenter.h"
 #include "MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffractionView.h"
 #include "MantidQtCustomInterfaces/Muon/ALCHelper.h"
 
@@ -18,8 +18,8 @@
 #include "Poco/DirectoryIterator.h"
 #include <Poco/File.h>
 
-#include <QThread>
 #include <MantidAPI/AlgorithmManager.h>
+#include <QThread>
 
 using namespace Mantid::API;
 using namespace MantidQt::CustomInterfaces;
@@ -657,12 +657,13 @@ void MantidQt::CustomInterfaces::EnggDiffractionPresenter::
           m_view->setFittingRunNumVec(runnoDirVector);
 
           // add bank to the combo-box and list view
-          m_view->addBankItems(splitBaseName, focusedFile);
+          setBankItems();
+          setDefaultBank(splitBaseName, focusedFile);
           runNoVec.clear();
           runNoVec.push_back(splitBaseName[1]);
           auto fittingMultiRunMode = m_view->getFittingMultiRunMode();
           if (!fittingMultiRunMode)
-            m_view->addRunNoItem(runNoVec, false);
+            setRunNoItems(runNoVec, false);
         }
       }
       // assuming that no directory is found so look for number
@@ -698,13 +699,14 @@ void MantidQt::CustomInterfaces::EnggDiffractionPresenter::
           m_view->setFittingRunNumVec(runnoDirVector);
 
           // add bank to the combo-box and list view
-          m_view->addBankItems(splitBaseName, focusedFile);
+          setBankItems();
+          setDefaultBank(splitBaseName, focusedFile);
           runNoVec.clear();
           runNoVec.push_back(strFocusedFile);
 
           auto fittingMultiRunMode = m_view->getFittingMultiRunMode();
           if (!fittingMultiRunMode)
-            m_view->addRunNoItem(runNoVec, false);
+            setRunNoItems(runNoVec, false);
         }
       }
     }
@@ -762,8 +764,8 @@ void EnggDiffractionPresenter::enableMultiRun(
     std::string firstRun, std::string lastRun,
     std::vector<std::string> &fittingRunNoDirVec) {
 
-  bool firstDig = m_view->isDigit(firstRun);
-  bool lastDig = m_view->isDigit(lastRun);
+  bool firstDig = isDigit(firstRun);
+  bool lastDig = isDigit(lastRun);
 
   std::vector<std::string> RunNumberVec;
   if (firstDig && lastDig) {
@@ -801,7 +803,7 @@ void EnggDiffractionPresenter::enableMultiRun(
         auto global_vec_size = fittingRunNoDirVec.size();
         if (size_t(diff) == global_vec_size) {
 
-          m_view->addRunNoItem(RunNumberVec, true);
+          setRunNoItems(RunNumberVec, true);
 
           m_view->setBankEmit();
         }
@@ -823,7 +825,9 @@ void EnggDiffractionPresenter::enableMultiRun(
 
 void EnggDiffractionPresenter::processFitPeaks() {
   const std::string focusedRunNo = m_view->getFittingRunNo();
-  const std::string fitPeaksData = m_view->fittingPeaksData();
+  std::string fittingPeaks = m_view->fittingPeaksData();
+
+  const std::string fitPeaksData = validateFittingexpectedPeaks(fittingPeaks);
 
   g_log.debug() << "the expected peaks are: " << fitPeaksData << '\n';
 
@@ -849,7 +853,7 @@ void EnggDiffractionPresenter::processFitPeaks() {
 }
 
 void EnggDiffractionPresenter::inputChecksBeforeFitting(
-    const std::string &focusedRunNo, const std::string &ExpectedPeaks) {
+    const std::string &focusedRunNo, const std::string &expectedPeaks) {
   if (focusedRunNo.size() == 0) {
     throw std::invalid_argument(
         "Focused Run "
@@ -863,27 +867,64 @@ void EnggDiffractionPresenter::inputChecksBeforeFitting(
                                 focusedRunNo);
   }
 
-  if (ExpectedPeaks.empty()) {
+  if (expectedPeaks.empty()) {
     g_log.warning() << "Expected peaks were not passed, via fitting interface, "
                        "the default list of "
                        "expected peaks will be utilised instead.\n";
   }
   bool contains_non_digits =
-      ExpectedPeaks.find_first_not_of("0123456789,. ") != std::string::npos;
+      expectedPeaks.find_first_not_of("0123456789,. ") != std::string::npos;
   if (contains_non_digits) {
-    throw std::invalid_argument("The expected peaks provided " + ExpectedPeaks +
+    throw std::invalid_argument("The expected peaks provided " + expectedPeaks +
                                 " is invalid, "
                                 "fitting process failed. Please try again!");
   }
 }
 
+std::string EnggDiffractionPresenter::validateFittingexpectedPeaks(
+    std::string &expectedPeaks) const {
+
+  if (!expectedPeaks.empty()) {
+
+    g_log.debug() << "Validating the expected peak list.\n";
+
+    auto *comma = ",";
+
+    for (size_t i = 0; i < expectedPeaks.size() - 1; i++) {
+      size_t j = i + 1;
+
+      if (expectedPeaks[i] == *comma && expectedPeaks[i] == expectedPeaks[j]) {
+        expectedPeaks.erase(j, 1);
+        i--;
+
+      } else {
+        ++j;
+      }
+    }
+
+    size_t strLength = expectedPeaks.length() - 1;
+    if (expectedPeaks.at(size_t(0)) == ',') {
+      expectedPeaks.erase(size_t(0), 1);
+      strLength -= size_t(1);
+    }
+
+    if (expectedPeaks.at(strLength) == ',') {
+      expectedPeaks.erase(strLength, 1);
+    }
+
+    m_view->setPeakList(expectedPeaks);
+  }
+
+  return expectedPeaks;
+}
+
 void EnggDiffractionPresenter::startAsyncFittingWorker(
-    const std::string &focusedRunNo, const std::string &ExpectedPeaks) {
+    const std::string &focusedRunNo, const std::string &expectedPeaks) {
 
   delete m_workerThread;
   m_workerThread = new QThread(this);
   EnggDiffWorker *worker =
-      new EnggDiffWorker(this, focusedRunNo, ExpectedPeaks);
+      new EnggDiffWorker(this, focusedRunNo, expectedPeaks);
   worker->moveToThread(m_workerThread);
 
   connect(m_workerThread, SIGNAL(started()), worker, SLOT(fitting()));
@@ -941,7 +982,7 @@ void EnggDiffractionPresenter::setDifcTzero(MatrixWorkspace_sptr wks) const {
 }
 
 void EnggDiffractionPresenter::doFitting(const std::string &focusedRunNo,
-                                         const std::string &ExpectedPeaks) {
+                                         const std::string &expectedPeaks) {
   g_log.notice() << "EnggDiffraction GUI: starting new fitting with file "
                  << focusedRunNo << ". This may take a few seconds... \n";
 
@@ -987,8 +1028,8 @@ void EnggDiffractionPresenter::doFitting(const std::string &focusedRunNo,
   try {
     enggFitPeaks->initialize();
     enggFitPeaks->setProperty("InputWorkspace", focusedWS);
-    if (!ExpectedPeaks.empty()) {
-      enggFitPeaks->setProperty("ExpectedPeaks", ExpectedPeaks);
+    if (!expectedPeaks.empty()) {
+      enggFitPeaks->setProperty("expectedPeaks", expectedPeaks);
     }
     enggFitPeaks->setProperty("FittedPeaks", focusedFitPeaksTableName);
     enggFitPeaks->execute();
@@ -1282,10 +1323,8 @@ void EnggDiffractionPresenter::runAlignDetectorsAlg(std::string workspaceName) {
     difcTable->addColumn("double", "difa");
     difcTable->addColumn("double", "tzero");
     TableRow row = difcTable->appendRow();
-    auto spec = inputWS->getSpectrum(0);
-    if (!spec)
-      return;
-    Mantid::detid_t detID = *(spec->getDetectorIDs().cbegin());
+    auto &spec = inputWS->getSpectrum(0);
+    Mantid::detid_t detID = *(spec.getDetectorIDs().cbegin());
 
     row << detID << difc << difa << tzero;
   } catch (std::runtime_error &rexc) {
@@ -1370,7 +1409,133 @@ void EnggDiffractionPresenter::setDataToClonedWS(std::string &current_WS,
   auto currentPeakWS = ADS.retrieveWS<MatrixWorkspace>(current_WS);
   auto currentClonedWS = ADS.retrieveWS<MatrixWorkspace>(cloned_WS);
   currentClonedWS->getSpectrum(0)
-      ->setData(currentPeakWS->readY(0), currentPeakWS->readE(0));
+      .setData(currentPeakWS->readY(0), currentPeakWS->readE(0));
+}
+
+void EnggDiffractionPresenter::setBankItems() {
+  try {
+    auto fitting_runno_vector = m_view->getFittingRunNumVec();
+
+    if (!fitting_runno_vector.empty()) {
+
+      // delete previous bank added to the list
+      m_view->clearFittingComboBox();
+
+      for (size_t i = 0; i < fitting_runno_vector.size(); i++) {
+        Poco::Path vecFile(fitting_runno_vector[i]);
+        std::string strVecFile = vecFile.toString();
+        // split the directory from m_fitting_runno_dir_vec
+        std::vector<std::string> vecFileSplit =
+            m_view->splitFittingDirectory(strVecFile);
+
+        // get the last split in vector which will be bank
+        std::string bankID = (vecFileSplit.back());
+
+        bool digit = isDigit(bankID);
+
+        if (digit || bankID == "cropped") {
+          m_view->addBankItem(bankID);
+        } else {
+          QString qBank = QString("Bank %1").arg(i + 1);
+          m_view->addBankItem(qBank.toStdString());
+        }
+      }
+
+      m_view->enableFittingComboBox(true);
+    } else {
+      // upon invalid file
+      // disable the widgets when only one related file found
+      m_view->enableFittingComboBox(false);
+
+      m_view->clearFittingComboBox();
+    }
+
+  } catch (std::runtime_error &re) {
+    m_view->userWarning("Unable to insert items: ",
+                        "Could not add banks to "
+                        "combo-box or list widget; " +
+                            static_cast<std::string>(re.what()) +
+                            ". Please try again");
+  }
+}
+
+void EnggDiffractionPresenter::setRunNoItems(
+    std::vector<std::string> runNumVector, bool multiRun) {
+  try {
+    if (!runNumVector.empty()) {
+
+      // delete previous bank added to the list
+      m_view->clearFittingListWidget();
+
+      for (size_t i = 0; i < runNumVector.size(); i++) {
+
+        // get the last split in vector which will be bank
+        std::string currentRun = (runNumVector[i]);
+
+        m_view->addRunNoItem(currentRun);
+      }
+
+      if (multiRun) {
+        m_view->enableFittingListWidget(true);
+
+        auto currentIndex = m_view->getFittingListWidgetCurrentRow();
+        if (currentIndex == -1)
+          m_view->setFittingListWidgetCurrentRow(0);
+      } else {
+        m_view->enableFittingListWidget(false);
+      }
+    }
+
+    else {
+      // upon invalid file
+      // disable the widgets when only one related file found
+      m_view->enableFittingListWidget(false);
+
+      m_view->clearFittingListWidget();
+    }
+
+  } catch (std::runtime_error &re) {
+    m_view->userWarning("Unable to insert items: ",
+                        "Could not add list widget; " +
+                            static_cast<std::string>(re.what()) +
+                            ". Please try again");
+  }
+}
+
+void EnggDiffractionPresenter::setDefaultBank(
+    std::vector<std::string> splittedBaseName, QString selectedFile) {
+
+  if (!splittedBaseName.empty()) {
+
+    std::string bankID = (splittedBaseName.back());
+    auto combo_data = m_view->getFittingComboIdx(bankID);
+
+    if (combo_data > -1) {
+      m_view->setBankIdComboBox(combo_data);
+    } else {
+      m_view->setFittingRunNo(selectedFile);
+    }
+  }
+  // check if the vector is not empty so that the first directory
+  // can be assigned to text-field when number is given
+  else if (!m_view->getFittingRunNumVec().empty()) {
+    auto firstDir = m_view->getFittingRunNumVec().at(0);
+    auto intialDir = QString::fromStdString(firstDir);
+    m_view->setFittingRunNo(intialDir);
+  }
+  // if nothing found related to text-field input
+  else if (!m_view->getFittingRunNo().empty())
+    m_view->setFittingRunNo(selectedFile);
+}
+
+bool EnggDiffractionPresenter::isDigit(std::string text) {
+  for (size_t i = 0; i < text.size(); i++) {
+    char *str = &text[i];
+    if (std::isdigit(*str)) {
+      return true;
+    }
+  }
+  return false;
 }
 
 void EnggDiffractionPresenter::plotFitPeaksCurves() {

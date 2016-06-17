@@ -392,7 +392,7 @@ void LoadRawHelper::setWorkspaceData(
   MantidVec &E = newWorkspace->dataE(wsIndex);
   std::transform(Y.begin(), Y.end(), E.begin(), dblSqrt);
 
-  newWorkspace->getSpectrum(wsIndex)->setSpectrumNo(nspecNum);
+  newWorkspace->getSpectrum(wsIndex).setSpectrumNo(nspecNum);
   // for loadrawbin0
   if (binStart == 0) {
     newWorkspace->setX(wsIndex, timeChannelsVec[0]);

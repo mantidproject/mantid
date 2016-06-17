@@ -389,7 +389,7 @@ void LoadDetectorsGroupingFile::generateNoInstrumentGroupWorkspace() {
       new DataObjects::GroupingWorkspace(numvectors));
 
   for (size_t i = 0; i < m_groupWS->getNumberHistograms(); i++) {
-    m_groupWS->getSpectrum(i)->setSpectrumNo(specids[i]);
+    m_groupWS->getSpectrum(i).setSpectrumNo(specids[i]);
   }
 
   return;

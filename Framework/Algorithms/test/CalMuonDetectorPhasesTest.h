@@ -60,7 +60,7 @@ public:
     calc->initialize();
     calc->setChild(true);
     calc->setProperty("InputWorkspace", ws);
-    calc->setPropertyValue("Frequency", "25");
+    calc->setPropertyValue("Frequency", "4");
     calc->setPropertyValue("DataFitted", "fit");
     calc->setPropertyValue("DetectorTable", "tab");
     calc->setProperty("ForwardSpectra", std::vector<int>{1});
@@ -124,6 +124,22 @@ public:
     runExecutionTest(ws);
   }
 
+  /// Test what happens when you supply frequency in Mrad/s rather than MHz
+  void testFrequencyUnits() {
+    auto ws = createWorkspace(4, 100, "Microseconds");
+    auto calc = AlgorithmManager::Instance().create("CalMuonDetectorPhases");
+    calc->initialize();
+    calc->setChild(true);
+    calc->setProperty("InputWorkspace", ws);
+    calc->setPropertyValue("Frequency", "25"); // Mrad/s, not MHz
+    calc->setPropertyValue("DataFitted", "fit");
+    calc->setPropertyValue("DetectorTable", "tab");
+    calc->setProperty("ForwardSpectra", std::vector<int>{1, 2});
+    calc->setProperty("BackwardSpectra", std::vector<int>{3, 4});
+
+    TS_ASSERT_THROWS(calc->execute(), std::runtime_error);
+  }
+
 private:
   MatrixWorkspace_sptr createWorkspace(size_t nspec, size_t maxt,
                                        const std::string &units) {
@@ -185,7 +201,7 @@ private:
     calc->initialize();
     calc->setChild(true);
     calc->setProperty("InputWorkspace", workspace);
-    calc->setPropertyValue("Frequency", "25");
+    calc->setPropertyValue("Frequency", "4");
     calc->setPropertyValue("DataFitted", "fit");
     calc->setPropertyValue("DetectorTable", "tab");
     calc->setProperty("ForwardSpectra", std::vector<int>{1, 2});
@@ -198,6 +214,11 @@ private:
     // Check the table workspace
     TS_ASSERT_EQUALS(tab->rowCount(), 4);
     TS_ASSERT_EQUALS(tab->columnCount(), 3);
+    // Test detector IDs
+    TS_ASSERT_EQUALS(tab->Int(0, 0), 1);
+    TS_ASSERT_EQUALS(tab->Int(1, 0), 2);
+    TS_ASSERT_EQUALS(tab->Int(2, 0), 3);
+    TS_ASSERT_EQUALS(tab->Int(3, 0), 4);
     // Test asymmetries
     TS_ASSERT_DELTA(tab->Double(0, 1), 0.099, 0.001);
     TS_ASSERT_DELTA(tab->Double(1, 1), 0.100, 0.001);

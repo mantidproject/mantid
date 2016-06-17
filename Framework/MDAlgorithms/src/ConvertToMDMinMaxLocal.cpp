@@ -18,16 +18,6 @@ namespace MDAlgorithms {
 DECLARE_ALGORITHM(ConvertToMDMinMaxLocal)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
-*/
-ConvertToMDMinMaxLocal::ConvertToMDMinMaxLocal() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
-*/
-ConvertToMDMinMaxLocal::~ConvertToMDMinMaxLocal() {}
-
-//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string ConvertToMDMinMaxLocal::name() const {
   return "ConvertToMDMinMaxLocal";
@@ -165,7 +155,7 @@ void ConvertToMDMinMaxLocal::findMinMaxValues(MDWSDescription &WSDescription,
     pQtransf->calcYDepCoordinates(locCoord, iSpctr);
 
     // get the range of the input data in the spectra
-    auto source_range = inWS->getSpectrum(iSpctr)->getXDataRange();
+    auto source_range = inWS->getSpectrum(iSpctr).getXDataRange();
 
     // extract part of this range which has well defined unit conversion
     source_range = unitsConverter.getConversionRange(source_range.first,

@@ -40,8 +40,8 @@ public:
     for (int j = 0; j < 5; ++j) {
       space2D->setX(j, x);
       space2D->setData(j, vec, vec);
-      space2D->getSpectrum(j)->setSpectrumNo(j);
-      space2D->getSpectrum(j)->setDetectorID(j);
+      space2D->getSpectrum(j).setSpectrumNo(j);
+      space2D->getSpectrum(j).setDetectorID(j);
     }
     Instrument_sptr instr(new Instrument);
     for (detid_t i = 0; i < 5; i++) {
@@ -118,23 +118,23 @@ public:
     for (int i = 0; i < 5; ++i) {
       TS_ASSERT_DELTA(outputWS->dataE(0)[i], 1.7321, 0.0001);
     }
-    TS_ASSERT_EQUALS(outputWS->getSpectrum(0)->getSpectrumNo(), 0);
+    TS_ASSERT_EQUALS(outputWS->getSpectrum(0).getSpectrumNo(), 0);
     TS_ASSERT_EQUALS(outputWS->dataX(1), tens);
     TS_ASSERT_EQUALS(outputWS->dataY(1), ones);
     TS_ASSERT_EQUALS(outputWS->dataE(1), ones);
-    TS_ASSERT_EQUALS(outputWS->getSpectrum(1)->getSpectrumNo(), 1);
+    TS_ASSERT_EQUALS(outputWS->getSpectrum(1).getSpectrumNo(), 1);
     TS_ASSERT_EQUALS(outputWS->dataX(2), tens);
     TS_ASSERT_EQUALS(outputWS->dataY(2), zeroes);
     TS_ASSERT_EQUALS(outputWS->dataE(2), zeroes);
-    TS_ASSERT_EQUALS(outputWS->getSpectrum(2)->getSpectrumNo(), -1);
+    TS_ASSERT_EQUALS(outputWS->getSpectrum(2).getSpectrumNo(), -1);
     TS_ASSERT_EQUALS(outputWS->dataX(3), tens);
     TS_ASSERT_EQUALS(outputWS->dataY(3), zeroes);
     TS_ASSERT_EQUALS(outputWS->dataE(3), zeroes);
-    TS_ASSERT_EQUALS(outputWS->getSpectrum(3)->getSpectrumNo(), -1);
+    TS_ASSERT_EQUALS(outputWS->getSpectrum(3).getSpectrumNo(), -1);
     TS_ASSERT_EQUALS(outputWS->dataX(4), tens);
     TS_ASSERT_EQUALS(outputWS->dataY(4), ones);
     TS_ASSERT_EQUALS(outputWS->dataE(4), ones);
-    TS_ASSERT_EQUALS(outputWS->getSpectrum(4)->getSpectrumNo(), 4);
+    TS_ASSERT_EQUALS(outputWS->getSpectrum(4).getSpectrumNo(), 4);
 
     boost::shared_ptr<const IDetector> det;
     TS_ASSERT_THROWS_NOTHING(det = outputWS->getDetector(0));

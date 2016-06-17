@@ -1664,8 +1664,7 @@ void SANSRunWindow::setGeometryDetails() {
     return;
   }
 
-  const std::set<detid_t> &dets =
-      monitorWs->getSpectrum(monitorWsIndex)->getDetectorIDs();
+  const auto &dets = monitorWs->getSpectrum(monitorWsIndex).getDetectorIDs();
   if (dets.empty())
     return;
 

@@ -220,17 +220,10 @@ private:
                          DataObjects::EventWorkspace_sptr outputWS,
                          const double prog4Copy);
 
-  /// Copy the data data in ungrouped histograms from the input workspace to the
-  /// output
-  void moveOthers(const std::set<int64_t> &unGroupedSet,
-                  API::MatrixWorkspace_const_sptr inputWS,
-                  API::MatrixWorkspace_sptr outputWS, size_t outIndex);
-  /// Copy the data data in ungrouped event lists from the input workspace to
-  /// the output
-  void moveOthersEvent(const std::set<int64_t> &unGroupedSet,
-                       DataObjects::EventWorkspace_const_sptr inputWS,
-                       DataObjects::EventWorkspace_sptr outputWS,
-                       size_t outIndex);
+  /// Copy the ungrouped spectra from the input workspace to the output
+  template <class TIn, class TOut>
+  void moveOthers(const std::set<int64_t> &unGroupedSet, const TIn &inputWS,
+                  TOut &outputWS, size_t outIndex);
 
   /// flag values
   enum {
@@ -259,6 +252,49 @@ private:
                                    /// for an algorithm notification and update
                                    /// the progress bar
 };
+
+/**
+*  Only to be used if the KeepUnGrouped property is true, moves the spectra that
+* were not selected
+*  to be in a group to the end of the output spectrum
+*  @param unGroupedSet :: list of WORKSPACE indexes that were included in a
+* group
+*  @param inputWS :: user selected input workspace for the algorithm
+*  @param outputWS :: user selected output workspace for the algorithm
+*  @param outIndex :: the next spectra index available after the grouped spectra
+*/
+template <class TIn, class TOut>
+void GroupDetectors2::moveOthers(const std::set<int64_t> &unGroupedSet,
+                                 const TIn &inputWS, TOut &outputWS,
+                                 size_t outIndex) {
+  g_log.debug() << "Starting to copy the ungrouped spectra\n";
+  double prog4Copy = (1. - 1. * static_cast<double>(m_FracCompl)) /
+                     static_cast<double>(unGroupedSet.size());
+
+  // go thorugh all the spectra in the input workspace
+  for (auto copyFrIt : unGroupedSet) {
+    if (copyFrIt == USED)
+      continue; // Marked as not to be used
+    size_t sourceIndex = static_cast<size_t>(copyFrIt);
+
+    outputWS.getSpectrum(outIndex) = inputWS.getSpectrum(sourceIndex);
+
+    // go to the next free index in the output workspace
+    outIndex++;
+    // make regular progress reports and check for cancelling the algorithm
+    if (outIndex % INTERVAL == 0) {
+      m_FracCompl += INTERVAL * prog4Copy;
+      if (m_FracCompl > 1.0) {
+        m_FracCompl = 1.0;
+      }
+      progress(m_FracCompl);
+      interruption_point();
+    }
+  }
+
+  g_log.debug() << name() << " copied " << unGroupedSet.size() - 1
+                << " ungrouped spectra\n";
+}
 
 } // namespace DataHandling
 } // namespace Mantid
