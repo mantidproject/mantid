@@ -98,6 +98,13 @@ public:
     TS_ASSERT_EQUALS(label, "MUSR00015189-90, 15192");
   }
 
+  /// Test an instrument with no IDF and a run number of zero
+  /// (which can occur when loading data from this old instrument)
+  void test_getRunLabel_DEVA() {
+    const std::string label = getRunLabel("DEVA", {0});
+    TS_ASSERT_EQUALS(label, "DEVA000");
+  }
+
   void test_sumWorkspaces() {
     MatrixWorkspace_sptr ws1 =
         WorkspaceCreationHelper::Create2DWorkspace123(1, 3);
@@ -490,6 +497,18 @@ public:
     std::vector<int> expectedRuns{12345, 12346, 12347, 12348};
     TS_ASSERT_THROWS_NOTHING(parseRunLabel(runLabel, instrument, runs));
     TS_ASSERT_EQUALS(instrument, "EMU");
+    TS_ASSERT_EQUALS(runs, expectedRuns);
+  }
+
+  /// This can happen with very old NeXus files where the stored run number is
+  /// zero
+  void test_parseRunLabel_allZeros() {
+    const std::string runLabel = "DEVA000";
+    std::string instrument = "";
+    std::vector<int> runs;
+    std::vector<int> expectedRuns{0};
+    TS_ASSERT_THROWS_NOTHING(parseRunLabel(runLabel, instrument, runs));
+    TS_ASSERT_EQUALS(instrument, "DEVA");
     TS_ASSERT_EQUALS(runs, expectedRuns);
   }
 

@@ -362,9 +362,15 @@ std::string getRunLabel(const std::string &instrument,
   auto ranges = findConsecutiveRuns(runNumbers);
 
   // Zero-padding for the first run
-  int zeroPadding = ConfigService::Instance()
-                        .getInstrument(instrument)
-                        .zeroPadding(ranges.begin()->first);
+  int zeroPadding;
+  try {
+    zeroPadding = ConfigService::Instance()
+                      .getInstrument(instrument)
+                      .zeroPadding(ranges.begin()->first);
+  } catch (const Mantid::Kernel::Exception::NotFoundError &) {
+    // Old muon instrument without an IDF - default to 3 zeros
+    zeroPadding = 3;
+  }
 
   // Begin string output with full label of first run
   std::ostringstream label;
@@ -921,35 +927,40 @@ void parseRunLabel(const std::string &label, std::string &instrument,
   }();
   instrument = label.substr(0, zeroPos);
   const size_t numPos = label.find_first_not_of('0', zeroPos);
-  std::string runString = label.substr(numPos, label.size());
-  // sets of continuous ranges
-  Mantid::Kernel::StringTokenizer rangeTokenizer(
-      runString, ",", Mantid::Kernel::StringTokenizer::TOK_TRIM);
-  for (const auto &range : rangeTokenizer.asVector()) {
-    Mantid::Kernel::StringTokenizer pairTokenizer(
-        range, "-", Mantid::Kernel::StringTokenizer::TOK_TRIM);
-    try {
-      if (pairTokenizer.count() == 2) {
-        // Range of run numbers
-        // Deal with common part of string: "151" in "15189-91"
-        const size_t diff =
-            pairTokenizer[0].length() - pairTokenizer[1].length();
-        const std::string endRun =
-            pairTokenizer[0].substr(0, diff) + pairTokenizer[1];
-        const int start = boost::lexical_cast<int>(pairTokenizer[0]);
-        const int end = boost::lexical_cast<int>(endRun);
-        for (int run = start; run < end + 1; run++) {
-          runNumbers.push_back(run);
+  if (numPos != std::string::npos) {
+    std::string runString = label.substr(numPos, label.size());
+    // sets of continuous ranges
+    Mantid::Kernel::StringTokenizer rangeTokenizer(
+        runString, ",", Mantid::Kernel::StringTokenizer::TOK_TRIM);
+    for (const auto &range : rangeTokenizer.asVector()) {
+      Mantid::Kernel::StringTokenizer pairTokenizer(
+          range, "-", Mantid::Kernel::StringTokenizer::TOK_TRIM);
+      try {
+        if (pairTokenizer.count() == 2) {
+          // Range of run numbers
+          // Deal with common part of string: "151" in "15189-91"
+          const size_t diff =
+              pairTokenizer[0].length() - pairTokenizer[1].length();
+          const std::string endRun =
+              pairTokenizer[0].substr(0, diff) + pairTokenizer[1];
+          const int start = boost::lexical_cast<int>(pairTokenizer[0]);
+          const int end = boost::lexical_cast<int>(endRun);
+          for (int run = start; run < end + 1; run++) {
+            runNumbers.push_back(run);
+          }
+        } else if (pairTokenizer.count() == 1) {
+          // Single run
+          runNumbers.push_back(boost::lexical_cast<int>(pairTokenizer[0]));
+        } else {
+          throw std::invalid_argument("Failed to parse run label: " + label);
         }
-      } else if (pairTokenizer.count() == 1) {
-        // Single run
-        runNumbers.push_back(boost::lexical_cast<int>(pairTokenizer[0]));
-      } else {
+      } catch (const boost::bad_lexical_cast &) {
         throw std::invalid_argument("Failed to parse run label: " + label);
       }
-    } catch (const boost::bad_lexical_cast &) {
-      throw std::invalid_argument("Failed to parse run label: " + label);
     }
+  } else {
+    // The string was "INST000" or similar...
+    runNumbers = {0};
   }
 }
 
