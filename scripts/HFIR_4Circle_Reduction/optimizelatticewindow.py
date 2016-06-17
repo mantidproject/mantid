@@ -1,5 +1,4 @@
 #pylint: disable=C0103
-import sys
 from PyQt4 import QtGui, QtCore
 
 import ui_OptimizeLattice
@@ -34,8 +33,7 @@ class OptimizeLatticeWindow(QtGui.QMainWindow):
                                                  'Monoclinic',
                                                  'Triclinic'])
 
-        self.ui.comboBox_ubSource.addItems(['Tab - Calculate UB Matrix',
-                                           'Tab - Accepted UB Matrix'])
+        self.ui.comboBox_ubSource.addItems(['Tab - Calculate UB Matrix', 'Tab - Accepted UB Matrix'])
 
         self.ui.lineEdit_tolerance.setText('0.12')
 
@@ -115,3 +113,4 @@ class OptimizeLatticeWindow(QtGui.QMainWindow):
             tab_index = 4
 
         return tab_index
+
