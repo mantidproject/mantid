@@ -90,7 +90,7 @@ std::map<std::string, std::string> PhaseQuadMuon::validateInputs() {
     result["PhaseTable"] = "PhaseTable must have one row per spectrum";
   }
 
-  // PhaseTable should have two columns: (detector, phase)
+  // PhaseTable should have three columns: (detector, asymmetry, phase)
   if (tabWS->columnCount() != 3) {
     result["PhaseTable"] = "PhaseTable must have three columns";
   }
