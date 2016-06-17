@@ -231,7 +231,7 @@ vtkPeakMarkerFactory::create(ProgressAction &progressUpdating) const {
     } else if (shape.shapeName() ==
                Mantid::DataObjects::PeakShapeEllipsoid::ellipsoidShapeName()) {
       vtkNew<vtkFloatArray> transformSignal;
-      transformSignal->Allocate(1);
+      transformSignal->SetNumberOfTuples(1);
       transformSignal->SetNumberOfComponents(9);
       auto tensor = getTransformTensor(
           dynamic_cast<const Mantid::DataObjects::PeakShapeEllipsoid &>(shape),
