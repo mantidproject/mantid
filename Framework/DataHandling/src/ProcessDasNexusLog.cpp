@@ -23,11 +23,6 @@ DECLARE_ALGORITHM(ProcessDasNexusLog)
  */
 ProcessDasNexusLog::ProcessDasNexusLog() : Algorithm(), DeprecatedAlgorithm() {}
 
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-ProcessDasNexusLog::~ProcessDasNexusLog() = default;
-
 void ProcessDasNexusLog::init() {
   this->declareProperty(
       make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(

@@ -40,17 +40,6 @@ namespace DataHandling {
 
 DECLARE_ALGORITHM(SaveMask)
 
-//----------------------------------------------------------------------------------------------
-/**
- * Constructor
- */
-SaveMask::SaveMask() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-SaveMask::~SaveMask() = default;
-
 /// Define input parameters
 void SaveMask::init() {
 

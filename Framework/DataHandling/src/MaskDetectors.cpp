@@ -23,12 +23,6 @@ using Geometry::Instrument_const_sptr;
 using Geometry::IDetector_const_sptr;
 using namespace DataObjects;
 
-/// (Empty) Constructor
-MaskDetectors::MaskDetectors() {}
-
-/// Destructor
-MaskDetectors::~MaskDetectors() = default;
-
 /*
  * Define input arguments
  */

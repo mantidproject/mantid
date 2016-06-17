@@ -15,12 +15,6 @@ using namespace Kernel;
 using namespace API;
 using namespace DataObjects;
 
-/// (Empty) Constructor
-CompressEvents::CompressEvents() {}
-
-/// Destructor
-CompressEvents::~CompressEvents() = default;
-
 void CompressEvents::init() {
   declareProperty(
       make_unique<WorkspaceProperty<EventWorkspace>>("InputWorkspace", "",

@@ -35,12 +35,6 @@ using namespace API;
 using namespace Geometry;
 using namespace DataObjects;
 
-/// Constructor
-LoadIsawDetCal::LoadIsawDetCal() : API::Algorithm() {}
-
-/// Destructor
-LoadIsawDetCal::~LoadIsawDetCal() = default;
-
 /** Initialisation method
 */
 void LoadIsawDetCal::init() {

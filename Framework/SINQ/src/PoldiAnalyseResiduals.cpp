@@ -18,16 +18,6 @@ using namespace Geometry;
 DECLARE_ALGORITHM(PoldiAnalyseResiduals)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
-   */
-PoldiAnalyseResiduals::PoldiAnalyseResiduals() : Algorithm() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
-   */
-PoldiAnalyseResiduals::~PoldiAnalyseResiduals() = default;
-
-//----------------------------------------------------------------------------------------------
 
 /// Algorithms name for identification. @see Algorithm::name
 const std::string PoldiAnalyseResiduals::name() const {

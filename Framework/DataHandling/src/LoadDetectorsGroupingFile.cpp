@@ -30,18 +30,6 @@ namespace DataHandling {
 
 DECLARE_ALGORITHM(LoadDetectorsGroupingFile)
 
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-LoadDetectorsGroupingFile::LoadDetectorsGroupingFile()
-    : m_groupWS(), m_instrument(), m_pDoc(nullptr), m_pRootElem(nullptr),
-      m_groupComponentsMap(), m_groupDetectorsMap(), m_groupSpectraMap() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-LoadDetectorsGroupingFile::~LoadDetectorsGroupingFile() = default;
-
 void LoadDetectorsGroupingFile::init() {
   /// Initialise the properties
 
@@ -404,11 +392,6 @@ LoadGroupXMLFile::LoadGroupXMLFile()
       m_pDoc(nullptr), m_pRootElem(nullptr), m_groupComponentsMap(),
       m_groupDetectorsMap(), m_groupSpectraMap(), m_startGroupID(1),
       m_groupNamesMap() {}
-
-/*
- * Initialization
- */
-LoadGroupXMLFile::~LoadGroupXMLFile() { return; }
 
 void LoadGroupXMLFile::loadXMLFile(std::string xmlfilename) {
 

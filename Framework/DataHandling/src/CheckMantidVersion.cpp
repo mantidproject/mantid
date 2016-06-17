@@ -23,16 +23,6 @@ using Mantid::API::WorkspaceProperty;
 DECLARE_ALGORITHM(CheckMantidVersion)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-CheckMantidVersion::CheckMantidVersion() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-CheckMantidVersion::~CheckMantidVersion() = default;
-
-//----------------------------------------------------------------------------------------------
 
 /// Algorithms name for identification. @see Algorithm::name
 const std::string CheckMantidVersion::name() const {

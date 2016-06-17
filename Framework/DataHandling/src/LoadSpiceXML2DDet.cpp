@@ -41,14 +41,7 @@ const char INT32 = 'i';
  * @param nodename
  */
 SpiceXMLNode::SpiceXMLNode(const std::string &nodename)
-    : m_value(""), m_unit(""), m_typechar('s'), m_typefullname("") {
-  m_name = nodename;
-}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-SpiceXMLNode::~SpiceXMLNode() = default;
+    : m_name{nodename}, m_typechar('s') {}
 
 //----------------------------------------------------------------------------------------------
 /** Set node value in string format

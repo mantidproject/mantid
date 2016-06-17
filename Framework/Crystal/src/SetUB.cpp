@@ -26,8 +26,6 @@ int SetUB::version() const { return 1; }
 const std::string SetUB::category() const { return "Crystal\\UBMatrix"; }
 
 //----------------------------------------------------------------------------------------------
-
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void SetUB::init() {

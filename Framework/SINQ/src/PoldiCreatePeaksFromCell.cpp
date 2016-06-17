@@ -21,16 +21,6 @@ using namespace Kernel;
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(PoldiCreatePeaksFromCell)
 
-//----------------------------------------------------------------------------------------------
-/** Constructor
-   */
-PoldiCreatePeaksFromCell::PoldiCreatePeaksFromCell() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
-   */
-PoldiCreatePeaksFromCell::~PoldiCreatePeaksFromCell() = default;
-
 const std::string PoldiCreatePeaksFromCell::name() const {
   return "PoldiCreatePeaksFromCell";
 }

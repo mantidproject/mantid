@@ -40,16 +40,6 @@ namespace DataHandling {
 DECLARE_ALGORITHM(LoadGSASInstrumentFile)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-LoadGSASInstrumentFile::LoadGSASInstrumentFile() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-LoadGSASInstrumentFile::~LoadGSASInstrumentFile() = default;
-
-//----------------------------------------------------------------------------------------------
 /** Implement abstract Algorithm methods
  */
 void LoadGSASInstrumentFile::init() {

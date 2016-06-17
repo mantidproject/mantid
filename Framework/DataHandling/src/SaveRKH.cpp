@@ -20,12 +20,6 @@ DECLARE_ALGORITHM(SaveRKH)
 
 using namespace API;
 
-/// Constructor
-SaveRKH::SaveRKH() : API::Algorithm(), m_workspace(), m_2d(false), m_outRKH() {}
-
-/// Virtual destructor
-SaveRKH::~SaveRKH() = default;
-
 //---------------------------------------------------
 // Private member functions
 //---------------------------------------------------

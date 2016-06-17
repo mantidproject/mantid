@@ -22,10 +22,6 @@ Kernel::Logger g_log("LoadHelper");
 using namespace Kernel;
 using namespace API;
 
-LoadHelper::LoadHelper() = default;
-
-LoadHelper::~LoadHelper() = default;
-
 /**
  * Finds the path for the instrument name in the nexus file
  * Usually of the form: entry0/\<NXinstrument class\>/name

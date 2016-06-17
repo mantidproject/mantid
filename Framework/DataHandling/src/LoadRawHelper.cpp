@@ -44,8 +44,6 @@ LoadRawHelper::LoadRawHelper()
       m_monitordetectorList(), m_bmspeclist(false), m_total_specs(0),
       m_logCreator() {}
 
-LoadRawHelper::~LoadRawHelper() = default;
-
 /// Initialisation method.
 void LoadRawHelper::init() {
   const std::vector<std::string> exts{".raw", ".s*", ".add"};

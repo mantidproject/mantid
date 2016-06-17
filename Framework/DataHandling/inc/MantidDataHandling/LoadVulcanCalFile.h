@@ -27,8 +27,6 @@ enum VULCAN_OFFSET_LEVEL {
 class DLLExport LoadVulcanCalFile : public API::Algorithm {
 public:
   LoadVulcanCalFile();
-  ~LoadVulcanCalFile() override;
-
   /// Algorithm's name for identification
   const std::string name() const override { return "LoadVulcanCalFile"; }
   /// Summary of algorithms purpose

@@ -113,10 +113,9 @@ bool operator<(const RefinedRange_sptr &lhs, const RefinedRange_sptr &rhs) {
 DECLARE_ALGORITHM(PoldiFitPeaks1D2)
 
 PoldiFitPeaks1D2::PoldiFitPeaks1D2()
-    : m_peaks(), m_profileTemplate(), m_fitplots(new WorkspaceGroup),
-      m_fwhmMultiples(1.0), m_maxRelativeFwhm(0.02) {}
-
-PoldiFitPeaks1D2::~PoldiFitPeaks1D2() = default;
+    : m_peaks(), m_profileTemplate(),
+      m_fitplots(boost::make_shared<WorkspaceGroup>()), m_fwhmMultiples(1.0),
+      m_maxRelativeFwhm(0.02) {}
 
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string PoldiFitPeaks1D2::name() const { return "PoldiFitPeaks1D"; }

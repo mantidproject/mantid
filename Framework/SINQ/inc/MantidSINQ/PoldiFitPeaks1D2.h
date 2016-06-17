@@ -80,8 +80,6 @@ operator<(const RefinedRange_sptr &lhs, const RefinedRange_sptr &rhs);
 class MANTID_SINQ_DLL PoldiFitPeaks1D2 : public API::Algorithm {
 public:
   PoldiFitPeaks1D2();
-  ~PoldiFitPeaks1D2() override;
-
   const std::string name() const override;
   /// Summary of algorithms purpose
   const std::string summary() const override {

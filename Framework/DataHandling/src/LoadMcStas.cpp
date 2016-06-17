@@ -27,16 +27,6 @@ using namespace DataObjects;
 DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadMcStas)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-LoadMcStas::LoadMcStas() : m_countNumWorkspaceAdded(1) {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-LoadMcStas::~LoadMcStas() = default;
-
-//----------------------------------------------------------------------------------------------
 // Algorithm's name for identification. @see Algorithm::name
 const std::string LoadMcStas::name() const { return "LoadMcStas"; }
 

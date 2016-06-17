@@ -109,9 +109,6 @@ namespace DataHandling {
 */
 class DLLExport GroupDetectors2 : public API::Algorithm {
 public:
-  GroupDetectors2();
-  ~GroupDetectors2() override;
-
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "GroupDetectors"; };
   /// Summary of algorithms purpose

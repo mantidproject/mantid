@@ -52,16 +52,6 @@ static bool checkIntersection(std::vector<std::string> v1,
 }
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-LoadSpiceAscii::LoadSpiceAscii() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-LoadSpiceAscii::~LoadSpiceAscii() = default;
-
-//----------------------------------------------------------------------------------------------
 /** Name
  * @brief LoadSpiceAscii::name
  * @return

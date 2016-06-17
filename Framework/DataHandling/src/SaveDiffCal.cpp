@@ -29,17 +29,6 @@ using namespace H5;
 DECLARE_ALGORITHM(SaveDiffCal)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-SaveDiffCal::SaveDiffCal()
-    : m_numValues(0), m_calibrationWS(), m_detidToIndex() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-SaveDiffCal::~SaveDiffCal() = default;
-
-//----------------------------------------------------------------------------------------------
 
 /// Algorithms name for identification. @see Algorithm::name
 const std::string SaveDiffCal::name() const { return "SaveDiffCal"; }

@@ -40,16 +40,6 @@ DECLARE_ALGORITHM(LoadFullprofResolution)
 std::map<std::string, size_t> LoadFullprofResolution::m_rowNumbers;
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-LoadFullprofResolution::LoadFullprofResolution() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-LoadFullprofResolution::~LoadFullprofResolution() = default;
-
-//----------------------------------------------------------------------------------------------
 /** Implement abstract Algorithm methods
  */
 void LoadFullprofResolution::init() {

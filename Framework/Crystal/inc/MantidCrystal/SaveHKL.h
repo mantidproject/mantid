@@ -16,9 +16,6 @@ namespace Crystal {
 
 class DLLExport SaveHKL : public API::Algorithm {
 public:
-  SaveHKL();
-  ~SaveHKL() override;
-
   /// Algorithm's name for identification
   const std::string name() const override { return "SaveHKL"; };
   /// Summary of algorithms purpose

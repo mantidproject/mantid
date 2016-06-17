@@ -11,16 +11,6 @@ namespace DataHandling {
 
 DECLARE_ALGORITHM(RenameLog)
 
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-RenameLog::RenameLog() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-RenameLog::~RenameLog() = default;
-
 void RenameLog::init() {
 
   declareProperty(make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(

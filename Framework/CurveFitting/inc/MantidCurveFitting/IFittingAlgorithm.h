@@ -49,8 +49,6 @@ namespace CurveFitting {
 */
 class DLLExport IFittingAlgorithm : public API::Algorithm {
 public:
-  IFittingAlgorithm();
-
   const std::string category() const override;
 
 private:

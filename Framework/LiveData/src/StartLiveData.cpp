@@ -26,16 +26,6 @@ const char *listenerPropertyGroup = "ListenerProperties";
 }
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-StartLiveData::StartLiveData() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-StartLiveData::~StartLiveData() = default;
-
-//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string StartLiveData::name() const { return "StartLiveData"; }
 
