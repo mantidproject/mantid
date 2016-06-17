@@ -512,6 +512,17 @@ public:
     TS_ASSERT_EQUALS(runs, expectedRuns);
   }
 
+  /// No zero padding, but a zero does appear later in the label
+  void test_parseRunLabel_noPadding_zeroInRunNumber() {
+    const std::string runLabel = "MUSR15190";
+    std::string instrument = "";
+    std::vector<int> runs;
+    std::vector<int> expectedRuns{15190};
+    TS_ASSERT_THROWS_NOTHING(parseRunLabel(runLabel, instrument, runs));
+    TS_ASSERT_EQUALS(instrument, "MUSR");
+    TS_ASSERT_EQUALS(runs, expectedRuns);
+  }
+
 private:
   // Creates a single-point workspace with instrument and runNumber set
   Workspace_sptr createWs(const std::string &instrName, int runNumber,

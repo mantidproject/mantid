@@ -907,7 +907,7 @@ Muon::DatasetParams parseWorkspaceName(const std::string &wsName) {
 /**
  * Parse a run label e.g. "MUSR00015189-91, 15193" into instrument
  * ("MUSR") and set of runs (15189, 15190, 15191, 15193).
- * Assumes instrument name doesn't contain the character 0.
+ * Assumes instrument name doesn't contain a digit (true for muon instruments).
  * @param label :: [input] Label to parse
  * @param instrument :: [output] Name of instrument
  * @param runNumbers :: [output] Vector to fill with run numbers
@@ -915,18 +915,9 @@ Muon::DatasetParams parseWorkspaceName(const std::string &wsName) {
  */
 void parseRunLabel(const std::string &label, std::string &instrument,
                    std::vector<int> &runNumbers) {
-  const size_t zeroPos = [&label] {
-    const size_t pos = label.find_first_of('0');
-    if (pos != std::string::npos) {
-      return pos;
-    } else {
-      // If there are no zeros, it's probably something like "MUSR15189-91" so
-      // split at first number
-      return label.find_first_of("123456789");
-    }
-  }();
-  instrument = label.substr(0, zeroPos);
-  const size_t numPos = label.find_first_not_of('0', zeroPos);
+  const size_t instPos = label.find_first_of("0123456789");
+  instrument = label.substr(0, instPos);
+  const size_t numPos = label.find_first_not_of('0', instPos);
   if (numPos != std::string::npos) {
     std::string runString = label.substr(numPos, label.size());
     // sets of continuous ranges
