@@ -68,11 +68,13 @@ add_dependencies ( check FrameworkTests )
 
 include_directories (Kernel/inc)
 add_subdirectory (Kernel)
-set ( MANTIDLIBS ${MANTIDLIBS} Kernel )
 
 include_directories (HistogramData/inc)
 add_subdirectory (HistogramData)
+
+# HistogramData has header-only dependency on Kernel, so Kernel comes after.
 set ( MANTIDLIBS ${MANTIDLIBS} HistogramData )
+set ( MANTIDLIBS ${MANTIDLIBS} Kernel )
 
 include_directories (Geometry/inc)
 # muParser needed by Geometry and subsequent packages

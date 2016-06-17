@@ -4,7 +4,6 @@ if ( CXXTEST_FOUND )
   cxxtest_add_test ( HistogramDataTest ${TEST_FILES} ${GMOCK_TEST_FILES})
   target_link_libraries( HistogramDataTest LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
     HistogramData
-    Kernel
     ${Boost_LIBRARIES}
     ${GTEST_LIBRARIES} )
   
