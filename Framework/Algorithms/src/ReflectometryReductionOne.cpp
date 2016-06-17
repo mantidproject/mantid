@@ -1,3 +1,4 @@
+#include "MantidAlgorithms/BoostOptionalToAlgorithmProperty.h"
 #include "MantidAlgorithms/ReflectometryReductionOne.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -94,16 +95,6 @@ double calculateQ(double lambda, double theta) {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ReflectometryReductionOne)
-
-//----------------------------------------------------------------------------------------------
-/** Constructor
-*/
-ReflectometryReductionOne::ReflectometryReductionOne() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
-*/
-ReflectometryReductionOne::~ReflectometryReductionOne() {}
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
@@ -535,7 +526,6 @@ void ReflectometryReductionOne::exec() {
     double temp = this->getProperty("ThetaIn");
     theta = temp;
   }
-
   const std::string strAnalysisMode = getProperty("AnalysisMode");
   const bool isPointDetector =
       (pointDetectorAnalysis.compare(strAnalysisMode) == 0);
@@ -545,10 +535,6 @@ void ReflectometryReductionOne::exec() {
   const MinMax wavelengthInterval =
       this->getMinMax("WavelengthMin", "WavelengthMax");
   const double wavelengthStep = getProperty("WavelengthStep");
-  const MinMax monitorBackgroundWavelengthInterval = getMinMax(
-      "MonitorBackgroundWavelengthMin", "MonitorBackgroundWavelengthMax");
-  const MinMax monitorIntegrationWavelengthInterval = getMinMax(
-      "MonitorIntegrationWavelengthMin", "MonitorIntegrationWavelengthMax");
 
   const std::string processingCommands = getWorkspaceIndexList();
 
@@ -556,7 +542,19 @@ void ReflectometryReductionOne::exec() {
   fetchOptionalLowerUpperPropertyValue("RegionOfDirectBeam", isPointDetector,
                                        directBeam);
 
-  const int i0MonitorIndex = getProperty("I0MonitorIndex");
+  auto instrument = runWS->getInstrument();
+
+  const OptionalInteger i0MonitorIndex = checkForOptionalInstrumentDefault<int>(
+      this, "I0MonitorIndex", instrument, "I0MonitorIndex");
+
+  const OptionalMinMax monitorBackgroundWavelengthInterval = getOptionalMinMax(
+      this, "MonitorBackgroundWavelengthMin", "MonitorBackgroundWavelengthMax",
+      instrument, "MonitorBackgroundWavelengthMin",
+      "MonitorBackgroundWavelengthMax");
+  const OptionalMinMax monitorIntegrationWavelengthInterval = getOptionalMinMax(
+      this, "MonitorIntegrationWavelengthMin",
+      "MonitorIntegrationWavelengthMax", instrument,
+      "MonitorIntegrationWavelengthMin", "MonitorIntegrationWavelengthMax");
 
   const bool correctDetectorPositions = getProperty("CorrectDetectorPositions");
 
@@ -610,10 +608,12 @@ void ReflectometryReductionOne::exec() {
       auto integrationAlg = this->createChildAlgorithm("Integration");
       integrationAlg->initialize();
       integrationAlg->setProperty("InputWorkspace", monitorWS);
-      integrationAlg->setProperty(
-          "RangeLower", monitorIntegrationWavelengthInterval.get<0>());
-      integrationAlg->setProperty(
-          "RangeUpper", monitorIntegrationWavelengthInterval.get<1>());
+      if (monitorIntegrationWavelengthInterval.is_initialized()) {
+        integrationAlg->setProperty(
+            "RangeLower", monitorIntegrationWavelengthInterval.get().get<0>());
+        integrationAlg->setProperty(
+            "RangeUpper", monitorIntegrationWavelengthInterval.get().get<1>());
+      }
       integrationAlg->execute();
       MatrixWorkspace_sptr integratedMonitor =
           integrationAlg->getProperty("OutputWorkspace");
@@ -737,9 +737,10 @@ void ReflectometryReductionOne::exec() {
 */
 MatrixWorkspace_sptr ReflectometryReductionOne::transmissonCorrection(
     MatrixWorkspace_sptr IvsLam, const MinMax &wavelengthInterval,
-    const MinMax &wavelengthMonitorBackgroundInterval,
-    const MinMax &wavelengthMonitorIntegrationInterval,
-    const int &i0MonitorIndex, MatrixWorkspace_sptr firstTransmissionRun,
+    const OptionalMinMax &wavelengthMonitorBackgroundInterval,
+    const OptionalMinMax &wavelengthMonitorIntegrationInterval,
+    const OptionalInteger &i0MonitorIndex,
+    MatrixWorkspace_sptr firstTransmissionRun,
     OptionalMatrixWorkspace_sptr secondTransmissionRun,
     const OptionalDouble &stitchingStart, const OptionalDouble &stitchingDelta,
     const OptionalDouble &stitchingEnd,
@@ -791,18 +792,24 @@ MatrixWorkspace_sptr ReflectometryReductionOne::transmissonCorrection(
       }
     }
     alg->setProperty("ProcessingInstructions", spectrumProcessingCommands);
-    alg->setProperty("I0MonitorIndex", i0MonitorIndex);
+    if (i0MonitorIndex.is_initialized()) {
+      alg->setProperty("I0MonitorIndex", i0MonitorIndex.get());
+    }
     alg->setProperty("WavelengthMin", wavelengthInterval.get<0>());
     alg->setProperty("WavelengthMax", wavelengthInterval.get<1>());
     alg->setProperty("WavelengthStep", wavelengthStep);
-    alg->setProperty("MonitorBackgroundWavelengthMin",
-                     wavelengthMonitorBackgroundInterval.get<0>());
-    alg->setProperty("MonitorBackgroundWavelengthMax",
-                     wavelengthMonitorBackgroundInterval.get<1>());
-    alg->setProperty("MonitorIntegrationWavelengthMin",
-                     wavelengthMonitorIntegrationInterval.get<0>());
-    alg->setProperty("MonitorIntegrationWavelengthMax",
-                     wavelengthMonitorIntegrationInterval.get<1>());
+    if (wavelengthMonitorBackgroundInterval.is_initialized()) {
+      alg->setProperty("MonitorBackgroundWavelengthMin",
+                       wavelengthMonitorBackgroundInterval.get().get<0>());
+      alg->setProperty("MonitorBackgroundWavelengthMax",
+                       wavelengthMonitorBackgroundInterval.get().get<1>());
+    }
+    if (wavelengthMonitorIntegrationInterval.is_initialized()) {
+      alg->setProperty("MonitorIntegrationWavelengthMin",
+                       wavelengthMonitorIntegrationInterval.get().get<0>());
+      alg->setProperty("MonitorIntegrationWavelengthMax",
+                       wavelengthMonitorIntegrationInterval.get().get<1>());
+    }
     alg->execute();
     denominator = alg->getProperty("OutputWorkspace");
   }

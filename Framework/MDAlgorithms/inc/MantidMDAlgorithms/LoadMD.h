@@ -41,7 +41,6 @@ namespace MDAlgorithms {
 class DLLExport LoadMD : public API::IFileLoader<Kernel::NexusDescriptor> {
 public:
   LoadMD();
-  ~LoadMD() override;
 
   /// Algorithm's name for identification
   const std::string name() const override { return "LoadMD"; };

@@ -148,7 +148,7 @@ InstrumentWidget::InstrumentWidget(const QString &wsName, QWidget *parent,
 
   // Init actions
   m_clearPeakOverlays = new QAction("Clear peaks", this);
-  connect(m_clearPeakOverlays, SIGNAL(activated()), this,
+  connect(m_clearPeakOverlays, SIGNAL(triggered()), this,
           SLOT(clearPeakOverlays()));
 
   // confirmClose(app->confirmCloseInstrWindow);

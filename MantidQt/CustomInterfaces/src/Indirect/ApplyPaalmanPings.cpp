@@ -508,10 +508,8 @@ bool ApplyPaalmanPings::validate() {
     QString containerType =
         container.right(container.length() - container.lastIndexOf("_"));
 
-    g_log.debug() << "Sample type is: " << sampleType.toStdString()
-                  << std::endl;
-    g_log.debug() << "Can type is: " << containerType.toStdString()
-                  << std::endl;
+    g_log.debug() << "Sample type is: " << sampleType.toStdString() << '\n';
+    g_log.debug() << "Can type is: " << containerType.toStdString() << '\n';
 
     if (containerType != sampleType)
       uiv.addErrorMessage(

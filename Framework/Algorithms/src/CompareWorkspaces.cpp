@@ -132,12 +132,12 @@ void CompareWorkspaces::exec() {
 
   if (!m_Result) {
     std::string message = m_Messages->cell<std::string>(0, 0);
-    g_log.notice() << "The workspaces did not match: " << message << std::endl;
+    g_log.notice() << "The workspaces did not match: " << message << '\n';
   } else {
     std::string ws1 = Workspace_const_sptr(getProperty("Workspace1"))->name();
     std::string ws2 = Workspace_const_sptr(getProperty("Workspace2"))->name();
     g_log.notice() << "The workspaces \"" << ws1 << "\" and \"" << ws2
-                   << "\" matched!" << std::endl;
+                   << "\" matched!\n";
   }
 
   setProperty("Result", m_Result);
@@ -179,7 +179,7 @@ bool CompareWorkspaces::processGroups() {
 
   if (m_Result && ws1 && ws2) {
     g_log.notice() << "All workspaces in workspace groups \"" << ws1->name()
-                   << "\" and \"" << ws2->name() << "\" matched!" << std::endl;
+                   << "\" and \"" << ws2->name() << "\" matched!\n";
   }
 
   setProperty("Result", m_Result);
@@ -449,8 +449,8 @@ bool CompareWorkspaces::compareEventWorkspaces(
     if (!mismatchedEvent ||
         checkallspectra) // This guard will avoid checking unnecessarily
     {
-      const EventList &el1 = ews1.getEventList(i);
-      const EventList &el2 = ews2.getEventList(i);
+      const EventList &el1 = ews1.getSpectrum(i);
+      const EventList &el2 = ews2.getSpectrum(i);
       bool printdetail = (i == wsindex2print);
       if (printdetail) {
         g_log.information() << "Spectrum " << i
@@ -727,23 +727,23 @@ bool CompareWorkspaces::checkSpectraMap(MatrixWorkspace_const_sptr ws1,
   }
 
   for (size_t i = 0; i < ws1->getNumberHistograms(); i++) {
-    const ISpectrum *spec1 = ws1->getSpectrum(i);
-    const ISpectrum *spec2 = ws2->getSpectrum(i);
-    if (spec1->getSpectrumNo() != spec2->getSpectrumNo()) {
+    const auto &spec1 = ws1->getSpectrum(i);
+    const auto &spec2 = ws2->getSpectrum(i);
+    if (spec1.getSpectrumNo() != spec2.getSpectrumNo()) {
       recordMismatch("Spectrum number mismatch");
       return false;
     }
-    if (spec1->getDetectorIDs().size() != spec2->getDetectorIDs().size()) {
+    if (spec1.getDetectorIDs().size() != spec2.getDetectorIDs().size()) {
       std::ostringstream out;
       out << "Number of detector IDs mismatch: "
-          << spec1->getDetectorIDs().size() << " vs "
-          << spec2->getDetectorIDs().size() << " at workspace index " << i;
+          << spec1.getDetectorIDs().size() << " vs "
+          << spec2.getDetectorIDs().size() << " at workspace index " << i;
       recordMismatch(out.str());
       return false;
     }
-    auto it2 = spec2->getDetectorIDs().cbegin();
-    for (auto it1 = spec1->getDetectorIDs().cbegin();
-         it1 != spec1->getDetectorIDs().cend(); ++it1, ++it2) {
+    auto it2 = spec2.getDetectorIDs().cbegin();
+    for (auto it1 = spec1.getDetectorIDs().cbegin();
+         it1 != spec1.getDetectorIDs().cend(); ++it1, ++it2) {
       if (*it1 != *it2) {
         recordMismatch("Detector IDs mismatch");
         return false;

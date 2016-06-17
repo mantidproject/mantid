@@ -130,13 +130,13 @@ double ProjectMD::getValue(IMDHistoWorkspace_sptr ws, int dim[]) {
   // double *a = ws->getSignalArray();
   // double val = a[idx];
   // std::cout << "index " << idx << " value " << val << " dims " << dim[0] <<",
-  // " << dim[1] << "," <<dim[2] <<std::endl;
+  // " << dim[1] << "," <<dim[2] <<'\n';
   return val;
 }
 void ProjectMD::putValue(IMDHistoWorkspace_sptr ws, int dim[], double value) {
   unsigned int idx = calcIndex(ws, dim);
   // std::cout << "Result index " << idx << " value " << value << " dim= " <<
-  // dim[0] << ", " << dim[1] <<", " << dim[2] <<std::endl;
+  // dim[0] << ", " << dim[1] <<", " << dim[2] <<'\n';
   ws->setSignalAt(idx, value);
   ws->setErrorSquaredAt(idx, value);
 }

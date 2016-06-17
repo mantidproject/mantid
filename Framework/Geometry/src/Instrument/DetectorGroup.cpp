@@ -52,7 +52,7 @@ void DetectorGroup::addDetector(IDetector_const_sptr det, bool &warn) {
   // Warn if adding a masked detector
   if (warn && det->isMasked()) {
     g_log.warning() << "Adding a detector (ID:" << det->getID()
-                    << ") that is flagged as masked." << std::endl;
+                    << ") that is flagged as masked.\n";
     warn = false;
   }
 
@@ -64,7 +64,7 @@ void DetectorGroup::addDetector(IDetector_const_sptr det, bool &warn) {
             .second) &&
       warn) {
     g_log.warning() << "Detector with ID " << det->getID()
-                    << " is already in group." << std::endl;
+                    << " is already in group.\n";
     warn = false;
   }
 }

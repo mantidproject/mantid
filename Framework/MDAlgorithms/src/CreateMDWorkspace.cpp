@@ -27,16 +27,6 @@ using namespace Mantid::DataObjects;
 DECLARE_ALGORITHM(CreateMDWorkspace)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-CreateMDWorkspace::CreateMDWorkspace() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-CreateMDWorkspace::~CreateMDWorkspace() {}
-
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void CreateMDWorkspace::init() {
@@ -191,14 +181,14 @@ void CreateMDWorkspace::exec() {
   std::string filename = getProperty("Filename");
   if (!filename.empty()) {
     // First save to the NXS file
-    g_log.notice() << "Running SaveMD" << std::endl;
+    g_log.notice() << "Running SaveMD\n";
     IAlgorithm_sptr alg = createChildAlgorithm("SaveMD");
     alg->setPropertyValue("Filename", filename);
     alg->setProperty("InputWorkspace",
                      boost::dynamic_pointer_cast<IMDWorkspace>(out));
     alg->executeAsChildAlg();
     // And now re-load it with this file as the backing.
-    g_log.notice() << "Running LoadMD" << std::endl;
+    g_log.notice() << "Running LoadMD\n";
     alg = createChildAlgorithm("LoadMD");
     alg->setPropertyValue("Filename", filename);
     alg->setProperty("FileBackEnd", true);

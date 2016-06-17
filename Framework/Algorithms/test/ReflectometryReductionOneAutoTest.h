@@ -194,28 +194,33 @@ public:
   }
 
   void test_must_provide_wavelengths() {
-    auto alg =
+    auto algWithMax =
         AlgorithmManager::Instance().create("ReflectometryReductionOneAuto");
-    alg->initialize();
-    alg->setProperty("InputWorkspace", m_TOF);
-    alg->setProperty("FirstTransmissionRun", m_TOF);
-    alg->setProperty("SecondTransmissionRun", m_TOF);
-    alg->setProperty("MomentumTransferStep", 0.1);
-    alg->setProperty("WavelengthMax", 1.0);
-    alg->setPropertyValue("OutputWorkspace", "out_ws_Q");
-    alg->setPropertyValue("OutputWorkspaceWavelength", "out_ws_Lam");
-    alg->setRethrows(true);
-    TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
+    algWithMax->initialize();
+    algWithMax->setProperty("InputWorkspace", m_TOF);
+    algWithMax->setProperty("FirstTransmissionRun", m_TOF);
+    algWithMax->setProperty("SecondTransmissionRun", m_TOF);
+    algWithMax->setProperty("ProcessingInstructions", "3:4");
+    algWithMax->setProperty("MomentumTransferStep", 0.1);
+    algWithMax->setProperty("WavelengthMax", 1.0);
+    algWithMax->setPropertyValue("OutputWorkspace", "out_ws_Q");
+    algWithMax->setPropertyValue("OutputWorkspaceWavelength", "out_ws_Lam");
+    algWithMax->setRethrows(true);
+    TS_ASSERT_THROWS(algWithMax->execute(), std::runtime_error);
 
-    alg->setProperty("InputWorkspace", m_TOF);
-    alg->setProperty("FirstTransmissionRun", m_TOF);
-    alg->setProperty("SecondTransmissionRun", m_TOF);
-    alg->setProperty("MomentumTransferStep", 0.1);
-    alg->setProperty("WavelengthMin", 1.0);
-    alg->setPropertyValue("OutputWorkspace", "out_ws_Q");
-    alg->setPropertyValue("OutputWorkspaceWavelength", "out_ws_Lam");
-    alg->setRethrows(true);
-    TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
+    auto algWithMin =
+        AlgorithmManager::Instance().create("ReflectometryReductionOneAuto");
+    algWithMin->initialize();
+    algWithMin->setProperty("InputWorkspace", m_TOF);
+    algWithMin->setProperty("FirstTransmissionRun", m_TOF);
+    algWithMin->setProperty("SecondTransmissionRun", m_TOF);
+    algWithMin->setProperty("ProcessingInstructions", "3:4");
+    algWithMin->setProperty("MomentumTransferStep", 0.1);
+    algWithMin->setProperty("WavelengthMin", 1.0);
+    algWithMin->setPropertyValue("OutputWorkspace", "out_ws_Q");
+    algWithMin->setPropertyValue("OutputWorkspaceWavelength", "out_ws_Lam");
+    algWithMin->setRethrows(true);
+    TS_ASSERT_THROWS(algWithMin->execute(), std::runtime_error);
   }
 
   void test_wavelength_min_greater_wavelength_max_throws() {
@@ -243,10 +248,12 @@ public:
 
   void test_monitor_index_positive() {
     auto alg = construct_standard_algorithm();
-    TS_ASSERT_THROWS(alg->setProperty("I0MonitorIndex", -1),
-                     std::invalid_argument);
+    auto tempInst = m_TOF->getInstrument();
+    m_TOF->setInstrument(m_dataWorkspace->getInstrument());
+    alg->setProperty("InputWorkspace", m_TOF);
+    TS_ASSERT_THROWS(alg->execute(), std::invalid_argument);
+    m_TOF->setInstrument(tempInst);
   }
-
   void
   test_cannot_set_direct_beam_region_of_interest_without_multidetector_run() {
     auto alg = construct_standard_algorithm();
@@ -437,8 +444,8 @@ public:
 
     // Add instrument to workspace
     tinyWS->setInstrument(instrument);
-    tinyWS->getSpectrum(0)->addDetectorID(det->getID());
-    tinyWS->getSpectrum(1)->addDetectorID(monitor->getID());
+    tinyWS->getSpectrum(0).addDetectorID(det->getID());
+    tinyWS->getSpectrum(1).addDetectorID(monitor->getID());
 
     // Now we can parameterize the instrument
     auto tinyInst = tinyWS->getInstrument();
@@ -499,6 +506,79 @@ public:
     AnalysisDataService::Instance().remove(inWSName);
     AnalysisDataService::Instance().remove(outWSQName);
     AnalysisDataService::Instance().remove(outWSLamName);
+  }
+
+  void test_i0_monitor_index_not_required() {
+    // Prepare instrument
+    //------------------
+    // hold the current instrument assigned to m_dataWorkspace
+    auto m_dataWorkspaceInstHolder = m_dataWorkspace->getInstrument();
+    Instrument_sptr instrument = boost::make_shared<Instrument>();
+    instrument->setReferenceFrame(
+        boost::make_shared<ReferenceFrame>(Y, X, Left, "0,0,0"));
+
+    ObjComponent *source = new ObjComponent("source");
+    source->setPos(V3D(0, 0, 0));
+    instrument->add(source);
+    instrument->markAsSource(source);
+
+    ObjComponent *sample = new ObjComponent("some-surface-holder");
+    source->setPos(V3D(15, 0, 0));
+    instrument->add(sample);
+    instrument->markAsSamplePos(sample);
+
+    Detector *det = new Detector("point-detector", 1, NULL);
+    det->setPos(20, (20 - sample->getPos().X()), 0);
+    instrument->add(det);
+    instrument->markAsDetector(det);
+
+    Detector *monitor = new Detector("Monitor", 2, NULL);
+    monitor->setPos(14, 0, 0);
+    instrument->add(monitor);
+    instrument->markAsMonitor(monitor);
+
+    // Add new instrument to workspace
+    m_dataWorkspace->setInstrument(instrument);
+
+    // Now we can parameterize the instrument
+    // without setting the I0MonitorIndex
+    auto tinyInst = m_dataWorkspace->getInstrument();
+    ParameterMap_sptr params = tinyInst->getParameterMap();
+    params->addDouble(tinyInst.get(), "PointDetectorStart", 0.0);
+    params->addDouble(tinyInst.get(), "PointDetectorStop", 0.0);
+    params->addDouble(tinyInst.get(), "LambdaMin", 0.0);
+    params->addDouble(tinyInst.get(), "LambdaMax", 10.0);
+    params->addDouble(tinyInst.get(), "MonitorBackgroundMin", 0.0);
+    params->addDouble(tinyInst.get(), "MonitorBackgroundMax", 0.0);
+    params->addDouble(tinyInst.get(), "MonitorIntegralMin", 0.0);
+    params->addDouble(tinyInst.get(), "MonitorIntegralMax", 10.0);
+
+    // Reduce
+    IAlgorithm_sptr alg =
+        AlgorithmManager::Instance().create("ReflectometryReductionOneAuto");
+    alg->setRethrows(true);
+    alg->setChild(true);
+    TS_ASSERT_THROWS_NOTHING(alg->initialize());
+    TS_ASSERT_THROWS_NOTHING(
+        alg->setProperty("InputWorkspace", m_dataWorkspace));
+    TS_ASSERT_THROWS_NOTHING(
+        alg->setProperty("I0MonitorIndex", Mantid::EMPTY_INT()));
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty("WavelengthStep", 1.0));
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty("MomentumTransferStep", 0.1));
+    TS_ASSERT_THROWS_NOTHING(
+        alg->setPropertyValue("OutputWorkspace", outWSQName));
+    TS_ASSERT_THROWS_NOTHING(
+        alg->setPropertyValue("OutputWorkspaceWavelength", outWSLamName));
+    // we have intentionally not set
+    TS_ASSERT_THROWS_NOTHING(alg->execute());
+
+    // Remove workspace from the data service.
+    AnalysisDataService::Instance().remove(inWSName);
+    AnalysisDataService::Instance().remove(outWSQName);
+    AnalysisDataService::Instance().remove(outWSLamName);
+
+    // reset the instrument associated with m_dataWorkspace
+    m_dataWorkspace->setInstrument(m_dataWorkspaceInstHolder);
   }
 };
 

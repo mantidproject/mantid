@@ -236,7 +236,7 @@ bool ImggTomographicReconstruction::processGroups() {
   g_log.notice() << "Finished reconstruction of volume from workspace "
                  << wks->getTitle() << " with " << projSize
                  << " input projections, " << ysize << " rows by " << xsize
-                 << " columns." << std::endl;
+                 << " columns.\n";
 
   // This is an ugly workaround for the issue that processGroups()
   // does not fully finish the algorithm:
@@ -301,8 +301,7 @@ ImggTomographicReconstruction::prepareInputData(
   for (int slice = 0; slice < static_cast<int>(wksg->size()); ++slice) {
     size_t startSlice = slice * oneSliceSize;
     for (size_t row = 0; row < ysize; ++row) {
-      const Mantid::API::ISpectrum *specRow = fwks->getSpectrum(row);
-      const auto &dataY = specRow->readY();
+      const auto &dataY = fwks->getSpectrum(row).readY();
       size_t startRow = startSlice + row * ysize;
       // MSVC will produce C4244 warnings in <xutility> (double=>float
       // converstion)
@@ -397,13 +396,13 @@ ImggTomographicReconstruction::buildOutputWks(const std::vector<float> &dataVol,
                                                      xsize + 1, xsize));
     size_t startSlice = slice * oneSliceSize;
     for (size_t row = 0; row < ysize; ++row) {
-      Mantid::API::ISpectrum *specRow = sliceWS->getSpectrum(row);
-      auto &dataX = specRow->dataX();
+      auto &specRow = sliceWS->getSpectrum(row);
+      auto &dataX = specRow.dataX();
       std::fill(dataX.begin(), dataX.end(), static_cast<double>(row));
 
       size_t startRow = startSlice + row * ysize;
       size_t endRow = startRow + xsize;
-      auto &dataY = specRow->dataY();
+      auto &dataY = specRow.dataY();
       std::transform(dataVol.begin() + startRow, dataVol.begin() + endRow,
                      dataY.begin(), DoubleToFloatStd());
     }

@@ -2303,9 +2303,9 @@ void InstrumentDefinitionParser::setComponentLinks(
         // user, and throw an exception.
         if (!detector) {
           g_log.error() << "Error whilst loading parameters. No detector "
-                           "found with id '" << detid << "'" << std::endl;
-          g_log.error() << "Please check that your detectors' ids are correct."
-                        << std::endl;
+                           "found with id '" << detid << "'\n";
+          g_log.error()
+              << "Please check that your detectors' ids are correct.\n";
           throw Kernel::Exception::InstrumentDefinitionError(
               "Invalid detector id in component-link tag.");
         }
@@ -2323,11 +2323,10 @@ void InstrumentDefinitionParser::setComponentLinks(
             if (!consistent) {
               g_log.warning() << "Error whilst loading parameters. Name '"
                               << name << "' does not match id '" << detid
-                              << "'." << std::endl;
+                              << "'.\n";
               g_log.warning()
                   << "Parameters have been applied to detector with id '"
-                  << detid << "'. Please check the name is correct."
-                  << std::endl;
+                  << detid << "'. Please check the name is correct.\n";
             }
           }
         }
@@ -2841,8 +2840,7 @@ InstrumentDefinitionParser::convertLocationsElement(
 
     if (!name.empty()) {
       // Add name with appropriate numeric postfix
-      pLoc->setAttribute(
-          "name", name + boost::lexical_cast<std::string>(nameCountStart + i));
+      pLoc->setAttribute("name", name + std::to_string(nameCountStart + i));
     }
 
     // Copy values of all the attributes set

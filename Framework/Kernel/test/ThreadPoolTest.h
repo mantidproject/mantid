@@ -39,7 +39,7 @@ public:
   void waste_time_with_lock(double seconds) {
     {
       std::lock_guard<std::mutex> lock(m_mutex);
-      std::cout << "waste_time for " << seconds << " seconds." << std::endl;
+      std::cout << "waste_time for " << seconds << " seconds.\n";
     }
     waste_time(seconds);
   }
@@ -131,7 +131,7 @@ public:
 
     TS_ASSERT_THROWS_NOTHING(p.joinAll());
 
-    std::cout << overall.elapsed() << " secs total." << std::endl;
+    std::cout << overall.elapsed() << " secs total.\n";
   }
 
   void test_Constructor() { ThreadPool p; }
@@ -345,7 +345,7 @@ public:
 
     Timer overall;
     TS_ASSERT_THROWS_NOTHING(p.joinAll());
-    // std::cout << overall.elapsed() << " secs total." << std::endl;
+    // std::cout << overall.elapsed() << " secs total.\n";
 
     // Expected total
     size_t expected = (num * num + num) / 2;

@@ -30,6 +30,7 @@
 #include "LegendWidget.h"
 #include "QwtPieCurve.h"
 
+#include <QCloseEvent>
 #include <QTextCursor>
 
 #include <qwt_text.h>

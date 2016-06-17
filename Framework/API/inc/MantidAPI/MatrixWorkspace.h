@@ -173,68 +173,68 @@ public:
   //----------------------------------------------------------------------
 
   /// Return the underlying ISpectrum ptr at the given workspace index.
-  virtual ISpectrum *getSpectrum(const size_t index) = 0;
+  virtual ISpectrum &getSpectrum(const size_t index) = 0;
 
   /// Return the underlying ISpectrum ptr (const version) at the given workspace
   /// index.
-  virtual const ISpectrum *getSpectrum(const size_t index) const = 0;
+  virtual const ISpectrum &getSpectrum(const size_t index) const = 0;
 
   // Methods for getting read-only access to the data.
   // Just passes through to the virtual dataX/Y/E function (const version)
   /// Returns a read-only (i.e. const) reference to the specified X array
   /// @param index :: workspace index to retrieve.
   const MantidVec &readX(std::size_t const index) const {
-    return getSpectrum(index)->dataX();
+    return getSpectrum(index).dataX();
   }
   /// Returns a read-only (i.e. const) reference to the specified Y array
   /// @param index :: workspace index to retrieve.
   const MantidVec &readY(std::size_t const index) const {
-    return getSpectrum(index)->dataY();
+    return getSpectrum(index).dataY();
   }
   /// Returns a read-only (i.e. const) reference to the specified E array
   /// @param index :: workspace index to retrieve.
   const MantidVec &readE(std::size_t const index) const {
-    return getSpectrum(index)->dataE();
+    return getSpectrum(index).dataE();
   }
   /// Returns a read-only (i.e. const) reference to the specified X error array
   /// @param index :: workspace index to retrieve.
   const MantidVec &readDx(size_t const index) const {
-    return getSpectrum(index)->dataDx();
+    return getSpectrum(index).dataDx();
   }
 
   /// Returns the x data
   virtual MantidVec &dataX(const std::size_t index) {
     invalidateCommonBinsFlag();
-    return getSpectrum(index)->dataX();
+    return getSpectrum(index).dataX();
   }
   /// Returns the y data
   virtual MantidVec &dataY(const std::size_t index) {
-    return getSpectrum(index)->dataY();
+    return getSpectrum(index).dataY();
   }
   /// Returns the error data
   virtual MantidVec &dataE(const std::size_t index) {
-    return getSpectrum(index)->dataE();
+    return getSpectrum(index).dataE();
   }
   /// Returns the x error data
   virtual MantidVec &dataDx(const std::size_t index) {
-    return getSpectrum(index)->dataDx();
+    return getSpectrum(index).dataDx();
   }
 
   /// Returns the x data const
   virtual const MantidVec &dataX(const std::size_t index) const {
-    return getSpectrum(index)->dataX();
+    return getSpectrum(index).dataX();
   }
   /// Returns the y data const
   virtual const MantidVec &dataY(const std::size_t index) const {
-    return getSpectrum(index)->dataY();
+    return getSpectrum(index).dataY();
   }
   /// Returns the error const
   virtual const MantidVec &dataE(const std::size_t index) const {
-    return getSpectrum(index)->dataE();
+    return getSpectrum(index).dataE();
   }
   /// Returns the error const
   virtual const MantidVec &dataDx(const std::size_t index) const {
-    return getSpectrum(index)->dataDx();
+    return getSpectrum(index).dataDx();
   }
 
   virtual double getXMin() const;
@@ -243,48 +243,48 @@ public:
 
   /// Returns a pointer to the x data
   virtual Kernel::cow_ptr<MantidVec> refX(const std::size_t index) const {
-    return getSpectrum(index)->ptrX();
+    return getSpectrum(index).ptrX();
   }
 
   /// Returns a pointer to the dX  (X Error) data
   virtual Kernel::cow_ptr<MantidVec> refDx(const std::size_t index) const {
-    return getSpectrum(index)->ptrDx();
+    return getSpectrum(index).ptrDx();
   }
 
   /// Set the specified X array to point to the given existing array
   virtual void setX(const std::size_t index, const MantidVec &X) {
-    getSpectrum(index)->setX(X);
+    getSpectrum(index).setX(X);
     invalidateCommonBinsFlag();
   }
 
   /// Set the specified X array to point to the given existing array
   virtual void setX(const std::size_t index, const MantidVecPtr &X) {
-    getSpectrum(index)->setX(X);
+    getSpectrum(index).setX(X);
     invalidateCommonBinsFlag();
   }
 
   /// Set the specified X array to point to the given existing array
   virtual void setX(const std::size_t index, const MantidVecPtr::ptr_type &X) {
-    getSpectrum(index)->setX(X);
+    getSpectrum(index).setX(X);
     invalidateCommonBinsFlag();
   }
 
   /// Set the specified Dx (X Error) array to point to the given existing array
   virtual void setDx(const std::size_t index, const MantidVec &Dx) {
-    getSpectrum(index)->setDx(Dx);
+    getSpectrum(index).setDx(Dx);
     invalidateCommonBinsFlag();
   }
 
   /// Set the specified Dx (X Error) array to point to the given existing array
   virtual void setDx(const std::size_t index, const MantidVecPtr &Dx) {
-    getSpectrum(index)->setDx(Dx);
+    getSpectrum(index).setDx(Dx);
     invalidateCommonBinsFlag();
   }
 
   /// Set the specified Dx (X Error) array to point to the given existing array
   virtual void setDx(const std::size_t index,
                      const MantidVecPtr::ptr_type &Dx) {
-    getSpectrum(index)->setDx(Dx);
+    getSpectrum(index).setDx(Dx);
     invalidateCommonBinsFlag();
   }
 
@@ -292,7 +292,7 @@ public:
   @param index :: the workspace index to set.
   @param Y :: Y vector  */
   virtual void setData(const std::size_t index, const MantidVecPtr &Y) {
-    getSpectrum(index)->setData(Y);
+    getSpectrum(index).setData(Y);
   }
 
   /** Sets the data in the workspace
@@ -301,7 +301,7 @@ public:
   @param E :: Error vector   */
   virtual void setData(const std::size_t index, const MantidVecPtr &Y,
                        const MantidVecPtr &E) {
-    getSpectrum(index)->setData(Y, E);
+    getSpectrum(index).setData(Y, E);
   }
 
   /** Sets the data in the workspace
@@ -310,7 +310,7 @@ public:
   @param E :: Error vector   */
   virtual void setData(const std::size_t index, const MantidVecPtr::ptr_type &Y,
                        const MantidVecPtr::ptr_type &E) {
-    getSpectrum(index)->setData(Y, E);
+    getSpectrum(index).setData(Y, E);
   }
 
   /**
@@ -318,7 +318,7 @@ public:
    * @param index: the workspace index
    */
   virtual bool hasDx(const std::size_t index) const {
-    return getSpectrum(index)->hasDx();
+    return getSpectrum(index).hasDx();
   }
 
   /// Generate the histogram or rebin the existing histogram.

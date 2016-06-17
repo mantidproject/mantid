@@ -1496,8 +1496,7 @@ void PlotDialog::showStatistics() {
       t->setText(i, 2, QString::number(sum));
       t->setText(i, 3, QString::number(sum / h_sum * 100));
     }
-    t->setHeader(QStringList() << tr("Bins") << tr("Quantity") << tr("Sum")
-                               << tr("Percent"));
+    t->setHeader({tr("Bins"), tr("Quantity"), tr("Sum"), tr("Percent")});
     t->showMaximized();
   }
 
@@ -2370,7 +2369,7 @@ bool PlotDialog::acceptParams() {
     // Update axes page
     boxXAxis->setCurrentIndex(sp->xAxis() - 2);
     boxYAxis->setCurrentIndex(sp->yAxis());
-  } else if (privateTabWidget->currentPage() == contourLinesPage) {
+  } else if (privateTabWidget->currentWidget() == contourLinesPage) {
     Spectrogram *sp = dynamic_cast<Spectrogram *>(plotItem);
 
     if (!sp || sp->rtti() != QwtPlotItem::Rtti_PlotSpectrogram) {

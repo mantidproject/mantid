@@ -17,8 +17,6 @@ UnaryOperation::UnaryOperation() : API::Algorithm() {
   this->useHistogram = false;
 }
 
-UnaryOperation::~UnaryOperation() {}
-
 /** Initialisation method.
  *  Defines input and output workspace properties
  */
@@ -131,20 +129,20 @@ void UnaryOperation::execEvent() {
     PARALLEL_START_INTERUPT_REGION
     // switch to weighted events if needed, and use the appropriate helper
     // function
-    EventList *evlist = outputWS->getEventListPtr(i);
-    switch (evlist->getEventType()) {
+    auto &evlist = outputWS->getSpectrum(i);
+    switch (evlist.getEventType()) {
     case TOF:
       // Switch to weights if needed.
-      evlist->switchTo(WEIGHTED);
+      evlist.switchTo(WEIGHTED);
     /* no break */
     // Fall through
 
     case WEIGHTED:
-      unaryOperationEventHelper(evlist->getWeightedEvents());
+      unaryOperationEventHelper(evlist.getWeightedEvents());
       break;
 
     case WEIGHTED_NOTIME:
-      unaryOperationEventHelper(evlist->getWeightedEventsNoTime());
+      unaryOperationEventHelper(evlist.getWeightedEventsNoTime());
       break;
     }
 
@@ -156,7 +154,7 @@ void UnaryOperation::execEvent() {
   outputWS->clearMRU();
   auto inputWS = boost::dynamic_pointer_cast<EventWorkspace>(matrixOutputWS);
   if (inputWS->getNumberEvents() != outputWS->getNumberEvents()) {
-    g_log.information() << "Number of events has changed!!!" << std::endl;
+    g_log.information() << "Number of events has changed!!!\n";
   }
 }
 

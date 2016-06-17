@@ -21,16 +21,6 @@ namespace Algorithms {
 DECLARE_ALGORITHM(CalculateZscore)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-CalculateZscore::CalculateZscore() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-CalculateZscore::~CalculateZscore() {}
-
-//----------------------------------------------------------------------------------------------
 /** Define properties
   */
 void CalculateZscore::init() {
@@ -90,7 +80,7 @@ void CalculateZscore::exec() {
         stringstream errmsg;
         errmsg << "Input workspace index " << inpwsindex
                << " is out of input workspace range = "
-               << inpWS->getNumberHistograms() << endl;
+               << inpWS->getNumberHistograms() << '\n';
       }
     }
 

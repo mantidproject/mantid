@@ -25,7 +25,7 @@ for item in data_search_dirs:
     if item.endswith("SANS2D/"):
         TEST_DIR = item
 if len(TEST_DIR) == 0:
-    raise RuntimeError, "Could not locate test data directory: [...]/Data/SANS2D"
+    raise RuntimeError("Could not locate test data directory: [...]/Data/SANS2D")
 
 
 def _diff_iq(x, y):
@@ -145,11 +145,11 @@ class HFIRTestsAPIv2(stresstesting.MantidStressTest):
 
     def assertTrue(self, condition):
         if not condition:
-            raise RuntimeError, "Condition failed"
+            raise RuntimeError("Condition failed")
 
     def assertEqual(self, a, b):
         if not a == b:
-            raise RuntimeError, "%s != %s" % (a, b)
+            raise RuntimeError("%s != %s" % (a, b))
 
     def _assertAlmostEqual(self, first, second, places=None, msg=None, delta=None, rel_delta=None):
         return self.assertAlmostEqual(first, second, places, msg, delta, rel_delta)
@@ -158,7 +158,7 @@ class HFIRTestsAPIv2(stresstesting.MantidStressTest):
         if not assertAlmostEqual(first, second, places, msg, delta, rel_delta):
             if msg is None:
                 msg = "Failed condition"
-            raise RuntimeError, msg
+            raise RuntimeError(msg)
 
     def _cleanup(self):
         ws_list = AnalysisDataService.getObjectNames()

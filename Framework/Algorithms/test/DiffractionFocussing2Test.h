@@ -129,7 +129,7 @@ public:
       xRef[4] = 1e6;
       // Set an X-axis
       inputW->setX(pix, axis);
-      inputW->getEventList(pix).addEventQuickly(TofEvent(1000.0));
+      inputW->getSpectrum(pix).addEventQuickly(TofEvent(1000.0));
     }
 
     // ------------ Create a grouping workspace by name -------------
@@ -191,7 +191,7 @@ public:
     TS_ASSERT_EQUALS(output->blocksize(), 4);
 
     TS_ASSERT_EQUALS(output->getAxis(1)->length(), numgroups);
-    TS_ASSERT_EQUALS(output->getSpectrum(0)->getSpectrumNo(), 1);
+    TS_ASSERT_EQUALS(output->getSpectrum(0).getSpectrumNo(), 1);
 
     // Events in these two banks alone
     if (preserveEvents)
@@ -203,7 +203,7 @@ public:
     // Now let's test the grouping of detector UDETS to groups
     for (size_t wi = 0; wi < output->getNumberHistograms(); wi++) {
       // This is the list of the detectors (grouped)
-      auto mylist = output->getSpectrum(wi)->getDetectorIDs();
+      auto mylist = output->getSpectrum(wi).getDetectorIDs();
       // 1024 pixels in a bank
       TS_ASSERT_EQUALS(mylist.size(), bankWidthInPixels * bankWidthInPixels);
     }
@@ -277,7 +277,7 @@ public:
     // Fill a whole bunch of events
     PARALLEL_FOR_NO_WSP_CHECK()
     for (int i = 0; i < static_cast<int>(ws->getNumberHistograms()); i++) {
-      EventList &el = ws->getEventList(i);
+      EventList &el = ws->getSpectrum(i);
       for (int j = 0; j < 20; j++) {
         el.addEventQuickly(TofEvent(double(j) * 1e-3));
       }

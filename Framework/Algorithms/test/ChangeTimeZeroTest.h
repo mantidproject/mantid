@@ -539,11 +539,11 @@ private:
     for (size_t workspaceIndex = 0; workspaceIndex < ws->getNumberHistograms();
          ++workspaceIndex) {
 
-      auto eventList = ws->getEventListPtr(workspaceIndex);
-      auto eventListDuplicate = duplicateWs->getEventListPtr(workspaceIndex);
+      auto &eventList = ws->getSpectrum(workspaceIndex);
+      auto &eventListDuplicate = duplicateWs->getSpectrum(workspaceIndex);
 
-      auto events = eventList->getEvents();
-      auto eventsDuplicate = eventListDuplicate->getEvents();
+      auto &events = eventList.getEvents();
+      auto &eventsDuplicate = eventListDuplicate.getEvents();
 
       for (unsigned int i = 0; i < events.size(); ++i) {
         double secs = DateAndTime::secondsFromDuration(

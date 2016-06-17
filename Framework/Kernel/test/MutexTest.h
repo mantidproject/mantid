@@ -20,27 +20,27 @@ Poco::RWLock _access;
 //}
 
 void reader() {
-  //  std::cout << "Read started" << std::endl;
+  //  std::cout << "Read started\n";
   Poco::ScopedReadRWLock lock(_access);
-  //  std::cout << "Read launching" << std::endl;
+  //  std::cout << "Read launching\n";
   // do work here, without anyone having exclusive access
   for (size_t i = 0; i < shared_data.size(); i++) {
     double val = shared_data[i];
     UNUSED_ARG(val)
   }
-  //  std::cout << "Read finished" << std::endl;
+  //  std::cout << "Read finished\n";
 }
 
 void unconditional_writer() {
-  //  std::cout << "Write started" << std::endl;
+  //  std::cout << "Write started\n";
   Poco::ScopedWriteRWLock lock(_access);
-  //  std::cout << "Write launching" << std::endl;
+  //  std::cout << "Write launching\n";
   // do work here, with exclusive access
   shared_data.resize(shared_data.size() + 1, 2.345);
   // Dumb thing to slow down the writer
   for (size_t i = 0; i < shared_data.size(); i++)
     shared_data[i] = 4.567;
-  //  std::cout << "Write finished" << std::endl;
+  //  std::cout << "Write finished\n";
 }
 
 class MutexTest : public CxxTest::TestSuite {
@@ -59,7 +59,7 @@ public:
     for (size_t i = 0; i < numTasks; i++)
       pool.schedule(new FunctionTask(reader));
     pool.joinAll();
-    std::cout << tim << " to execute all " << numTasks << " tasks" << std::endl;
+    std::cout << tim << " to execute all " << numTasks << " tasks\n";
   }
 
   /** Launch a bunch of writing threads */
@@ -70,7 +70,7 @@ public:
     for (size_t i = 0; i < numTasks; i++)
       pool.schedule(new FunctionTask(unconditional_writer));
     pool.joinAll();
-    std::cout << tim << " to execute all " << numTasks << " tasks" << std::endl;
+    std::cout << tim << " to execute all " << numTasks << " tasks\n";
     TSM_ASSERT_EQUALS("The writers were all called", shared_data.size(),
                       DATA_SIZE + numTasks)
   }
@@ -87,7 +87,7 @@ public:
         pool.schedule(new FunctionTask(reader));
     }
     pool.joinAll();
-    std::cout << tim << " to execute all " << numTasks << " tasks" << std::endl;
+    std::cout << tim << " to execute all " << numTasks << " tasks\n";
     TSM_ASSERT_EQUALS("The writers were all called", shared_data.size(),
                       DATA_SIZE + numTasks / 10)
   }

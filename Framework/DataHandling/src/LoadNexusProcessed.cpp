@@ -18,10 +18,11 @@
 #include "MantidDataObjects/PeakShapeSphericalFactory.h"
 #include "MantidDataObjects/PeakShapeEllipsoidFactory.h"
 #include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/DateAndTime.h"
-#include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/MultiThreaded.h"
+#include "MantidKernel/StringTokenizer.h"
+#include "MantidKernel/UnitFactory.h"
 #include "MantidNexus/NexusClasses.h"
 #include "MantidNexus/NexusFileIO.h"
 
@@ -29,8 +30,6 @@
 #include <boost/regex.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/shared_array.hpp>
-
-#include <MantidKernel/StringTokenizer.h>
 
 #include <nexus/NeXusException.hpp>
 
@@ -80,34 +79,18 @@ struct SpectraInfo {
         spectraNumbers(other.spectraNumbers),
         detectorIndex(other.detectorIndex), detectorCount(other.detectorCount),
         detectorList(other.detectorList) {}
-
-  /*
-  SpectraInfo& operator=(const SpectraInfo& other)
-  {
-    if (&other != this)
-    {
-      nSpectra = other.nSpectra;
-      hasSpectra = other.hasSpectra;
-      spectraNumbers = other.spectraNumbers;
-      detectorIndex = other.detectorIndex;
-      detectorCount = other.detectorCount;
-      detectorList = other.detectorList;
-    }
-    return *this;
-  }
-  */
 };
 
 // Helper typdef.
 typedef boost::optional<SpectraInfo> SpectraInfo_optional;
 
 /**
- * Extract ALL the detector, spectrum number and workspace index mapping
- * information.
- * @param mtd_entry
- * @param logger
- * @return
- */
+* Extract ALL the detector, spectrum number and workspace index mapping
+* information.
+* @param mtd_entry
+* @param logger
+* @return
+*/
 SpectraInfo extractMappingInfo(NXEntry &mtd_entry, Logger &logger) {
   // Instrument information
   NXInstrument inst = mtd_entry.openNXInstrument("instrument");
@@ -131,8 +114,7 @@ SpectraInfo extractMappingInfo(NXEntry &mtd_entry, Logger &logger) {
     detectorList = detlist_group.sharedBuffer();
   } catch (std::runtime_error &) {
     logger.information() << "detector_list block not found. The workspace will "
-                            "not contain any detector information."
-                         << std::endl;
+                            "not contain any detector information.\n";
     return SpectraInfo();
   }
 
@@ -164,12 +146,12 @@ SpectraInfo extractMappingInfo(NXEntry &mtd_entry, Logger &logger) {
 }
 
 /**
- * Is this file from a well-formed multiperiod group workspace.
- * @param nWorkspaceEntries : Number of entries in the group workspace
- * @param sampleWS : Sample workspace to inspect the logs of
- * @param log : Information logger object
- * @return True only if multiperiod.
- */
+* Is this file from a well-formed multiperiod group workspace.
+* @param nWorkspaceEntries : Number of entries in the group workspace
+* @param sampleWS : Sample workspace to inspect the logs of
+* @param log : Information logger object
+* @return True only if multiperiod.
+*/
 bool isMultiPeriodFile(int nWorkspaceEntries, Workspace_sptr sampleWS,
                        Logger &log) {
   bool isMultiPeriod = false;
@@ -200,11 +182,11 @@ LoadNexusProcessed::LoadNexusProcessed()
 LoadNexusProcessed::~LoadNexusProcessed() { delete m_cppFile; }
 
 /**
- * Return the confidence with with this algorithm can load the file
- * @param descriptor A descriptor for the file
- * @returns An integer specifying the confidence level. 0 indicates it will not
- * be used
- */
+* Return the confidence with with this algorithm can load the file
+* @param descriptor A descriptor for the file
+* @returns An integer specifying the confidence level. 0 indicates it will not
+* be used
+*/
 int LoadNexusProcessed::confidence(Kernel::NexusDescriptor &descriptor) const {
   if (descriptor.pathExists("/mantid_workspace_1"))
     return 80;
@@ -213,8 +195,8 @@ int LoadNexusProcessed::confidence(Kernel::NexusDescriptor &descriptor) const {
 }
 
 /** Initialisation method.
- *
- */
+*
+*/
 void LoadNexusProcessed::init() {
   // Declare required input parameters for algorithm
   const std::vector<std::string> exts{".nxs", ".nx5", ".xml"};
@@ -257,15 +239,15 @@ void LoadNexusProcessed::init() {
 }
 
 /**
- * Loading specifically for mulitperiod group workspaces
- * @param root : NXRoot ref
- * @param entryName : Entry name to load.
- * @param tempMatrixWorkspace : Template workspace to base the next multiperiod
- * entry off.
- * @param nWorkspaceEntries : N entries in the file
- * @param p : index + 1 being processed.
- * @return Next multiperiod group workspace
- */
+* Loading specifically for mulitperiod group workspaces
+* @param root : NXRoot ref
+* @param entryName : Entry name to load.
+* @param tempMatrixWorkspace : Template workspace to base the next multiperiod
+* entry off.
+* @param nWorkspaceEntries : N entries in the file
+* @param p : index + 1 being processed.
+* @return Next multiperiod group workspace
+*/
 Workspace_sptr LoadNexusProcessed::doAccelleratedMultiPeriodLoading(
     NXRoot &root, const std::string &entryName,
     MatrixWorkspace_sptr &tempMatrixWorkspace, const int64_t nWorkspaceEntries,
@@ -291,10 +273,8 @@ Workspace_sptr LoadNexusProcessed::doAccelleratedMultiPeriodLoading(
   NXData wsEntry(mtdEntry, "workspace");
   if (!wsEntry.openLocal()) {
     std::stringstream buffer;
-    buffer
-        << "Group entry " << p - 1
-        << " is not a workspace 2D. Retry with FastMultiPeriod option set off."
-        << std::endl;
+    buffer << "Group entry " << p - 1 << " is not a workspace 2D. Retry with "
+                                         "FastMultiPeriod option set off.\n";
     throw std::runtime_error(buffer.str());
   }
 
@@ -302,7 +282,7 @@ Workspace_sptr LoadNexusProcessed::doAccelleratedMultiPeriodLoading(
     std::stringstream buffer;
     buffer << "Group entry " << p - 1 << " has fractional area present. Try "
                                          "reloading with FastMultiPeriod set "
-                                         "off." << std::endl;
+                                         "off.\n";
     throw std::runtime_error(buffer.str());
   }
 
@@ -384,10 +364,10 @@ Workspace_sptr LoadNexusProcessed::doAccelleratedMultiPeriodLoading(
 
 //-------------------------------------------------------------------------------------------------
 /** Executes the algorithm. Reading in the file and creating and populating
- *  the output workspace
- *
- *  @throw runtime_error Thrown if algorithm cannot execute
- */
+*  the output workspace
+*
+*  @throw runtime_error Thrown if algorithm cannot execute
+*/
 void LoadNexusProcessed::exec() {
   progress(0, "Opening file...");
 
@@ -492,11 +472,11 @@ void LoadNexusProcessed::exec() {
       Workspace_sptr local_workspace;
 
       /*
-       For multiperiod workspaces we can accelerate the loading by making
-       resonable assumptions about the differences between the workspaces
-       Only Y, E and log data entries should vary. Therefore we can clone our
-       temp workspace, and overwrite those things we are interested in.
-       */
+      For multiperiod workspaces we can accelerate the loading by making
+      resonable assumptions about the differences between the workspaces
+      Only Y, E and log data entries should vary. Therefore we can clone our
+      temp workspace, and overwrite those things we are interested in.
+      */
       if (bAccelleratedMultiPeriodLoading) {
         local_workspace = doAccelleratedMultiPeriodLoading(
             root, basename + os.str(), tempMatrixWorkspace, nWorkspaceEntries,
@@ -527,26 +507,26 @@ void LoadNexusProcessed::exec() {
 }
 
 /**
- * Decides what to call a child of a group workspace.
- *
- * This function uses information about if the child workspace has a common stem
- * and checks if the file contained a workspace name to decide what it should be
- *called
- *
- * @param name :: The name loaded from the file (possibly the empty string if
- *none was loaded)
- * @param baseName :: The name group workspace
- * @param wsIndex :: The current index of this workspace
- * @param commonStem :: Whether the workspaces share a common name stem
- *
- * @return The name of the workspace
- */
+* Decides what to call a child of a group workspace.
+*
+* This function uses information about if the child workspace has a common stem
+* and checks if the file contained a workspace name to decide what it should be
+*called
+*
+* @param name :: The name loaded from the file (possibly the empty string if
+*none was loaded)
+* @param baseName :: The name group workspace
+* @param wsIndex :: The current index of this workspace
+* @param commonStem :: Whether the workspaces share a common name stem
+*
+* @return The name of the workspace
+*/
 std::string LoadNexusProcessed::buildWorkspaceName(const std::string &name,
                                                    const std::string &baseName,
                                                    int64_t wsIndex,
                                                    bool commonStem) {
   std::string wsName;
-  std::string index = boost::lexical_cast<std::string>(wsIndex);
+  std::string index = std::to_string(wsIndex);
 
   // if we don't have a common stem then use name tag
   if (!commonStem) {
@@ -576,10 +556,10 @@ std::string LoadNexusProcessed::buildWorkspaceName(const std::string &name,
 }
 
 /**
- * Append an index to the name if it already exists in the AnalysisDataService
- *
- * @param wsName :: Name to call the workspace
- */
+* Append an index to the name if it already exists in the AnalysisDataService
+*
+* @param wsName :: Name to call the workspace
+*/
 void LoadNexusProcessed::correctForWorkspaceNameClash(std::string &wsName) {
   bool noClash(false);
 
@@ -587,7 +567,7 @@ void LoadNexusProcessed::correctForWorkspaceNameClash(std::string &wsName) {
     std::string wsIndex = ""; // dont use an index if there is no other
                               // workspace
     if (i > 0) {
-      wsIndex = "_" + boost::lexical_cast<std::string>(i);
+      wsIndex = "_" + std::to_string(i);
     }
 
     bool wsExists = AnalysisDataService::Instance().doesExist(wsName + wsIndex);
@@ -599,13 +579,13 @@ void LoadNexusProcessed::correctForWorkspaceNameClash(std::string &wsName) {
 }
 
 /**
- * Check if the workspace name contains a common stem and load the workspace
- *names
- *
- * @param root :: the root for the NeXus document
- * @param names :: vector to store the names to be loaded.
- * @return Whether there was a common stem.
- */
+* Check if the workspace name contains a common stem and load the workspace
+*names
+*
+* @param root :: the root for the NeXus document
+* @param names :: vector to store the names to be loaded.
+* @return Whether there was a common stem.
+*/
 bool LoadNexusProcessed::checkForCommonNameStem(
     NXRoot &root, std::vector<std::string> &names) {
   bool success(true);
@@ -629,12 +609,12 @@ bool LoadNexusProcessed::checkForCommonNameStem(
 }
 
 /**
- * Load the workspace name, if the attribute exists
- *
- * @param root :: Root of NeXus file
- * @param entry_name :: Entry in NeXus file to look at
- * @return The workspace name. If none found an empty string is returned.
- */
+* Load the workspace name, if the attribute exists
+*
+* @param root :: Root of NeXus file
+* @param entry_name :: Entry in NeXus file to look at
+* @return The workspace name. If none found an empty string is returned.
+*/
 std::string
 LoadNexusProcessed::loadWorkspaceName(NXRoot &root,
                                       const std::string &entry_name) {
@@ -648,15 +628,15 @@ LoadNexusProcessed::loadWorkspaceName(NXRoot &root,
 
 //-------------------------------------------------------------------------------------------------
 /**
- * Load an event_workspace field
- *
- * @param wksp_cls  Nexus data for "event_workspace"
- * @param xbins bins on the "X" axis
- * @param progressStart algorithm progress (from 0)
- * @param progressRange  progress made after loading an entry
- *
- * @return event_workspace object with data
- */
+* Load an event_workspace field
+*
+* @param wksp_cls  Nexus data for "event_workspace"
+* @param xbins bins on the "X" axis
+* @param progressStart algorithm progress (from 0)
+* @param progressRange  progress made after loading an entry
+*
+* @return event_workspace object with data
+*/
 API::MatrixWorkspace_sptr
 LoadNexusProcessed::loadEventEntry(NXData &wksp_cls, NXDouble &xbins,
                                    const double &progressStart,
@@ -742,7 +722,7 @@ LoadNexusProcessed::loadEventEntry(NXData &wksp_cls, NXDouble &xbins,
     int64_t index_start = indices[wi];
     int64_t index_end = indices[wi + 1];
     if (index_end >= index_start) {
-      EventList &el = ws->getEventList(j);
+      EventList &el = ws->getSpectrum(j);
       el.switchTo(type);
 
       // Allocate all the required memory
@@ -787,12 +767,12 @@ LoadNexusProcessed::loadEventEntry(NXData &wksp_cls, NXDouble &xbins,
 
 //-------------------------------------------------------------------------------------------------
 /**
- * Load a numeric column to the TableWorkspace.
- * @param tableData   :: Table data to load from
- * @param dataSetName :: Name of the data set to use to get column data
- * @param tableWs     :: Workspace to add column to
- * @param columnType  :: Name of the column type to create
- */
+* Load a numeric column to the TableWorkspace.
+* @param tableData   :: Table data to load from
+* @param dataSetName :: Name of the data set to use to get column data
+* @param tableWs     :: Workspace to add column to
+* @param columnType  :: Name of the column type to create
+*/
 template <typename ColumnType, typename NexusType>
 void LoadNexusProcessed::loadNumericColumn(
     const Mantid::NeXus::NXData &tableData, const std::string &dataSetName,
@@ -820,8 +800,8 @@ void LoadNexusProcessed::loadNumericColumn(
 
 //-------------------------------------------------------------------------------------------------
 /**
- * Load a table
- */
+* Load a table
+*/
 API::Workspace_sptr LoadNexusProcessed::loadTableEntry(NXEntry &entry) {
   API::ITableWorkspace_sptr workspace;
   workspace =
@@ -831,8 +811,7 @@ API::Workspace_sptr LoadNexusProcessed::loadTableEntry(NXEntry &entry) {
 
   int columnNumber = 1;
   do {
-    std::string dataSetName =
-        "column_" + boost::lexical_cast<std::string>(columnNumber);
+    std::string dataSetName = "column_" + std::to_string(columnNumber);
 
     NXInfo info = nx_tw.getDataSetInfo(dataSetName.c_str());
     if (info.stat == NX_ERROR) {
@@ -861,7 +840,7 @@ API::Workspace_sptr LoadNexusProcessed::loadTableEntry(NXEntry &entry) {
         loadNumericColumn<bool, bool>(nx_tw, dataSetName, workspace, "bool");
       } else {
         throw std::logic_error("Column with Nexus data type " +
-                               boost::lexical_cast<std::string>(info.type) +
+                               std::to_string(info.type) +
                                " cannot be loaded.");
       }
     } else if (info.rank == 2) {
@@ -904,12 +883,12 @@ API::Workspace_sptr LoadNexusProcessed::loadTableEntry(NXEntry &entry) {
 }
 
 /**
- * Loads a vector column to the TableWorkspace.
- * @param tableData   :: Table data to load from
- * @param dataSetName :: Name of the data set to use to get column data
- * @param tableWs     :: Workspace to add column to
- * @param columnType  :: Name of the column type to create
- */
+* Loads a vector column to the TableWorkspace.
+* @param tableData   :: Table data to load from
+* @param dataSetName :: Name of the data set to use to get column data
+* @param tableWs     :: Workspace to add column to
+* @param columnType  :: Name of the column type to create
+*/
 template <typename Type>
 void LoadNexusProcessed::loadVectorColumn(const NXData &tableData,
                                           const std::string &dataSetName,
@@ -953,10 +932,10 @@ void LoadNexusProcessed::loadVectorColumn(const NXData &tableData,
 }
 
 /**
- * Loads a V3D column to the TableWorkspace.
- * @param data   :: Table data to load from
- * @param tableWs     :: Workspace to add column to
- */
+* Loads a V3D column to the TableWorkspace.
+* @param data   :: Table data to load from
+* @param tableWs     :: Workspace to add column to
+*/
 void LoadNexusProcessed::loadV3DColumn(
     Mantid::NeXus::NXDouble &data, const API::ITableWorkspace_sptr &tableWs) {
   std::string columnTitle = data.attributes("name");
@@ -979,8 +958,8 @@ void LoadNexusProcessed::loadV3DColumn(
 
 //-------------------------------------------------------------------------------------------------
 /**
- * Load peaks
- */
+* Load peaks
+*/
 API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(NXEntry &entry) {
   // API::IPeaksWorkspace_sptr workspace;
   API::ITableWorkspace_sptr tWorkspace;
@@ -997,8 +976,7 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(NXEntry &entry) {
   int numberPeaks = 0;
   std::vector<std::string> columnNames;
   do {
-    std::string str =
-        "column_" + boost::lexical_cast<std::string>(columnNumber);
+    std::string str = "column_" + std::to_string(columnNumber);
 
     NXInfo info = nx_tw.getDataSetInfo(str.c_str());
     if (info.stat == NX_ERROR) {
@@ -1250,19 +1228,19 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(NXEntry &entry) {
 
 //-------------------------------------------------------------------------------------------------
 /**
- * Load a Workspace2D
- *
- * @param wksp_cls Nexus data for "Workspace2D" (or "offsets_workspace")
- * @param xbins bins on the "X" axis
- * @param progressStart algorithm progress (from 0)
- * @param progressRange progress made after loading an entry
- * @param mtd_entry Nexus entry for "mantid_workspace_..."
- * @param xlength bins in the "X" axis (xbins)
- * @param workspaceType Takes values like "Workspace2D", "RebinnedOutput",
- *etc.
- *
- * @return workspace object containing loaded data
- */
+* Load a Workspace2D
+*
+* @param wksp_cls Nexus data for "Workspace2D" (or "offsets_workspace")
+* @param xbins bins on the "X" axis
+* @param progressStart algorithm progress (from 0)
+* @param progressRange progress made after loading an entry
+* @param mtd_entry Nexus entry for "mantid_workspace_..."
+* @param xlength bins in the "X" axis (xbins)
+* @param workspaceType Takes values like "Workspace2D", "RebinnedOutput",
+*etc.
+*
+* @return workspace object containing loaded data
+*/
 API::MatrixWorkspace_sptr LoadNexusProcessed::loadNonEventEntry(
     NXData &wksp_cls, NXDouble &xbins, const double &progressStart,
     const double &progressRange, const NXEntry &mtd_entry, const int xlength,
@@ -1294,7 +1272,7 @@ API::MatrixWorkspace_sptr LoadNexusProcessed::loadNonEventEntry(
     local_workspace->setTitle(mtd_entry.getString("title"));
   } catch (std::runtime_error &) {
     g_log.debug() << "No title was found in the input file, "
-                  << getPropertyValue("Filename") << std::endl;
+                  << getPropertyValue("Filename") << '\n';
   }
 
   // Set the YUnit label
@@ -1454,17 +1432,17 @@ API::MatrixWorkspace_sptr LoadNexusProcessed::loadNonEventEntry(
 
 //-------------------------------------------------------------------------------------------------
 /**
- * Load a single entry into a workspace (event_workspace or workspace2d)
- *
- * @param root :: The opened root node
- * @param entry_name :: The entry name
- * @param progressStart :: The percentage value to start the progress
- *reporting
- * for this entry
- * @param progressRange :: The percentage range that the progress reporting
- * should cover
- * @returns A 2D workspace containing the loaded data
- */
+* Load a single entry into a workspace (event_workspace or workspace2d)
+*
+* @param root :: The opened root node
+* @param entry_name :: The entry name
+* @param progressStart :: The percentage value to start the progress
+*reporting
+* for this entry
+* @param progressRange :: The percentage range that the progress reporting
+* should cover
+* @returns A 2D workspace containing the loaded data
+*/
 API::Workspace_sptr LoadNexusProcessed::loadEntry(NXRoot &root,
                                                   const std::string &entry_name,
                                                   const double &progressStart,
@@ -1638,10 +1616,10 @@ API::Workspace_sptr LoadNexusProcessed::loadEntry(NXRoot &root,
 
 //-------------------------------------------------------------------------------------------------
 /**
- * Read the instrument group
- * @param mtd_entry :: The node for the current workspace
- * @param local_workspace :: The workspace to attach the instrument
- */
+* Read the instrument group
+* @param mtd_entry :: The node for the current workspace
+* @param local_workspace :: The workspace to attach the instrument
+*/
 void LoadNexusProcessed::readInstrumentGroup(
     NXEntry &mtd_entry, API::MatrixWorkspace_sptr local_workspace) {
   // Get spectrum information for the current entry.
@@ -1672,13 +1650,13 @@ void LoadNexusProcessed::readInstrumentGroup(
         (m_list &&
          find(m_spec_list.begin(), m_spec_list.end(), i) !=
              m_spec_list.end())) {
-      ISpectrum *spec = local_workspace->getSpectrum(index);
-      spec->setSpectrumNo(spectrum);
+      auto &spec = local_workspace->getSpectrum(index);
+      spec.setSpectrumNo(spectrum);
       ++index;
 
       int start = spectraInfo.detectorIndex[i - 1];
       int end = start + spectraInfo.detectorCount[i - 1];
-      spec->setDetectorIDs(
+      spec.setDetectorIDs(
           std::set<detid_t>(spectraInfo.detectorList.get() + start,
                             spectraInfo.detectorList.get() + end));
     }
@@ -1687,13 +1665,13 @@ void LoadNexusProcessed::readInstrumentGroup(
 
 //-------------------------------------------------------------------------------------------------
 /**
- * Loads the information contained in non-Spectra (ie, Text or Numeric) axis
- * in
- * the Nexus
- * file into the workspace.
- * @param local_workspace :: pointer to workspace object
- * @param data :: reference to the NeXuS data for the axis
- */
+* Loads the information contained in non-Spectra (ie, Text or Numeric) axis
+* in
+* the Nexus
+* file into the workspace.
+* @param local_workspace :: pointer to workspace object
+* @param data :: reference to the NeXuS data for the axis
+*/
 void LoadNexusProcessed::loadNonSpectraAxis(
     API::MatrixWorkspace_sptr local_workspace, NXData &data) {
   Axis *axis = local_workspace->getAxis(1);
@@ -1709,24 +1687,24 @@ void LoadNexusProcessed::loadNonSpectraAxis(
     axisData.load();
     std::string axisLabels(axisData(), axisData.dim0());
     // Use boost::tokenizer to split up the input
-    boost::char_separator<char> sep("\n");
-    boost::tokenizer<boost::char_separator<char>> tokenizer(axisLabels, sep);
+    Mantid::Kernel::StringTokenizer tokenizer(
+        axisLabels, "\n", Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
     // We must cast the axis object to TextAxis so we may use ->setLabel
     TextAxis *textAxis = static_cast<TextAxis *>(axis);
     int i = 0;
-    for (auto tokIter = tokenizer.begin(); tokIter != tokenizer.end();
-         ++tokIter, ++i) {
-      textAxis->setLabel(i, *tokIter);
+    for (const auto &tokIter : tokenizer) {
+      textAxis->setLabel(i, tokIter);
+      i++;
     }
   }
 }
 
 /**
- * Binary predicate function object to sort the AlgorithmHistory vector by
- * execution order
- * @param elem1 :: first element in the vector
- * @param elem2 :: second element in the vecor
- */
+* Binary predicate function object to sort the AlgorithmHistory vector by
+* execution order
+* @param elem1 :: first element in the vector
+* @param elem2 :: second element in the vecor
+*/
 bool UDlesserExecCount(NXClassInfo elem1, NXClassInfo elem2) {
   std::string::size_type index1, index2;
   std::string num1, num2;
@@ -1753,14 +1731,14 @@ bool UDlesserExecCount(NXClassInfo elem1, NXClassInfo elem2) {
 
 //-------------------------------------------------------------------------------------------------
 /** If the first string contains exactly three words separated by spaces
- *  these words will be copied into each of the following strings that were
- * passed
- *  @param[in] words3 a string with 3 words separated by spaces
- *  @param[out] w1 the first word in the input string
- *  @param[out] w2 the second word in the input string
- *  @param[out] w3 the third word in the input string
- *  @throw out_of_range if there aren't exaltly three strings in the word
- */
+*  these words will be copied into each of the following strings that were
+* passed
+*  @param[in] words3 a string with 3 words separated by spaces
+*  @param[out] w1 the first word in the input string
+*  @param[out] w2 the second word in the input string
+*  @param[out] w3 the third word in the input string
+*  @throw out_of_range if there aren't exaltly three strings in the word
+*/
 void LoadNexusProcessed::getWordsInString(const std::string &words3,
                                           std::string &w1, std::string &w2,
                                           std::string &w3) {
@@ -1779,15 +1757,15 @@ void LoadNexusProcessed::getWordsInString(const std::string &words3,
 
 //-------------------------------------------------------------------------------------------------
 /** If the first string contains exactly four words separated by spaces
- *  these words will be copied into each of the following strings that were
- * passed
- *  @param[in] words4 a string with 4 words separated by spaces
- *  @param[out] w1 the first word in the input string
- *  @param[out] w2 the second word in the input string
- *  @param[out] w3 the third word in the input string
- *  @param[out] w4 the fourth word in the input string
- *  @throw out_of_range if there aren't exaltly four strings in the word
- */
+*  these words will be copied into each of the following strings that were
+* passed
+*  @param[in] words4 a string with 4 words separated by spaces
+*  @param[out] w1 the first word in the input string
+*  @param[out] w2 the second word in the input string
+*  @param[out] w3 the third word in the input string
+*  @param[out] w4 the fourth word in the input string
+*  @throw out_of_range if there aren't exaltly four strings in the word
+*/
 void LoadNexusProcessed::getWordsInString(const std::string &words4,
                                           std::string &w1, std::string &w2,
                                           std::string &w3, std::string &w4) {
@@ -1807,11 +1785,11 @@ void LoadNexusProcessed::getWordsInString(const std::string &words4,
 
 //-------------------------------------------------------------------------------------------------
 /**
- * Read the bin masking information from the mantid_workspace_i/workspace
- * group.
- * @param wksp_cls :: The data group
- * @param local_workspace :: The workspace to read into
- */
+* Read the bin masking information from the mantid_workspace_i/workspace
+* group.
+* @param wksp_cls :: The data group
+* @param local_workspace :: The workspace to read into
+*/
 void LoadNexusProcessed::readBinMasking(
     NXData &wksp_cls, API::MatrixWorkspace_sptr local_workspace) {
   if (wksp_cls.getDataSetInfo("masked_spectra").stat == NX_ERROR) {
@@ -1836,21 +1814,21 @@ void LoadNexusProcessed::readBinMasking(
 }
 
 /**
- * Perform a call to nxgetslab, via the NexusClasses wrapped methods for a
- * given
- * blocksize. This assumes that the
- * xbins have alread been cached
- * @param data :: The NXDataSet object of y values
- * @param errors :: The NXDataSet object of error values
- * @param farea :: The NXDataSet object of fraction area values
- * @param hasFArea :: Flag to signal a RebinnedOutput workspace is in use
- * @param xErrors :: The NXDataSet object of xError values
- * @param hasXErrors :: Flag to signal the File contains x errors
- * @param blocksize :: The blocksize to use
- * @param nchannels :: The number of channels for the block
- * @param hist :: The workspace index to start reading into
- * @param local_workspace :: A pointer to the workspace
- */
+* Perform a call to nxgetslab, via the NexusClasses wrapped methods for a
+* given
+* blocksize. This assumes that the
+* xbins have alread been cached
+* @param data :: The NXDataSet object of y values
+* @param errors :: The NXDataSet object of error values
+* @param farea :: The NXDataSet object of fraction area values
+* @param hasFArea :: Flag to signal a RebinnedOutput workspace is in use
+* @param xErrors :: The NXDataSet object of xError values
+* @param hasXErrors :: Flag to signal the File contains x errors
+* @param blocksize :: The blocksize to use
+* @param nchannels :: The number of channels for the block
+* @param hist :: The workspace index to start reading into
+* @param local_workspace :: A pointer to the workspace
+*/
 void LoadNexusProcessed::loadBlock(NXDataSetTyped<double> &data,
                                    NXDataSetTyped<double> &errors,
                                    NXDataSetTyped<double> &farea, bool hasFArea,
@@ -1911,22 +1889,22 @@ void LoadNexusProcessed::loadBlock(NXDataSetTyped<double> &data,
 }
 
 /**
- * Perform a call to nxgetslab, via the NexusClasses wrapped methods for a
- * given
- * blocksize. This assumes that the
- * xbins have alread been cached
- * @param data :: The NXDataSet object of y values
- * @param errors :: The NXDataSet object of error values
- * @param farea :: The NXDataSet object of fraction area values
- * @param hasFArea :: Flag to signal a RebinnedOutput workspace is in use
- * @param xErrors :: The NXDataSet object of xError values
- * @param hasXErrors :: Flag to signal the File contains x errors
- * @param blocksize :: The blocksize to use
- * @param nchannels :: The number of channels for the block
- * @param hist :: The workspace index to start reading into
- * @param wsIndex :: The workspace index to save data into
- * @param local_workspace :: A pointer to the workspace
- */
+* Perform a call to nxgetslab, via the NexusClasses wrapped methods for a
+* given
+* blocksize. This assumes that the
+* xbins have alread been cached
+* @param data :: The NXDataSet object of y values
+* @param errors :: The NXDataSet object of error values
+* @param farea :: The NXDataSet object of fraction area values
+* @param hasFArea :: Flag to signal a RebinnedOutput workspace is in use
+* @param xErrors :: The NXDataSet object of xError values
+* @param hasXErrors :: Flag to signal the File contains x errors
+* @param blocksize :: The blocksize to use
+* @param nchannels :: The number of channels for the block
+* @param hist :: The workspace index to start reading into
+* @param wsIndex :: The workspace index to save data into
+* @param local_workspace :: A pointer to the workspace
+*/
 
 void LoadNexusProcessed::loadBlock(NXDataSetTyped<double> &data,
                                    NXDataSetTyped<double> &errors,
@@ -1988,23 +1966,23 @@ void LoadNexusProcessed::loadBlock(NXDataSetTyped<double> &data,
 }
 
 /**
- * Perform a call to nxgetslab, via the NexusClasses wrapped methods for a
- * given
- * blocksize. The xbins are read along with
- * each call to the data/error loading
- * @param data :: The NXDataSet object of y values
- * @param errors :: The NXDataSet object of error values
- * @param farea :: The NXDataSet object of fraction area values
- * @param hasFArea :: Flag to signal a RebinnedOutput workspace is in use
- * @param xErrors :: The NXDataSet object of xError values
- * @param hasXErrors :: Flag to signal the File contains x errors
- * @param xbins :: The xbin NXDataSet
- * @param blocksize :: The blocksize to use
- * @param nchannels :: The number of channels for the block
- * @param hist :: The workspace index to start reading into
- * @param wsIndex :: The workspace index to save data into
- * @param local_workspace :: A pointer to the workspace
- */
+* Perform a call to nxgetslab, via the NexusClasses wrapped methods for a
+* given
+* blocksize. The xbins are read along with
+* each call to the data/error loading
+* @param data :: The NXDataSet object of y values
+* @param errors :: The NXDataSet object of error values
+* @param farea :: The NXDataSet object of fraction area values
+* @param hasFArea :: Flag to signal a RebinnedOutput workspace is in use
+* @param xErrors :: The NXDataSet object of xError values
+* @param hasXErrors :: Flag to signal the File contains x errors
+* @param xbins :: The xbin NXDataSet
+* @param blocksize :: The blocksize to use
+* @param nchannels :: The number of channels for the block
+* @param hist :: The workspace index to start reading into
+* @param wsIndex :: The workspace index to save data into
+* @param local_workspace :: A pointer to the workspace
+*/
 void LoadNexusProcessed::loadBlock(NXDataSetTyped<double> &data,
                                    NXDataSetTyped<double> &errors,
                                    NXDataSetTyped<double> &farea, bool hasFArea,
@@ -2073,9 +2051,9 @@ void LoadNexusProcessed::loadBlock(NXDataSetTyped<double> &data,
 }
 
 /**
- *Validates the optional 'spectra to read' properties, if they have been set
- * @param numberofspectra :: number of spectrum
- */
+*Validates the optional 'spectra to read' properties, if they have been set
+* @param numberofspectra :: number of spectrum
+*/
 void LoadNexusProcessed::checkOptionalProperties(
     const std::size_t numberofspectra) {
   // read in the settings passed to the algorithm
@@ -2117,18 +2095,18 @@ void LoadNexusProcessed::checkOptionalProperties(
 }
 
 /**
- * Calculate the size of a workspace
- *
- * @param numberofspectra :: count of spectra found in the file being loaded
- *
- * @param gen_filtered_list :: process SpectrumList and SpectrumMin/Max
- *                             and save resulting explicit list of
- *                             spectra indices into a vector data
- *                             member, presently used only when loading
- *                             into event_workspace
- *
- * @return the size of a workspace
- */
+* Calculate the size of a workspace
+*
+* @param numberofspectra :: count of spectra found in the file being loaded
+*
+* @param gen_filtered_list :: process SpectrumList and SpectrumMin/Max
+*                             and save resulting explicit list of
+*                             spectra indices into a vector data
+*                             member, presently used only when loading
+*                             into event_workspace
+*
+* @return the size of a workspace
+*/
 size_t
 LoadNexusProcessed::calculateWorkspaceSize(const std::size_t numberofspectra,
                                            bool gen_filtered_list) {

@@ -96,6 +96,8 @@ if __name__ == '__main__':
                'ill.eu': 'ILL',
                'psi.ch': 'PSI',
                'ansto.gov.au': 'ANSTO',
+               'ansto': 'ANSTO',
+               'mantidproject.org': 'OTHERS',
                'MichaelWedel@users.noreply.github.com': 'PSI',
                'stuart.i.campbell@gmail.com': 'ORNL',
                'uwstout.edu': 'ORNL',
@@ -126,8 +128,10 @@ if __name__ == '__main__':
                'diegomon93@gmail.com': 'OTHERS',
                'mgt110@ic.ac.uk': 'OTHERS',
                'granrothge@users.noreply.github.com': 'ORNL',
-               'tom.g.r.brooks@gmail.com': 'STFC'
-               }
+               'tom.g.r.brooks@gmail.com': 'STFC',
+               'ross.whitfield@gmail.com': 'ORNL',
+               'MikeHart85@users.noreply.github.com': 'STFC'
+              }
 
     days_in_month = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
 

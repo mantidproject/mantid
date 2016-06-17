@@ -18,16 +18,6 @@ using namespace Mantid::Kernel;
 DECLARE_ALGORITHM(GetSpiceDataRawCountsFromMD)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-GetSpiceDataRawCountsFromMD::GetSpiceDataRawCountsFromMD() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
-  */
-GetSpiceDataRawCountsFromMD::~GetSpiceDataRawCountsFromMD() {}
-
-//----------------------------------------------------------------------------------------------
 /** Initialization
  * @brief GetSpiceDataRawCountsFromMD::init
  */

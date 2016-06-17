@@ -43,6 +43,7 @@
 #include "MantidQtMantidWidgets/DoubleSpinBox.h"
 
 #include <QListWidget>
+#include <QCloseEvent>
 #include <QTableWidget>
 #include <QHeaderView>
 #include <QLineEdit>
@@ -144,9 +145,8 @@ void FitDialog::initFitPage() {
   boxParams->horizontalHeader()->setResizeMode(3, QHeaderView::Stretch);
   boxParams->horizontalHeader()->setResizeMode(4,
                                                QHeaderView::ResizeToContents);
-  QStringList header = QStringList() << tr("Parameter") << tr("From")
-                                     << tr("Value") << tr("To")
-                                     << tr("Constant");
+  QStringList header{tr("Parameter"), tr("From"), tr("Value"), tr("To"),
+                     tr("Constant")};
   boxParams->setHorizontalHeaderLabels(header);
   boxParams->verticalHeader()->setResizeMode(QHeaderView::ResizeToContents);
   boxParams->verticalHeader()->hide();
@@ -514,9 +514,11 @@ void FitDialog::applyChanges() {
   app->fitPoints = generatePointsBox->value();
   app->generateUniformFitPoints = generatePointsBtn->isChecked();
   if (d_current_fit &&
-      !(qstrcmp("PolynomialFit", d_current_fit->className()) == 0) &&
-      !(qstrcmp("LinearFit", d_current_fit->className()) == 0) &&
-      !(qstrcmp("LinearSlopeFit", d_current_fit->className()) == 0))
+      !(strcmp("PolynomialFit", d_current_fit->metaObject()->className()) ==
+        0) &&
+      !(strcmp("LinearFit", d_current_fit->metaObject()->className()) == 0) &&
+      !(strcmp("LinearSlopeFit", d_current_fit->metaObject()->className()) ==
+        0))
     app->fit_scale_errors = scaleErrorsBox->isChecked();
   app->saveSettings();
   btnApply->setEnabled(false);
@@ -594,8 +596,8 @@ void FitDialog::activateCurve(const QString &curveName) {
 
   double start, end;
   d_graph->range(d_graph->curveIndex(curveName), &start, &end);
-  boxFrom->setValue(QMIN(start, end));
-  boxTo->setValue(QMAX(start, end));
+  boxFrom->setValue(qMin(start, end));
+  boxTo->setValue(qMax(start, end));
   // Set the same color as the data curve chosen for fit (Feature Request #4031)
   boxColor->setColor(c->pen().color());
 }
@@ -1093,7 +1095,7 @@ void FitDialog::accept() {
   } else
     n = rows;
 
-  QStringList parameters = QStringList();
+  QStringList parameters;
   MyParser parser;
   bool error = false;
   QVarLengthArray<double> paramsInit(n);
@@ -1220,8 +1222,8 @@ void FitDialog::modifyGuesses(double *initVal) {
 void FitDialog::changeDataRange() {
   double start = d_graph->selectedXStartValue();
   double end = d_graph->selectedXEndValue();
-  boxFrom->setValue(QMIN(start, end));
-  boxTo->setValue(QMAX(start, end));
+  boxFrom->setValue(qMin(start, end));
+  boxTo->setValue(qMax(start, end));
 }
 
 void FitDialog::setSrcTables(QList<MdiSubWindow *> tables) {

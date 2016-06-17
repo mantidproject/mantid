@@ -46,11 +46,6 @@ namespace Algorithms {
  */
 class DLLExport MultiplyRange : public API::Algorithm {
 public:
-  /// no arg constructor
-  MultiplyRange() : API::Algorithm() {}
-  /// virtual destructor
-  ~MultiplyRange() override {}
-
   const std::string name() const override { return "MultiplyRange"; }
   /// Summary of algorithms purpose
   const std::string summary() const override {

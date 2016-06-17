@@ -344,7 +344,7 @@ void MantidSampleLogDialog::init() {
                          Strings::toString(m_experimentInfoIndex) +
                          ") is not available. There are " +
                          Strings::toString(mei->getNumExperimentInfo()) +
-                         " in the workspace" << std::endl;
+                         " in the workspace\n";
         // Make a blank experiment info object
         m_ei = ExperimentInfo_const_sptr(new ExperimentInfo());
       } else

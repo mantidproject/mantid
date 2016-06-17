@@ -245,12 +245,12 @@ void SANSRunWindow::initLayout() {
   m_uiForm.batch_table->setContextMenuPolicy(Qt::ActionsContextMenu);
   m_batch_paste = new QAction(tr("&Paste"), m_uiForm.batch_table);
   m_batch_paste->setShortcut(tr("Ctrl+P"));
-  connect(m_batch_paste, SIGNAL(activated()), this, SLOT(pasteToBatchTable()));
+  connect(m_batch_paste, SIGNAL(triggered()), this, SLOT(pasteToBatchTable()));
   m_uiForm.batch_table->addAction(m_batch_paste);
 
   m_batch_clear = new QAction(tr("&Clear"), m_uiForm.batch_table);
   m_uiForm.batch_table->addAction(m_batch_clear);
-  connect(m_batch_clear, SIGNAL(activated()), this, SLOT(clearBatchTable()));
+  connect(m_batch_clear, SIGNAL(triggered()), this, SLOT(clearBatchTable()));
 
   // Main Logging
   m_uiForm.logging_field->attachLoggingChannel();
@@ -684,7 +684,7 @@ void SANSRunWindow::readSettings() {
                 << "\nFound previous user mask file "
                 << m_uiForm.userfile_edit->text().toStdString()
                 << "\nFound instrument definition directory "
-                << m_ins_defdir.toStdString() << std::endl;
+                << m_ins_defdir.toStdString() << '\n';
 }
 /** Sets the states of the checkboxes in the save box using those
 * in the passed QSettings object
@@ -752,7 +752,7 @@ QString SANSRunWindow::runReduceScriptFunction(const QString &pycode) {
   if (!m_have_reducemodule) {
     return QString();
   }
-  g_log.debug() << "Executing Python: " << pycode.toStdString() << std::endl;
+  g_log.debug() << "Executing Python: " << pycode.toStdString() << '\n';
 
   const static QString PYTHON_SEP("C++runReduceScriptFunctionC++");
   QString code_torun = pycode + ";print '" + PYTHON_SEP + "p'";
@@ -1664,8 +1664,7 @@ void SANSRunWindow::setGeometryDetails() {
     return;
   }
 
-  const std::set<detid_t> &dets =
-      monitorWs->getSpectrum(monitorWsIndex)->getDetectorIDs();
+  const auto &dets = monitorWs->getSpectrum(monitorWsIndex).getDetectorIDs();
   if (dets.empty())
     return;
 

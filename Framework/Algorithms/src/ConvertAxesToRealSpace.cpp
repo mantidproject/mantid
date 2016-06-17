@@ -19,16 +19,6 @@ using namespace Mantid::DataObjects;
 DECLARE_ALGORITHM(ConvertAxesToRealSpace)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-ConvertAxesToRealSpace::ConvertAxesToRealSpace() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-ConvertAxesToRealSpace::~ConvertAxesToRealSpace() {}
-
-//----------------------------------------------------------------------------------------------
 
 /// Algorithm's name
 const std::string ConvertAxesToRealSpace::name() const {
@@ -171,7 +161,7 @@ void ConvertAxesToRealSpace::exec() {
       }
     } catch (Exception::NotFoundError) {
       g_log.debug() << "Could not find detector for workspace index " << i
-                    << std::endl;
+                    << '\n';
       failedCount++;
       // flag this is the datavector
       dataVector[i].horizontalValue = std::numeric_limits<double>::min();
@@ -186,8 +176,7 @@ void ConvertAxesToRealSpace::exec() {
   }
 
   g_log.warning() << "Could not find detector for " << failedCount
-                  << " spectra, see the debug log for more details."
-                  << std::endl;
+                  << " spectra, see the debug log for more details.\n";
 
   // set up the axes on the output workspace
   MantidVecPtr x, y;
@@ -255,7 +244,7 @@ void ConvertAxesToRealSpace::exec() {
     // using -1 as a flag for could not find detector
     if ((xIndex == -1) || (yIndex == -1)) {
       // do nothing the detector could not be found
-      g_log.warning() << "here " << i << std::endl;
+      g_log.warning() << "here " << i << '\n';
     } else {
       // update the data
       MantidVec &yVec = outputWs->dataY(yIndex);

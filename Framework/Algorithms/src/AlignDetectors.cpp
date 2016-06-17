@@ -329,8 +329,8 @@ void AlignDetectors::exec() {
     PARALLEL_START_INTERUPT_REGION
     try {
       // Get the input spectrum number at this workspace index
-      auto inSpec = inputWS->getSpectrum(size_t(i));
-      auto toDspacing = converter.getConversionFunc(inSpec->getDetectorIDs());
+      auto &inSpec = inputWS->getSpectrum(size_t(i));
+      auto toDspacing = converter.getConversionFunc(inSpec.getDetectorIDs());
 
       // Get references to the x data
       MantidVec &xOut = outputWS->dataX(i);
@@ -339,13 +339,13 @@ void AlignDetectors::exec() {
       // because in the case
       // where the input & output workspaces are the same, it might move if the
       // vectors were shared.
-      const MantidVec &xIn = inSpec->readX();
+      const MantidVec &xIn = inSpec.readX();
 
       std::transform(xIn.begin(), xIn.end(), xOut.begin(), toDspacing);
 
       // Copy the Y&E data
-      outputWS->dataY(i) = inSpec->readY();
-      outputWS->dataE(i) = inSpec->readE();
+      outputWS->dataY(i) = inSpec.readY();
+      outputWS->dataE(i) = inSpec.readE();
 
     } catch (Exception::NotFoundError &) {
       // Zero the data in this case
@@ -388,8 +388,8 @@ void AlignDetectors::execEvent() {
     PARALLEL_START_INTERUPT_REGION
 
     auto toDspacing = converter.getConversionFunc(
-        outputWS->getSpectrum(size_t(i))->getDetectorIDs());
-    outputWS->getEventList(i).convertTof(toDspacing);
+        outputWS->getSpectrum(size_t(i)).getDetectorIDs());
+    outputWS->getSpectrum(i).convertTof(toDspacing);
 
     progress.report();
     PARALLEL_END_INTERUPT_REGION

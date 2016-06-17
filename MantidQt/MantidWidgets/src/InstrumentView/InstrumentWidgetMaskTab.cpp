@@ -208,38 +208,38 @@ InstrumentWidgetMaskTab::InstrumentWidgetMaskTab(InstrumentWidget *instrWidget)
       new QAction("As Detector Mask to workspace", this);
   m_save_as_workspace_exclude->setToolTip(
       "Save current detector mask to mask workspace.");
-  connect(m_save_as_workspace_exclude, SIGNAL(activated()), this,
+  connect(m_save_as_workspace_exclude, SIGNAL(triggered()), this,
           SLOT(saveMaskToWorkspace()));
 
   m_save_as_workspace_include =
       new QAction("As Detector ROI to workspace", this);
   m_save_as_workspace_include->setToolTip(
       "Save current detector mask as ROI to mask workspace.");
-  connect(m_save_as_workspace_include, SIGNAL(activated()), this,
+  connect(m_save_as_workspace_include, SIGNAL(triggered()), this,
           SLOT(saveInvertedMaskToWorkspace()));
 
   m_save_as_file_exclude = new QAction("As Detector Mask to file", this);
   m_save_as_file_exclude->setToolTip(
       "Save current detector mask to mask file.");
-  connect(m_save_as_file_exclude, SIGNAL(activated()), this,
+  connect(m_save_as_file_exclude, SIGNAL(triggered()), this,
           SLOT(saveMaskToFile()));
 
   m_save_as_file_include = new QAction("As Detector ROI to file", this);
   m_save_as_file_include->setToolTip("Save current mask as ROI to mask file.");
-  connect(m_save_as_file_include, SIGNAL(activated()), this,
+  connect(m_save_as_file_include, SIGNAL(triggered()), this,
           SLOT(saveInvertedMaskToFile()));
 
   m_save_as_cal_file_exclude =
       new QAction("As Detector Mask to cal file", this);
   m_save_as_cal_file_exclude->setToolTip(
       "Save current detector mask to cal file.");
-  connect(m_save_as_cal_file_exclude, SIGNAL(activated()), this,
+  connect(m_save_as_cal_file_exclude, SIGNAL(triggered()), this,
           SLOT(saveMaskToCalFile()));
 
   m_save_as_cal_file_include = new QAction("As Detector ROI to cal file", this);
   m_save_as_cal_file_include->setToolTip(
       "Save current detector mask as ROI to cal file.");
-  connect(m_save_as_cal_file_include, SIGNAL(activated()), this,
+  connect(m_save_as_cal_file_include, SIGNAL(triggered()), this,
           SLOT(saveInvertedMaskToCalFile()));
 
   m_save_as_table_xrange_exclude =
@@ -249,29 +249,29 @@ InstrumentWidgetMaskTab::InstrumentWidgetMaskTab(InstrumentWidget *instrWidget)
       "The name of output table workspace is 'MaskBinTable'. "
       "If the output table workspace has alrady exist, then "
       "the newly masked detectors will be added to output workspace.");
-  connect(m_save_as_table_xrange_exclude, SIGNAL(activated()), this,
+  connect(m_save_as_table_xrange_exclude, SIGNAL(triggered()), this,
           SLOT(saveMaskToTable()));
 
   m_save_group_file_include = new QAction("As include group to file", this);
   m_save_group_file_include->setToolTip(
       "Save current mask as include group to a file.");
-  connect(m_save_group_file_include, SIGNAL(activated()), this,
+  connect(m_save_group_file_include, SIGNAL(triggered()), this,
           SLOT(saveIncludeGroupToFile()));
 
   m_save_group_file_exclude = new QAction("As exclude group to file", this);
   m_save_group_file_exclude->setToolTip(
       "Save current mask as exclude group to a file.");
-  connect(m_save_group_file_exclude, SIGNAL(activated()), this,
+  connect(m_save_group_file_exclude, SIGNAL(triggered()), this,
           SLOT(saveExcludeGroupToFile()));
 
   m_extract_to_workspace = new QAction("Extract detectors to workspace", this);
   m_extract_to_workspace->setToolTip("Extract detectors to workspace.");
-  connect(m_extract_to_workspace, SIGNAL(activated()), this,
+  connect(m_extract_to_workspace, SIGNAL(triggered()), this,
           SLOT(extractDetsToWorkspace()));
 
   m_sum_to_workspace = new QAction("Sum detectors to workspace", this);
   m_sum_to_workspace->setToolTip("Sum detectors to workspace.");
-  connect(m_sum_to_workspace, SIGNAL(activated()), this,
+  connect(m_sum_to_workspace, SIGNAL(triggered()), this,
           SLOT(sumDetsToWorkspace()));
 
   // Save button and its menus

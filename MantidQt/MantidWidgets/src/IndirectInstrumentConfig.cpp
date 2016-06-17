@@ -177,8 +177,7 @@ void IndirectInstrumentConfig::setInstrument(const QString &instrumentName) {
     m_instrumentSelector->setCurrentIndex(index);
   } else {
     g_log.information() << "Instrument " << instrumentName.toStdString()
-                        << " not found in current list, using default"
-                        << std::endl;
+                        << " not found in current list, using default\n";
   }
 }
 
@@ -204,8 +203,7 @@ void IndirectInstrumentConfig::setAnalyser(const QString &analyserName) {
     m_uiForm.cbAnalyser->setCurrentIndex(index);
   } else {
     g_log.information() << "Analyser " << analyserName.toStdString()
-                        << " not found in current list, using default"
-                        << std::endl;
+                        << " not found in current list, using default\n";
   }
 }
 
@@ -231,8 +229,7 @@ void IndirectInstrumentConfig::setReflection(const QString &reflectionName) {
     m_uiForm.cbReflection->setCurrentIndex(index);
   } else {
     g_log.information() << "Reflection " << reflectionName.toStdString()
-                        << " not found in current list, using default"
-                        << std::endl;
+                        << " not found in current list, using default\n";
   }
 }
 
@@ -257,7 +254,7 @@ void IndirectInstrumentConfig::updateInstrumentConfigurations(
     return;
 
   g_log.debug() << "Loading configuration for instrument: "
-                << instrumentName.toStdString() << std::endl;
+                << instrumentName.toStdString() << '\n';
 
   bool analyserPreviousBlocking = m_uiForm.cbAnalyser->signalsBlocked();
   m_uiForm.cbAnalyser->blockSignals(true);
@@ -378,8 +375,7 @@ void IndirectInstrumentConfig::newInstrumentConfiguration() {
   g_log.debug() << "Instrument configuration: "
                 << "Instrument=" << getInstrumentName().toStdString()
                 << ", Analyser=" << getAnalyserName().toStdString()
-                << ", Reflection=" << getReflectionName().toStdString()
-                << std::endl;
+                << ", Reflection=" << getReflectionName().toStdString() << '\n';
 
   emit instrumentConfigurationUpdated(getInstrumentName(), getAnalyserName(),
                                       getReflectionName());

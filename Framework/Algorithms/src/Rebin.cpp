@@ -51,7 +51,7 @@ Rebin::rebinParamsFromInput(const std::vector<double> &inParams,
     inputWS.getXMinMax(xmin, xmax);
 
     logger.information() << "Using the current min and max as default " << xmin
-                         << ", " << xmax << std::endl;
+                         << ", " << xmax << '\n';
     rbParams.resize(3);
     rbParams[0] = xmin;
     rbParams[1] = inParams[0];
@@ -181,7 +181,7 @@ void Rebin::exec() {
         outputWS->setX(i, XValues_new);
 
         // Get a const event list reference. eventInputWS->dataY() doesn't work.
-        const EventList &el = eventInputWS->getEventList(i);
+        const EventList &el = eventInputWS->getSpectrum(i);
         MantidVec y_data, e_data;
         // The EventList takes care of histogramming.
         el.generateHistogram(*XValues_new, y_data, e_data);
@@ -219,8 +219,7 @@ void Rebin::exec() {
   { //------- Workspace2D or other MatrixWorkspace ---------------------------
 
     if (!isHist) {
-      g_log.information() << "Rebin: Converting Data to Histogram."
-                          << std::endl;
+      g_log.information() << "Rebin: Converting Data to Histogram.\n";
       Mantid::API::Algorithm_sptr ChildAlg =
           createChildAlgorithm("ConvertToHistogram");
       ChildAlg->initialize();
@@ -259,7 +258,7 @@ void Rebin::exec() {
         VectorHelper::rebin(XValues, YValues, YErrors, *XValues_new,
                             YValues_new, YErrors_new, dist);
       } catch (std::exception &ex) {
-        g_log.error() << "Error in rebin function: " << ex.what() << std::endl;
+        g_log.error() << "Error in rebin function: " << ex.what() << '\n';
         throw;
       }
 
@@ -288,8 +287,7 @@ void Rebin::exec() {
     }
 
     if (!isHist) {
-      g_log.information() << "Rebin: Converting Data back to Data Points."
-                          << std::endl;
+      g_log.information() << "Rebin: Converting Data back to Data Points.\n";
       Mantid::API::Algorithm_sptr ChildAlg =
           createChildAlgorithm("ConvertToPointData");
       ChildAlg->initialize();
