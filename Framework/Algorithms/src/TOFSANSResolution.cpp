@@ -72,18 +72,18 @@ double TOFSANSResolution::getTOFResolution(double wl) {
  * Return the effective pixel size in X, in meters
  */
 double TOFSANSResolution::getEffectiveXPixelSize() {
-    double pixel_size_x = getProperty("PixelSizeX");
-    return pixel_size_x / 1000.0;
+  double pixel_size_x = getProperty("PixelSizeX");
+  return pixel_size_x / 1000.0;
 }
 
 /*
  * Return the effective pixel size in Y, in meters
  */
 double TOFSANSResolution::getEffectiveYPixelSize() {
-    double pixel_size_y = getProperty("PixelSizeY");
-    return pixel_size_y / 1000.0;
+  double pixel_size_y = getProperty("PixelSizeY");
+  return pixel_size_y / 1000.0;
 }
-  
+
 void TOFSANSResolution::exec() {
   MatrixWorkspace_sptr iqWS = getProperty("InputWorkspace");
   MatrixWorkspace_sptr reducedWS = getProperty("ReducedWorkspace");
