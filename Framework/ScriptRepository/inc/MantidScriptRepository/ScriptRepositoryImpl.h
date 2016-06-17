@@ -7,8 +7,6 @@
 #include <map>
 #include <json/value.h>
 
-
-
 namespace Mantid {
 namespace API {
 
