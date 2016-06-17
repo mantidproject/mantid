@@ -5,6 +5,8 @@
 #include "MantidAPI/IWorkspaceProperty.h"
 #include "MantidKernel/ConfigService.h"
 
+#include <sstream>
+
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 
@@ -58,7 +60,7 @@ ListPropertyWidget::ListPropertyWidget(Mantid::Kernel::Property *prop,
 QString ListPropertyWidget::getValue() const {
   auto selectedItems = m_list->selectedItems();
   std::stringstream ss;
-  for (size_t i = 0; i < selectedItems.size(); ++i) {
+  for (int i = 0; i < selectedItems.size(); ++i) {
     if (i != 0) {
       ss << ",";
     }
