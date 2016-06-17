@@ -203,7 +203,8 @@ void MuonFitDataSelector::setWorkspaceDetails(const QString &runNumbers,
   }
 
   // Set initial run to be run number of the workspace loaded in Home tab
-  // and search for filenames
+  // and search for filenames. Use busy cursor until search finished.
+  setBusyState();
   m_ui.runs->setFileTextWithSearch(runs);
 }
 
@@ -527,6 +528,36 @@ QString MuonFitDataSelector::getRuns() const {
     return m_ui.runs->getText();
   } else {
     return "";
+  }
+}
+
+/**
+ * Slot: called when file finding finished. Resets the cursor for this widget
+ * back to the normal, non-busy state.
+ */
+void MuonFitDataSelector::unsetBusyState() {
+  disconnect(m_ui.runs, SIGNAL(fileInspectionFinished()), this,
+             SLOT(unsetBusyState()));
+  this->setCursor(Qt::ArrowCursor);
+  m_ui.groupBoxDataSelector->setEnabled(true);
+  m_ui.groupBoxGroups->setEnabled(true);
+  if (m_ui.groupBoxPeriods->isVisible()) {
+    m_ui.groupBoxPeriods->setEnabled(true);
+  }
+}
+
+/**
+ * Sets busy cursor and disables input while file search in progress.
+ * Connects up slot to reset busy state when search done.
+ */
+void MuonFitDataSelector::setBusyState() {
+  connect(m_ui.runs, SIGNAL(fileInspectionFinished()), this,
+          SLOT(unsetBusyState()));
+  this->setCursor(Qt::WaitCursor);
+  m_ui.groupBoxDataSelector->setEnabled(false);
+  m_ui.groupBoxGroups->setEnabled(false);
+  if (m_ui.groupBoxPeriods->isVisible()) {
+    m_ui.groupBoxPeriods->setEnabled(false);
   }
 }
 

@@ -125,12 +125,18 @@ private:
   void setFitType(IMuonFitDataSelector::FitType type);
   /// Check/uncheck "Combination" box and enable/disable text boxes
   void setPeriodCombination(bool on);
+  /// Set busy cursor and disable input
+  void setBusyState();
   /// Member - user interface
   Ui::MuonFitDataSelector m_ui;
   /// Map of group names to checkboxes
   QMap<QString, QCheckBox *> m_groupBoxes;
   /// Map of period names to checkboxes
   QMap<QString, QCheckBox *> m_periodBoxes;
+
+  private slots:
+  /// Set normal cursor and enable input
+  void unsetBusyState();
 };
 
 } // namespace MantidWidgets
