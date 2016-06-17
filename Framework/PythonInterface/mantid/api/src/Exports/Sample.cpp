@@ -33,7 +33,7 @@ void export_Sample() {
            "Returns True if this sample has a crystal structure, false "
            "otherwise")
       .def("setCrystalStructure", &Sample::setCrystalStructure,
-           (arg("self"), arg("newCrystalStructure")), arg("crystalStructure"),
+           (arg("self"), arg("newCrystalStructure")),
            "Assign a crystal structure object to the sample.")
       .def("clearCrystalStructure", &Sample::clearCrystalStructure, arg("self"),
            "Removes the internally stored crystal structure.")
