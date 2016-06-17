@@ -19,12 +19,9 @@
 #include <boost/scope_exit.hpp>
 #include <stdexcept>
 
-namespace MantidQt
-{
-namespace CustomInterfaces
-{
-namespace MuonAnalysisHelper
-{
+namespace MantidQt {
+namespace CustomInterfaces {
+namespace MuonAnalysisHelper {
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -34,16 +31,12 @@ using namespace Mantid::API;
  * @param field :: Field to set validator for
  * @param allowEmpty :: Whether the validator should accept empty inputs as well
  */
-void setDoubleValidator(QLineEdit* field, bool allowEmpty)
-{
-  QDoubleValidator* newValidator;
+void setDoubleValidator(QLineEdit *field, bool allowEmpty) {
+  QDoubleValidator *newValidator;
 
-  if (allowEmpty)
-  {
+  if (allowEmpty) {
     newValidator = new DoubleOrEmptyValidator(field);
-  }
-  else
-  {
+  } else {
     newValidator = new QDoubleValidator(field);
   }
 
@@ -51,20 +44,16 @@ void setDoubleValidator(QLineEdit* field, bool allowEmpty)
   field->setValidator(newValidator);
 }
 
-
 /**
- * Return a first period MatrixWorkspace in a run workspace. If the run workspace has one period
+ * Return a first period MatrixWorkspace in a run workspace. If the run
+ * workspace has one period
  * only - it is returned.
  * @param ws :: Run workspace
  */
-MatrixWorkspace_sptr firstPeriod(Workspace_sptr ws)
-{
-  if ( auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(ws) )
-  {
-    return boost::dynamic_pointer_cast<MatrixWorkspace>( group->getItem(0) );
-  }
-  else
-  {
+MatrixWorkspace_sptr firstPeriod(Workspace_sptr ws) {
+  if (auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(ws)) {
+    return boost::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(0));
+  } else {
     return boost::dynamic_pointer_cast<MatrixWorkspace>(ws);
   }
 }
@@ -74,14 +63,10 @@ MatrixWorkspace_sptr firstPeriod(Workspace_sptr ws)
  * @param ws :: Run wokspace
  * @return Number of periods
  */
-size_t numPeriods(Workspace_sptr ws)
-{
-  if ( auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(ws) )
-  {
+size_t numPeriods(Workspace_sptr ws) {
+  if (auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(ws)) {
     return group->size();
-  }
-  else
-  {
+  } else {
     return 1;
   }
 }
@@ -91,14 +76,12 @@ size_t numPeriods(Workspace_sptr ws)
  * @param runWs :: Run workspace to retrieve information from
  * @param out :: Stream to print to
  */
-void printRunInfo(MatrixWorkspace_sptr runWs, std::ostringstream& out)
-{
+void printRunInfo(MatrixWorkspace_sptr runWs, std::ostringstream &out) {
   // Remember current out stream format
   std::ios_base::fmtflags outFlags(out.flags());
   std::streamsize outPrecision(out.precision());
 
-  BOOST_SCOPE_EXIT((&out)(&outFlags)(&outPrecision))
-  {
+  BOOST_SCOPE_EXIT((&out)(&outFlags)(&outPrecision)) {
     // Restore the flags when exiting the function
     out.precision(outPrecision);
     out.flags(outFlags);
@@ -111,68 +94,57 @@ void printRunInfo(MatrixWorkspace_sptr runWs, std::ostringstream& out)
   out << "\nTitle: " << runWs->getTitle();
   out << "\nComment: " << runWs->getComment();
 
-  const Run& run = runWs->run();
+  const Run &run = runWs->run();
 
   Mantid::Kernel::DateAndTime start, end;
 
   // Add the start time for the run
   out << "\nStart: ";
-  if ( run.hasProperty("run_start") )
-  {
+  if (run.hasProperty("run_start")) {
     start = run.getProperty("run_start")->value();
     out << start.toSimpleString();
   }
 
   // Add the end time for the run
   out << "\nEnd: ";
-  if ( run.hasProperty("run_end") )
-  {
+  if (run.hasProperty("run_end")) {
     end = run.getProperty("run_end")->value();
     out << end.toSimpleString();
   }
 
   // Add the end time for the run
   out << "\nGood frames: ";
-  if ( run.hasProperty("goodfrm") )
-  {
+  if (run.hasProperty("goodfrm")) {
     out << run.getProperty("goodfrm")->value();
   }
 
   // Add counts to run information
   out << "\nCounts: ";
   double counts(0.0);
-  for (size_t i=0; i<runWs->getNumberHistograms(); ++i)
-  {
-    for (size_t j=0; j<runWs->blocksize(); ++j)
-    {
+  for (size_t i = 0; i < runWs->getNumberHistograms(); ++i) {
+    for (size_t j = 0; j < runWs->blocksize(); ++j) {
       counts += runWs->dataY(i)[j];
     }
   }
   // output this number to three decimal places
   out << std::setprecision(3);
-  out << counts/1000000 << " MEv";
+  out << counts / 1000000 << " MEv";
   out << std::setprecision(12);
   // Add average temperature.
   out << "\nAverage Temperature: ";
-  if ( run.hasProperty("Temp_Sample") )
-  {
+  if (run.hasProperty("Temp_Sample")) {
     // Filter the temperatures by the start and end times for the run.
     run.getProperty("Temp_Sample")->filterByTime(start, end);
 
     // Get average of the values
     double average = run.getPropertyAsSingleValue("Temp_Sample");
 
-    if (average != 0.0)
-    {
+    if (average != 0.0) {
       out << average;
-    }
-    else
-    {
+    } else {
       out << "Not set";
     }
-  }
-  else
-  {
+  } else {
     out << "Not found";
   }
 
@@ -199,8 +171,7 @@ void printRunInfo(MatrixWorkspace_sptr runWs, std::ostringstream& out)
  * Constructor
  * @param groupName :: The top-level group to use for all the widgets
  */
-WidgetAutoSaver::WidgetAutoSaver(const QString& groupName)
-{
+WidgetAutoSaver::WidgetAutoSaver(const QString &groupName) {
   m_settings.beginGroup(groupName);
 }
 
@@ -210,37 +181,33 @@ WidgetAutoSaver::WidgetAutoSaver(const QString& groupName)
  * @param name :: A name to use when saving/loading
  * @param defaultValue :: A value to load when the widget has not been saved yet
  */
-void WidgetAutoSaver::registerWidget(QWidget *widget, const QString& name, QVariant defaultValue)
-{
+void WidgetAutoSaver::registerWidget(QWidget *widget, const QString &name,
+                                     QVariant defaultValue) {
   m_registeredWidgets.push_back(widget);
   m_widgetNames[widget] = name;
   m_widgetDefaultValues[widget] = defaultValue;
-  m_widgetGroups[widget] = m_settings.group(); // Current group set up using beginGroup and endGroup
+  m_widgetGroups[widget] =
+      m_settings.group(); // Current group set up using beginGroup and endGroup
 }
 
 /**
- * Return a signal (which can be used instead of SIGNAL()) which is emmited when given widget is
+ * Return a signal (which can be used instead of SIGNAL()) which is emmited when
+ * given widget is
  * changed.
  * @param widget
- * @return A signal you can use instead of SIGNAL() to determine when widget value was changed
+ * @return A signal you can use instead of SIGNAL() to determine when widget
+ * value was changed
  */
-const char* WidgetAutoSaver::changedSignal(QWidget *widget)
-{
-  if ( qobject_cast<QLineEdit*>(widget) )
-  {
+const char *WidgetAutoSaver::changedSignal(QWidget *widget) {
+  if (qobject_cast<QLineEdit *>(widget)) {
     return SIGNAL(textChanged(QString));
-  }
-  else if ( qobject_cast<QCheckBox*>(widget) )
-  {
+  } else if (qobject_cast<QCheckBox *>(widget)) {
     return SIGNAL(stateChanged(int));
-  }
-  else if ( qobject_cast<QComboBox*>(widget) )
-  {
+  } else if (qobject_cast<QComboBox *>(widget)) {
     return SIGNAL(currentIndexChanged(int));
   }
   // ... add more as neccessary
-  else
-  {
+  else {
     throw std::runtime_error("Unsupported widget type");
   }
 }
@@ -249,12 +216,8 @@ const char* WidgetAutoSaver::changedSignal(QWidget *widget)
  * Enable/disable auto-saving of all the registered widgets.
  * @param enabled :: Whether auto-saving should be enabled or disabled
  */
-void WidgetAutoSaver::setAutoSaveEnabled(bool enabled)
-{
-  foreach (QWidget* w, m_registeredWidgets)
-  {
-    setAutoSaveEnabled(w, enabled);
-  }
+void WidgetAutoSaver::setAutoSaveEnabled(bool enabled) {
+  foreach (QWidget *w, m_registeredWidgets) { setAutoSaveEnabled(w, enabled); }
 }
 
 /**
@@ -262,8 +225,7 @@ void WidgetAutoSaver::setAutoSaveEnabled(bool enabled)
  * @param widget :: Registered widget for which to enable/disable auto-saving
  * @param enabled :: Whether auto-saving should be enabled or disabled
  */
-void WidgetAutoSaver::setAutoSaveEnabled(QWidget* widget, bool enabled)
-{
+void WidgetAutoSaver::setAutoSaveEnabled(QWidget *widget, bool enabled) {
   if (enabled)
     connect(widget, changedSignal(widget), this, SLOT(saveWidgetValue()));
   else
@@ -273,30 +235,24 @@ void WidgetAutoSaver::setAutoSaveEnabled(QWidget* widget, bool enabled)
 /**
  * Saves the value of the registered widget which signalled the slot
  */
-void WidgetAutoSaver::saveWidgetValue()
-{
+void WidgetAutoSaver::saveWidgetValue() {
   // Get the widget which called the slot
-  QWidget* sender = qobject_cast<QWidget*>(QObject::sender());
+  QWidget *sender = qobject_cast<QWidget *>(QObject::sender());
 
-  if(!sender)
+  if (!sender)
     throw std::runtime_error("Unable to save value of non-widget QObject");
 
-  const QString& senderName = m_widgetNames[sender];
-  const QString& senderGroup = m_widgetGroups[sender];
+  const QString &senderName = m_widgetNames[sender];
+  const QString &senderGroup = m_widgetGroups[sender];
 
   QSettings settings;
   settings.beginGroup(senderGroup);
 
-  if ( auto w = qobject_cast<QLineEdit*>(sender) )
-  {
+  if (auto w = qobject_cast<QLineEdit *>(sender)) {
     settings.setValue(senderName, w->text());
-  }
-  else if ( auto w = qobject_cast<QCheckBox*>(sender) )
-  {
+  } else if (auto w = qobject_cast<QCheckBox *>(sender)) {
     settings.setValue(senderName, w->isChecked());
-  }
-  else if ( auto w = qobject_cast<QComboBox*>(sender) )
-  {
+  } else if (auto w = qobject_cast<QComboBox *>(sender)) {
     settings.setValue(senderName, w->currentIndex());
   }
   // ... add more as neccessary
@@ -306,10 +262,9 @@ void WidgetAutoSaver::saveWidgetValue()
  * Load the auto-saved (or default) value of the given widget.
  * @param widget :: Widget to load saved value for
  */
-void WidgetAutoSaver::loadWidgetValue(QWidget *widget)
-{
-  const QString& name = m_widgetNames[widget];
-  const QString& group = m_widgetGroups[widget];
+void WidgetAutoSaver::loadWidgetValue(QWidget *widget) {
+  const QString &name = m_widgetNames[widget];
+  const QString &group = m_widgetGroups[widget];
   QVariant defaultValue = m_widgetDefaultValues[widget];
 
   QSettings settings;
@@ -317,16 +272,11 @@ void WidgetAutoSaver::loadWidgetValue(QWidget *widget)
 
   QVariant value = settings.value(name, defaultValue);
 
-  if ( auto w = qobject_cast<QLineEdit*>(widget) )
-  {
+  if (auto w = qobject_cast<QLineEdit *>(widget)) {
     w->setText(value.toString());
-  }
-  else if ( auto w = qobject_cast<QCheckBox*>(widget) )
-  {
+  } else if (auto w = qobject_cast<QCheckBox *>(widget)) {
     w->setChecked(value.toBool());
-  }
-  else if ( auto w = qobject_cast<QComboBox*>(widget) )
-  {
+  } else if (auto w = qobject_cast<QComboBox *>(widget)) {
     w->setCurrentIndex(value.toInt());
   }
   // ... add more as neccessary
@@ -335,31 +285,24 @@ void WidgetAutoSaver::loadWidgetValue(QWidget *widget)
 /**
  * Load the auto-saved (or default) value of all the registered widgets.
  */
-void WidgetAutoSaver::loadWidgetValues()
-{
-  foreach (QWidget* w, m_registeredWidgets)
-  {
-    loadWidgetValue(w);
-  }
+void WidgetAutoSaver::loadWidgetValues() {
+  foreach (QWidget *w, m_registeredWidgets) { loadWidgetValue(w); }
 }
 
 /**
- * Begin new-auto save group. All the registerWidget calls between this and next beginGroup will be
+ * Begin new-auto save group. All the registerWidget calls between this and next
+ * beginGroup will be
  * put in the given group.
  * @param name :: The name of the group
  */
-void WidgetAutoSaver::beginGroup(const QString &name)
-{
+void WidgetAutoSaver::beginGroup(const QString &name) {
   m_settings.beginGroup(name);
 }
 
 /**
  * Ends the scope of the previous begin group.
  */
-void WidgetAutoSaver::endGroup()
-{
-  m_settings.endGroup();
-}
+void WidgetAutoSaver::endGroup() { m_settings.endGroup(); }
 
 /**
  * Get a run label for the workspace.
@@ -489,8 +432,7 @@ findConsecutiveRuns(const std::vector<int> &runs) {
  * @param workspaces :: List of workspaces
  * @return Result workspace
  */
-Workspace_sptr sumWorkspaces(const std::vector<Workspace_sptr>& workspaces)
-{
+Workspace_sptr sumWorkspaces(const std::vector<Workspace_sptr> &workspaces) {
   if (workspaces.size() < 1)
     throw std::invalid_argument("Couldn't sum an empty list of workspaces");
 
@@ -503,24 +445,26 @@ Workspace_sptr sumWorkspaces(const std::vector<Workspace_sptr>& workspaces)
   };
 
   // Comparison function for doubles
-  auto numericalCompare = [](const std::string &first,
-                             const std::string &second) {
-    try {
-      return boost::lexical_cast<double>(first) <
-             boost::lexical_cast<double>(second);
-    } catch (boost::bad_lexical_cast & /*e*/) {
-      return false;
-    }
-  };
+  auto numericalCompare =
+      [](const std::string &first, const std::string &second) {
+        try {
+          return boost::lexical_cast<double>(first) <
+                 boost::lexical_cast<double>(second);
+        } catch (boost::bad_lexical_cast & /*e*/) {
+          return false;
+        }
+      };
 
   // Range of log values
   auto startRange = findLogRange(workspaces, "run_start", dateCompare);
   auto endRange = findLogRange(workspaces, "run_end", dateCompare);
   auto tempRange = findLogRange(workspaces, "sample_temp", numericalCompare);
-  auto fieldRange = findLogRange(workspaces, "sample_magn_field", numericalCompare);
+  auto fieldRange =
+      findLogRange(workspaces, "sample_magn_field", numericalCompare);
 
   // Create accumulator workspace by cloning the first one from the list
-  IAlgorithm_sptr cloneAlg = AlgorithmManager::Instance().create("CloneWorkspace");
+  IAlgorithm_sptr cloneAlg =
+      AlgorithmManager::Instance().create("CloneWorkspace");
   cloneAlg->setLogging(false);
   cloneAlg->setRethrows(true);
   cloneAlg->setPropertyValue("InputWorkspace", firstEntry.name());
@@ -565,32 +509,30 @@ Workspace_sptr sumWorkspaces(const std::vector<Workspace_sptr>& workspaces)
 }
 
 /*
- * Validates and returns a double value. If it is not invalid, the widget is set to default value,
+ * Validates and returns a double value. If it is not invalid, the widget is set
+ * to default value,
  * appropriate warning is printed and default value is returned.
  * @param field :: Field to get value from
  * @param defaultValue :: Default value to return/set if field value is invalid
  * @param valueDescr :: Description of the value
  * @param log :: Log to print warning to in case value is invalid
- * @return Value if field is valid, default value otherwise. If default value is empty, EMPTY_DBL() is returned
+ * @return Value if field is valid, default value otherwise. If default value is
+ * empty, EMPTY_DBL() is returned
  */
-double getValidatedDouble(QLineEdit* field, const QString& defaultValue,
-                          const QString& valueDescr, Logger& log)
-{
+double getValidatedDouble(QLineEdit *field, const QString &defaultValue,
+                          const QString &valueDescr, Logger &log) {
   bool ok;
   double value = field->text().toDouble(&ok);
 
-  if (!ok)
-  {
-    log.warning() << "The value of " << valueDescr.toStdString() << " is invalid. ";
+  if (!ok) {
+    log.warning() << "The value of " << valueDescr.toStdString()
+                  << " is invalid. ";
     log.warning() << "Reset to default.\n";
     field->setText(defaultValue);
 
-    if(defaultValue.isEmpty())
-    {
+    if (defaultValue.isEmpty()) {
       return Mantid::EMPTY_DBL();
-    }
-    else
-    {
+    } else {
       return defaultValue.toDouble();
     }
   }
@@ -599,37 +541,34 @@ double getValidatedDouble(QLineEdit* field, const QString& defaultValue,
 }
 
 /**
- * Makes sure the specified workspaces are in specified group. If group exists already - missing
- * workspaces are added to it, otherwise new group is created. If ws exists in ADS under groupName,
+ * Makes sure the specified workspaces are in specified group. If group exists
+ * already - missing
+ * workspaces are added to it, otherwise new group is created. If ws exists in
+ * ADS under groupName,
  * and it is not a group - it's overwritten.
  * @param groupName :: Name of the group workspaces should be in
  * @param inputWorkspaces :: Names of the workspaces to group
  */
-void groupWorkspaces(const std::string& groupName, const std::vector<std::string>& inputWorkspaces)
-{
-  auto& ads = AnalysisDataService::Instance();
+void groupWorkspaces(const std::string &groupName,
+                     const std::vector<std::string> &inputWorkspaces) {
+  auto &ads = AnalysisDataService::Instance();
 
   WorkspaceGroup_sptr group;
-  if (ads.doesExist(groupName))
-  {
+  if (ads.doesExist(groupName)) {
     group = ads.retrieveWS<WorkspaceGroup>(groupName);
   }
 
-  if(group)
-  {
+  if (group) {
     // Exists and is a group -> add missing workspaces to it
-    for (auto it = inputWorkspaces.begin(); it != inputWorkspaces.end(); ++it)
-    {
-      if (!group->contains(*it))
-      {
+    for (auto it = inputWorkspaces.begin(); it != inputWorkspaces.end(); ++it) {
+      if (!group->contains(*it)) {
         group->add(*it);
       }
     }
-  }
-  else
-  {
+  } else {
     // Doesn't exist or isn't a group -> create/overwrite
-    IAlgorithm_sptr groupingAlg = AlgorithmManager::Instance().create("GroupWorkspaces");
+    IAlgorithm_sptr groupingAlg =
+        AlgorithmManager::Instance().create("GroupWorkspaces");
     groupingAlg->setProperty("InputWorkspaces", inputWorkspaces);
     groupingAlg->setPropertyValue("OutputWorkspace", groupName);
     groupingAlg->execute();

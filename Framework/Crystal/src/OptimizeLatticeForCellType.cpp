@@ -111,8 +111,7 @@ void OptimizeLatticeForCellType::exec() {
         runWS[count]->addPeak(peak);
         run = peak.getRunNumber();
         AnalysisDataService::Instance().addOrReplace(
-            boost::lexical_cast<std::string>(run) + ws->getName(),
-            runWS[count]);
+            std::to_string(run) + ws->getName(), runWS[count]);
       } else {
         runWS[count]->addPeak(peak);
       }
@@ -143,7 +142,6 @@ void OptimizeLatticeForCellType::exec() {
     fit_alg->setProperty("InputWorkspace", peakWS);
     fit_alg->setProperty("CostFunction", "Unweighted least squares");
     fit_alg->setProperty("CreateOutput", true);
-    fit_alg->setProperty("Output", "fit");
     fit_alg->executeAsChildAlg();
 
     double chisq = fit_alg->getProperty("OutputChi2overDoF");
@@ -191,7 +189,7 @@ void OptimizeLatticeForCellType::exec() {
     AnalysisDataService::Instance().remove("_peaks");
     if (perRun) {
       std::string outputdir = getProperty("OutputDirectory");
-      if (outputdir[outputdir.size() - 1] != '/')
+      if (outputdir.back() != '/')
         outputdir += "/";
       // Save Peaks
       Mantid::API::IAlgorithm_sptr savePks_alg =

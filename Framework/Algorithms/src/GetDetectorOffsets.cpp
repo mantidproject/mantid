@@ -23,14 +23,6 @@ using namespace API;
 using std::size_t;
 using namespace DataObjects;
 
-/// Constructor
-GetDetectorOffsets::GetDetectorOffsets()
-    : API::Algorithm(), m_Xmin(DBL_MAX), m_Xmax(-DBL_MIN), m_maxOffset(0.),
-      m_dreference(0.), m_dideal(0.), m_step(0.) {}
-
-/// Destructor
-GetDetectorOffsets::~GetDetectorOffsets() {}
-
 //-----------------------------------------------------------------------------------------
 /** Initialisation method. Declares properties to be used in algorithm.
  */
@@ -131,7 +123,7 @@ void GetDetectorOffsets::exec() {
     }
 
     // Get the list of detectors in this pixel
-    const auto &dets = inputW->getSpectrum(wi)->getDetectorIDs();
+    const auto &dets = inputW->getSpectrum(wi).getDetectorIDs();
 
     // Most of the exec time is in FitSpectra, so this critical block should not
     // be a problem.

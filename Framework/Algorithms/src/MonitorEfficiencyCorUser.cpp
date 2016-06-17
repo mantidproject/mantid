@@ -17,17 +17,6 @@ using namespace Geometry;
 DECLARE_ALGORITHM(MonitorEfficiencyCorUser)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-MonitorEfficiencyCorUser::MonitorEfficiencyCorUser()
-    : m_inputWS(), m_outputWS(), m_Ei(.0), m_monitorCounts(0) {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-MonitorEfficiencyCorUser::~MonitorEfficiencyCorUser() {}
-
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 
@@ -132,7 +121,7 @@ MonitorEfficiencyCorUser::calculateFormulaValue(const std::string &formula,
     p.SetExpr(formula);
     double eff = p.Eval();
     g_log.debug() << "Formula: " << formula << " with: " << energy
-                  << "evaluated to: " << eff << std::endl;
+                  << "evaluated to: " << eff << '\n';
     return eff;
 
   } catch (mu::Parser::exception_type &e) {

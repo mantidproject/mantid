@@ -204,7 +204,7 @@ void DetectorEfficiencyCor::correctForEfficiency(int64_t spectraIn) {
 
   // get a pointer to the detectors that created the spectrum
   const std::set<detid_t> &dets =
-      m_inputWS->getSpectrum(spectraIn)->getDetectorIDs();
+      m_inputWS->getSpectrum(spectraIn).getDetectorIDs();
   const double ndets(static_cast<double>(dets.size())); // We correct each pixel
                                                         // so make sure we
                                                         // average the
@@ -447,7 +447,7 @@ void DetectorEfficiencyCor::logErrors(size_t totalNDetectors) const {
   if (!m_spectraSkipped.empty()) {
     g_log.warning() << "There were " << nspecs
                     << " spectra that could not be corrected out of total: "
-                    << totalNDetectors << std::endl;
+                    << totalNDetectors << '\n';
     g_log.warning() << "Their spectra were nullified\n";
     g_log.debug() << " Nullified spectra numbers: ";
     auto itend = m_spectraSkipped.end();

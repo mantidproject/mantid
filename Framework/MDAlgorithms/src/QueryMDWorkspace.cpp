@@ -58,16 +58,6 @@ whichNormalisation(const std::string &strNormalisation) {
   return requestedNormalisation;
 }
 
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-QueryMDWorkspace::QueryMDWorkspace() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-QueryMDWorkspace::~QueryMDWorkspace() {}
-
 /// Initialise the properties
 void QueryMDWorkspace::init() {
   declareProperty(make_unique<WorkspaceProperty<IMDWorkspace>>(

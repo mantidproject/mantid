@@ -314,9 +314,7 @@ protected:
     return (m_quoteString) ? std::string("\"" + str + "\"") : str;
   }
   /// Apply if int
-  std::string apply(const int &i) const override {
-    return boost::lexical_cast<std::string>(i);
-  }
+  std::string apply(const int &i) const override { return std::to_string(i); }
   /// Apply if double
   std::string apply(const double &d) const override {
     return boost::lexical_cast<std::string>(d);
@@ -572,7 +570,7 @@ protected:
     }
     if (m_value.size() > 2) {
       // check if the value is in barckets (...)
-      if (m_value[0] == '(' && m_value[m_value.size() - 1] == ')') {
+      if (m_value.front() == '(' && m_value.back() == ')') {
         m_value.erase(0, 1);
         m_value.erase(m_value.size() - 1);
       }
@@ -717,7 +715,7 @@ void IFunction::setMatrixWorkspace(
     const Geometry::ParameterMap &paramMap = workspace->instrumentParameters();
 
     Geometry::IDetector_const_sptr det;
-    size_t numDetectors = workspace->getSpectrum(wi)->getDetectorIDs().size();
+    size_t numDetectors = workspace->getSpectrum(wi).getDetectorIDs().size();
     if (numDetectors > 1) {
       // If several detectors are on this workspace index, just use the ID of
       // the first detector
@@ -725,7 +723,7 @@ void IFunction::setMatrixWorkspace(
       // and not the group. Ask Roman.
       Instrument_const_sptr inst = workspace->getInstrument();
       det = inst->getDetector(
-          *workspace->getSpectrum(wi)->getDetectorIDs().begin());
+          *workspace->getSpectrum(wi).getDetectorIDs().begin());
     } else
       // Get the detector (single) at this workspace index
       det = workspace->getDetector(wi);
@@ -776,12 +774,12 @@ void IFunction::setMatrixWorkspace(
                 g_log.debug()
                     << "For FitParameter " << parameterName(i)
                     << " centre of peak before any unit convertion is "
-                    << centreValue << std::endl;
+                    << centreValue << '\n';
                 centreValue =
                     convertValue(centreValue, centreUnit, workspace, wi);
                 g_log.debug() << "For FitParameter " << parameterName(i)
                               << " centre of peak after any unit convertion is "
-                              << centreValue << std::endl;
+                              << centreValue << '\n';
               }
 
               double paramValue = fitParam.getValue(centreValue);
@@ -797,11 +795,11 @@ void IFunction::setMatrixWorkspace(
                     fitParam.getLookUpTable().getYUnit(); // from table
                 g_log.debug() << "The FitParameter " << parameterName(i)
                               << " = " << paramValue
-                              << " before y-unit convertion" << std::endl;
+                              << " before y-unit convertion\n";
                 paramValue /= convertValue(1.0, resultUnit, workspace, wi);
                 g_log.debug() << "The FitParameter " << parameterName(i)
                               << " = " << paramValue
-                              << " after y-unit convertion" << std::endl;
+                              << " after y-unit convertion\n";
               } else {
                 // so from formula
 
@@ -828,19 +826,18 @@ void IFunction::setMatrixWorkspace(
                     g_log.debug() << "The FitParameter " << parameterName(i)
                                   << " = " << paramValue
                                   << " before result-unit convertion (using "
-                                  << resultUnitStr << ")" << std::endl;
+                                  << resultUnitStr << ")\n";
                     paramValue *= p.Eval();
                     g_log.debug() << "The FitParameter " << parameterName(i)
                                   << " = " << paramValue
-                                  << " after result-unit convertion"
-                                  << std::endl;
+                                  << " after result-unit convertion\n";
                   } catch (mu::Parser::exception_type &e) {
                     g_log.error()
                         << "Cannot convert formula unit to workspace unit"
                         << " Formula unit which cannot be passed is "
                         << resultUnitStr
                         << ". Muparser error message is: " << e.GetMsg()
-                        << std::endl;
+                        << '\n';
                   }
                 } // end if
               } // end trying to convert result-unit from formula or y-unit for

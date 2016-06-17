@@ -37,7 +37,7 @@ public:
 
 protected:
   // Assignment operator.
-  QwtWorkspaceBinData & operator=(const QwtWorkspaceBinData &);
+  QwtWorkspaceBinData &operator=(const QwtWorkspaceBinData &);
   /**
   Return the x value of data point i
   @param i :: Index
@@ -73,6 +73,5 @@ private:
   QString m_xTitle;
   /// A title for the Y axis
   QString m_yTitle;
-
 };
 #endif

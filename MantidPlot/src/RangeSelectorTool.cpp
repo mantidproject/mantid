@@ -36,6 +36,7 @@
 #include <QPoint>
 #include <QApplication>
 #include <QClipboard>
+#include <QKeyEvent>
 #include <QMessageBox>
 #include <QEvent>
 #include <QLocale>
@@ -279,8 +280,8 @@ void RangeSelectorTool::copySelection() {
   if (!d_selected_curve)
     return;
 
-  int start_point = QMIN(d_active_point, d_inactive_point);
-  int end_point = QMAX(d_active_point, d_inactive_point);
+  int start_point = qMin(d_active_point, d_inactive_point);
+  int end_point = qMax(d_active_point, d_inactive_point);
   QLocale locale = d_graph->plotWidget()->locale();
   QString text;
   for (int i = start_point; i <= end_point; i++) {
@@ -317,10 +318,10 @@ void RangeSelectorTool::clearSelection() {
       return;
     }
 
-    int start_point = QMIN(d_active_point, d_inactive_point);
+    int start_point = qMin(d_active_point, d_inactive_point);
     int start_row =
         (static_cast<DataCurve *>(d_selected_curve))->tableRow(start_point);
-    int end_point = QMAX(d_active_point, d_inactive_point);
+    int end_point = qMax(d_active_point, d_inactive_point);
     int end_row =
         (static_cast<DataCurve *>(d_selected_curve))->tableRow(end_point);
     int col = t->colIndex(d_selected_curve->title().text());
@@ -375,10 +376,10 @@ void RangeSelectorTool::pasteSelection() {
   QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
   QTextStream ts(&text, QIODevice::ReadOnly);
-  int start_point = QMIN(d_active_point, d_inactive_point);
+  int start_point = qMin(d_active_point, d_inactive_point);
   int start_row =
       (static_cast<DataCurve *>(d_selected_curve))->tableRow(start_point);
-  int end_point = QMAX(d_active_point, d_inactive_point);
+  int end_point = qMax(d_active_point, d_inactive_point);
   int end_row =
       (static_cast<DataCurve *>(d_selected_curve))->tableRow(end_point);
   int col = t->colIndex(d_selected_curve->title().text());
@@ -425,8 +426,8 @@ void RangeSelectorTool::setCurveRange() {
 
   if ((static_cast<PlotCurve *>(d_selected_curve))->type() != Graph::Function) {
     (static_cast<DataCurve *>(d_selected_curve))
-        ->setRowRange(QMIN(d_active_point, d_inactive_point),
-                      QMAX(d_active_point, d_inactive_point));
+        ->setRowRange(qMin(d_active_point, d_inactive_point),
+                      qMax(d_active_point, d_inactive_point));
     d_graph->updatePlot();
     d_graph->notifyChanges();
   }

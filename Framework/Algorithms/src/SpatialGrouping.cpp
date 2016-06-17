@@ -73,8 +73,8 @@ void SpatialGrouping::exec() {
   // Make a map key = spectrum number, value = detector at that spectrum
   m_detectors.clear();
   for (size_t i = 0; i < inputWorkspace->getNumberHistograms(); i++) {
-    const ISpectrum *spec = inputWorkspace->getSpectrum(i);
-    m_detectors[spec->getSpectrumNo()] = inputWorkspace->getDetector(i);
+    const auto &spec = inputWorkspace->getSpectrum(i);
+    m_detectors[spec.getSpectrumNo()] = inputWorkspace->getDetector(i);
   }
 
   // TODO: There is a confusion in this algorithm between detector IDs and
@@ -136,12 +136,12 @@ void SpatialGrouping::exec() {
   }
 
   if (m_groups.empty()) {
-    g_log.warning() << "No groups generated." << std::endl;
+    g_log.warning() << "No groups generated.\n";
     return;
   }
 
   // Create grouping XML file
-  g_log.information() << "Creating XML Grouping File." << std::endl;
+  g_log.information() << "Creating XML Grouping File.\n";
   std::vector<std::vector<detid_t>>::iterator grpIt;
   std::ofstream xml;
   std::string fname = getPropertyValue("Filename");
@@ -172,8 +172,8 @@ void SpatialGrouping::exec() {
       // smap.getDetectors((*grpIt)[i]);
       size_t workspaceIndex =
           inputWorkspace->getIndexFromSpectrumNumber((*grpIt)[i]);
-      const std::set<detid_t> &detIds =
-          inputWorkspace->getSpectrum(workspaceIndex)->getDetectorIDs();
+      const auto &detIds =
+          inputWorkspace->getSpectrum(workspaceIndex).getDetectorIDs();
       for (auto detId : detIds) {
         xml << "," << detId;
       }
@@ -185,7 +185,7 @@ void SpatialGrouping::exec() {
 
   xml.close();
 
-  g_log.information() << "Finished creating XML Grouping File." << std::endl;
+  g_log.information() << "Finished creating XML Grouping File.\n";
 }
 
 /**

@@ -599,10 +599,10 @@ void Graph::showAxis(int axis, int type, const QString &formatInfo,
 
   scale->setMargin(baselineDist);
   QPalette pal = scale->palette();
-  if (pal.color(QPalette::Active, QColorGroup::Foreground) != c)
-    pal.setColor(QColorGroup::Foreground, c);
-  if (pal.color(QPalette::Active, QColorGroup::Text) != labelsColor)
-    pal.setColor(QColorGroup::Text, labelsColor);
+  if (pal.color(QPalette::Active, QPalette::Foreground) != c)
+    pal.setColor(QPalette::Foreground, c);
+  if (pal.color(QPalette::Active, QPalette::Text) != labelsColor)
+    pal.setColor(QPalette::Text, labelsColor);
   scale->setPalette(pal);
 
   if (!labelsOn)
@@ -669,7 +669,7 @@ void Graph::setLabelsTextFormat(int axis, int type,
   if (type != ScaleDraw::Text && type != ScaleDraw::ColHeader)
     return;
 
-  QStringList list = QStringList();
+  QStringList list;
   if (type == ScaleDraw::Text) {
     if (!table)
       return;
@@ -777,7 +777,7 @@ void Graph::setAxisLabelsColor(int axis, const QColor &color) {
       dynamic_cast<QwtScaleWidget *>(d_plot->axisWidget(axis));
   if (scale) {
     QPalette pal = scale->palette();
-    pal.setColor(QColorGroup::Text, color);
+    pal.setColor(QPalette::Text, color);
     scale->setPalette(pal);
   }
 }
@@ -787,7 +787,7 @@ void Graph::setAxisColor(int axis, const QColor &color) {
       dynamic_cast<QwtScaleWidget *>(d_plot->axisWidget(axis));
   if (scale) {
     QPalette pal = scale->palette();
-    pal.setColor(QColorGroup::Foreground, color);
+    pal.setColor(QPalette::Foreground, color);
     scale->setPalette(pal);
   }
 }
@@ -796,7 +796,7 @@ QColor Graph::axisColor(int axis) {
   QwtScaleWidget *scale =
       dynamic_cast<QwtScaleWidget *>(d_plot->axisWidget(axis));
   if (scale)
-    return scale->palette().color(QPalette::Active, QColorGroup::Foreground);
+    return scale->palette().color(QPalette::Active, QPalette::Foreground);
   else
     return QColor(Qt::black);
 }
@@ -805,7 +805,7 @@ QColor Graph::axisLabelsColor(int axis) {
   QwtScaleWidget *scale =
       dynamic_cast<QwtScaleWidget *>(d_plot->axisWidget(axis));
   if (scale)
-    return scale->palette().color(QPalette::Active, QColorGroup::Text);
+    return scale->palette().color(QPalette::Active, QPalette::Text);
   else
     return QColor(Qt::black);
 }
@@ -1067,8 +1067,8 @@ void Graph::initScaleLimits() { // We call this function the first time we add
  */
 void Graph::niceLogScales(QwtPlot::Axis axis) {
   const QwtScaleDiv *scDiv = d_plot->axisScaleDiv(axis);
-  double start = QMIN(scDiv->lBound(), scDiv->hBound());
-  double end = QMAX(scDiv->lBound(), scDiv->hBound());
+  double start = qMin(scDiv->lBound(), scDiv->hBound());
+  double end = qMax(scDiv->lBound(), scDiv->hBound());
 
   // log scales can't represent zero or negative values, 1e-10 as a
   // low range is enough to display all data but still be plottable on
@@ -1156,8 +1156,8 @@ void Graph::setScale(QwtPlot::Axis axis, ScaleTransformation::Type scaleType) {
   }
 
   const QwtScaleDiv *scDiv = d_plot->axisScaleDiv(axis);
-  double start = QMIN(scDiv->lBound(), scDiv->hBound());
-  double end = QMAX(scDiv->lBound(), scDiv->hBound());
+  double start = qMin(scDiv->lBound(), scDiv->hBound());
+  double end = qMax(scDiv->lBound(), scDiv->hBound());
 
   ScaleEngine *scaleEng =
       dynamic_cast<ScaleEngine *>(d_plot->axisScaleEngine(axis));
@@ -1371,7 +1371,7 @@ void Graph::setAxisScale(int axis, double start, double end, int scaleType,
     max_min_intervals = 3;
   if (minorTicks > 1)
     max_min_intervals = minorTicks + 1;
-  QwtScaleDiv div = sc_engine->divideScale(QMIN(start, end), QMAX(start, end),
+  QwtScaleDiv div = sc_engine->divideScale(qMin(start, end), qMax(start, end),
                                            majorTicks, max_min_intervals, step);
   d_plot->setAxisMaxMajor(axis, majorTicks);
   d_plot->setAxisMaxMinor(axis, minorTicks);
@@ -1844,7 +1844,7 @@ void Graph::updateCurvesData(Table *w, const QString &yColName) {
 QColor Graph::canvasFrameColor() {
   QwtPlotCanvas *canvas = (QwtPlotCanvas *)d_plot->canvas();
   QPalette pal = canvas->palette();
-  return pal.color(QPalette::Active, QColorGroup::Foreground);
+  return pal.color(QPalette::Active, QPalette::Foreground);
 }
 
 int Graph::canvasFrameWidth() {
@@ -1857,11 +1857,11 @@ void Graph::setCanvasFrame(int width, const QColor &color) {
   QPalette pal = canvas->palette();
 
   if (canvas->lineWidth() == width &&
-      pal.color(QPalette::Active, QColorGroup::Foreground) == color)
+      pal.color(QPalette::Active, QPalette::Foreground) == color)
     return;
 
   canvas->setLineWidth(width);
-  pal.setColor(QColorGroup::Foreground, color);
+  pal.setColor(QPalette::Foreground, color);
   canvas->setPalette(pal);
   emit modifiedGraph();
 }
@@ -3358,7 +3358,7 @@ void Graph::zoom(bool on) {
   if (on)
     d_plot->canvas()->setCursor(cursor);
   else
-    d_plot->canvas()->setCursor(Qt::arrowCursor);
+    d_plot->canvas()->setCursor(Qt::ArrowCursor);
 }
 
 void Graph::zoomOut() {
@@ -3379,8 +3379,8 @@ void Graph::drawText(bool on) {
     d_plot->canvas()->setCursor(c);
     // d_plot->setCursor(c);
   } else {
-    d_plot->canvas()->setCursor(Qt::arrowCursor);
-    // d_plot->setCursor(Qt::arrowCursor);
+    d_plot->canvas()->setCursor(Qt::ArrowCursor);
+    // d_plot->setCursor(Qt::ArrowCursor);
   }
   drawTextOn = on;
 }
@@ -3768,16 +3768,15 @@ void Graph::setFrame(int width, const QColor &color) {
     return;
 
   QPalette pal = d_plot->palette();
-  pal.setColor(QColorGroup::Foreground, color);
+  pal.setColor(QPalette::Foreground, color);
   d_plot->setPalette(pal);
 
   d_plot->setLineWidth(width);
 }
 
 void Graph::setBackgroundColor(const QColor &color) {
-  QColorGroup cg;
   QPalette p = d_plot->palette();
-  p.setColor(QColorGroup::Window, color);
+  p.setColor(QPalette::Window, color);
   d_plot->setPalette(p);
 
   d_plot->setAutoFillBackground(true);
@@ -3935,7 +3934,6 @@ void Graph::showAxisTitleMenu() {
 
 void Graph::showAxisContextMenu(int axis) {
   QMenu menu(this);
-  menu.isCheckable();
 
   menu.addAction(getQPixmap("unzoom_xpm"), tr("&Rescale to show all"), this,
                  SLOT(setAutoScale()), tr("Ctrl+Shift+R"));
@@ -4025,8 +4023,8 @@ void Graph::copy(Graph *g) {
       if (scale) {
         scale->setMargin(plot->axisWidget(i)->margin());
         QPalette pal = scale->palette();
-        pal.setColor(QColorGroup::Foreground, g->axisColor(i));
-        pal.setColor(QColorGroup::Text, g->axisLabelsColor(i));
+        pal.setColor(QPalette::Foreground, g->axisColor(i));
+        pal.setColor(QPalette::Text, g->axisLabelsColor(i));
         scale->setPalette(pal);
         d_plot->setAxisFont(i, plot->axisFont(i));
 
@@ -4329,8 +4327,8 @@ void Graph::copy(Graph *g) {
 
     sc_engine->clone(se);
     const QwtScaleDiv *sd = plot->axisScaleDiv(i);
-    QwtScaleDiv div = sc_engine->divideScale(QMIN(sd->lBound(), sd->hBound()),
-                                             QMAX(sd->lBound(), sd->hBound()),
+    QwtScaleDiv div = sc_engine->divideScale(qMin(sd->lBound(), sd->hBound()),
+                                             qMax(sd->lBound(), sd->hBound()),
                                              majorTicks, minorTicks, step);
 
     if (se->testAttribute(QwtScaleEngine::Inverted))
@@ -5327,7 +5325,7 @@ void Graph::enablePanningMagnifier(bool on) {
 
   QwtPlotCanvas *cnvs = d_plot->canvas(); // canvas();
   if (on) {
-    cnvs->setCursor(Qt::pointingHandCursor);
+    cnvs->setCursor(Qt::PointingHandCursor);
     d_magnifier = new QwtPlotMagnifier(cnvs);
     // Disable the mouse button as it causes issues with the context menu
     d_magnifier->setMouseButton(Qt::NoButton);
@@ -5339,7 +5337,7 @@ void Graph::enablePanningMagnifier(bool on) {
     connect(d_panner, SIGNAL(panned(int, int)), multiLayer(),
             SLOT(notifyChanges()));
   } else {
-    cnvs->setCursor(Qt::arrowCursor);
+    cnvs->setCursor(Qt::ArrowCursor);
     d_magnifier = NULL;
     d_panner = NULL;
   }
@@ -5667,27 +5665,24 @@ void Graph::loadFromProject(const std::string &lines, ApplicationWindow *app,
   }
 
   if (tsv.selectLine("AxesNumberColors")) {
-    QStringList sl =
-        QString::fromUtf8(tsv.lineAsString("AxesNumberColors").c_str())
-            .split("\t");
+    QStringList sl = QString::fromUtf8(tsv.lineAsString("AxesNumberColors")
+                                           .c_str()).split("\t");
     sl.pop_front();
     for (int i = 0; i < sl.count(); ++i)
       setAxisLabelsColor(i, QColor(sl[i]));
   }
 
   if (tsv.selectLine("AxesTitleColors")) {
-    QStringList sl =
-        QString::fromUtf8(tsv.lineAsString("AxesTitleColors").c_str())
-            .split("\t");
+    QStringList sl = QString::fromUtf8(tsv.lineAsString("AxesTitleColors")
+                                           .c_str()).split("\t");
     sl.pop_front();
     for (int i = 0; i < sl.count(); ++i)
       setAxisTitleColor(i, QColor(sl[i]));
   }
 
   if (tsv.selectLine("AxesTitleAlignment")) {
-    QStringList sl =
-        QString::fromUtf8(tsv.lineAsString("AxesTitleAlignment").c_str())
-            .split("\t");
+    QStringList sl = QString::fromUtf8(tsv.lineAsString("AxesTitleAlignment")
+                                           .c_str()).split("\t");
     sl.pop_front();
     for (int i = 0; i < sl.count(); ++i)
       setAxisTitleAlignment(i, sl[i].toInt());
@@ -5814,9 +5809,8 @@ void Graph::loadFromProject(const std::string &lines, ApplicationWindow *app,
   }
 
   if (tsv.selectLine("EnabledTickLabels")) {
-    QStringList sl =
-        QString::fromUtf8(tsv.lineAsString("EnabledTickLabels").c_str())
-            .split("\t");
+    QStringList sl = QString::fromUtf8(tsv.lineAsString("EnabledTickLabels")
+                                           .c_str()).split("\t");
     sl.pop_front();
     for (int i = 0; i < sl.count(); ++i)
       enableAxisLabels(i, sl[i].toInt());
@@ -5828,9 +5822,8 @@ void Graph::loadFromProject(const std::string &lines, ApplicationWindow *app,
   }
 
   for (int i = 0; tsv.selectLine("ImageMarker", i); ++i) {
-    QStringList sl =
-        QString::fromUtf8(tsv.lineAsString("ImageMarker", i).c_str())
-            .split("\t");
+    QStringList sl = QString::fromUtf8(tsv.lineAsString("ImageMarker", i)
+                                           .c_str()).split("\t");
     insertImageMarker(sl, fileVersion);
   }
 
@@ -5848,9 +5841,8 @@ void Graph::loadFromProject(const std::string &lines, ApplicationWindow *app,
   }
 
   if (tsv.selectLine("LabelsRotation")) {
-    QStringList sl =
-        QString::fromUtf8(tsv.lineAsString("LabelsRotation").c_str())
-            .split("\t");
+    QStringList sl = QString::fromUtf8(tsv.lineAsString("LabelsRotation")
+                                           .c_str()).split("\t");
     setAxisLabelRotation(QwtPlot::xBottom, sl[1].toInt());
     setAxisLabelRotation(QwtPlot::xTop, sl[2].toInt());
   }
@@ -6398,9 +6390,8 @@ std::string Graph::saveToProject() {
     QwtScaleWidget *scale =
         dynamic_cast<QwtScaleWidget *>(d_plot->axisWidget(i));
     QColor col =
-        scale
-            ? scale->palette().color(QPalette::Active, QColorGroup::Foreground)
-            : QColor(Qt::black);
+        scale ? scale->palette().color(QPalette::Active, QPalette::Foreground)
+              : QColor(Qt::black);
     tsv << col.name();
   }
 
@@ -6408,9 +6399,9 @@ std::string Graph::saveToProject() {
   for (int i = 0; i < 4; ++i) {
     QwtScaleWidget *scale =
         dynamic_cast<QwtScaleWidget *>(d_plot->axisWidget(i));
-    QColor col =
-        scale ? scale->palette().color(QPalette::Active, QColorGroup::Text)
-              : QColor(Qt::black);
+    QColor col = scale
+                     ? scale->palette().color(QPalette::Active, QPalette::Text)
+                     : QColor(Qt::black);
     tsv << col.name();
   }
 
@@ -6637,8 +6628,8 @@ std::string Graph::saveScale() {
     if (!scDiv)
       return "";
 
-    tsv << QString::number(QMIN(scDiv->lBound(), scDiv->hBound()), 'g', 15);
-    tsv << QString::number(QMAX(scDiv->lBound(), scDiv->hBound()), 'g', 15);
+    tsv << QString::number(qMin(scDiv->lBound(), scDiv->hBound()), 'g', 15);
+    tsv << QString::number(qMax(scDiv->lBound(), scDiv->hBound()), 'g', 15);
 
     tsv << QString::number(d_user_step[i], 'g', 15);
     tsv << d_plot->axisMaxMajor(i);

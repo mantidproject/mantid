@@ -8,16 +8,14 @@
 
 #include <QDialog>
 
-namespace Ui
-{
-  class SelectFunctionDialog;
+namespace Ui {
+class SelectFunctionDialog;
 }
 
 /**
  * Select a function type out of a list of available ones.
  */
-class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS SelectFunctionDialog : public QDialog
-{
+class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS SelectFunctionDialog : public QDialog {
   Q_OBJECT
 
 public:
@@ -29,6 +27,7 @@ public:
   ~SelectFunctionDialog() override;
   /// Return selected function
   QString getFunction() const;
+
 protected:
   /// Ui elements form
   Ui::SelectFunctionDialog *m_form;
@@ -41,4 +40,3 @@ private:
 };
 
 #endif // MANTIDWIDGETS_SELECTFUNCTIONDIALOG_H_
-

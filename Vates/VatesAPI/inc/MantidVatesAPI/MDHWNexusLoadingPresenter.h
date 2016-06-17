@@ -4,17 +4,16 @@
 #include <vector>
 #include "MantidVatesAPI/MDHWLoadingPresenter.h"
 
-namespace Mantid
-{
-namespace VATES
-{
+namespace Mantid {
+namespace VATES {
 /**
     @class MDHWNexusLoadingPresenter
     For loading conversion of MDHW workspaces into render-able vtk objects.
 
     @date 08/04/2013
 
-    Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+    Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+   National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -36,8 +35,7 @@ namespace VATES
  */
 
 class MDLoadingView;
-class DLLExport MDHWNexusLoadingPresenter : public MDHWLoadingPresenter
-{
+class DLLExport MDHWNexusLoadingPresenter : public MDHWLoadingPresenter {
 public:
   MDHWNexusLoadingPresenter(std::unique_ptr<MDLoadingView> view,
                             const std::string fileName);
@@ -49,9 +47,10 @@ public:
   bool canReadFile() const override;
   std::string getWorkspaceTypeName() override;
   std::vector<int> getExtents();
+
 private:
   void loadWorkspace();
-  void loadWorkspace(ProgressAction& rebinningProgressUpdate);
+  void loadWorkspace(ProgressAction &rebinningProgressUpdate);
   const std::string m_filename;
   std::string m_wsTypeName;
   Mantid::API::IMDHistoWorkspace_sptr m_histoWs;

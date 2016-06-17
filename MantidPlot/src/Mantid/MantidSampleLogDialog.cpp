@@ -344,8 +344,7 @@ void MantidSampleLogDialog::init() {
                          Strings::toString(m_experimentInfoIndex) +
                          ") is not available. There are " +
                          Strings::toString(mei->getNumExperimentInfo()) +
-                         " in the workspace"
-                  << std::endl;
+                         " in the workspace\n";
         // Make a blank experiment info object
         m_ei = ExperimentInfo_const_sptr(new ExperimentInfo());
       } else
@@ -448,8 +447,9 @@ void MantidSampleLogDialog::init() {
                dynamic_cast<
                    Mantid::Kernel::PropertyWithValue<std::vector<double>> *>(
                    *pItr) ||
-               dynamic_cast<Mantid::Kernel::PropertyWithValue<std::vector<int>>
-                                *>(*pItr)) {
+               dynamic_cast<
+                   Mantid::Kernel::PropertyWithValue<std::vector<int>> *>(
+                   *pItr)) {
       treeItem->setText(1, "numeric array");
       treeItem->setData(
           1, Qt::UserRole,

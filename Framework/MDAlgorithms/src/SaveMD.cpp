@@ -21,23 +21,25 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 
+namespace {
+template <typename MDE, size_t nd>
+void prepareUpdate(MDBoxFlatTree &BoxFlatStruct, BoxController *bc,
+                   typename MDEventWorkspace<MDE, nd>::sptr ws,
+                   std::string filename) {
+  // remove all boxes from the DiskBuffer. DB will calculate boxes positions
+  // on HDD.
+  bc->getFileIO()->flushCache();
+  // flatten the box structure; this will remember boxes file positions in the
+  // box structure
+  BoxFlatStruct.initFlatStructure(ws, filename);
+}
+}
+
 namespace Mantid {
 namespace MDAlgorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SaveMD)
-
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-SaveMD::SaveMD() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-SaveMD::~SaveMD() {}
-
-//----------------------------------------------------------------------------------------------
 
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
@@ -92,12 +94,10 @@ void SaveMD::doSaveEvents(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   bool wsIsFileBacked = ws->isFileBacked();
   std::string filename = getPropertyValue("Filename");
   BoxController_sptr bc = ws->getBoxController();
+  auto copyFile =
+      wsIsFileBacked && !filename.empty() && filename != bc->getFilename();
   if (wsIsFileBacked) {
-    if (!filename.empty() && filename != bc->getFilename()) {
-      throw std::runtime_error("Algorithm cannot currently save a file-backed "
-                               "workspace to a new file. Please make "
-                               "a copy outside of Mantid");
-    } else if (makeFileBackend) {
+    if (makeFileBackend) {
       throw std::runtime_error(
           "MakeFileBacked selected but workspace is already file backed.");
     }
@@ -144,12 +144,14 @@ void SaveMD::doSaveEvents(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   //-----------------------------------------------------------------------------------------------------
   if (updateFileBackend) // the workspace is already file backed;
   {
-    // remove all boxes from the DiskBuffer. DB will calculate boxes positions
-    // on HDD.
-    bc->getFileIO()->flushCache();
-    // flatten the box structure; this will remember boxes file positions in the
-    // box structure
-    BoxFlatStruct.initFlatStructure(ws, filename);
+    prepareUpdate<MDE, nd>(BoxFlatStruct, bc.get(), ws, filename);
+  } else if (copyFile) {
+    // Update the original file
+    if (ws->fileNeedsUpdating()) {
+      prepareUpdate<MDE, nd>(BoxFlatStruct, bc.get(), ws, filename);
+      BoxFlatStruct.saveBoxStructure(filename);
+    }
+    Poco::File(bc->getFilename()).copyTo(filename);
   } else // not file backed;
   {
     // the boxes file positions are unknown and we need to calculate it.
@@ -214,7 +216,9 @@ void SaveMD::doSaveEvents(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   prog->resetNumSteps(8, 0.92, 1.00);
 
   // Save box structure;
-  BoxFlatStruct.saveBoxStructure(filename);
+  if (!copyFile) {
+    BoxFlatStruct.saveBoxStructure(filename);
+  }
 
   delete prog;
 

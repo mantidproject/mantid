@@ -306,8 +306,8 @@ PeaksWorkspace::peakInfo(Kernel::V3D qFrame, bool labCoords) const {
     }
 
     if (hasOneRunNumber) {
-      std::pair<std::string, std::string> runn(
-          "RunNumber", "   " + boost::lexical_cast<std::string>(runNum));
+      std::pair<std::string, std::string> runn("RunNumber",
+                                               "   " + std::to_string(runNum));
       Result.push_back(runn);
     }
 
@@ -321,7 +321,7 @@ PeaksWorkspace::peakInfo(Kernel::V3D qFrame, bool labCoords) const {
     Result.push_back(GRead);
 
     std::pair<std::string, std::string> SeqNum(
-        "Seq Num,1st=1", "    " + boost::lexical_cast<std::string>(seqNum + 1));
+        "Seq Num,1st=1", "    " + std::to_string(seqNum + 1));
     Result.push_back(SeqNum);
 
     oss << std::setw(12) << std::fixed << std::setprecision(3)
@@ -352,11 +352,11 @@ PeaksWorkspace::peakInfo(Kernel::V3D qFrame, bool labCoords) const {
       oss.clear();
 
       std::pair<std::string, std::string> row(
-          "Row", "    " + boost::lexical_cast<std::string>(peak->getRow()));
+          "Row", "    " + std::to_string(peak->getRow()));
       Result.push_back(row);
 
       std::pair<std::string, std::string> col(
-          "Col", "    " + boost::lexical_cast<std::string>(peak->getCol()));
+          "Col", "    " + std::to_string(peak->getCol()));
       Result.push_back(col);
 
       std::pair<std::string, std::string> bank("Bank",

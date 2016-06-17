@@ -168,7 +168,7 @@ void MergeRuns::buildAdditionTables() {
     table->reserve(nhist);
     for (int inWI = 0; inWI < static_cast<int>(nhist); inWI++) {
       // Get the set of detectors in the output
-      auto &inDets = ews->getEventList(inWI).getDetectorIDs();
+      auto &inDets = ews->getSpectrum(inWI).getDetectorIDs();
 
       bool done = false;
 
@@ -177,7 +177,7 @@ void MergeRuns::buildAdditionTables() {
       int outWI = inWI;
       if (outWI < lhs_nhist) // don't go out of bounds
       {
-        auto &outDets = lhs->getEventList(outWI).getDetectorIDs();
+        auto &outDets = lhs->getSpectrum(outWI).getDetectorIDs();
 
         // Checks that inDets is a subset of outDets
         if (std::includes(outDets.begin(), outDets.end(), inDets.begin(),
@@ -218,7 +218,7 @@ void MergeRuns::buildAdditionTables() {
         // NOTE: This can be SUPER SLOW!
         for (outWI = 0; outWI < lhs_nhist; outWI++) {
           std::set<detid_t> &outDets2 =
-              lhs->getEventList(outWI).getDetectorIDs();
+              lhs->getSpectrum(outWI).getDetectorIDs();
           // Another subset check
           if (std::includes(outDets2.begin(), outDets2.end(), inDets.begin(),
                             inDets.end())) {
@@ -282,11 +282,11 @@ void MergeRuns::execEvent() {
       int64_t inWI = WI.first;
       int64_t outWI = WI.second;
       if (outWI >= 0) {
-        outWS->getEventList(outWI) += addee->getEventList(inWI);
+        outWS->getSpectrum(outWI) += addee->getSpectrum(inWI);
       } else {
         // Add an entry to list
         outWS->getOrAddEventList(outWS->getNumberHistograms()) +=
-            addee->getEventList(inWI);
+            addee->getSpectrum(inWI);
       }
     }
 
@@ -421,14 +421,14 @@ MergeRuns::validateInputs(const std::vector<std::string> &inputWorkspaces) {
           inputWorkspaces[i]);
       if (!ws) {
         g_log.error() << "Input workspace " << inputWorkspaces[i]
-                      << " not found." << std::endl;
+                      << " not found.\n";
         throw Kernel::Exception::NotFoundError("Data Object",
                                                inputWorkspaces[i]);
       }
       inWS.push_back(ws);
     } catch (Exception::NotFoundError &) {
-      g_log.error() << "Input workspace " << inputWorkspaces[i] << " not found."
-                    << std::endl;
+      g_log.error() << "Input workspace " << inputWorkspaces[i]
+                    << " not found.\n";
       throw;
     }
     // Check that it has common binning

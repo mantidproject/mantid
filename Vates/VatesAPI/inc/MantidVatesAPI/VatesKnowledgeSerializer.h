@@ -4,35 +4,36 @@
 #include <boost/shared_ptr.hpp>
 #include <string>
 
-namespace Mantid
-{
+namespace Mantid {
 /// Forward Declarations;
-namespace Geometry
-{
+namespace Geometry {
 class MDImplicitFunction;
 }
-namespace API
-{
+namespace API {
 class IMDWorkspace;
 }
 
-namespace VATES
-{
+namespace VATES {
 
-//The workspace location may or may not be required. This type defines the options.
-enum LocationPolicy{LocationMandatory, LocationNotRequired};
+// The workspace location may or may not be required. This type defines the
+// options.
+enum LocationPolicy { LocationMandatory, LocationNotRequired };
 
 /**
 
- This type assists with the generation of well-formed xml meeting the xsd scehema. The individual components utilised here may not be able to form well-formed
+ This type assists with the generation of well-formed xml meeting the xsd
+ scehema. The individual components utilised here may not be able to form
+ well-formed
  xml in their own right and therefore do not have a toXMLString method.
 
- This implementation is based on a builder pattern using the create mechanism for xml string generation.
+ This implementation is based on a builder pattern using the create mechanism
+ for xml string generation.
 
  @author Owen Arnold, Tessella plc
  @date 14/12/2010
 
- Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+ Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+ National Laboratory & European Spallation Source
 
  This file is part of Mantid.
 
@@ -52,25 +53,25 @@ enum LocationPolicy{LocationMandatory, LocationNotRequired};
  File change history is stored at: <https://github.com/mantidproject/mantid>
  Code Documentation is available at: <http://doxygen.mantidproject.org> */
 
-class DLLExport VatesKnowledgeSerializer
-{
+class DLLExport VatesKnowledgeSerializer {
 
 private:
-
-  boost::shared_ptr<const Mantid::Geometry::MDImplicitFunction>  m_spFunction;
+  boost::shared_ptr<const Mantid::Geometry::MDImplicitFunction> m_spFunction;
   std::string m_wsLocationXML;
   std::string m_wsNameXML;
   std::string m_wsName;
   std::string m_geomXML;
-public:
 
+public:
   VatesKnowledgeSerializer();
 
   /// Set the implicit function to use called.
-  void setImplicitFunction(boost::shared_ptr<const Mantid::Geometry::MDImplicitFunction> spFunction);
+  void setImplicitFunction(
+      boost::shared_ptr<const Mantid::Geometry::MDImplicitFunction> spFunction);
 
   /// Set the workspace name to apply.
-  void setWorkspace(boost::shared_ptr<const Mantid::API::IMDWorkspace> workspace);
+  void
+  setWorkspace(boost::shared_ptr<const Mantid::API::IMDWorkspace> workspace);
 
   /// Set the workspace name to apply.
   void setWorkspaceName(std::string wsName);
@@ -82,10 +83,10 @@ public:
   std::string createXMLString() const;
 
   /// Get the underlying workspace name.
-  const std::string& getWorkspaceName() const;
+  const std::string &getWorkspaceName() const;
 
   /// Get the underlying workspace geometry.
-  const std::string& getWorkspaceGeometry() const;
+  const std::string &getWorkspaceGeometry() const;
 
   /// Determine if function information is available/set.
   bool hasFunctionInfo() const;
@@ -93,10 +94,6 @@ public:
   /// Determine if gemetry information is available/set.
   bool hasGeometryInfo() const;
 };
-
-
-
-
 }
 }
 #endif

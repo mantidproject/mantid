@@ -17,20 +17,16 @@ class QtProperty;
 class QtBrowserItem;
 class QVBoxLayout;
 
-namespace Mantid
-{
-  namespace API
-  {
-    class IFitFunction;
-    class IPeakFunction;
-    class CompositeFunction;
-  }
+namespace Mantid {
+namespace API {
+class IFitFunction;
+class IPeakFunction;
+class CompositeFunction;
+}
 }
 
-namespace MantidQt
-{
-namespace MantidWidgets
-{
+namespace MantidQt {
+namespace MantidWidgets {
 class PropertyHandler;
 
 class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS MuonFitPropertyBrowser
@@ -40,7 +36,7 @@ class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS MuonFitPropertyBrowser
 
 public:
   /// Constructor.
-  MuonFitPropertyBrowser(QWidget *parent = NULL, QObject* mantidui = NULL);  
+  MuonFitPropertyBrowser(QWidget *parent = NULL, QObject *mantidui = NULL);
   /// Initialise the layout.
   void init() override;
   /// Set the input workspace name
@@ -83,7 +79,7 @@ protected:
 private slots:
   void doubleChanged(QtProperty *prop) override;
 
-private:  
+private:
   /// Get the registered function names
   void populateFunctionNames() override;
   /// Check if the workspace can be used in the fit
@@ -96,6 +92,5 @@ private:
 
 } // MantidQt
 } // API
-
 
 #endif /*MUONFITPROPERTYBROWSER_H_*/

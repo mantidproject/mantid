@@ -94,7 +94,7 @@ public:
 
   /// the fitting hard work that a worker / thread will run
   void doFitting(const std::string &focusedRunNo,
-                 const std::string &ExpectedPeaks);
+                 const std::string &expectedPeaks);
 
   void runFittingAlgs(std::string FocusedFitPeaksTableName,
                       std::string FocusedWSName);
@@ -107,8 +107,10 @@ public:
   void plotFitPeaksCurves();
 
   void runEvaluateFunctionAlg(const std::string &bk2BkExpFunction,
-                              const std::string &InputName, const std::string &OutputName,
-                              const std::string &startX, const std::string &endX);
+                              const std::string &InputName,
+                              const std::string &OutputName,
+                              const std::string &startX,
+                              const std::string &endX);
 
   void runCropWorkspaceAlg(std::string workspaceName);
 
@@ -129,6 +131,15 @@ public:
                             const std::string &outputWorkspace);
 
   void setDataToClonedWS(std::string &current_WS, const std::string &cloned_WS);
+
+  void setBankItems();
+
+  void setRunNoItems(std::vector<std::string> runNumVector, bool multiRun);
+
+  void setDefaultBank(std::vector<std::string> splittedBaseName,
+                      QString selectedFile);
+
+  bool isDigit(std::string text);
 
 protected:
   void initialize();
@@ -289,10 +300,12 @@ private:
 
   // Methods related single peak fits
   virtual void startAsyncFittingWorker(const std::string &focusedRunNo,
-                                       const std::string &ExpectedPeaks);
+                                       const std::string &expectedPeaks);
+
+  std::string validateFittingexpectedPeaks(std::string &expectedPeaks) const;
 
   void inputChecksBeforeFitting(const std::string &focusedRunNo,
-                                const std::string &ExpectedPeaks);
+                                const std::string &expectedPeaks);
 
   void updateFittingDirVec(const std::string &bankDir,
                            const std::string &focusedFile, const bool multi_run,

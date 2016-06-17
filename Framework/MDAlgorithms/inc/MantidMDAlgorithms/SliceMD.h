@@ -47,9 +47,6 @@ public:
   //  considering for slicing
   //};
 
-  SliceMD();
-  ~SliceMD() override;
-
   /// Algorithm's name for identification
   const std::string name() const override { return "SliceMD"; };
   /// Summary of algorithms purpose

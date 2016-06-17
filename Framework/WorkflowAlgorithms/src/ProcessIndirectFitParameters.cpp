@@ -18,16 +18,6 @@ using namespace Kernel;
 DECLARE_ALGORITHM(ProcessIndirectFitParameters)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-ProcessIndirectFitParameters::ProcessIndirectFitParameters() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-ProcessIndirectFitParameters::~ProcessIndirectFitParameters() {}
-
-//----------------------------------------------------------------------------------------------
 
 /// Algorithms name for identification. @see Algorithm::name
 const std::string ProcessIndirectFitParameters::name() const {

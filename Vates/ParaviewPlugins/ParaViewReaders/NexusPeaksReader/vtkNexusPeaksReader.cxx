@@ -204,7 +204,9 @@ int vtkNexusPeaksReader::CanReadFile(const char* fname)
   }
   catch(std::exception& ex)
   {
-    std::cerr << "Could not open " << fileString << " as an PeaksWorkspace nexus file because of exception: " << ex.what() << std::endl;
+    std::cerr << "Could not open " << fileString
+              << " as an PeaksWorkspace nexus file because of exception: "
+              << ex.what() << '\n';
     // Clean up, if possible
     if (file)
       file->close();

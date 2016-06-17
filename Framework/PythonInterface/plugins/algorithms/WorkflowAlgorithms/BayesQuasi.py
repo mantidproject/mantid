@@ -1,4 +1,7 @@
 #pylint: disable=invalid-name,too-many-instance-attributes,too-many-branches,no-init
+import os
+import numpy as np
+
 from IndirectImport import *
 
 from mantid.api import (PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty, PropertyMode,
@@ -6,8 +9,7 @@ from mantid.api import (PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProper
 from mantid.kernel import StringListValidator, Direction
 from mantid.simpleapi import *
 from mantid import config, logger
-import os
-import numpy as np
+
 
 if is_supported_f2py_platform():
     QLr     = import_f2py("QLres")
@@ -364,7 +366,7 @@ class BayesQuasi(PythonAlgorithm):
             yProb = yPr0
             yProb = np.append(yProb,yPr1)
             yProb = np.append(yProb,yPr2)
-            probWs = CreateWorkspace(OutputWorkspace=probWS, DataX=xProb, DataY=yProb, DataE=eProb,\
+            CreateWorkspace(OutputWorkspace=probWS, DataX=xProb, DataY=yProb, DataE=eProb,\
                 Nspec=3, UnitX='MomentumTransfer')
             outWS = C2Fw(self._samWS[:-4],fname)
             if self._plot != 'None':

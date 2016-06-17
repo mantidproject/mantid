@@ -350,7 +350,7 @@ void Cylinder::print() const
   Quadratic::print();
   std::cout << "Axis ==" << Normal << " ";
   std::cout << "Centre == " << Centre << " ";
-  std::cout << "Radius == " << Radius << std::endl;
+  std::cout << "Radius == " << Radius << '\n';
   return;
 }
 
@@ -409,7 +409,7 @@ void Cylinder::getBoundingBox(double &xmax, double &ymax, double &zmax,
     xmax = ymax = zmax = DBL_MIN;
     for (std::vector<V3D>::const_iterator it = listOfPoints.begin();
          it != listOfPoints.end(); ++it) {
-      //			std::cout<<(*it)<<std::endl;
+      //			std::cout<<(*it)<<'\n';
       if ((*it)[0] < xmin)
         xmin = (*it)[0];
       if ((*it)[1] < ymin)

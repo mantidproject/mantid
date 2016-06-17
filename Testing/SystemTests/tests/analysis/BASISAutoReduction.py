@@ -2,10 +2,10 @@
 """
 System Test for BASIS autoreduction
 """
-from mantid.simpleapi import *
-
 import stresstesting
 import os
+
+from mantid.simpleapi import *
 
 class BASISAutoReductionTest(stresstesting.MantidStressTest):
 

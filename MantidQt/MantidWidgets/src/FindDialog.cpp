@@ -13,10 +13,8 @@
 #include <QGridLayout>
 #include <QVBoxLayout>
 
-
 FindDialog::FindDialog(ScriptEditor *editor, Qt::WindowFlags flags)
-  : FindReplaceDialog(editor, flags)
-{
+    : FindReplaceDialog(editor, flags) {
   setWindowTitle(tr("MantidPlot") + " - " + tr("Find"));
   initLayout();
 }

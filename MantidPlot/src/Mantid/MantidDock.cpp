@@ -20,6 +20,10 @@
 
 #include <Poco/Path.h>
 
+#ifdef MAKE_VATES
+#include "vtkPVDisplayInformation.h"
+#endif
+
 #include <algorithm>
 #include <sstream>
 
@@ -94,8 +98,8 @@ MantidDockWidget::MantidDockWidget(MantidUI *mui, ApplicationWindow *parent)
   m_loadMapper = new QSignalMapper(this);
   m_loadMapper->setMapping(liveDataAction, "StartLiveData");
   m_loadMapper->setMapping(loadFileAction, "Load");
-  connect(liveDataAction, SIGNAL(activated()), m_loadMapper, SLOT(map()));
-  connect(loadFileAction, SIGNAL(activated()), m_loadMapper, SLOT(map()));
+  connect(liveDataAction, SIGNAL(triggered()), m_loadMapper, SLOT(map()));
+  connect(loadFileAction, SIGNAL(triggered()), m_loadMapper, SLOT(map()));
   connect(m_loadMapper, SIGNAL(mapped(const QString &)), m_mantidUI,
           SLOT(showAlgorithmDialog(const QString &)));
   m_loadMenu->addAction(loadFileAction);
@@ -192,11 +196,11 @@ void MantidDockWidget::createWorkspaceMenuActions() {
   connect(m_colorFill, SIGNAL(triggered()), this, SLOT(drawColorFillPlot()));
 
   m_showDetectors = new QAction(tr("Show Detectors"), this);
-  connect(m_showDetectors, SIGNAL(activated()), this,
+  connect(m_showDetectors, SIGNAL(triggered()), this,
           SLOT(showDetectorTable()));
 
   m_showBoxData = new QAction(tr("Show Box Data Table"), this);
-  connect(m_showBoxData, SIGNAL(activated()), m_mantidUI,
+  connect(m_showBoxData, SIGNAL(triggered()), m_mantidUI,
           SLOT(importBoxDataTable()));
 
   m_showVatesGui = new QAction(tr("Show Vates Simple Interface"), this);
@@ -207,18 +211,18 @@ void MantidDockWidget::createWorkspaceMenuActions() {
         QSize(), QIcon::Normal, QIcon::Off);
     m_showVatesGui->setIcon(icon);
   }
-  connect(m_showVatesGui, SIGNAL(activated()), m_mantidUI,
+  connect(m_showVatesGui, SIGNAL(triggered()), m_mantidUI,
           SLOT(showVatesSimpleInterface()));
 
   m_showMDPlot = new QAction(tr("Plot MD"), this);
-  connect(m_showMDPlot, SIGNAL(activated()), m_mantidUI, SLOT(showMDPlot()));
+  connect(m_showMDPlot, SIGNAL(triggered()), m_mantidUI, SLOT(showMDPlot()));
 
   m_showListData = new QAction(tr("List Data"), this);
-  connect(m_showListData, SIGNAL(activated()), m_mantidUI,
+  connect(m_showListData, SIGNAL(triggered()), m_mantidUI,
           SLOT(showListData()));
 
   m_showSpectrumViewer = new QAction(tr("Show Spectrum Viewer"), this);
-  connect(m_showSpectrumViewer, SIGNAL(activated()), m_mantidUI,
+  connect(m_showSpectrumViewer, SIGNAL(triggered()), m_mantidUI,
           SLOT(showSpectrumViewer()));
 
   m_showSliceViewer = new QAction(tr("Show Slice Viewer"), this);
@@ -229,7 +233,7 @@ void MantidDockWidget::createWorkspaceMenuActions() {
         QSize(), QIcon::Normal, QIcon::Off);
     m_showSliceViewer->setIcon(icon);
   }
-  connect(m_showSliceViewer, SIGNAL(activated()), m_mantidUI,
+  connect(m_showSliceViewer, SIGNAL(triggered()), m_mantidUI,
           SLOT(showSliceViewer()));
 
   m_showLogs = new QAction(tr("Sample Logs..."), this);
@@ -245,11 +249,11 @@ void MantidDockWidget::createWorkspaceMenuActions() {
           SLOT(showAlgorithmHistory()));
 
   m_saveNexus = new QAction(tr("Save Nexus"), this);
-  connect(m_saveNexus, SIGNAL(activated()), m_mantidUI,
+  connect(m_saveNexus, SIGNAL(triggered()), m_mantidUI,
           SLOT(saveNexusWorkspace()));
 
   m_rename = new QAction(tr("Rename"), this);
-  connect(m_rename, SIGNAL(activated()), this, SLOT(renameWorkspace()));
+  connect(m_rename, SIGNAL(triggered()), this, SLOT(renameWorkspace()));
 
   m_delete = new QAction(tr("Delete"), this);
   connect(m_delete, SIGNAL(triggered()), this, SLOT(deleteWorkspaces()));
@@ -272,7 +276,7 @@ void MantidDockWidget::createWorkspaceMenuActions() {
           SLOT(convertMDHistoToMatrixWorkspace()));
 
   m_clearUB = new QAction(tr("Clear UB Matrix"), this);
-  connect(m_clearUB, SIGNAL(activated()), this, SLOT(clearUB()));
+  connect(m_clearUB, SIGNAL(triggered()), this, SLOT(clearUB()));
 
   m_plotSurface = new QAction(tr("Plot Surface from Group"), this);
   connect(m_plotSurface, SIGNAL(triggered()), this, SLOT(plotSurface()));
@@ -317,12 +321,12 @@ void MantidDockWidget::createSortMenuActions() {
   m_sortChoiceGroup->setExclusive(true);
   m_byNameChoice->setChecked(true);
 
-  connect(m_ascendingSortAction, SIGNAL(activated()), this,
+  connect(m_ascendingSortAction, SIGNAL(triggered()), this,
           SLOT(sortAscending()));
-  connect(m_descendingSortAction, SIGNAL(activated()), this,
+  connect(m_descendingSortAction, SIGNAL(triggered()), this,
           SLOT(sortDescending()));
-  connect(m_byNameChoice, SIGNAL(activated()), this, SLOT(chooseByName()));
-  connect(m_byLastModifiedChoice, SIGNAL(activated()), this,
+  connect(m_byNameChoice, SIGNAL(triggered()), this, SLOT(chooseByName()));
+  connect(m_byLastModifiedChoice, SIGNAL(triggered()), this,
           SLOT(chooseByLastModified()));
 
   m_sortMenu->addActions(sortDirectionGroup->actions());
@@ -592,6 +596,10 @@ void MantidDockWidget::addMDEventWorkspaceMenuItems(
   menu->addAction(m_showVatesGui); // Show the Vates simple interface
   if (!MantidQt::API::InterfaceManager::hasVatesLibraries()) {
     m_showVatesGui->setEnabled(false);
+#ifdef MAKE_VATES
+  } else if (!vtkPVDisplayInformation::SupportsOpenGLLocally()) {
+    m_showVatesGui->setEnabled(false);
+#endif
   } else {
     std::size_t nDim = WS->getNonIntegratedDimensions().size();
     m_showVatesGui->setEnabled(nDim >= 3 && nDim < 5);
@@ -609,6 +617,10 @@ void MantidDockWidget::addMDHistoWorkspaceMenuItems(
   menu->addAction(m_showVatesGui); // Show the Vates simple interface
   if (!MantidQt::API::InterfaceManager::hasVatesLibraries()) {
     m_showVatesGui->setEnabled(false);
+#ifdef MAKE_VATES
+  } else if (!vtkPVDisplayInformation::SupportsOpenGLLocally()) {
+    m_showVatesGui->setEnabled(false);
+#endif
   } else {
     std::size_t nDim = WS->getNonIntegratedDimensions().size();
     m_showVatesGui->setEnabled(nDim >= 3 && nDim < 5);
@@ -903,7 +915,7 @@ void MantidDockWidget::saveWorkspacesToFolder(const QString &folder) {
     } catch (std::runtime_error &rte) {
       docklog.error() << "Error saving workspace "
                       << workspaceName.toStdString() << ": " << rte.what()
-                      << std::endl;
+                      << '\n';
     }
   }
 }
@@ -1004,14 +1016,14 @@ void MantidDockWidget::deleteWorkspaces() {
 void MantidDockWidget::sortAscending() {
   if (isTreeUpdating())
     return;
-  m_tree->setSortOrder(Qt::Ascending);
+  m_tree->setSortOrder(Qt::AscendingOrder);
   m_tree->sort();
 }
 
 void MantidDockWidget::sortDescending() {
   if (isTreeUpdating())
     return;
-  m_tree->setSortOrder(Qt::Descending);
+  m_tree->setSortOrder(Qt::DescendingOrder);
   m_tree->sort();
 }
 
@@ -1283,7 +1295,7 @@ void MantidDockWidget::popupMenu(const QPoint &pos) {
           QString name = QString::fromStdString(programNames[i]);
           // Setup new menu option for the program
           m_program = new QAction(name, this);
-          connect(m_program, SIGNAL(activated()), m_programMapper, SLOT(map()));
+          connect(m_program, SIGNAL(triggered()), m_programMapper, SLOT(map()));
           // Send name of program when clicked
           m_programMapper->setMapping(m_program, name);
           m_saveToProgram->addAction(m_program);
@@ -1568,17 +1580,17 @@ void MantidTreeWidget::dropEvent(QDropEvent *de) {
       treelog.error() << "Failed to Load the file "
                       << filenames[i].toStdString()
                       << " . The reason for failure is: " << error.what()
-                      << std::endl;
+                      << '\n';
     } catch (std::logic_error &error) {
       treelog.error() << "Failed to Load the file "
                       << filenames[i].toStdString()
                       << " . The reason for failure is: " << error.what()
-                      << std::endl;
+                      << '\n';
     } catch (std::exception &error) {
       treelog.error() << "Failed to Load the file "
                       << filenames[i].toStdString()
                       << " . The reason for failure is: " << error.what()
-                      << std::endl;
+                      << '\n';
     }
   }
 }
@@ -1862,17 +1874,17 @@ bool MantidTreeWidgetItem::operator<(const QTreeWidgetItem &other) const {
     return false;
 
   if (!thisShouldBeSorted && !otherShouldBeSorted) {
-    if (m_parent->getSortOrder() == Qt::Ascending)
+    if (m_parent->getSortOrder() == Qt::AscendingOrder)
       return m_sortPos < otherSortPos;
     else
       return m_sortPos >= otherSortPos;
   } else if (thisShouldBeSorted && !otherShouldBeSorted) {
-    if (m_parent->getSortOrder() == Qt::Ascending)
+    if (m_parent->getSortOrder() == Qt::AscendingOrder)
       return false;
     else
       return true;
   } else if (!thisShouldBeSorted && otherShouldBeSorted) {
-    if (m_parent->getSortOrder() == Qt::Ascending)
+    if (m_parent->getSortOrder() == Qt::AscendingOrder)
       return true;
     else
       return false;

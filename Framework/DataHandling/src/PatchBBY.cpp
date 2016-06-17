@@ -198,13 +198,13 @@ void PatchBBY::exec() {
     case TYPE_INT:
       tmp_int = property_value;
       if (tmp_int != EMPTY_INT())
-        logContentNewBuffer << itr->Name << " = " << tmp_int << std::endl;
+        logContentNewBuffer << itr->Name << " = " << tmp_int << '\n';
       break;
 
     case TYPE_DBL:
       tmp_dbl = property_value;
       if (tmp_dbl != EMPTY_DBL())
-        logContentNewBuffer << itr->Name << " = " << tmp_dbl << std::endl;
+        logContentNewBuffer << itr->Name << " = " << tmp_dbl << '\n';
       break;
 
     case TYPE_STR:
@@ -215,9 +215,9 @@ void PatchBBY::exec() {
       tmp_str = static_cast<std::string>(property_value);
       if (!tmp_str.empty()) {
         if (Poco::icompare(tmp_str, EXTERNAL) == 0)
-          logContentNewBuffer << itr->Name << " = " << EXTERNAL << std::endl;
+          logContentNewBuffer << itr->Name << " = " << EXTERNAL << '\n';
         else if (Poco::icompare(tmp_str, INTERNAL) == 0)
-          logContentNewBuffer << itr->Name << " = " << INTERNAL << std::endl;
+          logContentNewBuffer << itr->Name << " = " << INTERNAL << '\n';
         else
           throw std::invalid_argument("invalid: FrameSource");
       }
@@ -254,49 +254,48 @@ void PatchBBY::exec() {
         std::string tmp_str;
 
         if (loadNXDataSet(entry, "monitor/bm1_counts", tmp_int32))
-          logContentNewBuffer << "Bm1Counts = " << tmp_int32 << std::endl;
+          logContentNewBuffer << "Bm1Counts = " << tmp_int32 << '\n';
         if (loadNXDataSet(entry, "instrument/att_pos", tmp_float))
-          logContentNewBuffer << "AttPos = " << tmp_float << std::endl;
+          logContentNewBuffer << "AttPos = " << tmp_float << '\n';
 
         if (loadNXString(entry, "instrument/detector/frame_source", tmp_str))
-          logContentNewBuffer << "FrameSource = " << tmp_str << std::endl;
+          logContentNewBuffer << "FrameSource = " << tmp_str << '\n';
         if (loadNXDataSet(entry, "instrument/nvs067/lambda", tmp_float))
-          logContentNewBuffer << "Wavelength = " << tmp_float << std::endl;
+          logContentNewBuffer << "Wavelength = " << tmp_float << '\n';
 
         if (loadNXDataSet(entry, "instrument/master_chopper_freq", tmp_float))
-          logContentNewBuffer << "MasterChopperFreq = " << tmp_float
-                              << std::endl;
+          logContentNewBuffer << "MasterChopperFreq = " << tmp_float << '\n';
         if (loadNXDataSet(entry, "instrument/t0_chopper_freq", tmp_float))
-          logContentNewBuffer << "T0ChopperFreq = " << tmp_float << std::endl;
+          logContentNewBuffer << "T0ChopperFreq = " << tmp_float << '\n';
         if (loadNXDataSet(entry, "instrument/t0_chopper_phase", tmp_float))
           logContentNewBuffer
               << "T0ChopperPhase = " << (tmp_float < 999.0 ? tmp_float : 0.0)
-              << std::endl;
+              << '\n';
 
         if (loadNXDataSet(entry, "instrument/L1", tmp_float))
-          logContentNewBuffer << "L1 = " << tmp_float << std::endl;
+          logContentNewBuffer << "L1 = " << tmp_float << '\n';
         if (loadNXDataSet(entry, "instrument/Ltof_det", tmp_float))
-          logContentNewBuffer << "LTofDet = " << tmp_float << std::endl;
+          logContentNewBuffer << "LTofDet = " << tmp_float << '\n';
         if (loadNXDataSet(entry, "instrument/L2_det", tmp_float))
-          logContentNewBuffer << "L2Det = " << tmp_float << std::endl;
+          logContentNewBuffer << "L2Det = " << tmp_float << '\n';
 
         if (loadNXDataSet(entry, "instrument/L2_curtainl", tmp_float))
-          logContentNewBuffer << "L2CurtainL = " << tmp_float << std::endl;
+          logContentNewBuffer << "L2CurtainL = " << tmp_float << '\n';
         if (loadNXDataSet(entry, "instrument/L2_curtainr", tmp_float))
-          logContentNewBuffer << "L2CurtainR = " << tmp_float << std::endl;
+          logContentNewBuffer << "L2CurtainR = " << tmp_float << '\n';
         if (loadNXDataSet(entry, "instrument/L2_curtainu", tmp_float))
-          logContentNewBuffer << "L2CurtainU = " << tmp_float << std::endl;
+          logContentNewBuffer << "L2CurtainU = " << tmp_float << '\n';
         if (loadNXDataSet(entry, "instrument/L2_curtaind", tmp_float))
-          logContentNewBuffer << "L2CurtainD = " << tmp_float << std::endl;
+          logContentNewBuffer << "L2CurtainD = " << tmp_float << '\n';
 
         if (loadNXDataSet(entry, "instrument/detector/curtainl", tmp_float))
-          logContentNewBuffer << "CurtainL = " << tmp_float << std::endl;
+          logContentNewBuffer << "CurtainL = " << tmp_float << '\n';
         if (loadNXDataSet(entry, "instrument/detector/curtainr", tmp_float))
-          logContentNewBuffer << "CurtainR = " << tmp_float << std::endl;
+          logContentNewBuffer << "CurtainR = " << tmp_float << '\n';
         if (loadNXDataSet(entry, "instrument/detector/curtainu", tmp_float))
-          logContentNewBuffer << "CurtainU = " << tmp_float << std::endl;
+          logContentNewBuffer << "CurtainU = " << tmp_float << '\n';
         if (loadNXDataSet(entry, "instrument/detector/curtaind", tmp_float))
-          logContentNewBuffer << "CurtainD = " << tmp_float << std::endl;
+          logContentNewBuffer << "CurtainD = " << tmp_float << '\n';
       }
     }
   }

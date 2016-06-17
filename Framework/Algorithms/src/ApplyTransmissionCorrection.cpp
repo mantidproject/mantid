@@ -74,7 +74,7 @@ void ApplyTransmissionCorrection::exec() {
     // bins)
     if (transWS->readY(0).size() != inputWS->readY(0).size()) {
       g_log.error() << "Input and transmission workspaces have a different "
-                       "number of wavelength bins" << std::endl;
+                       "number of wavelength bins\n";
       throw std::invalid_argument("Input and transmission workspaces have a "
                                   "different number of wavelength bins");
     }
@@ -99,8 +99,7 @@ void ApplyTransmissionCorrection::exec() {
       det = inputWS->getDetector(i);
     } catch (Exception::NotFoundError &) {
       g_log.warning() << "Workspace index " << i
-                      << " has no detector assigned to it - discarding"
-                      << std::endl;
+                      << " has no detector assigned to it - discarding'\n";
       // Catch if no detector. Next line tests whether this happened - test
       // placed
       // outside here because Mac Intel compiler doesn't like 'continue' in a

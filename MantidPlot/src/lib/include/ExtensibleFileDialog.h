@@ -34,15 +34,18 @@
 
 //! QFileDialog plus generic extension support.
 /**
- * This is a simple hack on top of QFileDialog that allows a custom extension widget to be added to
- * the bottom of the dialog. A button is provided for toggling display of this widget on/off.
+ * This is a simple hack on top of QFileDialog that allows a custom extension
+ *widget to be added to
+ * the bottom of the dialog. A button is provided for toggling display of this
+ *widget on/off.
  *
- * For the placement of button and extension widget, it is assumed that QFileDialog uses a
- * QGridLayout as its top-level layout. Other layouts will probably lead to a strange outlook,
+ * For the placement of button and extension widget, it is assumed that
+ *QFileDialog uses a
+ * QGridLayout as its top-level layout. Other layouts will probably lead to a
+ *strange outlook,
  * although the functionality should stay intact.
  */
-class ExtensibleFileDialog : public QFileDialog
-{
+class ExtensibleFileDialog : public QFileDialog {
   Q_OBJECT
 
 public:
@@ -52,17 +55,21 @@ public:
    * \param extended flag: show/hide the advanced options on start-up
    * \param flags window flags
    */
-  ExtensibleFileDialog(QWidget *parent=0, bool extended = true, Qt::WFlags flags=0);
-  //! Set the extension widget to be displayed when the user presses the toggle button.
+  ExtensibleFileDialog(QWidget *parent = 0, bool extended = true,
+                       Qt::WFlags flags = 0);
+  //! Set the extension widget to be displayed when the user presses the toggle
+  // button.
   void setExtensionWidget(QWidget *extension);
 
   //! Tells weather the dialog has a valid extension widget
-  bool isExtendable(){return d_extension != NULL;};
-  bool isExtended(){return d_extension_toggle->isChecked();};
+  bool isExtendable() { return d_extension != NULL; };
+  bool isExtended() { return d_extension_toggle->isChecked(); };
   //! Toggle extension widget on/off
   void setExtended(bool extended);
   //! Sets the text to be displayed in the toggle button
-  void setExtentionToggleButtonText(const QString& text){d_extension_toggle->setText(text);};
+  void setExtentionToggleButtonText(const QString &text) {
+    d_extension_toggle->setText(text);
+  };
   //! Enables/Disables editing of the file type filter
   void setEditableFilter(bool on = true);
 

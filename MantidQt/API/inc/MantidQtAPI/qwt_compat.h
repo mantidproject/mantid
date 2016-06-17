@@ -5,17 +5,17 @@
 
 #if QWT_VERSION >= 0x050200
 // FAA 11/04/2010: QWT 5.2.0 changed some member functions
-// QwtScaleEngine 
+// QwtScaleEngine
 //   loMargin/hiMargin renamed to lowerMargin/upperMargin
-// QwtScaleDiv 
+// QwtScaleDiv
 //   lBound/hBound renamed to lowerBound/upperBound
-#   define lBound() lowerBound()
-#   define hBound() upperBound()
-#   define loMargin() lowerMargin()
-#   define hiMargin() upperMargin()
+#define lBound() lowerBound()
+#define hBound() upperBound()
+#define loMargin() lowerMargin()
+#define hiMargin() upperMargin()
 #else
-#   define lowerMargin()  loMargin()
-#   define upperMargin()  hiMargin()
+#define lowerMargin() loMargin()
+#define upperMargin() hiMargin()
 #endif /* QWT_VERSION >= 0x050200 */
 
 #endif /* MANTID_QWT_COMPAT */

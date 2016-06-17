@@ -33,7 +33,6 @@ using std::runtime_error;
 using std::size_t;
 using std::vector;
 using std::cout;
-using std::endl;
 using namespace boost::posix_time;
 
 //==========================================================================================
@@ -77,11 +76,11 @@ public:
             tof = (pix + i + 0.5) * BIN_DELTA;
           }
           size_t pulse_time = static_cast<size_t>(tof);
-          retVal->getEventList(pix) += TofEvent(tof, pulse_time);
-          retVal->getEventList(pix) += TofEvent(tof, pulse_time);
+          retVal->getSpectrum(pix) += TofEvent(tof, pulse_time);
+          retVal->getSpectrum(pix) += TofEvent(tof, pulse_time);
         }
-        retVal->getEventList(pix).addDetectorID(pix);
-        retVal->getEventList(pix).setSpectrumNo(pix);
+        retVal->getSpectrum(pix).addDetectorID(pix);
+        retVal->getSpectrum(pix).setSpectrumNo(pix);
       }
     } else {
       retVal->initialize(1, 1, 1);
@@ -120,11 +119,11 @@ public:
     //      for (int i=0; i<NUMBINS-1; i++)
     //      {
     //        //Two events per bin
-    //        retVal->getEventList(pix) += TofEvent((i+0.5)*BIN_DELTA, 1);
-    //        retVal->getEventList(pix) += TofEvent((i+0.5)*BIN_DELTA, 1);
+    //        retVal->getSpectrum(pix) += TofEvent((i+0.5)*BIN_DELTA, 1);
+    //        retVal->getSpectrum(pix) += TofEvent((i+0.5)*BIN_DELTA, 1);
     //      }
-    //      retVal->getEventList(pix).addDetectorID(pix);
-    //      retVal->getEventList(pix).setSpectrumNo(pix);
+    //      retVal->getSpectrum(pix).addDetectorID(pix);
+    //      retVal->getSpectrum(pix).setSpectrumNo(pix);
     //    }
     //
     //    //Create the x-axis for histogramming.
@@ -148,7 +147,7 @@ public:
     TS_ASSERT_EQUALS(ew->size(), (NUMBINS - 1) * NUMPIXELS);
 
     // Are the returned arrays the right size?
-    const EventList el(ew->getEventList(1));
+    const EventList el(ew->getSpectrum(1));
     TS_ASSERT_EQUALS(el.constDataX().size(), NUMBINS);
     boost::scoped_ptr<MantidVec> Y(el.makeDataY());
     boost::scoped_ptr<MantidVec> E(el.makeDataE());
@@ -169,8 +168,8 @@ public:
     TS_ASSERT_EQUALS(ew2->getNumberEvents(), ew1->getNumberEvents());
 
     // Double # of events in the copied workspace
-    ew2->getEventList(0) += ew2->getEventList(0);
-    ew2->getEventList(1) += ew2->getEventList(1);
+    ew2->getSpectrum(0) += ew2->getSpectrum(0);
+    ew2->getSpectrum(1) += ew2->getSpectrum(1);
 
     // Original is still 2.0
     TS_ASSERT_DELTA(ew1->readY(0)[0], 2.0, 1e-5);
@@ -221,7 +220,7 @@ public:
     TS_ASSERT_EQUALS(ew->size(), 500);
 
     // Didn't set X? well all the histograms show a single bin
-    const EventList el(ew->getEventList(1));
+    const EventList el(ew->getSpectrum(1));
     TS_ASSERT_EQUALS(el.constDataX().size(), 2);
     TS_ASSERT_EQUALS(el.constDataX()[0], 0.0);
     TS_ASSERT_EQUALS(el.constDataX()[1], std::numeric_limits<double>::min());
@@ -237,9 +236,9 @@ public:
     EventWorkspace_sptr ws =
         WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(
             1, 10, false /*dont clear the events*/);
-    TS_ASSERT_EQUALS(ws->getEventList(2).getNumberEvents(), 200);
+    TS_ASSERT_EQUALS(ws->getSpectrum(2).getNumberEvents(), 200);
     ws->maskWorkspaceIndex(2);
-    TS_ASSERT_EQUALS(ws->getEventList(2).getNumberEvents(), 0);
+    TS_ASSERT_EQUALS(ws->getSpectrum(2).getNumberEvents(), 0);
   }
 
   void test_resizeTo() {
@@ -248,8 +247,8 @@ public:
     ew->resizeTo(3);
     TS_ASSERT_EQUALS(ew->getNumberHistograms(), 3);
     for (size_t i = 0; i < ew->getNumberHistograms(); ++i) {
-      TS_ASSERT_EQUALS(ew->getSpectrum(i)->getSpectrumNo(), i + 1);
-      // TS_ASSERT( ew->getEventList(i).empty() );
+      TS_ASSERT_EQUALS(ew->getSpectrum(i).getSpectrumNo(), i + 1);
+      // TS_ASSERT( ew->getSpectrum(i).empty() );
       TS_ASSERT_EQUALS(ew->readX(i).size(), 2);
     }
   }
@@ -272,11 +271,11 @@ public:
     TS_ASSERT_EQUALS(ew->getNumberHistograms(), numpixels);
     int badcount = 0;
     for (int i = 0; i < numpixels; i++) {
-      ISpectrum *spec = ew->getSpectrum(i);
-      bool b = spec->hasDetectorID(i + 1);
+      auto &spec = ew->getSpectrum(i);
+      bool b = spec.hasDetectorID(i + 1);
       TSM_ASSERT("Workspace i has the given detector id i+1", b);
       TSM_ASSERT_EQUALS("Matching detector ID and spectrum number.",
-                        spec->getSpectrumNo(), i + 1);
+                        spec.getSpectrumNo(), i + 1);
       if (b)
         if (badcount++ > 40)
           break;
@@ -292,10 +291,10 @@ public:
     size_t wi = 0;
     for (int pix = 5; pix < NUMPIXELS; pix += 10) {
       for (int i = 0; i < pix; i++) {
-        uneven->getEventList(wi) += TofEvent((pix + i + 0.5) * BIN_DELTA, 1);
+        uneven->getSpectrum(wi) += TofEvent((pix + i + 0.5) * BIN_DELTA, 1);
       }
-      uneven->getEventList(wi).addDetectorID(pix);
-      uneven->getEventList(wi).setSpectrumNo(pix);
+      uneven->getSpectrum(wi).addDetectorID(pix);
+      uneven->getSpectrum(wi).setSpectrumNo(pix);
       wi++;
     }
 
@@ -321,17 +320,17 @@ public:
     // pixel id: 5,15,25, etc.
     for (int wi = 0; wi < static_cast<int>(uneven->getNumberHistograms());
          wi++) {
-      TS_ASSERT_EQUALS(*uneven->getSpectrum(wi)->getDetectorIDs().begin(),
+      TS_ASSERT_EQUALS(*uneven->getSpectrum(wi).getDetectorIDs().begin(),
                        5 + wi * 10);
     }
 
     // Workspace index 0 is at pixelid 5 and has 5 events
-    const EventList el0(uneven->getEventList(0));
+    const EventList el0(uneven->getSpectrum(0));
     TS_ASSERT_EQUALS(el0.getNumberEvents(), 5);
     // And so on, the # of events = pixel ID
-    const EventList el1(uneven->getEventList(1));
+    const EventList el1(uneven->getSpectrum(1));
     TS_ASSERT_EQUALS(el1.getNumberEvents(), 15);
-    const EventList el5(uneven->getEventList(5));
+    const EventList el5(uneven->getSpectrum(5));
     TS_ASSERT_EQUALS(el5.getNumberEvents(), 55);
 
     // Out of range
@@ -364,7 +363,7 @@ public:
       xRef[i] = i * BIN_DELTA * 2;
 
     ew->setX(0, axis);
-    const EventList el(ew->getEventList(0));
+    const EventList el(ew->getSpectrum(0));
     TS_ASSERT_EQUALS(el.constDataX()[0], 0);
     TS_ASSERT_EQUALS(el.constDataX()[1], BIN_DELTA * 2);
 
@@ -381,7 +380,7 @@ public:
     TS_ASSERT_EQUALS((*Y)[NUMBINS / 2 - 2], 4);
 
     // But pixel 1 is the same, 2 events in the bin
-    const EventList el1(ew->getEventList(1));
+    const EventList el1(ew->getSpectrum(1));
     TS_ASSERT_EQUALS(el1.constDataX()[1], BIN_DELTA * 1);
     boost::scoped_ptr<MantidVec> Y1(el1.makeDataY());
     TS_ASSERT_EQUALS((*Y1)[1], 2);
@@ -589,8 +588,8 @@ public:
 
     EventWorkspace_sptr ws(new EventWorkspace);
     ws->initialize(1, 2, 1);
-    ws->getEventList(0) += TofEvent(0, min); // min
-    ws->getEventList(0) += TofEvent(0, max); // max;
+    ws->getSpectrum(0) += TofEvent(0, min); // min
+    ws->getSpectrum(0) += TofEvent(0, max); // max;
 
     TS_ASSERT_EQUALS(max, ws->getPulseTimeMax());
   }
@@ -601,8 +600,8 @@ public:
 
     EventWorkspace_sptr ws(new EventWorkspace);
     ws->initialize(1, 2, 1);
-    ws->getEventList(0) += TofEvent(0, min); // min
-    ws->getEventList(0) += TofEvent(0, max); // max;
+    ws->getSpectrum(0) += TofEvent(0, min); // min
+    ws->getSpectrum(0) += TofEvent(0, max); // max;
 
     TS_ASSERT_EQUALS(min, ws->getPulseTimeMin());
   }
@@ -614,11 +613,11 @@ public:
     EventWorkspace_sptr ws(new EventWorkspace);
     ws->initialize(2, 2, 1);
     // First spectrum
-    ws->getEventList(0) += TofEvent(0, min + int64_t(1));
-    ws->getEventList(0) += TofEvent(0, max); // max in spectra 1
+    ws->getSpectrum(0) += TofEvent(0, min + int64_t(1));
+    ws->getSpectrum(0) += TofEvent(0, max); // max in spectra 1
     // Second spectrum
-    ws->getEventList(1) += TofEvent(0, min); // min in spectra 2
-    ws->getEventList(1) += TofEvent(0, max - int64_t(1));
+    ws->getSpectrum(1) += TofEvent(0, min); // min in spectra 2
+    ws->getSpectrum(1) += TofEvent(0, max - int64_t(1));
 
     V3D source(0, 0, 0);
     V3D sample(10, 0, 0);
@@ -643,8 +642,8 @@ public:
 
     EventWorkspace_sptr ws(new EventWorkspace);
     ws->initialize(1,2,1);
-    ws->getEventList(0) += TofEvent(0, min); // min
-    ws->getEventList(0) += TofEvent(0, max); // max;
+    ws->getSpectrum(0) += TofEvent(0, min); // min
+    ws->getSpectrum(0) += TofEvent(0, max); // max;
 
     TS_ASSERT_EQUALS(min, ws->getPulseTimeMin());
     */
@@ -657,13 +656,13 @@ public:
         boost::dynamic_pointer_cast<const EventWorkspace>(ew);
 
     // OK, we grab data0 from the MRU.
-    const ISpectrum *inSpec = ew2->getSpectrum(0);
-    const ISpectrum *inSpec300 = ew2->getSpectrum(300);
-    inSpec->lockData();
-    inSpec300->lockData();
+    const auto &inSpec = ew2->getSpectrum(0);
+    const auto &inSpec300 = ew2->getSpectrum(300);
+    inSpec.lockData();
+    inSpec300.lockData();
 
-    const MantidVec &data0 = inSpec->readY();
-    const MantidVec &e300 = inSpec300->readE();
+    const MantidVec &data0 = inSpec.readY();
+    const MantidVec &e300 = inSpec300.readE();
     TS_ASSERT_EQUALS(data0.size(), NUMBINS - 1);
     MantidVec data0_copy(data0);
     MantidVec e300_copy(e300);
@@ -681,8 +680,8 @@ public:
       TS_ASSERT_EQUALS(e300[i], e300_copy[i]);
     }
 
-    inSpec->unlockData();
-    inSpec300->unlockData();
+    inSpec.unlockData();
+    inSpec300.unlockData();
 
     MantidVec otherData = ew2->readY(255);
 
@@ -700,7 +699,7 @@ public:
 
     EventWorkspace_sptr outWS = test_in;
     for (int wi = 0; wi < NUMPIXELS; wi++) {
-      std::vector<TofEvent> ve = outWS->getEventList(wi).getEvents();
+      std::vector<TofEvent> ve = outWS->getSpectrum(wi).getEvents();
       TS_ASSERT_EQUALS(ve.size(), NUMBINS);
       for (size_t i = 0; i < ve.size() - 1; i++)
         TS_ASSERT_LESS_THAN_EQUALS(ve[i].tof(), ve[i + 1].tof());
@@ -719,7 +718,7 @@ public:
     test_in->sortAll(TOF_SORT, prog);
 
     EventWorkspace_sptr outWS = test_in;
-    std::vector<TofEvent> ve = outWS->getEventList(0).getEvents();
+    std::vector<TofEvent> ve = outWS->getSpectrum(0).getEvents();
     TS_ASSERT_EQUALS(ve.size(), numEvents);
     for (size_t i = 0; i < ve.size() - 1; i++)
       TS_ASSERT_LESS_THAN_EQUALS(ve[i].tof(), ve[i + 1].tof());
@@ -737,7 +736,7 @@ public:
     test_in->sortAll(PULSETIME_SORT, prog);
 
     EventWorkspace_sptr outWS = test_in;
-    std::vector<TofEvent> ve = outWS->getEventList(0).getEvents();
+    std::vector<TofEvent> ve = outWS->getSpectrum(0).getEvents();
     TS_ASSERT_EQUALS(ve.size(), numEvents);
     for (size_t i = 0; i < ve.size() - 1; i++)
       TS_ASSERT_LESS_THAN_EQUALS(ve[i].pulseTime(), ve[i + 1].pulseTime());
@@ -752,7 +751,7 @@ public:
 
     EventWorkspace_sptr outWS = test_in;
     for (int wi = 0; wi < NUMPIXELS; wi++) {
-      std::vector<TofEvent> ve = outWS->getEventList(wi).getEvents();
+      std::vector<TofEvent> ve = outWS->getSpectrum(wi).getEvents();
       TS_ASSERT_EQUALS(ve.size(), NUMBINS);
       for (size_t i = 0; i < ve.size() - 1; i++)
         TS_ASSERT_LESS_THAN_EQUALS(ve[i].pulseTime(), ve[i + 1].pulseTime());
