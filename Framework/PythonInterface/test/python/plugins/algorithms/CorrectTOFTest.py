@@ -1,3 +1,5 @@
+from __future__ import (absolute_import, division, print_function)
+
 import unittest
 from mantid.simpleapi import CreateSampleWorkspace, CloneWorkspace, GroupWorkspaces, AddSampleLogMultiple, CreateEmptyTableWorkspace
 from testhelpers import run_algorithm

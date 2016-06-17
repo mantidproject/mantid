@@ -1,4 +1,6 @@
-﻿import unittest
+from __future__ import (absolute_import, division, print_function)
+
+import unittest
 from mantid.api import (AlgorithmFactory, AlgorithmProxy, IAlgorithm, IEventWorkspace, ITableWorkspace,
                         PythonAlgorithm, MatrixWorkspace, mtd, WorkspaceGroup)
 import mantid.simpleapi as simpleapi
