@@ -2241,6 +2241,8 @@ void MuonAnalysis::loadFittings() {
           SLOT(dataGroupsChanged()));
   connect(m_dataSelector, SIGNAL(selectedPeriodsChanged()), this,
           SLOT(dataPeriodsChanged()));
+  connect(m_dataSelector, SIGNAL(workspaceChanged()), this,
+          SLOT(dataWorkspaceChanged()));
   connect(m_uiForm.fitBrowser, SIGNAL(xRangeChanged(double, double)), this,
           SLOT(fitRangeChangedManually(double, double)));
 }
