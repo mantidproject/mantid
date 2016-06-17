@@ -76,14 +76,17 @@ void initArrayLookup(PyArrayIndex &index) {
   typedef SequenceTypeHandler<std::vector<double>> FloatArrayHandler;
   index.emplace("FloatArray", boost::make_shared<FloatArrayHandler>());
 
-  typedef SequenceTypeHandler<std::vector<int>> IntArrayHandler;
-  index.emplace("IntArray", boost::make_shared<IntArrayHandler>());
+  typedef SequenceTypeHandler<std::vector<std::string>> StringArrayHandler;
+  index.emplace("StringArray", boost::make_shared<StringArrayHandler>());
 
   typedef SequenceTypeHandler<std::vector<long>> LongIntArrayHandler;
   index.emplace("LongIntArray", boost::make_shared<LongIntArrayHandler>());
 
-  typedef SequenceTypeHandler<std::vector<std::string>> StringArrayHandler;
-  index.emplace("StringArray", boost::make_shared<StringArrayHandler>());
+#if PY_MAJOR_VERSION < 3
+  // Backwards compatible behaviour
+  typedef SequenceTypeHandler<std::vector<int>> IntArrayHandler;
+  index.emplace("IntArray", boost::make_shared<IntArrayHandler>());
+#endif
 }
 
 /**
@@ -188,6 +191,11 @@ const std::string PropertyWithValueFactory::isArray(PyObject *const object) {
     if (PyFloat_Check(item)) {
       return std::string("FloatArray");
     }
+#if PY_MAJOR_VERSION >= 3
+    if (PyUnicode_Check(item)) {
+      return std::string("StringArray");
+    }
+#endif
     if (PyBytes_Check(item)) {
       return std::string("StringArray");
     }
