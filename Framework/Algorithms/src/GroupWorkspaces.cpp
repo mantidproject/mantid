@@ -17,8 +17,11 @@ GroupWorkspaces::GroupWorkspaces() : API::Algorithm(), m_group() {}
 /// Initialisation method
 void GroupWorkspaces::init() {
 
-  declareProperty("InputWorkspaces", "", make_unique<ADSValidator>(),
-                  "Name of the Input Workspaces to Group");
+  declareProperty(
+      Kernel::make_unique<ArrayProperty<std::string>>(
+          "InputWorkspaces",
+          boost::make_shared<ADSValidator>()),
+      "Name of the Input Workspaces to Group");
   declareProperty(
       make_unique<WorkspaceProperty<WorkspaceGroup>>("OutputWorkspace", "",
                                                      Direction::Output),
@@ -29,12 +32,8 @@ void GroupWorkspaces::init() {
  *  @throw std::runtime_error If the selected workspaces are not of same types
  */
 void GroupWorkspaces::exec() {
-  const std::string inputWorkspaceString = getProperty("InputWorkspaces");
-  Kernel::StringTokenizer st(inputWorkspaceString, ",",
-                             StringTokenizer::TOK_TRIM |
-                                 StringTokenizer::TOK_IGNORE_EMPTY |
-                                 StringTokenizer::TOK_IGNORE_FINAL_EMPTY_TOKEN);
-  auto inputWorkspaces = st.asVector();
+  const std::vector<std::string> inputWorkspaces =
+      getProperty("InputWorkspaces");
 
   m_group = boost::make_shared<WorkspaceGroup>();
   addToGroup(inputWorkspaces);

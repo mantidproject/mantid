@@ -9,8 +9,8 @@ namespace API {
 /// Default constructor. Sets up an empty list of valid values.
 ADSValidator::ADSValidator(const bool allowMultiSelection,
                            const bool isOptional)
-    : TypedValidator<std::string>(), m_AllowMultiSelection(allowMultiSelection),
-      m_isOptional(isOptional){};
+    : TypedValidator<std::vector<std::string>>(),
+      m_AllowMultiSelection(allowMultiSelection), m_isOptional(isOptional){};
 
 /// Clone the validator
 IValidator_sptr ADSValidator::clone() const {
@@ -37,23 +37,18 @@ void ADSValidator::setOptional(const bool setOptional) {
 *  @return "" if the value is on the list, or "The workspace is not in the
 * workspace list"
 */
-std::string ADSValidator::checkValidity(const std::string &value) const {
-  if (!m_isOptional && isEmpty(value))
+std::string
+ADSValidator::checkValidity(const std::vector<std::string> &value) const {
+  if (!m_isOptional && (value.size() == 0))
     return "Select a value";
-  std::vector<std::string> ws_to_validate;
-  ws_to_validate.push_back(value);
-  if (m_AllowMultiSelection) {
-    StringTokenizer tokenizer(
-        value, ",|;\t", StringTokenizer::TOK_TRIM |
-                            StringTokenizer::TOK_IGNORE_EMPTY |
-                            StringTokenizer::TOK_IGNORE_FINAL_EMPTY_TOKEN);
-    ws_to_validate = tokenizer.asVector();
+  if (!m_AllowMultiSelection && (value.size() > 1)) {
+    return "Only one workspace was expected.";
   }
   auto &ads = AnalysisDataService::Instance();
   std::ostringstream os;
-  for (std::string wsName : ws_to_validate) {
+  for (std::string wsName : value) {
     if (!ads.doesExist(wsName)) {
-      os << "The workspace \"" << value << "\" is not in the workspace list";
+      os << "The workspace \"" << wsName << "\" is not in the workspace list.";
     }
   }
   return os.str();
@@ -74,15 +69,6 @@ std::vector<std::string> ADSValidator::allowedValues() const {
   auto values = std::vector<std::string>(vals.begin(), vals.end());
   std::sort(values.begin(), values.end());
   return values;
-}
-
-/**
-* Is the value considered empty. Specialized string version to use empty
-* @param value :: The value to check
-* @return True if it is considered empty
-*/
-bool ADSValidator::isEmpty(const std::string &value) const {
-  return value.empty();
 }
 
 } // namespace API

@@ -24,6 +24,8 @@ private:
 };
 }
 
+typedef std::vector<std::string> StringVector;
+
 class ADSValidatorTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
@@ -35,11 +37,12 @@ public:
     ADSValidator adsValidator;
     // default is mandatory
     TS_ASSERT_EQUALS(adsValidator.isOptional(), false);
-    TS_ASSERT_DIFFERS(adsValidator.isValid(""), "");
+    StringVector sv;
+    TS_ASSERT_DIFFERS(adsValidator.isValid(sv), "");
 
     adsValidator.setOptional(true);
     TS_ASSERT_EQUALS(adsValidator.isOptional(), true);
-    TS_ASSERT_EQUALS(adsValidator.isValid(""), "");
+    TS_ASSERT_EQUALS(adsValidator.isValid(sv), "");
   }
 
   void test_SingleValue() {
@@ -49,10 +52,12 @@ public:
 
     ADSValidator adsValidator(false);
 
-    TS_ASSERT_EQUALS(adsValidator.isValid(wsName), "");
-    TS_ASSERT_DIFFERS(adsValidator.isValid(wsName + ", " + wsName), "");
-    TS_ASSERT_DIFFERS(adsValidator.isValid(wsName + ", "), "");
-
+    StringVector sv;
+    sv.push_back(wsName);
+    TS_ASSERT_EQUALS(adsValidator.isValid(sv), "");
+    sv.push_back(wsName);
+    TS_ASSERT_DIFFERS(adsValidator.isValid(sv), "");
+ 
     ads.remove(wsName);
   }
 
@@ -69,18 +74,18 @@ public:
     ADSValidator adsValidator(true);
 
     // all valid options
-    TS_ASSERT_EQUALS(adsValidator.isValid(ws1Name), "");
-    TS_ASSERT_EQUALS(adsValidator.isValid(ws1Name + ", " + ws2Name), "");
-    TS_ASSERT_EQUALS(adsValidator.isValid(ws1Name + "; " + ws2Name), "");
-    TS_ASSERT_EQUALS(
-        adsValidator.isValid(ws1Name + "\t" + ws2Name + "\t " + ws3Name), "");
-    TS_ASSERT_EQUALS(adsValidator.isValid(ws1Name + ",| " + ws2Name + ", "),
-                     "");
+    StringVector sv;
+    sv.push_back(ws1Name);
+    TS_ASSERT_EQUALS(adsValidator.isValid(sv), "");
+    sv.push_back(ws2Name);
+    TS_ASSERT_EQUALS(adsValidator.isValid(sv), "");
+    sv.push_back(ws3Name);
+    TS_ASSERT_EQUALS(adsValidator.isValid(sv), "");
+
 
     // invalid ws in string
-    TS_ASSERT_DIFFERS(
-        adsValidator.isValid(ws1Name + "\t" + wsInvalidName + "\t " + ws3Name),
-        "");
+    sv.push_back(wsInvalidName);
+    TS_ASSERT_DIFFERS(adsValidator.isValid(sv), "");
 
     ads.remove(ws1Name);
     ads.remove(ws2Name);
