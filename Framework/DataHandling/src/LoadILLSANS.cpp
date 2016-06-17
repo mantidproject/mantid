@@ -25,7 +25,7 @@ DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadILLSANS)
 /** Constructor
  */
 LoadILLSANS::LoadILLSANS()
-    : m_defaultBinning(2), m_supportedInstruments{"D33"} {}
+    : m_supportedInstruments{"D33"}, m_defaultBinning{2} {}
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
