@@ -37,13 +37,15 @@ void export_WorkspaceGroup() {
       .def("isMultiPeriod", &WorkspaceGroup::isMultiperiod, arg("self"),
            "Retuns true if the workspace group is multi-period")
       // ------------ Operators --------------------------------
-      .def("__len__", &WorkspaceGroup::getNumberOfEntries)
+      .def("__len__", &WorkspaceGroup::getNumberOfEntries, arg("self"),
+           "Gets the number of entries in the workspace group")
       .def("__contains__",
            (bool (WorkspaceGroup::*)(const std::string &wsName) const) &
-               WorkspaceGroup::contains)
+               WorkspaceGroup::contains, (arg("self"),arg("workspace name")),
+           "Does this group contain the named workspace?")
       .def("__getitem__",
            (Workspace_sptr (WorkspaceGroup::*)(const size_t) const) &
-               WorkspaceGroup::getItem,
+               WorkspaceGroup::getItem, (arg("self"), arg("index")),
            return_value_policy<Policies::ToWeakPtr>());
 
   Registry::RegisterWorkspacePtrToPython<WorkspaceGroup>();
