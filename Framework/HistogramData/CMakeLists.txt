@@ -39,6 +39,7 @@ set ( INC_FILES
 	inc/MantidHistogramData/StandardDeviationVectorOf.h
 	inc/MantidHistogramData/VarianceVectorOf.h
 	inc/MantidHistogramData/VectorOf.h
+	inc/MantidHistogramData/XValidation.h
 )
 
 set ( TEST_FILES
@@ -66,6 +67,7 @@ set ( TEST_FILES
 	StandardDeviationVectorOfTest.h
 	VarianceVectorOfTest.h
 	VectorOfTest.h
+	XValidationTest.h
 )
 
 if (COVERALLS)
