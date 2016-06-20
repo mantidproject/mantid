@@ -147,11 +147,11 @@ struct dtrs_control_type {
   int taylor_max_degree = 3;
 
   //!  any entry of H that is smaller than h_min * MAXVAL( H ) we be treated as
-  //zero
+  // zero
   double h_min = epsmch;
 
   //!  any entry of C that is smaller than c_min * MAXVAL( C ) we be treated as
-  //zero
+  // zero
   double c_min = epsmch;
 
   //!  lower and upper bounds on the multiplier, if known
@@ -164,7 +164,7 @@ struct dtrs_control_type {
   double stop_absolute_normal = epsmch;
 
   //!  is the solution is REQUIRED to lie on the boundary (i.e., is the
-  //constraint
+  // constraint
   //!  an equality)?
   bool equality_problem = false;
 };
