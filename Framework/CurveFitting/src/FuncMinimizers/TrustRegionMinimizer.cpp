@@ -114,6 +114,8 @@ void TrustRegionMinimizer::eval_J(const DoubleFortranVector &x,
 void TrustRegionMinimizer::eval_HF(const DoubleFortranVector &x,
                                    const DoubleFortranVector &f,
                                    DoubleFortranMatrix &h) const {
+  UNUSED_ARG(x);
+  UNUSED_ARG(f);
   int n = static_cast<int>(m_leastSquares->nParams());
   if (h.len1() != n || h.len2() != n) {
     h.allocate(n, n);

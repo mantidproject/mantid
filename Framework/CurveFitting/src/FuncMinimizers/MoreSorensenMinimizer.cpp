@@ -255,8 +255,8 @@ void more_sorensen(const DoubleFortranMatrix &J, const DoubleFortranVector &f,
 
     if (nd <= Delta + epsilon) {
       // we're within the tr radius
-      if (abs(sigma) < options.more_sorensen_tiny ||
-          abs(nd - Delta) < epsilon) {
+      if (fabs(sigma) < options.more_sorensen_tiny ||
+          fabs(nd - Delta) < epsilon) {
         // we're good....exit
         break;
       }
@@ -285,7 +285,7 @@ void more_sorensen(const DoubleFortranMatrix &J, const DoubleFortranVector &f,
 
     auto nq = norm2(w.q);
     sigma_shift = (pow((nd / nq), 2)) * ((nd - Delta) / Delta);
-    if (abs(sigma_shift) < options.more_sorensen_tiny * abs(sigma)) {
+    if (fabs(sigma_shift) < options.more_sorensen_tiny * fabs(sigma)) {
       if (no_restarts < 1) {
         // find a shift that makes (A + sigma I) positive definite
         get_pd_shift(sigma, d, options, inform, w);
@@ -325,7 +325,7 @@ void more_sorensen(const DoubleFortranMatrix &J, const DoubleFortranVector &f,
 /// Implements the abstarct method of TrustRegionMinimizer.
 void MoreSorensenMinimizer::calculate_step(
     const DoubleFortranMatrix &J, const DoubleFortranVector &f,
-    const DoubleFortranMatrix &hf, const DoubleFortranVector &g, double Delta,
+    const DoubleFortranMatrix &hf, const DoubleFortranVector &, double Delta,
     DoubleFortranVector &d, double &normd, const NLLS::nlls_options &options,
     NLLS::nlls_inform &inform, NLLS::calculate_step_work &w) {
   more_sorensen(J, f, hf, Delta, d, normd, options, inform, w.more_sorensen_ws);

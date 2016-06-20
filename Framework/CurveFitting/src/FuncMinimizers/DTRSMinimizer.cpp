@@ -10,6 +10,7 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/System.h"
 #include <algorithm>
+#include <limits>
 
 namespace Mantid {
 namespace CurveFitting {
@@ -133,8 +134,8 @@ enum class ErrorCode {
 
 /// Replacement for FORTRAN's SIGN intrinsic function
 inline double sign(double x, double y) {
-  return y >= 0.0 ? std::abs(x) : -std::abs(x);
-};
+  return y >= 0.0 ? fabs(x) : -fabs(x);
+}
 
 //!  - - - - - - - - - - - - - - - - - - - - - - -
 //!   control derived type with component defaults
@@ -312,9 +313,9 @@ void roots_quadratic(double a0, double a1, double a2, double tol, int &nroots,
                      double &root1, double &root2) {
 
   auto rhs = tol * a1 * a1;
-  if (std::fabs(a0 * a2) > rhs) { // really is quadratic
+  if (fabs(a0 * a2) > rhs) { // really is quadratic
     root2 = a1 * a1 - four * a2 * a0;
-    if (abs(root2) <= pow(epsmch * a1, 2)) { // numerical double root
+    if (fabs(root2) <= pow(epsmch * a1, 2)) { // numerical double root
       nroots = 2;
       root1 = -half * a1 / a2;
       root2 = root1;
@@ -463,13 +464,13 @@ void roots_cubic(double a0, double a1, double a2, double a3, double tol,
     d = -t - c - s;
     c = c - s;
     t = t - s;
-    if (abs(c) > abs(t)) {
+    if (fabs(c) > fabs(t)) {
       root3 = c;
     } else {
       root3 = t;
       t = c;
     }
-    if (abs(d) > abs(t)) {
+    if (fabs(d) > fabs(t)) {
       root2 = d;
     } else {
       root2 = t;
@@ -655,7 +656,7 @@ void dtrs_solve_main(int n, double radius, double f,
     inform.hard_case = true;
     for (int i = 1; i <= n; ++i) { // for_do(i, 1, n)
       if (h(i) == lambda_min) {
-        if (abs(c(i)) > epsmch * c_norm) {
+        if (fabs(c(i)) > epsmch * c_norm) {
           inform.hard_case = false;
           c2 = c2 + pow(c(i), 2);
         } else {
@@ -688,7 +689,7 @@ void dtrs_solve_main(int n, double radius, double f,
           auto distx =
               (radius - inform.x_norm) * ((radius + inform.x_norm) / radius);
           auto alpha = sign(
-              distx / (abs(utx) + sqrt(pow(utx, 2) + distx / radius)), utx);
+              distx / (fabs(utx) + sqrt(pow(utx, 2) + distx / radius)), utx);
 
           //  record the optimal values
 
@@ -752,7 +753,7 @@ void dtrs_solve_main(int n, double radius, double f,
     //!  the current estimate gives a good approximation to the required
     //!  root
 
-    if (abs(inform.x_norm - radius) <=
+    if (fabs(inform.x_norm - radius) <=
         std::max(control.stop_normal * radius, control.stop_absolute_normal)) {
       if (inform.x_norm > radius) {
         lambda_l = std::max(lambda_l, lambda);
@@ -958,7 +959,7 @@ void dtrs_solve(int n, double radius, double f, const DoubleFortranVector &c,
   auto scale_c = maxAbsVal(c); // maxval( abs( c ) )
   if (scale_c > zero) {
     for (int i = 1; i <= n; ++i) { // do i = 1, n
-      if (abs(c(i)) >= control.h_min * scale_c) {
+      if (fabs(c(i)) >= control.h_min * scale_c) {
         c_scale(i) = c(i) / scale_c;
       } else {
         c_scale(i) = zero;
@@ -1078,10 +1079,10 @@ void solve_dtrs(const DoubleFortranMatrix &J, const DoubleFortranVector &f,
   }
 
   for (int ii = 1; ii <= n; ++ii) { // for_do(ii, 1,n)
-    if (abs(w.v_trans(ii)) < epsmch) {
+    if (fabs(w.v_trans(ii)) < epsmch) {
       w.v_trans(ii) = zero;
     }
-    if (abs(w.ew(ii)) < epsmch) {
+    if (fabs(w.ew(ii)) < epsmch) {
       w.ew(ii) = zero;
     }
   }
