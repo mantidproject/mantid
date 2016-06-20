@@ -2,7 +2,8 @@
     File                 : DataSetDialog.cpp
     Project              : QtiPlot
     --------------------------------------------------------------------
-    Copyright            : (C) 2006 by Ion Vasilief, Tilman Hoener zu Siederdissen
+    Copyright            : (C) 2006 by Ion Vasilief, Tilman Hoener zu
+ Siederdissen
     Email (use @ for *)  : ion_vasilief*yahoo.fr, thzs*gmx.net
     Description          : Multi purpose dialog for choosing a data set
 
@@ -38,73 +39,67 @@
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 
-DataSetDialog::DataSetDialog( const QString& text, ApplicationWindow* app, Graph* g,  Qt::WFlags fl )
-: QDialog( g, fl ),
-  d_app(app),
-  d_graph(g)
-{
-	setAttribute(Qt::WA_DeleteOnClose);
-	setWindowTitle(tr("MantidPlot - Select data set"));
+DataSetDialog::DataSetDialog(const QString &text, ApplicationWindow *app,
+                             Graph *g, Qt::WFlags fl)
+    : QDialog(g, fl), d_app(app), d_graph(g) {
+  setAttribute(Qt::WA_DeleteOnClose);
+  setWindowTitle(tr("MantidPlot - Select data set"));
 
-	d_operation = ApplicationWindow::NoAnalysis;
-	d_graph = 0;
+  d_operation = ApplicationWindow::NoAnalysis;
+  d_graph = 0;
 
-	QVBoxLayout * mainLayout = new QVBoxLayout( this );
-	QHBoxLayout * bottomLayout = new QHBoxLayout();
-	bottomLayout->addStretch();
+  QVBoxLayout *mainLayout = new QVBoxLayout(this);
+  QHBoxLayout *bottomLayout = new QHBoxLayout();
+  bottomLayout->addStretch();
 
-	groupBox1 = new QGroupBox();
-	QHBoxLayout * topLayout = new QHBoxLayout( groupBox1 );
+  groupBox1 = new QGroupBox();
+  QHBoxLayout *topLayout = new QHBoxLayout(groupBox1);
 
-	topLayout->addWidget( new QLabel(text) );
-	boxName = new QComboBox();
-	topLayout->addWidget(boxName);
+  topLayout->addWidget(new QLabel(text));
+  boxName = new QComboBox();
+  topLayout->addWidget(boxName);
 
-	buttonOk = new QPushButton(tr( "&OK" ));
-	buttonOk->setAutoDefault( true );
-	buttonOk->setDefault( true );
-	bottomLayout->addWidget( buttonOk );
+  buttonOk = new QPushButton(tr("&OK"));
+  buttonOk->setAutoDefault(true);
+  buttonOk->setDefault(true);
+  bottomLayout->addWidget(buttonOk);
 
-	buttonCancel = new QPushButton(tr( "&Cancel" ));
-	buttonCancel->setAutoDefault( true );
-	bottomLayout->addWidget( buttonCancel );
+  buttonCancel = new QPushButton(tr("&Cancel"));
+  buttonCancel->setAutoDefault(true);
+  bottomLayout->addWidget(buttonCancel);
 
-	mainLayout->addWidget( groupBox1 );
-	mainLayout->addLayout( bottomLayout );
+  mainLayout->addWidget(groupBox1);
+  mainLayout->addLayout(bottomLayout);
 
-	connect( buttonOk, SIGNAL( clicked() ), this, SLOT( accept() ) );
-	connect( buttonCancel, SIGNAL( clicked() ), this, SLOT( reject() ) );
+  connect(buttonOk, SIGNAL(clicked()), this, SLOT(accept()));
+  connect(buttonCancel, SIGNAL(clicked()), this, SLOT(reject()));
 
   setGraph(g);
 }
 
-void DataSetDialog::accept()
-{
-	if (d_operation == ApplicationWindow::NoAnalysis)
-		emit options(boxName->currentText());
-	else if (d_graph){
-      if (d_app)
-            d_app->analyzeCurve(d_graph, d_operation, boxName->currentText());
-	}
-	close();
+void DataSetDialog::accept() {
+  if (d_operation == ApplicationWindow::NoAnalysis)
+    emit options(boxName->currentText());
+  else if (d_graph) {
+    if (d_app)
+      d_app->analyzeCurve(d_graph, d_operation, boxName->currentText());
+  }
+  close();
 }
 
-void DataSetDialog::setCurveNames(const QStringList& names)
-{
-	boxName->addItems(names);
+void DataSetDialog::setCurveNames(const QStringList &names) {
+  boxName->addItems(names);
 }
 
-void DataSetDialog::setCurentDataSet(const QString& s)
-{
-	int row = boxName->findText(s);
-	boxName->setCurrentIndex(row);
+void DataSetDialog::setCurentDataSet(const QString &s) {
+  int row = boxName->findText(s);
+  boxName->setCurrentIndex(row);
 }
 
-void DataSetDialog::setGraph(Graph *g)
-{
-    if (!g)
-        return;
+void DataSetDialog::setGraph(Graph *g) {
+  if (!g)
+    return;
 
-   d_graph = g;
-   boxName->addItems(g->analysableCurvesList());
+  d_graph = g;
+  boxName->addItems(g->analysableCurvesList());
 }

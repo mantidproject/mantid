@@ -22,9 +22,6 @@ public:
   /// Constructor
   FitOneSinglePeak();
 
-  /// Desctructor
-  ~FitOneSinglePeak() override;
-
   /// Summary of algorithms purpose
   const std::string summary() const override {
     return "Fit a single peak with checking mechanism. ";
@@ -247,7 +244,6 @@ private:
 class DLLExport FitPeak : public API::Algorithm {
 public:
   FitPeak();
-  ~FitPeak() override;
 
   /// Algorithm's name
   const std::string name() const override { return "FitPeak"; }

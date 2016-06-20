@@ -1,13 +1,15 @@
 #ifndef MANTID_VATES_VTK_MD_HISTO_HEX_FACTORY_H_
 #define MANTID_VATES_VTK_MD_HISTO_HEX_FACTORY_H_
 
-/** Concrete implementation of vtkDataSetFactory. Creates a vtkUnStructuredGrid. Uses Thresholding technique
- * to create sparse 3D representation of data. 
+/** Concrete implementation of vtkDataSetFactory. Creates a vtkUnStructuredGrid.
+ Uses Thresholding technique
+ * to create sparse 3D representation of data.
 
  @author Owen Arnold, Tessella plc
  @date 06/05/2011
 
- Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+ Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+ National Laboratory & European Spallation Source
 
  This file is part of Mantid.
 
@@ -37,23 +39,20 @@
 #include <vtkHexahedron.h>
 #include "MantidDataObjects/MDHistoWorkspace.h"
 
-namespace Mantid
-{
-namespace VATES
-{
+namespace Mantid {
+namespace VATES {
 
-class DLLExport vtkMDHistoHexFactory: public vtkDataSetFactory
-{
+class DLLExport vtkMDHistoHexFactory : public vtkDataSetFactory {
 public:
-
   /// Constructor
-  vtkMDHistoHexFactory(ThresholdRange_scptr thresholdRange, const VisualNormalization normalizationOption);
+  vtkMDHistoHexFactory(ThresholdRange_scptr thresholdRange,
+                       const VisualNormalization normalizationOption);
 
   /// Assignment operator
-  vtkMDHistoHexFactory& operator=(const vtkMDHistoHexFactory& other);
+  vtkMDHistoHexFactory &operator=(const vtkMDHistoHexFactory &other);
 
   /// Copy constructor.
-  vtkMDHistoHexFactory(const vtkMDHistoHexFactory& other);
+  vtkMDHistoHexFactory(const vtkMDHistoHexFactory &other);
 
   /// Destructor
   ~vtkMDHistoHexFactory() override;
@@ -87,9 +86,7 @@ protected:
 
   /// Threshold range.
   mutable ThresholdRange_scptr m_thresholdRange;
-
 };
-
 }
 }
 

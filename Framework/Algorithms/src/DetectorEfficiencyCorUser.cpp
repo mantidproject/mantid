@@ -19,17 +19,6 @@ using namespace Geometry;
 DECLARE_ALGORITHM(DetectorEfficiencyCorUser)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-DetectorEfficiencyCorUser::DetectorEfficiencyCorUser()
-    : API::Algorithm(), m_inputWS(), m_outputWS(), m_Ei(0.) {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-DetectorEfficiencyCorUser::~DetectorEfficiencyCorUser() {}
-
-//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string DetectorEfficiencyCorUser::name() const {
   return "DetectorEfficiencyCorUser";
@@ -148,7 +137,7 @@ DetectorEfficiencyCorUser::calculateFormulaValue(const std::string &formula,
     p.SetExpr(formula);
     double eff = p.Eval();
     g_log.debug() << "Formula: " << formula << " with: " << energy
-                  << "evaluated to: " << eff << std::endl;
+                  << "evaluated to: " << eff << '\n';
     return eff;
 
   } catch (mu::Parser::exception_type &e) {

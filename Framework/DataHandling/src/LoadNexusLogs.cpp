@@ -192,8 +192,7 @@ void LoadNexusLogs::exec() {
   if (workspace->mutableRun().hasProperty("proton_log")) {
     std::vector<int> event_frame_number;
     this->getLogger().notice()
-        << "Using old ISIS proton_log and event_frame_number indirection..."
-        << std::endl;
+        << "Using old ISIS proton_log and event_frame_number indirection...\n";
     try {
       // Find the bank/name corresponding to the first event data entry, i.e.
       // one with type NXevent_data.
@@ -215,9 +214,9 @@ void LoadNexusLogs::exec() {
                     "/event_frame_number");
       file.getData(event_frame_number);
     } catch (const ::NeXus::Exception &) {
-      this->getLogger().warning() << "Unable to load event_frame_number - "
-                                     "filtering events by time will not work "
-                                  << std::endl;
+      this->getLogger().warning()
+          << "Unable to load event_frame_number - "
+             "filtering events by time will not work \n";
     }
     file.openPath("/" + entry_name);
     if (!event_frame_number.empty()) // ISIS indirection - see above comments

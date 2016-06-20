@@ -3,6 +3,7 @@
 //----------------------------------------------------------------------
 #include "MantidKernel/PropertyManager.h"
 #include "MantidKernel/FilteredTimeSeriesProperty.h"
+#include "MantidKernel/StringTokenizer.h"
 
 #include <json/json.h>
 
@@ -345,17 +346,14 @@ void PropertyManager::setPropertiesWithSimpleString(
     const std::unordered_set<std::string> &ignoreProperties) {
   ::Json::Value propertyJson;
   // Split up comma-separated properties
-  typedef boost::tokenizer<boost::char_separator<char>> tokenizer;
+  typedef Mantid::Kernel::StringTokenizer tokenizer;
 
   boost::char_separator<char> sep(";");
-  tokenizer propPairs(propertiesString, sep);
+  tokenizer propPairs(propertiesString, ";",
+                      Mantid::Kernel::StringTokenizer::TOK_TRIM);
   int index = 0;
   // Iterate over the properties
-  for (tokenizer::iterator it = propPairs.begin(); it != propPairs.end();
-       ++it) {
-    // Pair of the type "
-    std::string pair = *it;
-
+  for (const auto &pair : propPairs) {
     size_t n = pair.find('=');
     if (n != std::string::npos) {
       // Normal "PropertyName=value" string.
@@ -447,8 +445,7 @@ bool PropertyManager::validateProperties() const {
     //"" means no error
     if (!error.empty()) {
       g_log.error() << "Property \"" << property.first
-                    << "\" is not set to a valid value: \"" << error << "\"."
-                    << std::endl;
+                    << "\" is not set to a valid value: \"" << error << "\".\n";
       allValid = false;
     }
   }

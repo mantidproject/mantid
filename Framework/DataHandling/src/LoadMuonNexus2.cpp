@@ -173,7 +173,7 @@ void LoadMuonNexus2::doExec() {
   // Set y axis unit
   localWorkspace->setYUnit("Counts");
 
-  // g_log.error()<<" number of perioids= "<<m_numberOfPeriods<<std::endl;
+  // g_log.error()<<" number of perioids= "<<m_numberOfPeriods<<'\n';
   WorkspaceGroup_sptr wsGrpSptr = WorkspaceGroup_sptr(new WorkspaceGroup);
   if (entry.containsDataSet("title")) {
     wsGrpSptr->setTitle(entry.getString("title"));
@@ -249,7 +249,7 @@ void LoadMuonNexus2::doExec() {
          spec <= static_cast<int>(m_spec_max); ++spec) {
       int i = index_spectrum[spec]; // if spec not found i is 0
       loadData(counts, timeBins, counter, period, i, localWorkspace);
-      localWorkspace->getSpectrum(counter)->setSpectrumNo(spectrum_index[i]);
+      localWorkspace->getSpectrum(counter).setSpectrumNo(spectrum_index[i]);
       counter++;
       progress.report();
     }
@@ -259,7 +259,7 @@ void LoadMuonNexus2::doExec() {
       for (auto spec : m_spec_list) {
         int k = index_spectrum[spec]; // if spec not found k is 0
         loadData(counts, timeBins, counter, period, k, localWorkspace);
-        localWorkspace->getSpectrum(counter)->setSpectrumNo(spectrum_index[k]);
+        localWorkspace->getSpectrum(counter).setSpectrumNo(spectrum_index[k]);
         counter++;
         progress.report();
       }
@@ -349,8 +349,7 @@ void LoadMuonNexus2::loadLogs(API::MatrixWorkspace_sptr ws, NXEntry &entry,
     ws->setComment(entry.getString("notes"));
   }
 
-  std::string run_num =
-      boost::lexical_cast<std::string>(entry.getInt("run_number"));
+  std::string run_num = std::to_string(entry.getInt("run_number"));
   // The sample is left to delete the property
   ws->mutableRun().addLogData(
       new PropertyWithValue<std::string>("run_number", run_num));

@@ -9,69 +9,69 @@
 
 using namespace Mantid::API;
 
-namespace MantidQt
-{
-namespace CustomInterfaces
-{
+namespace MantidQt {
+namespace CustomInterfaces {
 
-  /** ALCPeakFittingModel : Concrete model for ALC peak fitting
-    
-    Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+/** ALCPeakFittingModel : Concrete model for ALC peak fitting
 
-    This file is part of Mantid.
+  Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+  National Laboratory & European Spallation Source
 
-    Mantid is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 3 of the License, or
-    (at your option) any later version.
+  This file is part of Mantid.
 
-    Mantid is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+  Mantid is free software; you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation; either version 3 of the License, or
+  (at your option) any later version.
 
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  Mantid is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
 
-    File change history is stored at: <https://github.com/mantidproject/mantid>
-    Code Documentation is available at: <http://doxygen.mantidproject.org>
-  */
-  class MANTIDQT_CUSTOMINTERFACES_DLL ALCPeakFittingModel : public IALCPeakFittingModel
-  {
-  public:
-    // -- IALCPeakFittingModel interface -----------------------------------------------------------
-    IFunction_const_sptr fittedPeaks() const override { return m_fittedPeaks; }
-    MatrixWorkspace_const_sptr data() const override { return m_data; }
-    ITableWorkspace_sptr parameterTable() const { return m_parameterTable; }
+  You should have received a copy of the GNU General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-    void fitPeaks(IFunction_const_sptr peaks) override;
-    // -- End of IALCPeakFittingModel interface ----------------------------------------------------
+  File change history is stored at: <https://github.com/mantidproject/mantid>
+  Code Documentation is available at: <http://doxygen.mantidproject.org>
+*/
+class MANTIDQT_CUSTOMINTERFACES_DLL ALCPeakFittingModel
+    : public IALCPeakFittingModel {
+public:
+  // -- IALCPeakFittingModel interface
+  // -----------------------------------------------------------
+  IFunction_const_sptr fittedPeaks() const override { return m_fittedPeaks; }
+  MatrixWorkspace_const_sptr data() const override { return m_data; }
+  ITableWorkspace_sptr parameterTable() const { return m_parameterTable; }
 
-    /// Update the data
-    void setData(MatrixWorkspace_const_sptr newData);
+  void fitPeaks(IFunction_const_sptr peaks) override;
+  // -- End of IALCPeakFittingModel interface
+  // ----------------------------------------------------
 
-    /// Export data and fitted peaks as a single workspace
-    MatrixWorkspace_sptr exportWorkspace();
+  /// Update the data
+  void setData(MatrixWorkspace_const_sptr newData);
 
-    /// Export fitted peaks as a table workspace
-    ITableWorkspace_sptr exportFittedPeaks();
+  /// Export data and fitted peaks as a single workspace
+  MatrixWorkspace_sptr exportWorkspace();
 
-  private:
-    /// The data we are fitting peaks to
-    MatrixWorkspace_const_sptr m_data;
+  /// Export fitted peaks as a table workspace
+  ITableWorkspace_sptr exportFittedPeaks();
 
-    /// Parameter table containing fit results
-    ITableWorkspace_sptr m_parameterTable;
+private:
+  /// The data we are fitting peaks to
+  MatrixWorkspace_const_sptr m_data;
 
-    /// Setter for convenience
-    void setFittedPeaks(IFunction_const_sptr fittedPeaks);
+  /// Parameter table containing fit results
+  ITableWorkspace_sptr m_parameterTable;
 
-    /// Last fitted peaks
-    IFunction_const_sptr m_fittedPeaks;
-  };
+  /// Setter for convenience
+  void setFittedPeaks(IFunction_const_sptr fittedPeaks);
 
+  /// Last fitted peaks
+  IFunction_const_sptr m_fittedPeaks;
+};
 
 } // namespace CustomInterfaces
 } // namespace MantidQt
 
-#endif  /* MANTID_CUSTOMINTERFACES_ALCPEAKFITTINGMODEL_H_ */
+#endif /* MANTID_CUSTOMINTERFACES_ALCPEAKFITTINGMODEL_H_ */

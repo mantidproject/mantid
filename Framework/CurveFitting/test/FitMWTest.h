@@ -618,7 +618,7 @@ public:
 
     API::MatrixWorkspace_sptr ws = createTestWorkspace(false);
     ws->setInstrument(instrument);
-    ws->getSpectrum(0)->setDetectorID(det->getID());
+    ws->getSpectrum(0).setDetectorID(det->getID());
 
     auto &pmap = ws->instrumentParameters();
 

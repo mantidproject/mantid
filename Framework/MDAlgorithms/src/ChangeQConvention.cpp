@@ -28,18 +28,6 @@ namespace MDAlgorithms {
 DECLARE_ALGORITHM(ChangeQConvention)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-ChangeQConvention::ChangeQConvention() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-ChangeQConvention::~ChangeQConvention() {}
-
-//----------------------------------------------------------------------------------------------
-
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void ChangeQConvention::init() {
@@ -55,7 +43,7 @@ void ChangeQConvention::exec() {
   IMDWorkspace_sptr ws = getProperty("InputWorkspace");
   std::string convention = ws->getConvention();
 
-  g_log.information() << "Transforming Q in workspace" << std::endl;
+  g_log.information() << "Transforming Q in workspace\n";
 
   Algorithm_sptr transform_alg = createChildAlgorithm("TransformMD");
   transform_alg->setProperty("InputWorkspace",

@@ -36,17 +36,6 @@ const double WAVELENGTH_TO_VELOCITY =
 const double WAVELENGTH_MAX = 1000.;
 }
 
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-EstimateResolutionDiffraction::EstimateResolutionDiffraction()
-    : m_inputWS(), m_outputWS(), m_centreVelocity(0.), m_L1(0.), m_deltaT(0.) {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-EstimateResolutionDiffraction::~EstimateResolutionDiffraction() {}
-
 const std::string EstimateResolutionDiffraction::name() const {
   return "EstimateResolutionDiffraction";
 }

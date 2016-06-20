@@ -100,8 +100,7 @@ class IqtFitSequential(PythonAlgorithm):
 
 
     def PyExec(self):
-        from IndirectDataAnalysis import (convertToElasticQ)
-        from IndirectCommon import (getWSprefix)
+        from IndirectCommon import (getWSprefix, convertToElasticQ)
 
         setup_prog = Progress(self, start=0.0, end=0.1, nreports=4)
         self._fit_type = self._fit_type[:-2]
@@ -123,8 +122,8 @@ class IqtFitSequential(PythonAlgorithm):
 
         # Name stem for generated workspace
         output_workspace = '%sIqtFit_%s_s%d_to_%d' % (getWSprefix(self._input_ws.getName()),
-                                                  self._fit_type, self._spec_min,
-                                                  self._spec_max)
+                                                      self._fit_type, self._spec_min,
+                                                      self._spec_max)
 
         setup_prog.report('Converting to Histogram')
         convert_to_hist_alg = self.createChildAlgorithm("ConvertToHistogram")
@@ -186,6 +185,8 @@ class IqtFitSequential(PythonAlgorithm):
         pifp_alg.setProperty("OutputWorkspace", self._result_name)
         pifp_alg.execute()
         self._result_ws = pifp_alg.getProperty("OutputWorkspace").value
+
+        mtd.addOrReplace(self._result_name, self._result_ws)
 
         # Process generated workspaces
         wsnames = mtd[self._fit_group_name].getNames()

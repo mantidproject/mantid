@@ -113,11 +113,11 @@ void InelasticDiffRotDiscreteCircle::function1D(double *out,
     Q = m_qValueCache[specIdx];
 
     g_log.debug() << "Get Q value for workspace index " << specIdx << ": " << Q
-                  << std::endl;
+                  << '\n';
   } else {
     Q = getAttribute("Q").asDouble();
 
-    g_log.debug() << "Using Q attribute: " << Q << std::endl;
+    g_log.debug() << "Using Q attribute: " << Q << '\n';
   }
 
   std::vector<double> sph(N);

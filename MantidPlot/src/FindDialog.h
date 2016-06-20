@@ -2,10 +2,11 @@
     File                 : FindDialog.h
     Project              : QtiPlot
     --------------------------------------------------------------------
-    Copyright            : (C) 2006 by Ion Vasilief, Tilman Hoener zu Siederdissen
+    Copyright            : (C) 2006 by Ion Vasilief, Tilman Hoener zu
+ Siederdissen
     Email (use @ for *)  : ion_vasilief*yahoo.fr, thzs*gmx.net
     Description          : Find dialog
-                           
+
  ***************************************************************************/
 
 /***************************************************************************
@@ -38,34 +39,33 @@ class QComboBox;
 class QLabel;
 
 //! Find dialog
-class FindDialog : public QDialog
-{
-    Q_OBJECT
+class FindDialog : public QDialog {
+  Q_OBJECT
 
 public:
-    FindDialog( QWidget* parent = 0, Qt::WFlags fl = 0 );
-    ~FindDialog() override;
+  FindDialog(QWidget *parent = 0, Qt::WFlags fl = 0);
+  ~FindDialog() override;
 
 private:
-	QPushButton* buttonFind;
-	QPushButton* buttonCancel;
-	QPushButton* buttonReset;
+  QPushButton *buttonFind;
+  QPushButton *buttonCancel;
+  QPushButton *buttonReset;
 
-	QLabel *labelStart;
-	QComboBox* boxFind;
+  QLabel *labelStart;
+  QComboBox *boxFind;
 
-    QCheckBox* boxWindowNames;
-    QCheckBox* boxWindowLabels;
-	QCheckBox* boxFolderNames;
+  QCheckBox *boxWindowNames;
+  QCheckBox *boxWindowLabels;
+  QCheckBox *boxFolderNames;
 
-	QCheckBox* boxCaseSensitive;
-    QCheckBox* boxPartialMatch;
-	QCheckBox* boxSubfolders;
+  QCheckBox *boxCaseSensitive;
+  QCheckBox *boxPartialMatch;
+  QCheckBox *boxSubfolders;
 
 public slots:
 
-	//! Displays the project current folder path 
-	void setStartPath();
+  //! Displays the project current folder path
+  void setStartPath();
 
 protected slots:
 

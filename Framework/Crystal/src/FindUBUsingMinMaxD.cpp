@@ -100,8 +100,8 @@ void FindUBUsingMinMaxD::exec() {
       IndexingUtils::Find_UB(UB, q_vectors, min_d, max_d, tolerance, base_index,
                              num_initial, degrees_per_step);
 
-  std::cout << "Error = " << error << std::endl;
-  std::cout << "UB = " << UB << std::endl;
+  std::cout << "Error = " << error << '\n';
+  std::cout << "UB = " << UB << '\n';
 
   if (!IndexingUtils::CheckUB(UB)) // UB not found correctly
   {

@@ -37,6 +37,7 @@
 #include "pixmaps.h"
 #include "TSVSerialiser.h"
 
+#include <QContextMenuEvent>
 #include <QMessageBox>
 #include <QDateTime>
 #include <QTextStream>
@@ -441,7 +442,7 @@ void Table::setColWidths(const QStringList &widths) {
 }
 
 void Table::setColumnTypes(const QStringList &ctl) {
-  int n = QMIN((int)ctl.count(), numCols());
+  int n = qMin((int)ctl.count(), numCols());
   for (int i = 0; i < n; i++) {
     QStringList l = ctl[i].split(";");
     colTypes[i] = l[0].toInt();
@@ -472,9 +473,9 @@ void Table::setCommands(const QString &com) {
 
 bool Table::calculate() {
   bool success = true;
-  for (int col=leftSelectedColumn(); col<=rightSelectedColumn(); col++)
-   if (!calculate(col, topSelectedRow(), bottomSelectedRow()))
-     success = false;
+  for (int col = leftSelectedColumn(); col <= rightSelectedColumn(); col++)
+    if (!calculate(col, topSelectedRow(), bottomSelectedRow()))
+      success = false;
   return success;
 }
 
@@ -753,9 +754,9 @@ void Table::setColName(int col, const QString &text, bool enumerateRight) {
       newLabel += QString::number(n);
 
     if (col_label.contains(newLabel) > 0) {
-      auto msg = "There is already a column called : <b>" +
-        newLabel + "</b> in table <b>" + caption +
-        "</b>!<p>Please choose another name!";
+      auto msg = "There is already a column called : <b>" + newLabel +
+                 "</b> in table <b>" + caption +
+                 "</b>!<p>Please choose another name!";
       QMessageBox::critical(0, tr("MantidPlot - Error"),
                             tr(msg.toAscii().constData()));
       return;
@@ -1030,8 +1031,8 @@ void Table::deleteRows(int startRow, int endRow) {
     }
   }
 
-  int start = QMIN(startRow, endRow);
-  int end = QMAX(startRow, endRow);
+  int start = qMin(startRow, endRow);
+  int end = qMax(startRow, endRow);
 
   start--;
   end--;
@@ -1603,8 +1604,7 @@ void Table::setText(int row, int col, const QString &text) {
   d_table->setText(row, col, text);
 }
 
-void Table::saveToMemory()
-{
+void Table::saveToMemory() {
   // clear d_saved_cells, if any
   freeMemory();
   d_saved_cells = new double *[d_table->columnCount()];
@@ -2233,7 +2233,7 @@ void Table::importASCII(const QString &fname, const QString &sep,
       }
 
       if (importComments) { // import comments
-        s = t.readLine(); // read 2nd line
+        s = t.readLine();   // read 2nd line
         if (simplifySpaces)
           s = s.simplified();
         else if (stripSpaces)
@@ -2241,7 +2241,7 @@ void Table::importASCII(const QString &fname, const QString &sep,
         line = s.split(sep, QString::SkipEmptyParts);
         for (int i = 0; i < line.size(); i++)
           comments[startCol + i] = line[i];
-        qApp->processEvents(QEventLoop::ExcludeUserInput);
+        qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
       }
     } else if (rows > 0) { // put values in the first line of the table
       for (int i = 0; i < cols; i++)
@@ -2320,8 +2320,8 @@ bool Table::exportASCII(const QString &fname, const QString &separator,
   if (!f.open(QIODevice::WriteOnly)) {
     QApplication::restoreOverrideCursor();
     auto msg = "Could not write to file: <br><h4>" + fname +
-      "</h4><p>Please verify that you have the right to "
-      "write to this location!";
+               "</h4><p>Please verify that you have the right to "
+               "write to this location!";
     QMessageBox::critical(0, tr("MantidPlot - ASCII Export Error"),
                           tr(msg.toAscii().constData()).arg(fname));
     return false;
@@ -2499,7 +2499,7 @@ void Table::restore(QString &spec) {
       d_table->setText(i, j, "");
   }
 
-  t.readLine(); // table geometry useless info when restoring
+  t.readLine();     // table geometry useless info when restoring
   s = t.readLine(); // header line
 
   list = s.split("\t");
@@ -3133,7 +3133,7 @@ void Table::loadFromProject(const std::string &lines, ApplicationWindow *app,
       }
     }
 
-    QApplication::processEvents(QEventLoop::ExcludeUserInput);
+    QApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
     QApplication::restoreOverrideCursor();
     table()->blockSignals(false);
   }

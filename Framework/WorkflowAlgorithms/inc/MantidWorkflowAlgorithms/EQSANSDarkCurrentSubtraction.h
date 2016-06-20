@@ -33,10 +33,6 @@ namespace WorkflowAlgorithms {
 */
 class DLLExport EQSANSDarkCurrentSubtraction : public API::Algorithm {
 public:
-  /// (Empty) Constructor
-  EQSANSDarkCurrentSubtraction() : API::Algorithm() {}
-  /// Virtual destructor
-  ~EQSANSDarkCurrentSubtraction() override {}
   /// Algorithm's name
   const std::string name() const override {
     return "EQSANSDarkCurrentSubtraction";

@@ -57,13 +57,6 @@ DECLARE_FILELOADER_ALGORITHM(LoadSQW2)
 //------------------------------------------------------------------------------
 // Public methods
 //------------------------------------------------------------------------------
-/// Default constructor
-LoadSQW2::LoadSQW2()
-    : API::IFileLoader<Kernel::FileDescriptor>(), m_file(), m_reader(),
-      m_outputWS(), m_nspe(0), m_uToRLU(), m_outputFrame() {}
-
-/// Default destructor
-LoadSQW2::~LoadSQW2() {}
 
 /// Algorithms name for identification. @see Algorithm::name
 const std::string LoadSQW2::name() const { return "LoadSQW"; }

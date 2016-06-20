@@ -39,6 +39,7 @@ public:
   std::string get_text_from_tag(const std::string &);
   std::map<std::string, std::string>
   get_attributes_from_tag(const std::string &);
+  std::vector<std::string> get_subnodes(const std::string &);
 
 private:
   Poco::AutoPtr<Poco::XML::Document> pDoc;

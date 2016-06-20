@@ -160,7 +160,7 @@ void LoadRawHelper::setProtonCharge(API::Run &run) {
  *  @param run :: the workspace's run object
  */
 void LoadRawHelper::setRunNumber(API::Run &run) {
-  std::string run_num = boost::lexical_cast<std::string>(isisRaw->r_number);
+  std::string run_num = std::to_string(isisRaw->r_number);
   run.addLogData(new PropertyWithValue<std::string>("run_number", run_num));
 }
 /**reads workspace dimensions,number of periods etc from raw data
@@ -282,11 +282,9 @@ void LoadRawHelper::createMonitorWorkspace(
     }
 
   } catch (std::out_of_range &) {
-    pAlg->getLogger().debug() << "Error in creating monitor workspace"
-                              << std::endl;
+    pAlg->getLogger().debug() << "Error in creating monitor workspace\n";
   } catch (std::runtime_error &) {
-    pAlg->getLogger().debug() << "Error in creating monitor workspace"
-                              << std::endl;
+    pAlg->getLogger().debug() << "Error in creating monitor workspace\n";
   }
 }
 
@@ -394,7 +392,7 @@ void LoadRawHelper::setWorkspaceData(
   MantidVec &E = newWorkspace->dataE(wsIndex);
   std::transform(Y.begin(), Y.end(), E.begin(), dblSqrt);
 
-  newWorkspace->getSpectrum(wsIndex)->setSpectrumNo(nspecNum);
+  newWorkspace->getSpectrum(wsIndex).setSpectrumNo(nspecNum);
   // for loadrawbin0
   if (binStart == 0) {
     newWorkspace->setX(wsIndex, timeChannelsVec[0]);
@@ -440,8 +438,7 @@ LoadRawHelper::getmonitorSpectrumList(const SpectrumDetectorMapping &mapping) {
     }
   } else {
     g_log.error()
-        << "monitor detector id list is empty  for the selected workspace"
-        << std::endl;
+        << "monitor detector id list is empty  for the selected workspace\n";
   }
 
   return spectrumIndices;
@@ -599,7 +596,7 @@ void LoadRawHelper::runLoadInstrument(
     std::vector<specnum_t>::const_iterator itr;
     for (itr = m_monitordetectorList.begin();
          itr != m_monitordetectorList.end(); ++itr) {
-      g_log.debug() << "Monitor detector id is " << (*itr) << std::endl;
+      g_log.debug() << "Monitor detector id is " << (*itr) << '\n';
     }
   }
 }
@@ -626,7 +623,7 @@ void LoadRawHelper::runLoadInstrumentFromRaw(
   std::vector<specnum_t>::const_iterator itr;
   for (itr = m_monitordetectorList.begin(); itr != m_monitordetectorList.end();
        ++itr) {
-    g_log.debug() << "Monitor dtector id is " << (*itr) << std::endl;
+    g_log.debug() << "Monitor dtector id is " << (*itr) << '\n';
   }
   if (!loadInst->isExecuted()) {
     g_log.error("No instrument definition loaded");
@@ -1009,8 +1006,7 @@ void LoadRawHelper::calculateWorkspacesizes(
     normalwsSpecs = m_total_specs - monitorwsSpecs;
     g_log.debug()
         << "normalwsSpecs   when m_interval  & m_bmspeclist are  false is  "
-        << normalwsSpecs << "  monitorwsSpecs is " << monitorwsSpecs
-        << std::endl;
+        << normalwsSpecs << "  monitorwsSpecs is " << monitorwsSpecs << '\n';
   } else if (m_interval || m_bmspeclist) {
     if (m_interval) {
       int msize = 0;
@@ -1024,7 +1020,7 @@ void LoadRawHelper::calculateWorkspacesizes(
       normalwsSpecs = m_total_specs - monitorwsSpecs;
       g_log.debug() << "normalwsSpecs when  m_interval true is  "
                     << normalwsSpecs << "  monitorwsSpecs is " << monitorwsSpecs
-                    << std::endl;
+                    << '\n';
     }
     if (m_bmspeclist) {
       if (m_interval) {
@@ -1040,8 +1036,7 @@ void LoadRawHelper::calculateWorkspacesizes(
         }
         if (m_spec_list.empty()) {
           g_log.debug() << "normalwsSpecs is " << normalwsSpecs
-                        << "  monitorwsSpecs is " << monitorwsSpecs
-                        << std::endl;
+                        << "  monitorwsSpecs is " << monitorwsSpecs << '\n';
         } else { // at this point there are monitors in the list which are not
                  // in the min& max range
           // so find those  monitors  count and calculate the workspace specs
@@ -1056,8 +1051,7 @@ void LoadRawHelper::calculateWorkspacesizes(
           monitorwsSpecs += monCounter;
           normalwsSpecs = m_total_specs - monitorwsSpecs;
           g_log.debug() << "normalwsSpecs is  " << normalwsSpecs
-                        << "  monitorwsSpecs is " << monitorwsSpecs
-                        << std::endl;
+                        << "  monitorwsSpecs is " << monitorwsSpecs << '\n';
         }
       }      // end if loop for m_interval
       else { // if only List true

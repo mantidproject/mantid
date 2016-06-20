@@ -7,10 +7,8 @@
 ImportWorkspaceDlg::ImportWorkspaceDlg(QWidget *parent, size_t num)
     : QDialog(parent), numHists(num), lowerLimit(0), upperLimit(0),
       filtered(false), minValue(0), maxValue(100.) {
-  label = new QLabel(tr("Set Histogram Range to Load (Max Number = " +
-                        QString::number(numHists) + "):")
-                         .toAscii()
-                         .constData());
+  label = new QLabel(
+      QString("Set Histogram Range to Load (Max Number = %1):").arg(numHists));
 
   labelLow = new QLabel(tr("From:"));
   lineLow = new QLineEdit;
@@ -40,7 +38,7 @@ ImportWorkspaceDlg::ImportWorkspaceDlg(QWidget *parent, size_t num)
   grid1->addWidget(lineMaximum, 1, 1);
   filterLayout->addLayout(grid1);
 
-  enableFilter(QCheckBox::Off);
+  enableFilter(Qt::Unchecked);
 
   okButton = new QPushButton(tr("OK"));
   okButton->setDefault(true);
@@ -131,13 +129,13 @@ void ImportWorkspaceDlg::okClicked() {
 }
 
 void ImportWorkspaceDlg::enableFilter(int state) {
-  if (state == QCheckBox::Off) {
+  if (state == Qt::Unchecked) {
     lineMaximum->setReadOnly(true);
     lineMinimum->setReadOnly(true);
     lineMinimum->setText("");
     lineMaximum->setText("");
   }
-  if (state == QCheckBox::On) {
+  if (state == Qt::Checked) {
     lineMinimum->setReadOnly(false);
     lineMaximum->setReadOnly(false);
     lineMinimum->setText(QString::number(minValue));

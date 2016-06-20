@@ -13,4 +13,4 @@
 #include <traceback.h>
 #include <frameobject.h>
 
-#endif //PYTHONSYSTEMHEADER_H_
+#endif // PYTHONSYSTEMHEADER_H_

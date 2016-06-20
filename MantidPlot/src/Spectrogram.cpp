@@ -799,7 +799,7 @@ void Spectrogram::drawContourLines(
 void Spectrogram::updateLabels(
     QPainter *p, const QwtScaleMap &xMap, const QwtScaleMap &yMap,
     const QwtRasterData::ContourLines &contourLines) const {
-  (void)p; // Avoid compiler warning
+  (void)p;    // Avoid compiler warning
   (void)xMap; // Avoid compiler warning
   (void)yMap; // Avoid compiler warning
 
