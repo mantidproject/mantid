@@ -19,8 +19,10 @@ public:
   ~MockPeakShapeFactory() override {}
 };
 
+#if defined(GCC_VERSION) && GCC_VERSION >= 50000
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wsuggest-override"
+#endif
 
 class MockPeakShape : public Mantid::Geometry::PeakShape {
 public:
@@ -37,6 +39,8 @@ public:
 }
 }
 
+#if defined(GCC_VERSION) && GCC_VERSION >= 50000
 #pragma GCC diagnostic pop
+#endif
 
 #endif /* MOCKOBJECTS_H_ */

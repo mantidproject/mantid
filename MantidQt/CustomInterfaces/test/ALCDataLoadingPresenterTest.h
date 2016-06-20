@@ -24,8 +24,10 @@ operator<<(std::basic_ostream<CharType, CharTrait> &out,
 }
 }
 
+#if defined(GCC_VERSION) && GCC_VERSION >= 50000
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wsuggest-override"
+#endif
 
 class MockALCDataLoadingView : public IALCDataLoadingView {
   // XXX: A workaround, needed because of the way the comma is treated in a
@@ -368,6 +370,8 @@ public:
   }
 };
 
+#if defined(GCC_VERSION) && GCC_VERSION >= 50000
 #pragma GCC diagnostic pop
+#endif
 
 #endif /* MANTID_CUSTOMINTERFACES_ALCDATALOADINGTEST_H_ */

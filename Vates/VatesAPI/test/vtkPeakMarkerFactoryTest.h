@@ -23,8 +23,10 @@ using namespace ::testing;
 using namespace Mantid::VATES;
 using Mantid::VATES::vtkPeakMarkerFactory;
 
+#if defined(GCC_VERSION) && GCC_VERSION >= 50000
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wsuggest-override"
+#endif
 
 class MockPeakShape : public Peak {
 public:
@@ -313,5 +315,8 @@ public:
     }
   }
 };
+#if defined(GCC_VERSION) && GCC_VERSION >= 50000
 #pragma GCC diagnostic pop
+#endif
+
 #endif

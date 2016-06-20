@@ -5,8 +5,10 @@
 
 #include <gmock/gmock.h>
 
+#if defined(GCC_VERSION) && GCC_VERSION >= 50000
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wsuggest-override"
+#endif
 
 // This is a simple mock for the tomo interface view when using SCARF.
 class MockEnggDiffractionView
@@ -238,5 +240,8 @@ public:
   // virtual void plotCalibOutput();
   MOCK_METHOD1(plotCalibOutput, void(const std::string &pyCode));
 };
+#if defined(GCC_VERSION) && GCC_VERSION >= 50000
 #pragma GCC diagnostic pop
+#endif
+
 #endif // MANTID_CUSTOMINTERFACES_ENGGDIFFRACTIONVIEWMOCK_H

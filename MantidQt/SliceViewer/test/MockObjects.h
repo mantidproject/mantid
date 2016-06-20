@@ -23,8 +23,10 @@ using namespace Mantid::Geometry;
 using namespace Mantid;
 using boost::regex;
 
+#if defined(GCC_VERSION) && GCC_VERSION >= 50000
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wsuggest-override"
+#endif
 
 namespace {
 /*------------------------------------------------------------
@@ -249,5 +251,9 @@ public:
   MOCK_METHOD3(setRange, void(size_t nBins, coord_t min, coord_t max));
 };
 }
+
+#if defined(GCC_VERSION) && GCC_VERSION >= 50000
+#pragma GCC diagnostic pop
+#endif
 
 #endif

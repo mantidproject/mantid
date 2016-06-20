@@ -16,8 +16,10 @@
 namespace Mantid {
 namespace Crystal {
 
+#if defined(GCC_VERSION) && GCC_VERSION >= 50000
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wsuggest-override"
+#endif
 
 // Mock Background strategy
 class MockBackgroundStrategy : public BackgroundStrategy {
@@ -49,7 +51,9 @@ public:
   }
 };
 
+#if defined(GCC_VERSION) && GCC_VERSION >= 50000
 #pragma GCC diagnostic pop
+#endif
 }
 }
 

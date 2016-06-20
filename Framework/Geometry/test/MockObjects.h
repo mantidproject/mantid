@@ -21,8 +21,10 @@ using boost::regex;
 
 namespace {
 
+#if defined(GCC_VERSION) && GCC_VERSION >= 50000
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wsuggest-override"
+#endif
 
 /*------------------------------------------------------------
  Mock Peak Transform
@@ -112,6 +114,8 @@ public:
   MOCK_CONST_METHOD0(getPeakShape, const Mantid::Geometry::PeakShape &());
 };
 }
-
+#if defined(GCC_VERSION) && GCC_VERSION >= 50000
 #pragma GCC diagnostic pop
+#endif
+
 #endif /* MANTIDGEOMETRYTEST_MOCKOBJECTS_H_ */

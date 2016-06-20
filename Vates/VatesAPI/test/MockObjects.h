@@ -73,9 +73,10 @@ public:
   ~FakeIMDDimension() override {}
 };
 
+#if defined(GCC_VERSION) && GCC_VERSION >= 50000
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wsuggest-override"
-
+#endif
 //=================================================================================================
 /// Concrete mocked implementation of IMDWorkspace for testing.
 class MockIMDWorkspace : public Mantid::API::IMDWorkspace {
@@ -180,7 +181,9 @@ public:
   MOCK_METHOD1(eventRaised, void(double));
 };
 
+#if defined(GCC_VERSION) && GCC_VERSION >= 50000
 #pragma GCC diagnostic pop
+#endif
 
 class FakeProgressAction : public Mantid::VATES::ProgressAction {
   void eventRaised(double) override {}

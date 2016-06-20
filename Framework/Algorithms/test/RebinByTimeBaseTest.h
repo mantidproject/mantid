@@ -68,8 +68,10 @@ createEventWorkspace(const int numberspectra, const int nDistrubutedEvents,
   return retVal;
 }
 
+#if defined(GCC_VERSION) && GCC_VERSION >= 50000
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wsuggest-override"
+#endif
 
 /*
  This type is an IEventWorkspace, but not an EventWorkspace.
@@ -108,7 +110,10 @@ private:
 };
 }
 
+#if defined(GCC_VERSION) && GCC_VERSION >= 50000
 #pragma gcc diagnostic pop
+#endif
+
 //=====================================================================================
 // Functional Tests
 //=====================================================================================

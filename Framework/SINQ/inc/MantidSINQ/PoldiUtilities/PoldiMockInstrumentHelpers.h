@@ -35,8 +35,10 @@ using namespace Geometry;
 
 typedef std::pair<double, double> DoublePair;
 
+#if defined(GCC_VERSION) && GCC_VERSION >= 50000
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wsuggest-override"
+#endif
 
 class MockDetector : public PoldiAbstractDetector {
 protected:
@@ -391,7 +393,9 @@ public:
   }
 };
 
+#if defined(GCC_VERSION) && GCC_VERSION >= 50000
 #pragma GCC diagnostic pop
+#endif
 
 class PoldiPeakCollectionHelpers {
   /* This class contains some static helper function to create

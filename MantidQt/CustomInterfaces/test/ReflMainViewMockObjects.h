@@ -11,8 +11,10 @@
 using namespace MantidQt::CustomInterfaces;
 using namespace Mantid::API;
 
+#if defined(GCC_VERSION) && GCC_VERSION >= 50000
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wsuggest-override"
+#endif
 
 class MockView : public ReflMainView {
 public:
@@ -88,5 +90,9 @@ public:
   MOCK_CONST_METHOD1(transformArchivePath, std::string(const std::string &));
   ~MockICatalogInfo() override {}
 };
+
+#if defined(GCC_VERSION) && GCC_VERSION >= 50000
 #pragma GCC diagnostic pop
+#endif
+
 #endif /*MANTID_CUSTOMINTERFACES_REFLMAINVIEWMOCKOBJECTS_H*/

@@ -5,8 +5,10 @@
 
 #include <gmock/gmock.h>
 
+#if defined(GCC_VERSION) && GCC_VERSION >= 50000
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wsuggest-override"
+#endif
 
 class MockImageROIView : public MantidQt::CustomInterfaces::IImageROIView {
 public:
@@ -107,6 +109,8 @@ public:
   MOCK_METHOD0(resetWidgetsOnNewStack, void());
 };
 
+#if defined(GCC_VERSION) && GCC_VERSION >= 50000
 #pragma GCC diagnostic pop
+#endif
 
 #endif // MANTID_CUSTOMINTERFACES_IMAGEROIVIEWMOCK_H
