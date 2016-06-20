@@ -726,12 +726,10 @@ void dtrs_solve_main(int n, double radius, double f,
   }
 
   //  the iterates will all be in the L region. Prepare for the main loop
-  int it = 0;
   auto max_order = std::max(1, std::min(max_degree, control.taylor_max_degree));
 
   //  start the main loop
   for (;;) {
-    it = it + 1;
 
     //  if h(lambda) is positive definite, solve  h(lambda) x = - c
 
