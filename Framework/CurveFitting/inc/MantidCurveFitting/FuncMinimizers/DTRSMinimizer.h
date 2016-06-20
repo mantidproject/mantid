@@ -1,5 +1,5 @@
-#ifndef MANTID_CURVEFITTING_GALAHADMINIMIZER_H_
-#define MANTID_CURVEFITTING_GALAHADMINIMIZER_H_
+#ifndef MANTID_CURVEFITTING_DTRSMINIMIZER_H_
+#define MANTID_CURVEFITTING_DTRSMINIMIZER_H_
 
 #include "MantidCurveFitting/FuncMinimizers/TrustRegionMinimizer.h"
 
@@ -7,7 +7,7 @@ namespace Mantid {
 namespace CurveFitting {
 namespace FuncMinimisers {
 
-/** A Galahad trust region minimizers.
+/** A GALAHAD trust region minimizer.
 
     Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
     National Laboratory & European Spallation Source
@@ -30,10 +30,10 @@ namespace FuncMinimisers {
     File change history is stored at: <https://github.com/mantidproject/mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport GalahadMinimizer : public TrustRegionMinimizer {
+class DLLExport DTRSMinimizer : public TrustRegionMinimizer {
 public:
   /// constructor and destructor
-  GalahadMinimizer();
+  DTRSMinimizer();
   /// Name of the minimizer.
   std::string name() const override;
 
@@ -41,7 +41,7 @@ private:
   void calculate_step(const DoubleFortranMatrix &J,
                       const DoubleFortranVector &f,
                       const DoubleFortranMatrix &hf,
-                      const DoubleFortranVector &g, int n, int m, double Delta,
+                      const DoubleFortranVector &g, double Delta,
                       DoubleFortranVector &d, double &normd,
                       const NLLS::nlls_options &options,
                       NLLS::nlls_inform &inform,
@@ -52,4 +52,4 @@ private:
 } // namespace CurveFitting
 } // namespace Mantid
 
-#endif /*MANTID_CURVEFITTING_GALAHADMINIMIZER_H_*/
+#endif /*MANTID_CURVEFITTING_DTRSMINIMIZER_H_*/

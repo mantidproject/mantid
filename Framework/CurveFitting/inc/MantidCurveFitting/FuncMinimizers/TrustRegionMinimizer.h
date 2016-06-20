@@ -41,15 +41,11 @@ class DLLExport TrustRegionMinimizer : public API::IFuncMinimizer {
 public:
   /// constructor and destructor
   TrustRegionMinimizer();
-
-  /// Overloading base class methods
-
   /// Initialize minimizer, i.e. pass a function to minimize.
   void initialize(API::ICostFunction_sptr costFunction,
                   size_t maxIterations = 0) override;
   /// Do one iteration.
   bool iterate(size_t) override;
-
   /// Return current value of the cost function
   double costFunctionVal() override;
 
@@ -61,13 +57,13 @@ private:
   /// Evaluate the Hessian
   void eval_HF(const DoubleFortranVector &x, const DoubleFortranVector &f,
                DoubleFortranMatrix &h) const;
-  virtual void calculate_step(const DoubleFortranMatrix &J,
-                              const DoubleFortranVector &f,
-                              const DoubleFortranMatrix &hf,
-                              const DoubleFortranVector &g, int n, int m,
-                              double Delta, DoubleFortranVector &d,
-                              double &normd, const NLLS::nlls_options &options,
-                              NLLS::nlls_inform &inform, NLLS::calculate_step_work &w) = 0;
+  /// Find a correction vector to the parameters.
+  virtual void
+  calculate_step(const DoubleFortranMatrix &J, const DoubleFortranVector &f,
+                 const DoubleFortranMatrix &hf, const DoubleFortranVector &g,
+                 double Delta, DoubleFortranVector &d, double &normd,
+                 const NLLS::nlls_options &options, NLLS::nlls_inform &inform,
+                 NLLS::calculate_step_work &w) = 0;
 
   /// Stored cost function
   boost::shared_ptr<CostFunctions::CostFuncLeastSquares> m_leastSquares;

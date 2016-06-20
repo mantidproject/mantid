@@ -13,13 +13,16 @@ namespace Mantid {
 namespace CurveFitting {
 namespace NLLS {
 
+/// Too small values don't work well with numerical derivatives.
 const double epsmch = 1e-6; // std::numeric_limits<double>::epsilon();
 
 ///  Takes an m x n matrix J and forms the
 ///  n x n matrix A given by
 ///  A = J' * J
-void matmult_inner(const DoubleFortranMatrix &J, int n, int m,
-                   DoubleFortranMatrix &A) {
+/// @param J :: The matrix.
+/// @param A :: The result.
+void matmult_inner(const DoubleFortranMatrix &J, DoubleFortranMatrix &A) {
+  auto n = J.len2();
   A.allocate(n, n);
   gsl_blas_dgemm(CblasTrans, CblasNoTrans, 1.0, J.gsl(), J.gsl(), 0.0, A.gsl());
 }
@@ -27,6 +30,9 @@ void matmult_inner(const DoubleFortranMatrix &J, int n, int m,
 ///  Given an (m x n)  matrix J held by columns as a vector,
 ///  this routine returns the largest and smallest singular values
 ///  of J.
+/// @param J :: The matrix.
+/// @param s1 :: The largest sv.
+/// @param sn :: The smalles sv.
 void get_svd_J(const DoubleFortranMatrix &J, double &s1, double &sn) {
 
   auto n = J.len2();
@@ -39,12 +45,19 @@ void get_svd_J(const DoubleFortranMatrix &J, double &s1, double &sn) {
   sn = S(n);
 }
 
+/// Compute the 2-norm of a vector which is a square root of the
+/// sum of squares of its elements.
+/// @param v :: The vector.
 double norm2(const DoubleFortranVector &v) {
   if (v.size() == 0)
     return 0.0;
   return gsl_blas_dnrm2(v.gsl());
 }
 
+/// Multiply a matrix by a vector.
+/// @param J :: The matrix.
+/// @param x :: The vector.
+/// @param Jx :: The result vector.
 void mult_J(const DoubleFortranMatrix &J, const DoubleFortranVector &x,
             DoubleFortranVector &Jx) {
   // dgemv('N',m,n,alpha,J,m,x,1,beta,Jx,1);
@@ -54,6 +67,10 @@ void mult_J(const DoubleFortranMatrix &J, const DoubleFortranVector &x,
   gsl_blas_dgemv(CblasNoTrans, 1.0, J.gsl(), x.gsl(), 0.0, Jx.gsl());
 }
 
+/// Multiply a transposed matrix by a vector.
+/// @param J :: The matrix.
+/// @param x :: The vector.
+/// @param Jx :: The result vector.
 void mult_Jt(const DoubleFortranMatrix &J, const DoubleFortranVector &x,
              DoubleFortranVector &Jtx) {
   // dgemv('T',m,n,alpha,J,m,x,1,beta,Jtx,1)
@@ -63,10 +80,10 @@ void mult_Jt(const DoubleFortranMatrix &J, const DoubleFortranVector &x,
   gsl_blas_dgemv(CblasTrans, 1.0, J.gsl(), x.gsl(), 0.0, Jtx.gsl());
 }
 
+/// Dot product of two vectors.
 double dot_product(const DoubleFortranVector &x, const DoubleFortranVector &y) {
   return x.dot(y);
 }
-
 
 /// Input:
 /// f = f(x_k), J = J(x_k),
@@ -78,9 +95,15 @@ double dot_product(const DoubleFortranVector &x, const DoubleFortranVector &y) {
 /// This subroutine evaluates the model at the point d
 /// This value is returned as the scalar
 ///       md :=m_k(d)
-void evaluate_model(const DoubleFortranVector &f, const DoubleFortranMatrix &J,
+/// @param f :: Vector of the residuals (at d = 0).
+/// @param J :: The Jacobian matrix at d = 0.
+/// @param J :: The Hessian matrix at d = 0.
+/// @param d :: The point where to evaluate the model.
+/// @param options :: The options.
+/// @param w :: The work struct.
+double evaluate_model(const DoubleFortranVector &f, const DoubleFortranMatrix &J,
                     const DoubleFortranMatrix &hf, const DoubleFortranVector &d,
-                    double &md, int m, int n, const nlls_options options,
+                    const nlls_options options,
                     evaluate_model_work &w) {
 
   // Jd = J*d
@@ -90,7 +113,7 @@ void evaluate_model(const DoubleFortranVector &f, const DoubleFortranMatrix &J,
   // 0.5 (f^T f + f^T J d + d^T' J ^T J d )
   DoubleFortranVector temp = f;
   temp += w.Jd;
-  md = 0.5 * pow(norm2(temp), 2);
+  double md = 0.5 * pow(norm2(temp), 2);
   switch (options.model) {
   case 1: // first-order (no Hessian)
     //! nothing to do here...
@@ -101,6 +124,7 @@ void evaluate_model(const DoubleFortranVector &f, const DoubleFortranMatrix &J,
     mult_J(hf, d, w.Hd);
     md = md + 0.5 * dot_product(d, w.Hd);
   }
+  return md;
 }
 
 /// Calculate the quantity
@@ -109,12 +133,16 @@ void evaluate_model(const DoubleFortranVector &f, const DoubleFortranMatrix &J,
 ///             m_k(0)  - m_k(d)         predicted_reduction
 ///
 /// if model is good, rho should be close to one
-void calculate_rho(double normf, double normfnew, double md, double &rho,
+/// @param normf :: The 2-norm of the residuals vector at d = 0.
+/// @param normfnew :: The 2-norm of the residuals vector at d != 0.
+/// @param md :: The value of the model at the same d as normfnew.
+/// @param options :: The options.
+double calculate_rho(double normf, double normfnew, double md,
                    const nlls_options &options) {
 
   auto actual_reduction = (0.5 * pow(normf, 2)) - (0.5 * pow(normfnew, 2));
   auto predicted_reduction = ((0.5 * pow(normf, 2)) - md);
-
+  double rho = 0.0;
   if (abs(actual_reduction) < 10 * epsmch) {
     rho = one;
   } else if (abs(predicted_reduction) < 10 * epsmch) {
@@ -122,9 +150,13 @@ void calculate_rho(double normf, double normfnew, double md, double &rho,
   } else {
     rho = actual_reduction / predicted_reduction;
   }
+  return rho;
 }
 
-void rank_one_update(DoubleFortranMatrix &hf, NLLS_workspace w, int n) {
+/// Update the Hessian matrix without actually evaluating it (quasi-Newton?)
+/// @param hf :: The matrix to update.
+/// @param w :: The work struct.
+void rank_one_update(DoubleFortranMatrix &hf, NLLS_workspace w) {
 
   auto yts = dot_product(w.d, w.y);
   if (abs(yts) < 10 * epsmch) {
@@ -158,6 +190,11 @@ void rank_one_update(DoubleFortranMatrix &hf, NLLS_workspace w, int n) {
   gsl_blas_dger(alpha, w.y.gsl(), w.y.gsl(), hf.gsl());
 }
 
+/// Update the trust region radius which is hidden in NLLS_workspace w (w.Delta).
+/// @param rho :: The rho calculated by calculate_rho(...). It may also be updated.
+/// @param options :: The options.
+/// @param inform :: The information.
+/// @param w :: The work struct containing the radius that is to be updated (w.Delta).
 void update_trust_region_radius(double &rho, const nlls_options &options,
                                 nlls_inform &inform, NLLS_workspace &w) {
 
@@ -214,6 +251,7 @@ void update_trust_region_radius(double &rho, const nlls_options &options,
   }
 }
 
+/// Test the convergence.
 void test_convergence(double normF, double normJF, double normF0,
                       double normJF0, const nlls_options &options,
                       nlls_inform &inform) {
@@ -238,11 +276,18 @@ void test_convergence(double normF, double normJF, double normF0,
 ///  Calculates a diagonal scaling W, stored in w.diag
 ///  updates v(i) -> (1/W_i) * v(i)
 ///          A(i,j) -> (1 / (W_i * W_j)) * A(i,j)
-void apply_scaling(const DoubleFortranMatrix &J, int n, int m,
+/// @param J :: The Jacobian.
+/// @param A :: The Hessian.
+/// @param v :: The gradient (?).
+/// @param w :: Stored scaling data.
+/// @param options :: The options.
+/// @param inform :: The information.
+void apply_scaling(const DoubleFortranMatrix &J,
                    DoubleFortranMatrix &A, DoubleFortranVector &v,
                    apply_scaling_work &w, const nlls_options options,
                    nlls_inform inform) {
-
+  auto m = J.len1();
+  auto n = J.len2();
   if (w.diag.len() != n) {
     w.diag.allocate(n);
   }
@@ -305,10 +350,12 @@ void apply_scaling(const DoubleFortranMatrix &J, int n, int m,
   }
 }
 
-/// calculate all the eigenvalues of A (symmetric)
-void all_eig_symm(const DoubleFortranMatrix &A, int n, DoubleFortranVector &ew,
-                  DoubleFortranMatrix &ev, all_eig_symm_work &w,
-                  nlls_inform &inform) {
+/// Calculate all the eigenvalues of a symmetric matrix.
+/// @param A :: The input matrix.
+/// @param ew :: The output eigenvalues.
+/// @param ev :: The output eigenvectors.
+void all_eig_symm(const DoubleFortranMatrix &A, DoubleFortranVector &ew,
+                  DoubleFortranMatrix &ev) {
   auto M = A;
   M.eigenSystem(ew, ev);
 }
@@ -316,7 +363,7 @@ void all_eig_symm(const DoubleFortranMatrix &A, int n, DoubleFortranVector &ew,
 // This isn't used because we don't calculate second derivatives in Mantid
 // If we start using them the method should be un-commented and used here
 //
-//void apply_second_order_info(int n, int m, const DoubleFortranVector &X,
+// void apply_second_order_info(int n, int m, const DoubleFortranVector &X,
 //                             NLLS_workspace &w, eval_hf_type eval_HF,
 //                             params_base_type params,
 //                             const nlls_options &options, nlls_inform &inform,

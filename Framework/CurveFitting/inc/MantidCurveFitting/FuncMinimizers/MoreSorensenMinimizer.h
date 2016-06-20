@@ -10,7 +10,7 @@ namespace Mantid {
 namespace CurveFitting {
 namespace FuncMinimisers {
 
-/** A More-Sorensen trust region minimizers.
+/** A More-Sorensen trust region minimizer.
 
     Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
     National Laboratory & European Spallation Source
@@ -44,7 +44,7 @@ private:
   void calculate_step(const DoubleFortranMatrix &J,
                       const DoubleFortranVector &f,
                       const DoubleFortranMatrix &hf,
-                      const DoubleFortranVector &g, int n, int m, double Delta,
+                      const DoubleFortranVector &g, double Delta,
                       DoubleFortranVector &d, double &normd,
                       const NLLS::nlls_options &options,
                       NLLS::nlls_inform &inform,

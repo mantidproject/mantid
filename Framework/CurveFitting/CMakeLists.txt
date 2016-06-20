@@ -34,7 +34,7 @@ set ( SRC_FILES
 	src/FuncMinimizers/DerivMinimizer.cpp
 	src/FuncMinimizers/FABADAMinimizer.cpp
 	src/FuncMinimizers/FRConjugateGradientMinimizer.cpp
-	src/FuncMinimizers/GalahadMinimizer.cpp
+	src/FuncMinimizers/DTRSMinimizer.cpp
 	src/FuncMinimizers/LevenbergMarquardtMDMinimizer.cpp
 	src/FuncMinimizers/LevenbergMarquardtMinimizer.cpp
 	src/FuncMinimizers/MoreSorensenMinimizer.cpp
@@ -171,7 +171,7 @@ set ( INC_FILES
 	inc/MantidCurveFitting/FuncMinimizers/DerivMinimizer.h
 	inc/MantidCurveFitting/FuncMinimizers/FABADAMinimizer.h
 	inc/MantidCurveFitting/FuncMinimizers/FRConjugateGradientMinimizer.h
-	inc/MantidCurveFitting/FuncMinimizers/GalahadMinimizer.h
+	inc/MantidCurveFitting/FuncMinimizers/DTRSMinimizer.h
 	inc/MantidCurveFitting/FuncMinimizers/LevenbergMarquardtMDMinimizer.h
 	inc/MantidCurveFitting/FuncMinimizers/LevenbergMarquardtMinimizer.h
 	inc/MantidCurveFitting/FuncMinimizers/MoreSorensenMinimizer.h

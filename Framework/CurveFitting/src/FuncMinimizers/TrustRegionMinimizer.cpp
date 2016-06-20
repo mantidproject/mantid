@@ -12,6 +12,7 @@
 #include "MantidKernel/System.h"
 
 #include <boost/lexical_cast.hpp>
+#include <boost/math/special_functions/fpclassify.hpp>
 #include <gsl/gsl_blas.h>
 #include <gsl/gsl_version.h>
 
@@ -23,8 +24,12 @@ using namespace NLLS;
 
 TrustRegionMinimizer::TrustRegionMinimizer()
     : m_function(){
+  declareProperty("InitialRadius", 100.0, "Initial radius of the trust region.");
 }
 
+/// Initialise the minimizer.
+/// @param costFunction :: The cost function to minimize. Must be the least squares.
+/// @parm maxIterations :: Maximum number of iterations that the minimiser will do.
 void TrustRegionMinimizer::initialize(
     API::ICostFunction_sptr costFunction, size_t maxIterations) {
   m_leastSquares =
@@ -54,6 +59,7 @@ void TrustRegionMinimizer::initialize(
     } else
       m_J.m_index.push_back(-1);
   }
+  m_options.initial_radius = getProperty("InitialRadius");
 }
 
 /// Evaluate the fitting function and calculate the residuals.
@@ -109,8 +115,8 @@ void TrustRegionMinimizer::eval_HF(const DoubleFortranVector &x, const DoubleFor
   h.zero();
 }
 
-
-bool TrustRegionMinimizer::iterate(size_t iter) {
+/// Perform a single iteration.
+bool TrustRegionMinimizer::iterate(size_t) {
   int max_tr_decrease = 100;
   double rho, normFnew, md, Jmax, JtJdiag;
   auto &w = m_workspace;
@@ -231,7 +237,7 @@ bool TrustRegionMinimizer::iterate(size_t iter) {
       return true;
     }
     // Calculate the step d that the model thinks we should take next
-    calculate_step(w.J, w.f, w.hf, w.g, n, m, w.Delta, w.d, w.normd, options,
+    calculate_step(w.J, w.f, w.hf, w.g, w.Delta, w.d, w.normd, options,
                    inform, w.calculate_step_ws);
 
     // Accept the step?
@@ -244,7 +250,7 @@ bool TrustRegionMinimizer::iterate(size_t iter) {
     // Get the value of the model
     //      md :=   m_k(d)       
     // evaluated at the new step 
-    evaluate_model(w.f, w.J, w.hf, w.d, md, m, n, options, w.evaluate_model_ws);
+    md = evaluate_model(w.f, w.J, w.hf, w.d, options, w.evaluate_model_ws);
 
     // Calculate the quantity                                  
     //   rho = 0.5||f||^2 - 0.5||fnew||^2 =   actual_reduction 
@@ -252,7 +258,10 @@ bool TrustRegionMinimizer::iterate(size_t iter) {
     //             m_k(0)  - m_k(d)         predicted_reduction
     //                                                         
     // if model is good, rho should be close to one
-    calculate_rho(w.normF, normFnew, md, rho, options);
+    rho = calculate_rho(w.normF, normFnew, md, options);
+    if (boost::math::isnan(rho) || boost::math::isinf(rho)) {
+      throw std::runtime_error("Rho is NaN or infinite.");
+    }
     if (rho > options.eta_successful) {
       success = true;
     }
@@ -340,7 +349,7 @@ bool TrustRegionMinimizer::iterate(size_t iter) {
       // call apply_second_order_info anyway, so that we update the
       // second order approximation
       if (!options.exact_second_derivatives) {
-        rank_one_update(w.hf_temp, w, n);
+        rank_one_update(w.hf_temp, w);
       }
     }
   }
@@ -353,7 +362,7 @@ bool TrustRegionMinimizer::iterate(size_t iter) {
       inform.h_eval = inform.h_eval + 1;
     } else {
       // use the rank-one approximation...
-      rank_one_update(w.hf, w, n);
+      rank_one_update(w.hf, w);
     }
   }
 
@@ -380,6 +389,7 @@ bool TrustRegionMinimizer::iterate(size_t iter) {
   return true;
 }
 
+/// Return the current value of the cost function.
 double TrustRegionMinimizer::costFunctionVal() {
   return m_leastSquares->val();
 }

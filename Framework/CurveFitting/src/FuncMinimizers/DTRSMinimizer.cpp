@@ -1,7 +1,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidCurveFitting/FuncMinimizers/GalahadMinimizer.h"
+#include "MantidCurveFitting/FuncMinimizers/DTRSMinimizer.h"
 #include "MantidCurveFitting/RalNlls/TrustRegion.h"
 
 #include "MantidAPI/FuncMinimizerFactory.h"
@@ -17,19 +17,19 @@ namespace FuncMinimisers {
 
 // clang-format off
 ///@cond nodoc
-DECLARE_FUNCMINIMIZER(GalahadMinimizer,Galahad)
+DECLARE_FUNCMINIMIZER(DTRSMinimizer, DTRS)
 ///@endcond
 // clang-format on
 
 using namespace NLLS;
 
-GalahadMinimizer::GalahadMinimizer()
+DTRSMinimizer::DTRSMinimizer()
     : TrustRegionMinimizer(){
 }
 
 /// Name of the minimizer.
-std::string GalahadMinimizer::name() const {
-  return "Galahad";
+std::string DTRSMinimizer::name() const {
+  return "DTRS";
 }
 
 namespace {
@@ -216,48 +216,85 @@ bool hard_case = false;
 std::vector<dtrs_history_type> history;
 };
 
+/// Get the smallest of the four values.
+/// @param a :: Value number 1.
+/// @param b :: Value number 2.
+/// @param c :: Value number 3.
+/// @param d :: Value number 4.
 double smallest(double a, double b, double c, double d) {
   return std::min(std::min(a, b), std::min(c, d));
 }
 
+
+/// Get the smallest of the three values.
+/// @param a :: Value number 1.
+/// @param b :: Value number 2.
+/// @param c :: Value number 3.
 double smallest(double a, double b, double c) {
   return std::min(std::min(a, b), c);
 }
 
+
+/// Get the largest of the four values.
+/// @param a :: Value number 1.
+/// @param b :: Value number 2.
+/// @param c :: Value number 3.
+/// @param d :: Value number 4.
 double biggest(double a, double b, double c, double d) {
   return std::max(std::max(a, b), std::max(c, d));
 }
 
+/// Get the largest of the three values.
+/// @param a :: Value number 1.
+/// @param b :: Value number 2.
+/// @param c :: Value number 3.
 double biggest(double a, double b, double c) {
   return std::max(std::max(a, b), c);
 }
 
+/// Find the largest by absolute value element of a vector.
+/// @param v :: The searched vector.
 double maxAbsVal(const DoubleFortranVector &v) {
   auto p = v.indicesOfMinMaxElements();
   return std::max(fabs(v.get(p.first)), fabs(v.get(p.second)));
 }
 
+/// Find the smallest by absolute value element of a vector.
+/// @param v :: The searched vector.
 double minAbsVal(const DoubleFortranVector &v) {
   auto p = v.indicesOfMinMaxElements();
   return std::min(fabs(v.get(p.first)), fabs(v.get(p.second)));
 }
 
+/// Find the minimum and maximum elements of a vector.
+/// @param v :: The searched vector.
+/// @returns :: A pair of doubles where the first is the minimum and
+///     the second is the maxumum.
 std::pair<double, double> minMaxValues(const DoubleFortranVector &v) {
   auto p = v.indicesOfMinMaxElements();
   return std::make_pair(v.get(p.first), v.get(p.second));
 }
 
+/// Compute the 2-norm of a vector which is a square root of the
+/// sum of squares of its elements.
+/// @param v :: The vector.
 double two_norm(const DoubleFortranVector &v) {
   if (v.size() == 0)
     return 0.0;
   return gsl_blas_dnrm2(v.gsl());
 }
 
+/// Get the dot-product of two vectors of the same size.
+/// @param v1 :: The first vector.
+/// @param v2 :: The second vector.
 double dot_product(const DoubleFortranVector &v1,
                    const DoubleFortranVector &v2) {
   return v1.dot(v2);
 }
 
+/// Find the maximum element in the first n elements of a vector.
+/// @param v :: The vector.
+/// @param n :: The number of elements to examine.
 double maxVal(const DoubleFortranVector &v, int n) {
   double res = -std::numeric_limits<double>::max();
   for (int i = 1; i <= n; ++i) {
@@ -274,10 +311,16 @@ double maxVal(const DoubleFortranVector &v, int n) {
 ///                   a2 * x**2 + a1 * x + a0 = 0
 ///
 ///  where a0, a1 and a2 are real
+/// @param a0 :: The free coefficient.
+/// @param a1 :: The coefficient at the linear term.
+/// @param a2 :: The coefficient at the quadratic term.
+/// @param tol :: A tolerance for comparing doubles.
+/// @param nroots :: The output number of real roots.
+/// @param root1 :: The first real root if nroots > 0.
+/// @param root2 :: The second real root if nroots = 2.
 void roots_quadratic(double a0, double a1, double a2, double tol, int &nroots,
-                     double &root1, double &root2, bool debug) {
+                     double &root1, double &root2) {
 
-  UNUSED_ARG(debug);
   auto rhs = tol * a1 * a1;
   if (std::fabs(a0 * a2) > rhs) { // really is quadratic
     root2 = a1 * a1 - four * a2 * a0;
@@ -352,14 +395,21 @@ void roots_quadratic(double a0, double a1, double a2, double tol, int &nroots,
 ///                a3 * x**3 + a2 * x**2 + a1 * x + a0 = 0
 ///
 ///  where a0, a1, a2 and a3 are real
+/// @param a0 :: The free coefficient.
+/// @param a1 :: The coefficient at the linear term.
+/// @param a2 :: The coefficient at the quadratic term.
+/// @param a3 :: The coefficient at the cubic term.
+/// @param tol :: A tolerance for comparing doubles.
+/// @param nroots :: The output number of real roots.
+/// @param root1 :: The first real root.
+/// @param root2 :: The second real root if nroots > 1.
+/// @param root3 :: The third real root if nroots == 3.
 void roots_cubic(double a0, double a1, double a2, double a3, double tol,
-                 int &nroots, double &root1, double &root2, double &root3,
-                 bool debug) {
-  UNUSED_ARG(debug);
+                 int &nroots, double &root1, double &root2, double &root3) {
 
   //  Check to see if the cubic is actually a quadratic
   if (a3 == zero) {
-    roots_quadratic(a0, a1, a2, tol, nroots, root1, root2, debug);
+    roots_quadratic(a0, a1, a2, tol, nroots, root1, root2);
     root3 = infinity;
     return;
   }
@@ -367,7 +417,7 @@ void roots_cubic(double a0, double a1, double a2, double a3, double tol,
   //  Deflate the polnomial if the trailing coefficient is zero
   if (a0 == zero) {
     root1 = zero;
-    roots_quadratic(a1, a2, a3, tol, nroots, root2, root3, debug);
+    roots_quadratic(a1, a2, a3, tol, nroots, root2, root3);
     nroots = nroots + 1;
     return;
   }
@@ -485,21 +535,14 @@ void roots_cubic(double a0, double a1, double a2, double a3, double tol,
 }
 
 ///  Compute pi_beta = ||x||^beta and its derivatives
-///
-///  Arguments:
-///  =========
-///
-///  Input -
-///   max_order - maximum order of derivative
-///   beta - power
-///   x_norm2 - (0) value of ||x||^2,
-///             (i) ith derivative of ||x||^2, i = 1, max_order
-///  Output -
-///   pi_beta - (0) value of ||x||^beta,
-///             (i) ith derivative of ||x||^beta, i = 1, max_order
-///
 ///  Extracted wholesale from module RAL_NLLS_RQS
 ///
+/// @param max_order :: Maximum order of derivative.
+/// @param beta :: Power.
+/// @param x_norm2 :: (0) value of ||x||^2,
+///                   (i) ith derivative of ||x||^2, i = 1, max_order
+/// @param pi_beta :: (0) value of ||x||^beta,
+///                   (i) ith derivative of ||x||^beta, i = 1, max_order
 void dtrs_pi_derivs(int max_order, double beta,
                     const DoubleFortranVector &x_norm2,
                     DoubleFortranVector &pi_beta) {
@@ -520,12 +563,8 @@ void dtrs_pi_derivs(int max_order, double beta,
 
 ///  Set initial values for the TRS control parameters
 ///
-///  Arguments:
-///  =========
-///
-///   control  a structure containing control information. See DTRS_control_type
-///   inform   a structure containing information. See DRQS_inform_type
-///
+/// @param control :: A structure containing control information.
+/// @param inform  :: A structure containing information.
 void dtrs_initialize(dtrs_control_type &control, dtrs_inform_type &inform) {
   inform.status = ErrorCode::ral_nlls_ok;
   control.stop_normal = pow(epsmch, 0.75);
@@ -539,25 +578,14 @@ void dtrs_initialize(dtrs_control_type &control, dtrs_inform_type &inform) {
 ///
 ///  where H is diagonal, using a secular iteration
 ///
-///  Arguments:
-///  =========
-///
-///   n - the number of unknowns
-///
-///   radius - the trust-region radius
-///
-///   f - the value of constant term for the quadratic function
-///
-///   C - a vector of values for the linear term c
-///
-///   H -  a vector of values for the diagonal matrix H
-///
-///   X - the required solution vector x
-///
-///   control - a structure containing control information. See
-///   DTRS_control_type
-///
-///   inform - a structure containing information. See DTRS_inform_type
+/// @param n :: The number of unknowns.
+/// @param radius :: The trust-region radius.
+/// @param f :: The value of constant term for the quadratic function
+/// @param c :: A vector of values for the linear term c.
+/// @param h :: A vector of values for the diagonal matrix H.
+/// @param x :: The required solution vector x.
+/// @param control :: A structure containing control information.
+/// @param inform :: A structure containing information.
 ///
 void dtrs_solve_main(int n, double radius, double f,
                      const DoubleFortranVector &c, const DoubleFortranVector &h,
@@ -611,7 +639,7 @@ void dtrs_solve_main(int n, double radius, double f,
       lambda = zero;
     }
     inform.status = ErrorCode::ral_nlls_ok;
-    goto Label900;
+    return;
   }
 
   //  construct values lambda_l and lambda_u for which lambda_l <=
@@ -682,7 +710,7 @@ void dtrs_solve_main(int n, double radius, double f,
         inform.x_norm = two_norm(x);
         inform.obj = f + half * (dot_product(c, x) - lambda * pow(radius, 2));
         inform.status = ErrorCode::ral_nlls_ok;
-        goto Label900;
+        return;
 
         //  the hard case didn't occur after all
       } else {
@@ -734,7 +762,7 @@ void dtrs_solve_main(int n, double radius, double f,
       inform.obj = f + half * dot_product(c, x);
       inform.status = ErrorCode::ral_nlls_ok;
       region = 'L';
-      goto Label900;
+      return;
     }
 
     //!  the current estimate gives a good approximation to the required
@@ -836,8 +864,7 @@ void dtrs_solve_main(int n, double radius, double f,
       int nroots = 0;
       double root1 = 0, root2 = 0, root3 = 0;
 
-      roots_cubic(a_0, a_1, a_2, a_3, roots_tol, nroots, root1, root2, root3,
-                  roots_debug);
+      roots_cubic(a_0, a_1, a_2, a_3, roots_tol, nroots, root1, root2, root3);
       n_lambda = n_lambda + 1;
       if (nroots == 3) {
         lambda_new(n_lambda) = lambda + root3;
@@ -863,8 +890,7 @@ void dtrs_solve_main(int n, double radius, double f,
         a_2 = a_2 / a_max;
         a_3 = a_3 / a_max;
       }
-      roots_cubic(a_0, a_1, a_2, a_3, roots_tol, nroots, root1, root2, root3,
-                  roots_debug);
+      roots_cubic(a_0, a_1, a_2, a_3, roots_tol, nroots, root1, root2, root3);
       n_lambda = n_lambda + 1;
       if (nroots == 3) {
         lambda_new(n_lambda) = lambda + root3;
@@ -892,13 +918,6 @@ void dtrs_solve_main(int n, double radius, double f,
 
   } // for(;;)
 
-  //  Record the optimal obective value
-
-  inform.obj = f + half * (dot_product(c, x) - lambda * x_norm2(0));
-Label900:
-  inform.multiplier = lambda;
-  inform.pole = std::max(zero, -lambda_min);
-
 }
 
 ///  Solve the trust-region subproblem
@@ -908,25 +927,14 @@ Label900:
 ///
 ///  where H is diagonal, using a secular iteration
 ///
-///  Arguments:
-///  =========
-///
-///   n - the number of unknowns
-///
-///   radius - the trust-region radius
-///
-///   f - the value of constant term for the quadratic function
-///
-///   C - a vector of values for the linear term c
-///
-///   H -  a vector of values for the diagonal matrix H
-///
-///   X - the required solution vector x
-///
-///   control - a structure containing control information. See
-///   DTRS_control_type
-///
-///   inform - a structure containing information. See DTRS_inform_type
+/// @param n :: The number of unknowns.
+/// @param radius :: The trust-region radius.
+/// @param f :: The value of constant term for the quadratic function.
+/// @param c :: A vector of values for the linear term c.
+/// @param h ::  A vector of values for the diagonal matrix H.
+/// @param x :: The required solution vector x.
+/// @param control :: A structure containing control information.
+/// @param inform :: A structure containing information.
 ///
 void dtrs_solve(int n, double radius, double f, const DoubleFortranVector &c,
                 const DoubleFortranVector &h, DoubleFortranVector &x,
@@ -1017,8 +1025,18 @@ void dtrs_solve(int n, double radius, double f, const DoubleFortranVector &c,
 ///   pre-process
 ///
 ///   main output  d, the soln to the TR subproblem
+/// @param J :: The Jacobian.
+/// @param f :: The residuals.
+/// @param hf :: The Hessian (sort of).
+/// @param Delta :: The raduis of the trust region.
+/// @param d :: The output vector of corrections to the parameters giving the
+///       solution to the TR subproblem.
+/// @param normd :: The 2-norm of d.
+/// @param options :: The options.
+/// @param inform :: The inform struct.
+/// @param w :: The work struct.
 void solve_dtrs(const DoubleFortranMatrix &J, const DoubleFortranVector &f,
-                const DoubleFortranMatrix &hf, int n, int m, double Delta,
+                const DoubleFortranMatrix &hf, double Delta,
                 DoubleFortranVector &d, double &normd,
                 const nlls_options &options, nlls_inform &inform,
                 solve_dtrs_work &w) {
@@ -1039,7 +1057,7 @@ void solve_dtrs(const DoubleFortranMatrix &J, const DoubleFortranVector &f,
   //
   //  first, find the matrix H and vector v
   //  Set A = J^T J
-  matmult_inner(J, n, m, w.A);
+  matmult_inner(J, w.A);
   // add any second order information...
   // so A = J^T J + HF
   w.A += hf;
@@ -1049,15 +1067,15 @@ void solve_dtrs(const DoubleFortranMatrix &J, const DoubleFortranVector &f,
 
   // if scaling needed, do it
   if (options.scale != 0) {
-    apply_scaling(J, n, m, w.A, w.v, w.apply_scaling_ws, options, inform);
+    apply_scaling(J, w.A, w.v, w.apply_scaling_ws, options, inform);
   }
 
   // Now that we have the unprocessed matrices, we need to get an
   // eigendecomposition to make A diagonal
   //
-  all_eig_symm(w.A, n, w.ew, w.ev, w.all_eig_symm_ws, inform);
+  all_eig_symm(w.A, w.ew, w.ev);
   if (inform.status != NLLS_ERROR::OK) {
-    return; // goto 1000
+    return;
   }
 
   // We can now change variables, setting y = Vp, getting
@@ -1073,6 +1091,7 @@ void solve_dtrs(const DoubleFortranMatrix &J, const DoubleFortranVector &f,
   // we've now got the vectors we need, pass to dtrs_solve
   dtrs_initialize(dtrs_options, dtrs_inform);
 
+  auto n = J.len2();
   if (w.v_trans.len() != n) {
     w.v_trans.allocate(n);
   }
@@ -1092,7 +1111,7 @@ void solve_dtrs(const DoubleFortranMatrix &J, const DoubleFortranVector &f,
     inform.external_return = int(dtrs_inform.status);
     inform.external_name = "galahad_dtrs";
     inform.status = NLLS_ERROR::FROM_EXTERNAL;
-    return; // goto 1000
+    return;
   }
 
   // and return the un-transformed vector
@@ -1110,14 +1129,15 @@ void solve_dtrs(const DoubleFortranMatrix &J, const DoubleFortranVector &f,
 
 } // namespace
 
-void GalahadMinimizer::calculate_step(const DoubleFortranMatrix &J,
+/// Implements the abstarct method of TrustRegionMinimizer.
+void DTRSMinimizer::calculate_step(const DoubleFortranMatrix &J,
                               const DoubleFortranVector &f,
                               const DoubleFortranMatrix &hf,
-                              const DoubleFortranVector &g, int n, int m,
+                              const DoubleFortranVector &g,
                               double Delta, DoubleFortranVector &d,
                               double &normd, const NLLS::nlls_options &options,
                               NLLS::nlls_inform &inform, NLLS::calculate_step_work &w) {
-    solve_dtrs(J, f, hf, n, m, Delta, d, normd, options, inform,
+    solve_dtrs(J, f, hf, Delta, d, normd, options, inform,
                   w.solve_dtrs_ws);
 }
 

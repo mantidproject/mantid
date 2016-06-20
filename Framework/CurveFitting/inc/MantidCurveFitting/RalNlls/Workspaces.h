@@ -39,16 +39,12 @@ enum class NLLS_ERROR {
   BAD_TR_STRATEGY = -10,
   FIND_BETA = -11,
   BAD_SCALING = -12,
-  //     ! dogleg errors
-  DOGLEG_MODEL = -101,
-  //     ! AINT errors
-  AINT_EIG_IMAG = -201,
-  AINT_EIG_ODD = -202,
+  NAN_OR_INF = -13,
   //     ! More-Sorensen errors
   MS_MAXITS = -301,
   MS_TOO_MANY_SHIFTS = -302,
   MS_NO_PROGRESS = -303,
-  MS_NOT_PO = -304 // Matrix is not positive-definite
+  MS_NOT_PD = -304 // Matrix is not positive-definite
   //     ! DTRS errors
 };
 
