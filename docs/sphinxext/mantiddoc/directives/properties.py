@@ -1,6 +1,9 @@
 #pylint: disable=invalid-name
 from mantiddoc.directives.base import AlgorithmBaseDirective
+import re
 import string
+
+SUBSTITUTE_REF_RE = re.compile(r'\|(.+?)\|')
 
 class PropertiesDirective(AlgorithmBaseDirective):
 
@@ -239,7 +242,16 @@ class PropertiesDirective(AlgorithmBaseDirective):
             allowedValueString = allowedValueString.replace("','","', '")
             desc += prefixString + allowedValueString
 
-        return desc
+        return self._escape_subsitution_refs(desc)
+
+    def _escape_subsitution_refs(self, desc):
+        """
+        Find occurrences of text surrounded by vertical bars and assume they
+        are not docutils subsitution referencess by esacping them
+        """
+        def repl(match):
+            return '\|' + match.group(1) + '\|'
+        return SUBSTITUTE_REF_RE.sub(repl, desc)
 
 
 def setup(app):
