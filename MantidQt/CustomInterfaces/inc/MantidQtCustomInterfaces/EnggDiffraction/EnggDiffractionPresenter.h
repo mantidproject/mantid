@@ -21,8 +21,6 @@ class QThread;
 namespace MantidQt {
 namespace CustomInterfaces {
 
-struct GSASCalibrationParms;
-
 /**
 Presenter for the Enggineering Diffraction GUI (presenter as in the
 MVP Model-View-Presenter pattern). In principle, in a strict MVP

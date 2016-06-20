@@ -60,9 +60,14 @@ class MANTIDQT_CUSTOMINTERFACES_DLL EnggDiffFittingViewQtWidget
 
 public:
   EnggDiffFittingViewQtWidget(
-      QWidget *parent, boost::shared_ptr<IEnggDiffractionUserMsg> mainMsg);
+      QWidget *parent, boost::shared_ptr<IEnggDiffractionUserMsg> mainMsg,
+      boost::shared_ptr<IEnggDiffractionSettings> mainSettings,
+      boost::shared_ptr<IEnggDiffractionCalibration> mainCalib,
+      boost::shared_ptr<IEnggDiffractionPythonRunner> mainPyhonRunner);
   ~EnggDiffFittingViewQtWidget() override;
 
+  /// From the IEnggDiffractionUserMsg interface
+  //@{
   void showStatus(const std::string &sts) override;
 
   void userWarning(const std::string &warn,
@@ -70,10 +75,29 @@ public:
 
   void userError(const std::string &err,
                  const std::string &description) override;
-
   void enableCalibrateFocusFitUserActions(bool enable) override;
+  //@}
+
+  /// From the IEnggDiffractionSettings interface
+  //@{
+  EnggDiffCalibSettings currentCalibSettings() const override;
+
+  std::string focusingDir() const override;
+  //@}
+
+  /// From the IEnggDiffractionCalibration interface
+  //@{
+  std::vector<GSASCalibrationParms> currentCalibration() const override;
+  //@}
+
+  /// From the IEnggDiffractionPythonRunner interface
+  //@{
+  virtual std::string enggRunPythonCode(const std::string &pyCode) override;
+  //@}
 
   void enable(bool enable);
+
+  std::vector<std::string> logMsgs() const override { return m_logMsgs; }
 
   void setFittingRunNo(const std::string &path) override;
 
@@ -101,8 +125,6 @@ public:
   splitFittingDirectory(std::string &selectedfPath) override;
 
   void setBankEmit() override;
-
-  std::string getFocusDir() override;
 
   void setDataVector(std::vector<boost::shared_ptr<QwtData>> &data,
                      bool focused, bool plotSinglePeaks) override;
@@ -174,8 +196,6 @@ private:
   /// save settings (before closing)
   void saveSettings() const override;
 
-  Ui::EnggDiffractionQtTabFitting m_ui;
-
   /// converts QList to a vector
   std::vector<std::string> qListToVector(QStringList list,
                                          bool validator) const;
@@ -191,6 +211,11 @@ private:
   // vector holding directory of focused bank file
   static std::vector<std::string> m_fitting_runno_dir_vec;
 
+  Ui::EnggDiffractionQtTabFitting m_ui;
+
+  // here the view puts messages before notifying the presenter to show them
+  std::vector<std::string> m_logMsgs;
+
   /// Loaded focused workspace
   std::vector<QwtPlotCurve *> m_focusedDataVector;
 
@@ -203,8 +228,17 @@ private:
   /// zoom-in/zoom-out tool for fitting
   QwtPlotZoomer *m_zoomTool = nullptr;
 
-  // user messages interface provided by a main view/widget
+  /// user messages interface provided by a main view/widget
   boost::shared_ptr<IEnggDiffractionUserMsg> m_mainMsgProvider;
+
+  /// settings from the user
+  boost::shared_ptr<IEnggDiffractionSettings> m_mainSettings;
+
+  /// interface for the 'current' calibration
+  boost::shared_ptr<IEnggDiffractionCalibration> m_mainCalib;
+
+  /// interface for the Python runner
+  boost::shared_ptr<IEnggDiffractionPythonRunner> m_mainPythonRunner;
 
   /// presenter as in the model-view-presenter
   boost::scoped_ptr<IEnggDiffFittingPresenter> m_presenter;

@@ -25,21 +25,6 @@ using namespace MantidQt::CustomInterfaces;
 namespace MantidQt {
 namespace CustomInterfaces {
 
-/**
- * Parameters from a GSAS calibration. They define a conversion of
- * units time-of-flight<->d-spacing that can be calculated with the
- * algorithm AlignDetectors for example.
- */
-struct GSASCalibrationParms {
-  GSASCalibrationParms(size_t bid, double dc, double da, double tz)
-      : bankid(bid), difc(dc), difa(da), tzero(tz) {}
-
-  size_t bankid{0};
-  double difc{0};
-  double difa{0};
-  double tzero{0};
-};
-
 namespace {
 Mantid::Kernel::Logger g_log("EngineeringDiffractionGUI");
 }

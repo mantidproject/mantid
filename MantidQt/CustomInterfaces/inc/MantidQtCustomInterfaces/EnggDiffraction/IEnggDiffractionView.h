@@ -5,7 +5,9 @@
 #include <vector>
 
 #include "MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffractionUserMsg.h"
-#include "MantidQtCustomInterfaces/EnggDiffraction/EnggDiffCalibSettings.h"
+#include "MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffractionSettings.h"
+#include "MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffractionCalibration.h"
+#include "MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffractionPythonRunner.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -38,7 +40,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class IEnggDiffractionView : public IEnggDiffractionUserMsg {
+class IEnggDiffractionView : public IEnggDiffractionUserMsg,
+                             public IEnggDiffractionSettings,
+                             public IEnggDiffractionCalibration,
+                             public IEnggDiffractionPythonRunner {
 
 public:
   IEnggDiffractionView(){};
@@ -94,12 +99,6 @@ public:
    * @return RB number as string as provided by the user
    */
   virtual std::string getRBNumber() const = 0;
-
-  /**
-   *
-   * @return calibration settings object with current user settings
-   */
-  virtual EnggDiffCalibSettings currentCalibSettings() const = 0;
 
   /**
    * What's the instrument this interface is using?
@@ -184,13 +183,6 @@ public:
   virtual std::vector<std::string> newCeriaNo() const = 0;
 
   /**
-   * The filename (can be full path) selected to write a calibration
-   *
-   * @return file name
-   */
-  virtual std::string outCalibFilename() const = 0;
-
-  /**
    * A new calibration is calculated or loaded => update display and
    * widgets. This becomes the new 'current' calibration.
    *
@@ -203,19 +195,6 @@ public:
                               const std::string &fname) = 0;
 
   /**
-   * Run Python code received as a script string. This is used for
-   * example to write GSAS instrument parameters file, or other code
-   * included with the Engg scripts. Temporarily here until we have a
-   * more final way of generating these files. A SaveGSAS algorithm
-   * that can handle ENGIN-X files would be ideal.
-   *
-   * @param pyCode Python script as a string
-   *
-   * @return status string from running the code
-   */
-  virtual std::string enggRunPythonCode(const std::string &pyCode) = 0;
-
-  /**
    * Enable/disable all the sections or tabs of the interface. To be
    * used with required parameters, like a valid instrument, a valid
    * RB number, etc. This should effectively disable/enable all
@@ -224,13 +203,6 @@ public:
    * @param enable true to enable all tabs of the interface
    */
   virtual void enableTabs(bool enable) = 0;
-
-  /**
-   * Directory set for focusing outputs
-   *
-   * @return directory path as a string
-   */
-  virtual std::string focusingDir() const = 0;
 
   /**
    * A (sample) run to focus

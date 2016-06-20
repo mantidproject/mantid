@@ -4,16 +4,15 @@
 #include <string>
 #include <vector>
 
-#include "MantidQtCustomInterfaces/EnggDiffraction/EnggDiffCalibSettings.h"
-
 namespace MantidQt {
 namespace CustomInterfaces {
 
 /**
 Interface for user message related functionality in the engineering
-diffraction custom interface / GUI. This can be used in different
-tabs/widgets as well as in the main/central view. Normally the
-individual / area specific tabs/widgets will forward to the main view.
+diffraction custom interface / GUI view(s). This can be used in
+different tabs/widgets as well as in the main/central view. Normally
+the individual / area specific tabs/widgets will forward to the main
+view.
 
 Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory, NScD
 Oak Ridge National Laboratory & European Spallation Source
@@ -41,9 +40,6 @@ class IEnggDiffractionUserMsg {
 public:
   virtual ~IEnggDiffractionUserMsg(){};
 
-  /// @name Direct (and usually modal, or at least top/pop-up level) user
-  /// interaction
-  //@{
   /**
    * Display the current status (running some algorithms, finished,
    * ready, etc.), in a status bar or similar.
@@ -52,6 +48,9 @@ public:
    */
   virtual void showStatus(const std::string &sts) = 0;
 
+  /// @name Direct (and usually modal, or at least top/pop-up level) user
+  /// interaction
+  //@{
   /**
    * Display a warning to the user (for example as a pop-up window).
    *
@@ -73,6 +72,7 @@ public:
    */
   virtual void userError(const std::string &err,
                          const std::string &description) = 0;
+  //@}
 
   /**
    * Enable/disable all user actions to

@@ -37,9 +37,13 @@ bool EnggDiffFittingViewQtWidget::m_fittingMutliRunMode = false;
 std::vector<std::string> EnggDiffFittingViewQtWidget::m_fitting_runno_dir_vec;
 
 EnggDiffFittingViewQtWidget::EnggDiffFittingViewQtWidget(
-    QWidget * /*parent*/, boost::shared_ptr<IEnggDiffractionUserMsg> mainMsg)
+    QWidget * /*parent*/, boost::shared_ptr<IEnggDiffractionUserMsg> mainMsg,
+    boost::shared_ptr<IEnggDiffractionSettings> mainSettings,
+    boost::shared_ptr<IEnggDiffractionCalibration> mainCalib,
+    boost::shared_ptr<IEnggDiffractionPythonRunner> mainPythonRunner)
     : IEnggDiffFittingView(), m_fittedDataVector(), m_mainMsgProvider(mainMsg),
-      m_presenter(nullptr) {
+      m_mainSettings(mainSettings), m_mainCalib(mainCalib),
+      m_mainPythonRunner(mainPythonRunner), m_presenter(nullptr) {
   initLayout();
 }
 
@@ -183,6 +187,25 @@ void EnggDiffFittingViewQtWidget::userError(const std::string &err,
 void EnggDiffFittingViewQtWidget::enableCalibrateFocusFitUserActions(
     bool enable) {
   m_mainMsgProvider->enableCalibrateFocusFitUserActions(enable);
+}
+
+EnggDiffCalibSettings
+EnggDiffFittingViewQtWidget::currentCalibSettings() const {
+  return m_mainSettings->currentCalibSettings();
+}
+
+std::string EnggDiffFittingViewQtWidget::focusingDir() const {
+  return m_mainSettings->focusingDir();
+}
+
+std::string
+EnggDiffFittingViewQtWidget::enggRunPythonCode(const std::string &pyCode) {
+  return m_mainPythonRunner->enggRunPythonCode(pyCode);
+}
+
+std::vector<GSASCalibrationParms>
+EnggDiffFittingViewQtWidget::currentCalibration() const {
+  return m_mainCalib->currentCalibration();
 }
 
 void EnggDiffFittingViewQtWidget::fitClicked() {
@@ -394,7 +417,7 @@ void EnggDiffFittingViewQtWidget::resetView() {
 void EnggDiffFittingViewQtWidget::browsePeaksToFit() {
 
   try {
-    QString prevPath = QString::fromStdString(m_focusDir);
+    QString prevPath = QString::fromStdString(m_mainSettings->focusingDir());
     if (prevPath.isEmpty()) {
       prevPath = MantidQt::API::AlgorithmInputHistory::Instance()
                      .getPreviousDirectory();
@@ -422,7 +445,7 @@ void EnggDiffFittingViewQtWidget::browsePeaksToFit() {
 
 void EnggDiffFittingViewQtWidget::browseFitFocusedRun() {
   resetFittingMultiMode();
-  QString prevPath = QString::fromStdString(m_focusDir);
+  QString prevPath = QString::fromStdString(m_mainSettings->focusingDir());
   if (prevPath.isEmpty()) {
     prevPath =
         MantidQt::API::AlgorithmInputHistory::Instance().getPreviousDirectory();
@@ -499,8 +522,7 @@ void EnggDiffFittingViewQtWidget::plotSeparateWindow() {
       "fitting_plot = plotSpectrum(single_peak_ws, spec_list).activeLayer()\n"
       "fitting_plot.setTitle(\"Engg GUI Single Peaks Fitting Workspace\")\n";
 
-  std::string status =
-      runPythonCode(QString::fromStdString(pyCode), false).toStdString();
+  std::string status = m_mainPythonRunner->enggRunPythonCode(pyCode);
   m_logMsgs.emplace_back("Plotted output focused data, with status string " +
                          status);
   m_presenter->notify(IEnggDiffFittingPresenter::LogMsg);
@@ -534,8 +556,6 @@ void EnggDiffFittingViewQtWidget::setBankIdComboBox(int idx) {
   QComboBox *bankName = m_ui.comboBox_bank;
   bankName->setCurrentIndex(idx);
 }
-
-std::string EnggDiffFittingViewQtWidget::getFocusDir() { return m_focusDir; }
 
 void EnggDiffFittingViewQtWidget::addBankItem(std::string bankID) {
 
@@ -609,7 +629,7 @@ void EnggDiffFittingViewQtWidget::savePeakList() {
   // call function in EnggPresenter..
 
   try {
-    QString prevPath = QString::fromStdString(m_focusDir);
+    QString prevPath = QString::fromStdString(m_mainSettings->focusingDir());
     if (prevPath.isEmpty()) {
       prevPath = MantidQt::API::AlgorithmInputHistory::Instance()
                      .getPreviousDirectory();

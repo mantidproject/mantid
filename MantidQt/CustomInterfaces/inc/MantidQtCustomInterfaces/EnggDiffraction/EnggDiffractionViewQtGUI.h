@@ -108,8 +108,6 @@ public:
 
   std::vector<std::string> newCeriaNo() const override;
 
-  std::string outCalibFilename() const override { return m_outCalibFilename; }
-
   int currentCropCalibBankName() const override {
     return m_currentCropCalibBankName;
   }
@@ -120,6 +118,8 @@ public:
 
   void newCalibLoaded(const std::string &vanadiumNo, const std::string &ceriaNo,
                       const std::string &fname) override;
+
+  std::vector<GSASCalibrationParms> currentCalibration() const override;
 
   std::string enggRunPythonCode(const std::string &pyCode) override;
 
@@ -259,7 +259,7 @@ private:
   Ui::EnggDiffractionQtTabFocus m_uiTabFocus;
   Ui::EnggDiffractionQtTabPreproc m_uiTabPreproc;
   // Ui::EnggDiffractionQtTabFitting m_uiTabFitting;
-  EnggDiffFittingViewQtWidget* m_fittingWidget;
+  EnggDiffFittingViewQtWidget *m_fittingWidget;
   Ui::EnggDiffractionQtTabSettings m_uiTabSettings;
 
   /// converts QList to a vector
@@ -284,11 +284,8 @@ private:
   // multi-run focus mode type selected
   int static m_currentRunMode;
 
-  /// current calibration produced in the 'Calibration' tab
-  std::string m_currentCalibFilename;
   /// calibration settings - from/to the 'settings' tab
   EnggDiffCalibSettings m_calibSettings;
-  std::string m_outCalibFilename;
 
   /// To show important non-modal messages
   QMessageBox *m_splashMsg;

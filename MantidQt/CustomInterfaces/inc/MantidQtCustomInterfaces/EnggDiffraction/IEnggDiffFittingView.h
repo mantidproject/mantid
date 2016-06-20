@@ -2,6 +2,9 @@
 #define MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_IENGGDIFFFITTINGVIEW_H_
 
 #include "MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffractionUserMsg.h"
+#include "MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffractionSettings.h"
+#include "MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffractionCalibration.h"
+#include "MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffractionPythonRunner.h"
 
 #include <string>
 #include <vector>
@@ -39,7 +42,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class IEnggDiffFittingView : public IEnggDiffractionUserMsg {
+class IEnggDiffFittingView : public IEnggDiffractionUserMsg,
+                             public IEnggDiffractionSettings,
+                             public IEnggDiffractionCalibration,
+                             public IEnggDiffractionPythonRunner {
 
 public:
   virtual ~IEnggDiffFittingView() = default;
@@ -152,13 +158,6 @@ public:
   virtual void setFittingListWidgetCurrentRow(int idx) const = 0;
 
   /**
-   * Gets the set focus directory within the setting tab
-   *
-   * @return std::string of focus directory
-   */
-  virtual std::string getFocusDir() = 0;
-
-  /**
    * sets the fitting run number according to path
    *
    * @param path of the selected focused run file
@@ -205,6 +204,13 @@ public:
    */
   virtual void setDataVector(std::vector<boost::shared_ptr<QwtData>> &data,
                              bool focused, bool plotSinglePeaks) = 0;
+
+  /**
+   * Messages that this view wants to send to the logging system.
+   *
+   * @return list of messages to log, one by one.
+   */
+  virtual std::vector<std::string> logMsgs() const = 0;
 
   /**
    * Save user settings (normally when closing the interface).

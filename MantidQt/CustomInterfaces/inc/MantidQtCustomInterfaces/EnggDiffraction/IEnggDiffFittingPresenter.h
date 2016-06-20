@@ -42,6 +42,7 @@ public:
     FittingRunNo, ///< Creates widgets and handles multi/run numbers
     FitPeaks,     ///< Preforms single peak fits
     ShutDown,     ///< closing the interface
+    LogMsg,       ///< need to send a message to the Mantid log system
   };
 
   /**

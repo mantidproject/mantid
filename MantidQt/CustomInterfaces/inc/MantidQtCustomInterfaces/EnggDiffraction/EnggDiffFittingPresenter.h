@@ -106,6 +106,7 @@ protected:
   void processStart();
   void processFitPeaks();
   void processShutDown();
+  void processLogMsg();
 
   /// clean shut down of model, view, etc.
   void cleanup();

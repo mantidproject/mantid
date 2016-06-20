@@ -70,6 +70,10 @@ void EnggDiffFittingPresenter::notify(
   case IEnggDiffFittingPresenter::ShutDown:
     processShutDown();
     break;
+
+  case IEnggDiffFittingPresenter::LogMsg:
+    processLogMsg();
+    break;
   }
 }
 
@@ -132,7 +136,7 @@ void EnggDiffFittingPresenter::fittingFinished() {
                     "fits has completed. \n";
 
   // enable the GUI
-  m_view->enableCalibrateAndFocusActions(true);
+  m_view->enableCalibrateFocusFitUserActions(true);
 }
 
 // Fitting Tab Run Number & Bank handling here
@@ -208,7 +212,7 @@ void EnggDiffFittingPresenter::fittingRunNoChanged() {
 
       } else {
         // if given a single run number instead
-        auto focusDir = m_view->getFocusDir();
+        auto focusDir = m_view->focusingDir();
 
         if (focusDir.empty()) {
           m_view->userWarning(
@@ -309,7 +313,7 @@ void EnggDiffFittingPresenter::enableMultiRun(
         RunNumberVec.push_back(std::to_string(i));
       }
 
-      auto focusDir = m_view->getFocusDir();
+      auto focusDir = m_view->focusingDir();
       if (focusDir.empty()) {
         m_view->userWarning(
             "Invalid Input",
@@ -352,6 +356,13 @@ void EnggDiffFittingPresenter::processShutDown() {
   cleanup();
 }
 
+void EnggDiffFittingPresenter::processLogMsg() {
+  std::vector<std::string> msgs = m_view->logMsgs();
+  for (size_t i = 0; i < msgs.size(); i++) {
+    g_log.information() << msgs[i] << '\n';
+  }
+}
+
 void EnggDiffFittingPresenter::processFitPeaks() {
   const std::string focusedRunNo = m_view->getFittingRunNo();
   std::string fittingPeaks = m_view->fittingPeaksData();
@@ -375,7 +386,7 @@ void EnggDiffFittingPresenter::processFitPeaks() {
 
   m_view->showStatus("Fitting single peaks...");
   // disable GUI to avoid any double threads
-  m_view->enableCalibrateAndFocusActions(false);
+  m_view->enableCalibrateFocusFitUserActions(false);
   // startAsyncFittingWorker
   // doFitting()
   startAsyncFittingWorker(focusedRunNo, fitPeaksData);
@@ -469,21 +480,22 @@ void EnggDiffFittingPresenter::setDifcTzero(MatrixWorkspace_sptr wks) const {
   const std::string units = "none";
   auto &run = wks->mutableRun();
 
-  if (m_currentCalibParms.empty()) {
+  std::vector<GSASCalibrationParms> calibParms = m_view->currentCalibration();
+  if (calibParms.empty()) {
     run.addProperty<int>("bankid", 1, units, true);
     run.addProperty<double>("difc", 18400.0, units, true);
     run.addProperty<double>("difa", 0.0, units, true);
     run.addProperty<double>("tzero", 4.0, units, true);
   } else {
     GSASCalibrationParms parms(0, 0.0, 0.0, 0.0);
-    for (const auto &p : m_currentCalibParms) {
+    for (const auto &p : calibParms) {
       if (p.bankid == bankID) {
         parms = p;
         break;
       }
     }
     if (0 == parms.difc)
-      parms = m_currentCalibParms.front();
+      parms = calibParms.front();
 
     run.addProperty<int>("bankid", static_cast<int>(parms.bankid), units, true);
     run.addProperty<double>("difc", parms.difc, units, true);

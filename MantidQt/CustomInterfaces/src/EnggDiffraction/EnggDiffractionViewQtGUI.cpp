@@ -65,7 +65,7 @@ const std::string EnggDiffractionViewQtGUI::g_settingsGroup =
 */
 EnggDiffractionViewQtGUI::EnggDiffractionViewQtGUI(QWidget *parent)
     : UserSubWindow(parent), IEnggDiffractionView(), m_currentInst("ENGINX"),
-      m_currentCalibFilename(""), m_splashMsg(nullptr), m_presenter(nullptr) {}
+      m_splashMsg(nullptr), m_presenter(nullptr) {}
 
 EnggDiffractionViewQtGUI::~EnggDiffractionViewQtGUI() {}
 
@@ -85,8 +85,9 @@ void EnggDiffractionViewQtGUI::initLayout() {
   m_uiTabPreproc.setupUi(wPreproc);
   m_ui.tabMain->addTab(wPreproc, QString("Pre-processing"));
 
+  auto sharedView = boost::make_shared<EnggDiffractionViewQtGUI>(this);
   m_fittingWidget = new EnggDiffFittingViewQtWidget(
-      m_ui.tabMain, boost::make_shared<EnggDiffractionViewQtGUI>(this));
+      m_ui.tabMain, sharedView, sharedView, sharedView, sharedView);
   m_ui.tabMain->addTab(m_fittingWidget, QString("Fitting"));
 
   QWidget *wSettings = new QWidget(m_ui.tabMain);
@@ -158,7 +159,7 @@ void EnggDiffractionViewQtGUI::doSetupTabCalib() {
   connect(m_uiTabCalib.comboBox_calib_cropped_bank_name,
           SIGNAL(currentIndexChanged(int)), this, SLOT(enableSpecNos()));
 
-  enableCalibrateAndFocusActions(true);
+  enableCalibrateFocusFitUserActions(true);
 }
 
 void EnggDiffractionViewQtGUI::doSetupTabFocus() {
@@ -280,7 +281,6 @@ void EnggDiffractionViewQtGUI::readSettings() {
       qs.value("user-params-current-ceria-num", "").toString());
   QString calibFname = qs.value("current-calib-filename", "").toString();
   m_uiTabCalib.lineEdit_current_calib_filename->setText(calibFname);
-  m_currentCalibFilename = calibFname.toStdString();
 
   m_uiTabCalib.MWRunFiles_new_vanadium_num->setUserInput(
       qs.value("user-params-new-vanadium-num", "").toString());
@@ -892,8 +892,7 @@ void EnggDiffractionViewQtGUI::browseDirFocusing() {
 
   MantidQt::API::AlgorithmInputHistory::Instance().setPreviousDirectory(dir);
   m_focusDir = dir.toStdString();
-  m_uiTabSettings.lineEdit_dir_focusing->setText(
-      QString::fromStdString(m_focusDir));
+  m_uiTabSettings.lineEdit_dir_focusing->setText(dir);
 }
 
 void EnggDiffractionViewQtGUI::browseTextureDetGroupingFile() {
