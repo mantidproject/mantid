@@ -258,7 +258,8 @@ bool TrustRegionMinimizer::iterate(size_t) {
     // Get the value of the model
     //      md :=   m_k(d)
     // evaluated at the new step
-    double md = evaluate_model(w.f, w.J, w.hf, w.d, options, w.evaluate_model_ws);
+    double md =
+        evaluate_model(w.f, w.J, w.hf, w.d, options, w.evaluate_model_ws);
 
     // Calculate the quantity
     //   rho = 0.5||f||^2 - 0.5||fnew||^2 =   actual_reduction
