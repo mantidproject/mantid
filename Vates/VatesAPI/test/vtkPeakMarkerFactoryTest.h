@@ -23,6 +23,9 @@ using namespace ::testing;
 using namespace Mantid::VATES;
 using Mantid::VATES::vtkPeakMarkerFactory;
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wsuggest-override"
+
 class MockPeakShape : public Peak {
 public:
   MOCK_CONST_METHOD0(getHKL, Mantid::Kernel::V3D(void));
@@ -310,5 +313,5 @@ public:
     }
   }
 };
-
+#pragma GCC diagnostic pop
 #endif

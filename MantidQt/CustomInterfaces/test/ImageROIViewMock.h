@@ -5,6 +5,9 @@
 
 #include <gmock/gmock.h>
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wsuggest-override"
+
 class MockImageROIView : public MantidQt::CustomInterfaces::IImageROIView {
 public:
   // void initParams(ImageStackPreParams &params)
@@ -103,5 +106,7 @@ public:
   // void resetNormArea()
   MOCK_METHOD0(resetWidgetsOnNewStack, void());
 };
+
+#pragma GCC diagnostic pop
 
 #endif // MANTID_CUSTOMINTERFACES_IMAGEROIVIEWMOCK_H

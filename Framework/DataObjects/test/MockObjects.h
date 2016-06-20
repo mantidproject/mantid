@@ -19,6 +19,9 @@ public:
   ~MockPeakShapeFactory() override {}
 };
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wsuggest-override"
+
 class MockPeakShape : public Mantid::Geometry::PeakShape {
 public:
   MOCK_CONST_METHOD0(frame, Mantid::Kernel::SpecialCoordinateSystem());
@@ -33,5 +36,7 @@ public:
 };
 }
 }
+
+#pragma GCC diagnostic pop
 
 #endif /* MOCKOBJECTS_H_ */

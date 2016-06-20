@@ -16,6 +16,9 @@
 namespace Mantid {
 namespace Crystal {
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wsuggest-override"
+
 // Mock Background strategy
 class MockBackgroundStrategy : public BackgroundStrategy {
 public:
@@ -45,6 +48,8 @@ public:
     return this->getLabel() == label;
   }
 };
+
+#pragma GCC diagnostic pop
 }
 }
 

@@ -21,6 +21,9 @@ using namespace Mantid::Kernel;
 using ::testing::_;
 using ::testing::Mock;
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wsuggest-override"
+
 class MockPawleyFunction : public IPawleyFunction {
 public:
   MockPawleyFunction() {}
@@ -187,5 +190,7 @@ private:
 
   PoldiInstrumentAdapter_sptr m_instrument;
 };
+
+#pragma GCC diagnostic pop
 
 #endif /* MANTID_SINQ_POLDISPECTRUMPAWLEYFUNCTIONTEST_H_ */

@@ -10,6 +10,9 @@
 
 #include "MantidAPI/IMDIterator.h"
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wsuggest-override"
+
 class SignalRangeTest : public CxxTest::TestSuite {
 private:
   class MockMDWorkspace : public Mantid::API::IMDWorkspace {
@@ -199,5 +202,5 @@ public:
     TS_ASSERT_DELTA(5.0, range.maxValue(), 1e-10);
   }
 };
-
+#pragma GCC diagnostic pop
 #endif /* MANTIDQT_API_SIGNALRANGETEST */

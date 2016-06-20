@@ -21,6 +21,9 @@ const int ScaleCol = 6;
 const int GroupCol = 7;
 const int OptionsCol = 8;
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wsuggest-override"
+
 class MockDataProcessorView : public DataProcessorView {
 public:
   MockDataProcessorView(){};
@@ -110,4 +113,5 @@ private:
   std::map<std::string, QVariant> m_options;
 };
 
+#pragma GCC diagnostic pop
 #endif /*MANTID_MANTIDWIDGETS_DATAPROCESSORVIEWMOCKOBJECTS_H*/

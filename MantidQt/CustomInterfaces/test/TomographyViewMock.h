@@ -5,6 +5,9 @@
 
 #include <gmock/gmock.h>
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wsuggest-override"
+
 // This is a simple mock for the tomo interface view when using SCARF.
 class MockTomographyIfaceView
     : public MantidQt::CustomInterfaces::ITomographyIfaceView {
@@ -132,5 +135,5 @@ public:
   // virtual void runAggregateBands(Mantid::API::IAlgorithm_sptr alg)
   MOCK_METHOD1(runAggregateBands, void(Mantid::API::IAlgorithm_sptr alg));
 };
-
+#pragma GCC diagnostic pop
 #endif // MANTID_CUSTOMINTERFACES_TOMOGRAPHYIFACEVIEWMOCK_H

@@ -32,6 +32,9 @@ IPeaksWorkspace_sptr make_peaks_workspace(const V3D &hklPeak) {
   return peakWS;
 }
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wsuggest-override"
+
 // Mock Background strategy
 class MockIMDIterator : public IMDIterator {
 public:
@@ -157,5 +160,7 @@ public:
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockIterator));
   }
 };
+
+#pragma GCC diagnostic pop
 
 #endif /* MANTID_CRYSTAL_PEAKBACKGROUNDTEST_H_ */

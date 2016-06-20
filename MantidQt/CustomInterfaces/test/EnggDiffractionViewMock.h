@@ -5,6 +5,9 @@
 
 #include <gmock/gmock.h>
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wsuggest-override"
+
 // This is a simple mock for the tomo interface view when using SCARF.
 class MockEnggDiffractionView
     : public MantidQt::CustomInterfaces::IEnggDiffractionView {
@@ -235,5 +238,5 @@ public:
   // virtual void plotCalibOutput();
   MOCK_METHOD1(plotCalibOutput, void(const std::string &pyCode));
 };
-
+#pragma GCC diagnostic pop
 #endif // MANTID_CUSTOMINTERFACES_ENGGDIFFRACTIONVIEWMOCK_H

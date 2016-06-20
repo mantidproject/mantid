@@ -17,6 +17,9 @@ using namespace MantidQt::CustomInterfaces;
 using namespace testing;
 using boost::scoped_ptr;
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wsuggest-override"
+
 class MockALCBaselineModellingView : public IALCBaselineModellingView {
 public:
   void requestFit() { emit fitRequested(); }
@@ -361,5 +364,5 @@ public:
     m_view->help();
   }
 };
-
+#pragma GCC diagnostic pop
 #endif /* MANTIDQT_CUSTOMINTERFACES_ALCBASELINEMODELLINGTEST_H_ */

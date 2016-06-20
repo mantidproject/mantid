@@ -35,6 +35,9 @@ using namespace Geometry;
 
 typedef std::pair<double, double> DoublePair;
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wsuggest-override"
+
 class MockDetector : public PoldiAbstractDetector {
 protected:
   std::vector<int> m_availableElements;
@@ -387,6 +390,8 @@ public:
     EXPECT_CALL(*chopper, zeroOffset()).WillRepeatedly(Return(0.15));
   }
 };
+
+#pragma GCC diagnostic pop
 
 class PoldiPeakCollectionHelpers {
   /* This class contains some static helper function to create

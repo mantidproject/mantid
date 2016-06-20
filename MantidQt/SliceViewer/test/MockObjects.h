@@ -23,8 +23,10 @@ using namespace Mantid::Geometry;
 using namespace Mantid;
 using boost::regex;
 
-namespace {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wsuggest-override"
 
+namespace {
 /*------------------------------------------------------------
 Zoomable Peaks View
 ------------------------------------------------------------*/
