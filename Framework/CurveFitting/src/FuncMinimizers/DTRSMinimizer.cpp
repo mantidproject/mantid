@@ -140,19 +140,12 @@ inline double sign(double x, double y) {
 //!   control derived type with component defaults
 //!  - - - - - - - - - - - - - - - - - - - - - - -
 struct dtrs_control_type {
-  //!  controls level of diagnostic output
-  int print_level = 0;
-
   //!  maximum degree of Taylor approximant allowed
   int taylor_max_degree = 3;
 
   //!  any entry of H that is smaller than h_min * MAXVAL( H ) we be treated as
   // zero
   double h_min = epsmch;
-
-  //!  any entry of C that is smaller than c_min * MAXVAL( C ) we be treated as
-  // zero
-  double c_min = epsmch;
 
   //!  lower and upper bounds on the multiplier, if known
   double lower = lower_default;
@@ -510,7 +503,7 @@ void roots_cubic(double a0, double a1, double a2, double a3, double tol,
   double pprime = (three * a3 * root1 + two * a2) * root1 + a1;
   if (pprime != zero) {
     root1 = root1 - p / pprime;
-    p = ((a3 * root1 + a2) * root1 + a1) * root1 + a0;
+    // p = ((a3 * root1 + a2) * root1 + a1) * root1 + a0; // never used
   }
 
   if (nroots == 3) {
@@ -518,14 +511,14 @@ void roots_cubic(double a0, double a1, double a2, double a3, double tol,
     pprime = (three * a3 * root2 + two * a2) * root2 + a1;
     if (pprime != zero) {
       root2 = root2 - p / pprime;
-      p = ((a3 * root2 + a2) * root2 + a1) * root2 + a0;
+      // p = ((a3 * root2 + a2) * root2 + a1) * root2 + a0; // never used
     }
 
     p = ((a3 * root3 + a2) * root3 + a1) * root3 + a0;
     pprime = (three * a3 * root3 + two * a2) * root3 + a1;
     if (pprime != zero) {
       root3 = root3 - p / pprime;
-      p = ((a3 * root3 + a2) * root3 + a1) * root3 + a0;
+      // p = ((a3 * root3 + a2) * root3 + a1) * root3 + a0; // never used
     }
   }
 }
@@ -598,7 +591,6 @@ void dtrs_solve_main(int n, double radius, double f,
   inform.obj = f;
   inform.hard_case = false;
   double delta_lambda = zero;
-  char region = 'L';
 
   //  check for n < 0 or delta < 0
   if (n < 0 || radius < 0) {
@@ -615,7 +607,6 @@ void dtrs_solve_main(int n, double radius, double f,
   double lambda_max = 0.0;
   std::tie(lambda_min, lambda_max) = minMaxValues(h);
 
-  region = 'L';
   double lambda = 0.0;
   //!  check for the trivial case
   if (c_norm == zero && lambda_min >= zero) {
@@ -757,7 +748,6 @@ void dtrs_solve_main(int n, double radius, double f,
     if (lambda == zero && inform.x_norm <= radius) {
       inform.obj = f + half * dot_product(c, x);
       inform.status = ErrorCode::ral_nlls_ok;
-      region = 'L';
       return;
     }
 
@@ -769,7 +759,6 @@ void dtrs_solve_main(int n, double radius, double f,
       if (inform.x_norm > radius) {
         lambda_l = std::max(lambda_l, lambda);
       } else {
-        region = 'G';
         lambda_u = std::min(lambda_u, lambda);
       }
       inform.status = ErrorCode::ral_nlls_ok;

@@ -126,7 +126,6 @@ void TrustRegionMinimizer::eval_HF(const DoubleFortranVector &x,
 /// Perform a single iteration.
 bool TrustRegionMinimizer::iterate(size_t) {
   int max_tr_decrease = 100;
-  double rho, normFnew, md, Jmax, JtJdiag;
   auto &w = m_workspace;
   auto &options = m_options;
   auto &inform = m_inform;
@@ -148,11 +147,11 @@ bool TrustRegionMinimizer::iterate(size_t) {
 
     if (options.relative_tr_radius == 1) {
       // first, let's get diag(J^TJ)
-      Jmax = 0.0;
+      double Jmax = 0.0;
       for (int i = 1; i <= n; ++i) {
         // note:: assumes column-storage of J
         // JtJdiag = norm2( w.J( (i-1)*m + 1 : i*m ) );
-        JtJdiag = 0.0;
+        double JtJdiag = 0.0;
         for (int j = 1; j <= m; ++j) { // for_do(j, 1, m)
           JtJdiag += pow(w.J(j, i), 2);
         }
@@ -234,9 +233,10 @@ bool TrustRegionMinimizer::iterate(size_t) {
   w.iter = w.iter + 1;
   inform.iter = w.iter;
 
-  rho = -one; // intialize rho as a negative value
+  double rho = -one; // intialize rho as a negative value
   bool success = false;
   int no_reductions = 0;
+  double normFnew = 0.0;
 
   while (!success) { // loop until successful
     no_reductions = no_reductions + 1;
@@ -258,7 +258,7 @@ bool TrustRegionMinimizer::iterate(size_t) {
     // Get the value of the model
     //      md :=   m_k(d)
     // evaluated at the new step
-    md = evaluate_model(w.f, w.J, w.hf, w.d, options, w.evaluate_model_ws);
+    double md = evaluate_model(w.f, w.J, w.hf, w.d, options, w.evaluate_model_ws);
 
     // Calculate the quantity
     //   rho = 0.5||f||^2 - 0.5||fnew||^2 =   actual_reduction

@@ -6,6 +6,7 @@
 #include <limits>
 #include <string>
 
+#include <boost/math/special_functions/fpclassify.hpp>
 #include <gsl/gsl_blas.h>
 #include <gsl/gsl_linalg.h>
 
@@ -204,7 +205,11 @@ void update_trust_region_radius(double &rho, const nlls_options &options,
 
   switch (options.tr_update_strategy) {
   case 1: // default, step-function
-    if (rho < options.eta_success_but_reduce) {
+    if (boost::math::isinf(rho) || boost::math::isnan(rho)) {
+      w.Delta =
+          std::max(options.radius_reduce, options.radius_reduce_max) * w.Delta;
+      rho = -one; // set to be negative, so that the logic works....
+    } else if (rho < options.eta_success_but_reduce) {
       // unsuccessful....reduce Delta
       w.Delta =
           std::max(options.radius_reduce, options.radius_reduce_max) * w.Delta;
@@ -218,20 +223,19 @@ void update_trust_region_radius(double &rho, const nlls_options &options,
       // if d is on the tr boundary, this is Delta
       // otherwise, point was within the tr, and there's no point
       // increasing the radius
-    } else if (rho >= options.eta_too_successful) {
-      // too successful....accept step, but don't change w.Delta
     } else {
-      // just incase (NaNs and the like...)
-      w.Delta =
-          std::max(options.radius_reduce, options.radius_reduce_max) * w.Delta;
-      rho = -one; // set to be negative, so that the logic works....
+      // too successful....accept step, but don't change w.Delta
     }
     break;
   case 2: //  Continuous method
           //  Based on that proposed by Hans Bruun Nielsen, TR
           //  IMM-REP-1999-05
           //  http://www2.imm.dtu.dk/documents/ftp/tr99/tr05_99.pdf
-    if (rho >= options.eta_too_successful) {
+    if (boost::math::isinf(rho) || boost::math::isnan(rho)) {
+      w.Delta =
+          std::max(options.radius_reduce, options.radius_reduce_max) * w.Delta;
+      rho = -one; // set to be negative, so that the logic works....
+    } else if (rho >= options.eta_too_successful) {
       // too successful....accept step, but don't change w.Delta
     } else if (rho > options.eta_successful) {
       w.Delta =
@@ -240,14 +244,9 @@ void update_trust_region_radius(double &rho, const nlls_options &options,
                                       1 - ((options.radius_increase - 1) *
                                            (pow((1 - 2 * rho), w.tr_p)))));
       w.tr_nu = options.radius_reduce;
-    } else if (rho <= options.eta_successful) {
+    } else {
       w.Delta = w.Delta * w.tr_nu;
       w.tr_nu = w.tr_nu * 0.5;
-    } else {
-      // just incase (NaNs and the like...)
-      w.Delta =
-          std::max(options.radius_reduce, options.radius_reduce_max) * w.Delta;
-      rho = -one; // set to be negative, so that the logic works....
     }
     break;
   default:
@@ -300,14 +299,12 @@ void apply_scaling(const DoubleFortranMatrix &J, DoubleFortranMatrix &A,
   case 2:
     for (int ii = 1; ii <= n; ++ii) { // do ii = 1,n
       double temp = zero;
-      double Jij = 0.0;
       if (options.scale == 1) {
         //! use the scaling present in gsl:
         //! scale by W, W_ii = ||J(i,:)||_2^2
         for (int jj = 1; jj <= m; ++jj) { // for_do(jj, 1,m)
           // get_element_of_matrix(J,m,jj,ii,Jij);
-          Jij = J(jj, ii);
-          temp = temp + pow(Jij, 2);
+          temp = temp + pow(J(jj, ii), 2);
         }
       } else if (options.scale == 2) {
         //! scale using the (approximate) hessian
