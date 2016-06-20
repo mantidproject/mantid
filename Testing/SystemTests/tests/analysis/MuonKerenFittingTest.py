@@ -1,8 +1,8 @@
-#pylint: disable=no-init,attribute-defined-outside-init
+#pylint: disable=no-init,attribute-defined-outside-init,too-few-public-methods
 import stresstesting
 from mantid.simpleapi import *
 
-class MuonKerenFittingTest(stresstesting.MantidStressTest):  # pylint: disable-too-few-public-methods
+class MuonKerenFittingTest(stresstesting.MantidStressTest):
     '''Tests the Keren fitting function on a real workspace, to check results vs. WiMDA'''
 
     def runTest(self):
@@ -29,7 +29,7 @@ class MuonKerenFittingTest(stresstesting.MantidStressTest):  # pylint: disable-t
         Chisq = params.cell(5,1)
 
 	# Check that params are within the errors of those obtained in WiMDA
-        self.assertTrue(Chisq < 1.1, "Fitted chi-square too large") 
+        self.assertTrue(Chisq < 1.1, "Fitted chi-square too large")
         self.assertDelta(Background, 0.1623, 0.0046, "Fitted A0 outside errors")
         self.assertDelta(Initial, 0.0389, 0.0040, "Fitted A outside errors")
         self.assertDelta(Delta, 0.96, 0.11, "Fitted Delta outside errors")
