@@ -177,7 +177,7 @@ public:
 
     const std::string groupName =
         "test_Exec_With_Input_That_Is_Not_In_ADS_Fails";
-    runAlgorithm(inputs, groupName,true);
+    runAlgorithm(inputs, groupName, true);
 
     TS_ASSERT_EQUALS(
         false,
