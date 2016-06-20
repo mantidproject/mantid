@@ -102,8 +102,7 @@ void MessageDisplay::attachLoggingChannel() {
 
   QSettings settings;
   int priority = settings.value(QString::fromStdString(m_FilterChannelName),
-                                Message::Priority::PRIO_NOTICE)
-                     .toInt();
+                                Message::Priority::PRIO_NOTICE).toInt();
 
   auto &configService = Mantid::Kernel::ConfigService::Instance();
   configService.registerLoggingFilterChannel(m_FilterChannelName,
@@ -323,11 +322,11 @@ void MessageDisplay::initActions() {
   m_logLevelMapping->setMapping(m_information, Poco::Message::PRIO_INFORMATION);
   m_logLevelMapping->setMapping(m_debug, Poco::Message::PRIO_DEBUG);
 
-  connect(m_error, SIGNAL(activated()), m_logLevelMapping, SLOT(map()));
-  connect(m_warning, SIGNAL(activated()), m_logLevelMapping, SLOT(map()));
-  connect(m_notice, SIGNAL(activated()), m_logLevelMapping, SLOT(map()));
-  connect(m_information, SIGNAL(activated()), m_logLevelMapping, SLOT(map()));
-  connect(m_debug, SIGNAL(activated()), m_logLevelMapping, SLOT(map()));
+  connect(m_error, SIGNAL(triggered()), m_logLevelMapping, SLOT(map()));
+  connect(m_warning, SIGNAL(triggered()), m_logLevelMapping, SLOT(map()));
+  connect(m_notice, SIGNAL(triggered()), m_logLevelMapping, SLOT(map()));
+  connect(m_information, SIGNAL(triggered()), m_logLevelMapping, SLOT(map()));
+  connect(m_debug, SIGNAL(triggered()), m_logLevelMapping, SLOT(map()));
 
   connect(m_logLevelMapping, SIGNAL(mapped(int)), this,
           SLOT(setGlobalLogLevel(int)));

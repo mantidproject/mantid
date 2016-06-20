@@ -667,8 +667,7 @@ void MuonAnalysis::runSaveGroupButton() {
   QString prevPath =
       prevValues.value("dir", QString::fromStdString(
                                   ConfigService::Instance().getString(
-                                      "defaultsave.directory")))
-          .toString();
+                                      "defaultsave.directory"))).toString();
 
   QString filter;
   filter.append("Files (*.xml *.XML)");
@@ -707,8 +706,7 @@ void MuonAnalysis::runLoadGroupButton() {
   QString prevPath =
       prevValues.value("dir", QString::fromStdString(
                                   ConfigService::Instance().getString(
-                                      "defaultload.directory")))
-          .toString();
+                                      "defaultload.directory"))).toString();
 
   QString filter;
   filter.append("Files (*.xml *.XML)");
@@ -1202,7 +1200,9 @@ MuonAnalysis::load(const QStringList &files) const {
 
     if (f == files.constBegin()) {
       // These are only needed for the first file
-      load->setPropertyValue("DeadTimeTable", "__NotUsed");
+      if (m_uiForm.deadTimeType->currentText() == "From Data File") {
+        load->setPropertyValue("DeadTimeTable", "__NotUsed");
+      }
       load->setPropertyValue("DetectorGroupingTable", "__NotUsed");
     }
 
@@ -1215,10 +1215,18 @@ MuonAnalysis::load(const QStringList &files) const {
 
       // Check that is a valid Muon instrument
       if (m_uiForm.instrSelector->findText(QString::fromStdString(instrName)) ==
-          -1)
-        throw std::runtime_error("Instrument is not recognized: " + instrName);
+          -1) {
+        if (0 !=
+            instrName.compare(
+                "DEVA")) { // special case - no IDF but let it load anyway
+          throw std::runtime_error("Instrument is not recognized: " +
+                                   instrName);
+        }
+      }
 
-      result->loadedDeadTimes = load->getProperty("DeadTimeTable");
+      if (m_uiForm.deadTimeType->currentText() == "From Data File") {
+        result->loadedDeadTimes = load->getProperty("DeadTimeTable");
+      }
       result->loadedGrouping = load->getProperty("DetectorGroupingTable");
       result->mainFieldDirection =
           static_cast<std::string>(load->getProperty("MainFieldDirection"));
@@ -1836,16 +1844,23 @@ void MuonAnalysis::plotSpectrum(const QString &wsName, bool logScale) {
   s << "";
 
   // Remove data and difference from given plot (keep fit and guess)
-  s << "def remove_data(window):";
+  // num_to_keep: number of previous fits to keep
+  s << "def remove_data(window, num_to_keep):";
   s << "  if window is None:";
   s << "    raise ValueError('No plot to remove data from')";
-  s << "  to_keep = ['Workspace-Calc', 'CompositeFunction']";
+  // Need to keep the last "num_to_keep" curves with
+  // "Workspace-Calc" in their name, plus guesses
   s << "  layer = window.activeLayer()";
   s << "  if layer is not None:";
-  s << "    for i in range(0, layer.numCurves()):";
-  s << "      if not any (x in layer.curveTitle(i) for x in to_keep):";
-  s << "        layer.removeCurve(i)";
-  s << "";
+  s << "    kept_fits = 0";
+  s << "    for i in range(layer.numCurves() - 1, -1, -1):"; // reversed
+  s << "      title = layer.curveTitle(i)";
+  s << "      if title == \"CompositeFunction\":";
+  s << "        continue"; // keep all guesses
+  s << "      if \"Workspace-Calc\" in title and kept_fits < num_to_keep:";
+  s << "        kept_fits = kept_fits + 1";
+  s << "        continue";           // keep last n fits
+  s << "      layer.removeCurve(i)"; // remove everything else
 
   // Plot data in the given window with given options
   s << "def plot_data(ws_name, errors, connect, window_to_use):";
@@ -1881,7 +1896,8 @@ void MuonAnalysis::plotSpectrum(const QString &wsName, bool logScale) {
 
   // Plot the data!
   s << "win = get_window('%WSNAME%', '%PREV%', %USEPREV%)";
-  s << "remove_data(win)";
+  s << "if %FITSTOKEEP% != -1:";
+  s << "  remove_data(win, %FITSTOKEEP%)";
   s << "g = plot_data('%WSNAME%', %ERRORS%, %CONNECT%, win)";
   s << "format_graph(g, '%WSNAME%', %LOGSCALE%, %YAUTO%, '%YMIN%', '%YMAX%')";
 
@@ -1907,6 +1923,11 @@ void MuonAnalysis::plotSpectrum(const QString &wsName, bool logScale) {
   pyS.replace("%YAUTO%", params["YAxisAuto"]);
   pyS.replace("%YMIN%", params["YAxisMin"]);
   pyS.replace("%YMAX%", params["YAxisMax"]);
+  if (policy == MuonAnalysisOptionTab::PreviousWindow) {
+    pyS.replace("%FITSTOKEEP%", m_uiForm.spinBoxNPlotsToKeep->text());
+  } else {
+    pyS.replace("%FITSTOKEEP%", "-1");
+  }
 
   runPythonCode(pyS);
 }
@@ -2321,7 +2342,7 @@ void MuonAnalysis::setAppendingRun(int inc) {
   // Increment is positive (next button)
   if (inc < 0) {
     // Add the file to the beginning of mwRunFiles text box.
-    QString lastName = m_previousFilenames[m_previousFilenames.size() - 1];
+    QString lastName = m_previousFilenames.back();
     separateMuonFile(filePath, lastName, run, runSize);
     getFullCode(runSize, run);
     m_uiForm.mwRunFiles->setUserInput(newRun + '-' + run);

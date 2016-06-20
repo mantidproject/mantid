@@ -32,7 +32,7 @@ public:
                                  size_t numberDetectors) {
     TS_ASSERT_EQUALS(output->getNumberHistograms(), numberDetectors);
     for (size_t i = 0; i < output->getNumberHistograms(); i++) {
-      TS_ASSERT_EQUALS(output->getSpectrum(i)->getDetectorIDs().size(), 1);
+      TS_ASSERT_EQUALS(output->getSpectrum(i).getDetectorIDs().size(), 1);
     }
   }
 

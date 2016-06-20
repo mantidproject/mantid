@@ -3,11 +3,12 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidQtAPI/FileDialogHandler.h"
 #include "MantidQtAPI/HelpWindow.h"
-#include "MantidQtCustomInterfaces/Reflectometry/DataProcessorCommandAdapter.h"
-#include "MantidQtCustomInterfaces/Reflectometry/QDataProcessorWidget.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflGenericDataProcessorPresenterFactory.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflMainViewPresenter.h"
+#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorCommandAdapter.h"
+#include "MantidQtMantidWidgets/DataProcessorUI/QDataProcessorWidget.h"
 #include "MantidQtMantidWidgets/HintingLineEditFactory.h"
+#include "MantidQtMantidWidgets/SlitCalculator.h"
 #include <qinputdialog.h>
 #include <qmessagebox.h>
 
@@ -18,6 +19,7 @@ const QString ReflSettingsGroup = "Mantid/CustomInterfaces/ISISReflectometry";
 namespace MantidQt {
 namespace CustomInterfaces {
 using namespace Mantid::API;
+using namespace MantidQt::MantidWidgets;
 
 DECLARE_SUBWINDOW(QtReflMainView)
 
@@ -25,8 +27,7 @@ DECLARE_SUBWINDOW(QtReflMainView)
 /** Constructor
 */
 QtReflMainView::QtReflMainView(QWidget *parent)
-    : UserSubWindow(parent),
-      m_calculator(new MantidWidgets::SlitCalculator(this)) {}
+    : UserSubWindow(parent), m_calculator(new SlitCalculator(this)) {}
 
 //----------------------------------------------------------------------------------------------
 /** Destructor
@@ -216,16 +217,6 @@ This slot notifies the presenter that the "transfer" button has been pressed
 */
 void QtReflMainView::on_actionTransfer_triggered() {
   m_presenter->notify(IReflPresenter::Flag::TransferFlag);
-}
-
-/**
-This slot opens the documentation when the "help" button has been pressed
-*/
-void QtReflMainView::on_actionHelp_triggered() {
-  MantidQt::API::HelpWindow::showPage(
-      this,
-      QString(
-          "qthelp://org.mantidproject/doc/interfaces/ISIS_Reflectometry.html"));
 }
 
 /**

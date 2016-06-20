@@ -73,10 +73,6 @@ namespace Algorithms {
 */
 class DLLExport CalculateTransmissionBeamSpreader : public API::Algorithm {
 public:
-  /// Constructor
-  CalculateTransmissionBeamSpreader();
-  /// Virtual destructor
-  ~CalculateTransmissionBeamSpreader() override;
   /// Algorithm's name
   const std::string name() const override {
     return "CalculateTransmissionBeamSpreader";
@@ -108,7 +104,8 @@ private:
   /// Sum the total detector, excluding masked pixels and monitors
   API::MatrixWorkspace_sptr sumSpectra(API::MatrixWorkspace_sptr WS);
 
-  bool logFit; ///< If true, will take log of transmission curve before fitting
+  bool logFit =
+      false; ///< If true, will take log of transmission curve before fitting
 };
 
 } // namespace Algorithm

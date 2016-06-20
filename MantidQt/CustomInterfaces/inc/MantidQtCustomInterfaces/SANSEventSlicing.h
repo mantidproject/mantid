@@ -5,54 +5,50 @@
 #include "MantidQtAPI/UserSubWindow.h"
 #include <QString>
 
-namespace MantidQt
-{
-namespace CustomInterfaces
-{
+namespace MantidQt {
+namespace CustomInterfaces {
 
-class SANSEventSlicing : public API::UserSubWindow
-{
+class SANSEventSlicing : public API::UserSubWindow {
   Q_OBJECT
 
 public:
   /// Default Constructor
-  SANSEventSlicing(QWidget *parent=0);
+  SANSEventSlicing(QWidget *parent = 0);
   /// Destructor
   ~SANSEventSlicing() override;
 
-  static std::string name(){return "SANS ISIS Slicing";}
-  static QString categoryInfo() {return "SANS";}
+  static std::string name() { return "SANS ISIS Slicing"; }
+  static QString categoryInfo() { return "SANS"; }
 
 private:
-
-  struct ChargeAndTime{
-    QString charge; 
+  struct ChargeAndTime {
+    QString charge;
     QString time;
   };
 
   void initLayout() override;
 
-  ChargeAndTime getFullChargeAndTime(const QString & name_ws); 
-  QString createSliceEventCode(const QString & name_ws, const QString & start, const QString & stop); 
-  ChargeAndTime runSliceEvent(const QString & code2run); 
-  void checkPythonOutput(const QString & result); 
-  ChargeAndTime values2ChargeAndTime(const QString & input);
-  void raiseWarning(QString title, QString message); 
+  ChargeAndTime getFullChargeAndTime(const QString &name_ws);
+  QString createSliceEventCode(const QString &name_ws, const QString &start,
+                               const QString &stop);
+  ChargeAndTime runSliceEvent(const QString &code2run);
+  void checkPythonOutput(const QString &result);
+  ChargeAndTime values2ChargeAndTime(const QString &input);
+  void raiseWarning(QString title, QString message);
 
- protected:
-   void showEvent(QShowEvent *) override;
- private slots:
+protected:
+  void showEvent(QShowEvent *) override;
+private slots:
 
-   /// Apply the slice for the SANS data, and update the view with the last
-   /// sliced data.
-   void doApplySlice();
-   void onChangeWorkspace(const QString &newWs);
-  
- private:
-  Ui::SANSEventSlicing ui; 
+  /// Apply the slice for the SANS data, and update the view with the last
+  /// sliced data.
+  void doApplySlice();
+  void onChangeWorkspace(const QString &newWs);
+
+private:
+  Ui::SANSEventSlicing ui;
 };
-
 }
 }
 
-#endif  //MANTIDQTCUSTOMINTERFACES_SANSEVENTSLICING_H_
+#endif // MANTIDQTCUSTOMINTERFACES_SANSEVENTSLICING_H_

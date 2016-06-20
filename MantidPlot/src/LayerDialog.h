@@ -38,34 +38,33 @@ class QCheckBox;
 class QComboBox;
 
 //! Arrange layers dialog
-class LayerDialog : public QDialog
-{
-    Q_OBJECT
+class LayerDialog : public QDialog {
+  Q_OBJECT
 
 public:
-    LayerDialog( QWidget* parent = 0, Qt::WFlags fl = 0 );
-	void setMultiLayer(MultiLayer *g);
+  LayerDialog(QWidget *parent = 0, Qt::WFlags fl = 0);
+  void setMultiLayer(MultiLayer *g);
 
 protected slots:
   void accept() override;
-        void update();
-	void enableLayoutOptions(bool ok);
-	void swapLayers();
+  void update();
+  void enableLayoutOptions(bool ok);
+  void swapLayers();
 
 private:
-	MultiLayer *multi_layer;
+  MultiLayer *multi_layer;
 
-	QPushButton* buttonOk;
-	QPushButton* buttonCancel;
-	QPushButton* buttonApply;
-	QPushButton* buttonSwapLayers;
-    QGroupBox *GroupCanvasSize, *GroupGrid;
-    QSpinBox *boxX, *boxY, *boxColsGap, *boxRowsGap;
-	QSpinBox *boxRightSpace, *boxLeftSpace, *boxTopSpace, *boxBottomSpace;
-	QSpinBox *boxCanvasWidth, *boxCanvasHeight, *layersBox;
-	QSpinBox *boxLayerDest, *boxLayerSrc;
-	QCheckBox *fitBox;
-	QComboBox *alignHorBox, *alignVertBox;
+  QPushButton *buttonOk;
+  QPushButton *buttonCancel;
+  QPushButton *buttonApply;
+  QPushButton *buttonSwapLayers;
+  QGroupBox *GroupCanvasSize, *GroupGrid;
+  QSpinBox *boxX, *boxY, *boxColsGap, *boxRowsGap;
+  QSpinBox *boxRightSpace, *boxLeftSpace, *boxTopSpace, *boxBottomSpace;
+  QSpinBox *boxCanvasWidth, *boxCanvasHeight, *layersBox;
+  QSpinBox *boxLayerDest, *boxLayerSrc;
+  QCheckBox *fitBox;
+  QComboBox *alignHorBox, *alignVertBox;
 };
 
 #endif

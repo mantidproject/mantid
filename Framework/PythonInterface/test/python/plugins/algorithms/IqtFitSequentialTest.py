@@ -28,6 +28,10 @@ class IqtFitSequentialTest(unittest.TestCase):
         self._validate_matrix_values(result)
         self._validate_group_values(fit_group)
 
+        self._validate_sample_log_values(result)
+        self._validate_sample_log_values(fit_group.getItem(0))
+
+
 
     def _validate_table_shape(self, tableWS):
         # Check length of rows and columns
@@ -55,7 +59,7 @@ class IqtFitSequentialTest(unittest.TestCase):
         self.assertEquals('f0.A0',text_axis.label(0))
         self.assertEquals('f1.Intensity',text_axis.label(1))
         self.assertEquals('f1.Tau',text_axis.label(2))
-        
+
         # Check bin units
         self.assertEquals('MomentumTransfer', matrixWS.getAxis(0).getUnit().unitID())
 
@@ -68,14 +72,14 @@ class IqtFitSequentialTest(unittest.TestCase):
         nhists = sub_ws.getNumberHistograms()
         self.assertEquals(nbins, 58)
         self.assertEquals(nhists, 3)
-        
+
         # Check histogram names
         text_axis = sub_ws.getAxis(1)
         self.assertTrue(text_axis.isText())
         self.assertEquals('Data',text_axis.label(0))
         self.assertEquals('Calc',text_axis.label(1))
         self.assertEquals('Diff',text_axis.label(2))
-        
+
         # Check bin units
         self.assertEquals('ns', str(sub_ws.getAxis(0).getUnit().symbol()))
 
@@ -124,6 +128,21 @@ class IqtFitSequentialTest(unittest.TestCase):
         diff = sub_ws.readY(2)
         self.assertEquals(round(diff[0], 6),-0.073454)
         self.assertEquals(round(diff[-1],6), 0.005157)
+
+    def _validate_sample_log_values(self, matrixWS):
+        run = matrixWS.getRun()
+        # Check additionally added logs
+        self.assertEqual(run.getProperty('fit_type').value, '1E')
+        self.assertEqual(run.getProperty('intensities_constrained').value, 'True')
+        self.assertEqual(run.getProperty('beta_constrained').value, 'False')
+        self.assertEqual(run.getProperty('end_x').value, 0.24)
+        self.assertEqual(run.getProperty('start_x').value, 0.0)
+
+        # Check copied logs from input
+        self.assertEqual(run.getProperty('current_period').value, 1)
+        self.assertEqual(run.getProperty('iqt_resolution_workspace').value, 'iris26173_graphite002_res')
+        self.assertEqual(run.getProperty('iqt_sample_workspace').value, 'iris26176_graphite002_red')
+
 
 
 #---------------------------------------Success cases--------------------------------------

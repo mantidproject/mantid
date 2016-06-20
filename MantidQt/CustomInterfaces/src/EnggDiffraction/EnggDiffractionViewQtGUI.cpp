@@ -1,9 +1,9 @@
+#include "MantidQtCustomInterfaces/EnggDiffraction/EnggDiffractionViewQtGUI.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidKernel/ConfigService.h"
-#include "MantidQtAPI/AlgorithmRunner.h"
 #include "MantidQtAPI/AlgorithmInputHistory.h"
+#include "MantidQtAPI/AlgorithmRunner.h"
 #include "MantidQtAPI/HelpWindow.h"
-#include "MantidQtCustomInterfaces/EnggDiffraction/EnggDiffractionViewQtGUI.h"
 #include "MantidQtCustomInterfaces/EnggDiffraction/EnggDiffractionPresenter.h"
 #include "MantidQtMantidWidgets/MWRunFiles.h"
 #include "Poco/DirectoryIterator.h"
@@ -15,8 +15,8 @@ using namespace MantidQt::CustomInterfaces;
 #include <fstream>
 #include <random>
 
-#include <boost/lexical_cast.hpp>
 #include <Poco/Path.h>
+#include <boost/lexical_cast.hpp>
 
 #include <QCheckBox>
 #include <QCloseEvent>
@@ -69,8 +69,9 @@ const std::string EnggDiffractionViewQtGUI::m_settingsGroup =
 */
 EnggDiffractionViewQtGUI::EnggDiffractionViewQtGUI(QWidget *parent)
     : UserSubWindow(parent), IEnggDiffractionView(), m_currentInst("ENGINX"),
-      m_currentCalibFilename(""), m_focusedDataVector(), m_fittedDataVector(),
-      m_peakPicker(NULL), m_zoomTool(NULL), m_presenter(NULL) {}
+      m_currentCalibFilename(""), m_splashMsg(nullptr), m_focusedDataVector(),
+      m_fittedDataVector(), m_peakPicker(nullptr), m_zoomTool(nullptr),
+      m_presenter(nullptr) {}
 
 EnggDiffractionViewQtGUI::~EnggDiffractionViewQtGUI() {
   for (auto curves : m_focusedDataVector) {
@@ -319,6 +320,11 @@ void EnggDiffractionViewQtGUI::doSetupTabSettings() {
 }
 
 void EnggDiffractionViewQtGUI::doSetupGeneralWidgets() {
+  doSetupSplashMsg();
+
+  // don't show the re-size corner
+  m_ui.statusbar->setSizeGripEnabled(false);
+
   // change instrument
   connect(m_ui.comboBox_instrument, SIGNAL(currentIndexChanged(int)), this,
           SLOT(instrumentChanged(int)));
@@ -330,6 +336,21 @@ void EnggDiffractionViewQtGUI::doSetupGeneralWidgets() {
 
   connect(m_ui.lineEdit_RBNumber, SIGNAL(editingFinished()), this,
           SLOT(RBNumberChanged()));
+}
+
+void EnggDiffractionViewQtGUI::doSetupSplashMsg() {
+  if (m_splashMsg)
+    delete m_splashMsg;
+
+  m_splashMsg = new QMessageBox(this);
+  m_splashMsg->setIcon(QMessageBox::Information);
+  m_splashMsg->setStandardButtons(QMessageBox::NoButton);
+  m_splashMsg->setWindowTitle("Setting up");
+  m_splashMsg->setText("Setting up the interface!");
+  m_splashMsg->setWindowFlags(Qt::SplashScreen | Qt::FramelessWindowHint |
+                              Qt::X11BypassWindowManagerHint);
+  m_splashMsg->setWindowModality(Qt::NonModal);
+  // we don't want to show now: m_splashMsg->show();
 }
 
 void EnggDiffractionViewQtGUI::readSettings() {
@@ -599,6 +620,28 @@ std::string EnggDiffractionViewQtGUI::guessDefaultFullCalibrationPath() const {
   templ.append("ENGINX_full_pixel_calibration_vana194547_ceria193749.csv");
   return templ.toString();
 }
+
+void EnggDiffractionViewQtGUI::splashMessage(bool visible,
+                                             const std::string &shortMsg,
+                                             const std::string &description) {
+  if (!m_splashMsg)
+    return;
+
+  m_splashMsg->setWindowTitle(QString::fromStdString(shortMsg));
+  m_splashMsg->setText(QString::fromStdString(description));
+  // when showing the message, force it to show up centered
+  if (visible) {
+    const auto pos = this->mapToGlobal(rect().center());
+    m_splashMsg->move(pos.x() - m_splashMsg->width() / 2,
+                      pos.y() - m_splashMsg->height() / 2);
+  }
+  m_splashMsg->setVisible(visible);
+}
+
+void EnggDiffractionViewQtGUI::showStatus(const std::string &sts) {
+  m_ui.statusbar->showMessage(QString::fromStdString(sts));
+}
+
 void EnggDiffractionViewQtGUI::userWarning(const std::string &err,
                                            const std::string &description) {
   QMessageBox::warning(this, QString::fromStdString(err),
@@ -1362,6 +1405,40 @@ std::string EnggDiffractionViewQtGUI::getFittingRunNo() const {
   return m_uiTabFitting.lineEdit_pushButton_run_num->text().toStdString();
 }
 
+void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::
+    clearFittingComboBox() const {
+  m_uiTabFitting.comboBox_bank->clear();
+}
+
+void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::
+    enableFittingComboBox(bool enable) const {
+  m_uiTabFitting.comboBox_bank->setEnabled(enable);
+}
+
+void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::
+    clearFittingListWidget() const {
+  m_uiTabFitting.listWidget_fitting_run_num->clear();
+}
+
+void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::
+    enableFittingListWidget(bool enable) const {
+  m_uiTabFitting.listWidget_fitting_run_num->setEnabled(enable);
+}
+
+int MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::
+    getFittingListWidgetCurrentRow() const {
+  return m_uiTabFitting.listWidget_fitting_run_num->currentRow();
+}
+
+void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::
+    setFittingListWidgetCurrentRow(int idx) const {
+  m_uiTabFitting.listWidget_fitting_run_num->setCurrentRow(idx);
+}
+
+int EnggDiffractionViewQtGUI::getFittingComboIdx(std::string bank) const {
+  return m_uiTabFitting.comboBox_bank->findText(QString::fromStdString(bank));
+}
+
 void EnggDiffractionViewQtGUI::plotSeparateWindow() {
   std::string pyCode =
 
@@ -1389,23 +1466,14 @@ void EnggDiffractionViewQtGUI::plotSeparateWindow() {
 }
 
 std::string EnggDiffractionViewQtGUI::fittingPeaksData() const {
-  // this should be moved to Helper or could use the poco string tokenizers
-  std::string exptPeaks =
-      m_uiTabFitting.lineEdit_fitting_peaks->text().toStdString();
-  size_t strLength = exptPeaks.length() - 1;
 
-  if (!exptPeaks.empty()) {
+  return m_uiTabFitting.lineEdit_fitting_peaks->text().toStdString();
+}
 
-    if (exptPeaks.at(size_t(0)) == ',') {
-      exptPeaks.erase(size_t(0), 1);
-      strLength -= size_t(1);
-    }
-
-    if (exptPeaks.at(strLength) == ',') {
-      exptPeaks.erase(strLength, 1);
-    }
-  }
-  return exptPeaks;
+void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::setPeakList(
+    std::string peakList) const {
+  m_uiTabFitting.lineEdit_fitting_peaks->setText(
+      QString::fromStdString(peakList));
 }
 
 std::vector<std::string>
@@ -1429,94 +1497,15 @@ MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::getFocusDir() {
   return m_focusDir;
 }
 
-void EnggDiffractionViewQtGUI::addBankItems(
-    std::vector<std::string> splittedBaseName, QString selectedFile) {
-  try {
-    if (!m_fitting_runno_dir_vec.empty()) {
+void EnggDiffractionViewQtGUI::addBankItem(std::string bankID) {
 
-      // delete previous bank added to the list
-      m_uiTabFitting.comboBox_bank->clear();
-
-      for (size_t i = 0; i < m_fitting_runno_dir_vec.size(); i++) {
-        Poco::Path vecFile(m_fitting_runno_dir_vec[i]);
-        std::string strVecFile = vecFile.toString();
-        // split the directory from m_fitting_runno_dir_vec
-        std::vector<std::string> vecFileSplit =
-            splitFittingDirectory(strVecFile);
-
-        // get the last split in vector which will be bank
-        std::string bankID = (vecFileSplit[vecFileSplit.size() - 1]);
-
-        bool digit = isDigit(bankID);
-
-        if (digit) {
-          m_uiTabFitting.comboBox_bank->addItem(QString::fromStdString(bankID));
-
-        } else {
-          m_uiTabFitting.comboBox_bank->addItem(QString("Bank %1").arg(i + 1));
-        }
-      }
-
-      m_uiTabFitting.comboBox_bank->setEnabled(true);
-    } else {
-      // upon invalid file
-      // disable the widgets when only one related file found
-      m_uiTabFitting.comboBox_bank->setEnabled(false);
-
-      m_uiTabFitting.comboBox_bank->clear();
-    }
-
-    setDefaultBank(splittedBaseName, selectedFile);
-
-  } catch (std::runtime_error &re) {
-    userWarning("Unable to insert items: ",
-                "Could not add banks to "
-                "combo-box or list widget; " +
-                    static_cast<std::string>(re.what()) + ". Please try again");
-  }
+  m_uiTabFitting.comboBox_bank->addItem(QString::fromStdString(bankID));
 }
 
 void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::addRunNoItem(
-    std::vector<std::string> runNumVector, bool multiRun) {
-  try {
-    if (!runNumVector.empty()) {
-
-      // delete previous bank added to the list
-      m_uiTabFitting.listWidget_fitting_run_num->clear();
-
-      for (size_t i = 0; i < runNumVector.size(); i++) {
-
-        // get the last split in vector which will be bank
-        std::string currentRun = (runNumVector[i]);
-
-        m_uiTabFitting.listWidget_fitting_run_num->addItem(
-            QString::fromStdString(currentRun));
-      }
-
-      if (multiRun) {
-        m_uiTabFitting.listWidget_fitting_run_num->setEnabled(true);
-        auto currentIndex =
-            m_uiTabFitting.listWidget_fitting_run_num->currentRow();
-        if (currentIndex == -1)
-          m_uiTabFitting.listWidget_fitting_run_num->setCurrentRow(0);
-      } else {
-        m_uiTabFitting.listWidget_fitting_run_num->setEnabled(false);
-      }
-    }
-
-    else {
-      // upon invalid file
-      // disable the widgets when only one related file found
-      m_uiTabFitting.listWidget_fitting_run_num->setEnabled(false);
-
-      m_uiTabFitting.listWidget_fitting_run_num->clear();
-    }
-
-  } catch (std::runtime_error &re) {
-    userWarning("Unable to insert items: ",
-                "Could not add list widget; " +
-                    static_cast<std::string>(re.what()) + ". Please try again");
-  }
+    std::string runNo) {
+  m_uiTabFitting.listWidget_fitting_run_num->addItem(
+      QString::fromStdString(runNo));
 }
 
 std::vector<std::string> EnggDiffractionViewQtGUI::getFittingRunNumVec() {
@@ -1535,44 +1524,6 @@ void EnggDiffractionViewQtGUI::setFittingMultiRunMode(bool mode) {
 
 bool EnggDiffractionViewQtGUI::getFittingMultiRunMode() {
   return m_fittingMutliRunMode;
-}
-
-void EnggDiffractionViewQtGUI::setDefaultBank(
-    std::vector<std::string> splittedBaseName, QString selectedFile) {
-
-  if (!splittedBaseName.empty()) {
-
-    std::string bankID = (splittedBaseName[splittedBaseName.size() - 1]);
-    auto combo_data =
-        m_uiTabFitting.comboBox_bank->findText(QString::fromStdString(bankID));
-
-    if (combo_data > -1) {
-      setBankIdComboBox(combo_data);
-    } else {
-      setFittingRunNo(selectedFile);
-    }
-  }
-  // check if the vector is not empty so that the first directory
-  // can be assigned to text-field when number is given
-  else if (!m_fitting_runno_dir_vec.empty()) {
-    auto firstDir = m_fitting_runno_dir_vec.at(0);
-    auto intialDir = QString::fromStdString(firstDir);
-    setFittingRunNo(intialDir);
-  }
-  // if nothing found related to text-field input
-  else if (!getFittingRunNo().empty())
-    setFittingRunNo(selectedFile);
-}
-
-bool MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::isDigit(
-    std::string text) {
-  for (size_t i = 0; i < text.size(); i++) {
-    char *str = &text[i];
-    if (std::isdigit(*str)) {
-      return true;
-    }
-  }
-  return false;
 }
 
 void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::setPeakPick() {
@@ -1703,6 +1654,7 @@ void EnggDiffractionViewQtGUI::closeEvent(QCloseEvent *event) {
 
   if (answer == QMessageBox::AcceptRole && m_ui.pushButton_close->isEnabled()) {
     m_presenter->notify(IEnggDiffractionPresenter::ShutDown);
+    delete m_splashMsg;
     event->accept();
   } else {
     event->ignore();

@@ -14,6 +14,31 @@
 namespace Mantid {
 namespace DataHandling {
 
+namespace {
+
+/**
+ * Retrieve "Axis" property value. The most commmon use case is calling
+ * this algorithm from Python where Axis is input as a C long. The
+ * definition of long varies across platforms and long v = args.getProperty()
+ * is currently unable to cope so we go via the long route to retrieve
+ * the value.
+ * @param args Dictionary-type containing the argument
+ */
+long getAxisIndex(const Kernel::PropertyManager &args) {
+  using Kernel::Property;
+  using Kernel::PropertyWithValue;
+  long axisIdx(1);
+  if (args.existsProperty("Axis")) {
+    Kernel::Property *axisProp = args.getProperty("Axis");
+    axisIdx = static_cast<PropertyWithValue<long> *>(axisProp)->operator()();
+    if (axisIdx < 0 || axisIdx > 2)
+      throw std::invalid_argument(
+          "Geometry.Axis value must be either 0,1,2 (X,Y,Z)");
+  }
+  return axisIdx;
+}
+}
+
 using Geometry::SampleEnvironment;
 
 // Register the algorithm into the AlgorithmFactory
@@ -50,10 +75,11 @@ std::map<std::string, std::string> SetSample::validateInputs() {
       }
     }
 
-    if (!environArgs->existsProperty("Can")) {
-      errors["Environment"] = "Environment flags must contain a 'Can' entry.";
+    if (!environArgs->existsProperty("Container")) {
+      errors["Environment"] =
+          "Environment flags must contain a 'Container' entry.";
     } else {
-      std::string name = environArgs->getPropertyValue("Can");
+      std::string name = environArgs->getPropertyValue("Container");
       if (name.empty()) {
         errors["Environment"] = "Environment 'Can' flag is an empty string!";
       }
@@ -132,7 +158,7 @@ SetSample::setSampleEnvironment(API::MatrixWorkspace_sptr &workspace,
   using Kernel::ConfigService;
 
   const std::string envName = args.getPropertyValue("Name");
-  const std::string canName = args.getPropertyValue("Can");
+  const std::string canName = args.getPropertyValue("Container");
   // The specifications need to be qualified by the facility and instrument.
   // Check instrument for name and then lookup facility if facility
   // is unknown then set to default facility & instrument.
@@ -175,7 +201,7 @@ SetSample::setSampleEnvironment(API::MatrixWorkspace_sptr &workspace,
 void SetSample::setSampleShape(API::MatrixWorkspace_sptr &workspace,
                                const Kernel::PropertyManager_sptr &args,
                                const Geometry::SampleEnvironment *sampleEnv) {
-  using Geometry::Can;
+  using Geometry::Container;
   /* The sample geometry can be specified in two ways:
      - a known set of primitive shapes with values or CSG string
      - or a <samplegeometry> field sample environment can, with values possible
@@ -191,9 +217,9 @@ void SetSample::setSampleShape(API::MatrixWorkspace_sptr &workspace,
   // Any arguments in the args dict are assumed to be values that should
   // override the default set by the sampleEnv samplegeometry if it exists
   if (sampleEnv) {
-    if (sampleEnv->can()->hasSampleShape()) {
-      const auto &can = sampleEnv->can();
-      Can::ShapeArgs shapeArgs;
+    if (sampleEnv->container()->hasSampleShape()) {
+      const auto &can = sampleEnv->container();
+      Container::ShapeArgs shapeArgs;
       if (args) {
         const auto &props = args->getProperties();
         for (const auto &prop : props) {
@@ -304,14 +330,9 @@ SetSample::createCylinderXML(const Kernel::PropertyManager &args) const {
   double height = args.getProperty("Height");
   double radius = args.getProperty("Radius");
   std::vector<double> center = args.getProperty("Center");
-  double axisDbl(1.0); // Default Axis is Y
-  if (args.existsProperty("Axis")) {
-    axisDbl = args.getProperty("Axis");
-    if (axisDbl < 0 || axisDbl > 2)
-      throw std::invalid_argument(
-          "Geometry.Axis value must be either 0,1,2 (X,Y,Z)");
-  }
-  size_t axisIdx = static_cast<size_t>(axisDbl);
+  // Expected to be a long so that the mapping from Python is simple
+  // Expected to be a long so that the mapping from Python is simple
+  long axisIdx = getAxisIndex(args);
   // convert to metres
   height *= 0.01;
   radius *= 0.01;
@@ -353,14 +374,8 @@ SetSample::createHollowCylinderXML(const Kernel::PropertyManager &args) const {
   double innerRadius = args.getProperty("InnerRadius");
   double outerRadius = args.getProperty("OuterRadius");
   std::vector<double> center = args.getProperty("Center");
-  double axisDbl(1.0); // Default Axis is Y
-  if (args.existsProperty("Axis")) {
-    axisDbl = args.getProperty("Axis");
-    if (axisDbl < 0 || axisDbl > 2)
-      throw std::invalid_argument(
-          "Geometry.Axis value must be either 0,1,2 (X,Y,Z)");
-  }
-  size_t axisIdx = static_cast<size_t>(axisDbl);
+  // Expected to be a long so that the mapping from Python is simple
+  long axisIdx = getAxisIndex(args);
   // convert to metres
   height *= 0.01;
   innerRadius *= 0.01;

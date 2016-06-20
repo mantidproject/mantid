@@ -87,7 +87,7 @@ void SavePHX::exec() {
   size_t nDetectors = pCalcDetPar->getNDetectors();
 
   // Write the number of detectors to the file.
-  outPHX_file << " " << nDetectors << std::endl;
+  outPHX_file << " " << nDetectors << '\n';
 
   for (size_t i = 0; i < nDetectors; ++i) {
     // verify if no detector defined;
@@ -99,7 +99,7 @@ void SavePHX::exec() {
     outPHX_file << std::fixed << std::setprecision(3);
     outPHX_file << " " << secondary_flightpath[i] << "\t 0 \t\t" << polar[i]
                 << " \t" << azimuthal[i] << " \t" << polar_width[i] << " \t"
-                << azimuthal_width[i] << " \t\t" << det_ID[i] << std::endl;
+                << azimuthal_width[i] << " \t\t" << det_ID[i] << '\n';
   }
 
   // Close the file

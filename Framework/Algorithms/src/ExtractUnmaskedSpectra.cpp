@@ -12,16 +12,6 @@ using Mantid::API::WorkspaceProperty;
 DECLARE_ALGORITHM(ExtractUnmaskedSpectra)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-ExtractUnmaskedSpectra::ExtractUnmaskedSpectra() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-ExtractUnmaskedSpectra::~ExtractUnmaskedSpectra() {}
-
-//----------------------------------------------------------------------------------------------
 
 /// Algorithms name for identification. @see Algorithm::name
 const std::string ExtractUnmaskedSpectra::name() const {

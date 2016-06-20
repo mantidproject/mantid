@@ -28,14 +28,11 @@ namespace MantidWidgets {
 //               ++++++++ Public members ++++++++
 //               ++++++++++++++++++++++++++++++++
 
-MWView::MWView(QWidget *parent) :
-  QWidget(parent),
-  MantidQt::API::WorkspaceObserver(),
-  m_mdSettings(boost::make_shared<MantidQt::API::MdSettings>()),
-  m_workspace(),
-  m_wellcomeWorkspace(),
-  m_wellcomeName{"__MWViewWellcomeWorkspace"},
-  m_dimensions() {
+MWView::MWView(QWidget *parent)
+    : QWidget(parent), MantidQt::API::WorkspaceObserver(),
+      m_mdSettings(boost::make_shared<MantidQt::API::MdSettings>()),
+      m_workspace(), m_wellcomeWorkspace(),
+      m_wellcomeName{"__MWViewWellcomeWorkspace"}, m_dimensions() {
   // Watch for the deletion of the associated workspace
   this->observePreDelete(true);
   m_spect = new QwtPlotSpectrogram();
@@ -48,7 +45,7 @@ MWView::MWView(QWidget *parent) :
 }
 
 MWView::~MWView() {
-  this->observePreDelete(false);  //Disconnect notifications
+  this->observePreDelete(false); // Disconnect notifications
   saveSettings();
   delete m_data;
   delete m_spect;
@@ -112,9 +109,7 @@ void MWView::updateDisplay() {
   m_uiForm.plot2D->replot();
 }
 
-SafeQwtPlot* MWView::getPlot2D(){
-  return m_uiForm.plot2D;
-}
+SafeQwtPlot *MWView::getPlot2D() { return m_uiForm.plot2D; }
 
 //               ++++++++++++++++++++++++++++++++
 //               ++++++++ Public slots   ++++++++
@@ -144,12 +139,13 @@ void MWView::setTransparentZerosSlot(bool transparent) {
 /*
  * @brief Clean shown data when associated workspace is deleted
  */
-void MWView::preDeleteHandle(const std::string &workspaceName,
-  const boost::shared_ptr<Mantid::API::Workspace> workspace) {
+void MWView::preDeleteHandle(
+    const std::string &workspaceName,
+    const boost::shared_ptr<Mantid::API::Workspace> workspace) {
   UNUSED_ARG(workspaceName);
   Mantid::API::MatrixWorkspace_sptr ws =
-    boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(workspace);
-  if(ws && ws==m_workspace){
+      boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(workspace);
+  if (ws && ws == m_workspace) {
     this->showWellcomeWorkspace();
   }
 }
@@ -162,10 +158,10 @@ void MWView::preDeleteHandle(const std::string &workspaceName,
 void MWView::initLayout() {
   m_uiForm.setupUi(this);
   QObject::connect(m_uiForm.colorBar,
-                   SIGNAL(changedColorRange(double, double, bool)),
-                   this, SLOT(colorRangeChangedSlot()));
-  QObject::connect(m_uiForm.colorBar, SIGNAL(colorBarDoubleClicked()),
-                   this, SLOT(loadColorMapSlot()));
+                   SIGNAL(changedColorRange(double, double, bool)), this,
+                   SLOT(colorRangeChangedSlot()));
+  QObject::connect(m_uiForm.colorBar, SIGNAL(colorBarDoubleClicked()), this,
+                   SLOT(loadColorMapSlot()));
   /// initialize the color on the bar and the data
   m_uiForm.colorBar->setViewRange(1, 10);
   m_spect->attach(m_uiForm.plot2D); // attach the spectrogram to the plot
@@ -227,13 +223,12 @@ void MWView::checkRangeLimits() {
         boost::math::isnan(max) || boost::math::isinf(max)) {
       mess << "Dimension " << m_workspace->getDimension(d)->getName()
            << " has a bad range: (";
-      mess << min << ", " << max << ")" << std::endl;
+      mess << min << ", " << max << ")\n";
     }
   }
   if (!mess.str().empty()) {
     mess << "Bad ranges could cause memory allocation errors. Please fix the "
-            "workspace.";
-    mess << std::endl << "You can continue using Mantid.";
+            "workspace.\nYou can continue using Mantid.";
     throw std::out_of_range(mess.str());
   }
 }
@@ -279,21 +274,24 @@ void MWView::setVectorDimensions() {
  * is selected
  */
 void MWView::spawnWellcomeWorkspace() {
-  if(Mantid::API::AnalysisDataService::Instance().doesExist(m_wellcomeName)) {
-    m_wellcomeWorkspace = Mantid::API::AnalysisDataService::Instance()
-      .retrieveWS<Mantid::API::MatrixWorkspace>(m_wellcomeName);
+  if (Mantid::API::AnalysisDataService::Instance().doesExist(m_wellcomeName)) {
+    m_wellcomeWorkspace =
+        Mantid::API::AnalysisDataService::Instance()
+            .retrieveWS<Mantid::API::MatrixWorkspace>(m_wellcomeName);
   } else {
     int numberSpectra = 100;
     double intensity = 10.0;
     auto dataX = std::vector<double>();
     auto dataY = std::vector<double>();
-    for(int i=0; i<numberSpectra; i++){
-      for(int j=0; j<numberSpectra; j++){
-        dataX.push_back(j*1.);
-        dataY.push_back(intensity*(i*i+j*j)/(2*numberSpectra*numberSpectra));
+    for (int i = 0; i < numberSpectra; i++) {
+      for (int j = 0; j < numberSpectra; j++) {
+        dataX.push_back(j * 1.);
+        dataY.push_back(intensity * (i * i + j * j) /
+                        (2 * numberSpectra * numberSpectra));
       }
     }
-    auto createWsAlg = Mantid::API::AlgorithmManager::Instance().create("CreateWorkspace");
+    auto createWsAlg =
+        Mantid::API::AlgorithmManager::Instance().create("CreateWorkspace");
     createWsAlg->initialize();
     createWsAlg->setChild(true);
     createWsAlg->setLogging(false);
@@ -303,7 +301,8 @@ void MWView::spawnWellcomeWorkspace() {
     createWsAlg->setProperty("DataY", dataY);
     createWsAlg->execute();
     m_wellcomeWorkspace = createWsAlg->getProperty("OutputWorkspace");
-    Mantid::API::AnalysisDataService::Instance().add(m_wellcomeName, m_wellcomeWorkspace);
+    Mantid::API::AnalysisDataService::Instance().add(m_wellcomeName,
+                                                     m_wellcomeWorkspace);
   }
 }
 
@@ -314,7 +313,7 @@ void MWView::showWellcomeWorkspace() {
   this->spawnWellcomeWorkspace();
   this->setWorkspace(m_wellcomeWorkspace);
   this->updateDisplay();
-  m_uiForm.colorBar->setScale(0); //reset to linear color scale
+  m_uiForm.colorBar->setScale(0); // reset to linear color scale
 }
 
 } // namespace MantidQt

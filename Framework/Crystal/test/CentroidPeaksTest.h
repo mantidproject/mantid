@@ -84,7 +84,7 @@ public:
     DateAndTime run_start("2010-01-01T00:00:00");
 
     for (int pix = 0; pix < numPixels; pix++) {
-      EventList &el = retVal->getEventList(pix);
+      auto &el = retVal->getSpectrum(pix);
       el.setSpectrumNo(pix);
       el.setDetectorID(pix);
       // Background
@@ -142,16 +142,6 @@ public:
     EventWorkspace_sptr in_ws =
         boost::dynamic_pointer_cast<EventWorkspace>(inputW);
     inputW->getAxis(0)->setUnit("TOF");
-    /*if (type == WEIGHTED)
-      in_ws *= 2.0;
-    if (type == WEIGHTED_NOTIME)
-    {
-      for (size_t i =0; i<in_ws->getNumberHistograms(); i++)
-      {
-        EventList & el = in_ws->getEventList(i);
-        el.compressEvents(0.0, &el);
-      }
-    }*/
     // Register the workspace in the data service
 
     // Create the peaks workspace

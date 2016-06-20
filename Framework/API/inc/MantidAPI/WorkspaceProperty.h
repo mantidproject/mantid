@@ -338,7 +338,9 @@ public:
         } else
           ++it;
       }
-      return std::vector<std::string>(vals.begin(), vals.end());
+      auto values = std::vector<std::string>(vals.begin(), vals.end());
+      std::sort(values.begin(), values.end());
+      return values;
     } else {
       // For output workspaces, just return an empty set
       return std::vector<std::string>();
@@ -396,7 +398,7 @@ private:
   *  @returns A user level description of the problem or "" if it is valid.
   */
   std::string isValidGroup(boost::shared_ptr<WorkspaceGroup> wsGroup) const {
-    g_log.debug() << " Input WorkspaceGroup found " << std::endl;
+    g_log.debug() << " Input WorkspaceGroup found \n";
 
     std::vector<std::string> wsGroupNames = wsGroup->getNames();
     std::string error;
@@ -412,7 +414,7 @@ private:
                                               "will therefore be ignored as "
                                               "part of the GroupedWorkspace.";
 
-        g_log.debug() << error << std::endl;
+        g_log.debug() << error << '\n';
       } else {
         // ... and if it is a workspace of incorrect type, exclude the group by
         // returning an error.
@@ -421,7 +423,7 @@ private:
                   Kernel::PropertyWithValue<boost::shared_ptr<TYPE>>::type() +
                   ".";
 
-          g_log.debug() << error << std::endl;
+          g_log.debug() << error << '\n';
 
           return error;
         }

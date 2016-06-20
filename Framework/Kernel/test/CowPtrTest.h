@@ -63,6 +63,23 @@ public:
                       2)
   }
 
+  void test_move_constructor() {
+    auto resource = boost::make_shared<int>(42);
+    cow_ptr<int> source{resource};
+    cow_ptr<int> clone(std::move(source));
+    TS_ASSERT(!source);
+    TS_ASSERT_EQUALS(clone.get(), resource.get());
+  }
+
+  void test_move_assignment() {
+    auto resource = boost::make_shared<int>(42);
+    cow_ptr<int> source{resource};
+    cow_ptr<int> clone;
+    clone = std::move(source);
+    TS_ASSERT(!source);
+    TS_ASSERT_EQUALS(clone.get(), resource.get());
+  }
+
   void test_copy_assign_nullptr() {
     cow_ptr<MyType> cow1{nullptr};
     TS_ASSERT(!cow1);

@@ -459,7 +459,7 @@ class DirectEnergyConversion(object):
         if not prop_man.motor_offset is None and np.isnan(psi):
             #logs have a problem
             prop_man.log("*** Can not retrieve rotation value from sample environment logs: {0}.\n"
-                "     Rotation angle remains undefined".format(prop_man.motor_log_names))
+                         "     Rotation angle remains undefined".format(prop_man.motor_log_names))
             PropertyManager.psi = None # Just in case
         else:
             # store psi in property not to retrieve it from workspace again
@@ -1788,7 +1788,8 @@ class DirectEnergyConversion(object):
         if prop_man.energy_bins: # It should already be a distribution.
             ConvertToDistribution(Workspace=result_ws)
         # nullify negarive signals if necessary
-        if prop_man.check_background and prop_man.nullify_negative_signal:
+        if prop_man.check_background and (hasattr(prop_man,'nullify_negative_signal') and
+                                          prop_man.nullify_negative_signal):
             zeroBg = CreateWorkspace(DataX='0,1',DataY=0,DataE=0,UnitX='TOF')
             result_ws=RemoveBackground(result_ws,BkgWorkspace=zeroBg,Emode='Direct',NullifyNegativeValues=True)
             DeleteWorkspace(zeroBg)

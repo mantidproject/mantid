@@ -11,12 +11,10 @@
 #include "MantidAPI/IConstraint.h"
 #include "MantidAPI/ParameterTie.h"
 #include "MantidCurveFitting/Functions/CrystalFieldSpectrum.h"
-#include "MantidCurveFitting/Algorithms/Fit.h"
 
 using namespace Mantid;
 using namespace Mantid::API;
 using namespace Mantid::CurveFitting;
-using namespace Mantid::CurveFitting::Algorithms;
 using namespace Mantid::CurveFitting::Functions;
 
 class CrystalFieldSpectrumTest : public CxxTest::TestSuite {

@@ -190,132 +190,39 @@
          <layout class="QVBoxLayout" name="verticalLayout_6">
           <item>
            <layout class="QGridLayout" name="gridLayout_2">
-            <item row="4" column="0">
-             <widget class="QLabel" name="label_3">
-              <property name="text">
-               <string>Scale Data</string>
-              </property>
-             </widget>
-            </item>
-            <item row="0" column="3">
-             <widget class="QLabel" name="file_extension_label">
+            <item row="2" column="3">
+             <widget class="QLabel" name="label_10">
               <property name="minimumSize">
                <size>
-                <width>160</width>
+                <width>200</width>
                 <height>0</height>
                </size>
               </property>
               <property name="maximumSize">
                <size>
-                <width>160</width>
+                <width>200</width>
                 <height>16777215</height>
                </size>
               </property>
               <property name="toolTip">
-               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;File extension of the run file to load. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Width of events (in microseconds) near the prompt pulse to remove. 0 disables. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
               </property>
               <property name="text">
-               <string>File Extension</string>
+               <string>Remove Prompt Pulse Width</string>
               </property>
              </widget>
             </item>
             <item row="1" column="3">
-             <widget class="QLabel" name="label_6">
-              <property name="minimumSize">
-               <size>
-                <width>240</width>
-                <height>0</height>
-               </size>
-              </property>
-              <property name="maximumSize">
-               <size>
-                <width>240</width>
-                <height>16777215</height>
-               </size>
-              </property>
+             <widget class="QLabel" name="label_5">
               <property name="text">
-               <string>Minumum Cropped Wavelength</string>
+               <string>Maximum Cropped Wavelength</string>
               </property>
              </widget>
             </item>
-            <item row="3" column="4">
-             <widget class="QLineEdit" name="removepromptwidth_edit">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="minimumSize">
-               <size>
-                <width>200</width>
-                <height>0</height>
-               </size>
-              </property>
-              <property name="maximumSize">
-               <size>
-                <width>200</width>
-                <height>16777215</height>
-               </size>
-              </property>
-              <property name="toolTip">
-               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Enter value for width of events (in microseconds) near the prompt pulse to remove&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-              </property>
-             </widget>
-            </item>
-            <item row="0" column="4">
-             <widget class="QComboBox" name="extension_combo">
-              <property name="minimumSize">
-               <size>
-                <width>200</width>
-                <height>0</height>
-               </size>
-              </property>
-              <property name="maximumSize">
-               <size>
-                <width>200</width>
-                <height>16777215</height>
-               </size>
-              </property>
-              <property name="toolTip">
-               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Select a type of file extension to load run with. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-              </property>
-              <item>
-               <property name="text">
-                <string>_event.nxs</string>
-               </property>
-              </item>
-              <item>
-               <property name="text">
-                <string>_histo.nxs</string>
-               </property>
-              </item>
-              <item>
-               <property name="text">
-                <string>_runinfo.xml</string>
-               </property>
-              </item>
-             </widget>
-            </item>
-            <item row="1" column="4">
-             <widget class="QLineEdit" name="cropwavelengthmin_edit">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="minimumSize">
-               <size>
-                <width>200</width>
-                <height>0</height>
-               </size>
-              </property>
-              <property name="maximumSize">
-               <size>
-                <width>200</width>
-                <height>16777215</height>
-               </size>
+            <item row="4" column="0">
+             <widget class="QLabel" name="label_3">
+              <property name="text">
+               <string>Scale Data</string>
               </property>
              </widget>
             </item>
@@ -334,40 +241,6 @@
                </size>
               </property>
              </spacer>
-            </item>
-            <item row="4" column="4">
-             <widget class="QComboBox" name="pushdatapos_combo">
-              <property name="minimumSize">
-               <size>
-                <width>200</width>
-                <height>0</height>
-               </size>
-              </property>
-              <property name="maximumSize">
-               <size>
-                <width>200</width>
-                <height>16777215</height>
-               </size>
-              </property>
-              <property name="toolTip">
-               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Choose a method/algorithm to process negative intensity data. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-              </property>
-              <item>
-               <property name="text">
-                <string>None</string>
-               </property>
-              </item>
-              <item>
-               <property name="text">
-                <string>ResetToZero</string>
-               </property>
-              </item>
-              <item>
-               <property name="text">
-                <string>AddMinimum</string>
-               </property>
-              </item>
-             </widget>
             </item>
             <item row="0" column="0">
              <widget class="QLabel" name="label_2">
@@ -414,28 +287,6 @@
               </property>
              </widget>
             </item>
-            <item row="4" column="3">
-             <widget class="QLabel" name="pushdatapostive_labe">
-              <property name="minimumSize">
-               <size>
-                <width>160</width>
-                <height>0</height>
-               </size>
-              </property>
-              <property name="maximumSize">
-               <size>
-                <width>120</width>
-                <height>16777215</height>
-               </size>
-              </property>
-              <property name="toolTip">
-               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Method/algorithm to process data if negative intensity in corrected diffraction data exists. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-              </property>
-              <property name="text">
-               <string>Push Data Positive</string>
-              </property>
-             </widget>
-            </item>
             <item row="0" column="1">
              <widget class="QLineEdit" name="outputfileprefix_edit">
               <property name="sizePolicy">
@@ -458,28 +309,6 @@
               </property>
              </widget>
             </item>
-            <item row="3" column="3">
-             <widget class="QLabel" name="label_10">
-              <property name="minimumSize">
-               <size>
-                <width>200</width>
-                <height>0</height>
-               </size>
-              </property>
-              <property name="maximumSize">
-               <size>
-                <width>200</width>
-                <height>16777215</height>
-               </size>
-              </property>
-              <property name="toolTip">
-               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Width of events (in microseconds) near the prompt pulse to remove. 0 disables. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-              </property>
-              <property name="text">
-               <string>Remove Prompt Pulse Width</string>
-              </property>
-             </widget>
-            </item>
             <item row="1" column="0">
              <widget class="QLabel" name="low_resolution_label">
               <property name="sizePolicy">
@@ -493,20 +322,6 @@
               </property>
               <property name="text">
                <string>Low Resolution Ref</string>
-              </property>
-             </widget>
-            </item>
-            <item row="5" column="3">
-             <widget class="QLabel" name="label_4">
-              <property name="text">
-               <string>FilterBadPulses</string>
-              </property>
-             </widget>
-            </item>
-            <item row="5" column="4">
-             <widget class="QLineEdit" name="filterbadpulses_edit">
-              <property name="toolTip">
-               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Check to filter out events measured while proton charge is more than 5% below average &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
               </property>
              </widget>
             </item>
@@ -532,13 +347,6 @@
               </property>
               <property name="toolTip">
                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Enter value for reference total flight path for frame unwrapping. Zero skips the correction. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-              </property>
-             </widget>
-            </item>
-            <item row="2" column="3">
-             <widget class="QLabel" name="label_5">
-              <property name="text">
-               <string>Maximum Cropped Wavelength</string>
               </property>
              </widget>
             </item>
@@ -638,7 +446,146 @@
               </property>
              </widget>
             </item>
-            <item row="6" column="0">
+            <item row="0" column="3">
+             <widget class="QLabel" name="label_6">
+              <property name="minimumSize">
+               <size>
+                <width>240</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>240</width>
+                <height>16777215</height>
+               </size>
+              </property>
+              <property name="text">
+               <string>Minumum Cropped Wavelength</string>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="3">
+             <widget class="QLabel" name="pushdatapostive_labe">
+              <property name="minimumSize">
+               <size>
+                <width>160</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>120</width>
+                <height>16777215</height>
+               </size>
+              </property>
+              <property name="toolTip">
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Method/algorithm to process data if negative intensity in corrected diffraction data exists. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+              </property>
+              <property name="text">
+               <string>Push Data Positive</string>
+              </property>
+             </widget>
+            </item>
+            <item row="4" column="3">
+             <widget class="QLabel" name="label_4">
+              <property name="text">
+               <string>FilterBadPulses</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="4">
+             <widget class="QLineEdit" name="cropwavelengthmin_edit">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>200</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>200</width>
+                <height>16777215</height>
+               </size>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="4">
+             <widget class="QLineEdit" name="lineEdit_croppedWavelengthMax"/>
+            </item>
+            <item row="2" column="4">
+             <widget class="QLineEdit" name="removepromptwidth_edit">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>200</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>200</width>
+                <height>16777215</height>
+               </size>
+              </property>
+              <property name="toolTip">
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Enter value for width of events (in microseconds) near the prompt pulse to remove&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="4">
+             <widget class="QComboBox" name="pushdatapos_combo">
+              <property name="minimumSize">
+               <size>
+                <width>200</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>200</width>
+                <height>16777215</height>
+               </size>
+              </property>
+              <property name="toolTip">
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Choose a method/algorithm to process negative intensity data. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+              </property>
+              <item>
+               <property name="text">
+                <string>None</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>ResetToZero</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>AddMinimum</string>
+               </property>
+              </item>
+             </widget>
+            </item>
+            <item row="4" column="4">
+             <widget class="QLineEdit" name="filterbadpulses_edit">
+              <property name="toolTip">
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Check to filter out events measured while proton charge is more than 5% below average &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+              </property>
+             </widget>
+            </item>
+            <item row="5" column="3">
              <widget class="QCheckBox" name="preserveevents_checkbox">
               <property name="maximumSize">
                <size>
@@ -657,7 +604,7 @@
               </property>
              </widget>
             </item>
-            <item row="6" column="2">
+            <item row="5" column="5">
              <spacer name="horizontalSpacer_6">
               <property name="orientation">
                <enum>Qt::Horizontal</enum>
@@ -669,9 +616,6 @@
                </size>
               </property>
              </spacer>
-            </item>
-            <item row="2" column="4">
-             <widget class="QLineEdit" name="lineEdit_croppedWavelengthMax"/>
             </item>
            </layout>
           </item>
@@ -926,13 +870,6 @@
   <tabstop>maxchunksize_edit</tabstop>
   <tabstop>scaledata_edit</tabstop>
   <tabstop>bkgdsmoothpar_edit</tabstop>
-  <tabstop>extension_combo</tabstop>
-  <tabstop>cropwavelengthmin_edit</tabstop>
-  <tabstop>lineEdit_croppedWavelengthMax</tabstop>
-  <tabstop>removepromptwidth_edit</tabstop>
-  <tabstop>pushdatapos_combo</tabstop>
-  <tabstop>filterbadpulses_edit</tabstop>
-  <tabstop>preserveevents_checkbox</tabstop>
   <tabstop>stripvanpeaks_chkbox</tabstop>
   <tabstop>vanpeakfwhm_edit</tabstop>
   <tabstop>vanpeaktol_edit</tabstop>

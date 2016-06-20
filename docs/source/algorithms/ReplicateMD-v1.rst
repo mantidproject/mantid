@@ -14,6 +14,10 @@ This algorithm creates a higher dimensional dataset by replicating along an addi
 
 The *ShapeWorkspace* input defines the shape of the *OutputWorkspace*, but not the contents. The *DataWorkspace* provides the data contents in the lower dimensionality cut, which will be replicated over. This algorithm operates on :ref:`MDHistoWorkspace <MDHistoWorkspace>` inputs and provides a :ref:`MDHistoWorkspace <MDHistoWorkspace>` as an output.
 
+The *ShapeWorkspace* and *DataWorkspace* can have any number of extra integrated trailing dimensions. For example the *ShapeWorkspace* can have shape ``[10, 5, 1, 1]``
+(where each number in the list is a number of bins in the corresponding dimension) and the *DataWorkspace* can have either ``[10, 1, 1, 1]`` or ``[1, 5, 1, 1]``.
+But the following arrangement will cause a run-time error: shape ``[10, 1, 5, 1]``, data ``[1, 1, 5, 1]``. In such case the dimensions can be re-arranged using
+:ref:`algm-TransposeMD` algorithm.
 
 Usage
 -----

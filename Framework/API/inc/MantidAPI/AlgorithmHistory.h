@@ -153,15 +153,15 @@ private:
   /// The name of the Algorithm
   std::string m_name;
   /// The version of the algorithm
-  int m_version;
+  int m_version{-1};
   /// The execution date of the algorithm
   Mantid::Kernel::DateAndTime m_executionDate;
   /// The execution duration of the algorithm
-  double m_executionDuration;
+  double m_executionDuration{-1.0};
   /// The PropertyHistory's defined for the algorithm
   Mantid::Kernel::PropertyHistories m_properties;
   /// count keeps track of execution order of an algorithm
-  std::size_t m_execCount;
+  std::size_t m_execCount{0};
   /// set of child algorithm histories for this history record
   AlgorithmHistories m_childHistories;
 };

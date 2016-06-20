@@ -35,16 +35,8 @@
 #include "ApplicationWindow.h"
 #include "Mantid/MantidUI.h"
 
-#include <QObject>
-#include <QStringList>
-#include <QDir>
-#include <QApplication>
-#include <QTemporaryFile>
-#include <QTextStream>
-
 #include <Qsci/qscilexerpython.h>
 #include "MantidKernel/ConfigService.h"
-#include "MantidQtAPI/InterfaceManager.h"
 
 #include <cassert>
 
@@ -229,10 +221,10 @@ bool PythonScripting::start() {
       d_initialized = false;
     }
   } catch (std::exception &ex) {
-    std::cerr << "Exception in PythonScripting.cpp: " << ex.what() << std::endl;
+    std::cerr << "Exception in PythonScripting.cpp: " << ex.what() << '\n';
     d_initialized = false;
   } catch (...) {
-    std::cerr << "Exception in PythonScripting.cpp" << std::endl;
+    std::cerr << "Exception in PythonScripting.cpp\n";
     d_initialized = false;
   }
   if (d_initialized) {
@@ -301,7 +293,7 @@ PyObject *PythonScripting::toPyList(const QStringList &items) {
   PyObject *pylist = PyList_New((length));
   for (Py_ssize_t i = 0; i < length; ++i) {
     QString item = items.at(static_cast<int>(i));
-    PyList_SetItem(pylist, i, PyString_FromString(item.ascii()));
+    PyList_SetItem(pylist, i, PyString_FromString(item.toAscii()));
   }
   return pylist;
 }
@@ -344,7 +336,7 @@ bool PythonScripting::setQObject(QObject *val, const char *name,
   if (!sipAPI__qti->api_find_class) {
     throw std::runtime_error("sipAPI_qti->api_find_class is undefined");
   }
-  sipWrapperType *klass = sipFindClass(val->className());
+  sipWrapperType *klass = sipFindClass(val->metaObject()->className());
   if (!klass)
     return false;
   pyobj = sipConvertFromInstance(val, klass, NULL);
@@ -404,7 +396,8 @@ const QStringList PythonScripting::mathFunctions() const {
 }
 
 const QString PythonScripting::mathFunctionDoc(const QString &name) const {
-  PyObject *mathf = PyDict_GetItemString(m_math, name); // borrowed
+  PyObject *mathf =
+      PyDict_GetItemString(m_math, name.toAscii().constData()); // borrowed
   if (!mathf)
     return "";
   PyObject *pydocstr = PyObject_GetAttrString(mathf, "__doc__"); // new

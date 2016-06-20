@@ -43,10 +43,6 @@ namespace Algorithms {
  */
 class DLLExport RenameWorkspace : public API::Algorithm {
 public:
-  /// Default constructor
-  RenameWorkspace() : API::Algorithm(){};
-  /// Destructor
-  ~RenameWorkspace() override{};
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "RenameWorkspace"; }
   /// Summary of algorithms purpose

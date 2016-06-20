@@ -21,7 +21,7 @@ private:
                         "11200.715115	0.000000	6.500000");
     Poco::TemporaryFile tmpFile;
     std::ofstream ofs(tmpFile.path().c_str());
-    ofs << content << std::endl;
+    ofs << content << '\n';
     ofs.close();
     TSM_ASSERT("File has not been created.", tmpFile.exists());
     TSM_ASSERT("File is not a file.", tmpFile.isFile());

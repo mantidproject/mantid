@@ -53,7 +53,8 @@ std::string convertAxesTitleToLatex(const std::string &toConvert) {
     converted = toConvert;
   }
 
-  // Finally if there are any spaces they will disappear in Mathmode, hence we need to replace
+  // Finally if there are any spaces they will disappear in Mathmode, hence we
+  // need to replace
   // any space with $ $.
   boost::regex re(" ");
   converted = boost::regex_replace(converted, re, "$ $");

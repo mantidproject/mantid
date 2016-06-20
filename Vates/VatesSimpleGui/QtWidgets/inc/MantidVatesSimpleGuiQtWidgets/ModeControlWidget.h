@@ -8,12 +8,9 @@
 #include <QWidget>
 #include <QString>
 
-namespace Mantid
-{
-namespace Vates
-{
-namespace SimpleGui
-{
+namespace Mantid {
+namespace Vates {
+namespace SimpleGui {
 /**
  *
   This class controls the current view for the main level program.
@@ -21,7 +18,8 @@ namespace SimpleGui
   @author Michael Reuter
   @date 24/05/2011
 
-  Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+  Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+ National Laboratory & European Spallation Source
 
   This file is part of Mantid.
 
@@ -41,8 +39,8 @@ namespace SimpleGui
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class EXPORT_OPT_MANTIDVATES_SIMPLEGUI_QTWIDGETS ModeControlWidget : public QWidget
-{
+class EXPORT_OPT_MANTIDVATES_SIMPLEGUI_QTWIDGETS ModeControlWidget
+    : public QWidget {
   Q_OBJECT
 
 public:
@@ -55,7 +53,7 @@ public:
   ~ModeControlWidget() override;
 
   /// Enumeration for the view types
-  enum Views {STANDARD, THREESLICE, MULTISLICE, SPLATTERPLOT};
+  enum Views { STANDARD, THREESLICE, MULTISLICE, SPLATTERPLOT };
 
 public slots:
   /// Enable/disable a specific view button.
@@ -108,9 +106,9 @@ protected slots:
 
 private:
   Ui::ModeControlWidgetClass ui; ///< The mode control widget's UI form
-  std::map<QString, Views> mapFromStringToView; //< Holds the mapping from the a string to an associated enum
+  std::map<QString, Views> mapFromStringToView; //< Holds the mapping from the a
+  // string to an associated enum
 };
-
 }
 }
 }

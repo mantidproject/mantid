@@ -4,10 +4,8 @@
 
 #include <QPainter>
 
-namespace MantidQt
-{
-namespace SliceViewer
-{
+namespace MantidQt {
+namespace SliceViewer {
 
 PeakRepresentationSphere::PeakRepresentationSphere(
     const Mantid::Kernel::V3D &origin, const double &peakRadius,
@@ -22,13 +20,12 @@ PeakRepresentationSphere::PeakRepresentationSphere(
       m_peakRadiusSQ(m_peakRadius * m_peakRadius),
       m_backgroundInnerRadiusSQ(backgroundInnerRadius * backgroundInnerRadius),
       m_backgroundOuterRadiusSQ(backgroundOuterRadius * backgroundOuterRadius),
-      m_showBackgroundRadius(false)
-{
-    // This possibility can arise from IntegratePeaksMD.
-    if (m_backgroundOuterRadiusSQ <= m_backgroundInnerRadiusSQ) {
-        m_backgroundOuterRadius = m_backgroundInnerRadius;
-        m_backgroundOuterRadiusSQ = m_backgroundInnerRadiusSQ;
-    }
+      m_showBackgroundRadius(false) {
+  // This possibility can arise from IntegratePeaksMD.
+  if (m_backgroundOuterRadiusSQ <= m_backgroundInnerRadiusSQ) {
+    m_backgroundOuterRadius = m_backgroundInnerRadius;
+    m_backgroundOuterRadiusSQ = m_backgroundInnerRadiusSQ;
+  }
 }
 
 //----------------------------------------------------------------------------------------------
@@ -53,26 +50,25 @@ apply.
     \           /
      \---------/
 */
-void PeakRepresentationSphere::setSlicePoint(const double &z)
-{
-    const double distance = z - m_origin.Z();
-    const double distanceSQ = distance * distance;
+void PeakRepresentationSphere::setSlicePoint(const double &z) {
+  const double distance = z - m_origin.Z();
+  const double distanceSQ = distance * distance;
 
-    if (distanceSQ <= m_backgroundOuterRadiusSQ) {
-        const double distanceAbs = std::sqrt(distanceSQ);
-        m_peakRadiusAtDistance = std::sqrt(m_peakRadiusSQ - distanceSQ);
-        m_backgroundInnerRadiusAtDistance
-            = std::sqrt(m_backgroundInnerRadiusSQ - distanceSQ);
-        m_backgroundOuterRadiusAtDistance
-            = std::sqrt(m_backgroundOuterRadiusSQ - distanceSQ);
-        // Apply a linear transform to convert from a distance to an opacity
-        // between opacityMin and opacityMax.
-        m_cachedOpacityAtDistance = m_cachedOpacityGradient * distanceAbs
-                                    + m_opacityMax;
-    } else {
-        m_cachedOpacityAtDistance = m_opacityMin;
-        m_backgroundOuterRadiusAtDistance.reset();
-    }
+  if (distanceSQ <= m_backgroundOuterRadiusSQ) {
+    const double distanceAbs = std::sqrt(distanceSQ);
+    m_peakRadiusAtDistance = std::sqrt(m_peakRadiusSQ - distanceSQ);
+    m_backgroundInnerRadiusAtDistance =
+        std::sqrt(m_backgroundInnerRadiusSQ - distanceSQ);
+    m_backgroundOuterRadiusAtDistance =
+        std::sqrt(m_backgroundOuterRadiusSQ - distanceSQ);
+    // Apply a linear transform to convert from a distance to an opacity
+    // between opacityMin and opacityMax.
+    m_cachedOpacityAtDistance =
+        m_cachedOpacityGradient * distanceAbs + m_opacityMax;
+  } else {
+    m_cachedOpacityAtDistance = m_opacityMin;
+    m_backgroundOuterRadiusAtDistance.reset();
+  }
 }
 
 /**
@@ -80,139 +76,126 @@ void PeakRepresentationSphere::setSlicePoint(const double &z)
  *@param peakTransform : transform to use.
  */
 void PeakRepresentationSphere::movePosition(
-    Mantid::Geometry::PeakTransform_sptr peakTransform)
-{
-    m_origin = peakTransform->transform(m_originalOrigin);
+    Mantid::Geometry::PeakTransform_sptr peakTransform) {
+  m_origin = peakTransform->transform(m_originalOrigin);
 }
 
 /**
  * Setter for showing/hiding the background radius.
  * @param show: Flag indicating what to do.
 */
-void PeakRepresentationSphere::showBackgroundRadius(const bool show)
-{
-    m_showBackgroundRadius = show;
+void PeakRepresentationSphere::showBackgroundRadius(const bool show) {
+  m_showBackgroundRadius = show;
 }
 
 /**
  *@return bounding box for peak in natural coordinates.
  */
-PeakBoundingBox PeakRepresentationSphere::getBoundingBox() const
-{
-    using Mantid::Kernel::V2D;
-    Left left(m_origin.X() - m_backgroundOuterRadius);
-    Bottom bottom(m_origin.Y() - m_backgroundOuterRadius);
-    Right right(m_origin.X() + m_backgroundOuterRadius);
-    Top top(m_origin.Y() + m_backgroundOuterRadius);
-    SlicePoint slicePoint(m_origin.Z());
+PeakBoundingBox PeakRepresentationSphere::getBoundingBox() const {
+  using Mantid::Kernel::V2D;
+  Left left(m_origin.X() - m_backgroundOuterRadius);
+  Bottom bottom(m_origin.Y() - m_backgroundOuterRadius);
+  Right right(m_origin.X() + m_backgroundOuterRadius);
+  Top top(m_origin.Y() + m_backgroundOuterRadius);
+  SlicePoint slicePoint(m_origin.Z());
 
-    return PeakBoundingBox(left, right, top, bottom, slicePoint);
+  return PeakBoundingBox(left, right, top, bottom, slicePoint);
 }
 
-double PeakRepresentationSphere::getEffectiveRadius() const
-{
-    return m_showBackgroundRadius ? m_backgroundOuterRadius : m_peakRadius;
+double PeakRepresentationSphere::getEffectiveRadius() const {
+  return m_showBackgroundRadius ? m_backgroundOuterRadius : m_peakRadius;
 }
 
-void PeakRepresentationSphere::setOccupancyInView(const double)
-{
-    // DO NOTHING
+void PeakRepresentationSphere::setOccupancyInView(const double) {
+  // DO NOTHING
 }
 
-void PeakRepresentationSphere::setOccupancyIntoView(const double)
-{
-    // DO NOTHING
+void PeakRepresentationSphere::setOccupancyIntoView(const double) {
+  // DO NOTHING
 }
 
-const Mantid::Kernel::V3D &PeakRepresentationSphere::getOrigin() const
-{
-    return m_origin;
+const Mantid::Kernel::V3D &PeakRepresentationSphere::getOrigin() const {
+  return m_origin;
 }
 
 std::shared_ptr<PeakPrimitives> PeakRepresentationSphere::getDrawingInformation(
-    PeakRepresentationViewInformation viewInformation)
-{
-    auto drawingInformation = std::make_shared<PeakPrimitiveCircle>(
-        Mantid::Kernel::V3D() /*Peak Origin*/, 0.0 /*peakOpacityAtDistance*/,
-        0 /* PeakLineWidth */, 0.0 /*peakInnerRadiusX*/,
-        0.0 /*peakInnerRadiusY*/, 0.0 /*backgroundOuterRadiusX*/,
-        0.0 /*backgroundOuterRadiusY*/, 0.0 /*backgroundInnerRadiusX*/,
-        0.0 /*backgroundInnerRadiusY*/);
+    PeakRepresentationViewInformation viewInformation) {
+  auto drawingInformation = std::make_shared<PeakPrimitiveCircle>(
+      Mantid::Kernel::V3D() /*Peak Origin*/, 0.0 /*peakOpacityAtDistance*/,
+      0 /* PeakLineWidth */, 0.0 /*peakInnerRadiusX*/, 0.0 /*peakInnerRadiusY*/,
+      0.0 /*backgroundOuterRadiusX*/, 0.0 /*backgroundOuterRadiusY*/,
+      0.0 /*backgroundInnerRadiusX*/, 0.0 /*backgroundInnerRadiusY*/);
 
-    // Scale factor for going from viewX to windowX
-    const auto scaleY = viewInformation.windowHeight
-                        / viewInformation.viewHeight;
-    // Scale factor for going from viewY to windowY
-    const auto scaleX = viewInformation.windowWidth / viewInformation.viewWidth;
+  // Scale factor for going from viewX to windowX
+  const auto scaleY = viewInformation.windowHeight / viewInformation.viewHeight;
+  // Scale factor for going from viewY to windowY
+  const auto scaleX = viewInformation.windowWidth / viewInformation.viewWidth;
 
-    // Add the innder radius
-    drawingInformation->peakInnerRadiusX = scaleX
-                                           * m_peakRadiusAtDistance.get();
-    drawingInformation->peakInnerRadiusY = scaleY
-                                           * m_peakRadiusAtDistance.get();
+  // Add the innder radius
+  drawingInformation->peakInnerRadiusX = scaleX * m_peakRadiusAtDistance.get();
+  drawingInformation->peakInnerRadiusY = scaleY * m_peakRadiusAtDistance.get();
 
-    // If the outer radius is selected, then add the outer radius
-    if (this->m_showBackgroundRadius) {
-        drawingInformation->backgroundOuterRadiusX
-            = scaleX * m_backgroundOuterRadiusAtDistance.get();
-        drawingInformation->backgroundOuterRadiusY
-            = scaleY * m_backgroundOuterRadiusAtDistance.get();
-        drawingInformation->backgroundInnerRadiusX
-            = scaleX * m_backgroundInnerRadiusAtDistance.get();
-        drawingInformation->backgroundInnerRadiusY
-            = scaleY * m_backgroundInnerRadiusAtDistance.get();
-    }
+  // If the outer radius is selected, then add the outer radius
+  if (this->m_showBackgroundRadius) {
+    drawingInformation->backgroundOuterRadiusX =
+        scaleX * m_backgroundOuterRadiusAtDistance.get();
+    drawingInformation->backgroundOuterRadiusY =
+        scaleY * m_backgroundOuterRadiusAtDistance.get();
+    drawingInformation->backgroundInnerRadiusX =
+        scaleX * m_backgroundInnerRadiusAtDistance.get();
+    drawingInformation->backgroundInnerRadiusY =
+        scaleY * m_backgroundInnerRadiusAtDistance.get();
+  }
 
-    drawingInformation->peakLineWidth = 2;
-    drawingInformation->peakOpacityAtDistance = m_cachedOpacityAtDistance;
-    drawingInformation->peakOrigin = m_origin;
+  drawingInformation->peakLineWidth = 2;
+  drawingInformation->peakOpacityAtDistance = m_cachedOpacityAtDistance;
+  drawingInformation->peakOrigin = m_origin;
 
-    return drawingInformation;
+  return drawingInformation;
 }
 
 void PeakRepresentationSphere::doDraw(
     QPainter &painter, PeakViewColor &foregroundColor,
     PeakViewColor &backgroundColor,
     std::shared_ptr<PeakPrimitives> drawingInformation,
-    PeakRepresentationViewInformation viewInformation)
-{
-    auto drawingInformationSphere
-        = std::static_pointer_cast<PeakPrimitiveCircle>(drawingInformation);
+    PeakRepresentationViewInformation viewInformation) {
+  auto drawingInformationSphere =
+      std::static_pointer_cast<PeakPrimitiveCircle>(drawingInformation);
 
-    // Setup the QPainter
-    painter.setRenderHint(QPainter::Antialiasing);
-    painter.setOpacity(drawingInformationSphere->peakOpacityAtDistance);
+  // Setup the QPainter
+  painter.setRenderHint(QPainter::Antialiasing);
+  painter.setOpacity(drawingInformationSphere->peakOpacityAtDistance);
 
-    // Add a pen with color, style and stroke, and a painter path
-    auto foregroundColorSphere = foregroundColor.colorSphere;
-    QPainterPath peakRadiusInnerPath;
-    const QPointF originWindows(viewInformation.xOriginWindow,
-                                viewInformation.yOriginWindow);
-    peakRadiusInnerPath.addEllipse(originWindows,
-                                   drawingInformationSphere->peakInnerRadiusX,
-                                   drawingInformationSphere->peakInnerRadiusY);
+  // Add a pen with color, style and stroke, and a painter path
+  auto foregroundColorSphere = foregroundColor.colorSphere;
+  QPainterPath peakRadiusInnerPath;
+  const QPointF originWindows(viewInformation.xOriginWindow,
+                              viewInformation.yOriginWindow);
+  peakRadiusInnerPath.addEllipse(originWindows,
+                                 drawingInformationSphere->peakInnerRadiusX,
+                                 drawingInformationSphere->peakInnerRadiusY);
 
-    QPen pen(foregroundColorSphere);
-    pen.setWidth(drawingInformationSphere->peakLineWidth);
-    pen.setStyle(Qt::DashLine);
-    painter.strokePath(peakRadiusInnerPath, pen);
+  QPen pen(foregroundColorSphere);
+  pen.setWidth(drawingInformationSphere->peakLineWidth);
+  pen.setStyle(Qt::DashLine);
+  painter.strokePath(peakRadiusInnerPath, pen);
 
-    // Draw the background if this is requested
-    if (m_showBackgroundRadius) {
-        QPainterPath backgroundOuterPath;
-        backgroundOuterPath.setFillRule(Qt::WindingFill);
-        backgroundOuterPath.addEllipse(
-            originWindows, drawingInformationSphere->backgroundOuterRadiusX,
-            drawingInformationSphere->backgroundOuterRadiusY);
-        QPainterPath backgroundInnerPath;
-        backgroundInnerPath.addEllipse(
-            originWindows, drawingInformationSphere->backgroundInnerRadiusX,
-            drawingInformationSphere->backgroundInnerRadiusY);
-        QPainterPath backgroundRadiusFill
-            = backgroundOuterPath.subtracted(backgroundInnerPath);
-        painter.fillPath(backgroundRadiusFill, backgroundColor.colorSphere);
-    }
-    painter.end();
+  // Draw the background if this is requested
+  if (m_showBackgroundRadius) {
+    QPainterPath backgroundOuterPath;
+    backgroundOuterPath.setFillRule(Qt::WindingFill);
+    backgroundOuterPath.addEllipse(
+        originWindows, drawingInformationSphere->backgroundOuterRadiusX,
+        drawingInformationSphere->backgroundOuterRadiusY);
+    QPainterPath backgroundInnerPath;
+    backgroundInnerPath.addEllipse(
+        originWindows, drawingInformationSphere->backgroundInnerRadiusX,
+        drawingInformationSphere->backgroundInnerRadiusY);
+    QPainterPath backgroundRadiusFill =
+        backgroundOuterPath.subtracted(backgroundInnerPath);
+    painter.fillPath(backgroundRadiusFill, backgroundColor.colorSphere);
+  }
+  painter.end();
 }
 }
 }

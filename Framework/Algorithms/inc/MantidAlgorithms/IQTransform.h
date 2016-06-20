@@ -67,7 +67,6 @@ namespace Algorithms {
 class DLLExport IQTransform : public API::Algorithm {
 public:
   IQTransform();
-  ~IQTransform() override;
   const std::string name() const override { return "IQTransform"; }
   /// Summary of algorithms purpose
   const std::string summary() const override {

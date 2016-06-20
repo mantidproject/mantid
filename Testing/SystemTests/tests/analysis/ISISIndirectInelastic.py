@@ -1013,7 +1013,10 @@ class ISISIndirectInelasticIqtAndIqtFitMulti(ISISIndirectInelasticBase):
 class OSIRISIqtAndIqtFitMulti(ISISIndirectInelasticIqtAndIqtFitMulti):
 
     def skipTests(self):
-        return platform.system() == "Darwin"
+        operating_sys = platform.system()
+        # Skip Test on Windows and OSX
+        if operating_sys == "Darwin" or operating_sys == "Windows":
+            return True
 
     def __init__(self):
         ISISIndirectInelasticIqtAndIqtFitMulti.__init__(self)
@@ -1094,7 +1097,8 @@ class ISISIndirectInelasticConvFit(ISISIndirectInelasticBase):
             EndX=self.endx,
             BackgroundType=self.bg,
             SpecMin=self.spectra_min,
-            SpecMax=self.spectra_max)
+            SpecMax=self.spectra_max,
+            OutputWorkspace='result')
 
     def _validate_properties(self):
         '''Check the object properties are in an expected state to continue'''

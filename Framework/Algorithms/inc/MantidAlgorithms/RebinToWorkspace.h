@@ -47,10 +47,6 @@ namespace Algorithms {
 
 class DLLExport RebinToWorkspace : public Mantid::API::Algorithm {
 public:
-  /// Constructor
-  RebinToWorkspace() : Mantid::API::Algorithm() {}
-  /// Virtual destructor
-  ~RebinToWorkspace() override {}
   /// Algorithm's name
   const std::string name() const override { return "RebinToWorkspace"; }
   /// Summary of algorithms purpose
