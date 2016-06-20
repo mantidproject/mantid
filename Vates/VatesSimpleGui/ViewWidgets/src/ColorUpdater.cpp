@@ -230,10 +230,10 @@ double ColorUpdater::getMinimumRange() { return this->m_minScale; }
  * color updater.
  */
 void ColorUpdater::print() {
-  std::cout << "Auto Scale: " << this->m_autoScaleState << std::endl;
-  std::cout << "Log Scale: " << this->m_logScaleState << std::endl;
-  std::cout << "Min Range: " << this->m_minScale << std::endl;
-  std::cout << "Max Range: " << this->m_maxScale << std::endl;
+  std::cout << "Auto Scale: " << this->m_autoScaleState << '\n';
+  std::cout << "Log Scale: " << this->m_logScaleState << '\n';
+  std::cout << "Min Range: " << this->m_minScale << '\n';
+  std::cout << "Max Range: " << this->m_maxScale << '\n';
 }
 
 /**

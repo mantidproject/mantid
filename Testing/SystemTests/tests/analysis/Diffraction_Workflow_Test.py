@@ -5,10 +5,9 @@ and runs Diffraction Workflow.
 """
 import stresstesting
 import numpy
+import os
 from mantid.simpleapi import *
 from mantid.api import FileFinder
-
-import os
 
 class Diffraction_Workflow_Test(stresstesting.MantidStressTest):
 

@@ -80,7 +80,7 @@ void PeakHKL::draw(QPainter &painter, int prec) {
 
 void PeakHKL::print() const {
   std::cerr << "     " << p.x() << ' ' << p.y() << '(' << h << ',' << k << ','
-            << l << ")(" << nh << ',' << nk << ',' << nl << ')' << std::endl;
+            << l << ")(" << nh << ',' << nk << ',' << nl << ')' << '\n';
 }
 
 /**

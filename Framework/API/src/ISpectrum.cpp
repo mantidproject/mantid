@@ -207,17 +207,6 @@ specnum_t ISpectrum::getSpectrumNo() const { return m_specNo; }
  * @param num :: the spectrum number of this spectrum */
 void ISpectrum::setSpectrumNo(specnum_t num) { m_specNo = num; }
 
-// ---------------------------------------------------------
-/** Lock access to the data so that it does not get deleted while reading.
- * Does nothing unless overridden.
- */
-void ISpectrum::lockData() const {}
-
-/** Unlock access to the data so that it can again get deleted.
- * Does nothing unless overridden.
- */
-void ISpectrum::unlockData() const {}
-
 //---------------------------------------------------------
 /**
  * Gets the value of the use flag.

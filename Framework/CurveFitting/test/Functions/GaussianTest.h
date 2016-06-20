@@ -213,11 +213,11 @@ public:
     TS_ASSERT(s.minimize());
 
     API::IFunction_sptr res = costFun->getFittingFunction();
-    // std::cerr << "result=" << s.getError() << std::endl;
-    // std::cerr << "cost=" << costFun->val() << std::endl;
+    // std::cerr << "result=" << s.getError() << '\n';
+    // std::cerr << "cost=" << costFun->val() << '\n';
     // for (size_t i = 0; i < res->nParams(); ++i) {
     //  std::cerr << res->parameterName(i) << " = " << res->getParameter(i)
-    //            << std::endl;
+    //            << '\n';
     //}
   }
 

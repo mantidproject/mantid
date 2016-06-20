@@ -31,6 +31,7 @@
 #include "ImageExportDialog.h"
 #include "ApplicationWindow.h"
 
+#include <QCloseEvent>
 #include <QStackedWidget>
 #include <QImageWriter>
 #include <QGroupBox>

@@ -5,6 +5,17 @@ set ( SRC_FILES
     src/CatalogSelector.cpp
     src/CheckboxHeader.cpp
     src/ColorBarWidget.cpp
+    src/DataProcessorUI/DataProcessorGenerateNotebook.cpp
+    src/DataProcessorUI/DataProcessorPostprocessingAlgorithm.cpp
+    src/DataProcessorUI/DataProcessorPreprocessingAlgorithm.cpp
+    src/DataProcessorUI/DataProcessorProcessingAlgorithm.cpp
+    src/DataProcessorUI/DataProcessorProcessingAlgorithmBase.cpp
+    src/DataProcessorUI/DataProcessorWhiteList.cpp
+    src/DataProcessorUI/GenericDataProcessorPresenter.cpp
+    src/DataProcessorUI/ParseKeyValueString.cpp
+    src/DataProcessorUI/QDataProcessorTableModel.cpp
+    src/DataProcessorUI/QDataProcessorWidget.cpp
+    src/DataProcessorUI/QtDataProcessorOptionsDialog.cpp
     src/DataSelector.cpp
     src/DiagResults.cpp
     src/DisplayCurveFit.cpp
@@ -106,6 +117,10 @@ set ( MOC_FILES
     inc/MantidQtMantidWidgets/AlgorithmSelectorWidget.h
     inc/MantidQtMantidWidgets/CheckboxHeader.h
     inc/MantidQtMantidWidgets/ColorBarWidget.h
+    inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorCommandAdapter.h
+    inc/MantidQtMantidWidgets/DataProcessorUI/QDataProcessorTableModel.h
+    inc/MantidQtMantidWidgets/DataProcessorUI/QDataProcessorWidget.h
+    inc/MantidQtMantidWidgets/DataProcessorUI/QtDataProcessorOptionsDialog.h
     inc/MantidQtMantidWidgets/DataSelector.h
     inc/MantidQtMantidWidgets/DiagResults.h
     inc/MantidQtMantidWidgets/DisplayCurveFit.h
@@ -183,6 +198,41 @@ set ( INC_FILES
     ${MOC_FILES}
     inc/MantidQtMantidWidgets/AlgorithmHintStrategy.h
     inc/MantidQtMantidWidgets/CatalogHelper.h
+    inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorAppendRowCommand.h
+    inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorClearSelectedCommand.h
+    inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorCommand.h
+    inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorCommandBase.h
+    inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorCopySelectedCommand.h
+    inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorCutSelectedCommand.h
+    inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorDeleteRowCommand.h
+    inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorExpandCommand.h
+    inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorExportTableCommand.h
+    inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorGenerateNotebook.h
+    inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorGroupRowsCommand.h
+    inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorImportTableCommand.h
+    inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorNewTableCommand.h
+    inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorOpenTableCommand.h
+    inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorOptionsCommand.h
+    inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorPasteSelectedCommand.h
+    inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorPlotGroupCommand.h
+    inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorPlotRowCommand.h
+    inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorPostprocessingAlgorithm.h
+    inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorPrependRowCommand.h
+    inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorPreprocessingAlgorithm.h
+    inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorPresenter.h
+    inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorProcessingAlgorithm.h
+    inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorProcessingAlgorithmBase.h
+    inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorProcessCommand.h
+    inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorSaveTableAsCommand.h
+    inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorSaveTableCommand.h
+    inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorVectorString.h
+    inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorView.h
+    inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorWhiteList.h
+    inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorWorkspaceCommand.h
+    inc/MantidQtMantidWidgets/DataProcessorUI/GenericDataProcessorPresenter.h
+    inc/MantidQtMantidWidgets/DataProcessorUI/GenericDataProcessorPresenterFactory.h
+    inc/MantidQtMantidWidgets/DataProcessorUI/ParseKeyValueString.h
+    inc/MantidQtMantidWidgets/DataProcessorUI/WorkspaceReceiver.h
     inc/MantidQtMantidWidgets/ErrorCurve.h
     inc/MantidQtMantidWidgets/WidgetDllOption.h
     inc/MantidQtMantidWidgets/HintStrategy.h
@@ -233,10 +283,14 @@ set ( INC_FILES
     inc/MantidQtMantidWidgets/InstrumentView/UnwrappedSurface.h
     inc/MantidQtMantidWidgets/InstrumentView/Viewport.h
     inc/MantidQtMantidWidgets/InstrumentView/XIntegrationControl.h
+	inc/MantidQtMantidWidgets/ProgressableView.h
+	inc/MantidQtMantidWidgets/ProgressPresenter.h
 )
 
 # QtDesigner UI files to process
 set ( UI_FILES 
+    inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorOptionsDialog.ui
+    inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorWidget.ui
     inc/MantidQtMantidWidgets/DataSelector.ui
     inc/MantidQtMantidWidgets/CatalogSearch.ui
     inc/MantidQtMantidWidgets/CatalogSelector.ui
@@ -268,6 +322,15 @@ set ( TEST_PY_FILES
 
 set ( TEST_FILES
   AlgorithmHintStrategyTest.h
+  DataProcessorUI/DataProcessorPostprocessingAlgorithmTest.h
+  DataProcessorUI/DataProcessorPreprocessingAlgorithmTest.h
+  DataProcessorUI/DataProcessorProcessingAlgorithmBaseTest.h
+  DataProcessorUI/DataProcessorProcessingAlgorithmTest.h
+  DataProcessorUI/DataProcessorCommandsTest.h
+  DataProcessorUI/DataProcessorGenerateNotebookTest.h
+  DataProcessorUI/DataProcessorWhiteListTest.h
+  DataProcessorUI/GenericDataProcessorPresenterTest.h
+  DataProcessorUI/ParseKeyValueStringTest.h
 )
 
 find_package (Qt4 REQUIRED QtHelp QtWebKit QtNetwork QUIET)
@@ -291,10 +354,12 @@ add_definitions ( -DQSCINTILLA_DLL )     # Will only have an effect on Windows (
 
 
 # For Windows:
-add_definitions ( -DIN_MANTIDQT_MANTIDWIDGETS -DQT_QTPROPERTYBROWSER_IMPORT )
+add_definitions ( -DQT_QTPROPERTYBROWSER_IMPORT )
 # Use a precompiled header where they are supported
 enable_precompiled_headers( inc/MantidQtMantidWidgets/PrecompiledHeader.h ALL_SRC )
 add_library ( MantidWidgets ${ALL_SRC} ${INC_FILES} ${UI_HDRS} ${RES_FILES} )
+
+set_target_properties ( MantidWidgets PROPERTIES COMPILE_DEFINITIONS "IN_MANTIDQT_MANTIDWIDGETS")
 
 if (OSX_VERSION VERSION_GREATER 10.8)
   set_target_properties ( MantidWidgets PROPERTIES INSTALL_RPATH "@loader_path/../MacOS")

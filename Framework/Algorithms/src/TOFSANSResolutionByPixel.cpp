@@ -128,10 +128,9 @@ void TOFSANSResolutionByPixel::exec() {
     LCollim = collimationLengthEstimator.provideCollimationLength(inWS);
     g_log.information() << "No collimation length was specified. A default "
                            "collimation length was estimated to be " << LCollim
-                        << std::endl;
+                        << '\n';
   } else {
-    g_log.information() << "The collimation length is  " << LCollim
-                        << std::endl;
+    g_log.information() << "The collimation length is  " << LCollim << '\n';
   }
 
   const int numberOfSpectra = static_cast<int>(inWS->getNumberHistograms());
@@ -143,8 +142,7 @@ void TOFSANSResolutionByPixel::exec() {
       det = inWS->getDetector(i);
     } catch (Exception::NotFoundError &) {
       g_log.information() << "Workspace index " << i
-                          << " has no detector assigned to it - discarding"
-                          << std::endl;
+                          << " has no detector assigned to it - discarding\n";
     }
     // If no detector found or if it's masked or a monitor, skip onto the next
     // spectrum

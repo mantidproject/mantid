@@ -64,11 +64,6 @@ static const double COEFF4 = 1.1967;
 static const double COEFF5 = -0.8667;
 } // end of anonymous
 
-MultipleScatteringCylinderAbsorption::MultipleScatteringCylinderAbsorption()
-    : API::Algorithm() {}
-
-MultipleScatteringCylinderAbsorption::~MultipleScatteringCylinderAbsorption() {}
-
 const std::string MultipleScatteringCylinderAbsorption::name() const {
   return "MultipleScatteringCylinderAbsorption";
 }
@@ -181,7 +176,7 @@ void MultipleScatteringCylinderAbsorption::exec() {
         continue;
       const double tth_rad = out_WSevent->detectorTwoTheta(*det);
 
-      EventList &eventList = out_WSevent->getEventList(index);
+      EventList &eventList = out_WSevent->getSpectrum(index);
       vector<double> tof_vec, y_vec, err_vec;
       eventList.getTofs(tof_vec);
       eventList.getWeights(y_vec);

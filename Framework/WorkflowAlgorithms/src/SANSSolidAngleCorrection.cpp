@@ -59,6 +59,10 @@ void SANSSolidAngleCorrection::init() {
   declareProperty("DetectorTubes", false, "If true, the algorithm will assume "
                                           "that the detectors are tubes in the "
                                           "Y direction.");
+  declareProperty("DetectorWing", false,
+                  "If true, the algorithm will assume "
+                  "that the detector is curved around the sample. E.g. BIOSANS "
+                  "Wing detector.");
   declareProperty("OutputMessage", "", Direction::Output);
   declareProperty("ReductionProperties", "__sans_reduction_properties",
                   Direction::Input);
@@ -116,8 +120,7 @@ void SANSSolidAngleCorrection::exec() {
       det = inputWS->getDetector(i);
     } catch (Exception::NotFoundError &) {
       g_log.warning() << "Workspace index " << i
-                      << " has no detector assigned to it - discarding"
-                      << std::endl;
+                      << " has no detector assigned to it - discarding\n";
       // Catch if no detector. Next line tests whether this happened - test
       // placed
       // outside here because Mac Intel compiler doesn't like 'continue' in a
@@ -140,13 +143,18 @@ void SANSSolidAngleCorrection::exec() {
 
     // Compute solid angle correction factor
     const bool is_tube = getProperty("DetectorTubes");
+    const bool is_wing = getProperty("DetectorWing");
+
     const double tanTheta = tan(inputWS->detectorTwoTheta(*det));
     const double theta_term = sqrt(tanTheta * tanTheta + 1.0);
     double corr;
-    if (is_tube) {
+    if (is_tube || is_wing) {
       const double tanAlpha = tan(getYTubeAngle(det, inputWS));
       const double alpha_term = sqrt(tanAlpha * tanAlpha + 1.0);
-      corr = alpha_term * theta_term * theta_term;
+      if (is_tube)
+        corr = alpha_term * theta_term * theta_term;
+      else // if (is_wing) {
+        corr = alpha_term;
     } else {
       corr = theta_term * theta_term * theta_term;
     }
@@ -187,8 +195,7 @@ void SANSSolidAngleCorrection::execEvent() {
       det = outputEventWS->getDetector(i);
     } catch (Exception::NotFoundError &) {
       g_log.warning() << "Workspace index " << i
-                      << " has no detector assigned to it - discarding"
-                      << std::endl;
+                      << " has no detector assigned to it - discarding\n";
       // Catch if no detector. Next line tests whether this happened - test
       // placed
       // outside here because Mac Intel compiler doesn't like 'continue' in a
@@ -214,7 +221,7 @@ void SANSSolidAngleCorrection::execEvent() {
     } else {
       corr = theta_term * theta_term * theta_term;
     }
-    EventList &el = outputEventWS->getEventList(i);
+    EventList &el = outputEventWS->getSpectrum(i);
     el *= corr;
     progress.report("Solid Angle Correction");
     PARALLEL_END_INTERUPT_REGION

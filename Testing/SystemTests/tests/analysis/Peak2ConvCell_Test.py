@@ -371,7 +371,7 @@ class Peak2ConvCell_Test(object):  # (stresstesting.MantidStressTest):
         M = matrix([[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]])
         M1 = matrix([[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]])
         G = UB.T * UB
-        G.I
+        #G.I
 
         if G[0, 1] > 0:
             if G[0, 2] > 0:
@@ -403,7 +403,7 @@ class Peak2ConvCell_Test(object):  # (stresstesting.MantidStressTest):
         while done == 1:
             done = 0
             X = UB.T * UB
-            X.I
+            #X.I
 
             print "B1", X
             if X[0, 0] > X[1, 1] or (math.fabs(X[0, 0] - X[1, 1]) < tolerance / 10 and math.fabs(X[1, 2]) > math.fabs(

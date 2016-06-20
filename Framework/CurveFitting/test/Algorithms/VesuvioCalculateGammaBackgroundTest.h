@@ -26,7 +26,7 @@ public:
     using namespace Mantid::API;
     auto inputWS = createTestWorkspaceWithFoilChanger(); // specNo=1
     // Put spectrum in forward scatter range
-    inputWS->getSpectrum(0)->setSpectrumNo(135);
+    inputWS->getSpectrum(0).setSpectrumNo(135);
     auto alg = runSuccessTestCase(inputWS);
 
     MatrixWorkspace_sptr backgroundWS = alg->getProperty("BackgroundWorkspace");
@@ -116,10 +116,10 @@ public:
   void test_Restricting_Correction_Range_Only_Gives_Output_For_Those_Spectra() {
     using namespace Mantid::API;
     auto inputWS = createTwoSpectrumWorkspaceWithFoilChanger();
-    inputWS->getSpectrum(0)->setSpectrumNo(135);
-    inputWS->getSpectrum(1)->setSpectrumNo(135);
-    inputWS->getSpectrum(1)->clearDetectorIDs();
-    inputWS->getSpectrum(1)->addDetectorID(1);
+    inputWS->getSpectrum(0).setSpectrumNo(135);
+    inputWS->getSpectrum(1).setSpectrumNo(135);
+    inputWS->getSpectrum(1).clearDetectorIDs();
+    inputWS->getSpectrum(1).addDetectorID(1);
     auto alg = runSuccessTestCase(inputWS, "1");
 
     MatrixWorkspace_sptr backgroundWS = alg->getProperty("BackgroundWorkspace");

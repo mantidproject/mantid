@@ -1,22 +1,30 @@
 #ifndef MANTID_CUSTOMINTERFACES_REFLMAINVIEWPRESENTER_H
 #define MANTID_CUSTOMINTERFACES_REFLMAINVIEWPRESENTER_H
 
-#include "MantidAPI/ITableWorkspace_fwd.h"
+#include "MantidAPI/IAlgorithm.h"
 #include "MantidQtCustomInterfaces/DllConfig.h"
 #include "MantidQtCustomInterfaces/Reflectometry/IReflPresenter.h"
-#include "MantidQtCustomInterfaces/Reflectometry/IReflSearcher.h"
-#include "MantidQtCustomInterfaces/Reflectometry/ReflMainView.h"
-#include "MantidQtCustomInterfaces/Reflectometry/ReflTransferStrategy.h"
-#include "MantidQtCustomInterfaces/Reflectometry/WorkspaceReceiver.h"
-
-#include <Poco/AutoPtr.h>
-#include <memory>
+#include "MantidQtMantidWidgets/DataProcessorUI/WorkspaceReceiver.h"
+#include <boost/shared_ptr.hpp>
 
 namespace MantidQt {
-namespace CustomInterfaces {
+
+namespace MantidWidgets {
 // Forward decs
 class ProgressableView;
 class DataProcessorPresenter;
+}
+
+namespace CustomInterfaces {
+
+// Forward decs
+class ReflMainView;
+class ReflSearchModel;
+class IReflSearcher;
+class ReflTransferStrategy;
+
+using MantidWidgets::DataProcessorPresenter;
+using MantidWidgets::ProgressableView;
 
 /** @class ReflMainViewPresenter
 
@@ -46,7 +54,7 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class MANTIDQT_CUSTOMINTERFACES_DLL ReflMainViewPresenter
     : public IReflPresenter,
-      public WorkspaceReceiver {
+      public MantidQt::MantidWidgets::WorkspaceReceiver {
 public:
   ReflMainViewPresenter(
       ReflMainView *mainView, ProgressableView *progressView,
@@ -59,7 +67,7 @@ public:
 
 protected:
   // the search model
-  ReflSearchModel_sptr m_searchModel;
+  boost::shared_ptr<ReflSearchModel> m_searchModel;
   // the main view we're managing
   ReflMainView *m_view;
   // The table view's presenter

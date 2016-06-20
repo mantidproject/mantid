@@ -783,7 +783,7 @@ void AlgorithmDialog::executeAlgorithmAsync() {
     }
   } catch (Poco::NoThreadAvailableException &) {
     g_log.error() << "No thread was available to run the " << algToExec->name()
-                  << " algorithm in the background." << std::endl;
+                  << " algorithm in the background.\n";
   }
 }
 

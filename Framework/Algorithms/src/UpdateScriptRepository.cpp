@@ -9,16 +9,6 @@ namespace Algorithms {
 DECLARE_ALGORITHM(UpdateScriptRepository)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-UpdateScriptRepository::UpdateScriptRepository() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-UpdateScriptRepository::~UpdateScriptRepository() {}
-
-//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string UpdateScriptRepository::name() const {
   return "UpdateScriptRepository";
@@ -63,7 +53,7 @@ void UpdateScriptRepository::exec() {
     }
     info << "Please check these files before using them. "
          << "Note: These files were configured for AutoUpdate.";
-    g_log.warning() << info.str() << std::endl;
+    g_log.warning() << info.str() << '\n';
   }
 }
 

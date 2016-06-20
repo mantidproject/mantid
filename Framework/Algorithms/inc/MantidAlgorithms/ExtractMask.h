@@ -49,10 +49,6 @@ namespace Algorithms {
 */
 class DLLExport ExtractMask : public Mantid::API::Algorithm {
 public:
-  /// Constructor
-  ExtractMask() : Mantid::API::Algorithm() {}
-  /// Virtual destructor
-  ~ExtractMask() override {}
   /// Algorithm's name
   const std::string name() const override { return "ExtractMask"; }
   /// Summary of algorithms purpose

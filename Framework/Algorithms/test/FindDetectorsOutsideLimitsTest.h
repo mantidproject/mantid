@@ -65,13 +65,13 @@ public:
       if (i == 19) {
         work_in->setData(i, yStrange, yTooDead);
       }
-      work_in->getSpectrum(i)->setSpectrumNo(i);
+      work_in->getSpectrum(i).setSpectrumNo(i);
 
       Mantid::Geometry::Detector *det =
           new Mantid::Geometry::Detector("", i, NULL);
       instr->add(det);
       instr->markAsDetector(det);
-      work_in->getSpectrum(i)->setDetectorID(i);
+      work_in->getSpectrum(i).setDetectorID(i);
     }
 
     FindDetectorsOutsideLimits alg;
@@ -156,7 +156,7 @@ public:
     DateAndTime run_start("2010-01-01T00:00:00");
     // Add ten more at #10 so that it fails
     for (int i = 0; i < 10; i++)
-      work_in->getEventList(10)
+      work_in->getSpectrum(10)
           .addEventQuickly(TofEvent((i + 0.5), run_start + double(i)));
 
     AnalysisDataService::Instance().add("testdead_in", work_in);

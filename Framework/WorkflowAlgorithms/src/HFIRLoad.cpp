@@ -81,8 +81,7 @@ void HFIRLoad::moveToBeamCenter(API::MatrixWorkspace_sptr &dataWS,
     center_y = default_ctr_y_pix;
     g_log.information() << "Setting beam center to ["
                         << Poco::NumberFormatter::format(center_x, 1) << ", "
-                        << Poco::NumberFormatter::format(center_y, 1) << "]"
-                        << std::endl;
+                        << Poco::NumberFormatter::format(center_y, 1) << "]\n";
     return;
   }
 
@@ -100,9 +99,15 @@ void HFIRLoad::moveToBeamCenter(API::MatrixWorkspace_sptr &dataWS,
   mvAlg->setProperty("RelativePosition", true);
   mvAlg->executeAsChildAlg();
   g_log.information() << "Moving beam center to " << center_x << " " << center_y
-                      << std::endl;
+                      << '\n';
 }
 
+/**
+ * Here the property "sample_detector_distance" is set.
+ * This is the Sample - center of detector distance that all legacy algorithms
+ * use
+ * This was done by Mathieu before BioSANS had the wing detector
+ */
 void HFIRLoad::exec() {
   // Reduction property manager
   const std::string reductionManagerName = getProperty("ReductionProperties");
@@ -154,7 +159,7 @@ void HFIRLoad::exec() {
     // reduced data set
     // as a sensitivity data set.
     g_log.warning() << "Unable to load file as a SPICE file. Trying to load as "
-                       "a Nexus file." << std::endl;
+                       "a Nexus file.\n";
     loadAlg = createChildAlgorithm("Load", 0, 0.2);
     loadAlg->setProperty("Filename", fileName);
     loadAlg->executeAsChildAlg();
@@ -164,7 +169,7 @@ void HFIRLoad::exec() {
     dataWS->mutableRun().addProperty("is_sensitivity", 1, "", true);
     setProperty<MatrixWorkspace_sptr>("OutputWorkspace", dataWS);
     g_log.notice() << "Successfully loaded " << fileName
-                   << " and setting sensitivity flag to True" << std::endl;
+                   << " and setting sensitivity flag to True\n";
     return;
   }
   Workspace_sptr dataWS_tmp = loadAlg->getProperty("OutputWorkspace");
@@ -178,6 +183,8 @@ void HFIRLoad::exec() {
   double sdd = 0.0;
   const double sample_det_dist = getProperty("SampleDetectorDistance");
   if (!isEmpty(sample_det_dist)) {
+    g_log.debug() << "Getting the SampleDetectorDistance = " << sample_det_dist
+                  << " from the Algorithm input property.\n";
     sdd = sample_det_dist;
   } else {
     const std::string sddName = "sample-detector-distance";
@@ -198,6 +205,8 @@ void HFIRLoad::exec() {
     }
   }
   dataWS->mutableRun().addProperty("sample_detector_distance", sdd, "mm", true);
+  g_log.debug() << "FINAL: Using Total Sample Detector Distance = " << sdd
+                << "\n";
 
   progress.report("MoveInstrumentComponent...");
 
@@ -209,7 +218,7 @@ void HFIRLoad::exec() {
   mvAlg->setProperty("Z", sdd / 1000.0);
   mvAlg->setProperty("RelativePosition", false);
   mvAlg->executeAsChildAlg();
-  g_log.information() << "Moving detector to " << sdd / 1000.0 << std::endl;
+  g_log.information() << "Moving detector to " << sdd / 1000.0 << '\n';
   output_message += "   Detector position: " +
                     Poco::NumberFormatter::format(sdd / 1000.0, 3) + " m\n";
 

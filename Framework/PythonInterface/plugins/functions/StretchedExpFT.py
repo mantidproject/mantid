@@ -1,4 +1,5 @@
-# pylint: disable=invalid-name
+# pylint: disable=invalid-name, anomalous-backslash-in-string, attribute-defined-outside-init
+
 '''
 @author Jose Borreguero, NScD
 @date October 06, 2013
@@ -23,15 +24,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 '''
-
-from mantid.api import IFunction1D, FunctionFactory
-from mantid import logger
-from numpy import interp
-import numpy as np
 import copy
+import numpy as np
 import scipy.constants
 from scipy.fftpack import fft, fftfreq
 from scipy.special import gamma
+from mantid.api import IFunction1D, FunctionFactory
 
 class StretchedExpFT(IFunction1D):
     # Class variables
@@ -41,7 +39,7 @@ class StretchedExpFT(IFunction1D):
     def __init__(self):
         """declare some constants"""
         super(StretchedExpFT, self).__init__()
-        self._parmlist = list()
+        self._parmList = list()
 
     def category(self):
         return 'QuasiElastic'
@@ -52,22 +50,23 @@ class StretchedExpFT(IFunction1D):
         self.declareParameter('Height', 0.1, 'Intensity at the origin')
         self.declareParameter('Tau', 100.0, 'Relaxation time')
         self.declareParameter('Beta', 1.0, 'Stretching exponent')
-        self.declareParameter('Center', 0.0, 'Center of the peak')
+        self.declareParameter('Centre', 0.0, 'Centre of the peak')
         # Keep order in which parameters are declared. Should be a class
         # variable but we initialize it just below parameter declaration
         # to make sure we follow the order.
-        self._parmList = ['Height', 'Tau', 'Beta', 'Center']
+        self._parmList = ['Height', 'Tau', 'Beta', 'Centre']
 
     def validateParams(self):
         """Check parameters are positive"""
         height = self.getParameterValue('Height')
         tau = self.getParameterValue('Tau')
         beta = self.getParameterValue('Beta')
-        center = self.getParameterValue('Center')
-        for name, value in {'Height': height, 'Tau': tau, 'Beta': beta}.items():
+        Centre = self.getParameterValue('Centre')
+
+        for _, value in {'Height': height, 'Tau': tau, 'Beta': beta}.items():
             if value <= 0:
                 return None
-        return {'Height': height, 'Tau': tau, 'Beta': beta, 'Center': center}
+        return {'Height': height, 'Tau': tau, 'Beta': beta, 'Centre': Centre}
 
     def function1D(self, xvals, **optparms):
         """ Fourier transform of the Symmetrized Stretched Exponential
@@ -112,7 +111,7 @@ class StretchedExpFT(IFunction1D):
         # Find corresponding energies
         energies = StretchedExpFT._planck_constant * fftfreq(2*nt, d=dt)  # standard ordering
         energies = np.concatenate([energies[nt:], energies[:nt]])  # increasing ordering
-        transform = p['Height'] * interp(xvals-p['Center'], energies, fourier)
+        transform = p['Height'] * np.interp(xvals-p['Centre'], energies, fourier)
         return transform
 
     def fillJacobian(self, xvals, jacobian, partials):
@@ -146,7 +145,7 @@ class StretchedExpFT(IFunction1D):
         # Add these quantities to original parameter values
         dp = {'Tau': 1.0,  # change by 1ps
               'Beta': 0.01,
-              'Center': 0.0001  # change by 0.1 micro-eV
+              'Centre': 0.0001  # change by 0.1 micro-eV
              }
         for name in dp.keys():
             pp = copy.copy(p)

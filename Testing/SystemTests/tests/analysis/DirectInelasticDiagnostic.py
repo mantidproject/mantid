@@ -1,10 +1,11 @@
 #pylint: disable=no-init
+import os
 from stresstesting import MantidStressTest
 import mantid.simpleapi as ms
 import Direct.DirectEnergyConversion as reduction
-import os
 
 class DirectInelasticDiagnostic(MantidStressTest):
+    saved_diag_file=""
 
     def requiredMemoryMB(self):
         """Requires 4Gb"""

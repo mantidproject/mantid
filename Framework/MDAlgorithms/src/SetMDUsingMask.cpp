@@ -16,16 +16,6 @@ namespace MDAlgorithms {
 DECLARE_ALGORITHM(SetMDUsingMask)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-SetMDUsingMask::SetMDUsingMask() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-SetMDUsingMask::~SetMDUsingMask() {}
-
-//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string SetMDUsingMask::name() const { return "SetMDUsingMask"; }
 

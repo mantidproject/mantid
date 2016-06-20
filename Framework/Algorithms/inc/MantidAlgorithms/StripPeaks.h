@@ -57,8 +57,6 @@ class DLLExport StripPeaks : public API::Algorithm {
 public:
   /// (Empty) Constructor
   StripPeaks();
-  /// Virtual destructor
-  ~StripPeaks() override {}
   /// Algorithm's name
   const std::string name() const override { return "StripPeaks"; }
   /// Summary of algorithms purpose

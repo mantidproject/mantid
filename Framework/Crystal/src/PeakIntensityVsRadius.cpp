@@ -168,7 +168,7 @@ void PeakIntensityVsRadius::exec() {
     double radius =
         RadiusStart +
         double(step) * (RadiusEnd - RadiusStart) / (double(NumSteps - 1));
-    g_log.debug() << "Integrating radius " << radius << std::endl;
+    g_log.debug() << "Integrating radius " << radius << '\n';
     prog.report("Radius " + Kernel::Strings::toString(radius));
 
     double OuterRadius = 0;

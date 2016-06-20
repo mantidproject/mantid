@@ -147,7 +147,7 @@ void pythonCalc::appendChk(const QLineEdit *const userVal,
 */
 QString pythonCalc::run() {
   // std::cerr<<"Script:\n";
-  // std::cerr<<m_pyScript.toStdString()<<std::endl;
+  // std::cerr<<m_pyScript.toStdString()<<'\n';
   QString tests = runPythonCode(m_pyScript, false);
   // std::cerr << "results\n";
   // std::cerr << tests.toStdString() << "\n";

@@ -36,8 +36,6 @@ public:
                                const std::vector<int> summedPeriods,
                                const std::vector<int> subtractedPeriods,
                                const int groupIndex);
-  ~MuonGroupAsymmetryCalculator() override;
-
   /// Performs group asymmetry calculation
   API::MatrixWorkspace_sptr calculate() const override;
 

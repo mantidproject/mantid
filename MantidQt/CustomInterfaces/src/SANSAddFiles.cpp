@@ -341,8 +341,7 @@ void SANSAddFiles::runPythonAddFiles() {
 
   code_torun += ")\n";
 
-  g_log.debug() << "Executing Python: \n" << code_torun.toStdString()
-                << std::endl;
+  g_log.debug() << "Executing Python: \n" << code_torun.toStdString() << '\n';
 
   m_SANSForm->sum_Btn->setEnabled(false);
   m_pythonRunning = true;

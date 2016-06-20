@@ -75,13 +75,8 @@ public:
   // Get the number of histograms. aka the number of pixels or detectors.
   std::size_t getNumberHistograms() const override;
 
-  //------------------------------------------------------------
-  // Return the underlying ISpectrum ptr at the given workspace index.
-  Mantid::API::ISpectrum *getSpectrum(const size_t index) override;
-
-  // Return the underlying ISpectrum ptr (const version) at the given workspace
-  // index.
-  const Mantid::API::ISpectrum *getSpectrum(const size_t index) const override;
+  EventList &getSpectrum(const size_t index) override;
+  const EventList &getSpectrum(const size_t index) const override;
 
   //------------------------------------------------------------
 
@@ -144,16 +139,6 @@ public:
   //------------------------------------------------------------
   // Set the x-axis data (histogram bins) for all pixels
   virtual void setAllX(Kernel::cow_ptr<MantidVec> &x);
-
-  // Get an EventList object at the given workspace index number
-  virtual EventList &getEventList(const std::size_t workspace_index);
-
-  // Get a const EventList object at the given workspace index number
-  virtual const EventList &
-  getEventList(const std::size_t workspace_index) const;
-
-  // Get an EventList pointer at the given workspace index number
-  EventList *getEventListPtr(const std::size_t workspace_index) override;
 
   // Get or add an EventList
   EventList &getOrAddEventList(const std::size_t workspace_index);

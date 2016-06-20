@@ -36,8 +36,6 @@ public:
                             const std::vector<int> summedPeriods,
                             const std::vector<int> subtractedPeriods,
                             const int groupIndex);
-  ~MuonGroupCountsCalculator() override;
-
   /// Performs group counts calculation
   Mantid::API::MatrixWorkspace_sptr calculate() const override;
 };

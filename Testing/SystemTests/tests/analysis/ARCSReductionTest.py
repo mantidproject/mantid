@@ -3,10 +3,9 @@
 System test for ARCS reduction
 """
 
-from mantid.simpleapi import *
 import os
 import stresstesting
-from numpy import *
+from mantid.simpleapi import *
 
 class ARCSReductionTest(stresstesting.MantidStressTest):
 

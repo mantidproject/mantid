@@ -24,11 +24,8 @@ public:
   /**
    * Constructor.
    * @param the_index :: unique index into the workspace of this data
-   * @param locked :: reference to a bool that will be set to true if
-   *        the marker should NOT be deleted
    */
-  MantidVecWithMarker(const size_t the_index, bool &locked)
-      : m_index(the_index), m_locked(locked) {}
+  MantidVecWithMarker(const size_t the_index) : m_index(the_index) {}
 
   /// Destructor
   ~MantidVecWithMarker() {
@@ -55,10 +52,6 @@ public:
 
   /// Set the unique index value.
   void setIndex(const size_t the_index) { m_index = the_index; }
-
-  /// Locked: can't be deleted. This will point to the EventList's m_lockedMRU
-  /// bool.
-  bool &m_locked;
 };
 
 //============================================================================
@@ -120,12 +113,6 @@ protected:
 
   /// The most-recently-used list of dataE histograms
   mutable mru_lists m_bufferedDataE;
-
-  /// These markers will be deleted when they are NOT locked
-  mutable std::vector<MantidVecWithMarker *> m_markersToDelete;
-
-  /// Mutex around accessing m_markersToDelete
-  std::mutex m_toDeleteMutex;
 
   /// Mutex when adding entries in the MRU list
   mutable std::mutex m_changeMruListsMutexE;

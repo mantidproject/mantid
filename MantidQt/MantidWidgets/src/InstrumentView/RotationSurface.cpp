@@ -123,7 +123,7 @@ void RotationSurface::init() {
                             } catch (std::exception &e) {
                               // stop executing the body of the loop
                               exceptionThrown = true;
-                              g_log.error() << e.what() << std::endl;
+                              g_log.error() << e.what() << '\n';
                             } catch (...) {
                               // stop executing the body of the loop
                               exceptionThrown = true;

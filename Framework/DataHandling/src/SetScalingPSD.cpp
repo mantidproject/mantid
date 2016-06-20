@@ -97,8 +97,7 @@ bool SetScalingPSD::processScalingFile(const std::string &scalingFile,
 
     std::ifstream sFile(scalingFile.c_str());
     if (!sFile) {
-      g_log.error() << "Unable to open scaling file " << scalingFile
-                    << std::endl;
+      g_log.error() << "Unable to open scaling file " << scalingFile << '\n';
       return false;
     }
     std::string str;
@@ -167,7 +166,7 @@ bool SetScalingPSD::processScalingFile(const std::string &scalingFile,
           scaleMap[detIndex - 1] = scale;
         else
           its->second = 0.5 * (its->second + scale);
-        // std::cout << detIndex << scale << scaleDir << std::endl;
+        // std::cout << detIndex << scale << scaleDir << '\n';
       }
       detIdLast = detIndex;
       detPosLast = detPos;
@@ -222,7 +221,7 @@ bool SetScalingPSD::processScalingFile(const std::string &scalingFile,
           } else
             its->second = 3.0; // crazy test value
         }
-        // std::cout << detIndex << scale << scaleDir << std::endl;
+        // std::cout << detIndex << scale << scaleDir << '\n';
       }
       detIdLast = detID[i];
       detPosLast = detPos;

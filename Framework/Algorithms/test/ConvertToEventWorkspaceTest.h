@@ -100,11 +100,11 @@ public:
     // Event-specific checks
     TS_ASSERT_EQUALS(outWS->getNumberEvents(),
                      GenerateMultipleEvents ? 1006 : 499);
-    TS_ASSERT_EQUALS(outWS->getEventList(1).getNumberEvents(),
+    TS_ASSERT_EQUALS(outWS->getSpectrum(1).getNumberEvents(),
                      GenerateMultipleEvents ? 20 : 10);
 
     // Check a couple of events
-    EventList &el = outWS->getEventList(0);
+    EventList &el = outWS->getSpectrum(0);
     TS_ASSERT_EQUALS(el.getWeightedEventsNoTime().size(),
                      GenerateMultipleEvents ? 26 : 9);
     WeightedEventNoTime ev;

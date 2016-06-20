@@ -39,7 +39,7 @@ void EModeHandler::setEMode(const int mode) {
     m_svUI->emode_combo_box->setCurrentIndex(mode);
   else
     g_log.error() << "Mode number invalid: "
-                  << QString::number(mode).toStdString() << std::endl;
+                  << QString::number(mode).toStdString() << '\n';
 }
 
 /**
