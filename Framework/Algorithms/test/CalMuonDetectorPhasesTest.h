@@ -124,22 +124,6 @@ public:
     runExecutionTest(ws);
   }
 
-  /// Test what happens when you supply frequency in Mrad/s rather than MHz
-  void testFrequencyUnits() {
-    auto ws = createWorkspace(4, 100, "Microseconds");
-    auto calc = AlgorithmManager::Instance().create("CalMuonDetectorPhases");
-    calc->initialize();
-    calc->setChild(true);
-    calc->setProperty("InputWorkspace", ws);
-    calc->setPropertyValue("Frequency", "25"); // Mrad/s, not MHz
-    calc->setPropertyValue("DataFitted", "fit");
-    calc->setPropertyValue("DetectorTable", "tab");
-    calc->setProperty("ForwardSpectra", std::vector<int>{1, 2});
-    calc->setProperty("BackwardSpectra", std::vector<int>{3, 4});
-
-    TS_ASSERT_THROWS(calc->execute(), std::runtime_error);
-  }
-
 private:
   MatrixWorkspace_sptr createWorkspace(size_t nspec, size_t maxt,
                                        const std::string &units) {
