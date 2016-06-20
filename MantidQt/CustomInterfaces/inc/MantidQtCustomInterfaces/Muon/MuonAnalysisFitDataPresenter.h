@@ -1,5 +1,5 @@
-#ifndef MANTID_CUSTOMINTERFACES_MUONANALYSISFITDATAHELPER_H_
-#define MANTID_CUSTOMINTERFACES_MUONANALYSISFITDATAHELPER_H_
+#ifndef MANTID_CUSTOMINTERFACES_MUONANALYSISFITDATAPRESENTER_H_
+#define MANTID_CUSTOMINTERFACES_MUONANALYSISFITDATAPRESENTER_H_
 
 #include "MantidQtCustomInterfaces/DllConfig.h"
 #include "MantidQtCustomInterfaces/Muon/MuonAnalysisHelper.h"
@@ -15,11 +15,10 @@ class Grouping;
 namespace MantidQt {
 namespace CustomInterfaces {
 
-/** MuonAnalysisFitDataHelper : Updates fit browser from data widget
+/** MuonAnalysisFitDataPresenter : Updates fit browser from data widget
 
-  When data widget reports changes, MuonAnalysis uses this helper class
-  to update the fit browser. It is implemented as a separate class for
-  testing purposes.
+  When data widget (View) reports changes, MuonAnalysis uses this presenter
+  class to update the fit browser (Model).
 
   Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
@@ -42,10 +41,10 @@ namespace CustomInterfaces {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTIDQT_CUSTOMINTERFACES_DLL MuonAnalysisFitDataHelper {
+class MANTIDQT_CUSTOMINTERFACES_DLL MuonAnalysisFitDataPresenter {
 public:
   /// Constructor
-  MuonAnalysisFitDataHelper(
+  MuonAnalysisFitDataPresenter(
       MantidQt::MantidWidgets::IWorkspaceFitControl *fitBrowser,
       MantidQt::MantidWidgets::IMuonFitDataSelector *dataSelector);
   /// Handles "data properties changed"
@@ -81,4 +80,4 @@ private:
 } // namespace CustomInterfaces
 } // namespace Mantid
 
-#endif /* MANTID_CUSTOMINTERFACES_MUONANALYSISFITDATAHELPER_H_ */
+#endif /* MANTID_CUSTOMINTERFACES_MUONANALYSISFITDATAPRESENTER_H_ */

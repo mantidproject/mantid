@@ -1,5 +1,5 @@
-#ifndef MANTID_CUSTOMINTERFACES_MUONANALYSISFITFUNCTIONHELPERTEST_H_
-#define MANTID_CUSTOMINTERFACES_MUONANALYSISFITFUNCTIONHELPERTEST_H_
+#ifndef MANTID_CUSTOMINTERFACES_MUONANALYSISFITFUNCTIONPRESENTERTEST_H_
+#define MANTID_CUSTOMINTERFACES_MUONANALYSISFITFUNCTIONPRESENTERTEST_H_
 
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
@@ -7,11 +7,11 @@
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/FunctionFactory.h"
-#include "MantidQtCustomInterfaces/Muon/MuonAnalysisFitFunctionHelper.h"
+#include "MantidQtCustomInterfaces/Muon/MuonAnalysisFitFunctionPresenter.h"
 #include "MantidQtMantidWidgets/IFunctionBrowser.h"
 #include "MantidQtMantidWidgets/IMuonFitFunctionControl.h"
 
-using MantidQt::CustomInterfaces::MuonAnalysisFitFunctionHelper;
+using MantidQt::CustomInterfaces::MuonAnalysisFitFunctionPresenter;
 using MantidQt::MantidWidgets::IFunctionBrowser;
 using MantidQt::MantidWidgets::IMuonFitFunctionControl;
 using namespace testing;
@@ -43,18 +43,18 @@ public:
                void(const QString &, const QString &, double));
 };
 
-class MuonAnalysisFitFunctionHelperTest : public CxxTest::TestSuite {
+class MuonAnalysisFitFunctionPresenterTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static MuonAnalysisFitFunctionHelperTest *createSuite() {
-    return new MuonAnalysisFitFunctionHelperTest();
+  static MuonAnalysisFitFunctionPresenterTest *createSuite() {
+    return new MuonAnalysisFitFunctionPresenterTest();
   }
-  static void destroySuite(MuonAnalysisFitFunctionHelperTest *suite) {
+  static void destroySuite(MuonAnalysisFitFunctionPresenterTest *suite) {
     delete suite;
   }
 
-  MuonAnalysisFitFunctionHelperTest() {
+  MuonAnalysisFitFunctionPresenterTest() {
     Mantid::API::FrameworkManager::Instance(); // To make sure everything is
                                                // initialized
   }
@@ -68,8 +68,8 @@ public:
   void setUp() override {
     m_funcBrowser = new NiceMock<MockFunctionBrowser>();
     m_fitBrowser = new NiceMock<MockFitFunctionControl>();
-    m_helper =
-        new MuonAnalysisFitFunctionHelper(nullptr, m_fitBrowser, m_funcBrowser);
+    m_presenter = new MuonAnalysisFitFunctionPresenter(nullptr, m_fitBrowser,
+                                                       m_funcBrowser);
     testString = QString("Test function");
   }
 
@@ -79,24 +79,24 @@ public:
     TS_ASSERT(Mock::VerifyAndClearExpectations(m_fitBrowser));
     delete m_funcBrowser;
     delete m_fitBrowser;
-    delete m_helper;
+    delete m_presenter;
   }
 
   void test_updateFunction() {
     EXPECT_CALL(*m_fitBrowser, setFunction(testString)).Times(1);
-    m_helper->updateFunction();
+    m_presenter->updateFunction();
   }
 
   void test_updateFunctionAndFit_nonSequential() {
     EXPECT_CALL(*m_fitBrowser, setFunction(testString)).Times(1);
     EXPECT_CALL(*m_fitBrowser, runFit()).Times(1);
-    m_helper->updateFunctionAndFit(false);
+    m_presenter->updateFunctionAndFit(false);
   }
 
   void test_updateFunctionAndFit_sequential() {
     EXPECT_CALL(*m_fitBrowser, setFunction(testString)).Times(1);
     EXPECT_CALL(*m_fitBrowser, runSequentialFit()).Times(1);
-    m_helper->updateFunctionAndFit(true);
+    m_presenter->updateFunctionAndFit(true);
   }
 
   void test_handleFitFinished() {
@@ -117,29 +117,29 @@ public:
     EXPECT_CALL(*m_fitBrowser,
                 setParameterValue(funcIndex, paramName, paramValue))
         .Times(1);
-    m_helper->handleParameterEdited(funcIndex, paramName);
+    m_presenter->handleParameterEdited(funcIndex, paramName);
   }
 
   void test_handleModelCleared() {
     EXPECT_CALL(*m_funcBrowser, clear()).Times(1);
-    m_helper->handleModelCleared();
+    m_presenter->handleModelCleared();
   }
 
   void test_handleErrorsEnabled_On() {
     EXPECT_CALL(*m_funcBrowser, setErrorsEnabled(true)).Times(1);
-    m_helper->handleErrorsEnabled(true);
+    m_presenter->handleErrorsEnabled(true);
   }
 
   void test_handleErrorsEnabled_Off() {
     EXPECT_CALL(*m_funcBrowser, setErrorsEnabled(false)).Times(1);
-    m_helper->handleErrorsEnabled(false);
+    m_presenter->handleErrorsEnabled(false);
   }
 
   void test_handleFunctionLoaded() {
     const QString funcString("some function string");
     EXPECT_CALL(*m_funcBrowser, clear()).Times(1);
     EXPECT_CALL(*m_funcBrowser, setFunction(funcString)).Times(1);
-    m_helper->handleFunctionLoaded(funcString);
+    m_presenter->handleFunctionLoaded(funcString);
   }
 
 private:
@@ -150,13 +150,13 @@ private:
     EXPECT_CALL(*m_fitBrowser, getFunction()).Times(1);
     EXPECT_CALL(*m_funcBrowser, updateParameters(testing::Ref(*function)))
         .Times(1);
-    m_helper->handleFitFinished(wsName);
+    m_presenter->handleFitFinished(wsName);
   }
 
   QString testString;
   MockFunctionBrowser *m_funcBrowser;
   MockFitFunctionControl *m_fitBrowser;
-  MuonAnalysisFitFunctionHelper *m_helper;
+  MuonAnalysisFitFunctionPresenter *m_presenter;
 };
 
-#endif /* MANTID_CUSTOMINTERFACES_MUONANALYSISFITFUNCTIONHELPERTEST_H_ */
+#endif /* MANTID_CUSTOMINTERFACES_MUONANALYSISFITFUNCTIONPRESENTERTEST_H_ */

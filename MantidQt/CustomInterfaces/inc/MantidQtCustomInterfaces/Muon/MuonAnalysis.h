@@ -27,8 +27,8 @@ class FunctionBrowser;
 class MuonFitDataSelector;
 }
 namespace CustomInterfaces {
-class MuonAnalysisFitDataHelper;
-class MuonAnalysisFitFunctionHelper;
+class MuonAnalysisFitDataPresenter;
+class MuonAnalysisFitFunctionPresenter;
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
@@ -557,11 +557,11 @@ private:
   /// Data selector widget for fit tab
   MantidQt::MantidWidgets::MuonFitDataSelector *m_dataSelector;
 
-  /// Helper to get data to fit
-  std::unique_ptr<MuonAnalysisFitDataHelper> m_fitDataHelper;
+  /// Presenter to get data to fit
+  std::unique_ptr<MuonAnalysisFitDataPresenter> m_fitDataPresenter;
 
-  /// Helper to get fit function
-  std::unique_ptr<MuonAnalysisFitFunctionHelper> m_fitFunctionHelper;
+  /// Presenter to get fit function
+  std::unique_ptr<MuonAnalysisFitFunctionPresenter> m_fitFunctionPresenter;
 };
 }
 }

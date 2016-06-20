@@ -23,9 +23,9 @@
 #include "MantidQtAPI/FileDialogHandler.h"
 #include "MantidQtAPI/ManageUserDirectories.h"
 #include "MantidQtCustomInterfaces/Muon/MuonAnalysis.h"
-#include "MantidQtCustomInterfaces/Muon/MuonAnalysisFitDataHelper.h"
+#include "MantidQtCustomInterfaces/Muon/MuonAnalysisFitDataPresenter.h"
 #include "MantidQtCustomInterfaces/Muon/MuonAnalysisFitDataTab.h"
-#include "MantidQtCustomInterfaces/Muon/MuonAnalysisFitFunctionHelper.h"
+#include "MantidQtCustomInterfaces/Muon/MuonAnalysisFitFunctionPresenter.h"
 #include "MantidQtCustomInterfaces/Muon/MuonAnalysisOptionTab.h"
 #include "MantidQtCustomInterfaces/Muon/MuonAnalysisResultTableTab.h"
 #include "MantidQtMantidWidgets/MuonFunctionBrowser.h"
@@ -1970,7 +1970,7 @@ void MuonAnalysis::selectMultiPeak(const QString &wsName) {
     setCurrentDataName(wsName);
   }
 
-  if (wsName != m_fitDataHelper->getAssignedFirstRun()) {
+  if (wsName != m_fitDataPresenter->getAssignedFirstRun()) {
     // Set the available groups/pairs and periods
     const Grouping groups = m_groupingHelper.parseGroupingTable();
     QStringList groupsAndPairs;
@@ -1984,7 +1984,7 @@ void MuonAnalysis::selectMultiPeak(const QString &wsName) {
     m_dataSelector->setNumPeriods(m_numPeriods);
 
     // Set the selected run, group/pair and period
-    m_fitDataHelper->setAssignedFirstRun(wsName);
+    m_fitDataPresenter->setAssignedFirstRun(wsName);
   }
 
   QString code;
@@ -2228,11 +2228,12 @@ void MuonAnalysis::loadFittings() {
   // Add Data Selector widget to the fit tab
   m_dataSelector = new MuonFitDataSelector(m_uiForm.fitBrowser);
   m_uiForm.fitBrowser->addExtraWidget(m_dataSelector);
-  // Set up fit data and function helpers
-  m_fitDataHelper = Mantid::Kernel::make_unique<MuonAnalysisFitDataHelper>(
-      m_uiForm.fitBrowser, m_dataSelector);
-  m_fitFunctionHelper =
-      Mantid::Kernel::make_unique<MuonAnalysisFitFunctionHelper>(
+  // Set up fit data and function presenters
+  m_fitDataPresenter =
+      Mantid::Kernel::make_unique<MuonAnalysisFitDataPresenter>(
+          m_uiForm.fitBrowser, m_dataSelector);
+  m_fitFunctionPresenter =
+      Mantid::Kernel::make_unique<MuonAnalysisFitFunctionPresenter>(
           nullptr, m_uiForm.fitBrowser, m_functionBrowser);
   // Connect signals
   connect(m_dataSelector, SIGNAL(dataPropertiesChanged()), this,
@@ -3204,8 +3205,8 @@ std::string MuonAnalysis::getSubtractedPeriods() const {
  * Pass this information to the fit helper
  */
 void MuonAnalysis::dataPropsChanged() {
-  if (m_fitDataHelper) {
-    m_fitDataHelper->handleDataPropertiesChanged();
+  if (m_fitDataPresenter) {
+    m_fitDataPresenter->handleDataPropertiesChanged();
   }
 }
 
@@ -3214,8 +3215,8 @@ void MuonAnalysis::dataPropsChanged() {
  * Pass this information to the fit helper
  */
 void MuonAnalysis::dataGroupsChanged() {
-  if (m_fitDataHelper) {
-    m_fitDataHelper->handleSelectedDataChanged(
+  if (m_fitDataPresenter) {
+    m_fitDataPresenter->handleSelectedDataChanged(
         m_groupingHelper.parseGroupingTable(),
         parsePlotType(m_uiForm.frontPlotFuncs), isOverwriteEnabled());
   }
@@ -3226,8 +3227,8 @@ void MuonAnalysis::dataGroupsChanged() {
  * Pass this information to the fit helper
  */
 void MuonAnalysis::dataPeriodsChanged() {
-  if (m_fitDataHelper) {
-    m_fitDataHelper->handleSelectedDataChanged(
+  if (m_fitDataPresenter) {
+    m_fitDataPresenter->handleSelectedDataChanged(
         m_groupingHelper.parseGroupingTable(),
         parsePlotType(m_uiForm.frontPlotFuncs), isOverwriteEnabled());
   }
@@ -3240,8 +3241,8 @@ void MuonAnalysis::dataPeriodsChanged() {
  * @param end :: [input] end of fit range
  */
 void MuonAnalysis::fitRangeChangedManually(double start, double end) {
-  if (m_fitDataHelper) {
-    m_fitDataHelper->handleXRangeChangedGraphically(start, end);
+  if (m_fitDataPresenter) {
+    m_fitDataPresenter->handleXRangeChangedGraphically(start, end);
   }
 }
 
@@ -3250,8 +3251,8 @@ void MuonAnalysis::fitRangeChangedManually(double start, double end) {
  * Pass this information to the fit helper
  */
 void MuonAnalysis::dataWorkspaceChanged() {
-  if (m_fitDataHelper) {
-    m_fitDataHelper->handleSelectedDataChanged(
+  if (m_fitDataPresenter) {
+    m_fitDataPresenter->handleSelectedDataChanged(
         m_groupingHelper.parseGroupingTable(),
         parsePlotType(m_uiForm.frontPlotFuncs), isOverwriteEnabled());
   }

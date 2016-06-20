@@ -1,5 +1,5 @@
-#ifndef MANTID_CUSTOMINTERFACES_MUONANALYSISFITDATAHELPERTEST_H_
-#define MANTID_CUSTOMINTERFACES_MUONANALYSISFITDATAHELPERTEST_H_
+#ifndef MANTID_CUSTOMINTERFACES_MUONANALYSISFITDATAPRESENTERTEST_H_
+#define MANTID_CUSTOMINTERFACES_MUONANALYSISFITDATAPRESENTERTEST_H_
 
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
@@ -7,12 +7,12 @@
 
 #include "MantidAPI/GroupingLoader.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidQtCustomInterfaces/Muon/MuonAnalysisFitDataHelper.h"
+#include "MantidQtCustomInterfaces/Muon/MuonAnalysisFitDataPresenter.h"
 #include "MantidQtCustomInterfaces/Muon/MuonAnalysisHelper.h"
 #include "MantidQtMantidWidgets/IMuonFitDataSelector.h"
 #include "MantidQtMantidWidgets/IWorkspaceFitControl.h"
 
-using MantidQt::CustomInterfaces::MuonAnalysisFitDataHelper;
+using MantidQt::CustomInterfaces::MuonAnalysisFitDataPresenter;
 using MantidQt::MantidWidgets::IMuonFitDataSelector;
 using MantidQt::MantidWidgets::IWorkspaceFitControl;
 using namespace testing;
@@ -52,14 +52,14 @@ public:
   MOCK_METHOD1(setWorkspaceNames, void(const QStringList &));
 };
 
-class MuonAnalysisFitDataHelperTest : public CxxTest::TestSuite {
+class MuonAnalysisFitDataPresenterTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static MuonAnalysisFitDataHelperTest *createSuite() {
-    return new MuonAnalysisFitDataHelperTest();
+  static MuonAnalysisFitDataPresenterTest *createSuite() {
+    return new MuonAnalysisFitDataPresenterTest();
   }
-  static void destroySuite(MuonAnalysisFitDataHelperTest *suite) {
+  static void destroySuite(MuonAnalysisFitDataPresenterTest *suite) {
     delete suite;
   }
 
@@ -67,7 +67,8 @@ public:
   void setUp() override {
     m_dataSelector = new NiceMock<MockDataSelector>();
     m_fitBrowser = new NiceMock<MockFitBrowser>();
-    m_helper = new MuonAnalysisFitDataHelper(m_fitBrowser, m_dataSelector);
+    m_presenter =
+        new MuonAnalysisFitDataPresenter(m_fitBrowser, m_dataSelector);
   }
 
   /// Run after each test to check expectations and remove mocks
@@ -76,7 +77,7 @@ public:
     TS_ASSERT(Mock::VerifyAndClearExpectations(m_fitBrowser));
     delete m_dataSelector;
     delete m_fitBrowser;
-    delete m_helper;
+    delete m_presenter;
   }
 
   void test_handleDataPropertiesChanged() {
@@ -86,7 +87,7 @@ public:
     EXPECT_CALL(*m_fitBrowser, setWorkspaceIndex(0)).Times(1);
     EXPECT_CALL(*m_fitBrowser, setStartX(0.3)).Times(1);
     EXPECT_CALL(*m_fitBrowser, setEndX(9.9)).Times(1);
-    m_helper->handleDataPropertiesChanged();
+    m_presenter->handleDataPropertiesChanged();
   }
 
   void test_handleSelectedDataChanged() {
@@ -124,7 +125,7 @@ public:
     EXPECT_CALL(*m_fitBrowser,
                 setWorkspaceNames(UnorderedElementsAreArray(expectedNames)))
         .Times(1);
-    m_helper->handleSelectedDataChanged(
+    m_presenter->handleSelectedDataChanged(
         grouping, MantidQt::CustomInterfaces::Muon::PlotType::Asymmetry, true);
     // test ADS here
     Mantid::API::AnalysisDataService::Instance().clear();
@@ -133,7 +134,7 @@ public:
   void test_handleXRangeChangedGraphically() {
     EXPECT_CALL(*m_dataSelector, setStartTimeQuietly(0.4)).Times(1);
     EXPECT_CALL(*m_dataSelector, setEndTimeQuietly(9.4)).Times(1);
-    m_helper->handleXRangeChangedGraphically(0.4, 9.4);
+    m_presenter->handleXRangeChangedGraphically(0.4, 9.4);
   }
 
   void test_setAssignedFirstRun_singleWorkspace() {
@@ -143,7 +144,7 @@ public:
         .Times(1);
     EXPECT_CALL(*m_dataSelector, setWorkspaceIndex(0u)).Times(1);
     EXPECT_CALL(*m_fitBrowser, allowSequentialFits(true)).Times(1);
-    m_helper->setAssignedFirstRun(wsName);
+    m_presenter->setAssignedFirstRun(wsName);
   }
 
   void test_setAssignedFirstRun_contiguousRange() {
@@ -155,7 +156,7 @@ public:
     EXPECT_CALL(*m_fitBrowser, allowSequentialFits(false)).Times(1);
     EXPECT_CALL(*m_dataSelector, setChosenGroup(QString("long"))).Times(1);
     EXPECT_CALL(*m_dataSelector, setChosenPeriod(QString("1"))).Times(1);
-    m_helper->setAssignedFirstRun(wsName);
+    m_presenter->setAssignedFirstRun(wsName);
   }
 
   void test_setAssignedFirstRun_nonContiguousRange() {
@@ -168,30 +169,30 @@ public:
     EXPECT_CALL(*m_fitBrowser, allowSequentialFits(false)).Times(1);
     EXPECT_CALL(*m_dataSelector, setChosenGroup(QString("long"))).Times(1);
     EXPECT_CALL(*m_dataSelector, setChosenPeriod(QString("1"))).Times(1);
-    m_helper->setAssignedFirstRun(wsName);
+    m_presenter->setAssignedFirstRun(wsName);
   }
 
   void test_setAssignedFirstRun_alreadySet() {
     const QString wsName("MUSR00015189; Pair; long; Asym; 1; #1");
-    m_helper->setAssignedFirstRun(wsName);
+    m_presenter->setAssignedFirstRun(wsName);
     EXPECT_CALL(*m_dataSelector, setWorkspaceDetails(_, _)).Times(0);
     EXPECT_CALL(*m_dataSelector, setWorkspaceIndex(_)).Times(0);
     EXPECT_CALL(*m_fitBrowser, allowSequentialFits(_)).Times(0);
     EXPECT_CALL(*m_dataSelector, setChosenGroup(QString("long"))).Times(0);
     EXPECT_CALL(*m_dataSelector, setChosenPeriod(QString("1"))).Times(0);
-    m_helper->setAssignedFirstRun(wsName);
+    m_presenter->setAssignedFirstRun(wsName);
   }
 
   void test_getAssignedFirstRun() {
     const QString wsName("MUSR00015189; Pair; long; Asym; 1; #1");
-    m_helper->setAssignedFirstRun(wsName);
-    TS_ASSERT_EQUALS(wsName, m_helper->getAssignedFirstRun());
+    m_presenter->setAssignedFirstRun(wsName);
+    TS_ASSERT_EQUALS(wsName, m_presenter->getAssignedFirstRun());
   }
 
 private:
   MockDataSelector *m_dataSelector;
   MockFitBrowser *m_fitBrowser;
-  MuonAnalysisFitDataHelper *m_helper;
+  MuonAnalysisFitDataPresenter *m_presenter;
 };
 
-#endif /* MANTID_CUSTOMINTERFACES_MUONANALYSISFITDATAHELPERTEST_H_ */
+#endif /* MANTID_CUSTOMINTERFACES_MUONANALYSISFITDATAPRESENTERTEST_H_ */

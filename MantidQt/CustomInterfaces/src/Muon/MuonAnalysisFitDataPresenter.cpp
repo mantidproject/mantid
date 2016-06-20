@@ -1,4 +1,4 @@
-#include "MantidQtCustomInterfaces/Muon/MuonAnalysisFitDataHelper.h"
+#include "MantidQtCustomInterfaces/Muon/MuonAnalysisFitDataPresenter.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/GroupingLoader.h"
 
@@ -14,7 +14,7 @@ namespace CustomInterfaces {
  * @param fitBrowser :: [input] Pointer to fit browser to update
  * @param dataSelector :: [input] Pointer to data selector to get input from
  */
-MuonAnalysisFitDataHelper::MuonAnalysisFitDataHelper(
+MuonAnalysisFitDataPresenter::MuonAnalysisFitDataPresenter(
     IWorkspaceFitControl *fitBrowser, IMuonFitDataSelector *dataSelector)
     : m_fitBrowser(fitBrowser), m_dataSelector(dataSelector) {}
 
@@ -22,7 +22,7 @@ MuonAnalysisFitDataHelper::MuonAnalysisFitDataHelper(
  * Called when data selector reports "data properties changed"
  * Updates WS index, startX, endX
  */
-void MuonAnalysisFitDataHelper::handleDataPropertiesChanged() {
+void MuonAnalysisFitDataPresenter::handleDataPropertiesChanged() {
   // update workspace index
   const unsigned int wsIndex = m_dataSelector->getWorkspaceIndex();
   m_fitBrowser->setWorkspaceIndex(static_cast<int>(wsIndex));
@@ -40,7 +40,7 @@ void MuonAnalysisFitDataHelper::handleDataPropertiesChanged() {
  * @param plotType :: [input] Type of plot currently selected in interface
  * @param overwrite :: [input] Whether overwrite is on or off in interface
  */
-void MuonAnalysisFitDataHelper::handleSelectedDataChanged(
+void MuonAnalysisFitDataPresenter::handleSelectedDataChanged(
     const Mantid::API::Grouping &grouping, const Muon::PlotType &plotType,
     bool overwrite) {
   const auto names = generateWorkspaceNames(grouping, plotType, overwrite);
@@ -53,8 +53,8 @@ void MuonAnalysisFitDataHelper::handleSelectedDataChanged(
  * @param start :: [input] start of fit range
  * @param end :: [input] end of fit range
  */
-void MuonAnalysisFitDataHelper::handleXRangeChangedGraphically(double start,
-                                                               double end) {
+void MuonAnalysisFitDataPresenter::handleXRangeChangedGraphically(double start,
+                                                                  double end) {
   m_dataSelector->setStartTimeQuietly(start);
   m_dataSelector->setEndTimeQuietly(end);
 }
@@ -66,7 +66,7 @@ void MuonAnalysisFitDataHelper::handleXRangeChangedGraphically(double start,
  * If multiple runs selected, disable sequential fit option.
  * @param wsName :: [input] Name of new workspace
  */
-void MuonAnalysisFitDataHelper::setAssignedFirstRun(const QString &wsName) {
+void MuonAnalysisFitDataPresenter::setAssignedFirstRun(const QString &wsName) {
   if (wsName == m_PPAssignedFirstRun)
     return;
 
@@ -99,7 +99,7 @@ void MuonAnalysisFitDataHelper::setAssignedFirstRun(const QString &wsName) {
  * sends a signal to update the peak picker.
  * @param names :: [input] Names of workspaces to create
  */
-void MuonAnalysisFitDataHelper::createWorkspacesToFit(
+void MuonAnalysisFitDataPresenter::createWorkspacesToFit(
     const std::vector<std::string> &names) {
 
   // We need to know if the runs are sequential/single (loop over selectedRuns)
@@ -140,7 +140,7 @@ void MuonAnalysisFitDataHelper::createWorkspacesToFit(
  * @param overwrite :: [input] Whether overwrite is on or off in interface
  * @returns :: list of workspace names
  */
-std::vector<std::string> MuonAnalysisFitDataHelper::generateWorkspaceNames(
+std::vector<std::string> MuonAnalysisFitDataPresenter::generateWorkspaceNames(
     const Mantid::API::Grouping &grouping, const Muon::PlotType &plotType,
     bool overwrite) {
   // From view, get names of all workspaces needed

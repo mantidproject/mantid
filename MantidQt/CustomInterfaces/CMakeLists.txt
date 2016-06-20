@@ -77,9 +77,9 @@ set ( SRC_FILES
 	src/Muon/ALCPeakFittingView.cpp
 	src/Muon/IO_MuonGrouping.cpp
 	src/Muon/MuonAnalysis.cpp
-	src/Muon/MuonAnalysisFitDataHelper.cpp
+	src/Muon/MuonAnalysisFitDataPresenter.cpp
 	src/Muon/MuonAnalysisFitDataTab.cpp
-	src/Muon/MuonAnalysisFitFunctionHelper.cpp
+	src/Muon/MuonAnalysisFitFunctionPresenter.cpp
 	src/Muon/MuonAnalysisHelper.cpp
 	src/Muon/MuonAnalysisOptionTab.cpp
 	src/Muon/MuonAnalysisResultTableTab.cpp
@@ -221,9 +221,9 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/Muon/IALCPeakFittingView.h
 	inc/MantidQtCustomInterfaces/Muon/IO_MuonGrouping.h
 	inc/MantidQtCustomInterfaces/Muon/MuonAnalysis.h
-	inc/MantidQtCustomInterfaces/Muon/MuonAnalysisFitDataHelper.h
+	inc/MantidQtCustomInterfaces/Muon/MuonAnalysisFitDataPresenter.h
 	inc/MantidQtCustomInterfaces/Muon/MuonAnalysisFitDataTab.h
-	inc/MantidQtCustomInterfaces/Muon/MuonAnalysisFitFunctionHelper.h
+	inc/MantidQtCustomInterfaces/Muon/MuonAnalysisFitFunctionPresenter.h
 	inc/MantidQtCustomInterfaces/Muon/MuonAnalysisHelper.h
 	inc/MantidQtCustomInterfaces/Muon/MuonAnalysisOptionTab.h
 	inc/MantidQtCustomInterfaces/Muon/MuonAnalysisResultTableTab.h
@@ -364,7 +364,7 @@ set ( MOC_FILES inc/MantidQtCustomInterfaces/Background.h
                 inc/MantidQtCustomInterfaces/Muon/IALCPeakFittingModel.h
                 inc/MantidQtCustomInterfaces/Muon/MuonAnalysis.h
                 inc/MantidQtCustomInterfaces/Muon/MuonAnalysisFitDataTab.h
-				inc/MantidQtCustomInterfaces/Muon/MuonAnalysisFitFunctionHelper.h
+				inc/MantidQtCustomInterfaces/Muon/MuonAnalysisFitFunctionPresenter.h
                 inc/MantidQtCustomInterfaces/Muon/MuonAnalysisHelper.h
                 inc/MantidQtCustomInterfaces/Muon/MuonAnalysisOptionTab.h
                 inc/MantidQtCustomInterfaces/Muon/MuonAnalysisResultTableTab.h
@@ -477,8 +477,8 @@ set ( TEST_FILES
 	ImageROIPresenterTest.h
 	ImggFormatsConvertPresenterTest.h
 	MeasurementItemTest.h
-	MuonAnalysisFitDataHelperTest.h
-	MuonAnalysisFitFunctionHelperTest.h
+	MuonAnalysisFitDataPresenterTest.h
+	MuonAnalysisFitFunctionPresenterTest.h
 	MuonAnalysisHelperTest.h
 	ReflLegacyTransferStrategyTest.h
 	ReflMainViewPresenterTest.h
