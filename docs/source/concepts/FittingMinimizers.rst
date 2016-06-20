@@ -38,6 +38,12 @@ options are available:
 
   A `Gauss-Newton <https://en.wikipedia.org/wiki/Gauss–Newton_algorithm#Improved_versions>`__ algorithm with damping.
 - :ref:`FABADA <FABADA>`
+- DTRS 
+  
+  A trust region minimizer (not listed in the comparison table)
+- Mose-Sorensen
+  
+  A trust region minimizer (not listed in the comparison table)
 
 All these algorithms are `iterative
 <https://en.wikipedia.org/wiki/Iterative_method>`__.  The *Simplex*
