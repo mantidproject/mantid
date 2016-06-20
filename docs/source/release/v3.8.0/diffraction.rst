@@ -8,6 +8,15 @@ Diffraction Changes
 Crystal Improvements
 --------------------
 
+Single Crystal Diffraction
+--------------------------
+
+- HFIR HB3A's data reduction interface application (MantidPlot/Interfaces/Diffraction/HFIR 4Circle Reduction)
+  has been expanded and improved from previous release. It provides an integrated user-frieldly interface for
+  instrument scientists and users to access data, calculate and refine UB matrix, merge multiple data sets
+  for slice-view and peak integration.
+  
+
 Engineering Diffraction
 -----------------------
 
