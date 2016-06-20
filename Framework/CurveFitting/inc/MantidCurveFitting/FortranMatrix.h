@@ -158,14 +158,12 @@ MatrixClass FortranMatrix<MatrixClass>::moveToBaseMatrix() {
 }
 
 /// Get the size along the first dimension as an int.
-template <class MatrixClass>
-int FortranMatrix<MatrixClass>::len1() const {
+template <class MatrixClass> int FortranMatrix<MatrixClass>::len1() const {
   return static_cast<int>(this->size1());
 }
 
 /// Get the size along the second dimension as an int.
-template <class MatrixClass>
-int FortranMatrix<MatrixClass>::len2() const {
+template <class MatrixClass> int FortranMatrix<MatrixClass>::len2() const {
   return static_cast<int>(this->size2());
 }
 

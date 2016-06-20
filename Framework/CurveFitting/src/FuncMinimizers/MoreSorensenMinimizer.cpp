@@ -21,19 +21,17 @@ DECLARE_FUNCMINIMIZER(MoreSorensenMinimizer,More-Sorensen)
 
 using namespace NLLS;
 
-MoreSorensenMinimizer::MoreSorensenMinimizer()
-    : TrustRegionMinimizer(){
-}
+MoreSorensenMinimizer::MoreSorensenMinimizer() : TrustRegionMinimizer() {}
 
 /// Name of the minimizer.
-std::string MoreSorensenMinimizer::name() const {
-  return "More-Sorensen";
-}
+std::string MoreSorensenMinimizer::name() const { return "More-Sorensen"; }
 
 namespace {
 
-/// Solve a system of linear equations. The system's matrix must be positive-definite.
-/// @param A :: A matrix of a system of equations. Must be positive-definite otherwise
+/// Solve a system of linear equations. The system's matrix must be
+/// positive-definite.
+/// @param A :: A matrix of a system of equations. Must be positive-definite
+/// otherwise
 ///     the solution will not be found and an error code returned.
 /// @param b :: A vector of the right-hand side.
 /// @param LtL :: A work matrix.
@@ -161,7 +159,6 @@ void findbeta(const DoubleFortranVector &a, const DoubleFortranVector &b,
   }
 }
 
-
 /// Solve the trust-region subproblem using
 /// the method of More and Sorensen
 ///
@@ -258,7 +255,8 @@ void more_sorensen(const DoubleFortranMatrix &J, const DoubleFortranVector &f,
 
     if (nd <= Delta + epsilon) {
       // we're within the tr radius
-      if (abs(sigma) < options.more_sorensen_tiny || abs(nd - Delta) < epsilon) {
+      if (abs(sigma) < options.more_sorensen_tiny ||
+          abs(nd - Delta) < epsilon) {
         // we're good....exit
         break;
       }
@@ -278,8 +276,8 @@ void more_sorensen(const DoubleFortranMatrix &J, const DoubleFortranVector &f,
     // w.q = R'\d
     // DTRSM( "Left", "Lower", "No Transpose", "Non-unit", n, 1, one, w.LtL, n,
     // w.q, n );
-    for(int j=1; j <= w.LtL.len1(); ++j) {
-      for(int k=j + 1; k <= w.LtL.len1(); ++k) {
+    for (int j = 1; j <= w.LtL.len1(); ++j) {
+      for (int k = j + 1; k <= w.LtL.len1(); ++k) {
         w.LtL(j, k) = 0.0;
       }
     }
@@ -325,15 +323,12 @@ void more_sorensen(const DoubleFortranMatrix &J, const DoubleFortranVector &f,
 } // namespace
 
 /// Implements the abstarct method of TrustRegionMinimizer.
-void MoreSorensenMinimizer::calculate_step(const DoubleFortranMatrix &J,
-                              const DoubleFortranVector &f,
-                              const DoubleFortranMatrix &hf,
-                              const DoubleFortranVector &g,
-                              double Delta, DoubleFortranVector &d,
-                              double &normd, const NLLS::nlls_options &options,
-                              NLLS::nlls_inform &inform, NLLS::calculate_step_work &w) {
-    more_sorensen(J, f, hf, Delta, d, normd, options, inform,
-                  w.more_sorensen_ws);
+void MoreSorensenMinimizer::calculate_step(
+    const DoubleFortranMatrix &J, const DoubleFortranVector &f,
+    const DoubleFortranMatrix &hf, const DoubleFortranVector &g, double Delta,
+    DoubleFortranVector &d, double &normd, const NLLS::nlls_options &options,
+    NLLS::nlls_inform &inform, NLLS::calculate_step_work &w) {
+  more_sorensen(J, f, hf, Delta, d, normd, options, inform, w.more_sorensen_ws);
 }
 
 } // namespace FuncMinimisers

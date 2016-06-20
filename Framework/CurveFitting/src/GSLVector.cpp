@@ -220,7 +220,7 @@ size_t GSLVector::indexOfMaxElement() const {
 }
 
 /// Get indices of both the minimum and maximum elements
-std::pair<size_t,size_t> GSLVector::indicesOfMinMaxElements() const {
+std::pair<size_t, size_t> GSLVector::indicesOfMinMaxElements() const {
   if (m_data.empty()) {
     throw std::runtime_error("Cannot find min or max element of empty vector.");
   }

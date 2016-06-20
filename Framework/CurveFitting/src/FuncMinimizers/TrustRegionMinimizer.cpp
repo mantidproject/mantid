@@ -22,22 +22,25 @@ namespace FuncMinimisers {
 
 using namespace NLLS;
 
-TrustRegionMinimizer::TrustRegionMinimizer()
-    : m_function(){
-  declareProperty("InitialRadius", 100.0, "Initial radius of the trust region.");
+TrustRegionMinimizer::TrustRegionMinimizer() : m_function() {
+  declareProperty("InitialRadius", 100.0,
+                  "Initial radius of the trust region.");
 }
 
 /// Initialise the minimizer.
-/// @param costFunction :: The cost function to minimize. Must be the least squares.
-/// @parm maxIterations :: Maximum number of iterations that the minimiser will do.
-void TrustRegionMinimizer::initialize(
-    API::ICostFunction_sptr costFunction, size_t maxIterations) {
+/// @param costFunction :: The cost function to minimize. Must be the least
+/// squares.
+/// @parm maxIterations :: Maximum number of iterations that the minimiser will
+/// do.
+void TrustRegionMinimizer::initialize(API::ICostFunction_sptr costFunction,
+                                      size_t maxIterations) {
   m_leastSquares =
       boost::dynamic_pointer_cast<CostFunctions::CostFuncLeastSquares>(
           costFunction);
   if (!m_leastSquares) {
-    throw std::runtime_error("Trust-region minimizer can only be used with Least "
-                             "squares cost function.");
+    throw std::runtime_error(
+        "Trust-region minimizer can only be used with Least "
+        "squares cost function.");
   }
 
   m_function = m_leastSquares->getFittingFunction();
@@ -64,8 +67,9 @@ void TrustRegionMinimizer::initialize(
 
 /// Evaluate the fitting function and calculate the residuals.
 /// @param x :: The fitting parameters as a fortran 1d array.
-/// @param f :: The output fortran vector with the weighted residuals. 
-void TrustRegionMinimizer::eval_F(const DoubleFortranVector &x, DoubleFortranVector &f) const {
+/// @param f :: The output fortran vector with the weighted residuals.
+void TrustRegionMinimizer::eval_F(const DoubleFortranVector &x,
+                                  DoubleFortranVector &f) const {
   m_leastSquares->setParameters(x);
   auto &domain = *m_leastSquares->getDomain();
   auto &values = *m_leastSquares->getValues();
@@ -74,15 +78,17 @@ void TrustRegionMinimizer::eval_F(const DoubleFortranVector &x, DoubleFortranVec
   if (f.len() != m) {
     f.allocate(m);
   }
-  for(size_t i = 0; i < values.size(); ++i) {
-    f.set(i, (values.getCalculated(i) - values.getFitData(i)) * values.getFitWeight(i));
+  for (size_t i = 0; i < values.size(); ++i) {
+    f.set(i, (values.getCalculated(i) - values.getFitData(i)) *
+                 values.getFitWeight(i));
   }
 }
 
 /// Evaluate the Jacobian
 /// @param x :: The fitting parameters as a fortran 1d array.
 /// @param J :: The output fortran matrix with the weighted Jacobian.
-void TrustRegionMinimizer::eval_J(const DoubleFortranVector &x, DoubleFortranMatrix &J) const {
+void TrustRegionMinimizer::eval_J(const DoubleFortranVector &x,
+                                  DoubleFortranMatrix &J) const {
   m_leastSquares->setParameters(x);
   auto &domain = *m_leastSquares->getDomain();
   auto &values = *m_leastSquares->getValues();
@@ -93,9 +99,9 @@ void TrustRegionMinimizer::eval_J(const DoubleFortranVector &x, DoubleFortranMat
   }
   m_J.setJ(J.gsl());
   m_function->functionDeriv(domain, m_J);
-  for(int i = 1; i <= m; ++i) {
+  for (int i = 1; i <= m; ++i) {
     double w = values.getFitWeight(i - 1);
-    for(int j = 1; j <= n; ++j) {
+    for (int j = 1; j <= n; ++j) {
       J(i, j) *= w;
     }
   }
@@ -103,9 +109,11 @@ void TrustRegionMinimizer::eval_J(const DoubleFortranVector &x, DoubleFortranMat
 
 /// Evaluate the Hessian
 /// @param x :: The fitting parameters as a fortran 1d array.
-/// @param f :: The fortran vector with the weighted residuals. 
+/// @param f :: The fortran vector with the weighted residuals.
 /// @param h :: The fortran matrix with the Hessian.
-void TrustRegionMinimizer::eval_HF(const DoubleFortranVector &x, const DoubleFortranVector &f, DoubleFortranMatrix &h) const {
+void TrustRegionMinimizer::eval_HF(const DoubleFortranVector &x,
+                                   const DoubleFortranVector &f,
+                                   DoubleFortranMatrix &h) const {
   int n = static_cast<int>(m_leastSquares->nParams());
   if (h.len1() != n || h.len2() != n) {
     h.allocate(n, n);
@@ -237,8 +245,8 @@ bool TrustRegionMinimizer::iterate(size_t) {
       return true;
     }
     // Calculate the step d that the model thinks we should take next
-    calculate_step(w.J, w.f, w.hf, w.g, w.Delta, w.d, w.normd, options,
-                   inform, w.calculate_step_ws);
+    calculate_step(w.J, w.f, w.hf, w.g, w.Delta, w.d, w.normd, options, inform,
+                   w.calculate_step_ws);
 
     // Accept the step?
     w.Xnew = X;
@@ -248,15 +256,15 @@ bool TrustRegionMinimizer::iterate(size_t) {
     normFnew = norm2(w.fnew);
 
     // Get the value of the model
-    //      md :=   m_k(d)       
-    // evaluated at the new step 
+    //      md :=   m_k(d)
+    // evaluated at the new step
     md = evaluate_model(w.f, w.J, w.hf, w.d, options, w.evaluate_model_ws);
 
-    // Calculate the quantity                                  
-    //   rho = 0.5||f||^2 - 0.5||fnew||^2 =   actual_reduction 
+    // Calculate the quantity
+    //   rho = 0.5||f||^2 - 0.5||fnew||^2 =   actual_reduction
     //         --------------------------   -------------------
     //             m_k(0)  - m_k(d)         predicted_reduction
-    //                                                         
+    //
     // if model is good, rho should be close to one
     rho = calculate_rho(w.normF, normFnew, md, options);
     if (boost::math::isnan(rho) || boost::math::isinf(rho)) {
@@ -355,7 +363,7 @@ bool TrustRegionMinimizer::iterate(size_t) {
   }
 
   if (w.use_second_derivatives) {
-    //apply_second_order_info(n, m, X, w, eval_HF, params, options, inform,
+    // apply_second_order_info(n, m, X, w, eval_HF, params, options, inform,
     //                        weights);
     if (options.exact_second_derivatives) {
       eval_HF(X, w.f, w.hf);
@@ -390,9 +398,7 @@ bool TrustRegionMinimizer::iterate(size_t) {
 }
 
 /// Return the current value of the cost function.
-double TrustRegionMinimizer::costFunctionVal() {
-  return m_leastSquares->val();
-}
+double TrustRegionMinimizer::costFunctionVal() { return m_leastSquares->val(); }
 
 } // namespace FuncMinimisers
 } // namespace CurveFitting

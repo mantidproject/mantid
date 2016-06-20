@@ -101,10 +101,11 @@ double dot_product(const DoubleFortranVector &x, const DoubleFortranVector &y) {
 /// @param d :: The point where to evaluate the model.
 /// @param options :: The options.
 /// @param w :: The work struct.
-double evaluate_model(const DoubleFortranVector &f, const DoubleFortranMatrix &J,
-                    const DoubleFortranMatrix &hf, const DoubleFortranVector &d,
-                    const nlls_options options,
-                    evaluate_model_work &w) {
+double evaluate_model(const DoubleFortranVector &f,
+                      const DoubleFortranMatrix &J,
+                      const DoubleFortranMatrix &hf,
+                      const DoubleFortranVector &d, const nlls_options options,
+                      evaluate_model_work &w) {
 
   // Jd = J*d
   mult_J(J, d, w.Jd);
@@ -138,7 +139,7 @@ double evaluate_model(const DoubleFortranVector &f, const DoubleFortranMatrix &J
 /// @param md :: The value of the model at the same d as normfnew.
 /// @param options :: The options.
 double calculate_rho(double normf, double normfnew, double md,
-                   const nlls_options &options) {
+                     const nlls_options &options) {
 
   auto actual_reduction = (0.5 * pow(normf, 2)) - (0.5 * pow(normfnew, 2));
   auto predicted_reduction = ((0.5 * pow(normf, 2)) - md);
@@ -190,11 +191,14 @@ void rank_one_update(DoubleFortranMatrix &hf, NLLS_workspace w) {
   gsl_blas_dger(alpha, w.y.gsl(), w.y.gsl(), hf.gsl());
 }
 
-/// Update the trust region radius which is hidden in NLLS_workspace w (w.Delta).
-/// @param rho :: The rho calculated by calculate_rho(...). It may also be updated.
+/// Update the trust region radius which is hidden in NLLS_workspace w
+/// (w.Delta).
+/// @param rho :: The rho calculated by calculate_rho(...). It may also be
+/// updated.
 /// @param options :: The options.
 /// @param inform :: The information.
-/// @param w :: The work struct containing the radius that is to be updated (w.Delta).
+/// @param w :: The work struct containing the radius that is to be updated
+/// (w.Delta).
 void update_trust_region_radius(double &rho, const nlls_options &options,
                                 nlls_inform &inform, NLLS_workspace &w) {
 
@@ -282,10 +286,9 @@ void test_convergence(double normF, double normJF, double normF0,
 /// @param w :: Stored scaling data.
 /// @param options :: The options.
 /// @param inform :: The information.
-void apply_scaling(const DoubleFortranMatrix &J,
-                   DoubleFortranMatrix &A, DoubleFortranVector &v,
-                   apply_scaling_work &w, const nlls_options options,
-                   nlls_inform inform) {
+void apply_scaling(const DoubleFortranMatrix &J, DoubleFortranMatrix &A,
+                   DoubleFortranVector &v, apply_scaling_work &w,
+                   const nlls_options options, nlls_inform inform) {
   auto m = J.len1();
   auto n = J.len2();
   if (w.diag.len() != n) {

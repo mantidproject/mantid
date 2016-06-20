@@ -157,8 +157,7 @@ VectorClass FortranVector<VectorClass>::moveToBaseVector() {
 }
 
 /// Get the length of the vector as an int.
-template <class VectorClass>
-int FortranVector<VectorClass>::len() const {
+template <class VectorClass> int FortranVector<VectorClass>::len() const {
   return static_cast<int>(this->size());
 }
 
