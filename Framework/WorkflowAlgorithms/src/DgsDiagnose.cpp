@@ -19,16 +19,6 @@ namespace WorkflowAlgorithms {
 DECLARE_ALGORITHM(DgsDiagnose)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-DgsDiagnose::DgsDiagnose() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-DgsDiagnose::~DgsDiagnose() {}
-
-//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string DgsDiagnose::name() const { return "DgsDiagnose"; }
 

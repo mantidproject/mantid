@@ -62,14 +62,16 @@ def _equal_within_tolerance(self, expected, actual, tolerance=0.05):
     abs_difference = abs(expected - actual)
     self.assertTrue(abs_difference <= abs(tolerance_value))
 
-def _get_maximum_peak_height(workspace, ws_index):
+def _get_maximum_peak_height_max_and_index(workspace, ws_index):
     """
     returns the maximum height in y of a given spectrum of a workspace
     workspace is assumed to be a matrix workspace
     """
     y_data = workspace.readY(ws_index)
     peak_height = np.amax(y_data)
-    return peak_height
+    peak_bin = np.argmax(y_data)
+
+    return peak_height, peak_bin
 
 #====================================================================================
 
@@ -148,14 +150,18 @@ class SingleSpectrumBackground(stresstesting.MantidStressTest):
 
         index_one_first = -0.00656639296531
         index_one_last = 0.00720728978699
-        calc_data_height = 0.138704
+        calc_data_height_expected = 0.138704
+        calc_data_bin_expected = 635
         if _is_old_boost_version():
             index_one_first = 0.000628498710145
             index_two_first = -0.00487957546659
 
         _equal_within_tolerance(self, index_one_first, fitted_ws.readY(0)[0])
         _equal_within_tolerance(self, index_one_last, fitted_ws.readY(0)[-1])
-        _equal_within_tolerance(self, calc_data_height, _get_maximum_peak_height(fitted_ws, 1))
+
+        calc_data_height_actual, calc_data_bin_actual = _get_maximum_peak_height_max_and_index(fitted_ws, 1)
+        _equal_within_tolerance(self, calc_data_height_expected, calc_data_height_actual)
+        self.assertTrue(abs(calc_data_bin_expected - calc_data_bin_actual) <= 1)
 
         fitted_params = self._fit_results[1]
         self.assertTrue(isinstance(fitted_params, MatrixWorkspace))

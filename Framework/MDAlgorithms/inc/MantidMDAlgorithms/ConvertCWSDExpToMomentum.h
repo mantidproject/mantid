@@ -37,7 +37,6 @@ namespace MDAlgorithms {
 class DLLExport ConvertCWSDExpToMomentum : public API::Algorithm {
 public:
   ConvertCWSDExpToMomentum();
-  ~ConvertCWSDExpToMomentum() override;
 
   /// Algorithm's name
   const std::string name() const override { return "ConvertCWSDExpToMomentum"; }

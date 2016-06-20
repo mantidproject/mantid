@@ -17,16 +17,6 @@ namespace MDAlgorithms {
 DECLARE_ALGORITHM(MergeMD)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-MergeMD::MergeMD() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-MergeMD::~MergeMD() {}
-
-//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string MergeMD::name() const { return "MergeMD"; }
 
