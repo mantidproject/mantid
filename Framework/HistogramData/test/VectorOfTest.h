@@ -311,11 +311,12 @@ public:
 
   void test_vector_move_assignment() {
     std::vector<double> raw{0.1, 0.2, 0.3};
+	auto old_ptr = &raw[0];
     VectorOfTester values(0);
     TS_ASSERT_THROWS_NOTHING(values = std::move(raw));
     TS_ASSERT_EQUALS(raw.size(), 0);
     TS_ASSERT(values);
-    TS_ASSERT_DIFFERS(&(values.data()[0]), &raw[0]);
+    TS_ASSERT_EQUALS(&values[0], old_ptr);
     TS_ASSERT_EQUALS(values.size(), 3);
     TS_ASSERT_EQUALS(values[0], 0.1);
   }
