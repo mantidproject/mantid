@@ -77,16 +77,6 @@ bool all_given(const std::vector<std::vector<double>> &params) {
 DECLARE_ALGORITHM(CreateMD)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-CreateMD::CreateMD() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-CreateMD::~CreateMD() {}
-
-//----------------------------------------------------------------------------------------------
 
 /// Algorithms name for identification. @see Algorithm::name
 const std::string CreateMD::name() const { return "CreateMD"; }
@@ -474,7 +464,7 @@ Mantid::API::IMDEventWorkspace_sptr CreateMD::single_run(
   } else {
     if (input_workspace->sample().hasOrientedLattice()) {
       g_log.warning() << "Sample already has a UB. This will not be "
-                         "overwritten. Use ClearUB and re-run." << std::endl;
+                         "overwritten. Use ClearUB and re-run.\n";
     } else {
       setUB(input_workspace, alatt[0], alatt[1], alatt[2], angdeg[0], angdeg[1],
             angdeg[2], u, v);

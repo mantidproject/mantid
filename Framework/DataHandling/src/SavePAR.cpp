@@ -88,7 +88,7 @@ void SavePAR::exec() {
   size_t nDetectors = pCalcDetPar->getNDetectors();
 
   // Write the number of detectors to the file.
-  outPAR_file << " " << nDetectors << std::endl;
+  outPAR_file << " " << nDetectors << '\n';
 
   for (size_t i = 0; i < nDetectors; ++i) {
     // verify if no detector defined;
@@ -109,7 +109,7 @@ void SavePAR::exec() {
     outPAR_file.width(10);
     outPAR_file << azimuthal_width[i];
     outPAR_file.width(10);
-    outPAR_file << det_ID[i] << std::endl;
+    outPAR_file << det_ID[i] << '\n';
   }
 
   // Close the file

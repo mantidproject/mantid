@@ -39,10 +39,6 @@ namespace Algorithms {
  */
 class DLLExport FFT : public API::Algorithm {
 public:
-  /// Default constructor
-  FFT() : API::Algorithm(){};
-  /// Destructor
-  ~FFT() override{};
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "FFT"; }
   /// Summary of algorithms purpose

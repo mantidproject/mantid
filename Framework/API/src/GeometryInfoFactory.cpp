@@ -23,7 +23,7 @@ GeometryInfo GeometryInfoFactory::create(const size_t index) const {
   // current (2016) instrument code there are memory allocations when getting
   // the detector, so this additional allocation may be negligible, but we want
   // this class to be future proof. GeometryInfo should be kept small.
-  return {*this, *(m_workspace.getSpectrum(index))};
+  return {*this, m_workspace.getSpectrum(index)};
 }
 
 const Geometry::Instrument &GeometryInfoFactory::getInstrument() const {

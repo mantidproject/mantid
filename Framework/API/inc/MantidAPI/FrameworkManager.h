@@ -132,6 +132,8 @@ private:
    * class interface.
    */
   boost::mpi::environment m_mpi_environment;
+  int argc = 0;
+  char **argv;
 #endif
 };
 

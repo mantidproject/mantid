@@ -81,10 +81,10 @@ createDiffractionEventWorkspace(int numEvents, int numPixels, int numBins) {
 
   for (int pix = 0; pix < numPixels; pix++) {
     for (int i = 0; i < numEvents; i++) {
-      retVal->getEventList(pix) += Mantid::DataObjects::TofEvent(
+      retVal->getSpectrum(pix) += Mantid::DataObjects::TofEvent(
           (i + 0.5) * binDelta, run_start + double(i));
     }
-    retVal->getEventList(pix).addDetectorID(pix);
+    retVal->getSpectrum(pix).addDetectorID(pix);
   }
 
   // Create the x-axis for histogramming.

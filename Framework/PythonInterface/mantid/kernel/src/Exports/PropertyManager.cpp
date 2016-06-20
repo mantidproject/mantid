@@ -8,7 +8,6 @@
 #include "MantidKernel/PropertyManager.h"
 
 #include <boost/python/class.hpp>
-#include <boost/python/register_ptr_to_python.hpp>
 
 using Mantid::Kernel::IPropertyManager;
 using Mantid::Kernel::PropertyManager;

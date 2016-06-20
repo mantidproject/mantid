@@ -459,7 +459,7 @@ class DirectEnergyConversion(object):
         if not prop_man.motor_offset is None and np.isnan(psi):
             #logs have a problem
             prop_man.log("*** Can not retrieve rotation value from sample environment logs: {0}.\n"
-                "     Rotation angle remains undefined".format(prop_man.motor_log_names))
+                         "     Rotation angle remains undefined".format(prop_man.motor_log_names))
             PropertyManager.psi = None # Just in case
         else:
             # store psi in property not to retrieve it from workspace again

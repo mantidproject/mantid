@@ -179,7 +179,7 @@ int RectangularDetectorActor::genTexture(char *&image_data,
   mDet->getTextureSize(text_x_size, text_y_size);
 
   // std::cerr << "Texture size: " << text_x_size << ',' << text_y_size
-  // <<std::endl;
+  // <<'\n';
 
   //------ Create the image data buffer -------
   if (!image_data) {

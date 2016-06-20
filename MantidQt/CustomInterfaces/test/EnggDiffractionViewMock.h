@@ -146,18 +146,40 @@ public:
                std::vector<std::string>(std::string &selectedfPath));
 
   // adds the number of banks to the combo-box widget on the interface
-  MOCK_METHOD2(addBankItems, void(std::vector<std::string> splittedBaseName,
-                                  QString selectedFile));
+  MOCK_METHOD1(addBankItem, void(std::string bankID));
 
   // adds the run number to the list view widget on the interface
-  MOCK_METHOD2(addRunNoItem,
-               void(std::vector<std::string> runNumVector, bool multiRun));
-
-  // checks if the text-inputted is a valid run
-  MOCK_METHOD1(isDigit, bool(std::string text));
+  MOCK_METHOD1(addRunNoItem, void(std::string runNo));
 
   // emits the signal within view when run number / bank changed
   MOCK_METHOD0(setBankEmit, void());
+
+  // sets the bank combo-box according to given index
+  MOCK_METHOD1(setBankIdComboBox, void(int idx));
+
+  // deletes all items from the fitting combo-box widget
+  MOCK_CONST_METHOD0(clearFittingComboBox, void());
+
+  // enables or disables the fitting combo-box
+  MOCK_CONST_METHOD1(enableFittingComboBox, void(bool enable));
+
+  // gets the index of the bank according to text found
+  MOCK_CONST_METHOD1(getFittingComboIdx, int(std::string bank));
+
+  // deletes all items from the fitting list widget
+  MOCK_CONST_METHOD0(clearFittingListWidget, void());
+
+  // enables or disables the fitting list widget
+  MOCK_CONST_METHOD1(enableFittingListWidget, void(bool enable));
+
+  // return idx of current selected row of list widget
+  MOCK_CONST_METHOD0(getFittingListWidgetCurrentRow, int());
+
+  // sets the current row of the fitting list widget
+  MOCK_CONST_METHOD1(setFittingListWidgetCurrentRow, void(int idx));
+
+  // sets the peak list according to the QString given
+  MOCK_CONST_METHOD1(setPeakList, void(std::string peakList));
 
   // gets the set focus directory within the setting tab
   MOCK_METHOD0(getFocusDir, std::string());

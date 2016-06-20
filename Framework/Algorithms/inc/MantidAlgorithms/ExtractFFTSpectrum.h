@@ -43,10 +43,6 @@ namespace Algorithms {
 */
 class DLLExport ExtractFFTSpectrum : public API::Algorithm {
 public:
-  /// (Empty) Constructor
-  ExtractFFTSpectrum() : API::Algorithm() {}
-  /// Virtual destructor
-  ~ExtractFFTSpectrum() override {}
   /// Algorithm's name
   const std::string name() const override { return "ExtractFFTSpectrum"; }
   /// Summary of algorithms purpose

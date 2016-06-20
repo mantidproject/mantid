@@ -37,10 +37,6 @@ namespace WorkflowAlgorithms {
 
 class DLLExport RefReduction : public API::Algorithm {
 public:
-  /// (Empty) Constructor
-  RefReduction() : API::Algorithm() {}
-  /// Virtual destructor
-  ~RefReduction() override {}
   /// Algorithm's name
   const std::string name() const override { return "RefReduction"; }
   /// Summary of algorithms purpose

@@ -504,8 +504,8 @@ int Object::createSurfaceList(const int outFlag) {
 
     std::vector<const Surface *>::const_iterator vc;
     for (vc = SurList.begin(); vc != SurList.end(); ++vc) {
-      std::cerr << "Point == " << *vc << std::endl;
-      std::cerr << (*vc)->getName() << std::endl;
+      std::cerr << "Point == " << *vc << '\n';
+      std::cerr << (*vc)->getName() << '\n';
     }
   }
   return 1;
@@ -585,14 +585,14 @@ void Object::print() const {
     }
   }
 
-  std::cout << "Name == " << ObjNum << std::endl;
-  std::cout << "Rules == " << Rcount << std::endl;
+  std::cout << "Name == " << ObjNum << '\n';
+  std::cout << "Rules == " << Rcount << '\n';
   std::vector<int>::const_iterator mc;
   std::cout << "Surface included == ";
   for (mc = Cells.begin(); mc < Cells.end(); ++mc) {
     std::cout << (*mc) << " ";
   }
-  std::cout << std::endl;
+  std::cout << '\n';
   return;
 }
 
@@ -609,8 +609,8 @@ void Object::makeComplement() {
 * Displays the rule tree
 */
 void Object::printTree() const {
-  std::cout << "Name == " << ObjNum << std::endl;
-  std::cout << TopRule->display() << std::endl;
+  std::cout << "Name == " << ObjNum << '\n';
+  std::cout << TopRule->display() << '\n';
   return;
 }
 
@@ -729,8 +729,8 @@ int Object::procString(const std::string &Line) {
     ;
 
   if (RuleList.size() != 1) {
-    std::cerr << "Map size not equal to 1 == " << RuleList.size() << std::endl;
-    std::cerr << "Error Object::ProcString : " << Ln << std::endl;
+    std::cerr << "Map size not equal to 1 == " << RuleList.size() << '\n';
+    std::cerr << "Error Object::ProcString : " << Ln << '\n';
     exit(1);
     return 0;
   }

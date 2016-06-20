@@ -553,24 +553,23 @@ void PoldiPeakSearch::init() {
 }
 
 void PoldiPeakSearch::exec() {
-  g_log.information() << "PoldiPeakSearch:" << std::endl;
+  g_log.information() << "PoldiPeakSearch:\n";
 
   Workspace2D_sptr correlationWorkspace = getProperty("InputWorkspace");
   MantidVec correlationQValues = correlationWorkspace->readX(0);
   MantidVec correlatedCounts = correlationWorkspace->readY(0);
-  g_log.information() << "   Auto-correlation data read." << std::endl;
+  g_log.information() << "   Auto-correlation data read.\n";
 
   Unit_sptr xUnit = correlationWorkspace->getAxis(0)->unit();
 
   if (xUnit->caption() == "") {
     g_log.information()
-        << "   Workspace does not have unit, defaulting to MomentumTransfer."
-        << std::endl;
+        << "   Workspace does not have unit, defaulting to MomentumTransfer.\n";
 
     xUnit = UnitFactory::Instance().create("MomentumTransfer");
   } else {
-    g_log.information() << "   Unit of workspace is " << xUnit->caption() << "."
-                        << std::endl;
+    g_log.information() << "   Unit of workspace is " << xUnit->caption()
+                        << ".\n";
   }
 
   setMinimumDistance(getProperty("MinimumPeakSeparation"));
@@ -582,17 +581,16 @@ void PoldiPeakSearch::exec() {
                              "spectrum points - no peaks possible."));
   }
 
-  g_log.information() << "   Parameters set." << std::endl;
+  g_log.information() << "   Parameters set.\n";
 
   MantidVec summedNeighborCounts = getNeighborSums(correlatedCounts);
   g_log.information() << "   Neighboring counts summed, contains "
-                      << summedNeighborCounts.size() << " data points."
-                      << std::endl;
+                      << summedNeighborCounts.size() << " data points.\n";
 
   std::list<MantidVec::const_iterator> peakPositionsSummed =
       findPeaks(summedNeighborCounts.begin(), summedNeighborCounts.end());
   g_log.information() << "   Peaks detected in summed spectrum: "
-                      << peakPositionsSummed.size() << std::endl;
+                      << peakPositionsSummed.size() << '\n';
 
   /* This step is required because peaks are actually searched in the
    * "sum-of-neighbors"-spectrum.
@@ -604,8 +602,8 @@ void PoldiPeakSearch::exec() {
       mapPeakPositionsToCorrelationData(peakPositionsSummed,
                                         summedNeighborCounts.begin(),
                                         correlatedCounts.begin());
-  g_log.information() << "   Peak positions transformed to original spectrum."
-                      << std::endl;
+  g_log.information()
+      << "   Peak positions transformed to original spectrum.\n";
 
   /* Since intensities are required for filtering, they are extracted from the
    * original count data,
@@ -615,13 +613,13 @@ void PoldiPeakSearch::exec() {
       getPeaks(correlatedCounts.begin(), correlatedCounts.end(),
                peakPositionsCorrelation, correlationQValues, xUnit);
   g_log.information()
-      << "   Extracted peak positions in Q and intensity guesses." << std::endl;
+      << "   Extracted peak positions in Q and intensity guesses.\n";
 
   UncertainValue backgroundWithSigma =
       getBackgroundWithSigma(peakPositionsCorrelation, correlatedCounts);
   g_log.information() << "   Calculated average background and deviation: "
                       << UncertainValueIO::toString(backgroundWithSigma)
-                      << std::endl;
+                      << '\n';
 
   if ((*getProperty("MinimumPeakHeight")).isDefault()) {
     setMinimumPeakHeight(minimumPeakHeightFromBackground(backgroundWithSigma));
@@ -637,7 +635,7 @@ void PoldiPeakSearch::exec() {
 
   g_log.information() << "   Peaks above minimum intensity ("
                       << m_minimumPeakHeight
-                      << "): " << intensityFilteredPeaks.size() << std::endl;
+                      << "): " << intensityFilteredPeaks.size() << '\n';
 
   std::sort(intensityFilteredPeaks.begin(), intensityFilteredPeaks.end(),
             boost::bind<bool>(&PoldiPeak::greaterThan, _1, _2,

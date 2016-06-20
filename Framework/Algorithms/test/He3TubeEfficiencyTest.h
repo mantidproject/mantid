@@ -75,13 +75,13 @@ public:
         boost::dynamic_pointer_cast<EventWorkspace>(result);
 
     // Monitor events should be untouched
-    EventList mon_ev = ev_result->getEventList(0);
+    EventList mon_ev = ev_result->getSpectrum(0);
     TS_ASSERT_DELTA(mon_ev.getEvent(1).m_weight, 1.0, 1e-6);
     // Check some detector events
-    EventList det1_ev = ev_result->getEventList(1);
+    EventList det1_ev = ev_result->getSpectrum(1);
     TS_ASSERT_DELTA(det1_ev.getEvent(1).m_weight, 1.098646, 1e-6);
     TS_ASSERT_DELTA(det1_ev.getEvent(1).m_errorSquared, 1.207024, 1e-6);
-    EventList det3_ev = ev_result->getEventList(3);
+    EventList det3_ev = ev_result->getSpectrum(3);
     TS_ASSERT_DELTA(det3_ev.getEvent(4).m_weight, 1.000036, 1e-6);
 
     AnalysisDataService::Instance().remove(inputEvWS);
@@ -147,10 +147,10 @@ public:
         boost::dynamic_pointer_cast<EventWorkspace>(result);
 
     // Monitor should be untouched
-    EventList mon_ev = ev_result->getEventList(0);
+    EventList mon_ev = ev_result->getSpectrum(0);
     TS_ASSERT_DELTA(mon_ev.getEvent(1).m_weight, 1.0, 1e-6);
     // Check that detectors have no events
-    EventList det1_ev = ev_result->getEventList(1);
+    EventList det1_ev = ev_result->getSpectrum(1);
     TS_ASSERT_EQUALS(det1_ev.getNumberEvents(), 0);
     // Check that the total number of events is just the monitor
     TS_ASSERT_EQUALS(ev_result->getNumberEvents(), 5);
@@ -185,7 +185,7 @@ private:
     for (int i = 0; i < nspecs; i++) {
       space2D->setX(i, x);
       space2D->setData(i, y, e);
-      space2D->getSpectrum(i)->setSpectrumNo(i);
+      space2D->getSpectrum(i).setSpectrumNo(i);
     }
 
     AnalysisDataService::Instance().add(inputWS, space2D);

@@ -171,13 +171,13 @@ protected:
             SymmetryElementFactor::Instance().createSymElement(mirrorZ);
 
     // Prints "m"
-    std::cout << element->hmSymbol() << std::endl;
+    std::cout << element->hmSymbol() << '\n';
 
     SymmetryElementMirror_sptr mirrorElement =
             boost::dynamic_pointer_cast<SymmetryElementMirror>(element);
 
     // Prints [0,0,1]
-    std::cout << mirrorElement->getAxis() << std::endl;
+    std::cout << mirrorElement->getAxis() << '\n';
   \endcode
 
   Please see also the additional documentation for SymmetryElement.

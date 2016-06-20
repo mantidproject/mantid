@@ -244,10 +244,10 @@ private:
     ws->setInstrument(inst);
 
     for (size_t i = 0; i < nhist; ++i) {
-      ISpectrum *spec = ws->getSpectrum(0);
-      spec->setSpectrumNo(static_cast<Mantid::specnum_t>(i + 1));
-      spec->clearDetectorIDs();
-      spec->addDetectorID(static_cast<Mantid::detid_t>(i + 1));
+      auto &spec = ws->getSpectrum(0);
+      spec.setSpectrumNo(static_cast<Mantid::specnum_t>(i + 1));
+      spec.clearDetectorIDs();
+      spec.addDetectorID(static_cast<Mantid::detid_t>(i + 1));
     }
 
     TS_ASSERT_THROWS_NOTHING(

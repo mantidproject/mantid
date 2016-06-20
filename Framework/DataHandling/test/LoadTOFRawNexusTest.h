@@ -67,14 +67,14 @@ public:
     TS_ASSERT_EQUALS(ws->getInstrument()->getName(), "REF_L");
     TS_ASSERT_EQUALS(ws->getNumberHistograms(), 77824);
 
-    ISpectrum *spec = ws->getSpectrum(27955);
-    TS_ASSERT_EQUALS(spec->getSpectrumNo(), 27956);
-    TS_ASSERT_EQUALS(spec->getDetectorIDs().size(), 1);
-    TS_ASSERT(spec->hasDetectorID(27955));
+    auto &spec = ws->getSpectrum(27955);
+    TS_ASSERT_EQUALS(spec.getSpectrumNo(), 27956);
+    TS_ASSERT_EQUALS(spec.getDetectorIDs().size(), 1);
+    TS_ASSERT(spec.hasDetectorID(27955));
     MantidVec X, Y, E;
-    X = spec->dataX();
-    Y = spec->dataY();
-    E = spec->dataE();
+    X = spec.dataX();
+    Y = spec.dataY();
+    E = spec.dataE();
     TS_ASSERT_EQUALS(X.size(), 502);
     TS_ASSERT_EQUALS(Y.size(), 501);
     TS_ASSERT_EQUALS(E.size(), 501);
@@ -87,12 +87,12 @@ public:
     TS_ASSERT_DELTA(E[94], 1.0, 1e-4);
 
     // More data in this spectrum
-    spec = ws->getSpectrum(38019);
-    TS_ASSERT_EQUALS(spec->getSpectrumNo(), 38020);
-    TS_ASSERT_EQUALS(spec->getDetectorIDs().size(), 1);
-    TS_ASSERT(spec->hasDetectorID(38019));
-    TS_ASSERT_DELTA(spec->dataY()[105], 23.0, 1e-4);
-    TS_ASSERT_DELTA(spec->dataE()[105], sqrt(23.0), 1e-4);
+    auto &spec2 = ws->getSpectrum(38019);
+    TS_ASSERT_EQUALS(spec2.getSpectrumNo(), 38020);
+    TS_ASSERT_EQUALS(spec2.getDetectorIDs().size(), 1);
+    TS_ASSERT(spec2.hasDetectorID(38019));
+    TS_ASSERT_DELTA(spec2.dataY()[105], 23.0, 1e-4);
+    TS_ASSERT_DELTA(spec2.dataE()[105], sqrt(23.0), 1e-4);
 
     TS_ASSERT_EQUALS(ws->getAxis(1)->length(), 77824);
     TS_ASSERT_EQUALS(ws->getAxis(0)->length(), 502);
@@ -191,7 +191,7 @@ public:
       ld.setPropertyValue("Filename", filename);
     } catch (...) {
       std::cout << "Test not completed due to missing data file " << filename
-                << std::endl;
+                << '\n';
       return Mantid::API::MatrixWorkspace_sptr();
     }
     ld.setProperty("Signal", signal);

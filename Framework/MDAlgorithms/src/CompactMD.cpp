@@ -135,8 +135,7 @@ void CompactMD::exec() {
   // setting property PxBin depending on the number of dimensions the
   // input workspace has.
   for (size_t iter = 0; iter < input_ws->getNumDims(); iter++) {
-    std::string propertyString =
-        "P" + boost::lexical_cast<std::string>(iter + 1) + "Bin";
+    std::string propertyString = "P" + std::to_string(iter + 1) + "Bin";
     cut_alg->setProperty(propertyString, pBinStrings[iter]);
   }
   cut_alg->execute();

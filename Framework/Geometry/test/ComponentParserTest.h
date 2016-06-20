@@ -39,7 +39,7 @@ public:
   //    std::ostringstream str;
   //    size_t num = 1000000;
   //    CPUTimer tim;
-  //    std::cout << std::endl;
+  //    std::cout << '\n';
   //
   //    if (false)
   //    {
@@ -62,7 +62,7 @@ public:
   //      }
   //      writer.endFragment();
   //      std::cout << tim << " to write out simple XML with Poco XMLWriter. "
-  //      << str.str().size() << " chars." << std::endl;
+  //      << str.str().size() << " chars.\n";
   //      //std::cout << str.str().substr(0, 500);
   //    }
   //
@@ -79,7 +79,7 @@ public:
   //      }
   //      std::cout << tim << " to write out simple XML by manually appending
   //      strings (fastest possible). " << xmlStr.str().size() << " chars." <<
-  //      std::endl;
+  //      '\n';
   //      //std::cout << xmlStr.str().substr(0, 500);
   //      xml = xmlStr.str();
   //      tim.reset();
@@ -113,11 +113,11 @@ public:
   //      file->writeData("names", names);
   //      file->close();
   //      std::cout << tim << " to write make a NXS array " << num << "
-  //      entries." << std::endl;
+  //      entries.\n";
   //    }
   //
   //    xml = "<root>" + xml + "</root>";
-  //    if (xml.size() < 400) std::cout << xml << std::endl << std::endl;
+  //    if (xml.size() < 400) std::cout << xml << std::endl << '\n';
   //    tim.reset();
   //
   //    ComponentParser compParser;
@@ -141,7 +141,7 @@ public:
   //    TS_ASSERT_EQUALS( comp->getRotation(), Quat(4,5,6,7));
   //    TS_ASSERT_EQUALS( comp->getPos(), V3D(1,2,3));
   //
-  //    std::cout << tim << " to parse " << num << " entries." << std::endl;
+  //    std::cout << tim << " to parse " << num << " entries.\n";
   //  }
 };
 

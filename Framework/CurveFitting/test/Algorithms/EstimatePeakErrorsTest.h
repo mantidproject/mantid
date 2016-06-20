@@ -284,7 +284,7 @@ private:
 
     fun.function(x, y);
     ws->setX(0, x.toVector());
-    ws->getSpectrum(0)->setData(y.toVector(), e);
+    ws->getSpectrum(0).setData(y.toVector(), e);
     assert(n == noise.size());
     for (size_t i = 0; i < n; ++i) {
       ws->dataY(0)[i] += noiseLevel * noise[i];

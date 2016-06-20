@@ -37,8 +37,9 @@ def combineDataMulti(wksp_list, output_wksp, beg_overlap, end_overlap, Qmin, Qma
 
     for i in range(0, len(wksp_list) - 1):
         w1 = currentSum
-        w2 = getWorkspace(wksp_list[
-                              i + 1])  # TODO: distinguishing between a group and a individual workspace is unnecessary for an algorithm. But custom group behavior WILL be required.
+        w2 = getWorkspace(wksp_list[i + 1])
+        # TODO: distinguishing between a group and a individual workspace is unnecessary for an algorithm.
+        #       But custom group behavior WILL be required.
         if defaultoverlaps:
             overlapLow = w2.readX(0)[0]
             overlapHigh = 0.5 * max(w1.readX(0))

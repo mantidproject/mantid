@@ -990,7 +990,7 @@ T Matrix<T>::factor()
     }
     if (Pmax < 1e-8) // maxtrix signular
     {
-      //          std::cerr<<"Matrix Singular"<<std::endl;
+      //          std::cerr<<"Matrix Singular"<<'\n';
       return 0;
     }
     // Swap Columns
@@ -1061,7 +1061,7 @@ void Matrix<T>::lubcmp(int *rowperm, int &interchange)
   double sum, dum, big, temp;
 
   if (nx != ny || nx < 2) {
-    std::cerr << "Error with lubcmp" << std::endl;
+    std::cerr << "Error with lubcmp\n";
     return;
   }
   auto vv = new double[nx];
@@ -1210,7 +1210,7 @@ void Matrix<T>::sortEigen(Matrix<T> &DiagMatrix)
 */
 {
   if (ny != nx || nx != DiagMatrix.nx || nx != DiagMatrix.ny) {
-    std::cerr << "Matrix not Eigen Form" << std::endl;
+    std::cerr << "Matrix not Eigen Form\n";
     throw(std::invalid_argument(" Matrix is not in an eigenvalue format"));
   }
   std::vector<int> index;
@@ -1237,13 +1237,13 @@ int Matrix<T>::Diagonalise(Matrix<T> &EigenVec, Matrix<T> &DiagMatrix) const
 */
 {
   if (nx != ny || nx < 1) {
-    std::cerr << "Matrix not square" << std::endl;
+    std::cerr << "Matrix not square\n";
     return 0;
   }
   for (size_t i = 0; i < nx; i++)
     for (size_t j = i + 1; j < nx; j++)
       if (fabs(V[i][j] - V[j][i]) > 1e-6) {
-        std::cerr << "Matrix not symmetric" << std::endl;
+        std::cerr << "Matrix not symmetric\n";
         std::cerr << (*this);
         return 0;
       }
@@ -1334,7 +1334,7 @@ int Matrix<T>::Diagonalise(Matrix<T> &EigenVec, Matrix<T> &DiagMatrix) const
       ZeroComp[j] = 0.0;
     }
   }
-  std::cerr << "Error :: Iterations are a problem" << std::endl;
+  std::cerr << "Error :: Iterations are a problem\n";
   return 0;
 }
 
@@ -1347,13 +1347,13 @@ bool Matrix<T>::isRotation() const
   if (this->nx != this->ny)
     throw(std::invalid_argument("matrix is not square"));
   //  std::cout << "Matrix determinant-1 is " << (this->determinant()-1) <<
-  //  std::endl;
+  //  '\n';
   if (fabs(this->determinant() - 1) > 1e-5) {
     return false;
   } else {
     Matrix<T> prod(nx, ny), ident(nx, ny, true);
     prod = this->operator*(this->Tprime());
-    //    std::cout << "Matrix * Matrix' = " << std::endl << prod << std::endl;
+    //    std::cout << "Matrix * Matrix' = " << std::endl << prod << '\n';
     return prod.equals(ident, 1e-5);
   }
 }
@@ -1468,13 +1468,13 @@ void Matrix<T>::write(std::ostream &Fh, const int blockCnt) const
     }
 
     if (ACnt) {
-      Fh << " ----- " << ACnt << " " << BCnt << " ------ " << std::endl;
+      Fh << " ----- " << ACnt << " " << BCnt << " ------ \n";
     }
     for (size_t i = 0; i < nx; i++) {
       for (size_t j = ACnt; j < BCnt; j++) {
         Fh << std::setw(10) << V[i][j] << "  ";
       }
-      Fh << std::endl;
+      Fh << '\n';
     }
   } while (BCnt < ny);
 
