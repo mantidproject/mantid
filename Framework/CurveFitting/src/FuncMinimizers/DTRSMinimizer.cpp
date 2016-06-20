@@ -133,9 +133,7 @@ enum class ErrorCode {
 };
 
 /// Replacement for FORTRAN's SIGN intrinsic function
-inline double sign(double x, double y) {
-  return y >= 0.0 ? fabs(x) : -fabs(x);
-}
+inline double sign(double x, double y) { return y >= 0.0 ? fabs(x) : -fabs(x); }
 
 //!  - - - - - - - - - - - - - - - - - - - - - - -
 //!   control derived type with component defaults
