@@ -1,6 +1,7 @@
 #include "MantidQtCustomInterfaces/Muon/MuonAnalysisFitDataPresenter.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/GroupingLoader.h"
+#include "MantidAPI/Workspace_fwd.h"
 
 using MantidQt::MantidWidgets::IMuonFitDataSelector;
 using MantidQt::MantidWidgets::IWorkspaceFitControl;
@@ -101,27 +102,28 @@ void MuonAnalysisFitDataPresenter::setAssignedFirstRun(const QString &wsName) {
  */
 void MuonAnalysisFitDataPresenter::createWorkspacesToFit(
     const std::vector<std::string> &names) {
-
-  // We need to know if the runs are sequential/single (loop over selectedRuns)
-  // or
-  // co-added (use whole run string at once)
-  const auto fitType = m_dataSelector->getFitType();
-
   // For each name, if not in the ADS, create it
+  std::vector<Mantid::API::Workspace_sptr> workspaces;
   for (const auto &name : names) {
     if (AnalysisDataService::Instance().doesExist(name)) {
       // We already have it! Just retrieve it
+      workspaces.push_back(AnalysisDataService::Instance().retrieve(name));
     } else {
-      // Create here
+      // Create here (but don't add to the ADS)
+      // workspaces.push_back...
     }
   }
 
-  if (fitType == IMuonFitDataSelector::FitType::CoAdd) {
-    // deal with this
-    // MuonAnalysisHelper::sumWorkspaces()...
-  } else {
-    // otherwise add them all to the ADS
-    // AnalysisDataService::Instance().add(workspace, ...)
+  // Co-add workspaces together if required
+  if (m_dataSelector->getFitType() == IMuonFitDataSelector::FitType::CoAdd) {
+    const auto coadded = MuonAnalysisHelper::sumWorkspaces(workspaces);
+    workspaces.clear();
+    workspaces.push_back(coadded);
+  }
+
+  // Add all relevant workspaces to the ADS
+  for (const auto ws : workspaces) {
+    AnalysisDataService::Instance().addOrReplace(ws->name(), ws);
   }
 
   // Update model with these
