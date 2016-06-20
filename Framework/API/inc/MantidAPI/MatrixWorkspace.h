@@ -12,8 +12,8 @@
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/ISpectrum.h"
-#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/MatrixWSIndexCalculator.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 
 namespace Mantid {
 //----------------------------------------------------------------------------
@@ -257,6 +257,12 @@ public:
   }
   HistogramData::HistogramDx &mutableDx(const size_t index) {
     return getSpectrum(index).mutableDx();
+  }
+  virtual HistogramData::HistogramY &mutableY(const size_t index) {
+    return getSpectrum(index).mutableY();
+  }
+  virtual HistogramData::HistogramE &mutableE(const size_t index) {
+    return getSpectrum(index).mutableE();
   }
   Kernel::cow_ptr<HistogramData::HistogramX> sharedX(const size_t index) const {
     return getSpectrum(index).sharedX();

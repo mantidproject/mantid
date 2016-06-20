@@ -1,10 +1,10 @@
 #ifndef MANTID_API_ISPECTRUM_H_
 #define MANTID_API_ISPECTRUM_H_
 
-#include "MantidKernel/System.h"
 #include "MantidGeometry/IDTypes.h"
-#include "MantidKernel/cow_ptr.h"
 #include "MantidHistogramData/Histogram.h"
+#include "MantidKernel/System.h"
+#include "MantidKernel/cow_ptr.h"
 
 #include <set>
 
@@ -168,6 +168,12 @@ public:
   }
   HistogramData::HistogramDx &mutableDx() {
     return mutableHistogramRef().mutableDx();
+  }
+  HistogramData::HistogramY &mutableY() {
+    return mutableHistogramRef().mutableY();
+  }
+  HistogramData::HistogramE &mutableE() {
+    return mutableHistogramRef().mutableE();
   }
   Kernel::cow_ptr<HistogramData::HistogramX> sharedX() const {
     return histogramRef().sharedX();
