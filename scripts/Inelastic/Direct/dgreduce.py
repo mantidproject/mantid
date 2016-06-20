@@ -2,7 +2,7 @@
 """ Empty class temporary left for compatibility with previous interfaces """
 import Direct.DirectEnergyConversion as DRC
 from mantid.simpleapi import *
-from mantid.kernel import funcreturns
+from mantid.kernel import funcinspect
 from mantid import api
 
 # the class which is responsible for data reduction
@@ -136,7 +136,7 @@ def arb_units(wb_run,sample_run,ei_guess,rebin,map_file='default',monovan_run=No
         Reducer.sample_run = sample_run
         sample_run = None
     try:
-        n,r=funcreturns.lhs_info('both')
+        n,r=funcinspect.lhs_info('both')
         wksp_out=r[0]
     except:
         wksp_out = "reduced_ws"
@@ -274,7 +274,7 @@ def abs_units(wb_for_run,sample_run,monovan_run,wb_for_monovanadium,samp_rmm,sam
         sample_run = None
 
     try:
-        n,r=funcreturns.lhs_info('both')
+        n,r=funcinspect.lhs_info('both')
         results_name=r[0]
     except:
         results_name = Reducer.prop_man.get_sample_ws_name()

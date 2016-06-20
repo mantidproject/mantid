@@ -1,3 +1,5 @@
+from __future__ import (absolute_import, division, print_function)
+
 import unittest
 import numpy
 from mantid.kernel import *
@@ -35,7 +37,7 @@ class CreateLeBailFitInputTest(unittest.TestCase):
             numrowgood = 29
         else:
             numrowgood = 28
-        print "Parameter name of first line = ", paramname0
+        print("Parameter name of first line = ", paramname0)
 
         #self.assertEqual(numrowgood, paramws.rowCount())
 

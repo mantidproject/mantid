@@ -121,7 +121,7 @@ set ( PY_FILES
   __init__.py
   _aliases.py
   environment.py
-  funcreturns.py
+  funcinspect.py
   plugins.py
 )
 
