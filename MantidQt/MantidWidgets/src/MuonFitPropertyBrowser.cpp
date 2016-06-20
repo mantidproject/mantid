@@ -411,5 +411,19 @@ void MuonFitPropertyBrowser::setParameterValue(const QString &funcIndex,
   }
 }
 
+/**
+ * Set the list of workspaces to fit to the given list
+ * @param wsNames :: [input] List of workspace names to fit
+ */
+void MuonFitPropertyBrowser::setWorkspaceNames(const QStringList &wsNames) {
+  // Extend base class behaviour
+  IWorkspaceFitControl::setWorkspaceNames(wsNames);
+  // Save the names for later use
+  m_workspacesToFit.clear();
+  std::transform(wsNames.begin(), wsNames.end(),
+                 std::back_inserter(m_workspacesToFit),
+                 [](const QString &qs) { return qs.toStdString(); });
+}
+
 } // MantidQt
 } // API

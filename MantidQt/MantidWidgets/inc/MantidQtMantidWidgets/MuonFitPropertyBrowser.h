@@ -58,6 +58,8 @@ public:
   /// Set parameter value externally
   void setParameterValue(const QString &funcIndex, const QString &paramName,
                          double value) override;
+  /// Set list of workspaces to fit
+  void setWorkspaceNames(const QStringList &wsNames) override;
 
 public slots:
   /// Perform the fit algorithm
