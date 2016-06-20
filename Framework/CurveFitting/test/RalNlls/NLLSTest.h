@@ -35,7 +35,7 @@ public:
     fit.initialize();
     fit.setPropertyValue("Function", "name=ExpDecay");
     fit.setProperty("InputWorkspace", ws);
-    fit.setProperty("Minimizer", "Galahad");
+    fit.setProperty("Minimizer", "DTRS");
     fit.execute();
     IFunction_sptr fun = fit.getProperty("Function");
     TS_ASSERT_DELTA(fun->getParameter(0), 60.195, 0.001);
