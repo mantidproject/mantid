@@ -125,12 +125,12 @@ void MuonAnalysisFitDataHelper::createWorkspacesToFit(
   }
 
   // Update model with these
-  // m_fitBrowser->... (m_workspacesToFit)
-
-  // NB This is necessary to set peak picker, UI properties via signal!
-  if (!names.empty()) {
-    m_fitBrowser->setWorkspaceName(QString::fromStdString(names.front()));
-  }
+  // (This will set peak picker, UI properties via signal)
+  QStringList qNames;
+  std::transform(
+      names.begin(), names.end(), std::back_inserter(qNames),
+      [](const std::string &s) { return QString::fromStdString(s); });
+  m_fitBrowser->setWorkspaceNames(qNames);
 }
 
 /**

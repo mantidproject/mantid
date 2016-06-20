@@ -5,7 +5,10 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
+#include "MantidAPI/GroupingLoader.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidQtCustomInterfaces/Muon/MuonAnalysisFitDataHelper.h"
+#include "MantidQtCustomInterfaces/Muon/MuonAnalysisHelper.h"
 #include "MantidQtMantidWidgets/IMuonFitDataSelector.h"
 #include "MantidQtMantidWidgets/IWorkspaceFitControl.h"
 
@@ -46,6 +49,7 @@ public:
   MOCK_METHOD1(setEndX, void(double));
   MOCK_METHOD1(setWorkspaceIndex, void(int));
   MOCK_METHOD1(allowSequentialFits, void(bool));
+  MOCK_METHOD1(setWorkspaceNames, void(const QStringList &));
 };
 
 class MuonAnalysisFitDataHelperTest : public CxxTest::TestSuite {
@@ -85,14 +89,45 @@ public:
     m_helper->handleDataPropertiesChanged();
   }
 
-  void test_handleSelectedGroupsChanged() {
-    TS_FAIL("Test not implemented!");
-    m_helper->handleSelectedGroupsChanged();
-  }
-
-  void test_handleSelectedPeriodsChanged() {
-    TS_FAIL("Test not implemented!");
-    m_helper->handleSelectedPeriodsChanged();
+  void test_handleSelectedDataChanged() {
+    Mantid::API::Grouping grouping;
+    grouping.groupNames = {"fwd", "bwd"};
+    grouping.pairNames = {"long"};
+    EXPECT_CALL(*m_dataSelector, getInstrumentName())
+        .Times(1)
+        .WillOnce(Return("MUSR"));
+    EXPECT_CALL(*m_dataSelector, getRuns())
+        .Times(1)
+        .WillOnce(Return("15189-91"));
+    EXPECT_CALL(*m_dataSelector, getChosenGroups())
+        .Times(1)
+        .WillOnce(Return(QStringList({"fwd", "long"})));
+    EXPECT_CALL(*m_dataSelector, getPeriodSelections())
+        .Times(1)
+        .WillOnce(Return(QStringList({"1", "1-2"})));
+    EXPECT_CALL(*m_dataSelector, getFitType())
+        .Times(1)
+        .WillOnce(Return(IMuonFitDataSelector::FitType::Simultaneous));
+    std::vector<QString> expectedNames = {
+        "MUSR00015189; Group; fwd; Asym; 1; #1",
+        "MUSR00015189; Pair; long; Asym; 1; #1",
+        "MUSR00015189; Group; fwd; Asym; 1-2; #1",
+        "MUSR00015189; Pair; long; Asym; 1-2; #1",
+        "MUSR00015190; Group; fwd; Asym; 1; #1",
+        "MUSR00015190; Pair; long; Asym; 1; #1",
+        "MUSR00015190; Group; fwd; Asym; 1-2; #1",
+        "MUSR00015190; Pair; long; Asym; 1-2; #1",
+        "MUSR00015191; Group; fwd; Asym; 1; #1",
+        "MUSR00015191; Pair; long; Asym; 1; #1",
+        "MUSR00015191; Group; fwd; Asym; 1-2; #1",
+        "MUSR00015191; Pair; long; Asym; 1-2; #1"};
+    EXPECT_CALL(*m_fitBrowser,
+                setWorkspaceNames(UnorderedElementsAreArray(expectedNames)))
+        .Times(1);
+    m_helper->handleSelectedDataChanged(
+        grouping, MantidQt::CustomInterfaces::Muon::PlotType::Asymmetry, true);
+    // test ADS here
+    Mantid::API::AnalysisDataService::Instance().clear();
   }
 
   void test_handleXRangeChangedGraphically() {
@@ -151,11 +186,6 @@ public:
     const QString wsName("MUSR00015189; Pair; long; Asym; 1; #1");
     m_helper->setAssignedFirstRun(wsName);
     TS_ASSERT_EQUALS(wsName, m_helper->getAssignedFirstRun());
-  }
-
-  void test_handleDataWorkspaceChanged() {
-    TS_FAIL("Test not implemented!");
-    m_helper->handleDataWorkspaceChanged();
   }
 
 private:

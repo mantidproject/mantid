@@ -3,6 +3,7 @@
 
 #include "WidgetDllOption.h"
 #include <QString>
+#include <QStringList>
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -40,6 +41,9 @@ public:
   virtual void setEndX(double end) = 0;
   virtual void setWorkspaceIndex(int i) = 0;
   virtual void allowSequentialFits(bool allow) = 0;
+  virtual void setWorkspaceNames(const QStringList &wsNames) {
+    this->setWorkspaceName(wsNames.front());
+  }
 };
 
 } // namespace MantidWidgets
