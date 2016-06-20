@@ -12,7 +12,7 @@ boost::shared_ptr<GenericDataProcessorPresenter>
 PoldiGenericDataProcessorPresenterFactory::create() {
 
   /* The white list defining number of columns, their names and how they relate
-   * to the algorithm's input properties */
+  * to the algorithm's input properties */
   DataProcessorWhiteList whitelist;
   whitelist.addElement(
       "Run(s)", "InputWorkspace",
@@ -36,19 +36,13 @@ PoldiGenericDataProcessorPresenterFactory::create() {
       std::set<std::string>{"InputWorkspace", "ExpectedPeaks",
                             "ProfileFunction", "OutputWorkspace"});
 
-  // Pre-processing instructions as a map:
-  // Keys are the column names
-  // Values are the associated pre-processing algorithms
-  std::map<std::string, DataProcessorPreprocessingAlgorithm> preprocessMap = {
-      {"Run(s)", DataProcessorPreprocessingAlgorithm()}};
-
   // How to post-process groups
   DataProcessorPostprocessingAlgorithm postprocessor(
       "GroupWorkspaces", "PoldiGroup_",
       std::set<std::string>{"InputWorkspaces", "OutputWorkspaces"});
 
-  return boost::make_shared<GenericDataProcessorPresenter>(
-      whitelist, preprocessMap, processor, postprocessor);
+  return boost::make_shared<GenericDataProcessorPresenter>(whitelist, processor,
+                                                           postprocessor);
 }
 }
 }
