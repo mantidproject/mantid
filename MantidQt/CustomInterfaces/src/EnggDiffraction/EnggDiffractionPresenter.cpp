@@ -334,7 +334,7 @@ void EnggDiffractionPresenter::processCalcCalib() {
   const std::string outFilename = outputCalibFilename(vanNo, ceriaNo);
 
   m_view->showStatus("Calculating calibration...");
-  m_view->enableCalibrateAndFocusActions(false);
+  m_view->enableCalibrateFocusFitUserActions(false);
   // alternatively, this would be GUI-blocking:
   // doNewCalibration(outFilename, vanNo, ceriaNo, specNos);
   // calibrationFinished()
@@ -382,7 +382,7 @@ void EnggDiffractionPresenter::ProcessCropCalib() {
   }
 
   m_view->showStatus("Calculating cropped calibration...");
-  m_view->enableCalibrateAndFocusActions(false);
+  m_view->enableCalibrateFocusFitUserActions(false);
   // alternatively, this would be GUI-blocking:
   // doNewCalibration(outFilename, vanNo, ceriaNo, specNo/bankName);
   // calibrationFinished()
@@ -532,7 +532,7 @@ void EnggDiffractionPresenter::startFocusing(
   const std::string focusDir = m_view->focusingDir();
 
   m_view->showStatus("Focusing...");
-  m_view->enableCalibrateAndFocusActions(false);
+  m_view->enableCalibrateFocusFitUserActions(false);
   // GUI-blocking alternative:
   // doFocusRun(focusDir, outFilenames, runNo, banks, specNos, dgFile)
   // focusingFinished()
@@ -561,7 +561,7 @@ void EnggDiffractionPresenter::processRebinTime() {
                                     "may take some seconds... \n";
 
   m_view->showStatus("Rebinning by time...");
-  m_view->enableCalibrateAndFocusActions(false);
+  m_view->enableCalibrateFocusFitUserActions(false);
   // GUI-blocking alternative:
   // doRebinningTime(runNo, bin, outWSName)
   // rebinningFinished()
@@ -588,7 +588,7 @@ void EnggDiffractionPresenter::processRebinMultiperiod() {
                                     "may take some seconds... \n";
 
   m_view->showStatus("Rebinning by pulses...");
-  m_view->enableCalibrateAndFocusActions(false);
+  m_view->enableCalibrateFocusFitUserActions(false);
   // GUI-blocking alternative:
   // doRebinningPulses(runNo, nperiods, timeStep, outWSName)
   // rebinningFinished()
@@ -993,7 +993,7 @@ void EnggDiffractionPresenter::calibrationFinished() {
   if (!m_view)
     return;
 
-  m_view->enableCalibrateAndFocusActions(true);
+  m_view->enableCalibrateFocusFitUserActions(true);
   if (!m_calibFinishedOK) {
     g_log.warning() << "The calibration did not finish correctly. Please "
                        "check previous log messages for details.\n";
@@ -1624,7 +1624,7 @@ void EnggDiffractionPresenter::focusingFinished() {
     m_workerThread = NULL;
   }
 
-  m_view->enableCalibrateAndFocusActions(true);
+  m_view->enableCalibrateFocusFitUserActions(true);
 
   // display warning and information to the users regarding Stop Focus
   if (g_abortThread) {
@@ -2336,7 +2336,7 @@ void EnggDiffractionPresenter::rebinningFinished() {
     m_workerThread = NULL;
   }
 
-  m_view->enableCalibrateAndFocusActions(true);
+  m_view->enableCalibrateFocusFitUserActions(true);
 }
 
 /**

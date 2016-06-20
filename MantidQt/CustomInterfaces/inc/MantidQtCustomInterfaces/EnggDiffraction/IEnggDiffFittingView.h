@@ -1,6 +1,8 @@
 #ifndef MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_IENGGDIFFFITTINGVIEW_H_
 #define MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_IENGGDIFFFITTINGVIEW_H_
 
+#include "MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffractionUserMsg.h"
+
 #include <string>
 #include <vector>
 
@@ -37,7 +39,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class IEnggDiffFittingView {
+class IEnggDiffFittingView : public IEnggDiffractionUserMsg {
 
 public:
   virtual ~IEnggDiffFittingView() = default;

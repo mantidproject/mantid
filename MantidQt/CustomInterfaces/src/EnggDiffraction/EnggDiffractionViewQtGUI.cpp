@@ -85,7 +85,8 @@ void EnggDiffractionViewQtGUI::initLayout() {
   m_uiTabPreproc.setupUi(wPreproc);
   m_ui.tabMain->addTab(wPreproc, QString("Pre-processing"));
 
-  m_fittingWidget = new EnggDiffFittingViewQtWidget(m_ui.tabMain);
+  m_fittingWidget = new EnggDiffFittingViewQtWidget(
+      m_ui.tabMain, boost::make_shared<EnggDiffractionViewQtGUI>(this));
   m_ui.tabMain->addTab(m_fittingWidget, QString("Fitting"));
 
   QWidget *wSettings = new QWidget(m_ui.tabMain);
@@ -615,7 +616,7 @@ void EnggDiffractionViewQtGUI::newCalibLoaded(const std::string &vanadiumNo,
   }
 }
 
-void EnggDiffractionViewQtGUI::enableCalibrateAndFocusActions(bool enable) {
+void EnggDiffractionViewQtGUI::enableCalibrateFocusFitUserActions(bool enable) {
   // calibrate
   m_uiTabCalib.groupBox_make_new_calib->setEnabled(enable);
   m_uiTabCalib.groupBox_current_calib->setEnabled(enable);

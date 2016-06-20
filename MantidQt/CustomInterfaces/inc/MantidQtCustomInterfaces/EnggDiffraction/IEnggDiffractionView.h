@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 
+#include "MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffractionUserMsg.h"
 #include "MantidQtCustomInterfaces/EnggDiffraction/EnggDiffCalibSettings.h"
 
 namespace MantidQt {
@@ -37,7 +38,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class IEnggDiffractionView {
+class IEnggDiffractionView : public IEnggDiffractionUserMsg {
 
 public:
   IEnggDiffractionView(){};
@@ -59,36 +60,6 @@ public:
    */
   virtual void splashMessage(bool visible, const std::string &shortMsg,
                              const std::string &description) = 0;
-
-  /**
-   * Display the current status (running some algorithms, finished,
-   * ready, etc.), in a status bar or similar.
-   *
-   * @param sts status message which should be concise
-   */
-  virtual void showStatus(const std::string &sts) = 0;
-
-  /**
-   * Display a warning to the user (for example as a pop-up window).
-   *
-   * @param warn warning title, should be short and would normally be
-   * shown as the title of the window or a big banner.
-   *
-   * @param description longer, free form description of the issue.
-   */
-  virtual void userWarning(const std::string &warn,
-                           const std::string &description) = 0;
-
-  /**
-   * Display an error message (for example as a pop-up window).
-   *
-   * @param err Error title, should be short and would normally be
-   * shown as the title of the window or a big banner.
-   *
-   * @param description longer, free form description of the issue.
-   */
-  virtual void userError(const std::string &err,
-                         const std::string &description) = 0;
 
   /**
    * Gets a filename from the user, to use for a new calibration file.
@@ -253,15 +224,6 @@ public:
    * @param enable true to enable all tabs of the interface
    */
   virtual void enableTabs(bool enable) = 0;
-
-  /**
-   * Enable/disable calibrate+focus actions. The idea is that actions
-   * / buttons like 'calibrate', 'load calibration', or 'focus' can be
-   * disabled while a calibration of a focusing is being calculated.
-   *
-   * @param enable true to enable actions (default initial state)
-   */
-  virtual void enableCalibrateAndFocusActions(bool enable) = 0;
 
   /**
    * Directory set for focusing outputs

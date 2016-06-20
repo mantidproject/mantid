@@ -125,7 +125,7 @@ public:
 
   void enableTabs(bool enable) override;
 
-  void enableCalibrateAndFocusActions(bool enable) override;
+  void enableCalibrateFocusFitUserActions(bool enable) override;
 
   std::string focusingDir() const override;
 

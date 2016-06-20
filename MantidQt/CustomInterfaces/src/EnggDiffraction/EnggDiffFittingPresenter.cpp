@@ -67,8 +67,8 @@ void EnggDiffFittingPresenter::notify(
     processFitPeaks();
     break;
 
-  case IEnggDiffFittingPresenter::Shutdown:
-    processShutdown();
+  case IEnggDiffFittingPresenter::ShutDown:
+    processShutDown();
     break;
   }
 }
@@ -347,7 +347,7 @@ void EnggDiffFittingPresenter::enableMultiRun(
 
 void EnggDiffFittingPresenter::processStart() {}
 
-void EnggDiffFittingPresenter::processShutdown() {
+void EnggDiffFittingPresenter::processShutDown() {
   m_view->saveSettings();
   cleanup();
 }

@@ -28,18 +28,18 @@ namespace CustomInterfaces {
 const std::string EnggDiffFittingViewQtWidget::g_settingsGroup =
     "CustomInterfaces/EnggDiffraction/FittingView";
 
-const std::string
-    EnggDiffFittingViewQtWidget::EnggDiffractionViewQtWidget::g_peaksListExt =
-        "Peaks list File: CSV "
-        "(*.csv *.txt);;"
-        "Other extensions/all files (*.*)";
+const std::string EnggDiffFittingViewQtWidget::g_peaksListExt =
+    "Peaks list File: CSV "
+    "(*.csv *.txt);;"
+    "Other extensions/all files (*.*)";
 
 bool EnggDiffFittingViewQtWidget::m_fittingMutliRunMode = false;
 std::vector<std::string> EnggDiffFittingViewQtWidget::m_fitting_runno_dir_vec;
 
-EnggDiffFittingViewQtWidget::EnggDiffFittingViewQtWidget(QWidget *parent = 0)
-    : IEnggDiffFittingView(), m_fittedDataVector(), m_peakPicker(nullptr),
-      m_zoomTool(nullptr), m_presenter(nullptr) {
+EnggDiffFittingViewQtWidget::EnggDiffFittingViewQtWidget(
+    QWidget * /*parent*/, boost::shared_ptr<IEnggDiffractionUserMsg> mainMsg)
+    : IEnggDiffFittingView(), m_fittedDataVector(), m_mainMsgProvider(mainMsg),
+      m_presenter(nullptr) {
   initLayout();
 }
 
@@ -164,6 +164,25 @@ void EnggDiffFittingViewQtWidget::enable(bool enable) {
   m_ui.pushButton_save_peak_list->setEnabled(enable);
   m_ui.comboBox_bank->setEnabled(enable);
   m_ui.groupBox_fititng_preview->setEnabled(enable);
+}
+
+void EnggDiffFittingViewQtWidget::showStatus(const std::string &sts) {
+  m_mainMsgProvider->showStatus(sts);
+}
+
+void EnggDiffFittingViewQtWidget::userWarning(const std::string &err,
+                                              const std::string &description) {
+  m_mainMsgProvider->userWarning(err, description);
+}
+
+void EnggDiffFittingViewQtWidget::userError(const std::string &err,
+                                            const std::string &description) {
+  m_mainMsgProvider->userError(err, description);
+}
+
+void EnggDiffFittingViewQtWidget::enableCalibrateFocusFitUserActions(
+    bool enable) {
+  m_mainMsgProvider->enableCalibrateFocusFitUserActions(enable);
 }
 
 void EnggDiffFittingViewQtWidget::fitClicked() {

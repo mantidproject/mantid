@@ -1,5 +1,5 @@
-#ifndef MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_IENGGDIFFVIEWQTWIDGET_H_
-#define MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_IENGGDIFFVIEWQTWIDGET_H_
+#ifndef MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_IENGGDIFFFITTINGVIEWQTWIDGET_H_
+#define MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_IENGGDIFFFITTINGVIEWQTWIDGET_H_
 
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidQtCustomInterfaces/DllConfig.h"
@@ -59,10 +59,19 @@ class MANTIDQT_CUSTOMINTERFACES_DLL EnggDiffFittingViewQtWidget
   Q_OBJECT
 
 public:
-  /// Default Constructor
-  EnggDiffFittingViewQtWidget(QWidget *parent = 0);
-  /// Destructor
+  EnggDiffFittingViewQtWidget(
+      QWidget *parent, boost::shared_ptr<IEnggDiffractionUserMsg> mainMsg);
   ~EnggDiffFittingViewQtWidget() override;
+
+  void showStatus(const std::string &sts) override;
+
+  void userWarning(const std::string &warn,
+                   const std::string &description) override;
+
+  void userError(const std::string &err,
+                 const std::string &description) override;
+
+  void enableCalibrateFocusFitUserActions(bool enable) override;
 
   void enable(bool enable);
 
@@ -172,9 +181,9 @@ private:
                                          bool validator) const;
 
   // path/name for the persistent settings group of this interface
-  const static std::string g_settingsGroup;
+  static const std::string g_settingsGroup;
 
-  static std::string g_peaksListExt;
+  static const std::string g_peaksListExt;
 
   /// indentifier for fitting multi-run or single run input
   static bool m_fittingMutliRunMode;
@@ -189,10 +198,13 @@ private:
   std::vector<QwtPlotCurve *> m_fittedDataVector;
 
   /// Peak picker tool for fitting - only one on the plot at any given moment
-  MantidWidgets::PeakPicker *m_peakPicker;
+  MantidWidgets::PeakPicker *m_peakPicker = nullptr;
 
   /// zoom-in/zoom-out tool for fitting
-  QwtPlotZoomer *m_zoomTool;
+  QwtPlotZoomer *m_zoomTool = nullptr;
+
+  // user messages interface provided by a main view/widget
+  boost::shared_ptr<IEnggDiffractionUserMsg> m_mainMsgProvider;
 
   /// presenter as in the model-view-presenter
   boost::scoped_ptr<IEnggDiffFittingPresenter> m_presenter;
