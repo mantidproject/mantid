@@ -100,9 +100,9 @@ class SANSMove(object):
             raise ValueError("SANSMove: The provided coordinates cannot be empty.")
         if not isinstance(workspace, MatrixWorkspace):
             raise ValueError("SANSMove: The input workspace has to be a MatrixWorkspace")
-        if component not in move_info.detectors:
+        if component is not None and component not in move_info.detectors:
             raise ValueError("SANSMove: The component to be moved {} cannot be found in the"
-                             " state inforamtion of type {}".format(str(component), str(type(move_info))))
+                             " state information of type {}".format(str(component), str(type(move_info))))
         if not isinstance(move_info, SANSStateMoveWorkspace):
             raise ValueError("SANSMove: The provided state information is of the wrong type. It must be"
                              " of type SANSStateMoveWorkspace, but was {}".format(str(type(move_info))))
@@ -254,6 +254,8 @@ class SANSMoveSANS2D(SANSMove):
         # For LOQ we only have to coordinates
         assert(len(coordinates) == 2)
 
+        _component = component
+
         # Move the high angle bank
         self._move_high_angle_bank(move_info, workspace, coordinates)
 
@@ -269,7 +271,8 @@ class SANSMoveSANS2D(SANSMove):
     def do_move_with_elementary_displacement(self, move_info, workspace, coordinates, component):
         # For LOQ we only have to coordinates
         assert(len(coordinates) == 2)
-        apply_standard_displacement(move_info, workspace, coordinates, component)
+        coordinates_to_move = [-coordinates[0], -coordinates[1]]
+        apply_standard_displacement(move_info, workspace, coordinates_to_move, component)
 
     @staticmethod
     def is_correct(instrument_type, run_number, **kwargs):

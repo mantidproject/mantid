@@ -71,13 +71,20 @@ def is_positive(value):
 # Parameters
 # -------------------------------------------------------
 class TypedParameter(object):
+    """
+    The TypedParameter descriptor allows the user to store/handle a type-checked value with an additional
+    validator option, e.g. one can restrict the held parameter to be only a positive value.
+    """
     __counter = 0
 
     def __init__(self, parameter_type, validator=lambda x: True):
         cls = self.__class__
         prefix = cls.__name__
         index = cls.__counter
-        # Name which is used to store value in the instance. Will be unique.
+        # Name which is used to store value in the instance. This will be unique and not accessible via the standard
+        # attribute access, since the developer/user cannot apply the hash symbol in their code (it is valid though
+        # when writing into the __dict__). Note that the name which we generate here will be altered (via a
+        # class decorator) in the classes which actually use the TypedParameter descriptor, to make it more readable.
         self.name = '_{}#{}'.format(prefix, index)
         self.parameter_type = parameter_type
         self.value = None
@@ -139,6 +146,9 @@ class DictParameter(TypedParameter):
 
 
 class ClassTypeParameter(TypedParameter):
+    """
+    This TypedParameter variant allows for storing a class type. We make use of this quite a lot
+    """
     def __init__(self, class_type):
         super(ClassTypeParameter, self).__init__(class_type, is_not_none)
 
@@ -171,6 +181,11 @@ class SANSStateBase(object):
 
 
 def sans_parameters(cls):
+    """
+    Class decorator which changes the names of TypedParameters in a class instance in order to make it more readable.
+    :param cls: The class with the TypedParameters
+    :return: The class with the TypedParameters
+    """
     for attribute_name, attribute_value in cls.__dict__.iteritems():
         if isinstance(attribute_value, TypedParameter):
             attribute_value.name = '_{}#{}'.format(type(attribute_value).__name__, attribute_name)

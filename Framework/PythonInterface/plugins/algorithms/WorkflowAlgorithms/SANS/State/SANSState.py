@@ -50,7 +50,6 @@ class SANSStateISIS(SANSStateBase, SANSState):
         if is_invalid:
             raise ValueError("SANSState: There is an issue with your in put. See: {}".format(json.dumps(is_invalid)))
 
-
         # Check the attributes themselves
         is_invalid = {}
         for descriptor_name, descriptor_object in inspect.getmembers(type(self)):

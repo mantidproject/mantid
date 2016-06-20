@@ -71,53 +71,56 @@ class SANSMoveTest(unittest.TestCase):
         rotation = detector.getRotation()
         return position, rotation
 
+    def check_that_elementary_displacement_with_only_translation_is_correct(self, workspace, mover, move_info,
+                                                                            coordinates, component):
+        position_before_move, rotation_before_move = SANSMoveTest._get_position_and_rotation(workspace, move_info,
+                                                                                             component)
+        expected_position_elementary_move = V3D(position_before_move[0] - coordinates[0],
+                                                position_before_move[1] - coordinates[1],
+                                                position_before_move[2])
+        mover.do_move_with_elementary_displacement(move_info, workspace, coordinates,
+                                                   component)
+        expected_rotation = rotation_before_move
+        self.compare_expected_position(expected_position_elementary_move, expected_rotation,
+                                       component, move_info, workspace)
+
     def compare_expected_position(self, expected_position, expected_rotation, component, move_info, workspace):
         position, rotation = SANSMoveTest._get_position_and_rotation(workspace, move_info, component)
-        print "================"
-        print position
-        print expected_position
-        print rotation
-        print expected_rotation
-        self.assertTrue(position == expected_position)
-        self.assertTrue(rotation == expected_rotation)
+        for index in range(0, 3):
+            self.assertAlmostEqual(position[index], expected_position[index], delta=1e-4)
+            self.assertAlmostEqual(rotation[index], expected_rotation[index], delta=1e-4)
 
     def test_that_LOQ_can_perform_a_correct_initial_move_and_subsequent_elementary_move(self):
         # Arrange
         # Setup data info
         file_name = "LOQ74044"
-        # builder = SANSMoveTest._provide_builder(file_name)
-        # builder.set_LAB_x_translation_correction = 123
-        # move_info = builder.build()
-        #
-        # # Setup mover
-        # workspace = load_workspace(file_name)
-        # mover = SANSMoveTest._provide_mover(workspace)
-        #
-        # coordinates = [45, 25]
-        # component = SANSConstants.low_angle_bank
-        #
-        # # Act + Assert for initial move
-        # center_position = move_info.center_position
-        # initial_z_position = 15.15
-        # expected_position = V3D(center_position - coordinates[0], center_position - coordinates[1], initial_z_position)
-        # expected_rotation = Quat(1., 0., 0., 0.)
-        # mover.move_initial(move_info, workspace, coordinates, component)
-        # self.compare_expected_position(expected_position, expected_rotation, component, move_info, workspace)
-        #
-        # # Act + Assert for elementary move
-        # component_elementary_move = SANSConstants.high_angle_bank
-        # coordinates_elementary_move = [120, 135]
-        # position_before_move, _ = SANSMoveTest._get_position_and_rotation(workspace, move_info,
-        #                                                                   component_elementary_move)
-        # expected_position_elementary_move = V3D(position_before_move[0] - coordinates_elementary_move[0],
-        #                                         position_before_move[1] - coordinates_elementary_move[1],
-        #                                         position_before_move[2])
-        # mover.do_move_with_elementary_displacement(move_info, workspace, coordinates_elementary_move,
-        #                                            component_elementary_move)
-        # self.compare_expected_position(expected_position_elementary_move, expected_rotation,
-        #                                component_elementary_move, move_info, workspace)
+        builder = SANSMoveTest._provide_builder(file_name)
+        builder.set_LAB_x_translation_correction = 123
+        move_info = builder.build()
 
-    def test_that_LOQ_can_perform_a_correct_initial_move_and_subsequent_elementary_move(self):
+        # Setup mover
+        workspace = load_workspace(file_name)
+        mover = SANSMoveTest._provide_mover(workspace)
+
+        coordinates = [45, 25]
+        component = SANSConstants.low_angle_bank
+
+        # Act + Assert for initial move
+        center_position = move_info.center_position
+        initial_z_position = 15.15
+        expected_position = V3D(center_position - coordinates[0], center_position - coordinates[1], initial_z_position)
+        expected_rotation = Quat(1., 0., 0., 0.)
+        mover.move_initial(move_info, workspace, coordinates, component)
+        self.compare_expected_position(expected_position, expected_rotation, component, move_info, workspace)
+
+        # # Act + Assert for elementary move
+        component_elementary_move = SANSConstants.high_angle_bank
+        coordinates_elementary_move = [120, 135]
+        self.check_that_elementary_displacement_with_only_translation_is_correct(workspace, mover, move_info,
+                                                                                 coordinates_elementary_move,
+                                                                                 component_elementary_move)
+
+    def test_that_SANS2D_can_perform_a_correct_initial_move_and_subsequent_elementary_move(self):
         # Arrange
         # Setup data info
         file_name = "SANS2D00028784"
@@ -131,41 +134,46 @@ class SANSMoveTest(unittest.TestCase):
         mover = SANSMoveTest._provide_mover(workspace)
 
         coordinates = [0, 0]
+        # The component input is not relevant for SANS2D's initial move. All detectors are moved
 
-        # Act + Assert for initial move for low angle bank
-        component = SANSConstants.low_angle_bank
+        # Act for initial move
+        mover.move_initial(move_info, workspace, coordinates, component=None)
+
+        # Assert low angle bank for initial move
         # These values are on the workspace and in the sample logs
+        component_to_investigate = SANSConstants.low_angle_bank
         initial_z_position = 23.281
         rear_det_z = 11.9989755859
         offset = 4.
+        total_x = 0.
+        total_y = 0.
         total_z = initial_z_position + rear_det_z - offset
-        expected_position = V3D(-coordinates[0], - coordinates[1], total_z)
+        expected_position = V3D(total_x - coordinates[0], total_y - coordinates[1], total_z)
         expected_rotation = Quat(1., 0., 0., 0.)
-        mover.move_initial(move_info, workspace, coordinates, component)
-        self.compare_expected_position(expected_position, expected_rotation, component, move_info, workspace)
+        self.compare_expected_position(expected_position, expected_rotation,
+                                       component_to_investigate, move_info, workspace)
 
-        # Act + Assert for initial move for low angle bank
-        component = SANSConstants.high_angle_bank
+        # Act + Assert for initial move for high angle bank
         # These values are on the workspace and in the sample logs
+        component_to_investigate = SANSConstants.high_angle_bank
+        initial_x_position = 1.1
+        x_correction = -0.188187
         initial_z_position = 23.281
-        total_z = initial_z_position
-        expected_position = V3D(-coordinates[0], - coordinates[1], total_z)
-        expected_rotation = Quat(1., 0., 0., 0.)
-        mover.move_initial(move_info, workspace, coordinates, component)
-        self.compare_expected_position(expected_position, expected_rotation, component, move_info, workspace)
+        z_correction = 1.002
+        total_x = initial_x_position + x_correction
+        total_y = 0.
+        total_z = initial_z_position + z_correction
+        expected_position = V3D(total_x - coordinates[0], total_y-coordinates[1], total_z)
+        expected_rotation = Quat(1., 0., 7.87625e-05, 0.)
+        self.compare_expected_position(expected_position, expected_rotation,
+                                       component_to_investigate, move_info, workspace)
 
         # Act + Assert for elementary move
-        # component_elementary_move = SANSConstants.high_angle_bank
-        # coordinates_elementary_move = [120, 135]
-        # position_before_move, _ = SANSMoveTest._get_position_and_rotation(workspace, move_info,
-        #                                                                   component_elementary_move)
-        # expected_position_elementary_move = V3D(position_before_move[0] - coordinates_elementary_move[0],
-        #                                         position_before_move[1] - coordinates_elementary_move[1],
-        #                                         position_before_move[2])
-        # mover.do_move_with_elementary_displacement(move_info, workspace, coordinates_elementary_move,
-        #                                            component_elementary_move)
-        # self.compare_expected_position(expected_position_elementary_move, expected_rotation,
-        #                                component_elementary_move, move_info, workspace)
+        component_elementary_move = SANSConstants.low_angle_bank
+        coordinates_elementary_move = [120, 135]
+        self.check_that_elementary_displacement_with_only_translation_is_correct(workspace, mover, move_info,
+                                                                                 coordinates_elementary_move,
+                                                                                 component_elementary_move)
 
     # def test_that_LARMOR_old_Style_can_be_moved(self):
     #     pass
