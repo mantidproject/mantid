@@ -173,8 +173,6 @@ class SANSStateMoveWorkspaceLARMORTest(unittest.TestCase):
         state.detectors[SANSConstants.low_angle_bank].detector_name_short = test_name
         self.assertTrue(state.detectors[SANSConstants.low_angle_bank].detector_name_short == test_name)
 
-        state.coord1_scale_factor = test_value
-        self.assertTrue(state.coord1_scale_factor == test_value)
 
         try:
             state.validate()
@@ -189,20 +187,12 @@ class SANSStateMoveWorkspaceLARMORTest(unittest.TestCase):
 
         # Act + Assert
         with self.assertRaises(TypeError):
-            state.coord1_scale_factor = ["sdf"]
-
-        with self.assertRaises(TypeError):
             state.detectors[SANSConstants.high_angle_bank].detector_name_short = 123
 
     def test_validate_method_raises_value_error_for_invalid_state(self):
         # Arrange
         state = SANSStateMoveWorkspaceLARMOR()
         test_name = "test_name"
-        state.detectors[SANSConstants.high_angle_bank].detector_name = test_name
-        self.assertTrue(state.detectors[SANSConstants.high_angle_bank].detector_name == test_name)
-        state.detectors[SANSConstants.high_angle_bank].detector_name_short = test_name
-        self.assertTrue(state.detectors[SANSConstants.high_angle_bank].detector_name_short == test_name)
-
         state.detectors[SANSConstants.low_angle_bank].detector_name = test_name
         self.assertTrue(state.detectors[SANSConstants.low_angle_bank].detector_name == test_name)
         state.detectors[SANSConstants.low_angle_bank].detector_name_short = test_name

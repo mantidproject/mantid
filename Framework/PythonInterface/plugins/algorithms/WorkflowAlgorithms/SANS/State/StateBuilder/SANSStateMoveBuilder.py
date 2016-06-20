@@ -67,8 +67,7 @@ class SANSStateMoveLOQBuilder(object):
 
 
 class SANSStateMoveSANS2DBuilder(object):
-    @automatic_setters(SANSStateMoveWorkspaceSANS2D, exclusions=["detector_name",
-                                                                 "detector_name_short", "monitor_names"])
+    @automatic_setters(SANSStateMoveWorkspaceSANS2D, exclusions=["detector_name", "detector_name_short", "monitor_names"])
     def __init__(self, data_info):
         super(SANSStateMoveSANS2DBuilder, self).__init__()
         self.state = SANSStateMoveWorkspaceSANS2D()

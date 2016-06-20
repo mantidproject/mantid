@@ -219,6 +219,7 @@ class SANSMoveSANS2D(SANSMove):
         lab_detector_default_sd_m = move_info.lab_detector_default_sd_m
         x_shift = -coordinates[0]
         y_shift = -coordinates[1]
+
         z_shift = (lab_detector_z + lab_detector.z_translation_correction) - lab_detector_default_sd_m
         detector_name = lab_detector.detector_name
         offset = {CanonicalCoordinates.X: x_shift,
