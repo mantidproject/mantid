@@ -507,14 +507,16 @@ void LoadSpice2D::setMetadataAsRunProperties(
  * offset is not used
  * GPSANS: distance = flange_det_dist! (sample_to_flange is 0 for GPSANS)
  * BioSANS: distance = flange_det_dist + sample_to_flange!
- * For back compatibility I'm subracting the offset to flange_det_dist
+ * For back compatibility I'm setting the offset to 0 and not reading it from
+ * the file
+ *
  * @return : sample_detector_distance
  */
 double
 LoadSpice2D::detectorDistance(std::map<std::string, std::string> &metadata) {
 
-  double sample_detector_distance = 0;
-  double sample_detector_distance_offset, sample_si_window_distance;
+  double sample_detector_distance = 0, sample_detector_distance_offset = 0,
+         sample_si_window_distance = 0;
 
   // check if it's the new format
   if (metadata.find("Motor_Positions/sample_det_dist") != metadata.end()) {
@@ -539,11 +541,7 @@ LoadSpice2D::detectorDistance(std::map<std::string, std::string> &metadata) {
                         metadata["Motor_Positions/flange_det_dist"], std::dec);
     sample_detector_distance *= 1000.0;
 
-    sample_detector_distance_offset =
-        addRunProperty<double>(metadata, "Header/tank_internal_offset",
-                               "sample-detector-distance-offset", "mm");
-
-    sample_detector_distance -= sample_detector_distance_offset;
+    addRunProperty<double>("sample-detector-distance-offset", 0, "mm");
 
     addRunProperty<double>("sample-detector-distance", sample_detector_distance,
                            "mm");
