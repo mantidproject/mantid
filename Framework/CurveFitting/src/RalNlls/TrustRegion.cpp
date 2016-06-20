@@ -71,7 +71,7 @@ void mult_J(const DoubleFortranMatrix &J, const DoubleFortranVector &x,
 /// Multiply a transposed matrix by a vector.
 /// @param J :: The matrix.
 /// @param x :: The vector.
-/// @param Jx :: The result vector.
+/// @param Jtx :: The result vector.
 void mult_Jt(const DoubleFortranMatrix &J, const DoubleFortranVector &x,
              DoubleFortranVector &Jtx) {
   // dgemv('T',m,n,alpha,J,m,x,1,beta,Jtx,1)
@@ -88,7 +88,7 @@ double dot_product(const DoubleFortranVector &x, const DoubleFortranVector &y) {
 
 /// Input:
 /// f = f(x_k), J = J(x_k),
-/// hf = \sum_{i=1}^m f_i(x_k) \nabla^2 f_i(x_k) (or an approx)
+/// hf = \\sum_{i=1}^m f_i(x_k) \\nabla^2 f_i(x_k) (or an approx)
 ///
 /// We have a model
 ///      m_k(d) = 0.5 f^T f  + d^T J f + 0.5 d^T (J^T J + HF) d
@@ -98,7 +98,7 @@ double dot_product(const DoubleFortranVector &x, const DoubleFortranVector &y) {
 ///       md :=m_k(d)
 /// @param f :: Vector of the residuals (at d = 0).
 /// @param J :: The Jacobian matrix at d = 0.
-/// @param J :: The Hessian matrix at d = 0.
+/// @param hf :: The Hessian matrix at d = 0.
 /// @param d :: The point where to evaluate the model.
 /// @param options :: The options.
 /// @param w :: The work struct.

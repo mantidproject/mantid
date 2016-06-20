@@ -30,7 +30,7 @@ TrustRegionMinimizer::TrustRegionMinimizer() : m_function() {
 /// Initialise the minimizer.
 /// @param costFunction :: The cost function to minimize. Must be the least
 /// squares.
-/// @parm maxIterations :: Maximum number of iterations that the minimiser will
+/// @param maxIterations :: Maximum number of iterations that the minimiser will
 /// do.
 void TrustRegionMinimizer::initialize(API::ICostFunction_sptr costFunction,
                                       size_t maxIterations) {

@@ -31,9 +31,9 @@ std::string DTRSMinimizer::name() const { return "DTRS"; }
 
 namespace {
 
-const double HUGE = std::numeric_limits<double>::max();
+const double huge = std::numeric_limits<double>::max();
 const double epsmch = std::numeric_limits<double>::epsilon();
-const double largest = HUGE;
+const double largest = huge;
 const double lower_default = -0.5 * largest;
 const double upper_default = largest;
 const double point4 = 0.4;
@@ -52,7 +52,7 @@ const int history_max = 100;
 const double teneps = 10.0 * epsmch;
 const double roots_tol = teneps;
 const bool roots_debug = false;
-const double infinity = HUGE;
+const double infinity = huge;
 
 enum class ErrorCode {
   ral_nlls_ok = 0,
@@ -1112,7 +1112,7 @@ void solve_dtrs(const DoubleFortranMatrix &J, const DoubleFortranVector &f,
 /// Implements the abstarct method of TrustRegionMinimizer.
 void DTRSMinimizer::calculate_step(
     const DoubleFortranMatrix &J, const DoubleFortranVector &f,
-    const DoubleFortranMatrix &hf, const DoubleFortranVector &g, double Delta,
+    const DoubleFortranMatrix &hf, const DoubleFortranVector &, double Delta,
     DoubleFortranVector &d, double &normd, const NLLS::nlls_options &options,
     NLLS::nlls_inform &inform, NLLS::calculate_step_work &w) {
   solve_dtrs(J, f, hf, Delta, d, normd, options, inform, w.solve_dtrs_ws);
