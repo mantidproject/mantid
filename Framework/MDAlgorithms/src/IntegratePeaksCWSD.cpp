@@ -235,15 +235,6 @@ void IntegratePeaksCWSD::simplePeakIntegration(
   double min_distance = 10000000;
   double max_distance = -1;
 
-  /*
-  signal_t total_signal = 0.;
-  signal_t total_unmasked_signal = 0;
-  size_t num_masked_det = 0;
-  size_t num_unmasked_det = 0;
-  size_t num_det = 0;
-  int testrunnumber = 13;
-  */
-
   while (scancell) {
     // Go through all the MDEvents in one cell.
     size_t numeventincell = mditer->getNumEvents();
