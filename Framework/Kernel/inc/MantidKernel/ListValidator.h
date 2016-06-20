@@ -50,7 +50,9 @@ public:
   ListValidator() : TypedValidator<TYPE>() {}
 
   /** Constructor
-   *  @param values :: A set of values consisting of the valid values     */
+   *  @param values :: A set of values consisting of the valid values
+   *  @param allowMultiSelection :: True if the list allows multi selection
+   */
   explicit ListValidator(const std::set<TYPE> &values,
                          const bool allowMultiSelection = false)
       : TypedValidator<TYPE>(), m_allowedValues(values.begin(), values.end()),
@@ -63,6 +65,7 @@ public:
 
   /** Constructor
    *  @param values :: An unordered set of values consisting of the valid values
+   *  @param allowMultiSelection :: True if the list allows multi selection
    */
   explicit ListValidator(const std::unordered_set<TYPE> &values,
                          const bool allowMultiSelection = false)
@@ -77,6 +80,7 @@ public:
   /** Constructor
    *  @param values :: A vector of the valid values
    *  @param aliases :: Optional aliases for the valid values.
+   *  @param allowMultiSelection :: True if the list allows multi selection
    */
   explicit ListValidator(const std::vector<TYPE> &values,
                          const std::map<std::string, std::string> &aliases =
