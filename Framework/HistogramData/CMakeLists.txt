@@ -21,6 +21,7 @@ set ( INC_FILES
 	inc/MantidHistogramData/CountStandardDeviations.h
 	inc/MantidHistogramData/CountVariances.h
 	inc/MantidHistogramData/Counts.h
+	inc/MantidHistogramData/EValidation.h
 	inc/MantidHistogramData/FixedLengthVector.h
 	inc/MantidHistogramData/Frequencies.h
 	inc/MantidHistogramData/FrequencyStandardDeviations.h
@@ -37,6 +38,7 @@ set ( INC_FILES
 	inc/MantidHistogramData/Points.h
 	inc/MantidHistogramData/Scalable.h
 	inc/MantidHistogramData/StandardDeviationVectorOf.h
+	inc/MantidHistogramData/Validation.h
 	inc/MantidHistogramData/VarianceVectorOf.h
 	inc/MantidHistogramData/VectorOf.h
 	inc/MantidHistogramData/XValidation.h
@@ -49,6 +51,7 @@ set ( TEST_FILES
 	CountStandardDeviationsTest.h
 	CountVariancesTest.h
 	CountsTest.h
+	EValidationTest.h
 	FixedLengthVectorTest.h
 	FrequenciesTest.h
 	FrequencyStandardDeviationsTest.h

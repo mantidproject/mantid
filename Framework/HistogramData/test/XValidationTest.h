@@ -3,6 +3,8 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidHistogramData/BinEdges.h"
+#include "MantidHistogramData/Points.h"
 #include "MantidHistogramData/XValidation.h"
 
 #include <cfloat>

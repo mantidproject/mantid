@@ -3,7 +3,10 @@
 
 namespace Mantid {
 namespace HistogramData {
+
 class HistogramX;
+class HistogramE;
+
 namespace detail {
 
 template <class TargetType> struct Validator {
@@ -13,6 +16,12 @@ template <class TargetType> struct Validator {
 
 // Defined in XValidation.h
 template <> struct Validator<HistogramX> {
+  template <class T> static bool isValid(const T &data);
+  template <class T> static void checkValidity(const T &data);
+};
+
+// Defined in EValidation.h
+template <> struct Validator<HistogramE> {
   template <class T> static bool isValid(const T &data);
   template <class T> static void checkValidity(const T &data);
 };

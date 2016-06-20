@@ -1,8 +1,6 @@
 #ifndef MANTID_HISTOGRAMDATA_XVALIDATION_H_
 #define MANTID_HISTOGRAMDATA_XVALIDATION_H_
 
-#include "MantidHistogramData/BinEdges.h"
-#include "MantidHistogramData/Points.h"
 #include "MantidHistogramData/Validation.h"
 
 #include <cmath>
@@ -10,6 +8,10 @@
 
 namespace Mantid {
 namespace HistogramData {
+
+class BinEdges;
+class HistogramX;
+class Points;
 
 namespace detail {
 template <class T> bool Validator<HistogramX>::isValid(const T &data) {
