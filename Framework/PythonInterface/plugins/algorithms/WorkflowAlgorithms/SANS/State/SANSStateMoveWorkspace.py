@@ -108,15 +108,11 @@ class SANSStateMoveWorkspaceLOQ(SANSStateMoveWorkspaceISIS):
 
     def __init__(self):
         super(SANSStateMoveWorkspaceLOQ, self).__init__()
-        # Set the monitor names
-        # TODO set this dynamically, based on IDF
-        self.monitor_names = {1: 'monitor1',
-                              2: 'monitor2',
-                              3: 'monitor3',
-                              4: 'monitor4'}
-
         # Set the center_position in meter
         self.center_position = 317.5 / 1000.
+
+        # Set the monitor names
+        self.monitor_names = {}
 
     @property
     def property_manager(self):
@@ -158,6 +154,8 @@ class SANSStateMoveWorkspaceSANS2D(SANSStateMoveWorkspaceISIS):
         self.hab_detector_default_sd_m = 4.0
         self.hab_detector_default_x_m = 1.1
         self.lab_detector_default_sd_m = 4.0
+
+        # The actual values are found on the workspace and should be used from there. This is only a fall back.
         self.hab_detector_x = 0.0
         self.hab_detector_z = 0.0
         self.hab_detector_rotation = 0.0
@@ -165,11 +163,7 @@ class SANSStateMoveWorkspaceSANS2D(SANSStateMoveWorkspaceISIS):
         self.lab_detector_z = 0.0
 
         # Set the monitor names
-        # TODO set this dynamically, based on IDF
-        self.monitor_names = {1: 'monitor1',
-                              2: 'monitor2',
-                              3: 'monitor3',
-                              4: 'monitor4'}
+        self.monitor_names = {}
 
         self.monitor_4_offset = 0.0
 
@@ -189,17 +183,15 @@ class SANSStateMoveWorkspaceSANS2D(SANSStateMoveWorkspaceISIS):
 class SANSStateMoveWorkspaceLARMOR(SANSStateMoveWorkspaceISIS):
     monitor_names = DictParameter()
     bench_rotation = FloatParameter()
-    coord1_scale_factor = PositiveFloatParameter()
 
     def __init__(self):
         super(SANSStateMoveWorkspaceLARMOR, self).__init__()
 
+        # Set a default for the bench rotation
+        self.bench_rotation = 0.0
+
         # Set the monitor names
-        # TODO set this dynamically, based on IDF
-        self.monitor_names = {1: 'monitor1',
-                              2: 'monitor2',
-                              3: 'monitor3',
-                              4: 'monitor4'}
+        self.monitor_names = {}
 
     @property
     def property_manager(self):
@@ -211,12 +203,7 @@ class SANSStateMoveWorkspaceLARMOR(SANSStateMoveWorkspaceISIS):
 
     def validate(self):
         super(SANSStateMoveWorkspaceLARMOR, self).validate()
-        is_invalid = {}
-        if not self.coord1_scale_factor:
-            is_invalid.update({"coord1_scale_factor": "The scale factor for coordinate 1 has not been specified."})
-        if is_invalid:
-            raise ValueError("SANSStateMoveWorkspaceLARMOR: The provided inputs are illegal. "
-                             "Please see: {}".format(json.dumps(is_invalid)))
+
 
 # -----------------------------------------------
 # SANSStateData setup for other facilities/techniques/scenarios.

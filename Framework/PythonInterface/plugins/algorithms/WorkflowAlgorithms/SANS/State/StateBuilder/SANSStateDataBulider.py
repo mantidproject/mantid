@@ -2,14 +2,14 @@ import copy
 from SANSStateBase import (TypedParameter, is_not_none)
 from Common.SANSConstants import SANSFacility
 from State.SANSStateData import SANSStateDataISIS
+from State.StateBuilder.StateBuilderFunctions import automatic_setters
 
 
 # ---------------------------------------
 # State builders
 # ---------------------------------------
 class SANStateDataISISBuilder(object):
-    state = TypedParameter(SANSStateDataISIS, is_not_none)
-
+    @automatic_setters(SANSStateDataISIS)
     def __init__(self):
         super(SANStateDataISISBuilder, self).__init__()
         self.state = SANSStateDataISIS()

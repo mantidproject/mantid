@@ -6,6 +6,7 @@ set ( TEST_PY_FILES
    SANSStateTest.py
    SANSStateDataTest.py
    SANSStateReductionTest.py
+   SANSStateMoveBuilderTest.py
    SANSStateMoveWorkspaceTest.py
   )
 

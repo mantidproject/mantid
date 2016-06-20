@@ -1,10 +1,11 @@
 import copy
-import xml.etree import ElementTree
 
-from State.SANSStateMoveWorkspace import SANSStateMoveWorkspaceLOQ
+from State.SANSStateMoveWorkspace import (SANSStateMoveWorkspaceLOQ, SANSStateMoveWorkspaceSANS2D,
+                                          SANSStateMoveWorkspaceLARMOR)
+from State.StateBuilder.StateBuilderFunctions import automatic_setters
 from Common.SANSFileInformation import (SANSFileInformationFactory, get_instrument_paths_for_sans_file)
 from Common.SANSConstants import (SANSConstants, SANSInstrument)
-from Common.XMLParsing import get_named_elements_from_ipf_file
+from Common.XMLParsing import (get_named_elements_from_ipf_file, get_monitor_names_from_idf_file)
 
 
 # -------------------------------------
@@ -12,15 +13,15 @@ from Common.XMLParsing import get_named_elements_from_ipf_file
 # -------------------------------------
 def set_detector_names(move_info, ipf_path):
     detector_names = {SANSConstants.low_angle_bank: "low-angle-detector-name",
-                     SANSConstants.high_angle_bank: "high-angle-detector-name"}
+                      SANSConstants.high_angle_bank: "high-angle-detector-name"}
     detector_names_short = {SANSConstants.low_angle_bank: "low-angle-detector-short-name",
-                           SANSConstants.high_angle_bank: "high-angle-detector-short-name"}
+                            SANSConstants.high_angle_bank: "high-angle-detector-short-name"}
 
     names_to_search = []
     names_to_search.extend(detector_names.values())
     names_to_search.extend(detector_names_short.values())
 
-    found_detector_names = get_named_elements_from_ipf_file(ipf_path, names_to_search)
+    found_detector_names = get_named_elements_from_ipf_file(ipf_path, names_to_search, str)
 
     for detector_type in move_info.detectors:
         try:
@@ -30,31 +31,65 @@ def set_detector_names(move_info, ipf_path):
             detector_name_short = found_detector_names[detector_name_short_tag]
         except KeyError:
             continue
+
         move_info.detectors[detector_type].detector_name = detector_name
         move_info.detectors[detector_type].detector_name_short = detector_name_short
-    return move_info
+
+
+def set_monitor_names(move_info, idf_path):
+    monitor_names = get_monitor_names_from_idf_file(idf_path)
+    move_info.monitor_names = monitor_names
+
+
+def setup_idf_and_ipf_content(move_info, data_info):
+    # Get the IDF and IPF path since they contain most of the import information
+    file_name = data_info.sample_scatter
+    idf_path, ipf_path = get_instrument_paths_for_sans_file(file_name)
+    # Set the detector names
+    set_detector_names(move_info, ipf_path)
+    # Set the monitor names
+    set_monitor_names(move_info, idf_path)
 
 
 # ---------------------------------------
 # State builders
 # ---------------------------------------
-class SANStateMoveLOQBuilder(object):
+class SANSStateMoveLOQBuilder(object):
+    @automatic_setters(SANSStateMoveWorkspaceLOQ, exclusions=["detector_name", "detector_name_short", "monitor_names"])
     def __init__(self, data_info):
-        super(SANStateMoveLOQBuilder, self).__init__()
+        super(SANSStateMoveLOQBuilder, self).__init__()
         self.state = SANSStateMoveWorkspaceLOQ()
-        self._extract_move_information(data_info)
-
-    def _extract_move_information(self, data_info):
-        # Get the IDF and IPF path since they contain most of the import information
-        file_name = data_info.sample_scatter
-        idf_path, ipf_path = get_instrument_paths_for_sans_file(file_name)
-
-        # Set the detector names
-        self.state = set_detector_names(self.state, ipf_path)
+        setup_idf_and_ipf_content(self.state, data_info)
 
     def build(self):
         self.state.validate()
         return copy.copy(self.state)
+
+
+class SANSStateMoveSANS2DBuilder(object):
+    @automatic_setters(SANSStateMoveWorkspaceSANS2D, exclusions=["detector_name",
+                                                                 "detector_name_short", "monitor_names"])
+    def __init__(self, data_info):
+        super(SANSStateMoveSANS2DBuilder, self).__init__()
+        self.state = SANSStateMoveWorkspaceSANS2D()
+        setup_idf_and_ipf_content(self.state, data_info)
+
+    def build(self):
+        self.state.validate()
+        return copy.copy(self.state)
+
+
+class SANSStateMoveLARMORBuilder(object):
+        @automatic_setters(SANSStateMoveWorkspaceLARMOR, exclusions=["detector_name",
+                                                                     "detector_name_short", "monitor_names"])
+        def __init__(self, data_info):
+            super(SANSStateMoveLARMORBuilder, self).__init__()
+            self.state = SANSStateMoveWorkspaceLARMOR()
+            setup_idf_and_ipf_content(self.state, data_info)
+
+        def build(self):
+            self.state.validate()
+            return copy.copy(self.state)
 
 
 # ------------------------------------------
@@ -71,7 +106,11 @@ def get_state_move_builder(data_info):
     instrument = file_info.get_instrument()
 
     if instrument is SANSInstrument.LOQ:
-        return SANStateMoveLOQBuilder(data_info)
+        return SANSStateMoveLOQBuilder(data_info)
+    elif instrument is SANSInstrument.SANS2D:
+        return SANSStateMoveSANS2DBuilder(data_info)
+    elif instrument is SANSInstrument.LARMOR:
+        return SANSStateMoveLARMORBuilder(data_info)
     else:
         raise NotImplementedError("SANSStateMoveBuilder: Could not find any valid move builder for the "
                                   "specified SANSStateData object {}".format(str(data_info)))

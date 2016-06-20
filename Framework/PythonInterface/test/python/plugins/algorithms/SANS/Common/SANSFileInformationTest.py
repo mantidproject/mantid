@@ -1,8 +1,8 @@
 import unittest
 import mantid
 
-from Load.SANSFileInformation import (SANSFileInformationFactory, SANSFileInformation, SANSFileType,
-                                      SANSInstrument, get_instrument_paths_for_sans_file)
+from Common.SANSFileInformation import (SANSFileInformationFactory, SANSFileInformation, SANSFileType,
+                                        SANSInstrument, get_instrument_paths_for_sans_file)
 from mantid.kernel import DateAndTime
 
 
@@ -51,7 +51,7 @@ class SANSFileInformationGeneralFunctionsTest(unittest.TestCase):
         self.assertTrue(idf_path is not None)
         self.assertTrue(ipf_path is not None)
         self.assertTrue("Definition" in idf_path)
-        self.assertTrue("Parameters" in idf_path)
+        self.assertTrue("Parameters" in ipf_path)
 
 
 if __name__ == '__main__':
