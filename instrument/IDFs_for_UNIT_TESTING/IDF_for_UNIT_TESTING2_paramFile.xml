@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<parameter-file instrument="IDF_for_UNIT_TESTING2" valid-from="blah...">
+
+<component-link name="nickel-holder" >
+  <parameter name="fjols-test-paramfile"> <value val="2000.0" /> </parameter>
+</component-link>
+
+<component-link name="IDF_for_UNIT_TESTING2.xml/combined translation6" >
+  <parameter name="fjols-test-paramfile"> 
+    <value val="50.0" /> 
+    <description is="test description.  
+    Full test description." />     
+  </parameter>
+</component-link>
+
+<component-link id="1301" >
+  <parameter name="testDouble"> <value val="25.0" /> </parameter>
+  <parameter name="testString" type="string">
+    <value val="hello world" />
+    <description is="its test hello word."/>
+  </parameter>
+</component-link>
+
+</parameter-file>

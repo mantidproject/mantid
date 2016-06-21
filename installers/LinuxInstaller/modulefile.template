@@ -1,0 +1,12 @@
+#%Module 1.0
+
+module load /etc/modulefiles/compat-openmpi-x86_64
+module load sns_software
+
+set                     PREFIX          @INSTALL_ROOT@/@CPACK_PACKAGE_FILE_NAME@
+
+prepend-path            PATH            $PREFIX/bin
+# Second one is to pick up boostmpi (not openmpi itself which comes from the compat package above)
+prepend-path            LD_LIBRARY_PATH $PREFIX/lib:/usr/lib64/openmpi/lib
+prepend-path            PYTHONPATH      $PREFIX/bin
+

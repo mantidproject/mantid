@@ -1,0 +1,12 @@
+<ServerManagerConfiguration>
+  <!-- Begin SinglePeakMarkerSource -->
+  <ProxyGroup name="sources">
+    <SourceProxy name="SinglePeakMarkerSource" class="vtkSinglePeakMarkerSource">
+      <DoubleVectorProperty name="Position1" command="SetPosition1" number_of_elements="1" default_values="0"/>
+      <DoubleVectorProperty name="Position2" command="SetPosition2" number_of_elements="1" default_values="0"/>
+      <DoubleVectorProperty name="Position3" command="SetPosition3" number_of_elements="1" default_values="0"/>
+      <DoubleVectorProperty name="RadiusMarker" command="SetRadiusMarker" number_of_elements="1" default_values="1"/>
+    </SourceProxy>
+  </ProxyGroup>
+  <!-- End SinglePeakMarkerSource -->
+</ServerManagerConfiguration>

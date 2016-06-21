@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>English</string>
+	<key>CFBundleExecutable</key>
+	<string>MantidPlot</string>
+	<key>CFBundleGetInfoString</key>
+	<string>@VERSION_MAJOR@.@VERSION_MINOR@.@MtdVersion_WC_LAST_CHANGED_REV@</string>
+	<key>CFBundleIconFile</key>
+	<string>MantidPlot.icns</string>
+	<key>CFBundleIdentifier</key>
+	<string>@MAC_BUNDLE_IDENTIFIER@</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleLongVersionString</key>
+	<string>@VERSION_MAJOR@.@VERSION_MINOR@.@MtdVersion_WC_LAST_CHANGED_REV@</string>
+	<key>CFBundleName</key>
+	<string>MantidPlot</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleShortVersionString</key>
+	<string>@VERSION_MAJOR@.@VERSION_MINOR@.@MtdVersion_WC_LAST_CHANGED_REV@</string>
+	<key>CFBundleSignature</key>
+	<string>????</string>
+	<key>CFBundleVersion</key>
+	<string>@VERSION_MAJOR@.@VERSION_MINOR@.@MtdVersion_WC_LAST_CHANGED_REV@</string>
+	<key>CSResourcesFileMapped</key>
+	<true/>
+	<key>LSRequiresCarbon</key>
+	<true/>
+	<key>NSHumanReadableCopyright</key>
+	<string>Copyright 2011 ISIS Rutherford Appleton Laboratory and NScD Oak Ridge National Laboratory</string>
+</dict>
+</plist>

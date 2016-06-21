@@ -1,0 +1,24 @@
+digraph ApplyPaalmanPingsCorrection_CanScaleOnly {
+  label="ApplyPaalmanPingsCorrection Container Scale Only Flowchart"
+  $global_style
+
+  subgraph params {
+    $param_style
+    SampleWorkspace
+    CanWorkspace
+    CanScaleFactor
+    OutputWorkspace
+  }
+
+  subgraph algorithms {
+    $algorithm_style
+    Scale
+    Minus
+  }
+
+  CanWorkspace    -> Scale
+  CanScaleFactor  -> Scale
+  Scale           -> Minus           [label="RHSWorkspace"]
+  SampleWorkspace -> Minus           [label="LHSWorkspace"]
+  Minus           -> OutputWorkspace
+}

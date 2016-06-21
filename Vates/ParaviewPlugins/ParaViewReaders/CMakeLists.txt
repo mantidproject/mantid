@@ -1,0 +1,4 @@
+add_subdirectory( MDEWNexusReader )
+add_subdirectory( PeaksReader )
+add_subdirectory( NexusPeaksReader )
+add_subdirectory( MDHWNexusReader )

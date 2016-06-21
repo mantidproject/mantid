@@ -1,0 +1,6 @@
+<ParaViewReaders>
+  <Reader name="PeaksReader"
+    extensions="peaks"
+    file_description="ISAW Peaks File">
+  </Reader>
+</ParaViewReaders>

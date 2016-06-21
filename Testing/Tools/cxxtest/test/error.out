@@ -1,0 +1,51 @@
+Running 14 tests
+In CreatedTest::test_nothing:
+CreatedTest.h:26: Error: Test failed: Nothing to test
+.
+In EnumTraits::test_Enum_traits:
+EnumTraits.h:32: Error: Test failed: Yes
+EnumTraits.h:33: Error: Test failed: No
+EnumTraits.h:34: Error: Test failed: Maybe
+EnumTraits.h:35: Error: Test failed: DontKnow
+EnumTraits.h:36: Error: Test failed: DontCare
+EnumTraits.h:37: Error: Test failed: (Answer)1000
+In ExceptionTest::testAssertion:
+ExceptionTest.h:20: Error: Expected (throwThis(5)) to throw (const char *) but it threw something else
+ExceptionTest.h:22: Error: Expected (goodFunction(1)) to throw (...) but it didn't throw
+ExceptionTest.h:24: Error: Test failed: Unhandled exception
+ExceptionTest.h:26: Error: Expected (throwThis(-1)) not to throw, but it did
+ExceptionTest.h:31: Error: Test failed: throwThis(3) failed
+In FixtureTest::test_strcpy:
+FixtureTest.h:32: Error: Expected (_buffer[1] == 'E'), found ('e' != 'E')
+In MessageTest::testValues:
+MessageTest.h:24: Error: Test failed: My hovercraft
+MessageTest.h:24: Error: Assertion failed: value != 0
+MessageTest.h:25: Error: Test failed: of eels
+MessageTest.h:25: Error: Expected (value == value * value), found (2 != 4)
+In SimpleTest::testEquality:
+SimpleTest.h:16: Error: Expected (1 == 2), found (1 != 2)
+SimpleTest.h:17: Error: Expected ('a' == 'A'), found ('a' != 'A')
+SimpleTest.h:18: Error: Expected (1.0 == -12345678900000000000000000000000000000000000000000.1234), found (1.0000 != -1.2345E50)
+In SimpleTest::testAddition:
+SimpleTest.h:24: Error: Expected (2 + 2 == 5), found (4 != 5)
+In SimpleTest::TestMultiplication:
+SimpleTest.h:30: Error: Expected (4 * 4 == 44), found (16 != 44)
+SimpleTest.h:31: Error: Expected (-2 * -2 != 4), found (4)
+In SimpleTest::testComparison:
+SimpleTest.h:37: Error: Expected (-1 < -2), found (-1 >= -2)
+In SimpleTest::testTheWorldIsCrazy:
+SimpleTest.h:42: Error: Expected (true == false), found (true != false)
+In SimpleTest::test_Failure:
+SimpleTest.h:47: Error: Test failed: Not implemented
+SimpleTest.h:48: Error: Test failed: 1569779912
+In SimpleTest::test_TS_WARN_macro:
+SimpleTest.h:53: Warning: Just a friendly warning
+SimpleTest.h:54: Warning: Warnings don't abort the test
+.
+In TestFunky::testPets:
+TraitsTest.h:59: Error: Expected (pet1 == pet2), found (Pet("dog") != Pet("cat"))
+TraitsTest.h:61: Error: Expected (cat != gato), found (Pet("cat"))
+TraitsTest.h:64: Error: Expected (String("Hello") == String("World!")), found ("Hello" != "World!")
+Failed 12 of 14 tests
+Success rate: 14%
+Error level = 12

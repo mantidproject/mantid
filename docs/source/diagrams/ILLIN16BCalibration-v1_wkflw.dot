@@ -1,0 +1,51 @@
+digraph ILLIN16BCalibration {
+  label="ILLIN16BCalibration Flowchart"
+  $global_style
+
+  subgraph decisions {
+    $decision_style
+    UseAutoScaling [label="ScaleFactor = 1?"]
+  }
+
+  subgraph values {
+    $value_style
+    AutoScaleFactor [label="1 / (sum / (num_spectra - num_zero_spectra))"]
+  }
+
+  subgraph params {
+    $param_style
+    Run
+    MirrorMode
+    MapFile
+    PeakRange
+    ScaleFactor
+    OutputWorkspace
+  }
+
+  subgraph algorithms {
+    $algorithm_style
+    IndirectILLReduction
+    Integration
+    FindDetectorsOutsideLimits
+    SumSpectra
+    Scale_Auto [label="Scale"]
+    Scale_Manual [label="Scale"]
+  }
+
+  Run -> IndirectILLReduction
+  MapFile -> IndirectILLReduction
+  MirrorMode -> IndirectILLReduction
+  IndirectILLReduction -> Integration [label="ReducedWorkspace"]
+  PeakRange -> Integration
+  Integration -> FindDetectorsOutsideLimits
+  Integration -> SumSpectra
+  Integration -> UseAutoScaling
+  UseAutoScaling -> Scale_Auto [label="Yes"]
+  SumSpectra -> AutoScaleFactor [label="sum"]
+  FindDetectorsOutsideLimits -> AutoScaleFactor [label="num_zero_spectra"]
+  AutoScaleFactor -> Scale_Auto [label="Factor"]
+  Scale_Auto -> OutputWorkspace
+  UseAutoScaling -> Scale_Manual [label="No"]
+  ScaleFactor -> Scale_Manual
+  Scale_Manual -> OutputWorkspace
+}

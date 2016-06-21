@@ -1,0 +1,8 @@
+#ifndef MANTID_CURVEFITTING_PRECOMPILEDHEADER_H_
+#define MANTID_CURVEFITTING_PRECOMPILEDHEADER_H_
+
+#include <vector>
+#include <string>
+#include <set>
+
+#endif // MANTID_CURVEFITTING_PRECOMPILEDHEADER_H_

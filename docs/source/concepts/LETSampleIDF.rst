@@ -1,0 +1,714 @@
+.. _LET_Sample_IDF:
+
+.. role:: xml(literal)
+   :class: highlight
+   
+IDF ISIS LET annotated
+=========================
+
+This page annotates the direct inelastic instrument LET, with the purpose of (hopefully) quickly learn the basis of creating a similar IDF. 
+
+Instrument view of LET
+----------------------
+
+LET consists of doors (in the speach of LET scientists) where each door is made up of a number of tupes along the y-axis (green line in picture below), where each tube is made up of a sequence pixels (detectors). 
+
+The view of the instrument below is in the 'Full 3D' mode.
+
+.. figure:: ../images/LETinFull3DInstrumentView.png
+   :alt: LETinFull3DInstrumentView.png
+
+   LETinFull3DInstrumentView.png
+
+An annotated version of the ISIS LET IDF
+----------------------------------------
+
+.. code-block:: xml
+
+  <!-- Specify name of instrument and date from when this IDF is valid -->
+  <instrument xmlns="http://www.mantidproject.org/IDF/1.0" 
+              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+              xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 Schema/IDFSchema.xsd"
+              name="LET" 
+              valid-from   ="1900-01-31 23:59:59"
+              valid-to     ="2100-01-31 23:59:59"
+              last-modified="2012-03-13 00:00:00">
+   
+  <!-- Specify various optional defaults --> 
+    <defaults>
+      <length unit="meter"/>
+      <angle unit="degree"/>
+      <reference-frame>
+        <along-beam axis="z"/>
+        <pointing-up axis="y"/>
+        <handedness val="right"/>
+        <origin val="beam" /> 
+      </reference-frame>
+      <default-view view="cylindrical_y"/>
+      <!-- The option below will by default orientate the
+           z-axis of any component to point from (0,0,0) towards the component. -->
+      <components-are-facing x="0.0" y="0.0" z="0.0" />
+    </defaults>
+   
+   
+  <!-- Specify monitor components. Monitors collect data hence 
+       the idlist="monitors", which specify the name of a list of detector/monitor IDs.
+       For ISIS data this provides the link between the data and the components
+       collecting the data. Even for data not associated with unique IDs,
+       unique ID numbers of your choice are still required, for subsequent 
+       use by Mantid analysis -->
+    <component type="monitors" idlist="monitors">
+      <location/>
+    </component>
+   
+    <!-- Specify what a type with name="monitors" is. This type happens to be a container/grouping
+         of the monitors of this instrument. This grouping is here entirely optional. Only difference
+         it makes is that in the Mantid instrument view tree these will be listed under one node, and
+         in Python/C++ code a user can more easy for example set a property which applies
+         to all the monitors -->
+    <type name="monitors">
+      <component type="monitor">
+        <location r="17.758" t="180.0" p="0.0" name="monitor1" />
+        <location r="17.060" t="180.0" p="0.0" name="monitor2" />
+        <location r="16.558" t="180.0" p="0.0" name="monitor3" />
+        <location r="13.164" t="180.0" p="0.0" name="monitor4" />
+        <location r="9.255" t="180.0" p="0.0" name="monitor5" />
+        <location r="1.333" t="180.0" p="0.0" name="monitor6" />
+        <location r="1.088" t="180.0" p="0.0" name="monitor7" />
+        <location r="1.088" t="180.0" p="0.0" name="monitor8" />
+      </component>
+    </type>
+   
+    <!-- Define the monitor detector IDs. There are 8 of these on LET -->
+    <idlist idname="monitors">
+      <id start="11" end="81" step="10"/>
+    </idlist>
+   
+    <!-- Define the type monitor, which is given a physical shape.
+         More specifically here a cylindrical shape. See http://www.mantidproject.org/HowToDefineGeometricShape
+         for all the options for defining a physical shape -->
+    <type name="monitor" is="monitor">
+      <cylinder id="some-shape">
+        <centre-of-bottom-base r="0.0" t="0.0" p="0.0" />
+        <axis x="0.0" y="0.0" z="1.0" />
+        <radius val="0.01" />
+        <height val="0.03" />
+      </cylinder>
+      <algebra val="some-shape" />
+    </type>
+   
+   
+  <!-- ISIS is a neutron spallation source. Therefore an important
+       piece of information is the position the source relative to
+       the sample, which is needed to calculate neutron flightpaths. 
+       The source currently also serves as a point along the beam, and 
+       the source-to-sample direction is used to determine the beam 
+       direction in a number of parts of the Mantid code. -->
+    <component type="undulator">
+      <location z="-25.0">     <!-- Specify location of this component --> 
+        <facing val="none"/>   <!-- The <facing> tag here overwrites the default <components-are-facing> set above --> 
+      </location>  
+    </component>
+  <!-- Specify the type with name "undulator", which 'is' marked as being the Source. 
+       Optionally you may define a geometric shape for the Source. In some cases done
+       with the purpose to get it to show up in the Mantid Instrument view.
+       See http://www.mantidproject.org/HowToDefineGeometricShape for more on geometric shapes -->
+    <type name="undulator" is="Source">
+      <cylinder id="some-shape">
+        <centre-of-bottom-base r="0.0" t="0.0" p="0.0" />
+        <axis x="0.0" y="0.0" z="1.0" /> 
+        <radius val="0.01" />
+        <height val="0.03" />
+      </cylinder> 
+      <algebra val="some-shape" />
+    </type>
+   
+  <!-- Specify the position of the sample and here a shape for
+       this sample also --> 
+    <component type="nickel-holder">
+      <location> <facing val="none"/> </location>
+    </component>
+    <type name="nickel-holder" is="SamplePos">
+      <sphere id="some-shape">
+        <centre x="0.0"  y="0.0" z="0.0" />
+        <radius val="0.03" />
+      </sphere>
+      <algebra val="some-shape" />
+    </type>
+   
+  <!-- Specify the LET doors structure. Here the instrument scientist has
+       decided to define components of types: door01, ..., door12, where 
+       each of these are placeholders for the same type LETdoor. The effect 
+       of this is that you will have the node structure door01->LETdoor->tube1 etc.
+   
+       An alternative would have been to instead of the xml code
+       <component type="door01" idlist="door01">
+         <location />
+       </component>
+       <type name="door01">
+         <component type="LETdoor">
+           <location  x="-1.8805" z="2.9519"> <facing x="0" y="0" z="0"/>
+         </component>
+       </type>
+   
+       have
+   
+       <component type="LETdoor" idlist="door01" name="door01">
+         <location  x="-1.8805" z="2.9519"> <facing x="0" y="0" z="0"/>
+       </component>
+   
+       which would have given the node structure door01->tube1 etc. Both choices are
+       equally valid. -->
+    <component type="door01" idlist="door01"><location /></component>
+    <component type="door02" idlist="door02"><location /></component>
+    <component type="door03" idlist="door03"><location /></component>
+    <component type="door04" idlist="door04"><location /></component>
+    <component type="door05" idlist="door05"><location /></component>
+    <component type="door06" idlist="door06"><location /></component>
+    <component type="door07" idlist="door07"><location /></component>
+    <component type="door08" idlist="door08"><location /></component>
+    <component type="door09" idlist="door09"><location /></component>
+    <component type="door10" idlist="door10"><location /></component>
+    <component type="door11" idlist="door11"><location /></component>
+    <component type="door12" idlist="door12"><location /></component>
+   
+    <type name="door01">
+      <component type="LETdoor">
+        <!-- Note here the instrument scientist has chosen to put in <facing x="0" y="0" z="0"/>
+             This element in fact here has no effect since the default
+             option set at the top <components-are-facing x="0.0" y="0.0" z="0.0" /> 
+             will already face any component to x="0.0" y="0.0" z="0.0" -->
+        <location  x="-1.8805" z="2.9519"> <facing x="0" y="0" z="0"/> </location>
+      </component>
+    </type> 
+    <type name="door02">
+      <component type="LETdoor">
+        <location  x="  -1.0525    " z="  3.3380    "> <facing x="0" y="0" z="0"/> </location>
+      </component>
+    </type>
+    <type name="door03">
+      <component type="LETdoor">
+        <location  x=" -0.15267    " z="  3.4967    "> <facing x="0" y="0" z="0"/> </location>
+      </component>
+    </type>
+    <type name="door04">
+      <component type="LETdoor">
+        <location  x="0.75754    " z="  3.4170    "> <facing x="0" y="0" z="0"/> </location>
+      </component>
+    </type>
+    <type name="door05">
+      <component type="LETdoor">
+        <location  x=" 1.6161    " z="  3.1045    "> <facing x="0" y="0" z="0"/> </location>
+      </component>
+    </type>
+    <type name="door06">
+      <component type="LETdoor">
+        <location  x=" 2.3646    " z="  2.5805    "> <facing x="0" y="0" z="0"/> </location>
+      </component>
+    </type>
+    <type name="door07">
+      <component type="LETdoor">
+        <location  x=" 2.9519    " z="  1.8805    "> <facing x="0" y="0" z="0"/> </location>
+      </component>
+    </type>
+    <type name="door08">
+      <component type="LETdoor">
+        <location  x=" 3.3380    " z="  1.0525    "> <facing x="0" y="0" z="0"/> </location>
+      </component>
+    </type>
+    <type name="door09">
+      <component type="LETdoor">
+        <location  x=" 3.4967    " z=" 0.15267    "> <facing x="0" y="0" z="0"/> </location>
+      </component>
+    </type>
+    <type name="door10">
+      <component type="LETdoor">
+        <location  x=" 3.4170    " z="-0.75754    "> <facing x="0" y="0" z="0"/> </location>
+      </component>
+    </type>
+    <type name="door11">
+      <component type="LETdoor">
+        <location  x=" 3.1045    " z=" -1.6161    "> <facing x="0" y="0" z="0"/> </location>
+      </component>
+    </type>
+    <type name="door12">
+      <component type="LETdoor">
+        <location  x=" 2.5805    " z=" -2.3646    "> <facing x="0" y="0" z="0"/> </location>
+      </component>
+    </type>
+   
+    <type name="LETdoor">
+      <component type="LETtube" outline="yes">
+        <location  x="   -0.393024    " z="  -0.221369E-01" name="tube1" />
+        <location  x="   -0.367765    " z="  -0.193752E-01" name="tube2" />
+        <location  x="   -0.342486    " z="  -0.167970E-01" name="tube3" />
+        <location  x="   -0.317189    " z="  -0.144023E-01" name="tube4" />
+        <location  x="   -0.291876    " z="  -0.121914E-01" name="tube5" />
+        <location  x="   -0.266547    " z="  -0.101643E-01" name="tube6" />
+        <location  x="   -0.241204    " z="  -0.832121E-02" name="tube7" />
+        <location  x="   -0.215848    " z="  -0.666210E-02" name="tube8" />
+        <location  x="   -0.190481    " z="  -0.518712E-02" name="tube9" />
+        <location  x="   -0.165104    " z="  -0.389635E-02" name="tube10" />
+        <location  x="   -0.139718    " z="  -0.278984E-02" name="tube11" />
+        <location  x="   -0.114325    " z="  -0.186766E-02" name="tube12" />
+        <location  x="   -0.889254E-01" z="  -0.112986E-02" name="tube13" />
+        <location  x="   -0.635215E-01" z="  -0.576474E-03" name="tube14" />
+        <location  x="   -0.381142E-01" z="  -0.207534E-03" name="tube15" />
+        <location  x="   -0.127050E-01" z="  -0.230596E-04" name="tube16" />
+        <location  x="  0.127050E-01" z="  -0.230596E-04" name="tube17" />
+        <location  x="  0.381142E-01" z="  -0.207534E-03" name="tube18" />
+        <location  x="  0.635215E-01" z="  -0.576474E-03" name="tube19" />
+        <location  x="  0.889254E-01" z="  -0.112986E-02" name="tube20" />
+        <location  x="  0.114325    " z="  -0.186766E-02" name="tube21" />
+        <location  x="  0.139718    " z="  -0.278984E-02" name="tube22" />
+        <location  x="  0.165104    " z="  -0.389635E-02" name="tube23" />
+        <location  x="  0.190481    " z="  -0.518712E-02" name="tube24" />
+        <location  x="  0.215848    " z="  -0.666210E-02" name="tube25" />
+        <location  x="  0.241204    " z="  -0.832121E-02" name="tube26" />
+        <location  x="  0.266547    " z="  -0.101643E-01" name="tube27" />
+        <location  x="  0.291876    " z="  -0.121914E-01" name="tube28" />
+        <location  x="  0.317189    " z="  -0.144023E-01" name="tube29" />
+        <location  x="  0.342486    " z="  -0.167970E-01" name="tube30" />
+        <location  x="  0.367765    " z="  -0.193752E-01" name="tube31" />
+        <location  x="  0.393024    " z="  -0.221369E-01" name="tube32" />
+      </component>
+    </type>
+   
+  <!-- Here the type for a tube is defined. It using the shorthand notation
+       <locations> to define 1024 pixels at positions along the y-axis. 
+   
+       Note also the 'outline' attribute is used. The attribute is to overcome
+       a technical difficulty when displaying and rotating a lot of
+       shapes in Mantid Instrument Viewer. For more information on this see www.mantidproject.org/IDF -->
+    <type name="LETtube" outline="yes">
+      <component type="pixel">
+        <locations y="-2.00304" y-end="2.00304" n-elements="1024" />
+      </component>
+    </type>
+   
+   
+    <type name="pixel" is="detector">
+      <cylinder id="cyl-approx">
+        <centre-of-bottom-base r="0.0" t="0.0" p="0.0" />
+        <axis x="0.0" y="0.2" z="0.0" />
+        <radius val="   0.127000E-01" />
+        <height val="   0.391602E-02" />
+      </cylinder>
+      <algebra val="cyl-approx" />
+    </type>
+   
+   
+     <!-- DETECTOR ID LISTS -->
+    <idlist idname="door01">
+      <id start="1110001" end="1111024" />
+      <id start="1120001" end="1121024" />
+      <id start="1130001" end="1131024" />
+      <id start="1140001" end="1141024" />
+      <id start="1150001" end="1151024" />
+      <id start="1160001" end="1161024" />
+      <id start="1170001" end="1171024" />
+      <id start="1180001" end="1181024" />
+      <id start="1210001" end="1211024" />
+      <id start="1220001" end="1221024" />
+      <id start="1230001" end="1231024" />
+      <id start="1240001" end="1241024" />
+      <id start="1250001" end="1251024" />
+      <id start="1260001" end="1261024" />
+      <id start="1270001" end="1271024" />
+      <id start="1280001" end="1281024" />
+      <id start="1310001" end="1311024" />
+      <id start="1320001" end="1321024" />
+      <id start="1330001" end="1331024" />
+      <id start="1340001" end="1341024" />
+      <id start="1350001" end="1351024" />
+      <id start="1360001" end="1361024" />
+      <id start="1370001" end="1371024" />
+      <id start="1380001" end="1381024" />
+      <id start="1410001" end="1411024" />
+      <id start="1420001" end="1421024" />
+      <id start="1430001" end="1431024" />
+      <id start="1440001" end="1441024" />
+      <id start="1450001" end="1451024" />
+      <id start="1460001" end="1461024" />
+      <id start="1470001" end="1471024" />
+      <id start="1480001" end="1481024" />
+    </idlist>
+    <idlist idname="door02">
+      <id start="2110001" end="2111024" />
+      <id start="2120001" end="2121024" />
+      <id start="2130001" end="2131024" />
+      <id start="2140001" end="2141024" />
+      <id start="2150001" end="2151024" />
+      <id start="2160001" end="2161024" />
+      <id start="2170001" end="2171024" />
+      <id start="2180001" end="2181024" />
+      <id start="2210001" end="2211024" />
+      <id start="2220001" end="2221024" />
+      <id start="2230001" end="2231024" />
+      <id start="2240001" end="2241024" />
+      <id start="2250001" end="2251024" />
+      <id start="2260001" end="2261024" />
+      <id start="2270001" end="2271024" />
+      <id start="2280001" end="2281024" />
+      <id start="2310001" end="2311024" />
+      <id start="2320001" end="2321024" />
+      <id start="2330001" end="2331024" />
+      <id start="2340001" end="2341024" />
+      <id start="2350001" end="2351024" />
+      <id start="2360001" end="2361024" />
+      <id start="2370001" end="2371024" />
+      <id start="2380001" end="2381024" />
+      <id start="2410001" end="2411024" />
+      <id start="2420001" end="2421024" />
+      <id start="2430001" end="2431024" />
+      <id start="2440001" end="2441024" />
+      <id start="2450001" end="2451024" />
+      <id start="2460001" end="2461024" />
+      <id start="2470001" end="2471024" />
+      <id start="2480001" end="2481024" />
+    </idlist>
+    <idlist idname="door03">
+      <id start="3110001" end="3111024" />
+      <id start="3120001" end="3121024" />
+      <id start="3130001" end="3131024" />
+      <id start="3140001" end="3141024" />
+      <id start="3150001" end="3151024" />
+      <id start="3160001" end="3161024" />
+      <id start="3170001" end="3171024" />
+      <id start="3180001" end="3181024" />
+      <id start="3210001" end="3211024" />
+      <id start="3220001" end="3221024" />
+      <id start="3230001" end="3231024" />
+      <id start="3240001" end="3241024" />
+      <id start="3250001" end="3251024" />
+      <id start="3260001" end="3261024" />
+      <id start="3270001" end="3271024" />
+      <id start="3280001" end="3281024" />
+      <id start="3310001" end="3311024" />
+      <id start="3320001" end="3321024" />
+      <id start="3330001" end="3331024" />
+      <id start="3340001" end="3341024" />
+      <id start="3350001" end="3351024" />
+      <id start="3360001" end="3361024" />
+      <id start="3370001" end="3371024" />
+      <id start="3380001" end="3381024" />
+      <id start="3410001" end="3411024" />
+      <id start="3420001" end="3421024" />
+      <id start="3430001" end="3431024" />
+      <id start="3440001" end="3441024" />
+      <id start="3450001" end="3451024" />
+      <id start="3460001" end="3461024" />
+      <id start="3470001" end="3471024" />
+      <id start="3480001" end="3481024" />
+    </idlist>
+    <idlist idname="door04">
+      <id start="4110001" end="4111024" />
+      <id start="4120001" end="4121024" />
+      <id start="4130001" end="4131024" />
+      <id start="4140001" end="4141024" />
+      <id start="4150001" end="4151024" />
+      <id start="4160001" end="4161024" />
+      <id start="4170001" end="4171024" />
+      <id start="4180001" end="4181024" />
+      <id start="4210001" end="4211024" />
+      <id start="4220001" end="4221024" />
+      <id start="4230001" end="4231024" />
+      <id start="4240001" end="4241024" />
+      <id start="4250001" end="4251024" />
+      <id start="4260001" end="4261024" />
+      <id start="4270001" end="4271024" />
+      <id start="4280001" end="4281024" />
+      <id start="4310001" end="4311024" />
+      <id start="4320001" end="4321024" />
+      <id start="4330001" end="4331024" />
+      <id start="4340001" end="4341024" />
+      <id start="4350001" end="4351024" />
+      <id start="4360001" end="4361024" />
+      <id start="4370001" end="4371024" />
+      <id start="4380001" end="4381024" />
+      <id start="4410001" end="4411024" />
+      <id start="4420001" end="4421024" />
+      <id start="4430001" end="4431024" />
+      <id start="4440001" end="4441024" />
+      <id start="4450001" end="4451024" />
+      <id start="4460001" end="4461024" />
+      <id start="4470001" end="4471024" />
+      <id start="4480001" end="4481024" />
+    </idlist>
+    <idlist idname="door05">
+      <id start="5110001" end="5111024" />
+      <id start="5120001" end="5121024" />
+      <id start="5130001" end="5131024" />
+      <id start="5140001" end="5141024" />
+      <id start="5150001" end="5151024" />
+      <id start="5160001" end="5161024" />
+      <id start="5170001" end="5171024" />
+      <id start="5180001" end="5181024" />
+      <id start="5210001" end="5211024" />
+      <id start="5220001" end="5221024" />
+      <id start="5230001" end="5231024" />
+      <id start="5240001" end="5241024" />
+      <id start="5250001" end="5251024" />
+      <id start="5260001" end="5261024" />
+      <id start="5270001" end="5271024" />
+      <id start="5280001" end="5281024" />
+      <id start="5310001" end="5311024" />
+      <id start="5320001" end="5321024" />
+      <id start="5330001" end="5331024" />
+      <id start="5340001" end="5341024" />
+      <id start="5350001" end="5351024" />
+      <id start="5360001" end="5361024" />
+      <id start="5370001" end="5371024" />
+      <id start="5380001" end="5381024" />
+      <id start="5410001" end="5411024" />
+      <id start="5420001" end="5421024" />
+      <id start="5430001" end="5431024" />
+      <id start="5440001" end="5441024" />
+      <id start="5450001" end="5451024" />
+      <id start="5460001" end="5461024" />
+      <id start="5470001" end="5471024" />
+      <id start="5480001" end="5481024" />
+    </idlist>
+    <idlist idname="door06">
+      <id start="6110001" end="6111024" />
+      <id start="6120001" end="6121024" />
+      <id start="6130001" end="6131024" />
+      <id start="6140001" end="6141024" />
+      <id start="6150001" end="6151024" />
+      <id start="6160001" end="6161024" />
+      <id start="6170001" end="6171024" />
+      <id start="6180001" end="6181024" />
+      <id start="6210001" end="6211024" />
+      <id start="6220001" end="6221024" />
+      <id start="6230001" end="6231024" />
+      <id start="6240001" end="6241024" />
+      <id start="6250001" end="6251024" />
+      <id start="6260001" end="6261024" />
+      <id start="6270001" end="6271024" />
+      <id start="6280001" end="6281024" />
+      <id start="6310001" end="6311024" />
+      <id start="6320001" end="6321024" />
+      <id start="6330001" end="6331024" />
+      <id start="6340001" end="6341024" />
+      <id start="6350001" end="6351024" />
+      <id start="6360001" end="6361024" />
+      <id start="6370001" end="6371024" />
+      <id start="6380001" end="6381024" />
+      <id start="6410001" end="6411024" />
+      <id start="6420001" end="6421024" />
+      <id start="6430001" end="6431024" />
+      <id start="6440001" end="6441024" />
+      <id start="6450001" end="6451024" />
+      <id start="6460001" end="6461024" />
+      <id start="6470001" end="6471024" />
+      <id start="6480001" end="6481024" />
+    </idlist>
+    <idlist idname="door07">
+      <id start="7110001" end="7111024" />
+      <id start="7120001" end="7121024" />
+      <id start="7130001" end="7131024" />
+      <id start="7140001" end="7141024" />
+      <id start="7150001" end="7151024" />
+      <id start="7160001" end="7161024" />
+      <id start="7170001" end="7171024" />
+      <id start="7180001" end="7181024" />
+      <id start="7210001" end="7211024" />
+      <id start="7220001" end="7221024" />
+      <id start="7230001" end="7231024" />
+      <id start="7240001" end="7241024" />
+      <id start="7250001" end="7251024" />
+      <id start="7260001" end="7261024" />
+      <id start="7270001" end="7271024" />
+      <id start="7280001" end="7281024" />
+      <id start="7310001" end="7311024" />
+      <id start="7320001" end="7321024" />
+      <id start="7330001" end="7331024" />
+      <id start="7340001" end="7341024" />
+      <id start="7350001" end="7351024" />
+      <id start="7360001" end="7361024" />
+      <id start="7370001" end="7371024" />
+      <id start="7380001" end="7381024" />
+      <id start="7410001" end="7411024" />
+      <id start="7420001" end="7421024" />
+      <id start="7430001" end="7431024" />
+      <id start="7440001" end="7441024" />
+      <id start="7450001" end="7451024" />
+      <id start="7460001" end="7461024" />
+      <id start="7470001" end="7471024" />
+      <id start="7480001" end="7481024" />
+    </idlist>
+    <idlist idname="door08">
+      <id start="8110001" end="8111024" />
+      <id start="8120001" end="8121024" />
+      <id start="8130001" end="8131024" />
+      <id start="8140001" end="8141024" />
+      <id start="8150001" end="8151024" />
+      <id start="8160001" end="8161024" />
+      <id start="8170001" end="8171024" />
+      <id start="8180001" end="8181024" />
+      <id start="8210001" end="8211024" />
+      <id start="8220001" end="8221024" />
+      <id start="8230001" end="8231024" />
+      <id start="8240001" end="8241024" />
+      <id start="8250001" end="8251024" />
+      <id start="8260001" end="8261024" />
+      <id start="8270001" end="8271024" />
+      <id start="8280001" end="8281024" />
+      <id start="8310001" end="8311024" />
+      <id start="8320001" end="8321024" />
+      <id start="8330001" end="8331024" />
+      <id start="8340001" end="8341024" />
+      <id start="8350001" end="8351024" />
+      <id start="8360001" end="8361024" />
+      <id start="8370001" end="8371024" />
+      <id start="8380001" end="8381024" />
+      <id start="8410001" end="8411024" />
+      <id start="8420001" end="8421024" />
+      <id start="8430001" end="8431024" />
+      <id start="8440001" end="8441024" />
+      <id start="8450001" end="8451024" />
+      <id start="8460001" end="8461024" />
+      <id start="8470001" end="8471024" />
+      <id start="8480001" end="8481024" />
+    </idlist>
+    <idlist idname="door09">
+      <id start="9110001" end="9111024" />
+      <id start="9120001" end="9121024" />
+      <id start="9130001" end="9131024" />
+      <id start="9140001" end="9141024" />
+      <id start="9150001" end="9151024" />
+      <id start="9160001" end="9161024" />
+      <id start="9170001" end="9171024" />
+      <id start="9180001" end="9181024" />
+      <id start="9210001" end="9211024" />
+      <id start="9220001" end="9221024" />
+      <id start="9230001" end="9231024" />
+      <id start="9240001" end="9241024" />
+      <id start="9250001" end="9251024" />
+      <id start="9260001" end="9261024" />
+      <id start="9270001" end="9271024" />
+      <id start="9280001" end="9281024" />
+      <id start="9310001" end="9311024" />
+      <id start="9320001" end="9321024" />
+      <id start="9330001" end="9331024" />
+      <id start="9340001" end="9341024" />
+      <id start="9350001" end="9351024" />
+      <id start="9360001" end="9361024" />
+      <id start="9370001" end="9371024" />
+      <id start="9380001" end="9381024" />
+      <id start="9410001" end="9411024" />
+      <id start="9420001" end="9421024" />
+      <id start="9430001" end="9431024" />
+      <id start="9440001" end="9441024" />
+      <id start="9450001" end="9451024" />
+      <id start="9460001" end="9461024" />
+      <id start="9470001" end="9471024" />
+      <id start="9480001" end="9481024" />
+    </idlist>
+    <idlist idname="door10">
+      <id start="10110001" end="10111024" />
+      <id start="10120001" end="10121024" />
+      <id start="10130001" end="10131024" />
+      <id start="10140001" end="10141024" />
+      <id start="10150001" end="10151024" />
+      <id start="10160001" end="10161024" />
+      <id start="10170001" end="10171024" />
+      <id start="10180001" end="10181024" />
+      <id start="10210001" end="10211024" />
+      <id start="10220001" end="10221024" />
+      <id start="10230001" end="10231024" />
+      <id start="10240001" end="10241024" />
+      <id start="10250001" end="10251024" />
+      <id start="10260001" end="10261024" />
+      <id start="10270001" end="10271024" />
+      <id start="10280001" end="10281024" />
+      <id start="10310001" end="10311024" />
+      <id start="10320001" end="10321024" />
+      <id start="10330001" end="10331024" />
+      <id start="10340001" end="10341024" />
+      <id start="10350001" end="10351024" />
+      <id start="10360001" end="10361024" />
+      <id start="10370001" end="10371024" />
+      <id start="10380001" end="10381024" />
+      <id start="10410001" end="10411024" />
+      <id start="10420001" end="10421024" />
+      <id start="10430001" end="10431024" />
+      <id start="10440001" end="10441024" />
+      <id start="10450001" end="10451024" />
+      <id start="10460001" end="10461024" />
+      <id start="10470001" end="10471024" />
+      <id start="10480001" end="10481024" />
+    </idlist>
+    <idlist idname="door11">
+      <id start="11110001" end="11111024" />
+      <id start="11120001" end="11121024" />
+      <id start="11130001" end="11131024" />
+      <id start="11140001" end="11141024" />
+      <id start="11150001" end="11151024" />
+      <id start="11160001" end="11161024" />
+      <id start="11170001" end="11171024" />
+      <id start="11180001" end="11181024" />
+      <id start="11210001" end="11211024" />
+      <id start="11220001" end="11221024" />
+      <id start="11230001" end="11231024" />
+      <id start="11240001" end="11241024" />
+      <id start="11250001" end="11251024" />
+      <id start="11260001" end="11261024" />
+      <id start="11270001" end="11271024" />
+      <id start="11280001" end="11281024" />
+      <id start="11310001" end="11311024" />
+      <id start="11320001" end="11321024" />
+      <id start="11330001" end="11331024" />
+      <id start="11340001" end="11341024" />
+      <id start="11350001" end="11351024" />
+      <id start="11360001" end="11361024" />
+      <id start="11370001" end="11371024" />
+      <id start="11380001" end="11381024" />
+      <id start="11410001" end="11411024" />
+      <id start="11420001" end="11421024" />
+      <id start="11430001" end="11431024" />
+      <id start="11440001" end="11441024" />
+      <id start="11450001" end="11451024" />
+      <id start="11460001" end="11461024" />
+      <id start="11470001" end="11471024" />
+      <id start="11480001" end="11481024" />
+    </idlist>
+    <idlist idname="door12">
+      <id start="12110001" end="12111024" />
+      <id start="12120001" end="12121024" />
+      <id start="12130001" end="12131024" />
+      <id start="12140001" end="12141024" />
+      <id start="12150001" end="12151024" />
+      <id start="12160001" end="12161024" />
+      <id start="12170001" end="12171024" />
+      <id start="12180001" end="12181024" />
+      <id start="12210001" end="12211024" />
+      <id start="12220001" end="12221024" />
+      <id start="12230001" end="12231024" />
+      <id start="12240001" end="12241024" />
+      <id start="12250001" end="12251024" />
+      <id start="12260001" end="12261024" />
+      <id start="12270001" end="12271024" />
+      <id start="12280001" end="12281024" />
+      <id start="12310001" end="12311024" />
+      <id start="12320001" end="12321024" />
+      <id start="12330001" end="12331024" />
+      <id start="12340001" end="12341024" />
+      <id start="12350001" end="12351024" />
+      <id start="12360001" end="12361024" />
+      <id start="12370001" end="12371024" />
+      <id start="12380001" end="12381024" />
+      <id start="12410001" end="12411024" />
+      <id start="12420001" end="12421024" />
+      <id start="12430001" end="12431024" />
+      <id start="12440001" end="12441024" />
+      <id start="12450001" end="12451024" />
+      <id start="12460001" end="12461024" />
+      <id start="12470001" end="12471024" />
+      <id start="12480001" end="12481024" />
+    </idlist>
+   </instrument>
+        
+
+
+.. categories:: Concepts

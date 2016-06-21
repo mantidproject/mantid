@@ -1,0 +1,2485 @@
+<?xml version='1.0' encoding='ASCII'?>
+<instrument xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.mantidproject.org/IDF/1.0" last-modified="2015-07-06 17:02:46.748632" name="CORELLI" valid-from="2014-02-25 00:00:00" valid-to="2100-01-31 23:59:59" xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 http://schema.mantidproject.org/IDF/1.0/IDFSchema.xsd">
+  <!--Created by Ross Whitfield-->
+  <defaults>
+    <length unit="metre"/>
+    <angle unit="degree"/>
+    <reference-frame>
+      <along-beam axis="z"/>
+      <pointing-up axis="y"/>
+      <handedness val="right"/>
+    </reference-frame>
+    <default-view view="cylindrical_y"/>
+  </defaults>
+  <!--SOURCE AND SAMPLE POSITION-->
+  <component type="moderator">
+    <location z="-20.0"/>
+  </component>
+  <type is="Source" name="moderator">
+    <cuboid id="shape">
+      <left-front-bottom-point x="-0.06" y="-0.06" z="-0.03"/>
+      <left-front-top-point x="-0.06" y="0.06" z="-0.03"/>
+      <left-back-bottom-point x="-0.06" y="-0.06" z="0.03"/>
+      <right-front-bottom-point x="0.06" y="-0.06" z="-0.03"/>
+    </cuboid>
+    <algebra val="shape"/>
+  </type>
+  <component type="sample-position">
+    <location x="0.0" y="0.0" z="0.0"/>
+  </component>
+  <type is="SamplePos" name="sample-position"/>
+  <!--MONITORS-->
+  <component idlist="monitors" type="monitors">
+    <location/>
+  </component>
+  <type name="monitors">
+    <component type="monitor">
+      <location name="monitor1" z="-2.046"/>
+      <location name="monitor2" z="-1.948"/>
+      <location name="monitor3" z="4.554"/>
+    </component>
+  </type>
+  <component type="single-disk-chopper">
+    <location z="-7.669527"/>
+  </component>
+  <type is="chopper" name="single-disk-chopper">
+    <cylinder id="body">
+      <centre-of-bottom-base x="-0.17" y="0.0" z="0.0"/>
+      <axis x="0.0" y="0.0" z="1.0"/>
+      <radius val="0.2"/>
+      <height val="0.02"/>
+    </cylinder>
+    <cuboid id="hole">
+      <left-front-bottom-point x="0.04" y="-0.02" z="0.0"/>
+      <left-front-top-point x="0.04" y="-0.02" z="0.02"/>
+      <left-back-bottom-point x="-0.04" y="-0.02" z="0.0"/>
+      <right-front-bottom-point x="0.04" y="0.02" z="0.0"/>
+    </cuboid>
+    <algebra val="body (# hole)"/>
+  </type>
+  <component type="double-disk-chopper">
+    <location z="-11.79995"/>
+    <parameter name="Speed (Hz)">
+      <logfile id="BL9:Chop:Skf2:MotorSpeed"/>
+    </parameter>
+    <parameter name="Bandwidth (A)">
+      <logfile id="BL9:Chop:Skf23:Bandwidth"/>
+    </parameter>
+    <parameter name="Center (A)">
+      <logfile id="BL9:Chop:Skf23:CenterWavelength"/>
+    </parameter>
+  </component>
+  <type is="chopper" name="double-disk-chopper">
+    <cylinder id="body1">
+      <centre-of-bottom-base x="0.17" y="0.0" z="0.0"/>
+      <axis x="0.0" y="0.0" z="1.0"/>
+      <radius val="0.2"/>
+      <height val="0.02"/>
+    </cylinder>
+    <cuboid id="hole">
+      <left-front-bottom-point x="0.04" y="-0.02" z="0.0"/>
+      <left-front-top-point x="0.04" y="-0.02" z="0.055"/>
+      <left-back-bottom-point x="-0.04" y="-0.02" z="0.0"/>
+      <right-front-bottom-point x="0.04" y="0.02" z="0.0"/>
+    </cuboid>
+    <cylinder id="body2">
+      <centre-of-bottom-base x="-0.17" y="-0.0" z="0.035"/>
+      <axis x="0.0" y="0.0" z="1.0"/>
+      <radius val="0.2"/>
+      <height val="0.02"/>
+    </cylinder>
+    <algebra val="(body1 : body2) (#hole)"/>
+  </type>
+  <component type="correlation-chopper">
+    <location z="-2.000653"/>
+    <parameter name="Speed (Hz)">
+      <logfile id="BL9:Chop:Skf4:MotorSpeed"/>
+    </parameter>
+  </component>
+  <type is="chopper" name="correlation-chopper">
+    <cylinder id="body">
+      <centre-of-bottom-base x="-0.28" y="0.0" z="0.0"/>
+      <axis x="0.0" y="0.0" z="1.0"/>
+      <radius val="0.255"/>
+      <height val="0.02"/>
+    </cylinder>
+    <hexahedron id="hole0">
+      <left-back-bottom-point x="-0.28" y="0.3" z="0.0"/>
+      <left-front-bottom-point x="-0.28" y="0.3" z="0.02"/>
+      <right-front-bottom-point x="-0.25810687051" y="0.299200085029" z="0.02"/>
+      <right-back-bottom-point x="-0.25810687051" y="0.299200085029" z="0.0"/>
+      <left-back-top-point x="-0.28" y="0.24" z="0.0"/>
+      <left-front-top-point x="-0.28" y="0.24" z="0.02"/>
+      <right-front-top-point x="-0.262485496408" y="0.239360068023" z="0.02"/>
+      <right-back-top-point x="-0.262485496408" y="0.239360068023" z="0.0"/>
+    </hexahedron>
+    <hexahedron id="hole1">
+      <left-back-bottom-point x="-0.243397621659" y="0.297758737739" z="0.0"/>
+      <left-front-bottom-point x="-0.243397621659" y="0.297758737739" z="0.02"/>
+      <right-front-bottom-point x="-0.221344524478" y="0.294210018849" z="0.02"/>
+      <right-back-bottom-point x="-0.221344524478" y="0.294210018849" z="0.0"/>
+      <left-back-top-point x="-0.250718097327" y="0.238206990191" z="0.0"/>
+      <left-front-top-point x="-0.250718097327" y="0.238206990191" z="0.02"/>
+      <right-front-top-point x="-0.233075619582" y="0.235368015079" z="0.02"/>
+      <right-back-top-point x="-0.233075619582" y="0.235368015079" z="0.0"/>
+    </hexahedron>
+    <hexahedron id="hole2">
+      <left-back-bottom-point x="-0.199712445822" y="0.289056929763" z="0.0"/>
+      <left-front-bottom-point x="-0.199712445822" y="0.289056929763" z="0.02"/>
+      <right-front-bottom-point x="-0.18560840902" y="0.284763458948" z="0.02"/>
+      <right-back-bottom-point x="-0.18560840902" y="0.284763458948" z="0.0"/>
+      <left-back-top-point x="-0.215769956658" y="0.231245543811" z="0.0"/>
+      <left-front-top-point x="-0.215769956658" y="0.231245543811" z="0.02"/>
+      <right-front-top-point x="-0.204486727216" y="0.227810767159" z="0.02"/>
+      <right-back-top-point x="-0.204486727216" y="0.227810767159" z="0.0"/>
+    </hexahedron>
+    <hexahedron id="hole3">
+      <left-back-bottom-point x="-0.171766518693" y="0.279795485175" z="0.0"/>
+      <left-front-bottom-point x="-0.171766518693" y="0.279795485175" z="0.02"/>
+      <right-front-bottom-point x="-0.165020845774" y="0.277091670921" z="0.02"/>
+      <right-back-bottom-point x="-0.165020845774" y="0.277091670921" z="0.0"/>
+      <left-back-top-point x="-0.193413214954" y="0.22383638814" z="0.0"/>
+      <left-front-top-point x="-0.193413214954" y="0.22383638814" z="0.02"/>
+      <right-front-top-point x="-0.18801667662" y="0.221673336736" z="0.02"/>
+      <right-back-top-point x="-0.18801667662" y="0.221673336736" z="0.0"/>
+    </hexahedron>
+    <hexahedron id="hole4">
+      <left-back-bottom-point x="-0.131594413666" y="0.260721656072" z="0.0"/>
+      <left-front-bottom-point x="-0.131594413666" y="0.260721656072" z="0.02"/>
+      <right-front-bottom-point x="-0.125241802292" y="0.257001751438" z="0.02"/>
+      <right-back-bottom-point x="-0.125241802292" y="0.257001751438" z="0.0"/>
+      <left-back-top-point x="-0.161275530933" y="0.208577324857" z="0.0"/>
+      <left-front-top-point x="-0.161275530933" y="0.208577324857" z="0.02"/>
+      <right-front-top-point x="-0.156193441833" y="0.20560140115" z="0.02"/>
+      <right-back-top-point x="-0.156193441833" y="0.20560140115" z="0.0"/>
+    </hexahedron>
+    <hexahedron id="hole5">
+      <left-back-bottom-point x="-0.118964707116" y="0.253115851826" z="0.0"/>
+      <left-front-bottom-point x="-0.118964707116" y="0.253115851826" z="0.02"/>
+      <right-front-bottom-point x="-0.106723914657" y="0.244898751014" z="0.02"/>
+      <right-back-bottom-point x="-0.106723914657" y="0.244898751014" z="0.0"/>
+      <left-back-top-point x="-0.151171765693" y="0.202492681461" z="0.0"/>
+      <left-front-top-point x="-0.151171765693" y="0.202492681461" z="0.02"/>
+      <right-front-top-point x="-0.141379131726" y="0.195919000811" z="0.02"/>
+      <right-back-top-point x="-0.141379131726" y="0.195919000811" z="0.0"/>
+    </hexahedron>
+    <hexahedron id="hole6">
+      <left-back-bottom-point x="-0.0890472767451" y="0.231380762989" z="0.0"/>
+      <left-front-bottom-point x="-0.0890472767451" y="0.231380762989" z="0.02"/>
+      <right-front-bottom-point x="-0.0834392751587" y="0.226636010929" z="0.02"/>
+      <right-back-bottom-point x="-0.0834392751587" y="0.226636010929" z="0.0"/>
+      <left-back-top-point x="-0.127237821396" y="0.185104610392" z="0.0"/>
+      <left-front-top-point x="-0.127237821396" y="0.185104610392" z="0.02"/>
+      <right-front-top-point x="-0.122751420127" y="0.181308808743" z="0.02"/>
+      <right-back-top-point x="-0.122751420127" y="0.181308808743" z="0.0"/>
+    </hexahedron>
+    <hexahedron id="hole7">
+      <left-back-bottom-point x="-0.0672062719135" y="0.211468270166" z="0.0"/>
+      <left-front-bottom-point x="-0.0672062719135" y="0.211468270166" z="0.02"/>
+      <right-front-bottom-point x="-0.0474339430799" y="0.189507332757" z="0.02"/>
+      <right-back-bottom-point x="-0.0474339430799" y="0.189507332757" z="0.0"/>
+      <left-back-top-point x="-0.109765017531" y="0.169174616133" z="0.0"/>
+      <left-front-top-point x="-0.109765017531" y="0.169174616133" z="0.02"/>
+      <right-front-top-point x="-0.0939471544639" y="0.151605866206" z="0.02"/>
+      <right-back-top-point x="-0.0939471544639" y="0.151605866206" z="0.0"/>
+    </hexahedron>
+    <hexahedron id="hole8">
+      <left-back-bottom-point x="-0.0427771009692" y="0.183644483106" z="0.0"/>
+      <left-front-bottom-point x="-0.0427771009692" y="0.183644483106" z="0.02"/>
+      <right-front-bottom-point x="-0.0385070060749" y="0.177991948933" z="0.02"/>
+      <right-back-bottom-point x="-0.0385070060749" y="0.177991948933" z="0.0"/>
+      <left-back-top-point x="-0.0902216807753" y="0.146915586485" z="0.0"/>
+      <left-front-top-point x="-0.0902216807753" y="0.146915586485" z="0.02"/>
+      <right-front-top-point x="-0.0868056048599" y="0.142393559147" z="0.02"/>
+      <right-back-top-point x="-0.0868056048599" y="0.142393559147" z="0.0"/>
+    </hexahedron>
+    <hexahedron id="hole9">
+      <left-back-bottom-point x="-0.0341583213915" y="0.171935653833" z="0.0"/>
+      <left-front-bottom-point x="-0.0341583213915" y="0.171935653833" z="0.02"/>
+      <right-front-bottom-point x="-0.0299470188015" y="0.165751339644" z="0.02"/>
+      <right-back-bottom-point x="-0.0299470188015" y="0.165751339644" z="0.0"/>
+      <left-back-top-point x="-0.0833266571132" y="0.137548523066" z="0.0"/>
+      <left-front-top-point x="-0.0833266571132" y="0.137548523066" z="0.02"/>
+      <right-front-top-point x="-0.0799576150412" y="0.132601071715" z="0.02"/>
+      <right-back-top-point x="-0.0799576150412" y="0.132601071715" z="0.0"/>
+    </hexahedron>
+    <hexahedron id="hole10">
+      <left-back-bottom-point x="-0.0259190869962" y="0.159508274541" z="0.0"/>
+      <left-front-bottom-point x="-0.0259190869962" y="0.159508274541" z="0.02"/>
+      <right-front-bottom-point x="-0.0220951234362" y="0.153248408294" z="0.02"/>
+      <right-back-bottom-point x="-0.0220951234362" y="0.153248408294" z="0.0"/>
+      <left-back-top-point x="-0.076735269597" y="0.127606619633" z="0.0"/>
+      <left-front-top-point x="-0.076735269597" y="0.127606619633" z="0.02"/>
+      <right-front-top-point x="-0.0736760987489" y="0.122598726635" z="0.02"/>
+      <right-back-top-point x="-0.0736760987489" y="0.122598726635" z="0.0"/>
+    </hexahedron>
+    <hexahedron id="hole11">
+      <left-back-bottom-point x="-0.014909522507" y="0.14045297698" z="0.0"/>
+      <left-front-bottom-point x="-0.014909522507" y="0.14045297698" z="0.02"/>
+      <right-front-bottom-point x="-0.0114986682551" y="0.133817169493" z="0.02"/>
+      <right-back-bottom-point x="-0.0114986682551" y="0.133817169493" z="0.0"/>
+      <left-back-top-point x="-0.0679276180056" y="0.112362381584" z="0.0"/>
+      <left-front-top-point x="-0.0679276180056" y="0.112362381584" z="0.02"/>
+      <right-front-top-point x="-0.0651989346041" y="0.107053735595" z="0.02"/>
+      <right-back-top-point x="-0.0651989346041" y="0.107053735595" z="0.0"/>
+    </hexahedron>
+    <hexahedron id="hole12">
+      <left-back-bottom-point x="-0.00523812184702" y="0.12044048453" z="0.0"/>
+      <left-front-bottom-point x="-0.00523812184702" y="0.12044048453" z="0.02"/>
+      <right-front-bottom-point x="0.00295288109308" y="0.0996878482119" z="0.02"/>
+      <right-back-bottom-point x="0.00295288109308" y="0.0996878482119" z="0.0"/>
+      <left-back-top-point x="-0.0601904974776" y="0.0963523876241" z="0.0"/>
+      <left-front-top-point x="-0.0601904974776" y="0.0963523876241" z="0.02"/>
+      <right-front-top-point x="-0.0536376951255" y="0.0797502785696" z="0.02"/>
+      <right-back-top-point x="-0.0536376951255" y="0.0797502785696" z="0.0"/>
+    </hexahedron>
+    <hexahedron id="hole13">
+      <left-back-bottom-point x="0.00528133765422" y="0.0928146453219" z="0.0"/>
+      <left-front-bottom-point x="0.00528133765422" y="0.0928146453219" z="0.02"/>
+      <right-front-bottom-point x="0.0145638255313" y="0.0568520244877" z="0.02"/>
+      <right-back-bottom-point x="0.0145638255313" y="0.0568520244877" z="0.0"/>
+      <left-back-top-point x="-0.0517749298766" y="0.0742517162575" z="0.0"/>
+      <left-front-top-point x="-0.0517749298766" y="0.0742517162575" z="0.02"/>
+      <right-front-top-point x="-0.0443489395749" y="0.0454816195901" z="0.02"/>
+      <right-back-top-point x="-0.0443489395749" y="0.0454816195901" z="0.0"/>
+    </hexahedron>
+    <hexahedron id="hole14">
+      <left-back-bottom-point x="0.0158675126554" y="0.049622726196" z="0.0"/>
+      <left-front-bottom-point x="0.0158675126554" y="0.049622726196" z="0.02"/>
+      <right-front-bottom-point x="0.0187174094554" y="0.027711176234" z="0.02"/>
+      <right-back-bottom-point x="0.0187174094554" y="0.027711176234" z="0.0"/>
+      <left-back-top-point x="-0.0433059898757" y="0.0396981809568" z="0.0"/>
+      <left-front-top-point x="-0.0433059898757" y="0.0396981809568" z="0.02"/>
+      <right-front-top-point x="-0.0410260724357" y="0.0221689409872" z="0.02"/>
+      <right-back-top-point x="-0.0410260724357" y="0.0221689409872" z="0.0"/>
+    </hexahedron>
+    <hexahedron id="hole15">
+      <left-back-bottom-point x="0.0199488547873" y="0.00553936023352" z="0.0"/>
+      <left-front-bottom-point x="0.0199488547873" y="0.00553936023352" z="0.02"/>
+      <right-front-bottom-point x="0.0199965695879" y="-0.00143465517683" z="0.02"/>
+      <right-back-bottom-point x="0.0199965695879" y="-0.00143465517683" z="0.0"/>
+      <left-back-top-point x="-0.0400409161702" y="0.00443148818682" z="0.0"/>
+      <left-front-top-point x="-0.0400409161702" y="0.00443148818682" z="0.02"/>
+      <right-front-top-point x="-0.0400027443297" y="-0.00114772414146" z="0.02"/>
+      <right-back-top-point x="-0.0400027443297" y="-0.00114772414146" z="0.0"/>
+    </hexahedron>
+    <hexahedron id="hole16">
+      <left-back-bottom-point x="0.019552465355" y="-0.0163804914378" z="0.0"/>
+      <left-front-bottom-point x="0.019552465355" y="-0.0163804914378" z="0.02"/>
+      <right-front-bottom-point x="0.0175282511001" y="-0.0384309744516" z="0.02"/>
+      <right-back-bottom-point x="0.0175282511001" y="-0.0384309744516" z="0.0"/>
+      <left-back-top-point x="-0.040358027716" y="-0.0131043931502" z="0.0"/>
+      <left-front-top-point x="-0.040358027716" y="-0.0131043931502" z="0.02"/>
+      <right-front-top-point x="-0.0419773991199" y="-0.0307447795612" z="0.02"/>
+      <right-back-top-point x="-0.0419773991199" y="-0.0307447795612" z="0.0"/>
+    </hexahedron>
+    <hexahedron id="hole17">
+      <left-back-bottom-point x="0.0164709171235" y="-0.0458802277672" z="0.0"/>
+      <left-front-bottom-point x="0.0164709171235" y="-0.0458802277672" z="0.02"/>
+      <right-front-bottom-point x="0.0122980577979" y="-0.0675414347461" z="0.02"/>
+      <right-back-bottom-point x="0.0122980577979" y="-0.0675414347461" z="0.0"/>
+      <left-back-top-point x="-0.0428232663012" y="-0.0367041822138" z="0.0"/>
+      <left-front-top-point x="-0.0428232663012" y="-0.0367041822138" z="0.02"/>
+      <right-front-top-point x="-0.0461615537617" y="-0.0540331477969" z="0.02"/>
+      <right-back-top-point x="-0.0461615537617" y="-0.0540331477969" z="0.0"/>
+    </hexahedron>
+    <hexahedron id="hole18">
+      <left-back-bottom-point x="0.00179120198851" y="-0.10292579114" z="0.0"/>
+      <left-front-bottom-point x="0.00179120198851" y="-0.10292579114" z="0.02"/>
+      <right-front-bottom-point x="-0.000851707776235" y="-0.109891905746" z="0.02"/>
+      <right-back-bottom-point x="-0.000851707776235" y="-0.109891905746" z="0.0"/>
+      <left-back-top-point x="-0.0545670384092" y="-0.0823406329123" z="0.0"/>
+      <left-front-top-point x="-0.0545670384092" y="-0.0823406329123" z="0.02"/>
+      <right-front-top-point x="-0.056681366221" y="-0.087913524597" z="0.02"/>
+      <right-back-top-point x="-0.056681366221" y="-0.087913524597" z="0.0"/>
+    </hexahedron>
+    <hexahedron id="hole19">
+      <left-back-bottom-point x="-0.00660056801513" y="-0.123502026665" z="0.0"/>
+      <left-front-bottom-point x="-0.00660056801513" y="-0.123502026665" z="0.02"/>
+      <right-front-bottom-point x="-0.0130579110046" y="-0.136901136309" z="0.02"/>
+      <right-back-bottom-point x="-0.0130579110046" y="-0.136901136309" z="0.0"/>
+      <left-back-top-point x="-0.0612804544121" y="-0.098801621332" z="0.0"/>
+      <left-front-top-point x="-0.0612804544121" y="-0.098801621332" z="0.02"/>
+      <right-front-top-point x="-0.0664463288037" y="-0.109520909047" z="0.02"/>
+      <right-back-top-point x="-0.0664463288037" y="-0.109520909047" z="0.0"/>
+    </hexahedron>
+    <hexahedron id="hole20">
+      <left-back-bottom-point x="-0.0164323551072" y="-0.143290252863" z="0.0"/>
+      <left-front-bottom-point x="-0.0164323551072" y="-0.143290252863" z="0.02"/>
+      <right-front-bottom-point x="-0.020142651267" y="-0.149913836284" z="0.02"/>
+      <right-back-bottom-point x="-0.020142651267" y="-0.149913836284" z="0.0"/>
+      <left-back-top-point x="-0.0691458840858" y="-0.114632202291" z="0.0"/>
+      <left-front-top-point x="-0.0691458840858" y="-0.114632202291" z="0.02"/>
+      <right-front-top-point x="-0.0721141210136" y="-0.119931069027" z="0.02"/>
+      <right-back-top-point x="-0.0721141210136" y="-0.119931069027" z="0.0"/>
+    </hexahedron>
+    <hexahedron id="hole21">
+      <left-back-bottom-point x="-0.0277279591423" y="-0.162353987945" z="0.0"/>
+      <left-front-bottom-point x="-0.0277279591423" y="-0.162353987945" z="0.02"/>
+      <right-front-bottom-point x="-0.0319052621135" y="-0.168668316625" z="0.02"/>
+      <right-back-bottom-point x="-0.0319052621135" y="-0.168668316625" z="0.0"/>
+      <left-back-top-point x="-0.0781823673139" y="-0.129883190356" z="0.0"/>
+      <left-front-top-point x="-0.0781823673139" y="-0.129883190356" z="0.02"/>
+      <right-front-top-point x="-0.0815242096908" y="-0.1349346533" z="0.02"/>
+      <right-back-top-point x="-0.0815242096908" y="-0.1349346533" z="0.0"/>
+    </hexahedron>
+    <hexahedron id="hole22">
+      <left-back-bottom-point x="-0.0544342489995" y="-0.197787997552" z="0.0"/>
+      <left-front-bottom-point x="-0.0544342489995" y="-0.197787997552" z="0.02"/>
+      <right-front-bottom-point x="-0.0594368715522" y="-0.203351681501" z="0.02"/>
+      <right-back-bottom-point x="-0.0594368715522" y="-0.203351681501" z="0.0"/>
+      <left-back-top-point x="-0.0995473991996" y="-0.158230398042" z="0.0"/>
+      <left-front-top-point x="-0.0995473991996" y="-0.158230398042" z="0.02"/>
+      <right-front-top-point x="-0.103549497242" y="-0.162681345201" z="0.02"/>
+      <right-back-top-point x="-0.103549497242" y="-0.162681345201" z="0.0"/>
+    </hexahedron>
+    <hexahedron id="hole23">
+      <left-back-bottom-point x="-0.0644127704164" y="-0.208619621418" z="0.0"/>
+      <left-front-bottom-point x="-0.0644127704164" y="-0.208619621418" z="0.02"/>
+      <right-front-bottom-point x="-0.0697645696187" y="-0.21401183101" z="0.02"/>
+      <right-back-bottom-point x="-0.0697645696187" y="-0.21401183101" z="0.0"/>
+      <left-back-top-point x="-0.107530216333" y="-0.166895697134" z="0.0"/>
+      <left-front-top-point x="-0.107530216333" y="-0.166895697134" z="0.02"/>
+      <right-front-top-point x="-0.111811655695" y="-0.171209464808" z="0.02"/>
+      <right-back-top-point x="-0.111811655695" y="-0.171209464808" z="0.0"/>
+    </hexahedron>
+    <hexahedron id="hole24">
+      <left-back-bottom-point x="-0.0750140448062" y="-0.21904510534" z="0.0"/>
+      <left-front-bottom-point x="-0.0750140448062" y="-0.21904510534" z="0.02"/>
+      <right-front-bottom-point x="-0.086146821476" y="-0.228956207988" z="0.02"/>
+      <right-back-bottom-point x="-0.086146821476" y="-0.228956207988" z="0.0"/>
+      <left-back-top-point x="-0.116011235845" y="-0.175236084272" z="0.0"/>
+      <left-front-top-point x="-0.116011235845" y="-0.175236084272" z="0.02"/>
+      <right-front-top-point x="-0.124917457181" y="-0.18316496639" z="0.02"/>
+      <right-back-top-point x="-0.124917457181" y="-0.18316496639" z="0.0"/>
+    </hexahedron>
+    <hexahedron id="hole25">
+      <left-back-bottom-point x="-0.109461597402" y="-0.246812992445" z="0.0"/>
+      <left-front-bottom-point x="-0.109461597402" y="-0.246812992445" z="0.02"/>
+      <right-front-bottom-point x="-0.115761703192" y="-0.251049361405" z="0.02"/>
+      <right-back-bottom-point x="-0.115761703192" y="-0.251049361405" z="0.0"/>
+      <left-back-top-point x="-0.143569277922" y="-0.197450393956" z="0.0"/>
+      <left-front-top-point x="-0.143569277922" y="-0.197450393956" z="0.02"/>
+      <right-front-top-point x="-0.148609362554" y="-0.200839489124" z="0.02"/>
+      <right-back-top-point x="-0.148609362554" y="-0.200839489124" z="0.0"/>
+    </hexahedron>
+    <hexahedron id="hole26">
+      <left-back-bottom-point x="-0.121850965683" y="-0.254929172408" z="0.0"/>
+      <left-front-bottom-point x="-0.121850965683" y="-0.254929172408" z="0.02"/>
+      <right-front-bottom-point x="-0.128207935578" y="-0.258764698478" z="0.02"/>
+      <right-back-bottom-point x="-0.128207935578" y="-0.258764698478" z="0.0"/>
+      <left-back-top-point x="-0.153480772546" y="-0.203943337926" z="0.0"/>
+      <left-front-top-point x="-0.153480772546" y="-0.203943337926" z="0.02"/>
+      <right-front-top-point x="-0.158566348462" y="-0.207011758782" z="0.02"/>
+      <right-back-top-point x="-0.158566348462" y="-0.207011758782" z="0.0"/>
+    </hexahedron>
+    <hexahedron id="hole27">
+      <left-back-bottom-point x="-0.134639552067" y="-0.262431591423" z="0.0"/>
+      <left-front-bottom-point x="-0.134639552067" y="-0.262431591423" z="0.02"/>
+      <right-front-bottom-point x="-0.147943021208" y="-0.269371405966" z="0.02"/>
+      <right-back-bottom-point x="-0.147943021208" y="-0.269371405966" z="0.0"/>
+      <left-back-top-point x="-0.163711641654" y="-0.209945273138" z="0.0"/>
+      <left-front-top-point x="-0.163711641654" y="-0.209945273138" z="0.02"/>
+      <right-front-top-point x="-0.174354416966" y="-0.215497124773" z="0.02"/>
+      <right-back-top-point x="-0.174354416966" y="-0.215497124773" z="0.0"/>
+    </hexahedron>
+    <hexahedron id="hole28">
+      <left-back-bottom-point x="-0.154345021175" y="-0.272416641005" z="0.0"/>
+      <left-front-bottom-point x="-0.154345021175" y="-0.272416641005" z="0.02"/>
+      <right-front-bottom-point x="-0.161216136181" y="-0.27548211139" z="0.02"/>
+      <right-back-bottom-point x="-0.161216136181" y="-0.27548211139" z="0.0"/>
+      <left-back-top-point x="-0.17947601694" y="-0.217933312804" z="0.0"/>
+      <left-front-top-point x="-0.17947601694" y="-0.217933312804" z="0.02"/>
+      <right-front-top-point x="-0.184972908945" y="-0.220385689112" z="0.02"/>
+      <right-back-top-point x="-0.184972908945" y="-0.220385689112" z="0.0"/>
+    </hexahedron>
+    <hexahedron id="hole29">
+      <left-back-bottom-point x="-0.181834630306" y="-0.283484673647" z="0.0"/>
+      <left-front-bottom-point x="-0.181834630306" y="-0.283484673647" z="0.02"/>
+      <right-front-bottom-point x="-0.210185337176" y="-0.291763453597" z="0.02"/>
+      <right-back-bottom-point x="-0.210185337176" y="-0.291763453597" z="0.0"/>
+      <left-back-top-point x="-0.201467704245" y="-0.226787738918" z="0.0"/>
+      <left-front-top-point x="-0.201467704245" y="-0.226787738918" z="0.02"/>
+      <right-front-top-point x="-0.224148269741" y="-0.233410762878" z="0.02"/>
+      <right-back-top-point x="-0.224148269741" y="-0.233410762878" z="0.0"/>
+    </hexahedron>
+    <hexahedron id="hole30">
+      <left-back-bottom-point x="-0.224536700944" y="-0.294828462768" z="0.0"/>
+      <left-front-bottom-point x="-0.224536700944" y="-0.294828462768" z="0.02"/>
+      <right-front-bottom-point x="-0.231983958089" y="-0.296132503652" z="0.02"/>
+      <right-back-bottom-point x="-0.231983958089" y="-0.296132503652" z="0.0"/>
+      <left-back-top-point x="-0.235629360756" y="-0.235862770214" z="0.0"/>
+      <left-front-top-point x="-0.235629360756" y="-0.235862770214" z="0.02"/>
+      <right-front-top-point x="-0.241587166471" y="-0.236906002922" z="0.02"/>
+      <right-back-top-point x="-0.241587166471" y="-0.236906002922" z="0.0"/>
+    </hexahedron>
+    <hexahedron id="hole31">
+      <left-back-bottom-point x="-0.239290515819" y="-0.297225062701" z="0.0"/>
+      <left-front-bottom-point x="-0.239290515819" y="-0.297225062701" z="0.02"/>
+      <right-front-bottom-point x="-0.253874141492" y="-0.298860234085" z="0.02"/>
+      <right-back-bottom-point x="-0.253874141492" y="-0.298860234085" z="0.0"/>
+      <left-back-top-point x="-0.247432412656" y="-0.237780050161" z="0.0"/>
+      <left-front-top-point x="-0.247432412656" y="-0.237780050161" z="0.02"/>
+      <right-front-top-point x="-0.259099313194" y="-0.239088187268" z="0.02"/>
+      <right-back-top-point x="-0.259099313194" y="-0.239088187268" z="0.0"/>
+    </hexahedron>
+    <hexahedron id="hole32">
+      <left-back-bottom-point x="-0.298272751909" y="-0.299442993803" z="0.0"/>
+      <left-front-bottom-point x="-0.298272751909" y="-0.299442993803" z="0.02"/>
+      <right-front-bottom-point x="-0.305479002038" y="-0.29891607594" z="0.02"/>
+      <right-back-bottom-point x="-0.305479002038" y="-0.29891607594" z="0.0"/>
+      <left-back-top-point x="-0.294618201528" y="-0.239554395042" z="0.0"/>
+      <left-front-top-point x="-0.294618201528" y="-0.239554395042" z="0.02"/>
+      <right-front-top-point x="-0.30038320163" y="-0.239132860752" z="0.02"/>
+      <right-back-top-point x="-0.30038320163" y="-0.239132860752" z="0.0"/>
+    </hexahedron>
+    <hexahedron id="hole33">
+      <left-back-bottom-point x="-0.334928052331" y="-0.294928650808" z="0.0"/>
+      <left-front-bottom-point x="-0.334928052331" y="-0.294928650808" z="0.02"/>
+      <right-front-bottom-point x="-0.349463248213" y="-0.291847318212" z="0.02"/>
+      <right-back-bottom-point x="-0.349463248213" y="-0.291847318212" z="0.0"/>
+      <left-back-top-point x="-0.323942441865" y="-0.235942920646" z="0.0"/>
+      <left-front-top-point x="-0.323942441865" y="-0.235942920646" z="0.02"/>
+      <right-front-top-point x="-0.33557059857" y="-0.23347785457" z="0.02"/>
+      <right-back-top-point x="-0.33557059857" y="-0.23347785457" z="0.0"/>
+    </hexahedron>
+    <hexahedron id="hole34">
+      <left-back-bottom-point x="-0.356537539936" y="-0.290072413339" z="0.0"/>
+      <left-front-bottom-point x="-0.356537539936" y="-0.290072413339" z="0.02"/>
+      <right-front-bottom-point x="-0.370805789234" y="-0.28592710372" z="0.02"/>
+      <right-back-bottom-point x="-0.370805789234" y="-0.28592710372" z="0.0"/>
+      <left-back-top-point x="-0.341230031949" y="-0.232057930672" z="0.0"/>
+      <left-front-top-point x="-0.341230031949" y="-0.232057930672" z="0.02"/>
+      <right-front-top-point x="-0.352644631388" y="-0.228741682976" z="0.02"/>
+      <right-back-top-point x="-0.352644631388" y="-0.228741682976" z="0.0"/>
+    </hexahedron>
+    <hexahedron id="hole35">
+      <left-back-bottom-point x="-0.377818954652" y="-0.283604393673" z="0.0"/>
+      <left-front-bottom-point x="-0.377818954652" y="-0.283604393673" z="0.02"/>
+      <right-front-bottom-point x="-0.391667964605" y="-0.278442571603" z="0.02"/>
+      <right-back-bottom-point x="-0.391667964605" y="-0.278442571603" z="0.0"/>
+      <left-back-top-point x="-0.358255163722" y="-0.226883514939" z="0.0"/>
+      <left-front-top-point x="-0.358255163722" y="-0.226883514939" z="0.02"/>
+      <right-front-top-point x="-0.369334371684" y="-0.222754057282" z="0.02"/>
+      <right-back-top-point x="-0.369334371684" y="-0.222754057282" z="0.0"/>
+    </hexahedron>
+    <hexahedron id="hole36">
+      <left-back-bottom-point x="-0.411939430776" y="-0.269429001049" z="0.0"/>
+      <left-front-bottom-point x="-0.411939430776" y="-0.269429001049" z="0.02"/>
+      <right-front-bottom-point x="-0.418385233652" y="-0.266175744776" z="0.02"/>
+      <right-back-bottom-point x="-0.418385233652" y="-0.266175744776" z="0.0"/>
+      <left-back-top-point x="-0.385551544621" y="-0.215543200839" z="0.0"/>
+      <left-front-top-point x="-0.385551544621" y="-0.215543200839" z="0.02"/>
+      <right-front-top-point x="-0.390708186922" y="-0.212940595821" z="0.02"/>
+      <right-back-top-point x="-0.390708186922" y="-0.212940595821" z="0.0"/>
+    </hexahedron>
+    <hexahedron id="hole37">
+      <left-back-bottom-point x="-0.431371849123" y="-0.259010739726" z="0.0"/>
+      <left-front-bottom-point x="-0.431371849123" y="-0.259010739726" z="0.02"/>
+      <right-front-bottom-point x="-0.443935844767" y="-0.251246967744" z="0.02"/>
+      <right-back-bottom-point x="-0.443935844767" y="-0.251246967744" z="0.0"/>
+      <left-back-top-point x="-0.401097479298" y="-0.20720859178" z="0.0"/>
+      <left-front-top-point x="-0.401097479298" y="-0.20720859178" z="0.02"/>
+      <right-front-top-point x="-0.411148675814" y="-0.200997574195" z="0.02"/>
+      <right-back-top-point x="-0.411148675814" y="-0.200997574195" z="0.0"/>
+    </hexahedron>
+    <hexahedron id="hole38">
+      <left-back-bottom-point x="-0.450034046559" y="-0.247160723034" z="0.0"/>
+      <left-front-bottom-point x="-0.450034046559" y="-0.247160723034" z="0.02"/>
+      <right-front-bottom-point x="-0.456119469703" y="-0.242861961599" z="0.02"/>
+      <right-back-bottom-point x="-0.456119469703" y="-0.242861961599" z="0.0"/>
+      <left-back-top-point x="-0.416027237247" y="-0.197728578427" z="0.0"/>
+      <left-front-top-point x="-0.416027237247" y="-0.197728578427" z="0.02"/>
+      <right-front-top-point x="-0.420895575763" y="-0.194289569279" z="0.02"/>
+      <right-back-top-point x="-0.420895575763" y="-0.194289569279" z="0.0"/>
+    </hexahedron>
+    <hexahedron id="hole39">
+      <left-back-bottom-point x="-0.462000542954" y="-0.238486482561" z="0.0"/>
+      <left-front-bottom-point x="-0.462000542954" y="-0.238486482561" z="0.02"/>
+      <right-front-bottom-point x="-0.467858699526" y="-0.233899784122" z="0.02"/>
+      <right-back-bottom-point x="-0.467858699526" y="-0.233899784122" z="0.0"/>
+      <left-back-top-point x="-0.425600434363" y="-0.190789186049" z="0.0"/>
+      <left-front-top-point x="-0.425600434363" y="-0.190789186049" z="0.02"/>
+      <right-front-top-point x="-0.43028695962" y="-0.187119827298" z="0.02"/>
+      <right-back-top-point x="-0.43028695962" y="-0.187119827298" z="0.0"/>
+    </hexahedron>
+    <hexahedron id="hole40">
+      <left-back-bottom-point x="-0.473565310683" y="-0.229199630236" z="0.0"/>
+      <left-front-bottom-point x="-0.473565310683" y="-0.229199630236" z="0.02"/>
+      <right-front-bottom-point x="-0.50521674349" y="-0.198185313411" z="0.02"/>
+      <right-back-bottom-point x="-0.50521674349" y="-0.198185313411" z="0.0"/>
+      <left-back-top-point x="-0.434852248546" y="-0.183359704189" z="0.0"/>
+      <left-front-top-point x="-0.434852248546" y="-0.183359704189" z="0.02"/>
+      <right-front-top-point x="-0.460173394792" y="-0.158548250729" z="0.02"/>
+      <right-back-top-point x="-0.460173394792" y="-0.158548250729" z="0.0"/>
+    </hexahedron>
+    <hexahedron id="hole41">
+      <left-back-bottom-point x="-0.510042033738" y="-0.192563399206" z="0.0"/>
+      <left-front-bottom-point x="-0.510042033738" y="-0.192563399206" z="0.02"/>
+      <right-front-bottom-point x="-0.519379365813" y="-0.180824553706" z="0.02"/>
+      <right-back-bottom-point x="-0.519379365813" y="-0.180824553706" z="0.0"/>
+      <left-back-top-point x="-0.46403362699" y="-0.154050719365" z="0.0"/>
+      <left-front-top-point x="-0.46403362699" y="-0.154050719365" z="0.02"/>
+      <right-front-top-point x="-0.47150349265" y="-0.144659642965" z="0.02"/>
+      <right-back-top-point x="-0.47150349265" y="-0.144659642965" z="0.0"/>
+    </hexahedron>
+    <hexahedron id="hole42">
+      <left-back-bottom-point x="-0.523707527209" y="-0.174947538369" z="0.0"/>
+      <left-front-bottom-point x="-0.523707527209" y="-0.174947538369" z="0.02"/>
+      <right-front-bottom-point x="-0.531976929823" y="-0.162811629919" z="0.02"/>
+      <right-back-bottom-point x="-0.531976929823" y="-0.162811629919" z="0.0"/>
+      <left-back-top-point x="-0.474966021767" y="-0.139958030696" z="0.0"/>
+      <left-front-top-point x="-0.474966021767" y="-0.139958030696" z="0.02"/>
+      <right-front-top-point x="-0.481581543858" y="-0.130249303935" z="0.02"/>
+      <right-back-top-point x="-0.481581543858" y="-0.130249303935" z="0.0"/>
+    </hexahedron>
+    <hexahedron id="hole43">
+      <left-back-bottom-point x="-0.539708080235" y="-0.150172277937" z="0.0"/>
+      <left-front-bottom-point x="-0.539708080235" y="-0.150172277937" z="0.02"/>
+      <right-front-bottom-point x="-0.550027228458" y="-0.130710733649" z="0.02"/>
+      <right-back-bottom-point x="-0.550027228458" y="-0.130710733649" z="0.0"/>
+      <left-back-top-point x="-0.487766464188" y="-0.12013782235" z="0.0"/>
+      <left-front-top-point x="-0.487766464188" y="-0.12013782235" z="0.02"/>
+      <right-front-top-point x="-0.496021782767" y="-0.104568586919" z="0.02"/>
+      <right-back-top-point x="-0.496021782767" y="-0.104568586919" z="0.0"/>
+    </hexahedron>
+    <hexahedron id="hole44">
+      <left-back-bottom-point x="-0.556194400618" y="-0.117118115881" z="0.0"/>
+      <left-front-bottom-point x="-0.556194400618" y="-0.117118115881" z="0.02"/>
+      <right-front-bottom-point x="-0.558940655069" y="-0.110417892343" z="0.02"/>
+      <right-back-bottom-point x="-0.558940655069" y="-0.110417892343" z="0.0"/>
+      <left-back-top-point x="-0.500955520494" y="-0.0936944927045" z="0.0"/>
+      <left-front-top-point x="-0.500955520494" y="-0.0936944927045" z="0.02"/>
+      <right-front-top-point x="-0.503152524055" y="-0.0883343138745" z="0.02"/>
+      <right-back-top-point x="-0.503152524055" y="-0.0883343138745" z="0.0"/>
+    </hexahedron>
+    <hexahedron id="hole45">
+      <left-back-bottom-point x="-0.564092500504" y="-0.0963921737346" z="0.0"/>
+      <left-front-bottom-point x="-0.564092500504" y="-0.0963921737346" z="0.02"/>
+      <right-front-bottom-point x="-0.566204689663" y="-0.0899270571911" z="0.02"/>
+      <right-back-bottom-point x="-0.566204689663" y="-0.0899270571911" z="0.0"/>
+      <left-back-top-point x="-0.507274000403" y="-0.0771137389877" z="0.0"/>
+      <left-front-top-point x="-0.507274000403" y="-0.0771137389877" z="0.02"/>
+      <right-front-top-point x="-0.50896375173" y="-0.0719416457529" z="0.02"/>
+      <right-back-top-point x="-0.50896375173" y="-0.0719416457529" z="0.0"/>
+    </hexahedron>
+    <hexahedron id="hole46">
+      <left-back-bottom-point x="-0.568542466511" y="-0.0821172638348" z="0.0"/>
+      <left-front-bottom-point x="-0.568542466511" y="-0.0821172638348" z="0.02"/>
+      <right-front-bottom-point x="-0.573713641745" y="-0.0610925253421" z="0.02"/>
+      <right-back-bottom-point x="-0.573713641745" y="-0.0610925253421" z="0.0"/>
+      <left-back-top-point x="-0.510833973209" y="-0.0656938110679" z="0.0"/>
+      <left-front-top-point x="-0.510833973209" y="-0.0656938110679" z="0.02"/>
+      <right-front-top-point x="-0.514970913396" y="-0.0488740202736" z="0.02"/>
+      <right-back-top-point x="-0.514970913396" y="-0.0488740202736" z="0.0"/>
+    </hexahedron>
+    <hexahedron id="hole47">
+      <left-back-bottom-point x="-0.578324671782" y="-0.0316605465207" z="0.0"/>
+      <left-front-bottom-point x="-0.578324671782" y="-0.0316605465207" z="0.02"/>
+      <right-front-bottom-point x="-0.579844474643" y="-0.00965872797791" z="0.02"/>
+      <right-back-bottom-point x="-0.579844474643" y="-0.00965872797791" z="0.0"/>
+      <left-back-top-point x="-0.518659737426" y="-0.0253284372166" z="0.0"/>
+      <left-front-top-point x="-0.518659737426" y="-0.0253284372166" z="0.02"/>
+      <right-front-top-point x="-0.519875579714" y="-0.00772698238233" z="0.02"/>
+      <right-back-top-point x="-0.519875579714" y="-0.00772698238233" z="0.0"/>
+    </hexahedron>
+    <hexahedron id="hole48">
+      <left-back-bottom-point x="-0.579992393857" y="-0.00213626495011" z="0.0"/>
+      <left-front-bottom-point x="-0.579992393857" y="-0.00213626495011" z="0.02"/>
+      <right-front-bottom-point x="-0.579959884196" y="0.00490590184433" z="0.02"/>
+      <right-back-bottom-point x="-0.579959884196" y="0.00490590184433" z="0.0"/>
+      <left-back-top-point x="-0.519993915086" y="-0.00170901196008" z="0.0"/>
+      <left-front-top-point x="-0.519993915086" y="-0.00170901196008" z="0.02"/>
+      <right-front-top-point x="-0.519967907357" y="0.00392472147547" z="0.02"/>
+      <right-back-top-point x="-0.519967907357" y="0.00392472147547" z="0.0"/>
+    </hexahedron>
+    <hexahedron id="hole49">
+      <left-back-bottom-point x="-0.579339051721" y="0.0199030679766" z="0.0"/>
+      <left-front-bottom-point x="-0.579339051721" y="0.0199030679766" z="0.02"/>
+      <right-front-bottom-point x="-0.577990710746" y="0.0346631837704" z="0.02"/>
+      <right-back-bottom-point x="-0.577990710746" y="0.0346631837704" z="0.0"/>
+      <left-back-top-point x="-0.519471241377" y="0.0159224543813" z="0.0"/>
+      <left-front-top-point x="-0.519471241377" y="0.0159224543813" z="0.02"/>
+      <right-front-top-point x="-0.518392568597" y="0.0277305470163" z="0.02"/>
+      <right-back-top-point x="-0.518392568597" y="0.0277305470163" z="0.0"/>
+    </hexahedron>
+    <hexahedron id="hole50">
+      <left-back-bottom-point x="-0.577035801036" y="0.0420681934862" z="0.0"/>
+      <left-front-bottom-point x="-0.577035801036" y="0.0420681934862" z="0.02"/>
+      <right-front-bottom-point x="-0.56541871697" y="0.0923913199569" z="0.02"/>
+      <right-back-bottom-point x="-0.56541871697" y="0.0923913199569" z="0.0"/>
+      <left-back-top-point x="-0.517628640828" y="0.033654554789" z="0.0"/>
+      <left-front-top-point x="-0.517628640828" y="0.033654554789" z="0.02"/>
+      <right-front-top-point x="-0.508334973576" y="0.0739130559656" z="0.02"/>
+      <right-back-top-point x="-0.508334973576" y="0.0739130559656" z="0.0"/>
+    </hexahedron>
+    <hexahedron id="hole51">
+      <left-back-bottom-point x="-0.557695843175" y="0.113512196188" z="0.0"/>
+      <left-front-bottom-point x="-0.557695843175" y="0.113512196188" z="0.02"/>
+      <right-front-bottom-point x="-0.554864779729" y="0.120205461042" z="0.02"/>
+      <right-back-bottom-point x="-0.554864779729" y="0.120205461042" z="0.0"/>
+      <left-back-top-point x="-0.50215667454" y="0.0908097569505" z="0.0"/>
+      <left-front-top-point x="-0.50215667454" y="0.0908097569505" z="0.02"/>
+      <right-front-top-point x="-0.499891823783" y="0.0961643688338" z="0.02"/>
+      <right-back-top-point x="-0.499891823783" y="0.0961643688338" z="0.0"/>
+    </hexahedron>
+    <hexahedron id="hole52">
+      <left-back-bottom-point x="-0.5518635624" y="0.126847165672" z="0.0"/>
+      <left-front-bottom-point x="-0.5518635624" y="0.126847165672" z="0.02"/>
+      <right-front-bottom-point x="-0.548594688313" y="0.133629687607" z="0.02"/>
+      <right-back-bottom-point x="-0.548594688313" y="0.133629687607" z="0.0"/>
+      <left-back-top-point x="-0.49749084992" y="0.101477732538" z="0.0"/>
+      <left-front-top-point x="-0.49749084992" y="0.101477732538" z="0.02"/>
+      <right-front-top-point x="-0.494875750651" y="0.106903750085" z="0.02"/>
+      <right-back-top-point x="-0.494875750651" y="0.106903750085" z="0.0"/>
+    </hexahedron>
+    <hexahedron id="hole53">
+      <left-back-bottom-point x="-0.545308329244" y="0.140041031251" z="0.0"/>
+      <left-front-bottom-point x="-0.545308329244" y="0.140041031251" z="0.02"/>
+      <right-front-bottom-point x="-0.538062546467" y="0.152982751025" z="0.02"/>
+      <right-back-bottom-point x="-0.538062546467" y="0.152982751025" z="0.0"/>
+      <left-back-top-point x="-0.492246663395" y="0.112032825001" z="0.0"/>
+      <left-front-top-point x="-0.492246663395" y="0.112032825001" z="0.02"/>
+      <right-front-top-point x="-0.486450037173" y="0.12238620082" z="0.02"/>
+      <right-back-top-point x="-0.486450037173" y="0.12238620082" z="0.0"/>
+    </hexahedron>
+    <hexahedron id="hole54">
+      <left-back-bottom-point x="-0.534206112132" y="0.159308670683" z="0.0"/>
+      <left-front-bottom-point x="-0.534206112132" y="0.159308670683" z="0.02"/>
+      <right-front-bottom-point x="-0.530180195344" y="0.165559263883" z="0.02"/>
+      <right-back-bottom-point x="-0.530180195344" y="0.165559263883" z="0.0"/>
+      <left-back-top-point x="-0.483364889705" y="0.127446936546" z="0.0"/>
+      <left-front-top-point x="-0.483364889705" y="0.127446936546" z="0.02"/>
+      <right-front-top-point x="-0.480144156275" y="0.132447411107" z="0.02"/>
+      <right-back-top-point x="-0.480144156275" y="0.132447411107" z="0.0"/>
+    </hexahedron>
+    <hexahedron id="hole55">
+      <left-back-bottom-point x="-0.52602758692" y="0.171669526924" z="0.0"/>
+      <left-front-bottom-point x="-0.52602758692" y="0.171669526924" z="0.02"/>
+      <right-front-bottom-point x="-0.521623403944" y="0.177814877517" z="0.02"/>
+      <right-back-bottom-point x="-0.521623403944" y="0.177814877517" z="0.0"/>
+      <left-back-top-point x="-0.476822069536" y="0.137335621539" z="0.0"/>
+      <left-front-top-point x="-0.476822069536" y="0.137335621539" z="0.02"/>
+      <right-front-top-point x="-0.473298723155" y="0.142251902014" z="0.02"/>
+      <right-back-top-point x="-0.473298723155" y="0.142251902014" z="0.0"/>
+    </hexahedron>
+    <hexahedron id="hole56">
+      <left-back-bottom-point x="-0.512685081974" y="0.189361169796" z="0.0"/>
+      <left-front-bottom-point x="-0.512685081974" y="0.189361169796" z="0.02"/>
+      <right-front-bottom-point x="-0.502946951169" y="0.20073529078" z="0.02"/>
+      <right-back-bottom-point x="-0.502946951169" y="0.20073529078" z="0.0"/>
+      <left-back-top-point x="-0.46614806558" y="0.151488935837" z="0.0"/>
+      <left-front-top-point x="-0.46614806558" y="0.151488935837" z="0.02"/>
+      <right-front-top-point x="-0.458357560935" y="0.160588232624" z="0.02"/>
+      <right-back-top-point x="-0.458357560935" y="0.160588232624" z="0.0"/>
+    </hexahedron>
+    <hexahedron id="hole57">
+      <left-back-bottom-point x="-0.482325512667" y="0.221504823703" z="0.0"/>
+      <left-front-bottom-point x="-0.482325512667" y="0.221504823703" z="0.02"/>
+      <right-front-bottom-point x="-0.453528176512" y="0.24472019115" z="0.02"/>
+      <right-back-bottom-point x="-0.453528176512" y="0.24472019115" z="0.0"/>
+      <left-back-top-point x="-0.441860410134" y="0.177203858963" z="0.0"/>
+      <left-front-top-point x="-0.441860410134" y="0.177203858963" z="0.02"/>
+      <right-front-top-point x="-0.41882254121" y="0.19577615292" z="0.02"/>
+      <right-back-top-point x="-0.41882254121" y="0.19577615292" z="0.0"/>
+    </hexahedron>
+    <hexahedron id="hole58">
+      <left-back-bottom-point x="-0.441030875155" y="0.253118662384" z="0.0"/>
+      <left-front-bottom-point x="-0.441030875155" y="0.253118662384" z="0.02"/>
+      <right-front-bottom-point x="-0.395496422759" y="0.276876464023" z="0.02"/>
+      <right-back-bottom-point x="-0.395496422759" y="0.276876464023" z="0.0"/>
+      <left-back-top-point x="-0.408824700124" y="0.202494929907" z="0.0"/>
+      <left-front-top-point x="-0.408824700124" y="0.202494929907" z="0.02"/>
+      <right-front-top-point x="-0.372397138207" y="0.221501171218" z="0.02"/>
+      <right-back-top-point x="-0.372397138207" y="0.221501171218" z="0.0"/>
+    </hexahedron>
+    <hexahedron id="hole59">
+      <left-back-bottom-point x="-0.388614282387" y="0.279647881561" z="0.0"/>
+      <left-front-bottom-point x="-0.388614282387" y="0.279647881561" z="0.02"/>
+      <right-front-bottom-point x="-0.381508059765" y="0.282305001378" z="0.02"/>
+      <right-back-bottom-point x="-0.381508059765" y="0.282305001378" z="0.0"/>
+      <left-back-top-point x="-0.366891425909" y="0.223718305249" z="0.0"/>
+      <left-front-top-point x="-0.366891425909" y="0.223718305249" z="0.02"/>
+      <right-front-top-point x="-0.361206447812" y="0.225844001102" z="0.02"/>
+      <right-back-top-point x="-0.361206447812" y="0.225844001102" z="0.0"/>
+    </hexahedron>
+    <hexahedron id="hole60">
+      <left-back-bottom-point x="-0.374560556389" y="0.284707395716" z="0.0"/>
+      <left-front-bottom-point x="-0.374560556389" y="0.284707395716" z="0.02"/>
+      <right-front-bottom-point x="-0.367526226741" y="0.286948008588" z="0.02"/>
+      <right-back-bottom-point x="-0.367526226741" y="0.286948008588" z="0.0"/>
+      <left-back-top-point x="-0.355648445111" y="0.227765916573" z="0.0"/>
+      <left-front-top-point x="-0.355648445111" y="0.227765916573" z="0.02"/>
+      <right-front-top-point x="-0.350020981393" y="0.22955840687" z="0.02"/>
+      <right-back-top-point x="-0.350020981393" y="0.22955840687" z="0.0"/>
+    </hexahedron>
+    <hexahedron id="hole61">
+      <left-back-bottom-point x="-0.360332958143" y="0.289044314658" z="0.0"/>
+      <left-front-bottom-point x="-0.360332958143" y="0.289044314658" z="0.02"/>
+      <right-front-bottom-point x="-0.353216530194" y="0.290928409933" z="0.02"/>
+      <right-back-bottom-point x="-0.353216530194" y="0.290928409933" z="0.0"/>
+      <left-back-top-point x="-0.344266366515" y="0.231235451726" z="0.0"/>
+      <left-front-top-point x="-0.344266366515" y="0.231235451726" z="0.02"/>
+      <right-front-top-point x="-0.338573224155" y="0.232742727947" z="0.02"/>
+      <right-back-top-point x="-0.338573224155" y="0.232742727947" z="0.0"/>
+    </hexahedron>
+    <hexahedron id="hole62">
+      <left-back-bottom-point x="-0.324259966012" y="0.296717130292" z="0.0"/>
+      <left-front-bottom-point x="-0.324259966012" y="0.296717130292" z="0.02"/>
+      <right-front-bottom-point x="-0.316940151288" y="0.297717022058" z="0.02"/>
+      <right-back-bottom-point x="-0.316940151288" y="0.297717022058" z="0.0"/>
+      <left-back-top-point x="-0.315407972809" y="0.237373704233" z="0.0"/>
+      <left-front-top-point x="-0.315407972809" y="0.237373704233" z="0.02"/>
+      <right-front-top-point x="-0.30955212103" y="0.238173617646" z="0.02"/>
+      <right-back-top-point x="-0.30955212103" y="0.238173617646" z="0.0"/>
+    </hexahedron>
+    <hexahedron id="hole63">
+      <left-back-bottom-point x="-0.302258654923" y="0.299173114235" z="0.0"/>
+      <left-front-bottom-point x="-0.302258654923" y="0.299173114235" z="0.02"/>
+      <right-front-bottom-point x="-0.294916412161" y="0.299628938269" z="0.02"/>
+      <right-back-bottom-point x="-0.294916412161" y="0.299628938269" z="0.0"/>
+      <left-back-top-point x="-0.297806923938" y="0.239338491388" z="0.0"/>
+      <left-front-top-point x="-0.297806923938" y="0.239338491388" z="0.02"/>
+      <right-front-top-point x="-0.291933129728" y="0.239703150615" z="0.02"/>
+      <right-back-top-point x="-0.291933129728" y="0.239703150615" z="0.0"/>
+    </hexahedron>
+    <algebra val="body : hole0 : hole1 : hole2 : hole3 : hole4 : hole5 : hole6 : hole7 : hole8 : hole9 : hole10 : hole11 : hole12 : hole13 : hole14 : hole15 : hole16 : hole17 : hole18 : hole19 : hole20 : hole21 : hole22 : hole23 : hole24 : hole25 : hole26 : hole27 : hole28 : hole29 : hole30 : hole31 : hole32 : hole33 : hole34 : hole35 : hole36 : hole37 : hole38 : hole39 : hole40 : hole41 : hole42 : hole43 : hole44 : hole45 : hole46 : hole47 : hole48 : hole49 : hole50 : hole51 : hole52 : hole53 : hole54 : hole55 : hole56 : hole57 : hole58 : hole59 : hole60 : hole61 : hole62 : hole63"/>
+  </type>
+  <component-link name="correlation-chopper">
+    <parameter name="sequence" type="string">
+      <value val="4.185 2.823 4.267 4.248 2.816 2.809 1.388 7.113 1.406 1.41 2.816 4.251 1.403 4.244 5.646 1.43 1.353 1.424 1.429 1.419 1.401 2.803 1.425 2.821 4.262 1.386 7.098 1.403 4.221 4.242 1.332 2.856 4.23 1.437 4.214 7.054 1.423 2.822 2.841 1.38 1.45 2.783 1.446 7.036 1.429 1.384 1.451 1.389 2.847 5.611 1.45 1.379 1.418 1.414 2.866 1.354 1.437 4.225 5.643 2.803 1.444 1.411 2.803 8.488 1.38 5.678 2.838 1.393 2.838 1.411 2.823 4.238 1.379 2.833 2.821 1.402 1.423 1.4 1.421 1.412 8.471 1.415 2.865 1.394 2.805 2.83 4.208 2.851 1.383 2.854 1.299 1.557 4.136 5.692 4.213 1.437 1.345 2.867 2.831 1.426 9.876 4.296 1.388 1.392 1.438 1.376 2.833 1.415 1.42 1.411 1.444 2.789 2.86 5.592 7.069 2.876 9.821 1.417 1.449 1.404 1.41 1.431 1.406 5.642 1.411 2.818 1.405 2.85"/>
+    </parameter>
+  </component-link>
+  <component idlist="A row" type="A row">
+    <location/>
+  </component>
+  <type name="A row">
+    <component type="bank1">
+      <location/>
+    </component>
+    <component type="bank2">
+      <location/>
+    </component>
+    <component type="bank3">
+      <location/>
+    </component>
+    <component type="bank4">
+      <location/>
+    </component>
+    <component type="bank5">
+      <location/>
+    </component>
+    <component type="bank6">
+      <location/>
+    </component>
+    <component type="bank7">
+      <location/>
+    </component>
+    <component type="bank8">
+      <location/>
+    </component>
+    <component type="bank9">
+      <location/>
+    </component>
+    <component type="bank10">
+      <location/>
+    </component>
+    <component type="bank11">
+      <location/>
+    </component>
+    <component type="bank12">
+      <location/>
+    </component>
+    <component type="bank13">
+      <location/>
+    </component>
+    <component type="bank14">
+      <location/>
+    </component>
+    <component type="bank15">
+      <location/>
+    </component>
+    <component type="bank16">
+      <location/>
+    </component>
+    <component type="bank17">
+      <location/>
+    </component>
+    <component type="bank18">
+      <location/>
+    </component>
+    <component type="bank19">
+      <location/>
+    </component>
+    <component type="bank20">
+      <location/>
+    </component>
+    <component type="bank21">
+      <location/>
+    </component>
+    <component type="bank22">
+      <location/>
+    </component>
+    <component type="bank23">
+      <location/>
+    </component>
+    <component type="bank24">
+      <location/>
+    </component>
+    <component type="bank25">
+      <location/>
+    </component>
+    <component type="bank26">
+      <location/>
+    </component>
+    <component type="bank27">
+      <location/>
+    </component>
+    <component type="bank28">
+      <location/>
+    </component>
+    <component type="bank29">
+      <location/>
+    </component>
+  </type>
+  <type name="bank1">
+    <component type="sixteenpack">
+      <location x="1.274295027" y="-0.804864486" z="-2.054426768">
+        <rot axis-x="0" axis-y="1" axis-z="0" val="328.19">
+          <rot axis-x="1" axis-y="0" axis-z="0" val="0">
+            <rot axis-x="0" axis-y="0" axis-z="1" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="bank2">
+    <component type="sixteenpack">
+      <location x="1.462650296" y="-0.804864486" z="-1.924876949">
+        <rot axis-x="0" axis-y="1" axis-z="0" val="322.77">
+          <rot axis-x="1" axis-y="0" axis-z="0" val="0">
+            <rot axis-x="0" axis-y="0" axis-z="1" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="bank3">
+    <component type="sixteenpack">
+      <location x="1.637926704" y="-0.804864486" z="-1.778115089">
+        <rot axis-x="0" axis-y="1" axis-z="0" val="317.35">
+          <rot axis-x="1" axis-y="0" axis-z="0" val="0">
+            <rot axis-x="0" axis-y="0" axis-z="1" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="bank4">
+    <component type="sixteenpack">
+      <location x="1.798556949" y="-0.804864486" z="-1.615453515">
+        <rot axis-x="0" axis-y="1" axis-z="0" val="311.93">
+          <rot axis-x="1" axis-y="0" axis-z="0" val="0">
+            <rot axis-x="0" axis-y="0" axis-z="1" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="bank5">
+    <component type="sixteenpack">
+      <location x="1.943104691" y="-0.804864486" z="-1.438346731">
+        <rot axis-x="0" axis-y="1" axis-z="0" val="306.51">
+          <rot axis-x="1" axis-y="0" axis-z="0" val="0">
+            <rot axis-x="0" axis-y="0" axis-z="1" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="bank6">
+    <component type="sixteenpack">
+      <location x="2.070277401" y="-0.804864486" z="-1.248378405">
+        <rot axis-x="0" axis-y="1" axis-z="0" val="301.09">
+          <rot axis-x="1" axis-y="0" axis-z="0" val="0">
+            <rot axis-x="0" axis-y="0" axis-z="1" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="bank7">
+    <component type="sixteenpack">
+      <location x="2.246370655" y="-0.804864486" z="-0.893485333">
+        <rot axis-x="0" axis-y="1" axis-z="0" val="291.69">
+          <rot axis-x="1" axis-y="0" axis-z="0" val="0">
+            <rot axis-x="0" axis-y="0" axis-z="1" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="bank8">
+    <component type="sixteenpack">
+      <location x="2.320722146" y="-0.804864486" z="-0.677307816">
+        <rot axis-x="0" axis-y="1" axis-z="0" val="286.27">
+          <rot axis-x="1" axis-y="0" axis-z="0" val="0">
+            <rot axis-x="0" axis-y="0" axis-z="1" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="bank9">
+    <component type="sixteenpack">
+      <location x="2.374321991" y="-0.804864486" z="-0.455073886">
+        <rot axis-x="0" axis-y="1" axis-z="0" val="280.85">
+          <rot axis-x="1" axis-y="0" axis-z="0" val="0">
+            <rot axis-x="0" axis-y="0" axis-z="1" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="bank10">
+    <component type="sixteenpack">
+      <location x="2.406690904" y="-0.804864486" z="-0.228770735">
+        <rot axis-x="0" axis-y="1" axis-z="0" val="275.43">
+          <rot axis-x="1" axis-y="0" axis-z="0" val="0">
+            <rot axis-x="0" axis-y="0" axis-z="1" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="bank11">
+    <component type="sixteenpack">
+      <location x="2.417539448" y="-0.804864486" z="-0.00042194">
+        <rot axis-x="0" axis-y="1" axis-z="0" val="270.01">
+          <rot axis-x="1" axis-y="0" axis-z="0" val="0">
+            <rot axis-x="0" axis-y="0" axis-z="1" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="bank12">
+    <component type="sixteenpack">
+      <location x="2.385146032" y="-0.804864486" z="0.394430682">
+        <rot axis-x="0" axis-y="1" axis-z="0" val="260.61">
+          <rot axis-x="1" axis-y="0" axis-z="0" val="0">
+            <rot axis-x="0" axis-y="0" axis-z="1" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="bank13">
+    <component type="sixteenpack">
+      <location x="2.337225898" y="-0.804864486" z="0.617958138">
+        <rot axis-x="0" axis-y="1" axis-z="0" val="255.19">
+          <rot axis-x="1" axis-y="0" axis-z="0" val="0">
+            <rot axis-x="0" axis-y="0" axis-z="1" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="bank14">
+    <component type="sixteenpack">
+      <location x="2.268406542" y="-0.804864486" z="0.835959879">
+        <rot axis-x="0" axis-y="1" axis-z="0" val="249.77">
+          <rot axis-x="1" axis-y="0" axis-z="0" val="0">
+            <rot axis-x="0" axis-y="0" axis-z="1" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="bank15">
+    <component type="sixteenpack">
+      <location x="2.179303339" y="-0.804864486" z="1.046486558">
+        <rot axis-x="0" axis-y="1" axis-z="0" val="244.35">
+          <rot axis-x="1" axis-y="0" axis-z="0" val="0">
+            <rot axis-x="0" axis-y="0" axis-z="1" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="bank16">
+    <component type="sixteenpack">
+      <location x="2.070713041" y="-0.804864486" z="1.247655666">
+        <rot axis-x="0" axis-y="1" axis-z="0" val="238.93">
+          <rot axis-x="1" axis-y="0" axis-z="0" val="0">
+            <rot axis-x="0" axis-y="0" axis-z="1" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="bank17">
+    <component type="sixteenpack">
+      <location x="1.839133279" y="-0.804864486" z="1.569103547">
+        <rot axis-x="0" axis-y="1" axis-z="0" val="229.53">
+          <rot axis-x="1" axis-y="0" axis-z="0" val="0">
+            <rot axis-x="0" axis-y="0" axis-z="1" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="bank18">
+    <component type="sixteenpack">
+      <location x="1.682699644" y="-0.804864486" z="1.73580502">
+        <rot axis-x="0" axis-y="1" axis-z="0" val="224.11">
+          <rot axis-x="1" axis-y="0" axis-z="0" val="0">
+            <rot axis-x="0" axis-y="0" axis-z="1" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="bank19">
+    <component type="sixteenpack">
+      <location x="1.511219491" y="-0.804864486" z="1.886985111">
+        <rot axis-x="0" axis-y="1" axis-z="0" val="218.69">
+          <rot axis-x="1" axis-y="0" axis-z="0" val="0">
+            <rot axis-x="0" axis-y="0" axis-z="1" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="bank20">
+    <component type="sixteenpack">
+      <location x="1.326226176" y="-0.804864486" z="2.021291985">
+        <rot axis-x="0" axis-y="1" axis-z="0" val="213.27">
+          <rot axis-x="1" axis-y="0" axis-z="0" val="0">
+            <rot axis-x="0" axis-y="0" axis-z="1" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="bank21">
+    <component type="sixteenpack">
+      <location x="1.12937389" y="-0.804864486" z="2.137524684">
+        <rot axis-x="0" axis-y="1" axis-z="0" val="207.85">
+          <rot axis-x="1" axis-y="0" axis-z="0" val="0">
+            <rot axis-x="0" axis-y="0" axis-z="1" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="bank22">
+    <component type="sixteenpack">
+      <location x="0.765095564" y="-0.804864486" z="2.293278425">
+        <rot axis-x="0" axis-y="1" axis-z="0" val="198.45">
+          <rot axis-x="1" axis-y="0" axis-z="0" val="0">
+            <rot axis-x="0" axis-y="0" axis-z="1" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="bank23">
+    <component type="sixteenpack">
+      <location x="0.545061359" y="-0.804864486" z="2.355293033">
+        <rot axis-x="0" axis-y="1" axis-z="0" val="193.03">
+          <rot axis-x="1" axis-y="0" axis-z="0" val="0">
+            <rot axis-x="0" axis-y="0" axis-z="1" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="bank24">
+    <component type="sixteenpack">
+      <location x="0.320153274" y="-0.804864486" z="2.396246865">
+        <rot axis-x="0" axis-y="1" axis-z="0" val="187.61">
+          <rot axis-x="1" axis-y="0" axis-z="0" val="0">
+            <rot axis-x="0" axis-y="0" axis-z="1" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="bank25">
+    <component type="sixteenpack">
+      <location x="0.092382414" y="-0.804864486" z="2.415773716">
+        <rot axis-x="0" axis-y="1" axis-z="0" val="182.19">
+          <rot axis-x="1" axis-y="0" axis-z="0" val="0">
+            <rot axis-x="0" axis-y="0" axis-z="1" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="bank26">
+    <component type="sixteenpack">
+      <location x="-0.136214521" y="-0.804864486" z="2.413698979">
+        <rot axis-x="0" axis-y="1" axis-z="0" val="176.77">
+          <rot axis-x="1" axis-y="0" axis-z="0" val="0">
+            <rot axis-x="0" axis-y="0" axis-z="1" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="bank27">
+    <component type="sixteenpack">
+      <location x="-0.46128828" y="-0.804864486" z="2.373122475">
+        <rot axis-x="0" axis-y="1" axis-z="0" val="169">
+          <rot axis-x="1" axis-y="0" axis-z="0" val="0">
+            <rot axis-x="0" axis-y="0" axis-z="1" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="bank28">
+    <component type="sixteenpack">
+      <location x="-0.683381125" y="-0.804864486" z="2.318941008">
+        <rot axis-x="0" axis-y="1" axis-z="0" val="163.58">
+          <rot axis-x="1" axis-y="0" axis-z="0" val="0">
+            <rot axis-x="0" axis-y="0" axis-z="1" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="bank29">
+    <component type="sixteenpack">
+      <location x="-0.899363249" y="-0.804864486" z="2.24402382">
+        <rot axis-x="0" axis-y="1" axis-z="0" val="158.16">
+          <rot axis-x="1" axis-y="0" axis-z="0" val="0">
+            <rot axis-x="0" axis-y="0" axis-z="1" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <component idlist="B row" type="B row">
+    <location/>
+  </component>
+  <type name="B row">
+    <component type="bank30">
+      <location/>
+    </component>
+    <component type="bank31">
+      <location/>
+    </component>
+    <component type="bank32">
+      <location/>
+    </component>
+    <component type="bank33">
+      <location/>
+    </component>
+    <component type="bank34">
+      <location/>
+    </component>
+    <component type="bank35">
+      <location/>
+    </component>
+    <component type="bank36">
+      <location/>
+    </component>
+    <component type="bank37">
+      <location/>
+    </component>
+    <component type="bank38">
+      <location/>
+    </component>
+    <component type="bank39">
+      <location/>
+    </component>
+    <component type="bank40">
+      <location/>
+    </component>
+    <component type="bank41">
+      <location/>
+    </component>
+    <component type="bank42">
+      <location/>
+    </component>
+    <component type="bank43">
+      <location/>
+    </component>
+    <component type="bank44">
+      <location/>
+    </component>
+    <component type="bank45">
+      <location/>
+    </component>
+    <component type="bank46">
+      <location/>
+    </component>
+    <component type="bank47">
+      <location/>
+    </component>
+    <component type="bank48">
+      <location/>
+    </component>
+    <component type="bank49">
+      <location/>
+    </component>
+    <component type="bank50">
+      <location/>
+    </component>
+    <component type="bank51">
+      <location/>
+    </component>
+    <component type="bank52">
+      <location/>
+    </component>
+    <component type="bank53">
+      <location/>
+    </component>
+    <component type="bank54">
+      <location/>
+    </component>
+    <component type="bank55">
+      <location/>
+    </component>
+    <component type="bank56">
+      <location/>
+    </component>
+    <component type="bank57">
+      <location/>
+    </component>
+    <component type="bank58">
+      <location/>
+    </component>
+    <component type="bank59">
+      <location/>
+    </component>
+    <component type="bank60">
+      <location/>
+    </component>
+    <component type="bank61">
+      <location/>
+    </component>
+    <component type="bank62">
+      <location/>
+    </component>
+  </type>
+  <type name="bank30">
+    <component type="sixteenpack">
+      <location x="1.304201117" y="0.082562778" z="-2.229192417">
+        <rot axis-x="0" axis-y="1" axis-z="0" val="329.67">
+          <rot axis-x="1" axis-y="0" axis-z="0" val="0">
+            <rot axis-x="0" axis-y="0" axis-z="1" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="bank31">
+    <component type="sixteenpack">
+      <location x="1.49609828" y="0.082562778" z="-2.105214793">
+        <rot axis-x="0" axis-y="1" axis-z="0" val="324.6">
+          <rot axis-x="1" axis-y="0" axis-z="0" val="0">
+            <rot axis-x="0" axis-y="0" axis-z="1" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="bank32">
+    <component type="sixteenpack">
+      <location x="1.676288396" y="0.082562778" z="-1.964763752">
+        <rot axis-x="0" axis-y="1" axis-z="0" val="319.53">
+          <rot axis-x="1" axis-y="0" axis-z="0" val="0">
+            <rot axis-x="0" axis-y="0" axis-z="1" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="bank33">
+    <component type="sixteenpack">
+      <location x="1.843361467" y="0.082562778" z="-1.808938333">
+        <rot axis-x="0" axis-y="1" axis-z="0" val="314.46">
+          <rot axis-x="1" axis-y="0" axis-z="0" val="0">
+            <rot axis-x="0" axis-y="0" axis-z="1" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="bank34">
+    <component type="sixteenpack">
+      <location x="1.996010138" y="0.082562778" z="-1.638957876">
+        <rot axis-x="0" axis-y="1" axis-z="0" val="309.39">
+          <rot axis-x="1" axis-y="0" axis-z="0" val="0">
+            <rot axis-x="0" axis-y="0" axis-z="1" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="bank35">
+    <component type="sixteenpack">
+      <location x="2.133039925" y="0.082562778" z="-1.456152488">
+        <rot axis-x="0" axis-y="1" axis-z="0" val="304.32">
+          <rot axis-x="1" axis-y="0" axis-z="0" val="0">
+            <rot axis-x="0" axis-y="0" axis-z="1" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="bank36">
+    <component type="sixteenpack">
+      <location x="2.253378563" y="0.082562778" z="-1.26195263">
+        <rot axis-x="0" axis-y="1" axis-z="0" val="299.25">
+          <rot axis-x="1" axis-y="0" axis-z="0" val="0">
+            <rot axis-x="0" axis-y="0" axis-z="1" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="bank37">
+    <component type="sixteenpack">
+      <location x="2.368113691" y="0.082562778" z="-1.030668199">
+        <rot axis-x="0" axis-y="1" axis-z="0" val="293.52">
+          <rot axis-x="1" axis-y="0" axis-z="0" val="0">
+            <rot axis-x="0" axis-y="0" axis-z="1" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="bank38">
+    <component type="sixteenpack">
+      <location x="2.449931376" y="0.082562778" z="-0.817358942">
+        <rot axis-x="0" axis-y="1" axis-z="0" val="288.45">
+          <rot axis-x="1" axis-y="0" axis-z="0" val="0">
+            <rot axis-x="0" axis-y="0" axis-z="1" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="bank39">
+    <component type="sixteenpack">
+      <location x="2.51257822" y="0.082562778" z="-0.597653809">
+        <rot axis-x="0" axis-y="1" axis-z="0" val="283.38">
+          <rot axis-x="1" axis-y="0" axis-z="0" val="0">
+            <rot axis-x="0" axis-y="0" axis-z="1" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="bank40">
+    <component type="sixteenpack">
+      <location x="2.555564008" y="0.082562778" z="-0.373272004">
+        <rot axis-x="0" axis-y="1" axis-z="0" val="278.31">
+          <rot axis-x="1" axis-y="0" axis-z="0" val="0">
+            <rot axis-x="0" axis-y="0" axis-z="1" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="bank41">
+    <component type="sixteenpack">
+      <location x="2.578552374" y="0.082562778" z="-0.145969326">
+        <rot axis-x="0" axis-y="1" axis-z="0" val="273.24">
+          <rot axis-x="1" axis-y="0" axis-z="0" val="0">
+            <rot axis-x="0" axis-y="0" axis-z="1" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="bank42">
+    <component type="sixteenpack">
+      <location x="2.581363432" y="0.082562778" z="0.08247557">
+        <rot axis-x="0" axis-y="1" axis-z="0" val="268.17">
+          <rot axis-x="1" axis-y="0" axis-z="0" val="0">
+            <rot axis-x="0" axis-y="0" axis-z="1" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="bank43">
+    <component type="sixteenpack">
+      <location x="2.560231046" y="0.082562778" z="0.339788726">
+        <rot axis-x="0" axis-y="1" axis-z="0" val="262.44">
+          <rot axis-x="1" axis-y="0" axis-z="0" val="0">
+            <rot axis-x="0" axis-y="0" axis-z="1" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="bank44">
+    <component type="sixteenpack">
+      <location x="2.520186008" y="0.082562778" z="0.564713974">
+        <rot axis-x="0" axis-y="1" axis-z="0" val="257.37">
+          <rot axis-x="1" axis-y="0" axis-z="0" val="0">
+            <rot axis-x="0" axis-y="0" axis-z="1" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="bank45">
+    <component type="sixteenpack">
+      <location x="2.460420382" y="0.082562778" z="0.785220306">
+        <rot axis-x="0" axis-y="1" axis-z="0" val="252.3">
+          <rot axis-x="1" axis-y="0" axis-z="0" val="0">
+            <rot axis-x="0" axis-y="0" axis-z="1" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="bank46">
+    <component type="sixteenpack">
+      <location x="2.381401839" y="0.082562778" z="0.999582248">
+        <rot axis-x="0" axis-y="1" axis-z="0" val="247.23">
+          <rot axis-x="1" axis-y="0" axis-z="0" val="0">
+            <rot axis-x="0" axis-y="0" axis-z="1" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="bank47">
+    <component type="sixteenpack">
+      <location x="2.283748701" y="0.082562778" z="1.206122407">
+        <rot axis-x="0" axis-y="1" axis-z="0" val="242.16">
+          <rot axis-x="1" axis-y="0" axis-z="0" val="0">
+            <rot axis-x="0" axis-y="0" axis-z="1" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="bank48">
+    <component type="sixteenpack">
+      <location x="2.168225109" y="0.082562778" z="1.403224595">
+        <rot axis-x="0" axis-y="1" axis-z="0" val="237.09">
+          <rot axis-x="1" axis-y="0" axis-z="0" val="0">
+            <rot axis-x="0" axis-y="0" axis-z="1" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="bank49">
+    <component type="sixteenpack">
+      <location x="2.01729243" y="0.082562778" z="1.612690497">
+        <rot axis-x="0" axis-y="1" axis-z="0" val="231.36">
+          <rot axis-x="1" axis-y="0" axis-z="0" val="0">
+            <rot axis-x="0" axis-y="0" axis-z="1" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="bank50">
+    <component type="sixteenpack">
+      <location x="1.866881812" y="0.082562778" z="1.7846545">
+        <rot axis-x="0" axis-y="1" axis-z="0" val="226.29">
+          <rot axis-x="1" axis-y="0" axis-z="0" val="0">
+            <rot axis-x="0" axis-y="0" axis-z="1" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="bank51">
+    <component type="sixteenpack">
+      <location x="1.701862747" y="0.082562778" z="1.942653489">
+        <rot axis-x="0" axis-y="1" axis-z="0" val="221.22">
+          <rot axis-x="1" axis-y="0" axis-z="0" val="0">
+            <rot axis-x="0" axis-y="0" axis-z="1" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="bank52">
+    <component type="sixteenpack">
+      <location x="1.523526516" y="0.082562778" z="2.085451113">
+        <rot axis-x="0" axis-y="1" axis-z="0" val="216.15">
+          <rot axis-x="1" axis-y="0" axis-z="0" val="0">
+            <rot axis-x="0" axis-y="0" axis-z="1" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="bank53">
+    <component type="sixteenpack">
+      <location x="1.33326861" y="0.082562778" z="2.211929972">
+        <rot axis-x="0" axis-y="1" axis-z="0" val="211.08">
+          <rot axis-x="1" axis-y="0" axis-z="0" val="0">
+            <rot axis-x="0" axis-y="0" axis-z="1" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="bank54">
+    <component type="sixteenpack">
+      <location x="1.132577808" y="0.082562778" z="2.321100363">
+        <rot axis-x="0" axis-y="1" axis-z="0" val="206.01">
+          <rot axis-x="1" axis-y="0" axis-z="0" val="0">
+            <rot axis-x="0" axis-y="0" axis-z="1" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="bank55">
+    <component type="sixteenpack">
+      <location x="0.895178412" y="0.082562778" z="2.422580236">
+        <rot axis-x="0" axis-y="1" axis-z="0" val="200.28">
+          <rot axis-x="1" axis-y="0" axis-z="0" val="0">
+            <rot axis-x="0" axis-y="0" axis-z="1" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="bank56">
+    <component type="sixteenpack">
+      <location x="0.677585904" y="0.082562778" z="2.492211213">
+        <rot axis-x="0" axis-y="1" axis-z="0" val="195.21">
+          <rot axis-x="1" axis-y="0" axis-z="0" val="0">
+            <rot axis-x="0" axis-y="0" axis-z="1" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="bank57">
+    <component type="sixteenpack">
+      <location x="0.454691251" y="0.082562778" z="2.542340507">
+        <rot axis-x="0" axis-y="1" axis-z="0" val="190.14">
+          <rot axis-x="1" axis-y="0" axis-z="0" val="0">
+            <rot axis-x="0" axis-y="0" axis-z="1" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="bank58">
+    <component type="sixteenpack">
+      <location x="0.228238615" y="0.082562778" z="2.572575854">
+        <rot axis-x="0" axis-y="1" axis-z="0" val="185.07">
+          <rot axis-x="1" axis-y="0" axis-z="0" val="0">
+            <rot axis-x="0" axis-y="0" axis-z="1" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="bank59">
+    <component type="sixteenpack">
+      <location x="-0.228238615" y="0.082562778" z="2.572575854">
+        <rot axis-x="0" axis-y="1" axis-z="0" val="174.93">
+          <rot axis-x="1" axis-y="0" axis-z="0" val="0">
+            <rot axis-x="0" axis-y="0" axis-z="1" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="bank60">
+    <component type="sixteenpack">
+      <location x="-0.483946097" y="0.082562778" z="2.536934284">
+        <rot axis-x="0" axis-y="1" axis-z="0" val="169.2">
+          <rot axis-x="1" axis-y="0" axis-z="0" val="0">
+            <rot axis-x="0" axis-y="0" axis-z="1" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="bank61">
+    <component type="sixteenpack">
+      <location x="-0.706248527" y="0.082562778" z="2.484240811">
+        <rot axis-x="0" axis-y="1" axis-z="0" val="164.13">
+          <rot axis-x="1" axis-y="0" axis-z="0" val="0">
+            <rot axis-x="0" axis-y="0" axis-z="1" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="bank62">
+    <component type="sixteenpack">
+      <location x="-0.923024525" y="0.082562778" z="2.412108023">
+        <rot axis-x="0" axis-y="1" axis-z="0" val="159.06">
+          <rot axis-x="1" axis-y="0" axis-z="0" val="0">
+            <rot axis-x="0" axis-y="0" axis-z="1" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <component idlist="C row" type="C row">
+    <location/>
+  </component>
+  <type name="C row">
+    <component type="bank63">
+      <location/>
+    </component>
+    <component type="bank64">
+      <location/>
+    </component>
+    <component type="bank65">
+      <location/>
+    </component>
+    <component type="bank66">
+      <location/>
+    </component>
+    <component type="bank67">
+      <location/>
+    </component>
+    <component type="bank68">
+      <location/>
+    </component>
+    <component type="bank69">
+      <location/>
+    </component>
+    <component type="bank70">
+      <location/>
+    </component>
+    <component type="bank71">
+      <location/>
+    </component>
+    <component type="bank72">
+      <location/>
+    </component>
+    <component type="bank73">
+      <location/>
+    </component>
+    <component type="bank74">
+      <location/>
+    </component>
+    <component type="bank75">
+      <location/>
+    </component>
+    <component type="bank76">
+      <location/>
+    </component>
+    <component type="bank77">
+      <location/>
+    </component>
+    <component type="bank78">
+      <location/>
+    </component>
+    <component type="bank79">
+      <location/>
+    </component>
+    <component type="bank80">
+      <location/>
+    </component>
+    <component type="bank81">
+      <location/>
+    </component>
+    <component type="bank82">
+      <location/>
+    </component>
+    <component type="bank83">
+      <location/>
+    </component>
+    <component type="bank84">
+      <location/>
+    </component>
+    <component type="bank85">
+      <location/>
+    </component>
+    <component type="bank86">
+      <location/>
+    </component>
+    <component type="bank87">
+      <location/>
+    </component>
+    <component type="bank88">
+      <location/>
+    </component>
+    <component type="bank89">
+      <location/>
+    </component>
+    <component type="bank90">
+      <location/>
+    </component>
+    <component type="bank91">
+      <location/>
+    </component>
+  </type>
+  <type name="bank63">
+    <component type="sixteenpack">
+      <location x="1.274473643" y="0.966788649" z="-2.054714734">
+        <rot axis-x="0" axis-y="1" axis-z="0" val="328.19">
+          <rot axis-x="1" axis-y="0" axis-z="0" val="0">
+            <rot axis-x="0" axis-y="0" axis-z="1" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="bank64">
+    <component type="sixteenpack">
+      <location x="1.462855314" y="0.966788649" z="-1.925146757">
+        <rot axis-x="0" axis-y="1" axis-z="0" val="322.77">
+          <rot axis-x="1" axis-y="0" axis-z="0" val="0">
+            <rot axis-x="0" axis-y="0" axis-z="1" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="bank65">
+    <component type="sixteenpack">
+      <location x="1.638156291" y="0.966788649" z="-1.778364325">
+        <rot axis-x="0" axis-y="1" axis-z="0" val="317.35">
+          <rot axis-x="1" axis-y="0" axis-z="0" val="0">
+            <rot axis-x="0" axis-y="0" axis-z="1" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="bank66">
+    <component type="sixteenpack">
+      <location x="1.798809051" y="0.966788649" z="-1.615679952">
+        <rot axis-x="0" axis-y="1" axis-z="0" val="311.93">
+          <rot axis-x="1" axis-y="0" axis-z="0" val="0">
+            <rot axis-x="0" axis-y="0" axis-z="1" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="bank67">
+    <component type="sixteenpack">
+      <location x="1.943377054" y="0.966788649" z="-1.438548342">
+        <rot axis-x="0" axis-y="1" axis-z="0" val="306.51">
+          <rot axis-x="1" axis-y="0" axis-z="0" val="0">
+            <rot axis-x="0" axis-y="0" axis-z="1" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="bank68">
+    <component type="sixteenpack">
+      <location x="2.070567589" y="0.966788649" z="-1.248553389">
+        <rot axis-x="0" axis-y="1" axis-z="0" val="301.09">
+          <rot axis-x="1" axis-y="0" axis-z="0" val="0">
+            <rot axis-x="0" axis-y="0" axis-z="1" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="bank69">
+    <component type="sixteenpack">
+      <location x="2.246685526" y="0.966788649" z="-0.893610572">
+        <rot axis-x="0" axis-y="1" axis-z="0" val="291.69">
+          <rot axis-x="1" axis-y="0" axis-z="0" val="0">
+            <rot axis-x="0" axis-y="0" axis-z="1" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="bank70">
+    <component type="sixteenpack">
+      <location x="2.321047439" y="0.966788649" z="-0.677402754">
+        <rot axis-x="0" axis-y="1" axis-z="0" val="286.27">
+          <rot axis-x="1" axis-y="0" axis-z="0" val="0">
+            <rot axis-x="0" axis-y="0" axis-z="1" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="bank71">
+    <component type="sixteenpack">
+      <location x="2.374654797" y="0.966788649" z="-0.455137674">
+        <rot axis-x="0" axis-y="1" axis-z="0" val="280.85">
+          <rot axis-x="1" axis-y="0" axis-z="0" val="0">
+            <rot axis-x="0" axis-y="0" axis-z="1" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="bank72">
+    <component type="sixteenpack">
+      <location x="2.407028248" y="0.966788649" z="-0.228802802">
+        <rot axis-x="0" axis-y="1" axis-z="0" val="275.43">
+          <rot axis-x="1" axis-y="0" axis-z="0" val="0">
+            <rot axis-x="0" axis-y="0" axis-z="1" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="bank73">
+    <component type="sixteenpack">
+      <location x="2.417878311" y="0.966788649" z="-0.000421999">
+        <rot axis-x="0" axis-y="1" axis-z="0" val="270.01">
+          <rot axis-x="1" axis-y="0" axis-z="0" val="0">
+            <rot axis-x="0" axis-y="0" axis-z="1" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="bank74">
+    <component type="sixteenpack">
+      <location x="2.385480356" y="0.966788649" z="0.394485969">
+        <rot axis-x="0" axis-y="1" axis-z="0" val="260.61">
+          <rot axis-x="1" axis-y="0" axis-z="0" val="0">
+            <rot axis-x="0" axis-y="0" axis-z="1" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="bank75">
+    <component type="sixteenpack">
+      <location x="2.337553504" y="0.966788649" z="0.618044757">
+        <rot axis-x="0" axis-y="1" axis-z="0" val="255.19">
+          <rot axis-x="1" axis-y="0" axis-z="0" val="0">
+            <rot axis-x="0" axis-y="0" axis-z="1" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="bank76">
+    <component type="sixteenpack">
+      <location x="2.268724502" y="0.966788649" z="0.836077055">
+        <rot axis-x="0" axis-y="1" axis-z="0" val="249.77">
+          <rot axis-x="1" axis-y="0" axis-z="0" val="0">
+            <rot axis-x="0" axis-y="0" axis-z="1" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="bank77">
+    <component type="sixteenpack">
+      <location x="2.17960881" y="0.966788649" z="1.046633242">
+        <rot axis-x="0" axis-y="1" axis-z="0" val="244.35">
+          <rot axis-x="1" axis-y="0" axis-z="0" val="0">
+            <rot axis-x="0" axis-y="0" axis-z="1" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="bank78">
+    <component type="sixteenpack">
+      <location x="2.071003291" y="0.966788649" z="1.247830548">
+        <rot axis-x="0" axis-y="1" axis-z="0" val="238.93">
+          <rot axis-x="1" axis-y="0" axis-z="0" val="0">
+            <rot axis-x="0" axis-y="0" axis-z="1" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="bank79">
+    <component type="sixteenpack">
+      <location x="1.839391068" y="0.966788649" z="1.569323487">
+        <rot axis-x="0" axis-y="1" axis-z="0" val="229.53">
+          <rot axis-x="1" axis-y="0" axis-z="0" val="0">
+            <rot axis-x="0" axis-y="0" axis-z="1" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="bank80">
+    <component type="sixteenpack">
+      <location x="1.682935506" y="0.966788649" z="1.736048326">
+        <rot axis-x="0" axis-y="1" axis-z="0" val="224.11">
+          <rot axis-x="1" axis-y="0" axis-z="0" val="0">
+            <rot axis-x="0" axis-y="0" axis-z="1" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="bank81">
+    <component type="sixteenpack">
+      <location x="1.511431317" y="0.966788649" z="1.887249608">
+        <rot axis-x="0" axis-y="1" axis-z="0" val="218.69">
+          <rot axis-x="1" axis-y="0" axis-z="0" val="0">
+            <rot axis-x="0" axis-y="0" axis-z="1" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="bank82">
+    <component type="sixteenpack">
+      <location x="1.326412072" y="0.966788649" z="2.021575307">
+        <rot axis-x="0" axis-y="1" axis-z="0" val="213.27">
+          <rot axis-x="1" axis-y="0" axis-z="0" val="0">
+            <rot axis-x="0" axis-y="0" axis-z="1" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="bank83">
+    <component type="sixteenpack">
+      <location x="1.129532193" y="0.966788649" z="2.137824299">
+        <rot axis-x="0" axis-y="1" axis-z="0" val="207.85">
+          <rot axis-x="1" axis-y="0" axis-z="0" val="0">
+            <rot axis-x="0" axis-y="0" axis-z="1" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="bank84">
+    <component type="sixteenpack">
+      <location x="0.765202807" y="0.966788649" z="2.293599872">
+        <rot axis-x="0" axis-y="1" axis-z="0" val="198.45">
+          <rot axis-x="1" axis-y="0" axis-z="0" val="0">
+            <rot axis-x="0" axis-y="0" axis-z="1" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="bank85">
+    <component type="sixteenpack">
+      <location x="0.54513776" y="0.966788649" z="2.355623172">
+        <rot axis-x="0" axis-y="1" axis-z="0" val="193.03">
+          <rot axis-x="1" axis-y="0" axis-z="0" val="0">
+            <rot axis-x="0" axis-y="0" axis-z="1" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="bank86">
+    <component type="sixteenpack">
+      <location x="0.32019815" y="0.966788649" z="2.396582745">
+        <rot axis-x="0" axis-y="1" axis-z="0" val="187.61">
+          <rot axis-x="1" axis-y="0" axis-z="0" val="0">
+            <rot axis-x="0" axis-y="0" axis-z="1" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="bank87">
+    <component type="sixteenpack">
+      <location x="0.092395363" y="0.966788649" z="2.416112333">
+        <rot axis-x="0" axis-y="1" axis-z="0" val="182.19">
+          <rot axis-x="1" axis-y="0" axis-z="0" val="0">
+            <rot axis-x="0" axis-y="0" axis-z="1" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="bank88">
+    <component type="sixteenpack">
+      <location x="-0.136233614" y="0.966788649" z="2.414037305">
+        <rot axis-x="0" axis-y="1" axis-z="0" val="176.77">
+          <rot axis-x="1" axis-y="0" axis-z="0" val="0">
+            <rot axis-x="0" axis-y="0" axis-z="1" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="bank89">
+    <component type="sixteenpack">
+      <location x="-0.461352939" y="0.966788649" z="2.373455113">
+        <rot axis-x="0" axis-y="1" axis-z="0" val="169">
+          <rot axis-x="1" axis-y="0" axis-z="0" val="0">
+            <rot axis-x="0" axis-y="0" axis-z="1" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="bank90">
+    <component type="sixteenpack">
+      <location x="-0.683476914" y="0.966788649" z="2.319266051">
+        <rot axis-x="0" axis-y="1" axis-z="0" val="163.58">
+          <rot axis-x="1" axis-y="0" axis-z="0" val="0">
+            <rot axis-x="0" axis-y="0" axis-z="1" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="bank91">
+    <component type="sixteenpack">
+      <location x="-0.899489312" y="0.966788649" z="2.244338363">
+        <rot axis-x="0" axis-y="1" axis-z="0" val="158.16">
+          <rot axis-x="1" axis-y="0" axis-z="0" val="0">
+            <rot axis-x="0" axis-y="0" axis-z="1" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <!--16-PACK-->
+  <type name="sixteenpack">
+    <properties/>
+    <component type="tube">
+      <location name="tube1" x="-0.104775"/>
+      <location name="tube2" x="-0.090805"/>
+      <location name="tube3" x="-0.076835"/>
+      <location name="tube4" x="-0.062865"/>
+      <location name="tube5" x="-0.048895"/>
+      <location name="tube6" x="-0.034925"/>
+      <location name="tube7" x="-0.020955"/>
+      <location name="tube8" x="-0.006985"/>
+      <location name="tube9" x="0.006985"/>
+      <location name="tube10" x="0.020955"/>
+      <location name="tube11" x="0.034925"/>
+      <location name="tube12" x="0.048895"/>
+      <location name="tube13" x="0.062865"/>
+      <location name="tube14" x="0.076835"/>
+      <location name="tube15" x="0.090805"/>
+      <location name="tube16" x="0.104775"/>
+    </component>
+  </type>
+  <!--STANDARD 256 PIXEL TUBE-->
+  <type name="tube" outline="yes">
+    <properties/>
+    <component type="pixel">
+      <location name="pixel1" y="-0.4179609375"/>
+      <location name="pixel2" y="-0.4146828125"/>
+      <location name="pixel3" y="-0.4114046875"/>
+      <location name="pixel4" y="-0.4081265625"/>
+      <location name="pixel5" y="-0.4048484375"/>
+      <location name="pixel6" y="-0.4015703125"/>
+      <location name="pixel7" y="-0.3982921875"/>
+      <location name="pixel8" y="-0.3950140625"/>
+      <location name="pixel9" y="-0.3917359375"/>
+      <location name="pixel10" y="-0.3884578125"/>
+      <location name="pixel11" y="-0.3851796875"/>
+      <location name="pixel12" y="-0.3819015625"/>
+      <location name="pixel13" y="-0.3786234375"/>
+      <location name="pixel14" y="-0.3753453125"/>
+      <location name="pixel15" y="-0.3720671875"/>
+      <location name="pixel16" y="-0.3687890625"/>
+      <location name="pixel17" y="-0.3655109375"/>
+      <location name="pixel18" y="-0.3622328125"/>
+      <location name="pixel19" y="-0.3589546875"/>
+      <location name="pixel20" y="-0.3556765625"/>
+      <location name="pixel21" y="-0.3523984375"/>
+      <location name="pixel22" y="-0.3491203125"/>
+      <location name="pixel23" y="-0.3458421875"/>
+      <location name="pixel24" y="-0.3425640625"/>
+      <location name="pixel25" y="-0.3392859375"/>
+      <location name="pixel26" y="-0.3360078125"/>
+      <location name="pixel27" y="-0.3327296875"/>
+      <location name="pixel28" y="-0.3294515625"/>
+      <location name="pixel29" y="-0.3261734375"/>
+      <location name="pixel30" y="-0.3228953125"/>
+      <location name="pixel31" y="-0.3196171875"/>
+      <location name="pixel32" y="-0.3163390625"/>
+      <location name="pixel33" y="-0.3130609375"/>
+      <location name="pixel34" y="-0.3097828125"/>
+      <location name="pixel35" y="-0.3065046875"/>
+      <location name="pixel36" y="-0.3032265625"/>
+      <location name="pixel37" y="-0.2999484375"/>
+      <location name="pixel38" y="-0.2966703125"/>
+      <location name="pixel39" y="-0.2933921875"/>
+      <location name="pixel40" y="-0.2901140625"/>
+      <location name="pixel41" y="-0.2868359375"/>
+      <location name="pixel42" y="-0.2835578125"/>
+      <location name="pixel43" y="-0.2802796875"/>
+      <location name="pixel44" y="-0.2770015625"/>
+      <location name="pixel45" y="-0.2737234375"/>
+      <location name="pixel46" y="-0.2704453125"/>
+      <location name="pixel47" y="-0.2671671875"/>
+      <location name="pixel48" y="-0.2638890625"/>
+      <location name="pixel49" y="-0.2606109375"/>
+      <location name="pixel50" y="-0.2573328125"/>
+      <location name="pixel51" y="-0.2540546875"/>
+      <location name="pixel52" y="-0.2507765625"/>
+      <location name="pixel53" y="-0.2474984375"/>
+      <location name="pixel54" y="-0.2442203125"/>
+      <location name="pixel55" y="-0.2409421875"/>
+      <location name="pixel56" y="-0.2376640625"/>
+      <location name="pixel57" y="-0.2343859375"/>
+      <location name="pixel58" y="-0.2311078125"/>
+      <location name="pixel59" y="-0.2278296875"/>
+      <location name="pixel60" y="-0.2245515625"/>
+      <location name="pixel61" y="-0.2212734375"/>
+      <location name="pixel62" y="-0.2179953125"/>
+      <location name="pixel63" y="-0.2147171875"/>
+      <location name="pixel64" y="-0.2114390625"/>
+      <location name="pixel65" y="-0.2081609375"/>
+      <location name="pixel66" y="-0.2048828125"/>
+      <location name="pixel67" y="-0.2016046875"/>
+      <location name="pixel68" y="-0.1983265625"/>
+      <location name="pixel69" y="-0.1950484375"/>
+      <location name="pixel70" y="-0.1917703125"/>
+      <location name="pixel71" y="-0.1884921875"/>
+      <location name="pixel72" y="-0.1852140625"/>
+      <location name="pixel73" y="-0.1819359375"/>
+      <location name="pixel74" y="-0.1786578125"/>
+      <location name="pixel75" y="-0.1753796875"/>
+      <location name="pixel76" y="-0.1721015625"/>
+      <location name="pixel77" y="-0.1688234375"/>
+      <location name="pixel78" y="-0.1655453125"/>
+      <location name="pixel79" y="-0.1622671875"/>
+      <location name="pixel80" y="-0.1589890625"/>
+      <location name="pixel81" y="-0.1557109375"/>
+      <location name="pixel82" y="-0.1524328125"/>
+      <location name="pixel83" y="-0.1491546875"/>
+      <location name="pixel84" y="-0.1458765625"/>
+      <location name="pixel85" y="-0.1425984375"/>
+      <location name="pixel86" y="-0.1393203125"/>
+      <location name="pixel87" y="-0.1360421875"/>
+      <location name="pixel88" y="-0.1327640625"/>
+      <location name="pixel89" y="-0.1294859375"/>
+      <location name="pixel90" y="-0.1262078125"/>
+      <location name="pixel91" y="-0.1229296875"/>
+      <location name="pixel92" y="-0.1196515625"/>
+      <location name="pixel93" y="-0.1163734375"/>
+      <location name="pixel94" y="-0.1130953125"/>
+      <location name="pixel95" y="-0.1098171875"/>
+      <location name="pixel96" y="-0.1065390625"/>
+      <location name="pixel97" y="-0.1032609375"/>
+      <location name="pixel98" y="-0.0999828125"/>
+      <location name="pixel99" y="-0.0967046875"/>
+      <location name="pixel100" y="-0.0934265625"/>
+      <location name="pixel101" y="-0.0901484375"/>
+      <location name="pixel102" y="-0.0868703125"/>
+      <location name="pixel103" y="-0.0835921875"/>
+      <location name="pixel104" y="-0.0803140625"/>
+      <location name="pixel105" y="-0.0770359375"/>
+      <location name="pixel106" y="-0.0737578125"/>
+      <location name="pixel107" y="-0.0704796875"/>
+      <location name="pixel108" y="-0.0672015625"/>
+      <location name="pixel109" y="-0.0639234375"/>
+      <location name="pixel110" y="-0.0606453125"/>
+      <location name="pixel111" y="-0.0573671875"/>
+      <location name="pixel112" y="-0.0540890625"/>
+      <location name="pixel113" y="-0.0508109375"/>
+      <location name="pixel114" y="-0.0475328125"/>
+      <location name="pixel115" y="-0.0442546875"/>
+      <location name="pixel116" y="-0.0409765625"/>
+      <location name="pixel117" y="-0.0376984375"/>
+      <location name="pixel118" y="-0.0344203125"/>
+      <location name="pixel119" y="-0.0311421875"/>
+      <location name="pixel120" y="-0.0278640625"/>
+      <location name="pixel121" y="-0.0245859375"/>
+      <location name="pixel122" y="-0.0213078125"/>
+      <location name="pixel123" y="-0.0180296875"/>
+      <location name="pixel124" y="-0.0147515625"/>
+      <location name="pixel125" y="-0.0114734375"/>
+      <location name="pixel126" y="-0.0081953125"/>
+      <location name="pixel127" y="-0.0049171875"/>
+      <location name="pixel128" y="-0.0016390625"/>
+      <location name="pixel129" y="0.0016390625"/>
+      <location name="pixel130" y="0.0049171875"/>
+      <location name="pixel131" y="0.0081953125"/>
+      <location name="pixel132" y="0.0114734375"/>
+      <location name="pixel133" y="0.0147515625"/>
+      <location name="pixel134" y="0.0180296875"/>
+      <location name="pixel135" y="0.0213078125"/>
+      <location name="pixel136" y="0.0245859375"/>
+      <location name="pixel137" y="0.0278640625"/>
+      <location name="pixel138" y="0.0311421875"/>
+      <location name="pixel139" y="0.0344203125"/>
+      <location name="pixel140" y="0.0376984375"/>
+      <location name="pixel141" y="0.0409765625"/>
+      <location name="pixel142" y="0.0442546875"/>
+      <location name="pixel143" y="0.0475328125"/>
+      <location name="pixel144" y="0.0508109375"/>
+      <location name="pixel145" y="0.0540890625"/>
+      <location name="pixel146" y="0.0573671875"/>
+      <location name="pixel147" y="0.0606453125"/>
+      <location name="pixel148" y="0.0639234375"/>
+      <location name="pixel149" y="0.0672015625"/>
+      <location name="pixel150" y="0.0704796875"/>
+      <location name="pixel151" y="0.0737578125"/>
+      <location name="pixel152" y="0.0770359375"/>
+      <location name="pixel153" y="0.0803140625"/>
+      <location name="pixel154" y="0.0835921875"/>
+      <location name="pixel155" y="0.0868703125"/>
+      <location name="pixel156" y="0.0901484375"/>
+      <location name="pixel157" y="0.0934265625"/>
+      <location name="pixel158" y="0.0967046875"/>
+      <location name="pixel159" y="0.0999828125"/>
+      <location name="pixel160" y="0.1032609375"/>
+      <location name="pixel161" y="0.1065390625"/>
+      <location name="pixel162" y="0.1098171875"/>
+      <location name="pixel163" y="0.1130953125"/>
+      <location name="pixel164" y="0.1163734375"/>
+      <location name="pixel165" y="0.1196515625"/>
+      <location name="pixel166" y="0.1229296875"/>
+      <location name="pixel167" y="0.1262078125"/>
+      <location name="pixel168" y="0.1294859375"/>
+      <location name="pixel169" y="0.1327640625"/>
+      <location name="pixel170" y="0.1360421875"/>
+      <location name="pixel171" y="0.1393203125"/>
+      <location name="pixel172" y="0.1425984375"/>
+      <location name="pixel173" y="0.1458765625"/>
+      <location name="pixel174" y="0.1491546875"/>
+      <location name="pixel175" y="0.1524328125"/>
+      <location name="pixel176" y="0.1557109375"/>
+      <location name="pixel177" y="0.1589890625"/>
+      <location name="pixel178" y="0.1622671875"/>
+      <location name="pixel179" y="0.1655453125"/>
+      <location name="pixel180" y="0.1688234375"/>
+      <location name="pixel181" y="0.1721015625"/>
+      <location name="pixel182" y="0.1753796875"/>
+      <location name="pixel183" y="0.1786578125"/>
+      <location name="pixel184" y="0.1819359375"/>
+      <location name="pixel185" y="0.1852140625"/>
+      <location name="pixel186" y="0.1884921875"/>
+      <location name="pixel187" y="0.1917703125"/>
+      <location name="pixel188" y="0.1950484375"/>
+      <location name="pixel189" y="0.1983265625"/>
+      <location name="pixel190" y="0.2016046875"/>
+      <location name="pixel191" y="0.2048828125"/>
+      <location name="pixel192" y="0.2081609375"/>
+      <location name="pixel193" y="0.2114390625"/>
+      <location name="pixel194" y="0.2147171875"/>
+      <location name="pixel195" y="0.2179953125"/>
+      <location name="pixel196" y="0.2212734375"/>
+      <location name="pixel197" y="0.2245515625"/>
+      <location name="pixel198" y="0.2278296875"/>
+      <location name="pixel199" y="0.2311078125"/>
+      <location name="pixel200" y="0.2343859375"/>
+      <location name="pixel201" y="0.2376640625"/>
+      <location name="pixel202" y="0.2409421875"/>
+      <location name="pixel203" y="0.2442203125"/>
+      <location name="pixel204" y="0.2474984375"/>
+      <location name="pixel205" y="0.2507765625"/>
+      <location name="pixel206" y="0.2540546875"/>
+      <location name="pixel207" y="0.2573328125"/>
+      <location name="pixel208" y="0.2606109375"/>
+      <location name="pixel209" y="0.2638890625"/>
+      <location name="pixel210" y="0.2671671875"/>
+      <location name="pixel211" y="0.2704453125"/>
+      <location name="pixel212" y="0.2737234375"/>
+      <location name="pixel213" y="0.2770015625"/>
+      <location name="pixel214" y="0.2802796875"/>
+      <location name="pixel215" y="0.2835578125"/>
+      <location name="pixel216" y="0.2868359375"/>
+      <location name="pixel217" y="0.2901140625"/>
+      <location name="pixel218" y="0.2933921875"/>
+      <location name="pixel219" y="0.2966703125"/>
+      <location name="pixel220" y="0.2999484375"/>
+      <location name="pixel221" y="0.3032265625"/>
+      <location name="pixel222" y="0.3065046875"/>
+      <location name="pixel223" y="0.3097828125"/>
+      <location name="pixel224" y="0.3130609375"/>
+      <location name="pixel225" y="0.3163390625"/>
+      <location name="pixel226" y="0.3196171875"/>
+      <location name="pixel227" y="0.3228953125"/>
+      <location name="pixel228" y="0.3261734375"/>
+      <location name="pixel229" y="0.3294515625"/>
+      <location name="pixel230" y="0.3327296875"/>
+      <location name="pixel231" y="0.3360078125"/>
+      <location name="pixel232" y="0.3392859375"/>
+      <location name="pixel233" y="0.3425640625"/>
+      <location name="pixel234" y="0.3458421875"/>
+      <location name="pixel235" y="0.3491203125"/>
+      <location name="pixel236" y="0.3523984375"/>
+      <location name="pixel237" y="0.3556765625"/>
+      <location name="pixel238" y="0.3589546875"/>
+      <location name="pixel239" y="0.3622328125"/>
+      <location name="pixel240" y="0.3655109375"/>
+      <location name="pixel241" y="0.3687890625"/>
+      <location name="pixel242" y="0.3720671875"/>
+      <location name="pixel243" y="0.3753453125"/>
+      <location name="pixel244" y="0.3786234375"/>
+      <location name="pixel245" y="0.3819015625"/>
+      <location name="pixel246" y="0.3851796875"/>
+      <location name="pixel247" y="0.3884578125"/>
+      <location name="pixel248" y="0.3917359375"/>
+      <location name="pixel249" y="0.3950140625"/>
+      <location name="pixel250" y="0.3982921875"/>
+      <location name="pixel251" y="0.4015703125"/>
+      <location name="pixel252" y="0.4048484375"/>
+      <location name="pixel253" y="0.4081265625"/>
+      <location name="pixel254" y="0.4114046875"/>
+      <location name="pixel255" y="0.4146828125"/>
+      <location name="pixel256" y="0.4179609375"/>
+    </component>
+  </type>
+  <!--PIXEL FOR STANDARD 256 PIXEL TUBE-->
+  <type is="detector" name="pixel">
+    <cylinder id="cyl-approx">
+      <centre-of-bottom-base p="0.0" r="0.0" t="0.0"/>
+      <axis x="0.0" y="1.0" z="0.0"/>
+      <radius val="0.00635"/>
+      <height val="0.003278125"/>
+    </cylinder>
+    <algebra val="cyl-approx"/>
+  </type>
+  <!--MONITOR SHAPE-->
+  <!--FIXME: Do something real here.-->
+  <type is="monitor" name="monitor">
+    <cylinder id="cyl-approx">
+      <centre-of-bottom-base p="0.0" r="0.0" t="0.0"/>
+      <axis x="0.0" y="0.0" z="1.0"/>
+      <radius val="0.01"/>
+      <height val="0.03"/>
+    </cylinder>
+    <algebra val="cyl-approx"/>
+  </type>
+  <!--DETECTOR IDs-->
+  <idlist idname="A row">
+    <id end="4095" start="0"/>
+    <id end="8191" start="4096"/>
+    <id end="12287" start="8192"/>
+    <id end="16383" start="12288"/>
+    <id end="20479" start="16384"/>
+    <id end="24575" start="20480"/>
+    <id end="28671" start="24576"/>
+    <id end="32767" start="28672"/>
+    <id end="36863" start="32768"/>
+    <id end="40959" start="36864"/>
+    <id end="45055" start="40960"/>
+    <id end="49151" start="45056"/>
+    <id end="53247" start="49152"/>
+    <id end="57343" start="53248"/>
+    <id end="61439" start="57344"/>
+    <id end="65535" start="61440"/>
+    <id end="69631" start="65536"/>
+    <id end="73727" start="69632"/>
+    <id end="77823" start="73728"/>
+    <id end="81919" start="77824"/>
+    <id end="86015" start="81920"/>
+    <id end="90111" start="86016"/>
+    <id end="94207" start="90112"/>
+    <id end="98303" start="94208"/>
+    <id end="102399" start="98304"/>
+    <id end="106495" start="102400"/>
+    <id end="110591" start="106496"/>
+    <id end="114687" start="110592"/>
+    <id end="118783" start="114688"/>
+  </idlist>
+  <idlist idname="B row">
+    <id end="122879" start="118784"/>
+    <id end="126975" start="122880"/>
+    <id end="131071" start="126976"/>
+    <id end="135167" start="131072"/>
+    <id end="139263" start="135168"/>
+    <id end="143359" start="139264"/>
+    <id end="147455" start="143360"/>
+    <id end="151551" start="147456"/>
+    <id end="155647" start="151552"/>
+    <id end="159743" start="155648"/>
+    <id end="163839" start="159744"/>
+    <id end="167935" start="163840"/>
+    <id end="172031" start="167936"/>
+    <id end="176127" start="172032"/>
+    <id end="180223" start="176128"/>
+    <id end="184319" start="180224"/>
+    <id end="188415" start="184320"/>
+    <id end="192511" start="188416"/>
+    <id end="196607" start="192512"/>
+    <id end="200703" start="196608"/>
+    <id end="204799" start="200704"/>
+    <id end="208895" start="204800"/>
+    <id end="212991" start="208896"/>
+    <id end="217087" start="212992"/>
+    <id end="221183" start="217088"/>
+    <id end="225279" start="221184"/>
+    <id end="229375" start="225280"/>
+    <id end="233471" start="229376"/>
+    <id end="237567" start="233472"/>
+    <id end="241663" start="237568"/>
+    <id end="245759" start="241664"/>
+    <id end="249855" start="245760"/>
+    <id end="253951" start="249856"/>
+  </idlist>
+  <idlist idname="C row">
+    <id end="258047" start="253952"/>
+    <id end="262143" start="258048"/>
+    <id end="266239" start="262144"/>
+    <id end="270335" start="266240"/>
+    <id end="274431" start="270336"/>
+    <id end="278527" start="274432"/>
+    <id end="282623" start="278528"/>
+    <id end="286719" start="282624"/>
+    <id end="290815" start="286720"/>
+    <id end="294911" start="290816"/>
+    <id end="299007" start="294912"/>
+    <id end="303103" start="299008"/>
+    <id end="307199" start="303104"/>
+    <id end="311295" start="307200"/>
+    <id end="315391" start="311296"/>
+    <id end="319487" start="315392"/>
+    <id end="323583" start="319488"/>
+    <id end="327679" start="323584"/>
+    <id end="331775" start="327680"/>
+    <id end="335871" start="331776"/>
+    <id end="339967" start="335872"/>
+    <id end="344063" start="339968"/>
+    <id end="348159" start="344064"/>
+    <id end="352255" start="348160"/>
+    <id end="356351" start="352256"/>
+    <id end="360447" start="356352"/>
+    <id end="364543" start="360448"/>
+    <id end="368639" start="364544"/>
+    <id end="372735" start="368640"/>
+  </idlist>
+  <!--MONITOR IDs-->
+  <idlist idname="monitors">
+    <id val="-1"/>
+    <id val="-2"/>
+    <id val="-3"/>
+  </idlist>
+  <!--DETECTOR PARAMETERS-->
+  <component-link name="A row">
+    <parameter name="tube_pressure">
+      <value units="atm" val="15.0"/>
+    </parameter>
+    <parameter name="tube_thickness">
+      <value units="metre" val="0.0005"/>
+    </parameter>
+    <parameter name="tube_temperature">
+      <value units="K" val="290.0"/>
+    </parameter>
+  </component-link>
+  <component-link name="B row">
+    <parameter name="tube_pressure">
+      <value units="atm" val="15.0"/>
+    </parameter>
+    <parameter name="tube_thickness">
+      <value units="metre" val="0.0005"/>
+    </parameter>
+    <parameter name="tube_temperature">
+      <value units="K" val="290.0"/>
+    </parameter>
+  </component-link>
+  <component-link name="C row">
+    <parameter name="tube_pressure">
+      <value units="atm" val="15.0"/>
+    </parameter>
+    <parameter name="tube_thickness">
+      <value units="metre" val="0.0005"/>
+    </parameter>
+    <parameter name="tube_temperature">
+      <value units="K" val="290.0"/>
+    </parameter>
+  </component-link>
+</instrument>

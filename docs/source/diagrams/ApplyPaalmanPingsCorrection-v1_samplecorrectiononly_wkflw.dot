@@ -1,0 +1,29 @@
+digraph ApplyPaalmanPingsCorrection_SampleCorrectOnly {
+  label="ApplyPaalmanPingsCorrection Sample Correct Only Flowchart"
+  $global_style
+
+  subgraph descision {
+    $decision_style
+    IsAssInWavelength [label="Is in Wavelength?"]
+  }
+
+  subgraph params {
+    $param_style
+    SampleWorkspace
+    CorrectionsWorkspace
+    OutputWorkspace
+  }
+
+  subgraph algorithms {
+    $algorithm_style
+    Divide
+    ConvertUnits
+  }
+
+  SampleWorkspace       -> Divide             [label="LHSWorkspace"]
+  CorrectionsWorkspace  -> IsAssInWavelength  [label="As,s"]
+  IsAssInWavelength     -> Divide             [label="Yes, RHSWorkspace"]
+  IsAssInWavelength     -> ConvertUnits       [label="No"]
+  ConvertUnits          -> Divide             [label="RHSWorkspace"]
+  Divide                -> OutputWorkspace
+}

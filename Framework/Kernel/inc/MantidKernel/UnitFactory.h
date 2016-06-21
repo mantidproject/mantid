@@ -1,0 +1,99 @@
+#ifndef MANTID_KERNEL_UNITFACTORYIMPL_H_
+#define MANTID_KERNEL_UNITFACTORYIMPL_H_
+
+/* Used to register unit classes into the factory. creates a global object in an
+ * anonymous namespace. The object itself does nothing, but the comma operator
+ * is used in the call to its constructor to effect a call to the factory's
+ * subscribe method.
+ *
+ * The second operation that this macro performs is to provide the definition
+ * of the unitID method for the concrete unit.
+ */
+#define DECLARE_UNIT(classname)                                                \
+  namespace {                                                                  \
+  Mantid::Kernel::RegistrationHelper                                           \
+      register_alg_##classname(((Mantid::Kernel::UnitFactory::Instance()       \
+                                     .subscribe<classname>(#classname)),       \
+                                0));                                           \
+  }                                                                            \
+  const std::string Mantid::Kernel::Units::classname::unitID() const {         \
+    return #classname;                                                         \
+  }
+
+//----------------------------------------------------------------------
+// Includes
+//----------------------------------------------------------------------
+#include "MantidKernel/DllConfig.h"
+#include "MantidKernel/DynamicFactory.h"
+#include "MantidKernel/SingletonHolder.h"
+
+namespace Mantid {
+namespace Kernel {
+
+//----------------------------------------------------------------------
+// Forward declaration
+//----------------------------------------------------------------------
+class Unit;
+
+/** Creates instances of concrete units.
+    The factory is a singleton that hands out shared pointers to the base Unit
+   class.
+    It overrides the base class DynamicFactory::create method so that only a
+   single
+    instance of a given unit is ever created, and a pointer to that same
+   instance
+    is passed out each time the unit is requested.
+
+    @author Russell Taylor, Tessella Support Services plc
+    @date 13/03/2008
+
+    Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+   National Laboratory & European Spallation Source
+
+    This file is part of Mantid.
+
+    Mantid is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 3 of the License, or
+    (at your option) any later version.
+
+    Mantid is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+    File change history is stored at: <https://github.com/mantidproject/mantid>
+    Code Documentation is available at: <http://doxygen.mantidproject.org>
+*/
+class MANTID_KERNEL_DLL UnitFactoryImpl final : public DynamicFactory<Unit> {
+public:
+  UnitFactoryImpl(const UnitFactoryImpl &) = delete;
+  UnitFactoryImpl &operator=(const UnitFactoryImpl &) = delete;
+
+private:
+  friend struct CreateUsingNew<UnitFactoryImpl>;
+
+  /// Private Constructor for singleton class
+  UnitFactoryImpl() = default;
+
+  /// Private Destructor
+  ~UnitFactoryImpl() override = default;
+};
+
+/// Forward declaration of a specialisation of SingletonHolder for
+/// AlgorithmFactoryImpl (needed for dllexport/dllimport) .
+#ifdef _WIN32
+// this breaks new namespace declaraion rules; need to find a better fix
+template class MANTID_KERNEL_DLL
+    Mantid::Kernel::SingletonHolder<UnitFactoryImpl>;
+#endif /* _WIN32 */
+/// The specialisation of the SingletonHolder class that holds the UnitFactory
+typedef SingletonHolder<UnitFactoryImpl> UnitFactory;
+
+} // namespace Kernel
+} // namespace Mantid
+
+#endif /*MANTID_KERNEL_UNITFACTORYIMPL_H_*/

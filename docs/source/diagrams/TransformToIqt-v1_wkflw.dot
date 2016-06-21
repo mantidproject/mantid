@@ -1,0 +1,68 @@
+digraph TransformToIqt {
+  label="TransformToIqt Flowchart"
+  $global_style
+
+  subgraph descision {
+    $decision_style
+    IsDryRun                        [label="DryRun?"]
+  }
+
+  subgraph processes {
+    $process_style
+    CalculateBinningParameters      [label="Calculate binning parameters"]
+  }
+
+  subgraph params {
+    $param_style
+    SampleWorkspace
+    ResolutionWorkspace
+    EnergyMin
+    EnergyMax
+    BinReductionFactor
+    ParameterWorkspace
+    OutputWorkspace
+  }
+
+  subgraph algorithms {
+    $algorithm_style
+    Divide
+    Rebin_Sample                    [label="Rebin"]
+    Rebin_Resolution                [label="Rebin"]
+    Integration_Sample              [label="Integration"]
+    ConvertToPointData_Sample       [label="ConvertToPointData"]
+    ExtractFFTSpectrum_Sample       [label="ExtractFFTSpectrum"]
+    Divide_Sample                   [label="Divide"]
+    Rebin_Resolution                [label="Rebin"]
+    Integration_Resolution          [label="Integration"]
+    ConvertToPointData_Resolution   [label="ConvertToPointData"]
+    ExtractFFTSpectrum_Resolution   [label="ExtractFFTSpectrum"]
+    Divide_Resolution               [label="Divide"]
+  }
+
+  SampleWorkspace               -> CalculateBinningParameters
+  EnergyMin                     -> CalculateBinningParameters
+  EnergyMax                     -> CalculateBinningParameters
+  BinReductionFactor            -> CalculateBinningParameters
+  CalculateBinningParameters    -> ParameterWorkspace
+
+  SampleWorkspace               -> IsDryRun
+  IsDryRun                      -> Rebin_Sample                   [label="No"]
+  CalculateBinningParameters    -> Rebin_Sample
+  Rebin_Sample                  -> Integration_Sample
+  Rebin_Sample                  -> ConvertToPointData_Sample
+  ConvertToPointData_Sample     -> ExtractFFTSpectrum_Sample
+  ExtractFFTSpectrum_Sample     -> Divide_Sample                  [label="LHSWorkspace"]
+  Integration_Sample            -> Divide_Sample                  [label="RHSWorkspace"]
+
+  ResolutionWorkspace           -> Rebin_Resolution
+  CalculateBinningParameters    -> Rebin_Resolution
+  Rebin_Resolution              -> Integration_Resolution
+  Rebin_Resolution              -> ConvertToPointData_Resolution
+  ConvertToPointData_Resolution -> ExtractFFTSpectrum_Resolution
+  ExtractFFTSpectrum_Resolution -> Divide_Resolution              [label="LHSWorkspace"]
+  Integration_Resolution        -> Divide_Resolution              [label="RHSWorkspace"]
+
+  Divide_Sample                 -> Divide                         [label="LHSWorkspace"]
+  Divide_Resolution             -> Divide                         [label="RHSWorkspace"]
+  Divide                        -> OutputWorkspace
+}

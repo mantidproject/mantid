@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<parameter-file instrument="D17" valid-from="2012-10-01T00:00:00">
+
+	<component-link name="D17">
+
+		<parameter name="deltaE-mode" type="string">
+			<value val="direct" />
+		</parameter>
+
+		<!-- Mapping of nexus fields:
+		- Change the name from val to name in the properties
+		 -->		
+		<parameter name="channel_width" type="string">
+			<value val="monitor1.time_of_flight_0" />
+		</parameter>
+		<!--  Get value from properties -->
+		<parameter name="detector_distance" type="string">
+			<value val="det.value" />
+		</parameter>
+		<parameter name="detector_centre" type="string">
+			<value val="PSD.ny" />
+		</parameter>
+		
+		
+		
+		
+
+	</component-link>
+
+</parameter-file>

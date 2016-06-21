@@ -1,0 +1,137 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!-- For help on the notation used to specify an Instrument Definition File 
+     see http://www.mantidproject.org/IDF -->
+<instrument xmlns="http://www.mantidproject.org/IDF/1.0" 
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 http://schema.mantidproject.org/IDF/1.0/IDFSchema.xsd"
+ name="MANDI" valid-from   ="2013-03-15 00:00:00"
+                         valid-to     ="2013-07-31 23:59:59"
+		         last-modified="2013-03-18 10:00:00">
+  <!--Created by Vickie Lynch-->
+  <!--Modified by Vickie Lynch using the MANDI.py script from the Translation Service calibration/geometry/ code. -->
+
+  <!--DEFAULTS-->
+  <defaults>
+    <length unit="metre"/>
+    <angle unit="degree"/>
+    <reference-frame>
+      <along-beam axis="z"/>
+      <pointing-up axis="y"/>
+      <handedness val="right"/>
+    </reference-frame>
+    <default-view view="spherical_y"/>
+  </defaults>
+
+  <!--SOURCE-->
+  <component type="moderator">
+    <location z="-30.0"/>
+  </component>
+  <type name="moderator" is="Source"/>
+
+  <!--SAMPLE-->
+  <component type="sample-position">
+    <location y="0.0" x="0.0" z="0.0"/>
+  </component>
+  <type name="sample-position" is="SamplePos"/>
+
+  <!--MONITORS-->
+  <component type="monitors" idlist="monitors">
+    <location/>
+  </component>
+  <type name="monitors">
+    <component type="monitor">
+      <location z="-2.935" name="monitor1"/>
+    </component>
+    <component type="monitor">
+      <location z="-0.898" name="monitor2"/>
+    </component>
+    <component type="monitor">
+      <location z="1.042" name="monitor3"/>
+    </component>
+  </type>
+  
+<!-- XML Code automatically generated on 2013-03-18 08:22:59.866512 for the Mantid instrument definition file -->
+<component type="panel" idstart="917504" idfillbyfirst="y" idstepbyrow="256">
+<location r="0.455000" t="133.320872" p="-46.751427" name="bank14" rot="-63.920201" axis-x="0" axis-y="1" axis-z="0">
+  <rot val="53.154399">
+    <rot val="41.466968" axis-x="0" axis-y="1" axis-z="0" />
+  </rot>
+</location>
+</component> 
+<component type="panel" idstart="1310720" idfillbyfirst="y" idstepbyrow="256">
+<location r="0.425000" t="23.905622" p="-42.859145" name="bank20" rot="-177.410228" axis-x="0" axis-y="1" axis-z="0">
+  <rot val="47.178655">
+    <rot val="22.073524" axis-x="0" axis-y="1" axis-z="0" />
+  </rot>
+</location>
+</component> 
+<component type="panel" idstart="1441792" idfillbyfirst="y" idstepbyrow="256">
+<location r="0.425000" t="90.000202" p="-16.000018" name="bank22" rot="-105.410002" axis-x="0" axis-y="1" axis-z="0">
+  <rot val="47.178655">
+    <rot val="22.073524" axis-x="0" axis-y="1" axis-z="0" />
+  </rot>
+</location>
+</component> 
+<component type="panel" idstart="2031616" idfillbyfirst="y" idstepbyrow="256">
+<location r="0.395000" t="36.000027" p="0.000000" name="bank31" rot="-143.999973" axis-x="0" axis-y="1" axis-z="0">
+  <rot val="45.000000">
+    <rot val="0.000000" axis-x="0" axis-y="1" axis-z="0" />
+  </rot>
+</location>
+</component> 
+<component type="panel" idstart="2097152" idfillbyfirst="y" idstepbyrow="256">
+<location r="0.395000" t="72.000168" p="0.000000" name="bank32" rot="-107.999832" axis-x="0" axis-y="1" axis-z="0">
+  <rot val="45.000000">
+    <rot val="0.000000" axis-x="0" axis-y="1" axis-z="0" />
+  </rot>
+</location>
+</component> 
+<component type="panel" idstart="2162688" idfillbyfirst="y" idstepbyrow="256">
+<location r="0.395000" t="108.000253" p="0.000000" name="bank33" rot="-71.999747" axis-x="0" axis-y="1" axis-z="0">
+  <rot val="45.000000">
+    <rot val="0.000000" axis-x="0" axis-y="1" axis-z="0" />
+  </rot>
+</location>
+</component> 
+<!-- List of all the banks:
+14,20,22,31,32,33
+-->
+
+<!-- NOTE: This detector is the same as the SNAP detector -->
+<!-- Rectangular Detector Panel -->
+<type name="panel" is="rectangular_detector" type="pixel"
+    xpixels="256" xstart="-0.078795" xstep="+0.000618"
+    ypixels="256" ystart="-0.078795" ystep="+0.000618" >
+  <properties/>
+</type>
+
+  <!-- Pixel for Detectors-->
+  <type is="detector" name="pixel">
+    <cuboid id="pixel-shape">
+      <left-front-bottom-point y="-0.000309" x="-0.000309" z="0.0"/>
+      <left-front-top-point y="0.000309" x="-0.000309" z="0.0"/>
+      <left-back-bottom-point y="-0.000309" x="-0.000309" z="-0.0001"/>
+      <right-front-bottom-point y="-0.000309" x="0.000309" z="0.0"/>
+    </cuboid>
+    <algebra val="pixel-shape"/>
+  </type>
+
+  <!-- Shape for Monitors-->
+  <!-- TODO: Update to real shape -->
+  <type is="monitor" name="monitor">
+    <cylinder id="some-shape">
+      <centre-of-bottom-base p="0.0" r="0.0" t="0.0"/>
+      <axis y="0.0" x="0.0" z="1.0"/>
+      <radius val="0.01"/>
+      <height val="0.03"/>
+    </cylinder>
+    <algebra val="some-shape"/>
+  </type>
+
+  <!--MONITOR IDs-->
+  <idlist idname="monitors">
+    <id val="-1"/>
+    <id val="-2"/>
+    <id val="-3"/>
+  </idlist>
+</instrument>

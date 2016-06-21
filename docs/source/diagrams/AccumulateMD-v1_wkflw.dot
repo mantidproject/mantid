@@ -1,0 +1,53 @@
+digraph AccumulateMD {
+  label="AccumulateMD Flowchart"
+  $global_style
+
+  subgraph params {
+    $param_style
+    DataSources
+    OutputWorkspace
+    InputWorkspace
+    Clean
+  }
+
+  subgraph algorithms {
+    $algorithm_style
+    createMD1            [label="CreateMD v1"]
+    createMD2            [label="CreateMD v1"]
+    mergeMD             [label="MergeMD v1"]
+  }
+  
+  subgraph decisions {
+    $decision_style
+    existYet    [label="Do any of these\nDataSources exist yet?"]
+    createClean [label="Is Clean true?"]
+    newData     [label="Are any of the DataSources not\nalready in InputWorkspace?"]
+  }
+  
+  subgraph values{
+    $value_style
+    done1   [label="Done"]
+    done2   [label="Done"]
+    
+  }
+  
+  DataSources               ->  existYet
+  InputWorkspace            ->  existYet
+  Clean                     ->  createClean
+  
+  existYet -> createClean   [label="Yes"]
+  existYet -> done1         [label="No"]
+  
+  createClean -> newData    [label="No"]
+  createClean -> createMD1  [label="Yes"]
+
+  createMD1 -> OutputWorkspace
+  
+  newData -> done2      [label="No"]
+  newData -> createMD2  [label="Yes - Create workspace\nwith new data sources"]
+  
+  createMD2 -> mergeMD  [label="Merge created workspace with InputWorkspace"]
+  mergeMD   -> OutputWorkspace
+
+}
+

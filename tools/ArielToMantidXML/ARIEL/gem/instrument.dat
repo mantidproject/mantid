@@ -1,0 +1,17 @@
+********************
+superclass::  assembly
+********************
+scope:: specific
+name:: detector_table
+type:: pointer
+rank:: 0
+*********************
+scope:: specific
+name:: electronics_table
+type:: pointer
+rank:: 0
+*********************
+scope:: specific
+name:: data_master
+type:: pointer
+rank:: 0

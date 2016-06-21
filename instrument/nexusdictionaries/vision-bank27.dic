@@ -1,0 +1,7 @@
+data=/entry/bank27/data
+x-axis=/entry/bank27/time_of_flight
+y-axis=/entry/bank27/pixel_id
+x-axis-name=TOF
+title=/entry/title
+sample=/entry/sample/name
+InstrumentName=/entry/instrument/name

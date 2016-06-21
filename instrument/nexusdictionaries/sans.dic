@@ -1,0 +1,5 @@
+data=/entry1/data1/counts
+x-axis=/entry1/data1/detector_x
+y-axis=/entry1/data1/detector_y
+x-axis-name=pixel
+title=/entry1/title

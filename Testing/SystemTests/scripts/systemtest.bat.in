@@ -1,0 +1,62 @@
+@echo off
+:: Wrapper script to launch the system tests for a development build.
+::
+:: It uses the mantidpython launch script to run the tests. All arguments to
+:: this script are forwarded to the test runner.
+
+set PYTHON_EXE=@PYTHON_EXECUTABLE@
+set RUNNER_SCRIPT=@SYSTEMTESTS_RUNNER_SCRIPT@
+set BIN_DIR=@CMAKE_RUNTIME_OUTPUT_DIRECTORY@
+set MANTIDPYTHON_ARGS=--classic
+
+:: Print usage
+if [%1]==[-h] (
+  goto usage
+  goto end
+)
+
+:: Are there enough arguments
+if [%1] EQU [-C] (
+  if [%2] NEQ [] (
+    set MANTIDPYTHON=%BIN_DIR%\%2\mantidpython.bat
+  ) else (
+    echo -C requires a config argument
+    echo.
+    echo Use -h for full usage
+    goto error
+  )
+) else (
+  echo Multi-configuration build requires -C ^<cfg^> to specify test configuration
+  echo.
+  echo Use -h for full usage
+  goto error
+)
+
+:: Update testing data
+echo Updating testing data...
+msbuild /nologo /nr:false /p:Configuration=%2 StandardTestData.vcxproj
+if ERRORLEVEL 1 exit /b %ERRORLEVEL%
+msbuild /nologo /nr:false /p:Configuration=%2 SystemTestData.vcxproj
+if ERRORLEVEL 1 exit /b %ERRORLEVEL%
+
+:: Execute
+echo.
+echo Running tests...
+%MANTIDPYTHON% %MANTIDPYTHON_ARGS% %RUNNER_SCRIPT% --executable="%MANTIDPYTHON%" --exec-args="--classic" %3 %4 %5 %6 %7 %8 %9
+goto end
+
+:: -------- Functions  ---------
+
+:usage
+echo systemtest.bat -C ^<cfg^> ^[arg1^] ^[arg2^] ...
+echo.
+echo ^<cfg^> is one ^[Release^|Debug^|RelWithDebInfo^|MinSizeRelease^]
+echo All arguments after ^<cfg^> are passed to the runSystemTest.py script
+%PYTHON_EXE% %RUNNER_SCRIPT% -h
+goto:eof
+
+:end
+exit /b 0
+
+:error
+exit /b 1

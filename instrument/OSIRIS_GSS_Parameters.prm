@@ -1,0 +1,14 @@
+            123456789012345678901234567890123456789012345678901234567890        
+INS   BANK  1                                                                   
+INS   FPATH1    34.0                                                            
+INS   FPATH2    35.012                                                          
+INS   HTYPE   PNTR                                                              
+INS  1 ICONS  17423.13     -1.22      1.82                                      
+INS  1BNKPAR    0.8918    158.46      0.00    .00000     .3000    1    1        
+INS  1I HEAD   OSIRIS IPF from Rietveld of Si collected Feb 06 (all detectors)  
+INS  1I ITYP    0    1.000   1000.000       2                                   
+INS  1PRCF      2   15   0.000200                                               
+INS  1PRCF 1   0.000000E+00   0.475600E+00   6.955000E+01   1.247000E+01        
+INS  1PRCF 2   0.000000E+00   4.697000E+02   3.279000E+01   4.092000E+00        
+INS  1PRCF 3   5.608000E+00   0.913400E+00   0.000000E+00   0.000000E+00        
+INS  1PRCF 4   0.000000E+00   0.000000E+00   0.000000E+00   0.000000E+00        

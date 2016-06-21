@@ -1,0 +1,3 @@
+*.aux *.cp *.css *.def *.dvi *.fn *.ins *.ky *.log *.pdf *.pg *.tp *.toc *.pl *.sty *.vr *.tmp *.ps *.eps
+tech*.tex *.fot *.out *.tex *.info .emacs_
+Versions.html Versions.texi

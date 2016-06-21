@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<parameter-file instrument = "%instrument_name%" date = "%last_modified%">
+
+<component-link name = "%instrument_name%">
+
+<parameter name="detector-name" type="string">
+  <value val="detector1"/>
+</parameter>
+
+<parameter name="default-incident-monitor-spectrum">
+  <value val="1"/>
+</parameter>
+
+<parameter name="number-of-x-pixels">
+  <value val="%n_x_pixels%"/>
+</parameter>
+
+<parameter name="number-of-y-pixels">
+  <value val="%n_y_pixels%"/>
+</parameter>
+
+<parameter name="number-of-monitors">
+  <value val="2"/>
+</parameter>
+
+<parameter name="x-pixel-size">
+  <value val="%pixel_size_x%"/>
+</parameter>
+
+<parameter name="y-pixel-size">
+  <value val="%pixel_size_y%"/>
+</parameter>
+
+</component-link>
+
+</parameter-file>

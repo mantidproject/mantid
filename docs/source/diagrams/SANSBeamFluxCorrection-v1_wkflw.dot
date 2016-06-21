@@ -1,0 +1,43 @@
+digraph SANSBeamFluxCorrection {
+  label="SANSBeamFluxCorrection Flowchart"
+  $global_style
+
+  subgraph params {
+    $param_style
+    flexRefWS       [label="FlexRefWorkspace"]
+    monitorWS       [label="MonitorWorkspace"]
+    inputWS         [label="InputWorkspace"]
+    outputWS        [label="OutputWorkspace"]
+  }
+
+  subgraph decision {
+    $decision_style
+    isEntryName         [label="Has Entry Name?"]
+  }
+  
+  subgraph algoritms {
+    $algorithm_style
+    convertToHist       [label="ConvertToHistogram v1"]
+    rebinToWs           [label="RebinToWorkspace v1"]
+    rebinToWs2          [label="RebinToWorkspace v1"]
+    divide              [label="Divide v1"]
+    divide2             [label="Divide v1"]
+    load                [label="Load v1"]
+  }
+
+  isEntryName           -> load [label="Yes"]
+  isEntryName           -> flexRefWS [label="No. Emtpy Workspace"]
+  load                  -> flexRefWS
+  flexRefWS             -> convertToHist
+  convertToHist         -> rebinToWs
+  inputWS               -> rebinToWs
+  rebinToWs             -> divide2
+  
+  inputWS               -> rebinToWs2
+  monitorWS             -> rebinToWs2
+  rebinToWs2            -> divide
+  inputWS               -> divide
+  divide                -> divide2
+  
+  divide2               -> outputWS
+}

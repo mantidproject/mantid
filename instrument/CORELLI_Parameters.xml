@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<parameter-file instrument = "CORELLI" valid-from = "2014-02-25 00:00:00">
+
+  <component-link name = "CORELLI">
+
+    <!-- Specify the gap between the tubes for Peak::findDetector -->
+    <parameter name="tube-gap">
+      <value val="0.00065"/>
+    </parameter>
+
+    <!--   formula for t0 calculation. See http://muparser.sourceforge.net/mup_features.html#idDef2 for available operators-->
+    <parameter name="t0_formula" type="string">
+      <!-- This formula was taken from ARCS and needs to be updated for CORELLI -->
+      <value val="(101.9 * incidentEnergy^(-0.41) * exp(-incidentEnergy/282.0))" />
+    </parameter>
+
+  </component-link>
+
+</parameter-file>

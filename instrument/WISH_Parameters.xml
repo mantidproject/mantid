@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<parameter-file instrument = "WISH" valid-from = "2013-03-13T00:00:00">
+    
+    <component-link name="WISH">
+    
+        <!-- SplitInto defaults for MDWorkspaces -->
+		<parameter name="SplitInto">
+		  <value val="2"/>
+		</parameter>
+		
+		<!-- SplitThreshold defaults for MDWorkspaces -->
+		<parameter name="SplitThreshold">
+		  <value val="30"/>
+		</parameter>
+		
+		 <!-- MaxRecursionDepth defaults for MDWorkspaces -->
+		<parameter name="MaxRecursionDepth">
+		  <value val="20"/>
+		</parameter>
+        
+         <!-- Offset the psi values in the mini-plot -->
+         <parameter name="offset-phi" type="string">
+          <value val="Always" />
+         </parameter>
+		
+    </component-link>
+</parameter-file>    

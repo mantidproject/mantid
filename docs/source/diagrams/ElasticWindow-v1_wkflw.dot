@@ -1,0 +1,67 @@
+digraph ElasticWindow {
+  label="ElasticWindow Flowchart"
+  $global_style
+
+  subgraph values {
+    $value_style
+    ConvertUnits_Target   [label="QSquared"]
+    ConvertAxis_Q_Taregt  [label="ElasticQ"]
+    ConvertAxis_Q2_Target [label="ElasticQSquared"]
+  }
+
+  subgraph descision {
+    $decision_style
+    HaveBackgroundRange       [label="Have Background Range?"]
+    VertAxisIsSpectraNumber   [label="Vertical Axis is Spectra Number?"]
+  }
+
+  subgraph params {
+    $param_style
+    InputWorkspace
+    OutputInQ
+    OutputInQSquared
+    IntegrationRangeStart
+    IntegrationRangeEnd
+    BackgroundRangeStart
+    BackgroundRangeEnd
+  }
+
+  subgraph algorithms {
+    $algorithm_style
+    CalculateFlatBackground
+    Integration
+    ConvertToHistogram
+    ConvertUnits
+    ConvertAxis_Q   [label="ConvertSpectrumAxis"]
+    ConvertAxis_Q2  [label="ConvertSpectrumAxis"]
+    Transpose_Q     [label="Transpose"]
+    Transpose_Q2    [label="Transpose"]
+    Transpose_Q_B   [label="Transpose"]
+  }
+
+  InputWorkspace          -> HaveBackgroundRange
+  HaveBackgroundRange     -> CalculateFlatBackground  [label="Yes"]
+  BackgroundRangeStart    -> CalculateFlatBackground
+  BackgroundRangeEnd      -> CalculateFlatBackground
+  CalculateFlatBackground -> Integration
+  HaveBackgroundRange     -> Integration              [label="No"]
+  IntegrationRangeStart   -> Integration
+  IntegrationRangeEnd     -> Integration
+  Integration             -> VertAxisIsSpectraNumber
+
+  VertAxisIsSpectraNumber -> ConvertAxis_Q            [label="Yes"]
+  ConvertAxis_Q_Taregt    -> ConvertAxis_Q            [label="Target"]
+  ConvertAxis_Q           -> Transpose_Q
+  Transpose_Q             -> OutputInQ
+  VertAxisIsSpectraNumber -> ConvertAxis_Q2           [label="Yes"]
+  ConvertAxis_Q2_Target   -> ConvertAxis_Q2           [label="Target"]
+  ConvertAxis_Q2          -> Transpose_Q2
+  Transpose_Q2            -> OutputInQSquared
+
+  VertAxisIsSpectraNumber -> Transpose_Q_B            [label="No"]
+  Transpose_Q_B           -> OutputInQ
+  VertAxisIsSpectraNumber -> ConvertToHistogram       [label="No"]
+  ConvertToHistogram      -> ConvertUnits
+  ConvertUnits_Target     -> ConvertUnits             [label="Target"]
+  ConvertUnits            -> OutputInQSquared
+}

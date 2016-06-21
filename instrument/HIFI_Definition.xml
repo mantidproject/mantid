@@ -1,0 +1,236 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- For help on the notation used to specify an Instrument Definition File 
+     see http://www.mantidproject.org/IDF -->
+<instrument xmlns="http://www.mantidproject.org/IDF/1.0" 
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 http://schema.mantidproject.org/IDF/1.0/IDFSchema.xsd"
+ name="HIFI" valid-from   ="1900-01-31 23:59:59"
+                        valid-to     ="2100-01-31 23:59:59"
+		        last-modified="2011-03-17 16:00:00">
+
+  <defaults>
+    <length unit="meter"/>
+    <angle unit="degree"/>
+    <reference-frame>
+      <!-- The z-axis is set parallel to and in the direction of the beam. the 
+           y-axis points up and the coordinate system is right handed. -->
+      <along-beam axis="z"/>
+      <pointing-up axis="y"/>
+      <handedness val="right"/>
+    </reference-frame>
+  </defaults>
+
+  
+  <!-- BRIEF DESCRIPTION OF HIFI INSTRUMENT: 
+  
+      Generated from engineering drawings of scintillators JSL 23/2/2011
+  -->
+  
+  <parameter name="Default grouping file" type="string">
+    <value val="Grouping/HIFI_Detector_Grouping_LF_64.xml"/>
+  </parameter>     
+  
+  <!-- LIST OF PHYSICAL COMPONENTS (which the instrument consists of) -->
+  
+  <!-- dummy components added for visualisation purposes. 
+       To easy spot what geometry the instrument is in -->
+   <!--    
+  <component type="along z">
+    <location />
+  </component> 
+       
+  <type name="along z">
+  <cylinder id="A">
+    <centre-of-bottom-base x="0.0" y="0.0" z="0.0" />
+    <axis x="0.0" y="0" z="1" /> 
+    <radius val="0.002" />
+    <height val="0.10" />
+  </cylinder>
+  </type> 
+  
+  <component type="along x">
+    <location />
+  </component> 
+       
+  <type name="along x">
+  <cylinder id="B">
+    <centre-of-bottom-base x="0.0" y="0.0" z="0.0" />
+    <axis x="1.0" y="0" z="0" /> 
+    <radius val="0.002" />
+    <height val="0.10" />
+  </cylinder>
+  </type>
+   
+  <component type="along y">
+    <location />
+  </component> 
+       
+  <type name="along y">
+  <cylinder id="C">
+    <centre-of-bottom-base x="0.0" y="0.0" z="0.0" />
+    <axis x="0.0" y="1" z="0" /> 
+    <radius val="0.002" />
+    <height val="0.10" />
+  </cylinder>
+  </type> 
+  -->
+
+  <!-- source and sample-position components -->
+
+  <component type="source">
+    <location z="-10.0" />
+  </component>
+  <type name="source" is="Source" />
+  
+  <component type="some-sample-holder">
+    <location />
+  </component>
+  
+  <type name="some-sample-holder" is="SamplePos">
+    <cylinder id="A">
+    <centre-of-bottom-base x="0.0" y="0.0" z="-0.001" />
+    <axis x="0.0" y="0" z="1" /> 
+    <radius val="0.02" />
+    <height val="0.002" />
+  </cylinder>
+
+  </type>
+    
+  <!-- detector components --> 
+  
+  <component type="both-rings">
+    <location x="0.0" y="0.0" z="0.0"/>
+  </component>  
+  
+  <type name="both-rings" >
+    <component type="ring-forward" idlist="ids-forward">
+      <location x="0.0" y="0.0" z="0.0" name="front" /> 
+     </component>
+    <component type="ring-backward" idlist="ids-backward">     
+      <location x="0.0" y="0.0" z="0.0" name="back" />
+    </component>    
+  </type>
+
+
+ <type name="ring-forward">
+  <component type="forward-pixel">
+   <location rot="-180.00" axis-x="0.0" axis-y="0.0" axis-z="1.0" name="det01"/>
+   <location rot="-168.75" axis-x="0.0" axis-y="0.0" axis-z="1.0" name="det02"/>
+   <location rot="-157.50" axis-x="0.0" axis-y="0.0" axis-z="1.0" name="det03"/>
+   <location rot="-146.25" axis-x="0.0" axis-y="0.0" axis-z="1.0" name="det04"/>
+   <location rot="-135.00" axis-x="0.0" axis-y="0.0" axis-z="1.0" name="det05"/>
+   <location rot="-123.75" axis-x="0.0" axis-y="0.0" axis-z="1.0" name="det06"/>
+   <location rot="-112.50" axis-x="0.0" axis-y="0.0" axis-z="1.0" name="det07"/>
+   <location rot="-101.25" axis-x="0.0" axis-y="0.0" axis-z="1.0" name="det08"/>
+   <location rot="-90.00" axis-x="0.0" axis-y="0.0" axis-z="1.0" name="det09"/>
+   <location rot="-78.75" axis-x="0.0" axis-y="0.0" axis-z="1.0" name="det10"/>
+   <location rot="-67.50" axis-x="0.0" axis-y="0.0" axis-z="1.0" name="det11"/>
+   <location rot="-56.25" axis-x="0.0" axis-y="0.0" axis-z="1.0" name="det12"/>
+   <location rot="-45.00" axis-x="0.0" axis-y="0.0" axis-z="1.0" name="det13"/>
+   <location rot="-33.75" axis-x="0.0" axis-y="0.0" axis-z="1.0" name="det14"/>
+   <location rot="-22.50" axis-x="0.0" axis-y="0.0" axis-z="1.0" name="det15"/>
+   <location rot="-11.25" axis-x="0.0" axis-y="0.0" axis-z="1.0" name="det16"/>
+   <location rot="0.00" axis-x="0.0" axis-y="0.0" axis-z="1.0" name="det17"/>
+   <location rot="11.25" axis-x="0.0" axis-y="0.0" axis-z="1.0" name="det18"/>
+   <location rot="22.50" axis-x="0.0" axis-y="0.0" axis-z="1.0" name="det19"/>
+   <location rot="33.75" axis-x="0.0" axis-y="0.0" axis-z="1.0" name="det20"/>
+   <location rot="45.00" axis-x="0.0" axis-y="0.0" axis-z="1.0" name="det21"/>
+   <location rot="56.25" axis-x="0.0" axis-y="0.0" axis-z="1.0" name="det22"/>
+   <location rot="67.50" axis-x="0.0" axis-y="0.0" axis-z="1.0" name="det23"/>
+   <location rot="78.75" axis-x="0.0" axis-y="0.0" axis-z="1.0" name="det24"/>
+   <location rot="90.00" axis-x="0.0" axis-y="0.0" axis-z="1.0" name="det25"/>
+   <location rot="101.25" axis-x="0.0" axis-y="0.0" axis-z="1.0" name="det26"/>
+   <location rot="112.50" axis-x="0.0" axis-y="0.0" axis-z="1.0" name="det27"/>
+   <location rot="123.75" axis-x="0.0" axis-y="0.0" axis-z="1.0" name="det28"/>
+   <location rot="135.00" axis-x="0.0" axis-y="0.0" axis-z="1.0" name="det29"/>
+   <location rot="146.25" axis-x="0.0" axis-y="0.0" axis-z="1.0" name="det30"/>
+   <location rot="157.50" axis-x="0.0" axis-y="0.0" axis-z="1.0" name="det31"/>
+   <location rot="168.75" axis-x="0.0" axis-y="0.0" axis-z="1.0" name="det32"/>
+  </component>
+ </type>
+
+ <type name="ring-backward">
+  <component type="backward-pixel">
+   <location rot="168.75" axis-x="0.0" axis-y="0.0" axis-z="1.0" name="det33"/>
+   <location rot="157.50" axis-x="0.0" axis-y="0.0" axis-z="1.0" name="det34"/>
+   <location rot="146.25" axis-x="0.0" axis-y="0.0" axis-z="1.0" name="det35"/>
+   <location rot="135.00" axis-x="0.0" axis-y="0.0" axis-z="1.0" name="det36"/>
+   <location rot="123.75" axis-x="0.0" axis-y="0.0" axis-z="1.0" name="det37"/>
+   <location rot="112.50" axis-x="0.0" axis-y="0.0" axis-z="1.0" name="det38"/>
+   <location rot="101.25" axis-x="0.0" axis-y="0.0" axis-z="1.0" name="det39"/>
+   <location rot="90.00" axis-x="0.0" axis-y="0.0" axis-z="1.0" name="det40"/>
+   <location rot="78.75" axis-x="0.0" axis-y="0.0" axis-z="1.0" name="det41"/>
+   <location rot="67.50" axis-x="0.0" axis-y="0.0" axis-z="1.0" name="det42"/>
+   <location rot="56.25" axis-x="0.0" axis-y="0.0" axis-z="1.0" name="det43"/>
+   <location rot="45.00" axis-x="0.0" axis-y="0.0" axis-z="1.0" name="det44"/>
+   <location rot="33.75" axis-x="0.0" axis-y="0.0" axis-z="1.0" name="det45"/>
+   <location rot="22.50" axis-x="0.0" axis-y="0.0" axis-z="1.0" name="det46"/>
+   <location rot="11.25" axis-x="0.0" axis-y="0.0" axis-z="1.0" name="det47"/>
+   <location rot="0.00" axis-x="0.0" axis-y="0.0" axis-z="1.0" name="det48"/>
+   <location rot="-11.25" axis-x="0.0" axis-y="0.0" axis-z="1.0" name="det49"/>
+   <location rot="-22.50" axis-x="0.0" axis-y="0.0" axis-z="1.0" name="det50"/>
+   <location rot="-33.75" axis-x="0.0" axis-y="0.0" axis-z="1.0" name="det51"/>
+   <location rot="-45.00" axis-x="0.0" axis-y="0.0" axis-z="1.0" name="det52"/>
+   <location rot="-56.25" axis-x="0.0" axis-y="0.0" axis-z="1.0" name="det53"/>
+   <location rot="-67.50" axis-x="0.0" axis-y="0.0" axis-z="1.0" name="det54"/>
+   <location rot="-78.75" axis-x="0.0" axis-y="0.0" axis-z="1.0" name="det55"/>
+   <location rot="-90.00" axis-x="0.0" axis-y="0.0" axis-z="1.0" name="det56"/>
+   <location rot="-101.25" axis-x="0.0" axis-y="0.0" axis-z="1.0" name="det57"/>
+   <location rot="-112.50" axis-x="0.0" axis-y="0.0" axis-z="1.0" name="det58"/>
+   <location rot="-123.75" axis-x="0.0" axis-y="0.0" axis-z="1.0" name="det59"/>
+   <location rot="-135.00" axis-x="0.0" axis-y="0.0" axis-z="1.0" name="det60"/>
+   <location rot="-146.25" axis-x="0.0" axis-y="0.0" axis-z="1.0" name="det61"/>
+   <location rot="-157.50" axis-x="0.0" axis-y="0.0" axis-z="1.0" name="det62"/>
+   <location rot="-168.75" axis-x="0.0" axis-y="0.0" axis-z="1.0" name="det63"/>
+   <location rot="-180.00" axis-x="0.0" axis-y="0.0" axis-z="1.0" name="det64"/>
+  </component>
+ </type>
+
+ <!-- these are oriented in the top position in each ring at the final z position -->
+ <type name="forward-pixel">
+  <component type="pixel">
+   <location x="0.0" y="0.072" z="-0.0785" rot="90" axis-x="0.0" axis-y="1.0" axis-z="0.0"/>
+  </component>
+ </type>
+
+ <type name="backward-pixel">
+  <component type="pixel">
+   <location x="0.0" y="0.072" z="0.0785" rot="-90" axis-x="0.0" axis-y="1.0" axis-z="0.0"/>
+  </component>
+ </type>
+
+ <type name="pixel" is="detector">    
+  
+    <!-- It is implicitely assumed here that the front y-z plane (looking down
+         the x-axis) is the surface that see the neutron beam. This surface is
+	 6.2..20.8 mm along z and 74mm along y and the depth along x is 5mm.
+	 defined with "origin" centred in the front face, then translate z by 72mm.
+	 for forward detector use, rotate 90 deg clockwise (looking towards +y direction)
+	 then translate by 78.5mm along z. Reverse for backward.
+	 this defines "top" element.
+	 Rotate about z in multiples of 11.25 deg to get others  -->
+     <hexahedron id="shape">
+      <left-front-bottom-point x="0.0" y="-0.037" z="-0.0031"  />
+      <right-front-bottom-point x="0.0" y="-0.037" z="0.0031"  />
+      <left-front-top-point x="0.0" y="0.037" z="-0.0104"  />
+      <right-front-top-point x="0.0" y="0.037" z="0.0104"  />
+      <left-back-bottom-point x="0.005" y="-0.037" z="-0.0031"  />
+      <right-back-bottom-point x="0.005" y="-0.037" z="0.0031"  />
+      <left-back-top-point x="0.005" y="0.037" z="-0.0104"  />
+      <right-back-top-point x="0.005" y="0.037" z="0.0104"  />
+    </hexahedron>
+    <algebra val="shape" />
+    
+  </type>  
+ 
+  <!-- DETECTOR ID LISTS -->
+
+  <idlist idname="ids-forward">
+    <id start="1" end="32" />      
+  </idlist> 
+  
+  <idlist idname="ids-backward"> 
+    <id start="33" end="64" />      
+  </idlist>   
+  
+</instrument>

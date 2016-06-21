@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<detector-grouping instrument="MUSR" description="musr transverse (64 detectors)"> 
+
+<group name="top"> <ids val="24,17,18,19,20,21,22,23,56,49,50,51,52,53,54,55"/> </group> 
+<group name="bkwd"> <ids val="25,26,27,28,29,30,31,32,41,42,43,44,45,46,47,48"/> </group>
+<group name="bottom"> <ids val="1,2,3,4,5,6,7,8,33,34,35,36,37,38,39,40"/> </group>
+<group name="fwd"> <ids val="9,10,11,12,13,14,15,16,57,58,59,60,61,62,63,64"/> </group>
+
+<default name="fwd"/>
+
+
+
+</detector-grouping> 
+

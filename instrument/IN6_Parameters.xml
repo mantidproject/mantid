@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<parameter-file instrument="IN6" valid-from="2012-10-01T00:00:00">
+
+	<component-link name="IN6">
+
+		<parameter name="deltaE-mode" type="string">
+			<value val="direct" />
+		</parameter>
+
+		<!-- Distance between sample and equatorial line of the detector. Mandatory 
+			if you want to correct the flight paths. -->
+		<parameter name="l2" type="string">
+			<value val="2.48" />
+		</parameter>
+
+		<!-- formula for Detector efficiency calculation. Algorithm: DetectorEfficiencyCorUser 
+			See http://muparser.sourceforge.net/mup_features.html#idDef2 for available 
+			operators -->
+		<parameter name="formula_eff" type="string">
+			<value val="exp(-0.0565/sqrt(e))*(1.0-exp(-3.284/sqrt(e)))" />
+		</parameter>
+
+	</component-link>
+
+</parameter-file>

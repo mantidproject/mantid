@@ -1,0 +1,45 @@
+***************
+superclass:: detector
+***************
+scope:: generic
+name:: width
+type:: real
+rank:: 0
+value:: .005
+***************
+scope:: generic
+name:: arc
+type:: real
+rank:: 0
+value:: 20.00
+***************
+scope:: generic
+name:: box
+type:: real
+rank:: 2
+dimensions:: 2 4
+values:: -10.00 0.00
+         -10.00 0.126
+          10.00 0.126
+          10.00 0.00
+*****************
+scope:: specific
+name:: calculated_resolution
+type:: real
+rank:: 0
+*****************
+scope:: specific
+name:: measured_resolution
+type:: real
+rank:: 0
+****************
+scope:: specific
+name:: geometrical_conversion
+type:: real
+rank:: 0
+****************
+scope:: specific
+name:: offset
+type:: real
+rank:: 0
+

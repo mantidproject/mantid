@@ -1,0 +1,98 @@
+digraph MuscatSofQW {
+  label="MuscatSofQW Flowchart"
+  $global_style
+
+  subgraph params  {
+    $param_style
+    SampleWorkspace
+    ResolutionWorkspace
+    ParameterWorkspace1        [label="ParameterWorkspace"]
+    ParameterWorkspace2        [label="ParameterWorkspace"]
+    ParameterWorkspace3        [label="ParameterWorkspace"]
+    EnergyMax
+    EnergyInc
+    OutputWorkspace
+    Delta
+    Lorentzians
+    RebinnedSample
+    RebinnedSample2            [label="RebinnedSample"]
+    RebinnedResolution
+    qValues
+    lorHeights                 [label="LorentzianHeights"]
+    lorWidths                  [label="LorentzianWidths"]
+    rebinParam                 [label="RebinParameter"]
+    SpecMax
+    CurrentSpec
+    FitFunctionString
+    ConstructConvFitFunction
+  }
+
+  subgraph algorithms  {
+    $algorithm_style
+    End
+    Rebin      [label="Rebin"]
+    Fit
+    DeleteWorkspace
+    CreateWorkspace
+    CopyLogs
+  }
+  
+  subgraph decisions  {
+    $decision_style
+    isConvFitProg [label="ConvFit Fit Program"]
+    hasLor        [label="Number of Lorentzians"]
+    processedAll  [label="Have all the spectra been processed"]
+  }
+
+  //Validation
+  ParameterWorkspace1           -> isConvFitProg                  [label="Extract fit_program"]
+  isConvFitProg                 -> End                            [label="No : Program must be ConvFit"]
+  isConvFitProg                 -> Delta                          [label="Extract delta_function"]
+  ParameterWorkspace1           -> hasLor
+  hasLor                        -> End                            [label="0 : Must have Lorentzians"]
+  hasLor                        -> Lorentzians                    [label="1 or 2"]
+  
+  //initial processing
+  EnergyMax                     -> rebinParam
+  EnergyInc                     -> rebinParam
+  SampleWorkspace               -> Rebin
+  ResolutionWorkspace           -> Rebin
+  rebinParam                    -> Rebin
+  Rebin                         -> RebinnedSample
+  Rebin                         -> RebinnedResolution
+  ParameterWorkspace2           -> lorHeights
+  ParameterWorkspace2           -> lorWidths
+  Lorentzians                   -> lorHeights
+  Lorentzians                   -> lorWidths
+  ParameterWorkspace2           -> qValues
+  qValues                       -> SpecMax                         [label="Length of qValues"]
+  SpecMax                       -> CurrentSpec
+  
+  //Start of fit loop
+  CurrentSpec                   -> ConstructConvFitFunction
+  Delta                         -> ConstructConvFitFunction
+  lorHeights                    -> ConstructConvFitFunction
+  lorWidths                     -> ConstructConvFitFunction
+  RebinnedResolution            -> ConstructConvFitFunction
+  ConstructConvFitFunction      -> FitFunctionString
+  FitFunctionString             -> Fit
+  RebinnedSample2               -> Fit
+  CurrentSpec                   -> Fit
+  Fit                           -> FitOutputWorkspace
+  FitOutputWorkspace            -> x_data
+  FitOutputWorkspace            -> y_data
+  FitOutputWorkspace            -> e_data
+  FitOutputWorkspace            -> DeleteWorkspace
+  DeleteWorkspace               -> processedAll
+  processedAll                  -> ConstructConvFitFunction        [label="No"]
+  processedAll                  -> CreateWorkspace                 [label="Yes"]
+  // End of fit loop
+  x_data                        -> CreateWorkspace
+  y_data                        -> CreateWorkspace
+  e_data                        -> CreateWorkspace
+  SpecMax                       -> CreateWorkspace
+  qValues                       -> CreateWorkspace
+  ParameterWorkspace3           -> CopyLogs
+  CreateWorkspace               -> CopyLogs
+  CopyLogs                      -> OutputWorkspace
+}

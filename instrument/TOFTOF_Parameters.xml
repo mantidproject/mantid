@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<parameter-file instrument="TOFTOF" valid-from="2012-10-01T00:00:00">
+
+	<component-link name="TOFTOF">
+
+		<parameter name="deltaE-mode" type="string">
+			<value val="direct" />
+		</parameter>
+
+		<!-- Distance between sample and equatorial line of the detector. Mandatory 
+			if you want to correct the flight paths. -->
+		<parameter name="l2" type="string">
+			<value val="4.0" />
+		</parameter>
+
+		<!-- formula for Detector efficiency calculation. Algorithm: DetectorEfficiencyCorUser 
+			See http://muparser.sourceforge.net/mup_features.html#idDef2 for available 
+			operators -->
+		<parameter name="formula_eff" type="string">
+			<value val="exp(-0.31/sqrt(e))*(1.0-exp(-9.3518/sqrt(e)))" />
+		</parameter>
+
+                <!-- formula for Monitor efficiency calculation. Algorithm: MonitorEfficiencyCorUser  -->
+		<parameter name="formula_mon_eff" type="string">
+			<value val="sqrt(e/25.3)" />
+		</parameter>
+
+          
+	</component-link>
+
+</parameter-file>

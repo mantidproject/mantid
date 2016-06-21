@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<parameter-file instrument = "IN16" valid-from = "2010-05-05T00:00:00">
+
+<component-link name = "IN16">
+
+<parameter name="deltaE-mode" type="string">
+  <value val="indirect"/>
+</parameter>
+
+<parameter name="analysers" type="string">
+  <value val="silicon" />
+</parameter>
+
+<parameter name="refl-silicon" type="string">
+  <value val="111,311" />
+</parameter>
+
+
+<!-- Reduction workflow parameters under this line -->
+<parameter name="Workflow.beam-width" type="string">
+    <value val="3.5" />
+</parameter>
+<parameter name="Workflow.beam-height" type="string">
+    <value val="3.0" />
+</parameter>
+</component-link>
+
+</parameter-file>

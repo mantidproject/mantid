@@ -1,0 +1,17 @@
+//----------------------------------------------------------------------
+// Includes
+//----------------------------------------------------------------------
+#include "MantidKernel/ParaViewVersion.h"
+
+namespace Mantid
+{
+namespace Kernel
+{
+
+std::string ParaViewVersion::targetVersion()
+{
+  return "@COMPATIBLE_PARAVIEW_VERSION@";
+}
+
+} // namespace Kernel
+} // namespace Mantid

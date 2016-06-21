@@ -1,0 +1,9 @@
+<RCC>
+    <qresource prefix="/MultiDatasetFit/icons">
+        <file>zoom.png</file>
+        <file>panning.png</file>
+        <file>range.png</file>
+        <file>export-plot.png</file>
+        <file>export-all-plots.png</file>
+    </qresource>
+</RCC>

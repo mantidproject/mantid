@@ -1,0 +1,22 @@
+Operations on EventWorkspaces vs Workspace2Ds
+#############################################
+
++--------------+-----+--------------------+--+--------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+|LHS           ||sym||RHS                 |\=|Output        | Notes                                                                                                                                                              |
++==============+=====+====================+==+==============+====================================================================================================================================================================+
+|Workspace2D   ||sym||Workspace2D         |\=|Workspace2D   | The number of bins DO need to match for both operands.                                                                                                             |
++--------------+-----+--------------------+--+--------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+|Workspace2D   ||sym||EventWorkspace      |\=|Workspace2D   | The histogram representation of the RHS EventWorkspace is used as the right-hand operand. The number of bins DO                                                    |
+|              |     |                    |  |              | need to match for both operands.                                                                                                                                   |
++--------------+-----+--------------------+--+--------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+|EventWorkspace||sym||EventWorkspace      |\=|EventWorkspace| The histogram representation of the RHS EventWorkspace is used as the right-hand operand. The number of bins DO                                                    |
+|              |     |                    |  |              | NOT need to match for both operands. The output EventWorkspace will use WeightedEvents, where each event's                                                         |
+|              |     |                    |  |              | weight will have been |verb| by the Y value at the corresponding X bin on the RHS.                                                                                 |
++--------------+-----+--------------------+--+--------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+|EventWorkspace||sym||Workspace2D         |\=|EventWorkspace| The histogram representation of the RHS EventWorkspace is used as the right-hand operand. The number of bins DO                                                    |
+|              |     |                    |  |              | NOT need to match for both operands.                                                                                                                               |
++--------------+-----+--------------------+--+--------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+|EventWorkspace||sym||WorkspaceSingleValue|\=|EventWorkspace| The value (and error) is applied to the weight of every event in the workspace. The output EventWorkspace will                                                     |
+|              |     |                    |  |              | use WeightedEvents. If Output--LHS, then the operation is performed in-place and no copying of workspaces is                                                       |
+|              |     |                    |  |              | done.                                                                                                                                                              |
++--------------+-----+--------------------+--+--------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------+

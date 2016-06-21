@@ -1,0 +1,13 @@
+data=/entry1/merged/counts
+x-axis=/entry1/merged/time_binning
+x-axis-name=time_of_flight
+title=/entry1/title
+sample=/entry1/sample/name
+sample_distance=/entry1/sample/distance
+detector_distance=/entry1/FOCUS/merged/distance
+ei=/entry1/FOCUS/monochromator/energy
+fermi_speed=/entry1/FOCUS/fermi_chopper/rotation_speed
+disk_speed=/entry1/FOCUS/disk_chopper/rotation_speed
+monitor1=/entry1/FOCUS/counter/monitor
+beam_monitor=/entry1/FOCUS/counter/beam_monitor
+proton_monitor=/entry1/FOCUS/counter/proton_beam_monitor

@@ -1,0 +1,80 @@
+digraph FocusChunks {
+  label="FocusAndSum Flowchart"
+  $global_style
+
+  subgraph params {
+    $param_style
+    RunNumberList
+    FilterWall
+    CalibrationFile
+    SplittersWorkspace
+    OutputWorkspacesList
+  }
+
+  subgraph algorithms {
+    $algorithm_style
+    getChunk [label="Get a chunk to process"]
+    alignAndFocusPowder	[label="AlignAndFocusPowder v1"]
+    getRunNumber [label="Get a run number"]
+    load [label="Load v1"]
+    split [label="SplitEvents v1"]
+    gatherWorkspace [label="Gather workspaces MPI"]
+    compressEvents [label="CompressEvents v1"]
+    normaliseByCurrent [label="NormaliseByCurrent v1"]
+    plusAmongChunks [label="Plus v1\n workspaces from different chunks \nbut same time range."]
+    setGSASParamFile [label="Set GSAS iparam file to run"]
+    compressEvents [label="CompressEvents v1"]
+    normaliseByCurrent [label="NormaliseByCurrent v1"]
+  }
+
+  subgraph decisions{
+    $decision_style
+    doSplitWorkspace  [label="Do split workspaces?"]
+    haveMPI [label="Have MPI?"]
+    isLastRunNumber [label="Is Last Run Number?"]
+    allChunksProcessed [label="Are All Chunks Reduced?"]
+  }
+
+  subgraph values {
+    $value_style
+    RunNumber [label="Run Number"]
+    RunOutputWorkspacesList [label="OutputWorkspaces\nfor a run number"]
+  }
+
+  RunNumberList       -> getRunNumber
+  getRunNumber        -> RunNumber
+
+  RunNumber	      -> getChunk
+  getChunk	      -> load
+  FilterWall          -> load
+  load	  	      -> doSplitWorkspace
+
+  doSplitWorkspace	-> split	    [label="Yes"]
+  SplittersWorkspace	-> split
+  CalibrationFile       -> alignAndFocusPowder
+  split	                -> alignAndFocusPowder
+
+  doSplitWorkspace	-> alignAndFocusPowder  [label="No"]
+
+  alignAndFocusPowder	-> plusAmongChunks
+  plusAmongChunks	-> allChunksProcessed
+
+  allChunksProcessed	-> getChunk  [label="No"]
+ 
+  allChunksProcessed	-> haveMPI [label="Yes"]
+
+  haveMPI	      -> gatherWorkspace [label="Yes"]
+  gatherWorkspace    -> setGSASParamFile
+
+  haveMPI	      -> setGSASParamFile [label="No"]
+
+  setGSASParamFile    -> compressEvents
+  compressEvents      -> normaliseByCurrent
+  normaliseByCurrent  -> RunOutputWorkspacesList
+
+  RunOutputWorkspacesList -> isLastRunNumber
+  isLastRunNumber      -> getRunNumber [label="No"]
+
+  isLastRunNumber      -> OutputWorkspacesList [label="Yes"]
+
+}

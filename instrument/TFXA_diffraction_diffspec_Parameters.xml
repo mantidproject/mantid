@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<parameter-file instrument="TFXA" valid-from="1985-01-01T00:00:00">
+
+  <component-link name = "TFXA">
+
+    <parameter name="analysis-type" type="string">
+      <value val="diffraction" />
+    </parameter>
+
+    <parameter name="analyser" type="string">
+      <value val="diff" />
+    </parameter>
+
+    <parameter name="reflection" type="string">
+      <value val="spec" />
+    </parameter>
+
+    <parameter name="spectra-min">
+      <value val="146" />
+    </parameter>
+
+    <parameter name="spectra-max">
+      <value val="149" />
+    </parameter>
+
+    <parameter name="Workflow.Diffraction.Correction" type="string">
+      <value val="Monitor" />
+    </parameter>
+
+    <parameter name="Workflow.Monitor1-ScalingFactor">
+      <value val="1" />
+    </parameter>
+
+    <parameter name="Workflow.NamingConvention" type="string">
+      <value val="AnalyserReflection" />
+    </parameter>
+
+    <!-- These two properties being set to invalid values (-1) will signal to the
+        reducer that it is not to correct for monitor efficiency.
+        -->
+    <parameter name="Workflow.Monitor1-Area">
+      <value val="-1" />
+    </parameter>
+    <parameter name="Workflow.Monitor1-Thickness">
+      <value val="-1" />
+    </parameter>
+
+  </component-link>
+
+</parameter-file>

@@ -1,0 +1,64 @@
+digraph ProcessIndirectFitParameters {
+  label="ProcessIndirectFitParameters Flowchart"
+  $global_style
+
+  subgraph params  {
+    $param_style
+	//Properties
+	InputWorkspace
+	ColumnX
+	ParameterNames
+	XAxisUnit
+	OutputWorkspace
+
+	//Local
+	allColumnNames
+	currentColumnName
+	ErrorColumnName
+	ColumnName
+	PeakWorkspaces
+	WorkspaceNames
+  }
+
+  subgraph algorithms  {
+    $algorithm_style
+	ConvertTableToMatrixWorkspace
+	RenameWorkspace
+  }
+  
+  subgraph decisions  {
+    $decision_style
+	processedAllColumns	[label="All columns to workspaces"]
+  }
+  
+  subgraph process  {
+    $process_style
+	searchForParams		[label="searchforFitParams: Search for strings that have the given word as their suffix"]
+	conjoinParams		[label="Conjoin all the workspaces that are about the same peak (Could be multiple Lorentzians)"]
+	conjoinPeaks		[label="Conjoin all the peak workspaces into a single workspace"]
+	replaceXAxis		[label="Replace the x axis with the parameter names"]
+	replaceXUnit		[label="Replace the x axis unit with algorithm input"]
+  }
+
+  InputWorkspace				-> allColumnNames						[label="Get all column names from the TableWorkspace"]
+  allColumnNames				-> currentColumnName					[label="Extract ColumnName to be used in a loop"]
+  currentColumnName				-> searchForParams
+  ParameterNames				-> searchForParams
+  searchForParams				-> ColumnName							[label="Corresponding name for currentColumnName from tableWorkspace"]
+  searchForParams				-> ErrorColumnName						[label="Corresponding errors for currentColumnName from tableWorkspace"]
+  ColumnX						-> ConvertTableToMatrixWorkspace		[label="X"]
+  ColumnName					-> ConvertTableToMatrixWorkspace		[label="Y"]
+  ErrorColumnName				-> ConvertTableToMatrixWorkspace		[label="E"]
+  ConvertTableToMatrixWorkspace	-> WorkspaceNames						[label="Vector to store workspaces for Conjoining"]
+  WorkspaceNames				-> processedAllColumns
+  processedAllColumns			-> allColumnNames						[label="No"]
+  processedAllColumns			-> conjoinParams						[label="Yes"]
+  conjoinParams					-> PeakWorkspaces
+  PeakWorkspaces				-> conjoinPeaks
+  conjoinPeaks					-> RenameWorkspace
+  RenameWorkspace				-> replaceXAxis
+  replaceXAxis					-> replaceXUnit
+  XAxisUnit						-> replaceXUnit
+  replaceXUnit					-> OutputWorkspace
+  
+}

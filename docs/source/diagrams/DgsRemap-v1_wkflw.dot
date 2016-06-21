@@ -1,0 +1,37 @@
+digraph DgsRemap {
+  label="DgsRemap Flowchart"
+  $global_style
+
+  subgraph params {
+    $param_style
+    InputWorkspace
+    MaskWorkspace
+    GroupingWorkspace
+    OutputWorkspace
+  }
+
+  subgraph algorithms {
+    $algorithm_style
+    maskDet1  [label="MaskDetectors"]
+    maskDet2  [label="MaskDetectors"]
+    groupDet1 [label="GroupDetectors"]
+    groupDet2 [label="GroupDetectors"]
+  }
+
+  subgraph decisions {
+    $decision_style
+    ExecuteOppositeOrder
+  }
+
+  InputWorkspace       -> ExecuteOppositeOrder
+  ExecuteOppositeOrder -> maskDet1  [label="True"]
+  ExecuteOppositeOrder -> groupDet2 [label="False"]
+  maskDet1             -> groupDet1
+  groupDet2            -> maskDet2
+  groupDet1            -> OutputWorkspace
+  maskDet2             -> OutputWorkspace
+  GroupingWorkspace    -> groupDet1
+  GroupingWorkspace    -> groupDet2
+  MaskWorkspace        -> maskDet1
+  MaskWorkspace        -> maskDet2
+}

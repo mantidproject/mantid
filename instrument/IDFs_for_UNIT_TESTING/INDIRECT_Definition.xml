@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<instrument name="indirect neutronic" valid-from   ="1900-01-31 23:59:59"
+                                      valid-to     ="2100-01-31 23:59:59"
+                                      last-modified="2011-08-25T12:00:00">
+
+<!-- XY detector -->
+<defaults>
+  <length unit="meter" />
+  <angle unit="degree" />
+  <reference-frame>
+    <along-beam axis="z" />
+    <pointing-up axis="y" />
+    <handedness val="right" />
+  </reference-frame>
+  <indirect-neutronic-positions />
+</defaults>
+
+
+<component type="panel" idlist="idlist_for_bank1">
+  <location r="0" t="0" rot="0" axis-x="0" axis-y="1" axis-z="0" name="bank1"  xpixels="3" ypixels="2" />
+</component>
+
+<!-- Detector Panel -->
+<type is="detector" name="panel">
+  <properties/>
+  <component type="pixel">
+    <location x="0" y="0">
+      <neutronic x="2" y="2"/>
+    </location>
+    <location x="0" y="1">
+      <neutronic x="2" y="3" type="banana" />
+    </location>
+    <location x="1" y="0">
+      <neutronic x="3" y="2"/>
+    </location>
+    <location x="1" y="1">
+      <neutronic x="3" y="3"/>
+    </location>
+    <location x="2" y="0"/> <!-- No neutronic position for this one -->
+    <location x="2" y="1">
+      <neutronic x="4" y="3"/>
+    </location>
+  </component>
+</type>
+
+<!-- Pixel for Detectors-->
+<type is="detector" name="pixel">
+  <cuboid id="pixel-shape">
+    <left-front-bottom-point y="-0.4" x="-0.4" z="0.0"/>
+    <left-front-top-point y="0.4" x="-0.4" z="0.0"/>
+    <left-back-bottom-point y="-0.4" x="-0.4" z="-0.1"/>
+    <right-front-bottom-point y="-0.4" x="0.4" z="0.0"/>
+  </cuboid>
+  <algebra val="pixel-shape"/>
+</type>
+
+<!-- Sample 'neutronic' pixel -->
+<type is="detector" name="banana">
+  <cuboid id="pixel-shape">
+    <left-front-bottom-point y="-0.2" x="-0.2" z="0.0"/>
+    <left-front-top-point y="0.2" x="-0.2" z="0.0"/>
+    <left-back-bottom-point y="-0.2" x="-0.2" z="-0.1"/>
+    <right-front-bottom-point y="-0.2" x="0.2" z="0.0"/>
+  </cuboid>
+  <algebra val="pixel-shape"/>
+</type>
+
+<!-- monitor -->
+<component type="monitor" idlist="monitor">
+  <location z="-1">
+    <neutronic z="-1" /> <!-- Even if the neutronic is in the same place, you have to specify it again (for detectors/monitor) -->
+  </location>
+</component>
+
+<type name="monitor" is="monitor" />
+
+<!-- detector and monitor IDs -->
+
+<idlist idname="idlist_for_bank1">
+  <id start="1000" end="1005" />
+</idlist>
+<idlist idname="monitor">
+  <id val="1" />  
+</idlist>
+
+<!--  Source and sample-position components and their types -->
+
+<component type="moderator">
+  <location z="-10." /> 
+</component>
+<component type="nickel-holder">
+  <location />
+</component>
+
+<type name="moderator" is="Source">
+  <properties />
+</type>
+<type name="nickel-holder" is="SamplePos">
+  <properties />
+</type>
+
+</instrument>

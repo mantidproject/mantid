@@ -1,0 +1,6 @@
+********************
+superclass:: assembly
+********************
+scope::  generic
+name::   bank_verylow
+type::  assembly_list

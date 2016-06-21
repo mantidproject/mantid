@@ -1,0 +1,45 @@
+digraph MSDFit {
+  label="MSDFit Flowchart"
+  $global_style
+
+  subgraph params {
+    $param_style
+    InputWorkspace
+    XStart
+    XEnd
+    SpecMin
+    SpecMax
+    OutputWorkspace
+    ParameterWorkspace
+    FitWorkspaces
+  }
+
+  subgraph algorithms {
+    $algorithm_style
+    PlotPeakByLogValue
+    ConvertToMatrixWorkspace_A0 [label="ConvertToMatrixWorkspace"]
+    ConvertToMatrixWorkspace_A1 [label="ConvertToMatrixWorkspace"]
+    SortXAxis
+    GroupWorkspaces
+  }
+
+  subgraph values {
+    $value_style
+    FitFunction [label="Fit Function"]
+  }
+
+  InputWorkspace              -> FitFunction
+  SpecMin                     -> FitFunction
+  SpecMax                     -> FitFunction
+  FitFunction                 -> PlotPeakByLogValue
+  XStart                      -> PlotPeakByLogValue
+  XEnd                        -> PlotPeakByLogValue
+  PlotPeakByLogValue          -> ParameterWorkspace           [label="Parameters"]
+  PlotPeakByLogValue          -> FitWorkspaces                [label="Fitted Workspaces"]
+  PlotPeakByLogValue          -> ConvertToMatrixWorkspace_A0  [label="Parameters"]
+  ConvertToMatrixWorkspace_A0 -> GroupWorkspaces              [label="A0"]
+  PlotPeakByLogValue          -> ConvertToMatrixWorkspace_A1  [label="Parameters"]
+  ConvertToMatrixWorkspace_A1 -> SortXAxis
+  SortXAxis                   -> GroupWorkspaces              [label="A1"]
+  GroupWorkspaces             -> OutputWorkspace
+}

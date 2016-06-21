@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<parameter-file instrument = "LARMOR" valid-from = "2013-11-06T00:00:00">
+
+<component-link name = "LARMOR">
+
+<parameter name="low-angle-detector-name" type="string">
+  <value val="DetectorBench"/>
+</parameter>
+
+<parameter name="low-angle-detector-short-name" type="string">
+  <value val="rear"/>
+</parameter>
+
+<parameter name="default-incident-monitor-spectrum">
+  <value val="2"/>
+</parameter>
+
+<parameter name="default-transmission-monitor-spectrum">
+  <value val="3"/>
+</parameter>
+
+<parameter name="low-angle-detector-num-rows">
+  <value val="512"/>
+</parameter>
+
+<parameter name="low-angle-detector-num-columns">
+  <value val="80"/>
+</parameter>
+
+
+<parameter name="high-angle-detector-num-columns">
+  <value val="0"/>
+</parameter>
+
+<parameter name="high-angle-detector-num-rows">
+  <value val="0"/>
+</parameter>
+
+<parameter name="high-angle-detector-name" type="string">
+  <value val="front-detector"/>
+</parameter>
+
+<parameter name="high-angle-detector-short-name" type="string">
+  <value val="front"/>
+</parameter>
+
+
+<parameter name="centre-finder-step-size">
+<!-- this is the initial step for the beam centre finder degrees (X value)-->
+<!-- 5mm at 4m = 0.07deg -->
+  <value val="0.07"/>
+</parameter>
+
+<parameter name="beam-centre-scale-factor1">
+<!-- This is a scale factor to allow the beam centre coordinates to be set in meaningful units (X value)-->
+<!-- e.g. mm in the mask file means this should be 1000.0 -->
+<!-- If no value is supplied then a default of 1000.0 is assumed for backward compatibility -->
+<!-- For Larmor X is in degrees so does not need a multiplier -->
+  <value val="1000.0"/>
+</parameter>
+
+<parameter name="centre-finder-step-size2">
+<!-- this is the second initial step for the beam centre finder if using angle and displacement (Y value)-->
+  <value val="0.005"/>
+</parameter>
+
+<parameter name="beam-centre-scale-factor2">
+<!-- This is a scale factor to allow the beam centre coordinates to be set in meaningful units (Y value)-->
+<!-- e.g. mm in the mask file means this should be 1000.0 -->
+<!-- If no value is supplied then a default of 1000.0 is assumed for backward compatibility -->
+<!-- For Larmor Y is in mm -->
+  <value val="1000.0"/>
+</parameter>
+
+</component-link>
+
+</parameter-file>

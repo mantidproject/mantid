@@ -1,0 +1,71 @@
+liborigin and opj2dat
+---------------------
+
+Author : Stefan Gerlach
+
+Thanks to :
+Ion Vasilief	for Windows patches and testing
+
+compiling :
+	$ make -f Makefile.LINUX
+	or for Darwin :
+	$ make -f Makefile.DARWIN
+	or for Windows :
+	$ make -f Makefile.WINDOWS
+	or with Solaris Compiler :
+	$ make -f Makefile.Solaris
+Usage :
+	$ ./opj2dat <project.opj>
+
+---------------------------------------------------------------------------
+FEATURES :
+	* reads any worksheets with all columns
+	* supports 4.1, 5.0, 6.0, 6.1, 7.0, 7.5 projects
+
+---------------------------------------------------------------------------
+TODO :
+	V CRASH on 4.1 projects companatomy(_new)
+	V crash on backup.opj
+		-> cname==0 but no matrix !
+	* read spreadsheet infos (LAYER section) with better method
+		-> check out examples
+	* support MATRIX tables
+		* check older project versions (6.0,5.0,etc.)
+			-> size always 0
+		* get column/row numbers -> resize matrix
+			* check ws+matrix.opj
+			5x2 & 2x5	: 0x215 / 0x23D
+		* check all matrix examples (also mixed)
+	* fix reading of mixed columns in file
+		-> SiGe example
+	* support FUNCTION : drf_spin
+	* read graphs
+	* support extra graph (no link to data) : power_cdw
+	* fix various problems (check ORIGIN/README)
+
+---------------------------------------------------------------------------
+Changelog :
+
+06-07-06	* read size of matrix	
+06-02-06	* replaced arrays with vectors and char* with strings
+06-01-06	* fixed convertion of 4.1 projects
+05-30-06	* read matrix tables (testing)
+05-29-06	* read column type if names are not matching (seems to be ok)
+05-26-06	* compare only 11 chars of col label in header section
+05-24-06	* fixed byteorder on big endian systems
+05-16-06	* better method for storing label data (Entry)
+11-15-05	* read empty entries
+		* read label columns
+11-12-05	* read valuesize from file
+		* get names with multiple '_' correct
+11-10-05	* 4.1 projects : data reading
+11-09-05	* completely redesigned (using '\n')
+10-25-05	* fixed problems reading column types
+		* general column names and spreadsheet sections
+09-23-05	* read also 4.1 projects
+09-22-05	* new spreadsheet name finding and corrected column names
+09-21-05	* new version resolving 6.0SR4 vs 6.1 problems
+		* Spreadsheet SECTION for 6.1,6.04,6.0,5.0
+09-20-05	* SPREADSHEET section for all spreadsheets (7.5,7.0)
+09-09-05	* import also 5.0 projects
+09-03-05	* STARTED project liborigin from LabPlot import filter

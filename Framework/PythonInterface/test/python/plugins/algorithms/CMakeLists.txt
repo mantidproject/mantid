@@ -1,0 +1,114 @@
+##
+## Tests for PythonAlgorithms
+##
+
+set ( TEST_PY_FILES
+  AddSampleLogMultipleTest.py
+  AlignComponentsTest.py
+  ApplyPaalmanPingsCorrectionTest.py
+  BayesQuasiTest.py
+  CalculateSampleTransmissionTest.py
+  CheckForSampleLogsTest.py
+  ConjoinSpectraTest.py
+  CompareSampleLogsTest.py
+  ComputeCalibrationCoefVanTest.py
+  CorrectLogTimesTest.py
+  CreateLeBailFitInputTest.py
+  DetectorFloodWeightingTest.py
+  IndirectCalibrationTest.py
+  CorrectTOFTest.py
+  CreateWorkspaceTest.py
+  CylinderPaalmanPingsCorrection2Test.py
+  DakotaChiSquaredTest.py
+  DNSComputeDetEffCorrCoefsTest.py
+  DNSMergeRunsTest.py
+  DNSFlippingRatioCorrTest.py
+  DSFinterpTest.py
+  EnggCalibrateFullTest.py
+  EnggCalibrateTest.py
+  EnggFitDIFCFromPeaksTest.py
+  EnggFitPeaksTest.py
+  EnggFocusTest.py
+  EnggVanadiumCorrectionsTest.py
+  FilterLogByTimeTest.py
+  FindEPPTest.py
+  FindReflectometryLinesTest.py
+  FitGaussianTest.py
+  FlatPlatePaalmanPingsCorrectionTest.py
+  GSASIIRefineFitPeaksTest.py
+  GetEiT0atSNSTest.py
+  GetNegMuMuonicXRDTest.py
+  IndirectAnnulusAbsorptionTest.py
+  IndirectCylinderAbsorptionTest.py
+  IndirectFlatPlateAbsorptionTest.py
+  IndirectILLReductionTest.py
+  IndirectTransmissionTest.py
+  IndirectTransmissionMonitorTest.py
+  ILLIN16BCalibrationTest.py
+  IqtFitMultipleTest.py
+  IqtFitSequentialTest.py
+  ISISIndirectDiffractionReductionTest.py
+  ISISIndirectEnergyTransferTest.py
+  LoadDNSLegacyTest.py
+  LoadEmptyVesuvioTest.py
+  LoadFullprofFileTest.py
+  LoadLiveDataTest.py
+  LoadLogPropertyTableTest.py
+  LoadMultipleGSSTest.py
+  LoadNMoldyn3AsciiTest.py
+  LoadNMoldyn4AsciiTest.py
+  MaskAngleTest.py
+  MaskBTPTest.py
+  MaskWorkspaceToCalFileTest.py
+  MeanTest.py
+  MergeCalFilesTest.py
+  MolDynTest.py
+  MSDFitTest.py
+  MuscatSofQWTest.py
+  NormaliseSpectraTest.py
+  OSIRISDiffractionReductionTest.py
+  ResNorm2Test.py
+  RetrieveRunInfoTest.py
+  SANSFitShiftScaleTest.py
+  SANSWideAngleCorrectionTest.py
+  SaveNexusPDTest.py
+  SavePlot1DTest.py
+  SavePlot1DAsJsonTest.py
+  SaveVulcanGSSTest.py
+  SimulatedDensityOfStatesTest.py
+  SortByQVectorsTest.py
+  SofQWMomentsTest.py
+  SortDetectorsTest.py
+  SortXAxisTest.py
+  StatisticsOfTableWorkspaceTest.py
+  Stitch1DManyTest.py
+  StringToPngTest.py
+  SuggestTibCNCSTest.py
+  SuggestTibHYSPECTest.py
+  SwapWidthsTest.py
+  SymmetriseTest.py
+  UpdatePeakParameterTableValueTest.py
+  SANSDarkRunBackgroundCorrectionTest.py
+  SANSSubtractTest.py
+  TimeSliceTest.py
+  TOFTOFConvertTofToDeltaETest.py
+  TOFTOFCropWorkspaceTest.py
+  TOFTOFMergeRunsTest.py
+  TOSCABankCorrectionTest.py
+  TransformToIqtTest.py
+  ExportSampleLogsToCSVFileTest.py
+  ExportExperimentLogTest.py
+  PoldiMergeTest.py
+  VesuvioDiffractionReductionTest.py
+  VesuvioPreFitTest.py
+  VesuvioResolutionTest.py
+  VesuvioThicknessTest.py
+  VesuvioTOFFitTest.py
+  PoldiCreatePeaksFromFileTest.py
+  LoadCIFTest.py
+)
+
+check_tests_valid ( ${CMAKE_CURRENT_SOURCE_DIR} ${TEST_PY_FILES} )
+
+# Prefix for test name=PythonAlgorithms
+pyunittest_add_test ( ${CMAKE_CURRENT_SOURCE_DIR} PythonAlgorithms ${TEST_PY_FILES} )

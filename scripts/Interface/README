@@ -1,0 +1,21 @@
+Minimal list of files to create an interface.
+
+More information about the application design can be found here:
+   www.mantidproject.org/Architecture_of_Reduction_Application_for_HFIR_SANS
+
+reduction_gui/instruments/
+   example_interface.py
+   instrument_factory.py   <----- register your interface here
+   
+reduction_gui/reduction/
+   example_state.py 
+   
+reduction_gui/widgets/
+   example_widget.py
+   
+ui/
+   example.ui
+   ui_example.iu   <----- generate by pyuic4
+   
+Generating python code from the .ui file
+   pyuic4 -o ui/ui_example.py ui/example.ui

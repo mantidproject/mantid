@@ -1,0 +1,10 @@
+data=/elastic/elastic_bank/data
+x-axis=/elastic/elastic_bank/time_binning
+x-axis-name=time_of_flight
+title=/elastic/title
+sample=/elastic/sample/name
+detector_distance=/elastic/MARS/elastic_bank/distance
+scattering_angle=/elastic/MARS/elastic_bank/scattering_angle
+chopper_distance=/elastic/MARS/pulse_producing_chopper/distance
+monitor1=/elastic/pre_sample_monitor/integral
+monitortof=/elastic/pre_sample_monitor/data

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<parameter-file instrument = "MANDI" valid-from="2014-08-01 00:00:00" valid-to="2015-07-31 23:59:59">
+
+<component-link name = "MANDI">
+
+<!-- Specify that any banks not in NeXus file are to be removed -->
+<parameter name="remove-unused-banks">
+  <value val="1"/>
+</parameter>
+
+</component-link>
+
+</parameter-file>
+

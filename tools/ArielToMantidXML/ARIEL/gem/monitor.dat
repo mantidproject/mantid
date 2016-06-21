@@ -1,0 +1,12 @@
+***************
+superclass:: detector
+***************
+scope:: generic
+name:: box
+type:: real
+rank:: 2
+dimensions:: 2 4
+values:: -45.00  -2.00
+          45.00  -2.00
+	   135.00  -2.00
+         225.00  -2.00

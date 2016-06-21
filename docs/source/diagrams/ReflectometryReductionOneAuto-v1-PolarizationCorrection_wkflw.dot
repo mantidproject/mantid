@@ -1,0 +1,28 @@
+digraph ReflectometryReductionOne {
+  label = "ReflectometryReductionOneAuto polarization correction step"
+  $global_style
+
+  subgraph params {
+    $param_style
+    inWL  [label="OutputWorkspaceWavelength"]
+    outWL [label="OutputWorkspaceWavelength"]
+    outMT [label="OutputWorkspace"]
+  }
+
+  subgraph algorithms {
+    $algorithm_style
+    polCor        [label="PolarizationCorrection"]
+    reflRedOne_0b [label="ReflectometryReductionOne"]
+    reflRedOne_1b [label="ReflectometryReductionOne"]
+    groupIvLam_b  [label="GroupWorkspaces"]
+  }
+
+  inWL   -> polCor
+  polCor -> reflRedOne_0b [label="Iv&lambda;[0]"]
+  polCor -> reflRedOne_1b [label="Iv&lambda;[1]"]
+  polCor -> outWL         [label="Iv&lambda;"]
+
+  reflRedOne_0b -> groupIvLam_b [label="IvQ[0]"]
+  reflRedOne_1b -> groupIvLam_b [label="IvQ[1]"]
+  groupIvLam_b  -> outMT        [label="IvQ"]
+}

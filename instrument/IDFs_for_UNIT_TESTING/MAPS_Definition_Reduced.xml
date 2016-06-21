@@ -1,0 +1,321 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- For help on the notation used to specify an Instrument Definition File 
+     see http://www.mantidproject.org/IDF -->
+<!-- This file contain the MAPS instrument with the majority of it components removed for use in unit testing.
+
+     The remaining windows are A1, B1 and C4. 
+     B1_window has tubes at a different orientation to the other two windows.
+     C4_window has its tubes in reverse order to A1_window.
+     Some of these windows have had tube packs removed from them.
+     Each tube has been reduced from 256 detectors to 25 and each detector has been made 10 times longer to take up the space.
+     
+     This file be useful in unit tests that need to make use of the differing absolute and relative positions or rotations
+     such as is necessary to test ApplyCalibration -->
+<instrument name="MAPS" valid-from   ="2010-01-31 23:59:59"
+                        valid-to     ="2100-01-31 23:59:59"
+		        last-modified="2013-02-12 10:00:00">
+
+  <defaults>
+    <length unit="meter"/>
+    <angle unit="degree"/>
+    <reference-frame>
+      <!-- The z-axis is set parallel to and in the direction of the beam. the 
+           y-axis points up and the coordinate system is right handed. -->
+      <along-beam axis="z"/>
+      <pointing-up axis="y"/>
+      <handedness val="right"/>
+    </reference-frame>
+    <default-view view="spherical_y"/>
+  </defaults>
+
+  
+  <!-- DESCRIPTION OF INSTRUMENT IN WORDS: 
+  
+    The data for MAPS was obtained from Toby Perring.
+  
+  -->
+
+  
+  <!--  SOURCE AND SAMPLE POSITION -->
+  
+  <component type="undulator">
+    <location z="-12.0" />
+  </component>
+  <type name="undulator" is="Source"> </type>
+  
+  <component type="sample-position">
+    <location />
+  </component>
+  <type name="sample-position" is="SamplePos"></type>
+  
+  
+  <component type="monitors" idlist="monitors">
+    <location />
+  </component>
+  
+  <!-- MONITORS -->  
+  
+  <type name="monitors">
+    <component type="monitor" >
+      <location z="-3.045" />
+      <location z="-1.695" />
+      <location z="8.350" />
+      <location z="6.000" />
+    </component>
+  </type>  
+  
+  <!-- DETECTORS -->
+  
+  <component type="A1_window" idlist="A1_window">
+    <!-- rotate coordinate system so x-axis points down and y-axis to the left
+         seen from the sample looking at the detectors -->
+    <location rot="-90"/> 
+  </component>   
+  
+  <type name="A1_window" >
+    <component type="PSD_TUBE_STRIP 8 pack up"> 
+      <!-- rotate the z-axis towards the y-axis -->
+      <location rot="-3.0000" axis-x="1" axis-y="0" axis-z="0"/>   
+      <location rot="-5.1008" axis-x="1" axis-y="0" axis-z="0"/>
+      <location rot="-7.2016" axis-x="1" axis-y="0" axis-z="0"/>   
+      <location rot="-9.3024" axis-x="1" axis-y="0" axis-z="0"/>
+    </component>
+  </type>   
+  
+  <component type="B1_window" idlist="B1_window">
+    <location />  
+  </component>  
+  
+  <type name="B1_window" >
+    <component type="PSD_TUBE_STRIP 8 pack up"> 
+      <!-- rotate the z-axis towards the y-axis -->    
+      <location rot="-6.1512" axis-x="1" axis-y="0" axis-z="0"/>
+      <location rot="-10.8780" axis-x="1" axis-y="0" axis-z="0"/>     
+    </component>
+    <component type="PSD_TUBE_STRIP 10 pack up"> 
+      <!-- rotate the z-axis towards the y-axis -->    
+      <location rot="-8.2520" axis-x="1" axis-y="0" axis-z="0"/>         
+    </component>    
+  </type> 
+
+
+  <component type="C4_window" idlist="C4_window">
+    <location rot="-90"/>  
+  </component> 
+
+  <type name="C4_window" >
+    <component type="PSD_TUBE_STRIP 8 pack down"> 
+      <!-- rotate the y-axis towards the z-axis -->
+      <location rot="51.0558" axis-x="1" axis-y="0" axis-z="0"/>   
+      <location rot="55.7826" axis-x="1" axis-y="0" axis-z="0"/>   
+      <location rot="57.8834" axis-x="1" axis-y="0" axis-z="0"/>
+    </component>
+    <component type="PSD_TUBE_STRIP 10 pack down"> 
+      <!-- rotate the y-axis towards the z-axis -->      
+      <location rot="53.1566" axis-x="1" axis-y="0" axis-z="0"/>
+    </component>      
+  </type>
+  
+  <!-- pack of 8 designed initially for the B1 window, i.e. with the
+       tubes horizontally aligned and stacked upwards -->
+  <type name="PSD_TUBE_STRIP 8 pack up">
+    <component type="PSD_TUBE_STRIP">
+      <location r="6.0" t="0.0000" p="90"/>
+      <location r="6.0" t="0.2626" p="90"/>
+      <location r="6.0" t="0.5252" p="90"/>
+      <location r="6.0" t="0.7878" p="90"/>
+      <location r="6.0" t="1.0504" p="90"/>
+      <location r="6.0" t="1.3130" p="90"/> 
+      <location r="6.0" t="1.5756" p="90"/>
+      <location r="6.0" t="1.8382" p="90"/>  
+      </component>
+  </type>
+  
+  <!-- mirrow image of type "PSD_TUBE_STRIP 8 pack up". Perhaps there is a 
+       more elegant way of avoiding having to use this mirrow type but for 
+       now this works. -->
+  <type name="PSD_TUBE_STRIP 8 pack down">
+    <component type="PSD_TUBE_STRIP">
+      <location r="6.0" t="0.0000" p="90"/>
+      <location r="6.0" t="-0.2626" p="90"/>
+      <location r="6.0" t="-0.5252" p="90"/>
+      <location r="6.0" t="-0.7878" p="90"/>
+      <location r="6.0" t="-1.0504" p="90"/>
+      <location r="6.0" t="-1.3130" p="90"/> 
+      <location r="6.0" t="-1.5756" p="90"/>
+      <location r="6.0" t="-1.8382" p="90"/>  
+      </component>
+  </type>  
+
+  
+  <type name="PSD_TUBE_STRIP 10 pack up">
+    <component type="PSD_TUBE_STRIP">
+      <location r="6.0" t="0.0000" p="90"/>
+      <location r="6.0" t="0.2626" p="90"/>
+      <location r="6.0" t="0.5252" p="90"/>
+      <location r="6.0" t="0.7878" p="90"/>
+      <location r="6.0" t="1.0504" p="90"/>
+      <location r="6.0" t="1.3130" p="90"/> 
+      <location r="6.0" t="1.5756" p="90"/>
+      <location r="6.0" t="1.8382" p="90"/>  
+      <location r="6.0" t="2.1008" p="90"/>
+      <location r="6.0" t="2.3634" p="90"/>       
+      </component>
+  </type>
+  
+  <type name="PSD_TUBE_STRIP 10 pack down">
+    <component type="PSD_TUBE_STRIP">
+      <location r="6.0" t="0.0000" p="90"/>
+      <location r="6.0" t="-0.2626" p="90"/>
+      <location r="6.0" t="-0.5252" p="90"/>
+      <location r="6.0" t="-0.7878" p="90"/>
+      <location r="6.0" t="-1.0504" p="90"/>
+      <location r="6.0" t="-1.3130" p="90"/> 
+      <location r="6.0" t="-1.5756" p="90"/>
+      <location r="6.0" t="-1.8382" p="90"/>  
+      <location r="6.0" t="-2.1008" p="90"/>
+      <location r="6.0" t="-2.3634" p="90"/>       
+      </component>
+  </type>  
+   
+  <!-- Set the origin at centre of tube, i.e. between to two middle pixels 
+       This tube is of the type used for the A, B and C windows -->
+  <type name="PSD_TUBE_STRIP" outline="yes">
+    <component type="PSD_TUBE_STRIP pixel">
+      <locations x="-0.535898" x-end="0.535898" n-elements="25" />
+    </component>
+  </type>
+    
+  <!-- cylinder pixel of length 1.076/256 -->
+  <type name="PSD_TUBE_STRIP pixel" is="detector">
+    <parameter name="He3 pressure"> <value val="10"/> </parameter> 
+    <parameter name="delay time"> <value val="10.6"/> </parameter> 
+    <parameter name="dead time"> <value val="10.6"/> </parameter> 
+    <cylinder id="shape1">
+      <centre-of-bottom-base x="-0.0021015625" y="0.0" z="0.0" />
+      <axis x="1.0" y="0.0" z="0.0" /> 
+      <radius val="0.0127" />
+      <height val="0.04203125" />
+    </cylinder>     
+  </type>
+  
+  <!-- Note better shape info should be added here -->
+  <type name="monitor" is="monitor">
+    <cylinder id="some-shape">
+      <centre-of-bottom-base r="0.0" t="0.0" p="0.0" />
+      <axis x="0.0" y="0.0" z="1.0" /> 
+      <radius val="0.01" />
+      <height val="0.03" />
+    </cylinder> 
+    <algebra val="some-shape" />    
+  </type>
+
+  
+  <!-- DETECTOR ID LISTS -->
+  
+  <idlist idname="monitors">
+    <id start="1000001" end="1000004" />
+  </idlist>
+
+  <idlist idname="A1_window">
+    <id start="11101001" end="11101025" />
+    <id start="11102001" end="11102025" />    
+    <id start="11103001" end="11103025" />
+    <id start="11104001" end="11104025" />
+    <id start="11105001" end="11105025" />
+    <id start="11106001" end="11106025" />
+    <id start="11107001" end="11107025" />
+    <id start="11108001" end="11108025" />  
+    <id start="11201001" end="11201025" />
+    <id start="11202001" end="11202025" />    
+    <id start="11203001" end="11203025" />
+    <id start="11204001" end="11204025" />
+    <id start="11205001" end="11205025" />
+    <id start="11206001" end="11206025" />
+    <id start="11207001" end="11207025" />
+    <id start="11208001" end="11208025" />  
+    <id start="11301001" end="11301025" />
+    <id start="11302001" end="11302025" />    
+    <id start="11303001" end="11303025" />
+    <id start="11304001" end="11304025" />
+    <id start="11305001" end="11305025" />
+    <id start="11306001" end="11306025" />
+    <id start="11307001" end="11307025" />
+    <id start="11308001" end="11308025" />  
+    <id start="11401001" end="11401025" />
+    <id start="11402001" end="11402025" />    
+    <id start="11403001" end="11403025" />
+    <id start="11404001" end="11404025" />
+    <id start="11405001" end="11405025" />
+    <id start="11406001" end="11406025" />
+    <id start="11407001" end="11407025" />
+    <id start="11408001" end="11408025" />  
+  </idlist>    
+  
+  <idlist idname="B1_window">
+    <id start="21101001" end="21101025" />
+    <id start="21102001" end="21102025" />    
+    <id start="21103001" end="21103025" />
+    <id start="21104001" end="21104025" />
+    <id start="21105001" end="21105025" />
+    <id start="21106001" end="21106025" />
+    <id start="21107001" end="21107025" />
+    <id start="21108001" end="21108025" />   
+    <id start="21301001" end="21301025" />
+    <id start="21302001" end="21302025" />    
+    <id start="21303001" end="21303025" />
+    <id start="21304001" end="21304025" />
+    <id start="21305001" end="21305025" />
+    <id start="21306001" end="21306025" />
+    <id start="21307001" end="21307025" />
+    <id start="21308001" end="21308025" />
+    <id start="21201001" end="21201025" />
+    <id start="21202001" end="21202025" />    
+    <id start="21203001" end="21203025" />
+    <id start="21204001" end="21204025" />
+    <id start="21205001" end="21205025" />
+    <id start="21206001" end="21206025" />
+    <id start="21207001" end="21207025" />
+    <id start="21208001" end="21208025" /> 
+    <id start="21209001" end="21209025" />
+    <id start="21210001" end="21210025" />     
+  </idlist>
+
+  <idlist idname="C4_window">
+    <id start="34101001" end="34101025" />
+    <id start="34102001" end="34102025" />    
+    <id start="34103001" end="34103025" />
+    <id start="34104001" end="34104025" />
+    <id start="34105001" end="34105025" />
+    <id start="34106001" end="34106025" />
+    <id start="34107001" end="34107025" />
+    <id start="34108001" end="34108025" />   
+    <id start="34301001" end="34301025" />
+    <id start="34302001" end="34302025" />    
+    <id start="34303001" end="34303025" />
+    <id start="34304001" end="34304025" />
+    <id start="34305001" end="34305025" />
+    <id start="34306001" end="34306025" />
+    <id start="34307001" end="34307025" />
+    <id start="34308001" end="34308025" />  
+    <id start="34401001" end="34401025" />
+    <id start="34402001" end="34402025" />    
+    <id start="34403001" end="34403025" />
+    <id start="34404001" end="34404025" />
+    <id start="34405001" end="34405025" />
+    <id start="34406001" end="34406025" />
+    <id start="34407001" end="34407025" />
+    <id start="34408001" end="34408025" /> 
+    <id start="34201001" end="34201025" />
+    <id start="34202001" end="34202025" />    
+    <id start="34203001" end="34203025" />
+    <id start="34204001" end="34204025" />
+    <id start="34205001" end="34205025" />
+    <id start="34206001" end="34206025" />
+    <id start="34207001" end="34207025" />
+    <id start="34208001" end="34208025" /> 
+    <id start="34209001" end="34209025" />
+    <id start="34210001" end="34210025" />     
+  </idlist>
+  
+</instrument>

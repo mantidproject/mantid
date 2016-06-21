@@ -1,0 +1,569 @@
+<ui version="4.0" >
+ <class>LOQScriptInputDialog</class>
+ <widget class="QDialog" name="LOQScriptInputDialog" >
+  <property name="windowModality" >
+   <enum>Qt::NonModal</enum>
+  </property>
+  <property name="geometry" >
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>493</width>
+    <height>693</height>
+   </rect>
+  </property>
+  <property name="focusPolicy" >
+   <enum>Qt::ClickFocus</enum>
+  </property>
+  <property name="windowTitle" >
+   <string>LOQ Script Input</string>
+  </property>
+  <property name="layoutDirection" >
+   <enum>Qt::LeftToRight</enum>
+  </property>
+  <property name="modal" >
+   <bool>true</bool>
+  </property>
+  <widget class="QGroupBox" name="groupBox_2" >
+   <property name="geometry" >
+    <rect>
+     <x>23</x>
+     <y>229</y>
+     <width>355</width>
+     <height>70</height>
+    </rect>
+   </property>
+   <property name="title" >
+    <string>Radii (mm)</string>
+   </property>
+   <widget class="QLabel" name="label_6" >
+    <property name="geometry" >
+     <rect>
+      <x>16</x>
+      <y>30</y>
+      <width>54</width>
+      <height>18</height>
+     </rect>
+    </property>
+    <property name="text" >
+     <string>Minimum</string>
+    </property>
+    <property name="buddy" >
+     <cstring>radMinBox</cstring>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_7" >
+    <property name="geometry" >
+     <rect>
+      <x>153</x>
+      <y>30</y>
+      <width>54</width>
+      <height>18</height>
+     </rect>
+    </property>
+    <property name="text" >
+     <string>Maximum</string>
+    </property>
+    <property name="buddy" >
+     <cstring>radMaxBox</cstring>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="radMinBox" >
+    <property name="geometry" >
+     <rect>
+      <x>78</x>
+      <y>24</y>
+      <width>55</width>
+      <height>28</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="radMaxBox" >
+    <property name="geometry" >
+     <rect>
+      <x>221</x>
+      <y>24</y>
+      <width>55</width>
+      <height>28</height>
+     </rect>
+    </property>
+   </widget>
+  </widget>
+  <widget class="QGroupBox" name="groupBox_3" >
+   <property name="geometry" >
+    <rect>
+     <x>22</x>
+     <y>311</y>
+     <width>439</width>
+     <height>70</height>
+    </rect>
+   </property>
+   <property name="title" >
+    <string>Wavelength</string>
+   </property>
+   <widget class="QLabel" name="label_8" >
+    <property name="geometry" >
+     <rect>
+      <x>16</x>
+      <y>30</y>
+      <width>54</width>
+      <height>18</height>
+     </rect>
+    </property>
+    <property name="text" >
+     <string>Minimum</string>
+    </property>
+    <property name="buddy" >
+     <cstring>wavMinBox</cstring>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_9" >
+    <property name="geometry" >
+     <rect>
+      <x>153</x>
+      <y>30</y>
+      <width>54</width>
+      <height>18</height>
+     </rect>
+    </property>
+    <property name="text" >
+     <string>Maximum</string>
+    </property>
+    <property name="buddy" >
+     <cstring>wavMaxBox</cstring>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="wavMinBox" >
+    <property name="geometry" >
+     <rect>
+      <x>78</x>
+      <y>24</y>
+      <width>55</width>
+      <height>28</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="wavMaxBox" >
+    <property name="geometry" >
+     <rect>
+      <x>221</x>
+      <y>24</y>
+      <width>55</width>
+      <height>28</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_10" >
+    <property name="geometry" >
+     <rect>
+      <x>297</x>
+      <y>29</y>
+      <width>54</width>
+      <height>18</height>
+     </rect>
+    </property>
+    <property name="text" >
+     <string>Bin width</string>
+    </property>
+    <property name="buddy" >
+     <cstring>wavBinBox</cstring>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="wavBinBox" >
+    <property name="geometry" >
+     <rect>
+      <x>358</x>
+      <y>24</y>
+      <width>55</width>
+      <height>28</height>
+     </rect>
+    </property>
+   </widget>
+  </widget>
+  <widget class="QGroupBox" name="groupBox_4" >
+   <property name="geometry" >
+    <rect>
+     <x>19</x>
+     <y>475</y>
+     <width>355</width>
+     <height>70</height>
+    </rect>
+   </property>
+   <property name="title" >
+    <string>Beam centre</string>
+   </property>
+   <widget class="QLabel" name="label_11" >
+    <property name="geometry" >
+     <rect>
+      <x>17</x>
+      <y>28</y>
+      <width>59</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text" >
+     <string>x position</string>
+    </property>
+    <property name="buddy" >
+     <cstring>beamXBox</cstring>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="beamXBox" >
+    <property name="geometry" >
+     <rect>
+      <x>78</x>
+      <y>24</y>
+      <width>55</width>
+      <height>28</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="beamYBox" >
+    <property name="geometry" >
+     <rect>
+      <x>221</x>
+      <y>24</y>
+      <width>55</width>
+      <height>28</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_13" >
+    <property name="geometry" >
+     <rect>
+      <x>152</x>
+      <y>28</y>
+      <width>59</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text" >
+     <string>y position</string>
+    </property>
+    <property name="buddy" >
+     <cstring>beamYBox</cstring>
+    </property>
+   </widget>
+  </widget>
+  <widget class="QLabel" name="label_12" >
+   <property name="geometry" >
+    <rect>
+     <x>25</x>
+     <y>565</y>
+     <width>135</width>
+     <height>18</height>
+    </rect>
+   </property>
+   <property name="text" >
+    <string>Efficiency correction file</string>
+   </property>
+   <property name="buddy" >
+    <cstring>effFileBox</cstring>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="effFileBox" >
+   <property name="geometry" >
+    <rect>
+     <x>161</x>
+     <y>560</y>
+     <width>280</width>
+     <height>28</height>
+    </rect>
+   </property>
+   <property name="text" >
+    <string/>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="browseButton" >
+   <property name="geometry" >
+    <rect>
+     <x>361</x>
+     <y>596</y>
+     <width>80</width>
+     <height>28</height>
+    </rect>
+   </property>
+   <property name="text" >
+    <string>Browse</string>
+   </property>
+   <property name="autoDefault" >
+    <bool>false</bool>
+   </property>
+  </widget>
+  <widget class="QGroupBox" name="groupBox_5" >
+   <property name="geometry" >
+    <rect>
+     <x>19</x>
+     <y>392</y>
+     <width>439</width>
+     <height>70</height>
+    </rect>
+   </property>
+   <property name="title" >
+    <string>Momentum transfer </string>
+   </property>
+   <widget class="QLabel" name="label_14" >
+    <property name="geometry" >
+     <rect>
+      <x>16</x>
+      <y>30</y>
+      <width>54</width>
+      <height>18</height>
+     </rect>
+    </property>
+    <property name="text" >
+     <string>Minimum</string>
+    </property>
+    <property name="buddy" >
+     <cstring>momMinBox</cstring>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_15" >
+    <property name="geometry" >
+     <rect>
+      <x>153</x>
+      <y>30</y>
+      <width>54</width>
+      <height>18</height>
+     </rect>
+    </property>
+    <property name="text" >
+     <string>Maximum</string>
+    </property>
+    <property name="buddy" >
+     <cstring>momMaxBox</cstring>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="momMinBox" >
+    <property name="geometry" >
+     <rect>
+      <x>78</x>
+      <y>24</y>
+      <width>55</width>
+      <height>28</height>
+     </rect>
+    </property>
+    <property name="text" >
+     <string/>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="momMaxBox" >
+    <property name="geometry" >
+     <rect>
+      <x>221</x>
+      <y>24</y>
+      <width>55</width>
+      <height>28</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_16" >
+    <property name="geometry" >
+     <rect>
+      <x>297</x>
+      <y>29</y>
+      <width>54</width>
+      <height>18</height>
+     </rect>
+    </property>
+    <property name="text" >
+     <string>Bin width</string>
+    </property>
+    <property name="buddy" >
+     <cstring>momBinBox</cstring>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="momBinBox" >
+    <property name="geometry" >
+     <rect>
+      <x>358</x>
+      <y>24</y>
+      <width>55</width>
+      <height>28</height>
+     </rect>
+    </property>
+   </widget>
+  </widget>
+  <widget class="QGroupBox" name="groupBox_6" >
+   <property name="geometry" >
+    <rect>
+     <x>23</x>
+     <y>7</y>
+     <width>432</width>
+     <height>211</height>
+    </rect>
+   </property>
+   <property name="title" >
+    <string>Workspaces</string>
+   </property>
+   <widget class="QWidget" name="gridLayoutWidget" >
+    <property name="geometry" >
+     <rect>
+      <x>13</x>
+      <y>18</y>
+      <width>408</width>
+      <height>184</height>
+     </rect>
+    </property>
+    <layout class="QGridLayout" name="gridLayout" >
+     <property name="verticalSpacing" >
+      <number>6</number>
+     </property>
+     <item row="1" column="0" >
+      <widget class="QLabel" name="label_2" >
+       <property name="text" >
+        <string>Empty Can Workspace</string>
+       </property>
+       <property name="buddy" >
+        <cstring>emptycanBox</cstring>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="0" >
+      <widget class="QLabel" name="label_3" >
+       <property name="text" >
+        <string>Transmission Sample Workspace</string>
+       </property>
+       <property name="buddy" >
+        <cstring>transSampleBox</cstring>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="0" >
+      <widget class="QLabel" name="label_4" >
+       <property name="text" >
+        <string>Transmission Direct Workspace</string>
+       </property>
+       <property name="buddy" >
+        <cstring>transDirectBox</cstring>
+       </property>
+      </widget>
+     </item>
+     <item row="4" column="0" >
+      <widget class="QLabel" name="label_5" >
+       <property name="text" >
+        <string>Transmission Empty Can Workspace</string>
+       </property>
+       <property name="buddy" >
+        <cstring>transEmptyBox</cstring>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="1" >
+      <widget class="QLineEdit" name="sampleBox" >
+       <property name="focusPolicy" >
+        <enum>Qt::StrongFocus</enum>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="1" >
+      <widget class="QLineEdit" name="emptycanBox" />
+     </item>
+     <item row="2" column="1" >
+      <widget class="QLineEdit" name="transSampleBox" />
+     </item>
+     <item row="3" column="1" >
+      <widget class="QLineEdit" name="transDirectBox" />
+     </item>
+     <item row="4" column="1" >
+      <widget class="QLineEdit" name="transEmptyBox" />
+     </item>
+     <item row="0" column="0" >
+      <widget class="QLabel" name="label" >
+       <property name="text" >
+        <string>Sample Workspace</string>
+       </property>
+       <property name="buddy" >
+        <cstring>sampleBox</cstring>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </widget>
+  </widget>
+  <widget class="QPushButton" name="pushButton" >
+   <property name="geometry" >
+    <rect>
+     <x>301</x>
+     <y>650</y>
+     <width>80</width>
+     <height>28</height>
+    </rect>
+   </property>
+   <property name="text" >
+    <string>Run</string>
+   </property>
+   <property name="default" >
+    <bool>true</bool>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="pushButton_2" >
+   <property name="geometry" >
+    <rect>
+     <x>397</x>
+     <y>650</y>
+     <width>80</width>
+     <height>28</height>
+    </rect>
+   </property>
+   <property name="text" >
+    <string>Cancel</string>
+   </property>
+   <property name="autoDefault" >
+    <bool>false</bool>
+   </property>
+  </widget>
+ </widget>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>pushButton</sender>
+   <signal>clicked()</signal>
+   <receiver>LOQScriptInputDialog</receiver>
+   <slot>accept()</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>340</x>
+     <y>663</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>246</x>
+     <y>346</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>pushButton_2</sender>
+   <signal>clicked()</signal>
+   <receiver>LOQScriptInputDialog</receiver>
+   <slot>reject()</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>436</x>
+     <y>663</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>246</x>
+     <y>346</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+ <designerdata>
+  <property name="gridDeltaX" >
+   <number>10</number>
+  </property>
+  <property name="gridDeltaY" >
+   <number>10</number>
+  </property>
+  <property name="gridSnapX" >
+   <bool>false</bool>
+  </property>
+  <property name="gridSnapY" >
+   <bool>false</bool>
+  </property>
+  <property name="gridVisible" >
+   <bool>true</bool>
+  </property>
+ </designerdata>
+</ui>

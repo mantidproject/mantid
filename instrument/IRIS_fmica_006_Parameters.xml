@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<parameter-file instrument = "IRIS" valid-from = "2010-07-15T00:00:00">
+
+<component-link name = "IRIS">
+
+<parameter name="analysis-type" type="string">
+  <value val="spectroscopy" />
+</parameter>
+
+<parameter name="spectra-min">
+	<value val="54" />
+</parameter>
+
+<parameter name="spectra-max">
+	<value val="104" />
+</parameter>
+
+<parameter name="peak-start">
+	<value val="62500" />
+</parameter>
+
+<parameter name="peak-end">
+	<value val="65000" />
+</parameter>
+
+<parameter name="back-start">
+	<value val="59000" />
+</parameter>
+
+<parameter name="back-end">
+	<value val="61500" />
+</parameter>
+
+<parameter name="analyser" type="string">
+  <value val="fmica" />
+</parameter>
+
+<parameter name="reflection" type="string">
+  <value val="006" />
+</parameter>
+
+</component-link>
+<component-link name="mica">
+<parameter name="Efixed"> <value val="1.8567" /> </parameter>
+<parameter name="resolution"> <value val="0.011" /> </parameter>
+</component-link>
+</parameter-file>
