@@ -9,6 +9,7 @@ namespace Mantid {
 namespace HistogramData {
 
 class HistogramX;
+class HistogramY;
 class HistogramE;
 
 namespace detail {
@@ -19,6 +20,11 @@ template <class TargetType> struct Validator {
 };
 
 template <> struct Validator<HistogramX> {
+  template <class T> static bool isValid(const T &data);
+  template <class T> static void checkValidity(const T &data);
+};
+
+template <> struct Validator<HistogramY> {
   template <class T> static bool isValid(const T &data);
   template <class T> static void checkValidity(const T &data);
 };
@@ -44,6 +50,18 @@ template <class T> void Validator<HistogramX>::checkValidity(const T &data) {
   if (!isValid(data))
     throw std::runtime_error(
         "Invalid data found during construction of HistogramX");
+}
+
+template <class T> bool Validator<HistogramY>::isValid(const T &data) {
+  auto result = std::find_if(data.begin(), data.end(),
+                             [](const double &y) { return !std::isfinite(y); });
+  return result == data.end();
+}
+
+template <class T> void Validator<HistogramY>::checkValidity(const T &data) {
+  if (!isValid(data))
+    throw std::runtime_error(
+        "Invalid data found during construction of HistogramY");
 }
 
 template <class T> bool Validator<HistogramE>::isValid(const T &data) {
