@@ -339,8 +339,7 @@ struct NLLS_workspace {
   calculate_step_work calculate_step_ws;
   evaluate_model_work evaluate_model_ws;
   NLLS_workspace();
-  void initialize(int n, int m, const nlls_options &options,
-                  nlls_inform &inform);
+  void initialize(int n, int m, const nlls_options &options);
 };
 
 } // NLLS

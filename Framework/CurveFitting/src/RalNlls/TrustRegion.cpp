@@ -141,11 +141,11 @@ double evaluate_model(const DoubleFortranVector &f,
 /// @param options :: The options.
 double calculate_rho(double normf, double normfnew, double md,
                      const nlls_options &options) {
-
+  UNUSED_ARG(options);
   auto actual_reduction = (0.5 * pow(normf, 2)) - (0.5 * pow(normfnew, 2));
   auto predicted_reduction = ((0.5 * pow(normf, 2)) - md);
   double rho = 0.0;
-  if (abs(actual_reduction) < 10 * epsmch) {
+  if (fabs(actual_reduction) < 10 * epsmch) {
     rho = one;
   } else if (abs(predicted_reduction) < 10 * epsmch) {
     rho = one;
@@ -161,7 +161,7 @@ double calculate_rho(double normf, double normfnew, double md,
 void rank_one_update(DoubleFortranMatrix &hf, NLLS_workspace w) {
 
   auto yts = dot_product(w.d, w.y);
-  if (abs(yts) < 10 * epsmch) {
+  if (fabs(yts) < 10 * epsmch) {
     //! safeguard: skip this update
     return;
   }
@@ -172,8 +172,8 @@ void rank_one_update(DoubleFortranMatrix &hf, NLLS_workspace w) {
   w.ysharpSks -= w.Sks;
 
   // now, let's scale hd (Nocedal and Wright, Section 10.2)
-  auto dSks = abs(dot_product(w.d, w.Sks));
-  auto alpha = abs(dot_product(w.d, w.y_sharp)) / dSks;
+  auto dSks = fabs(dot_product(w.d, w.Sks));
+  auto alpha = fabs(dot_product(w.d, w.y_sharp)) / dSks;
   alpha = std::min(one, alpha);
   hf *= alpha;
 

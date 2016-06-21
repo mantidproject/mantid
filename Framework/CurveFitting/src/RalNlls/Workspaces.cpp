@@ -15,9 +15,7 @@ NLLS_workspace::NLLS_workspace()
 /// @param n :: The number of fitting parameters.
 /// @param m :: The number of data points.
 /// @param options :: The options.
-/// @param inform :: The inform struct.
-void NLLS_workspace::initialize(int n, int m, const nlls_options &options,
-                                nlls_inform &inform) {
+void NLLS_workspace::initialize(int n, int m, const nlls_options &options) {
 
   tr_nu = options.radius_increase;
 

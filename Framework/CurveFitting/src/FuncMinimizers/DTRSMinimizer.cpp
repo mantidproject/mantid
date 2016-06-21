@@ -51,7 +51,6 @@ const int max_degree = 3;
 const int history_max = 100;
 const double teneps = 10.0 * epsmch;
 const double roots_tol = teneps;
-const bool roots_debug = false;
 const double infinity = huge;
 
 enum class ErrorCode {
@@ -206,23 +205,6 @@ struct dtrs_inform_type {
   //!  history information
   std::vector<dtrs_history_type> history;
 };
-
-/// Get the smallest of the four values.
-/// @param a :: Value number 1.
-/// @param b :: Value number 2.
-/// @param c :: Value number 3.
-/// @param d :: Value number 4.
-double smallest(double a, double b, double c, double d) {
-  return std::min(std::min(a, b), std::min(c, d));
-}
-
-/// Get the smallest of the three values.
-/// @param a :: Value number 1.
-/// @param b :: Value number 2.
-/// @param c :: Value number 3.
-double smallest(double a, double b, double c) {
-  return std::min(std::min(a, b), c);
-}
 
 /// Get the largest of the four values.
 /// @param a :: Value number 1.
