@@ -118,12 +118,6 @@ public:
     getSpectrum(index).mutableHistogramRef().setFrequencyStandardDeviations(
         std::forward<T>(data)...);
   }
-  HistogramData::HistogramY &mutableY(const size_t index) override {
-    return getSpectrum(index).mutableHistogramRef().mutableY();
-  }
-  HistogramData::HistogramE &mutableE(const size_t index) override {
-    return getSpectrum(index).mutableHistogramRef().mutableE();
-  }
   void setSharedY(const size_t index,
                   const Kernel::cow_ptr<HistogramData::HistogramY> &y) {
     getSpectrum(index).mutableHistogramRef().setSharedY(y);

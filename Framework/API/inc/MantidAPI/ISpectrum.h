@@ -169,10 +169,10 @@ public:
   HistogramData::HistogramDx &mutableDx() {
     return mutableHistogramRef().mutableDx();
   }
-  HistogramData::HistogramY &mutableY() {
+  virtual HistogramData::HistogramY &mutableY() {
     return mutableHistogramRef().mutableY();
   }
-  HistogramData::HistogramE &mutableE() {
+  virtual HistogramData::HistogramE &mutableE() {
     return mutableHistogramRef().mutableE();
   }
   Kernel::cow_ptr<HistogramData::HistogramX> sharedX() const {

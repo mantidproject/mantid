@@ -127,16 +127,6 @@ public:
   Kernel::cow_ptr<HistogramData::HistogramX>
   refX(const std::size_t) const override;
 
-  HistogramData::HistogramY &mutableY(const size_t index) override {
-    throw Mantid::Kernel::Exception::NotImplementedError(
-        "This method has not been implemented for EventWorkspace");
-  }
-
-  HistogramData::HistogramE &mutableE(const size_t index) override {
-    throw Mantid::Kernel::Exception::NotImplementedError(
-        "This method has not been implemented for EventWorkspace");
-  }
-
   /// Generate a new histogram from specified event list at the given index.
   void generateHistogram(const std::size_t index, const MantidVec &X,
                          MantidVec &Y, MantidVec &E,

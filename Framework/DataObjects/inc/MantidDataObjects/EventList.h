@@ -6,16 +6,16 @@
 #endif
 #include "MantidAPI/IEventList.h"
 #include "MantidDataObjects/Events.h"
-#include "MantidKernel/cow_ptr.h"
 #include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/TimeSplitter.h"
 #include "MantidKernel/Unit.h"
+#include "MantidKernel/cow_ptr.h"
 #include <cstddef>
 #include <iosfwd>
 #include <set>
 #include <vector>
-#include "MantidKernel/MultiThreaded.h"
 
 namespace Mantid {
 namespace DataObjects {
@@ -340,6 +340,8 @@ public:
   frequencyStandardDeviations() const override;
   const HistogramData::HistogramY &y() const override;
   const HistogramData::HistogramE &e() const override;
+  HistogramData::HistogramY &mutableY() override;
+  HistogramData::HistogramE &mutableE() override;
   Kernel::cow_ptr<HistogramData::HistogramY> sharedY() const override;
   Kernel::cow_ptr<HistogramData::HistogramE> sharedE() const override;
 

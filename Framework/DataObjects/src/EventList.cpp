@@ -1,5 +1,5 @@
-#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataObjects/EventList.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataObjects/EventWorkspaceMRU.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/Exception.h"
@@ -1596,6 +1596,16 @@ const HistogramData::HistogramY &EventList::y() const {
 const HistogramData::HistogramE &EventList::e() const {
   return countStandardDeviations().data();
 }
+HistogramData::HistogramY &EventList::mutableY() {
+  throw Mantid::Kernel::Exception::NotImplementedError(
+      "This method is not implemented for EventList. Writing to Y is "
+      "forbidden.");
+}
+HistogramData::HistogramE &EventList::mutableE() {
+  throw Mantid::Kernel::Exception::NotImplementedError(
+      "This method is not implemented for EventList. Writing to E is "
+      "forbidden.");
+}
 Kernel::cow_ptr<HistogramData::HistogramY> EventList::sharedY() const {
   return counts().cowData();
 }
@@ -2403,15 +2413,15 @@ void EventList::generateErrorsHistogram(const MantidVec &Y,
                  static_cast<double (*)(double)>(sqrt));
 
 } //----------------------------------------------------------------------------------
-  /** Integrate the events between a range of X values, or all events.
-   *
-   * @param events :: reference to a vector of events to change.
-   * @param minX :: minimum X bin to use in integrating.
-   * @param maxX :: maximum X bin to use in integrating.
-   * @param entireRange :: set to true to use the entire range. minX and maxX are
-   *then ignored!
-   * @return the integrated number of events.
-   */
+/** Integrate the events between a range of X values, or all events.
+ *
+ * @param events :: reference to a vector of events to change.
+ * @param minX :: minimum X bin to use in integrating.
+ * @param maxX :: maximum X bin to use in integrating.
+ * @param entireRange :: set to true to use the entire range. minX and maxX are
+ *then ignored!
+ * @return the integrated number of events.
+ */
 template <class T>
 double EventList::integrateHelper(std::vector<T> &events, const double minX,
                                   const double maxX, const bool entireRange) {

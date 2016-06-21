@@ -258,10 +258,10 @@ public:
   HistogramData::HistogramDx &mutableDx(const size_t index) {
     return getSpectrum(index).mutableDx();
   }
-  virtual HistogramData::HistogramY &mutableY(const size_t index) {
+  HistogramData::HistogramY &mutableY(const size_t index) {
     return getSpectrum(index).mutableY();
   }
-  virtual HistogramData::HistogramE &mutableE(const size_t index) {
+  HistogramData::HistogramE &mutableE(const size_t index) {
     return getSpectrum(index).mutableE();
   }
   Kernel::cow_ptr<HistogramData::HistogramX> sharedX(const size_t index) const {
