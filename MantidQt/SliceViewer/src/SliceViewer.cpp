@@ -624,13 +624,15 @@ void SliceViewer::updateDimensionSliceWidgets() {
 
   bool dimXset = false;
   bool dimYset = false;
-// put non integrated dimensions first
+  // put non integrated dimensions first
   for (size_t d = 0; d < m_dimensions.size(); d++) {
-    if ((dimXset == false) && (m_ws->getDimension(d)->getIsIntegrated() == false)) {
+    if ((dimXset == false) &&
+        (m_ws->getDimension(d)->getIsIntegrated() == false)) {
       m_dimX = d;
       dimXset = true;
     }
-    if ((dimYset == false) && (m_ws->getDimension(d)->getIsIntegrated() == false) && (d != m_dimX)) {
+    if ((dimYset == false) &&
+        (m_ws->getDimension(d)->getIsIntegrated() == false) && (d != m_dimX)) {
       m_dimY = d;
       dimYset = true;
     }
