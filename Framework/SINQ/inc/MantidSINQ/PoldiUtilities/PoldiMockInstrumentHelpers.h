@@ -10,11 +10,12 @@
 #include "MantidSINQ/PoldiUtilities/PoldiInstrumentAdapter.h"
 #include "MantidSINQ/PoldiUtilities/PoldiPeakCollection.h"
 
-#include "MantidSINQ/PoldiUtilities/PoldiHeliumDetector.h"
-#include "MantidSINQ/PoldiUtilities/PoldiConversions.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/FitParameter.h"
 #include "MantidKernel/Interpolation.h"
+#include "MantidKernel/WarningSuppressions.h"
+#include "MantidSINQ/PoldiUtilities/PoldiConversions.h"
+#include "MantidSINQ/PoldiUtilities/PoldiHeliumDetector.h"
 
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/TableWorkspace.h"
@@ -35,10 +36,7 @@ using namespace Geometry;
 
 typedef std::pair<double, double> DoublePair;
 
-#if defined(GCC_VERSION) && GCC_VERSION >= 50000
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wsuggest-override"
-#endif
+GCC_DIAG_OFF_SUGGEST_OVERRIDE
 
 class MockDetector : public PoldiAbstractDetector {
 protected:
@@ -393,9 +391,7 @@ public:
   }
 };
 
-#if defined(GCC_VERSION) && GCC_VERSION >= 50000
-#pragma GCC diagnostic pop
-#endif
+GCC_DIAG_ON_SUGGEST_OVERRIDE
 
 class PoldiPeakCollectionHelpers {
   /* This class contains some static helper function to create

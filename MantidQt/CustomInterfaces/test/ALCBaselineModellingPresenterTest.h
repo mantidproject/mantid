@@ -10,6 +10,7 @@
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidKernel/WarningSuppressions.h"
 
 #include "MantidQtCustomInterfaces/Muon/ALCBaselineModellingPresenter.h"
 
@@ -17,10 +18,8 @@ using namespace MantidQt::CustomInterfaces;
 using namespace testing;
 using boost::scoped_ptr;
 
-#if defined(GCC_VERSION) && GCC_VERSION >= 50000
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wsuggest-override"
-#endif
+GCC_DIAG_OFF_SUGGEST_OVERRIDE
+
 class MockALCBaselineModellingView : public IALCBaselineModellingView {
 public:
   void requestFit() { emit fitRequested(); }
@@ -365,8 +364,7 @@ public:
     m_view->help();
   }
 };
-#if defined(GCC_VERSION) && GCC_VERSION >= 50000
-#pragma GCC diagnostic pop
-#endif
+
+GCC_DIAG_ON_SUGGEST_OVERRIDE
 
 #endif /* MANTIDQT_CUSTOMINTERFACES_ALCBASELINEMODELLINGTEST_H_ */

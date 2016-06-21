@@ -1,19 +1,17 @@
 #ifndef MANTIDQT_API_SIGNALRANGETEST_H_
 #define MANTIDQT_API_SIGNALRANGETEST_H_
 
-#include "MantidQtAPI/SignalRange.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidKernel/MultiThreaded.h"
+#include "MantidKernel/WarningSuppressions.h"
+#include "MantidQtAPI/SignalRange.h"
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
 #include "MantidAPI/IMDIterator.h"
 
-#if defined(GCC_VERSION) && GCC_VERSION >= 50000
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wsuggest-override"
-#endif
+GCC_DIAG_OFF_SUGGEST_OVERRIDE
 
 class SignalRangeTest : public CxxTest::TestSuite {
 private:
@@ -204,8 +202,6 @@ public:
     TS_ASSERT_DELTA(5.0, range.maxValue(), 1e-10);
   }
 };
-#if defined(GCC_VERSION) && GCC_VERSION >= 50000
-#pragma GCC diagnostic pop
-#endif
+GCC_DIAG_ON_SUGGEST_OVERRIDE
 
 #endif /* MANTIDQT_API_SIGNALRANGETEST */

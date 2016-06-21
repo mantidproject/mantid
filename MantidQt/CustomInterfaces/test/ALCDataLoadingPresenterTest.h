@@ -4,8 +4,9 @@
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 
-#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidKernel/WarningSuppressions.h"
 
 #include "MantidQtCustomInterfaces/Muon/IALCDataLoadingView.h"
 #include "MantidQtCustomInterfaces/Muon/ALCDataLoadingPresenter.h"
@@ -24,10 +25,7 @@ operator<<(std::basic_ostream<CharType, CharTrait> &out,
 }
 }
 
-#if defined(GCC_VERSION) && GCC_VERSION >= 50000
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wsuggest-override"
-#endif
+GCC_DIAG_OFF_SUGGEST_OVERRIDE
 
 class MockALCDataLoadingView : public IALCDataLoadingView {
   // XXX: A workaround, needed because of the way the comma is treated in a
@@ -370,8 +368,6 @@ public:
   }
 };
 
-#if defined(GCC_VERSION) && GCC_VERSION >= 50000
-#pragma GCC diagnostic pop
-#endif
+GCC_DIAG_ON_SUGGEST_OVERRIDE
 
 #endif /* MANTID_CUSTOMINTERFACES_ALCDATALOADINGTEST_H_ */

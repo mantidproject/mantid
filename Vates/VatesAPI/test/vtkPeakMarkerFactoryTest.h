@@ -4,6 +4,7 @@
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidDataObjects/PeakShapeSpherical.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidKernel/WarningSuppressions.h"
 #include "MantidVatesAPI/vtkPeakMarkerFactory.h"
 #include "MockObjects.h"
 
@@ -23,10 +24,7 @@ using namespace ::testing;
 using namespace Mantid::VATES;
 using Mantid::VATES::vtkPeakMarkerFactory;
 
-#if defined(GCC_VERSION) && GCC_VERSION >= 50000
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wsuggest-override"
-#endif
+GCC_DIAG_OFF_SUGGEST_OVERRIDE
 
 class MockPeakShape : public Peak {
 public:
@@ -315,8 +313,6 @@ public:
     }
   }
 };
-#if defined(GCC_VERSION) && GCC_VERSION >= 50000
-#pragma GCC diagnostic pop
-#endif
+GCC_DIAG_ON_SUGGEST_OVERRIDE
 
 #endif
