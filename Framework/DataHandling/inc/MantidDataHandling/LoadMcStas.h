@@ -35,9 +35,6 @@ namespace DataHandling {
 */
 class DLLExport LoadMcStas : public API::IFileLoader<Kernel::NexusDescriptor> {
 public:
-  LoadMcStas();
-  ~LoadMcStas() override;
-
   const std::string name() const override;
   /// Summary of algorithms purpose
   const std::string summary() const override {
@@ -64,7 +61,7 @@ private:
 
   // used as part of given useful names to workspaces added to output
   // groupworkspace
-  size_t m_countNumWorkspaceAdded;
+  size_t m_countNumWorkspaceAdded{1};
 };
 
 } // namespace DataHandling

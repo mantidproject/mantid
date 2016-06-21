@@ -75,11 +75,6 @@ FitPowderDiffPeaks::FitPowderDiffPeaks()
       m_fitPeakBackgroundComposite(false) {}
 
 //----------------------------------------------------------------------------------------------
-/** Destructor
- */
-FitPowderDiffPeaks::~FitPowderDiffPeaks() {}
-
-//----------------------------------------------------------------------------------------------
 /** Parameter declaration
  */
 void FitPowderDiffPeaks::init() {

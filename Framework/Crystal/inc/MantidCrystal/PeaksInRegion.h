@@ -32,9 +32,6 @@ namespace Crystal {
 */
 class DLLExport PeaksInRegion : public PeaksIntersection {
 public:
-  PeaksInRegion();
-  ~PeaksInRegion() override;
-
   const std::string name() const override;
   /// Summary of algorithms purpose
   const std::string summary() const override {

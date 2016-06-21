@@ -49,8 +49,6 @@ class DLLExport NormaliseVanadium : public API::Algorithm {
 public:
   /// (Empty) Constructor
   NormaliseVanadium();
-  /// Virtual destructor
-  ~NormaliseVanadium() override {}
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "NormaliseVanadium"; }
   /// Summary of algorithms purpose

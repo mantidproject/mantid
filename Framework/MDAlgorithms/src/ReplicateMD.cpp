@@ -130,16 +130,6 @@ size_t linearIndexToLinearIndex(const size_t &nDimsShape,
 DECLARE_ALGORITHM(ReplicateMD)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-ReplicateMD::ReplicateMD() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-ReplicateMD::~ReplicateMD() {}
-
-//----------------------------------------------------------------------------------------------
 
 /// Algorithms name for identification. @see Algorithm::name
 const std::string ReplicateMD::name() const { return "ReplicateMD"; }

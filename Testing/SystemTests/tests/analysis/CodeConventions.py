@@ -1,8 +1,8 @@
 #pylint: disable=no-init
 import stresstesting
+import re
 import mantid
 from mantid.simpleapi import *
-import re
 
 MAX_ALG_LEN = 40 # TODO convention says 20 is the maximum
 

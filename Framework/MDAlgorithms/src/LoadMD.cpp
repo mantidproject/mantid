@@ -49,11 +49,6 @@ LoadMD::LoadMD()
       m_BoxStructureAndMethadata(true), // this is faster but rarely needed.
       m_saveMDVersion(false), m_requiresMDFrameCorrection(false) {}
 
-//----------------------------------------------------------------------------------------------
-/** Destructor
-*/
-LoadMD::~LoadMD() {}
-
 /**
 * Return the confidence with which this algorithm can load the file
 * @param descriptor A descriptor for the file

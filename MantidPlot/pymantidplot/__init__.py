@@ -2,6 +2,8 @@
 MantidPlot module to gain access to plotting functions etc.
 Requires that the main script be run from within MantidPlot
 """
+from __future__ import (absolute_import, division,
+                        print_function)
 # Requires MantidPlot
 try:
     import _qti
@@ -776,12 +778,6 @@ def plotSlice(source, label="", xydim=None, slicepoint=None,
     workspace_names = getWorkspaceNames(source)
     __checkPlotSliceWorkspaces(workspace_names)
 
-    try:
-        import mantidqtpython
-    except:
-        print "Could not find module mantidqtpython. Cannot open the SliceViewer."
-        return
-
     # Make a list of widgets to return
     out = []
     for wsname in workspace_names:
@@ -833,7 +829,6 @@ def closeAllSliceViewers():
     Closes all currently open SliceViewer windows. This might be useful to
     clean up your desktop after opening many windows.
     """
-    import mantidqtpython
     threadsafe_call(mantidqtpython.MantidQt.Factory.WidgetFactory.Instance().closeAllSliceViewerWindows)
 
 
@@ -929,7 +924,7 @@ def __doSliceViewer(wsname, label="", xydim=None, slicepoint=None,
     try:
         threadsafe_call(sv.setColorScaleLog, colorscalelog)
     except:
-        print "Log color scale not possible."
+        print("Log color scale not possible.")
 
     # --- XY limits ---
     if not limits is None:
@@ -948,9 +943,7 @@ def get_screenshot_dir():
         if not os.path.exists(dest):
             os.mkdir(dest)
     else:
-        errormsg = "The expected environmental does not exist: " + expected_env_var
-        print errormsg
-        raise RuntimeError(errormsg)
+        raise RuntimeError("The expected environmental does not exist: " + expected_env_var)
     return dest
 
 
@@ -1187,7 +1180,7 @@ def createDetectorTable(source):
     try:
         import mantidqtpython
     except:
-        print "Could not find module mantidqtpython. Cannot open the detector table."
+        print("Could not find module mantidqtpython. Cannot open the detector table.")
         return
 
     workspace_names = getWorkspaceNames(source)

@@ -1,7 +1,10 @@
+from __future__ import (absolute_import, division, print_function)
+
 import unittest
 from mantid.api import AlgorithmManager, MatrixWorkspace
 from testhelpers import run_algorithm
 import numpy as np
+import sys
 
 class PropertyWithValueTest(unittest.TestCase):
 
@@ -36,6 +39,10 @@ class PropertyWithValueTest(unittest.TestCase):
 
     def test_set_property_int(self):
         self._integration.setProperty("StartWorkspaceIndex", 5)
+        self.assertEquals(self._integration.getProperty("StartWorkspaceIndex").value, 5)
+
+    def test_set_int_property_python_long_py2(self):
+        self._integration.setProperty("StartWorkspaceIndex", long(5))
         self.assertEquals(self._integration.getProperty("StartWorkspaceIndex").value, 5)
 
     def test_set_property_float(self):

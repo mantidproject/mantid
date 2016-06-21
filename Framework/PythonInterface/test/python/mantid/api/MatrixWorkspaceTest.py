@@ -1,4 +1,6 @@
-﻿import unittest
+from __future__ import (absolute_import, print_function)
+
+import unittest
 import sys
 import math
 from testhelpers import create_algorithm, run_algorithm, can_be_instantiated, WorkspaceCreationHelper
@@ -54,14 +56,13 @@ class MatrixWorkspaceTest(unittest.TestCase):
 
         xunit = xaxis.getUnit()
         self.assertEquals(xunit.caption(), "Time-of-flight")
-        self.assertEquals(xunit.label(), "microsecond")
+        self.assertEquals(str(xunit.symbol()), "microsecond")
         self.assertEquals(xunit.unitID(), "TOF")
 
         yunit = yaxis.getUnit()
         self.assertEquals(yunit.caption(), "Spectrum")
-        self.assertEquals(yunit.label(), "")
+        self.assertEquals(str(yunit.symbol()), "")
         self.assertEquals(yunit.unitID(), "Label")
-
 
     def test_detector_retrieval(self):
         det = self._test_ws.getDetector(0)

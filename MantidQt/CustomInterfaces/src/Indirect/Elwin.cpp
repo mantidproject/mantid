@@ -201,10 +201,29 @@ void Elwin::run() {
       addSaveAlgorithm(eltWorkspace);
   }
 
+  connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
+          SLOT(unGroupInput(bool)));
   m_batchAlgoRunner->executeBatchAsync();
 
   // Set the result workspace for Python script export
   m_pythonExportWsName = qSquaredWorkspace.toStdString();
+}
+
+/**
+ * Ungroups the output after the execution of the algorithm
+ */
+void Elwin::unGroupInput(bool error) {
+  disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
+             SLOT(unGroupInput(bool)));
+  if (error)
+    return;
+  if (!m_uiForm.ckGroupInput->isChecked()) {
+    IAlgorithm_sptr ungroupAlg =
+        AlgorithmManager::Instance().create("UnGroupWorkspace");
+    ungroupAlg->initialize();
+    ungroupAlg->setProperty("InputWorkspace", "IDA_Elwin_Input");
+    ungroupAlg->execute();
+  }
 }
 
 /**
@@ -385,14 +404,8 @@ void Elwin::plotInput() {
 
   try {
     QPair<double, double> range = m_uiForm.ppPlot->getCurveRange("Sample");
-    // Set maximum range of Integration
     m_uiForm.ppPlot->getRangeSelector("ElwinIntegrationRange")
         ->setRange(range.first, range.second);
-    // Set initial values
-    m_uiForm.ppPlot->getRangeSelector("ElwinIntegrationRange")
-        ->setMinimum(range.first);
-    m_uiForm.ppPlot->getRangeSelector("ElwinIntegrationRange")
-        ->setMaximum(range.second);
   } catch (std::invalid_argument &exc) {
     showMessageBox(exc.what());
   }

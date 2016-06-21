@@ -44,10 +44,10 @@ ISISCalibration::ISISCalibration(IndirectDataReduction *idrUI, QWidget *parent)
 
   // Cal plot range selectors
   auto calPeak = m_uiForm.ppCalibration->addRangeSelector("CalPeak");
+  calPeak->setColour(Qt::red);
   auto calBackground =
       m_uiForm.ppCalibration->addRangeSelector("CalBackground");
-  calBackground->setColour(
-      Qt::darkGreen); // Dark green to signify background range
+  calBackground->setColour(Qt::blue); // blue to be consistent with fit wizard
 
   // RES PROPERTY TREE
   m_propTrees["ResPropTree"] = new QtTreePropertyBrowser();
@@ -98,8 +98,9 @@ ISISCalibration::ISISCalibration(IndirectDataReduction *idrUI, QWidget *parent)
   // Res plot range selectors
   // Create ResBackground first so ResPeak is drawn above it
   auto resBackground = m_uiForm.ppResolution->addRangeSelector("ResBackground");
-  resBackground->setColour(Qt::darkGreen);
+  resBackground->setColour(Qt::blue);
   auto resPeak = m_uiForm.ppResolution->addRangeSelector("ResPeak");
+  resPeak->setColour(Qt::red);
 
   // SIGNAL/SLOT CONNECTIONS
   // Update instrument information when a new instrument config is selected

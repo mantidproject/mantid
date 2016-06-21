@@ -36,19 +36,6 @@ const size_t NUMBERDETECTORPERMODULE = 1232;
 const size_t NUMBERRESERVEDPERMODULE = 1250;
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-LoadVulcanCalFile::LoadVulcanCalFile()
-    : m_instrument(), m_groupingType(VULCAN_OFFSET_BANK), m_offsetFilename(""),
-      m_badPixFilename(""), m_tofOffsetsWS(), m_offsetsWS(), m_groupWS(),
-      m_maskWS(), m_doAlignEventWS(false), m_eventWS(), m_effLTheta() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-LoadVulcanCalFile::~LoadVulcanCalFile() {}
-
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void LoadVulcanCalFile::init() {

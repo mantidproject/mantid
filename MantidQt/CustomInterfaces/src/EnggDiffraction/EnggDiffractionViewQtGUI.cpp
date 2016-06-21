@@ -1,9 +1,9 @@
+#include "MantidQtCustomInterfaces/EnggDiffraction/EnggDiffractionViewQtGUI.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidKernel/ConfigService.h"
-#include "MantidQtAPI/AlgorithmRunner.h"
 #include "MantidQtAPI/AlgorithmInputHistory.h"
+#include "MantidQtAPI/AlgorithmRunner.h"
 #include "MantidQtAPI/HelpWindow.h"
-#include "MantidQtCustomInterfaces/EnggDiffraction/EnggDiffractionViewQtGUI.h"
 #include "MantidQtCustomInterfaces/EnggDiffraction/EnggDiffractionPresenter.h"
 #include "MantidQtMantidWidgets/MWRunFiles.h"
 #include "Poco/DirectoryIterator.h"
@@ -15,8 +15,8 @@ using namespace MantidQt::CustomInterfaces;
 #include <fstream>
 #include <random>
 
-#include <boost/lexical_cast.hpp>
 #include <Poco/Path.h>
+#include <boost/lexical_cast.hpp>
 
 #include <QCheckBox>
 #include <QCloseEvent>
@@ -1407,6 +1407,40 @@ std::string EnggDiffractionViewQtGUI::getFittingRunNo() const {
   return m_uiTabFitting.lineEdit_pushButton_run_num->text().toStdString();
 }
 
+void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::
+    clearFittingComboBox() const {
+  m_uiTabFitting.comboBox_bank->clear();
+}
+
+void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::
+    enableFittingComboBox(bool enable) const {
+  m_uiTabFitting.comboBox_bank->setEnabled(enable);
+}
+
+void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::
+    clearFittingListWidget() const {
+  m_uiTabFitting.listWidget_fitting_run_num->clear();
+}
+
+void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::
+    enableFittingListWidget(bool enable) const {
+  m_uiTabFitting.listWidget_fitting_run_num->setEnabled(enable);
+}
+
+int MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::
+    getFittingListWidgetCurrentRow() const {
+  return m_uiTabFitting.listWidget_fitting_run_num->currentRow();
+}
+
+void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::
+    setFittingListWidgetCurrentRow(int idx) const {
+  m_uiTabFitting.listWidget_fitting_run_num->setCurrentRow(idx);
+}
+
+int EnggDiffractionViewQtGUI::getFittingComboIdx(std::string bank) const {
+  return m_uiTabFitting.comboBox_bank->findText(QString::fromStdString(bank));
+}
+
 void EnggDiffractionViewQtGUI::plotSeparateWindow() {
   std::string pyCode =
 
@@ -1434,23 +1468,14 @@ void EnggDiffractionViewQtGUI::plotSeparateWindow() {
 }
 
 std::string EnggDiffractionViewQtGUI::fittingPeaksData() const {
-  // this should be moved to Helper or could use the poco string tokenizers
-  std::string exptPeaks =
-      m_uiTabFitting.lineEdit_fitting_peaks->text().toStdString();
-  size_t strLength = exptPeaks.length() - 1;
 
-  if (!exptPeaks.empty()) {
+  return m_uiTabFitting.lineEdit_fitting_peaks->text().toStdString();
+}
 
-    if (exptPeaks.at(size_t(0)) == ',') {
-      exptPeaks.erase(size_t(0), 1);
-      strLength -= size_t(1);
-    }
-
-    if (exptPeaks.at(strLength) == ',') {
-      exptPeaks.erase(strLength, 1);
-    }
-  }
-  return exptPeaks;
+void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::setPeakList(
+    std::string peakList) const {
+  m_uiTabFitting.lineEdit_fitting_peaks->setText(
+      QString::fromStdString(peakList));
 }
 
 std::vector<std::string>
@@ -1474,94 +1499,15 @@ MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::getFocusDir() {
   return m_focusDir;
 }
 
-void EnggDiffractionViewQtGUI::addBankItems(
-    std::vector<std::string> splittedBaseName, QString selectedFile) {
-  try {
-    if (!m_fitting_runno_dir_vec.empty()) {
+void EnggDiffractionViewQtGUI::addBankItem(std::string bankID) {
 
-      // delete previous bank added to the list
-      m_uiTabFitting.comboBox_bank->clear();
-
-      for (size_t i = 0; i < m_fitting_runno_dir_vec.size(); i++) {
-        Poco::Path vecFile(m_fitting_runno_dir_vec[i]);
-        std::string strVecFile = vecFile.toString();
-        // split the directory from m_fitting_runno_dir_vec
-        std::vector<std::string> vecFileSplit =
-            splitFittingDirectory(strVecFile);
-
-        // get the last split in vector which will be bank
-        std::string bankID = (vecFileSplit.back());
-
-        bool digit = isDigit(bankID);
-
-        if (digit) {
-          m_uiTabFitting.comboBox_bank->addItem(QString::fromStdString(bankID));
-
-        } else {
-          m_uiTabFitting.comboBox_bank->addItem(QString("Bank %1").arg(i + 1));
-        }
-      }
-
-      m_uiTabFitting.comboBox_bank->setEnabled(true);
-    } else {
-      // upon invalid file
-      // disable the widgets when only one related file found
-      m_uiTabFitting.comboBox_bank->setEnabled(false);
-
-      m_uiTabFitting.comboBox_bank->clear();
-    }
-
-    setDefaultBank(splittedBaseName, selectedFile);
-
-  } catch (std::runtime_error &re) {
-    userWarning("Unable to insert items: ",
-                "Could not add banks to "
-                "combo-box or list widget; " +
-                    static_cast<std::string>(re.what()) + ". Please try again");
-  }
+  m_uiTabFitting.comboBox_bank->addItem(QString::fromStdString(bankID));
 }
 
 void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::addRunNoItem(
-    std::vector<std::string> runNumVector, bool multiRun) {
-  try {
-    if (!runNumVector.empty()) {
-
-      // delete previous bank added to the list
-      m_uiTabFitting.listWidget_fitting_run_num->clear();
-
-      for (size_t i = 0; i < runNumVector.size(); i++) {
-
-        // get the last split in vector which will be bank
-        std::string currentRun = (runNumVector[i]);
-
-        m_uiTabFitting.listWidget_fitting_run_num->addItem(
-            QString::fromStdString(currentRun));
-      }
-
-      if (multiRun) {
-        m_uiTabFitting.listWidget_fitting_run_num->setEnabled(true);
-        auto currentIndex =
-            m_uiTabFitting.listWidget_fitting_run_num->currentRow();
-        if (currentIndex == -1)
-          m_uiTabFitting.listWidget_fitting_run_num->setCurrentRow(0);
-      } else {
-        m_uiTabFitting.listWidget_fitting_run_num->setEnabled(false);
-      }
-    }
-
-    else {
-      // upon invalid file
-      // disable the widgets when only one related file found
-      m_uiTabFitting.listWidget_fitting_run_num->setEnabled(false);
-
-      m_uiTabFitting.listWidget_fitting_run_num->clear();
-    }
-
-  } catch (std::runtime_error &re) {
-    userWarning("Unable to insert items: ",
-                "Could not add list widget; " +
-                    static_cast<std::string>(re.what()) + ". Please try again");
-  }
+    std::string runNo) {
+  m_uiTabFitting.listWidget_fitting_run_num->addItem(
+      QString::fromStdString(runNo));
 }
 
 std::vector<std::string> EnggDiffractionViewQtGUI::getFittingRunNumVec() {
@@ -1580,44 +1526,6 @@ void EnggDiffractionViewQtGUI::setFittingMultiRunMode(bool mode) {
 
 bool EnggDiffractionViewQtGUI::getFittingMultiRunMode() {
   return m_fittingMutliRunMode;
-}
-
-void EnggDiffractionViewQtGUI::setDefaultBank(
-    std::vector<std::string> splittedBaseName, QString selectedFile) {
-
-  if (!splittedBaseName.empty()) {
-
-    std::string bankID = (splittedBaseName.back());
-    auto combo_data =
-        m_uiTabFitting.comboBox_bank->findText(QString::fromStdString(bankID));
-
-    if (combo_data > -1) {
-      setBankIdComboBox(combo_data);
-    } else {
-      setFittingRunNo(selectedFile);
-    }
-  }
-  // check if the vector is not empty so that the first directory
-  // can be assigned to text-field when number is given
-  else if (!m_fitting_runno_dir_vec.empty()) {
-    auto firstDir = m_fitting_runno_dir_vec.at(0);
-    auto intialDir = QString::fromStdString(firstDir);
-    setFittingRunNo(intialDir);
-  }
-  // if nothing found related to text-field input
-  else if (!getFittingRunNo().empty())
-    setFittingRunNo(selectedFile);
-}
-
-bool MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::isDigit(
-    std::string text) {
-  for (size_t i = 0; i < text.size(); i++) {
-    char *str = &text[i];
-    if (std::isdigit(*str)) {
-      return true;
-    }
-  }
-  return false;
 }
 
 void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::setPeakPick() {
