@@ -1,4 +1,4 @@
-#pylint: disable=invalid-name,protected-access
+# pylint: disable=invalid-name,protected-access
 from PyQt4 import QtGui, QtCore
 import reduction_gui.widgets.util as util
 import os
@@ -18,7 +18,7 @@ class SANSInstrumentWidget(BaseWidget):
     """
         Widget that present instrument details to the user
     """
-    ## Widget name
+    # # Widget name
     name = "Reduction Options"
 
     # Place holder for data read from file
@@ -82,13 +82,13 @@ class SANSInstrumentWidget(BaseWidget):
             self._sample_detector_distance_offset = value
             if not self._summary.detector_offset_chk.isChecked():
                 self._summary.detector_offset_edit.setText(str(value))
-                util._check_and_get_float_line_edit(self._summary.detector_offset_edit, min=0.0)
+                util._check_and_get_float_line_edit(self._summary.detector_offset_edit, min=-0.0000001)
 
         if key == "sample_si_window_distance":
             self._sample_si_window_distance = value
             if not self._summary.sample_si_dist_chk.isChecked():
                 self._summary.sample_si_dist_edit.setText(str(value))
-                util._check_and_get_float_line_edit(self._summary.sample_si_dist_edit, min=0.0)
+                util._check_and_get_float_line_edit(self._summary.sample_si_dist_edit, min=-0.0000001)
 
         elif key == "wavelength":
             self._wavelength = value
@@ -326,9 +326,9 @@ class SANSInstrumentWidget(BaseWidget):
         """
 
         self._summary.instr_name_label.setText(state.instrument_name)
-        #npixels = "%d x %d" % (state.nx_pixels, state.ny_pixels)
-        #self._summary.n_pixel_label.setText(QtCore.QString(npixels))
-        #self._summary.pixel_size_label.setText(QtCore.QString(str(state.pixel_size)))
+        # npixels = "%d x %d" % (state.nx_pixels, state.ny_pixels)
+        # self._summary.n_pixel_label.setText(QtCore.QString(npixels))
+        # self._summary.pixel_size_label.setText(QtCore.QString(str(state.pixel_size)))
 
         # Absolute scaling
         self._summary.scale_chk.setChecked(state.calculate_scale)
@@ -359,8 +359,8 @@ class SANSInstrumentWidget(BaseWidget):
 #                             self._summary.sample_dist_edit)
 #
         util._check_and_get_float_line_edit(self._summary.sample_dist_edit, min=0)
-        util._check_and_get_float_line_edit(self._summary.sample_si_dist_edit, min=0)
-        util._check_and_get_float_line_edit(self._summary.detector_offset_edit, min=0)
+        util._check_and_get_float_line_edit(self._summary.sample_si_dist_edit, min=-0.0001)
+        util._check_and_get_float_line_edit(self._summary.detector_offset_edit, min=-0.0001)
         util._check_and_get_float_line_edit(self._summary.total_detector_distance_edit, min=0)
 #         if self._sample_detector_distance is None:
 #             self._sample_detector_distance = state.sample_detector_distance
@@ -425,7 +425,7 @@ class SANSInstrumentWidget(BaseWidget):
             self._summary.mask_side_none_radio.setChecked(True)
 
     def _prepare_field(self, is_enabled, stored_value, chk_widget, edit_widget, suppl_value=None, suppl_edit=None):
-        #to_display = str(stored_value) if is_enabled else ''
+        # to_display = str(stored_value) if is_enabled else ''
         edit_widget.setEnabled(is_enabled)
         chk_widget.setChecked(is_enabled)
         edit_widget.setText(str(stored_value))

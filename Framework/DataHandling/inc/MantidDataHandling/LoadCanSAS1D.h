@@ -54,10 +54,6 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class DLLExport LoadCanSAS1D : public API::IFileLoader<Kernel::FileDescriptor> {
 public:
-  /// default constructor
-  LoadCanSAS1D();
-  /// destructor
-  ~LoadCanSAS1D() override;
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "LoadCanSAS1D"; }
   /// Summary of algorithms purpose
@@ -82,7 +78,7 @@ protected:
   std::string m_groupMembersBase;
   /// When a workspace group is being written this is the number of the last
   /// member that was written
-  int m_groupNumber;
+  int m_groupNumber = 0;
 
   /// Overwrites Algorithm method.
   void init() override;

@@ -22,12 +22,6 @@ namespace DataHandling {
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SaveCanSAS1D2)
 
-/// constructor
-SaveCanSAS1D2::SaveCanSAS1D2() {}
-
-/// destructor
-SaveCanSAS1D2::~SaveCanSAS1D2() {}
-
 /// Overwrites Algorithm method.
 void SaveCanSAS1D2::init() {
   SaveCanSAS1D::init();

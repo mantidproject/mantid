@@ -30,11 +30,6 @@ SaveFullprofResolution::SaveFullprofResolution()
 }
 
 //----------------------------------------------------------------------------------------------
-/** Destructor
- */
-SaveFullprofResolution::~SaveFullprofResolution() {}
-
-//----------------------------------------------------------------------------------------------
 /** Init to define parameters
   */
 void SaveFullprofResolution::init() {

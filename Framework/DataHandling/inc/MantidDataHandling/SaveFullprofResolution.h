@@ -34,8 +34,6 @@ namespace DataHandling {
 class DLLExport SaveFullprofResolution : public API::Algorithm {
 public:
   SaveFullprofResolution();
-  ~SaveFullprofResolution() override;
-
   /// Algorithm's name
   const std::string name() const override { return "SaveFullprofResolution"; }
   /// Summary of algorithms purpose

@@ -72,9 +72,6 @@ class DLLExport LoadParameterFile : public API::Algorithm {
 public:
   /// Default constructor
   LoadParameterFile();
-
-  /// Destructor
-  ~LoadParameterFile() override {}
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "LoadParameterFile"; };
   /// Summary of algorithms purpose
