@@ -37,7 +37,7 @@ void MergeRuns::init() {
   declareProperty(
       Kernel::make_unique<ArrayProperty<std::string>>(
           "InputWorkspaces", boost::make_shared<ADSValidator>()),
-      "The names of the input workspaces as a comma-separated list. You may "
+      "The names of the input workspaces as a list. You may "
       "also group workspaces using the GUI or [[GroupWorkspaces]], and specify "
       "the name of the group instead.");
   declareProperty(make_unique<WorkspaceProperty<Workspace>>(
