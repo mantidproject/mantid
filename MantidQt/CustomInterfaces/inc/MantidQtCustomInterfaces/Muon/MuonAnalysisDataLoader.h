@@ -6,6 +6,7 @@
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidAPI/GroupingLoader.h"
 #include "MantidAPI/Workspace_fwd.h"
+#include <QMap>
 #include <QStringList>
 
 namespace MantidQt {
@@ -88,6 +89,8 @@ private:
   std::string m_deadTimesFile;
   /// Muon instruments supported
   const QStringList m_instruments;
+  /// Cache of previously loaded data
+  mutable std::map<std::string, Muon::LoadResult> m_loadedDataCache;
 };
 
 } // namespace CustomInterfaces

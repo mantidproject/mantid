@@ -59,6 +59,22 @@ LoadResult MuonAnalysisDataLoader::loadFiles(const QStringList &files) const {
   if (files.empty())
     throw std::invalid_argument("Supplied list of files is empty");
 
+  // Convert list of files into a mangled map key
+  const auto toString = [](QStringList qsl) {
+    std::ostringstream oss;
+    qsl.sort();
+    for (const QString qs : qsl) {
+      oss << qs.toStdString() << ",";
+    }
+    return oss.str();
+  };
+
+  // Check cache to see if we've loaded this set of files before
+  const std::string fileString = toString(files);
+  if (m_loadedDataCache.find(fileString) != m_loadedDataCache.end()) {
+    return m_loadedDataCache[fileString];
+  }
+
   LoadResult result;
 
   std::vector<Workspace_sptr> loadedWorkspaces;
@@ -148,6 +164,8 @@ LoadResult MuonAnalysisDataLoader::loadFiles(const QStringList &files) const {
     result.label = MuonAnalysisHelper::getRunLabel(loadedWorkspaces);
   }
 
+  // Cache the result so we don't have to load it next time
+  m_loadedDataCache[fileString] = result;
   return result;
 }
 
