@@ -1,9 +1,9 @@
 import multiprocessing
 
-from mantid.api import AlgorithmFactory,  FileAction, FileProperty, PythonAlgorithm, Progress
+from mantid.api import AlgorithmFactory,  FileAction, FileProperty, PythonAlgorithm, Progress, WorkspaceProperty
 from mantid.kernel import logger, StringListValidator, Direction
 
-from scripts.AbinsModules import LoadCASTEP
+from AbinsModules import LoadCASTEP
 
 
 class ABINS(PythonAlgorithm):
@@ -93,6 +93,9 @@ class ABINS(PythonAlgorithm):
                              direction=Direction.Input,
                              defaultValue=False,
                              doc="Save unrefined and refined dynamical structure factor to *hdf5 file.")
+
+        self.declareProperty(WorkspaceProperty('OutputWorkspace', '', Direction.Output),
+                             doc="Name to give the output workspace.")
 
 
     def validateInputs(self):
