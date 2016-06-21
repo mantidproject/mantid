@@ -230,13 +230,6 @@ double maxAbsVal(const DoubleFortranVector &v) {
   return std::max(fabs(v.get(p.first)), fabs(v.get(p.second)));
 }
 
-/// Find the smallest by absolute value element of a vector.
-/// @param v :: The searched vector.
-double minAbsVal(const DoubleFortranVector &v) {
-  auto p = v.indicesOfMinMaxElements();
-  return std::min(fabs(v.get(p.first)), fabs(v.get(p.second)));
-}
-
 /// Find the minimum and maximum elements of a vector.
 /// @param v :: The searched vector.
 /// @returns :: A pair of doubles where the first is the minimum and

@@ -147,7 +147,7 @@ double calculate_rho(double normf, double normfnew, double md,
   double rho = 0.0;
   if (fabs(actual_reduction) < 10 * epsmch) {
     rho = one;
-  } else if (abs(predicted_reduction) < 10 * epsmch) {
+  } else if (fabs(predicted_reduction) < 10 * epsmch) {
     rho = one;
   } else {
     rho = actual_reduction / predicted_reduction;
