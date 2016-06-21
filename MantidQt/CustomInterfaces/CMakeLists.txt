@@ -77,6 +77,7 @@ set ( SRC_FILES
 	src/Muon/ALCPeakFittingView.cpp
 	src/Muon/IO_MuonGrouping.cpp
 	src/Muon/MuonAnalysis.cpp
+	src/Muon/MuonAnalysisDataLoader.cpp
 	src/Muon/MuonAnalysisFitDataPresenter.cpp
 	src/Muon/MuonAnalysisFitDataTab.cpp
 	src/Muon/MuonAnalysisFitFunctionPresenter.cpp
@@ -107,10 +108,10 @@ set ( SRC_FILES
 	src/Tomography/EnergyBandsViewQtGUI.cpp
 	src/Tomography/ImageROIPresenter.cpp
 	src/Tomography/ImageROIViewQtWidget.cpp
-	src/Tomography/ImggFormatsConvertPresenter.cpp
-	src/Tomography/ImggFormatsConvertViewQtWidget.cpp
 	src/Tomography/ImageStackPreParams.cpp
 	src/Tomography/ImggFormats.cpp
+	src/Tomography/ImggFormatsConvertPresenter.cpp
+	src/Tomography/ImggFormatsConvertViewQtWidget.cpp
 	src/Tomography/SavuConfigDialog.cpp
 	src/Tomography/StackOfImagesDirs.cpp
 	src/Tomography/TomoPathsConfig.cpp
@@ -221,6 +222,7 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/Muon/IALCPeakFittingView.h
 	inc/MantidQtCustomInterfaces/Muon/IO_MuonGrouping.h
 	inc/MantidQtCustomInterfaces/Muon/MuonAnalysis.h
+	inc/MantidQtCustomInterfaces/Muon/MuonAnalysisDataLoader.h
 	inc/MantidQtCustomInterfaces/Muon/MuonAnalysisFitDataPresenter.h
 	inc/MantidQtCustomInterfaces/Muon/MuonAnalysisFitDataTab.h
 	inc/MantidQtCustomInterfaces/Muon/MuonAnalysisFitFunctionPresenter.h
@@ -261,10 +263,10 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/Tomography/ITomographyIfaceView.h
 	inc/MantidQtCustomInterfaces/Tomography/ImageROIPresenter.h
 	inc/MantidQtCustomInterfaces/Tomography/ImageROIViewQtWidget.h
-	inc/MantidQtCustomInterfaces/Tomography/ImggFormatsConvertPresenter.h
-	inc/MantidQtCustomInterfaces/Tomography/ImggFormatsConvertViewQtWidget.h
 	inc/MantidQtCustomInterfaces/Tomography/ImageStackPreParams.h
 	inc/MantidQtCustomInterfaces/Tomography/ImggFormats.h
+	inc/MantidQtCustomInterfaces/Tomography/ImggFormatsConvertPresenter.h
+	inc/MantidQtCustomInterfaces/Tomography/ImggFormatsConvertViewQtWidget.h
 	inc/MantidQtCustomInterfaces/Tomography/StackOfImagesDirs.h
 	inc/MantidQtCustomInterfaces/Tomography/TomoPathsConfig.h
 	inc/MantidQtCustomInterfaces/Tomography/TomoRecToolConfig.h
@@ -477,6 +479,7 @@ set ( TEST_FILES
 	ImageROIPresenterTest.h
 	ImggFormatsConvertPresenterTest.h
 	MeasurementItemTest.h
+	MuonAnalysisDataLoaderTest.h
 	MuonAnalysisFitDataPresenterTest.h
 	MuonAnalysisFitFunctionPresenterTest.h
 	MuonAnalysisHelperTest.h
