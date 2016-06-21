@@ -65,14 +65,17 @@ public:
 
 private:
   /// Create workspaces to fit and update fit browser (model)
-  void createWorkspacesToFit(const std::vector<std::string> &names);
+  void createWorkspacesToFit(const std::vector<std::string> &names,
+                             const Mantid::API::Grouping &grouping) const;
   /// Generate names of workspaces to be created
   std::vector<std::string> generateWorkspaceNames(
       const Mantid::API::Grouping &grouping,
       const MantidQt::CustomInterfaces::Muon::PlotType &plotType,
-      bool overwrite);
+      bool overwrite) const;
   /// Create analysis workspace
-  Mantid::API::Workspace_sptr createWorkspace(const std::string &name);
+  Mantid::API::Workspace_sptr
+  createWorkspace(const std::string &name,
+                  const Mantid::API::Grouping &grouping) const;
   /// Fit browser to update (non-owning pointer)
   MantidQt::MantidWidgets::IWorkspaceFitControl *m_fitBrowser;
   /// Data selector to get input from (non-owning pointer)

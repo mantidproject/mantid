@@ -4,6 +4,7 @@
 #include "MantidQtCustomInterfaces/DllConfig.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
+#include "MantidAPI/GroupingLoader.h"
 #include "MantidAPI/Workspace_fwd.h"
 #include <QStringList>
 
@@ -66,7 +67,8 @@ public:
   Muon::LoadResult loadFiles(const QStringList &files) const;
   /// correct and group loaded data
   Mantid::API::Workspace_sptr
-  correctAndGroup(const Muon::LoadResult &loadedData) const;
+  correctAndGroup(const Muon::LoadResult &loadedData,
+                  const Mantid::API::Grouping &grouping) const;
   /// create analysis workspace
 
   /// Get dead time table

@@ -1239,7 +1239,7 @@ void MuonAnalysis::inputFileChanged(const QStringList &files) {
     try // to get the dead time correction
     {
       deadTimes = m_dataLoader.getDeadTimesTable(*loadResult);
-    } catch (std::exception &e) {
+    } catch (const std::exception &e) {
       // If dead correction wasn't applied we can still continue, though should
       // make user aware of that
       g_log.warning() << "No dead time correction applied: " << e.what()
@@ -1251,22 +1251,10 @@ void MuonAnalysis::inputFileChanged(const QStringList &files) {
     ITableWorkspace_sptr groupingTable = groupResult->groupingUsed->toTable();
 
     // Now apply DTC, if used, and grouping
-    IAlgorithm_sptr alg =
-        AlgorithmManager::Instance().createUnmanaged("MuonProcess");
-    alg->initialize();
-    alg->setProperty("InputWorkspace", loadResult->loadedWorkspace);
-    alg->setProperty("Mode", "CorrectAndGroup");
-    if (deadTimes != nullptr) {
-      alg->setProperty("ApplyDeadTimeCorrection", true);
-      alg->setProperty("DeadTimeTable", deadTimes);
-    }
-    alg->setProperty("LoadedTimeZero", loadResult->timeZero);
-    alg->setProperty("DetectorGroupingTable", groupingTable);
-    alg->setChild(true);
-    alg->setPropertyValue("OutputWorkspace", "__NotUsed");
-    alg->execute();
-    correctedGroupedWS = alg->getProperty("OutputWorkspace");
-  } catch (std::exception &e) {
+    correctedGroupedWS =
+        m_dataLoader.correctAndGroup(*loadResult, *groupResult->groupingUsed);
+
+  } catch (const std::exception &e) {
     g_log.error(e.what());
     QMessageBox::critical(this, "Loading failed",
                           "Unable to load the file[s]. See log for details.");

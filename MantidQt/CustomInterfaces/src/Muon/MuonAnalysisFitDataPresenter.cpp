@@ -7,6 +7,11 @@ using MantidQt::MantidWidgets::IMuonFitDataSelector;
 using MantidQt::MantidWidgets::IWorkspaceFitControl;
 using Mantid::API::AnalysisDataService;
 
+namespace {
+/// static logger
+Mantid::Kernel::Logger g_log("MuonAnalysisFitDataPresenter");
+}
+
 namespace MantidQt {
 namespace CustomInterfaces {
 
@@ -48,7 +53,7 @@ void MuonAnalysisFitDataPresenter::handleSelectedDataChanged(
     const Mantid::API::Grouping &grouping, const Muon::PlotType &plotType,
     bool overwrite) {
   const auto names = generateWorkspaceNames(grouping, plotType, overwrite);
-  createWorkspacesToFit(names);
+  createWorkspacesToFit(names, grouping);
 }
 
 /**
@@ -102,9 +107,11 @@ void MuonAnalysisFitDataPresenter::setAssignedFirstRun(const QString &wsName) {
  * yet exist in the ADS and adds them. Sets the workspace name, which
  * sends a signal to update the peak picker.
  * @param names :: [input] Names of workspaces to create
+ * @param grouping :: [input] Grouping table from interface
  */
 void MuonAnalysisFitDataPresenter::createWorkspacesToFit(
-    const std::vector<std::string> &names) {
+    const std::vector<std::string> &names,
+    const Mantid::API::Grouping &grouping) const {
   // For each name, if not in the ADS, create it
   std::vector<Mantid::API::Workspace_sptr> workspaces;
   for (const auto &name : names) {
@@ -113,7 +120,7 @@ void MuonAnalysisFitDataPresenter::createWorkspacesToFit(
       workspaces.push_back(AnalysisDataService::Instance().retrieve(name));
     } else {
       // Create here (but don't add to the ADS)
-      workspaces.push_back(createWorkspace(name));
+      workspaces.push_back(createWorkspace(name, grouping));
     }
   }
 
@@ -147,7 +154,7 @@ void MuonAnalysisFitDataPresenter::createWorkspacesToFit(
  */
 std::vector<std::string> MuonAnalysisFitDataPresenter::generateWorkspaceNames(
     const Mantid::API::Grouping &grouping, const Muon::PlotType &plotType,
-    bool overwrite) {
+    bool overwrite) const {
   // From view, get names of all workspaces needed
   std::vector<std::string> workspaceNames;
   const auto groups = m_dataSelector->getChosenGroups();
@@ -210,10 +217,13 @@ std::vector<std::string> MuonAnalysisFitDataPresenter::generateWorkspaceNames(
  * if you want multiple runs.
  * @param name :: [input] Name of workspace to create (in format INST0001234;
  * Pair; long; Asym; 1; #1)
+ * @param grouping :: [input] Grouping table from interface
  * @returns :: workspace
  */
-Mantid::API::Workspace_sptr
-MuonAnalysisFitDataPresenter::createWorkspace(const std::string &name) {
+Mantid::API::Workspace_sptr MuonAnalysisFitDataPresenter::createWorkspace(
+    const std::string &name, const Mantid::API::Grouping &grouping) const {
+  Mantid::API::Workspace_sptr outputWS;
+
   // parse name - should be a single-run workspace
   const auto params = MuonAnalysisHelper::parseWorkspaceName(name);
   if (params.runs.size() > 1) {
@@ -227,12 +237,24 @@ MuonAnalysisFitDataPresenter::createWorkspace(const std::string &name) {
   filename = QString::fromStdString(MuonAnalysisHelper::getRunLabel(
                                         params.instrument, params.runs))
                  .append(".nxs");
-  const auto loadedData = m_dataLoader.loadFiles(QStringList(filename));
+  try {
+    const auto loadedData = m_dataLoader.loadFiles(QStringList(filename));
 
-  // run analysis to generate workspace
+    // correct and group the data
+    const auto correctedData =
+        m_dataLoader.correctAndGroup(loadedData, grouping);
 
+    // run analysis to generate workspace
+    // ...
 
-  return loadedData.loadedWorkspace; // TEMPORARY
+    outputWS = correctedData; // TEMPORARY
+  } catch (const std::exception &ex) {
+    std::ostringstream err;
+    err << "Failed to create analysis workspace " << name << ": " << ex.what();
+    g_log.error(err.str());
+  }
+
+  return outputWS;
 }
 
 } // namespace CustomInterfaces
