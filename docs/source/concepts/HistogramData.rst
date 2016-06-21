@@ -79,8 +79,6 @@ The shortcomings of the current implementation are mostly obvious and can also b
 The new ``Histogram`` type
 --------------------------
 
-Currently the implementation is incomplete: ``Histogram`` contains only the x-data, whereas all the others (y-data, e-data, x-uncertainties) have not been transitioned yet.
-
 In its final form, we will be able to do things like the following:
 
 .. code-block:: c++
@@ -138,8 +136,9 @@ Further planned features:
 I will happily consider adding more features as long as they fit the overall design.
 Please get in** `contact <mailto:simon.heybrock@esss.se>`_ **with me!**
 
-The plan is to merge the changes for the x-data right after the next release.
-I will then work on reducing the use of the old interface (``readX()``, ``dataX()``, ...) as much as possible and also roll out changes for x-uncertainties. After that, changes for y-data and y-uncertainties will follow.
+The plan is to merge the basic changes soon after the 3.7 release.
+We will then work on reducing the use of the old interface (``readX()``, ``dataX()``, ``readY()``, ...) as much as possible.
+After that, more features will follow.
 
 We also want to expose most parts of the ``HistogramData`` module to Python, but no schedule has been decided yet.
 Parts of the old interface will be kept alive for now, in particular to maintain support for the old Python interface.
@@ -147,7 +146,7 @@ Parts of the old interface will be kept alive for now, in particular to maintain
 ``Histogram``
 #############
 
-Contains a copy-on-write pointer (``cow_ptr``) to the x-data. The interface gives access to the data as well as the pointer:
+Contains copy-on-write pointers (``cow_ptr``) to the x-data, y-data, and e-data. The interface gives access to the data as well as the pointer:
 
 .. code-block:: c++
   :linenos:
@@ -157,21 +156,34 @@ Contains a copy-on-write pointer (``cow_ptr``) to the x-data. The interface give
     // ...
     // Replacement for readX() and dataX() const
     const HistogramX &x() const;
+    const HistogramY &y() const;
+    const HistogramE &e() const;
     // Replacement for dataX()
     HistogramX &mutableX();
+    HistogramY &mutableY();
+    HistogramE &mutableE();
 
     // Replacement for refX()
     Kernel::cow_ptr<HistogramX> sharedX() const;
+    Kernel::cow_ptr<HistogramY> sharedY() const;
+    Kernel::cow_ptr<HistogramE> sharedE() const;
     // Replacement for setX()
-    void setSharedX(const Kernel::cow_ptr<HistogramX> &X);
+    void setSharedX(const Kernel::cow_ptr<HistogramX> &x);
+    void setSharedY(const Kernel::cow_ptr<HistogramY> &y);
+    void setSharedE(const Kernel::cow_ptr<HistogramE> &e);
   };
 
-``HistogramX``
-##############
+Note that there is also Dx-data, but it is not widely used and thus omited from this documentation.
+The interface for Dx is mostly equivalent to that for E.
+
+``HistogramX``, ``HistogramY``, and ``HistogramE``
+#################################################
 
 - The current fundamental type for x-data, ``std::vector<double>``, is replaced by ``HistogramX``.
-- Internally this is also a ``std::vector<double>`` and the interface is almost identical.
-- However, it does not allow for size modifications, since that could bring a histogram into an inconsistent state, e.g., by resizing the x-data without also resizing the y-data.
+- The current fundamental type for y-data, ``std::vector<double>``, is replaced by ``HistogramY``.
+- The current fundamental type for e-data, ``std::vector<double>``, is replaced by ``HistogramE``.
+- Internally these are also a ``std::vector<double>`` and the interface is almost identical.
+- However, they do not allow for size modifications, since that could bring a histogram into an inconsistent state, e.g., by resizing the x-data without also resizing the y-data.
 
 ``BinEdges``
 ############
@@ -215,13 +227,83 @@ Contains a copy-on-write pointer (``cow_ptr``) to the x-data. The interface give
 - Setting the same ``Points`` object on several histograms will share the underlying data.
 - ``Histogram::setPoints()`` includes a size check and throws if the histogram is incompatible with the size defined by the method arguments.
 
+``Counts``
+##########
+
+- For algorithms that work with counts, ``Histogram`` provides an interface for accessing and modifying the y-data as if it were stored as counts:
+
+  .. code-block:: c++
+    :linenos:
+  
+    class Histogram {
+    public:
+      // Returns by value!
+      Counts counts() const;
+      // Accepts any arguments that can be used to construct Counts
+      template <typename... T> void setCounts(T &&... data);
+    };
+
+- Currently the histogram stores counts directly. If this were ever not the case, ``Histogram::counts()`` will automatically compute the counts from the frequencies.
+- ``Counts`` contains a ``cow_ptr`` to ``HistogramY``. If the histogram stores counts (as in the current implementation), the ``Counts`` object returned by ``Histogram::counts()`` references the same ``HistogramY``, i.e., there is no expensive copy involved.
+- Setting the same ``Counts`` object on several histograms will share the underlying data.
+- ``Histogram::setCounts()`` includes a size check and throws if the histogram is incompatible with the size defined by the method arguments.
+
+``Frequencies``
+##############
+
+- For algorithms that work with frequencies (defined as counts divided by the bin width), ``Histogram`` provides an interface for accessing and modifying the y-data as if it were stored as frequencies:
+
+  .. code-block:: c++
+    :linenos:
+  
+    class Histogram {
+    public:
+      // Returns by value!
+      Frequencies frequencies() const;
+      // Accepts any arguments that can be used to construct Frequencies
+      template <typename... T> void setFrequencies(T &&... data);
+    };
+
+- Currently the histogram stores counts. ``Histogram::counts()`` will automatically compute the frequencies from the counts.
+- ``Frequencies`` contains a ``cow_ptr`` to ``HistogramY``.
+- Setting the same ``Frequencies`` object on several histograms will share not share the underlying data since a conversion is required. This is in contrast to ``BinEdges`` and ``Points`` where the internal storage mode is changed when seeters are used. This is currently not the case for ``Counts`` and ``Frequencies``, i.e., y-data is always stored as counts.
+- ``Histogram::setFrequencies()`` includes a size check and throws if the histogram is incompatible with the size defined by the method arguments.
+
+``CountVariances``, ``CountStandardDeviations``, ``FrequencyVariances``, and ``FrequencyStandardDeviations``
+###########################################################################################################
+
+- For algorithms that work with counts or frequencies, ``Histogram`` provides an interface for accessing and modifying the e-data as if it were stored as variances or standard deviations of counts or frequencies:
+
+  .. code-block:: c++
+    :linenos:
+  
+    class Histogram {
+    public:
+      // Return by value!
+      CountVariances countVariances() const;
+      CountStandardDeviations countStandardDeviations() const;
+      FrequencyVariances frequencyVariances() const;
+      FrequencyStandardDeviations frequencyStandardDeviations() const;
+      // Accept any arguments that can be used to construct the respectivy object
+      template <typename... T> void setCountVariances(T &&... data);
+      template <typename... T> void setCountStandardDeviations(T &&... data);
+      template <typename... T> void setFrequencyVariances(T &&... data);
+      template <typename... T> void setFrequencyStandardDeviations(T &&... data);
+    };
+
+- Currently the histogram stores the standard deviations of the counts. When accessing the uncertainties via any of the other 3 types the above interface methods, ``Histogram`` will automatically compute the requested type from the standard deviations of the counts.
+- Each of the 4 types for uncertainties contains a ``cow_ptr`` to ``HistogramE``. In the current implementation the ``CountStandardDeviations`` object returned by ``Histogram::countStandardDeviations()`` references the same ``HistogramE`` as stored in the histogram, i.e., there is no expensive copy involved.
+- Setting the same ``CountStandardDeviations`` object on several histograms will share the underlying data.
+- Setting any of the other 3 uncertantity objects on several histograms will not share the underlying data, since a conversion needs to take place.
+- All ``Histogram`` setters for uncertainties includes a size check and throw if the histogram is incompatible with the size defined by the method arguments.
+
 Code examples
 #############
 
 All new classes and functions described here are part of the module ``HistogramData``. The following code examples assume ``using namespace HistogramData;``.
 
-Working with bin edges
-~~~~~~~~~~~~~~~~~~~~~~
+Working with bin edges and counts
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: c++
   :linenos:
@@ -229,12 +311,12 @@ Working with bin edges
   /////////////////////////////////////////////////////
   // Construct like std::vector<double>:
   /////////////////////////////////////////////////////
-  BinEdges edges(length); // initialized to 0.0
-  BinEdges edges(length, 42.0);
-  BinEdges edges{0.1, 0.2, 0.4, 0.8};
+  Counts counts(length); // initialized to 0.0
+  Counts counts(length, 42.0);
+  Counts counts{0.1, 0.2, 0.4, 0.8};
   std::vector<double> data(...);
-  BinEdges edges(data);
-  BinEdges edges(data.begin() + 1, data.end());
+  Counts counts(data);
+  Counts counts(data.begin() + 1, data.end());
 
   /////////////////////////////////////////////////////
   // Iterators:
@@ -242,6 +324,9 @@ Working with bin edges
   BinEdges edges = {1.0, 2.0, 4.0};
   if(edges.cbegin() != edges.cend())
     *(edges.begin()) += 2.0;
+  // Range-based for works thanks to iterators:
+  for (auto &edge : edges)
+    edge += 0.1;
 
   /////////////////////////////////////////////////////
   // Index operator:
@@ -262,7 +347,7 @@ Working with bin edges
   // If you need write access via index, use:
   auto x = edges.mutableData(); // works similar to current dataX()
   for (size_t i = 0; i < x.size(); ++i)
-    x[i] += 0.1;
+    x[i] += 0.1*i;
 
   // Better (for simple cases):
   edges += 0.1;
@@ -274,7 +359,7 @@ Working with points
   :linenos:
 
   // Works identically to BinEdges
-  Points points(length);
+  Points points{0.1, 0.2, 0.4};
   // ...
 
   // Type safe!
@@ -294,10 +379,7 @@ Working with histograms
   /////////////////////////////////////////////////////
   // Construct Histogram:
   /////////////////////////////////////////////////////
-  // Note that this currently only takes arguments for the
-  // x-data, but will be extended later, e.g.,
-  // Histogram histogram(BinEdges(length+1), Counts(length));
-  Histogram histogram(BinEdges{0.1, 0.2, 0.4});
+  Histogram histogram(BinEdges{0.1, 0.2, 0.4}, Counts(2, 1000));
   histogram.xMode(); // returns Histogram::XMode::BinEdges
 
   /////////////////////////////////////////////////////
