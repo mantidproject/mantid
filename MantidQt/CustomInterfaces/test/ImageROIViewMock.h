@@ -1,14 +1,12 @@
 #ifndef MANTID_CUSTOMINTERFACES_IMAGEROIVIEWMOCK_H
 #define MANTID_CUSTOMINTERFACES_IMAGEROIVIEWMOCK_H
 
+#include "MantidKernel/WarningSuppressions.h"
 #include "MantidQtCustomInterfaces/Tomography/ITomographyIfaceView.h"
 
 #include <gmock/gmock.h>
 
-#if defined(GCC_VERSION) && GCC_VERSION >= 50000
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wsuggest-override"
-#endif
+GCC_DIAG_OFF_SUGGEST_OVERRIDE
 
 class MockImageROIView : public MantidQt::CustomInterfaces::IImageROIView {
 public:
@@ -109,8 +107,6 @@ public:
   MOCK_METHOD0(resetWidgetsOnNewStack, void());
 };
 
-#if defined(GCC_VERSION) && GCC_VERSION >= 50000
-#pragma GCC diagnostic pop
-#endif
+GCC_DIAG_ON_SUGGEST_OVERRIDE
 
 #endif // MANTID_CUSTOMINTERFACES_IMAGEROIVIEWMOCK_H

@@ -1,14 +1,12 @@
 #ifndef MANTID_CUSTOMINTERFACES_TOMOGRAPHYIFACEVIEWMOCK_H
 #define MANTID_CUSTOMINTERFACES_TOMOGRAPHYIFACEVIEWMOCK_H
 
+#include "MantidKernel/WarningSuppressions.h"
 #include "MantidQtCustomInterfaces/Tomography/ITomographyIfaceView.h"
 
 #include <gmock/gmock.h>
 
-#if defined(GCC_VERSION) && GCC_VERSION >= 50000
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wsuggest-override"
-#endif
+GCC_DIAG_OFF_SUGGEST_OVERRIDE
 
 // This is a simple mock for the tomo interface view when using SCARF.
 class MockTomographyIfaceView
@@ -138,8 +136,6 @@ public:
   MOCK_METHOD1(runAggregateBands, void(Mantid::API::IAlgorithm_sptr alg));
 };
 
-#if defined(GCC_VERSION) && GCC_VERSION >= 50000
-#pragma GCC diagnostic pop
-#endif
+GCC_DIAG_ON_SUGGEST_OVERRIDE
 
 #endif // MANTID_CUSTOMINTERFACES_TOMOGRAPHYIFACEVIEWMOCK_H

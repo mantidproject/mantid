@@ -1,6 +1,7 @@
 #ifndef MANTID_MANTIDWIDGETS_DATAPROCESSORVIEWMOCKOBJECTS_H
 #define MANTID_MANTIDWIDGETS_DATAPROCESSORVIEWMOCKOBJECTS_H
 
+#include "MantidKernel/WarningSuppressions.h"
 #include "MantidKernel/make_unique.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorAppendRowCommand.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorView.h"
@@ -21,10 +22,7 @@ const int ScaleCol = 6;
 const int GroupCol = 7;
 const int OptionsCol = 8;
 
-#if defined(GCC_VERSION) && GCC_VERSION >= 50000
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wsuggest-override"
-#endif
+GCC_DIAG_OFF_SUGGEST_OVERRIDE
 
 class MockDataProcessorView : public DataProcessorView {
 public:
@@ -115,8 +113,6 @@ private:
   std::map<std::string, QVariant> m_options;
 };
 
-#if defined(GCC_VERSION) && GCC_VERSION >= 50000
-#pragma GCC diagnostic pop
-#endif
+GCC_DIAG_ON_SUGGEST_OVERRIDE
 
 #endif /*MANTID_MANTIDWIDGETS_DATAPROCESSORVIEWMOCKOBJECTS_H*/

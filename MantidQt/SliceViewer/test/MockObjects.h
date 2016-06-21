@@ -3,19 +3,20 @@
 
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/IPeaksWorkspace.h"
+#include "MantidGeometry/Crystal/IPeak.h"
 #include "MantidGeometry/Crystal/PeakTransform.h"
 #include "MantidGeometry/Crystal/PeakTransformFactory.h"
-#include "MantidQtSliceViewer/PeaksPresenter.h"
+#include "MantidKernel/UnitLabel.h"
+#include "MantidKernel/WarningSuppressions.h"
 #include "MantidQtSliceViewer/PeakOverlayView.h"
 #include "MantidQtSliceViewer/PeakOverlayViewFactory.h"
 #include "MantidQtSliceViewer/PeakViewColor.h"
-#include "MantidQtSliceViewer/ZoomablePeaksView.h"
+#include "MantidQtSliceViewer/PeaksPresenter.h"
 #include "MantidQtSliceViewer/UpdateableOnDemand.h"
-#include "MantidGeometry/Crystal/IPeak.h"
-#include "MantidKernel/UnitLabel.h"
+#include "MantidQtSliceViewer/ZoomablePeaksView.h"
+#include <QColor>
 #include <boost/regex.hpp>
 #include <gmock/gmock.h>
-#include <QColor>
 
 using namespace MantidQt::SliceViewer;
 using namespace Mantid::API;
@@ -23,10 +24,7 @@ using namespace Mantid::Geometry;
 using namespace Mantid;
 using boost::regex;
 
-#if defined(GCC_VERSION) && GCC_VERSION >= 50000
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wsuggest-override"
-#endif
+GCC_DIAG_OFF_SUGGEST_OVERRIDE
 
 namespace {
 /*------------------------------------------------------------
@@ -252,8 +250,6 @@ public:
 };
 }
 
-#if defined(GCC_VERSION) && GCC_VERSION >= 50000
-#pragma GCC diagnostic pop
-#endif
+GCC_DIAG_ON_SUGGEST_OVERRIDE
 
 #endif
