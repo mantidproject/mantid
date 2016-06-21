@@ -77,24 +77,51 @@ PointStandardDeviations Histogram::pointStandardDeviations() const {
     return PointStandardDeviations(m_dx);
 }
 
+/** Returns the counts of the Histogram.
+
+  The returned Counts's internal pointer references the same data as the
+  Histogram, i.e., there is little overhead. */
 Counts Histogram::counts() const { return Counts(m_y); }
 
+/** Returns the variances of the counts of the Histogram.
+
+  The variances are computed from the standard deviations that are stored in the
+  Histogram, i.e., this method comes with an overhead. */
 CountVariances Histogram::countVariances() const {
   return CountVariances(countStandardDeviations());
 }
 
+/** Returns the standard deviations of the counts of the Histogram.
+
+  The returned CountStandardDeviations's internal pointer references the same
+  data as the uncertainties stored in the Histogram, i.e., there is little
+  overhead. */
+Counts Histogram::counts() const { return Counts(m_y); }
 CountStandardDeviations Histogram::countStandardDeviations() const {
   return CountStandardDeviations(m_e);
 }
 
+/** Returns the frequencies of the Histogram, i.e., the counts divided by the
+  bin widths.
+
+  The frequencies are computed on the fly from other data stored in the
+  Histogram, i.e., this method comes with an overhead. */
 Frequencies Histogram::frequencies() const {
   return Frequencies(counts(), binEdges());
 }
 
+/** Returns the variances of the frequencies of the Histogram.
+
+  The variances are computed on the fly from other data stored in the
+  Histogram, i.e., this method comes with an overhead. */
 FrequencyVariances Histogram::frequencyVariances() const {
   return FrequencyVariances(countVariances(), binEdges());
 }
 
+/** Returns the standard deviations of the frequencies of the Histogram.
+
+  The standard deviations are computed on the fly from other data stored in the
+  Histogram, i.e., this method comes with an overhead. */
 FrequencyStandardDeviations Histogram::frequencyStandardDeviations() const {
   return FrequencyStandardDeviations(countStandardDeviations(), binEdges());
 }
