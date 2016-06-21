@@ -1,7 +1,10 @@
-from mantid.kernel import logger, StringListValidator, Direction
-from mantid.api import AlgorithmFactory,  FileAction, FileProperty, PythonAlgorithm, Progress
-from AbinsModules import LoadCASTEP
 import multiprocessing
+
+from mantid.api import AlgorithmFactory,  FileAction, FileProperty, PythonAlgorithm, Progress
+from mantid.kernel import logger, StringListValidator, Direction
+
+from scripts.AbinsModules import LoadCASTEP
+
 
 class ABINS(PythonAlgorithm):
 

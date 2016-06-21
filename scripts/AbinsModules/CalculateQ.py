@@ -1,6 +1,8 @@
-from IOmodule import IOmodule
 import numpy
+
 import Constants
+from IOmodule import IOmodule
+
 
 class CalculateQ(IOmodule):
     """
