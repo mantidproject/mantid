@@ -86,7 +86,7 @@ LoadResult MuonAnalysisDataLoader::loadFiles(const QStringList &files) const {
     if (fileName == files.first()) {
       instrName = getInstrumentName(loadedWorkspace);
 
-      // Check that is a valid Muon instrument
+      // Check that it is a valid Muon instrument
       if (!m_instruments.contains(QString::fromStdString(instrName),
                                   Qt::CaseInsensitive)) {
         if (0 != instrName.compare("DEVA")) {

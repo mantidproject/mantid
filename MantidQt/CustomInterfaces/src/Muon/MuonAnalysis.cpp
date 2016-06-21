@@ -2126,7 +2126,7 @@ void MuonAnalysis::loadFittings() {
   // Set up fit data and function presenters
   m_fitDataPresenter =
       Mantid::Kernel::make_unique<MuonAnalysisFitDataPresenter>(
-          m_uiForm.fitBrowser, m_dataSelector);
+          m_uiForm.fitBrowser, m_dataSelector, m_dataLoader);
   m_fitFunctionPresenter =
       Mantid::Kernel::make_unique<MuonAnalysisFitFunctionPresenter>(
           nullptr, m_uiForm.fitBrowser, m_functionBrowser);

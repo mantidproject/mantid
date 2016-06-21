@@ -2,6 +2,7 @@
 #define MANTID_CUSTOMINTERFACES_MUONANALYSISFITDATAPRESENTER_H_
 
 #include "MantidQtCustomInterfaces/DllConfig.h"
+#include "MantidQtCustomInterfaces/Muon/MuonAnalysisDataLoader.h"
 #include "MantidQtCustomInterfaces/Muon/MuonAnalysisHelper.h"
 #include "MantidQtMantidWidgets/IMuonFitDataSelector.h"
 #include "MantidQtMantidWidgets/IWorkspaceFitControl.h"
@@ -46,7 +47,8 @@ public:
   /// Constructor
   MuonAnalysisFitDataPresenter(
       MantidQt::MantidWidgets::IWorkspaceFitControl *fitBrowser,
-      MantidQt::MantidWidgets::IMuonFitDataSelector *dataSelector);
+      MantidQt::MantidWidgets::IMuonFitDataSelector *dataSelector,
+      MuonAnalysisDataLoader &dataLoader);
   /// Handles "data properties changed"
   void handleDataPropertiesChanged();
   /// Handles "selected data changed"
@@ -69,12 +71,16 @@ private:
       const Mantid::API::Grouping &grouping,
       const MantidQt::CustomInterfaces::Muon::PlotType &plotType,
       bool overwrite);
+  /// Create analysis workspace
+  Mantid::API::Workspace_sptr createWorkspace(const std::string &name);
   /// Fit browser to update (non-owning pointer)
   MantidQt::MantidWidgets::IWorkspaceFitControl *m_fitBrowser;
   /// Data selector to get input from (non-owning pointer)
   MantidQt::MantidWidgets::IMuonFitDataSelector *m_dataSelector;
   /// Workspace assigned to peak picker
   QString m_PPAssignedFirstRun;
+  /// Loader to load and analyse data (reference)
+  MuonAnalysisDataLoader &m_dataLoader;
 };
 
 } // namespace CustomInterfaces

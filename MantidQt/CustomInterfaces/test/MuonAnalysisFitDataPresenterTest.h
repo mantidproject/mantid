@@ -7,14 +7,18 @@
 
 #include "MantidAPI/GroupingLoader.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/FrameworkManager.h"
+#include "MantidQtCustomInterfaces/Muon/MuonAnalysisDataLoader.h"
 #include "MantidQtCustomInterfaces/Muon/MuonAnalysisFitDataPresenter.h"
 #include "MantidQtCustomInterfaces/Muon/MuonAnalysisHelper.h"
 #include "MantidQtMantidWidgets/IMuonFitDataSelector.h"
 #include "MantidQtMantidWidgets/IWorkspaceFitControl.h"
 
+using MantidQt::CustomInterfaces::MuonAnalysisDataLoader;
 using MantidQt::CustomInterfaces::MuonAnalysisFitDataPresenter;
 using MantidQt::MantidWidgets::IMuonFitDataSelector;
 using MantidQt::MantidWidgets::IWorkspaceFitControl;
+using MantidQt::CustomInterfaces::Muon::DeadTimesType;
 using namespace testing;
 
 /// Mock data selector widget
@@ -63,12 +67,19 @@ public:
     delete suite;
   }
 
+  /// Constructor
+  MuonAnalysisFitDataPresenterTest()
+      : m_dataLoader(DeadTimesType::None,
+                     QStringList{"MUSR", "EMU", "HIFI", "ARGUS", "CHRONUS"}) {
+    Mantid::API::FrameworkManager::Instance();
+  }
+
   /// Run before each test to create mock objects
   void setUp() override {
     m_dataSelector = new NiceMock<MockDataSelector>();
     m_fitBrowser = new NiceMock<MockFitBrowser>();
-    m_presenter =
-        new MuonAnalysisFitDataPresenter(m_fitBrowser, m_dataSelector);
+    m_presenter = new MuonAnalysisFitDataPresenter(m_fitBrowser, m_dataSelector,
+                                                   m_dataLoader);
   }
 
   /// Run after each test to check expectations and remove mocks
@@ -193,6 +204,7 @@ private:
   MockDataSelector *m_dataSelector;
   MockFitBrowser *m_fitBrowser;
   MuonAnalysisFitDataPresenter *m_presenter;
+  MuonAnalysisDataLoader m_dataLoader;
 };
 
 #endif /* MANTID_CUSTOMINTERFACES_MUONANALYSISFITDATAPRESENTERTEST_H_ */

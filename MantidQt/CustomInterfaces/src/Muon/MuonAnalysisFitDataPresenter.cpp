@@ -14,10 +14,13 @@ namespace CustomInterfaces {
  * Constructor
  * @param fitBrowser :: [input] Pointer to fit browser to update
  * @param dataSelector :: [input] Pointer to data selector to get input from
+ * @param dataLoader :: [input] Data loader (shared with MuonAnalysis)
  */
 MuonAnalysisFitDataPresenter::MuonAnalysisFitDataPresenter(
-    IWorkspaceFitControl *fitBrowser, IMuonFitDataSelector *dataSelector)
-    : m_fitBrowser(fitBrowser), m_dataSelector(dataSelector) {}
+    IWorkspaceFitControl *fitBrowser, IMuonFitDataSelector *dataSelector,
+    MuonAnalysisDataLoader &dataLoader)
+    : m_fitBrowser(fitBrowser), m_dataSelector(dataSelector),
+      m_dataLoader(dataLoader) {}
 
 /**
  * Called when data selector reports "data properties changed"
@@ -110,7 +113,7 @@ void MuonAnalysisFitDataPresenter::createWorkspacesToFit(
       workspaces.push_back(AnalysisDataService::Instance().retrieve(name));
     } else {
       // Create here (but don't add to the ADS)
-      // workspaces.push_back...
+      workspaces.push_back(createWorkspace(name));
     }
   }
 
@@ -199,6 +202,38 @@ std::vector<std::string> MuonAnalysisFitDataPresenter::generateWorkspaceNames(
     }
   }
   return workspaceNames;
+}
+
+/**
+ * Create an analysis workspace given the required name.
+ * Only supports single-run workspaces: create one for each run and co-add them
+ * if you want multiple runs.
+ * @param name :: [input] Name of workspace to create (in format INST0001234;
+ * Pair; long; Asym; 1; #1)
+ * @returns :: workspace
+ */
+Mantid::API::Workspace_sptr
+MuonAnalysisFitDataPresenter::createWorkspace(const std::string &name) {
+  // parse name - should be a single-run workspace
+  const auto params = MuonAnalysisHelper::parseWorkspaceName(name);
+  if (params.runs.size() > 1) {
+    throw std::invalid_argument("Failed to create workspace with multiple "
+                                "runs: instead, create several single-run "
+                                "workspaces and co-add together");
+  }
+
+  // load original data - need to get filename
+  QString filename;
+  filename = QString::fromStdString(MuonAnalysisHelper::getRunLabel(
+                                        params.instrument, params.runs))
+                 .append(".nxs");
+  const auto loadedData = m_dataLoader.loadFiles(QStringList(filename));
+
+
+
+  // run analysis to generate workspace
+
+  return loadedData.loadedWorkspace; // TEMPORARY
 }
 
 } // namespace CustomInterfaces
