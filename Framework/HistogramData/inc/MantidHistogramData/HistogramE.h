@@ -20,6 +20,14 @@ template <class FrequencyVariances, class HistogramE> class VectorOf;
 
 /** HistogramE
 
+  This class holds e-data of a histogram. The e-data can be variances or
+  standard deviations of counts or frequencies. To prevent breaking the
+  histogram, the length of HistogramE cannot be changed via the public
+  interface.
+
+  @author Simon Heybrock
+  @date 2016
+
   Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
 

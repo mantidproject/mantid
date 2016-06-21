@@ -19,10 +19,11 @@ template <class Frequencies, class HistogramY> class VectorOf;
 /** HistogramY
 
   This class holds y-data of a histogram. The y-data can be counts or
-  frequencies. HistogramY is used to directly reference data in a Histogram when
-  it needs to be modified without a specific need for counts or frequencies. To
-  prevent breaking the histogram, the length of HistogramY cannot be changed via
-  the public interface.
+  frequencies. To prevent breaking the histogram, the length of HistogramY
+  cannot be changed via the public interface.
+
+  @author Simon Heybrock
+  @date 2016
 
   Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
