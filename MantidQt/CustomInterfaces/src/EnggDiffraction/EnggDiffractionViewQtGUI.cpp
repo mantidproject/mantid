@@ -6,12 +6,6 @@
 #include "MantidQtCustomInterfaces/EnggDiffraction/EnggDiffractionPresenter.h"
 #include "MantidQtMantidWidgets/MWRunFiles.h"
 
-#include <array>
-#include <fstream>
-#include <random>
-
-#include <boost/lexical_cast.hpp>
-
 #include <Poco/DirectoryIterator.h>
 #include <Poco/Path.h>
 

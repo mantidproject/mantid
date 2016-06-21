@@ -5,8 +5,11 @@
 #include "MantidQtCustomInterfaces/EnggDiffraction/EnggDiffFittingPresenter.h"
 #include "MantidQtMantidWidgets/PeakPicker.h"
 
+#include <array>
 #include <fstream>
 #include <iomanip>
+#include <random>
+#include <sstream>
 
 #include <boost/algorithm/string.hpp>
 
