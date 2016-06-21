@@ -21,7 +21,22 @@
 namespace Mantid {
 namespace HistogramData {
 
-/** Histogram : TODO: DESCRIPTION
+/** Histogram
+
+  Histogram is a container for objects that together represent a histogram. In
+  the simpest case this are bin edges, counts (e.g., neutron counts from an
+  experiment), and statistical uncertainties for these counts. These three
+  objects are also referred to as X, Y, and E data of the histogram.
+
+  More generally, the X data in the Histogram can be accessed as bin edges or as
+  points (which basically correspond to the bin centers). The Y data in the
+  Histogram can be accessed as counts or frequencies (which correspond to the
+  counts divided by the bin widths). The E data in the Histogram can be accessed
+  as standard deviations or variances (with two cases, uncertainties for counts
+  and for frequencies).
+
+  Histogram currently provides a legacy interface alongside with the new and
+  recommended interface.
 
   @author Simon Heybrock
   @date 2016
