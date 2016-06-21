@@ -15,18 +15,6 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 
 //--------------------------------------------------------------------------
-/** Constructor
- */
-IndexPeaks::IndexPeaks() {}
-
-//--------------------------------------------------------------------------
-/** Destructor
- */
-IndexPeaks::~IndexPeaks() {}
-
-//--------------------------------------------------------------------------
-
-//--------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void IndexPeaks::init() {

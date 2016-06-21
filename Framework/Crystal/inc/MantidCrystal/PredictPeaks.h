@@ -23,7 +23,6 @@ namespace Crystal {
 class DLLExport PredictPeaks : public API::Algorithm {
 public:
   PredictPeaks();
-  ~PredictPeaks() override;
 
   /// Algorithm's name for identification
   const std::string name() const override { return "PredictPeaks"; };

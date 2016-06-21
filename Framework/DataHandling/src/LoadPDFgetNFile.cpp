@@ -29,16 +29,6 @@ namespace DataHandling {
 DECLARE_FILELOADER_ALGORITHM(LoadPDFgetNFile)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-LoadPDFgetNFile::LoadPDFgetNFile() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-LoadPDFgetNFile::~LoadPDFgetNFile() {}
-
-//----------------------------------------------------------------------------------------------
 /**
  * Return the confidence with with this algorithm can load the file
  * @param descriptor A descriptor for the file

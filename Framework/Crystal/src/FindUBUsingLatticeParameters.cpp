@@ -15,16 +15,6 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 
 //--------------------------------------------------------------------------
-/** Constructor
- */
-FindUBUsingLatticeParameters::FindUBUsingLatticeParameters() {}
-
-//--------------------------------------------------------------------------
-/** Destructor
- */
-FindUBUsingLatticeParameters::~FindUBUsingLatticeParameters() {}
-
-//--------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void FindUBUsingLatticeParameters::init() {

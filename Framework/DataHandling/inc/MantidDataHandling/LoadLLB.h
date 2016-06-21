@@ -36,7 +36,6 @@ namespace DataHandling {
 class DLLExport LoadLLB : public API::IFileLoader<Kernel::NexusDescriptor> {
 public:
   LoadLLB();
-  ~LoadLLB() override;
 
   const std::string name() const override;
   /// Summary of algorithms purpose
