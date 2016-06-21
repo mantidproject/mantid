@@ -345,6 +345,9 @@ public:
   Kernel::cow_ptr<HistogramData::HistogramY> sharedY() const override;
   Kernel::cow_ptr<HistogramData::HistogramE> sharedE() const override;
 
+protected:
+  void checkHistogram(const HistogramData::Histogram &histogram) const override;
+
 private:
   const HistogramData::Histogram &histogramRef() const override {
     return m_histogram;

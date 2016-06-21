@@ -183,6 +183,9 @@ public:
   HistogramData::Histogram histogram(const size_t index) const {
     return getSpectrum(index).histogram();
   }
+  template <typename... T> void setHistogram(const size_t index, T &&... data) {
+	  getSpectrum(index).setHistogram(std::forward<T>(data)...);
+  }
   HistogramData::BinEdges binEdges(const size_t index) const {
     return getSpectrum(index).binEdges();
   }

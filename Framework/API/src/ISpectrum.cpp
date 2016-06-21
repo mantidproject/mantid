@@ -1,6 +1,6 @@
 #include "MantidAPI/ISpectrum.h"
-#include "MantidKernel/System.h"
 #include "MantidHistogramData/Histogram.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace API {
@@ -159,6 +159,12 @@ bool ISpectrum::hasDx() const { return bool(histogramRef().sharedDx()); }
  * Resets the hasDx flag
  */
 void ISpectrum::resetHasDx() { mutableHistogramRef().setSharedDx(nullptr); }
+
+template <typename... T> void ISpectrum::setHistogram(T &&... data) {
+  HistogramData::Histogram histogram(std::forward<T>(data)...);
+  checkHistogram(histogram);
+  mutableHistogramRef() = std::move(histogram);
+}
 
 } // namespace Mantid
 } // namespace API

@@ -107,6 +107,7 @@ public:
   void resetHasDx();
 
   HistogramData::Histogram histogram() const { return histogramRef(); }
+  template <typename... T> void setHistogram(T &&... data);
 
   HistogramData::BinEdges binEdges() const { return histogramRef().binEdges(); }
   HistogramData::BinEdgeStandardDeviations binEdgeStandardDeviations() const {
@@ -197,6 +198,9 @@ public:
   friend class DataObjects::Workspace2D;
 
 protected:
+  virtual void checkHistogram(const HistogramData::Histogram &histogram) const {
+  }
+
   // Copy and move are not public since this is an abstract class, but protected
   // such that derived classes can implement copy and move.
   ISpectrum(const ISpectrum &) = default;

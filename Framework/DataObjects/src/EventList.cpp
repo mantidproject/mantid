@@ -4594,5 +4594,12 @@ HistogramData::Histogram &EventList::mutableHistogramRef() {
   return m_histogram;
 }
 
+void EventList::checkHistogram(
+    const HistogramData::Histogram &histogram) const {
+  if (histogram.sharedY() || histogram.sharedE())
+    throw std::runtime_error("EventList: setting histogram data with non-null "
+                             "Y or E data is not possible");
+}
+
 } /// namespace DataObjects
 } /// namespace Mantid
