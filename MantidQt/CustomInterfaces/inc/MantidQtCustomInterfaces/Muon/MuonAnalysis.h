@@ -17,6 +17,7 @@
 #include "MantidQtMantidWidgets/pythonCalc.h"
 #include "MantidQtMantidWidgets/MWDiag.h"
 #include "MantidQtCustomInterfaces/Muon/IO_MuonGrouping.h"
+#include "MantidQtCustomInterfaces/Muon/MuonAnalysisDataLoader.h"
 #include "MantidQtCustomInterfaces/Muon/MuonAnalysisHelper.h"
 
 #include <map>
@@ -40,16 +41,6 @@ namespace Muon {
 class MuonAnalysisOptionTab;
 class MuonAnalysisFitDataTab;
 class MuonAnalysisResultTableTab;
-
-struct LoadResult {
-  Workspace_sptr loadedWorkspace;
-  Workspace_sptr loadedGrouping;
-  Workspace_sptr loadedDeadTimes;
-  std::string mainFieldDirection;
-  double timeZero;
-  double firstGoodData;
-  std::string label;
-};
 
 struct GroupResult {
   bool usedExistGrouping;
@@ -289,9 +280,6 @@ private:
 
   /// Input file changed - update GUI accordingly
   void inputFileChanged(const QStringList &filenames);
-
-  /// Loads the given list of files
-  boost::shared_ptr<LoadResult> load(const QStringList &files) const;
 
   /// Get grouping for the loaded workspace
   boost::shared_ptr<GroupResult>
@@ -562,6 +550,12 @@ private:
 
   /// Presenter to get fit function
   std::unique_ptr<MuonAnalysisFitFunctionPresenter> m_fitFunctionPresenter;
+
+  /// Helper class to load data
+  MuonAnalysisDataLoader m_dataLoader;
+
+  /// Get list of supported instruments
+  QStringList getSupportedInstruments();
 };
 }
 }

@@ -2,11 +2,34 @@
 #define MANTIDQT_CUSTOMINTERFACES_MUONANALYSISDATALOADER_H_
 
 #include "MantidQtCustomInterfaces/DllConfig.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidAPI/Workspace_fwd.h"
+#include <QStringList>
+
+namespace MantidQt {
+namespace CustomInterfaces {
+namespace Muon {
+/// Ways to deal with dead time correction
+enum class DeadTimesType { None, FromFile, FromDisk };
+
+/// Data loaded from file
+struct LoadResult {
+  Mantid::API::Workspace_sptr loadedWorkspace;
+  Mantid::API::Workspace_sptr loadedGrouping;
+  Mantid::API::Workspace_sptr loadedDeadTimes;
+  std::string mainFieldDirection;
+  double timeZero;
+  double firstGoodData;
+  std::string label;
+};
+}
+}
+}
 
 namespace MantidQt {
 namespace CustomInterfaces {
 
-/** MuonAnalysisDataLoader : Loads and processes muon data for MuonAnalysis 
+/** MuonAnalysisDataLoader : Loads and processes muon data for MuonAnalysis
 
   Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
@@ -30,7 +53,29 @@ namespace CustomInterfaces {
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class MANTIDQT_CUSTOMINTERFACES_DLL MuonAnalysisDataLoader {
-public:};
+public:
+  /// constructor
+  MuonAnalysisDataLoader(const Muon::DeadTimesType &deadTimesType,
+                         const QStringList &instruments,
+                         const std::string &deadTimesFile = "");
+  /// change dead times type
+  void setDeadTimesType(const Muon::DeadTimesType &deadTimesType,
+                        const std::string &deadTimesFile = "");
+  /// set available instruments
+  /// load files
+  Muon::LoadResult loadFiles(const QStringList &files) const;
+
+private:
+  /// Get instrument name from workspace
+  std::string
+  getInstrumentName(const Mantid::API::Workspace_sptr workspace) const;
+  /// Dead times type
+  Muon::DeadTimesType m_deadTimesType;
+  /// Dead times file
+  std::string m_deadTimesFile;
+  /// Muon instruments supported
+  const QStringList m_instruments;
+};
 
 } // namespace CustomInterfaces
 } // namespace MantidQt

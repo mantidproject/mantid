@@ -99,7 +99,8 @@ MuonAnalysis::MuonAnalysis(QWidget *parent)
       m_resultTableTab(NULL), // Will be created in initLayout()
       m_dataTimeZero(0.0), m_dataFirstGoodData(0.0),
       m_currentLabel("NoLabelSet"), m_numPeriods(0),
-      m_groupingHelper(this->m_uiForm) {}
+      m_groupingHelper(this->m_uiForm),
+      m_dataLoader(Muon::DeadTimesType::None, getSupportedInstruments()) {}
 
 /**
  * Destructor
@@ -1143,112 +1144,6 @@ void MuonAnalysis::handleInputFileChanges() {
 }
 
 /**
- * Loads the given list of files
- * @param files :: A list of files to load
- * @return Struct with various loaded parameters
- */
-boost::shared_ptr<LoadResult>
-MuonAnalysis::load(const QStringList &files) const {
-  if (files.empty())
-    throw std::invalid_argument("Supplied list of files is empty");
-
-  auto result = boost::make_shared<LoadResult>();
-
-  std::vector<Workspace_sptr> loadedWorkspaces;
-
-  std::string instrName; // Instrument name all the run files should belong to
-
-  // Go through all the files and try to load them
-  for (auto f = files.constBegin(); f != files.constEnd(); ++f) {
-    std::string file = (*f).toStdString();
-
-    // Setup Load Nexus Algorithm
-    IAlgorithm_sptr load =
-        AlgorithmManager::Instance().createUnmanaged("LoadMuonNexus");
-
-    load->initialize();
-    load->setChild(true);
-    load->setLogging(false); // We'll take care of print messages ourself
-    load->setPropertyValue("Filename", file);
-
-    // Just to pass validation
-    load->setPropertyValue("OutputWorkspace", "__NotUsed");
-
-    if (f == files.constBegin()) {
-      // These are only needed for the first file
-      if (m_uiForm.deadTimeType->currentText() == "From Data File") {
-        load->setPropertyValue("DeadTimeTable", "__NotUsed");
-      }
-      load->setPropertyValue("DetectorGroupingTable", "__NotUsed");
-    }
-
-    load->execute();
-
-    Workspace_sptr loadedWorkspace = load->getProperty("OutputWorkspace");
-
-    if (f == files.constBegin()) {
-      instrName = firstPeriod(loadedWorkspace)->getInstrument()->getName();
-
-      // Check that is a valid Muon instrument
-      if (m_uiForm.instrSelector->findText(QString::fromStdString(instrName)) ==
-          -1) {
-        if (0 !=
-            instrName.compare(
-                "DEVA")) { // special case - no IDF but let it load anyway
-          throw std::runtime_error("Instrument is not recognized: " +
-                                   instrName);
-        }
-      }
-
-      if (m_uiForm.deadTimeType->currentText() == "From Data File") {
-        result->loadedDeadTimes = load->getProperty("DeadTimeTable");
-      }
-      result->loadedGrouping = load->getProperty("DetectorGroupingTable");
-      result->mainFieldDirection =
-          static_cast<std::string>(load->getProperty("MainFieldDirection"));
-      result->timeZero = load->getProperty("TimeZero");
-      result->firstGoodData = load->getProperty("FirstGoodData");
-    } else {
-      if (firstPeriod(loadedWorkspace)->getInstrument()->getName() != instrName)
-        throw std::runtime_error(
-            "All the files should be produced by the same instrument");
-    }
-
-    loadedWorkspaces.push_back(loadedWorkspace);
-  }
-
-  if (instrName == "ARGUS") {
-    // Some of the ARGUS data files contain wrong information about the
-    // instrument main field
-    // direction. It is alway longitudinal.
-    result->mainFieldDirection = "longitudinal";
-  }
-
-  if (loadedWorkspaces.size() == 1) {
-
-    // If single workspace loaded - use it
-    Workspace_sptr ws = loadedWorkspaces.front();
-    result->loadedWorkspace = ws;
-
-    result->label = getRunLabel(ws);
-  } else {
-    // If multiple workspaces loaded - sum them to get the one to work with
-    try {
-      result->loadedWorkspace = sumWorkspaces(loadedWorkspaces);
-    } catch (std::exception &e) {
-      std::ostringstream error;
-      error << "Unable to sum workspaces together: " << e.what() << "\n";
-      error << "Make sure they have equal dimensions and number of periods.";
-      throw std::runtime_error(error.str());
-    }
-
-    result->label = getRunLabel(loadedWorkspaces);
-  }
-
-  return result;
-}
-
-/**
  * Get grouping for the loaded workspace
  * @param loadResult :: Various loaded parameters as returned by load()
  * @return Used grouping for populating grouping table
@@ -1339,7 +1234,7 @@ void MuonAnalysis::inputFileChanged(const QStringList &files) {
 
   try {
     // Load the new file(s)
-    loadResult = load(files);
+    loadResult = boost::make_shared<LoadResult>(m_dataLoader.loadFiles(files));
 
     try // to get the dead time correction
     {
@@ -2766,11 +2661,17 @@ void MuonAnalysis::onDeadTimeTypeChanged(int choice) {
   {
     m_uiForm.mwRunDeadTimeFile->setVisible(false);
     m_uiForm.dtcFileLabel->setVisible(false);
+    if (choice == 0) {
+      m_dataLoader.setDeadTimesType(Muon::DeadTimesType::None);
+    } else {
+      m_dataLoader.setDeadTimesType(Muon::DeadTimesType::FromFile);
+    }
   } else // choice must be from workspace
   {
     m_uiForm.mwRunDeadTimeFile->setVisible(true);
     m_uiForm.mwRunDeadTimeFile->setUserInput("");
     m_uiForm.dtcFileLabel->setVisible(true);
+    m_dataLoader.setDeadTimesType(Muon::DeadTimesType::FromDisk);
   }
 
   QSettings group;
@@ -2804,7 +2705,9 @@ void MuonAnalysis::deadTimeFileSelected() {
   QSettings group;
   group.beginGroup(m_settingsGroup + "DeadTimeOptions");
   group.setValue("deadTimeFile", m_uiForm.mwRunDeadTimeFile->getText());
-
+  m_dataLoader.setDeadTimesType(
+      Muon::DeadTimesType::FromDisk,
+      m_uiForm.mwRunDeadTimeFile->getText().toStdString());
   m_deadTimesChanged = true;
   homeTabUpdatePlot();
 }
@@ -3256,6 +3159,18 @@ void MuonAnalysis::dataWorkspaceChanged() {
         m_groupingHelper.parseGroupingTable(),
         parsePlotType(m_uiForm.frontPlotFuncs), isOverwriteEnabled());
   }
+}
+
+/**
+ * Return a list of supported muon instruments
+ * @returns :: list of instruments
+ */
+QStringList MuonAnalysis::getSupportedInstruments() {
+  QStringList instruments;
+  for (int i = 0; i < m_uiForm.instrSelector->count(); i++) {
+    instruments.append(m_uiForm.instrSelector->itemText(i));
+  }
+  return instruments;
 }
 
 } // namespace MantidQt
