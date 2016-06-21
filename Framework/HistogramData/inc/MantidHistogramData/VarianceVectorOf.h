@@ -9,7 +9,23 @@ namespace Mantid {
 namespace HistogramData {
 namespace detail {
 
-/** VarianceVectorOf : TODO: DESCRIPTION
+/** VarianceVectorOf
+
+  This class is an implementation detail of classes like
+  HistogramData::CountVariances and HistogramData::FrequencyVariances. It
+  extends VectorOf with conversions (construction and assignment) from objects
+  holding standard deviations.
+
+  The first template parameter is the type of the inheriting class. This is the
+  CRTP (curiously recurring template pattern).
+
+  The second template parameter is the type of the object to store.
+
+  The third template parameter is the type of the associated standard deviation
+  object.
+
+  @author Simon Heybrock
+  @date 2016
 
   Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
@@ -46,9 +62,13 @@ public:
   VarianceVectorOf &operator=(const VarianceVectorOf &) = default;
   VarianceVectorOf &operator=(VarianceVectorOf &&) = default;
 
+  /// Copy construct from sigmas, taking the square of each sigma value.
   VarianceVectorOf(const Sigmas &sigmas);
+  /// Move construct from sigmas, taking the square of each sigma value.
   VarianceVectorOf(Sigmas &&sigmas);
+  /// Copy assignment from sigmas, taking the square of each sigma value.
   VarianceVectorOf &operator=(const Sigmas &sigmas);
+  /// Move assignment from sigmas, taking the square of each sigma value.
   VarianceVectorOf &operator=(Sigmas &&sigmas);
 
 protected:
