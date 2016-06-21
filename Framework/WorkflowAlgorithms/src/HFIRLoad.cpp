@@ -143,6 +143,8 @@ void HFIRLoad::exec() {
 
   IAlgorithm_sptr loadAlg = createChildAlgorithm("LoadSpice2D", 0, 0.2);
   loadAlg->setProperty("Filename", fileName);
+  loadAlg->setPropertyValue("OutputWorkspace",
+                            getPropertyValue("OutputWorkspace"));
   if (!isEmpty(wavelength_input)) {
     loadAlg->setProperty("Wavelength", wavelength_input);
     loadAlg->setProperty("WavelengthSpread", wavelength_spread_input);
@@ -173,6 +175,10 @@ void HFIRLoad::exec() {
     return;
   }
   Workspace_sptr dataWS_tmp = loadAlg->getProperty("OutputWorkspace");
+  AnalysisDataService::Instance().addOrReplace(
+      getPropertyValue("OutputWorkspace"), dataWS_tmp);
+  g_log.debug() << "Calling LoadSpice2D Done. OutputWorkspace name = "
+                << dataWS_tmp->name() << "\n";
   API::MatrixWorkspace_sptr dataWS =
       boost::dynamic_pointer_cast<MatrixWorkspace>(dataWS_tmp);
 
