@@ -76,7 +76,7 @@ def get_masked_ids(
     component = instrument.getComponentByName(component_name)
 
     Logger("hfir_instrument").debug(
-        "Masking pixels: nx_low=%s, nx_high=%s, ny_low=%s, ny_high=%s for component %s of type=%s." %
+        "Masking pixels: nx_low=%s, nx_high=%s, ny_low=%s, ny_high=%s for component %s of type=%s." % 
         (nx_low, nx_high, ny_low, ny_high, component_name, component.type()))
 
     IDs = []
@@ -86,14 +86,12 @@ def get_masked_ids(
         while i < nx_low * component.idstep():
             IDs.append(component.idstart() + i)
             i += 1
-
         
         # right
         i = component.maxDetectorID() - nx_high * component.idstep()
         while i < component.maxDetectorID():
             IDs.append(i)
-            i += 1
-        
+            i += 1       
 
         # low: 0,256,512,768,..,1,257,513
         for row in range(ny_low):
@@ -131,7 +129,7 @@ def get_masked_ids(
 
     else:
         Logger("hfir_instrument").error(
-            "get_masked_pixels not applied. Component not valid: %s of type %s." %
+            "get_masked_pixels not applied. Component not valid: %s of type %s." % 
             (component.getName(), component.type()))
 
     return IDs
@@ -234,5 +232,5 @@ def get_aperture_distance(workspace):
         return float(apertures[index])
     except:
         raise RuntimeError(
-            "Could not find the for %s\n  %s" %
+            "Could not find the for %s\n  %s" % 
             (workspace, sys.exc_info()[1]))
