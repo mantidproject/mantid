@@ -81,18 +81,19 @@ def get_masked_ids(
 
     IDs = []
     if component.type() == 'RectangularDetector':
-        # right
+        # left
         i = 0
-        while i < nx_high * component.idstep():
+        while i < nx_low * component.idstep():
             IDs.append(component.idstart() + i)
             i += 1
 
-        # left
-        i = component.maxDetectorID()
-        while i < component.nelements() * component.idstep() - component.idstep() + \
-                nx_low + component.idstart():
+        
+        # right
+        i = component.maxDetectorID() - nx_high * component.idstep()
+        while i < component.maxDetectorID():
             IDs.append(i)
-            i -= 1
+            i += 1
+        
 
         # low: 0,256,512,768,..,1,257,513
         for row in range(ny_low):
