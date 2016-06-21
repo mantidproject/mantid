@@ -12,7 +12,7 @@ DEFAULT_VANADIUM_BINS = [-0.0034, 0.068, 0.0034]  # meV
 DEFAULT_CONFIG_DIR = config["instrumentDefinition.directory"]
 
 # BASIS allows two possible reflections, with associated default properties
-reflections_dict = {"silicon111": {"name": "silicon111",
+REFLECTIONS_DICT = {"silicon111": {"name": "silicon111",
                                    "energy_bins": [-150, 0.4, 500],  # micro-eV
                                    "q_bins": [0.3, 0.2, 1.9],  # inverse Angstroms
                                    "mask_file": "BASIS_Mask_ThreeQuartersRemain_SouthTop_NorthTop_NorthBottom_MorePixelsEliminated_08122015.xml",
@@ -92,9 +92,9 @@ class BASISReduction(PythonAlgorithm):
 
         # Properties affected by the reflection selected
         titleReflection = "Reflection Selector"
-        available_reflections = reflections_dict.keys()
+        available_reflections = REFLECTIONS_DICT.keys()
         available_reflections.sort()  # preserve order in which they are presented
-        default_reflection = reflections_dict["silicon111"]
+        default_reflection = REFLECTIONS_DICT["silicon111"]
         self.declareProperty("ReflectionType", default_reflection["name"],
                              StringListValidator(available_reflections),
                              "Analyzer. Documentation lists typical associated property values.")
@@ -102,7 +102,7 @@ class BASISReduction(PythonAlgorithm):
         self.declareProperty(FloatArrayProperty("EnergyBins",
                                                 default_reflection["energy_bins"],
                                                 direction=Direction.Input),
-                              "Energy transfer binning scheme (in ueV)")
+                             "Energy transfer binning scheme (in ueV)")
         self.setPropertyGroup("EnergyBins", titleReflection)
         self.declareProperty(FloatArrayProperty("MomentumTransferBins",
                                                 default_reflection["q_bins"],
@@ -144,7 +144,7 @@ class BASISReduction(PythonAlgorithm):
     def PyExec(self):
         config['default.facility'] = "SNS"
         config['default.instrument'] = self._long_inst
-        self._reflection = reflections_dict[self.getProperty("ReflectionType").value]
+        self._reflection = REFLECTIONS_DICT[self.getProperty("ReflectionType").value]
         self._doIndiv = self.getProperty("DoIndividual").value
         self._etBins = 1.E-03 * self.getProperty("EnergyBins").value  # micro-eV to mili-eV
         self._qBins = self.getProperty("MomentumTransferBins").value
