@@ -6,11 +6,36 @@
 #include <gmock/gmock.h>
 
 // This is a simple mock for the tomo interface view when using SCARF.
-class MockEnggDiffrFittingView
+class MockEnggDiffFittingView
     : public MantidQt::CustomInterfaces::IEnggDiffFittingView {
 
 public:
-  
+  // virtual void showStatus(const std::string &sts);
+  MOCK_METHOD1(showStatus, void(const std::string &sts));
+
+  // virtual void userWarning(const std::string &warn, const std::string
+  // &description);
+  MOCK_METHOD2(userWarning,
+               void(const std::string &warn, const std::string &description));
+
+  // virtual void userError(const std::string &err, const std::string
+  // &description);
+  MOCK_METHOD2(userError,
+               void(const std::string &err, const std::string &description));
+
+  // virtual void enableCalibrateFocusFitUserActions(bool enable);
+  MOCK_METHOD1(enableCalibrateFocusFitUserActions, void(bool));
+
+  // virtual EnggDiffCalibSettings currentCalibSettings() const;
+  MOCK_CONST_METHOD0(currentCalibSettings,
+                     MantidQt::CustomInterfaces::EnggDiffCalibSettings());
+
+  // virtual std::string focusingDir() const;
+  MOCK_CONST_METHOD0(focusingDir, std::string());
+
+  // virtual std::string enggRunPythonCode(const std::string &pyCode)
+  MOCK_METHOD1(enggRunPythonCode, std::string(const std::string &));
+
   // virtual std::string fittingRunNo() const;
   MOCK_CONST_METHOD0(getFittingRunNo, std::string());
 
@@ -58,7 +83,10 @@ public:
   MOCK_CONST_METHOD1(setFittingListWidgetCurrentRow, void(int idx));
 
   // sets the peak list according to the QString given
-  MOCK_CONST_METHOD1(setPeakList, void(std::string peakList));
+  MOCK_CONST_METHOD1(setPeakList, void(const std::string &peakList));
+
+  // std::vector<std::string> logMsgs() const;
+  MOCK_CONST_METHOD0(logMsgs, std::vector<std::string>());
 
   // gets the global vector in view containing focused file directory
   MOCK_METHOD0(getFittingRunNumVec, std::vector<std::string>());

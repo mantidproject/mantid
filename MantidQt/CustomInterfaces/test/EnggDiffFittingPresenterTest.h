@@ -4,7 +4,7 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidQtCustomInterfaces/EnggDiffraction/EnggDiffFittingPresenter.h"
 
-#include "EnggDiffractionViewMock.h"
+#include "EnggDiffFittingViewMock.h"
 #include <cxxtest/TestSuite.h>
 
 using namespace MantidQt::CustomInterfaces;
@@ -19,7 +19,7 @@ using testing::Return;
 class EnggDiffFittingPresenterNoThread : public EnggDiffFittingPresenter {
 public:
   EnggDiffFittingPresenterNoThread(IEnggDiffFittingView *view)
-      : EnggDiffFittingPresenter(view) {}
+      : EnggDiffFittingPresenter(view, nullptr) {}
 
 private:
   // not async at all
@@ -51,8 +51,8 @@ public:
 
   void setUp() override {
     m_view.reset(new testing::NiceMock<MockEnggDiffFittingView>());
-    m_presenter.reset(
-        new MantidQt::CustomInterfaces::EnggDiffFittingPresenter(m_view.get()));
+    m_presenter.reset(new MantidQt::CustomInterfaces::EnggDiffFittingPresenter(
+        m_view.get(), nullptr));
 
     // default banks
     m_ex_enginx_banks.push_back(true);
@@ -64,7 +64,6 @@ public:
     m_ex_run_number.push_back(g_validRunNo);
     g_vanNo.emplace_back("8899999988");
     g_ceriaNo.emplace_back("9999999999");
-    g_rebinRunNo.push_back(g_eventModeRunNo);
 
     // provide personal directories in order to carry out the full disable tests
     m_basicCalibSettings.m_inputDirCalib = "GUI_calib_folder/";
@@ -87,7 +86,8 @@ public:
 
   void test_fitting_with_missing_param() {
     testing::NiceMock<MockEnggDiffFittingView> mockView;
-    MantidQt::CustomInterfaces::EnggDiffFittingPresenter pres(&mockView);
+    MantidQt::CustomInterfaces::EnggDiffFittingPresenter pres(&mockView,
+                                                              nullptr);
 
     EXPECT_CALL(mockView, getFittingRunNo()).Times(1).WillOnce(Return(""));
     EXPECT_CALL(mockView, fittingPeaksData()).Times(1).WillOnce(Return(""));
@@ -112,7 +112,7 @@ public:
   // which should produce a warning
   void test_fitting_without_focused_run() {
     testing::NiceMock<MockEnggDiffFittingView> mockView;
-    EnggDiffPresenterNoThread pres(&mockView);
+    EnggDiffFittingPresenterNoThread pres(&mockView);
 
     // inputs from user
     const std::string mockFname = "";
@@ -143,7 +143,7 @@ public:
   // produce a warning
   void test_fitting_with_invalid_expected_peaks() {
     testing::NiceMock<MockEnggDiffFittingView> mockView;
-    EnggDiffPresenterNoThread pres(&mockView);
+    EnggDiffFittingPresenterNoThread pres(&mockView);
 
     // inputs from user
     EXPECT_CALL(mockView, getFittingRunNo())
@@ -171,7 +171,7 @@ public:
   // Fitting test begin here
   void test_fitting_runno_valid_single_run() {
     testing::NiceMock<MockEnggDiffFittingView> mockView;
-    EnggDiffPresenterNoThread pres(&mockView);
+    EnggDiffFittingPresenterNoThread pres(&mockView);
 
     // inputs from user
     EXPECT_CALL(mockView, getFittingRunNo())
@@ -198,7 +198,7 @@ public:
 
   void test_fitting_runno_invalid_run() {
     testing::NiceMock<MockEnggDiffFittingView> mockView;
-    EnggDiffPresenterNoThread pres(&mockView);
+    EnggDiffFittingPresenterNoThread pres(&mockView);
 
     // inputs from user - empty run number given
     EXPECT_CALL(mockView, getFittingRunNo())
@@ -225,7 +225,7 @@ public:
 
   void test_fitting_runno_multiple_run() {
     testing::NiceMock<MockEnggDiffFittingView> mockView;
-    EnggDiffPresenterNoThread pres(&mockView);
+    EnggDiffFittingPresenterNoThread pres(&mockView);
     // 23931-23934
     std::vector<std::string> RunNumDir;
     RunNumDir.emplace_back("241391");
@@ -250,7 +250,7 @@ public:
         .WillOnce(Return(splittedFileVec));
 
     // could possibly feature to create unique path
-    EXPECT_CALL(mockView, getFocusDir()).Times(1);
+    EXPECT_CALL(mockView, focusingDir()).Times(1);
 
     // should not get to the point where the status is updated
     EXPECT_CALL(mockView, showStatus(testing::_)).Times(0);
@@ -265,7 +265,7 @@ public:
 
   void diable_test_fitting_runno_single_run() {
     testing::NiceMock<MockEnggDiffFittingView> mockView;
-    EnggDiffPresenterNoThread pres(&mockView);
+    EnggDiffFittingPresenterNoThread pres(&mockView);
 
     // focus directory need to be set for this in the settings
 
@@ -299,6 +299,8 @@ public:
 
     EXPECT_CALL(mockView, addBankItem(testing::_)).Times(1);
 
+    EXPECT_CALL(mockView, focusingDir()).Times(0);
+
     // should not get to the point where the status is updated
     EXPECT_CALL(mockView, showStatus(testing::_)).Times(0);
 
@@ -311,7 +313,7 @@ public:
 
   void test_fitting_runno_browsed_run_add_run_item() {
     testing::NiceMock<MockEnggDiffFittingView> mockView;
-    EnggDiffPresenterNoThread pres(&mockView);
+    EnggDiffFittingPresenterNoThread pres(&mockView);
     // Tests the browse directory file
     std::vector<std::string> RunNumDir;
     RunNumDir.emplace_back("241395");
@@ -348,6 +350,8 @@ public:
 
     EXPECT_CALL(mockView, setFittingListWidgetCurrentRow(testing::_)).Times(0);
 
+    EXPECT_CALL(mockView, focusingDir()).Times(0);
+
     // No errors/0 warnings. File entered is not found
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
     EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(1);
@@ -357,9 +361,18 @@ public:
 
   void test_shutDown() {
     testing::NiceMock<MockEnggDiffFittingView> mockView;
-    MantidQt::CustomInterfaces::EnggDiffFittingPresenter pres(&mockView);
+    MantidQt::CustomInterfaces::EnggDiffFittingPresenter pres(&mockView,
+                                                              nullptr);
 
-    EXPECT_CALL(mockView, showStatus(testing::_)).Times(1);
+    EXPECT_CALL(mockView, setPeakList(testing::_)).Times(0);
+    EXPECT_CALL(mockView, getFittingRunNo()).Times(0);
+    EXPECT_CALL(mockView, getFittingRunNumVec()).Times(0);
+    EXPECT_CALL(mockView, splitFittingDirectory(testing::_)).Times(0);
+    EXPECT_CALL(mockView, focusingDir()).Times(0);
+
+    EXPECT_CALL(mockView, getFittingMultiRunMode()).Times(0);
+
+    EXPECT_CALL(mockView, showStatus(testing::_)).Times(0);
 
     EXPECT_CALL(mockView, saveSettings()).Times(1);
     // No errors, no warnings
@@ -374,8 +387,8 @@ public:
   }
 
 private:
-  boost::scoped_ptr<testing::NiceMock<MockEnggDiffFittingView>> m_view;
-  boost::scoped_ptr<MantidQt::CustomInterfaces::EnggDiffFittingPresenter>
+  std::unique_ptr<testing::NiceMock<MockEnggDiffFittingView>> m_view;
+  std::unique_ptr<MantidQt::CustomInterfaces::EnggDiffFittingPresenter>
       m_presenter;
 
   std::vector<bool> m_ex_enginx_banks;
