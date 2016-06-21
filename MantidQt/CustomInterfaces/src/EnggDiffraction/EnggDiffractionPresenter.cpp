@@ -64,8 +64,8 @@ std::string EnggDiffractionPresenter::g_calibCropIdentifier = "SpectrumNumbers";
 std::string EnggDiffractionPresenter::g_sumOfFilesFocus = "";
 
 EnggDiffractionPresenter::EnggDiffractionPresenter(IEnggDiffractionView *view)
-    : m_workerThread(NULL), m_calibFinishedOK(false), m_focusFinishedOK(false),
-      m_rebinningFinishedOK(false),
+    : m_workerThread(nullptr), m_calibFinishedOK(false),
+      m_focusFinishedOK(false), m_rebinningFinishedOK(false),
       m_view(view) /*, m_model(new EnggDiffractionModel()), */ {
   if (!m_view) {
     throw std::runtime_error(
@@ -92,7 +92,7 @@ void EnggDiffractionPresenter::cleanup() {
       m_workerThread->wait(10);
     }
     delete m_workerThread;
-    m_workerThread = NULL;
+    m_workerThread = nullptr;
   }
 }
 
@@ -1611,7 +1611,7 @@ void EnggDiffractionPresenter::focusingFinished() {
   }
   if (m_workerThread) {
     delete m_workerThread;
-    m_workerThread = NULL;
+    m_workerThread = nullptr;
   }
 
   m_view->enableCalibrateFocusFitUserActions(true);
@@ -2323,7 +2323,7 @@ void EnggDiffractionPresenter::rebinningFinished() {
   }
   if (m_workerThread) {
     delete m_workerThread;
-    m_workerThread = NULL;
+    m_workerThread = nullptr;
   }
 
   m_view->enableCalibrateFocusFitUserActions(true);

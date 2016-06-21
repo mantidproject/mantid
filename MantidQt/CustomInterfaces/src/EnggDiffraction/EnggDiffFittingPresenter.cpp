@@ -37,7 +37,8 @@ const std::string EnggDiffFittingPresenter::g_focusedFittingWSName =
 EnggDiffFittingPresenter::EnggDiffFittingPresenter(
     IEnggDiffFittingView *view,
     boost::shared_ptr<IEnggDiffractionCalibration> mainCalib)
-    : m_fittingFinishedOK(false), m_mainCalib(mainCalib), m_view(view) {}
+    : m_fittingFinishedOK(false), m_workerThread(nullptr),
+      m_mainCalib(mainCalib), m_view(view) {}
 
 EnggDiffFittingPresenter::~EnggDiffFittingPresenter() { cleanup(); }
 
@@ -56,7 +57,7 @@ void EnggDiffFittingPresenter::cleanup() {
       m_workerThread->wait(10);
     }
     delete m_workerThread;
-    m_workerThread = NULL;
+    m_workerThread = nullptr;
   }
 }
 
@@ -117,7 +118,7 @@ void EnggDiffFittingPresenter::fittingFinished() {
     g_log.warning() << "The single peak fitting did not finish correctly.\n";
     if (m_workerThread) {
       delete m_workerThread;
-      m_workerThread = NULL;
+      m_workerThread = nullptr;
     }
 
     m_view->showStatus(
@@ -129,7 +130,7 @@ void EnggDiffFittingPresenter::fittingFinished() {
     m_view->showStatus("Single peak fittin process finished. Ready");
     if (m_workerThread) {
       delete m_workerThread;
-      m_workerThread = NULL;
+      m_workerThread = nullptr;
     }
   }
 

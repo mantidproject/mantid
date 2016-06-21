@@ -76,8 +76,8 @@ void EnggDiffractionViewQtGUI::initLayout() {
   // presenter that knows how to handle a IEnggDiffractionView should
   // take care of all the logic. Note that the view needs to know the
   // concrete presenter
-  auto pres = boost::make_shared<EnggDiffractionPresenter>(this);
-  m_presenter.reset(pres.get());
+  auto fullPres = boost::make_shared<EnggDiffractionPresenter>(this);
+  m_presenter = fullPres;
 
   // add tab contents and set up their ui's
   QWidget *wCalib = new QWidget(m_ui.tabMain);
@@ -92,9 +92,12 @@ void EnggDiffractionViewQtGUI::initLayout() {
   m_uiTabPreproc.setupUi(wPreproc);
   m_ui.tabMain->addTab(wPreproc, QString("Pre-processing"));
 
-  auto sharedView = boost::make_shared<EnggDiffractionViewQtGUI>(this);
+  // This is created from a QWidget* -> use null-deleter to prevent double-free
+  // with Qt
+  boost::shared_ptr<EnggDiffractionViewQtGUI> sharedView(
+      this, [](EnggDiffractionViewQtGUI *) {});
   m_fittingWidget = new EnggDiffFittingViewQtWidget(
-      m_ui.tabMain, sharedView, sharedView, pres, sharedView);
+      m_ui.tabMain, sharedView, sharedView, fullPres, sharedView);
   m_ui.tabMain->addTab(m_fittingWidget, QString("Fitting"));
 
   QWidget *wSettings = new QWidget(m_ui.tabMain);
@@ -1087,7 +1090,7 @@ void EnggDiffractionViewQtGUI::closeEvent(QCloseEvent *event) {
 
 void EnggDiffractionViewQtGUI::openHelpWin() {
   MantidQt::API::HelpWindow::showCustomInterface(
-      NULL, QString("Engineering_Diffraction"));
+      nullptr, QString("Engineering_Diffraction"));
 }
 
 } // namespace CustomInterfaces

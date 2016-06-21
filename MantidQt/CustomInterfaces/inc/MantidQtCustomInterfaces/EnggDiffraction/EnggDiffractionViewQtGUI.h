@@ -304,7 +304,7 @@ private:
   static const std::string g_DetGrpExtStr;
 
   /// presenter as in the model-view-presenter
-  boost::scoped_ptr<IEnggDiffractionPresenter> m_presenter;
+  boost::shared_ptr<IEnggDiffractionPresenter> m_presenter;
 };
 
 } // namespace CustomInterfaces
