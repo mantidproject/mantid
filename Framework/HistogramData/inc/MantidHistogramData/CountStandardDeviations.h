@@ -12,7 +12,15 @@ class BinEdges;
 class CountVariances;
 class FrequencyStandardDeviations;
 
-/** CountStandardDeviations : TODO: DESCRIPTION
+/** CountStandardDeviations
+
+  Container for the standard deviations of the counts in a histogram. A
+  copy-on-write mechanism saves memory and makes copying cheap. The
+  implementation is based on detail::StandardDeviationVectorOf, which provides
+  conversion from the corresponding variance type, CountVariances.
+
+  @author Simon Heybrock
+  @date 2016
 
   Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
@@ -44,21 +52,22 @@ public:
   using StandardDeviationVectorOf<CountStandardDeviations, HistogramE,
                                   CountVariances>::
   operator=;
+  /// Default constructor, creates a NULL object.
   CountStandardDeviations() = default;
   // The copy and move constructor and assignment are not captured properly by
   // the using declaration above, so we need them here explicitly.
+  /// Copy constructor. Lightweight, internal data will be shared.
   CountStandardDeviations(const CountStandardDeviations &) = default;
+  /// Move constructor.
   CountStandardDeviations(CountStandardDeviations &&) = default;
+  /// Copy assignment. Lightweight, internal data will be shared.
   CountStandardDeviations &
   operator=(const CountStandardDeviations &)& = default;
+  /// Move assignment.
   CountStandardDeviations &operator=(CountStandardDeviations &&)& = default;
 
-  /// Constructs CountStandardDeviations from FrequencyStandardDeviations and
-  /// bin width based on BinEdges.
   CountStandardDeviations(const FrequencyStandardDeviations &frequencies,
                           const BinEdges &edges);
-  /// Move-constructs CountStandardDeviations from FrequencyStandardDeviations
-  /// and bin width based on BinEdges.
   CountStandardDeviations(FrequencyStandardDeviations &&frequencies,
                           const BinEdges &edges);
 };

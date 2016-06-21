@@ -7,10 +7,14 @@
 namespace Mantid {
 namespace HistogramData {
 
+/// Constructs CountVariances from FrequencyVariances and bin width based on
+/// BinEdges.
 CountVariances::CountVariances(const FrequencyVariances &frequencies,
                                const BinEdges &edges)
     : CountVariances(FrequencyVariances(frequencies), edges) {}
 
+/// Move-constructs CountVariances from FrequencyVariances and bin width based
+/// on BinEdges.
 CountVariances::CountVariances(FrequencyVariances &&frequencies,
                                const BinEdges &edges) {
   if (!frequencies)

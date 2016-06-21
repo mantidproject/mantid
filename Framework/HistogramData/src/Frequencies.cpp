@@ -5,9 +5,11 @@
 namespace Mantid {
 namespace HistogramData {
 
+/// Constructs Frequencies from Counts and bin width based on BinEdges.
 Frequencies::Frequencies(const Counts &counts, const BinEdges &edges)
     : Frequencies(Counts(counts), edges) {}
 
+/// Move-constructs Frequencies from Counts and bin width based on BinEdges.
 Frequencies::Frequencies(Counts &&counts, const BinEdges &edges) {
   if (!counts)
     return;

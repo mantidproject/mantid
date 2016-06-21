@@ -15,7 +15,13 @@ class Counts;
 
 /** Frequencies
 
-  Container for the frequencies in a histogram.
+  Container for the frequencies in a histogram. A copy-on-write mechanism saves
+  memory and makes copying cheap. The implementation is based on
+  detail::VectorOf, a wrapper around a cow_ptr. Mixins such as detail::Iterable
+  provide iterators and other operations.
+
+  @author Simon Heybrock
+  @date 2016
 
   Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
@@ -46,17 +52,20 @@ class MANTID_HISTOGRAMDATA_DLL Frequencies
 public:
   using VectorOf<Frequencies, HistogramY>::VectorOf;
   using VectorOf<Frequencies, HistogramY>::operator=;
+  /// Default constructor, creates a NULL object.
   Frequencies() = default;
   // The copy and move constructor and assignment are not captured properly by
   // the using declaration above, so we need them here explicitly.
+  /// Copy constructor. Lightweight, internal data will be shared.
   Frequencies(const Frequencies &) = default;
+  /// Move constructor.
   Frequencies(Frequencies &&) = default;
+  /// Copy assignment. Lightweight, internal data will be shared.
   Frequencies &operator=(const Frequencies &)& = default;
+  /// Move assignment.
   Frequencies &operator=(Frequencies &&)& = default;
 
-  /// Constructs Frequencies from Counts and bin width based on BinEdges.
   Frequencies(const Counts &counts, const BinEdges &edges);
-  /// Move-constructs Frequencies from Counts and bin width based on BinEdges.
   Frequencies(Counts &&counts, const BinEdges &edges);
 };
 

@@ -11,7 +11,15 @@ namespace HistogramData {
 class BinEdgeVariances;
 class PointStandardDeviations;
 
-/** PointVariances : TODO: DESCRIPTION
+/** PointVariances
+
+  Container for the variances of the points in a histogram. A copy-on-write
+  mechanism saves memory and makes copying cheap. The implementation is based on
+  detail::VarianceVectorOf, which provides conversion from the corresponding
+  standard deviation type, PointStandardDeviations.
+
+  @author Simon Heybrock
+  @date 2016
 
   Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
@@ -42,12 +50,17 @@ public:
                          PointStandardDeviations>::VarianceVectorOf;
   using VarianceVectorOf<PointVariances, HistogramDx, PointStandardDeviations>::
   operator=;
+  /// Default constructor, creates a NULL object.
   PointVariances() = default;
   // The copy and move constructor and assignment are not captured properly by
   // the using declaration above, so we need them here explicitly.
+  /// Copy constructor. Lightweight, internal data will be shared.
   PointVariances(const PointVariances &) = default;
+  /// Move constructor.
   PointVariances(PointVariances &&) = default;
+  /// Copy assignment. Lightweight, internal data will be shared.
   PointVariances &operator=(const PointVariances &)& = default;
+  /// Move assignment.
   PointVariances &operator=(PointVariances &&)& = default;
 
   /// Constructs PointVariances from BinEdgeVariances, where each point is a bin

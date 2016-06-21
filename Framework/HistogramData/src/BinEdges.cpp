@@ -4,6 +4,8 @@
 namespace Mantid {
 namespace HistogramData {
 
+/// Constructs BinEdges from points, approximating each bin edges as mid-point
+/// between two points.
 BinEdges::BinEdges(const Points &points) {
   if (!points)
     return;

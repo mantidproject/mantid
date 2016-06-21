@@ -4,6 +4,7 @@
 namespace Mantid {
 namespace HistogramData {
 
+/// Constructs Points from BinEdges, where each point is a bin center.
 Points::Points(const BinEdges &edges) {
   if (!edges)
     return;

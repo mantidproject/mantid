@@ -12,7 +12,15 @@ class BinEdges;
 class CountStandardDeviations;
 class FrequencyVariances;
 
-/** FrequencyStandardDeviations : TODO: DESCRIPTION
+/** FrequencyStandardDeviations
+
+  Container for the standard deviations of the frequencies in a histogram. A
+  copy-on-write mechanism saves memory and makes copying cheap. The
+  implementation is based on detail::StandardDeviationVectorOf, which provides
+  conversion from the corresponding variance type, FrequencyVariances.
+
+  @author Simon Heybrock
+  @date 2016
 
   Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
@@ -45,22 +53,23 @@ public:
   using StandardDeviationVectorOf<FrequencyStandardDeviations, HistogramE,
                                   FrequencyVariances>::
   operator=;
+  /// Default constructor, creates a NULL object.
   FrequencyStandardDeviations() = default;
   // The copy and move constructor and assignment are not captured properly by
   // the using declaration above, so we need them here explicitly.
+  /// Copy constructor. Lightweight, internal data will be shared.
   FrequencyStandardDeviations(const FrequencyStandardDeviations &) = default;
+  /// Move constructor.
   FrequencyStandardDeviations(FrequencyStandardDeviations &&) = default;
+  /// Copy assignment. Lightweight, internal data will be shared.
   FrequencyStandardDeviations &
   operator=(const FrequencyStandardDeviations &)& = default;
+  /// Move assignment.
   FrequencyStandardDeviations &
   operator=(FrequencyStandardDeviations &&)& = default;
 
-  /// Constructs FrequencStandardDeviations from CountStandardDeviations and bin
-  /// width based on BinEdges.
   FrequencyStandardDeviations(const CountStandardDeviations &counts,
                               const BinEdges &edges);
-  /// Move-constructs FrequencyStandardDeviations from CountStandardDeviations
-  /// and bin width based on BinEdges.
   FrequencyStandardDeviations(CountStandardDeviations &&counts,
                               const BinEdges &edges);
 };

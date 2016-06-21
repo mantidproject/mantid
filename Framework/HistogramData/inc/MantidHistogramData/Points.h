@@ -16,7 +16,13 @@ class BinEdges;
 /** Points
 
   Container for the points a histogram. This roughly corresponds to the bin
-  centers of the histogram.
+  centers of the histogram. A copy-on-write mechanism saves memory and makes
+  copying cheap. The implementation is based on detail::VectorOf, a wrapper
+  around a cow_ptr. Mixins such as detail::Iterable provide iterators and other
+  operations.
+
+  @author Simon Heybrock
+  @date 2016
 
   Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
@@ -47,15 +53,19 @@ class MANTID_HISTOGRAMDATA_DLL Points
 public:
   using VectorOf<Points, HistogramX>::VectorOf;
   using VectorOf<Points, HistogramX>::operator=;
+  /// Default constructor, creates a NULL object.
   Points() = default;
   // The copy and move constructor and assignment are not captured properly by
   // the using declaration above, so we need them here explicitly.
+  /// Copy constructor. Lightweight, internal data will be shared.
   Points(const Points &) = default;
+  /// Move constructor.
   Points(Points &&) = default;
+  /// Copy assignment. Lightweight, internal data will be shared.
   Points &operator=(const Points &)& = default;
+  /// Move assignment.
   Points &operator=(Points &&)& = default;
 
-  /// Constructs Points from BinEdges, where each point is a bin center.
   Points(const BinEdges &edges);
 };
 
