@@ -34,7 +34,7 @@ namespace Registry {
   */
 class MappingTypeHandler final : public PropertyValueHandler {
 public:
-  const static bool isCorrectType(const boost::python::api::object &obj);
+  static bool isCorrectType(const boost::python::api::object &obj);
 
 private:
   void set(Kernel::IPropertyManager *alg, const std::string &name,

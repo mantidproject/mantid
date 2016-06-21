@@ -27,8 +27,7 @@ namespace Registry {
  * @param obj: the object to check
  * @returns true if the input is a dict type else false
  */
-const bool
-MappingTypeHandler::isCorrectType(const boost::python::api::object &obj) {
+bool MappingTypeHandler::isCorrectType(const boost::python::api::object &obj) {
   return PyObject_TypeCheck(obj.ptr(), &PyDict_Type);
 }
 
