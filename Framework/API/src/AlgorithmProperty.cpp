@@ -42,11 +42,6 @@ AlgorithmProperty &AlgorithmProperty::operator=(const AlgorithmProperty &rhs) {
 }
 
 /**
- * Destructor
- */
-AlgorithmProperty::~AlgorithmProperty() {}
-
-/**
  * Return the algorithm as string
  * @returns The algorithm serialized as a string
  */

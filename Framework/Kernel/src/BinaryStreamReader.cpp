@@ -98,13 +98,6 @@ BinaryStreamReader::BinaryStreamReader(std::istream &istrm)
 }
 
 /**
- * Destructor
- * The stream state is left as it was in the last call to a read operation.
- * It is up to the caller to close it.
- */
-BinaryStreamReader::~BinaryStreamReader() {}
-
-/**
  * Read a int32_t from the stream
  * @param value The value is stored in the given stream
  * @return A reference to the BinaryStreamReader object

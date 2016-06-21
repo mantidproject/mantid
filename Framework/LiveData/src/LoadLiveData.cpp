@@ -23,16 +23,6 @@ namespace LiveData {
 DECLARE_ALGORITHM(LoadLiveData)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-LoadLiveData::LoadLiveData() : LiveDataAlgorithm() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-LoadLiveData::~LoadLiveData() {}
-
-//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string LoadLiveData::name() const { return "LoadLiveData"; }
 

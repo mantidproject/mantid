@@ -82,7 +82,7 @@ FrameworkManagerImpl::FrameworkManagerImpl()
 }
 
 /// Destructor
-FrameworkManagerImpl::~FrameworkManagerImpl() {}
+FrameworkManagerImpl::~FrameworkManagerImpl() = default;
 
 /// Starts asynchronous tasks that are done as part of Start-up.
 void FrameworkManagerImpl::AsynchronousStartupTasks() {
