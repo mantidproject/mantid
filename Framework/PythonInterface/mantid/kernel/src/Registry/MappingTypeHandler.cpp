@@ -71,7 +71,8 @@ void MappingTypeHandler::set(Kernel::IPropertyManager *alg,
 std::unique_ptr<Kernel::Property> MappingTypeHandler::create(
     const std::string &name, const boost::python::api::object &defaultValue,
     const boost::python::api::object &, const unsigned int direction) const {
-  // We follow the same steps as above. Create a property manager and populate it
+  // We follow the same steps as above. Create a property manager and populate
+  // it
   // with some sub-values
   auto cppvalue = boost::make_shared<Mantid::Kernel::PropertyManager>();
   dict pydict(defaultValue);

@@ -216,7 +216,6 @@ const std::string PropertyWithValueFactory::isArray(PyObject *const object) {
     return std::string("");
   }
 }
-
 }
 }
 }
