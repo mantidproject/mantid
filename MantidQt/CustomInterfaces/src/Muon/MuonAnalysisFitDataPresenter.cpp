@@ -229,9 +229,8 @@ MuonAnalysisFitDataPresenter::createWorkspace(const std::string &name) {
                  .append(".nxs");
   const auto loadedData = m_dataLoader.loadFiles(QStringList(filename));
 
-
-
   // run analysis to generate workspace
+
 
   return loadedData.loadedWorkspace; // TEMPORARY
 }

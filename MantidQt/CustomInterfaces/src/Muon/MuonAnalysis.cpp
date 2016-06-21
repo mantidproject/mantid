@@ -1238,7 +1238,7 @@ void MuonAnalysis::inputFileChanged(const QStringList &files) {
 
     try // to get the dead time correction
     {
-      deadTimes = getDeadTimeCorrection(loadResult);
+      deadTimes = m_dataLoader.getDeadTimesTable(*loadResult);
     } catch (std::exception &e) {
       // If dead correction wasn't applied we can still continue, though should
       // make user aware of that
@@ -2863,75 +2863,6 @@ std::string MuonAnalysis::deadTimeFilename() const {
 }
 
 /**
- * Loads dead time table (group of tables) from the file.
- * @param filename :: File to load dead times from
- * @return Table (group of tables) with dead times
- */
-Workspace_sptr MuonAnalysis::loadDeadTimes(const std::string &filename) const {
-  try {
-    IAlgorithm_sptr loadDeadTimes =
-        AlgorithmManager::Instance().create("LoadNexusProcessed");
-    loadDeadTimes->setChild(true);
-    loadDeadTimes->setLogging(false); // We'll take care of logging ourself
-    loadDeadTimes->setPropertyValue("Filename", filename);
-    loadDeadTimes->setPropertyValue("OutputWorkspace", "__NotUsed");
-    loadDeadTimes->execute();
-
-    return loadDeadTimes->getProperty("OutputWorkspace");
-  } catch (std::exception &e) {
-    std::ostringstream errorMsg;
-    errorMsg << "Unable to load dead times from the specified file: "
-             << e.what();
-    throw std::runtime_error(errorMsg.str());
-  }
-}
-
-/**
- * Gets table of dead time corrections from the loaded workspace.
- * @param loadResult :: Struct with loaded parameters
- * @returns Table of dead times, or nullptr if no correction used
- */
-ITableWorkspace_sptr MuonAnalysis::getDeadTimeCorrection(
-    boost::shared_ptr<LoadResult> loadResult) const {
-  // Dead time table which will be used
-  Workspace_sptr deadTimes;
-
-  if (m_uiForm.deadTimeType->currentText() != "None") {
-    if (m_uiForm.deadTimeType->currentText() == "From Data File") {
-      if (!loadResult->loadedDeadTimes)
-        throw std::runtime_error(
-            "Data file doesn't appear to contain dead time values");
-
-      deadTimes = loadResult->loadedDeadTimes;
-    } else if (m_uiForm.deadTimeType->currentText() == "From Disk") {
-      deadTimes = loadDeadTimes(deadTimeFilename());
-    }
-  }
-
-  return deadTimesToTable(deadTimes);
-}
-
-/**
- * Converts dead times workspace to a TableWorkspace
- * @param deadTimes :: [input] Loaded dead times Workspace_sptr
- * @returns Table workspace of dead times
- */
-ITableWorkspace_sptr
-MuonAnalysis::deadTimesToTable(const Workspace_sptr &deadTimes) const {
-  ITableWorkspace_sptr deadTimesTable;
-  if (deadTimes != nullptr) {
-    if (auto table = boost::dynamic_pointer_cast<ITableWorkspace>(deadTimes)) {
-      deadTimesTable = table;
-    } else if (auto group =
-                   boost::dynamic_pointer_cast<WorkspaceGroup>(deadTimes)) {
-      deadTimesTable =
-          boost::dynamic_pointer_cast<ITableWorkspace>(group->getItem(0));
-    }
-  }
-  return deadTimesTable;
-}
-
-/**
  * Creates an algorithm with all the properties set according to widget values
  * on the interface.
  * @return The algorithm with properties set
@@ -2950,12 +2881,12 @@ Algorithm_sptr MuonAnalysis::createProcessAlgorithm() {
   if (m_uiForm.deadTimeType->currentIndex() != 0) {
     procAlg->setProperty("ApplyDeadTimeCorrection", true);
 
-    if (m_uiForm.deadTimeType->currentIndex() == 2) // From Specified File
-    {
-
-      Workspace_sptr deadTimes = loadDeadTimes(deadTimeFilename());
-
-      procAlg->setProperty("DeadTimeTable", deadTimesToTable(deadTimes));
+    if (m_uiForm.deadTimeType->currentIndex() == 2) { // From Specified File
+      m_dataLoader.setDeadTimesType(Muon::DeadTimesType::FromDisk,
+                                    deadTimeFilename());
+      // The LoadResult passed in isn't used, it will read from the file
+      procAlg->setProperty("DeadTimeTable",
+                           m_dataLoader.getDeadTimesTable(LoadResult()));
     }
   }
 

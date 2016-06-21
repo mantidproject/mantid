@@ -3,6 +3,7 @@
 
 #include "MantidQtCustomInterfaces/DllConfig.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidAPI/Workspace_fwd.h"
 #include <QStringList>
 
@@ -61,9 +62,19 @@ public:
   /// change dead times type
   void setDeadTimesType(const Muon::DeadTimesType &deadTimesType,
                         const std::string &deadTimesFile = "");
-  /// set available instruments
   /// load files
   Muon::LoadResult loadFiles(const QStringList &files) const;
+  /// correct and group loaded data
+  Mantid::API::Workspace_sptr
+  correctAndGroup(const Muon::LoadResult &loadedData) const;
+  /// create analysis workspace
+
+  /// Get dead time table
+  Mantid::API::ITableWorkspace_sptr
+  getDeadTimesTable(const Muon::LoadResult &loadedData) const;
+  /// Load dead times from file
+  Mantid::API::Workspace_sptr
+  loadDeadTimesFromFile(const std::string &filename) const;
 
 private:
   /// Get instrument name from workspace

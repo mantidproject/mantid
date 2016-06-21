@@ -333,16 +333,6 @@ private:
   /// Returns custom dead time table file name as set on the interface
   std::string deadTimeFilename() const;
 
-  /// Loads dead time table (group of tables) from the file.
-  Workspace_sptr loadDeadTimes(const std::string &filename) const;
-
-  /// Convert dead times workspace to table workspace
-  ITableWorkspace_sptr deadTimesToTable(const Workspace_sptr &deadTimes) const;
-
-  /// Gets table of dead time corrections from the loaded workspace
-  ITableWorkspace_sptr
-  getDeadTimeCorrection(boost::shared_ptr<LoadResult> loadResult) const;
-
   /// Creates an algorithm with all the properties set according to widget
   /// values on the interface
   Algorithm_sptr createProcessAlgorithm();
