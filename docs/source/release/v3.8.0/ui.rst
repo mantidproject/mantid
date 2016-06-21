@@ -41,7 +41,7 @@ SliceViewer Improvements
 VSI Improvements
 ----------------
 
-- ParaView updated to version 5.1.0-RC1
+- ParaView updated to version 5.1.0
 
 |
 
