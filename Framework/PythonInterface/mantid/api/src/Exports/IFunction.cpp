@@ -23,7 +23,7 @@ PyObject *getCategories(IFunction &self) {
 
   PyObject *registered = PyList_New(0);
   for (auto &categorie : categories) {
-    PyObject *value = PyString_FromString(categorie.c_str());
+    PyObject *value = PyBytes_FromString(categorie.c_str());
     if (PyList_Append(registered, value))
       throw std::runtime_error("Failed to insert value into PyList");
   }

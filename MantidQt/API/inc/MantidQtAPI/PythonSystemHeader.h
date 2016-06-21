@@ -13,4 +13,22 @@
 #include <traceback.h>
 #include <frameobject.h>
 
+// Macros for 2/3 compatability
+#if PY_VERSION_HEX >= 0x03000000
+#define IS_PY3K
+#define INT_CHECK PyLong_Check
+#define TO_LONG PyLong_AsLong
+#define STR_CHECK PyUnicode_Check
+#define TO_CSTRING _PyUnicode_AsString
+#define FROM_CSTRING PyUnicode_FromString
+#define CODE_OBJECT(x) x
+#else
+#define INT_CHECK PyInt_Check
+#define TO_LONG PyInt_AsLong
+#define STR_CHECK PyString_Check
+#define TO_CSTRING PyString_AsString
+#define FROM_CSTRING PyString_FromString
+#define CODE_OBJECT(x) (PyCodeObject *) x
+#endif
+
 #endif // PYTHONSYSTEMHEADER_H_

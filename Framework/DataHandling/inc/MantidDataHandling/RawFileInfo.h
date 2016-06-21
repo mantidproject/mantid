@@ -62,11 +62,6 @@ class DLLExport RawFileInfo : public API::Algorithm {
 public:
   static const std::string runTitle(const ISISRAW &isisRaw);
   static const std::string runHeader(const ISISRAW &isisRaw);
-
-  /// (Empty) Constructor
-  RawFileInfo() : Mantid::API::Algorithm() {}
-  /// Virtual destructor
-  ~RawFileInfo() override {}
   /// Algorithm's name
   const std::string name() const override { return "RawFileInfo"; }
   /// Summary of algorithms purpose

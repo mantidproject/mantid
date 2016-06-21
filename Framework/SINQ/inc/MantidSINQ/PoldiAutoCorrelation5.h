@@ -58,10 +58,6 @@ namespace Poldi {
 
 class MANTID_SINQ_DLL PoldiAutoCorrelation5 : public API::Algorithm {
 public:
-  /// Default constructor
-  PoldiAutoCorrelation5() {}
-  /// Destructor
-  ~PoldiAutoCorrelation5() override {}
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "PoldiAutoCorrelation"; }
   /// Summary of algorithms purpose

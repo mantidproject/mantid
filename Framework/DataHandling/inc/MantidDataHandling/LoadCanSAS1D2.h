@@ -70,10 +70,6 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class DLLExport LoadCanSAS1D2 : public LoadCanSAS1D {
 public:
-  /// default constructor
-  LoadCanSAS1D2();
-  /// destructor
-  ~LoadCanSAS1D2() override;
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 2; }
 

@@ -50,7 +50,6 @@ public:
   enum class MatrixOrdering { RowMajor, ColumnMajor };
 
   BinaryStreamReader(std::istream &istrm);
-  ~BinaryStreamReader();
 
   ///@name Single-value stream operators
   /// @{

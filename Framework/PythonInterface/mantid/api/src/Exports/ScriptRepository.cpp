@@ -24,7 +24,7 @@ PyObject *getListFiles(ScriptRepository &self) {
 
   PyObject *registered = PyList_New(0);
   for (auto &file : files) {
-    PyObject *value = PyString_FromString(file.c_str());
+    PyObject *value = PyBytes_FromString(file.c_str());
     if (PyList_Append(registered, value))
       throw std::runtime_error("Failed to insert value into PyList");
   }
@@ -43,25 +43,25 @@ PyObject *getStatus(ScriptRepository &self, const std::string &path) {
   PyObject *value;
   switch (st) {
   case BOTH_UNCHANGED:
-    value = PyString_FromString("BOTH_UNCHANGED");
+    value = PyBytes_FromString("BOTH_UNCHANGED");
     break;
   case REMOTE_ONLY:
-    value = PyString_FromString("REMOTE_ONLY");
+    value = PyBytes_FromString("REMOTE_ONLY");
     break;
   case LOCAL_ONLY:
-    value = PyString_FromString("LOCAL_ONLY");
+    value = PyBytes_FromString("LOCAL_ONLY");
     break;
   case REMOTE_CHANGED:
-    value = PyString_FromString("REMOTE_CHANGED");
+    value = PyBytes_FromString("REMOTE_CHANGED");
     break;
   case LOCAL_CHANGED:
-    value = PyString_FromString("LOCAL_CHANGED");
+    value = PyBytes_FromString("LOCAL_CHANGED");
     break;
   case BOTH_CHANGED:
-    value = PyString_FromString("BOTH_CHANGED");
+    value = PyBytes_FromString("BOTH_CHANGED");
     break;
   default:
-    value = PyString_FromString("BOTH_UNCHANGED");
+    value = PyBytes_FromString("BOTH_UNCHANGED");
     break;
   }
   return value;
@@ -69,7 +69,7 @@ PyObject *getStatus(ScriptRepository &self, const std::string &path) {
 
 PyObject *getDescription(ScriptRepository &self, const std::string &path) {
   PyObject *value;
-  value = PyString_FromString(self.description(path).c_str());
+  value = PyBytes_FromString(self.description(path).c_str());
   return value;
 }
 

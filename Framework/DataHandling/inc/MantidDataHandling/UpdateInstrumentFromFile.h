@@ -61,10 +61,6 @@ class DLLExport UpdateInstrumentFromFile : public API::Algorithm {
 public:
   /// Default constructor
   UpdateInstrumentFromFile();
-
-  /// Destructor
-  ~UpdateInstrumentFromFile() override {}
-
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "UpdateInstrumentFromFile"; }
   /// Summary of algorithms purpose

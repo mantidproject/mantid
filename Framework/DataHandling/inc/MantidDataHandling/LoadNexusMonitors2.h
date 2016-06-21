@@ -46,12 +46,6 @@ namespace DataHandling {
  */
 class DLLExport LoadNexusMonitors2 : public API::Algorithm {
 public:
-  /// Default constructor
-  LoadNexusMonitors2();
-
-  /// Destructor
-  ~LoadNexusMonitors2() override;
-
   /// Algorithm's name for identification
   const std::string name() const override { return "LoadNexusMonitors"; }
 
@@ -115,9 +109,10 @@ private:
 private:
   std::string m_filename; ///< The name and path of the input file
   API::MatrixWorkspace_sptr m_workspace; ///< The workspace being filled out
-  size_t m_monitor_count;                ///< Number of monitors
+  size_t m_monitor_count{0};             ///< Number of monitors
   std::string m_top_entry_name;          ///< name of top level NXentry to use
-  bool m_allMonitorsHaveHistoData; ///< Flag that all monitors have histogram
+  bool m_allMonitorsHaveHistoData{
+      false}; ///< Flag that all monitors have histogram
   /// data in the entry
 };
 

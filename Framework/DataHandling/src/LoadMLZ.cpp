@@ -34,20 +34,11 @@ DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadMLZ)
 /** Constructor
  */
 LoadMLZ::LoadMLZ()
-    : m_instrumentName(""), m_instrumentPath(""), m_numberOfTubes(0),
-      m_numberOfPixelsPerTube(0), m_numberOfChannels(0),
-      m_numberOfHistograms(0), m_monitorElasticPeakPosition(0),
-      m_wavelength(0.0), m_channelWidth(0.0), m_timeOfFlightDelay(0.0),
-      m_monitorCounts(0), m_chopper_speed(0.0), m_chopper_ratio(0), m_l1(0.0),
-      m_l2(0.0), m_t1(0.0) {
-  m_supportedInstruments.emplace_back("TOFTOF");
-  m_supportedInstruments.emplace_back("DNS");
-}
-
-//---------------------------------------------------------------------------
-/** Destructor
- */
-LoadMLZ::~LoadMLZ() {}
+    : m_numberOfTubes{0}, m_numberOfPixelsPerTube{0}, m_numberOfChannels{0},
+      m_numberOfHistograms{0}, m_monitorElasticPeakPosition{0},
+      m_wavelength{0.0}, m_channelWidth{0.0}, m_timeOfFlightDelay{0.0},
+      m_monitorCounts{0}, m_chopper_speed{0.0}, m_chopper_ratio{0}, m_l1{0.0},
+      m_l2{0.0}, m_t1{0.0}, m_supportedInstruments{"TOFTOF", "DNS"} {}
 
 //---------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
