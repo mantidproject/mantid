@@ -11,7 +11,23 @@ namespace Mantid {
 namespace HistogramData {
 namespace detail {
 
-/** StandardDeviationVectorOf : TODO: DESCRIPTION
+/** StandardDeviationVectorOf
+
+  This class is an implementation detail of classes like
+  HistogramData::CountStandardDeviations and
+  HistogramData::FrequencyStandardDeviations. It
+  extends VectorOf with conversions (construction and assignment) from objects
+  holding variances.
+
+  The first template parameter is the type of the inheriting class. This is the
+  CRTP (curiously recurring template pattern).
+
+  The second template parameter is the type of the object to store.
+
+  The third template parameter is the type of the associated variance object.
+
+  @author Simon Heybrock
+  @date 2016
 
   Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
@@ -50,9 +66,13 @@ public:
   operator=(const StandardDeviationVectorOf &) = default;
   StandardDeviationVectorOf &operator=(StandardDeviationVectorOf &&) = default;
 
+  /// Copy construct from variances, taking the square-root of each variance.
   StandardDeviationVectorOf(const Variances &variances);
+  /// Move construct from variances, taking the square-root of each variance.
   StandardDeviationVectorOf(Variances &&variances);
+  /// Copy assignment from variances, taking the square-root of each variance.
   StandardDeviationVectorOf &operator=(const Variances &variances);
+  /// Move assignment from variances, taking the square-root of each variance.
   StandardDeviationVectorOf &operator=(Variances &&variances);
 
 protected:
