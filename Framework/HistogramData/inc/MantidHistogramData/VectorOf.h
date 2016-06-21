@@ -11,9 +11,17 @@ namespace detail {
 
 /** VectorOf
 
-  This class is an implementation detail of class like HistogramData::BinEdges
+  This class is an implementation detail of classes like HistogramData::BinEdges
   and HistogramData::Points. It wraps a copy-on-write pointer to an underlying
-  data type based on std::vector, such as HistogramX.
+  data type based on std::vector, such as HistogramX and HistogramY.
+
+  The first template parameter is the type of the inheriting class. This is the
+  CRTP (curiously recurring template pattern).
+
+  The second template parameter is the type of the object to store.
+
+  @author Simon Heybrock
+  @date 2016
 
   Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
@@ -38,50 +46,69 @@ namespace detail {
 */
 template <class T, class CowType> class VectorOf {
 public:
+  /// Default constructor, the stored object will be NULL.
   VectorOf() = default;
+  /// Construct stored object of length count initialized to the constant value.
   VectorOf(size_t count, const double &value) {
     m_data = Kernel::make_cow<CowType>(count, value);
   }
+  /// Construct stored object of length count.
   explicit VectorOf(size_t count) { m_data = Kernel::make_cow<CowType>(count); }
+  /// Construct stored object with the contents of the initializer list init.
   VectorOf(std::initializer_list<double> init) {
     m_data = Kernel::make_cow<CowType>(init);
   }
+  /// Copy constructor. Lightweight, stored object will be shared.
   VectorOf(const VectorOf &) = default;
+  /// Move constructor.
   VectorOf(VectorOf &&) = default;
   // Note the lvalue reference qualifier for all assignment operators. This
   // prevents mistakes in client code, assigning to an rvalue, such as
   // histogram.getBinEdges() = { 0.1, 0.2 };
+  /// Copy assignment. Lightweight, stored object will be shared.
   VectorOf &operator=(const VectorOf &)& = default;
+  /// Move assignment.
   VectorOf &operator=(VectorOf &&)& = default;
 
+  /// Assigns the stored object with the contents of the initializer list init.
   VectorOf &operator=(std::initializer_list<double> ilist) & {
     m_data = Kernel::make_cow<CowType>(ilist);
     return *this;
   }
+  /// Constructs the stored object with the contents of the range [first, last).
   template <class InputIt>
   VectorOf(InputIt first, InputIt last)
       : m_data(Kernel::make_cow<CowType>(first, last)) {}
 
+  /// Copy construct from cow_ptr. Lightweight, stored object will be shared.
   explicit VectorOf(const Kernel::cow_ptr<CowType> &other) : m_data(other) {}
+  /// Copy construct from shared_ptr. Lightweight, stored object will be shared.
   explicit VectorOf(const boost::shared_ptr<CowType> &other) : m_data(other) {}
+  /// Copy construct stored object from data.
   explicit VectorOf(const CowType &data)
       : m_data(Kernel::make_cow<CowType>(data)) {}
+  /// Move construct stored object from data.
   explicit VectorOf(CowType &&data)
       : m_data(Kernel::make_cow<CowType>(std::move(data))) {}
 
+  /// Copy assignment from cow_ptr. Lightweight, stored object will be shared.
   VectorOf &operator=(const Kernel::cow_ptr<CowType> &other) & {
     m_data = other;
     return *this;
   }
+  /// Copy assignment from shared_ptr. Lightweight, stored object will be
+  /// shared.
   VectorOf &operator=(const boost::shared_ptr<CowType> &other) & {
     m_data = other;
     return *this;
   }
+  /// Copy assignment to stored object from data.
   VectorOf &operator=(const CowType &data) & {
     if (!m_data || (&(*m_data) != &data))
       m_data = Kernel::make_cow<CowType>(data);
     return *this;
   }
+  /// Move assignment to stored object from data.
   VectorOf &operator=(CowType &&data) & {
     if (!m_data || (&(*m_data) != &data))
       m_data = Kernel::make_cow<CowType>(std::move(data));
