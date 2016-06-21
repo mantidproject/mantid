@@ -3,27 +3,28 @@
 
 //#include "MantidMDAlgorithms/CreateMDWorkspace.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IMDIterator.h"
 #include "MantidAPI/IMDWorkspace.h"
+#include "MantidAPI/NullCoordTransform.h"
 #include "MantidAPI/Workspace_fwd.h"
+#include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
-#include "MantidGeometry/MDGeometry/MDTypes.h"
 #include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
+#include "MantidGeometry/MDGeometry/MDTypes.h"
 #include "MantidKernel/UnitLabel.h"
-#include "MantidDataObjects/MDHistoWorkspace.h"
-#include "MantidVatesAPI/MDLoadingView.h"
+#include "MantidKernel/WarningSuppressions.h"
 #include "MantidVatesAPI/Common.h"
-#include "MantidVatesAPI/vtkDataSetFactory.h"
+#include "MantidVatesAPI/MDLoadingView.h"
 #include "MantidVatesAPI/MDLoadingView.h"
 #include "MantidVatesAPI/ProgressAction.h"
 #include "MantidVatesAPI/VatesXMLDefinitions.h"
 #include "MantidVatesAPI/WorkspaceProvider.h"
-#include "MantidAPI/NullCoordTransform.h"
-#include "MantidAPI/FrameworkManager.h"
+#include "MantidVatesAPI/vtkDataSetFactory.h"
 #include <gmock/gmock.h>
-#include <vtkFieldData.h>
 #include <vtkCharArray.h>
+#include <vtkFieldData.h>
 #include <vtkStringArray.h>
 
 using Mantid::Geometry::MDHistoDimension;
@@ -73,10 +74,7 @@ public:
   ~FakeIMDDimension() override {}
 };
 
-#if defined(GCC_VERSION) && GCC_VERSION >= 50000
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wsuggest-override"
-#endif
+GCC_DIAG_OFF_SUGGEST_OVERRIDE
 //=================================================================================================
 /// Concrete mocked implementation of IMDWorkspace for testing.
 class MockIMDWorkspace : public Mantid::API::IMDWorkspace {
@@ -181,9 +179,7 @@ public:
   MOCK_METHOD1(eventRaised, void(double));
 };
 
-#if defined(GCC_VERSION) && GCC_VERSION >= 50000
-#pragma GCC diagnostic pop
-#endif
+GCC_DIAG_ON_SUGGEST_OVERRIDE
 
 class FakeProgressAction : public Mantid::VATES::ProgressAction {
   void eventRaised(double) override {}
