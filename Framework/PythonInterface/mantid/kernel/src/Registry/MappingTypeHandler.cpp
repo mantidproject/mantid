@@ -2,6 +2,7 @@
 #include "MantidPythonInterface/kernel/Registry/PropertyWithValueFactory.h"
 
 #include "MantidKernel/PropertyManager.h"
+#include "MantidKernel/PropertyManagerProperty.h"
 #include "MantidKernel/PropertyWithValue.h"
 
 #include <boost/make_shared.hpp>
@@ -19,6 +20,17 @@ using Kernel::PropertyManager;
 using Kernel::PropertyWithValue;
 namespace PythonInterface {
 namespace Registry {
+
+/**
+ * Checks if the boost python input object is of the correct type. In this case
+ * a dict.
+ * @param obj: the object to check
+ * @retruns true if the input is a dict type else false
+ */
+const bool
+MappingTypeHandler::isCorrectType(const boost::python::api::object &obj) {
+  return PyObject_TypeCheck(obj.ptr(), &PyDict_Type);
+}
 
 /**
  * Sets the named property in the PropertyManager by extracting a new
@@ -61,12 +73,20 @@ MappingTypeHandler::create(const std::string &name,
                            const boost::python::api::object &defaultValue,
                            const boost::python::api::object &validator,
                            const unsigned int direction) const {
-  UNUSED_ARG(name);
-  UNUSED_ARG(defaultValue);
-  UNUSED_ARG(validator);
-  UNUSED_ARG(direction);
-  throw std::runtime_error("A mapping type property should use the "
-                           "PropertyManagerProperty directly");
+  // We follow the same steps as above
+  auto cppvalue = boost::make_shared<Mantid::Kernel::PropertyManager>();
+  dict pydict(defaultValue);
+  object iterkeys(pydict.iterkeys()), itervalues(pydict.itervalues());
+  auto length = len(pydict);
+  for (ssize_t i = 0; i < length; ++i) {
+    const auto pykey = iterkeys.attr("next")();
+    const auto pyvalue = itervalues.attr("next")();
+    const std::string cppkey = extract<std::string>(pykey)();
+    cppvalue->declareProperty(
+      PropertyWithValueFactory::create(cppkey, pyvalue, direction));
+  }
+  std::unique_ptr<Kernel::Property> valueProp = Kernel::make_unique<Kernel::PropertyManagerProperty>(name, cppvalue, direction);
+  return valueProp;
 }
 }
 }

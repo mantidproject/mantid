@@ -33,7 +33,9 @@ namespace Registry {
   * to a C++ PropertyManager type.
   */
 class MappingTypeHandler final : public PropertyValueHandler {
-
+public:
+  const static bool isCorrectType(const boost::python::api::object &obj);
+private:
   void set(Kernel::IPropertyManager *alg, const std::string &name,
            const boost::python::api::object &mapping) const override;
   std::unique_ptr<Kernel::Property>

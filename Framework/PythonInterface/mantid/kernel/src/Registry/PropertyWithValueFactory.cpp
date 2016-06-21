@@ -2,6 +2,7 @@
 // Includes
 //-----------------------------------------------------------------------------
 #include "MantidPythonInterface/kernel/Registry/PropertyWithValueFactory.h"
+#include "MantidPythonInterface/kernel/Registry/MappingTypeHandler.h"
 #include "MantidPythonInterface/kernel/Registry/TypedPropertyValueHandler.h"
 #include "MantidPythonInterface/kernel/Registry/SequenceTypeHandler.h"
 #include "MantidKernel/PropertyWithValue.h"
@@ -81,6 +82,29 @@ const PyArrayIndex &getArrayIndex() {
     initArrayLookup(index);
   return index;
 }
+
+bool isDict(PyObject *const object) {
+  // Create a borrowed reference
+  boost::python::object obj(
+      boost::python::handle<>(boost::python::borrowed(object)));
+  return MappingTypeHandler::isCorrectType(obj);
+}
+
+// Property Handler for MappingType
+typedef std::vector<boost::shared_ptr<PropertyValueHandler>> PyDictStorage;
+
+void initDictStorage(PyDictStorage &storage) {
+  assert(storage.empty());
+  // Map the Python dict types to the best match in C++
+  storage.emplace_back(boost::make_shared<MappingTypeHandler>());
+}
+
+const PropertyValueHandler &getDictProperty() {
+  static PyDictStorage storage;
+  if (storage.empty())
+    initDictStorage(storage);
+  return *(storage[0]);
+}
 }
 
 /**
@@ -127,11 +151,16 @@ PropertyWithValueFactory::create(const std::string &name,
  */
 const PropertyValueHandler &
 PropertyWithValueFactory::lookup(PyObject *const object) {
+  // Check if we are dealing with a dict type
+  if (isDict(object)) {
+    return getDictProperty();
+  }
+
   // Check if object is array.
-  const auto ptype = isArray(object);
-  if (!ptype.empty()) {
+  const auto arrayType = isArray(object);
+  if (!arrayType.empty()) {
     const PyArrayIndex &arrayIndex = getArrayIndex();
-    auto ait = arrayIndex.find(ptype);
+    auto ait = arrayIndex.find(arrayType);
     if (ait != arrayIndex.end()) {
       return *(ait->second);
     }
@@ -187,6 +216,7 @@ const std::string PropertyWithValueFactory::isArray(PyObject *const object) {
     return std::string("");
   }
 }
+
 }
 }
 }
