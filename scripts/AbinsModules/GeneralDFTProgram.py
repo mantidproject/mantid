@@ -60,7 +60,7 @@ class GeneralDFTProgram(IOmodule):
 
           For more details about these fields please look at the documentation of IOmodule class.
 
-          6) Method should return a list of dictionaries with the following structure:
+        @return: Method should return a list of dictionaries with the following structure:
 
                data= [ {"frequencies": numpy.array, "atomicDisplacements": numpy.array, "weight": numpy._float, "value":numpy.array},
                        {"frequencies": numpy.array, "atomicDisplacements": numpy.array, "weight": numpy._float, "value":numpy.array}
@@ -77,8 +77,6 @@ class GeneralDFTProgram(IOmodule):
 
                       "weight" - weight of k-point
 
-
-        @return:
         """
         return None
 
@@ -146,9 +144,7 @@ class GeneralDFTProgram(IOmodule):
 
         for i in range(_num_k_points):
 
-            print _number_of_atoms,
             temp_1 = i * _number_of_phonons
-            print "temp_1=", temp_1
             _rearranged_data.append({"weight":data["weights"][i],
                                      "value" :data["k_vectors"][i],
                                     "frequencies":data["frequencies"][temp_1:temp_1 + _number_of_phonons],
