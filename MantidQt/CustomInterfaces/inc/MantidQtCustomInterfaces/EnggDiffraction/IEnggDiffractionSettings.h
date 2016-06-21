@@ -37,7 +37,7 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class IEnggDiffractionSettings {
 public:
-  virtual ~IEnggDiffractionSettings(){};
+  virtual ~IEnggDiffractionSettings() = default;
 
   /**
    * Calibration settings as defined by the user.

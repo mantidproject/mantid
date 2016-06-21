@@ -72,6 +72,13 @@ EnggDiffractionViewQtGUI::~EnggDiffractionViewQtGUI() {}
 void EnggDiffractionViewQtGUI::initLayout() {
   // setup container ui
   m_ui.setupUi(this);
+
+  // presenter that knows how to handle a IEnggDiffractionView should
+  // take care of all the logic. Note that the view needs to know the
+  // concrete presenter
+  auto pres = boost::make_shared<EnggDiffractionPresenter>(this);
+  m_presenter.reset(pres.get());
+
   // add tab contents and set up their ui's
   QWidget *wCalib = new QWidget(m_ui.tabMain);
   m_uiTabCalib.setupUi(wCalib);
@@ -87,7 +94,7 @@ void EnggDiffractionViewQtGUI::initLayout() {
 
   auto sharedView = boost::make_shared<EnggDiffractionViewQtGUI>(this);
   m_fittingWidget = new EnggDiffFittingViewQtWidget(
-      m_ui.tabMain, sharedView, sharedView, sharedView, sharedView);
+      m_ui.tabMain, sharedView, sharedView, pres, sharedView);
   m_ui.tabMain->addTab(m_fittingWidget, QString("Fitting"));
 
   QWidget *wSettings = new QWidget(m_ui.tabMain);
@@ -111,13 +118,6 @@ void EnggDiffractionViewQtGUI::initLayout() {
   doSetupTabPreproc();
   doSetupTabSettings();
 
-  // presenter that knows how to handle a IEnggDiffractionView should take care
-  // of all the logic
-  // note that the view needs to know the concrete presenter
-  m_presenter.reset(new EnggDiffractionPresenter(this));
-
-  // it will know what compute resources and tools we have available:
-  // This view doesn't even know the names of compute resources, etc.
   m_presenter->notify(IEnggDiffractionPresenter::Start);
   m_presenter->notify(IEnggDiffractionPresenter::RBNumberChange);
 }

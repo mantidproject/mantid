@@ -38,7 +38,7 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 class IEnggDiffractionUserMsg {
 
 public:
-  virtual ~IEnggDiffractionUserMsg(){};
+  virtual ~IEnggDiffractionUserMsg() = default;
 
   /**
    * Display the current status (running some algorithms, finished,

@@ -6,7 +6,6 @@
 
 #include "MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffractionUserMsg.h"
 #include "MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffractionSettings.h"
-#include "MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffractionCalibration.h"
 #include "MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffractionPythonRunner.h"
 
 namespace MantidQt {
@@ -42,12 +41,10 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class IEnggDiffractionView : public IEnggDiffractionUserMsg,
                              public IEnggDiffractionSettings,
-                             public IEnggDiffractionCalibration,
                              public IEnggDiffractionPythonRunner {
 
 public:
-  IEnggDiffractionView(){};
-  virtual ~IEnggDiffractionView(){};
+  virtual ~IEnggDiffractionView() = default;
 
   /// @name Direct (and usually modal, or at least top/pop-up level) user
   /// interaction

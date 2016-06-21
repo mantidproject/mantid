@@ -5,6 +5,8 @@
 
 #include <gmock/gmock.h>
 
+class QwtData;
+
 // This is a simple mock for the tomo interface view when using SCARF.
 class MockEnggDiffractionView
     : public MantidQt::CustomInterfaces::IEnggDiffractionView {
@@ -87,14 +89,19 @@ public:
   MOCK_METHOD3(newCalibLoaded, void(const std::string &, const std::string &,
                                     const std::string &));
 
+  // virtual std::vector<GSASCalibrationParms> currentCalibration() const
+  MOCK_CONST_METHOD0(
+      currentCalibration,
+      std::vector<MantidQt::CustomInterfaces::GSASCalibrationParms>());
+
   // virtual std::string enggRunPythonCode(const std::string &pyCode)
   MOCK_METHOD1(enggRunPythonCode, std::string(const std::string &));
 
   // virtual void enableTabs(bool enable);
   MOCK_METHOD1(enableTabs, void(bool));
 
-  // virtual void enableCalibrateAndFocusActions(bool enable);
-  MOCK_METHOD1(enableCalibrateAndFocusActions, void(bool));
+  // virtual void enableCalibrateFocusFitUserActions(bool enable);
+  MOCK_METHOD1(enableCalibrateFocusFitUserActions, void(bool));
 
   // virtual std::string focusingDir() const;
   MOCK_CONST_METHOD0(focusingDir, std::string());
@@ -131,6 +138,9 @@ public:
 
   // virtual double rebinningPulsesPerPeriod() const;
   MOCK_CONST_METHOD0(rebinningPulsesTime, double());
+
+  // virtual bool focusedOutWorkspace() const;
+  MOCK_CONST_METHOD0(focusedOutWorkspace, bool());
 
   // virtual bool plotCalibWorkspace
   MOCK_CONST_METHOD0(plotCalibWorkspace, bool());

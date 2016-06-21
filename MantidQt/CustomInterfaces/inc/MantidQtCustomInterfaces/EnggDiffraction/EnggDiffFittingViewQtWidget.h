@@ -85,11 +85,6 @@ public:
   std::string focusingDir() const override;
   //@}
 
-  /// From the IEnggDiffractionCalibration interface
-  //@{
-  std::vector<GSASCalibrationParms> currentCalibration() const override;
-  //@}
-
   /// From the IEnggDiffractionPythonRunner interface
   //@{
   virtual std::string enggRunPythonCode(const std::string &pyCode) override;
@@ -169,9 +164,6 @@ signals:
   void setBank();
 
 private slots:
-  // enables the text field when appropriate bank name is selected
-  void enableSpecNos();
-
   // slot of the fitting peaks per part of the interface
   void browseFitFocusedRun();
   void resetFittingMultiMode();
@@ -233,9 +225,6 @@ private:
 
   /// settings from the user
   boost::shared_ptr<IEnggDiffractionSettings> m_mainSettings;
-
-  /// interface for the 'current' calibration
-  boost::shared_ptr<IEnggDiffractionCalibration> m_mainCalib;
 
   /// interface for the Python runner
   boost::shared_ptr<IEnggDiffractionPythonRunner> m_mainPythonRunner;

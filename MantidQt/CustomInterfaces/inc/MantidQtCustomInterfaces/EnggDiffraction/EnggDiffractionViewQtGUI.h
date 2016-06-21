@@ -119,8 +119,6 @@ public:
   void newCalibLoaded(const std::string &vanadiumNo, const std::string &ceriaNo,
                       const std::string &fname) override;
 
-  std::vector<GSASCalibrationParms> currentCalibration() const override;
-
   std::string enggRunPythonCode(const std::string &pyCode) override;
 
   void enableTabs(bool enable) override;

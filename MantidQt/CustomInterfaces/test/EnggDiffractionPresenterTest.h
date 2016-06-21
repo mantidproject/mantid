@@ -318,12 +318,12 @@ public:
 
     // only after the error, it should disable actions at the beginning of the
     // calculations
-    EXPECT_CALL(mockView, enableCalibrateAndFocusActions(false)).Times(0);
+    EXPECT_CALL(mockView, enableCalibrateFocusFitUserActions(false)).Times(0);
 
     // and only after the error it should enable them again at the
     // (unsuccessful) end - this happens when a separate thread
     // finished (here the thread is mocked)
-    EXPECT_CALL(mockView, enableCalibrateAndFocusActions(true)).Times(0);
+    EXPECT_CALL(mockView, enableCalibrateFocusFitUserActions(true)).Times(0);
 
     // plots peaks and curves
     // the test doesnt get to here as it finishes at EnggCalibrate algo
@@ -531,11 +531,11 @@ public:
 
     // with the normal thread should disable actions at the beginning
     // of the calculations
-    EXPECT_CALL(mockView, enableCalibrateAndFocusActions(false)).Times(0);
+    EXPECT_CALL(mockView, enableCalibrateFocusFitUserActions(false)).Times(0);
 
     // and should enable them again at the (unsuccessful) end - this happens
     // when a separate thread finished (here the thread is mocked)
-    EXPECT_CALL(mockView, enableCalibrateAndFocusActions(true)).Times(0);
+    EXPECT_CALL(mockView, enableCalibrateFocusFitUserActions(true)).Times(0);
 
     // tests whether the plot functions have been called
     EXPECT_CALL(mockView, plotCalibWorkspace()).Times(0);
@@ -608,11 +608,11 @@ public:
     // it will not get to the next steps:
 
     // should disable actions at the beginning of the calculations
-    EXPECT_CALL(mockView, enableCalibrateAndFocusActions(false)).Times(0);
+    EXPECT_CALL(mockView, enableCalibrateFocusFitUserActions(false)).Times(0);
 
     // and should enable them again at the (unsuccessful) end - this happens
     // when a separate thread finished (here the thread is mocked)
-    EXPECT_CALL(mockView, enableCalibrateAndFocusActions(true)).Times(0);
+    EXPECT_CALL(mockView, enableCalibrateFocusFitUserActions(true)).Times(0);
 
     // A warning about the vanadium
     EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(1);
@@ -762,8 +762,8 @@ public:
     EXPECT_CALL(mockView, plotFocusedSpectrum(testing::_)).Times(0);
 
     // it should not get there
-    EXPECT_CALL(mockView, enableCalibrateAndFocusActions(false)).Times(0);
-    EXPECT_CALL(mockView, enableCalibrateAndFocusActions(true)).Times(0);
+    EXPECT_CALL(mockView, enableCalibrateFocusFitUserActions(false)).Times(0);
+    EXPECT_CALL(mockView, enableCalibrateFocusFitUserActions(true)).Times(0);
 
     // should not get to the point where the status is updated
     EXPECT_CALL(mockView, showStatus(testing::_)).Times(0);

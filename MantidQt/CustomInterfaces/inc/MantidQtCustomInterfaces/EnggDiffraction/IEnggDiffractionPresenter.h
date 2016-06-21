@@ -32,8 +32,9 @@ File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class IEnggDiffractionPresenter {
+
 public:
-  virtual ~IEnggDiffractionPresenter() {}
+  virtual ~IEnggDiffractionPresenter() = default;
 
   /// These are user actions, triggered from the (passive) view, that need
   /// handling by the presenter

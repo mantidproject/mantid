@@ -50,7 +50,7 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class IEnggDiffractionCalibration {
 public:
-  virtual ~IEnggDiffractionCalibration(){};
+  virtual ~IEnggDiffractionCalibration() = default;
 
   virtual std::vector<GSASCalibrationParms> currentCalibration() const = 0;
 };

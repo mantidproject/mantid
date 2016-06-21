@@ -33,7 +33,7 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class IEnggDiffractionPythonRunner {
 public:
-  virtual ~IEnggDiffractionPythonRunner(){};
+  virtual ~IEnggDiffractionPythonRunner() = default;
 
   /**
    * Run Python code received as a script string. This is used for

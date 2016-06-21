@@ -4,6 +4,7 @@
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidQtCustomInterfaces/DllConfig.h"
+#include "MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffractionCalibration.h"
 #include "MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffFittingPresenter.h"
 #include "MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffFittingView.h"
 
@@ -45,15 +46,23 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 // needs to be dll-exported for the tests
 class MANTIDQT_CUSTOMINTERFACES_DLL EnggDiffFittingPresenter
     : public QObject,
-      public IEnggDiffFittingPresenter {
+      public IEnggDiffFittingPresenter,
+      public IEnggDiffractionCalibration {
   // Q_OBJECT for 'connect' with thread/worker
   Q_OBJECT
 
 public:
-  EnggDiffFittingPresenter(IEnggDiffFittingView *view);
+  EnggDiffFittingPresenter(
+      IEnggDiffFittingView *view,
+      boost::shared_ptr<IEnggDiffractionCalibration> mainCalib);
   ~EnggDiffFittingPresenter() override;
 
   void notify(IEnggDiffFittingPresenter::Notification notif) override;
+
+  /// From the IEnggDiffractionCalibration interface
+  //@{
+  std::vector<GSASCalibrationParms> currentCalibration() const override;
+  //@}
 
   /// the fitting hard work that a worker / thread will run
   void doFitting(const std::string &focusedRunNo,
@@ -145,6 +154,9 @@ private:
   bool m_fittingFinishedOK;
 
   QThread *m_workerThread;
+
+  /// interface for the 'current' calibration
+  boost::shared_ptr<IEnggDiffractionCalibration> m_mainCalib;
 
   /// Associated view for this presenter (MVP pattern)
   IEnggDiffFittingView *const m_view;

@@ -5,6 +5,7 @@
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/Workspace_fwd.h"
 #include "MantidQtCustomInterfaces/DllConfig.h"
+#include "MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffractionCalibration.h"
 #include "MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffractionPresenter.h"
 #include "MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffractionView.h"
 
@@ -51,7 +52,8 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 // needs to be dll-exported for the tests
 class MANTIDQT_CUSTOMINTERFACES_DLL EnggDiffractionPresenter
     : public QObject,
-      public IEnggDiffractionPresenter {
+      public IEnggDiffractionPresenter,
+      public IEnggDiffractionCalibration {
   // Q_OBJECT for 'connect' with thread/worker
   Q_OBJECT
 
@@ -150,6 +152,7 @@ private:
                                   const std::string &ceriaNo,
                                   const std::string &bankName = "") const;
 
+  std::vector<GSASCalibrationParms> currentCalibration() const override;
   //@}
 
   /// @name Focusing related private methods

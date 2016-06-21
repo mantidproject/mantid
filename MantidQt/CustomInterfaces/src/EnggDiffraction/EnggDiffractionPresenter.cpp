@@ -1034,6 +1034,11 @@ std::string EnggDiffractionPresenter::buildCalibrateSuggestedFilename(
   return sugg;
 }
 
+std::vector<GSASCalibrationParms>
+EnggDiffractionPresenter::currentCalibration() const {
+  return m_currentCalibParms;
+}
+
 /**
 * Calculate a calibration, responding the the "new calibration"
 * action/button.

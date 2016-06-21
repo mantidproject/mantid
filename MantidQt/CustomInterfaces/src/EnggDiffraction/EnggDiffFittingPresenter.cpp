@@ -27,8 +27,17 @@ const bool EnggDiffFittingPresenter::g_useAlignDetectors = true;
 const std::string EnggDiffFittingPresenter::g_focusedFittingWSName =
     "engggui_fitting_focused_ws";
 
-EnggDiffFittingPresenter::EnggDiffFittingPresenter(IEnggDiffFittingView *view)
-    : m_fittingFinishedOK(false), m_view(view) {}
+/**
+ * Constructs a presenter for a fitting tab/widget view, which has a
+ * handle on the current calibration (produced and updated elsewhere).
+ *
+ * @param view the view that is attached to this presenter
+ * @param mainCalib provides the current calibration parameters/status
+ */
+EnggDiffFittingPresenter::EnggDiffFittingPresenter(
+    IEnggDiffFittingView *view,
+    boost::shared_ptr<IEnggDiffractionCalibration> mainCalib)
+    : m_fittingFinishedOK(false), m_mainCalib(mainCalib), m_view(view) {}
 
 EnggDiffFittingPresenter::~EnggDiffFittingPresenter() { cleanup(); }
 
@@ -75,6 +84,11 @@ void EnggDiffFittingPresenter::notify(
     processLogMsg();
     break;
   }
+}
+
+std::vector<GSASCalibrationParms>
+EnggDiffFittingPresenter::currentCalibration() const {
+  return m_mainCalib->currentCalibration();
 }
 
 void EnggDiffFittingPresenter::startAsyncFittingWorker(
@@ -480,7 +494,7 @@ void EnggDiffFittingPresenter::setDifcTzero(MatrixWorkspace_sptr wks) const {
   const std::string units = "none";
   auto &run = wks->mutableRun();
 
-  std::vector<GSASCalibrationParms> calibParms = m_view->currentCalibration();
+  std::vector<GSASCalibrationParms> calibParms = currentCalibration();
   if (calibParms.empty()) {
     run.addProperty<int>("bankid", 1, units, true);
     run.addProperty<double>("difc", 18400.0, units, true);

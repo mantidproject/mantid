@@ -42,9 +42,13 @@ EnggDiffFittingViewQtWidget::EnggDiffFittingViewQtWidget(
     boost::shared_ptr<IEnggDiffractionCalibration> mainCalib,
     boost::shared_ptr<IEnggDiffractionPythonRunner> mainPythonRunner)
     : IEnggDiffFittingView(), m_fittedDataVector(), m_mainMsgProvider(mainMsg),
-      m_mainSettings(mainSettings), m_mainCalib(mainCalib),
-      m_mainPythonRunner(mainPythonRunner), m_presenter(nullptr) {
+      m_mainSettings(mainSettings), m_mainPythonRunner(mainPythonRunner),
+      m_presenter(nullptr) {
+
   initLayout();
+
+  m_presenter.reset(new EnggDiffFittingPresenter(this, mainCalib));
+  m_presenter->notify(IEnggDiffFittingPresenter::Start);
 }
 
 EnggDiffFittingViewQtWidget::~EnggDiffFittingViewQtWidget() {
@@ -64,9 +68,6 @@ void EnggDiffFittingViewQtWidget::initLayout() {
 
   readSettings();
   doSetup();
-
-  m_presenter.reset(new EnggDiffFittingPresenter(this));
-  m_presenter->notify(IEnggDiffFittingPresenter::Start);
 }
 
 void EnggDiffFittingViewQtWidget::doSetup() {
@@ -201,11 +202,6 @@ std::string EnggDiffFittingViewQtWidget::focusingDir() const {
 std::string
 EnggDiffFittingViewQtWidget::enggRunPythonCode(const std::string &pyCode) {
   return m_mainPythonRunner->enggRunPythonCode(pyCode);
-}
-
-std::vector<GSASCalibrationParms>
-EnggDiffFittingViewQtWidget::currentCalibration() const {
-  return m_mainCalib->currentCalibration();
 }
 
 void EnggDiffFittingViewQtWidget::fitClicked() {
