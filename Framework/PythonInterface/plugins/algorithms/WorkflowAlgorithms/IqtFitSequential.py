@@ -186,6 +186,8 @@ class IqtFitSequential(PythonAlgorithm):
         pifp_alg.execute()
         self._result_ws = pifp_alg.getProperty("OutputWorkspace").value
 
+        mtd.addOrReplace(self._result_name, self._result_ws)
+
         # Process generated workspaces
         wsnames = mtd[self._fit_group_name].getNames()
         for i, workspace in enumerate(wsnames):

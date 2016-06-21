@@ -36,9 +36,6 @@ namespace DataHandling {
 */
 class DLLExport PDLoadCharacterizations : public API::Algorithm {
 public:
-  PDLoadCharacterizations();
-  ~PDLoadCharacterizations() override;
-
   const std::string name() const override;
   int version() const override;
   const std::string category() const override;

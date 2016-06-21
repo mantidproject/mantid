@@ -41,9 +41,6 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class DLLExport LoadFullprofResolution : public API::Algorithm {
 public:
-  LoadFullprofResolution();
-  ~LoadFullprofResolution() override;
-
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "LoadFullprofResolution"; }
 

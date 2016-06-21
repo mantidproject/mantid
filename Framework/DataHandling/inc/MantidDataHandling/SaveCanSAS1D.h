@@ -96,10 +96,6 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class DLLExport SaveCanSAS1D : public API::Algorithm {
 public:
-  /// default constructor
-  SaveCanSAS1D();
-  ~SaveCanSAS1D() override;
-
   const std::string name() const override { return "SaveCanSAS1D"; }
   const std::string summary() const override {
     return "Save a MatrixWorkspace to a file in the canSAS 1-D format";

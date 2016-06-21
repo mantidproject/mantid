@@ -76,8 +76,6 @@ public:
   /// Constructor
   UserFunction1D()
       : m_x(0.0), m_x_set(false), m_parameters(new double[100]), m_nPars(0){};
-  /// Destructor
-  ~UserFunction1D() override{};
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "UserFunction1D"; }
   /// Algorithm's version for identification overriding a virtual method

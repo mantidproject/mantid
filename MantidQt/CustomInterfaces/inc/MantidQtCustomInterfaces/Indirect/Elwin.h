@@ -30,6 +30,7 @@ private slots:
   void minChanged(double val);
   void maxChanged(double val);
   void updateRS(QtProperty *prop, double val);
+  void unGroupInput(bool error);
 
 private:
   void addSaveAlgorithm(QString workspaceName, QString filename = "");

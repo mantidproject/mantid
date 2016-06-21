@@ -3,10 +3,15 @@ Module containing classes that act as proxies to the various MantidPlot gui obje
 accessible from python. They listen for the QObject 'destroyed' signal and set the wrapped
 reference to None, thus ensuring that further attempts at access do not cause a crash.
 """
+from __future__ import (absolute_import, division,
+                        print_function)
 
 from PyQt4 import QtCore, QtGui
 from PyQt4.QtCore import Qt, pyqtSlot
-import __builtin__
+try:
+    import builtins
+except ImportError:
+    import __builtin__ as builtins
 import mantid
 import mantidqtpython
 
@@ -60,7 +65,7 @@ class CrossThreadCall(QtCore.QObject):
         else:
             try:
                 self.__func_return = self.__callable(*self.__args, **self.__kwargs)
-            except Exception, exc:
+            except Exception as exc:
                 self.__exception = exc
 
         if self.__exception is not None:
@@ -74,11 +79,11 @@ class CrossThreadCall(QtCore.QObject):
 
             Most types pass okay, but enums don't so they have
             to be coerced to ints. An enum is currently detected
-            as a type that is not a bool and inherits from __builtin__.int
+            as a type that is not a bool and inherits from int
         """
         argtype = type(argument)
         return argtype
-        if isinstance(argument, __builtin__.int) and argtype != bool:
+        if isinstance(argument, builtins.int) and argtype != bool:
             argtype = int
         return argtype
 
@@ -179,7 +184,7 @@ class QtProxyObject(QtCore.QObject):
         """
         Return a string representation of the proxied object
         """
-        return `self._getHeldObject()`
+        return repr(self._getHeldObject())
 
     def _getHeldObject(self):
         """
@@ -669,7 +674,7 @@ class SliceViewerWindowProxy(QtProxyObject):
         """
         Return a string representation of the proxied object
         """
-        return `self._getHeldObject()`
+        return repr(self._getHeldObject())
 
     def __dir__(self):
         """
@@ -777,7 +782,7 @@ def getWorkspaceNames(source):
         try:
             # for non-existent names this raises a KeyError
             w = mantid.AnalysisDataService.Instance()[source]
-        except Exception, exc:
+        except Exception as exc:
             raise ValueError("Workspace '%s' not found!"%source)
 
         if w != None:

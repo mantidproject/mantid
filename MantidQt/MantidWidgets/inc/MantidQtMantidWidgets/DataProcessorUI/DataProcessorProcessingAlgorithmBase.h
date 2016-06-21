@@ -39,6 +39,9 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS DataProcessorProcessingAlgorithmBase {
 public:
+  // Default constructor
+  DataProcessorProcessingAlgorithmBase();
+
   // Constructor
   DataProcessorProcessingAlgorithmBase(
       const std::string &name,

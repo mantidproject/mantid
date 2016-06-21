@@ -102,6 +102,12 @@ void HFIRLoad::moveToBeamCenter(API::MatrixWorkspace_sptr &dataWS,
                       << '\n';
 }
 
+/**
+ * Here the property "sample_detector_distance" is set.
+ * This is the Sample - center of detector distance that all legacy algorithms
+ * use
+ * This was done by Mathieu before BioSANS had the wing detector
+ */
 void HFIRLoad::exec() {
   // Reduction property manager
   const std::string reductionManagerName = getProperty("ReductionProperties");
@@ -177,6 +183,8 @@ void HFIRLoad::exec() {
   double sdd = 0.0;
   const double sample_det_dist = getProperty("SampleDetectorDistance");
   if (!isEmpty(sample_det_dist)) {
+    g_log.debug() << "Getting the SampleDetectorDistance = " << sample_det_dist
+                  << " from the Algorithm input property.\n";
     sdd = sample_det_dist;
   } else {
     const std::string sddName = "sample-detector-distance";
@@ -197,6 +205,8 @@ void HFIRLoad::exec() {
     }
   }
   dataWS->mutableRun().addProperty("sample_detector_distance", sdd, "mm", true);
+  g_log.debug() << "FINAL: Using Total Sample Detector Distance = " << sdd
+                << "\n";
 
   progress.report("MoveInstrumentComponent...");
 

@@ -66,7 +66,10 @@ class VesuvioTests(unittest.TestCase):
         diff_mode = "SingleDifference"
         self._run_load("14188", "3-134", diff_mode, load_mon=True)
         self.assertTrue(mtd.doesExist('evs_raw_monitors'))
-        self.assertTrue(isinstance(mtd['evs_raw_monitors'], MatrixWorkspace))
+        monitor_ws = mtd['evs_raw_monitors']
+        self.assertTrue(isinstance(monitor_ws, MatrixWorkspace))
+        self.assertEqual(monitor_ws.readX(0)[0], 5)
+        self.assertEqual(monitor_ws.readX(0)[-1], 19990)
 
     def test_monitors_loaded_into_ADS_when_monitor_load_is_true_for_forward_scattering(self):
         diff_mode = "SingleDifference"
