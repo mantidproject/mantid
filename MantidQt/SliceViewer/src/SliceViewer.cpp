@@ -622,23 +622,22 @@ void SliceViewer::updateDimensionSliceWidgets() {
     widget->hide();
   }
 
-  bool m_dimXset = false;
-  bool m_dimYset = false;
-  if (m_firstWorkspaceOpen == false) { // put non integrated dimensions first
-	  for (size_t d = 0; d < m_dimensions.size(); d++) {
-		  if ((m_dimXset == false) && (m_ws->getDimension(d)->getIsIntegrated() == false)) {
-			  m_dimX = d;
-			  m_dimXset = true;
-		  }
-		  if ((m_dimYset == false) && (m_ws->getDimension(d)->getIsIntegrated() == false) && (d != m_dimX)) {
-			  m_dimY = d;
-			  m_dimYset = true;
-		  }
-		  if ((m_dimXset == true) && (m_dimYset == true)) {
-			  break;
-		  }
-	  }
-  }
+  bool dimXset = false;
+  bool dimYset = false;
+// put non integrated dimensions first
+  for (size_t d = 0; d < m_dimensions.size(); d++) {
+    if ((dimXset == false) && (m_ws->getDimension(d)->getIsIntegrated() == false)) {
+		  m_dimX = d;
+		  dimXset = true;
+		}
+	  if ((dimYset == false) && (m_ws->getDimension(d)->getIsIntegrated() == false) && (d != m_dimX)) {
+		  m_dimY = d;
+		  dimYset = true;
+		}
+	  if ((dimXset == true) && (dimYset == true)) {
+		  break;
+		}
+	}
 
   int maxLabelWidth = 10;
   int maxUnitsWidth = 10;
