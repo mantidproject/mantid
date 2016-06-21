@@ -105,6 +105,9 @@ public:
     Mantid::API::Grouping grouping;
     grouping.groupNames = {"fwd", "bwd"};
     grouping.pairNames = {"long"};
+    grouping.groups = {"1-32", "33-64"};
+    grouping.pairs.emplace_back(0, 1);
+    grouping.pairAlphas = {1.0};
     EXPECT_CALL(*m_dataSelector, getInstrumentName())
         .Times(1)
         .WillOnce(Return("MUSR"));
@@ -136,6 +139,7 @@ public:
     EXPECT_CALL(*m_fitBrowser,
                 setWorkspaceNames(UnorderedElementsAreArray(expectedNames)))
         .Times(1);
+    m_dataLoader.setDeadTimesType(DeadTimesType::FromFile);
     m_presenter->handleSelectedDataChanged(
         grouping, MantidQt::CustomInterfaces::Muon::PlotType::Asymmetry, true);
     // test ADS here
