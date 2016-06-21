@@ -3,22 +3,22 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidHistogramData/BinEdgeStandardDeviations.h"
-#include "MantidHistogramData/BinEdgeVariances.h"
+#include "MantidHistogramData/CountStandardDeviations.h"
+#include "MantidHistogramData/CountVariances.h"
 #include "MantidHistogramData/EValidation.h"
+#include "MantidHistogramData/FrequencyStandardDeviations.h"
+#include "MantidHistogramData/FrequencyVariances.h"
 #include "MantidHistogramData/HistogramE.h"
-#include "MantidHistogramData/PointStandardDeviations.h"
-#include "MantidHistogramData/PointVariances.h"
 
 #include <cfloat>
 #include <numeric>
 
-using Mantid::HistogramData::BinEdgeStandardDeviations;
-using Mantid::HistogramData::BinEdgeVariances;
+using Mantid::HistogramData::CountStandardDeviations;
+using Mantid::HistogramData::CountVariances;
+using Mantid::HistogramData::FrequencyStandardDeviations;
+using Mantid::HistogramData::FrequencyVariances;
 using Mantid::HistogramData::HistogramE;
 using Mantid::HistogramData::isValid;
-using Mantid::HistogramData::PointStandardDeviations;
-using Mantid::HistogramData::PointVariances;
 
 class EValidationTest : public CxxTest::TestSuite {
 public:
@@ -39,25 +39,23 @@ public:
 
   void test_works_for_HistogramE() { TS_ASSERT(isValid(HistogramE{1.0, 2.0})); }
 
-  void test_works_for_BinEdgeStandardDeviations() {
-    TS_ASSERT(isValid(BinEdgeStandardDeviations{1.0, 2.0}));
+  void test_works_for_CountStandardDeviations() {
+    TS_ASSERT(isValid(CountStandardDeviations{1.0, 2.0}));
   }
 
-  void test_works_for_BinEdgeVariances() {
-    TS_ASSERT(isValid(BinEdgeVariances{1.0, 2.0}));
+  void test_works_for_CountVariances() {
+    TS_ASSERT(isValid(CountVariances{1.0, 2.0}));
   }
 
-  void test_works_for_PointStandardDeviations() {
-    TS_ASSERT(isValid(PointStandardDeviations{1.0, 2.0}));
+  void test_works_for_FrequencyStandardDeviations() {
+    TS_ASSERT(isValid(FrequencyStandardDeviations{1.0, 2.0}));
   }
 
-  void test_works_for_PointVariances() {
-    TS_ASSERT(isValid(PointVariances{1.0, 2.0}));
+  void test_works_for_FrequencyVariances() {
+    TS_ASSERT(isValid(FrequencyVariances{1.0, 2.0}));
   }
 
-  void test_length_zero() {
-    TS_ASSERT(isValid(HistogramE(0)));
-  }
+  void test_length_zero() { TS_ASSERT(isValid(HistogramE(0))); }
 
   void test_detects_negative() {
     TS_ASSERT(!isValid(makeE({-1.0, 1.0, 1.0})));
