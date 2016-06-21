@@ -45,7 +45,7 @@ class PropertyManagerPropertyTest(unittest.TestCase):
 
         pmgr = fake.getProperty("Args").value
         self.assertTrue(isinstance(pmgr, PropertyManager))
-        self.assertEqual(4, len(pmgr))
+        self.assertEqual(5, len(pmgr))
         self.assertTrue('A' in pmgr)
         self.assertEqual(1, pmgr['A'].value)
         self.assertTrue('B' in pmgr)
@@ -60,13 +60,22 @@ class PropertyManagerPropertyTest(unittest.TestCase):
         # Check the level-1 nested property manager property
         # Get the level1-nested property manager 
         nested_l1_pmgr = pmgr['E'].value
-        evaluate_pmgr(nested_l1_pmgr, 'F', 10.4)
-        evaluate_pmgr(nested_l1_pmgr, 'G', [1.0,2.0, 3.0])
+        self.assertEqual(3, len(nested_l1_pmgr))
+        self.assertTrue('F' in nested_l1_pmgr)
+        self.assertEqual(10.4, nested_l1_pmgr['F'].value)
+        self.assertTrue('G' in nested_l1_pmgr)
+        self.assertEqual(1., nested_l1_pmgr['G'].value[0])
+        self.assertEqual(2., nested_l1_pmgr['G'].value[1])
+        self.assertEqual(3., nested_l1_pmgr['G'].value[2])
+        self.assertTrue('H' in nested_l1_pmgr)
+        self.assertTrue(isinstance(nested_l1_pmgr['H'].value, PropertyManager))
 
         # Get the level2-nested property manager 
         nested_l2_pmgr = nested_l1_pmgr['H'].value
-        evaluate_pmgr(nested_l2_pmgr, 'I', "test")
-        evaluate_pmgr(nested_l2_pmgr, 'J', 120.6)
+        self.assertTrue('I' in nested_l2_pmgr)
+        self.assertEqual("test", nested_l2_pmgr['I'].value)
+        self.assertTrue('J' in nested_l2_pmgr)
+        self.assertEqual(120.6, nested_l2_pmgr['J'].value)
 
     def _check_object_attributes(self, prop, name, direction):
         self.assertEquals(prop.name, name)
