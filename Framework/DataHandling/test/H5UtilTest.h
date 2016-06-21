@@ -62,7 +62,12 @@ public:
     const std::string ATTR_NAME_2("attributeName2");
     const std::string ATTR_VALUE_2("attriuteValue2");
 
-    std::map<std::string, std::string> attributesScalar{
+    const std::string ATTR_NAME_3("attributeName3");
+    const float ATTR_VALUE_3(123.0f);
+    const std::string ATTR_NAME_4("attributeName4");
+    const int ATTR_VALUE_4(7);
+
+    std::map<std::string, std::string> stringAttributesScalar{
         {ATTR_NAME_1, ATTR_VALUE_1}, {ATTR_NAME_2, ATTR_VALUE_2}};
 
     removeFile(FILENAME);
@@ -72,18 +77,26 @@ public:
       H5File file(FILENAME, H5F_ACC_EXCL);
       auto group = H5Util::createGroupNXS(file, GRP_NAME, "NXentry");
       H5Util::writeWithStrAttributes(group, DATA_NAME, DATA_VALUE,
-                                     attributesScalar);
+                                     stringAttributesScalar);
+      auto data = group.openDataSet(DATA_NAME);
+      // Add the float and string attribute
+      H5Util::writeNumAttribute(data, ATTR_NAME_3, ATTR_VALUE_3);
+      H5Util::writeNumAttribute(data, ATTR_NAME_4, ATTR_VALUE_4);
       file.close();
     }
 
     // Assert
     TS_ASSERT(Poco::File(FILENAME).exists());
+    std::map<std::string, float> floatAttributesScalar{{ATTR_NAME_3, ATTR_VALUE_3}};
+    std::map<std::string, int> intAttributesScalar{{ATTR_NAME_4, ATTR_VALUE_4}};
     do_assert_simple_string_data_set(FILENAME, GRP_NAME, DATA_NAME, DATA_VALUE,
-                                     attributesScalar);
+                                     stringAttributesScalar, floatAttributesScalar,
+                                     intAttributesScalar);
 
     // cleanup
     removeFile(FILENAME);
   }
+
 
   void test_array1d() {
     const std::string FILENAME("H5UtilTest_array1d.h5");
@@ -148,8 +161,12 @@ private:
   void do_assert_simple_string_data_set(
       const std::string &filename, const std::string &groupName,
       const std::string &dataName, const std::string &dataValue,
-      const std::map<std::string, std::string> &attributes =
-          std::map<std::string, std::string>()) {
+      const std::map<std::string, std::string> &stringAttributes =
+          std::map<std::string, std::string>(),
+      const std::map<std::string, float> &floatAttributes =
+      std::map<std::string, float>(),
+      const std::map<std::string, int> &intAttributes =
+      std::map<std::string, int>()) {
     TS_ASSERT(Poco::File(filename).exists());
 
     // read tests
@@ -167,24 +184,42 @@ private:
     TS_ASSERT_EQUALS(dataCheck, dataValue);
 
     // Check the attributes
-    do_test_attributes_on_data_set(data, attributes);
-
+    do_test_attributes_on_data_set(data, stringAttributes, floatAttributes, intAttributes);
     file.close();
   }
 
   void do_test_attributes_on_data_set(
-      H5::DataSet &data, std::map<std::string, std::string> attributes) {
+      H5::DataSet &data, const std::map<std::string, std::string>& stringAttributes,
+      const std::map<std::string, float>& floatAttributes,
+      const std::map<std::string, int>& intAttributes) {
     auto numAttributes = data.getNumAttrs();
-    auto expectedNumAttributes = static_cast<int>(attributes.size());
+    auto expectedNumStringAttributes = static_cast<int>(stringAttributes.size());
+    auto expectedNumFloatAttributes = static_cast<int>(floatAttributes.size());
+    auto expectedNumIntAttributes = static_cast<int>(intAttributes.size());
+    int totalNumAttributs = expectedNumStringAttributes +
+                            expectedNumFloatAttributes +
+                            expectedNumIntAttributes;
     TSM_ASSERT_EQUALS("There should be two attributes present.",
-                      expectedNumAttributes, numAttributes);
+                      totalNumAttributs, numAttributes);
 
-    for (auto &attribute : attributes) {
+    for (auto &attribute : stringAttributes) {
       auto value = H5Util::readAttributeAsString(data, attribute.first);
       TSM_ASSERT_EQUALS("Should retrieve the correct attribute value",
                         attribute.second, value);
     }
+
+    for (auto &attribute : floatAttributes) {
+      auto value = H5Util::readNumAttributeCoerce<float>(data, attribute.first);
+      TSM_ASSERT_EQUALS("Should retrieve the correct attribute value", attribute.second, value);
+    }
+
+    for (auto &attribute : intAttributes) {
+      auto value = H5Util::readNumAttributeCoerce<int>(data, attribute.first);
+      TSM_ASSERT_EQUALS("Should retrieve the correct attribute value",
+                        attribute.second, value);
+    }
   }
+
 };
 
 #endif /* MANTID_DATAHANDLING_H5UTILTEST_H_ */

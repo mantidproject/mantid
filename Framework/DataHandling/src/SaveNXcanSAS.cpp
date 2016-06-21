@@ -241,7 +241,7 @@ std::string getDate() {
   time_t rawtime;
   time(&rawtime);
   char temp[25];
-  strftime(temp, 25, "%d-%b-%Y %H:%M:%S", localtime(&rawtime));
+  strftime(temp, 25,"%Y-%m-%dT%H:%M:%S", localtime(&rawtime));
   std::string sasDate(temp);
   return sasDate;
 }
