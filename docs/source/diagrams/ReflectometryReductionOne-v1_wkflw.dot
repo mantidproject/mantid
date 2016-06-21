@@ -9,6 +9,7 @@ digraph ReflectometryReductionOne {
     secondTransRun    [label="SecondTransmissionRun"]
     outputWorkspaceWL [label="OutputWorkspaceWavelength"]
     outputWorkspaceMT [label="OutputWorkspace"]
+    outputWorksapceMTScale [label="OutputWorkspace"]
     thetaIn           [label="ThetaIn"]
     sourceRotationAngle  [label = "Rotation Angle"] 
    sourceRotationAngleBack [label = "-Rotation Angle"]
@@ -54,13 +55,13 @@ digraph ReflectometryReductionOne {
   }
 
   subgraph processes {
-   $process_style
+    $process_style
     directBeamNorm  [label="Perform Direct\nBeam Normalisation"]
     getSourceRotationAngle [label="Get Angle for Source Rotation"]
   }
 
   subgraph values {
-  $value_style
+   $value_style
     valMon          [label="I&#8320;(&lambda;)"]
     valDet          [label="I(&lambda;)"]
     valIntegrated   [label="&Sigma; I&#8320;(&lambda;)"]
@@ -121,7 +122,11 @@ digraph ReflectometryReductionOne {
   rotateSourceBack      -> outputWorkspaceMT
   outputWorkspaceMT   ->  checkRebin
   checkRebin          ->  checkScale [label="No"]
-  checkRebin         -> rebin [label="Yes"]
+  checkScale          -> scale [label="Yes"]
+  checkRebin          -> rebin [label="Yes"]
+  rebin               -> checkScale
+  checkScale          -> outputWorksapceMTScale [label="No"]
+  scale               -> outputWorksapceMTScale
   momentumTransferMin  -> rebin
   momentumTransferStep -> rebin
   momentumTransferMax  -> rebin
