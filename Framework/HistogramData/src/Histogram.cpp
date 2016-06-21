@@ -96,7 +96,6 @@ CountVariances Histogram::countVariances() const {
   The returned CountStandardDeviations's internal pointer references the same
   data as the uncertainties stored in the Histogram, i.e., there is little
   overhead. */
-Counts Histogram::counts() const { return Counts(m_y); }
 CountStandardDeviations Histogram::countStandardDeviations() const {
   return CountStandardDeviations(m_e);
 }
