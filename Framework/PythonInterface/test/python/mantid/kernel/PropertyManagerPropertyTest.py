@@ -1,4 +1,4 @@
-"""Test the exposed PropertyManagerProperty
+﻿"""Test the exposed PropertyManagerProperty
 """
 import unittest
 from mantid.kernel import PropertyManagerProperty, Direction, PropertyManager
@@ -32,8 +32,15 @@ class PropertyManagerPropertyTest(unittest.TestCase):
         #
         fake = FakeAlgorithm()
         fake.initialize()
-        fake.setProperty("Args", {'A': 1, 'B':10.5, 'C':'String arg', 
-                         'D': [0.0,11.3]})
+        fake.setProperty("Args", {'A': 1, 
+                                  'B':10.5, 
+                                  'C':'String arg', 
+                                  'D': [0.0,11.3], 
+                                  'E':{'F':10.4, 
+                                       'G': [1.0,2.0, 3.0],
+                                       'H':{'I': "test",
+                                       'J': 120.6}}})
+
         pmgr = fake.getProperty("Args").value
         self.assertTrue(isinstance(pmgr, PropertyManager))
         self.assertEqual(4, len(pmgr))
@@ -47,6 +54,17 @@ class PropertyManagerPropertyTest(unittest.TestCase):
         array_value = pmgr['D'].value
         self.assertEqual(0.0,array_value[0])
         self.assertEqual(11.3,array_value[1])
+
+        # Check the level-1 nested property manager property
+        # Get the level1-nested property manager 
+        nested_l1_pmgr = pmgr['E'].value
+        evaluate_pmgr(nested_l1_pmgr, 'F', 10.4)
+        evaluate_pmgr(nested_l1_pmgr, 'G', [1.0,2.0, 3.0])
+
+        # Get the level2-nested property manager 
+        nested_l2_pmgr = nested_l1_pmgr['H'].value
+        evaluate_pmgr(nested_l2_pmgr, 'I', "test")
+        evaluate_pmgr(nested_l2_pmgr, 'J', 120.6)
 
     def _check_object_attributes(self, prop, name, direction):
         self.assertEquals(prop.name, name)

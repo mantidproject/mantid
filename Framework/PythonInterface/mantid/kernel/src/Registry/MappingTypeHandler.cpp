@@ -68,12 +68,11 @@ void MappingTypeHandler::set(Kernel::IPropertyManager *alg,
  * @param direction The direction of the property
  * @returns A pointer to a newly constructed property instance
  */
-std::unique_ptr<Kernel::Property>
-MappingTypeHandler::create(const std::string &name,
-                           const boost::python::api::object &defaultValue,
-                           const boost::python::api::object &validator,
-                           const unsigned int direction) const {
-  // We follow the same steps as above
+std::unique_ptr<Kernel::Property> MappingTypeHandler::create(
+    const std::string &name, const boost::python::api::object &defaultValue,
+    const boost::python::api::object &, const unsigned int direction) const {
+  // We follow the same steps as above. Create a property manager and populate it
+  // with some sub-values
   auto cppvalue = boost::make_shared<Mantid::Kernel::PropertyManager>();
   dict pydict(defaultValue);
   object iterkeys(pydict.iterkeys()), itervalues(pydict.itervalues());
@@ -83,9 +82,12 @@ MappingTypeHandler::create(const std::string &name,
     const auto pyvalue = itervalues.attr("next")();
     const std::string cppkey = extract<std::string>(pykey)();
     cppvalue->declareProperty(
-      PropertyWithValueFactory::create(cppkey, pyvalue, direction));
+        PropertyWithValueFactory::create(cppkey, pyvalue, direction));
   }
-  std::unique_ptr<Kernel::Property> valueProp = Kernel::make_unique<Kernel::PropertyManagerProperty>(name, cppvalue, direction);
+  // Wrap the property manager in a PropertyManagerProperty instance.
+  std::unique_ptr<Kernel::Property> valueProp =
+      Kernel::make_unique<Kernel::PropertyManagerProperty>(name, cppvalue,
+                                                           direction);
   return valueProp;
 }
 }
