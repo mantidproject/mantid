@@ -78,6 +78,10 @@ template <typename NumT, typename LocationType>
 void writeNumAttribute(LocationType &location, const std::string &name,
                        const NumT &value);
 
+template <typename NumT, typename LocationType>
+void writeNumAttribute(LocationType &location, const std::string &name,
+                       const std::vector<NumT> &value);
+
 MANTID_DATAHANDLING_DLL void write(H5::Group &group, const std::string &name,
                                    const std::string &value);
 

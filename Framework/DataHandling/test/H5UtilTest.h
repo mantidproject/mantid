@@ -67,6 +67,11 @@ public:
     const std::string ATTR_NAME_4("attributeName4");
     const int ATTR_VALUE_4(7);
 
+    const std::string ATTR_NAME_5("attributeName5");
+    const std::vector<float> ATTR_VALUE_5 = {12.5f, 34.6f, 455.5f};
+    const std::string ATTR_NAME_6("attributeName6");
+    const std::vector<int> ATTR_VALUE_6 = {12, 44, 78};
+
     std::map<std::string, std::string> stringAttributesScalar{
         {ATTR_NAME_1, ATTR_VALUE_1}, {ATTR_NAME_2, ATTR_VALUE_2}};
 
@@ -79,9 +84,14 @@ public:
       H5Util::writeWithStrAttributes(group, DATA_NAME, DATA_VALUE,
                                      stringAttributesScalar);
       auto data = group.openDataSet(DATA_NAME);
-      // Add the float and string attribute
+      // Add the float and int attribute
       H5Util::writeNumAttribute(data, ATTR_NAME_3, ATTR_VALUE_3);
       H5Util::writeNumAttribute(data, ATTR_NAME_4, ATTR_VALUE_4);
+
+      // Add the float and int vector attributes
+      H5Util::writeNumAttribute(data, ATTR_NAME_5, ATTR_VALUE_5);
+      H5Util::writeNumAttribute(data, ATTR_NAME_6, ATTR_VALUE_6);
+
       file.close();
     }
 
@@ -89,9 +99,14 @@ public:
     TS_ASSERT(Poco::File(FILENAME).exists());
     std::map<std::string, float> floatAttributesScalar{{ATTR_NAME_3, ATTR_VALUE_3}};
     std::map<std::string, int> intAttributesScalar{{ATTR_NAME_4, ATTR_VALUE_4}};
+    std::map<std::string, std::vector<float>> floatVectorAttributesScalar{
+        {ATTR_NAME_5, ATTR_VALUE_5}};
+    std::map<std::string, std::vector<int>> intVectorAttributesScalar{
+        {ATTR_NAME_6, ATTR_VALUE_6}};
     do_assert_simple_string_data_set(FILENAME, GRP_NAME, DATA_NAME, DATA_VALUE,
                                      stringAttributesScalar, floatAttributesScalar,
-                                     intAttributesScalar);
+                                     intAttributesScalar, floatVectorAttributesScalar,
+                                     intVectorAttributesScalar);
 
     // cleanup
     removeFile(FILENAME);
@@ -166,7 +181,11 @@ private:
       const std::map<std::string, float> &floatAttributes =
       std::map<std::string, float>(),
       const std::map<std::string, int> &intAttributes =
-      std::map<std::string, int>()) {
+      std::map<std::string, int>(),
+      const std::map<std::string, std::vector<float>> &floatVectorAttributes =
+      std::map<std::string, std::vector<float>>(),
+      const std::map<std::string, std::vector<int>> &intVectorAttributes =
+      std::map<std::string, std::vector<int>>()) {
     TS_ASSERT(Poco::File(filename).exists());
 
     // read tests
@@ -184,21 +203,29 @@ private:
     TS_ASSERT_EQUALS(dataCheck, dataValue);
 
     // Check the attributes
-    do_test_attributes_on_data_set(data, stringAttributes, floatAttributes, intAttributes);
+    do_test_attributes_on_data_set(data, stringAttributes, floatAttributes,
+                                   intAttributes, floatVectorAttributes,
+                                   intVectorAttributes);
     file.close();
   }
 
   void do_test_attributes_on_data_set(
       H5::DataSet &data, const std::map<std::string, std::string>& stringAttributes,
       const std::map<std::string, float>& floatAttributes,
-      const std::map<std::string, int>& intAttributes) {
+      const std::map<std::string, int>& intAttributes,
+      const std::map<std::string, std::vector<float>>& floatVectorAttributes,
+      const std::map<std::string, std::vector<int>>& intVectorAttributes) {
     auto numAttributes = data.getNumAttrs();
     auto expectedNumStringAttributes = static_cast<int>(stringAttributes.size());
     auto expectedNumFloatAttributes = static_cast<int>(floatAttributes.size());
     auto expectedNumIntAttributes = static_cast<int>(intAttributes.size());
+    auto expectedNumFloatVectorAttributes = static_cast<int>(floatVectorAttributes.size());
+    auto expectedNumIntVectorAttributes = static_cast<int>(intVectorAttributes.size());
     int totalNumAttributs = expectedNumStringAttributes +
                             expectedNumFloatAttributes +
-                            expectedNumIntAttributes;
+                            expectedNumIntAttributes +
+                            expectedNumFloatVectorAttributes +
+                            expectedNumIntVectorAttributes;
     TSM_ASSERT_EQUALS("There should be two attributes present.",
                       totalNumAttributs, numAttributes);
 
