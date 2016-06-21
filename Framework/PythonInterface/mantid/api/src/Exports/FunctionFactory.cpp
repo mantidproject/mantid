@@ -36,7 +36,7 @@ PyObject *getFunctionNames(FunctionFactoryImpl &self) {
 
   PyObject *registered = PyList_New(0);
   for (const auto &name : names) {
-    PyObject *value = PyString_FromString(name.c_str());
+    PyObject *value = PyBytes_FromString(name.c_str());
     if (PyList_Append(registered, value))
       throw std::runtime_error("Failed to insert value into PyList");
   }

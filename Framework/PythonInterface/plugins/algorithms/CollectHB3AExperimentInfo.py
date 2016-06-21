@@ -30,6 +30,8 @@ class CollectHB3AExperimentInfo(PythonAlgorithm):
         self._detStartID = {}
         self._2thetaScanPtDict = {}
         self._scanPt2ThetaDict = {}
+        self._monitorCountsDict = dict()    # key = 2-tuple (int, int) as scan number and pt number.
+        self._expDurationDict = dict()  # key = 2-tuple (int, int) as scan number and pt number.
 
         self._currStartDetID = -999999999
 
@@ -63,7 +65,9 @@ class CollectHB3AExperimentInfo(PythonAlgorithm):
                 If no Pt. given, then all Pt. are all loaded."
         self.declareProperty(mantid.kernel.IntArrayProperty("PtLists", []), pd)
 
-        self.declareProperty(FileProperty(name="DataDirectory",defaultValue="",action=FileAction.OptionalDirectory))
+        self.declareProperty(FileProperty(name="DataDirectory",
+                                          defaultValue="",
+                                          action=FileAction.OptionalDirectory))
 
         self.declareProperty("GetFileFromServer", False, "Obtain data file directly from neutrons.ornl.gov.")
 
@@ -107,13 +111,33 @@ class CollectHB3AExperimentInfo(PythonAlgorithm):
         self._collectPixelsPositions()
 
         # Set up ScanPtFileTable
-        for scannumber in sorted(self._scanPtDict.keys()):
-            for ptnumber in sorted(self._scanPtDict[scannumber]):
-                self.log().debug("Keys for scanPt2ThetaDict: %s." %(str(self._scanPt2ThetaDict.keys())))
-                twotheta = self._scanPt2ThetaDict[(scannumber, ptnumber)]
-                startdetid = self._detStartID[twotheta]
-                datafilename = 'HB3A_exp%d_scan%04d_%04d.xml'%(self._expNumber, scannumber, ptnumber)
-                self._myScanPtFileTableWS.addRow([int(scannumber), int(ptnumber), str(datafilename), int(startdetid)])
+        self.log().warning('Scan numbers are %s.' % str(self._scanPtDict.keys()))
+        self.log().warning("Keys for scanPt2ThetaDict: %s." % str(self._scanPt2ThetaDict.keys()))
+
+        for scan_number in sorted(self._scanPtDict.keys()):
+            self.log().warning('scan %d has Pt. as %s.' % (scan_number, str(self._scanPtDict[scan_number])))
+
+            start_det_id = None
+            for pt_number in sorted(self._scanPtDict[scan_number]):
+                # get start det id.  all Pt. belonged to same scan will use the same starting detector ID
+                if start_det_id is None:
+                    # get 2theta for starting det-ID
+                    assert (scan_number, pt_number) in self._scanPt2ThetaDict, 'Scan %d Pt %d cannot be ' \
+                                                                               'found in scan-pt-2theta dict, ' \
+                                                                               'whose keys are %s.' \
+                                                                               '' % (scan_number, pt_number,
+                                                                                     str(self._scanPt2ThetaDict.keys()))
+                    two_theta = self._scanPt2ThetaDict[(scan_number, pt_number)]
+
+                    assert two_theta in self._detStartID
+                    start_det_id = self._detStartID[two_theta]
+
+                # get detector counts file name and monitor counts
+                data_file_name = 'HB3A_exp%d_scan%04d_%04d.xml' % (self._expNumber, scan_number, pt_number)
+                monitor_counts = self._monitorCountsDict[(scan_number, pt_number)]
+                duration = self._expDurationDict[(scan_number, pt_number)]
+                self._myScanPtFileTableWS.addRow([int(scan_number), int(pt_number), str(data_file_name),
+                                                  int(start_det_id), int(monitor_counts), float(duration)])
 
         # Output
         self.setProperty("OutputWorkspace", self._myScanPtFileTableWS)
@@ -136,6 +160,8 @@ class CollectHB3AExperimentInfo(PythonAlgorithm):
         self._myScanPtFileTableWS.addColumn("int", "Pt")
         self._myScanPtFileTableWS.addColumn("str", "Filename")
         self._myScanPtFileTableWS.addColumn("int", "StartDetID")
+        self._myScanPtFileTableWS.addColumn('int', 'MonitorCounts')
+        self._myScanPtFileTableWS.addColumn('float', 'Duration')
 
         return
 
@@ -222,6 +248,8 @@ class CollectHB3AExperimentInfo(PythonAlgorithm):
             try:
                 iColPtNumber = colnames.index('Pt.')
                 iCol2Theta = colnames.index('2theta')
+                iColMonitor = colnames.index('monitor')
+                iColTime = colnames.index('time')
             except IndexError as e:
                 raise IndexError("Either Pt. or 2theta is not found in columns: %d"%(str(e)))
 
@@ -229,10 +257,15 @@ class CollectHB3AExperimentInfo(PythonAlgorithm):
                 ptnumber = spicetable.cell(irow, iColPtNumber)
                 if ptnumber in requiredptnumbers:
                     twotheta = spicetable.cell(irow, iCol2Theta)
+                    monitor = spicetable.cell(irow, iColMonitor)
+                    exp_time = spicetable.cell(irow, iColTime)
+                    self._monitorCountsDict[(scannumber, ptnumber)] = monitor
+                    self._expDurationDict[(scannumber, ptnumber)] = exp_time
                     if self._2thetaScanPtDict.has_key(twotheta) is False:
                         self._2thetaScanPtDict[twotheta] = []
-                    self._2thetaScanPtDict[twotheta].append( (scannumber, ptnumber) ) # ENDFOR
-        # ENDFOR
+                    self._2thetaScanPtDict[twotheta].append((scannumber, ptnumber))
+            # END-FOR
+        # END-FOR
 
         self.log().notice("[DB] Number of 2theta entries = %d." % (len(self._2thetaScanPtDict.keys())))
 
@@ -245,7 +278,7 @@ class CollectHB3AExperimentInfo(PythonAlgorithm):
             if twotheta_curr - twotheta_prev < self._tol2Theta:
                 # two keys (2theta) are close enough, combine then
                 self._2thetaScanPtDict[twotheta_prev].extend(self._2thetaScanPtDict[twotheta_curr][:])
-                del self._2thetaScanPtDict[twotehta]
+                del self._2thetaScanPtDict[twotheta_curr]
             else:
                 # advanced to current 2theta and no more operation is required
                 twotheta_prev = twotheta_curr

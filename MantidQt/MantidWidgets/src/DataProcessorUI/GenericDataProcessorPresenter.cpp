@@ -71,7 +71,7 @@ GenericDataProcessorPresenter::GenericDataProcessorPresenter(
     : WorkspaceObserver(), m_view(nullptr), m_progressView(nullptr),
       m_whitelist(whitelist), m_preprocessMap(preprocessMap),
       m_processor(processor), m_postprocessor(postprocessor),
-      m_tableDirty(false) {
+      m_workspaceReceiver(), m_tableDirty(false) {
 
   // Columns Group and Options must be added to the whitelist
   m_whitelist.addElement("Group", "Group",

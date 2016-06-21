@@ -1,5 +1,7 @@
 ﻿"""Test the exposed PropertyManagerProperty
 """
+from __future__ import (absolute_import, division, print_function)
+
 import unittest
 from mantid.kernel import PropertyManagerProperty, Direction, PropertyManager
 from mantid.api import Algorithm

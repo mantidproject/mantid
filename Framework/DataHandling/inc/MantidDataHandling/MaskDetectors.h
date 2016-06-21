@@ -54,9 +54,6 @@ namespace DataHandling {
 */
 class DLLExport MaskDetectors : public API::Algorithm {
 public:
-  MaskDetectors();
-  ~MaskDetectors() override;
-
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "MaskDetectors"; };
   /// Summary of algorithms purpose

@@ -45,5 +45,11 @@ BOOST_PYTHON_MODULE(_api)
   // Internal function to declare C++ algorithms that are a part of this module
   boost::python::def("_declareCPPAlgorithms", &_declareCPPAlgorithms);
 
+  try {
 @EXPORT_FUNCTIONS@
+  } catch(boost::python::error_already_set&) {
+  PyErr_Print();
+  exit(1);
+}
+
 }

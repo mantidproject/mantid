@@ -52,10 +52,6 @@
 
 class MANTID_SINQ_DLL LoadFlexiNexus : public Mantid::API::Algorithm {
 public:
-  /// (Empty) Constructor
-  LoadFlexiNexus() : Mantid::API::Algorithm() {}
-  /// Virtual destructor
-  ~LoadFlexiNexus() override {}
   /// Algorithm's name
   const std::string name() const override { return "LoadFlexiNexus"; }
   /// Summary of algorithms purpose

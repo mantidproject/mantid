@@ -29,14 +29,28 @@ void initTypeLookup(PyTypeIndex &index) {
   typedef TypedPropertyValueHandler<double> FloatHandler;
   index.emplace(&PyFloat_Type, boost::make_shared<FloatHandler>());
 
-  typedef TypedPropertyValueHandler<long> IntHandler;
-  index.emplace(&PyInt_Type, boost::make_shared<IntHandler>());
-
   typedef TypedPropertyValueHandler<bool> BoolHandler;
   index.emplace(&PyBool_Type, boost::make_shared<BoolHandler>());
 
-  typedef TypedPropertyValueHandler<std::string> StrHandler;
-  index.emplace(&PyString_Type, boost::make_shared<StrHandler>());
+  // Python 2/3 have an arbitrary-sized long type. The handler
+  // will raise an error if the input value overflows a C long
+  typedef TypedPropertyValueHandler<long> IntHandler;
+  index.emplace(&PyLong_Type, boost::make_shared<IntHandler>());
+
+  // In Python 3 all strings are unicode but in Python 2 unicode strings
+  // must be explicitly requested. The C++ string handler will accept both
+  // but throw and error if the unicode string contains non-ascii characters
+  typedef TypedPropertyValueHandler<std::string> AsciiStrHandler;
+  // Both versions have unicode objects
+  index.emplace(&PyUnicode_Type, boost::make_shared<AsciiStrHandler>());
+
+#if PY_MAJOR_VERSION < 3
+  // Version < 3 had separate fixed-precision long and arbitrary precision
+  // long objects. Handle these too
+  index.emplace(&PyInt_Type, boost::make_shared<IntHandler>());
+  // Version 2 also has the PyString_Type
+  index.emplace(&PyString_Type, boost::make_shared<AsciiStrHandler>());
+#endif
 }
 
 /**
@@ -63,14 +77,17 @@ void initArrayLookup(PyArrayIndex &index) {
   typedef SequenceTypeHandler<std::vector<double>> FloatArrayHandler;
   index.emplace("FloatArray", boost::make_shared<FloatArrayHandler>());
 
-  typedef SequenceTypeHandler<std::vector<int>> IntArrayHandler;
-  index.emplace("IntArray", boost::make_shared<IntArrayHandler>());
+  typedef SequenceTypeHandler<std::vector<std::string>> StringArrayHandler;
+  index.emplace("StringArray", boost::make_shared<StringArrayHandler>());
 
   typedef SequenceTypeHandler<std::vector<long>> LongIntArrayHandler;
   index.emplace("LongIntArray", boost::make_shared<LongIntArrayHandler>());
 
-  typedef SequenceTypeHandler<std::vector<std::string>> StringArrayHandler;
-  index.emplace("StringArray", boost::make_shared<StringArrayHandler>());
+#if PY_MAJOR_VERSION < 3
+  // Backwards compatible behaviour
+  typedef SequenceTypeHandler<std::vector<int>> IntArrayHandler;
+  index.emplace("IntArray", boost::make_shared<IntArrayHandler>());
+#endif
 }
 
 /**
@@ -194,13 +211,21 @@ const std::string PropertyWithValueFactory::isArray(PyObject *const object) {
     if (PyLong_Check(item)) {
       return std::string("LongIntArray");
     }
+#if PY_MAJOR_VERSION < 3
+    // In python 2 ints & longs are separate
     if (PyInt_Check(item)) {
       return std::string("IntArray");
     }
+#endif
     if (PyFloat_Check(item)) {
       return std::string("FloatArray");
     }
-    if (PyString_Check(item)) {
+#if PY_MAJOR_VERSION >= 3
+    if (PyUnicode_Check(item)) {
+      return std::string("StringArray");
+    }
+#endif
+    if (PyBytes_Check(item)) {
       return std::string("StringArray");
     }
     // If we get here, we've found a sequence and we can't interpret the item

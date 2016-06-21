@@ -25,12 +25,6 @@ using namespace API;
 using namespace DataObjects;
 using std::size_t;
 
-/// (Empty) Constructor
-GroupDetectors2::GroupDetectors2() : m_FracCompl(0.0) {}
-
-/// Destructor
-GroupDetectors2::~GroupDetectors2() {}
-
 // progress estimates
 const double GroupDetectors2::CHECKBINS = 0.10;
 const double GroupDetectors2::OPENINGFILE = 0.03;

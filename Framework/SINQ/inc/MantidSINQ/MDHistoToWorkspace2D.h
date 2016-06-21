@@ -39,8 +39,6 @@ class MANTID_SINQ_DLL MDHistoToWorkspace2D : public Mantid::API::Algorithm {
 public:
   /// Default constructor
   MDHistoToWorkspace2D();
-  /// Virtual destructor
-  ~MDHistoToWorkspace2D() override {}
   /// Algorithm's name
   const std::string name() const override { return "MDHistoToWorkspace2D"; }
   /// Summary of algorithms purpose
