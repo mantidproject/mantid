@@ -1,5 +1,5 @@
 from docutils import statemachine
-from docutils.parsers.rst import Directive
+from docutils.parsers.rst import Directive #pylint: disable=unused-import
 import re
 
 ALG_DOCNAME_RE = re.compile(r'^([A-Z][a-zA-Z0-9]+)-v([0-9][0-9]*)$')

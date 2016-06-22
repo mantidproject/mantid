@@ -1,7 +1,7 @@
-#pylint: disable=invalid-name
-from mantiddoc.directives.base import AlgorithmBaseDirective
+#pylint: disable=invalid-name,deprecated-module
+from mantiddoc.directives.base import AlgorithmBaseDirective #pylint: disable=unused-import
 import re
-import string
+from string import punctuation
 
 SUBSTITUTE_REF_RE = re.compile(r'\|(.+?)\|')
 
@@ -168,14 +168,14 @@ class PropertiesDirective(AlgorithmBaseDirective):
                 defaultstr = "*Optional*"
             else:
                 defaultstr = str(val)
-        except:
+        except ValueError:
             try:
                 val = float(default)
                 if val >= 1e+307:
                     defaultstr = "*Optional*"
                 else:
                     defaultstr = str(val)
-            except:
+            except ValueError:
                 # Fall-back default for anything
                 defaultstr = str(default)
 
@@ -186,7 +186,7 @@ class PropertiesDirective(AlgorithmBaseDirective):
 
         # A special case for single-character default values (e.g. + or *, see MuonLoad). We don't
         # want them to be interpreted as list items.
-        if len(defaultstr) == 1 and defaultstr in string.punctuation:
+        if len(defaultstr) == 1 and defaultstr in punctuation:
             defaultstr = "\\" + defaultstr
 
         # Values ending with underscores should just be literals
@@ -250,7 +250,7 @@ class PropertiesDirective(AlgorithmBaseDirective):
         are not docutils subsitution referencess by esacping them
         """
         def repl(match):
-            return '\|' + match.group(1) + '\|'
+            return r'\|' + match.group(1) + r'\|'
         return SUBSTITUTE_REF_RE.sub(repl, desc)
 
 
