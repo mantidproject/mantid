@@ -56,8 +56,6 @@ namespace MantidQt {
             ApplicationWindow* window;
             MantidUI* mantidUI;
 
-            friend class ApplicationWindow;
-
             void saveProjectFile(Folder *folder, const QString &fn, bool compress);
             QString saveProjectFolder(Folder *folder, int &windowCount, bool isTopLevel = false);
         };

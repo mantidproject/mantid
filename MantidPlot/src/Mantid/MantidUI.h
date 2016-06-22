@@ -6,6 +6,7 @@
 //----------------------------------
 #include "../ApplicationWindow.h"
 #include "../Graph.h"
+#include "Mantid/IProjectSerialisable.h"
 
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/Algorithm.h"
@@ -100,7 +101,7 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 Q_DECLARE_METATYPE(Mantid::API::MatrixWorkspace_sptr)
 Q_DECLARE_METATYPE(Mantid::API::MatrixWorkspace_const_sptr)
 
-class MantidUI : public QObject {
+class MantidUI : public QObject, Mantid::IProjectSerialisable {
   Q_OBJECT
 
 public:
@@ -502,7 +503,11 @@ public slots:
   void clearAllMemory(const bool prompt = true);
   // Ticket #672
   void saveNexusWorkspace();
-  QString saveToString(const std::string &workingDir);
+  // Serialise the workspaces to a TSV file.
+  std::string saveToProject(ApplicationWindow *app) override;
+  // Load the workspaces from a Mantid project
+  void loadFromProject(const std::string &lines, ApplicationWindow *app,
+                                 const int fileVersion) override;
 
 #ifdef _WIN32
 public:

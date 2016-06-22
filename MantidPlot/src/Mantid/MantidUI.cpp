@@ -2091,16 +2091,18 @@ void MantidUI::enableSaveNexus(const QString &wsName) {
 
 void MantidUI::disableSaveNexus() { appWindow()->disableSaveNexus(); }
 
-/** This method is sueful for saving the currently loaded workspaces to project
-* file on save.
-*  saves the names of all the workspaces loaded into mantid workspace tree
-*  into a string and calls save nexus on each workspace to save the data to a
-* nexus file.
-* @param workingDir :: -working directory of teh current project
-*/
-QString MantidUI::saveToString(const std::string &workingDir) {
-  using namespace Mantid::API;
 
+/** This method implements IProjectSerialisable to save the currently loaded workspaces in
+ * the project.
+ *
+ * Saves the names of all the workspaces loaded into mantid workspace tree. Creates
+ * a string and calls save nexus on each workspace to save the data to a nexus file.
+ *
+ * @param app :: The application window instance
+ */
+std::string MantidUI::saveToProject(ApplicationWindow *app) {
+  using namespace Mantid::API;
+  std::string workingDir = app->workingDir.toStdString();
   QString wsNames;
   wsNames = "<mantidworkspaces>\n";
   wsNames += "WorkspaceNames";
@@ -2136,8 +2138,13 @@ QString MantidUI::saveToString(const std::string &workingDir) {
     }
   }
   wsNames += "\n</mantidworkspaces>\n";
-  return wsNames;
+  return wsNames.toStdString();
 }
+
+void MantidUI::loadFromProject(const string &lines, ApplicationWindow *app, const int fileVersion) {
+    throw std::runtime_error("Not yet implemented");
+}
+
 /**
 *  Prepares the Mantid Menu depending on the state of the active MantidMatrix.
 */

@@ -77,7 +77,8 @@ void ProjectSerialiser::saveProjectFile(Folder *folder, const QString &fn,
   QString text;
 
   // Save the list of workspaces
-  text += mantidUI->saveToString(window->workingDir.toStdString());
+  std::string workspaceString = mantidUI->saveToProject(window);
+  text += QString::fromStdString(workspaceString);
 
   ScriptingWindow* scriptingWindow = window->getScriptWindowHandle();
   if (scriptingWindow)
