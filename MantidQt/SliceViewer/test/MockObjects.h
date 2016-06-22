@@ -3,19 +3,20 @@
 
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/IPeaksWorkspace.h"
+#include "MantidGeometry/Crystal/IPeak.h"
 #include "MantidGeometry/Crystal/PeakTransform.h"
 #include "MantidGeometry/Crystal/PeakTransformFactory.h"
-#include "MantidQtSliceViewer/PeaksPresenter.h"
+#include "MantidKernel/UnitLabel.h"
+#include "MantidKernel/WarningSuppressions.h"
 #include "MantidQtSliceViewer/PeakOverlayView.h"
 #include "MantidQtSliceViewer/PeakOverlayViewFactory.h"
 #include "MantidQtSliceViewer/PeakViewColor.h"
-#include "MantidQtSliceViewer/ZoomablePeaksView.h"
+#include "MantidQtSliceViewer/PeaksPresenter.h"
 #include "MantidQtSliceViewer/UpdateableOnDemand.h"
-#include "MantidGeometry/Crystal/IPeak.h"
-#include "MantidKernel/UnitLabel.h"
+#include "MantidQtSliceViewer/ZoomablePeaksView.h"
+#include <QColor>
 #include <boost/regex.hpp>
 #include <gmock/gmock.h>
-#include <QColor>
 
 using namespace MantidQt::SliceViewer;
 using namespace Mantid::API;
@@ -23,8 +24,9 @@ using namespace Mantid::Geometry;
 using namespace Mantid;
 using boost::regex;
 
-namespace {
+GCC_DIAG_OFF_SUGGEST_OVERRIDE
 
+namespace {
 /*------------------------------------------------------------
 Zoomable Peaks View
 ------------------------------------------------------------*/
@@ -247,5 +249,7 @@ public:
   MOCK_METHOD3(setRange, void(size_t nBins, coord_t min, coord_t max));
 };
 }
+
+GCC_DIAG_ON_SUGGEST_OVERRIDE
 
 #endif
