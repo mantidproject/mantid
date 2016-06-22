@@ -37,7 +37,7 @@ Bugs Resolved
 
 SliceViewer Improvements
 ------------------------
-
+* When opening the sliceviewer, it will default to showing the first two non-integrated dimensions
 |
 
 Full list of

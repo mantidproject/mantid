@@ -37,14 +37,6 @@ static const string RUNINFO_PARAM("Filename");
 static const string MAP_PARAM("MappingFilename");
 
 //----------------------------------------------------------------------------------------------
-/// Constructor
-LoadPreNexus::LoadPreNexus() {}
-
-//----------------------------------------------------------------------------------------------
-/// Destructor
-LoadPreNexus::~LoadPreNexus() {}
-
-//----------------------------------------------------------------------------------------------
 /// @copydoc Mantid::API::IAlgorithm::name()
 const std::string LoadPreNexus::name() const { return "LoadPreNexus"; }
 

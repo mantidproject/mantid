@@ -24,12 +24,6 @@ using namespace Kernel;
 using namespace API;
 using namespace Geometry;
 
-/// (Empty) Constructor
-FindDetectorsInShape::FindDetectorsInShape() {}
-
-/// Destructor
-FindDetectorsInShape::~FindDetectorsInShape() {}
-
 void FindDetectorsInShape::init() {
   declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "Workspace", "", Direction::Input),

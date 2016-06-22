@@ -10,12 +10,15 @@
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidKernel/WarningSuppressions.h"
 
 #include "MantidQtCustomInterfaces/Muon/ALCBaselineModellingPresenter.h"
 
 using namespace MantidQt::CustomInterfaces;
 using namespace testing;
 using boost::scoped_ptr;
+
+GCC_DIAG_OFF_SUGGEST_OVERRIDE
 
 class MockALCBaselineModellingView : public IALCBaselineModellingView {
 public:
@@ -361,5 +364,7 @@ public:
     m_view->help();
   }
 };
+
+GCC_DIAG_ON_SUGGEST_OVERRIDE
 
 #endif /* MANTIDQT_CUSTOMINTERFACES_ALCBASELINEMODELLINGTEST_H_ */

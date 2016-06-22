@@ -48,16 +48,6 @@ const string PARAM_MAX_BANK_NUM("MaxBankNumber");
 }
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-CreateChunkingFromInstrument::CreateChunkingFromInstrument() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-CreateChunkingFromInstrument::~CreateChunkingFromInstrument() {}
-
-//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const string CreateChunkingFromInstrument::name() const {
   return "CreateChunkingFromInstrument";

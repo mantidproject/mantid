@@ -24,7 +24,7 @@ namespace Environment {
  */
 bool typeHasAttribute(PyObject *obj, const char *attr) {
   PyObject *cls_dict = obj->ob_type->tp_dict;
-  return PyDict_Contains(cls_dict, PyString_FromString(attr)) > 0;
+  return PyDict_Contains(cls_dict, PyBytes_FromString(attr)) > 0;
 }
 
 /** Same as above but taking a wrapper reference instead

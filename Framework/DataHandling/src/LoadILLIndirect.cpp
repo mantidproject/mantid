@@ -32,11 +32,6 @@ LoadILLIndirect::LoadILLIndirect()
 }
 
 //----------------------------------------------------------------------------------------------
-/** Destructor
- */
-LoadILLIndirect::~LoadILLIndirect() {}
-
-//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string LoadILLIndirect::name() const { return "LoadILLIndirect"; }
 

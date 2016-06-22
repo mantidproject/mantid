@@ -281,13 +281,6 @@ SaveGSASInstrumentFile::SaveGSASInstrumentFile()
       m_galpha(), m_gbeta(), m_bank_mndsp(), m_bank_mxtof() {}
 
 //----------------------------------------------------------------------------------------------
-/** Destructor
- */
-SaveGSASInstrumentFile::~SaveGSASInstrumentFile() {}
-
-//----------------------------------------------------------------------------------------------
-
-//----------------------------------------------------------------------------------------------
 /** Declare properties
   */
 void SaveGSASInstrumentFile::init() {

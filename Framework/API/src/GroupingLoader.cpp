@@ -34,7 +34,7 @@ GroupingLoader::GroupingLoader(Geometry::Instrument_const_sptr instrument,
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-GroupingLoader::~GroupingLoader() {}
+GroupingLoader::~GroupingLoader() = default;
 
 /**
  * Attempts to load a grouping information referenced by IDF.

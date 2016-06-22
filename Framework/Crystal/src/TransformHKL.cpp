@@ -18,14 +18,6 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 
 //--------------------------------------------------------------------------
-/** Constructor
- */
-TransformHKL::TransformHKL() {}
-
-//--------------------------------------------------------------------------
-/** Destructor
- */
-TransformHKL::~TransformHKL() {}
 
 const std::string TransformHKL::name() const { return "TransformHKL"; }
 

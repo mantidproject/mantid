@@ -11,16 +11,6 @@ namespace DataHandling {
 
 DECLARE_ALGORITHM(Merge2WorkspaceLogs)
 
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-Merge2WorkspaceLogs::Merge2WorkspaceLogs() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-Merge2WorkspaceLogs::~Merge2WorkspaceLogs() {}
-
 void Merge2WorkspaceLogs::init() {
 
   declareProperty(make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(

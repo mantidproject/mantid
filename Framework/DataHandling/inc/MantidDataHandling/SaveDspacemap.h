@@ -15,9 +15,6 @@ namespace DataHandling {
  */
 class DLLExport SaveDspacemap : public API::Algorithm {
 public:
-  SaveDspacemap();
-  ~SaveDspacemap() override;
-
   /// Algorithm's name for identification
   const std::string name() const override { return "SaveDspacemap"; };
   /// Summary of algorithms purpose
