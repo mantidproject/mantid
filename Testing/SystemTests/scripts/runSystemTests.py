@@ -70,7 +70,7 @@ if save_dir is None or save_dir == "":
   with open(SAVE_DIR_LIST_PATH, 'r') as f_handle:
     save_dir = f_handle.read().strip()
 # Configure properties file
-mtdconf = stresstesting.MantidFrameworkConfig(loglevel='information',#options.loglevel,
+mtdconf = stresstesting.MantidFrameworkConfig(loglevel=options.loglevel,
                                               data_dirs=data_paths, save_dir=save_dir,
                                               archivesearch=options.archivesearch)
 if options.makeprop:
@@ -81,8 +81,7 @@ execargs = options.execargs
 runner = stresstesting.TestRunner(executable=options.executable, exec_args=execargs, escape_quotes=True)
 reporter = stresstesting.XmlResultReporter(showSkipped=options.showskipped)
 mgr = stresstesting.TestManager(mtdconf.testDir, runner, output = [reporter],
-                                testsInclude="EQSANSDQOutput",#options.testsInclude,
-                                testsExclude=options.testsExclude)
+                                testsInclude=options.testsInclude, testsExclude=options.testsExclude)
 try:
   mgr.executeTests()
 except KeyboardInterrupt:
