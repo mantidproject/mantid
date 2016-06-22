@@ -1,4 +1,4 @@
-# pylint: disable=invalid-name,too-many-arguments
+# pylint: disable=invalid-name,too-many-arguments,too-many-branches
 import sys
 from mantid.kernel import Logger
 
@@ -86,13 +86,11 @@ def get_masked_ids(
         while i < nx_low * component.idstep():
             IDs.append(component.idstart() + i)
             i += 1
-        
         # right
         i = component.maxDetectorID() - nx_high * component.idstep()
         while i < component.maxDetectorID():
             IDs.append(i)
-            i += 1       
-
+            i += 1
         # low: 0,256,512,768,..,1,257,513
         for row in range(ny_low):
             i = row + component.idstart()
@@ -100,7 +98,6 @@ def get_masked_ids(
                     ny_low + component.idstart():
                 IDs.append(i)
                 i += component.idstep()
-
         # high # 255, 511, 767..
         for row in range(ny_high):
             i = component.idstep() + component.idstart() - row - 1
@@ -113,10 +110,8 @@ def get_masked_ids(
         total_n_tubes = component.nelements()
         for tube in range(nx_low):
             IDs.extend(list(_get_ids_for_assembly(component[tube])))
-
         for tube in range(total_n_tubes - nx_high, total_n_tubes):
             IDs.extend(list(_get_ids_for_assembly(component[tube])))
-
         # y
         for tube in range(total_n_tubes):
             for pixel in range(component[tube].nelements()):
@@ -126,14 +121,11 @@ def get_masked_ids(
                         component[tube].nelements() - ny_high,
                         component[tube].nelements()):
                     IDs.append(component[tube][pixel].getID())
-
     else:
         Logger("hfir_instrument").error(
             "get_masked_pixels not applied. Component not valid: %s of type %s." % 
             (component.getName(), component.type()))
-
     return IDs
-
 
 def get_masked_pixels(
         nx_low,
