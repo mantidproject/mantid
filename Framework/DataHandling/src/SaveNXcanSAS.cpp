@@ -303,6 +303,14 @@ std::string getIntensityUnitLabel(std::string intensityUnitLabel) {
   }
 }
 
+std::string getIntensityUnit(Mantid::API::MatrixWorkspace_sptr workspace) {
+  auto iUnit = workspace->YUnit();
+  if (iUnit.empty()) {
+    iUnit = workspace->YUnitLabel();
+  }
+  return iUnit;
+}
+
 std::string getMomentumTransferLabel(std::string momentumTransferLabel) {
   if (momentumTransferLabel == "Angstrom^-1") {
     return sasMomentumTransfer;
@@ -355,7 +363,8 @@ void addData1D(H5::Group &data, Mantid::API::MatrixWorkspace_sptr workspace) {
   // Add I with units + uncertainty definition
   const auto intensity = workspace->readY(0);
   std::map<std::string, std::string> iAttributes;
-  auto iUnit = workspace->YUnit();
+  auto iUnit = getIntensityUnit(workspace);
+  iUnit = getIntensityUnitLabel(iUnit);
   iAttributes.insert(std::make_pair(sasUnitAttr, iUnit));
   iAttributes.insert(std::make_pair(sasUncertaintyAttr, sasDataIdev));
 
@@ -535,7 +544,7 @@ void addData2D(H5::Group &data, Mantid::API::MatrixWorkspace_sptr workspace) {
 
   // Get 2D I data and store it
   std::map<std::string, std::string> iAttributes;
-  auto iUnit = workspace->YUnit();
+  auto iUnit = getIntensityUnit(workspace);
   iUnit = getIntensityUnitLabel(iUnit);
   iAttributes.insert(std::make_pair(sasUnitAttr, iUnit));
   iAttributes.insert(std::make_pair(sasUncertaintyAttr, sasDataIdev));
