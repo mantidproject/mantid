@@ -114,6 +114,7 @@
 #include "TiledWindow.h"
 #include "DockedWindow.h"
 #include "TSVSerialiser.h"
+#include "ProjectSerialiser.h"
 
 // TODO: move tool-specific code to an extension manager
 #include "ScreenPickerTool.h"
@@ -195,6 +196,7 @@
 #include "MantidQtAPI/AlgorithmInputHistory.h"
 #include "MantidQtAPI/ManageUserDirectories.h"
 #include "MantidQtAPI/Message.h"
+
 
 #include "MantidQtMantidWidgets/CatalogHelper.h"
 #include "MantidQtMantidWidgets/CatalogSearch.h"
@@ -6133,7 +6135,8 @@ bool ApplicationWindow::saveProject(bool compress) {
     ;
   }
 
-  saveProjectFile(projectFolder(), projectname, compress);
+  ProjectSerialiser serialiser(this, mantidUI);
+  serialiser.save(projectFolder(), projectname, compress);
 
   setWindowTitle("MantidPlot - " + projectname);
   savedProject();
@@ -14321,73 +14324,6 @@ Folder *ApplicationWindow::appendProject(const QString &fn,
   return 0;
 }
 
-void ApplicationWindow::saveProjectFile(Folder *folder, const QString &fn,
-                                        bool compress) {
-  QFile f(fn);
-  if (d_backup_files && f.exists()) { // make byte-copy of current file so that
-                                      // there's always a copy of the data on
-                                      // disk
-    while (!f.open(QIODevice::ReadOnly)) {
-      if (f.isOpen())
-        f.close();
-      int choice = QMessageBox::warning(
-          this, tr("MantidPlot - File backup error"), // Mantid
-          tr("Cannot make a backup copy of <b>%1</b> (to %2).<br>If you ignore "
-             "this, you run the risk of <b>data loss</b>.")
-              .arg(projectname)
-              .arg(projectname + "~"),
-          QMessageBox::Retry | QMessageBox::Default,
-          QMessageBox::Abort | QMessageBox::Escape, QMessageBox::Ignore);
-      if (choice == QMessageBox::Abort)
-        return;
-      if (choice == QMessageBox::Ignore)
-        break;
-    }
-
-    if (f.isOpen()) {
-      QFile::copy(fn, fn + "~");
-      f.close();
-    }
-  }
-
-  if (!f.open(QIODevice::WriteOnly)) {
-    QMessageBox::about(this, tr("MantidPlot - File save error"),
-                       tr("The file: <br><b>%1</b> is opened in read-only mode")
-                           .arg(fn)); // Mantid
-    return;
-  }
-  QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
-
-  QString text;
-
-  // Save the list of workspaces
-  text += mantidUI->saveToString(workingDir.toStdString());
-
-  if (scriptingWindow)
-    text += scriptingWindow->saveToString();
-
-  int windowCount = 0;
-  text += saveProjectFolder(folder, windowCount, true);
-
-  text.prepend("<windows>\t" + QString::number(windowCount) + "\n");
-  text.prepend("<scripting-lang>\t" + QString(scriptingEnv()->objectName()) +
-               "\n");
-  text.prepend("MantidPlot " + QString::number(maj_version) + "." +
-               QString::number(min_version) + "." +
-               QString::number(patch_version) + " project file\n");
-
-  QTextStream t(&f);
-  t.setCodec(QTextCodec::codecForName("UTF-8"));
-  t << text;
-  f.close();
-
-  if (compress) {
-    file_compress(fn.toLatin1().constData(), "w9");
-  }
-
-  QApplication::restoreOverrideCursor();
-}
-
 void ApplicationWindow::saveAsProject() {
   saveFolderAsProject(currentFolder());
 }
@@ -14406,7 +14342,8 @@ void ApplicationWindow::saveFolderAsProject(Folder *f) {
     if (!baseName.contains("."))
       fn.append(".qti");
 
-    saveProjectFile(f, fn, selectedFilter.contains(".gz"));
+    ProjectSerialiser serialiser(this, mantidUI);
+    serialiser.save(f, fn, selectedFilter.contains(".gz"));
   }
 }
 
@@ -16943,49 +16880,6 @@ void ApplicationWindow::dropInTiledWindow(MdiSubWindow *w, QPoint pos) {
   if (tw != NULL) {
     tw->dropAtPosition(w, pos);
   }
-}
-
-QString ApplicationWindow::saveProjectFolder(Folder *folder, int &windowCount,
-                                             bool isTopLevel) {
-  QString text;
-
-  // Write the folder opening tag
-  if (!isTopLevel) {
-    text += "<folder>\t" + QString(folder->objectName()) + "\t" +
-            folder->birthDate() + "\t" + folder->modificationDate();
-
-    if (folder == currentFolder())
-      text += "\tcurrent";
-    text += "\n";
-    text += "<open>" + QString::number(folder->folderListItem()->isExpanded()) +
-            "</open>\n";
-  }
-
-  // Write windows
-  QList<MdiSubWindow *> windows = folder->windowsList();
-  foreach (MdiSubWindow *w, windows) {
-    Mantid::IProjectSerialisable *ips =
-        dynamic_cast<Mantid::IProjectSerialisable *>(w);
-    if (ips)
-      text += QString::fromUtf8(ips->saveToProject(this).c_str());
-
-    ++windowCount;
-  }
-
-  // Write subfolders
-  QList<Folder *> subfolders = folder->folders();
-  foreach (Folder *f, subfolders) { text += saveProjectFolder(f, windowCount); }
-
-  // Write log info
-  if (!folder->logInfo().isEmpty())
-    text += "<log>\n" + folder->logInfo() + "</log>\n";
-
-  // Write the folder closing tag
-  if (!isTopLevel) {
-    text += "</folder>\n";
-  }
-
-  return text;
 }
 
 bool ApplicationWindow::isOfType(const QObject *obj,

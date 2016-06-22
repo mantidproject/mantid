@@ -268,10 +268,6 @@ public slots:
                      bool compress = false);
   bool saveProject(bool compress = false);
 
-  /// Serialises a project folder into its string project file representation
-  QString saveProjectFolder(Folder *folder, int &windowCount,
-                            bool isTopLevel = false);
-
   //! Set the project status to modifed
   void modifiedProject();
   //! Set the project status to saved (not modified)
@@ -1019,8 +1015,6 @@ public slots:
   Folder *appendProject(const QString &file_name, Folder *parentFolder = 0);
   void saveAsProject();
   void saveFolderAsProject(Folder *f);
-  void saveProjectFile(Folder *folder, const QString &fn,
-                       bool compress = false);
 
   //!  adds a folder list item to the list view "lv"
   void addFolderListViewItem(Folder *f);
