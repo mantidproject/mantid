@@ -194,6 +194,12 @@ public:
   void setSharedDx(const Kernel::cow_ptr<HistogramData::HistogramDx> &dx) {
     mutableHistogramRef().setSharedDx(dx);
   }
+  virtual void setSharedY(const Kernel::cow_ptr<HistogramData::HistogramY> &y) {
+    mutableHistogramRef().setSharedY(y);
+  }
+  virtual void setSharedE(const Kernel::cow_ptr<HistogramData::HistogramE> &e) {
+    mutableHistogramRef().setSharedE(e);
+  }
 
   friend class DataObjects::Workspace2D;
 

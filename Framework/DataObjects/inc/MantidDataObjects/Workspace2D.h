@@ -118,14 +118,6 @@ public:
     getSpectrum(index).mutableHistogramRef().setFrequencyStandardDeviations(
         std::forward<T>(data)...);
   }
-  void setSharedY(const size_t index,
-                  const Kernel::cow_ptr<HistogramData::HistogramY> &y) {
-    getSpectrum(index).mutableHistogramRef().setSharedY(y);
-  }
-  void setSharedE(const size_t index,
-                  const Kernel::cow_ptr<HistogramData::HistogramE> &e) {
-    getSpectrum(index).mutableHistogramRef().setSharedE(e);
-  }
 
 protected:
   /// Protected copy constructor. May be used by childs for cloning.

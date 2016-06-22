@@ -288,7 +288,14 @@ public:
                    const Kernel::cow_ptr<HistogramData::HistogramDx> &dx) {
     getSpectrum(index).setSharedDx(dx);
   }
-
+  void setSharedY(const size_t index,
+                  const Kernel::cow_ptr<HistogramData::HistogramY> &y) {
+    getSpectrum(index).setSharedY(y);
+  }
+  void setSharedE(const size_t index,
+                  const Kernel::cow_ptr<HistogramData::HistogramE> &e) {
+    getSpectrum(index).setSharedE(e);
+  }
   // Methods for getting read-only access to the data.
   // Just passes through to the virtual dataX/Y/E function (const version)
   /// Returns a read-only (i.e. const) reference to the specified X array
