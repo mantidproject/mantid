@@ -38,10 +38,10 @@ options are available:
 
   A `Gauss-Newton <https://en.wikipedia.org/wiki/Gauss–Newton_algorithm#Improved_versions>`__ algorithm with damping.
 - :ref:`FABADA <FABADA>`
-- DTRS 
-  
+- `DTRS <https://ccpforge.cse.rl.ac.uk/gf/project/ral_nlls>`__
+
   A trust region minimizer (not listed in the comparison table)
-- Mose-Sorensen
+- `Mose-Sorensen <https://ccpforge.cse.rl.ac.uk/gf/project/ral_nlls>`__
   
   A trust region minimizer (not listed in the comparison table)
 
