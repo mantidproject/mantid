@@ -73,6 +73,14 @@ public:
       : m_data(first, last) {
     Validator<T>::checkValidity(m_data);
   }
+  template <class Generator,
+            class = typename std::enable_if<
+                !std::is_convertible<Generator, double>::value>::type>
+  FixedLengthVector(size_t count, Generator g)
+      : m_data(count) {
+    std::generate(m_data.begin(), m_data.end(), g);
+    Validator<T>::checkValidity(m_data);
+  }
 
   template <class InputIt> void assign(InputIt first, InputIt last) & {
     checkAssignmentSize(static_cast<size_t>(std::distance(first, last)));

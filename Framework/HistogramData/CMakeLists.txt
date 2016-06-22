@@ -32,6 +32,7 @@ set ( INC_FILES
 	inc/MantidHistogramData/HistogramX.h
 	inc/MantidHistogramData/HistogramY.h
 	inc/MantidHistogramData/Iterable.h
+	inc/MantidHistogramData/LinearGenerator.h
 	inc/MantidHistogramData/Offsetable.h
 	inc/MantidHistogramData/PointStandardDeviations.h
 	inc/MantidHistogramData/PointVariances.h
@@ -42,6 +43,7 @@ set ( INC_FILES
 	inc/MantidHistogramData/VarianceVectorOf.h
 	inc/MantidHistogramData/VectorOf.h
 	inc/MantidHistogramData/XValidation.h
+	inc/MantidHistogramData/YValidation.h
 )
 
 set ( TEST_FILES
@@ -62,6 +64,7 @@ set ( TEST_FILES
 	HistogramXTest.h
 	HistogramYTest.h
 	IterableTest.h
+	LinearGeneratorTest.h
 	OffsetableTest.h
 	PointStandardDeviationsTest.h
 	PointVariancesTest.h
@@ -71,6 +74,7 @@ set ( TEST_FILES
 	VarianceVectorOfTest.h
 	VectorOfTest.h
 	XValidationTest.h
+	YValidationTest.h
 )
 
 if (COVERALLS)
