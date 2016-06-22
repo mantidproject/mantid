@@ -20,12 +20,14 @@ namespace CustomInterfaces {
  * @param fitBrowser :: [input] Pointer to fit browser to update
  * @param dataSelector :: [input] Pointer to data selector to get input from
  * @param dataLoader :: [input] Data loader (shared with MuonAnalysis)
+ * @param timeZero :: [input] Time zero from MuonAnalysis interface (optional)
+ * @param rebinArgs :: [input] Rebin args from MuonAnalysis interface (optional)
  */
 MuonAnalysisFitDataPresenter::MuonAnalysisFitDataPresenter(
     IWorkspaceFitControl *fitBrowser, IMuonFitDataSelector *dataSelector,
-    MuonAnalysisDataLoader &dataLoader)
+    MuonAnalysisDataLoader &dataLoader, double timeZero, std::string rebinArgs)
     : m_fitBrowser(fitBrowser), m_dataSelector(dataSelector),
-      m_dataLoader(dataLoader) {}
+      m_dataLoader(dataLoader), m_timeZero(timeZero), m_rebinArgs(rebinArgs) {}
 
 /**
  * Called when data selector reports "data properties changed"
@@ -225,7 +227,7 @@ Mantid::API::Workspace_sptr MuonAnalysisFitDataPresenter::createWorkspace(
   Mantid::API::Workspace_sptr outputWS;
 
   // parse name - should be a single-run workspace
-  const auto params = MuonAnalysisHelper::parseWorkspaceName(name);
+  auto params = MuonAnalysisHelper::parseWorkspaceName(name);
   if (params.runs.size() > 1) {
     throw std::invalid_argument("Failed to create workspace with multiple "
                                 "runs: instead, create several single-run "
@@ -259,7 +261,7 @@ Mantid::API::Workspace_sptr MuonAnalysisFitDataPresenter::createWorkspace(
       }
     }
     analysisOptions.loadedTimeZero = loadedData.timeZero;
-    // analysisOptions.timeZero = // Same as MA uses? How do we know?
+    analysisOptions.timeZero = m_timeZero;
     analysisOptions.timeLimits.first = m_dataSelector->getStartTime();
     analysisOptions.timeLimits.second = m_dataSelector->getEndTime();
     analysisOptions.rebinArgs = ""; // Or use the same as MA?

@@ -48,7 +48,8 @@ public:
   MuonAnalysisFitDataPresenter(
       MantidQt::MantidWidgets::IWorkspaceFitControl *fitBrowser,
       MantidQt::MantidWidgets::IMuonFitDataSelector *dataSelector,
-      MuonAnalysisDataLoader &dataLoader);
+      MuonAnalysisDataLoader &dataLoader, double timeZero = 0,
+      std::string rebinArgs = "");
   /// Handles "data properties changed"
   void handleDataPropertiesChanged();
   /// Handles "selected data changed"
@@ -62,6 +63,10 @@ public:
   void setAssignedFirstRun(const QString &wsName);
   /// Get the workspace the peak picker is currently assigned to
   QString getAssignedFirstRun() const { return m_PPAssignedFirstRun; };
+  /// Change the stored time zero
+  void setTimeZero(double timeZero) { m_timeZero = timeZero; }
+  /// Change the stored rebin args
+  void setRebinArgs(const std::string &rebinArgs) { m_rebinArgs = rebinArgs; }
 
 private:
   /// Create workspaces to fit and update fit browser (model)
@@ -84,6 +89,10 @@ private:
   QString m_PPAssignedFirstRun;
   /// Loader to load and analyse data (reference)
   MuonAnalysisDataLoader &m_dataLoader;
+  /// Stored time zero
+  double m_timeZero;
+  /// Stored rebin args
+  std::string m_rebinArgs;
 };
 
 } // namespace CustomInterfaces

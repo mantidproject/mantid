@@ -1200,6 +1200,7 @@ void MuonAnalysis::inputFileChanged(const QStringList &files) {
 
   // Set various instance variables
   m_dataTimeZero = loadResult->timeZero;
+  m_fitDataPresenter->setTimeZero(m_dataTimeZero);
   m_dataFirstGoodData = loadResult->firstGoodData - loadResult->timeZero;
   m_title = matrix_workspace->getTitle();
   m_previousFilenames = files;
@@ -2034,7 +2035,7 @@ void MuonAnalysis::loadFittings() {
   // Set up fit data and function presenters
   m_fitDataPresenter =
       Mantid::Kernel::make_unique<MuonAnalysisFitDataPresenter>(
-          m_uiForm.fitBrowser, m_dataSelector, m_dataLoader);
+          m_uiForm.fitBrowser, m_dataSelector, m_dataLoader, m_dataTimeZero);
   m_fitFunctionPresenter =
       Mantid::Kernel::make_unique<MuonAnalysisFitFunctionPresenter>(
           nullptr, m_uiForm.fitBrowser, m_functionBrowser);
