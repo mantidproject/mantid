@@ -12,5 +12,8 @@ Displaying the ragged data using 1D line plots or 2D colour or contour plots is 
 
 Many algorithms cannot operate on Ragged Workspaces, either due to logical or implementation restrictions. If you encounter these problems you may wish to run a Rebin algorithm first to map the data to a regular datagrid of X values.
 
+.. image:: /images/MBC_Ragged.png
+   :width: 40%
+   :alt: Ragged Workspace
 
 .. categories:: Concepts
