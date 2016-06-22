@@ -29,8 +29,6 @@ H5::DataSet writeScalarStrDataSet(Group &group, const std::string &name,
   return data;
 }
 
-
-
 } // anonymous
 
 // -------------------------------------------------------------------
@@ -244,6 +242,25 @@ std::vector<OutputNumT> convertingingRead(DataSet &dataset,
 }
 
 template <typename InputNumT, typename OutputNumT>
+std::vector<OutputNumT> convertingingNumArrayAttributeRead(Attribute &attribute,
+                                          const DataType &dataType) {
+  DataSpace dataSpace = attribute.getSpace();
+
+  std::vector<InputNumT> temp(dataSpace.getSelectNpoints());
+  attribute.read(dataType, temp.data());
+
+  std::vector<OutputNumT> result;
+  result.resize(temp.size());
+
+  std::transform(temp.begin(), temp.end(), result.begin(),
+                 [](const InputNumT a) {
+                   return boost::numeric_cast<OutputNumT>(a);
+                 });
+
+  return result;
+}
+
+template <typename InputNumT, typename OutputNumT>
 OutputNumT convertingingRead(Attribute &attribute,
                                           const DataType &dataType) {
   InputNumT temp;
@@ -252,7 +269,6 @@ OutputNumT convertingingRead(Attribute &attribute,
   return result;
 }
 
-
 } // anonymous
 
 template < typename NumT, typename LocationType>
@@ -260,6 +276,7 @@ NumT readNumAttributeCoerce(LocationType &location,
                             const std::string &attributeName){
     auto attribute = location.openAttribute(attributeName);
     auto dataType = attribute.getDataType();
+
     NumT value;
 
     if (getType<NumT>() == dataType) {
@@ -278,6 +295,34 @@ NumT readNumAttributeCoerce(LocationType &location,
         value = convertingingRead<double, NumT>(attribute, dataType);
     }
 
+    return value;
+}
+
+template < typename NumT, typename LocationType>
+std::vector<NumT> readNumArrayAttributeCoerce(LocationType &location,
+                            const std::string &attributeName){
+    auto attribute = location.openAttribute(attributeName);
+    auto dataType = attribute.getDataType();
+
+    std::vector<NumT> value;
+
+    if (getType<NumT>() == dataType) {
+        DataSpace dataSpace = attribute.getSpace();
+        value.resize(dataSpace.getSelectNpoints());
+        attribute.read(dataType, value.data());
+    } else if (PredType::NATIVE_INT32 == dataType) {
+        value = convertingingNumArrayAttributeRead<int32_t, NumT>(attribute, dataType);
+    } else if (PredType::NATIVE_UINT32 == dataType) {
+        value = convertingingNumArrayAttributeRead<uint32_t, NumT>(attribute, dataType);
+    } else if (PredType::NATIVE_INT64 == dataType) {
+        value = convertingingNumArrayAttributeRead<int64_t, NumT>(attribute, dataType);
+    } else if (PredType::NATIVE_UINT64 == dataType) {
+        value = convertingingNumArrayAttributeRead<uint64_t, NumT>(attribute, dataType);
+    } else if (PredType::NATIVE_FLOAT == dataType) {
+        value = convertingingNumArrayAttributeRead<float, NumT>(attribute, dataType);
+    } else if (PredType::NATIVE_DOUBLE == dataType) {
+        value = convertingingNumArrayAttributeRead<double, NumT>(attribute, dataType);
+    }
     return value;
 }
 
@@ -437,6 +482,34 @@ template MANTID_DATAHANDLING_DLL uint64_t
 readNumAttributeCoerce(H5::Group &location, const std::string &attributeName);
 template MANTID_DATAHANDLING_DLL uint64_t
 readNumAttributeCoerce(H5::DataSet &location, const std::string &attributeName);
+
+// -------------------------------------------------------------------
+// instantiations for readNumArrayAttributeCoerce
+// -------------------------------------------------------------------
+template MANTID_DATAHANDLING_DLL std::vector<float>
+readNumArrayAttributeCoerce(H5::Group &location, const std::string &attributeName);
+template MANTID_DATAHANDLING_DLL std::vector<float>
+readNumArrayAttributeCoerce(H5::DataSet &location, const std::string &attributeName);
+template MANTID_DATAHANDLING_DLL std::vector<double>
+readNumArrayAttributeCoerce(H5::Group &location, const std::string &attributeName);
+template MANTID_DATAHANDLING_DLL std::vector<double>
+readNumArrayAttributeCoerce(H5::DataSet &location, const std::string &attributeName);
+template MANTID_DATAHANDLING_DLL std::vector<int32_t>
+readNumArrayAttributeCoerce(H5::Group &location, const std::string &attributeName);
+template MANTID_DATAHANDLING_DLL std::vector<int32_t>
+readNumArrayAttributeCoerce(H5::DataSet &location, const std::string &attributeName);
+template MANTID_DATAHANDLING_DLL std::vector<uint32_t>
+readNumArrayAttributeCoerce(H5::Group &location, const std::string &attributeName);
+template MANTID_DATAHANDLING_DLL std::vector<uint32_t>
+readNumArrayAttributeCoerce(H5::DataSet &location, const std::string &attributeName);
+template MANTID_DATAHANDLING_DLL std::vector<int64_t>
+readNumArrayAttributeCoerce(H5::Group &location, const std::string &attributeName);
+template MANTID_DATAHANDLING_DLL std::vector<int64_t>
+readNumArrayAttributeCoerce(H5::DataSet &location, const std::string &attributeName);
+template MANTID_DATAHANDLING_DLL std::vector<uint64_t>
+readNumArrayAttributeCoerce(H5::Group &location, const std::string &attributeName);
+template MANTID_DATAHANDLING_DLL std::vector<uint64_t>
+readNumArrayAttributeCoerce(H5::DataSet &location, const std::string &attributeName);
 
 // -------------------------------------------------------------------
 // instantiations for writeArray1D

@@ -245,8 +245,27 @@ private:
       TSM_ASSERT_EQUALS("Should retrieve the correct attribute value",
                         attribute.second, value);
     }
-  }
 
+    for (auto &attribute : floatVectorAttributes) {
+      std::vector<float> value = H5Util::readNumArrayAttributeCoerce<float>(data, attribute.first);
+      TSM_ASSERT_EQUALS("Should retrieve the correct attribute value",
+                        attribute.second, value);
+    }
+
+    for (auto &attribute : intVectorAttributes) {
+      std::vector<int> value = H5Util::readNumArrayAttributeCoerce<int>(data, attribute.first);
+      TSM_ASSERT_EQUALS("Should retrieve the correct attribute value",
+                        attribute.second, value);
+    }
+
+    // Test that coerced read works
+    std::vector<int> expectedCoerced = {12, 34, 455};
+    for (auto &attribute : floatVectorAttributes) {
+      std::vector<int> value = H5Util::readNumArrayAttributeCoerce<int>(data, attribute.first);
+      TSM_ASSERT_EQUALS("Should retrieve the correct attribute value",
+                        expectedCoerced, value);
+    }
+  }
 };
 
 #endif /* MANTID_DATAHANDLING_H5UTILTEST_H_ */

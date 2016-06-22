@@ -110,6 +110,10 @@ template <typename NumT, typename LocationType>
 NumT readNumAttributeCoerce(LocationType &location,
                             const std::string &attributeName);
 
+template <typename NumT, typename LocationType>
+std::vector<NumT> readNumArrayAttributeCoerce(LocationType &location,
+                                              const std::string &attributeName);
+
 template <typename NumT>
 std::vector<NumT> readArray1DCoerce(H5::Group &group, const std::string &name);
 
