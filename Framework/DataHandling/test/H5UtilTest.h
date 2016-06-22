@@ -81,8 +81,8 @@ public:
     { // write tests
       H5File file(FILENAME, H5F_ACC_EXCL);
       auto group = H5Util::createGroupNXS(file, GRP_NAME, "NXentry");
-      H5Util::writeWithStrAttributes(group, DATA_NAME, DATA_VALUE,
-                                     stringAttributesScalar);
+      H5Util::writeScalarDataSetWithStrAttributes(group, DATA_NAME, DATA_VALUE,
+                                                   stringAttributesScalar);
       auto data = group.openDataSet(DATA_NAME);
       // Add the float and int attribute
       H5Util::writeNumAttribute(data, ATTR_NAME_3, ATTR_VALUE_3);

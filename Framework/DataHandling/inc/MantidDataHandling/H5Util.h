@@ -85,10 +85,10 @@ void writeNumAttribute(LocationType &location, const std::string &name,
 MANTID_DATAHANDLING_DLL void write(H5::Group &group, const std::string &name,
                                    const std::string &value);
 
-MANTID_DATAHANDLING_DLL void
-writeWithStrAttributes(H5::Group &group, const std::string &name,
-                       const std::string &value,
-                       const std::map<std::string, std::string> &attributes);
+template <typename T>
+void writeScalarDataSetWithStrAttributes(
+    H5::Group &group, const std::string &name, const T &value,
+    const std::map<std::string, std::string> &attributes);
 
 template <typename NumT>
 void writeArray1D(H5::Group &group, const std::string &name,

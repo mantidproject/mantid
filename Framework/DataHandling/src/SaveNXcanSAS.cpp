@@ -192,8 +192,8 @@ void addDetectors(H5::Group &group, Mantid::API::MatrixWorkspace_sptr workspace,
             group, sasDetectorName, sasInstrumentDetectorClassAttr);
         Mantid::DataHandling::H5Util::write(detector, sasInstrumentDetectorName,
                                             detectorName);
-        Mantid::DataHandling::H5Util::writeWithStrAttributes(
-            detector, sasInstrumentDetectorSdd, std::to_string(distance),
+        Mantid::DataHandling::H5Util::writeScalarDataSetWithStrAttributes(
+            detector, sasInstrumentDetectorSdd, distance,
             sddAttributes);
       }
     }

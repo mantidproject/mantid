@@ -19,17 +19,7 @@ namespace {
 Mantid::Kernel::Logger g_log("H5Util");
 
 const std::string NX_ATTR_CLASS("NX_class");
-
-H5::DataSet writeScalarStrDataSet(Group &group, const std::string &name,
-                                  const std::string &value) {
-  StrType dataType(0, value.length() + 1);
-  DataSpace dataSpace = getDataSpace(1);
-  H5::DataSet data = group.createDataSet(name, dataType, dataSpace);
-  data.write(value, dataType);
-  return data;
 }
-
-} // anonymous
 
 // -------------------------------------------------------------------
 // convert primitives to HDF5 enum
@@ -61,6 +51,44 @@ template <> MANTID_DATAHANDLING_DLL DataType getType<uint64_t>() {
   return PredType::NATIVE_UINT64;
 }
 
+DataSpace getDataSpace(const size_t length) {
+  hsize_t dims[] = {length};
+  return DataSpace(1, dims);
+}
+
+template <typename NumT> DataSpace getDataSpace(const std::vector<NumT> &data) {
+  return H5Util::getDataSpace(data.size());
+}
+
+namespace {
+
+template<typename NumT>
+H5::DataSet writeScalarDataSet(Group &group, const std::string &name,
+                                  const NumT &value) {
+  static_assert(std::is_integral<NumT>::value || std::is_floating_point<NumT>::value,
+                "The writeNumAttribute function only accepts integral of floating point values.");
+  auto dataType = getType<NumT>();
+  DataSpace dataSpace = getDataSpace(1);
+  H5::DataSet data = group.createDataSet(name, dataType, dataSpace);
+  data.write(&value, dataType);
+  return data;
+}
+
+template<>
+H5::DataSet writeScalarDataSet<std::string>(Group &group, const std::string &name,
+                                  const std::string &value) {
+  StrType dataType(0, value.length() + 1);
+  DataSpace dataSpace = getDataSpace(1);
+  H5::DataSet data = group.createDataSet(name, dataType, dataSpace);
+  data.write(value, dataType);
+  return data;
+}
+
+
+
+} // anonymous
+
+
 // -------------------------------------------------------------------
 // write methods
 // -------------------------------------------------------------------
@@ -77,15 +105,6 @@ Group createGroupNXS(Group &group, const std::string &name,
   auto outGroup = group.createGroup(name);
   writeStrAttribute(outGroup, NX_ATTR_CLASS, nxtype);
   return outGroup;
-}
-
-DataSpace getDataSpace(const size_t length) {
-  hsize_t dims[] = {length};
-  return DataSpace(1, dims);
-}
-
-template <typename NumT> DataSpace getDataSpace(const std::vector<NumT> &data) {
-  return H5Util::getDataSpace(data.size());
 }
 
 DSetCreatPropList setCompressionAttributes(const std::size_t length,
@@ -135,17 +154,19 @@ void writeNumAttribute(LocationType &location, const std::string &name,
 
 
 void write(Group &group, const std::string &name, const std::string &value) {
-  writeScalarStrDataSet(group, name, value);
+  writeScalarDataSet(group, name, value);
 }
 
-void writeWithStrAttributes(
-    H5::Group &group, const std::string &name, const std::string &value,
+template<typename T>
+void writeScalarDataSetWithStrAttributes(
+    H5::Group &group, const std::string &name, const T &value,
     const std::map<std::string, std::string> &attributes) {
-  auto data = writeScalarStrDataSet(group, name, value);
+  auto data = writeScalarDataSet(group, name, value);
   for (const auto &attribute : attributes) {
     writeStrAttribute(data, attribute.first, attribute.second);
   }
 }
+
 
 template <typename NumT>
 void writeArray1D(Group &group, const std::string &name,
@@ -532,6 +553,33 @@ writeArray1D(H5::Group &group, const std::string &name,
 template MANTID_DATAHANDLING_DLL void
 writeArray1D(H5::Group &group, const std::string &name,
              const std::vector<uint64_t> &values);
+
+
+// -------------------------------------------------------------------
+// Instantiations for writeScalarWithStrAttributes
+// -------------------------------------------------------------------
+template MANTID_DATAHANDLING_DLL void writeScalarDataSetWithStrAttributes(
+    H5::Group &group, const std::string &name, const std::string &value,
+    const std::map<std::string, std::string> &attributes);
+template MANTID_DATAHANDLING_DLL void writeScalarDataSetWithStrAttributes(
+    H5::Group &group, const std::string &name, const float &value,
+    const std::map<std::string, std::string> &attributes);
+template MANTID_DATAHANDLING_DLL void writeScalarDataSetWithStrAttributes(
+    H5::Group &group, const std::string &name, const double &value,
+    const std::map<std::string, std::string> &attributes);
+template MANTID_DATAHANDLING_DLL void writeScalarDataSetWithStrAttributes(
+    H5::Group &group, const std::string &name, const int32_t &value,
+    const std::map<std::string, std::string> &attributes);
+template MANTID_DATAHANDLING_DLL void writeScalarDataSetWithStrAttributes(
+    H5::Group &group, const std::string &name, const uint32_t &value,
+    const std::map<std::string, std::string> &attributes);
+template MANTID_DATAHANDLING_DLL void writeScalarDataSetWithStrAttributes(
+    H5::Group &group, const std::string &name, const int64_t &value,
+    const std::map<std::string, std::string> &attributes);
+template MANTID_DATAHANDLING_DLL void writeScalarDataSetWithStrAttributes(
+    H5::Group &group, const std::string &name, const uint64_t &value,
+    const std::map<std::string, std::string> &attributes);
+
 
 // -------------------------------------------------------------------
 // instantiations for getDataSpace
