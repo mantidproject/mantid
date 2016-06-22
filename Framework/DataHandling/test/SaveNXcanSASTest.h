@@ -512,9 +512,9 @@ private:
     TSM_ASSERT_EQUALS("Should be just Idev", errorAttribute, sasDataIdev);
 
     // Q_indices attribute
-    auto qAttribute = Mantid::DataHandling::H5Util::readAttributeAsString(
+    auto qAttribute = Mantid::DataHandling::H5Util::readNumArrayAttributeCoerce<int>(
         data, sasDataQIndicesAttr);
-    TSM_ASSERT_EQUALS("Should be just 0", qAttribute, "0");
+    TSM_ASSERT_EQUALS("Should be just 0", qAttribute, std::vector<int>{0});
 
     // Signal attribute
     auto signalAttribute =
@@ -589,9 +589,10 @@ private:
     TSM_ASSERT_EQUALS("Should be just Idev", errorAttribute, sasDataIdev);
 
     // Q_indices attribute
-    auto qAttribute = Mantid::DataHandling::H5Util::readAttributeAsString(
+    auto qAttribute = Mantid::DataHandling::H5Util::readNumArrayAttributeCoerce<int>(
         data, sasDataQIndicesAttr);
-    TSM_ASSERT_EQUALS("Should be just 0,1", qAttribute, "0,1");
+    std::vector<int> expectedQIndices{0,1};
+    TSM_ASSERT_EQUALS("Should be just 0,1", qAttribute, expectedQIndices);
 
     // Signal attribute
     auto signalAttribute =

@@ -322,8 +322,9 @@ void addData1D(H5::Group &data, Mantid::API::MatrixWorkspace_sptr workspace) {
                                                   sasDataQ);
   Mantid::DataHandling::H5Util::writeStrAttribute(data, sasDataIUncertaintyAttr,
                                                   sasDataIdev);
-  Mantid::DataHandling::H5Util::writeStrAttribute(data, sasDataQIndicesAttr,
-                                                  "0");
+  Mantid::DataHandling::H5Util::writeNumAttribute(data, sasDataQIndicesAttr,
+                                                  std::vector<int>{0});
+
   if (workspace->hasDx(0)) {
     Mantid::DataHandling::H5Util::writeStrAttribute(
         data, sasDataQUncertaintyAttr, sasDataQdev);
@@ -508,8 +509,9 @@ void addData2D(H5::Group &data, Mantid::API::MatrixWorkspace_sptr workspace) {
                                                   sasDataIAxesAttr2D);
   Mantid::DataHandling::H5Util::writeStrAttribute(data, sasDataIUncertaintyAttr,
                                                   sasDataIdev);
-  Mantid::DataHandling::H5Util::writeStrAttribute(data, sasDataQIndicesAttr,
-                                                  "0,1");
+  // Write the Q Indices as Int Array
+  Mantid::DataHandling::H5Util::writeNumAttribute(data, sasDataQIndicesAttr,
+                                                  std::vector<int>{0, 1});
 
   // Store the 2D Qx data + units
   std::map<std::string, std::string> qxAttributes;
