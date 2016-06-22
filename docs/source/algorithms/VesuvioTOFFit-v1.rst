@@ -49,7 +49,7 @@ Usage
 
    out_ws, fit_params, chi_sq = VesuvioTOFFit(InputWorkspace=tof_ws, Masses=[1.0079, 16.0, 27.0, 133.0],
                                               MassProfiles=profiles, Background=background,
-                                              IntensityConstraints=[0,1,0,-4])
+                                              IntensityConstraints='[0,1,0,-4]')
 
 .. categories::
 
