@@ -1281,13 +1281,6 @@ public:
     TS_ASSERT_DELTA(out->getParameter("f0.A1"), 0.0, 0.01);
   }
 
-  //#if !(defined __APPLE__)
-  /**
-  * Changing compiler on OS X has yet again caused this (and only this) test to
-  * fail.
-  * Switch it off until it is clear why the other Fit tests are okay on OS X
-  * using Intel
-  */
   void test_Function_IkedaCarpenterPV_NoInstrument() {
     // Try to fit an IC peak to a Gaussian mock data peak
     // Note that fitting a none-totally optimized IC to a Gaussian peak so
@@ -1410,7 +1403,6 @@ public:
     chi2 = fitIndirect.getProperty("OutputChi2overDoF");
     TS_ASSERT_DELTA(chi2, 0.5721, 1);
   }
-  //#endif
 
   void test_function_LogNormal() {
 
