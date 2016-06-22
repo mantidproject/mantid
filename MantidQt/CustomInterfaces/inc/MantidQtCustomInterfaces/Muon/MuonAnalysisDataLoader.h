@@ -3,9 +3,10 @@
 
 #include "MantidQtCustomInterfaces/DllConfig.h"
 #include "MantidQtCustomInterfaces/Muon/MuonAnalysisHelper.h"
-#include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidAPI/IAlgorithm_fwd.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidAPI/GroupingLoader.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/Workspace_fwd.h"
 #include <QMap>
 #include <QStringList>
@@ -94,7 +95,7 @@ public:
 protected:
   /// Set properties of algorithm from options
   void
-  setProcessAlgorithmProperties(IAlgorithm_sptr alg,
+  setProcessAlgorithmProperties(Mantid::API::IAlgorithm_sptr alg,
                                 const Muon::AnalysisOptions &options) const;
 
 private:

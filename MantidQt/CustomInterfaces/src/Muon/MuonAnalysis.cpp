@@ -506,103 +506,23 @@ Workspace_sptr MuonAnalysis::createAnalysisWorkspace(ItemType itemType,
                                                      int tableRow,
                                                      PlotType plotType,
                                                      bool isRaw) {
-  IAlgorithm_sptr alg =
-      AlgorithmManager::Instance().createUnmanaged("MuonProcess");
-
-  alg->initialize();
-
-  // ---- Input workspace ----
   auto loadedWS =
       AnalysisDataService::Instance().retrieveWS<Workspace>(m_grouped_name);
-  auto inputGroup = boost::make_shared<WorkspaceGroup>();
+  Muon::AnalysisOptions options(m_groupingHelper.parseGroupingTable());
+  options.summedPeriods = getSummedPeriods();
+  options.subtractedPeriods = getSubtractedPeriods();
+  options.timeZero = timeZero();           // user input
+  options.loadedTimeZero = m_dataTimeZero; // from file
+  options.timeLimits.first = startTime();
+  options.timeLimits.second = finishTime();
+  options.rebinArgs = isRaw ? "" : rebinParams(loadedWS);
+  options.plotType = plotType;
 
-  if (auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(loadedWS)) {
-    // If is a group, will need to handle periods
-    for (int i = 0; i < group->getNumberOfEntries(); i++) {
-      auto ws = boost::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(i));
-      inputGroup->addWorkspace(ws);
-    }
-    // Parse selected operation
-    alg->setProperty("SummedPeriodSet", getSummedPeriods());
-    alg->setProperty("SubtractedPeriodSet", getSubtractedPeriods());
-  } else if (auto ws = boost::dynamic_pointer_cast<MatrixWorkspace>(loadedWS)) {
-    // Put this single WS into a group and set it as the input property
-    inputGroup->addWorkspace(ws);
-    alg->setProperty("SummedPeriodSet", "1");
-  } else {
-    throw std::runtime_error("Unsupported workspace type");
-  }
-  alg->setProperty("InputWorkspace", inputGroup);
-  alg->setProperty("Mode", "Analyse");
+  const auto *table =
+      itemType == ItemType::Group ? m_uiForm.groupTable : m_uiForm.pairTable;
+  options.groupPairName = table->item(tableRow, 0)->text().toStdString();
 
-  // ---- Time zero correction ----
-  alg->setProperty("TimeZero", timeZero());           // user input
-  alg->setProperty("LoadedTimeZero", m_dataTimeZero); // from file
-
-  // ---- X axis options ----
-  alg->setProperty("Xmin", startTime());
-
-  double Xmax = finishTime();
-  if (Xmax != EMPTY_DBL()) {
-    alg->setProperty("Xmax", Xmax);
-  }
-
-  // ---- Rebin parameters ----
-  std::string params = rebinParams(loadedWS);
-  if (!isRaw && !params.empty()) {
-    alg->setProperty("RebinParams", params);
-  }
-
-  // ---- Analysis ----
-  if (itemType == Group) {
-    std::string outputType;
-
-    switch (plotType) {
-    case Counts:
-    case Logarithm:
-      outputType = "GroupCounts";
-      break;
-    case Asymmetry:
-      outputType = "GroupAsymmetry";
-      break;
-    default:
-      throw std::invalid_argument("Unsupported plot type");
-    }
-
-    alg->setProperty("OutputType", outputType);
-
-    int groupNum = getGroupNumberFromRow(tableRow);
-    alg->setProperty("GroupIndex", groupNum);
-  } else if (itemType == Pair) {
-    if (plotType == Asymmetry)
-      alg->setProperty("OutputType", "PairAsymmetry");
-    else
-      throw std::invalid_argument("Pairs support asymmetry plot type only");
-
-    QTableWidget *t = m_uiForm.pairTable;
-
-    double alpha = t->item(tableRow, 3)->text().toDouble();
-    int index1 =
-        static_cast<QComboBox *>(t->cellWidget(tableRow, 1))->currentIndex();
-    int index2 =
-        static_cast<QComboBox *>(t->cellWidget(tableRow, 2))->currentIndex();
-
-    alg->setProperty("PairFirstIndex", index1);
-    alg->setProperty("PairSecondIndex", index2);
-    alg->setProperty("Alpha", alpha);
-  } else {
-    throw std::invalid_argument("Unsupported item type");
-  }
-
-  // We don't want workspace in the ADS so far
-  alg->setChild(true);
-
-  // Name is not used, as is child algorithm, so just to make validator happy
-  alg->setPropertyValue("OutputWorkspace", "__IAmNinjaYouDontSeeMe");
-
-  alg->execute();
-
-  return alg->getProperty("OutputWorkspace");
+  return m_dataLoader.createAnalysisWorkspace(loadedWS, options);
 }
 
 /**
