@@ -105,7 +105,7 @@ public:
         "Workspace_0");
     TS_ASSERT(out);
     TS_ASSERT_EQUALS(out->getNumberHistograms(), 3);
-    for(size_t i = 0; i < out->blocksize(); ++i) {
+    for (size_t i = 0; i < out->blocksize(); ++i) {
       TS_ASSERT_EQUALS(out->readY(0)[i], 0.0);
       TS_ASSERT_DIFFERS(out->readY(1)[i], 0.0);
       TS_ASSERT_EQUALS(out->readY(2)[i], -out->readY(1)[i]);
@@ -114,7 +114,7 @@ public:
         "Workspace_1");
     TS_ASSERT(out);
     TS_ASSERT_EQUALS(out->getNumberHistograms(), 3);
-    for(size_t i = 0; i < out->blocksize(); ++i) {
+    for (size_t i = 0; i < out->blocksize(); ++i) {
       TS_ASSERT_EQUALS(out->readY(0)[i], 0.0);
       TS_ASSERT_DIFFERS(out->readY(1)[i], 0.0);
       TS_ASSERT_EQUALS(out->readY(2)[i], -out->readY(1)[i]);
