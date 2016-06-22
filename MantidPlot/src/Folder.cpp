@@ -239,6 +239,107 @@ Folder *Folder::rootFolder() {
 
 bool Folder::isEmpty() const { return lstWindows.isEmpty(); }
 
+/**
+ * Load the folder structure from a Mantid project file
+ *
+ * @param lines :: lines containing the folder structure
+ * @param app :: the current application window instance
+ * @param fileVersion :: the version of the file
+ */
+void Folder::loadFromProject(const std::string &lines, ApplicationWindow *app, const int fileVersion)
+{
+    (void)app; //suppress unused variable warnings
+    throw std::runtime_error("Not yet implemented.");
+}
+
+/**
+ * Save the folder structure to a Mantid project file.
+ *
+ * @param app :: the current application window instance
+ * @return string represnetation of the folder's data
+ */
+std::string Folder::saveToProject(ApplicationWindow *app)
+{
+    QString text;
+    bool isCurrentFolder = app->currentFolder() == this;
+    int windowCount = 0;
+
+    text += saveFolderHeader(isCurrentFolder);
+    text += saveFolderSubWindows(app, this, windowCount);
+    text += saveFolderFooter();
+
+    return text.toStdString();
+}
+
+/**
+ * Generate the opening tags and meta information about
+ * a folder record for the Mantid project file.
+ *
+ * @param isCurrentFolder :: whether this folder is the current one.
+ * @return string representation of the folder's header data
+ */
+QString Folder::saveFolderHeader(bool isCurrentFolder)
+{
+    QString text;
+
+    // Write the folder opening tag
+    text += "<folder>\t" + QString(objectName()) + "\t" +
+            birthDate() + "\t" + modificationDate();
+
+    // label it as current if necessary
+    if (isCurrentFolder) {
+        text += "\tcurrent";
+    }
+
+    text += "\n";
+    text += "<open>" + QString::number(folderListItem()->isExpanded()) +
+            "</open>\n";
+    return text;
+}
+
+/**
+ * Generate the subfolder and subwindow records for the current folder.
+ * This method will recursively convert subfolders to their text representation
+ *
+ * @param app :: the current application window instance
+ * @param folder :: the folder to generate the text for.
+ * @param windowCount :: count of the number of windows
+ * @return string representation of the folder's subfolders
+ */
+QString Folder::saveFolderSubWindows(ApplicationWindow* app, Folder * folder,
+                                     int &windowCount)
+{
+    QString text;
+
+    // Write windows
+    QList<MdiSubWindow *> windows = folder->windowsList();
+    foreach (MdiSubWindow *w, windows) {
+      Mantid::IProjectSerialisable *ips =
+          dynamic_cast<Mantid::IProjectSerialisable *>(w);
+
+      if (ips) {
+        text += QString::fromUtf8(ips->saveToProject(app).c_str());
+      }
+
+      ++windowCount;
+    }
+
+    // Write subfolders
+    QList<Folder *> subfolders = folder->folders();
+    foreach (Folder *f, subfolders) { text += saveFolderSubWindows(app, f, windowCount); }
+
+    return text;
+}
+
+/**
+ * Generate the closing folder data and end tag.
+ * @return footer string for this folder
+ */
+QString Folder::saveFolderFooter()
+{
+    return "</folder>\n";
+}
+
 /*****************************************************************************
  *
  * Class FolderListItem

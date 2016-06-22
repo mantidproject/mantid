@@ -35,6 +35,7 @@
 #include <QTreeWidget>
 
 #include "MdiSubWindow.h"
+#include "Mantid/IProjectSerialisable.h"
 
 class FolderListItem;
 class Table;
@@ -43,7 +44,7 @@ class MultiLayer;
 class Note;
 
 //! Folder for the project explorer
-class Folder : public QObject {
+class Folder : public QObject, Mantid::IProjectSerialisable {
   Q_OBJECT
 
 public:
@@ -126,6 +127,20 @@ public:
   void clearLogInfo() { d_log_info = QString(); };
 
   bool isEmpty() const;
+
+  /// Loads the given lines from the project file and applies them.
+  void loadFromProject(const std::string &lines, ApplicationWindow *app,
+                       const int fileVersion) override;
+  /// Serialises to a string that can be saved to a project file.
+  std::string saveToProject(ApplicationWindow *app) override;
+
+private:
+  /// Save header information about the folder
+  QString saveFolderHeader(bool isCurrentFolder);
+  /// Recursively save subwindows and subfolders
+  QString saveFolderSubWindows(ApplicationWindow* app, Folder*, int& windowCount);
+  /// Save footer infromation about the folder
+  QString saveFolderFooter();
 
 public slots:
   /// Mantid: made this a slot for use with script messages when there is no
