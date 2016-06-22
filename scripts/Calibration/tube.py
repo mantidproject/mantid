@@ -231,14 +231,14 @@ def calibrate(ws, tubeSet, knownPositions, funcForm, **kwargs):
     pixels along the tube. This is done by fitting the peaks positions found
     at the previous step against the known_positions provided.
 
-    |
+    ::
 
-     known       |              *
-     positions   |           *
-                 |      *
-                 |  *
-                 |________________
-                   pixels positions
+        known       |              *
+        positions   |           *
+                    |      *
+                    |  *
+                    |________________
+                      pixels positions
 
     The default operation is to fit the pixels positions against the known
     positions with a quadratic function in order to define an operation to
