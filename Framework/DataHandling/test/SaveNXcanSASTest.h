@@ -538,8 +538,9 @@ private:
     TSM_ASSERT_EQUALS("Should be just Idev", errorAttribute, sasDataIdev);
 
     // Q_indices attribute
-    auto qAttribute = Mantid::DataHandling::H5Util::readNumArrayAttributeCoerce<int>(
-        data, sasDataQIndicesAttr);
+    auto qAttribute =
+        Mantid::DataHandling::H5Util::readNumArrayAttributeCoerce<int>(
+            data, sasDataQIndicesAttr);
     TSM_ASSERT_EQUALS("Should be just 0", qAttribute, std::vector<int>{0});
 
     // Signal attribute
@@ -619,9 +620,10 @@ private:
     TSM_ASSERT_EQUALS("Should be just Idev", errorAttribute, sasDataIdev);
 
     // Q_indices attribute
-    auto qAttribute = Mantid::DataHandling::H5Util::readNumArrayAttributeCoerce<int>(
-        data, sasDataQIndicesAttr);
-    std::vector<int> expectedQIndices{0,1};
+    auto qAttribute =
+        Mantid::DataHandling::H5Util::readNumArrayAttributeCoerce<int>(
+            data, sasDataQIndicesAttr);
+    std::vector<int> expectedQIndices{0, 1};
     TSM_ASSERT_EQUALS("Should be just 0,1", qAttribute, expectedQIndices);
 
     // Signal attribute
@@ -649,8 +651,8 @@ private:
                       classAttribute, sasTransmissionSpectrumClassAttr);
     classAttribute = Mantid::DataHandling::H5Util::readAttributeAsString(
         transmission, nxclass);
-    TSM_ASSERT_EQUALS("Should be NXdata class",
-                      classAttribute, nxTransmissionSpectrumClassAttr);
+    TSM_ASSERT_EQUALS("Should be NXdata class", classAttribute,
+                      nxTransmissionSpectrumClassAttr);
 
     // Name attribute
     auto nameAttribute = Mantid::DataHandling::H5Util::readAttributeAsString(
