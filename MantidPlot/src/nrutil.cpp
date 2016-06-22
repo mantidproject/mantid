@@ -8,17 +8,16 @@
 #include "MantidKernel/Logger.h"
 
 namespace {
-  Mantid::Kernel::Logger &LOGGER() {
-    static Mantid::Kernel::Logger glog("nrutil");
-    return glog;
-  }
-
+Mantid::Kernel::Logger &LOGGER() {
+  static Mantid::Kernel::Logger glog("nrutil");
+  return glog;
+}
 }
 
-  if (ia <= ib)
-    return ia;
-  else
-    return ib;
+if (ia <= ib)
+  return ia;
+else
+  return ib;
 }
 
 void nrerror(
@@ -28,7 +27,7 @@ void nrerror(
 
 double **matrix(long nrl, long nrh, long ncl,
                 long nch) { // allocate a double matrix with subscript range
-                            // m[nrl..nrh][ncl..nch]
+  // m[nrl..nrh][ncl..nch]
   long i, nrow = nrh - nrl + 1, ncol = nch - ncl + 1;
   double **m;
 

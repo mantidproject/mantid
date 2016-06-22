@@ -725,8 +725,8 @@ int Object::procString(const std::string &Line) {
   }
   // Do outside loop...
   int nullInt;
-  while (procPair(Ln, RuleList, nullInt))
-  {}
+  while (procPair(Ln, RuleList, nullInt)) {
+  }
 
   assert(RuleList.size() == 1);
   TopRule = std::move((RuleList.begin())->second);
