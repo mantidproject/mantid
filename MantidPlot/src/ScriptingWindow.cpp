@@ -408,10 +408,28 @@ void ScriptingWindow::showPythonHelp() {
 }
 
 /**
- * calls MultiTabScriptInterpreter saveToString and
- *  saves the currently opened script file names to a string
- */
-QString ScriptingWindow::saveToString() { return m_manager->saveToString(); }
+  * Calls MultiTabScriptInterpreter to save the currently opened
+  * script file names to a string.
+  *
+  * @param app :: the current application window instance
+  * @return script file names in the matid project format
+  */
+ std::string ScriptingWindow::saveToProject(ApplicationWindow *app) {
+     (void)app; // suppress unused variable warnings
+     return m_manager->saveToString().toStdString();
+ }
+
+ /** Stub from IProjectSerialisable
+  *
+  * @param lines :: raw lines from the project file
+  * @param app :: the current application window instance
+  * @param fileVersion :: the file version used when saved
+  */
+ void ScriptingWindow::loadFromProject(const std::string &lines, ApplicationWindow *app,
+                                       const int fileVersion)
+ {
+    throw std::runtime_error("Not yet implemented");
+ }
 
 /**
  * Saves scripts file names to a string

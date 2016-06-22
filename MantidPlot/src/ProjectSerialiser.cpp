@@ -81,8 +81,10 @@ void ProjectSerialiser::saveProjectFile(Folder *folder, const QString &fn,
   text += QString::fromStdString(workspaceString);
 
   ScriptingWindow* scriptingWindow = window->getScriptWindowHandle();
-  if (scriptingWindow)
-    text += scriptingWindow->saveToString();
+  if (scriptingWindow) {
+       std::string scriptString = scriptingWindow->saveToProject(window);
+       text += QString::fromStdString(scriptString);
+  }
 
   int windowCount = 0;
   text += saveProjectFolder(folder, windowCount, true);
