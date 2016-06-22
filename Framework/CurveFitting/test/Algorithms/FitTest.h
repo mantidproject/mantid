@@ -1281,7 +1281,7 @@ public:
     TS_ASSERT_DELTA(out->getParameter("f0.A1"), 0.0, 0.01);
   }
 
-#if !(defined __APPLE__)
+  //#if !(defined __APPLE__)
   /**
   * Changing compiler on OS X has yet again caused this (and only this) test to
   * fail.
@@ -1410,7 +1410,7 @@ public:
     chi2 = fitIndirect.getProperty("OutputChi2overDoF");
     TS_ASSERT_DELTA(chi2, 0.5721, 1);
   }
-#endif
+  //#endif
 
   void test_function_LogNormal() {
 
