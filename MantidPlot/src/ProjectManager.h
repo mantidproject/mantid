@@ -50,28 +50,16 @@ namespace MantidQt {
         {
         public:
             ProjectManager(ApplicationWindow* window, MantidUI* mantidUI);
-            bool saveProject(bool compress = false);
+            void save(Folder* folder, const QString& projectname, bool compress = false);
 
         private:
             ApplicationWindow* window;
             MantidUI* mantidUI;
 
-            bool autoSave;
-            int autoSaveTime;
-            int savingTimerId;
-            bool d_backup_files;
-
-            friend class MantidUI;
             friend class ApplicationWindow;
 
-            void saveProjectAs(const QString& filename = QString(), bool compress = false);
-            Folder *projectFolder() const;
-            void saveFolderAsProject(Folder *f);
-            void saveAsProject();
             void saveProjectFile(Folder *folder, const QString &fn, bool compress);
             QString saveProjectFolder(Folder *folder, int &windowCount, bool isTopLevel = false);
-            QString saveToString(const std::string &workingDir);
-            void savedatainNexusFormat(const std::string &fileName, const std::string &wsName);
         };
     }
 }

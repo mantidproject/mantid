@@ -2,6 +2,10 @@
 #include "ApplicationWindow.h"
 #include "ScriptingWindow.h"
 
+#include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/IMDHistoWorkspace.h"
+#include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidAPI/IPeaksWorkspace.h"
 #include "Mantid/MantidUI.h"
 #include "MantidKernel/MantidVersion.h"
 #include "MantidQtAPI/FileDialogHandler.h"
@@ -19,106 +23,24 @@ extern "C" {
     void file_compress(const char *file, const char *mode);
 }
 
-ProjectManager::ProjectManager(ApplicationWindow* window, MantidUI* mantidUI) : window(window), mantidUI(mantidUI)
+ProjectManager::ProjectManager(ApplicationWindow* window, MantidUI* mantidUI)
+    : window(window), mantidUI(mantidUI)
 {
-    autoSave = false;
-    autoSaveTime = 15;
-    savingTimerId = 0;
 }
 
-bool ProjectManager::saveProject(bool compress)
+void ProjectManager::save(Folder *folder, const QString &fn, bool compress)
 {
-    if (window->projectname == "untitled" ||
-        window->projectname.endsWith(".opj", Qt::CaseInsensitive) ||
-        window->projectname.endsWith(".ogm", Qt::CaseInsensitive) ||
-        window->projectname.endsWith(".ogw", Qt::CaseInsensitive) ||
-        window->projectname.endsWith(".ogg", Qt::CaseInsensitive)) {
-      saveProjectAs();
-      return true;
-      ;
-    }
-
-    saveProjectFile(projectFolder(), window->projectname, compress);
-
-    window->setWindowTitle("MantidPlot - " + window->projectname);
-    window->savedProject();
-
-    if (autoSave) {
-      if (savingTimerId)
-        window->killTimer(savingTimerId);
-      savingTimerId = window->startTimer(autoSaveTime * 60000);
-    } else
-      savingTimerId = 0;
-
-    // Back-up file to be removed because file has successfully saved.
-    QFile::remove(window->projectname + "~");
-
-    QApplication::restoreOverrideCursor();
-    return true;
-}
-
-void ProjectManager::saveProjectAs(const QString &fileName, bool compress) {
-  QString fn = fileName;
-  if (fileName.isEmpty()) {
-    QString filter = window->tr("MantidPlot project") + " (*.mantid);;";
-    filter += window->tr("Compressed MantidPlot project") + " (*.mantid.gz)";
-
-    QString selectedFilter;
-    fn = MantidQt::API::FileDialogHandler::getSaveFileName(
-        window, window->tr("Save Project As"), window->workingDir, filter, &selectedFilter);
-    if (selectedFilter.contains(".gz"))
-      compress = true;
-  }
-
-  if (!fn.isEmpty()) {
-    // Check if exists. If not, create directory first.
-    QFileInfo tempFile(fn);
-    if (!tempFile.exists()) {
-      // Make the directory
-      QString dir(fn);
-      if (fn.contains('.'))
-        dir = fn.left(fn.indexOf('.'));
-      QDir().mkdir(dir);
-
-      // Get the file name
-      QString file("temp");
-      for (int i = 0; i < dir.size(); ++i) {
-        if (dir[i] == '/')
-          file = dir.right(dir.size() - i);
-        else if (dir[i] == '\\')
-          file = dir.right(i);
-      }
-      fn = dir + file;
-    }
-
-    QFileInfo fi(fn);
-    window->workingDir = fi.absolutePath();
-    QString baseName = fi.fileName();
-    if (!baseName.contains("."))
-      fn.append(".mantid");
-
-    window->projectname = fn;
-    if (saveProject(compress)) {
-      window->recentProjects.removeAll(window->projectname);
-      window->recentProjects.push_front(window->projectname);
-      window->updateRecentProjectsList();
-
-      QFileInfo fi(fn);
-      QString baseName = fi.baseName();
-      FolderListItem *item =
-          dynamic_cast<FolderListItem *>(window->folders->firstChild());
-      if (item) {
-        item->setText(0, baseName);
-        item->folder()->setObjectName(baseName);
-      }
-    }
-  }
+    // save workspaces
+    // save scripting window
+    // save sub windows
+    // save project file
+    saveProjectFile(folder, fn, compress);
 }
 
 void ProjectManager::saveProjectFile(Folder *folder, const QString &fn,
                                         bool compress) {
   QFile f(fn);
-  if (d_backup_files && f.exists()) { // make byte-copy of current file so that
+  if (window->d_backup_files && f.exists()) { // make byte-copy of current file so that
                                       // there's always a copy of the data on
                                       // disk
     while (!f.open(QIODevice::ReadOnly)) {
@@ -183,35 +105,6 @@ void ProjectManager::saveProjectFile(Folder *folder, const QString &fn,
   QApplication::restoreOverrideCursor();
 }
 
-void ProjectManager::saveAsProject() {
-  saveFolderAsProject(window->currentFolder());
-}
-
-void ProjectManager::saveFolderAsProject(Folder *f) {
-  QString filter = window->tr("MantidPlot project") + " (*.qti);;"; // Mantid
-  filter += window->tr("Compressed MantidPlot project") + " (*.qti.gz)";
-
-  QString selectedFilter;
-  QString fn = MantidQt::API::FileDialogHandler::getSaveFileName(
-      window, window->tr("Save project as"), window->workingDir, filter, &selectedFilter);
-  if (!fn.isEmpty()) {
-    QFileInfo fi(fn);
-    window->workingDir = fi.absolutePath();
-    QString baseName = fi.fileName();
-    if (!baseName.contains("."))
-      fn.append(".qti");
-
-    saveProjectFile(f, fn, selectedFilter.contains(".gz"));
-  }
-}
-
-Folder *ProjectManager::projectFolder() const {
-  auto fli = dynamic_cast<FolderListItem *>(window->folders->firstChild());
-  if (fli)
-    return fli->folder();
-  else
-    throw std::runtime_error("Couldn't retrieve project folder");
-}
 
 QString ProjectManager::saveProjectFolder(Folder *folder, int &windowCount,
                                              bool isTopLevel) {
@@ -255,4 +148,3 @@ QString ProjectManager::saveProjectFolder(Folder *folder, int &windowCount,
 
   return text;
 }
-
