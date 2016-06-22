@@ -2,6 +2,8 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/AlgorithmFactory.h"
+#include "MantidAPI/AlgorithmManager.h"
+#include <MantidAPI/IAlgorithm.h>
 #include "MantidAPI/HistoryItem.h"
 #include "MantidAPI/ScriptBuilder.h"
 #include "MantidKernel/Property.h"
@@ -137,6 +139,26 @@ ScriptBuilder::buildAlgorithmString(AlgorithmHistory_const_sptr algHistory) {
     return buildCommentString(algHistory);
 
   auto props = algHistory->getProperties();
+
+  try {
+    // create a fresh version of the algorithm - unmanaged
+    IAlgorithm_sptr algFresh = AlgorithmManager::Instance().createUnmanaged(
+        name, algHistory->version());
+    algFresh->initialize();
+
+    const auto &propsFresh = algFresh->getProperties();
+    // remove properties that are not present on a fresh algorithm
+    // i.e. remove dynamically added properties
+    std::remove_if(props.begin(), props.end(),
+                   [&propsFresh](const std::string &propName) {
+                     return std::find(propsFresh.begin(), propsFresh.end(),
+                                      propName) == propsFresh.end();
+                   });
+  } catch (std::exception &) {
+    g_log.error() << "Could not create a fresh version of " << name
+                  << " version " << algHistory->version() << "\n";
+  }
+
   for (auto &propIter : props) {
     prop = buildPropertyString(propIter);
     if (prop.length() > 0) {
