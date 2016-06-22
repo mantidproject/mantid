@@ -22,16 +22,6 @@ namespace PythonInterface {
 namespace Registry {
 
 /**
- * Checks if the boost python input object is of the correct type. In this case
- * a dict.
- * @param obj: the object to check
- * @returns true if the input is a dict type else false
- */
-bool MappingTypeHandler::isCorrectType(const boost::python::api::object &obj) {
-  return PyObject_TypeCheck(obj.ptr(), &PyDict_Type);
-}
-
-/**
  * Sets the named property in the PropertyManager by extracting a new
  * PropertyManager from the Python object
  * @param alg A pointer to the PropertyManager containing the named property

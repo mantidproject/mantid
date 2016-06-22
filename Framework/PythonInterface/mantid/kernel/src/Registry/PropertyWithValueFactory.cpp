@@ -51,6 +51,10 @@ void initTypeLookup(PyTypeIndex &index) {
   // Version 2 also has the PyString_Type
   index.emplace(&PyString_Type, boost::make_shared<AsciiStrHandler>());
 #endif
+
+  // Handle a dictionary type
+  index.emplace(&PyDict_Type, boost::make_shared<MappingTypeHandler>());
+
 }
 
 /**
@@ -100,28 +104,6 @@ const PyArrayIndex &getArrayIndex() {
   return index;
 }
 
-bool isDict(PyObject *const object) {
-  // Create a borrowed reference
-  boost::python::object obj(
-      boost::python::handle<>(boost::python::borrowed(object)));
-  return MappingTypeHandler::isCorrectType(obj);
-}
-
-// Property Handler for MappingType
-typedef std::vector<boost::shared_ptr<PropertyValueHandler>> PyDictStorage;
-
-void initDictStorage(PyDictStorage &storage) {
-  assert(storage.empty());
-  // Map the Python dict types to the best match in C++
-  storage.emplace_back(boost::make_shared<MappingTypeHandler>());
-}
-
-const PropertyValueHandler &getDictProperty() {
-  static PyDictStorage storage;
-  if (storage.empty())
-    initDictStorage(storage);
-  return *(storage[0]);
-}
 }
 
 /**
@@ -168,11 +150,6 @@ PropertyWithValueFactory::create(const std::string &name,
  */
 const PropertyValueHandler &
 PropertyWithValueFactory::lookup(PyObject *const object) {
-  // Check if we are dealing with a dict type
-  if (isDict(object)) {
-    return getDictProperty();
-  }
-
   // Check if object is array.
   const auto arrayType = isArray(object);
   if (!arrayType.empty()) {
