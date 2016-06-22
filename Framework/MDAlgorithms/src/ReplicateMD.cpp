@@ -293,7 +293,7 @@ void ReplicateMD::exec() {
    the linear index -> linear index calculation below will not work correctly.
    */
   MDHistoWorkspace_const_sptr transposedDataWS = dataWS;
-  if (dataWS->getNumDims() == shapeWS->getNumDims()) {
+  if (dataWS->getNumDims() <= shapeWS->getNumDims()) {
     auto axes = findAxes(*shapeWS, *dataWS);
     transposedDataWS = transposeMD(dataWS, axes);
     nDimsData = transposedDataWS->getNumDims();
