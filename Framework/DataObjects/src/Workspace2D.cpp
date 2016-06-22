@@ -70,7 +70,7 @@ void Workspace2D::init(const std::size_t &NVectors, const std::size_t &XLength,
   data.resize(m_noVectors);
 
   auto x = Kernel::make_cow<HistogramData::HistogramX>(
-      XLength, HistogramData::LinearGenerator(0.0, 1.0));
+      XLength, HistogramData::LinearGenerator(1.0, 1.0));
   HistogramData::Counts y(YLength);
   HistogramData::CountStandardDeviations e(YLength);
   for (size_t i = 0; i < m_noVectors; i++) {

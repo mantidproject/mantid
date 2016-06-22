@@ -83,7 +83,7 @@ Workspace2D_sptr Create1DWorkspaceRand(int size) {
   std::generate(e1.begin(), e1.end(), randFunc);
   auto retVal = boost::make_shared<Workspace2D>();
   retVal->initialize(1, size, size);
-  retVal->setPoints(0, size, 1.0);
+  retVal->setPoints(0, size, LinearGenerator(1.0, 1.0));
   retVal->dataY(0) = y1;
   retVal->dataE(0) = e1;
   return retVal;
@@ -95,7 +95,7 @@ Workspace2D_sptr Create1DWorkspaceConstant(int size, double value,
   MantidVec e1(size, error);
   auto retVal = boost::make_shared<Workspace2D>();
   retVal->initialize(1, size, size);
-  retVal->setPoints(0, size, 1.0);
+  retVal->setPoints(0, size, LinearGenerator(1.0, 1.0));
   retVal->dataY(0) = y1;
   retVal->dataE(0) = e1;
   return retVal;
@@ -116,7 +116,7 @@ Workspace2D_sptr Create1DWorkspaceFib(int size) {
   std::generate(y1.begin(), y1.end(), FibSeries<double>());
   auto retVal = boost::make_shared<Workspace2D>();
   retVal->initialize(1, size, size);
-  retVal->setPoints(0, size, 1.0);
+  retVal->setPoints(0, size, LinearGenerator(1.0, 1.0));
   retVal->dataY(0) = y1;
   retVal->dataE(0) = e1;
   return retVal;
@@ -159,7 +159,7 @@ Create2DWorkspaceWithValues(int64_t nHist, int64_t nBins, bool isHist,
                             const std::set<int64_t> &maskedWorkspaceIndices,
                             double xVal, double yVal, double eVal) {
   auto x1 = Kernel::make_cow<HistogramData::HistogramX>(
-      isHist ? nBins + 1 : nBins, xVal);
+      isHist ? nBins + 1 : nBins, LinearGenerator(xVal, 1.0));
   Counts y1(nBins, yVal);
   CountStandardDeviations e1(nBins, eVal);
   auto retVal = boost::make_shared<Workspace2D>();
