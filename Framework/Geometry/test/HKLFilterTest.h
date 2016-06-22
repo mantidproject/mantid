@@ -7,6 +7,7 @@
 
 #include "MantidGeometry/Crystal/HKLFilter.h"
 #include "MantidKernel/V3D.h"
+#include "MantidKernel/WarningSuppressions.h"
 
 #include <boost/make_shared.hpp>
 
