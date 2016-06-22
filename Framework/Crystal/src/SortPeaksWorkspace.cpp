@@ -12,16 +12,6 @@ namespace Crystal {
 DECLARE_ALGORITHM(SortPeaksWorkspace)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-SortPeaksWorkspace::SortPeaksWorkspace() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-SortPeaksWorkspace::~SortPeaksWorkspace() {}
-
-//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string SortPeaksWorkspace::name() const {
   return "SortPeaksWorkspace";

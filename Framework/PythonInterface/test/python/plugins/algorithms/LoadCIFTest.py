@@ -1,4 +1,6 @@
 # pylint: disable=no-init,too-many-public-methods,invalid-name,protected-access
+from __future__ import (absolute_import, division, print_function)
+
 import unittest
 from testhelpers import assertRaisesNothing
 

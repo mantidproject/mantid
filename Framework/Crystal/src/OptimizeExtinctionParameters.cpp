@@ -28,9 +28,6 @@ OptimizeExtinctionParameters::OptimizeExtinctionParameters() {
   m_pointGroups = getAllPointGroups();
 }
 
-/// Destructor
-OptimizeExtinctionParameters::~OptimizeExtinctionParameters() {}
-
 static double gsl_costFunction(const gsl_vector *v, void *params) {
   std::string *p = reinterpret_cast<std::string *>(params);
   std::string inname = p[0];

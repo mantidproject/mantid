@@ -11,6 +11,8 @@ Interfaces
 Muon Analysis
 #############
 
+- When reusing the same plot window, an option has been added on the Settings tab to control how many previous fits are kept. It can be adjusted to 0 (remove all previous fits; default pre-Mantid 3.7), 1 (keep just one previous fit plus this one; new default) or higher.
+
 Algorithms
 ----------
 

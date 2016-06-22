@@ -39,10 +39,6 @@ namespace Crystal {
  */
 class DLLExport PeakIntegration : public API::Algorithm {
 public:
-  /// Default constructor
-  PeakIntegration();
-  /// Destructor
-  ~PeakIntegration() override;
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "PeakIntegration"; }
   /// Algorithm's version for identification overriding a virtual method
@@ -68,7 +64,7 @@ private:
                     double qspan, DataObjects::PeaksWorkspace_sptr &Peaks,
                     const detid2index_map &pixel_to_wi);
 
-  bool m_IC; ///< Ikeida Carpenter fit of TOF
+  bool m_IC = false; ///< Ikeida Carpenter fit of TOF
 };
 
 } // namespace Algorithm

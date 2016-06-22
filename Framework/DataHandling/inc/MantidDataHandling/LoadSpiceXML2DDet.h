@@ -12,8 +12,6 @@ namespace DataHandling {
 class SpiceXMLNode {
 public:
   SpiceXMLNode(const std::string &nodename);
-  ~SpiceXMLNode();
-
   void setParameters(const std::string &nodetype, const std::string &nodeunit,
                      const std::string &nodedescription);
   void setValue(const std::string &strvalue);

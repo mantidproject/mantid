@@ -44,8 +44,6 @@ public:
   Progress(Algorithm *alg, double start, double end, int numSteps);
   Progress(Algorithm *alg, double start, double end, int64_t numSteps);
   Progress(Algorithm *alg, double start, double end, size_t numSteps);
-  ~Progress() override;
-
   void doReport(const std::string &msg = "") override;
   bool hasCancellationBeenRequested() const override;
 

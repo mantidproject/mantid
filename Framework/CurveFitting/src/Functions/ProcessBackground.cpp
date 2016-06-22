@@ -45,11 +45,6 @@ ProcessBackground::ProcessBackground()
       m_upperBound(DBL_MIN), m_bkgdType(), m_numFWHM(-1.) {}
 
 //----------------------------------------------------------------------------------------------
-/** Destructor
- */
-ProcessBackground::~ProcessBackground() {}
-
-//----------------------------------------------------------------------------------------------
 /** Define parameters
  */
 void ProcessBackground::init() {
@@ -914,16 +909,6 @@ void ProcessBackground::removePeaks() {
 
   return;
 }
-
-//----------------------------------------------------------------------------------------------
-/** Constructor
-  */
-RemovePeaks::RemovePeaks() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
-  */
-RemovePeaks::~RemovePeaks() {}
 
 //----------------------------------------------------------------------------------------------
 /** Set up: parse peak workspace to vectors
