@@ -198,8 +198,7 @@ public:
   friend class DataObjects::Workspace2D;
 
 protected:
-  virtual void checkHistogram(const HistogramData::Histogram &histogram) const {
-  }
+  virtual void checkHistogram(const HistogramData::Histogram &) const {}
 
   // Copy and move are not public since this is an abstract class, but protected
   // such that derived classes can implement copy and move.
