@@ -15,6 +15,9 @@ New
 Improved
 ########
 
+- :ref:`FilterEvents <algm-FilterEvents>` now produces output
+  workspaces with the same workspace numbers as specified by the
+  ``SplittersWorkspace``.
 
 Deprecated
 ##########
