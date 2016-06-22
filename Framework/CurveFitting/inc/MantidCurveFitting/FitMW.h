@@ -100,9 +100,9 @@ public:
 
 protected:
   /// Calculate size and starting iterator in the X array
-  void getStartIterator(const Mantid::MantidVec &X,
-                        Mantid::MantidVec::const_iterator &from, size_t &n,
-                        bool isHisto) const;
+  void getStartIterator(const HistogramData::Points &X,
+                        Mantid::MantidVec::const_iterator &from,
+                        size_t &n) const;
   /// Set all parameters
   void setParameters() const;
 
