@@ -37,7 +37,7 @@ struct AnalysisOptions {
   std::pair<double, double> timeLimits; /// Min, max X values
   std::string rebinArgs;     /// Arguments for rebin (empty to not rebin)
   std::string groupPairName; /// Name of group or pair to use
-  const Mantid::API::Grouping &grouping; /// Grouping to use
+  const Mantid::API::Grouping grouping; /// Grouping to use
   PlotType plotType;                     /// Type of analysis to perform
   explicit AnalysisOptions(const Mantid::API::Grouping &g) : grouping(g){};
 };
@@ -75,6 +75,8 @@ public:
   /// change dead times type
   void setDeadTimesType(const Muon::DeadTimesType &deadTimesType,
                         const std::string &deadTimesFile = "");
+  /// change list of supported instruments
+  void setSupportedInstruments(const QStringList &instruments);
   /// load files
   Muon::LoadResult loadFiles(const QStringList &files) const;
   /// correct and group loaded data
@@ -107,7 +109,7 @@ private:
   /// Dead times file
   std::string m_deadTimesFile;
   /// Muon instruments supported
-  const QStringList m_instruments;
+  QStringList m_instruments;
   /// Cache of previously loaded data
   mutable std::map<std::string, Muon::LoadResult> m_loadedDataCache;
 };

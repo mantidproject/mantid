@@ -100,7 +100,9 @@ MuonAnalysis::MuonAnalysis(QWidget *parent)
       m_dataTimeZero(0.0), m_dataFirstGoodData(0.0),
       m_currentLabel("NoLabelSet"), m_numPeriods(0),
       m_groupingHelper(this->m_uiForm),
-      m_dataLoader(Muon::DeadTimesType::None, getSupportedInstruments()) {}
+      m_dataLoader(Muon::DeadTimesType::None, // will be replaced by correct
+                                              // instruments later
+                   {"MUSR", "HIFI", "EMU", "ARGUS", "CHRONUS"}) {}
 
 /**
  * Destructor
@@ -196,6 +198,9 @@ void MuonAnalysis::initLayout() {
           SIGNAL(runAsPythonScript(const QString &, bool)));
 
   setCurrentDataName(NOT_AVAILABLE);
+
+  // Now we know the facility, update supported instruments
+  m_dataLoader.setSupportedInstruments(getSupportedInstruments());
 
   // connect guess alpha
   connect(m_uiForm.guessAlphaButton, SIGNAL(clicked()), this,

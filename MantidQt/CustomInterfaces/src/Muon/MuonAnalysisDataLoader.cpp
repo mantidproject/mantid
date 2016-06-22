@@ -53,6 +53,15 @@ void MuonAnalysisDataLoader::setDeadTimesType(
 }
 
 /**
+ * Set the list of supported instruments
+ * @param instruments :: [input] List of supported instruments
+ */
+void MuonAnalysisDataLoader::setSupportedInstruments(
+    const QStringList &instruments) {
+  m_instruments = instruments;
+}
+
+/**
  * Load data from the given files into a struct
  * @param files :: [input] List of files to load
  * @returns :: struct with loaded data
@@ -400,10 +409,12 @@ void MuonAnalysisDataLoader::setProcessAlgorithmProperties(
 
     const auto pairNum =
         indexOf(options.groupPairName, options.grouping.pairNames);
-    alg->setProperty("PairFirstIndex",
-                     options.grouping.pairs.at(pairNum).first);
-    alg->setProperty("PairSecondIndex",
-                     options.grouping.pairs.at(pairNum).second);
+    alg->setProperty(
+        "PairFirstIndex",
+        static_cast<int>(options.grouping.pairs.at(pairNum).first));
+    alg->setProperty(
+        "PairSecondIndex",
+        static_cast<int>(options.grouping.pairs.at(pairNum).second));
     alg->setProperty("Alpha", options.grouping.pairAlphas.at(pairNum));
   } else {
     throw std::invalid_argument("Cannot create analysis workspace: Group/pair "
