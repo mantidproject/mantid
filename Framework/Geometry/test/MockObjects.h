@@ -8,10 +8,11 @@
 #ifndef MANTIDGEOMETRYTEST_MOCKOBJECTS_H_
 #define MANTIDGEOMETRYTEST_MOCKOBJECTS_H_
 
+#include "MantidGeometry/Crystal/IPeak.h"
 #include "MantidGeometry/Crystal/PeakTransform.h"
 #include "MantidGeometry/Crystal/PeakTransformFactory.h"
-#include "MantidGeometry/Crystal/IPeak.h"
 #include "MantidKernel/SpecialCoordinateSystem.h"
+#include "MantidKernel/WarningSuppressions.h"
 #include <boost/regex.hpp>
 #include <gmock/gmock.h>
 
@@ -20,6 +21,8 @@ using namespace Mantid;
 using boost::regex;
 
 namespace {
+
+GCC_DIAG_OFF_SUGGEST_OVERRIDE
 
 /*------------------------------------------------------------
  Mock Peak Transform
@@ -109,4 +112,5 @@ public:
   MOCK_CONST_METHOD0(getPeakShape, const Mantid::Geometry::PeakShape &());
 };
 }
+GCC_DIAG_ON_SUGGEST_OVERRIDE
 #endif /* MANTIDGEOMETRYTEST_MOCKOBJECTS_H_ */

@@ -58,17 +58,14 @@ public:
 
   void test_default() {
 
-    // Default: Plus
+    // Default: no algorithm
     auto plus = DataProcessorPreprocessingAlgorithm();
-    TS_ASSERT_EQUALS(plus.name(), "Plus");
-    TS_ASSERT_EQUALS(plus.lhsProperty(), "LHSWorkspace");
-    TS_ASSERT_EQUALS(plus.rhsProperty(), "RHSWorkspace");
-    TS_ASSERT_EQUALS(plus.outputProperty(), "OutputWorkspace");
-    TS_ASSERT_EQUALS(plus.prefix(), "TOF_");
-    TS_ASSERT_EQUALS(plus.show(), true);
-    std::set<std::string> blacklist = {"LHSWorkspace", "RHSWorkspace",
-                                       "OutputWorkspace"};
-    TS_ASSERT_EQUALS(plus.blacklist(), blacklist);
+    TS_ASSERT_EQUALS(plus.name(), "");
+    TS_ASSERT_EQUALS(plus.lhsProperty(), "");
+    TS_ASSERT_EQUALS(plus.rhsProperty(), "");
+    TS_ASSERT_EQUALS(plus.outputProperty(), "");
+    TS_ASSERT_EQUALS(plus.prefix(), "");
+    TS_ASSERT_EQUALS(plus.blacklist().size(), 0);
   }
 
   void test_WeightedMean() {
