@@ -1,11 +1,16 @@
 #include "MantidQtCustomInterfaces/Muon/MuonAnalysisFitDataPresenter.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/GroupingLoader.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Workspace_fwd.h"
+#include <boost/lexical_cast.hpp>
 
 using MantidQt::MantidWidgets::IMuonFitDataSelector;
 using MantidQt::MantidWidgets::IWorkspaceFitControl;
 using Mantid::API::AnalysisDataService;
+using Mantid::API::MatrixWorkspace;
+typedef MantidQt::CustomInterfaces::Muon::MuonAnalysisOptionTab::RebinType
+    RebinType;
 
 namespace {
 /// static logger
@@ -25,7 +30,8 @@ namespace CustomInterfaces {
  */
 MuonAnalysisFitDataPresenter::MuonAnalysisFitDataPresenter(
     IWorkspaceFitControl *fitBrowser, IMuonFitDataSelector *dataSelector,
-    MuonAnalysisDataLoader &dataLoader, double timeZero, std::string rebinArgs)
+    MuonAnalysisDataLoader &dataLoader, double timeZero,
+    RebinOptions &rebinArgs)
     : m_fitBrowser(fitBrowser), m_dataSelector(dataSelector),
       m_dataLoader(dataLoader), m_timeZero(timeZero), m_rebinArgs(rebinArgs) {}
 
@@ -260,11 +266,13 @@ Mantid::API::Workspace_sptr MuonAnalysisFitDataPresenter::createWorkspace(
             params.periods.substr(minus, std::string::npos);
       }
     }
+
+    // Rebin params: use the same as MuonAnalysis uses
+    analysisOptions.rebinArgs = getRebinParams(correctedData);
     analysisOptions.loadedTimeZero = loadedData.timeZero;
     analysisOptions.timeZero = m_timeZero;
     analysisOptions.timeLimits.first = m_dataSelector->getStartTime();
     analysisOptions.timeLimits.second = m_dataSelector->getEndTime();
-    analysisOptions.rebinArgs = ""; // Or use the same as MA?
     analysisOptions.groupPairName = params.itemName;
     analysisOptions.plotType = params.plotType;
     outputWS =
@@ -276,6 +284,31 @@ Mantid::API::Workspace_sptr MuonAnalysisFitDataPresenter::createWorkspace(
   }
 
   return outputWS;
+}
+
+/**
+ * Generates rebin parameter string from options passed in by MuonAnalysis
+ * @param ws :: [input] Workspace to get bin size from
+ * @returns :: parameter string for rebinning
+ */
+std::string
+MuonAnalysisFitDataPresenter::getRebinParams(const Workspace_sptr ws) const {
+  std::string params = "";
+  if (m_rebinArgs.first == RebinType::FixedRebin) {
+    try {
+      const double step = std::stod(m_rebinArgs.second);
+      auto mws = boost::dynamic_pointer_cast<MatrixWorkspace>(ws);
+      if (mws) {
+        const double binSize = mws->dataX(0)[1] - mws->dataX(0)[0];
+        params = boost::lexical_cast<std::string>(step * binSize);
+      }
+    } catch (const std::exception &) {
+      params = "";
+    }
+  } else if (m_rebinArgs.first == RebinType::VariableRebin) {
+    params = m_rebinArgs.second;
+  }
+  return params;
 }
 
 } // namespace CustomInterfaces

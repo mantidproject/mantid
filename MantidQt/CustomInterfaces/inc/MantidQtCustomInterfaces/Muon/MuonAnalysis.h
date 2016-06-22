@@ -423,6 +423,9 @@ private:
   /// specified
   std::string rebinParams(Workspace_sptr wsForRebin);
 
+  /// Updates rebin params in the fit data presenter
+  void updateRebinParams();
+
   /// title of run
   std::string m_title;
 

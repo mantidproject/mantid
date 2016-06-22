@@ -2036,6 +2036,7 @@ void MuonAnalysis::loadFittings() {
   m_fitDataPresenter =
       Mantid::Kernel::make_unique<MuonAnalysisFitDataPresenter>(
           m_uiForm.fitBrowser, m_dataSelector, m_dataLoader, m_dataTimeZero);
+  updateRebinParams(); // set initial params for fit data presenter
   m_fitFunctionPresenter =
       Mantid::Kernel::make_unique<MuonAnalysisFitFunctionPresenter>(
           nullptr, m_uiForm.fitBrowser, m_functionBrowser);
@@ -2479,10 +2480,18 @@ void MuonAnalysis::groupTabUpdatePlot() {
     runFrontPlotButton();
 }
 
+/**
+ * Called when something on the options tab has been changed
+ * Update rebin params in fit data presenter and replot if necessary
+ */
 void MuonAnalysis::settingsTabUpdatePlot() {
+  // Update the fit data presenter if rebin options have changed
+  updateRebinParams();
+
   if (isAutoUpdateEnabled() && m_currentTab == m_uiForm.Settings &&
-      m_loaded == true)
+      m_loaded == true) {
     runFrontPlotButton();
+  }
 }
 
 /**
@@ -3011,6 +3020,22 @@ QStringList MuonAnalysis::getSupportedInstruments() {
     instruments.append(m_uiForm.instrSelector->itemText(i));
   }
   return instruments;
+}
+
+/**
+ * Gets rebin arguments off the options tab and passes them to the fit data
+ * presenter
+ */
+void MuonAnalysis::updateRebinParams() {
+  std::pair<MuonAnalysisOptionTab::RebinType, std::string> rebinParams;
+  rebinParams.first = m_optionTab->getRebinType();
+  if (rebinParams.first == MuonAnalysisOptionTab::RebinType::FixedRebin) {
+    rebinParams.second = std::to_string(m_optionTab->getRebinStep());
+  } else if (rebinParams.first =
+                 MuonAnalysisOptionTab::RebinType::VariableRebin) {
+    rebinParams.second = m_optionTab->getRebinParams();
+  }
+  m_fitDataPresenter->setRebinArgs(rebinParams);
 }
 
 } // namespace MantidQt

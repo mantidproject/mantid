@@ -4,8 +4,14 @@
 #include "MantidQtCustomInterfaces/DllConfig.h"
 #include "MantidQtCustomInterfaces/Muon/MuonAnalysisDataLoader.h"
 #include "MantidQtCustomInterfaces/Muon/MuonAnalysisHelper.h"
+#include "MantidQtCustomInterfaces/Muon/MuonAnalysisOptionTab.h"
 #include "MantidQtMantidWidgets/IMuonFitDataSelector.h"
 #include "MantidQtMantidWidgets/IWorkspaceFitControl.h"
+
+/// Save some typing
+typedef std::pair<
+    MantidQt::CustomInterfaces::Muon::MuonAnalysisOptionTab::RebinType,
+    std::string> RebinOptions;
 
 namespace Mantid {
 namespace API {
@@ -49,7 +55,10 @@ public:
       MantidQt::MantidWidgets::IWorkspaceFitControl *fitBrowser,
       MantidQt::MantidWidgets::IMuonFitDataSelector *dataSelector,
       MuonAnalysisDataLoader &dataLoader, double timeZero = 0,
-      std::string rebinArgs = "");
+      RebinOptions &rebinArgs =
+          RebinOptions(MantidQt::CustomInterfaces::Muon::MuonAnalysisOptionTab::
+                           RebinType::NoRebin,
+                       ""));
   /// Handles "data properties changed"
   void handleDataPropertiesChanged();
   /// Handles "selected data changed"
@@ -66,7 +75,7 @@ public:
   /// Change the stored time zero
   void setTimeZero(double timeZero) { m_timeZero = timeZero; }
   /// Change the stored rebin args
-  void setRebinArgs(const std::string &rebinArgs) { m_rebinArgs = rebinArgs; }
+  void setRebinArgs(const RebinOptions &rebinArgs) { m_rebinArgs = rebinArgs; }
 
 private:
   /// Create workspaces to fit and update fit browser (model)
@@ -81,6 +90,8 @@ private:
   Mantid::API::Workspace_sptr
   createWorkspace(const std::string &name,
                   const Mantid::API::Grouping &grouping) const;
+  /// Get rebin options for analysis
+  std::string getRebinParams(const Mantid::API::Workspace_sptr ws) const;
   /// Fit browser to update (non-owning pointer)
   MantidQt::MantidWidgets::IWorkspaceFitControl *m_fitBrowser;
   /// Data selector to get input from (non-owning pointer)
@@ -92,9 +103,8 @@ private:
   /// Stored time zero
   double m_timeZero;
   /// Stored rebin args
-  std::string m_rebinArgs;
+  RebinOptions m_rebinArgs;
 };
-
 } // namespace CustomInterfaces
 } // namespace Mantid
 
