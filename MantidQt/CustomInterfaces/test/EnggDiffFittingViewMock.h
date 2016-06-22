@@ -1,9 +1,12 @@
 #ifndef MANTID_CUSTOMINTERFACES_ENGGDIFFFITTINGVIEWMOCK_H
 #define MANTID_CUSTOMINTERFACES_ENGGDIFFFITTINGVIEWMOCK_H
 
+#include "MantidKernel/WarningSuppressions.h"
 #include "MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffFittingView.h"
 
 #include <gmock/gmock.h>
+
+GCC_DIAG_OFF_SUGGEST_OVERRIDE
 
 // This is a simple mock for the tomo interface view when using SCARF.
 class MockEnggDiffFittingView
