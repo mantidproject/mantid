@@ -46,10 +46,10 @@ class ScriptingWindow;
 
 namespace MantidQt {
     namespace API {
-        class ProjectManager
+        class ProjectSerialiser
         {
         public:
-            ProjectManager(ApplicationWindow* window, MantidUI* mantidUI);
+            ProjectSerialiser(ApplicationWindow* window, MantidUI* mantidUI);
             void save(Folder* folder, const QString& projectname, bool compress = false);
 
         private:

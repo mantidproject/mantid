@@ -1,4 +1,4 @@
-#include "ProjectManager.h"
+#include "ProjectSerialiser.h"
 #include "ApplicationWindow.h"
 #include "ScriptingWindow.h"
 
@@ -23,12 +23,12 @@ extern "C" {
     void file_compress(const char *file, const char *mode);
 }
 
-ProjectManager::ProjectManager(ApplicationWindow* window, MantidUI* mantidUI)
+ProjectSerialiser::ProjectSerialiser(ApplicationWindow* window, MantidUI* mantidUI)
     : window(window), mantidUI(mantidUI)
 {
 }
 
-void ProjectManager::save(Folder *folder, const QString &fn, bool compress)
+void ProjectSerialiser::save(Folder *folder, const QString &fn, bool compress)
 {
     // save workspaces
     // save scripting window
@@ -37,7 +37,7 @@ void ProjectManager::save(Folder *folder, const QString &fn, bool compress)
     saveProjectFile(folder, fn, compress);
 }
 
-void ProjectManager::saveProjectFile(Folder *folder, const QString &fn,
+void ProjectSerialiser::saveProjectFile(Folder *folder, const QString &fn,
                                         bool compress) {
   QFile f(fn);
   if (window->d_backup_files && f.exists()) { // make byte-copy of current file so that
@@ -106,7 +106,7 @@ void ProjectManager::saveProjectFile(Folder *folder, const QString &fn,
 }
 
 
-QString ProjectManager::saveProjectFolder(Folder *folder, int &windowCount,
+QString ProjectSerialiser::saveProjectFolder(Folder *folder, int &windowCount,
                                              bool isTopLevel) {
   QString text;
 
