@@ -117,4 +117,6 @@ public:
                     bool plotSinglePeaks));
 };
 
+GCC_DIAG_ON_SUGGEST_OVERRIDE
+
 #endif // MANTID_CUSTOMINTERFACES_ENGGDIFFFITTINGVIEWMOCK_H
