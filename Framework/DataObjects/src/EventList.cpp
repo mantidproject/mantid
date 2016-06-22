@@ -1,5 +1,4 @@
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/MemoryManager.h"
 #include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/EventWorkspaceMRU.h"
 #include "MantidKernel/DateAndTime.h"
@@ -119,29 +118,25 @@ bool compareEventPulseTimeTOF(const TofEvent &e1, const TofEvent &e2) {
 // -------------------------------------------------------------------
 
 /// Constructor (empty)
-EventList::EventList()
-    : eventType(TOF), order(UNSORTED), mru(nullptr), m_lockedMRU(false) {}
+EventList::EventList() : eventType(TOF), order(UNSORTED), mru(nullptr) {}
 
 /** Constructor with a MRU list
  * @param mru :: pointer to the MRU of the parent EventWorkspace
  * @param specNo :: the spectrum number for the event list
  */
 EventList::EventList(EventWorkspaceMRU *mru, specnum_t specNo)
-    : IEventList(specNo), eventType(TOF), order(UNSORTED), mru(mru),
-      m_lockedMRU(false) {}
+    : IEventList(specNo), eventType(TOF), order(UNSORTED), mru(mru) {}
 
 /** Constructor copying from an existing event list
  * @param rhs :: EventList object to copy*/
-EventList::EventList(const EventList &rhs)
-    : IEventList(rhs), mru(rhs.mru), m_lockedMRU(false) {
+EventList::EventList(const EventList &rhs) : IEventList(rhs), mru(rhs.mru) {
   // Call the copy operator to do the job,
   this->operator=(rhs);
 }
 
 /** Constructor, taking a vector of events.
  * @param events :: Vector of TofEvent's */
-EventList::EventList(const std::vector<TofEvent> &events)
-    : mru(nullptr), m_lockedMRU(false) {
+EventList::EventList(const std::vector<TofEvent> &events) : mru(nullptr) {
   this->events.assign(events.begin(), events.end());
   this->eventType = TOF;
   this->order = UNSORTED;
@@ -149,8 +144,7 @@ EventList::EventList(const std::vector<TofEvent> &events)
 
 /** Constructor, taking a vector of events.
  * @param events :: Vector of WeightedEvent's */
-EventList::EventList(const std::vector<WeightedEvent> &events)
-    : mru(nullptr), m_lockedMRU(false) {
+EventList::EventList(const std::vector<WeightedEvent> &events) : mru(nullptr) {
   this->weightedEvents.assign(events.begin(), events.end());
   this->eventType = WEIGHTED;
   this->order = UNSORTED;
@@ -159,7 +153,7 @@ EventList::EventList(const std::vector<WeightedEvent> &events)
 /** Constructor, taking a vector of events.
  * @param events :: Vector of WeightedEventNoTime's */
 EventList::EventList(const std::vector<WeightedEventNoTime> &events)
-    : mru(nullptr), m_lockedMRU(false) {
+    : mru(nullptr) {
   this->weightedEventsNoTime.assign(events.begin(), events.end());
   this->eventType = WEIGHTED_NOTIME;
   this->order = UNSORTED;
@@ -198,9 +192,6 @@ void EventList::createFromHistogram(const ISpectrum *inSpec, bool GenerateZeros,
   // Cached values for later checks
   double inf = std::numeric_limits<double>::infinity();
   double ninf = -inf;
-
-  // For thread safety
-  inSpec->lockData();
 
   // Get the input histogram
   const MantidVec &X = inSpec->readX();
@@ -272,8 +263,6 @@ void EventList::createFromHistogram(const ISpectrum *inSpec, bool GenerateZeros,
   // Manually set that this is sorted by TOF, since it is. This will make it
   // "threadSafe" in other algos.
   this->setSortOrder(TOF_SORT);
-
-  inSpec->unlockData();
 }
 
 // --------------------------------------------------------------------------
@@ -917,17 +906,6 @@ EventWorkspaceMRU *EventList::getMRU() { return mru; }
  */
 void EventList::reserve(size_t num) { this->events.reserve(num); }
 
-// ---------------------------------------------------------
-/** Lock access to the data so that it does not get deleted while reading.
- * Call this BEFORE readY() and readE().
- */
-void EventList::lockData() const { m_lockedMRU = true; }
-
-/** Unlock access to the data so that it can again get deleted.
- * Call this once you are done with using the Y or E data.
- */
-void EventList::unlockData() const { m_lockedMRU = false; }
-
 // ==============================================================================================
 // --- Sorting functions -----------------------------------------------------
 // ==============================================================================================
@@ -1116,7 +1094,6 @@ template <typename T> void parallel_sort4(std::vector<T> &vec) {
   // We can clear the incoming vector to free up memory now,
   //  because it is copied already in temp1, temp2
   vec.clear();
-  MemoryManager::Instance().releaseFreeMemory();
 
   // Final merge
   std::vector<T> temp;
@@ -1542,10 +1519,10 @@ const MantidVec &EventList::constDataY() const {
 
   if (yData == nullptr) {
     // Create the MRU object
-    yData = new MantidVecWithMarker(this->m_specNo, this->m_lockedMRU);
+    yData = new MantidVecWithMarker(this->m_specNo);
 
     // prepare to update the uncertainties
-    auto eData = new MantidVecWithMarker(this->m_specNo, this->m_lockedMRU);
+    auto eData = new MantidVecWithMarker(this->m_specNo);
     mru->ensureEnoughBuffersE(thread);
 
     // see if E should be calculated;
@@ -1584,7 +1561,7 @@ const MantidVec &EventList::constDataE() const {
 
   if (eData == nullptr) {
     // Create the MRU object
-    eData = new MantidVecWithMarker(this->m_specNo, this->m_lockedMRU);
+    eData = new MantidVecWithMarker(this->m_specNo);
 
     // Now use that to get E -- Y values are generated from another function
     MantidVec Y_ignored;

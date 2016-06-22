@@ -5,30 +5,25 @@
 #include <map>
 #include <algorithm>
 
-namespace Mantid
-{
-namespace Vates
-{
-namespace SimpleGui
-{
-namespace
-{
-    /// Static logger
-    Kernel::Logger g_log("MdControlWidget");
+namespace Mantid {
+namespace Vates {
+namespace SimpleGui {
+namespace {
+/// Static logger
+Kernel::Logger g_log("MdControlWidget");
 }
 
-ModeControlWidget::ModeControlWidget(QWidget *parent) : QWidget(parent)
-{
+ModeControlWidget::ModeControlWidget(QWidget *parent) : QWidget(parent) {
   this->ui.setupUi(this);
 
-  QObject::connect(this->ui.multiSliceButton, SIGNAL(clicked()),
-                   this, SLOT(onMultiSliceViewButtonClicked()));
-  QObject::connect(this->ui.standardButton, SIGNAL(clicked()),
-                   this, SLOT(onStandardViewButtonClicked()));
-  QObject::connect(this->ui.threeSliceButton, SIGNAL(clicked()),
-                   this, SLOT(onThreeSliceViewButtonClicked()));
-  QObject::connect(this->ui.splatterPlotButton, SIGNAL(clicked()),
-                   this, SLOT(onSplatterPlotViewButtonClicked()));
+  QObject::connect(this->ui.multiSliceButton, SIGNAL(clicked()), this,
+                   SLOT(onMultiSliceViewButtonClicked()));
+  QObject::connect(this->ui.standardButton, SIGNAL(clicked()), this,
+                   SLOT(onStandardViewButtonClicked()));
+  QObject::connect(this->ui.threeSliceButton, SIGNAL(clicked()), this,
+                   SLOT(onThreeSliceViewButtonClicked()));
+  QObject::connect(this->ui.splatterPlotButton, SIGNAL(clicked()), this,
+                   SLOT(onSplatterPlotViewButtonClicked()));
 
   // Add the mapping from string to the view enum
   MantidQt::API::MdConstants mdConstants;
@@ -42,54 +37,42 @@ ModeControlWidget::ModeControlWidget(QWidget *parent) : QWidget(parent)
                               ModeControlWidget::SPLATTERPLOT);
 }
 
-ModeControlWidget::~ModeControlWidget()
-{
-  
-}
+ModeControlWidget::~ModeControlWidget() {}
 
-void ModeControlWidget::enableViewButtons(ModeControlWidget::Views initialView, bool state)
-{
+void ModeControlWidget::enableViewButtons(ModeControlWidget::Views initialView,
+                                          bool state) {
   // Set all buttons to the specified state
   this->ui.standardButton->setEnabled(state);
   this->ui.multiSliceButton->setEnabled(state);
   this->ui.splatterPlotButton->setEnabled(state);
   this->ui.threeSliceButton->setEnabled(state);
 
-  // Disable the defaultView (this is already disabled in the case of state == false)
-  switch(initialView)
-  {
-    case ModeControlWidget::STANDARD:
-    {
-      this->ui.standardButton->setEnabled(false);
-    }
-    break;
+  // Disable the defaultView (this is already disabled in the case of state ==
+  // false)
+  switch (initialView) {
+  case ModeControlWidget::STANDARD: {
+    this->ui.standardButton->setEnabled(false);
+  } break;
 
-    case ModeControlWidget::THREESLICE:
-    {
-      this->ui.threeSliceButton->setEnabled(false);
-    }
-    break;
+  case ModeControlWidget::THREESLICE: {
+    this->ui.threeSliceButton->setEnabled(false);
+  } break;
 
-    case ModeControlWidget::MULTISLICE:
-    {
-      this->ui.multiSliceButton->setEnabled(false);
-    }
-    break;
+  case ModeControlWidget::MULTISLICE: {
+    this->ui.multiSliceButton->setEnabled(false);
+  } break;
 
-    case ModeControlWidget::SPLATTERPLOT:
-    {
-      this->ui.splatterPlotButton->setEnabled(false);
-    }
-    break;
+  case ModeControlWidget::SPLATTERPLOT: {
+    this->ui.splatterPlotButton->setEnabled(false);
+  } break;
 
-    default:
-      g_log.warning("Attempted to disable an unknown default view. \n");
-      break;
+  default:
+    g_log.warning("Attempted to disable an unknown default view. \n");
+    break;
   }
 }
 
-void ModeControlWidget::onMultiSliceViewButtonClicked()
-{
+void ModeControlWidget::onMultiSliceViewButtonClicked() {
   this->ui.multiSliceButton->setEnabled(false);
   this->ui.standardButton->setEnabled(true);
   this->ui.splatterPlotButton->setEnabled(true);
@@ -97,8 +80,7 @@ void ModeControlWidget::onMultiSliceViewButtonClicked()
   emit executeSwitchViews(ModeControlWidget::MULTISLICE);
 }
 
-void ModeControlWidget::onStandardViewButtonClicked()
-{
+void ModeControlWidget::onStandardViewButtonClicked() {
   this->ui.standardButton->setEnabled(false);
   this->ui.multiSliceButton->setEnabled(true);
   this->ui.splatterPlotButton->setEnabled(true);
@@ -106,8 +88,7 @@ void ModeControlWidget::onStandardViewButtonClicked()
   emit executeSwitchViews(ModeControlWidget::STANDARD);
 }
 
-void ModeControlWidget::onThreeSliceViewButtonClicked()
-{
+void ModeControlWidget::onThreeSliceViewButtonClicked() {
   this->ui.threeSliceButton->setEnabled(false);
   this->ui.multiSliceButton->setEnabled(true);
   this->ui.splatterPlotButton->setEnabled(true);
@@ -115,13 +96,11 @@ void ModeControlWidget::onThreeSliceViewButtonClicked()
   emit executeSwitchViews(ModeControlWidget::THREESLICE);
 }
 
-void ModeControlWidget::setToStandardView()
-{
+void ModeControlWidget::setToStandardView() {
   this->onStandardViewButtonClicked();
 }
 
-void ModeControlWidget::onSplatterPlotViewButtonClicked()
-{
+void ModeControlWidget::onSplatterPlotViewButtonClicked() {
   this->ui.splatterPlotButton->setEnabled(false);
   this->ui.standardButton->setEnabled(true);
   this->ui.multiSliceButton->setEnabled(true);
@@ -133,36 +112,26 @@ void ModeControlWidget::onSplatterPlotViewButtonClicked()
  * Set the current view to a new, selected view
  *
  */
-void ModeControlWidget::setToSelectedView(ModeControlWidget::Views view)
-{
-  switch(view)
-  {
-    case ModeControlWidget::STANDARD:
-    {
-      this->onStandardViewButtonClicked();
-    }
-    break;
+void ModeControlWidget::setToSelectedView(ModeControlWidget::Views view) {
+  switch (view) {
+  case ModeControlWidget::STANDARD: {
+    this->onStandardViewButtonClicked();
+  } break;
 
-    case ModeControlWidget::MULTISLICE:
-    {
-      this->onMultiSliceViewButtonClicked();
-    }
-    break;
+  case ModeControlWidget::MULTISLICE: {
+    this->onMultiSliceViewButtonClicked();
+  } break;
 
-    case ModeControlWidget::THREESLICE:
-    {
-      this->onThreeSliceViewButtonClicked();
-    }
-    break;
+  case ModeControlWidget::THREESLICE: {
+    this->onThreeSliceViewButtonClicked();
+  } break;
 
-    case ModeControlWidget::SPLATTERPLOT:
-    {
-      this->onSplatterPlotViewButtonClicked();
-    }
-    break;
+  case ModeControlWidget::SPLATTERPLOT: {
+    this->onSplatterPlotViewButtonClicked();
+  } break;
 
-    default:
-      break;
+  default:
+    break;
   }
 }
 
@@ -172,10 +141,8 @@ void ModeControlWidget::setToSelectedView(ModeControlWidget::Views view)
  * @param state Enable/diable the view mode button
  */
 void ModeControlWidget::enableViewButton(ModeControlWidget::Views mode,
-                                         bool state)
-{
-  switch (mode)
-  {
+                                         bool state) {
+  switch (mode) {
   case ModeControlWidget::STANDARD:
     this->ui.standardButton->setEnabled(state);
     break;
@@ -194,18 +161,14 @@ void ModeControlWidget::enableViewButton(ModeControlWidget::Views mode,
 }
 
 /**
- * A string is checked against the enum for the views. 
+ * A string is checked against the enum for the views.
  * @param view A selected view.
  * @returns The selected view as enum or the standard view.
  */
-ModeControlWidget::Views ModeControlWidget::getViewFromString(QString view)
-{
-  if (!view.isEmpty() && mapFromStringToView.count(view) == 1)
-  {
+ModeControlWidget::Views ModeControlWidget::getViewFromString(QString view) {
+  if (!view.isEmpty() && mapFromStringToView.count(view) == 1) {
     return mapFromStringToView[view];
-  }
-  else 
-  {
+  } else {
     // The view was not found, hence return the standard view
     g_log.warning("The specified default view could not be found! \n");
 

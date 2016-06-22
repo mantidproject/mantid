@@ -487,7 +487,7 @@ void MultiTabScriptInterpreter::spacesToTabs() { m_current->spacesToTabs(); }
 void MultiTabScriptInterpreter::showSelectFont() {
   // Would prefer to use QFontDialog but only interested in font family
 
-  QDialog *selectFont =new QDialog(this, Qt::Dialog);
+  QDialog *selectFont = new QDialog(this, Qt::Dialog);
   selectFont->setModal(false);
   selectFont->setWindowTitle("Configure Tab Whitespace");
 

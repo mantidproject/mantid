@@ -8,13 +8,12 @@
  * Defines a mapping between a workspace ID and a pixmap
  * to use for an icon.
  */
-class WorkspaceIcons
-{
+class WorkspaceIcons {
 public:
   WorkspaceIcons();
 
   /// Returns an icon for the given ID
-  QPixmap getIcon(const std::string & workspaceID) const;
+  QPixmap getIcon(const std::string &workspaceID) const;
 
 private:
   /// Defines the mapping between ID & pixmap name

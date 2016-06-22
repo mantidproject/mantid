@@ -29,13 +29,6 @@ MaskBinsFromTable::MaskBinsFromTable()
       m_useDetectorID(false), m_useSpectrumID(false) {}
 
 //----------------------------------------------------------------------------------------------
-/** Destructor
- */
-MaskBinsFromTable::~MaskBinsFromTable() {}
-
-//----------------------------------------------------------------------------------------------
-
-//----------------------------------------------------------------------------------------------
 void MaskBinsFromTable::init() {
   this->declareProperty(Kernel::make_unique<WorkspaceProperty<>>(
                             "InputWorkspace", "", Direction::Input,
@@ -146,7 +139,7 @@ void MaskBinsFromTable::processMaskBinWorkspace(
   if (!masktblws)
     throw std::invalid_argument("Input workspace is not a table workspace.");
   g_log.debug() << "Lines of parameters workspace = " << masktblws->rowCount()
-                << std::endl;
+                << '\n';
 
   // Check column names type and sequence
   vector<std::string> colnames = masktblws->getColumnNames();

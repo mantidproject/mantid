@@ -45,17 +45,17 @@ public:
 
     TS_ASSERT_THROWS_NOTHING(
         log1.fatal() << "A fatal message from the stream operators " << 4.5
-                     << std::endl;
+                     << '\n';
         log1.error() << "A error message from the stream operators " << -0.2
-                     << std::endl;
+                     << '\n';
         log1.warning() << "A warning message from the stream operators "
-                       << 999.99 << std::endl;
+                       << 999.99 << '\n';
         log1.notice() << "A notice message from the stream operators " << 0.0
-                      << std::endl;
+                      << '\n';
         log1.information() << "A information message from the stream operators "
-                           << -999.99 << std::endl;
+                           << -999.99 << '\n';
         log1.debug() << "A debug message from the stream operators " << 5684568
-                     << std::endl;
+                     << '\n';
 
         );
 
@@ -76,20 +76,19 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         log1.fatal()
             << "A fatal message from the stream operators with enabled=true "
-            << 4.5 << std::endl;);
+            << 4.5 << '\n';);
 
     TS_ASSERT_THROWS_NOTHING(log1.setEnabled(false));
     TS_ASSERT(!log1.getEnabled());
     TS_ASSERT_THROWS_NOTHING(log1.fatal("YOU SHOULD NEVER SEE THIS"));
     TS_ASSERT_THROWS_NOTHING(
-        log1.fatal() << "YOU SHOULD NEVER SEE THIS VIA A STREAM" << std::endl;);
+        log1.fatal() << "YOU SHOULD NEVER SEE THIS VIA A STREAM\n";);
 
     TS_ASSERT_THROWS_NOTHING(log1.setEnabled(true));
     TS_ASSERT(log1.getEnabled());
     TS_ASSERT_THROWS_NOTHING(log1.fatal("you are allowed to see this"));
-    TS_ASSERT_THROWS_NOTHING(log1.fatal()
-                                 << "you are allowed to see this via a stream"
-                                 << std::endl;);
+    TS_ASSERT_THROWS_NOTHING(
+        log1.fatal() << "you are allowed to see this via a stream\n";);
   }
 
   void testLogLevelOffset() {
@@ -349,7 +348,7 @@ public:
     }
     // Check that the last directory matches that returned by
     // getInstrumentDirectory
-    TS_ASSERT_EQUALS(directories[directories.size() - 1],
+    TS_ASSERT_EQUALS(directories.back(),
                      ConfigService::Instance().getInstrumentDirectory());
 
     // check all of the directory entries actually exist

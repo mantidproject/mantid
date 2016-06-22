@@ -1,3 +1,5 @@
+from __future__ import (absolute_import, division, print_function)
+
 import unittest
 from mantid.kernel import *
 from mantid.api import *
@@ -61,7 +63,7 @@ class StretchedExpFTTest(unittest.TestCase):
     def testRegistered(self):
         try:
             FunctionFactory.createFunction('StretchedExpFT')
-        except RuntimeError, exc:
+        except RuntimeError as exc:
             self.fail('Could not create StretchedExpFT function: %s' % str(exc))
 
     def testGaussian(self):
@@ -77,7 +79,7 @@ class StretchedExpFTTest(unittest.TestCase):
         functor = lambda E: np.sqrt(np.pi)/E0 * np.exp(-(np.pi*E/E0)**2)
         self.createData(functor)  # Create workspace "data"
         # Initial guess reasonably far from target parameters
-        fString = "name=StretchedExpFT,Height=3.0,Tau=50,Beta=1.5,Center=0.0002;" +\
+        fString = "name=StretchedExpFT,Height=3.0,Tau=50,Beta=1.5,Centre=0.0002;" +\
                   "name=FlatBackground,A0=0.0"
         Fit(Function=fString, InputWorkspace="data", MaxIterations=100, Output="fit")
         self.asserFit(mtd["fit_Parameters"], height, beta, tau)
@@ -96,7 +98,7 @@ class StretchedExpFTTest(unittest.TestCase):
         functor = lambda E: (1.0/np.pi) * hwhm/(hwhm**2 + E**2)
         self.createData(functor)  # Create workspace "data"
         # Initial guess reasonably far from target parameters
-        fString = "name=StretchedExpFT,Height=3.0,Tau=50,Beta=1.5,Center=0.0002;" +\
+        fString = "name=StretchedExpFT,Height=3.0,Tau=50,Beta=1.5,Centre=0.0002;" +\
                   "name=FlatBackground,A0=0.0"
         Fit(Function=fString, InputWorkspace="data", MaxIterations=100, Output="fit")
         self.asserFit(mtd["fit_Parameters"], height, beta, tau)

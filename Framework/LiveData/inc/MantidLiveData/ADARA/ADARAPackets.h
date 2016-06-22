@@ -438,8 +438,6 @@ private:
 
 class DLLExport BeamlineInfoPkt : public Packet {
 public:
-  BeamlineInfoPkt(const BeamlineInfoPkt &pkt);
-
   const uint32_t &targetStationNumber() const { return m_targetStationNumber; }
 
   const std::string &id() const { return m_id; }

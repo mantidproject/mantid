@@ -17,8 +17,8 @@ namespace VATES {
  * @param frame The coordinate frame
  */
 ConcretePeaksPresenterVsi::ConcretePeaksPresenterVsi(
-    Mantid::API::IPeaksWorkspace_sptr peaksWorkspace, ViewFrustum_const_sptr frustum,
-    std::string frame)
+    Mantid::API::IPeaksWorkspace_sptr peaksWorkspace,
+    ViewFrustum_const_sptr frustum, std::string frame)
     : m_viewableRegion(frustum), m_peaksWorkspace(peaksWorkspace),
       m_frame(frame) {}
 
@@ -29,7 +29,8 @@ ConcretePeaksPresenterVsi::~ConcretePeaksPresenterVsi() {}
  * Update the view frustum
  * @param frustum The view frustum.
  */
-void ConcretePeaksPresenterVsi::updateViewFrustum(ViewFrustum_const_sptr frustum) {
+void ConcretePeaksPresenterVsi::updateViewFrustum(
+    ViewFrustum_const_sptr frustum) {
   m_viewableRegion = frustum;
 }
 
@@ -37,7 +38,7 @@ void ConcretePeaksPresenterVsi::updateViewFrustum(ViewFrustum_const_sptr frustum
  * Get the viewable peaks. Essentially copied from the slice viewer.
  * @returns A vector indicating which of the peaks are viewable.
  */
-std::vector<bool> ConcretePeaksPresenterVsi::getViewablePeaks() const{
+std::vector<bool> ConcretePeaksPresenterVsi::getViewablePeaks() const {
   // Need to apply a transform.
   // Don't bother to find peaks in the region if there are no peaks to find.
   Mantid::API::ITableWorkspace_sptr outTable;
@@ -78,7 +79,7 @@ std::vector<bool> ConcretePeaksPresenterVsi::getViewablePeaks() const{
  * @returns A pointer to the underlying peaks workspace.
  */
 Mantid::API::IPeaksWorkspace_sptr
-ConcretePeaksPresenterVsi::getPeaksWorkspace() const{
+ConcretePeaksPresenterVsi::getPeaksWorkspace() const {
   return m_peaksWorkspace;
 }
 
@@ -86,13 +87,13 @@ ConcretePeaksPresenterVsi::getPeaksWorkspace() const{
  * Get the frame
  * @returns The frame.
  */
-std::string ConcretePeaksPresenterVsi::getFrame() const{ return m_frame; }
+std::string ConcretePeaksPresenterVsi::getFrame() const { return m_frame; }
 
 /**
  * Get the name of the underlying peaks workspace.
  * @returns The name of the peaks workspace.
  */
-std::string ConcretePeaksPresenterVsi::getPeaksWorkspaceName() const{
+std::string ConcretePeaksPresenterVsi::getPeaksWorkspaceName() const {
   return m_peaksWorkspace->getName();
 }
 
@@ -134,8 +135,8 @@ void ConcretePeaksPresenterVsi::getPeaksInfo(
  * @param shape The shape of a peak.
  * @returns The maximal radius of the peak.
  */
-double ConcretePeaksPresenterVsi::getMaxRadius (
-    Mantid::Geometry::PeakShape_sptr shape) const{
+double ConcretePeaksPresenterVsi::getMaxRadius(
+    Mantid::Geometry::PeakShape_sptr shape) const {
   const double defaultRadius = 1.0;
 
   boost::optional<double> radius =

@@ -105,8 +105,8 @@ public:
 
     // test X
     TS_ASSERT_EQUALS(X.size(), 360);
-    TS_ASSERT_DELTA(X[0], 32471.4, .1);
-    TS_ASSERT_DELTA(X[X.size() - 1], 194590.43, .1);
+    TS_ASSERT_DELTA(X.front(), 32471.4, .1);
+    TS_ASSERT_DELTA(X.back(), 194590.43, .1);
 
     // test some meta data
     std::string title = data->getTitle();

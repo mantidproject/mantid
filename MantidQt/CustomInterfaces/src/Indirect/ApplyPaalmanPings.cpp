@@ -101,21 +101,21 @@ void ApplyPaalmanPings::updateContainer() {
 
     IAlgorithm_sptr scaleXAlg = AlgorithmManager::Instance().create("ScaleX");
     scaleXAlg->initialize();
-	scaleXAlg->setLogging(false);
-	scaleXAlg->setProperty("InputWorkspace", canName.toStdString());
-	scaleXAlg->setProperty("OutputWorkspace", m_containerWorkspaceName);
-	scaleXAlg->setProperty("Factor", shift);
-	scaleXAlg->setProperty("Operation", "Add");
-	scaleXAlg->execute();
+    scaleXAlg->setLogging(false);
+    scaleXAlg->setProperty("InputWorkspace", canName.toStdString());
+    scaleXAlg->setProperty("OutputWorkspace", m_containerWorkspaceName);
+    scaleXAlg->setProperty("Factor", shift);
+    scaleXAlg->setProperty("Operation", "Add");
+    scaleXAlg->execute();
 
     IAlgorithm_sptr scaleAlg = AlgorithmManager::Instance().create("Scale");
-	scaleAlg->initialize();
-	scaleAlg->setLogging(false);
-	scaleAlg->setProperty("InputWorkspace", m_containerWorkspaceName);
-	scaleAlg->setProperty("OutputWorkspace", m_containerWorkspaceName);
-	scaleAlg->setProperty("Factor", scale);
-	scaleAlg->setProperty("Operation", "Multiply");
-	scaleAlg->execute();
+    scaleAlg->initialize();
+    scaleAlg->setLogging(false);
+    scaleAlg->setProperty("InputWorkspace", m_containerWorkspaceName);
+    scaleAlg->setProperty("OutputWorkspace", m_containerWorkspaceName);
+    scaleAlg->setProperty("Factor", scale);
+    scaleAlg->setProperty("Operation", "Multiply");
+    scaleAlg->execute();
 
     const auto sampleValid = m_uiForm.dsSample->isValid();
     if (sampleValid) {
@@ -129,12 +129,12 @@ void ApplyPaalmanPings::updateContainer() {
       rebin->execute();
     } else {
       // Sample was not valid so do not rebin
-	  m_uiForm.ppPreview->removeSpectrum("Container");
+      m_uiForm.ppPreview->removeSpectrum("Container");
       return;
     }
   } else {
     // Can was not valid so do not replot
-	m_uiForm.ppPreview->removeSpectrum("Container");
+    m_uiForm.ppPreview->removeSpectrum("Container");
     return;
   }
   plotPreview(m_uiForm.spPreviewSpec->value());
@@ -170,33 +170,35 @@ void ApplyPaalmanPings::run() {
   if (useCan) {
     const auto canName =
         m_uiForm.dsContainer->getCurrentDataName().toStdString();
-	const auto cloneName = "__algorithm_can";
-	IAlgorithm_sptr clone = AlgorithmManager::Instance().create("CloneWorkspace");
-	clone->initialize();
-	clone->setProperty("InputWorkspace", canName);
-	clone->setProperty("Outputworkspace", cloneName);
-	clone->execute();
+    const auto cloneName = "__algorithm_can";
+    IAlgorithm_sptr clone =
+        AlgorithmManager::Instance().create("CloneWorkspace");
+    clone->initialize();
+    clone->setProperty("InputWorkspace", canName);
+    clone->setProperty("Outputworkspace", cloneName);
+    clone->execute();
 
     const bool useShift = m_uiForm.ckShiftCan->isChecked();
-	if (useShift) {
-		IAlgorithm_sptr scaleX = AlgorithmManager::Instance().create("ScaleX");
-		scaleX->initialize();
-		scaleX->setLogging(false);
-		scaleX->setProperty("InputWorkspace", cloneName);
-		scaleX->setProperty("OutputWorkspace", cloneName);
-		scaleX->setProperty("Factor", m_uiForm.spCanShift->value());
-		scaleX->setProperty("Operation", "Add");
-		scaleX->execute();
-		IAlgorithm_sptr rebin =
-			AlgorithmManager::Instance().create("RebinToWorkspace");
-		rebin->initialize();
-		rebin->setLogging(false);
-		rebin->setProperty("WorkspaceToRebin", cloneName);
-		rebin->setProperty("WorkspaceToMatch", m_sampleWorkspaceName);
-		rebin->setProperty("OutputWorkspace", cloneName);
-		rebin->execute();
-	}
-	canClone = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(cloneName);
+    if (useShift) {
+      IAlgorithm_sptr scaleX = AlgorithmManager::Instance().create("ScaleX");
+      scaleX->initialize();
+      scaleX->setLogging(false);
+      scaleX->setProperty("InputWorkspace", cloneName);
+      scaleX->setProperty("OutputWorkspace", cloneName);
+      scaleX->setProperty("Factor", m_uiForm.spCanShift->value());
+      scaleX->setProperty("Operation", "Add");
+      scaleX->execute();
+      IAlgorithm_sptr rebin =
+          AlgorithmManager::Instance().create("RebinToWorkspace");
+      rebin->initialize();
+      rebin->setLogging(false);
+      rebin->setProperty("WorkspaceToRebin", cloneName);
+      rebin->setProperty("WorkspaceToMatch", m_sampleWorkspaceName);
+      rebin->setProperty("OutputWorkspace", cloneName);
+      rebin->execute();
+    }
+    canClone =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(cloneName);
     // Check for same binning across sample and container
     if (!checkWorkspaceBinningMatches(sampleWs, canClone)) {
       const char *text =
@@ -506,10 +508,8 @@ bool ApplyPaalmanPings::validate() {
     QString containerType =
         container.right(container.length() - container.lastIndexOf("_"));
 
-    g_log.debug() << "Sample type is: " << sampleType.toStdString()
-                  << std::endl;
-    g_log.debug() << "Can type is: " << containerType.toStdString()
-                  << std::endl;
+    g_log.debug() << "Sample type is: " << sampleType.toStdString() << '\n';
+    g_log.debug() << "Can type is: " << containerType.toStdString() << '\n';
 
     if (containerType != sampleType)
       uiv.addErrorMessage(

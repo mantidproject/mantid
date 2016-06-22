@@ -307,7 +307,7 @@ const API::MatrixWorkspace_sptr LoadRKH::read1D() {
     // Set the appropriate values
     for (int index = 0; index < pointsToRead; ++index) {
       localworkspace->getSpectrum(index)
-          ->setSpectrumNo(static_cast<int>(columnOne[index]));
+          .setSpectrumNo(static_cast<int>(columnOne[index]));
       localworkspace->dataY(index)[0] = ydata[index];
       localworkspace->dataE(index)[0] = errdata[index];
     }
@@ -492,7 +492,7 @@ const std::string LoadRKH::readUnit(const std::string &line) {
     // accepted.
     // cppcheck-suppress stlIfStrFind
     if (unit.find('(') != 0 || unit.find(')') != unit.size()) {
-      std::string qCode = boost::lexical_cast<std::string>(SaveRKH::Q_CODE);
+      std::string qCode = std::to_string(SaveRKH::Q_CODE);
       if (symbol == qCode && theQuantity == "q" &&
           unit == "(1/Angstrom)") { // 6 q (1/Angstrom) is the synatx for
                                     // MomentumTransfer

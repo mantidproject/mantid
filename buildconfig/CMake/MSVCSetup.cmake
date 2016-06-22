@@ -13,6 +13,10 @@ add_definitions ( -D_USE_MATH_DEFINES -DNOMINMAX )
 add_definitions ( -DGSL_DLL -DJSON_DLL )
 add_definitions ( -DPOCO_NO_UNWINDOWS )
 add_definitions ( -D_SCL_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_WARNINGS )
+# Workaround Qt compiler detection
+#https://forum.qt.io/topic/43778/error-when-initializing-qstringlist-using-initializer-list/3
+#https://bugreports.qt.io/browse/QTBUG-39142
+add_definitions ( -DQ_COMPILER_INITIALIZER_LISTS )
 
 ##########################################################################
 # Additional compiler flags

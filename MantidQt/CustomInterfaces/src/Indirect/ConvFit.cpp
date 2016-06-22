@@ -41,23 +41,10 @@ void ConvFit::setup() {
   m_runMax = 0;
 
   // Initialise fitTypeStrings
-  m_fitStrings = QStringList() << ""
-                               << "1L"
-                               << "2L"
-                               << "IDS"
-                               << "IDC"
-                               << "EDS"
-                               << "EDC"
-                               << "SFT";
+  m_fitStrings = {"", "1L", "2L", "IDS", "IDC", "EDS", "EDC", "SFT"};
   // All Parameters in tree that should be defaulting to 1
-  m_defaultParams = QStringList() << "Amplitude"
-                                  << "Beta"
-                                  << "Decay"
-                                  << "Diffusion"
-                                  << "Height"
-                                  << "Intensity"
-                                  << "Radius"
-                                  << "Tau";
+  m_defaultParams = {"Amplitude", "Beta",      "Decay",  "Diffusion",
+                     "Height",    "Intensity", "Radius", "Tau"};
 
   // Create TreeProperty Widget
   m_cfTree = new QtTreePropertyBrowser();
@@ -300,6 +287,7 @@ void ConvFit::run() {
   cfs->setProperty("Minimizer",
                    minimizerString("$outputname_$wsindex").toStdString());
   cfs->setProperty("MaxIterations", maxIterations);
+  cfs->setProperty("OutputWorkspace", (m_baseName.toStdString() + "_Result"));
   m_batchAlgoRunner->addAlgorithm(cfs);
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
           SLOT(algorithmComplete(bool)));
@@ -1158,8 +1146,7 @@ void ConvFit::singleFit() {
       runPythonCode(
           QString(
               "from IndirectCommon import getWSprefix\nprint getWSprefix('") +
-          m_cfInputWSName + QString("')\n"))
-          .trimmed();
+          m_cfInputWSName + QString("')\n")).trimmed();
   m_singleFitOutputName +=
       QString("conv_") + fitType + bgType + m_uiForm.spPlotSpectrum->text();
   int maxIterations =
@@ -1685,7 +1672,7 @@ void ConvFit::updatePlotOptions() {
     plotOptions << "Height";
   }
 
-  QStringList params = QStringList();
+  QStringList params;
 
   if (fitFunctionType != 2) {
     params = getFunctionParameters(m_uiForm.cbFitType->currentText());

@@ -895,7 +895,7 @@ public:
     //      int endtime=clock();
     //      std::cout << std::endl << "Cyl tri time=" <<
     //      (endtime-starttime)/(static_cast<double>(CLOCKS_PER_SEC*iter)) <<
-    //      std::endl;
+    //      '\n';
     //      iter=50;
     //      starttime=clock();
     //      for (int i=0;i<iter;i++)
@@ -903,7 +903,7 @@ public:
     //      endtime=clock();
     //      std::cout << "Cyl ray time=" <<
     //      (endtime-starttime)/(static_cast<double>(CLOCKS_PER_SEC*iter)) <<
-    //      std::endl;
+    //      '\n';
     //    }
 
     saTri = geom_obj->triangleSolidAngle(observer);

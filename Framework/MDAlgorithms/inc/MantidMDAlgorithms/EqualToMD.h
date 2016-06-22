@@ -35,9 +35,6 @@ namespace MDAlgorithms {
 */
 class DLLExport EqualToMD : public BooleanBinaryOperationMD {
 public:
-  EqualToMD();
-  ~EqualToMD() override;
-
   const std::string name() const override;
   int version() const override;
 

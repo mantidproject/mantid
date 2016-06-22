@@ -102,7 +102,7 @@ bool Quasi::validate() {
   const auto eMin = m_dblManager->value(m_properties["EMin"]);
   const auto eMax = m_dblManager->value(m_properties["EMax"]);
   if (eMin >= eMax)
-	  errors.append("EMin must be strictly less than EMax.\n");
+    errors.append("EMin must be strictly less than EMax.\n");
 
   // Create and show error messages
   errors.append(uiv.generateErrorMessage());
@@ -112,7 +112,7 @@ bool Quasi::validate() {
     return false;
   }
 
-  //Validate program
+  // Validate program
   QString program = m_uiForm.cbProgram->currentText();
   if (program == "Stretched Exponential") {
     QString resName = m_uiForm.dsResolution->getCurrentDataName();

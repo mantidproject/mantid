@@ -1,12 +1,8 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidDataHandling/LoadRawSpectrum0.h"
 #include "LoadRaw/isisraw2.h"
 #include "MantidDataHandling/LoadLog.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidAPI/MemoryManager.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/UnitFactory.h"
@@ -30,8 +26,6 @@ using namespace API;
 LoadRawSpectrum0::LoadRawSpectrum0()
     : isisRaw(), m_filename(), m_numberOfSpectra(0), m_cache_options(),
       m_specTimeRegimes(), m_prog(0.0), m_lengthIn(0), m_noTimeRegimes(0) {}
-
-LoadRawSpectrum0::~LoadRawSpectrum0() {}
 
 /// Initialisation method.
 void LoadRawSpectrum0::init() { LoadRawHelper::init(); }

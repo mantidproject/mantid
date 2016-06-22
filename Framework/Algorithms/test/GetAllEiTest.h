@@ -318,10 +318,8 @@ public:
                                                                      true);
     auto det1 = tws->getDetector(0);
     auto det2 = tws->getDetector(4);
-    auto spec1 = tws->getSpectrum(0);
-    auto spec2 = tws->getSpectrum(4);
-    auto detID1 = spec1->getDetectorIDs();
-    auto detID2 = spec2->getDetectorIDs();
+    auto detID1 = tws->getSpectrum(0).getDetectorIDs();
+    auto detID2 = tws->getSpectrum(4).getDetectorIDs();
 
     m_getAllEi.initialize();
     m_getAllEi.setProperty("Workspace", tws);
@@ -342,15 +340,13 @@ public:
     TSM_ASSERT_EQUALS("Detector's ID for the first spectrum and new workspace "
                       "should coincide",
                       *(detID1.begin()),
-                      (*wws->getSpectrum(0)->getDetectorIDs().begin()));
+                      (*wws->getSpectrum(0).getDetectorIDs().begin()));
     TSM_ASSERT_EQUALS("Detector's ID for the second spectrum and new workspace "
                       "should coincide",
                       *(detID2.begin()),
-                      (*wws->getSpectrum(1)->getDetectorIDs().begin()));
-    auto pSpec1 = wws->getSpectrum(0);
-    auto pSpec2 = wws->getSpectrum(1);
-    auto Xsp1 = pSpec1->dataX();
-    auto Xsp2 = pSpec2->dataX();
+                      (*wws->getSpectrum(1).getDetectorIDs().begin()));
+    auto Xsp1 = wws->getSpectrum(0).dataX();
+    auto Xsp2 = wws->getSpectrum(1).dataX();
     size_t nSpectra = Xsp2.size();
     TS_ASSERT_EQUALS(nSpectra, 101);
     TS_ASSERT(boost::math::isinf(Xsp1[nSpectra - 1]));
@@ -540,7 +536,7 @@ private:
         double tm2 = t - t2;
         y[i] = (10000 * std::exp(-tm1 * tm1 / 1000.) +
                 20000 * std::exp(-tm2 * tm2 / 1000.));
-        // std::cout<<"t="<<t<<" signal="<<y[i]<<" ind="<<i<<std::endl;
+        // std::cout<<"t="<<t<<" signal="<<y[i]<<" ind="<<i<<'\n';
       }
     }
     // signal at second monitor
@@ -554,7 +550,7 @@ private:
         double tm2 = t - t2;
         y[i] = (100 * std::exp(-tm1 * tm1 / 1000.) +
                 200 * std::exp(-tm2 * tm2 / 1000.));
-        // std::cout<<"t="<<t<<" signal="<<y[i]<<" ind="<<i<<std::endl;
+        // std::cout<<"t="<<t<<" signal="<<y[i]<<" ind="<<i<<'\n';
       }
     }
 

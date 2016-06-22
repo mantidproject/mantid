@@ -242,16 +242,6 @@ using Mantid::API::WorkspaceProperty;
 DECLARE_ALGORITHM(IntegrateMDHistoWorkspace)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-IntegrateMDHistoWorkspace::IntegrateMDHistoWorkspace() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-IntegrateMDHistoWorkspace::~IntegrateMDHistoWorkspace() {}
-
-//----------------------------------------------------------------------------------------------
 
 /// Algorithms name for identification. @see Algorithm::name
 const std::string IntegrateMDHistoWorkspace::name() const {

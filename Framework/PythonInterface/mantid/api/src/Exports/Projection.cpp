@@ -62,7 +62,7 @@ object createWorkspace() {
 
       "  if OutputWorkspace is None:\n"
       "    lhs = "
-      "kernel.funcreturns.process_frame(inspect.currentframe().f_back)\n"
+      "kernel.funcinspect.process_frame(inspect.currentframe().f_back)\n"
       "    if lhs[0] > 0:\n"
       "      OutputWorkspace = lhs[1][0]\n"
       "    else:\n"

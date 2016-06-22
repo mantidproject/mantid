@@ -26,14 +26,6 @@ const std::string WL_PROP_NAME("WaveLengthLogNames");
 DECLARE_ALGORITHM(PDDetermineCharacterizations)
 
 //----------------------------------------------------------------------------------------------
-/// Constructor
-PDDetermineCharacterizations::PDDetermineCharacterizations() {}
-
-//----------------------------------------------------------------------------------------------
-/// Destructor
-PDDetermineCharacterizations::~PDDetermineCharacterizations() {}
-
-//----------------------------------------------------------------------------------------------
 
 /// Algorithms name for identification. @see Algorithm::name
 const std::string PDDetermineCharacterizations::name() const {

@@ -56,10 +56,6 @@ namespace RemoteAlgorithms {
 
 class DLLExport SubmitRemoteJob : public Mantid::API::Algorithm {
 public:
-  /// (Empty) Constructor
-  SubmitRemoteJob() : Mantid::API::Algorithm() {}
-  /// Virtual destructor
-  ~SubmitRemoteJob() override {}
   /// Algorithm's name
   const std::string name() const override { return "SubmitRemoteJob"; }
   /// Summary of algorithms purpose

@@ -20,7 +20,6 @@ class CompareFailsException : public std::runtime_error {
 public:
   explicit CompareFailsException(const std::string &msg)
       : std::runtime_error(msg) {}
-  ~CompareFailsException() throw() override {}
   std::string getMessage() const { return this->what(); }
 };
 
@@ -29,18 +28,6 @@ namespace MDAlgorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CompareMDWorkspaces)
-
-//----------------------------------------------------------------------------------------------
-/** Constructor
-*/
-CompareMDWorkspaces::CompareMDWorkspaces()
-    : inWS2(), m_result(), m_tolerance(0.0), m_CheckEvents(true),
-      m_CompareBoxID(true) {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
-*/
-CompareMDWorkspaces::~CompareMDWorkspaces() {}
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
@@ -356,7 +343,7 @@ void CompareMDWorkspaces::exec() {
   this->doComparison();
 
   if (m_result != "") {
-    g_log.notice() << "The workspaces did not match: " << m_result << std::endl;
+    g_log.notice() << "The workspaces did not match: " << m_result << '\n';
     this->setProperty("Equals", false);
   } else {
     m_result = "Success!";

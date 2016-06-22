@@ -120,7 +120,6 @@ class BASISReduction(PythonAlgorithm):
         self._maskFile = self.getProperty("MaskFile").value
         self._groupDetOpt = self.getProperty("GroupDetectors").value
         self._normalizeToFirst = self.getProperty("NormalizeToFirst").value
-        self._normalizeToVanadium = self.getProperty("GroupDetectors").value
         self._doNorm = self.getProperty("DivideByVanadium").value
 
         datasearch = config["datasearch.searcharchive"]

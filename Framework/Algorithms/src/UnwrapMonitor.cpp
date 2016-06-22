@@ -79,7 +79,7 @@ void UnwrapMonitor::exec() {
   const int numberOfSpectra =
       static_cast<int>(m_inputWS->getNumberHistograms());
   g_log.debug() << "Number of spectra in input workspace: " << numberOfSpectra
-                << std::endl;
+                << '\n';
 
   // Get the "reference" flightpath (currently passed in as a property)
   m_LRef = getProperty("LRef");
@@ -87,7 +87,7 @@ void UnwrapMonitor::exec() {
   m_Tmin = m_inputWS->readX(0).front();
   m_Tmax = m_inputWS->readX(0).back();
   g_log.debug() << "Frame range in microseconds is: " << m_Tmin << " - "
-                << m_Tmax << std::endl;
+                << m_Tmax << '\n';
   m_XSize = m_inputWS->readX(0).size();
 
   // Retrieve the source-sample distance
@@ -113,7 +113,7 @@ void UnwrapMonitor::exec() {
     if (Ld < 0.0) {
       // If the detector flightpath is missing, zero the data
       g_log.debug() << "Detector information for workspace index " << i
-                    << " is not available." << std::endl;
+                    << " is not available.\n";
       tempWS->dataX(i).assign(tempWS->dataX(i).size(), 0.0);
       tempWS->dataY(i).assign(tempWS->dataY(i).size(), 0.0);
       tempWS->dataE(i).assign(tempWS->dataE(i).size(), 0.0);
@@ -147,7 +147,7 @@ void UnwrapMonitor::exec() {
 
     g_log.debug() << "Rebinned workspace has "
                   << outputWS->getNumberHistograms() << " histograms of "
-                  << outputWS->blocksize() << " bins each" << std::endl;
+                  << outputWS->blocksize() << " bins each\n";
     setProperty("OutputWorkspace", outputWS);
   } else
     setProperty("OutputWorkspace", tempWS);
@@ -167,7 +167,7 @@ double UnwrapMonitor::getPrimaryFlightpath() const {
   double L1;
   try {
     L1 = instrument->getSource()->getDistance(*sample);
-    g_log.debug() << "Source-sample distance (in metres): " << L1 << std::endl;
+    g_log.debug() << "Source-sample distance (in metres): " << L1 << '\n';
   } catch (Exception::NotFoundError &) {
     g_log.error("Unable to calculate source-sample distance");
     throw Exception::InstrumentDefinitionError(
@@ -419,7 +419,7 @@ UnwrapMonitor::rebin(const API::MatrixWorkspace_sptr &workspace,
   childAlg->setProperty<std::vector<double>>("Params", paramArray);
   g_log.debug() << "Rebinning unwrapped data into " << numBins
                 << " bins of width " << step << " Angstroms, running from "
-                << min << " to " << max << std::endl;
+                << min << " to " << max << '\n';
 
   childAlg->executeAsChildAlg();
   return childAlg->getProperty("OutputWorkspace");

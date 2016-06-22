@@ -37,16 +37,6 @@ const string S_OF_Q_MINUS_ONE("S(Q)-1");
 const string Q_S_OF_Q_MINUS_ONE("Q[S(Q)-1]");
 }
 
-//----------------------------------------------------------------------------------------------
-/** Constructor
-*/
-PDFFourierTransform::PDFFourierTransform() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
-*/
-PDFFourierTransform::~PDFFourierTransform() {}
-
 const std::string PDFFourierTransform::name() const {
   return "PDFFourierTransform";
 }
@@ -317,7 +307,7 @@ void PDFFourierTransform::exec() {
       error += (sinus * inputDfOfQ[q_index]) * (sinus * inputDfOfQ[q_index]);
       // g_log.debug() << "q[" << i << "] = " << q << "  dq = " << deltaq << "
       // S(q) =" << s;
-      // g_log.debug() << "  d(gr) = " << temp << "  gr = " << gr << std::endl;
+      // g_log.debug() << "  d(gr) = " << temp << "  gr = " << gr << '\n';
     }
 
     // put the information into the output

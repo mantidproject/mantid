@@ -30,16 +30,6 @@ const std::size_t DIMS(3);
 const std::size_t BUFF_SIZE(DIMS * sizeof(float));
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-SaveIsawQvector::SaveIsawQvector() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-SaveIsawQvector::~SaveIsawQvector() {}
-
-//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string SaveIsawQvector::name() const { return "SaveIsawQvector"; }
 
@@ -149,7 +139,7 @@ void SaveIsawQvector::exec() {
   std::vector<double> Qx_save, Qy_save, Qz_save;
   for (std::size_t i = 0; i < numSpectra; ++i) {
     // get a reference to the event list
-    const EventList &events = wksp->getEventList(i);
+    const EventList &events = wksp->getSpectrum(i);
 
     // check to see if the event list is empty
     if (events.empty()) {

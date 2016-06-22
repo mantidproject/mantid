@@ -70,8 +70,6 @@ class DLLExport GetDetOffsetsMultiPeaks : public API::Algorithm {
 public:
   /// Default constructorMatrix
   GetDetOffsetsMultiPeaks();
-  /// Destructor
-  ~GetDetOffsetsMultiPeaks() override;
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "GetDetOffsetsMultiPeaks"; }
   /// Algorithm's version for identification overriding a virtual method

@@ -130,16 +130,6 @@ size_t linearIndexToLinearIndex(const size_t &nDimsShape,
 DECLARE_ALGORITHM(ReplicateMD)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-ReplicateMD::ReplicateMD() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-ReplicateMD::~ReplicateMD() {}
-
-//----------------------------------------------------------------------------------------------
 
 /// Algorithms name for identification. @see Algorithm::name
 const std::string ReplicateMD::name() const { return "ReplicateMD"; }
@@ -193,6 +183,7 @@ std::map<std::string, std::string> ReplicateMD::validateInputs() {
   }
 
   size_t nonMatchingCount = 0;
+  bool haveMatchingIntegratedDims = false;
   for (size_t i = 0; i < shapeWS->getNumDims(); ++i) {
     const auto shapeDim = shapeWS->getDimension(i);
 
@@ -200,16 +191,29 @@ std::map<std::string, std::string> ReplicateMD::validateInputs() {
     const auto dataDim = findMatchingDimension(*dataWS, *shapeDim);
     if (dataDim) {
       if (dataDim->getIsIntegrated()) {
-        // We count this as a non-matching dimension
-        ++nonMatchingCount;
+        if (!shapeDim->getIsIntegrated()) {
+          // We count this as a non-matching dimension
+          ++nonMatchingCount;
+        } else {
+          haveMatchingIntegratedDims = true;
+        }
       } else {
         // Check bin sizes match between the two dimensions
         if (shapeDim->getNBins() != dataDim->getNBins()) {
           std::stringstream stream;
           stream << "Dimension with id " << shapeDim->getDimensionId()
-                 << "in ShapeWorkspace has a different number of bins as the "
+                 << " in ShapeWorkspace has a different number of bins as the "
                     "same id dimension in the DataWorkspace";
           errorMap.emplace("DataWorkspace", stream.str());
+        } else if (haveMatchingIntegratedDims) {
+          errorMap.emplace(
+              "ShapeWorkspace",
+              "Extra integrated dimensions must be only "
+              "the last dimensions, e.g.:\n\nThis is allowed:\n  "
+              "Shape: {10, 5, 1, 1}\n  Data:  { 1, 5, 1, 1}\n\nBut "
+              "this is not:\n  Shape: {10, 1, 5, 1}\n  Data:  { 1, 1, "
+              "5, 1}\n\nUse TransposeMD to re-arrange dimensions.");
+          break;
         }
       }
     } else {

@@ -38,10 +38,6 @@ namespace Algorithms {
 */
 class DLLExport ElasticWindow : public API::Algorithm {
 public:
-  /// (Empty) Constructor
-  ElasticWindow() : API::Algorithm() {}
-  /// Virtual destructor
-  ~ElasticWindow() override {}
   /// Algorithm's name
   const std::string name() const override { return "ElasticWindow"; }
   /// Summary of algorithms purpose

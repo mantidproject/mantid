@@ -64,14 +64,14 @@ public:
   std::size_t getNumberHistograms() const override { return m_spectra.size(); }
 
   /// Return the underlying ISpectrum ptr at the given workspace index.
-  ISpectrum *getSpectrum(const size_t index) override {
-    return &m_spectra[index];
+  ISpectrum &getSpectrum(const size_t index) override {
+    return m_spectra[index];
   }
 
   /// Return the underlying ISpectrum ptr (const version) at the given workspace
   /// index.
-  const ISpectrum *getSpectrum(const size_t index) const override {
-    return &m_spectra[index];
+  const ISpectrum &getSpectrum(const size_t index) const override {
+    return m_spectra[index];
   }
   const std::string id(void) const override { return ""; }
   void init(const size_t &, const size_t &, const size_t &) override {}

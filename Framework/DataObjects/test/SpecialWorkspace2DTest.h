@@ -65,7 +65,7 @@ public:
     TS_ASSERT_EQUALS(ws->blocksize(), 1);
     TS_ASSERT_EQUALS(ws->getInstrument()->getName(),
                      "basic"); // Name of the test instrument
-    const auto &dets = ws->getSpectrum(0)->getDetectorIDs();
+    const auto &dets = ws->getSpectrum(0).getDetectorIDs();
     TS_ASSERT_EQUALS(dets.size(), 1);
 
     TS_ASSERT_EQUALS(*(ws->getDetectorIDs(0).begin()), 1);

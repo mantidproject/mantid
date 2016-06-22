@@ -50,9 +50,6 @@ namespace MDAlgorithms {
 /// Convert to MD Events class itself:
 class DLLExport ConvertToMD : public ConvertToMDParent {
 public:
-  ConvertToMD();
-  ~ConvertToMD() override;
-
   /// Algorithm's name for identification
   const std::string name() const override;
   /// Summary of algorithms purpose

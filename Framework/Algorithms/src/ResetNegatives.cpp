@@ -15,14 +15,6 @@ namespace Algorithms {
 DECLARE_ALGORITHM(ResetNegatives)
 
 //----------------------------------------------------------------------------------------------
-/// Constructor
-ResetNegatives::ResetNegatives() {}
-
-//----------------------------------------------------------------------------------------------
-/// Destructor
-ResetNegatives::~ResetNegatives() {}
-
-//----------------------------------------------------------------------------------------------
 /// @copydoc Mantid::API::IAlgorithm::name()
 const std::string ResetNegatives::name() const { return "ResetNegatives"; }
 

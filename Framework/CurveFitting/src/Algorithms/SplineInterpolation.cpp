@@ -24,11 +24,6 @@ SplineInterpolation::SplineInterpolation()
     : m_cspline(boost::make_shared<CubicSpline>()) {}
 
 //----------------------------------------------------------------------------------------------
-/** Destructor
- */
-SplineInterpolation::~SplineInterpolation() {}
-
-//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string SplineInterpolation::name() const {
   return "SplineInterpolation";
@@ -90,7 +85,7 @@ void SplineInterpolation::exec() {
   if (mws->getNumberHistograms() > 1) {
     g_log.warning()
         << "Algorithm can only interpolate against a single data set. "
-           "Only the first data set will be used." << std::endl;
+           "Only the first data set will be used.\n";
   }
 
   // convert data to binned data as required

@@ -64,7 +64,6 @@ using Poco::XML::NodeIterator;
 using Poco::XML::NodeFilter;
 using MantidQt::API::AlgorithmRunner;
 
-
 namespace MantidQt {
 namespace SliceViewer {
 
@@ -702,8 +701,7 @@ void SliceViewer::setWorkspace(Mantid::API::IMDWorkspace_sptr ws) {
     // MDEWs)
     coord_t min = m_ws->getDimension(d)->getMinimum();
     coord_t max = m_ws->getDimension(d)->getMaximum();
-    if (max < min)
-    {
+    if (max < min) {
       coord_t tmp = max;
       max = min;
       min = tmp;
@@ -712,7 +710,7 @@ void SliceViewer::setWorkspace(Mantid::API::IMDWorkspace_sptr ws) {
         boost::math::isnan(max) || boost::math::isinf(max)) {
       mess << "Dimension " << m_ws->getDimension(d)->getName()
            << " has a bad range: (";
-      mess << min << ", " << max << ")" << std::endl;
+      mess << min << ", " << max << ")\n";
     }
     size_t numBins = static_cast<size_t>((max - min) / binSizes[d]);
     MDHistoDimension_sptr dim(
@@ -723,9 +721,8 @@ void SliceViewer::setWorkspace(Mantid::API::IMDWorkspace_sptr ws) {
 
   if (!mess.str().empty()) {
     mess << "Bad ranges could cause memory allocation errors. Please fix the "
-            "workspace.";
-    mess << std::endl
-         << "You can continue using Mantid.";
+            "workspace.\n"
+            "You can continue using Mantid.";
     throw std::out_of_range(mess.str());
   }
 
@@ -743,12 +740,13 @@ void SliceViewer::setWorkspace(Mantid::API::IMDWorkspace_sptr ws) {
   // Build up the widgets
   this->updateDimensionSliceWidgets();
 
-
-  // This will auto scale the color bar to the current slice when the workspace is
+  // This will auto scale the color bar to the current slice when the workspace
+  // is
   // loaded. This always happens when a workspace is loaded for the first time.
   // For live event data workspaces subsequent updates might not lead to an auto
   // scaling of the color scale range (if this is explicitly turned off).
-  if (shouldAutoScaleForNewlySetWorkspace(m_firstWorkspaceOpen, m_colorBar->getAutoScale())) {
+  if (shouldAutoScaleForNewlySetWorkspace(m_firstWorkspaceOpen,
+                                          m_colorBar->getAutoScale())) {
     findRangeFull();
     m_colorBar->setViewRange(m_colorRangeFull);
     m_colorBar->updateColorMap();
@@ -1390,8 +1388,7 @@ void SliceViewer::findRangeSlice() {
     // the rebin selection and continue to use the original WS
     if (!isRebinInConsistentState(m_overlayWS.get(), m_rebinMode)) {
       setRebinMode(false);
-    }
-    else {
+    } else {
       workspace_used = this->m_overlayWS;
     }
   }
@@ -1440,16 +1437,16 @@ void SliceViewer::findRangeSlice() {
 
     // Iterate through the slice
     m_colorRangeSlice = API::SignalRange(*workspace_used, *function,
-      this->getNormalization()).interval();
+                                         this->getNormalization()).interval();
     delete function;
 
     // In case of failure, use the full range instead
     if (m_colorRangeSlice == QwtDoubleInterval(0.0, 1.0)) {
       m_colorRangeSlice = m_colorRangeFull;
     }
-  }
-  else {
-    // If the slice does not cut through the workspace we make use fo the full workspace
+  } else {
+    // If the slice does not cut through the workspace we make use fo the full
+    // workspace
     m_colorRangeSlice = m_colorRangeFull;
   }
 }
@@ -2350,18 +2347,13 @@ SliceViewer::setPeaksWorkspaces(const QStringList &list) {
 
     // Peak View factory, displays peaks on a peak by peak basis
     auto peakViewFactory = boost::make_shared<PeakViewFactory>(
-                                  m_ws, peaksWS,
-                                  m_plot,
-                                  m_plot->canvas(),
-                                  m_spect->xAxis(),
-                                  m_spect->yAxis(),
-                                  numberOfChildPresenters);
+        m_ws, peaksWS, m_plot, m_plot->canvas(), m_spect->xAxis(),
+        m_spect->yAxis(), numberOfChildPresenters);
 
     try {
       m_peaksPresenter->addPeaksPresenter(
-          boost::make_shared<ConcretePeaksPresenter>(
-              peakViewFactory, peaksWS, m_ws,
-              transformFactory));
+          boost::make_shared<ConcretePeaksPresenter>(peakViewFactory, peaksWS,
+                                                     m_ws, transformFactory));
     } catch (std::logic_error &ex) {
       // Incompatible PeaksWorkspace.
       disablePeakOverlays();
@@ -2575,12 +2567,12 @@ void SliceViewer::setColorBarAutoScale(bool autoscale) {
 * be applied only if it is explicitly requested
 */
 void SliceViewer::applyColorScalingForCurrentSliceIfRequired() {
-  auto useAutoColorScaleforCurrentSlice = m_colorBar->getAutoColorScaleforCurrentSlice();
+  auto useAutoColorScaleforCurrentSlice =
+      m_colorBar->getAutoColorScaleforCurrentSlice();
   if (useAutoColorScaleforCurrentSlice) {
     setColorScaleAutoSlice();
   }
 }
-
 
 } // namespace
 }

@@ -65,7 +65,7 @@ private:
   /// Private Constructor for singleton class
   AlgorithmDialogFactoryImpl() = default;
 
-  ///Private Destructor
+  /// Private Destructor
   ~AlgorithmDialogFactoryImpl() override = default;
 };
 
@@ -141,7 +141,7 @@ private:
 
   /// Private Constructor for singleton class
   UserSubWindowFactoryImpl();
-  ///Private Destructor
+  /// Private Destructor
   ~UserSubWindowFactoryImpl() override = default;
   /// Try to create a sub window from the list of aliases for an interface
   UserSubWindow *createFromAlias(const std::string &name) const;

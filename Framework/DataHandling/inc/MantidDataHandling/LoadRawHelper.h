@@ -56,8 +56,6 @@ class DLLExport LoadRawHelper
 public:
   /// Default constructor
   LoadRawHelper();
-  /// Destructor
-  ~LoadRawHelper() override;
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "LoadRawHelper"; }
   /// Algorithm's version for identification overriding a virtual method

@@ -39,9 +39,9 @@ using namespace MantidQt::MantidWidgets;
 const std::string MuonAnalysisResultTableTab::WORKSPACE_POSTFIX("_Workspace");
 const std::string MuonAnalysisResultTableTab::PARAMS_POSTFIX("_Parameters");
 const QString MuonAnalysisResultTableTab::RUN_NUMBER_LOG("run_number");
-const QStringList MuonAnalysisResultTableTab::NON_TIMESERIES_LOGS =
-    QStringList() << MuonAnalysisResultTableTab::RUN_NUMBER_LOG << "sample_temp"
-                  << "sample_magn_field";
+const QStringList MuonAnalysisResultTableTab::NON_TIMESERIES_LOGS{
+    MuonAnalysisResultTableTab::RUN_NUMBER_LOG, "sample_temp",
+    "sample_magn_field"};
 
 /**
 * Constructor
@@ -822,12 +822,12 @@ void MuonAnalysisResultTableTab::createTable() {
 
     // Python code to show a table on the screen
     std::stringstream code;
-    code << "found = False" << std::endl
-         << "for w in windows():" << std::endl
-         << "  if w.windowLabel() == '" << tableName << "':" << std::endl
-         << "    found = True; w.show(); w.setFocus()" << std::endl
-         << "if not found:" << std::endl
-         << "  importTableWorkspace('" << tableName << "', True)" << std::endl;
+    code << "found = False\n"
+         << "for w in windows():\n"
+         << "  if w.windowLabel() == '" << tableName << "':\n"
+         << "    found = True; w.show(); w.setFocus()\n"
+         << "if not found:\n"
+         << "  importTableWorkspace('" << tableName << "', True)\n";
 
     emit runPythonCode(QString::fromStdString(code.str()), false);
   } else {

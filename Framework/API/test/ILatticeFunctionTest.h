@@ -6,11 +6,14 @@
 #include <gmock/gmock.h>
 
 #include "MantidAPI/ILatticeFunction.h"
+#include "MantidKernel/WarningSuppressions.h"
 
 using Mantid::API::ILatticeFunction;
 using Mantid::Kernel::V3D;
 
 using namespace Mantid::API;
+
+GCC_DIAG_OFF_SUGGEST_OVERRIDE
 
 using ::testing::_;
 using ::testing::Mock;
@@ -104,5 +107,7 @@ private:
     MOCK_CONST_METHOD0(size, size_t());
   };
 };
+
+GCC_DIAG_ON_SUGGEST_OVERRIDE
 
 #endif /* MANTID_API_ILATTICEFUNCTIONTEST_H_ */

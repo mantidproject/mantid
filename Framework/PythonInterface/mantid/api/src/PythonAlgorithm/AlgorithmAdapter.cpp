@@ -99,8 +99,7 @@ const std::string AlgorithmAdapter<BaseAlgorithm>::category() const {
     this->getLogger().warning()
         << "Python Algorithm " << name << " v" << version
         << " does not have a category defined. See "
-           "http://www.mantidproject.org/Basic_PythonAlgorithm_Structure"
-        << std::endl;
+           "http://www.mantidproject.org/Basic_PythonAlgorithm_Structure\n";
   }
   return algCategory;
 }
@@ -145,9 +144,13 @@ bool AlgorithmAdapter<BaseAlgorithm>::isRunning() const {
     PyObject *result = PyObject_CallObject(m_isRunningObj, nullptr);
     if (PyErr_Occurred())
       Environment::throwRuntimeError(true);
-    if (PyBool_Check(result))
-      return PyInt_AsLong(result);
-    else
+    if (PyBool_Check(result)) {
+#if PY_MAJOR_VERSION >= 3
+      return static_cast<bool>(PyLong_AsLong(result));
+#else
+      return static_cast<bool>(PyInt_AsLong(result));
+#endif
+    } else
       throw std::runtime_error(
           "AlgorithmAdapter.isRunning - Expected bool return type.");
   }

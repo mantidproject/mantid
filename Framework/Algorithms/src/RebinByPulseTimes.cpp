@@ -16,16 +16,6 @@ namespace Algorithms {
 DECLARE_ALGORITHM(RebinByPulseTimes)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-RebinByPulseTimes::RebinByPulseTimes() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-RebinByPulseTimes::~RebinByPulseTimes() {}
-
-//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string RebinByPulseTimes::name() const {
   return "RebinByPulseTimes";
@@ -62,10 +52,10 @@ void RebinByPulseTimes::doHistogramming(IEventWorkspace_sptr inWS,
   for (int i = 0; i < histnumber; ++i) {
     PARALLEL_START_INTERUPT_REGION
 
-    const IEventList *el = inWS->getEventListPtr(i);
+    const auto &el = inWS->getSpectrum(i);
     MantidVec y_data, e_data;
     // The EventList takes care of histogramming.
-    el->generateHistogramPulseTime(*XValues_new, y_data, e_data);
+    el.generateHistogramPulseTime(*XValues_new, y_data, e_data);
 
     // Set the X axis for each output histogram
     outputWS->setX(i, OutXValues_scaled);

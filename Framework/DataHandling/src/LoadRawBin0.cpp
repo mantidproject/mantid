@@ -1,9 +1,5 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidDataHandling/LoadRawBin0.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidAPI/MemoryManager.h"
 #include "MantidAPI/WorkspaceGroup_fwd.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/ConfigService.h"
@@ -32,8 +28,6 @@ LoadRawBin0::LoadRawBin0()
     : isisRaw(), m_filename(), m_numberOfSpectra(0), m_noTimeRegimes(0),
       m_cache_options(), m_specTimeRegimes(), m_prog(0.0), m_lengthIn(0),
       m_perioids(), m_total_specs(0), m_timeChannelsVec() {}
-
-LoadRawBin0::~LoadRawBin0() {}
 
 /// Initialisation method.
 void LoadRawBin0::init() {

@@ -1,38 +1,38 @@
 #ifndef MANTIDQTCUSTOMINTERFACES_DYNAMICPDF_FITCONTROL_H_
 #define MANTIDQTCUSTOMINTERFACES_DYNAMICPDF_FITCONTROL_H_
 
-//Mantid Coding standars <http://www.mantidproject.org/Coding_Standards>
-//Mantid Headers from the same project
+// Mantid Coding standars <http://www.mantidproject.org/Coding_Standards>
+// Mantid Headers from the same project
 #include "ui_DPDFFitControl.h"
-//Mantid headers from other projects
+// Mantid headers from other projects
 #include "MantidAPI/IFunction.h"
 #include "MantidQtCustomInterfaces/DllConfig.h"
-//3rd party library headers
+// 3rd party library headers
 #include <QWidget>
-//System headers
+// System headers
 
 // Forward Declarations
 class QAction;
 class QMenu;
 namespace Mantid {
 namespace API {
-  class IFunction;
+class IFunction;
 }
 }
 namespace MantidQt {
 namespace API {
- class AlgorithmRunner;
+class AlgorithmRunner;
 }
 namespace MantidWidgets {
-  class FunctionBrowser;
-  class FitOptionsBrowser;
+class FunctionBrowser;
+class FitOptionsBrowser;
 }
 namespace CustomInterfaces {
 namespace DynamicPDF {
-  class BackgroundRemover;
-  class DPDFFitOptionsBrowser;
-  class InputDataControl;
-  class DisplayControl;
+class BackgroundRemover;
+class DPDFFitOptionsBrowser;
+class InputDataControl;
+class DisplayControl;
 }
 }
 }
@@ -67,9 +67,9 @@ namespace DynamicPDF {
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class MANTIDQT_CUSTOMINTERFACES_DLL FitControl : public QWidget {
-Q_OBJECT
+  Q_OBJECT
 
-friend class BackgroundRemover;
+  friend class BackgroundRemover;
 
 public:
   FitControl(QWidget *parent = nullptr);
@@ -103,10 +103,10 @@ private:
   void setDisplayControl(DisplayControl *displayControl);
   void fitSequential();
   void fitSimultaneous();
-  void fitIndividual(const bool &isEvaluation=false);
+  void fitIndividual(const bool &isEvaluation = false);
   void updateFunctionBrowser(Mantid::API::IFunction_sptr fun);
   void updateFunctionBrowser(const QString &directory,
-    const QString &modelName);
+                             const QString &modelName);
   void initBuiltInModels();
   void saveBuiltInModels();
   void loadBuiltInModels(QMenu *menuBuiltIn);
@@ -130,8 +130,7 @@ private:
   /// Workspace root name for model evaluation
   const std::string m_modelEvaluationName;
 
-};  // class FitControl
-
+}; // class FitControl
 }
 }
 }

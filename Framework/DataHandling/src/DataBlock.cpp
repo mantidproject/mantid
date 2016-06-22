@@ -24,8 +24,6 @@ DataBlock::DataBlock(int numberOfPeriods, size_t numberOfSpectra,
       m_numberOfChannels(numberOfChannels),
       m_minSpectraID(std::numeric_limits<int64_t>::max()), m_maxSpectraID(0) {}
 
-DataBlock::~DataBlock() {}
-
 int64_t DataBlock::getMinSpectrumID() const { return m_minSpectraID; }
 
 void DataBlock::setMinSpectrumID(int64_t minSpecID) {

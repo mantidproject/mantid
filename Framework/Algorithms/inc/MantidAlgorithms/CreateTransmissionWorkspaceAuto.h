@@ -36,9 +36,6 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 class DLLExport CreateTransmissionWorkspaceAuto
     : public API::DataProcessorAlgorithm {
 public:
-  CreateTransmissionWorkspaceAuto();
-  ~CreateTransmissionWorkspaceAuto() override;
-
   //----------------------------------------------------------------------------------------------
   /// Algorithm's name for identification. @see Algorithm::name
   const std::string name() const override {
@@ -56,10 +53,6 @@ private:
   void exec() override;
 
   template <typename T> boost::optional<T> isSet(std::string propName) const;
-
-  double checkForDefault(std::string propName,
-                         Mantid::Geometry::Instrument_const_sptr instrument,
-                         std::string idf_name = "") const;
 };
 
 } // namespace Algorithms

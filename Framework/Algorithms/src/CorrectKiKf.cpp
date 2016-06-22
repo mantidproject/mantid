@@ -24,12 +24,6 @@ using namespace DataObjects;
 using namespace Geometry;
 using std::size_t;
 
-/// Default constructor
-CorrectKiKf::CorrectKiKf() : Algorithm() {}
-
-/// Destructor
-CorrectKiKf::~CorrectKiKf() {}
-
 /// Initialisation method
 void CorrectKiKf::init() {
   auto wsValidator = boost::make_shared<WorkspaceUnitValidator>("DeltaE");
@@ -177,10 +171,9 @@ void CorrectKiKf::exec() {
   PARALLEL_CHECK_INTERUPT_REGION
 
   if (negativeEnergyWarning)
-    g_log.information() << "Ef <= 0 or Ei <= 0 in at least one spectrum!!!!"
-                        << std::endl;
+    g_log.information() << "Ef <= 0 or Ei <= 0 in at least one spectrum!!!!\n";
   if ((negativeEnergyWarning) && (efixedProp == EMPTY_DBL()))
-    g_log.information() << "Try to set fixed energy" << std::endl;
+    g_log.information() << "Try to set fixed energy\n";
   this->setProperty("OutputWorkspace", outputWS);
   return;
 }
@@ -272,20 +265,20 @@ void CorrectKiKf::execEvent() {
       efixed = efixedProp;
 
     // Do the correction
-    EventList *evlist = outputWS->getEventListPtr(i);
-    switch (evlist->getEventType()) {
+    auto &evlist = outputWS->getSpectrum(i);
+    switch (evlist.getEventType()) {
     case TOF:
       // Switch to weights if needed.
-      evlist->switchTo(WEIGHTED);
+      evlist.switchTo(WEIGHTED);
     /* no break */
     // Fall through
 
     case WEIGHTED:
-      correctKiKfEventHelper(evlist->getWeightedEvents(), efixed, emodeStr);
+      correctKiKfEventHelper(evlist.getWeightedEvents(), efixed, emodeStr);
       break;
 
     case WEIGHTED_NOTIME:
-      correctKiKfEventHelper(evlist->getWeightedEventsNoTime(), efixed,
+      correctKiKfEventHelper(evlist.getWeightedEventsNoTime(), efixed,
                              emodeStr);
       break;
     }
@@ -300,9 +293,9 @@ void CorrectKiKf::execEvent() {
     g_log.information() << "Ef <= 0 or Ei <= 0 for "
                         << inputWS->getNumberEvents() -
                                outputWS->getNumberEvents() << " events, out of "
-                        << inputWS->getNumberEvents() << std::endl;
+                        << inputWS->getNumberEvents() << '\n';
     if (efixedProp == EMPTY_DBL())
-      g_log.information() << "Try to set fixed energy" << std::endl;
+      g_log.information() << "Try to set fixed energy\n";
   }
 }
 

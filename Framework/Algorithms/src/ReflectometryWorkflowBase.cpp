@@ -1,5 +1,7 @@
 #include "MantidAlgorithms/ReflectometryWorkflowBase.h"
+#include "MantidAlgorithms/BoostOptionalToAlgorithmProperty.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
@@ -22,30 +24,13 @@ bool checkNotPositive(const int value) { return value < 0; }
 }
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-ReflectometryWorkflowBase::ReflectometryWorkflowBase() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-ReflectometryWorkflowBase::~ReflectometryWorkflowBase() {}
 
 /**
  * Init index properties.
  */
 void ReflectometryWorkflowBase::initIndexInputs() {
-
-  boost::shared_ptr<CompositeValidator> mandatoryWorkspaceIndex =
-      boost::make_shared<CompositeValidator>();
-  mandatoryWorkspaceIndex->add(boost::make_shared<MandatoryValidator<int>>());
-  auto boundedIndex = boost::make_shared<BoundedValidator<int>>();
-  boundedIndex->setLower(0);
-  mandatoryWorkspaceIndex->add(boundedIndex);
-
-  declareProperty(make_unique<PropertyWithValue<int>>("I0MonitorIndex",
-                                                      Mantid::EMPTY_INT(),
-                                                      mandatoryWorkspaceIndex),
+  declareProperty(make_unique<PropertyWithValue<int>>(
+                      "I0MonitorIndex", Mantid::EMPTY_INT(), Direction::Input),
                   "I0 monitor workspace index");
 
   declareProperty(Kernel::make_unique<PropertyWithValue<std::string>>(
@@ -81,24 +66,20 @@ void ReflectometryWorkflowBase::initWavelengthInputs() {
 
   declareProperty(make_unique<PropertyWithValue<double>>(
                       "MonitorBackgroundWavelengthMin", Mantid::EMPTY_DBL(),
-                      boost::make_shared<MandatoryValidator<double>>(),
                       Direction::Input),
                   "Wavelength minimum for monitor background in angstroms.");
 
   declareProperty(make_unique<PropertyWithValue<double>>(
                       "MonitorBackgroundWavelengthMax", Mantid::EMPTY_DBL(),
-                      boost::make_shared<MandatoryValidator<double>>(),
                       Direction::Input),
                   "Wavelength maximum for monitor background in angstroms.");
 
   declareProperty(make_unique<PropertyWithValue<double>>(
                       "MonitorIntegrationWavelengthMin", Mantid::EMPTY_DBL(),
-                      boost::make_shared<MandatoryValidator<double>>(),
                       Direction::Input),
                   "Wavelength minimum for integration in angstroms.");
   declareProperty(make_unique<PropertyWithValue<double>>(
                       "MonitorIntegrationWavelengthMax", Mantid::EMPTY_DBL(),
-                      boost::make_shared<MandatoryValidator<double>>(),
                       Direction::Input),
                   "Wavelength maximum for integration in angstroms.");
 }
@@ -198,6 +179,36 @@ ReflectometryWorkflowBase::getMinMax(const std::string &minProperty,
         "Cannot have any WavelengthMin > WavelengthMax");
   }
   return MinMax(min, max);
+}
+/**
+ * Get min max pairs of Optional Properties
+ * @param alg : A Pointer to the algorithm to which the properties belong
+ * @param minProperty : Property name for the min property
+ * @param maxProperty : Property name for the max property
+ * @param inst : Pointer to the instrument associated with the workspace (for
+ * optional defaults)
+ * @param minIdfName : name of the min property component in the instrument
+ * defintion (for optional defaults)
+ * @param maxIdfName : name of the max property component in the instrument
+ * defintion (for optional defaults)
+ * @return An initliazed/uninitialized boost::optional of type MinMax.
+ */
+ReflectometryWorkflowBase::OptionalMinMax
+ReflectometryWorkflowBase::getOptionalMinMax(
+    Mantid::API::Algorithm *const alg, const std::string &minProperty,
+    const std::string &maxProperty,
+    Mantid::Geometry::Instrument_const_sptr inst, std::string minIdfName,
+    std::string maxIdfName) const {
+  const auto min = checkForOptionalInstrumentDefault<double>(alg, minProperty,
+                                                             inst, minIdfName);
+  const auto max = checkForOptionalInstrumentDefault<double>(alg, maxProperty,
+                                                             inst, maxIdfName);
+  if (min.is_initialized() && max.is_initialized()) {
+    MinMax result = getMinMax(minProperty, maxProperty);
+    return OptionalMinMax(result);
+  } else {
+    return OptionalMinMax();
+  }
 }
 
 /**
@@ -350,10 +361,9 @@ void ReflectometryWorkflowBase::getTransmissionRunInfo(
  * correction.
  * @return The cropped and corrected monitor workspace.
  */
-MatrixWorkspace_sptr
-ReflectometryWorkflowBase::toLamMonitor(const MatrixWorkspace_sptr &toConvert,
-                                        const int monitorIndex,
-                                        const MinMax &backgroundMinMax) {
+MatrixWorkspace_sptr ReflectometryWorkflowBase::toLamMonitor(
+    const MatrixWorkspace_sptr &toConvert, const OptionalInteger monitorIndex,
+    const OptionalMinMax &backgroundMinMax) {
   // Convert Units.
   auto convertUnitsAlg = this->createChildAlgorithm("ConvertUnits");
   convertUnitsAlg->initialize();
@@ -367,13 +377,14 @@ ReflectometryWorkflowBase::toLamMonitor(const MatrixWorkspace_sptr &toConvert,
   auto cropWorkspaceAlg = this->createChildAlgorithm("CropWorkspace");
   cropWorkspaceAlg->initialize();
   cropWorkspaceAlg->setProperty("InputWorkspace", monitorWS);
-  cropWorkspaceAlg->setProperty("StartWorkspaceIndex", monitorIndex);
-  cropWorkspaceAlg->setProperty("EndWorkspaceIndex", monitorIndex);
+  cropWorkspaceAlg->setProperty("StartWorkspaceIndex", monitorIndex.get());
+  cropWorkspaceAlg->setProperty("EndWorkspaceIndex", monitorIndex.get());
   cropWorkspaceAlg->execute();
   monitorWS = cropWorkspaceAlg->getProperty("OutputWorkspace");
 
   // If min&max are both 0, we won't do the flat background normalization.
-  if (backgroundMinMax.get<0>() == 0 && backgroundMinMax.get<1>() == 0)
+  if (backgroundMinMax.get().get<0>() == 0 &&
+      backgroundMinMax.get().get<1>() == 0)
     return monitorWS;
 
   // Flat background correction
@@ -381,8 +392,8 @@ ReflectometryWorkflowBase::toLamMonitor(const MatrixWorkspace_sptr &toConvert,
       this->createChildAlgorithm("CalculateFlatBackground");
   correctMonitorsAlg->initialize();
   correctMonitorsAlg->setProperty("InputWorkspace", monitorWS);
-  correctMonitorsAlg->setProperty("StartX", backgroundMinMax.get<0>());
-  correctMonitorsAlg->setProperty("EndX", backgroundMinMax.get<1>());
+  correctMonitorsAlg->setProperty("StartX", backgroundMinMax.get().get<0>());
+  correctMonitorsAlg->setProperty("EndX", backgroundMinMax.get().get<1>());
   correctMonitorsAlg->setProperty("SkipMonitors", false);
   correctMonitorsAlg->execute();
   monitorWS = correctMonitorsAlg->getProperty("OutputWorkspace");
@@ -444,6 +455,23 @@ ReflectometryWorkflowBase::toLamDetector(const std::string &processingCommands,
   return detectorWS;
 }
 
+MatrixWorkspace_sptr
+ReflectometryWorkflowBase::makeUnityWorkspace(const std::vector<double> &x) {
+  auto createWorkspaceAlg = this->createChildAlgorithm("CreateWorkspace");
+  createWorkspaceAlg->initialize();
+  createWorkspaceAlg->setProperty("DataX", x);
+  createWorkspaceAlg->setProperty("DataY",
+                                  std::vector<double>(x.size() - 1, 1.0));
+  createWorkspaceAlg->setProperty("NSpec", 1);
+  createWorkspaceAlg->setProperty("DataE",
+                                  std::vector<double>(x.size() - 1, 0.0));
+  createWorkspaceAlg->setProperty("UnitX", "Wavelength");
+  createWorkspaceAlg->execute();
+  MatrixWorkspace_sptr unityWorkspace =
+      createWorkspaceAlg->getProperty("OutputWorkspace");
+  return unityWorkspace;
+}
+
 /**
  * Convert From a TOF workspace into a detector and monitor workspace both in
  * Lambda.
@@ -459,17 +487,22 @@ ReflectometryWorkflowBase::toLamDetector(const std::string &processingCommands,
 ReflectometryWorkflowBase::DetectorMonitorWorkspacePair
 ReflectometryWorkflowBase::toLam(MatrixWorkspace_sptr toConvert,
                                  const std::string &processingCommands,
-                                 const int monitorIndex,
+                                 const OptionalInteger monitorIndex,
                                  const MinMax &wavelengthMinMax,
-                                 const MinMax &backgroundMinMax,
+                                 const OptionalMinMax &backgroundMinMax,
                                  const double &wavelengthStep) {
   // Detector Workspace Processing
   MatrixWorkspace_sptr detectorWS = toLamDetector(
       processingCommands, toConvert, wavelengthMinMax, wavelengthStep);
 
-  // Monitor Workspace Processing
-  MatrixWorkspace_sptr monitorWS =
-      toLamMonitor(toConvert, monitorIndex, backgroundMinMax);
+  MatrixWorkspace_sptr monitorWS;
+  if (monitorIndex.is_initialized() && backgroundMinMax.is_initialized()) {
+    // Monitor Workspace Processing
+    monitorWS = toLamMonitor(toConvert, monitorIndex, backgroundMinMax);
+  } else {
+    // We don't have a monitor index, so we divide through by unity.
+    monitorWS = makeUnityWorkspace(detectorWS->readX(0));
+  }
 
   // Rebin the Monitor Workspace to match the Detector Workspace.
   auto rebinToWorkspaceAlg = this->createChildAlgorithm("RebinToWorkspace");

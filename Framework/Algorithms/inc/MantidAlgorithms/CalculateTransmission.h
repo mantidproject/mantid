@@ -68,10 +68,6 @@ namespace Algorithms {
 */
 class DLLExport CalculateTransmission : public API::Algorithm {
 public:
-  /// Constructor
-  CalculateTransmission();
-  /// Virtual destructor
-  ~CalculateTransmission() override;
   /// Algorithm's name
   const std::string name() const override { return "CalculateTransmission"; }
   /// Summary of algorithms purpose
@@ -91,7 +87,7 @@ public:
 private:
   /// stores an estimate of the progress so far as a proportion (starts at zero
   /// goes to 1.0)
-  mutable double m_done;
+  mutable double m_done = 0.0;
 
   /// Initialisation code
   void init() override;

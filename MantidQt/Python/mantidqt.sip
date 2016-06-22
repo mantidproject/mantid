@@ -22,7 +22,8 @@
 %Include qwttypes.sip
 
 %ModuleHeaderCode
-#include <MantidQtAPI/WorkspaceObserver.h>
+#include "MantidQtAPI/PythonSystemHeader.h"
+#include "MantidQtAPI/WorkspaceObserver.h"
 %End
 
 %InitialisationCode

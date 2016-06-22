@@ -32,11 +32,6 @@ LoadILLIndirect::LoadILLIndirect()
 }
 
 //----------------------------------------------------------------------------------------------
-/** Destructor
- */
-LoadILLIndirect::~LoadILLIndirect() {}
-
-//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string LoadILLIndirect::name() const { return "LoadILLIndirect"; }
 
@@ -138,7 +133,7 @@ void LoadILLIndirect::setInstrumentName(const NeXus::NXEntry &firstEntry,
   m_instrumentName =
       m_loader.getStringFromNexusPath(firstEntry, instrumentNamePath + "/name");
   boost::to_upper(m_instrumentName); // "IN16b" in file, keep it upper case.
-  g_log.debug() << "Instrument name set to: " + m_instrumentName << std::endl;
+  g_log.debug() << "Instrument name set to: " + m_instrumentName << '\n';
 }
 
 /**
@@ -199,14 +194,13 @@ void LoadILLIndirect::initWorkSpace(
   // dim0 * m_numberOfPixelsPerTube is the total number of detectors
   m_numberOfHistograms = m_numberOfTubes * m_numberOfPixelsPerTube;
 
-  g_log.debug() << "NumberOfTubes: " << m_numberOfTubes << std::endl;
-  g_log.debug() << "NumberOfPixelsPerTube: " << m_numberOfPixelsPerTube
-                << std::endl;
-  g_log.debug() << "NumberOfChannels: " << m_numberOfChannels << std::endl;
+  g_log.debug() << "NumberOfTubes: " << m_numberOfTubes << '\n';
+  g_log.debug() << "NumberOfPixelsPerTube: " << m_numberOfPixelsPerTube << '\n';
+  g_log.debug() << "NumberOfChannels: " << m_numberOfChannels << '\n';
   g_log.debug() << "NumberOfSimpleDetectors: " << m_numberOfSimpleDetectors
-                << std::endl;
-  g_log.debug() << "Monitors: " << monitorsData.size() << std::endl;
-  g_log.debug() << "Monitors[0]: " << monitorsData[0].size() << std::endl;
+                << '\n';
+  g_log.debug() << "Monitors: " << monitorsData.size() << '\n';
+  g_log.debug() << "Monitors[0]: " << monitorsData[0].size() << '\n';
 
   // Now create the output workspace
 
@@ -400,7 +394,7 @@ void LoadILLIndirect::moveSingleDetectors() {
   std::string prefix("single_tube_");
 
   for (int i = 1; i <= 8; i++) {
-    std::string componentName = prefix + boost::lexical_cast<std::string>(i);
+    std::string componentName = prefix + std::to_string(i);
 
     moveComponent(componentName, i * 20.0, 2.0 + i / 10.0);
   }
