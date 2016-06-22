@@ -24,8 +24,7 @@ REFLECTIONS_DICT = {"silicon111": {"name": "silicon111",
                                    "q_bins": [0.5, 0.2, 3.7],
                                    "mask_file": "BASIS_Mask_OneQuarterRemains_SouthBottom.xml",
                                    "parameter_file": "BASIS_silicon_311_Parameters.xml",
-                                   "default_energy": 7.6368}
-                    }
+                                   "default_energy": 7.6368}}
 
 #pylint: disable=too-many-instance-attributes
 class BASISReduction(PythonAlgorithm):
