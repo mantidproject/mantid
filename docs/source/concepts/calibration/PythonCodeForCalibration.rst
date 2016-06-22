@@ -118,7 +118,7 @@ A set of optional parameters are available for the **calibrate**
 function for the sake of flexibility, to improve results.
 
 The calibration heavily depends on the :ref:`estimation of the peaks position
-<Peak position estimation>`,
+<tubecalibintro-peak-pos-estimation>`,
 when this step does not perform well, the calibration provides bad
 results.
 
