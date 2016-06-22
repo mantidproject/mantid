@@ -152,7 +152,7 @@ void writeNumAttribute(LocationType &location, const std::string &name,
 
   auto attribute = location.createAttribute(name, attrType, attrSpace);
   // Wrap the data set in an array
-  std::array<NumT, 1> valueArray = {value};
+  std::array<NumT, 1> valueArray = {{value}};
   attribute.write(attrType, valueArray.data());
 }
 
@@ -328,8 +328,10 @@ NumT readNumAttributeCoerce(LocationType &location,
     value = convertingingRead<float, NumT>(attribute, dataType);
   } else if (PredType::NATIVE_DOUBLE == dataType) {
     value = convertingingRead<double, NumT>(attribute, dataType);
+  } else {
+    // not a supported type
+    throw DataTypeIException();
   }
-
   return value;
 }
 
@@ -364,6 +366,9 @@ readNumArrayAttributeCoerce(LocationType &location,
   } else if (PredType::NATIVE_DOUBLE == dataType) {
     value =
         convertingingNumArrayAttributeRead<double, NumT>(attribute, dataType);
+  } else {
+    // not a supported type
+    throw DataTypeIException();
   }
   return value;
 }
