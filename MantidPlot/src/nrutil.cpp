@@ -14,16 +14,15 @@ Mantid::Kernel::Logger &LOGGER() {
 }
 }
 
-if (ia <= ib)
-  return ia;
-else
-  return ib;
+int IMIN(int ia, int ib) {
+  if (ia <= ib)
+    return ia;
+  else
+    return ib;
 }
 
-void nrerror(
-{
-  LOGGER().error(error_text);
-}
+// Numerical Recipes standard error handler
+void nrerror(const char *error_text) { LOGGER().error(error_text); }
 
 double **matrix(long nrl, long nrh, long ncl,
                 long nch) { // allocate a double matrix with subscript range
