@@ -61,6 +61,17 @@ MANTID_DATAHANDLING_DLL H5::Group createGroupNXS(H5::H5File &file,
 MANTID_DATAHANDLING_DLL H5::Group createGroupNXS(H5::Group &group,
                                                  const std::string &name,
                                                  const std::string &nxtype);
+
+MANTID_DATAHANDLING_DLL H5::Group createGroupCanSAS(H5::Group &group,
+                                                    const std::string &name,
+                                                    const std::string &nxtype,
+                                                    const std::string &cstype);
+
+MANTID_DATAHANDLING_DLL H5::Group createGroupCanSAS(H5::H5File &file,
+                                                    const std::string &name,
+                                                    const std::string &nxtype,
+                                                    const std::string &cstype);
+
 /**
  * Sets up the chunking and compression rate.
  * @param length

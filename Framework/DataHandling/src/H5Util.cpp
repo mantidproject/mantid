@@ -19,6 +19,7 @@ namespace {
 Mantid::Kernel::Logger g_log("H5Util");
 
 const std::string NX_ATTR_CLASS("NX_class");
+const std::string CAN_SAS_ATTR_CLASS("canSAS_class");
 }
 
 // -------------------------------------------------------------------
@@ -104,6 +105,20 @@ Group createGroupNXS(Group &group, const std::string &name,
                      const std::string &nxtype) {
   auto outGroup = group.createGroup(name);
   writeStrAttribute(outGroup, NX_ATTR_CLASS, nxtype);
+  return outGroup;
+}
+
+Group createGroupCanSAS(H5File &file, const std::string &name,
+                     const std::string &nxtype, const std::string &cstype) {
+  auto outGroup = createGroupNXS(file, name, nxtype);
+  writeStrAttribute(outGroup, CAN_SAS_ATTR_CLASS, cstype);
+  return outGroup;
+}
+
+Group createGroupCanSAS(Group &group, const std::string &name,
+                     const std::string &nxtype, const std::string &cstype) {
+  auto outGroup = createGroupNXS(group, name, nxtype);
+  writeStrAttribute(outGroup, CAN_SAS_ATTR_CLASS, cstype);
   return outGroup;
 }
 

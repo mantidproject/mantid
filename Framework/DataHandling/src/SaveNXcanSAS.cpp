@@ -133,8 +133,8 @@ H5::Group addSasEntry(H5::H5File &file,
                       const std::string &suffix) {
   using namespace Mantid::DataHandling::NXcanSAS;
   const std::string sasEntryName = sasEntryGroupName + suffix;
-  auto sasEntry = Mantid::DataHandling::H5Util::createGroupNXS(
-      file, sasEntryName, sasEntryClassAttr);
+  auto sasEntry = Mantid::DataHandling::H5Util::createGroupCanSAS(
+      file, sasEntryName, nxEntryClassAttr, sasEntryClassAttr);
 
   // Add version
   Mantid::DataHandling::H5Util::writeStrAttribute(sasEntry, sasEntryVersionAttr,
@@ -188,8 +188,8 @@ void addDetectors(H5::Group &group, Mantid::API::MatrixWorkspace_sptr workspace,
         std::map<std::string, std::string> sddAttributes;
         sddAttributes.insert(
             std::make_pair(sasUnitAttr, sasInstrumentDetectorSddUnitAttrValue));
-        auto detector = Mantid::DataHandling::H5Util::createGroupNXS(
-            group, sasDetectorName, sasInstrumentDetectorClassAttr);
+        auto detector = Mantid::DataHandling::H5Util::createGroupCanSAS(
+            group, sasDetectorName, nxInstrumentDetectorClassAttr, sasInstrumentDetectorClassAttr);
         Mantid::DataHandling::H5Util::write(detector, sasInstrumentDetectorName,
                                             detectorName);
         Mantid::DataHandling::H5Util::writeScalarDataSetWithStrAttributes(
@@ -214,8 +214,8 @@ void addInstrument(H5::Group &group,
                    const std::vector<std::string> &detectorNames) {
   // Setup instrument
   const std::string sasInstrumentNameForGroup = sasInstrumentGroupName;
-  auto instrument = Mantid::DataHandling::H5Util::createGroupNXS(
-      group, sasInstrumentNameForGroup, sasInstrumentClassAttr);
+  auto instrument = Mantid::DataHandling::H5Util::createGroupCanSAS(
+      group, sasInstrumentNameForGroup, nxInstrumentClassAttr, sasInstrumentClassAttr);
   auto instrumentName = getInstrumentName(workspace);
   Mantid::DataHandling::H5Util::write(instrument, sasInstrumentName,
                                       instrumentName);
@@ -225,8 +225,8 @@ void addInstrument(H5::Group &group,
 
   // Setup source
   const std::string sasSourceName = sasInstrumentSourceGroupName;
-  auto source = Mantid::DataHandling::H5Util::createGroupNXS(
-      instrument, sasSourceName, sasInstrumentSourceClassAttr);
+  auto source = Mantid::DataHandling::H5Util::createGroupCanSAS(
+      instrument, sasSourceName, nxInstrumentSourceClassAttr, sasInstrumentSourceClassAttr);
   Mantid::DataHandling::H5Util::write(source, sasInstrumentSourceRadiation,
                                       radiationSource);
 
@@ -255,8 +255,8 @@ std::string getDate() {
 void addProcess(H5::Group &group, Mantid::API::MatrixWorkspace_sptr workspace) {
   // Setup process
   const std::string sasProcessNameForGroup = sasProcessGroupName;
-  auto process = Mantid::DataHandling::H5Util::createGroupNXS(
-      group, sasProcessNameForGroup, sasProcessClassAttr);
+  auto process = Mantid::DataHandling::H5Util::createGroupCanSAS(
+      group, sasProcessNameForGroup,  nxProcessClassAttr, sasProcessClassAttr);
 
   // Add name
   Mantid::DataHandling::H5Util::write(process, sasProcessName,
@@ -556,8 +556,8 @@ void addData2D(H5::Group &data, Mantid::API::MatrixWorkspace_sptr workspace) {
 
 void addData(H5::Group &group, Mantid::API::MatrixWorkspace_sptr workspace) {
   const std::string sasDataName = sasDataGroupName;
-  auto data = Mantid::DataHandling::H5Util::createGroupNXS(group, sasDataName,
-                                                           sasDataClassAttr);
+  auto data = Mantid::DataHandling::H5Util::createGroupCanSAS(group, sasDataName,
+                                                           nxDataClassAttr, sasDataClassAttr);
 
   auto workspaceDimensionality = getWorkspaceDimensionality(workspace);
   switch (workspaceDimensionality) {
@@ -580,8 +580,9 @@ void addTransmission(H5::Group &group,
   // Setup process
   const std::string sasTransmissionName =
       sasTransmissionSpectrumGroupName + "_" + transmissionName;
-  auto transmission = Mantid::DataHandling::H5Util::createGroupNXS(
-      group, sasTransmissionName, sasTransmissionSpectrumClassAttr);
+  auto transmission = Mantid::DataHandling::H5Util::createGroupCanSAS(
+      group, sasTransmissionName, nxTransmissionSpectrumClassAttr,
+        sasTransmissionSpectrumClassAttr);
 
   // Add attributes for @signal, @T_axes, @T_indices, @T_uncertainty, @name,
   // @timestamp
