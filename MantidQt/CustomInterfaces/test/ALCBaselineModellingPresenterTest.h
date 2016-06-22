@@ -69,6 +69,7 @@ public:
 
   MOCK_METHOD2(fit, void(IFunction_const_sptr, const std::vector<Section> &));
 };
+GCC_DIAG_ON_SUGGEST_OVERRIDE
 
 MATCHER_P(FunctionName, name, "") { return arg->name() == name; }
 
@@ -364,7 +365,5 @@ public:
     m_view->help();
   }
 };
-
-GCC_DIAG_ON_SUGGEST_OVERRIDE
 
 #endif /* MANTIDQT_CUSTOMINTERFACES_ALCBASELINEMODELLINGTEST_H_ */

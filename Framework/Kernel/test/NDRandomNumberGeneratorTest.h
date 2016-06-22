@@ -15,6 +15,8 @@ private:
   class Mock3DRandomNumberGenerator
       : public Mantid::Kernel::NDRandomNumberGenerator {
   public:
+    Mock3DRandomNumberGenerator()
+        : Mantid::Kernel::NDRandomNumberGenerator(3) {}
     GCC_DIAG_OFF_SUGGEST_OVERRIDE
     MOCK_METHOD0(generateNextPoint, void());
     MOCK_METHOD0(restart, void());

@@ -68,6 +68,8 @@ public:
   void selectFirstRun() { emit firstRunSelected(); }
 };
 
+GCC_DIAG_ON_SUGGEST_OVERRIDE
+
 MATCHER_P3(QwtDataX, i, value, delta, "") {
   return fabs(arg.x(i) - value) < delta;
 }
@@ -367,7 +369,5 @@ public:
     m_view->help();
   }
 };
-
-GCC_DIAG_ON_SUGGEST_OVERRIDE
 
 #endif /* MANTID_CUSTOMINTERFACES_ALCDATALOADINGTEST_H_ */

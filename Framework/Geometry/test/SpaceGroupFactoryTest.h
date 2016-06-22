@@ -10,7 +10,7 @@ using ::testing::Return;
 #include "MantidGeometry/Crystal/CyclicGroup.h"
 #include "MantidGeometry/Crystal/PointGroupFactory.h"
 #include "MantidGeometry/Crystal/SpaceGroupFactory.h"
-#include "MantidKernel/WarningSuppresssions.h"
+#include "MantidKernel/WarningSuppressions.h"
 
 using namespace Mantid::Geometry;
 using Mantid::Kernel::V3D;

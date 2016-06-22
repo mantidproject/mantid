@@ -13,8 +13,6 @@ using Mantid::Kernel::V3D;
 
 using namespace Mantid::API;
 
-GCC_DIAG_OFF_SUGGEST_OVERRIDE
-
 using ::testing::_;
 using ::testing::Mock;
 using ::testing::Return;
@@ -75,13 +73,10 @@ public:
 
 private:
   std::vector<V3D> getTestHKLs() { return {{1, 1, 0}}; }
-
+  GCC_DIAG_OFF_SUGGEST_OVERRIDE
   // Mock function to check whether the correct methods are called
   class MockLatticeFunction : public ILatticeFunction {
   public:
-    MockLatticeFunction() : ILatticeFunction() {}
-    ~MockLatticeFunction() override {}
-
     MOCK_CONST_METHOD0(name, std::string());
     MOCK_CONST_METHOD2(functionLattice,
                        void(const LatticeDomain &, FunctionValues &));

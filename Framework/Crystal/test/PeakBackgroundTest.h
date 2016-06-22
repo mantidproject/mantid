@@ -66,6 +66,7 @@ public:
   MOCK_CONST_METHOD1(isWithinBounds, bool(size_t));
 };
 }
+GCC_DIAG_ON_SUGGEST_OVERRIDE
 
 class PeakBackgroundTest : public CxxTest::TestSuite {
 public:
@@ -160,7 +161,5 @@ public:
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockIterator));
   }
 };
-
-GCC_DIAG_ON_SUGGEST_OVERRIDE
 
 #endif /* MANTID_CRYSTAL_PEAKBACKGROUNDTEST_H_ */

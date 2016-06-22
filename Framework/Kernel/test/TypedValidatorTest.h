@@ -13,7 +13,7 @@ namespace {
     Mantid::Kernel::IValidator_sptr clone() const override {                   \
       return boost::make_shared<ClassName>();                                  \
     }                                                                          \
-    std::string checkValidity(const HeldType &) const { return ""; }           \
+    std::string checkValidity(const HeldType &) const override { return ""; }  \
   };
 
 /// Dummy object to hold in a shared_ptr for test
