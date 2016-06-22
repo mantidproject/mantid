@@ -6,8 +6,9 @@
 
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
-#include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/FunctionFactory.h"
+#include "MantidKernel/WarningsSuppressions.h"
 
 #include "MantidQtCustomInterfaces/Muon/IALCPeakFittingView.h"
 #include "MantidQtCustomInterfaces/Muon/IALCPeakFittingModel.h"
@@ -27,6 +28,8 @@ operator<<(std::basic_ostream<CharType, CharTrait> &out,
   return out;
 }
 }
+
+GCC_DIAG_OFF_SUGGEST_OVERRIDE
 
 class MockALCPeakFittingView : public IALCPeakFittingView {
 public:
@@ -353,5 +356,5 @@ public:
     m_model->setError("Test error");
   }
 };
-
+GCC_DIAG_ON_SUGGEST_OVERRIDE
 #endif /* MANTIDQT_CUSTOMINTERFACES_ALCPEAKFITTINGTEST_H_ */
