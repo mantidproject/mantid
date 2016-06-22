@@ -14,10 +14,10 @@ using namespace API;
 
 /// Constructor
 FunctionGenerator::FunctionGenerator(API::IFunction_sptr source)
-    : m_source(source), m_nOwnParams(source->nParams()),
-      m_dirty(true) {
+    : m_source(source), m_nOwnParams(source->nParams()), m_dirty(true) {
   if (!m_source) {
-    throw std::logic_error("FunctionGenerator initialised with null source function.");
+    throw std::logic_error(
+        "FunctionGenerator initialised with null source function.");
   }
 }
 
@@ -25,7 +25,7 @@ void FunctionGenerator::init() {}
 
 /// Set i-th parameter
 void FunctionGenerator::setParameter(size_t i, const double &value,
-                                        bool explicitlySet) {
+                                     bool explicitlySet) {
   if (i < m_nOwnParams) {
     m_source->setParameter(i, value, explicitlySet);
     m_dirty = true;
@@ -55,8 +55,7 @@ double FunctionGenerator::getParameter(size_t i) const {
 
 /// Set parameter by name.
 void FunctionGenerator::setParameter(const std::string &name,
-                                        const double &value,
-                                        bool explicitlySet) {
+                                     const double &value, bool explicitlySet) {
   auto i = parameterIndex(name);
   setParameter(i, value, explicitlySet);
 }
@@ -168,8 +167,8 @@ FunctionGenerator::getParameterIndex(const ParameterReference &ref) const {
 
 /// Tie a parameter to other parameters (or a constant)
 API::ParameterTie *FunctionGenerator::tie(const std::string &parName,
-                                             const std::string &expr,
-                                             bool isDefault) {
+                                          const std::string &expr,
+                                          bool isDefault) {
   if (isSourceName(parName)) {
     return m_source->tie(parName, expr, isDefault);
   } else {
@@ -253,7 +252,7 @@ void FunctionGenerator::setUpForFit() { updateTargetFunction(); }
 
 /// Declare a new parameter
 void FunctionGenerator::declareParameter(const std::string &, double,
-                                            const std::string &) {
+                                         const std::string &) {
   throw Kernel::Exception::NotImplementedError(
       "FunctionGenerator cannot not have its own parameters.");
 }
@@ -305,7 +304,7 @@ FunctionGenerator::getAttribute(const std::string &attName) const {
 
 /// Set a value to attribute attName
 void FunctionGenerator::setAttribute(const std::string &attName,
-                                        const IFunction::Attribute &att) {
+                                     const IFunction::Attribute &att) {
   if (IFunction::hasAttribute(attName)) {
     IFunction::setAttribute(attName, att);
     m_dirty = true;
@@ -336,10 +335,11 @@ bool FunctionGenerator::hasAttribute(const std::string &attName) const {
 
 // Evaluates the function
 void FunctionGenerator::function(const API::FunctionDomain &domain,
-                                    API::FunctionValues &values) const {
+                                 API::FunctionValues &values) const {
   updateTargetFunction();
   if (!m_target) {
-    throw std::logic_error("FunctionGenerator failed to generate target function.");
+    throw std::logic_error(
+        "FunctionGenerator failed to generate target function.");
   }
   m_target->function(domain, values);
 }
@@ -360,7 +360,8 @@ void FunctionGenerator::checkTargetFunction() const {
     updateTargetFunction();
   }
   if (!m_target) {
-    throw std::logic_error("FunctionGenerator failed to generate target function.");
+    throw std::logic_error(
+        "FunctionGenerator failed to generate target function.");
   }
 }
 

@@ -12,7 +12,7 @@ function consisting of two parts: the source and the target. The source
 function generates the target function which in turn is used to calculate
 the output. Concrete functions subclassing FunctionGenerator must implement
 the following virtual methods:
-  
+
   name()
   category()
   buildTargetFunction()

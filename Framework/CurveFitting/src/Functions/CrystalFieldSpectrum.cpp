@@ -57,15 +57,15 @@ void CrystalFieldSpectrum::buildTargetFunction() const {
     if (!peak) {
       throw std::runtime_error("A peak function is expected.");
     }
-  if (i < nPeaks) {
-    peak->fixCentre();
-    peak->fixIntensity();
-    peak->setCentre(values.getCalculated(i));
-    peak->setIntensity(values.getCalculated(i + nPeaks));
-  } else {
-    peak->setHeight(0.0);
-    peak->fixAll();
-  }
+    if (i < nPeaks) {
+      peak->fixCentre();
+      peak->fixIntensity();
+      peak->setCentre(values.getCalculated(i));
+      peak->setIntensity(values.getCalculated(i + nPeaks));
+    } else {
+      peak->setHeight(0.0);
+      peak->fixAll();
+    }
     peak->setFwhm(fwhm);
     spectrum->addFunction(peak);
   }
@@ -84,7 +84,7 @@ void CrystalFieldSpectrum::updateTargetFunction() const {
   auto nPeaks = values.size() / 2;
 
   size_t maxNPeaks = m_source->getAttribute("MaxPeakCount").asInt();
-  auto spectrum = dynamic_cast<CompositeFunction*>(m_target.get());
+  auto spectrum = dynamic_cast<CompositeFunction *>(m_target.get());
   if (!spectrum || spectrum->nFunctions() != maxNPeaks) {
     buildTargetFunction();
     return;
@@ -96,15 +96,15 @@ void CrystalFieldSpectrum::updateTargetFunction() const {
     if (!peak) {
       throw std::runtime_error("A peak function is expected.");
     }
-  if (i < nPeaks) {
-    auto centre = values.getCalculated(i);
-    auto intensity = values.getCalculated(i + nPeaks);
-    peak->setCentre(centre);
-    peak->setIntensity(intensity);
-  } else {
-    peak->setHeight(0.0);
-    peak->fixAll();
-  }
+    if (i < nPeaks) {
+      auto centre = values.getCalculated(i);
+      auto intensity = values.getCalculated(i + nPeaks);
+      peak->setCentre(centre);
+      peak->setIntensity(intensity);
+    } else {
+      peak->setHeight(0.0);
+      peak->fixAll();
+    }
   }
 }
 

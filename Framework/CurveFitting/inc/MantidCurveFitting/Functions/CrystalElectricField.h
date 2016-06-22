@@ -10,12 +10,12 @@ namespace Functions {
 
 void MANTID_CURVEFITTING_DLL
 calculateEigensystem(DoubleFortranVector &eigenvalues,
-                    ComplexFortranMatrix &eigenvectors,
-                    ComplexFortranMatrix &hamiltonian, int nre,
-                    const DoubleFortranVector &bmol,
-                    const DoubleFortranVector &bext,
-                    const ComplexFortranMatrix &bkq, double alpha_euler = 0.0,
-                    double beta_euler = 0.0, double gamma_euler = 0.0);
+                     ComplexFortranMatrix &eigenvectors,
+                     ComplexFortranMatrix &hamiltonian, int nre,
+                     const DoubleFortranVector &bmol,
+                     const DoubleFortranVector &bext,
+                     const ComplexFortranMatrix &bkq, double alpha_euler = 0.0,
+                     double beta_euler = 0.0, double gamma_euler = 0.0);
 
 void MANTID_CURVEFITTING_DLL
 calculateIntensities(int nre, const DoubleFortranVector &energies,

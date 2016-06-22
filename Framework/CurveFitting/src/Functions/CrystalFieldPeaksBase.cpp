@@ -11,10 +11,19 @@ namespace Functions {
 namespace {
 
 // Maps ion name to its int code.
-std::map<std::string, int> ion2nre{
-    {"Ce", 1},  {"Pr", 2},  {"Nd", 3}, {"Pm", 4}, {"Sm", 5},
-    {"Eu", 6},  {"Gd", 7},  {"Tb", 8}, {"Dy", 9}, {"Ho", 10},
-    {"Er", 11}, {"Tm", 12}, {"Yb", 13}};
+std::map<std::string, int> ion2nre{{"Ce", 1},
+                                   {"Pr", 2},
+                                   {"Nd", 3},
+                                   {"Pm", 4},
+                                   {"Sm", 5},
+                                   {"Eu", 6},
+                                   {"Gd", 7},
+                                   {"Tb", 8},
+                                   {"Dy", 9},
+                                   {"Ho", 10},
+                                   {"Er", 11},
+                                   {"Tm", 12},
+                                   {"Yb", 13}};
 
 void fixx(API::IFunction &fun, const std::string &par) {
   fun.setParameter(par, 0.0);
@@ -386,7 +395,8 @@ void CrystalFieldPeaksBase::calculateEigenSystem(DoubleFortranVector &en,
   ComplexFortranMatrix ham;
   calculateEigensystem(en, wf, ham, nre, bmol, bext, bkq);
   // MaxPeakCount is a read-only "mutable" attribute.
-  const_cast<CrystalFieldPeaksBase*>(this)->setAttributeValue("MaxPeakCount", static_cast<int>(en.size()));
+  const_cast<CrystalFieldPeaksBase *>(this)
+      ->setAttributeValue("MaxPeakCount", static_cast<int>(en.size()));
 }
 
 /// Perform a castom action when an attribute is set.

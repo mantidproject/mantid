@@ -1135,9 +1135,7 @@ void IFunction::unfixAll() {
 /// If it returns a number greater than 1 then the domain
 /// passed to function(domain, values) method must have a
 /// CompositeDomain type with the same number of parts.
-size_t IFunction::getNumberDomains() const {
-  return 1;
-}
+size_t IFunction::getNumberDomains() const { return 1; }
 
 /// Split this function (if needed) into a list of independent functions.
 /// The number of functions must be the number of domains this function is

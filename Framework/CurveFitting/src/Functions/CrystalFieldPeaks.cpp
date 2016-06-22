@@ -33,7 +33,6 @@ size_t CrystalFieldPeaks::getDefaultDomainSize() const {
 void CrystalFieldPeaks::functionGeneral(const API::FunctionDomainGeneral &,
                                         API::FunctionValues &values) const {
 
-
   DoubleFortranVector en;
   ComplexFortranMatrix wf;
   int nre = 0;

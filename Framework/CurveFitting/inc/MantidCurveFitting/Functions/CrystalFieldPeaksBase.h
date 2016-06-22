@@ -46,6 +46,7 @@ public:
   /// Calculate the crystal field eigensystem
   void calculateEigenSystem(DoubleFortranVector &en, ComplexFortranMatrix &wf,
                             int &nre) const;
+
 protected:
   /// Store the default domain size after first
   /// function evaluation

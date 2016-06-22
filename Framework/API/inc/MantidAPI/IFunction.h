@@ -508,7 +508,8 @@ public:
   /// Get number of domains required by this function
   virtual size_t getNumberDomains() const;
   /// Split this function (if needed) into a list of independent functions.
-  virtual std::vector<boost::shared_ptr<IFunction>> createEquivalentFunctions() const;
+  virtual std::vector<boost::shared_ptr<IFunction>>
+  createEquivalentFunctions() const;
   /// Calculate numerical derivatives
   void calNumericalDeriv(const FunctionDomain &domain, Jacobian &jacobian);
   /// Set the covariance matrix
