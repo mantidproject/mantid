@@ -224,7 +224,7 @@ public:
     do_assert(parameters);
 
     // Clean up
-    //removeFile(parameters.filename);
+    removeFile(parameters.filename);
   }
 
 private:
