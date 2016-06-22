@@ -12,7 +12,7 @@
 #define FAKEGMOCKOBJECTS_H_
 
 #include "MantidGeometry/Instrument/INearestNeighboursFactory.h"
-#include "MantidKernel/WarningSuppressions.h"i
+#include "MantidKernel/WarningSuppressions.h"
 #include "gmock/gmock.h"
 
 using namespace Mantid;

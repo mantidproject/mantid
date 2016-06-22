@@ -8,7 +8,7 @@
 
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/FunctionFactory.h"
-#include "MantidKernel/WarningsSuppressions.h"
+#include "MantidKernel/WarningSuppressions.h"
 
 #include "MantidQtCustomInterfaces/Muon/IALCPeakFittingView.h"
 #include "MantidQtCustomInterfaces/Muon/IALCPeakFittingModel.h"

@@ -4,7 +4,7 @@
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidDataObjects/WorkspaceSingleValue.h"
-#include "MantidKernel/WarningSuppresssions.h"
+#include "MantidKernel/WarningSuppressions.h"
 #include "MantidMDAlgorithms/BinaryOperationMD.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"

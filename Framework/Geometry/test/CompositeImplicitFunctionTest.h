@@ -8,7 +8,7 @@
 #include <typeinfo>
 
 #include "MantidGeometry/MDGeometry/CompositeImplicitFunction.h"
-#include "MantidKernel/WarningSuppresssions.h"
+#include "MantidKernel/WarningSuppressions.h"
 
 using namespace Mantid::Geometry;
 

@@ -69,7 +69,6 @@ public:
 
   MOCK_METHOD2(fit, void(IFunction_const_sptr, const std::vector<Section> &));
 };
-GCC_DIAG_ON_SUGGEST_OVERRIDE
 
 MATCHER_P(FunctionName, name, "") { return arg->name() == name; }
 
@@ -86,6 +85,7 @@ MATCHER_P3(QwtDataY, i, value, delta, "") {
 MATCHER_P3(VectorValue, i, value, delta, "") {
   return fabs(arg.at(i) - value) < delta;
 }
+GCC_DIAG_ON_SUGGEST_OVERRIDE
 
 class ALCBaselineModellingPresenterTest : public CxxTest::TestSuite {
   MockALCBaselineModellingView *m_view;
