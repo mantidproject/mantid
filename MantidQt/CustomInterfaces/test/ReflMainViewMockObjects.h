@@ -3,6 +3,7 @@
 
 #include "MantidKernel/ICatalogInfo.h"
 #include "MantidKernel/ProgressBase.h"
+#include "MantidKernel/WarningSuppressions.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflMainView.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflSearchModel.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorCommand.h"
@@ -10,6 +11,8 @@
 
 using namespace MantidQt::CustomInterfaces;
 using namespace Mantid::API;
+
+GCC_DIAG_OFF_SUGGEST_OVERRIDE
 
 class MockView : public ReflMainView {
 public:
@@ -85,5 +88,7 @@ public:
   MOCK_CONST_METHOD1(transformArchivePath, std::string(const std::string &));
   ~MockICatalogInfo() override {}
 };
+
+GCC_DIAG_ON_SUGGEST_OVERRIDE
 
 #endif /*MANTID_CUSTOMINTERFACES_REFLMAINVIEWMOCKOBJECTS_H*/

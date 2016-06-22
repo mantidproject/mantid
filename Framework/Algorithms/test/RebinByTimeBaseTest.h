@@ -8,12 +8,13 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidKernel/DateAndTime.h"
-#include "MantidAlgorithms/RebinByTimeAtSample.h"
 #include "MantidAPI/Axis.h"
-#include "MantidDataObjects/Workspace2D.h"
+#include "MantidAlgorithms/RebinByTimeAtSample.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Events.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/WarningSuppressions.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <boost/make_shared.hpp>
 #include <gmock/gmock.h>
@@ -68,6 +69,8 @@ createEventWorkspace(const int numberspectra, const int nDistrubutedEvents,
   return retVal;
 }
 
+GCC_DIAG_OFF_SUGGEST_OVERRIDE
+
 /*
  This type is an IEventWorkspace, but not an EventWorkspace.
  */
@@ -104,6 +107,9 @@ private:
   }
 };
 }
+
+GCC_DIAG_ON_SUGGEST_OVERRIDE
+
 //=====================================================================================
 // Functional Tests
 //=====================================================================================
