@@ -245,9 +245,22 @@ Mantid::API::Workspace_sptr MuonAnalysisFitDataPresenter::createWorkspace(
         m_dataLoader.correctAndGroup(loadedData, grouping);
 
     // run analysis to generate workspace
-    // ...
-
-    outputWS = correctedData; // TEMPORARY
+    Muon::AnalysisOptions analysisOptions(grouping);
+    // Periods
+    if (params.periods.empty()) {
+      analysisOptions.summedPeriods = "1";
+    } else {
+      // split on "-" and then convert all "+" to ","
+      // TODO
+    }
+    analysisOptions.loadedTimeZero = loadedData.timeZero;
+    //analysisOptions.timeZero = // Same as MA uses? How do we know?
+    analysisOptions.timeLimits.first = m_dataSelector->getStartTime();
+    analysisOptions.timeLimits.second = m_dataSelector->getEndTime();
+    analysisOptions.rebinArgs = ""; // Or use the same as MA?
+    analysisOptions.groupPairName = params.itemName;
+    analysisOptions.plotType = params.plotType;
+    outputWS = m_dataLoader.createAnalysisWorkspace(correctedData, analysisOptions);
   } catch (const std::exception &ex) {
     std::ostringstream err;
     err << "Failed to create analysis workspace " << name << ": " << ex.what();

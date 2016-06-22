@@ -2,6 +2,7 @@
 #define MANTIDQT_CUSTOMINTERFACES_MUONANALYSISDATALOADER_H_
 
 #include "MantidQtCustomInterfaces/DllConfig.h"
+#include "MantidQtCustomInterfaces/Muon/MuonAnalysisHelper.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidAPI/GroupingLoader.h"
@@ -25,12 +26,21 @@ struct LoadResult {
   double firstGoodData;
   std::string label;
 };
-}
-}
-}
 
-namespace MantidQt {
-namespace CustomInterfaces {
+/// Parameters for creating analysis workspace
+struct AnalysisOptions {
+  std::string summedPeriods;            /// Set of periods to sum
+  std::string subtractedPeriods;        /// Set of periods to subtract
+  double timeZero;                      /// Value to use for t0 correction
+  double loadedTimeZero;                /// Time zero from data file
+  std::pair<double, double> timeLimits; /// Min, max X values
+  std::string rebinArgs;     /// Arguments for rebin (empty to not rebin)
+  std::string groupPairName; /// Name of group or pair to use
+  const Mantid::API::Grouping &grouping; /// Grouping to use
+  PlotType plotType;                     /// Type of analysis to perform
+  explicit AnalysisOptions(const Mantid::API::Grouping &g) : grouping(g){};
+};
+} // namespace Muon
 
 /** MuonAnalysisDataLoader : Loads and processes muon data for MuonAnalysis
 
@@ -71,13 +81,21 @@ public:
   correctAndGroup(const Muon::LoadResult &loadedData,
                   const Mantid::API::Grouping &grouping) const;
   /// create analysis workspace
-
+  Mantid::API::Workspace_sptr
+  createAnalysisWorkspace(const Mantid::API::Workspace_sptr inputWS,
+                          const Muon::AnalysisOptions &options) const;
   /// Get dead time table
   Mantid::API::ITableWorkspace_sptr
   getDeadTimesTable(const Muon::LoadResult &loadedData) const;
   /// Load dead times from file
   Mantid::API::Workspace_sptr
   loadDeadTimesFromFile(const std::string &filename) const;
+
+protected:
+  /// Set properties of algorithm from options
+  void
+  setProcessAlgorithmProperties(IAlgorithm_sptr alg,
+                                const Muon::AnalysisOptions &options) const;
 
 private:
   /// Get instrument name from workspace

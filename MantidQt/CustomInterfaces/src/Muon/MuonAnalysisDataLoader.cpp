@@ -11,10 +11,12 @@ using Mantid::API::AlgorithmManager;
 using Mantid::API::IAlgorithm_sptr;
 using Mantid::API::ITableWorkspace;
 using Mantid::API::ITableWorkspace_sptr;
+using Mantid::API::MatrixWorkspace;
 using Mantid::API::Workspace_sptr;
 using Mantid::API::WorkspaceGroup;
 using MantidQt::CustomInterfaces::Muon::LoadResult;
 using MantidQt::CustomInterfaces::Muon::DeadTimesType;
+using MantidQt::CustomInterfaces::Muon::AnalysisOptions;
 
 namespace {
 /// static logger
@@ -287,6 +289,125 @@ Workspace_sptr MuonAnalysisDataLoader::loadDeadTimesFromFile(
     errorMsg << "Unable to load dead times from the specified file: "
              << e.what();
     throw std::runtime_error(errorMsg.str());
+  }
+}
+
+/**
+ * Perform analysis on the given workspace using the parameters supplied
+ * (using the MuonProcess algorithm)
+ * @param inputWS :: [input] Workspace to analyse (previously grouped and
+ * dead-time corrected)
+ * @param options :: [input] Struct containing parameters for what sort of
+ * analysis to do
+ * @returns :: Workspace containing analysed data
+ */
+Workspace_sptr MuonAnalysisDataLoader::createAnalysisWorkspace(
+    const Workspace_sptr inputWS, const AnalysisOptions &options) const {
+  IAlgorithm_sptr alg =
+      AlgorithmManager::Instance().createUnmanaged("MuonProcess");
+
+  alg->initialize();
+
+  // Set input workspace property
+  auto inputGroup = boost::make_shared<WorkspaceGroup>();
+  // If is a group, will need to handle periods
+  if (auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(inputWS)) {
+    for (int i = 0; i < group->getNumberOfEntries(); i++) {
+      auto ws = boost::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(i));
+      inputGroup->addWorkspace(ws);
+    }
+    alg->setProperty("SummedPeriodSet", options.summedPeriods);
+    alg->setProperty("SubtractedPeriodSet", options.subtractedPeriods);
+  } else if (auto ws = boost::dynamic_pointer_cast<MatrixWorkspace>(inputWS)) {
+    // Put this single WS into a group and set it as the input property
+    inputGroup->addWorkspace(ws);
+    alg->setProperty("SummedPeriodSet", "1");
+  } else {
+    throw std::runtime_error(
+        "Cannot create analysis workspace: unsupported workspace type");
+  }
+  alg->setProperty("InputWorkspace", inputGroup);
+
+  // Set the rest of the algorithm properties
+  setProcessAlgorithmProperties(alg, options);
+
+  // We don't want workspace in the ADS so far
+  alg->setChild(true);
+  alg->setPropertyValue("OutputWorkspace", "__NotUsed");
+  alg->execute();
+  return alg->getProperty("OutputWorkspace");
+}
+
+/**
+ * Set algorithm properties according to the given options
+ * @param alg :: [input, output] Algorithm to set properties to
+ * @param options :: [input] Options to get properties from
+ */
+void MuonAnalysisDataLoader::setProcessAlgorithmProperties(
+    IAlgorithm_sptr alg, const AnalysisOptions &options) const {
+  alg->setProperty("Mode", "Analyse");
+  alg->setProperty("TimeZero", options.timeZero);             // user input
+  alg->setProperty("LoadedTimeZero", options.loadedTimeZero); // from file
+  alg->setProperty("Xmin", options.timeLimits.first);
+  double Xmax = options.timeLimits.second;
+  if (Xmax != Mantid::EMPTY_DBL()) {
+    alg->setProperty("Xmax", Xmax);
+  }
+  if (!options.rebinArgs.empty()) {
+    alg->setProperty("RebinParams", options.rebinArgs);
+  }
+
+  // ---- Analysis ----
+  // Find if name is in group/pair collection
+  const auto isContainedIn = [](const std::string &name,
+                                const std::vector<std::string> &collection) {
+    return std::find(collection.begin(), collection.end(), name) !=
+           collection.end();
+  };
+  // Find index of a name in a collection
+  const auto indexOf = [](const std::string &name,
+                          const std::vector<std::string> &collection) {
+    return std::distance(collection.begin(),
+                         std::find(collection.begin(), collection.end(), name));
+  };
+  if (isContainedIn(options.groupPairName, options.grouping.groupNames)) {
+    // Group
+    std::string outputType;
+    switch (options.plotType) {
+    case Muon::PlotType::Counts:
+    case Muon::PlotType::Logarithm:
+      outputType = "GroupCounts";
+      break;
+    case Muon::PlotType::Asymmetry:
+      outputType = "GroupAsymmetry";
+      break;
+    default:
+      throw std::invalid_argument(
+          "Cannot create analysis workspace: Unsupported plot type");
+    }
+    alg->setProperty("OutputType", outputType);
+
+    const auto groupNum =
+        indexOf(options.groupPairName, options.grouping.groupNames);
+    alg->setProperty("GroupIndex", static_cast<int>(groupNum));
+  } else if (isContainedIn(options.groupPairName, options.grouping.pairNames)) {
+    // Pair
+    if (options.plotType == Muon::PlotType::Asymmetry)
+      alg->setProperty("OutputType", "PairAsymmetry");
+    else
+      throw std::invalid_argument("Cannot create analysis workspace: Pairs "
+                                  "support asymmetry plot type only");
+
+    const auto pairNum =
+        indexOf(options.groupPairName, options.grouping.pairNames);
+    alg->setProperty("PairFirstIndex",
+                     options.grouping.pairs.at(pairNum).first);
+    alg->setProperty("PairSecondIndex",
+                     options.grouping.pairs.at(pairNum).second);
+    alg->setProperty("Alpha", options.grouping.pairAlphas.at(pairNum));
+  } else {
+    throw std::invalid_argument("Cannot create analysis workspace: Group/pair "
+                                "name not found in grouping");
   }
 }
 
