@@ -80,7 +80,7 @@ private:
     MOCK_CONST_METHOD0(getLinearIndex, size_t());
     MOCK_CONST_METHOD1(isWithinBounds, bool(size_t));
   };
-
+  GCC_DIAG_ON_SUGGEST_OVERRIDE
   class NormalizableMockIterator : public MockMDIterator {
   public:
     Mantid::signal_t getNormalizedSignal() const override {
@@ -202,6 +202,5 @@ public:
     TS_ASSERT_DELTA(5.0, range.maxValue(), 1e-10);
   }
 };
-GCC_DIAG_ON_SUGGEST_OVERRIDE
 
 #endif /* MANTIDQT_API_SIGNALRANGETEST */

@@ -10,6 +10,8 @@
 namespace Mantid {
 namespace DataObjects {
 
+GCC_DIAG_OFF_SUGGEST_OVERRIDE
+
 class MockPeakShapeFactory : public PeakShapeFactory {
 public:
   MOCK_CONST_METHOD1(create,
@@ -19,8 +21,6 @@ public:
       void(boost::shared_ptr<const PeakShapeFactory> successorFactory));
   ~MockPeakShapeFactory() override {}
 };
-
-GCC_DIAG_OFF_SUGGEST_OVERRIDE
 
 class MockPeakShape : public Mantid::Geometry::PeakShape {
 public:

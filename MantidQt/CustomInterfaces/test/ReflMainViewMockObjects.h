@@ -16,9 +16,6 @@ GCC_DIAG_OFF_SUGGEST_OVERRIDE
 
 class MockView : public ReflMainView {
 public:
-  MockView(){};
-  ~MockView() override {}
-
   // Gmock requires parameters and return values of mocked methods to be
   // copyable
   // We can't mock setTableCommands(std::vector<DataProcessorCommand_uptr>)

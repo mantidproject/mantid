@@ -1,22 +1,23 @@
 #ifndef MANTID_VATESAPI_VTKDATASETTOPEAKSFILTEREDDATASETTEST_H_
 #define MANTID_VATESAPI_VTKDATASETTOPEAKSFILTEREDDATASETTEST_H_
 
+#include "MantidAPI/IPeaksWorkspace.h"
+#include "MantidDataObjects/NoShape.h"
+#include "MantidDataObjects/PeakShapeEllipsoid.h"
+#include "MantidDataObjects/PeakShapeSpherical.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidGeometry/Crystal/PeakShape.h"
+#include "MantidKernel/V3D.h"
+#include "MantidKernel/WarningSuppressions.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "MantidVatesAPI/FieldDataToMetadata.h"
 #include "MantidVatesAPI/MetadataJsonManager.h"
 #include "MantidVatesAPI/MetadataToFieldData.h"
-#include "MantidVatesAPI/VatesConfigurations.h"
 #include "MantidVatesAPI/NoThresholdRange.h"
+#include "MantidVatesAPI/UserDefinedThresholdRange.h"
+#include "MantidVatesAPI/VatesConfigurations.h"
 #include "MantidVatesAPI/vtkDataSetToPeaksFilteredDataSet.h"
 #include "MantidVatesAPI/vtkSplatterPlotFactory.h"
-#include "MantidVatesAPI/UserDefinedThresholdRange.h"
-#include "MantidAPI/IPeaksWorkspace.h"
-#include "MantidDataObjects/PeaksWorkspace.h"
-#include "MantidGeometry/Crystal/PeakShape.h"
-#include "MantidDataObjects/PeakShapeSpherical.h"
-#include "MantidDataObjects/PeakShapeEllipsoid.h"
-#include "MantidDataObjects/NoShape.h"
-#include "MantidKernel/V3D.h"
 
 #include "MockObjects.h"
 #include <gmock/gmock.h>
@@ -37,7 +38,7 @@
 using namespace Mantid::DataObjects;
 using namespace Mantid::VATES;
 using namespace ::testing;
-
+GCC_DIAG_OFF_SUGGEST_OVERRIDE
 class MockPeakFilter : public Mantid::DataObjects::Peak {
 public:
   MOCK_CONST_METHOD0(getHKL, Mantid::Kernel::V3D(void));
@@ -51,7 +52,7 @@ public:
   MOCK_METHOD1(getPeak, Mantid::DataObjects::Peak &(int peakNum));
   MOCK_CONST_METHOD1(getPeak, const Mantid::DataObjects::Peak &(int peakNum));
 };
-
+GCC_DIAG_ON_SUGGEST_OVERRIDE
 struct PeaksFilterDataContainer {
   double radius;
   double radiusFactor;

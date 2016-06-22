@@ -45,7 +45,7 @@ public:
 
   MOCK_METHOD4(setMatrixWorkspace,
                void(MatrixWorkspace_const_sptr, size_t, double, double));
-
+  GCC_DIAG_ON_SUGGEST_OVERRIDE
 protected:
   void init() override { setDecoratedFunction("Gaussian"); }
 };
@@ -189,7 +189,5 @@ private:
 
   PoldiInstrumentAdapter_sptr m_instrument;
 };
-
-GCC_DIAG_ON_SUGGEST_OVERRIDE
 
 #endif /* MANTID_SINQ_POLDISPECTRUMPAWLEYFUNCTIONTEST_H_ */
