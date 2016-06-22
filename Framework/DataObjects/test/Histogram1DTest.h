@@ -6,6 +6,7 @@
 #include <boost/shared_ptr.hpp>
 #include <cxxtest/TestSuite.h>
 
+#include "MantidHistogramData/LinearGenerator.h"
 #include "MantidDataObjects/Histogram1D.h"
 
 using Mantid::DataObjects::Histogram1D;
@@ -26,7 +27,7 @@ public:
   void setUp() override {
     nel = 100;
     x1.resize(nel);
-    std::fill(x1.begin(), x1.end(), rand());
+    std::generate(x1.begin(), x1.end(), LinearGenerator(0.1, 0.01));
     y1.resize(nel);
     std::fill(y1.begin(), y1.end(), rand());
     e1.resize(nel);
@@ -34,8 +35,8 @@ public:
     std::fill(pa->begin(), pa->end(), rand());
     pb = boost::make_shared<HistogramE>(nel);
     std::fill(pb->begin(), pb->end(), rand());
-    h.setHistogram(Histogram(Points(100)));
-    h2.setHistogram(Histogram(Points(100)));
+    h.setHistogram(Histogram(Points(100, LinearGenerator(0.0, 1.0))));
+    h2.setHistogram(Histogram(Points(100, LinearGenerator(0.0, 1.0))));
     h.setCounts(100);
     h.setCountStandardDeviations(100);
     h2.setCounts(100);
