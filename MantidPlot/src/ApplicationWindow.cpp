@@ -6135,7 +6135,7 @@ bool ApplicationWindow::saveProject(bool compress) {
     ;
   }
 
-  ProjectSerialiser serialiser(this, mantidUI);
+  ProjectSerialiser serialiser(this);
   serialiser.save(projectFolder(), projectname, compress);
 
   setWindowTitle("MantidPlot - " + projectname);
@@ -14342,7 +14342,7 @@ void ApplicationWindow::saveFolderAsProject(Folder *f) {
     if (!baseName.contains("."))
       fn.append(".qti");
 
-    ProjectSerialiser serialiser(this, mantidUI);
+    ProjectSerialiser serialiser(this);
     serialiser.save(f, fn, selectedFilter.contains(".gz"));
   }
 }

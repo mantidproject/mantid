@@ -15,8 +15,6 @@
 
 // Forward declare Mantid classes.
 class ApplicationWindow;
-class MantidUI;
-class ScriptingWindow;
 
 /** Manages saving and loading Mantid project files.
 
@@ -49,15 +47,23 @@ namespace MantidQt {
         class ProjectSerialiser
         {
         public:
-            ProjectSerialiser(ApplicationWindow* window, MantidUI* mantidUI);
-            void save(Folder* folder, const QString& projectname, bool compress = false);
+            /// Create a new serialiser with the current application window
+            ProjectSerialiser(ApplicationWindow* window);
+            /// Save the current state of the project to disk
+            void save(Folder* folder, const QString& projectName, bool compress = false);
 
         private:
+            /// Store a referece to the caller application window instance
             ApplicationWindow* window;
-            MantidUI* mantidUI;
 
-            void saveProjectFile(Folder *folder, const QString &fn, bool compress);
-            QString saveProjectFolder(Folder *folder, int &windowCount, bool isTopLevel = false);
+            /// Attempt to backup files before save
+            bool canBackupProjectFiles(QFile* fileHandle, const QString& projectName);
+            /// Check that the project is writable
+            bool canWriteToProject(QFile* fileHandle, const QString& projectName);
+            /// Convert the current state of the application to a project file
+            QString serialiseProjectState(Folder* folder);
+            /// Save the project file to disk
+            void saveProjectFile(QFile* fileHandle, const QString &projectName, QString& text, bool compress);
         };
     }
 }

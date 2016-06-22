@@ -267,6 +267,7 @@ std::string Folder::saveToProject(ApplicationWindow *app)
     text += saveFolderHeader(isCurrentFolder);
     text += saveFolderSubWindows(app, this, windowCount);
     text += saveFolderFooter();
+    text.prepend("<windows>\t" + QString::number(windowCount) + "\n");
 
     return text.toStdString();
 }
@@ -327,6 +328,11 @@ QString Folder::saveFolderSubWindows(ApplicationWindow* app, Folder * folder,
     // Write subfolders
     QList<Folder *> subfolders = folder->folders();
     foreach (Folder *f, subfolders) { text += saveFolderSubWindows(app, f, windowCount); }
+
+    // Write log info
+    if (!folder->logInfo().isEmpty()) {
+        text += "<log>\n" + folder->logInfo() + "</log>\n";
+    }
 
     return text;
 }
