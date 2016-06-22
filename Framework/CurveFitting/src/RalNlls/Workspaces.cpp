@@ -1,3 +1,5 @@
+// This code was originally translated from Fortran code on
+// https://ccpforge.cse.rl.ac.uk/gf/project/ral_nlls June 2016
 #include "MantidCurveFitting/RalNlls/Workspaces.h"
 
 namespace Mantid {

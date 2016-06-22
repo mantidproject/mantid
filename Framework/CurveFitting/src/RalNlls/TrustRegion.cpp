@@ -1,3 +1,8 @@
+// This code was originally translated from Fortran code on
+// https://ccpforge.cse.rl.ac.uk/gf/project/ral_nlls June 2016
+//----------------------------------------------------------------------
+// Includes
+//----------------------------------------------------------------------
 #include "MantidCurveFitting/RalNlls/TrustRegion.h"
 
 #include <algorithm>
