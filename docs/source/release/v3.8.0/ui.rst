@@ -31,6 +31,8 @@ Scripting Window
 
 Documentation
 #############
+* Added Ragged Workspace as a concept page
+
 
 Bugs Resolved
 -------------
