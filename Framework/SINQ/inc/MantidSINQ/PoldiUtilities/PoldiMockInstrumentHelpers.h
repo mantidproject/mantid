@@ -36,7 +36,6 @@ using namespace Geometry;
 
 typedef std::pair<double, double> DoublePair;
 
-
 class MockDetector : public PoldiAbstractDetector {
 protected:
   std::vector<int> m_availableElements;
