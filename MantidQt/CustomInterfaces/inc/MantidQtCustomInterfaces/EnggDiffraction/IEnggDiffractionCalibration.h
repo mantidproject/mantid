@@ -24,8 +24,11 @@ struct GSASCalibrationParms {
 /**
 Interface to the current calibration functionality of the Engineering
 Diffraction (EnggDiffraction) GUI. This can be used in different
-tabs/widgets as well as in the main/central view. Normally the
-individual / area specific tabs/widgets will forward to the main view.
+tabs/widgets as well as in the main/central view. Normally this
+interface will be provided by the presenters of the widgets (assuming
+an MVP design). The individual / area specific tabs/widgets (their
+presenters) will forward to the widget responsible for the
+calibration.
 
 Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory, NScD
 Oak Ridge National Laboratory & European Spallation Source
