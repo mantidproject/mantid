@@ -54,7 +54,6 @@ void initTypeLookup(PyTypeIndex &index) {
 
   // Handle a dictionary type
   index.emplace(&PyDict_Type, boost::make_shared<MappingTypeHandler>());
-
 }
 
 /**
@@ -103,7 +102,6 @@ const PyArrayIndex &getArrayIndex() {
     initArrayLookup(index);
   return index;
 }
-
 }
 
 /**
