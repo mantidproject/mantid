@@ -16,7 +16,6 @@
 #include "MantidAPI/WorkspaceProperty.h"
 
 #include "MantidAPI/TextAxis.h"
-#include "MantidHistogramData/Points.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/EmptyValues.h"
 #include "MantidKernel/Matrix.h"
@@ -163,7 +162,7 @@ void FitMW::createDomain(boost::shared_ptr<API::FunctionDomain> &domain,
                          size_t i0) {
   setParameters();
 
-  auto X = m_matrixWorkspace->points(m_workspaceIndex);
+  auto &X = m_matrixWorkspace->points(m_workspaceIndex);
 
   if (X.size() == 0) {
     throw std::runtime_error("Workspace contains no data.");
@@ -207,6 +206,8 @@ void FitMW::createDomain(boost::shared_ptr<API::FunctionDomain> &domain,
     values->expand(i0 + domain->size());
   }
 
+  bool shouldNormalise = m_normalise && m_matrixWorkspace->isHistogramData();
+
   // set the data to fit to
   m_startIndex = std::distance(X.cbegin(), from);
   assert(n == domain->size());
@@ -217,22 +218,20 @@ void FitMW::createDomain(boost::shared_ptr<API::FunctionDomain> &domain,
     throw std::runtime_error("FitMW: Inconsistent MatrixWorkspace");
   }
   // bool foundZeroOrNegativeError = false;
-  auto binEdges = m_matrixWorkspace->binEdges(m_workspaceIndex);
-
   for (size_t i = m_startIndex; i < ito; ++i) {
     size_t j = i - m_startIndex + i0;
     double y = Y[i];
     double error = E[i];
     double weight = 0.0;
-	
-	if (m_normalise) {
-		double binWidth = binEdges[i + 1] - binEdges[i];
-		if (binWidth == 0.0) {
-			throw std::runtime_error("Zero width bin found, division by zero.");
-		}
-		y /= binWidth;
-		error /= binWidth;
-	}
+
+    if (shouldNormalise) {
+      double binWidth = X[i + 1] - X[i];
+      if (binWidth == 0.0) {
+        throw std::runtime_error("Zero width bin found, division by zero.");
+      }
+      y /= binWidth;
+      error /= binWidth;
+    }
 
     if (!boost::math::isfinite(y)) // nan or inf data
     {
@@ -304,18 +303,20 @@ FitMW::createOutputWorkspace(const std::string &baseName,
       ++wsIndex;
   }
 
+  bool shouldDeNormalise = m_normalise && m_matrixWorkspace->isHistogramData();
+
   // Set the difference spectrum
-  auto X = ws->binEdges(0);
+  auto &X = ws->x(0);
   auto &Ycal = ws->mutableY(1);
   auto &Diff = ws->mutableY(2);
   const size_t nData = values->size();
   for (size_t i = 0; i < nData; ++i) {
     Diff[i] = values->getFitData(i) - Ycal[i];
-	if (m_normalise) {
-		double binWidth = X[i + 1] - X[i];
-		Ycal[i] *= binWidth;
-		Diff[i] *= binWidth;
-	}
+    if (shouldDeNormalise) {
+      double binWidth = X[i + 1] - X[i];
+      Ycal[i] *= binWidth;
+      Diff[i] *= binWidth;
+    }
   }
 
   if (!outputWorkspacePropertyName.empty()) {
@@ -408,7 +409,7 @@ void FitMW::getStartIterator(const HistogramData::Points &X,
  */
 size_t FitMW::getDomainSize() const {
   setParameters();
-  auto X = m_matrixWorkspace->points(m_workspaceIndex);
+  auto &X = m_matrixWorkspace->points(m_workspaceIndex);
   size_t n = 0;
   Mantid::MantidVec::const_iterator from;
   getStartIterator(X, from, n);
@@ -521,8 +522,8 @@ API::MatrixWorkspace_sptr FitMW::createEmptyResultWS(const size_t nhistograms,
   ws->replaceAxis(1, tAxis);
 
   auto &inputX = m_matrixWorkspace->x(m_workspaceIndex);
-  auto &inputY = m_matrixWorkspace->y(m_workspaceIndex);
-  auto &inputE = m_matrixWorkspace->e(m_workspaceIndex);
+  auto &inputY = m_matrixWorkspace->readY(m_workspaceIndex);
+  auto &inputE = m_matrixWorkspace->readE(m_workspaceIndex);
   // X values for all
   for (size_t i = 0; i < nhistograms; i++) {
     ws->dataX(i).assign(inputX.begin() + m_startIndex,
@@ -589,8 +590,8 @@ void FitMW::addFunctionValuesToWS(
     }
 
     double chi2 = function->getChiSquared();
-    auto &yValues = ws->mutableY(wsIndex);
-    auto &eValues = ws->mutableE(wsIndex);
+    MantidVec &yValues = ws->dataY(wsIndex);
+    MantidVec &eValues = ws->dataE(wsIndex);
     for (size_t i = 0; i < nData; i++) {
       yValues[i] = resultValues->getCalculated(i);
       eValues[i] = std::sqrt(E[i] * chi2);
