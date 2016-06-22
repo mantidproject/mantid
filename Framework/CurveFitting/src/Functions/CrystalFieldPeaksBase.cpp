@@ -320,6 +320,7 @@ CrystalFieldPeaksBase::CrystalFieldPeaksBase()
 /// Calculate the crystal field eigensystem
 /// @param en :: Output eigenvalues.
 /// @param wf :: Output eigenvectors.
+/// @param nre :: Output ion code.
 void CrystalFieldPeaksBase::calculateEigenSystem(DoubleFortranVector &en,
                                                  ComplexFortranMatrix &wf,
                                                  int &nre) const {

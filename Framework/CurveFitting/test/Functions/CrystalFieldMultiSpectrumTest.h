@@ -12,6 +12,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/ParameterTie.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidCurveFitting/Algorithms/Fit.h"
 #include "MantidCurveFitting/Functions/CrystalFieldMultiSpectrum.h"
 
@@ -34,7 +35,8 @@ public:
     std::vector<double> temps(1, 44);
     fun.setAttributeValue("Temperatures", temps);
     fun.setAttributeValue("ToleranceIntensity", 0.001);
-    fun.setAttributeValue("FWHM", 1.5);
+    std::vector<double> fwhs(1, 1.5);
+    fun.setAttributeValue("FWHMs", fwhs);
     fun.buildTargetFunction();
     auto attNames = fun.getAttributeNames();
     auto parNames = fun.getParameterNames();
@@ -99,11 +101,10 @@ public:
     alg->setProperty("OutputWorkspace", "out");
     alg->execute();
 
-    IFunction_sptr fun = alg->getProperty("Function");
-    for (size_t i = 0; i < fun->nParams(); ++i) {
-      std::cerr << "Param " << i << ' ' << fun->parameterName(i) << " = "
-                << fun->getParameter(i) << std::endl;
-    }
+    auto out0 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("Workspace_0");
+    TS_ASSERT(out0);
+    TS_ASSERT_EQUALS(out0->getNumberHistograms(), 3);
+    AnalysisDataService::Instance().clear();
   }
 
 private:
