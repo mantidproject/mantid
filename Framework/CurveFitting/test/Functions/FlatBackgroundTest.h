@@ -5,7 +5,7 @@
 
 #include "MantidCurveFitting/Functions/FlatBackground.h"
 
-using namespace Mantid::CurveFitting::Functions;
+using Mantid::CurveFitting::Functions::FlatBackground;
 
 class FlatBackgroundTest : public CxxTest::TestSuite {
 public:

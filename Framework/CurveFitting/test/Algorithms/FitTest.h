@@ -578,6 +578,7 @@ public:
   }
 
   // Background functions:
+  // ---------------------
 
   // A test for [-1, 1] range data
   void test_function_Chebyshev() {
@@ -593,7 +594,6 @@ public:
       Y[i] = x * x * x;
       E[i] = 1;
     }
-    // X.back() = 1.;
 
     Algorithms::Fit fit;
     fit.initialize();
@@ -655,6 +655,56 @@ public:
     TS_ASSERT_DELTA(out->getParameter("A1"), 750, 1e-12);
     TS_ASSERT_DELTA(out->getParameter("A2"), 0, 1e-12);
     TS_ASSERT_DELTA(out->getParameter("A3"), 250, 1e-12);
+  }
+
+  // Test function on a Fullprof polynomial function
+  void test_function_FullprofPolynomial() {
+    // Create a workspace
+    const int histogramNumber = 1;
+    const int timechannels = 1000;
+
+    Mantid::API::MatrixWorkspace_sptr ws2D =
+        WorkspaceFactory::Instance().create("Workspace2D", histogramNumber,
+                                            timechannels, timechannels);
+
+    double tof0 = 8000.;
+    double dtof = 5.;
+
+    Mantid::MantidVec &X = ws2D->dataX(0);
+    Mantid::MantidVec &Y = ws2D->dataY(0);
+    Mantid::MantidVec &E = ws2D->dataE(0);
+    for (int i = 0; i < timechannels; i++) {
+      X[i] = static_cast<double>(i) * dtof + tof0;
+      Y[i] = X[i] * 0.013;
+      E[i] = sqrt(Y[i]);
+    }
+
+    // Set up fit
+    Algorithms::Fit fitalg;
+    TS_ASSERT_THROWS_NOTHING(fitalg.initialize());
+    TS_ASSERT(fitalg.isInitialized());
+
+    // const std::string funcStr = "name=FullprofPolynomial, n=6, Bkpos=10000, "
+    //                            "A0=0.3, A1=1.0, A2=-0.5, A3=0.05, A4=-0.02";
+    const std::string funcStr = "name=FullprofPolynomial, n=6, Bkpos=10000, "
+                                "A0=0.5, A1=1.0, A2=-0.5, A3=0.0, A4=-0.02";
+    fitalg.setProperty("Function", funcStr);
+    fitalg.setProperty("InputWorkspace", ws2D);
+    fitalg.setPropertyValue("WorkspaceIndex", "0");
+
+    // execute fit
+    TS_ASSERT_THROWS_NOTHING(TS_ASSERT(fitalg.execute()));
+    TS_ASSERT(fitalg.isExecuted());
+
+    // test the output from fit is what you expect
+    double chi2 = fitalg.getProperty("OutputChi2overDoF");
+
+    TS_ASSERT_DELTA(chi2, 0.0, 0.1);
+
+    IFunction_sptr out = fitalg.getProperty("Function");
+    TS_ASSERT_DELTA(out->getParameter("A0"), 130., 0.001);
+    TS_ASSERT_DELTA(out->getParameter("A1"), 130., 0.001);
+    TS_ASSERT_DELTA(out->getParameter("A3"), 0., 0.001);
   }
 };
 

@@ -9,7 +9,7 @@
 #include "MantidAPI/FunctionValues.h"
 
 using namespace Mantid::API;
-using namespace Mantid::CurveFitting::Functions;
+using Mantid::CurveFitting::Functions::CubicSpline;
 
 class CubicSplineTest : public CxxTest::TestSuite {
 public:

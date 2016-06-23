@@ -11,7 +11,7 @@
 
 using namespace Mantid::API;
 using namespace Mantid::CurveFitting;
-using namespace Mantid::CurveFitting::Functions;
+using Mantid::CurveFitting::Functions::Chebyshev;
 
 class ChebyshevTest : public CxxTest::TestSuite {
 public:
