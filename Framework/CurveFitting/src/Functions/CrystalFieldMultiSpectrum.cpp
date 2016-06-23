@@ -38,8 +38,8 @@ public:
     throw Exception::NotImplementedError(
         "This method is intentionally not implemented.");
   }
-  void functionGeneral(const API::FunctionDomainGeneral &generalDomain,
-                       API::FunctionValues &values) const override {
+  void functionGeneral(const API::FunctionDomainGeneral &,
+                       API::FunctionValues &) const override {
     throw Exception::NotImplementedError(
         "This method is intentionally not implemented.");
   }
