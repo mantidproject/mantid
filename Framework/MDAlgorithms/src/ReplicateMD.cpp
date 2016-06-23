@@ -298,19 +298,17 @@ void ReplicateMD::exec() {
     // Check that the indices stored in axes are compatible with the
     // dimensionality of the data workspace
     const auto numberOfDimensionsOfDataWorkspace = static_cast<int>(nDimsData);
-    int axisDimCounter = 0;
     for (const auto &axis : axes) {
       if (axis >= numberOfDimensionsOfDataWorkspace) {
         std::string message =
             "ReplicateMD: Cannot transpose the data workspace. Attempting to "
             "swap dimension index " +
-            std::to_string(axisDimCounter) + " with index " +
+            std::to_string(std::distance(axes.data(), &axis)) + " with index " +
             std::to_string(axis) +
             ", but the dimensionality of the data workspace is " +
             std::to_string(nDimsData);
         throw std::runtime_error(message);
       }
-      ++axisDimCounter;
     }
     transposedDataWS = transposeMD(dataWS, axes);
     nDimsData = transposedDataWS->getNumDims();
