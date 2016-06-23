@@ -707,8 +707,8 @@ public:
 
   void test_function_LinearBackground() {
     // create mock data to test against
-    int histogramNumber = 1;
-    int timechannels = 5;
+    const int histogramNumber = 1;
+    const int timechannels = 5;
     Mantid::API::MatrixWorkspace_sptr ws2D =
         WorkspaceFactory::Instance().create("Workspace2D", histogramNumber,
                                             timechannels, timechannels);
@@ -741,6 +741,44 @@ public:
     IFunction_sptr out = alg2.getProperty("Function");
     TS_ASSERT_DELTA(out->getParameter("A0"), 0.0, 0.01);
     TS_ASSERT_DELTA(out->getParameter("A1"), 1.0, 0.0003);
+  }
+
+  void test_function_Polynomial_QuadraticBackground() {
+    const int histogramNumber = 1;
+    const int timechannels = 5;
+    Mantid::API::MatrixWorkspace_sptr ws2D =
+        WorkspaceFactory::Instance().create("Workspace2D", histogramNumber,
+                                            timechannels, timechannels);
+
+    for (int i = 0; i < timechannels; i++) {
+      ws2D->dataX(0)[i] = i + 1;
+      ws2D->dataY(0)[i] = (i + 1) * (i + 1) + 2 * (i + 1) + 3.0;
+      ws2D->dataE(0)[i] = 1.0;
+    }
+
+    CurveFitting::Algorithms::Fit alg2;
+    TS_ASSERT_THROWS_NOTHING(alg2.initialize());
+    TS_ASSERT(alg2.isInitialized());
+
+    // set up fitting function
+    const std::string funcStr = "name=Polynomial, n=2, A0=0.0, A1=1.";
+    alg2.setProperty("Function", funcStr);
+    // Set which spectrum to fit against and initial starting values
+    alg2.setProperty("InputWorkspace", ws2D);
+    alg2.setPropertyValue("WorkspaceIndex", "0");
+
+    // execute fit
+    TS_ASSERT_THROWS_NOTHING(TS_ASSERT(alg2.execute()))
+    TS_ASSERT(alg2.isExecuted());
+
+    // test the output from fit is what you expect
+    double dummy = alg2.getProperty("OutputChi2overDoF");
+
+    TS_ASSERT_DELTA(dummy, 0.0, 0.1);
+    IFunction_sptr out = alg2.getProperty("Function");
+    TS_ASSERT_DELTA(out->getParameter("A0"), 3.0, 0.01);
+    TS_ASSERT_DELTA(out->getParameter("A1"), 2.0, 0.0003);
+    TS_ASSERT_DELTA(out->getParameter("A2"), 1.0, 0.01);
   }
 };
 

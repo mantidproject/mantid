@@ -1,5 +1,5 @@
-#ifndef LINEARBACKGROUNDTEST_H_
-#define LINEARBACKGROUNDTEST_H_
+#ifndef MANTID_CURVEFITTING_LINEARBACKGROUNDTEST_H_
+#define MANTID_CURVEFITTING_LINEARBACKGROUNDTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
@@ -30,14 +30,15 @@ public:
   }
 
   void test_calculate() {
-    const double a1 = 2;
-    const double a0 = 0.3;
 
     LinearBackground lin;
     lin.initialize();
     // set up fitting function
     TS_ASSERT_THROWS(lin.setParameter("X", 1.0), std::invalid_argument);
     TS_ASSERT_THROWS(lin.setParameter("A9", 1.0), std::invalid_argument);
+
+    const double a1 = 2;
+    const double a0 = 0.3;
     lin.setParameter("A1", a1);
     lin.setParameter("A0", a0);
 
@@ -53,4 +54,4 @@ public:
   }
 };
 
-#endif /*LINEARBACKGROUNDTEST_H_*/
+#endif /*MANTID_CURVEFITTING_LINEARBACKGROUNDTEST_H_*/
