@@ -39,8 +39,8 @@ Output:
 
 .. testoutput:: ReplicateMDExample1D
 
-   Num dims: 2
-   Num points: 10000
+   Num dims: 3
+   Num points: 6000
 
 .. categories::
 
