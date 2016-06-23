@@ -293,19 +293,27 @@ class CollectHB3AExperimentInfo(PythonAlgorithm):
         # Reset the current starting detector ID
         self._currStartDetID = 0
 
-        for twotheta in sorted(self._2thetaScanPtDict.keys()):
-            if len(self._2thetaScanPtDict[twotheta]) == 0:
+        distinct_2theta_list = sorted(self._2thetaScanPtDict.keys())
+        num_distinct_2theta = len(distinct_2theta_list)
+
+        self.log().warning('Number of distinct 2theta is %d. They are %s.' % (num_distinct_2theta,
+                                                                              str(distinct_2theta_list)))
+
+        for index, two_theta in enumerate(distinct_2theta_list):
+            if len(self._2thetaScanPtDict[two_theta]) == 0:
                 raise RuntimeError("Logic error to have empty list.")
             else:
-                self.log().notice("[DB] Process pixels of detector centered at 2theta = %.5f." % (twotheta))
+                self.log().warning("[DB] For %d-th 2theta = %.5f. Number of Pts. is %d. "
+                                   "They are %s." % (index, two_theta, len(self._2thetaScanPtDict[two_theta]),
+                                                     str(self._2thetaScanPtDict[two_theta])))
 
             # Get scan/pt and set dictionary
-            self.log().debug("Processing detector @ 2theta = %.5f, " % (twotheta))
-            scannumber, ptnumber = self._2thetaScanPtDict[twotheta][0]
-            self.log().debug("self._2thetaScanPtDict: %s" % (self._2thetaScanPtDict[twotheta]))
+            self.log().debug("Processing detector @ 2theta = %.5f, " % (two_theta))
+            scannumber, ptnumber = self._2thetaScanPtDict[two_theta][0]
+            self.log().debug("self._2thetaScanPtDict: %s" % (self._2thetaScanPtDict[two_theta]))
 
-            self._scanPt2ThetaDict[(scannumber, ptnumber)] = twotheta
-            self._detStartID[twotheta] = self._currStartDetID
+            self._scanPt2ThetaDict[(scannumber, ptnumber)] = two_theta
+            self._detStartID[two_theta] = self._currStartDetID
 
             if self._doGenerateVirtualInstrument is True:
                 # Load detector counts file (.xml)
