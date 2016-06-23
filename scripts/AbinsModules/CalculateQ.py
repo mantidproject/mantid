@@ -33,7 +33,7 @@ class CalculateQ(IOmodule):
 
     def  collectFrequencies(self, frequencies=None):
         """
-        Collect frequencies.
+        Collects frequencies.
         @param frequencies: frequencies in the form of numpy array
         """
         if not (isinstance(frequencies, numpy.ndarray) or
@@ -61,17 +61,17 @@ class CalculateQ(IOmodule):
 
     def _calculate_Qvectors(self):
         """
-        Calculate Q vectors for the given instrument.
+        Calculates Q vectors for the given instrument.
         """
         self._functions[self._instrument]()
 
     def getQvectors(self):
         """
-        Calculate Q vectors and return them. Save Q vectors to hdf file.
+        Calculates Q vectors and return them. Save Q vectors to hdf file.
         @return: Q vectors for the required instrument
         """
         self._calculate_Qvectors()
-        self.addDataset("Q vectors", self._Qvectors[self._sample_form])
+        self.addNumpyDataset("Q vectors", self._Qvectors[self._sample_form])
         self.addAttribute("Instrument", self._instrument)
         self.addAttribute("SampleForm", self._sample_form)
         self.save()

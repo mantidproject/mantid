@@ -21,6 +21,7 @@ class ABINS(PythonAlgorithm):
     _structureFactorRefined = None
     _threadsNumber = None
     _saveS = None
+    _output_workspace_name = None
 
     # ----------------------------------------------------------------------------------------
 
@@ -110,14 +111,22 @@ class ABINS(PythonAlgorithm):
 
         temperature = self.getPropertyValue("Temperature")
         if temperature < 0:
-            issues["Temperature"]="Temperature must be positive!"
+            issues["Temperature"] = "Temperature must be positive!"
 
-        tot_num_cpu=multiprocessing.cpu_count()
-        num_cpu=self.getPropertyValue("Number of threads")
-        if num_cpu<1:
+        tot_num_cpu = multiprocessing.cpu_count()
+        num_cpu = self.getPropertyValue("Number of threads")
+        if num_cpu < 1:
             issues["Number of threads"] = "Number of threads cannot be smaller than 1!"
-        elif num_cpu>tot_num_cpu:
+        elif num_cpu > tot_num_cpu:
             issues["Number of threads"] = "Number of threads cannot be larger than available number of threads!"
+
+        dft_filename = self.getProperty("DFT program")
+        if dft_filename == "CASTEP":
+            output = self._validate_castep_input_file(filename=dft_filename)
+            if not output["Valid"]:
+                issues["DFT program"] = output["Comment"]
+        elif dft_filename == "CRYSTAL":
+            issues["DFT program"] = "Support for CRYSTAL DFT program not implemented yet!"
 
         return issues
 
@@ -132,11 +141,102 @@ class ABINS(PythonAlgorithm):
         self._get_properties()
         prog_reporter.report("Input data from the user has been collected.")
 
-        castep_reader=LoadCASTEP(self._phononFile)
-        castep_data=castep_reader.readPhononFile()
+        castep_reader = LoadCASTEP(self._phononFile)
+        castep_reader.readPhononFile()
+        # castep_data = castep_reader.readPhononFile()
         prog_reporter.report("Phonon file has been read.")
 
+    def _validate_crystal_input_file(self, filename=None):
+        pass
 
+    def _validate_castep_input_file(self, filename=None):
+        """
+        Check if input DFT phonon file has been produced by CASTEP. Currently the crucial keywords in the first few
+        lines are checked (to be modified if a better validation is found...)
+
+
+        :param filename: name of the file to check
+        :return: Dictionary with two entries "Valid", "Comment". Valid key can have two values: True/ False. As it
+                 comes to "Comment" it is an empty string if Valid:True, otherwise stores description of the problem.
+        """
+        output = {"Valid": True, "Comment": ""}
+        msg_err = "Invalid %s file. " %filename
+        msg_case_explanation = "(Fortran notation is followed: case of letter does not matter; " \
+                               "empty lines are not taken into account)"
+        msg_rename = "Please rename your file and try again."
+
+        # check name of file
+        if "." not in filename:
+            output = {"Valid": False, "Comment": msg_err+" One dot '.' is expected in the name of file! " + msg_rename}
+            return output
+        elif filename.count(".") != 1:
+            output = {"Valid": False, "Comment": msg_err+" Only one dot should be in the name of file! " + msg_rename}
+            return output
+        elif filename[filename.find(".")].lower() != "phonon":
+            output = {"Valid": False, "Comment": msg_err+" The expected extension of file is phonon "
+                                                       "(case of letter does not matter)! " + msg_rename}
+            return output
+
+        # check a structure of the header part of file.
+        # Here fortran convention is followed: case of letter does not matter
+        with open(filename, "r") as castep_file:
+
+            line = self._get_one_line(castep_file)
+            if not self._compare_one_line(line, "beginheader"): # first line is BEGIN header
+                output = {"Valid": False, "Comment": msg_err+"The first line should be 'BEGIN header' "+msg_case_explanation}
+                return output
+
+            line = self._get_one_line(castep_file)
+            if not self._compare_one_line(one_line=line, pattern="numberofions"):
+
+                output = {"Valid": False, "Comment": msg_err+"The second line should include 'Number of ions' " +
+                                                     msg_case_explanation}
+                return output
+
+            line = self._get_one_line(castep_file)
+            if not self._compare_one_line(one_line=line, pattern="numberofbranches"):
+
+                output = {"Valid": False, "Comment": msg_err+"The third line should include 'Number of branches' " +
+                                                     msg_case_explanation}
+                return output
+
+            line = self._get_one_line(castep_file)
+            if not self._compare_one_line(one_line=line, pattern="numberofwavevectors"):
+
+                output = {"Valid": False, "Comment": msg_err+"The fourth line should include 'Number of wavevectors' " +
+                                                     msg_case_explanation}
+
+            line = self._get_one_line(castep_file)
+            if not self._compare_one_line(one_line=line,
+                                          pattern="frequenciesin"):
+
+                output = {"Valid": False, "Comment": msg_err+"The fifth line should be 'Frequencies in'" +
+                                                     msg_case_explanation}
+
+        return output
+
+    def _get_one_line(self, file_obj=None):
+        """
+
+        :param file_obj:  file object from which reading is done
+        :return: string containing one non empty line
+        """
+        line = file_obj.readline().strip()
+
+        while line and line == "":
+            line = file_obj.readline().strip()
+
+        return line
+
+    def _compare_one_line(self, one_line, pattern):
+        """
+
+        :param one_line:  line in the for mof string to be compared
+        :param pattern: string which should be present in the line after removing white spaces and setting all
+                        letters to lower case
+        :return:  True is pattern present in the line, otherwise False
+        """
+        return one_line and pattern in one_line.lower().replace(" ", "")
 
     def _get_properties(self):
 
@@ -145,10 +245,11 @@ class ABINS(PythonAlgorithm):
         self._temperature = self.getProperty("Temperature").value
         self._sampleForm = self.getProperty("Sample Form").value
         self._intrinsicBroadening = self.getProperty("Intrinsic Broadening").value
-        self._instrument=self.getProperty("Instrument").value
+        self._instrument = self.getProperty("Instrument").value
         self._structureFactorMode = self.getProperty("Dynamical Structure Factor").value
         self._threadsNumber = self.getProperty("Number of threads")
         self._saveS = self.getProperty("Save S")
+        self._output_workspace_name = self.getProperty("OutputWorkspace")
 
 try:
     AlgorithmFactory.subscribe(ABINS)
