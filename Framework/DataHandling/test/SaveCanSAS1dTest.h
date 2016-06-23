@@ -232,7 +232,7 @@ public:
     TS_ASSERT_DELTA(ws2d->dataE(0).back(), 0, tolerance);
 
     // Check that sample information is correct
-    auto sample = ws2d->sample();
+    auto& sample = ws2d->sample();
     TS_ASSERT(sample.getGeometryFlag() == 1);
     TS_ASSERT(sample.getHeight() == 1.0);
     TS_ASSERT(sample.getWidth() == 2.0);

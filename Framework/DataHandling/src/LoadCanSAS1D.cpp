@@ -183,9 +183,6 @@ LoadCanSAS1D::loadEntry(Poco::XML::Node *const workspaceData,
 
   createLogs(workspaceElem, dataWS);
 
-  // Load the sample information
-  createSampleInformation(workspaceElem, dataWS);
-
   Element *titleElem = workspaceElem->getChildElement("Title");
   check(titleElem, "<Title>");
   dataWS->setTitle(titleElem->innerText());
@@ -257,6 +254,9 @@ LoadCanSAS1D::loadEntry(Poco::XML::Node *const workspaceData,
   instname = nameElem->innerText();
   // run load instrument
   runLoadInstrument(instname, dataWS);
+
+  // Load the sample information
+  createSampleInformation(workspaceElem, dataWS);
 
   dataWS->getAxis(0)->setUnit("MomentumTransfer");
   if (isCommon)
@@ -357,7 +357,7 @@ void LoadCanSAS1D::createLogs(const Poco::XML::Element *const sasEntry,
 
 void LoadCanSAS1D::createSampleInformation(const Poco::XML::Element *const sasEntry,
   Mantid::API::MatrixWorkspace_sptr wSpace) const {
-  auto sample = wSpace->mutableSample();
+  auto& sample = wSpace->mutableSample();
 
   // Get the thickness information
   auto sasSampleElement = sasEntry->getChildElement("SASsample");
@@ -369,12 +369,12 @@ void LoadCanSAS1D::createSampleInformation(const Poco::XML::Element *const sasEn
   }
 
   auto sasInstrumentElement = sasEntry->getChildElement("SASinstrument");
-  check(sasSampleElement, "<SASinstrument>");
-  auto sasCollimationElement = sasEntry->getChildElement("SAScollimation");
-  check(sasSampleElement, "<SAScollimation>");
+  check(sasInstrumentElement, "<SASinstrument>");
+  auto sasCollimationElement = sasInstrumentElement->getChildElement("SAScollimation");
+  check(sasCollimationElement, "<SAScollimation>");
 
   // Get the geometry information
-  auto geometryElement = sasEntry->getChildElement("name");
+  auto geometryElement = sasCollimationElement->getChildElement("name");
   if (geometryElement) {
     auto geometry = geometryElement->innerText();
     auto geometryID = getGeometryID(geometry);
@@ -382,14 +382,14 @@ void LoadCanSAS1D::createSampleInformation(const Poco::XML::Element *const sasEn
   }
 
   // Get the thickness information
-  auto widthElement = sasEntry->getChildElement("X");
+  auto widthElement = sasCollimationElement->getChildElement("X");
   if (widthElement) {
     double width = std::stod(widthElement->innerText());
     sample.setWidth(width);
   }
 
   // Get the thickness information
-  auto heightElement = sasEntry->getChildElement("Y");
+  auto heightElement = sasCollimationElement->getChildElement("Y");
   if (heightElement) {
     double height = std::stod(heightElement->innerText());
     sample.setHeight(height);

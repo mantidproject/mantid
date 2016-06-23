@@ -143,7 +143,6 @@ void SaveCanSAS1D::exec() {
   // are no detecors present
   std::string sasInstrument;
   try {
-    std::string sasInstrument;
     createSASInstrument(sasInstrument);
   }
   catch (Kernel::Exception::NotFoundError &) {
@@ -487,7 +486,7 @@ void SaveCanSAS1D::createSASSampleElement(std::string &sasSample) {
   if (thickness > 0) {
     std::string thicknessTag = "\n\t\t\t<thickness unit=\"mm\">";
     thicknessTag += std::to_string(thickness);
-    thicknessTag += "<\thickness>";
+    thicknessTag += "</thickness>";
     sasSample += thicknessTag;
   }
   sasSample += "\n\t\t</SASsample>";
@@ -636,9 +635,10 @@ void SaveCanSAS1D::createSASInstrument(std::string& sasInstrument) {
     std::string collimationGeometry = getProperty("Geometry");
     sasCollimation += "\n\t\t\t\t<name>" + collimationGeometry + "</name>";
     // Width
-    sasCollimation += "<X unit=\"mm\">" + std::to_string(collimationWidth) + "</X>";
+    sasCollimation += "\n\t\t\t\t<X unit=\"mm\">" + std::to_string(collimationWidth) + "</X>";
     // Height
-    sasCollimation += "<Y unit=\"mm\">" + std::to_string(collimationHeight) + "</Y>";
+    sasCollimation += "\n\t\t\t\t<Y unit=\"mm\">" + std::to_string(collimationHeight) + "</Y>";
+    sasCollimation += "\n\t\t\t</SAScollimation>";
   }
   sasInstrument += sasCollimation;
 
