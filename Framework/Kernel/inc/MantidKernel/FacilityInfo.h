@@ -95,7 +95,7 @@ public:
   /// Returns the catalogInfo class.
   const CatalogInfo &catalogInfo() const { return m_catalogs; }
 
-  ///Returns a bool indicating whether prefix is required in file names
+  /// Returns a bool indicating whether prefix is required in file names
   const bool &allowNoPrefix() const { return m_allowNoPrefix; }
 
 private:

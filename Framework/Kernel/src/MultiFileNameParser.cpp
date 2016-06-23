@@ -693,9 +693,9 @@ std::string getMatchingString(const std::string &regexString,
 std::string pad(unsigned int run, const std::string &instString) {
   InstrumentInfo instInfo = ConfigService::Instance().getInstrument(instString);
   FacilityInfo facilityInfo = instInfo.facility();
-  std::string prefix ="";
-  if(!facilityInfo.allowNoPrefix())
-      prefix = instInfo.filePrefix(run) + instInfo.delimiter();
+  std::string prefix = "";
+  if (!facilityInfo.allowNoPrefix())
+    prefix = instInfo.filePrefix(run) + instInfo.delimiter();
   unsigned int padLength = instInfo.zeroPadding(run);
   std::string runStr = std::to_string(run);
   if (runStr.size() < padLength)
