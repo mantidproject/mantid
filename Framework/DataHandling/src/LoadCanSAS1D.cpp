@@ -30,6 +30,22 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 
+namespace {
+int getGeometryID(const std::string &selection) {
+  int geometryID = 0;
+  if (selection == "Cylinder") {
+    geometryID = 1;
+  } else if (selection == "Flat plate") {
+    geometryID = 2;
+  } else if (selection == "Disc") {
+    geometryID = 3;
+  } else {
+    geometryID = 0;
+  }
+  return geometryID;
+}
+}
+
 namespace Mantid {
 namespace DataHandling {
 
@@ -166,6 +182,9 @@ LoadCanSAS1D::loadEntry(Poco::XML::Node *const workspaceData,
       WorkspaceFactory::Instance().create("Workspace2D", 1, nBins, nBins);
 
   createLogs(workspaceElem, dataWS);
+
+  // Load the sample information
+  createSampleInformation(workspaceElem, dataWS);
 
   Element *titleElem = workspaceElem->getChildElement("Title");
   check(titleElem, "<Title>");
@@ -333,6 +352,47 @@ void LoadCanSAS1D::createLogs(const Poco::XML::Element *const sasEntry,
         }
       }
     }
+  }
+}
+
+void LoadCanSAS1D::createSampleInformation(const Poco::XML::Element *const sasEntry,
+  Mantid::API::MatrixWorkspace_sptr wSpace) const {
+  auto sample = wSpace->mutableSample();
+
+  // Get the thickness information
+  auto sasSampleElement = sasEntry->getChildElement("SASsample");
+  check(sasSampleElement, "<SASsample>");
+  auto thicknessElement = sasSampleElement->getChildElement("thickness");
+  if (thicknessElement) {
+    double thickness = std::stod(thicknessElement->innerText());
+    sample.setThickness(thickness);
+  }
+
+  auto sasInstrumentElement = sasEntry->getChildElement("SASinstrument");
+  check(sasSampleElement, "<SASinstrument>");
+  auto sasCollimationElement = sasEntry->getChildElement("SAScollimation");
+  check(sasSampleElement, "<SAScollimation>");
+
+  // Get the geometry information
+  auto geometryElement = sasEntry->getChildElement("name");
+  if (geometryElement) {
+    auto geometry = geometryElement->innerText();
+    auto geometryID = getGeometryID(geometry);
+    sample.setGeometryFlag(geometryID);
+  }
+
+  // Get the thickness information
+  auto widthElement = sasEntry->getChildElement("X");
+  if (widthElement) {
+    double width = std::stod(widthElement->innerText());
+    sample.setWidth(width);
+  }
+
+  // Get the thickness information
+  auto heightElement = sasEntry->getChildElement("Y");
+  if (heightElement) {
+    double height = std::stod(heightElement->innerText());
+    sample.setHeight(height);
   }
 }
 }
