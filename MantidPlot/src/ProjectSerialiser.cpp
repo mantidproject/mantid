@@ -174,14 +174,7 @@ void ProjectSerialiser::loadProjectSections(const std::string &lines, const int 
   if (tsv.hasSection("scriptwindow")) {
     std::vector<std::string> scriptSections = tsv.sections("scriptwindow");
     for (auto it = scriptSections.begin(); it != scriptSections.end(); ++it) {
-      TSVSerialiser sTSV(*it);
-      QStringList files;
-
-      auto scriptNames = sTSV.values("ScriptNames");
-      // Iterate, ignoring scriptNames[0] which is just "ScriptNames"
-      for (size_t i = 1; i < scriptNames.size(); ++i)
-        files.append(QString::fromStdString(scriptNames[i]));
-      openScriptWindow(files);
+      openScriptWindow(*it, fileVersion);
     }
   }
 
@@ -247,7 +240,7 @@ QString ProjectSerialiser::serialiseProjectState(Folder* folder)
 
     // Save the list of workspaces
     if(window->mantidUI) {
-        std::string workspaceString = window->mantidUI->saveToProject(window);
+        std::string workspaceString = window->mantidUI->saveWorkspaces(window);
         text += QString::fromStdString(workspaceString);
     }
 
@@ -258,13 +251,106 @@ QString ProjectSerialiser::serialiseProjectState(Folder* folder)
          text += QString::fromStdString(scriptString);
     }
 
-    // Recursively save folders
+    // Finally, recursively save folders
     if(folder) {
-        std::string folderString = folder->saveToProject(window);
+        std::string folderString = saveFolderState(folder);
         text += QString::fromStdString(folderString);
     }
 
     return text;
+}
+
+/**
+ * Save the folder structure to a Mantid project file.
+ *
+ * @param app :: the current application window instance
+ * @return string represnetation of the folder's data
+ */
+std::string ProjectSerialiser::saveFolderState(Folder *folder)
+{
+    QString text;
+    bool isCurrentFolder = window->currentFolder() == folder;
+    int windowCount = 0;
+
+    text += saveFolderHeader(folder, isCurrentFolder);
+    text += saveFolderSubWindows(folder, windowCount);
+    text += saveFolderFooter();
+    text.prepend("<windows>\t" + QString::number(windowCount) + "\n");
+
+    return text.toStdString();
+}
+
+/**
+ * Generate the opening tags and meta information about
+ * a folder record for the Mantid project file.
+ *
+ * @param isCurrentFolder :: whether this folder is the current one.
+ * @return string representation of the folder's header data
+ */
+QString ProjectSerialiser::saveFolderHeader(Folder* folder, bool isCurrentFolder)
+{
+    QString text;
+
+    // Write the folder opening tag
+    text += "<folder>\t" + QString(folder->objectName()) + "\t" +
+            folder->birthDate() + "\t" + folder->modificationDate();
+
+    // label it as current if necessary
+    if (isCurrentFolder) {
+        text += "\tcurrent";
+    }
+
+    text += "\n";
+    text += "<open>" + QString::number(folder->folderListItem()->isExpanded()) +
+            "</open>\n";
+    return text;
+}
+
+/**
+ * Generate the subfolder and subwindow records for the current folder.
+ * This method will recursively convert subfolders to their text representation
+ *
+ * @param app :: the current application window instance
+ * @param folder :: the folder to generate the text for.
+ * @param windowCount :: count of the number of windows
+ * @return string representation of the folder's subfolders
+ */
+QString ProjectSerialiser::saveFolderSubWindows(Folder * folder, int &windowCount)
+{
+    QString text;
+
+    // Write windows
+    QList<MdiSubWindow *> windows = folder->windowsList();
+    foreach (MdiSubWindow *w, windows) {
+      Mantid::IProjectSerialisable *ips =
+          dynamic_cast<Mantid::IProjectSerialisable *>(w);
+
+      if (ips) {
+        text += QString::fromUtf8(ips->saveToProject(window).c_str());
+      }
+
+      ++windowCount;
+    }
+
+    // Write subfolders
+    QList<Folder *> subfolders = folder->folders();
+    foreach (Folder *f, subfolders) { text += saveFolderSubWindows(f, windowCount); }
+
+    // Write log info
+    if (!folder->logInfo().isEmpty()) {
+        text += "<log>\n" + folder->logInfo() + "</log>\n";
+    }
+
+    return text;
+}
+
+/**
+ * Generate the closing folder data and end tag.
+ * @return footer string for this folder
+ */
+QString ProjectSerialiser::saveFolderFooter()
+{
+    return "</folder>\n";
 }
 
 /**
@@ -619,7 +705,7 @@ void ProjectSerialiser::openSurfacePlot(const std::string &lines,
 
 /** This method opens script window with a list of scripts loaded
  */
-void ProjectSerialiser::openScriptWindow(const QStringList &files) {
+void ProjectSerialiser::openScriptWindow(const std::string &lines, const int fileVersion) {
   window->showScriptWindow();
   ScriptingWindow* scriptingWindow = window->getScriptWindowHandle();
 
@@ -629,15 +715,21 @@ void ProjectSerialiser::openScriptWindow(const QStringList &files) {
   scriptingWindow->setWindowTitle("MantidPlot: " +
                                   window->scriptingEnv()->languageName() + " Window");
 
-  // The first time we don't use a new tab, to re-use the blank script tab
-  // on further iterations we open a new tab
-  bool newTab = false;
-  for (auto file = files.begin(); file != files.end(); ++file) {
-    if (file->isEmpty())
-      continue;
-    scriptingWindow->open(*file, newTab);
-    newTab = true;
-  }
+  scriptingWindow->loadFromProject(lines, window, fileVersion);
+}
+
+void ProjectSerialiser::openScriptWindow(const QStringList &files)
+{
+  window->showScriptWindow();
+  ScriptingWindow* scriptingWindow = window->getScriptWindowHandle();
+
+  if (!scriptingWindow)
+    return;
+
+  scriptingWindow->setWindowTitle("MantidPlot: " +
+                                  window->scriptingEnv()->languageName() + " Window");
+
+  scriptingWindow->loadFromFileList(files);
 }
 
 void ProjectSerialiser::populateMantidTreeWidget(const QString &s) {

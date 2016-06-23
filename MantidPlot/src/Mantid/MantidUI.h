@@ -101,7 +101,7 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 Q_DECLARE_METATYPE(Mantid::API::MatrixWorkspace_sptr)
 Q_DECLARE_METATYPE(Mantid::API::MatrixWorkspace_const_sptr)
 
-class MantidUI : public QObject, Mantid::IProjectSerialisable {
+class MantidUI : public QObject {
   Q_OBJECT
 
 public:
@@ -504,10 +504,7 @@ public slots:
   // Ticket #672
   void saveNexusWorkspace();
   // Serialise the workspaces to a TSV file.
-  std::string saveToProject(ApplicationWindow *app) override;
-  // Load the workspaces from a Mantid project
-  void loadFromProject(const std::string &lines, ApplicationWindow *app,
-                                 const int fileVersion) override;
+  std::string saveWorkspaces(ApplicationWindow *app);
 
 #ifdef _WIN32
 public:

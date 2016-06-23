@@ -2103,7 +2103,7 @@ void MantidUI::disableSaveNexus() { appWindow()->disableSaveNexus(); }
  *
  * @param app :: The application window instance
  */
-std::string MantidUI::saveToProject(ApplicationWindow *app) {
+std::string MantidUI::saveWorkspaces(ApplicationWindow *app) {
   using namespace Mantid::API;
   std::string workingDir = app->workingDir.toStdString();
   QString wsNames;
@@ -2142,10 +2142,6 @@ std::string MantidUI::saveToProject(ApplicationWindow *app) {
   }
   wsNames += "\n</mantidworkspaces>\n";
   return wsNames.toStdString();
-}
-
-void MantidUI::loadFromProject(const string &lines, ApplicationWindow *app, const int fileVersion) {
-    throw std::runtime_error("Not yet implemented");
 }
 
 /**

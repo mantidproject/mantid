@@ -70,6 +70,8 @@ namespace MantidQt {
             void saveProjectFile(QFile* fileHandle, const QString &projectName, QString& text, bool compress);
             /// Load sections of the folder
             void loadProjectSections(const std::string& lines, const int fileVersion, const bool isTopLevel);
+            /// Open the script window and load scripts from string
+            void openScriptWindow(const std::string &files, const int fileVersion);
             void openMantidMatrix(const std::string &lines);
             void openMatrix(const std::string &lines, const int fileVersion);
             void openMultiLayer(const std::string &lines, const int fileVersion);
@@ -79,6 +81,10 @@ namespace MantidQt {
             void populateMantidTreeWidget(const QString &s);
             void loadWsToMantidTree(const std::string &wsName);
 
+            std::string saveFolderState(Folder *folder);
+            QString saveFolderHeader(Folder* folder, bool isCurrentFolder);
+            QString saveFolderSubWindows(Folder *folder, int &windowCount);
+            QString saveFolderFooter();
         };
     }
 }

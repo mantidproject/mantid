@@ -5,6 +5,7 @@
 #include "MultiTabScriptInterpreter.h"
 #include "ScriptingEnv.h"
 #include "ScriptFileInterpreter.h"
+#include "TSVSerialiser.h"
 #include "pixmaps.h"
 
 // Mantid
@@ -419,7 +420,8 @@ void ScriptingWindow::showPythonHelp() {
      return m_manager->saveToString().toStdString();
  }
 
- /** Stub from IProjectSerialisable
+ /**
+  * Load script files from the project file
   *
   * @param lines :: raw lines from the project file
   * @param app :: the current application window instance
@@ -428,7 +430,35 @@ void ScriptingWindow::showPythonHelp() {
  void ScriptingWindow::loadFromProject(const std::string &lines, ApplicationWindow *app,
                                        const int fileVersion)
  {
-    throw std::runtime_error("Not yet implemented");
+     Q_UNUSED(app);
+     Q_UNUSED(fileVersion);
+
+     TSVSerialiser sTSV(lines);
+     QStringList files;
+
+     auto scriptNames = sTSV.values("ScriptNames");
+
+     // Iterate, ignoring scriptNames[0] which is just "ScriptNames"
+     for (size_t i = 1; i < scriptNames.size(); ++i)
+         files.append(QString::fromStdString(scriptNames[i]));
+
+     loadFromFileList(files);
+ }
+
+ /**
+  * Load script files from a list of file names
+  * @param files :: List of file names to oepn
+  */
+ void ScriptingWindow::loadFromFileList(const QStringList &files) {
+     // The first time we don't use a new tab, to re-use the blank script tab
+     // on further iterations we open a new tab
+     bool newTab = false;
+     for (auto file = files.begin(); file != files.end(); ++file) {
+       if (file->isEmpty())
+         continue;
+       open(*file, newTab);
+       newTab = true;
+     }
  }
 
 /**

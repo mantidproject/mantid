@@ -60,7 +60,9 @@ public:
   std::string saveToProject(ApplicationWindow *app) override;
   /// Loads the open script names for the current project
   void loadFromProject(const std::string &lines, ApplicationWindow *app,
-                                 const int fileVersion) override;
+                       const int fileVersion) override;
+  // Loads the scripts from a list of filenames
+  void loadFromFileList(const QStringList &files);
 signals:
   /// Show the scripting language dialog
   void chooseScriptingLanguage();
