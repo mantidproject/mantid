@@ -18,6 +18,10 @@ class FunctionValues;
 class MatrixWorkspace;
 }
 
+namespace HistogramData {
+class Points;
+}
+
 namespace CurveFitting {
 
 class SimpleChebfun;
