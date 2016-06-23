@@ -124,7 +124,6 @@
 #include "LineProfileTool.h"
 #include "RangeSelectorTool.h"
 #include "PlotToolInterface.h"
-#include "Mantid/IProjectSerialisable.h"
 #include "Mantid/MantidMatrix.h"
 #include "Mantid/MantidTable.h"
 #include "Mantid/MantidMatrixCurve.h"
@@ -4635,7 +4634,8 @@ ApplicationWindow *ApplicationWindow::openProject(const QString &filename,
   d_loaded_current = 0;
 
   // Open as a top level folder
-  openProjectFolder(lines, fileVersion, true);
+  ProjectSerialiser serialiser(this);
+  serialiser.load(lines, fileVersion, true);
 
   if (d_loaded_current)
     curFolder = d_loaded_current;
@@ -4667,166 +4667,6 @@ ApplicationWindow *ApplicationWindow::openProject(const QString &filename,
 
   return this;
 }
-
-void ApplicationWindow::openProjectFolder(std::string lines,
-                                          const int fileVersion,
-                                          const bool isTopLevel) {
-  // If we're not the top level folder, read the folder settings and create the
-  // folder
-  // This is a legacy edgecase because folders are written
-  // <folder>\tsettings\tgo\there
-  if (!isTopLevel && lines.size() > 0) {
-    std::vector<std::string> lineVec;
-    boost::split(lineVec, lines, boost::is_any_of("\n"));
-
-    std::string firstLine = lineVec.front();
-
-    std::vector<std::string> values;
-    boost::split(values, firstLine, boost::is_any_of("\t"));
-
-    Folder *newFolder =
-        new Folder(currentFolder(), QString::fromStdString(values[1]));
-    newFolder->setBirthDate(QString::fromStdString(values[2]));
-    newFolder->setModificationDate(QString::fromStdString(values[3]));
-
-    if (values.size() > 4 && values[4] == "current")
-      d_loaded_current = newFolder;
-
-    FolderListItem *fli =
-        new FolderListItem(currentFolder()->folderListItem(), newFolder);
-    newFolder->setFolderListItem(fli);
-
-    d_current_folder = newFolder;
-
-    // Remove the first line (i.e. the folder's settings line)
-    lineVec.erase(lineVec.begin());
-    lines = boost::algorithm::join(lineVec, "\n");
-  }
-
-  // This now ought to be the regular contents of a folder. Parse as normal.
-  TSVSerialiser tsv(lines);
-
-  // If this is the top level folder of the project, we'll need to load the
-  // workspaces before anything else.
-  if (isTopLevel && tsv.hasSection("mantidworkspaces")) {
-    // There should only be one of these, so we only read the first.
-    std::string workspaces = tsv.sections("mantidworkspaces").front();
-    populateMantidTreeWidget(QString::fromStdString(workspaces));
-  }
-
-  if (tsv.hasSection("open")) {
-    std::string openStr = tsv.sections("open").front();
-    int openValue = 0;
-    std::stringstream(openStr) >> openValue;
-    currentFolder()->folderListItem()->setExpanded(openValue);
-  }
-
-  if (tsv.hasSection("mantidmatrix")) {
-    std::vector<std::string> matrices = tsv.sections("mantidmatrix");
-    for (auto it = matrices.begin(); it != matrices.end(); ++it) {
-      openMantidMatrix(*it);
-    }
-  }
-
-  if (tsv.hasSection("table")) {
-    std::vector<std::string> tableSections = tsv.sections("table");
-    for (auto it = tableSections.begin(); it != tableSections.end(); ++it) {
-      openTable(*it, fileVersion);
-    }
-  }
-
-  if (tsv.hasSection("TableStatistics")) {
-    std::vector<std::string> tableStatsSections =
-        tsv.sections("TableStatistics");
-    for (auto it = tableStatsSections.begin(); it != tableStatsSections.end();
-         ++it) {
-      openTableStatistics(*it, fileVersion);
-    }
-  }
-
-  if (tsv.hasSection("matrix")) {
-    std::vector<std::string> matrixSections = tsv.sections("matrix");
-    for (auto it = matrixSections.begin(); it != matrixSections.end(); ++it) {
-      openMatrix(*it, fileVersion);
-    }
-  }
-
-  if (tsv.hasSection("multiLayer")) {
-    std::vector<std::string> multiLayer = tsv.sections("multiLayer");
-    for (auto it = multiLayer.begin(); it != multiLayer.end(); ++it) {
-      openMultiLayer(*it, fileVersion);
-    }
-  }
-
-  if (tsv.hasSection("SurfacePlot")) {
-    std::vector<std::string> plotSections = tsv.sections("SurfacePlot");
-    for (auto it = plotSections.begin(); it != plotSections.end(); ++it) {
-      openSurfacePlot(*it, fileVersion);
-    }
-  }
-
-  if (tsv.hasSection("log")) {
-    std::vector<std::string> logSections = tsv.sections("log");
-    for (auto it = logSections.begin(); it != logSections.end(); ++it) {
-      currentFolder()->appendLogInfo(QString::fromStdString(*it));
-    }
-  }
-
-  if (tsv.hasSection("note")) {
-    std::vector<std::string> noteSections = tsv.sections("note");
-    for (auto it = noteSections.begin(); it != noteSections.end(); ++it) {
-      Note *n = newNote("");
-      n->loadFromProject(*it, this, fileVersion);
-    }
-  }
-
-  if (tsv.hasSection("scriptwindow")) {
-    std::vector<std::string> scriptSections = tsv.sections("scriptwindow");
-    for (auto it = scriptSections.begin(); it != scriptSections.end(); ++it) {
-      TSVSerialiser sTSV(*it);
-      QStringList files;
-
-      auto scriptNames = sTSV.values("ScriptNames");
-      // Iterate, ignoring scriptNames[0] which is just "ScriptNames"
-      for (size_t i = 1; i < scriptNames.size(); ++i)
-        files.append(QString::fromStdString(scriptNames[i]));
-      openScriptWindow(files);
-    }
-  }
-
-  if (tsv.hasSection("instrumentwindow")) {
-    std::vector<std::string> instrumentSections =
-        tsv.sections("instrumentwindow");
-    for (auto it = instrumentSections.begin(); it != instrumentSections.end();
-         ++it) {
-      TSVSerialiser iws(*it);
-      if (iws.selectLine("WorkspaceName")) {
-        std::string wsName = iws.asString(1);
-        InstrumentWindow *iw = dynamic_cast<InstrumentWindow *>(
-            mantidUI->getInstrumentView(QString::fromStdString(wsName)));
-        if (iw) {
-          iw->loadFromProject(*it, this, fileVersion);
-        }
-      }
-    }
-  }
-
-  // Deal with subfolders last.
-  if (tsv.hasSection("folder")) {
-    std::vector<std::string> folders = tsv.sections("folder");
-    for (auto it = folders.begin(); it != folders.end(); ++it) {
-      openProjectFolder(*it, fileVersion);
-    }
-  }
-
-  // We're returning to our parent folder, so set d_current_folder to our parent
-  Folder *parent = dynamic_cast<Folder *>(currentFolder()->parent());
-  if (!parent)
-    d_current_folder = projectFolder();
-  else
-    d_current_folder = parent;
-}
-
 bool ApplicationWindow::setScriptingLanguage(const QString &lang) {
   if (lang.isEmpty())
     return false;
@@ -11245,406 +11085,6 @@ void ApplicationWindow::deleteLayer() {
   plot->confirmRemoveLayer();
 }
 
-void ApplicationWindow::openMatrix(const std::string &lines,
-                                   const int fileVersion) {
-  // The first line specifies the name, dimensions and date.
-  std::vector<std::string> lineVec;
-  boost::split(lineVec, lines, boost::is_any_of("\n"));
-  std::string firstLine = lineVec.front();
-  lineVec.erase(lineVec.begin());
-  std::string newLines = boost::algorithm::join(lineVec, "\n");
-
-  // Parse the first line
-  std::vector<std::string> values;
-  boost::split(values, firstLine, boost::is_any_of("\t"));
-
-  if (values.size() < 4) {
-    return;
-  }
-
-  const std::string caption = values[0];
-  const std::string date = values[3];
-
-  int rows = 0;
-  int cols = 0;
-  Mantid::Kernel::Strings::convert<int>(values[1], rows);
-  Mantid::Kernel::Strings::convert<int>(values[2], cols);
-
-  Matrix *m = newMatrix(QString::fromStdString(caption), rows, cols);
-  setListViewDate(QString::fromStdString(caption),
-                  QString::fromStdString(date));
-  m->setBirthDate(QString::fromStdString(date));
-
-  TSVSerialiser tsv(newLines);
-
-  if (tsv.hasLine("geometry")) {
-    std::string gStr = tsv.lineAsString("geometry");
-    restoreWindowGeometry(this, m, QString::fromStdString(gStr));
-  }
-
-  m->loadFromProject(newLines, this, fileVersion);
-}
-
-void ApplicationWindow::openMantidMatrix(const std::string &lines) {
-  TSVSerialiser tsv(lines);
-
-  MantidMatrix *m = 0;
-
-  if (tsv.selectLine("WorkspaceName")) {
-    m = mantidUI->openMatrixWorkspace(tsv.asString(1), -1, -1);
-  }
-
-  if (!m)
-    return;
-
-  if (tsv.selectLine("geometry")) {
-    const std::string geometry = tsv.lineAsString("geometry");
-    restoreWindowGeometry(this, m, QString::fromStdString(geometry));
-  }
-
-  if (tsv.selectLine("tgeometry")) {
-    const std::string geometry = tsv.lineAsString("tgeometry");
-    restoreWindowGeometry(this, m, QString::fromStdString(geometry));
-  }
-
-  // Append to the list of mantid matrix windows
-  m_mantidmatrixWindows << m;
-}
-
-void ApplicationWindow::openMultiLayer(const std::string &lines,
-                                       const int fileVersion) {
-  MultiLayer *plot = 0;
-  std::string multiLayerLines = lines;
-
-  // The very first line of a multilayer section has some important settings,
-  // and lacks a name. Take it out and parse it manually.
-
-  if (multiLayerLines.length() == 0)
-    return;
-
-  std::vector<std::string> lineVec;
-  boost::split(lineVec, multiLayerLines, boost::is_any_of("\n"));
-
-  std::string firstLine = lineVec.front();
-  // Remove the first line
-  lineVec.erase(lineVec.begin());
-  multiLayerLines = boost::algorithm::join(lineVec, "\n");
-
-  // Split the line up into its values
-  std::vector<std::string> values;
-  boost::split(values, firstLine, boost::is_any_of("\t"));
-
-  std::string caption = values[0];
-  int rows = 1;
-  int cols = 1;
-  Mantid::Kernel::Strings::convert<int>(values[1], rows);
-  Mantid::Kernel::Strings::convert<int>(values[2], cols);
-  std::string birthDate = values[3];
-
-  plot = multilayerPlot(QString::fromUtf8(caption.c_str()), 0, rows, cols);
-  plot->setBirthDate(QString::fromStdString(birthDate));
-  setListViewDate(QString::fromStdString(caption),
-                  QString::fromStdString(birthDate));
-
-  plot->loadFromProject(multiLayerLines, this, fileVersion);
-}
-
-/** This method opens script window with a list of scripts loaded
- */
-void ApplicationWindow::openScriptWindow(const QStringList &files) {
-  showScriptWindow();
-  if (!scriptingWindow)
-    return;
-
-  scriptingWindow->setWindowTitle("MantidPlot: " +
-                                  scriptingEnv()->languageName() + " Window");
-
-  // The first time we don't use a new tab, to re-use the blank script tab
-  // on further iterations we open a new tab
-  bool newTab = false;
-  for (auto file = files.begin(); file != files.end(); ++file) {
-    if (file->isEmpty())
-      continue;
-    scriptingWindow->open(*file, newTab);
-    newTab = true;
-  }
-}
-
-/** This method populates the mantid workspace tree when project file is loaded
-* and
-*   then groups all the workspaces that belonged to a group when the project was
-* saved.
-*
-*   @params &s :: A QString that contains all the names of workspaces and group
-* workspaces
-*                 that the user is trying to load from a project.
-*/
-void ApplicationWindow::populateMantidTreeWidget(const QString &s) {
-  QStringList list = s.split("\t");
-  QStringList::const_iterator line = list.begin();
-  for (++line; line != list.end(); ++line) {
-    if ((*line)
-            .contains(',')) // ...it is a group and more work needs to be done
-    {
-      // Format of string is "GroupName, Workspace, Workspace, Workspace, ....
-      // and so on "
-      QStringList groupWorkspaces = (*line).split(',');
-      std::string groupName = groupWorkspaces[0].toStdString();
-      std::vector<std::string> inputWsVec;
-      // Work through workspaces, load into Mantid and then push into
-      // vectorgroup (ignore group name, start at 1)
-      for (int i = 1; i < groupWorkspaces.size(); i++) {
-        std::string wsName = groupWorkspaces[i].toStdString();
-        loadWsToMantidTree(wsName);
-        inputWsVec.push_back(wsName);
-      }
-
-      try {
-        bool smallGroup(inputWsVec.size() < 2);
-        if (smallGroup) // if the group contains less than two items...
-        {
-          // ...create a new workspace and then delete it later on (group
-          // workspace requires two workspaces in order to run the alg)
-          Mantid::API::IAlgorithm_sptr alg =
-              Mantid::API::AlgorithmManager::Instance().create(
-                  "CreateWorkspace", 1);
-          alg->setProperty("OutputWorkspace", "boevsMoreBoevs");
-          alg->setProperty<std::vector<double>>("DataX",
-                                                std::vector<double>(2, 0.0));
-          alg->setProperty<std::vector<double>>("DataY",
-                                                std::vector<double>(2, 0.0));
-          // execute the algorithm
-          alg->execute();
-          // name picked because random and won't ever be used.
-          inputWsVec.emplace_back("boevsMoreBoevs");
-        }
-
-        // Group the workspaces as they were when the project was saved
-        std::string algName("GroupWorkspaces");
-        Mantid::API::IAlgorithm_sptr groupingAlg =
-            Mantid::API::AlgorithmManager::Instance().create(algName, 1);
-        groupingAlg->initialize();
-        groupingAlg->setProperty("InputWorkspaces", inputWsVec);
-        groupingAlg->setPropertyValue("OutputWorkspace", groupName);
-        // execute the algorithm
-        groupingAlg->execute();
-
-        if (smallGroup) {
-          // Delete the temporary workspace used to create a group of 1 or less
-          // (currently can't have group of 0)
-          Mantid::API::AnalysisDataService::Instance().remove("boevsMoreBoevs");
-        }
-      }
-      // Error catching for algorithms
-      catch (std::invalid_argument &) {
-        QMessageBox::critical(this, "MantidPlot - Algorithm error",
-                              " Error in Grouping Workspaces");
-      } catch (Mantid::Kernel::Exception::NotFoundError &) {
-        QMessageBox::critical(this, "MantidPlot - Algorithm error",
-                              " Error in Grouping Workspaces");
-      } catch (std::runtime_error &) {
-        QMessageBox::critical(this, "MantidPlot - Algorithm error",
-                              " Error in Grouping Workspaces");
-      } catch (std::exception &) {
-        QMessageBox::critical(this, "MantidPlot - Algorithm error",
-                              " Error in Grouping Workspaces");
-      }
-    } else // ...not a group so just load the workspace
-    {
-      loadWsToMantidTree((*line).toStdString());
-    }
-  }
-}
-
-/** This method populates the mantid workspace tree when  project file is loaded
- */
-void ApplicationWindow::loadWsToMantidTree(const std::string &wsName) {
-  if (wsName.empty()) {
-    throw std::runtime_error("Workspace Name not found in project file ");
-  }
-  std::string fileName(workingDir.toStdString() + "/" + wsName);
-  fileName.append(".nxs");
-  mantidUI->loadWSFromFile(wsName, fileName);
-}
-
-void ApplicationWindow::openTable(const std::string &lines,
-                                  const int fileVersion) {
-  std::vector<std::string> lineVec, valVec;
-  boost::split(lineVec, lines, boost::is_any_of("\n"));
-
-  const std::string firstLine = lineVec.front();
-  boost::split(valVec, firstLine, boost::is_any_of("\t"));
-
-  if (valVec.size() < 4)
-    return;
-
-  std::string caption = valVec[0];
-  std::string date = valVec[3];
-  int rows = 1;
-  int cols = 1;
-  Mantid::Kernel::Strings::convert<int>(valVec[1], rows);
-  Mantid::Kernel::Strings::convert<int>(valVec[2], cols);
-
-  Table *t = newTable(QString::fromStdString(caption), rows, cols);
-  setListViewDate(QString::fromStdString(caption),
-                  QString::fromStdString(date));
-  t->setBirthDate(QString::fromStdString(date));
-  t->loadFromProject(lines, this, fileVersion);
-}
-
-void ApplicationWindow::openTableStatistics(const std::string &lines,
-                                            const int fileVersion) {
-  std::vector<std::string> lineVec;
-  boost::split(lineVec, lines, boost::is_any_of("\n"));
-
-  const std::string firstLine = lineVec.front();
-
-  std::vector<std::string> firstLineVec;
-  boost::split(firstLineVec, firstLine, boost::is_any_of("\t"));
-
-  if (firstLineVec.size() < 4)
-    return;
-
-  const std::string name = firstLineVec[0];
-  const std::string tableName = firstLineVec[1];
-  const std::string type = firstLineVec[2];
-  const std::string birthDate = firstLineVec[3];
-
-  TSVSerialiser tsv(lines);
-
-  if (!tsv.hasLine("Targets"))
-    return;
-
-  const std::string targetsLine = tsv.lineAsString("Targets");
-
-  std::vector<std::string> targetsVec;
-  boost::split(targetsVec, targetsLine, boost::is_any_of("\t"));
-
-  // Erase the first item ("Targets")
-  targetsVec.erase(targetsVec.begin());
-
-  QList<int> targets;
-  for (auto it = targetsVec.begin(); it != targetsVec.end(); ++it) {
-    int target = 0;
-    Mantid::Kernel::Strings::convert<int>(*it, target);
-    targets << target;
-  }
-
-  TableStatistics *t = newTableStatistics(
-      table(QString::fromStdString(tableName)),
-      type == "row" ? TableStatistics::row : TableStatistics::column, targets,
-      QString::fromStdString(name));
-
-  if (!t)
-    return;
-
-  setListViewDate(QString::fromStdString(name),
-                  QString::fromStdString(birthDate));
-  t->setBirthDate(QString::fromStdString(birthDate));
-
-  t->loadFromProject(lines, this, fileVersion);
-}
-
-void ApplicationWindow::openSurfacePlot(const std::string &lines,
-                                        const int fileVersion) {
-  std::vector<std::string> lineVec, valVec;
-  boost::split(lineVec, lines, boost::is_any_of("\n"));
-
-  // First line is name\tdate
-  const std::string firstLine = lineVec[0];
-  boost::split(valVec, firstLine, boost::is_any_of("\t"));
-
-  if (valVec.size() < 2)
-    return;
-
-  const std::string caption = valVec[0];
-  const std::string dateStr = valVec[1];
-  valVec.clear();
-
-  const std::string tsvLines = boost::algorithm::join(lineVec, "\n");
-
-  TSVSerialiser tsv(tsvLines);
-
-  Graph3D *plot = 0;
-
-  if (tsv.selectLine("SurfaceFunction")) {
-    std::string funcStr;
-    double val2, val3, val4, val5, val6, val7;
-    tsv >> funcStr >> val2 >> val3 >> val4 >> val5 >> val6 >> val7;
-
-    const QString funcQStr = QString::fromStdString(funcStr);
-
-    if (funcQStr.endsWith("(Y)", Qt::CaseSensitive)) {
-      plot = dataPlot3D(QString::fromStdString(caption),
-                        QString::fromStdString(funcStr), val2, val3, val4, val5,
-                        val6, val7);
-    } else if (funcQStr.contains("(Z)", Qt::CaseSensitive) > 0) {
-      plot = openPlotXYZ(QString::fromStdString(caption),
-                         QString::fromStdString(funcStr), val2, val3, val4,
-                         val5, val6, val7);
-    } else if (funcQStr.startsWith("matrix<", Qt::CaseSensitive) &&
-               funcQStr.endsWith(">", Qt::CaseInsensitive)) {
-      plot = openMatrixPlot3D(QString::fromStdString(caption),
-                              QString::fromStdString(funcStr), val2, val3, val4,
-                              val5, val6, val7);
-    } else if (funcQStr.contains("mantidMatrix3D")) {
-      MantidMatrix *m = 0;
-      if (tsv.selectLine("title")) {
-        std::string wsName = tsv.asString(1);
-
-        // wsName is actually "Workspace workspacename", so we chop off
-        // the first 10 characters.
-        if (wsName.length() < 11)
-          return;
-
-        wsName = wsName.substr(10, std::string::npos);
-
-        // Get the workspace this pertains to.
-        for (auto mIt = m_mantidmatrixWindows.begin();
-             mIt != m_mantidmatrixWindows.end(); ++mIt) {
-          if (*mIt && wsName == (*mIt)->getWorkspaceName()) {
-            m = *mIt;
-            break;
-          }
-        }
-      } // select line "title"
-
-      int style = Qwt3D::WIREFRAME;
-      if (tsv.selectLine("Style"))
-        tsv >> style;
-
-      if (m)
-        plot = m->plotGraph3D(style);
-    } else if (funcQStr.contains(",")) {
-      QStringList l = funcQStr.split(",", QString::SkipEmptyParts);
-      plot = plotParametricSurface(l[0], l[1], l[2], l[3].toDouble(),
-                                   l[4].toDouble(), l[5].toDouble(),
-                                   l[6].toDouble(), l[7].toInt(), l[8].toInt(),
-                                   l[9].toInt(), l[10].toInt());
-    } else {
-      QStringList l = funcQStr.split(";", QString::SkipEmptyParts);
-      if (l.count() == 1) {
-        plot = plotSurface(funcQStr, val2, val3, val4, val5, val6, val7);
-      } else if (l.count() == 3) {
-        plot = plotSurface(l[0], val2, val3, val4, val5, val6, val7,
-                           l[1].toInt(), l[2].toInt());
-      }
-      setWindowName(plot, QString::fromStdString(caption));
-    }
-  }
-
-  if (!plot)
-    return;
-
-  setListViewDate(QString::fromStdString(caption),
-                  QString::fromStdString(dateStr));
-  plot->setBirthDate(QString::fromStdString(dateStr));
-  plot->setIgnoreFonts(true);
-  restoreWindowGeometry(this, plot,
-                        QString::fromStdString(tsv.lineAsString("geometry")));
-  plot->loadFromProject(tsvLines, this, fileVersion);
-}
-
 void ApplicationWindow::copyActiveLayer() {
   MultiLayer *plot = dynamic_cast<MultiLayer *>(activeWindow(MultiLayerWindow));
   if (!plot)
@@ -14222,6 +13662,35 @@ QStringList ApplicationWindow::mantidmatrixNames() {
   return names;
 }
 
+/**
+ * Add a MantidMatrix to the application window instance
+ * @param matrix :: the MantidMatrix to add
+ */
+void ApplicationWindow::addMantidMatrixWindow(MantidMatrix *matrix)
+{
+    m_mantidmatrixWindows << matrix;
+}
+
+/**
+ * Find a MantidMatrix instance using its name.
+ * @param wsName :: the name of the workspace
+ * @return a pointer to a MantidMatrix or NULL
+ */
+MantidMatrix *ApplicationWindow::findMantidMatrixWindow(const std::__1::string &wsName)
+{
+    MantidMatrix* m = NULL;
+
+    for (auto mIt = m_mantidmatrixWindows.begin();
+         mIt != m_mantidmatrixWindows.end(); ++mIt) {
+        if (*mIt && wsName == (*mIt)->getWorkspaceName()) {
+            m = *mIt;
+            break;
+        }
+    }
+
+    return m;
+}
+
 bool ApplicationWindow::alreadyUsedName(const QString &label) {
   Folder *f = projectFolder();
   while (f) {
@@ -14308,7 +13777,8 @@ Folder *ApplicationWindow::appendProject(const QString &fn,
     changeFolder(parentFolder, true);
 
   // Open folders
-  openProjectFolder(lines, fileVersion, true);
+  ProjectSerialiser serialiser(this);
+  serialiser.load(lines, fileVersion, true);
 
   // Restore the selected folder
   folders->setCurrentItem(curFolder->folderListItem());

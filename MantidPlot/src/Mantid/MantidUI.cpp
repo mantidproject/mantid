@@ -14,6 +14,8 @@
 #include "MantidMDCurveDialog.h"
 #include "MantidQtMantidWidgets/FitPropertyBrowser.h"
 #include "MantidTable.h"
+#include "ProjectSerialiser.h"
+
 #include "../../MantidQt/MantidWidgets/ui_SequentialFitDialog.h"
 #include "../Spectrogram.h"
 #include "../pixmaps.h"
@@ -1370,7 +1372,8 @@ bool MantidUI::drop(QDropEvent *e) {
     QStringList pyFiles = extractPyFiles(e->mimeData()->urls());
     if (pyFiles.size() > 0) {
       try {
-        m_appWindow->openScriptWindow(pyFiles);
+        MantidQt::API::ProjectSerialiser serialiser(m_appWindow);
+        serialiser.openScriptWindow(pyFiles);
       } catch (std::runtime_error &error) {
         g_log.error()
             << "Failed to Load the python files. The reason for failure is: "

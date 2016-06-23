@@ -51,9 +51,13 @@ namespace MantidQt {
             ProjectSerialiser(ApplicationWindow* window);
             /// Save the current state of the project to disk
             void save(Folder* folder, const QString& projectName, bool compress = false);
+            /// Load a project file from disk
+            void load(std::string lines, const int fileVersion, const bool isTopLevel = false);
+            /// Open the script window and load scripts from string
+            void openScriptWindow(const QStringList &files);
 
         private:
-            /// Store a referece to the caller application window instance
+            /// Store a reference to the caller application window instance
             ApplicationWindow* window;
 
             /// Attempt to backup files before save
@@ -64,6 +68,17 @@ namespace MantidQt {
             QString serialiseProjectState(Folder* folder);
             /// Save the project file to disk
             void saveProjectFile(QFile* fileHandle, const QString &projectName, QString& text, bool compress);
+            /// Load sections of the folder
+            void loadProjectSections(const std::string& lines, const int fileVersion, const bool isTopLevel);
+            void openMantidMatrix(const std::string &lines);
+            void openMatrix(const std::string &lines, const int fileVersion);
+            void openMultiLayer(const std::string &lines, const int fileVersion);
+            void openSurfacePlot(const std::string &lines, const int fileVersion);
+            void openTable(const std::string &lines, const int fileVersion);
+            void openTableStatistics(const std::string &lines, const int fileVersion);
+            void populateMantidTreeWidget(const QString &s);
+            void loadWsToMantidTree(const std::string &wsName);
+
         };
     }
 }

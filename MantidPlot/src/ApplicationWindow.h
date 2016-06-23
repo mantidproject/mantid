@@ -222,8 +222,6 @@ public slots:
   ApplicationWindow *open(const QString &fn, bool factorySettings = false,
                           bool newProject = true);
   ApplicationWindow *openProject(const QString &fn, const int fileVersion);
-  void openProjectFolder(std::string lines, const int fileVersion,
-                         bool isTopLevel = false);
   ApplicationWindow *importOPJ(const QString &fn, bool factorySettings = false,
                                bool newProject = true);
   /// Load mantid data files using generic load algorithm, opening user dialog
@@ -928,6 +926,12 @@ public slots:
   /// returns a list of all the mantid matrix objects in the project
   QStringList mantidmatrixNames();
 
+  /// Add a mantid matrix window to the application window
+  void addMantidMatrixWindow(MantidMatrix* matrix);
+
+  /// Find a mantid matrix window by name
+  MantidMatrix* findMantidMatrixWindow(const std::string& wsName);
+
   //! \name Notes
   //@{
   //! Creates a new empty note window
@@ -1108,8 +1112,6 @@ protected:
 private:
   QMenu *createPopupMenu() override { return NULL; }
 
-  void populateMantidTreeWidget(const QString &s);
-  void loadWsToMantidTree(const std::string &wsName);
   /// this method saves the data on project save
   void savedatainNexusFormat(const std::string &wsName,
                              const std::string &fileName);
@@ -1118,18 +1120,6 @@ private:
   bool shouldExecuteAndQuit(const QString &arg);
   bool isSilentStartup(const QString &arg);
   void handleConfigDir();
-
-  //! \name Project File Loading
-  //@{
-  void openMantidMatrix(const std::string &lines);
-
-  void openMatrix(const std::string &lines, const int fileVersion);
-  void openMultiLayer(const std::string &lines, const int fileVersion);
-  void openSurfacePlot(const std::string &lines, const int fileVersion);
-  void openTable(const std::string &lines, const int fileVersion);
-  void openTableStatistics(const std::string &lines, const int fileVersion);
-  void openScriptWindow(const QStringList &lines);
-  //@}
 
 private slots:
   //! \name Initialization
