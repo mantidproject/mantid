@@ -133,8 +133,8 @@ public:
         d = GonAngles5638[2] - table->Double(i, 1);
       else if (nm == "omega5638")
         d = GonAngles5638[0] - table->Double(i, 1);
-
-      TS_ASSERT_DELTA(d, 0, .3);
+      // This was 0.3 degrees for gsl1, but gsl2 needs larger delta
+      TS_ASSERT_DELTA(d, 0, 1.0);
     }
   }
 
