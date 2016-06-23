@@ -24,15 +24,19 @@ class GeneralDFTProgram(IOmodule):
           of file (part of a name after '.') is arbitrary.
 
           2) Method should read from a phonon file an information about frequencies, atomic displacements,
-          k-point vectors, weights of k-points.
+          k-point vectors, weights of k-points and ions.
 
           3) Method should reconstruct data for symmetry equivalent k-points (protected method _recoverSymmetryPoints).
 
              **Notice: this step is not implemented now. At the moment only Gamma point calculations are supported.**
 
-          4) Method should calculate hash of a file with phonon data (protected method _calculateHash).
+          4) Method should determine symmetry equivalent atoms
 
-          5) Method should store phonon data in an hdf file (inherited method save()). The name of an hdf file is
+              **Notice: this step is not implemented now.**
+
+          5) Method should calculate hash of a file with phonon data (protected method _calculateHash).
+
+          6) Method should store phonon data in an hdf file (inherited method save()). The name of an hdf file is
           foo.hdf5 (CASTEP: foo.phonon -> foo.hdf5). In order to save the data to hdf file the following fields
           should be set:
 
@@ -50,9 +54,28 @@ class GeneralDFTProgram(IOmodule):
                         "k_vectors"    - all k-points in one numpy array
 
                                          **Notice: both symmetry equivalent and inequivalent points should be stored; at
-                                          the moment only Gamma point calculations are supported
+                                          the moment only Gamma point calculations are supported**
 
                         "atomicDisplacements" - atomic displacements for all atoms and all k-points in one numpy array
+
+              The following structured datasets should be also defined:
+
+                        "ions"          - Python list with the information about ions. Each entry in the list is a
+                                          dictionary with the following entries:
+
+                                               "symbol" - chemical symbol of the element (for example hydrogen -> H)
+
+                                               "sort"   - defines symmetry equivalent atoms, e.g, atoms with the same
+                                                          sort are symmetry equivalent
+
+                                                          **Notice at the moment this parameter is not functional
+                                                            in LoadCastep**
+
+                                               "fract_coord" - equilibrium position of atom; it has a form of numpy
+                                                               array with three floats
+
+                                               "atom" - number of atom in the unit cell
+
 
               The attributes should be an dictionary with the following entries:
 
@@ -85,7 +108,7 @@ class GeneralDFTProgram(IOmodule):
     # Protected methods which should be reused by classes which read DFT phonon data
     def _recoverSymmetryPoints(self, data=None):
         """
-        This method reconstructs symmetry equivalent k-points
+        This method reconstructs symmetry equivalent k-points.
         @param data: dictionary with the data for only symmetry inequivalent k-points. This methods
         adds to this dictionary phonon data for symmetry equivalent k-points.
         """

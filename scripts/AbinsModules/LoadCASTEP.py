@@ -70,11 +70,11 @@ class LoadCASTEP(GeneralDFTProgram):
                     line = f_handle.readline()
                     line_data = line.strip().split()
 
-                    species = line_data[4]
-                    ion = {'species': species,
+                    symbol = line_data[4]
+                    ion = {'symbol': symbol,
                            'fract_coord': np.array([float(line_data[1]), float(line_data[2]), float(line_data[3])]),
-                           'index': int(line_data[0]) - 1,
-                           'bond_number': len([i for i in file_data['ions'] if i['species'] == species]) + 1}
+                           'atom': int(line_data[0]) - 1,
+                           'sort': len([i for i in file_data['ions'] if i['symbol'] == symbol]) + 1}
                     # -1 to convert to zero based indexing
                     file_data['ions'].append(ion)
 

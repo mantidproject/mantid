@@ -8,10 +8,10 @@ class IOmodule(object):
     def __init__(self):
 
         self._hdf_filename = None # name of hdf file
-        self._group_name = None # name of group from hdf file.
+        self._group_name = None # name of a group from hdf file.
         self._attributes = {} # attributes for group
         self._numpy_datasets = {} # datasets for group are expected to be numpy arrays
-        self._structured_datasets = {} # complex data sets
+        self._structured_datasets = {} # complex data sets which has the form of Python dictionary
 
         # All fields have to be set by inheriting class.
 
@@ -25,10 +25,10 @@ class IOmodule(object):
         self._hdf_filename = core_name + ".hdf5"
         self._group_name = group_name
 
-        hdf_file = h5py.File(self._hdf_filename, 'a')
-        if not self._group_name in hdf_file:
-            hdf_file.create_group(self._group_name)
-        hdf_file.close()
+        with h5py.File(self._hdf_filename, 'a') as hdf_file:
+            if not self._group_name in hdf_file:
+                hdf_file.create_group(self._group_name)
+
 
     def addAttribute(self, name=None, value=None):
         """
@@ -40,15 +40,15 @@ class IOmodule(object):
 
     def addStructuredDataset(self, name=None, value=None):
         """
-        Adds data in the form of list of dictionaries into the collection of datasets.
+        Adds data in the form of dictionary or a list of dictionaries into the collection of structured datasets.
         @param name: name of dataset
-        @param value: list of dictionaries to be s
+        @param value: dictionary or list of dictionaries is expected
         """
         self._structured_datasets[name]=value
 
     def addNumpyDataset(self, name=None, value=None):
         """
-        Adds dataset in the for mof numpy array to the dictionary with the collection of other datasets.
+        Adds dataset in the form of numpy array to the dictionary with the collection of other datasets.
         @param name: name of dataset
         @param value: value of dataset. Numpy array is expected. More about dataset at:
         http://docs.h5py.org/en/latest/high/dataset.html
@@ -66,7 +66,10 @@ class IOmodule(object):
 
     def _recursively_save_dict_contents_to_group(self, hdf_file=None, path=None, dic=None):
         """
-        ....
+        Helper function for saving structured data into an hdf file.
+        @param hdf_file: hdf file object
+        @param path: absolute name of the group
+        @param dic:  dictionary to be added
         """
 
         if isinstance(dic, dict):
@@ -116,7 +119,7 @@ class IOmodule(object):
 
     def save(self):
         """
-        Saves data and attributes to hdf5 file.
+        Saves datasets and attributes to an hdf file.
         """
 
         with h5py.File(self._hdf_filename, 'a') as hdf_file:
@@ -129,7 +132,7 @@ class IOmodule(object):
 
     def _list_of_str(self, list_str=None):
         """
-        Checks if all elements of list are strings.
+        Checks if all elements of the list are strings.
         @param list_str: list to check
         @return: True if each entry in the list is a string, otherwise False
         """
@@ -181,8 +184,8 @@ class IOmodule(object):
     def _load_dataset(self, name=None, group=None):
         """
         Loads dataset.
-        @param group: group in hdf file
         @param name: name of dataset
+        @param group: group in hdf file
         @return: value of dataset
         """
         if not name in group:
@@ -219,8 +222,8 @@ class IOmodule(object):
     def _convert_unicode_to_string_core(self, item=None):
         """
         Convert atom element from unicode to str
-        :param item: converts unicode to item
-        :return:
+        @param item: converts unicode to item
+        @return: converted element
         """
         assert isinstance(item, unicode)
         return str(item).replace("u'", "'")
@@ -228,16 +231,8 @@ class IOmodule(object):
     def _convert_unicode_to_str(self, objectToCheck=None):
         """
         Converts unicode to python str, works for nested dicts and lists (recursive algorithm).
-        Works for list in which entry is a tuple of items or one item only (item= one string, one float, ...etc. )
-        Works for dictionary in which value/keyword is a tuple of items  or one item only
-        In case tuple is a  keyword of the dictionary it will be converted to python str with a
-        tuple brackets  -> "( )" (keywords in the dictionary are expected to be be
-        a string or one of the primitive type of python but not tuple),
-        in case of tuple value in dictionary, it will be converted to tuple,
-        all unicode will be removed from the entries of tuple.
 
-        :param objectToCheck: Entry in dictionary read by read_txt_file in
-                            which  unicode symbols should be converted to str.
+        @param objectToCheck: dictionary, or list with names which should be converted from unicode to string.
         """
 
         if isinstance(objectToCheck, list):
@@ -261,9 +256,6 @@ class IOmodule(object):
             objectToCheck = self._convert_unicode_to_string_core(objectToCheck)
 
         return objectToCheck
-
-
-
 
     def _load_structured_dataset(self, hdf_file=None, name=None, group=None):
         """
@@ -318,8 +310,8 @@ class IOmodule(object):
 
             if not self._structured_datasets is None:
                 results["structuredDatasets"] = self._load_structured_datasets(hdf_file=hdf_file,
-                                                                                list_of_structured_datasets=list_of_structured_datasets,
-                                                                                group=group)
+                                                                               list_of_structured_datasets=list_of_structured_datasets,
+                                                                               group=group)
 
             if not self._attributes is None:
                 results["attributes"] = self._load_attributes(list_of_attributes=list_of_attributes, group=group)
