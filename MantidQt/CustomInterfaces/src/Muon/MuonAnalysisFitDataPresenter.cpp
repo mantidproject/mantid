@@ -133,7 +133,6 @@ void MuonAnalysisFitDataPresenter::createWorkspacesToFit(
   }
 
   // Update model with these
-  // (This will set peak picker, UI properties via signal)
   QStringList qNames;
   std::transform(
       names.begin(), names.end(), std::back_inserter(qNames),
