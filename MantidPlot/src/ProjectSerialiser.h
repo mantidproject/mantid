@@ -59,6 +59,8 @@ namespace MantidQt {
         private:
             /// Store a reference to the caller application window instance
             ApplicationWindow* window;
+            /// Store a count of the number of windows during saving
+            int m_windowCount;
 
             /// Attempt to backup files before save
             bool canBackupProjectFiles(QFile* fileHandle, const QString& projectName);
@@ -81,9 +83,9 @@ namespace MantidQt {
             void populateMantidTreeWidget(const QString &s);
             void loadWsToMantidTree(const std::string &wsName);
 
-            std::string saveFolderState(Folder *folder);
+            QString saveFolderState(Folder *folder, const bool isTopLevel = false);
             QString saveFolderHeader(Folder* folder, bool isCurrentFolder);
-            QString saveFolderSubWindows(Folder *folder, int &windowCount);
+            QString saveFolderSubWindows(Folder *folder);
             QString saveFolderFooter();
             std::string saveWorkspaces();
         };

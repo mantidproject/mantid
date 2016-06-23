@@ -1,3 +1,4 @@
+#include "globals.h"
 #include "ProjectSerialiser.h"
 #include "ApplicationWindow.h"
 #include "ScriptingWindow.h"
@@ -37,7 +38,8 @@ ProjectSerialiser::ProjectSerialiser(ApplicationWindow* window)
  */
 void ProjectSerialiser::save(Folder *folder, const QString &projectName, bool compress)
 {
-     QFile fileHandle(projectName);
+    m_windowCount = 0;
+    QFile fileHandle(projectName);
 
     // attempt to backup project files and check we can write
     if (!canBackupProjectFiles(&fileHandle, projectName) || !canWriteToProject(&fileHandle, projectName)) {
@@ -253,8 +255,7 @@ QString ProjectSerialiser::serialiseProjectState(Folder* folder)
 
     // Finally, recursively save folders
     if(folder) {
-        std::string folderString = saveFolderState(folder);
-        text += QString::fromStdString(folderString);
+       text += saveFolderState(folder, true);
     }
 
     return text;
@@ -266,18 +267,23 @@ QString ProjectSerialiser::serialiseProjectState(Folder* folder)
  * @param app :: the current application window instance
  * @return string represnetation of the folder's data
  */
-std::string ProjectSerialiser::saveFolderState(Folder *folder)
+QString ProjectSerialiser::saveFolderState(Folder *folder, const bool isTopLevel)
 {
     QString text;
     bool isCurrentFolder = window->currentFolder() == folder;
-    int windowCount = 0;
 
-    text += saveFolderHeader(folder, isCurrentFolder);
-    text += saveFolderSubWindows(folder, windowCount);
-    text += saveFolderFooter();
-    text.prepend("<windows>\t" + QString::number(windowCount) + "\n");
+    if(!isTopLevel) {
+        text += saveFolderHeader(folder, isCurrentFolder);
+    }
 
-    return text.toStdString();
+    text += saveFolderSubWindows(folder);
+
+    if(!isTopLevel) {
+        text += saveFolderFooter();
+    }
+
+
+    return text;
 }
 
 /**
@@ -315,7 +321,7 @@ QString ProjectSerialiser::saveFolderHeader(Folder* folder, bool isCurrentFolder
  * @param windowCount :: count of the number of windows
  * @return string representation of the folder's subfolders
  */
-QString ProjectSerialiser::saveFolderSubWindows(Folder * folder, int &windowCount)
+QString ProjectSerialiser::saveFolderSubWindows(Folder * folder)
 {
     QString text;
 
@@ -329,12 +335,14 @@ QString ProjectSerialiser::saveFolderSubWindows(Folder * folder, int &windowCoun
         text += QString::fromUtf8(ips->saveToProject(window).c_str());
       }
 
-      ++windowCount;
+      ++m_windowCount;
     }
 
     // Write subfolders
     QList<Folder *> subfolders = folder->folders();
-    foreach (Folder *f, subfolders) { text += saveFolderSubWindows(f, windowCount); }
+    foreach (Folder *f, subfolders) {
+        text += saveFolderState(f);
+    }
 
     // Write log info
     if (!folder->logInfo().isEmpty()) {
@@ -456,11 +464,19 @@ bool ProjectSerialiser::canBackupProjectFiles(QFile* fileHandle, const QString& 
 void ProjectSerialiser::saveProjectFile(QFile* fileHandle, const QString &projectName, QString& text, bool compress) {
   QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
+  // add number of MdiSubWindows saved to file
+  text.prepend("<windows>\t" + QString::number(m_windowCount) + "\n");
+
   // add some header content to the file
   text.prepend("<scripting-lang>\t" + QString(window->scriptingEnv()->objectName()) +
                "\n");
 
-  QString version(Mantid::Kernel::MantidVersion::version());
+  // construct MantidPlot version number
+  QString version;
+  version += QString::number(maj_version) + ".";
+  version += QString::number(min_version) + ".";
+  version += QString::number(patch_version);
+
   text.prepend("MantidPlot " + version + " project file\n");
 
   // write out the saved project state

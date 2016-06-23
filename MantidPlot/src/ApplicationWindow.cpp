@@ -29,7 +29,6 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#include "globals.h"
 #include "ApplicationWindow.h"
 #include "pixmaps.h"
 #include "CurvesDialog.h"
