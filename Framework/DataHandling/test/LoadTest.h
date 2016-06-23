@@ -240,7 +240,10 @@ public:
   void test_ILLLoadMultipleFilesNoPrefix() {
       Load loader;
       loader.initialize();
-      loader.setPropertyValue("Filename","084446_IN4.nxs + 084447_IN4.nxs");
+      loader.setPropertyValue("Filename","084446_IN4 + 084447_IN4.nxs");
+      //Note, in real use, ILL files will not have suffixes, these are
+      //added just for this test, to identify the test data with ILL.
+
       std::string outputWS = "LoadTest_out";
       loader.setPropertyValue("OutputWorkspace", outputWS);
       TS_ASSERT_THROWS_NOTHING(loader.execute());
