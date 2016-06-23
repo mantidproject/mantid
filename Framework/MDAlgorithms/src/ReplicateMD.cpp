@@ -298,7 +298,7 @@ void ReplicateMD::exec() {
     // Check that the indices stored in axes are compatible with the
     // dimensionality of the data workspace
     const auto numberOfDimensionsOfDataWorkspace = static_cast<int>(nDimsData);
-    for (const auto &axis : axes) {
+    for (auto &axis : axes) {
       if (axis >= numberOfDimensionsOfDataWorkspace) {
         std::string message =
             "ReplicateMD: Cannot transpose the data workspace. Attempting to "
