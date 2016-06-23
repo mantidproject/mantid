@@ -64,20 +64,20 @@ void SaveCanSAS1D::init() {
       "Cylinder", "Flat plate", "Disc",
   };
   declareProperty(
-      "CollimationGeometry", "Disc",
-      boost::make_shared<Kernel::StringListValidator>(radiation_source),
+      "Geometry", "Disc",
+      boost::make_shared<Kernel::StringListValidator>(collimationGeometry),
       "The geometry type of the collimation.");
-  auto mustBePositive = boost::make_shared<Kernel::BoundedValidator<double>>();
-  mustBePositive->setLower(0);
-  declareProperty("CollimationHeight", 0, mustBePositive,
+  auto mustBePositiveOrZero = boost::make_shared<Kernel::BoundedValidator<double>>();
+  mustBePositiveOrZero->setLower(0);
+  declareProperty("SampleHeight", 0.0, mustBePositiveOrZero,
                   "The height of the collimation element in mm. If specified "
                   "as 0 it will not be recorded.");
-  declareProperty("CollimationWidth", 0, mustBePositive,
+  declareProperty("SampleWidth", 0.0, mustBePositiveOrZero,
                   "The width of the collimation element in mm. If specified as "
                   "0 it will not be recorded.");
 
   // Sample information
-  declareProperty("SampleThickness", 0, mustBePositive,
+  declareProperty("SampleThickness", 0.0, mustBePositiveOrZero,
                   "The thickness of the sample in mm. If specified as 0 it "
                   "will not be recorded.");
 }
@@ -627,13 +627,13 @@ void SaveCanSAS1D::createSASInstrument(std::string& sasInstrument) {
 
   // Add the collimation. We add the collimation information if 
   // either the width of the height is different from 0
-  double collimationHeight = getProperty("CollimationHeight");
-  double collimationWidth = getProperty("CollimationWidth");
+  double collimationHeight = getProperty("SampleHeight");
+  double collimationWidth = getProperty("SampleWidth");
   std::string sasCollimation = "\n\t\t\t<SAScollimation\>";
   if (collimationHeight > 0 || collimationWidth > 0) {
     sasCollimation = "\n\t\t\t<SAScollimation>";
     // Geometry
-    std::string collimationGeometry = getProperty("CollimationGeometry");
+    std::string collimationGeometry = getProperty("Geometry");
     sasCollimation += "\n\t\t\t\t<name>" + collimationGeometry + "</name>";
     // Width
     sasCollimation += "<X unit=\"mm\">" + std::to_string(collimationWidth) + "</X>";
