@@ -238,27 +238,25 @@ public:
    * without instrument prefix in the file names.
    */
   void test_ILLLoadMultipleFilesNoPrefix() {
-      Load loader;
-      loader.initialize();
-      loader.setPropertyValue("Filename","084446_IN4 + 084447_IN4.nxs");
-      //Note, in real use, ILL files will not have suffixes, these are
-      //added just for this test, to identify the test data with ILL.
+    Load loader;
+    loader.initialize();
+    loader.setPropertyValue("Filename", "084446_IN4 + 084447_IN4.nxs");
+    // Note, in real use, ILL files will not have suffixes, these are
+    // added just for this test, to identify the test data with ILL.
 
-      std::string outputWS = "LoadTest_out";
-      loader.setPropertyValue("OutputWorkspace", outputWS);
-      TS_ASSERT_THROWS_NOTHING(loader.execute());
+    std::string outputWS = "LoadTest_out";
+    loader.setPropertyValue("OutputWorkspace", outputWS);
+    TS_ASSERT_THROWS_NOTHING(loader.execute());
 
-      MatrixWorkspace_sptr output =
-          AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-              outputWS);
-      MatrixWorkspace_sptr output2D =
-          boost::dynamic_pointer_cast<MatrixWorkspace>(output);
+    MatrixWorkspace_sptr output =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputWS);
+    MatrixWorkspace_sptr output2D =
+        boost::dynamic_pointer_cast<MatrixWorkspace>(output);
 
-      TS_ASSERT_EQUALS(output2D->getNumberHistograms(), 397);
+    TS_ASSERT_EQUALS(output2D->getNumberHistograms(), 397);
 
-      AnalysisDataService::Instance().clear();
+    AnalysisDataService::Instance().clear();
   }
-
 
   void test_EventPreNeXus_WithNoExecute() {
     Load loader;
