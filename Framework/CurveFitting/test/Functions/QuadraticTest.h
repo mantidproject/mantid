@@ -5,6 +5,9 @@
 
 #include "MantidCurveFitting/Functions/Quadratic.h"
 
+#include <array>
+#include <numeric>
+
 using Mantid::CurveFitting::Functions::Quadratic;
 
 class QuadraticTest : public CxxTest::TestSuite {

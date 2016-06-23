@@ -5,6 +5,9 @@
 
 #include "MantidCurveFitting/Functions/Polynomial.h"
 
+#include <array>
+#include <numeric>
+
 using Mantid::CurveFitting::Functions::Polynomial;
 
 class PolynomialTest : public CxxTest::TestSuite {

@@ -5,6 +5,9 @@
 
 #include "MantidCurveFitting/Functions/LinearBackground.h"
 
+#include <array>
+#include <numeric>
+
 using namespace Mantid::API;
 using Mantid::CurveFitting::Functions::LinearBackground;
 

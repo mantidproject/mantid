@@ -5,6 +5,8 @@
 
 #include "MantidCurveFitting/Functions/FullprofPolynomial.h"
 
+#include <array>
+
 using namespace Mantid::API;
 using Mantid::CurveFitting::Functions::FullprofPolynomial;
 
