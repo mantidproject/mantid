@@ -2,21 +2,15 @@
 #define CubicSplineTEST_H_
 
 #include <boost/scoped_array.hpp>
-#include <cmath>
 #include <cxxtest/TestSuite.h>
 
 #include "MantidCurveFitting/Functions/CubicSpline.h"
-#include "MantidCurveFitting/Algorithms/Fit.h"
-#include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/FunctionFactory.h"
-#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FunctionDomain1D.h"
 #include "MantidAPI/FunctionValues.h"
+#include "MantidDataObjects/Workspace2D.h"
 
-using namespace Mantid;
 using namespace Mantid::API;
-using namespace Mantid::CurveFitting;
-using namespace Mantid::CurveFitting::Algorithms;
 using namespace Mantid::CurveFitting::Functions;
 
 class CubicSplineTest : public CxxTest::TestSuite {
@@ -51,7 +45,7 @@ public:
 
     // Check that resizing the spline has initialised the attributes/parameters
     for (int i = 0; i < 10; ++i) {
-      std::string index = boost::lexical_cast<std::string>(i);
+      auto index = std::to_string(i);
 
       std::string xAttrName = "x" + index;
       std::string yAttrName = "y" + index;
@@ -91,7 +85,7 @@ public:
       // set the x values to be some arbitary value
       cspline.setXAttribute(i, i * 2);
 
-      std::string index = boost::lexical_cast<std::string>(i);
+      auto index = std::to_string(i);
       std::string xAttrName = "x" + index;
 
       // check x value is equal to what we set

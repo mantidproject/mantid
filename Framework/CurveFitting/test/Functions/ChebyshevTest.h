@@ -15,6 +15,11 @@ using namespace Mantid::CurveFitting::Functions;
 
 class ChebyshevTest : public CxxTest::TestSuite {
 public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static ChebyshevTest *createSuite() { return new ChebyshevTest(); }
+  static void destroySuite(ChebyshevTest *suite) { delete suite; }
+
   void test_category() {
     Chebyshev cfn;
     cfn.initialize();
