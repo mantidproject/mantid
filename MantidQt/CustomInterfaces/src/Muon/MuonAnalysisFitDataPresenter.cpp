@@ -120,28 +120,16 @@ void MuonAnalysisFitDataPresenter::setAssignedFirstRun(const QString &wsName) {
 void MuonAnalysisFitDataPresenter::createWorkspacesToFit(
     const std::vector<std::string> &names,
     const Mantid::API::Grouping &grouping) const {
+
   // For each name, if not in the ADS, create it
-  std::vector<Mantid::API::Workspace_sptr> workspaces;
   for (const auto &name : names) {
     if (AnalysisDataService::Instance().doesExist(name)) {
-      // We already have it! Just retrieve it
-      workspaces.push_back(AnalysisDataService::Instance().retrieve(name));
+      // We already have it! Leave it there
     } else {
-      // Create here (but don't add to the ADS)
-      workspaces.push_back(createWorkspace(name, grouping));
+      // Create here and add to the ADS
+      const auto ws = createWorkspace(name, grouping);
+      AnalysisDataService::Instance().add(name, ws);
     }
-  }
-
-  // Co-add workspaces together if required
-  if (m_dataSelector->getFitType() == IMuonFitDataSelector::FitType::CoAdd) {
-    const auto coadded = MuonAnalysisHelper::sumWorkspaces(workspaces);
-    workspaces.clear();
-    workspaces.push_back(coadded);
-  }
-
-  // Add all relevant workspaces to the ADS
-  for (const auto ws : workspaces) {
-    AnalysisDataService::Instance().addOrReplace(ws->name(), ws);
   }
 
   // Update model with these
@@ -201,10 +189,19 @@ std::vector<std::string> MuonAnalysisFitDataPresenter::generateWorkspaceNames(
   };
 
   // generate workspace names
-  for (const int run : selectedRuns) {
-    params.runs = {run};
-    for (const auto &group : groups) {
+  std::vector<std::vector<int>> runNumberVectors;
+  if (m_dataSelector->getFitType() == IMuonFitDataSelector::FitType::CoAdd) {
+    // Analyse all the runs in one go
+    runNumberVectors.push_back(selectedRuns);
+  } else { // Analyse the runs one by one
+    for (const int run : selectedRuns) {
+      runNumberVectors.push_back({run});
+    }
+  }
 
+  for (const auto runsVector : runNumberVectors) {
+    params.runs = runsVector;
+    for (const auto &group : groups) {
       params.itemType = getItemType(group.toStdString());
       params.itemName = group.toStdString();
       for (const auto &period : periods) {
@@ -221,8 +218,6 @@ std::vector<std::string> MuonAnalysisFitDataPresenter::generateWorkspaceNames(
 
 /**
  * Create an analysis workspace given the required name.
- * Only supports single-run workspaces: create one for each run and co-add them
- * if you want multiple runs.
  * @param name :: [input] Name of workspace to create (in format INST0001234;
  * Pair; long; Asym; 1; #1)
  * @param grouping :: [input] Grouping table from interface
@@ -232,21 +227,19 @@ Mantid::API::Workspace_sptr MuonAnalysisFitDataPresenter::createWorkspace(
     const std::string &name, const Mantid::API::Grouping &grouping) const {
   Mantid::API::Workspace_sptr outputWS;
 
-  // parse name - should be a single-run workspace
+  // parse name to get runs, periods, groups etc
   auto params = MuonAnalysisHelper::parseWorkspaceName(name);
-  if (params.runs.size() > 1) {
-    throw std::invalid_argument("Failed to create workspace with multiple "
-                                "runs: instead, create several single-run "
-                                "workspaces and co-add together");
-  }
 
-  // load original data - need to get filename
-  QString filename;
-  filename = QString::fromStdString(MuonAnalysisHelper::getRunLabel(
-                                        params.instrument, params.runs))
-                 .append(".nxs");
+  // load original data - need to get filename(s) of individual run(s)
+  QStringList filenames;
+  for (const int run : params.runs) {
+    filenames.append(QString::fromStdString(MuonAnalysisHelper::getRunLabel(
+                                                params.instrument, {run}))
+                         .append(".nxs"));
+  }
   try {
-    const auto loadedData = m_dataLoader.loadFiles(QStringList(filename));
+    // This will sum multiple runs together
+    const auto loadedData = m_dataLoader.loadFiles(filenames);
 
     // correct and group the data
     const auto correctedData =
@@ -261,9 +254,9 @@ Mantid::API::Workspace_sptr MuonAnalysisFitDataPresenter::createWorkspace(
       std::replace(params.periods.begin(), params.periods.end(), ',', '+');
       const size_t minus = params.periods.find('-');
       analysisOptions.summedPeriods = params.periods.substr(0, minus);
-      if (minus != std::string::npos) {
+      if (minus != std::string::npos && minus != params.periods.size()) {
         analysisOptions.subtractedPeriods =
-            params.periods.substr(minus, std::string::npos);
+            params.periods.substr(minus + 1, std::string::npos);
       }
     }
 
