@@ -25,7 +25,7 @@ class LoadCASTEP(GeneralDFTProgram):
     # noinspection PyMethodMayBeStatic
     def _parse_block_header(self, header_match, block_count):
         """
-        Parse the header of a block of frequencies and intensities
+        Parses the header of a block of frequencies and intensities
 
         @param header_match: the regex match to the header
         @param block_count: the count of blocks found so far
@@ -42,7 +42,7 @@ class LoadCASTEP(GeneralDFTProgram):
 
     def _parse_phonon_file_header(self, f_handle):
         """
-        Read information from the header of a <>.phonon file
+        Reads information from the header of a <>.phonon file
 
         @param f_handle: handle to the file.
         @return List of ions in file as list of tuple of (ion, mode number)
@@ -139,7 +139,7 @@ class LoadCASTEP(GeneralDFTProgram):
 
     def readPhononFile(self):
         """
-        Read frequencies, weights of k-point vectors, k-point vectors, amplitudes of atomic displacements
+        Reads frequencies, weights of k-point vectors, k-point vectors, amplitudes of atomic displacements
         from a <>.phonon file. Save frequencies, weights of k-point vectors, k-point vectors, amplitudes of atomic
         displacements, information about Gamma-[pint calculation (True/False) hash of the phonon file (hash) to <>.hdf5
 
@@ -199,10 +199,17 @@ class LoadCASTEP(GeneralDFTProgram):
         self._recoverSymmetryPoints(data=file_data)
 
         # save stuff to hdf file
-        for name in file_data:
-            self.addDataset(name,file_data[name])
+        _numpy_datasets_to_save=["frequencies", "weights", "k_vectors", "atomicDisplacements", "unit_cell"]
+        for name in _numpy_datasets_to_save:
+            self.addNumpyDataset(name, file_data[name])
+
+        _structured_datasets=["ions"]
+        for item in _structured_datasets:
+            self.addStructuredDataset(name=item, value=file_data[item])
+
         self.addAttribute("hash", hash_filename)
-        # self.save()
+
+        self.save()
 
         return self._rearrange_data(data=file_data)
 
