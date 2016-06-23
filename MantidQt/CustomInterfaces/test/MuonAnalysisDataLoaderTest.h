@@ -5,6 +5,7 @@
 #include <Poco/Path.h>
 #include <Poco/File.h>
 
+#include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -18,12 +19,29 @@
 using MantidQt::CustomInterfaces::MuonAnalysisDataLoader;
 using MantidQt::CustomInterfaces::Muon::DeadTimesType;
 using MantidQt::CustomInterfaces::Muon::LoadResult;
+using MantidQt::CustomInterfaces::Muon::AnalysisOptions;
+using MantidQt::CustomInterfaces::Muon::PlotType;
+using MantidQt::CustomInterfaces::Muon::ItemType;
+using Mantid::API::IAlgorithm_sptr;
 using Mantid::API::TableRow;
 using Mantid::API::Workspace;
 using Mantid::API::WorkspaceFactory;
 using Mantid::API::WorkspaceGroup;
 using Mantid::DataObjects::TableWorkspace;
 using Mantid::DataObjects::TableWorkspace_sptr;
+
+/// Inherits from class under test so that protected methods can be tested
+class TestDataLoader : public MuonAnalysisDataLoader {
+public:
+  TestDataLoader(const DeadTimesType &deadTimesType,
+                 const QStringList &instruments,
+                 const std::string &deadTimesFile = "")
+      : MuonAnalysisDataLoader(deadTimesType, instruments, deadTimesFile){};
+  void setProcessAlgorithmProperties(IAlgorithm_sptr alg,
+                                     const AnalysisOptions &options) const {
+    MuonAnalysisDataLoader::setProcessAlgorithmProperties(alg, options);
+  }
+};
 
 class MuonAnalysisDataLoaderTest : public CxxTest::TestSuite {
 public:
@@ -183,12 +201,81 @@ public:
     }
   }
 
+  void test_setProcessAlgorithmProperties_GroupCounts() {
+    doTest_setAlgorithmProperties(ItemType::Group, PlotType::Counts, "0.08");
+  }
+
+  void test_setProcessAlgorithmProperties_GroupCounts_NoRebin() {
+    doTest_setAlgorithmProperties(ItemType::Group, PlotType::Counts, "");
+  }
+
+  void test_setProcessAlgorithmProperties_GroupLog() {
+    doTest_setAlgorithmProperties(ItemType::Group, PlotType::Logarithm, "");
+  }
+
+  void test_setProcessAlgorithmProperties_GroupAsym() {
+    doTest_setAlgorithmProperties(ItemType::Group, PlotType::Asymmetry, "");
+  }
+
+  void test_setProcessAlgorithmProperties_PairAsym() {
+    doTest_setAlgorithmProperties(ItemType::Pair, PlotType::Asymmetry, "");
+  }
+
+  void test_setProcessAlgorithmProperties_PairCounts_Throws() {
+    doTest_setAlgorithmProperties(ItemType::Pair, PlotType::Counts, "", true);
+  }
+
+  void test_setProcessAlgorithmProperties_PairLog_Throws() {
+    doTest_setAlgorithmProperties(ItemType::Pair, PlotType::Logarithm, "",
+                                  true);
+  }
+
+  void test_createAnalysisWorkspace() {
+    MuonAnalysisDataLoader loader(DeadTimesType::FromFile, {"MUSR"});
+    LoadResult result;
+    TS_ASSERT_THROWS_NOTHING(result = loader.loadFiles({"MUSR00015189.nxs"}));
+    Mantid::API::Grouping grouping;
+    grouping.groupNames = {"fwd", "bwd"};
+    grouping.groups = {"33-64", "1-32"};
+    grouping.pairNames = {"long"};
+    grouping.pairs.emplace_back(0, 1);
+    grouping.pairAlphas = {1.0};
+    Mantid::API::Workspace_sptr corrected;
+    TS_ASSERT_THROWS_NOTHING(corrected =
+                                 loader.correctAndGroup(result, grouping));
+    Mantid::API::Workspace_sptr analysed;
+    AnalysisOptions options(grouping);
+    options.groupPairName = "long";
+    options.loadedTimeZero = 0.55;
+    options.plotType = PlotType::Asymmetry;
+    options.rebinArgs = "";
+    options.subtractedPeriods = "2";
+    options.summedPeriods = "1";
+    options.timeLimits.first = 0.11;
+    options.timeLimits.second = 10.0;
+    options.timeZero = 0.55;
+    TS_ASSERT_THROWS_NOTHING(
+        analysed = loader.createAnalysisWorkspace(corrected, options));
+    // test the output
+    Mantid::MantidVec expectedOutput = {
+        -0.000584754, -0.037308, -0.0183329, 0.0250825, -0.0154756,
+        0.018308,     0.0116216, -0.019053,  0.0100087, -0.0393029};
+    const auto outputWS =
+        boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(analysed);
+    TS_ASSERT(outputWS);
+    const auto &data = outputWS->dataY(0);
+    TS_ASSERT_EQUALS(data.size(), 617);
+    for (size_t i = 0; i < expectedOutput.size(); i++) {
+      TS_ASSERT_DELTA(data[i], expectedOutput[i], 1e-6);
+    }
+  }
+
 private:
   /**
    * Creates Dead Time Table using all the data between begin and end.
    * @param specToLoad :: vector containing the spectrum numbers to load
    * @param deadTimes :: vector containing the corresponding dead times
-   * @return Dead Time Table create using the data
+   * @return Dead Time Table created using the data
    */
   TableWorkspace_sptr createDeadTimeTable(std::vector<int> specToLoad,
                                           std::vector<double> deadTimes) {
@@ -205,6 +292,74 @@ private:
     }
 
     return deadTimeTable;
+  }
+
+  /**
+   * Test the method "setAlgorithmProperties" with provided options
+   * @param item :: [input] Item type group/pair
+   * @param plot :: [input] Plot type counts/log/asym
+   * @param rebinArgs :: [input] Arguments for rebin
+   * @param shouldThrow :: [input, optional] If call should fail or not (default
+   * false)
+   */
+  void doTest_setAlgorithmProperties(ItemType item, PlotType plot,
+                                     const std::string &rebinArgs,
+                                     bool shouldThrow = false) {
+    TestDataLoader loader(DeadTimesType::FromFile, {"MUSR"});
+    Mantid::API::Grouping grouping;
+    grouping.groupNames = {"fwd", "bwd"};
+    grouping.groups = {"33-64", "1-32"};
+    grouping.pairNames = {"long"};
+    grouping.pairs.emplace_back(1, 0);
+    grouping.pairAlphas = {1.0};
+
+    auto alg =
+        Mantid::API::AlgorithmFactory::Instance().create("MuonProcess", 1);
+    alg->initialize();
+
+    AnalysisOptions options(grouping);
+    // set options
+    options.groupPairName = item == ItemType::Group ? "bwd" : "long";
+    options.loadedTimeZero = 0.012;
+    options.plotType = plot;
+    options.rebinArgs = rebinArgs;
+    options.subtractedPeriods = "2";
+    options.summedPeriods = "1";
+    options.timeLimits.first = 0.1;
+    options.timeLimits.second = 10.0;
+    options.timeZero = 0.014;
+
+    if (shouldThrow) {
+      TS_ASSERT_THROWS(loader.setProcessAlgorithmProperties(alg, options),
+                       std::invalid_argument);
+    } else {
+      TS_ASSERT_THROWS_NOTHING(
+          loader.setProcessAlgorithmProperties(alg, options));
+      // test options == alg props
+      TS_ASSERT_EQUALS(alg->getPropertyValue("Mode"), "Analyse");
+      TS_ASSERT_EQUALS((double)alg->getProperty("TimeZero"), options.timeZero);
+      TS_ASSERT_EQUALS((double)alg->getProperty("LoadedTimeZero"),
+                       options.loadedTimeZero);
+      TS_ASSERT_EQUALS((double)alg->getProperty("Xmin"),
+                       options.timeLimits.first);
+      TS_ASSERT_EQUALS((double)alg->getProperty("Xmax"),
+                       options.timeLimits.second);
+      TS_ASSERT_EQUALS(alg->getPropertyValue("RebinParams"), options.rebinArgs);
+      const std::string outputType = alg->getPropertyValue("OutputType");
+      if (item == ItemType::Group) {
+        TS_ASSERT_EQUALS((int)alg->getProperty("GroupIndex"), 1);
+        if (plot == PlotType::Asymmetry) {
+          TS_ASSERT_EQUALS(outputType, "GroupAsymmetry");
+        } else {
+          TS_ASSERT_EQUALS(outputType, "GroupCounts");
+        }
+      } else {
+        TS_ASSERT_EQUALS(outputType, "PairAsymmetry");
+        TS_ASSERT_EQUALS((int)alg->getProperty("PairFirstIndex"), 1);
+        TS_ASSERT_EQUALS((int)alg->getProperty("PairSecondIndex"), 0);
+        TS_ASSERT_EQUALS((double)alg->getProperty("Alpha"), 1.0);
+      }
+    }
   }
 };
 
