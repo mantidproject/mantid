@@ -177,7 +177,8 @@ class CollectHB3AExperimentInfo(PythonAlgorithm):
             spicetablews = self._loadSpiceFile(spicefilename)
             self._spiceTableDict[scan] = spicetablews
             if spicetablews is None:
-                self.glog.warning("Unable to access Exp %d Scan %d's SPICE file %s." % (self._expNumber, scan, spicefilename))
+                self.glog.warning("Unable to access Exp %d Scan %d's SPICE file %s." % (self._expNumber, scan,
+                                                                                        spicefilename))
 
             # Get list of Pts.
             if len(self._ptListList[iscan]) == 0:
@@ -309,35 +310,37 @@ class CollectHB3AExperimentInfo(PythonAlgorithm):
 
             # Get scan/pt and set dictionary
             self.log().debug("Processing detector @ 2theta = %.5f, " % (two_theta))
-            scannumber, ptnumber = self._2thetaScanPtDict[two_theta][0]
-            self.log().debug("self._2thetaScanPtDict: %s" % (self._2thetaScanPtDict[two_theta]))
+            for scannumber, ptnumber in self._2thetaScanPtDict[two_theta]:
+                # scannumber, ptnumber = self._2thetaScanPtDict[two_theta][0]
+                self.log().debug("self._2thetaScanPtDict: %s" % (self._2thetaScanPtDict[two_theta]))
 
-            self._scanPt2ThetaDict[(scannumber, ptnumber)] = two_theta
-            self._detStartID[two_theta] = self._currStartDetID
+                self._scanPt2ThetaDict[(scannumber, ptnumber)] = two_theta
+                self._detStartID[two_theta] = self._currStartDetID
 
-            if self._doGenerateVirtualInstrument is True:
-                # Load detector counts file (.xml)
-                dataws = self._loadHB3ADetCountFile(scannumber, ptnumber)
+                if self._doGenerateVirtualInstrument is True:
+                    # Load detector counts file (.xml)
+                    dataws = self._loadHB3ADetCountFile(scannumber, ptnumber)
 
-                # write each detector's position and ID to table workspace
-                maxdetid = 0
-                for iws in xrange(dataws.getNumberHistograms()):
-                    detector = dataws.getDetector(iws)
-                    detpos = detector.getPos()
-                    newdetid = self._currStartDetID + detector.getID()
-                    if detector.getID() > maxdetid:
-                        maxdetid = detector.getID()
-                    self._myPixelInfoTableWS.addRow([newdetid, detpos.X(), detpos.Y(), detpos.Z(), detector.getID()])
-                # ENDFOR (iws)
+                    # write each detector's position and ID to table workspace
+                    maxdetid = 0
+                    for iws in xrange(dataws.getNumberHistograms()):
+                        detector = dataws.getDetector(iws)
+                        detpos = detector.getPos()
+                        newdetid = self._currStartDetID + detector.getID()
+                        if detector.getID() > maxdetid:
+                            maxdetid = detector.getID()
+                        self._myPixelInfoTableWS.addRow([newdetid, detpos.X(), detpos.Y(), detpos.Z(), detector.getID()])
+                    # ENDFOR (iws)
 
-            else:
-                # No need to generate virtual instrument information.
-                maxdetid = self._numPixelsDetector
+                else:
+                    # No need to generate virtual instrument information.
+                    maxdetid = self._numPixelsDetector
+                # END-IF-ELSE
 
-            # END-IF-ELSE
+                # Update start ID
+                self._currStartDetID += maxdetid
 
-            # Update start ID
-            self._currStartDetID += maxdetid
+            # END-FOR
         # ENDFOR
 
         return
