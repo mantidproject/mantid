@@ -299,9 +299,22 @@ void MuonFitPropertyBrowser::runFit() {
     alg->setPropertyValue("Output", outputName());
     alg->setPropertyValue("Minimizer", minimizer());
     alg->setPropertyValue("CostFunction", costFunction());
+
+    // If we are doing a simultaneous fit, set this up here
+    const int nWorkspaces = static_cast<int>(m_workspacesToFit.size());
+    if (nWorkspaces > 1) {
+      for (int i = 1; i < nWorkspaces; i++) {
+        std::string suffix = boost::lexical_cast<std::string>(i);
+        alg->setPropertyValue("InputWorkspace_" + suffix, m_workspacesToFit[i]);
+        alg->setProperty("WorkspaceIndex_" + suffix, workspaceIndex());
+        alg->setProperty("StartX_" + suffix, startX());
+        alg->setProperty("EndX_" + suffix, endX());
+      }
+    }
+
     observeFinish(alg);
     alg->executeAsync();
-  } catch (std::exception &e) {
+  } catch (const std::exception &e) {
     QString msg = "Fit algorithm failed.\n\n" + QString(e.what()) + "\n";
     QMessageBox::critical(this, "Mantid - Error", msg);
   }
