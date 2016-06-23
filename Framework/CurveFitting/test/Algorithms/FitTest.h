@@ -684,8 +684,6 @@ public:
     TS_ASSERT_THROWS_NOTHING(fitalg.initialize());
     TS_ASSERT(fitalg.isInitialized());
 
-    // const std::string funcStr = "name=FullprofPolynomial, n=6, Bkpos=10000, "
-    //                            "A0=0.3, A1=1.0, A2=-0.5, A3=0.05, A4=-0.02";
     const std::string funcStr = "name=FullprofPolynomial, n=6, Bkpos=10000, "
                                 "A0=0.5, A1=1.0, A2=-0.5, A3=0.0, A4=-0.02";
     fitalg.setProperty("Function", funcStr);
@@ -705,6 +703,44 @@ public:
     TS_ASSERT_DELTA(out->getParameter("A0"), 130., 0.001);
     TS_ASSERT_DELTA(out->getParameter("A1"), 130., 0.001);
     TS_ASSERT_DELTA(out->getParameter("A3"), 0., 0.001);
+  }
+
+  void test_function_LinearBackground() {
+    // create mock data to test against
+    int histogramNumber = 1;
+    int timechannels = 5;
+    Mantid::API::MatrixWorkspace_sptr ws2D =
+        WorkspaceFactory::Instance().create("Workspace2D", histogramNumber,
+                                            timechannels, timechannels);
+
+    for (int i = 0; i < timechannels; i++) {
+      ws2D->dataX(0)[i] = i + 1;
+      ws2D->dataY(0)[i] = i + 1;
+      ws2D->dataE(0)[i] = 1.0;
+    }
+
+    Algorithms::Fit alg2;
+    TS_ASSERT_THROWS_NOTHING(alg2.initialize());
+    TS_ASSERT(alg2.isInitialized());
+
+    const std::string funcStr = "name=LinearBackground, A0=1.0";
+    alg2.setProperty("Function", funcStr);
+    // Set which spectrum to fit against and initial starting values
+    alg2.setProperty("InputWorkspace", ws2D);
+    alg2.setPropertyValue("WorkspaceIndex", "0");
+
+    // execute fit
+    TS_ASSERT_THROWS_NOTHING(TS_ASSERT(alg2.execute()))
+
+    TS_ASSERT(alg2.isExecuted());
+
+    // test the output from fit is what you expect
+    double dummy = alg2.getProperty("OutputChi2overDoF");
+
+    TS_ASSERT_DELTA(dummy, 0.0, 0.1);
+    IFunction_sptr out = alg2.getProperty("Function");
+    TS_ASSERT_DELTA(out->getParameter("A0"), 0.0, 0.01);
+    TS_ASSERT_DELTA(out->getParameter("A1"), 1.0, 0.0003);
   }
 };
 

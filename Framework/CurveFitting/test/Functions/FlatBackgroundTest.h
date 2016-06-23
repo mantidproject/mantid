@@ -40,7 +40,7 @@ private:
     bkgd.setParameter("A0", val);
     bkgd.function1D(yValues.data(), nullptr, numPoints); // don't need x-values
 
-    for (std::size_t i = 0; i < numPoints; i++) {
+    for (size_t i = 0; i < numPoints; i++) {
       TS_ASSERT_EQUALS(yValues[i], val);
     }
   }
