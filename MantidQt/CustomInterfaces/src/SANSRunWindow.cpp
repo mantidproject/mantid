@@ -4421,8 +4421,9 @@ bool SANSRunWindow::areSettingsValid(States type) {
   auto isMergedReduction = m_uiForm.detbank_sel->currentIndex() == 3;
   if (type == States::TwoD && isMergedReduction) {
     isValid = false;
-    message += "A merged Detector Bank selection is currently not supported for 2D "
-           "reductions.\n";
+    message +=
+        "A merged Detector Bank selection is currently not supported for 2D "
+        "reductions.\n";
   }
 
   // R_MAX -- can be only >0 or -1
