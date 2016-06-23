@@ -1,6 +1,9 @@
-#pylint: disable=no-init,invalid-name, W0201, W1401, W0702, W0121, W0511
-import math
+#pylint: disable=no-init,invalid-name, no-self-use
+"""
+    Top-level auto-reduction algorithm for the SNS Liquids Reflectometer
+"""
 import sys
+import math
 import re
 import platform
 import time
@@ -16,24 +19,31 @@ from reduction_gui.reduction.reflectometer.refl_data_script import DataSets
 class LRAutoReduction(PythonAlgorithm):
 
     def category(self):
+        """ Return category """
         return "Reflectometry\\SNS"
 
     def name(self):
+        """ Return name """
         return "LRAutoReduction"
 
     def version(self):
+        """ Return version number """
         return 1
 
     def summary(self):
+        """ Short description """
         return "Find reflectivity peak and return its pixel range."
 
     def PyInit(self):
-        self.declareProperty(FileProperty("Filename", "", FileAction.Load, ['.nxs']), "Data file to reduce")
-        self.declareProperty(FileProperty("TemplateFile", "", FileAction.OptionalLoad, ['.xml']), "Template reduction file")
+        """ Property declarations """
+        self.declareProperty(FileProperty("Filename", "", FileAction.Load, ['.nxs']),
+                             "Data file to reduce")
+        self.declareProperty(FileProperty("TemplateFile", "", FileAction.OptionalLoad, ['.xml']),
+                             "Template reduction file")
 
         # ------------ Properties that should be in the meta data -------------
         self.declareProperty("ScaleToUnity", True,
-                             "If true, the reflectivity under the Q given cutoff will be scaled to 1")
+                             "If true, the reflectivity under the Q cutoff will be scaled to 1")
         self.declareProperty(IntArrayProperty("PrimaryFractionRange", [117, 197],
                                               IntArrayLengthValidator(2), direction=Direction.Input),
                              "Pixel range to use for calculating the primary fraction correction.")
@@ -44,12 +54,18 @@ class LRAutoReduction(PythonAlgorithm):
         self.declareProperty("IncidentMedium", "medium", "Name of the incident medium")
         # ---------------------------------------------------------------------
 
-        self.declareProperty("ScalingFactorTOFStep", 200.0, "Bin width in TOF for fitting scaling factors")
-        self.declareProperty("WavelengthOffset", 0.0, doc="Wavelength offset used for TOF range determination")
-        self.declareProperty("ScalingWavelengthCutoff", 10.0, "Wavelength above which the scaling factors are assumed to be one")
-        self.declareProperty("FindPeaks", False, "Find reflectivity peaks instead of using the template values")
-        self.declareProperty("ReadSequenceFromFile", False, "Read the run sequence information from the file, not the title")
-        self.declareProperty("ForceSequenceNumber", 0, "Force the sequence number value if it's not available")
+        self.declareProperty("ScalingFactorTOFStep", 200.0,
+                             "Bin width in TOF for fitting scaling factors")
+        self.declareProperty("WavelengthOffset", 0.0,
+                             "Wavelength offset used for TOF range determination")
+        self.declareProperty("ScalingWavelengthCutoff", 10.0,
+                             "Wavelength above which the scaling factors are assumed to be one")
+        self.declareProperty("FindPeaks", False,
+                             "Find reflectivity peaks instead of using the template values")
+        self.declareProperty("ReadSequenceFromFile", False,
+                             "Read the run sequence information from the file, not the title")
+        self.declareProperty("ForceSequenceNumber", 0,
+                             "Force the sequence number value if it's not available")
 
         self.declareProperty(FileProperty('OutputFilename', '', action=FileAction.OptionalSave, extensions=["txt"]),
                              doc='Name of the reflectivity file output')
@@ -100,7 +116,8 @@ class LRAutoReduction(PythonAlgorithm):
             first_run_of_set, sequence_number, is_direct_beam = self._parse_title(meta_data_run, run_number)
             do_reduction = not is_direct_beam
 
-        self.setProperty("SequenceInfo", [int(run_number), int(first_run_of_set), int(sequence_number)])
+        self.setProperty("SequenceInfo",
+                         [int(run_number), int(first_run_of_set), int(sequence_number)])
         return run_number, first_run_of_set, sequence_number, do_reduction, is_direct_beam
 
 
@@ -147,7 +164,9 @@ class LRAutoReduction(PythonAlgorithm):
 
         if sequence_number == -1:
             logger.notice("Title: %s" % title)
-            raise RuntimeError("Could not identify sequence number. Make sure the run title ends with -n where 1 < n < 7")
+            msg = "Could not identify sequence number. "
+            msg += "Make sure the run title ends with -n where 1 < n < 7"
+            raise RuntimeError(msg)
 
         return first_run_of_set, sequence_number, is_direct_beam
 
@@ -294,7 +313,6 @@ class LRAutoReduction(PythonAlgorithm):
         # Get the TOF range
         tof_range = self._get_tof_range()
 
-        # TODO: sync up names with new DAS
         # Get information from meta-data
         meta_data_run = self.event_data.getRun()
         _incident_medium = self.getProperty("IncidentMedium").value
@@ -335,7 +353,8 @@ class LRAutoReduction(PythonAlgorithm):
 
         # Copy over the existing series, up to the point we are at
         new_data_sets = []
-        # First, copy over the entries in the existing template, up to the point previous to the current point
+        # First, copy over the entries in the existing template,
+        # up to the point previous to the current point
         for i in range(min(int(run_number) - int(first_run_of_set), len(s.data_sets))):
             sequence_id = int(first_run_of_set) + i
             logger.information("Copying %s" % sequence_id)
@@ -377,8 +396,9 @@ class LRAutoReduction(PythonAlgorithm):
         wl = self.event_data.getRun().getProperty('LambdaRequest').value[0]
         chopper_speed = self.event_data.getRun().getProperty('SpeedRequest1').value[0]
         wl_offset = self.getProperty("WavelengthOffset").value
-        tof_min = source_detector_distance / h * m * (wl + wl_offset * 60.0 / chopper_speed - 1.7 * 60.0 / chopper_speed) * 1e-4
-        tof_max = source_detector_distance / h * m * (wl + wl_offset * 60.0 / chopper_speed + 1.7 * 60.0 / chopper_speed) * 1e-4
+        cst = source_detector_distance / h * m
+        tof_min = cst * (wl + wl_offset * 60.0 / chopper_speed - 1.7 * 60.0 / chopper_speed) * 1e-4
+        tof_max = cst * (wl + wl_offset * 60.0 / chopper_speed + 1.7 * 60.0 / chopper_speed) * 1e-4
         return [tof_min, tof_max]
 
 
@@ -396,7 +416,7 @@ class LRAutoReduction(PythonAlgorithm):
         direct_beam_runs_str = self._read_property(meta_data_run, "direct_beam_runs",
                                                    _direct_beam_runs, is_string=True)
         # The direct runs in the DAS logs are stored as a string
-        if type(direct_beam_runs_str) is str:
+        if isinstance(direct_beam_runs_str, (str, unicode)):
             try:
                 direct_beam_runs = [int(r.strip()) for r in direct_beam_runs_str.split(',')]
             except ValueError:
@@ -420,7 +440,9 @@ class LRAutoReduction(PythonAlgorithm):
 
         # Raise an exception if we haven't found our direct beam run
         if direct_beam_found is None:
-            raise RuntimeError("Could not find a valid direct beam run for wl=%s in %s" % (data_wl, str(direct_beam_runs)))
+            msg = "Could not find a valid direct beam run for "
+            msg += "wl=%s in %s" % (data_wl, str(direct_beam_runs))
+            raise RuntimeError(msg)
 
         # Find the direct beam peak
         peak, low_res = self._find_peaks(direct_beam_data)
@@ -528,8 +550,9 @@ class LRAutoReduction(PythonAlgorithm):
         dQ_constant = data_set.fourth_column_dq0
         dQ_slope = data_set.fourth_column_dq_over_q
 
-        LRReflectivityOutput(ReducedWorkspaces=input_ws_list, ScaleToUnity=scale_to_unity, ScalingWavelengthCutoff=wl_cutoff,
-                             OutputBinning=output_binning, DQConstant=dQ_constant, DQSlope=dQ_slope, OutputFilename=file_path)
+        LRReflectivityOutput(ReducedWorkspaces=input_ws_list, ScaleToUnity=scale_to_unity,
+                             ScalingWavelengthCutoff=wl_cutoff, OutputBinning=output_binning,
+                             DQConstant=dQ_constant, DQSlope=dQ_slope, OutputFilename=file_path)
         for ws in input_ws_list:
             AnalysisDataService.remove(str(ws))
 
@@ -565,7 +588,8 @@ class LRAutoReduction(PythonAlgorithm):
         # Determine where we are in the scan
         run_number, first_run_of_set, sequence_number, do_reduction, is_direct_beam = self._get_series_info(filename)
         logger.information("Run %s - Sequence %s [%s/%s]" % (run_number, first_run_of_set,
-                                                             sequence_number, self._get_sequence_total(default=-1)))
+                                                             sequence_number,
+                                                             self._get_sequence_total(default=-1)))
 
         # If we have a direct beam, compute the scaling factors
         if is_direct_beam:
