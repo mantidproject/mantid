@@ -6,6 +6,7 @@
 #include <gmock/gmock.h>
 
 #include "MantidAPI/ILatticeFunction.h"
+#include "MantidKernel/WarningSuppressions.h"
 
 using Mantid::API::ILatticeFunction;
 using Mantid::Kernel::V3D;
@@ -72,13 +73,10 @@ public:
 
 private:
   std::vector<V3D> getTestHKLs() { return {{1, 1, 0}}; }
-
+  GCC_DIAG_OFF_SUGGEST_OVERRIDE
   // Mock function to check whether the correct methods are called
   class MockLatticeFunction : public ILatticeFunction {
   public:
-    MockLatticeFunction() : ILatticeFunction() {}
-    ~MockLatticeFunction() override {}
-
     MOCK_CONST_METHOD0(name, std::string());
     MOCK_CONST_METHOD2(functionLattice,
                        void(const LatticeDomain &, FunctionValues &));
@@ -104,5 +102,7 @@ private:
     MOCK_CONST_METHOD0(size, size_t());
   };
 };
+
+GCC_DIAG_ON_SUGGEST_OVERRIDE
 
 #endif /* MANTID_API_ILATTICEFUNCTIONTEST_H_ */

@@ -28,6 +28,8 @@ Performance
 CurveFitting
 ------------
 
+- Added two new minimizers belonging to the trust region family of algorithms: DTRS and More-Sorensen.
+
 Improved
 ########
 
