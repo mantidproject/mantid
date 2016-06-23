@@ -60,11 +60,11 @@ FUNC_BAD_PARAMS = {
     "PawleyParameterFunction":("a","b","c"),
     "PawleyFunction":("f0.a","f0.b","f0.c", "f0.Alpha", "f0.Beta", "f0.Gamma", "f0.ZeroShift"),
     "LatticeFunction":("a","b","c"),
-	"CrystalFieldSpectrum":("f0.Amplitude","f0.PeakCentre","f0.FWHM","f1.Amplitude","f1.PeakCentre","f1.FWHM",
-							"f2.Amplitude","f2.PeakCentre","f2.FWHM","f3.Amplitude","f3.PeakCentre","f3.FWHM",
-							"f4.Amplitude","f4.PeakCentre","f4.FWHM","f5.Amplitude","f5.PeakCentre","f5.FWHM"),
-	"CrystalFieldMultiSpectrum":("f0.f0.A0","f0.f1.Amplitude","f0.f1.PeakCentre","f0.f1.FWHM",
-								"f0.f2.Amplitude","f0.f2.PeakCentre","f0.f2.FWHM")
+    "CrystalFieldSpectrum":("f0.Amplitude","f0.PeakCentre","f0.FWHM","f1.Amplitude","f1.PeakCentre","f1.FWHM",
+                            "f2.Amplitude","f2.PeakCentre","f2.FWHM","f3.Amplitude","f3.PeakCentre","f3.FWHM",
+                            "f4.Amplitude","f4.PeakCentre","f4.FWHM","f5.Amplitude","f5.PeakCentre","f5.FWHM"),
+    "CrystalFieldMultiSpectrum":("f0.f0.A0","f0.f1.Amplitude","f0.f1.PeakCentre","f0.f1.FWHM",
+                                 "f0.f2.Amplitude","f0.f2.PeakCentre","f0.f2.FWHM")
     }
 
 class Algorithms(stresstesting.MantidStressTest):
