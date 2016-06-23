@@ -263,6 +263,7 @@ class LRAutoReduction(PythonAlgorithm):
         else:
             value = default
             logger.error("No %s value in the data logs: using %s=%s" % (key, key, default))
+            return value
         if is_string and len(value.strip()) == 0:
             value = default
             logger.error("Empty %s value in the data logs: using %s=%s" % (key, key, default))
@@ -391,13 +392,17 @@ class LRAutoReduction(PythonAlgorithm):
         data_wl = self.event_data.getRun().getProperty('LambdaRequest').value[0]
         data_thi = self.event_data.getRun().getProperty('thi').value[0]
 
-        _direct_beam_runs = self.getProperty("DirectBeamList").value
+        _direct_beam_runs = list(self.getProperty("DirectBeamList").value)
         direct_beam_runs_str = self._read_property(meta_data_run, "direct_beam_runs",
                                                    _direct_beam_runs, is_string=True)
-        try:
-            direct_beam_runs = [int(r.strip()) for r in direct_beam_runs_str.split(',')]
-        except ValueError:
-            direct_beam_runs = []
+        # The direct runs in the DAS logs are stored as a string
+        if type(direct_beam_runs_str) is str:
+            try:
+                direct_beam_runs = [int(r.strip()) for r in direct_beam_runs_str.split(',')]
+            except ValueError:
+                direct_beam_runs = []
+        else:
+            direct_beam_runs = direct_beam_runs_str
 
         # For each run, load and compare the wavelength
         direct_beam_found = None
@@ -559,9 +564,8 @@ class LRAutoReduction(PythonAlgorithm):
 
         # Determine where we are in the scan
         run_number, first_run_of_set, sequence_number, do_reduction, is_direct_beam = self._get_series_info(filename)
-
-        # Get the reduction parameters for this run
-        data_set, incident_medium = self._get_template(run_number, first_run_of_set, sequence_number)
+        logger.information("Run %s - Sequence %s [%s/%s]" % (run_number, first_run_of_set,
+                                                             sequence_number, self._get_sequence_total(default=-1)))
 
         # If we have a direct beam, compute the scaling factors
         if is_direct_beam:
@@ -579,7 +583,7 @@ class LRAutoReduction(PythonAlgorithm):
             _incident_medium = self.getProperty("IncidentMedium").value
             incident_medium = self._read_property(meta_data_run, "incident_medium",
                                                   _incident_medium, is_string=True)
-            file_id = incident_medium.replace("medium","")
+            file_id = incident_medium.replace("medium", "")
             LRDirectBeamSort(RunList=range(first_run_of_set, first_run_of_set + sequence_number),
                              UseLowResCut=True, ComputeScalingFactors=True, TOFSteps=sf_tof_step,
                              IncidentMedium=incident_medium,
@@ -589,6 +593,9 @@ class LRAutoReduction(PythonAlgorithm):
         elif not do_reduction:
             logger.notice("The data is of a type that does not have to be reduced")
             return
+
+        # Get the reduction parameters for this run
+        data_set, incident_medium = self._get_template(run_number, first_run_of_set, sequence_number)
 
         # Write template before we start the computation
         self._write_template(data_set, run_number, first_run_of_set, sequence_number)
