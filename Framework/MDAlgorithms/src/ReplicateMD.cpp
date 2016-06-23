@@ -303,8 +303,8 @@ void ReplicateMD::exec() {
       if (axis >= numberOfDimensionsOfDataWorkspace) {
         std::string message =
             "ReplicateMD: Cannot transpose the data workspace. Attempting to "
-            "swap dimension index" +
-            std::to_string(axisDimCounter) + " with inxex " +
+            "swap dimension index " +
+            std::to_string(axisDimCounter) + " with index " +
             std::to_string(axis) +
             ", but the dimensionality of the data workspace is " +
             std::to_string(nDimsData);
