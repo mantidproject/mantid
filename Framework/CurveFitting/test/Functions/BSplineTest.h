@@ -2,13 +2,10 @@
 #define BSPLINETEST_H_
 
 #include "MantidCurveFitting/Functions/BSpline.h"
-#include "MantidAPI/FunctionDomain1D.h"
-#include "MantidAPI/FunctionValues.h"
 #include "MantidAPI/FunctionFactory.h"
 
 #include <cxxtest/TestSuite.h>
 
-using namespace Mantid;
 using namespace Mantid::API;
 using Mantid::CurveFitting::Functions::BSpline;
 

@@ -1,12 +1,10 @@
 #ifndef CubicSplineTEST_H_
 #define CubicSplineTEST_H_
 
+#include "MantidCurveFitting/Functions/CubicSpline.h"
+
 #include <boost/scoped_array.hpp>
 #include <cxxtest/TestSuite.h>
-
-#include "MantidCurveFitting/Functions/CubicSpline.h"
-#include "MantidAPI/FunctionDomain1D.h"
-#include "MantidAPI/FunctionValues.h"
 
 using namespace Mantid::API;
 using Mantid::CurveFitting::Functions::CubicSpline;

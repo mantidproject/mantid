@@ -4,13 +4,10 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidCurveFitting/Functions/Chebyshev.h"
-#include "MantidAPI/FunctionDomain1D.h"
-#include "MantidAPI/FunctionValues.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidDataObjects/Workspace2D.h"
 
 using namespace Mantid::API;
-using namespace Mantid::CurveFitting;
 using Mantid::CurveFitting::Functions::Chebyshev;
 
 class ChebyshevTest : public CxxTest::TestSuite {
