@@ -16,6 +16,7 @@
 #include "MantidAPI/WorkspaceProperty.h"
 
 #include "MantidAPI/TextAxis.h"
+#include "MantidHistogramData/Points.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/EmptyValues.h"
 #include "MantidKernel/Matrix.h"
