@@ -32,17 +32,16 @@ namespace HistogramData {
 class MANTID_HISTOGRAMDATA_DLL LinearGenerator {
 public:
   LinearGenerator(double start, double increment)
-      : current(start), increment(increment) {}
+      : start(start), increment(increment) {}
 
   double operator()() {
-    double old = current;
-    current += increment;
-    return old;
+    return start + increment * static_cast<double>(count++);
   }
 
 private:
-  double current;
+  double start;
   double increment;
+  size_t count{0};
 };
 
 } // namespace HistogramData
