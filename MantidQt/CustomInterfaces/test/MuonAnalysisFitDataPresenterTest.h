@@ -19,6 +19,7 @@ using MantidQt::CustomInterfaces::MuonAnalysisFitDataPresenter;
 using MantidQt::MantidWidgets::IMuonFitDataSelector;
 using MantidQt::MantidWidgets::IWorkspaceFitControl;
 using MantidQt::CustomInterfaces::Muon::DeadTimesType;
+using Mantid::API::AnalysisDataService;
 using namespace testing;
 
 /// Mock data selector widget
@@ -101,49 +102,13 @@ public:
     m_presenter->handleDataPropertiesChanged();
   }
 
-  void test_handleSelectedDataChanged() {
-    Mantid::API::Grouping grouping;
-    grouping.groupNames = {"fwd", "bwd"};
-    grouping.pairNames = {"long"};
-    grouping.groups = {"1-32", "33-64"};
-    grouping.pairs.emplace_back(0, 1);
-    grouping.pairAlphas = {1.0};
-    EXPECT_CALL(*m_dataSelector, getInstrumentName())
-        .Times(1)
-        .WillOnce(Return("MUSR"));
-    EXPECT_CALL(*m_dataSelector, getRuns())
-        .Times(1)
-        .WillOnce(Return("15189-91"));
-    EXPECT_CALL(*m_dataSelector, getChosenGroups())
-        .Times(1)
-        .WillOnce(Return(QStringList({"fwd", "long"})));
-    EXPECT_CALL(*m_dataSelector, getPeriodSelections())
-        .Times(1)
-        .WillOnce(Return(QStringList({"1", "1-2"})));
-    EXPECT_CALL(*m_dataSelector, getFitType())
-        .Times(1)
-        .WillOnce(Return(IMuonFitDataSelector::FitType::Simultaneous));
-    std::vector<QString> expectedNames = {
-        "MUSR00015189; Group; fwd; Asym; 1; #1",
-        "MUSR00015189; Pair; long; Asym; 1; #1",
-        "MUSR00015189; Group; fwd; Asym; 1-2; #1",
-        "MUSR00015189; Pair; long; Asym; 1-2; #1",
-        "MUSR00015190; Group; fwd; Asym; 1; #1",
-        "MUSR00015190; Pair; long; Asym; 1; #1",
-        "MUSR00015190; Group; fwd; Asym; 1-2; #1",
-        "MUSR00015190; Pair; long; Asym; 1-2; #1",
-        "MUSR00015191; Group; fwd; Asym; 1; #1",
-        "MUSR00015191; Pair; long; Asym; 1; #1",
-        "MUSR00015191; Group; fwd; Asym; 1-2; #1",
-        "MUSR00015191; Pair; long; Asym; 1-2; #1"};
-    EXPECT_CALL(*m_fitBrowser,
-                setWorkspaceNames(UnorderedElementsAreArray(expectedNames)))
-        .Times(1);
-    m_dataLoader.setDeadTimesType(DeadTimesType::FromFile);
-    m_presenter->handleSelectedDataChanged(
-        grouping, MantidQt::CustomInterfaces::Muon::PlotType::Asymmetry, true);
-    // test ADS here
-    Mantid::API::AnalysisDataService::Instance().clear();
+  void test_handleSelectedDataChanged_Simultaneous() {
+    doTest_handleSelectedDataChanged(
+        IMuonFitDataSelector::FitType::Simultaneous);
+  }
+
+  void test_handleSelectedDataChanged_CoAdd() {
+    doTest_handleSelectedDataChanged(IMuonFitDataSelector::FitType::CoAdd);
   }
 
   void test_handleXRangeChangedGraphically() {
@@ -205,6 +170,66 @@ public:
   }
 
 private:
+  void doTest_handleSelectedDataChanged(IMuonFitDataSelector::FitType fitType) {
+    Mantid::API::Grouping grouping;
+    grouping.groupNames = {"fwd", "bwd"};
+    grouping.pairNames = {"long"};
+    grouping.groups = {"1-32", "33-64"};
+    grouping.pairs.emplace_back(0, 1);
+    grouping.pairAlphas = {1.0};
+    EXPECT_CALL(*m_dataSelector, getInstrumentName())
+        .Times(1)
+        .WillOnce(Return("MUSR"));
+    EXPECT_CALL(*m_dataSelector, getRuns())
+        .Times(1)
+        .WillOnce(Return("15189-91"));
+    EXPECT_CALL(*m_dataSelector, getChosenGroups())
+        .Times(1)
+        .WillOnce(Return(QStringList({"fwd", "long"})));
+    EXPECT_CALL(*m_dataSelector, getPeriodSelections())
+        .Times(1)
+        .WillOnce(Return(QStringList({"1", "1-2"})));
+    EXPECT_CALL(*m_dataSelector, getFitType())
+        .Times(1)
+        .WillOnce(Return(fitType));
+    ON_CALL(*m_dataSelector, getStartTime()).WillByDefault(Return(0.55));
+    ON_CALL(*m_dataSelector, getEndTime()).WillByDefault(Return(10.0));
+    const std::vector<QString> expectedNames = [&fitType]() {
+      if (fitType == IMuonFitDataSelector::FitType::CoAdd) {
+        return std::vector<QString>{
+            "MUSR00015189-91; Group; fwd; Asym; 1; #1",
+            "MUSR00015189-91; Pair; long; Asym; 1; #1",
+            "MUSR00015189-91; Group; fwd; Asym; 1-2; #1",
+            "MUSR00015189-91; Pair; long; Asym; 1-2; #1"};
+      } else {
+        return std::vector<QString>{"MUSR00015189; Group; fwd; Asym; 1; #1",
+                                    "MUSR00015189; Pair; long; Asym; 1; #1",
+                                    "MUSR00015189; Group; fwd; Asym; 1-2; #1",
+                                    "MUSR00015189; Pair; long; Asym; 1-2; #1",
+                                    "MUSR00015190; Group; fwd; Asym; 1; #1",
+                                    "MUSR00015190; Pair; long; Asym; 1; #1",
+                                    "MUSR00015190; Group; fwd; Asym; 1-2; #1",
+                                    "MUSR00015190; Pair; long; Asym; 1-2; #1",
+                                    "MUSR00015191; Group; fwd; Asym; 1; #1",
+                                    "MUSR00015191; Pair; long; Asym; 1; #1",
+                                    "MUSR00015191; Group; fwd; Asym; 1-2; #1",
+                                    "MUSR00015191; Pair; long; Asym; 1-2; #1"};
+      }
+    }();
+    EXPECT_CALL(*m_fitBrowser,
+                setWorkspaceNames(UnorderedElementsAreArray(expectedNames)))
+        .Times(1);
+    m_dataLoader.setDeadTimesType(DeadTimesType::FromFile);
+    m_presenter->handleSelectedDataChanged(
+        grouping, MantidQt::CustomInterfaces::Muon::PlotType::Asymmetry, true);
+    // test that all expected names are in the ADS
+    const auto namesInADS = AnalysisDataService::Instance().getObjectNames();
+    for (const QString &name : expectedNames) {
+      TS_ASSERT(namesInADS.find(name.toStdString()) != namesInADS.end());
+    }
+    AnalysisDataService::Instance().clear();
+  }
+
   MockDataSelector *m_dataSelector;
   MockFitBrowser *m_fitBrowser;
   MuonAnalysisFitDataPresenter *m_presenter;
