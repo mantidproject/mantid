@@ -17,8 +17,6 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidAPI/AlgorithmFactory.h"
-#include "MantidDataHandling/LoadRaw3.h"
-#include "MantidKernel/System.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/FunctionDomain1D.h"
 #include "MantidAPI/FunctionValues.h"

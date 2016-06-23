@@ -566,11 +566,102 @@ public:
     double dummy = fit.getProperty("OutputChi2overDoF");
     TS_ASSERT_DELTA(dummy, 0.0001, 20000);
 
+    // Test the goodness of the fit
+    double chi2 = fit.getProperty("OutputChi2overDoF");
+    TS_ASSERT_DELTA(chi2, 0.001, 0.001);
+
     IFunction_sptr out = fit.getProperty("Function");
     TS_ASSERT_DELTA(out->getParameter("A"), 1000, 30.0);
     TS_ASSERT_DELTA(out->getParameter("B"), 26, 0.1);
     TS_ASSERT_DELTA(out->getParameter("C"), 7.7, 0.1);
     TS_ASSERT_DELTA(out->getParameter("D"), 0, 0.1);
+  }
+
+  // Background functions:
+
+  // A test for [-1, 1] range data
+  void test_function_Chebyshev() {
+    Mantid::API::MatrixWorkspace_sptr ws =
+        WorkspaceFactory::Instance().create("Workspace2D", 1, 11, 11);
+
+    Mantid::MantidVec &X = ws->dataX(0);
+    Mantid::MantidVec &Y = ws->dataY(0);
+    Mantid::MantidVec &E = ws->dataE(0);
+    for (size_t i = 0; i < Y.size(); i++) {
+      double x = -1. + 0.1 * static_cast<double>(i);
+      X[i] = x;
+      Y[i] = x * x * x;
+      E[i] = 1;
+    }
+    // X.back() = 1.;
+
+    Algorithms::Fit fit;
+    fit.initialize();
+
+    fit.setProperty("Function", "name=Chebyshev, n=3");
+    fit.setProperty("InputWorkspace", ws);
+    fit.setPropertyValue("WorkspaceIndex", "0");
+
+    fit.execute();
+    double startX = fit.getProperty("StartX");
+    TS_ASSERT_EQUALS(startX, -1);
+    double endX = fit.getProperty("EndX");
+    TS_ASSERT_EQUALS(endX, 1);
+    TS_ASSERT(fit.isExecuted());
+
+    IFunction_sptr out = fit.getProperty("Function");
+    TS_ASSERT_DELTA(out->getParameter("A0"), 0, 1e-12);
+    TS_ASSERT_DELTA(out->getParameter("A1"), 0.75, 1e-12);
+    TS_ASSERT_DELTA(out->getParameter("A2"), 0, 1e-12);
+    TS_ASSERT_DELTA(out->getParameter("A3"), 0.25, 1e-12);
+  }
+
+  // A test for a random number data
+  void test_function_Chebyshev_Background() {
+    Mantid::API::MatrixWorkspace_sptr ws =
+        WorkspaceFactory::Instance().create("Workspace2D", 1, 21, 21);
+
+    Mantid::MantidVec &X = ws->dataX(0);
+    Mantid::MantidVec &Y = ws->dataY(0);
+    Mantid::MantidVec &E = ws->dataE(0);
+    for (size_t i = 0; i < Y.size(); i++) {
+      double x = -10. + 1 * static_cast<double>(i);
+      X[i] = x;
+      Y[i] = x * x * x;
+      if (Y[i] < 1.0) {
+        E[i] = 1.0;
+      } else {
+        E[i] = sqrt(Y[i]);
+      }
+    }
+
+    Algorithms::Fit fit;
+    fit.initialize();
+
+    fit.setPropertyValue("Function",
+                         "name=Chebyshev, n=3, StartX=-10.0, EndX=10.0");
+    fit.setProperty("InputWorkspace", ws);
+    fit.setPropertyValue("WorkspaceIndex", "0");
+
+    fit.setProperty("Minimizer", "Levenberg-MarquardtMD");
+    fit.setProperty("CostFunction", "Least squares");
+    fit.setProperty("MaxIterations", 1000);
+
+    fit.execute();
+    double startX = fit.getProperty("StartX");
+    TS_ASSERT_EQUALS(startX, -10.0);
+    double endX = fit.getProperty("EndX");
+    TS_ASSERT_EQUALS(endX, 10.0);
+    TS_ASSERT(fit.isExecuted());
+
+    double chi2 = fit.getProperty("OutputChi2overDoF");
+    TS_ASSERT(chi2 < 2.0);
+
+    IFunction_sptr out = fit.getProperty("Function");
+    TS_ASSERT_DELTA(out->getParameter("A0"), 0, 1e-12);
+    TS_ASSERT_DELTA(out->getParameter("A1"), 0.75, 1e-12);
+    TS_ASSERT_DELTA(out->getParameter("A2"), 0, 1e-12);
+    TS_ASSERT_DELTA(out->getParameter("A3"), 0.25, 1e-12);
   }
 };
 

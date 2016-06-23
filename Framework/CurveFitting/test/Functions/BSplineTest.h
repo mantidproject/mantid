@@ -76,8 +76,7 @@ public:
     const double dx = 20.0 / 9;
     for (size_t i = 0; i < 10; ++i) {
       TS_ASSERT_DELTA(-10.0 + static_cast<double>(i) * dx, breaks[i], 1e-14);
-      TS_ASSERT_EQUALS(bsp.parameterName(i),
-                       "A" + std::to_string(i));
+      TS_ASSERT_EQUALS(bsp.parameterName(i), "A" + std::to_string(i));
     }
     TS_ASSERT_EQUALS(bsp.parameterName(10), "A10");
   }
@@ -105,8 +104,7 @@ public:
     TS_ASSERT_EQUALS(bsp.nParams(), 9);
     for (size_t i = 0; i < 8; ++i) {
       TS_ASSERT_DELTA(inputBreaks[i], breaks[i], 1e-14);
-      TS_ASSERT_EQUALS(bsp.parameterName(i),
-                       "A" + std::to_string(i));
+      TS_ASSERT_EQUALS(bsp.parameterName(i), "A" + std::to_string(i));
     }
     TS_ASSERT_EQUALS(bsp.parameterName(8), "A8");
   }
