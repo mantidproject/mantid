@@ -1248,6 +1248,9 @@ class MainWindow(QtGui.QMainWindow):
             except RuntimeError as run_err:
                 status = False
                 ret_obj = 'RuntimeError: %s.' % str(run_err)
+            except AssertionError as ass_err:
+                status = False
+                ret_obj = 'AssertionError: %s.' % str(ass_err)
 
             if status:
                 center_i = ret_obj
@@ -1308,6 +1311,8 @@ class MainWindow(QtGui.QMainWindow):
         # pop error message if there is any
         if len(grand_error_message) > 0:
             self.pop_one_button_dialog(grand_error_message)
+
+        self.ui.tableWidget_mergeScans.select_all_rows(False)
 
         return
 
