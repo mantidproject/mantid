@@ -612,6 +612,8 @@ void DiffractionFocussing2::determineRebinParameters() {
       Xmin = Xmax / nPoints;
     if (Xmin <= 0)
       Xmin = 1.0;
+    if(Xmin == Xmax)
+      Xmin = Xmax / 2.0;
 
     if (Xmax < Xmin) // Should never happen
     {
