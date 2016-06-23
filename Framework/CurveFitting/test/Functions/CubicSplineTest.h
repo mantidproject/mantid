@@ -5,10 +5,8 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidCurveFitting/Functions/CubicSpline.h"
-#include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/FunctionDomain1D.h"
 #include "MantidAPI/FunctionValues.h"
-#include "MantidDataObjects/Workspace2D.h"
 
 using namespace Mantid::API;
 using namespace Mantid::CurveFitting::Functions;
