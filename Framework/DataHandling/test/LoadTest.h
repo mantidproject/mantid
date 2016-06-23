@@ -233,6 +233,30 @@ public:
                boost::algorithm::ends_with(second, "CSP79590.raw"));
   }
 
+  /*
+   * This test loads and sums 2 IN4 runs from ILL
+   * without instrument prefix in the file names.
+   */
+  void test_ILLLoadMultipleFilesNoPrefix() {
+      Load loader;
+      loader.initialize();
+      loader.setPropertyValue("Filename","084446_IN4.nxs + 084447_IN4.nxs");
+      std::string outputWS = "LoadTest_out";
+      loader.setPropertyValue("OutputWorkspace", outputWS);
+      TS_ASSERT_THROWS_NOTHING(loader.execute());
+
+      MatrixWorkspace_sptr output =
+          AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+              outputWS);
+      MatrixWorkspace_sptr output2D =
+          boost::dynamic_pointer_cast<MatrixWorkspace>(output);
+
+      TS_ASSERT_EQUALS(output2D->getNumberHistograms(), 397);
+
+      AnalysisDataService::Instance().clear();
+  }
+
+
   void test_EventPreNeXus_WithNoExecute() {
     Load loader;
     loader.initialize();

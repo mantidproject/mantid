@@ -692,7 +692,7 @@ std::string getMatchingString(const std::string &regexString,
  */
 std::string pad(unsigned int run, const std::string &instString) {
   InstrumentInfo instInfo = ConfigService::Instance().getInstrument(instString);
-  FacilityInfo facilityInfo = ConfigService::Instance().getFacility();
+  FacilityInfo facilityInfo = instInfo.facility();
   std::string prefix ="";
   if(!facilityInfo.allowNoPrefix())
       prefix = instInfo.filePrefix(run) + instInfo.delimiter();
