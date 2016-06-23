@@ -33,7 +33,7 @@ createSinglePulseEventWorkspace(const V3D &sourcePosition,
     for (size_t i = 0; i < allSpectraTOF.size(); i++) {
       const double tof = allSpectraTOF[i];
       uint64_t pulseTime(0); // Pulse time is always zero. Same pulse.
-      retVal->getEventList(pix) += TofEvent(tof, pulseTime);
+      retVal->getSpectrum(pix) += TofEvent(tof, pulseTime);
     }
   }
 

@@ -31,6 +31,7 @@
 #include "Table.h"
 
 #include <QApplication>
+#include <QCloseEvent>
 #include <QMessageBox>
 #include <QLayout>
 #include <QSpinBox>

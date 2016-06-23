@@ -622,6 +622,25 @@ void SliceViewer::updateDimensionSliceWidgets() {
     widget->hide();
   }
 
+  bool dimXset = false;
+  bool dimYset = false;
+  // put non integrated dimensions first
+  for (size_t d = 0; d < m_dimensions.size(); d++) {
+    if ((dimXset == false) &&
+        (m_ws->getDimension(d)->getIsIntegrated() == false)) {
+      m_dimX = d;
+      dimXset = true;
+    }
+    if ((dimYset == false) &&
+        (m_ws->getDimension(d)->getIsIntegrated() == false) && (d != m_dimX)) {
+      m_dimY = d;
+      dimYset = true;
+    }
+    if ((dimXset == true) && (dimYset == true)) {
+      break;
+    }
+  }
+
   int maxLabelWidth = 10;
   int maxUnitsWidth = 10;
   // Set each dimension
@@ -710,7 +729,7 @@ void SliceViewer::setWorkspace(Mantid::API::IMDWorkspace_sptr ws) {
         boost::math::isnan(max) || boost::math::isinf(max)) {
       mess << "Dimension " << m_ws->getDimension(d)->getName()
            << " has a bad range: (";
-      mess << min << ", " << max << ")" << std::endl;
+      mess << min << ", " << max << ")\n";
     }
     size_t numBins = static_cast<size_t>((max - min) / binSizes[d]);
     MDHistoDimension_sptr dim(
@@ -721,9 +740,8 @@ void SliceViewer::setWorkspace(Mantid::API::IMDWorkspace_sptr ws) {
 
   if (!mess.str().empty()) {
     mess << "Bad ranges could cause memory allocation errors. Please fix the "
-            "workspace.";
-    mess << std::endl
-         << "You can continue using Mantid.";
+            "workspace.\n"
+            "You can continue using Mantid.";
     throw std::out_of_range(mess.str());
   }
 

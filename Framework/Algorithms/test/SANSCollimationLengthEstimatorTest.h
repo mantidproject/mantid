@@ -152,10 +152,10 @@ Mantid::API::MatrixWorkspace_sptr createTestWorkspace(
   // Link workspace with detector
   for (size_t i = 0; i < nhist; ++i) {
     const Mantid::specnum_t specID = static_cast<Mantid::specnum_t>(id + i);
-    auto *spec = ws2d->getSpectrum(i);
-    spec->setSpectrumNo(specID);
-    spec->clearDetectorIDs();
-    spec->addDetectorID(id);
+    auto &spec = ws2d->getSpectrum(i);
+    spec.setSpectrumNo(specID);
+    spec.clearDetectorIDs();
+    spec.addDetectorID(id);
   }
   return ws2d;
 }

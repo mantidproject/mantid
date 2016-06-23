@@ -1,8 +1,8 @@
 #ifndef MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_IENGGDIFFRACTIONVIEWQTGUI_H_
 #define MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_IENGGDIFFRACTIONVIEWQTGUI_H_
 
-#include "MantidQtAPI/UserSubWindow.h"
 #include "MantidAPI/IPeakFunction.h"
+#include "MantidQtAPI/UserSubWindow.h"
 #include "MantidQtCustomInterfaces/DllConfig.h"
 #include "MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffractionPresenter.h"
 #include "MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffractionView.h"
@@ -10,9 +10,9 @@
 
 #include "ui_EnggDiffractionQtGUI.h"
 #include "ui_EnggDiffractionQtTabCalib.h"
+#include "ui_EnggDiffractionQtTabFitting.h"
 #include "ui_EnggDiffractionQtTabFocus.h"
 #include "ui_EnggDiffractionQtTabPreproc.h"
-#include "ui_EnggDiffractionQtTabFitting.h"
 #include "ui_EnggDiffractionQtTabSettings.h"
 
 #include <boost/scoped_ptr.hpp>
@@ -157,7 +157,23 @@ public:
 
   std::string getFittingRunNo() const override;
 
+  void clearFittingComboBox() const override;
+
+  void enableFittingComboBox(bool enable) const override;
+
+  int getFittingComboIdx(std::string bank) const override;
+
+  void clearFittingListWidget() const override;
+
+  void enableFittingListWidget(bool enable) const override;
+
+  int getFittingListWidgetCurrentRow() const override;
+
+  void setFittingListWidgetCurrentRow(int idx) const override;
+
   std::string fittingPeaksData() const override;
+
+  void setPeakList(std::string peakList) const override;
 
   std::vector<std::string>
   splitFittingDirectory(std::string &selectedfPath) override;
@@ -169,11 +185,9 @@ public:
   void setDataVector(std::vector<boost::shared_ptr<QwtData>> &data,
                      bool focused, bool plotSinglePeaks) override;
 
-  void addBankItems(std::vector<std::string> splittedBaseName,
-                    QString selectedFile) override;
+  void addBankItem(std::string bankID) override;
 
-  void addRunNoItem(std::vector<std::string> runNumVector,
-                    bool multiRun) override;
+  void addRunNoItem(std::string runNo) override;
 
   std::vector<std::string> getFittingRunNumVec() override;
 
@@ -182,11 +196,6 @@ public:
   bool getFittingMultiRunMode() override;
 
   void setFittingMultiRunMode(bool mode) override;
-
-  bool isDigit(std::string text) override;
-
-  void setDefaultBank(std::vector<std::string> splittedBaseName,
-                      QString selectedFile);
 
   std::string fittingRunNoFactory(std::string bank, std::string fileName,
                                   std::string &bankDir, std::string fileDir);
@@ -276,7 +285,7 @@ private slots:
   // slot of the fitting peaks per part of the interface
   void browseFitFocusedRun();
   void resetFittingMultiMode();
-  void setBankIdComboBox(int idx);
+  void setBankIdComboBox(int idx) override;
   void browsePeaksToFit();
   void setPeakPick();
   void addPeakToList();

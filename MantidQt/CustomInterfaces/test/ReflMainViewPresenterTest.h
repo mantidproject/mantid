@@ -6,11 +6,10 @@
 #include <gtest/gtest.h>
 
 #include "MantidAPI/FrameworkManager.h"
-#include "MantidQtCustomInterfaces/Reflectometry/GenericDataProcessorPresenter.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflMainViewPresenter.h"
 
-#include "DataProcessorMockObjects.h"
-#include "ProgressableViewMockObject.h"
+#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorMockObjects.h"
+#include "MantidQtMantidWidgets/DataProcessorUI/ProgressableViewMockObject.h"
 #include "ReflMainViewMockObjects.h"
 
 using namespace MantidQt::CustomInterfaces;

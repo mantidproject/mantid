@@ -50,11 +50,6 @@ FitOneSinglePeak::FitOneSinglePeak()
       m_finalGoodnessValue(0.), m_numFitCalls(0), m_sstream("") {}
 
 //----------------------------------------------------------------------------------------------
-/** Destructor for FitOneSinglePeak
-  */
-FitOneSinglePeak::~FitOneSinglePeak() {}
-
-//----------------------------------------------------------------------------------------------
 /** Set workspaces
   */
 void FitOneSinglePeak::setWorskpace(API::MatrixWorkspace_sptr dataws,
@@ -1081,11 +1076,6 @@ FitPeak::FitPeak()
       m_bestPeakFunc(), m_bestBkgdFunc(), m_bestRwp(DBL_MAX),
       m_finalGoodnessValue(0.), m_vecybkup(), m_vecebkup(), m_costFunction(),
       m_lightWeightOutput(false) {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-FitPeak::~FitPeak() {}
 
 //----------------------------------------------------------------------------------------------
 /** Declare properties

@@ -1,17 +1,18 @@
 #ifndef REBINNING_XML_GENERATOR_TEST_H
 #define REBINNING_XML_GENERATOR_TEST_H
 
-#include <gmock/gmock.h>
-#include <gtest/gtest.h>
-#include <cxxtest/TestSuite.h>
-#include <MantidGeometry/MDGeometry/IMDDimension.h>
-#include "MantidVatesAPI/VatesKnowledgeSerializer.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
 #include "MantidKernel/System.h"
-#include "MantidAPI/AnalysisDataService.h"
-#include <boost/shared_ptr.hpp>
+#include "MantidKernel/WarningSuppressions.h"
+#include "MantidVatesAPI/VatesKnowledgeSerializer.h"
 #include "MockObjects.h"
+#include <MantidGeometry/MDGeometry/IMDDimension.h>
+#include <boost/shared_ptr.hpp>
+#include <cxxtest/TestSuite.h>
+#include <gmock/gmock.h>
+#include <gtest/gtest.h>
 
 using namespace Mantid::VATES;
 
@@ -20,12 +21,13 @@ private:
   // Helper class
   class MockImplicitFunction : public Mantid::Geometry::MDImplicitFunction {
   public:
+    GCC_DIAG_OFF_SUGGEST_OVERRIDE
     MOCK_METHOD1(isPointContained, bool(const Mantid::coord_t *pPoint));
     MOCK_METHOD1(isPointContained, bool(const std::vector<Mantid::coord_t> &));
     MOCK_METHOD1(isPointContained, bool(const Mantid::Kernel::VMD &));
     MOCK_CONST_METHOD0(getName, std::string());
     MOCK_CONST_METHOD0(toXMLString, std::string());
-    ~MockImplicitFunction() override {}
+    GCC_DIAG_ON_SUGGEST_OVERRIDE
   };
 
   // Test methods

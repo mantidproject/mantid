@@ -12,16 +12,6 @@ namespace Crystal {
 DECLARE_ALGORITHM(ClearUB)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-ClearUB::ClearUB() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-ClearUB::~ClearUB() {}
-
-//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string ClearUB::name() const { return "ClearUB"; }
 

@@ -13,7 +13,7 @@ const std::string IEventWorkspace::toString() const {
   std::ostringstream os;
   os << MatrixWorkspace::toString() << "\n";
 
-  os << "Events: " + boost::lexical_cast<std::string>(getNumberEvents());
+  os << "Events: " + std::to_string(getNumberEvents());
   switch (getEventType()) {
   case WEIGHTED:
     os << " (weighted)\n";

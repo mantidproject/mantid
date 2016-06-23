@@ -35,9 +35,6 @@ namespace DataHandling {
 */
 class DLLExport NexusTester : public API::Algorithm {
 public:
-  NexusTester();
-  ~NexusTester() override;
-
   const std::string name() const override;
   /// Summary of algorithms purpose
   const std::string summary() const override {

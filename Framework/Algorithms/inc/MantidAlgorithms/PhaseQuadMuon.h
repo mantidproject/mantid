@@ -38,10 +38,6 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class DLLExport PhaseQuadMuon : public API::Algorithm {
 public:
-  /// Default constructor
-  PhaseQuadMuon(){};
-  /// Destructor
-  ~PhaseQuadMuon() override{};
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "PhaseQuad"; }
   /// Summary of algorithm's purpose

@@ -41,6 +41,7 @@
 #include <QLabel>
 #include <QLineEdit>
 #include <QComboBox>
+#include <QCloseEvent>
 
 ExpDecayDialog::ExpDecayDialog(int type, QWidget *parent, Qt::WFlags fl)
     : QDialog(parent, fl), fitter(NULL), graph(NULL), buttonFit(NULL),
@@ -171,7 +172,7 @@ void ExpDecayDialog::activateCurve(const QString &curveName) {
   int precision = app->fit_output_precision;
   double start, end;
   graph->range(graph->curveIndex(curveName), &start, &end);
-  boxStart->setText(QString::number(QMIN(start, end)));
+  boxStart->setText(QString::number(qMin(start, end)));
   boxYOffset->setText(QString::number(c->minYValue(), 'g', precision));
   if (slopes < 2)
     boxAmplitude->setText(
@@ -181,7 +182,7 @@ void ExpDecayDialog::activateCurve(const QString &curveName) {
 void ExpDecayDialog::changeDataRange() {
   double start = graph->selectedXStartValue();
   double end = graph->selectedXEndValue();
-  boxStart->setText(QString::number(QMIN(start, end), 'g', 15));
+  boxStart->setText(QString::number(qMin(start, end), 'g', 15));
 }
 
 void ExpDecayDialog::fit() {

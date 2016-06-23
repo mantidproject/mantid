@@ -39,10 +39,6 @@ namespace Algorithms {
  */
 class DLLExport SplineBackground : public API::Algorithm {
 public:
-  /// Default constructor
-  SplineBackground() : API::Algorithm(){};
-  /// Destructor
-  ~SplineBackground() override{};
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "SplineBackground"; }
   /// Algorithm's version for identification overriding a virtual method

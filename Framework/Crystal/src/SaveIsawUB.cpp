@@ -18,18 +18,6 @@ using namespace Mantid::API;
 using namespace std;
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-SaveIsawUB::SaveIsawUB() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-SaveIsawUB::~SaveIsawUB() {}
-
-//----------------------------------------------------------------------------------------------
-
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void SaveIsawUB::init() {
@@ -125,7 +113,7 @@ void SaveIsawUB::exec() {
     for (size_t basis = 0; basis < 3; basis++) {
       out << setw(11) << setprecision(8) << ub[beam][basis] << setw(12)
           << setprecision(8) << ub[back][basis] << setw(12) << setprecision(8)
-          << ub[up][basis] << " " << endl;
+          << ub[up][basis] << " \n";
     }
 
     out << setw(11) << setprecision(4) << lattice.a() << setw(12)
@@ -133,7 +121,7 @@ void SaveIsawUB::exec() {
         << lattice.c() << setw(12) << setprecision(4) << lattice.alpha()
         << setw(12) << setprecision(4) << lattice.beta() << setw(12)
         << setprecision(4) << lattice.gamma() << setw(12) << setprecision(4)
-        << lattice.volume() << " " << endl;
+        << lattice.volume() << " \n";
     double ErrorVolume = getErrorVolume(lattice);
     out << setw(11) << setprecision(4) << lattice.errora() << setw(12)
         << setprecision(4) << lattice.errorb() << setw(12) << setprecision(4)
@@ -141,19 +129,18 @@ void SaveIsawUB::exec() {
         << lattice.erroralpha() << setw(12) << setprecision(4)
         << lattice.errorbeta() << setw(12) << setprecision(4)
         << lattice.errorgamma() << setw(12) << setprecision(4) << ErrorVolume
-        << " " << endl;
+        << " \n";
 
-    out << endl
-        << endl;
+    out << "\n\n";
 
     out << "The above matrix is the Transpose of the UB Matrix. ";
-    out << "The UB matrix maps the column" << endl;
+    out << "The UB matrix maps the column\n";
     out << "vector (h,k,l ) to the column vector ";
-    out << "(q'x,q'y,q'z)." << endl;
+    out << "(q'x,q'y,q'z).\n";
     out << "|Q'|=1/dspacing and its coordinates are a ";
-    out << "right-hand coordinate system where" << endl;
+    out << "right-hand coordinate system where\n";
     out << " x is the beam direction and z is vertically ";
-    out << "upward.(IPNS convention)" << endl;
+    out << "upward.(IPNS convention)\n";
 
     out.close();
 

@@ -1,12 +1,13 @@
 #ifndef MANTID_CRYSTAL_PEAKBACKGROUNDTEST_H_
 #define MANTID_CRYSTAL_PEAKBACKGROUNDTEST_H_
 
+#include "MantidCrystal/PeakBackground.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidKernel/WarningSuppressions.h"
+#include "MantidTestHelpers/ComponentCreationHelper.h"
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
-#include "MantidCrystal/PeakBackground.h"
-#include "MantidGeometry/Instrument.h"
-#include "MantidDataObjects/PeaksWorkspace.h"
-#include "MantidTestHelpers/ComponentCreationHelper.h"
 
 using Mantid::Crystal::PeakBackground;
 using namespace Mantid::API;
@@ -31,6 +32,8 @@ IPeaksWorkspace_sptr make_peaks_workspace(const V3D &hklPeak) {
   peakWS->addPeak(peak);
   return peakWS;
 }
+
+GCC_DIAG_OFF_SUGGEST_OVERRIDE
 
 // Mock Background strategy
 class MockIMDIterator : public IMDIterator {
@@ -63,6 +66,7 @@ public:
   MOCK_CONST_METHOD1(isWithinBounds, bool(size_t));
 };
 }
+GCC_DIAG_ON_SUGGEST_OVERRIDE
 
 class PeakBackgroundTest : public CxxTest::TestSuite {
 public:

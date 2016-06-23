@@ -35,8 +35,6 @@ class DLLExport EQSANSTofStructure : public API::Algorithm {
 public:
   /// Default constructor
   EQSANSTofStructure();
-  /// Virtual destructor
-  ~EQSANSTofStructure() override {}
   /// Algorithm's name
   const std::string name() const override { return "EQSANSTofStructure"; }
   /// Summary of algorithms purpose

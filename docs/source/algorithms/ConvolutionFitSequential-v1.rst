@@ -48,10 +48,7 @@ Usage
     AppendSpectra(InputWorkspace1="__ConvFit_Resolution", InputWorkspace2=resolution.getName(), OutputWorkspace="__ConvFit_Resolution")  
   
   # Run algorithm
-  wsName = ConvolutionFitSequential(InputWorkspace=sample, Function=function ,BackgroundType=bgType, StartX=startX, EndX=endX, SpecMin=specMin, SpecMax=specMax, Convolve=convolve, Minimizer=minimizer, MaxIterations=maxIt)
-
-  # Obtain result
-  result_ws = mtd[wsName]
+  result_ws = ConvolutionFitSequential(InputWorkspace=sample, Function=function ,BackgroundType=bgType, StartX=startX, EndX=endX, SpecMin=specMin, SpecMax=specMax, Convolve=convolve, Minimizer=minimizer, MaxIterations=maxIt)
   
   print "Result has %i Spectra" %result_ws.getNumberHistograms()
   

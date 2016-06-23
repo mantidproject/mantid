@@ -33,6 +33,8 @@
 #include "Matrix.h"
 #include "MatrixModel.h"
 
+#include <QCloseEvent>
+#include <QColorGroup>
 #include <QLayout>
 #include <QGroupBox>
 #include <QPushButton>
@@ -726,7 +728,7 @@ void PreviewTable::importASCII(const QString &fname, const QString &sep,
         line = s.split(sep, QString::SkipEmptyParts);
         for (int i = 0; i < line.size(); i++)
           comments[startCol + i] = line[i];
-        qApp->processEvents(QEventLoop::ExcludeUserInput);
+        qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
       }
     } else if (rows > 0) { // put values in the first line of the table
       for (int i = 0; i < cols; i++)
@@ -757,7 +759,7 @@ void PreviewTable::importASCII(const QString &fname, const QString &sep,
         setText(row, startCol + j, line[j]);
 
       row++;
-      qApp->processEvents(QEventLoop::ExcludeUserInput);
+      qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
     }
     blockSignals(false);
     f.remove();
@@ -883,7 +885,7 @@ PreviewMatrix::PreviewMatrix(QWidget *parent, Matrix *m) : QTableView(parent) {
   setFocusPolicy(Qt::NoFocus);
 
   QPalette pal = palette();
-  pal.setColor(QColorGroup::Base, QColor(255, 255, 128));
+  pal.setColor(QPalette::ColorRole::Base, QColor(255, 255, 128));
   setPalette(pal);
 
   // set header properties

@@ -29,17 +29,6 @@ using namespace H5;
 DECLARE_ALGORITHM(SaveDiffCal)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-SaveDiffCal::SaveDiffCal()
-    : m_numValues(0), m_calibrationWS(), m_detidToIndex() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-SaveDiffCal::~SaveDiffCal() {}
-
-//----------------------------------------------------------------------------------------------
 
 /// Algorithms name for identification. @see Algorithm::name
 const std::string SaveDiffCal::name() const { return "SaveDiffCal"; }
@@ -142,8 +131,7 @@ void SaveDiffCal::writeIntFieldFromSVWS(
 
   int32_t value;
   for (size_t i = 0; i < m_numValues; ++i) {
-    auto spectrum = ws->getSpectrum(i);
-    auto ids = spectrum->getDetectorIDs();
+    auto &ids = ws->getSpectrum(i).getDetectorIDs();
     auto found = m_detidToIndex.find(*(ids.begin()));
     if (found != m_detidToIndex.end()) {
       value = static_cast<int32_t>(ws->getValue(found->first));

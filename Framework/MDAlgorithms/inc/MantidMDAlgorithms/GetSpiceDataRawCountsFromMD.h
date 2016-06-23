@@ -36,12 +36,6 @@ namespace MDAlgorithms {
 */
 class DLLExport GetSpiceDataRawCountsFromMD : public API::Algorithm {
 public:
-  /// Creator
-  GetSpiceDataRawCountsFromMD();
-
-  /// Destructor
-  ~GetSpiceDataRawCountsFromMD() override;
-
   /// Algorithm's name
   const std::string name() const override {
     return "GetSpiceDataRawCountsFromMD";

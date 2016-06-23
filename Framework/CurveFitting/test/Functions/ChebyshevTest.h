@@ -57,7 +57,6 @@ public:
 
     double startx = 10.0;
     double endx = -10.0;
-
     cheb.setAttributeValue("StartX", startx);
     cheb.setAttributeValue("EndX", endx);
 

@@ -135,7 +135,7 @@ void LoadAscii2::parseLine(const std::string &line,
       // there were more separators than there should have been, which isn't
       // right, or something went rather wrong
       throw std::runtime_error(
-          "Line " + boost::lexical_cast<std::string>(m_lineNo) +
+          "Line " + std::to_string(m_lineNo) +
           ": Sets of values must have between 1 and 3 delimiters");
     } else if (cols == 1) {
       // a size of 1 is a spectra ID as long as there are no alphabetic
@@ -151,7 +151,7 @@ void LoadAscii2::parseLine(const std::string &line,
         // if not then they've ommitted IDs in the the file previously and just
         // decided to include one (which is wrong and confuses everything)
         throw std::runtime_error(
-            "Line " + boost::lexical_cast<std::string>(m_lineNo) +
+            "Line " + std::to_string(m_lineNo) +
             ": Inconsistent inclusion of spectra IDs. All spectra must have "
             "IDs or all spectra must not have IDs. "
             "Check for blank lines, as they symbolize the end of one spectra "
@@ -168,7 +168,7 @@ void LoadAscii2::parseLine(const std::string &line,
     }
   } else if (badLine(line)) {
     throw std::runtime_error(
-        "Line " + boost::lexical_cast<std::string>(m_lineNo) +
+        "Line " + std::to_string(m_lineNo) +
         ": Unexpected character found at beginning of line. Lines must either "
         "be a single integer, a list of numeric values, blank, or a text line "
         "beginning with the specified comment indicator: " +
@@ -176,7 +176,7 @@ void LoadAscii2::parseLine(const std::string &line,
   } else {
     // strictly speaking this should never be hit, but just being sure
     throw std::runtime_error(
-        "Line " + boost::lexical_cast<std::string>(m_lineNo) +
+        "Line " + std::to_string(m_lineNo) +
         ": Unknown format at line. Lines must either be a single integer, a "
         "list of numeric values, blank, or a text line beginning with the "
         "specified comment indicator: " +
@@ -212,10 +212,10 @@ void LoadAscii2::writeToWorkspace(API::MatrixWorkspace_sptr &localWorkspace,
     }
     if (m_spectrumIDcount != 0) {
       localWorkspace->getSpectrum(i)
-          ->setSpectrumNo(m_spectra[i].getSpectrumNo());
+          .setSpectrumNo(m_spectra[i].getSpectrumNo());
     } else {
       localWorkspace->getSpectrum(i)
-          ->setSpectrumNo(static_cast<specnum_t>(i) + 1);
+          .setSpectrumNo(static_cast<specnum_t>(i) + 1);
     }
   }
 }
@@ -257,7 +257,7 @@ void LoadAscii2::setcolumns(std::ifstream &file, std::string &line,
             // isn't right, or something went rather wrong
             throw std::runtime_error(
                 "Sets of values must have between 1 and 3 delimiters. Found " +
-                boost::lexical_cast<std::string>(cols) + ".");
+                std::to_string(cols) + ".");
           } else if (cols != 1) {
             try {
               fillInputValues(values, columns);
@@ -673,7 +673,7 @@ void LoadAscii2::exec() {
   if (sep.empty()) {
     g_log.notice() << "\"UserDefined\" has been selected, but no custom "
                       "separator has been entered."
-                      " Using default instead." << std::endl;
+                      " Using default instead.\n";
     sep = ",";
   }
   m_columnSep = sep;
@@ -704,7 +704,7 @@ void LoadAscii2::exec() {
     rd = readData(file);
   } catch (std::exception &e) {
     g_log.error() << "Failed to read as ASCII this file: '" << filename
-                  << ", error description: " << e.what() << std::endl;
+                  << ", error description: " << e.what() << '\n';
     throw std::runtime_error("Failed to recognize this file as an ASCII file, "
                              "cannot continue.");
   }

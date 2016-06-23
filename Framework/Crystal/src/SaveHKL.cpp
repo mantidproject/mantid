@@ -39,18 +39,6 @@ namespace Crystal {
 DECLARE_ALGORITHM(SaveHKL)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-SaveHKL::SaveHKL() : m_smu(0.), m_amu(0.), m_radius(0.), m_power_th(0.) {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-SaveHKL::~SaveHKL() {}
-
-//----------------------------------------------------------------------------------------------
-
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void SaveHKL::init() {
@@ -595,7 +583,7 @@ void SaveHKL::exec() {
           out << std::setw(9) << std::fixed << std::setprecision(4) << dsp;
         }
 
-        out << std::endl;
+        out << '\n';
       }
     }
   }
@@ -615,7 +603,7 @@ void SaveHKL::exec() {
     out << "    0.00    0.00   0  0.0000 0.0000      0      0 0.0000 "
            "  0  0.00000   0.0000";
   }
-  out << std::endl;
+  out << '\n';
   out.flush();
   out.close();
   // delete banned peaks

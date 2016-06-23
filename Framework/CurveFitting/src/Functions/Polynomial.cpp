@@ -136,7 +136,7 @@ void Polynomial::setAttribute(const std::string &attName,
           "Polynomial: polynomial order cannot be negative.");
     }
     for (int i = 0; i <= m_n; ++i) {
-      std::string parName = "A" + boost::lexical_cast<std::string>(i);
+      std::string parName = "A" + std::to_string(i);
       declareParameter(parName);
     }
   }

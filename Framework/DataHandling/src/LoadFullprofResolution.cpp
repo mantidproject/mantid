@@ -40,16 +40,6 @@ DECLARE_ALGORITHM(LoadFullprofResolution)
 std::map<std::string, size_t> LoadFullprofResolution::m_rowNumbers;
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-LoadFullprofResolution::LoadFullprofResolution() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-LoadFullprofResolution::~LoadFullprofResolution() {}
-
-//----------------------------------------------------------------------------------------------
 /** Implement abstract Algorithm methods
  */
 void LoadFullprofResolution::init() {
@@ -360,10 +350,10 @@ void LoadFullprofResolution::scanBanks(const vector<string> &lines,
   }
 
   g_log.debug() << "[DB1112] Number of bank IDs = " << banks.size() << ", "
-                << "Number of ranges = " << bankstartindexmap.size() << endl;
+                << "Number of ranges = " << bankstartindexmap.size() << '\n';
   for (auto &bank : banks) {
     g_log.debug() << "Bank " << bank << " From line " << bankstartindexmap[bank]
-                  << " to " << bankendindexmap[bank] << endl;
+                  << " to " << bankendindexmap[bank] << '\n';
   }
 
   return;

@@ -393,7 +393,7 @@ inline std::ostream &operator<<(std::ostream &ostr, const ComplexMatrix &m) {
       ostr << std::setw(28) << std::setprecision(13) << value.real() << "+"
            << value.imag() << "j ";
     }
-    ostr << std::endl;
+    ostr << '\n';
   }
   ostr.flags(fflags);
   return ostr;

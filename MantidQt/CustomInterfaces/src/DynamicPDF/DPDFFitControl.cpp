@@ -376,7 +376,7 @@ void FitControl::loadBuiltInModels(QMenu *menuModels) {
   for (int i = 0; i < modelNames.size(); i++) {
     QAction *actionModel = new QAction(modelNames.at(i), this);
     mapperModel->setMapping(actionModel, modelNames.at(i));
-    connect(actionModel, SIGNAL(activated()), mapperModel, SLOT(map()));
+    connect(actionModel, SIGNAL(triggered()), mapperModel, SLOT(map()));
     menuModels->addAction(actionModel);
   }
   connect(mapperModel, SIGNAL(mapped(const QString &)), this,
