@@ -780,6 +780,47 @@ public:
     TS_ASSERT_DELTA(out->getParameter("A1"), 2.0, 0.0003);
     TS_ASSERT_DELTA(out->getParameter("A2"), 1.0, 0.01);
   }
+
+  void test_function_Quadratic() {
+    // create mock data to test against
+    int histogramNumber = 1;
+    int timechannels = 5;
+    Mantid::API::MatrixWorkspace_sptr ws2D =
+        WorkspaceFactory::Instance().create("Workspace2D", histogramNumber,
+                                            timechannels, timechannels);
+
+    for (int i = 0; i < timechannels; i++) {
+      ws2D->dataX(0)[i] = i + 1;
+      ws2D->dataY(0)[i] = (i + 1) * (i + 1);
+      ws2D->dataE(0)[i] = 1.0;
+    }
+
+    Fit fitalg;
+    TS_ASSERT_THROWS_NOTHING(fitalg.initialize());
+    TS_ASSERT(fitalg.isInitialized());
+
+    // set up fitting function
+    const std::string funcStr = "name=Quadratic, A0=1.0";
+    fitalg.setPropertyValue("Function", funcStr);
+
+    // Set which spectrum to fit against and initial starting values
+    fitalg.setProperty("InputWorkspace", ws2D);
+    fitalg.setPropertyValue("WorkspaceIndex", "0");
+
+    // execute fit
+    TS_ASSERT_THROWS_NOTHING(TS_ASSERT(fitalg.execute()))
+
+    TS_ASSERT(fitalg.isExecuted());
+
+    // test the output from fit is what you expect
+    double dummy = fitalg.getProperty("OutputChi2overDoF");
+    TS_ASSERT_DELTA(dummy, 0.0, 0.1);
+
+    IFunction_sptr out = fitalg.getProperty("Function");
+    TS_ASSERT_DELTA(out->getParameter("A0"), 0.0, 0.01);
+    TS_ASSERT_DELTA(out->getParameter("A1"), 0.0, 0.01);
+    TS_ASSERT_DELTA(out->getParameter("A2"), 1.0, 0.0001);
+  }
 };
 
 class FitTestPerformance : public CxxTest::TestSuite {
