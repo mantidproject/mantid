@@ -97,6 +97,8 @@ public slots:
   void userChangedRuns();
   /// Called when period combination box checked/unchecked
   void periodCombinationStateChanged(int state);
+  /// Called when fit type changed
+  void fitTypeChanged(bool state);
 
 signals:
   /// Edited the ws index, start or end fields

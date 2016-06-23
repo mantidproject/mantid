@@ -47,6 +47,8 @@ MuonFitDataSelector::MuonFitDataSelector(QWidget *parent, int runNumber,
  */
 void MuonFitDataSelector::setUpConnections() {
   connect(m_ui.runs, SIGNAL(filesFound()), this, SLOT(userChangedRuns()));
+  connect(m_ui.rbCoAdd, SIGNAL(toggled(bool)), this,
+          SLOT(fitTypeChanged(bool)));
   connect(m_ui.txtWSIndex, SIGNAL(editingFinished()), this,
           SIGNAL(dataPropertiesChanged()));
   connect(m_ui.txtStart, SIGNAL(editingFinished()), this,
@@ -57,6 +59,15 @@ void MuonFitDataSelector::setUpConnections() {
           SLOT(periodCombinationStateChanged(int)));
   connect(m_ui.chkCombine, SIGNAL(clicked()), this,
           SIGNAL(selectedPeriodsChanged()));
+}
+
+/**
+ * Called when fit type changed. Emit a signal.
+ * @param state :: [input] Unused.
+ */
+void MuonFitDataSelector::fitTypeChanged(bool state) {
+  (void)state;
+  emit workspaceChanged();
 }
 
 /**
