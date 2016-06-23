@@ -503,8 +503,6 @@ public slots:
   void clearAllMemory(const bool prompt = true);
   // Ticket #672
   void saveNexusWorkspace();
-  // Serialise the workspaces to a TSV file.
-  std::string saveWorkspaces(ApplicationWindow *app);
 
 #ifdef _WIN32
 public:

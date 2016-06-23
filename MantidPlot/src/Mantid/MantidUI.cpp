@@ -2094,56 +2094,6 @@ void MantidUI::enableSaveNexus(const QString &wsName) {
 
 void MantidUI::disableSaveNexus() { appWindow()->disableSaveNexus(); }
 
-
-/** This method implements IProjectSerialisable to save the currently loaded workspaces in
- * the project.
- *
- * Saves the names of all the workspaces loaded into mantid workspace tree. Creates
- * a string and calls save nexus on each workspace to save the data to a nexus file.
- *
- * @param app :: The application window instance
- */
-std::string MantidUI::saveWorkspaces(ApplicationWindow *app) {
-  using namespace Mantid::API;
-  std::string workingDir = app->workingDir.toStdString();
-  QString wsNames;
-  wsNames = "<mantidworkspaces>\n";
-  wsNames += "WorkspaceNames";
-  QTreeWidget *tree = m_exploreMantid->m_tree;
-  int count = tree->topLevelItemCount();
-  for (int i = 0; i < count; ++i) {
-    QTreeWidgetItem *item = tree->topLevelItem(i);
-    QString wsName = item->text(0);
-
-    Workspace_sptr ws = AnalysisDataService::Instance().retrieveWS<Workspace>(
-        wsName.toStdString());
-    WorkspaceGroup_sptr group =
-        boost::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(ws);
-    // We don't split up multiperiod workspaces for performance reasons.
-    // There's significant optimisations we can perform on load if they're a
-    // single file.
-    if (ws->id() == "WorkspaceGroup" && group && !group->isMultiperiod()) {
-      wsNames += "\t";
-      wsNames += wsName;
-      std::vector<std::string> secondLevelItems = group->getNames();
-      for (size_t j = 0; j < secondLevelItems.size(); j++) {
-        wsNames += ",";
-        wsNames += QString::fromStdString(secondLevelItems[j]);
-        std::string fileName(workingDir + "//" + secondLevelItems[j] + ".nxs");
-        savedatainNexusFormat(fileName, secondLevelItems[j]);
-      }
-    } else {
-      wsNames += "\t";
-      wsNames += wsName;
-
-      std::string fileName(workingDir + "//" + wsName.toStdString() + ".nxs");
-      savedatainNexusFormat(fileName, wsName.toStdString());
-    }
-  }
-  wsNames += "\n</mantidworkspaces>\n";
-  return wsNames.toStdString();
-}
-
 /**
 *  Prepares the Mantid Menu depending on the state of the active MantidMatrix.
 */

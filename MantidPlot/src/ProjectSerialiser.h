@@ -85,6 +85,7 @@ namespace MantidQt {
             QString saveFolderHeader(Folder* folder, bool isCurrentFolder);
             QString saveFolderSubWindows(Folder *folder, int &windowCount);
             QString saveFolderFooter();
+            std::string saveWorkspaces();
         };
     }
 }

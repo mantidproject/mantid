@@ -240,7 +240,7 @@ QString ProjectSerialiser::serialiseProjectState(Folder* folder)
 
     // Save the list of workspaces
     if(window->mantidUI) {
-        std::string workspaceString = window->mantidUI->saveWorkspaces(window);
+        std::string workspaceString = saveWorkspaces();
         text += QString::fromStdString(workspaceString);
     }
 
@@ -352,6 +352,55 @@ QString ProjectSerialiser::saveFolderFooter()
 {
     return "</folder>\n";
 }
+
+/** This method saves the currently loaded workspaces in
+ * the project.
+ *
+ * Saves the names of all the workspaces loaded into mantid workspace tree. Creates
+ * a string and calls save nexus on each workspace to save the data to a nexus file.
+ *
+ * @param app :: The application window instance
+ */
+std::string ProjectSerialiser::saveWorkspaces() {
+  using namespace Mantid::API;
+  std::string workingDir = window->workingDir.toStdString();
+  QString wsNames;
+  wsNames = "<mantidworkspaces>\n";
+  wsNames += "WorkspaceNames";
+
+  auto workspaceItems = AnalysisDataService::Instance().getObjectNames();
+  for (auto itemIter = workspaceItems.cbegin(); itemIter != workspaceItems.cend(); ++itemIter) {
+    QString wsName = QString::fromStdString(*itemIter);
+
+    Workspace_sptr ws = AnalysisDataService::Instance().retrieveWS<Workspace>(
+        wsName.toStdString());
+    WorkspaceGroup_sptr group =
+        boost::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(ws);
+    // We don't split up multiperiod workspaces for performance reasons.
+    // There's significant optimisations we can perform on load if they're a
+    // single file.
+    if (ws->id() == "WorkspaceGroup" && group && !group->isMultiperiod()) {
+      wsNames += "\t";
+      wsNames += wsName;
+      std::vector<std::string> secondLevelItems = group->getNames();
+      for (size_t j = 0; j < secondLevelItems.size(); j++) {
+        wsNames += ",";
+        wsNames += QString::fromStdString(secondLevelItems[j]);
+        std::string fileName(workingDir + "//" + secondLevelItems[j] + ".nxs");
+        window->mantidUI->savedatainNexusFormat(fileName, secondLevelItems[j]);
+      }
+    } else {
+      wsNames += "\t";
+      wsNames += wsName;
+
+      std::string fileName(workingDir + "//" + wsName.toStdString() + ".nxs");
+      window->mantidUI->savedatainNexusFormat(fileName, wsName.toStdString());
+    }
+  }
+  wsNames += "\n</mantidworkspaces>\n";
+  return wsNames.toStdString();
+}
+
 
 /**
  * Check if the project can be backed up.
