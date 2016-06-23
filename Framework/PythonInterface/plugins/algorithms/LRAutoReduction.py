@@ -1,4 +1,4 @@
-#pylint: disable=no-init,invalid-name, no-self-use
+#pylint: disable=no-init, invalid-name, no-self-use, attribute-defined-outside-init
 """
     Top-level auto-reduction algorithm for the SNS Liquids Reflectometer
 """
@@ -7,8 +7,8 @@ import math
 import re
 import platform
 import time
-import mantid
 import numpy as np
+import mantid
 from mantid.api import *
 from mantid.simpleapi import *
 from mantid.kernel import *
@@ -107,9 +107,9 @@ class LRAutoReduction(PythonAlgorithm):
             first_run_of_set = meta_data_run.getProperty("sequence_id").value[0]
             data_type = meta_data_run.getProperty("data_type").value[0]
             # Normal sample data is type 0
-            do_reduction = data_type==0
+            do_reduction = data_type == 0
             # Direct beams for scaling factors are type 1
-            is_direct_beam = data_type==1
+            is_direct_beam = data_type == 1
             # Type 2 is zero-attenuator direct beams
             # Type 3 is data that we don't need to treat
         else:
@@ -145,13 +145,14 @@ class LRAutoReduction(PythonAlgorithm):
             is_direct_beam = True
 
         # Determine the sequence ID and sequence number
+        #pylint: disable=bare-except
         try:
-            m = re.search("Run:(\d+)-(\d+)\.", title)
+            m = re.search(r"Run:(\d+)-(\d+)\.", title)
             if m is not None:
                 first_run_of_set = m.group(1)
                 sequence_number = int(m.group(2))
             else:
-                m = re.search("-(\d+)\.", title)
+                m = re.search(r"-(\d+)\.", title)
                 if m is not None:
                     sequence_number = int(m.group(1))
                     first_run_of_set = int(run_number) - int(sequence_number) + 1
