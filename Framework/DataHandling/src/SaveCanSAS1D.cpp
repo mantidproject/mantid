@@ -627,7 +627,7 @@ void SaveCanSAS1D::createSASInstrument(std::string &sasInstrument) {
   // either the width of the height is different from 0
   double collimationHeight = getProperty("SampleHeight");
   double collimationWidth = getProperty("SampleWidth");
-  std::string sasCollimation = "\n\t\t\t<SAScollimation\>";
+  std::string sasCollimation = "\n\t\t\t<SAScollimation/>";
   if (collimationHeight > 0 || collimationWidth > 0) {
     sasCollimation = "\n\t\t\t<SAScollimation>";
     // Geometry
