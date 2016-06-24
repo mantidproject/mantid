@@ -194,6 +194,11 @@ public:
     TS_ASSERT_EQUALS(values[1], 0.2);
   }
 
+  void test_empty() {
+    TS_ASSERT_EQUALS(FixedLengthVectorTester(0).empty(), true);
+    TS_ASSERT_EQUALS(FixedLengthVectorTester(1).empty(), false);
+  }
+
   void test_size() {
     const FixedLengthVectorTester values(42);
     TS_ASSERT_EQUALS(values.size(), 42);

@@ -328,6 +328,11 @@ public:
     TS_ASSERT(not_null);
   }
 
+  void test_empty() {
+    TS_ASSERT_EQUALS(VectorOfTester(0).empty(), true);
+    TS_ASSERT_EQUALS(VectorOfTester(1).empty(), false);
+  }
+
   void test_size() {
     const VectorOfTester values(42);
     TS_ASSERT_EQUALS(values.size(), 42);

@@ -118,6 +118,10 @@ public:
   /// Checks if *this stores a non-null pointer.
   explicit operator bool() const { return m_data.operator bool(); }
 
+  /// Returns true if the stored object has size 0. The behavior is undefined if
+  /// the stored pointer is null.
+  bool empty() const { return m_data->empty(); }
+
   /// Returns the size of the stored object. The behavior is undefined if the
   /// stored pointer is null.
   size_t size() const { return m_data->size(); }
