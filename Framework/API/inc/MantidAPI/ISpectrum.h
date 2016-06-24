@@ -107,7 +107,11 @@ public:
   void resetHasDx();
 
   HistogramData::Histogram histogram() const { return histogramRef(); }
-  template <typename... T> void setHistogram(T &&... data);
+  template <typename... T> void setHistogram(T &&... data) {
+    HistogramData::Histogram histogram(std::forward<T>(data)...);
+    checkHistogram(histogram);
+    mutableHistogramRef() = std::move(histogram);
+  }
 
   HistogramData::BinEdges binEdges() const { return histogramRef().binEdges(); }
   HistogramData::BinEdgeStandardDeviations binEdgeStandardDeviations() const {

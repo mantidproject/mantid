@@ -160,11 +160,5 @@ bool ISpectrum::hasDx() const { return bool(histogramRef().sharedDx()); }
  */
 void ISpectrum::resetHasDx() { mutableHistogramRef().setSharedDx(nullptr); }
 
-template <typename... T> void ISpectrum::setHistogram(T &&... data) {
-  HistogramData::Histogram histogram(std::forward<T>(data)...);
-  checkHistogram(histogram);
-  mutableHistogramRef() = std::move(histogram);
-}
-
 } // namespace Mantid
 } // namespace API
