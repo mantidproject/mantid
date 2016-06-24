@@ -56,8 +56,7 @@ void MuonAnalysisFitFunctionPresenter::doConnect() {
  * Queries function browser and updates function in fit property browser.
  */
 void MuonAnalysisFitFunctionPresenter::updateFunction() {
-  const auto globalFunc = m_funcBrowser->getGlobalFunction();
-  m_fitBrowser->setFunction(QString::fromStdString(globalFunc->asString()));
+  m_fitBrowser->setFunction(m_funcBrowser->getGlobalFunction());
 }
 
 /**

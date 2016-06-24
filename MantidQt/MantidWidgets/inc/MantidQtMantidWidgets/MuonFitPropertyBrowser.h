@@ -46,7 +46,7 @@ public:
   /// Add an extra widget into the browser
   void addExtraWidget(QWidget *widget);
   /// Set function externally
-  void setFunction(const QString &funcString) override;
+  void setFunction(const Mantid::API::IFunction_sptr func) override;
   /// Run a non-sequential fit
   void runFit() override;
   /// Run a sequential fit

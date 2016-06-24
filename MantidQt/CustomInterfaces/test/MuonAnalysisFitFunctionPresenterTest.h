@@ -19,10 +19,12 @@ using namespace testing;
 // Mock function browser widget
 class MockFunctionBrowser : public IFunctionBrowser {
 public:
-  QString getFunctionString() override { return QString("Test function"); }
-  Mantid::API::IFunction_sptr getGlobalFunction() override {
-    return Mantid::API::FunctionFactory::Instance().createFunction("Gaussian");
+  MockFunctionBrowser() {
+    m_func =
+        Mantid::API::FunctionFactory::Instance().createFunction("Gaussian");
   }
+  QString getFunctionString() override { return QString("Test function"); }
+  Mantid::API::IFunction_sptr getGlobalFunction() override { return m_func; }
   MOCK_METHOD0(functionStructureChanged, void());
   MOCK_METHOD1(updateParameters, void(const Mantid::API::IFunction &));
   MOCK_METHOD2(parameterChanged, void(const QString &, const QString &));
@@ -32,12 +34,15 @@ public:
   MOCK_METHOD0(clearErrors, void());
   MOCK_METHOD1(setFunction, void(const QString &));
   MOCK_METHOD1(setNumberOfDatasets, void(int));
+
+private:
+  Mantid::API::IFunction_sptr m_func;
 };
 
 // Mock muon fit property browser
 class MockFitFunctionControl : public IMuonFitFunctionControl {
 public:
-  MOCK_METHOD1(setFunction, void(const QString &));
+  MOCK_METHOD1(setFunction, void(const Mantid::API::IFunction_sptr));
   MOCK_METHOD0(runFit, void());
   MOCK_METHOD0(runSequentialFit, void());
   MOCK_METHOD0(functionUpdateRequested, void());
@@ -74,7 +79,6 @@ public:
     m_fitBrowser = new NiceMock<MockFitFunctionControl>();
     m_presenter = new MuonAnalysisFitFunctionPresenter(nullptr, m_fitBrowser,
                                                        m_funcBrowser);
-    testString = QString("name=Gaussian,Height=0,PeakCentre=0,Sigma=0");
   }
 
   /// Run after each test to check expectations and remove mocks
@@ -87,18 +91,21 @@ public:
   }
 
   void test_updateFunction() {
-    EXPECT_CALL(*m_fitBrowser, setFunction(testString)).Times(1);
+    EXPECT_CALL(*m_fitBrowser, setFunction(m_funcBrowser->getGlobalFunction()))
+        .Times(1);
     m_presenter->updateFunction();
   }
 
   void test_updateFunctionAndFit_nonSequential() {
-    EXPECT_CALL(*m_fitBrowser, setFunction(testString)).Times(1);
+    EXPECT_CALL(*m_fitBrowser, setFunction(m_funcBrowser->getGlobalFunction()))
+        .Times(1);
     EXPECT_CALL(*m_fitBrowser, runFit()).Times(1);
     m_presenter->updateFunctionAndFit(false);
   }
 
   void test_updateFunctionAndFit_sequential() {
-    EXPECT_CALL(*m_fitBrowser, setFunction(testString)).Times(1);
+    EXPECT_CALL(*m_fitBrowser, setFunction(m_funcBrowser->getGlobalFunction()))
+        .Times(1);
     EXPECT_CALL(*m_fitBrowser, runSequentialFit()).Times(1);
     m_presenter->updateFunctionAndFit(true);
   }
@@ -163,7 +170,6 @@ private:
     m_presenter->handleFitFinished(wsName);
   }
 
-  QString testString;
   MockFunctionBrowser *m_funcBrowser;
   MockFitFunctionControl *m_fitBrowser;
   MuonAnalysisFitFunctionPresenter *m_presenter;

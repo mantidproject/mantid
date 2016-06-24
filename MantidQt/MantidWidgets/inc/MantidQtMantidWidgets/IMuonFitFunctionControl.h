@@ -37,7 +37,7 @@ namespace MantidWidgets {
 class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS IMuonFitFunctionControl {
 public:
   virtual ~IMuonFitFunctionControl() {}
-  virtual void setFunction(const QString &funcString) = 0;
+  virtual void setFunction(const Mantid::API::IFunction_sptr func) = 0;
   virtual void runFit() = 0;
   virtual void runSequentialFit() = 0;
   virtual Mantid::API::IFunction_sptr getFunction() const = 0;

@@ -386,11 +386,12 @@ void MuonFitPropertyBrowser::addExtraWidget(QWidget *widget) {
 }
 
 /**
- * Called externally to set the function via a string
- * @param funcString :: [input] Fit function as a string
+ * Called externally to set the function
+ * @param func :: [input] Fit function to use
  */
-void MuonFitPropertyBrowser::setFunction(const QString &funcString) {
-  createCompositeFunction(funcString);
+void MuonFitPropertyBrowser::setFunction(const IFunction_sptr func) {
+  //createCompositeFunction(funcString);
+  throw std::runtime_error("Not implemented yet!");
 }
 
 /**
