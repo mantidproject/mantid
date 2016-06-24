@@ -431,8 +431,14 @@ void MuonFitPropertyBrowser::setParameterValue(const QString &funcIndex,
 void MuonFitPropertyBrowser::setWorkspaceNames(const QStringList &wsNames) {
   // Extend base class behaviour
   IWorkspaceFitControl::setWorkspaceNames(wsNames);
-  // Save the names for later use
+
   m_workspacesToFit.clear();
+  // If the existing one isn't in the list, add it
+  const std::string currentName = workspaceName();
+  if (!wsNames.contains(QString::fromStdString(currentName))) {
+    m_workspacesToFit.push_back(currentName);
+  }
+  // Now add the other names to the list
   std::transform(wsNames.begin(), wsNames.end(),
                  std::back_inserter(m_workspacesToFit),
                  [](const QString &qs) { return qs.toStdString(); });
