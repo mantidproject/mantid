@@ -9,12 +9,14 @@ import sys
 import math
 import csv
 import time
+import datetime
 import random
 import numpy
 from scipy.optimize import curve_fit
 
 
 from PyQt4 import QtCore, QtGui
+from PyQt4.QtCore import QThread
 try:
     from mantidqtpython import MantidQt
 except ImportError as e:
@@ -35,6 +37,101 @@ except AttributeError:
 
 # import line for the UI python class
 from ui_MainWindow import Ui_MainWindow
+
+
+class getPostsThread(QThread):
+    def __init__(self, main_window):
+        QThread.__init__(self)
+        self.main_window = main_window
+        print '[DB...Prototype] Thread init...'
+        self.start_time = None
+        self.num_loops = 0
+        self.stopSignal = False
+
+    def __del__(self):
+        self.wait()
+
+    def stop(self):
+        print 'set stop to ', self.stop
+        self.stopSignal = True
+
+    def run(self):
+        if self.start_time is None:
+            self.start_time = datetime.datetime.now()
+
+        while not self.stopSignal:
+            msg = 'loop %d: %s ... %s' % (self.num_loops, (datetime.datetime.now()), str(self.stopSignal))
+            print '....................................', msg
+            self.sleep(1)
+            self.num_loops += 1
+            self.main_window.ui.label_message.setText(msg)
+
+        return
+
+
+class AddPeaksThread(QThread):
+    mySignal = QtCore.pyqtSignal(int, int)  #
+
+    def __init__(self, main_window, exp_number, scan_number_list):
+        QThread.__init__(self)
+
+        self.main_window = main_window
+        self.exp_number = exp_number
+        self.scan_number_list = scan_number_list
+
+        self.mySignal.connect(self.main_window.update_message)  # connect to the updateTextEdit slot defined in app1.py
+
+        # self.mySignal.emit(-1)
+
+    def __del__(self):
+        self.wait()
+
+
+    def run(self):
+        failed_list = list()
+        for index, scan_number in enumerate(self.scan_number_list):
+            # self.mySignal.emit(index)
+
+            # merge peak
+            status, err_msg = self.main_window._myControl.merge_pts_in_scan(self.exp_number, scan_number, [], 'q-sample')
+
+            # continue to the next scan if there is something wrong
+            if status is False:
+                failed_list.append((scan_number, err_msg))
+                continue
+
+            # find peak
+            self.main_window._myControl.find_peak(self.exp_number, scan_number)
+
+            # get PeakInfo
+            peak_info = self.main_window._myControl.get_peak_info(self.exp_number, scan_number)
+            assert isinstance(peak_info, r4c.PeakProcessHelper)
+
+            self.mySignal.emit(self.exp_number, scan_number)
+
+            # retrieve and set HKL from spice table
+            peak_info.retrieve_hkl_from_spice_table()
+
+            # add to table
+            # self.main_window.set_ub_peak_table(peak_info)
+
+        # END-FOR
+
+        # pop error if there is any scan that is not reduced right
+        if len(failed_list) > 0:
+            failed_scans_str = 'Unable to merge scans: '
+            sum_error_str = ''
+            for fail_tup in failed_list:
+                failed_scans_str += '%d, ' % fail_tup[0]
+                sum_error_str += '%s\n' % fail_tup[1]
+            # END-FOR
+
+            self.main_window.pop_one_button_dialog(failed_scans_str)
+            self.main_window.pop_one_button_dialog(sum_error_str)
+
+        self.mySignal.emit(1234, 2234)
+
+        return
 
 
 class MainWindow(QtGui.QMainWindow):
@@ -266,6 +363,29 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
+    def update_message(self, int_msg, int_msg2):
+        message = str(self.ui.label_message.text())
+        message += '| %d/%d: %s' % (int_msg, int_msg2, str(datetime.datetime.now()))
+
+        self.ui.label_message.setText(message)
+
+        self.ui.statusbar.showMessage(message)
+
+        if int_msg == 1234:
+            return
+
+        exp_number = int_msg
+        scan_number = int_msg2
+        peak_info = self._myControl.get_peak_info(exp_number, scan_number)
+        assert isinstance(peak_info, r4c.PeakProcessHelper)
+
+        # retrieve and set HKL from spice table
+        peak_info.retrieve_hkl_from_spice_table()
+
+        # add to table
+        self.set_ub_peak_table(peak_info)
+
+
     def evt_show_survey(self):
         """
         Show survey result
@@ -318,7 +438,6 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.comboBox_mode.setCurrentIndex(0)
         self.ui.lineEdit_localSpiceDir.setEnabled(True)
         self.ui.pushButton_browseLocalDataDir.setEnabled(True)
-
 
         return
 
@@ -435,13 +554,27 @@ class MainWindow(QtGui.QMainWindow):
 
         # get experiment number
         status, exp_number = gutil.parse_integers_editors(self.ui.lineEdit_exp)
-        assert status
+        if not status:
+            self.pop_one_button_dialog('Unable to get experiment number\n  due to %s.' % str(exp_number))
+            return
+
+        # state a thread
+        print '[DB...BAT] Kick of thread'
+        self.get_thread = getPostsThread(self)
+        self.get_thread.start()
 
         # switch to tab-3
         self.ui.tabWidget.setCurrentIndex(MainWindow.TabPage['Calculate UB'])
 
         # find peak and add peak
         failed_list = list()
+
+        # prototype for a new thread
+        self.add_peaks_thread = AddPeaksThread(self, exp_number, scan_number_list)
+        self.add_peaks_thread.start()
+        """
+        class AddPeaksThread
+        def __init__(self, main_window, exp_number, scan_number_list):
         for scan_number in scan_number_list:
             # merge peak
             status, err_msg = self._myControl.merge_pts_in_scan(exp_number, scan_number, [], 'q-sample')
@@ -477,6 +610,10 @@ class MainWindow(QtGui.QMainWindow):
             self.pop_one_button_dialog(failed_scans_str)
             self.pop_one_button_dialog(sum_error_str)
         # END-FOR
+        """
+
+        self.get_thread.stop()
+        print '[DB...Prototype]', self.get_thread.num_loops
 
         return
 
