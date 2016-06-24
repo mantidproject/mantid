@@ -20,6 +20,9 @@ using namespace testing;
 class MockFunctionBrowser : public IFunctionBrowser {
 public:
   QString getFunctionString() override { return QString("Test function"); }
+  Mantid::API::IFunction_sptr getGlobalFunction() override {
+    return Mantid::API::FunctionFactory::Instance().createFunction("Gaussian");
+  }
   MOCK_METHOD0(functionStructureChanged, void());
   MOCK_METHOD1(updateParameters, void(const Mantid::API::IFunction &));
   MOCK_METHOD2(parameterChanged, void(const QString &, const QString &));
@@ -71,7 +74,7 @@ public:
     m_fitBrowser = new NiceMock<MockFitFunctionControl>();
     m_presenter = new MuonAnalysisFitFunctionPresenter(nullptr, m_fitBrowser,
                                                        m_funcBrowser);
-    testString = QString("Test function");
+    testString = QString("name=Gaussian,Height=0,PeakCentre=0,Sigma=0");
   }
 
   /// Run after each test to check expectations and remove mocks

@@ -48,6 +48,7 @@ public:
   virtual void clearErrors() = 0;
   virtual void setFunction(const QString &funStr) = 0;
   virtual void setNumberOfDatasets(int n) = 0;
+  virtual Mantid::API::IFunction_sptr getGlobalFunction() = 0;
 };
 
 } // namespace MantidWidgets
