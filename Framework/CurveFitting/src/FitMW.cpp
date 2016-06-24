@@ -163,7 +163,7 @@ void FitMW::createDomain(boost::shared_ptr<API::FunctionDomain> &domain,
                          size_t i0) {
   setParameters();
 
-  auto X = m_matrixWorkspace->points(m_workspaceIndex);
+  auto X = m_matrixWorkspace->x(m_workspaceIndex);
 
   if (X.size() == 0) {
     throw std::runtime_error("Workspace contains no data.");
@@ -172,7 +172,7 @@ void FitMW::createDomain(boost::shared_ptr<API::FunctionDomain> &domain,
   // find the fitting interval: from -> to
   Mantid::MantidVec::const_iterator from;
   size_t n = 0;
-  getStartIterator(X, from, n);
+  getStartIterator(X, from, n, m_matrixWorkspace->isHistogramData());
   auto to = from + n;
 
   if (m_domainType != Simple) {
@@ -198,14 +198,25 @@ void FitMW::createDomain(boost::shared_ptr<API::FunctionDomain> &domain,
     // else continue with simple domain
   }
 
-  // set function domain
-  domain.reset(new API::FunctionDomain1DSpectrum(m_workspaceIndex, from, to));
+  if (m_matrixWorkspace->isHistogramData()) {
+    std::vector<double> x(static_cast<size_t>(to - from));
+    auto it = from;
+    for (size_t i = 0; it != to; ++it, ++i) {
+      x[i] = (*it + *(it + 1)) / 2;
+    }
+    domain.reset(new API::FunctionDomain1DSpectrum(m_workspaceIndex, x));
+    x.clear();
+  } else {
+    domain.reset(new API::FunctionDomain1DSpectrum(m_workspaceIndex, from, to));
+  }
 
   if (!values) {
     values.reset(new API::FunctionValues(*domain));
   } else {
     values->expand(i0 + domain->size());
   }
+
+  bool shouldNormalise = m_normalise && m_matrixWorkspace->isHistogramData();
 
   // set the data to fit to
   m_startIndex = std::distance(X.cbegin(), from);
@@ -217,22 +228,21 @@ void FitMW::createDomain(boost::shared_ptr<API::FunctionDomain> &domain,
     throw std::runtime_error("FitMW: Inconsistent MatrixWorkspace");
   }
   // bool foundZeroOrNegativeError = false;
-  auto binEdges = m_matrixWorkspace->binEdges(m_workspaceIndex);
 
   for (size_t i = m_startIndex; i < ito; ++i) {
     size_t j = i - m_startIndex + i0;
     double y = Y[i];
     double error = E[i];
     double weight = 0.0;
-	
-	if (m_normalise) {
-		double binWidth = binEdges[i + 1] - binEdges[i];
-		if (binWidth == 0.0) {
-			throw std::runtime_error("Zero width bin found, division by zero.");
-		}
-		y /= binWidth;
-		error /= binWidth;
-	}
+
+    if (shouldNormalise) {
+      double binWidth = X[i + 1] - X[i];
+      if (binWidth == 0.0) {
+        throw std::runtime_error("Zero width bin found, division by zero.");
+      }
+      y /= binWidth;
+      error /= binWidth;
+    }
 
     if (!boost::math::isfinite(y)) // nan or inf data
     {
@@ -305,17 +315,20 @@ FitMW::createOutputWorkspace(const std::string &baseName,
   }
 
   // Set the difference spectrum
-  auto X = ws->binEdges(0);
+
+  bool shouldDeNormalise = m_normalise && m_matrixWorkspace->isHistogramData();
+
+  auto X = ws->x(0);
   auto &Ycal = ws->mutableY(1);
   auto &Diff = ws->mutableY(2);
   const size_t nData = values->size();
   for (size_t i = 0; i < nData; ++i) {
     Diff[i] = values->getFitData(i) - Ycal[i];
-	if (m_normalise) {
-		double binWidth = X[i + 1] - X[i];
-		Ycal[i] *= binWidth;
-		Diff[i] *= binWidth;
-	}
+    if (shouldDeNormalise) {
+      double binWidth = X[i + 1] - X[i];
+      Ycal[i] *= binWidth;
+      Diff[i] *= binWidth;
+    }
   }
 
   if (!outputWorkspacePropertyName.empty()) {
@@ -347,9 +360,9 @@ FitMW::createOutputWorkspace(const std::string &baseName,
  * @param n :: Size of the fitting data
  * @param isHisto :: True if it's histogram data.
  */
-void FitMW::getStartIterator(const HistogramData::Points &X,
-                             Mantid::MantidVec::const_iterator &from,
-                             size_t &n) const {
+void FitMW::getStartIterator(const HistogramData::HistogramX &X,
+                             Mantid::MantidVec::const_iterator &from, size_t &n,
+                             bool isHistogram) const {
   if (X.size() == 0) {
     throw std::runtime_error("Workspace contains no data.");
   }
@@ -401,6 +414,13 @@ void FitMW::getStartIterator(const HistogramData::Points &X,
   }
 
   n = static_cast<size_t>(to - from);
+
+  if (isHistogram) {
+    if (X.end() == to) {
+      to = X.end() - 1;
+      --n;
+    }
+  }
 }
 
 /**
@@ -408,10 +428,10 @@ void FitMW::getStartIterator(const HistogramData::Points &X,
  */
 size_t FitMW::getDomainSize() const {
   setParameters();
-  auto X = m_matrixWorkspace->points(m_workspaceIndex);
+  auto X = m_matrixWorkspace->x(m_workspaceIndex);
   size_t n = 0;
   Mantid::MantidVec::const_iterator from;
-  getStartIterator(X, from, n);
+  getStartIterator(X, from, n, m_matrixWorkspace->isHistogramData());
   return n;
 }
 
