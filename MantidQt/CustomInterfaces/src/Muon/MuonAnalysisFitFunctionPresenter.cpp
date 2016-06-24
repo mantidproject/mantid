@@ -40,6 +40,8 @@ void MuonAnalysisFitFunctionPresenter::doConnect() {
     connect(fitBrowser, SIGNAL(fitUndone()), this, SLOT(handleFitFinished()));
     connect(fitBrowser, SIGNAL(functionLoaded(const QString &)), this,
             SLOT(handleFunctionLoaded(const QString &)));
+    connect(fitBrowser, SIGNAL(workspacesToFitChanged(int)), this,
+            SLOT(updateNumberOfDatasets(int)));
   }
   if (const QObject *funcBrowser = dynamic_cast<QObject *>(m_funcBrowser)) {
     connect(funcBrowser, SIGNAL(functionStructureChanged()), this,
@@ -129,6 +131,15 @@ void MuonAnalysisFitFunctionPresenter::handleFunctionLoaded(
     const QString &funcString) {
   m_funcBrowser->clear();
   m_funcBrowser->setFunction(funcString);
+}
+
+/**
+ * Called when the number of datasets to fit is changed in the model.
+ * Update the view with the new number of datasets.
+ * @param n :: [input] Number of datasets to fit
+ */
+void MuonAnalysisFitFunctionPresenter::updateNumberOfDatasets(int nDatasets) {
+  m_funcBrowser->setNumberOfDatasets(nDatasets);
 }
 
 } // namespace CustomInterfaces

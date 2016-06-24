@@ -42,6 +42,7 @@ public:
   virtual void setWorkspaceIndex(int i) = 0;
   virtual void allowSequentialFits(bool allow) = 0;
   virtual void setWorkspaceNames(const QStringList &wsNames) {}
+  virtual void workspacesToFitChanged(int n) {}
 };
 
 } // namespace MantidWidgets

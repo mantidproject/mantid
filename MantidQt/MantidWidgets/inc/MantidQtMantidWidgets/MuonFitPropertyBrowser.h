@@ -74,6 +74,8 @@ signals:
   void functionUpdateRequested() override;
   /// Emitted when a fit or sequential fit is requested
   void functionUpdateAndFitRequested(bool sequential) override;
+  /// Emitted when number of workspaces to fit is changed
+  void workspacesToFitChanged(int n) override;
 
 protected:
   void showEvent(QShowEvent *e) override;

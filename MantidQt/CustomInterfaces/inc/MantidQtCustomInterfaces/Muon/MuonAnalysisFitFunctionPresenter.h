@@ -60,6 +60,8 @@ public slots:
   void handleErrorsEnabled(bool enabled);
   /// When a saved setup is loaded, update the function browser
   void handleFunctionLoaded(const QString &funcString);
+  /// When number of datasets to fit changes, update function browser
+  void updateNumberOfDatasets(int nDatasets);
 
 private:
   /// Connect signals and slots

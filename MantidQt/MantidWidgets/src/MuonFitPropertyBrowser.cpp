@@ -436,6 +436,8 @@ void MuonFitPropertyBrowser::setWorkspaceNames(const QStringList &wsNames) {
   std::transform(wsNames.begin(), wsNames.end(),
                  std::back_inserter(m_workspacesToFit),
                  [](const QString &qs) { return qs.toStdString(); });
+  // Update listeners
+  emit workspacesToFitChanged(static_cast<int>(m_workspacesToFit.size()));
 }
 
 } // MantidQt

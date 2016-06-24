@@ -169,7 +169,7 @@ signals:
 public slots:
 
   // Handling of multiple datasets
-  void setNumberOfDatasets(int n);
+  void setNumberOfDatasets(int n) override;
   void resetLocalParameters();
   void setCurrentDataset(int i);
   void removeDatasets(QList<int> indices);

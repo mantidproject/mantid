@@ -47,6 +47,7 @@ public:
   virtual void setErrorsEnabled(bool enabled) = 0;
   virtual void clearErrors() = 0;
   virtual void setFunction(const QString &funStr) = 0;
+  virtual void setNumberOfDatasets(int n) = 0;
 };
 
 } // namespace MantidWidgets

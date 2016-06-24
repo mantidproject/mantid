@@ -28,6 +28,7 @@ public:
   MOCK_METHOD1(setErrorsEnabled, void(bool));
   MOCK_METHOD0(clearErrors, void());
   MOCK_METHOD1(setFunction, void(const QString &));
+  MOCK_METHOD1(setNumberOfDatasets, void(int));
 };
 
 // Mock muon fit property browser
@@ -140,6 +141,12 @@ public:
     EXPECT_CALL(*m_funcBrowser, clear()).Times(1);
     EXPECT_CALL(*m_funcBrowser, setFunction(funcString)).Times(1);
     m_presenter->handleFunctionLoaded(funcString);
+  }
+
+  void test_updateNumberOfDatasets() {
+    const int nDatasets(21);
+    EXPECT_CALL(*m_funcBrowser, setNumberOfDatasets(nDatasets)).Times(1);
+    m_presenter->updateNumberOfDatasets(nDatasets);
   }
 
 private:

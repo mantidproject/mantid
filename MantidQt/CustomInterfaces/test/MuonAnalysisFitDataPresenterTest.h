@@ -55,6 +55,7 @@ public:
   MOCK_METHOD1(setWorkspaceIndex, void(int));
   MOCK_METHOD1(allowSequentialFits, void(bool));
   MOCK_METHOD1(setWorkspaceNames, void(const QStringList &));
+  MOCK_METHOD1(workspacesToFitChanged, void(int));
 };
 
 class MuonAnalysisFitDataPresenterTest : public CxxTest::TestSuite {
