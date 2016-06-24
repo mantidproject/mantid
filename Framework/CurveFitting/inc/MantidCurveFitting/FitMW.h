@@ -19,7 +19,7 @@ class MatrixWorkspace;
 }
 
 namespace HistogramData {
-class Points;
+class HistogramX;
 }
 
 namespace CurveFitting {
@@ -104,9 +104,9 @@ public:
 
 protected:
   /// Calculate size and starting iterator in the X array
-  void getStartIterator(const HistogramData::Points &X,
-                        Mantid::MantidVec::const_iterator &from,
-                        size_t &n) const;
+  void getStartIterator(const HistogramData::HistogramX &X,
+                        Mantid::MantidVec::const_iterator &from, size_t &n,
+                        bool isHistogram) const;
   /// Set all parameters
   void setParameters() const;
 
