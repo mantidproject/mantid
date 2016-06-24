@@ -5,6 +5,11 @@ SANS Changes
 .. contents:: Table of Contents
    :local:
 
+
+- Enable the CanSAS1D algorithms to handle geometry inforamtion.
+- Provide warning when users try to use a 2D reduction together with a merged reduction selection.
+
+
 Bug Fixes
 ---------
 
