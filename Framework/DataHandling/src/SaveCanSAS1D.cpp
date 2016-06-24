@@ -607,7 +607,7 @@ void SaveCanSAS1D::createSASProcessElement(std::string &sasProcess) {
 }
 
 /** This method creates an XML element named "SASinstrument"
-*  @param sasProcess :: string for sasinstrument element in the xml
+*  @param sasInstrument :: string for sasinstrument element in the xml
 */
 void SaveCanSAS1D::createSASInstrument(std::string &sasInstrument) {
   sasInstrument = "\n\t\t<SASinstrument>";
