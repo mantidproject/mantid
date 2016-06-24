@@ -109,10 +109,12 @@ void export_Projection() {
       .def(init<const Mantid::Kernel::V3D &, const Mantid::Kernel::V3D &,
                 const Mantid::Kernel::V3D &>(
           "Constructs a 3 dimensional projection", args("u", "v", "w")))
-      .def("__init__", make_constructor(&projCtor2),
+      .def("__init__", make_constructor(&projCtor2, default_call_policies(),
+                                        (arg("u"), arg("v"))),
            "Constructs a 3 dimensional projection, with w as the cross product "
            "of u and v.")
-      .def("__init__", make_constructor(&projCtor3),
+      .def("__init__", make_constructor(&projCtor3, default_call_policies(),
+                                        (arg("u"), arg("v"), arg("w"))),
            "Constructs a 3 dimensional projection")
       .def("getOffset", &Projection::getOffset, (arg("self"), arg("nd")),
            "Returns the offset for the given dimension", args("dimension"))
