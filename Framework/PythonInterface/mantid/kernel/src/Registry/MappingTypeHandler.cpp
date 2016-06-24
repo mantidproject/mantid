@@ -2,6 +2,7 @@
 #include "MantidPythonInterface/kernel/Registry/PropertyWithValueFactory.h"
 
 #include "MantidKernel/PropertyManager.h"
+#include "MantidKernel/PropertyManagerProperty.h"
 #include "MantidKernel/PropertyWithValue.h"
 
 #include <boost/make_shared.hpp>
@@ -56,17 +57,28 @@ void MappingTypeHandler::set(Kernel::IPropertyManager *alg,
  * @param direction The direction of the property
  * @returns A pointer to a newly constructed property instance
  */
-std::unique_ptr<Kernel::Property>
-MappingTypeHandler::create(const std::string &name,
-                           const boost::python::api::object &defaultValue,
-                           const boost::python::api::object &validator,
-                           const unsigned int direction) const {
-  UNUSED_ARG(name);
-  UNUSED_ARG(defaultValue);
-  UNUSED_ARG(validator);
-  UNUSED_ARG(direction);
-  throw std::runtime_error("A mapping type property should use the "
-                           "PropertyManagerProperty directly");
+std::unique_ptr<Kernel::Property> MappingTypeHandler::create(
+    const std::string &name, const boost::python::api::object &defaultValue,
+    const boost::python::api::object &, const unsigned int direction) const {
+  // We follow the same steps as above. Create a property manager and populate
+  // it
+  // with some sub-values
+  auto cppvalue = boost::make_shared<Mantid::Kernel::PropertyManager>();
+  dict pydict(defaultValue);
+  object iterkeys(pydict.iterkeys()), itervalues(pydict.itervalues());
+  auto length = len(pydict);
+  for (ssize_t i = 0; i < length; ++i) {
+    const auto pykey = iterkeys.attr("next")();
+    const auto pyvalue = itervalues.attr("next")();
+    const std::string cppkey = extract<std::string>(pykey)();
+    cppvalue->declareProperty(
+        PropertyWithValueFactory::create(cppkey, pyvalue, direction));
+  }
+  // Wrap the property manager in a PropertyManagerProperty instance.
+  std::unique_ptr<Kernel::Property> valueProp =
+      Kernel::make_unique<Kernel::PropertyManagerProperty>(name, cppvalue,
+                                                           direction);
+  return valueProp;
 }
 }
 }
