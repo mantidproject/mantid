@@ -13,9 +13,6 @@
 namespace Mantid {
 namespace DataObjects {
 
-// To ensure MDEvent is as small as possible
-#pragma pack(push, 2)
-
 /** Templated class holding data about a neutron detection event
  * in N-dimensions (for example, Qx, Qy, Qz, E).
  *
@@ -305,8 +302,6 @@ public:
     }
   }
 };
-// Return to normal packing
-#pragma pack(pop)
 } // namespace DataObjects
 } // namespace Mantid
 
