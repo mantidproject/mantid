@@ -1,4 +1,6 @@
 #pylint: disable=invalid-name,too-many-public-methods,too-many-arguments
+from __future__ import (absolute_import, division, print_function)
+
 import mantid
 from mantid.api import AnalysisDataService
 from mantid.simpleapi import CreateWorkspace, SaveNexusPD

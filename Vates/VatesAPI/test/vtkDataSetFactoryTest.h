@@ -2,19 +2,20 @@
 #ifndef VTKDATASETFACTORYTEST_H_
 #define VTKDATASETFACTORYTEST_H_
 
+#include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/IMDWorkspace.h"
-#include "MantidVatesAPI/vtkDataSetFactory.h"
+#include "MantidAPI/Workspace.h"
+#include "MantidKernel/WarningSuppressions.h"
+#include "MantidKernel/make_unique.h"
+#include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "MantidVatesAPI/ProgressAction.h"
+#include "MantidVatesAPI/vtkDataSetFactory.h"
+#include "MantidVatesAPI/vtkStructuredGrid_Silent.h"
+#include "vtkDataSet.h"
+#include "vtkFloatArray.h"
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
-#include "vtkDataSet.h"
-#include "vtkFloatArray.h"
-#include "MantidAPI/Workspace.h"
-#include "MantidAPI/IMDHistoWorkspace.h"
-#include "MantidKernel/make_unique.h"
-#include "MantidTestHelpers/MDEventsTestHelper.h"
-#include "MantidVatesAPI/vtkStructuredGrid_Silent.h"
 
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
@@ -26,11 +27,13 @@ private:
   /// Mocked helper type
   class MockvtkDataSetFactory : public Mantid::VATES::vtkDataSetFactory {
   public:
+    GCC_DIAG_OFF_SUGGEST_OVERRIDE
     MOCK_CONST_METHOD1(
         create, vtkSmartPointer<vtkDataSet>(Mantid::VATES::ProgressAction &));
     MOCK_METHOD1(initialize, void(boost::shared_ptr<Mantid::API::Workspace>));
     MOCK_CONST_METHOD0(validate, void());
     MOCK_CONST_METHOD0(getFactoryTypeName, std::string());
+    GCC_DIAG_ON_SUGGEST_OVERRIDE
     void setSuccessorConcrete(std::unique_ptr<vtkDataSetFactory> pSuccessor) {
       vtkDataSetFactory::setSuccessor(pSuccessor);
     }

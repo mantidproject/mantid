@@ -246,7 +246,7 @@ size_t ConnectedComponentLabeling::getStartLabelId() const { return m_startId; }
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-ConnectedComponentLabeling::~ConnectedComponentLabeling() {}
+ConnectedComponentLabeling::~ConnectedComponentLabeling() = default;
 
 /**
  * Get the number of threads available

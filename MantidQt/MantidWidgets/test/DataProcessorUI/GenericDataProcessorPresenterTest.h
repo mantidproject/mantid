@@ -47,13 +47,14 @@ private:
   DataProcessorWhiteList createReflectometryWhiteList() {
 
     DataProcessorWhiteList whitelist;
-    whitelist.addElement("Run(s)", "InputWorkspace");
-    whitelist.addElement("Angle", "ThetaIn");
-    whitelist.addElement("Transmission Run(s)", "FirstTransmissionRun");
-    whitelist.addElement("Q min", "MomentumTransferMinimum");
-    whitelist.addElement("Q max", "MomentumTransferMaximum");
-    whitelist.addElement("dQ/Q", "MomentumTransferStep");
-    whitelist.addElement("Scale", "ScaleFactor");
+    whitelist.addElement("Run(s)", "InputWorkspace", "", true, "TOF_");
+    whitelist.addElement("Angle", "ThetaIn", "");
+    whitelist.addElement("Transmission Run(s)", "FirstTransmissionRun", "",
+                         true, "TRANS_");
+    whitelist.addElement("Q min", "MomentumTransferMinimum", "");
+    whitelist.addElement("Q max", "MomentumTransferMaximum", "");
+    whitelist.addElement("dQ/Q", "MomentumTransferStep", "");
+    whitelist.addElement("Scale", "ScaleFactor", "");
     return whitelist;
   }
 
@@ -61,13 +62,16 @@ private:
   createReflectometryPreprocessMap() {
 
     return std::map<std::string, DataProcessorPreprocessingAlgorithm>{
-        {"Run(s)", DataProcessorPreprocessingAlgorithm()},
+        {"Run(s)", DataProcessorPreprocessingAlgorithm(
+                       "Plus", "TOF_",
+                       std::set<std::string>{"LHSWorkspace", "RHSWorkspace",
+                                             "OutputWorkspace"})},
         {"Transmission Run(s)",
          DataProcessorPreprocessingAlgorithm(
              "CreateTransmissionWorkspaceAuto", "TRANS_",
              std::set<std::string>{"FirstTransmissionRun",
-                                   "SecondTransmissionRun", "OutputWorkspace"},
-             false)}};
+                                   "SecondTransmissionRun",
+                                   "OutputWorkspace"})}};
   }
 
   DataProcessorProcessingAlgorithm createReflectometryProcessor() {
@@ -167,6 +171,45 @@ private:
     row << "24682"
         << "1.5"
         << ""
+        << "1.4"
+        << "2.9"
+        << "0.04"
+        << "1" << 1 << "";
+    return ws;
+  }
+
+  ITableWorkspace_sptr
+  createPrefilledWorkspaceWithTrans(const std::string &wsName,
+                                    const DataProcessorWhiteList &whitelist) {
+    auto ws = createWorkspace(wsName, whitelist);
+    TableRow row = ws->appendRow();
+    row << "12345"
+        << "0.5"
+        << "11115"
+        << "0.1"
+        << "1.6"
+        << "0.04"
+        << "1" << 0 << "";
+    row = ws->appendRow();
+    row << "12346"
+        << "1.5"
+        << "11116"
+        << "1.4"
+        << "2.9"
+        << "0.04"
+        << "1" << 0 << "";
+    row = ws->appendRow();
+    row << "24681"
+        << "0.5"
+        << "22221"
+        << "0.1"
+        << "1.6"
+        << "0.04"
+        << "1" << 1 << "";
+    row = ws->appendRow();
+    row << "24682"
+        << "1.5"
+        << "22222"
         << "1.4"
         << "2.9"
         << "0.04"
@@ -2005,6 +2048,79 @@ public:
         dynamic_cast<DataProcessorSeparatorCommand *>(commands[24].get()));
     TS_ASSERT(
         dynamic_cast<DataProcessorDeleteRowCommand *>(commands[25].get()));
+  }
+
+  void testWorkspaceNamesNoTrans() {
+    NiceMock<MockDataProcessorView> mockDataProcessorView;
+    NiceMock<MockProgressableView> mockProgress;
+    GenericDataProcessorPresenter presenter(
+        createReflectometryWhiteList(), createReflectometryPreprocessMap(),
+        createReflectometryProcessor(), createReflectometryPostprocessor());
+    presenter.acceptViews(&mockDataProcessorView, &mockProgress);
+
+    createPrefilledWorkspace("TestWorkspace", presenter.getWhiteList());
+    EXPECT_CALL(mockDataProcessorView, getWorkspaceToOpen())
+        .Times(1)
+        .WillRepeatedly(Return("TestWorkspace"));
+    presenter.notify(DataProcessorPresenter::OpenTableFlag);
+
+    // Tidy up
+    AnalysisDataService::Instance().remove("TestWorkspace");
+
+    // Test the names of the reduced workspaces
+    TS_ASSERT_EQUALS(presenter.getReducedWorkspaceName(0, "prefix_1_"),
+                     "prefix_1_TOF_12345");
+    TS_ASSERT_EQUALS(presenter.getReducedWorkspaceName(1, "prefix_2_"),
+                     "prefix_2_TOF_12346");
+    TS_ASSERT_EQUALS(presenter.getReducedWorkspaceName(2), "TOF_24681");
+    TS_ASSERT_EQUALS(presenter.getReducedWorkspaceName(3), "TOF_24682");
+    // Test the names of the post-processed ws
+    TS_ASSERT_EQUALS(presenter.getPostprocessedWorkspaceName(
+                         std::set<int>{0, 1}, "new_prefix_"),
+                     "new_prefix_TOF_12345_TOF_12346");
+    TS_ASSERT_EQUALS(
+        presenter.getPostprocessedWorkspaceName(std::set<int>{2, 3}),
+        "TOF_24681_TOF_24682");
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
+  }
+
+  void testWorkspaceNamesWithTrans() {
+    NiceMock<MockDataProcessorView> mockDataProcessorView;
+    NiceMock<MockProgressableView> mockProgress;
+    GenericDataProcessorPresenter presenter(
+        createReflectometryWhiteList(), createReflectometryPreprocessMap(),
+        createReflectometryProcessor(), createReflectometryPostprocessor());
+    presenter.acceptViews(&mockDataProcessorView, &mockProgress);
+
+    createPrefilledWorkspaceWithTrans("TestWorkspace",
+                                      presenter.getWhiteList());
+    EXPECT_CALL(mockDataProcessorView, getWorkspaceToOpen())
+        .Times(1)
+        .WillRepeatedly(Return("TestWorkspace"));
+    presenter.notify(DataProcessorPresenter::OpenTableFlag);
+
+    // Tidy up
+    AnalysisDataService::Instance().remove("TestWorkspace");
+
+    // Test the names of the reduced workspaces
+    TS_ASSERT_EQUALS(presenter.getReducedWorkspaceName(0, "prefix_1_"),
+                     "prefix_1_TOF_12345_TRANS_11115");
+    TS_ASSERT_EQUALS(presenter.getReducedWorkspaceName(1, "prefix_2_"),
+                     "prefix_2_TOF_12346_TRANS_11116");
+    TS_ASSERT_EQUALS(presenter.getReducedWorkspaceName(2),
+                     "TOF_24681_TRANS_22221");
+    TS_ASSERT_EQUALS(presenter.getReducedWorkspaceName(3),
+                     "TOF_24682_TRANS_22222");
+    // Test the names of the post-processed ws
+    TS_ASSERT_EQUALS(presenter.getPostprocessedWorkspaceName(
+                         std::set<int>{0, 1}, "new_prefix_"),
+                     "new_prefix_TOF_12345_TRANS_11115_TOF_12346_TRANS_11116");
+    TS_ASSERT_EQUALS(
+        presenter.getPostprocessedWorkspaceName(std::set<int>{2, 3}),
+        "TOF_24681_TRANS_22221_TOF_24682_TRANS_22222");
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
   }
 };
 

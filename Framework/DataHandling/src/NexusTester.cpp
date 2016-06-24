@@ -19,16 +19,6 @@ namespace DataHandling {
 DECLARE_ALGORITHM(NexusTester)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-NexusTester::NexusTester() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-NexusTester::~NexusTester() {}
-
-//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string NexusTester::name() const { return "NexusTester"; }
 

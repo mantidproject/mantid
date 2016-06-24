@@ -10,12 +10,15 @@
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidKernel/WarningSuppressions.h"
 
 #include "MantidQtCustomInterfaces/Muon/ALCBaselineModellingPresenter.h"
 
 using namespace MantidQt::CustomInterfaces;
 using namespace testing;
 using boost::scoped_ptr;
+
+GCC_DIAG_OFF_SUGGEST_OVERRIDE
 
 class MockALCBaselineModellingView : public IALCBaselineModellingView {
 public:
@@ -82,6 +85,7 @@ MATCHER_P3(QwtDataY, i, value, delta, "") {
 MATCHER_P3(VectorValue, i, value, delta, "") {
   return fabs(arg.at(i) - value) < delta;
 }
+GCC_DIAG_ON_SUGGEST_OVERRIDE
 
 class ALCBaselineModellingPresenterTest : public CxxTest::TestSuite {
   MockALCBaselineModellingView *m_view;

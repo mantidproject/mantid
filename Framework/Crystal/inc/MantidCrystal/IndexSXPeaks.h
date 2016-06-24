@@ -153,10 +153,6 @@ private:
 
 class DLLExport IndexSXPeaks : public API::Algorithm {
 public:
-  /// Default constructor
-  IndexSXPeaks() : API::Algorithm(){};
-  /// Destructor
-  ~IndexSXPeaks() override{};
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "IndexSXPeaks"; }
   /// Summary of algorithms purpose
