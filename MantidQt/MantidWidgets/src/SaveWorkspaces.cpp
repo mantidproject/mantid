@@ -39,8 +39,9 @@ using namespace Mantid::API;
 SaveWorkspaces::SaveWorkspaces(QWidget *parent, const QString &suggFname,
                                QHash<const QCheckBox *const, QString> &defSavs,
                                bool saveAsZeroErrorFree)
-    : API::MantidDialog(parent), m_saveAsZeroErrorFree(saveAsZeroErrorFree), m_geometryID("),
-                            m_sampleHeight(""), m_sampleWidth(""), m_sampleThickness(""){
+    : API::MantidDialog(parent), m_saveAsZeroErrorFree(saveAsZeroErrorFree),
+      m_geometryID(""), m_sampleHeight(""), m_sampleWidth(""),
+      m_sampleThickness("") {
   setAttribute(Qt::WA_DeleteOnClose);
   setWindowTitle("Save Workspaces");
 
