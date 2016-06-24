@@ -8,12 +8,11 @@
 #include "MantidSINQ/PoldiUtilities/PoldiSpectrumDomainFunction.h"
 #include "MantidSINQ/PoldiUtilities/PoldiMockInstrumentHelpers.h"
 #include "MantidSINQ/PoldiUtilities/PoldiInstrumentAdapter.h"
-#include "MantidAPI/FunctionDomain1D.h"
-#include "MantidAPI/FunctionValues.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/MultiDomainFunction.h"
-#include "MantidCurveFitting/FitMW.h"
 #include "MantidCurveFitting/Jacobian.h"
+
+#include "MantidCurveFitting/Functions/Gaussian.h"
 
 using ::testing::Return;
 
@@ -209,11 +208,11 @@ public:
 
     TS_ASSERT_EQUALS(function->getParameter("PeakCentre"), 1.1086444);
 
-    MultiDomainFunction *mdf = new MultiDomainFunction();
-    mdf->addFunction(IFunction_sptr(dynamic_cast<IFunction *>(function)));
+    MultiDomainFunction mdf;
+    mdf.addFunction(IFunction_sptr(dynamic_cast<IFunction *>(function)));
 
     TS_ASSERT_EQUALS(
-        static_cast<IFunction *>(mdf)->getParameter("f0.PeakCentre"),
+        static_cast<IFunction *>(&mdf)->getParameter("f0.PeakCentre"),
         1.1086444);
   }
 
@@ -271,28 +270,31 @@ public:
   }
 
   /*
-   * This test must be re-enabled, when #9497 is fixed, then it will pass.
+   * This test must be re-enabled, when
+   * https://github.com/mantidproject/mantid/issues/10340
+   * (orginally trac issue #9497) is fixed, then it will pass.
    *
-   void ___testCreateInitialized()
-   {
-       IFunction_sptr function(new Gaussian());
-       function->initialize();
-       function->setParameter(0, 1.23456);
-       function->setParameter(1, 1.234567);
-       function->setParameter(2, 0.01234567);
-
-       IFunction_sptr clone = function->clone();
-
-       // passes, Parameter 0 has less than 7 significant digits
-       TS_ASSERT_EQUALS(function->getParameter(0), clone->getParameter(0));
-
-       // fails, Parameter 1 has more than 7 significant digits
-       TS_ASSERT_EQUALS(function->getParameter(1), clone->getParameter(1));
-
-       // fails, Parameter 2 has more than 7 significant digits
-       TS_ASSERT_EQUALS(function->getParameter(2), clone->getParameter(2));
-   }
+   * As of 2016/06/22 thre is still an issue with the precision in the
+   * conversion to/from strings
    */
+  void ___testCreateInitialized() {
+    IFunction_sptr function(new Gaussian());
+    function->initialize();
+    function->setParameter(0, 1.23456);
+    function->setParameter(1, 1.234567);
+    function->setParameter(2, 0.01234567);
+
+    IFunction_sptr clone = function->clone();
+
+    // passes, Parameter 0 has less than 7 significant digits
+    TS_ASSERT_EQUALS(function->getParameter(0), clone->getParameter(0));
+
+    // fails, Parameter 1 has more than 7 significant digits
+    TS_ASSERT_EQUALS(function->getParameter(1), clone->getParameter(1));
+
+    // fails, Parameter 2 has more than 7 significant digits
+    TS_ASSERT_EQUALS(function->getParameter(2), clone->getParameter(2));
+  }
 
 private:
   class TestablePoldiSpectrumDomainFunction : PoldiSpectrumDomainFunction {
