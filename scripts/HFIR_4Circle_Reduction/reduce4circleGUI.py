@@ -1221,12 +1221,17 @@ class MainWindow(QtGui.QMainWindow):
         # integrate peak
         grand_error_message = ''
         for row_number in row_number_list:
+            # get scan number and pt numbers
             scan_number = self.ui.tableWidget_mergeScans.get_scan_number(row_number)
             status, pt_number_list = self._myControl.get_pt_numbers(exp_number, scan_number)
+
+            # set intensity to zero and error message
             if status is False:
-                print ('Unable to get Pt. of experiment %d scan %d due to %s.' % (
-                    exp_number, scan_number, str(pt_number_list)
-                ))
+                error_msg = 'Unable to get Pt. of experiment %d scan %d due to %s.' % (
+                    exp_number, scan_number, str(pt_number_list))
+                self._myControl.set_peak_intensity(exp_number, scan_number, 0.)
+                self.ui.tableWidget_mergeScans.set_peak_intensity(row_number, scan_number, 0., False)
+                self.ui.tableWidget_mergeScans.set_status(scan_number, error_msg)
                 continue
 
             # merge all Pt. of the scan if they are not merged.
@@ -1238,11 +1243,22 @@ class MainWindow(QtGui.QMainWindow):
             # END-IF
 
             # calculate peak center
-            status, ret_obj = self._myControl.calculate_peak_center(exp_number, scan_number, pt_number_list)
+            try:
+                status, ret_obj = self._myControl.calculate_peak_center(exp_number, scan_number, pt_number_list)
+            except RuntimeError as run_err:
+                status = False
+                ret_obj = 'RuntimeError: %s.' % str(run_err)
+            except AssertionError as ass_err:
+                status = False
+                ret_obj = 'AssertionError: %s.' % str(ass_err)
+
             if status:
                 center_i = ret_obj
             else:
-                print 'Unable to find peak for exp %d scan %d.' % (exp_number, scan_number)
+                error_msg = 'Unable to find peak for exp %d scan %d: %s.' % (exp_number, scan_number, str(ret_obj))
+                self._myControl.set_peak_intensity(exp_number, scan_number, 0.)
+                self.ui.tableWidget_mergeScans.set_peak_intensity(row_number, scan_number, 0., False)
+                self.ui.tableWidget_mergeScans.set_status(scan_number, error_msg)
                 continue
 
             # mask workspace
@@ -1260,12 +1276,28 @@ class MainWindow(QtGui.QMainWindow):
                                                                    use_mask=mask_det,
                                                                    normalization=norm_type,
                                                                    mask_ws_name=selected_mask)
-            assert status, str(ret_obj)
+            # handle integration error
+            if not status:
+                error_msg = str(ret_obj)
+                self._myControl.set_peak_intensity(exp_number, scan_number, 0.)
+                self.ui.tableWidget_mergeScans.set_peak_intensity(row_number, scan_number, 0., False)
+                self.ui.tableWidget_mergeScans.set_status(scan_number, error_msg)
+                continue
+
             pt_dict = ret_obj
 
             background_pt_list = pt_number_list[:num_bg_pt] + pt_number_list[-num_bg_pt:]
             avg_bg_value = self._myControl.estimate_background(pt_dict, background_pt_list)
             intensity_i = self._myControl.simple_integrate_peak(pt_dict, avg_bg_value)
+
+            # check intensity value
+            if intensity_i < 0:
+                # set to status
+                error_msg = 'Negative intensity: %.3f' % intensity_i
+                self.ui.tableWidget_mergeScans.set_status(scan_no=scan_number, status=error_msg)
+                # reset intensity to 0.
+                intensity_i = 0.
+
             # set the calculated peak intensity to _peakInfoDict
             status, error_msg = self._myControl.set_peak_intensity(exp_number, scan_number, intensity_i)
             if status is False:
@@ -1279,6 +1311,8 @@ class MainWindow(QtGui.QMainWindow):
         # pop error message if there is any
         if len(grand_error_message) > 0:
             self.pop_one_button_dialog(grand_error_message)
+
+        self.ui.tableWidget_mergeScans.select_all_rows(False)
 
         return
 
