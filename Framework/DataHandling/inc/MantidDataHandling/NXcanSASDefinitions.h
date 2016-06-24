@@ -24,7 +24,7 @@ const std::string sasCanSASclass = "canSAS_class";
 
 // SASentry
 const std::string sasEntryClassAttr = "SASentry";
-const std::string nxEntryClassAttr = " NXentry";
+const std::string nxEntryClassAttr = "NXentry";
 const std::string sasEntryGroupName = "sasentry";
 const std::string sasEntryVersionAttr = "version";
 const std::string sasEntryVersionAttrValue = "1.0";
