@@ -1,12 +1,12 @@
 #ifndef CALCULATEEFFICIENCYTEST_H_
 #define CALCULATEEFFICIENCYTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidAlgorithms/CalculateEfficiency.h"
 #include "MantidAPI/Axis.h"
+#include "MantidAlgorithms/CalculateEfficiency.h"
 #include "MantidDataHandling/LoadSpice2D.h"
 #include "MantidDataHandling/MoveInstrumentComponent.h"
 #include "MantidTestHelpers/SANSInstrumentCreationHelper.h"
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -24,7 +24,7 @@ public:
 
     // Set up the X bin for the monitor channels
     for (int i = 0; i < SANSInstrumentCreationHelper::nMonitors; i++) {
-      Mantid::MantidVec &X = ws->dataX(i);
+      auto &X = ws->mutableX(i);
       X[0] = 1;
       X[1] = 2;
     }
@@ -33,9 +33,9 @@ public:
       for (int iy = 0; iy < SANSInstrumentCreationHelper::nBins; iy++) {
         int i = ix * SANSInstrumentCreationHelper::nBins + iy +
                 SANSInstrumentCreationHelper::nMonitors;
-        Mantid::MantidVec &X = ws->dataX(i);
-        Mantid::MantidVec &Y = ws->dataY(i);
-        Mantid::MantidVec &E = ws->dataE(i);
+        auto &X = ws->mutableX(i);
+        auto &Y = ws->mutableY(i);
+        auto &E = ws->mutableE(i);
         X[0] = 1;
         X[1] = 2;
         Y[0] = 2.0;
@@ -44,8 +44,7 @@ public:
     }
     // Change one of the bins so that it will be excluded for having a high
     // signal
-    Mantid::MantidVec &Y =
-        ws->dataY(SANSInstrumentCreationHelper::nMonitors + 5);
+    auto &Y = ws->mutableY(SANSInstrumentCreationHelper::nMonitors + 5);
     Y[0] = 202.0;
   }
 
@@ -80,28 +79,23 @@ public:
         boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(ws_out);
 
     double tolerance(1e-03);
+    TS_ASSERT_DELTA(ws2d_out->y(1 + SANSInstrumentCreationHelper::nMonitors)[0],
+                    0.9, tolerance);
     TS_ASSERT_DELTA(
-        ws2d_out->dataY(1 + SANSInstrumentCreationHelper::nMonitors)[0], 0.9,
+        ws2d_out->y(15 + SANSInstrumentCreationHelper::nMonitors)[0], 0.9,
         tolerance);
-    TS_ASSERT_DELTA(
-        ws2d_out->dataY(15 + SANSInstrumentCreationHelper::nMonitors)[0], 0.9,
-        tolerance);
-    TS_ASSERT_DELTA(
-        ws2d_out->dataY(6 + SANSInstrumentCreationHelper::nMonitors)[0], 0.9,
-        tolerance);
-    TS_ASSERT_DELTA(
-        ws2d_out->dataY(5 + SANSInstrumentCreationHelper::nMonitors)[0], 90.9,
-        tolerance);
+    TS_ASSERT_DELTA(ws2d_out->y(6 + SANSInstrumentCreationHelper::nMonitors)[0],
+                    0.9, tolerance);
+    TS_ASSERT_DELTA(ws2d_out->y(5 + SANSInstrumentCreationHelper::nMonitors)[0],
+                    90.9, tolerance);
 
+    TS_ASSERT_DELTA(ws2d_out->e(1 + SANSInstrumentCreationHelper::nMonitors)[0],
+                    0.4502, tolerance);
     TS_ASSERT_DELTA(
-        ws2d_out->dataE(1 + SANSInstrumentCreationHelper::nMonitors)[0], 0.4502,
+        ws2d_out->e(15 + SANSInstrumentCreationHelper::nMonitors)[0], 0.4502,
         tolerance);
-    TS_ASSERT_DELTA(
-        ws2d_out->dataE(15 + SANSInstrumentCreationHelper::nMonitors)[0],
-        0.4502, tolerance);
-    TS_ASSERT_DELTA(
-        ws2d_out->dataE(6 + SANSInstrumentCreationHelper::nMonitors)[0], 0.4502,
-        tolerance);
+    TS_ASSERT_DELTA(ws2d_out->e(6 + SANSInstrumentCreationHelper::nMonitors)[0],
+                    0.4502, tolerance);
 
     // Check that pixels that were out of range were masked
     TS_ASSERT(
@@ -127,32 +121,26 @@ public:
     ws2d_out =
         boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(ws_out);
 
-    TS_ASSERT_DELTA(
-        ws2d_out->dataX(1 + SANSInstrumentCreationHelper::nMonitors)[0], 1.0,
-        tolerance);
-    TS_ASSERT_DELTA(
-        ws2d_out->dataX(1 + SANSInstrumentCreationHelper::nMonitors)[1], 2.0,
-        tolerance);
+    TS_ASSERT_DELTA(ws2d_out->x(1 + SANSInstrumentCreationHelper::nMonitors)[0],
+                    1.0, tolerance);
+    TS_ASSERT_DELTA(ws2d_out->x(1 + SANSInstrumentCreationHelper::nMonitors)[1],
+                    2.0, tolerance);
 
+    TS_ASSERT_DELTA(ws2d_out->y(1 + SANSInstrumentCreationHelper::nMonitors)[0],
+                    1.0, tolerance);
     TS_ASSERT_DELTA(
-        ws2d_out->dataY(1 + SANSInstrumentCreationHelper::nMonitors)[0], 1.0,
+        ws2d_out->y(15 + SANSInstrumentCreationHelper::nMonitors)[0], 1.0,
         tolerance);
-    TS_ASSERT_DELTA(
-        ws2d_out->dataY(15 + SANSInstrumentCreationHelper::nMonitors)[0], 1.0,
-        tolerance);
-    TS_ASSERT_DELTA(
-        ws2d_out->dataY(6 + SANSInstrumentCreationHelper::nMonitors)[0], 1.0,
-        tolerance);
+    TS_ASSERT_DELTA(ws2d_out->y(6 + SANSInstrumentCreationHelper::nMonitors)[0],
+                    1.0, tolerance);
 
+    TS_ASSERT_DELTA(ws2d_out->e(1 + SANSInstrumentCreationHelper::nMonitors)[0],
+                    0.5002, tolerance);
     TS_ASSERT_DELTA(
-        ws2d_out->dataE(1 + SANSInstrumentCreationHelper::nMonitors)[0], 0.5002,
+        ws2d_out->e(15 + SANSInstrumentCreationHelper::nMonitors)[0], 0.5002,
         tolerance);
-    TS_ASSERT_DELTA(
-        ws2d_out->dataE(15 + SANSInstrumentCreationHelper::nMonitors)[0],
-        0.5002, tolerance);
-    TS_ASSERT_DELTA(
-        ws2d_out->dataE(6 + SANSInstrumentCreationHelper::nMonitors)[0], 0.5002,
-        tolerance);
+    TS_ASSERT_DELTA(ws2d_out->e(6 + SANSInstrumentCreationHelper::nMonitors)[0],
+                    0.5002, tolerance);
 
     // Check that pixels that were out of range were masked
     TS_ASSERT(ws2d_out->getDetector(5 + SANSInstrumentCreationHelper::nMonitors)
@@ -233,13 +221,13 @@ public:
     // Get the coordinate of the detector pixel
 
     double tolerance(1e-03);
-    TS_ASSERT_DELTA(ws2d_out->dataY(1 + nmon)[0], 0.980083, tolerance);
-    TS_ASSERT_DELTA(ws2d_out->dataY(193 + nmon)[0], 1.23006, tolerance);
-    TS_ASSERT_DELTA(ws2d_out->dataY(6 + nmon)[0], 1.10898, tolerance);
+    TS_ASSERT_DELTA(ws2d_out->y(1 + nmon)[0], 0.980083, tolerance);
+    TS_ASSERT_DELTA(ws2d_out->y(193 + nmon)[0], 1.23006, tolerance);
+    TS_ASSERT_DELTA(ws2d_out->y(6 + nmon)[0], 1.10898, tolerance);
 
-    TS_ASSERT_DELTA(ws2d_out->dataE(1 + nmon)[0], 0.0990047, tolerance);
-    TS_ASSERT_DELTA(ws2d_out->dataE(193 + nmon)[0], 0.110913, tolerance);
-    TS_ASSERT_DELTA(ws2d_out->dataE(6 + nmon)[0], 0.105261, tolerance);
+    TS_ASSERT_DELTA(ws2d_out->e(1 + nmon)[0], 0.0990047, tolerance);
+    TS_ASSERT_DELTA(ws2d_out->e(193 + nmon)[0], 0.110913, tolerance);
+    TS_ASSERT_DELTA(ws2d_out->e(6 + nmon)[0], 0.105261, tolerance);
 
     // Check that pixels that were out of range were masked
     TS_ASSERT(ws2d_out->getDetector(1826)->isMasked())
