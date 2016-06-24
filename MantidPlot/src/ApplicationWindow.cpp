@@ -4634,7 +4634,7 @@ ApplicationWindow *ApplicationWindow::openProject(const QString &filename,
 
   // Open as a top level folder
   ProjectSerialiser serialiser(this);
-  serialiser.load(lines, fileVersion, true);
+  serialiser.load(lines, fileVersion);
 
   if (d_loaded_current)
     curFolder = d_loaded_current;
@@ -13777,7 +13777,7 @@ Folder *ApplicationWindow::appendProject(const QString &fn,
 
   // Open folders
   ProjectSerialiser serialiser(this);
-  serialiser.load(lines, fileVersion, true);
+  serialiser.load(lines, fileVersion);
 
   // Restore the selected folder
   folders->setCurrentItem(curFolder->folderListItem());

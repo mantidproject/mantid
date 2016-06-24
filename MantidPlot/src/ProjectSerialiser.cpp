@@ -201,7 +201,7 @@ void ProjectSerialiser::loadProjectSections(const std::string &lines, const int 
   if (tsv.hasSection("folder")) {
     std::vector<std::string> folders = tsv.sections("folder");
     for (auto it = folders.begin(); it != folders.end(); ++it) {
-      load(*it, fileVersion);
+      load(*it, fileVersion, false);
     }
   }
 
@@ -242,20 +242,19 @@ QString ProjectSerialiser::serialiseProjectState(Folder* folder)
 
     // Save the list of workspaces
     if(window->mantidUI) {
-        std::string workspaceString = saveWorkspaces();
-        text += QString::fromStdString(workspaceString);
+        text += saveWorkspaces();
     }
 
     // Save the scripting window
     ScriptingWindow* scriptingWindow = window->getScriptWindowHandle();
     if (scriptingWindow) {
-         std::string scriptString = scriptingWindow->saveToProject(window);
-         text += QString::fromStdString(scriptString);
+        std::string scriptString = scriptingWindow->saveToProject(window);
+        text += QString::fromStdString(scriptString);
     }
 
     // Finally, recursively save folders
     if(folder) {
-       text += saveFolderState(folder, true);
+        text += saveFolderState(folder, true);
     }
 
     return text;
@@ -369,7 +368,7 @@ QString ProjectSerialiser::saveFolderFooter()
  *
  * @param app :: The application window instance
  */
-std::string ProjectSerialiser::saveWorkspaces() {
+QString ProjectSerialiser::saveWorkspaces() {
   using namespace Mantid::API;
   std::string workingDir = window->workingDir.toStdString();
   QString wsNames;
@@ -406,7 +405,7 @@ std::string ProjectSerialiser::saveWorkspaces() {
     }
   }
   wsNames += "\n</mantidworkspaces>\n";
-  return wsNames.toStdString();
+  return wsNames;
 }
 
 

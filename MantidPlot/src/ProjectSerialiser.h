@@ -52,15 +52,19 @@ namespace MantidQt {
             /// Save the current state of the project to disk
             void save(Folder* folder, const QString& projectName, bool compress = false);
             /// Load a project file from disk
-            void load(std::string lines, const int fileVersion, const bool isTopLevel = false);
+            void load(std::string lines, const int fileVersion, const bool isTopLevel = true);
             /// Open the script window and load scripts from string
             void openScriptWindow(const QStringList &files);
 
         private:
+            // Instance Variables
+
             /// Store a reference to the caller application window instance
             ApplicationWindow* window;
             /// Store a count of the number of windows during saving
             int m_windowCount;
+
+            // Saving Functions
 
             /// Attempt to backup files before save
             bool canBackupProjectFiles(QFile* fileHandle, const QString& projectName);
@@ -70,6 +74,15 @@ namespace MantidQt {
             QString serialiseProjectState(Folder* folder);
             /// Save the project file to disk
             void saveProjectFile(QFile* fileHandle, const QString &projectName, QString& text, bool compress);
+
+            QString saveFolderState(Folder *folder, const bool isTopLevel = false);
+            QString saveFolderHeader(Folder* folder, bool isCurrentFolder);
+            QString saveFolderSubWindows(Folder *folder);
+            QString saveFolderFooter();
+            QString saveWorkspaces();
+
+            // Loading Functions
+
             /// Load sections of the folder
             void loadProjectSections(const std::string& lines, const int fileVersion, const bool isTopLevel);
             /// Open the script window and load scripts from string
@@ -83,11 +96,6 @@ namespace MantidQt {
             void populateMantidTreeWidget(const QString &s);
             void loadWsToMantidTree(const std::string &wsName);
 
-            QString saveFolderState(Folder *folder, const bool isTopLevel = false);
-            QString saveFolderHeader(Folder* folder, bool isCurrentFolder);
-            QString saveFolderSubWindows(Folder *folder);
-            QString saveFolderFooter();
-            std::string saveWorkspaces();
         };
     }
 }
