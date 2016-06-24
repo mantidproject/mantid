@@ -67,8 +67,8 @@ private:
   std::vector<double> m_qValueCache; // List of calculated Q values
 };
 
-}  // namespace Functions
-}  // namespace CurveFitting
-}  // namespace Mantid
+} // namespace Functions
+} // namespace CurveFitting
+} // namespace Mantid
 
-#endif  // MANTID_INELASTICDIFFROTDISCRETECIRCLE_H_
+#endif // MANTID_INELASTICDIFFROTDISCRETECIRCLE_H_

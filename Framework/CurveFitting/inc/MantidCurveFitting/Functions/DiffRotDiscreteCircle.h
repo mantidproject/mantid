@@ -61,11 +61,11 @@ public:
 
   /// Override parent definition
   virtual void declareAttribute(const std::string &name,
-    const API::IFunction::Attribute &defaultValue);
+                                const API::IFunction::Attribute &defaultValue);
 
   /// Override parent definition
   void setAttribute(const std::string &name,
-    const API::IFunction::Attribute &att) override;
+                    const API::IFunction::Attribute &att) override;
 
 private:
   boost::shared_ptr<ElasticDiffRotDiscreteCircle> m_elastic;

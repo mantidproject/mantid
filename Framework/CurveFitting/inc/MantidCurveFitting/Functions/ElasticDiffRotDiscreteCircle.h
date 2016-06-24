@@ -57,8 +57,8 @@ public:
   double HeightPrefactor() const override;
 };
 
-}  // namespace Functions
-}  // namespace CurveFitting
-}  // namespace Mantid
+} // namespace Functions
+} // namespace CurveFitting
+} // namespace Mantid
 
 #endif // MANTID_ELASTICDIFFROTDISCRETECIRCLE_H_

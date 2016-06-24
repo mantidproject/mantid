@@ -35,9 +35,9 @@ InelasticDiffRotDiscreteCircle::InelasticDiffRotDiscreteCircle()
   this->declareParameter("Intensity", 1.0, "scaling factor [no units]");
   this->declareParameter("Radius", 1.0, "Circle radius [Angstroms]");
   this->declareParameter("Decay", 1.0,
-    "Inverse of transition rate, in nanoseconds "
-    "if energy in micro-ev, or picoseconds if "
-    "energy in mili-eV");
+                         "Inverse of transition rate, in nanoseconds "
+                         "if energy in micro-ev, or picoseconds if "
+                         "energy in mili-eV");
   this->declareParameter("Shift", 0.0, "Shift in the centre of the peak");
 
   this->declareAttribute("Q", API::IFunction::Attribute(EMPTY_DBL()));
@@ -71,8 +71,8 @@ void InelasticDiffRotDiscreteCircle::init() {
  * @exception No Q values can be found in associated attributes
  */
 void InelasticDiffRotDiscreteCircle::function1D(double *out,
-  const double *xValues,
-  const size_t nData) const {
+                                                const double *xValues,
+                                                const size_t nData) const {
 
   auto I = this->getParameter("Intensity");
   auto R = this->getParameter("Radius");
@@ -92,8 +92,7 @@ void InelasticDiffRotDiscreteCircle::function1D(double *out,
 
     g_log.debug() << "Get Q value for workspace index " << specIdx << ": " << Q
                   << '\n';
-  }
-  else {
+  } else {
     Q = getAttribute("Q").asDouble();
 
     g_log.debug() << "Using Q attribute: " << Q << '\n';
@@ -107,7 +106,7 @@ void InelasticDiffRotDiscreteCircle::function1D(double *out,
   }
 
   std::vector<double> ratel(N);
-  for (int l = 1; l < N; l++) {  // l goes up to N-1
+  for (int l = 1; l < N; l++) { // l goes up to N-1
     // notice that 0 < l/N < 1
     ratel[l] = rate * 4 * pow(sin(M_PI * l / N), 2);
   }
@@ -115,10 +114,10 @@ void InelasticDiffRotDiscreteCircle::function1D(double *out,
   for (size_t i = 0; i < nData; i++) {
     double w = xValues[i] - S;
     double S = 0.0;
-    for (int l = 1; l < N; l++) {  // l goes up to N-1
+    for (int l = 1; l < N; l++) { // l goes up to N-1
       double lorentzian = ratel[l] / (ratel[l] * ratel[l] + w * w);
       double al = 0.0;
-      for (int k = 1; k < N; k++) {  // case k==N after the loop
+      for (int k = 1; k < N; k++) { // case k==N after the loop
         double y = 2 * M_PI * l * k / N;
         al += cos(y) * sph[k];
       }
@@ -169,6 +168,6 @@ void InelasticDiffRotDiscreteCircle::setWorkspace(
   }
 }
 
-}  // namespace Functions
-}  // namespace CurveFitting
-}  // namespace Mantid
+} // namespace Functions
+} // namespace CurveFitting
+} // namespace Mantid

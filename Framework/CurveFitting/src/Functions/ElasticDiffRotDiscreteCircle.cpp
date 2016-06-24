@@ -64,6 +64,6 @@ double ElasticDiffRotDiscreteCircle::HeightPrefactor() const {
   return aN / N;
 }
 
-}  // namespace Functions
-}  // namespace CurveFitting
-}  // namespace Mantid
+} // namespace Functions
+} // namespace CurveFitting
+} // namespace Mantid
