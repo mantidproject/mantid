@@ -1232,6 +1232,8 @@ public:
   void disableTools();
 
   void saveProjectAs(const QString& fileName = QString(), bool = false);
+  void openProject(const QString& fileName = QString(), const int fileVersion = 0);
+
   MdiSubWindow* clone(MdiSubWindow*);
 
   Matrix* tableToMatrix(Table* t);

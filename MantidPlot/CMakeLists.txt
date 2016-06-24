@@ -863,6 +863,7 @@ set ( MANTIDPLOT_TEST_PY_FILES
     MantidPlotSliceViewerTest.py
     MantidPlot1DPlotTest.py
     MantidPlot2DPlotTest.py
+    MantidPlotProjectSerialiseTest.py
     MantidPlotProxiesTest.py
     MantidPlotPythonImportTest.py
     MantidPlotFoldersTest.py
