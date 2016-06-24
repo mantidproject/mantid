@@ -106,11 +106,9 @@ void SaveCanSAS1D2::exec() {
   std::string sasInstrument;
   try {
     createSASInstrument(sasInstrument);
-  }
-  catch (Kernel::Exception::NotFoundError &) {
+  } catch (Kernel::Exception::NotFoundError &) {
     throw;
-  }
-  catch (std::runtime_error &) {
+  } catch (std::runtime_error &) {
     throw;
   }
   m_outFile << sasInstrument;

@@ -156,7 +156,7 @@ protected:
   void createSASProcessElement(std::string &sasProcess);
 
   /// this method creates a sasInstrument element
-  void createSASInstrument(std::string & sasInstrument);
+  void createSASInstrument(std::string &sasInstrument);
 
   /// points to the workspace that will be written to file
   API::MatrixWorkspace_const_sptr m_workspace;

@@ -355,9 +355,10 @@ void LoadCanSAS1D::createLogs(const Poco::XML::Element *const sasEntry,
   }
 }
 
-void LoadCanSAS1D::createSampleInformation(const Poco::XML::Element *const sasEntry,
-  Mantid::API::MatrixWorkspace_sptr wSpace) const {
-  auto& sample = wSpace->mutableSample();
+void LoadCanSAS1D::createSampleInformation(
+    const Poco::XML::Element *const sasEntry,
+    Mantid::API::MatrixWorkspace_sptr wSpace) const {
+  auto &sample = wSpace->mutableSample();
 
   // Get the thickness information
   auto sasSampleElement = sasEntry->getChildElement("SASsample");
@@ -370,7 +371,8 @@ void LoadCanSAS1D::createSampleInformation(const Poco::XML::Element *const sasEn
 
   auto sasInstrumentElement = sasEntry->getChildElement("SASinstrument");
   check(sasInstrumentElement, "<SASinstrument>");
-  auto sasCollimationElement = sasInstrumentElement->getChildElement("SAScollimation");
+  auto sasCollimationElement =
+      sasInstrumentElement->getChildElement("SAScollimation");
   check(sasCollimationElement, "<SAScollimation>");
 
   // Get the geometry information

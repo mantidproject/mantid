@@ -67,7 +67,8 @@ void SaveCanSAS1D::init() {
       "Geometry", "Disc",
       boost::make_shared<Kernel::StringListValidator>(collimationGeometry),
       "The geometry type of the collimation.");
-  auto mustBePositiveOrZero = boost::make_shared<Kernel::BoundedValidator<double>>();
+  auto mustBePositiveOrZero =
+      boost::make_shared<Kernel::BoundedValidator<double>>();
   mustBePositiveOrZero->setLower(0);
   declareProperty("SampleHeight", 0.0, mustBePositiveOrZero,
                   "The height of the collimation element in mm. If specified "
@@ -144,11 +145,9 @@ void SaveCanSAS1D::exec() {
   std::string sasInstrument;
   try {
     createSASInstrument(sasInstrument);
-  }
-  catch (Kernel::Exception::NotFoundError &) {
+  } catch (Kernel::Exception::NotFoundError &) {
     throw;
-  }
-  catch (std::runtime_error &) {
+  } catch (std::runtime_error &) {
     throw;
   }
   m_outFile << sasInstrument;
@@ -610,7 +609,7 @@ void SaveCanSAS1D::createSASProcessElement(std::string &sasProcess) {
 /** This method creates an XML element named "SASinstrument"
 *  @param sasProcess :: string for sasinstrument element in the xml
 */
-void SaveCanSAS1D::createSASInstrument(std::string& sasInstrument) {
+void SaveCanSAS1D::createSASInstrument(std::string &sasInstrument) {
   sasInstrument = "\n\t\t<SASinstrument>";
   std::string sasInstrName = "\n\t\t\t<name>";
   std::string instrname = m_workspace->getInstrument()->getName();
@@ -624,7 +623,7 @@ void SaveCanSAS1D::createSASInstrument(std::string& sasInstrument) {
   createSASSourceElement(sasSource);
   sasInstrument += sasSource;
 
-  // Add the collimation. We add the collimation information if 
+  // Add the collimation. We add the collimation information if
   // either the width of the height is different from 0
   double collimationHeight = getProperty("SampleHeight");
   double collimationWidth = getProperty("SampleWidth");
@@ -635,9 +634,11 @@ void SaveCanSAS1D::createSASInstrument(std::string& sasInstrument) {
     std::string collimationGeometry = getProperty("Geometry");
     sasCollimation += "\n\t\t\t\t<name>" + collimationGeometry + "</name>";
     // Width
-    sasCollimation += "\n\t\t\t\t<X unit=\"mm\">" + std::to_string(collimationWidth) + "</X>";
+    sasCollimation +=
+        "\n\t\t\t\t<X unit=\"mm\">" + std::to_string(collimationWidth) + "</X>";
     // Height
-    sasCollimation += "\n\t\t\t\t<Y unit=\"mm\">" + std::to_string(collimationHeight) + "</Y>";
+    sasCollimation += "\n\t\t\t\t<Y unit=\"mm\">" +
+                      std::to_string(collimationHeight) + "</Y>";
     sasCollimation += "\n\t\t\t</SAScollimation>";
   }
   sasInstrument += sasCollimation;

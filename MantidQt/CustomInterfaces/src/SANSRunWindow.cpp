@@ -2952,7 +2952,7 @@ void SANSRunWindow::handleDefSaveClick() {
       }
 
       // Add the sample information to the output
-      auto sampleWidth =m_uiForm.sample_width->text();
+      auto sampleWidth = m_uiForm.sample_width->text();
       auto sampleHeight = m_uiForm.sample_height->text();
       auto sampleThickness = m_uiForm.sample_thick->text();
       auto geometryID = m_uiForm.sample_geomid->currentText();
