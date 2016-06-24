@@ -89,6 +89,8 @@ signals:
   void dataReadyToProcess(bool state);
   // signal  to notify mask file loaded
   void userfileLoaded();
+  /// signal to send gemoetry information
+  void sendGeometryInformation(QString &, QString &, QString &, QString &);
 
 private:
   /// Stores the batch or single run mode selection
@@ -315,6 +317,8 @@ private slots:
   void onUpDownCheckboxChanged();
   /// Handle a change of the aperture geometry for QResolution
   void handleQResolutionApertureChange(int aperture);
+  ///
+  void onUpdateGeometryRequest();
 
 private:
   /// used to specify the range of validation to do
