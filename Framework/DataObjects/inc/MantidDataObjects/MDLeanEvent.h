@@ -302,6 +302,7 @@ public:
     }
   }
 };
+
 } // namespace DataObjects
 } // namespace Mantid
 
