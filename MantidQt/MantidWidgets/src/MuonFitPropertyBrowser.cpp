@@ -265,15 +265,6 @@ void MuonFitPropertyBrowser::runFit() {
     }
     m_fitActionUndoFit->setEnabled(true);
 
-    std::string funStr;
-    if (m_compositeFunction->name() == "MultiBG") {
-      funStr = "";
-    } else if (m_compositeFunction->nFunctions() > 1) {
-      funStr = m_compositeFunction->asString();
-    } else {
-      funStr = (m_compositeFunction->getFunction(0))->asString();
-    }
-
     if (AnalysisDataService::Instance().doesExist(
             wsName + "_NormalisedCovarianceMatrix")) {
       FrameworkManager::Instance().deleteWorkspace(
@@ -288,7 +279,15 @@ void MuonFitPropertyBrowser::runFit() {
 
     IAlgorithm_sptr alg = AlgorithmManager::Instance().create("Fit");
     alg->initialize();
-    alg->setPropertyValue("Function", funStr);
+    if (m_compositeFunction->name() == "MultiBG") {
+      alg->setPropertyValue("Function", "");
+    } else if (m_compositeFunction->nFunctions() > 1) {
+      alg->setProperty("Function", boost::dynamic_pointer_cast<IFunction>(
+                                       m_compositeFunction));
+    } else {
+      alg->setProperty("Function", boost::dynamic_pointer_cast<IFunction>(
+                                       m_compositeFunction->getFunction(0)));
+    }
     if (rawData())
       alg->setPropertyValue("InputWorkspace", wsName + "_Raw");
     else
@@ -390,8 +389,7 @@ void MuonFitPropertyBrowser::addExtraWidget(QWidget *widget) {
  * @param func :: [input] Fit function to use
  */
 void MuonFitPropertyBrowser::setFunction(const IFunction_sptr func) {
-  //createCompositeFunction(funcString);
-  throw std::runtime_error("Not implemented yet!");
+  createCompositeFunction(func);
 }
 
 /**

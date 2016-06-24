@@ -381,8 +381,10 @@ protected:
   void minimizerChanged();
   /// Do the fitting
   void doFit(int maxIterations);
-  /// Create CompositeFunction
+  /// Create CompositeFunction from string
   void createCompositeFunction(const QString &str = "");
+  /// Create CompositeFunction from pointer
+  void createCompositeFunction(const Mantid::API::IFunction_sptr func);
 
   /// Property managers:
   QtGroupPropertyManager *m_groupManager;

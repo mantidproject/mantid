@@ -668,25 +668,23 @@ void FitPropertyBrowser::acceptFit() {
 
 void FitPropertyBrowser::closeFit() { m_fitSelector->close(); }
 
-/// Create CompositeFunction
-void FitPropertyBrowser::createCompositeFunction(const QString &str) {
+/**
+ * Create CompositeFunction from function pointer
+ * @param func :: [input] Pointer to function
+ */
+void FitPropertyBrowser::createCompositeFunction(
+    const Mantid::API::IFunction_sptr func) {
   if (m_compositeFunction) {
     emit functionRemoved();
     m_autoBackground = NULL;
   }
-  if (str.isEmpty()) {
+  if (!func) {
     m_compositeFunction.reset(new Mantid::API::CompositeFunction);
   } else {
-    auto f = Mantid::API::FunctionFactory::Instance().createInitialized(
-        str.toStdString());
-    if (!f) {
-      createCompositeFunction();
-      return;
-    }
-    auto cf = boost::dynamic_pointer_cast<Mantid::API::CompositeFunction>(f);
+    auto cf = boost::dynamic_pointer_cast<Mantid::API::CompositeFunction>(func);
     if (!cf || (cf->name() != "CompositeFunction" && cf->name() != "MultiBG")) {
       m_compositeFunction.reset(new Mantid::API::CompositeFunction);
-      m_compositeFunction->addFunction(f);
+      m_compositeFunction->addFunction(func);
     } else {
       m_compositeFunction = cf;
     }
@@ -705,6 +703,24 @@ void FitPropertyBrowser::createCompositeFunction(const QString &str) {
   disableUndo();
   setFitEnabled(m_compositeFunction->nFunctions() > 0);
   emit functionChanged();
+}
+
+/**
+ * Create CompositeFunction from string
+ * @param str :: [input] Function string
+ */
+void FitPropertyBrowser::createCompositeFunction(const QString &str) {
+  if (str.isEmpty()) {
+    createCompositeFunction(Mantid::API::IFunction_sptr());
+  } else {
+    auto f = Mantid::API::FunctionFactory::Instance().createInitialized(
+        str.toStdString());
+    if (f) {
+      createCompositeFunction(f);
+    } else {
+      createCompositeFunction(Mantid::API::IFunction_sptr());
+    }
+  }
 }
 
 void FitPropertyBrowser::popupMenu(const QPoint &) {
