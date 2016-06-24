@@ -1377,7 +1377,7 @@ class InstrumentWindow: MdiSubWindow /PyName=InstrumentView/
     also a tree view of the instrument hierarchy.
 
     For further help see the functions defined on each of the following
-		- InstrumentWidget
+        - InstrumentWidget
         - InstrumentWidgetRenderTab
         - InstrumentWidgetPickTab
         - InstrumentWidgetMaskTab

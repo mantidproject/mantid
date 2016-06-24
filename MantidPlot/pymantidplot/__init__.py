@@ -20,6 +20,10 @@ import time
 import mantid.api
 import mantidqtpython
 from mantidqtpython import GraphOptions
+# historical names in MantidPlot
+from mantidqtpython import MantidQt as _MantidQt
+InstrumentViewMaskTab = _MantidQt.MantidWidgets.InstrumentWidgetMaskTab
+InstrumentViewPickTab = _MantidQt.MantidWidgets.InstrumentWidgetPickTab
 
 # Import into the global namespace qti classes that:
 #   (a) don't need a proxy & (b) can be constructed from python or (c) have enumerations within them

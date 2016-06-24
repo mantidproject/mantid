@@ -36,14 +36,13 @@ the Mantid :ref:`ConvertUnits <algm-ConvertUnits>`. See also
 :ref:`EnggFitDIFCFromPeaks <algm-EnggFitDIFCFromPeaks>`.
 
 This algorithm currently fits (single) peaks of type
-:ref:`Back2BackExponential <func-Back2BackExponential>`. Other
+:ref:`Back2BackExponential <func-BackToBackExponential>`. Other
 alternatives might be added as optional in the future (for example the
 simpler :ref:`Gaussian <func-Gaussian>` or the more complex
-:ref:`Bk2BkExpConvPV <func-Bk2BkExpConvPV` or :ref:`IkedaCarpenterPV
-<func-IkedaCarpenterPV>`). To produce an initial guess for the peak
-function parameters this algorithm uses the :ref:`FindPeaks
-<algm-FindPeaks>` algorithm starting from the expected peaks list
-given in the inputs.
+*Bk2BkExpConvPV* or :ref:`IkedaCarpenterPV <func-IkedaCarpenterPV>`). To
+produce an initial guess for the peak
+function parameters this algorithm uses the :ref:`FindPeaks <algm-FindPeaks>` algorithm
+starting from the expected peaks list given in the inputs.
 
 The algorithm produces an output table workspace with information
 about the peaks fitted. The table has one row per peak and several
