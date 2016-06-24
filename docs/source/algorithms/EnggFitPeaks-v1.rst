@@ -39,7 +39,7 @@ This algorithm currently fits (single) peaks of type
 :ref:`Back2BackExponential <func-BackToBackExponential>`. Other
 alternatives might be added as optional in the future (for example the
 simpler :ref:`Gaussian <func-Gaussian>` or the more complex
-:ref:`Bk2BkExpConvPV <func-NeutronBk2BkExpConvPVoigt>` or :ref:`IkedaCarpenterPV <func-IkedaCarpenterPV>`). To
+*Bk2BkExpConvPV* or :ref:`IkedaCarpenterPV <func-IkedaCarpenterPV>`). To
 produce an initial guess for the peak
 function parameters this algorithm uses the :ref:`FindPeaks <algm-FindPeaks>` algorithm
 starting from the expected peaks list given in the inputs.
