@@ -1,17 +1,18 @@
 #ifndef MANTID_MDEVENTS_BINTOMDHISTOWORKSPACETEST_H_
 #define MANTID_MDEVENTS_BINTOMDHISTOWORKSPACETEST_H_
 
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
-#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/ImplicitFunctionBuilder.h"
 #include "MantidAPI/ImplicitFunctionFactory.h"
-#include "MantidAPI/ImplicitFunctionParser.h"
 #include "MantidAPI/ImplicitFunctionParameterParserFactory.h"
+#include "MantidAPI/ImplicitFunctionParser.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
 #include "MantidGeometry/MDGeometry/QSample.h"
-#include "MantidGeometry/Instrument.h"
+#include "MantidKernel/WarningSuppressions.h"
 #include "MantidMDAlgorithms/BinMD.h"
 #include "MantidMDAlgorithms/CreateMDWorkspace.h"
 #include "MantidMDAlgorithms/FakeMDEventData.h"
@@ -33,7 +34,7 @@ using namespace Mantid::MDAlgorithms;
 using Mantid::coord_t;
 
 class BinMDTest : public CxxTest::TestSuite {
-
+  GCC_DIAG_OFF_SUGGEST_OVERRIDE
 private:
   // Helper class. Mock Implicit function.
   class MockImplicitFunction : public Mantid::Geometry::MDImplicitFunction {
@@ -43,9 +44,8 @@ private:
     bool isPointContained(const Mantid::coord_t *) override { return false; }
     std::string getName() const override { return "MockImplicitFunction"; }
     MOCK_CONST_METHOD0(toXMLString, std::string());
-    ~MockImplicitFunction() override { ; }
   };
-
+  GCC_DIAG_ON_SUGGEST_OVERRIDE
   // Helper class. Builds mock implicit functions.
   class MockImplicitFunctionBuilder
       : public Mantid::API::ImplicitFunctionBuilder {

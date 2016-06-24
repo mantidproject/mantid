@@ -36,9 +36,6 @@ namespace Crystal {
   */
 class DLLExport TransformHKL : public API::Algorithm {
 public:
-  TransformHKL();
-  ~TransformHKL() override;
-
   /// Algorithm's name for identification
   const std::string name() const override;
 

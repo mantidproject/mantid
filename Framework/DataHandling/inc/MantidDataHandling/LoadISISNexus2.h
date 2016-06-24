@@ -76,8 +76,6 @@ class DLLExport LoadISISNexus2
 public:
   /// Default constructor
   LoadISISNexus2();
-  /// Destructor
-  ~LoadISISNexus2() override {}
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "LoadISISNexus"; }
   /// Algorithm's version for identification overriding a virtual method

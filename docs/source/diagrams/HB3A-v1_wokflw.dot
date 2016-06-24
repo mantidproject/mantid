@@ -1,0 +1,99 @@
+digraph HB3AReduction {
+  label = "HB3A Data Reduction Flowchart"
+  $global_style
+
+  ratio = fill;
+  node [style=filled];
+
+  subgraph params {
+    $param_style
+    ExperimentNumber
+    PtNumberList
+    OutputWorkspace
+  }
+
+  subgraph decisions {
+    $decision_style
+    isOutputHKL [label="Is output in HKL-space?"]
+  }
+
+  subgraph algorithms {
+    $algorithm_style
+    downloadData [label="DownloadFile v1\n Spice file, XML file"]
+    viewRawData [label="View data (GUI)"]
+    loadSpiceFile [label="LoadSpiceAscii v1"]
+    loadDetFile [label="LoadSpiceXML2DDet v1"]
+    collectExpInfo [label="CollectHB3AExperimentInfo v1", color=yellow]
+    collectExpInfo2 [label="CollectHB3AExperimentInfo v1", color=salmon2]
+    convertToQ [label="ConvertCWSDExpToMomentum v1\nExp. Info. WS", color=yellow]
+    convertToQ2 [label="ConvertCWSDExpToMomentum v1\nExp. Info. WS", color=salmon2]
+    findPeaks [label="FindPeaksMD v1", color=yellow]
+    combinePeaks [label="CombinePeaksWorkspace v1\n(cal ub)", color=greenyellow]
+    calUB [label="CalculateUMatrix v1\n(cal ub)", color=greenyellow]
+    getUB [label="PeakWorkspace.getUB()\n(cal ub)", color=greenyellow]
+    setUB [label="SetUB v1\n(index peaks)", color=deepskyblue]
+    indexPeaks [label="IndexPeaks v1\n(index peaks)", color=deepskyblue]
+    convert2HKL [label="ConvertCWSDMDtoHKL v1", color=salmon2]
+    mergeMD [label="MergeMD v1", color=salmon2]
+    integratePeak [label="IntegratePeaksCWSD v1", color=navy]
+  }
+
+  subgraph values {
+    $value_style
+    detMatrix	[label="Measurement Workspace"]
+    spiceTable	[label="Spice TableWorkspace"]
+    expScanMD	[label="Exp-scan MDWorkspace"]
+    peakWS	[label="Peaks PeakWorkspace"]
+    peakWS2	[label="Integrated Peaks PeakWorkspace"]
+    combPeakWS	[label="Combined peaks PeaksWorkspace"]
+    maskWS	[label="Mask workspace"]
+
+    ubmatrix [label="UB matrix"]
+  }
+
+  ExperimentNumber	-> downloadData
+  PtNumberList		-> downloadData
+  downloadData		-> loadSpiceFile
+  loadSpiceFile		-> loadDetFile
+  loadSpiceFile		-> spiceTable
+  loadDetFile		-> viewRawData
+  loadDetFile		-> detMatrix
+
+  detMatrix		-> collectExpInfo
+  spiceTable		-> collectExpInfo
+  collectExpInfo	-> convertToQ
+  convertToQ		-> expScanMD
+  expScanMD		-> findPeaks
+  findPeaks		-> peakWS
+
+  peakWS		-> combinePeaks
+  combinePeaks		-> combPeakWS
+  combPeakWS            -> calUB
+  calUB			-> combPeakWS;
+  combPeakWS		-> getUB
+  getUB			-> ubmatrix
+
+  ubmatrix		-> setUB
+  peakWS		-> setUB
+  setUB			-> peakWS
+  peakWS		-> indexPeaks
+
+  ExperimentNumber	-> collectExpInfo2;
+  PtNumberList 	-> collectExpInfo2
+  collectExpInfo2	-> convertToQ2
+  convertToQ2		-> isOutputHKL
+  isOutputHKL		-> convert2HKL [label="Yes"]
+  convert2HKL		-> mergeMD
+  isOutputHKL		-> mergeMD [label="No"];
+
+ 
+  expScanMD		-> integratePeak
+  peakWS		-> integratePeak
+  maskWS		-> integratePeak
+  integratePeak	        -> peakWS2
+
+  viewRawData		-> OutputWorkspace
+
+}
+
+

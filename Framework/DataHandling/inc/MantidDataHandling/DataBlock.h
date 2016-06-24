@@ -44,7 +44,7 @@ public:
   DataBlock(int numberOfperiods, size_t numberOfSpectra,
             size_t numberOfChannels);
 
-  virtual ~DataBlock();
+  virtual ~DataBlock() = default;
 
   virtual int64_t getMinSpectrumID() const;
   virtual void setMinSpectrumID(int64_t minSpecID);

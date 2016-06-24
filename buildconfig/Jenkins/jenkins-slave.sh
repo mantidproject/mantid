@@ -85,7 +85,9 @@ else
 fi
 
 echo "starting ..."
-JAVA=`which java`
+if [ -z "${JAVA}" ]; then
+  JAVA=`which java`
+fi
 JAVA_ARGS="${PROXY_ARGS} -jar ${JAR_FILE} -jnlpUrl ${SLAVE_AGENT_URL} -secret ${SECRET}"
 echo "${JAVA} ${JAVA_ARGS}"
 ${JAVA} ${JAVA_ARGS}

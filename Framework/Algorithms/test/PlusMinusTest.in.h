@@ -1146,7 +1146,7 @@ public:
     DO_PLUS = @PLUSMINUSTEST_DO_PLUS@;
   }
   
-  void setUp()
+  void setUp() override
   {
   	ws2D_1 = WorkspaceCreationHelper::Create2DWorkspace(10000 /*histograms*/, 1000/*bins*/);
    	ws2D_2 = WorkspaceCreationHelper::Create2DWorkspace(10000 /*histograms*/, 1000/*bins*/);

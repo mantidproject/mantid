@@ -64,8 +64,6 @@ class DLLExport SaveGSS : public Mantid::API::Algorithm {
 public:
   /// Constructor
   SaveGSS();
-  /// Virtual destructor
-  ~SaveGSS() override {}
   /// Algorithm's name
   const std::string name() const override { return "SaveGSS"; }
   /// Summary of algorithms purpose

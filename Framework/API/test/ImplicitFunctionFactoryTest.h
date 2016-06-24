@@ -1,19 +1,22 @@
 #ifndef IMPLICIT_FUNCTION_FACTORY_TEST_H_
 #define IMPLICIT_FUNCTION_FACTORY_TEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include <vector>
-#include <gmock/gmock.h>
-#include <gtest/gtest.h>
+#include "MantidAPI/ImplicitFunctionFactory.h"
+#include "MantidAPI/ImplicitFunctionParameter.h"
 #include "MantidAPI/ImplicitFunctionParameterParserFactory.h"
 #include "MantidAPI/ImplicitFunctionParserFactory.h"
-#include "MantidAPI/ImplicitFunctionFactory.h"
-#include "MantidKernel/ConfigService.h"
 #include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
-#include "MantidAPI/ImplicitFunctionParameter.h"
-#include <boost/shared_ptr.hpp>
+#include "MantidKernel/ConfigService.h"
+#include "MantidKernel/WarningSuppressions.h"
 #include <boost/scoped_ptr.hpp>
+#include <boost/shared_ptr.hpp>
+#include <cxxtest/TestSuite.h>
+#include <gmock/gmock.h>
+#include <gtest/gtest.h>
 #include <memory>
+#include <vector>
+
+GCC_DIAG_OFF_SUGGEST_OVERRIDE
 
 class ImplicitFunctionFactoryTest : public CxxTest::TestSuite {
 private:
@@ -104,6 +107,7 @@ private:
     MOCK_METHOD1(setSuccessorParser,
                  void(Mantid::API::ImplicitFunctionParameterParser *successor));
   };
+  GCC_DIAG_ON_SUGGEST_OVERRIDE
 
   class MockImplicitFunctionBuilderA
       : public Mantid::API::ImplicitFunctionBuilder {

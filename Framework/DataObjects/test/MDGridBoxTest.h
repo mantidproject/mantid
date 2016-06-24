@@ -1,10 +1,16 @@
 #ifndef MDGRIDBOXTEST_H
 #define MDGRIDBOXTEST_H
 
+#include "MDBoxTest.h"
+#include "MantidAPI/BoxController.h"
+#include "MantidDataObjects/CoordTransformDistance.h"
+#include "MantidDataObjects/MDBox.h"
+#include "MantidDataObjects/MDGridBox.h"
+#include "MantidDataObjects/MDLeanEvent.h"
 #include "MantidGeometry/MDGeometry/MDBoxImplicitFunction.h"
 #include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
-#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/CPUTimer.h"
+#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Memory.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/ProgressText.h"
@@ -12,14 +18,9 @@
 #include "MantidKernel/ThreadScheduler.h"
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/Utils.h"
-#include "MantidAPI/BoxController.h"
-#include "MantidDataObjects/CoordTransformDistance.h"
-#include "MantidDataObjects/MDBox.h"
-#include "MantidDataObjects/MDLeanEvent.h"
-#include "MantidDataObjects/MDGridBox.h"
-#include <nexus/NeXusFile.hpp>
+#include "MantidKernel/WarningSuppressions.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
-#include "MDBoxTest.h"
+#include <Poco/File.h>
 #include <boost/random/linear_congruential.hpp>
 #include <boost/random/mersenne_twister.hpp>
 #include <boost/random/uniform_int.hpp>
@@ -27,11 +28,11 @@
 #include <boost/random/variate_generator.hpp>
 #include <cmath>
 #include <cxxtest/TestSuite.h>
+#include <gmock/gmock.h>
 #include <map>
 #include <memory>
-#include <Poco/File.h>
+#include <nexus/NeXusFile.hpp>
 #include <vector>
-#include <gmock/gmock.h>
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
@@ -50,10 +51,12 @@ private:
     MockMDBox()
         : MDBox<MDLeanEvent<1>, 1>(new API::BoxController(1)),
           pBC(MDBox<MDLeanEvent<1>, 1>::getBoxController()) {}
+    GCC_DIAG_OFF_SUGGEST_OVERRIDE
     MOCK_CONST_METHOD0(getIsMasked, bool());
     MOCK_METHOD0(mask, void());
     MOCK_METHOD0(unmask, void());
     ~MockMDBox() override { delete pBC; }
+    GCC_DIAG_ON_SUGGEST_OVERRIDE
   };
 
   // the sp to a box controller used as general reference to all tested

@@ -58,8 +58,6 @@ std::string DLLExport titleString(const std::string &wsName);
 boost::tuple<std::string, std::string> DLLExport postprocessGroupString(
     const std::set<int> &rows, QDataProcessorTableModel_sptr model,
     const DataProcessorWhiteList &whitelist,
-    const std::map<std::string, DataProcessorPreprocessingAlgorithm> &
-        preprocessMap,
     const DataProcessorProcessingAlgorithm &processor,
     const DataProcessorPostprocessingAlgorithm &postprocessor,
     const std::string &postprocessingOptions);
@@ -69,12 +67,10 @@ plotsString(const std::vector<std::string> &output_ws,
             const std::string &stitched_wsStr,
             const DataProcessorProcessingAlgorithm &processor);
 
-std::string DLLExport getWorkspaceName(
-    int rowNo, QDataProcessorTableModel_sptr model,
-    const DataProcessorWhiteList &whitelist,
-    const std::map<std::string, DataProcessorPreprocessingAlgorithm> &
-        preprocessMap,
-    const DataProcessorProcessingAlgorithm &processor, bool prefix);
+std::string DLLExport
+getReducedWorkspaceName(int rowNo, QDataProcessorTableModel_sptr model,
+                        const DataProcessorWhiteList &whitelist,
+                        const std::string &prefix = "");
 
 boost::tuple<std::string, std::string> DLLExport reduceRowString(
     const int rowNo, const std::string &instrument,

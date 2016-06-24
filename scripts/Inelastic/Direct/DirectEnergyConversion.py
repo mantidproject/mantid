@@ -1,7 +1,7 @@
 ﻿#pylint: disable=too-many-lines
 #pylint: disable=invalid-name
 from mantid.simpleapi import *
-from mantid.kernel import funcreturns
+from mantid.kernel import funcinspect
 from mantid import geometry,api
 
 import os.path
@@ -189,7 +189,7 @@ class DirectEnergyConversion(object):
         # output workspace name.
         try:
 #pylint: disable=unused-variable
-            n,r = funcreturns.lhs_info('both')
+            n,r = funcinspect.lhs_info('both')
             out_ws_name = r[0]
 #pylint: disable=bare-except
         except:
@@ -357,7 +357,7 @@ class DirectEnergyConversion(object):
 
         # output workspace name.
         try:
-            _,r = funcreturns.lhs_info('both')
+            _,r = funcinspect.lhs_info('both')
             out_ws_name = r[0]
 #pylint: disable=bare-except
         except:

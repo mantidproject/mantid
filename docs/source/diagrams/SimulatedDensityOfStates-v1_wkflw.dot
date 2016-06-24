@@ -1,7 +1,7 @@
 digraph SimulatedDensityOfStates {
   label="SimulatedDensityOfStates Flowchart"
   $global_style
-  
+
   subgraph params {
     $param_style
 	CASTEPFile
@@ -20,14 +20,14 @@ digraph SimulatedDensityOfStates {
 	file_data
     file_data1      [label="file_data"]
     file_data2      [label="file_data"]
-	partial_workspaces      label=["partial_workspaces"]
+	partial_workspaces      [label="partial_workspaces"]
 	partial_ions
 	sum_workspace
     DoS_Workspace
-    DoS_Workspace1          label=["DoS_Workspace"]
-    DoS_Workspace2          label=["DoS_Workspace"]
+    DoS_Workspace1          [label="DoS_Workspace"]
+    DoS_Workspace2          [label="DoS_Workspace"]
   }
-  
+
   subgraph process  {
     $process_style
 	read_data_from_file
@@ -41,20 +41,20 @@ digraph SimulatedDensityOfStates {
     sum_workspace                       [label="sum_workspace"]
     sum_workspace1                      [label="sum_workspace"]
   }
-  
+
   CASTEPFile						->	read_data_from_file
   PHONONFile						->	read_data_from_file
   read_data_from_file				-> 	file_data
   file_data                         ->  SpectrumType
-  
+
   // Ion Table
   SpectrumType						-> 	ion_table_process				[label="IonTable"]
     ion_table_process                   ->  OutputWorkspace             [label="Output Table of Ions"]
-    
+
   // Bond Table
-  SpectrumType						->  bond_table_process				[label="BondTable"]  
+  SpectrumType						->  bond_table_process				[label="BondTable"]
     bond_table_process                  -> OutputWorkspace1             [label="Output Table of Bonds"]
-    
+
   // DOS + calc_partial
   SpectrumType						->	partial_ions							[label="DOS and ions given in input"]
 	partial_ions					->	compute_partial_ion_workflow
@@ -65,7 +65,7 @@ digraph SimulatedDensityOfStates {
 	SumContributions				-> 	GroupWorkspaces 						[label="No"]
 		partial_workspaces				->  GroupWorkspaces
         GroupWorkspaces					-> 	OutputWorkspace2
-        
+
   // DOS + scale_by_cross_section
   SpectrumType						->	Ions                                    [label="DOS and scale_by_cross_section"]
     Ions	    						->  all_ions                            [label="Convert user input to dictionary"]
@@ -79,13 +79,14 @@ digraph SimulatedDensityOfStates {
   SpectrumType						->	compute_DOS								[label="DOS"]
     compute_DOS                         -> DoS_Workspace
     DoS_Workspace                       -> OutputWorkspace4
-  
+
   // IR_Active
   SpectrumType						->  compute_DOS_IR							[label="IR_Active"]
     compute_DOS_IR                      -> DoS_Workspace1
     DoS_Workspace1                      -> OutputWorkspace5
-    
+
   //Raman_Active
   SpectrumType						-> 	compute_DOS_Ramen							[label="Raman_Active"]
     compute_DOS_Ramen                   -> DoS_Workspace2
     DoS_Workspace2                      -> OutputWorkspace6
+}

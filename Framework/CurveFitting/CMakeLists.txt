@@ -34,11 +34,14 @@ set ( SRC_FILES
 	src/FuncMinimizers/DerivMinimizer.cpp
 	src/FuncMinimizers/FABADAMinimizer.cpp
 	src/FuncMinimizers/FRConjugateGradientMinimizer.cpp
+	src/FuncMinimizers/DTRSMinimizer.cpp
 	src/FuncMinimizers/LevenbergMarquardtMDMinimizer.cpp
 	src/FuncMinimizers/LevenbergMarquardtMinimizer.cpp
+	src/FuncMinimizers/MoreSorensenMinimizer.cpp
 	src/FuncMinimizers/PRConjugateGradientMinimizer.cpp
 	src/FuncMinimizers/SimplexMinimizer.cpp
 	src/FuncMinimizers/SteepestDescentMinimizer.cpp
+	src/FuncMinimizers/TrustRegionMinimizer.cpp
 	src/FunctionDomain1DSpectrumCreator.cpp
 	src/Functions/Abragam.cpp
 	src/Functions/BSpline.cpp
@@ -54,6 +57,8 @@ set ( SRC_FILES
 	src/Functions/Convolution.cpp
 	src/Functions/CrystalElectricField.cpp
 	src/Functions/CrystalFieldPeaks.cpp
+	src/Functions/CrystalFieldPeaksBase.cpp
+	src/Functions/CrystalFieldMultiSpectrum.cpp
 	src/Functions/CrystalFieldSpectrum.cpp
 	src/Functions/CubicSpline.cpp
 	src/Functions/DeltaFunction.cpp
@@ -66,6 +71,7 @@ set ( SRC_FILES
 	src/Functions/ExpDecayOsc.cpp
 	src/Functions/FlatBackground.cpp
 	src/Functions/FullprofPolynomial.cpp
+	src/Functions/FunctionGenerator.cpp
 	src/Functions/GausDecay.cpp
 	src/Functions/GausOsc.cpp
 	src/Functions/Gaussian.cpp
@@ -119,6 +125,8 @@ set ( SRC_FILES
 	src/MultiDomainCreator.cpp
 	src/ParDomain.cpp
 	src/ParameterEstimator.cpp
+	src/RalNlls/TrustRegion.cpp
+	src/RalNlls/Workspaces.cpp
 	src/SeqDomain.cpp
 	src/SeqDomainSpectrumCreator.cpp
 	src/SpecialFunctionHelper.cpp
@@ -166,11 +174,14 @@ set ( INC_FILES
 	inc/MantidCurveFitting/FuncMinimizers/DerivMinimizer.h
 	inc/MantidCurveFitting/FuncMinimizers/FABADAMinimizer.h
 	inc/MantidCurveFitting/FuncMinimizers/FRConjugateGradientMinimizer.h
+	inc/MantidCurveFitting/FuncMinimizers/DTRSMinimizer.h
 	inc/MantidCurveFitting/FuncMinimizers/LevenbergMarquardtMDMinimizer.h
 	inc/MantidCurveFitting/FuncMinimizers/LevenbergMarquardtMinimizer.h
+	inc/MantidCurveFitting/FuncMinimizers/MoreSorensenMinimizer.h
 	inc/MantidCurveFitting/FuncMinimizers/PRConjugateGradientMinimizer.h
 	inc/MantidCurveFitting/FuncMinimizers/SimplexMinimizer.h
 	inc/MantidCurveFitting/FuncMinimizers/SteepestDescentMinimizer.h
+	inc/MantidCurveFitting/FuncMinimizers/TrustRegionMinimizer.h
 	inc/MantidCurveFitting/FunctionDomain1DSpectrumCreator.h
 	inc/MantidCurveFitting/Functions/Abragam.h
 	inc/MantidCurveFitting/Functions/BSpline.h
@@ -186,6 +197,8 @@ set ( INC_FILES
 	inc/MantidCurveFitting/Functions/Convolution.h
 	inc/MantidCurveFitting/Functions/CrystalElectricField.h
 	inc/MantidCurveFitting/Functions/CrystalFieldPeaks.h
+	inc/MantidCurveFitting/Functions/CrystalFieldPeaksBase.h
+	inc/MantidCurveFitting/Functions/CrystalFieldMultiSpectrum.h
 	inc/MantidCurveFitting/Functions/CrystalFieldSpectrum.h
 	inc/MantidCurveFitting/Functions/CubicSpline.h
 	inc/MantidCurveFitting/Functions/DeltaFunction.h
@@ -198,6 +211,7 @@ set ( INC_FILES
 	inc/MantidCurveFitting/Functions/ExpDecayOsc.h
 	inc/MantidCurveFitting/Functions/FlatBackground.h
 	inc/MantidCurveFitting/Functions/FullprofPolynomial.h
+	inc/MantidCurveFitting/Functions/FunctionGenerator.h
 	inc/MantidCurveFitting/Functions/GausDecay.h
 	inc/MantidCurveFitting/Functions/GausOsc.h
 	inc/MantidCurveFitting/Functions/Gaussian.h
@@ -240,6 +254,8 @@ set ( INC_FILES
 	inc/MantidCurveFitting/Functions/UserFunction1D.h
 	inc/MantidCurveFitting/Functions/VesuvioResolution.h
 	inc/MantidCurveFitting/Functions/Voigt.h
+	inc/MantidCurveFitting/RalNlls/TrustRegion.h
+	inc/MantidCurveFitting/RalNlls/Workspaces.h
 	inc/MantidCurveFitting/GSLFunctions.h
 	inc/MantidCurveFitting/GSLJacobian.h
 	inc/MantidCurveFitting/GSLMatrix.h
@@ -318,6 +334,7 @@ set ( TEST_FILES
 	Functions/CrystalFieldEnergiesTest.h
 	Functions/CrystalFieldPeaksTest.h
 	Functions/CrystalFieldTest.h
+	Functions/CrystalFieldMultiSpectrumTest.h
 	Functions/CrystalFieldSpectrumTest.h
 	Functions/CubicSplineTest.h
 	Functions/DeltaFunctionTest.h
@@ -372,6 +389,7 @@ set ( TEST_FILES
 	Functions/UserFunctionTest.h
 	Functions/VesuvioResolutionTest.h
 	Functions/VoigtTest.h
+	RalNlls/NLLSTest.h
 	GSLMatrixTest.h
 	GSLVectorTest.h
 	GeneralDomainCreatorTest.h

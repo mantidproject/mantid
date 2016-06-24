@@ -59,7 +59,7 @@ class VisionReduction(PythonAlgorithm):
         return "This algorithm reduces the inelastic detectors on VISION. ** Under Development **"
 
     def PyInit(self):
-        self.declareProperty(FileProperty("Filename", "", action=FileAction.Load, extensions=["*.nxs.h5"]))
+        self.declareProperty(FileProperty("Filename", "", action=FileAction.Load, extensions=[".nxs.h5"]))
         self.declareProperty(WorkspaceProperty("OutputWorkspace", "", direction=Direction.Output))
 
     #pylint: disable=too-many-locals
