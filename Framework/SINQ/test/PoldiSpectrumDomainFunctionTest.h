@@ -12,13 +12,10 @@
 #include "MantidAPI/MultiDomainFunction.h"
 #include "MantidCurveFitting/Jacobian.h"
 
-#include "MantidCurveFitting/Functions/Gaussian.h"
-
 using ::testing::Return;
 
 using namespace Mantid::Poldi;
 using namespace Mantid::API;
-using namespace Mantid::CurveFitting;
 
 class PoldiSpectrumDomainFunctionTest : public CxxTest::TestSuite {
 public:
@@ -120,26 +117,14 @@ public:
 
     function.function(domain, values);
 
-    std::vector<double> reference;
-    reference.push_back(0.214381692355321);
-    reference.push_back(1.4396533098854);
-    reference.push_back(7.69011673999647);
-    reference.push_back(32.6747845396612);
-    reference.push_back(110.432605589092);
-    reference.push_back(296.883931458002);
-    reference.push_back(634.864220660384);
-    reference.push_back(1079.89069118744);
-    reference.push_back(1461.11207069126);
-    reference.push_back(1572.50503614829);
-    reference.push_back(1346.18685763306);
-    reference.push_back(916.691981263516);
-    reference.push_back(496.502218342172);
-    reference.push_back(213.861997764049);
-    reference.push_back(73.2741206547921);
-    reference.push_back(19.9697293956518);
-    reference.push_back(4.32910692237627);
-    reference.push_back(0.746498624291666);
-    reference.push_back(0.102391587633906);
+    std::array<double, 19> reference{
+        0.214381692355321, 1.4396533098854,  7.69011673999647,
+        32.6747845396612,  110.432605589092, 296.883931458002,
+        634.864220660384,  1079.89069118744, 1461.11207069126,
+        1572.50503614829,  1346.18685763306, 916.691981263516,
+        496.502218342172,  213.861997764049, 73.2741206547921,
+        19.9697293956518,  4.32910692237627, 0.746498624291666,
+        0.102391587633906};
 
     for (size_t i = 0; i < reference.size(); ++i) {
       TS_ASSERT_DELTA(values[479 + i] / reference[i], 1.0, 1e-14);
@@ -165,26 +150,14 @@ public:
 
     function.functionDeriv(domain, jacobian);
 
-    std::vector<double> reference;
-    reference.push_back(0.214381692355321);
-    reference.push_back(1.4396533098854);
-    reference.push_back(7.69011673999647);
-    reference.push_back(32.6747845396612);
-    reference.push_back(110.432605589092);
-    reference.push_back(296.883931458002);
-    reference.push_back(634.864220660384);
-    reference.push_back(1079.89069118744);
-    reference.push_back(1461.11207069126);
-    reference.push_back(1572.50503614829);
-    reference.push_back(1346.18685763306);
-    reference.push_back(916.691981263516);
-    reference.push_back(496.502218342172);
-    reference.push_back(213.861997764049);
-    reference.push_back(73.2741206547921);
-    reference.push_back(19.9697293956518);
-    reference.push_back(4.32910692237627);
-    reference.push_back(0.746498624291666);
-    reference.push_back(0.102391587633906);
+    std::array<double, 19> reference{
+        0.214381692355321, 1.4396533098854,  7.69011673999647,
+        32.6747845396612,  110.432605589092, 296.883931458002,
+        634.864220660384,  1079.89069118744, 1461.11207069126,
+        1572.50503614829,  1346.18685763306, 916.691981263516,
+        496.502218342172,  213.861997764049, 73.2741206547921,
+        19.9697293956518,  4.32910692237627, 0.746498624291666,
+        0.102391587633906};
 
     for (size_t i = 0; i < reference.size(); ++i) {
       TS_ASSERT_DELTA((jacobian.get(479 + i, 0)) /
@@ -278,7 +251,8 @@ public:
    * conversion to/from strings
    */
   void ___testCreateInitialized() {
-    IFunction_sptr function(new Gaussian());
+    IFunction_sptr function =
+        FunctionFactory::Instance().createFunction("Gaussian");
     function->initialize();
     function->setParameter(0, 1.23456);
     function->setParameter(1, 1.234567);
