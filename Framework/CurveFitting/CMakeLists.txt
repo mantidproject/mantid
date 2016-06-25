@@ -81,7 +81,8 @@ set ( SRC_FILES
 	src/Functions/GramCharlierComptonProfile.cpp
 	src/Functions/IkedaCarpenterPV.cpp
 	src/Functions/InelasticDiffRotDiscreteCircle.cpp
-	src/Functions/Keren.cpp
+	src/Functions/InelasticDiffSphere.cpp
+    src/Functions/Keren.cpp
 	src/Functions/LinearBackground.cpp
 	src/Functions/LogNormal.cpp
 	src/Functions/Lorentzian.cpp
@@ -224,6 +225,7 @@ set ( INC_FILES
 	inc/MantidCurveFitting/Functions/GramCharlierComptonProfile.h
 	inc/MantidCurveFitting/Functions/IkedaCarpenterPV.h
 	inc/MantidCurveFitting/Functions/InelasticDiffRotDiscreteCircle.h
+	inc/MantidCurveFitting/Functions/InelasticDiffSphere.h
     inc/MantidCurveFitting/Functions/Keren.h
 	inc/MantidCurveFitting/Functions/LinearBackground.h
 	inc/MantidCurveFitting/Functions/LogNormal.h

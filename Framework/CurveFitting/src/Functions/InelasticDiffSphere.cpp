@@ -264,7 +264,7 @@ void InelasticDiffSphere::setWorkspace(
     Mantid::Geometry::IDetector_const_sptr det;
     try {
       det = workspace->getDetector(idx);
-    } catch (Exception::NotFoundError &) {
+    } catch (Kernel::Exception::NotFoundError &) {
       m_qValueCache.clear();
       g_log.information("Cannot populate Q values from workspace");
       break;
