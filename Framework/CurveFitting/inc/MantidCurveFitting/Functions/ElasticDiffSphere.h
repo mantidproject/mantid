@@ -57,8 +57,8 @@ public:
   void init() override;
 };
 
-}  // namespace Functions
-}  // namespace CurveFitting
-}  // namespace Mantid
+} // namespace Functions
+} // namespace CurveFitting
+} // namespace Mantid
 
 #endif // MANTID_ELASTICDIFFSPHERE_H_

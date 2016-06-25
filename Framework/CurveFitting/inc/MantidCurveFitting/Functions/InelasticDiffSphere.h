@@ -55,7 +55,8 @@ struct linearJ {
 };
 
 /**
- * @brief Inelastic part of the DiffSphere function. Contains the 98 Lorentzians.
+ * @brief Inelastic part of the DiffSphere function. Contains the 98
+ * Lorentzians.
  */
 class DLLExport InelasticDiffSphere : public API::ParamFunction,
                                       public API::IFunction1D {
@@ -115,8 +116,8 @@ private:
 
 }; // end of class InelasticDiffSphere
 
-}  // namespace Functions
-}  // namespace CurveFitting
-}  // namespace Mantid
+} // namespace Functions
+} // namespace CurveFitting
+} // namespace Mantid
 
 #endif // MANTID_INELASTICDIFFSPHERE_H_

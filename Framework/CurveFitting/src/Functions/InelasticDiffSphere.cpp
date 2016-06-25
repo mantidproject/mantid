@@ -32,9 +32,10 @@ InelasticDiffSphere::InelasticDiffSphere()
     : m_lmax(24), m_divZone(0.1), m_hbar(0.658211626) {
   this->declareParameter("Intensity", 1.0, "scaling factor");
   this->declareParameter("Radius", 2.0, "Sphere radius, in Angstroms");
-  this->declareParameter("Diffusion", 0.05, "Diffusion coefficient, in units of "
-                                      "A^2*THz, if energy in meV, or A^2*PHz "
-                                      "if energy in ueV");
+  this->declareParameter("Diffusion", 0.05,
+                         "Diffusion coefficient, in units of "
+                         "A^2*THz, if energy in meV, or A^2*PHz "
+                         "if energy in ueV");
   this->declareParameter("Shift", 0.0, "Shift in domain");
 
   this->declareAttribute("Q", API::IFunction::Attribute(EMPTY_DBL()));
@@ -139,10 +140,11 @@ void InelasticDiffSphere::initLinJlist() {
  * @brief Initialize coefficients and terms that are invariant during fitting
  */
 void InelasticDiffSphere::init() {
-  this->initXnlCoeff();   // initialize m_xnl with the list of coefficients xnlist
-  this->initAlphaCoeff(); // initialize m_alpha, certain factors constant over the fit
-  this->initLinJlist();   // initialize m_linearJlist, linear interpolation around
-                          // numerical divergence
+  this->initXnlCoeff(); // initialize m_xnl with the list of coefficients xnlist
+  this->initAlphaCoeff(); // initialize m_alpha, certain factors constant over
+                          // the fit
+  this->initLinJlist(); // initialize m_linearJlist, linear interpolation around
+                        // numerical divergence
 }
 
 /**
@@ -283,6 +285,6 @@ void InelasticDiffSphere::setWorkspace(
   }
 }
 
-}  // namespace Functions
-}  // namespace CurveFitting
-}  // namespace Mantid
+} // namespace Functions
+} // namespace CurveFitting
+} // namespace Mantid

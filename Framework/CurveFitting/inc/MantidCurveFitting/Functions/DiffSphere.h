@@ -40,7 +40,6 @@ File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
-
 class DLLExport DiffSphere : public API::ImmutableCompositeFunction {
 
 public:
@@ -62,7 +61,7 @@ public:
 
   /// Override parent definition
   void setAttribute(const std::string &name,
-    const API::IFunction::Attribute &att) override;
+                    const API::IFunction::Attribute &att) override;
 
   /// overwrite IFunction base class method, which declare function parameters
   void init() override;

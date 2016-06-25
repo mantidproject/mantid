@@ -28,7 +28,7 @@ DECLARE_FUNCTION(ElasticDiffSphere)
  * @brief Constructor where fitting parameters are declared
  */
 ElasticDiffSphere::ElasticDiffSphere() {
-  //parameter "Height" declared in parent DeltaFunction constructor
+  // parameter "Height" declared in parent DeltaFunction constructor
   // declareParameter("Height", 1.0);
   declareParameter("Radius", 2.0, "Sphere radius");
   declareAttribute("Q", API::IFunction::Attribute(1.0));
@@ -63,6 +63,6 @@ double ElasticDiffSphere::HeightPrefactor() const {
   return pow(3 * boost::math::sph_bessel(1, Q * R) / (Q * R), 2);
 }
 
-}  // namespace Functions
-}  // namespace CurveFitting
-}  // namespace Mantid
+} // namespace Functions
+} // namespace CurveFitting
+} // namespace Mantid
