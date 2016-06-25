@@ -10,6 +10,7 @@
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/VectorHelper.h"
+#include "MantidGeometry/Crystal/IPeak.h"
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -19,6 +20,7 @@ using Mantid::API::WorkspaceProperty;
 using namespace Mantid::DataObjects;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
+using namespace Mantid::Geometry;
 
 
 // Register the algorithm into the AlgorithmFactory
@@ -29,11 +31,7 @@ DECLARE_ALGORITHM(IntegratePeaksMDHisto)
  * Constructor
  */
 IntegratePeaksMDHisto::IntegratePeaksMDHisto()
-    : m_normWS(), m_inputWS(), m_hmin(0.0f), m_hmax(0.0f), m_kmin(0.0f),
-      m_kmax(0.0f), m_lmin(0.0f), m_lmax(0.0f), m_hIntegrated(true),
-      m_kIntegrated(true), m_lIntegrated(true), m_rubw(3, 3), m_kiMin(0.0),
-      m_kiMax(EMPTY_DBL()), m_hIdx(-1), m_kIdx(-1), m_lIdx(-1), m_hX(), m_kX(),
-      m_lX(), m_samplePos(), m_beamDir() {}
+    {}
 
 
 //----------------------------------------------------------------------------------------------
@@ -92,69 +90,69 @@ void IntegratePeaksMDHisto::exec() {
   if (peakWS != inPeakWS)
     peakWS = inPeakWS->clone();
 
-  API::MatrixWorkspace_const_sptr integrFlux = getProperty("FluxWorkspace");
-  integrFlux->getXMinMax(m_kiMin, m_kiMax);
-  API::MatrixWorkspace_const_sptr solidAngleWS =
+  API::MatrixWorkspace_const_sptr flux = getProperty("FluxWorkspace");
+  API::MatrixWorkspace_const_sptr sa =
       getProperty("SolidAngleWorkspace");
 
-  m_inputWS = getProperty("InputWorkspace");
-  if (inputEnergyMode() != "Elastic") {
-    throw std::invalid_argument("Invalid energy transfer mode. Algorithm "
-                                "currently only supports elastic data.");
-  }
-  // Min/max dimension values
-  const auto hdim(m_inputWS->getDimension(0)), kdim(m_inputWS->getDimension(1)),
-      ldim(m_inputWS->getDimension(2));
-  m_hmin = hdim->getMinimum();
-  m_kmin = kdim->getMinimum();
-  m_lmin = ldim->getMinimum();
-  m_hmax = hdim->getMaximum();
-  m_kmax = kdim->getMaximum();
-  m_lmax = ldim->getMaximum();
+  API::IMDEventWorkspace_const_sptr m_inputWS = getProperty("InputWorkspace");
 
-  const auto &exptInfoZero = *(m_inputWS->getExperimentInfo(0));
-  auto source = exptInfoZero.getInstrument()->getSource();
-  auto sample = exptInfoZero.getInstrument()->getSample();
-  if (source == nullptr || sample == nullptr) {
-    throw Kernel::Exception::InstrumentDefinitionError(
-        "Instrument not sufficiently defined: failed to get source and/or "
-        "sample");
-  }
-  m_samplePos = sample->getPos();
-  m_beamDir = m_samplePos - source->getPos();
-  m_beamDir.normalize();
-}
+  double box = 0.5;
+  int gridPts = 201;
+  
+  int npeaks = peakWS->getNumberPeaks();
 
-
-  auto prog = make_unique<API::Progress>(this, 0.3, 1.0, ndets);
-  PARALLEL_FOR1(integrPeaks)
-  for (int64_t i = 0; i < npeaks; i++) {
+  auto prog = make_unique<API::Progress>(this, 0.3, 1.0, npeaks);
+  PARALLEL_FOR1(peakWS)
+  for (int i = 0; i < npeaks; i++) {
     PARALLEL_START_INTERUPT_REGION
 
-    const auto peak = peaks[i];
+    IPeak &p = peakWS->getPeak(i);
+    // round to integer
     int h = int(p.getH() + 0.5);
     int k = int(p.getK() + 0.5);
     int l = int(p.getL() + 0.5);
-    MDNormSCD(InputWorkspace = 'MDdata';
-        AlignedDim0='[H,0,0],'+str(H-0.5)+','+str(H+0.5)+',201';
-        AlignedDim1='[0,K,0],'+str(K-0.5)+','+str(K+0.5)+',201';
-        AlignedDim2='[0,0,L],'+str(L-0.5)+','+str(L+0.5)+',201';
-        FluxWorkspace = flux;
-        SolidAngleWorkspace = sa;
-        OutputWorkspace = 'mdout'+str(run)+'_'+str(i);
-        OutputNormalizationWorkspace = 'mdnorm'+str(run)+'_'+str(i))
+    MDHistoWorkspace_sptr normBox = normalize(h, k, l, box, gridPts, flux, sa, m_inputWS);
 
-      PARALLEL_CRITICAL(updateMD) {
-        signal += m_normWS->getSignalAt(linIndex);
-        m_normWS->setSignalAt(linIndex, signal);
-      }
-    }
+      //PARALLEL_CRITICAL(updateMD) {
+        //signal += m_normWS->getSignalAt(linIndex);
+      //}
     prog->report();
 
     PARALLEL_END_INTERUPT_REGION
   }
   PARALLEL_CHECK_INTERUPT_REGION
 }
+MDHistoWorkspace_sptr IntegratePeaksMDHisto::normalize(
+    int h, int k, int l, double box, int gridPts,
+     API::MatrixWorkspace_const_sptr flux,  API::MatrixWorkspace_const_sptr sa,  API::IMDEventWorkspace_const_sptr ws) {
+
+  API::IAlgorithm_sptr normAlg = createChildAlgorithm("MDNormSCD");
+  normAlg->setProperty("InputWorkspace", ws);
+  normAlg->setProperty("AlignedDim0",
+        "[H,0,0],"+boost::lexical_cast<std::string>(h-box)+","+boost::lexical_cast<std::string>(h+box)+","+boost::lexical_cast<std::string>(gridPts));
+  normAlg->setProperty("AlignedDim1",
+        "[0,K,0],"+boost::lexical_cast<std::string>(k-box)+","+boost::lexical_cast<std::string>(k+box)+","+boost::lexical_cast<std::string>(gridPts));
+  normAlg->setProperty("AlignedDim2",
+        "[0,0,L],"+boost::lexical_cast<std::string>(l-box)+","+boost::lexical_cast<std::string>(l+box)+","+boost::lexical_cast<std::string>(gridPts));
+  normAlg->setProperty("FluxWorkspace", flux);
+  normAlg->setProperty("SolidAngleWorkspace", sa);
+  normAlg->setProperty("OutputWorkspace", "mdout");
+  normAlg->setProperty("OutputNormalizationWorkspace", "mdnorm");
+  normAlg->executeAsChildAlg();
+
+  MDHistoWorkspace_sptr mdout = normAlg->getProperty("OutputWorkspace");
+  MDHistoWorkspace_sptr mdnorm = normAlg->getProperty("OutputtNormalizationWorkspace");
+
+  API::IAlgorithm_sptr alg = createChildAlgorithm("DivideMD");
+  alg->setProperty("LHSWorkspace", mdout);
+  alg->setProperty("RHSWorkspace", mdnorm);
+  alg->setPropertyValue("OutputWorkspace", "out");
+  alg->execute();
+  MDHistoWorkspace_sptr out = alg->getProperty("OutputWorkspace");
+  return out;
+}
+
+
 
 
 

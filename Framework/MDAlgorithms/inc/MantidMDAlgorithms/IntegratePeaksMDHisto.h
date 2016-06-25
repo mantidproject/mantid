@@ -6,6 +6,8 @@
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidKernel/System.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
+#include "MantidAPI/IMDEventWorkspace_fwd.h"
+#include "MantidDataObjects/MDEventWorkspace.h"
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -17,6 +19,7 @@ namespace MDAlgorithms {
  */
 class DLLExport IntegratePeaksMDHisto : public API::Algorithm {
 public:
+  IntegratePeaksMDHisto();
   /// Algorithm's name for identification
   const std::string name() const override { return "IntegratePeaksMD"; };
   /// Summary of algorithms purpose
@@ -35,6 +38,12 @@ private:
   void init() override;
   /// Run the algorithm
   void exec() override;
+ 
+
+  DataObjects::MDHistoWorkspace_sptr normalize(
+    int h, int k, int l, double box, int gridPts,
+     API::MatrixWorkspace_const_sptr flux,  API::MatrixWorkspace_const_sptr sa, 
+     API::IMDEventWorkspace_const_sptr ws);
 
 };
 

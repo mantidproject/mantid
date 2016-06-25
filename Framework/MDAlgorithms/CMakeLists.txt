@@ -314,7 +314,7 @@ set ( TEST_FILES
 	IntegrateFluxTest.h
 	IntegrateMDHistoWorkspaceTest.h
 	IntegratePeaksMD2Test.h
-	IntegratePeaksMDHistoTest.h
+	#IntegratePeaksMDHistoTest.h
 	IntegratePeaksMDTest.h
 	IntegratePeaksCWSDTest.h
 	InvalidParameterParserTest.h
