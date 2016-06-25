@@ -28,6 +28,7 @@ using namespace Mantid::Kernel;
 PredictPeaks::PredictPeaks()
     : m_runNumber(-1), m_inst(), m_pw(), m_sfCalculator() {
   m_refConds = getAllReflectionConditions();
+  convention = ConfigService::Instance().getString("Q.convention");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -391,12 +392,16 @@ void PredictPeaks::setStructureFactorCalculatorFromSample(
  * @param orientedUB
  * @param goniometerMatrix
  */
-void PredictPeaks::calculateQAndAddToOutput(const V3D &hkl,
+void PredictPeaks::calculateQAndAddToOutput(V3D &hkl,
                                             const DblMatrix &orientedUB,
                                             const DblMatrix &goniometerMatrix) {
   // The q-vector direction of the peak is = goniometer * ub * hkl_vector
   // This is in inelastic convention: momentum transfer of the LATTICE!
   // Also, q does have a 2pi factor = it is equal to 2pi/wavelength.
+  if (convention == "Crystallography")
+  {
+    hkl = hkl * (-1.0);
+  }
   V3D q = orientedUB * hkl * (2.0 * M_PI);
 
   // Create the peak using the Q in the lab framewith all its info:
