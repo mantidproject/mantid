@@ -175,7 +175,7 @@ public:
   void test_manual_U_and_gonio() { do_test_manual(22.5, 22.5); }
 
   void test_crystallography() {
-    Kernel::ConfigService::Instance().setString("Q.convention", 
+    Kernel::ConfigService::Instance().setString("Q.convention",
                                                 "Crystallography");
     do_test_exec("Primitive", 10, std::vector<V3D>());
   }
