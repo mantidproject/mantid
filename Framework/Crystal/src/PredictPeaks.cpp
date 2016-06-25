@@ -398,8 +398,7 @@ void PredictPeaks::calculateQAndAddToOutput(V3D &hkl,
   // The q-vector direction of the peak is = goniometer * ub * hkl_vector
   // This is in inelastic convention: momentum transfer of the LATTICE!
   // Also, q does have a 2pi factor = it is equal to 2pi/wavelength.
-  if (convention == "Crystallography")
-  {
+  if (convention == "Crystallography") {
     hkl = hkl * (-1.0);
   }
   V3D q = orientedUB * hkl * (2.0 * M_PI);
