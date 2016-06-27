@@ -181,7 +181,7 @@ AlgorithmHistory_sptr AlgorithmHistory::operator[](const size_t index) const {
 */
 const std::string &
 AlgorithmHistory::getPropertyValue(const std::string &name) const {
-  for (auto &hist : m_properties) {
+  for (const auto &hist : m_properties) {
     if (hist->name() == name) {
       return hist->value();
     }
