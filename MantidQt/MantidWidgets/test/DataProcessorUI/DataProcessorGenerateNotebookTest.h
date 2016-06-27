@@ -396,6 +396,38 @@ public:
     }
   }
 
+  void testReduceRowStringNoPreProcessing() {
+
+    std::map<std::string, DataProcessorPreprocessingAlgorithm>
+        emptyPreProcessMap;
+    std::map<std::string, std::string> emptyPreProcessingOptions;
+
+    boost::tuple<std::string, std::string> output = reduceRowString(
+        1, m_instrument, m_model, createReflectometryWhiteList(),
+        emptyPreProcessMap, createReflectometryProcessor(),
+        emptyPreProcessingOptions, "");
+
+    const std::string result[] = {
+        "IvsQ_TOF_12346, IvsLam_TOF_12346, _ = "
+        "ReflectometryReductionOneAuto(InputWorkspace = "
+        "12346, "
+        "ThetaIn = "
+        "1.5, MomentumTransferMinimum = 1.4, "
+        "MomentumTransferMaximum = "
+        "2.9, "
+        "MomentumTransferStep = 0.04, ScaleFactor = 1)",
+        ""};
+
+    std::vector<std::string> notebookLines;
+    boost::split(notebookLines, boost::get<0>(output), boost::is_any_of("\n"));
+
+    int i = 0;
+    for (auto it = notebookLines.begin(); it != notebookLines.end();
+         ++it, ++i) {
+      TS_ASSERT_EQUALS(*it, result[i])
+    }
+  }
+
   void testPlusString() {
 
     auto reflectometryPreprocessMap = createReflectometryPreprocessMap();

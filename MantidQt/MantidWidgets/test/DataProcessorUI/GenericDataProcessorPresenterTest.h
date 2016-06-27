@@ -2154,6 +2154,110 @@ public:
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
   }
+
+  /// Tests the reduction when no pre-processing algorithms are given
+
+  void testProcessNoPreProcessing() {
+
+    NiceMock<MockDataProcessorView> mockDataProcessorView;
+    NiceMock<MockProgressableView> mockProgress;
+
+    // We don't know the view we will handle yet, so none of the methods below
+    // should be called
+    EXPECT_CALL(mockDataProcessorView, setTableList(_)).Times(0);
+    EXPECT_CALL(mockDataProcessorView, setOptionsHintStrategy(_, _)).Times(0);
+    // Constructor (no pre-processing)
+    GenericDataProcessorPresenter presenter(createReflectometryWhiteList(),
+                                            createReflectometryProcessor(),
+                                            createReflectometryPostprocessor());
+    // Verify expectations
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
+
+    // Check that the presenter has updated the whitelist adding columns 'Group'
+    // and 'Options'
+    auto whitelist = presenter.getWhiteList();
+    TS_ASSERT_EQUALS(whitelist.size(), 9);
+    TS_ASSERT_EQUALS(whitelist.colNameFromColIndex(7), "Group");
+    TS_ASSERT_EQUALS(whitelist.colNameFromColIndex(8), "Options");
+
+    // When the presenter accepts the views, expect the following:
+    // Expect that the list of settings is populated
+    EXPECT_CALL(mockDataProcessorView, loadSettings(_)).Times(Exactly(1));
+    // Expect that the list of tables is populated
+    EXPECT_CALL(mockDataProcessorView, setTableList(_)).Times(Exactly(1));
+    // Expect that the layout containing (only) processing and
+    // post-processing options is created
+    std::vector<std::string> stages = {"Process", "Post-process"};
+    std::vector<std::string> algorithms = {"ReflectometryReductionOneAuto",
+                                           "Stitch1DMany"};
+    EXPECT_CALL(mockDataProcessorView, setGlobalOptions(stages, algorithms, _))
+        .Times(Exactly(1));
+    // Expect that the autocompletion hints are populated
+    EXPECT_CALL(mockDataProcessorView, setOptionsHintStrategy(_, 8))
+        .Times(Exactly(1));
+    // Now accept the views
+    presenter.acceptViews(&mockDataProcessorView, &mockProgress);
+
+    // Verify expectations
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
+
+    createPrefilledWorkspace("TestWorkspace", presenter.getWhiteList());
+    EXPECT_CALL(mockDataProcessorView, getWorkspaceToOpen())
+        .Times(1)
+        .WillRepeatedly(Return("TestWorkspace"));
+    presenter.notify(DataProcessorPresenter::OpenTableFlag);
+
+    std::set<int> rowlist;
+    rowlist.insert(0);
+    rowlist.insert(1);
+
+    createTOFWorkspace("12345", "12345");
+    createTOFWorkspace("12346", "12346");
+
+    // We should not receive any errors
+    EXPECT_CALL(mockDataProcessorView, giveUserCritical(_, _)).Times(0);
+
+    // The user hits the "process" button with the first two rows selected
+    EXPECT_CALL(mockDataProcessorView, getSelectedRows())
+        .Times(1)
+        .WillRepeatedly(Return(rowlist));
+    EXPECT_CALL(mockDataProcessorView, getProcessingOptions(_)).Times(0);
+    EXPECT_CALL(mockDataProcessorView,
+                getProcessingOptions("ReflectometryReductionOneAuto"))
+        .Times(2)
+        .WillRepeatedly(Return(""));
+    EXPECT_CALL(mockDataProcessorView, getProcessingOptions("Stitch1DMany"))
+        .Times(1)
+        .WillOnce(Return("Params = \"0.1\""));
+    EXPECT_CALL(mockDataProcessorView, getEnableNotebook())
+        .Times(1)
+        .WillRepeatedly(Return(false));
+    EXPECT_CALL(mockDataProcessorView, requestNotebookPath()).Times(0);
+
+    presenter.notify(DataProcessorPresenter::ProcessFlag);
+
+    // Check output workspaces were created as expected
+    TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsQ_TOF_12345"));
+    TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsLam_TOF_12345"));
+    TS_ASSERT(AnalysisDataService::Instance().doesExist("12345"));
+    TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsQ_TOF_12346"));
+    TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsLam_TOF_12346"));
+    TS_ASSERT(AnalysisDataService::Instance().doesExist("12346"));
+    TS_ASSERT(
+        AnalysisDataService::Instance().doesExist("IvsQ_TOF_12345_TOF_12346"));
+
+    // Tidy up
+    AnalysisDataService::Instance().remove("TestWorkspace");
+    AnalysisDataService::Instance().remove("IvsQ_TOF_12345");
+    AnalysisDataService::Instance().remove("IvsLam_TOF_12345");
+    AnalysisDataService::Instance().remove("12345");
+    AnalysisDataService::Instance().remove("IvsQ_TOF_12346");
+    AnalysisDataService::Instance().remove("IvsLam_TOF_12346");
+    AnalysisDataService::Instance().remove("12346");
+    AnalysisDataService::Instance().remove("IvsQ_TOF_12345_TOF_12346");
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
+  }
 };
 
 #endif /* MANTID_MANTIDWIDGETS_GENERICDATAPROCESSORPRESENTERTEST_H */
