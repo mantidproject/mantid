@@ -3,13 +3,16 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/AlgorithmManager.h"
-#include <MantidAPI/IAlgorithm.h>
+#include "MantidAPI/AlgorithmHistory.h"
+#include "MantidKernel/PropertyHistory.h"
+#include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/HistoryItem.h"
 #include "MantidAPI/ScriptBuilder.h"
 #include "MantidKernel/Property.h"
 #include "MantidKernel/Logger.h"
 
 #include <boost/utility.hpp>
+#include <set>
 
 namespace Mantid {
 namespace API {
@@ -147,13 +150,24 @@ ScriptBuilder::buildAlgorithmString(AlgorithmHistory_const_sptr algHistory) {
     algFresh->initialize();
 
     const auto &propsFresh = algFresh->getProperties();
+    //just get the names out of the fresh alg properties
+    std::set<std::string> freshPropNames;
+    for (const auto &propFresh : propsFresh)
+    {
+      freshPropNames.insert(propFresh->name());
+    }
+
     // remove properties that are not present on a fresh algorithm
     // i.e. remove dynamically added properties
-    std::remove_if(props.begin(), props.end(),
-                   [&propsFresh](const std::string &propName) {
-                     return std::find(propsFresh.begin(), propsFresh.end(),
-                                      propName) == propsFresh.end();
-                   });
+    for (auto prop_iter = props.begin(); prop_iter != props.end();) {
+      if (std::find(freshPropNames.begin(), freshPropNames.end(),
+                    (*prop_iter)->name()) == freshPropNames.end()) {
+        prop_iter = props.erase(prop_iter);
+      } else {
+        ++prop_iter;
+      }
+    }
+
   } catch (std::exception &) {
     g_log.error() << "Could not create a fresh version of " << name
                   << " version " << algHistory->version() << "\n";
