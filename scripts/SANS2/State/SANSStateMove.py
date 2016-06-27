@@ -1,14 +1,14 @@
 import json
 from SANSStateBase import (SANSStateBase, FloatParameter, DictParameter, ClassTypeParameter, StringParameter,
-                           PositiveFloatParameter, convert_state_to_dict, set_state_from_property_manager,
                            sans_parameters)
+from State.SANSStateSerializer import(convert_state_to_dict, set_state_from_property_manager)
 from Common.SANSConstants import (Coordinates, CanonicalCoordinates, SANSConstants)
 
 
 # ------------------------------------------------
 # SANSStateData
 # ------------------------------------------------
-class SANSStateMoveWorkspace(object):
+class SANSStateMove(object):
     pass
 
 
@@ -16,7 +16,7 @@ class SANSStateMoveWorkspace(object):
 #  SANSStateMoveWorkspace Setup for the different machines
 # --------------------------------------------------------
 @sans_parameters
-class SANSStateMoveWorkspaceDetectorISIS(SANSStateBase, SANSStateMoveWorkspace):
+class SANSStateMoveDetectorISIS(SANSStateBase, SANSStateMove):
     x_translation_correction = FloatParameter()
     y_translation_correction = FloatParameter()
     z_translation_correction = FloatParameter()
@@ -35,7 +35,7 @@ class SANSStateMoveWorkspaceDetectorISIS(SANSStateBase, SANSStateMoveWorkspace):
     detector_name_short = StringParameter()
 
     def __init__(self):
-        super(SANSStateMoveWorkspaceDetectorISIS, self).__init__()
+        super(SANSStateMoveDetectorISIS, self).__init__()
         # Translation correction
         self.x_translation_correction = 0.0
         self.y_translation_correction = 0.0
@@ -64,18 +64,18 @@ class SANSStateMoveWorkspaceDetectorISIS(SANSStateBase, SANSStateMoveWorkspace):
         if not self.detector_name_short:
             is_invalid.update({"detector_name_short": "The short detector name has not been specified."})
         if is_invalid:
-            raise ValueError("SANSStateMoveWorkspaceDetectorISIS: The provided inputs are illegal. "
+            raise ValueError("SANSStateMoveDetectorISIS: The provided inputs are illegal. "
                              "Please see: {}".format(json.dumps(is_invalid)))
 
 
 @sans_parameters
-class SANSStateMoveWorkspaceISIS(SANSStateBase, SANSStateMoveWorkspace):
+class SANSStateMoveISIS(SANSStateBase, SANSStateMove):
     sample_offset = FloatParameter()
     sample_offset_direction = ClassTypeParameter(Coordinates)
     detectors = DictParameter()
 
     def __init__(self):
-        super(SANSStateMoveWorkspaceISIS, self).__init__()
+        super(SANSStateMoveISIS, self).__init__()
 
         # Setup the sample offset
         self.sample_offset = 0.0
@@ -84,8 +84,8 @@ class SANSStateMoveWorkspaceISIS(SANSStateBase, SANSStateMoveWorkspace):
         self.sample_offset_direction = CanonicalCoordinates.Z
 
         # Setup the detectors
-        self.detectors = {SANSConstants.low_angle_bank: SANSStateMoveWorkspaceDetectorISIS(),
-                          SANSConstants.high_angle_bank: SANSStateMoveWorkspaceDetectorISIS()}
+        self.detectors = {SANSConstants.low_angle_bank: SANSStateMoveDetectorISIS(),
+                          SANSConstants.high_angle_bank: SANSStateMoveDetectorISIS()}
 
     @property
     def property_manager(self):
@@ -102,12 +102,12 @@ class SANSStateMoveWorkspaceISIS(SANSStateBase, SANSStateMoveWorkspace):
 
 
 @sans_parameters
-class SANSStateMoveWorkspaceLOQ(SANSStateMoveWorkspaceISIS):
+class SANSStateMoveLOQ(SANSStateMoveISIS):
     monitor_names = DictParameter()
     center_position = FloatParameter()
 
     def __init__(self):
-        super(SANSStateMoveWorkspaceLOQ, self).__init__()
+        super(SANSStateMoveLOQ, self).__init__()
         # Set the center_position in meter
         self.center_position = 317.5 / 1000.
 
@@ -124,11 +124,11 @@ class SANSStateMoveWorkspaceLOQ(SANSStateMoveWorkspaceISIS):
 
     def validate(self):
         # No validation of the descriptors on this level, let potential exceptions from detectors "bubble" up
-        super(SANSStateMoveWorkspaceLOQ, self).validate()
+        super(SANSStateMoveLOQ, self).validate()
 
 
 @sans_parameters
-class SANSStateMoveWorkspaceSANS2D(SANSStateMoveWorkspaceISIS):
+class SANSStateMoveSANS2D(SANSStateMoveISIS):
     monitor_names = DictParameter()
 
     hab_detector_radius = FloatParameter()
@@ -148,7 +148,7 @@ class SANSStateMoveWorkspaceSANS2D(SANSStateMoveWorkspaceISIS):
     monitor_4_offset = FloatParameter()
 
     def __init__(self):
-        super(SANSStateMoveWorkspaceSANS2D, self).__init__()
+        super(SANSStateMoveSANS2D, self).__init__()
         # Set the descriptors which corresponds to information which we gain through the IPF
         self.hab_detector_radius = 306.0
         self.hab_detector_default_sd_m = 4.0
@@ -176,16 +176,16 @@ class SANSStateMoveWorkspaceSANS2D(SANSStateMoveWorkspaceISIS):
         set_state_from_property_manager(self, value)
 
     def validate(self):
-        super(SANSStateMoveWorkspaceSANS2D, self).validate()
+        super(SANSStateMoveSANS2D, self).validate()
 
 
 @sans_parameters
-class SANSStateMoveWorkspaceLARMOR(SANSStateMoveWorkspaceISIS):
+class SANSStateMoveLARMOR(SANSStateMoveISIS):
     monitor_names = DictParameter()
     bench_rotation = FloatParameter()
 
     def __init__(self):
-        super(SANSStateMoveWorkspaceLARMOR, self).__init__()
+        super(SANSStateMoveLARMOR, self).__init__()
 
         # Set a default for the bench rotation
         self.bench_rotation = 0.0
@@ -202,7 +202,7 @@ class SANSStateMoveWorkspaceLARMOR(SANSStateMoveWorkspaceISIS):
         set_state_from_property_manager(self, value)
 
     def validate(self):
-        super(SANSStateMoveWorkspaceLARMOR, self).validate()
+        super(SANSStateMoveLARMOR, self).validate()
 
 
 # -----------------------------------------------

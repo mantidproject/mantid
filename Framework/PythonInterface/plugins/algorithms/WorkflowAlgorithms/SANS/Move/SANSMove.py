@@ -1,7 +1,7 @@
 import math
 from mantid.api import MatrixWorkspace
 from abc import (ABCMeta, abstractmethod)
-from State.SANSStateMoveWorkspace import (SANSStateMoveWorkspace, SANSStateMoveWorkspaceLOQ)
+from State.SANSStateMove import (SANSStateMove, SANSStateMoveLOQ)
 from Common.SANSConstants import (SANSInstrument, convert_string_to_sans_instrument,
                                   CanonicalCoordinates, SANSConstants)
 from Common.SANSFunctions import (create_unmanaged_algorithm, get_single_valued_logs_from_workspace)
@@ -103,9 +103,9 @@ class SANSMove(object):
         if component is not None and component not in move_info.detectors:
             raise ValueError("SANSMove: The component to be moved {} cannot be found in the"
                              " state information of type {}".format(str(component), str(type(move_info))))
-        if not isinstance(move_info, SANSStateMoveWorkspace):
+        if not isinstance(move_info, SANSStateMove):
             raise ValueError("SANSMove: The provided state information is of the wrong type. It must be"
-                             " of type SANSStateMoveWorkspace, but was {}".format(str(type(move_info))))
+                             " of type SANSStateMove, but was {}".format(str(type(move_info))))
         move_info.validate()
 
 

@@ -1,9 +1,12 @@
 import unittest
 import mantid
 
+from mantid.kernel import (PropertyManagerProperty, PropertyManager)
+from mantid.api import Algorithm
+
 from State.SANSState import (SANSStateISIS, SANSState)
 from State.SANSStateData import (SANSStateDataISIS, SANSStateData)
-from State.SANSStateMoveWorkspace import (SANSStateMoveWorkspaceLOQ)
+from State.SANSStateMove import (SANSStateMoveLOQ)
 from Common.SANSConstants import SANSConstants
 
 
@@ -21,7 +24,7 @@ class SANSStateTest(unittest.TestCase):
         data.sample_scatter = "sample_scat"
         state.data = data
 
-        move = SANSStateMoveWorkspaceLOQ()
+        move = SANSStateMoveLOQ()
         move.detectors[SANSConstants.high_angle_bank].detector_name = "test"
         move.detectors[SANSConstants.high_angle_bank].detector_name_short = "test"
         move.detectors[SANSConstants.low_angle_bank].detector_name = "test"
@@ -72,9 +75,16 @@ class SANSStateTest(unittest.TestCase):
         self.assertTrue(stored_name == ws_name_1)
 
     def test_that_property_manager_can_be_generated_from_state_object(self):
+        class FakeAlgorithm(Algorithm):
+            def PyInit(self):
+                self.declareProperty(PropertyManagerProperty("Args"))
+
+            def PyExec(self):
+                pass
         # Arrange
         state = SANSStateISIS()
 
+        # Prepare state data
         data = SANSStateDataISIS()
         ws_name_sample = "SANS2D00001234"
         ws_name_can = "SANS2D00001234"
@@ -88,15 +98,20 @@ class SANSStateTest(unittest.TestCase):
         state.data = data
 
         # Act
-        property_manager = state.property_manager
+        serialized = state.property_manager
+
+        fake = FakeAlgorithm()
+        fake.initialize()
+        fake.setProperty("Args", serialized)
+        pmgr = fake.getProperty("Args").value
 
         # Assert
-        # state_2 = SANSStateISIS()
-        # state_2.property_manager = property_manager
-        # self.assertTrue(state_2.data.sample_scatter == ws_name_sample)
-        # self.assertTrue(state_2.data.sample_scatter_period == period)
-        # self.assertTrue(state_2.data.can_scatter == ws_name_can)
-        # self.assertTrue(state_2.data.can_scatter_period == period)
+        state_2 = SANSStateISIS()
+        state_2.property_manager = pmgr
+        self.assertTrue(state_2.data.sample_scatter == ws_name_sample)
+        self.assertTrue(state_2.data.sample_scatter_period == period)
+        self.assertTrue(state_2.data.can_scatter == ws_name_can)
+        self.assertTrue(state_2.data.can_scatter_period == period)
 
 
 if __name__ == '__main__':

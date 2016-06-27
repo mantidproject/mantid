@@ -1,6 +1,7 @@
 import unittest
 import mantid
-
+from mantid.kernel import (PropertyManagerProperty, PropertyManager)
+from mantid.api import Algorithm
 from State.SANSStateData import (SANSStateDataISIS, SANSStateData)
 
 
@@ -116,7 +117,13 @@ class SANSStateDataTest(unittest.TestCase):
         # Act + Assert
         self.assertRaises(ValueError, state.validate)
 
-    def test_that_property_manager_can_be_generated_from_state_object(self):
+    def test_that_dict_can_be_generated_from_state_object_and_property_manager_read_in(self):
+        class FakeAlgorithm(Algorithm):
+            def PyInit(self):
+                self.declareProperty(PropertyManagerProperty("Args"))
+
+            def PyExec(self):
+                pass
         # Arrange
         state = SANSStateDataISIS()
         ws_name_sample = "SANS2D00001234"
@@ -129,15 +136,21 @@ class SANSStateDataTest(unittest.TestCase):
         state.can_scatter_period = period
 
         # Act
-        # property_manager = state.property_manager
+        serialized = state.property_manager
+        fake = FakeAlgorithm()
+        fake.initialize()
+        fake.setProperty("Args", serialized)
+        pmgr = fake.getProperty("Args").value
 
         # Assert
-        # state_2 = SANSStateDataISIS()
-        # state_2.property_manager = property_manager
-        # self.assertTrue(state_2.sample_scatter == ws_name_sample)
-        # self.assertTrue(state_2.sample_scatter_period == period)
-        # self.assertTrue(state_2.can_scatter == ws_name_can)
-        # self.assertTrue(state_2.can_scatter_period == period)
+        self.assertTrue(type(serialized) == dict)
+        self.assertTrue(type(pmgr) == PropertyManager)
+        state_2 = SANSStateDataISIS()
+        state_2.property_manager = pmgr
+        self.assertTrue(state_2.sample_scatter == ws_name_sample)
+        self.assertTrue(state_2.sample_scatter_period == period)
+        self.assertTrue(state_2.can_scatter == ws_name_can)
+        self.assertTrue(state_2.can_scatter_period == period)
 
 
 if __name__ == '__main__':

@@ -1,19 +1,18 @@
 import unittest
 import mantid
 
-from State.SANSStateMoveWorkspace import (SANSStateMoveWorkspaceLOQ,SANSStateMoveWorkspaceSANS2D,
-                                          SANSStateMoveWorkspaceLARMOR, SANSStateMoveWorkspace)
+from State.SANSStateMove import (SANSStateMoveLOQ,SANSStateMoveSANS2D, SANSStateMoveLARMOR, SANSStateMove)
 from Common.SANSConstants import SANSConstants
 
 
 class SANSStateMoveWorkspaceLOQTest(unittest.TestCase):
     def test_that_is_sans_state_data_object(self):
-        state = SANSStateMoveWorkspaceLOQ()
-        self.assertTrue(isinstance(state, SANSStateMoveWorkspace))
+        state = SANSStateMoveLOQ()
+        self.assertTrue(isinstance(state, SANSStateMove))
 
     def test_that_can_set_and_get_values(self):
         # Arrange
-        state = SANSStateMoveWorkspaceLOQ()
+        state = SANSStateMoveLOQ()
         test_value = 12.4
         # Assert
         self.assertTrue(state.detectors[SANSConstants.low_angle_bank].x_translation_correction == 0.0)
@@ -49,7 +48,7 @@ class SANSStateMoveWorkspaceLOQTest(unittest.TestCase):
 
     def test_that_invalid_types_for_parameters_raise_type_error(self):
         # Arrange
-        state = SANSStateMoveWorkspaceLOQ()
+        state = SANSStateMoveLOQ()
 
         # Act + Assert
         with self.assertRaises(TypeError):
@@ -60,7 +59,7 @@ class SANSStateMoveWorkspaceLOQTest(unittest.TestCase):
 
     def test_validate_method_raises_value_error_for_invalid_state(self):
         # Arrange
-        state = SANSStateMoveWorkspaceLOQ()
+        state = SANSStateMoveLOQ()
         test_name = "test_name"
         state.detectors[SANSConstants.low_angle_bank].detector_name = test_name
         self.assertTrue(state.detectors[SANSConstants.low_angle_bank].detector_name == test_name)
@@ -76,12 +75,12 @@ class SANSStateMoveWorkspaceLOQTest(unittest.TestCase):
 
 class SANSStateMoveWorkspaceSANS2DTest(unittest.TestCase):
     def test_that_is_sans_state_data_object(self):
-        state = SANSStateMoveWorkspaceSANS2D()
-        self.assertTrue(isinstance(state, SANSStateMoveWorkspace))
+        state = SANSStateMoveSANS2D()
+        self.assertTrue(isinstance(state, SANSStateMove))
 
     def test_that_can_set_and_get_values(self):
         # Arrange
-        state = SANSStateMoveWorkspaceSANS2D()
+        state = SANSStateMoveSANS2D()
         test_value = 12.4
         # Assert
         self.assertTrue(state.detectors[SANSConstants.low_angle_bank].x_translation_correction == 0.0)
@@ -118,7 +117,7 @@ class SANSStateMoveWorkspaceSANS2DTest(unittest.TestCase):
 
     def test_that_invalid_types_for_parameters_raise_type_error(self):
         # Arrange
-        state = SANSStateMoveWorkspaceSANS2D()
+        state = SANSStateMoveSANS2D()
 
         # Act + Assert
         with self.assertRaises(TypeError):
@@ -129,7 +128,7 @@ class SANSStateMoveWorkspaceSANS2DTest(unittest.TestCase):
 
     def test_validate_method_raises_value_error_for_invalid_state(self):
         # Arrange
-        state = SANSStateMoveWorkspaceSANS2D()
+        state = SANSStateMoveSANS2D()
         test_name = "test_name"
         state.detectors[SANSConstants.low_angle_bank].detector_name = test_name
         self.assertTrue(state.detectors[SANSConstants.low_angle_bank].detector_name == test_name)
@@ -145,12 +144,12 @@ class SANSStateMoveWorkspaceSANS2DTest(unittest.TestCase):
 
 class SANSStateMoveWorkspaceLARMORTest(unittest.TestCase):
     def test_that_is_sans_state_data_object(self):
-        state = SANSStateMoveWorkspaceLARMOR()
-        self.assertTrue(isinstance(state, SANSStateMoveWorkspace))
+        state = SANSStateMoveLARMOR()
+        self.assertTrue(isinstance(state, SANSStateMove))
 
     def test_that_can_set_and_get_values(self):
         # Arrange
-        state = SANSStateMoveWorkspaceLARMOR()
+        state = SANSStateMoveLARMOR()
         test_value = 12.4
         # Assert
         self.assertTrue(state.detectors[SANSConstants.low_angle_bank].x_translation_correction == 0.0)
@@ -183,7 +182,7 @@ class SANSStateMoveWorkspaceLARMORTest(unittest.TestCase):
 
     def test_that_invalid_types_for_parameters_raise_type_error(self):
         # Arrange
-        state = SANSStateMoveWorkspaceLARMOR()
+        state = SANSStateMoveLARMOR()
 
         # Act + Assert
         with self.assertRaises(TypeError):
@@ -191,7 +190,7 @@ class SANSStateMoveWorkspaceLARMORTest(unittest.TestCase):
 
     def test_validate_method_raises_value_error_for_invalid_state(self):
         # Arrange
-        state = SANSStateMoveWorkspaceLARMOR()
+        state = SANSStateMoveLARMOR()
         test_name = "test_name"
         state.detectors[SANSConstants.low_angle_bank].detector_name = test_name
         self.assertTrue(state.detectors[SANSConstants.low_angle_bank].detector_name == test_name)

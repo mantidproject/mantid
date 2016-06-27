@@ -1,6 +1,6 @@
 import json
-from SANSStateBase import (SANSStateBase, ClassTypeParameter, convert_state_to_dict,
-                           set_state_from_property_manager, sans_parameters)
+from SANSStateBase import (SANSStateBase, ClassTypeParameter, sans_parameters)
+from State.SANSStateSerializer import(convert_state_to_dict, set_state_from_property_manager)
 
 
 # ------------------------------------------------

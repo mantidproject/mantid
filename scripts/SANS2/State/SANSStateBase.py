@@ -1,59 +1,5 @@
 ﻿from abc import (ABCMeta, abstractmethod)
-import inspect
 import copy
-from mantid.kernel import PropertyManager
-
-
-# ------------------------------------------------
-# Free functions
-# ------------------------------------------------
-def get_descriptor_values(instance):
-    # Get all descriptor names which are TypedParameter of instance's type
-    descriptor_names = []
-    for descriptor_name, descriptor_object in inspect.getmembers(type(instance)):
-        if inspect.isdatadescriptor(descriptor_object) and isinstance(descriptor_object, TypedParameter):
-            descriptor_names.append(descriptor_name)
-
-    # Get the descriptor values from the instance
-    descriptor_values = {}
-    for key in descriptor_names:
-        if hasattr(instance, key):
-            value = getattr(instance, key)
-            if value is not None:
-                descriptor_values.update({key: value})
-    return descriptor_values
-
-
-def convert_state_to_property_manager(instance):
-    descriptor_values = get_descriptor_values(instance)
-
-    # Add the descriptors to a PropertyManager object
-    property_manager = PropertyManager()
-    for key in descriptor_values:
-        value = descriptor_values[key]
-        if value is not None:
-            property_manager.declareProperty(key, value)
-    return property_manager
-
-
-def convert_state_to_dict(instance):
-    descriptor_values = get_descriptor_values(instance)
-    # Add the descriptors to a dict
-    state_dict = dict()
-    for key, value in descriptor_values.iteritems():
-        # If the value is a SANSBaseState then create a dict from it
-        if isinstance(value, SANSStateBase):
-            sub_state_dict = convert_state_to_dict(value)
-            value = sub_state_dict
-        state_dict.update({key: value})
-    return state_dict
-
-
-def set_state_from_property_manager(instance, property_manager):
-    keys = property_manager.keys()
-    for key in keys:
-        value = property_manager.getProperty(key).value
-        setattr(instance, key, value)
 
 
 # ---------------------------------------------------------------

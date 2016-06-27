@@ -7,7 +7,7 @@ set ( TEST_PY_FILES
    SANSStateDataTest.py
    SANSStateReductionTest.py
    SANSStateMoveBuilderTest.py
-   SANSStateMoveWorkspaceTest.py
+   SANSStateMoveTest.py
   )
 
 check_tests_valid ( ${CMAKE_CURRENT_SOURCE_DIR} ${TEST_PY_FILES} )

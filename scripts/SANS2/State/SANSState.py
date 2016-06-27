@@ -2,10 +2,10 @@ import json
 import pickle
 import inspect
 from mantid.kernel import PropertyManager
-from State.SANSStateBase import (SANSStateBase, TypedParameter, convert_state_to_dict,
-                                 set_state_from_property_manager, sans_parameters)
+from State.SANSStateBase import (SANSStateBase, TypedParameter, sans_parameters)
+from State.SANSStateSerializer import(convert_state_to_dict, set_state_from_property_manager)
 from SANSStateData import SANSStateData
-from SANSStateMoveWorkspace import SANSStateMoveWorkspace
+from SANSStateMove import SANSStateMove
 
 
 # -----------------------------------------------
@@ -33,7 +33,7 @@ class SANSState(object):
 @sans_parameters
 class SANSStateISIS(SANSStateBase, SANSState):
     data = TypedParameter(SANSStateData, validator_sub_state)
-    move = TypedParameter(SANSStateMoveWorkspace, validator_sub_state)
+    move = TypedParameter(SANSStateMove, validator_sub_state)
 
     def __init__(self):
         super(SANSStateISIS, self).__init__()
@@ -63,7 +63,6 @@ class SANSStateISIS(SANSStateBase, SANSState):
         if is_invalid:
             raise ValueError("SANSState: There is an issue with your in put. See: {}".format(json.dumps(is_invalid)))
 
-
     @property
     def property_manager(self):
         return convert_state_to_dict(self)
@@ -72,9 +71,3 @@ class SANSStateISIS(SANSStateBase, SANSState):
     def property_manager(self, value):
         set_state_from_property_manager(self, value)
 
-
-# ----------------------------------------------------
-# SANSStateFactory method
-# ----------------------------------------------------
-def create_correct_sans_state_for_dictionary_input(input):
-    pass
