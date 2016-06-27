@@ -4,7 +4,7 @@
 #include "MantidKernel/System.h"
 #include "MantidQtAPI/MantidWidget.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorView.h"
-#include "MantidQtMantidWidgets/DataProcessorUI/QDataProcessorTableModel.h"
+#include "MantidQtMantidWidgets/DataProcessorUI/QDataProcessorTreeModel.h"
 #include "MantidQtMantidWidgets/ProgressableView.h"
 #include "MantidQtMantidWidgets/WidgetDllOption.h"
 #include "ui_DataProcessorWidget.h"
@@ -49,7 +49,7 @@ public:
   ~QDataProcessorWidget() override;
 
   // Connect the model
-  void showTable(QDataProcessorTableModel_sptr model) override;
+  void showTable(QDataProcessorTreeModel_sptr model) override;
 
   // Dialog/Prompt methods
   std::string askUserString(const std::string &prompt, const std::string &title,
@@ -109,7 +109,7 @@ private:
   // the presenter
   boost::shared_ptr<DataProcessorPresenter> m_presenter;
   // the models
-  QDataProcessorTableModel_sptr m_model;
+  QDataProcessorTreeModel_sptr m_model;
   // the interface
   Ui::DataProcessorWidget ui;
   // the workspace the user selected to open

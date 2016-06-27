@@ -3,7 +3,7 @@
 #include "MantidQtAPI/HelpWindow.h"
 #include "MantidQtAPI/MantidWidget.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorPresenter.h"
-#include "MantidQtMantidWidgets/DataProcessorUI/QDataProcessorTableModel.h"
+#include "MantidQtMantidWidgets/DataProcessorUI/QDataProcessorTreeModel.h"
 #include "MantidQtMantidWidgets/HintingLineEditFactory.h"
 
 #include <QWidget>
@@ -46,8 +46,11 @@ void QDataProcessorWidget::createTable() {
   ui.rowToolBar->addAction(QWhatsThis::createAction(this));
 
   // Allow rows and columns to be reordered
-  ui.viewTable->verticalHeader()->setMovable(true);
-  ui.viewTable->horizontalHeader()->setMovable(true);
+  QHeaderView *header = new QHeaderView(Qt::Horizontal);
+  header->setMovable(true);
+  header->setStretchLastSection(true);
+  header->setResizeMode(QHeaderView::ResizeToContents);
+  ui.viewTable->setHeader(header);
 
   // Re-emit a signal when the instrument changes
   connect(ui.comboProcessInstrument, SIGNAL(currentIndexChanged(int)), this,
@@ -83,14 +86,13 @@ void QDataProcessorWidget::setModel(const std::string &name) {
 Set a new model in the tableview
 @param model : the model to be attached to the tableview
 */
-void QDataProcessorWidget::showTable(QDataProcessorTableModel_sptr model) {
+void QDataProcessorWidget::showTable(QDataProcessorTreeModel_sptr model) {
   m_model = model;
   // So we can notify the presenter when the user updates the table
   connect(m_model.get(),
           SIGNAL(dataChanged(const QModelIndex &, const QModelIndex &)), this,
           SLOT(tableUpdated(const QModelIndex &, const QModelIndex &)));
   ui.viewTable->setModel(m_model.get());
-  ui.viewTable->resizeColumnsToContents();
 }
 
 /**

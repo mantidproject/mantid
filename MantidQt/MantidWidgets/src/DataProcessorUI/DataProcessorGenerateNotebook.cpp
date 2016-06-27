@@ -50,7 +50,7 @@ specified via the corresponding hinting line edit in the view
 @returns ipython notebook string
 */
 DataProcessorGenerateNotebook::DataProcessorGenerateNotebook(
-    std::string name, QDataProcessorTableModel_sptr model,
+    std::string name, QDataProcessorTreeModel_sptr model,
     const std::string instrument, const DataProcessorWhiteList &whitelist,
     const std::map<std::string, DataProcessorPreprocessingAlgorithm> &
         preprocessMap,
@@ -235,12 +235,12 @@ std::string plotsString(const std::vector<std::string> &output_ws,
 
 /**
   Create string of markdown code to display a table of data from the GUI
-  @param model : tablemodel for the full table
+  @param model : TreeModel for the full table
   @param whitelist : the whitelist defining the table columns
   @param rows : rows from full table to include
   @return string containing the markdown code
   */
-std::string tableString(QDataProcessorTableModel_sptr model,
+std::string tableString(QDataProcessorTreeModel_sptr model,
                         const DataProcessorWhiteList &whitelist,
                         const std::set<int> &rows) {
   std::ostringstream table_string;
@@ -286,7 +286,7 @@ std::string tableString(QDataProcessorTableModel_sptr model,
   @return tuple containing the python code string and the output workspace name
   */
 boost::tuple<std::string, std::string> postprocessGroupString(
-    const std::set<int> &rows, QDataProcessorTableModel_sptr model,
+    const std::set<int> &rows, QDataProcessorTreeModel_sptr model,
     const DataProcessorWhiteList &whitelist,
     const DataProcessorProcessingAlgorithm &processor,
     const DataProcessorPostprocessingAlgorithm &postprocessor,
@@ -353,13 +353,13 @@ std::string plot1DString(const std::vector<std::string> &ws_names) {
 /**
  Constructs the name for the reduced workspace
  @param rowNo : the row
- @param model : tablemodel for the full table
+ @param model : TreeModel for the full table
  @param whitelist : the whitelist
  @param prefix : wheter to return the name with the prefix or not
  @return : the workspace name
 */
 std::string getReducedWorkspaceName(int rowNo,
-                                    QDataProcessorTableModel_sptr model,
+                                    QDataProcessorTreeModel_sptr model,
                                     const DataProcessorWhiteList &whitelist,
                                     const std::string &prefix) {
 
@@ -413,7 +413,7 @@ std::string getReducedWorkspaceName(int rowNo,
 */
 boost::tuple<std::string, std::string> reduceRowString(
     const int rowNo, const std::string &instrument,
-    QDataProcessorTableModel_sptr model,
+    QDataProcessorTreeModel_sptr model,
     const DataProcessorWhiteList &whitelist,
     const std::map<std::string, DataProcessorPreprocessingAlgorithm> &
         preprocessMap,

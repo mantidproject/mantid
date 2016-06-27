@@ -35,7 +35,7 @@
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorView.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorWorkspaceCommand.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/ParseKeyValueString.h"
-#include "MantidQtMantidWidgets/DataProcessorUI/QDataProcessorTableModel.h"
+#include "MantidQtMantidWidgets/DataProcessorUI/QDataProcessorTreeModel.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/QtDataProcessorOptionsDialog.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/WorkspaceReceiver.h"
 #include "MantidQtMantidWidgets/ProgressPresenter.h"
@@ -216,7 +216,8 @@ void GenericDataProcessorPresenter::validateModel(ITableWorkspace_sptr model) {
     throw std::runtime_error("Null pointer");
 
   int columns = static_cast<int>(model->columnCount());
-  if (columns != m_columns)
+  if (columns != m_columns + 1)
+    // Table workspace must have one extra column corresponding to the group
     throw std::runtime_error("Selected table has the incorrect number of "
                              "columns to be used as a data processor table.");
 
@@ -251,6 +252,10 @@ bool GenericDataProcessorPresenter::isValidModel(Workspace_sptr model) {
 */
 ITableWorkspace_sptr GenericDataProcessorPresenter::createDefaultWorkspace() {
   ITableWorkspace_sptr ws = WorkspaceFactory::Instance().createTable();
+
+  // First column is group
+  auto column = ws->addColumn("str", "Group");
+  column->setPlotType(0);
 
   for (int col = 0; col < m_columns; col++) {
     // The columns provided to this presenter
@@ -1029,7 +1034,7 @@ void GenericDataProcessorPresenter::newTable() {
       return;
 
   m_ws = createDefaultWorkspace();
-  m_model.reset(new QDataProcessorTableModel(m_ws, m_whitelist));
+  m_model.reset(new QDataProcessorTreeModel(m_ws, m_whitelist));
   m_wsName.clear();
   m_view->showTable(m_model);
 
@@ -1067,7 +1072,7 @@ void GenericDataProcessorPresenter::openTable() {
   try {
     validateModel(newTable);
     m_ws = newTable;
-    m_model.reset(new QDataProcessorTableModel(m_ws, m_whitelist));
+    m_model.reset(new QDataProcessorTreeModel(m_ws, m_whitelist));
     m_wsName = toOpen;
     m_view->showTable(m_model);
     m_tableDirty = false;

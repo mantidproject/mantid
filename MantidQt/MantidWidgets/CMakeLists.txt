@@ -13,7 +13,8 @@ set ( SRC_FILES
     src/DataProcessorUI/DataProcessorWhiteList.cpp
     src/DataProcessorUI/GenericDataProcessorPresenter.cpp
     src/DataProcessorUI/ParseKeyValueString.cpp
-    src/DataProcessorUI/QDataProcessorTableModel.cpp
+    src/DataProcessorUI/QDataProcessorTreeItem.cpp
+    src/DataProcessorUI/QDataProcessorTreeModel.cpp
     src/DataProcessorUI/QDataProcessorWidget.cpp
     src/DataProcessorUI/QtDataProcessorOptionsDialog.cpp
     src/DataSelector.cpp
@@ -118,7 +119,7 @@ set ( MOC_FILES
     inc/MantidQtMantidWidgets/CheckboxHeader.h
     inc/MantidQtMantidWidgets/ColorBarWidget.h
     inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorCommandAdapter.h
-    inc/MantidQtMantidWidgets/DataProcessorUI/QDataProcessorTableModel.h
+    inc/MantidQtMantidWidgets/DataProcessorUI/QDataProcessorTreeModel.h
     inc/MantidQtMantidWidgets/DataProcessorUI/QDataProcessorWidget.h
     inc/MantidQtMantidWidgets/DataProcessorUI/QtDataProcessorOptionsDialog.h
     inc/MantidQtMantidWidgets/DataSelector.h
@@ -232,6 +233,7 @@ set ( INC_FILES
     inc/MantidQtMantidWidgets/DataProcessorUI/GenericDataProcessorPresenter.h
     inc/MantidQtMantidWidgets/DataProcessorUI/GenericDataProcessorPresenterFactory.h
     inc/MantidQtMantidWidgets/DataProcessorUI/ParseKeyValueString.h
+    inc/MantidQtMantidWidgets/DataProcessorUI/QDataProcessorTreeItem.h
     inc/MantidQtMantidWidgets/DataProcessorUI/WorkspaceReceiver.h
     inc/MantidQtMantidWidgets/ErrorCurve.h
     inc/MantidQtMantidWidgets/WidgetDllOption.h
