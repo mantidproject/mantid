@@ -24,7 +24,7 @@ class CalculateQ(IOmodule):
 
 
         # prepare hdf file
-        self._prepare_HDF_file(file_name=filename, group_name="Qvectors")
+        self._prepare_HDF_file_for_saving()
 
         # _functions and _Q defined in the form of dictionaries with keys as names of instruments. If a name of
         # instrument is set to 'None' then Q vectors does not depend on frequency.

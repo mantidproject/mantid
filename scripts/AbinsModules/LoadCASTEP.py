@@ -19,8 +19,6 @@ class LoadCASTEP(GeneralDFTProgram):
         # Regex pattern for a floating point number
         self._float_regex = r'\-?(?:\d+\.?\d*|\d*\.?\d+)'
 
-        # prepare hdf file
-        self._prepare_HDF_file(file_name=filename, group_name="PhononAB")
 
     # noinspection PyMethodMayBeStatic
     def _parse_block_header(self, header_match, block_count):
