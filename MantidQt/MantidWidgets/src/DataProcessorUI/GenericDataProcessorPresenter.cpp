@@ -229,12 +229,8 @@ void GenericDataProcessorPresenter::validateModel(ITableWorkspace_sptr model) {
   try {
     // All columns must be strings
     size_t ncols = model->columnCount();
-    for (size_t i = 0; i < ncols - 2; i++)
+    for (size_t i = 0; i < ncols; i++)
       model->String(0, i);
-    // Except Group, which must be int
-    model->Int(0, ncols - 2);
-    // Options column must be string too
-    model->String(0, ncols - 1);
   } catch (const std::runtime_error &) {
     throw std::runtime_error("Selected table does not meet the specifications "
                              "to become a model for this interface.");
@@ -262,16 +258,11 @@ bool GenericDataProcessorPresenter::isValidModel(Workspace_sptr model) {
 ITableWorkspace_sptr GenericDataProcessorPresenter::createWorkspace() {
   ITableWorkspace_sptr ws = WorkspaceFactory::Instance().createTable();
 
-  for (int col = 0; col < m_columns - 2; col++) {
+  for (int col = 0; col < m_columns; col++) {
     // The columns provided to this presenter
     auto column = ws->addColumn("str", m_whitelist.colNameFromColIndex(col));
     column->setPlotType(0);
   }
-  // The Group column, must be int
-  auto colGroup = ws->addColumn("int", "Group");
-  colGroup->setPlotType(0);
-  auto colOptions = ws->addColumn("str", "Options");
-  colOptions->setPlotType(0);
 
   return ws;
 }

@@ -327,7 +327,7 @@ void LoadTBL::exec() {
     auto colQmax = ws->addColumn("str", "Qmax");
     auto colDqq = ws->addColumn("str", "dq/q");
     auto colScale = ws->addColumn("str", "Scale");
-    auto colStitch = ws->addColumn("int", "StitchGroup");
+    auto colStitch = ws->addColumn("str", "StitchGroup");
     auto colOptions = ws->addColumn("str", "Options");
 
     colRuns->setPlotType(0);
@@ -354,6 +354,7 @@ void LoadTBL::exec() {
       }
       getCells(line, rowVec, 16, isOld);
       const std::string scaleStr = rowVec.at(16);
+      const std::string stitchStr = boost::lexical_cast<std::string>(stitchID);
 
       // check if the first run in the row has any data associated with it
       // 0 = runs, 1 = theta, 2 = trans, 3 = qmin, 4 = qmax
@@ -365,7 +366,7 @@ void LoadTBL::exec() {
         }
         row << rowVec.at(15);
         row << scaleStr;
-        row << stitchID;
+        row << stitchStr;
       }
 
       // check if the second run in the row has any data associated with it
@@ -378,7 +379,7 @@ void LoadTBL::exec() {
         }
         row << rowVec.at(15);
         row << scaleStr;
-        row << stitchID;
+        row << stitchStr;
       }
 
       // check if the third run in the row has any data associated with it
@@ -392,7 +393,7 @@ void LoadTBL::exec() {
           else
             row << rowVec.at(i);
         }
-        row << stitchID;
+        row << stitchStr;
       }
       ++stitchID;
       setProperty("OutputWorkspace", ws);
@@ -411,15 +412,7 @@ void LoadTBL::exec() {
           heading = columnHeadings.erase(heading);
         } else {
           Mantid::API::Column_sptr col;
-          // The Group column will always be second-to-last
-          // in the TBL file. This is the only column that
-          // should be of type "int".
-          if (*heading == columnHeadings.at(columnHeadings.size() - 2))
-            col = ws->addColumn("int", *heading);
-          else
-            // All other entries in the TableWorkspace will
-            // have a type of "str"
-            col = ws->addColumn("str", *heading);
+          col = ws->addColumn("str", *heading);
           col->setPlotType(0);
           heading++;
         }
@@ -435,12 +428,7 @@ void LoadTBL::exec() {
       // populate the columns with their values for this row.
       TableRow row = ws->appendRow();
       for (size_t i = 0; i < expectedCommas + 1; ++i) {
-        if (i == expectedCommas - 1)
-          // taking into consideration Group column
-          // of type "int"
-          row << boost::lexical_cast<int>(rowVec.at(i));
-        else
-          row << rowVec.at(i);
+        row << rowVec.at(i);
       }
     }
     setProperty("OutputWorkspace", ws);

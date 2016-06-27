@@ -69,16 +69,10 @@ private:
 
     const int ncols = static_cast<int>(whitelist.size());
 
-    for (int col = 0; col < ncols - 2; col++) {
+    for (int col = 0; col < ncols; col++) {
       auto column = ws->addColumn("str", whitelist.colNameFromColIndex(col));
       column->setPlotType(0);
     }
-    auto colGroup =
-        ws->addColumn("int", whitelist.colNameFromColIndex(ncols - 2));
-    auto colOptions =
-        ws->addColumn("str", whitelist.colNameFromColIndex(ncols - 1));
-    colGroup->setPlotType(0);
-    colOptions->setPlotType(0);
 
     if (wsName.length() > 0)
       AnalysisDataService::Instance().addOrReplace(wsName, ws);
@@ -97,7 +91,7 @@ private:
         << "0.1"
         << "1.6"
         << "0.04"
-        << "1" << 0 << "";
+        << "1" << "0" << "";
     row = ws->appendRow();
     row << "12346"
         << "1.5"
@@ -105,7 +99,7 @@ private:
         << "1.4"
         << "2.9"
         << "0.04"
-        << "1" << 0 << "";
+        << "1" << "0" << "";
     row = ws->appendRow();
     row << "24681"
         << "0.5"
@@ -113,7 +107,7 @@ private:
         << "0.1"
         << "1.6"
         << "0.04"
-        << "1" << 1 << "";
+        << "1" << "1" << "";
     row = ws->appendRow();
     row << "24682"
         << "1.5"
@@ -121,7 +115,7 @@ private:
         << "1.4"
         << "2.9"
         << "0.04"
-        << "1" << 1 << "";
+        << "1" << "1" << "";
     return ws;
   }
 

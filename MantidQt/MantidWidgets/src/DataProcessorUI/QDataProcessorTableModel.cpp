@@ -48,17 +48,11 @@ void QDataProcessorTableModel::updateDataCache(const int row) const {
 
   int ncols = static_cast<int>(m_whitelist.size());
 
-  for (int col = 0; col < ncols - 2; col++) {
+  for (int col = 0; col < ncols; col++) {
 
     m_dataCache.push_back(
         QString::fromStdString(tableRow.cell<std::string>(col)));
   }
-
-  // Column 'Group'
-  m_dataCache.push_back(QString::number(tableRow.cell<int>(ncols - 2)));
-  // Column 'Options'
-  m_dataCache.push_back(
-      QString::fromStdString(tableRow.cell<std::string>(ncols - 1)));
 
   m_dataCachePeakIndex = row;
 }
@@ -135,16 +129,7 @@ bool QDataProcessorTableModel::setData(const QModelIndex &index,
   if (index.isValid() && role == Qt::EditRole) {
     const int colNumber = index.column();
     const int rowNumber = index.row();
-
-    const int ncols = static_cast<int>(m_whitelist.size());
-
-    if (colNumber == ncols - 2) {
-
-      m_tWS->Int(rowNumber, colNumber) = str.toInt();
-    } else {
-
-      m_tWS->String(rowNumber, colNumber) = str.toStdString();
-    }
+		m_tWS->String(rowNumber, colNumber) = str.toStdString();
 
     invalidateDataCache(rowNumber);
     emit dataChanged(index, index);
