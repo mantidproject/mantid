@@ -392,8 +392,44 @@ void MuonFitPropertyBrowser::finishHandle(const IAlgorithm *alg) {
     }
   }
 
+  // If fit was simultaneous, insert extra information into params table
+  const int nWorkspaces = static_cast<int>(m_workspacesToFit.size());
+  if (nWorkspaces > 1) {
+    editTableAfterSimultaneousFit(alg, nWorkspaces);
+  }
 
   FitPropertyBrowser::finishHandle(alg);
+}
+
+/**
+ * After a simultaneous fit, insert extra information into parameters table
+ * (i.e. what runs, groups, periods "f0", "f1" etc were)
+ * @param fitAlg :: [input] Pointer to fit algorithm that just finished
+ * @param nWorkspaces :: [input] Number of workspaces that were fitted
+ */
+void MuonFitPropertyBrowser::editTableAfterSimultaneousFit(
+    const Mantid::API::IAlgorithm *fitAlg, const int nWorkspaces) const {
+  try {
+    const std::string paramTableName = fitAlg->getProperty("OutputParameters");
+    const auto paramTable =
+        AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(
+            paramTableName);
+    if (paramTable) {
+      Mantid::API::TableRow f0Row = paramTable->appendRow();
+      f0Row << "f0=" + fitAlg->getPropertyValue("InputWorkspace") << 0.0 << 0.0;
+      for (int i = 1; i < nWorkspaces; i++) {
+        const std::string suffix = boost::lexical_cast<std::string>(i);
+        const auto wsName =
+            fitAlg->getPropertyValue("InputWorkspace_" + suffix);
+        Mantid::API::TableRow row = paramTable->appendRow();
+        row << "f" + suffix + "=" + wsName << 0.0 << 0.0;
+      }
+    }
+  } catch (const Mantid::Kernel::Exception::NotFoundError &) {
+    // Not a fatal error, but shouldn't happen
+    g_log.warning(
+        "Could not find output parameters table for simultaneous fit");
+  }
 }
 
 /**
