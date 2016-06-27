@@ -51,6 +51,8 @@ namespace MantidWidgets {
 
 using namespace Mantid::API;
 
+const std::string MuonFitPropertyBrowser::SIMULTANEOUS_PREFIX{"MuonSimulFit_"};
+
 /**
  * Constructor
  * @param parent :: The parent widget - must be an ApplicationWindow
@@ -501,6 +503,22 @@ void MuonFitPropertyBrowser::setWorkspaceNames(const QStringList &wsNames) {
                  [](const QString &qs) { return qs.toStdString(); });
   // Update listeners
   emit workspacesToFitChanged(static_cast<int>(m_workspacesToFit.size()));
+}
+
+/**
+ * Override in the case of simultaneous fits to use a special prefix.
+ * Otherwise, use the parent class method.
+ * @returns :: output name for Fit algorithm
+ */
+std::string MuonFitPropertyBrowser::outputName() const {
+  const int nWorkspaces = static_cast<int>(m_workspacesToFit.size());
+  if (nWorkspaces > 1) {
+    // simultaneous fit
+    return SIMULTANEOUS_PREFIX + m_simultaneousLabel;
+  } else {
+    // use parent class behaviour
+    return FitPropertyBrowser::outputName();
+  }
 }
 
 } // MantidQt

@@ -257,6 +257,8 @@ private slots:
   void dataPeriodsChanged();
   /// Called when user changes fit range graphically
   void fitRangeChangedManually(double start, double end);
+  /// Called when user changes simultaneous fit label
+  void simultaneousFitLabelChanged();
 
 private:
  

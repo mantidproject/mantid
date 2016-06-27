@@ -44,6 +44,7 @@ public:
   MOCK_CONST_METHOD0(getFitType, IMuonFitDataSelector::FitType());
   MOCK_CONST_METHOD0(getInstrumentName, QString());
   MOCK_CONST_METHOD0(getRuns, QString());
+  MOCK_CONST_METHOD0(getSimultaneousFitLabel, QString());
 };
 
 /// Mock fit property browser
@@ -56,6 +57,7 @@ public:
   MOCK_METHOD1(allowSequentialFits, void(bool));
   MOCK_METHOD1(setWorkspaceNames, void(const QStringList &));
   MOCK_METHOD1(workspacesToFitChanged, void(int));
+  MOCK_METHOD1(setSimultaneousLabel, void(const std::string &));
 };
 
 class MuonAnalysisFitDataPresenterTest : public CxxTest::TestSuite {
@@ -168,6 +170,16 @@ public:
     const QString wsName("MUSR00015189; Pair; long; Asym; 1; #1");
     m_presenter->setAssignedFirstRun(wsName);
     TS_ASSERT_EQUALS(wsName, m_presenter->getAssignedFirstRun());
+  }
+
+  void test_handleSimultaneousFitLabelChanged() {
+    const QString label("UserSelectedFitLabel");
+    EXPECT_CALL(*m_dataSelector, getSimultaneousFitLabel())
+        .Times(1)
+        .WillOnce(Return(label));
+    EXPECT_CALL(*m_fitBrowser, setSimultaneousLabel(label.toStdString()))
+        .Times(1);
+    m_presenter->handleSimultaneousFitLabelChanged();
   }
 
 private:

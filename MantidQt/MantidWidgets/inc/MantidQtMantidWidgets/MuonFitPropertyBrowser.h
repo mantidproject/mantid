@@ -60,6 +60,14 @@ public:
                          double value) override;
   /// Set list of workspaces to fit
   void setWorkspaceNames(const QStringList &wsNames) override;
+  /// Get output name
+  std::string outputName() const override;
+  /// Prefix for simultaneous fit results
+  static const std::string SIMULTANEOUS_PREFIX;
+  /// Set label for simultaneous fit results
+  void setSimultaneousLabel(const std::string &label) override {
+    m_simultaneousLabel = label;
+  }
 
 public slots:
   /// Perform the fit algorithm
@@ -95,6 +103,8 @@ private:
   QVBoxLayout *m_additionalLayout;
   /// Names of workspaces to fit
   std::vector<std::string> m_workspacesToFit;
+  /// Label to use for simultaneous fits
+  std::string m_simultaneousLabel;
 };
 
 } // MantidQt

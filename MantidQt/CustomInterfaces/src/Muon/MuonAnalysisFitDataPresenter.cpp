@@ -33,7 +33,10 @@ MuonAnalysisFitDataPresenter::MuonAnalysisFitDataPresenter(
     MuonAnalysisDataLoader &dataLoader, double timeZero,
     RebinOptions &rebinArgs)
     : m_fitBrowser(fitBrowser), m_dataSelector(dataSelector),
-      m_dataLoader(dataLoader), m_timeZero(timeZero), m_rebinArgs(rebinArgs) {}
+      m_dataLoader(dataLoader), m_timeZero(timeZero), m_rebinArgs(rebinArgs) {
+  // Ensure this is set correctly at the start
+  handleSimultaneousFitLabelChanged();
+}
 
 /**
  * Called when data selector reports "data properties changed"
@@ -301,6 +304,14 @@ MuonAnalysisFitDataPresenter::getRebinParams(const Workspace_sptr ws) const {
     params = m_rebinArgs.second;
   }
   return params;
+}
+
+/**
+ * Set the label for simultaneous fit results based on input
+ */
+void MuonAnalysisFitDataPresenter::handleSimultaneousFitLabelChanged() const {
+  const QString label = m_dataSelector->getSimultaneousFitLabel();
+  m_fitBrowser->setSimultaneousLabel(label.toStdString());
 }
 
 } // namespace CustomInterfaces

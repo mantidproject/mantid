@@ -2056,6 +2056,8 @@ void MuonAnalysis::loadFittings() {
           SLOT(dataWorkspaceChanged()));
   connect(m_uiForm.fitBrowser, SIGNAL(xRangeChanged(double, double)), this,
           SLOT(fitRangeChangedManually(double, double)));
+  connect(m_dataSelector, SIGNAL(simulLabelChanged()), this,
+          SLOT(simultaneousFitLabelChanged()));
 }
 
 /**
@@ -3041,6 +3043,16 @@ void MuonAnalysis::updateRebinParams() {
     rebinParams.second = m_optionTab->getRebinParams();
   }
   m_fitDataPresenter->setRebinArgs(rebinParams);
+}
+
+/**
+ * Slot: label for simultaneous fit results changed in data selector.
+ * Update the presenter with this information.
+ */
+void MuonAnalysis::simultaneousFitLabelChanged() {
+  if (m_fitDataPresenter) {
+    m_fitDataPresenter->handleSimultaneousFitLabelChanged();
+  }
 }
 
 } // namespace MantidQt

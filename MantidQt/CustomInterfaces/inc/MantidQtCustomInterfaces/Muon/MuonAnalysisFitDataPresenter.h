@@ -76,6 +76,8 @@ public:
   void setTimeZero(double timeZero) { m_timeZero = timeZero; }
   /// Change the stored rebin args
   void setRebinArgs(const RebinOptions &rebinArgs) { m_rebinArgs = rebinArgs; }
+  /// Handles label for simultaneous fit results being changed
+  void handleSimultaneousFitLabelChanged() const;
 
 private:
   /// Create workspaces to fit and update fit browser (model)

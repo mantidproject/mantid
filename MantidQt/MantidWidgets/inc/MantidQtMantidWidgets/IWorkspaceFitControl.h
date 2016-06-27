@@ -43,6 +43,7 @@ public:
   virtual void allowSequentialFits(bool allow) = 0;
   virtual void setWorkspaceNames(const QStringList &wsNames) {}
   virtual void workspacesToFitChanged(int n) {}
+  virtual void setSimultaneousLabel(const std::string &label) {}
 };
 
 } // namespace MantidWidgets

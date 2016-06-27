@@ -59,6 +59,8 @@ void MuonFitDataSelector::setUpConnections() {
           SLOT(periodCombinationStateChanged(int)));
   connect(m_ui.chkCombine, SIGNAL(clicked()), this,
           SIGNAL(selectedPeriodsChanged()));
+  connect(m_ui.txtSimFitLabel, SIGNAL(editingFinished()), this,
+          SIGNAL(simulLabelChanged()));
 }
 
 /**
@@ -67,6 +69,8 @@ void MuonFitDataSelector::setUpConnections() {
  */
 void MuonFitDataSelector::fitTypeChanged(bool state) {
   (void)state;
+  m_ui.txtSimFitLabel->setEnabled(m_ui.rbSimultaneous->isEnabled() &&
+                                  getFitType() == FitType::Simultaneous);
   emit workspaceChanged();
 }
 
@@ -230,6 +234,8 @@ void MuonFitDataSelector::setDefaultValues() {
   this->setStartTime(0.0);
   this->setEndTime(0.0);
   setPeriodCombination(false);
+  m_ui.txtSimFitLabel->setText("Label");
+  emit simulLabelChanged(); // make sure default "Label" is set
 }
 
 /**
@@ -497,6 +503,7 @@ void MuonFitDataSelector::setFitType(IMuonFitDataSelector::FitType type) {
     m_ui.rbSimultaneous->setEnabled(true);
     m_ui.rbCoAdd->setChecked(type == FitType::CoAdd);
     m_ui.rbSimultaneous->setChecked(type == FitType::Simultaneous);
+    m_ui.txtSimFitLabel->setEnabled(type == FitType::Simultaneous);
   }
 }
 
@@ -570,6 +577,14 @@ void MuonFitDataSelector::setBusyState() {
   if (m_ui.groupBoxPeriods->isVisible()) {
     m_ui.groupBoxPeriods->setEnabled(false);
   }
+}
+
+/**
+ * Get text entered as the simultaneous fit label
+ * @returns :: text entered in the textbox
+ */
+QString MuonFitDataSelector::getSimultaneousFitLabel() const {
+  return m_ui.txtSimFitLabel->text();
 }
 
 } // namespace MantidWidgets

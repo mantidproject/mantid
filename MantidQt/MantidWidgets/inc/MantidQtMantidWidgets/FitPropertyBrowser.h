@@ -132,7 +132,7 @@ public:
   /// Set workspace index
   void setWorkspaceIndex(int i) override;
   /// Get the output name
-  std::string outputName() const;
+  virtual std::string outputName() const;
   /// Set the output name
   void setOutputName(const std::string &);
   /// Get the minimizer

@@ -11,6 +11,7 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 
 #include "MantidQtMantidWidgets/MuonSequentialFitDialog.h"
+#include "MantidQtMantidWidgets/MuonFitPropertyBrowser.h"
 #include "MantidQtAPI/UserSubWindow.h"
 #include "MantidQtCustomInterfaces/Muon/MuonAnalysisHelper.h"
 
@@ -299,6 +300,11 @@ QStringList MuonAnalysisResultTableTab::getIndividualFitWorkspaces() {
     // Ignore sequential fit results
     if (boost::starts_with(*it, MuonSequentialFitDialog::SEQUENTIAL_PREFIX))
       continue;
+
+    // Ignore simultaneous fit results
+    if (boost::starts_with(*it, MuonFitPropertyBrowser::SIMULTANEOUS_PREFIX)) {
+      continue;
+    }
 
     workspaces << QString::fromStdString(wsBaseName(*it));
   }

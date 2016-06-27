@@ -74,6 +74,8 @@ public:
   QString getInstrumentName() const override;
   /// Get selected run numbers
   QString getRuns() const override;
+  /// Get label for simultaneous fit
+  QString getSimultaneousFitLabel() const override;
 
 public slots:
   /// Set number of periods in data
@@ -109,6 +111,8 @@ signals:
   void selectedPeriodsChanged();
   /// Changed the workspace
   void workspaceChanged();
+  /// Simultaneous fit label changed
+  void simulLabelChanged();
 
 private:
   /// Add a checkbox to Groups section
