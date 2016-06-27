@@ -1,10 +1,11 @@
 #pylint: disable=no-init,invalid-name
+import math
+import numpy as np
 from mantid.simpleapi import *
 from mantid.api import PythonAlgorithm, AlgorithmFactory, PropertyMode, MatrixWorkspaceProperty, \
                        WorkspaceGroupProperty, InstrumentValidator, WorkspaceUnitValidator, Progress
 from mantid.kernel import StringListValidator, StringMandatoryValidator, IntBoundedValidator, \
                           FloatBoundedValidator, Direction, logger, CompositeValidator
-import math, numpy as np
 
 #pylint: disable=too-many-instance-attributes
 class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):

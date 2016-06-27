@@ -46,10 +46,6 @@ File change history is stored at: <https://github.com/mantidproject/mantid>
 */
 class DLLExport Divide : public BinaryOperation {
 public:
-  /// Default constructor
-  Divide() : BinaryOperation(), m_warnOnZeroDivide(true){};
-  /// Destructor
-  ~Divide() override{};
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "Divide"; }
   /// Summary of algorithms purpose
@@ -95,7 +91,7 @@ private:
       const API::MatrixWorkspace_const_sptr rhs) const override;
   // usually you want to warn user if division by 0 occurs. set it to false to
   // generate these warnings on debug level only
-  bool m_warnOnZeroDivide;
+  bool m_warnOnZeroDivide = true;
 };
 
 } // namespace Algorithm

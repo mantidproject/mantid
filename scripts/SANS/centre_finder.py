@@ -519,11 +519,11 @@ class PositionProviderFactory(object):
             coord1_scale_factor = reducer.get_beam_center_scale_factor1()
 
             return PositionProviderAngleY(increment_coord1 = increment_coord1_angle,
-                                           increment_coord2 = self.increment_coord2,
-                                           tolerance = self.tolerance,
-                                           tolerance_angle = tolerance_angle,
-                                           coord1_offset = coord1_offset,
-                                           coord1_scale_factor = coord1_scale_factor)
+                                          increment_coord2 = self.increment_coord2,
+                                          tolerance = self.tolerance,
+                                          tolerance_angle = tolerance_angle,
+                                          coord1_offset = coord1_offset,
+                                          coord1_scale_factor = coord1_scale_factor)
         else:
             return PositionProviderXY(increment_coord1 = self.increment_coord1,
                                       increment_coord2 = self.increment_coord2,

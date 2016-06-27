@@ -68,6 +68,22 @@ double TOFSANSResolution::getTOFResolution(double wl) {
   return m_wl_resolution;
 }
 
+/*
+ * Return the effective pixel size in X, in meters
+ */
+double TOFSANSResolution::getEffectiveXPixelSize() {
+  double pixel_size_x = getProperty("PixelSizeX");
+  return pixel_size_x / 1000.0;
+}
+
+/*
+ * Return the effective pixel size in Y, in meters
+ */
+double TOFSANSResolution::getEffectiveYPixelSize() {
+  double pixel_size_y = getProperty("PixelSizeY");
+  return pixel_size_y / 1000.0;
+}
+
 void TOFSANSResolution::exec() {
   MatrixWorkspace_sptr iqWS = getProperty("InputWorkspace");
   MatrixWorkspace_sptr reducedWS = getProperty("ReducedWorkspace");
@@ -75,13 +91,11 @@ void TOFSANSResolution::exec() {
       boost::dynamic_pointer_cast<EventWorkspace>(reducedWS);
   const double min_wl = getProperty("MinWavelength");
   const double max_wl = getProperty("MaxWavelength");
-  double pixel_size_x = getProperty("PixelSizeX");
-  double pixel_size_y = getProperty("PixelSizeY");
+  double pixel_size_x = getEffectiveXPixelSize();
+  double pixel_size_y = getEffectiveYPixelSize();
   double R1 = getProperty("SourceApertureRadius");
   double R2 = getProperty("SampleApertureRadius");
   // Convert to meters
-  pixel_size_x /= 1000.0;
-  pixel_size_y /= 1000.0;
   R1 /= 1000.0;
   R2 /= 1000.0;
   m_wl_resolution = getProperty("DeltaT");

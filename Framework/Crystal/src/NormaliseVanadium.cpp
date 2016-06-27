@@ -78,13 +78,11 @@ void NormaliseVanadium::exec() {
     MantidVec &E = correctionFactors->dataE(i);
 
     // Copy over bin boundaries
-    const ISpectrum *inSpec = m_inputWS->getSpectrum(i);
-    inSpec->lockData(); // for MRU-related thread safety
-
-    const MantidVec &Xin = inSpec->readX();
+    const auto &inSpec = m_inputWS->getSpectrum(i);
+    const MantidVec &Xin = inSpec.readX();
     correctionFactors->dataX(i) = Xin;
-    const MantidVec &Yin = inSpec->readY();
-    const MantidVec &Ein = inSpec->readE();
+    const MantidVec &Yin = inSpec.readY();
+    const MantidVec &Ein = inSpec.readE();
 
     // Get detector position
     IDetector_const_sptr det;
@@ -137,8 +135,6 @@ void NormaliseVanadium::exec() {
       Y[j] = Yin[j] / normvalue;
       E[j] = Ein[j] / normvalue;
     }
-
-    inSpec->unlockData();
 
     prog.report();
 

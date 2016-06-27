@@ -28,16 +28,10 @@ namespace Crystal {
 DECLARE_ALGORITHM(SCDCalibratePanels)
 
 namespace {
-const double MAX_DET_HW_SCALE = 1.15;
-const double MIN_DET_HW_SCALE = 0.85;
-const double RAD_TO_DEG = 180. / M_PI;
+constexpr double MAX_DET_HW_SCALE = 1.15;
+constexpr double MIN_DET_HW_SCALE = 0.85;
+constexpr double RAD_TO_DEG = 180. / M_PI;
 }
-
-SCDCalibratePanels::SCDCalibratePanels() : API::Algorithm() {
-  // g_log.setLevel(7);
-}
-
-SCDCalibratePanels::~SCDCalibratePanels() {}
 
 const std::string SCDCalibratePanels::name() const {
   return "SCDCalibratePanels";
@@ -1265,9 +1259,9 @@ void SCDCalibratePanels::exec() {
       bank = boost::lexical_cast<int>(bankName.substr(k + 1));
     if (bank != bankLast) {
       iSpectrum++;
-      ColWksp->getSpectrum(iSpectrum)->setSpectrumNo(specnum_t(bank));
-      RowWksp->getSpectrum(iSpectrum)->setSpectrumNo(specnum_t(bank));
-      TofWksp->getSpectrum(iSpectrum)->setSpectrumNo(specnum_t(bank));
+      ColWksp->getSpectrum(iSpectrum).setSpectrumNo(specnum_t(bank));
+      RowWksp->getSpectrum(iSpectrum).setSpectrumNo(specnum_t(bank));
+      TofWksp->getSpectrum(iSpectrum).setSpectrumNo(specnum_t(bank));
       bankLast = bank;
       icount = 0;
     }

@@ -22,9 +22,6 @@ namespace MDAlgorithms {
 class DLLExport CreateMDWorkspace
     : public MDAlgorithms::BoxControllerSettingsAlgorithm {
 public:
-  CreateMDWorkspace();
-  ~CreateMDWorkspace() override;
-
   /// Algorithm's name for identification
   const std::string name() const override { return "CreateMDWorkspace"; }
   /// Summary of algorithms purpose

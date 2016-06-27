@@ -622,6 +622,25 @@ void SliceViewer::updateDimensionSliceWidgets() {
     widget->hide();
   }
 
+  bool dimXset = false;
+  bool dimYset = false;
+  // put non integrated dimensions first
+  for (size_t d = 0; d < m_dimensions.size(); d++) {
+    if ((dimXset == false) &&
+        (m_ws->getDimension(d)->getIsIntegrated() == false)) {
+      m_dimX = d;
+      dimXset = true;
+    }
+    if ((dimYset == false) &&
+        (m_ws->getDimension(d)->getIsIntegrated() == false) && (d != m_dimX)) {
+      m_dimY = d;
+      dimYset = true;
+    }
+    if ((dimXset == true) && (dimYset == true)) {
+      break;
+    }
+  }
+
   int maxLabelWidth = 10;
   int maxUnitsWidth = 10;
   // Set each dimension

@@ -1,6 +1,8 @@
-from mantiddoc.directives.base import BaseDirective
-from sphinx.locale import _
-import os, string, subprocess
+from mantiddoc.directives.base import BaseDirective #pylint: disable=unused-import
+from sphinx.locale import _ #pylint: disable=unused-import
+import os
+from string import Template
+import subprocess
 
 ######################
 #CONFIGURABLE OPTIONS#
@@ -61,7 +63,7 @@ class DiagramDirective(BaseDirective):
 
         try:
             dot_executable = os.environ["DOT_EXECUTABLE"]
-        except:
+        except KeyError:
             self.add_rst(".. figure:: /images/ImageNotFound.png\n\n" +
                          "    graphviz not found - diagram could not be rendered.")
             return []
@@ -83,7 +85,7 @@ class DiagramDirective(BaseDirective):
         except:
             raise RuntimeError("Cannot find dot-file: '" + diagram_name + "' in '" + os.path.join(env.srcdir,"diagrams"))
 
-        out_src = string.Template(in_src).substitute(STYLE)
+        out_src = Template(in_src).substitute(STYLE)
         gviz = subprocess.Popen([dot_executable,"-Tpng","-o",out_path], stdin=subprocess.PIPE)
         gviz.communicate(input=out_src)
         gviz.wait()

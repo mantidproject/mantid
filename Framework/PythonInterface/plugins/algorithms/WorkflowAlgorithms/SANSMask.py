@@ -84,7 +84,7 @@ class SANSMask(PythonAlgorithm):
             if facility.upper() == "HFIR":
                 masked_ids = hfir_instrument.get_masked_ids(
                     edges[0], edges[1], edges[2], edges[3], workspace, component_name)
-                self._mask_ids(masked_ids, workspace)
+                self._mask_ids(list(masked_ids), workspace)
             else:
                 masked_pixels = sns_instrument.get_masked_pixels(
                     edges[0], edges[1], edges[2], edges[3], workspace)
@@ -120,23 +120,22 @@ class SANSMask(PythonAlgorithm):
                 DetectorList=masked_detectors)
 
     def _mask_ids(self, id_list, workspace):
-        api.MaskDetectors(Workspace=workspace, DetectorList=id_list)
+        # There is some error with the id_list and np.long64
+        new_id_list = [int(i) for i in id_list]
+        api.MaskDetectors(Workspace=workspace, DetectorList=new_id_list)
 
     def _apply_saved_mask(self, workspace, facility):
         # Check whether the workspace has mask information
         if workspace.getRun().hasProperty("rectangular_masks"):
             mask_str = workspace.getRun().getProperty("rectangular_masks").value
-            try:
-                rectangular_masks = pickle.loads(mask_str)
-            except pickle.PickleError:
-                rectangular_masks = []
-                toks = mask_str.split(',')
-                for item in toks:
-                    if len(item) > 0:
-                        c = item.strip().split(' ')
-                        if len(c) == 4:
-                            rectangular_masks.append(
-                                [int(c[0]), int(c[2]), int(c[1]), int(c[3])])
+            rectangular_masks = []
+            toks = mask_str.split(',')
+            for item in toks:
+                if len(item) > 0:
+                    c = item.strip().split(' ')
+                    if len(c) == 4:
+                        rectangular_masks.append(
+                            [int(c[0]), int(c[2]), int(c[1]), int(c[3])])
             masked_pixels = []
             for rec in rectangular_masks:
                 try:

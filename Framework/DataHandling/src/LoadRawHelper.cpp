@@ -44,8 +44,6 @@ LoadRawHelper::LoadRawHelper()
       m_monitordetectorList(), m_bmspeclist(false), m_total_specs(0),
       m_logCreator() {}
 
-LoadRawHelper::~LoadRawHelper() {}
-
 /// Initialisation method.
 void LoadRawHelper::init() {
   const std::vector<std::string> exts{".raw", ".s*", ".add"};
@@ -392,7 +390,7 @@ void LoadRawHelper::setWorkspaceData(
   MantidVec &E = newWorkspace->dataE(wsIndex);
   std::transform(Y.begin(), Y.end(), E.begin(), dblSqrt);
 
-  newWorkspace->getSpectrum(wsIndex)->setSpectrumNo(nspecNum);
+  newWorkspace->getSpectrum(wsIndex).setSpectrumNo(nspecNum);
   // for loadrawbin0
   if (binStart == 0) {
     newWorkspace->setX(wsIndex, timeChannelsVec[0]);

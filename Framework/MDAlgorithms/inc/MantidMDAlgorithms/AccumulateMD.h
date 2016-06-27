@@ -86,9 +86,6 @@ padParameterVector(std::vector<double> &param_vector,
 */
 class DLLExport AccumulateMD : public API::DataProcessorAlgorithm {
 public:
-  AccumulateMD();
-  ~AccumulateMD() override;
-
   const std::string name() const override;
   int version() const override;
   const std::string category() const override;

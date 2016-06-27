@@ -1,8 +1,8 @@
 #pylint: disable=no-init,invalid-name
+import numpy as np
 import mantid
 import mantid.simpleapi as api
 from mantid.kernel import StringListValidator
-import numpy as np
 
 try:
     import h5py  # http://www.h5py.org/
@@ -43,7 +43,7 @@ class SaveNexusPD(mantid.api.PythonAlgorithm):
     def _determineCompression(self):
         compression = self.getProperty('Compression').value
 
-        if not str(compression) == "None":
+        if str(compression) != "None":
             self._compressArgs['compression'] = compression
 
     def PyInit(self):
@@ -125,6 +125,7 @@ class SaveNexusPD(mantid.api.PythonAlgorithm):
                               dtype=self._dtype,
                               **self._compressArgs)
 
+    #pylint: disable=too-many-arguments
     def _writeX(self, nxdata, name, wksp, index, writeDx):
         units = wksp.getAxis(0).getUnit().symbol().ascii()
         reverse = (name == 'Q')  # reverse the array

@@ -73,12 +73,6 @@ struct SpectraInfo {
       : nSpectra(_nSpectra), hasSpectra(_hasSpectra),
         spectraNumbers(_spectraNumbers), detectorIndex(_detectorIndex),
         detectorCount(_detectorCount), detectorList(_detectorList) {}
-
-  SpectraInfo(const SpectraInfo &other)
-      : nSpectra(other.nSpectra), hasSpectra(other.hasSpectra),
-        spectraNumbers(other.spectraNumbers),
-        detectorIndex(other.detectorIndex), detectorCount(other.detectorCount),
-        detectorList(other.detectorList) {}
 };
 
 // Helper typdef.
@@ -722,7 +716,7 @@ LoadNexusProcessed::loadEventEntry(NXData &wksp_cls, NXDouble &xbins,
     int64_t index_start = indices[wi];
     int64_t index_end = indices[wi + 1];
     if (index_end >= index_start) {
-      EventList &el = ws->getEventList(j);
+      EventList &el = ws->getSpectrum(j);
       el.switchTo(type);
 
       // Allocate all the required memory
@@ -1650,13 +1644,13 @@ void LoadNexusProcessed::readInstrumentGroup(
         (m_list &&
          find(m_spec_list.begin(), m_spec_list.end(), i) !=
              m_spec_list.end())) {
-      ISpectrum *spec = local_workspace->getSpectrum(index);
-      spec->setSpectrumNo(spectrum);
+      auto &spec = local_workspace->getSpectrum(index);
+      spec.setSpectrumNo(spectrum);
       ++index;
 
       int start = spectraInfo.detectorIndex[i - 1];
       int end = start + spectraInfo.detectorCount[i - 1];
-      spec->setDetectorIDs(
+      spec.setDetectorIDs(
           std::set<detid_t>(spectraInfo.detectorList.get() + start,
                             spectraInfo.detectorList.get() + end));
     }

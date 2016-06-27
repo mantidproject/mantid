@@ -63,9 +63,6 @@ class DLLExport SetScalingPSD : public API::Algorithm {
 public:
   /// Default constructor
   SetScalingPSD();
-
-  /// Destructor
-  ~SetScalingPSD() override {}
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "SetScalingPSD"; };
   /// Summary of algorithms purpose

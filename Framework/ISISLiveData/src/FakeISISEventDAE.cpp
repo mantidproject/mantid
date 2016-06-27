@@ -48,8 +48,6 @@ public:
     m_prog->report(0, "Client Connected");
     sendInitialSetup();
   }
-  /// Destructor.
-  ~TestServerConnection() override {}
   /// Sends an OK message when there is nothing to send or an error occured
   void sendOK() {
     std::string comm = "OK";

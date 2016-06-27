@@ -131,7 +131,7 @@ if __name__ == '__main__':
                'tom.g.r.brooks@gmail.com': 'STFC',
                'ross.whitfield@gmail.com': 'ORNL',
                'MikeHart85@users.noreply.github.com': 'STFC'
-               }
+              }
 
     days_in_month = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
 

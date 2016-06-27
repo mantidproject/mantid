@@ -16,12 +16,6 @@ DECLARE_ALGORITHM(GroupDetectors)
 using namespace Kernel;
 using namespace API;
 
-/// (Empty) Constructor
-GroupDetectors::GroupDetectors() {}
-
-/// Destructor
-GroupDetectors::~GroupDetectors() {}
-
 void GroupDetectors::init() {
   declareProperty(
       make_unique<WorkspaceProperty<>>(
@@ -91,7 +85,7 @@ void GroupDetectors::exec() {
   const size_t vectorSize = WS->blocksize();
 
   const specnum_t firstIndex = static_cast<specnum_t>(indexList[0]);
-  ISpectrum *firstSpectrum = WS->getSpectrum(firstIndex);
+  auto &firstSpectrum = WS->getSpectrum(firstIndex);
   MantidVec &firstY = WS->dataY(firstIndex);
 
   setProperty("ResultIndex", firstIndex);
@@ -101,15 +95,15 @@ void GroupDetectors::exec() {
   for (size_t i = 0; i < indexList.size() - 1; ++i) {
     // The current spectrum
     const size_t currentIndex = indexList[i + 1];
-    ISpectrum *spec = WS->getSpectrum(currentIndex);
+    auto &spec = WS->getSpectrum(currentIndex);
 
     // Add the current detector to belong to the first spectrum
-    firstSpectrum->addDetectorIDs(spec->getDetectorIDs());
+    firstSpectrum.addDetectorIDs(spec.getDetectorIDs());
 
     // Add up all the Y spectra and store the result in the first one
-    auto fEit = firstSpectrum->dataE().begin();
-    auto Yit = spec->dataY().begin();
-    auto Eit = spec->dataE().begin();
+    auto fEit = firstSpectrum.dataE().begin();
+    auto Yit = spec.dataY().begin();
+    auto Eit = spec.dataE().begin();
     for (auto fYit = firstY.begin(); fYit != firstY.end();
          ++fYit, ++fEit, ++Yit, ++Eit) {
       *fYit += *Yit;
@@ -119,10 +113,10 @@ void GroupDetectors::exec() {
 
     // Now zero the now redundant spectrum and set its spectraNo to indicate
     // this (using -1)
-    spec->dataY().assign(vectorSize, 0.0);
-    spec->dataE().assign(vectorSize, 0.0);
-    spec->setSpectrumNo(-1);
-    spec->clearDetectorIDs();
+    spec.dataY().assign(vectorSize, 0.0);
+    spec.dataE().assign(vectorSize, 0.0);
+    spec.setSpectrumNo(-1);
+    spec.clearDetectorIDs();
     progress.report();
   }
 }

@@ -290,10 +290,10 @@ public:
     // let's check on the setup
     TS_ASSERT_EQUALS(evg1->getNumberEvents(), 600);
     TS_ASSERT_EQUALS(evg1->getNumberHistograms(), 2);
-    TS_ASSERT(evg1->getEventList(0).hasDetectorID(0));
-    TS_ASSERT(evg1->getEventList(0).hasDetectorID(1));
-    TS_ASSERT(evg1->getEventList(0).hasDetectorID(2));
-    TS_ASSERT(evg1->getEventList(1).hasDetectorID(3));
+    TS_ASSERT(evg1->getSpectrum(0).hasDetectorID(0));
+    TS_ASSERT(evg1->getSpectrum(0).hasDetectorID(1));
+    TS_ASSERT(evg1->getSpectrum(0).hasDetectorID(2));
+    TS_ASSERT(evg1->getSpectrum(1).hasDetectorID(3));
 
     groups.clear();
     groups.push_back(makeVector(2, 3, 4));
@@ -503,16 +503,16 @@ public:
                      ev1->getNumberEvents() + evg1->getNumberEvents());
     TS_ASSERT_EQUALS(output->getNumberHistograms(), 2); // 2 groups; 0-2 and 3-5
 
-    TS_ASSERT_EQUALS(output->getEventList(0).getNumberEvents(),
+    TS_ASSERT_EQUALS(output->getSpectrum(0).getNumberEvents(),
                      600); // 300 + 3x100
-    TS_ASSERT(output->getEventList(0).hasDetectorID(0));
-    TS_ASSERT(output->getEventList(0).hasDetectorID(1));
-    TS_ASSERT(output->getEventList(0).hasDetectorID(2));
+    TS_ASSERT(output->getSpectrum(0).hasDetectorID(0));
+    TS_ASSERT(output->getSpectrum(0).hasDetectorID(1));
+    TS_ASSERT(output->getSpectrum(0).hasDetectorID(2));
 
-    TS_ASSERT_EQUALS(output->getEventList(1).getNumberEvents(), 300); // 300
-    TS_ASSERT(output->getEventList(1).hasDetectorID(3));
-    TS_ASSERT(output->getEventList(1).hasDetectorID(4));
-    TS_ASSERT(output->getEventList(1).hasDetectorID(5));
+    TS_ASSERT_EQUALS(output->getSpectrum(1).getNumberEvents(), 300); // 300
+    TS_ASSERT(output->getSpectrum(1).hasDetectorID(3));
+    TS_ASSERT(output->getSpectrum(1).hasDetectorID(4));
+    TS_ASSERT(output->getSpectrum(1).hasDetectorID(5));
 
     EventTeardown();
   }
@@ -540,15 +540,15 @@ public:
                      ev1->getNumberEvents() + evg1->getNumberEvents());
     // Grouped pixel IDs: 0; 1; 2; 012; 345
     TS_ASSERT_EQUALS(output->getNumberHistograms(), 5);
-    TS_ASSERT(output->getEventList(0).hasDetectorID(0));
-    TS_ASSERT(output->getEventList(1).hasDetectorID(1));
-    TS_ASSERT(output->getEventList(2).hasDetectorID(2));
-    TS_ASSERT(output->getEventList(3).hasDetectorID(0));
-    TS_ASSERT(output->getEventList(3).hasDetectorID(1));
-    TS_ASSERT(output->getEventList(3).hasDetectorID(2));
-    TS_ASSERT(output->getEventList(4).hasDetectorID(3));
-    TS_ASSERT(output->getEventList(4).hasDetectorID(4));
-    TS_ASSERT(output->getEventList(4).hasDetectorID(5));
+    TS_ASSERT(output->getSpectrum(0).hasDetectorID(0));
+    TS_ASSERT(output->getSpectrum(1).hasDetectorID(1));
+    TS_ASSERT(output->getSpectrum(2).hasDetectorID(2));
+    TS_ASSERT(output->getSpectrum(3).hasDetectorID(0));
+    TS_ASSERT(output->getSpectrum(3).hasDetectorID(1));
+    TS_ASSERT(output->getSpectrum(3).hasDetectorID(2));
+    TS_ASSERT(output->getSpectrum(4).hasDetectorID(3));
+    TS_ASSERT(output->getSpectrum(4).hasDetectorID(4));
+    TS_ASSERT(output->getSpectrum(4).hasDetectorID(5));
 
     EventTeardown();
   }
@@ -575,19 +575,19 @@ public:
     TS_ASSERT_EQUALS(output->getNumberEvents(),
                      ev6->getNumberEvents() + evg2->getNumberEvents());
     TS_ASSERT_EQUALS(output->getNumberHistograms(), 4);
-    TS_ASSERT_EQUALS(output->getEventList(0).getNumberEvents(),
+    TS_ASSERT_EQUALS(output->getSpectrum(0).getNumberEvents(),
                      400); // 4 lists were added
-    TS_ASSERT_EQUALS(output->getEventList(1).getNumberEvents(), 600);
-    TS_ASSERT_EQUALS(output->getEventList(2).getNumberEvents(), 100);
-    TS_ASSERT_EQUALS(output->getEventList(3).getNumberEvents(), 100);
+    TS_ASSERT_EQUALS(output->getSpectrum(1).getNumberEvents(), 600);
+    TS_ASSERT_EQUALS(output->getSpectrum(2).getNumberEvents(), 100);
+    TS_ASSERT_EQUALS(output->getSpectrum(3).getNumberEvents(), 100);
     // Groups are 3,4;   0,1,2;   15(from ev6); 5(unused in ev6)
-    TS_ASSERT(output->getEventList(0).hasDetectorID(3));
-    TS_ASSERT(output->getEventList(0).hasDetectorID(4));
-    TS_ASSERT(output->getEventList(1).hasDetectorID(0));
-    TS_ASSERT(output->getEventList(1).hasDetectorID(1));
-    TS_ASSERT(output->getEventList(1).hasDetectorID(2));
-    TS_ASSERT(output->getEventList(2).hasDetectorID(15));
-    TS_ASSERT(output->getEventList(3)
+    TS_ASSERT(output->getSpectrum(0).hasDetectorID(3));
+    TS_ASSERT(output->getSpectrum(0).hasDetectorID(4));
+    TS_ASSERT(output->getSpectrum(1).hasDetectorID(0));
+    TS_ASSERT(output->getSpectrum(1).hasDetectorID(1));
+    TS_ASSERT(output->getSpectrum(1).hasDetectorID(2));
+    TS_ASSERT(output->getSpectrum(2).hasDetectorID(15));
+    TS_ASSERT(output->getSpectrum(3)
                   .hasDetectorID(5)); // Leftover from the ev1 workspace
 
     EventTeardown();
@@ -617,21 +617,21 @@ public:
                                                     evg2->getNumberEvents());
     TS_ASSERT_EQUALS(output->getNumberHistograms(), 3);
 
-    TS_ASSERT_EQUALS(output->getEventList(0).getNumberEvents(),
+    TS_ASSERT_EQUALS(output->getSpectrum(0).getNumberEvents(),
                      900); // 300 (evg1) + 3x100 (ev1) + 3x100 (evg2 had 012)
-    TS_ASSERT(output->getEventList(0).hasDetectorID(0));
-    TS_ASSERT(output->getEventList(0).hasDetectorID(1));
-    TS_ASSERT(output->getEventList(0).hasDetectorID(2));
+    TS_ASSERT(output->getSpectrum(0).hasDetectorID(0));
+    TS_ASSERT(output->getSpectrum(0).hasDetectorID(1));
+    TS_ASSERT(output->getSpectrum(0).hasDetectorID(2));
 
-    TS_ASSERT_EQUALS(output->getEventList(1).getNumberEvents(),
+    TS_ASSERT_EQUALS(output->getSpectrum(1).getNumberEvents(),
                      500); // 300 + 2x100 (evg2 had 3,4 only)
-    TS_ASSERT(output->getEventList(1).hasDetectorID(3));
-    TS_ASSERT(output->getEventList(1).hasDetectorID(4));
-    TS_ASSERT(output->getEventList(1).hasDetectorID(5));
+    TS_ASSERT(output->getSpectrum(1).hasDetectorID(3));
+    TS_ASSERT(output->getSpectrum(1).hasDetectorID(4));
+    TS_ASSERT(output->getSpectrum(1).hasDetectorID(5));
 
     // Leftover 15 from evg2
-    TS_ASSERT_EQUALS(output->getEventList(2).getNumberEvents(), 100); // (evg2)
-    TS_ASSERT(output->getEventList(2).hasDetectorID(15));
+    TS_ASSERT_EQUALS(output->getSpectrum(2).getNumberEvents(), 100); // (evg2)
+    TS_ASSERT(output->getSpectrum(2).hasDetectorID(15));
 
     EventTeardown();
   }

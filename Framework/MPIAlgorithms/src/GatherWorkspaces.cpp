@@ -4,10 +4,12 @@
 #include "MantidMPIAlgorithms/GatherWorkspaces.h"
 #include "MantidMPIAlgorithms/MPISerialization.h"
 #include <boost/mpi.hpp>
+#include <boost/version.hpp>
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ArrayBoundedValidator.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidAPI/WorkspaceFactory.h"
 
 namespace mpi = boost::mpi;
 
@@ -20,6 +22,35 @@ using namespace DataObjects;
 
 // Anonymous namespace for locally-used functors
 namespace {
+
+/// Functor used for computing the sum of the square values of a vector
+// Used by the eplus templates below
+template <class T> struct SumGaussError : public std::binary_function<T, T, T> {
+  SumGaussError() {}
+  /// Sums the arguments in quadrature
+  inline T operator()(const T &l, const T &r) const {
+    return std::sqrt(l * l + r * r);
+  }
+};
+
+// Newer versions of boost::mpi::reduce (>=v1.55) will recognize std::vector
+// as a collection of individual elements and operate on a per-element
+// basis.  Older versions treat vectors as a single object.  Thus we need
+// two different versions of the sum operators that we pass into reduce().
+// This is explained in more detail at:
+// http://stackoverflow.com/questions/28845847/custom-reduce-operation-in-boost-mpi
+#ifndef BOOST_VERSION
+#error BOOST_VERSION macro is not defined!
+#endif
+#if (BOOST_VERSION / 100 % 1000) >= 55 // is the boost version >= 1.55?
+
+struct vplus : public std::plus<double> {};
+
+struct eplus : public SumGaussError<double> {};
+
+#else // older version of Boost that passes the entire MantidVec
+// the operator
+
 /// Sum for boostmpi MantidVec
 struct vplus : public std::binary_function<MantidVec, MantidVec,
                                            MantidVec> { // functor for operator+
@@ -30,15 +61,6 @@ struct vplus : public std::binary_function<MantidVec, MantidVec,
     std::transform(_Left.begin(), _Left.end(), _Right.begin(), v.begin(),
                    std::plus<double>());
     return (v);
-  }
-};
-
-/// Functor used for computing the sum of the square values of a vector
-template <class T> struct SumGaussError : public std::binary_function<T, T, T> {
-  SumGaussError() {}
-  /// Sums the arguments in quadrature
-  inline T operator()(const T &l, const T &r) const {
-    return std::sqrt(l * l + r * r);
   }
 };
 
@@ -54,6 +76,8 @@ struct eplus : public std::binary_function<MantidVec, MantidVec,
     return (v);
   }
 };
+
+#endif // boost version
 }
 
 // Register the algorithm into the AlgorithmFactory
@@ -62,13 +86,13 @@ DECLARE_ALGORITHM(GatherWorkspaces)
 void GatherWorkspaces::init() {
   // Input workspace is optional, except for the root process
   if (mpi::communicator().rank())
-    declareProperty(new WorkspaceProperty<>(
+    declareProperty(make_unique<WorkspaceProperty<>>(
         "InputWorkspace", "", Direction::Input, PropertyMode::Optional));
   else
-    declareProperty(new WorkspaceProperty<>(
+    declareProperty(make_unique<WorkspaceProperty<>>(
         "InputWorkspace", "", Direction::Input, PropertyMode::Mandatory));
   // Output is optional - only the root process will output a workspace
-  declareProperty(new WorkspaceProperty<>(
+  declareProperty(make_unique<WorkspaceProperty<>>(
       "OutputWorkspace", "", Direction::Output, PropertyMode::Optional));
   declareProperty(
       "PreserveEvents", false,
@@ -169,7 +193,7 @@ void GatherWorkspaces::exec() {
 
   for (size_t wi = 0; wi < totalSpec; wi++) {
     if (included.rank() == 0) {
-      const ISpectrum *inSpec = inputWorkspace->getSpectrum(wi);
+      const auto &inSpec = inputWorkspace->getSpectrum(wi);
       if (accum == "Add") {
         outputWorkspace->dataX(wi) = inputWorkspace->readX(wi);
         reduce(included, inputWorkspace->readY(wi), outputWorkspace->dataY(wi),
@@ -196,17 +220,17 @@ void GatherWorkspaces::exec() {
           reqs[j++] = included.irecv(i, 0, outputWorkspace->dataX(index));
           reqs[j++] = included.irecv(i, 1, outputWorkspace->dataY(index));
           reqs[j++] = included.irecv(i, 2, outputWorkspace->dataE(index));
-          ISpectrum *outSpec = outputWorkspace->getSpectrum(index);
-          outSpec->clearDetectorIDs();
-          outSpec->addDetectorIDs(inSpec->getDetectorIDs());
+          auto &outSpec = outputWorkspace->getSpectrum(index);
+          outSpec.clearDetectorIDs();
+          outSpec.addDetectorIDs(inSpec.getDetectorIDs());
         }
 
         // Make sure everything's been received before exiting the algorithm
         mpi::wait_all(reqs.begin(), reqs.end());
       }
-      ISpectrum *outSpec = outputWorkspace->getSpectrum(wi);
-      outSpec->clearDetectorIDs();
-      outSpec->addDetectorIDs(inSpec->getDetectorIDs());
+      auto &outSpec = outputWorkspace->getSpectrum(wi);
+      outSpec.clearDetectorIDs();
+      outSpec.addDetectorIDs(inSpec.getDetectorIDs());
     } else {
       if (accum == "Add") {
         reduce(included, inputWorkspace->readY(wi), vplus(), 0);
@@ -250,20 +274,20 @@ void GatherWorkspaces::execEvent() {
       // How do we accumulate the data?
       std::string accum = this->getPropertyValue("AccumulationMethod");
       std::vector<Mantid::DataObjects::EventList> out_values;
-      gather(included, eventW->getEventList(wi), out_values, 0);
+      gather(included, eventW->getSpectrum(wi), out_values, 0);
       for (int i = 0; i < included.size(); i++) {
         size_t index = wi; // accum == "Add"
         if (accum == "Append")
           index = wi + i * totalSpec;
         outputWorkspace->dataX(index) = eventW->readX(wi);
         outputWorkspace->getOrAddEventList(index) += out_values[i];
-        const ISpectrum *inSpec = eventW->getSpectrum(wi);
-        ISpectrum *outSpec = outputWorkspace->getSpectrum(index);
-        outSpec->clearDetectorIDs();
-        outSpec->addDetectorIDs(inSpec->getDetectorIDs());
+        const auto &inSpec = eventW->getSpectrum(wi);
+        auto &outSpec = outputWorkspace->getSpectrum(index);
+        outSpec.clearDetectorIDs();
+        outSpec.addDetectorIDs(inSpec.getDetectorIDs());
       }
     } else {
-      gather(included, eventW->getEventList(wi), 0);
+      gather(included, eventW->getSpectrum(wi), 0);
     }
   }
 }

@@ -45,6 +45,16 @@
         </property>
        </widget>
       </item>
+      <item>
+       <widget class="QCheckBox" name="ckGroupInput">
+         <property name="text">
+           <string>Group Input</string>
+         </property>
+         <property name="checked">
+           <bool>true</bool>
+         </property>
+       </widget>
+      </item>
      </layout>
     </widget>
    </item>

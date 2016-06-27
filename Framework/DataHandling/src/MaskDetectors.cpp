@@ -23,12 +23,6 @@ using Geometry::Instrument_const_sptr;
 using Geometry::IDetector_const_sptr;
 using namespace DataObjects;
 
-/// (Empty) Constructor
-MaskDetectors::MaskDetectors() {}
-
-/// Destructor
-MaskDetectors::~MaskDetectors() {}
-
 /*
  * Define input arguments
  */
@@ -291,7 +285,7 @@ void MaskDetectors::fillIndexListFromSpectra(
   indexList.reserve(WS->getNumberHistograms());
 
   for (int i = 0; i < static_cast<int>(WS->getNumberHistograms()); ++i) {
-    const specnum_t currentSpec = WS->getSpectrum(i)->getSpectrumNo();
+    const specnum_t currentSpec = WS->getSpectrum(i).getSpectrumNo();
     if (spectraSet.find(currentSpec) != spectraSet.end()) {
       indexList.push_back(i);
     }

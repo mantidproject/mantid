@@ -1,4 +1,6 @@
-﻿import unittest
+from __future__ import (absolute_import, division, print_function)
+
+import unittest
 from mantid.api import (AlgorithmFactory, AlgorithmProxy, IAlgorithm, IEventWorkspace, ITableWorkspace,
                         PythonAlgorithm, MatrixWorkspace, mtd, WorkspaceGroup)
 import mantid.simpleapi as simpleapi
@@ -209,7 +211,7 @@ FullBinsOnly(Input) *boolean*       Omit the final bin if it's width is smaller 
     def test_that_dialog_call_raises_runtime_error(self):
         try:
             simpleapi.LoadEventNexusDialog()
-        except RuntimeError, exc:
+        except RuntimeError as exc:
             msg = str(exc)
             if msg != "Can only display properties dialog in gui mode":
                 self.fail("Dialog function raised the correct exception type but the message was wrong")
@@ -280,7 +282,7 @@ FullBinsOnly(Input) *boolean*       Omit the final bin if it's width is smaller 
         simpleapi._create_algorithm_function("SimpleAPIPythonAlgorithm2", 1, alg2)
         try:
             simpleapi_alg1_func()
-        except RuntimeError, exc:
+        except RuntimeError as exc:
             self.fail("Running algorithm 2 from 1 failed: " + str(exc))
 
     def test_optional_workspaces_are_ignored_if_not_present_in_output_even_if_given_as_input(self):

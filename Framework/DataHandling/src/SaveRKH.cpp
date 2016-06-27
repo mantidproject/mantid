@@ -20,12 +20,6 @@ DECLARE_ALGORITHM(SaveRKH)
 
 using namespace API;
 
-/// Constructor
-SaveRKH::SaveRKH() : API::Algorithm(), m_workspace(), m_2d(false), m_outRKH() {}
-
-/// Virtual destructor
-SaveRKH::~SaveRKH() {}
-
 //---------------------------------------------------
 // Private member functions
 //---------------------------------------------------
@@ -156,7 +150,7 @@ void SaveRKH::write1D() {
 
     specnum_t specid(0);
     try {
-      specid = m_workspace->getSpectrum(i)->getSpectrumNo();
+      specid = m_workspace->getSpectrum(i).getSpectrumNo();
     } catch (...) {
       specid = static_cast<specnum_t>(i + 1);
     }

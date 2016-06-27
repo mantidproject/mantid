@@ -24,7 +24,7 @@ void tracebackToMsg(std::stringstream &msg, PyTracebackObject *traceback,
     msg << "caused by";
 
   msg << " line " << traceback->tb_lineno << " in \'"
-      << PyString_AsString(traceback->tb_frame->f_code->co_filename) << "\'";
+      << PyBytes_AsString(traceback->tb_frame->f_code->co_filename) << "\'";
   tracebackToMsg(msg, traceback->tb_next, false);
 }
 }
@@ -48,7 +48,7 @@ void throwRuntimeError(const bool withTrace) {
   PyObject *str_repr = PyObject_Str(value);
   std::stringstream msg;
   if (value && str_repr) {
-    msg << PyString_AsString(str_repr);
+    msg << PyBytes_AsString(str_repr);
   } else {
     msg << "Unknown exception has occurred.";
   }

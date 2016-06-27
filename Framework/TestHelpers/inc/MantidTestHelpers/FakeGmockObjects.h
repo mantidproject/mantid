@@ -12,10 +12,11 @@
 #define FAKEGMOCKOBJECTS_H_
 
 #include "MantidGeometry/Instrument/INearestNeighboursFactory.h"
+#include "MantidKernel/WarningSuppressions.h"
 #include "gmock/gmock.h"
 
 using namespace Mantid;
-
+GCC_DIAG_OFF_SUGGEST_OVERRIDE
 // Helper and typedef for mocking NearestNeighbourFactory usage
 class MockNearestNeighboursFactory
     : public Mantid::Geometry::INearestNeighboursFactory {
@@ -41,5 +42,5 @@ public:
   MOCK_METHOD0(die, void());
   ~MockNearestNeighbours() override { die(); }
 };
-
+GCC_DIAG_ON_SUGGEST_OVERRIDE
 #endif /* FAKEOBJECTS_H_ */

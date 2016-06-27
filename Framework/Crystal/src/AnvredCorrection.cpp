@@ -188,13 +188,12 @@ void AnvredCorrection::exec() {
     MantidVec &E = correctionFactors->dataE(i);
 
     // Copy over bin boundaries
-    const ISpectrum *inSpec = m_inputWS->getSpectrum(i);
-    inSpec->lockData(); // for MRU-related thread safety
+    const auto &inSpec = m_inputWS->getSpectrum(i);
 
-    const MantidVec &Xin = inSpec->readX();
+    const MantidVec &Xin = inSpec.readX();
     correctionFactors->dataX(i) = Xin;
-    const MantidVec &Yin = inSpec->readY();
-    const MantidVec &Ein = inSpec->readE();
+    const MantidVec &Yin = inSpec.readY();
+    const MantidVec &Ein = inSpec.readE();
 
     // Get detector position
     IDetector_const_sptr det;
@@ -246,8 +245,6 @@ void AnvredCorrection::exec() {
         E[j] = Ein[j] * value;
       }
     }
-
-    inSpec->unlockData();
 
     prog.report();
 
@@ -325,7 +322,7 @@ void AnvredCorrection::execEvent() {
     // scattered beam
     double scattering = dir.angle(V3D(0.0, 0.0, 1.0));
 
-    EventList el = eventW->getEventList(i);
+    EventList el = eventW->getSpectrum(i);
     el.switchTo(WEIGHTED_NOTIME);
     std::vector<WeightedEventNoTime> events = el.getWeightedEventsNoTime();
 
@@ -356,12 +353,12 @@ void AnvredCorrection::execEvent() {
     }
     correctionFactors->getOrAddEventList(i) += events;
 
-    auto &dets = eventW->getEventList(i).getDetectorIDs();
+    auto &dets = eventW->getSpectrum(i).getDetectorIDs();
     for (auto const &det : dets)
       correctionFactors->getOrAddEventList(i).addDetectorID(det);
     // When focussing in place, you can clear out old memory from the input one!
     if (inPlace) {
-      eventW->getEventList(i).clear();
+      eventW->getSpectrum(i).clear();
     }
 
     prog.report();

@@ -13,16 +13,6 @@ namespace Algorithms {
 
 DECLARE_ALGORITHM(StripVanadiumPeaks2)
 
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-StripVanadiumPeaks2::StripVanadiumPeaks2() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-StripVanadiumPeaks2::~StripVanadiumPeaks2() {}
-
 void StripVanadiumPeaks2::init() {
   // Declare inputs and output.  Copied from StripPeaks
 

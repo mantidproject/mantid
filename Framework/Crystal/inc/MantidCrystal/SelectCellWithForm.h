@@ -39,9 +39,6 @@ namespace Crystal {
   */
 class DLLExport SelectCellWithForm : public API::Algorithm {
 public:
-  SelectCellWithForm();
-  ~SelectCellWithForm() override;
-
   /// Algorithm's name for identification
   const std::string name() const override { return "SelectCellWithForm"; };
 

@@ -245,12 +245,12 @@ void SANSRunWindow::initLayout() {
   m_uiForm.batch_table->setContextMenuPolicy(Qt::ActionsContextMenu);
   m_batch_paste = new QAction(tr("&Paste"), m_uiForm.batch_table);
   m_batch_paste->setShortcut(tr("Ctrl+P"));
-  connect(m_batch_paste, SIGNAL(activated()), this, SLOT(pasteToBatchTable()));
+  connect(m_batch_paste, SIGNAL(triggered()), this, SLOT(pasteToBatchTable()));
   m_uiForm.batch_table->addAction(m_batch_paste);
 
   m_batch_clear = new QAction(tr("&Clear"), m_uiForm.batch_table);
   m_uiForm.batch_table->addAction(m_batch_clear);
-  connect(m_batch_clear, SIGNAL(activated()), this, SLOT(clearBatchTable()));
+  connect(m_batch_clear, SIGNAL(triggered()), this, SLOT(clearBatchTable()));
 
   // Main Logging
   m_uiForm.logging_field->attachLoggingChannel();
@@ -1664,8 +1664,7 @@ void SANSRunWindow::setGeometryDetails() {
     return;
   }
 
-  const std::set<detid_t> &dets =
-      monitorWs->getSpectrum(monitorWsIndex)->getDetectorIDs();
+  const auto &dets = monitorWs->getSpectrum(monitorWsIndex).getDetectorIDs();
   if (dets.empty())
     return;
 
@@ -2384,7 +2383,7 @@ void SANSRunWindow::handleReduceButtonClick(const QString &typeStr) {
   const States type = typeStr == "1D" ? OneD : TwoD;
 
   // Make sure that all settings are valid
-  if (!areSettingsValid()) {
+  if (!areSettingsValid(type)) {
     return;
   }
 
@@ -4413,10 +4412,19 @@ void SANSRunWindow::resetToM3IfNecessary() {
  * Check tha the Settings are valid. We need to do this for inputs which cannot
  * be checked with simple validators
  */
-bool SANSRunWindow::areSettingsValid() {
+bool SANSRunWindow::areSettingsValid(States type) {
   bool isValid = true;
   QString message;
   // ------------ GUI INPUT CHECKS ------------
+
+  // We currently do not allow a 2D reduction with a merged flag
+  auto isMergedReduction = m_uiForm.detbank_sel->currentIndex() == 3;
+  if (type == States::TwoD && isMergedReduction) {
+    isValid = false;
+    message +=
+        "A merged Detector Bank selection is currently not supported for 2D "
+        "reductions.\n";
+  }
 
   // R_MAX -- can be only >0 or -1
   auto r_max = m_uiForm.rad_max->text().simplified().toDouble();

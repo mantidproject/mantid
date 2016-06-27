@@ -61,7 +61,6 @@ namespace Algorithms {
 class DLLExport FitPowderDiffPeaks : public API::Algorithm {
 public:
   FitPowderDiffPeaks();
-  ~FitPowderDiffPeaks() override;
 
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "FitPowderDiffPeaks"; }

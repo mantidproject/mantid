@@ -17,16 +17,6 @@ namespace MDAlgorithms {
 DECLARE_ALGORITHM(SaveZODS)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-SaveZODS::SaveZODS() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-SaveZODS::~SaveZODS() {}
-
-//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string SaveZODS::name() const { return "SaveZODS"; }
 

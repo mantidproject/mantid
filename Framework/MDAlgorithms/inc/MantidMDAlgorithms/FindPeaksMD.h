@@ -23,8 +23,6 @@ namespace MDAlgorithms {
 class DLLExport FindPeaksMD : public API::Algorithm {
 public:
   FindPeaksMD();
-  ~FindPeaksMD() override;
-
   /// Algorithm's name for identification
   const std::string name() const override { return "FindPeaksMD"; };
   /// Summary of algorithms purpose
