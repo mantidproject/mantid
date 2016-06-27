@@ -557,9 +557,11 @@ class ProcessTableWidget(tableBase.NTableWidget):
         assert isinstance(scans, list)
 
         if allow_duplicate_scans is False:
-            scan_list = self.get_scan_list()
+            scan_list = self.get_scan_list(output_row_number=False)
         else:
             scan_list = list()
+
+        print '[DB...BAT] Existing scan list: ', scan_list
 
         # set value as default
         # Append rows
@@ -630,10 +632,11 @@ class ProcessTableWidget(tableBase.NTableWidget):
 
         return self.get_cell_value(i_row, j_col_merged)
 
-    def get_scan_list(self):
+    def get_scan_list(self, output_row_number=True):
         """
         Get all scans that are already listed in the table.
-        :return:
+        :param output_row_number:
+        :return: list of 2-tuple or integer according to value of output_row_number
         """
         scan_list = list()
         num_rows = self.rowCount()
@@ -641,7 +644,11 @@ class ProcessTableWidget(tableBase.NTableWidget):
 
         for i_row in xrange(num_rows):
             scan_num = self.get_cell_value(i_row, col_scan_index)
-            scan_list.append((scan_num, i_row))
+            if output_row_number:
+                scan_list.append((scan_num, i_row))
+            else:
+                scan_list.append(scan_num)
+        # END-FOR (i_row)
 
         return scan_list
 

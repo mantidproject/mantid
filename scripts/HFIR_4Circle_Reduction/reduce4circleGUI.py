@@ -64,7 +64,7 @@ class getPostsThread(QThread):
             print '....................................', msg
             self.sleep(1)
             self.num_loops += 1
-            self.main_window.ui.label_message.setText(msg)
+            # self.main_window.ui.label_message.setText(msg)
 
         return
 
@@ -150,6 +150,8 @@ class AddPeaksThread(QThread):
             # add to table
             # self.main_window.set_ub_peak_table(peak_info)
         # END-FOR
+
+        self.peakStatusSignal.emit(self._expNumber, -1, len(self._scanNumberList))
 
         # pop error if there is any scan that is not reduced right
         if len(failed_list) > 0:
@@ -580,6 +582,7 @@ class MainWindow(QtGui.QMainWindow):
         failed_list = list()
 
         # prototype for a new thread
+        self.ui.progressBar_add_ub_peaks.setRange(0, len(scan_number_list))
         self.add_peaks_thread = AddPeaksThread(self, exp_number, scan_number_list)
         self.add_peaks_thread.start()
         """
@@ -1326,6 +1329,9 @@ class MainWindow(QtGui.QMainWindow):
         It will so the simple cuboid integration with region of interest and background subtraction.
         :return:
         """
+        # start timer
+        integrate_peak_time_start = time.clock()
+
         # get rows to merge
         row_number_list = self.ui.tableWidget_mergeScans.get_selected_rows(True)
         if len(row_number_list) == 0:
@@ -1456,6 +1462,11 @@ class MainWindow(QtGui.QMainWindow):
             self.pop_one_button_dialog(grand_error_message)
 
         self.ui.tableWidget_mergeScans.select_all_rows(False)
+
+        # count time
+        integrate_peak_time_end = time.clock()
+        elapsed = integrate_peak_time_end - integrate_peak_time_start
+        self.ui.statusbar.showMessage('Peak integration is finished in %.2f seconds' % elapsed)
 
         return
 
@@ -2983,8 +2994,11 @@ class MainWindow(QtGui.QMainWindow):
         :return:
         """
         # show message to bar
-        message = 'Processing experiment %d scan %d starting from %s.' % (exp_number, scan_number,
-                                                                          str(datetime.datetime.now()))
+        if scan_number < 0:
+            message = 'Peak processing finished'
+        else:
+            message = 'Processing experiment %d scan %d starting from %s.' % (exp_number, scan_number,
+                                                                              str(datetime.datetime.now()))
         self.ui.statusbar.showMessage(message)
 
         # update progress bar

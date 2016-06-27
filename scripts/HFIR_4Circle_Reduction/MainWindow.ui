@@ -193,7 +193,7 @@
            <bool>true</bool>
           </property>
           <property name="currentIndex">
-           <number>1</number>
+           <number>5</number>
           </property>
           <widget class="QWidget" name="tab">
            <attribute name="title">
@@ -1143,13 +1143,6 @@ p, li { white-space: pre-wrap; }
               </item>
              </layout>
             </item>
-            <item row="1" column="0">
-             <widget class="QLabel" name="label_message">
-              <property name="text">
-               <string>Status:</string>
-              </property>
-             </widget>
-            </item>
            </layout>
           </widget>
           <widget class="QWidget" name="tab_4">
@@ -1937,6 +1930,13 @@ p, li { white-space: pre-wrap; }
                  </layout>
                 </item>
                </layout>
+              </item>
+              <item>
+               <widget class="QProgressBar" name="progressBar_add_ub_peaks">
+                <property name="value">
+                 <number>24</number>
+                </property>
+               </widget>
               </item>
               <item>
                <layout class="QHBoxLayout" name="horizontalLayout_13">
@@ -2940,6 +2940,13 @@ p, li { white-space: pre-wrap; }
                <widget class="QPushButton" name="pushButton_selectAllScans2Merge">
                 <property name="text">
                  <string>Select All</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="pushButton_sortMergeTable">
+                <property name="text">
+                 <string>Sort</string>
                 </property>
                </widget>
               </item>
