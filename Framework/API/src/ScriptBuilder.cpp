@@ -150,10 +150,9 @@ ScriptBuilder::buildAlgorithmString(AlgorithmHistory_const_sptr algHistory) {
     algFresh->initialize();
 
     const auto &propsFresh = algFresh->getProperties();
-    //just get the names out of the fresh alg properties
+    // just get the names out of the fresh alg properties
     std::set<std::string> freshPropNames;
-    for (const auto &propFresh : propsFresh)
-    {
+    for (const auto &propFresh : propsFresh) {
       freshPropNames.insert(propFresh->name());
     }
 

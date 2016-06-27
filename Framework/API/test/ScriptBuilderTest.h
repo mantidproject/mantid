@@ -157,16 +157,20 @@ class ScriptBuilderTest : public CxxTest::TestSuite {
   public:
     AlgorithmWithDynamicProperty() : Algorithm() {}
     ~AlgorithmWithDynamicProperty() override {}
-    const std::string name() const override { return "AlgorithmWithDynamicProperty"; }
+    const std::string name() const override {
+      return "AlgorithmWithDynamicProperty";
+    }
     int version() const override { return 1; }
     const std::string category() const override { return "Cat;Leopard;Mink"; }
-    const std::string summary() const override { return "AlgorithmWithDynamicProperty"; }
+    const std::string summary() const override {
+      return "AlgorithmWithDynamicProperty";
+    }
 
     void init() override {
       declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
-        "InputWorkspace", "", Direction::Input));
+          "InputWorkspace", "", Direction::Input));
       declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
-        "OutputWorkspace", "", Direction::Output));
+          "OutputWorkspace", "", Direction::Output));
       declareProperty("PropertyA", "Hello");
       declareProperty("PropertyB", "World");
     }
@@ -175,7 +179,7 @@ class ScriptBuilderTest : public CxxTest::TestSuite {
       setPropertyValue("DynamicProperty1", "outputValue");
 
       boost::shared_ptr<MatrixWorkspace> output =
-        boost::make_shared<WorkspaceTester>();
+          boost::make_shared<WorkspaceTester>();
       setProperty("OutputWorkspace", output);
     }
   };
@@ -187,7 +191,8 @@ public:
     Mantid::API::AlgorithmFactory::Instance().subscribe<NestedAlgorithm>();
     Mantid::API::AlgorithmFactory::Instance().subscribe<BasicAlgorithm>();
     Mantid::API::AlgorithmFactory::Instance().subscribe<SubAlgorithm>();
-    Mantid::API::AlgorithmFactory::Instance().subscribe<AlgorithmWithDynamicProperty>();
+    Mantid::API::AlgorithmFactory::Instance()
+        .subscribe<AlgorithmWithDynamicProperty>();
   }
 
   void tearDown() override {
@@ -196,7 +201,8 @@ public:
     Mantid::API::AlgorithmFactory::Instance().unsubscribe("NestedAlgorithm", 1);
     Mantid::API::AlgorithmFactory::Instance().unsubscribe("BasicAlgorithm", 1);
     Mantid::API::AlgorithmFactory::Instance().unsubscribe("SubAlgorithm", 1);
-    Mantid::API::AlgorithmFactory::Instance().unsubscribe("AlgorithmWithDynamicProperty", 1);
+    Mantid::API::AlgorithmFactory::Instance().unsubscribe(
+        "AlgorithmWithDynamicProperty", 1);
   }
 
   void test_Build_Simple() {
@@ -396,7 +402,7 @@ public:
         "test_output_workspace");
     auto wsHist = ws->getHistory();
 
-    //check the dynamic property is in the history records
+    // check the dynamic property is in the history records
     const auto &hist_props = wsHist.getAlgorithmHistory(0)->getProperties();
     bool foundDynamicProperty = false;
     for (const auto &hist_prop : hist_props) {
@@ -410,7 +416,7 @@ public:
     ScriptBuilder builder(wsHist.createView());
     std::string scriptText = builder.build();
 
-    //The dynamic property should not be in the script.
+    // The dynamic property should not be in the script.
     TS_ASSERT_EQUALS(scriptText, result);
 
     AnalysisDataService::Instance().remove("test_output_workspace");
