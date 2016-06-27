@@ -327,6 +327,13 @@ class LRAutoReduction(PythonAlgorithm):
         angle_offset = self._read_property(meta_data_run, "angle_offset", 0.016)
         angle_offset_err = self._read_property(meta_data_run, "angle_offset_error", 0.001)
 
+        _primary_range = self.getProperty("PrimaryFractionRange").value        
+        _primary_min = int(_primary_range[0])
+        _primary_max = int(_primary_range[1])
+        # The DAS logs are all stored as floats, but we are expecting an integer
+        primary_min = math.trunc(float(self._read_property(meta_data_run, "primary_range_min", _primary_min)))
+        primary_max = math.trunc(float(self._read_property(meta_data_run, "primary_range_max", _primary_max)))
+
         _sf_file = self.getProperty("ScalingFactorFile").value
         sf_file = self._read_property(meta_data_run, "scaling_factor_file",
                                       _sf_file, is_string=True)
@@ -344,7 +351,8 @@ class LRAutoReduction(PythonAlgorithm):
             d.incident_medium_index_selected = 0
             d.angle_offset = angle_offset
             d.angle_offset_error = angle_offset_err
-
+            d.clocking_from = primary_min
+            d.clocking_to = primary_max
             d.q_min = q_min
             d.q_step = q_step
             d.fourth_column_dq0 = dQ_constant
