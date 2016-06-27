@@ -48,7 +48,8 @@ ADSValidator::checkValidity(const std::vector<std::string> &value) const {
   std::ostringstream os;
   for (std::string wsName : value) {
     if (!ads.doesExist(wsName)) {
-      os << "The workspace \"" << wsName << "\" is not in the workspace list.\n";
+      os << "The workspace \"" << wsName
+         << "\" is not in the workspace list.\n";
     }
   }
   return os.str();

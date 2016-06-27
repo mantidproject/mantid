@@ -12,7 +12,7 @@ namespace API {
 
 /** Widget for displaying a Property that has a set of allowed values.
  * The display is then a multi selection list box instead of a Text box.
- 
+
   Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
  National Laboratory & European Spallation Source
 
