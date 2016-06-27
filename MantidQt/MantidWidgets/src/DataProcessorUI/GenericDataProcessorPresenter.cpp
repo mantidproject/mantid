@@ -300,8 +300,8 @@ void GenericDataProcessorPresenter::process() {
     return;
   }
 
-  auto rows = m_view->getSelectedItems();
-  if (rows.empty()) {
+  auto groups = m_view->getSelectedItems();
+  if (groups.empty()) {
     if (m_options["WarnProcessAll"].toBool()) {
       // Does the user want to abort?
       if (!m_view->askUserYesNo(
@@ -315,15 +315,30 @@ void GenericDataProcessorPresenter::process() {
     for (int idxGroup = 0; idxGroup < m_model->rowCount(); ++idxGroup) {
       for (int idxRun = 0;
            idxRun < m_model->rowCount(m_model->index(idxGroup, 0)); ++idxRun)
-        rows[idxGroup].insert(idxRun);
+        groups[idxGroup].insert(idxRun);
+    }
+  }
+
+  // They may have selected a group (parent item), so populate group with every
+  // row
+  for (auto itGroup = groups.begin(); itGroup != groups.end(); ++itGroup) {
+    int idxGroup = itGroup->first;
+    if (groups[idxGroup].size() == 0) {
+      // We are processing the whole group but user clicked on parent item so we
+      // have to populate the group manually
+      int numRows = static_cast<int>(numRowsInGroup(idxGroup));
+      for (int r = 0; r < numRows; r++) {
+        groups[idxGroup].insert(r);
+      }
     }
   }
 
   // Check each group and warn if we're only partially processing it
-  for (auto gIt = rows.begin(); gIt != rows.end(); ++gIt) {
+  for (auto gIt = groups.begin(); gIt != groups.end(); ++gIt) {
 
     const int &groupId = gIt->first;
     const std::set<int> &groupRows = gIt->second;
+
     // Are we only partially processing a group?
     if (groupRows.size() < numRowsInGroup(gIt->first) &&
         m_options["WarnProcessPartialGroup"].toBool()) {
@@ -336,17 +351,17 @@ void GenericDataProcessorPresenter::process() {
     }
   }
 
-  if (!rowsValid(rows)) {
+  if (!rowsValid(groups)) {
     return;
   }
 
-  if (!processGroups(rows)) {
+  if (!processGroups(groups)) {
     return;
   }
 
   // If "Output Notebook" checkbox is checked then create an ipython notebook
   if (m_view->getEnableNotebook()) {
-    saveNotebook(rows);
+    saveNotebook(groups);
   }
 }
 

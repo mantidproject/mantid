@@ -619,21 +619,20 @@ std::map<int, std::set<int>> QDataProcessorWidget::getSelectedItems() const {
     auto selectedRows = selectionModel->selectedRows();
     for (auto it = selectedRows.begin(); it != selectedRows.end(); ++it) {
 
-      int group;
-      int run = -1;
-
       if (it->parent().isValid()) {
         // A run was selected
         // Add run and corresponding group
-        run = it->row();
-        group = it->parent().row();
+        int run = it->row();
+        int group = it->parent().row();
         rows[group].insert(run);
       } else {
         // A group was selected
         // Start with empty set, we do not at this point if a run belonging to
         // this group has been selected
-        if (!rows.count(group))
+        if (!rows.count(it->row())) {
+          int group = it->row();
           rows[group] = std::set<int>();
+        }
       }
     }
   }
