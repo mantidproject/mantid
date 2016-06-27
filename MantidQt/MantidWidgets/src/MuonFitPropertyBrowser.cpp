@@ -310,6 +310,7 @@ void MuonFitPropertyBrowser::runFit() {
     // If we are doing a simultaneous fit, set this up here
     const int nWorkspaces = static_cast<int>(m_workspacesToFit.size());
     if (nWorkspaces > 1) {
+      alg->setPropertyValue("InputWorkspace", m_workspacesToFit[0]);
       for (int i = 1; i < nWorkspaces; i++) {
         std::string suffix = boost::lexical_cast<std::string>(i);
         alg->setPropertyValue("InputWorkspace_" + suffix, m_workspacesToFit[i]);
@@ -492,12 +493,6 @@ void MuonFitPropertyBrowser::setWorkspaceNames(const QStringList &wsNames) {
   IWorkspaceFitControl::setWorkspaceNames(wsNames);
 
   m_workspacesToFit.clear();
-  // If the existing one isn't in the list, add it
-  const std::string currentName = workspaceName();
-  if (!wsNames.contains(QString::fromStdString(currentName))) {
-    m_workspacesToFit.push_back(currentName);
-  }
-  // Now add the other names to the list
   std::transform(wsNames.begin(), wsNames.end(),
                  std::back_inserter(m_workspacesToFit),
                  [](const QString &qs) { return qs.toStdString(); });
