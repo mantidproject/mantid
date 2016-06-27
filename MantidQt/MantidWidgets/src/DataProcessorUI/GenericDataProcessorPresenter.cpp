@@ -300,7 +300,7 @@ void GenericDataProcessorPresenter::process() {
     return;
   }
 
-  std::set<int> rows = m_view->getSelectedRows();
+  std::set<int> rows = m_view->getSelectedRuns();
   if (rows.empty()) {
     if (m_options["WarnProcessAll"].toBool()) {
       // Does the user want to abort?
@@ -852,7 +852,7 @@ void GenericDataProcessorPresenter::insertRow(int index) {
 Insert a row after the last selected row
 */
 void GenericDataProcessorPresenter::appendRow() {
-  std::set<int> rows = m_view->getSelectedRows();
+  std::set<int> rows = m_view->getSelectedRuns();
   if (rows.empty())
     insertRow(m_model->rowCount());
   else
@@ -864,7 +864,7 @@ void GenericDataProcessorPresenter::appendRow() {
 Insert a row before the first selected row
 */
 void GenericDataProcessorPresenter::prependRow() {
-  std::set<int> rows = m_view->getSelectedRows();
+  std::set<int> rows = m_view->getSelectedRuns();
   if (rows.empty())
     insertRow(0);
   else
@@ -906,7 +906,7 @@ int GenericDataProcessorPresenter::getBlankRow() {
 Delete row(s) from the model
 */
 void GenericDataProcessorPresenter::deleteRow() {
-  std::set<int> rows = m_view->getSelectedRows();
+  std::set<int> rows = m_view->getSelectedRuns();
   for (auto row = rows.rbegin(); row != rows.rend(); ++row)
     m_model->removeRow(*row);
 
@@ -917,7 +917,7 @@ void GenericDataProcessorPresenter::deleteRow() {
 Group rows together
 */
 void GenericDataProcessorPresenter::groupRows() {
-  const std::set<int> rows = m_view->getSelectedRows();
+  const std::set<int> rows = m_view->getSelectedRuns();
   // Find the first unused group id, ignoring the selected rows
   const int groupId = getUnusedGroup(rows);
 
@@ -1179,7 +1179,7 @@ size_t GenericDataProcessorPresenter::numRowsInGroup(int groupId) const {
 void GenericDataProcessorPresenter::expandSelection() {
   std::set<int> groupIds;
 
-  std::set<int> rows = m_view->getSelectedRows();
+  std::set<int> rows = m_view->getSelectedRuns();
   for (auto row = rows.begin(); row != rows.end(); ++row)
     groupIds.insert(m_model->data(m_model->index(*row, m_colGroup)).toInt());
 
@@ -1195,7 +1195,7 @@ void GenericDataProcessorPresenter::expandSelection() {
 
 /** Clear the currently selected rows */
 void GenericDataProcessorPresenter::clearSelected() {
-  std::set<int> rows = m_view->getSelectedRows();
+  std::set<int> rows = m_view->getSelectedRuns();
   std::set<int> ignore;
   for (auto row = rows.begin(); row != rows.end(); ++row) {
     ignore.clear();
@@ -1215,7 +1215,7 @@ void GenericDataProcessorPresenter::clearSelected() {
 void GenericDataProcessorPresenter::copySelected() {
   std::vector<std::string> lines;
 
-  std::set<int> rows = m_view->getSelectedRows();
+  std::set<int> rows = m_view->getSelectedRuns();
   for (auto rowIt = rows.begin(); rowIt != rows.end(); ++rowIt) {
     std::vector<std::string> line;
     for (int col = 0; col < m_columns; ++col)
@@ -1242,7 +1242,7 @@ void GenericDataProcessorPresenter::pasteSelected() {
 
   // If we have rows selected, we'll overwrite them. If not, we'll append new
   // rows to write to.
-  std::set<int> rows = m_view->getSelectedRows();
+  std::set<int> rows = m_view->getSelectedRuns();
   if (rows.empty()) {
     // Add as many new rows as required
     for (size_t i = 0; i < lines.size(); ++i) {
@@ -1322,7 +1322,7 @@ void GenericDataProcessorPresenter::setInstrumentList(
 
 /** Plots any currently selected rows */
 void GenericDataProcessorPresenter::plotRow() {
-  auto selectedRows = m_view->getSelectedRows();
+  auto selectedRows = m_view->getSelectedRuns();
 
   if (selectedRows.empty())
     return;
@@ -1350,7 +1350,7 @@ void GenericDataProcessorPresenter::plotRow() {
 
 /** Plots any currently selected groups */
 void GenericDataProcessorPresenter::plotGroup() {
-  auto selectedRows = m_view->getSelectedRows();
+  auto selectedRows = m_view->getSelectedRuns();
 
   if (selectedRows.empty())
     return;

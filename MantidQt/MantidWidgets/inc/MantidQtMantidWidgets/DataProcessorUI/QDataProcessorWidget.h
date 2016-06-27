@@ -92,7 +92,7 @@ public:
       const std::vector<std::map<std::string, std::string>> &hints) override;
 
   // Accessor methods
-  std::set<int> getSelectedRows() const override;
+  std::set<int> getSelectedRuns() const override;
   std::string getProcessInstrument() const override;
   std::string getProcessingOptions(const std::string &name) const override;
   std::string getWorkspaceToOpen() const override;

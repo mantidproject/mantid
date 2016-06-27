@@ -612,7 +612,7 @@ std::string QDataProcessorWidget::getProcessInstrument() const {
 Get the indices of the highlighted rows
 @returns a set of ints containing the highlighted row numbers
 */
-std::set<int> QDataProcessorWidget::getSelectedRows() const {
+std::set<int> QDataProcessorWidget::getSelectedRuns() const {
   std::set<int> rows;
   auto selectionModel = ui.viewTable->selectionModel();
   if (selectionModel) {
