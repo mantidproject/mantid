@@ -4,6 +4,7 @@
 #include "MantidKernel/System.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/QDataProcessorTreeModel.h"
 
+#include <map>
 #include <set>
 #include <string>
 
@@ -87,7 +88,7 @@ public:
   virtual void setModel(const std::string &name) = 0;
 
   // Accessor methods
-  virtual std::set<int> getSelectedRuns() const = 0;
+  virtual std::map<int, std::set<int>> getSelectedItems() const = 0;
   virtual std::string getWorkspaceToOpen() const = 0;
   virtual std::string getClipboard() const = 0;
   virtual std::string getProcessInstrument() const = 0;

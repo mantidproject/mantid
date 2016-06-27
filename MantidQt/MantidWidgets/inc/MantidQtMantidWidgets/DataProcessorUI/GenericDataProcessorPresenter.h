@@ -76,9 +76,11 @@ public:
   // Get the whitelist
   DataProcessorWhiteList getWhiteList() const { return m_whitelist; };
   // Get the name of the reduced workspace for a given row
-  std::string getReducedWorkspaceName(int row, const std::string &prefix = "");
+  std::string getReducedWorkspaceName(int group, int row,
+                                      const std::string &prefix = "");
   // Get the name of a post-processed workspace
-  std::string getPostprocessedWorkspaceName(const std::set<int> &rows,
+  std::string getPostprocessedWorkspaceName(int groupID,
+                                            const std::set<int> &rows,
                                             const std::string &prefix = "");
 
 protected:
@@ -111,13 +113,13 @@ protected:
   // stores the user options for the presenter
   std::map<std::string, QVariant> m_options;
   // Post-process some rows
-  void postProcessRows(std::set<int> rows);
+  void postProcessGroup(int groupId, const std::set<int> &rows);
   // process selected rows
   void process();
   // process groups of rows
-  bool processGroups(std::map<int, std::set<int>> groups, std::set<int> rows);
+  bool processGroups(const std::map<int, std::set<int>> &groups);
   // Reduce a row
-  void reduceRow(int rowNo);
+  void reduceRow(int groupNo, int rowNo);
   // prepare a run or list of runs for processing
   Mantid::API::Workspace_sptr
   prepareRunWorkspace(const std::string &run,
@@ -132,7 +134,7 @@ protected:
   // get the number of rows in a group
   size_t numRowsInGroup(int groupId) const;
   // Validate rows
-  bool rowsValid(std::set<int> rows);
+  bool rowsValid(const std::map<int, std::set<int>> &groups);
   // Validate a row
   void validateRow(int rowNo) const;
   // insert a row in the model before the given index
@@ -183,7 +185,7 @@ protected:
                     const std::string &newName) override;
   void afterReplaceHandle(const std::string &name,
                           Mantid::API::Workspace_sptr workspace) override;
-  void saveNotebook(std::map<int, std::set<int>> groups, std::set<int> rows);
+  void saveNotebook(const std::map<int, std::set<int>> &groups);
   void accept(WorkspaceReceiver *workspaceReceiver) override;
   std::vector<std::unique_ptr<DataProcessorCommand>> getTableList();
 

@@ -51,7 +51,7 @@ std::string DLLExport plot1DString(const std::vector<std::string> &ws_names);
 
 std::string DLLExport tableString(QDataProcessorTreeModel_sptr model,
                                   const DataProcessorWhiteList &whitelist,
-                                  const std::set<int> &rows);
+                                  const std::map<int, std::set<int>> &rows);
 
 std::string DLLExport titleString(const std::string &wsName);
 
@@ -114,8 +114,7 @@ public:
       const std::string postprocessingInstructions);
   virtual ~DataProcessorGenerateNotebook(){};
 
-  std::string generateNotebook(std::map<int, std::set<int>> groups,
-                               std::set<int> rows);
+  std::string generateNotebook(const std::map<int, std::set<int>> &groups);
 
 private:
   // The table ws name

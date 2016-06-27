@@ -52,8 +52,8 @@ specified via the corresponding hinting line edit in the view
 DataProcessorGenerateNotebook::DataProcessorGenerateNotebook(
     std::string name, QDataProcessorTreeModel_sptr model,
     const std::string instrument, const DataProcessorWhiteList &whitelist,
-    const std::map<std::string, DataProcessorPreprocessingAlgorithm> &
-        preprocessMap,
+    const std::map<std::string, DataProcessorPreprocessingAlgorithm>
+        &preprocessMap,
     const DataProcessorProcessingAlgorithm &processor,
     const DataProcessorPostprocessingAlgorithm &postprocessor,
     const std::map<std::string, std::string> preprocessingOptionsMap,
@@ -75,17 +75,16 @@ DataProcessorGenerateNotebook::DataProcessorGenerateNotebook(
 /**
   Generate an ipython notebook
   @param groups : groups of rows which were stitched
-  @param rows : rows which were processed
   @returns ipython notebook string
   */
 std::string DataProcessorGenerateNotebook::generateNotebook(
-    std::map<int, std::set<int>> groups, std::set<int> rows) {
+    const std::map<int, std::set<int>> &groups) {
 
   auto notebook = Mantid::Kernel::make_unique<Mantid::API::NotebookWriter>();
 
   notebook->markdownCell(titleString(m_wsName));
 
-  notebook->markdownCell(tableString(m_model, m_whitelist, rows));
+  notebook->markdownCell(tableString(m_model, m_whitelist, groups));
 
   int groupNo = 1;
   for (auto gIt = groups.begin(); gIt != groups.end(); ++gIt, ++groupNo) {
@@ -237,12 +236,12 @@ std::string plotsString(const std::vector<std::string> &output_ws,
   Create string of markdown code to display a table of data from the GUI
   @param model : TreeModel for the full table
   @param whitelist : the whitelist defining the table columns
-  @param rows : rows from full table to include
+  @param groups : groups and rows from full table to include
   @return string containing the markdown code
   */
 std::string tableString(QDataProcessorTreeModel_sptr model,
                         const DataProcessorWhiteList &whitelist,
-                        const std::set<int> &rows) {
+                        const std::map<int, std::set<int>> &groups) {
   std::ostringstream table_string;
 
   const int ncols = static_cast<int>(whitelist.size());
@@ -258,18 +257,23 @@ std::string tableString(QDataProcessorTreeModel_sptr model,
   table_string << "---"
                << "\n";
 
-  for (auto rowIt = rows.begin(); rowIt != rows.end(); ++rowIt) {
+  for (auto groupIt = groups.begin(); groupIt != groups.end(); ++groupIt) {
 
-    for (int col = 0; col < ncols - 1; col++)
-      table_string
-          << model->data(model->index(*rowIt, col)).toString().toStdString()
-          << " | ";
+    auto rows = groupIt->second;
 
-    table_string
-        << model->data(model->index(*rowIt, ncols - 1)).toString().toStdString()
-        << "\n";
+    for (auto rowIt = rows.begin(); rowIt != rows.end(); ++rowIt) {
+
+      for (int col = 0; col < ncols - 1; col++)
+        table_string
+            << model->data(model->index(*rowIt, col)).toString().toStdString()
+            << " | ";
+
+      table_string << model->data(model->index(*rowIt, ncols - 1))
+                          .toString()
+                          .toStdString()
+                   << "\n";
+    }
   }
-
   return table_string.str();
 }
 
@@ -322,7 +326,8 @@ boost::tuple<std::string, std::string> postprocessGroupString(
   stitch_string << outputWSName;
   stitch_string << completeOutputProperties(
                        postprocessor.name(),
-                       postprocessor.numberOfOutputProperties()) << " = ";
+                       postprocessor.numberOfOutputProperties())
+                << " = ";
   stitch_string << postprocessor.name() << "(";
   stitch_string << postprocessor.inputProperty() << " = '";
   stitch_string << boost::algorithm::join(inputNames, ", ") << "'";
@@ -413,10 +418,9 @@ std::string getReducedWorkspaceName(int rowNo,
 */
 boost::tuple<std::string, std::string> reduceRowString(
     const int rowNo, const std::string &instrument,
-    QDataProcessorTreeModel_sptr model,
-    const DataProcessorWhiteList &whitelist,
-    const std::map<std::string, DataProcessorPreprocessingAlgorithm> &
-        preprocessMap,
+    QDataProcessorTreeModel_sptr model, const DataProcessorWhiteList &whitelist,
+    const std::map<std::string, DataProcessorPreprocessingAlgorithm>
+        &preprocessMap,
     const DataProcessorProcessingAlgorithm &processor,
     const std::map<std::string, std::string> &preprocessingOptionsMap,
     const std::string &processingOptions) {
