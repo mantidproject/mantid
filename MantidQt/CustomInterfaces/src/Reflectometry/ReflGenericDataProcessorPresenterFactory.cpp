@@ -21,6 +21,12 @@ ReflGenericDataProcessorPresenterFactory::create() {
   // 'Scale' column will be linked to 'ScaleFactor'
   // Descriptions can also be added
   DataProcessorWhiteList whitelist;
+  whitelist.addElement("Group", "Group",
+                       "<b>Grouping for post-processing</b><br "
+                       "/><i>required</i><br />The value of this column "
+                       "determines which other rows this row's output will "
+                       "be post-processed with. All rows with the same group "
+                       "number are post-processed together.");
   whitelist.addElement("Run(s)", "InputWorkspace",
                        "<b>Sample runs to be processed.</b><br "
                        "/><i>required</i><br />Runs may be given as run "

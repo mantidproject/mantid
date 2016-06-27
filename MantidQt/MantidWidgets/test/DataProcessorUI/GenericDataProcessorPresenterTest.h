@@ -47,6 +47,7 @@ private:
   DataProcessorWhiteList createReflectometryWhiteList() {
 
     DataProcessorWhiteList whitelist;
+    whitelist.addElement("Group", "Group", "");
     whitelist.addElement("Run(s)", "InputWorkspace", "", true, "TOF_");
     whitelist.addElement("Angle", "ThetaIn", "");
     whitelist.addElement("Transmission Run(s)", "FirstTransmissionRun", "",
@@ -138,44 +139,47 @@ private:
                            const DataProcessorWhiteList &whitelist) {
     auto ws = createWorkspace(wsName, whitelist);
     TableRow row = ws->appendRow();
-    row << "12345"
+    row << "0"
+        << "12345"
         << "0.5"
         << ""
         << "0.1"
         << "1.6"
         << "0.04"
         << "1"
-        << "0"
+
         << "";
     row = ws->appendRow();
-    row << "12346"
+    row << "0"
+        << "12346"
         << "1.5"
         << ""
         << "1.4"
         << "2.9"
         << "0.04"
         << "1"
-        << "0"
         << "";
     row = ws->appendRow();
-    row << "24681"
+    row << "1"
+        << "24681"
         << "0.5"
         << ""
         << "0.1"
         << "1.6"
         << "0.04"
         << "1"
-        << "1"
+
         << "";
     row = ws->appendRow();
-    row << "24682"
+    row << "1"
+        << "24682"
         << "1.5"
         << ""
         << "1.4"
         << "2.9"
         << "0.04"
         << "1"
-        << "1"
+
         << "";
     return ws;
   }
@@ -185,44 +189,48 @@ private:
                                     const DataProcessorWhiteList &whitelist) {
     auto ws = createWorkspace(wsName, whitelist);
     TableRow row = ws->appendRow();
-    row << "12345"
+    row << "0"
+        << "12345"
         << "0.5"
         << "11115"
         << "0.1"
         << "1.6"
         << "0.04"
         << "1"
-        << "0"
+
         << "";
     row = ws->appendRow();
-    row << "12346"
+    row << "0"
+        << "12346"
         << "1.5"
         << "11116"
         << "1.4"
         << "2.9"
         << "0.04"
         << "1"
-        << "0"
+
         << "";
     row = ws->appendRow();
-    row << "24681"
+    row << "1"
+        << "24681"
         << "0.5"
         << "22221"
         << "0.1"
         << "1.6"
         << "0.04"
         << "1"
-        << "1"
+
         << "";
     row = ws->appendRow();
-    row << "24682"
+    row << "1"
+        << "24682"
         << "1.5"
         << "22222"
         << "1.4"
         << "2.9"
         << "0.04"
         << "1"
-        << "1"
+
         << "";
     return ws;
   }
@@ -261,7 +269,7 @@ public:
     // 'Options'
     auto whitelist = presenter.getWhiteList();
     TS_ASSERT_EQUALS(whitelist.size(), 9);
-    TS_ASSERT_EQUALS(whitelist.colNameFromColIndex(7), "Group");
+    TS_ASSERT_EQUALS(whitelist.colNameFromColIndex(0), "Group");
     TS_ASSERT_EQUALS(whitelist.colNameFromColIndex(8), "Options");
   }
 
@@ -930,22 +938,24 @@ public:
 
     auto ws = createWorkspace("TestWorkspace", presenter.getWhiteList());
     TableRow row = ws->appendRow();
-    row << "dataA"
+    row << "1"
+        << "dataA"
         << "0.7"
         << ""
         << "0.1"
         << "1.6"
         << "0.04"
-        << "1"
+
         << "1";
     row = ws->appendRow();
-    row << "dataB"
+    row << "1"
+        << "dataB"
         << "2.3"
         << ""
         << "1.4"
         << "2.9"
         << "0.04"
-        << "1"
+
         << "1";
 
     createTOFWorkspace("dataA");
@@ -1242,104 +1252,114 @@ public:
 
     auto ws = createWorkspace("TestWorkspace", presenter.getWhiteList());
     TableRow row = ws->appendRow();
-    row << ""
+    row << "0"
+        << ""
         << ""
         << ""
         << ""
         << ""
         << ""
         << "1"
-        << "0"
+
         << ""; // Row 0
     row = ws->appendRow();
-    row << ""
+    row << "1"
+        << ""
         << ""
         << ""
         << ""
         << ""
         << ""
         << "1"
-        << "1"
+
         << ""; // Row 1
     row = ws->appendRow();
-    row << ""
+    row << "1"
+        << ""
         << ""
         << ""
         << ""
         << ""
         << ""
         << "1"
-        << "1"
+
         << ""; // Row 2
     row = ws->appendRow();
-    row << ""
+    row << "2"
+        << ""
         << ""
         << ""
         << ""
         << ""
         << ""
         << "1"
-        << "2"
+
         << ""; // Row 3
     row = ws->appendRow();
-    row << ""
+    row << "2"
+        << ""
         << ""
         << ""
         << ""
         << ""
         << ""
         << "1"
-        << "2"
+
         << ""; // Row 4
     row = ws->appendRow();
-    row << ""
+    row << "2"
+        << ""
         << ""
         << ""
         << ""
         << ""
         << ""
         << "1"
-        << "2"
+
         << ""; // Row 5
     row = ws->appendRow();
-    row << ""
+    row << "3"
+        << ""
         << ""
         << ""
         << ""
         << ""
         << ""
         << "1"
-        << "3"
+
         << ""; // Row 6
     row = ws->appendRow();
-    row << ""
+    row << "4"
+        << ""
         << ""
         << ""
         << ""
         << ""
         << ""
         << "1"
-        << "4"
+
         << ""; // Row 7
     row = ws->appendRow();
-    row << ""
+    row << "4"
+        << ""
         << ""
         << ""
         << ""
         << ""
         << ""
         << "1"
-        << "4"
+
         << ""; // Row 8
     row = ws->appendRow();
-    row << ""
+    row << "5"
+        << ""
         << ""
         << ""
         << ""
         << ""
         << ""
         << "1"
-        << "5"
+
         << ""; // Row 9
 
     EXPECT_CALL(mockDataProcessorView, getWorkspaceToOpen())
@@ -1516,7 +1536,7 @@ public:
     std::set<int> rowlist;
     rowlist.insert(1);
 
-    const std::string expected = "12346\t1.5\t\t1.4\t2.9\t0.04\t1\t0\t";
+    const std::string expected = "0\t12346\t1.5\t\t1.4\t2.9\t0.04\t1\t";
 
     // The user hits "copy selected" with the second and third rows selected
     EXPECT_CALL(mockDataProcessorView, setClipboard(expected));
@@ -1548,10 +1568,10 @@ public:
     rowlist.insert(2);
     rowlist.insert(3);
 
-    const std::string expected = "12345\t0.5\t\t0.1\t1.6\t0.04\t1\t0\t\n"
-                                 "12346\t1.5\t\t1.4\t2.9\t0.04\t1\t0\t\n"
-                                 "24681\t0.5\t\t0.1\t1.6\t0.04\t1\t1\t\n"
-                                 "24682\t1.5\t\t1.4\t2.9\t0.04\t1\t1\t";
+    const std::string expected = "0\t12345\t0.5\t\t0.1\t1.6\t0.04\t1\t\n"
+                                 "0\t12346\t1.5\t\t1.4\t2.9\t0.04\t1\t\n"
+                                 "1\t24681\t0.5\t\t0.1\t1.6\t0.04\t1\t\n"
+                                 "1\t24682\t1.5\t\t1.4\t2.9\t0.04\t1\t";
 
     // The user hits "copy selected" with the second and third rows selected
     EXPECT_CALL(mockDataProcessorView, setClipboard(expected));
@@ -1580,7 +1600,7 @@ public:
     std::set<int> rowlist;
     rowlist.insert(1);
 
-    const std::string expected = "12346\t1.5\t\t1.4\t2.9\t0.04\t1\t0\t";
+    const std::string expected = "0\t12346\t1.5\t\t1.4\t2.9\t0.04\t1\t";
 
     // The user hits "copy selected" with the second and third rows selected
     EXPECT_CALL(mockDataProcessorView, setClipboard(expected));
@@ -1622,9 +1642,9 @@ public:
     rowlist.insert(1);
     rowlist.insert(2);
 
-    const std::string expected = "12345\t0.5\t\t0.1\t1.6\t0.04\t1\t0\t\n"
-                                 "12346\t1.5\t\t1.4\t2.9\t0.04\t1\t0\t\n"
-                                 "24681\t0.5\t\t0.1\t1.6\t0.04\t1\t1\t";
+    const std::string expected = "0\t12345\t0.5\t\t0.1\t1.6\t0.04\t1\t\n"
+                                 "0\t12346\t1.5\t\t1.4\t2.9\t0.04\t1\t\n"
+                                 "1\t24681\t0.5\t\t0.1\t1.6\t0.04\t1\t";
 
     // The user hits "copy selected" with the second and third rows selected
     EXPECT_CALL(mockDataProcessorView, setClipboard(expected));
@@ -1662,7 +1682,7 @@ public:
     std::set<int> rowlist;
     rowlist.insert(1);
 
-    const std::string clipboard = "123\t0.5\t456\t1.2\t3.4\t3.14\t5\t6\tabc";
+    const std::string clipboard = "6\t123\t0.5\t456\t1.2\t3.4\t3.14\t5\tabc";
 
     // The user hits "copy selected" with the second and third rows selected
     EXPECT_CALL(mockDataProcessorView, getClipboard())
@@ -1712,7 +1732,7 @@ public:
         .WillRepeatedly(Return("TestWorkspace"));
     presenter.notify(DataProcessorPresenter::OpenTableFlag);
 
-    const std::string clipboard = "123\t0.5\t456\t1.2\t3.4\t3.14\t5\t6\tabc";
+    const std::string clipboard = "6\t123\t0.5\t456\t1.2\t3.4\t3.14\t5\tabc";
 
     // The user hits "copy selected" with the second and third rows selected
     EXPECT_CALL(mockDataProcessorView, getClipboard())
@@ -1767,8 +1787,8 @@ public:
     rowlist.insert(1);
     rowlist.insert(2);
 
-    const std::string clipboard = "123\t0.5\t456\t1.2\t3.4\t3.14\t5\t6\tabc\n"
-                                  "345\t2.7\t123\t2.1\t4.3\t2.17\t3\t2\tdef";
+    const std::string clipboard = "6\t123\t0.5\t456\t1.2\t3.4\t3.14\t5\tabc\n"
+                                  "2\t345\t2.7\t123\t2.1\t4.3\t2.17\t3\tdef";
 
     // The user hits "copy selected" with the second and third rows selected
     EXPECT_CALL(mockDataProcessorView, getClipboard())
@@ -1827,8 +1847,8 @@ public:
         .WillRepeatedly(Return("TestWorkspace"));
     presenter.notify(DataProcessorPresenter::OpenTableFlag);
 
-    const std::string clipboard = "123\t0.5\t456\t1.2\t3.4\t3.14\t5\t6\tabc\n"
-                                  "345\t2.7\t123\t2.1\t4.3\t2.17\t3\t2\tdef";
+    const std::string clipboard = "6\t123\t0.5\t456\t1.2\t3.4\t3.14\t5\tabc\n"
+                                  "2\t345\t2.7\t123\t2.1\t4.3\t2.17\t3\tdef";
 
     // The user hits "copy selected" with the second and third rows selected
     EXPECT_CALL(mockDataProcessorView, getClipboard())
@@ -2177,7 +2197,7 @@ public:
     // and 'Options'
     auto whitelist = presenter.getWhiteList();
     TS_ASSERT_EQUALS(whitelist.size(), 9);
-    TS_ASSERT_EQUALS(whitelist.colNameFromColIndex(7), "Group");
+    TS_ASSERT_EQUALS(whitelist.colNameFromColIndex(0), "Group");
     TS_ASSERT_EQUALS(whitelist.colNameFromColIndex(8), "Options");
 
     // When the presenter accepts the views, expect the following:

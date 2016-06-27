@@ -71,15 +71,9 @@ GenericDataProcessorPresenter::GenericDataProcessorPresenter(
     : WorkspaceObserver(), m_view(nullptr), m_progressView(nullptr),
       m_whitelist(whitelist), m_preprocessMap(preprocessMap),
       m_processor(processor), m_postprocessor(postprocessor),
-      m_workspaceReceiver(), m_tableDirty(false) {
+      m_workspaceReceiver(), m_tableDirty(false), m_colGroup(0) {
 
-  // Columns Group and Options must be added to the whitelist
-  m_whitelist.addElement("Group", "Group",
-                         "<b>Grouping for post-processing</b><br "
-                         "/><i>required</i><br />The value of this column "
-                         "determines which other rows this row's output will "
-                         "be post-processed with. All rows with the same group "
-                         "number are post-processed together.");
+  // Column Options must be added to the whitelist
   m_whitelist.addElement("Options", "Options",
                          "<b>Override <samp>" + processor.name() +
                              "</samp> properties</b><br /><i>optional</i><br "
@@ -252,10 +246,10 @@ bool GenericDataProcessorPresenter::isValidModel(Workspace_sptr model) {
 }
 
 /**
-* Creates a model using the whitelist supplied to this presenter
+* Creates a default model using the whitelist supplied to this presenter
 * @returns : The new model
 */
-ITableWorkspace_sptr GenericDataProcessorPresenter::createWorkspace() {
+ITableWorkspace_sptr GenericDataProcessorPresenter::createDefaultWorkspace() {
   ITableWorkspace_sptr ws = WorkspaceFactory::Instance().createTable();
 
   for (int col = 0; col < m_columns; col++) {
@@ -263,16 +257,6 @@ ITableWorkspace_sptr GenericDataProcessorPresenter::createWorkspace() {
     auto column = ws->addColumn("str", m_whitelist.colNameFromColIndex(col));
     column->setPlotType(0);
   }
-
-  return ws;
-}
-
-/**
-* Creates a default model using the whitelist supplied to this presenter
-* @returns : The new model
-*/
-ITableWorkspace_sptr GenericDataProcessorPresenter::createDefaultWorkspace() {
-  auto ws = createWorkspace();
   ws->appendRow();
   return ws;
 }
@@ -290,8 +274,7 @@ int GenericDataProcessorPresenter::getUnusedGroup(
       continue;
 
     // This is an unselected row. Add it to the list of used group ids
-    usedGroups.insert(
-        m_model->data(m_model->index(idx, m_columns - 2)).toInt());
+    usedGroups.insert(m_model->data(m_model->index(idx, m_colGroup)).toInt());
   }
 
   int groupId = 0;
@@ -762,7 +745,7 @@ void GenericDataProcessorPresenter::reduceRow(int rowNo) {
   /* excluding 'Group' and 'Options' */
 
   // Loop over all columns except 'Group' and 'Options'
-  for (int i = 0; i < m_columns - 2; i++) {
+  for (int i = m_colGroup + 1; i < m_columns - 1; i++) {
 
     // The algorithm's property linked to this column
     auto propertyName = m_whitelist.algPropFromColIndex(i);
@@ -835,7 +818,7 @@ void GenericDataProcessorPresenter::reduceRow(int rowNo) {
   if (alg->isExecuted()) {
 
     /* The reduction is complete, try to populate the columns */
-    for (int i = 0; i < m_columns - 2; i++) {
+    for (int i = m_colGroup; i < m_columns - 1; i++) {
       if (m_model->data(m_model->index(rowNo, i)).toString().isEmpty()) {
 
         std::string propValue =
@@ -857,8 +840,7 @@ void GenericDataProcessorPresenter::insertRow(int index) {
   if (!m_model->insertRow(index))
     return;
   // Set the group id of the new row
-  // m_columns - 2 is the index of column 'Group'
-  m_model->setData(m_model->index(index, m_columns - 2), groupId);
+  m_model->setData(m_model->index(index, m_colGroup), groupId);
 }
 
 /**
@@ -898,7 +880,7 @@ int GenericDataProcessorPresenter::getBlankRow() {
     for (int j = 0; j < m_columns; ++j) {
       // Don't bother checking the group column, it'll always have a
       // value.
-      if (j == m_columns - 2)
+      if (j == m_colGroup)
         continue;
 
       if (!m_model->data(m_model->index(i, j)).toString().isEmpty()) {
@@ -936,7 +918,7 @@ void GenericDataProcessorPresenter::groupRows() {
 
   // Now we just have to set the group id on the selected rows
   for (auto it = rows.begin(); it != rows.end(); ++it)
-    m_model->setData(m_model->index(*it, m_columns - 2), groupId);
+    m_model->setData(m_model->index(*it, m_colGroup), groupId);
 
   m_tableDirty = true;
 }
@@ -1183,7 +1165,7 @@ void GenericDataProcessorPresenter::afterReplaceHandle(
 size_t GenericDataProcessorPresenter::numRowsInGroup(int groupId) const {
   size_t count = 0;
   for (int i = 0; i < m_model->rowCount(); ++i)
-    if (m_model->data(m_model->index(i, m_columns - 2)).toInt() == groupId)
+    if (m_model->data(m_model->index(i, m_colGroup)).toInt() == groupId)
       count++;
   return count;
 }
@@ -1194,13 +1176,12 @@ void GenericDataProcessorPresenter::expandSelection() {
 
   std::set<int> rows = m_view->getSelectedRows();
   for (auto row = rows.begin(); row != rows.end(); ++row)
-    groupIds.insert(m_model->data(m_model->index(*row, m_columns - 2)).toInt());
+    groupIds.insert(m_model->data(m_model->index(*row, m_colGroup)).toInt());
 
   std::set<int> selection;
 
   for (int i = 0; i < m_model->rowCount(); ++i)
-    if (groupIds.find(
-            m_model->data(m_model->index(i, m_columns - 2)).toInt()) !=
+    if (groupIds.find(m_model->data(m_model->index(i, m_colGroup)).toInt()) !=
         groupIds.end())
       selection.insert(i);
 
@@ -1215,14 +1196,12 @@ void GenericDataProcessorPresenter::clearSelected() {
     ignore.clear();
     ignore.insert(*row);
 
-    for (int i = 0; i < m_columns - 2; i++) {
+    // 'Group' column
+    m_model->setData(m_model->index(*row, m_colGroup), getUnusedGroup(ignore));
+
+    for (int i = m_colGroup + 1; i < m_columns - 1; i++) {
       m_model->setData(m_model->index(*row, i), "");
     }
-    // 'Group' column
-    m_model->setData(m_model->index(*row, m_columns - 2),
-                     getUnusedGroup(ignore));
-    // 'Options' column
-    m_model->setData(m_model->index(*row, m_columns - 1), "");
   }
   m_tableDirty = true;
 }
@@ -1318,7 +1297,7 @@ void GenericDataProcessorPresenter::transfer(
     }
 
     // Special case grouping. Group cell entry is string it seems!
-    m_model->setData(m_model->index(rowIndex, m_columns - 2),
+    m_model->setData(m_model->index(rowIndex, m_colGroup),
                      groups[row["Group"]]);
   }
 }
@@ -1375,13 +1354,13 @@ void GenericDataProcessorPresenter::plotGroup() {
   std::set<int> selectedGroups;
   for (auto row = selectedRows.begin(); row != selectedRows.end(); ++row)
     selectedGroups.insert(
-        m_model->data(m_model->index(*row, m_columns - 2)).toInt());
+        m_model->data(m_model->index(*row, m_colGroup)).toInt());
 
   // Now, get the rows belonging to the specified groups
   std::map<int, std::set<int>> rowsByGroup;
   const int numRows = m_model->rowCount();
   for (int row = 0; row < numRows; ++row) {
-    int group = m_model->data(m_model->index(row, m_columns - 2)).toInt();
+    int group = m_model->data(m_model->index(row, m_colGroup)).toInt();
 
     // Skip groups we don't care about
     if (selectedGroups.find(group) == selectedGroups.end())

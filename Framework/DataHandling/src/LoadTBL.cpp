@@ -320,6 +320,7 @@ void LoadTBL::exec() {
   if (isOld) {
     /**THIS IS ESSENTIALLY THE OLD LoadReflTBL CODE**/
     // create the column headings
+    auto colStitch = ws->addColumn("str", "StitchGroup");
     auto colRuns = ws->addColumn("str", "Run(s)");
     auto colTheta = ws->addColumn("str", "ThetaIn");
     auto colTrans = ws->addColumn("str", "TransRun(s)");
@@ -327,9 +328,9 @@ void LoadTBL::exec() {
     auto colQmax = ws->addColumn("str", "Qmax");
     auto colDqq = ws->addColumn("str", "dq/q");
     auto colScale = ws->addColumn("str", "Scale");
-    auto colStitch = ws->addColumn("str", "StitchGroup");
     auto colOptions = ws->addColumn("str", "Options");
 
+    colStitch->setPlotType(0);
     colRuns->setPlotType(0);
     colTheta->setPlotType(0);
     colTrans->setPlotType(0);
@@ -337,7 +338,6 @@ void LoadTBL::exec() {
     colQmax->setPlotType(0);
     colDqq->setPlotType(0);
     colScale->setPlotType(0);
-    colStitch->setPlotType(0);
     colOptions->setPlotType(0);
     // we are using the old ReflTBL format
     // where all of the entries are on one line
@@ -361,12 +361,12 @@ void LoadTBL::exec() {
       if (rowVec[0] != "" || rowVec[1] != "" || rowVec[2] != "" ||
           rowVec[3] != "" || rowVec[4] != "") {
         TableRow row = ws->appendRow();
+        row << stitchStr;
         for (int i = 0; i < 5; ++i) {
           row << rowVec.at(i);
         }
         row << rowVec.at(15);
         row << scaleStr;
-        row << stitchStr;
       }
 
       // check if the second run in the row has any data associated with it
@@ -374,12 +374,12 @@ void LoadTBL::exec() {
       if (rowVec[5] != "" || rowVec[6] != "" || rowVec[7] != "" ||
           rowVec[8] != "" || rowVec[9] != "") {
         TableRow row = ws->appendRow();
+        row << stitchStr;
         for (int i = 5; i < 10; ++i) {
           row << rowVec.at(i);
         }
         row << rowVec.at(15);
         row << scaleStr;
-        row << stitchStr;
       }
 
       // check if the third run in the row has any data associated with it
@@ -387,13 +387,13 @@ void LoadTBL::exec() {
       if (rowVec[10] != "" || rowVec[11] != "" || rowVec[12] != "" ||
           rowVec[13] != "" || rowVec[14] != "") {
         TableRow row = ws->appendRow();
+        row << stitchStr;
         for (int i = 10; i < 17; ++i) {
           if (i == 16)
             row << scaleStr;
           else
             row << rowVec.at(i);
         }
-        row << stitchStr;
       }
       ++stitchID;
       setProperty("OutputWorkspace", ws);

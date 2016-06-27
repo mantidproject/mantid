@@ -51,8 +51,8 @@ class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS GenericDataProcessorPresenter
 public:
   GenericDataProcessorPresenter(
       const DataProcessorWhiteList &whitelist,
-      const std::map<std::string, DataProcessorPreprocessingAlgorithm> &
-          preprocessMap,
+      const std::map<std::string, DataProcessorPreprocessingAlgorithm>
+          &preprocessMap,
       const DataProcessorProcessingAlgorithm &processor,
       const DataProcessorPostprocessingAlgorithm &postprocessor);
   GenericDataProcessorPresenter(
@@ -106,6 +106,8 @@ protected:
   WorkspaceReceiver *m_workspaceReceiver;
   // stores whether or not the table has changed since it was last saved
   bool m_tableDirty;
+  // Index for column 'Group'
+  int m_colGroup;
   // stores the user options for the presenter
   std::map<std::string, QVariant> m_options;
   // Post-process some rows
@@ -187,7 +189,6 @@ protected:
 
   void validateModel(Mantid::API::ITableWorkspace_sptr model);
   bool isValidModel(Mantid::API::Workspace_sptr model);
-  Mantid::API::ITableWorkspace_sptr createWorkspace();
   Mantid::API::ITableWorkspace_sptr createDefaultWorkspace();
 };
 }

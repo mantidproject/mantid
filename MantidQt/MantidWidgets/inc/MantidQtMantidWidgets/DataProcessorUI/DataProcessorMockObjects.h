@@ -12,14 +12,14 @@ using namespace MantidQt::MantidWidgets;
 using namespace Mantid::API;
 
 // Clean column ids for use within tests
-const int RunCol = 0;
-const int ThetaCol = 1;
-const int TransCol = 2;
-const int QMinCol = 3;
-const int QMaxCol = 4;
-const int DQQCol = 5;
-const int ScaleCol = 6;
-const int GroupCol = 7;
+const int GroupCol = 0;
+const int RunCol = 1;
+const int ThetaCol = 2;
+const int TransCol = 3;
+const int QMinCol = 4;
+const int QMaxCol = 5;
+const int DQQCol = 6;
+const int ScaleCol = 7;
 const int OptionsCol = 8;
 
 GCC_DIAG_OFF_SUGGEST_OVERRIDE
