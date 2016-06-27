@@ -811,7 +811,7 @@ public:
     // See
     // http://docs.mantidproject.org/nightly/concepts/HowToDefineGeometricShape.html#hexahedron
     Hexahedron hex;
-    hex.lbb = V3D(0, 0, 0);
+    hex.lbb = V3D(0, 0, -2);
     hex.lfb = V3D(1, 0, 0);
     hex.rfb = V3D(1, 1, 0);
     hex.rbb = V3D(0, 1, 0);
@@ -829,7 +829,7 @@ public:
     TS_ASSERT_DELTA(bb.zMax(), 2, 0.0001);
     TS_ASSERT_DELTA(bb.xMin(), 0, 0.0001);
     TS_ASSERT_DELTA(bb.yMin(), 0, 0.0001);
-    TS_ASSERT_DELTA(bb.zMin(), 0, 0.0001);
+    TS_ASSERT_DELTA(bb.zMin(), -2, 0.0001);
   }
 
   void testdefineBoundingBox()
