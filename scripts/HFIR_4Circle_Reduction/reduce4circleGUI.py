@@ -18,155 +18,28 @@ from scipy.optimize import curve_fit
 from PyQt4 import QtCore, QtGui
 from PyQt4.QtCore import QThread
 try:
+    _fromUtf8 = QtCore.QString.fromUtf8
+except AttributeError:
+    def _fromUtf8(s):
+        return s
+
+try:
     from mantidqtpython import MantidQt
 except ImportError as e:
     NO_SCROLL = True
 else:
     NO_SCROLL = False
 
-import reduce4circleControl as r4c
+# import reduce4circleControl as r4c
 import guiutility as gutil
 import fourcircle_utility as hb3a
 import plot3dwindow
+from multi_threads_helpers import *
 
-try:
-    _fromUtf8 = QtCore.QString.fromUtf8
-except AttributeError:
-    def _fromUtf8(s):
-        return s
+
 
 # import line for the UI python class
 from ui_MainWindow import Ui_MainWindow
-
-
-class getPostsThread(QThread):
-    def __init__(self, main_window):
-        QThread.__init__(self)
-        self.main_window = main_window
-        print '[DB...Prototype] Thread init...'
-        self.start_time = None
-        self.num_loops = 0
-        self.stopSignal = False
-
-    def __del__(self):
-        self.wait()
-
-    def stop(self):
-        print 'set stop to ', self.stop
-        self.stopSignal = True
-
-    def run(self):
-        if self.start_time is None:
-            self.start_time = datetime.datetime.now()
-
-        while not self.stopSignal:
-            msg = 'loop %d: %s ... %s' % (self.num_loops, (datetime.datetime.now()), str(self.stopSignal))
-            print '....................................', msg
-            self.sleep(1)
-            self.num_loops += 1
-            # self.main_window.ui.label_message.setText(msg)
-
-        return
-
-
-class AddPeaksThread(QThread):
-    """
-    A QThread class to add peaks to Mantid to calculate UB matrix
-    """
-    # signal for a peak is added: int_0 = experiment number, int_1 = scan number
-    peakAddedSignal = QtCore.pyqtSignal(int, int)
-    # signal for status: int_0 = experiment number, int_1 = scan number, int_2 = progress (0...)
-    peakStatusSignal = QtCore.pyqtSignal(int, int, int)
-
-    def __init__(self, main_window, exp_number, scan_number_list):
-        """
-        Initialization
-        :param main_window:
-        :param exp_number:
-        :param scan_number_list:
-        """
-        QThread.__init__(self)
-
-        # check
-        assert main_window is not None, 'Main window cannot be None'
-        assert isinstance(exp_number, int), 'Experiment number must be an integer.'
-        assert isinstance(scan_number_list, list), 'Scan number list must be a list but not %s.' \
-                                                   '' % str(type(scan_number_list))
-
-        # set values
-        self._mainWindow = main_window
-        self._expNumber = exp_number
-        self._scanNumberList = scan_number_list
-
-        # connect to the updateTextEdit slot defined in app1.py
-        self.peakAddedSignal.connect(self._mainWindow.update_peak_added_info)
-        self.peakStatusSignal.connect(self._mainWindow.update_adding_peaks_status)
-
-        return
-
-    def __del__(self):
-        """
-        Delete signal
-        :return:
-        """
-        self.wait()
-
-        return
-
-    def run(self):
-        """
-        method for thread is running
-        :return:
-        """
-        # declare list of failed
-        failed_list = list()
-
-        # loop over all scan numbers
-        for index, scan_number in enumerate(self._scanNumberList):
-            # update state
-            self.peakStatusSignal.emit(self._expNumber, scan_number, index)
-
-            # merge peak
-            status, err_msg = self._mainWindow._myControl.merge_pts_in_scan(
-                self._expNumber, scan_number, [], 'q-sample')
-
-            # continue to the next scan if there is something wrong
-            if status is False:
-                failed_list.append((scan_number, err_msg))
-                continue
-
-            # find peak
-            self._mainWindow._myControl.find_peak(self._expNumber, scan_number)
-
-            # get PeakInfo
-            peak_info = self._mainWindow._myControl.get_peak_info(self._expNumber, scan_number)
-            assert isinstance(peak_info, r4c.PeakProcessHelper)
-
-            # send signal to main window for peak being added
-            self.peakAddedSignal.emit(self._expNumber, scan_number)
-
-            # retrieve and set HKL from spice table
-            # peak_info.retrieve_hkl_from_spice_table()
-            # add to table
-            # self.main_window.set_ub_peak_table(peak_info)
-        # END-FOR
-
-        self.peakStatusSignal.emit(self._expNumber, -1, len(self._scanNumberList))
-
-        # pop error if there is any scan that is not reduced right
-        if len(failed_list) > 0:
-            failed_scans_str = 'Unable to merge scans: '
-            sum_error_str = ''
-            for fail_tup in failed_list:
-                failed_scans_str += '%d, ' % fail_tup[0]
-                sum_error_str += '%s\n' % fail_tup[1]
-            # END-FOR
-
-            self._mainWindow.pop_one_button_dialog(failed_scans_str)
-            self._mainWindow.pop_one_button_dialog(sum_error_str)
-        # END-IF
-
-        return
 
 
 class MainWindow(QtGui.QMainWindow):
@@ -1365,9 +1238,20 @@ class MainWindow(QtGui.QMainWindow):
 
         # background Pt.
         status, num_bg_pt = gutil.parse_integers_editors(self.ui.lineEdit_numPt4Background, allow_blank=False)
-        assert status and num_bg_pt > 0, 'Number of Pt number for background must be larger than 0!'
+        if not status or num_bg_pt == 0:
+            self.pop_one_button_dialog('Number of Pt number for background must be larger than 0: %s!' % str(num_bg_pt))
+            return
 
         # integrate peak
+        self.ui.progressBar_mergeScans.setRange(0, len(row_number_list))
+        self.ui.progressBar_mergeScans.setValue(0)
+        self.ui.progressBar_mergeScans.setTextVisible(True)
+        self.ui.progressBar_mergeScans.setStatusTip('Hello')
+
+        # FIXME/NOW - need to split loop to 2 loops; one to read table information, the other to process peak
+        self._myIntegratePeaksThread = IntegratePeaksThread(self, exp_number, row_number_list)
+        self._myIntegratePeaksThread.start()
+        """
         grand_error_message = ''
         for row_number in row_number_list:
             # get scan number and pt numbers
@@ -1467,6 +1351,7 @@ class MainWindow(QtGui.QMainWindow):
         integrate_peak_time_end = time.clock()
         elapsed = integrate_peak_time_end - integrate_peak_time_start
         self.ui.statusbar.showMessage('Peak integration is finished in %.2f seconds' % elapsed)
+        """
 
         return
 
@@ -3003,6 +2888,18 @@ class MainWindow(QtGui.QMainWindow):
 
         # update progress bar
         self.ui.progressBar_add_ub_peaks.setValue(progress)
+
+        return
+
+    def upate_merge_status(self, exp_number, scan_number, progress, mode):
+        """
+
+        :param exp_number:
+        :param scan_number:
+        :param progress:
+        :param mode:
+        :return:
+        """
 
         return
 
