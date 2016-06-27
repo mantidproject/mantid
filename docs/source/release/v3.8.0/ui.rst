@@ -39,7 +39,6 @@ Documentation
 #############
 * Added Ragged Workspace as a concept page
 
->>>>>>> origin/master
 
 Bugs Resolved
 -------------
