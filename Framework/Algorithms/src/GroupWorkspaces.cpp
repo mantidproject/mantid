@@ -3,6 +3,7 @@
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/GroupWorkspaces.h"
 #include "MantidAPI/ADSValidator.h"
+#include "MantidKernel/ArrayProperty.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -10,6 +11,7 @@ namespace Algorithms {
 DECLARE_ALGORITHM(GroupWorkspaces)
 
 using namespace API;
+using namespace Kernel;
 
 /// Default constructor
 GroupWorkspaces::GroupWorkspaces() : API::Algorithm(), m_group() {}
