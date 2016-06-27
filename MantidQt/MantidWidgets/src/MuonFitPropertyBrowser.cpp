@@ -2,6 +2,8 @@
 #include "MantidQtMantidWidgets/PropertyHandler.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/TableRow.h"
 #include "MantidQtMantidWidgets/StringEditorFactory.h"
 
 // Suppress a warning coming out of code that isn't ours
@@ -39,6 +41,10 @@
 #include <QMessageBox>
 #include <QAction>
 #include <QLayout>
+
+namespace {
+Mantid::Kernel::Logger g_log("MuonFitPropertyBrowser");
+}
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -365,11 +371,27 @@ void MuonFitPropertyBrowser::finishHandle(const IAlgorithm *alg) {
   auto inWs = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
       static_cast<std::string>(alg->getProperty("InputWorkspace")));
 
-  auto outWs = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-      outputName() + "_Workspace");
+  // Copy experiment info to output workspace
+  if (AnalysisDataService::Instance().doesExist(outputName() + "_Workspace")) {
+    auto outWs = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+        outputName() + "_Workspace");
+    if (inWs && outWs) {
+      outWs->copyExperimentInfoFrom(inWs.get());
+    }
+  } else if (AnalysisDataService::Instance().doesExist(outputName() +
+                                                       "_Workspaces")) {
+    // Output workspace was a group
+    auto outWs = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
+        outputName() + "_Workspaces");
+    for (size_t i = 0; i < outWs->size(); i++) {
+      auto matrixWs =
+          boost::dynamic_pointer_cast<MatrixWorkspace>(outWs->getItem(i));
+      if (matrixWs) {
+        matrixWs->copyExperimentInfoFrom(inWs.get());
+      }
+    }
+  }
 
-  if (inWs && outWs)
-    outWs->copyExperimentInfoFrom(inWs.get());
 
   FitPropertyBrowser::finishHandle(alg);
 }
