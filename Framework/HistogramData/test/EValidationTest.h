@@ -63,9 +63,9 @@ public:
     TS_ASSERT(!isValid(makeE({1.0, 1.0, -1.0})));
   }
 
-  void test_detects_nan() {
-    TS_ASSERT(!isValid(makeE({NAN})));
-    TS_ASSERT(!isValid(makeE({-NAN})));
+  void test_accepts_nan() {
+    TS_ASSERT(isValid(makeE({NAN})));
+    TS_ASSERT(isValid(makeE({-NAN})));
   }
 
   void test_detects_inf() {

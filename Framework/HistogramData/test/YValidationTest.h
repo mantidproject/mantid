@@ -43,9 +43,9 @@ public:
 
   void test_length_zero() { TS_ASSERT(isValid(HistogramY(0))); }
 
-  void test_detects_nan() {
-    TS_ASSERT(!isValid(makeY({NAN})));
-    TS_ASSERT(!isValid(makeY({-NAN})));
+  void test_accepts_nan() {
+    TS_ASSERT(isValid(makeY({NAN})));
+    TS_ASSERT(isValid(makeY({-NAN})));
   }
 
   void test_detects_inf() {

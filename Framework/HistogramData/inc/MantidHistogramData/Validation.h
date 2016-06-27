@@ -54,7 +54,7 @@ template <class T> void Validator<HistogramX>::checkValidity(const T &data) {
 
 template <class T> bool Validator<HistogramY>::isValid(const T &data) {
   auto result = std::find_if(data.begin(), data.end(),
-                             [](const double &y) { return !std::isfinite(y); });
+                             [](const double &y) { return std::isinf(y); });
   return result == data.end();
 }
 
@@ -66,7 +66,7 @@ template <class T> void Validator<HistogramY>::checkValidity(const T &data) {
 
 template <class T> bool Validator<HistogramE>::isValid(const T &data) {
   auto result = std::find_if(data.begin(), data.end(), [](const double &e) {
-    return e < 0.0 || !std::isfinite(e);
+    return e < 0.0 || std::isinf(e);
   });
   return result == data.end();
 }
