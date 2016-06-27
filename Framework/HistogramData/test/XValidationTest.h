@@ -61,22 +61,38 @@ public:
     TS_ASSERT(!isValid(makeX({1.0, 3.0, 2.0, 4.0})));
   }
 
-  void test_detects_nan() {
-    TS_ASSERT(!isValid(makeX({NAN})));
-    TS_ASSERT(!isValid(makeX({NAN, 1.0})));
-    TS_ASSERT(!isValid(makeX({NAN, -1.0})));
-    TS_ASSERT(!isValid(makeX({1.0, NAN})));
-    TS_ASSERT(!isValid(makeX({-1.0, NAN})));
+  void test_accepts_nan() {
+    TS_ASSERT(isValid(makeX({NAN})));
+    TS_ASSERT(isValid(makeX({NAN, 1.0})));
+    TS_ASSERT(isValid(makeX({NAN, -1.0})));
+    TS_ASSERT(isValid(makeX({1.0, NAN})));
+    TS_ASSERT(isValid(makeX({-1.0, NAN})));
   }
 
-  void test_detects_inf() {
-    TS_ASSERT(!isValid(makeX({INFINITY})));
-    TS_ASSERT(!isValid(makeX({-INFINITY})));
-    TS_ASSERT(!isValid(makeX({-INFINITY, 0.0})));
-    TS_ASSERT(!isValid(makeX({0.0, INFINITY})));
-    TS_ASSERT(!isValid(makeX({-INFINITY, INFINITY})));
+  void test_detects_non_boundary_nan() {
+    TS_ASSERT(!isValid(makeX({-1.0, NAN, 1.0})));
+    TS_ASSERT(isValid(makeX({NAN, -1.0, 0.0, 1.0})));
+    TS_ASSERT(!isValid(makeX({NAN, -1.0, NAN, 1.0})));
+    TS_ASSERT(isValid(makeX({-1.0, 0.0, 1.0, NAN})));
+    TS_ASSERT(!isValid(makeX({-1.0, NAN, 1.0, NAN})));
+  }
+
+  void test_accepts_inf() {
+    TS_ASSERT(isValid(makeX({INFINITY})));
+    TS_ASSERT(isValid(makeX({-INFINITY})));
+    TS_ASSERT(isValid(makeX({-INFINITY, 0.0})));
+    TS_ASSERT(isValid(makeX({0.0, INFINITY})));
+    TS_ASSERT(isValid(makeX({-INFINITY, INFINITY})));
     TS_ASSERT(isValid(makeX({-DBL_MAX / 2.0, DBL_MAX / 2.0})));
-    TS_ASSERT(!isValid(makeX({-DBL_MAX, DBL_MAX})));
+    TS_ASSERT(isValid(makeX({-DBL_MAX, DBL_MAX})));
+  }
+
+  void test_detects_non_increasing_inf() {
+    // INF is ok, but order must be correct
+    TS_ASSERT(!isValid(makeX({0.0, -INFINITY})));
+    TS_ASSERT(!isValid(makeX({INFINITY, 0.0})));
+    TS_ASSERT(!isValid(makeX({INFINITY, -INFINITY})));
+    TS_ASSERT(!isValid(makeX({DBL_MAX, -DBL_MAX})));
   }
 
   void test_denormal() {

@@ -2,6 +2,7 @@
 #define MANTID_HISTOGRAMDATA_VALIDATION_H_
 
 #include <algorithm>
+#include <cfloat>
 #include <cmath>
 #include <stdexcept>
 
@@ -35,15 +36,20 @@ template <> struct Validator<HistogramE> {
 };
 
 template <class T> bool Validator<HistogramX>::isValid(const T &data) {
-  if (data.size() == 1)
-    return std::isfinite(data[0]);
-  for (size_t i = 1; i < data.size(); ++i) {
-    double delta = data[i] - data[i - 1];
-    // Not 0.0, not denormal, not inf, not nan.
-    if (delta < 0.0 || !std::isnormal(delta))
+  auto start = std::find_if_not(data.cbegin(), data.cend(),
+                                static_cast<bool (*)(double)>(std::isnan));
+  auto it = start + 1;
+  for (; it < data.cend(); ++it) {
+    if(std::isnan(*it))
+      break;
+    double delta = *it - *(it - 1);
+    // Not 0.0, not denormal
+    if (delta < DBL_MIN)
       return false;
   }
-  return true;
+  // after first NAN everything must be NAN
+  return std::find_if_not(it, data.cend(), static_cast<bool (*)(double)>(
+                                            std::isnan)) == data.cend();
 }
 
 template <class T> void Validator<HistogramX>::checkValidity(const T &data) {
