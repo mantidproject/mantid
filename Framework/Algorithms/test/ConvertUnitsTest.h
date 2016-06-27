@@ -243,7 +243,9 @@ public:
     for (size_t i = 0; i < output->getNumberHistograms(); ++i) {
       auto &outX = output->x(i);
       for (size_t j = 0; j <= xsize; ++j) {
-        TS_ASSERT_EQUALS(outX[j], 2.0 * M_PI);
+        // Axis gets reversed by ConvertUnits to make it strictly increasing
+        TS_ASSERT_EQUALS(outX[j],
+                         2.0 * M_PI / (1.0 + static_cast<double>(xsize - j)));
       }
     }
 
