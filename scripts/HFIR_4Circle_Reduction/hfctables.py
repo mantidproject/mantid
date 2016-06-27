@@ -260,7 +260,6 @@ class UBMatrixTable(tableBase.NTableWidget):
         Guarantees: return a 3 x 3 ndarray
         :return:
         """
-        # print '[DB] MatrixTable: _Matrix = ', self._matrix
         return self._matrix.copy()
 
     def get_matrix_str(self):
@@ -561,8 +560,6 @@ class ProcessTableWidget(tableBase.NTableWidget):
             scan_list = self.get_scan_list()
         else:
             scan_list = list()
-
-        print '[DB...BAT] <append scans> in-table scans: ' % scan_list
 
         # set value as default
         # Append rows

@@ -70,30 +70,65 @@ class getPostsThread(QThread):
 
 
 class AddPeaksThread(QThread):
-    mySignal = QtCore.pyqtSignal(int, int)  #
+    """
+    A QThread class to add peaks to Mantid to calculate UB matrix
+    """
+    # signal for a peak is added: int_0 = experiment number, int_1 = scan number
+    peakAddedSignal = QtCore.pyqtSignal(int, int)
+    # signal for status: int_0 = experiment number, int_1 = scan number, int_2 = progress (0...)
+    peakStatusSignal = QtCore.pyqtSignal(int, int, int)
 
     def __init__(self, main_window, exp_number, scan_number_list):
+        """
+        Initialization
+        :param main_window:
+        :param exp_number:
+        :param scan_number_list:
+        """
         QThread.__init__(self)
 
-        self.main_window = main_window
-        self.exp_number = exp_number
-        self.scan_number_list = scan_number_list
+        # check
+        assert main_window is not None, 'Main window cannot be None'
+        assert isinstance(exp_number, int), 'Experiment number must be an integer.'
+        assert isinstance(scan_number_list, list), 'Scan number list must be a list but not %s.' \
+                                                   '' % str(type(scan_number_list))
 
-        self.mySignal.connect(self.main_window.update_message)  # connect to the updateTextEdit slot defined in app1.py
+        # set values
+        self._mainWindow = main_window
+        self._expNumber = exp_number
+        self._scanNumberList = scan_number_list
 
-        # self.mySignal.emit(-1)
+        # connect to the updateTextEdit slot defined in app1.py
+        self.peakAddedSignal.connect(self._mainWindow.update_peak_added_info)
+        self.peakStatusSignal.connect(self._mainWindow.update_adding_peaks_status)
+
+        return
 
     def __del__(self):
+        """
+        Delete signal
+        :return:
+        """
         self.wait()
 
+        return
 
     def run(self):
+        """
+        method for thread is running
+        :return:
+        """
+        # declare list of failed
         failed_list = list()
-        for index, scan_number in enumerate(self.scan_number_list):
-            # self.mySignal.emit(index)
+
+        # loop over all scan numbers
+        for index, scan_number in enumerate(self._scanNumberList):
+            # update state
+            self.peakStatusSignal.emit(self._expNumber, scan_number, index)
 
             # merge peak
-            status, err_msg = self.main_window._myControl.merge_pts_in_scan(self.exp_number, scan_number, [], 'q-sample')
+            status, err_msg = self._mainWindow._myControl.merge_pts_in_scan(
+                self._expNumber, scan_number, [], 'q-sample')
 
             # continue to the next scan if there is something wrong
             if status is False:
@@ -101,20 +136,19 @@ class AddPeaksThread(QThread):
                 continue
 
             # find peak
-            self.main_window._myControl.find_peak(self.exp_number, scan_number)
+            self._mainWindow._myControl.find_peak(self._expNumber, scan_number)
 
             # get PeakInfo
-            peak_info = self.main_window._myControl.get_peak_info(self.exp_number, scan_number)
+            peak_info = self._mainWindow._myControl.get_peak_info(self._expNumber, scan_number)
             assert isinstance(peak_info, r4c.PeakProcessHelper)
 
-            self.mySignal.emit(self.exp_number, scan_number)
+            # send signal to main window for peak being added
+            self.peakAddedSignal.emit(self._expNumber, scan_number)
 
             # retrieve and set HKL from spice table
-            peak_info.retrieve_hkl_from_spice_table()
-
+            # peak_info.retrieve_hkl_from_spice_table()
             # add to table
             # self.main_window.set_ub_peak_table(peak_info)
-
         # END-FOR
 
         # pop error if there is any scan that is not reduced right
@@ -126,10 +160,9 @@ class AddPeaksThread(QThread):
                 sum_error_str += '%s\n' % fail_tup[1]
             # END-FOR
 
-            self.main_window.pop_one_button_dialog(failed_scans_str)
-            self.main_window.pop_one_button_dialog(sum_error_str)
-
-        self.mySignal.emit(1234, 2234)
+            self._mainWindow.pop_one_button_dialog(failed_scans_str)
+            self._mainWindow.pop_one_button_dialog(sum_error_str)
+        # END-IF
 
         return
 
@@ -362,29 +395,6 @@ class MainWindow(QtGui.QMainWindow):
         self.load_settings()
 
         return
-
-    def update_message(self, int_msg, int_msg2):
-        message = str(self.ui.label_message.text())
-        message += '| %d/%d: %s' % (int_msg, int_msg2, str(datetime.datetime.now()))
-
-        self.ui.label_message.setText(message)
-
-        self.ui.statusbar.showMessage(message)
-
-        if int_msg == 1234:
-            return
-
-        exp_number = int_msg
-        scan_number = int_msg2
-        peak_info = self._myControl.get_peak_info(exp_number, scan_number)
-        assert isinstance(peak_info, r4c.PeakProcessHelper)
-
-        # retrieve and set HKL from spice table
-        peak_info.retrieve_hkl_from_spice_table()
-
-        # add to table
-        self.set_ub_peak_table(peak_info)
-
 
     def evt_show_survey(self):
         """
@@ -661,8 +671,6 @@ class MainWindow(QtGui.QMainWindow):
             self.pop_one_button_dialog(int_list)
             return
         exp_no, scan_no = int_list
-        print '[DB] Experiment number = ', exp_no
-        print '[DB] Scan numbers = ', str(scan_no), 'of type ', type(scan_no)
 
         # Get HKL from GUI
         status, float_list = gutil.parse_float_editors([self.ui.lineEdit_H,
@@ -956,7 +964,6 @@ class MainWindow(QtGui.QMainWindow):
         """
         # Find out the lines to get deleted
         row_num_list = self.ui.tableWidget_peaksCalUB.get_selected_rows()
-        print '[DB] Row %s are selected' % str(row_num_list)
 
         # Delete
         self.ui.tableWidget_peaksCalUB.delete_rows(row_num_list)
@@ -1285,8 +1292,6 @@ class MainWindow(QtGui.QMainWindow):
         pt_dict = ret_obj
         assert isinstance(pt_dict, dict)
 
-        print '[DB-BAT] Returned Pt. dict: ', pt_dict
-
         # clear table
         if self.ui.tableWidget_peakIntegration.rowCount() > 0:
             self.ui.tableWidget_peakIntegration.remove_all_rows()
@@ -1299,7 +1304,8 @@ class MainWindow(QtGui.QMainWindow):
             intensity_list.append(pt_intensity)
             status, msg = self.ui.tableWidget_peakIntegration.append_pt(pt, -1, pt_intensity)
             if not status:
-                print '[Error!] Unable to add Pt %d due to %s.' % (pt, msg)
+                error_msg = '[Error!] Unable to add Pt %d due to %s.' % (pt, msg)
+                self.pop_one_button_dialog(error_msg)
 
         # Set up the experiment information to table
         self.ui.tableWidget_peakIntegration.set_exp_info(exp_number, scan_number)
@@ -1812,7 +1818,6 @@ class MainWindow(QtGui.QMainWindow):
 
         # Process
         scan_row_list = self.ui.tableWidget_mergeScans.get_selected_scans()
-        print '[DB] %d scans have been selected to merge.' % len(scan_row_list)
         frame = str(self.ui.comboBox_mergeScanFrame.currentText())
         for tup2 in scan_row_list:
             #
@@ -2098,10 +2103,9 @@ class MainWindow(QtGui.QMainWindow):
         :return:
         """
         lower_left_c, upper_right_c = self.ui.graphicsView.get_roi()
-        print '[DB-BAT] Save RIO as [%s, %s]' % (str(lower_left_c), str(upper_right_c))
 
         status, par_val_list = gutil.parse_integers_editors([self.ui.lineEdit_exp, self.ui.lineEdit_run])
-        assert status
+        assert status, str(par_val_list)
         exp_number = par_val_list[0]
         scan_number = par_val_list[1]
 
@@ -2967,5 +2971,46 @@ class MainWindow(QtGui.QMainWindow):
                                                       'Scan', scan_no,
                                                       'Pt', pt_no)
         self.ui.plainTextEdit_rawDataInformation.setPlainText(info)
+
+        return
+
+    def update_adding_peaks_status(self, exp_number, scan_number, progress):
+        """
+        Update the status for adding peak to UB matrix calculating
+        :param exp_number:
+        :param scan_number:
+        :param progress:
+        :return:
+        """
+        # show message to bar
+        message = 'Processing experiment %d scan %d starting from %s.' % (exp_number, scan_number,
+                                                                          str(datetime.datetime.now()))
+        self.ui.statusbar.showMessage(message)
+
+        # update progress bar
+        self.ui.progressBar_add_ub_peaks.setValue(progress)
+
+        return
+
+    def update_peak_added_info(self, int_msg, int_msg2):
+        """
+        Update the peak-being-added information
+        :param int_msg:
+        :param int_msg2:
+        :return:
+        """
+        # get parameters passed
+        exp_number = int_msg
+        scan_number = int_msg2
+
+        # get PeakInfo
+        peak_info = self._myControl.get_peak_info(exp_number, scan_number)
+        assert isinstance(peak_info, r4c.PeakProcessHelper)
+
+        # retrieve and set HKL from spice table
+        peak_info.retrieve_hkl_from_spice_table()
+
+        # add to table
+        self.set_ub_peak_table(peak_info)
 
         return

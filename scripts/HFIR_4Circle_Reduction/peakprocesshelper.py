@@ -103,7 +103,6 @@ class PeakProcessHelper(object):
         # END-FOR (i_peak)
 
         self._avgPeakCenter = q_sample_sum/weight_sum
-        print '[DB] Weighted peak center = %s' % str(self._avgPeakCenter)
 
         return
 
@@ -295,9 +294,6 @@ class PeakProcessHelper(object):
         self._userHKL[0] = mi_h
         self._userHKL[1] = mi_k
         self._userHKL[2] = mi_l
-
-        print '[DB] PeakInfo Set User HKL to (%f, %f, %f) ' % (self._userHKL[0], self._userHKL[1],
-                                                               self._userHKL[2])
 
         return
 

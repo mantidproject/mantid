@@ -576,7 +576,6 @@ class CWSCDReductionControl(object):
             return False, 'RuntimeError: %s.' % str(error)
 
         # get the information whether there is any k-shift vector specified by user
-        print '[DB...Prototype] Current k-shift vectors are ... ', self._kShiftDict
 
         # form k-shift and peak intensity information
         scan_kindex_dict = dict()
@@ -670,7 +669,6 @@ class CWSCDReductionControl(object):
         # Find peak in Q-space
         merged_ws_name = get_merged_md_name(self._instrumentName, exp_number, scan_number, pt_number_list)
         peak_ws_name = get_peak_ws_name(exp_number, scan_number, pt_number_list)
-        print '[DB] Found peaks are output workspace %s.' % peak_ws_name
         api.FindPeaksMD(InputWorkspace=merged_ws_name,
                         MaxPeaks=10,
                         PeakDistanceThreshold=5.,
@@ -1163,10 +1161,7 @@ class CWSCDReductionControl(object):
         elif normalization == 'monitor':
             norm_by_mon = True
 
-        print '[DB-INFO] Integrate Pt. with mask workspace %s. Norm by time = %d; Norm by monitor = %d.' \
-              '' % (mask_ws_name, norm_by_time, norm_by_mon)
-
-        # VZ-FUTURE: Are you sure ScaleFactor is 1 !!!
+        # TODO/NOW: Are you sure ScaleFactor is 1 !!!
         api.IntegratePeaksCWSD(InputWorkspace=md_ws_name,
                                OutputWorkspace=integrated_peak_ws_name,
                                PeakRadius=peak_radius,
@@ -1181,7 +1176,6 @@ class CWSCDReductionControl(object):
         pt_dict = dict()
         out_peak_ws = AnalysisDataService.retrieve(integrated_peak_ws_name)
         num_peaks = out_peak_ws.rowCount()
-        print '[DB....BAT] There are %d peaks to export!' % num_peaks
 
         for i_peak in xrange(num_peaks):
             peak_i = out_peak_ws.getPeak(i_peak)
@@ -1492,7 +1486,6 @@ class CWSCDReductionControl(object):
                 continue
             pt_list_str += ',%d' % pt
         # END-FOR (pt)
-        print '[DB] Pt list = %s' % pt_list_str
         if pt_list_str == '-1':
             return False, err_msg
 
@@ -1826,8 +1819,6 @@ class CWSCDReductionControl(object):
                          oriented_lattice.errorc(), oriented_lattice.erroralpha(),
                          oriented_lattice.errorbeta(), oriented_lattice.errorgamma()]
 
-        print '[DB-BAT] Refined UB = ', refined_ub_matrix, 'of type', type(refined_ub_matrix)
-
         result_tuple = (peak_ws, refined_ub_matrix, lattice, lattice_error)
 
         return result_tuple
@@ -2075,7 +2066,6 @@ class CWSCDReductionControl(object):
         try:
             ws = self._mySpiceTableDict[(exp_no, scan_no)]
         except KeyError:
-            print '[DB] Keys to SPICE TABLE: %s' % str(self._mySpiceTableDict.keys())
             return None
 
         return ws
@@ -2233,10 +2223,8 @@ class CWSCDReductionControl(object):
                 wavelength = get_hb3a_wavelength(m1)
                 if wavelength is None:
                     q_range = 0.
-                    print '[DB-BAT] 2theta = %f, lambda = None, Q = %f' % (two_theta, q_range)
                 else:
                     q_range = 4.*math.pi*math.sin(two_theta/180.*math.pi*0.5)/wavelength
-                    print '[DB-BAT] 2theta = %f, lambda = %f, Q = %f' % (two_theta, wavelength, q_range)
 
                 # appending to list
                 scan_sum_list.append([max_count, scan_number, max_row, max_h, max_k, max_l,
