@@ -165,7 +165,7 @@ void FitMW::createDomain(boost::shared_ptr<API::FunctionDomain> &domain,
 
   auto X = m_matrixWorkspace->x(m_workspaceIndex);
 
-  if (X.size() == 0) {
+  if (X.empty()) {
     throw std::runtime_error("Workspace contains no data.");
   }
 
@@ -363,7 +363,7 @@ FitMW::createOutputWorkspace(const std::string &baseName,
 void FitMW::getStartIterator(const HistogramData::HistogramX &X,
                              Mantid::MantidVec::const_iterator &from, size_t &n,
                              bool isHistogram) const {
-  if (X.size() == 0) {
+  if (X.empty()) {
     throw std::runtime_error("Workspace contains no data.");
   }
 
