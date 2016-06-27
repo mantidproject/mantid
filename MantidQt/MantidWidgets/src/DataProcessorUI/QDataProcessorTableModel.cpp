@@ -129,7 +129,7 @@ bool QDataProcessorTableModel::setData(const QModelIndex &index,
   if (index.isValid() && role == Qt::EditRole) {
     const int colNumber = index.column();
     const int rowNumber = index.row();
-		m_tWS->String(rowNumber, colNumber) = str.toStdString();
+    m_tWS->String(rowNumber, colNumber) = str.toStdString();
 
     invalidateDataCache(rowNumber);
     emit dataChanged(index, index);

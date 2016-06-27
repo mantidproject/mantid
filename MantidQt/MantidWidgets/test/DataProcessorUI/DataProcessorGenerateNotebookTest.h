@@ -91,7 +91,9 @@ private:
         << "0.1"
         << "1.6"
         << "0.04"
-        << "1" << "0" << "";
+        << "1"
+        << "0"
+        << "";
     row = ws->appendRow();
     row << "12346"
         << "1.5"
@@ -99,7 +101,9 @@ private:
         << "1.4"
         << "2.9"
         << "0.04"
-        << "1" << "0" << "";
+        << "1"
+        << "0"
+        << "";
     row = ws->appendRow();
     row << "24681"
         << "0.5"
@@ -107,7 +111,9 @@ private:
         << "0.1"
         << "1.6"
         << "0.04"
-        << "1" << "1" << "";
+        << "1"
+        << "1"
+        << "";
     row = ws->appendRow();
     row << "24682"
         << "1.5"
@@ -115,7 +121,9 @@ private:
         << "1.4"
         << "2.9"
         << "0.04"
-        << "1" << "1" << "";
+        << "1"
+        << "1"
+        << "";
     return ws;
   }
 
@@ -177,10 +185,17 @@ public:
     std::vector<std::string> notebookLines;
     boost::split(notebookLines, generatedNotebook, boost::is_any_of("\n"));
     const std::string result[] = {
-        "{", "   \"metadata\" : {", "      \"name\" : \"Mantid Notebook\"",
-        "   },", "   \"nbformat\" : 3,", "   \"nbformat_minor\" : 0,",
-        "   \"worksheets\" : [", "      {", "         \"cells\" : [",
-        "            {", "               \"cell_type\" : \"markdown\",",
+        "{",
+        "   \"metadata\" : {",
+        "      \"name\" : \"Mantid Notebook\"",
+        "   },",
+        "   \"nbformat\" : 3,",
+        "   \"nbformat_minor\" : 0,",
+        "   \"worksheets\" : [",
+        "      {",
+        "         \"cells\" : [",
+        "            {",
+        "               \"cell_type\" : \"markdown\",",
     };
 
     // Check that the first 10 lines are output as expected

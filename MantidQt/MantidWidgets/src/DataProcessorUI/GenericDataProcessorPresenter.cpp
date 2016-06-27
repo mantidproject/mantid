@@ -64,8 +64,8 @@ namespace MantidWidgets {
 */
 GenericDataProcessorPresenter::GenericDataProcessorPresenter(
     const DataProcessorWhiteList &whitelist,
-    const std::map<std::string, DataProcessorPreprocessingAlgorithm> &
-        preprocessMap,
+    const std::map<std::string, DataProcessorPreprocessingAlgorithm>
+        &preprocessMap,
     const DataProcessorProcessingAlgorithm &processor,
     const DataProcessorPostprocessingAlgorithm &postprocessor)
     : WorkspaceObserver(), m_view(nullptr), m_progressView(nullptr),
@@ -1199,8 +1199,9 @@ void GenericDataProcessorPresenter::expandSelection() {
   std::set<int> selection;
 
   for (int i = 0; i < m_model->rowCount(); ++i)
-    if (groupIds.find(m_model->data(m_model->index(i, m_columns - 2))
-                          .toInt()) != groupIds.end())
+    if (groupIds.find(
+            m_model->data(m_model->index(i, m_columns - 2)).toInt()) !=
+        groupIds.end())
       selection.insert(i);
 
   m_view->setSelection(selection);

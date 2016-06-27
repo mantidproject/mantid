@@ -1,11 +1,11 @@
 #ifndef LOADTBLTEST_H_
 #define LOADTBLTEST_H_
 
-#include "cxxtest/TestSuite.h"
-#include "MantidDataHandling/LoadTBL.h"
-#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidDataHandling/LoadTBL.h"
+#include "cxxtest/TestSuite.h"
 #include <Poco/File.h>
 #include <fstream>
 
