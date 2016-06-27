@@ -728,8 +728,13 @@ int Object::procString(const std::string &Line) {
   while (procPair(Ln, RuleList, nullInt)) {
   }
 
-  assert(RuleList.size() == 1);
-  TopRule = std::move((RuleList.begin())->second);
+  if (RuleList.size() == 1) {
+    TopRule = std::move((RuleList.begin())->second);
+  } else {
+    throw std::logic_error("Object::procString() - Unexpected number of "
+                           "surface rules found. Expected=1, found=" +
+                           std::to_string(RuleList.size()));
+  }
   return 1;
 }
 
