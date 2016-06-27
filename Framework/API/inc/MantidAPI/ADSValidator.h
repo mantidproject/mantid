@@ -10,8 +10,6 @@
 namespace Mantid {
 namespace API {
 
-using namespace Mantid::Kernel;
-
 /** ADSValidator : a validator that requires the value of a property to be
     present in the ADS.  The  type must be std::string
 
@@ -44,7 +42,7 @@ public:
                const bool isOptional = false);
 
   /// Clone the validator
-  IValidator_sptr clone() const override;
+  Kernel::IValidator_sptr clone() const override;
 
   bool isMultipleSelectionAllowed() override;
 

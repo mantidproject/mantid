@@ -13,7 +13,7 @@ ADSValidator::ADSValidator(const bool allowMultiSelection,
       m_AllowMultiSelection(allowMultiSelection), m_isOptional(isOptional) {}
 
 /// Clone the validator
-IValidator_sptr ADSValidator::clone() const {
+Kernel::IValidator_sptr ADSValidator::clone() const {
   return boost::make_shared<ADSValidator>(*this);
 }
 
@@ -48,7 +48,7 @@ ADSValidator::checkValidity(const std::vector<std::string> &value) const {
   std::ostringstream os;
   for (std::string wsName : value) {
     if (!ads.doesExist(wsName)) {
-      os << "The workspace \"" << wsName << "\" is not in the workspace list.";
+      os << "The workspace \"" << wsName << "\" is not in the workspace list.\n";
     }
   }
   return os.str();
