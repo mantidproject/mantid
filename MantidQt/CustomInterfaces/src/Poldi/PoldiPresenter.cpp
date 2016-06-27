@@ -92,9 +92,9 @@ void PoldiPresenter::loadDemoTable() {
   // Then populate the table
   std::map<std::string, std::string> firstRow = {
       {"Run(s)", "poldi_data_6904"},
-      {"Expected Peak(s)", "Si"},
-      {"Profile Function", "Gaussian"},
-      {"Number of Peaks", "8"}};
+      {"Expected peak(s)", "Si"},
+      {"Profile function", "Gaussian"},
+      {"Maximum number of peaks", "8"}};
   std::vector<std::map<std::string, std::string>> toTransfer;
   toTransfer.push_back(firstRow);
   m_presenter->transfer(toTransfer);
