@@ -9,7 +9,7 @@ class GeneralDFTProgram(IOmodule):
     """
 
     def __init__(self,filename):
-        super(GeneralDFTProgram,self).__init__()
+        super(GeneralDFTProgram,self).__init__(input_filename=filename, group_name="PhononAB")
 
         self._filename = filename # name of a filename with the phonon data (for example CASTEP: foo.phonon)
 

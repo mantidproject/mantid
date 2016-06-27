@@ -54,6 +54,7 @@ set ( TEST_PY_FILES
       test/VesuvioFittingTest.py
       test/VesuvioProfileTest.py
       test/ReductionSettingsTest.py
+      test/IOmoduleTest.py
       )
 
 
