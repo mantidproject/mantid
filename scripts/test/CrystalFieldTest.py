@@ -41,11 +41,13 @@ class CrystalFieldTests(unittest.TestCase):
         self._do_test_eigensystem(en, wf, ham)
 
     def test_C2v_mol(self):
-        en, wf, ham = energies(1, B20=0.3365, B22=7.4851, B40=0.4062, B42=-3.8296, B44=-2.3210, Bmol=[1, 2, 3])
+        en, wf, ham = energies(1, B20=0.3365, B22=7.4851, B40=0.4062, B42=-3.8296, B44=-2.3210,
+                               BmolX=1.0, BmolY=2.0, BmolZ=3.0)
         self._do_test_eigensystem(en, wf, ham)
 
     def test_C2v_ext(self):
-        en, wf, ham = energies(1, B20=0.3365, B22=7.4851, B40=0.4062, B42=-3.8296, B44=-2.3210, Bext=[1, 2, 3])
+        en, wf, ham = energies(1, B20=0.3365, B22=7.4851, B40=0.4062, B42=-3.8296, B44=-2.3210,
+                               BextX=1.0, BextY=2.0, BextZ=3.0)
         self._do_test_eigensystem(en, wf, ham)
 
     def test_upd3(self):
@@ -59,9 +61,9 @@ class CrystalFieldTests(unittest.TestCase):
             self.assertAlmostEqual(expectedEigenvalues[i], en[i], 1)
         # Now test the eigenvectors by computing the dipole transition matrix elements. Use the magnetic field
         #   terms but divide by gJ*uB (gJ=0.8 for U4+/Pr3+ and uB=0.6715)
-        _, _, hx = energies(2, Bext=[1, 0, 0])
-        _, _, hy = energies(2, Bext=[0, 1, 0])
-        _, _, hz = energies(2, Bext=[0, 0, 1])
+        _, _, hx = energies(2, BextX=1.0)
+        _, _, hy = energies(2, BextY=1.0)
+        _, _, hz = energies(2, BextZ=1.0)
         ix = np.dot(np.conj(np.transpose(wf)), np.dot(hx, wf))
         iy = np.dot(np.conj(np.transpose(wf)), np.dot(hy, wf))
         iz = np.dot(np.conj(np.transpose(wf)), np.dot(hz, wf))
