@@ -35,33 +35,32 @@ namespace {
 
 enum class StoreType { Qx, Qy, I, Idev, Other };
 
-bool isCanSASCompliant(bool isStrict, const std::string &input)
-{
-    auto baseRegex = isStrict ? std::regex("[a-z_][a-z0-9_]*")
-                              : std::regex("[A-Za-z_][\\w_]*");
-    return std::regex_match(input, baseRegex);
+bool isCanSASCompliant(bool isStrict, const std::string &input) {
+  auto baseRegex = isStrict ? std::regex("[a-z_][a-z0-9_]*")
+                            : std::regex("[A-Za-z_][\\w_]*");
+  return std::regex_match(input, baseRegex);
 }
 
-void removeSpecialCharacters(std::string &input)
-{
-    std::regex toReplace("[-\\.]");
-    std::string replaceWith("_");
-    input = std::regex_replace(input, toReplace, replaceWith);
+void removeSpecialCharacters(std::string &input) {
+  std::regex toReplace("[-\\.]");
+  std::string replaceWith("_");
+  input = std::regex_replace(input, toReplace, replaceWith);
 }
 
-std::string makeCompliantName(const std::string& input, bool isStrict, std::function<void(std::string&)> captializeStrategy) {
+std::string
+makeCompliantName(const std::string &input, bool isStrict,
+                  std::function<void(std::string &)> captializeStrategy) {
   auto output = input;
   // Check if input is compliant
   if (!isCanSASCompliant(isStrict, output)) {
-      removeSpecialCharacters(output);
-      captializeStrategy(output);
-      // Check if the changes have made it compliant
-      if (!isCanSASCompliant(isStrict, output)) {
-          std::string message
-              = "SaveNXcanSAS: The input " + input
-                + "is not compliant with the NXcanSAS format.";
-          throw std::runtime_error(message);
-      }
+    removeSpecialCharacters(output);
+    captializeStrategy(output);
+    // Check if the changes have made it compliant
+    if (!isCanSASCompliant(isStrict, output)) {
+      std::string message = "SaveNXcanSAS: The input " + input +
+                            "is not compliant with the NXcanSAS format.";
+      throw std::runtime_error(message);
+    }
   }
   return output;
 }
@@ -71,13 +70,11 @@ std::string makeCompliantName(const std::string& input, bool isStrict, std::func
  * "[A-Za-z_][\w_]*"
  * For now "-" is converted to "_", "." is converted to "_", else we throw
  */
-std::string makeCanSASRelaxedName(const std::string &input)
-{
+std::string makeCanSASRelaxedName(const std::string &input) {
   bool isStrict = false;
   auto emptyCapitalizationStrategy = [](std::string &) {};
   return makeCompliantName(input, isStrict, emptyCapitalizationStrategy);
 }
-
 
 template <typename NumT>
 void writeArray1DWithStrAttributes(
@@ -226,11 +223,11 @@ void addDetectors(H5::Group &group, Mantid::API::MatrixWorkspace_sptr workspace,
         continue;
       }
 
-      std::cout << "======================" <<std::endl;
+      std::cout << "======================" << std::endl;
       std::string sasDetectorName =
           sasInstrumentDetectorGroupName + detectorName;
       sasDetectorName = makeCanSASRelaxedName(sasDetectorName);
-      std::cout << "======================" <<std::endl;
+      std::cout << "======================" << std::endl;
       std::cout << sasDetectorName;
       auto instrument = workspace->getInstrument();
       auto component = instrument->getComponentByName(detectorName);
