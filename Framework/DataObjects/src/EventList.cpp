@@ -1628,6 +1628,10 @@ void EventList::setSharedE(const Kernel::cow_ptr<HistogramData::HistogramE> &) {
  * @return reference to the Y vector.
  */
 const MantidVec &EventList::dataY() const {
+  if (!mru)
+    throw std::runtime_error(
+        "'EventList::dataY()' called with no MRU set. This is not allowed.");
+
   // WARNING: counts() is stored in MRU, returning reference fine as long as it
   // stays there.
   return counts().rawData();
@@ -1639,6 +1643,10 @@ const MantidVec &EventList::dataY() const {
  * @return reference to the E vector.
  */
 const MantidVec &EventList::dataE() const {
+  if (!mru)
+    throw std::runtime_error(
+        "'EventList::dataE()' called with no MRU set. This is not allowed.");
+
   // WARNING: countStandardDeviations() is stored in MRU, returning reference
   // fine as long as it stays there.
   return countStandardDeviations().rawData();
