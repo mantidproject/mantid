@@ -1612,14 +1612,12 @@ Kernel::cow_ptr<HistogramData::HistogramY> EventList::sharedY() const {
 Kernel::cow_ptr<HistogramData::HistogramE> EventList::sharedE() const {
   return countStandardDeviations().cowData();
 }
-void EventList::setSharedY(
-    const Kernel::cow_ptr<HistogramData::HistogramY> &) {
+void EventList::setSharedY(const Kernel::cow_ptr<HistogramData::HistogramY> &) {
   throw Mantid::Kernel::Exception::NotImplementedError(
       "This method is not implemented for EventList. Writing to Y is "
       "forbidden.");
 }
-void EventList::setSharedE(
-    const Kernel::cow_ptr<HistogramData::HistogramE> &) {
+void EventList::setSharedE(const Kernel::cow_ptr<HistogramData::HistogramE> &) {
   throw Mantid::Kernel::Exception::NotImplementedError(
       "This method is not implemented for EventList. Writing to E is "
       "forbidden.");
@@ -2424,15 +2422,15 @@ void EventList::generateErrorsHistogram(const MantidVec &Y,
                  static_cast<double (*)(double)>(sqrt));
 
 } //----------------------------------------------------------------------------------
-/** Integrate the events between a range of X values, or all events.
- *
- * @param events :: reference to a vector of events to change.
- * @param minX :: minimum X bin to use in integrating.
- * @param maxX :: maximum X bin to use in integrating.
- * @param entireRange :: set to true to use the entire range. minX and maxX are
- *then ignored!
- * @return the integrated number of events.
- */
+  /** Integrate the events between a range of X values, or all events.
+   *
+   * @param events :: reference to a vector of events to change.
+   * @param minX :: minimum X bin to use in integrating.
+   * @param maxX :: maximum X bin to use in integrating.
+   * @param entireRange :: set to true to use the entire range. minX and maxX are
+   *then ignored!
+   * @return the integrated number of events.
+   */
 template <class T>
 double EventList::integrateHelper(std::vector<T> &events, const double minX,
                                   const double maxX, const bool entireRange) {
