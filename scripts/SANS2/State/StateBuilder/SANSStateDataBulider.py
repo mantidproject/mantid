@@ -1,8 +1,8 @@
 import copy
 from SANSStateBase import (TypedParameter, is_not_none)
-from Common.SANSConstants import SANSFacility
-from State.SANSStateData import SANSStateDataISIS
-from State.StateBuilder.StateBuilderFunctions import automatic_setters
+from SANS2.Common.SANSConstants import SANSFacility
+from SANS2.State.SANSStateData import SANSStateDataISIS
+from SANS2.State.StateBuilder.StateBuilderFunctions import automatic_setters
 
 
 # ---------------------------------------

@@ -4,10 +4,10 @@ import mantid
 from mantid.kernel import (PropertyManagerProperty, PropertyManager)
 from mantid.api import Algorithm
 
-from State.SANSState import (SANSStateISIS, SANSState)
-from State.SANSStateData import (SANSStateDataISIS, SANSStateData)
-from State.SANSStateMove import (SANSStateMoveLOQ)
-from Common.SANSConstants import SANSConstants
+from SANS2.State.SANSState import (SANSStateISIS, SANSState)
+from SANS2.State.SANSStateData import (SANSStateDataISIS, SANSStateData)
+from SANS2.State.SANSStateMove import (SANSStateMoveLOQ)
+from SANS2.Common.SANSConstants import SANSConstants
 
 
 class SANSStateTest(unittest.TestCase):
@@ -97,21 +97,39 @@ class SANSStateTest(unittest.TestCase):
 
         state.data = data
 
+        # Prepare the move
+        move = SANSStateMoveLOQ()
+        test_value = 12.4
+        test_name = "test_name"
+        move.detectors[SANSConstants.low_angle_bank].x_translation_correction = test_value
+        move.detectors[SANSConstants.high_angle_bank].y_translation_correction = test_value
+        move.detectors[SANSConstants.high_angle_bank].detector_name = test_name
+        move.detectors[SANSConstants.high_angle_bank].detector_name_short = test_name
+        move.detectors[SANSConstants.low_angle_bank].detector_name = test_name
+        move.detectors[SANSConstants.low_angle_bank].detector_name_short = test_name
+        state.move = move
+
         # Act
         serialized = state.property_manager
 
         fake = FakeAlgorithm()
         fake.initialize()
         fake.setProperty("Args", serialized)
-        pmgr = fake.getProperty("Args").value
+        property_manager = fake.getProperty("Args").value
 
         # Assert
         state_2 = SANSStateISIS()
-        state_2.property_manager = pmgr
+        state_2.property_manager = property_manager
+
         self.assertTrue(state_2.data.sample_scatter == ws_name_sample)
         self.assertTrue(state_2.data.sample_scatter_period == period)
         self.assertTrue(state_2.data.can_scatter == ws_name_can)
         self.assertTrue(state_2.data.can_scatter_period == period)
+
+        self.assertTrue(state_2.move.detectors[SANSConstants.low_angle_bank].x_translation_correction == test_value)
+        self.assertTrue(state_2.move.detectors[SANSConstants.high_angle_bank].y_translation_correction == test_value)
+        self.assertTrue(state_2.move.detectors[SANSConstants.high_angle_bank].detector_name == test_name)
+        self.assertTrue(state_2.move.detectors[SANSConstants.high_angle_bank].detector_name_short == test_name)
 
 
 if __name__ == '__main__':

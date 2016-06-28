@@ -3,9 +3,9 @@ import mantid
 from mantid.kernel import (PropertyManagerProperty, PropertyManager)
 from mantid.api import Algorithm
 
-from State.SANSStateMove import (SANSStateMoveLOQ,SANSStateMoveSANS2D, SANSStateMoveLARMOR, SANSStateMove)
-from State.SANSStateSerializer import create_deserialized_sans_state_from_property_manager
-from Common.SANSConstants import SANSConstants
+from SANS2.State.SANSStateMove import (SANSStateMoveLOQ,SANSStateMoveSANS2D, SANSStateMoveLARMOR, SANSStateMove)
+from SANS2.State.SANSStateSerializer import create_deserialized_sans_state_from_property_manager
+from SANS2.Common.SANSConstants import SANSConstants
 
 
 class SANSStateMoveWorkspaceLOQTest(unittest.TestCase):
@@ -233,6 +233,7 @@ class SANSStateMoveWorkspaceLARMORTest(unittest.TestCase):
         # Assert
         state_2 = create_deserialized_sans_state_from_property_manager(pmgr)
         state_2.property_manager = pmgr
+
 
 
 if __name__ == '__main__':

@@ -1,10 +1,11 @@
 import math
 from mantid.api import MatrixWorkspace
 from abc import (ABCMeta, abstractmethod)
-from State.SANSStateMove import (SANSStateMove, SANSStateMoveLOQ)
-from Common.SANSConstants import (SANSInstrument, convert_string_to_sans_instrument,
-                                  CanonicalCoordinates, SANSConstants)
-from Common.SANSFunctions import (create_unmanaged_algorithm, get_single_valued_logs_from_workspace)
+from SANS2.State.SANSStateMove import (SANSStateMove, SANSStateMoveLOQ)
+from SANS2.Common.SANSEnumerations import (SANSInstrument, convert_string_to_sans_instrument,
+                                  CanonicalCoordinates)
+from SANS2.Common.SANSConstants import SANSConstants
+from SANS2.Common.SANSFunctions import (create_unmanaged_algorithm, get_single_valued_logs_from_workspace)
 
 
 # -------------------------------------------------

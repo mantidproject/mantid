@@ -5,8 +5,7 @@ from abc import (ABCMeta, abstractmethod)
 from mantid.api import FileFinder
 from mantid.kernel import (DateAndTime, ConfigService)
 from mantid.api import (AlgorithmManager, ExperimentInfo)
-
-from Common.SANSEnumerations(SANSInstrument, convert_sans_instrument_to_string)
+from SANS2.Common.SANSEnumerations import (SANSInstrument, convert_sans_instrument_to_string)
 
 
 # ------------------------------------

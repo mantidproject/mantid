@@ -3,10 +3,10 @@ import mantid
 
 from mantid.api import AlgorithmManager
 from mantid.kernel import (Quat, V3D)
-from Move.SANSMove import (SANSMoveFactory, SANSMoveLOQ, SANSMoveSANS2D, SANSMoveLARMORNewStyle, SANSMoveLARMOROldStyle)
-from State.SANSStateData import SANSStateDataISIS
-from State.StateBuilder.SANSStateMoveBuilder import get_state_move_builder
-from Common.SANSConstants import SANSConstants
+from SANS.Move.SANSMove import (SANSMoveFactory, SANSMoveLOQ, SANSMoveSANS2D, SANSMoveLARMORNewStyle, SANSMoveLARMOROldStyle)
+from SANS2.State.SANSStateData import SANSStateDataISIS
+from SANS2.State.StateBuilder.SANSStateMoveBuilder import get_state_move_builder
+from SANS2.Common.SANSConstants import SANSConstants
 
 
 def load_workspace(file_name):

@@ -2,7 +2,7 @@ import unittest
 import mantid
 from mantid.kernel import (PropertyManagerProperty, PropertyManager)
 from mantid.api import Algorithm
-from State.SANSStateData import (SANSStateDataISIS, SANSStateData)
+from SANS2.State.SANSStateData import (SANSStateDataISIS, SANSStateData)
 
 
 class SANSStateDataTest(unittest.TestCase):
@@ -140,13 +140,14 @@ class SANSStateDataTest(unittest.TestCase):
         fake = FakeAlgorithm()
         fake.initialize()
         fake.setProperty("Args", serialized)
-        pmgr = fake.getProperty("Args").value
+        property_manager = fake.getProperty("Args").value
 
         # Assert
         self.assertTrue(type(serialized) == dict)
-        self.assertTrue(type(pmgr) == PropertyManager)
+        self.assertTrue(type(property_manager) == PropertyManager)
         state_2 = SANSStateDataISIS()
-        state_2.property_manager = pmgr
+        state_2.property_manager = property_manager
+
         self.assertTrue(state_2.sample_scatter == ws_name_sample)
         self.assertTrue(state_2.sample_scatter_period == period)
         self.assertTrue(state_2.can_scatter == ws_name_can)

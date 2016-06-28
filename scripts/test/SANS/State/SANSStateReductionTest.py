@@ -1,7 +1,7 @@
 import unittest
 import mantid
 
-from State.SANSStateReduction import (SANSStateReductionISIS, SANSReductionType)
+from SANS2.State.SANSStateReduction import (SANSStateReductionISIS, SANSReductionType)
 
 
 class SANSStateDataTest(unittest.TestCase):

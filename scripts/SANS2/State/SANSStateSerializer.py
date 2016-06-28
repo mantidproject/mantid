@@ -1,7 +1,7 @@
 from mantid.kernel import (PropertyManager)
 import inspect
 import importlib
-from State.SANSStateBase import (SANSStateBase, TypedParameter, ClassTypeParameter)
+from SANS2.State.SANSStateBase import (SANSStateBase, TypedParameter, ClassTypeParameter)
 
 
 STATE_NAME = "state_name"
@@ -161,7 +161,7 @@ def set_state_from_property_manager(instance, property_manager):
                 else:
                     sub_dict_value_to_insert = sub_dict_value
                 dict_element.update({sub_dict_key: sub_dict_value_to_insert})
-
+            setattr(instance, key, dict_element)
         elif is_class_type_parameter(value):
             # We need to first get the outer class from the module
             module_name, outer_class_name, class_name = get_module_and_class_name_from_encoded_string(class_type_parameter_id, value)

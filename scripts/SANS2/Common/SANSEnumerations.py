@@ -1,4 +1,4 @@
-from Common.SANSConstants import SANSConstants
+from SANS2.Common.SANSConstants import SANSConstants
 
 
 # -------------------------------------------
@@ -14,6 +14,12 @@ def inner_classes_with_name_space(*inner_classes):
         # Add each inner class to the outer class
         for inner_class in inner_classes:
             new_class = type(inner_class, (cls, ), {"outer_class_name": cls.__name__})
+            # We set the module of the inner class to the module of the outer class. We have to do this since we
+            # are dynamically adding the inner class which gets its module name from the module where it was added,
+            # but not where the outer class lives.
+            module_of_outer_class = getattr(cls, "__module__")
+            setattr(new_class, "__module__", module_of_outer_class)
+            # Add the inner class to the outer class
             setattr(cls, inner_class, new_class)
         return cls
     return inner_class_builder

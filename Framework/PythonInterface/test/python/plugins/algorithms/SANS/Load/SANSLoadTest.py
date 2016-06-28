@@ -4,9 +4,9 @@ import mantid
 from mantid.dataobjects import (Workspace2D, EventWorkspace)
 from mantid.api import (AnalysisDataService, AlgorithmManager, WorkspaceGroup)
 
-
-from Load.SANSLoad import (SANSLoadFactory)
-from State.SANSStateData import (SANSStateDataISIS, SANSDataType)
+from SANS.Load.SANSLoadData import SANSLoadDataFactory
+from SANS2.State.SANSStateData import (SANSStateDataISIS, SANSDataType)
+from SANS2.State.SANSState import SANSStateISIS
 
 
 def remove_all_workspaces_from_ads():
@@ -34,11 +34,13 @@ def compare_workspaces(workspace1, workspace2):
 class SANSLoadFactoryTest(unittest.TestCase):
     def test_that_valid_file_information_does_not_raise(self):
         # Arrange
-        load_factory = SANSLoadFactory()
+        load_factory = SANSLoadDataFactory()
 
-        state = SANSStateDataISIS()
+        data = SANSStateDataISIS()
         ws_name_sample = "SANS2D00022024"
-        state.sample_scatter = ws_name_sample
+        data.sample_scatter = ws_name_sample
+        state = SANSStateISIS()
+        state.data = data
 
         # Act + Assert
         try:
@@ -52,7 +54,7 @@ class SANSLoadFactoryTest(unittest.TestCase):
 class SANSLoaderTest(unittest.TestCase):
     def test_that_can_load_isis_nexus_file_with_histo_data_and_single_period(self):
         # Arrange
-        load_factory = SANSLoadFactory()
+        load_factory = SANSLoadDataFactory()
 
         data_info = SANSStateDataISIS()
         ws_name_sample = "SANS2D00000808"
@@ -61,8 +63,10 @@ class SANSLoaderTest(unittest.TestCase):
         data_info.sample_transmission = ws_name_sample_transmission
         ws_name_sample_direct = "SANS2D00028804"
         data_info.sample_direct = ws_name_sample_direct
+        state = SANSStateISIS()
+        state.data = data_info
 
-        loader = load_factory.create_loader(data_info)
+        loader = load_factory.create_loader(state)
 
         # Act
         workspace, workspace_monitors = loader.execute(data_info, use_loaded=False, publish_to_ads=False)
@@ -89,7 +93,7 @@ class SANSLoaderTest(unittest.TestCase):
 
     def test_that_can_load_raw_file_with_histo_data_and_single_period(self):
         # Arrange
-        load_factory = SANSLoadFactory()
+        load_factory = SANSLoadDataFactory()
 
         data_info = SANSStateDataISIS()
         ws_name_sample = "SANS2D00000808.raw"
@@ -98,8 +102,10 @@ class SANSLoaderTest(unittest.TestCase):
         data_info.sample_transmission = ws_name_sample_transmission
         ws_name_sample_direct = "SANS2D00028804"
         data_info.sample_direct = ws_name_sample_direct
+        state = SANSStateISIS()
+        state.data = data_info
 
-        loader = load_factory.create_loader(data_info)
+        loader = load_factory.create_loader(state)
 
         # Act
         workspace, workspace_monitors = loader.execute(data_info, use_loaded=False, publish_to_ads=False)
@@ -126,12 +132,14 @@ class SANSLoaderTest(unittest.TestCase):
 
     def test_that_can_load_isis_nexus_file_with_histo_data_and_multi_period(self):
         # Arrange
-        load_factory = SANSLoadFactory()
+        load_factory = SANSLoadDataFactory()
 
         data_info = SANSStateDataISIS()
         ws_name_sample = "SANS2D00005512.nxs"
         data_info.sample_scatter = ws_name_sample
-        loader = load_factory.create_loader(data_info)
+        state = SANSStateISIS()
+        state.data = data_info
+        loader = load_factory.create_loader(state)
 
         # Act
         workspace, workspace_monitors = loader.execute(data_info, use_loaded=False, publish_to_ads=False)
@@ -156,13 +164,15 @@ class SANSLoaderTest(unittest.TestCase):
 
     def test_that_can_load_isis_nexus_file_with_histo_data_and_multi_period_and_select_single_period(self):
         # Arrange
-        load_factory = SANSLoadFactory()
+        load_factory = SANSLoadDataFactory()
 
         data_info = SANSStateDataISIS()
         ws_name_sample = "SANS2D00005512.nxs"
         data_info.sample_scatter = ws_name_sample
         data_info.sample_scatter_period = 3
-        loader = load_factory.create_loader(data_info)
+        state = SANSStateISIS()
+        state.data = data_info
+        loader = load_factory.create_loader(state)
 
         # Act
         workspace, workspace_monitors = loader.execute(data_info, use_loaded=False, publish_to_ads=False)
@@ -185,12 +195,14 @@ class SANSLoaderTest(unittest.TestCase):
 
     def test_that_can_load_isis_nexus_file_with_histo_data_and_multi_period_and_add_to_ads(self):
         # Arrange
-        load_factory = SANSLoadFactory()
+        load_factory = SANSLoadDataFactory()
 
         data_info = SANSStateDataISIS()
         ws_name_sample = "SANS2D00005512.nxs"
         data_info.sample_scatter = ws_name_sample
-        loader = load_factory.create_loader(data_info)
+        state = SANSStateISIS()
+        state.data = data_info
+        loader = load_factory.create_loader(state)
 
         # Act
         workspace, workspace_monitors = loader.execute(data_info, use_loaded=False, publish_to_ads=True)
@@ -227,7 +239,7 @@ class SANSLoaderTest(unittest.TestCase):
 
     def test_that_can_load_isis_nexus_file_with_event_data_and_single_period(self):
         # Arrange
-        load_factory = SANSLoadFactory()
+        load_factory = SANSLoadDataFactory()
 
         data_info = SANSStateDataISIS()
         ws_name_sample = "SANS2D00028827"
@@ -236,8 +248,9 @@ class SANSLoaderTest(unittest.TestCase):
         data_info.sample_transmission = ws_name_sample_transmission
         ws_name_sample_direct = "SANS2D00028804"
         data_info.sample_direct = ws_name_sample_direct
-
-        loader = load_factory.create_loader(data_info)
+        state = SANSStateISIS()
+        state.data = data_info
+        loader = load_factory.create_loader(state)
 
         # Act
         workspace, workspace_monitors = loader.execute(data_info, use_loaded=False, publish_to_ads=False)

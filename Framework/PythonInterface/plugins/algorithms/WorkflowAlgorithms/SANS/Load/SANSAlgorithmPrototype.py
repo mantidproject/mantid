@@ -3,7 +3,7 @@
 from mantid.simpleapi import *
 from mantid.api import DataProcessorAlgorithm
 from mantid.kernel import Direction, Property, PropertyManagerProperty
-from State.SANSStatePrototype import SANSStatePrototype
+from SANS2.State.SANSStatePrototype import SANSStatePrototype
 
 
 class SANSAlgorithmPrototype(DataProcessorAlgorithm):

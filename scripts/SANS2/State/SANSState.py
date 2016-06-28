@@ -1,11 +1,10 @@
 import json
 import pickle
 import inspect
-from mantid.kernel import PropertyManager
-from State.SANSStateBase import (SANSStateBase, TypedParameter, sans_parameters)
-from State.SANSStateSerializer import(convert_state_to_dict, set_state_from_property_manager)
-from SANSStateData import SANSStateData
-from SANSStateMove import SANSStateMove
+from SANS2.State.SANSStateBase import (SANSStateBase, TypedParameter, sans_parameters)
+from SANS2.State.SANSStateSerializer import(convert_state_to_dict, set_state_from_property_manager)
+from SANS2.State.SANSStateData import SANSStateData
+from SANS2.State.SANSStateMove import SANSStateMove
 
 
 # -----------------------------------------------
@@ -45,7 +44,7 @@ class SANSStateISIS(SANSStateBase, SANSState):
         if not self.data:
             is_invalid.update("SANSStateISIS: The state object needs to include a SANSStateData object.")
         if not self.move:
-            is_invalid.update("SANSStateISIS: The state object needs to include a SANSStateMoveWorkspace object.")
+            is_invalid.update("SANSStateISIS: The state object needs to include a SANSStateMove object.")
 
         if is_invalid:
             raise ValueError("SANSState: There is an issue with your in put. See: {}".format(json.dumps(is_invalid)))

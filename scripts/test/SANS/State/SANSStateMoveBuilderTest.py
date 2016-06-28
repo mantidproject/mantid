@@ -1,9 +1,9 @@
 import unittest
 import mantid
 
-from State.SANSStateData import SANSStateDataISIS
-from State.StateBuilder.SANSStateMoveBuilder import get_state_move_builder
-from Common.SANSConstants import SANSConstants
+from SANS2.State.SANSStateData import SANSStateDataISIS
+from SANS2.State.StateBuilder.SANSStateMoveBuilder import get_state_move_builder
+from SANS2.Common.SANSConstants import SANSConstants
 
 
 class SANSStateMoveBuilderTest(unittest.TestCase):
