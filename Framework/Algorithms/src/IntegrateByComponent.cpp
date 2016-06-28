@@ -15,15 +15,6 @@ DECLARE_ALGORITHM(IntegrateByComponent)
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-IntegrateByComponent::IntegrateByComponent() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-IntegrateByComponent::~IntegrateByComponent() {}
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name

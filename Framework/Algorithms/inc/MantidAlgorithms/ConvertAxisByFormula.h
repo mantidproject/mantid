@@ -32,9 +32,6 @@ namespace Algorithms {
 */
 class DLLExport ConvertAxisByFormula : public API::Algorithm {
 public:
-  ConvertAxisByFormula();
-  ~ConvertAxisByFormula() override;
-
   const std::string name() const override;
   /// Summary of algorithms purpose
   const std::string summary() const override {

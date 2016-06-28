@@ -24,11 +24,6 @@ IMuonAsymmetryCalculator::IMuonAsymmetryCalculator(
     : m_inputWS(inputWS), m_summedPeriods(summedPeriods),
       m_subtractedPeriods(subtractedPeriods) {}
 
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-IMuonAsymmetryCalculator::~IMuonAsymmetryCalculator() {}
-
 /**
 * Sums the specified periods of the input workspace group
 * @param periodsToSum :: [input] List of period indexes (1-based) to be summed

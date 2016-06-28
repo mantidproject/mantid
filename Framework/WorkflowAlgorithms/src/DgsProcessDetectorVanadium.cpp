@@ -19,16 +19,6 @@ namespace WorkflowAlgorithms {
 DECLARE_ALGORITHM(DgsProcessDetectorVanadium)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-DgsProcessDetectorVanadium::DgsProcessDetectorVanadium() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-DgsProcessDetectorVanadium::~DgsProcessDetectorVanadium() {}
-
-//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string DgsProcessDetectorVanadium::name() const {
   return "DgsProcessDetectorVanadium";

@@ -25,7 +25,8 @@ DECLARE_ALGORITHM(IQTransform)
 using namespace Kernel;
 using namespace API;
 
-IQTransform::IQTransform() : API::Algorithm(), m_label(new Units::Label) {
+IQTransform::IQTransform()
+    : API::Algorithm(), m_label(boost::make_shared<Units::Label>()) {
   /* Just for fun, this is implemented as follows....
    * We fill a map below with the transformation name as the key and
    * a function pointer to the method that does the transformation as
@@ -43,8 +44,6 @@ IQTransform::IQTransform() : API::Algorithm(), m_label(new Units::Label) {
   m_transforms["Log-Log"] = &IQTransform::logLog;
   m_transforms["General"] = &IQTransform::general;
 }
-
-IQTransform::~IQTransform() {}
 
 void IQTransform::init() {
   auto wsValidator = boost::make_shared<CompositeValidator>();

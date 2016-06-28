@@ -68,9 +68,6 @@ private:
   Kernel::EnabledWhenProperty *Prop1, *Prop2;
 };
 
-OptimizeCrystalPlacement::OptimizeCrystalPlacement() : Algorithm() {}
-OptimizeCrystalPlacement::~OptimizeCrystalPlacement() {}
-
 void OptimizeCrystalPlacement::init() {
   declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
                       "PeaksWorkspace", "", Direction::Input),

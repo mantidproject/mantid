@@ -23,12 +23,6 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 
 //--------------------------------------------------------------------------
-/** Constructor
- */
-GoniometerAnglesFromPhiRotation::GoniometerAnglesFromPhiRotation()
-    : Algorithm() {}
-
-GoniometerAnglesFromPhiRotation::~GoniometerAnglesFromPhiRotation() {}
 
 void GoniometerAnglesFromPhiRotation::init() {
   declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(

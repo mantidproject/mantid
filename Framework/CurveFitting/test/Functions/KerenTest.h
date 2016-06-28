@@ -10,6 +10,10 @@
 
 using Mantid::CurveFitting::Functions::Keren;
 
+namespace {
+constexpr double TWOPI = 2.0 * M_PI;
+}
+
 /// Test class to test protected methods
 class TestFunction : public Keren {
 public:
@@ -50,15 +54,15 @@ public:
 
     const double field = 100;
     const double larmor =
-        Mantid::PhysicalConstants::MuonGyromagneticRatio * field;
+        Mantid::PhysicalConstants::MuonGyromagneticRatio * field * TWOPI;
     const double delta = larmor * 0.2;
     const double fluct = delta;
 
-    TS_ASSERT_DELTA(function.wrapRelaxation(delta, larmor, fluct, 1.0), 0.0582,
+    TS_ASSERT_DELTA(function.wrapRelaxation(delta, larmor, fluct, 1.0), 0.2057,
                     0.0001);
-    TS_ASSERT_DELTA(function.wrapRelaxation(delta, larmor, fluct, 5.0), 0.1555,
+    TS_ASSERT_DELTA(function.wrapRelaxation(delta, larmor, fluct, 5.0), 0.7261,
                     0.001);
-    TS_ASSERT_DELTA(function.wrapRelaxation(delta, larmor, fluct, 10.0), 0.2753,
+    TS_ASSERT_DELTA(function.wrapRelaxation(delta, larmor, fluct, 10.0), 1.3811,
                     0.001);
   }
 
@@ -68,16 +72,16 @@ public:
 
     const double field = 100;
     const double larmor =
-        Mantid::PhysicalConstants::MuonGyromagneticRatio * field;
+        Mantid::PhysicalConstants::MuonGyromagneticRatio * field * TWOPI;
     const double delta = larmor * 0.2;
     const double fluct = delta;
 
     TS_ASSERT_DELTA(function.wrapPolarization(delta, larmor, fluct, 1.0),
-                    0.9434, 0.001);
+                    0.8141, 0.001);
     TS_ASSERT_DELTA(function.wrapPolarization(delta, larmor, fluct, 5.0),
-                    0.8560, 0.001);
+                    0.4838, 0.001);
     TS_ASSERT_DELTA(function.wrapPolarization(delta, larmor, fluct, 10.0),
-                    0.7594, 0.001);
+                    0.2513, 0.001);
   }
 
   void test_evaluateFunction() {
@@ -85,7 +89,7 @@ public:
     function.initialize();
     const double field = 100;
     const double delta =
-        Mantid::PhysicalConstants::MuonGyromagneticRatio * field * 0.2;
+        Mantid::PhysicalConstants::MuonGyromagneticRatio * field * TWOPI * 0.2;
     const double fluct = delta;
     function.setParameter("A", 1.0);
     function.setParameter("Delta", delta);
@@ -95,7 +99,7 @@ public:
     double x = 1.0;
     double y;
     TS_ASSERT_THROWS_NOTHING(function.wrapFunc1D(&y, &x, 1));
-    TS_ASSERT_DELTA(y, 0.9434, 0.001);
+    TS_ASSERT_DELTA(y, 0.8141, 0.001);
   }
 };
 

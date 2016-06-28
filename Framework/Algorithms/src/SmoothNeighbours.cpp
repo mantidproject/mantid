@@ -643,7 +643,6 @@ void SmoothNeighbours::execWorkspace2D() {
       double weightSquared = weight * weight;
 
       const auto &inSpec = inWS->getSpectrum(inWI);
-      inSpec.lockData();
       const MantidVec &inY = inSpec.readY();
       const MantidVec &inE = inSpec.readE();
       const MantidVec &inX = inSpec.readX();
@@ -663,8 +662,6 @@ void SmoothNeighbours::execWorkspace2D() {
       if (inWS->isHistogramData()) {
         outX[YLength] = inX[YLength];
       }
-
-      inSpec.unlockData();
     } //(each neighbour)
 
     // Now un-square the error, since we summed it in quadrature

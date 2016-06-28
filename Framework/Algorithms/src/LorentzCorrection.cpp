@@ -19,16 +19,6 @@ using Mantid::API::WorkspaceProperty;
 DECLARE_ALGORITHM(LorentzCorrection)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-LorentzCorrection::LorentzCorrection() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-LorentzCorrection::~LorentzCorrection() {}
-
-//----------------------------------------------------------------------------------------------
 
 /// Algorithm's version for identification. @see Algorithm::version
 int LorentzCorrection::version() const { return 1; }

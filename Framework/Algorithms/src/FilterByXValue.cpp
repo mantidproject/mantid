@@ -11,12 +11,6 @@ using namespace Kernel;
 using namespace API;
 using namespace DataObjects;
 
-/// Constructor
-FilterByXValue::FilterByXValue() {}
-
-/// Destructor
-FilterByXValue::~FilterByXValue() {}
-
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string FilterByXValue::name() const { return "FilterByXValue"; }
 /// Algorithm's version for identification. @see Algorithm::version

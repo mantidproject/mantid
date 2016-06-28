@@ -27,13 +27,6 @@ EventWorkspaceMRU::~EventWorkspaceMRU() {
       delete data;
     }
   }
-
-  for (auto &marker : m_markersToDeleteY) {
-    delete marker;
-  }
-  for (auto &marker : m_markersToDeleteE) {
-    delete marker;
-  }
 }
 
 //---------------------------------------------------------------------------
@@ -70,18 +63,6 @@ void EventWorkspaceMRU::ensureEnoughBuffersY(size_t thread_num) const {
 //---------------------------------------------------------------------------
 /// Clear all the data in the MRU buffers
 void EventWorkspaceMRU::clear() {
-  std::lock_guard<std::mutex> _lock(this->m_toDeleteMutex);
-
-  // FIXME: don't clear the locked ones!
-  for (auto &marker : m_markersToDeleteY)
-    if (!marker->m_locked)
-      delete marker;
-  m_markersToDeleteY.clear();
-  for (auto &marker : m_markersToDeleteE)
-    if (!marker->m_locked)
-      delete marker;
-  m_markersToDeleteE.clear();
-
   // Make sure you free up the memory in the MRUs
   for (auto &data : m_bufferedDataY)
     if (data) {
@@ -139,13 +120,7 @@ void EventWorkspaceMRU::insertY(size_t thread_num, HistogramData::Counts data,
   yWithMarker->m_data = std::move(data);
   auto oldData = m_bufferedDataY[thread_num]->insert(yWithMarker);
   // And clear up the memory of the old one, if it is dropping out.
-  if (oldData) {
-    if (oldData->m_locked) {
-      std::lock_guard<std::mutex> _lock(this->m_toDeleteMutex);
-      m_markersToDeleteY.push_back(oldData);
-    } else
-      delete oldData;
-  }
+  delete oldData;
 }
 
 /** Insert a new histogram into the MRU
@@ -164,13 +139,7 @@ void EventWorkspaceMRU::insertE(size_t thread_num,
   eWithMarker->m_data = std::move(data);
   auto oldData = m_bufferedDataE[thread_num]->insert(eWithMarker);
   // And clear up the memory of the old one, if it is dropping out.
-  if (oldData) {
-    if (oldData->m_locked) {
-      std::lock_guard<std::mutex> _lock(this->m_toDeleteMutex);
-      m_markersToDeleteE.push_back(oldData);
-    } else
-      delete oldData;
-  }
+  delete oldData;
 }
 
 /** Delete any entries in the MRU at the given index

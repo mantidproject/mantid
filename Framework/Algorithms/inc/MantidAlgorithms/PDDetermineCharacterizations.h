@@ -45,9 +45,6 @@ namespace Algorithms {
 */
 class DLLExport PDDetermineCharacterizations : public API::Algorithm {
 public:
-  PDDetermineCharacterizations();
-  ~PDDetermineCharacterizations() override;
-
   const std::string name() const override;
   int version() const override;
   const std::string category() const override;

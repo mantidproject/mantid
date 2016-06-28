@@ -18,17 +18,6 @@ namespace Algorithms {
 
 DECLARE_ALGORITHM(EditInstrumentGeometry)
 
-//----------------------------------------------
-//------------------------------------------------
-/** Constructor
- */
-EditInstrumentGeometry::EditInstrumentGeometry() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-EditInstrumentGeometry::~EditInstrumentGeometry() {}
-
 const std::string EditInstrumentGeometry::name() const {
   return "EditInstrumentGeometry";
 }

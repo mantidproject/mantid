@@ -655,32 +655,18 @@ public:
     // OK, we grab data0 from the MRU.
     const auto &inSpec = ew2->getSpectrum(0);
     const auto &inSpec300 = ew2->getSpectrum(300);
-    inSpec.lockData();
-    inSpec300.lockData();
 
     const MantidVec &data0 = inSpec.readY();
     const MantidVec &e300 = inSpec300.readE();
     TS_ASSERT_EQUALS(data0.size(), NUMBINS - 1);
-    MantidVec data0_copy(data0);
-    MantidVec e300_copy(e300);
 
     // Fill up the MRU to make data0 drop off
     for (size_t i = 0; i < 200; i++)
       MantidVec otherData = ew2->readY(i);
 
-    // data0 should not have changed!
-    for (size_t i = 0; i < data0.size(); i++) {
-      TS_ASSERT_EQUALS(data0[i], data0_copy[i]);
-    }
-
-    for (size_t i = 0; i < e300.size(); i++) {
-      TS_ASSERT_EQUALS(e300[i], e300_copy[i]);
-    }
-
-    inSpec.unlockData();
-    inSpec300.unlockData();
-
-    MantidVec otherData = ew2->readY(255);
+    // data0 and e300 are now invalid references!
+    TS_ASSERT_DIFFERS(&data0, &inSpec.readY());
+    TS_ASSERT_DIFFERS(&e300, &inSpec.readE());
 
     // MRU is full
     TS_ASSERT_EQUALS(ew2->MRUSize(), 50);

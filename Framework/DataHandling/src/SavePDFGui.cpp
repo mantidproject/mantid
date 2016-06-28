@@ -17,16 +17,6 @@ using Mantid::API::WorkspaceProperty;
 DECLARE_ALGORITHM(SavePDFGui)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-SavePDFGui::SavePDFGui() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-SavePDFGui::~SavePDFGui() {}
-
-//----------------------------------------------------------------------------------------------
 
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string SavePDFGui::name() const { return "SavePDFGui"; }

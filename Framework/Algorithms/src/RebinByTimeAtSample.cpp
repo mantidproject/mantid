@@ -20,16 +20,6 @@ using namespace Mantid::DataObjects;
 DECLARE_ALGORITHM(RebinByTimeAtSample)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-RebinByTimeAtSample::RebinByTimeAtSample() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-RebinByTimeAtSample::~RebinByTimeAtSample() {}
-
-//----------------------------------------------------------------------------------------------
 
 /// Algorithm's version for identification. @see Algorithm::version
 int RebinByTimeAtSample::version() const { return 1; }

@@ -98,8 +98,6 @@ SCDPanelErrors::SCDPanelErrors()
   SampleOffsets = false;
 }
 
-SCDPanelErrors::~SCDPanelErrors() {}
-
 size_t SCDPanelErrors::nAttributes() const { return m_attrNames.size(); }
 
 std::vector<std::string> SCDPanelErrors::getAttributeNames() const {

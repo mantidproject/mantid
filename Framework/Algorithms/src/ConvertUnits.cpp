@@ -42,9 +42,6 @@ ConvertUnits::ConvertUnits()
     : Algorithm(), m_numberOfSpectra(0), m_distribution(false),
       m_inputEvents(false), m_inputUnit(), m_outputUnit() {}
 
-/// Destructor
-ConvertUnits::~ConvertUnits() {}
-
 /// Initialisation method
 void ConvertUnits::init() {
   auto wsValidator = boost::make_shared<CompositeValidator>();

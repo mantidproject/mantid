@@ -15,6 +15,9 @@ New
 Improved
 ########
 
+- :ref:`FilterEvents <algm-FilterEvents>` now produces output
+  workspaces with the same workspace numbers as specified by the
+  ``SplittersWorkspace``.
 
 Deprecated
 ##########
@@ -27,6 +30,8 @@ Performance
 
 CurveFitting
 ------------
+
+- Added two new minimizers belonging to the trust region family of algorithms: DTRS and More-Sorensen.
 
 Improved
 ########

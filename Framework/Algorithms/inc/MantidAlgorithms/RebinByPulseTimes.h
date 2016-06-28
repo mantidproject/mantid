@@ -33,9 +33,6 @@ namespace Algorithms {
  */
 class DLLExport RebinByPulseTimes : public RebinByTimeBase {
 public:
-  RebinByPulseTimes();
-  ~RebinByPulseTimes() override;
-
   const std::string name() const override;
   /// Summary of algorithms purpose
   const std::string summary() const override {

@@ -10,7 +10,7 @@ from collections import Iterable
 
 from mantid.simpleapi import *
 #pylint: disable=unused-import
-from mantid.kernel import funcreturns
+from mantid.kernel import funcinspect
 #pylint: disable=unused-import
 from mantid import api,geometry,config
 
@@ -28,7 +28,7 @@ class PropDescriptor(object):
     def dependencies(self):
         """Returns the list of other properties names, this property depends on"""
         return []
-#pylint: disable=unused-argument		
+#pylint: disable=unused-argument
     def validate(self,instance, owner):
         """Interface to validate property descriptor,
            provided to check properties interaction before long run
@@ -89,7 +89,7 @@ class AvrgAccuracy(PropDescriptor):
         else:
             return self._accuracy
     def __set__(self,instance,value):
-        """ Set up incident energy or range of energies in various formats 
+        """ Set up incident energy or range of energies in various formats
             or define autoEi"""
         val = int(value)
         if val < 1:
@@ -114,9 +114,9 @@ class AvrgAccuracy(PropDescriptor):
 
             def out(a,b):
                 if mult>1:
-                   return a<b
-                else: 
-                   return false
+                    return a<b
+                else:
+                    return false
             tv = abs(val)
             fin_mult  = 1
             while out(tv,lim):
@@ -160,7 +160,7 @@ class IncidentEnergy(PropDescriptor):
             return self._incident_energy
 #pylint: disable=too-many-branches
     def __set__(self,instance,value):
-        """ Set up incident energy or range of energies in various formats 
+        """ Set up incident energy or range of energies in various formats
             or define autoEi"""
         if value != None:
             if isinstance(value,str):
@@ -241,7 +241,7 @@ class IncidentEnergy(PropDescriptor):
             if self._incident_energy==0:
                 return []
             else:
-               return [self._incident_energy]
+                return [self._incident_energy]
     #
     def get_current(self):
         """ Return current energy out of range of energies"""
@@ -287,15 +287,15 @@ class IncidentEnergy(PropDescriptor):
         # Calculate autoEi
         self._autoEiCalculated = False
         if ei_mon_spec is None:
-            ei_mon_spec = instance.ei_mon_spectra;
+            ei_mon_spec = instance.ei_mon_spectra
         guess_ei_ws = GetAllEi(Workspace=monitor_ws,Monitor1SpecID = ei_mon_spec[0],\
                                Monitor2SpecID = ei_mon_spec[1])
-        guessEi  = guess_ei_ws.readX(0);
+        guessEi  = guess_ei_ws.readX(0)
         fin_ei = []
         for ei in guessEi:
             try:
-                ei_ref,t_peak,monIndex,tZero=GetEi(InputWorkspace=monitor_ws,\
-                                             Monitor1Spec=ei_mon_spec[0], Monitor2Spec=ei_mon_spec[1], EnergyEstimate=ei)
+                ei_ref,_,_,_=GetEi(InputWorkspace=monitor_ws,\
+                                   Monitor1Spec=ei_mon_spec[0], Monitor2Spec=ei_mon_spec[1], EnergyEstimate=ei)
                 fin_ei.append(ei_ref)
 #pylint: disable=broad-except
             except:
@@ -585,7 +585,7 @@ class mon2NormalizationEnergyRange(PropDescriptor):
         en_range = self._relative_range
         if len(en_range) != 2:
             return(False,2,'mon2_normalization_energy_range can be initialized by list of two values only.'
-                  ' Got {0} values'.format(len(range)))
+                   ' Got {0} values'.format(len(range)))
 
         result = (True,0,'')
 
@@ -1010,8 +1010,8 @@ class EiMonSpectra(prop_helpers.ComplexProperty):
         #end if
         if len(val) != 2:
             raise KeyError("ei_mon_spectra may be either tuple defining two spectra "\
-                "lists or string, which can be transformed to such lists. Got {0}"
-                .format(value))
+                           "lists or string, which can be transformed to such lists. Got {0}"
+                           .format(value))
 
         # Handle self-assignment. Otherwise suppose that the values are meaningful
         if val[0] == 'ei-mon1-spec':
@@ -1432,16 +1432,16 @@ class RotationAngle(PropDescriptor):
        property value. If set explicitly to some value,
        the value specified is used and stored in NXSPE files.
     """
-    def __init__(self,MotorLogNamesClass,MotorOffset):
-        self._mot_offset = MotorOffset
+    def __init__(self,MotorLogNamesClass,Motor_Offset):
+        self._mot_offset = Motor_Offset
         self._motor_log = MotorLogNamesClass
-       # user may override value derived
-       # from log, by providing its own value
-       # this value would be used instead of
-       # calculations
+        # user may override value derived
+        # from log, by providing its own value
+        # this value would be used instead of
+        # calculations
         self._own_psi_value = None
-       # user should define workspace, which contain rotation logs
-       # Motor log will be read from this workspace
+        # user should define workspace, which contain rotation logs
+        # Motor log will be read from this workspace
         self._log_ws_name = None
 
     #

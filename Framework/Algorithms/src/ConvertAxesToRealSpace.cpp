@@ -19,16 +19,6 @@ using namespace Mantid::DataObjects;
 DECLARE_ALGORITHM(ConvertAxesToRealSpace)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-ConvertAxesToRealSpace::ConvertAxesToRealSpace() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-ConvertAxesToRealSpace::~ConvertAxesToRealSpace() {}
-
-//----------------------------------------------------------------------------------------------
 
 /// Algorithm's name
 const std::string ConvertAxesToRealSpace::name() const {

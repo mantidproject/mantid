@@ -24,11 +24,8 @@ public:
   /**
    * Constructor.
    * @param the_index :: unique index into the workspace of this data
-   * @param locked :: reference to a bool that will be set to true if
-   *        the marker should NOT be deleted
    */
-  TypeWithMarker(const size_t the_index, bool &locked)
-      : m_index(the_index), m_locked(locked) {}
+  TypeWithMarker(const size_t the_index) : m_index(the_index) {}
   TypeWithMarker(const TypeWithMarker &other) = delete;
   TypeWithMarker &operator=(const TypeWithMarker &other) = delete;
 
@@ -44,10 +41,6 @@ public:
 
   /// Set the unique index value.
   void setIndex(const size_t the_index) { m_index = the_index; }
-
-  /// Locked: can't be deleted. This will point to the EventList's m_lockedMRU
-  /// bool.
-  bool &m_locked;
 };
 
 //============================================================================
@@ -112,13 +105,6 @@ protected:
 
   /// The most-recently-used list of dataE histograms
   mutable std::vector<mru_listE *> m_bufferedDataE;
-
-  /// These markers will be deleted when they are NOT locked
-  mutable std::vector<YWithMarker *> m_markersToDeleteY;
-  mutable std::vector<EWithMarker *> m_markersToDeleteE;
-
-  /// Mutex around accessing m_markersToDelete
-  std::mutex m_toDeleteMutex;
 
   /// Mutex when adding entries in the MRU list
   mutable std::mutex m_changeMruListsMutexE;

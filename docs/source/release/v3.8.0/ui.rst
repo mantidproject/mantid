@@ -29,15 +29,23 @@ Algorithm Toolbox
 Scripting Window
 ################
 
+Progress Reporting
+##################
+
+- The progress reporting for algorithms has been improved, so that the progress is reported correctly when processin workspace groups or multi-period workspaces.
+
+
 Documentation
 #############
+* Added Ragged Workspace as a concept page
+
 
 Bugs Resolved
 -------------
 
 SliceViewer Improvements
 ------------------------
-
+* When opening the sliceviewer, it will default to showing the first two non-integrated dimensions
 |
 
 Full list of

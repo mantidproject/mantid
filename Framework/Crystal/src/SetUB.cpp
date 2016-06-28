@@ -16,16 +16,6 @@ namespace Crystal {
 DECLARE_ALGORITHM(SetUB)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-SetUB::SetUB() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-SetUB::~SetUB() {}
-
-//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string SetUB::name() const { return "SetUB"; }
 
@@ -34,8 +24,6 @@ int SetUB::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string SetUB::category() const { return "Crystal\\UBMatrix"; }
-
-//----------------------------------------------------------------------------------------------
 
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.

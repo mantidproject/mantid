@@ -156,9 +156,6 @@ public:
   void clear(const bool removeDetIDs = true) override;
   void clearUnused();
 
-  void lockData() const override;
-  void unlockData() const override;
-
   void setMRU(EventWorkspaceMRU *newMRU);
 
   EventWorkspaceMRU *getMRU();
@@ -379,9 +376,6 @@ private:
 
   /// Mutex that is locked while sorting an event list
   mutable std::mutex m_sortMutex;
-
-  /// Lock out deletion of items in the MRU
-  mutable bool m_lockedMRU;
 
   template <class T>
   static typename std::vector<T>::const_iterator

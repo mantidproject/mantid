@@ -39,18 +39,6 @@ using boost::bind;
 DECLARE_ALGORITHM(ConvertUnitsUsingDetectorTable)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-ConvertUnitsUsingDetectorTable::ConvertUnitsUsingDetectorTable()
-    : Algorithm(), m_numberOfSpectra(0), m_distribution(false),
-      m_inputEvents(false) {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-ConvertUnitsUsingDetectorTable::~ConvertUnitsUsingDetectorTable() {}
-
-//----------------------------------------------------------------------------------------------
 
 /// Algorithms name for identification. @see Algorithm::name
 const std::string ConvertUnitsUsingDetectorTable::name() const {
@@ -67,7 +55,7 @@ const std::string ConvertUnitsUsingDetectorTable::category() const {
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
 const std::string ConvertUnitsUsingDetectorTable::summary() const {
-  return " *** Warning - This Routine is under development *** \n"
+  return "**Warning - This Routine is under development**\n"
          "Performs a unit change on the X values of a workspace";
 }
 

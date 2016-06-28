@@ -11,16 +11,6 @@ namespace Mantid {
 namespace MDAlgorithms {
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-BoxControllerSettingsAlgorithm::BoxControllerSettingsAlgorithm() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-BoxControllerSettingsAlgorithm::~BoxControllerSettingsAlgorithm() {}
-
-//----------------------------------------------------------------------------------------------
 /** Add Box-controller-specific properties to this algorithm
  *
  * @param SplitInto :: default parameter value

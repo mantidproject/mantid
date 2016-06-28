@@ -387,6 +387,7 @@ set ( TEST_FILES
 	RebinHistogramTest.h
 	RebinParamsValidatorTest.h
 	RegexStringsTest.h
+	ShrinkToFitTest.h
 	SLSQPMinimizerTest.h
 	SobolSequenceTest.h
 	SpecialCoordinateSystemTest.h

@@ -133,11 +133,6 @@ GetDetOffsetsMultiPeaks::GetDetOffsetsMultiPeaks()
       m_useFitWindowTable(false), m_vecFitWindow() {}
 
 //----------------------------------------------------------------------------------------------
-/** Destructor
-  */
-GetDetOffsetsMultiPeaks::~GetDetOffsetsMultiPeaks() {}
-
-//----------------------------------------------------------------------------------------------
 /** Initialisation method. Declares properties to be used in algorithm.
    */
 void GetDetOffsetsMultiPeaks::init() {

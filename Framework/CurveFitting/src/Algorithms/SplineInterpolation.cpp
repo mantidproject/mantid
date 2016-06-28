@@ -24,11 +24,6 @@ SplineInterpolation::SplineInterpolation()
     : m_cspline(boost::make_shared<CubicSpline>()) {}
 
 //----------------------------------------------------------------------------------------------
-/** Destructor
- */
-SplineInterpolation::~SplineInterpolation() {}
-
-//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string SplineInterpolation::name() const {
   return "SplineInterpolation";

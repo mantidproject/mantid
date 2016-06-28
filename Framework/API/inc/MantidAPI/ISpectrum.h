@@ -98,11 +98,6 @@ public:
 
   void setSpectrumNo(specnum_t num);
 
-  // ---------------------------------------------------------
-  virtual void lockData() const;
-  virtual void unlockData() const;
-
-  //-------------------------------------------------------
   bool hasDx() const;
   void resetHasDx();
 

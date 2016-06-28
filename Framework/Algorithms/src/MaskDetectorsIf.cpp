@@ -16,13 +16,6 @@ DECLARE_ALGORITHM(MaskDetectorsIf)
 
 using namespace Kernel;
 
-/// Constructor
-MaskDetectorsIf::MaskDetectorsIf()
-    : API::Algorithm(), value(0.), select_on(false) {}
-
-/// Destructor
-MaskDetectorsIf::~MaskDetectorsIf() {}
-
 /** Initialisation method. Declares properties to be used in algorithm.
  *
  */
@@ -184,13 +177,11 @@ void MaskDetectorsIf::createNewCalFile(const std::string &oldfile,
 }
 
 std::string
-MaskDetectorsIf::allowedValuesStatement(std::vector<std::string> vals) {
+MaskDetectorsIf::allowedValuesStatement(const std::vector<std::string> &vals) {
   std::ostringstream statement;
   statement << "Allowed Values: ";
-  for (size_t i = 0; i < vals.size(); ++i) {
-    statement << vals[i];
-    if (i < vals.size())
-      statement << ", ";
+  for (const auto &val : vals) {
+    statement << val << ", ";
   }
   return statement.str();
 }

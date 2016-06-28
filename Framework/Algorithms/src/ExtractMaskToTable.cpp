@@ -18,16 +18,6 @@ using namespace std;
 DECLARE_ALGORITHM(ExtractMaskToTable)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-ExtractMaskToTable::ExtractMaskToTable() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-ExtractMaskToTable::~ExtractMaskToTable() {}
-
-//----------------------------------------------------------------------------------------------
 /** Declare properties
   */
 void ExtractMaskToTable::init() {

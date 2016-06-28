@@ -49,7 +49,6 @@ namespace MDAlgorithms {
 class DLLExport SlicingAlgorithm : public API::Algorithm {
 public:
   SlicingAlgorithm();
-  ~SlicingAlgorithm() override;
 
   ///@return a string with the character that identifies each dimension in order
   ///(01234)

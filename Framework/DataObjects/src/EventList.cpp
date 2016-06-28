@@ -121,7 +121,7 @@ bool compareEventPulseTimeTOF(const TofEvent &e1, const TofEvent &e2) {
 // EventWorkspace is always histogram data and so is thus EventList
 EventList::EventList()
     : m_histogram(HistogramData::Histogram::XMode::BinEdges), eventType(TOF),
-      order(UNSORTED), mru(nullptr), m_lockedMRU(false) {}
+      order(UNSORTED), mru(nullptr) {}
 
 /** Constructor with a MRU list
  * @param mru :: pointer to the MRU of the parent EventWorkspace
@@ -130,13 +130,13 @@ EventList::EventList()
 EventList::EventList(EventWorkspaceMRU *mru, specnum_t specNo)
     : IEventList(specNo),
       m_histogram(HistogramData::Histogram::XMode::BinEdges), eventType(TOF),
-      order(UNSORTED), mru(mru), m_lockedMRU(false) {}
+      order(UNSORTED), mru(mru) {}
 
 /** Constructor copying from an existing event list
  * @param rhs :: EventList object to copy*/
 EventList::EventList(const EventList &rhs)
     : IEventList(rhs), m_histogram(HistogramData::Histogram::XMode::BinEdges),
-      mru(rhs.mru), m_lockedMRU(false) {
+      mru(rhs.mru) {
   // Call the copy operator to do the job,
   this->operator=(rhs);
 }
@@ -145,7 +145,7 @@ EventList::EventList(const EventList &rhs)
  * @param events :: Vector of TofEvent's */
 EventList::EventList(const std::vector<TofEvent> &events)
     : m_histogram(HistogramData::Histogram::XMode::BinEdges), eventType(TOF),
-      mru(nullptr), m_lockedMRU(false) {
+      mru(nullptr) {
   this->events.assign(events.begin(), events.end());
   this->eventType = TOF;
   this->order = UNSORTED;
@@ -154,8 +154,7 @@ EventList::EventList(const std::vector<TofEvent> &events)
 /** Constructor, taking a vector of events.
  * @param events :: Vector of WeightedEvent's */
 EventList::EventList(const std::vector<WeightedEvent> &events)
-    : m_histogram(HistogramData::Histogram::XMode::BinEdges), mru(nullptr),
-      m_lockedMRU(false) {
+    : m_histogram(HistogramData::Histogram::XMode::BinEdges), mru(nullptr) {
   this->weightedEvents.assign(events.begin(), events.end());
   this->eventType = WEIGHTED;
   this->order = UNSORTED;
@@ -164,8 +163,7 @@ EventList::EventList(const std::vector<WeightedEvent> &events)
 /** Constructor, taking a vector of events.
  * @param events :: Vector of WeightedEventNoTime's */
 EventList::EventList(const std::vector<WeightedEventNoTime> &events)
-    : m_histogram(HistogramData::Histogram::XMode::BinEdges), mru(nullptr),
-      m_lockedMRU(false) {
+    : m_histogram(HistogramData::Histogram::XMode::BinEdges), mru(nullptr) {
   this->weightedEventsNoTime.assign(events.begin(), events.end());
   this->eventType = WEIGHTED_NOTIME;
   this->order = UNSORTED;
@@ -204,9 +202,6 @@ void EventList::createFromHistogram(const ISpectrum *inSpec, bool GenerateZeros,
   // Cached values for later checks
   double inf = std::numeric_limits<double>::infinity();
   double ninf = -inf;
-
-  // For thread safety
-  inSpec->lockData();
 
   // Get the input histogram
   const MantidVec &X = inSpec->readX();
@@ -278,8 +273,6 @@ void EventList::createFromHistogram(const ISpectrum *inSpec, bool GenerateZeros,
   // Manually set that this is sorted by TOF, since it is. This will make it
   // "threadSafe" in other algos.
   this->setSortOrder(TOF_SORT);
-
-  inSpec->unlockData();
 }
 
 // --------------------------------------------------------------------------
@@ -923,17 +916,6 @@ EventWorkspaceMRU *EventList::getMRU() { return mru; }
  * @param num :: number of events that will be in this EventList
  */
 void EventList::reserve(size_t num) { this->events.reserve(num); }
-
-// ---------------------------------------------------------
-/** Lock access to the data so that it does not get deleted while reading.
- * Call this BEFORE readY() and readE().
- */
-void EventList::lockData() const { m_lockedMRU = true; }
-
-/** Unlock access to the data so that it can again get deleted.
- * Call this once you are done with using the Y or E data.
- */
-void EventList::unlockData() const { m_lockedMRU = false; }
 
 // ==============================================================================================
 // --- Sorting functions -----------------------------------------------------

@@ -13,6 +13,7 @@
 
 #include <Poco/ActiveResult.h>
 
+#include <clocale>
 #include <cstdarg>
 
 #ifdef _WIN32
@@ -47,12 +48,10 @@ void NexusErrorFunction(void *data, char *text) {
 /// Default constructor
 FrameworkManagerImpl::FrameworkManagerImpl()
 #ifdef MPI_BUILD
-    : m_mpi_environment()
+    : m_mpi_environment(argc, argv)
 #endif
 {
-  // Mantid only understands English...
-  setGlobalLocaleToAscii();
-  // Setup memory allocation scheme
+  setGlobalNumericLocaleToC();
   Kernel::MemoryOptions::initAllocatorOptions();
 
 #ifdef _WIN32
@@ -83,7 +82,7 @@ FrameworkManagerImpl::FrameworkManagerImpl()
 }
 
 /// Destructor
-FrameworkManagerImpl::~FrameworkManagerImpl() {}
+FrameworkManagerImpl::~FrameworkManagerImpl() = default;
 
 /// Starts asynchronous tasks that are done as part of Start-up.
 void FrameworkManagerImpl::AsynchronousStartupTasks() {
@@ -150,22 +149,18 @@ void FrameworkManagerImpl::loadPluginsUsingKey(const std::string &key) {
 }
 
 /**
- * Set the global locale for all C++ stream operations to use simple ASCII
- * characters.
- * If the system supports it UTF-8 encoding will be used, otherwise the
- * classic C locale is used
+ * Set the numeric formatting category of the C locale to classic C.
  */
-void FrameworkManagerImpl::setGlobalLocaleToAscii() {
-  // This ensures that all subsequent stream operations interpret everything as
-  // simple
-  // ASCII. On systems in the UK and US having this as the system default is not
-  // an issue.
-  // However, systems that have their encoding set differently can see
-  // unexpected behavour when
-  // translating from string->numeral values. One example is floating-point
-  // interpretation in
-  // German where a comma is used instead of a period.
-  std::locale::global(std::locale::classic());
+void FrameworkManagerImpl::setGlobalNumericLocaleToC() {
+  // Some languages, for example German, using different decimal separators.
+  // By default C/C++ operations attempting to extract numbers from a stream
+  // will use the system locale. For those locales where numbers are formatted
+  // differently we see issues, particularly with opencascade, where Mantid
+  // will hang or throw an exception while trying to parse text.
+  //
+  // The following tells all numerical extraction operations to use classic
+  // C as the locale.
+  setlocale(LC_NUMERIC, "C");
 }
 
 /// Silence NeXus output

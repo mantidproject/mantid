@@ -28,10 +28,10 @@ directly:
 This function requires some inputs and allow for some optional
 parameters as well. The minimum set of parameters required are:
 
-- The workspace whose instrument is based on tubes (ws), where the counts in the tube pixels have been integrated
-- Definition of the set of tubes to be calibrated (tubeSet)
-- The position of the known points (knownPositions)
-- The shape of the known points (funcForm). Currently, we accept two shapes identified as 1 for :ref:`Gaussian <func-Gaussian>` and 2 for Edges.
+* The workspace whose instrument is based on tubes (ws), where the counts in the tube pixels have been integrated
+* Definition of the set of tubes to be calibrated (tubeSet)
+* The position of the known points (knownPositions)
+* The shape of the known points (funcForm). Currently, we accept two shapes identified as 1 for :ref:`Gaussian <func-Gaussian>` and 2 for Edges.
 
 Parameter: Workspace
 ####################
@@ -52,10 +52,9 @@ Parameter: tubeSet
 The second step is to define what are the tubes to be calibrated
 (**tubeSet**). This parameter accepts the following inputs:
 
-* As single string that defines a set of tubes 
-  (e.g. MERLIN/door2/tube_1_1), door (e.g. MAPS/A1_window), or the whole instrument (e.g. MAPS)
-* A list of strings (e.g. [MERLIN/door2/tube_1_1, MERLIN/door2/tube_1_2], [MERLIN/door1, MERLIN/door2])
-* A `TubeSpec <TubeSpec>`__ object.
+* As single string that defines a set of tubes (e.g.MERLIN/door2/tube_1_1), door (e.g. MAPS/A1_window), or the whole instrument (e.g. MAPS)
+* A list of strings (e.g. [MERLIN/door2/tube_1_1, MERLIN/door2/tube_1_2], [MERLIN/door1, MERLIN/door2])
+* A `TubeSpec <TubeSpec>`__ object.
 
 .. code:: python
 
@@ -86,7 +85,7 @@ points were measured and the result was:
 .. code:: python
 
       # remember that the origin is in the center of the tube. measured in meters.
-      knownPositions = [-0.50, -0.16, 0.0, 0.16, 0.50] 
+      knownPositions = [-0.50, -0.16, 0.0, 0.16, 0.50]
       # the shape of these points: edge, Gaussian, Gaussian, Gaussian, edge
       funcForm = [2, 1, 1, 1, 2]
 
@@ -113,13 +112,13 @@ those detectors.
 Options
 #######
 
-A more extensive description of the options is found at :ref:`here <api_Calibration>`.
+A more extensive description of the options is found at :ref:`here <api_Calibration>`.
 
 A set of optional parameters are available for the **calibrate**
 function for the sake of flexibility, to improve results.
 
 The calibration heavily depends on the :ref:`estimation of the peaks position
-<Peak position estimation>`,
+<tubecalibintro-peak-pos-estimation>`,
 when this step does not perform well, the calibration provides bad
 results.
 
@@ -158,7 +157,7 @@ Saving the Detector Positions to Text File
       tofile = open(file_path,'w')
       for row in calibTable:
         print >> tofile, row['Detector ID'], row['Detector Position']
-      tofile.close()  
+      tofile.close()
 
 
 .. code:: python
@@ -168,7 +167,7 @@ Saving the Detector Positions to Text File
       det_pos = [ws.getDetector(i).getPos() for i in range(ws.getNumberHistograms()) if not ws.getDetector(i).isMonitor()]
       for det in det_pos:
         print >> tofile, det
-      tofile.close() 
+      tofile.close()
 
 
 Loading Detector Positions From Text File
