@@ -101,7 +101,7 @@ public:
   bool hasDx() const;
   void resetHasDx();
 
-  HistogramData::Histogram histogram() const { return histogramRef(); }
+  virtual HistogramData::Histogram histogram() const { return histogramRef(); }
   template <typename... T> void setHistogram(T &&... data) {
     HistogramData::Histogram histogram(std::forward<T>(data)...);
     checkHistogram(histogram);

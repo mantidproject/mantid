@@ -1496,6 +1496,13 @@ MantidVec *EventList::makeDataE() const {
   return E;
 }
 
+HistogramData::Histogram EventList::histogram() const {
+  HistogramData::Histogram ret(m_histogram);
+  ret.setCounts(counts());
+  ret.setCountStandardDeviations(countStandardDeviations());
+  return ret;
+}
+
 HistogramData::Counts EventList::counts() const {
   if (!mru)
     throw std::runtime_error(

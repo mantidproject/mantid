@@ -327,6 +327,7 @@ public:
                           Mantid::Kernel::Unit *toUnit);
   void convertUnitsQuickly(const double &factor, const double &power);
 
+  HistogramData::Histogram histogram() const override;
   HistogramData::Counts counts() const override;
   HistogramData::CountVariances countVariances() const override;
   HistogramData::CountStandardDeviations
