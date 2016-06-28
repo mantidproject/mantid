@@ -114,9 +114,9 @@ EventWorkspaceMRU::findE(size_t thread_num, size_t index) {
  * @param locked :: locking status of the data
  */
 void EventWorkspaceMRU::insertY(size_t thread_num, HistogramData::Counts data,
-                                const size_t index, bool &locked) {
+                                const size_t index) {
   std::lock_guard<std::mutex> _lock(m_changeMruListsMutexY);
-  auto yWithMarker = new TypeWithMarker<HistogramData::Counts>(index, locked);
+  auto yWithMarker = new TypeWithMarker<HistogramData::Counts>(index);
   yWithMarker->m_data = std::move(data);
   auto oldData = m_bufferedDataY[thread_num]->insert(yWithMarker);
   // And clear up the memory of the old one, if it is dropping out.
@@ -132,10 +132,10 @@ void EventWorkspaceMRU::insertY(size_t thread_num, HistogramData::Counts data,
  */
 void EventWorkspaceMRU::insertE(size_t thread_num,
                                 HistogramData::CountStandardDeviations data,
-                                const size_t index, bool &locked) {
+                                const size_t index) {
   std::lock_guard<std::mutex> _lock(m_changeMruListsMutexE);
   auto eWithMarker =
-      new TypeWithMarker<HistogramData::CountStandardDeviations>(index, locked);
+      new TypeWithMarker<HistogramData::CountStandardDeviations>(index);
   eWithMarker->m_data = std::move(data);
   auto oldData = m_bufferedDataE[thread_num]->insert(eWithMarker);
   // And clear up the memory of the old one, if it is dropping out.

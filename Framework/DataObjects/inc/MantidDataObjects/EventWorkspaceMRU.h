@@ -88,9 +88,9 @@ public:
   HistogramData::Counts findY(size_t thread_num, size_t index);
   HistogramData::CountStandardDeviations findE(size_t thread_num, size_t index);
   void insertY(size_t thread_num, HistogramData::Counts data,
-               const size_t index, bool &locked);
+               const size_t index);
   void insertE(size_t thread_num, HistogramData::CountStandardDeviations data,
-               const size_t index, bool &locked);
+               const size_t index);
 
   void deleteIndex(size_t index);
 

@@ -1524,9 +1524,9 @@ HistogramData::Counts EventList::counts() const {
                             eData.mutableRawData(), skipErrors);
 
     // Lets save it in the MRU
-    mru->insertY(thread, yData, this->m_specNo, this->m_lockedMRU);
+    mru->insertY(thread, yData, this->m_specNo);
     if (!skipErrors) {
-      mru->insertE(thread, eData, this->m_specNo, this->m_lockedMRU);
+      mru->insertE(thread, eData, this->m_specNo);
     }
   }
   return yData;
@@ -1557,7 +1557,7 @@ EventList::countStandardDeviations() const {
     this->generateHistogram(readX(), Y_ignored, eData.mutableRawData());
 
     // Lets save it in the MRU
-    mru->insertE(thread, eData, this->m_specNo, this->m_lockedMRU);
+    mru->insertE(thread, eData, this->m_specNo);
   }
   return eData;
 }
