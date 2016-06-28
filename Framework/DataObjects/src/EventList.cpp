@@ -1510,7 +1510,7 @@ HistogramData::Counts EventList::counts() const {
   HistogramData::Counts yData;
 
   // Is the data in the mrulist?
-  if(mru) {
+  if (mru) {
     mru->ensureEnoughBuffersY(thread);
     yData = mru->findY(thread, this->m_specNo);
   }
@@ -1553,7 +1553,7 @@ EventList::countStandardDeviations() const {
   HistogramData::CountStandardDeviations eData;
 
   // Is the data in the mrulist?
-  if(mru) {
+  if (mru) {
     mru->ensureEnoughBuffersE(thread);
     eData = mru->findE(thread, this->m_specNo);
   }
@@ -1566,7 +1566,7 @@ EventList::countStandardDeviations() const {
     this->generateHistogram(readX(), Y_ignored, eData.mutableRawData());
 
     // Lets save it in the MRU
-    if(mru)
+    if (mru)
       mru->insertE(thread, eData, this->m_specNo);
   }
   return eData;
