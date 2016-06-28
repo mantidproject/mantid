@@ -1504,16 +1504,16 @@ HistogramData::Histogram EventList::histogram() const {
 }
 
 HistogramData::Counts EventList::counts() const {
-  if (!mru)
-    throw std::runtime_error(
-        "'EventList::counts()' called with no MRU set. This is not allowed.");
-
   // This is the thread number from which this function was called.
   int thread = PARALLEL_THREAD_NUMBER;
-  mru->ensureEnoughBuffersY(thread);
+
+  HistogramData::Counts yData;
 
   // Is the data in the mrulist?
-  auto yData = mru->findY(thread, this->m_specNo);
+  if(mru) {
+    mru->ensureEnoughBuffersY(thread);
+    yData = mru->findY(thread, this->m_specNo);
+  }
 
   if (!yData) {
     // Create the MRU object
@@ -1521,7 +1521,6 @@ HistogramData::Counts EventList::counts() const {
 
     // prepare to update the uncertainties
     auto eData = HistogramData::CountStandardDeviations(0);
-    mru->ensureEnoughBuffersE(thread);
 
     // see if E should be calculated;
     bool skipErrors = (eventType == TOF);
@@ -1531,9 +1530,12 @@ HistogramData::Counts EventList::counts() const {
                             eData.mutableRawData(), skipErrors);
 
     // Lets save it in the MRU
-    mru->insertY(thread, yData, this->m_specNo);
-    if (!skipErrors) {
-      mru->insertE(thread, eData, this->m_specNo);
+    if (mru) {
+      mru->insertY(thread, yData, this->m_specNo);
+      if (!skipErrors) {
+        mru->ensureEnoughBuffersE(thread);
+        mru->insertE(thread, eData, this->m_specNo);
+      }
     }
   }
   return yData;
@@ -1545,16 +1547,16 @@ HistogramData::CountVariances EventList::countVariances() const {
 
 HistogramData::CountStandardDeviations
 EventList::countStandardDeviations() const {
-  if (!mru)
-    throw std::runtime_error("'EventList::countStandardDeviations()' called "
-                             "with no MRU set. This is not allowed.");
-
   // This is the thread number from which this function was called.
   int thread = PARALLEL_THREAD_NUMBER;
-  mru->ensureEnoughBuffersE(thread);
+
+  HistogramData::CountStandardDeviations eData;
 
   // Is the data in the mrulist?
-  auto eData = mru->findE(thread, this->m_specNo);
+  if(mru) {
+    mru->ensureEnoughBuffersE(thread);
+    eData = mru->findE(thread, this->m_specNo);
+  }
 
   if (!eData) {
     eData = HistogramData::CountStandardDeviations(0);
@@ -1564,7 +1566,8 @@ EventList::countStandardDeviations() const {
     this->generateHistogram(readX(), Y_ignored, eData.mutableRawData());
 
     // Lets save it in the MRU
-    mru->insertE(thread, eData, this->m_specNo);
+    if(mru)
+      mru->insertE(thread, eData, this->m_specNo);
   }
   return eData;
 }
@@ -1580,9 +1583,17 @@ EventList::frequencyStandardDeviations() const {
                                                     binEdges());
 }
 const HistogramData::HistogramY &EventList::y() const {
+  if (!mru)
+    throw std::runtime_error(
+        "'EventList::y()' called with no MRU set. This is not allowed.");
+
   return counts().data();
 }
 const HistogramData::HistogramE &EventList::e() const {
+  if (!mru)
+    throw std::runtime_error(
+        "'EventList::e()' called with no MRU set. This is not allowed.");
+
   return countStandardDeviations().data();
 }
 HistogramData::HistogramY &EventList::mutableY() {
