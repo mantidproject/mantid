@@ -12,6 +12,7 @@
 #include "MantidPythonInterface/kernel/IsNone.h"
 #include "MantidPythonInterface/kernel/Policies/VectorToNumpy.h"
 #include "MantidPythonInterface/kernel/Converters/MapToPyDictionary.h"
+#include "MantidPythonInterface/kernel/Environment/GlobalInterpreterLock.h"
 
 #include <Poco/Thread.h>
 
@@ -33,9 +34,13 @@ using Mantid::API::IAlgorithm_sptr;
 using Mantid::PythonInterface::AlgorithmIDProxy;
 using Mantid::PythonInterface::isNone;
 using Mantid::PythonInterface::Policies::VectorToNumpy;
+namespace Environment = Mantid::PythonInterface::Environment;
 using namespace boost::python;
 
 namespace {
+
+/// Converter for std::string to python string
+using ToPyString = to_python_value<const std::string &>;
 
 // Global map of the thread ID to the current algorithm object
 using ThreadIDObjectMap = std::unordered_map<long, object>;
@@ -118,8 +123,9 @@ PropertyVector apiOrderedProperties(const IAlgorithm &propMgr) {
 object getInputPropertiesWithMandatoryFirst(IAlgorithm &self) {
   PropertyVector properties(apiOrderedProperties(self));
 
+  Environment::GlobalInterpreterLock gil;
   list names;
-  to_python_value<const std::string &> toPyStr;
+  ToPyString toPyStr;
   for (const auto &prop : properties) {
     if (prop->direction() != Direction::Output) {
       names.append(handle<>(toPyStr(prop->name())));
@@ -135,16 +141,14 @@ object getInputPropertiesWithMandatoryFirst(IAlgorithm &self) {
 * @param self :: A pointer to the python object wrapping and Algorithm.
 * @return A Python list of strings
 */
-PyObject *getAlgorithmPropertiesOrdered(IAlgorithm &self) {
+object getAlgorithmPropertiesOrdered(IAlgorithm &self) {
   PropertyVector properties(apiOrderedProperties(self));
 
-  PropertyVector::const_iterator iend = properties.end();
-  // Build a python list
-  PyObject *names = PyList_New(0);
-  for (PropertyVector::const_iterator itr = properties.begin(); itr != iend;
-       ++itr) {
-    Property *p = *itr;
-    PyList_Append(names, PyBytes_FromString(p->name().c_str()));
+  Environment::GlobalInterpreterLock gil;
+  list names;
+  ToPyString toPyStr;
+  for (const auto & prop : properties) {
+    names.append(handle<>(toPyStr(prop->name())));
   }
   return names;
 }
@@ -154,13 +158,15 @@ PyObject *getAlgorithmPropertiesOrdered(IAlgorithm &self) {
  * @param self :: A pointer to the python object wrapping and Algorithm.
  * @return A Python list of strings
  */
-PyObject *getOutputProperties(IAlgorithm &self) {
+object getOutputProperties(IAlgorithm &self) {
   const PropertyVector &properties(self.getProperties()); // No copy
-  // Build the list
-  PyObject *names = PyList_New(0);
-  for (auto p : properties) {
+
+  Environment::GlobalInterpreterLock gil;
+  list names;
+  ToPyString toPyStr;
+  for (const auto & p : properties) {
     if (p->direction() == Direction::Output) {
-      PyList_Append(names, PyBytes_FromString(p->name().c_str()));
+      names.append(handle<>(toPyStr(p->name())));
     }
   }
   return names;
