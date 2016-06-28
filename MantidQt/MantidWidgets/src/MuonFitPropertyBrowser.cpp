@@ -396,9 +396,10 @@ void MuonFitPropertyBrowser::finishHandle(const IAlgorithm *alg) {
   }
 
   // If fit was simultaneous, insert extra information into params table
+  // and group the output workspaces
   const int nWorkspaces = static_cast<int>(m_workspacesToFit.size());
   if (nWorkspaces > 1) {
-    editTableAfterSimultaneousFit(alg, nWorkspaces);
+    finishAfterSimultaneousFit(alg, nWorkspaces);
   }
 
   FitPropertyBrowser::finishHandle(alg);
@@ -407,16 +408,16 @@ void MuonFitPropertyBrowser::finishHandle(const IAlgorithm *alg) {
 /**
  * After a simultaneous fit, insert extra information into parameters table
  * (i.e. what runs, groups, periods "f0", "f1" etc were)
+ * and group the output workspaces
  * @param fitAlg :: [input] Pointer to fit algorithm that just finished
  * @param nWorkspaces :: [input] Number of workspaces that were fitted
  */
-void MuonFitPropertyBrowser::editTableAfterSimultaneousFit(
+void MuonFitPropertyBrowser::finishAfterSimultaneousFit(
     const Mantid::API::IAlgorithm *fitAlg, const int nWorkspaces) const {
+  AnalysisDataServiceImpl &ads = AnalysisDataService::Instance();
   try {
     const std::string paramTableName = fitAlg->getProperty("OutputParameters");
-    const auto paramTable =
-        AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(
-            paramTableName);
+    const auto paramTable = ads.retrieveWS<ITableWorkspace>(paramTableName);
     if (paramTable) {
       Mantid::API::TableRow f0Row = paramTable->appendRow();
       f0Row << "f0=" + fitAlg->getPropertyValue("InputWorkspace") << 0.0 << 0.0;
@@ -432,6 +433,39 @@ void MuonFitPropertyBrowser::editTableAfterSimultaneousFit(
     // Not a fatal error, but shouldn't happen
     g_log.warning(
         "Could not find output parameters table for simultaneous fit");
+  }
+
+  // Group output together
+  std::string groupName = fitAlg->getPropertyValue("Output");
+  std::string baseName = groupName;
+  if (ads.doesExist(groupName)) {
+    QMessageBox::StandardButton answer =
+        QMessageBox::question(parentWidget(), "Label already exists",
+                              "Label you specified was used for one of the "
+                              "previous fits. Do you want to overwrite it?",
+                              QMessageBox::Yes | QMessageBox::No);
+    if (answer == QMessageBox::Yes) {
+      ads.deepRemoveGroup(groupName);
+    } else {
+      int i = 0;
+      bool exists = true;
+      std::string uniqueName;
+      while (exists) {
+        uniqueName = groupName + '#' + std::to_string(++i);
+        exists = ads.doesExist(uniqueName);
+      }
+      groupName = uniqueName;
+    }
+  }
+
+  // Create a group for label
+  try {
+    ads.add(groupName, boost::make_shared<WorkspaceGroup>());
+    ads.addToGroup(groupName, baseName + "_NormalisedCovarianceMatrix");
+    ads.addToGroup(groupName, baseName + "_Parameters");
+    ads.addToGroup(groupName, baseName + "_Workspaces");
+  } catch (const Mantid::Kernel::Exception::NotFoundError &err) {
+    g_log.warning(err.what());
   }
 }
 

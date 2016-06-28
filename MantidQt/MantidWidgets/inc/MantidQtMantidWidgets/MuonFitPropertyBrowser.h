@@ -96,9 +96,10 @@ private:
   void populateFunctionNames() override;
   /// Check if the workspace can be used in the fit
   bool isWorkspaceValid(Mantid::API::Workspace_sptr) const override;
-  /// After a simultaneous fit, add information to results table
-  void editTableAfterSimultaneousFit(const Mantid::API::IAlgorithm *fitAlg,
-                                     const int nWorkspaces) const;
+  /// After a simultaneous fit, add information to results table and group
+  /// workspaces
+  void finishAfterSimultaneousFit(const Mantid::API::IAlgorithm *fitAlg,
+                                  const int nWorkspaces) const;
   /// Layout for extra widgets
   QVBoxLayout *m_additionalLayout;
   /// Names of workspaces to fit
