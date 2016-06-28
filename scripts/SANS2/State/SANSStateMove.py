@@ -2,7 +2,8 @@ import json
 from SANSStateBase import (SANSStateBase, FloatParameter, DictParameter, ClassTypeParameter, StringParameter,
                            sans_parameters)
 from State.SANSStateSerializer import(convert_state_to_dict, set_state_from_property_manager)
-from Common.SANSConstants import (Coordinates, CanonicalCoordinates, SANSConstants)
+from Common.SANSConstants import (SANSConstants)
+from Common.SANSEnumerations import (Coordinates, CanonicalCoordinates)
 
 
 # ------------------------------------------------

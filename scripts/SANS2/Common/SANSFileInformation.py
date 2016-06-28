@@ -6,7 +6,7 @@ from mantid.api import FileFinder
 from mantid.kernel import (DateAndTime, ConfigService)
 from mantid.api import (AlgorithmManager, ExperimentInfo)
 
-from Common.SANSConstants import (SANSInstrument, convert_sans_instrument_to_string)
+from Common.SANSEnumerations(SANSInstrument, convert_sans_instrument_to_string)
 
 
 # ------------------------------------

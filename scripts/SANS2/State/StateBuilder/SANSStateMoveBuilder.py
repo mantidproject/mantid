@@ -1,7 +1,6 @@
 import copy
 
-from State.SANSStateMoveWorkspace import (SANSStateMoveWorkspaceLOQ, SANSStateMoveWorkspaceSANS2D,
-                                          SANSStateMoveWorkspaceLARMOR)
+from State.SANSStateMove import (SANSStateMoveLOQ, SANSStateMoveSANS2D, SANSStateMoveLARMOR)
 from State.StateBuilder.StateBuilderFunctions import automatic_setters
 from Common.SANSFileInformation import (SANSFileInformationFactory, get_instrument_paths_for_sans_file)
 from Common.SANSConstants import (SANSConstants, SANSInstrument)
@@ -55,10 +54,10 @@ def setup_idf_and_ipf_content(move_info, data_info):
 # State builders
 # ---------------------------------------
 class SANSStateMoveLOQBuilder(object):
-    @automatic_setters(SANSStateMoveWorkspaceLOQ, exclusions=["detector_name", "detector_name_short", "monitor_names"])
+    @automatic_setters(SANSStateMoveLOQ, exclusions=["detector_name", "detector_name_short", "monitor_names"])
     def __init__(self, data_info):
         super(SANSStateMoveLOQBuilder, self).__init__()
-        self.state = SANSStateMoveWorkspaceLOQ()
+        self.state = SANSStateMoveLOQ()
         setup_idf_and_ipf_content(self.state, data_info)
 
     def build(self):
@@ -67,10 +66,10 @@ class SANSStateMoveLOQBuilder(object):
 
 
 class SANSStateMoveSANS2DBuilder(object):
-    @automatic_setters(SANSStateMoveWorkspaceSANS2D, exclusions=["detector_name", "detector_name_short", "monitor_names"])
+    @automatic_setters(SANSStateMoveSANS2D, exclusions=["detector_name", "detector_name_short", "monitor_names"])
     def __init__(self, data_info):
         super(SANSStateMoveSANS2DBuilder, self).__init__()
-        self.state = SANSStateMoveWorkspaceSANS2D()
+        self.state = SANSStateMoveSANS2D()
         setup_idf_and_ipf_content(self.state, data_info)
 
     def build(self):
@@ -79,11 +78,11 @@ class SANSStateMoveSANS2DBuilder(object):
 
 
 class SANSStateMoveLARMORBuilder(object):
-        @automatic_setters(SANSStateMoveWorkspaceLARMOR, exclusions=["detector_name",
-                                                                     "detector_name_short", "monitor_names"])
+        @automatic_setters(SANSStateMoveLARMOR, exclusions=["detector_name",
+                                                            "detector_name_short", "monitor_names"])
         def __init__(self, data_info):
             super(SANSStateMoveLARMORBuilder, self).__init__()
-            self.state = SANSStateMoveWorkspaceLARMOR()
+            self.state = SANSStateMoveLARMOR()
             setup_idf_and_ipf_content(self.state, data_info)
 
         def build(self):

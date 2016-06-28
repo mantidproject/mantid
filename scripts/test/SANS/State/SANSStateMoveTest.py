@@ -1,7 +1,10 @@
 import unittest
 import mantid
+from mantid.kernel import (PropertyManagerProperty, PropertyManager)
+from mantid.api import Algorithm
 
 from State.SANSStateMove import (SANSStateMoveLOQ,SANSStateMoveSANS2D, SANSStateMoveLARMOR, SANSStateMove)
+from State.SANSStateSerializer import create_deserialized_sans_state_from_property_manager
 from Common.SANSConstants import SANSConstants
 
 
@@ -201,7 +204,35 @@ class SANSStateMoveWorkspaceLARMORTest(unittest.TestCase):
         self.assertRaises(ValueError, state.validate)
 
     def test_that_property_manager_can_be_generated_from_state_object(self):
-        pass
+        class FakeAlgorithm(Algorithm):
+            def PyInit(self):
+                self.declareProperty(PropertyManagerProperty("Args"))
+
+            def PyExec(self):
+                pass
+        # Arrange
+        state = SANSStateMoveLARMOR()
+        test_value = 12.4
+        test_name = "test_name"
+        state.detectors[SANSConstants.low_angle_bank].x_translation_correction = test_value
+        state.detectors[SANSConstants.high_angle_bank].y_translation_correction = test_value
+
+        state.detectors[SANSConstants.high_angle_bank].detector_name = test_name
+        state.detectors[SANSConstants.high_angle_bank].detector_name_short = test_name
+        state.detectors[SANSConstants.low_angle_bank].detector_name = test_name
+        state.detectors[SANSConstants.low_angle_bank].detector_name_short = test_name
+
+        # Act
+        serialized = state.property_manager
+
+        fake = FakeAlgorithm()
+        fake.initialize()
+        fake.setProperty("Args", serialized)
+        pmgr = fake.getProperty("Args").value
+
+        # Assert
+        state_2 = create_deserialized_sans_state_from_property_manager(pmgr)
+        state_2.property_manager = pmgr
 
 
 if __name__ == '__main__':
