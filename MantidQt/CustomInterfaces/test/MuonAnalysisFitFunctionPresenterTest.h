@@ -34,6 +34,8 @@ public:
   MOCK_METHOD0(clearErrors, void());
   MOCK_METHOD1(setFunction, void(const QString &));
   MOCK_METHOD1(setNumberOfDatasets, void(int));
+  MOCK_METHOD1(updateMultiDatasetParameters,
+               void(const Mantid::API::IFunction &));
 
 private:
   Mantid::API::IFunction_sptr m_func;
@@ -165,7 +167,8 @@ private:
     const auto function = createFunction();
     ON_CALL(*m_fitBrowser, getFunction()).WillByDefault(Return(function));
     EXPECT_CALL(*m_fitBrowser, getFunction()).Times(1);
-    EXPECT_CALL(*m_funcBrowser, updateParameters(testing::Ref(*function)))
+    EXPECT_CALL(*m_funcBrowser,
+                updateMultiDatasetParameters(testing::Ref(*function)))
         .Times(1);
     m_presenter->handleFitFinished(wsName);
   }

@@ -43,12 +43,29 @@ void MuonAnalysisFitFunctionPresenter::doConnect() {
     connect(fitBrowser, SIGNAL(workspacesToFitChanged(int)), this,
             SLOT(updateNumberOfDatasets(int)));
   }
+  setParameterUpdates(true);
+}
+
+/**
+ * Switch signals on/off for updating the function browser
+ * @param on :: [input] On/off for signals and slots
+ */
+void MuonAnalysisFitFunctionPresenter::setParameterUpdates(bool on) {
   if (const QObject *funcBrowser = dynamic_cast<QObject *>(m_funcBrowser)) {
-    connect(funcBrowser, SIGNAL(functionStructureChanged()), this,
-            SLOT(updateFunction()));
-    connect(funcBrowser,
-            SIGNAL(parameterChanged(const QString &, const QString &)), this,
-            SLOT(handleParameterEdited(const QString &, const QString &)));
+    if (on) {
+      connect(funcBrowser, SIGNAL(functionStructureChanged()), this,
+              SLOT(updateFunction()));
+      connect(funcBrowser,
+              SIGNAL(parameterChanged(const QString &, const QString &)), this,
+              SLOT(handleParameterEdited(const QString &, const QString &)));
+    } else {
+      disconnect(funcBrowser, SIGNAL(functionStructureChanged()), this,
+                 SLOT(updateFunction()));
+      disconnect(funcBrowser,
+                 SIGNAL(parameterChanged(const QString &, const QString &)),
+                 this,
+                 SLOT(handleParameterEdited(const QString &, const QString &)));
+    }
   }
 }
 
@@ -85,7 +102,11 @@ void MuonAnalysisFitFunctionPresenter::updateFunctionAndFit(bool sequential) {
 void MuonAnalysisFitFunctionPresenter::handleFitFinished(
     const QString &wsName) {
   const auto function = m_fitBrowser->getFunction();
-  m_funcBrowser->updateParameters(*function);
+  // We are updating function browser from fit browser, so turn off updates to
+  // fit browser when function browser is updated...
+  setParameterUpdates(false);
+  m_funcBrowser->updateMultiDatasetParameters(*function);
+  setParameterUpdates(true); // reset signals and slots
   if (wsName.isEmpty()) {
     // No fitted workspace: a fit was undone so clear the errors
     m_funcBrowser->clearErrors();

@@ -140,7 +140,7 @@ public:
   /// Return the multidomain function if number of datasets is greater than 1
   Mantid::API::IFunction_sptr getGlobalFunction() override;
   /// Update parameter values in the browser to match those of a function.
-  void updateMultiDatasetParameters(const Mantid::API::IFunction &fun);
+  void updateMultiDatasetParameters(const Mantid::API::IFunction &fun) override;
 
   /// Resize the browser's columns
   void setColumnSizes(int s0, int s1, int s2 = -1);

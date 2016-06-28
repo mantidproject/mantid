@@ -66,6 +66,8 @@ public slots:
 private:
   /// Connect signals and slots
   void doConnect();
+  /// Suspend updates to function parameters, or turn back on
+  void setParameterUpdates(bool on);
   /// Non-owning pointer to muon fit property browser
   MantidQt::MantidWidgets::IMuonFitFunctionControl *m_fitBrowser;
   /// Non-owning pointer to function browser widget
