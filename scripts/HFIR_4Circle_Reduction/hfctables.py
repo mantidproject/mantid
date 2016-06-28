@@ -498,6 +498,7 @@ class ProcessTableWidget(tableBase.NTableWidget):
         # some commonly used column index
         self._colIndexKIndex = None
         self._colIndexHKL = None
+        self._colIndexStatus = None
 
         return
 
@@ -689,6 +690,7 @@ class ProcessTableWidget(tableBase.NTableWidget):
         # set up column index
         self._colIndexKIndex = self.TableSetup.index(('K-Index', 'int'))
         self._colIndexHKL = self.TableSetup.index(('HKL', 'str'))
+        self._colIndexStatus = self.TableSetup.index(('Status', 'str'))
 
         return
 
@@ -832,7 +834,7 @@ class ProcessTableWidget(tableBase.NTableWidget):
         for i_row in xrange(num_rows):
             tmp_scan_no = self.get_cell_value(i_row, 0)
             if scan_no == tmp_scan_no:
-                self.update_cell_value(i_row, 2, status)
+                self.update_cell_value(i_row, self._colIndexStatus, status)
                 set_done = True
                 break
         # END-FOR
@@ -854,8 +856,7 @@ class ProcessTableWidget(tableBase.NTableWidget):
         assert isinstance(status, str), 'Status (description) must be a string, but not %s.' % str(type(status))
 
         # Set
-        i_status = self.TableSetup.index(('Status', 'str'))
-        self.update_cell_value(row_number, i_status, status)
+        self.update_cell_value(row_number, self._colIndexStatus, status)
 
         return
 
