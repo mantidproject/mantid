@@ -66,7 +66,7 @@ SliceSelector::SliceSelector(QWidget *parent)
       m_selectedWorkspaceIndex{0} {
   this->observePreDelete(true); // Subscribe to notifications
   Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
-    "Feature", "DynamicPDF->SliceSelector", false);
+      "Feature", "DynamicPDF->SliceSelector", false);
   this->initLayout();
 }
 
