@@ -101,6 +101,8 @@ public slots:
   void periodCombinationStateChanged(int state);
   /// Called when fit type changed
   void fitTypeChanged(bool state);
+  /// Called when group/period box selection changes
+  void checkForMultiGroupPeriodSelection();
 
 signals:
   /// Edited the ws index, start or end fields

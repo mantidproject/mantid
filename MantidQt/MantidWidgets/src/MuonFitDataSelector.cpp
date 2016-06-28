@@ -61,6 +61,10 @@ void MuonFitDataSelector::setUpConnections() {
           SIGNAL(selectedPeriodsChanged()));
   connect(m_ui.txtSimFitLabel, SIGNAL(editingFinished()), this,
           SIGNAL(simulLabelChanged()));
+  connect(this, SIGNAL(selectedGroupsChanged()), this,
+          SLOT(checkForMultiGroupPeriodSelection()));
+  connect(this, SIGNAL(selectedPeriodsChanged()), this,
+          SLOT(checkForMultiGroupPeriodSelection()));
 }
 
 /**
@@ -288,8 +292,6 @@ void MuonFitDataSelector::setNumPeriods(size_t numPeriods) {
       auto checkbox = new QCheckBox(name);
       m_periodBoxes.insert(name, checkbox);
       m_ui.verticalLayoutPeriods->addWidget(checkbox);
-      connect(checkbox, SIGNAL(clicked()), this,
-              SIGNAL(selectedPeriodsChanged()));
     }
   } else if (numPeriods < currentPeriods) {
     // delete the excess
@@ -306,6 +308,13 @@ void MuonFitDataSelector::setNumPeriods(size_t numPeriods) {
       m_periodBoxes.remove(name);
     }
   }
+
+  // Ensure signals connected
+  for (const auto &checkbox : m_periodBoxes) {
+    connect(checkbox, SIGNAL(clicked()), this,
+            SIGNAL(selectedPeriodsChanged()));
+  }
+
   // Always put the combination at the bottom ("-1" = at end)
   m_ui.verticalLayoutPeriods->removeItem(m_ui.horizontalLayoutPeriodsCombine);
   m_ui.verticalLayoutPeriods->insertLayout(-1,
@@ -527,6 +536,7 @@ void MuonFitDataSelector::setPeriodCombination(bool on) {
 void MuonFitDataSelector::periodCombinationStateChanged(int state) {
   m_ui.txtFirst->setEnabled(state == Qt::Checked);
   m_ui.txtSecond->setEnabled(state == Qt::Checked);
+  checkForMultiGroupPeriodSelection();
 }
 
 /**
@@ -586,6 +596,17 @@ void MuonFitDataSelector::setBusyState() {
  */
 QString MuonFitDataSelector::getSimultaneousFitLabel() const {
   return m_ui.txtSimFitLabel->text();
+}
+
+/**
+ * Enable the "Label" textbox if multiple groups or periods are selected.
+ * Called when groups/periods selection changes.
+ */
+void MuonFitDataSelector::checkForMultiGroupPeriodSelection() {
+  const auto groups = getChosenGroups();
+  const auto periods = getPeriodSelections();
+  m_ui.txtSimFitLabel->setEnabled(groups.size() > 1 || periods.size() > 1 ||
+                                  getFitType() == FitType::Simultaneous);
 }
 
 } // namespace MantidWidgets
