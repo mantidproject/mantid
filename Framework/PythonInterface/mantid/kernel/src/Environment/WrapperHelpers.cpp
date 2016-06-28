@@ -24,7 +24,11 @@ namespace Environment {
  */
 bool typeHasAttribute(PyObject *obj, const char *attr) {
   PyObject *cls_dict = obj->ob_type->tp_dict;
+#if PY_VERSION_HEX >= 0x03000000
+  return PyDict_Contains(cls_dict, PyUnicode_FromString(attr)) > 0;
+#else
   return PyDict_Contains(cls_dict, PyBytes_FromString(attr)) > 0;
+#endif
 }
 
 /** Same as above but taking a wrapper reference instead
