@@ -112,7 +112,7 @@ public:
   HistogramData::BinEdgeStandardDeviations binEdgeStandardDeviations() const {
     return histogramRef().binEdgeStandardDeviations();
   }
-  HistogramData::Points points() const { return histogramRef().binEdges(); }
+  HistogramData::Points points() const { return histogramRef().points(); }
   HistogramData::PointStandardDeviations pointStandardDeviations() const {
     return histogramRef().pointStandardDeviations();
   }
