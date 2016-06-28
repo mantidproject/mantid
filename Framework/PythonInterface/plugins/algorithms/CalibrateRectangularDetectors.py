@@ -1,4 +1,6 @@
 #pylint: disable=no-init,invalid-name
+from __future__ import (absolute_import, division, print_function)
+
 from mantid.api import *
 from mantid.kernel import *
 from mantid.simpleapi import *
@@ -170,9 +172,9 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
         """
         Logger("CalibrateRectangularDetector").warning("Loading PreNexus for run %s" % runnumber)
         mykwargs = {}
-        if kwargs.has_key("FilterByTimeStart"):
+        if "FilterByTimeStart" in kwargs:
             mykwargs["ChunkNumber"] = int(kwargs["FilterByTimeStart"])
-        if kwargs.has_key("FilterByTimeStop"):
+        if "FilterByTimeStop" in kwargs:
             mykwargs["TotalChunks"] = int(kwargs["FilterByTimeStop"])
 
         # generate the workspace name
