@@ -5,35 +5,6 @@ from PyQt4.QtCore import QThread
 
 import reduce4circleControl as r4c
 
-class getPostsThread(QThread):
-    def __init__(self, main_window):
-        QThread.__init__(self)
-        self.main_window = main_window
-        print '[DB...Prototype] Thread init...'
-        self.start_time = None
-        self.num_loops = 0
-        self.stopSignal = False
-
-    def __del__(self):
-        self.wait()
-
-    def stop(self):
-        print 'set stop to ', self.stop
-        self.stopSignal = True
-
-    def run(self):
-        if self.start_time is None:
-            self.start_time = datetime.datetime.now()
-
-        while not self.stopSignal:
-            msg = 'loop %d: %s ... %s' % (self.num_loops, (datetime.datetime.now()), str(self.stopSignal))
-            print '....................................', msg
-            self.sleep(1)
-            self.num_loops += 1
-            # self.main_window.ui.label_message.setText(msg)
-
-        return
-
 
 class AddPeaksThread(QThread):
     """
@@ -140,7 +111,8 @@ class IntegratePeaksThread(QThread):
     A thread to integrate peaks
     """
     # signal to emit before a merge/integration status: exp number, scan number, progress, mode
-    peakMergeSignal = QtCore.pyqtSignal(int, int, int, int)
+    peakMergeSignal = QtCore.pyqtSignal(int, int, float, int)
+    errorSignal = QtCore.pyqtSignal(int, int, str)
 
     def __init__(self, main_window, exp_number, row_number_list, mask_det, mask_name, norm_type):
         """
@@ -175,6 +147,7 @@ class IntegratePeaksThread(QThread):
 
         # link signals
         self.peakMergeSignal.connect(self._mainWindow.upate_merge_status)
+        self.errorSignal.connect(self._mainWindow.update_merget_status_error)
 
         return
 
@@ -243,7 +216,7 @@ class IntegratePeaksThread(QThread):
 
             # emit signal for run start (mode 0)
             mode = int(0)
-            self.peakMergeSignal.emit(self._expNumber, scan_number, index, mode)
+            self.peakMergeSignal.emit(self._expNumber, scan_number, float(index), mode)
 
             # merge if not merged
             if merged is False:
@@ -278,6 +251,9 @@ class IntegratePeaksThread(QThread):
                                                                           self._selectedMaskName)
 
             # integrate peak
+            print '[DB...BAD] Normalization: %s; Use Mask = %s, Mask Workspace = %s.' % (
+                self._normalizeType, str(self._maskDetector), self._selectedMaskName
+            )
             status, ret_obj = self._mainWindow._myControl.integrate_scan_peaks(exp=self._expNumber,
                                                                                scan=scan_number,
                                                                                peak_radius=1.0,
@@ -309,10 +285,10 @@ class IntegratePeaksThread(QThread):
             avg_bg_value = self._mainWindow._myControl.estimate_background(pt_dict, background_pt_list)
             intensity_i = self._mainWindow._myControl.simple_integrate_peak(pt_dict, avg_bg_value)
 
-            self.peakMergeSignal.emit(self._expNumber, scan_number, int(intensity_i), 1)
+            mode = 1
+            self.peakMergeSignal.emit(self._expNumber, scan_number, float(intensity_i), mode)
 
-            continue
-
+            """
             # check intensity value
             if intensity_i < 0:
                 # set to status
@@ -329,17 +305,16 @@ class IntegratePeaksThread(QThread):
 
             # set the value to table
             self._mainWindow.ui.tableWidget_mergeScans.set_peak_intensity(row_number, None, intensity_i)
+            """
         # END-FOR
 
-        # pop error message if there is any
-        if len(grand_error_message) > 0:
-            self.pop_one_button_dialog(grand_error_message)
-
+        # terminate the process
+        self.peakMergeSignal.emit(self._expNumber, -1, len(scan_number_list), 2)
         self._mainWindow.ui.tableWidget_mergeScans.select_all_rows(False)
 
         # count time
-        integrate_peak_time_end = time.clock()
-        elapsed = integrate_peak_time_end - integrate_peak_time_start
-        self._mainWindow.ui.statusbar.showMessage('Peak integration is finished in %.2f seconds' % elapsed)
+        #integrate_peak_time_end = time.clock()
+        #elapsed = integrate_peak_time_end - integrate_peak_time_start
+        # self._mainWindow.ui.statusbar.showMessage('Peak integration is finished in %.2f seconds' % elapsed)
 
         return

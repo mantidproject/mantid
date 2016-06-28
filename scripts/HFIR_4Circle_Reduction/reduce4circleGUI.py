@@ -63,9 +63,12 @@ class MainWindow(QtGui.QMainWindow):
         # Make UI scrollable
         if NO_SCROLL is False:
             self._scrollbars = MantidQt.API.WidgetScrollbarDecorator(self)
-            self._scrollbars.setEnabled(True) # Must follow after setupUi(self)!
+            self._scrollbars.setEnabled(True)  # Must follow after setupUi(self)!
 
         self._init_widgets()
+
+        # thread
+        self._myIntegratePeaksThread = None
 
         # Mantid configuration
         self._instrument = str(self.ui.comboBox_instrument.currentText())
@@ -442,11 +445,6 @@ class MainWindow(QtGui.QMainWindow):
         if not status:
             self.pop_one_button_dialog('Unable to get experiment number\n  due to %s.' % str(exp_number))
             return
-
-        # state a thread
-        print '[DB...BAT] Kick of thread'
-        self.get_thread = getPostsThread(self)
-        self.get_thread.start()
 
         # switch to tab-3
         self.ui.tabWidget.setCurrentIndex(MainWindow.TabPage['Calculate UB'])
@@ -1249,7 +1247,8 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.progressBar_mergeScans.setStatusTip('Hello')
 
         # FIXME/NOW - need to split loop to 2 loops; one to read table information, the other to process peak
-        self._myIntegratePeaksThread = IntegratePeaksThread(self, exp_number, row_number_list)
+        self._myIntegratePeaksThread = IntegratePeaksThread(self, exp_number, row_number_list,
+                                                            mask_det, selected_mask, norm_type)
         self._myIntegratePeaksThread.start()
         """
         grand_error_message = ''
@@ -2891,17 +2890,82 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
-    def upate_merge_status(self, exp_number, scan_number, progress, mode):
+    def upate_merge_status(self, exp_number, scan_number, sig_value, mode):
         """
 
         :param exp_number:
         :param scan_number:
-        :param progress:
+        :param sig_value:
         :param mode:
         :return:
         """
+        if mode == 0:
+            # start of processing one peak
+            progress = int(sig_value - 0.5)
+            if progress == 0:
+                # run start
+                self.merge_run_start = time.clock()
+                self.grand_error_message = ''
+
+            print '[DB...BAD] Get scan %d progress %d (%f)' % (scan_number, progress, sig_value)
+            self.ui.progressBar_mergeScans.setValue(progress)
+
+        elif mode == 1:
+            # end of processing one peak
+            intensity = sig_value
+
+            # check intensity value
+            is_error = False
+            if intensity < 0:
+                # set to status
+                error_msg = 'Negative intensity: %.3f' % intensity
+                self.ui.tableWidget_mergeScans.set_status(scan_no=scan_number, status=error_msg)
+                # reset intensity to 0.
+                intensity = 0.
+                is_error = True
+
+            # set the calculated peak intensity to _peakInfoDict
+            status, error_msg = self._myControl.set_peak_intensity(exp_number, scan_number, intensity)
+            if status:
+                # set the value to table
+                self.ui.tableWidget_mergeScans.set_peak_intensity(None, scan_number, intensity)
+                if not is_error:
+                    self.ui.tableWidget_mergeScans.set_status(scan_number, 'Done')
+            else:
+                self.grand_error_message += error_msg + '\n'
+                self.ui.tableWidget_mergeScans.set_status(scan_number, error_msg)
+
+        elif mode == 2:
+            # end of the whole run
+            progress = int(sig_value+0.5)
+            self.ui.progressBar_mergeScans.setValue(progress)
+
+            self.merge_run_end = time.clock()
+
+            elapsed = self.merge_run_end - self.merge_run_start
+            message = 'Peak integration is over. Used %.2f seconds' % elapsed
+
+            self.ui.statusbar.showMessage(message)
+
+            # pop error message if there is any
+            if len(self.grand_error_message) > 0:
+                self.pop_one_button_dialog(self.grand_error_message)
+
+            del self._myIntegratePeaksThread
 
         return
+
+    def update_merget_status_error(self, exp_number, scan_number, error_msg):
+        """
+        blablabla
+        :param exp_number:
+        :param scan_number:
+        :param error_msg:
+        :return:
+        """
+        # TODO/NOW - check and doc!
+
+
 
     def update_peak_added_info(self, int_msg, int_msg2):
         """
