@@ -273,16 +273,20 @@ void MuonFitPropertyBrowser::runFit() {
     }
     m_fitActionUndoFit->setEnabled(true);
 
-    if (AnalysisDataService::Instance().doesExist(
-            wsName + "_NormalisedCovarianceMatrix")) {
-      FrameworkManager::Instance().deleteWorkspace(
-          wsName + "_NormalisedCovarianceMatrix");
-    }
-    if (AnalysisDataService::Instance().doesExist(wsName + "_Parameters")) {
-      FrameworkManager::Instance().deleteWorkspace(wsName + "_Parameters");
-    }
-    if (AnalysisDataService::Instance().doesExist(wsName + "_Workspace")) {
-      FrameworkManager::Instance().deleteWorkspace(wsName + "_Workspace");
+    // Delete any existing results for this workspace, UNLESS we are doing a
+    // simultaneous fit
+    if (m_workspacesToFit.size() < 2) {
+      if (AnalysisDataService::Instance().doesExist(
+              wsName + "_NormalisedCovarianceMatrix")) {
+        FrameworkManager::Instance().deleteWorkspace(
+            wsName + "_NormalisedCovarianceMatrix");
+      }
+      if (AnalysisDataService::Instance().doesExist(wsName + "_Parameters")) {
+        FrameworkManager::Instance().deleteWorkspace(wsName + "_Parameters");
+      }
+      if (AnalysisDataService::Instance().doesExist(wsName + "_Workspace")) {
+        FrameworkManager::Instance().deleteWorkspace(wsName + "_Workspace");
+      }
     }
 
     IAlgorithm_sptr alg = AlgorithmManager::Instance().create("Fit");
