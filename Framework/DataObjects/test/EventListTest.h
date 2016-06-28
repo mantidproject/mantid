@@ -2464,6 +2464,54 @@ public:
     }
     return ret;
   }
+
+  void test_readYE_throws_without_MRU() {
+    EventList el;
+    TS_ASSERT_THROWS(el.readY(), std::runtime_error);
+    TS_ASSERT_THROWS(el.readE(), std::runtime_error);
+  }
+
+  void test_counts_works_without_MRU() {
+    EventList el;
+    TS_ASSERT_THROWS_NOTHING(el.counts());
+    TS_ASSERT_THROWS_NOTHING(el.countStandardDeviations());
+  }
+
+  void test_histogram() {
+    EventList el;
+    el += TofEvent(1);
+    el.setHistogram(HistogramData::BinEdges{0, 2, 4});
+    auto histogram = el.histogram();
+    TS_ASSERT(histogram.sharedY());
+    TS_ASSERT(histogram.sharedE());
+    el += TofEvent(1);
+    el += TofEvent(3);
+    TS_ASSERT_EQUALS(histogram.y()[0], 1.0);
+    TS_ASSERT_EQUALS(histogram.y()[1], 0.0);
+    auto updated = el.histogram();
+    TS_ASSERT_EQUALS(updated.y()[0], 2.0);
+    TS_ASSERT_EQUALS(updated.y()[1], 1.0);
+    TS_ASSERT_EQUALS(updated.e()[0], M_SQRT2);
+    TS_ASSERT_EQUALS(updated.e()[1], 1.0);
+  }
+
+  void test_histogram_no_mru() {
+    EventList el;
+    auto hist1 = el.histogram();
+    auto hist2 = el.histogram();
+    TS_ASSERT_EQUALS(hist1.sharedX(), hist2.sharedX());
+    TS_ASSERT_DIFFERS(hist1.sharedY(), hist2.sharedY());
+    TS_ASSERT_DIFFERS(hist1.sharedE(), hist2.sharedE());
+  }
+
+  void test_setHistogram() {
+    EventList el;
+    HistogramData::Histogram histogram(HistogramData::BinEdges{0, 2, 4});
+    TS_ASSERT_THROWS_NOTHING(el.setHistogram(histogram));
+    TS_ASSERT_EQUALS(el.sharedX(), histogram.sharedX());
+    histogram.setCounts(2);
+    TS_ASSERT_THROWS(el.setHistogram(histogram), std::runtime_error);
+  }
 };
 
 //==========================================================================================
