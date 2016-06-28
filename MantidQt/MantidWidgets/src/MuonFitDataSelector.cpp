@@ -498,6 +498,7 @@ void MuonFitDataSelector::setFitType(IMuonFitDataSelector::FitType type) {
   if (type == FitType::Single) {
     m_ui.rbCoAdd->setEnabled(false);
     m_ui.rbSimultaneous->setEnabled(false);
+    m_ui.txtSimFitLabel->setEnabled(false);
   } else {
     m_ui.rbCoAdd->setEnabled(true);
     m_ui.rbSimultaneous->setEnabled(true);
