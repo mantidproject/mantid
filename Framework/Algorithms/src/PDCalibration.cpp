@@ -265,13 +265,15 @@ void PDCalibration::exec() {
     //       std::cout << std::endl;
 
     //       std::cout << "------------------------------" << std::endl;
-    double difc_cumm = 0.;
-    size_t difc_count = 0;
+    // double difc_cumm = 0.;
+    // size_t difc_count = 0;
+    std::vector<double> d_vec;
+    std::vector<double> tof_vec;
     for (size_t i = 0; i < fittedTable->rowCount(); ++i) {
       // Get peak value
       double centre = fittedTable->getRef<double>("centre", i);
-      double width = fittedTable->getRef<double>("width", i);
-      double height = fittedTable->getRef<double>("height", i);
+      // double width = fittedTable->getRef<double>("width", i);
+      // double height = fittedTable->getRef<double>("height", i);
       double chi2 = fittedTable->getRef<double>("chi2", i);
 
       //         std::cout << "d=" << peaks.inDPos[i]<< " centre old=" <<
@@ -285,19 +287,22 @@ void PDCalibration::exec() {
         //                     << " < " << peaks.inTofWindows[2*i+1] <<
         //                     std::endl;
       } else {
-        double difc = centre / peaks.inDPos[i];
-        difc_cumm += difc;
-        difc_count += 1;
+        // double difc = centre / peaks.inDPos[i];
+        // difc_cumm += difc;
+        // difc_count += 1;
 
         //           std::cout << " new=" << centre << " width=" << width << "
         //           height=" << height
         //                     << " chi2=" << chi2 << " difc=" << difc <<
         //                     std::endl;
+        d_vec.push_back(peaks.inDPos[i]);
+        tof_vec.push_back(centre);
       }
     }
-    if (difc_count > 0) {
-      setCalibrationValues(
-          peaks.detid, (difc_cumm / static_cast<double>(difc_count)), 0., 0.);
+    if (d_vec.size() > 0) {
+      double difcc = 0, t0 = 0, difa = 0;
+      fitDIFCtZeroDIFA(d_vec, tof_vec, difcc, t0, difa);
+      setCalibrationValues(peaks.detid, difcc, difa, t0);
 
       //           std::cout << "avg difc = " <<
       //           (difc_cumm/static_cast<double>(difc_count)) << std::endl;
@@ -328,6 +333,102 @@ struct d_to_tof {
   double difa;
   double tzero;
 };
+}
+
+void PDCalibration::fitDIFCtZeroDIFA(const std::vector<double> &d,
+                                     const std::vector<double> &tof,
+                                     double &difc, double &t0, double &difa) {
+  difc = 0;
+  t0 = 0;
+  difa = 0;
+
+  double sum = 0;
+  double sumX = 0;
+  double sumY = 0;
+  double sumX2 = 0;
+  double sumXY = 0;
+  double sumX2Y = 0;
+  double sumX3 = 0;
+  double sumX4 = 0;
+
+  for (size_t i = 0; i < d.size(); ++i) {
+    sum++;
+    sumX += d[i];
+    sumY += tof[i];
+    sumX2 += d[i] * d[i];
+    sumXY += d[i] * tof[i];
+    sumX2Y += d[i] * d[i] * tof[i];
+    sumX3 += d[i] * d[i] * d[i];
+    sumX4 += d[i] * d[i] * d[i] * d[i];
+  }
+
+  // DIFC only
+  double difc0 = sumXY / sumX2;
+  // std::cout << "difc0 = " << difc0 << '\n';
+
+  // DIFC and t0
+  double determinant = sum * sumX2 - sumX * sumX;
+  double difc1 = (sum * sumXY - sumX * sumY) / determinant;
+  double tZero1 = sumY / sum - difc1 * sumX / sum;
+  // std::cout << "difc1 = " << difc1 << '\n';
+  // std::cout << "tZero1 = " << tZero1 << '\n';
+
+  // DIFC, t0 and DIFA
+  determinant = sum * sumX2 * sumX4 + sumX * sumX3 * sumX2 +
+                sumX2 * sumX * sumX3 - sumX2 * sumX2 * sumX2 -
+                sumX * sumX * sumX4 - sum * sumX3 * sumX3;
+  double tZero2 =
+      (sumY * sumX2 * sumX4 + sumX * sumX3 * sumX2Y + sumX2 * sumXY * sumX3 -
+       sumX2 * sumX2 * sumX2Y - sumX * sumXY * sumX4 - sumY * sumX3 * sumX3) /
+      determinant;
+  double difc2 =
+      (sum * sumXY * sumX4 + sumY * sumX3 * sumX2 + sumX2 * sumX * sumX2Y -
+       sumX2 * sumXY * sumX2 - sumY * sumX * sumX4 - sum * sumX3 * sumX2Y) /
+      determinant;
+  double difa2 =
+      (sum * sumX2 * sumX2Y + sumX * sumXY * sumX2 + sumY * sumX * sumX3 -
+       sumY * sumX2 * sumX2 - sumX * sumX * sumX2Y - sum * sumXY * sumX3) /
+      determinant;
+  // std::cout << "difc2 = " << difc2 << '\n';
+  // std::cout << "tZero2 = " << tZero2 << '\n';
+  // std::cout << "difa2 = " << difa2 << '\n';
+
+  // calculated reduced chi squared for each fit
+  double chisq0 = 0;
+  double chisq1 = 0;
+  double chisq2 = 0;
+  for (size_t i = 0; i < d.size(); ++i) {
+    // difc chi-squared
+    double temp = difc0 * d[i] - tof[i];
+    chisq0 += (temp * temp);
+
+    // difc and t0 chi-squared
+    temp = tZero1 + difc1 * d[i] - tof[i];
+    chisq1 += (temp * temp);
+
+    // difc, t0 and difa chi-squared
+    temp = tZero2 + difc2 * d[i] + difa2 * d[i] * d[i] - tof[i];
+    chisq2 += (temp * temp);
+  }
+
+  chisq0 = chisq0 / (sum - 1);
+  chisq1 = chisq1 / (sum - 2);
+  chisq2 = chisq2 / (sum - 3);
+  // std::cout << "chisq0 = " << chisq0 << '\n';
+  // std::cout << "chisq1 = " << chisq1 << '\n';
+  // std::cout << "chisq2 = " << chisq2 << '\n';
+
+  // choose best one according to chi-squared
+  if ((chisq0 < chisq1) && (chisq0 < chisq2)) {
+    difc = difc0;
+  } else if ((chisq1 < chisq0) && (chisq1 < chisq2)) {
+    difc = difc1;
+    t0 = tZero1;
+  } else {
+    difc = difc2;
+    t0 = tZero2;
+    difa = difa2;
+  }
 }
 
 vector<double>

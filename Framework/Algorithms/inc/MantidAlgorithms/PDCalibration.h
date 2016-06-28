@@ -58,7 +58,8 @@ private:
                                       const double widthMax);
   void setCalibrationValues(const detid_t detid, const double difc,
                             const double difa, const double tzero);
-
+  void fitDIFCtZeroDIFA(const std::vector<double> &d, const std::vector<double> &tof,
+			double &difc, double &t0, double &difa);
   API::MatrixWorkspace_sptr m_uncalibratedWS;
   API::ITableWorkspace_sptr m_calibrationTable;
   std::vector<double> m_peaksInDspacing;
