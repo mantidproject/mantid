@@ -31,7 +31,7 @@ type of discrete rotational diffusion in a circle.
 
 with h = 4.135665616 meV ps.
 
-This function makes up the inelastic part of `DiffRotDiscreteCircle <DiffRotDiscreteCircle>`__.
+This function makes up the inelastic part of :ref:`DiffRotDiscreteCircle <func-DiffRotDiscreteCircle>`.
 
 .. attributes::
 

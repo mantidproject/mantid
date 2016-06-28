@@ -43,8 +43,8 @@ the two fundamental fitting parameters of the structure factor
 The transition rate, expressed in units of energy is :math:`h\tau^{-1}`,
 with h = 4.135665616 meV ps.
 
-This function is a composite of `ElasticDiffRotDiscreteCircle <ElasticDiffRotDiscreteCircle>`__ and
-`InelasticDiffRotDiscreteCircle <InelasticDiffRotDiscreteCircle>`__.
+This function is a composite of :ref:`ElasticDiffRotDiscreteCircle <func-ElasticDiffRotDiscreteCircle>` and
+:ref:`InelasticDiffRotDiscreteCircle <func-InelasticDiffRotDiscreteCircle>`.
 
 When using DiffRotDiscreteCircle, the value of Q can be obtained either
 though the Q attribute or can be calculated from the input workspace using the

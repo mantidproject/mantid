@@ -25,7 +25,7 @@ type of discrete rotational diffusion in a circle.
 
    A_0(Q,r) = \frac{1}{N} \sum_{k=1}^{N} j_0( 2 Q r sin(\frac{\pi k}{N}) )
 
-This function makes up the elastic part of `DiffRotDiscreteCircle <DiffRotDiscreteCircle>`__.
+This function makes up the elastic part of :ref:`DiffRotDiscreteCircle <func-DiffRotDiscreteCircle>`.
 
 .. attributes::
 
