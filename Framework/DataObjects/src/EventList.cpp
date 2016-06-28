@@ -4605,6 +4605,9 @@ HistogramData::Histogram &EventList::mutableHistogramRef() {
 
 void EventList::checkHistogram(
     const HistogramData::Histogram &histogram) const {
+  if (histogram.xMode() != HistogramData::Histogram::XMode::BinEdges)
+    throw std::runtime_error("EventList: setting histogram with storage mode "
+                             "other than BinEdges is not possible");
   if (histogram.sharedY() || histogram.sharedE())
     throw std::runtime_error("EventList: setting histogram data with non-null "
                              "Y or E data is not possible");

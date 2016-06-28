@@ -2511,6 +2511,8 @@ public:
     TS_ASSERT_EQUALS(el.sharedX(), histogram.sharedX());
     histogram.setCounts(2);
     TS_ASSERT_THROWS(el.setHistogram(histogram), std::runtime_error);
+    HistogramData::Histogram points(HistogramData::Points{0, 2});
+    TS_ASSERT_THROWS(el.setHistogram(points), std::runtime_error);
   }
 };
 
