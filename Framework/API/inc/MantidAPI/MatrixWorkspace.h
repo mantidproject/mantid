@@ -194,7 +194,7 @@ public:
     return getSpectrum(index).binEdgeStandardDeviations();
   }
   HistogramData::Points points(const size_t index) const {
-    return getSpectrum(index).binEdges();
+    return getSpectrum(index).points();
   }
   HistogramData::PointStandardDeviations
   pointStandardDeviations(const size_t index) const {
