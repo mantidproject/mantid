@@ -274,7 +274,7 @@ void PDCalibration::exec() {
       double height = fittedTable->getRef<double>("height", i);
       double chi2 = fittedTable->getRef<double>("chi2", i);
 
-      //         std::cout << "d=" << m_peaksInDspacing[i]<< " centre old=" <<
+      //         std::cout << "d=" << peaks.inDPos[i]<< " centre old=" <<
       //         peaks.inTofPos[i];
       if (chi2 > 1.e10) {
         //           std::cout << " failed to fit - chisq" << chi2 << std::endl;
@@ -285,7 +285,7 @@ void PDCalibration::exec() {
         //                     << " < " << peaks.inTofWindows[2*i+1] <<
         //                     std::endl;
       } else {
-        double difc = centre / m_peaksInDspacing[i];
+        double difc = centre / peaks.inDPos[i];
         difc_cumm += difc;
         difc_count += 1;
 
