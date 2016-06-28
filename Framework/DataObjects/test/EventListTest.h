@@ -2479,6 +2479,15 @@ public:
     TS_ASSERT_THROWS_NOTHING(el.countStandardDeviations());
   }
 
+  void test_setPoints_fails() {
+    EventList el;
+    el.setHistogram(HistogramData::BinEdges{0, 2});
+    TS_ASSERT_THROWS_NOTHING(el.setBinEdges(HistogramData::BinEdges{0, 2}));
+    TS_ASSERT_THROWS(el.setPoints(1), std::runtime_error);
+    TS_ASSERT_THROWS(el.setPointVariances(1), std::runtime_error);
+    TS_ASSERT_THROWS(el.setPointStandardDeviations(1), std::runtime_error);
+  }
+
   void test_histogram() {
     EventList el;
     el += TofEvent(1);

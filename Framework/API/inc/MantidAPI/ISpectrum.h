@@ -127,12 +127,15 @@ public:
         std::forward<T>(data)...);
   }
   template <typename... T> void setPoints(T &&... data) {
+    checkWorksWithPoints();
     mutableHistogramRef().setPoints(std::forward<T>(data)...);
   }
   template <typename... T> void setPointVariances(T &&... data) {
+    checkWorksWithPoints();
     mutableHistogramRef().setPointVariances(std::forward<T>(data)...);
   }
   template <typename... T> void setPointStandardDeviations(T &&... data) {
+    checkWorksWithPoints();
     mutableHistogramRef().setPointStandardDeviations(std::forward<T>(data)...);
   }
   virtual HistogramData::Counts counts() const {
@@ -204,6 +207,7 @@ public:
 
 protected:
   virtual void checkHistogram(const HistogramData::Histogram &) const {}
+  virtual void checkWorksWithPoints() const {}
 
   // Copy and move are not public since this is an abstract class, but protected
   // such that derived classes can implement copy and move.

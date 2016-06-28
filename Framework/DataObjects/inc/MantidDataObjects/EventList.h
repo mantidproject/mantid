@@ -347,6 +347,7 @@ public:
 
 protected:
   void checkHistogram(const HistogramData::Histogram &histogram) const override;
+  void checkWorksWithPoints() const override;
 
 private:
   const HistogramData::Histogram &histogramRef() const override {

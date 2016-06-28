@@ -4621,5 +4621,10 @@ void EventList::checkHistogram(
                              "Y or E data is not possible");
 }
 
+void EventList::checkWorksWithPoints() const {
+  throw std::runtime_error("EventList: setting Points as X data is not "
+                           "possible, only BinEdges are supported");
+}
+
 } /// namespace DataObjects
 } /// namespace Mantid
