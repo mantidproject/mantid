@@ -37,8 +37,8 @@ The roots of this set of equations are the numerical coefficients
 :math:`x_{n,l}`.
 
 The fit function DiffSphere has an elastic part modeled by fitting
-function `ElasticDiffSphere <ElasticDiffSphere>`__,
-and an inelastic part modeled by `InelasticDiffSphere <InelasticDiffSphere>`__.
+function :ref:`ElasticDiffSphere <func-ElasticDiffSphere>`,
+and an inelastic part modeled by :ref:`InelasticDiffSphere <func-InelasticDiffSphere>`.
 
 .. attributes::
 

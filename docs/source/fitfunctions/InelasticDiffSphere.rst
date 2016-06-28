@@ -11,7 +11,7 @@ Description
 
 This fitting function models the inelastic part of the dynamics structure factor
 of a particle undergoing continuous diffusion but confined to a spherical volume,
-`DiffSphere <DiffSphere>`__.
+:ref:`DiffSphere <func-DiffSphere>`.
 
 .. math::
 
