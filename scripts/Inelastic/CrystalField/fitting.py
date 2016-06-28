@@ -1,3 +1,4 @@
+import numpy as np
 
 
 class CrystalField(object):
@@ -68,11 +69,13 @@ class CrystalField(object):
 
                         IntensityScaling: A scaling factor for the intensity of each spectrum.
                         FWHM: A default value for the full width at half maximum of the peaks.
+                        Temperature: A temperature "of the spectrum" in Kelvin
         """
         self._ion = Ion
         self._symmetry = Symmetry
         self._toleranceEnergy = 1e-10
         self._toleranceIntensity = 1e-3
+        self._temperature = None
         self._intensityScaling = 1.0
         self._FWHM = 0.0
         self._resolutionModel = None
@@ -88,6 +91,8 @@ class CrystalField(object):
                 self._FWHM = kwargs[key]
             elif key == 'ResolutionModel':
                 self._resolutionModel = kwargs[key]
+            elif key == 'Temperature':
+                self._temperature = kwargs[key]
             else:
                 self._fieldParameters[key] = kwargs[key]
 
@@ -97,6 +102,10 @@ class CrystalField(object):
         self._eigenvectors = None
         self._hamiltonian = None
 
+        # Peak lists
+        self._dirty_peaks = True
+        self._peakList = None
+
         # Spectra
         self._dirty_spectra = True
 
@@ -105,10 +114,45 @@ class CrystalField(object):
         Also store them and the hamiltonian.
         Protected method. Shouldn't be called directly by user code.
         """
-        from energies import energies
-        nre = self.ion_nre_map[self._ion]
-        self._eigenvalues, self._eigenvectors, self._hamiltonian = energies(nre, **self._fieldParameters)
-        self._dirty_eigensystem = False
+        if self._dirty_eigensystem:
+            from energies import energies
+            nre = self.ion_nre_map[self._ion]
+            self._eigenvalues, self._eigenvectors, self._hamiltonian = energies(nre, **self._fieldParameters)
+            self._dirty_eigensystem = False
+
+    def _makePeaksFunction(self, i):
+        """Form a definition string for the CrystalFieldPeaks function
+        :param i: Index of a spectrum.
+        """
+        if self._temperature is None:
+            raise RuntimeError('Temperature must be set.')
+        if isinstance(self._temperature, float) or isinstance(self._temperature, int):
+            if i != 0:
+                raise RuntimeError('Cannot evaluate spectrum %s. Only 1 temperature is given.' % i)
+            temperature = float(self._temperature)
+        else:
+            n = len(self._temperature)
+            if i >= -n and i < n:
+                temperature = float(self._temperature[i])
+            else:
+                raise RuntimeError('Cannot evaluate spectrum %s. Only %s temperatures are given.' % (i, n))
+        s = 'name=CrystalFieldPeaks,Ion=%s,Symmetry=%s,Temperature=%s' % (self._ion, self._symmetry, temperature)
+        s += ',ToleranceEnergy=%s,ToleranceIntensity=%s' % (self._toleranceEnergy, self._toleranceIntensity)
+        s += ',%s' % ','.join(['%s=%s' % item for item in self._fieldParameters.iteritems()])
+        return s
+
+    def _calcPeaksList(self, i):
+        """Calculate a peak list for spectrum i"""
+        if self._dirty_peaks:
+            from mantid.api import AlgorithmManager
+            alg = AlgorithmManager.createUnmanaged('EvaluateFunction')
+            alg.initialize()
+            alg.setChild(True)
+            alg.setProperty('Function',  self._makePeaksFunction(i))
+            del alg['InputWorkspace']
+            alg.setProperty('OutputWorkspace', 'dummy')
+            alg.execute()
+            self._peakList = alg.getProperty('OutputWorkspace').value
 
     @property
     def Ion(self):
@@ -134,6 +178,8 @@ class CrystalField(object):
             raise RuntimeError(msg)
         self._ion = value
         self._dirty_eigensystem = True
+        self._dirty_peaks = True
+        self._dirty_spectra = True
 
     @property
     def Symmetry(self):
@@ -159,6 +205,8 @@ class CrystalField(object):
             raise RuntimeError(msg)
         self._symmetry = value
         self._dirty_eigensystem = True
+        self._dirty_peaks = True
+        self._dirty_spectra = True
 
     @property
     def ToleranceEnergy(self):
@@ -169,6 +217,7 @@ class CrystalField(object):
     def ToleranceEnergy(self, value):
         """Set energy tolerance"""
         self._toleranceEnergy = value
+        self._dirty_peaks = True
         self._dirty_spectra = True
 
     @property
@@ -180,6 +229,27 @@ class CrystalField(object):
     def ToleranceIntensity(self, value):
         """Set intensity tolerance"""
         self._toleranceIntensity = value
+        self._dirty_peaks = True
+        self._dirty_spectra = True
+
+    @property
+    def IntensityScaling(self):
+        return self._intensityScaling
+
+    @IntensityScaling.setter
+    def IntensityScaling(self, value):
+        self._intensityScaling = value
+        self._dirty_peaks = True
+        self._dirty_spectra = True
+
+    @property
+    def Temperature(self):
+        return self._temperature
+
+    @Temperature.setter
+    def Temperature(self, value):
+        self._temperature= value
+        self._dirty_peaks = True
         self._dirty_spectra = True
 
     @property
@@ -191,26 +261,20 @@ class CrystalField(object):
         self._FWHM = value
         self._dirty_spectra = True
 
-    @property
-    def IntensityScaling(self):
-        return self._intensityScaling
-
-    @IntensityScaling.setter
-    def IntensityScaling(self, value):
-        self._intensityScaling = value
-        self._dirty_spectra = True
-
     def getEigenvalues(self):
-        if self._dirty_eigensystem:
-            self._calcEigensystem()
+        self._calcEigensystem()
         return self._eigenvalues
 
     def getEigenvectors(self):
-        if self._dirty_eigensystem:
-            self._calcEigensystem()
+        self._calcEigensystem()
         return self._eigenvectors
 
     def getHamiltonian(self):
-        if self._dirty_eigensystem:
-            self._calcEigensystem()
+        self._calcEigensystem()
         return self._hamiltonian
+
+    def getPeakList(self, i=0):
+        """Get the peak list for spectrum i as a numpy array"""
+        self._calcPeaksList(i)
+        peaks = np.array([self._peakList.column(0), self._peakList.column(10)])
+        return peaks
