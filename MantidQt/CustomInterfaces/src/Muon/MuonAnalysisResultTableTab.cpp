@@ -67,14 +67,18 @@ MuonAnalysisResultTableTab::MuonAnalysisResultTableTab(Ui::MuonAnalysis &uiForm)
   connect(m_uiForm.createTableBtn, SIGNAL(clicked()), this,
           SLOT(onCreateTableClicked()));
 
-  // Enable label combox-box only when sequential fit type selected
+  // Enable relevant label combo-box only when matching fit type selected
   connect(m_uiForm.sequentialFit, SIGNAL(toggled(bool)), m_uiForm.fitLabelCombo,
           SLOT(setEnabled(bool)));
+  connect(m_uiForm.simultaneousFit, SIGNAL(toggled(bool)),
+          m_uiForm.cmbFitLabelSimultaneous, SLOT(setEnabled(bool)));
 
-  // Re-populate tables when fit type or seq. fit label is changed
+  // Re-populate tables when fit type or seq./sim. fit label is changed
   connect(m_uiForm.fitType, SIGNAL(buttonClicked(QAbstractButton *)), this,
           SLOT(populateTables()));
   connect(m_uiForm.fitLabelCombo, SIGNAL(activated(int)), this,
+          SLOT(populateTables()));
+  connect(m_uiForm.cmbFitLabelSimultaneous, SIGNAL(activated(int)), this,
           SLOT(populateTables()));
 }
 
@@ -214,19 +218,21 @@ QStringList MuonAnalysisResultTableTab::getFittedWorkspaces() {
     return getIndividualFitWorkspaces();
   } else if (m_uiForm.fitType->checkedButton() == m_uiForm.sequentialFit) {
     QString selectedLabel = m_uiForm.fitLabelCombo->currentText();
-
-    return getSequentialFitWorkspaces(selectedLabel);
+    return getMultipleFitWorkspaces(selectedLabel, true);
+  } else if (m_uiForm.fitType->checkedButton() == m_uiForm.simultaneousFit) {
+    return getMultipleFitWorkspaces(
+        m_uiForm.cmbFitLabelSimultaneous->currentText(), false);
   } else {
-    throw std::runtime_error("Uknown fit type option");
+    throw std::runtime_error("Unknown fit type option");
   }
 }
 
 /**
- * Returns a list of labels user has made sequential fits for.
- * @return List of labels
+ * Returns a list of labels user has made sequential and simultaneous fits for.
+ * @return Pair of lists of labels: <sequential, simultaneous>
  */
-QStringList MuonAnalysisResultTableTab::getSequentialFitLabels() {
-  QStringList labels;
+std::pair<QStringList, QStringList> MuonAnalysisResultTableTab::getFitLabels() {
+  QStringList seqLabels, simLabels;
 
   std::map<std::string, Workspace_sptr> items =
       AnalysisDataService::Instance().topLevelItems();
@@ -235,29 +241,41 @@ QStringList MuonAnalysisResultTableTab::getSequentialFitLabels() {
     if (it->second->id() != "WorkspaceGroup")
       continue;
 
-    if (it->first.find(MuonSequentialFitDialog::SEQUENTIAL_PREFIX) != 0)
+    if (it->first.find(MuonSequentialFitDialog::SEQUENTIAL_PREFIX) == 0) {
+      std::string label =
+          it->first.substr(MuonSequentialFitDialog::SEQUENTIAL_PREFIX.size());
+      seqLabels << QString::fromStdString(label);
+    } else if (it->first.find(MuonFitPropertyBrowser::SIMULTANEOUS_PREFIX) ==
+               0) {
+      std::string label =
+          it->first.substr(MuonFitPropertyBrowser::SIMULTANEOUS_PREFIX.size());
+      simLabels << QString::fromStdString(label);
+    } else {
       continue;
-
-    std::string label =
-        it->first.substr(MuonSequentialFitDialog::SEQUENTIAL_PREFIX.size());
-
-    labels << QString::fromStdString(label);
+    }
   }
 
-  return labels;
+  return std::make_pair(seqLabels, simLabels);
 }
 
 /**
- * Returns a list of sequentially fitted workspaces names.
- * @param label :: Label to return sequential fits for
+ * Returns a list of sequentially/simultaneously fitted workspaces names.
+ * @param label :: Label to return sequential/simultaneous fits for
+ * @param sequential :: true for sequential, false for simultaneous
  * @return List of workspace base names
  */
 QStringList
-MuonAnalysisResultTableTab::getSequentialFitWorkspaces(const QString &label) {
+MuonAnalysisResultTableTab::getMultipleFitWorkspaces(const QString &label,
+                                                     bool sequential) {
   const AnalysisDataServiceImpl &ads = AnalysisDataService::Instance();
 
-  std::string groupName =
-      MuonSequentialFitDialog::SEQUENTIAL_PREFIX + label.toStdString();
+  const std::string groupName = [&label, &sequential]() {
+    if (sequential) {
+      return MuonSequentialFitDialog::SEQUENTIAL_PREFIX + label.toStdString();
+    } else {
+      return MuonFitPropertyBrowser::SIMULTANEOUS_PREFIX + label.toStdString();
+    }
+  }();
 
   WorkspaceGroup_sptr group;
 
@@ -353,17 +371,21 @@ bool MuonAnalysisResultTableTab::isFittedWs(const std::string &wsName) {
 }
 
 /**
- * Refresh the label list and re-populate the tables.
+ * Refresh the label lists and re-populate the tables.
  */
 void MuonAnalysisResultTableTab::refresh() {
   m_uiForm.individualFit->setChecked(true);
 
-  QStringList labels = getSequentialFitLabels();
+  auto labels = getFitLabels();
 
   m_uiForm.fitLabelCombo->clear();
-  m_uiForm.fitLabelCombo->addItems(labels);
+  m_uiForm.fitLabelCombo->addItems(labels.first);
+  m_uiForm.cmbFitLabelSimultaneous->clear();
+  m_uiForm.cmbFitLabelSimultaneous->addItems(labels.second);
 
   m_uiForm.sequentialFit->setEnabled(m_uiForm.fitLabelCombo->count() != 0);
+  m_uiForm.simultaneousFit->setEnabled(
+      m_uiForm.cmbFitLabelSimultaneous->count() != 0);
 
   populateTables();
 }

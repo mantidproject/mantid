@@ -120,11 +120,11 @@ private:
   /// Returns a list individually fitted workspaces names
   QStringList getIndividualFitWorkspaces();
 
-  /// Returns a list of sequentially fitted workspaces names
-  QStringList getSequentialFitWorkspaces(const QString &label);
+  /// Returns a list of sequentially/simultaneously fitted workspaces names
+  QStringList getMultipleFitWorkspaces(const QString &label, bool sequential);
 
-  /// Returns a list of labels user has made sequential fits for
-  QStringList getSequentialFitLabels();
+  /// Returns a list of labels user has made sequential/simultaneous fits for
+  std::pair<QStringList, QStringList> getFitLabels();
 
   bool haveSameParameters(const QStringList &wsList);
   QStringList getSelectedWs();
