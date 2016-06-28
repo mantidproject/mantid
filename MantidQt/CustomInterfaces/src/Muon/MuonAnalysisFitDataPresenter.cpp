@@ -123,6 +123,10 @@ void MuonAnalysisFitDataPresenter::setAssignedFirstRun(const QString &wsName) {
 void MuonAnalysisFitDataPresenter::createWorkspacesToFit(
     const std::vector<std::string> &names,
     const Mantid::API::Grouping &grouping) const {
+  if (names.empty()) {
+    m_fitBrowser->setWorkspaceNames(QStringList());
+    return;
+  }
 
   // For each name, if not in the ADS, create it
   for (const auto &name : names) {
@@ -141,6 +145,17 @@ void MuonAnalysisFitDataPresenter::createWorkspacesToFit(
       names.begin(), names.end(), std::back_inserter(qNames),
       [](const std::string &s) { return QString::fromStdString(s); });
   m_fitBrowser->setWorkspaceNames(qNames);
+
+  // Quietly update the workspace name set in the fit property browser
+  // (Don't want the signal to change what's selected in the view)
+  auto *fitBrowser = dynamic_cast<QObject *>(m_fitBrowser);
+  if (fitBrowser) {
+    fitBrowser->blockSignals(true);
+  }
+  m_fitBrowser->setWorkspaceName(qNames.first());
+  if (fitBrowser) {
+    fitBrowser->blockSignals(false);
+  }
 }
 
 /**

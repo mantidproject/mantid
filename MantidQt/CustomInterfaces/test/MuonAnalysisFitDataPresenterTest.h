@@ -44,7 +44,9 @@ public:
   MOCK_CONST_METHOD0(getFitType, IMuonFitDataSelector::FitType());
   MOCK_CONST_METHOD0(getInstrumentName, QString());
   MOCK_CONST_METHOD0(getRuns, QString());
-  MOCK_CONST_METHOD0(getSimultaneousFitLabel, QString());
+  QString getSimultaneousFitLabel() const override {
+    return QString("UserSelectedFitLabel");
+  }
 };
 
 /// Mock fit property browser
@@ -173,11 +175,8 @@ public:
   }
 
   void test_handleSimultaneousFitLabelChanged() {
-    const QString label("UserSelectedFitLabel");
-    EXPECT_CALL(*m_dataSelector, getSimultaneousFitLabel())
-        .Times(1)
-        .WillOnce(Return(label));
-    EXPECT_CALL(*m_fitBrowser, setSimultaneousLabel(label.toStdString()))
+    EXPECT_CALL(*m_fitBrowser,
+                setSimultaneousLabel(std::string("UserSelectedFitLabel")))
         .Times(1);
     m_presenter->handleSimultaneousFitLabelChanged();
   }
@@ -232,6 +231,7 @@ private:
     EXPECT_CALL(*m_fitBrowser,
                 setWorkspaceNames(UnorderedElementsAreArray(expectedNames)))
         .Times(1);
+    EXPECT_CALL(*m_fitBrowser, setWorkspaceName(_)).Times(1);
     m_dataLoader.setDeadTimesType(DeadTimesType::FromFile);
     m_presenter->handleSelectedDataChanged(
         grouping, MantidQt::CustomInterfaces::Muon::PlotType::Asymmetry, true);
