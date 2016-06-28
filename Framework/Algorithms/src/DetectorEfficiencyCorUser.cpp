@@ -170,7 +170,6 @@ DetectorEfficiencyCorUser::calculateFormulaValue(const std::string &formula,
  * line,
  * and a vector with energies.
  *  Efficiency = f(Ei-DeltaE) / f(Ei)
- * Hope all compilers supports the NRVO (otherwise will copy the output vector)
  * @param eff0 :: calculated eff0
  * @param formula :: formula to calculate efficiency (parsed from IDF)
  * @param xIn :: Energy bins vector (X axis)
@@ -179,7 +178,8 @@ DetectorEfficiencyCorUser::calculateFormulaValue(const std::string &formula,
 MantidVec DetectorEfficiencyCorUser::calculateEfficiency(
     double eff0, const std::string &formula, const MantidVec &xIn) {
 
-  MantidVec effOut(xIn.size() - 1); // x are bins and have more one value than y
+  // Histogram data: xIn.size() == yIn.size() + 1
+  MantidVec effOut(xIn.size() - 1);
 
   try {
     double e;
@@ -187,24 +187,10 @@ MantidVec DetectorEfficiencyCorUser::calculateEfficiency(
     p.DefineVar("e", &e);
     p.SetExpr(formula);
 
-    // copied from Jaques Ollivier Code
-    bool conditionForEnergy =
-        std::min(std::abs(*std::min_element(xIn.begin(), xIn.end())), m_Ei) <
-        m_Ei;
-
-    auto xIn_it = xIn.cbegin(); // DeltaE
-    auto effOut_it = effOut.begin();
-    for (; effOut_it != effOut.end(); ++xIn_it, ++effOut_it) {
-      if (conditionForEnergy) {
-        // cppcheck cannot see that this is used by reference by muparser
-        e = std::fabs(m_Ei + *xIn_it);
-      } else {
-        // cppcheck cannot see that this is used by reference by muparser
-        // cppcheck-suppress unreadVariable
-        e = std::fabs(m_Ei - *xIn_it);
-      }
+    for (size_t i = 0; i < effOut.size(); ++i) {
+      e = m_Ei - xIn[i];
       double eff = p.Eval();
-      *effOut_it = eff / eff0;
+      effOut[i] = eff / eff0;
     }
     return effOut;
   } catch (mu::Parser::exception_type &e) {
