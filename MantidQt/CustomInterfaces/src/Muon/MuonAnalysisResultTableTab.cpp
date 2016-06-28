@@ -292,11 +292,16 @@ MuonAnalysisResultTableTab::getMultipleFitWorkspaces(const QString &label,
 
   QStringList workspaces;
 
-  for (auto it = wsNames.begin(); it != wsNames.end(); it++) {
-    if (!isFittedWs(*it))
-      continue; // Doesn't pass basic checks
-
-    workspaces << QString::fromStdString(wsBaseName(*it));
+  // Check it passes basic checks
+  for (const auto& name : wsNames) {
+    if (sequential) {
+      if (!isFittedWs(name))
+        continue;
+    } else { // Simultaneous outputs a group
+      if (!isFittedWsGroup(name))
+        continue;
+    }
+    workspaces << QString::fromStdString(wsBaseName(name, !sequential));
   }
 
   return workspaces;
@@ -309,22 +314,22 @@ MuonAnalysisResultTableTab::getMultipleFitWorkspaces(const QString &label,
 QStringList MuonAnalysisResultTableTab::getIndividualFitWorkspaces() {
   QStringList workspaces;
 
-  auto allWorkspaces = AnalysisDataService::Instance().getObjectNames();
+  const auto allWorkspaces = AnalysisDataService::Instance().getObjectNames();
 
-  for (auto it = allWorkspaces.begin(); it != allWorkspaces.end(); it++) {
-    if (!isFittedWs(*it))
+  for (const auto &name : allWorkspaces) {
+    if (!isFittedWs(name))
       continue; // Doesn't pass basic checks
 
     // Ignore sequential fit results
-    if (boost::starts_with(*it, MuonSequentialFitDialog::SEQUENTIAL_PREFIX))
+    if (boost::starts_with(name, MuonSequentialFitDialog::SEQUENTIAL_PREFIX))
       continue;
 
     // Ignore simultaneous fit results
-    if (boost::starts_with(*it, MuonFitPropertyBrowser::SIMULTANEOUS_PREFIX)) {
+    if (boost::starts_with(name, MuonFitPropertyBrowser::SIMULTANEOUS_PREFIX)) {
       continue;
     }
 
-    workspaces << QString::fromStdString(wsBaseName(*it));
+    workspaces << QString::fromStdString(wsBaseName(name));
   }
 
   return workspaces;
@@ -332,12 +337,17 @@ QStringList MuonAnalysisResultTableTab::getIndividualFitWorkspaces() {
 
 /**
  * Returns name of the fitted workspace with WORKSPACE_POSTFIX removed.
- * @param wsName :: Name of the fitted workspace. Shoud end with
- * WORKSPACE_POSTFIX.
+ * @param wsName :: Name of the fitted workspace. Should end with
+ * WORKSPACE_POSTFIX or WORKSPACE_POSTFIX + 's'
+ * @param group :: Whether it's a group (_Workspaces) or not (_Workspace).
+ * Default false.
  * @return wsName without WORKSPACE_POSTFIX
  */
-std::string MuonAnalysisResultTableTab::wsBaseName(const std::string &wsName) {
-  return wsName.substr(0, wsName.size() - WORKSPACE_POSTFIX.size());
+std::string MuonAnalysisResultTableTab::wsBaseName(const std::string &wsName,
+                                                   bool group) {
+  const size_t postfixSize =
+      group ? WORKSPACE_POSTFIX.size() + 1 : WORKSPACE_POSTFIX.size();
+  return wsName.substr(0, wsName.size() - postfixSize);
 }
 
 /**
@@ -360,6 +370,47 @@ bool MuonAnalysisResultTableTab::isFittedWs(const std::string &wsName) {
   }
 
   std::string baseName = wsBaseName(wsName);
+
+  try {
+    retrieveWSChecked<ITableWorkspace>(baseName + PARAMS_POSTFIX);
+  } catch (...) {
+    return false; // _Parameters workspace not found / has incorrect type
+  }
+
+  return true; // All OK
+}
+
+/**
+ * Does basic checks for whether the workspace is a fitted ws group
+ * (i.e. output of a simultaneous fit).
+ * @param wsName :: name of workspace to check
+ * @return :: true if ok, false if not
+ */
+bool MuonAnalysisResultTableTab::isFittedWsGroup(const std::string &wsName) {
+  const std::string postfix = WORKSPACE_POSTFIX + 's';
+  if (!boost::ends_with(wsName, postfix)) {
+    return false; // Doesn't end with "_Workspaces"
+  }
+
+  try {
+    const auto wsGroup = retrieveWSChecked<WorkspaceGroup>(wsName);
+    if (wsGroup) {
+      for (size_t i = 0; i < wsGroup->size(); i++) {
+        const auto ws =
+            boost::dynamic_pointer_cast<MatrixWorkspace>(wsGroup->getItem(i));
+        if (!ws) {
+          return false; // Group contains workspaces of incorrect type
+        } else {
+          ws->run().startTime();
+          ws->run().endTime();
+        }
+      }
+    }
+  } catch (...) {
+    return false; // Not found / incorrect type / doesn't have start/end time
+  }
+
+  std::string baseName = wsBaseName(wsName, true);
 
   try {
     retrieveWSChecked<ITableWorkspace>(baseName + PARAMS_POSTFIX);
@@ -444,76 +495,87 @@ void MuonAnalysisResultTableTab::populateLogsAndValues(
     QMap<QString, QVariant> wsLogValues;
 
     // Get log information
+    std::vector<std::string> workspaceNames;
     std::string wsName = fittedWsList[i].toStdString();
-    auto ws = retrieveWSChecked<ExperimentInfo>(wsName + WORKSPACE_POSTFIX);
+    if (AnalysisDataService::Instance().doesExist(wsName + WORKSPACE_POSTFIX)) {
+      workspaceNames.push_back(wsName + WORKSPACE_POSTFIX);
+    } else {
+      auto wsGroup =
+          retrieveWSChecked<WorkspaceGroup>(wsName + WORKSPACE_POSTFIX + 's');
+      workspaceNames = wsGroup->getNames();
+    }
+    for (const auto &name : workspaceNames) {
+      auto ws = retrieveWSChecked<ExperimentInfo>(name);
 
-    Mantid::Kernel::DateAndTime start = ws->run().startTime();
-    Mantid::Kernel::DateAndTime end = ws->run().endTime();
+      Mantid::Kernel::DateAndTime start = ws->run().startTime();
+      Mantid::Kernel::DateAndTime end = ws->run().endTime();
 
-    const std::vector<Property *> &logData = ws->run().getLogData();
+      const std::vector<Property *> &logData = ws->run().getLogData();
 
-    for (const auto prop : logData) {
-      // Check if is a timeseries log
-      if (TimeSeriesProperty<double> *tspd =
-              dynamic_cast<TimeSeriesProperty<double> *>(prop)) {
-        QString logFile(QFileInfo(prop->name().c_str()).fileName());
+      for (const auto prop : logData) {
+        // Check if is a timeseries log
+        if (TimeSeriesProperty<double> *tspd =
+                dynamic_cast<TimeSeriesProperty<double> *>(prop)) {
+          QString logFile(QFileInfo(prop->name().c_str()).fileName());
 
-        double value(0.0);
-        int count(0);
+          double value(0.0);
+          int count(0);
 
-        Mantid::Kernel::DateAndTime logTime;
+          Mantid::Kernel::DateAndTime logTime;
 
-        // iterate through all logs entries of a specific log
-        for (int k(0); k < tspd->size(); k++) {
-          // Get the log time for the specific entry
-          logTime = tspd->nthTime(k);
+          // iterate through all logs entries of a specific log
+          for (int k(0); k < tspd->size(); k++) {
+            // Get the log time for the specific entry
+            logTime = tspd->nthTime(k);
 
-          // If the entry was made during the run times
-          if ((logTime >= start) && (logTime <= end)) {
-            // add it to a total and increment the count (will be used to make
-            // average entry value during a run)
-            value += tspd->nthValue(k);
-            count++;
-          }
-        }
-
-        if (count != 0) {
-          // Find average
-          wsLogValues[logFile] = value / count;
-        }
-      } else // Should be a non-timeseries one
-      {
-        QString logName = QString::fromStdString(prop->name());
-
-        // Check if we should display it
-        if (NON_TIMESERIES_LOGS.contains(logName)) {
-          QVariant value;
-
-          if (logName == RUN_NUMBER_LOG) { // special case
-            value = MuonAnalysisHelper::runNumberString(wsName, prop->value());
-          } else if (auto stringProp =
-                         dynamic_cast<PropertyWithValue<std::string> *>(prop)) {
-            value = QString::fromStdString((*stringProp)());
-          } else if (auto doubleProp =
-                         dynamic_cast<PropertyWithValue<double> *>(prop)) {
-            value = (*doubleProp)();
-          } else {
-            throw std::runtime_error("Unsupported non-timeseries log type");
+            // If the entry was made during the run times
+            if ((logTime >= start) && (logTime <= end)) {
+              // add it to a total and increment the count (will be used to make
+              // average entry value during a run)
+              value += tspd->nthValue(k);
+              count++;
+            }
           }
 
-          wsLogValues[logName] = value;
+          if (count != 0) {
+            // Find average
+            wsLogValues[logFile] = value / count;
+          }
+        } else // Should be a non-timeseries one
+        {
+          QString logName = QString::fromStdString(prop->name());
+
+          // Check if we should display it
+          if (NON_TIMESERIES_LOGS.contains(logName)) {
+            QVariant value;
+
+            if (logName == RUN_NUMBER_LOG) { // special case
+              value =
+                  MuonAnalysisHelper::runNumberString(wsName, prop->value());
+            } else if (auto stringProp =
+                           dynamic_cast<PropertyWithValue<std::string> *>(
+                               prop)) {
+              value = QString::fromStdString((*stringProp)());
+            } else if (auto doubleProp =
+                           dynamic_cast<PropertyWithValue<double> *>(prop)) {
+              value = (*doubleProp)();
+            } else {
+              throw std::runtime_error("Unsupported non-timeseries log type");
+            }
+
+            wsLogValues[logName] = value;
+          }
         }
       }
+
+      // Append log names found in the workspace to the list of all known log
+      // names
+      allLogs += wsLogValues.keys().toSet();
+
+      // Add all data collected from one workspace to another map. Will be used
+      // when creating table.
+      m_logValues[fittedWsList[i]] = wsLogValues;
     }
-
-    // Append log names found in the workspace to the list of all known log
-    // names
-    allLogs += wsLogValues.keys().toSet();
-
-    // Add all data collected from one workspace to another map. Will be used
-    // when creating table.
-    m_logValues[fittedWsList[i]] = wsLogValues;
-
   } // End loop over all workspace's log information and param information
 
   // Remove the logs that don't appear in all workspaces
