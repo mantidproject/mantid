@@ -53,15 +53,13 @@ public:
   /// Default constructor, the stored object will be NULL.
   VectorOf() = default;
   /// Construct stored object of length count initialized to the constant value.
-  VectorOf(size_t count, const double &value) {
-    m_data = Kernel::make_cow<CowType>(count, value);
-  }
+  VectorOf(size_t count, const double &value)
+      : m_data(Kernel::make_cow<CowType>(count, value)) {}
   /// Construct stored object of length count.
-  explicit VectorOf(size_t count) { m_data = Kernel::make_cow<CowType>(count); }
+  explicit VectorOf(size_t count) : m_data(Kernel::make_cow<CowType>(count)) {}
   /// Construct stored object with the contents of the initializer list init.
-  VectorOf(std::initializer_list<double> init) {
-    m_data = Kernel::make_cow<CowType>(init);
-  }
+  VectorOf(std::initializer_list<double> init)
+      : m_data(Kernel::make_cow<CowType>(init)) {}
   /// Copy constructor. Lightweight, stored object will be shared.
   VectorOf(const VectorOf &) = default;
   /// Move constructor.
