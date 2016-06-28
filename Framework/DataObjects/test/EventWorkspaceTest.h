@@ -887,6 +887,32 @@ public:
     // dataX(0) is now different from dataX(1).
     TS_ASSERT(!ws->isCommonBins());
   }
+
+  void test_readYE() {
+    int numEvents = 2;
+    int numHistograms = 2;
+    EventWorkspace_const_sptr ws =
+        WorkspaceCreationHelper::CreateRandomEventWorkspace(numEvents,
+                                                            numHistograms);
+    TS_ASSERT_THROWS_NOTHING(ws->readY(0));
+    TS_ASSERT_THROWS_NOTHING(ws->dataY(0));
+    TS_ASSERT_THROWS_NOTHING(ws->readE(0));
+    TS_ASSERT_THROWS_NOTHING(ws->dataE(0));
+  }
+
+  void test_histogram() {
+    int numEvents = 2;
+    int numHistograms = 2;
+    EventWorkspace_const_sptr ws =
+        WorkspaceCreationHelper::CreateRandomEventWorkspace(numEvents,
+                                                            numHistograms);
+    auto hist1 = ws->histogram(0);
+    auto hist2 = ws->histogram(0);
+    TS_ASSERT_EQUALS(hist1.sharedX(), hist2.sharedX());
+    // Y and E are in the MRU
+    TS_ASSERT_EQUALS(hist1.sharedY(), hist2.sharedY());
+    TS_ASSERT_EQUALS(hist1.sharedE(), hist2.sharedE());
+  }
 };
 
 #endif /* EVENTWORKSPACETEST_H_ */
