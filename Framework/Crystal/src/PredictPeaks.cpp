@@ -344,9 +344,8 @@ void PredictPeaks::fillPossibleHKLsUsingPeaksWorkspace(
   // HKL's are flipped by -1 because of the internal Q convention
   // is not the same as the PeaksWorkspace convention
   double qSign = 1.0;
-  if (peaksWorkspace->getConvention() !=   convention)
+  if (peaksWorkspace->getConvention() ==  "Crystallography")
     qSign = -1.0;
-
 
   for (int i = 0; i < static_cast<int>(peaksWorkspace->getNumberPeaks()); ++i) {
     IPeak &p = peaksWorkspace->getPeak(i);
