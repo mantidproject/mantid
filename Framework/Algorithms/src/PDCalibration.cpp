@@ -353,10 +353,6 @@ struct d_to_tof {
 void PDCalibration::fitDIFCtZeroDIFA(const std::vector<double> &d,
                                      const std::vector<double> &tof,
                                      double &difc, double &t0, double &difa) {
-  difc = 0;
-  t0 = 0;
-  difa = 0;
-
   double sum = 0;
   double sumX = 0;
   double sumY = 0;
@@ -379,7 +375,6 @@ void PDCalibration::fitDIFCtZeroDIFA(const std::vector<double> &d,
 
   // DIFC only
   double difc0 = sumXY / sumX2;
-  // std::cout << "difc0 = " << difc0 << '\n';
   // Get out early if only DIFC is needed.
   if (calParams == "DIFC") {
     difc = difc0;
@@ -394,8 +389,40 @@ void PDCalibration::fitDIFCtZeroDIFA(const std::vector<double> &d,
     difc1 = (sum * sumXY - sumX * sumY) / determinant;
     tZero1 = sumY / sum - difc1 * sumX / sum;
   }
-  // std::cout << "difc1 = " << difc1 << '\n';
-  // std::cout << "tZero1 = " << tZero1 << '\n';
+
+  // calculated chi squared for each fit
+  double chisq0 = 0;
+  double chisq1 = 0;
+  for (size_t i = 0; i < d.size(); ++i) {
+    // difc chi-squared
+    double temp = difc0 * d[i] - tof[i];
+    chisq0 += (temp * temp);
+
+    // difc and t0 chi-squared
+    temp = tZero1 + difc1 * d[i] - tof[i];
+    chisq1 += (temp * temp);
+  }
+  // Get reduced chi-squared
+  chisq0 = chisq0 / (sum - 1);
+  chisq1 = chisq1 / (sum - 2);
+
+  // Select difc, t0 depending on CalibrationParameters chosen and
+  // number of peaks fitted.
+  if (sum == 2) {
+    // use 'difc+t0' because it should be an exact fit
+    difc = difc1;
+    t0 = tZero1;
+    return;
+  } else if (calParams == "DIFC+TZERO") {
+    // choose best one according to chi-squared
+    if (chisq0 < chisq1) {
+      difc = difc0;
+    } else {
+      difc = difc1;
+      t0 = tZero1;
+    }
+    return;
+  }
 
   // DIFC, t0 and DIFA
   double tZero2 = 0;
@@ -418,64 +445,34 @@ void PDCalibration::fitDIFCtZeroDIFA(const std::vector<double> &d,
          sumY * sumX2 * sumX2 - sumX * sumX * sumX2Y - sum * sumXY * sumX3) /
         determinant;
   }
-  // std::cout << "difc2 = " << difc2 << '\n';
-  // std::cout << "tZero2 = " << tZero2 << '\n';
-  // std::cout << "difa2 = " << difa2 << '\n';
 
   // calculated reduced chi squared for each fit
-  double chisq0 = 0;
-  double chisq1 = 0;
   double chisq2 = 0;
   for (size_t i = 0; i < d.size(); ++i) {
-    // difc chi-squared
-    double temp = difc0 * d[i] - tof[i];
-    chisq0 += (temp * temp);
-
-    // difc and t0 chi-squared
-    temp = tZero1 + difc1 * d[i] - tof[i];
-    chisq1 += (temp * temp);
-
-    // difc, t0 and difa chi-squared
-    temp = tZero2 + difc2 * d[i] + difa2 * d[i] * d[i] - tof[i];
+    double temp = tZero2 + difc2 * d[i] + difa2 * d[i] * d[i] - tof[i];
     chisq2 += (temp * temp);
   }
+  chisq2 = chisq2 / (sum - 3);
 
   // Select difc, t0 and difa depending on CalibrationParameters chosen and
   // number of peaks fitted.
-  if (sum == 2) {
-    // use 'difc+t0' because it should be an exact fit
-    difc = difc1;
-    t0 = tZero1;
+  if (sum == 3) {
+    // use 'difc+t0+difa' because it should be an exact fit
+    difc = difc2;
+    t0 = tZero2;
+    difa = difa2;
   } else {
-    chisq0 = chisq0 / (sum - 1);
-    chisq1 = chisq1 / (sum - 2);
-    if (calParams == "DIFC+TZERO") {
-      // choose best one according to chi-squared
-      if (chisq0 < chisq1) {
-        difc = difc0;
-      } else {
-        difc = difc1;
-        t0 = tZero1;
-      }
-    } else if (sum == 3) {
-      // use 'difc+t0+difa' because it should be an exact fit
+    // look for solution with DIFC + TZERO + DIFA
+    // choose best one according to chi-squared between all three
+    if ((chisq0 < chisq1) && (chisq0 < chisq2)) {
+      difc = difc0;
+    } else if ((chisq1 < chisq0) && (chisq1 < chisq2)) {
+      difc = difc1;
+      t0 = tZero1;
+    } else {
       difc = difc2;
       t0 = tZero2;
       difa = difa2;
-    } else {
-      // look for solution with DIFC + TZERO + DIFA
-      chisq2 = chisq2 / (sum - 3);
-      // choose best one according to chi-squared between all three
-      if ((chisq0 < chisq1) && (chisq0 < chisq2)) {
-        difc = difc0;
-      } else if ((chisq1 < chisq0) && (chisq1 < chisq2)) {
-        difc = difc1;
-        t0 = tZero1;
-      } else {
-        difc = difc2;
-        t0 = tZero2;
-        difa = difa2;
-      }
     }
   }
 }
