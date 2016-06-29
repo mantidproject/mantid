@@ -61,7 +61,7 @@ public:
   HistogramY &operator=(const HistogramY &)& = default;
   HistogramY &operator=(HistogramY &&)& = default;
 
-  // The classes are friends, such that they can modify the length.
+  // These classes are friends, such that they can modify the length.
   friend class Histogram;
   friend class detail::VectorOf<Counts, HistogramY>;
   friend class detail::VectorOf<Frequencies, HistogramY>;

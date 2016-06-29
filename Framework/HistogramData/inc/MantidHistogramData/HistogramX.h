@@ -63,7 +63,7 @@ public:
   HistogramX &operator=(const HistogramX &)& = default;
   HistogramX &operator=(HistogramX &&)& = default;
 
-  // The classes are friends, such that they can modify the length.
+  // These classes are friends, such that they can modify the length.
   friend class Histogram;
   friend class detail::VectorOf<BinEdges, HistogramX>;
   friend class detail::VectorOf<Points, HistogramX>;
