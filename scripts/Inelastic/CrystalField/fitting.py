@@ -278,3 +278,146 @@ class CrystalField(object):
         self._calcPeaksList(i)
         peaks = np.array([self._peakList.column(0), self._peakList.column(10)])
         return peaks
+
+
+class SimpleFunction(object):
+    """A helper object that simplifies getting and setting parameters of a simple named function."""
+
+    def __init__(self, name):
+        """
+        Constructor
+        :param name: A valid name registered with the FunctionFactory.
+        """
+        self._name = name
+        # Function attributes.
+        self._attrib = {}
+        # Function parameters.
+        self._params = {}
+
+    @property
+    def name(self):
+        """Read only name of this function"""
+        return self._name
+
+    @property
+    def attr(self):
+        return self._attrib
+
+    @property
+    def param(self):
+        return self._params
+
+    def toString(self):
+        """Create function initialisation string"""
+        attrib = ['%s=%s' % item for item in self._attrib.iteritems()] + \
+                 ['%s=%s' % item for item in self._params.iteritems()]
+        if len(attrib) > 0:
+            return 'name=%s,%s' % (self._name, ','.join(attrib))
+        return 'name=%s' % self._name
+
+
+class CompositeProperties(object):
+
+    def __init__(self):
+        self._properties = {}
+
+    def __getitem__(self, item):
+        if item not in self._properties:
+            self._properties[item] = {}
+        return self._properties[item]
+
+    def getSize(self):
+        s = self._properties.keys()
+        if len(s) > 0:
+            return max(s) + 1
+        return 0
+
+    def toStringList(self):
+        prop_list = []
+        for i in range(self.getSize()):
+            if i in self._properties:
+                props = self._properties[i]
+                prop_list.append(','.join(['%s=%s' % item for item in props.iteritems()]))
+            else:
+                prop_list.append('')
+        return prop_list
+
+
+class PeaksFunction(object):
+    """A helper object that simplifies getting and setting parameters of a composite function
+    containing multiple peaks of the same type.
+
+    The object of this class has no access to the C++ fit function it represents. It means that
+    it doesn't know what attributes or parameters the function defines and relies on the user
+    to provide correct information.
+    """
+    def __init__(self, name):
+        """
+        Constructor.
+
+        :param name: The name of the function of each peak.  E.g. Gaussian
+        """
+        # Name of the peaks
+        self._name = name
+        # Collection of all attributes
+        self._attrib = CompositeProperties()
+        # Collection of all parameters
+        self._params = CompositeProperties()
+
+    @property
+    def name(self):
+        """Read only name of the peak function"""
+        return self._name
+
+    @property
+    def attr(self):
+        """Get a dict of all currently set attributes.
+        Use this property to set or get an attribute.
+        You can only get an attribute that has been previously set via this property.
+        """
+        return self._attrib
+
+    @property
+    def param(self):
+        """Get a dict of all currently set parameters
+        Use this property to set or get a parameter.
+        You can only get an parameter that has been previously set via this property.
+        Example:
+
+            fun = PeaksFunction('Gaussian')
+            # Set Sigma parameter of the second peak
+            peaks.param[1]['Sigma'] = 0.1
+            ...
+            # Get the value of a previously set parameter
+            sigma = peaks.param[1]['Sigma']
+            ...
+            # Trying to get a value that wasn't set results in an error
+            height = peaks[1]['Height'] # error
+        """
+        return self._params
+
+    def toString(self):
+        """Create function initialisation string"""
+        n = max(self._attrib.getSize(), self._params.getSize())
+        if n == 0:
+            raise RuntimeError('PeaksFunction cannot be empty')
+        attribs = self._attrib.toStringList()
+        params = self._params.toStringList()
+        if len(attribs) < n:
+            attribs += [''] * (n - len(attribs))
+        if len(params) < n:
+            params += [''] * (n - len(params))
+        peaks = []
+        for i in range(n):
+            a = attribs[i]
+            p = params[i]
+            if len(a) != 0 or len(p) != 0:
+                if len(a) == 0:
+                    peaks.append('name=%s,%s' % (self._name, p))
+                elif len(p) == 0:
+                    peaks.append('name=%s,%s' % (self._name, a))
+                else:
+                    peaks.append('name=%s,%s,%s' % (self._name, a,p))
+            else:
+                peaks.append('name=%s' % self._name)
+        return ';'.join(peaks)
