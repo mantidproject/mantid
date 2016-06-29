@@ -1,3 +1,4 @@
+""" Handles calibration of SANS workspaces."""
 from os.path import (basename, splitext, isfile)
 from mantid.api import (AnalysisDataService)
 
@@ -9,9 +10,16 @@ from SANS2.State.SANSStateData import SANSDataType
 
 
 # -----------------------------
-#  Free functions
+#  Free functions for Calibration
 # -----------------------------
 def has_calibration_already_been_applied(workspace, full_file_path):
+    """
+    Checks if particular calibration, defined by the file path has been applied to a workspace.
+
+    :param workspace: The workspace which might have been calibrated
+    :param full_file_path: An absolute file path to the calibration file.
+    :return: True if the calibration has been applied else False
+    """
     has_calibration_applied = False
     if has_tag(SANSConstants.Calibration.calibration_workspace_tag, workspace):
         value = get_tag(SANSConstants.Calibration.calibration_workspace_tag, workspace)
@@ -39,6 +47,13 @@ def get_already_loaded_calibration_workspace(full_file_path):
 
 
 def get_calibration_workspace(full_file_path, use_loaded):
+    """
+    Load the calibration workspace from the specified file
+
+    :param full_file_path: Path to the calibration file.
+    :param use_loaded: Allows us to check for the calibration file on the ADS
+    :return: the calibration workspace
+    """
     calibration_workspace = None
     # Here we can avoid reloading of the calibration workspace
     if use_loaded:

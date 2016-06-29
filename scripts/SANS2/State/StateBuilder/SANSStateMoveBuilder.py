@@ -3,7 +3,8 @@ import copy
 from SANS2.State.SANSStateMove import (SANSStateMoveLOQ, SANSStateMoveSANS2D, SANSStateMoveLARMOR)
 from SANS2.State.StateBuilder.StateBuilderFunctions import automatic_setters
 from SANS2.Common.SANSFileInformation import (SANSFileInformationFactory, get_instrument_paths_for_sans_file)
-from SANS2.Common.SANSConstants import (SANSConstants, SANSInstrument)
+from SANS2.Common.SANSConstants import SANSConstants
+from SANS2.Common.SANSEnumerations import SANSInstrument
 from SANS2.Common.XMLParsing import (get_named_elements_from_ipf_file, get_monitor_names_from_idf_file)
 
 

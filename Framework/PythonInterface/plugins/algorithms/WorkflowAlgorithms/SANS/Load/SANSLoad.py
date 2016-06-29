@@ -1,3 +1,5 @@
+""" SANSLoad algorithm which handles loading SANS files"""
+
 from mantid.kernel import (Direction, PropertyManagerProperty, Property)
 from mantid.api import (DataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode)
 from SANS2.State.SANSStateSerializer import create_deserialized_sans_state_from_property_manager
@@ -20,7 +22,8 @@ class SANSLoad(DataProcessorAlgorithm):
                              doc='A property manager which fulfills the SANSState contract.')
 
         self.declareProperty("PublishToCache", True, direction=Direction.Input,
-                             doc="Publish the loaded files to a cache, in order to avoid reloading for subsequent runs.")
+                             doc="Publish the loaded files to a cache, in order to avoid reloading "
+                                 "for subsequent runs.")
 
         self.declareProperty("UseCached", True, direction=Direction.Input,
                              doc="Checks if there are loaded files available. If they are, those files are used.")
@@ -176,7 +179,6 @@ class SANSLoad(DataProcessorAlgorithm):
                                     there will be only one element in this list. Only when dealing with multiperiod
                                     data can we expected to see more workspaces in the list.
         """
-
         self.setProperty(name, workspace_collection[0])
         number_of_workspaces = 1
         if len(workspace_collection) > 1:
@@ -194,6 +196,7 @@ class SANSLoad(DataProcessorAlgorithm):
 
     def set_property_with_number_of_workspaces(self, name, workspace_collection):
         counter = self.set_property(name, workspace_collection)
+        # The property name for the number of workspaces
         number_of_workspaces_name = "NumberOf" + name + "s"
         self.setProperty(number_of_workspaces_name, counter)
 

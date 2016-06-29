@@ -1,3 +1,5 @@
+""" Implementation for the SANSLoad algorithm"""
+
 from abc import (ABCMeta, abstractmethod)
 from mantid.api import (WorkspaceGroup, AnalysisDataService)
 from SANS2.Common.SANSFileInformation import (SANSFileInformationFactory, SANSFileType, get_extension_for_file_type)
@@ -57,6 +59,16 @@ def is_transmission_type(to_check):
 
 
 def get_expected_workspace_names(file_information, is_transmission, period):
+    """
+    Creates the expected names for SANS workspaces.
+
+    SANS scientists expect the load workspaces to have certain, typical names. For example, the file SANS2D00022024.nxs
+    which is used as a transmission workspace translates into 22024_trans_nxs.
+    :param file_information: a file information object
+    :param is_transmission: if the file inforamation is for a transmission or not
+    :param period: the period of interest
+    :return: a list of workspace names
+    """
     suffix_file_type = get_extension_for_file_type(file_information)
     if is_transmission:
         suffix_data = SANSConstants.trans_suffix
@@ -269,6 +281,7 @@ def load_isis(data_type, file_information, period, use_cached, publish_to_ads):
 # Load classes
 # -------------------------------------------------
 class SANSLoadData(object):
+    """ Base class for all SANSLoad implementations."""
     __metaclass__ = ABCMeta
 
     @abstractmethod
@@ -288,6 +301,7 @@ class SANSLoadData(object):
 
 
 class SANSLoadDataISIS(SANSLoadData):
+    """Load implementation of SANSLoad for ISIS data"""
     def do_execute(self, data_info, use_cached, publish_to_ads):
         # Get all entries from the state file
         file_info, period_info = get_file_and_period_information_from_data(data_info)
@@ -312,6 +326,7 @@ class SANSLoadDataISIS(SANSLoadData):
 
 
 class SANSLoadDataFactory(object):
+    """ A factory for SANSLoadData."""
     def __init__(self):
         super(SANSLoadDataFactory, self).__init__()
 
@@ -326,6 +341,12 @@ class SANSLoadDataFactory(object):
 
     @staticmethod
     def create_loader(state):
+        """
+        Provides the appropriate loader.
+
+        :param state: a SANSState object
+        :return: the corresponding loader
+        """
         instrument_type = SANSLoadDataFactory._get_instrument_type(state)
         if instrument_type is SANSInstrument.LARMOR or instrument_type is SANSInstrument.LOQ or\
            instrument_type is SANSInstrument.SANS2D:
