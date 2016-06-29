@@ -30,8 +30,8 @@ public:
     m_wrong_ws = boost::make_shared<WorkspaceTester>();
     m_wrong_ws->initialize(1, 3, 3);
 
-    points = {2.0, 1.0, 0.0};
-    m_wrong_ws->setPoints(0, points);
+    auto bad_points = {2.0, 1.0, 0.0};
+    m_wrong_ws->setPoints(0, bad_points);
   }
 
   void testRight() { TS_ASSERT_EQUALS(validator.isValid(m_right_ws), ""); }
