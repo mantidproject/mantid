@@ -42,7 +42,7 @@ const std::string MuonAnalysisResultTableTab::PARAMS_POSTFIX("_Parameters");
 const QString MuonAnalysisResultTableTab::RUN_NUMBER_LOG("run_number");
 const QStringList MuonAnalysisResultTableTab::NON_TIMESERIES_LOGS{
     MuonAnalysisResultTableTab::RUN_NUMBER_LOG, "sample_temp",
-    "sample_magn_field"};
+    "sample_magn_field", "group", "period"};
 
 /**
 * Constructor

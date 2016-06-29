@@ -384,6 +384,9 @@ void MuonAnalysisFitDataPresenter::renameFittedWorkspaces(
       wsName = wsName.substr(wsName.find_first_of('=') + 1); // strip the "f0="
       const auto runsPeriods = MuonAnalysisHelper::runNumberString(wsName, "0");
       const auto wsDetails = MuonAnalysisHelper::parseWorkspaceName(wsName);
+      // Add group and period as log values so they appear in the table
+      addSpecialLogs(oldName, wsDetails);
+      // Generate new name and rename workspace
       std::ostringstream newName;
       newName << groupName << "_" << wsDetails.label << "_"
               << wsDetails.itemName << "_" << wsDetails.periods << "_Workspace";
@@ -408,6 +411,25 @@ void MuonAnalysisFitDataPresenter::extractFittedWorkspaces(
       ads.addToGroup(groupName, name);
     }
     ads.remove(resultsGroupName); // should be empty now
+  }
+}
+
+/**
+ * Add extra logs to the named workspace, using supplied parameters.
+ * This is so they can be selected to add to the results table.
+ * At present these are:
+ * - "group": group name
+ * - "period": period string
+ * @param wsName :: [input] Name of workspace to add logs to
+ * @param wsParams :: [input] Parameters to get log values from
+ */
+void MuonAnalysisFitDataPresenter::addSpecialLogs(
+    const std::string &wsName, const Muon::DatasetParams &wsParams) const {
+  auto matrixWs =
+      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName);
+  if (matrixWs) {
+    matrixWs->mutableRun().addProperty<std::string>("group", wsParams.itemName);
+    matrixWs->mutableRun().addProperty<std::string>("period", wsParams.periods);
   }
 }
 

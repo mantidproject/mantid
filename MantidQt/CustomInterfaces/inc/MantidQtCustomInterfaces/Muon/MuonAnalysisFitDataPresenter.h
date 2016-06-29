@@ -100,6 +100,10 @@ private:
   void renameFittedWorkspaces(const std::string &groupName) const;
   /// Extract workspaces from group and move up a level
   void extractFittedWorkspaces(const std::string &groupName) const;
+  /// Add special logs to fitted workspaces
+  void addSpecialLogs(
+      const std::string &wsName,
+      const MantidQt::CustomInterfaces::Muon::DatasetParams &wsParams) const;
   /// Fit browser to update (non-owning pointer)
   MantidQt::MantidWidgets::IWorkspaceFitControl *m_fitBrowser;
   /// Data selector to get input from (non-owning pointer)
