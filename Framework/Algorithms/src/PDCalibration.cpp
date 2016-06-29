@@ -194,6 +194,9 @@ void PDCalibration::exec() {
   m_tofMax = tofBinningParams.back();
 
   m_peaksInDspacing = getProperty("PeakPositions");
+  //Sort peak positions, requried for correct peak window calculations
+  std::sort(m_peaksInDspacing.begin(), m_peaksInDspacing.end());
+
   const double peakWindowMaxInDSpacing = 0.1; // TODO configurable
   const auto windowsInDSpacing =
       dSpacingWindows(m_peaksInDspacing, peakWindowMaxInDSpacing);
