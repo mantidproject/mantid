@@ -76,6 +76,7 @@ private:
 
 public:
   enum class XMode { BinEdges, Points };
+  /// Construct with given storage mode for X data (BinEdges or Points).
   explicit Histogram(XMode mode)
       : m_x(Kernel::make_cow<HistogramX>(0)), m_xMode(mode) {}
 
@@ -90,6 +91,7 @@ public:
   Histogram &operator=(const Histogram &)& = default;
   Histogram &operator=(Histogram &&)& = default;
 
+  /// Returns the storage mode of the X data (BinEdges or Points).
   XMode xMode() const noexcept { return m_xMode; }
 
   BinEdges binEdges() const;
@@ -210,6 +212,14 @@ template <>
 void MANTID_HISTOGRAMDATA_DLL
 Histogram::setUncertainties(const FrequencyStandardDeviations &e);
 
+/** Construct from X data, (optionally) Y data, and (optionally) E data.
+
+  @param x X data for the Histogram. Can be BinEdges or Points.
+  @param y Optional Y data for the Histogram. Can be Counts or Frequencies.
+  @param e Optional E data for the Histogram. Can be Variances or
+  StandardDeviations for Counts or Frequencies. If not specified or null, the
+  standard deviations will be set as the suare root of the Y data.
+  */
 template <class TX, class TY, class TE>
 Histogram::Histogram(const TX &x, const TY &y, const TE &e) {
   initX(x);
