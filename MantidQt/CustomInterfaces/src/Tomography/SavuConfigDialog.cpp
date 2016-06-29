@@ -314,10 +314,10 @@ void TomographyIfaceViewQtGUI::menuSaveAsClicked() {
 QString TomographyIfaceViewQtGUI::tableWSRowToString(ITableWorkspace_sptr table,
                                                      size_t i) {
   std::stringstream msg;
-  msg << "ID: " << table->cell<std::string>(i, 0) << std::endl
-      << "Params: " << table->cell<std::string>(i, 1) << std::endl
-      << "Name: " << table->cell<std::string>(i, 2) << std::endl
-      << "Cite: " << table->cell<std::string>(i, 3);
+  msg << "ID: " << table->cell<std::string>(i, 0)
+      << "\nParams: " << table->cell<std::string>(i, 1)
+      << "\nName: " << table->cell<std::string>(i, 2)
+      << "\nCite: " << table->cell<std::string>(i, 3);
   return QString::fromStdString(msg.str());
 }
 

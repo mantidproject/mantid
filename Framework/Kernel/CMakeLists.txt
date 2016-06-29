@@ -23,6 +23,7 @@ set ( SRC_FILES
 	src/EmptyValues.cpp
 	src/EnabledWhenProperty.cpp
 	src/EnvironmentHistory.cpp
+	src/EqualBinsChecker.cpp
 	src/Exception.cpp
 	src/FacilityInfo.cpp
 	src/FileDescriptor.cpp
@@ -168,6 +169,7 @@ set ( INC_FILES
 	inc/MantidKernel/EmptyValues.h
 	inc/MantidKernel/EnabledWhenProperty.h
 	inc/MantidKernel/EnvironmentHistory.h
+	inc/MantidKernel/EqualBinsChecker.h
 	inc/MantidKernel/Exception.h
 	inc/MantidKernel/FacilityInfo.h
 	inc/MantidKernel/Fast_Exponential.h
@@ -326,6 +328,7 @@ set ( TEST_FILES
 	DynamicFactoryTest.h
 	EnabledWhenPropertyTest.h
 	EnvironmentHistoryTest.h
+	EqualBinsCheckerTest.h
 	FacilitiesTest.h
 	FileDescriptorTest.h
 	FileValidatorTest.h
@@ -387,6 +390,7 @@ set ( TEST_FILES
 	RebinHistogramTest.h
 	RebinParamsValidatorTest.h
 	RegexStringsTest.h
+	ShrinkToFitTest.h
 	SLSQPMinimizerTest.h
 	SobolSequenceTest.h
 	SpecialCoordinateSystemTest.h

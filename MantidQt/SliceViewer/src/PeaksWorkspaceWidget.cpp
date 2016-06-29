@@ -6,8 +6,6 @@
 #include <QColorDialog>
 #include <QPlastiqueStyle>
 
-
-
 namespace {
 QColor getSelectedColor() {
   QColorDialog colourDlg;
@@ -28,13 +26,16 @@ Constructor
 @param coordinateSystem : Name of coordinate system used
 @param defaultForegroundPeakViewColor : Default peak foreground colour
 @param defaultBackgroundPeakViewColor : Default peak background colour
-@param canAddPeaks : Flag to indicate that peaks can be added. False for no add mode.
+@param canAddPeaks : Flag to indicate that peaks can be added. False for no add
+mode.
 @param parent : parent widget
 */
 PeaksWorkspaceWidget::PeaksWorkspaceWidget(
     Mantid::API::IPeaksWorkspace_const_sptr ws,
-    const std::string &coordinateSystem, PeakViewColor defaultForegroundPeakViewColor,
-    PeakViewColor defaultBackgroundPeakViewColor, const bool canAddPeaks, PeaksViewer *parent)
+    const std::string &coordinateSystem,
+    PeakViewColor defaultForegroundPeakViewColor,
+    PeakViewColor defaultBackgroundPeakViewColor, const bool canAddPeaks,
+    PeaksViewer *parent)
     : QWidget(parent), m_ws(ws), m_coordinateSystem(coordinateSystem),
       m_foregroundPeakViewColor(defaultForegroundPeakViewColor),
       m_backgroundPeakViewColor(defaultBackgroundPeakViewColor),
@@ -65,8 +66,10 @@ PeaksWorkspaceWidget::PeaksWorkspaceWidget(
   connect(ui.btnRemove, SIGNAL(clicked()), this,
           SLOT(onRemoveWorkspaceClicked()));
   connect(ui.btnHide, SIGNAL(clicked()), this, SLOT(onToggleHideInPlot()));
-  connect(ui.btnAddPeak, SIGNAL(toggled(bool)), this, SLOT(onAddPeaksToggled(bool)));
-  connect(ui.btnRemovePeak, SIGNAL(toggled(bool)), this, SLOT(onClearPeaksToggled(bool)));
+  connect(ui.btnAddPeak, SIGNAL(toggled(bool)), this,
+          SLOT(onAddPeaksToggled(bool)));
+  connect(ui.btnRemovePeak, SIGNAL(toggled(bool)), this,
+          SLOT(onClearPeaksToggled(bool)));
 
   // Override the styles for the colour buttons, because with some inherited
   // styles, the button background colour will be hidden.
@@ -77,7 +80,6 @@ PeaksWorkspaceWidget::PeaksWorkspaceWidget(
   ui.btnBackgroundColorEllipsoid->setStyle(new QPlastiqueStyle);
   ui.btnPeakColorEllipsoid->setStyle(new QPlastiqueStyle);
 
-
   ui.ckShowBackground->setVisible(true);
   ui.lblShowBackgroundColour->setVisible(true);
 
@@ -87,9 +89,9 @@ PeaksWorkspaceWidget::PeaksWorkspaceWidget(
   // Populate controls with data.
   populate();
 
-  QItemSelectionModel* selectionModel = ui.tblPeaks->selectionModel();
-  connect(selectionModel, SIGNAL(currentChanged(QModelIndex,QModelIndex)), this, SLOT(onCurrentChanged(QModelIndex, QModelIndex)));
-
+  QItemSelectionModel *selectionModel = ui.tblPeaks->selectionModel();
+  connect(selectionModel, SIGNAL(currentChanged(QModelIndex, QModelIndex)),
+          this, SLOT(onCurrentChanged(QModelIndex, QModelIndex)));
 }
 
 std::set<QString> PeaksWorkspaceWidget::getShownColumns() {
@@ -120,7 +122,7 @@ void PeaksWorkspaceWidget::setShownColumns(std::set<QString> &cols) {
 Populate controls with data ready for rendering.
 */
 void PeaksWorkspaceWidget::createTableMVC() {
-  QPeaksTableModel* model = new QPeaksTableModel(this->m_ws);
+  QPeaksTableModel *model = new QPeaksTableModel(this->m_ws);
   connect(model, SIGNAL(peaksSorted(const std::string &, const bool)), this,
           SLOT(onPeaksSorted(const std::string &, const bool)));
   ui.tblPeaks->setModel(model);
@@ -194,9 +196,12 @@ PeaksWorkspaceWidget::~PeaksWorkspaceWidget() {}
 */
 void PeaksWorkspaceWidget::onForegroundPeakViewColorClicked() {
   auto foregroundColorCross = ui.btnPeakColor->palette().button().color();
-  auto foregroundColorSphere = ui.btnPeakColorSphere->palette().button().color();
-  auto foregroundColorEllipsoid = ui.btnPeakColorEllipsoid->palette().button().color();
-  PeakViewColor color(foregroundColorCross, foregroundColorSphere, foregroundColorEllipsoid);
+  auto foregroundColorSphere =
+      ui.btnPeakColorSphere->palette().button().color();
+  auto foregroundColorEllipsoid =
+      ui.btnPeakColorEllipsoid->palette().button().color();
+  PeakViewColor color(foregroundColorCross, foregroundColorSphere,
+                      foregroundColorEllipsoid);
   emit peakColorchanged(this->m_ws, color);
 }
 
@@ -204,10 +209,14 @@ void PeaksWorkspaceWidget::onForegroundPeakViewColorClicked() {
  * Handler for changing the background colour of an integrated peak.
 */
 void PeaksWorkspaceWidget::onBackgroundPeakViewColorClicked() {
-  auto backgroundColorSphere = ui.btnBackgroundColorSphere->palette().button().color();
-  auto backgroundColorEllipsoid = ui.btnBackgroundColorEllipsoid->palette().button().color();
-  // The first entry will be negelected as there is no background color for cross
-  PeakViewColor color(backgroundColorSphere, backgroundColorSphere, backgroundColorEllipsoid);
+  auto backgroundColorSphere =
+      ui.btnBackgroundColorSphere->palette().button().color();
+  auto backgroundColorEllipsoid =
+      ui.btnBackgroundColorEllipsoid->palette().button().color();
+  // The first entry will be negelected as there is no background color for
+  // cross
+  PeakViewColor color(backgroundColorSphere, backgroundColorSphere,
+                      backgroundColorEllipsoid);
   emit backgroundColorChanged(this->m_ws, color);
 }
 
@@ -341,7 +350,8 @@ void PeaksWorkspaceWidget::workspaceUpdate(
     m_ws = ws;
   }
   // Set at new representation for the model.
-  static_cast<QPeaksTableModel*>(this->ui.tblPeaks->model())->setPeaksWorkspace(m_ws);
+  static_cast<QPeaksTableModel *>(this->ui.tblPeaks->model())
+      ->setPeaksWorkspace(m_ws);
   // Update the display name of the workspace.
   m_nameText = m_ws->getName().c_str();
   this->ui.lblWorkspaceName->setText(m_nameText);
@@ -351,41 +361,39 @@ void PeaksWorkspaceWidget::workspaceUpdate(
  * @brief PeaksWorkspaceWidget::onCurrentChanged
  * @param index : Index of the table newly selected
  */
-void PeaksWorkspaceWidget::onCurrentChanged(QModelIndex index, QModelIndex)
-{
-    if (index.isValid()) {
-      emit zoomToPeak(this->m_ws, index.row());
-    }
+void PeaksWorkspaceWidget::onCurrentChanged(QModelIndex index, QModelIndex) {
+  if (index.isValid()) {
+    emit zoomToPeak(this->m_ws, index.row());
+  }
 }
 
 /**
  * @brief PeaksWorkspaceWidget::onClearPeaksToggled
  * @param on : Enter mode
  */
-void PeaksWorkspaceWidget::onClearPeaksToggled(bool on)
-{
-    //We should now tell the PeaksViewer about this.
-    m_parent->clearPeaksModeRequest(this, on);
+void PeaksWorkspaceWidget::onClearPeaksToggled(bool on) {
+  // We should now tell the PeaksViewer about this.
+  m_parent->clearPeaksModeRequest(this, on);
 }
 
 /**
  * @brief PeaksWorkspaceWidget::onAddPeaksToggled
  * @param on : Enter mode
  */
-void PeaksWorkspaceWidget::onAddPeaksToggled(bool on)
-{
-    // We should now tell the PeaksViewer about this. It should have a global mode for AddingPeaks it merely needs to know the destination workspace
-    m_parent->addPeaksModeRequest(this, on);
+void PeaksWorkspaceWidget::onAddPeaksToggled(bool on) {
+  // We should now tell the PeaksViewer about this. It should have a global mode
+  // for AddingPeaks it merely needs to know the destination workspace
+  m_parent->addPeaksModeRequest(this, on);
 }
 
 void PeaksWorkspaceWidget::exitClearPeaksMode() {
-    SignalBlocker<QPushButton> scopedBlocker(ui.btnRemovePeak);
-    scopedBlocker->setChecked(false);
+  SignalBlocker<QPushButton> scopedBlocker(ui.btnRemovePeak);
+  scopedBlocker->setChecked(false);
 }
 
 void PeaksWorkspaceWidget::exitAddPeaksMode() {
-    SignalBlocker<QPushButton> scopedBlocker(ui.btnAddPeak);
-    scopedBlocker->setChecked(false);
+  SignalBlocker<QPushButton> scopedBlocker(ui.btnAddPeak);
+  scopedBlocker->setChecked(false);
 }
 
 void PeaksWorkspaceWidget::onForegroundColorCrossClicked() {

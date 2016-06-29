@@ -27,12 +27,6 @@ namespace DataHandling {
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SaveCanSAS1D)
 
-/// constructor
-SaveCanSAS1D::SaveCanSAS1D() {}
-
-/// destructor
-SaveCanSAS1D::~SaveCanSAS1D() {}
-
 /// Overwrites Algorithm method.
 void SaveCanSAS1D::init() {
   declareProperty(
@@ -549,7 +543,7 @@ void SaveCanSAS1D::createSASDetectorElement(std::string &sasDet) {
     } else {
       g_log.notice() << "Detector with name " << detectorName
                      << " does not exist in the instrument of the workspace: "
-                     << m_workspace->name() << std::endl;
+                     << m_workspace->name() << '\n';
     }
   }
 }

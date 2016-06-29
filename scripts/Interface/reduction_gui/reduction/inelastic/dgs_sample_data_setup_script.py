@@ -159,11 +159,11 @@ class SampleSetupScript(BaseScriptElement):
                                                                  "tzero_guess",
                                                                  default=SampleSetupScript.tzero_guess)
             self.monitor1_specid = BaseScriptElement.getStringElement(instrument_dom,
-                                                                   "monitor1_specid",
-                                                                   default=SampleSetupScript.monitor1_specid)
+                                                                      "monitor1_specid",
+                                                                      default=SampleSetupScript.monitor1_specid)
             self.monitor2_specid = BaseScriptElement.getStringElement(instrument_dom,
-                                                                   "monitor2_specid",
-                                                                   default=SampleSetupScript.monitor2_specid)
+                                                                      "monitor2_specid",
+                                                                      default=SampleSetupScript.monitor2_specid)
             self.et_range_low = BaseScriptElement.getStringElement(instrument_dom,
                                                                    "et_range/low",
                                                                    default=SampleSetupScript.et_range_low)

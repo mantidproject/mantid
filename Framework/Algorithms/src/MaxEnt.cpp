@@ -1,14 +1,16 @@
 #include "MantidAlgorithms/MaxEnt.h"
+#include "MantidAPI/EqualBinSizesValidator.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/TextAxis.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAlgorithms/MaxEnt/MaxentEntropyNegativeValues.h"
 #include "MantidAlgorithms/MaxEnt/MaxentEntropyPositiveValues.h"
+#include "MantidAlgorithms/MaxEnt/MaxentSpaceComplex.h"
+#include "MantidAlgorithms/MaxEnt/MaxentSpaceReal.h"
+#include "MantidAlgorithms/MaxEnt/MaxentTransformFourier.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/UnitFactory.h"
-#include <boost/make_shared.hpp>
-#include <boost/shared_array.hpp>
 #include <gsl/gsl_linalg.h>
 
 namespace Mantid {
@@ -45,16 +47,6 @@ std::map<std::string, std::string> inverseLabel = {{"s", "Hz"},
 }
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-MaxEnt::MaxEnt() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-MaxEnt::~MaxEnt() {}
-
-//----------------------------------------------------------------------------------------------
 
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string MaxEnt::name() const { return "MaxEnt"; }
@@ -70,7 +62,7 @@ const std::string MaxEnt::summary() const {
   return "Runs Maximum Entropy method on every spectrum of an input workspace. "
          "Note this algorithm is still in development, and its interface is "
          "likely to change. It currently works for the case where data and "
-         "image are related by a Fourier transform.";
+         "image are related by a 1D Fourier transform.";
 }
 
 //----------------------------------------------------------------------------------------------
@@ -78,18 +70,35 @@ const std::string MaxEnt::summary() const {
  */
 void MaxEnt::init() {
 
+  // X values in input workspace must be (almost) equally spaced
+  const double warningLevel = 0.01;
+  const double errorLevel = 0.5;
   declareProperty(
-      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
+      make_unique<WorkspaceProperty<>>(
+          "InputWorkspace", "", Direction::Input,
+          boost::make_shared<EqualBinSizesValidator>(errorLevel, warningLevel)),
       "An input workspace.");
 
   declareProperty("ComplexData", false,
-                  "Whether or not the input data are complex. If true, the "
+                  "If true, the input data is assumed to be complex and the "
                   "input workspace is expected to have an even number of "
-                  "histograms.");
+                  "histograms (2N). Spectrum numbers S and S+N are assumed to "
+                  "be the real and imaginary part of the complex signal "
+                  "respectively.");
 
-  declareProperty("PositiveImage", false, "If true, the reconstructed image "
-                                          "must be positive. It can take "
-                                          "negative values otherwise");
+  declareProperty("ComplexImage", true,
+                  "If true, the algorithm will use complex images for the "
+                  "calculations. This is the recommended option when there is "
+                  "no prior knowledge about the image. If the image is known "
+                  "to be real, this option can be set to false and the "
+                  "algorithm will only consider the real part for "
+                  "calculations.");
+
+  declareProperty("PositiveImage", false,
+                  "If true, the reconstructed image is only allowed to take "
+                  "positive values. It can take negative values otherwise. "
+                  "This option defines the entropy formula that will be used "
+                  "for the calculations (see next section for more details).");
 
   declareProperty("AutoShift", false,
                   "Automatically calculate and apply phase shift. Zero on the "
@@ -118,33 +127,33 @@ void MaxEnt::init() {
                       "ChiEps", 0.001, mustBeNonNegative, Direction::Input),
                   "Required precision for Chi-square");
 
-  declareProperty(make_unique<PropertyWithValue<double>>("DistancePenalty", 0.1,
-                                                         mustBeNonNegative,
-                                                         Direction::Input),
-                  "Distance penalty applied to the current image");
+  declareProperty(
+      make_unique<PropertyWithValue<double>>(
+          "DistancePenalty", 0.1, mustBeNonNegative, Direction::Input),
+      "Distance penalty applied to the current image at each iteration.");
 
   declareProperty(make_unique<PropertyWithValue<double>>(
                       "MaxAngle", 0.05, mustBeNonNegative, Direction::Input),
-                  "Maximum degree of non-parallelism between S and C");
+                  "Maximum degree of non-parallelism between S and C.");
 
   mustBePositive = boost::make_shared<BoundedValidator<size_t>>();
   mustBePositive->setLower(1);
   declareProperty(make_unique<PropertyWithValue<size_t>>(
                       "MaxIterations", 20000, mustBePositive, Direction::Input),
-                  "Maximum number of iterations");
+                  "Maximum number of iterations.");
 
   declareProperty(make_unique<PropertyWithValue<size_t>>("AlphaChopIterations",
                                                          500, mustBePositive,
                                                          Direction::Input),
-                  "Maximum number of iterations in alpha chop");
+                  "Maximum number of iterations in alpha chop.");
 
   declareProperty(
       make_unique<WorkspaceProperty<>>("EvolChi", "", Direction::Output),
-      "Output workspace containing the evolution of Chi-sq");
+      "Output workspace containing the evolution of Chi-sq.");
   declareProperty(
       make_unique<WorkspaceProperty<>>("EvolAngle", "", Direction::Output),
       "Output workspace containing the evolution of "
-      "non-paralellism between S and C");
+      "non-paralellism between S and C.");
   declareProperty(make_unique<WorkspaceProperty<>>("ReconstructedImage", "",
                                                    Direction::Output),
                   "The output workspace containing the reconstructed image.");
@@ -163,37 +172,7 @@ std::map<std::string, std::string> MaxEnt::validateInputs() {
   MatrixWorkspace_sptr inWS = getProperty("InputWorkspace");
 
   if (inWS) {
-
-    // 1. X values in input workspace must be (almost) equally spaced
-
-    const double warningLevel = 0.01;
-    const double errorLevel = 0.5;
-    bool printWarning = false;
-    // Average spacing
-    const MantidVec &X = inWS->readX(0);
-    const double dx =
-        (X[X.size() - 1] - X[0]) / static_cast<double>(X.size() - 1);
-    for (size_t i = 1; i < X.size() - 1; i++) {
-      // 1% accuracy exceeded, but data still usable
-      if (std::abs(X[i] - X[0] - static_cast<double>(i) * dx) / dx >
-          warningLevel) {
-        printWarning = true;
-        if (std::abs(X[i] - X[0] - static_cast<double>(i) * dx) / dx >
-            errorLevel) {
-          // 50% accuracy exceeded, data not usable
-          printWarning = false;
-          result["InputWorkspace"] =
-              "X axis must be linear (all bins have same width)";
-          break;
-        }
-      }
-    }
-    if (printWarning) {
-      g_log.warning() << "Bin widths differ by more than " << warningLevel * 100
-                      << "% of average\n";
-    }
-
-    // 2. If the input signal is complex, we expect an even number of histograms
+    // If the input signal is complex, we expect an even number of histograms
     // in the input workspace
 
     size_t nhistograms = inWS->getNumberHistograms();
@@ -213,7 +192,9 @@ void MaxEnt::exec() {
 
   // MaxEnt parameters
   // Complex data?
-  bool complex = getProperty("ComplexData");
+  bool complexData = getProperty("ComplexData");
+  // Complex image?
+  bool complexImage = getProperty("ComplexImage");
   // Image must be positive?
   bool positiveImage = getProperty("PositiveImage");
   // Autoshift
@@ -244,16 +225,35 @@ void MaxEnt::exec() {
   // Number of X bins
   size_t npointsX = inWS->isHistogramData() ? npoints + 1 : npoints;
 
+  // Is our data space real or complex?
+  MaxentSpace_sptr dataSpace;
+  if (complexData) {
+    dataSpace = std::make_shared<MaxentSpaceComplex>();
+  } else {
+    dataSpace = std::make_shared<MaxentSpaceReal>();
+  }
+  // Is our image space real or complex?
+  MaxentSpace_sptr imageSpace;
+  if (complexImage) {
+    imageSpace = std::make_shared<MaxentSpaceComplex>();
+  } else {
+    imageSpace = std::make_shared<MaxentSpaceReal>();
+  }
+  // The type of transform. Currently a 1D Fourier Transform
+  MaxentTransform_sptr transform =
+      std::make_shared<MaxentTransformFourier>(dataSpace, imageSpace);
+
   // The type of entropy we are going to use (depends on the type of image,
   // positive only, or positive and/or negative)
-  MaxentData_sptr maxentData;
+  MaxentEntropy_sptr entropy;
   if (positiveImage) {
-    maxentData = boost::make_shared<MaxentData>(
-        boost::make_shared<MaxentEntropyPositiveValues>());
+    entropy = std::make_shared<MaxentEntropyPositiveValues>();
   } else {
-    maxentData = boost::make_shared<MaxentData>(
-        boost::make_shared<MaxentEntropyNegativeValues>());
+    entropy = std::make_shared<MaxentEntropyNegativeValues>();
   }
+
+  // Entropy and transform is all we need to set up a calculator
+  MaxentCalculator maxentCalculator = MaxentCalculator(entropy, transform);
 
   // Output workspaces
   MatrixWorkspace_sptr outImageWS;
@@ -261,7 +261,7 @@ void MaxEnt::exec() {
   MatrixWorkspace_sptr outEvolChi;
   MatrixWorkspace_sptr outEvolTest;
 
-  nspec = complex ? nspec / 2 : nspec;
+  nspec = complexData ? nspec / 2 : nspec;
   outImageWS =
       WorkspaceFactory::Instance().create(inWS, 2 * nspec, npointsX, npoints);
   outDataWS =
@@ -269,23 +269,20 @@ void MaxEnt::exec() {
   outEvolChi = WorkspaceFactory::Instance().create(inWS, nspec, niter, niter);
   outEvolTest = WorkspaceFactory::Instance().create(inWS, nspec, niter, niter);
 
-  npoints *= 2;
+  npoints = complexImage ? npoints * 2 : npoints;
   for (size_t s = 0; s < nspec; s++) {
 
     // Start distribution (flat background)
     std::vector<double> image(npoints, background);
 
-    if (complex) {
-      auto dataRe = inWS->readY(s);
-      auto dataIm = inWS->readY(s + nspec);
-      auto errorsRe = inWS->readE(s);
-      auto errorsIm = inWS->readE(s + nspec);
-      maxentData->loadComplex(dataRe, dataIm, errorsRe, errorsIm, image,
-                              background);
+    std::vector<double> data;
+    std::vector<double> errors;
+    if (complexData) {
+      data = toComplex(inWS, s, false);  // false -> data
+      errors = toComplex(inWS, s, true); // true -> errors
     } else {
-      auto data = inWS->readY(s);
-      auto error = inWS->readE(s);
-      maxentData->loadReal(data, error, image, background);
+      data = inWS->readY(s);
+      errors = inWS->readE(s);
     }
 
     // To record the algorithm's progress
@@ -298,25 +295,24 @@ void MaxEnt::exec() {
     // Run maxent algorithm
     for (size_t it = 0; it < niter; it++) {
 
-      // Calculate quadratic model coefficients
-      // (SB eq. 21 and 24)
-      maxentData->calculateQuadraticCoefficients();
-      double currAngle = maxentData->getAngle();
-      double currChisq = maxentData->getChisq();
-      auto coeffs = maxentData->getQuadraticCoefficients();
+      // Iterates one step towards the solution. This means calculating
+      // quadratic coefficients, search directions, angle and chi-sq
+      maxentCalculator.iterate(data, errors, image, background);
 
       // Calculate delta to construct new image (SB eq. 25)
+      double currChisq = maxentCalculator.getChisq();
+      auto coeffs = maxentCalculator.getQuadraticCoefficients();
       auto delta = move(coeffs, chiTarget / currChisq, chiEps, alphaIter);
 
       // Apply distance penalty (SB eq. 33)
-      image = maxentData->getImage();
       delta = applyDistancePenalty(delta, coeffs, image, background, distEps);
 
-      // Update image according to 'delta' and calculate the new Chi-square
-      maxentData->updateImage(delta);
-      currChisq = maxentData->getChisq();
+      // Update image
+      auto dirs = maxentCalculator.getSearchDirections();
+      image = updateImage(image, delta, dirs);
 
       // Record the evolution of Chi-square and angle(S,C)
+      double currAngle = maxentCalculator.getAngle();
       evolChi[it] = currChisq;
       evolTest[it] = currAngle;
 
@@ -336,12 +332,13 @@ void MaxEnt::exec() {
     } // iterations
 
     // Get calculated data
-    auto solData = maxentData->getReconstructedData();
-    auto solImage = maxentData->getImage();
+    auto solData = maxentCalculator.getReconstructedData();
+    auto solImage = maxentCalculator.getImage();
 
     // Populate the output workspaces
-    populateDataWS(inWS, s, nspec, solData, outDataWS);
-    populateImageWS(inWS, s, nspec, solImage, outImageWS, autoShift);
+    populateDataWS(inWS, s, nspec, solData, complexData, outDataWS);
+    populateImageWS(inWS, s, nspec, solImage, complexImage, outImageWS,
+                    autoShift);
 
     // Populate workspaces recording the evolution of Chi and Test
     // X values
@@ -363,6 +360,38 @@ void MaxEnt::exec() {
 }
 
 //----------------------------------------------------------------------------------------------
+
+/** Returns a given spectrum as a complex number
+* @param inWS :: [input] The input workspace containing all the spectra
+* @param spec :: [input] The spectrum of interest
+* @param errors :: [input] If true, returns the errors, otherwise returns the
+* counts
+* @return : Spectrum 'spec' as a complex vector
+*/
+std::vector<double> MaxEnt::toComplex(const API::MatrixWorkspace_sptr &inWS,
+                                      size_t spec, bool errors) {
+
+  std::vector<double> result(inWS->blocksize() * 2);
+
+  if (inWS->getNumberHistograms() % 2)
+    throw std::invalid_argument(
+        "Cannot convert input workspace to complex data");
+
+  size_t nspec = inWS->getNumberHistograms() / 2;
+
+  if (!errors) {
+    for (size_t i = 0; i < inWS->blocksize(); i++) {
+      result[2 * i] = inWS->readY(spec)[i];
+      result[2 * i + 1] = inWS->readY(spec + nspec)[i];
+    }
+  } else {
+    for (size_t i = 0; i < inWS->blocksize(); i++) {
+      result[2 * i] = inWS->readE(spec)[i];
+      result[2 * i + 1] = inWS->readE(spec + nspec)[i];
+    }
+  }
+  return result;
+}
 
 /** Bisection method to move delta one step closer towards the solution
 * @param coeffs :: [input] The current quadratic coefficients
@@ -591,22 +620,55 @@ std::vector<double> MaxEnt::applyDistancePenalty(
   return newDelta;
 }
 
+/**
+* Updates the image according to an increment delta
+* @param image : [input] The current image as a vector (can be real or complex)
+* @param delta : [input] The increment delta as a vector (can be real or
+* complex)
+* @param dirs : [input] The search directions
+* @return : The new image
+*/
+std::vector<double>
+MaxEnt::updateImage(const std::vector<double> &image,
+                    const std::vector<double> &delta,
+                    const std::vector<std::vector<double>> dirs) {
+
+  std::vector<double> newImage = image;
+
+  if (image.empty() || dirs.empty() || (delta.size() != dirs.size())) {
+    throw std::runtime_error("Cannot calculate new image");
+  }
+
+  // Calculate the new image
+  for (size_t i = 0; i < image.size(); i++) {
+    for (size_t k = 0; k < delta.size(); k++) {
+      newImage[i] = newImage[i] + delta[k] * dirs[k][i];
+    }
+  }
+  return newImage;
+}
+
 /** Populates the output workspaces
 * @param inWS :: [input] The input workspace
 * @param spec :: [input] The current spectrum being analyzed
 * @param nspec :: [input] The total number of histograms in the input workspace
-* @param result :: [input] The result to be written in the output workspace
+* @param result :: [input] The image to be written in the output workspace (can
+* be real or complex vector)
+* @param complex :: [input] True if the result is a complex vector, false
+* otherwise
 * @param outWS :: [input] The output workspace to populate
 * @param autoShift :: [input] Whether or not to correct the phase shift
 */
 void MaxEnt::populateImageWS(const MatrixWorkspace_sptr &inWS, size_t spec,
                              size_t nspec, const std::vector<double> &result,
-                             MatrixWorkspace_sptr &outWS, bool autoShift) {
+                             bool complex, MatrixWorkspace_sptr &outWS,
+                             bool autoShift) {
 
-  if (result.size() % 2)
+  if (complex && result.size() % 2)
     throw std::invalid_argument("Cannot write results to output workspaces");
 
-  int npoints = static_cast<int>(result.size() / 2);
+  int npoints = complex ? static_cast<int>(result.size() / 2)
+                        : static_cast<int>(result.size());
   int npointsX = inWS->isHistogramData() ? npoints + 1 : npoints;
   MantidVec X(npointsX);
   MantidVec YR(npoints);
@@ -623,22 +685,39 @@ void MaxEnt::populateImageWS(const MatrixWorkspace_sptr &inWS, size_t spec,
   if (!autoShift)
     shift = 0;
 
+  // X values
   for (int i = 0; i < npoints; i++) {
-    int j = (npoints / 2 + i + isOdd) % npoints;
     X[i] = delta * (-npoints / 2 + i);
-
-    double xShift = X[i] * shift;
-    double c = cos(xShift);
-    double s = sin(xShift);
-    YR[i] = result[2 * j] * c - result[2 * j + 1] * s;
-    YI[i] = result[2 * j] * s + result[2 * j + 1] * c;
-    YR[i] *= dx;
-    YI[i] *= dx;
   }
   if (npointsX == npoints + 1)
     X[npoints] = X[npoints - 1] + delta;
 
-  // Caption & label
+  // Y values
+  if (complex) {
+    for (int i = 0; i < npoints; i++) {
+      int j = (npoints / 2 + i + isOdd) % npoints;
+      double xShift = X[i] * shift;
+      double c = cos(xShift);
+      double s = sin(xShift);
+      YR[i] = result[2 * j] * c - result[2 * j + 1] * s;
+      YI[i] = result[2 * j] * s + result[2 * j + 1] * c;
+      YR[i] *= dx;
+      YI[i] *= dx;
+    }
+  } else {
+    for (int i = 0; i < npoints; i++) {
+      int j = (npoints / 2 + i + isOdd) % npoints;
+      double xShift = X[i] * shift;
+      double c = cos(xShift);
+      double s = sin(xShift);
+      YR[i] = result[j] * c;
+      YI[i] = result[j] * s;
+      YR[i] *= dx;
+      YI[i] *= dx;
+    }
+  }
+
+  // X caption & label
   auto inputUnit = inWS->getAxis(0)->unit();
   if (inputUnit) {
     boost::shared_ptr<Kernel::Units::Label> lblUnit =
@@ -665,17 +744,20 @@ void MaxEnt::populateImageWS(const MatrixWorkspace_sptr &inWS, size_t spec,
 * @param inWS :: [input] The input workspace
 * @param spec :: [input] The current spectrum being analyzed
 * @param nspec :: [input] The total number of histograms in the input workspace
-* @param result :: [input] The result to be written in the output workspace
+* @param result :: [input] The reconstructed data to be written in the output
+* workspace (can be a real or complex vector)
+* @param complex :: [input] True if result is a complex vector, false otherwise
 * @param outWS :: [input] The output workspace to populate
 */
 void MaxEnt::populateDataWS(const MatrixWorkspace_sptr &inWS, size_t spec,
                             size_t nspec, const std::vector<double> &result,
-                            MatrixWorkspace_sptr &outWS) {
+                            bool complex, MatrixWorkspace_sptr &outWS) {
 
-  if (result.size() % 2)
+  if (complex && result.size() % 2)
     throw std::invalid_argument("Cannot write results to output workspaces");
 
-  int npoints = static_cast<int>(result.size() / 2);
+  int npoints = complex ? static_cast<int>(result.size() / 2)
+                        : static_cast<int>(result.size());
   int npointsX = inWS->isHistogramData() ? npoints + 1 : npoints;
   MantidVec X(npointsX);
   MantidVec YR(npoints);
@@ -685,13 +767,25 @@ void MaxEnt::populateDataWS(const MatrixWorkspace_sptr &inWS, size_t spec,
   double x0 = inWS->readX(spec)[0];
   double dx = inWS->readX(spec)[1] - x0;
 
+  // X values
   for (int i = 0; i < npoints; i++) {
     X[i] = x0 + i * dx;
-    YR[i] = result[2 * i];
-    YI[i] = result[2 * i + 1];
   }
   if (npointsX == npoints + 1)
     X[npoints] = x0 + npoints * dx;
+
+  // Y values
+  if (complex) {
+    for (int i = 0; i < npoints; i++) {
+      YR[i] = result[2 * i];
+      YI[i] = result[2 * i + 1];
+    }
+  } else {
+    for (int i = 0; i < npoints; i++) {
+      YR[i] = result[i];
+      YI[i] = 0.;
+    }
+  }
 
   outWS->dataX(spec).assign(X.begin(), X.end());
   outWS->dataY(spec).assign(YR.begin(), YR.end());

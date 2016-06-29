@@ -60,6 +60,8 @@ void SANSSensitivityCorrection::init() {
   declareProperty("BeamCenterY", EMPTY_DBL(),
                   "Beam position in Y pixel coordinates (optional: otherwise "
                   "sample beam center is used)");
+  declareProperty("MaskedFullComponent", "",
+                  "Component Name to fully mask according to the IDF file.");
 
   declareProperty(make_unique<WorkspaceProperty<>>(
       "OutputWorkspace", "", Direction::Output, PropertyMode::Optional));
@@ -135,6 +137,7 @@ void SANSSensitivityCorrection::exec() {
     floodWS = boost::dynamic_pointer_cast<MatrixWorkspace>(
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName));
     m_output_message += "   |Using " + wsName + "\n";
+    g_log.debug() << "Using sensitivity worspace " << wsName << "\n";
   } else {
     // Load the flood field if we don't have it already
     // First, try to determine whether we need to load data or a sensitivity
@@ -151,7 +154,7 @@ void SANSSensitivityCorrection::exec() {
         // Reset pointer
         floodWS.reset();
         g_log.error() << "A processed Mantid workspace was loaded but it "
-                         "wasn't a sensitivity file!" << std::endl;
+                         "wasn't a sensitivity file!\n";
       }
     }
 
@@ -182,6 +185,7 @@ void SANSSensitivityCorrection::exec() {
           loadAlg->setProperty("BeamCenterX", center_x);
         if (!isEmpty(center_y) && loadAlg->existsProperty("BeamCenterY"))
           loadAlg->setProperty("BeamCenterY", center_y);
+        loadAlg->setPropertyValue("OutputWorkspace", rawFloodWSName);
         loadAlg->executeAsChildAlg();
         Workspace_sptr tmpWS = loadAlg->getProperty("OutputWorkspace");
         rawFloodWS = boost::dynamic_pointer_cast<MatrixWorkspace>(tmpWS);
@@ -260,7 +264,7 @@ void SANSSensitivityCorrection::exec() {
             // We are running out of options
             g_log.error() << "No dark current algorithm provided to load ["
                           << getPropertyValue("DarkCurrentFile")
-                          << "]: skipped!" << std::endl;
+                          << "]: skipped!\n";
             dark_result = "   No dark current algorithm provided: skipped\n";
           }
         }
@@ -288,8 +292,11 @@ void SANSSensitivityCorrection::exec() {
 
         const double minEff = getProperty("MinEfficiency");
         const double maxEff = getProperty("MaxEfficiency");
+        const std::string maskComponent =
+            getPropertyValue("MaskedFullComponent");
         effAlg->setProperty("MinEfficiency", minEff);
         effAlg->setProperty("MaxEfficiency", maxEff);
+        effAlg->setProperty("MaskedFullComponent", maskComponent);
         effAlg->execute();
         floodWS = effAlg->getProperty("OutputWorkspace");
       } else {

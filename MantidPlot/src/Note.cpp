@@ -4,7 +4,7 @@
     --------------------------------------------------------------------
     Copyright            : (C) 2006 by Ion Vasilief,
                            Tilman Hoener zu Siederdissen,
-					  Knut Franke
+                                          Knut Franke
     Email (use @ for *)  : ion_vasilief*yahoo.fr, thzs*gmx.net,
                            knut.franke*gmx.de
     Description          : Notes window class
@@ -35,6 +35,7 @@
 
 #include <QFileDialog>
 #include <QMessageBox>
+#include <QTextCodec>
 #include <QTextStream>
 #include <Qsci/qsciprinter.h>
 #include <QPrintDialog>
@@ -44,14 +45,13 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidQtAPI/FileDialogHandler.h"
 
-Note::Note(const QString& label, QWidget* parent, const QString& name, Qt::WFlags f)
-  : MdiSubWindow(parent, label, name, f)
-{
+Note::Note(const QString &label, QWidget *parent, const QString &name,
+           Qt::WFlags f)
+    : MdiSubWindow(parent, label, name, f) {
   init();
 }
 
-void Note::init()
-{
+void Note::init() {
   te = new QTextEdit(this);
   te->setObjectName(name());
   setWidget(te);
@@ -60,32 +60,25 @@ void Note::init()
   connect(te, SIGNAL(textChanged()), this, SLOT(modifiedNote()));
 }
 
-void Note::setName(const QString& name)
-{
+void Note::setName(const QString &name) {
   te->setObjectName(name);
   MdiSubWindow::setName(name);
 }
 
-void Note::modifiedNote()
-{
-  emit modifiedWindow(this);
-}
+void Note::modifiedNote() { emit modifiedWindow(this); }
 
-void Note::print()
-{
+void Note::print() {
   QsciPrinter printer(QPrinter::HighResolution);
   printer.setColorMode(QPrinter::GrayScale);
   printer.setOutputFormat(QPrinter::PostScriptFormat);
   QPrintDialog printDialog(&printer);
   printDialog.setWindowTitle("MantidPlot - Print Note");
-  if (printDialog.exec() == QDialog::Accepted)
-  {
+  if (printDialog.exec() == QDialog::Accepted) {
     te->document()->print(&printer);
   }
 }
 
-void Note::exportPDF(const QString& fileName)
-{
+void Note::exportPDF(const QString &fileName) {
   QPrinter printer;
   printer.setColorMode(QPrinter::GrayScale);
   printer.setCreator("MantidPlot");
@@ -94,27 +87,27 @@ void Note::exportPDF(const QString& fileName)
   te->document()->print(&printer);
 }
 
-QString Note::exportASCII(const QString &filename)
-{
+QString Note::exportASCII(const QString &filename) {
   QString filter;
   filter += tr("Text") + " (*.txt *.TXT);;";
-  filter += tr("All Files")+" (*)";
+  filter += tr("All Files") + " (*)";
 
   QString selectedFilter;
   QString fn;
-  if (filename.isEmpty())
-  {
-    QString dir(Mantid::Kernel::ConfigService::Instance().getString("defaultsave.directory").c_str());
-    fn = MantidQt::API::FileDialogHandler::getSaveFileName(this, tr("Save Text to File"),dir,filter, &selectedFilter);
-  }
-  else
+  if (filename.isEmpty()) {
+    QString dir(Mantid::Kernel::ConfigService::Instance()
+                    .getString("defaultsave.directory")
+                    .c_str());
+    fn = MantidQt::API::FileDialogHandler::getSaveFileName(
+        this, tr("Save Text to File"), dir, filter, &selectedFilter);
+  } else
     fn = filename;
 
-  if ( !fn.isEmpty() ){
+  if (!fn.isEmpty()) {
     QFileInfo fi(fn);
 
     QString baseName = fi.fileName();
-    if (!baseName.contains(".")){
+    if (!baseName.contains(".")) {
       if (selectedFilter.contains(".txt"))
         fn.append(".txt");
       else if (selectedFilter.contains(".py"))
@@ -122,13 +115,15 @@ QString Note::exportASCII(const QString &filename)
     }
 
     QFile f(fn);
-    if (!f.open(IO_WriteOnly)){
-      QMessageBox::critical(0, tr("MantidPlot - File Save Error"),
-            tr("Could not write to file: <br><h4> %1 </h4><p>Please verify that you have the right to write to this location!").arg(fn));
+    if (!f.open(QIODevice::WriteOnly)) {
+      QMessageBox::critical(
+          0, tr("MantidPlot - File Save Error"),
+          tr("Could not write to file: <br><h4> %1 </h4><p>Please verify that "
+             "you have the right to write to this location!").arg(fn));
       return QString::null;
     }
 
-    QTextStream t( &f );
+    QTextStream t(&f);
     t.setCodec(QTextCodec::codecForName("UTF-8"));
     t << text();
     f.close();
@@ -136,19 +131,19 @@ QString Note::exportASCII(const QString &filename)
   return fn;
 }
 
-void Note::loadFromProject(const std::string& lines, ApplicationWindow* app, const int fileVersion)
-{
+void Note::loadFromProject(const std::string &lines, ApplicationWindow *app,
+                           const int fileVersion) {
   Q_UNUSED(fileVersion);
 
   std::vector<std::string> lineVec;
   boost::split(lineVec, lines, boost::is_any_of("\n"));
 
-  if(lineVec.size() < 1)
+  if (lineVec.size() < 1)
     return;
 
   std::vector<std::string> firstLineVec;
   boost::split(firstLineVec, lineVec[0], boost::is_any_of("\t"));
-  if(firstLineVec.size() < 2)
+  if (firstLineVec.size() < 2)
     return;
 
   const QString name = QString::fromUtf8(firstLineVec[0].c_str());
@@ -160,27 +155,24 @@ void Note::loadFromProject(const std::string& lines, ApplicationWindow* app, con
 
   TSVSerialiser tsv(lines);
 
-  if(tsv.hasLine("geometry"))
-  {
-    const QString geometry = QString::fromUtf8(tsv.lineAsString("geometry").c_str());
+  if (tsv.hasLine("geometry")) {
+    const QString geometry =
+        QString::fromUtf8(tsv.lineAsString("geometry").c_str());
     app->restoreWindowGeometry(app, this, geometry);
   }
 
-  if(tsv.selectLine("WindowLabel"))
-  {
+  if (tsv.selectLine("WindowLabel")) {
     setWindowLabel(QString::fromUtf8(tsv.asString(1).c_str()));
     setCaptionPolicy((MdiSubWindow::CaptionPolicy)tsv.asInt(2));
   }
 
-  if(tsv.hasSection("content"))
-  {
+  if (tsv.hasSection("content")) {
     const std::string content = tsv.sections("content").front();
     te->setText(QString::fromUtf8(content.c_str()));
   }
 }
 
-std::string Note::saveToProject(ApplicationWindow* app)
-{
+std::string Note::saveToProject(ApplicationWindow *app) {
   TSVSerialiser tsv;
   tsv.writeRaw("<note>");
   tsv.writeLine(name().toStdString()) << birthDate();

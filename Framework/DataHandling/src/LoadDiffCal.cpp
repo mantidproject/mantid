@@ -36,16 +36,6 @@ using namespace H5;
 DECLARE_ALGORITHM(LoadDiffCal)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-LoadDiffCal::LoadDiffCal() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-LoadDiffCal::~LoadDiffCal() {}
-
-//----------------------------------------------------------------------------------------------
 
 /// Algorithms name for identification. @see Algorithm::name
 const std::string LoadDiffCal::name() const { return "LoadDiffCal"; }

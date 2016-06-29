@@ -8,63 +8,60 @@
 #include "MantidAPI/Workspace_fwd.h"
 #include "WidgetDllOption.h"
 
-namespace MantidQt
-{
-namespace MantidWidgets
-{
+namespace MantidQt {
+namespace MantidWidgets {
 
-  /** A version of QwtPlot that adds a layer of thread safety.
-   *
-   * Each SafeQwtPlot has a workspace associated with it.
-   * Before drawing, it acquires a ReadLock to prevent
-   * an algorithm from modifying the underlying workspace while it is
-   * drawing.
-   *
-   * If no workspace is set, no drawing occurs (silently).
-    
-    @date 2012-01-24
+/** A version of QwtPlot that adds a layer of thread safety.
+ *
+ * Each SafeQwtPlot has a workspace associated with it.
+ * Before drawing, it acquires a ReadLock to prevent
+ * an algorithm from modifying the underlying workspace while it is
+ * drawing.
+ *
+ * If no workspace is set, no drawing occurs (silently).
 
-    Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+  @date 2012-01-24
 
-    This file is part of Mantid.
+  Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+ National Laboratory & European Spallation Source
 
-    Mantid is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 3 of the License, or
-    (at your option) any later version.
+  This file is part of Mantid.
 
-    Mantid is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+  Mantid is free software; you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation; either version 3 of the License, or
+  (at your option) any later version.
 
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  Mantid is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
 
-    File change history is stored at: <https://github.com/mantidproject/mantid>
-    Code Documentation is available at: <http://doxygen.mantidproject.org>
-  */
-  class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS SafeQwtPlot : public QwtPlot
-  {
-    Q_OBJECT
+  You should have received a copy of the GNU General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-  public:
-    explicit SafeQwtPlot(QWidget * parent = NULL);
-    explicit SafeQwtPlot(const QwtText &title, QWidget *p = NULL);
+  File change history is stored at: <https://github.com/mantidproject/mantid>
+  Code Documentation is available at: <http://doxygen.mantidproject.org>
+*/
+class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS SafeQwtPlot : public QwtPlot {
+  Q_OBJECT
 
-    ~SafeQwtPlot() override;
+public:
+  explicit SafeQwtPlot(QWidget *parent = NULL);
+  explicit SafeQwtPlot(const QwtText &title, QWidget *p = NULL);
 
-    void drawCanvas(QPainter *painter) override;
+  ~SafeQwtPlot() override;
 
-    void setWorkspace(Mantid::API::Workspace_sptr ws);
+  void drawCanvas(QPainter *painter) override;
 
-  private:
-    /// Workspace being read-locked
-    Mantid::API::Workspace_sptr m_ws;
-  };
+  void setWorkspace(Mantid::API::Workspace_sptr ws);
 
+private:
+  /// Workspace being read-locked
+  Mantid::API::Workspace_sptr m_ws;
+};
 
 } // namespace MantidWidgets
 } // namespace MantidQt
 
-#endif  /* MANTID_MANTIDWIDGETS_SAFEQWTPLOT_H_ */
+#endif /* MANTID_MANTIDWIDGETS_SAFEQWTPLOT_H_ */

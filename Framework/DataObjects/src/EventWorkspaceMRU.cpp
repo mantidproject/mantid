@@ -27,10 +27,6 @@ EventWorkspaceMRU::~EventWorkspaceMRU() {
       delete data;
     }
   }
-
-  for (auto &marker : m_markersToDelete) {
-    delete marker;
-  }
 }
 
 //---------------------------------------------------------------------------
@@ -67,14 +63,6 @@ void EventWorkspaceMRU::ensureEnoughBuffersY(size_t thread_num) const {
 //---------------------------------------------------------------------------
 /// Clear all the data in the MRU buffers
 void EventWorkspaceMRU::clear() {
-  std::lock_guard<std::mutex> _lock(this->m_toDeleteMutex);
-
-  // FIXME: don't clear the locked ones!
-  for (auto &marker : m_markersToDelete)
-    if (!marker->m_locked)
-      delete marker;
-  m_markersToDelete.clear();
-
   // Make sure you free up the memory in the MRUs
   for (auto &data : m_bufferedDataY)
     if (data) {
@@ -123,13 +111,7 @@ void EventWorkspaceMRU::insertY(size_t thread_num, MantidVecWithMarker *data) {
   std::lock_guard<std::mutex> _lock(m_changeMruListsMutexY);
   MantidVecWithMarker *oldData = m_bufferedDataY[thread_num]->insert(data);
   // And clear up the memory of the old one, if it is dropping out.
-  if (oldData) {
-    if (oldData->m_locked) {
-      std::lock_guard<std::mutex> _lock(this->m_toDeleteMutex);
-      m_markersToDelete.push_back(oldData);
-    } else
-      delete oldData;
-  }
+  delete oldData;
 }
 
 /** Insert a new histogram into the MRU
@@ -143,13 +125,7 @@ void EventWorkspaceMRU::insertE(size_t thread_num, MantidVecWithMarker *data) {
   std::lock_guard<std::mutex> _lock(m_changeMruListsMutexE);
   MantidVecWithMarker *oldData = m_bufferedDataE[thread_num]->insert(data);
   // And clear up the memory of the old one, if it is dropping out.
-  if (oldData) {
-    if (oldData->m_locked) {
-      std::lock_guard<std::mutex> _lock(this->m_toDeleteMutex);
-      m_markersToDelete.push_back(oldData);
-    } else
-      delete oldData;
-  }
+  delete oldData;
 }
 
 /** Delete any entries in the MRU at the given index

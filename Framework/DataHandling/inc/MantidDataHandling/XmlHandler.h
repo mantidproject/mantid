@@ -8,6 +8,8 @@
 #ifndef SUBPROJECTS__MANTIDFRAMEWORK_DATAHANDLING_SRC_XMLHANDLER_H_
 #define SUBPROJECTS__MANTIDFRAMEWORK_DATAHANDLING_SRC_XMLHANDLER_H_
 
+#include "MantidKernel/System.h"
+
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -28,7 +30,7 @@
 namespace Mantid {
 namespace DataHandling {
 
-class XmlHandler {
+class DLLExport XmlHandler {
 public:
   XmlHandler();
   XmlHandler(std::string);
@@ -39,6 +41,7 @@ public:
   std::string get_text_from_tag(const std::string &);
   std::map<std::string, std::string>
   get_attributes_from_tag(const std::string &);
+  std::vector<std::string> get_subnodes(const std::string &);
 
 private:
   Poco::AutoPtr<Poco::XML::Document> pDoc;

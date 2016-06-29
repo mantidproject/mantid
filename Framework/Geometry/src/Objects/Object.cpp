@@ -504,8 +504,8 @@ int Object::createSurfaceList(const int outFlag) {
 
     std::vector<const Surface *>::const_iterator vc;
     for (vc = SurList.begin(); vc != SurList.end(); ++vc) {
-      std::cerr << "Point == " << *vc << std::endl;
-      std::cerr << (*vc)->getName() << std::endl;
+      std::cerr << "Point == " << *vc << '\n';
+      std::cerr << (*vc)->getName() << '\n';
     }
   }
   return 1;
@@ -585,14 +585,14 @@ void Object::print() const {
     }
   }
 
-  std::cout << "Name == " << ObjNum << std::endl;
-  std::cout << "Rules == " << Rcount << std::endl;
+  std::cout << "Name == " << ObjNum << '\n';
+  std::cout << "Rules == " << Rcount << '\n';
   std::vector<int>::const_iterator mc;
   std::cout << "Surface included == ";
   for (mc = Cells.begin(); mc < Cells.end(); ++mc) {
     std::cout << (*mc) << " ";
   }
-  std::cout << std::endl;
+  std::cout << '\n';
   return;
 }
 
@@ -609,8 +609,8 @@ void Object::makeComplement() {
 * Displays the rule tree
 */
 void Object::printTree() const {
-  std::cout << "Name == " << ObjNum << std::endl;
-  std::cout << TopRule->display() << std::endl;
+  std::cout << "Name == " << ObjNum << '\n';
+  std::cout << TopRule->display() << '\n';
   return;
 }
 
@@ -725,16 +725,16 @@ int Object::procString(const std::string &Line) {
   }
   // Do outside loop...
   int nullInt;
-  while (procPair(Ln, RuleList, nullInt))
-    ;
-
-  if (RuleList.size() != 1) {
-    std::cerr << "Map size not equal to 1 == " << RuleList.size() << std::endl;
-    std::cerr << "Error Object::ProcString : " << Ln << std::endl;
-    exit(1);
-    return 0;
+  while (procPair(Ln, RuleList, nullInt)) {
   }
-  TopRule = std::move((RuleList.begin())->second);
+
+  if (RuleList.size() == 1) {
+    TopRule = std::move((RuleList.begin())->second);
+  } else {
+    throw std::logic_error("Object::procString() - Unexpected number of "
+                           "surface rules found. Expected=1, found=" +
+                           std::to_string(RuleList.size()));
+  }
   return 1;
 }
 
@@ -1647,20 +1647,19 @@ void Object::calcBoundingBoxByGeometry() {
     }
   } break;
   case GluGeometryHandler::GeometryType::HEXAHEDRON: {
-    // Vectors are in the same order as the following webpage:
-    // http://docs.mantidproject.org/nightly/concepts/HowToDefineGeometricShape.html#hexahedron
-    auto &lf = vectors[1];
-    auto &lb = vectors[0];
-    auto &rb = vectors[3];
-    auto &rf = vectors[2];
-    auto dz = vectors[4] - lf;
+    // These will be replaced by more realistic values in the loop below
+    minX = minY = minZ = std::numeric_limits<decltype(minZ)>::max();
+    maxX = maxY = maxZ = -std::numeric_limits<decltype(maxZ)>::max();
 
-    minX = std::min(lf.X(), lb.X());
-    maxX = std::max(rb.X(), rf.X());
-    minY = lb.Y();
-    maxY = rf.Y();
-    minZ = 0;
-    maxZ = dz.Z();
+    // Loop over all corner points to find minima and maxima on each axis
+    for (const auto &vector : vectors) {
+      minX = std::min(minX, vector.X());
+      maxX = std::max(maxX, vector.X());
+      minY = std::min(minY, vector.Y());
+      maxY = std::max(maxY, vector.Y());
+      minZ = std::min(minZ, vector.Z());
+      maxZ = std::max(maxZ, vector.Z());
+    }
   } break;
   case GluGeometryHandler::GeometryType::CYLINDER:
   case GluGeometryHandler::GeometryType::SEGMENTED_CYLINDER: {

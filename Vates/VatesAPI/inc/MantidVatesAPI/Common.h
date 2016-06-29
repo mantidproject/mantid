@@ -6,24 +6,24 @@
 
 class vtkFieldData;
 
-namespace Mantid
-{
-namespace Geometry
-{
-//Forward dec
+namespace Mantid {
+namespace Geometry {
+// Forward dec
 class IMDDimension;
 }
 
-namespace VATES
-{
+namespace VATES {
 /// Vector of IMDDimension shared pointers.
-typedef std::vector<boost::shared_ptr<Mantid::Geometry::IMDDimension> > DimensionVec;
+typedef std::vector<boost::shared_ptr<Mantid::Geometry::IMDDimension>>
+    DimensionVec;
 
 /// IMDDimension as shared pointer.
 typedef boost::shared_ptr<Mantid::Geometry::IMDDimension> Dimension_sptr;
 
-/// IMDDimension as const shared pointer. Note that IMDDimension is pure virtual.
-typedef boost::shared_ptr<const Mantid::Geometry::IMDDimension> Dimension_const_sptr;
+/// IMDDimension as const shared pointer. Note that IMDDimension is pure
+/// virtual.
+typedef boost::shared_ptr<const Mantid::Geometry::IMDDimension>
+    Dimension_const_sptr;
 
 std::string makeAxisTitle(const Mantid::Geometry::IMDDimension &dim);
 
@@ -40,10 +40,7 @@ std::string convertAxesTitleToLatex(const std::string &toConvert);
 
 void setAxisLabel(const std::string &metadataLabel,
                   const std::string &labelString, vtkFieldData *fieldData);
-
-
 }
-
 }
 
 #endif

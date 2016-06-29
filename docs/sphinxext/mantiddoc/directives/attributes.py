@@ -1,4 +1,4 @@
-from mantiddoc.directives.properties import PropertiesDirective
+from mantiddoc.directives.properties import PropertiesDirective #pylint: disable=unused-import
 
 class AttributesDirective(PropertiesDirective):
 

@@ -53,8 +53,9 @@ bool EXPORT_OPT_MANTIDQT_SLICEVIEWER doesSliceCutThroughWorkspace(
  * @param isAutoScalingOnLoad: is auto scaling on load selected
  * @returns true if autos scaling on load should be performed else false
 */
-bool EXPORT_OPT_MANTIDQT_SLICEVIEWER shouldAutoScaleForNewlySetWorkspace(
-    bool isFirstWorkspaceOpen, bool isAutoScalingOnLoad) {
+bool EXPORT_OPT_MANTIDQT_SLICEVIEWER
+shouldAutoScaleForNewlySetWorkspace(bool isFirstWorkspaceOpen,
+                                    bool isAutoScalingOnLoad) {
   return !isFirstWorkspaceOpen || isAutoScalingOnLoad;
 }
 
@@ -69,8 +70,9 @@ bool EXPORT_OPT_MANTIDQT_SLICEVIEWER shouldAutoScaleForNewlySetWorkspace(
  * @param useRebinMode: indicates if rebinning is to be used
  * @returns true rebin state is consistent, else false
 */
-bool EXPORT_OPT_MANTIDQT_SLICEVIEWER isRebinInConsistentState(
-    Mantid::API::IMDWorkspace *rebinnedWS, bool useRebinMode) {
+bool EXPORT_OPT_MANTIDQT_SLICEVIEWER
+isRebinInConsistentState(Mantid::API::IMDWorkspace *rebinnedWS,
+                         bool useRebinMode) {
   return rebinnedWS && useRebinMode;
 }
 }

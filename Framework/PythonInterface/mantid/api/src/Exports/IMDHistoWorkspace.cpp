@@ -32,8 +32,8 @@ PyObject *WrapReadOnlyNumpyFArray(Mantid::signal_t *arr,
   PyArray_CLEARFLAGS(nparray, NPY_ARRAY_WRITEABLE);
 #else
   PyArrayObject *nparray = (PyArrayObject *)PyArray_New(
-      &PyArray_Type, static_cast<int>(dims.size()), &dims[0], datatype, NULL,
-      static_cast<void *>(const_cast<double *>(arr)), 0, NPY_FARRAY, NULL);
+      &PyArray_Type, static_cast<int>(dims.size()), &dims[0], datatype, nullptr,
+      static_cast<void *>(const_cast<double *>(arr)), 0, NPY_FARRAY, nullptr);
   nparray->flags &= ~NPY_WRITEABLE;
 #endif
   return reinterpret_cast<PyObject *>(nparray);
@@ -117,8 +117,8 @@ void throwIfSizeIncorrect(IMDHistoWorkspace &self, const numeric::array &signal,
     int arrDim = extract<int>(arrShape[i])();
     if (wsShape[i] != arrDim) {
       std::ostringstream os;
-      os << fnLabel << ": The dimension size for the "
-         << boost::lexical_cast<std::string>(i) << "th dimension do not match. "
+      os << fnLabel << ": The dimension size for the " << std::to_string(i)
+         << "th dimension do not match. "
          << "Workspace dimension size=" << wsShape[i]
          << ", array size=" << arrDim;
       throw std::invalid_argument(os.str());

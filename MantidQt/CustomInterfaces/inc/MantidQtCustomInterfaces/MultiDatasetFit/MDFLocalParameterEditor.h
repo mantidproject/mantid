@@ -7,19 +7,15 @@ class QLineEdit;
 class QAction;
 class QPushButton;
 
-namespace MantidQt
-{
-namespace CustomInterfaces
-{
-namespace MDF
-{
+namespace MantidQt {
+namespace CustomInterfaces {
+namespace MDF {
 
 /**
  * An editor widget for editing a local parameter value.
  * It allows edit the values as well as fix/unfix the parameter.
  */
-class LocalParameterEditor: public QWidget
-{
+class LocalParameterEditor : public QWidget {
   Q_OBJECT
 public:
   LocalParameterEditor(QWidget *parent, int index, double value, bool fixed,
@@ -27,9 +23,9 @@ public:
                        bool othersTied);
 signals:
   void setAllValues(double);
-  void fixParameter(int,bool);
+  void fixParameter(int, bool);
   void setAllFixed(bool);
-  void setTie(int,QString);
+  void setTie(int, QString);
   void setTieAll(QString);
 private slots:
   void setAll();
@@ -46,8 +42,8 @@ private:
   bool eventFilter(QObject *widget, QEvent *evn) override;
   void setEditorState();
   static QString setTieDialog(QString tie);
-  QLineEdit* m_editor;
-  QPushButton* m_button;
+  QLineEdit *m_editor;
+  QPushButton *m_button;
   QAction *m_setAllAction;
   QAction *m_fixAction;
   QAction *m_fixAllAction;
@@ -66,10 +62,8 @@ private:
   bool m_othersTied;
 };
 
-
 } // MDF
 } // CustomInterfaces
 } // MantidQt
-
 
 #endif /*MDFDATASETPLOTDATA_H_*/

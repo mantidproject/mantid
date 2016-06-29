@@ -38,7 +38,7 @@ public:
         WorkspaceCreationHelper::Create2DWorkspace123(5, 3);
 
     for (size_t i = 0; i < inWS->getNumberHistograms(); ++i)
-      inWS->getSpectrum(i)->setDetectorID(static_cast<detid_t>(
+      inWS->getSpectrum(i).setDetectorID(static_cast<detid_t>(
           i + 1)); // To be consistent with how LoadMuonNexus works
 
     TableWorkspace_sptr grouping = createDetectorGroupingTable();
@@ -73,19 +73,19 @@ public:
       TS_ASSERT_DELTA(ws->readE(0)[2], 4.243, 0.001);
       TS_ASSERT_DELTA(ws->readE(1)[2], 5.196, 0.001);
 
-      TS_ASSERT_EQUALS(ws->getSpectrum(0)->getSpectrumNo(), 1);
-      TS_ASSERT_EQUALS(ws->getSpectrum(1)->getSpectrumNo(), 2);
+      TS_ASSERT_EQUALS(ws->getSpectrum(0).getSpectrumNo(), 1);
+      TS_ASSERT_EQUALS(ws->getSpectrum(1).getSpectrumNo(), 2);
 
       std::set<detid_t> d1;
       d1.insert(1);
       d1.insert(2);
-      TS_ASSERT_EQUALS(ws->getSpectrum(0)->getDetectorIDs(), d1);
+      TS_ASSERT_EQUALS(ws->getSpectrum(0).getDetectorIDs(), d1);
 
       std::set<detid_t> d2;
       d2.insert(3);
       d2.insert(4);
       d2.insert(5);
-      TS_ASSERT_EQUALS(ws->getSpectrum(1)->getDetectorIDs(), d2);
+      TS_ASSERT_EQUALS(ws->getSpectrum(1).getDetectorIDs(), d2);
     }
 
     // Remove workspace from the data service.

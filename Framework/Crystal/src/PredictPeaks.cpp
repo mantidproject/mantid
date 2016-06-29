@@ -28,14 +28,8 @@ using namespace Mantid::Kernel;
 PredictPeaks::PredictPeaks()
     : m_runNumber(-1), m_inst(), m_pw(), m_sfCalculator() {
   m_refConds = getAllReflectionConditions();
+  convention = ConfigService::Instance().getString("Q.convention");
 }
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-PredictPeaks::~PredictPeaks() {}
-
-//----------------------------------------------------------------------------------------------
 
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
@@ -140,10 +134,8 @@ void PredictPeaks::exec() {
     } catch (std::runtime_error &e) {
       // If there is no goniometer matrix, use identity matrix instead.
       g_log.error() << "Error getting the goniometer rotation matrix from the "
-                       "InputWorkspace." << std::endl
-                    << e.what() << std::endl;
-      g_log.warning() << "Using identity goniometer rotation matrix instead."
-                      << std::endl;
+                       "InputWorkspace.\n" << e.what() << '\n';
+      g_log.warning() << "Using identity goniometer rotation matrix instead.\n";
     }
   } else if (peaksWS) {
     // Sort peaks by run number so that peaks with equal goniometer matrices are
@@ -185,10 +177,9 @@ void PredictPeaks::exec() {
 
         g_log.error()
             << "Error getting the goniometer rotation matrix from the "
-               "InputWorkspace." << std::endl
-            << e.what() << std::endl;
-        g_log.warning() << "Using identity goniometer rotation matrix instead."
-                        << std::endl;
+               "InputWorkspace.\n" << e.what() << '\n';
+        g_log.warning()
+            << "Using identity goniometer rotation matrix instead.\n";
       }
     }
   }
@@ -350,10 +341,16 @@ void PredictPeaks::fillPossibleHKLsUsingPeaksWorkspace(
 
   bool roundHKL = getProperty("RoundHKL");
 
+  // HKL's are flipped by -1 because of the internal Q convention
+  // is not the same as the PeaksWorkspace convention
+  double qSign = 1.0;
+  if (peaksWorkspace->getConvention() == "Crystallography")
+    qSign = -1.0;
+
   for (int i = 0; i < static_cast<int>(peaksWorkspace->getNumberPeaks()); ++i) {
     IPeak &p = peaksWorkspace->getPeak(i);
     // Get HKL from that peak
-    V3D hkl = p.getHKL();
+    V3D hkl = p.getHKL() * qSign;
 
     if (roundHKL)
       hkl.round();
@@ -401,12 +398,15 @@ void PredictPeaks::setStructureFactorCalculatorFromSample(
  * @param orientedUB
  * @param goniometerMatrix
  */
-void PredictPeaks::calculateQAndAddToOutput(const V3D &hkl,
+void PredictPeaks::calculateQAndAddToOutput(V3D &hkl,
                                             const DblMatrix &orientedUB,
                                             const DblMatrix &goniometerMatrix) {
   // The q-vector direction of the peak is = goniometer * ub * hkl_vector
   // This is in inelastic convention: momentum transfer of the LATTICE!
   // Also, q does have a 2pi factor = it is equal to 2pi/wavelength.
+  if (convention == "Crystallography") {
+    hkl = hkl * (-1.0);
+  }
   V3D q = orientedUB * hkl * (2.0 * M_PI);
 
   // Create the peak using the Q in the lab framewith all its info:

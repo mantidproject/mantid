@@ -44,10 +44,6 @@ namespace Algorithms {
  */
 class DLLExport CalculateEfficiency : public API::Algorithm {
 public:
-  /// Default constructor
-  CalculateEfficiency() : API::Algorithm(){};
-  /// Destructor
-  ~CalculateEfficiency() override{};
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "CalculateEfficiency"; }
   /// Summary of algorithms purpose

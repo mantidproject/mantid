@@ -428,8 +428,7 @@ public:
     Workspace2D_sptr workspace =
         WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(3, 3);
     // Remove detectors from one spectrum
-    auto *spec = workspace->getSpectrum(1);
-    spec->clearDetectorIDs();
+    workspace->getSpectrum(1).clearDetectorIDs();
 
     std::string createdWS("ws");
     AnalysisDataService::Instance().add(createdWS, workspace);

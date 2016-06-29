@@ -1097,7 +1097,8 @@ class ISISIndirectInelasticConvFit(ISISIndirectInelasticBase):
             EndX=self.endx,
             BackgroundType=self.bg,
             SpecMin=self.spectra_min,
-            SpecMax=self.spectra_max)
+            SpecMax=self.spectra_max,
+            OutputWorkspace='result')
 
     def _validate_properties(self):
         '''Check the object properties are in an expected state to continue'''

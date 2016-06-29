@@ -2,7 +2,8 @@
     File                 : DataSetDialog.h
     Project              : QtiPlot
     --------------------------------------------------------------------
-    Copyright            : (C) 2006 by Ion Vasilief, Tilman Hoener zu Siederdissen
+    Copyright            : (C) 2006 by Ion Vasilief, Tilman Hoener zu
+ Siederdissen
     Email (use @ for *)  : ion_vasilief*yahoo.fr, thzs*gmx.net
     Description          : Multi purpose dialog for choosing a data set
 
@@ -40,34 +41,36 @@ class QComboBox;
 class Graph;
 
 //! Multi purpose dialog for choosing a data set
-class DataSetDialog : public QDialog
-{
-    Q_OBJECT
+class DataSetDialog : public QDialog {
+  Q_OBJECT
 
 public:
-    DataSetDialog( const QString& text, ApplicationWindow* app, Graph* g = NULL, Qt::WFlags fl = 0 );
+  DataSetDialog(const QString &text, ApplicationWindow *app, Graph *g = NULL,
+                Qt::WFlags fl = 0);
 
 public slots:
   void accept() override;
-        void setCurveNames(const QStringList& names);
-  void setOperationType(ApplicationWindow::Analysis operation){d_operation = operation;}
-	void setCurentDataSet(const QString& s);
+  void setCurveNames(const QStringList &names);
+  void setOperationType(ApplicationWindow::Analysis operation) {
+    d_operation = operation;
+  }
+  void setCurentDataSet(const QString &s);
 
 signals:
-	void options(const QString&);
+  void options(const QString &);
 
 private:
   void setGraph(Graph *g);
 
-  ApplicationWindow* d_app;
+  ApplicationWindow *d_app;
   Graph *d_graph;
   ApplicationWindow::Analysis d_operation;
   QString windowTitle;
 
-  QPushButton* buttonOk;
-  QPushButton* buttonCancel;
-  QGroupBox* groupBox1;
-  QComboBox* boxName;
+  QPushButton *buttonOk;
+  QPushButton *buttonCancel;
+  QGroupBox *groupBox1;
+  QComboBox *boxName;
 };
 
 #endif

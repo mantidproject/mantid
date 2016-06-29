@@ -16,18 +16,6 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-SaveDaveGrp::SaveDaveGrp() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-SaveDaveGrp::~SaveDaveGrp() {}
-
-//----------------------------------------------------------------------------------------------
-
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void SaveDaveGrp::init() {
@@ -68,10 +56,10 @@ void SaveDaveGrp::exec() {
     throw Exception::FileError("Unable to create file: ", filename);
   }
 
-  file << "# Number of " << xcaption << " values" << std::endl;
-  file << nBins << std::endl;
-  file << "# Number of " << ycaption << " values" << std::endl;
-  file << nSpectra << std::endl;
+  file << "# Number of " << xcaption << " values\n";
+  file << nBins << '\n';
+  file << "# Number of " << ycaption << " values\n";
+  file << nSpectra << '\n';
 
   bool toMicroeV = getProperty("ToMicroEV");
   bool xToMicroeV = false, yToMicroeV = false;
@@ -87,41 +75,41 @@ void SaveDaveGrp::exec() {
 
   if (xToMicroeV)
     xunit = "micro eV";
-  file << "# " << xcaption << " (" << xunit << ") values" << std::endl;
+  file << "# " << xcaption << " (" << xunit << ") values\n";
   std::vector<double> x = ws->readX(0);
   for (std::size_t i = 0; i < nBins; i++) {
     double xvalue = (isHist) ? (x[i] + x[i + 1]) * 0.5 : x[i];
     if (xToMicroeV)
       xvalue *= 1000.;
-    file << xvalue << std::endl;
+    file << xvalue << '\n';
   }
 
   if (yToMicroeV)
     yunit = "micro eV";
-  file << "# " << ycaption << " (" << yunit << ") values" << std::endl;
+  file << "# " << ycaption << " (" << yunit << ") values\n";
   double yvalue;
   if ((*ws->getAxis(1)).length() == (nSpectra + 1)) {
     for (std::size_t i = 0; i < nSpectra; i++) {
       yvalue = 0.5 * (((*ws->getAxis(1))(i)) + ((*ws->getAxis(1))(i + 1)));
       if (yToMicroeV)
         yvalue *= 1000.;
-      file << yvalue << std::endl;
+      file << yvalue << '\n';
     }
   } else {
     for (std::size_t i = 0; i < nSpectra; i++) {
       yvalue = (*ws->getAxis(1))(i);
       if (yToMicroeV)
         yvalue *= 1000.;
-      file << yvalue << std::endl;
+      file << yvalue << '\n';
     }
   }
   Progress progress(this, 0, 1, nSpectra);
   for (std::size_t i = 0; i < nSpectra; i++) {
-    file << "# Group " << i << std::endl;
+    file << "# Group " << i << '\n';
     std::vector<double> y = ws->readY(i), er = ws->readE(i);
     std::vector<double>::iterator ity, iter;
     for (ity = y.begin(), iter = er.begin(); ity != y.end(); ++ity, ++iter)
-      file << (*ity) << " " << (*iter) << std::endl;
+      file << (*ity) << " " << (*iter) << '\n';
     progress.report();
   }
   file.close();

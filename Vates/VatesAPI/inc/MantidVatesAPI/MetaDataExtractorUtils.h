@@ -6,13 +6,14 @@
 #include <qwt_double_interval.h>
 #include <string>
 
-
 /**
- * Class with utility methdos to extract meta data information from a IMDWorkspace.
+ * Class with utility methdos to extract meta data information from a
+ *IMDWorkspace.
  *
  * @date November 21, 2014
  *
- * Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+ * Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge
+ *National Laboratory
  *
  * This file is part of Mantid.
  *
@@ -32,44 +33,40 @@
  * File change history is stored at: <https://github.com/mantidproject/mantid>
  * Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-namespace Mantid
-{
-  namespace VATES
-  {
+namespace Mantid {
+namespace VATES {
 
-    class DLLExport MetaDataExtractorUtils
-    {
-      public:
+class DLLExport MetaDataExtractorUtils {
+public:
+  MetaDataExtractorUtils();
 
-        MetaDataExtractorUtils();
+  ~MetaDataExtractorUtils();
 
-        ~MetaDataExtractorUtils();
+  /**
+    * Get the minimum, maximum pair from the workspace
+    * @param workspace A pointer to the workspace
+    * @returns A pair of minimum and maximum values.
+    */
+  QwtDoubleInterval getMinAndMax(Mantid::API::IMDWorkspace_sptr workspace);
 
-        /**
-          * Get the minimum, maximum pair from the workspace
-          * @param workspace A pointer to the workspace
-          * @returns A pair of minimum and maximum values.
-          */
-        QwtDoubleInterval getMinAndMax(Mantid::API::IMDWorkspace_sptr workspace);
+  /**
+    * Extracts the instrument from the workspace.
+    * @param workspace A pointer to a workspace.
+    * @returns The instrument.
+    */
+  std::string extractInstrument(Mantid::API::IMDWorkspace_sptr workspace);
 
-        /**
-          * Extracts the instrument from the workspace.
-          * @param workspace A pointer to a workspace.
-          * @returns The instrument. 
-          */
-        std::string extractInstrument(Mantid::API::IMDWorkspace_sptr workspace);
+private:
+  /**
+  * Get the range of data values from an MD iterator
+  * @param it Iterator for a general MD workspace.
+  * @returns A maximum and minimum pair.
+  */
+  QwtDoubleInterval getRange(Mantid::API::IMDIterator *it);
 
-      private:
-          /**
-          * Get the range of data values from an MD iterator
-          * @param it Iterator for a general MD workspace.
-          * @returns A maximum and minimum pair.
-          */
-        QwtDoubleInterval getRange(Mantid::API::IMDIterator* it);
-
-        double defaultMin;
-        double defaultMax;
-    };
-  }
+  double defaultMin;
+  double defaultMax;
+};
+}
 }
 #endif

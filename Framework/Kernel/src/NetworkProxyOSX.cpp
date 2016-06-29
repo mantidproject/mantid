@@ -116,7 +116,7 @@ ProxyInfoVec proxyInformationFromPac(CFDictionaryRef dict,
                                                     &errorCode)) {
         logger.debug() << "Unable to get the PAC script at "
                        << toString(cfPacLocation) << "Error code: " << errorCode
-                       << std::endl;
+                       << '\n';
         return proxyInfoVec;
       }
 
@@ -140,8 +140,7 @@ ProxyInfoVec proxyInformationFromPac(CFDictionaryRef dict,
         std::string pacLocation = toString(cfPacLocation);
         CFStringRef pacErrorDescription = CFErrorCopyDescription(pacError);
         logger.debug() << "Execution of PAC script at \"%s\" failed: %s"
-                       << pacLocation << toString(pacErrorDescription)
-                       << std::endl;
+                       << pacLocation << toString(pacErrorDescription) << '\n';
       }
 
       CFIndex size = CFArrayGetCount(proxies);

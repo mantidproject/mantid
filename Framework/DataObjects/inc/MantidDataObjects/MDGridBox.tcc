@@ -590,7 +590,7 @@ TMDE(void MDGridBox)::getBoxes(std::vector<API::IMDNode *> &outBoxes,
           box->getBoxes(outBoxes, maxDepth, leafOnly, function);
         }
       } else {
-        //          std::cout << " is not touching at all." << std::endl;
+        //          std::cout << " is not touching at all.\n";
       }
 
       // Move on to the next box in the list
@@ -811,7 +811,7 @@ TMDE(void MDGridBox)::centerpointBin(MDBin<MDE, nd> &bin,
     index_max[d] = max;
 
     // std::cout << d << " from " << std::setw(5) << index_min[d] << " to " <<
-    // std::setw(5)  << index_max[d] << "inc" << std::endl;
+    // std::setw(5)  << index_max[d] << "inc\n";
   }
 
   // If you reach here, than at least some of bin is overlapping this box
@@ -823,7 +823,7 @@ TMDE(void MDGridBox)::centerpointBin(MDBin<MDE, nd> &bin,
   while (!allDone) {
     size_t index = getLinearIndex(counters);
     // std::cout << index << ": " << counters[0] << ", " << counters[1] <<
-    // std::endl;
+    // '\n';
 
     // Find if the box is COMPLETELY held in the bin.
     bool completelyWithin = true;
@@ -916,7 +916,7 @@ TMDE(void MDGridBox)::centerpointBin(MDBin<MDE, nd> &bin,
 //      index_max[d] = max;
 //
 //      //std::cout << d << " from " << std::setw(5) << index_min[d] << " to "
-//      << std::setw(5)  << index_max[d] << "inc" << std::endl;
+//      << std::setw(5)  << index_max[d] << "inc\n";
 //    }
 //
 //    // If you reach here, than at least some of bin is overlapping this box

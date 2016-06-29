@@ -5,7 +5,7 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace ReflTableSchema {
 
-ColumnIndexNameMap makeColumnIndexMap(){
+ColumnIndexNameMap makeColumnIndexMap() {
   return {{COL_RUNS, RUNS},
           {COL_ANGLE, ANGLE},
           {COL_TRANSMISSION, TRANSMISSION},
@@ -17,15 +17,14 @@ ColumnIndexNameMap makeColumnIndexMap(){
           {COL_OPTIONS, OPTIONS}};
 }
 
-ColumnNameIndexMap makeColumnNameMap(){
-    auto indexMap = makeColumnIndexMap();
-    ColumnNameIndexMap columnMap;
-    for(auto it = indexMap.begin(); it != indexMap.end(); ++it){
-      columnMap.emplace(it->second, it->first);
-    }
-    return columnMap;
+ColumnNameIndexMap makeColumnNameMap() {
+  auto indexMap = makeColumnIndexMap();
+  ColumnNameIndexMap columnMap;
+  for (auto it = indexMap.begin(); it != indexMap.end(); ++it) {
+    columnMap.emplace(it->second, it->first);
+  }
+  return columnMap;
 }
-
 }
 } // namespace CustomInterfaces
 } // namespace Mantid

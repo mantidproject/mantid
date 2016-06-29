@@ -42,7 +42,6 @@ namespace Algorithms {
 class DLLExport RefinePowderInstrumentParameters3 : public API::Algorithm {
 public:
   RefinePowderInstrumentParameters3();
-  ~RefinePowderInstrumentParameters3() override;
 
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override {

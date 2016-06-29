@@ -47,7 +47,6 @@ namespace Algorithms {
 class DLLExport NormaliseByDetector : public API::Algorithm {
 public:
   NormaliseByDetector(bool parallelExecution = true);
-  ~NormaliseByDetector() override;
 
   const std::string name() const override;
   /// Summary of algorithms purpose

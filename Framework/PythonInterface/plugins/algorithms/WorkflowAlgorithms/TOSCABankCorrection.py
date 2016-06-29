@@ -24,7 +24,7 @@ class TOSCABankCorrection(DataProcessorAlgorithm):
 
     def PyInit(self):
         self.declareProperty(WorkspaceProperty(name='InputWorkspace', defaultValue='',
-                             direction=Direction.Input),
+                                               direction=Direction.Input),
                              doc='Input reduced workspace')
 
         self.declareProperty(FloatArrayProperty(name='SearchRange',
@@ -42,7 +42,7 @@ class TOSCABankCorrection(DataProcessorAlgorithm):
                              doc='Type of peak to search for')
 
         self.declareProperty(MatrixWorkspaceProperty(name='OutputWorkspace', defaultValue='',
-                             direction=Direction.Output),
+                                                     direction=Direction.Output),
                              doc='Output corrected workspace')
 
         self.declareProperty(name='TargetPeakCentre', defaultValue=0.0,

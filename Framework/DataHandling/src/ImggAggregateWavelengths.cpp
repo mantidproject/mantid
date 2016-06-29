@@ -291,8 +291,7 @@ void ImggAggregateWavelengths::exec() {
     aggToFBands(inputPath, outputPath, tofRanges);
 
   g_log.notice() << "Saved output aggregated images into: " << outputPath
-                 << ". They are now ready for further processing. "
-                 << std::endl;
+                 << ". They are now ready for further processing. \n";
 }
 
 void ImggAggregateWavelengths::aggUniformBands(const std::string &inputPath,
@@ -307,7 +306,7 @@ void ImggAggregateWavelengths::aggUniformBands(const std::string &inputPath,
                     << inputPath
                     << " when trying to split the input bands into a uniform "
                        "number of output bands. Nothing will be produced in "
-                       "the output path." << std::endl;
+                       "the output path.\n";
   }
 
   auto outputSubdirs =
@@ -331,8 +330,7 @@ void ImggAggregateWavelengths::aggIndexBands(const std::string &inputPath,
   if (inputSubDirs.empty()) {
     g_log.warning() << "Could not find any input files or directories in "
                     << inputPath << " when looking for input bands. Nothing "
-                                    "will be produced in the output path."
-                    << std::endl;
+                                    "will be produced in the output path.\n";
   }
 
   auto outRanges = rangesFromStringProperty(rangesSpec, PROP_INDEX_RANGES);
@@ -391,7 +389,7 @@ void ImggAggregateWavelengths::processDirectory(
   if (images.empty()) {
     g_log.warning()
         << "Could not find any input image files in the subdirectory '"
-        << inDir.toString() << "'. It will be ignored." << std::endl;
+        << inDir.toString() << "'. It will be ignored.\n";
     return;
   }
 
@@ -780,15 +778,10 @@ void ImggAggregateWavelengths::aggImage(API::MatrixWorkspace_sptr accum,
   }
 
   for (size_t row = 0; row < sizeY; row++) {
-    Mantid::API::ISpectrum *spectrum = accum->getSpectrum(row);
-    Mantid::API::ISpectrum *specIn = toAdd->getSpectrum(row);
-    auto &dataY = spectrum->dataY();
-    const auto &dataYIn = specIn->readY();
+    auto &dataY = accum->dataY(row);
+    const auto &dataYIn = toAdd->readY(row);
     std::transform(dataY.begin(), dataY.end(), dataYIn.cbegin(), dataY.begin(),
                    std::plus<double>());
-    // for (size_t col = 0; col < sizeX; col++) {
-    //  dataY[col] += dataYIn[col];
-    //}
   }
 }
 
@@ -814,7 +807,7 @@ void ImggAggregateWavelengths::saveAggImage(
   if (!dirFile.isDirectory() || !dirFile.exists()) {
     g_log.information() << "Cannot save output image into '"
                         << outPath.toString()
-                        << "'. It is not an existing directory." << std::endl;
+                        << "'. It is not an existing directory.\n";
     return;
   }
 
@@ -824,7 +817,7 @@ void ImggAggregateWavelengths::saveAggImage(
   fullName += ".fits";
   saveFITS(accum, fullName);
   g_log.information() << "Saved output aggregated image into: " << fullName
-                      << std::endl;
+                      << '\n';
 }
 
 API::MatrixWorkspace_sptr

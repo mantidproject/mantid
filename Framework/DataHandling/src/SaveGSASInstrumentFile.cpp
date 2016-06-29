@@ -240,7 +240,7 @@ ChopperConfiguration::parseStringDbl(const string &instring) const {
   }
 
   // cout << "[C]* Input: " << instring << ": size of double vector: " <<
-  // vecdouble.size() << endl;
+  // vecdouble.size() << '\n';
 
   return vecdouble;
 }
@@ -266,7 +266,7 @@ ChopperConfiguration::parseStringUnsignedInt(const string &instring) const {
   }
 
   // cout << "[C]* Input : " << instring << ": size of string vector: " <<
-  // vecinteger.size() << endl;
+  // vecinteger.size() << '\n';
 
   return vecinteger;
 }
@@ -279,13 +279,6 @@ SaveGSASInstrumentFile::SaveGSASInstrumentFile()
       m_frequency(0), m_id_line(), m_sample(), m_vecBankID2File(),
       m_gsasFileName(), m_configuration(), m_profileMap(), m_gdsp(), m_gdt(),
       m_galpha(), m_gbeta(), m_bank_mndsp(), m_bank_mxtof() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-SaveGSASInstrumentFile::~SaveGSASInstrumentFile() {}
-
-//----------------------------------------------------------------------------------------------
 
 //----------------------------------------------------------------------------------------------
 /** Declare properties

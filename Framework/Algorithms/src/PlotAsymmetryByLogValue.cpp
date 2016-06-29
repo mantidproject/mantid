@@ -311,7 +311,7 @@ Workspace_sptr PlotAsymmetryByLogValue::doLoad(size_t runNumber) {
 
   // Check if file exists
   if (!Poco::File(fn.str()).exists()) {
-    m_log.warning() << "File " << fn.str() << " not found" << std::endl;
+    m_log.warning() << "File " << fn.str() << " not found\n";
     return Workspace_sptr();
   }
 
@@ -508,11 +508,11 @@ void PlotAsymmetryByLogValue::parseRunNames(std::string &firstFN,
 
     // First run number with last base name
     std::ostringstream tempFirst;
-    tempFirst << lastBase << firstFN << firstExt << std::endl;
+    tempFirst << lastBase << firstFN << firstExt << '\n';
     std::string pathFirst = FileFinder::Instance().getFullPath(tempFirst.str());
     // Last run number with first base name
     std::ostringstream tempLast;
-    tempLast << firstBase << lastFN << lastExt << std::endl;
+    tempLast << firstBase << lastFN << lastExt << '\n';
     std::string pathLast = FileFinder::Instance().getFullPath(tempLast.str());
 
     // Try to correct this on the fly by
@@ -522,14 +522,14 @@ void PlotAsymmetryByLogValue::parseRunNames(std::string &firstFN,
       fnExt = firstExt;
       g_log.warning()
           << "First and last run are not in the same directory. File "
-          << pathLast << " will be used instead." << std::endl;
+          << pathLast << " will be used instead.\n";
     } else if (Poco::File(pathFirst).exists()) {
       // ...or viceversa
       fnBase = lastBase;
       fnExt = lastExt;
       g_log.warning()
           << "First and last run are not in the same directory. File "
-          << pathFirst << " will be used instead." << std::endl;
+          << pathFirst << " will be used instead.\n";
     } else {
       throw std::runtime_error(
           "First and last runs are not in the same directory.");

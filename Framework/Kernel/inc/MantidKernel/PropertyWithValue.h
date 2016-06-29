@@ -546,6 +546,15 @@ public:
     return determineAllowedValues(m_value, *m_validator);
   }
 
+  /** Returns the set of valid values for this property, if such a set exists.
+  *  If not, it returns an empty vector.
+  *  @return Returns the set of valid values for this property, or it returns
+  * an empty vector.
+  */
+  bool isMultipleSelectionAllowed() override {
+    return m_validator->isMultipleSelectionAllowed();
+  }
+
   /**
    * Replace the current validator with the given one
    * @param newValidator :: A replacement validator

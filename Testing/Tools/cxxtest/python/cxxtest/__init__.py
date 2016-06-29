@@ -13,13 +13,13 @@ CxxTest's advantages over existing alternatives are that it:
 * Doesn't require exception handling
 * Doesn't require any external libraries (including memory management, file/console I/O, graphics libraries)
 * Is distributed entirely as a set of header files (and a python script).
-* Doesn't require the user to manually register tests and test suites 
+* Doesn't require the user to manually register tests and test suites
 
 The cxxtest Python package includes capabilities for parsing C/C++ source files and generating
 CxxTest drivers.
 """
 
-from __release__ import __version__, __date__
+from cxxtest.__release__ import __version__, __date__
 
 __maintainer__ = "TODO"
 __maintainer_email__ = "TODO"
@@ -27,4 +27,4 @@ __copyright__ = "TODO"
 __license__ = "LGPL"
 __url__ = "http://cxxtest.tigris.org/"
 
-from cxxtestgen import *
+from cxxtest.cxxtestgen import *

@@ -20,12 +20,6 @@ DECLARE_ALGORITHM(SaveRKH)
 
 using namespace API;
 
-/// Constructor
-SaveRKH::SaveRKH() : API::Algorithm(), m_workspace(), m_2d(false), m_outRKH() {}
-
-/// Virtual destructor
-SaveRKH::~SaveRKH() {}
-
 //---------------------------------------------------
 // Private member functions
 //---------------------------------------------------
@@ -156,7 +150,7 @@ void SaveRKH::write1D() {
 
     specnum_t specid(0);
     try {
-      specid = m_workspace->getSpectrum(i)->getSpectrumNo();
+      specid = m_workspace->getSpectrum(i).getSpectrumNo();
     } catch (...) {
       specid = static_cast<specnum_t>(i + 1);
     }
@@ -211,7 +205,7 @@ void SaveRKH::write2D() {
   }
   const Axis *const Y = m_workspace->getAxis(1);
   const size_t Ybins = Y->length();
-  m_outRKH << "\n  " << Ybins << std::endl;
+  m_outRKH << "\n  " << Ybins << '\n';
   for (size_t i = 0; i < Ybins; ++i) {
     m_outRKH << std::setw(14) << std::scientific << std::setprecision(6)
              << (*Y)(i);

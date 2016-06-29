@@ -602,7 +602,7 @@ std::string IntervalList::toStdString(int numOfIntervals) const {
     }
 
     output += ", ..., ";
-    output += m_list[m_list.size() - 1].toStdString();
+    output += m_list.back().toStdString();
   }
   return output;
 }
