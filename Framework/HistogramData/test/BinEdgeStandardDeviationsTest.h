@@ -6,8 +6,8 @@
 #include "MantidHistogramData/BinEdgeStandardDeviations.h"
 #include "MantidHistogramData/PointStandardDeviations.h"
 
-using Mantid::HistogramData::BinEdgeStandardDeviations;
-using Mantid::HistogramData::PointStandardDeviations;
+using namespace Mantid;
+using namespace HistogramData;
 
 class BinEdgeStandardDeviationsTest : public CxxTest::TestSuite {
 public:
@@ -18,6 +18,12 @@ public:
   }
   static void destroySuite(BinEdgeStandardDeviationsTest *suite) {
     delete suite;
+  }
+
+  void test_has_correct_mixins() {
+    BinEdgeStandardDeviations data;
+    TS_ASSERT_THROWS_NOTHING((dynamic_cast<detail::StandardDeviationVectorOf<
+        BinEdgeStandardDeviations, HistogramDx, BinEdgeVariances> &>(data)));
   }
 
   void test_default_constructor() {

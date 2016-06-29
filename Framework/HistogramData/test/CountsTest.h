@@ -7,9 +7,8 @@
 #include "MantidHistogramData/Counts.h"
 #include "MantidHistogramData/Frequencies.h"
 
-using Mantid::HistogramData::BinEdges;
-using Mantid::HistogramData::Counts;
-using Mantid::HistogramData::Frequencies;
+using namespace Mantid;
+using namespace HistogramData;
 
 class CountsTest : public CxxTest::TestSuite {
 public:
@@ -17,6 +16,15 @@ public:
   // This means the constructor isn't called when running other tests
   static CountsTest *createSuite() { return new CountsTest(); }
   static void destroySuite(CountsTest *suite) { delete suite; }
+
+  void test_has_correct_mixins() {
+    Counts data;
+    TS_ASSERT_THROWS_NOTHING(
+        (dynamic_cast<detail::VectorOf<Counts, HistogramY> &>(data)));
+    TS_ASSERT_THROWS_NOTHING(dynamic_cast<detail::Iterable<Counts> &>(data));
+    TS_ASSERT_THROWS_NOTHING(dynamic_cast<detail::Offsetable<Counts> &>(data));
+    TS_ASSERT_THROWS_NOTHING(dynamic_cast<detail::Scalable<Counts> &>(data));
+  }
 
   void test_construct_default() {
     const Counts counts{};

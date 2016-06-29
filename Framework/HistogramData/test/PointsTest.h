@@ -6,8 +6,8 @@
 #include "MantidHistogramData/Points.h"
 #include "MantidHistogramData/BinEdges.h"
 
-using Mantid::HistogramData::Points;
-using Mantid::HistogramData::BinEdges;
+using namespace Mantid;
+using namespace HistogramData;
 
 class PointsTest : public CxxTest::TestSuite {
 public:
@@ -15,6 +15,15 @@ public:
   // This means the constructor isn't called when running other tests
   static PointsTest *createSuite() { return new PointsTest(); }
   static void destroySuite(PointsTest *suite) { delete suite; }
+
+  void test_has_correct_mixins() {
+    Points data;
+    TS_ASSERT_THROWS_NOTHING(
+        (dynamic_cast<detail::VectorOf<Points, HistogramX> &>(data)));
+    TS_ASSERT_THROWS_NOTHING(dynamic_cast<detail::Iterable<Points> &>(data));
+    TS_ASSERT_THROWS_NOTHING(dynamic_cast<detail::Offsetable<Points> &>(data));
+    TS_ASSERT_THROWS_NOTHING(dynamic_cast<detail::Scalable<Points> &>(data));
+  }
 
   void test_construct_default() {
     const Points points{};

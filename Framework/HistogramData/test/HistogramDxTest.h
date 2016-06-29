@@ -3,9 +3,11 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidHistogramData/FixedLengthVector.h"
 #include "MantidHistogramData/HistogramDx.h"
 
-using Mantid::HistogramData::HistogramDx;
+using namespace Mantid;
+using namespace HistogramData;
 
 class HistogramDxTest : public CxxTest::TestSuite {
 public:
@@ -14,7 +16,16 @@ public:
   static HistogramDxTest *createSuite() { return new HistogramDxTest(); }
   static void destroySuite(HistogramDxTest *suite) { delete suite; }
 
-  void test_fake() {}
+  // The implementation of the testee is based on mixins and a few
+  // compiler-generated constructors. Tests for the features provided by mixins
+  // can be found in the respective mixin tests. Here we simply test that we
+  // have the expected mixins.
+
+  void test_has_correct_mixins() {
+    HistogramDx dx;
+    TS_ASSERT_THROWS_NOTHING(
+        dynamic_cast<detail::FixedLengthVector<HistogramDx> &>(dx));
+  }
 };
 
 #endif /* MANTID_HISTOGRAMDATA_HISTOGRAMDXTEST_H_ */

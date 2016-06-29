@@ -9,11 +9,8 @@
 #include "MantidHistogramData/FrequencyStandardDeviations.h"
 #include "MantidHistogramData/FrequencyVariances.h"
 
-using Mantid::HistogramData::BinEdges;
-using Mantid::HistogramData::CountStandardDeviations;
-using Mantid::HistogramData::CountVariances;
-using Mantid::HistogramData::FrequencyStandardDeviations;
-using Mantid::HistogramData::FrequencyVariances;
+using namespace Mantid;
+using namespace HistogramData;
 
 class FrequencyVariancesTest : public CxxTest::TestSuite {
 public:
@@ -23,6 +20,12 @@ public:
     return new FrequencyVariancesTest();
   }
   static void destroySuite(FrequencyVariancesTest *suite) { delete suite; }
+
+  void test_has_correct_mixins() {
+    FrequencyVariances data;
+    TS_ASSERT_THROWS_NOTHING((dynamic_cast<detail::VarianceVectorOf<
+        FrequencyVariances, HistogramE, FrequencyStandardDeviations> &>(data)));
+  }
 
   void test_construct_default() {
     const FrequencyVariances frequencies{};

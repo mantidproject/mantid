@@ -9,11 +9,8 @@
 #include "MantidHistogramData/FrequencyStandardDeviations.h"
 #include "MantidHistogramData/FrequencyVariances.h"
 
-using Mantid::HistogramData::BinEdges;
-using Mantid::HistogramData::CountStandardDeviations;
-using Mantid::HistogramData::CountVariances;
-using Mantid::HistogramData::FrequencyStandardDeviations;
-using Mantid::HistogramData::FrequencyVariances;
+using namespace Mantid;
+using namespace HistogramData;
 
 class CountVariancesTest : public CxxTest::TestSuite {
 public:
@@ -21,6 +18,12 @@ public:
   // This means the constructor isn't called when running other tests
   static CountVariancesTest *createSuite() { return new CountVariancesTest(); }
   static void destroySuite(CountVariancesTest *suite) { delete suite; }
+
+  void test_has_correct_mixins() {
+    CountVariances data;
+    TS_ASSERT_THROWS_NOTHING((dynamic_cast<detail::VarianceVectorOf<
+        CountVariances, HistogramE, CountStandardDeviations> &>(data)));
+  }
 
   void test_construct_default() {
     const CountVariances counts{};

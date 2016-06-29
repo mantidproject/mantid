@@ -7,9 +7,8 @@
 #include "MantidHistogramData/BinEdgeVariances.h"
 #include "MantidHistogramData/PointVariances.h"
 
-using Mantid::HistogramData::BinEdgeStandardDeviations;
-using Mantid::HistogramData::BinEdgeVariances;
-using Mantid::HistogramData::PointVariances;
+using namespace Mantid;
+using namespace HistogramData;
 
 class BinEdgeVariancesTest : public CxxTest::TestSuite {
 public:
@@ -19,6 +18,12 @@ public:
     return new BinEdgeVariancesTest();
   }
   static void destroySuite(BinEdgeVariancesTest *suite) { delete suite; }
+
+  void test_has_correct_mixins() {
+    BinEdgeVariances data;
+    TS_ASSERT_THROWS_NOTHING((dynamic_cast<detail::VarianceVectorOf<
+        BinEdgeVariances, HistogramDx, BinEdgeStandardDeviations> &>(data)));
+  }
 
   void test_default_constructor() {
     const BinEdgeVariances edges{};

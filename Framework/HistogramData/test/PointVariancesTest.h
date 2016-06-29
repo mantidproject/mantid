@@ -7,9 +7,8 @@
 #include "MantidHistogramData/PointStandardDeviations.h"
 #include "MantidHistogramData/PointVariances.h"
 
-using Mantid::HistogramData::BinEdgeVariances;
-using Mantid::HistogramData::PointStandardDeviations;
-using Mantid::HistogramData::PointVariances;
+using namespace Mantid;
+using namespace HistogramData;
 
 class PointVariancesTest : public CxxTest::TestSuite {
 public:
@@ -17,6 +16,12 @@ public:
   // This means the constructor isn't called when running other tests
   static PointVariancesTest *createSuite() { return new PointVariancesTest(); }
   static void destroySuite(PointVariancesTest *suite) { delete suite; }
+
+  void test_has_correct_mixins() {
+    PointVariances data;
+    TS_ASSERT_THROWS_NOTHING((dynamic_cast<detail::VarianceVectorOf<
+        PointVariances, HistogramDx, PointStandardDeviations> &>(data)));
+  }
 
   void test_construct_default() {
     const PointVariances points{};
