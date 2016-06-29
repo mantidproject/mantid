@@ -40,7 +40,12 @@ void IntegratePeaksMDHisto::init() {
   declareProperty(make_unique<WorkspaceProperty<IMDEventWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "An input Sample MDEventWorkspace in HKL.");
-
+  declareProperty("DeltaHKL", 0.5,
+                  "Distance from integer HKL to integrate peak.");
+  declareProperty("GridPoints",201,
+                  "Number of grid points for each dimension of HKL box.");
+  declareProperty("NeighborPoints", 10,
+                  "Number of points in 5^3 surrounding points above intensity threshold for point to be part of peak.");
   auto fluxValidator = boost::make_shared<CompositeValidator>();
   fluxValidator->add<WorkspaceUnitValidator>("Momentum");
   fluxValidator->add<InstrumentValidator>();
@@ -48,10 +53,10 @@ void IntegratePeaksMDHisto::init() {
   auto solidAngleValidator = fluxValidator->clone();
 
   declareProperty(make_unique<WorkspaceProperty<>>(
-                      "FluxWorkspace", "", Direction::Input, fluxValidator),
+                      "FluxWorkspace", "", Direction::Input, PropertyMode::Optional, fluxValidator),
                   "An input workspace containing momentum dependent flux.");
   declareProperty(make_unique<WorkspaceProperty<>>("SolidAngleWorkspace", "",
-                                                   Direction::Input,
+                                                   Direction::Input, PropertyMode::Optional,
                                                    solidAngleValidator),
                   "An input workspace containing momentum integrated vanadium "
                   "(a measure of the solid angle).");
@@ -75,7 +80,9 @@ void IntegratePeaksMDHisto::exec() {
   /// Peak workspace to integrate
   PeaksWorkspace_sptr inPeakWS =
       getProperty("PeaksWorkspace");
-
+  const double box = getProperty("DeltaHKL");
+  const int gridPts = getProperty("GridPoints");
+  const int neighborPts = getProperty("NeighborPoints");
   /// Output peaks workspace, create if needed
   PeaksWorkspace_sptr  peakWS =
       getProperty("OutputWorkspace");
@@ -86,10 +93,7 @@ void IntegratePeaksMDHisto::exec() {
   MatrixWorkspace_sptr sa =
       getProperty("SolidAngleWorkspace");
 
-  IMDEventWorkspace_sptr m_inputWS = getProperty("InputWorkspace");
-
-  double box = 0.5;
-  int gridPts = 201;
+  IMDEventWorkspace_sptr m_inputWS = getProperty("InputWorkspace");;
   
   int npeaks = peakWS->getNumberPeaks();
 
@@ -107,7 +111,7 @@ void IntegratePeaksMDHisto::exec() {
         h, k, l, box, gridPts, flux, sa, m_inputWS);
     double intensity = 0.0;
     double errorSquared = 0.0;
-    integratePeak(normBox, intensity, errorSquared, gridPts);
+    integratePeak(neighborPts, normBox, intensity, errorSquared);
     p.setIntensity(intensity);
     p.setSigmaIntensity(sqrt(errorSquared));
     prog->report();
@@ -153,14 +157,19 @@ MDHistoWorkspace_sptr IntegratePeaksMDHisto::normalize(
   return boost::dynamic_pointer_cast<MDHistoWorkspace>(out);
 }
 
-void  IntegratePeaksMDHisto::integratePeak(MDHistoWorkspace_sptr out, double& intensity, double& errorSquared, int gridPts) {
-   //AnalysisDataService::Instance().addOrReplace("box", out);
+void  IntegratePeaksMDHisto::integratePeak(const int neighborPts, MDHistoWorkspace_sptr out, double& intensity, double& errorSquared) {
+     //AnalysisDataService::Instance().addOrReplace("box", out);
+    std::vector<int> gridPts;
+    const size_t dimensionality = out->getNumDims();
+    for (size_t i = 0; i < dimensionality; ++i) {
+      gridPts.push_back(static_cast<int>(out->getDimension(i)->getNBins()));
+    }
+
     double *F = out->getSignalArray();
-    int noPoints = 10;
     double Fmax = 0;
     double Fmin = 1e300;
     double sum = 0.0;
-    for (int i = 0; i < gridPts*gridPts*gridPts; i++) {
+    for (int i = 0; i < gridPts[0]*gridPts[1]*gridPts[2]; i++) {
       if (!boost::math::isnan(F[i]) && !boost::math::isinf(F[i]) && F[i] != 0.0) {
         sum += F[i];
         if (F[i] < Fmin) Fmin = F[i];
@@ -177,12 +186,10 @@ void  IntegratePeaksMDHisto::integratePeak(MDHistoWorkspace_sptr out, double& in
     double measuredSum = 0.0;
     double errSqSum = 0.0;
     double measuredErrSqSum = 0.0;
-    //double Peak[201*201*201] = {0};
-    //double PeakErr2[201*201*201] = {0};
-    for (int Hindex  = 0; Hindex < gridPts; Hindex++) {
-        for (int Kindex  = 0; Kindex < gridPts; Kindex++) {
-            for (int Lindex  = 0; Lindex < gridPts; Lindex++) {
-              int iHKL = Hindex + gridPts * (Kindex +gridPts * Lindex);
+    for (int Hindex  = 0; Hindex < gridPts[0]; Hindex++) {
+        for (int Kindex  = 0; Kindex < gridPts[1]; Kindex++) {
+            for (int Lindex  = 0; Lindex < gridPts[2]; Lindex++) {
+              int iHKL = Hindex + gridPts[0] * (Kindex +gridPts[1] * Lindex);
                 if (!boost::math::isnan(F[iHKL]) && !boost::math::isinf(F[iHKL])) {
                     measuredPoints = measuredPoints + 1;
                     measuredSum = measuredSum + F[iHKL];
@@ -192,16 +199,14 @@ void  IntegratePeaksMDHisto::integratePeak(MDHistoWorkspace_sptr out, double& in
                         for (int Hj  = -2; Hj < 3; Hj++) {
                             for (int Kj  = -2; Kj <  3; Kj++) {
                               for (int Lj  = -2; Lj <  3; Lj++) {
-                                    int jHKL = Hindex + Hj + gridPts * (Kindex + Kj +gridPts * (Lindex + Lj));
-                                    if (Lindex+Lj >=   0 && Lindex+Lj < gridPts  && Kindex+Kj >=   0 && Kindex+Kj < gridPts && Hindex+Hj >=   0 && Hindex+Hj < gridPts && F[jHKL] > minIntensity) {
+                                    int jHKL = Hindex + Hj + gridPts[0] * (Kindex + Kj +gridPts[1] * (Lindex + Lj));
+                                    if (Lindex+Lj >=   0 && Lindex+Lj < gridPts[2]  && Kindex+Kj >=   0 && Kindex+Kj < gridPts[1] && Hindex+Hj >=   0 && Hindex+Hj < gridPts[0] && F[jHKL] > minIntensity) {
                                         neighborPoints = neighborPoints + 1;
                                     }
                                 }
                             }
                         }
-                        if (neighborPoints >=  noPoints) {
-                            //Peak[iHKL] = F[iHKL];
-                            //PeakErr2[iHKL] = SqError[iHKL];
+                        if (neighborPoints >=  neighborPts) {
                             peakPoints = peakPoints + 1;
                             peakSum = peakSum + F[iHKL];
                             errSqSum = errSqSum + SqError[iHKL];
@@ -209,7 +214,7 @@ void  IntegratePeaksMDHisto::integratePeak(MDHistoWorkspace_sptr out, double& in
                     }
                 }
                 else{
-                   double minR = sqrt( std::pow(float(Hindex)/float(gridPts) - 0.5, 2) + std::pow(float(Kindex)/float(gridPts) - 0.5, 2) + std::pow(float(Lindex)/float(gridPts) - 0.5, 2));
+                   double minR = sqrt( std::pow(float(Hindex)/float(gridPts[0]) - 0.5, 2) + std::pow(float(Kindex)/float(gridPts[1]) - 0.5, 2) + std::pow(float(Lindex)/float(gridPts[0]) - 0.5, 2));
                     if (minR < 0.1) {
                         intensity = 0.0;
                         errorSquared = 0.0;
