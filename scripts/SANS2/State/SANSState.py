@@ -57,7 +57,7 @@ class SANSStateISIS(SANSStateBase, SANSState):
                     attr = getattr(self, descriptor_name)
                     attr.validate()
                 except ValueError as e:
-                    is_invalid.update(descriptor_name, pickle.dumps(e.message))
+                    is_invalid.update({descriptor_name: pickle.dumps(e.message)})
 
         if is_invalid:
             raise ValueError("SANSState: There is an issue with your in put. See: {}".format(json.dumps(is_invalid)))
@@ -69,4 +69,3 @@ class SANSStateISIS(SANSStateBase, SANSState):
     @property_manager.setter
     def property_manager(self, value):
         set_state_from_property_manager(self, value)
-

@@ -1,4 +1,6 @@
-﻿import json
+﻿"""State about the actual data which is to be reduced."""
+
+import json
 from SANSStateBase import (SANSStateBase, StringParameter, PositiveIntegerParameter, sans_parameters)
 from SANS2.State.SANSStateSerializer import(convert_state_to_dict, set_state_from_property_manager)
 

@@ -1,3 +1,4 @@
+"""Serializes and deserializes SANSState obejcts when passed into Algorithms."""
 from mantid.kernel import (PropertyManager)
 import inspect
 import importlib

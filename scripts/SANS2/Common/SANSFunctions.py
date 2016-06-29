@@ -18,6 +18,7 @@ def get_log_value(run, log_name, log_type):
         number_of_entries = len(log_property.value)
 
         # If we have only one item, then there is nothing left to do
+        output = None
         if number_of_entries == 1:
             output = log_type(run.getLogData(log_name).value[0])
         else:

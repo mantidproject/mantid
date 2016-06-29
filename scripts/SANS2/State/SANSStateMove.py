@@ -1,3 +1,5 @@
+"""State for moving workspaces."""
+
 import json
 from SANSStateBase import (SANSStateBase, FloatParameter, DictParameter, ClassTypeParameter, StringParameter,
                            sans_parameters)

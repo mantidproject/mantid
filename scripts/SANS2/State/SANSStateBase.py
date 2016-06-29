@@ -1,4 +1,5 @@
-﻿from abc import (ABCMeta, abstractmethod)
+﻿""" Fundamental classes and Descriptors for the SANSState mechanism."""
+from abc import (ABCMeta, abstractmethod)
 import copy
 
 
@@ -50,7 +51,7 @@ class TypedParameter(object):
         self._type_check(value)
 
         if self.validator(value):
-            # The descriptor should be holding onto its own copy
+            # The descriptor should be holding onto its own data and return a deepcopy of the data.
             copied_value = copy.deepcopy(value)
             setattr(instance, self.name, copied_value)
         else:
@@ -66,6 +67,9 @@ class TypedParameter(object):
                                                                              str(value), str(type(value))))
 
 
+# ---------------------------------------------------
+# Various standard cases of the TypedParameter
+# ---------------------------------------------------
 class StringParameter(TypedParameter):
     def __init__(self):
         super(StringParameter, self).__init__(str, is_not_none)
@@ -93,7 +97,11 @@ class DictParameter(TypedParameter):
 
 class ClassTypeParameter(TypedParameter):
     """
-    This TypedParameter variant allows for storing a class type. We make use of this quite a lot
+    This TypedParameter variant allows for storing a class type.
+
+    This could be for example something from the SANSEnumerations module, e.g. CanonicalCoordinates.X
+    It is something that is used frequently with the main of moving away from using strings where types
+    should be used instead.
     """
     def __init__(self, class_type):
         super(ClassTypeParameter, self).__init__(class_type, is_not_none)
@@ -109,6 +117,7 @@ class ClassTypeParameter(TypedParameter):
 # SANSStateBase
 # ------------------------------------------------
 class SANSStateBase(object):
+    """ The fundamental base of the SANSState"""
     __metaclass__ = ABCMeta
 
     @property
@@ -129,6 +138,8 @@ class SANSStateBase(object):
 def sans_parameters(cls):
     """
     Class decorator which changes the names of TypedParameters in a class instance in order to make it more readable.
+
+    This is especially helpful for debugging. And also in order to find attributes in the dictionaries.
     :param cls: The class with the TypedParameters
     :return: The class with the TypedParameters
     """

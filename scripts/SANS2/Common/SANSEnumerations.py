@@ -71,3 +71,20 @@ class Coordinates(object):
 @inner_classes_with_name_space("X", "Y", "Z")
 class CanonicalCoordinates(Coordinates):
     pass
+
+
+# --------------------------
+#  Reductions
+# --------------------------
+class ReductionType(object):
+    pass
+
+
+@inner_classes_with_name_space("Hab", "Lab", "Merged", "Both")
+class SANSReductionType(ReductionType):
+    pass
+
+
+@inner_classes_with_name_space("OneDim", "TwoDim")
+class ReductionDimensionality(object):
+    pass
