@@ -69,6 +69,7 @@ class MainWindow(QtGui.QMainWindow):
 
         # thread
         self._myIntegratePeaksThread = None
+        self._addUBPeaksThread = None
 
         # Mantid configuration
         self._instrument = str(self.ui.comboBox_instrument.currentText())
@@ -269,10 +270,25 @@ class MainWindow(QtGui.QMainWindow):
         self._my3DWindow = None
         self._refineConfigWindow = None
 
+        # Timing and thread 'global'
+        self._startMeringScans = time.clock()
+        self._errorMessageEnsemble = ''
+
         # QSettings
         self.load_settings()
 
         return
+
+    @property
+    def controller(self):
+        """ Parameter controller
+        """
+        assert self._myControl is not None, 'Controller cannot be None.'
+        assert isinstance(self._myControl, r4c.CWSCDReductionControl), \
+            'My controller must be of type %s, but not %s.' % ('CWSCDReductionControl',
+                                                               self._myControl.__class__.__name__)
+
+        return self._myControl
 
     def evt_show_survey(self):
         """
@@ -449,55 +465,10 @@ class MainWindow(QtGui.QMainWindow):
         # switch to tab-3
         self.ui.tabWidget.setCurrentIndex(MainWindow.TabPage['Calculate UB'])
 
-        # find peak and add peak
-        failed_list = list()
-
         # prototype for a new thread
         self.ui.progressBar_add_ub_peaks.setRange(0, len(scan_number_list))
-        self.add_peaks_thread = AddPeaksThread(self, exp_number, scan_number_list)
-        self.add_peaks_thread.start()
-        """
-        class AddPeaksThread
-        def __init__(self, main_window, exp_number, scan_number_list):
-        for scan_number in scan_number_list:
-            # merge peak
-            status, err_msg = self._myControl.merge_pts_in_scan(exp_number, scan_number, [], 'q-sample')
-
-            # continue to the next scan if there is something wrong
-            if status is False:
-                failed_list.append((scan_number, err_msg))
-                continue
-
-            # find peak
-            self._myControl.find_peak(exp_number, scan_number)
-
-            # get PeakInfo
-            peak_info = self._myControl.get_peak_info(exp_number, scan_number)
-            assert isinstance(peak_info, r4c.PeakProcessHelper)
-
-            # retrieve and set HKL from spice table
-            peak_info.retrieve_hkl_from_spice_table()
-
-            # add to table
-            self.set_ub_peak_table(peak_info)
-        # END-FOR
-
-        # pop error if there is any scan that is not reduced right
-        if len(failed_list) > 0:
-            failed_scans_str = 'Unable to merge scans: '
-            sum_error_str = ''
-            for fail_tup in failed_list:
-                failed_scans_str += '%d, ' % fail_tup[0]
-                sum_error_str += '%s\n' % fail_tup[1]
-            # END-FOR
-
-            self.pop_one_button_dialog(failed_scans_str)
-            self.pop_one_button_dialog(sum_error_str)
-        # END-FOR
-        """
-
-        self.get_thread.stop()
-        print '[DB...Prototype]', self.get_thread.num_loops
+        self._addUBPeaksThread = AddPeaksThread(self, exp_number, scan_number_list)
+        self._addUBPeaksThread.start()
 
         return
 
@@ -1240,18 +1211,8 @@ class MainWindow(QtGui.QMainWindow):
             self.pop_one_button_dialog('Number of Pt number for background must be larger than 0: %s!' % str(num_bg_pt))
             return
 
-        # integrate peak
-        self.ui.progressBar_mergeScans.setRange(0, len(row_number_list))
-        self.ui.progressBar_mergeScans.setValue(0)
-        self.ui.progressBar_mergeScans.setTextVisible(True)
-        self.ui.progressBar_mergeScans.setStatusTip('Hello')
-
-        # FIXME/NOW - need to split loop to 2 loops; one to read table information, the other to process peak
-        self._myIntegratePeaksThread = IntegratePeaksThread(self, exp_number, row_number_list,
-                                                            mask_det, selected_mask, norm_type)
-        self._myIntegratePeaksThread.start()
-        """
-        grand_error_message = ''
+        # get the merging information: each item should be a tuple as (scan number, pt number list, merged)
+        scan_number_list = list()
         for row_number in row_number_list:
             # get scan number and pt numbers
             scan_number = self.ui.tableWidget_mergeScans.get_scan_number(row_number)
@@ -1259,98 +1220,30 @@ class MainWindow(QtGui.QMainWindow):
 
             # set intensity to zero and error message
             if status is False:
-                error_msg = 'Unable to get Pt. of experiment %d scan %d due to %s.' % (
-                    exp_number, scan_number, str(pt_number_list))
-                self._myControl.set_peak_intensity(exp_number, scan_number, 0.)
+                error_msg = 'Unable to get Pt. of experiment %d scan %d due to %s.' % (exp_number, scan_number,
+                                                                                       str(pt_number_list))
+                self.controller.set_peak_intensity(exp_number, scan_number, 0.)
                 self.ui.tableWidget_mergeScans.set_peak_intensity(row_number, scan_number, 0., False)
                 self.ui.tableWidget_mergeScans.set_status(scan_number, error_msg)
                 continue
 
             # merge all Pt. of the scan if they are not merged.
             merged = self.ui.tableWidget_mergeScans.get_merged_status(row_number)
-            if merged is False:
-                self._myControl.merge_pts_in_scan(exp_no=exp_number, scan_no=scan_number, pt_num_list=pt_number_list,
-                                                  target_frame='q-sample')
-                self.ui.tableWidget_mergeScans.set_status_by_row(row_number, 'Done')
-            # END-IF
 
-            # calculate peak center
-            try:
-                status, ret_obj = self._myControl.calculate_peak_center(exp_number, scan_number, pt_number_list)
-            except RuntimeError as run_err:
-                status = False
-                ret_obj = 'RuntimeError: %s.' % str(run_err)
-            except AssertionError as ass_err:
-                status = False
-                ret_obj = 'AssertionError: %s.' % str(ass_err)
-
-            if status:
-                center_i = ret_obj
-            else:
-                error_msg = 'Unable to find peak for exp %d scan %d: %s.' % (exp_number, scan_number, str(ret_obj))
-                self._myControl.set_peak_intensity(exp_number, scan_number, 0.)
-                self.ui.tableWidget_mergeScans.set_peak_intensity(row_number, scan_number, 0., False)
-                self.ui.tableWidget_mergeScans.set_status(scan_number, error_msg)
-                continue
-
-            # mask workspace
-            # VZ-FUTURE: consider to modify method generate_mask_workspace() such that it can be generalized outside
-            #            loop
-            if mask_det:
-                self._myControl.check_generate_mask_workspace(exp_number, scan_number, selected_mask)
-
-            # integrate peak
-            status, ret_obj = self._myControl.integrate_scan_peaks(exp=exp_number,
-                                                                   scan=scan_number,
-                                                                   peak_radius=1.0,
-                                                                   peak_centre=center_i,
-                                                                   merge_peaks=False,
-                                                                   use_mask=mask_det,
-                                                                   normalization=norm_type,
-                                                                   mask_ws_name=selected_mask)
-            # handle integration error
-            if not status:
-                error_msg = str(ret_obj)
-                self._myControl.set_peak_intensity(exp_number, scan_number, 0.)
-                self.ui.tableWidget_mergeScans.set_peak_intensity(row_number, scan_number, 0., False)
-                self.ui.tableWidget_mergeScans.set_status(scan_number, error_msg)
-                continue
-
-            pt_dict = ret_obj
-
-            background_pt_list = pt_number_list[:num_bg_pt] + pt_number_list[-num_bg_pt:]
-            avg_bg_value = self._myControl.estimate_background(pt_dict, background_pt_list)
-            intensity_i = self._myControl.simple_integrate_peak(pt_dict, avg_bg_value)
-
-            # check intensity value
-            if intensity_i < 0:
-                # set to status
-                error_msg = 'Negative intensity: %.3f' % intensity_i
-                self.ui.tableWidget_mergeScans.set_status(scan_no=scan_number, status=error_msg)
-                # reset intensity to 0.
-                intensity_i = 0.
-
-            # set the calculated peak intensity to _peakInfoDict
-            status, error_msg = self._myControl.set_peak_intensity(exp_number, scan_number, intensity_i)
-            if status is False:
-                grand_error_message += error_msg + '\n'
-                continue
-
-            # set the value to table
-            self.ui.tableWidget_mergeScans.set_peak_intensity(row_number, None, intensity_i)
+            # add to list
+            scan_number_list.append((scan_number, pt_number_list, merged))
+            self._mainWindow.ui.tableWidget_mergeScans.set_status_by_row(row_number, 'Waiting')
         # END-FOR
 
-        # pop error message if there is any
-        if len(grand_error_message) > 0:
-            self.pop_one_button_dialog(grand_error_message)
+        # set the progress bar
+        self.ui.progressBar_mergeScans.setRange(0, len(scan_number_list))
+        self.ui.progressBar_mergeScans.setValue(0)
+        self.ui.progressBar_mergeScans.setTextVisible(True)
+        self.ui.progressBar_mergeScans.setStatusTip('Hello')
 
-        self.ui.tableWidget_mergeScans.select_all_rows(False)
-
-        # count time
-        integrate_peak_time_end = time.clock()
-        elapsed = integrate_peak_time_end - integrate_peak_time_start
-        self.ui.statusbar.showMessage('Peak integration is finished in %.2f seconds' % elapsed)
-        """
+        self._myIntegratePeaksThread = IntegratePeaksThread(self, exp_number, scan_number_list,
+                                                            mask_det, selected_mask, norm_type)
+        self._myIntegratePeaksThread.start()
 
         return
 
@@ -2890,9 +2783,9 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
-    def upate_merge_status(self, exp_number, scan_number, sig_value, mode):
+    def update_merge_status(self, exp_number, scan_number, sig_value, mode):
         """
-
+        update the status of merging/integrating peaks
         :param exp_number:
         :param scan_number:
         :param sig_value:
@@ -2904,10 +2797,9 @@ class MainWindow(QtGui.QMainWindow):
             progress = int(sig_value - 0.5)
             if progress == 0:
                 # run start
-                self.merge_run_start = time.clock()
-                self.grand_error_message = ''
+                self._startMeringScans = time.clock()
+                self._errorMessageEnsemble = ''
 
-            print '[DB...BAD] Get scan %d progress %d (%f)' % (scan_number, progress, sig_value)
             self.ui.progressBar_mergeScans.setValue(progress)
 
         elif mode == 1:
@@ -2932,7 +2824,7 @@ class MainWindow(QtGui.QMainWindow):
                 if not is_error:
                     self.ui.tableWidget_mergeScans.set_status(scan_number, 'Done')
             else:
-                self.grand_error_message += error_msg + '\n'
+                self._errorMessageEnsemble += error_msg + '\n'
                 self.ui.tableWidget_mergeScans.set_status(scan_number, error_msg)
 
         elif mode == 2:
@@ -2940,32 +2832,45 @@ class MainWindow(QtGui.QMainWindow):
             progress = int(sig_value+0.5)
             self.ui.progressBar_mergeScans.setValue(progress)
 
-            self.merge_run_end = time.clock()
+            merge_run_end = time.clock()
 
-            elapsed = self.merge_run_end - self.merge_run_start
+            elapsed = merge_run_end - self._startMeringScans
             message = 'Peak integration is over. Used %.2f seconds' % elapsed
 
             self.ui.statusbar.showMessage(message)
 
             # pop error message if there is any
-            if len(self.grand_error_message) > 0:
-                self.pop_one_button_dialog(self.grand_error_message)
+            if len(self._errorMessageEnsemble) > 0:
+                self.pop_one_button_dialog(self._errorMessageEnsemble)
 
             del self._myIntegratePeaksThread
 
         return
 
-    def update_merget_status_error(self, exp_number, scan_number, error_msg):
+    def update_merge_error(self, exp_number, scan_number, error_msg):
         """
-        blablabla
+        Update the merge-scan table for error message
         :param exp_number:
         :param scan_number:
         :param error_msg:
         :return:
         """
-        # TODO/NOW - check and doc!
+        # check
+        assert isinstance(exp_number, int)
+        assert isinstance(scan_number, int)
+        assert isinstance(error_msg, str)
 
+        # set intensity, state to table
+        self.ui.tableWidget_mergeScans.set_peak_intensity(row_number=None, scan_number=scan_number,
+                                                          peak_intensity=0., lorentz_corrected=False)
+        self.ui.tableWidget_mergeScans.set_status(scan_no=scan_number, status=error_msg)
 
+        # set peak value
+        status, error_msg = self._myControl.set_peak_intensity(exp_number, scan_number, 0.)
+        if not status:
+            self.pop_one_button_dialog(error_msg)
+
+        return
 
     def update_peak_added_info(self, int_msg, int_msg2):
         """

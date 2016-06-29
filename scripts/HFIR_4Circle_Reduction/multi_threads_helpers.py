@@ -64,7 +64,7 @@ class AddPeaksThread(QThread):
             self.peakStatusSignal.emit(self._expNumber, scan_number, index)
 
             # merge peak
-            status, err_msg = self._mainWindow._myControl.merge_pts_in_scan(
+            status, err_msg = self._mainWindow.controller.merge_pts_in_scan(
                 self._expNumber, scan_number, [], 'q-sample')
 
             # continue to the next scan if there is something wrong
@@ -73,21 +73,17 @@ class AddPeaksThread(QThread):
                 continue
 
             # find peak
-            self._mainWindow._myControl.find_peak(self._expNumber, scan_number)
+            self._mainWindow.controller.find_peak(self._expNumber, scan_number)
 
             # get PeakInfo
-            peak_info = self._mainWindow._myControl.get_peak_info(self._expNumber, scan_number)
+            peak_info = self._mainWindow.controller.get_peak_info(self._expNumber, scan_number)
             assert isinstance(peak_info, r4c.PeakProcessHelper)
 
             # send signal to main window for peak being added
             self.peakAddedSignal.emit(self._expNumber, scan_number)
-
-            # retrieve and set HKL from spice table
-            # peak_info.retrieve_hkl_from_spice_table()
-            # add to table
-            # self.main_window.set_ub_peak_table(peak_info)
         # END-FOR
 
+        # send signal with unphysical scan number to flag the end of operation.
         self.peakStatusSignal.emit(self._expNumber, -1, len(self._scanNumberList))
 
         # pop error if there is any scan that is not reduced right
@@ -114,23 +110,24 @@ class IntegratePeaksThread(QThread):
     peakMergeSignal = QtCore.pyqtSignal(int, int, float, int)
     errorSignal = QtCore.pyqtSignal(int, int, str)
 
-    def __init__(self, main_window, exp_number, row_number_list, mask_det, mask_name, norm_type):
+    def __init__(self, main_window, exp_number, scan_tuple_list, mask_det, mask_name, norm_type):
         """
 
         :param main_window:
         :param exp_number:
-        :param row_number_list:
+        :param scan_tuple_list: list of tuples for scan as (scan number, pt number list, state as merged)
         :param mask_det:
         :param mask_name:
         :param norm_type: type of normalization
         """
+        # start thread
         QThread.__init__(self)
 
         # check
         assert main_window is not None, 'Main window cannot be None'
         assert isinstance(exp_number, int), 'Experiment number must be an integer.'
-        assert isinstance(row_number_list, list), 'Scan number list must be a list but not %s.' \
-                                                  '' % str(type(row_number_list))
+        assert isinstance(scan_tuple_list, list), 'Scan (info) tuple list must be a list but not %s.' \
+                                                  '' % str(type(scan_tuple_list))
         assert isinstance(mask_det, bool), 'Parameter mask_det must be a boolean but not %s.' \
                                            '' % str(type(mask_det))
         assert isinstance(mask_name, str), 'Name of mask must be a string but not %s.' % str(type(mask_name))
@@ -140,14 +137,14 @@ class IntegratePeaksThread(QThread):
         # set values
         self._mainWindow = main_window
         self._expNumber = exp_number
-        self._rowNumberList = row_number_list[:]
+        self._scanTupleList = scan_tuple_list[:]
         self._maskDetector = mask_det
         self._normalizeType = norm_type
         self._selectedMaskName = mask_name
 
         # link signals
-        self.peakMergeSignal.connect(self._mainWindow.upate_merge_status)
-        self.errorSignal.connect(self._mainWindow.update_merget_status_error)
+        self.peakMergeSignal.connect(self._mainWindow.update_merge_status)
+        self.errorSignal.connect(self._mainWindow.update_merge_error)
 
         return
 
@@ -165,52 +162,9 @@ class IntegratePeaksThread(QThread):
         Execute the thread!
         :return:
         """
-        # TODO/NEXT - consider to move the following section of codes to reduce4circleGUI
-        # get the merging information: each item should be a tuple as (scan number, pt number list, merged)
-        scan_number_list = list()
-
-        for row_number in self._rowNumberList:
-            # get scan number and pt numbers
-            scan_number = self._mainWindow.ui.tableWidget_mergeScans.get_scan_number(row_number)
-            status, pt_number_list = self._mainWindow._myControl.get_pt_numbers(self._expNumber, scan_number)
-
-            # set intensity to zero and error message
-            if status is False:
-                error_msg = 'Unable to get Pt. of experiment %d scan %d due to %s.' % (
-                    self._expNumber, scan_number, str(pt_number_list))
-                self._mainWindow._myControl.set_peak_intensity(self._expNumber, scan_number, 0.)
-                self._mainWindow.ui.tableWidget_mergeScans.set_peak_intensity(row_number, scan_number, 0., False)
-                self._mainWindow.ui.tableWidget_mergeScans.set_status(scan_number, error_msg)
-                continue
-
-            # merge all Pt. of the scan if they are not merged.
-            merged = self._mainWindow.ui.tableWidget_mergeScans.get_merged_status(row_number)
-
-            # add to list
-            scan_number_list.append((scan_number, pt_number_list, merged))
-            self._mainWindow.ui.tableWidget_mergeScans.set_status_by_row(row_number, 'Waiting')
-
-        # END-FOR
-
         grand_error_message = ''
-        for index, scan_tup in enumerate(scan_number_list):
-            """
-            # get scan number and pt numbers
-            scan_number = self._mainWindow.ui.tableWidget_mergeScans.get_scan_number(row_number)
-            status, pt_number_list = self._mainWindow._myControl.get_pt_numbers(self._expNumber, scan_number)
-
-            # set intensity to zero and error message
-            if status is False:
-                error_msg = 'Unable to get Pt. of experiment %d scan %d due to %s.' % (
-                    self._expNumber, scan_number, str(pt_number_list))
-                self._mainWindow._myControl.set_peak_intensity(self._expNumber, scan_number, 0.)
-                self._mainWindow.ui.tableWidget_mergeScans.set_peak_intensity(row_number, scan_number, 0., False)
-                self._mainWindow.ui.tableWidget_mergeScans.set_status(scan_number, error_msg)
-                continue
-
-            # merge all Pt. of the scan if they are not merged.
-            merged = self._mainWindow.ui.tableWidget_mergeScans.get_merged_status(row_number)
-            """
+        for index, scan_tup in enumerate(self._scanTupleList):
+            # check
             assert isinstance(scan_tup, tuple) and len(scan_tup) == 3
             scan_number, pt_number_list, merged = scan_tup
 
@@ -220,15 +174,16 @@ class IntegratePeaksThread(QThread):
 
             # merge if not merged
             if merged is False:
-                self._mainWindow._myControl.merge_pts_in_scan(exp_no=self._expNumber, scan_no=scan_number,
+                self._mainWindow.controller.merge_pts_in_scan(exp_no=self._expNumber, scan_no=scan_number,
                                                               pt_num_list=pt_number_list,
                                                               target_frame='q-sample')
-                self._mainWindow.ui.tableWidget_mergeScans.set_status_by_row(row_number, 'Done')
+                self._mainWindow.ui.tableWidget_mergeScans.set_status(scan_number, 'Merged')
             # END-IF
 
             # calculate peak center
             try:
-                status, ret_obj = self._mainWindow._myControl.calculate_peak_center(self._expNumber, scan_number, pt_number_list)
+                status, ret_obj = self._mainWindow.controller.calculate_peak_center(self._expNumber, scan_number,
+                                                                                    pt_number_list)
             except RuntimeError as run_err:
                 status = False
                 ret_obj = 'RuntimeError: %s.' % str(run_err)
@@ -240,21 +195,21 @@ class IntegratePeaksThread(QThread):
                 center_i = ret_obj
             else:
                 error_msg = 'Unable to find peak for exp %d scan %d: %s.' % (self._expNumber, scan_number, str(ret_obj))
-                self._mainWindow._myControl.set_peak_intensity(self._expNumber, scan_number, 0.)
-                self._mainWindow.ui.tableWidget_mergeScans.set_peak_intensity(row_number, scan_number, 0., False)
+                self._mainWindow.controller.set_peak_intensity(self._expNumber, scan_number, 0.)
+                self._mainWindow.ui.tableWidget_mergeScans.set_peak_intensity(None, scan_number, 0., False)
                 self._mainWindow.ui.tableWidget_mergeScans.set_status(scan_number, error_msg)
                 continue
 
             # check given mask workspace
             if self._maskDetector:
-                self._mainWindow._myControl.check_generate_mask_workspace(self._expNumber, scan_number,
+                self._mainWindow.controller.check_generate_mask_workspace(self._expNumber, scan_number,
                                                                           self._selectedMaskName)
 
             # integrate peak
             print '[DB...BAD] Normalization: %s; Use Mask = %s, Mask Workspace = %s.' % (
                 self._normalizeType, str(self._maskDetector), self._selectedMaskName
             )
-            status, ret_obj = self._mainWindow._myControl.integrate_scan_peaks(exp=self._expNumber,
+            status, ret_obj = self._mainWindow.controller.integrate_scan_peaks(exp=self._expNumber,
                                                                                scan=scan_number,
                                                                                peak_radius=1.0,
                                                                                peak_centre=center_i,
@@ -263,7 +218,6 @@ class IntegratePeaksThread(QThread):
                                                                                normalization=self._normalizeType,
                                                                                mask_ws_name=self._selectedMaskName)
             # handle integration error
-            # FIXME/TODO/NOW - Make this right
             if status:
                 # get PT dict
                 pt_dict = ret_obj
@@ -271,19 +225,13 @@ class IntegratePeaksThread(QThread):
                 # integration failed
                 error_msg = str(ret_obj)
                 self.errorSignal.emit(self._expNumber, scan_number, error_msg)
-                """ for main window method...
-
-                self._mainWindow._myControl.set_peak_intensity(self._expNumber, scan_number, 0.)
-                self._mainWindow.ui.tableWidget_mergeScans.set_peak_intensity(row_number, scan_number, 0., False)
-                self._mainWindow.ui.tableWidget_mergeScans.set_status(scan_number, error_msg)
-                """
                 continue
 
             # FIXME/TODO/NOW - Make this right
             num_bg_pt = 2
             background_pt_list = pt_number_list[:num_bg_pt] + pt_number_list[-num_bg_pt:]
-            avg_bg_value = self._mainWindow._myControl.estimate_background(pt_dict, background_pt_list)
-            intensity_i = self._mainWindow._myControl.simple_integrate_peak(pt_dict, avg_bg_value)
+            avg_bg_value = self._mainWindow.controller.estimate_background(pt_dict, background_pt_list)
+            intensity_i = self._mainWindow.controller.simple_integrate_peak(pt_dict, avg_bg_value)
 
             mode = 1
             self.peakMergeSignal.emit(self._expNumber, scan_number, float(intensity_i), mode)
@@ -298,7 +246,7 @@ class IntegratePeaksThread(QThread):
                 intensity_i = 0.
 
             # set the calculated peak intensity to _peakInfoDict
-            status, error_msg = self._mainWindow._myControl.set_peak_intensity(exp_number, scan_number, intensity_i)
+            status, error_msg = self._mainWindow.controller.set_peak_intensity(exp_number, scan_number, intensity_i)
             if status is False:
                 grand_error_message += error_msg + '\n'
                 continue
