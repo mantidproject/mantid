@@ -163,6 +163,32 @@ public:
   frequencyStandardDeviations() const {
     return histogramRef().frequencyStandardDeviations();
   }
+  template <typename... T> void setCounts(T &&... data) & {
+    // Check for the special case EventList, cannot set Y and E there.
+    checkIsYAndEWritable();
+    mutableHistogramRef().setCounts(std::forward<T>(data)...);
+  }
+  template <typename... T> void setCountVariances(T &&... data) & {
+    checkIsYAndEWritable();
+    mutableHistogramRef().setCountVariances(std::forward<T>(data)...);
+  }
+  template <typename... T> void setCountStandardDeviations(T &&... data) & {
+    checkIsYAndEWritable();
+    mutableHistogramRef().setCountStandardDeviations(std::forward<T>(data)...);
+  }
+  template <typename... T> void setFrequencies(T &&... data) & {
+    checkIsYAndEWritable();
+    mutableHistogramRef().setFrequencies(std::forward<T>(data)...);
+  }
+  template <typename... T> void setFrequencyVariances(T &&... data) & {
+    checkIsYAndEWritable();
+    mutableHistogramRef().setFrequencyVariances(std::forward<T>(data)...);
+  }
+  template <typename... T> void setFrequencyStandardDeviations(T &&... data) & {
+    checkIsYAndEWritable();
+    mutableHistogramRef().setFrequencyStandardDeviations(
+        std::forward<T>(data)...);
+  }
   const HistogramData::HistogramX &x() const { return histogramRef().x(); }
   virtual const HistogramData::HistogramY &y() const {
     return histogramRef().y();
@@ -213,6 +239,7 @@ public:
 protected:
   virtual void checkHistogram(const HistogramData::Histogram &) const {}
   virtual void checkWorksWithPoints() const {}
+  virtual void checkIsYAndEWritable() const {}
 
   // Copy and move are not public since this is an abstract class, but protected
   // such that derived classes can implement copy and move.

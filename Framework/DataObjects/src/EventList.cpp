@@ -4626,5 +4626,10 @@ void EventList::checkWorksWithPoints() const {
                            "possible, only BinEdges are supported");
 }
 
+void EventList::checkIsYAndEWritable() const {
+  throw std::runtime_error("EventList: Cannot set Y or E data, these data are "
+                           "generated automatically based on the events");
+}
+
 } /// namespace DataObjects
 } /// namespace Mantid

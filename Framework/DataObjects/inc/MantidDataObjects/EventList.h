@@ -327,6 +327,8 @@ public:
                           Mantid::Kernel::Unit *toUnit);
   void convertUnitsQuickly(const double &factor, const double &power);
 
+  /// Returns the Histogram associated with this spectrum. Y and E data is
+  /// computed from the event list.
   HistogramData::Histogram histogram() const override;
   HistogramData::Counts counts() const override;
   HistogramData::CountVariances countVariances() const override;
@@ -348,6 +350,7 @@ public:
 protected:
   void checkHistogram(const HistogramData::Histogram &histogram) const override;
   void checkWorksWithPoints() const override;
+  void checkIsYAndEWritable() const override;
 
 private:
   const HistogramData::Histogram &histogramRef() const override {

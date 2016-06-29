@@ -243,6 +243,29 @@ public:
   frequencyStandardDeviations(const size_t index) const {
     return getSpectrum(index).frequencyStandardDeviations();
   }
+  template <typename... T> void setCounts(const size_t index, T &&... data) & {
+    getSpectrum(index).setCounts(std::forward<T>(data)...);
+  }
+  template <typename... T>
+  void setCountVariances(const size_t index, T &&... data) & {
+    getSpectrum(index).setCountVariances(std::forward<T>(data)...);
+  }
+  template <typename... T>
+  void setCountStandardDeviations(const size_t index, T &&... data) & {
+    getSpectrum(index).setCountStandardDeviations(std::forward<T>(data)...);
+  }
+  template <typename... T>
+  void setFrequencies(const size_t index, T &&... data) & {
+    getSpectrum(index).setFrequencies(std::forward<T>(data)...);
+  }
+  template <typename... T>
+  void setFrequencyVariances(const size_t index, T &&... data) & {
+    getSpectrum(index).setFrequencyVariances(std::forward<T>(data)...);
+  }
+  template <typename... T>
+  void setFrequencyStandardDeviations(const size_t index, T &&... data) & {
+    getSpectrum(index).setFrequencyStandardDeviations(std::forward<T>(data)...);
+  }
   const HistogramData::HistogramX &x(const size_t index) const {
     return getSpectrum(index).x();
   }
