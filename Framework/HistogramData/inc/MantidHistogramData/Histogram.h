@@ -240,8 +240,6 @@ template <class TE> void Histogram::initE(const TE &e) {
  y lengths are consistent. */
 template <typename... T> void Histogram::setBinEdges(T &&... data) & {
   BinEdges edges(std::forward<T>(data)...);
-  // If there is no data changing the size is ok.
-  // if(m_y)
   checkSize(edges);
   if (selfAssignmentX(data...))
     return;
@@ -290,8 +288,6 @@ void Histogram::setBinEdgeStandardDeviations(T &&... data) & {
  y lengths are consistent. */
 template <typename... T> void Histogram::setPoints(T &&... data) & {
   Points points(std::forward<T>(data)...);
-  // If there is no data changing the size is ok.
-  // if(m_y)
   checkSize(points);
   if (selfAssignmentX(data...))
     return;
