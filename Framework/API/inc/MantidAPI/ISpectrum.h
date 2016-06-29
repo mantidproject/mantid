@@ -101,9 +101,13 @@ public:
   bool hasDx() const;
   void resetHasDx();
 
+  /// Returns the Histogram associated with this spectrum.
   virtual HistogramData::Histogram histogram() const { return histogramRef(); }
+  /// Sets the Histogram associated with this spectrum.
   template <typename... T> void setHistogram(T &&... data) {
     HistogramData::Histogram histogram(std::forward<T>(data)...);
+    // Check for the special case EventList, it only accepts histograms without
+    // Y and E data.
     checkHistogram(histogram);
     mutableHistogramRef() = std::move(histogram);
   }
@@ -127,6 +131,7 @@ public:
         std::forward<T>(data)...);
   }
   template <typename... T> void setPoints(T &&... data) {
+    // Check for the special case EventList, it only works with BinEdges.
     checkWorksWithPoints();
     mutableHistogramRef().setPoints(std::forward<T>(data)...);
   }
