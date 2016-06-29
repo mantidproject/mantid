@@ -8,6 +8,7 @@
 #include "MantidKernel/ArrayBoundedValidator.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/ListValidator.h"
 #include "MantidKernel/RebinParamsValidator.h"
 #include <cassert>
 
@@ -24,6 +25,7 @@ using Mantid::Kernel::ArrayBoundedValidator;
 using Mantid::Kernel::BoundedValidator;
 using Mantid::Kernel::Direction;
 using Mantid::Kernel::RebinParamsValidator;
+using Mantid::Kernel::StringListValidator;
 using Mantid::Kernel::make_unique;
 using std::vector;
 
@@ -177,6 +179,11 @@ void PDCalibration::init() {
       make_unique<ArrayProperty<double>>("PeakPositions", mustBePosArr),
       "Comma delimited d-space positions of reference peaks.");
 
+  std::vector<std::string> modes{"DIFC", "DIFC+TZERO", "DIFC+TZERO+DIFA"};
+  declareProperty("CalibrationParameters", "DIFC+TZERO+DIFA",
+                  boost::make_shared<StringListValidator>(modes),
+                  "Select calibration parameters to fit.");
+
   //  declareProperty(new WorkspaceProperty<API::ITableWorkspace>(
   //                    "RefTOFTable", "", Direction::Output),
   //                  "");
@@ -194,7 +201,7 @@ void PDCalibration::exec() {
   m_tofMax = tofBinningParams.back();
 
   m_peaksInDspacing = getProperty("PeakPositions");
-  //Sort peak positions, requried for correct peak window calculations
+  // Sort peak positions, requried for correct peak window calculations
   std::sort(m_peaksInDspacing.begin(), m_peaksInDspacing.end());
 
   const double peakWindowMaxInDSpacing = 0.1; // TODO configurable
@@ -206,6 +213,8 @@ void PDCalibration::exec() {
               << m_peaksInDspacing[i] << " < " << windowsInDSpacing[2 * i + 1]
               << std::endl;
   }
+
+  calParams = getPropertyValue("CalibrationParameters");
 
   m_uncalibratedWS = loadAndBin();
   setProperty("UncalibratedWorkspace", m_uncalibratedWS);
@@ -302,11 +311,14 @@ void PDCalibration::exec() {
         tof_vec.push_back(centre);
       }
     }
-    if (d_vec.size() > 0) {
-      double difcc = 0, t0 = 0, difa = 0;
-      fitDIFCtZeroDIFA(d_vec, tof_vec, difcc, t0, difa);
-      setCalibrationValues(peaks.detid, difcc, difa, t0);
-
+    if (d_vec.size() == 1) {
+      // If only 1 peak found just calculate and set difc
+      double difc = tof_vec.front() / d_vec.front();
+      setCalibrationValues(peaks.detid, difc, 0, 0);
+    } else if (d_vec.size() > 2) {
+      double difc = 0, t0 = 0, difa = 0;
+      fitDIFCtZeroDIFA(d_vec, tof_vec, difc, t0, difa);
+      setCalibrationValues(peaks.detid, difc, difa, t0);
       //           std::cout << "avg difc = " <<
       //           (difc_cumm/static_cast<double>(difc_count)) << std::endl;
     } else {
@@ -368,30 +380,44 @@ void PDCalibration::fitDIFCtZeroDIFA(const std::vector<double> &d,
   // DIFC only
   double difc0 = sumXY / sumX2;
   // std::cout << "difc0 = " << difc0 << '\n';
+  // Get out early if only DIFC is needed.
+  if (calParams == "DIFC") {
+    difc = difc0;
+    return;
+  }
 
   // DIFC and t0
+  double difc1 = 0;
+  double tZero1 = 0;
   double determinant = sum * sumX2 - sumX * sumX;
-  double difc1 = (sum * sumXY - sumX * sumY) / determinant;
-  double tZero1 = sumY / sum - difc1 * sumX / sum;
+  if (determinant != 0) {
+    difc1 = (sum * sumXY - sumX * sumY) / determinant;
+    tZero1 = sumY / sum - difc1 * sumX / sum;
+  }
   // std::cout << "difc1 = " << difc1 << '\n';
   // std::cout << "tZero1 = " << tZero1 << '\n';
 
   // DIFC, t0 and DIFA
+  double tZero2 = 0;
+  double difc2 = 0;
+  double difa2 = 0;
   determinant = sum * sumX2 * sumX4 + sumX * sumX3 * sumX2 +
                 sumX2 * sumX * sumX3 - sumX2 * sumX2 * sumX2 -
                 sumX * sumX * sumX4 - sum * sumX3 * sumX3;
-  double tZero2 =
-      (sumY * sumX2 * sumX4 + sumX * sumX3 * sumX2Y + sumX2 * sumXY * sumX3 -
-       sumX2 * sumX2 * sumX2Y - sumX * sumXY * sumX4 - sumY * sumX3 * sumX3) /
-      determinant;
-  double difc2 =
-      (sum * sumXY * sumX4 + sumY * sumX3 * sumX2 + sumX2 * sumX * sumX2Y -
-       sumX2 * sumXY * sumX2 - sumY * sumX * sumX4 - sum * sumX3 * sumX2Y) /
-      determinant;
-  double difa2 =
-      (sum * sumX2 * sumX2Y + sumX * sumXY * sumX2 + sumY * sumX * sumX3 -
-       sumY * sumX2 * sumX2 - sumX * sumX * sumX2Y - sum * sumXY * sumX3) /
-      determinant;
+  if (determinant != 0) {
+    tZero2 =
+        (sumY * sumX2 * sumX4 + sumX * sumX3 * sumX2Y + sumX2 * sumXY * sumX3 -
+         sumX2 * sumX2 * sumX2Y - sumX * sumXY * sumX4 - sumY * sumX3 * sumX3) /
+        determinant;
+    difc2 =
+        (sum * sumXY * sumX4 + sumY * sumX3 * sumX2 + sumX2 * sumX * sumX2Y -
+         sumX2 * sumXY * sumX2 - sumY * sumX * sumX4 - sum * sumX3 * sumX2Y) /
+        determinant;
+    difa2 =
+        (sum * sumX2 * sumX2Y + sumX * sumXY * sumX2 + sumY * sumX * sumX3 -
+         sumY * sumX2 * sumX2 - sumX * sumX * sumX2Y - sum * sumXY * sumX3) /
+        determinant;
+  }
   // std::cout << "difc2 = " << difc2 << '\n';
   // std::cout << "tZero2 = " << tZero2 << '\n';
   // std::cout << "difa2 = " << difa2 << '\n';
@@ -414,23 +440,43 @@ void PDCalibration::fitDIFCtZeroDIFA(const std::vector<double> &d,
     chisq2 += (temp * temp);
   }
 
-  chisq0 = chisq0 / (sum - 1);
-  chisq1 = chisq1 / (sum - 2);
-  chisq2 = chisq2 / (sum - 3);
-  // std::cout << "chisq0 = " << chisq0 << '\n';
-  // std::cout << "chisq1 = " << chisq1 << '\n';
-  // std::cout << "chisq2 = " << chisq2 << '\n';
-
-  // choose best one according to chi-squared
-  if ((chisq0 < chisq1) && (chisq0 < chisq2)) {
-    difc = difc0;
-  } else if ((chisq1 < chisq0) && (chisq1 < chisq2)) {
+  // Select difc, t0 and difa depending on CalibrationParameters chosen and
+  // number of peaks fitted.
+  if (sum == 2) {
+    // use 'difc+t0' because it should be an exact fit
     difc = difc1;
     t0 = tZero1;
   } else {
-    difc = difc2;
-    t0 = tZero2;
-    difa = difa2;
+    chisq0 = chisq0 / (sum - 1);
+    chisq1 = chisq1 / (sum - 2);
+    if (calParams == "DIFC+TZERO") {
+      // choose best one according to chi-squared
+      if (chisq0 < chisq1) {
+        difc = difc0;
+      } else {
+        difc = difc1;
+        t0 = tZero1;
+      }
+    } else if (sum == 3) {
+      // use 'difc+t0+difa' because it should be an exact fit
+      difc = difc2;
+      t0 = tZero2;
+      difa = difa2;
+    } else {
+      // look for solution with DIFC + TZERO + DIFA
+      chisq2 = chisq2 / (sum - 3);
+      // choose best one according to chi-squared between all three
+      if ((chisq0 < chisq1) && (chisq0 < chisq2)) {
+        difc = difc0;
+      } else if ((chisq1 < chisq0) && (chisq1 < chisq2)) {
+        difc = difc1;
+        t0 = tZero1;
+      } else {
+        difc = difc2;
+        t0 = tZero2;
+        difa = difa2;
+      }
+    }
   }
 }
 

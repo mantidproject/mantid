@@ -63,6 +63,7 @@ private:
   API::MatrixWorkspace_sptr m_uncalibratedWS;
   API::ITableWorkspace_sptr m_calibrationTable;
   std::vector<double> m_peaksInDspacing;
+  std::string calParams;
   std::map<detid_t, size_t> m_detidToRow;
   double m_tofMin;
   double m_tofMax;
