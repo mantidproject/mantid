@@ -329,5 +329,13 @@ void MuonAnalysisFitDataPresenter::handleSimultaneousFitLabelChanged() const {
   m_fitBrowser->setSimultaneousLabel(label.toStdString());
 }
 
+/**
+ * When a simultaneous fit finishes, transform the results so the results table
+ * can be easily generated.
+ */
+void MuonAnalysisFitDataPresenter::handleFitFinished() const {
+
+}
+
 } // namespace CustomInterfaces
 } // namespace MantidQt

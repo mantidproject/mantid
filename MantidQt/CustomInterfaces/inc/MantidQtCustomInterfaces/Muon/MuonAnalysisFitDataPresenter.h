@@ -78,6 +78,8 @@ public:
   void setRebinArgs(const RebinOptions &rebinArgs) { m_rebinArgs = rebinArgs; }
   /// Handles label for simultaneous fit results being changed
   void handleSimultaneousFitLabelChanged() const;
+  /// Transforms fit results when a simultaneous fit finishes
+  void handleFitFinished() const;
 
 private:
   /// Create workspaces to fit and update fit browser (model)

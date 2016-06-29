@@ -2058,6 +2058,8 @@ void MuonAnalysis::loadFittings() {
           SLOT(fitRangeChangedManually(double, double)));
   connect(m_dataSelector, SIGNAL(simulLabelChanged()), this,
           SLOT(simultaneousFitLabelChanged()));
+  connect(m_uiForm.fitBrowser, SIGNAL(fittingDone(const QString &)), this,
+          SLOT(fitCompleted(const QString &)));
 }
 
 /**
@@ -3052,6 +3054,17 @@ void MuonAnalysis::updateRebinParams() {
 void MuonAnalysis::simultaneousFitLabelChanged() {
   if (m_fitDataPresenter) {
     m_fitDataPresenter->handleSimultaneousFitLabelChanged();
+  }
+}
+
+/**
+ * Slot: fit has finished. Update data presenter with this information.
+ * @param status :: [input] Status string (unused)
+ */
+void MuonAnalysis::fitCompleted(const QString &status) {
+  Q_UNUSED(status);
+  if (m_fitDataPresenter) {
+    m_fitDataPresenter->handleFitFinished();
   }
 }
 

@@ -259,6 +259,8 @@ private slots:
   void fitRangeChangedManually(double start, double end);
   /// Called when user changes simultaneous fit label
   void simultaneousFitLabelChanged();
+  /// Called when fit completed
+  void fitCompleted(const QString &status);
 
 private:
  
