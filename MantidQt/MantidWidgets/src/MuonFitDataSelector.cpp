@@ -478,15 +478,19 @@ void MuonFitDataSelector::setUserInput(const QVariant &value) {
 
 /**
  * Returns the selected fit type.
- * - If only one run is selected, this is a single fit.
+ * - If only one run is selected, this is a single fit UNLESS multiple
+ * groups/periods are selected, in which case it's simultaneous.
  * - If multiple runs are selected, the user has the option of co-adding them or
  * doing a simultaneous fit, chosen via the radio buttons.
  * @returns :: fit type from enum
  */
 IMuonFitDataSelector::FitType MuonFitDataSelector::getFitType() const {
-  // If radio buttons disabled, it's a single fit
+  // If radio buttons disabled, it's a single fit unless multiple groups/periods chosen
   if (!m_ui.rbCoAdd->isEnabled()) {
-    return FitType::Single;
+    const auto groups = getChosenGroups();
+    const auto periods = getPeriodSelections();
+    return groups.size() <= 1 && periods.size() <= 1 ? FitType::Single
+                                                     : FitType::Simultaneous;
   } else {
     // which button is selected
     if (m_ui.rbCoAdd->isChecked()) {
