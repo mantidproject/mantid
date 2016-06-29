@@ -1596,31 +1596,11 @@ const HistogramData::HistogramE &EventList::e() const {
 
   return countStandardDeviations().data();
 }
-HistogramData::HistogramY &EventList::mutableY() {
-  throw Mantid::Kernel::Exception::NotImplementedError(
-      "This method is not implemented for EventList. Writing to Y is "
-      "forbidden.");
-}
-HistogramData::HistogramE &EventList::mutableE() {
-  throw Mantid::Kernel::Exception::NotImplementedError(
-      "This method is not implemented for EventList. Writing to E is "
-      "forbidden.");
-}
 Kernel::cow_ptr<HistogramData::HistogramY> EventList::sharedY() const {
   return counts().cowData();
 }
 Kernel::cow_ptr<HistogramData::HistogramE> EventList::sharedE() const {
   return countStandardDeviations().cowData();
-}
-void EventList::setSharedY(const Kernel::cow_ptr<HistogramData::HistogramY> &) {
-  throw Mantid::Kernel::Exception::NotImplementedError(
-      "This method is not implemented for EventList. Writing to Y is "
-      "forbidden.");
-}
-void EventList::setSharedE(const Kernel::cow_ptr<HistogramData::HistogramE> &) {
-  throw Mantid::Kernel::Exception::NotImplementedError(
-      "This method is not implemented for EventList. Writing to E is "
-      "forbidden.");
 }
 /** Look in the MRU to see if the Y histogram has been generated before.
  * If so, return that. If not, calculate, cache and return it.

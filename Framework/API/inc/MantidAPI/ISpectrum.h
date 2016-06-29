@@ -203,10 +203,12 @@ public:
   HistogramData::HistogramDx &mutableDx() {
     return mutableHistogramRef().mutableDx();
   }
-  virtual HistogramData::HistogramY &mutableY() {
+  HistogramData::HistogramY &mutableY() {
+    checkIsYAndEWritable();
     return mutableHistogramRef().mutableY();
   }
-  virtual HistogramData::HistogramE &mutableE() {
+  HistogramData::HistogramE &mutableE() {
+    checkIsYAndEWritable();
     return mutableHistogramRef().mutableE();
   }
   Kernel::cow_ptr<HistogramData::HistogramX> sharedX() const {
@@ -227,10 +229,12 @@ public:
   void setSharedDx(const Kernel::cow_ptr<HistogramData::HistogramDx> &dx) {
     mutableHistogramRef().setSharedDx(dx);
   }
-  virtual void setSharedY(const Kernel::cow_ptr<HistogramData::HistogramY> &y) {
+  void setSharedY(const Kernel::cow_ptr<HistogramData::HistogramY> &y) {
+    checkIsYAndEWritable();
     mutableHistogramRef().setSharedY(y);
   }
-  virtual void setSharedE(const Kernel::cow_ptr<HistogramData::HistogramE> &e) {
+  void setSharedE(const Kernel::cow_ptr<HistogramData::HistogramE> &e) {
+    checkIsYAndEWritable();
     mutableHistogramRef().setSharedE(e);
   }
 

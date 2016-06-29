@@ -340,12 +340,8 @@ public:
   frequencyStandardDeviations() const override;
   const HistogramData::HistogramY &y() const override;
   const HistogramData::HistogramE &e() const override;
-  HistogramData::HistogramY &mutableY() override;
-  HistogramData::HistogramE &mutableE() override;
   Kernel::cow_ptr<HistogramData::HistogramY> sharedY() const override;
   Kernel::cow_ptr<HistogramData::HistogramE> sharedE() const override;
-  void setSharedY(const Kernel::cow_ptr<HistogramData::HistogramY> &y) override;
-  void setSharedE(const Kernel::cow_ptr<HistogramData::HistogramE> &e) override;
 
 protected:
   void checkHistogram(const HistogramData::Histogram &histogram) const override;
