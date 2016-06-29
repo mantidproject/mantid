@@ -101,12 +101,10 @@ private:
   }
 
   /// Returns name of the fitted workspace with WORKSPACE_POSTFIX removed
-  static std::string wsBaseName(const std::string &wsName, bool group = false);
+  static std::string wsBaseName(const std::string &wsName);
 
   /// Does a few basic checks for whether the workspace is a fitted workspace
   static bool isFittedWs(const std::string &wsName);
-  /// Does basic checks for whether workspace is a group of fitted workspaces
-  static bool isFittedWsGroup(const std::string &wsName);
 
   void storeUserSettings();
   void applyUserSettings();
