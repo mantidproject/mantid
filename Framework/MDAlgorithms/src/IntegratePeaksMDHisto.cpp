@@ -21,7 +21,6 @@ using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
 
-
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(IntegratePeaksMDHisto)
 
@@ -78,7 +77,7 @@ void IntegratePeaksMDHisto::exec() {
       getProperty("PeaksWorkspace");
 
   /// Output peaks workspace, create if needed
-  PeaksWorkspace_sptr peakWS =
+  PeaksWorkspace_sptr  peakWS =
       getProperty("OutputWorkspace");
   if (peakWS != inPeakWS)
     peakWS = inPeakWS->clone();
@@ -101,9 +100,9 @@ void IntegratePeaksMDHisto::exec() {
 
     IPeak &p = peakWS->getPeak(i);
     // round to integer
-    int h = static_cast<int>(p.getH() + 0.5);
-    int k = static_cast<int>(p.getK() + 0.5);
-    int l = static_cast<int>(p.getL() + 0.5);
+    int h = static_cast<int>(std::round(p.getH()));
+    int k = static_cast<int>(std::round(p.getK()));
+    int l = static_cast<int>(std::round(p.getL()));
     MDHistoWorkspace_sptr normBox = normalize(
         h, k, l, box, gridPts, flux, sa, m_inputWS);
     double intensity = 0.0;
@@ -115,6 +114,8 @@ void IntegratePeaksMDHisto::exec() {
     PARALLEL_END_INTERUPT_REGION
   }
   PARALLEL_CHECK_INTERUPT_REGION
+  // Save the output
+  setProperty("OutputWorkspace", peakWS);
 }
 
 MDHistoWorkspace_sptr IntegratePeaksMDHisto::normalize(
@@ -140,7 +141,6 @@ MDHistoWorkspace_sptr IntegratePeaksMDHisto::normalize(
   normAlg->setProperty("OutputWorkspace", "mdout");
   normAlg->setProperty("OutputNormalizationWorkspace", "mdnorm");
   normAlg->executeAsChildAlg();
-
   Workspace_sptr mdout = normAlg->getProperty("OutputWorkspace");
   Workspace_sptr mdnorm = normAlg->getProperty("OutputNormalizationWorkspace");
 
@@ -149,17 +149,20 @@ MDHistoWorkspace_sptr IntegratePeaksMDHisto::normalize(
   alg->setProperty("RHSWorkspace", mdnorm);
   alg->setPropertyValue("OutputWorkspace", "out");
   alg->execute();
-  Workspace_sptr out = alg->getProperty("OutputWorkspace");
+  IMDWorkspace_sptr out = alg->getProperty("OutputWorkspace");
   return boost::dynamic_pointer_cast<MDHistoWorkspace>(out);
 }
 
 void  IntegratePeaksMDHisto::integratePeak(MDHistoWorkspace_sptr out, double& intensity, double& errorSquared, int gridPts) {
+   //AnalysisDataService::Instance().addOrReplace("box", out);
     double *F = out->getSignalArray();
     int noPoints = 10;
     double Fmax = 0;
     double Fmin = 1e300;
+    double sum = 0.0;
     for (int i = 0; i < gridPts*gridPts*gridPts; i++) {
       if (!boost::math::isnan(F[i]) && !boost::math::isinf(F[i]) && F[i] != 0.0) {
+        sum += F[i];
         if (F[i] < Fmin) Fmin = F[i];
         if (F[i] > Fmax) Fmax = F[i];
       }
@@ -183,7 +186,7 @@ void  IntegratePeaksMDHisto::integratePeak(MDHistoWorkspace_sptr out, double& in
                 if (!boost::math::isnan(F[iHKL]) && !boost::math::isinf(F[iHKL])) {
                     measuredPoints = measuredPoints + 1;
                     measuredSum = measuredSum + F[iHKL];
-                    measuredErrSqSum = measuredErrSqSum + F[iHKL];
+                    measuredErrSqSum = measuredErrSqSum + SqError[iHKL];
                     if (F[iHKL] > minIntensity) {
                         int neighborPoints  = 0;
                         for (int Hj  = -2; Hj < 3; Hj++) {
@@ -217,12 +220,31 @@ void  IntegratePeaksMDHisto::integratePeak(MDHistoWorkspace_sptr out, double& in
         }
     }
     double ratio = float(peakPoints)/float(measuredPoints - peakPoints);
-    //std::cout peakSum,  errSqSum,  ratio,  measuredSum,  measuredErrSqSum
     intensity = peakSum - ratio * (measuredSum - peakSum);
     errorSquared = errSqSum + ratio * (measuredErrSqSum - errSqSum);
     return;
 }
 
+/**
+ * Runs the BinMD algorithm on the input to provide the output workspace
+ * All slicing algorithm properties are passed along
+ * @return MDHistoWorkspace as a result of the binning
+ */
+/*MDHistoWorkspace_sptr MDNormSCD::binInputWS() {
+  const auto &props = getProperties();
+  IAlgorithm_sptr binMD = createChildAlgorithm("BinMD", 0.0, 0.3);
+  binMD->setPropertyValue("AxisAligned", "1");
+  for (auto prop : props) {
+    const auto &propName = prop->name();
+    if (propName != "FluxWorkspace" && propName != "SolidAngleWorkspace" &&
+        propName != "OutputNormalizationWorkspace") {
+      binMD->setPropertyValue(propName, prop->value());
+    }
+  }
+  binMD->executeAsChildAlg();
+  Workspace_sptr outputWS = binMD->getProperty("OutputWorkspace");
+  return boost::dynamic_pointer_cast<MDHistoWorkspace>(outputWS);
+}*/
 
 
 
