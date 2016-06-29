@@ -1,5 +1,5 @@
-import datetime
-import time
+#pylint: disable=W0403,R0913
+
 from PyQt4 import QtCore
 from PyQt4.QtCore import QThread
 
@@ -162,7 +162,6 @@ class IntegratePeaksThread(QThread):
         Execute the thread!
         :return:
         """
-        grand_error_message = ''
         for index, scan_tup in enumerate(self._scanTupleList):
             # check
             assert isinstance(scan_tup, tuple) and len(scan_tup) == 3

@@ -1171,9 +1171,6 @@ class MainWindow(QtGui.QMainWindow):
         It will so the simple cuboid integration with region of interest and background subtraction.
         :return:
         """
-        # start timer
-        integrate_peak_time_start = time.clock()
-
         # get rows to merge
         row_number_list = self.ui.tableWidget_mergeScans.get_selected_rows(True)
         if len(row_number_list) == 0:
