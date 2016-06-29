@@ -1,8 +1,11 @@
-#include "MantidQtCustomInterfaces/Muon/MuonAnalysisFitDataPresenter.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/GroupingLoader.h"
+#include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Workspace_fwd.h"
+#include "MantidQtCustomInterfaces/Muon/MuonAnalysisFitDataPresenter.h"
+#include "MantidQtCustomInterfaces/Muon/MuonAnalysisHelper.h"
+#include "MantidQtMantidWidgets/MuonFitPropertyBrowser.h"
 #include <boost/lexical_cast.hpp>
 
 using MantidQt::MantidWidgets::IMuonFitDataSelector;
@@ -331,10 +334,69 @@ void MuonAnalysisFitDataPresenter::handleSimultaneousFitLabelChanged() const {
 
 /**
  * When a simultaneous fit finishes, transform the results so the results table
- * can be easily generated.
+ * can be easily generated:
+ * - rename fitted workspaces
+ * - extract from group to one level up
+ * - split parameter table
  */
 void MuonAnalysisFitDataPresenter::handleFitFinished() const {
+  if (m_dataSelector->getFitType() ==
+      IMuonFitDataSelector::FitType::Simultaneous) {
+    AnalysisDataServiceImpl &ads = AnalysisDataService::Instance();
+    const auto label = m_dataSelector->getSimultaneousFitLabel();
+    const auto groupName =
+        MantidWidgets::MuonFitPropertyBrowser::SIMULTANEOUS_PREFIX +
+        label.toStdString();
+    renameFittedWorkspaces(groupName);
+    extractFittedWorkspaces(groupName);
+  }
+}
 
+/**
+ * Rename fitted workspaces so they can be linked to the input and found by the
+ * results table generation code.
+ * @param groupName :: [input] Name of group that workspaces belong to
+ */
+void MuonAnalysisFitDataPresenter::renameFittedWorkspaces(
+    const std::string &groupName) const {
+  AnalysisDataServiceImpl &ads = AnalysisDataService::Instance();
+  const auto resultsGroup =
+      ads.retrieveWS<WorkspaceGroup>(groupName + "_Workspaces");
+  const auto paramsTable =
+      ads.retrieveWS<ITableWorkspace>(groupName + "_Parameters");
+  if (resultsGroup && paramsTable) {
+    const size_t offset = paramsTable->rowCount() - resultsGroup->size();
+    for (size_t i = 0; i < resultsGroup->size(); i++) {
+      const std::string oldName = resultsGroup->getItem(i)->name();
+      auto wsName = paramsTable->cell<std::string>(offset + i, 0);
+      wsName = wsName.substr(wsName.find_first_of('=') + 1); // strip the "f0="
+      const auto runsPeriods = MuonAnalysisHelper::runNumberString(wsName, "0");
+      const auto wsDetails = MuonAnalysisHelper::parseWorkspaceName(wsName);
+      std::ostringstream newName;
+      newName << groupName << "_" << wsDetails.label << "_"
+              << wsDetails.itemName << "_" << wsDetails.periods << "_Workspace";
+      ads.rename(oldName, newName.str());
+    }
+  }
+}
+
+/**
+ * Moves all workspaces in group "groupName_Workspaces" up a level into
+ * "groupName"
+ * @param groupName :: [input] Name of upper group e.g. "MuonSimulFit_Label"
+ */
+void MuonAnalysisFitDataPresenter::extractFittedWorkspaces(
+    const std::string &groupName) const {
+  AnalysisDataServiceImpl &ads = AnalysisDataService::Instance();
+  const std::string resultsGroupName = groupName + "_Workspaces";
+  const auto resultsGroup = ads.retrieveWS<WorkspaceGroup>(resultsGroupName);
+  if (ads.doesExist(groupName) && resultsGroup) {
+    for (const auto &name : resultsGroup->getNames()) {
+      ads.removeFromGroup(resultsGroupName, name);
+      ads.addToGroup(groupName, name);
+    }
+    ads.remove(resultsGroupName); // should be empty now
+  }
 }
 
 } // namespace CustomInterfaces

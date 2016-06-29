@@ -96,6 +96,10 @@ private:
                   const Mantid::API::Grouping &grouping) const;
   /// Get rebin options for analysis
   std::string getRebinParams(const Mantid::API::Workspace_sptr ws) const;
+  /// Rename fit workspaces
+  void renameFittedWorkspaces(const std::string &groupName) const;
+  /// Extract workspaces from group and move up a level
+  void extractFittedWorkspaces(const std::string &groupName) const;
   /// Fit browser to update (non-owning pointer)
   MantidQt::MantidWidgets::IWorkspaceFitControl *m_fitBrowser;
   /// Data selector to get input from (non-owning pointer)
