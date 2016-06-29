@@ -238,8 +238,6 @@ public:
     mutableHistogramRef().setSharedE(e);
   }
 
-  friend class DataObjects::Workspace2D;
-
 protected:
   virtual void checkHistogram(const HistogramData::Histogram &) const {}
   virtual void checkWorksWithPoints() const {}
