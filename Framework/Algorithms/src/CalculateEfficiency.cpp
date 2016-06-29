@@ -65,7 +65,8 @@ void CalculateEfficiency::exec() {
   //  BioSANS has 2 detectors and reduces one at the time: one is masked!
   //  We must use that masked detector
   const std::string maskedComponent = getPropertyValue("MaskedFullComponent");
-  maskComponent(*inputWS, maskedComponent);
+  if (!maskedComponent.empty())
+    maskComponent(*inputWS, maskedComponent);
 
   // Now create the output workspace
   MatrixWorkspace_sptr outputWS; // = getProperty("OutputWorkspace");
@@ -269,10 +270,10 @@ void CalculateEfficiency::normalizeDetectors(MatrixWorkspace_sptr rebinnedWS,
 void CalculateEfficiency::maskComponent(MatrixWorkspace &ws,
                                         const std::string &componentName) {
   auto instrument = ws.getInstrument();
-  boost::shared_ptr<const Geometry::ICompAssembly> component =
-      boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(
-          instrument->getComponentByName(componentName));
   try {
+    boost::shared_ptr<const Geometry::ICompAssembly> component =
+        boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(
+            instrument->getComponentByName(componentName));
     std::vector<detid_t> detectorList;
     for (int x = 0; x < component->nelements(); x++) {
       boost::shared_ptr<Geometry::ICompAssembly> xColumn =
