@@ -54,11 +54,11 @@ void IntegratePeaksMDHisto::init() {
 
   declareProperty(make_unique<WorkspaceProperty<>>(
                       "FluxWorkspace", "", Direction::Input, PropertyMode::Optional, fluxValidator),
-                  "An input workspace containing momentum dependent flux.");
+                  "An optional input workspace containing momentum dependent flux for normalization.");
   declareProperty(make_unique<WorkspaceProperty<>>("SolidAngleWorkspace", "",
                                                    Direction::Input, PropertyMode::Optional,
                                                    solidAngleValidator),
-                  "An input workspace containing momentum integrated vanadium "
+                  "An optional input workspace containing momentum integrated vanadium for normalization "
                   "(a measure of the solid angle).");
 
   declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
@@ -107,8 +107,13 @@ void IntegratePeaksMDHisto::exec() {
     int h = static_cast<int>(std::round(p.getH()));
     int k = static_cast<int>(std::round(p.getK()));
     int l = static_cast<int>(std::round(p.getL()));
-    MDHistoWorkspace_sptr normBox = normalize(
-        h, k, l, box, gridPts, flux, sa, m_inputWS);
+    MDHistoWorkspace_sptr normBox;
+    if (sa && flux) {
+      normBox = normalize(h, k, l, box, gridPts, flux, sa, m_inputWS);
+    }
+    else {
+      normBox = bin(h, k, l, box, gridPts,m_inputWS);
+    }
     double intensity = 0.0;
     double errorSquared = 0.0;
     integratePeak(neighborPts, normBox, intensity, errorSquared);
@@ -158,7 +163,7 @@ MDHistoWorkspace_sptr IntegratePeaksMDHisto::normalize(
 }
 
 void  IntegratePeaksMDHisto::integratePeak(const int neighborPts, MDHistoWorkspace_sptr out, double& intensity, double& errorSquared) {
-     //AnalysisDataService::Instance().addOrReplace("box", out);
+     AnalysisDataService::Instance().addOrReplace("box", out);
     std::vector<int> gridPts;
     const size_t dimensionality = out->getNumDims();
     for (size_t i = 0; i < dimensionality; ++i) {
@@ -235,21 +240,28 @@ void  IntegratePeaksMDHisto::integratePeak(const int neighborPts, MDHistoWorkspa
  * All slicing algorithm properties are passed along
  * @return MDHistoWorkspace as a result of the binning
  */
-/*MDHistoWorkspace_sptr MDNormSCD::binInputWS() {
-  const auto &props = getProperties();
+MDHistoWorkspace_sptr IntegratePeaksMDHisto::bin(int h, int k, int l, double box, int gridPts,
+    IMDEventWorkspace_sptr ws) {
   IAlgorithm_sptr binMD = createChildAlgorithm("BinMD", 0.0, 0.3);
+  binMD->setProperty("InputWorkspace", ws);
+  binMD->setProperty("AlignedDim0",
+       "[H,0,0],"+boost::lexical_cast<std::string>(h-box)+","+
+       boost::lexical_cast<std::string>(h+box)+","+
+       boost::lexical_cast<std::string>(gridPts));
+  binMD->setProperty("AlignedDim1",
+       "[0,K,0],"+boost::lexical_cast<std::string>(k-box)+","+
+       boost::lexical_cast<std::string>(k+box)+","+
+       boost::lexical_cast<std::string>(gridPts));
+  binMD->setProperty("AlignedDim2",
+       "[0,0,L],"+boost::lexical_cast<std::string>(l-box)+","+
+       boost::lexical_cast<std::string>(l+box)+","+
+       boost::lexical_cast<std::string>(gridPts));
   binMD->setPropertyValue("AxisAligned", "1");
-  for (auto prop : props) {
-    const auto &propName = prop->name();
-    if (propName != "FluxWorkspace" && propName != "SolidAngleWorkspace" &&
-        propName != "OutputNormalizationWorkspace") {
-      binMD->setPropertyValue(propName, prop->value());
-    }
-  }
+  binMD->setPropertyValue("OutputWorkspace", "out");
   binMD->executeAsChildAlg();
   Workspace_sptr outputWS = binMD->getProperty("OutputWorkspace");
   return boost::dynamic_pointer_cast<MDHistoWorkspace>(outputWS);
-}*/
+}
 
 
 
