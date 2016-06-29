@@ -340,8 +340,20 @@ void MuonAnalysisFitDataPresenter::handleSimultaneousFitLabelChanged() const {
  * - split parameter table
  */
 void MuonAnalysisFitDataPresenter::handleFitFinished() const {
-  if (m_dataSelector->getFitType() ==
-      IMuonFitDataSelector::FitType::Simultaneous) {
+  // Test if this was a simultaneous fit, or a co-add fit with multiple
+  // groups/periods
+  auto &dataSelector = m_dataSelector; // local ref
+  const bool isSimultaneousFit = [dataSelector]() {
+    if (dataSelector->getFitType() ==
+        IMuonFitDataSelector::FitType::Simultaneous) {
+      return true;
+    } else {
+      return dataSelector->getChosenGroups().size() > 1 ||
+             dataSelector->getPeriodSelections().size() > 1;
+    }
+  }();
+  // If fitting was simultaneous, transform the results.
+  if (isSimultaneousFit) {
     AnalysisDataServiceImpl &ads = AnalysisDataService::Instance();
     const auto label = m_dataSelector->getSimultaneousFitLabel();
     const auto groupName =
