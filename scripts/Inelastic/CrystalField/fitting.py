@@ -11,6 +11,8 @@ class CrystalField(object):
                           'D4', 'C4v', 'D2d', 'D4h', 'C3', 'S6', 'D3', 'C3v', 'D3d', 'C6', 'C3h',
                           'C6h', 'D6', 'C6v', 'D3h', 'D6h', 'T', 'Td', 'Th', 'O', 'Oh']
 
+    default_peakShape = 'Gaussian'
+
     def __init__(self, Ion, Symmetry, **kwargs):
         """
         Constructor.
@@ -80,6 +82,10 @@ class CrystalField(object):
         self._FWHM = 0.0
         self._resolutionModel = None
         self._fieldParameters = {}
+
+        self.peaks = None
+        self.background = None
+
         for key in kwargs:
             if key == 'ToleranceEnergy':
                 self._toleranceEnergy = kwargs[key]
@@ -94,6 +100,7 @@ class CrystalField(object):
             elif key == 'Temperature':
                 self._temperature = kwargs[key]
             else:
+                # Crystal field parameters
                 self._fieldParameters[key] = kwargs[key]
 
         # Eigensystem
@@ -108,6 +115,28 @@ class CrystalField(object):
 
         # Spectra
         self._dirty_spectra = True
+
+    def _getTemperature(self, i):
+        """Get temperature value for i-th spectrum."""
+        if self._temperature is None:
+            raise RuntimeError('Temperature must be set.')
+        if isinstance(self._temperature, float) or isinstance(self._temperature, int):
+            if i != 0:
+                raise RuntimeError('Cannot evaluate spectrum %s. Only 1 temperature is given.' % i)
+            return float(self._temperature)
+        else:
+            n = len(self._temperature)
+            if i >= -n and i < n:
+                return float(self._temperature[i])
+            else:
+                raise RuntimeError('Cannot evaluate spectrum %s. Only %s temperatures are given.' % (i, n))
+
+    def _getPeaksFunction(self, i):
+        if self.peaks is None:
+            raise RuntimeError('Peaks function(s) must be set.')
+        if isinstance(self.peaks, list):
+            return self.peaks[i]
+        return self.peaks
 
     def _calcEigensystem(self):
         """Calculate the eigensystem: energies and wavefunctions.
@@ -124,18 +153,7 @@ class CrystalField(object):
         """Form a definition string for the CrystalFieldPeaks function
         :param i: Index of a spectrum.
         """
-        if self._temperature is None:
-            raise RuntimeError('Temperature must be set.')
-        if isinstance(self._temperature, float) or isinstance(self._temperature, int):
-            if i != 0:
-                raise RuntimeError('Cannot evaluate spectrum %s. Only 1 temperature is given.' % i)
-            temperature = float(self._temperature)
-        else:
-            n = len(self._temperature)
-            if i >= -n and i < n:
-                temperature = float(self._temperature[i])
-            else:
-                raise RuntimeError('Cannot evaluate spectrum %s. Only %s temperatures are given.' % (i, n))
+        temperature = self._getTemperature(i)
         s = 'name=CrystalFieldPeaks,Ion=%s,Symmetry=%s,Temperature=%s' % (self._ion, self._symmetry, temperature)
         s += ',ToleranceEnergy=%s,ToleranceIntensity=%s' % (self._toleranceEnergy, self._toleranceIntensity)
         s += ',%s' % ','.join(['%s=%s' % item for item in self._fieldParameters.iteritems()])
@@ -153,6 +171,13 @@ class CrystalField(object):
             alg.setProperty('OutputWorkspace', 'dummy')
             alg.execute()
             self._peakList = alg.getProperty('OutputWorkspace').value
+
+    def _makeCrystalFieldSpectrumFunction(self, i):
+        """Form a definition string for CrystalFieldSpectrumFunction function
+
+        :param i: Index of a spectrum
+        """
+        temperature = self._getTemperature(i)
 
     @property
     def Ion(self):
@@ -278,6 +303,9 @@ class CrystalField(object):
         self._calcPeaksList(i)
         peaks = np.array([self._peakList.column(0), self._peakList.column(10)])
         return peaks
+
+    def getSpectrum(self, i=0):
+        pass
 
 
 class SimpleFunction(object):
@@ -421,3 +449,17 @@ class PeaksFunction(object):
             else:
                 peaks.append('name=%s' % self._name)
         return ';'.join(peaks)
+
+
+class Background(object):
+    """Object representing spectrum background: a sum of a central peak and a
+    background.
+    """
+
+    def __init__(self, peak, background):
+        self.peak = peak
+        self.background = background
+
+    def toString(self):
+        return '%s;%s' % (self.peak, self.background)
+
