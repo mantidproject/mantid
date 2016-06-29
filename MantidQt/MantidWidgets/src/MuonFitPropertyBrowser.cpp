@@ -443,23 +443,7 @@ void MuonFitPropertyBrowser::finishAfterSimultaneousFit(
   std::string groupName = fitAlg->getPropertyValue("Output");
   std::string baseName = groupName;
   if (ads.doesExist(groupName)) {
-    QMessageBox::StandardButton answer =
-        QMessageBox::question(parentWidget(), "Label already exists",
-                              "Label you specified was used for one of the "
-                              "previous fits. Do you want to overwrite it?",
-                              QMessageBox::Yes | QMessageBox::No);
-    if (answer == QMessageBox::Yes) {
-      ads.deepRemoveGroup(groupName);
-    } else {
-      int i = 0;
-      bool exists = true;
-      std::string uniqueName;
-      while (exists) {
-        uniqueName = groupName + '#' + std::to_string(++i);
-        exists = ads.doesExist(uniqueName);
-      }
-      groupName = uniqueName;
-    }
+    ads.deepRemoveGroup(groupName);
   }
 
   // Create a group for label
