@@ -2488,6 +2488,36 @@ public:
     TS_ASSERT_THROWS(el.setPointStandardDeviations(1), std::runtime_error);
   }
 
+  void test_setCounts_fails() {
+    EventList el;
+    el.setHistogram(HistogramData::BinEdges{0, 2});
+    TS_ASSERT_THROWS(el.setCounts(1), std::runtime_error);
+    TS_ASSERT_THROWS(el.setCountVariances(1), std::runtime_error);
+    TS_ASSERT_THROWS(el.setCountStandardDeviations(1), std::runtime_error);
+  }
+
+  void test_setFrequencies_fails() {
+    EventList el;
+    el.setHistogram(HistogramData::BinEdges{0, 2});
+    TS_ASSERT_THROWS(el.setFrequencies(1), std::runtime_error);
+    TS_ASSERT_THROWS(el.setFrequencyVariances(1), std::runtime_error);
+    TS_ASSERT_THROWS(el.setFrequencyStandardDeviations(1), std::runtime_error);
+  }
+
+  void test_setShared_fails() {
+    EventList el;
+    TS_ASSERT_THROWS_NOTHING(el.setSharedX(el.sharedX()));
+    TS_ASSERT_THROWS(el.setSharedY(el.sharedY()), std::runtime_error);
+    TS_ASSERT_THROWS(el.setSharedE(el.sharedE()), std::runtime_error);
+  }
+
+  void test_mutable_access_fails() {
+    EventList el;
+    TS_ASSERT_THROWS_NOTHING(el.mutableX());
+    TS_ASSERT_THROWS(el.mutableY(), std::runtime_error);
+    TS_ASSERT_THROWS(el.mutableE(), std::runtime_error);
+  }
+
   void test_histogram() {
     EventList el;
     el += TofEvent(1);
