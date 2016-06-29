@@ -66,6 +66,7 @@ set ( SRC_FILES
 	src/Functions/DiffSphere.cpp
 	src/Functions/DynamicKuboToyabe.cpp
 	src/Functions/ElasticDiffRotDiscreteCircle.cpp
+	src/Functions/ElasticDiffSphere.cpp
 	src/Functions/EndErfc.cpp
 	src/Functions/ExpDecay.cpp
 	src/Functions/ExpDecayMuon.cpp
@@ -208,6 +209,7 @@ set ( INC_FILES
 	inc/MantidCurveFitting/Functions/DiffSphere.h
 	inc/MantidCurveFitting/Functions/DynamicKuboToyabe.h
 	inc/MantidCurveFitting/Functions/ElasticDiffRotDiscreteCircle.h
+	inc/MantidCurveFitting/Functions/ElasticDiffSphere.h
 	inc/MantidCurveFitting/Functions/EndErfc.h
 	inc/MantidCurveFitting/Functions/ExpDecay.h
 	inc/MantidCurveFitting/Functions/ExpDecayMuon.h
