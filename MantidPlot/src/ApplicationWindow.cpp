@@ -4583,6 +4583,24 @@ void ApplicationWindow::openRecentProject(QAction *action) {
   }
 }
 
+/**
+ * Open project with the given working directory.
+ *
+ * This function allows a project to be opened without
+ * using a GUI from the Python interface.
+ *
+ * @param workingDir :: the file directiory to use
+ * @param filename :: the path of the project file to open
+ * @param fileVersion :: the file version to use
+ * @return updated application window handle
+ */
+ApplicationWindow *ApplicationWindow::openProject(const QString &workingDir,
+                                                  const QString &filename,
+                                                  const int fileVersion) {
+    this->workingDir = workingDir;
+    return openProject(filename, fileVersion);
+}
+
 ApplicationWindow *ApplicationWindow::openProject(const QString &filename,
                                                   const int fileVersion) {
   newProject();

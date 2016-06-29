@@ -829,6 +829,20 @@ def closeAllSliceViewers():
 
 
 # -----------------------------------------------------------------------------
+def openProject(file_name, file_version = 0):
+    """Open a mantid project file.
+
+    This will load all associated workspaces and plots.
+
+    Args:
+        file_name :: file path to a mantid project file
+        file_version :: file version to use when loading (default 0).
+    """
+    working_dir = os.path.dirname(os.path.abspath(file_name))
+    threadsafe_call(_qti.app.openProject, working_dir, file_name, file_version)
+
+
+# -----------------------------------------------------------------------------
 # Legacy function
 plotTimeBin = plotBin
 

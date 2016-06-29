@@ -1232,7 +1232,7 @@ public:
   void disableTools();
 
   void saveProjectAs(const QString& fileName = QString(), bool = false);
-  void openProject(const QString& fileName = QString(), const int fileVersion = 0);
+  ApplicationWindow *openProject(const QString &workingDir, const QString &filename, const int fileVersion);
 
   MdiSubWindow* clone(MdiSubWindow*);
 
