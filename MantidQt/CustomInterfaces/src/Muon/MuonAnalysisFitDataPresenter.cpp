@@ -2,7 +2,9 @@
 #include "MantidAPI/GroupingLoader.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/TableRow.h"
 #include "MantidAPI/Workspace_fwd.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidQtCustomInterfaces/Muon/MuonAnalysisFitDataPresenter.h"
 #include "MantidQtCustomInterfaces/Muon/MuonAnalysisHelper.h"
 #include "MantidQtMantidWidgets/MuonFitPropertyBrowser.h"
@@ -12,6 +14,7 @@ using MantidQt::MantidWidgets::IMuonFitDataSelector;
 using MantidQt::MantidWidgets::IWorkspaceFitControl;
 using Mantid::API::AnalysisDataService;
 using Mantid::API::MatrixWorkspace;
+using Mantid::API::TableRow;
 typedef MantidQt::CustomInterfaces::Muon::MuonAnalysisOptionTab::RebinType
     RebinType;
 
@@ -359,17 +362,17 @@ void MuonAnalysisFitDataPresenter::handleFitFinished() const {
     const auto groupName =
         MantidWidgets::MuonFitPropertyBrowser::SIMULTANEOUS_PREFIX +
         label.toStdString();
-    renameFittedWorkspaces(groupName);
+    handleFittedWorkspaces(groupName);
     extractFittedWorkspaces(groupName);
   }
 }
 
 /**
  * Rename fitted workspaces so they can be linked to the input and found by the
- * results table generation code.
+ * results table generation code. Add special logs and generate params table.
  * @param groupName :: [input] Name of group that workspaces belong to
  */
-void MuonAnalysisFitDataPresenter::renameFittedWorkspaces(
+void MuonAnalysisFitDataPresenter::handleFittedWorkspaces(
     const std::string &groupName) const {
   AnalysisDataServiceImpl &ads = AnalysisDataService::Instance();
   const auto resultsGroup =
@@ -382,16 +385,24 @@ void MuonAnalysisFitDataPresenter::renameFittedWorkspaces(
       const std::string oldName = resultsGroup->getItem(i)->name();
       auto wsName = paramsTable->cell<std::string>(offset + i, 0);
       wsName = wsName.substr(wsName.find_first_of('=') + 1); // strip the "f0="
-      const auto runsPeriods = MuonAnalysisHelper::runNumberString(wsName, "0");
       const auto wsDetails = MuonAnalysisHelper::parseWorkspaceName(wsName);
       // Add group and period as log values so they appear in the table
       addSpecialLogs(oldName, wsDetails);
       // Generate new name and rename workspace
       std::ostringstream newName;
       newName << groupName << "_" << wsDetails.label << "_"
-              << wsDetails.itemName << "_" << wsDetails.periods << "_Workspace";
-      ads.rename(oldName, newName.str());
+              << wsDetails.itemName << "_" << wsDetails.periods;
+      ads.rename(oldName, newName.str() + "_Workspace");
+      // Generate new parameters table for this dataset
+      const auto fitTable = generateParametersTable(wsName, paramsTable);
+      if (fitTable) {
+        const std::string fitTableName = newName.str() + "_Parameters";
+        ads.add(fitTableName, fitTable);
+        ads.addToGroup(groupName, fitTableName);
+      }
     }
+    // Now that we have split parameters table, can delete it
+    ads.remove(groupName + "_Parameters");
   }
 }
 
@@ -431,6 +442,58 @@ void MuonAnalysisFitDataPresenter::addSpecialLogs(
     matrixWs->mutableRun().addProperty<std::string>("group", wsParams.itemName);
     matrixWs->mutableRun().addProperty<std::string>("period", wsParams.periods);
   }
+}
+
+/**
+ * Extract fit parameters into an individual parameters table for this dataset.
+ * This enables the Results Table tab of MuonAnalysis to do its work on them.
+ * @param wsName :: [input] Workspace name to extract parameters for
+ * @param inputTable :: [input] Fit parameters table for all datasets
+ * @returns :: individual table for the given workspace
+ */
+ITableWorkspace_sptr MuonAnalysisFitDataPresenter::generateParametersTable(
+    const std::string &wsName, ITableWorkspace_sptr inputTable) const {
+  ITableWorkspace_sptr fitTable =
+      Mantid::API::WorkspaceFactory::Instance().createTable("TableWorkspace");
+  auto nameCol = fitTable->addColumn("str", "Name");
+  nameCol->setPlotType(6); // label
+  auto valCol = fitTable->addColumn("double", "Value");
+  valCol->setPlotType(2); // Y
+  auto errCol = fitTable->addColumn("double", "Error");
+  errCol->setPlotType(5); // YErr
+
+  // Get "f0"/"f1" index for this workspace name
+  const std::string fIndex = [&inputTable, &wsName]() {
+    for (size_t i = 0; i < inputTable->rowCount(); i++) {
+      auto title = inputTable->cell<std::string>(i, 0);
+      const size_t eqPos = title.find_first_of('=');
+      if (eqPos == std::string::npos)
+        continue;
+      if (title.substr(eqPos + 1) == wsName) {
+        return title.substr(0, eqPos) + '.';
+      }
+    }
+    return std::string();
+  }();
+
+  static const std::string costFuncVal = "Cost function value";
+  TableRow row = inputTable->getFirstRow();
+  do {
+    std::string key;
+    double value;
+    double error;
+    row >> key >> value >> error;
+    const size_t fPos = key.find(fIndex);
+    if (fPos != std::string::npos) {
+      TableRow outputRow = fitTable->appendRow();
+      outputRow << key.substr(fPos + fIndex.size()) << value << error;
+    } else if (key == costFuncVal) {
+      TableRow outputRow = fitTable->appendRow();
+      outputRow << key << value << error;
+    }
+  } while (row.next());
+
+  return fitTable;
 }
 
 } // namespace CustomInterfaces

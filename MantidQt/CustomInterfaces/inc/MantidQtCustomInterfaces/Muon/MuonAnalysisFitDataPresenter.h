@@ -96,14 +96,18 @@ private:
                   const Mantid::API::Grouping &grouping) const;
   /// Get rebin options for analysis
   std::string getRebinParams(const Mantid::API::Workspace_sptr ws) const;
-  /// Rename fit workspaces
-  void renameFittedWorkspaces(const std::string &groupName) const;
+  /// Rename fit workspaces, add logs and generate params table
+  void handleFittedWorkspaces(const std::string &groupName) const;
   /// Extract workspaces from group and move up a level
   void extractFittedWorkspaces(const std::string &groupName) const;
   /// Add special logs to fitted workspaces
   void addSpecialLogs(
       const std::string &wsName,
       const MantidQt::CustomInterfaces::Muon::DatasetParams &wsParams) const;
+  /// Split parameters table into one for this dataset
+  Mantid::API::ITableWorkspace_sptr generateParametersTable(
+      const std::string &wsName,
+      const Mantid::API::ITableWorkspace_sptr inputTable) const;
   /// Fit browser to update (non-owning pointer)
   MantidQt::MantidWidgets::IWorkspaceFitControl *m_fitBrowser;
   /// Data selector to get input from (non-owning pointer)
