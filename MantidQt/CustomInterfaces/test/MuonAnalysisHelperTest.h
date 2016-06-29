@@ -116,10 +116,13 @@ public:
     DateAndTime end{"2015-12-24T09:00:00Z"};
     addLog(ws1, "run_start", start.toSimpleString());
     addLog(ws1, "run_end", end.toSimpleString());
+    addLog(ws1, "run_number", "15189");
     addLog(ws2, "run_start", start.toSimpleString());
     addLog(ws2, "run_end", end.toSimpleString());
+    addLog(ws2, "run_number", "15190");
     addLog(ws3, "run_start", start.toSimpleString());
     addLog(ws3, "run_end", end.toSimpleString());
+    addLog(ws3, "run_number", "15191");
 
     std::vector<Workspace_sptr> wsList{ws1, ws2, ws3};
 
@@ -136,6 +139,13 @@ public:
     TS_ASSERT_EQUALS(result->readY(0)[0], 6);
     TS_ASSERT_EQUALS(result->readY(0)[1], 6);
     TS_ASSERT_EQUALS(result->readY(0)[2], 6);
+
+    TS_ASSERT_EQUALS(result->run().getProperty("run_number")->value(),
+                     "15189-91");
+    TS_ASSERT_EQUALS(result->run().getProperty("run_start")->value(),
+                     start.toSimpleString());
+    TS_ASSERT_EQUALS(result->run().getProperty("run_end")->value(),
+                     end.toSimpleString());
 
     // Original workspaces shouldn't be touched
     TS_ASSERT_EQUALS(ws1->readY(0)[0], 2);

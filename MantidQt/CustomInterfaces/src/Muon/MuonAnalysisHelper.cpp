@@ -462,6 +462,7 @@ Workspace_sptr sumWorkspaces(const std::vector<Workspace_sptr> &workspaces) {
       };
 
   // Range of log values
+  auto runNumRange = findLogRange(workspaces, "run_number", numericalCompare);
   auto startRange = findLogRange(workspaces, "run_start", dateCompare);
   auto endRange = findLogRange(workspaces, "run_end", dateCompare);
   auto tempRange = findLogRange(workspaces, "sample_temp", numericalCompare);
@@ -510,6 +511,19 @@ Workspace_sptr sumWorkspaces(const std::vector<Workspace_sptr> &workspaces) {
                   rangeString(tempRange));
   replaceLogValue(accumulatorEntry.name(), "sample_magn_field",
                   rangeString(fieldRange));
+  // Construct range of run numbers differently
+  replaceLogValue(accumulatorEntry.name(), "run_number",
+                  [](std::pair<std::string, std::string> range) {
+                    for (size_t i = 0;
+                         i < range.first.size() && i < range.second.size();
+                         ++i) {
+                      if (range.first[i] != range.second[i]) {
+                        range.second.erase(0, i);
+                        break;
+                      }
+                    }
+                    return range.first + "-" + range.second;
+                  }(runNumRange));
 
   return accumulatorEntry.retrieve();
 }
