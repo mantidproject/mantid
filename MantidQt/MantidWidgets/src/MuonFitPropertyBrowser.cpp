@@ -315,6 +315,10 @@ void MuonFitPropertyBrowser::runFit() {
     const int nWorkspaces = static_cast<int>(m_workspacesToFit.size());
     if (nWorkspaces > 1) {
       alg->setPropertyValue("InputWorkspace", m_workspacesToFit[0]);
+      // Remove existing results with the same name
+      if (AnalysisDataService::Instance().doesExist(outputName())) {
+        AnalysisDataService::Instance().deepRemoveGroup(outputName());
+      }
       for (int i = 1; i < nWorkspaces; i++) {
         std::string suffix = boost::lexical_cast<std::string>(i);
         alg->setPropertyValue("InputWorkspace_" + suffix, m_workspacesToFit[i]);
