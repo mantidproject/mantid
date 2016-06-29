@@ -1,12 +1,11 @@
-from mantid.kernel import Direction
-from mantid.api import (DataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory)
+from mantid.kernel import (Direction, PropertyManagerProperty, Property)
+from mantid.api import (DataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode)
 from SANS2.State.SANSStateSerializer import create_deserialized_sans_state_from_property_manager
 from SANS.Load.SANSLoadData import SANSLoadDataFactory
 from SANS2.State.SANSStateData import SANSDataType
 
 
 class SANSLoad(DataProcessorAlgorithm):
-
     def category(self):
         return 'SANS\\Load'
 
@@ -17,49 +16,87 @@ class SANSLoad(DataProcessorAlgorithm):
         # ----------
         # INPUT
         # ----------
-        self.declareProperty('SANSState', '', direction=Direction.In,
+        self.declareProperty(PropertyManagerProperty('SANSState'),
                              doc='A property manager which fulfills the SANSState contract.')
 
-        self.declareProperty("PublishToCache", True,
-                             "Publish the loaded files to a cache, in order to avoid reloading for subsequent runs.")
+        self.declareProperty("PublishToCache", True, direction=Direction.Input,
+                             doc="Publish the loaded files to a cache, in order to avoid reloading for subsequent runs.")
 
-        self.declareProperty("UseCached", True,
-                             "Checks if there are loaded files available. If they are, those files are used.")
+        self.declareProperty("UseCached", True, direction=Direction.Input,
+                             doc="Checks if there are loaded files available. If they are, those files are used.")
 
-        self.declareProperty("MoveWorkspace", False,
-                             "Move the workspace according to the SANSState setting. This might be useful"
+        self.declareProperty("MoveWorkspace", False, direction=Direction.Input,
+                             doc="Move the workspace according to the SANSState setting. This might be useful"
                              "for manual inspection.")
 
         # ------------
         #  OUTPUT
         # ------------
+        default_number_of_workspaces = 0
+
         # Sample Scatter Workspaces
-        self.declareProperty(MatrixWorkspaceProperty('SampleScatterWorkspace', '', direction=Direction.Output),
+        self.declareProperty(MatrixWorkspaceProperty('SampleScatterWorkspace', '',
+                                                     optional=PropertyMode.Optional, direction=Direction.Output),
                              doc='The sample scatter workspace. This workspace does not contain monitors.')
-        self.declareProperty(MatrixWorkspaceProperty('SampleScatterMonitorWorkspace', '', direction=Direction.Output),
+        self.declareProperty(MatrixWorkspaceProperty('SampleScatterMonitorWorkspace', '',
+                                                     optional=PropertyMode.Optional, direction=Direction.Output),
                              doc='The sample scatter monitor workspace. This workspace only contains monitors.')
+        self.declareProperty('NumberOfSampleScatterWorkspaces', defaultValue=default_number_of_workspaces,
+                             direction=Direction.Output,
+                             doc='The number of workspace for sample scatter.')
 
         # Sample Transmission Workspace
-        self.declareProperty(MatrixWorkspaceProperty('SampleTransmissionWorkspace', '', direction=Direction.Output),
+        self.declareProperty(MatrixWorkspaceProperty('SampleTransmissionWorkspace', '',
+                                                     optional=PropertyMode.Optional, direction=Direction.Output),
                              doc='The sample transmission workspace.')
+        self.declareProperty('NumberOfSampleTransmissionWorkspaces', defaultValue=default_number_of_workspaces,
+                             direction=Direction.Output,
+                             doc='The number of workspace for sample transmission.')
 
         # Sample Direct Workspace
-        self.declareProperty(MatrixWorkspaceProperty('SampleDirectWorkspace', '', direction=Direction.Output),
+        self.declareProperty(MatrixWorkspaceProperty('SampleDirectWorkspace', '',
+                                                     optional=PropertyMode.Optional, direction=Direction.Output),
                              doc='The sample scatter direct workspace.')
+        self.declareProperty('NumberOfSampleDirectWorkspaces', defaultValue=default_number_of_workspaces,
+                             direction=Direction.Output,
+                             doc='The number of workspace for sample direct.')
+
+        self.setPropertyGroup("SampleScatterWorkspace", 'Sample')
+        self.setPropertyGroup("SampleScatterMonitorWorkspace", 'Sample')
+        self.setPropertyGroup("SampleTransmissionWorkspace", 'Sample')
+        self.setPropertyGroup("SampleDirectWorkspace", 'Sample')
 
         # Can Scatter Workspaces
-        self.declareProperty(MatrixWorkspaceProperty('CanScatterWorkspace', '', direction=Direction.Output),
+        self.declareProperty(MatrixWorkspaceProperty('CanScatterWorkspace', '',
+                                                     optional=PropertyMode.Optional, direction=Direction.Output),
                              doc='The can scatter workspace. This workspace does not contain monitors.')
-        self.declareProperty(MatrixWorkspaceProperty('CanScatterMonitorWorkspace', '', direction=Direction.Output),
+        self.declareProperty(MatrixWorkspaceProperty('CanScatterMonitorWorkspace', '',
+                                                     optional=PropertyMode.Optional, direction=Direction.Output),
                              doc='The can scatter monitor workspace. This workspace only contains monitors.')
+        self.declareProperty('NumberOfCanScatterWorkspaces', defaultValue=default_number_of_workspaces,
+                             direction=Direction.Output,
+                             doc='The number of workspace for can scatter.')
 
         # Sample Transmission Workspace
-        self.declareProperty(MatrixWorkspaceProperty('CanTransmissionWorkspace', '', direction=Direction.Output),
+        self.declareProperty(MatrixWorkspaceProperty('CanTransmissionWorkspace', '',
+                                                     optional=PropertyMode.Optional, direction=Direction.Output),
                              doc='The can transmission workspace.')
+        self.declareProperty('NumberOfCanTransmissionWorkspaces', defaultValue=default_number_of_workspaces,
+                             direction=Direction.Output,
+                             doc='The number of workspace for can transmission.')
 
         # Sample Direct Workspace
-        self.declareProperty(MatrixWorkspaceProperty('CanDirectWorkspace', '', direction=Direction.Output),
+        self.declareProperty(MatrixWorkspaceProperty('CanDirectWorkspace', '',
+                                                     optional=PropertyMode.Optional, direction=Direction.Output),
                              doc='The sample scatter direct workspace.')
+        self.declareProperty('NumberOfCanDirectWorkspaces', defaultValue=default_number_of_workspaces,
+                             direction=Direction.Output,
+                             doc='The number of workspace for can direct.')
+
+        self.setPropertyGroup("CanScatterWorkspace", 'Can')
+        self.setPropertyGroup("CanScatterMonitorWorkspace", 'Can')
+        self.setPropertyGroup("CanTransmissionWorkspace", 'Can')
+        self.setPropertyGroup("CanDirectWorkspace", 'Can')
 
     def PyExec(self):
         # Read the state
@@ -74,10 +111,12 @@ class SANSLoad(DataProcessorAlgorithm):
         use_cached = self.getProperty("UseCached").value
         publish_to_ads = self.getProperty("PublishToCache").value
         data = state.data
+
         workspaces, workspace_monitors = loader.execute(data_info=data, use_cached=use_cached,
                                                         publish_to_ads=publish_to_ads)
 
-        # Check if a move has been requested and perform it
+        # Check if a move has been requested and perform it. This can be useful if scientists want to load the data and
+        # have it moved in order to inspect it with other tools
         move_workspaces = self.getProperty("MoveWorkspace").value
         if move_workspaces:
             # TODO: Implement the move option
@@ -103,29 +142,60 @@ class SANSLoad(DataProcessorAlgorithm):
             errors.update({"SANSStatePrototype": str(e)})
         return errors
 
-    def set_output_for_workspaces(self, workspace_type, workspace):
+    def set_output_for_workspaces(self, workspace_type, workspaces):
         if workspace_type == SANSDataType.SampleScatter:
-            self.setProperty("SampleScatterWorkspace", workspace)
+            self.set_property_with_number_of_workspaces("SampleScatterWorkspace", workspaces)
         elif workspace_type == SANSDataType.SampleTransmission:
-            self.setProperty("SampleTransmissionWorkspace", workspace)
+            self.set_property_with_number_of_workspaces("SampleTransmissionWorkspace", workspaces)
         elif workspace_type == SANSDataType.SampleDirect:
-            self.setProperty("SampleDirectWorkspace", workspace)
+            self.set_property_with_number_of_workspaces("SampleDirectWorkspace", workspaces)
         elif workspace_type == SANSDataType.CanScatter:
-            self.setProperty("CanScatterWorkspace", workspace)
+            self.set_property_with_number_of_workspaces("CanScatterWorkspace", workspaces)
         elif workspace_type == SANSDataType.CanTransmission:
-            self.setProperty("CanTransmissionWorkspace", workspace)
+            self.set_property_with_number_of_workspaces("CanTransmissionWorkspace", workspaces)
         elif workspace_type == SANSDataType.CanDirect:
-            self.setProperty("CanDirectWorkspace", workspace)
+            self.set_property_with_number_of_workspaces("CanDirectWorkspace", workspaces)
         else:
             raise RuntimeError("SANSLoad: Unknown data output workspace format: {}".format(str(workspace_type)))
 
-    def set_output_for_monitor_workspaces(self, workspace_type, workspace):
+    def set_output_for_monitor_workspaces(self, workspace_type, workspaces):
         if workspace_type == SANSDataType.SampleScatter:
-            self.setProperty("SampleScatterMonitorWorkspace", workspace)
+            self.set_property("SampleScatterMonitorWorkspace", workspaces)
         elif workspace_type == SANSDataType.CanScatter:
-            self.setProperty("CanScatterMonitorWorkspace", workspace)
+            self.set_property("CanScatterMonitorWorkspace", workspaces)
         else:
             raise RuntimeError("SANSLoad: Unknown data output workspace format: {}".format(str(workspace_type)))
+
+    def set_property(self, name, workspace_collection):
+        """
+        We receive a name for a property and a collection of workspaces. If the workspace is a group workspace, then
+        we dynamically create output properties and inform the user that he needs to query the output workspaces
+        individually and we need to communicate how many there are.
+        :param name: The name of the output property
+        :param workspace_collection: A list of workspaces which corresponds to the name. Note that normally there
+                                    there will be only one element in this list. Only when dealing with multiperiod
+                                    data can we expected to see more workspaces in the list.
+        """
+
+        self.setProperty(name, workspace_collection[0])
+        number_of_workspaces = 1
+        if len(workspace_collection) > 1:
+            counter = 1
+            for workspace in workspace_collection:
+                output_name = name + "_" + str(counter)
+                self.declareProperty(MatrixWorkspaceProperty(output_name, '',
+                                                             optional=PropertyMode.Optional,
+                                                             direction=Direction.Output),
+                                     doc='A child workspace of a multi-period file.')
+                self.setProperty(output_name, workspace)
+                counter += 1
+            number_of_workspaces = counter - 1
+        return number_of_workspaces
+
+    def set_property_with_number_of_workspaces(self, name, workspace_collection):
+        counter = self.set_property(name, workspace_collection)
+        number_of_workspaces_name = "NumberOf" + name + "s"
+        self.setProperty(number_of_workspaces_name, counter)
 
 # Register algorithm with Mantid
 AlgorithmFactory.subscribe(SANSLoad)

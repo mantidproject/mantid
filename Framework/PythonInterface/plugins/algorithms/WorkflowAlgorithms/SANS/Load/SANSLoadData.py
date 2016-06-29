@@ -138,7 +138,6 @@ def get_loading_strategy(file_information, period, is_transmission):
 def add_workspaces_to_analysis_data_service(workspaces, workspace_names, is_monitor):
     if is_monitor:
         workspace_names = [workspace_name + SANSConstants.monitor_suffix for workspace_name in workspace_names]
-
     if len(workspaces) != len(workspace_names):
         raise RuntimeError("SANSLoad: There is a mismatch between the generated names and the length of"
                            " the WorkspaceGroup. The workspace has {} entries and there are {} "
@@ -174,7 +173,7 @@ def has_loaded_correctly_from_ads(file_information, workspaces, period):
     return is_valid
 
 
-def use_loaded_workspaces_from_ads(file_information, workspace_names, is_transmission,  period):
+def use_cached_workspaces_from_ads(file_information, workspace_names, is_transmission,  period):
     workspaces = []
     workspace_monitors = []
 
@@ -212,8 +211,7 @@ def run_loader(loader, file_information, is_transmission, period):
     # we extract it via OutputWorkspace or we want all child workspaces of a multi-period workspace in which case we
     # need to extract it via OutputWorkspace_1, OutputWorkspace_2, ...
     if number_of_periods == 1 or (number_of_periods > 1 and period is not SANSStateData.ALL_PERIODS):
-        for index in range(1, number_of_periods + 1):
-            workspaces.append(loader.getProperty(SANSConstants.output_workspace).value)
+        workspaces.append(loader.getProperty(SANSConstants.output_workspace).value)
     else:
         for index in range(1, number_of_periods + 1):
             workspaces.append(loader.getProperty(SANSConstants.output_workspace_group + str(index)).value)
@@ -230,9 +228,9 @@ def run_loader(loader, file_information, is_transmission, period):
     return workspaces, workspace_monitors
 
 
-def load_isis(data_type, file_information, period, use_loaded, publish_to_ads):
-    workspace = None
-    workspace_monitor = None
+def load_isis(data_type, file_information, period, use_cached, publish_to_ads):
+    workspace = []
+    workspace_monitor = []
 
     is_transmission = is_transmission_type(data_type)
 
@@ -241,12 +239,13 @@ def load_isis(data_type, file_information, period, use_loaded, publish_to_ads):
 
     # Make potentially use of loaded workspaces. For now we can only identify them by their name
     # TODO: Add tag into sample logs
-    if use_loaded:
-        workspace, workspace_monitor = use_loaded_workspaces_from_ads(file_information, workspace_names,
+    if use_cached:
+        workspace, workspace_monitor = use_cached_workspaces_from_ads(file_information, workspace_names,
                                                                       is_transmission, period)
 
-    # Load the workspace if required.
-    if workspace is None or workspace_monitor is None:
+    # Load the workspace if required. We need to load it if there is no workspace loaded from the cache or, in the case
+    # of scatter, ie. non-trans, there is no monitor workspace
+    if len(workspace) == 0 or (len(workspace_monitor) == 0 and not is_transmission):
         # Get the loading strategy
         loader = get_loading_strategy(file_information, period, is_transmission)
         workspace, workspace_monitor = run_loader(loader, file_information, is_transmission, period)
@@ -273,12 +272,12 @@ class SANSLoadData(object):
     __metaclass__ = ABCMeta
 
     @abstractmethod
-    def do_execute(self, data_info, use_loaded, publish_to_ads):
+    def do_execute(self, data_info, use_cached, publish_to_ads):
         pass
 
-    def execute(self, data_info, use_loaded, publish_to_ads):
+    def execute(self, data_info, use_cached, publish_to_ads):
         SANSLoadData._validate(data_info)
-        return self.do_execute(data_info, use_loaded, publish_to_ads)
+        return self.do_execute(data_info, use_cached, publish_to_ads)
 
     @staticmethod
     def _validate(data_info):
@@ -289,10 +288,9 @@ class SANSLoadData(object):
 
 
 class SANSLoadDataISIS(SANSLoadData):
-    def do_execute(self, data_info, use_loaded, publish_to_ads):
+    def do_execute(self, data_info, use_cached, publish_to_ads):
         # Get all entries from the state file
         file_info, period_info = get_file_and_period_information_from_data(data_info)
-
         # Scatter files and Transmission/Direct files have to be loaded slightly differently,
         # hence we separate the loading process.
         # TODO: make parallel with multiprocessing (check how ws_handle is being passed)
@@ -300,14 +298,15 @@ class SANSLoadDataISIS(SANSLoadData):
         workspace_monitors = dict()
         for key, value in file_info.iteritems():
             workspace_pack, workspace_monitors_pack = load_isis(key, value, period_info[key],
-                                                                use_loaded, publish_to_ads)
+                                                                use_cached, publish_to_ads)
             workspaces.update(workspace_pack)
             if workspace_monitors_pack is not None:
                 workspace_monitors.update(workspace_monitors_pack)
 
         # Apply the calibration if any exists.
         if data_info.calibration is not None:
-            apply_calibration(workspaces, workspace_monitors, use_loaded, publish_to_ads)
+            calibration_file = data_info.calibration
+            apply_calibration(calibration_file, workspaces, workspace_monitors, use_cached, publish_to_ads)
 
         return workspaces, workspace_monitors
 

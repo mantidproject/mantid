@@ -107,7 +107,7 @@ def calibrate(calibration_workspace, workspace_to_calibrate):
     copy_instrument_options = {SANSConstants.input_workspace: calibration_workspace,
                                SANSConstants.output_workspace: workspace_to_calibrate}
     alg = create_unmanaged_algorithm(copy_instrument_name, **copy_instrument_options)
-    alg.excute()
+    alg.execute()
 
 
 def add_to_ads(calibration_workspace, full_file_path):
@@ -118,9 +118,10 @@ def add_to_ads(calibration_workspace, full_file_path):
 def do_apply_calibration(full_file_path, workspaces_to_calibrate, use_loaded, publish_to_ads):
     # Check if the workspace has a calibration already applied to it and if it coincides with the
     # provided calibration file
-    for key, value in workspaces_to_calibrate.iteritems():
-        # If it is already calibrated then don't do anything
-        if has_calibration_already_been_applied(value, full_file_path):
+    for key, workspaces in workspaces_to_calibrate.iteritems():
+        # If it is already calibrated then don't do anything, We only need to check the first element, even for
+        # GroupWorkspaces
+        if has_calibration_already_been_applied(workspaces[0], full_file_path):
             continue
 
         # Load calibration workspace
@@ -134,20 +135,23 @@ def do_apply_calibration(full_file_path, workspaces_to_calibrate, use_loaded, pu
         # we used a workspace from the ADS or intend to publish to the ADS, we will be working with a cloned calibration
         # workspace in order to avoid this cross-talk. The calibration workspace sizes allow for very fast in-memory
         # cloning.
-        if use_loaded or publish_to_ads:
-            calibration_workspace_to_use = get_cloned_calibration_workspace(calibration_workspace)
-        else:
-            calibration_workspace_to_use = calibration_workspace
-        missing_parameters = get_missing_parameters(calibration_workspace_to_use, value)
-        apply_missing_parameters(calibration_workspace_to_use, value, missing_parameters)
-        calibrate(calibration_workspace_to_use, value)
+        has_been_published = False
+        for workspace in workspaces:
+            if use_loaded or publish_to_ads:
+                calibration_workspace_to_use = get_cloned_calibration_workspace(calibration_workspace)
+            else:
+                calibration_workspace_to_use = calibration_workspace
+            missing_parameters = get_missing_parameters(calibration_workspace_to_use, workspace)
+            apply_missing_parameters(calibration_workspace_to_use, workspace, missing_parameters)
+            calibrate(calibration_workspace_to_use, workspace)
 
-        # Publish to ADS if requested
-        if publish_to_ads:
-            add_to_ads(calibration_workspace, full_file_path)
+            # Publish to ADS if requested
+            if publish_to_ads and not has_been_published:
+                add_to_ads(calibration_workspace, full_file_path)
+                has_been_published = True
 
-        # Add calibration tag to workspace
-        add_calibration_tag_to_workspace(value, full_file_path)
+            # Add calibration tag to workspace
+            add_calibration_tag_to_workspace(workspace, full_file_path)
 
 
 def apply_calibration(calibration_file_name, workspaces, monitor_workspaces, use_loaded, publish_to_ads):

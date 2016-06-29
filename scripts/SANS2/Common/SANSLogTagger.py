@@ -10,7 +10,7 @@ def get_hash_value(value):
 
 
 def check_if_valid_tag_and_workspace(tag, workspace):
-    if not(isinstance(tag, str) and isinstance(workspace, MatrixWorkspace)):
+    if not(isinstance(tag, basestring) and isinstance(workspace, MatrixWorkspace)):
         raise RuntimeError("SANSLogTagger: Either tag {} or workspace are invalid. The tag has to be a string"
                            " and the workspace has to be a MatrixWorkspace".format(str(tag), str(workspace)))
 
