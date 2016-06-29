@@ -843,6 +843,14 @@ def openProject(file_name, file_version = 0):
 
 
 # -----------------------------------------------------------------------------
+def newProject():
+    """Start a new mantid project
+
+    This will clear all existing unsaved projects
+    """
+    threadsafe_call(_qti.app.newProject)
+
+# -----------------------------------------------------------------------------
 # Legacy function
 plotTimeBin = plotBin
 

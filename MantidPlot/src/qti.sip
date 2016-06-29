@@ -1218,6 +1218,7 @@ public:
   sipRes = sipCpp->currentFolder();
 %End
 
+  void newProject(const bool doNotSave = false);
   Folder* appendProject(const QString& file_name, Folder* parentFolder = 0);
   Folder* projectFolder() /PyName=rootFolder/;
 

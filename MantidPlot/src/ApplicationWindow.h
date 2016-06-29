@@ -655,7 +655,7 @@ public slots:
   void clearSelection();
   void copyActiveLayer();
 
-  void newProject();
+  void newProject(const bool doNotSave = false);
 
   //! Creates a new empty multilayer plot
   MultiLayer *newGraph(const QString &caption = tr("Graph"));
