@@ -861,7 +861,7 @@ void GenericDataProcessorPresenter::reduceRow(int groupNo, int rowNo) {
   if (alg->isExecuted()) {
 
     /* The reduction is complete, try to populate the columns */
-    for (int i = m_colGroup; i < m_columns - 1; i++) {
+    for (int i = 0; i < m_columns - 1; i++) {
       if (m_model->data(m_model->index(rowNo, i, m_model->index(groupNo, 0)))
               .toString()
               .isEmpty()) {
