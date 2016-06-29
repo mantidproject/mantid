@@ -374,12 +374,11 @@ bool MuonFitPropertyBrowser::isWorkspaceValid(Workspace_sptr ws) const {
 }
 
 void MuonFitPropertyBrowser::finishHandle(const IAlgorithm *alg) {
-  // Input workspace should be a MatrixWorkspace according to isWorkspaceValid
-  auto inWs = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-      static_cast<std::string>(alg->getProperty("InputWorkspace")));
-
   // Copy experiment info to output workspace
   if (AnalysisDataService::Instance().doesExist(outputName() + "_Workspace")) {
+    // Input workspace should be a MatrixWorkspace according to isWorkspaceValid
+    auto inWs = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+        static_cast<std::string>(alg->getProperty("InputWorkspace")));
     auto outWs = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
         outputName() + "_Workspace");
     if (inWs && outWs) {
@@ -388,13 +387,17 @@ void MuonFitPropertyBrowser::finishHandle(const IAlgorithm *alg) {
   } else if (AnalysisDataService::Instance().doesExist(outputName() +
                                                        "_Workspaces")) {
     // Output workspace was a group
-    auto outWs = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
+    auto outGroup = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
         outputName() + "_Workspaces");
-    for (size_t i = 0; i < outWs->size(); i++) {
-      auto matrixWs =
-          boost::dynamic_pointer_cast<MatrixWorkspace>(outWs->getItem(i));
-      if (matrixWs) {
-        matrixWs->copyExperimentInfoFrom(inWs.get());
+    if (outGroup->size() == m_workspacesToFit.size()) {
+      for (size_t i = 0; i < outGroup->size(); i++) {
+        auto outWs =
+            boost::dynamic_pointer_cast<MatrixWorkspace>(outGroup->getItem(i));
+        auto inWs = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+            m_workspacesToFit[i]);
+        if (inWs && outWs) {
+          outWs->copyExperimentInfoFrom(inWs.get());
+        }
       }
     }
   }
