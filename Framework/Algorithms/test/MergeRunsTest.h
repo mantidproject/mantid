@@ -647,10 +647,8 @@ public:
         WorkspaceCreationHelper::Create2DWorkspace123(3, 10, 1);
     badIn->dataX(0) = std::vector<double>(11, 2.0);
     AnalysisDataService::Instance().add("badIn", badIn);
-    TS_ASSERT_THROWS_NOTHING(
+    TS_ASSERT_THROWS_ANYTHING(
         merge.setPropertyValue("InputWorkspaces", "ws1,badIn"));
-    TS_ASSERT_THROWS(merge2.execute(), std::runtime_error);
-    TS_ASSERT(!merge2.isExecuted());
   }
 
   //-----------------------------------------------------------------------------------------------
