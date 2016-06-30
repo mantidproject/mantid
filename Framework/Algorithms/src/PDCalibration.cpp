@@ -8,8 +8,10 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ArrayBoundedValidator.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/RebinParamsValidator.h"
 #include <cassert>
 
@@ -24,7 +26,9 @@ using Mantid::DataObjects::EventWorkspace;
 using Mantid::Kernel::ArrayProperty;
 using Mantid::Kernel::ArrayBoundedValidator;
 using Mantid::Kernel::BoundedValidator;
+using Mantid::Kernel::CompositeValidator;
 using Mantid::Kernel::Direction;
+using Mantid::Kernel::MandatoryValidator;
 using Mantid::Kernel::RebinParamsValidator;
 using Mantid::Kernel::StringListValidator;
 using Mantid::Kernel::make_unique;
@@ -172,11 +176,14 @@ void PDCalibration::init() {
                                             FileProperty::OptionalLoad, exts2),
                   "Calibration measurement");
 
+  auto peaksValidator = boost::make_shared<CompositeValidator>();
   auto mustBePosArr =
       boost::make_shared<Kernel::ArrayBoundedValidator<double>>();
   mustBePosArr->setLower(0.0);
+  peaksValidator->add(mustBePosArr);
+  peaksValidator->add(boost::make_shared<MandatoryValidator<std::vector<double>>>());
   declareProperty(
-      make_unique<ArrayProperty<double>>("PeakPositions", mustBePosArr),
+		  make_unique<ArrayProperty<double>>("PeakPositions", peaksValidator),
       "Comma delimited d-space positions of reference peaks.");
 
   std::vector<std::string> modes{"DIFC", "DIFC+TZERO", "DIFC+TZERO+DIFA"};
