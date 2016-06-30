@@ -51,6 +51,16 @@ class SavePlot1D(mantid.api.PythonAlgorithm):
                              'Override with custom names for spectra')
         self.declareProperty('Result', '', Direction.Output)
 
+    def validateInputs(self):
+        messages = {}
+        outputType = self.getProperty('OutputType').value
+        if outputType != 'plotly':
+            filename = self.getProperty('OutputFilename').value
+            if len(filename.strip()) <= 0:
+                messages['OutputFilename'] = 'Required for OutputType != plotly'
+
+        return messages
+
     def PyExec(self):
         self._wksp = self.getProperty("InputWorkspace").value
         outputType = self.getProperty('OutputType').value
