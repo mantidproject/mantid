@@ -186,6 +186,8 @@ void PDCalibration::init() {
 		  make_unique<ArrayProperty<double>>("PeakPositions", peaksValidator),
       "Comma delimited d-space positions of reference peaks.");
 
+  declareProperty("PeakWindow", 0.1, mustBePositive,
+                  "The maximum window (in d space) around peak to look for peak.");
   std::vector<std::string> modes{"DIFC", "DIFC+TZERO", "DIFC+TZERO+DIFA"};
   declareProperty("CalibrationParameters", "DIFC+TZERO+DIFA",
                   boost::make_shared<StringListValidator>(modes),
@@ -211,7 +213,7 @@ void PDCalibration::exec() {
   // Sort peak positions, requried for correct peak window calculations
   std::sort(m_peaksInDspacing.begin(), m_peaksInDspacing.end());
 
-  const double peakWindowMaxInDSpacing = 0.1; // TODO configurable
+  const double peakWindowMaxInDSpacing = getProperty("PeakWindow");
   const auto windowsInDSpacing =
       dSpacingWindows(m_peaksInDspacing, peakWindowMaxInDSpacing);
 
