@@ -3,6 +3,7 @@ Test of basic project saving and loading
 """
 import mantidplottests
 from mantidplottests import *
+import shutil
 import numpy as np
 from PyQt4 import QtGui, QtCore
 
@@ -10,16 +11,276 @@ from PyQt4 import QtGui, QtCore
 class MantidPlotProjectSerialiseTest(unittest.TestCase):
 
     def setUp(self):
-        pass
+        self._project_name = "MantidPlotTestProject"
+        self._project_folder = os.path.expanduser("~/%s" % self._project_name)
+        file_name = "%s.mantid" % self._project_name
+        self._project_file = os.path.join(self._project_folder, file_name)
 
     def tearDown(self):
-        pass
+        # Clean up project files
+        if os.path.isdir(self._project_folder):
+            remove_folder(self._project_folder)
 
-    def test_saveProjectAs(self):
-        raise RuntimeError("FAIL")
+        clear_mantid()
 
-    def test_openProject(self):
-        raise RuntimeError("FAIL")
+    def test_project_file_with_no_data(self):
+        workspace_name = "fake_workspace"
+        create_dummy_workspace(workspace_name)
+
+        saveProjectAs(self._project_folder)
+
+        self.assertTrue(os.path.isdir(self._project_folder))
+        self.assertTrue(os.path.isfile(self._project_file))
+
+        file_text = "MantidPlot 0.9.5 project file\n" \
+                    "<scripting-lang>\tPython\n<windows>\t0\n" \
+                    "<mantidworkspaces>\nWorkspaceNames\n</mantidworkspaces>"
+
+        exp_contents = tokenise_project_file(file_text.split('\n'))
+        contents = read_project_file(self._project_folder)
+        self.assertEqual(contents, exp_contents)
+
+    def test_project_file_with_plotted_spectrum(self):
+        workspace_name = "fake_workspace"
+        create_dummy_workspace(workspace_name)
+        plotSpectrum(workspace_name, 1)
+
+        saveProjectAs(self._project_folder)
+
+        self.assert_project_files_saved(workspace_name)
+        contents = read_project_file(self._project_folder)
+
+        # Check corrent number of windows
+        window_count = find_elements(contents, '<windows>')[0]
+        self.assertEqual(int(window_count[1]), 1)
+
+        # Check workspace list was written
+        workspace_list = find_elements(contents, 'WorkspaceNames')[0]
+
+        self.assertEqual(len(workspace_list), 2)
+        self.assertEqual(workspace_list[1], workspace_name)
+
+        # Check plot was written
+        plot_titles = find_elements(contents, 'PlotTitle')[0]
+
+        self.assertEqual(len(plot_titles), 4)
+        self.assertEqual(plot_titles[1], workspace_name)
+
+    def test_project_file_1D_plot_with_labels_modified(self):
+        workspace_name = "fake_workspace"
+        create_dummy_workspace(workspace_name)
+        plotSpectrum(workspace_name, [0, 1])
+
+        # modify axes labels
+        graph = windows()[0]
+        layer = graph.layer(1)
+        layer.setTitle("Hello World")
+        layer.setAxisTitle(0, "Y Axis Modified")
+        layer.setAxisTitle(2, "X Axis Modified")
+
+        saveProjectAs(self._project_folder)
+
+        self.assert_project_files_saved(workspace_name)
+        contents = read_project_file(self._project_folder)
+
+        # Check corrent number of windows
+        window_count = find_elements(contents, '<windows>')[0]
+        self.assertEqual(int(window_count[1]), 1)
+
+        # Check plot title is correct
+        plot_title = find_elements(contents, 'PlotTitle')[0]
+        self.assertEqual(len(plot_title), 4)
+        self.assertEqual(plot_title[1], "Hello World")
+
+        # Check axes titles are correct
+        axes_titles = find_elements(contents, 'AxesTitles')[0]
+        self.assertEqual(len(axes_titles), 3)
+        self.assertEqual(axes_titles[1], 'X Axis Modified')
+        self.assertEqual(axes_titles[2], 'Y Axis Modified')
+
+    def test_project_file_1D_plot_with_error_bars(self):
+        workspace_name = "fake_workspace"
+        create_dummy_workspace(workspace_name)
+        plotSpectrum(workspace_name, 0, error_bars=True)
+
+        saveProjectAs(self._project_folder)
+
+        self.assert_project_files_saved(workspace_name)
+        contents = read_project_file(self._project_folder)
+        error_bars = find_elements(contents, '<MantidYErrors>1')[0]
+        self.assertEqual(len(error_bars), 6)
+
+    def test_project_file_1D_plot_with_axes_scaling(self):
+        workspace_name = "fake_workspace"
+        create_dummy_workspace(workspace_name)
+        plotSpectrum(workspace_name, 0)
+
+        # modify axes scales
+        graph = windows()[0]
+        layer = graph.layer(1)
+        layer.setAxisScale(0, 10, 10)
+        layer.logYlinX()
+
+        saveProjectAs(self._project_folder)
+
+        self.assert_project_files_saved(workspace_name)
+        contents = read_project_file(self._project_folder)
+
+        # Check axis scales are as expected
+        scale1, scale2, scale3, scale4 = find_elements(contents, 'scale')
+
+        self.assertEqual(int(scale1[2]), 10)
+        self.assertEqual(int(scale1[3]), 1000)
+
+        self.assertEqual(int(scale2[2]), 10)
+        self.assertEqual(int(scale2[3]), 1000)
+
+        self.assertEqual(int(scale3[2]), 0)
+        self.assertEqual(int(scale3[3]), 12)
+
+        self.assertEqual(int(scale4[2]), 0)
+        self.assertEqual(int(scale4[3]), 12)
+
+    def test_serialise_with_no_data(self):
+        workspace_name = "fake_workspace"
+        create_dummy_workspace(workspace_name)
+        self.save_and_reopen_project()
+
+        # Check that objects were reloaded
+        self.assertEqual(rootFolder().name(), self._project_name)
+        self.assertEqual(len(windows()), 0)
+        self.assertEqual(len(mtd.getObjectNames()), 0)
+
+    def test_serialise_1D_plot_with_plotted_spectrum(self):
+        workspace_name = "fake_workspace"
+        create_dummy_workspace(workspace_name)
+
+        plotSpectrum(workspace_name, 1)
+
+        self.save_and_reopen_project()
+
+        # Check that objects were reloaded
+        self.assertEqual(rootFolder().name(), self._project_name)
+        self.assertEqual(len(windows()), 1)
+        self.assertEqual(len(mtd.getObjectNames()), 1)
+
+    def test_serialise_1D_plot_with_two_plot_windows(self):
+        create_dummy_workspace("ws1")
+        create_dummy_workspace("ws2")
+
+        plotSpectrum("ws1", 1)
+        plotSpectrum("ws2", 1)
+
+        self.save_and_reopen_project()
+
+        # Check that objects were reloaded
+        self.assertEqual(rootFolder().name(), self._project_name)
+        self.assertEqual(len(windows()), 2)
+        self.assertEqual(len(mtd.getObjectNames()), 2)
+
+        # Check both windows are graph objects
+        for window in windows():
+            # slight hack as 'type' only returns
+            # an MDIWindow instance
+            self.assertIn('Graph', str(window))
+
+    def test_serialise_1D_plot_with_one_plot_and_multiple_spectra(self):
+        workspace_name = "fake_workspace"
+        create_dummy_workspace(workspace_name)
+        plotSpectrum(workspace_name, [0, 1])
+
+        self.save_and_reopen_project()
+
+        self.assertEqual(rootFolder().name(), self._project_name)
+        self.assertEqual(len(mtd.getObjectNames()), 1)
+        self.assertEqual(len(windows()), 1)
+
+        graph = windows()[0]
+        layer = graph.layer(1)
+
+        # Check graph and layer exist
+        self.assertIn('Graph', str(graph))
+        self.assertIsNotNone(layer)
+
+        # Check plot curves exist
+        curve1 = layer.curve(0)
+        curve2 = layer.curve(1)
+        self.assertTrue('QwtPlotCurve', str(type(curve1)))
+        self.assertTrue('QwtPlotCurve', str(type(curve2)))
+
+    def test_serialise_waterfall_plot(self):
+        workspace_name = "fake_workspace"
+        create_dummy_workspace(workspace_name)
+        plotSpectrum(workspace_name, [0, 1], waterfall=True)
+
+        self.save_and_reopen_project()
+
+        # Check that objects were reloaded
+        self.assertEqual(rootFolder().name(), self._project_name)
+        self.assertEqual(len(windows()), 1)
+        self.assertEqual(len(mtd.getObjectNames()), 1)
+
+        # Check window exists
+        graph = windows()[0]
+        self.assertIn('Graph', str(graph))
+
+        # Check plot curves exist
+        layer = graph.layer(1)
+        curve1 = layer.curve(0)
+        curve2 = layer.curve(1)
+        self.assertTrue('QwtPlotCurve', str(type(curve1)))
+        self.assertTrue('QwtPlotCurve', str(type(curve2)))
+
+    def test_serialise_2D_plot(self):
+        workspace_name = "fake_workspace"
+        create_dummy_workspace(workspace_name)
+        plot2D(workspace_name)
+
+        self.save_and_reopen_project()
+
+        # Check that objects were reloaded
+        self.assertEqual(rootFolder().name(), self._project_name)
+        self.assertEqual(len(windows()), 1)
+        self.assertEqual(len(mtd.getObjectNames()), 1)
+
+        # Check window exists
+        graph = windows()[0]
+        self.assertIn('Graph', str(graph))
+
+    def assert_project_files_saved(self, workspace_name):
+        """Check files were written to project folder """
+        file_name = '%s.nxs' % workspace_name
+        file_path = os.path.join(self._project_folder, file_name)
+        self.assertTrue(os.path.isdir(self._project_folder))
+        self.assertTrue(os.path.isfile(self._project_file))
+        self.assertTrue(os.path.isfile(file_path))
+
+    def save_and_reopen_project(self):
+        """Save project and clear mantid then reopen the project """
+        saveProjectAs(self._project_folder)
+        clear_mantid()
+        openProject(self._project_file)
+
+
+def clear_mantid():
+    """Clear plots and workspaces from Mantid.
+
+    This will also start a new project and remove any previous
+    project data
+    """
+    # Remove windows and plots
+    for window in windows():
+        window.close()
+    # Clear workspaces
+    mtd.clear()
+    # Start a blank project to remove
+    # anything else
+    newProject()
+
+
+def find_elements(tokens, name):
+    """Find an element in the tokens parsed from the file """
+    return filter(lambda l: l[0] == name, tokens)
 
 
 def create_dummy_workspace(ws_name):
@@ -42,6 +303,18 @@ def create_dummy_workspace(ws_name):
                     WorkspaceTitle="Faked data Workspace")
 
 
+def remove_folder(folder_name):
+    """ Remove a project folder after a test """
+    if not os.path.isdir(folder_name):
+        raise IOError('Path is not a directory')
+
+    try:
+        shutil.rmtree(folder_name)
+    except:
+        raise IOError('Could not clean up folder after test')
+
+
+
 def read_project_file(folder_name):
     """ Read lines from a .mantid project file """
 
@@ -49,7 +322,7 @@ def read_project_file(folder_name):
         raise IOError('Path is not a directory')
 
     project_name = os.path.basename(folder_name) + '.mantid'
-    project_file = os.path.join(project_name)
+    project_file = os.path.join(folder_name, project_name)
 
     if not os.path.isfile(project_file):
         raise IOError('Project file could not be found')
@@ -57,6 +330,9 @@ def read_project_file(folder_name):
     with open(project_file, 'r') as file_handle:
         lines = file_handle.readlines()
 
+    return tokenise_project_file(lines)
+
+def tokenise_project_file(lines):
     format_func = lambda s: s.strip().split('\t')
     tokens = map(format_func, lines)
     return tokens
