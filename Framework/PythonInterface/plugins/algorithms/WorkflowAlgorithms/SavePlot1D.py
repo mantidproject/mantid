@@ -1,5 +1,13 @@
 #pylint: disable=no-init,invalid-name
 import mantid,sys
+from mantid.kernel import StringListValidator
+
+try:
+    from plotly.offline import plot
+    import plotly.graph_objs as go
+    have_plotly = True
+except ImportError:
+    have_plotly = False
 
 class SavePlot1D(mantid.api.PythonAlgorithm):
 
@@ -23,14 +31,63 @@ class SavePlot1D(mantid.api.PythonAlgorithm):
 
     def PyInit(self):
         #declare properties
-        self.declareProperty(mantid.api.WorkspaceProperty("InputWorkspace","",mantid.kernel.Direction.Input),"Workspace to plot")
+        self.declareProperty(mantid.api.WorkspaceProperty("InputWorkspace","",mantid.kernel.Direction.Input),
+                             "Workspace to plot")
         self.declareProperty(mantid.api.FileProperty('OutputFilename', '', action=mantid.api.FileAction.Save, extensions = ["png"]),
                              doc='Name of the image file to savefile.')
-        self.declareProperty("XLabel","","Label on the X axis. If empty, it will be taken from workspace")
-        self.declareProperty("YLabel","","Label on the Y axis. If empty, it will be taken from workspace")
-
+        if have_plotly:
+            outputTypes = ['image', 'plotly', 'plotly-div']
+        else:
+            outputTypes = ['image']
+        self.declareProperty('OutputType', 'image',
+                             StringListValidator(outputTypes),
+                             'Method for rendering plot')
+        self.declareProperty("XLabel","",
+                             "Label on the X axis. If empty, it will be taken from workspace")
+        self.declareProperty("YLabel","",
+                             "Label on the Y axis. If empty, it will be taken from workspace")
 
     def PyExec(self):
+        outputType = self.getProperty('OutputType').value
+
+        if outputType == 'image':
+            self.saveImage()
+
+
+    def getData(self, ws, wkspIndex):
+        x=ws.readX(wkspIndex)
+        y=ws.readY(wkspIndex)
+        if x.size==y.size+1:
+            x=(x[:-1]+x[1:])*0.5
+
+        ax=ws.getAxis(1)
+        if ax.isSpectra():
+            label = ax.label(wkspIndex)
+        else:
+            LHS = a.title()
+            if LHS == "":
+                LHS = ax.getUnit().caption()
+            label = LHS + " = " + str(float(ax.label(wkspIndex)))
+
+        return (x, y, label)
+
+    def getAxesLabels(self, ws):
+        xlabel=self.getProperty('XLabel').value
+        if xlabel=='':
+            xaxis=ws.getAxis(0)
+            unitLabel=xaxis.getUnit().symbol().latex()
+            xlabel=xaxis.getUnit().caption()+" ($"+unitLabel+"$)"
+
+        ylabel=self.getProperty("YLabel").value
+        if ylabel=='':
+            ylabel=ws.YUnit()
+            if ylabel=='':
+                ylabel = ws.YUnitLabel()
+
+        return (xlabel, ylabel)
+
+
+    def saveImage(self):
         ok2run=''
         try:
             import matplotlib
@@ -49,15 +106,16 @@ class SavePlot1D(mantid.api.PythonAlgorithm):
         if type(self._wksp)==mantid.api.WorkspaceGroup:
             for i in range(self._wksp.getNumberOfEntries()):
                 plt.subplot(self._wksp.getNumberOfEntries(),1,i+1)
-                self.DoPlot(self._wksp.getItem(i))
+                self.doPlotImage(self._wksp.getItem(i))
         else:
-            self.DoPlot(self._wksp)
+            self.doPlotImage(self._wksp)
         plt.tight_layout(1.08)
         plt.show()
         filename = self.getProperty("OutputFilename").value
         plt.savefig(filename,bbox_inches='tight')
 
-    def DoPlot(self,ws):
+
+    def doPlotImage(self,ws):
         plt=sys.modules['matplotlib.pyplot']
         spectra=ws.getNumberHistograms()
         if spectra>10:
@@ -66,34 +124,15 @@ class SavePlot1D(mantid.api.PythonAlgorithm):
                     nreports=spectra)
 
         for j in range(spectra):
-            x=ws.readX(j)
-            y=ws.readY(j)
-            if x.size==y.size+1:
-                x=(x[:-1]+x[1:])*0.5
-            #get labels for the curves
-            a=ws.getAxis(1)
-            if a.isSpectra():
-                plotlabel=a.label(j)
-            else:
-                LHS=a.title()
-                if LHS=="":
-                    LHS=a.getUnit().caption()
-                plotlabel=LHS+" = "+str(float(a.label(j)))
-            plt.plot(x,y,label=plotlabel)
-            xlabel=self.getProperty("XLabel").value
-            ylabel=self.getProperty("YLabel").value
-            if xlabel=="":
-                xaxis=ws.getAxis(0)
-                unitLabel=xaxis.getUnit().symbol().latex()
-                xlabel=xaxis.getUnit().caption()+" ($"+unitLabel+"$)"
-            if ylabel=="":
-                ylabel=ws.YUnit()
-                if ylabel=='':
-                    ylabel = ws.YUnitLabel()
+            (x, y, plotlabel) = self.getData(ws, j)
 
+            plt.plot(x, y, label=plotlabel)
+
+            (xlabel, ylabel) = self.getAxesLabels(ws)
             plt.xlabel(xlabel)
             plt.ylabel(ylabel)
             prog_reporter.report("Processing")
+
         if spectra>1 and spectra<=10:
             plt.legend()
 
