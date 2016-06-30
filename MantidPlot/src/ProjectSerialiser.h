@@ -74,11 +74,15 @@ namespace MantidQt {
             QString serialiseProjectState(Folder* folder);
             /// Save the project file to disk
             void saveProjectFile(QFile* fileHandle, const QString &projectName, QString& text, bool compress);
-
+            /// Save the state of a folder
             QString saveFolderState(Folder *folder, const bool isTopLevel = false);
+            /// Save the header information about a folder
             QString saveFolderHeader(Folder* folder, bool isCurrentFolder);
+            /// Save sub-windows for a folder
             QString saveFolderSubWindows(Folder *folder);
+            /// Save the footer contents of a folder
             QString saveFolderFooter();
+            /// Save any currently loaded workspaces
             QString saveWorkspaces();
 
             // Loading Functions
@@ -87,13 +91,21 @@ namespace MantidQt {
             void loadProjectSections(const std::string& lines, const int fileVersion, const bool isTopLevel);
             /// Open the script window and load scripts from string
             void openScriptWindow(const std::string &files, const int fileVersion);
+            /// Open a Mantid matrix from a workspaces
             void openMantidMatrix(const std::string &lines);
+            /// Open a (non-Mantid) matrix
             void openMatrix(const std::string &lines, const int fileVersion);
+            /// Open a multi-layer plot window
             void openMultiLayer(const std::string &lines, const int fileVersion);
+            /// Open a surface plot window
             void openSurfacePlot(const std::string &lines, const int fileVersion);
+            /// Open a table window
             void openTable(const std::string &lines, const int fileVersion);
+            /// Open a table statistics window
             void openTableStatistics(const std::string &lines, const int fileVersion);
-            void populateMantidTreeWidget(const QString &s);
+            /// Load Nexus files and add workspaces to the ADS
+            void populateMantidTreeWidget(const QString &lines);
+            /// Load a single workspaces to the ADS
             void loadWsToMantidTree(const std::string &wsName);
 
         };

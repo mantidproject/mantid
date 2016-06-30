@@ -36,13 +36,15 @@ ProjectSerialiser::ProjectSerialiser(ApplicationWindow* window)
  * @param projectName :: the name of the project to write to
  * @param compress :: whether to compress the project (default false)
  */
-void ProjectSerialiser::save(Folder *folder, const QString &projectName, bool compress)
+void ProjectSerialiser::save(Folder *folder, const QString &projectName,
+                             bool compress)
 {
     m_windowCount = 0;
     QFile fileHandle(projectName);
 
     // attempt to backup project files and check we can write
-    if (!canBackupProjectFiles(&fileHandle, projectName) || !canWriteToProject(&fileHandle, projectName)) {
+    if (!canBackupProjectFiles(&fileHandle, projectName)
+            || !canWriteToProject(&fileHandle, projectName)) {
         return;
     }
 
@@ -50,7 +52,16 @@ void ProjectSerialiser::save(Folder *folder, const QString &projectName, bool co
     saveProjectFile(&fileHandle, projectName, text, compress);
 }
 
-void ProjectSerialiser::load(std::string lines, const int fileVersion, const bool isTopLevel)
+/**
+ * Load the state of Mantid from a collection of lines read from a project file
+ *
+ * @param lines :: string of characters from a project file
+ * @param fileVersion :: project file version used
+ * @param isTopLevel :: whether this function is being called on a top level
+ * 		folder. (Default True)
+ */
+void ProjectSerialiser::load(std::string lines, const int fileVersion,
+                             const bool isTopLevel)
 {
   // If we're not the top level folder, read the folder settings and create the
   // folder
@@ -94,7 +105,19 @@ void ProjectSerialiser::load(std::string lines, const int fileVersion, const boo
     window->d_current_folder = parent;
 }
 
-void ProjectSerialiser::loadProjectSections(const std::string &lines, const int fileVersion, const bool isTopLevel)
+/**
+ * Load sections of the project file back into Mantid
+ *
+ * This function looks at individual sections of the TSV project file
+ * and loads the relevant windows etc.
+ *
+ * @param lines :: string of characters from a Mantid project file.
+ * @param fileVersion :: version of the project file loaded
+ * @param isTopLevel :: whether this is being called on a top level folder.
+ */
+void ProjectSerialiser::loadProjectSections(const std::string &lines,
+                                            const int fileVersion,
+                                            const bool isTopLevel)
 {
   // This now ought to be the regular contents of a folder. Parse as normal.
   TSVSerialiser tsv(lines);
@@ -188,8 +211,9 @@ void ProjectSerialiser::loadProjectSections(const std::string &lines, const int 
           TSVSerialiser iws(*it);
           if (iws.selectLine("WorkspaceName")) {
               std::string wsName = iws.asString(1);
-              InstrumentWindow *iw = dynamic_cast<InstrumentWindow *>(
-                          window->mantidUI->getInstrumentView(QString::fromStdString(wsName)));
+              QString name = QString::fromStdString(wsName);
+              auto obj = window->mantidUI->getInstrumentView(name);
+              InstrumentWindow *iw = dynamic_cast<InstrumentWindow *>(obj);
               if (iw) {
                   iw->loadFromProject(*it, window, fileVersion);
               }
@@ -213,13 +237,15 @@ void ProjectSerialiser::loadProjectSections(const std::string &lines, const int 
  * @param projectName :: the name of the project
  * @return true if the file handle is writable
  */
-bool ProjectSerialiser::canWriteToProject(QFile* fileHandle, const QString& projectName)
+bool ProjectSerialiser::canWriteToProject(QFile* fileHandle,
+                                          const QString& projectName)
 {
     // check if we can write
     if (!fileHandle->open(QIODevice::WriteOnly)) {
         QMessageBox::about(window, window->tr("MantidPlot - File save error"),
-                              window->tr("The file: <br><b>%1</b> is opened in read-only mode")
-                                  .arg(projectName)); // Mantid
+                              window->tr("The file: <br><b>%1</b> is opened in "
+                              "read-only mode")
+                                    .arg(projectName)); // Mantid
         return false;
     }
     return true;
@@ -266,7 +292,8 @@ QString ProjectSerialiser::serialiseProjectState(Folder* folder)
  * @param app :: the current application window instance
  * @return string represnetation of the folder's data
  */
-QString ProjectSerialiser::saveFolderState(Folder *folder, const bool isTopLevel)
+QString ProjectSerialiser::saveFolderState(Folder *folder,
+                                           const bool isTopLevel)
 {
     QString text;
     bool isCurrentFolder = window->currentFolder() == folder;
@@ -292,7 +319,8 @@ QString ProjectSerialiser::saveFolderState(Folder *folder, const bool isTopLevel
  * @param isCurrentFolder :: whether this folder is the current one.
  * @return string representation of the folder's header data
  */
-QString ProjectSerialiser::saveFolderHeader(Folder* folder, bool isCurrentFolder)
+QString ProjectSerialiser::saveFolderHeader(Folder* folder,
+                                            bool isCurrentFolder)
 {
     QString text;
 
@@ -363,10 +391,11 @@ QString ProjectSerialiser::saveFolderFooter()
 /** This method saves the currently loaded workspaces in
  * the project.
  *
- * Saves the names of all the workspaces loaded into mantid workspace tree. Creates
- * a string and calls save nexus on each workspace to save the data to a nexus file.
+ * Saves the names of all the workspaces loaded into mantid workspace tree.
+ * Creates a string and calls save nexus on each workspace to save the data
+ * to a nexus file.
  *
- * @param app :: The application window instance
+ * @return workspace names formatted as a Mantid project file string
  */
 QString ProjectSerialiser::saveWorkspaces() {
   using namespace Mantid::API;
@@ -376,13 +405,15 @@ QString ProjectSerialiser::saveWorkspaces() {
   wsNames += "WorkspaceNames";
 
   auto workspaceItems = AnalysisDataService::Instance().getObjectNames();
-  for (auto itemIter = workspaceItems.cbegin(); itemIter != workspaceItems.cend(); ++itemIter) {
+  for (auto itemIter = workspaceItems.cbegin();
+            itemIter != workspaceItems.cend(); ++itemIter) {
     QString wsName = QString::fromStdString(*itemIter);
 
     Workspace_sptr ws = AnalysisDataService::Instance().retrieveWS<Workspace>(
         wsName.toStdString());
     WorkspaceGroup_sptr group =
         boost::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(ws);
+
     // We don't split up multiperiod workspaces for performance reasons.
     // There's significant optimisations we can perform on load if they're a
     // single file.
@@ -420,7 +451,8 @@ QString ProjectSerialiser::saveWorkspaces() {
  * @param projectName :: the name of the project
  * @return true if the project can be backed up or the user does not care
  */
-bool ProjectSerialiser::canBackupProjectFiles(QFile* fileHandle, const QString& projectName)
+bool ProjectSerialiser::canBackupProjectFiles(QFile* fileHandle,
+                                              const QString& projectName)
 {
 
     if (window->d_backup_files && fileHandle->exists()) { // make byte-copy of current file so that
@@ -460,15 +492,17 @@ bool ProjectSerialiser::canBackupProjectFiles(QFile* fileHandle, const QString& 
  * @param text :: the string representation of the current state
  * @param compress :: whether to compress the project
  */
-void ProjectSerialiser::saveProjectFile(QFile* fileHandle, const QString &projectName, QString& text, bool compress) {
+void ProjectSerialiser::saveProjectFile(QFile* fileHandle,
+                                        const QString &projectName,
+                                        QString& text, bool compress) {
   QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
   // add number of MdiSubWindows saved to file
   text.prepend("<windows>\t" + QString::number(m_windowCount) + "\n");
 
   // add some header content to the file
-  text.prepend("<scripting-lang>\t" + QString(window->scriptingEnv()->objectName()) +
-               "\n");
+  QString lang = QString(window->scriptingEnv()->objectName());
+  text.prepend("<scripting-lang>\t" + lang + "\n");
 
   // construct MantidPlot version number
   QString version;
@@ -492,7 +526,12 @@ void ProjectSerialiser::saveProjectFile(QFile* fileHandle, const QString &projec
   QApplication::restoreOverrideCursor();
 }
 
-
+/**
+ * Open a new matrix window
+ *
+ * @param lines :: string of characters from a Mantid project file
+ * @param fileVersion :: the version of the project file
+ */
 void ProjectSerialiser::openMatrix(const std::string &lines,
                                    const int fileVersion) {
   // The first line specifies the name, dimensions and date.
@@ -533,6 +572,11 @@ void ProjectSerialiser::openMatrix(const std::string &lines,
   m->loadFromProject(newLines, window, fileVersion);
 }
 
+/**
+ * Open a new Mantid Matrix window.
+ *
+ * @param lines :: string of characters from a Mantid project file
+ */
 void ProjectSerialiser::openMantidMatrix(const std::string &lines) {
   TSVSerialiser tsv(lines);
 
@@ -559,6 +603,11 @@ void ProjectSerialiser::openMantidMatrix(const std::string &lines) {
   window->addMantidMatrixWindow(m);
 }
 
+/**
+ * Open a new Multi-Layer plot window
+ * @param lines :: string of characters from a Mantid project file.
+ * @param fileVersion :: the version of the project file
+ */
 void ProjectSerialiser::openMultiLayer(const std::string &lines,
                                        const int fileVersion) {
   MultiLayer *plot = 0;
@@ -597,6 +646,11 @@ void ProjectSerialiser::openMultiLayer(const std::string &lines,
   plot->loadFromProject(multiLayerLines, window, fileVersion);
 }
 
+/**
+ * Open a new table window
+ * @param lines :: chracters from a Mantid project file
+ * @param fileVersion :: the version of the project file
+ */
 void ProjectSerialiser::openTable(const std::string &lines,
                                   const int fileVersion) {
   std::vector<std::string> lineVec, valVec;
@@ -622,6 +676,11 @@ void ProjectSerialiser::openTable(const std::string &lines,
   t->loadFromProject(lines, window, fileVersion);
 }
 
+/**
+ * Open a new table statistics window
+ * @param lines :: chracters from a Mantid project file
+ * @param fileVersion :: the version of the project file
+ */
 void ProjectSerialiser::openTableStatistics(const std::string &lines,
                                             const int fileVersion) {
   std::vector<std::string> lineVec;
@@ -675,6 +734,11 @@ void ProjectSerialiser::openTableStatistics(const std::string &lines,
   t->loadFromProject(lines, window, fileVersion);
 }
 
+/**
+ * Open a new surface plot window
+ * @param lines :: the string of characters from a Mantid project file
+ * @param fileVersion :: the version of the project file
+ */
 void ProjectSerialiser::openSurfacePlot(const std::string &lines,
                                         const int fileVersion) {
   std::vector<std::string> lineVec, valVec;
@@ -767,7 +831,10 @@ void ProjectSerialiser::openSurfacePlot(const std::string &lines,
   plot->loadFromProject(tsvLines, window, fileVersion);
 }
 
-/** This method opens script window with a list of scripts loaded
+/**
+ * Open a new script window
+ * @param lines :: the string of characters from a Mantid project file
+ * @param fileVersion :: the version of the project file
  */
 void ProjectSerialiser::openScriptWindow(const std::string &lines, const int fileVersion) {
   window->showScriptWindow();
@@ -782,6 +849,10 @@ void ProjectSerialiser::openScriptWindow(const std::string &lines, const int fil
   scriptingWindow->loadFromProject(lines, window, fileVersion);
 }
 
+/**
+ * Open a new script window
+ * @param files :: list of strings representing file names for python scripts
+ */
 void ProjectSerialiser::openScriptWindow(const QStringList &files)
 {
   window->showScriptWindow();
@@ -796,8 +867,13 @@ void ProjectSerialiser::openScriptWindow(const QStringList &files)
   scriptingWindow->loadFromFileList(files);
 }
 
-void ProjectSerialiser::populateMantidTreeWidget(const QString &s) {
-  QStringList list = s.split("\t");
+/**
+ * Populate Mantid and the ADS with workspaces loaded from the project file
+ *
+ * @param s :: the string of characters loaded from a Mantid project file
+ */
+void ProjectSerialiser::populateMantidTreeWidget(const QString &lines) {
+  QStringList list = lines.split("\t");
   QStringList::const_iterator line = list.begin();
   for (++line; line != list.end(); ++line) {
     if ((*line)
@@ -873,7 +949,10 @@ void ProjectSerialiser::populateMantidTreeWidget(const QString &s) {
   }
 }
 
-  /** This method populates the mantid workspace tree when  project file is loaded
+/**
+   * Load a workspace into Mantid from a project directory
+   *
+   * @param wsName :: the name of the workspace to load
    */
   void ProjectSerialiser::loadWsToMantidTree(const std::string &wsName) {
     if (wsName.empty()) {
