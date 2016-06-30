@@ -110,10 +110,10 @@ class IOmoduleTest(unittest.TestCase):
                           {"Winter":False, "Punctured":False, "Brand":"Mercedes", "Age":3},
                           {"Winter":False, "Punctured":False, "Brand":"Mercedes", "Age":5},
                           {"Winter":False, "Punctured":True, "Brand":"Mercedes", "Age":7}],
-                         data["structuredDatasets"]["wheels"])
+                         data["structured_datasets"]["wheels"])
 
         self.assertEqual({"AdjustableHeadrests":True, "ExtraPadding":True},
-                         data["structuredDatasets"]["chairs"])
+                         data["structured_datasets"]["chairs"])
 
         with self.assertRaises(ValueError):
             self.loader.load(list_of_structured_datasets=["WrongDataSet"])

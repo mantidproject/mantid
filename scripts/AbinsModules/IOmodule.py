@@ -5,11 +5,20 @@ import shutil
 
 class IOmodule(object):
     """
-    Class for ABINS I/O operations.
+    Class for ABINS I/O HDF file operations.
     """
     def __init__(self, input_filename=None, group_name=None):
 
-        if  isinstance(input_filename, str): self._input_file = input_filename
+        if  isinstance(input_filename, str):
+            # extract name of file from its path.
+            begin=0
+            while input_filename.find("/") != -1:
+                begin = input_filename.find("/") + 1
+                input_filename = input_filename[begin:]
+
+            if input_filename == "": raise ValueError("Name of the file cannot be an empty string!")
+
+            self._input_file = input_filename
         else: raise ValueError("Invalid name of hdf file. String was expected!")
 
         if  isinstance(group_name, str): self._group_name = group_name
@@ -347,7 +356,7 @@ class IOmodule(object):
             group = hdf_file[self._group_name]
 
             if self._list_of_str(list_str=list_of_structured_datasets):
-                results["structuredDatasets"] = self._load_structured_datasets(hdf_file=hdf_file,
+                results["structured_datasets"] = self._load_structured_datasets(hdf_file=hdf_file,
                                                                                list_of_structured_datasets=list_of_structured_datasets,
                                                                                group=group)
             if self._list_of_str(list_str=list_of_attributes):
