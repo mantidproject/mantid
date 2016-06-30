@@ -77,9 +77,9 @@ class MantidPlotProjectSerialiseTest(unittest.TestCase):
         # modify axes labels
         graph = windows()[0]
         layer = graph.layer(1)
-        layer.setTitle("Hello World")
-        layer.setAxisTitle(0, "Y Axis Modified")
-        layer.setAxisTitle(2, "X Axis Modified")
+        threadsafe_call(layer.setTitle, "Hello World")
+        threadsafe_call(layer.setAxisTitle, 0, "Y Axis Modified")
+        threadsafe_call(layer.setAxisTitle, 2, "X Axis Modified")
 
         saveProjectAs(self._project_folder)
 
@@ -121,8 +121,8 @@ class MantidPlotProjectSerialiseTest(unittest.TestCase):
         # modify axes scales
         graph = windows()[0]
         layer = graph.layer(1)
-        layer.setAxisScale(0, 10, 10)
-        layer.logYlinX()
+        threadsafe_call(layer.setAxisScale, 0, 10, 10)
+        threadsafe_call(layer.logYlinX)
 
         saveProjectAs(self._project_folder)
 
@@ -132,10 +132,10 @@ class MantidPlotProjectSerialiseTest(unittest.TestCase):
         # Check axis scales are as expected
         scale1, scale2, scale3, scale4 = find_elements(contents, 'scale')
 
-        self.assertEqual(int(scale1[2]), 10)
+        self.assertAlmostEqual(float(scale1[2]), 110.6670313)
         self.assertEqual(int(scale1[3]), 1000)
 
-        self.assertEqual(int(scale2[2]), 10)
+        self.assertAlmostEqual(float(scale2[2]), 110.6670313)
         self.assertEqual(int(scale2[3]), 1000)
 
         self.assertEqual(int(scale3[2]), 0)
