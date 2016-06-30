@@ -5,6 +5,7 @@
 #include "MantidAPI/TableRow.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/TableWorkspace.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ArrayBoundedValidator.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
@@ -27,6 +28,7 @@ using Mantid::Kernel::Direction;
 using Mantid::Kernel::RebinParamsValidator;
 using Mantid::Kernel::StringListValidator;
 using Mantid::Kernel::make_unique;
+using Mantid::Geometry::Instrument_const_sptr;
 using std::vector;
 
 // Register the algorithm into the AlgorithmFactory
@@ -165,11 +167,9 @@ void PDCalibration::init() {
                   "Logarithmic binning is used if Step is negative.");
 
   const std::vector<std::string> exts2{".h5", ".cal"};
-  // TODO should be optional
-  declareProperty(make_unique<FileProperty>(
-                      "PreviousCalibration", "",
-                      FileProperty::Load, // FileProperty::OptionalLoad,
-                      exts2),
+
+  declareProperty(make_unique<FileProperty>("PreviousCalibration", "",
+                                            FileProperty::OptionalLoad, exts2),
                   "Calibration measurement");
 
   auto mustBePosArr =
@@ -223,7 +223,12 @@ void PDCalibration::exec() {
       boost::dynamic_pointer_cast<EventWorkspace>(m_uncalibratedWS);
   bool isEvent = bool(uncalibratedEWS);
 
-  loadOldCalibration();
+  // Load Previous Calibration or create calibration table from signal file
+  if (!static_cast<std::string>(getProperty("PreviousCalibration")).empty()) {
+    loadOldCalibration();
+  } else {
+    createNewCalTable();
+  }
 
   const std::size_t NUMHIST = m_uncalibratedWS->getNumberHistograms();
 
@@ -676,6 +681,46 @@ void PDCalibration::loadOldCalibration() {
       newRow << calibrationTableOld->getRef<int>("dasid", rowNum);
     newRow << 0.; // tofmin   TODO
     newRow << 0.; // tofmax   TODO
+  }
+}
+
+void PDCalibration::createNewCalTable() {
+  // create new calibraion table for when an old one isn't loaded
+  // using the signal workspace and CalculateDIFC
+  auto alg = createChildAlgorithm("CalculateDIFC");
+  alg->setProperty("InputWorkspace", m_uncalibratedWS);
+  alg->executeAsChildAlg();
+  API::MatrixWorkspace_sptr difcWS = alg->getProperty("OutputWorkspace");
+
+  // create a new workspace
+  m_calibrationTable = boost::make_shared<DataObjects::TableWorkspace>();
+  // TODO m_calibrationTable->setTitle("");
+  m_calibrationTable->addColumn("int", "detid");
+  m_calibrationTable->addColumn("double", "difc");
+  m_calibrationTable->addColumn("double", "difa");
+  m_calibrationTable->addColumn("double", "tzero");
+  m_calibrationTable->addColumn("double", "tofmin");
+  m_calibrationTable->addColumn("double", "tofmax");
+  setProperty("OutputCalibrationTable", m_calibrationTable);
+
+  const detid2index_map allDetectors =
+      difcWS->getDetectorIDToWorkspaceIndexMap(true);
+
+  // copy over the values
+  detid2index_map::const_iterator it = allDetectors.begin();
+  for (; it != allDetectors.end(); ++it) {
+    const detid_t detID = it->first;
+    const size_t wi = it->second;
+    if ((!difcWS->getDetector(wi)->isMasked()) &&
+        (!difcWS->getDetector(wi)->isMonitor())) {
+      API::TableRow newRow = m_calibrationTable->appendRow();
+      newRow << detID;
+      newRow << difcWS->readY(wi)[0];
+      newRow << 0.; // difa
+      newRow << 0.; // tzero
+      newRow << 0.; // tofmin   TODO
+      newRow << 0.; // tofmax   TODO
+    }
   }
 }
 
