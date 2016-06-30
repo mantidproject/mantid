@@ -711,16 +711,13 @@ void PDCalibration::createNewCalTable() {
   for (; it != allDetectors.end(); ++it) {
     const detid_t detID = it->first;
     const size_t wi = it->second;
-    if ((!difcWS->getDetector(wi)->isMasked()) &&
-        (!difcWS->getDetector(wi)->isMonitor())) {
-      API::TableRow newRow = m_calibrationTable->appendRow();
-      newRow << detID;
-      newRow << difcWS->readY(wi)[0];
-      newRow << 0.; // difa
-      newRow << 0.; // tzero
-      newRow << 0.; // tofmin   TODO
-      newRow << 0.; // tofmax   TODO
-    }
+    API::TableRow newRow = m_calibrationTable->appendRow();
+    newRow << detID;
+    newRow << difcWS->readY(wi)[0];
+    newRow << 0.; // difa
+    newRow << 0.; // tzero
+    newRow << 0.; // tofmin   TODO
+    newRow << 0.; // tofmax   TODO
   }
 }
 
