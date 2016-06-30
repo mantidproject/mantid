@@ -459,7 +459,7 @@
       <technique>Imaging</technique>
       <technique>Tomography</technique>
    </instrument>
-   
+
    <instrument name="SWANS" shortname="SWANS" beamline="7">
       <technique>Small Wide Angle Scattering</technique>
    </instrument>
@@ -481,7 +481,7 @@
 
 </facility>
 
-<facility name="ILL" zeropadding="6" FileExtensions=".nxs,.hdf,.inx,.asc">
+<facility name="ILL" zeropadding="6" FileExtensions=".nxs,.hdf,.inx,.asc" nofileprefix="True">
 
   <instrument name="IN4">
     <technique>Neutron Spectroscopy</technique>
