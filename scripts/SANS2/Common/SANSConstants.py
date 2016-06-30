@@ -10,6 +10,8 @@ class SANSConstants(object):
     output_monitor_workspace = "MonitorWorkspace"
     output_monitor_workspace_group = output_monitor_workspace + "_"
 
+    workspace = "Workspace"
+
     sans_suffix = "sans"
     trans_suffix = "trans"
 

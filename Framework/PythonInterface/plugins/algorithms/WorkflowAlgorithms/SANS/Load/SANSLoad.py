@@ -2,9 +2,11 @@
 
 from mantid.kernel import (Direction, PropertyManagerProperty, Property)
 from mantid.api import (DataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode)
+
 from SANS2.State.SANSStateSerializer import create_deserialized_sans_state_from_property_manager
-from SANS.Load.SANSLoadData import SANSLoadDataFactory
 from SANS2.State.SANSStateData import SANSDataType
+from SANS.Load.SANSLoadData import SANSLoadDataFactory
+
 
 
 class SANSLoad(DataProcessorAlgorithm):
@@ -141,8 +143,8 @@ class SANSLoad(DataProcessorAlgorithm):
             state = create_deserialized_sans_state_from_property_manager(state_property_manager)
             state.property_manager = state_property_manager
             state.validate()
-        except ValueError, e:
-            errors.update({"SANSStatePrototype": str(e)})
+        except ValueError as e:
+            errors.update({"SANSLoad": str(e)})
         return errors
 
     def set_output_for_workspaces(self, workspace_type, workspaces):
