@@ -1,5 +1,6 @@
 import unittest
 import json
+import numpy as np
 from mantid.simpleapi import *
 
 from AbinsModules import  CalculateQ
@@ -23,11 +24,11 @@ class CalculateQTest(unittest.TestCase):
 
         # wrong sample form
         with self.assertRaises(ValueError):
-            poor_q_calculator = CalculateQ(filename="one_file", instrument="Different_instrument", sample_form="Solid")
+            poor_q_calculator = CalculateQ(filename="one_file", instrument="TOSCA", sample_form="Solid")
 
         # no frequencies required for the case when Q vectors do not depend on frequencies
         with self.assertRaises(ValueError):
-            poor_q_calculator = CalculateQ(filename="one_file", instrument="Different_instrument", sample_form="Powder")
+            poor_q_calculator = CalculateQ(filename="one_file", instrument="None", sample_form="Powder")
             poor_q_calculator.collectFrequencies(frequencies=np.array([1,2,3,4]))
 
 
@@ -60,7 +61,7 @@ class CalculateQTest(unittest.TestCase):
     def _prepare_data(self, name=None):
         """Reads a corrects values from ASCII file."""
         correct_data = None
-        with open(self._core+"Calculate_Q_"+name+"_data.txt") as data_file:
+        with open(self._core+"CalculateQ_"+name+"_data.txt") as data_file:
             correct_data = json.loads(data_file.read().replace("\n"," ").
                                       replace("array","").
                                       replace("([","[").
@@ -76,4 +77,5 @@ class CalculateQTest(unittest.TestCase):
 
 
 
-
+if __name__ == '__main__':
+    unittest.main()
