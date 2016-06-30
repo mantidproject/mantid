@@ -222,7 +222,9 @@ public slots:
   ApplicationWindow *open(const QString &fn, bool factorySettings = false,
                           bool newProject = true);
 
-  ApplicationWindow *openProject(const QString &workingDir, const QString &filename, const int fileVersion);
+  ApplicationWindow *openProject(const QString &workingDir,
+                                 const QString &filename,
+                                 const int fileVersion);
   ApplicationWindow *openProject(const QString &fn, const int fileVersion);
   void openProjectFolder(std::string lines, const int fileVersion,
                          bool isTopLevel = false);

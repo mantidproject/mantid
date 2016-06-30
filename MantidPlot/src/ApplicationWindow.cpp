@@ -4597,8 +4597,8 @@ void ApplicationWindow::openRecentProject(QAction *action) {
 ApplicationWindow *ApplicationWindow::openProject(const QString &workingDir,
                                                   const QString &filename,
                                                   const int fileVersion) {
-    this->workingDir = workingDir;
-    return openProject(filename, fileVersion);
+  this->workingDir = workingDir;
+  return openProject(filename, fileVersion);
 }
 
 ApplicationWindow *ApplicationWindow::openProject(const QString &filename,
@@ -9666,9 +9666,9 @@ void ApplicationWindow::foldersMenuActivated(int id) {
 void ApplicationWindow::newProject(const bool doNotSave) {
 
   if (doNotSave) {
-      // Save anything we need to
-      saveSettings();
-      mantidUI->saveProject(saved);
+    // Save anything we need to
+    saveSettings();
+    mantidUI->saveProject(saved);
   }
 
   // Clear out any old folders
