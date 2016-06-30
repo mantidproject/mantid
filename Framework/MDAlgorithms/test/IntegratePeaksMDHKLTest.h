@@ -1,0 +1,292 @@
+#ifndef MANTID_MDAGORITHMS_INTEGRATEPEAKSMDHKLTEST_H_
+#define MANTID_MDAGORITHMS_INTEGRATEPEAKSMDHKLTEST_H_
+
+#include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidAPI/FrameworkManager.h"
+#include "MantidDataObjects/MDEventFactory.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidDataObjects/PeakShapeSpherical.h"
+#include "MantidGeometry/MDGeometry/MDHistoDimension.h"
+#include "MantidGeometry/MDGeometry/HKL.h"
+#include "MantidMDAlgorithms/IntegratePeaksMDHKL.h"
+#include "MantidMDAlgorithms/CreateMDWorkspace.h"
+#include "MantidMDAlgorithms/FakeMDEventData.h"
+#include "MantidTestHelpers/ComponentCreationHelper.h"
+#include "MantidKernel/UnitLabelTypes.h"
+
+#include <boost/math/distributions/normal.hpp>
+#include <boost/math/special_functions/fpclassify.hpp>
+#include <boost/math/special_functions/pow.hpp>
+#include <boost/random/linear_congruential.hpp>
+#include <boost/random/mersenne_twister.hpp>
+#include <boost/random/uniform_int.hpp>
+#include <boost/random/uniform_real.hpp>
+#include <boost/random/variate_generator.hpp>
+
+#include <cxxtest/TestSuite.h>
+
+#include <Poco/File.h>
+
+using Mantid::Geometry::MDHistoDimension;
+using namespace Mantid::API;
+using namespace Mantid::DataObjects;
+using namespace Mantid::Geometry;
+using namespace Mantid::MDAlgorithms;
+using Mantid::Kernel::V3D;
+
+class IntegratePeaksMDHKLTest : public CxxTest::TestSuite {
+public:
+  IntegratePeaksMDHKLTest() { Mantid::API::FrameworkManager::Instance(); }
+  ~IntegratePeaksMDHKLTest() override {}
+
+  void test_Init() {
+    IntegratePeaksMDHKL alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT(alg.isInitialized())
+  }
+
+  //-------------------------------------------------------------------------------
+  /** Run the IntegratePeaksMDHKL with the given peak radius integration param */
+  static void doRun( std::string OutputWorkspace = "IntegratePeaksMDHKLTest_peaks") {
+    IntegratePeaksMDHKL alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT(alg.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("InputWorkspace", "IntegratePeaksMDHKLTest_MDEWS"));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("PeaksWorkspace", "IntegratePeaksMDHKLTest_peaks"));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("OutputWorkspace", OutputWorkspace));
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+  }
+
+  //-------------------------------------------------------------------------------
+  /** Create the (blank) MDEW */
+  static void createMDEW() {
+    // ---- Start with empty MDEW ----
+
+    CreateMDWorkspace algC;
+    TS_ASSERT_THROWS_NOTHING(algC.initialize())
+    TS_ASSERT(algC.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(algC.setProperty("Dimensions", "3"));
+    TS_ASSERT_THROWS_NOTHING(
+        algC.setProperty("Extents", "-10,10,-10,10,-10,10"));
+    TS_ASSERT_THROWS_NOTHING(algC.setProperty("Names", "[H,0,0],[0,K,0],[0,0,L]"));
+    std::string units = Mantid::Kernel::Units::Symbol::RLU.ascii() + "," +
+                        Mantid::Kernel::Units::Symbol::RLU.ascii() + "," +
+                        Mantid::Kernel::Units::Symbol::RLU.ascii();
+    TS_ASSERT_THROWS_NOTHING(algC.setProperty("Units", units));
+    TS_ASSERT_THROWS_NOTHING(algC.setProperty("SplitInto", "5"));
+    TS_ASSERT_THROWS_NOTHING(algC.setProperty("MaxRecursionDepth", "2"));
+    std::string frames = Mantid::Geometry::HKL::HKLName + "," +
+                         Mantid::Geometry::HKL::HKLName + "," +
+                         Mantid::Geometry::HKL::HKLName;
+    TS_ASSERT_THROWS_NOTHING(algC.setProperty("Frames", frames));
+    TS_ASSERT_THROWS_NOTHING(
+        algC.setPropertyValue("OutputWorkspace", "IntegratePeaksMDHKLTest_MDEWS"));
+    TS_ASSERT_THROWS_NOTHING(algC.execute());
+    TS_ASSERT(algC.isExecuted());
+  }
+
+  //-------------------------------------------------------------------------------
+  /** Add a fake peak */
+  static void addPeak(size_t num, double x, double y, double z, double radius) {
+    std::ostringstream mess;
+    mess << num << ", " << x << ", " << y << ", " << z << ", " << radius;
+    FakeMDEventData algF;
+    TS_ASSERT_THROWS_NOTHING(algF.initialize())
+    TS_ASSERT(algF.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(
+        algF.setPropertyValue("InputWorkspace", "IntegratePeaksMDHKLTest_MDEWS"));
+    TS_ASSERT_THROWS_NOTHING(
+        algF.setProperty("PeakParams", mess.str().c_str()));
+    TS_ASSERT_THROWS_NOTHING(algF.execute());
+    TS_ASSERT(algF.isExecuted());
+  }
+
+  //-------------------------------------------------------------------------------
+  /** Full test using faked-out peak data */
+  void test_exec() {
+    // --- Fake workspace with 3 peaks ------
+    createMDEW();
+    addPeak(1000, 0., 0., 0., 1.0);
+    addPeak(1000, 2., 3., 4., 0.5);
+    addPeak(1000, 6., 6., 6., 2.0);
+
+    MDEventWorkspace3Lean::sptr mdews =
+        AnalysisDataService::Instance().retrieveWS<MDEventWorkspace3Lean>(
+            "IntegratePeaksMDHKLTest_MDEWS");
+    auto &frame = mdews->getDimension(0)->getMDFrame();
+    TSM_ASSERT_EQUALS("Should be HKL", Mantid::Geometry::HKL::HKLName,
+                      frame.name());
+    TS_ASSERT_EQUALS(mdews->getNPoints(), 3000);
+    TS_ASSERT_DELTA(mdews->getBox()->getSignal(), 3000.0, 1e-2);
+
+    // Make a fake instrument - doesn't matter, we won't use it really
+    Instrument_sptr inst =
+        ComponentCreationHelper::createTestInstrumentRectangular(1, 100, 0.05);
+
+    // --- Make a fake PeaksWorkspace ---
+    PeaksWorkspace_sptr peakWS0(new PeaksWorkspace());
+    peakWS0->setInstrument(inst);
+    peakWS0->addPeak(Peak(inst, 15050, 1.0));
+
+    TS_ASSERT_EQUALS(peakWS0->getPeak(0).getIntensity(), 0.0);
+    AnalysisDataService::Instance().add("IntegratePeaksMDHKLTest_peaks", peakWS0);
+
+    // ------------- Integrating with cylinder ------------------------
+    doRun("IntegratePeaksMDHKLTest_peaks");
+
+    TS_ASSERT_DELTA(peakWS0->getPeak(0).getIntensity(), 2.0, 1e-2);
+
+    // Error is also calculated
+    TS_ASSERT_DELTA(peakWS0->getPeak(0).getSigmaIntensity(), M_SQRT2, 1e-2);
+
+  }
+
+  //-------------------------------------------------------------------------------
+  /// Integrate background between start/end background radius
+  void test_exec_shellBackground() {
+    createMDEW();
+    /* Create 3 overlapping shells so that density goes like this:
+     * r < 1 : density 1.0
+     * 1 < r < 2 : density 1/2
+     * 2 < r < 3 : density 1/3
+     */
+    addPeak(1000, 0., 0., 0., 1.0);
+    addPeak(1000 * 4, 0., 0., 0.,
+            2.0); // 8 times the volume / 4 times the counts = 1/2 density
+    addPeak(1000 * 9, 0., 0., 0.,
+            3.0); // 27 times the volume / 9 times the counts = 1/3 density
+
+    // --- Make a fake PeaksWorkspace ---
+    PeaksWorkspace_sptr peakWS(new PeaksWorkspace());
+    Instrument_sptr inst =
+        ComponentCreationHelper::createTestInstrumentCylindrical(5);
+    peakWS->addPeak(Peak(inst, 1, 1.0, V3D(0., 0., 0.)));
+    TS_ASSERT_EQUALS(peakWS->getPeak(0).getIntensity(), 0.0);
+    AnalysisDataService::Instance().addOrReplace("IntegratePeaksMDHKLTest_peaks",
+                                                 peakWS);
+
+    // Set background from 2.0 to 3.0.
+    // So the 1/2 density background remains, we subtract the 1/3 density =
+    // about 1500 counts
+    doRun("IntegratePeaksMDHKLTest_peaks");
+    TS_ASSERT_DELTA(peakWS->getPeak(0).getIntensity(), 1000 + 500, 80.0);
+    // Error is larger, since it is error of peak + error of background
+    TSM_ASSERT_DELTA("Error has increased",
+                     peakWS->getPeak(0).getSigmaIntensity(), sqrt(1830.0), 2);
+
+  }
+
+  void test_writes_out_selected_algorithm_parameters() {
+    createMDEW();
+
+    doRun("OutWS");
+
+    auto outWS =
+        AnalysisDataService::Instance().retrieveWS<PeaksWorkspace>("OutWS");
+
+    TS_ASSERT(outWS->hasIntegratedPeaks());
+  }
+
+};
+
+//=========================================================================================
+class IntegratePeaksMDHKLTestPerformance : public CxxTest::TestSuite {
+public:
+  size_t numPeaks;
+  PeaksWorkspace_sptr peakWS;
+
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static IntegratePeaksMDHKLTestPerformance *createSuite() {
+    return new IntegratePeaksMDHKLTestPerformance();
+  }
+  static void destroySuite(IntegratePeaksMDHKLTestPerformance *suite) {
+    delete suite;
+  }
+
+  IntegratePeaksMDHKLTestPerformance() {
+    numPeaks = 1000;
+    // Original MDEW.
+    IntegratePeaksMDHKLTest::createMDEW();
+
+    // Add a uniform, random background.
+
+    FakeMDEventData algF2;
+    TS_ASSERT_THROWS_NOTHING(algF2.initialize())
+    TS_ASSERT(algF2.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(
+        algF2.setPropertyValue("InputWorkspace", "IntegratePeaksMDHKLTest_MDEWS"));
+    TS_ASSERT_THROWS_NOTHING(algF2.setProperty("UniformParams", "100000"));
+    TS_ASSERT_THROWS_NOTHING(algF2.execute());
+    TS_ASSERT(algF2.isExecuted());
+
+    MDEventWorkspace3Lean::sptr mdews =
+        AnalysisDataService::Instance().retrieveWS<MDEventWorkspace3Lean>(
+            "IntegratePeaksMDHKLTest_MDEWS");
+    mdews->setCoordinateSystem(Mantid::Kernel::HKL);
+
+    // Make a fake instrument - doesn't matter, we won't use it really
+    Instrument_sptr inst =
+        ComponentCreationHelper::createTestInstrumentCylindrical(5);
+
+    boost::mt19937 rng;
+    boost::uniform_real<double> u(-9.0, 9.0); // Random from -9 to 9.0
+    boost::variate_generator<boost::mt19937 &, boost::uniform_real<double>> gen(
+        rng, u);
+
+    peakWS = PeaksWorkspace_sptr(new PeaksWorkspace());
+    for (size_t i = 0; i < numPeaks; ++i) {
+      // Random peak center
+      double x = gen();
+      double y = gen();
+      double z = gen();
+
+      // Make the peak
+      IntegratePeaksMDHKLTest::addPeak(1000, x, y, z, 0.02);
+      // With a center with higher density. 2000 events total.
+      IntegratePeaksMDHKLTest::addPeak(1000, x, y, z, 0.005);
+
+      // Make a few very strong peaks
+      if (i % 21 == 0)
+        IntegratePeaksMDHKLTest::addPeak(10000, x, y, z, 0.015);
+
+      // Add to peaks workspace
+      peakWS->addPeak(Peak(inst, 1, 1.0, V3D(x, y, z)));
+
+      if (i % 100 == 0)
+        std::cout << "Peak " << i << " added\n";
+    }
+    AnalysisDataService::Instance().add("IntegratePeaksMDHKLTest_peaks", peakWS);
+  }
+
+  ~IntegratePeaksMDHKLTestPerformance() override {
+    AnalysisDataService::Instance().remove("IntegratePeaksMDHKLTest_MDEWS");
+    AnalysisDataService::Instance().remove("IntegratePeaksMDHKLTest_peaks");
+  }
+
+  void setUp() override {}
+
+  void tearDown() override {}
+
+  void test_performance_NoBackground() {
+    for (size_t i = 0; i < 10; i++) {
+      IntegratePeaksMDHKLTest::doRun();
+    }
+    // All peaks should be at least 1000 counts (some might be more if they
+    // overla)
+    for (size_t i = 0; i < numPeaks; i += 7) {
+      double expected = 2000.0;
+      if ((i % 21) == 0)
+        expected += 10000.0;
+      TS_ASSERT_LESS_THAN(expected - 1, peakWS->getPeak(int(i)).getIntensity());
+    }
+  }
+
+};
+
+#endif /* MANTID_MDEVENTS_INTEGRATEPEAKSMDHKLTEST_H_ */

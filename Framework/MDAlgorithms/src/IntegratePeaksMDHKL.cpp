@@ -1,4 +1,4 @@
-#include "MantidMDAlgorithms/IntegratePeaksMDHisto.h"
+#include "MantidMDAlgorithms/IntegratePeaksMDHKL.h"
 
 #include "MantidAPI/CommonBinsValidator.h"
 #include "MantidAPI/InstrumentValidator.h"
@@ -22,13 +22,13 @@ using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
 
 // Register the algorithm into the AlgorithmFactory
-DECLARE_ALGORITHM(IntegratePeaksMDHisto)
+DECLARE_ALGORITHM(IntegratePeaksMDHKL)
 
 //----------------------------------------------------------------------------------------------
 /**
  * Constructor
  */
-IntegratePeaksMDHisto::IntegratePeaksMDHisto()
+IntegratePeaksMDHKL::IntegratePeaksMDHKL()
     {}
 
 
@@ -36,7 +36,7 @@ IntegratePeaksMDHisto::IntegratePeaksMDHisto()
 /**
   * Initialize the algorithm's properties.
   */
-void IntegratePeaksMDHisto::init() {
+void IntegratePeaksMDHKL::init() {
   declareProperty(make_unique<WorkspaceProperty<IMDWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "An input Sample MDEventWorkspace in HKL.");
@@ -76,7 +76,15 @@ void IntegratePeaksMDHisto::init() {
 /**
  * Execute the algorithm.
  */
-void IntegratePeaksMDHisto::exec() {
+void IntegratePeaksMDHKL::exec() {
+  IMDWorkspace_sptr m_inputWS = getProperty("InputWorkspace");
+  if (m_inputWS->getSpecialCoordinateSystem() != Mantid::Kernel::HKL) {
+    std::stringstream errmsg;
+    errmsg << "Input MDWorkspace's coordinate system is not HKL but "
+           << m_inputWS->getSpecialCoordinateSystem() << ".";
+    throw std::invalid_argument(errmsg.str());
+  }
+
   /// Peak workspace to integrate
   PeaksWorkspace_sptr inPeakWS =
       getProperty("PeaksWorkspace");
@@ -93,15 +101,14 @@ void IntegratePeaksMDHisto::exec() {
   MatrixWorkspace_sptr sa =
       getProperty("SolidAngleWorkspace");
 
-  IMDWorkspace_sptr m_inputWS = getProperty("InputWorkspace");
   IMDEventWorkspace_sptr m_eventWS = boost::dynamic_pointer_cast<IMDEventWorkspace>(m_inputWS);
   IMDHistoWorkspace_sptr m_histoWS = boost::dynamic_pointer_cast<IMDHistoWorkspace>(m_inputWS);
   int npeaks = peakWS->getNumberPeaks();
 
   auto prog = make_unique<Progress>(this, 0.3, 1.0, npeaks);
-  PARALLEL_FOR1(peakWS)
+  //PARALLEL_FOR1(peakWS)
   for (int i = 0; i < npeaks; i++) {
-    PARALLEL_START_INTERUPT_REGION
+    //PARALLEL_START_INTERUPT_REGION
 
     IPeak &p = peakWS->getPeak(i);
     // round to integer
@@ -110,7 +117,7 @@ void IntegratePeaksMDHisto::exec() {
     int l = static_cast<int>(std::round(p.getL()));
     MDHistoWorkspace_sptr histoBox;
     if (m_histoWS) {
-      histoBox = cutHisto(h, k, l, box, m_histoWS);
+      histoBox = cropHisto(h, k, l, box, m_histoWS);
     }
     else if (sa && flux) {
       histoBox = normalize(h, k, l, box, gridPts, flux, sa, m_eventWS);
@@ -124,14 +131,14 @@ void IntegratePeaksMDHisto::exec() {
     p.setIntensity(intensity);
     p.setSigmaIntensity(sqrt(errorSquared));
     prog->report();
-    PARALLEL_END_INTERUPT_REGION
+    //PARALLEL_END_INTERUPT_REGION
   }
-  PARALLEL_CHECK_INTERUPT_REGION
+  //PARALLEL_CHECK_INTERUPT_REGION
   // Save the output
   setProperty("OutputWorkspace", peakWS);
 }
 
-MDHistoWorkspace_sptr IntegratePeaksMDHisto::normalize(
+MDHistoWorkspace_sptr IntegratePeaksMDHKL::normalize(
     int h, int k, int l, double box, int gridPts,
      MatrixWorkspace_sptr flux,  MatrixWorkspace_sptr sa,
      IMDEventWorkspace_sptr ws) {
@@ -166,7 +173,7 @@ MDHistoWorkspace_sptr IntegratePeaksMDHisto::normalize(
   return boost::dynamic_pointer_cast<MDHistoWorkspace>(out);
 }
 
-void  IntegratePeaksMDHisto::integratePeak(const int neighborPts, MDHistoWorkspace_sptr out, double& intensity, double& errorSquared) {
+void  IntegratePeaksMDHKL::integratePeak(const int neighborPts, MDHistoWorkspace_sptr out, double& intensity, double& errorSquared) {
      AnalysisDataService::Instance().addOrReplace("box", out);
     std::vector<int> gridPts;
     const size_t dimensionality = out->getNumDims();
@@ -224,7 +231,7 @@ void  IntegratePeaksMDHisto::integratePeak(const int neighborPts, MDHistoWorkspa
                 }
                 else{
                    double minR = sqrt( std::pow(float(Hindex)/float(gridPts[0]) - 0.5, 2) + std::pow(float(Kindex)/float(gridPts[1]) - 0.5, 2) + std::pow(float(Lindex)/float(gridPts[0]) - 0.5, 2));
-                    if (minR < 0.1) {
+                    if (minR < 0.05) {
                         intensity = 0.0;
                         errorSquared = 0.0;
                         return;
@@ -244,7 +251,7 @@ void  IntegratePeaksMDHisto::integratePeak(const int neighborPts, MDHistoWorkspa
  * All slicing algorithm properties are passed along
  * @return MDHistoWorkspace as a result of the binning
  */
-MDHistoWorkspace_sptr IntegratePeaksMDHisto::binEvent(int h, int k, int l, double box, int gridPts,
+MDHistoWorkspace_sptr IntegratePeaksMDHKL::binEvent(int h, int k, int l, double box, int gridPts,
     IMDWorkspace_sptr ws) {
   IAlgorithm_sptr binMD = createChildAlgorithm("BinMD", 0.0, 0.3);
   binMD->setProperty("InputWorkspace", ws);
@@ -273,24 +280,24 @@ MDHistoWorkspace_sptr IntegratePeaksMDHisto::binEvent(int h, int k, int l, doubl
  * All slicing algorithm properties are passed along
  * @return MDHistoWorkspace as a result of the binning
  */
-MDHistoWorkspace_sptr IntegratePeaksMDHisto::cutHisto(int h, int k, int l, double box,
+MDHistoWorkspace_sptr IntegratePeaksMDHKL::cropHisto(int h, int k, int l, double box,
     IMDWorkspace_sptr ws) {
-  IAlgorithm_sptr cutMD = createChildAlgorithm("CutMD", 0.0, 0.3);
-  cutMD->setProperty("InputWorkspace", ws);
+  IAlgorithm_sptr cropMD = createChildAlgorithm("IntegrateMDHistoWorkspace", 0.0, 0.3);
+  cropMD->setProperty("InputWorkspace", ws);
 
-  cutMD->setProperty("P1Bin",
-      boost::lexical_cast<std::string>(h-box)+","+
+  cropMD->setProperty("P1Bin",
+      boost::lexical_cast<std::string>(h-box)+",0,"+
       boost::lexical_cast<std::string>(h+box));
-  cutMD->setProperty("P2Bin",
-      boost::lexical_cast<std::string>(k-box)+","+
+  cropMD->setProperty("P2Bin",
+      boost::lexical_cast<std::string>(k-box)+",0,"+
       boost::lexical_cast<std::string>(k+box));
-  cutMD->setProperty("P3Bin",
-       boost::lexical_cast<std::string>(l-box)+","+
+  cropMD->setProperty("P3Bin",
+       boost::lexical_cast<std::string>(l-box)+",0,"+
        boost::lexical_cast<std::string>(l+box));
 
-  cutMD->setPropertyValue("OutputWorkspace", "out");
-  cutMD->executeAsChildAlg();
-  IMDWorkspace_sptr outputWS = cutMD->getProperty("OutputWorkspace");
+  cropMD->setPropertyValue("OutputWorkspace", "out");
+  cropMD->executeAsChildAlg();
+  IMDHistoWorkspace_sptr outputWS = cropMD->getProperty("OutputWorkspace");
   return boost::dynamic_pointer_cast<MDHistoWorkspace>(outputWS);
 }
 

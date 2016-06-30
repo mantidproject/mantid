@@ -1,5 +1,5 @@
-#ifndef MANTID_MDALGORITHMS_INTEGRATEPEAKSMDHISTO_H_
-#define MANTID_MDALGORITHMS_INTEGRATEPEAKSMHISTO_H_
+#ifndef MANTID_MDALGORITHMS_INTEGRATEPEAKSMDHKL_H_
+#define MANTID_MDALGORITHMS_INTEGRATEPEAKSMHKL_H_
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/IMDHistoWorkspace_fwd.h"
@@ -17,11 +17,11 @@ namespace MDAlgorithms {
  * @author Vickie Lynch
  * @date 2016-06-23
  */
-class DLLExport IntegratePeaksMDHisto : public API::Algorithm {
+class DLLExport IntegratePeaksMDHKL : public API::Algorithm {
 public:
-  IntegratePeaksMDHisto();
+  IntegratePeaksMDHKL();
   /// Algorithm's name for identification
-  const std::string name() const override { return "IntegratePeaksMDHisto"; };
+  const std::string name() const override { return "IntegratePeaksMDHKL"; };
   /// Summary of algorithms purpose
   const std::string summary() const override {
     return "Integrate single-crystal peaks in reciprocal space, for "
@@ -46,7 +46,7 @@ private:
      API::IMDEventWorkspace_sptr ws);
   DataObjects::MDHistoWorkspace_sptr binEvent(int h, int k, int l, double box, int gridPts,
       API::IMDWorkspace_sptr ws);
-  DataObjects::MDHistoWorkspace_sptr cutHisto(int h, int k, int l, double box,
+  DataObjects::MDHistoWorkspace_sptr cropHisto(int h, int k, int l, double box,
       API::IMDWorkspace_sptr ws);
   void integratePeak(const int neighborPts, DataObjects::MDHistoWorkspace_sptr out, double& intensity, double& errorSquared);
 };
@@ -54,4 +54,4 @@ private:
 } // namespace Mantid
 } // namespace DataObjects
 
-#endif /* MANTID_MDALGORITHMS_INTEGRATEPEAKSMDHISTO_H_ */
+#endif /* MANTID_MDALGORITHMS_INTEGRATEPEAKSMDHKL_H_ */
