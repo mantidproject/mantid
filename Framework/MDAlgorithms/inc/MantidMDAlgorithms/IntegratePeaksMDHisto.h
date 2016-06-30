@@ -44,8 +44,10 @@ private:
     int h, int k, int l, double box, int gridPts,
      API::MatrixWorkspace_sptr flux,  API::MatrixWorkspace_sptr sa,
      API::IMDEventWorkspace_sptr ws);
-  DataObjects::MDHistoWorkspace_sptr bin(int h, int k, int l, double box, int gridPts,
-      API::IMDEventWorkspace_sptr ws);
+  DataObjects::MDHistoWorkspace_sptr binEvent(int h, int k, int l, double box, int gridPts,
+      API::IMDWorkspace_sptr ws);
+  DataObjects::MDHistoWorkspace_sptr cutHisto(int h, int k, int l, double box,
+      API::IMDWorkspace_sptr ws);
   void integratePeak(const int neighborPts, DataObjects::MDHistoWorkspace_sptr out, double& intensity, double& errorSquared);
 };
 

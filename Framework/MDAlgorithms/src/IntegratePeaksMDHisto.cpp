@@ -37,7 +37,7 @@ IntegratePeaksMDHisto::IntegratePeaksMDHisto()
   * Initialize the algorithm's properties.
   */
 void IntegratePeaksMDHisto::init() {
-  declareProperty(make_unique<WorkspaceProperty<IMDEventWorkspace>>(
+  declareProperty(make_unique<WorkspaceProperty<IMDWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "An input Sample MDEventWorkspace in HKL.");
   declareProperty("DeltaHKL", 0.5,
@@ -93,8 +93,9 @@ void IntegratePeaksMDHisto::exec() {
   MatrixWorkspace_sptr sa =
       getProperty("SolidAngleWorkspace");
 
-  IMDEventWorkspace_sptr m_inputWS = getProperty("InputWorkspace");;
-  
+  IMDWorkspace_sptr m_inputWS = getProperty("InputWorkspace");
+  IMDEventWorkspace_sptr m_eventWS = boost::dynamic_pointer_cast<IMDEventWorkspace>(m_inputWS);
+  IMDHistoWorkspace_sptr m_histoWS = boost::dynamic_pointer_cast<IMDHistoWorkspace>(m_inputWS);
   int npeaks = peakWS->getNumberPeaks();
 
   auto prog = make_unique<Progress>(this, 0.3, 1.0, npeaks);
@@ -107,16 +108,19 @@ void IntegratePeaksMDHisto::exec() {
     int h = static_cast<int>(std::round(p.getH()));
     int k = static_cast<int>(std::round(p.getK()));
     int l = static_cast<int>(std::round(p.getL()));
-    MDHistoWorkspace_sptr normBox;
-    if (sa && flux) {
-      normBox = normalize(h, k, l, box, gridPts, flux, sa, m_inputWS);
+    MDHistoWorkspace_sptr histoBox;
+    if (m_histoWS) {
+      histoBox = cutHisto(h, k, l, box, m_histoWS);
+    }
+    else if (sa && flux) {
+      histoBox = normalize(h, k, l, box, gridPts, flux, sa, m_eventWS);
     }
     else {
-      normBox = bin(h, k, l, box, gridPts,m_inputWS);
+      histoBox = binEvent(h, k, l, box, gridPts, m_eventWS);
     }
     double intensity = 0.0;
     double errorSquared = 0.0;
-    integratePeak(neighborPts, normBox, intensity, errorSquared);
+    integratePeak(neighborPts, histoBox, intensity, errorSquared);
     p.setIntensity(intensity);
     p.setSigmaIntensity(sqrt(errorSquared));
     prog->report();
@@ -240,8 +244,8 @@ void  IntegratePeaksMDHisto::integratePeak(const int neighborPts, MDHistoWorkspa
  * All slicing algorithm properties are passed along
  * @return MDHistoWorkspace as a result of the binning
  */
-MDHistoWorkspace_sptr IntegratePeaksMDHisto::bin(int h, int k, int l, double box, int gridPts,
-    IMDEventWorkspace_sptr ws) {
+MDHistoWorkspace_sptr IntegratePeaksMDHisto::binEvent(int h, int k, int l, double box, int gridPts,
+    IMDWorkspace_sptr ws) {
   IAlgorithm_sptr binMD = createChildAlgorithm("BinMD", 0.0, 0.3);
   binMD->setProperty("InputWorkspace", ws);
   binMD->setProperty("AlignedDim0",
@@ -264,7 +268,31 @@ MDHistoWorkspace_sptr IntegratePeaksMDHisto::bin(int h, int k, int l, double box
 }
 
 
+/**
+ * Runs the BinMD algorithm on the input to provide the output workspace
+ * All slicing algorithm properties are passed along
+ * @return MDHistoWorkspace as a result of the binning
+ */
+MDHistoWorkspace_sptr IntegratePeaksMDHisto::cutHisto(int h, int k, int l, double box,
+    IMDWorkspace_sptr ws) {
+  IAlgorithm_sptr cutMD = createChildAlgorithm("CutMD", 0.0, 0.3);
+  cutMD->setProperty("InputWorkspace", ws);
 
+  cutMD->setProperty("P1Bin",
+      boost::lexical_cast<std::string>(h-box)+","+
+      boost::lexical_cast<std::string>(h+box));
+  cutMD->setProperty("P2Bin",
+      boost::lexical_cast<std::string>(k-box)+","+
+      boost::lexical_cast<std::string>(k+box));
+  cutMD->setProperty("P3Bin",
+       boost::lexical_cast<std::string>(l-box)+","+
+       boost::lexical_cast<std::string>(l+box));
+
+  cutMD->setPropertyValue("OutputWorkspace", "out");
+  cutMD->executeAsChildAlg();
+  IMDWorkspace_sptr outputWS = cutMD->getProperty("OutputWorkspace");
+  return boost::dynamic_pointer_cast<MDHistoWorkspace>(outputWS);
+}
 
 
 } // namespace MDAlgorithms
