@@ -51,6 +51,7 @@ public:
   static QString categoryInfo() { return "Indirect"; }
   /// Default Constructor
   IndirectCorrections(QWidget *parent = 0);
+
 private:
   /// Initialize the layout
   void initLayout() override;
