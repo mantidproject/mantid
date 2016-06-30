@@ -843,6 +843,19 @@ def openProject(file_name, file_version = 0):
 
 
 # -----------------------------------------------------------------------------
+def saveProjectAs(file_name, compress=False):
+    """Save a mantid project
+
+    This will serialise all associated workspaces and windows
+
+    Args:
+        file_name :: file path to save to
+        compress :: whether to compress the project after saving
+    """
+    threadsafe_call(_qti.app.saveProjectAs, file_name, compress)
+
+
+# -----------------------------------------------------------------------------
 def newProject():
     """Start a new mantid project
 
@@ -856,9 +869,7 @@ plotTimeBin = plotBin
 
 # import 'safe' methods (i.e. no proxy required) of ApplicationWindow into the global namespace
 # Only 1 at the moment!
-appImports = [
-    'saveProjectAs'
-]
+appImports = []
 for name in appImports:
     globals()[name] = getattr(_qti.app, name)
 
