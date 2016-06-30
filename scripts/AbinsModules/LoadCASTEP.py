@@ -9,15 +9,16 @@ class LoadCASTEP(GeneralDFTProgram):
     Functions to read phonon file taken from SimulatedDensityOfStates (credits for Elliot Oram.).
     """
 
-    def __init__(self, filename):
+    def __init__(self, input_DFT_filename):
         """
 
-        @param filename: name of file with phonon data (foo.phonon)
+        @param input_DFT_filename: name of file with phonon data (foo.phonon)
         """
-        super(LoadCASTEP, self).__init__(filename=filename)
+        super(LoadCASTEP, self).__init__(input_DFT_filename=input_DFT_filename)
 
         # Regex pattern for a floating point number
         self._float_regex = r'\-?(?:\d+\.?\d*|\d*\.?\d+)'
+        self._sum_rule = None
 
 
     # noinspection PyMethodMayBeStatic
@@ -30,10 +31,13 @@ class LoadCASTEP(GeneralDFTProgram):
         @return weight for this block of values
         """
         # Found header block at start of frequencies
-        q1, q2, q3, weight = [float(x) for x in header_match.groups()]
+        if self._sum_rule and block_count == 0:
+            q1, q2, q3, weight, q1_dir,q2_dir,q3_dir = [float(x) for x in header_match.groups()]
+        else:
+            q1, q2, q3, weight = [float(x) for x in header_match.groups()]
+
         q_vector = [q1, q2, q3]
-        if block_count > 1 and sum(q_vector) == 0:
-            weight = 0.0
+
         return weight, q_vector
 
         # ----------------------------------------------------------------------------------------
@@ -133,6 +137,24 @@ class LoadCASTEP(GeneralDFTProgram):
 
         return np.asarray(vectors)
 
+    def _check_accoustic_sum(self):
+        """
+        Cheks if acoustic sum correction has been applied during calculations.
+        @return: True is correction has been applied, otherwise False.
+        """
+        header_str_sum = r"^ +q-pt=\s+\d+ +(%(s)s) +(%(s)s) +(%(s)s) +(%(s)s) + (%(s)s) + (%(s)s) + (%(s)s)" % {'s': self._float_regex}
+        header_sum = re.compile(header_str_sum)
+
+        header_str =  r"^ +q-pt=\s+\d+ +(%(s)s) +(%(s)s) +(%(s)s) +(%(s)s)" % {'s': self._float_regex}
+        header = re.compile(header_str)
+
+        with open(self._filename, "rU") as f:
+            found = False
+            for line in f:  #iterate over the file one line at a time(memory efficient)
+                if header_sum.match(line):
+                    return True
+
+            return found
 
 
     def readPhononFile(self):
@@ -151,8 +173,20 @@ class LoadCASTEP(GeneralDFTProgram):
 
         # Header regex. Looks for lines in the following format:
         #     q-pt=    1    0.000000  0.000000  0.000000      1.0000000000    0.000000  0.000000  1.000000
-        header_regex_str = r"^ +q-pt=\s+\d+ +(%(s)s) +(%(s)s) +(%(s)s) (?: *(%(s)s)){0,4}" % {'s': self._float_regex}
-        header_regex = re.compile(header_regex_str)
+        _sum_rule_header =   r"^ +q-pt=\s+\d+ +(%(s)s) +(%(s)s) +(%(s)s) +(%(s)s) + (%(s)s) + (%(s)s) + (%(s)s)" % {'s': self._float_regex}
+        _no_sum_rule_header =  r"^ +q-pt=\s+\d+ +(%(s)s) +(%(s)s) +(%(s)s) +(%(s)s)" % {'s': self._float_regex}
+
+        if self._check_accoustic_sum():
+            header_regex_str = _sum_rule_header
+            self._sum_rule = True
+        else:
+            header_regex_str = _no_sum_rule_header
+            self._sum_rule = False
+
+        _compiled_header_regex_str = re.compile(header_regex_str)
+        _compiled_no_sum_rule_header = re.compile(_no_sum_rule_header)
+
+        headers = {True:_compiled_header_regex_str, False: _compiled_no_sum_rule_header}
         eigenvectors_regex = re.compile(r"\s*Mode\s+Ion\s+X\s+Y\s+Z\s*")
         block_count = 0
 
@@ -160,7 +194,7 @@ class LoadCASTEP(GeneralDFTProgram):
         data_lists = (frequencies, ir_intensities, raman_intensities)
         with open(self._filename, 'rU') as f_handle:
             file_data.update(self._parse_phonon_file_header(f_handle))
-
+            header_found = False
             while True:
                 line = f_handle.readline()
                 # Check we've reached the end of file
@@ -168,10 +202,9 @@ class LoadCASTEP(GeneralDFTProgram):
                     break
 
                 # Check if we've found a block of frequencies
-                header_match = header_regex.match(line)
+                header_match =  headers[block_count == 0].match(line)
                 if header_match:
-                    block_count += 1
-
+                    header_found = True
                     weight, k_vector = self._parse_block_header(header_match, block_count)
                     weights.append(weight)
                     k_vectors.append(k_vector)
@@ -181,23 +214,25 @@ class LoadCASTEP(GeneralDFTProgram):
                         for data_list, item in zip(data_lists, line_data):
                             data_list.append(item)
 
-                vector_match = eigenvectors_regex.match(line)
-                if vector_match:
+                    block_count += 1
 
+                vector_match = eigenvectors_regex.match(line)
+                if vector_match and header_found:
+                    header_found = False
                     vectors = self._parse_phonon_eigenvectors(f_handle)
                     eigenvectors.append(vectors)
 
         file_data.update({"frequencies": np.asarray(frequencies),
                           "weights": np.asarray(weights),
                           "k_vectors": np.asarray(k_vectors),
-                          "atomicDisplacements": np.asanyarray(eigenvectors)})
+                          "atomic_displacements": np.asarray(eigenvectors)})
 
         hash_filename = self._calculateHash()
 
         self._recoverSymmetryPoints(data=file_data)
 
         # save stuff to hdf file
-        _numpy_datasets_to_save=["frequencies", "weights", "k_vectors", "atomicDisplacements", "unit_cell"]
+        _numpy_datasets_to_save=["frequencies", "weights", "k_vectors", "atomic_displacements", "unit_cell"]
         for name in _numpy_datasets_to_save:
             self.addNumpyDataset(name, file_data[name])
 
@@ -206,10 +241,13 @@ class LoadCASTEP(GeneralDFTProgram):
             self.addStructuredDataset(name=item, value=file_data[item])
 
         self.addAttribute("hash", hash_filename)
+        self.addAttribute("DFT_program", "CASTEP")
 
         self.save()
 
         return self._rearrange_data(data=file_data)
+
+
 
 
 

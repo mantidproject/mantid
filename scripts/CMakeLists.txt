@@ -55,6 +55,8 @@ set ( TEST_PY_FILES
       test/VesuvioProfileTest.py
       test/ReductionSettingsTest.py
       test/IOmoduleTest.py
+      test/LoadCASTEPTest.py
+      test/CalculateQTest.py
       )
 
 

@@ -8,10 +8,11 @@ class GeneralDFTProgram(IOmodule):
     in INS analysis.
     """
 
-    def __init__(self,filename):
-        super(GeneralDFTProgram,self).__init__(input_filename=filename, group_name="PhononAB")
+    def __init__(self, input_DFT_filename=None):
 
-        self._filename = filename # name of a filename with the phonon data (for example CASTEP: foo.phonon)
+        super(GeneralDFTProgram,self).__init__(input_filename=input_DFT_filename, group_name="PhononAB")
+        self._filename = input_DFT_filename # name of a filename with the phonon data (for example CASTEP: foo.phonon;
+                                            # filename can include path to the file as well)
 
 
     def readPhononFile(self):
@@ -56,7 +57,9 @@ class GeneralDFTProgram(IOmodule):
                                          **Notice: both symmetry equivalent and inequivalent points should be stored; at
                                           the moment only Gamma point calculations are supported**
 
-                        "atomicDisplacements" - atomic displacements for all atoms and all k-points in one numpy array
+                        "atomic_displacements" - atomic displacements for all atoms and all k-points in one numpy array
+                        
+                        "unit_cell"      -   numpy array with unit cell vectors
 
               The following structured datasets should be also defined:
 
@@ -81,12 +84,14 @@ class GeneralDFTProgram(IOmodule):
 
                         "hash"  - hash of a file with the phonon data. It should be a string representation of hash.
 
+                        "DFT_program" - name of the DFT program which was used to obtain phonon data (for CASTEP -> CASTEP).
+
           For more details about these fields please look at the documentation of IOmodule class.
 
         @return: Method should return a list of dictionaries with the following structure:
 
-               data= [ {"frequencies": numpy.array, "atomicDisplacements": numpy.array, "weight": numpy._float, "value":numpy.array},
-                       {"frequencies": numpy.array, "atomicDisplacements": numpy.array, "weight": numpy._float, "value":numpy.array}
+               data= [ {"frequencies": numpy.array, "atomic_displacements: numpy.array, "weight": numpy._float, "value":numpy.array},
+                       {"frequencies": numpy.array, "atomic_displacements: numpy.array, "weight": numpy._float, "value":numpy.array}
                      ]
 
              Each entry in the list corresponds to one k-point. Each item in the list is a dictionary. The meaning of
@@ -96,13 +101,34 @@ class GeneralDFTProgram(IOmodule):
 
                       "value"  - value of k-point (numpy array of dimension 3)
 
-                      "atomicDisplacements" - atomic displacements for the given k-point
+                      "atomic_displacements - atomic displacements for the given k-point
 
                       "weight" - weight of k-point
 
         """
         return None
 
+    def validData(self):
+        """
+        Checks if input DFT file and content of HDF file are consistent.
+        @return: True if consistent, otherwise False.
+        """
+        current_hash = self._calculateHash()
+        saved_hash = None
+        try:
+            saved_hash = self.load(list_of_attributes=["hash"])
+        except ValueError:
+            return False # no hash was found
+
+        return current_hash == saved_hash["attributes"]["hash"]
+
+    def loadData(self):
+        """
+        Loads data from hdf file.
+        @return:
+        """
+        data = self.load(list_of_numpy_datasets=["frequencies", "weights", "k_vectors", "atomic_displacements", "unit_cell"])
+        return self._rearrange_data(data=data["datasets"])
 
 
     # Protected methods which should be reused by classes which read DFT phonon data
@@ -140,8 +166,8 @@ class GeneralDFTProgram(IOmodule):
         @param data: dictionary with the data to rearrange
         @return: list of dictionaries with rearranged data.
                  The list has the following form:
-                 data= [ {"frequencies": numpy.array, "atomicDisplacements": numpy.array, "weight": numpy._float, "value":numpy.array},
-                       {"frequencies": numpy.array, "atomicDisplacements": numpy.array, "weight": numpy._float, "value":numpy.array}
+                 data= [ {"frequencies": numpy.array, "atomic_displacements: numpy.array, "weight": numpy._float, "value":numpy.array},
+                       {"frequencies": numpy.array, "atomic_displacements: numpy.array, "weight": numpy._float, "value":numpy.array}
                      ]
 
                  Each entry in the list corresponds to one k-point. Each item in the list is a dictionary. The meaning of
@@ -153,7 +179,7 @@ class GeneralDFTProgram(IOmodule):
 
                       "frequencies" - frequencies for the given k-point
 
-                      "atomicDisplacements" - atomic displacements for the given k-point
+                      "atomic_displacements - atomic displacements for the given k-point
 
 
 
@@ -161,7 +187,7 @@ class GeneralDFTProgram(IOmodule):
         _num_k_points = data["k_vectors"].shape[0]
 
         # here we multiply by _num_k_points because data["frequencies"] is one dimensional numpy array which stores frequencies for all k-points
-        _number_of_atoms = data["atomicDisplacements"].shape[1]/data["frequencies"].shape[0] * _num_k_points
+        _number_of_atoms = float(data["atomic_displacements"].shape[1])/data["frequencies"].shape[0] * _num_k_points
         _number_of_phonons = 3 * _number_of_atoms
         _rearranged_data = []
 
@@ -171,7 +197,7 @@ class GeneralDFTProgram(IOmodule):
             _rearranged_data.append({"weight":data["weights"][i],
                                      "value" :data["k_vectors"][i],
                                     "frequencies":data["frequencies"][temp_1:temp_1 + _number_of_phonons],
-                                    "atomicDisplacements":data["atomicDisplacements"][i]
+                                    "atomic_displacements":data["atomic_displacements"][i]
                                     } )
         return _rearranged_data
 
