@@ -718,8 +718,10 @@ void PDCalibration::createNewCalTable() {
 
   // copy over the values
   detid2index_map::const_iterator it = allDetectors.begin();
+  size_t i = 0;
   for (; it != allDetectors.end(); ++it) {
     const detid_t detID = it->first;
+    m_detidToRow[detID] = i++;
     const size_t wi = it->second;
     API::TableRow newRow = m_calibrationTable->appendRow();
     newRow << detID;
