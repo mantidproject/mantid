@@ -106,9 +106,9 @@ void IntegratePeaksMDHKL::exec() {
   int npeaks = peakWS->getNumberPeaks();
 
   auto prog = make_unique<Progress>(this, 0.3, 1.0, npeaks);
-  //PARALLEL_FOR1(peakWS)
+  PARALLEL_FOR1(peakWS)
   for (int i = 0; i < npeaks; i++) {
-    //PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERUPT_REGION
 
     IPeak &p = peakWS->getPeak(i);
     // round to integer
@@ -131,9 +131,9 @@ void IntegratePeaksMDHKL::exec() {
     p.setIntensity(intensity);
     p.setSigmaIntensity(sqrt(errorSquared));
     prog->report();
-    //PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERUPT_REGION
   }
-  //PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERUPT_REGION
   // Save the output
   setProperty("OutputWorkspace", peakWS);
 }
@@ -174,7 +174,7 @@ MDHistoWorkspace_sptr IntegratePeaksMDHKL::normalize(
 }
 
 void  IntegratePeaksMDHKL::integratePeak(const int neighborPts, MDHistoWorkspace_sptr out, double& intensity, double& errorSquared) {
-     AnalysisDataService::Instance().addOrReplace("box", out);
+     //AnalysisDataService::Instance().addOrReplace("box", out);
     std::vector<int> gridPts;
     const size_t dimensionality = out->getNumDims();
     for (size_t i = 0; i < dimensionality; ++i) {
