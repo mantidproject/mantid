@@ -417,40 +417,43 @@ void LoadSpice2D::addRunProperty(const std::string &name, const T &value,
 
 /**
  * Sets the beam trap as Run Property
+ * Resting positions:
+ * GPSANS: 1.000049 / 1.0
+ * BIOSANS: 9.999980
+ *
+ * Working positions:
+ * GPSANS: 548.999969
+ * BIOSANS: 544.999977
  */
 void LoadSpice2D::setBeamTrapRunProperty(
     std::map<std::string, std::string> &metadata) {
 
-  // Read in beam trap positions
-  double trap_pos = 0;
-  from_string<double>(trap_pos, metadata["Motor_Positions/trap_y_25mm"],
-                      std::dec);
+  std::vector<double> trapDiameters = {25.4, 50.8, 76.2, 101.6};
+  // default use the shortest trap
+  double trapInUseDiameter = 25.4;
 
-  double beam_trap_diam = 25.4;
+  std::vector<double> trapMotorPositions;
+  trapMotorPositions.push_back(
+      boost::lexical_cast<double>(metadata["Motor_Positions/trap_y_25mm"]));
+  trapMotorPositions.push_back(
+      boost::lexical_cast<double>(metadata["Motor_Positions/trap_y_50mm"]));
+  trapMotorPositions.push_back(
+      boost::lexical_cast<double>(metadata["Motor_Positions/trap_y_76mm"]));
+  trapMotorPositions.push_back(
+      boost::lexical_cast<double>(metadata["Motor_Positions/trap_y_101mm"]));
 
-  double highest_trap = 0;
-  from_string<double>(trap_pos, metadata["Motor_Positions/trap_y_101mm"],
-                      std::dec);
+  // The maximum value for the motors is the trap in use
+  std::vector<double>::iterator motorPosForTheTrapInUse =
+      std::max_element(trapMotorPositions.begin(), trapMotorPositions.end());
 
-  if (trap_pos > highest_trap) {
-    highest_trap = trap_pos;
-    beam_trap_diam = 101.6;
+  // Resting positions are below 10. Make sure we have one trap in use!
+  if (*motorPosForTheTrapInUse > 11.0) {
+    size_t indexOfMaxMotorPosition =
+        std::distance(trapMotorPositions.begin(), motorPosForTheTrapInUse);
+    trapInUseDiameter = trapDiameters[indexOfMaxMotorPosition];
   }
 
-  from_string<double>(trap_pos, metadata["Motor_Positions/trap_y_50mm"],
-                      std::dec);
-  if (trap_pos > highest_trap) {
-    highest_trap = trap_pos;
-    beam_trap_diam = 50.8;
-  }
-
-  from_string<double>(trap_pos, metadata["Motor_Positions/trap_y_76mm"],
-                      std::dec);
-  if (trap_pos > highest_trap) {
-    beam_trap_diam = 76.2;
-  }
-
-  addRunProperty<double>("beam-trap-diameter", beam_trap_diam, "mm");
+  addRunProperty<double>("beam-trap-diameter", trapInUseDiameter, "mm");
 }
 void LoadSpice2D::setMetadataAsRunProperties(
     std::map<std::string, std::string> &metadata) {
