@@ -270,7 +270,10 @@ def clear_mantid():
     """
     # Remove windows and plots
     for window in windows():
+        window.confirmClose(False)
         window.close()
+        QtCore.QCoreApplication.processEvents()
+
     # Clear workspaces
     mtd.clear()
     # Start a blank project to remove
