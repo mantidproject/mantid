@@ -84,6 +84,8 @@ class GeneralDFTProgram(IOmodule):
 
                         "hash"  - hash of a file with the phonon data. It should be a string representation of hash.
 
+                        "DFT_program" - name of the DFT program which was used to obtain phonon data (for CASTEP -> CASTEP).
+
           For more details about these fields please look at the documentation of IOmodule class.
 
         @return: Method should return a list of dictionaries with the following structure:

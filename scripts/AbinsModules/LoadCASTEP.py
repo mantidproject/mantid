@@ -241,6 +241,7 @@ class LoadCASTEP(GeneralDFTProgram):
             self.addStructuredDataset(name=item, value=file_data[item])
 
         self.addAttribute("hash", hash_filename)
+        self.addAttribute("DFT_program", "CASTEP")
 
         self.save()
 

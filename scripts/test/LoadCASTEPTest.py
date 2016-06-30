@@ -127,6 +127,7 @@ class LoadCASTEPTest(unittest.TestCase):
 
         # check attributes
         self.assertEqual(_correct_data["attributes"]["hash"], _data["attributes"]["hash"])
+        self.assertEqual(_correct_data["attributes"]["DFT_program"], _data["attributes"]["DFT_program"] )
 
 
         # check datasets
