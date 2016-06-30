@@ -215,7 +215,8 @@ void addDetectors(H5::Group &group, Mantid::API::MatrixWorkspace_sptr workspace,
 
       std::string sasDetectorName =
           sasInstrumentDetectorGroupName + detectorName;
-      sasDetectorName = Mantid::DataHandling::makeCanSASRelaxedName(sasDetectorName);
+      sasDetectorName =
+          Mantid::DataHandling::makeCanSASRelaxedName(sasDetectorName);
 
       auto instrument = workspace->getInstrument();
       auto component = instrument->getComponentByName(detectorName);

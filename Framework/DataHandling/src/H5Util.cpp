@@ -260,7 +260,7 @@ std::vector<NumT> readArray1DCoerce(H5::Group &group, const std::string &name) {
 namespace {
 template <typename InputNumT, typename OutputNumT>
 std::vector<OutputNumT> convertingRead(DataSet &dataset,
-                                          const DataType &dataType) {
+                                       const DataType &dataType) {
   DataSpace dataSpace = dataset.getSpace();
 
   std::vector<InputNumT> temp(dataSpace.getSelectNpoints());
@@ -280,7 +280,7 @@ std::vector<OutputNumT> convertingRead(DataSet &dataset,
 template <typename InputNumT, typename OutputNumT>
 std::vector<OutputNumT>
 convertingNumArrayAttributeRead(Attribute &attribute,
-                                   const DataType &dataType) {
+                                const DataType &dataType) {
   DataSpace dataSpace = attribute.getSpace();
 
   std::vector<InputNumT> temp(dataSpace.getSelectNpoints());
@@ -349,23 +349,19 @@ readNumArrayAttributeCoerce(LocationType &location,
     value.resize(dataSpace.getSelectNpoints());
     attribute.read(dataType, value.data());
   } else if (PredType::NATIVE_INT32 == dataType) {
-    value =
-        convertingNumArrayAttributeRead<int32_t, NumT>(attribute, dataType);
+    value = convertingNumArrayAttributeRead<int32_t, NumT>(attribute, dataType);
   } else if (PredType::NATIVE_UINT32 == dataType) {
     value =
         convertingNumArrayAttributeRead<uint32_t, NumT>(attribute, dataType);
   } else if (PredType::NATIVE_INT64 == dataType) {
-    value =
-        convertingNumArrayAttributeRead<int64_t, NumT>(attribute, dataType);
+    value = convertingNumArrayAttributeRead<int64_t, NumT>(attribute, dataType);
   } else if (PredType::NATIVE_UINT64 == dataType) {
     value =
         convertingNumArrayAttributeRead<uint64_t, NumT>(attribute, dataType);
   } else if (PredType::NATIVE_FLOAT == dataType) {
-    value =
-        convertingNumArrayAttributeRead<float, NumT>(attribute, dataType);
+    value = convertingNumArrayAttributeRead<float, NumT>(attribute, dataType);
   } else if (PredType::NATIVE_DOUBLE == dataType) {
-    value =
-        convertingNumArrayAttributeRead<double, NumT>(attribute, dataType);
+    value = convertingNumArrayAttributeRead<double, NumT>(attribute, dataType);
   } else {
     // not a supported type
     throw DataTypeIException();

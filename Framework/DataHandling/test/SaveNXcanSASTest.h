@@ -325,9 +325,9 @@ private:
                           std::vector<std::string> detectors) {
     for (auto &detector : detectors) {
       std::string detectorName = sasInstrumentDetectorGroupName + detector;
-      auto detectorNameSanitized = Mantid::DataHandling::makeCanSASRelaxedName(detectorName);
-      auto detectorGroup =
-          instrument.openGroup(detectorNameSanitized);
+      auto detectorNameSanitized =
+          Mantid::DataHandling::makeCanSASRelaxedName(detectorName);
+      auto detectorGroup = instrument.openGroup(detectorNameSanitized);
 
       auto numAttributes = detectorGroup.getNumAttrs();
       TSM_ASSERT_EQUALS("Should have 2 attributes", 2, numAttributes);
