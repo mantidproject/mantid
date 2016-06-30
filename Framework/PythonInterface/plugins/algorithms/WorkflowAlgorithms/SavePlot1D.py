@@ -3,6 +3,7 @@ import mantid,sys
 from mantid.kernel import Direction, StringListValidator
 
 try:
+    from plotly import tools as toolsly
     from plotly.offline import plot
     import plotly.graph_objs as go
     have_plotly = True
@@ -99,35 +100,49 @@ class SavePlot1D(mantid.api.PythonAlgorithm):
     def savePlotly(self, fullPage):
 
         if type(self._wksp)==mantid.api.WorkspaceGroup:
-            raise RuntimeError('not ready for workspace groups')
-            #for i in range(self._wksp.getNumberOfEntries()):
-            #    plt.subplot(self._wksp.getNumberOfEntries(),1,i+1)
-            #    self.doPlotImage(self._wksp.getItem(i))
-        else:
-            data = []
-            for i in xrange(self._wksp.getNumberHistograms()):
-                (x,y,label) = self.getData(self._wksp, i)
-                data.append(go.Scatter(x=x, y=y, name=label))
+            fig = toolsly.make_subplots(rows=self._wksp.getNumberOfEntries())
 
-            (xlabel, ylabel) = self.getAxesLabels(self._wksp, utf8=True)
+            for i in range(self._wksp.getNumberOfEntries()):
+                wksp = self._wksp.getItem(i)
+                (traces, xlabel, ylabel) = self.toScatterAndLabels(wksp)
+                for spectrum in traces:
+                    fig.append_trace(spectrum, i+1, 1)
+                fig['layout']['xaxis%d' % (i+1)].update(title=xlabel)
+                fig['layout']['yaxis%d' % (i+1)].update(title=ylabel)
+        else:
+            (traces, xlabel, ylabel) = self.toScatterAndLabels(self._wksp)
+
             layout = go.Layout(yaxis={'title':ylabel},
                                xaxis={'title':xlabel})
 
-            fig = go.Figure(data=data, layout=layout)
+            fig = go.Figure(data=traces, layout=layout)
 
-            if fullPage:
-                filename = self.getProperty("OutputFilename").value
-                plotly_args = {'filename':filename}
-            else:  # just the div
-                plotly_args = {'output_type':'div',
-                               'include_plotlyjs':False}
+        # extra arguments for div vs full page
+        if fullPage:
+            filename = self.getProperty("OutputFilename").value
+            plotly_args = {'filename':filename}
+        else:  # just the div
+            plotly_args = {'output_type':'div',
+                           'include_plotlyjs':False}
 
-            div = plot(fig, show_link=False, **plotly_args)
+        # render the plot
+        div = plot(fig, show_link=False, **plotly_args)
 
-            if fullPage:
-                return filename
-            else:
-                return str(div)
+        # decide what to return
+        if fullPage:
+            return filename
+        else:
+            return str(div)
+
+    def toScatterAndLabels(self, wksp):
+        data = []
+        for i in xrange(wksp.getNumberHistograms()):
+            (x,y,label) = self.getData(wksp, i)
+            data.append(go.Scatter(x=x, y=y, name=label))
+
+        (xlabel, ylabel) = self.getAxesLabels(wksp, utf8=True)
+
+        return (data, xlabel, ylabel)
 
     def saveImage(self):
         ok2run=''
