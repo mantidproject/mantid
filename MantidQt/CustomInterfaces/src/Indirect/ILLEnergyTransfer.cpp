@@ -69,7 +69,7 @@ void ILLEnergyTransfer::run() {
                             instDetails["reflection"].toStdString());
 
   // Handle input files
-  QString runFilename = m_uiForm.rfInput->getFirstFilename();
+  QString runFilename = m_uiForm.rfInput->getUserInput().toString();
   reductionAlg->setProperty("Run", runFilename.toStdString());
 
   // Handle calibration

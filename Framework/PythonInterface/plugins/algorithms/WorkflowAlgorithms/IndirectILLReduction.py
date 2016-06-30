@@ -2,7 +2,7 @@
 from mantid.simpleapi import *
 from mantid.kernel import StringListValidator, Direction
 from mantid.api import DataProcessorAlgorithm, PropertyMode, AlgorithmFactory, \
-                       FileProperty, FileAction, MatrixWorkspaceProperty
+                       MultipleFileProperty, FileProperty, FileAction, MatrixWorkspaceProperty
 from mantid import config, logger, mtd
 
 import numpy as np
@@ -36,10 +36,8 @@ class IndirectILLReduction(DataProcessorAlgorithm):
 
     def PyInit(self):
         # Input options
-        self.declareProperty(FileProperty('Run', '',
-                                          action=FileAction.Load,
-                                          extensions=["nxs"]),
-                             doc='File path of run.')
+        self.declareProperty(MultipleFileProperty('Run', extensions=["nxs"]),
+                                                  doc='File path of run (s).')
 
         self.declareProperty(MatrixWorkspaceProperty("CalibrationWorkspace", "",
                                                      optional=PropertyMode.Optional,
@@ -122,7 +120,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         self._save = self.getProperty('Save').value
         self._plot = self.getProperty('Plot').value
 
-        LoadILLIndirect(FileName=run_path, OutputWorkspace=self._raw_workspace)
+        Load(Filename=run_path, OutputWorkspace=self._raw_workspace)
 
         instrument = mtd[self._raw_workspace].getInstrument()
         self._instrument_name = instrument.getName()
