@@ -145,7 +145,7 @@ void writeNumAttribute(LocationType &location, const std::string &name,
                        const NumT &value) {
   static_assert(std::is_integral<NumT>::value ||
                     std::is_floating_point<NumT>::value,
-                "The writeNumAttribute function only accepts integral of "
+                "The writeNumAttribute function only accepts integral or "
                 "floating point values.");
   auto attrType = getType<NumT>();
   DataSpace attrSpace(H5S_SCALAR);
@@ -259,7 +259,7 @@ std::vector<NumT> readArray1DCoerce(H5::Group &group, const std::string &name) {
 
 namespace {
 template <typename InputNumT, typename OutputNumT>
-std::vector<OutputNumT> convertingingRead(DataSet &dataset,
+std::vector<OutputNumT> convertingRead(DataSet &dataset,
                                           const DataType &dataType) {
   DataSpace dataSpace = dataset.getSpace();
 
@@ -279,7 +279,7 @@ std::vector<OutputNumT> convertingingRead(DataSet &dataset,
 
 template <typename InputNumT, typename OutputNumT>
 std::vector<OutputNumT>
-convertingingNumArrayAttributeRead(Attribute &attribute,
+convertingNumArrayAttributeRead(Attribute &attribute,
                                    const DataType &dataType) {
   DataSpace dataSpace = attribute.getSpace();
 
@@ -297,7 +297,7 @@ convertingingNumArrayAttributeRead(Attribute &attribute,
 }
 
 template <typename InputNumT, typename OutputNumT>
-OutputNumT convertingingRead(Attribute &attribute, const DataType &dataType) {
+OutputNumT convertingRead(Attribute &attribute, const DataType &dataType) {
   InputNumT temp;
   attribute.read(dataType, &temp);
   OutputNumT result = boost::numeric_cast<OutputNumT>(temp);
@@ -317,17 +317,17 @@ NumT readNumAttributeCoerce(LocationType &location,
   if (getType<NumT>() == dataType) {
     attribute.read(dataType, &value);
   } else if (PredType::NATIVE_INT32 == dataType) {
-    value = convertingingRead<int32_t, NumT>(attribute, dataType);
+    value = convertingRead<int32_t, NumT>(attribute, dataType);
   } else if (PredType::NATIVE_UINT32 == dataType) {
-    value = convertingingRead<uint32_t, NumT>(attribute, dataType);
+    value = convertingRead<uint32_t, NumT>(attribute, dataType);
   } else if (PredType::NATIVE_INT64 == dataType) {
-    value = convertingingRead<int64_t, NumT>(attribute, dataType);
+    value = convertingRead<int64_t, NumT>(attribute, dataType);
   } else if (PredType::NATIVE_UINT64 == dataType) {
-    value = convertingingRead<uint64_t, NumT>(attribute, dataType);
+    value = convertingRead<uint64_t, NumT>(attribute, dataType);
   } else if (PredType::NATIVE_FLOAT == dataType) {
-    value = convertingingRead<float, NumT>(attribute, dataType);
+    value = convertingRead<float, NumT>(attribute, dataType);
   } else if (PredType::NATIVE_DOUBLE == dataType) {
-    value = convertingingRead<double, NumT>(attribute, dataType);
+    value = convertingRead<double, NumT>(attribute, dataType);
   } else {
     // not a supported type
     throw DataTypeIException();
@@ -350,22 +350,22 @@ readNumArrayAttributeCoerce(LocationType &location,
     attribute.read(dataType, value.data());
   } else if (PredType::NATIVE_INT32 == dataType) {
     value =
-        convertingingNumArrayAttributeRead<int32_t, NumT>(attribute, dataType);
+        convertingNumArrayAttributeRead<int32_t, NumT>(attribute, dataType);
   } else if (PredType::NATIVE_UINT32 == dataType) {
     value =
-        convertingingNumArrayAttributeRead<uint32_t, NumT>(attribute, dataType);
+        convertingNumArrayAttributeRead<uint32_t, NumT>(attribute, dataType);
   } else if (PredType::NATIVE_INT64 == dataType) {
     value =
-        convertingingNumArrayAttributeRead<int64_t, NumT>(attribute, dataType);
+        convertingNumArrayAttributeRead<int64_t, NumT>(attribute, dataType);
   } else if (PredType::NATIVE_UINT64 == dataType) {
     value =
-        convertingingNumArrayAttributeRead<uint64_t, NumT>(attribute, dataType);
+        convertingNumArrayAttributeRead<uint64_t, NumT>(attribute, dataType);
   } else if (PredType::NATIVE_FLOAT == dataType) {
     value =
-        convertingingNumArrayAttributeRead<float, NumT>(attribute, dataType);
+        convertingNumArrayAttributeRead<float, NumT>(attribute, dataType);
   } else if (PredType::NATIVE_DOUBLE == dataType) {
     value =
-        convertingingNumArrayAttributeRead<double, NumT>(attribute, dataType);
+        convertingNumArrayAttributeRead<double, NumT>(attribute, dataType);
   } else {
     // not a supported type
     throw DataTypeIException();
@@ -385,17 +385,17 @@ template <typename NumT> std::vector<NumT> readArray1DCoerce(DataSet &dataset) {
   }
 
   if (PredType::NATIVE_INT32 == dataType) {
-    return convertingingRead<int32_t, NumT>(dataset, dataType);
+    return convertingRead<int32_t, NumT>(dataset, dataType);
   } else if (PredType::NATIVE_UINT32 == dataType) {
-    return convertingingRead<uint32_t, NumT>(dataset, dataType);
+    return convertingRead<uint32_t, NumT>(dataset, dataType);
   } else if (PredType::NATIVE_INT64 == dataType) {
-    return convertingingRead<int64_t, NumT>(dataset, dataType);
+    return convertingRead<int64_t, NumT>(dataset, dataType);
   } else if (PredType::NATIVE_UINT64 == dataType) {
-    return convertingingRead<uint64_t, NumT>(dataset, dataType);
+    return convertingRead<uint64_t, NumT>(dataset, dataType);
   } else if (PredType::NATIVE_FLOAT == dataType) {
-    return convertingingRead<float, NumT>(dataset, dataType);
+    return convertingRead<float, NumT>(dataset, dataType);
   } else if (PredType::NATIVE_DOUBLE == dataType) {
-    return convertingingRead<double, NumT>(dataset, dataType);
+    return convertingRead<double, NumT>(dataset, dataType);
   }
 
   // not a supported type

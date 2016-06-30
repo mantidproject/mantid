@@ -324,8 +324,10 @@ private:
   void do_assert_detector(H5::Group &instrument,
                           std::vector<std::string> detectors) {
     for (auto &detector : detectors) {
+      std::string detectorName = sasInstrumentDetectorGroupName + detector;
+      auto detectorNameSanitized = Mantid::DataHandling::makeCanSASRelaxedName(detectorName);
       auto detectorGroup =
-          instrument.openGroup(sasInstrumentDetectorGroupName + detector);
+          instrument.openGroup(detectorNameSanitized);
 
       auto numAttributes = detectorGroup.getNumAttrs();
       TSM_ASSERT_EQUALS("Should have 2 attributes", 2, numAttributes);

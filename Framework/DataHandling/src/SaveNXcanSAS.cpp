@@ -18,9 +18,10 @@
 
 #include <H5Cpp.h>
 #include <boost/make_shared.hpp>
+#include <boost/regex.hpp>
+
 #include <Poco/File.h>
 #include <Poco/Path.h>
-#include <regex>
 #include <algorithm>
 #include <cctype>
 #include <iterator>
@@ -36,15 +37,15 @@ namespace {
 enum class StoreType { Qx, Qy, I, Idev, Other };
 
 bool isCanSASCompliant(bool isStrict, const std::string &input) {
-  auto baseRegex = isStrict ? std::regex("[a-z_][a-z0-9_]*")
-                            : std::regex("[A-Za-z_][\\w_]*");
-  return std::regex_match(input, baseRegex);
+  auto baseRegex = isStrict ? boost::regex("[a-z_][a-z0-9_]*")
+                            : boost::regex("[A-Za-z_][\\w_]*");
+  return boost::regex_match(input, baseRegex);
 }
 
 void removeSpecialCharacters(std::string &input) {
-  std::regex toReplace("[-\\.]");
+  boost::regex toReplace("[-\\.]");
   std::string replaceWith("_");
-  input = std::regex_replace(input, toReplace, replaceWith);
+  input = boost::regex_replace(input, toReplace, replaceWith);
 }
 
 std::string
@@ -63,17 +64,6 @@ makeCompliantName(const std::string &input, bool isStrict,
     }
   }
   return output;
-}
-
-/**
- * This makes out of an input a relaxed name, something conforming to
- * "[A-Za-z_][\w_]*"
- * For now "-" is converted to "_", "." is converted to "_", else we throw
- */
-std::string makeCanSASRelaxedName(const std::string &input) {
-  bool isStrict = false;
-  auto emptyCapitalizationStrategy = [](std::string &) {};
-  return makeCompliantName(input, isStrict, emptyCapitalizationStrategy);
 }
 
 template <typename NumT>
@@ -223,12 +213,10 @@ void addDetectors(H5::Group &group, Mantid::API::MatrixWorkspace_sptr workspace,
         continue;
       }
 
-      std::cout << "======================" << std::endl;
       std::string sasDetectorName =
           sasInstrumentDetectorGroupName + detectorName;
-      sasDetectorName = makeCanSASRelaxedName(sasDetectorName);
-      std::cout << "======================" << std::endl;
-      std::cout << sasDetectorName;
+      sasDetectorName = Mantid::DataHandling::makeCanSASRelaxedName(sasDetectorName);
+
       auto instrument = workspace->getInstrument();
       auto component = instrument->getComponentByName(detectorName);
 
@@ -858,6 +846,17 @@ void SaveNXcanSAS::exec() {
   addData(sasEntry, workspace);
 
   file.close();
+}
+
+/**
+ * This makes out of an input a relaxed name, something conforming to
+ * "[A-Za-z_][\w_]*"
+ * For now "-" is converted to "_", "." is converted to "_", else we throw
+ */
+std::string makeCanSASRelaxedName(const std::string &input) {
+  bool isStrict = false;
+  auto emptyCapitalizationStrategy = [](std::string &) {};
+  return makeCompliantName(input, isStrict, emptyCapitalizationStrategy);
 }
 
 } // namespace DataHandling
