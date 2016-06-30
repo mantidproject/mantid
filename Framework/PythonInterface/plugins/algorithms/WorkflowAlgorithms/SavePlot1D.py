@@ -1,6 +1,6 @@
 #pylint: disable=no-init,invalid-name
 import mantid,sys
-from mantid.kernel import StringListValidator
+from mantid.kernel import Direction, StringListValidator
 
 try:
     from plotly.offline import plot
@@ -36,7 +36,7 @@ class SavePlot1D(mantid.api.PythonAlgorithm):
         self.declareProperty(mantid.api.FileProperty('OutputFilename', '', action=mantid.api.FileAction.Save, extensions = ["png"]),
                              doc='Name of the image file to savefile.')
         if have_plotly:
-            outputTypes = ['image', 'plotly', 'plotly-div']
+            outputTypes = ['image', 'plotly', 'plotly-full']
         else:
             outputTypes = ['image']
         self.declareProperty('OutputType', 'image',
@@ -46,12 +46,18 @@ class SavePlot1D(mantid.api.PythonAlgorithm):
                              "Label on the X axis. If empty, it will be taken from workspace")
         self.declareProperty("YLabel","",
                              "Label on the Y axis. If empty, it will be taken from workspace")
+        self.declareProperty('Result', '', Direction.Output)
 
     def PyExec(self):
+        self._wksp = self.getProperty("InputWorkspace").value
         outputType = self.getProperty('OutputType').value
 
         if outputType == 'image':
-            self.saveImage()
+            result = self.saveImage()
+        else:
+            result = self.savePlotly(outputType == 'plotly-full')
+
+        self.setProperty('Result', result)
 
 
     def getData(self, ws, wkspIndex):
@@ -71,12 +77,15 @@ class SavePlot1D(mantid.api.PythonAlgorithm):
 
         return (x, y, label)
 
-    def getAxesLabels(self, ws):
+    def getAxesLabels(self, ws, utf8=False):
         xlabel=self.getProperty('XLabel').value
         if xlabel=='':
             xaxis=ws.getAxis(0)
-            unitLabel=xaxis.getUnit().symbol().latex()
-            xlabel=xaxis.getUnit().caption()+" ($"+unitLabel+"$)"
+            if utf8:
+                unitLabel = xaxis.getUnit().symbol().utf8()
+            else:  # latex markup
+                unitLabel= '$' + xaxis.getUnit().symbol().latex() + '$'
+            xlabel=xaxis.getUnit().caption()+' ('+unitLabel+')'
 
         ylabel=self.getProperty("YLabel").value
         if ylabel=='':
@@ -86,6 +95,39 @@ class SavePlot1D(mantid.api.PythonAlgorithm):
 
         return (xlabel, ylabel)
 
+
+    def savePlotly(self, fullPage):
+
+        if type(self._wksp)==mantid.api.WorkspaceGroup:
+            raise RuntimeError('not ready for workspace groups')
+            #for i in range(self._wksp.getNumberOfEntries()):
+            #    plt.subplot(self._wksp.getNumberOfEntries(),1,i+1)
+            #    self.doPlotImage(self._wksp.getItem(i))
+        else:
+            data = []
+            for i in xrange(self._wksp.getNumberHistograms()):
+                (x,y,label) = self.getData(self._wksp, i)
+                data.append(go.Scatter(x=x, y=y, name=label))
+
+            (xlabel, ylabel) = self.getAxesLabels(self._wksp, utf8=True)
+            layout = go.Layout(yaxis={'title':ylabel},
+                               xaxis={'title':xlabel})
+
+            fig = go.Figure(data=data, layout=layout)
+
+            if fullPage:
+                filename = self.getProperty("OutputFilename").value
+                plotly_args = {'filename':filename}
+            else:  # just the div
+                plotly_args = {'output_type':'div',
+                               'include_plotlyjs':False}
+
+            div = plot(fig, show_link=False, **plotly_args)
+
+            if fullPage:
+                return filename
+            else:
+                return str(div)
 
     def saveImage(self):
         ok2run=''
@@ -101,7 +143,6 @@ class SavePlot1D(mantid.api.PythonAlgorithm):
         matplotlib=sys.modules['matplotlib']
         matplotlib.use("agg")
         import matplotlib.pyplot as plt
-        self._wksp = self.getProperty("InputWorkspace").value
         plt.figure()
         if type(self._wksp)==mantid.api.WorkspaceGroup:
             for i in range(self._wksp.getNumberOfEntries()):
@@ -113,6 +154,8 @@ class SavePlot1D(mantid.api.PythonAlgorithm):
         plt.show()
         filename = self.getProperty("OutputFilename").value
         plt.savefig(filename,bbox_inches='tight')
+
+        return filename
 
 
     def doPlotImage(self,ws):
@@ -135,7 +178,5 @@ class SavePlot1D(mantid.api.PythonAlgorithm):
 
         if spectra>1 and spectra<=10:
             plt.legend()
-
-
 
 mantid.api.AlgorithmFactory.subscribe(SavePlot1D)
