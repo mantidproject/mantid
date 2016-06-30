@@ -1,6 +1,6 @@
 #pylint: disable=no-init,invalid-name
 import mantid,sys
-from mantid.kernel import Direction, StringListValidator
+from mantid.kernel import Direction, StringArrayProperty, StringListValidator
 
 try:
     from plotly import tools as toolsly
@@ -34,7 +34,7 @@ class SavePlot1D(mantid.api.PythonAlgorithm):
         #declare properties
         self.declareProperty(mantid.api.WorkspaceProperty("InputWorkspace","",mantid.kernel.Direction.Input),
                              "Workspace to plot")
-        self.declareProperty(mantid.api.FileProperty('OutputFilename', '', action=mantid.api.FileAction.Save, extensions = ["png"]),
+        self.declareProperty(mantid.api.FileProperty('OutputFilename', '', action=mantid.api.FileAction.OptionalSave, extensions = ["png"]),
                              doc='Name of the image file to savefile.')
         if have_plotly:
             outputTypes = ['image', 'plotly', 'plotly-full']
@@ -47,6 +47,8 @@ class SavePlot1D(mantid.api.PythonAlgorithm):
                              "Label on the X axis. If empty, it will be taken from workspace")
         self.declareProperty("YLabel","",
                              "Label on the Y axis. If empty, it will be taken from workspace")
+        self.declareProperty(StringArrayProperty('SpectraNames', [], direction=Direction.Input),
+                             'Override with custom names for spectra')
         self.declareProperty('Result', '', Direction.Output)
 
     def PyExec(self):
@@ -61,12 +63,17 @@ class SavePlot1D(mantid.api.PythonAlgorithm):
         self.setProperty('Result', result)
 
 
-    def getData(self, ws, wkspIndex):
+    def getData(self, ws, wkspIndex, label=''):
         x=ws.readX(wkspIndex)
         y=ws.readY(wkspIndex)
         if x.size==y.size+1:
             x=(x[:-1]+x[1:])*0.5
 
+        # use suggested label
+        if len(label.strip()) > 0:
+            return (x, y, label)
+
+        # determine the label from the data
         ax=ws.getAxis(1)
         if ax.isSpectra():
             label = ax.label(wkspIndex)
@@ -98,19 +105,23 @@ class SavePlot1D(mantid.api.PythonAlgorithm):
 
 
     def savePlotly(self, fullPage):
+        spectraNames = self.getProperty('SpectraNames').value
 
         if type(self._wksp)==mantid.api.WorkspaceGroup:
             fig = toolsly.make_subplots(rows=self._wksp.getNumberOfEntries())
 
             for i in range(self._wksp.getNumberOfEntries()):
                 wksp = self._wksp.getItem(i)
-                (traces, xlabel, ylabel) = self.toScatterAndLabels(wksp)
+                (traces, xlabel, ylabel) = self.toScatterAndLabels(wksp, spectraNames)
                 for spectrum in traces:
                     fig.append_trace(spectrum, i+1, 1)
                 fig['layout']['xaxis%d' % (i+1)].update(title=xlabel)
                 fig['layout']['yaxis%d' % (i+1)].update(title=ylabel)
+                if len(spectraNames) > 0: # remove the used spectra names
+                    spectraNames = spectraNames[len(traces):]
         else:
-            (traces, xlabel, ylabel) = self.toScatterAndLabels(self._wksp)
+            (traces, xlabel, ylabel) = self.toScatterAndLabels(self._wksp,
+                                                               spectraNames)
 
             layout = go.Layout(yaxis={'title':ylabel},
                                xaxis={'title':xlabel})
@@ -134,10 +145,13 @@ class SavePlot1D(mantid.api.PythonAlgorithm):
         else:
             return str(div)
 
-    def toScatterAndLabels(self, wksp):
+    def toScatterAndLabels(self, wksp, spectraNames=[]):
         data = []
         for i in xrange(wksp.getNumberHistograms()):
-            (x,y,label) = self.getData(wksp, i)
+            if len(spectraNames) > i:
+                (x,y,label) = self.getData(wksp, i, spectraNames[i])
+            else:
+                (x,y,label) = self.getData(wksp, i)
             data.append(go.Scatter(x=x, y=y, name=label))
 
         (xlabel, ylabel) = self.getAxesLabels(wksp, utf8=True)
