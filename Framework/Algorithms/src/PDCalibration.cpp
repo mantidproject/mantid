@@ -699,6 +699,7 @@ void PDCalibration::createNewCalTable() {
   m_calibrationTable->addColumn("double", "difc");
   m_calibrationTable->addColumn("double", "difa");
   m_calibrationTable->addColumn("double", "tzero");
+  m_hasDasIds = false;
   m_calibrationTable->addColumn("double", "tofmin");
   m_calibrationTable->addColumn("double", "tofmax");
   setProperty("OutputCalibrationTable", m_calibrationTable);
