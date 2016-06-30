@@ -110,7 +110,8 @@ class IntegratePeaksThread(QThread):
     peakMergeSignal = QtCore.pyqtSignal(int, int, float, int)
     errorSignal = QtCore.pyqtSignal(int, int, str)
 
-    def __init__(self, main_window, exp_number, scan_tuple_list, mask_det, mask_name, norm_type):
+    def __init__(self, main_window, exp_number, scan_tuple_list, mask_det, mask_name, norm_type, num_pt_bg_left,
+                 num_pt_bg_right):
         """
 
         :param main_window:
@@ -119,6 +120,8 @@ class IntegratePeaksThread(QThread):
         :param mask_det:
         :param mask_name:
         :param norm_type: type of normalization
+        :param num_pt_bg_left: number of Pt in the left
+        :param num_pt_bg_right: number of Pt for background in the right
         """
         # start thread
         QThread.__init__(self)
@@ -133,6 +136,8 @@ class IntegratePeaksThread(QThread):
         assert isinstance(mask_name, str), 'Name of mask must be a string but not %s.' % str(type(mask_name))
         assert isinstance(norm_type, str), 'Normalization type must be a string but not %s.' \
                                            '' % str(type(norm_type))
+        assert isinstance(num_pt_bg_left, int) and num_pt_bg_left >= 0
+        assert isinstance(num_pt_bg_right, int) and num_pt_bg_right >= 0
 
         # set values
         self._mainWindow = main_window
@@ -141,6 +146,8 @@ class IntegratePeaksThread(QThread):
         self._maskDetector = mask_det
         self._normalizeType = norm_type
         self._selectedMaskName = mask_name
+        self._numBgPtLeft = num_pt_bg_left
+        self._numBgPtRight = num_pt_bg_right
 
         # link signals
         self.peakMergeSignal.connect(self._mainWindow.update_merge_status)
@@ -226,42 +233,20 @@ class IntegratePeaksThread(QThread):
                 self.errorSignal.emit(self._expNumber, scan_number, error_msg)
                 continue
 
-            # FIXME/TODO/NOW - Make this right
-            num_bg_pt = 2
-            background_pt_list = pt_number_list[:num_bg_pt] + pt_number_list[-num_bg_pt:]
+            # calculate background value
+            background_pt_list = pt_number_list[:self._numBgPtLeft] + pt_number_list[-self._numBgPtRight:]
             avg_bg_value = self._mainWindow.controller.estimate_background(pt_dict, background_pt_list)
+
+            # correct intensity by background value
             intensity_i = self._mainWindow.controller.simple_integrate_peak(pt_dict, avg_bg_value)
 
+            # emit signal to main app for peak intensity value
             mode = 1
             self.peakMergeSignal.emit(self._expNumber, scan_number, float(intensity_i), mode)
-
-            """
-            # check intensity value
-            if intensity_i < 0:
-                # set to status
-                error_msg = 'Negative intensity: %.3f' % intensity_i
-                self._mainWindow.tableWidget_mergeScans.set_status(scan_no=scan_number, status=error_msg)
-                # reset intensity to 0.
-                intensity_i = 0.
-
-            # set the calculated peak intensity to _peakInfoDict
-            status, error_msg = self._mainWindow.controller.set_peak_intensity(exp_number, scan_number, intensity_i)
-            if status is False:
-                grand_error_message += error_msg + '\n'
-                continue
-
-            # set the value to table
-            self._mainWindow.ui.tableWidget_mergeScans.set_peak_intensity(row_number, None, intensity_i)
-            """
         # END-FOR
 
         # terminate the process
-        self.peakMergeSignal.emit(self._expNumber, -1, len(scan_number_list), 2)
+        self.peakMergeSignal.emit(self._expNumber, -1, len(self._scanTupleList), 2)
         self._mainWindow.ui.tableWidget_mergeScans.select_all_rows(False)
-
-        # count time
-        #integrate_peak_time_end = time.clock()
-        #elapsed = integrate_peak_time_end - integrate_peak_time_start
-        # self._mainWindow.ui.statusbar.showMessage('Peak integration is finished in %.2f seconds' % elapsed)
 
         return

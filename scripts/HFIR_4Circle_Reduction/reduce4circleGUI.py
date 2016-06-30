@@ -1238,8 +1238,20 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.progressBar_mergeScans.setTextVisible(True)
         self.ui.progressBar_mergeScans.setStatusTip('Hello')
 
+        # process background setup
+        status, ret_obj = gutil.parse_integers_editors([self.ui.lineEdit_numPt4Background,
+                                                        self.ui.lineEdit_numPt4BackgroundRight],
+                                                       allow_blank=False)
+        if not status:
+            error_msg = str(ret_obj)
+            self.pop_one_button_dialog(error_msg)
+            return
+        num_pt_bg_left = ret_obj[0]
+        num_pt_bg_right = ret_obj[1]
+
         self._myIntegratePeaksThread = IntegratePeaksThread(self, exp_number, scan_number_list,
-                                                            mask_det, selected_mask, norm_type)
+                                                            mask_det, selected_mask, norm_type,
+                                                            num_pt_bg_left, num_pt_bg_right)
         self._myIntegratePeaksThread.start()
 
         return
