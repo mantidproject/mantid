@@ -110,7 +110,7 @@ double dot_product(const DoubleFortranVector &x, const DoubleFortranVector &y) {
 double evaluate_model(const DoubleFortranVector &f,
                       const DoubleFortranMatrix &J,
                       const DoubleFortranMatrix &hf,
-                      const DoubleFortranVector &d, const nlls_options options,
+                      const DoubleFortranVector &d, const nlls_options &options,
                       evaluate_model_work &w) {
 
   // Jd = J*d
@@ -163,7 +163,7 @@ double calculate_rho(double normf, double normfnew, double md,
 /// Update the Hessian matrix without actually evaluating it (quasi-Newton?)
 /// @param hf :: The matrix to update.
 /// @param w :: The work struct.
-void rank_one_update(DoubleFortranMatrix &hf, NLLS_workspace w) {
+void rank_one_update(DoubleFortranMatrix &hf, NLLS_workspace &w) {
 
   auto yts = dot_product(w.d, w.y);
   if (fabs(yts) < 10 * epsmch) {
@@ -292,7 +292,7 @@ void test_convergence(double normF, double normJF, double normF0,
 /// @param inform :: The information.
 void apply_scaling(const DoubleFortranMatrix &J, DoubleFortranMatrix &A,
                    DoubleFortranVector &v, apply_scaling_work &w,
-                   const nlls_options options, nlls_inform inform) {
+                   const nlls_options &options, nlls_inform &inform) {
   auto m = J.len1();
   auto n = J.len2();
   if (w.diag.len() != n) {

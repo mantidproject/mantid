@@ -2,15 +2,16 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/GroupWorkspaces.h"
-#include "MantidKernel/MandatoryValidator.h"
+#include "MantidAPI/ADSValidator.h"
+#include "MantidKernel/ArrayProperty.h"
 
 namespace Mantid {
 namespace Algorithms {
 
 DECLARE_ALGORITHM(GroupWorkspaces)
 
-using namespace Kernel;
 using namespace API;
+using namespace Kernel;
 
 /// Default constructor
 GroupWorkspaces::GroupWorkspaces() : API::Algorithm(), m_group() {}
@@ -18,11 +19,9 @@ GroupWorkspaces::GroupWorkspaces() : API::Algorithm(), m_group() {}
 /// Initialisation method
 void GroupWorkspaces::init() {
 
-  declareProperty(
-      Kernel::make_unique<ArrayProperty<std::string>>(
-          "InputWorkspaces",
-          boost::make_shared<MandatoryValidator<std::vector<std::string>>>()),
-      "Name of the Input Workspaces to Group");
+  declareProperty(Kernel::make_unique<ArrayProperty<std::string>>(
+                      "InputWorkspaces", boost::make_shared<ADSValidator>()),
+                  "Names of the Input Workspaces to Group");
   declareProperty(
       make_unique<WorkspaceProperty<WorkspaceGroup>>("OutputWorkspace", "",
                                                      Direction::Output),
