@@ -33,8 +33,11 @@ class MantidPlotProjectSerialiseTest(unittest.TestCase):
         self.assertTrue(os.path.isfile(self._project_file))
 
         file_text = "MantidPlot 0.9.5 project file\n" \
-                    "<scripting-lang>\tPython\n<windows>\t0\n" \
-                    "<mantidworkspaces>\nWorkspaceNames\n</mantidworkspaces>"
+                    "<scripting-lang>\tPython\n" \
+                    "<windows>\t0\n" \
+                    "<mantidworkspaces>\n" \
+                    "WorkspaceNames\tfake_workspace\n" \
+                    "</mantidworkspaces>"
 
         exp_contents = tokenise_project_file(file_text.split('\n'))
         contents = read_project_file(self._project_folder)
@@ -149,7 +152,7 @@ class MantidPlotProjectSerialiseTest(unittest.TestCase):
         # Check that objects were reloaded
         self.assertEqual(rootFolder().name(), self._project_name)
         self.assertEqual(len(windows()), 0)
-        self.assertEqual(len(mtd.getObjectNames()), 0)
+        self.assertEqual(len(mtd.getObjectNames()), 1)
 
     def test_serialise_1D_plot_with_plotted_spectrum(self):
         workspace_name = "fake_workspace"
