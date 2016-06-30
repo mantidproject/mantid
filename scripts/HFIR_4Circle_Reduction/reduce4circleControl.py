@@ -1105,7 +1105,8 @@ class CWSCDReductionControl(object):
 
     def integrate_scan_peaks(self, exp, scan, peak_radius, peak_centre,
                              merge_peaks=True, use_mask=False,
-                             normalization='', mask_ws_name=None):
+                             normalization='', mask_ws_name=None,
+                             scale_factor=1):
         """
         :param exp:
         :param scan:
@@ -1116,6 +1117,7 @@ class CWSCDReductionControl(object):
         :param use_mask:
         :param normalization: normalization set up (by time or ...)
         :param mask_ws_name: mask workspace name or None
+        :param scale_factor: integrated peaks' scaling factor
         :return:
         """
         # check
@@ -1161,7 +1163,7 @@ class CWSCDReductionControl(object):
         elif normalization == 'monitor':
             norm_by_mon = True
 
-        # TODO/NOW: Are you sure ScaleFactor is 1 !!!
+        # integrate peak of a scan
         api.IntegratePeaksCWSD(InputWorkspace=md_ws_name,
                                OutputWorkspace=integrated_peak_ws_name,
                                PeakRadius=peak_radius,
@@ -1170,7 +1172,7 @@ class CWSCDReductionControl(object):
                                NormalizeByMonitor=norm_by_mon,
                                NormalizeByTime=norm_by_time,
                                MaskWorkspace=mask_ws_name,
-                               ScaleFactor=1)
+                               ScaleFactor=scale_factor)
 
         # process the output workspace
         pt_dict = dict()

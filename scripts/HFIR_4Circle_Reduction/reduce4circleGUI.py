@@ -1118,6 +1118,12 @@ class MainWindow(QtGui.QMainWindow):
         else:
             this_peak_centre = ret_obj
 
+        # scale factor
+        try:
+            intensity_scale_factor = float(self.ui.lineEdit_scaleFactor.text())
+        except ValueError:
+            intensity_scale_factor = 1.
+
         # get masked workspace
         status, ret_obj = self._myControl.integrate_scan_peaks(exp=exp_number,
                                                                scan=scan_number,
@@ -1125,7 +1131,8 @@ class MainWindow(QtGui.QMainWindow):
                                                                peak_centre=this_peak_centre,
                                                                merge_peaks=False,
                                                                use_mask=mask_detectors,
-                                                               normalization=norm_type)
+                                                               normalization=norm_type,
+                                                               scale_factor=intensity_scale_factor)
 
         # result due to error
         if status is False:
