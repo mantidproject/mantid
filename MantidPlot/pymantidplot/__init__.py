@@ -829,7 +829,7 @@ def closeAllSliceViewers():
 
 
 # -----------------------------------------------------------------------------
-def openProject(file_name, file_version = 0):
+def openProject(file_name, file_version=0):
     """Open a mantid project file.
 
     This will load all associated workspaces and plots.
@@ -867,8 +867,8 @@ def newProject():
 # Legacy function
 plotTimeBin = plotBin
 
-# import 'safe' methods (i.e. no proxy required) of ApplicationWindow into the global namespace
-# Only 1 at the moment!
+# import 'safe' methods (i.e. no proxy required) of ApplicationWindow into
+# the global namespace. None at the moment!
 appImports = []
 for name in appImports:
     globals()[name] = getattr(_qti.app, name)
