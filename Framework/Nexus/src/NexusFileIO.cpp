@@ -104,7 +104,7 @@ void NexusFileIO::openNexusWrite(const std::string &fileName,
     // on OSX and Ubuntu.
     Poco::Path path(fileName);
     std::string baseName = path.getBaseName();
-    if(baseName.size() >= 256) {
+    if(baseName.size() > NAME_MAX) {
       std::string message = "Filename is too long. Unable to open file: ";
       throw Exception::FileError(message, fileName);
     }
