@@ -38,7 +38,7 @@ public:
                                  double background) override;
   // Second derivative
   std::vector<double>
-  secondDerivative(const std::vector<double> &values) override;
+  secondDerivative(const std::vector<double> &values, double background) override;
   // Correct negative values
   std::vector<double> correctValues(const std::vector<double> &values,
                                     double newValue) override;

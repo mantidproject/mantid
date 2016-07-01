@@ -41,7 +41,7 @@ public:
     // Some values
     std::vector<double> values = {-1., -2., 10.};
     // Derivative
-    std::vector<double> result = entropy.secondDerivative(values);
+    std::vector<double> result = entropy.secondDerivative(values, 1);
     TS_ASSERT_EQUALS(values.size(), result.size());
     // fabs(x)
     TS_ASSERT_DELTA(result[0], 1, 1E-6);
