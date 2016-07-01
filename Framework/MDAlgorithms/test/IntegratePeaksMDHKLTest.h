@@ -73,6 +73,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(algC.setProperty("Dimensions", "3"));
     TS_ASSERT_THROWS_NOTHING(
         algC.setProperty("Extents", "-10,10,-10,10,-10,10"));
+
     TS_ASSERT_THROWS_NOTHING(algC.setProperty("Names", "[H,0,0],[0,K,0],[0,0,L]"));
     std::string units = Mantid::Kernel::Units::Symbol::RLU.ascii() + "," +
                         Mantid::Kernel::Units::Symbol::RLU.ascii() + "," +
@@ -102,6 +103,10 @@ public:
         algF.setPropertyValue("InputWorkspace", "IntegratePeaksMDHKLTest_MDEWS"));
     TS_ASSERT_THROWS_NOTHING(
         algF.setProperty("PeakParams", mess.str().c_str()));
+    TS_ASSERT_THROWS_NOTHING(
+        algF.setProperty("RandomSeed", "63759"));
+    TS_ASSERT_THROWS_NOTHING(
+        algF.setProperty("RandomizeSignal", "1"));
     TS_ASSERT_THROWS_NOTHING(algF.execute());
     TS_ASSERT(algF.isExecuted());
   }
@@ -111,9 +116,9 @@ public:
   void test_exec() {
     // --- Fake workspace with 3 peaks ------
     createMDEW();
-    addPeak(1000, 0., 0., 0., 1.0);
-    addPeak(1000, 2., 3., 4., 0.5);
-    addPeak(1000, 6., 6., 6., 2.0);
+    addPeak(1000, 1., 1., 1., 0.1);
+    addPeak(1000, 2., 3., 4., 0.15);
+    addPeak(1000, 6., 6., 6., 0.2);
 
     MDEventWorkspace3Lean::sptr mdews =
         AnalysisDataService::Instance().retrieveWS<MDEventWorkspace3Lean>(
@@ -122,7 +127,7 @@ public:
     TSM_ASSERT_EQUALS("Should be HKL", Mantid::Geometry::HKL::HKLName,
                       frame.name());
     TS_ASSERT_EQUALS(mdews->getNPoints(), 3000);
-    TS_ASSERT_DELTA(mdews->getBox()->getSignal(), 3000.0, 1e-2);
+    TS_ASSERT_DELTA(mdews->getBox()->getSignal(), 3021.7071, 1e-2);
 
     // Make a fake instrument - doesn't matter, we won't use it really
     Instrument_sptr inst =
@@ -131,7 +136,9 @@ public:
     // --- Make a fake PeaksWorkspace ---
     PeaksWorkspace_sptr peakWS0(new PeaksWorkspace());
     peakWS0->setInstrument(inst);
-    peakWS0->addPeak(Peak(inst, 15050, 1.0));
+    Peak Pin(inst, 15050, 1.0);
+    Pin.setHKL(V3D(1,1,1));
+    peakWS0->addPeak(Pin);
 
     TS_ASSERT_EQUALS(peakWS0->getPeak(0).getIntensity(), 0.0);
     AnalysisDataService::Instance().add("IntegratePeaksMDHKLTest_peaks", peakWS0);
@@ -139,10 +146,10 @@ public:
     // ------------- Integrating with cylinder ------------------------
     doRun("IntegratePeaksMDHKLTest_peaks");
 
-    TS_ASSERT_DELTA(peakWS0->getPeak(0).getIntensity(), 2.0, 1e-2);
+    TS_ASSERT_DELTA(peakWS0->getPeak(0).getIntensity(), 29.4284, 1e-2);
 
     // Error is also calculated
-    TS_ASSERT_DELTA(peakWS0->getPeak(0).getSigmaIntensity(), M_SQRT2, 1e-2);
+    TS_ASSERT_DELTA(peakWS0->getPeak(0).getSigmaIntensity(), 5.2813, 1e-2);
 
   }
 
@@ -155,7 +162,7 @@ public:
      * 1 < r < 2 : density 1/2
      * 2 < r < 3 : density 1/3
      */
-    addPeak(1000, 0., 0., 0., 1.0);
+    addPeak(1000, 1., 1., 1., 0.1);
     addPeak(1000 * 4, 0., 0., 0.,
             2.0); // 8 times the volume / 4 times the counts = 1/2 density
     addPeak(1000 * 9, 0., 0., 0.,
@@ -165,31 +172,20 @@ public:
     PeaksWorkspace_sptr peakWS(new PeaksWorkspace());
     Instrument_sptr inst =
         ComponentCreationHelper::createTestInstrumentCylindrical(5);
-    peakWS->addPeak(Peak(inst, 1, 1.0, V3D(0., 0., 0.)));
+    Peak Pin(inst, 1, 1.0);
+    Pin.setHKL(V3D(1,1,1));
+    peakWS->addPeak(Pin);
     TS_ASSERT_EQUALS(peakWS->getPeak(0).getIntensity(), 0.0);
     AnalysisDataService::Instance().addOrReplace("IntegratePeaksMDHKLTest_peaks",
                                                  peakWS);
 
     // Set background from 2.0 to 3.0.
-    // So the 1/2 density background remains, we subtract the 1/3 density =
-    // about 1500 counts
     doRun("IntegratePeaksMDHKLTest_peaks");
-    TS_ASSERT_DELTA(peakWS->getPeak(0).getIntensity(), 1000 + 500, 80.0);
+    TS_ASSERT_DELTA(peakWS->getPeak(0).getIntensity(), 29.4275, 0.1);
     // Error is larger, since it is error of peak + error of background
     TSM_ASSERT_DELTA("Error has increased",
-                     peakWS->getPeak(0).getSigmaIntensity(), sqrt(1830.0), 2);
+                     peakWS->getPeak(0).getSigmaIntensity(), 5.2814, 0.1);
 
-  }
-
-  void test_writes_out_selected_algorithm_parameters() {
-    createMDEW();
-
-    doRun("OutWS");
-
-    auto outWS =
-        AnalysisDataService::Instance().retrieveWS<PeaksWorkspace>("OutWS");
-
-    TS_ASSERT(outWS->hasIntegratedPeaks());
   }
 
 };
