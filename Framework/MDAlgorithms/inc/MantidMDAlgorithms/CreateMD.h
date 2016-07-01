@@ -43,9 +43,6 @@ extern bool dataExists(const std::string &data_name);
 */
 class MANTID_MDALGORITHMS_DLL CreateMD : public API::DataProcessorAlgorithm {
 public:
-  CreateMD();
-  ~CreateMD() override;
-
   const std::string name() const override;
   int version() const override;
   const std::string category() const override;

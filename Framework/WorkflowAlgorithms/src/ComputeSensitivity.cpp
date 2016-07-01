@@ -91,7 +91,7 @@ void ComputeSensitivity::exec() {
     outputMessage += outMsg2;
     setProperty("OutputMessage", outputMessage);
   } else {
-    g_log.error() << "Could not find sensitivity algorithm" << std::endl;
+    g_log.error() << "Could not find sensitivity algorithm\n";
   }
 }
 

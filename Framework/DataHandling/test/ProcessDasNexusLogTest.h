@@ -90,7 +90,7 @@ public:
                                       true);
 
     for (size_t i = 0; i < eventWS->getNumberHistograms(); i++) {
-      DataObjects::EventList *elist = eventWS->getEventListPtr(i);
+      auto &elist = eventWS->getSpectrum(i);
 
       for (int64_t pid = 0; pid < 5; pid++) {
         int64_t pulsetime_i64 = pid * pulsedt + runstart.totalNanoseconds();
@@ -98,7 +98,7 @@ public:
         for (size_t e = 0; e < 10; e++) {
           double tof = static_cast<double>(e * tofdt / 1000);
           DataObjects::TofEvent event(tof, pulsetime);
-          elist->addEventQuickly(event);
+          elist.addEventQuickly(event);
         }
       } // FOR each pulse
     }   // For each bank

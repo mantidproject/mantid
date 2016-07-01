@@ -173,7 +173,7 @@ void ConvertSpectrumAxis::exec() {
     outputWS->dataE(currentIndex) = inputWS->dataE(it->second);
     // We can keep the spectrum numbers etc.
     outputWS->getSpectrum(currentIndex)
-        ->copyInfoFrom(*inputWS->getSpectrum(it->second));
+        .copyInfoFrom(inputWS->getSpectrum(it->second));
     ++currentIndex;
   }
   setProperty("OutputWorkspace", outputWS);

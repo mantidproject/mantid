@@ -136,6 +136,7 @@
 #include <cassert>
 
 #include <qwt_scale_engine.h>
+#include <QColorGroup>
 #include <QFileDialog>
 #include <QInputDialog>
 #include <QProgressDialog>
@@ -159,6 +160,7 @@
 #include <QDateTime>
 #include <QShortcut>
 #include <QDockWidget>
+#include <QTextCodec>
 #include <QTextStream>
 #include <QVarLengthArray>
 #include <QList>
@@ -216,6 +218,10 @@
 
 #include "MantidQtAPI/ScriptRepositoryView.h"
 
+#ifdef MAKE_VATES
+#include "vtkPVDisplayInformation.h"
+#endif
+
 using namespace Qwt3D;
 using namespace MantidQt::API;
 using Mantid::Kernel::ConfigService;
@@ -228,7 +234,6 @@ using Mantid::Kernel::Logger;
 namespace {
 /// static logger
 Logger g_log("ApplicationWindow");
-
 }
 
 extern "C" {
@@ -371,6 +376,11 @@ void ApplicationWindow::init(bool factorySettings, const QStringList &args) {
                                                 false);
   }
 
+#ifdef MAKE_VATES
+  if (!vtkPVDisplayInformation::SupportsOpenGLLocally())
+    g_log.error("The OpenGL configuration does not support the VSI.");
+#endif
+
   // Create UI object
   mantidUI = new MantidUI(this);
 
@@ -393,11 +403,10 @@ void ApplicationWindow::init(bool factorySettings, const QStringList &args) {
   folders->header()->hide();
   folders->setSelectionMode(QAbstractItemView::SingleSelection);
 
-  connect(folders, SIGNAL(currentItemChanged(QTreeWidgetItem *, QTreeWidgetItem *)), this,
-          SLOT(folderItemChanged(QTreeWidgetItem *, QTreeWidgetItem *)));
   connect(folders,
-          SIGNAL(customContextMenuRequested(const QPoint &)),
-          this,
+          SIGNAL(currentItemChanged(QTreeWidgetItem *, QTreeWidgetItem *)),
+          this, SLOT(folderItemChanged(QTreeWidgetItem *, QTreeWidgetItem *)));
+  connect(folders, SIGNAL(customContextMenuRequested(const QPoint &)), this,
           SLOT(showFolderPopupMenu(const QPoint &)));
   connect(folders, SIGNAL(deleteSelection()), this,
           SLOT(deleteSelectedItems()));
@@ -519,29 +528,29 @@ void ApplicationWindow::init(bool factorySettings, const QStringList &args) {
   actionNextWindow = new QAction(QIcon(getQPixmap("next_xpm")),
                                  tr("&Next", "next window"), this);
   actionNextWindow->setShortcut(tr("F5", "next window shortcut"));
-  connect(actionNextWindow, SIGNAL(activated()), d_workspace,
+  connect(actionNextWindow, SIGNAL(triggered()), d_workspace,
           SLOT(activateNextSubWindow()));
 
   actionPrevWindow = new QAction(QIcon(getQPixmap("prev_xpm")),
                                  tr("&Previous", "previous window"), this);
   actionPrevWindow->setShortcut(tr("F6", "previous window shortcut"));
-  connect(actionPrevWindow, SIGNAL(activated()), d_workspace,
+  connect(actionPrevWindow, SIGNAL(triggered()), d_workspace,
           SLOT(activatePreviousSubWindow()));
 
-  connect(tablesDepend, SIGNAL(activated(int)), this, SLOT(showTable(int)));
+  connect(tablesDepend, SIGNAL(triggered(QAction *)), this,
+          SLOT(showTable(QAction *)));
 
   connect(this, SIGNAL(modified()), this, SLOT(modifiedProject()));
   connect(d_workspace, SIGNAL(subWindowActivated(QMdiSubWindow *)), this,
           SLOT(windowActivated(QMdiSubWindow *)));
-  connect(
-      lv, SIGNAL(customContextMenuRequested(const QPoint &)),
-      this, SLOT(showWindowPopupMenu(const QPoint &)));
+  connect(lv, SIGNAL(customContextMenuRequested(const QPoint &)), this,
+          SLOT(showWindowPopupMenu(const QPoint &)));
   connect(lv, SIGNAL(deleteSelection()), this, SLOT(deleteSelectedItems()));
 
-  connect(recentProjectsMenu, SIGNAL(triggered(QAction*)), this,
-          SLOT(openRecentProject(QAction*)));
-  connect(recentFilesMenu, SIGNAL(triggered(QAction*)), this,
-          SLOT(openRecentFile(QAction*)));
+  connect(recentProjectsMenu, SIGNAL(triggered(QAction *)), this,
+          SLOT(openRecentProject(QAction *)));
+  connect(recentFilesMenu, SIGNAL(triggered(QAction *)), this,
+          SLOT(openRecentFile(QAction *)));
 
   // apply user settings
   updateAppFonts();
@@ -621,14 +630,13 @@ bool ApplicationWindow::shouldWeShowFirstTimeSetup(
       const Mantid::Kernel::InstrumentInfo &instrumentInfo =
           config.getInstrument(instrument);
       g_log.information() << "Default facility '" << facilityInfo.name()
-                          << "', instrument '" << instrumentInfo.name() << "'"
-                          << std::endl;
+                          << "', instrument '" << instrumentInfo.name()
+                          << "'\n";
     } catch (Mantid::Kernel::Exception::NotFoundError &) {
       // failed to find the facility or instrument
       g_log.error() << "Could not find your default facility '" << facility
                     << "' or instrument '" << instrument
-                    << "' in facilities.xml, showing please select again."
-                    << std::endl;
+                    << "' in facilities.xml, showing please select again.\n";
       return true;
     }
   }
@@ -741,15 +749,8 @@ void ApplicationWindow::initGlobalConstants() {
   tableTextColor = QColor("#000000");
   tableHeaderColor = QColor("#000000");
 
-  plot3DColors = QStringList();
-  plot3DColors << "blue";
-  plot3DColors << "#000000";
-  plot3DColors << "#000000";
-  plot3DColors << "#000000";
-  plot3DColors << "red";
-  plot3DColors << "#000000";
-  plot3DColors << "#000000";
-  plot3DColors << "#ffffff";
+  plot3DColors = {"blue", "#000000", "#000000", "#000000",
+                  "red",  "#000000", "#000000", "#ffffff"};
 
   d_graph_tick_labels_dist = 4;
   d_graph_axes_labels_dist = 2;
@@ -886,10 +887,6 @@ void ApplicationWindow::initGlobalConstants() {
 
   // MG: On Linux, if cups defines a printer queue that cannot be contact, the
   // QPrinter constructor hangs and doesn't timeout.
-
-  //	QPrinterInfo::availablePrinters();
-
-  //	d_export_resolution = QPrinter().resolution();
   d_export_color = true;
   d_export_vector_size = static_cast<int>(QPrinter::Custom);
   d_keep_plot_aspect = true;
@@ -905,8 +902,6 @@ QMenuBar *ApplicationWindow::myMenuBar() {
 
 void ApplicationWindow::initToolBars() {
   initPlot3DToolBar();
-
-  //	setWindowIcon(QIcon(getQPixmap("logo_xpm")));
   setWindowIcon(QIcon(":/MantidPlot_Icon_32offset.png"));
   QPixmap openIcon, saveIcon;
 
@@ -975,7 +970,6 @@ void ApplicationWindow::initToolBars() {
   btnCursor->setActionGroup(dataTools);
   btnCursor->setCheckable(true);
   btnCursor->setIcon(QIcon(getQPixmap("select_xpm")));
-  // plotTools->addAction(btnCursor); disabled until fixed (#2783)
   btnPicker = new QAction(tr("S&creen Reader"), this);
   btnPicker->setActionGroup(dataTools);
   btnPicker->setCheckable(true);
@@ -986,21 +980,18 @@ void ApplicationWindow::initToolBars() {
   actionDrawPoints->setActionGroup(dataTools);
   actionDrawPoints->setCheckable(true);
   actionDrawPoints->setIcon(QIcon(getQPixmap("draw_points_xpm")));
-  // plotTools->addAction(actionDrawPoints); disabled until fixed (#2783)
 
   btnMovePoints = new QAction(tr("&Move Data Points..."), this);
   btnMovePoints->setShortcut(tr("Ctrl+ALT+M"));
   btnMovePoints->setActionGroup(dataTools);
   btnMovePoints->setCheckable(true);
   btnMovePoints->setIcon(QIcon(getQPixmap("hand_xpm")));
-  // plotTools->addAction(btnMovePoints); disabled until fixed (#2783)
 
   btnRemovePoints = new QAction(tr("Remove &Bad Data Points..."), this);
   btnRemovePoints->setShortcut(tr("Alt+B"));
   btnRemovePoints->setActionGroup(dataTools);
   btnRemovePoints->setCheckable(true);
   btnRemovePoints->setIcon(QIcon(getQPixmap("gomme_xpm")));
-  // plotTools->addAction(btnRemovePoints); disabled until fixed (#2783)
 
   if (mantidUI->fitFunctionBrowser()) {
     btnMultiPeakPick = new QAction(tr("Select Multiple Peaks..."), this);
@@ -1094,7 +1085,12 @@ void ApplicationWindow::insertTranslatedStrings() {
     setWindowTitle(tr("MantidPlot - untitled")); // Mantid
 
   QStringList labels;
-  labels << "Name" << "Type"<<"View" << "Size"<< "Created" << "Label";
+  labels << "Name"
+         << "Type"
+         << "View"
+         << "Size"
+         << "Created"
+         << "Label";
   lv->setHeaderLabels(labels);
   lv->resizeColumnToContents(0);
   lv->resizeColumnToContents(1);
@@ -1196,7 +1192,6 @@ void ApplicationWindow::initMainMenu() {
   plot3DMenu->addAction(actionContourMap);
   plot3DMenu->addAction(actionGrayMap);
   plot3DMenu->addSeparator();
-  // plot3DMenu->addAction(actionPlotHistogram);
 
   matrixMenu = new QMenu(this);
   matrixMenu->setObjectName("matrixMenu");
@@ -1230,9 +1225,6 @@ void ApplicationWindow::initMainMenu() {
 
   decayMenu = new QMenu(this);
   decayMenu->setObjectName("decayMenu");
-
-  multiPeakMenu = new QMenu(this);
-  multiPeakMenu->setObjectName("multiPeakMenu");
 
   analysisMenu = new QMenu(this);
   analysisMenu->setObjectName("analysisMenu");
@@ -1584,7 +1576,7 @@ void ApplicationWindow::customMenu(MdiSubWindow *w) {
   while (mIter.hasNext()) {
     QMenu *item = mIter.next();
     auto itemMenuAction = myMenuBar()->addMenu(item);
-    itemMenuAction->setText(tr(item->title()));
+    itemMenuAction->setText(item->title());
   }
 
   auto catalogMenuAction = myMenuBar()->addMenu(icat);
@@ -2599,8 +2591,7 @@ void ApplicationWindow::exportMatrix() {
     QMessageBox::critical(
         this, tr("MantidPlot - Export error"), // Mantid
         tr("Could not write to file: <br><h4> %1 </h4><p>Please verify that "
-           "you have the right to write to this location!")
-            .arg(file_name));
+           "you have the right to write to this location!").arg(file_name));
     return;
   }
 
@@ -2974,13 +2965,9 @@ void ApplicationWindow::setAutoUpdateTableValues(bool on) {
 }
 
 void ApplicationWindow::customTable(Table *w) {
-  QColorGroup cg;
-  cg.setColor(QColorGroup::Base, QColor(tableBkgdColor));
-  cg.setColor(QColorGroup::Text, QColor(tableTextColor));
   QPalette palette;
-  palette.setActive(cg);
-  palette.setDisabled(cg);
-  palette.setInactive(cg);
+  palette.setColor(QPalette::Base, QColor(tableBkgdColor));
+  palette.setColor(QPalette::Text, QColor(tableTextColor));
   w->setPalette(palette);
 
   w->setHeaderColor(tableHeaderColor);
@@ -3014,13 +3001,6 @@ void ApplicationWindow::setPreferences(Graph *g) {
     g->setScale(QwtPlot::yRight, d_axes_scales[1]);
     g->setScale(QwtPlot::xBottom, d_axes_scales[2]);
     g->setScale(QwtPlot::xTop, d_axes_scales[3]);
-
-    // QtiPlot makes these calls here (as of 26/6/12), but they spoil color fill
-    // plots for us.
-    //   Losing them seems to have no detrimental effect. Perhaps we need to
-    //   update our updateSecondaryAxis code to match QtiPlot's.
-    // g->updateSecondaryAxis(QwtPlot::xTop);
-    // g->updateSecondaryAxis(QwtPlot::yRight);
 
     QList<int> ticksList;
     ticksList << majTicksStyle << majTicksStyle << majTicksStyle
@@ -3882,7 +3862,6 @@ void ApplicationWindow::defineErrorBars(const QString &name, int type,
     ycol = t->colIndex(xColName);
 
   QVarLengthArray<double> Y(t->col(ycol));
-  // Y=t->col(ycol);
   QString errColName = t->colName(c);
 
   double prc = percent.toDouble();
@@ -4507,8 +4486,7 @@ ApplicationWindow *ApplicationWindow::open(const QString &fn,
       int choice = QMessageBox::question(
           this, tr("MantidPlot - File opening error"), // Mantid
           tr("The file <b>%1</b> is corrupted, but there exists a backup "
-             "copy.<br>Do you want to open the backup instead?")
-              .arg(fn),
+             "copy.<br>Do you want to open the backup instead?").arg(fn),
           QMessageBox::Yes | QMessageBox::Default,
           QMessageBox::No | QMessageBox::Escape);
       if (choice == QMessageBox::Yes)
@@ -4530,7 +4508,7 @@ ApplicationWindow *ApplicationWindow::open(const QString &fn,
   return app;
 }
 
-void ApplicationWindow::openRecentFile(QAction* action) {
+void ApplicationWindow::openRecentFile(QAction *action) {
   auto fn = action->data().toString();
   // if "," found in the QString
   if (fn.indexOf(",", 0)) {
@@ -4549,8 +4527,7 @@ void ApplicationWindow::openRecentFile(QAction* action) {
       QMessageBox::critical(
           this, tr("MantidPlot - File Open Error"), // Mantid
           tr("The file: <b> %1 </b> <p>is not there anymore!"
-             "<p>It will be removed from the list of recent files.")
-              .arg(fn));
+             "<p>It will be removed from the list of recent files.").arg(fn));
 
       recentFiles.removeAll(fn);
       updateRecentFilesList();
@@ -4561,7 +4538,7 @@ void ApplicationWindow::openRecentFile(QAction* action) {
   saveSettings(); // save new list of recent files
 }
 
-void ApplicationWindow::openRecentProject(QAction* action) {
+void ApplicationWindow::openRecentProject(QAction *action) {
   QString fn = action->text();
   int pos = fn.indexOf(" ", 0);
   fn = fn.right(fn.length() - pos - 1);
@@ -4571,10 +4548,9 @@ void ApplicationWindow::openRecentProject(QAction* action) {
     QMessageBox::critical(
         this, tr("MantidPlot - File Open Error"), // Mantid
         tr("The file: <b> %1 </b> <p>does not exist anymore!"
-           "<p>It will be removed from the list of recent projects.")
-            .arg(fn));
+           "<p>It will be removed from the list of recent projects.").arg(fn));
 
-    recentProjects.remove(fn);
+    recentProjects.removeAll(fn);
     updateRecentProjectsList();
     return;
   }
@@ -4624,7 +4600,7 @@ ApplicationWindow *ApplicationWindow::openProject(const QString &filename,
     throw std::runtime_error("Couldn't open project file");
 
   QTextStream fileTS(&file);
-  fileTS.setCodec(QTextCodec::codecForName("UTF-8")) ;
+  fileTS.setCodec(QTextCodec::codecForName("UTF-8"));
 
   QString baseName = fileInfo.fileName();
 
@@ -4974,8 +4950,7 @@ void ApplicationWindow::readSettings() {
   // set logging level to the last saved level
   int lastLoggingLevel =
       settings.value("/LastLoggingLevel",
-                     Mantid::Kernel::Logger::Priority::PRIO_NOTICE)
-          .toInt();
+                     Mantid::Kernel::Logger::Priority::PRIO_NOTICE).toInt();
   Mantid::Kernel::Logger::setLevelForAll(lastLoggingLevel);
 
   d_backup_files = settings.value("/BackupProjects", true).toBool();
@@ -5260,7 +5235,7 @@ void ApplicationWindow::readSettings() {
   applyCurveStyleToMantid = settings.value("/ApplyMantid", true).toBool();
   // Once only for DrawAllErrors set to true, by SSC request
   bool setDrawAllErrorsSetToTrueOnce =
-    settings.value("/DrawAllErrorsSetToTrueOnce", false).toBool();
+      settings.value("/DrawAllErrorsSetToTrueOnce", false).toBool();
   if (!setDrawAllErrorsSetToTrueOnce) {
     settings.setValue("/DrawAllErrors", true);
     settings.setValue("/DrawAllErrorsSetToTrueOnce", true);
@@ -5318,24 +5293,15 @@ void ApplicationWindow::readSettings() {
   }
 
   settings.beginGroup("/Colors");
-  plot3DColors = QStringList();
-  plot3DColors << QColor(settings.value("/MaxData", "blue").value<QColor>())
-                      .name();
-  plot3DColors << QColor(settings.value("/Labels", "#000000").value<QColor>())
-                      .name();
-  plot3DColors << QColor(settings.value("/Mesh", "#000000").value<QColor>())
-                      .name();
-  plot3DColors << QColor(settings.value("/Grid", "#000000").value<QColor>())
-                      .name();
-  plot3DColors << QColor(settings.value("/MinData", "red").value<QColor>())
-                      .name();
-  plot3DColors << QColor(settings.value("/Numbers", "#000000").value<QColor>())
-                      .name();
-  plot3DColors << QColor(settings.value("/Axes", "#000000").value<QColor>())
-                      .name();
-  plot3DColors << QColor(
-                      settings.value("/Background", "#ffffff").value<QColor>())
-                      .name();
+  plot3DColors = {
+      QColor(settings.value("/MaxData", "blue").value<QColor>()).name(),
+      QColor(settings.value("/Labels", "#000000").value<QColor>()).name(),
+      QColor(settings.value("/Mesh", "#000000").value<QColor>()).name(),
+      QColor(settings.value("/Grid", "#000000").value<QColor>()).name(),
+      QColor(settings.value("/MinData", "red").value<QColor>()).name(),
+      QColor(settings.value("/Numbers", "#000000").value<QColor>()).name(),
+      QColor(settings.value("/Axes", "#000000").value<QColor>()).name(),
+      QColor(settings.value("/Background", "#ffffff").value<QColor>()).name()};
   settings.endGroup(); // Colors
   settings.endGroup();
   /* ----------------- end group 3D Plots --------------------------- */
@@ -5387,8 +5353,6 @@ void ApplicationWindow::readSettings() {
       settings.value("/ImageFileTypeFilter", ".png").toString();
   d_export_transparency = settings.value("/ExportTransparency", false).toBool();
   d_export_quality = settings.value("/ImageQuality", 100).toInt();
-  //	d_export_resolution = settings.value("/Resolution",
-  // QPrinter().resolution()).toInt();
   d_export_color = settings.value("/ExportColor", true).toBool();
   d_export_vector_size =
       settings.value("/ExportPageSize", QPrinter::Custom).toInt();
@@ -5869,8 +5833,7 @@ void ApplicationWindow::exportGraph() {
     QMessageBox::critical(
         this, tr("MantidPlot - Export error"), // Mantid
         tr("Could not write to file: <br><h4> %1 </h4><p>Please verify that "
-           "you have the right to write to this location!")
-            .arg(file_name));
+           "you have the right to write to this location!").arg(file_name));
     return;
   }
   file.close();
@@ -5933,8 +5896,7 @@ void ApplicationWindow::exportLayer() {
     QMessageBox::critical(
         this, tr("MantidPlot - Export error"), // Mantid
         tr("Could not write to file: <br><h4> %1 </h4><p>Please verify that "
-           "you have the right to write to this location!")
-            .arg(file_name));
+           "you have the right to write to this location!").arg(file_name));
     return;
   }
   file.close();
@@ -5996,8 +5958,7 @@ void ApplicationWindow::exportAllGraphs() {
         QMessageBox::warning(
             this, tr("MantidPlot - Warning"), // Mantid
             tr("There are no plot layers available in window <b>%1</b>.<br>"
-               "Graph window not exported!")
-                .arg(plot2D->objectName()));
+               "Graph window not exported!").arg(plot2D->objectName()));
         QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
         continue;
       }
@@ -6015,8 +5976,7 @@ void ApplicationWindow::exportAllGraphs() {
       QApplication::restoreOverrideCursor();
 
       QString msg = tr("A file called: <p><b>%1</b><p>already exists. "
-                       "Do you want to overwrite it?")
-                        .arg(file_name);
+                       "Do you want to overwrite it?").arg(file_name);
       QMessageBox msgBox(QMessageBox::Question,
                          tr("MantidPlot - Overwrite file?"), msg, // Mantid
                          QMessageBox::Yes | QMessageBox::YesToAll |
@@ -6256,8 +6216,7 @@ void ApplicationWindow::loadDataFileByName(QString fn) {
 void ApplicationWindow::saveProjectAs(const QString &fileName, bool compress) {
   QString fn = fileName;
   if (fileName.isEmpty()) {
-    QString filter = tr("MantidPlot project") +
-                     " (*.mantid);;"; // tr("QtiPlot project")+" (*.qti);;";
+    QString filter = tr("MantidPlot project") + " (*.mantid);;";
     filter += tr("Compressed MantidPlot project") + " (*.mantid.gz)";
 
     QString selectedFilter;
@@ -6292,7 +6251,6 @@ void ApplicationWindow::saveProjectAs(const QString &fileName, bool compress) {
     workingDir = fi.absolutePath();
     QString baseName = fi.fileName();
     if (!baseName.contains("."))
-      // fn.append(".qti");
       fn.append(".mantid");
 
     projectname = fn;
@@ -6604,8 +6562,7 @@ void ApplicationWindow::exportAllTables(const QString &sep, bool colNames,
           auto result = QMessageBox::question(
               this, tr("MantidPlot - Overwrite file?"),
               tr("A file called: <p><b>%1</b><p>already exists. "
-                 "Do you want to overwrite it?")
-                  .arg(fileName),
+                 "Do you want to overwrite it?").arg(fileName),
               tr("&Yes"), tr("&All"), tr("&Cancel"), 0, 1);
 
           if (result == 1)
@@ -7425,7 +7382,6 @@ void ApplicationWindow::showPlotDialog(int curveKey) {
   PlotDialog *pd = new PlotDialog(d_extended_plot_dialog, this, w);
   pd->setAttribute(Qt::WA_DeleteOnClose);
   pd->insertColumnsList(columnsList(Table::All));
-  // pd->setMultiLayer(w);
   if (curveKey >= 0) {
     Graph *g = w->activeGraph();
     if (g)
@@ -7491,7 +7447,7 @@ void ApplicationWindow::showCurveContextMenu(int curveKey) {
         curveMenu.addSeparator();
         if (g->activeTool()->rtti() == PlotToolInterface::Rtti_RangeSelector) {
           QAction *act = new QAction(tr("Set Display Range"), this);
-          connect(act, SIGNAL(activated()),
+          connect(act, SIGNAL(triggered()),
                   dynamic_cast<RangeSelectorTool *>(g->activeTool()),
                   SLOT(setCurveRange()));
           curveMenu.addAction(act);
@@ -7797,8 +7753,7 @@ void ApplicationWindow::exportPDF() {
           this, tr("MantidPlot - Export error"), // Mantid
           tr("Could not write to file: <h4>%1</h4><p>Please verify that you "
              "have the right to write to this location or that the file is not "
-             "being used by another application!")
-              .arg(fname));
+             "being used by another application!").arg(fname));
       return;
     }
 
@@ -8254,10 +8209,6 @@ void ApplicationWindow::selectMultiPeak(MultiLayer *plot,
         mantidUI->fitFunctionBrowser()->setEndX(xmax);
       }
       g->setActiveTool(ppicker);
-      // do we need this? PeakPickerTool::windowStateChanged does nothing
-      // connect(plot,SIGNAL(windowStateChanged(Qt::WindowStates,
-      // Qt::WindowStates)),ppicker,SLOT(windowStateChanged(Qt::WindowStates,
-      // Qt::WindowStates)));
     }
   }
 }
@@ -8747,7 +8698,6 @@ MdiSubWindow *ApplicationWindow::clone(MdiSubWindow *w) {
       for (auto j = 0; j < nt->numRows(); j++) {
         auto io = t->table()->item(j, i);
         nt->table()->setItem(j, i, io);
-        // nt->table()->item(j, i)->setText(t->table()->item(j, i)->text());
       }
     }
 
@@ -9211,8 +9161,8 @@ void ApplicationWindow::closeWindow(MdiSubWindow *window) {
   removeWindowFromLists(window);
 
   // update list view in project explorer
-  auto found =
-      lv->findItems(window->objectName(), Qt::MatchExactly | Qt::MatchCaseSensitive, 0);
+  auto found = lv->findItems(window->objectName(),
+                             Qt::MatchExactly | Qt::MatchCaseSensitive, 0);
 
   if (!found.isEmpty())
     lv->takeTopLevelItem(lv->indexOfTopLevelItem(found[0]));
@@ -9261,11 +9211,6 @@ void ApplicationWindow::analysisMenuAboutToShow() {
     return;
 
   if (isOfType(w, "MultiLayer")) {
-    // The tool doesn't work yet (DataPickerTool)
-    // QMenu *translateMenu = analysisMenu->addMenu (tr("&Translate"));
-    // translateMenu->addAction(actionTranslateVert);
-    // translateMenu->addAction(actionTranslateHor);
-    // analysisMenu->insertSeparator();
     analysisMenu->addAction(actionDifferentiate);
     analysisMenu->addAction(actionIntegrate);
     analysisMenu->addAction(actionShowIntDialog);
@@ -9302,12 +9247,6 @@ void ApplicationWindow::analysisMenuAboutToShow() {
     analysisMenu->addAction(actionFitSigmoidal);
     analysisMenu->addAction(actionFitGauss);
     analysisMenu->addAction(actionFitLorentz);
-
-    // The tool doesn't work yet (DataPickerTool)
-    // multiPeakMenu->clear();
-    // multiPeakMenu = analysisMenu->addMenu (tr("Fit &Multi-peak"));
-    // multiPeakMenu->addAction(actionMultiPeakGauss);
-    // multiPeakMenu->addAction(actionMultiPeakLorentz);
 
     analysisMenu->addSeparator();
     analysisMenu->addAction(actionShowFitDialog);
@@ -9450,7 +9389,8 @@ void ApplicationWindow::fileMenuAboutToShow() {
   fileMenu->addSeparator();
   MdiSubWindow *t = activeWindow();
 
-  if (t && (isOfType(t, "Matrix")|| isOfType(t, "Table") || isOfType(t, "MantidMatrix"))) {
+  if (t && (isOfType(t, "Matrix") || isOfType(t, "Table") ||
+            isOfType(t, "MantidMatrix"))) {
     actionShowExportASCIIDialog->setEnabled(true);
   } else {
     actionShowExportASCIIDialog->setEnabled(false);
@@ -9494,7 +9434,8 @@ void ApplicationWindow::windowsMenuAboutToShow() {
   if (!activeWin)
     return;
 
-  if (isOfType(activeWin, "MantidMatrix") || isOfType(activeWin, "InstrumentWindow")) {
+  if (isOfType(activeWin, "MantidMatrix") ||
+      isOfType(activeWin, "InstrumentWindow")) {
     actionCopyWindow->setEnabled(false);
   } else {
     actionCopyWindow->setEnabled(true);
@@ -9505,10 +9446,10 @@ void ApplicationWindow::windowsMenuAboutToShow() {
   windowsMenu->addAction(actionResizeActiveWindow);
   if (activeWin->getFloatingWindow()) {
     windowsMenu->addAction(tr("Change to docked"), this,
-                            SLOT(changeActiveToDocked()));
+                           SLOT(changeActiveToDocked()));
   } else {
     windowsMenu->addAction(tr("Change to floating"), this,
-                            SLOT(changeActiveToFloating()));
+                           SLOT(changeActiveToFloating()));
   }
   windowsMenu->addAction(tr("&Hide Window"), this, SLOT(hideActiveWindow()));
 
@@ -9517,17 +9458,17 @@ void ApplicationWindow::windowsMenuAboutToShow() {
 // have a better solution than this right now.
 #ifdef _WIN32
   windowsMenu->addAction(getQPixmap("close_xpm"), tr("Close &Window"), this,
-                          SLOT(closeActiveWindow()), Qt::CTRL + Qt::Key_W);
+                         SLOT(closeActiveWindow()), Qt::CTRL + Qt::Key_W);
 #else
   windowsMenu->addAction(getQPixmap("close_xpm"), tr("Close &Window"), this,
-                          SLOT(closeActiveWindow()));
+                         SLOT(closeActiveWindow()));
 #endif
 
   if (n > 0 && n < 10) {
     windowsMenu->addSeparator();
     for (int i = 0; i < n; ++i) {
       auto activated = windowsMenu->addAction(windows.at(i)->objectName(), this,
-                                       SLOT(windowsMenuActivated()));
+                                              SLOT(windowsMenuActivated()));
       activated->setData(i);
       auto isChecked = currentFolder()->activeWindow() == windows.at(i);
       activated->setChecked(isChecked);
@@ -9536,14 +9477,14 @@ void ApplicationWindow::windowsMenuAboutToShow() {
     windowsMenu->addSeparator();
     for (int i = 0; i < 9; ++i) {
       auto activated = windowsMenu->addAction(windows.at(i)->objectName(), this,
-                                       SLOT(windowsMenuActivated()));
+                                              SLOT(windowsMenuActivated()));
       activated->setData(i);
       auto isChecked = activeWindow() == windows.at(i);
       activated->setChecked(isChecked);
     }
     windowsMenu->addSeparator();
     windowsMenu->addAction(tr("More windows..."), this,
-                            SLOT(showMoreWindows()));
+                           SLOT(showMoreWindows()));
   }
   reloadCustomActions();
 }
@@ -9581,7 +9522,7 @@ void ApplicationWindow::interfaceMenuAboutToShow() {
     QMenu *categoryMenu = new QMenu(interfaceMenu);
     categoryMenu->setObjectName(category + "Menu");
     auto categoryMenuAction = interfaceMenu->addMenu(categoryMenu);
-    categoryMenuAction->setText(tr(category));
+    categoryMenuAction->setText(category);
     categoryMenus[category] = categoryMenu;
   }
 
@@ -9598,8 +9539,8 @@ void ApplicationWindow::interfaceMenuAboutToShow() {
       if (!categoryMenus.contains(category))
         continue;
       QAction *openInterface = new QAction(interfaceMenu);
-      openInterface->setObjectName(tr(name));
-      openInterface->setText(tr(name));
+      openInterface->setObjectName(name);
+      openInterface->setText(name);
       openInterface->setData(data);
       categoryMenus[category]->addAction(openInterface);
 
@@ -9618,7 +9559,7 @@ void ApplicationWindow::interfaceMenuAboutToShow() {
   // Allow user to customise categories.
   QAction *customiseCategoriesAction =
       new QAction(tr("Add/Remove Categories"), this);
-  connect(customiseCategoriesAction, SIGNAL(activated()), this,
+  connect(customiseCategoriesAction, SIGNAL(triggered()), this,
           SLOT(showInterfaceCategoriesDialog()));
   interfaceMenu->addAction(customiseCategoriesAction);
 }
@@ -9644,22 +9585,21 @@ void ApplicationWindow::showMarkerPopupMenu() {
 
   if (g->imageMarkerSelected()) {
     markerMenu.addAction(getQPixmap("pixelProfile_xpm"),
-                          tr("&View Pixel Line profile"), this,
-                          SLOT(pixelLineProfile()));
-    markerMenu.addAction(tr("&Intensity Matrix"), this,
-                          SLOT(intensityTable()));
+                         tr("&View Pixel Line profile"), this,
+                         SLOT(pixelLineProfile()));
+    markerMenu.addAction(tr("&Intensity Matrix"), this, SLOT(intensityTable()));
     markerMenu.addSeparator();
   }
 
   if (!(g->activeTool() && dynamic_cast<PeakPickerTool *>(g->activeTool()))) {
     markerMenu.addAction(getQPixmap("cut_xpm"), tr("&Cut"), this,
-                          SLOT(cutSelection()));
+                         SLOT(cutSelection()));
     markerMenu.addAction(getQPixmap("copy_xpm"), tr("&Copy"), this,
-                          SLOT(copySelection()));
+                         SLOT(copySelection()));
   }
 
   markerMenu.addAction(getQPixmap("erase_xpm"), tr("&Delete"), this,
-                        SLOT(clearSelection()));
+                       SLOT(clearSelection()));
   markerMenu.addSeparator();
   if (g->arrowMarkerSelected())
     markerMenu.addAction(tr("&Properties..."), this, SLOT(showLineDialog()));
@@ -9683,8 +9623,8 @@ void ApplicationWindow::showMoreWindows() {
 void ApplicationWindow::windowsMenuActivated() {
   QList<MdiSubWindow *> windows = currentFolder()->windowsList();
   auto obj = sender();
-  auto action = qobject_cast<QAction*>(obj);
-  auto id = action->data().asInt();
+  auto action = qobject_cast<QAction *>(obj);
+  auto id = action->data().toInt();
   MdiSubWindow *w = windows.at(id);
   if (w) {
     this->activateWindow(w);
@@ -9905,7 +9845,7 @@ void ApplicationWindow::showListViewSelectionMenu(const QPoint &p) {
   cm.addAction(tr("&Hide All Windows"), this, SLOT(hideSelectedWindows()));
   cm.addSeparator();
   cm.addAction(tr("&Delete Selection"), this, SLOT(deleteSelectedItems()),
-                Qt::Key_F8);
+               Qt::Key_F8);
   cm.exec(lv->mapToGlobal(p));
 }
 
@@ -9969,13 +9909,13 @@ void ApplicationWindow::showWindowPopupMenu(const QPoint &p) {
     if (!hidden(w))
       cm.addAction(actionHideWindow);
     cm.addAction(getQPixmap("close_xpm"), tr("&Delete Window"), w,
-                  SLOT(close()), Qt::Key_F8);
+                 SLOT(close()), Qt::Key_F8);
     cm.addSeparator();
     cm.addAction(tr("&Rename Window"), this, SLOT(renameWindow()), Qt::Key_F2);
     cm.addAction(actionResizeWindow);
     cm.addSeparator();
     cm.addAction(getQPixmap("fileprint_xpm"), tr("&Print Window"), w,
-                  SLOT(print()));
+                 SLOT(print()));
     cm.addSeparator();
     cm.addAction(tr("&Properties..."), this, SLOT(windowProperties()));
 
@@ -10029,14 +9969,13 @@ void ApplicationWindow::showWindowPopupMenu(const QPoint &p) {
         }
       }
     } else if (isOfType(w, "TiledWindow")) {
-      std::cerr << "Menu for TiledWindow" << std::endl;
+      std::cerr << "Menu for TiledWindow\n";
     }
     cm.exec(lv->mapToGlobal(p));
   }
 }
 
-void ApplicationWindow::showTable(int i) {
-  auto selectedAction = tablesDepend->actions().at(i);
+void ApplicationWindow::showTable(QAction *selectedAction) {
   Table *t = table(selectedAction->text());
   if (!t)
     return;
@@ -10044,7 +9983,8 @@ void ApplicationWindow::showTable(int i) {
   updateWindowLists(t);
 
   t->showMaximized();
-  auto found = lv->findItems(t->objectName(), Qt::MatchExactly | Qt::MatchCaseSensitive, 0);
+  auto found = lv->findItems(t->objectName(),
+                             Qt::MatchExactly | Qt::MatchCaseSensitive, 0);
   if (!found.isEmpty())
     found[0]->setText(2, tr("Maximized"));
 }
@@ -10060,7 +10000,8 @@ void ApplicationWindow::showTable(const QString &curve) {
   w->table()->clearSelection();
   w->table()->selectColumn(colIndex);
   w->showMaximized();
-  auto found = lv->findItems(w->objectName(), Qt::MatchExactly | Qt::MatchCaseSensitive, 0);
+  auto found = lv->findItems(w->objectName(),
+                             Qt::MatchExactly | Qt::MatchCaseSensitive, 0);
   if (!found.isEmpty())
     found[0]->setText(2, tr("Maximized"));
   emit modified();
@@ -10161,19 +10102,19 @@ void ApplicationWindow::showGraphContextMenu() {
   if (lastCopiedLayer) {
     cm.addSeparator();
     cm.addAction(getQPixmap("paste_xpm"), tr("&Paste Layer"), this,
-                  SLOT(pasteSelection()));
+                 SLOT(pasteSelection()));
   } else if (d_text_copy) {
     cm.addSeparator();
     cm.addAction(getQPixmap("paste_xpm"), tr("&Paste Text"), plot,
-                  SIGNAL(pasteMarker()));
+                 SIGNAL(pasteMarker()));
   } else if (d_arrow_copy) {
     cm.addSeparator();
     cm.addAction(getQPixmap("paste_xpm"), tr("&Paste Line/Arrow"), plot,
-                  SIGNAL(pasteMarker()));
+                 SIGNAL(pasteMarker()));
   } else if (d_image_copy) {
     cm.addSeparator();
     cm.addAction(getQPixmap("paste_xpm"), tr("&Paste Image"), plot,
-                  SIGNAL(pasteMarker()));
+                 SIGNAL(pasteMarker()));
   }
   cm.addSeparator();
 
@@ -10191,12 +10132,12 @@ void ApplicationWindow::showGraphContextMenu() {
     auto normalization = cm.addMenu(tr("&Normalization"));
     auto noNorm = new QAction(tr("N&one"), normalization);
     noNorm->setCheckable(true);
-    connect(noNorm, SIGNAL(activated()), ag, SLOT(noNormalization()));
+    connect(noNorm, SIGNAL(triggered()), ag, SLOT(noNormalization()));
     normalization->addAction(noNorm);
 
     auto binNorm = new QAction(tr("&Bin Width"), normalization);
     binNorm->setCheckable(true);
-    connect(binNorm, SIGNAL(activated()), ag, SLOT(binWidthNormalization()));
+    connect(binNorm, SIGNAL(triggered()), ag, SLOT(binWidthNormalization()));
     normalization->addAction(binNorm);
 
     auto normalizationActions = new QActionGroup(this);
@@ -10210,17 +10151,17 @@ void ApplicationWindow::showGraphContextMenu() {
     auto normMD = cm.addMenu("MD &Normalization");
     auto noNormMD = new QAction(tr("N&one"), normMD);
     noNormMD->setCheckable(true);
-    connect(noNormMD, SIGNAL(activated()), ag, SLOT(noNormalizationMD()));
+    connect(noNormMD, SIGNAL(triggered()), ag, SLOT(noNormalizationMD()));
     normMD->addAction(noNormMD);
 
     auto volNormMD = new QAction(tr("&Volume"), normMD);
     volNormMD->setCheckable(true);
-    connect(volNormMD, SIGNAL(activated()), ag, SLOT(volumeNormalizationMD()));
+    connect(volNormMD, SIGNAL(triggered()), ag, SLOT(volumeNormalizationMD()));
     normMD->addAction(volNormMD);
 
     auto eventsNormMD = new QAction(tr("&Events"), normMD);
     eventsNormMD->setCheckable(true);
-    connect(eventsNormMD, SIGNAL(activated()), ag,
+    connect(eventsNormMD, SIGNAL(triggered()), ag,
             SLOT(numEventsNormalizationMD()));
     normMD->addAction(eventsNormMD);
 
@@ -10333,21 +10274,21 @@ void ApplicationWindow::showWindowContextMenu() {
       cm.addAction(getQPixmap("copy_xpm"), tr("&Copy"), t,
                    SLOT(copySelection()));
       cm.addAction(getQPixmap("paste_xpm"), tr("&Paste"), t,
-                    SLOT(pasteSelection()));
+                   SLOT(pasteSelection()));
       cm.addSeparator();
       cm.addAction(getQPixmap("insert_row_xpm"), tr("&Insert Row"), t,
-                    SLOT(insertRow()));
+                   SLOT(insertRow()));
       cm.addAction(getQPixmap("insert_column_xpm"), tr("&Insert Column"), t,
-                    SLOT(insertColumn()));
+                   SLOT(insertColumn()));
       if (t->numSelectedRows() > 0)
         cm.addAction(getQPixmap("delete_row_xpm"), tr("&Delete Rows"), t,
-                      SLOT(deleteSelectedRows()));
+                     SLOT(deleteSelectedRows()));
       else if (t->numSelectedColumns() > 0)
         cm.addAction(getQPixmap("delete_column_xpm"), tr("&Delete Columns"), t,
-                      SLOT(deleteSelectedColumns()));
+                     SLOT(deleteSelectedColumns()));
 
       cm.addAction(getQPixmap("erase_xpm"), tr("Clea&r"), t,
-                    SLOT(clearSelection()));
+                   SLOT(clearSelection()));
     } else if (t->viewType() == Matrix::ImageView) {
       cm.addAction(actionImportImage);
       cm.addAction(actionExportMatrix);
@@ -10499,60 +10440,6 @@ void ApplicationWindow::chooseHelpFolder() {
   }
 }
 
-void ApplicationWindow::showStandAloneHelp() {
-#ifdef Q_OS_MAC // Mac
-  QSettings settings(QSettings::IniFormat, QSettings::UserScope,
-                     QCoreApplication::organizationName(),
-                     QCoreApplication::applicationName());
-#else
-  QSettings settings; //(QSettings::NativeFormat,QSettings::UserScope,
-                      //"ProIndependent", "QtiPlot");
-#endif
-
-  settings.beginGroup("/General");
-  settings.beginGroup("/Paths");
-  QString helpPath = settings.value("/HelpFile", qApp->applicationDirPath() +
-                                                     "/manual/index.html")
-                         .toString();
-  settings.endGroup();
-  settings.endGroup();
-
-  QFile helpFile(helpPath);
-  if (!helpPath.isEmpty() && !helpFile.exists()) {
-    QMessageBox::critical(0, tr("MantidPlot - Help Files Not Found!"), // Mantid
-                          tr("The manual can be found at the following "
-                             "internet address:") +
-                              "<p><a href = "
-                              "http://www.mantidproject.org/"
-                              "MantidPlot:_Help>http://www.mantidproject.org/"
-                              "MantidPlot:_Help</a></p>");
-    exit(0);
-  }
-
-  QFileInfo fi(helpPath);
-  QString profilePath = QString(fi.absolutePath() + "/qtiplot.adp");
-  if (!QFile(profilePath).exists()) {
-    QMessageBox::critical(
-        0, tr("MantidPlot - Help Profile Not Found!"), // Mantid
-        tr("The assistant could not start because the file <b>%1</b> was not "
-           "found in the help file directory!")
-                .arg("qtiplot.adp") +
-            "<br>" +
-            tr("This file is provided with the MantidPlot manual which can be "
-               "downloaded from the following internet address:") +
-            "<p><a href = "
-            "http://www.mantidproject.org/MantidPlot:_Help>http://"
-            "www.mantidproject.org/MantidPlot:_Help</a></p>");
-    exit(0);
-  }
-
-  QStringList cmdLst = QStringList() << "-profile" << profilePath;
-  //  QAssistantClient *assist = new QAssistantClient( QString(), 0);
-  //  assist->setArguments( cmdLst );
-  //  assist->showPage(helpPath);
-  //  connect(assist, SIGNAL(assistantClosed()), qApp, SLOT(quit()) );
-}
-
 void ApplicationWindow::showHelp() {
   QFile helpFile(helpFilePath);
   if (!helpFile.exists()) {
@@ -10579,8 +10466,7 @@ void ApplicationWindow::showHelp() {
     QMessageBox::critical(
         this, tr("MantidPlot - Help Profile Not Found!"), // Mantid
         tr("The assistant could not start because the file <b>%1</b> was not "
-           "found in the help file directory!")
-                .arg("qtiplot.adp") +
+           "found in the help file directory!").arg("qtiplot.adp") +
             "<br>" +
             tr("This file is provided with the MantidPlot manual which can be "
                "downloaded from the following internet address:") +
@@ -10589,10 +10475,6 @@ void ApplicationWindow::showHelp() {
             "www.mantidproject.org/MantidPlot:_Help</a></p>");
     return;
   }
-
-  QStringList cmdLst = QStringList() << "-profile" << profilePath;
-  //  assistant->setArguments( cmdLst );
-  //  assistant->showPage(helpFilePath);
 }
 
 void ApplicationWindow::showPlotWizard() {
@@ -11196,13 +11078,13 @@ void ApplicationWindow::initPlot3DToolBar() {
   actionResetRotation = new QAction(this);
   actionResetRotation->setCheckable(false);
   actionResetRotation->setIcon(getQPixmap("reset_rotation_xpm"));
-  connect(actionResetRotation, SIGNAL(activated()), this,
+  connect(actionResetRotation, SIGNAL(triggered()), this,
           SLOT(resetRotation()));
 
   actionFitFrame = new QAction(this);
   actionFitFrame->setCheckable(false);
   actionFitFrame->setIcon(getQPixmap("fit_frame_xpm"));
-  connect(actionFitFrame, SIGNAL(activated()), this, SLOT(fitFrameToLayer()));
+  connect(actionFitFrame, SIGNAL(triggered()), this, SLOT(fitFrameToLayer()));
 
   // plot style actions
   plotstyle = new QActionGroup(this);
@@ -11287,11 +11169,9 @@ void ApplicationWindow::pixelLineProfile() {
     return;
 
   bool ok;
-  auto res = QInputDialog::getInt(this,
-                                 tr("MantidPlot - Set the number of pixels to average"),
-                                 tr("Number of averaged pixels"),
-                                 1, 1, 2000, 2,
-                                 &ok);
+  auto res = QInputDialog::getInt(
+      this, tr("MantidPlot - Set the number of pixels to average"),
+      tr("Number of averaged pixels"), 1, 1, 2000, 2, &ok);
   if (!ok)
     return;
 
@@ -11986,8 +11866,6 @@ void ApplicationWindow::connectMultilayerPlot(MultiLayer *g) {
   connect(g, SIGNAL(createTable(const QString &, int, int, const QString &)),
           this, SLOT(newTable(const QString &, int, int, const QString &)));
   connect(g, SIGNAL(viewTitleDialog()), this, SLOT(showTitleDialog()));
-  // connect
-  // (g,SIGNAL(modifiedWindow(MdiSubWindow*)),this,SLOT(modifiedProject(MdiSubWindow*)));
   connect(g, SIGNAL(modifiedPlot()), this, SLOT(modifiedProject()));
   connect(g, SIGNAL(showLineDialog()), this, SLOT(showLineDialog()));
   connect(g, SIGNAL(pasteMarker()), this, SLOT(pasteSelection()));
@@ -12079,127 +11957,127 @@ void ApplicationWindow::setPlot3DOptions() {
 
 void ApplicationWindow::createActions() {
   actionCustomActionDialog = new QAction(tr("Manage Custom Menus..."), this);
-  connect(actionCustomActionDialog, SIGNAL(activated()), this,
+  connect(actionCustomActionDialog, SIGNAL(triggered()), this,
           SLOT(showCustomActionDialog()));
 
   actionManageDirs = new QAction(QIcon(getQPixmap("managefolders_xpm")),
                                  tr("Manage User Directories"), this);
-  connect(actionManageDirs, SIGNAL(activated()), this,
+  connect(actionManageDirs, SIGNAL(triggered()), this,
           SLOT(showUserDirectoryDialog()));
 
   actionFirstTimeSetup = new QAction(tr("First Time Setup"), this);
-  connect(actionFirstTimeSetup, SIGNAL(activated()), this,
+  connect(actionFirstTimeSetup, SIGNAL(triggered()), this,
           SLOT(showFirstTimeSetup()));
 
   actionNewProject =
       new QAction(QIcon(":/NewProject16x16.png"), tr("New &Project"), this);
   actionNewProject->setShortcut(tr("Ctrl+N"));
-  connect(actionNewProject, SIGNAL(activated()), this, SLOT(newProject()));
+  connect(actionNewProject, SIGNAL(triggered()), this, SLOT(newProject()));
 
   actionSaveProject =
       new QAction(QIcon(":/SaveProject16x16.png"), tr("Save &Project"), this);
   actionSaveProject->setShortcut(tr("Ctrl+Shift+S"));
-  connect(actionSaveProject, SIGNAL(activated()), this, SLOT(saveProject()));
+  connect(actionSaveProject, SIGNAL(triggered()), this, SLOT(saveProject()));
 
   actionSaveFile = new QAction(QIcon(getQPixmap("filesave_nexus_xpm")),
                                tr("Save Nexus &File"), this);
   actionSaveFile->setShortcut(tr("Ctrl+S"));
-  connect(actionSaveFile, SIGNAL(activated()), this, SLOT(savetoNexusFile()));
+  connect(actionSaveFile, SIGNAL(triggered()), this, SLOT(savetoNexusFile()));
 
   actionNewGraph =
       new QAction(QIcon(getQPixmap("new_graph_xpm")), tr("New &Graph"), this);
   actionNewGraph->setShortcut(tr("Ctrl+G"));
-  connect(actionNewGraph, SIGNAL(activated()), this, SLOT(newGraph()));
+  connect(actionNewGraph, SIGNAL(triggered()), this, SLOT(newGraph()));
 
   actionNewNote =
       new QAction(QIcon(getQPixmap("new_note_xpm")), tr("New &Note"), this);
-  connect(actionNewNote, SIGNAL(activated()), this, SLOT(newNote()));
+  connect(actionNewNote, SIGNAL(triggered()), this, SLOT(newNote()));
 
   actionNewTable =
       new QAction(QIcon(getQPixmap("table_xpm")), tr("New &Table"), this);
   actionNewTable->setShortcut(tr("Ctrl+T"));
-  connect(actionNewTable, SIGNAL(activated()), this, SLOT(newTable()));
+  connect(actionNewTable, SIGNAL(triggered()), this, SLOT(newTable()));
 
   actionNewTiledWindow = new QAction(QIcon(getQPixmap("tiledwindow_xpm")),
                                      tr("New Tiled &Window"), this);
   actionNewTiledWindow->setShortcut(tr("Ctrl+Shift+T"));
-  connect(actionNewTiledWindow, SIGNAL(activated()), this,
+  connect(actionNewTiledWindow, SIGNAL(triggered()), this,
           SLOT(newTiledWindow()));
 
   actionNewMatrix =
       new QAction(QIcon(getQPixmap("new_matrix_xpm")), tr("New &Matrix"), this);
   actionNewMatrix->setShortcut(tr("Ctrl+M"));
-  connect(actionNewMatrix, SIGNAL(activated()), this, SLOT(newMatrix()));
+  connect(actionNewMatrix, SIGNAL(triggered()), this, SLOT(newMatrix()));
 
   actionNewFunctionPlot = new QAction(QIcon(getQPixmap("newF_xpm")),
                                       tr("New &Function Plot"), this);
-  connect(actionNewFunctionPlot, SIGNAL(activated()), this,
+  connect(actionNewFunctionPlot, SIGNAL(triggered()), this,
           SLOT(functionDialog()));
 
   actionNewSurfacePlot = new QAction(QIcon(getQPixmap("newFxy_xpm")),
                                      tr("New 3D &Surface Plot"), this);
   actionNewSurfacePlot->setShortcut(tr("Ctrl+ALT+Z"));
-  connect(actionNewSurfacePlot, SIGNAL(activated()), this,
+  connect(actionNewSurfacePlot, SIGNAL(triggered()), this,
           SLOT(newSurfacePlot()));
 
   actionOpenProj =
       new QAction(QIcon(":/LoadProject16x16.png"), tr("&Project"), this);
   actionOpenProj->setShortcut(tr("Ctrl+Shift+O"));
-  connect(actionOpenProj, SIGNAL(activated()), this, SLOT(open()));
+  connect(actionOpenProj, SIGNAL(triggered()), this, SLOT(open()));
 
   actionLoadFile =
       new QAction(QIcon(":/Open-icon16x16.png"), tr("Data File"), this);
   actionLoadFile->setShortcut(tr("Ctrl+Shift+F"));
-  connect(actionLoadFile, SIGNAL(activated()), this, SLOT(loadDataFile()));
+  connect(actionLoadFile, SIGNAL(triggered()), this, SLOT(loadDataFile()));
 
   actionLoadImage = new QAction(tr("Open Image &File"), this);
   actionLoadImage->setShortcut(tr("Ctrl+I"));
-  connect(actionLoadImage, SIGNAL(activated()), this, SLOT(loadImage()));
+  connect(actionLoadImage, SIGNAL(triggered()), this, SLOT(loadImage()));
 
   actionScriptRepo = new QAction(tr("Script Repositor&y"), this);
-  connect(actionScriptRepo, SIGNAL(activated()), this, SLOT(loadScriptRepo()));
+  connect(actionScriptRepo, SIGNAL(triggered()), this, SLOT(loadScriptRepo()));
 
   actionImportImage = new QAction(tr("Import I&mage..."), this);
-  connect(actionImportImage, SIGNAL(activated()), this, SLOT(importImage()));
+  connect(actionImportImage, SIGNAL(triggered()), this, SLOT(importImage()));
 
   actionSaveProjectAs = new QAction(QIcon(":/SaveProject16x16.png"),
                                     tr("Save Project &As..."), this);
-  connect(actionSaveProjectAs, SIGNAL(activated()), this,
+  connect(actionSaveProjectAs, SIGNAL(triggered()), this,
           SLOT(saveProjectAs()));
   actionSaveProjectAs->setEnabled(false);
 
   actionSaveNote = new QAction(tr("Save Note As..."), this);
-  connect(actionSaveNote, SIGNAL(activated()), this, SLOT(saveNoteAs()));
+  connect(actionSaveNote, SIGNAL(triggered()), this, SLOT(saveNoteAs()));
 
   actionLoad = new QAction(QIcon(getQPixmap("import_xpm")),
                            tr("&Import ASCII..."), this);
-  connect(actionLoad, SIGNAL(activated()), this, SLOT(importASCII()));
+  connect(actionLoad, SIGNAL(triggered()), this, SLOT(importASCII()));
 
   actionCopyWindow =
       new QAction(QIcon(getQPixmap("duplicate_xpm")), tr("&Duplicate"), this);
-  connect(actionCopyWindow, SIGNAL(activated()), this, SLOT(clone()));
+  connect(actionCopyWindow, SIGNAL(triggered()), this, SLOT(clone()));
 
   actionCutSelection =
       new QAction(QIcon(getQPixmap("cut_xpm")), tr("Cu&t Selection"), this);
   actionCutSelection->setShortcut(tr("Ctrl+X"));
-  connect(actionCutSelection, SIGNAL(activated()), this, SLOT(cutSelection()));
+  connect(actionCutSelection, SIGNAL(triggered()), this, SLOT(cutSelection()));
 
   actionCopySelection =
       new QAction(QIcon(getQPixmap("copy_xpm")), tr("&Copy Selection"), this);
   actionCopySelection->setShortcut(tr("Ctrl+C"));
-  connect(actionCopySelection, SIGNAL(activated()), this,
+  connect(actionCopySelection, SIGNAL(triggered()), this,
           SLOT(copySelection()));
 
   actionPasteSelection =
       new QAction(QIcon(getQPixmap("paste_xpm")), tr("&Paste Selection"), this);
   actionPasteSelection->setShortcut(tr("Ctrl+V"));
-  connect(actionPasteSelection, SIGNAL(activated()), this,
+  connect(actionPasteSelection, SIGNAL(triggered()), this,
           SLOT(pasteSelection()));
 
   actionClearSelection = new QAction(QIcon(getQPixmap("erase_xpm")),
                                      tr("&Delete Selection"), this);
   actionClearSelection->setShortcut(tr("Del", "delete key"));
-  connect(actionClearSelection, SIGNAL(activated()), this,
+  connect(actionClearSelection, SIGNAL(triggered()), this,
           SLOT(clearSelection()));
 
   actionShowExplorer = explorerWindow->toggleViewAction();
@@ -12219,7 +12097,7 @@ void ApplicationWindow::createActions() {
   actionShowScriptWindow->setShortcut(tr("F3"));
 #endif
   actionShowScriptWindow->setCheckable(true);
-  connect(actionShowScriptWindow, SIGNAL(activated()), this,
+  connect(actionShowScriptWindow, SIGNAL(triggered()), this,
           SLOT(showScriptWindow()));
 
   actionShowScriptInterpreter = new QAction(
@@ -12231,770 +12109,744 @@ void ApplicationWindow::createActions() {
   actionShowScriptInterpreter->setShortcut(tr("F4"));
 #endif
   actionShowScriptInterpreter->setCheckable(true);
-  connect(actionShowScriptInterpreter, SIGNAL(activated()), this,
+  connect(actionShowScriptInterpreter, SIGNAL(triggered()), this,
           SLOT(showScriptInterpreter()));
 #endif
 
   actionAddLayer =
       new QAction(QIcon(getQPixmap("newLayer_xpm")), tr("Add La&yer"), this);
   actionAddLayer->setShortcut(tr("Alt+L"));
-  connect(actionAddLayer, SIGNAL(activated()), this, SLOT(addLayer()));
+  connect(actionAddLayer, SIGNAL(triggered()), this, SLOT(addLayer()));
 
   actionShowLayerDialog = new QAction(QIcon(getQPixmap("arrangeLayers_xpm")),
                                       tr("Arran&ge Layers"), this);
   actionShowLayerDialog->setShortcut(tr("Alt+A"));
-  connect(actionShowLayerDialog, SIGNAL(activated()), this,
+  connect(actionShowLayerDialog, SIGNAL(triggered()), this,
           SLOT(showLayerDialog()));
 
   actionAutomaticLayout = new QAction(QIcon(getQPixmap("auto_layout_xpm")),
                                       tr("Automatic Layout"), this);
-  connect(actionAutomaticLayout, SIGNAL(activated()), this,
+  connect(actionAutomaticLayout, SIGNAL(triggered()), this,
           SLOT(autoArrangeLayers()));
 
   actionExportGraph = new QAction(tr("&Current"), this);
   actionExportGraph->setShortcut(tr("Alt+G"));
-  connect(actionExportGraph, SIGNAL(activated()), this, SLOT(exportGraph()));
+  connect(actionExportGraph, SIGNAL(triggered()), this, SLOT(exportGraph()));
 
   actionExportAllGraphs = new QAction(tr("&All"), this);
   actionExportAllGraphs->setShortcut(tr("Alt+X"));
-  connect(actionExportAllGraphs, SIGNAL(activated()), this,
+  connect(actionExportAllGraphs, SIGNAL(triggered()), this,
           SLOT(exportAllGraphs()));
 
   actionExportPDF =
       new QAction(QIcon(getQPixmap("pdf_xpm")), tr("&Export PDF"), this);
   actionExportPDF->setShortcut(tr("Ctrl+Alt+P"));
-  connect(actionExportPDF, SIGNAL(activated()), this, SLOT(exportPDF()));
+  connect(actionExportPDF, SIGNAL(triggered()), this, SLOT(exportPDF()));
 
   actionPrint =
       new QAction(QIcon(getQPixmap("fileprint_xpm")), tr("&Print"), this);
   actionPrint->setShortcut(tr("Ctrl+P"));
-  connect(actionPrint, SIGNAL(activated()), this, SLOT(print()));
+  connect(actionPrint, SIGNAL(triggered()), this, SLOT(print()));
 
   actionPrintAllPlots = new QAction(tr("Print All Plo&ts"), this);
-  connect(actionPrintAllPlots, SIGNAL(activated()), this,
+  connect(actionPrintAllPlots, SIGNAL(triggered()), this,
           SLOT(printAllPlots()));
 
   actionShowExportASCIIDialog = new QAction(tr("E&xport ASCII"), this);
-  connect(actionShowExportASCIIDialog, SIGNAL(activated()), this,
+  connect(actionShowExportASCIIDialog, SIGNAL(triggered()), this,
           SLOT(showExportASCIIDialog()));
 
   actionCloseAllWindows =
       new QAction(QIcon(getQPixmap("quit_xpm")), tr("&Quit"), this);
   actionCloseAllWindows->setShortcut(tr("Ctrl+Q"));
-  connect(actionCloseAllWindows, SIGNAL(activated()), qApp,
+  connect(actionCloseAllWindows, SIGNAL(triggered()), qApp,
           SLOT(closeAllWindows()));
 
   actionDeleteFitTables = new QAction(QIcon(getQPixmap("close_xpm")),
                                       tr("Delete &Fit Tables"), this);
-  connect(actionDeleteFitTables, SIGNAL(activated()), this,
+  connect(actionDeleteFitTables, SIGNAL(triggered()), this,
           SLOT(deleteFitTables()));
 
   actionShowPlotWizard =
       new QAction(QIcon(getQPixmap("wizard_xpm")), tr("Plot &Wizard"), this);
   actionShowPlotWizard->setShortcut(tr("Ctrl+Alt+W"));
-  connect(actionShowPlotWizard, SIGNAL(activated()), this,
+  connect(actionShowPlotWizard, SIGNAL(triggered()), this,
           SLOT(showPlotWizard()));
 
   actionShowConfigureDialog =
       new QAction(QIcon(":/configure.png"), tr("&Preferences..."), this);
-  connect(actionShowConfigureDialog, SIGNAL(activated()), this,
+  connect(actionShowConfigureDialog, SIGNAL(triggered()), this,
           SLOT(showPreferencesDialog()));
 
   actionShowCurvesDialog = new QAction(QIcon(getQPixmap("curves_xpm")),
                                        tr("Add/Remove &Curve..."), this);
   actionShowCurvesDialog->setShortcut(tr("Ctrl+Alt+C"));
-  connect(actionShowCurvesDialog, SIGNAL(activated()), this,
+  connect(actionShowCurvesDialog, SIGNAL(triggered()), this,
           SLOT(showCurvesDialog()));
 
   actionAddErrorBars = new QAction(QIcon(getQPixmap("errors_xpm")),
                                    tr("Add &Error Bars..."), this);
   actionAddErrorBars->setShortcut(tr("Ctrl+Alt+E"));
-  connect(actionAddErrorBars, SIGNAL(activated()), this, SLOT(addErrorBars()));
+  connect(actionAddErrorBars, SIGNAL(triggered()), this, SLOT(addErrorBars()));
 
   actionRemoveErrorBars = new QAction(QIcon(getQPixmap("errors_remove_xpm")),
                                       tr("&Remove Error Bars..."), this);
   actionRemoveErrorBars->setShortcut(tr("Ctrl+Alt+R"));
-  connect(actionRemoveErrorBars, SIGNAL(activated()), this,
+  connect(actionRemoveErrorBars, SIGNAL(triggered()), this,
           SLOT(removeErrorBars()));
 
   actionAddFunctionCurve =
       new QAction(QIcon(getQPixmap("fx_xpm")), tr("Add &Function..."), this);
   actionAddFunctionCurve->setShortcut(tr("Ctrl+Alt+F"));
-  connect(actionAddFunctionCurve, SIGNAL(activated()), this,
+  connect(actionAddFunctionCurve, SIGNAL(triggered()), this,
           SLOT(addFunctionCurve()));
 
   actionUnzoom = new QAction(QIcon(getQPixmap("unzoom_xpm")),
                              tr("&Rescale to Show All"), this);
   actionUnzoom->setShortcut(tr("Ctrl+Shift+R"));
-  connect(actionUnzoom, SIGNAL(activated()), this, SLOT(setAutoScale()));
+  connect(actionUnzoom, SIGNAL(triggered()), this, SLOT(setAutoScale()));
 
   actionNewLegend =
       new QAction(QIcon(getQPixmap("legend_xpm")), tr("New &Legend"), this);
   actionNewLegend->setShortcut(tr("Ctrl+Alt+L"));
-  connect(actionNewLegend, SIGNAL(activated()), this, SLOT(newLegend()));
+  connect(actionNewLegend, SIGNAL(triggered()), this, SLOT(newLegend()));
 
   actionTimeStamp =
       new QAction(QIcon(getQPixmap("clock_xpm")), tr("Add Time &Stamp"), this);
   actionTimeStamp->setShortcut(tr("Ctrl+ALT+S"));
-  connect(actionTimeStamp, SIGNAL(activated()), this, SLOT(addTimeStamp()));
+  connect(actionTimeStamp, SIGNAL(triggered()), this, SLOT(addTimeStamp()));
 
   actionAddImage =
       new QAction(QIcon(getQPixmap("monalisa_xpm")), tr("Add &Image"), this);
   actionAddImage->setShortcut(tr("Ctrl+Alt+I"));
-  connect(actionAddImage, SIGNAL(activated()), this, SLOT(addImage()));
+  connect(actionAddImage, SIGNAL(triggered()), this, SLOT(addImage()));
 
   actionPlotL = new QAction(QIcon(getQPixmap("lPlot_xpm")), tr("&Line"), this);
-  connect(actionPlotL, SIGNAL(activated()), this, SLOT(plotL()));
+  connect(actionPlotL, SIGNAL(triggered()), this, SLOT(plotL()));
 
   actionPlotP =
       new QAction(QIcon(getQPixmap("pPlot_xpm")), tr("&Scatter"), this);
-  connect(actionPlotP, SIGNAL(activated()), this, SLOT(plotP()));
+  connect(actionPlotP, SIGNAL(triggered()), this, SLOT(plotP()));
 
   actionPlotLP =
       new QAction(QIcon(getQPixmap("lpPlot_xpm")), tr("Line + S&ymbol"), this);
-  connect(actionPlotLP, SIGNAL(activated()), this, SLOT(plotLP()));
+  connect(actionPlotLP, SIGNAL(triggered()), this, SLOT(plotLP()));
 
   actionPlotVerticalDropLines = new QAction(QIcon(getQPixmap("dropLines_xpm")),
                                             tr("Vertical &Drop Lines"), this);
-  connect(actionPlotVerticalDropLines, SIGNAL(activated()), this,
+  connect(actionPlotVerticalDropLines, SIGNAL(triggered()), this,
           SLOT(plotVerticalDropLines()));
 
   actionPlotSpline =
       new QAction(QIcon(getQPixmap("spline_xpm")), tr("&Spline"), this);
-  connect(actionPlotSpline, SIGNAL(activated()), this, SLOT(plotSpline()));
+  connect(actionPlotSpline, SIGNAL(triggered()), this, SLOT(plotSpline()));
 
   actionPlotHorSteps =
       new QAction(getQPixmap("hor_steps_xpm"), tr("&Horizontal Steps"), this);
-  connect(actionPlotHorSteps, SIGNAL(activated()), this, SLOT(plotHorSteps()));
+  connect(actionPlotHorSteps, SIGNAL(triggered()), this, SLOT(plotHorSteps()));
 
   actionPlotVertSteps = new QAction(QIcon(getQPixmap("vert_steps_xpm")),
                                     tr("&Vertical Steps"), this);
-  connect(actionPlotVertSteps, SIGNAL(activated()), this,
+  connect(actionPlotVertSteps, SIGNAL(triggered()), this,
           SLOT(plotVertSteps()));
 
   actionPlotVerticalBars =
       new QAction(QIcon(getQPixmap("vertBars_xpm")), tr("&Columns"), this);
-  connect(actionPlotVerticalBars, SIGNAL(activated()), this,
+  connect(actionPlotVerticalBars, SIGNAL(triggered()), this,
           SLOT(plotVerticalBars()));
 
   actionPlotHorizontalBars =
       new QAction(QIcon(getQPixmap("hBars_xpm")), tr("&Rows"), this);
-  connect(actionPlotHorizontalBars, SIGNAL(activated()), this,
+  connect(actionPlotHorizontalBars, SIGNAL(triggered()), this,
           SLOT(plotHorizontalBars()));
 
   actionPlotArea =
       new QAction(QIcon(getQPixmap("area_xpm")), tr("&Area"), this);
-  connect(actionPlotArea, SIGNAL(activated()), this, SLOT(plotArea()));
+  connect(actionPlotArea, SIGNAL(triggered()), this, SLOT(plotArea()));
 
   actionPlotPie = new QAction(QIcon(getQPixmap("pie_xpm")), tr("&Pie"), this);
-  connect(actionPlotPie, SIGNAL(activated()), this, SLOT(plotPie()));
+  connect(actionPlotPie, SIGNAL(triggered()), this, SLOT(plotPie()));
 
   actionPlotVectXYAM =
       new QAction(QIcon(getQPixmap("vectXYAM_xpm")), tr("Vectors XY&AM"), this);
-  connect(actionPlotVectXYAM, SIGNAL(activated()), this, SLOT(plotVectXYAM()));
+  connect(actionPlotVectXYAM, SIGNAL(triggered()), this, SLOT(plotVectXYAM()));
 
   actionPlotVectXYXY = new QAction(QIcon(getQPixmap("vectXYXY_xpm")),
                                    tr("&Vectors &XYXY"), this);
-  connect(actionPlotVectXYXY, SIGNAL(activated()), this, SLOT(plotVectXYXY()));
+  connect(actionPlotVectXYXY, SIGNAL(triggered()), this, SLOT(plotVectXYXY()));
 
   actionPlotHistogram =
       new QAction(QIcon(getQPixmap("histogram_xpm")), tr("&Histogram"), this);
-  connect(actionPlotHistogram, SIGNAL(activated()), this,
+  connect(actionPlotHistogram, SIGNAL(triggered()), this,
           SLOT(plotHistogram()));
 
   actionPlotStackedHistograms = new QAction(
       QIcon(getQPixmap("stacked_hist_xpm")), tr("&Stacked Histogram"), this);
-  connect(actionPlotStackedHistograms, SIGNAL(activated()), this,
+  connect(actionPlotStackedHistograms, SIGNAL(triggered()), this,
           SLOT(plotStackedHistograms()));
 
   actionStemPlot =
       new QAction(QIcon(":/leaf.png"), tr("Stem-and-&Leaf Plot"), this);
-  connect(actionStemPlot, SIGNAL(activated()), this, SLOT(newStemPlot()));
+  connect(actionStemPlot, SIGNAL(triggered()), this, SLOT(newStemPlot()));
 
   actionPlot2VerticalLayers = new QAction(QIcon(getQPixmap("panel_v2_xpm")),
                                           tr("&Vertical 2 Layers"), this);
-  connect(actionPlot2VerticalLayers, SIGNAL(activated()), this,
+  connect(actionPlot2VerticalLayers, SIGNAL(triggered()), this,
           SLOT(plot2VerticalLayers()));
 
   actionPlot2HorizontalLayers = new QAction(QIcon(getQPixmap("panel_h2_xpm")),
                                             tr("&Horizontal 2 Layers"), this);
-  connect(actionPlot2HorizontalLayers, SIGNAL(activated()), this,
+  connect(actionPlot2HorizontalLayers, SIGNAL(triggered()), this,
           SLOT(plot2HorizontalLayers()));
 
   actionPlot4Layers =
       new QAction(QIcon(getQPixmap("panel_4_xpm")), tr("&4 Layers"), this);
-  connect(actionPlot4Layers, SIGNAL(activated()), this, SLOT(plot4Layers()));
+  connect(actionPlot4Layers, SIGNAL(triggered()), this, SLOT(plot4Layers()));
 
   actionPlotStackedLayers = new QAction(QIcon(getQPixmap("stacked_xpm")),
                                         tr("&Stacked Layers"), this);
-  connect(actionPlotStackedLayers, SIGNAL(activated()), this,
+  connect(actionPlotStackedLayers, SIGNAL(triggered()), this,
           SLOT(plotStackedLayers()));
 
   actionPlot3DRibbon =
       new QAction(QIcon(getQPixmap("ribbon_xpm")), tr("&Ribbon"), this);
-  connect(actionPlot3DRibbon, SIGNAL(activated()), this, SLOT(plot3DRibbon()));
+  connect(actionPlot3DRibbon, SIGNAL(triggered()), this, SLOT(plot3DRibbon()));
 
   actionPlot3DBars =
       new QAction(QIcon(getQPixmap("bars_xpm")), tr("&Bars"), this);
-  connect(actionPlot3DBars, SIGNAL(activated()), this, SLOT(plot3DBars()));
+  connect(actionPlot3DBars, SIGNAL(triggered()), this, SLOT(plot3DBars()));
 
   actionPlot3DScatter =
       new QAction(QIcon(getQPixmap("scatter_xpm")), tr("&Scatter"), this);
-  connect(actionPlot3DScatter, SIGNAL(activated()), this,
+  connect(actionPlot3DScatter, SIGNAL(triggered()), this,
           SLOT(plot3DScatter()));
 
   actionPlot3DTrajectory =
       new QAction(QIcon(getQPixmap("trajectory_xpm")), tr("&Trajectory"), this);
-  connect(actionPlot3DTrajectory, SIGNAL(activated()), this,
+  connect(actionPlot3DTrajectory, SIGNAL(triggered()), this,
           SLOT(plot3DTrajectory()));
 
   actionShowColStatistics = new QAction(QIcon(getQPixmap("col_stat_xpm")),
                                         tr("Statistics on &Columns"), this);
-  connect(actionShowColStatistics, SIGNAL(activated()), this,
+  connect(actionShowColStatistics, SIGNAL(triggered()), this,
           SLOT(showColStatistics()));
 
   actionShowRowStatistics = new QAction(QIcon(getQPixmap("stat_rows_xpm")),
                                         tr("Statistics on &Rows"), this);
-  connect(actionShowRowStatistics, SIGNAL(activated()), this,
+  connect(actionShowRowStatistics, SIGNAL(triggered()), this,
           SLOT(showRowStatistics()));
 
   actionIntegrate = new QAction(tr("&Integrate"), this);
-  connect(actionIntegrate, SIGNAL(activated()), this, SLOT(integrate()));
+  connect(actionIntegrate, SIGNAL(triggered()), this, SLOT(integrate()));
 
   actionShowIntDialog = new QAction(tr("Integr&ate Function..."), this);
-  connect(actionShowIntDialog, SIGNAL(activated()), this,
+  connect(actionShowIntDialog, SIGNAL(triggered()), this,
           SLOT(showIntegrationDialog()));
 
   actionInterpolate = new QAction(tr("Inte&rpolate ..."), this);
-  connect(actionInterpolate, SIGNAL(activated()), this,
+  connect(actionInterpolate, SIGNAL(triggered()), this,
           SLOT(showInterpolationDialog()));
 
   actionLowPassFilter = new QAction(tr("&Low Pass..."), this);
-  connect(actionLowPassFilter, SIGNAL(activated()), this,
+  connect(actionLowPassFilter, SIGNAL(triggered()), this,
           SLOT(lowPassFilterDialog()));
 
   actionHighPassFilter = new QAction(tr("&High Pass..."), this);
-  connect(actionHighPassFilter, SIGNAL(activated()), this,
+  connect(actionHighPassFilter, SIGNAL(triggered()), this,
           SLOT(highPassFilterDialog()));
 
   actionBandPassFilter = new QAction(tr("&Band Pass..."), this);
-  connect(actionBandPassFilter, SIGNAL(activated()), this,
+  connect(actionBandPassFilter, SIGNAL(triggered()), this,
           SLOT(bandPassFilterDialog()));
 
   actionBandBlockFilter = new QAction(tr("&Band Block..."), this);
-  connect(actionBandBlockFilter, SIGNAL(activated()), this,
+  connect(actionBandBlockFilter, SIGNAL(triggered()), this,
           SLOT(bandBlockFilterDialog()));
 
   actionFFT = new QAction(tr("&FFT..."), this);
-  connect(actionFFT, SIGNAL(activated()), this, SLOT(showFFTDialog()));
+  connect(actionFFT, SIGNAL(triggered()), this, SLOT(showFFTDialog()));
 
   actionSmoothSavGol = new QAction(tr("&Savitzky-Golay..."), this);
-  connect(actionSmoothSavGol, SIGNAL(activated()), this,
+  connect(actionSmoothSavGol, SIGNAL(triggered()), this,
           SLOT(showSmoothSavGolDialog()));
 
   actionSmoothFFT = new QAction(tr("&FFT Filter..."), this);
-  connect(actionSmoothFFT, SIGNAL(activated()), this,
+  connect(actionSmoothFFT, SIGNAL(triggered()), this,
           SLOT(showSmoothFFTDialog()));
 
   actionSmoothAverage = new QAction(tr("Moving Window &Average..."), this);
-  connect(actionSmoothAverage, SIGNAL(activated()), this,
+  connect(actionSmoothAverage, SIGNAL(triggered()), this,
           SLOT(showSmoothAverageDialog()));
 
   actionDifferentiate = new QAction(tr("&Differentiate"), this);
-  connect(actionDifferentiate, SIGNAL(activated()), this,
+  connect(actionDifferentiate, SIGNAL(triggered()), this,
           SLOT(differentiate()));
 
   actionFitLinear = new QAction(tr("Fit &Linear"), this);
-  connect(actionFitLinear, SIGNAL(activated()), this, SLOT(fitLinear()));
+  connect(actionFitLinear, SIGNAL(triggered()), this, SLOT(fitLinear()));
 
   actionShowFitPolynomDialog = new QAction(tr("Fit &Polynomial ..."), this);
-  connect(actionShowFitPolynomDialog, SIGNAL(activated()), this,
+  connect(actionShowFitPolynomDialog, SIGNAL(triggered()), this,
           SLOT(showFitPolynomDialog()));
 
   actionShowExpDecayDialog = new QAction(tr("&First Order ..."), this);
-  connect(actionShowExpDecayDialog, SIGNAL(activated()), this,
+  connect(actionShowExpDecayDialog, SIGNAL(triggered()), this,
           SLOT(showExpDecayDialog()));
 
   actionShowTwoExpDecayDialog = new QAction(tr("&Second Order ..."), this);
-  connect(actionShowTwoExpDecayDialog, SIGNAL(activated()), this,
+  connect(actionShowTwoExpDecayDialog, SIGNAL(triggered()), this,
           SLOT(showTwoExpDecayDialog()));
 
   actionShowExpDecay3Dialog = new QAction(tr("&Third Order ..."), this);
-  connect(actionShowExpDecay3Dialog, SIGNAL(activated()), this,
+  connect(actionShowExpDecay3Dialog, SIGNAL(triggered()), this,
           SLOT(showExpDecay3Dialog()));
 
   actionFitExpGrowth = new QAction(tr("Fit Exponential Gro&wth ..."), this);
-  connect(actionFitExpGrowth, SIGNAL(activated()), this,
+  connect(actionFitExpGrowth, SIGNAL(triggered()), this,
           SLOT(showExpGrowthDialog()));
 
   actionFitSigmoidal = new QAction(tr("Fit &Boltzmann (Sigmoidal)"), this);
-  connect(actionFitSigmoidal, SIGNAL(activated()), this, SLOT(fitSigmoidal()));
+  connect(actionFitSigmoidal, SIGNAL(triggered()), this, SLOT(fitSigmoidal()));
 
   actionFitGauss = new QAction(tr("Fit &Gaussian"), this);
-  connect(actionFitGauss, SIGNAL(activated()), this, SLOT(fitGauss()));
+  connect(actionFitGauss, SIGNAL(triggered()), this, SLOT(fitGauss()));
 
   actionFitLorentz = new QAction(tr("Fit Lorent&zian"), this);
-  connect(actionFitLorentz, SIGNAL(activated()), this, SLOT(fitLorentz()));
+  connect(actionFitLorentz, SIGNAL(triggered()), this, SLOT(fitLorentz()));
 
   actionShowFitDialog = new QAction(tr("Fit &Wizard..."), this);
   actionShowFitDialog->setShortcut(tr("Ctrl+Y"));
-  connect(actionShowFitDialog, SIGNAL(activated()), this,
+  connect(actionShowFitDialog, SIGNAL(triggered()), this,
           SLOT(showFitDialog()));
 
   actionShowPlotDialog = new QAction(tr("&Plot ..."), this);
-  connect(actionShowPlotDialog, SIGNAL(activated()), this,
+  connect(actionShowPlotDialog, SIGNAL(triggered()), this,
           SLOT(showGeneralPlotDialog()));
 
   actionShowScaleDialog = new QAction(tr("&Scales..."), this);
-  connect(actionShowScaleDialog, SIGNAL(activated()), this,
+  connect(actionShowScaleDialog, SIGNAL(triggered()), this,
           SLOT(showScaleDialog()));
 
   actionShowAxisDialog = new QAction(tr("&Axes..."), this);
-  connect(actionShowAxisDialog, SIGNAL(activated()), this,
+  connect(actionShowAxisDialog, SIGNAL(triggered()), this,
           SLOT(showAxisDialog()));
 
   actionShowGridDialog = new QAction(tr("&Grid ..."), this);
-  connect(actionShowGridDialog, SIGNAL(activated()), this,
+  connect(actionShowGridDialog, SIGNAL(triggered()), this,
           SLOT(showGridDialog()));
 
   actionShowTitleDialog = new QAction(tr("&Title ..."), this);
-  connect(actionShowTitleDialog, SIGNAL(activated()), this,
+  connect(actionShowTitleDialog, SIGNAL(triggered()), this,
           SLOT(showTitleDialog()));
 
   actionShowColumnOptionsDialog = new QAction(tr("Column &Options ..."), this);
   actionShowColumnOptionsDialog->setShortcut(tr("Ctrl+Alt+O"));
-  connect(actionShowColumnOptionsDialog, SIGNAL(activated()), this,
+  connect(actionShowColumnOptionsDialog, SIGNAL(triggered()), this,
           SLOT(showColumnOptionsDialog()));
 
-  // JZ May 3, 2011: Removed this because it segfaults.
   actionShowColumnValuesDialog = new QAction(
       QIcon(getQPixmap("formula_xpm")), tr("Set Column &Values ..."), this);
-  connect(actionShowColumnValuesDialog, SIGNAL(activated()), this,
+  connect(actionShowColumnValuesDialog, SIGNAL(triggered()), this,
           SLOT(showColumnValuesDialog()));
   actionShowColumnValuesDialog->setShortcut(tr("Alt+Q"));
 
   actionTableRecalculate = new QAction(tr("Recalculate"), this);
   actionTableRecalculate->setShortcut(tr("Ctrl+Return"));
-  connect(actionTableRecalculate, SIGNAL(activated()), this,
+  connect(actionTableRecalculate, SIGNAL(triggered()), this,
           SLOT(recalculateTable()));
 
   actionHideSelectedColumns = new QAction(tr("&Hide Selected"), this);
-  connect(actionHideSelectedColumns, SIGNAL(activated()), this,
+  connect(actionHideSelectedColumns, SIGNAL(triggered()), this,
           SLOT(hideSelectedColumns()));
 
   actionShowAllColumns = new QAction(tr("Sho&w All Columns"), this);
-  connect(actionShowAllColumns, SIGNAL(activated()), this,
+  connect(actionShowAllColumns, SIGNAL(triggered()), this,
           SLOT(showAllColumns()));
 
   actionSwapColumns = new QAction(QIcon(getQPixmap("swap_columns_xpm")),
                                   tr("&Swap columns"), this);
-  connect(actionSwapColumns, SIGNAL(activated()), this, SLOT(swapColumns()));
+  connect(actionSwapColumns, SIGNAL(triggered()), this, SLOT(swapColumns()));
 
   actionMoveColRight = new QAction(QIcon(getQPixmap("move_col_right_xpm")),
                                    tr("Move &Right"), this);
-  connect(actionMoveColRight, SIGNAL(activated()), this,
+  connect(actionMoveColRight, SIGNAL(triggered()), this,
           SLOT(moveColumnRight()));
 
   actionMoveColLeft = new QAction(QIcon(getQPixmap("move_col_left_xpm")),
                                   tr("Move &Left"), this);
-  connect(actionMoveColLeft, SIGNAL(activated()), this, SLOT(moveColumnLeft()));
+  connect(actionMoveColLeft, SIGNAL(triggered()), this, SLOT(moveColumnLeft()));
 
   actionMoveColFirst = new QAction(QIcon(getQPixmap("move_col_first_xpm")),
                                    tr("Move to F&irst"), this);
-  connect(actionMoveColFirst, SIGNAL(activated()), this,
+  connect(actionMoveColFirst, SIGNAL(triggered()), this,
           SLOT(moveColumnFirst()));
 
   actionMoveColLast = new QAction(QIcon(getQPixmap("move_col_last_xpm")),
                                   tr("Move to Las&t"), this);
-  connect(actionMoveColLast, SIGNAL(activated()), this, SLOT(moveColumnLast()));
+  connect(actionMoveColLast, SIGNAL(triggered()), this, SLOT(moveColumnLast()));
 
   actionShowColsDialog = new QAction(tr("&Columns..."), this);
-  connect(actionShowColsDialog, SIGNAL(activated()), this,
+  connect(actionShowColsDialog, SIGNAL(triggered()), this,
           SLOT(showColsDialog()));
 
   actionShowRowsDialog = new QAction(tr("&Rows..."), this);
-  connect(actionShowRowsDialog, SIGNAL(activated()), this,
+  connect(actionShowRowsDialog, SIGNAL(triggered()), this,
           SLOT(showRowsDialog()));
 
   actionDeleteRows = new QAction(tr("&Delete Rows Interval..."), this);
-  connect(actionDeleteRows, SIGNAL(activated()), this,
+  connect(actionDeleteRows, SIGNAL(triggered()), this,
           SLOT(showDeleteRowsDialog()));
 
   actionAbout = new QAction(tr("&About MantidPlot"), this); // Mantid
   actionAbout->setShortcut(tr("F1"));
-  connect(actionAbout, SIGNAL(activated()), this, SLOT(about()));
+  connect(actionAbout, SIGNAL(triggered()), this, SLOT(about()));
 
   actionShowHelp = new QAction(tr("&Help"), this);
   actionShowHelp->setShortcut(tr("Ctrl+H"));
-  connect(actionShowHelp, SIGNAL(activated()), this, SLOT(showHelp()));
+  connect(actionShowHelp, SIGNAL(triggered()), this, SLOT(showHelp()));
 
   actionMantidConcepts = new QAction(tr("&Mantid Concepts"), this);
-  connect(actionMantidConcepts, SIGNAL(activated()), this,
+  connect(actionMantidConcepts, SIGNAL(triggered()), this,
           SLOT(showMantidConcepts()));
 
   actionMantidAlgorithms = new QAction(tr("&Algorithm Descriptions"), this);
-  connect(actionMantidAlgorithms, SIGNAL(activated()), this,
+  connect(actionMantidAlgorithms, SIGNAL(triggered()), this,
           SLOT(showalgorithmDescriptions()));
 
   actionmantidplotHelp = new QAction(tr("&MantidPlot Help"), this);
-  connect(actionmantidplotHelp, SIGNAL(activated()), this,
+  connect(actionmantidplotHelp, SIGNAL(triggered()), this,
           SLOT(showmantidplotHelp()));
 
   actionChooseHelpFolder = new QAction(tr("&Choose Help Folder..."), this);
-  connect(actionChooseHelpFolder, SIGNAL(activated()), this,
+  connect(actionChooseHelpFolder, SIGNAL(triggered()), this,
           SLOT(chooseHelpFolder()));
 
   actionRename = new QAction(tr("&Rename Window"), this);
-  connect(actionRename, SIGNAL(activated()), this, SLOT(rename()));
+  connect(actionRename, SIGNAL(triggered()), this, SLOT(rename()));
 
   actionCloseWindow =
       new QAction(QIcon(getQPixmap("close_xpm")), tr("Close &Window"), this);
   actionCloseWindow->setShortcut(tr("Ctrl+W"));
-  connect(actionCloseWindow, SIGNAL(activated()), this,
+  connect(actionCloseWindow, SIGNAL(triggered()), this,
           SLOT(closeActiveWindow()));
 
   actionAddColToTable =
       new QAction(QIcon(getQPixmap("addCol_xpm")), tr("Add Column"), this);
-  connect(actionAddColToTable, SIGNAL(activated()), this,
+  connect(actionAddColToTable, SIGNAL(triggered()), this,
           SLOT(addColToTable()));
 
   actionGoToRow = new QAction(tr("&Go to Row..."), this);
   actionGoToRow->setShortcut(tr("Ctrl+Alt+G"));
-  connect(actionGoToRow, SIGNAL(activated()), this, SLOT(goToRow()));
+  connect(actionGoToRow, SIGNAL(triggered()), this, SLOT(goToRow()));
 
   actionGoToColumn = new QAction(tr("Go to Colum&n..."), this);
   actionGoToColumn->setShortcut(tr("Ctrl+Alt+C"));
-  connect(actionGoToColumn, SIGNAL(activated()), this, SLOT(goToColumn()));
+  connect(actionGoToColumn, SIGNAL(triggered()), this, SLOT(goToColumn()));
 
   actionClearTable = new QAction(getQPixmap("erase_xpm"), tr("Clear"), this);
-  connect(actionClearTable, SIGNAL(activated()), this, SLOT(clearTable()));
+  connect(actionClearTable, SIGNAL(triggered()), this, SLOT(clearTable()));
 
   actionDeleteLayer =
       new QAction(QIcon(getQPixmap("erase_xpm")), tr("&Remove Layer"), this);
   actionDeleteLayer->setShortcut(tr("Alt+R"));
-  connect(actionDeleteLayer, SIGNAL(activated()), this, SLOT(deleteLayer()));
+  connect(actionDeleteLayer, SIGNAL(triggered()), this, SLOT(deleteLayer()));
 
   actionResizeActiveWindow = new QAction(QIcon(getQPixmap("resize_xpm")),
                                          tr("Window &Geometry..."), this);
-  connect(actionResizeActiveWindow, SIGNAL(activated()), this,
+  connect(actionResizeActiveWindow, SIGNAL(triggered()), this,
           SLOT(resizeActiveWindow()));
 
   actionHideActiveWindow = new QAction(tr("&Hide Window"), this);
-  connect(actionHideActiveWindow, SIGNAL(activated()), this,
+  connect(actionHideActiveWindow, SIGNAL(triggered()), this,
           SLOT(hideActiveWindow()));
 
   actionShowMoreWindows = new QAction(tr("More windows..."), this);
-  connect(actionShowMoreWindows, SIGNAL(activated()), this,
+  connect(actionShowMoreWindows, SIGNAL(triggered()), this,
           SLOT(showMoreWindows()));
 
   actionPixelLineProfile = new QAction(QIcon(getQPixmap("pixelProfile_xpm")),
                                        tr("&View Pixel Line Profile"), this);
-  connect(actionPixelLineProfile, SIGNAL(activated()), this,
+  connect(actionPixelLineProfile, SIGNAL(triggered()), this,
           SLOT(pixelLineProfile()));
 
   actionIntensityTable = new QAction(tr("&Intensity Table"), this);
-  connect(actionIntensityTable, SIGNAL(activated()), this,
+  connect(actionIntensityTable, SIGNAL(triggered()), this,
           SLOT(intensityTable()));
 
   actionShowLineDialog = new QAction(tr("&Properties"), this);
-  connect(actionShowLineDialog, SIGNAL(activated()), this,
+  connect(actionShowLineDialog, SIGNAL(triggered()), this,
           SLOT(showLineDialog()));
 
   actionShowImageDialog = new QAction(tr("&Properties"), this);
-  connect(actionShowImageDialog, SIGNAL(activated()), this,
+  connect(actionShowImageDialog, SIGNAL(triggered()), this,
           SLOT(showImageDialog()));
 
   actionShowTextDialog = new QAction(tr("&Properties"), this);
-  connect(actionShowTextDialog, SIGNAL(activated()), this,
+  connect(actionShowTextDialog, SIGNAL(triggered()), this,
           SLOT(showTextDialog()));
 
   actionActivateWindow = new QAction(tr("&Activate Window"), this);
-  connect(actionActivateWindow, SIGNAL(activated()), this,
+  connect(actionActivateWindow, SIGNAL(triggered()), this,
           SLOT(activateWindow()));
 
   actionMinimizeWindow = new QAction(tr("Mi&nimize Window"), this);
-  connect(actionMinimizeWindow, SIGNAL(activated()), this,
+  connect(actionMinimizeWindow, SIGNAL(triggered()), this,
           SLOT(minimizeWindow()));
 
   actionMaximizeWindow = new QAction(tr("Ma&ximize Window"), this);
-  connect(actionMaximizeWindow, SIGNAL(activated()), this,
+  connect(actionMaximizeWindow, SIGNAL(triggered()), this,
           SLOT(maximizeWindow()));
 
   actionHideWindow = new QAction(tr("&Hide Window"), this);
-  connect(actionHideWindow, SIGNAL(activated()), this, SLOT(hideWindow()));
+  connect(actionHideWindow, SIGNAL(triggered()), this, SLOT(hideWindow()));
 
   actionResizeWindow = new QAction(QIcon(getQPixmap("resize_xpm")),
                                    tr("Re&size Window..."), this);
-  connect(actionResizeWindow, SIGNAL(activated()), this, SLOT(resizeWindow()));
+  connect(actionResizeWindow, SIGNAL(triggered()), this, SLOT(resizeWindow()));
 
   actionEditSurfacePlot = new QAction(tr("&Surface..."), this);
-  connect(actionEditSurfacePlot, SIGNAL(activated()), this,
+  connect(actionEditSurfacePlot, SIGNAL(triggered()), this,
           SLOT(editSurfacePlot()));
 
   actionAdd3DData = new QAction(tr("&Data Set..."), this);
-  connect(actionAdd3DData, SIGNAL(activated()), this, SLOT(add3DData()));
+  connect(actionAdd3DData, SIGNAL(triggered()), this, SLOT(add3DData()));
 
   actionSetMatrixProperties = new QAction(tr("Set &Properties..."), this);
-  connect(actionSetMatrixProperties, SIGNAL(activated()), this,
+  connect(actionSetMatrixProperties, SIGNAL(triggered()), this,
           SLOT(showMatrixDialog()));
 
   actionSetMatrixDimensions = new QAction(tr("Set &Dimensions..."), this);
-  connect(actionSetMatrixDimensions, SIGNAL(activated()), this,
+  connect(actionSetMatrixDimensions, SIGNAL(triggered()), this,
           SLOT(showMatrixSizeDialog()));
   actionSetMatrixDimensions->setShortcut(tr("Ctrl+D"));
 
   actionSetMatrixValues =
       new QAction(QIcon(getQPixmap("formula_xpm")), tr("Set &Values..."), this);
-  connect(actionSetMatrixValues, SIGNAL(activated()), this,
+  connect(actionSetMatrixValues, SIGNAL(triggered()), this,
           SLOT(showMatrixValuesDialog()));
   actionSetMatrixValues->setShortcut(tr("Alt+Q"));
 
   actionImagePlot =
       new QAction(QIcon(getQPixmap("image_plot_xpm")), tr("&Image Plot"), this);
-  connect(actionImagePlot, SIGNAL(activated()), this, SLOT(plotImage()));
+  connect(actionImagePlot, SIGNAL(triggered()), this, SLOT(plotImage()));
 
   actionTransposeMatrix = new QAction(tr("&Transpose"), this);
-  connect(actionTransposeMatrix, SIGNAL(activated()), this,
+  connect(actionTransposeMatrix, SIGNAL(triggered()), this,
           SLOT(transposeMatrix()));
 
   actionFlipMatrixVertically =
       new QAction(QIcon(getQPixmap("flip_vertical_xpm")), tr("Flip &V"), this);
   actionFlipMatrixVertically->setShortcut(tr("Ctrl+Shift+V"));
-  connect(actionFlipMatrixVertically, SIGNAL(activated()), this,
+  connect(actionFlipMatrixVertically, SIGNAL(triggered()), this,
           SLOT(flipMatrixVertically()));
 
   actionFlipMatrixHorizontally = new QAction(
       QIcon(getQPixmap("flip_horizontal_xpm")), tr("Flip &H"), this);
   actionFlipMatrixHorizontally->setShortcut(tr("Ctrl+Shift+H"));
-  connect(actionFlipMatrixHorizontally, SIGNAL(activated()), this,
+  connect(actionFlipMatrixHorizontally, SIGNAL(triggered()), this,
           SLOT(flipMatrixHorizontally()));
 
   actionRotateMatrix = new QAction(QIcon(getQPixmap("rotate_clockwise_xpm")),
                                    tr("R&otate 90"), this);
   actionRotateMatrix->setShortcut(tr("Ctrl+Shift+R"));
-  connect(actionRotateMatrix, SIGNAL(activated()), this,
+  connect(actionRotateMatrix, SIGNAL(triggered()), this,
           SLOT(rotateMatrix90()));
 
   actionRotateMatrixMinus =
       new QAction(QIcon(getQPixmap("rotate_counterclockwise_xpm")),
                   tr("Rotate &-90"), this);
   actionRotateMatrixMinus->setShortcut(tr("Ctrl+Alt+R"));
-  connect(actionRotateMatrixMinus, SIGNAL(activated()), this,
+  connect(actionRotateMatrixMinus, SIGNAL(triggered()), this,
           SLOT(rotateMatrixMinus90()));
 
   actionInvertMatrix = new QAction(tr("&Invert"), this);
-  connect(actionInvertMatrix, SIGNAL(activated()), this, SLOT(invertMatrix()));
+  connect(actionInvertMatrix, SIGNAL(triggered()), this, SLOT(invertMatrix()));
 
   actionMatrixDeterminant = new QAction(tr("&Determinant"), this);
-  connect(actionMatrixDeterminant, SIGNAL(activated()), this,
+  connect(actionMatrixDeterminant, SIGNAL(triggered()), this,
           SLOT(matrixDeterminant()));
 
   actionViewMatrixImage = new QAction(tr("&Image mode"), this);
   actionViewMatrixImage->setShortcut(tr("Ctrl+Shift+I"));
-  connect(actionViewMatrixImage, SIGNAL(activated()), this,
+  connect(actionViewMatrixImage, SIGNAL(triggered()), this,
           SLOT(viewMatrixImage()));
   actionViewMatrixImage->setCheckable(true);
 
   actionViewMatrix = new QAction(tr("&Data mode"), this);
   actionViewMatrix->setShortcut(tr("Ctrl+Shift+D"));
-  connect(actionViewMatrix, SIGNAL(activated()), this, SLOT(viewMatrixTable()));
+  connect(actionViewMatrix, SIGNAL(triggered()), this, SLOT(viewMatrixTable()));
   actionViewMatrix->setCheckable(true);
 
   actionMatrixXY = new QAction(tr("Show &X/Y"), this);
   actionMatrixXY->setShortcut(tr("Ctrl+Shift+X"));
-  connect(actionMatrixXY, SIGNAL(activated()), this, SLOT(viewMatrixXY()));
+  connect(actionMatrixXY, SIGNAL(triggered()), this, SLOT(viewMatrixXY()));
   actionMatrixXY->setCheckable(true);
 
   actionMatrixColumnRow = new QAction(tr("Show &Column/Row"), this);
   actionMatrixColumnRow->setShortcut(tr("Ctrl+Shift+C"));
-  connect(actionMatrixColumnRow, SIGNAL(activated()), this,
+  connect(actionMatrixColumnRow, SIGNAL(triggered()), this,
           SLOT(viewMatrixColumnRow()));
   actionMatrixColumnRow->setCheckable(true);
 
   actionMatrixGrayScale = new QAction(tr("&Gray Scale"), this);
-  connect(actionMatrixGrayScale, SIGNAL(activated()), this,
+  connect(actionMatrixGrayScale, SIGNAL(triggered()), this,
           SLOT(setMatrixGrayScale()));
   actionMatrixGrayScale->setCheckable(true);
 
   actionMatrixRainbowScale = new QAction(tr("&Rainbow"), this);
-  connect(actionMatrixRainbowScale, SIGNAL(activated()), this,
+  connect(actionMatrixRainbowScale, SIGNAL(triggered()), this,
           SLOT(setMatrixRainbowScale()));
   actionMatrixRainbowScale->setCheckable(true);
 
   actionMatrixCustomScale = new QAction(tr("&Custom"), this);
-  connect(actionMatrixCustomScale, SIGNAL(activated()), this,
+  connect(actionMatrixCustomScale, SIGNAL(triggered()), this,
           SLOT(showColorMapDialog()));
   actionMatrixCustomScale->setCheckable(true);
 
   actionExportMatrix = new QAction(tr("&Export Image ..."), this);
-  connect(actionExportMatrix, SIGNAL(activated()), this, SLOT(exportMatrix()));
+  connect(actionExportMatrix, SIGNAL(triggered()), this, SLOT(exportMatrix()));
 
   actionConvertMatrixDirect = new QAction(tr("&Direct"), this);
-  connect(actionConvertMatrixDirect, SIGNAL(activated()), this,
+  connect(actionConvertMatrixDirect, SIGNAL(triggered()), this,
           SLOT(convertMatrixToTableDirect()));
 
   actionConvertMatrixXYZ = new QAction(tr("&XYZ Columns"), this);
-  connect(actionConvertMatrixXYZ, SIGNAL(activated()), this,
+  connect(actionConvertMatrixXYZ, SIGNAL(triggered()), this,
           SLOT(convertMatrixToTableXYZ()));
 
   actionConvertMatrixYXZ = new QAction(tr("&YXZ Columns"), this);
-  connect(actionConvertMatrixYXZ, SIGNAL(activated()), this,
+  connect(actionConvertMatrixYXZ, SIGNAL(triggered()), this,
           SLOT(convertMatrixToTableYXZ()));
 
   actionMatrixFFTDirect = new QAction(tr("&Forward FFT"), this);
-  connect(actionMatrixFFTDirect, SIGNAL(activated()), this,
+  connect(actionMatrixFFTDirect, SIGNAL(triggered()), this,
           SLOT(matrixDirectFFT()));
 
   actionMatrixFFTInverse = new QAction(tr("&Inverse FFT"), this);
-  connect(actionMatrixFFTInverse, SIGNAL(activated()), this,
+  connect(actionMatrixFFTInverse, SIGNAL(triggered()), this,
           SLOT(matrixInverseFFT()));
 
   actionConvertTable = new QAction(tr("Convert to &Matrix"), this);
-  connect(actionConvertTable, SIGNAL(activated()), this,
+  connect(actionConvertTable, SIGNAL(triggered()), this,
           SLOT(convertTableToMatrix()));
 
   actionConvertTableToWorkspace =
       new QAction(tr("Convert to Table&Workspace"), this);
-  connect(actionConvertTableToWorkspace, SIGNAL(activated()), this,
+  connect(actionConvertTableToWorkspace, SIGNAL(triggered()), this,
           SLOT(convertTableToWorkspace()));
 
   actionConvertTableToMatrixWorkspace =
       new QAction(tr("Convert to MatrixWorkspace"), this);
-  connect(actionConvertTableToMatrixWorkspace, SIGNAL(activated()), this,
+  connect(actionConvertTableToMatrixWorkspace, SIGNAL(triggered()), this,
           SLOT(convertTableToMatrixWorkspace()));
 
   actionPlot3DWireFrame = new QAction(QIcon(getQPixmap("lineMesh_xpm")),
                                       tr("3D &Wire Frame"), this);
-  connect(actionPlot3DWireFrame, SIGNAL(activated()), this,
+  connect(actionPlot3DWireFrame, SIGNAL(triggered()), this,
           SLOT(plot3DWireframe()));
 
   actionPlot3DHiddenLine = new QAction(QIcon(getQPixmap("grid_only_xpm")),
                                        tr("3D &Hidden Line"), this);
-  connect(actionPlot3DHiddenLine, SIGNAL(activated()), this,
+  connect(actionPlot3DHiddenLine, SIGNAL(triggered()), this,
           SLOT(plot3DHiddenLine()));
 
   actionPlot3DPolygons =
       new QAction(QIcon(getQPixmap("no_grid_xpm")), tr("3D &Polygons"), this);
-  connect(actionPlot3DPolygons, SIGNAL(activated()), this,
+  connect(actionPlot3DPolygons, SIGNAL(triggered()), this,
           SLOT(plot3DPolygons()));
 
   actionPlot3DWireSurface = new QAction(QIcon(getQPixmap("grid_poly_xpm")),
                                         tr("3D Wire &Surface"), this);
-  connect(actionPlot3DWireSurface, SIGNAL(activated()), this,
+  connect(actionPlot3DWireSurface, SIGNAL(triggered()), this,
           SLOT(plot3DWireSurface()));
 
   actionColorMap = new QAction(QIcon(getQPixmap("color_map_xpm")),
                                tr("Contour - &Color Fill"), this);
-  connect(actionColorMap, SIGNAL(activated()), this, SLOT(plotColorMap()));
+  connect(actionColorMap, SIGNAL(triggered()), this, SLOT(plotColorMap()));
 
   actionContourMap = new QAction(QIcon(getQPixmap("contour_map_xpm")),
                                  tr("Contour &Lines"), this);
-  connect(actionContourMap, SIGNAL(activated()), this, SLOT(plotContour()));
+  connect(actionContourMap, SIGNAL(triggered()), this, SLOT(plotContour()));
 
   actionGrayMap = new QAction(QIcon(getQPixmap("gray_map_xpm")),
                               tr("&Gray Scale Map"), this);
-  connect(actionGrayMap, SIGNAL(activated()), this, SLOT(plotGrayScale()));
+  connect(actionGrayMap, SIGNAL(triggered()), this, SLOT(plotGrayScale()));
 
   actionNoContourColorMap =
       new QAction(QIcon(getQPixmap("color_map_xpm")), tr("Color &Fill"), this);
-  connect(actionNoContourColorMap, SIGNAL(activated()), this,
+  connect(actionNoContourColorMap, SIGNAL(triggered()), this,
           SLOT(plotNoContourColorMap()));
 
   actionSortTable = new QAction(tr("Sort Ta&ble"), this);
-  connect(actionSortTable, SIGNAL(activated()), this, SLOT(sortActiveTable()));
+  connect(actionSortTable, SIGNAL(triggered()), this, SLOT(sortActiveTable()));
 
   actionSortSelection = new QAction(tr("Sort Columns"), this);
-  connect(actionSortSelection, SIGNAL(activated()), this,
+  connect(actionSortSelection, SIGNAL(triggered()), this,
           SLOT(sortSelection()));
 
   actionNormalizeTable = new QAction(tr("&Table"), this);
-  connect(actionNormalizeTable, SIGNAL(activated()), this,
+  connect(actionNormalizeTable, SIGNAL(triggered()), this,
           SLOT(normalizeActiveTable()));
 
   actionNormalizeSelection = new QAction(tr("&Columns"), this);
-  connect(actionNormalizeSelection, SIGNAL(activated()), this,
+  connect(actionNormalizeSelection, SIGNAL(triggered()), this,
           SLOT(normalizeSelection()));
 
   actionCorrelate = new QAction(tr("Co&rrelate"), this);
-  connect(actionCorrelate, SIGNAL(activated()), this, SLOT(correlate()));
+  connect(actionCorrelate, SIGNAL(triggered()), this, SLOT(correlate()));
 
   actionAutoCorrelate = new QAction(tr("&Autocorrelate"), this);
-  connect(actionAutoCorrelate, SIGNAL(activated()), this,
+  connect(actionAutoCorrelate, SIGNAL(triggered()), this,
           SLOT(autoCorrelate()));
 
   actionConvolute = new QAction(tr("&Convolute"), this);
-  connect(actionConvolute, SIGNAL(activated()), this, SLOT(convolute()));
+  connect(actionConvolute, SIGNAL(triggered()), this, SLOT(convolute()));
 
   actionDeconvolute = new QAction(tr("&Deconvolute"), this);
-  connect(actionDeconvolute, SIGNAL(activated()), this, SLOT(deconvolute()));
-
-  actionTranslateHor = new QAction(tr("&Horizontal"), this);
-  connect(actionTranslateHor, SIGNAL(activated()), this,
-          SLOT(translateCurveHor()));
-
-  actionTranslateVert = new QAction(tr("&Vertical"), this);
-  connect(actionTranslateVert, SIGNAL(activated()), this,
-          SLOT(translateCurveVert()));
+  connect(actionDeconvolute, SIGNAL(triggered()), this, SLOT(deconvolute()));
 
   actionSetAscValues = new QAction(QIcon(getQPixmap("rowNumbers_xpm")),
                                    tr("Ro&w Numbers"), this);
-  connect(actionSetAscValues, SIGNAL(activated()), this, SLOT(setAscValues()));
+  connect(actionSetAscValues, SIGNAL(triggered()), this, SLOT(setAscValues()));
 
   actionSetRandomValues = new QAction(QIcon(getQPixmap("randomNumbers_xpm")),
                                       tr("&Random Values"), this);
-  connect(actionSetRandomValues, SIGNAL(activated()), this,
+  connect(actionSetRandomValues, SIGNAL(triggered()), this,
           SLOT(setRandomValues()));
 
   actionReadOnlyCol = new QAction(tr("&Read Only"), this);
-  connect(actionReadOnlyCol, SIGNAL(activated()), this, SLOT(setReadOnlyCol()));
+  connect(actionReadOnlyCol, SIGNAL(triggered()), this, SLOT(setReadOnlyCol()));
 
   actionSetXCol = new QAction(QIcon(getQPixmap("x_col_xpm")), tr("&X"), this);
-  connect(actionSetXCol, SIGNAL(activated()), this, SLOT(setXCol()));
+  connect(actionSetXCol, SIGNAL(triggered()), this, SLOT(setXCol()));
 
   actionSetYCol = new QAction(QIcon(getQPixmap("y_col_xpm")), tr("&Y"), this);
-  connect(actionSetYCol, SIGNAL(activated()), this, SLOT(setYCol()));
+  connect(actionSetYCol, SIGNAL(triggered()), this, SLOT(setYCol()));
 
   actionSetZCol = new QAction(QIcon(getQPixmap("z_col_xpm")), tr("&Z"), this);
-  connect(actionSetZCol, SIGNAL(activated()), this, SLOT(setZCol()));
+  connect(actionSetZCol, SIGNAL(triggered()), this, SLOT(setZCol()));
 
   actionSetXErrCol = new QAction(tr("X E&rror"), this);
-  connect(actionSetXErrCol, SIGNAL(activated()), this, SLOT(setXErrCol()));
+  connect(actionSetXErrCol, SIGNAL(triggered()), this, SLOT(setXErrCol()));
 
   actionSetYErrCol =
       new QAction(QIcon(getQPixmap("errors_xpm")), tr("Y &Error"), this);
-  connect(actionSetYErrCol, SIGNAL(activated()), this, SLOT(setYErrCol()));
+  connect(actionSetYErrCol, SIGNAL(triggered()), this, SLOT(setYErrCol()));
 
   actionDisregardCol = new QAction(QIcon(getQPixmap("disregard_col_xpm")),
                                    tr("&Disregard"), this);
-  connect(actionDisregardCol, SIGNAL(activated()), this, SLOT(disregardCol()));
+  connect(actionDisregardCol, SIGNAL(triggered()), this, SLOT(disregardCol()));
 
   actionSetLabelCol =
       new QAction(QIcon(getQPixmap("set_label_col_xpm")), tr("&Label"), this);
-  connect(actionSetLabelCol, SIGNAL(activated()), this, SLOT(setLabelCol()));
+  connect(actionSetLabelCol, SIGNAL(triggered()), this, SLOT(setLabelCol()));
 
   actionBoxPlot =
       new QAction(QIcon(getQPixmap("boxPlot_xpm")), tr("&Box Plot"), this);
-  connect(actionBoxPlot, SIGNAL(activated()), this, SLOT(plotBoxDiagram()));
-
-  actionMultiPeakGauss = new QAction(tr("&Gaussian..."), this);
-  connect(actionMultiPeakGauss, SIGNAL(activated()), this,
-          SLOT(fitMultiPeakGauss()));
-
-  actionMultiPeakLorentz = new QAction(tr("&Lorentzian..."), this);
-  connect(actionMultiPeakLorentz, SIGNAL(activated()), this,
-          SLOT(fitMultiPeakLorentz()));
-
-  // actionCheckUpdates = new QAction(tr("Search for &Updates"), this);
-  // connect(actionCheckUpdates, SIGNAL(activated()), this,
-  // SLOT(searchForUpdates()));
+  connect(actionBoxPlot, SIGNAL(triggered()), this, SLOT(plotBoxDiagram()));
 
   actionHomePage = new QAction(tr("&Mantid Homepage"), this); // Mantid change
-  connect(actionHomePage, SIGNAL(activated()), this, SLOT(showHomePage()));
-
-  // actionHelpForums = new QAction(tr("QtiPlot &Forums"), this); // Mantid
-  // change
-  //	connect(actionHelpForums, SIGNAL(triggered()), this,
-  // SLOT(showForums())); // Mantid change
+  connect(actionHomePage, SIGNAL(triggered()), this, SLOT(showHomePage()));
 
   actionHelpBugReports = new QAction(tr("Report a &Bug"), this);
   connect(actionHelpBugReports, SIGNAL(triggered()), this,
@@ -13004,37 +12856,37 @@ void ApplicationWindow::createActions() {
   connect(actionAskHelp, SIGNAL(triggered()), this, SLOT(showBugTracker()));
 
   actionShowCurvePlotDialog = new QAction(tr("&Plot details..."), this);
-  connect(actionShowCurvePlotDialog, SIGNAL(activated()), this,
+  connect(actionShowCurvePlotDialog, SIGNAL(triggered()), this,
           SLOT(showCurvePlotDialog()));
 
   actionShowCurveWorksheet = new QAction(tr("&Worksheet"), this);
-  connect(actionShowCurveWorksheet, SIGNAL(activated()), this,
+  connect(actionShowCurveWorksheet, SIGNAL(triggered()), this,
           SLOT(showCurveWorksheet()));
 
   actionCurveFullRange = new QAction(tr("&Reset to Full Range"), this);
-  connect(actionCurveFullRange, SIGNAL(activated()), this,
+  connect(actionCurveFullRange, SIGNAL(triggered()), this,
           SLOT(setCurveFullRange()));
 
   actionEditCurveRange = new QAction(tr("Edit &Range..."), this);
-  connect(actionEditCurveRange, SIGNAL(activated()), this,
+  connect(actionEditCurveRange, SIGNAL(triggered()), this,
           SLOT(showCurveRangeDialog()));
 
   actionRemoveCurve = new QAction(getQPixmap("close_xpm"), tr("&Delete"), this);
-  connect(actionRemoveCurve, SIGNAL(activated()), this, SLOT(removeCurve()));
+  connect(actionRemoveCurve, SIGNAL(triggered()), this, SLOT(removeCurve()));
 
   actionHideCurve = new QAction(tr("&Hide"), this);
-  connect(actionHideCurve, SIGNAL(activated()), this, SLOT(hideCurve()));
+  connect(actionHideCurve, SIGNAL(triggered()), this, SLOT(hideCurve()));
 
   actionHideOtherCurves = new QAction(tr("Hide &Other Curves"), this);
-  connect(actionHideOtherCurves, SIGNAL(activated()), this,
+  connect(actionHideOtherCurves, SIGNAL(triggered()), this,
           SLOT(hideOtherCurves()));
 
   actionShowAllCurves = new QAction(tr("&Show All Curves"), this);
-  connect(actionShowAllCurves, SIGNAL(activated()), this,
+  connect(actionShowAllCurves, SIGNAL(triggered()), this,
           SLOT(showAllCurves()));
 
   actionEditFunction = new QAction(tr("&Edit Function..."), this);
-  connect(actionEditFunction, SIGNAL(activated()), this,
+  connect(actionEditFunction, SIGNAL(triggered()), this,
           SLOT(showFunctionDialog()));
 
   actionFontBold = new QAction("B", this);
@@ -13056,12 +12908,12 @@ void ApplicationWindow::createActions() {
 
   actionSuperscript =
       new QAction(getQPixmap("exp_xpm"), tr("Superscript"), this);
-  connect(actionSuperscript, SIGNAL(activated()), this,
+  connect(actionSuperscript, SIGNAL(triggered()), this,
           SLOT(insertSuperscript()));
   actionSuperscript->setEnabled(false);
 
   actionSubscript = new QAction(getQPixmap("index_xpm"), tr("Subscript"), this);
-  connect(actionSubscript, SIGNAL(activated()), this, SLOT(insertSubscript()));
+  connect(actionSubscript, SIGNAL(triggered()), this, SLOT(insertSubscript()));
   actionSubscript->setEnabled(false);
 
   actionUnderline = new QAction("U", this);
@@ -13070,23 +12922,23 @@ void ApplicationWindow::createActions() {
   font = appFont;
   font.setUnderline(true);
   actionUnderline->setFont(font);
-  connect(actionUnderline, SIGNAL(activated()), this, SLOT(underline()));
+  connect(actionUnderline, SIGNAL(triggered()), this, SLOT(underline()));
   actionUnderline->setEnabled(false);
 
   actionGreekSymbol =
       new QAction(QString(QChar(0x3B1)) + QString(QChar(0x3B2)), this);
   actionGreekSymbol->setToolTip(tr("Greek"));
-  connect(actionGreekSymbol, SIGNAL(activated()), this,
+  connect(actionGreekSymbol, SIGNAL(triggered()), this,
           SLOT(insertGreekSymbol()));
 
   actionGreekMajSymbol = new QAction(QString(QChar(0x393)), this);
   actionGreekMajSymbol->setToolTip(tr("Greek"));
-  connect(actionGreekMajSymbol, SIGNAL(activated()), this,
+  connect(actionGreekMajSymbol, SIGNAL(triggered()), this,
           SLOT(insertGreekMajSymbol()));
 
   actionMathSymbol = new QAction(QString(QChar(0x222B)), this);
   actionMathSymbol->setToolTip(tr("Mathematical Symbols"));
-  connect(actionMathSymbol, SIGNAL(activated()), this,
+  connect(actionMathSymbol, SIGNAL(triggered()), this,
           SLOT(insertMathSymbol()));
 
   actionclearAllMemory = new QAction("&Clear All Memory", this);
@@ -13095,30 +12947,30 @@ void ApplicationWindow::createActions() {
           SLOT(clearAllMemory()));
 
   actionPanPlot = new QAction(QIcon(":/panning.png"), tr("Panning tool"), this);
-  connect(actionPanPlot, SIGNAL(activated()), this, SLOT(panOnPlot()));
+  connect(actionPanPlot, SIGNAL(triggered()), this, SLOT(panOnPlot()));
 
   actionCatalogLogin = new QAction("Login", this);
   actionCatalogLogin->setToolTip(tr("Catalog Login"));
-  connect(actionCatalogLogin, SIGNAL(activated()), this, SLOT(CatalogLogin()));
+  connect(actionCatalogLogin, SIGNAL(triggered()), this, SLOT(CatalogLogin()));
 
   actionCatalogSearch = new QAction("Search", this);
   actionCatalogSearch->setToolTip(tr("Search data in archives."));
-  connect(actionCatalogSearch, SIGNAL(activated()), this,
+  connect(actionCatalogSearch, SIGNAL(triggered()), this,
           SLOT(CatalogSearch()));
 
   actionCatalogPublish = new QAction("Publish", this);
   actionCatalogPublish->setToolTip(tr("Publish data to the archives."));
-  connect(actionCatalogPublish, SIGNAL(activated()), this,
+  connect(actionCatalogPublish, SIGNAL(triggered()), this,
           SLOT(CatalogPublish()));
 
   actionCatalogLogout = new QAction("Logout", this);
   actionCatalogLogout->setToolTip(tr("Catalog Logout"));
-  connect(actionCatalogLogout, SIGNAL(activated()), this,
+  connect(actionCatalogLogout, SIGNAL(triggered()), this,
           SLOT(CatalogLogout()));
 
   actionWaterfallPlot =
       new QAction(QIcon(":/waterfall_plot.png"), tr("&Waterfall Plot"), this);
-  connect(actionWaterfallPlot, SIGNAL(activated()), this,
+  connect(actionWaterfallPlot, SIGNAL(triggered()), this,
           SLOT(waterfallPlot()));
 }
 
@@ -13435,17 +13287,11 @@ void ApplicationWindow::translateActionsStrings() {
   actionAbout->setText(tr("&About MantidPlot")); // Mantid
   actionAbout->setShortcut(tr("F1"));
 
-  // actionShowHelp->setMenuText(tr("&Help"));
-  // actionShowHelp->setShortcut(tr("Ctrl+H"));
-
   actionMantidConcepts->setText(tr("&Mantid Concepts"));
 
   actionMantidAlgorithms->setText("&Algorithm Descriptions");
 
   actionmantidplotHelp->setText("&MantidPlot Help");
-
-  // actionChooseHelpFolder->setMenuText(tr("&Choose Help Folder..."));
-  // actionRename->setMenuText(tr("&Rename Window"));
 
   actionCloseWindow->setText(tr("Close &Window"));
   actionCloseWindow->setShortcut(tr("Ctrl+W"));
@@ -13454,7 +13300,7 @@ void ApplicationWindow::translateActionsStrings() {
   actionAddColToTable->setToolTip(tr("Add Column"));
 
   actionClearTable->setText(tr("Clear"));
-  actionGoToRow->setMenuText(tr("&Go to Row..."));
+  actionGoToRow->setText(tr("&Go to Row..."));
   actionGoToRow->setShortcut(tr("Ctrl+Alt+G"));
 
   actionGoToColumn->setText(tr("Go to Colum&n..."));
@@ -13527,8 +13373,6 @@ void ApplicationWindow::translateActionsStrings() {
   actionAutoCorrelate->setText(tr("&Autocorrelate"));
   actionConvolute->setText(tr("&Convolute"));
   actionDeconvolute->setText(tr("&Deconvolute"));
-  actionTranslateHor->setText(tr("&Horizontal"));
-  actionTranslateVert->setText(tr("&Vertical"));
   actionSetAscValues->setText(tr("Ro&w Numbers"));
   actionSetAscValues->setToolTip(tr("Fill selected columns with row numbers"));
   actionSetRandomValues->setText(tr("&Random Values"));
@@ -13552,20 +13396,9 @@ void ApplicationWindow::translateActionsStrings() {
   actionBoxPlot->setText(tr("&Box Plot"));
   actionBoxPlot->setToolTip(tr("Box and whiskers plot"));
 
-  actionMultiPeakGauss->setText(tr("&Gaussian..."));
-  actionMultiPeakLorentz->setText(tr("&Lorentzian..."));
   actionHomePage->setText(tr("&Mantid Homepage")); // Mantid change
-  // actionCheckUpdates->setText(tr("Search for &Updates")); //Mantid change
-  // - commented out
-  // actionHelpForums->setText(tr("Visit QtiPlot &Forums"));
   actionHelpBugReports->setText(tr("Report a &Bug"));
   actionAskHelp->setText(tr("Ask for Help"));
-  // actionDownloadManual->setText(tr("Download &Manual"));//Mantid change -
-  // commented out
-  // actionTranslations->setText(tr("&Translations"));//Mantid change -
-  // commented out
-  // actionDonate->setText(tr("Make a &Donation"));
-  // actionTechnicalSupport->setText(tr("Technical &Support"));
 
   btnPointer->setText(tr("Selection &Tools"));
   btnPointer->setToolTip(tr("Selection Tools"));
@@ -13611,9 +13444,6 @@ void ApplicationWindow::translateActionsStrings() {
   btnLine->setToolTip(tr("Draw Line"));
 
   // FIXME: is setText necessary for action groups?
-  //	coord->setText( tr( "Coordinates" ) );
-  //	coord->setText( tr( "&Coord" ) );
-  //  coord->setStatusTip( tr( "Coordinates" ) );
   Box->setText(tr("Box"));
   Box->setText(tr("Box"));
   Box->setToolTip(tr("Box"));
@@ -13666,9 +13496,6 @@ void ApplicationWindow::translateActionsStrings() {
   crossHairStyle->setToolTip(tr("Crosshairs"));
   crossHairStyle->setStatusTip(tr("Crosshairs"));
 
-  // floorstyle->setText( tr( "Floor Style" ) );
-  // floorstyle->setMenuText( tr( "Floor Style" ) );
-  // floorstyle->setStatusTip( tr( "Floor Style" ) );
   floordata->setText(tr("Floor Data Projection"));
   floordata->setToolTip(tr("Floor data projection"));
   floordata->setStatusTip(tr("Floor data projection"));
@@ -13830,10 +13657,10 @@ MultiLayer *ApplicationWindow::plotImage(Matrix *m) {
       return 0;
     }
     s->setAxis(QwtPlot::xTop, QwtPlot::yLeft);
-    plot->setScale(QwtPlot::xTop, QMIN(m->xStart(), m->xEnd()),
-                   QMAX(m->xStart(), m->xEnd()));
-    plot->setScale(QwtPlot::yLeft, QMIN(m->yStart(), m->yEnd()),
-                   QMAX(m->yStart(), m->yEnd()), 0.0, 5, 5,
+    plot->setScale(QwtPlot::xTop, qMin(m->xStart(), m->xEnd()),
+                   qMax(m->xStart(), m->xEnd()));
+    plot->setScale(QwtPlot::yLeft, qMin(m->yStart(), m->yEnd()),
+                   qMax(m->yStart(), m->yEnd()), 0.0, 5, 5,
                    GraphOptions::Linear, true);
   } else {
     g = mantidUI->plotSpectrogram(Graph::GrayScale);
@@ -14022,7 +13849,7 @@ void ApplicationWindow::updateRecentProjectsList() {
 
 void ApplicationWindow::updateRecentFilesList(QString fname) {
   if (!fname.isEmpty()) {
-    recentFiles.remove(fname);
+    recentFiles.removeAll(fname);
     recentFiles.push_front(fname);
   }
   while ((int)recentFiles.size() > MaxRecentFiles)
@@ -14061,72 +13888,6 @@ void ApplicationWindow::updateRecentFilesList(QString fname) {
     ma->setData(recentFiles[i]);
     recentFilesMenu->addAction(ma);
     menuCount++;
-  }
-}
-
-void ApplicationWindow::translateCurveHor() {
-  MultiLayer *plot = dynamic_cast<MultiLayer *>(activeWindow(MultiLayerWindow));
-  if (!plot)
-    return;
-  if (plot->isEmpty()) {
-    QMessageBox::warning(
-        this, tr("MantidPlot - Warning"), // Mantid
-        tr("<h4>There are no plot layers available in this window.</h4>"
-           "<p><h4>Please add a layer and try again!</h4>"));
-    btnPointer->setChecked(true);
-    return;
-  }
-
-  Graph *g = dynamic_cast<Graph *>(plot->activeGraph());
-  if (!g)
-    return;
-
-  if (g->isPiePlot()) {
-    QMessageBox::warning(
-        this, tr("MantidPlot - Warning"), // Mantid
-        tr("This functionality is not available for pie plots!"));
-
-    btnPointer->setChecked(true);
-    return;
-  } else if (g->validCurvesDataSize()) {
-    btnPointer->setChecked(true);
-    g->setActiveTool(
-        new TranslateCurveTool(g, this, TranslateCurveTool::Horizontal, info,
-                               SLOT(setText(const QString &))));
-    displayBar->show();
-  }
-}
-
-void ApplicationWindow::translateCurveVert() {
-  MultiLayer *plot = dynamic_cast<MultiLayer *>(activeWindow(MultiLayerWindow));
-  if (!plot)
-    return;
-  if (plot->isEmpty()) {
-    QMessageBox::warning(
-        this, tr("MantidPlot - Warning"), // Mantid
-        tr("<h4>There are no plot layers available in this window.</h4>"
-           "<p><h4>Please add a layer and try again!</h4>"));
-    btnPointer->setChecked(true);
-    return;
-  }
-
-  Graph *g = dynamic_cast<Graph *>(plot->activeGraph());
-  if (!g)
-    return;
-
-  if (g->isPiePlot()) {
-    QMessageBox::warning(
-        this, tr("MantidPlot - Warning"), // Mantid
-        tr("This functionality is not available for pie plots!"));
-
-    btnPointer->setChecked(true);
-    return;
-  } else if (g->validCurvesDataSize()) {
-    btnPointer->setChecked(true);
-    g->setActiveTool(new TranslateCurveTool(g, this,
-                                            TranslateCurveTool::Vertical, info,
-                                            SLOT(setText(const QString &))));
-    displayBar->show();
   }
 }
 
@@ -14229,57 +13990,10 @@ void ApplicationWindow::disregardCol() {
   t->setPlotDesignation(Table::None);
 }
 
-void ApplicationWindow::fitMultiPeakGauss() {
-  fitMultiPeak((int)MultiPeakFit::Gauss);
-}
-
-void ApplicationWindow::fitMultiPeakLorentz() {
-  fitMultiPeak((int)MultiPeakFit::Lorentz);
-}
-
-void ApplicationWindow::fitMultiPeak(int profile) {
-  MultiLayer *plot = dynamic_cast<MultiLayer *>(activeWindow(MultiLayerWindow));
-  if (!plot)
-    return;
-  if (plot->isEmpty()) {
-    QMessageBox::warning(
-        this, tr("MantidPlot - Warning"), // Mantid
-        tr("<h4>There are no plot layers available in this window.</h4>"
-           "<p><h4>Please add a layer and try again!</h4>"));
-    btnPointer->setChecked(true);
-    return;
-  }
-
-  Graph *g = dynamic_cast<Graph *>(plot->activeGraph());
-  if (!g || !g->validCurvesDataSize())
-    return;
-
-  if (g->isPiePlot()) {
-    QMessageBox::warning(
-        this, tr("MantidPlot - Warning"), // Mantid
-        tr("This functionality is not available for pie plots!"));
-    return;
-  } else {
-    bool ok;
-    int peaks = QInputDialog::getInteger(this,
-        tr("MantidPlot - Enter the number of peaks"), // Mantid
-        tr("Peaks"), 2, 2, 1000000, 1, &ok);
-    if (ok && peaks) {
-      g->setActiveTool(
-          new MultiPeakFitTool(g, this, (MultiPeakFit::PeakProfile)profile,
-                               peaks, info, SLOT(setText(const QString &))));
-      displayBar->show();
-    }
-  }
-}
-
 void ApplicationWindow::showHomePage() {
   QDesktopServices::openUrl(QUrl("http://www.mantidproject.org"));
 }
-void ApplicationWindow::showMantidConcepts() {
-  // QDesktopServices::openUrl(QUrl("http://www.mantidproject.org/Category:Concepts"));
-  HelpWindow::showConcept(this);
-}
+void ApplicationWindow::showMantidConcepts() { HelpWindow::showConcept(this); }
 void ApplicationWindow::showalgorithmDescriptions() {
   HelpWindow::showAlgorithm(this);
 }
@@ -14334,7 +14048,7 @@ void ApplicationWindow::parseCommandLineArguments(const QStringList &args) {
         (str == "-r" || str == "--revision") ||
         (str == "-a" || str == "--about") || (str == "-h" || str == "--help")) {
       g_log.warning()
-          << str.latin1()
+          << str.toLatin1().constData()
           << ": This command line option must be used without other arguments!";
     } else if ((str == "-d" || str == "--default-settings")) {
       default_settings = true;
@@ -14352,7 +14066,8 @@ void ApplicationWindow::parseCommandLineArguments(const QStringList &args) {
     else if (file_name.isEmpty() &&
              (str.startsWith("-") || str.startsWith("--"))) {
       g_log.warning()
-          << "'" << str.latin1() << "' unknown command line option!\n"
+          << "'" << str.toLatin1().constData()
+          << "' unknown command line option!\n"
           << "Type 'MantidPlot -h'' to see the list of the valid options.";
       unknown_opt_found = true;
       break;
@@ -14655,7 +14370,8 @@ void ApplicationWindow::saveProjectFile(Folder *folder, const QString &fn,
   text += saveProjectFolder(folder, windowCount, true);
 
   text.prepend("<windows>\t" + QString::number(windowCount) + "\n");
-  text.prepend("<scripting-lang>\t" + QString(scriptingEnv()->objectName()) + "\n");
+  text.prepend("<scripting-lang>\t" + QString(scriptingEnv()->objectName()) +
+               "\n");
   text.prepend("MantidPlot " + QString::number(maj_version) + "." +
                QString::number(min_version) + "." +
                QString::number(patch_version) + " project file\n");
@@ -14666,7 +14382,7 @@ void ApplicationWindow::saveProjectFile(Folder *folder, const QString &fn,
   f.close();
 
   if (compress) {
-    file_compress(fn.latin1(), "w9");
+    file_compress(fn.toLatin1().constData(), "w9");
   }
 
   QApplication::restoreOverrideCursor();
@@ -14699,15 +14415,15 @@ void ApplicationWindow::showFolderPopupMenu(const QPoint &p) {
   showFolderPopupMenu(item, p, true);
 }
 
-void ApplicationWindow::showFolderPopupMenu(QTreeWidgetItem *it, const QPoint &p,
-                                            bool fromFolders) {
+void ApplicationWindow::showFolderPopupMenu(QTreeWidgetItem *it,
+                                            const QPoint &p, bool fromFolders) {
 
   QMenu cm(this);
   QMenu window(this);
   QMenu viewWindowsMenu(this);
 
-  cm.insertItem(tr("&Find..."), this, SLOT(showFindDialogue()));
-  cm.insertSeparator();
+  cm.addAction(tr("&Find..."), this, SLOT(showFindDialogue()));
+  cm.addSeparator();
   cm.addAction(tr("App&end Project..."), this, SLOT(appendProject()));
 
   auto fli = dynamic_cast<FolderListItem *>(it);
@@ -14810,7 +14526,6 @@ void ApplicationWindow::hideAllFolderWindows() {
 
   if ((currentFolder()->children()).isEmpty())
     return;
-
 }
 
 void ApplicationWindow::projectProperties() {
@@ -14843,7 +14558,6 @@ void ApplicationWindow::projectProperties() {
       new QMessageBox(tr("Properties"), s, QMessageBox::NoIcon, QMessageBox::Ok,
                       QMessageBox::NoButton, QMessageBox::NoButton, this);
 
-  // mbox->setIconPixmap(QPixmap( qtiplot_logo_xpm ));
   mbox->show();
 }
 
@@ -14863,9 +14577,7 @@ void ApplicationWindow::folderProperties() {
        tr("windows");
   s += ", " + QString::number(currentFolder()->subfolders().count()) + " " +
        tr("folders") + "\n\n";
-  // s += "\n\n\n";
   s += tr("Created") + ": " + currentFolder()->birthDate() + "\n\n";
-  // s += tr("Modified") + ": " + currentFolder()->modificationDate() + "\n\n";
 
   QMessageBox *mbox =
       new QMessageBox(tr("Properties"), s, QMessageBox::NoIcon, QMessageBox::Ok,
@@ -15006,7 +14718,8 @@ void ApplicationWindow::folderItemDoubleClicked(QTreeWidgetItem *it) {
   folders->setCurrentItem(item);
 }
 
-void ApplicationWindow::folderItemChanged(QTreeWidgetItem *it, QTreeWidgetItem *) {
+void ApplicationWindow::folderItemChanged(QTreeWidgetItem *it,
+                                          QTreeWidgetItem *) {
   if (!it)
     return;
 
@@ -15089,8 +14802,6 @@ bool ApplicationWindow::changeFolder(Folder *newFolder, bool force) {
       else if (w->status() == MdiSubWindow::Maximized)
         w->setMaximized();
     }
-    // else
-    //  w->setStatus(MdiSubWindow::Hidden);
 
     addListViewItem(w);
   }
@@ -15243,8 +14954,8 @@ void ApplicationWindow::addFolderListViewItem(Folder *f) {
 }
 
 void ApplicationWindow::find(const QString &s, bool windowNames, bool labels,
-                             bool , bool caseSensitive,
-                             bool partialMatch, bool) {
+                             bool, bool caseSensitive, bool partialMatch,
+                             bool) {
   if (windowNames || labels) {
     MdiSubWindow *w = currentFolder()->findWindow(s, windowNames, labels,
                                                   caseSensitive, partialMatch);
@@ -15315,7 +15026,8 @@ void ApplicationWindow::goToRow() {
   if (!w)
     return;
 
-  if (w->inherits("Table") || QString(w->metaObject()->className()) == "Matrix") {
+  if (w->inherits("Table") ||
+      QString(w->metaObject()->className()) == "Matrix") {
     bool ok;
     int row = QInputDialog::getInteger(
         this, tr("MantidPlot - Enter row number"), tr("Row"), // Mantid
@@ -15340,7 +15052,8 @@ void ApplicationWindow::goToColumn() {
   if (!w)
     return;
 
-  if (w->inherits("Table") || QString(w->metaObject()->className()) == "Matrix") {
+  if (w->inherits("Table") ||
+      QString(w->metaObject()->className()) == "Matrix") {
     bool ok;
     int col = QInputDialog::getInteger(
         this, tr("MantidPlot - Enter column number"), tr("Column"), // Mantid
@@ -15806,16 +15519,9 @@ void ApplicationWindow::restoreApplicationGeometry() {
 
 void ApplicationWindow::scriptsDirPathChanged(const QString &path) {
   scriptsDirPath = path;
-
-  //  QList<MdiSubWindow*> windows = windowsList();
-  //  foreach(MdiSubWindow *w, windows){
-  //    if (w->isA("Note"))
-  //      dynamic_cast<Note*>(w)->setDirPath(path);
-  //  }
 }
 
-void ApplicationWindow::makeToolbarsMenu()
-{
+void ApplicationWindow::makeToolbarsMenu() {
   // cppcheck-suppress publicAllocationError
   actionFileTools = new QAction(standardTools->windowTitle(), toolbarsMenu);
   actionFileTools->setCheckable(true);
@@ -15858,7 +15564,8 @@ void ApplicationWindow::setToolbars() {
   plotTools->setVisible(d_plot_tool_bar);
   displayBar->setVisible(d_display_tool_bar);
   formatToolBar->setVisible(d_format_tool_bar);
-  plotTools->setEnabled(w && QString(w->metaObject()->className()) == "MultiLayer");
+  plotTools->setEnabled(w &&
+                        QString(w->metaObject()->className()) == "MultiLayer");
 }
 
 void ApplicationWindow::saveFitFunctions(const QStringList &lst) {
@@ -16188,7 +15895,7 @@ void ApplicationWindow::performCustomAction(QAction *action) {
   QString action_data = action->data().toString();
   if (QFileInfo(action_data).exists()) {
     QFile script_file(action_data);
-    if (!script_file.open(IO_ReadOnly)) {
+    if (!script_file.open(QIODevice::ReadOnly)) {
       QMessageBox::information(this, "MantidPlot",
                                "Error: There was a problem reading\n" +
                                    action_data);
@@ -16273,7 +15980,7 @@ void ApplicationWindow::loadCustomActions() {
 QList<QMenu *> ApplicationWindow::customizableMenusList() {
   QList<QMenu *> lst;
   lst << windowsMenu << view << graph << fileMenu << format << edit;
-  lst << help << plot2DMenu << analysisMenu << multiPeakMenu;
+  lst << help << plot2DMenu << analysisMenu;
   lst << matrixMenu << plot3DMenu << plotDataMenu; // scriptingMenu;
   lst << tableMenu << fillMenu << normMenu << newMenu << exportPlotMenu
       << smoothMenu;
@@ -16298,7 +16005,6 @@ void ApplicationWindow::addUserMenu(const QString &topMenu) {
   connect(customMenu, SIGNAL(triggered(QAction *)), this,
           SLOT(performCustomAction(QAction *)));
   d_user_menus.append(customMenu);
-  myMenuBar()->insertItem(tr(topMenu), customMenu);
   myMenuBar()->addMenu(customMenu)->setText(tr(topMenu.toAscii().constData()));
 }
 
@@ -16319,7 +16025,8 @@ void ApplicationWindow::addUserMenuAction(const QString &parentMenu,
       return;
   }
 
-  QAction *scriptAction = new QAction(tr(niceName.toAscii().constData()), topMenu);
+  QAction *scriptAction =
+      new QAction(tr(niceName.toAscii().constData()), topMenu);
   scriptAction->setData(itemData);
   topMenu->addAction(scriptAction);
   d_user_actions.append(scriptAction);
@@ -16418,7 +16125,7 @@ void ApplicationWindow::setMatrixUndoStackSize(int size) {
   while (f) {
     QList<MdiSubWindow *> folderWindows = f->windowsList();
     foreach (MdiSubWindow *w, folderWindows) {
-      if (w->isA("Matrix")) {
+      if (this->isOfType(w, "Matrix")) {
         auto matrix = dynamic_cast<Matrix *>(w);
         if (!matrix)
           continue;
@@ -16583,14 +16290,14 @@ void ApplicationWindow::CatalogLogin() {
 }
 
 void ApplicationWindow::CatalogSearch() {
-    // Only one ICAT GUI will appear, and that the previous one will be
-    // overridden.
-    // E.g. if a user opens the ICAT GUI without being logged into ICAT they
-    // will need to
-    // login in and then click "Search" again.
-    catalogSearch.reset(new MantidQt::MantidWidgets::CatalogSearch());
-    catalogSearch->show();
-    catalogSearch->raise();
+  // Only one ICAT GUI will appear, and that the previous one will be
+  // overridden.
+  // E.g. if a user opens the ICAT GUI without being logged into ICAT they
+  // will need to
+  // login in and then click "Search" again.
+  catalogSearch.reset(new MantidQt::MantidWidgets::CatalogSearch());
+  catalogSearch->show();
+  catalogSearch->raise();
 }
 
 void ApplicationWindow::CatalogPublish() {
@@ -16920,8 +16627,8 @@ void ApplicationWindow::detachMdiSubwindow(MdiSubWindow *w) {
     currentFolder()->removeWindow(w);
   }
   removeWindowFromLists(w);
-  auto found = lv->findItems(
-      w->objectName(), Qt::MatchExactly | Qt::MatchCaseSensitive, 0);
+  auto found = lv->findItems(w->objectName(),
+                             Qt::MatchExactly | Qt::MatchCaseSensitive, 0);
   if (!found.isEmpty())
     lv->takeTopLevelItem(lv->indexOfTopLevelItem(found[0]));
 
@@ -17281,8 +16988,7 @@ QString ApplicationWindow::saveProjectFolder(Folder *folder, int &windowCount,
   return text;
 }
 
-bool ApplicationWindow::isOfType(const QObject* obj, const char* toCompare) const {
+bool ApplicationWindow::isOfType(const QObject *obj,
+                                 const char *toCompare) const {
   return strcmp(obj->metaObject()->className(), toCompare) == 0;
 }
-
-

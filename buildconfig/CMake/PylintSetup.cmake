@@ -15,7 +15,7 @@ if ( PYLINT_FOUND )
   # Use msvs for MSVC generator, colorized for everything else. The buildservers can
   # set it to parseable for Jenkins
   if ( MSVC )
-    set ( DEFAULT_FORMAT "{path}({line}): [{msg_id}{obj}] {msg}" )
+    set ( DEFAULT_FORMAT "msvs" )
   else ()
     set ( DEFAULT_FORMAT "{C}:{line:3d},{column:2d}: {msg} ({symbol})" )
   endif ()

@@ -103,7 +103,7 @@ bool ISISHistoDataListener::connect(const Poco::Net::SocketAddress &address) {
   }
 
   m_numberOfPeriods = getInt("NPER");
-  g_log.information() << "Number of periods " << m_numberOfPeriods << std::endl;
+  g_log.information() << "Number of periods " << m_numberOfPeriods << '\n';
 
   // Set the spectra list to load
   std::vector<specnum_t> spectra = getProperty("SpectraList");
@@ -158,7 +158,7 @@ boost::shared_ptr<Workspace> ISISHistoDataListener::extractData() {
   if (m_timeRegime < 0) {
     m_timeRegime = getTimeRegimeToLoad();
     g_log.debug() << "Loading spectra for time regime " << m_timeRegime + 1
-                  << std::endl;
+                  << '\n';
   }
 
   if (!m_daeHandle) {
@@ -308,9 +308,8 @@ void ISISHistoDataListener::setPeriods(
     m_periodList = periodList;
     if (*std::max_element(m_periodList.begin(), m_periodList.end()) >
         m_numberOfPeriods) {
-      throw std::invalid_argument(
-          "Invalid period(s) specified. Maximum " +
-          boost::lexical_cast<std::string>(m_numberOfPeriods));
+      throw std::invalid_argument("Invalid period(s) specified. Maximum " +
+                                  std::to_string(m_numberOfPeriods));
     }
   }
 }
@@ -436,8 +435,7 @@ void ISISHistoDataListener::getData(int period, int index, int count,
     workspace->setX(wi, m_bins[m_timeRegime]);
     MantidVec &y = workspace->dataY(wi);
     MantidVec &e = workspace->dataE(wi);
-    workspace->getSpectrum(wi)
-        ->setSpectrumNo(index + static_cast<specnum_t>(i));
+    workspace->getSpectrum(wi).setSpectrumNo(index + static_cast<specnum_t>(i));
     size_t shift = i * (numberOfBins + 1) + 1;
     y.assign(dataBuffer.begin() + shift, dataBuffer.begin() + shift + y.size());
     std::transform(y.begin(), y.end(), e.begin(), dblSqrt);
@@ -509,7 +507,7 @@ void ISISHistoDataListener::loadTimeRegimes() {
   // If there is nonzero number of time channels for the second one then we have
   // two regimes.
   for (size_t tr = 0; tr < 2; ++tr) {
-    const std::string regime = boost::lexical_cast<std::string>(tr + 1);
+    const std::string regime = std::to_string(tr + 1);
     // get number of bins in this regime
     int nbins = getInt(ntcPrefix + regime);
     if (nbins == 0) {
@@ -555,12 +553,11 @@ void ISISHistoDataListener::loadTimeRegimes() {
         }
 
         for (auto &mon : m_monitorSpectra) {
-          g_log.information() << "Monitor spectrum " << mon << std::endl;
+          g_log.information() << "Monitor spectrum " << mon << '\n';
         }
 
         const std::string detRTCB =
-            rtcbPrefix + "_" +
-            boost::lexical_cast<std::string>(m_monitorSpectra.front());
+            rtcbPrefix + "_" + std::to_string(m_monitorSpectra.front());
         // read in the bin boundaries
         getFloatArray(detRTCB, floatBuffer, nbins + 1);
       }
@@ -577,14 +574,13 @@ void ISISHistoDataListener::loadTimeRegimes() {
       }
     }
   }
-  g_log.information() << "Number of time regimes " << m_bins.size()
-                      << std::endl;
+  g_log.information() << "Number of time regimes " << m_bins.size() << '\n';
   assert(m_numberOfBins.size() == m_numberOfSpectra.size());
   for (size_t i = 0; i < m_numberOfBins.size(); ++i) {
     g_log.information() << "Number of bins in time regime " << i + 1 << " is "
-                        << m_numberOfBins[i] << std::endl;
+                        << m_numberOfBins[i] << '\n';
     g_log.information() << "Number of spectra in time regime " << i + 1
-                        << " is " << m_numberOfSpectra[i] << std::endl;
+                        << " is " << m_numberOfSpectra[i] << '\n';
   }
 
   // find the total number of spectra in all regimes
@@ -610,7 +606,7 @@ int ISISHistoDataListener::getTimeRegimeToLoad() const {
           m_monitorSpectra.end();
       if (!isMonitor && specIt > m_totalNumberOfSpectra)
         throw std::invalid_argument("Invalid spectra index is found: " +
-                                    boost::lexical_cast<std::string>(specIt));
+                                    std::to_string(specIt));
       int specRegime = isMonitor ? 1 : 0;
       if (regime < 0) {
         regime = specRegime;

@@ -21,6 +21,8 @@ using namespace Mantid::Kernel;
 using ::testing::_;
 using ::testing::Mock;
 
+GCC_DIAG_OFF_SUGGEST_OVERRIDE
+
 class MockPawleyFunction : public IPawleyFunction {
 public:
   MockPawleyFunction() {}
@@ -43,7 +45,7 @@ public:
 
   MOCK_METHOD4(setMatrixWorkspace,
                void(MatrixWorkspace_const_sptr, size_t, double, double));
-
+  GCC_DIAG_ON_SUGGEST_OVERRIDE
 protected:
   void init() override { setDecoratedFunction("Gaussian"); }
 };

@@ -14,7 +14,7 @@ import sys
 import time
 
 # Default output format
-DEFAULT_PYLINT_FORMAT = '{msg_id}:{line:3d},{column}: {obj}: {msg}'
+DEFAULT_PYLINT_FORMAT = 'parseable'
 # Exe to call
 DEFAULT_PYLINT_EXE = 'pylint'
 # Default log level
@@ -470,7 +470,7 @@ def build_pylint_cmd(srcpath, options):
       A list of args to pass to subprocess.Popen
     """
     cmd = [options.exe]
-    cmd.extend(["--msg-template=" + options.format])
+    cmd.extend(["--output-format=" + options.format])
     if options.rcfile is not None:
         cmd.extend(["--rcfile=" + options.rcfile])
     # and finally, source module

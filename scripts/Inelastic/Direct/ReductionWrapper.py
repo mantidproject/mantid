@@ -1,7 +1,7 @@
 ﻿#pylint: disable=invalid-name
 from mantid.simpleapi import *
 from mantid import config,api
-from mantid.kernel import funcreturns
+from mantid.kernel import funcinspect
 
 from Direct.PropertyManager import PropertyManager
 # this import is used by children
@@ -14,7 +14,7 @@ try:
     h5py_installed = True
 except ImportError:
     h5py_installed = False
-    pass
+
 from abc import abstractmethod
 
 # R0921 abstract class not referenced -- wrong, client references it.
@@ -227,8 +227,7 @@ class ReductionWrapper(object):
          or workspace
 
          Change this method to verify different results or validate results differently"""
-        rez,message = ReductionWrapper.build_or_validate_result(self,
-                                     Error,ToleranceRelErr)
+        rez,message = ReductionWrapper.build_or_validate_result(self,Error,ToleranceRelErr)
         return rez,message
    #
 
@@ -522,7 +521,7 @@ class ReductionWrapper(object):
                     # here we have run numbers. Let's get real file names
                     prop_man = self.reducer.prop_man
                     instr_name = prop_man.short_instr_name
-                    is_found,fname = PropertyManager.sample_run.find_file(prop_man,instr_name,run);
+                    is_found,fname = PropertyManager.sample_run.find_file(prop_man,instr_name,run)
                     if not is_found:
                         raise RuntimeError("File has been found earlier but can not been retrieved now. Logical bug")
                     else:
@@ -541,7 +540,7 @@ class ReductionWrapper(object):
             data search path
         """
         try:
-            _,r = funcreturns.lhs_info('both')
+            _,r = funcinspect.lhs_info('both')
             out_ws_name = r[0]
 # no-exception-type(s) specified. Who knows what exception this internal procedure rises...
 #pylint: disable=W0702
@@ -655,7 +654,7 @@ def iliad(reduce):
         #seq = inspect.stack()
         # output workspace name.
         try:
-            _,r = funcreturns.lhs_info('both')
+            _,r = funcinspect.lhs_info('both')
             out_ws_name = r[0]
 # no-exception-type(s) specified. Who knows what exception this internal procedure rises...
 #pylint: disable=W0702

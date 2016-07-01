@@ -1,6 +1,9 @@
+from __future__ import (absolute_import, division,
+                        print_function)
+
+import inspect
 import threading
 import types
-import inspect
 
 from PyQt4 import QtGui
 
@@ -13,7 +16,6 @@ RegexLexer.get_tokens_unprocessed_unpatched = RegexLexer.get_tokens_unprocessed
 
 from IPython.qt.console.rich_ipython_widget import RichIPythonWidget
 from IPython.qt.inprocess import QtInProcessKernelManager
-
 
 def our_run_code(self, code_obj, result=None):
     """ Method with which we replace the run_code method of IPython's InteractiveShell class.
@@ -80,4 +82,3 @@ class MantidIPythonWidget(RichIPythonWidget):
 
         self.kernel_manager = kernel_manager
         self.kernel_client = kernel_client
-

@@ -124,8 +124,7 @@ void DiffractionFocussing::exec() {
       ++discarded;
     }
   g_log.warning() << "Discarded " << discarded
-                  << " spectra that were not assigned to any group"
-                  << std::endl;
+                  << " spectra that were not assigned to any group\n";
 
   // Running GroupDetectors leads to a load of redundant spectra
   // Create a new workspace that's the right size for the meaningful spectra and
@@ -146,9 +145,9 @@ void DiffractionFocussing::exec() {
     outE.assign(tmpE.begin(), tmpE.end());
     outY.assign(tmpY.begin(), tmpY.end());
     outX.assign(tmpX.begin(), tmpX.end());
-    API::ISpectrum *inSpec = tmpW->getSpectrum(i);
-    outputW->getSpectrum(hist)->setSpectrumNo(inSpec->getSpectrumNo());
-    inSpec->setSpectrumNo(-1);
+    auto &inSpec = tmpW->getSpectrum(i);
+    outputW->getSpectrum(hist).setSpectrumNo(inSpec.getSpectrumNo());
+    inSpec.setSpectrumNo(-1);
   }
 
   progress(1.);
@@ -219,14 +218,12 @@ void DiffractionFocussing::calculateRebinParams(
   int64_t length = workspace->getNumberHistograms();
   for (int64_t i = 0; i < length; i++) {
     const MantidVec &xVec = workspace->readX(i);
-    const double &localMin = xVec[0];
-    const double &localMax = xVec[xVec.size() - 1];
+    const double &localMin = xVec.front();
+    const double &localMax = xVec.back();
     if (localMin != std::numeric_limits<double>::infinity() &&
         localMax != std::numeric_limits<double>::infinity()) {
-      if (localMin < min)
-        min = localMin;
-      if (localMax > max)
-        max = localMax;
+      min = std::min(min, localMin);
+      max = std::max(max, localMax);
     }
   }
 
@@ -249,7 +246,7 @@ DiffractionFocussing::readGroupingFile(std::string groupingFileName) {
   std::ifstream grFile(groupingFileName.c_str());
   if (!grFile) {
     g_log.error() << "Unable to open grouping file " << groupingFileName
-                  << std::endl;
+                  << '\n';
     throw Exception::FileError("Error reading .cal file", groupingFileName);
   }
 

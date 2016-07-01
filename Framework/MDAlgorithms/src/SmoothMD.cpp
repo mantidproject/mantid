@@ -156,16 +156,6 @@ KernelVector normaliseKernel(KernelVector kernel) {
 DECLARE_ALGORITHM(SmoothMD)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-SmoothMD::SmoothMD() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-SmoothMD::~SmoothMD() {}
-
-//----------------------------------------------------------------------------------------------
 
 /// Algorithms name for identification. @see Algorithm::name
 const std::string SmoothMD::name() const { return "SmoothMD"; }
@@ -324,7 +314,7 @@ SmoothMD::gaussianSmooth(IMDHistoWorkspace_const_sptr toSmooth,
   for (size_t dimension_number = 0; dimension_number < widthVector.size();
        ++dimension_number) {
 
-    auto iterators = toSmooth->createIterators(nThreads, NULL);
+    auto iterators = toSmooth->createIterators(nThreads, nullptr);
 
     // Alternately write to each workspace
     if (dimension_number % 2 == 0) {

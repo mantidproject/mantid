@@ -14,16 +14,6 @@ using namespace DataObjects;
 DECLARE_ALGORITHM(MuonGroupDetectors)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-MuonGroupDetectors::MuonGroupDetectors() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-MuonGroupDetectors::~MuonGroupDetectors() {}
-
-//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string MuonGroupDetectors::name() const {
   return "MuonGroupDetectors";
@@ -105,7 +95,7 @@ void MuonGroupDetectors::exec() {
       throw std::invalid_argument("Some of the detector IDs were not found");
 
     // We will be setting them anew
-    outWS->getSpectrum(groupIndex)->clearDetectorIDs();
+    outWS->getSpectrum(groupIndex).clearDetectorIDs();
 
     for (auto &wsIndex : wsIndices) {
       for (size_t i = 0; i < inWS->blocksize(); ++i) {
@@ -120,14 +110,14 @@ void MuonGroupDetectors::exec() {
       // Detectors list of the group should contain all the detectors of it's
       // elements
       outWS->getSpectrum(groupIndex)
-          ->addDetectorIDs(inWS->getSpectrum(wsIndex)->getDetectorIDs());
+          .addDetectorIDs(inWS->getSpectrum(wsIndex).getDetectorIDs());
     }
 
     // Using the first detector X values
     outWS->dataX(groupIndex) = inWS->dataX(wsIndices.front());
 
     outWS->getSpectrum(groupIndex)
-        ->setSpectrumNo(static_cast<specnum_t>(groupIndex + 1));
+        .setSpectrumNo(static_cast<specnum_t>(groupIndex + 1));
   }
 
   setProperty("OutputWorkspace", outWS);

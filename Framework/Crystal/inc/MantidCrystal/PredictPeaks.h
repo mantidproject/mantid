@@ -23,7 +23,6 @@ namespace Crystal {
 class DLLExport PredictPeaks : public API::Algorithm {
 public:
   PredictPeaks();
-  ~PredictPeaks() override;
 
   /// Algorithm's name for identification
   const std::string name() const override { return "PredictPeaks"; };
@@ -59,7 +58,7 @@ private:
 
   void setStructureFactorCalculatorFromSample(const API::Sample &sample);
 
-  void calculateQAndAddToOutput(const Kernel::V3D &hkl,
+  void calculateQAndAddToOutput(Kernel::V3D &hkl,
                                 const Kernel::DblMatrix &orientedUB,
                                 const Kernel::DblMatrix &goniometerMatrix);
 
@@ -73,7 +72,7 @@ private:
   Geometry::Instrument_const_sptr m_inst;
   /// Output peaks workspace
   Mantid::DataObjects::PeaksWorkspace_sptr m_pw;
-
+  std::string convention;
   Geometry::StructureFactorCalculator_sptr m_sfCalculator;
 };
 

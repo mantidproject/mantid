@@ -30,11 +30,6 @@ SaveFullprofResolution::SaveFullprofResolution()
 }
 
 //----------------------------------------------------------------------------------------------
-/** Destructor
- */
-SaveFullprofResolution::~SaveFullprofResolution() {}
-
-//----------------------------------------------------------------------------------------------
 /** Init to define parameters
   */
 void SaveFullprofResolution::init() {
@@ -231,7 +226,7 @@ void SaveFullprofResolution::parseTableWorkspace() {
   map<string, double>::iterator mit;
   for (mit = m_profileParamMap.begin(); mit != m_profileParamMap.end(); ++mit)
     dbss << setw(20) << mit->first << " = " << setprecision(5) << mit->second
-         << endl;
+         << '\n';
   g_log.debug(dbss.str());
 
   return;

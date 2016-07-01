@@ -35,12 +35,6 @@ namespace DataHandling {
 
 DECLARE_FILELOADER_ALGORITHM(LoadCanSAS1D)
 
-/// constructor
-LoadCanSAS1D::LoadCanSAS1D() : m_groupNumber(0) {}
-
-/// destructor
-LoadCanSAS1D::~LoadCanSAS1D() {}
-
 /**
  * Return the confidence with with this algorithm can load the file
  * @param descriptor A descriptor for the file

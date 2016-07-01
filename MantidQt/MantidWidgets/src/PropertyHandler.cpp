@@ -1097,11 +1097,10 @@ void PropertyHandler::removeTie(const QString &parName) {
  Create a simple estimate of the full width half maximum
  @returns and estimate of the peak width, or 0 if an error occurs
 */
-double PropertyHandler::EstimateFwhm() const
-{
+double PropertyHandler::EstimateFwhm() const {
   double fwhm = 0.;
   auto ws = boost::dynamic_pointer_cast<const Mantid::API::MatrixWorkspace>(
-    m_browser->getWorkspace());
+      m_browser->getWorkspace());
   if (ws) {
     size_t wi = m_browser->workspaceIndex();
     const Mantid::MantidVec &X = ws->readX(wi);
@@ -1109,19 +1108,17 @@ double PropertyHandler::EstimateFwhm() const
     size_t n = Y.size() - 1;
     if (m_ci < 0 || m_ci > static_cast<int>(n)) {
       fwhm = 0.;
-    }
-    else {
-      double halfHeight = ((Y[m_ci] - m_base)/2.) + m_base;
-      //walk to the right
+    } else {
+      double halfHeight = ((Y[m_ci] - m_base) / 2.) + m_base;
+      // walk to the right
       size_t rightHwhmIndex = m_ci;
       while (rightHwhmIndex < n) {
-        if (Y[rightHwhmIndex++] <= halfHeight)
-        {
+        if (Y[rightHwhmIndex++] <= halfHeight) {
           break;
         }
       }
 
-      //walk to the left
+      // walk to the left
       size_t leftHwhmIndex = m_ci;
       while (leftHwhmIndex > 0) {
         if (Y[leftHwhmIndex--] <= halfHeight) {
@@ -1131,14 +1128,13 @@ double PropertyHandler::EstimateFwhm() const
 
       fwhm = fabs(X[rightHwhmIndex] - X[leftHwhmIndex]);
 
-      //apply a maximum limitation if larger than the fitting region
+      // apply a maximum limitation if larger than the fitting region
       double fitRange = m_browser->endX() - m_browser->startX();
-      if (fwhm > fitRange)
-      {
-        //set to 10% of fitting region
-        fwhm = fitRange*0.1;
+      if (fwhm > fitRange) {
+        // set to 10% of fitting region
+        fwhm = fitRange * 0.1;
       }
-    }  
+    }
   }
   return fwhm;
 }

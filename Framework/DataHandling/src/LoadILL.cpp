@@ -192,8 +192,7 @@ int LoadILL::getEPPFromVanadium(const std::string &filenameVanadium,
   }
   if (calculatedDetectorElasticPeakPosition == -1 && filenameVanadium != "") {
     g_log.information()
-        << "Calculating the elastic peak position from the Vanadium."
-        << std::endl;
+        << "Calculating the elastic peak position from the Vanadium.\n";
     calculatedDetectorElasticPeakPosition = validateVanadium(filenameVanadium);
   }
   return calculatedDetectorElasticPeakPosition;
@@ -221,7 +220,7 @@ void LoadILL::loadInstrumentDetails(NeXus::NXEntry &firstEntry) {
     throw std::runtime_error(message);
   }
 
-  g_log.debug() << "Instrument name set to: " + m_instrumentName << std::endl;
+  g_log.debug() << "Instrument name set to: " + m_instrumentName << '\n';
 }
 
 /**
@@ -258,10 +257,9 @@ void LoadILL::initWorkSpace(NeXus::NXEntry &entry,
   m_numberOfHistograms =
       (m_numberOfTubes + numberOfTubesInRosace) * m_numberOfPixelsPerTube;
 
-  g_log.debug() << "NumberOfTubes: " << m_numberOfTubes << std::endl;
-  g_log.debug() << "NumberOfPixelsPerTube: " << m_numberOfPixelsPerTube
-                << std::endl;
-  g_log.debug() << "NumberOfChannels: " << m_numberOfChannels << std::endl;
+  g_log.debug() << "NumberOfTubes: " << m_numberOfTubes << '\n';
+  g_log.debug() << "NumberOfPixelsPerTube: " << m_numberOfPixelsPerTube << '\n';
+  g_log.debug() << "NumberOfChannels: " << m_numberOfChannels << '\n';
 
   // Now create the output workspace
   // total number of spectra + number of monitors,
@@ -320,10 +318,10 @@ void LoadILL::loadTimeDetails(NeXus::NXEntry &entry) {
   //  m_timeOfFlightDelay = time_of_flight_data[2];
 
   g_log.debug("Nexus Data:");
-  g_log.debug() << " ChannelWidth: " << m_channelWidth << std::endl;
-  g_log.debug() << " Wavelength: " << m_wavelength << std::endl;
+  g_log.debug() << " ChannelWidth: " << m_channelWidth << '\n';
+  g_log.debug() << " Wavelength: " << m_wavelength << '\n';
   g_log.debug() << " ElasticPeakPosition: " << m_monitorElasticPeakPosition
-                << std::endl;
+                << '\n';
 }
 
 /**
@@ -339,15 +337,14 @@ void LoadILL::addAllNexusFieldsAsProperties(std::string filename) {
   NXhandle nxfileID;
   NXstatus stat = NXopen(filename.c_str(), NXACC_READ, &nxfileID);
 
-  g_log.debug() << "Starting parsing properties from : " << filename
-                << std::endl;
+  g_log.debug() << "Starting parsing properties from : " << filename << '\n';
   if (stat == NX_ERROR) {
     g_log.debug() << "convertNexusToProperties: Error loading " << filename;
     throw Kernel::Exception::FileError("Unable to open File:", filename);
   }
   m_loader.addNexusFieldsToWsRun(nxfileID, runDetails);
 
-  g_log.debug() << "End parsing properties from : " << filename << std::endl;
+  g_log.debug() << "End parsing properties from : " << filename << '\n';
 
   // Add also "Facility", as asked
   runDetails.addProperty("Facility", std::string("ILL"));
@@ -402,7 +399,7 @@ int LoadILL::getDetectorElasticPeakPosition(const NeXus::NXInt &data) {
   if (it == cumulatedSumOfSpectras.end()) {
     g_log.warning() << "No Elastic peak position found! Assuming the EPP in "
                        "the Nexus file: " << m_monitorElasticPeakPosition
-                    << std::endl;
+                    << '\n';
     calculatedDetectorElasticPeakPosition = m_monitorElasticPeakPosition;
 
   } else {
@@ -412,14 +409,14 @@ int LoadILL::getDetectorElasticPeakPosition(const NeXus::NXInt &data) {
     if (calculatedDetectorElasticPeakPosition == 0) {
       g_log.warning() << "Elastic peak position is ZERO Assuming the EPP in "
                          "the Nexus file: " << m_monitorElasticPeakPosition
-                      << std::endl;
+                      << '\n';
       calculatedDetectorElasticPeakPosition = m_monitorElasticPeakPosition;
 
     } else {
       g_log.debug() << "Calculated Detector EPP: "
                     << calculatedDetectorElasticPeakPosition;
       g_log.debug() << " :: Read EPP from the nexus file: "
-                    << m_monitorElasticPeakPosition << std::endl;
+                    << m_monitorElasticPeakPosition << '\n';
     }
   }
   return calculatedDetectorElasticPeakPosition;
@@ -474,7 +471,7 @@ void LoadILL::loadDataIntoTheWorkSpace(
     NeXus::NXEntry &entry, const std::vector<std::vector<int>> &monitors,
     int vanaCalculatedDetectorElasticPeakPosition) {
 
-  g_log.debug() << "Loading data into the workspace..." << std::endl;
+  g_log.debug() << "Loading data into the workspace...\n";
   // read in the data
   NXData dataGroup = entry.openNXData("data");
   NXInt data = dataGroup.openIntData();
@@ -515,8 +512,7 @@ void LoadILL::loadDataIntoTheWorkSpace(
   g_log.information()
       << " ::  Calculated bin = ["
       << detectorTofBins[calculatedDetectorElasticPeakPosition] << ","
-      << detectorTofBins[calculatedDetectorElasticPeakPosition + 1] << "]"
-      << std::endl;
+      << detectorTofBins[calculatedDetectorElasticPeakPosition + 1] << "]\n";
 
   // The binning for monitors is considered the same as for detectors
   size_t spec = 0;
@@ -561,14 +557,13 @@ void LoadILL::loadDataIntoTheWorkSpace(
     }
   }
 
-  g_log.debug() << "Loading data into the workspace: DONE!" << std::endl;
+  g_log.debug() << "Loading data into the workspace: DONE!\n";
 
   /**
    * IN4 Low angle and high angle have been split!
    */
   if (m_instrumentName == "IN4") {
-    g_log.debug() << "Loading data into the workspace: IN4 Rosace!"
-                  << std::endl;
+    g_log.debug() << "Loading data into the workspace: IN4 Rosace!\n";
     // read in the data
     NXData dataGroup = entry.openNXData("instrument/Detector_Rosace/data");
     NXInt data = dataGroup.openIntData();

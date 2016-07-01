@@ -324,7 +324,7 @@ public:
           double z = oz + origin[2];
           double center[3] = {x, y, z};
           MDLeanEvent<3> ev(1.0, 1.0, center);
-          //          std::cout << x << "," << y << "," << z << std::endl;
+          //          std::cout << x << "," << y << "," << z << '\n';
           in_ws->addEvent(ev);
         }
     in_ws->refreshCache();

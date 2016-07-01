@@ -19,22 +19,21 @@ class pqPipelineRepresentation;
 class pqPipelineSource;
 class pqRenderView;
 
-namespace Mantid
-{
-namespace Vates
-{
-namespace SimpleGui
-{
-  class RebinnedSourcesManager;
+namespace Mantid {
+namespace Vates {
+namespace SimpleGui {
+class RebinnedSourcesManager;
 /**
  *
  This class creates a scatter plot using the SplatterPlot ParaView plugin. The
- view will allow thresholding of the data and the ability to overlay peaks workspaces.
+ view will allow thresholding of the data and the ability to overlay peaks
+ workspaces.
 
  @author Michael Reuter
  @date 10/10/2011
 
- Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+ Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+ National Laboratory & European Spallation Source
 
  This file is part of Mantid.
 
@@ -54,8 +53,8 @@ namespace SimpleGui
  File change history is stored at: <https://github.com/mantidproject/mantid>
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class EXPORT_OPT_MANTIDVATES_SIMPLEGUI_VIEWWIDGETS SplatterPlotView : public ViewBase
-{
+class EXPORT_OPT_MANTIDVATES_SIMPLEGUI_VIEWWIDGETS SplatterPlotView
+    : public ViewBase {
   Q_OBJECT
 
 public:
@@ -64,7 +63,8 @@ public:
    * @param parent the parent widget for the threeslice view
    * @param rebinnedSourcesManager Pointer to a RebinnedSourcesManager
    */
-  explicit SplatterPlotView(QWidget *parent = 0, RebinnedSourcesManager* rebinnedSourcesManager = 0);
+  explicit SplatterPlotView(QWidget *parent = 0,
+                            RebinnedSourcesManager *rebinnedSourcesManager = 0);
   /// Default destructor
   ~SplatterPlotView() override;
 
@@ -93,7 +93,7 @@ public:
    */
   void resetDisplay() override;
   /**
-   * Destroy all sources in the view. 
+   * Destroy all sources in the view.
    */
   void destroyAllSourcesInView() override;
 
@@ -143,27 +143,29 @@ private:
   /// Set the state of the peak button
   void setPeakButton(bool state);
   /// Set the frame for the peaks
-  void setPeakSourceFrame(pqPipelineSource* source);
+  void setPeakSourceFrame(pqPipelineSource *source);
   /// Check if a peaks workspace is already part of the recorded peaks sources.
-  bool checkIfPeaksWorkspaceIsAlreadyBeingTracked(pqPipelineSource* source);
+  bool checkIfPeaksWorkspaceIsAlreadyBeingTracked(pqPipelineSource *source);
   /// Update the peaks filter
-  void updatePeaksFilter(pqPipelineSource* filter);
+  void updatePeaksFilter(pqPipelineSource *filter);
   /// Destroy splatter plot specific sources and filters
   void destroyFiltersForSplatterPlotView();
 
   bool m_noOverlay; ///< Flag to respond to overlay situation correctly
-  QList<QPointer<pqPipelineSource> > m_peaksSource; ///< A list of peaks sources
-  QPointer<pqPipelineSource> m_probeSource; ///< The VTK probe filter
-  QPointer<pqPipelineSource> m_splatSource; ///< The splatter plot source
+  QList<QPointer<pqPipelineSource>> m_peaksSource; ///< A list of peaks sources
+  QPointer<pqPipelineSource> m_probeSource;        ///< The VTK probe filter
+  QPointer<pqPipelineSource> m_splatSource;        ///< The splatter plot source
   QPointer<pqPipelineSource> m_threshSource; ///< The thresholding filter source
-  QPointer<pqPipelineSource> m_peaksFilter; ///< The peaks filter
-  Ui::SplatterPlotView m_ui; ///< The splatter plot view'a UI form
+  QPointer<pqPipelineSource> m_peaksFilter;  ///< The peaks filter
+  Ui::SplatterPlotView m_ui;     ///< The splatter plot view'a UI form
   QPointer<pqRenderView> m_view; ///< The main view area
   boost::shared_ptr<CameraManager> m_cameraManager; ///< The camera manager
-  PeaksTableControllerVsi* m_peaksTableController; ///< The peaks table controller
-  QAction* m_allPeaksAction;///<The action for showing all peaks in the table.
-  QAction* m_removePeaksAction; ///<The action for removing the peaks table.
-  std::string m_peaksWorkspaceNameDelimiter;///<Delimiter for peaks workspace strings.
+  PeaksTableControllerVsi *
+      m_peaksTableController; ///< The peaks table controller
+  QAction *m_allPeaksAction;  ///<The action for showing all peaks in the table.
+  QAction *m_removePeaksAction; ///<The action for removing the peaks table.
+  std::string
+      m_peaksWorkspaceNameDelimiter; ///<Delimiter for peaks workspace strings.
 };
 
 } // SimpleGui

@@ -10,16 +10,15 @@ PeriodicTableWidget::PeriodicTableWidget(QWidget *parent) : QWidget(parent) {
   populateGroupVectors();
   populateAllButtonsVector();
   ColourElements();
-  ///Hide the legend by default
+  /// Hide the legend by default
   ui.Groups->setVisible(false);
 }
 
 // slot for showing group legend dependant on state of radioButton
 void PeriodicTableWidget::showGroupLegend(bool checked) {
-    if (checked) {
+  if (checked) {
     ui.Groups->setVisible(true);
-    }
-    else{
+  } else {
     ui.Groups->setVisible(false);
   }
 }
@@ -127,7 +126,6 @@ void PeriodicTableWidget::ColourUnknownProperties(
   }
 }
 
-
 void PeriodicTableWidget::enableButtonByName(QString elementStr) {
   for (auto vector_i = AllElementButtons.begin();
        vector_i != AllElementButtons.end(); vector_i++) {
@@ -159,12 +157,12 @@ void PeriodicTableWidget::disableAllElementButtons() {
   disableButtons(TransitionMetals);
   disableButtons(UnknownProperties);
 }
-void PeriodicTableWidget::ColourButton(QPushButton *element, QString colourStr) {
+void PeriodicTableWidget::ColourButton(QPushButton *element,
+                                       QString colourStr) {
   element->setStyleSheet(
       "QPushButton{border:1px solid rgb(0, 0, 0); " + colourStr + ";}" +
       "QPushButton:checked{ background-color:rgb(175,255,255)}" +
-      "QPushButton:!enabled{background-color: rgb(204,204,204);" +
-      "}");
+      "QPushButton:!enabled{background-color: rgb(204,204,204);" + "}");
 }
 
 QString
@@ -205,9 +203,7 @@ QString PeriodicTableWidget::getAllCheckedElementsStr() {
   return allCheckedElementsStr;
 }
 
-QString PeriodicTableWidget::getValue() {
-    return getAllCheckedElementsStr();
-}
+QString PeriodicTableWidget::getValue() { return getAllCheckedElementsStr(); }
 
 void PeriodicTableWidget::disableButtons(
     QVector<QPushButton *> buttonsToDisable) {

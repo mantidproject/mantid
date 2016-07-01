@@ -101,7 +101,7 @@ void vtkSplatterPlotFactory::doCreate(
 
     if (VERBOSE) {
       std::cout << tim << " to retrieve the " << m_sortedBoxes.size()
-                << " boxes down." << std::endl;
+                << " boxes down.\n";
     }
 
     m_wsName = new_name;
@@ -141,14 +141,12 @@ void vtkSplatterPlotFactory::doCreate(
   points_per_box = std::max(points_per_box, size_t{1});
 
   if (VERBOSE) {
-    std::cout << "numPoints                 = " << numPoints << std::endl;
-    std::cout << "num boxes above zero      = " << m_sortedBoxes.size()
-              << std::endl;
-    std::cout << "num boxes to use          = " << num_boxes_to_use
-              << std::endl;
+    std::cout << "numPoints                 = " << numPoints << '\n';
+    std::cout << "num boxes above zero      = " << m_sortedBoxes.size() << '\n';
+    std::cout << "num boxes to use          = " << num_boxes_to_use << '\n';
     std::cout << "total_points_available    = " << total_points_available
-              << std::endl;
-    std::cout << "points needed per box     = " << points_per_box << std::endl;
+              << '\n';
+    std::cout << "points needed per box     = " << points_per_box << '\n';
   }
 
   // Save the events and signals that we actually use.
@@ -206,9 +204,9 @@ void vtkSplatterPlotFactory::doCreate(
   }
 
   if (VERBOSE) {
-    std::cout << "Recorded data for all points" << std::endl;
-    std::cout << "numPoints = " << numPoints << std::endl;
-    std::cout << tim << " to create " << pointIndex << " points." << std::endl;
+    std::cout << "Recorded data for all points\n";
+    std::cout << "numPoints = " << numPoints << '\n';
+    std::cout << tim << " to create " << pointIndex << " points.\n";
   }
 
   pointsArray->Resize(pointIndex);
@@ -225,7 +223,7 @@ void vtkSplatterPlotFactory::doCreate(
 void vtkSplatterPlotFactory::sortBoxesByDecreasingSignal(
     const bool VERBOSE) const {
   if (VERBOSE) {
-    std::cout << "START SORTING" << std::endl;
+    std::cout << "START SORTING\n";
   }
 
   std::sort(m_sortedBoxes.begin(), m_sortedBoxes.end(), [](IMDNode *box_1,
@@ -234,7 +232,7 @@ void vtkSplatterPlotFactory::sortBoxesByDecreasingSignal(
   });
 
   if (VERBOSE) {
-    std::cout << "DONE SORTING" << std::endl;
+    std::cout << "DONE SORTING\n";
   }
 }
 
@@ -416,8 +414,8 @@ vtkSplatterPlotFactory::create(ProgressAction &progressUpdating) const {
   if (nd > 3) {
     // Slice from >3D down to 3D
     this->slice = true;
-      this->sliceMask = Mantid::Kernel::make_unique<bool[]>(nd);
-      this->sliceImplicitFunction = boost::make_shared<MDImplicitFunction>();
+    this->sliceMask = Mantid::Kernel::make_unique<bool[]>(nd);
+    this->sliceImplicitFunction = boost::make_shared<MDImplicitFunction>();
     // Make the mask of dimensions
     // TODO: Smarter mapping
     for (size_t d = 0; d < nd; d++)

@@ -34,9 +34,6 @@ namespace MDAlgorithms {
 */
 class DLLExport ChangeQConvention : public API::Algorithm {
 public:
-  ChangeQConvention();
-  ~ChangeQConvention() override;
-
   /// Algorithm's name for identification
   const std::string name() const override { return "ChangeQConvention"; };
   /// Summary of algorithms purpose

@@ -49,11 +49,6 @@ namespace Algorithms {
 */
 class DLLExport CreateWorkspace : public API::Algorithm {
 public:
-  /// Default constructor
-  CreateWorkspace();
-  /// Default desctructor
-  ~CreateWorkspace() override;
-
   const std::string name() const override {
     return "CreateWorkspace";
   } ///< @return the algorithms name

@@ -123,8 +123,7 @@ void Expression::parse(const std::string &str) {
   m_expr = str;
   trim(m_expr);
 
-  if (m_expr.size() > 1 && m_expr[0] == '(' &&
-      m_expr[m_expr.size() - 1] == ')') {
+  if (m_expr.size() > 1 && m_expr.front() == '(' && m_expr.back() == ')') {
     if (m_expr.find('(', 1) == std::string::npos) {
       m_expr.erase(0, 1);
       m_expr.erase(m_expr.size() - 1, 1);
@@ -355,10 +354,10 @@ std::string Expression::GetOp(size_t i) {
 void Expression::logPrint(const std::string &pads) const {
   std::string myPads = pads + "   ";
   if (!m_terms.empty()) {
-    std::cerr << myPads << m_op << '[' << m_funct << ']' << "(" << '\n';
+    std::cerr << myPads << m_op << '[' << m_funct << ']' << "(\n";
     for (const auto &term : m_terms)
       term.logPrint(myPads);
-    std::cerr << myPads << ")" << '\n';
+    std::cerr << myPads << ")\n";
   } else
     std::cerr << myPads << m_op << m_funct << '\n';
 }

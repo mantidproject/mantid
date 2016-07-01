@@ -317,8 +317,8 @@ LineViewer::applyMatrixWorkspace(Mantid::API::MatrixWorkspace_sptr ws) {
   const double planeWidth = getPlanarWidth();
 
   if (planeWidth <= 0) {
-    g_log.error() << "Planar width must be > 0" << std::endl;
-    g_log.error() << "Planar width is: " << planeWidth << std::endl;
+    g_log.error() << "Planar width must be > 0\n";
+    g_log.error() << "Planar width is: " << planeWidth << '\n';
     return IAlgorithm_sptr();
   }
 
@@ -378,8 +378,8 @@ LineViewer::applyMatrixWorkspace(Mantid::API::MatrixWorkspace_sptr ws) {
     }
   } catch (std::exception &e) {
     // Log the error
-    g_log.error() << "Invalid property passed to Rebin2D:" << std::endl;
-    g_log.error() << e.what() << std::endl;
+    g_log.error() << "Invalid property passed to Rebin2D:\n";
+    g_log.error() << e.what() << '\n';
     return IAlgorithm_sptr();
   }
 

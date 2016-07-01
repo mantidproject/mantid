@@ -334,9 +334,8 @@ public:
       }
     }
 
-    double start_overlap_determined = stitched_x[overlap_indexes[0]];
-    double end_overlap_determined =
-        stitched_x[overlap_indexes[overlap_indexes.size() - 1]];
+    double start_overlap_determined = stitched_x[overlap_indexes.front()];
+    double end_overlap_determined = stitched_x[overlap_indexes.back()];
     TS_ASSERT_DELTA(start_overlap_determined, -0.4, 0.000000001);
     TS_ASSERT_DELTA(end_overlap_determined, 0.2, 0.000000001);
   }
@@ -363,9 +362,8 @@ public:
       }
     }
 
-    double start_overlap_determined = stitched_x[overlap_indexes[0]];
-    double end_overlap_determined =
-        stitched_x[overlap_indexes[overlap_indexes.size() - 1]];
+    double start_overlap_determined = stitched_x[overlap_indexes.front()];
+    double end_overlap_determined = stitched_x[overlap_indexes.back()];
     TS_ASSERT_DELTA(start_overlap_determined, -0.4, 0.000000001);
     TS_ASSERT_DELTA(end_overlap_determined, 0.2, 0.000000001);
   }
@@ -392,9 +390,8 @@ public:
       }
     }
 
-    double start_overlap_determined = stitched_x[overlap_indexes[0]];
-    double end_overlap_determined =
-        stitched_x[overlap_indexes[overlap_indexes.size() - 1]];
+    double start_overlap_determined = stitched_x[overlap_indexes.front()];
+    double end_overlap_determined = stitched_x[overlap_indexes.back()];
     TS_ASSERT_DELTA(start_overlap_determined, -0.4, 0.000000001);
     TS_ASSERT_DELTA(end_overlap_determined, 0.2, 0.000000001);
   }
@@ -569,7 +566,7 @@ public:
     TSM_ASSERT("All error values are non-zero", !alg.hasNonzeroErrors(ws));
 
     // Run it again with some zeros
-    e[e.size() - 1] = 1;
+    e.back() = 1;
     ws = createWorkspace(x, y, e, 1);
     TSM_ASSERT("NOT all error values are non-zero", alg.hasNonzeroErrors(ws));
   }
@@ -597,7 +594,7 @@ public:
     TSM_ASSERT("All error values are non-zero", !alg.hasNonzeroErrors(ws));
 
     // Run it again with some zeros
-    e[e.size() - 1] = 1;
+    e.back() = 1;
     ws = createWorkspace(x, y, e, nspectrum);
     TSM_ASSERT("NOT all error values are non-zero", alg.hasNonzeroErrors(ws));
   }

@@ -18,16 +18,6 @@ using namespace Geometry;
 DECLARE_ALGORITHM(PoldiAnalyseResiduals)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
-   */
-PoldiAnalyseResiduals::PoldiAnalyseResiduals() : Algorithm() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
-   */
-PoldiAnalyseResiduals::~PoldiAnalyseResiduals() {}
-
-//----------------------------------------------------------------------------------------------
 
 /// Algorithms name for identification. @see Algorithm::name
 const std::string PoldiAnalyseResiduals::name() const {
@@ -151,7 +141,7 @@ PoldiAnalyseResiduals::addWorkspaces(const DataObjects::Workspace2D_sptr &lhs,
 /// Output iteration information to log, report progress.
 void PoldiAnalyseResiduals::logIteration(int iteration, double relativeChange) {
   g_log.information() << "Iteration " << iteration
-                      << ", change=" << relativeChange << "%" << std::endl;
+                      << ", change=" << relativeChange << "%\n";
 
   int maxIterations = getProperty("MaxIterations");
   if (maxIterations > 0) {
@@ -257,7 +247,7 @@ void PoldiAnalyseResiduals::exec() {
   }
 
   g_log.notice() << "Finished after " << iteration
-                 << " iterations, final change=" << relativeChange << std::endl;
+                 << " iterations, final change=" << relativeChange << '\n';
 
   // Return final correlation spectrum.
   setProperty("OutputWorkspace", boost::dynamic_pointer_cast<Workspace>(sum));

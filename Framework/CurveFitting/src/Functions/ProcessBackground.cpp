@@ -45,11 +45,6 @@ ProcessBackground::ProcessBackground()
       m_upperBound(DBL_MIN), m_bkgdType(), m_numFWHM(-1.) {}
 
 //----------------------------------------------------------------------------------------------
-/** Destructor
- */
-ProcessBackground::~ProcessBackground() {}
-
-//----------------------------------------------------------------------------------------------
 /** Define parameters
  */
 void ProcessBackground::init() {
@@ -239,7 +234,7 @@ void ProcessBackground::exec() {
   // Process general properties
   m_dataWS = this->getProperty("InputWorkspace");
   if (!m_dataWS) {
-    g_log.error() << "Input Workspace cannot be obtained." << std::endl;
+    g_log.error() << "Input Workspace cannot be obtained.\n";
     throw std::invalid_argument("Input Workspace cannot be obtained.");
   }
 
@@ -272,7 +267,7 @@ void ProcessBackground::exec() {
 
     selectBkgdPoints();
   } else {
-    g_log.error() << "Option " << option << " is not supported. " << std::endl;
+    g_log.error() << "Option " << option << " is not supported. \n";
     throw std::invalid_argument("Unsupported option. ");
   }
 
@@ -431,8 +426,7 @@ void ProcessBackground::addRegion() {
   for (size_t i = 1; i < vx.size(); ++i) {
     if (vx[i] <= vx[i - 1]) {
       g_log.error()
-          << "The vector X with value inserted is not ordered incrementally"
-          << std::endl;
+          << "The vector X with value inserted is not ordered incrementally\n";
       throw std::runtime_error("Build new vector error!");
     }
   }
@@ -448,7 +442,7 @@ void ProcessBackground::addRegion() {
     m_outputWS->dataE(0)[i] = ve[i];
   }
   if (vx.size() > vy.size())
-    m_outputWS->dataX(0)[vx.size() - 1] = vx.back();
+    m_outputWS->dataX(0).back() = vx.back();
 
   // Write out dummy output workspaces
   setupDummyOutputWSes();
@@ -629,7 +623,7 @@ ProcessBackground::autoBackgroundSelection(Workspace2D_sptr bkgdWS) {
   try {
     fit = this->createChildAlgorithm("Fit", 0.0, 0.2, true);
   } catch (Exception::NotFoundError &) {
-    g_log.error() << "Requires CurveFitting library." << std::endl;
+    g_log.error() << "Requires CurveFitting library.\n";
     throw;
   }
 
@@ -654,7 +648,7 @@ ProcessBackground::autoBackgroundSelection(Workspace2D_sptr bkgdWS) {
                         (fitStatus.find("tolerance") < fitStatus.size());
   if (fitStatus.compare("success") != 0 && !allowedfailure) {
     g_log.error() << "ProcessBackground: Fit Status = " << fitStatus
-                  << ".  Not to update fit result" << std::endl;
+                  << ".  Not to update fit result\n";
     throw std::runtime_error("Bad Fit");
   }
 
@@ -809,7 +803,7 @@ void ProcessBackground::fitBackgroundFunction(std::string bkgdfunctiontype) {
   try {
     fit = this->createChildAlgorithm("Fit", 0.9, 1.0, true);
   } catch (Exception::NotFoundError &) {
-    g_log.error() << "Requires CurveFitting library." << std::endl;
+    g_log.error() << "Requires CurveFitting library.\n";
     throw;
   }
 
@@ -836,7 +830,7 @@ void ProcessBackground::fitBackgroundFunction(std::string bkgdfunctiontype) {
                         (fitStatus.find("tolerance") < fitStatus.size());
   if (fitStatus.compare("success") != 0 && !allowedfailure) {
     g_log.error() << "ProcessBackground: Fit Status = " << fitStatus
-                  << ".  Not to update fit result" << std::endl;
+                  << ".  Not to update fit result\n";
     throw std::runtime_error("Bad Fit");
   }
 
@@ -915,16 +909,6 @@ void ProcessBackground::removePeaks() {
 
   return;
 }
-
-//----------------------------------------------------------------------------------------------
-/** Constructor
-  */
-RemovePeaks::RemovePeaks() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
-  */
-RemovePeaks::~RemovePeaks() {}
 
 //----------------------------------------------------------------------------------------------
 /** Set up: parse peak workspace to vectors

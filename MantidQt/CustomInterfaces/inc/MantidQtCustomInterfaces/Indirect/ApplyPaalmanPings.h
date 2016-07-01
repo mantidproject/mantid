@@ -45,7 +45,6 @@ private:
 
   std::string m_sampleWorkspaceName;
   std::string m_containerWorkspaceName;
-
 };
 
 } // namespace CustomInterfaces

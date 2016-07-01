@@ -11,9 +11,6 @@ namespace Algorithms {
  */
 class DLLExport PDFFourierTransform : public API::Algorithm {
 public:
-  PDFFourierTransform();
-  ~PDFFourierTransform() override;
-
   /// Algorithm's name for identification
   const std::string name() const override;
   /// Summary of algorithms purpose

@@ -162,17 +162,16 @@ void PoldiTruncateData::exec() {
         setProperty("ExtraCountsWorkspace", extraCounts);
       } catch (std::invalid_argument) {
         m_log.warning() << "Extra count information was requested, but there "
-                           "are no extra bins." << std::endl;
+                           "are no extra bins.\n";
       }
     }
   } catch (std::invalid_argument) {
     m_log.error()
-        << "Cannot crop workspace. Please check the timing information."
-        << std::endl;
+        << "Cannot crop workspace. Please check the timing information.\n";
     m_log.error() << "  Calculated bin count: " << getCalculatedBinCount()
-                  << std::endl;
+                  << '\n';
     m_log.error() << "  Bin count in the workspace: " << getActualBinCount()
-                  << std::endl;
+                  << '\n';
 
     removeProperty("OutputWorkspace");
   }

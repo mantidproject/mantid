@@ -45,9 +45,9 @@ public:
     const int monitorIndex = 0;
 
     specnum_t specId1 =
-        toConvert->getSpectrum(workspaceIndexToKeep1)->getSpectrumNo();
+        toConvert->getSpectrum(workspaceIndexToKeep1).getSpectrumNo();
     specnum_t monitorSpecId =
-        toConvert->getSpectrum(monitorIndex)->getSpectrumNo();
+        toConvert->getSpectrum(monitorIndex).getSpectrumNo();
 
     // Define one spectra to keep
     detectorIndexRange.push_back(static_cast<int>(workspaceIndexToKeep1));
@@ -177,7 +177,7 @@ public:
     // set the instrument to this workspace
     m_tinyReflWS->setInstrument(instrument);
     // set this detector ready for processing instructions
-    m_tinyReflWS->getSpectrum(0)->setDetectorID(det->getID());
+    m_tinyReflWS->getSpectrum(0).setDetectorID(det->getID());
 
     auto alg = AlgorithmManager::Instance().create("ReflectometryReductionOne");
     alg->setRethrows(true);
@@ -229,11 +229,10 @@ public:
     // compare y data instead of workspaces.
     auto scaledYData = scaledWS->readY(0);
     auto nonScaledYData = nonScaledWS->readY(0);
-    TS_ASSERT_EQUALS(scaledYData[0], 2 * nonScaledYData[0]);
+    TS_ASSERT_EQUALS(scaledYData.front(), 2 * nonScaledYData.front());
     TS_ASSERT_EQUALS(scaledYData[scaledYData.size() / 2],
                      2 * nonScaledYData[nonScaledYData.size() / 2]);
-    TS_ASSERT_EQUALS(scaledYData[scaledYData.size() - 1],
-                     2 * nonScaledYData[nonScaledYData.size() - 1]);
+    TS_ASSERT_EQUALS(scaledYData.back(), 2 * nonScaledYData.back());
     // Remove workspace from the data service.
     AnalysisDataService::Instance().remove("Test");
     AnalysisDataService::Instance().remove("scaledTest");
@@ -265,7 +264,7 @@ public:
     TSM_ASSERT_DELTA("DQQ should be the same as abs(x[1]/x[0] - 1)",
                      binWidthFromLogarithmicEquation, 0.1, 1e-06);
     TSM_ASSERT_DELTA("Qmax should be the same as last Params entry (5.0)",
-                     xData[xData.size() - 1], 15.0, 1e-06);
+                     xData.back(), 15.0, 1e-06);
   }
   void test_post_processing_rebin_step_with_logarithmic_rebinning() {
     auto alg = construct_standard_algorithm();
@@ -287,7 +286,7 @@ public:
     TSM_ASSERT_DELTA("DQQ should be the same as abs(x[1]/x[0] - 1)",
                      binWidthFromLogarithmicEquation, 0.2, 1e-06);
     TSM_ASSERT_EQUALS("QMax should be the same as last Param entry",
-                      xData[xData.size() - 1], 5.0);
+                      xData.back(), 5.0);
   }
   void test_post_processing_rebin_step_with_linear_rebinning() {
     auto alg = construct_standard_algorithm();
@@ -307,7 +306,7 @@ public:
     TSM_ASSERT_DELTA("DQQ should the same as 0.2", xData[1] - xData[0], 0.2,
                      1e-06);
     TSM_ASSERT_DELTA("QMax should be the same as the last Param entry (5.233)",
-                     xData[xData.size() - 1], 5.233, 1e-06);
+                     xData.back(), 5.233, 1e-06);
   }
   void test_Qrange() {
     // set up the axis for the instrument
@@ -336,7 +335,7 @@ public:
     // set the instrument to this workspace
     m_tinyReflWS->setInstrument(instrument);
     // set this detector ready for processing instructions
-    m_tinyReflWS->getSpectrum(0)->setDetectorID(det->getID());
+    m_tinyReflWS->getSpectrum(0).setDetectorID(det->getID());
 
     auto alg = AlgorithmManager::Instance().create("ReflectometryReductionOne");
     alg->setRethrows(true);

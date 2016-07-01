@@ -31,57 +31,66 @@ using Mantid::API::WorkspaceProperty;
  * @param argv :: ignored
  * @return return code
  */
-int main( int argc, char ** argv )
-{
+int main(int argc, char **argv) {
   QApplication app(argc, argv);
   app.setApplicationName("PropertyWidgets demo");
-  QMainWindow * mainWin = new QMainWindow();
+  QMainWindow *mainWin = new QMainWindow();
 
-  QFrame * frame = new QFrame(mainWin);
+  QFrame *frame = new QFrame(mainWin);
   mainWin->setCentralWidget(frame);
 
-  QHBoxLayout * layout = new QHBoxLayout(frame);
+  QHBoxLayout *layout = new QHBoxLayout(frame);
   frame->setLayout(layout);
 
-  QFrame * frame1 = new QFrame(mainWin);
+  QFrame *frame1 = new QFrame(mainWin);
   frame1->setFrameStyle(QFrame::Box);
-  QFrame * frame2 = new QFrame(mainWin);
+  QFrame *frame2 = new QFrame(mainWin);
   frame2->setFrameStyle(QFrame::Box);
 
   layout->addWidget(frame1);
   layout->addWidget(frame2);
 
-  QVBoxLayout * layout1 = new QVBoxLayout(frame1);
-  QGridLayout * grid = new QGridLayout(frame2);
+  QVBoxLayout *layout1 = new QVBoxLayout(frame1);
+  QGridLayout *grid = new QGridLayout(frame2);
 
-  std::vector<Property*> props;
+  std::vector<Property *> props;
   props.push_back(new PropertyWithValue<bool>("BooleanProp", true));
-  props.push_back(new PropertyWithValue<std::string>("StringProperty", "default value"));
+  props.push_back(
+      new PropertyWithValue<std::string>("StringProperty", "default value"));
 
   std::vector<std::string> exts;
   exts.push_back(".txt");
   exts.push_back(".nxs");
-  props.push_back(new FileProperty("SaveFileProperty", "default.file.txt", FileProperty::Save, exts));
-  props.push_back(new FileProperty("LoadFileProperty", "default.file.txt", FileProperty::Load, exts));
-  props.push_back(new FileProperty("DirectoryFileProperty", "default.file.txt", FileProperty::Directory, exts));
+  props.push_back(new FileProperty("SaveFileProperty", "default.file.txt",
+                                   FileProperty::Save, exts));
+  props.push_back(new FileProperty("LoadFileProperty", "default.file.txt",
+                                   FileProperty::Load, exts));
+  props.push_back(new FileProperty("DirectoryFileProperty", "default.file.txt",
+                                   FileProperty::Directory, exts));
   props.push_back(new MultipleFileProperty("MultipleFileProperty", exts));
-  props.push_back(new WorkspaceProperty<>("InputWorkspaceProp", "", Direction::Input));
-  props.push_back(new WorkspaceProperty<>("InOutWorkspaceProp", "", Direction::InOut));
-  props.push_back(new WorkspaceProperty<>("OutputWorkspaceProp", "", Direction::Output));
-  props.push_back(new WorkspaceProperty<>("OutputWorkspaceProp2", "", Direction::Output));
+  props.push_back(
+      new WorkspaceProperty<>("InputWorkspaceProp", "", Direction::Input));
+  props.push_back(
+      new WorkspaceProperty<>("InOutWorkspaceProp", "", Direction::InOut));
+  props.push_back(
+      new WorkspaceProperty<>("OutputWorkspaceProp", "", Direction::Output));
+  props.push_back(
+      new WorkspaceProperty<>("OutputWorkspaceProp2", "", Direction::Output));
 
   std::vector<std::string> propOptions;
   propOptions.push_back("OptionA");
   propOptions.push_back("OptionTwo");
   propOptions.push_back("Yet Another Option");
-  props.push_back(new PropertyWithValue<std::string>("OptionsProperty", "OptionTwo", new ListValidator(propOptions)));
+  props.push_back(new PropertyWithValue<std::string>(
+      "OptionsProperty", "OptionTwo", new ListValidator(propOptions)));
 
-  for (size_t i=0; i<props.size(); i++)
-  {
+  for (size_t i = 0; i < props.size(); i++) {
     props[i]->setDocumentation("Tooltip for " + props[i]->name());
-    PropertyWidget * widget1 = PropertyWidgetFactory::createWidget(props[i], frame1, NULL);
+    PropertyWidget *widget1 =
+        PropertyWidgetFactory::createWidget(props[i], frame1, NULL);
     layout1->addWidget(widget1);
-    PropertyWidget * widget2 = PropertyWidgetFactory::createWidget(props[i], frame2, grid, int(i));
+    PropertyWidget *widget2 =
+        PropertyWidgetFactory::createWidget(props[i], frame2, grid, int(i));
     UNUSED_ARG(widget2);
   }
 

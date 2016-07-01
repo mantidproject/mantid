@@ -2,7 +2,8 @@
     File                 : NonLinearFit.h
     Project              : QtiPlot
     --------------------------------------------------------------------
-    Copyright            : (C) 2006 by Ion Vasilief, Tilman Hoener zu Siederdissen
+    Copyright            : (C) 2006 by Ion Vasilief, Tilman Hoener zu
+ Siederdissen
     Email (use @ for *)  : ion_vasilief*yahoo.fr, thzs*gmx.net
     Description          : NonLinearFit class
 
@@ -31,23 +32,24 @@
 
 #include "Fit.h"
 
-class NonLinearFit : public Fit
-{
-	Q_OBJECT
+class NonLinearFit : public Fit {
+  Q_OBJECT
 
-	public:
-		NonLinearFit(ApplicationWindow *parent, Graph *g);
-		NonLinearFit(ApplicationWindow *parent, Graph *g, const QString& curveTitle);
-		NonLinearFit(ApplicationWindow *parent, Graph *g, const QString& curveTitle, double start, double end);
-		NonLinearFit(ApplicationWindow *parent, Table *t, const QString& xCol, const QString& yCol, int startRow = 1, int endRow = -1);
+public:
+  NonLinearFit(ApplicationWindow *parent, Graph *g);
+  NonLinearFit(ApplicationWindow *parent, Graph *g, const QString &curveTitle);
+  NonLinearFit(ApplicationWindow *parent, Graph *g, const QString &curveTitle,
+               double start, double end);
+  NonLinearFit(ApplicationWindow *parent, Table *t, const QString &xCol,
+               const QString &yCol, int startRow = 1, int endRow = -1);
 
-                double eval(double *par, double x) override;
+  double eval(double *par, double x) override;
 
-                void setParametersList(const QStringList &lst) override;
-                void setFormula(const QString &s) override;
+  void setParametersList(const QStringList &lst) override;
+  void setFormula(const QString &s) override;
 
-        private:
-          void calculateFitCurveData(double *X, double *Y) override;
-                void init();
+private:
+  void calculateFitCurveData(double *X, double *Y) override;
+  void init();
 };
 #endif

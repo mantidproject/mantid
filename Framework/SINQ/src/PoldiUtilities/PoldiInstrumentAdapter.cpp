@@ -220,12 +220,7 @@ bool PoldiInstrumentAdapter::chopperSpeedMatchesTarget(
     const Run &runInformation, double chopperSpeed) const {
   try {
     double targetChopperSpeed = getChopperSpeedTargetFromRun(runInformation);
-
-    if (fabs(targetChopperSpeed - chopperSpeed) > 1e-4) {
-      return false;
-    }
-
-    return true;
+    return fabs(targetChopperSpeed - chopperSpeed) <= 1e-4;
   } catch (std::runtime_error) {
     // Old data files don't have information on target chopper speed. Do
     // nothing.

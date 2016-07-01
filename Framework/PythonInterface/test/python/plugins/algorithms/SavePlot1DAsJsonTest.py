@@ -1,4 +1,6 @@
 #pylint: disable=invalid-name,too-many-public-methods,too-many-arguments
+from __future__ import (absolute_import, division, print_function)
+
 import unittest
 import numpy as np
 import mantid.simpleapi as api

@@ -467,7 +467,8 @@ void MuonSequentialFitDialog::continueFit() {
       fit->setProperty("InputWorkspace", ws);
       fit->setProperty("Output", wsBaseName);
 
-      // We should have one spectrum only in the workspace, so use the first one.
+      // We should have one spectrum only in the workspace, so use the first
+      // one.
       fit->setProperty("WorkspaceIndex", 0);
 
       // Various properties from the fit prop. browser

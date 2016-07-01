@@ -74,7 +74,6 @@ class DLLExport CheckWorkspacesMatch : public API::Algorithm,
                                        public API::DeprecatedAlgorithm {
 public:
   CheckWorkspacesMatch();
-  ~CheckWorkspacesMatch() override;
 
   /// Algorithm's name
   const std::string name() const override { return "CheckWorkspacesMatch"; }

@@ -87,7 +87,7 @@ void export_OptionalBool() {
       .def("__init__",
            make_constructor(&createOptionalBool, default_call_policies(),
                             (arg("value"))))
-      .def("getValue", &OptionalBool::getValue);
+      .def("getValue", &OptionalBool::getValue, arg("self"));
 }
 
 void export_PropertyWithValueOptionalBool() {

@@ -1,4 +1,5 @@
 set ( SRC_FILES
+	src/ADSValidator.cpp
 	src/Algorithm.cpp
 	src/AlgorithmFactory.cpp
 	src/AlgorithmHasProperty.cpp
@@ -28,6 +29,7 @@ set ( SRC_FILES
 	src/DeprecatedAlgorithm.cpp
 	src/DomainCreatorFactory.cpp
 	src/EnabledWhenWorkspaceIsType.cpp
+	src/EqualBinSizesValidator.cpp
 	src/ExperimentInfo.cpp
 	src/Expression.cpp
 	src/FermiChopperModel.cpp
@@ -147,6 +149,7 @@ set ( SRC_UNITY_IGNORE_FILES src/CompositeFunction.cpp
 
 set ( INC_FILES
 	#	inc/MantidAPI/BoxCtrlChangesInterface.h
+	inc/MantidAPI/ADSValidator.h
 	inc/MantidAPI/Algorithm.h
 	inc/MantidAPI/AlgorithmFactory.h
 	inc/MantidAPI/AlgorithmHasProperty.h
@@ -180,6 +183,7 @@ set ( INC_FILES
 	inc/MantidAPI/DllConfig.h
 	inc/MantidAPI/DomainCreatorFactory.h
 	inc/MantidAPI/EnabledWhenWorkspaceIsType.h
+	inc/MantidAPI/EqualBinSizesValidator.h
 	inc/MantidAPI/ExperimentInfo.h
 	inc/MantidAPI/Expression.h
 	inc/MantidAPI/FermiChopperModel.h
@@ -326,6 +330,7 @@ set ( INC_FILES
 
 set ( TEST_FILES
 	#	IkedaCarpenterModeratorTest.h
+	ADSValidatorTest.h
 	AlgorithmFactoryTest.h
 	AlgorithmHasPropertyTest.h
 	AlgorithmHistoryTest.h
@@ -343,6 +348,7 @@ set ( TEST_FILES
 	CostFunctionFactoryTest.h
 	DataProcessorAlgorithmTest.h
 	EnabledWhenWorkspaceIsTypeTest.h
+	EqualBinSizesValidatorTest.h
 	ExperimentInfoTest.h
 	ExpressionTest.h
 	FermiChopperModelTest.h
