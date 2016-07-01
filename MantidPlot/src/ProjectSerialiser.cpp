@@ -25,7 +25,7 @@ void file_compress(const char *file, const char *mode);
 }
 
 ProjectSerialiser::ProjectSerialiser(ApplicationWindow *window)
-    : window(window) {}
+    : window(window), m_windowCount(0) {}
 
 /**
  * Save the current state of the application as a Mantid project file

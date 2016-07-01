@@ -47,7 +47,7 @@ namespace API {
 class ProjectSerialiser {
 public:
   /// Create a new serialiser with the current application window
-  ProjectSerialiser(ApplicationWindow *window);
+  explicit ProjectSerialiser(ApplicationWindow *window);
   /// Save the current state of the project to disk
   void save(Folder *folder, const QString &projectName, bool compress = false);
   /// Load a project file from disk
