@@ -8,8 +8,8 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ArrayBoundedValidator.h"
 #include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/RebinParamsValidator.h"
@@ -181,13 +181,15 @@ void PDCalibration::init() {
       boost::make_shared<Kernel::ArrayBoundedValidator<double>>();
   mustBePosArr->setLower(0.0);
   peaksValidator->add(mustBePosArr);
-  peaksValidator->add(boost::make_shared<MandatoryValidator<std::vector<double>>>());
+  peaksValidator->add(
+      boost::make_shared<MandatoryValidator<std::vector<double>>>());
   declareProperty(
-		  make_unique<ArrayProperty<double>>("PeakPositions", peaksValidator),
+      make_unique<ArrayProperty<double>>("PeakPositions", peaksValidator),
       "Comma delimited d-space positions of reference peaks.");
 
-  declareProperty("PeakWindow", 0.1, mustBePositive,
-                  "The maximum window (in d space) around peak to look for peak.");
+  declareProperty(
+      "PeakWindow", 0.1, mustBePositive,
+      "The maximum window (in d space) around peak to look for peak.");
   std::vector<std::string> modes{"DIFC", "DIFC+TZERO", "DIFC+TZERO+DIFA"};
   declareProperty("CalibrationParameters", "DIFC+TZERO+DIFA",
                   boost::make_shared<StringListValidator>(modes),
@@ -554,11 +556,29 @@ void PDCalibration::setCalibrationValues(const detid_t detid, const double difc,
   if (m_hasDasIds)
     hasDasIdsOffset++;
 
-  // TODO calculate values
-  m_calibrationTable->cell<double>(rowNum, 4 + hasDasIdsOffset) = 0.; // tofmin
-  m_calibrationTable->cell<double>(rowNum, 5 + hasDasIdsOffset) = 0.; // tofmax
+  const auto tofMinMax = getTOFminmax(difc, difa, tzero);
+  m_calibrationTable->cell<double>(rowNum, 4 + hasDasIdsOffset) = tofMinMax[0];
+  m_calibrationTable->cell<double>(rowNum, 5 + hasDasIdsOffset) = tofMinMax[1];
 }
 
+vector<double> PDCalibration::getTOFminmax(const double difc, const double difa,
+                                           const double tzero) {
+  vector<double> tofminmax(2);
+  if (difa == 0) {
+    tofminmax[0] = 0.;
+    tofminmax[1] = DBL_MAX;
+  } else {
+    double tofExtrema = tzero - difc * difc / (4 * difa);
+    if (difa < 0) {
+      tofminmax[0] = 0.;
+      tofminmax[1] = tofExtrema;
+    } else {
+      tofminmax[0] = std::max(0., tofExtrema);
+      tofminmax[1] = DBL_MAX;
+    }
+  }
+  return tofminmax;
+}
 MatrixWorkspace_sptr PDCalibration::load(const std::string filename) {
   // TODO this assumes that all files are event-based
   const double maxChunkSize = getProperty("MaxChunkSize");
@@ -688,8 +708,13 @@ void PDCalibration::loadOldCalibration() {
     newRow << calibrationTableOld->getRef<double>("tzero", rowNum);
     if (m_hasDasIds)
       newRow << calibrationTableOld->getRef<int>("dasid", rowNum);
-    newRow << 0.; // tofmin   TODO
-    newRow << 0.; // tofmax   TODO
+
+    const auto tofMinMax =
+        getTOFminmax(calibrationTableOld->getRef<double>("difc", rowNum),
+                     calibrationTableOld->getRef<double>("difa", rowNum),
+                     calibrationTableOld->getRef<double>("tzero", rowNum));
+    newRow << tofMinMax[0]; // tofmin
+    newRow << tofMinMax[1]; // tofmax
   }
 }
 
@@ -728,8 +753,8 @@ void PDCalibration::createNewCalTable() {
     newRow << difcWS->readY(wi)[0];
     newRow << 0.; // difa
     newRow << 0.; // tzero
-    newRow << 0.; // tofmin   TODO
-    newRow << 0.; // tofmax   TODO
+    newRow << 0.; // tofmin
+    newRow << DBL_MAX; // tofmax
   }
 }
 

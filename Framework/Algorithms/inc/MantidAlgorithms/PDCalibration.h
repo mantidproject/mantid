@@ -57,6 +57,9 @@ private:
   std::function<double(double)> getDSpacingToTof(const detid_t detid);
   std::vector<double> dSpacingWindows(const std::vector<double> &centres,
                                       const double widthMax);
+  std::vector<double> getTOFminmax(const double difc,
+				   const double difa,
+				   const double tzero);
   void setCalibrationValues(const detid_t detid, const double difc,
                             const double difa, const double tzero);
   void fitDIFCtZeroDIFA(const std::vector<double> &d, const std::vector<double> &tof,
