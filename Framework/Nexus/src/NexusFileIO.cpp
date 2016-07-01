@@ -22,6 +22,7 @@
 #include "MantidDataObjects/RebinnedOutput.h"
 
 #include <Poco/File.h>
+#include <Poco/Path.h>
 
 namespace Mantid {
 namespace NeXus {
@@ -99,6 +100,15 @@ void NexusFileIO::openNexusWrite(const std::string &fileName,
 
   /*Only create the file handle if needed.*/
   if (!m_filehandle) {
+    // The nexus or HDF5 libraries crash when the filename is greater than 255
+    // on OSX and Ubuntu.
+    Poco::Path path(fileName);
+    std::string baseName = path.getBaseName();
+    if(baseName.size() >= 256) {
+      std::string message = "Filename is too long. Unable to open file: ";
+      throw Exception::FileError(message, fileName);
+    }
+
     // open the file and copy the handle into the NeXus::File object
     NXstatus status = NXopen(fileName.c_str(), mode, &fileID);
     if (status == NX_ERROR) {
