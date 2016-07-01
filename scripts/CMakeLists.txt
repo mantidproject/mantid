@@ -57,6 +57,7 @@ set ( TEST_PY_FILES
       test/IOmoduleTest.py
       test/LoadCASTEPTest.py
       test/CalculateQTest.py
+      test/QvectorsTest.py
       )
 
 
