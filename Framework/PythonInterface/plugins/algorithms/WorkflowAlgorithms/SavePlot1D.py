@@ -157,7 +157,7 @@ class SavePlot1D(mantid.api.PythonAlgorithm):
         else:
             return str(div)
 
-    def toScatterAndLabels(self, wksp, spectraNames=[]):
+    def toScatterAndLabels(self, wksp, spectraNames):
         data = []
         for i in xrange(wksp.getNumberHistograms()):
             if len(spectraNames) > i:
@@ -198,7 +198,7 @@ class SavePlot1D(mantid.api.PythonAlgorithm):
         plt.tight_layout(1.08)
         plt.show()
         filename = self.getProperty("OutputFilename").value
-        plt.savefig(filename, bbox_inches='tight')
+        fig.savefig(filename, bbox_inches='tight')
 
         return filename
 
