@@ -8,6 +8,11 @@
 #include "MantidAPI/GroupingLoader.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/TableRow.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidQtCustomInterfaces/Muon/MuonAnalysisDataLoader.h"
 #include "MantidQtCustomInterfaces/Muon/MuonAnalysisFitDataPresenter.h"
 #include "MantidQtCustomInterfaces/Muon/MuonAnalysisHelper.h"
@@ -16,10 +21,15 @@
 
 using MantidQt::CustomInterfaces::MuonAnalysisDataLoader;
 using MantidQt::CustomInterfaces::MuonAnalysisFitDataPresenter;
+using MantidQt::CustomInterfaces::Muon::DeadTimesType;
 using MantidQt::MantidWidgets::IMuonFitDataSelector;
 using MantidQt::MantidWidgets::IWorkspaceFitControl;
-using MantidQt::CustomInterfaces::Muon::DeadTimesType;
 using Mantid::API::AnalysisDataService;
+using Mantid::API::ITableWorkspace;
+using Mantid::API::TableRow;
+using Mantid::API::Workspace;
+using Mantid::API::WorkspaceFactory;
+using Mantid::API::WorkspaceGroup;
 using namespace testing;
 
 /// Mock data selector widget
@@ -95,6 +105,7 @@ public:
     delete m_dataSelector;
     delete m_fitBrowser;
     delete m_presenter;
+    AnalysisDataService::Instance().clear();
   }
 
   void test_handleDataPropertiesChanged() {
@@ -181,6 +192,90 @@ public:
     m_presenter->handleSimultaneousFitLabelChanged();
   }
 
+  void test_handleFitFinished_nonSequential() {
+    EXPECT_CALL(*m_dataSelector, getFitType())
+        .Times(1)
+        .WillOnce(Return(IMuonFitDataSelector::FitType::Single));
+    EXPECT_CALL(*m_dataSelector, getChosenGroups())
+        .Times(1)
+        .WillOnce(Return(QStringList({"fwd"})));
+    EXPECT_CALL(*m_dataSelector, getPeriodSelections())
+        .Times(1)
+        .WillOnce(Return(QStringList({"1"})));
+    createFittedWorkspacesGroup(
+        m_dataSelector->getSimultaneousFitLabel().toStdString(),
+        {"MUSR00015189; Group; fwd; Asym; 1; #1"});
+    const auto workspacesBefore =
+        AnalysisDataService::Instance().getObjectNames();
+    m_presenter->handleFitFinished();
+    const auto workspacesAfter =
+        AnalysisDataService::Instance().getObjectNames();
+    // assert nothing has happened
+    TS_ASSERT_EQUALS(workspacesBefore, workspacesAfter);
+  }
+
+  void test_handleFitFinished_oneRunMultiplePeriods() {
+    EXPECT_CALL(*m_dataSelector, getFitType())
+        .Times(1)
+        .WillOnce(Return(IMuonFitDataSelector::FitType::Single));
+    EXPECT_CALL(*m_dataSelector, getChosenGroups())
+        .Times(1)
+        .WillOnce(Return(QStringList({"fwd"})));
+    EXPECT_CALL(*m_dataSelector, getPeriodSelections())
+        .Times(1)
+        .WillOnce(Return(QStringList({"1", "2"})));
+    createFittedWorkspacesGroup(
+        m_dataSelector->getSimultaneousFitLabel().toStdString(),
+        {"MUSR00015189; Group; fwd; Asym; 1; #1",
+         "MUSR00015189; Group; fwd; Asym; 2; #1"});
+    const auto workspacesBefore =
+        AnalysisDataService::Instance().getObjectNames();
+    m_presenter->handleFitFinished();
+    const auto workspacesAfter =
+        AnalysisDataService::Instance().getObjectNames();
+    // assert something has happened
+    TS_ASSERT_DIFFERS(workspacesBefore, workspacesAfter);
+  }
+
+  void test_handleFitFinished_oneRunMultipleGroups() {
+    EXPECT_CALL(*m_dataSelector, getFitType())
+        .Times(1)
+        .WillOnce(Return(IMuonFitDataSelector::FitType::CoAdd));
+    EXPECT_CALL(*m_dataSelector, getChosenGroups())
+        .Times(1)
+        .WillOnce(Return(QStringList({"fwd", "bwd"})));
+    ON_CALL(*m_dataSelector, getPeriodSelections())
+        .WillByDefault(Return(QStringList({"1"})));
+    createFittedWorkspacesGroup(
+        m_dataSelector->getSimultaneousFitLabel().toStdString(),
+        {"MUSR00015189-90; Group; fwd; Asym; 1; #1",
+         "MUSR00015189-90; Group; bwd; Asym; 1; #1"});
+    const auto workspacesBefore =
+        AnalysisDataService::Instance().getObjectNames();
+    m_presenter->handleFitFinished();
+    const auto workspacesAfter =
+        AnalysisDataService::Instance().getObjectNames();
+    // assert something has happened
+    TS_ASSERT_DIFFERS(workspacesBefore, workspacesAfter);
+  }
+
+  void test_handleFitFinished_simultaneous() {
+    EXPECT_CALL(*m_dataSelector, getFitType())
+        .Times(1)
+        .WillOnce(Return(IMuonFitDataSelector::FitType::Simultaneous));
+    ON_CALL(*m_dataSelector, getChosenGroups())
+        .WillByDefault(Return(QStringList({"long"})));
+    ON_CALL(*m_dataSelector, getPeriodSelections())
+        .WillByDefault(Return(QStringList({"1"})));
+    const auto label = m_dataSelector->getSimultaneousFitLabel().toStdString();
+    const std::vector<std::string> inputNames{
+        "MUSR00015189; Pair; long; Asym; 1; #1",
+        "MUSR00015190; Pair; long; Asym; 1; #1"};
+    createFittedWorkspacesGroup(label, inputNames);
+    m_presenter->handleFitFinished();
+    checkFittedWorkspacesHandledCorrectly(label, inputNames);
+  }
+
 private:
   void doTest_handleSelectedDataChanged(IMuonFitDataSelector::FitType fitType) {
     Mantid::API::Grouping grouping;
@@ -240,7 +335,126 @@ private:
     for (const QString &name : expectedNames) {
       TS_ASSERT(namesInADS.find(name.toStdString()) != namesInADS.end());
     }
-    AnalysisDataService::Instance().clear();
+  }
+
+  /**
+   * Creates a group of workspaces that are the output of a simultaneous fit,
+   * that handleFitFinished() will act on, e.g.:
+   *
+   * MuonSimulFit_Label
+   *   \__MuonSimulFit_Label_Parameters
+   *   \__MuonSimulFit_Label_Workspaces
+   *         \__MuonSimulFit_Label_Workspace0
+   *         \__MuonSimulFit_Label_Workspace1
+   *         \__ ...
+   *
+   * @param label :: [input] Selected label for fit
+   * @param inputNames :: [input] Names of input workspaces
+   */
+  void createFittedWorkspacesGroup(const std::string &label,
+                                   const std::vector<std::string> &inputNames) {
+    auto &ads = AnalysisDataService::Instance();
+    auto &wsf = WorkspaceFactory::Instance();
+    const std::string baseName = "MuonSimulFit_" + label;
+    const std::string groupName = baseName + "_Workspaces";
+    const std::string paramName = baseName + "_Parameters";
+    const std::string ncmName = baseName + "_NormalisedCovarianceMatrix";
+    ads.add(baseName, boost::make_shared<WorkspaceGroup>());
+    ads.add(groupName, boost::make_shared<WorkspaceGroup>());
+    ads.addToGroup(baseName, groupName);
+    auto paramTable = wsf.createTable();
+    paramTable->addColumn("str", "Name");
+    paramTable->addColumn("double", "Value");
+    paramTable->addColumn("double", "Error");
+    for (size_t i = 0; i < inputNames.size(); i++) {
+      const std::string name = baseName + "_Workspace" + std::to_string(i);
+      const auto matrixWs = wsf.create("Workspace2D", 1, 1, 1);
+      const auto ws = boost::dynamic_pointer_cast<Workspace>(matrixWs);
+      ads.add(name, ws);
+      ads.addToGroup(groupName, name);
+      TableRow rowA0 = paramTable->appendRow();
+      TableRow rowA1 = paramTable->appendRow();
+      rowA0 << "f" + std::to_string(i) + ".A0" << 0.1 << 0.01;
+      rowA1 << "f" + std::to_string(i) + ".A1" << 0.2 << 0.02;
+    }
+    TableRow costFuncRow = paramTable->appendRow();
+    costFuncRow << "Cost function value" << 1.0 << 0.0;
+    for (size_t i = 0; i < inputNames.size(); i++) {
+      TableRow row = paramTable->appendRow();
+      std::ostringstream oss;
+      oss << "f" << std::to_string(i) << "=" << inputNames[i];
+      row << oss.str() << 0.0 << 0.0;
+    }
+    ads.add(paramName, paramTable);
+    ads.addToGroup(baseName, paramName);
+    const auto ncmWs = boost::dynamic_pointer_cast<Workspace>(
+        wsf.create("Workspace2D", 1, 1, 1));
+    ads.add(ncmName, ncmWs);
+    ads.addToGroup(baseName, ncmName);
+  }
+
+  /**
+   * Checks the results of handleFitFinished() to see if workspaces are dealt
+   * with correctly:
+   *
+   * MuonSimulFit_Label
+   *   \__MuonSimulFit_Label_MUSR00015189_long_1_Workspace
+   *   \__...
+   *   \__MuonSimulFit_Label_MUSR00015189_long_1_Parameters
+   *   \__...
+   *
+   * @param label :: [input] Selected label for fit
+   * @param inputNames :: [input] Names of input workspaces
+   */
+  void checkFittedWorkspacesHandledCorrectly(
+      const std::string &label, const std::vector<std::string> &inputNames) {
+    auto &ads = AnalysisDataService::Instance();
+
+    const std::string baseName = "MuonSimulFit_" + label;
+    const auto baseGroup = ads.retrieveWS<WorkspaceGroup>(baseName);
+    TS_ASSERT(baseGroup);
+    if (baseGroup) {
+      // generate expected names
+      std::vector<std::string> expectedNames{baseName +
+                                             "_NormalisedCovarianceMatrix"};
+      for (const auto &name : inputNames) {
+        std::ostringstream oss;
+        const auto wsParams =
+            MantidQt::CustomInterfaces::MuonAnalysisHelper::parseWorkspaceName(
+                name);
+        oss << baseName << "_" << wsParams.label << "_" << wsParams.itemName
+            << "_" << wsParams.periods;
+        expectedNames.push_back(oss.str() + "_Workspace");
+        expectedNames.push_back(oss.str() + "_Parameters");
+      }
+      // Check expected workspaces in group
+      auto groupNames(baseGroup->getNames());
+      std::sort(groupNames.begin(), groupNames.end());
+      std::sort(expectedNames.begin(), expectedNames.end());
+      TS_ASSERT_EQUALS(expectedNames, groupNames);
+
+      // Check parameter tables
+      for (size_t i = 0; i < baseGroup->size(); i++) {
+        const auto table =
+            boost::dynamic_pointer_cast<ITableWorkspace>(baseGroup->getItem(i));
+        if (table) {
+          auto columns = table->getColumnNames();
+          std::sort(columns.begin(), columns.end());
+          TS_ASSERT_EQUALS(
+              columns, std::vector<std::string>({"Error", "Name", "Value"}));
+          TS_ASSERT_EQUALS(table->rowCount(), 3);
+          TS_ASSERT_EQUALS(table->String(0, 0), "A0");
+          TS_ASSERT_EQUALS(table->String(1, 0), "A1");
+          TS_ASSERT_EQUALS(table->String(2, 0), "Cost function value");
+          TS_ASSERT_EQUALS(table->Double(0, 1), 0.1);
+          TS_ASSERT_EQUALS(table->Double(1, 1), 0.2);
+          TS_ASSERT_EQUALS(table->Double(2, 1), 1.0);
+          TS_ASSERT_EQUALS(table->Double(0, 2), 0.01);
+          TS_ASSERT_EQUALS(table->Double(1, 2), 0.02);
+          TS_ASSERT_EQUALS(table->Double(2, 2), 0.0);
+        }
+      }
+    }
   }
 
   MockDataSelector *m_dataSelector;
