@@ -11,6 +11,8 @@ Algorithms
 New
 ###
 
+- :ref:`LoadPreNexusLive <algm-LoadPreNexusLive>` will load "live"
+  data from file on legacy SNS DAS instruments.
 
 Improved
 ########
