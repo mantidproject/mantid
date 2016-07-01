@@ -359,7 +359,7 @@ void PDCalibration::exec() {
     for (size_t i = 0; i < fittedTable->rowCount(); ++i) {
       // Get peak value
       double centre = fittedTable->getRef<double>("centre", i);
-      // double width = fittedTable->getRef<double>("width", i);
+      double width = fittedTable->getRef<double>("width", i);
       double height = fittedTable->getRef<double>("height", i);
       double chi2 = fittedTable->getRef<double>("chi2", i);
 
@@ -378,6 +378,22 @@ void PDCalibration::exec() {
       if (height < minPeakHeight) {
         continue;
       }
+
+      // background value
+      double back_intercept = fittedTable->getRef<double>("backgroundintercept", i);
+      double back_slope = fittedTable->getRef<double>("backgroundslope", i);
+      double back_quad = fittedTable->getRef<double>("A2", i);
+      double background =
+	back_intercept + back_slope * centre + back_quad * centre * centre;
+
+      // Continue to identify whether this peak will be accepted
+      // peak signal/noise ratio
+      if (height * 2.0 * sqrt(2.0 * M_LN2) / width < 5.)
+	continue;
+
+      // ban peaks that are not outside of error bars for the background
+      if (height < 0.5 * std::sqrt(height + background))
+	continue;
 
       d_vec.push_back(peaks.inDPos[i]);
       tof_vec.push_back(centre);
