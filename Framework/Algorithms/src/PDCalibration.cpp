@@ -191,6 +191,39 @@ void PDCalibration::init() {
       "PeakWindow", 0.1, mustBePositive,
       "The maximum window (in d space) around peak to look for peak.");
   std::vector<std::string> modes{"DIFC", "DIFC+TZERO", "DIFC+TZERO+DIFA"};
+
+  // copy FindPeaks properties
+  auto min = boost::make_shared<BoundedValidator<int>>();
+  min->setLower(1);
+  declareProperty(
+      "FWHM", 7, min,
+      "Estimated number of points covered by the fwhm of a peak (default 7)");
+  declareProperty("Tolerance", 4, min, "A measure of the strictness desired in "
+                                       "meeting the condition on peak "
+                                       "candidates,\n Mariscotti recommends 2 "
+                                       "(default 4)");
+  std::vector<std::string> peaktypes{"BackToBackExponential", "Gaussian",
+                                     "Lorentzian"};
+  declareProperty("PeakFunction", "Gaussian",
+                  boost::make_shared<StringListValidator>(peaktypes));
+  std::vector<std::string> bkgdtypes{"Flat", "Linear", "Quadratic"};
+  declareProperty("BackgroundType", "Linear",
+                  boost::make_shared<StringListValidator>(bkgdtypes),
+                  "Type of Background.");
+  declareProperty("HighBackground", true,
+                  "Relatively weak peak in high background");
+  auto mustBePositive1 = boost::make_shared<BoundedValidator<double>>();
+  mustBePositive1->setLower(1);
+  declareProperty(
+      "MinGuessedPeakWidth", 4., mustBePositive1,
+      "Minimum guessed peak width for fit. It is in unit of number of pixels.");
+  declareProperty(
+      "MaxGuessedPeakWidth", 4., mustBePositive1,
+      "Maximum guessed peak width for fit. It is in unit of number of pixels.");
+  declareProperty("MinimumPeakHeight", 2., "Minimum allowed peak height. ");
+  declareProperty("StartFromObservedPeakCentre", true,
+                  "Use observed value as the starting value of peak centre. ");
+
   declareProperty("CalibrationParameters", "DIFC+TZERO+DIFA",
                   boost::make_shared<StringListValidator>(modes),
                   "Select calibration parameters to fit.");
@@ -201,6 +234,20 @@ void PDCalibration::init() {
   declareProperty(make_unique<WorkspaceProperty<API::ITableWorkspace>>(
                       "OutputCalibrationTable", "", Direction::Output),
                   "");
+
+  // make group for FindPeak properties
+  std::string findPeaksGroup("Peak finding properties");
+  setPropertyGroup("PeakPositions", findPeaksGroup);
+  setPropertyGroup("PeakWindow", findPeaksGroup);
+  setPropertyGroup("FWHM", findPeaksGroup);
+  setPropertyGroup("Tolerance", findPeaksGroup);
+  setPropertyGroup("PeakFunction", findPeaksGroup);
+  setPropertyGroup("BackgroundType", findPeaksGroup);
+  setPropertyGroup("HighBackground", findPeaksGroup);
+  setPropertyGroup("MinGuessedPeakWidth", findPeaksGroup);
+  setPropertyGroup("MaxGuessedPeakWidth", findPeaksGroup);
+  setPropertyGroup("MinimumPeakHeight", findPeaksGroup);
+  setPropertyGroup("StartFromObservedPeakCentre", findPeaksGroup);
 }
 
 //----------------------------------------------------------------------------------------------
@@ -272,15 +319,20 @@ void PDCalibration::exec() {
     alg->setProperty("WorkspaceIndex", static_cast<int>(wkspIndex));
     alg->setProperty("PeakPositions", peaks.inTofPos);
     alg->setProperty("FitWindows", peaks.inTofWindows);
-    alg->setProperty("FWHM", 7);                           // TODO default
-    alg->setProperty("Tolerance", 4);                      // TODO default
-    alg->setProperty("PeakFunction", "Gaussian");          // TODO configurable?
-    alg->setProperty("BackgroundType", "Linear");          // TODO configurable?
-    alg->setProperty("HighBackground", true);              // TODO configurable?
-    alg->setProperty("MinGuessedPeakWidth", 4);            // TODO configurable?
-    alg->setProperty("MaxGuessedPeakWidth", 4);            // TODO configurable?
-    alg->setProperty("MinimumPeakHeight", 2.);             // TODO configurable?
-    alg->setProperty("StartFromObservedPeakCentre", true); // TODO configurable?
+    alg->setProperty<int>("FWHM", getProperty("FWHM"));
+    alg->setProperty<int>("Tolerance", getProperty("Tolerance"));
+    alg->setProperty<std::string>("PeakFunction", getProperty("PeakFunction"));
+    alg->setProperty<std::string>("BackgroundType",
+                                  getProperty("BackgroundType"));
+    alg->setProperty<bool>("HighBackground", getProperty("HighBackground"));
+    alg->setProperty<double>("MinGuessedPeakWidth",
+                             getProperty("MinGuessedPeakWidth"));
+    alg->setProperty<double>("MaxGuessedPeakWidth",
+                             getProperty("MaxGuessedPeakWidth"));
+    alg->setProperty<double>("MinimumPeakHeight",
+                             getProperty("MinimumPeakHeight"));
+    alg->setProperty<bool>("StartFromObservedPeakCentre",
+                           getProperty("StartFromObservedPeakCentre"));
     alg->executeAsChildAlg();
     API::ITableWorkspace_sptr fittedTable = alg->getProperty("PeaksList");
     //       std::cout << "fitted rowcount " << fittedTable->rowCount() <<
@@ -751,9 +803,9 @@ void PDCalibration::createNewCalTable() {
     API::TableRow newRow = m_calibrationTable->appendRow();
     newRow << detID;
     newRow << difcWS->readY(wi)[0];
-    newRow << 0.; // difa
-    newRow << 0.; // tzero
-    newRow << 0.; // tofmin
+    newRow << 0.;      // difa
+    newRow << 0.;      // tzero
+    newRow << 0.;      // tofmin
     newRow << DBL_MAX; // tofmax
   }
 }
