@@ -11,6 +11,7 @@ try:
 except ImportError:
     have_plotly = False
 
+
 class SavePlot1D(mantid.api.PythonAlgorithm):
 
     _wksp = None
@@ -32,13 +33,12 @@ class SavePlot1D(mantid.api.PythonAlgorithm):
         return False
 
     def PyInit(self):
-        #declare properties
-        self.declareProperty(mantid.api.WorkspaceProperty('InputWorkspace','',
+        self.declareProperty(mantid.api.WorkspaceProperty('InputWorkspace', '',
                                                           mantid.kernel.Direction.Input),
-                             "Workspace to plot")
+                             'Workspace to plot')
         self.declareProperty(mantid.api.FileProperty('OutputFilename', '',
                                                      action=mantid.api.FileAction.OptionalSave,
-                                                     extensions = ['.png']),
+                                                     extensions=['.png']),
                              doc='Name of the image file to savefile.')
         if have_plotly:
             outputTypes = ['image', 'plotly', 'plotly-full']
@@ -47,10 +47,10 @@ class SavePlot1D(mantid.api.PythonAlgorithm):
         self.declareProperty('OutputType', 'image',
                              StringListValidator(outputTypes),
                              'Method for rendering plot')
-        self.declareProperty("XLabel","",
-                             "Label on the X axis. If empty, it will be taken from workspace")
-        self.declareProperty("YLabel","",
-                             "Label on the Y axis. If empty, it will be taken from workspace")
+        self.declareProperty('XLabel', '',
+                             'Label on the X axis. If empty, it will be taken from workspace')
+        self.declareProperty('YLabel', '',
+                             'Label on the Y axis. If empty, it will be taken from workspace')
         self.declareProperty(StringArrayProperty('SpectraNames', [], direction=Direction.Input),
                              'Override with custom names for spectra')
         self.declareProperty('Result', '', Direction.Output)
@@ -76,19 +76,18 @@ class SavePlot1D(mantid.api.PythonAlgorithm):
 
         self.setProperty('Result', result)
 
-
     def getData(self, ws, wkspIndex, label=''):
-        x=ws.readX(wkspIndex)
-        y=ws.readY(wkspIndex)
-        if x.size==y.size+1:
-            x=(x[:-1]+x[1:])*0.5
+        x = ws.readX(wkspIndex)
+        y = ws.readY(wkspIndex)
+        if x.size == y.size+1:
+            x = (x[:-1]+x[1:])*0.5
 
         # use suggested label
         if len(label.strip()) > 0:
             return (x, y, label)
 
         # determine the label from the data
-        ax=ws.getAxis(1)
+        ax = ws.getAxis(1)
         if ax.isSpectra():
             label = ax.label(wkspIndex)
         else:
@@ -100,28 +99,27 @@ class SavePlot1D(mantid.api.PythonAlgorithm):
         return (x, y, label)
 
     def getAxesLabels(self, ws, utf8=False):
-        xlabel=self.getProperty('XLabel').value
-        if xlabel=='':
-            xaxis=ws.getAxis(0)
+        xlabel = self.getProperty('XLabel').value
+        if xlabel == '':
+            xaxis = ws.getAxis(0)
             if utf8:
                 unitLabel = xaxis.getUnit().symbol().utf8()
             else:  # latex markup
-                unitLabel= '$' + xaxis.getUnit().symbol().latex() + '$'
-            xlabel=xaxis.getUnit().caption()+' ('+unitLabel+')'
+                unitLabel = '$' + xaxis.getUnit().symbol().latex() + '$'
+            xlabel = xaxis.getUnit().caption()+' ('+unitLabel+')'
 
-        ylabel=self.getProperty("YLabel").value
-        if ylabel=='':
-            ylabel=ws.YUnit()
-            if ylabel=='':
+        ylabel = self.getProperty('YLabel').value
+        if ylabel == '':
+            ylabel = ws.YUnit()
+            if ylabel == '':
                 ylabel = ws.YUnitLabel()
 
         return (xlabel, ylabel)
 
-
     def savePlotly(self, fullPage):
         spectraNames = self.getProperty('SpectraNames').value
 
-        if type(self._wksp)==mantid.api.WorkspaceGroup:
+        if type(self._wksp) == mantid.api.WorkspaceGroup:
             fig = toolsly.make_subplots(rows=self._wksp.getNumberOfEntries())
 
             for i in range(self._wksp.getNumberOfEntries()):
@@ -131,24 +129,24 @@ class SavePlot1D(mantid.api.PythonAlgorithm):
                     fig.append_trace(spectrum, i+1, 1)
                 fig['layout']['xaxis%d' % (i+1)].update(title=xlabel)
                 fig['layout']['yaxis%d' % (i+1)].update(title=ylabel)
-                if len(spectraNames) > 0: # remove the used spectra names
+                if len(spectraNames) > 0:  # remove the used spectra names
                     spectraNames = spectraNames[len(traces):]
         else:
             (traces, xlabel, ylabel) = self.toScatterAndLabels(self._wksp,
                                                                spectraNames)
 
-            layout = go.Layout(yaxis={'title':ylabel},
-                               xaxis={'title':xlabel})
+            layout = go.Layout(yaxis={'title': ylabel},
+                               xaxis={'title': xlabel})
 
             fig = go.Figure(data=traces, layout=layout)
 
         # extra arguments for div vs full page
         if fullPage:
             filename = self.getProperty("OutputFilename").value
-            plotly_args = {'filename':filename}
+            plotly_args = {'filename': filename}
         else:  # just the div
-            plotly_args = {'output_type':'div',
-                           'include_plotlyjs':False}
+            plotly_args = {'output_type': 'div',
+                           'include_plotlyjs': False}
 
         # render the plot
         div = plot(fig, show_link=False, **plotly_args)
@@ -163,9 +161,9 @@ class SavePlot1D(mantid.api.PythonAlgorithm):
         data = []
         for i in xrange(wksp.getNumberHistograms()):
             if len(spectraNames) > i:
-                (x,y,label) = self.getData(wksp, i, spectraNames[i])
+                (x, y, label) = self.getData(wksp, i, spectraNames[i])
             else:
-                (x,y,label) = self.getData(wksp, i)
+                (x, y, label) = self.getData(wksp, i)
             data.append(go.Scatter(x=x, y=y, name=label))
 
         (xlabel, ylabel) = self.getAxesLabels(wksp, utf8=True)
@@ -173,25 +171,26 @@ class SavePlot1D(mantid.api.PythonAlgorithm):
         return (data, xlabel, ylabel)
 
     def saveImage(self):
-        ok2run=''
+        ok2run = ''
         try:
             import matplotlib
             from distutils.version import LooseVersion
-            if LooseVersion(matplotlib.__version__)<LooseVersion("1.2.0"):
-                ok2run='Wrong version of matplotlib. Required >= 1.2.0'
+            if LooseVersion(matplotlib.__version__) < LooseVersion("1.2.0"):
+                ok2run = 'Wrong version of matplotlib. Required >= 1.2.0'
         except ImportError:
-            ok2run='Problem importing matplotlib'
-        if ok2run!='':
+            ok2run = 'Problem importing matplotlib'
+        if not bool(ok2run):
             raise RuntimeError(ok2run)
-        matplotlib=sys.modules['matplotlib']
-        matplotlib.use("agg")
+
+        matplotlib = sys.modules['matplotlib']
+        matplotlib.use('agg')
         import matplotlib.pyplot as plt
 
-        if type(self._wksp)==mantid.api.WorkspaceGroup:
-            num_subplots=self._wksp.getNumberOfEntries()
+        if type(self._wksp) == mantid.api.WorkspaceGroup:
+            num_subplots = self._wksp.getNumberOfEntries()
             fig, axarr = plt.subplots(num_subplots)
             for i in range(self._wksp.getNumberOfEntries()):
-                self.doPlotImage(axarr[i],self._wksp.getItem(i))
+                self.doPlotImage(axarr[i], self._wksp.getItem(i))
         else:
             fig, ax = plt.subplots()
             self.doPlotImage(ax, self._wksp)
@@ -199,7 +198,7 @@ class SavePlot1D(mantid.api.PythonAlgorithm):
         plt.tight_layout(1.08)
         plt.show()
         filename = self.getProperty("OutputFilename").value
-        plt.savefig(filename,bbox_inches='tight')
+        plt.savefig(filename, bbox_inches='tight')
 
         return filename
 
