@@ -1,4 +1,4 @@
-#pylint: disable=no-init
+﻿#pylint: disable=no-init
 import stresstesting
 from mantid.simpleapi import *
 from ISISCommandInterface import *
@@ -25,7 +25,8 @@ class LOQCentreNoGrav(stresstesting.MantidStressTest):
 
     def validate(self):
         self.disableChecking.append('Instrument')
-        return '54431main_1D_3.0_9.0','LOQCentreNoGravSearchCentreFixed_V2.nxs'
+        self.tolerance = 1e-6
+        return '54431main_1D_3.0_9.0','LOQCentreNoGravSearchCentreFixed.nxs'
 
 class LOQCentreNoGravDefineCentre(stresstesting.MantidStressTest):
     def runTest(self):
