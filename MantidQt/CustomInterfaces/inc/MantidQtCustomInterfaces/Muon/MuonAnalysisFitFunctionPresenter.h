@@ -62,6 +62,8 @@ public slots:
   void handleFunctionLoaded(const QString &funcString);
   /// When number of datasets to fit changes, update function browser
   void updateNumberOfDatasets(int nDatasets);
+  /// When "edit local parameter" button is clicked, launch dialog
+  void editLocalParameterClicked(const QString &parName);
 
 private:
   /// Connect signals and slots

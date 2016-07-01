@@ -127,15 +127,18 @@ public:
   /// Get value of a local parameter
   double getLocalParameterValue(const QString &parName, int i) const override;
   /// Set value of a local parameter
-  void setLocalParameterValue(const QString &parName, int i, double value);
+  void setLocalParameterValue(const QString &parName, int i,
+                              double value) override;
   /// Check if a local parameter is fixed
   bool isLocalParameterFixed(const QString &parName, int i) const override;
   /// Fix/unfix local parameter
-  void setLocalParameterFixed(const QString &parName, int i, bool fixed);
+  void setLocalParameterFixed(const QString &parName, int i,
+                              bool fixed) override;
   /// Get the tie for a local parameter.
   QString getLocalParameterTie(const QString &parName, int i) const override;
   /// Set a tie for a local parameter.
-  void setLocalParameterTie(const QString &parName, int i, QString tie);
+  void setLocalParameterTie(const QString &parName, int i,
+                            QString tie) override;
 
   /// Return the multidomain function if number of datasets is greater than 1
   Mantid::API::IFunction_sptr getGlobalFunction() override;

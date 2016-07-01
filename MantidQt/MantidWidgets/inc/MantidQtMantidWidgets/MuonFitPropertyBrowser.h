@@ -68,6 +68,10 @@ public:
   void setSimultaneousLabel(const std::string &label) override {
     m_simultaneousLabel = label;
   }
+  /// Get names of workspaces that are set to be fitted
+  std::vector<std::string> getWorkspaceNamesToFit() const override {
+    return m_workspacesToFit;
+  }
 
 public slots:
   /// Perform the fit algorithm

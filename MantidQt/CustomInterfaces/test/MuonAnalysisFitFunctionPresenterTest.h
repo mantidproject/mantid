@@ -40,6 +40,9 @@ public:
   MOCK_CONST_METHOD2(getLocalParameterValue, double(const QString &, int));
   MOCK_CONST_METHOD2(getLocalParameterTie, QString(const QString &, int));
   MOCK_CONST_METHOD0(getNumberOfDatasets, int());
+  MOCK_METHOD3(setLocalParameterValue, void(const QString &, int, double));
+  MOCK_METHOD3(setLocalParameterFixed, void(const QString &, int, bool));
+  MOCK_METHOD3(setLocalParameterTie, void(const QString &, int, QString));
 
 private:
   Mantid::API::IFunction_sptr m_func;
@@ -56,6 +59,7 @@ public:
   MOCK_CONST_METHOD0(getFunction, Mantid::API::IFunction_sptr());
   MOCK_METHOD3(setParameterValue,
                void(const QString &, const QString &, double));
+  MOCK_CONST_METHOD0(getWorkspaceNamesToFit, std::vector<std::string>());
 };
 
 class MuonAnalysisFitFunctionPresenterTest : public CxxTest::TestSuite {

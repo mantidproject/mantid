@@ -43,6 +43,7 @@ public:
   virtual Mantid::API::IFunction_sptr getFunction() const = 0;
   virtual void setParameterValue(const QString &funcIndex,
                                  const QString &paramName, double value) = 0;
+  virtual std::vector<std::string> getWorkspaceNamesToFit() const = 0;
 signals:
   virtual void functionUpdateRequested() = 0;
   virtual void functionUpdateAndFitRequested(bool sequential) = 0;
