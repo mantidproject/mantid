@@ -15,6 +15,15 @@ Single Crystal Diffraction
   has been expanded and improved from previous release. It provides an integrated user-friendly interface for
   instrument scientists and users to access data, calculate and refine UB matrix, merge multiple data sets
   for slice-view and peak integration.
+.. figure::  ../../images/peak3d.png
+      :width: 487
+   :align: right
+- :ref:`IntegratePeaksMDHKL <algm-IntegratePeaksMDHKL>` has been added to integrate data in HKL space.  The 
+  main usage will be for data normalized by :ref:`MDNormSCD <algm-MDNormSCD>`, but it also works for MDHistoWorkspaces
+  and MDEventWorkspaces.  The MD data must be in units of HKL.  A 3D box is created for each peak and the background
+  and peak data are separated.  The intensity and sigma of the intensity is found from the grid inside the peak and
+  the background is subtracted.  The boxes are created and integrated in parallel and less memory is required than
+  binning all HKL at once.
   
 
 Engineering Diffraction
