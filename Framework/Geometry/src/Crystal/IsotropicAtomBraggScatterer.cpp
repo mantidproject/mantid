@@ -155,9 +155,8 @@ operator()() const {
   Mantid::Kernel::StringTokenizer tokens(
       m_scattererString, ";", Mantid::Kernel::StringTokenizer::TOK_TRIM);
   std::vector<BraggScatterer_sptr> scatterers;
-
-  for (auto it = tokens.begin(); it != tokens.end(); ++it) {
-    scatterers.push_back(getScatterer(boost::trim_copy(*it)));
+  for (const auto &token : tokens) {
+    scatterers.push_back(getScatterer(token));
   }
 
   return scatterers;

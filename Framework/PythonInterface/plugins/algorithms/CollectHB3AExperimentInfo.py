@@ -177,7 +177,8 @@ class CollectHB3AExperimentInfo(PythonAlgorithm):
             spicetablews = self._loadSpiceFile(spicefilename)
             self._spiceTableDict[scan] = spicetablews
             if spicetablews is None:
-                self.glog.warning("Unable to access Exp %d Scan %d's SPICE file %s." % (self._expNumber, scan, spicefilename))
+                self.glog.warning("Unable to access Exp %d Scan %d's SPICE file %s." % (self._expNumber, scan,
+                                                                                        spicefilename))
 
             # Get list of Pts.
             if len(self._ptListList[iscan]) == 0:
@@ -293,43 +294,53 @@ class CollectHB3AExperimentInfo(PythonAlgorithm):
         # Reset the current starting detector ID
         self._currStartDetID = 0
 
-        for twotheta in sorted(self._2thetaScanPtDict.keys()):
-            if len(self._2thetaScanPtDict[twotheta]) == 0:
+        distinct_2theta_list = sorted(self._2thetaScanPtDict.keys())
+        num_distinct_2theta = len(distinct_2theta_list)
+
+        self.log().warning('Number of distinct 2theta is %d. They are %s.' % (num_distinct_2theta,
+                                                                              str(distinct_2theta_list)))
+
+        for index, two_theta in enumerate(distinct_2theta_list):
+            if len(self._2thetaScanPtDict[two_theta]) == 0:
                 raise RuntimeError("Logic error to have empty list.")
             else:
-                self.log().notice("[DB] Process pixels of detector centered at 2theta = %.5f." % (twotheta))
+                self.log().warning("[DB] For %d-th 2theta = %.5f. Number of Pts. is %d. "
+                                   "They are %s." % (index, two_theta, len(self._2thetaScanPtDict[two_theta]),
+                                                     str(self._2thetaScanPtDict[two_theta])))
 
             # Get scan/pt and set dictionary
-            self.log().debug("Processing detector @ 2theta = %.5f, " % (twotheta))
-            scannumber, ptnumber = self._2thetaScanPtDict[twotheta][0]
-            self.log().debug("self._2thetaScanPtDict: %s" % (self._2thetaScanPtDict[twotheta]))
+            self.log().debug("Processing detector @ 2theta = %.5f, " % (two_theta))
+            for scannumber, ptnumber in self._2thetaScanPtDict[two_theta]:
+                # scannumber, ptnumber = self._2thetaScanPtDict[two_theta][0]
+                self.log().debug("self._2thetaScanPtDict: %s" % (self._2thetaScanPtDict[two_theta]))
 
-            self._scanPt2ThetaDict[(scannumber, ptnumber)] = twotheta
-            self._detStartID[twotheta] = self._currStartDetID
+                self._scanPt2ThetaDict[(scannumber, ptnumber)] = two_theta
+                self._detStartID[two_theta] = self._currStartDetID
 
-            if self._doGenerateVirtualInstrument is True:
-                # Load detector counts file (.xml)
-                dataws = self._loadHB3ADetCountFile(scannumber, ptnumber)
+                if self._doGenerateVirtualInstrument is True:
+                    # Load detector counts file (.xml)
+                    dataws = self._loadHB3ADetCountFile(scannumber, ptnumber)
 
-                # write each detector's position and ID to table workspace
-                maxdetid = 0
-                for iws in xrange(dataws.getNumberHistograms()):
-                    detector = dataws.getDetector(iws)
-                    detpos = detector.getPos()
-                    newdetid = self._currStartDetID + detector.getID()
-                    if detector.getID() > maxdetid:
-                        maxdetid = detector.getID()
-                    self._myPixelInfoTableWS.addRow([newdetid, detpos.X(), detpos.Y(), detpos.Z(), detector.getID()])
-                # ENDFOR (iws)
+                    # write each detector's position and ID to table workspace
+                    maxdetid = 0
+                    for iws in xrange(dataws.getNumberHistograms()):
+                        detector = dataws.getDetector(iws)
+                        detpos = detector.getPos()
+                        newdetid = self._currStartDetID + detector.getID()
+                        if detector.getID() > maxdetid:
+                            maxdetid = detector.getID()
+                        self._myPixelInfoTableWS.addRow([newdetid, detpos.X(), detpos.Y(), detpos.Z(), detector.getID()])
+                    # ENDFOR (iws)
 
-            else:
-                # No need to generate virtual instrument information.
-                maxdetid = self._numPixelsDetector
+                else:
+                    # No need to generate virtual instrument information.
+                    maxdetid = self._numPixelsDetector
+                # END-IF-ELSE
 
-            # END-IF-ELSE
+                # Update start ID
+                self._currStartDetID += maxdetid
 
-            # Update start ID
-            self._currStartDetID += maxdetid
+            # END-FOR
         # ENDFOR
 
         return

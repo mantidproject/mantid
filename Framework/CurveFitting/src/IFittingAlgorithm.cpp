@@ -12,7 +12,6 @@
 #include "MantidAPI/IFunctionMD.h"
 #include "MantidAPI/ILatticeFunction.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/MultiDomainFunction.h"
 
 #include "MantidKernel/ListValidator.h"
 
@@ -112,26 +111,13 @@ void IFittingAlgorithm::setDomainType() {
   } else {
     m_domainType = IDomainCreator::Simple;
   }
-  // Kernel::Property *prop = getPointerToProperty("Minimizer");
-  // auto minimizerProperty =
-  //    dynamic_cast<Kernel::PropertyWithValue<std::string> *>(prop);
-  // std::vector<std::string> minimizerOptions =
-  //    API::FuncMinimizerFactory::Instance().getKeys();
-  // if (m_domainType != IDomainCreator::Simple) {
-  //  auto it = std::find(minimizerOptions.begin(), minimizerOptions.end(),
-  //                      "Levenberg-Marquardt");
-  //  minimizerOptions.erase(it);
-  //}
-  // minimizerProperty->replaceValidator(Kernel::IValidator_sptr(
-  //    new Kernel::StartsWithValidator(minimizerOptions)));
 }
 
 void IFittingAlgorithm::setFunction() {
   // get the function
   m_function = getProperty("Function");
-  auto mdf = boost::dynamic_pointer_cast<API::MultiDomainFunction>(m_function);
-  if (mdf) {
-    size_t ndom = mdf->getMaxIndex() + 1;
+  size_t ndom = m_function->getNumberDomains();
+  if (ndom > 1) {
     m_workspacePropertyNames.resize(ndom);
     m_workspacePropertyNames[0] = "InputWorkspace";
     for (size_t i = 1; i < ndom; ++i) {
@@ -180,8 +166,7 @@ void IFittingAlgorithm::addWorkspace(const std::string &workspacePropertyName,
       // names of the sort InputWorkspace_#
       setFunction();
     }
-    auto multiFun = boost::dynamic_pointer_cast<API::MultiDomainFunction>(fun);
-    if (multiFun) {
+    if (fun->getNumberDomains() > 1) {
       auto multiCreator =
           new MultiDomainCreator(this, m_workspacePropertyNames);
       multiCreator->setCreator(index, creator);
@@ -213,9 +198,7 @@ void IFittingAlgorithm::addWorkspace(const std::string &workspacePropertyName,
  */
 void IFittingAlgorithm::addWorkspaces() {
   setDomainType();
-  auto multiFun =
-      boost::dynamic_pointer_cast<API::MultiDomainFunction>(m_function);
-  if (multiFun) {
+  if (m_function->getNumberDomains() > 1) {
     m_domainCreator.reset(
         new MultiDomainCreator(this, m_workspacePropertyNames));
   }
