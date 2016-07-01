@@ -21,13 +21,11 @@ using namespace MantidQt::API;
 
 // This C function is defined in the third party C lib minigzip.c
 extern "C" {
-    void file_compress(const char *file, const char *mode);
+void file_compress(const char *file, const char *mode);
 }
 
-ProjectSerialiser::ProjectSerialiser(ApplicationWindow* window)
-    : window(window)
-{
-}
+ProjectSerialiser::ProjectSerialiser(ApplicationWindow *window)
+    : window(window) {}
 
 /**
  * Save the current state of the application as a Mantid project file
@@ -37,19 +35,18 @@ ProjectSerialiser::ProjectSerialiser(ApplicationWindow* window)
  * @param compress :: whether to compress the project (default false)
  */
 void ProjectSerialiser::save(Folder *folder, const QString &projectName,
-                             bool compress)
-{
-    m_windowCount = 0;
-    QFile fileHandle(projectName);
+                             bool compress) {
+  m_windowCount = 0;
+  QFile fileHandle(projectName);
 
-    // attempt to backup project files and check we can write
-    if (!canBackupProjectFiles(&fileHandle, projectName)
-            || !canWriteToProject(&fileHandle, projectName)) {
-        return;
-    }
+  // attempt to backup project files and check we can write
+  if (!canBackupProjectFiles(&fileHandle, projectName) ||
+      !canWriteToProject(&fileHandle, projectName)) {
+    return;
+  }
 
-    QString text = serialiseProjectState(folder);
-    saveProjectFile(&fileHandle, projectName, text, compress);
+  QString text = serialiseProjectState(folder);
+  saveProjectFile(&fileHandle, projectName, text, compress);
 }
 
 /**
@@ -61,8 +58,7 @@ void ProjectSerialiser::save(Folder *folder, const QString &projectName,
  * 		folder. (Default True)
  */
 void ProjectSerialiser::load(std::string lines, const int fileVersion,
-                             const bool isTopLevel)
-{
+                             const bool isTopLevel) {
   // If we're not the top level folder, read the folder settings and create the
   // folder
   // This is a legacy edgecase because folders are written
@@ -84,8 +80,8 @@ void ProjectSerialiser::load(std::string lines, const int fileVersion,
     if (values.size() > 4 && values[4] == "current")
       window->d_loaded_current = newFolder;
 
-    FolderListItem *fli =
-        new FolderListItem(window->currentFolder()->folderListItem(), newFolder);
+    FolderListItem *fli = new FolderListItem(
+        window->currentFolder()->folderListItem(), newFolder);
     newFolder->setFolderListItem(fli);
 
     window->d_current_folder = newFolder;
@@ -117,8 +113,7 @@ void ProjectSerialiser::load(std::string lines, const int fileVersion,
  */
 void ProjectSerialiser::loadProjectSections(const std::string &lines,
                                             const int fileVersion,
-                                            const bool isTopLevel)
-{
+                                            const bool isTopLevel) {
   // This now ought to be the regular contents of a folder. Parse as normal.
   TSVSerialiser tsv(lines);
 
@@ -204,21 +199,21 @@ void ProjectSerialiser::loadProjectSections(const std::string &lines,
   }
 
   if (tsv.hasSection("instrumentwindow")) {
-      std::vector<std::string> instrumentSections =
-              tsv.sections("instrumentwindow");
-      for (auto it = instrumentSections.begin(); it != instrumentSections.end();
-           ++it) {
-          TSVSerialiser iws(*it);
-          if (iws.selectLine("WorkspaceName")) {
-              std::string wsName = iws.asString(1);
-              QString name = QString::fromStdString(wsName);
-              auto obj = window->mantidUI->getInstrumentView(name);
-              InstrumentWindow *iw = dynamic_cast<InstrumentWindow *>(obj);
-              if (iw) {
-                  iw->loadFromProject(*it, window, fileVersion);
-              }
-          }
+    std::vector<std::string> instrumentSections =
+        tsv.sections("instrumentwindow");
+    for (auto it = instrumentSections.begin(); it != instrumentSections.end();
+         ++it) {
+      TSVSerialiser iws(*it);
+      if (iws.selectLine("WorkspaceName")) {
+        std::string wsName = iws.asString(1);
+        QString name = QString::fromStdString(wsName);
+        auto obj = window->mantidUI->getInstrumentView(name);
+        InstrumentWindow *iw = dynamic_cast<InstrumentWindow *>(obj);
+        if (iw) {
+          iw->loadFromProject(*it, window, fileVersion);
+        }
       }
+    }
   }
 
   // Deal with subfolders last.
@@ -228,7 +223,6 @@ void ProjectSerialiser::loadProjectSections(const std::string &lines,
       load(*it, fileVersion, false);
     }
   }
-
 }
 
 /**
@@ -237,18 +231,16 @@ void ProjectSerialiser::loadProjectSections(const std::string &lines,
  * @param projectName :: the name of the project
  * @return true if the file handle is writable
  */
-bool ProjectSerialiser::canWriteToProject(QFile* fileHandle,
-                                          const QString& projectName)
-{
-    // check if we can write
-    if (!fileHandle->open(QIODevice::WriteOnly)) {
-        QMessageBox::about(window, window->tr("MantidPlot - File save error"),
-                              window->tr("The file: <br><b>%1</b> is opened in "
-                              "read-only mode")
-                                    .arg(projectName)); // Mantid
-        return false;
-    }
-    return true;
+bool ProjectSerialiser::canWriteToProject(QFile *fileHandle,
+                                          const QString &projectName) {
+  // check if we can write
+  if (!fileHandle->open(QIODevice::WriteOnly)) {
+    QMessageBox::about(window, window->tr("MantidPlot - File save error"),
+                       window->tr("The file: <br><b>%1</b> is opened in "
+                                  "read-only mode").arg(projectName)); // Mantid
+    return false;
+  }
+  return true;
 }
 
 /**
@@ -262,28 +254,27 @@ bool ProjectSerialiser::canWriteToProject(QFile* fileHandle,
  * @param folder :: the folder to write out
  * @return a string representation of the current project state
  */
-QString ProjectSerialiser::serialiseProjectState(Folder* folder)
-{
-    QString text;
+QString ProjectSerialiser::serialiseProjectState(Folder *folder) {
+  QString text;
 
-    // Save the list of workspaces
-    if(window->mantidUI) {
-        text += saveWorkspaces();
-    }
+  // Save the list of workspaces
+  if (window->mantidUI) {
+    text += saveWorkspaces();
+  }
 
-    // Save the scripting window
-    ScriptingWindow* scriptingWindow = window->getScriptWindowHandle();
-    if (scriptingWindow) {
-        std::string scriptString = scriptingWindow->saveToProject(window);
-        text += QString::fromStdString(scriptString);
-    }
+  // Save the scripting window
+  ScriptingWindow *scriptingWindow = window->getScriptWindowHandle();
+  if (scriptingWindow) {
+    std::string scriptString = scriptingWindow->saveToProject(window);
+    text += QString::fromStdString(scriptString);
+  }
 
-    // Finally, recursively save folders
-    if(folder) {
-        text += saveFolderState(folder, true);
-    }
+  // Finally, recursively save folders
+  if (folder) {
+    text += saveFolderState(folder, true);
+  }
 
-    return text;
+  return text;
 }
 
 /**
@@ -293,23 +284,21 @@ QString ProjectSerialiser::serialiseProjectState(Folder* folder)
  * @return string represnetation of the folder's data
  */
 QString ProjectSerialiser::saveFolderState(Folder *folder,
-                                           const bool isTopLevel)
-{
-    QString text;
-    bool isCurrentFolder = window->currentFolder() == folder;
+                                           const bool isTopLevel) {
+  QString text;
+  bool isCurrentFolder = window->currentFolder() == folder;
 
-    if(!isTopLevel) {
-        text += saveFolderHeader(folder, isCurrentFolder);
-    }
+  if (!isTopLevel) {
+    text += saveFolderHeader(folder, isCurrentFolder);
+  }
 
-    text += saveFolderSubWindows(folder);
+  text += saveFolderSubWindows(folder);
 
-    if(!isTopLevel) {
-        text += saveFolderFooter();
-    }
+  if (!isTopLevel) {
+    text += saveFolderFooter();
+  }
 
-
-    return text;
+  return text;
 }
 
 /**
@@ -319,24 +308,23 @@ QString ProjectSerialiser::saveFolderState(Folder *folder,
  * @param isCurrentFolder :: whether this folder is the current one.
  * @return string representation of the folder's header data
  */
-QString ProjectSerialiser::saveFolderHeader(Folder* folder,
-                                            bool isCurrentFolder)
-{
-    QString text;
+QString ProjectSerialiser::saveFolderHeader(Folder *folder,
+                                            bool isCurrentFolder) {
+  QString text;
 
-    // Write the folder opening tag
-    text += "<folder>\t" + QString(folder->objectName()) + "\t" +
-            folder->birthDate() + "\t" + folder->modificationDate();
+  // Write the folder opening tag
+  text += "<folder>\t" + QString(folder->objectName()) + "\t" +
+          folder->birthDate() + "\t" + folder->modificationDate();
 
-    // label it as current if necessary
-    if (isCurrentFolder) {
-        text += "\tcurrent";
-    }
+  // label it as current if necessary
+  if (isCurrentFolder) {
+    text += "\tcurrent";
+  }
 
-    text += "\n";
-    text += "<open>" + QString::number(folder->folderListItem()->isExpanded()) +
-            "</open>\n";
-    return text;
+  text += "\n";
+  text += "<open>" + QString::number(folder->folderListItem()->isExpanded()) +
+          "</open>\n";
+  return text;
 }
 
 /**
@@ -348,45 +336,39 @@ QString ProjectSerialiser::saveFolderHeader(Folder* folder,
  * @param windowCount :: count of the number of windows
  * @return string representation of the folder's subfolders
  */
-QString ProjectSerialiser::saveFolderSubWindows(Folder * folder)
-{
-    QString text;
+QString ProjectSerialiser::saveFolderSubWindows(Folder *folder) {
+  QString text;
 
-    // Write windows
-    QList<MdiSubWindow *> windows = folder->windowsList();
-    foreach (MdiSubWindow *w, windows) {
-      Mantid::IProjectSerialisable *ips =
-          dynamic_cast<Mantid::IProjectSerialisable *>(w);
+  // Write windows
+  QList<MdiSubWindow *> windows = folder->windowsList();
+  foreach (MdiSubWindow *w, windows) {
+    Mantid::IProjectSerialisable *ips =
+        dynamic_cast<Mantid::IProjectSerialisable *>(w);
 
-      if (ips) {
-        text += QString::fromUtf8(ips->saveToProject(window).c_str());
-      }
-
-      ++m_windowCount;
+    if (ips) {
+      text += QString::fromUtf8(ips->saveToProject(window).c_str());
     }
 
-    // Write subfolders
-    QList<Folder *> subfolders = folder->folders();
-    foreach (Folder *f, subfolders) {
-        text += saveFolderState(f);
-    }
+    ++m_windowCount;
+  }
 
-    // Write log info
-    if (!folder->logInfo().isEmpty()) {
-        text += "<log>\n" + folder->logInfo() + "</log>\n";
-    }
+  // Write subfolders
+  QList<Folder *> subfolders = folder->folders();
+  foreach (Folder *f, subfolders) { text += saveFolderState(f); }
 
-    return text;
+  // Write log info
+  if (!folder->logInfo().isEmpty()) {
+    text += "<log>\n" + folder->logInfo() + "</log>\n";
+  }
+
+  return text;
 }
 
 /**
  * Generate the closing folder data and end tag.
  * @return footer string for this folder
  */
-QString ProjectSerialiser::saveFolderFooter()
-{
-    return "</folder>\n";
-}
+QString ProjectSerialiser::saveFolderFooter() { return "</folder>\n"; }
 
 /** This method saves the currently loaded workspaces in
  * the project.
@@ -406,7 +388,7 @@ QString ProjectSerialiser::saveWorkspaces() {
 
   auto workspaceItems = AnalysisDataService::Instance().getObjectNames();
   for (auto itemIter = workspaceItems.cbegin();
-            itemIter != workspaceItems.cend(); ++itemIter) {
+       itemIter != workspaceItems.cend(); ++itemIter) {
     QString wsName = QString::fromStdString(*itemIter);
 
     Workspace_sptr ws = AnalysisDataService::Instance().retrieveWS<Workspace>(
@@ -439,7 +421,6 @@ QString ProjectSerialiser::saveWorkspaces() {
   return wsNames;
 }
 
-
 /**
  * Check if the project can be backed up.
  *
@@ -451,37 +432,38 @@ QString ProjectSerialiser::saveWorkspaces() {
  * @param projectName :: the name of the project
  * @return true if the project can be backed up or the user does not care
  */
-bool ProjectSerialiser::canBackupProjectFiles(QFile* fileHandle,
-                                              const QString& projectName)
-{
+bool ProjectSerialiser::canBackupProjectFiles(QFile *fileHandle,
+                                              const QString &projectName) {
 
-    if (window->d_backup_files && fileHandle->exists()) { // make byte-copy of current file so that
-                                        // there's always a copy of the data on
-                                        // disk
-      while (!fileHandle->open(QIODevice::ReadOnly)) {
-        if (fileHandle->isOpen())
-          fileHandle->close();
-        int choice = QMessageBox::warning(
-            window, window->tr("MantidPlot - File backup error"), // Mantid
-            window->tr("Cannot make a backup copy of <b>%1</b> (to %2).<br>If you ignore "
-               "this, you run the risk of <b>data loss</b>.")
-                .arg(projectName)
-                .arg(projectName + "~"),
-            QMessageBox::Retry | QMessageBox::Default,
-            QMessageBox::Abort | QMessageBox::Escape, QMessageBox::Ignore);
-        if (choice == QMessageBox::Abort)
-          return false;
-        if (choice == QMessageBox::Ignore)
-          break;
-      }
-
-      if (fileHandle->isOpen()) {
-        QFile::copy(projectName, projectName + "~");
+  if (window->d_backup_files &&
+      fileHandle->exists()) { // make byte-copy of current file so that
+                              // there's always a copy of the data on
+                              // disk
+    while (!fileHandle->open(QIODevice::ReadOnly)) {
+      if (fileHandle->isOpen())
         fileHandle->close();
-      }
+      int choice = QMessageBox::warning(
+          window, window->tr("MantidPlot - File backup error"), // Mantid
+          window->tr("Cannot make a backup copy of <b>%1</b> (to %2).<br>If "
+                     "you ignore "
+                     "this, you run the risk of <b>data loss</b>.")
+              .arg(projectName)
+              .arg(projectName + "~"),
+          QMessageBox::Retry | QMessageBox::Default,
+          QMessageBox::Abort | QMessageBox::Escape, QMessageBox::Ignore);
+      if (choice == QMessageBox::Abort)
+        return false;
+      if (choice == QMessageBox::Ignore)
+        break;
     }
 
-    return true;
+    if (fileHandle->isOpen()) {
+      QFile::copy(projectName, projectName + "~");
+      fileHandle->close();
+    }
+  }
+
+  return true;
 }
 
 /**
@@ -492,9 +474,9 @@ bool ProjectSerialiser::canBackupProjectFiles(QFile* fileHandle,
  * @param text :: the string representation of the current state
  * @param compress :: whether to compress the project
  */
-void ProjectSerialiser::saveProjectFile(QFile* fileHandle,
+void ProjectSerialiser::saveProjectFile(QFile *fileHandle,
                                         const QString &projectName,
-                                        QString& text, bool compress) {
+                                        QString &text, bool compress) {
   QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
   // add number of MdiSubWindows saved to file
@@ -559,7 +541,7 @@ void ProjectSerialiser::openMatrix(const std::string &lines,
 
   Matrix *m = window->newMatrix(QString::fromStdString(caption), rows, cols);
   window->setListViewDate(QString::fromStdString(caption),
-                  QString::fromStdString(date));
+                          QString::fromStdString(date));
   m->setBirthDate(QString::fromStdString(date));
 
   TSVSerialiser tsv(newLines);
@@ -638,10 +620,11 @@ void ProjectSerialiser::openMultiLayer(const std::string &lines,
   Mantid::Kernel::Strings::convert<int>(values[2], cols);
   std::string birthDate = values[3];
 
-  plot = window->multilayerPlot(QString::fromUtf8(caption.c_str()), 0, rows, cols);
+  plot =
+      window->multilayerPlot(QString::fromUtf8(caption.c_str()), 0, rows, cols);
   plot->setBirthDate(QString::fromStdString(birthDate));
   window->setListViewDate(QString::fromStdString(caption),
-                  QString::fromStdString(birthDate));
+                          QString::fromStdString(birthDate));
 
   plot->loadFromProject(multiLayerLines, window, fileVersion);
 }
@@ -671,7 +654,7 @@ void ProjectSerialiser::openTable(const std::string &lines,
 
   Table *t = window->newTable(QString::fromStdString(caption), rows, cols);
   window->setListViewDate(QString::fromStdString(caption),
-                  QString::fromStdString(date));
+                          QString::fromStdString(date));
   t->setBirthDate(QString::fromStdString(date));
   t->loadFromProject(lines, window, fileVersion);
 }
@@ -728,7 +711,7 @@ void ProjectSerialiser::openTableStatistics(const std::string &lines,
     return;
 
   window->setListViewDate(QString::fromStdString(name),
-                  QString::fromStdString(birthDate));
+                          QString::fromStdString(birthDate));
   t->setBirthDate(QString::fromStdString(birthDate));
 
   t->loadFromProject(lines, window, fileVersion);
@@ -770,17 +753,17 @@ void ProjectSerialiser::openSurfacePlot(const std::string &lines,
 
     if (funcQStr.endsWith("(Y)", Qt::CaseSensitive)) {
       plot = window->dataPlot3D(QString::fromStdString(caption),
-                        QString::fromStdString(funcStr), val2, val3, val4, val5,
-                        val6, val7);
+                                QString::fromStdString(funcStr), val2, val3,
+                                val4, val5, val6, val7);
     } else if (funcQStr.contains("(Z)", Qt::CaseSensitive) > 0) {
       plot = window->openPlotXYZ(QString::fromStdString(caption),
-                         QString::fromStdString(funcStr), val2, val3, val4,
-                         val5, val6, val7);
+                                 QString::fromStdString(funcStr), val2, val3,
+                                 val4, val5, val6, val7);
     } else if (funcQStr.startsWith("matrix<", Qt::CaseSensitive) &&
                funcQStr.endsWith(">", Qt::CaseInsensitive)) {
       plot = window->openMatrixPlot3D(QString::fromStdString(caption),
-                              QString::fromStdString(funcStr), val2, val3, val4,
-                              val5, val6, val7);
+                                      QString::fromStdString(funcStr), val2,
+                                      val3, val4, val5, val6, val7);
     } else if (funcQStr.contains("mantidMatrix3D")) {
       MantidMatrix *m = 0;
       if (tsv.selectLine("title")) {
@@ -803,17 +786,18 @@ void ProjectSerialiser::openSurfacePlot(const std::string &lines,
         plot = m->plotGraph3D(style);
     } else if (funcQStr.contains(",")) {
       QStringList l = funcQStr.split(",", QString::SkipEmptyParts);
-      plot = window->plotParametricSurface(l[0], l[1], l[2], l[3].toDouble(),
-                                   l[4].toDouble(), l[5].toDouble(),
-                                   l[6].toDouble(), l[7].toInt(), l[8].toInt(),
-                                   l[9].toInt(), l[10].toInt());
+      plot = window->plotParametricSurface(
+          l[0], l[1], l[2], l[3].toDouble(), l[4].toDouble(), l[5].toDouble(),
+          l[6].toDouble(), l[7].toInt(), l[8].toInt(), l[9].toInt(),
+          l[10].toInt());
     } else {
       QStringList l = funcQStr.split(";", QString::SkipEmptyParts);
       if (l.count() == 1) {
-        plot = window->plotSurface(funcQStr, val2, val3, val4, val5, val6, val7);
+        plot =
+            window->plotSurface(funcQStr, val2, val3, val4, val5, val6, val7);
       } else if (l.count() == 3) {
         plot = window->plotSurface(l[0], val2, val3, val4, val5, val6, val7,
-                           l[1].toInt(), l[2].toInt());
+                                   l[1].toInt(), l[2].toInt());
       }
       window->setWindowName(plot, QString::fromStdString(caption));
     }
@@ -823,11 +807,11 @@ void ProjectSerialiser::openSurfacePlot(const std::string &lines,
     return;
 
   window->setListViewDate(QString::fromStdString(caption),
-                  QString::fromStdString(dateStr));
+                          QString::fromStdString(dateStr));
   plot->setBirthDate(QString::fromStdString(dateStr));
   plot->setIgnoreFonts(true);
-  window->restoreWindowGeometry(window, plot,
-                        QString::fromStdString(tsv.lineAsString("geometry")));
+  window->restoreWindowGeometry(
+      window, plot, QString::fromStdString(tsv.lineAsString("geometry")));
   plot->loadFromProject(tsvLines, window, fileVersion);
 }
 
@@ -836,15 +820,16 @@ void ProjectSerialiser::openSurfacePlot(const std::string &lines,
  * @param lines :: the string of characters from a Mantid project file
  * @param fileVersion :: the version of the project file
  */
-void ProjectSerialiser::openScriptWindow(const std::string &lines, const int fileVersion) {
+void ProjectSerialiser::openScriptWindow(const std::string &lines,
+                                         const int fileVersion) {
   window->showScriptWindow();
-  ScriptingWindow* scriptingWindow = window->getScriptWindowHandle();
+  ScriptingWindow *scriptingWindow = window->getScriptWindowHandle();
 
   if (!scriptingWindow)
     return;
 
-  scriptingWindow->setWindowTitle("MantidPlot: " +
-                                  window->scriptingEnv()->languageName() + " Window");
+  scriptingWindow->setWindowTitle(
+      "MantidPlot: " + window->scriptingEnv()->languageName() + " Window");
 
   scriptingWindow->loadFromProject(lines, window, fileVersion);
 }
@@ -853,16 +838,15 @@ void ProjectSerialiser::openScriptWindow(const std::string &lines, const int fil
  * Open a new script window
  * @param files :: list of strings representing file names for python scripts
  */
-void ProjectSerialiser::openScriptWindow(const QStringList &files)
-{
+void ProjectSerialiser::openScriptWindow(const QStringList &files) {
   window->showScriptWindow();
-  ScriptingWindow* scriptingWindow = window->getScriptWindowHandle();
+  ScriptingWindow *scriptingWindow = window->getScriptWindowHandle();
 
   if (!scriptingWindow)
     return;
 
-  scriptingWindow->setWindowTitle("MantidPlot: " +
-                                  window->scriptingEnv()->languageName() + " Window");
+  scriptingWindow->setWindowTitle(
+      "MantidPlot: " + window->scriptingEnv()->languageName() + " Window");
 
   scriptingWindow->loadFromFileList(files);
 }
@@ -954,11 +938,11 @@ void ProjectSerialiser::populateMantidTreeWidget(const QString &lines) {
    *
    * @param wsName :: the name of the workspace to load
    */
-  void ProjectSerialiser::loadWsToMantidTree(const std::string &wsName) {
-    if (wsName.empty()) {
-      throw std::runtime_error("Workspace Name not found in project file ");
-    }
-    std::string fileName(window->workingDir.toStdString() + "/" + wsName);
-    fileName.append(".nxs");
-    window->mantidUI->loadWSFromFile(wsName, fileName);
+void ProjectSerialiser::loadWsToMantidTree(const std::string &wsName) {
+  if (wsName.empty()) {
+    throw std::runtime_error("Workspace Name not found in project file ");
   }
+  std::string fileName(window->workingDir.toStdString() + "/" + wsName);
+  fileName.append(".nxs");
+  window->mantidUI->loadWSFromFile(wsName, fileName);
+}

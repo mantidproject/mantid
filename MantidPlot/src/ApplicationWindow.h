@@ -927,10 +927,10 @@ public slots:
   QStringList mantidmatrixNames();
 
   /// Add a mantid matrix window to the application window
-  void addMantidMatrixWindow(MantidMatrix* matrix);
+  void addMantidMatrixWindow(MantidMatrix *matrix);
 
   /// Find a mantid matrix window by name
-  MantidMatrix* findMantidMatrixWindow(const std::string& wsName);
+  MantidMatrix *findMantidMatrixWindow(const std::string &wsName);
 
   //! \name Notes
   //@{

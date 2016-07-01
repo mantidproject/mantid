@@ -132,7 +132,8 @@ private:
   /// Save header information about the folder
   QString saveFolderHeader(bool isCurrentFolder);
   /// Recursively save subwindows and subfolders
-  QString saveFolderSubWindows(ApplicationWindow* app, Folder*, int& windowCount);
+  QString saveFolderSubWindows(ApplicationWindow *app, Folder *,
+                               int &windowCount);
   /// Save footer infromation about the folder
   QString saveFolderFooter();
 

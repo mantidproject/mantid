@@ -195,7 +195,6 @@
 #include "MantidQtAPI/ManageUserDirectories.h"
 #include "MantidQtAPI/Message.h"
 
-
 #include "MantidQtMantidWidgets/CatalogHelper.h"
 #include "MantidQtMantidWidgets/CatalogSearch.h"
 #include "MantidQtMantidWidgets/FitPropertyBrowser.h"
@@ -13665,9 +13664,8 @@ QStringList ApplicationWindow::mantidmatrixNames() {
  * Add a MantidMatrix to the application window instance
  * @param matrix :: the MantidMatrix to add
  */
-void ApplicationWindow::addMantidMatrixWindow(MantidMatrix *matrix)
-{
-    m_mantidmatrixWindows << matrix;
+void ApplicationWindow::addMantidMatrixWindow(MantidMatrix *matrix) {
+  m_mantidmatrixWindows << matrix;
 }
 
 /**
@@ -13675,19 +13673,19 @@ void ApplicationWindow::addMantidMatrixWindow(MantidMatrix *matrix)
  * @param wsName :: the name of the workspace
  * @return a pointer to a MantidMatrix or NULL
  */
-MantidMatrix *ApplicationWindow::findMantidMatrixWindow(const std::__1::string &wsName)
-{
-    MantidMatrix* m = NULL;
+MantidMatrix *
+ApplicationWindow::findMantidMatrixWindow(const std::__1::string &wsName) {
+  MantidMatrix *m = NULL;
 
-    for (auto mIt = m_mantidmatrixWindows.begin();
-         mIt != m_mantidmatrixWindows.end(); ++mIt) {
-        if (*mIt && wsName == (*mIt)->getWorkspaceName()) {
-            m = *mIt;
-            break;
-        }
+  for (auto mIt = m_mantidmatrixWindows.begin();
+       mIt != m_mantidmatrixWindows.end(); ++mIt) {
+    if (*mIt && wsName == (*mIt)->getWorkspaceName()) {
+      m = *mIt;
+      break;
     }
+  }
 
-    return m;
+  return m;
 }
 
 bool ApplicationWindow::alreadyUsedName(const QString &label) {

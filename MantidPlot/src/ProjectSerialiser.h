@@ -43,73 +43,74 @@ class ApplicationWindow;
 */
 
 namespace MantidQt {
-    namespace API {
-        class ProjectSerialiser
-        {
-        public:
-            /// Create a new serialiser with the current application window
-            ProjectSerialiser(ApplicationWindow* window);
-            /// Save the current state of the project to disk
-            void save(Folder* folder, const QString& projectName, bool compress = false);
-            /// Load a project file from disk
-            void load(std::string lines, const int fileVersion, const bool isTopLevel = true);
-            /// Open the script window and load scripts from string
-            void openScriptWindow(const QStringList &files);
+namespace API {
+class ProjectSerialiser {
+public:
+  /// Create a new serialiser with the current application window
+  ProjectSerialiser(ApplicationWindow *window);
+  /// Save the current state of the project to disk
+  void save(Folder *folder, const QString &projectName, bool compress = false);
+  /// Load a project file from disk
+  void load(std::string lines, const int fileVersion,
+            const bool isTopLevel = true);
+  /// Open the script window and load scripts from string
+  void openScriptWindow(const QStringList &files);
 
-        private:
-            // Instance Variables
+private:
+  // Instance Variables
 
-            /// Store a reference to the caller application window instance
-            ApplicationWindow* window;
-            /// Store a count of the number of windows during saving
-            int m_windowCount;
+  /// Store a reference to the caller application window instance
+  ApplicationWindow *window;
+  /// Store a count of the number of windows during saving
+  int m_windowCount;
 
-            // Saving Functions
+  // Saving Functions
 
-            /// Attempt to backup files before save
-            bool canBackupProjectFiles(QFile* fileHandle, const QString& projectName);
-            /// Check that the project is writable
-            bool canWriteToProject(QFile* fileHandle, const QString& projectName);
-            /// Convert the current state of the application to a project file
-            QString serialiseProjectState(Folder* folder);
-            /// Save the project file to disk
-            void saveProjectFile(QFile* fileHandle, const QString &projectName, QString& text, bool compress);
-            /// Save the state of a folder
-            QString saveFolderState(Folder *folder, const bool isTopLevel = false);
-            /// Save the header information about a folder
-            QString saveFolderHeader(Folder* folder, bool isCurrentFolder);
-            /// Save sub-windows for a folder
-            QString saveFolderSubWindows(Folder *folder);
-            /// Save the footer contents of a folder
-            QString saveFolderFooter();
-            /// Save any currently loaded workspaces
-            QString saveWorkspaces();
+  /// Attempt to backup files before save
+  bool canBackupProjectFiles(QFile *fileHandle, const QString &projectName);
+  /// Check that the project is writable
+  bool canWriteToProject(QFile *fileHandle, const QString &projectName);
+  /// Convert the current state of the application to a project file
+  QString serialiseProjectState(Folder *folder);
+  /// Save the project file to disk
+  void saveProjectFile(QFile *fileHandle, const QString &projectName,
+                       QString &text, bool compress);
+  /// Save the state of a folder
+  QString saveFolderState(Folder *folder, const bool isTopLevel = false);
+  /// Save the header information about a folder
+  QString saveFolderHeader(Folder *folder, bool isCurrentFolder);
+  /// Save sub-windows for a folder
+  QString saveFolderSubWindows(Folder *folder);
+  /// Save the footer contents of a folder
+  QString saveFolderFooter();
+  /// Save any currently loaded workspaces
+  QString saveWorkspaces();
 
-            // Loading Functions
+  // Loading Functions
 
-            /// Load sections of the folder
-            void loadProjectSections(const std::string& lines, const int fileVersion, const bool isTopLevel);
-            /// Open the script window and load scripts from string
-            void openScriptWindow(const std::string &files, const int fileVersion);
-            /// Open a Mantid matrix from a workspaces
-            void openMantidMatrix(const std::string &lines);
-            /// Open a (non-Mantid) matrix
-            void openMatrix(const std::string &lines, const int fileVersion);
-            /// Open a multi-layer plot window
-            void openMultiLayer(const std::string &lines, const int fileVersion);
-            /// Open a surface plot window
-            void openSurfacePlot(const std::string &lines, const int fileVersion);
-            /// Open a table window
-            void openTable(const std::string &lines, const int fileVersion);
-            /// Open a table statistics window
-            void openTableStatistics(const std::string &lines, const int fileVersion);
-            /// Load Nexus files and add workspaces to the ADS
-            void populateMantidTreeWidget(const QString &lines);
-            /// Load a single workspaces to the ADS
-            void loadWsToMantidTree(const std::string &wsName);
-
-        };
-    }
+  /// Load sections of the folder
+  void loadProjectSections(const std::string &lines, const int fileVersion,
+                           const bool isTopLevel);
+  /// Open the script window and load scripts from string
+  void openScriptWindow(const std::string &files, const int fileVersion);
+  /// Open a Mantid matrix from a workspaces
+  void openMantidMatrix(const std::string &lines);
+  /// Open a (non-Mantid) matrix
+  void openMatrix(const std::string &lines, const int fileVersion);
+  /// Open a multi-layer plot window
+  void openMultiLayer(const std::string &lines, const int fileVersion);
+  /// Open a surface plot window
+  void openSurfacePlot(const std::string &lines, const int fileVersion);
+  /// Open a table window
+  void openTable(const std::string &lines, const int fileVersion);
+  /// Open a table statistics window
+  void openTableStatistics(const std::string &lines, const int fileVersion);
+  /// Load Nexus files and add workspaces to the ADS
+  void populateMantidTreeWidget(const QString &lines);
+  /// Load a single workspaces to the ADS
+  void loadWsToMantidTree(const std::string &wsName);
+};
+}
 }
 
 #endif // PROJECTMANAGER_H
