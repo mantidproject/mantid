@@ -1,10 +1,9 @@
 from mantid import mtd
 from mantid.api import AlgorithmFactory, DataProcessorAlgorithm, FileAction, \
     FileProperty, WorkspaceProperty
-from mantid.kernel import Direction, EnabledWhenProperty, IntArrayBoundedValidator, \
+from mantid.kernel import Direction, EnabledWhenProperty, \
     PropertyCriterion, StringListValidator
-from mantid.simpleapi import FilterByXValue, GetIPTS, LoadEventPreNexus, \
-    LoadInstrument, LoadNexusLogs, NormaliseByCurrent
+from mantid.simpleapi import *
 import os
 
 
