@@ -1,7 +1,7 @@
 #include "MantidKernel/PropertyNexus.h"
 
-#include <nexus/NeXusException.hpp>
 #include <nexus/NeXusFile.hpp>
+#include <nexus/NeXusException.hpp>
 
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/DateAndTime.h"
@@ -42,7 +42,7 @@ namespace PropertyNexus {
 template <typename NumT>
 std::unique_ptr<Property>
 makeProperty(::NeXus::File *file, const std::string &name,
-             std::vector<Kernel::DateAndTime> &times) {
+             const std::vector<Kernel::DateAndTime> &times) {
   std::vector<NumT> values;
   file->getData(values);
   if (times.empty()) {
@@ -68,7 +68,7 @@ makeProperty(::NeXus::File *file, const std::string &name,
 */
 std::unique_ptr<Property>
 makeTimeSeriesBoolProperty(::NeXus::File *file, const std::string &name,
-                           std::vector<Kernel::DateAndTime> &times) {
+                           const std::vector<Kernel::DateAndTime> &times) {
   std::vector<uint8_t> savedValues;
   file->getData(savedValues);
   const size_t nvals = savedValues.size();
@@ -84,7 +84,7 @@ makeTimeSeriesBoolProperty(::NeXus::File *file, const std::string &name,
 /** Make a string/vector\<string\> property */
 std::unique_ptr<Property>
 makeStringProperty(::NeXus::File *file, const std::string &name,
-                   std::vector<Kernel::DateAndTime> &times) {
+                   const std::vector<Kernel::DateAndTime> &times) {
   std::vector<std::string> values;
   if (times.empty()) {
     std::string bigString = file->getStrData();
@@ -123,8 +123,8 @@ std::unique_ptr<Property> loadProperty(::NeXus::File *file,
 
   // Times in second offsets
   std::vector<double> timeSec;
-  std::string startStr = "";
-  std::string unitsStr = "";
+  std::string startStr;
+  std::string unitsStr;
 
   // Get the entries so that you can check if the "time" field is present
   std::map<std::string, std::string> entries = file->getEntries();

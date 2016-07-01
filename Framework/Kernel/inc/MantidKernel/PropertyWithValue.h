@@ -650,27 +650,22 @@ private:
   PropertyWithValue();
 };
 
-#define PROPERTYWITHVALUE_SAVEPROPERTY(type)                                   \
-  template <>                                                                  \
-  inline void PropertyWithValue<type>::saveProperty(::NeXus::File *file) {     \
-    file->makeGroup(this->name(), "NXlog", 1);                                 \
-    file->writeData("value", m_value);                                         \
-    file->closeGroup();                                                        \
-  }
-
-PROPERTYWITHVALUE_SAVEPROPERTY(float)
-PROPERTYWITHVALUE_SAVEPROPERTY(double)
-PROPERTYWITHVALUE_SAVEPROPERTY(int32_t)
-PROPERTYWITHVALUE_SAVEPROPERTY(uint32_t)
-PROPERTYWITHVALUE_SAVEPROPERTY(int64_t)
-PROPERTYWITHVALUE_SAVEPROPERTY(uint64_t)
-PROPERTYWITHVALUE_SAVEPROPERTY(std::string)
-PROPERTYWITHVALUE_SAVEPROPERTY(std::vector<double>)
-PROPERTYWITHVALUE_SAVEPROPERTY(std::vector<int32_t>)
+template <> void PropertyWithValue<float>::saveProperty(::NeXus::File *file);
+template <> void PropertyWithValue<double>::saveProperty(::NeXus::File *file);
+template <> void PropertyWithValue<int32_t>::saveProperty(::NeXus::File *file);
+template <> void PropertyWithValue<uint32_t>::saveProperty(::NeXus::File *file);
+template <> void PropertyWithValue<int64_t>::saveProperty(::NeXus::File *file);
+template <> void PropertyWithValue<uint64_t>::saveProperty(::NeXus::File *file);
+template <>
+void PropertyWithValue<std::string>::saveProperty(::NeXus::File *file);
+template <>
+void PropertyWithValue<std::vector<double>>::saveProperty(::NeXus::File *file);
+template <>
+void PropertyWithValue<std::vector<int32_t>>::saveProperty(::NeXus::File *file);
 
 template <typename TYPE>
 inline void PropertyWithValue<TYPE>::saveProperty(::NeXus::File *file) {
-  this->saveProperty(file);
+   this->saveProperty(file);
 }
 
 template <typename TYPE>

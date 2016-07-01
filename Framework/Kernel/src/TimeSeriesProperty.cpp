@@ -4,6 +4,7 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/TimeSplitter.h"
 #include "MantidKernel/make_unique.h"
+#include <nexus/NeXusFile.hpp>
 
 #include <boost/regex.hpp>
 
