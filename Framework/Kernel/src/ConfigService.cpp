@@ -1596,6 +1596,10 @@ void ConfigServiceImpl::appendDataSearchSubDir(const std::string &subdir) {
   } catch (Poco::PathSyntaxException &) {
     return;
   }
+
+  if (!subDirPath.isDirectory())
+    return;
+
   std::vector<std::string> newDataDirs = m_DataSearchDirs;
   std::vector<std::string>::const_iterator it = newDataDirs.begin();
   std::vector<std::string>::const_iterator end = newDataDirs.end();
