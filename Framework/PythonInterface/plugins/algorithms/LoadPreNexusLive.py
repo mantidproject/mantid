@@ -1,376 +1,115 @@
-"""*WIKI* 
-
--The purpose of this algorithm is to do a full reduction of SNAP data. This alloWS several runs, and with all the typical options that are usually used at the beamline, including calibrate from a cal file and from Convert Units, mask from file workspace and default masks, several groupings and save in GSAS or Fullprof format
-
-*WIKI*"""
-
-from mantid.kernel import *
-from mantid.api import *
-from mantid.simpleapi import *
+from mantid import mtd
+from mantid.api import AlgorithmFactory, DataProcessorAlgorithm, FileAction, \
+    FileProperty, WorkspaceProperty
+from mantid.kernel import Direction, EnabledWhenProperty, IntArrayBoundedValidator, \
+    PropertyCriterion, StringListValidator
+from mantid.simpleapi import FilterByXValue, GetIPTS, LoadEventPreNexus, \
+    LoadInstrument, LoadNexusLogs, NormaliseByCurrent
 import os
-import numpy as np
 
-class SNAP_Reduce(PythonAlgorithm):
-	
-	def get_IPTS_Local(self, run):
-			
-		runs = range(run-5, run+1)
-		file_Str  =''
-			
-		while len(runs)>0:
-			try :
-				r=runs.pop()
-				self.log().notice('\n run is : %s'%r)
-				file_Str  = FileFinder.findRuns(str(r))[0]
-				break
-			except RuntimeError:
-				pass
-					
-		if file_Str  =='':
-			self.log().error('The SNAP run %s is not found in the server - cannot find current IPTS, Choose another run'%run)
-			return False
-		else:
-			self.log().notice('File is: %s'%file_Str)
-			if file_Str.find('IPTS') > 0 :
-				start = file_Str.find('IPTS')
-			else :
-				start = file_Str.find('CAL')
-			temp = file_Str.find('/', start)
-			root = file_Str[0:temp+1]
-			self.log().notice('Root is: %s'%root)
-			return root
+class LoadPreNexusLive(DataProcessorAlgorithm):
+    def category(self):
+        return 'DataHandling'
 
-	def get_Run_Log_Local(self, run):
-			
-		runs = range(run-5, run+1)
-		file_Str  =''
-			
-		while len(runs)>0:
-			try :
-				r=runs.pop()
-				self.log().notice('\n run is : %s'%r)
-				file_Str  = FileFinder.findRuns(str(r))[0]
-				break
-			except RuntimeError:
-				pass
-					
-		if file_Str  =='':
-			self.log().error('The SNAP run %s is not found in the server - cannot find current IPTS, Choose another run'%run)
-			return False
-		else:
-			self.log().notice('File is: %s'%file_Str)
-			LogRun = int(file_Str.split('_')[1])
-			self.log().notice('Log Run is: %s'%LogRun)
-			return LogRun	
+    def findLivefile(self, instrument):
+        livepath = '/SNS/%s/shared/live/' % instrument
+        filenames = os.listdir(livepath)
 
-	def smooth (self, data, order):
-	# This smooths data based on linear weigthed average around point i 
-	# for example for an order of 7 the i point is weighted 4, i=/- 1 weighted 3, i+/-2 weighted 2 and  i+/-3 weighted 1
-	# this input is only the y values
-		sm = np.zeros(len(data))
-		factor = order/2+1
+        filenames = [name for name in filenames
+                     if name.startswith(instrument)]
+        filenames = [name for name in filenames
+                     if name.endswith('_live_neutron_event.dat')]
 
-		for i in range(len(data)):
-			temp=0
-			ave=0
-			for r in range( max(0,i-order/2), min(i+order/2,len(data)-1)+1):
-				temp = temp+(factor-abs(r-i))*data[r]
-				ave = ave+ factor-abs(r-i)
-			sm[i] = temp/ave
-		
-		return sm
+        if len(filenames) <= 0:
+            raise RuntimeError("Failed to find live file for '%s'" % instrument)
 
-	def LLS_transformation(self, input):
-	# this transforms data to be more sensitive to weak peaks. The function is reversed by the Inv_LLS function below  
-		out = np.log(np.log((input+1)**0.5+1)+1)
-	
-		return out
-	
-	def Inv_LLS_transformation (self, input):
-	# See Function LLS function above  
-		out = (np.exp(np.exp(input)-1)-1)**2-1
-	
-		return out
+        filenames.sort()
 
-	def peak_clip(self, data, win=30, decrese= True, LLS =True, smooth_window = 0 ):
-	
-		start_data = np.copy(data)
-
-		window =  win
-		print smooth_window
-	
-		if smooth_window > 0 : 
-			data = self.smooth(data, smooth_window)
-	
-		if  LLS ==True : 
-			data = self.LLS_transformation(data)
-
-		temp = data.copy()
-
-		if decrese == True: scan  = range(window+1,0,-1)
-		else : scan  = range(1,window+1)
-
-		for w in  scan:
-			for i in range(len(temp)):
-				if i<w or i > (len(temp)-w-1) :
-					continue
-				else:
-					win_array = temp[i-w:i+w+1].copy()
-					win_array_reversed = win_array[::-1]
-					average = (win_array+win_array_reversed)/2
-					temp[i]= np.min(average[:len(average)/2])
-					
-		if  LLS ==True : 
-			temp= self.Inv_LLS_transformation(temp)
-		
-		print min(start_data-temp)
-	
-		index = np.where((start_data-temp)==min(start_data-temp))[0][0]
-		
-		output = temp*(start_data[index]/ temp[index])
-				
-		return output
+        return os.path.join(livepath, filenames[-1])
 
 
-		
-		
-	def PyInit(self):
-		
-		validator = IntArrayBoundedValidator()
-		validator.setLower(0)
-		self.declareProperty(IntArrayProperty("RunNumbers", values=[0], direction=Direction.Input, 
-                                              validator=validator), "Run numbers to process, comma separated")
-						
-		self.declareProperty("Live Data", False,
-						"Read live data - requires a saved run in the current IPTS with the same Instrument configuration as the live run")
+    def findLogfile(self, instrument, runNumber):
+        filename = self.getProperty('LogFilename').value
+        if len(filename) > 0 and os.path.exists(filename):
+            return filename
 
-		mask = ["None", "Horizontal", "Vertical", "Masking Workspace", "Custom - xml masking file"]
-		self.declareProperty("Masking", "None", StringListValidator(mask),
-						"Mask to be applied to the data")	
+        try:
+            iptsdir = GetIPTS(Instrument=instrument, RunNumber=runNumber)
+            self.log().information('ipts %s' % iptsdir)
+        except RuntimeError:
+            self.log().warning('Failed to determine the IPTS containing %s_%d' % (instrument, runNumber))
+            return ''
 
-		self.declareProperty(WorkspaceProperty("Masking Workspace", "", Direction.Input, PropertyMode.Optional),"The workspace containing the mask.")
+        direc = os.path.join(iptsdir, 'data')
 
-		self.declareProperty(FileProperty(name="Masking Filename", defaultValue ="", 
-						direction = Direction.Input,
-						action=FileAction.OptionalLoad),
-                        doc = "The file containing the xml mask.")
+        filenames = os.listdir(direc)
+        filenames = [name for name in filenames
+                     if name.endswith('_event.nxs')]
 
-		self.declareProperty(name= "Calibration", defaultValue = "Convert Units", validator = StringListValidator(["Convert Units","Calibration File"]),
-						direction = Direction.Input, doc = "The type of conversion to d_spacing to be used.")		
+        if len(filenames) <= 0:
+            raise RuntimeError("Failed to find existing nexus file in '%s'" % iptsdir)
 
-		self.declareProperty(FileProperty(name="Calibration Filename", defaultValue ="", 
-						direction = Direction.Input,
-						action=FileAction.OptionalLoad), 
-                        doc = "The calibration file to convert to d_spacing.")
-						
-		self.declareProperty(FloatArrayProperty("Binning", [0.5,-0.004,7.0]),
-						"Min, Step, and Max of d-space bins.  Logarithmic binning is used if Step is negative.")
-			     
-		nor_corr = ["None", "From Workspace", "From Processed Nexus", "Extracted from Data"]
-		self.declareProperty("Normalization", "None", StringListValidator(nor_corr),
-						"If needed what type of input to use as normalization, Extracted from Data uses a background determination that is peak independent.This implemantation can be      tested in algorithm SNAP Peak Clipping Background")	
-						
-		self.declareProperty(FileProperty(name="Normalization Filename", defaultValue ="", 
-						direction = Direction.Input,
-						action=FileAction.OptionalLoad),
-						doc = "The file containing the processed nexus for normalization.")
+        filenames.sort()
 
-		self.declareProperty(WorkspaceProperty("Normalization Workspace", "", Direction.Input, PropertyMode.Optional),"The workspace containing the normalization data.")
-		
-		self.declareProperty("Peak Clipping Window Size", 10,
-						"Read live data - requires a saved run in the current IPTS with the same Instrumnet configuration")
+        return os.path.join(direc, filenames[-1])
 
-		self.declareProperty("Smoothing Range", 10,
-						"Read live data - requires a saved run in the current IPTS with the same Instrumnet configuration")
+    def PyInit(self):
+        instruments = ['BSS', 'SNAP', 'REF_M', 'CNCS', 'EQSANS', 'VULCAN',
+                       'VENUS', 'MANDI', 'TOPAZ', 'ARCS']
+        self.declareProperty('Instrument', '',
+                             StringListValidator(instruments),
+                             'Empty uses default instrument')
 
-		grouping = ["All", "Column", "Banks", "Modules", "2_4 Grouping"]
-		self.declareProperty("GroupDetectorsBy", "All", StringListValidator(grouping),
-						"Detector groups to use for future focussing: All detectors as one group, Groups (East,West for SNAP), Columns for SNAP, detector banks")	
+        self.declareProperty(WorkspaceProperty('OutputWorkspace','',
+                                               direction=Direction.Output))
 
-		mode = ["Set-Up", "Production"]
-		self.declareProperty("Processing Mode", "Production", StringListValidator(mode),
-						"Set-Up Mode is used for establishing correct parameters. Production Mode only Normalized workspace is kept for each run.")	
+        self.declareProperty("NormalizeByCurrent", True, "Normalize by current")
 
-		self.declareProperty(name= "Optional Prefix", defaultValue = "", 
-						direction = Direction.Input, doc = "Optional Prefix to be added to workspaces and output filenames")
+        self.declareProperty("LoadLogs", True, "Attempt to load logs from an existing file")
 
+        self.declareProperty(FileProperty('LogFilename', '',
+                                          direction=Direction.Input,
+                                          action=FileAction.OptionalLoad,
+                                          extensions=['_event.nxs']),
+                             doc='File containing logs to use (Optional)')
+        self.setPropertySettings('LogFilename',
+                                 EnabledWhenProperty('LoadLogs', PropertyCriterion.IsDefault))
 
-		self.declareProperty("Save Data", False," Save data in the following formats: Ascii- d-spacing ,Nexus Processed,GSAS and Fullprof")
-		
-	def PyExec(self):		
-		# Retrieve all relevant notice
-		
-		in_Runs = self.getProperty("RunNumbers").value
-	
-		live =  self.getProperty("Live Data").value
-		
-		masking  = self.getProperty("Masking").value
-		
-		if masking == "Custom - xml masking file" : 
-			mask_file = self.getProperty("Masking Filename").value
-			LoadMask(InputFile = mask_file, Instrument ='SNAP', OutputWorkspace = 'Custom Mask')
-		if masking == "Horizontal" : 
-			mask_file = self.getProperty("Masking Filename").value
-			if mtd.doesExist('Horizontal Mask')== False : 
-				LoadMask(InputFile = '/SNS/SNAP/shared/libs/Horizontal_Mask.xml', Instrument ='SNAP', OutputWorkspace = 'Horizontal Mask')
-		if masking == "Vertical" : 
-			mask_file = self.getProperty("Masking Filename").value
-			if mtd.doesExist('Vertical Mask')== False : 
-				LoadMask(InputFile = '/SNS/SNAP/shared/libs/Vertical_Mask.xml', Instrument ='SNAP', OutputWorkspace = 'Vertical Mask')
-		if masking == "Masking Workspace" : 	
-			mask_workspace = self.getProperty("Masking Workspace").value
+    def PyExec(self):
+        instrument = self.getProperty('Instrument').value
+        # TODO use the default instrument if this is not set
 
-		calib = self.getProperty("Calibration").value
-		if calib == "Calibration File" : 
-			cal_File = self.getProperty("Calibration Filename").value
-		
-		params = self.getProperty("Binning").value
-		norm = self.getProperty("Normalization").value
-		
-		if norm == "From Processed Nexus" :  
-			norm_File = self.getProperty("Normalization filename").value
-			Normalization = LoadNexusProcessed(Filename = norm_File)
-		if norm == "From Workspace" :  
-			normWS = self.getProperty("Normalization Workspace").value
-		
-		group = self.getProperty("GroupDetectorsBy").value
-		
-		if  group == 'All': 
-			real_name = 'All'
-		if  group == 'Column': 
-			real_name = 'Column'
-		if  group == 'Banks': 
-			real_name = 'Group'
-		if  group == 'Modules': 
-			real_name = 'bank'
-		if  group == '2_4 Grouping': 
-			real_name = '2_4 Grouping'
-			
-		if mtd.doesExist(group)== False :
-			if group == "2_4 Grouping":
-				LoadDetectorsGroupingFile(InputFile=r'/SNS/SNAP/shared/libs/SNAP_group_2_4.xml',OutputWorkspace='2_4 Grouping')
-			else:
-			    CreateGroupingWorkspace(InstrumentName ='SNAP', GroupDetectorsBy=real_name, OutputWorkspace=group)
-			
-		Process_Mode = self.getProperty("Processing Mode").value
-		
-		prefix = '_'+self.getProperty("Optional Prefix").value
+        eventFilename = self.findLivefile(instrument)
 
-		save_Data = self.getProperty("Save Data").value
+        self.log().information("Loading '%s'" % eventFilename)
+        wkspName = self.getPropertyValue('OutputWorkspace')
+        LoadEventPreNexus(EventFilename=eventFilename,
+                          OutputWorkspace=wkspName)
 
+        # let people know what was just loaded
+        wksp = mtd[wkspName]
+        instrument = str(wksp.getInstrument().getName())
+        runNumber = int(wksp.run()['run_number'].value)
+        startTime = str(wksp.run().startTime())
+        self.log().information('Loaded %s live run %d - starttime=%s'
+                               % (instrument, runNumber, startTime))
 
-#--------------------------- REDUCE DATA ------------------------------------------------
+        if self.getProperty('NormalizeByCurrent').value:
+            self.log().information('Normalising by current')
+            NormaliseByCurrent(InputWorkspace=wkspName, Outputworkspace=wkspName)
 
-		Tag = 'SNAP'
-		for r in in_Runs:
-			self.log().notice("processing run %s" %r)
-			print self.get_IPTS_Local(r)
-			if live == True :
-				Tag = 'Live'
-				WS = LoadEventPreNexus(EventFilename=r'/SNS/SNAP/shared/live/SNAP_%s_live_neutron_event.dat'%r ,PulseidFilename=r'/SNS/SNAP/shared/live/SNAP_%s_live_pulseid.dat'%r )
-				print 'going normalize'
-				WS = NormaliseByCurrent(InputWorkspace='WS', Outputworkspace='WS')
-				print 'going loadlogs'
-				LoadNexusLogs(Workspace=WS,Filename='%s/data/SNAP_%s_event.nxs' %(self.get_IPTS_Local(r),self.get_Run_Log_Local(r)))
-				LoadInstrument(Workspace=WS,InstrumentName='SNAP')
-				WS=FilterByXValue(InputWorkspace = WS, XMin = 1)
-			else :
-				WS = Load(Filename = str(r), Outputworkspace='WS')
-				WS = NormaliseByCurrent(InputWorkspace=WS, Outputworkspace='WS')
-				
-			
-			WS = CompressEvents(InputWorkspace=WS, Outputworkspace='WS')
-			WS = CropWorkspace(InputWorkspace='WS', OutputWorkspace='WS', XMax=50000)
-			WS = RemovePromptPulse(InputWorkspace=WS, OutputWorkspace='WS', Width='1600', Frequency='60.4')
-			
-			if masking == "Custom - xml masking file" : WS = MaskDetectors(Workspace=WS, MaskedWorkspace = 'Custom Mask')
-			if masking == "Masking Workspace" : WS = MaskDetectors(Workspace=WS, MaskedWorkspace = mask_workspace)
-			if masking == "Vertical" : WS = MaskDetectors(Workspace=WS, MaskedWorkspace = 'Vertical Mask')
-			if masking == "Horizontal" : WS = MaskDetectors(Workspace=WS, MaskedWorkspace = 'Horizontal Mask')
-			
-			if calib == "Convert Units" : 
-				WS_d=ConvertUnits(InputWorkspace = 'WS', Target='dSpacing', Outputworkspace='WS_d') 
-			
-			else : 
-				self.log().notice("\n calibration file : %s" %cal_File)
-				WS_d = AlignDetectors(InputWorkspace = 'WS', CalibrationFile = cal_File,Outputworkspace='WS_d')
-			
-			WS_d = Rebin(InputWorkspace = WS_d, Params=params, Outputworkspace='WS_d')
-			
-			if  group == "Low Res 5:6-high Res 1:4":
-				WS_red = GroupDetectors(InputWorkspace=WS_d,MapFile=r'/SNS/SNAP/shared/libs/14_56_grouping.xml',PreserveEvents=False)
-			else:
-				WS_red = DiffractionFocussing(InputWorkspace = WS_d, GroupingWorkspace= group, PreserveEvents=False)
+        if self.getProperty('LoadLogs').value:
+            logFilename = self.findLogfile(instrument, runNumber)
+            if len(logFilename) > 0:
+                self.log().information('Loading logs from %s' % logFilename)
+                LoadNexusLogs(Workspace=wkspName,Filename=logFilename)
+                instrFilename = mtd[wkspName].getInstrumentFilename(instrument, startTime)
+                LoadInstrument(Workspace=wkspName, Filename=instrFilename,
+                               RewriteSpectraMap=True)
 
-			if norm == "From Processed Nexus" :  
-				WS_nor = Divide(LHSWorkspace = WS_red, RHSWorkspace=Normalization)
-			if norm == "From Workspace" :  
-				WS_nor = Divide(LHSWorkspace = WS_red, RHSWorkspace=normWS)
-			if norm == "Extracted from Data" : 
-				
-				window = self.getProperty("Peak Clipping Window Size").value 
+        # gets rid of many simple DAS errors
+        FilterByXValue(InputWorkspace=wkspName, XMin=1)
 
-				smooth_range = self.getProperty("Smoothing Range").value
-				
-				peak_clip_WS = CloneWorkspace(WS_red)
-				n_histo = peak_clip_WS.getNumberHistograms()
-				
-				x = peak_clip_WS.extractX() 
-				y = peak_clip_WS.extractY() 
-				e = peak_clip_WS.extractE()
-	
-				for h in range(n_histo):
+        self.setProperty('OutputWorkspace', mtd[wkspName])
 
-					peak_clip_WS.setX(h,x[h])
-					peak_clip_WS.setY(h,self.peak_clip(y[h], win=window, decrese= True, LLS =True, smooth_window = smooth_range ))
-					peak_clip_WS.setE(h,e[h])
-
-				WS_nor = Divide(LHSWorkspace = WS_red, RHSWorkspace=peak_clip_WS)
-			
-			
-			if norm != 'None':
-				WS_nor = ReplaceSpecialValues(Inputworkspace = WS_nor,NaNValue='0',NaNError='0',InfinityValue='0',InfinityError='0')
-			
-			new_Tag = Tag+prefix
-			
-			if save_Data == True:
-				if norm == 'None':
-					WS_tof = ConvertUnits(InputWorkspace = "WS_red", Target = "TOF", AlignBins = False)
-				else:
-					WS_tof = ConvertUnits(InputWorkspace = "WS_nor", Target = "TOF", AlignBins = False)
-				
-				if norm == 'None':
-					SaveNexusProcessed(InputWorkspace = WS_red, Filename = '%s/shared/data/nexus/%s_%s_%s.nxs' %(self.get_IPTS_Local(r),new_Tag, r, group))
-					SaveAscii(InputWorkspace = WS_red, Filename = '%s/shared/data/d_spacing/%s_%s_%s.dat' %(self.get_IPTS_Local(r),new_Tag, r, group))
-				else:
-					SaveNexusProcessed(InputWorkspace = WS_nor, Filename = '%s/shared/data/nexus/%s_%s_%s.nxs' %(self.get_IPTS_Local(r),new_Tag, r, group))
-					SaveAscii(InputWorkspace = WS_nor, Filename = '%s/shared/data/d_spacing/%s_%s_%s.dat' %(self.get_IPTS_Local(r),new_Tag, r, group))
-                    
-				SaveGSS(InputWorkspace = WS_tof, Filename = '%s/shared/data/gsas/%s_%s_%s.gsa' %(self.get_IPTS_Local(r),new_Tag, r,group), Format='SLOG', SplitFiles=False, Append = False,ExtendedHeader=True)
-				SaveFocusedXYE(InputWorkspace = WS_tof, Filename = '%s/shared/data/fullprof/%s_%s_%s.dat' %(self.get_IPTS_Local(r),new_Tag, r,group),SplitFiles = True, Append=False)
-				DeleteWorkspace(Workspace = 'WS_tof')
-
-			DeleteWorkspace(Workspace = 'WS')
-			
-			if Process_Mode == "Production":
-				DeleteWorkspace(Workspace = 'WS_d')
-				if norm != "None":
-					DeleteWorkspace(Workspace = 'WS_red')
-					RenameWorkspace(InputWorkspace = WS_nor, OutputWorkspace = '%s_%s_%s_nor' %(new_Tag, r, group))
-				else :
-					RenameWorkspace(InputWorkspace = WS_red, OutputWorkspace = '%s_%s_%s_red' %(new_Tag, r, group))
-				if norm == "Extracted from Data" :
-					DeleteWorkspace(Workspace = 'peak_clip_WS')
-				
-			else:
-				
-				RenameWorkspace(Inputworkspace = 'WS_d', OutputWorkspace = '%s_%s_d' %(new_Tag, r))
-				RenameWorkspace(Inputworkspace = 'WS_red', OutputWorkspace = '%s_%s_%s_red' %(new_Tag, r, group))
-				if norm != "None":
-					RenameWorkspace(Inputworkspace = 'WS_nor', OutputWorkspace = '%s_%s_%s_nor' %(new_Tag, r, group))
-				if norm == "Extracted from Data" :
-					RenameWorkspace(Inputworkspace = 'peak_clip_WS', OutputWorkspace = '%s_%s_normalizer' %(new_Tag, r))
-
-
-
-AlgorithmFactory.subscribe(SNAP_Reduce)
+AlgorithmFactory.subscribe(LoadPreNexusLive)
