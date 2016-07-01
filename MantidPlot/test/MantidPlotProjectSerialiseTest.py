@@ -185,7 +185,7 @@ class MantidPlotProjectSerialiseTest(unittest.TestCase):
         for window in windows():
             # slight hack as 'type' only returns
             # an MDIWindow instance
-            self.assertIn('Graph', str(window))
+            self.assertTrue('Graph' in str(window))
 
     def test_serialise_1D_plot_with_one_plot_and_multiple_spectra(self):
         workspace_name = "fake_workspace"
@@ -202,7 +202,7 @@ class MantidPlotProjectSerialiseTest(unittest.TestCase):
         layer = graph.layer(1)
 
         # Check graph and layer exist
-        self.assertIn('Graph', str(graph))
+        self.assertTrue('Graph' in str(graph))
         self.assertIsNotNone(layer)
 
         # Check plot curves exist
@@ -225,7 +225,7 @@ class MantidPlotProjectSerialiseTest(unittest.TestCase):
 
         # Check window exists
         graph = windows()[0]
-        self.assertIn('Graph', str(graph))
+        self.assertTrue('Graph' in str(graph))
 
         # Check plot curves exist
         layer = graph.layer(1)
@@ -248,7 +248,7 @@ class MantidPlotProjectSerialiseTest(unittest.TestCase):
 
         # Check window exists
         graph = windows()[0]
-        self.assertIn('Graph', str(graph))
+        self.assertTrue('Graph' in str(graph))
 
     def assert_project_files_saved(self, workspace_name):
         """Check files were written to project folder """
