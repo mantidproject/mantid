@@ -5,7 +5,7 @@ from ISISCommandInterface import *
 
 class LOQCentreNoGrav(stresstesting.MantidStressTest):
     def __init__(self):
-        super(LOQCentreNoGrav, self).__init__()
+        stresstesting.MantidStressTest.__init__(self)
         self.tolerance = 1e-6
 
     def runTest(self):

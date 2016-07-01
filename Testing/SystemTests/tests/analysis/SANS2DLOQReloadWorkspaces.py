@@ -174,7 +174,7 @@ class LOQReductionOnLoadedWorkspaceMustProduceTheSameResult_1(stresstesting.Mant
     loaded workspaces
     """
     def __init__(self):
-        super(LOQReductionOnLoadedWorkspaceMustProduceTheSameResult_1, self).__init__()
+        stresstesting.MantidStressTest.__init__(self)
         self.tolerance = 1e-6
 
     def runTest(self):
