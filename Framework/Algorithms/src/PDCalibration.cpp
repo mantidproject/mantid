@@ -221,6 +221,9 @@ void PDCalibration::init() {
       "MaxGuessedPeakWidth", 4., mustBePositive1,
       "Maximum guessed peak width for fit. It is in unit of number of pixels.");
   declareProperty("MinimumPeakHeight", 2., "Minimum allowed peak height. ");
+  declareProperty(
+      "MaxChiSq", 100.,
+      "Maximum chisq value for individual peak fit allowed. (Default: 100)");
   declareProperty("StartFromObservedPeakCentre", true,
                   "Use observed value as the starting value of peak centre. ");
 
@@ -247,6 +250,7 @@ void PDCalibration::init() {
   setPropertyGroup("MinGuessedPeakWidth", findPeaksGroup);
   setPropertyGroup("MaxGuessedPeakWidth", findPeaksGroup);
   setPropertyGroup("MinimumPeakHeight", findPeaksGroup);
+  setPropertyGroup("MaxChiSq", findPeaksGroup);
   setPropertyGroup("StartFromObservedPeakCentre", findPeaksGroup);
 }
 
@@ -271,6 +275,9 @@ void PDCalibration::exec() {
               << m_peaksInDspacing[i] << " < " << windowsInDSpacing[2 * i + 1]
               << std::endl;
   }
+
+  double minPeakHeight = getProperty("MinimumPeakHeight");
+  double maxChiSquared = getProperty("MaxChiSq");
 
   calParams = getPropertyValue("CalibrationParameters");
 
@@ -353,31 +360,27 @@ void PDCalibration::exec() {
       // Get peak value
       double centre = fittedTable->getRef<double>("centre", i);
       // double width = fittedTable->getRef<double>("width", i);
-      // double height = fittedTable->getRef<double>("height", i);
+      double height = fittedTable->getRef<double>("height", i);
       double chi2 = fittedTable->getRef<double>("chi2", i);
 
-      //         std::cout << "d=" << peaks.inDPos[i]<< " centre old=" <<
-      //         peaks.inTofPos[i];
-      if (chi2 > 1.e10) {
-        //           std::cout << " failed to fit - chisq" << chi2 << std::endl;
-      } else if (peaks.inTofWindows[2 * i] >= centre ||
-                 peaks.inTofWindows[2 * i + 1] <= centre) {
-        //           std::cout << " failed to fit - centre " <<
-        //           peaks.inTofWindows[2*i] << " < " << centre
-        //                     << " < " << peaks.inTofWindows[2*i+1] <<
-        //                     std::endl;
-      } else {
-        // double difc = centre / peaks.inDPos[i];
-        // difc_cumm += difc;
-        // difc_count += 1;
-
-        //           std::cout << " new=" << centre << " width=" << width << "
-        //           height=" << height
-        //                     << " chi2=" << chi2 << " difc=" << difc <<
-        //                     std::endl;
-        d_vec.push_back(peaks.inDPos[i]);
-        tof_vec.push_back(centre);
+      // check chi-square
+      if (chi2 > maxChiSquared || chi2 < 0) {
+        continue;
       }
+
+      // rule out of peak with wrong position
+      if (peaks.inTofWindows[2 * i] >= centre ||
+          peaks.inTofWindows[2 * i + 1] <= centre) {
+        continue;
+      }
+
+      // check height
+      if (height < minPeakHeight) {
+        continue;
+      }
+
+      d_vec.push_back(peaks.inDPos[i]);
+      tof_vec.push_back(centre);
     }
     if (d_vec.size() == 1) {
       // If only 1 peak found just calculate and set difc
