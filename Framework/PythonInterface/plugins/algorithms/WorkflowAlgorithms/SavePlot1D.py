@@ -179,7 +179,7 @@ class SavePlot1D(mantid.api.PythonAlgorithm):
                 ok2run = 'Wrong version of matplotlib. Required >= 1.2.0'
         except ImportError:
             ok2run = 'Problem importing matplotlib'
-        if not bool(ok2run):
+        if len(ok2run) > 0:
             raise RuntimeError(ok2run)
 
         matplotlib = sys.modules['matplotlib']
