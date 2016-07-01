@@ -1597,8 +1597,9 @@ void ConfigServiceImpl::appendDataSearchSubDir(const std::string &subdir) {
     return;
   }
 
-  if (!subDirPath.isDirectory())
+  if (!subDirPath.isDirectory() || !subDirPath.isRelative()) {
     return;
+  }
 
   std::vector<std::string> newDataDirs = m_DataSearchDirs;
   std::vector<std::string>::const_iterator it = newDataDirs.begin();
