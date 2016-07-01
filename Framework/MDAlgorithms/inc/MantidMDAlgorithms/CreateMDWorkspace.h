@@ -11,7 +11,6 @@
 namespace Mantid {
 namespace MDAlgorithms {
 
-
 std::vector<std::string> MANTID_MDALGORITHMS_DLL
 parseNames(const std::string &names_string);
 

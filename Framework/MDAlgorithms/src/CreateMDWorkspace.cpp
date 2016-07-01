@@ -72,9 +72,9 @@ void CreateMDWorkspace::init() {
                   "A comma separated list of min, max for each dimension,\n"
                   "specifying the extents of each dimension.");
 
-  declareProperty(make_unique<ArrayProperty<std::string>>("Names",
-          Direction::Input),
-                  "A comma separated list of the name of each dimension.");
+  declareProperty(
+      make_unique<ArrayProperty<std::string>>("Names", Direction::Input),
+      "A comma separated list of the name of each dimension.");
 
   declareProperty(make_unique<ArrayProperty<std::string>>("Units"),
                   "A comma separated list of the units of each dimension.");

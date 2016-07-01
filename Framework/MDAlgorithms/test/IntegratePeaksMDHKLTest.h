@@ -47,15 +47,17 @@ public:
   }
 
   //-------------------------------------------------------------------------------
-  /** Run the IntegratePeaksMDHKL with the given peak radius integration param */
-  static void doRun( std::string OutputWorkspace = "IntegratePeaksMDHKLTest_peaks") {
+  /** Run the IntegratePeaksMDHKL with the given peak radius integration param
+   */
+  static void
+  doRun(std::string OutputWorkspace = "IntegratePeaksMDHKLTest_peaks") {
     IntegratePeaksMDHKL alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("InputWorkspace", "IntegratePeaksMDHKLTest_MDEWS"));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("PeaksWorkspace", "IntegratePeaksMDHKLTest_peaks"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue(
+        "InputWorkspace", "IntegratePeaksMDHKLTest_MDEWS"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue(
+        "PeaksWorkspace", "IntegratePeaksMDHKLTest_peaks"));
     TS_ASSERT_THROWS_NOTHING(
         alg.setPropertyValue("OutputWorkspace", OutputWorkspace));
     TS_ASSERT_THROWS_NOTHING(alg.execute());
@@ -74,7 +76,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         algC.setProperty("Extents", "-10,10,-10,10,-10,10"));
 
-    TS_ASSERT_THROWS_NOTHING(algC.setProperty("Names", "[H,0,0],[0,K,0],[0,0,L]"));
+    TS_ASSERT_THROWS_NOTHING(
+        algC.setProperty("Names", "[H,0,0],[0,K,0],[0,0,L]"));
     std::string units = Mantid::Kernel::Units::Symbol::RLU.ascii() + "," +
                         Mantid::Kernel::Units::Symbol::RLU.ascii() + "," +
                         Mantid::Kernel::Units::Symbol::RLU.ascii();
@@ -85,8 +88,8 @@ public:
                          Mantid::Geometry::HKL::HKLName + "," +
                          Mantid::Geometry::HKL::HKLName;
     TS_ASSERT_THROWS_NOTHING(algC.setProperty("Frames", frames));
-    TS_ASSERT_THROWS_NOTHING(
-        algC.setPropertyValue("OutputWorkspace", "IntegratePeaksMDHKLTest_MDEWS"));
+    TS_ASSERT_THROWS_NOTHING(algC.setPropertyValue(
+        "OutputWorkspace", "IntegratePeaksMDHKLTest_MDEWS"));
     TS_ASSERT_THROWS_NOTHING(algC.execute());
     TS_ASSERT(algC.isExecuted());
   }
@@ -99,14 +102,12 @@ public:
     FakeMDEventData algF;
     TS_ASSERT_THROWS_NOTHING(algF.initialize())
     TS_ASSERT(algF.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(
-        algF.setPropertyValue("InputWorkspace", "IntegratePeaksMDHKLTest_MDEWS"));
+    TS_ASSERT_THROWS_NOTHING(algF.setPropertyValue(
+        "InputWorkspace", "IntegratePeaksMDHKLTest_MDEWS"));
     TS_ASSERT_THROWS_NOTHING(
         algF.setProperty("PeakParams", mess.str().c_str()));
-    TS_ASSERT_THROWS_NOTHING(
-        algF.setProperty("RandomSeed", "63759"));
-    TS_ASSERT_THROWS_NOTHING(
-        algF.setProperty("RandomizeSignal", "1"));
+    TS_ASSERT_THROWS_NOTHING(algF.setProperty("RandomSeed", "63759"));
+    TS_ASSERT_THROWS_NOTHING(algF.setProperty("RandomizeSignal", "1"));
     TS_ASSERT_THROWS_NOTHING(algF.execute());
     TS_ASSERT(algF.isExecuted());
   }
@@ -137,11 +138,12 @@ public:
     PeaksWorkspace_sptr peakWS0(new PeaksWorkspace());
     peakWS0->setInstrument(inst);
     Peak Pin(inst, 15050, 1.0);
-    Pin.setHKL(V3D(1,1,1));
+    Pin.setHKL(V3D(1, 1, 1));
     peakWS0->addPeak(Pin);
 
     TS_ASSERT_EQUALS(peakWS0->getPeak(0).getIntensity(), 0.0);
-    AnalysisDataService::Instance().add("IntegratePeaksMDHKLTest_peaks", peakWS0);
+    AnalysisDataService::Instance().add("IntegratePeaksMDHKLTest_peaks",
+                                        peakWS0);
 
     // ------------- Integrating with cylinder ------------------------
     doRun("IntegratePeaksMDHKLTest_peaks");
@@ -150,7 +152,6 @@ public:
 
     // Error is also calculated
     TS_ASSERT_DELTA(peakWS0->getPeak(0).getSigmaIntensity(), 5.2813, 1e-2);
-
   }
 
   //-------------------------------------------------------------------------------
@@ -173,11 +174,11 @@ public:
     Instrument_sptr inst =
         ComponentCreationHelper::createTestInstrumentCylindrical(5);
     Peak Pin(inst, 1, 1.0);
-    Pin.setHKL(V3D(1,1,1));
+    Pin.setHKL(V3D(1, 1, 1));
     peakWS->addPeak(Pin);
     TS_ASSERT_EQUALS(peakWS->getPeak(0).getIntensity(), 0.0);
-    AnalysisDataService::Instance().addOrReplace("IntegratePeaksMDHKLTest_peaks",
-                                                 peakWS);
+    AnalysisDataService::Instance().addOrReplace(
+        "IntegratePeaksMDHKLTest_peaks", peakWS);
 
     // Set background from 2.0 to 3.0.
     doRun("IntegratePeaksMDHKLTest_peaks");
@@ -185,9 +186,7 @@ public:
     // Error is larger, since it is error of peak + error of background
     TSM_ASSERT_DELTA("Error has increased",
                      peakWS->getPeak(0).getSigmaIntensity(), 5.2814, 0.1);
-
   }
-
 };
 
 //=========================================================================================
@@ -215,8 +214,8 @@ public:
     FakeMDEventData algF2;
     TS_ASSERT_THROWS_NOTHING(algF2.initialize())
     TS_ASSERT(algF2.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(
-        algF2.setPropertyValue("InputWorkspace", "IntegratePeaksMDHKLTest_MDEWS"));
+    TS_ASSERT_THROWS_NOTHING(algF2.setPropertyValue(
+        "InputWorkspace", "IntegratePeaksMDHKLTest_MDEWS"));
     TS_ASSERT_THROWS_NOTHING(algF2.setProperty("UniformParams", "100000"));
     TS_ASSERT_THROWS_NOTHING(algF2.execute());
     TS_ASSERT(algF2.isExecuted());
@@ -257,7 +256,8 @@ public:
       if (i % 100 == 0)
         std::cout << "Peak " << i << " added\n";
     }
-    AnalysisDataService::Instance().add("IntegratePeaksMDHKLTest_peaks", peakWS);
+    AnalysisDataService::Instance().add("IntegratePeaksMDHKLTest_peaks",
+                                        peakWS);
   }
 
   ~IntegratePeaksMDHKLTestPerformance() override {
@@ -282,7 +282,6 @@ public:
       TS_ASSERT_LESS_THAN(expected - 1, peakWS->getPeak(int(i)).getIntensity());
     }
   }
-
 };
 
 #endif /* MANTID_MDEVENTS_INTEGRATEPEAKSMDHKLTEST_H_ */

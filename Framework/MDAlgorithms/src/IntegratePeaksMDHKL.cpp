@@ -15,7 +15,7 @@ namespace Mantid {
 namespace MDAlgorithms {
 
 using Mantid::Kernel::Direction;
-//using Mantid::API::WorkspaceProperty;
+// using Mantid::API::WorkspaceProperty;
 using namespace Mantid::DataObjects;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -28,9 +28,7 @@ DECLARE_ALGORITHM(IntegratePeaksMDHKL)
 /**
  * Constructor
  */
-IntegratePeaksMDHKL::IntegratePeaksMDHKL()
-    {}
-
+IntegratePeaksMDHKL::IntegratePeaksMDHKL() {}
 
 //----------------------------------------------------------------------------------------------
 /**
@@ -42,23 +40,27 @@ void IntegratePeaksMDHKL::init() {
                   "An input Sample MDEventWorkspace in HKL.");
   declareProperty("DeltaHKL", 0.5,
                   "Distance from integer HKL to integrate peak.");
-  declareProperty("GridPoints",201,
+  declareProperty("GridPoints", 201,
                   "Number of grid points for each dimension of HKL box.");
-  declareProperty("NeighborPoints", 10,
-                  "Number of points in 5^3 surrounding points above intensity threshold for point to be part of peak.");
+  declareProperty("NeighborPoints", 10, "Number of points in 5^3 surrounding "
+                                        "points above intensity threshold for "
+                                        "point to be part of peak.");
   auto fluxValidator = boost::make_shared<CompositeValidator>();
   fluxValidator->add<WorkspaceUnitValidator>("Momentum");
   fluxValidator->add<InstrumentValidator>();
   fluxValidator->add<CommonBinsValidator>();
   auto solidAngleValidator = fluxValidator->clone();
 
+  declareProperty(
+      make_unique<WorkspaceProperty<>>("FluxWorkspace", "", Direction::Input,
+                                       PropertyMode::Optional, fluxValidator),
+      "An optional input workspace containing momentum dependent flux for "
+      "normalization.");
   declareProperty(make_unique<WorkspaceProperty<>>(
-                      "FluxWorkspace", "", Direction::Input, PropertyMode::Optional, fluxValidator),
-                  "An optional input workspace containing momentum dependent flux for normalization.");
-  declareProperty(make_unique<WorkspaceProperty<>>("SolidAngleWorkspace", "",
-                                                   Direction::Input, PropertyMode::Optional,
-                                                   solidAngleValidator),
-                  "An optional input workspace containing momentum integrated vanadium for normalization "
+                      "SolidAngleWorkspace", "", Direction::Input,
+                      PropertyMode::Optional, solidAngleValidator),
+                  "An optional input workspace containing momentum integrated "
+                  "vanadium for normalization "
                   "(a measure of the solid angle).");
 
   declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
@@ -86,23 +88,22 @@ void IntegratePeaksMDHKL::exec() {
   }
 
   /// Peak workspace to integrate
-  PeaksWorkspace_sptr inPeakWS =
-      getProperty("PeaksWorkspace");
+  PeaksWorkspace_sptr inPeakWS = getProperty("PeaksWorkspace");
   const double box = getProperty("DeltaHKL");
   const int gridPts = getProperty("GridPoints");
   const int neighborPts = getProperty("NeighborPoints");
   /// Output peaks workspace, create if needed
-  PeaksWorkspace_sptr  peakWS =
-      getProperty("OutputWorkspace");
+  PeaksWorkspace_sptr peakWS = getProperty("OutputWorkspace");
   if (peakWS != inPeakWS)
     peakWS = inPeakWS->clone();
 
   MatrixWorkspace_sptr flux = getProperty("FluxWorkspace");
-  MatrixWorkspace_sptr sa =
-      getProperty("SolidAngleWorkspace");
+  MatrixWorkspace_sptr sa = getProperty("SolidAngleWorkspace");
 
-  IMDEventWorkspace_sptr m_eventWS = boost::dynamic_pointer_cast<IMDEventWorkspace>(m_inputWS);
-  IMDHistoWorkspace_sptr m_histoWS = boost::dynamic_pointer_cast<IMDHistoWorkspace>(m_inputWS);
+  IMDEventWorkspace_sptr m_eventWS =
+      boost::dynamic_pointer_cast<IMDEventWorkspace>(m_inputWS);
+  IMDHistoWorkspace_sptr m_histoWS =
+      boost::dynamic_pointer_cast<IMDHistoWorkspace>(m_inputWS);
   int npeaks = peakWS->getNumberPeaks();
 
   auto prog = make_unique<Progress>(this, 0.3, 1.0, npeaks);
@@ -118,11 +119,9 @@ void IntegratePeaksMDHKL::exec() {
     MDHistoWorkspace_sptr histoBox;
     if (m_histoWS) {
       histoBox = cropHisto(h, k, l, box, m_histoWS);
-    }
-    else if (sa && flux) {
+    } else if (sa && flux) {
       histoBox = normalize(h, k, l, box, gridPts, flux, sa, m_eventWS);
-    }
-    else {
+    } else {
       histoBox = binEvent(h, k, l, box, gridPts, m_eventWS);
     }
     double intensity = 0.0;
@@ -139,23 +138,22 @@ void IntegratePeaksMDHKL::exec() {
 }
 
 MDHistoWorkspace_sptr IntegratePeaksMDHKL::normalize(
-    int h, int k, int l, double box, int gridPts,
-     MatrixWorkspace_sptr flux,  MatrixWorkspace_sptr sa,
-     IMDEventWorkspace_sptr ws) {
+    int h, int k, int l, double box, int gridPts, MatrixWorkspace_sptr flux,
+    MatrixWorkspace_sptr sa, IMDEventWorkspace_sptr ws) {
   IAlgorithm_sptr normAlg = createChildAlgorithm("MDNormSCD");
   normAlg->setProperty("InputWorkspace", ws);
   normAlg->setProperty("AlignedDim0",
-        "[H,0,0],"+boost::lexical_cast<std::string>(h-box)+","+
-        boost::lexical_cast<std::string>(h+box)+","+
-        boost::lexical_cast<std::string>(gridPts));
+                       "[H,0,0]," + boost::lexical_cast<std::string>(h - box) +
+                           "," + boost::lexical_cast<std::string>(h + box) +
+                           "," + boost::lexical_cast<std::string>(gridPts));
   normAlg->setProperty("AlignedDim1",
-        "[0,K,0],"+boost::lexical_cast<std::string>(k-box)+","+
-        boost::lexical_cast<std::string>(k+box)+","+
-        boost::lexical_cast<std::string>(gridPts));
+                       "[0,K,0]," + boost::lexical_cast<std::string>(k - box) +
+                           "," + boost::lexical_cast<std::string>(k + box) +
+                           "," + boost::lexical_cast<std::string>(gridPts));
   normAlg->setProperty("AlignedDim2",
-        "[0,0,L],"+boost::lexical_cast<std::string>(l-box)+","+
-        boost::lexical_cast<std::string>(l+box)+","+
-        boost::lexical_cast<std::string>(gridPts));
+                       "[0,0,L]," + boost::lexical_cast<std::string>(l - box) +
+                           "," + boost::lexical_cast<std::string>(l + box) +
+                           "," + boost::lexical_cast<std::string>(gridPts));
   normAlg->setProperty("FluxWorkspace", flux);
   normAlg->setProperty("SolidAngleWorkspace", sa);
   normAlg->setProperty("OutputWorkspace", "mdout");
@@ -173,77 +171,89 @@ MDHistoWorkspace_sptr IntegratePeaksMDHKL::normalize(
   return boost::dynamic_pointer_cast<MDHistoWorkspace>(out);
 }
 
-void  IntegratePeaksMDHKL::integratePeak(const int neighborPts, MDHistoWorkspace_sptr out, double& intensity, double& errorSquared) {
-     //AnalysisDataService::Instance().addOrReplace("box", out);
-    std::vector<int> gridPts;
-    const size_t dimensionality = out->getNumDims();
-    for (size_t i = 0; i < dimensionality; ++i) {
-      gridPts.push_back(static_cast<int>(out->getDimension(i)->getNBins()));
-    }
+void IntegratePeaksMDHKL::integratePeak(const int neighborPts,
+                                        MDHistoWorkspace_sptr out,
+                                        double &intensity,
+                                        double &errorSquared) {
+  // AnalysisDataService::Instance().addOrReplace("box", out);
+  std::vector<int> gridPts;
+  const size_t dimensionality = out->getNumDims();
+  for (size_t i = 0; i < dimensionality; ++i) {
+    gridPts.push_back(static_cast<int>(out->getDimension(i)->getNBins()));
+  }
 
-    double *F = out->getSignalArray();
-    double Fmax = 0;
-    double Fmin = 1e300;
-    double sum = 0.0;
-    for (int i = 0; i < gridPts[0]*gridPts[1]*gridPts[2]; i++) {
-      if (!boost::math::isnan(F[i]) && !boost::math::isinf(F[i]) && F[i] != 0.0) {
-        sum += F[i];
-        if (F[i] < Fmin) Fmin = F[i];
-        if (F[i] > Fmax) Fmax = F[i];
+  double *F = out->getSignalArray();
+  double Fmax = 0;
+  double Fmin = 1e300;
+  double sum = 0.0;
+  for (int i = 0; i < gridPts[0] * gridPts[1] * gridPts[2]; i++) {
+    if (!boost::math::isnan(F[i]) && !boost::math::isinf(F[i]) && F[i] != 0.0) {
+      sum += F[i];
+      if (F[i] < Fmin)
+        Fmin = F[i];
+      if (F[i] > Fmax)
+        Fmax = F[i];
+    }
+  }
+
+  double *SqError = out->getErrorSquaredArray();
+
+  double minIntensity = Fmin + 0.01 * (Fmax - Fmin);
+  int measuredPoints = 0;
+  int peakPoints = 0;
+  double peakSum = 0.0;
+  double measuredSum = 0.0;
+  double errSqSum = 0.0;
+  double measuredErrSqSum = 0.0;
+  for (int Hindex = 0; Hindex < gridPts[0]; Hindex++) {
+    for (int Kindex = 0; Kindex < gridPts[1]; Kindex++) {
+      for (int Lindex = 0; Lindex < gridPts[2]; Lindex++) {
+        int iHKL = Hindex + gridPts[0] * (Kindex + gridPts[1] * Lindex);
+        if (!boost::math::isnan(F[iHKL]) && !boost::math::isinf(F[iHKL])) {
+          measuredPoints = measuredPoints + 1;
+          measuredSum = measuredSum + F[iHKL];
+          measuredErrSqSum = measuredErrSqSum + SqError[iHKL];
+          if (F[iHKL] > minIntensity) {
+            int neighborPoints = 0;
+            for (int Hj = -2; Hj < 3; Hj++) {
+              for (int Kj = -2; Kj < 3; Kj++) {
+                for (int Lj = -2; Lj < 3; Lj++) {
+                  int jHKL =
+                      Hindex + Hj +
+                      gridPts[0] * (Kindex + Kj + gridPts[1] * (Lindex + Lj));
+                  if (Lindex + Lj >= 0 && Lindex + Lj < gridPts[2] &&
+                      Kindex + Kj >= 0 && Kindex + Kj < gridPts[1] &&
+                      Hindex + Hj >= 0 && Hindex + Hj < gridPts[0] &&
+                      F[jHKL] > minIntensity) {
+                    neighborPoints = neighborPoints + 1;
+                  }
+                }
+              }
+            }
+            if (neighborPoints >= neighborPts) {
+              peakPoints = peakPoints + 1;
+              peakSum = peakSum + F[iHKL];
+              errSqSum = errSqSum + SqError[iHKL];
+            }
+          }
+        } else {
+          double minR =
+              sqrt(std::pow(float(Hindex) / float(gridPts[0]) - 0.5, 2) +
+                   std::pow(float(Kindex) / float(gridPts[1]) - 0.5, 2) +
+                   std::pow(float(Lindex) / float(gridPts[0]) - 0.5, 2));
+          if (minR < 0.05) {
+            intensity = 0.0;
+            errorSquared = 0.0;
+            return;
+          }
+        }
       }
     }
-
-    double *SqError = out->getErrorSquaredArray();
-
-    double minIntensity = Fmin + 0.01 * (Fmax - Fmin);
-    int measuredPoints  = 0;
-    int peakPoints  = 0;
-    double peakSum = 0.0;
-    double measuredSum = 0.0;
-    double errSqSum = 0.0;
-    double measuredErrSqSum = 0.0;
-    for (int Hindex  = 0; Hindex < gridPts[0]; Hindex++) {
-        for (int Kindex  = 0; Kindex < gridPts[1]; Kindex++) {
-            for (int Lindex  = 0; Lindex < gridPts[2]; Lindex++) {
-              int iHKL = Hindex + gridPts[0] * (Kindex +gridPts[1] * Lindex);
-                if (!boost::math::isnan(F[iHKL]) && !boost::math::isinf(F[iHKL])) {
-                    measuredPoints = measuredPoints + 1;
-                    measuredSum = measuredSum + F[iHKL];
-                    measuredErrSqSum = measuredErrSqSum + SqError[iHKL];
-                    if (F[iHKL] > minIntensity) {
-                        int neighborPoints  = 0;
-                        for (int Hj  = -2; Hj < 3; Hj++) {
-                            for (int Kj  = -2; Kj <  3; Kj++) {
-                              for (int Lj  = -2; Lj <  3; Lj++) {
-                                    int jHKL = Hindex + Hj + gridPts[0] * (Kindex + Kj +gridPts[1] * (Lindex + Lj));
-                                    if (Lindex+Lj >=   0 && Lindex+Lj < gridPts[2]  && Kindex+Kj >=   0 && Kindex+Kj < gridPts[1] && Hindex+Hj >=   0 && Hindex+Hj < gridPts[0] && F[jHKL] > minIntensity) {
-                                        neighborPoints = neighborPoints + 1;
-                                    }
-                                }
-                            }
-                        }
-                        if (neighborPoints >=  neighborPts) {
-                            peakPoints = peakPoints + 1;
-                            peakSum = peakSum + F[iHKL];
-                            errSqSum = errSqSum + SqError[iHKL];
-                        }
-                    }
-                }
-                else{
-                   double minR = sqrt( std::pow(float(Hindex)/float(gridPts[0]) - 0.5, 2) + std::pow(float(Kindex)/float(gridPts[1]) - 0.5, 2) + std::pow(float(Lindex)/float(gridPts[0]) - 0.5, 2));
-                    if (minR < 0.05) {
-                        intensity = 0.0;
-                        errorSquared = 0.0;
-                        return;
-                    }
-                }
-            }
-        }
-    }
-    double ratio = float(peakPoints)/float(measuredPoints - peakPoints);
-    intensity = peakSum - ratio * (measuredSum - peakSum);
-    errorSquared = errSqSum + ratio * (measuredErrSqSum - errSqSum);
-    return;
+  }
+  double ratio = float(peakPoints) / float(measuredPoints - peakPoints);
+  intensity = peakSum - ratio * (measuredSum - peakSum);
+  errorSquared = errSqSum + ratio * (measuredErrSqSum - errSqSum);
+  return;
 }
 
 /**
@@ -251,22 +261,23 @@ void  IntegratePeaksMDHKL::integratePeak(const int neighborPts, MDHistoWorkspace
  * All slicing algorithm properties are passed along
  * @return MDHistoWorkspace as a result of the binning
  */
-MDHistoWorkspace_sptr IntegratePeaksMDHKL::binEvent(int h, int k, int l, double box, int gridPts,
-    IMDWorkspace_sptr ws) {
+MDHistoWorkspace_sptr IntegratePeaksMDHKL::binEvent(int h, int k, int l,
+                                                    double box, int gridPts,
+                                                    IMDWorkspace_sptr ws) {
   IAlgorithm_sptr binMD = createChildAlgorithm("BinMD", 0.0, 0.3);
   binMD->setProperty("InputWorkspace", ws);
   binMD->setProperty("AlignedDim0",
-       "[H,0,0],"+boost::lexical_cast<std::string>(h-box)+","+
-       boost::lexical_cast<std::string>(h+box)+","+
-       boost::lexical_cast<std::string>(gridPts));
+                     "[H,0,0]," + boost::lexical_cast<std::string>(h - box) +
+                         "," + boost::lexical_cast<std::string>(h + box) + "," +
+                         boost::lexical_cast<std::string>(gridPts));
   binMD->setProperty("AlignedDim1",
-       "[0,K,0],"+boost::lexical_cast<std::string>(k-box)+","+
-       boost::lexical_cast<std::string>(k+box)+","+
-       boost::lexical_cast<std::string>(gridPts));
+                     "[0,K,0]," + boost::lexical_cast<std::string>(k - box) +
+                         "," + boost::lexical_cast<std::string>(k + box) + "," +
+                         boost::lexical_cast<std::string>(gridPts));
   binMD->setProperty("AlignedDim2",
-       "[0,0,L],"+boost::lexical_cast<std::string>(l-box)+","+
-       boost::lexical_cast<std::string>(l+box)+","+
-       boost::lexical_cast<std::string>(gridPts));
+                     "[0,0,L]," + boost::lexical_cast<std::string>(l - box) +
+                         "," + boost::lexical_cast<std::string>(l + box) + "," +
+                         boost::lexical_cast<std::string>(gridPts));
   binMD->setPropertyValue("AxisAligned", "1");
   binMD->setPropertyValue("OutputWorkspace", "out");
   binMD->executeAsChildAlg();
@@ -274,33 +285,33 @@ MDHistoWorkspace_sptr IntegratePeaksMDHKL::binEvent(int h, int k, int l, double 
   return boost::dynamic_pointer_cast<MDHistoWorkspace>(outputWS);
 }
 
-
 /**
  * Runs the BinMD algorithm on the input to provide the output workspace
  * All slicing algorithm properties are passed along
  * @return MDHistoWorkspace as a result of the binning
  */
-MDHistoWorkspace_sptr IntegratePeaksMDHKL::cropHisto(int h, int k, int l, double box,
-    IMDWorkspace_sptr ws) {
-  IAlgorithm_sptr cropMD = createChildAlgorithm("IntegrateMDHistoWorkspace", 0.0, 0.3);
+MDHistoWorkspace_sptr IntegratePeaksMDHKL::cropHisto(int h, int k, int l,
+                                                     double box,
+                                                     IMDWorkspace_sptr ws) {
+  IAlgorithm_sptr cropMD =
+      createChildAlgorithm("IntegrateMDHistoWorkspace", 0.0, 0.3);
   cropMD->setProperty("InputWorkspace", ws);
 
-  cropMD->setProperty("P1Bin",
-      boost::lexical_cast<std::string>(h-box)+",0,"+
-      boost::lexical_cast<std::string>(h+box));
-  cropMD->setProperty("P2Bin",
-      boost::lexical_cast<std::string>(k-box)+",0,"+
-      boost::lexical_cast<std::string>(k+box));
-  cropMD->setProperty("P3Bin",
-       boost::lexical_cast<std::string>(l-box)+",0,"+
-       boost::lexical_cast<std::string>(l+box));
+  cropMD->setProperty("P1Bin", boost::lexical_cast<std::string>(h - box) +
+                                   ",0," +
+                                   boost::lexical_cast<std::string>(h + box));
+  cropMD->setProperty("P2Bin", boost::lexical_cast<std::string>(k - box) +
+                                   ",0," +
+                                   boost::lexical_cast<std::string>(k + box));
+  cropMD->setProperty("P3Bin", boost::lexical_cast<std::string>(l - box) +
+                                   ",0," +
+                                   boost::lexical_cast<std::string>(l + box));
 
   cropMD->setPropertyValue("OutputWorkspace", "out");
   cropMD->executeAsChildAlg();
   IMDHistoWorkspace_sptr outputWS = cropMD->getProperty("OutputWorkspace");
   return boost::dynamic_pointer_cast<MDHistoWorkspace>(outputWS);
 }
-
 
 } // namespace MDAlgorithms
 } // namespace Mantid
