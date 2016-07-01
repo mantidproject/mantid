@@ -216,11 +216,11 @@ void PythonScripting::shutdown() {
 
 void PythonScripting::setupPythonPath() {
   using Mantid::Kernel::ConfigService;
-  // The python sys.path is updated as follows:
-  //   - the current working directory is inserted as position 0 to mimic the
-  //     behaviour of the vanilla python interpreter
-  //   - the directory of MantidPlot is added after this to find our bundled
-  //   - modules
+// The python sys.path is updated as follows:
+//   - the current working directory is inserted as position 0 to mimic the
+//     behaviour of the vanilla python interpreter
+//   - the directory of MantidPlot is added after this to find our bundled
+//   - modules
 #if PY_MAJOR_VERSION >= 3
   PyObject *syspath = PySys_GetObject("path");
 #else
