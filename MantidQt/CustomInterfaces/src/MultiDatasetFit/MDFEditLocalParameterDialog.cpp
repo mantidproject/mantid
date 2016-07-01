@@ -15,18 +15,18 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace MDF {
 
-/// Constructor.
+/**
+ * Constructor when used as part of MultiDatasetFit interface
+ * @param multifit :: [input] Pointer to parent MultiDatasetFit interface
+ * @param parName :: [input] Name of parameter to edit in this dialog
+ */
 EditLocalParameterDialog::EditLocalParameterDialog(MultiDatasetFit *multifit,
                                                    const QString &parName)
     : QDialog(multifit), m_parName(parName) {
   m_uiForm.setupUi(this);
-  QHeaderView *header = m_uiForm.tableWidget->horizontalHeader();
-  header->setResizeMode(0, QHeaderView::Stretch);
-  connect(m_uiForm.tableWidget, SIGNAL(cellChanged(int, int)), this,
-          SLOT(valueChanged(int, int)));
-  m_uiForm.lblParameterName->setText("Parameter: " + parName);
-
-  auto n = multifit->getNumberOfSpectra();
+  const int n = multifit->getNumberOfSpectra();
+  QStringList wsNames;
+  std::vector<size_t> wsIndices;
   for (int i = 0; i < n; ++i) {
     double value = multifit->getLocalParameterValue(parName, i);
     m_values.push_back(value);
@@ -34,64 +34,63 @@ EditLocalParameterDialog::EditLocalParameterDialog(MultiDatasetFit *multifit,
     m_fixes.push_back(fixed);
     auto tie = multifit->getLocalParameterTie(parName, i);
     m_ties.push_back(tie);
-    m_uiForm.tableWidget->insertRow(i);
-    auto cell = new QTableWidgetItem(makeNumber(value));
-    m_uiForm.tableWidget->setItem(i, valueColumn, cell);
-    auto headerItem = new QTableWidgetItem(
-        multifit->getWorkspaceName(i) + " (" +
-        QString::number(multifit->getWorkspaceIndex(i)) + ")");
-    m_uiForm.tableWidget->setVerticalHeaderItem(i, headerItem);
-    cell = new QTableWidgetItem("");
-    auto flags = cell->flags();
-    flags ^= Qt::ItemIsEditable;
-    flags ^= Qt::ItemIsSelectable;
-    flags ^= Qt::ItemIsEnabled;
-    cell->setFlags(flags);
-    m_uiForm.tableWidget->setItem(i, roleColumn, cell);
-    updateRoleColumn(i);
+    wsNames.append(multifit->getWorkspaceName(i));
+    wsIndices.push_back(multifit->getWorkspaceIndex(i));
   }
-  auto deleg = new LocalParameterItemDelegate(this);
-  m_uiForm.tableWidget->setItemDelegateForColumn(valueColumn, deleg);
-  connect(deleg, SIGNAL(setAllValues(double)), this,
-          SLOT(setAllValues(double)));
-  connect(deleg, SIGNAL(fixParameter(int, bool)), this,
-          SLOT(fixParameter(int, bool)));
-  connect(deleg, SIGNAL(setAllFixed(bool)), this, SLOT(setAllFixed(bool)));
-  connect(deleg, SIGNAL(setTie(int, QString)), this,
-          SLOT(setTie(int, QString)));
-  connect(deleg, SIGNAL(setTieAll(QString)), this, SLOT(setTieAll(QString)));
-
-  m_uiForm.tableWidget->installEventFilter(this);
+  doSetup(parName, wsNames, wsIndices);
 }
 
+/**
+ * Constructor when used outside of MultiDatasetFit interface
+ * @param parent :: [input] Parent widget of this dialog
+ * @param funcBrowser :: [input] Function browser this is working with
+ * @param parName :: [input] Name of parameter to edit in this dialog
+ * @param wsNames :: [input] Names of workspaces being fitted
+ * @param wsIndices :: [input] Indices of which spectrum in each workspace is
+ * fitted
+ */
 EditLocalParameterDialog::EditLocalParameterDialog(
     QWidget *parent, MantidWidgets::IFunctionBrowser *funcBrowser,
     const QString &parName, const QStringList &wsNames,
     const std::vector<size_t> &wsIndices)
     : QDialog(parent), m_parName(parName) {
   m_uiForm.setupUi(this);
+  const int n = funcBrowser->getNumberOfDatasets();
+  for (int i = 0; i < n; ++i) {
+    const double value = funcBrowser->getLocalParameterValue(parName, i);
+    m_values.push_back(value);
+    const bool fixed = funcBrowser->isLocalParameterFixed(parName, i);
+    m_fixes.push_back(fixed);
+    const auto tie = funcBrowser->getLocalParameterTie(parName, i);
+    m_ties.push_back(tie);
+  }
+  doSetup(parName, wsNames, wsIndices);
+}
+
+/**
+ * Common setup method used by both constructors
+ * Prerequisite: one of the constructors must have filled m_values, m_fixes,
+ * m_ties and set up the UI first
+ * @param parName :: [input] Name of parameter to edit in this dialog
+ * @param wsNames :: [input] Names of workspaces being fitted
+ * @param wsIndices :: [input] Indices of which spectrum in each workspace is
+ * fitted
+ */
+void EditLocalParameterDialog::doSetup(const QString &parName,
+                                       const QStringList &wsNames,
+                                       const std::vector<size_t> &wsIndices) {
   QHeaderView *header = m_uiForm.tableWidget->horizontalHeader();
   header->setResizeMode(0, QHeaderView::Stretch);
   connect(m_uiForm.tableWidget, SIGNAL(cellChanged(int, int)), this,
           SLOT(valueChanged(int, int)));
   m_uiForm.lblParameterName->setText("Parameter: " + parName);
-
-  auto n = funcBrowser->getNumberOfDatasets();
-  assert(wsNames.size() == n);
-  assert(wsIndices.size() == n);
-  for (int i = 0; i < n; ++i) {
-    double value = funcBrowser->getLocalParameterValue(parName, i);
-    m_values.push_back(value);
-    bool fixed = funcBrowser->isLocalParameterFixed(parName, i);
-    m_fixes.push_back(fixed);
-    auto tie = funcBrowser->getLocalParameterTie(parName, i);
-    m_ties.push_back(tie);
+  assert(wsNames.size() == static_cast<int>(wsIndices.size()));
+  for (int i = 0; i < wsNames.size(); i++) {
     m_uiForm.tableWidget->insertRow(i);
-    auto cell = new QTableWidgetItem(makeNumber(value));
+    auto cell = new QTableWidgetItem(makeNumber(m_values[i]));
     m_uiForm.tableWidget->setItem(i, valueColumn, cell);
-    auto headerItem = new QTableWidgetItem(
-        wsNames[i] + " (" +
-        QString::number(wsIndices[i]) + ")");
+    auto headerItem = new QTableWidgetItem(wsNames[i] + " (" +
+                                           QString::number(wsIndices[i]) + ")");
     m_uiForm.tableWidget->setVerticalHeaderItem(i, headerItem);
     cell = new QTableWidgetItem("");
     auto flags = cell->flags();

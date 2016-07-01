@@ -25,6 +25,8 @@ public:
                            MantidWidgets::IFunctionBrowser *funcBrowser,
                            const QString &parName, const QStringList &wsNames,
                            const std::vector<size_t> &wsIndices);
+  void doSetup(const QString &parName, const QStringList &wsNames,
+               const std::vector<size_t> &wsIndices);
   QList<double> getValues() const;
   QList<bool> getFixes() const;
   QStringList getTies() const;
