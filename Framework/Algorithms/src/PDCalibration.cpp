@@ -396,22 +396,19 @@ void PDCalibration::exec() {
       d_vec.push_back(peaks.inDPos[i]);
       tof_vec.push_back(centre);
     }
-    if (d_vec.size() == 1) {
+
+    if (d_vec.size() == 0) {
+      continue;
+    } else if (d_vec.size() == 1) {
       // If only 1 peak found just calculate and set difc
       double difc = tof_vec.front() / d_vec.front();
       setCalibrationValues(peaks.detid, difc, 0, 0);
-    } else if (d_vec.size() > 2) {
+    } else {
       double difc = 0, t0 = 0, difa = 0;
       fitDIFCtZeroDIFA(d_vec, tof_vec, difc, t0, difa);
       setCalibrationValues(peaks.detid, difc, difa, t0);
-      //           std::cout << "avg difc = " <<
-      //           (difc_cumm/static_cast<double>(difc_count)) << std::endl;
-    } else {
-      //           std::cout << "failed to fit - zero peaks found in " <<
-      //           peaks.detid << std::endl;
     }
 
-    // break;
     PARALLEL_END_INTERUPT_REGION
   }
   PARALLEL_CHECK_INTERUPT_REGION
