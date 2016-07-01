@@ -212,13 +212,11 @@ void PDCalibration::init() {
                   "Type of Background.");
   declareProperty("HighBackground", true,
                   "Relatively weak peak in high background");
-  auto mustBePositive1 = boost::make_shared<BoundedValidator<double>>();
-  mustBePositive1->setLower(1);
   declareProperty(
-      "MinGuessedPeakWidth", 4., mustBePositive1,
+      "MinGuessedPeakWidth", 4, min,
       "Minimum guessed peak width for fit. It is in unit of number of pixels.");
   declareProperty(
-      "MaxGuessedPeakWidth", 4., mustBePositive1,
+      "MaxGuessedPeakWidth", 4, min,
       "Maximum guessed peak width for fit. It is in unit of number of pixels.");
   declareProperty("MinimumPeakHeight", 2., "Minimum allowed peak height. ");
   declareProperty(
@@ -332,9 +330,9 @@ void PDCalibration::exec() {
     alg->setProperty<std::string>("BackgroundType",
                                   getProperty("BackgroundType"));
     alg->setProperty<bool>("HighBackground", getProperty("HighBackground"));
-    alg->setProperty<double>("MinGuessedPeakWidth",
+    alg->setProperty<int>("MinGuessedPeakWidth",
                              getProperty("MinGuessedPeakWidth"));
-    alg->setProperty<double>("MaxGuessedPeakWidth",
+    alg->setProperty<int>("MaxGuessedPeakWidth",
                              getProperty("MaxGuessedPeakWidth"));
     alg->setProperty<double>("MinimumPeakHeight",
                              getProperty("MinimumPeakHeight"));
