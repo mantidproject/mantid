@@ -7,6 +7,7 @@ from mantid.simpleapi import FilterByXValue, GetIPTS, LoadEventPreNexus, \
     LoadInstrument, LoadNexusLogs, NormaliseByCurrent
 import os
 
+
 class LoadPreNexusLive(DataProcessorAlgorithm):
     def category(self):
         return 'DataHandling'
@@ -27,7 +28,6 @@ class LoadPreNexusLive(DataProcessorAlgorithm):
 
         return os.path.join(livepath, filenames[-1])
 
-
     def findLogfile(self, instrument, runNumber):
         filename = self.getProperty('LogFilename').value
         if len(filename) > 0 and os.path.exists(filename):
@@ -37,7 +37,8 @@ class LoadPreNexusLive(DataProcessorAlgorithm):
             iptsdir = GetIPTS(Instrument=instrument, RunNumber=runNumber)
             self.log().information('ipts %s' % iptsdir)
         except RuntimeError:
-            self.log().warning('Failed to determine the IPTS containing %s_%d' % (instrument, runNumber))
+            msg = 'Failed to determine the IPTS containing %s_%d' % (instrument, runNumber)
+            self.log().warning(msg)
             return ''
 
         direc = os.path.join(iptsdir, 'data')
@@ -60,12 +61,13 @@ class LoadPreNexusLive(DataProcessorAlgorithm):
                              StringListValidator(instruments),
                              'Empty uses default instrument')
 
-        self.declareProperty(WorkspaceProperty('OutputWorkspace','',
+        self.declareProperty(WorkspaceProperty('OutputWorkspace', '',
                                                direction=Direction.Output))
 
-        self.declareProperty("NormalizeByCurrent", True, "Normalize by current")
+        self.declareProperty('NormalizeByCurrent', True, 'Normalize by current')
 
-        self.declareProperty("LoadLogs", True, "Attempt to load logs from an existing file")
+        self.declareProperty('LoadLogs', True,
+                             'Attempt to load logs from an existing file')
 
         self.declareProperty(FileProperty('LogFilename', '',
                                           direction=Direction.Input,
@@ -73,7 +75,8 @@ class LoadPreNexusLive(DataProcessorAlgorithm):
                                           extensions=['_event.nxs']),
                              doc='File containing logs to use (Optional)')
         self.setPropertySettings('LogFilename',
-                                 EnabledWhenProperty('LoadLogs', PropertyCriterion.IsDefault))
+                                 EnabledWhenProperty('LoadLogs',
+                                                     PropertyCriterion.IsDefault))
 
     def PyExec(self):
         instrument = self.getProperty('Instrument').value
@@ -96,14 +99,16 @@ class LoadPreNexusLive(DataProcessorAlgorithm):
 
         if self.getProperty('NormalizeByCurrent').value:
             self.log().information('Normalising by current')
-            NormaliseByCurrent(InputWorkspace=wkspName, Outputworkspace=wkspName)
+            NormaliseByCurrent(InputWorkspace=wkspName,
+                               Outputworkspace=wkspName)
 
         if self.getProperty('LoadLogs').value:
             logFilename = self.findLogfile(instrument, runNumber)
             if len(logFilename) > 0:
                 self.log().information('Loading logs from %s' % logFilename)
-                LoadNexusLogs(Workspace=wkspName,Filename=logFilename)
-                instrFilename = mtd[wkspName].getInstrumentFilename(instrument, startTime)
+                LoadNexusLogs(Workspace=wkspName, Filename=logFilename)
+                wksp = mtd[wkspName]
+                instrFilename = wksp.getInstrumentFilename(instrument, startTime)
                 LoadInstrument(Workspace=wkspName, Filename=instrFilename,
                                RewriteSpectraMap=True)
 
