@@ -80,7 +80,6 @@ class LoadPreNexusLive(DataProcessorAlgorithm):
 
     def PyExec(self):
         instrument = self.getProperty('Instrument').value
-        # TODO use the default instrument if this is not set
 
         eventFilename = self.findLivefile(instrument)
 
