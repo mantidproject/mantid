@@ -153,9 +153,9 @@ public:
 
     // Test some values
     TS_ASSERT_EQUALS(data->readY(0).size(), 50);
-    TS_ASSERT_DELTA(data->readY(0)[25], 0.3112, 0.0001);
-    TS_ASSERT_DELTA(data->readY(0)[26], 0.4893, 0.0001);
-    TS_ASSERT_DELTA(data->readY(0)[27], 0.6485, 0.0001);
+    TS_ASSERT_DELTA(data->readY(0)[25], 0.2550, 0.0001);
+    TS_ASSERT_DELTA(data->readY(0)[26], 0.4304, 0.0001);
+    TS_ASSERT_DELTA(data->readY(0)[27], 0.5881, 0.0001);
   }
 
   void test_sine() {
@@ -186,9 +186,9 @@ public:
     TS_ASSERT(angle);
 
     // Test some values
-    TS_ASSERT_DELTA(data->readY(0)[25], 0.8961, 0.0001);
-    TS_ASSERT_DELTA(data->readY(0)[26], 0.8257, 0.0001);
-    TS_ASSERT_DELTA(data->readY(0)[27], 0.7218, 0.0001);
+    TS_ASSERT_DELTA(data->readY(0)[25], 0.8862, 0.0001);
+    TS_ASSERT_DELTA(data->readY(0)[26], 0.8190, 0.0001);
+    TS_ASSERT_DELTA(data->readY(0)[27], 0.7188, 0.0001);
   }
 
   void test_sine_cosine_neg() {
@@ -323,11 +323,11 @@ public:
     TS_ASSERT_EQUALS(image->getNumberHistograms(), 2);
 
     // Test some values
-    TS_ASSERT_DELTA(image->readY(0)[70], 6.7631, 0.0001);
+    TS_ASSERT_DELTA(image->readY(0)[70], 6.3410, 0.0001);
     // Fails on RHEL and Ubuntu with delta 0.0001
-    TS_ASSERT_DELTA(image->readY(0)[71], 1.3452, 0.001);
-    TS_ASSERT_DELTA(image->readY(1)[78], 0.2293, 0.0001);
-    TS_ASSERT_DELTA(image->readY(1)[79], 0.8566, 0.0001);
+    TS_ASSERT_DELTA(image->readY(0)[71], 1.4128, 0.001);
+    TS_ASSERT_DELTA(image->readY(1)[78], 0.2096, 0.0001);
+    TS_ASSERT_DELTA(image->readY(1)[79], 0.6527, 0.0001);
   }
 
   void test_output_label() {
