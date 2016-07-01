@@ -36,6 +36,10 @@ public:
   MOCK_METHOD1(setNumberOfDatasets, void(int));
   MOCK_METHOD1(updateMultiDatasetParameters,
                void(const Mantid::API::IFunction &));
+  MOCK_CONST_METHOD2(isLocalParameterFixed, bool(const QString &, int));
+  MOCK_CONST_METHOD2(getLocalParameterValue, double(const QString &, int));
+  MOCK_CONST_METHOD2(getLocalParameterTie, QString(const QString &, int));
+  MOCK_CONST_METHOD0(getNumberOfDatasets, int());
 
 private:
   Mantid::API::IFunction_sptr m_func;

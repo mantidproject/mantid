@@ -2,6 +2,7 @@
 #define MDFEDITLOCALPARAMETERDIALOG_H_
 
 #include "ui_EditLocalParameterDialog.h"
+#include "MantidQtMantidWidgets/IFunctionBrowser.h"
 #include <QDialog>
 
 namespace MantidQt {
@@ -20,6 +21,10 @@ class EditLocalParameterDialog : public QDialog {
   Q_OBJECT
 public:
   EditLocalParameterDialog(MultiDatasetFit *parent, const QString &parName);
+  EditLocalParameterDialog(QWidget *parent,
+                           MantidWidgets::IFunctionBrowser *funcBrowser,
+                           const QString &parName, const QStringList &wsNames,
+                           const std::vector<size_t> &wsIndices);
   QList<double> getValues() const;
   QList<bool> getFixes() const;
   QStringList getTies() const;

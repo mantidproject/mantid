@@ -123,17 +123,17 @@ public:
   /// Get a list of names of local parameters
   QStringList getLocalParameters() const;
   /// Get the number of datasets
-  int getNumberOfDatasets() const;
+  int getNumberOfDatasets() const override;
   /// Get value of a local parameter
-  double getLocalParameterValue(const QString &parName, int i) const;
+  double getLocalParameterValue(const QString &parName, int i) const override;
   /// Set value of a local parameter
   void setLocalParameterValue(const QString &parName, int i, double value);
   /// Check if a local parameter is fixed
-  bool isLocalParameterFixed(const QString &parName, int i) const;
+  bool isLocalParameterFixed(const QString &parName, int i) const override;
   /// Fix/unfix local parameter
   void setLocalParameterFixed(const QString &parName, int i, bool fixed);
   /// Get the tie for a local parameter.
-  QString getLocalParameterTie(const QString &parName, int i) const;
+  QString getLocalParameterTie(const QString &parName, int i) const override;
   /// Set a tie for a local parameter.
   void setLocalParameterTie(const QString &parName, int i, QString tie);
 

@@ -64,6 +64,58 @@ EditLocalParameterDialog::EditLocalParameterDialog(MultiDatasetFit *multifit,
   m_uiForm.tableWidget->installEventFilter(this);
 }
 
+EditLocalParameterDialog::EditLocalParameterDialog(
+    QWidget *parent, MantidWidgets::IFunctionBrowser *funcBrowser,
+    const QString &parName, const QStringList &wsNames,
+    const std::vector<size_t> &wsIndices)
+    : QDialog(parent), m_parName(parName) {
+  m_uiForm.setupUi(this);
+  QHeaderView *header = m_uiForm.tableWidget->horizontalHeader();
+  header->setResizeMode(0, QHeaderView::Stretch);
+  connect(m_uiForm.tableWidget, SIGNAL(cellChanged(int, int)), this,
+          SLOT(valueChanged(int, int)));
+  m_uiForm.lblParameterName->setText("Parameter: " + parName);
+
+  auto n = funcBrowser->getNumberOfDatasets();
+  assert(wsNames.size() == n);
+  assert(wsIndices.size() == n);
+  for (int i = 0; i < n; ++i) {
+    double value = funcBrowser->getLocalParameterValue(parName, i);
+    m_values.push_back(value);
+    bool fixed = funcBrowser->isLocalParameterFixed(parName, i);
+    m_fixes.push_back(fixed);
+    auto tie = funcBrowser->getLocalParameterTie(parName, i);
+    m_ties.push_back(tie);
+    m_uiForm.tableWidget->insertRow(i);
+    auto cell = new QTableWidgetItem(makeNumber(value));
+    m_uiForm.tableWidget->setItem(i, valueColumn, cell);
+    auto headerItem = new QTableWidgetItem(
+        wsNames[i] + " (" +
+        QString::number(wsIndices[i]) + ")");
+    m_uiForm.tableWidget->setVerticalHeaderItem(i, headerItem);
+    cell = new QTableWidgetItem("");
+    auto flags = cell->flags();
+    flags ^= Qt::ItemIsEditable;
+    flags ^= Qt::ItemIsSelectable;
+    flags ^= Qt::ItemIsEnabled;
+    cell->setFlags(flags);
+    m_uiForm.tableWidget->setItem(i, roleColumn, cell);
+    updateRoleColumn(i);
+  }
+  auto deleg = new LocalParameterItemDelegate(this);
+  m_uiForm.tableWidget->setItemDelegateForColumn(valueColumn, deleg);
+  connect(deleg, SIGNAL(setAllValues(double)), this,
+          SLOT(setAllValues(double)));
+  connect(deleg, SIGNAL(fixParameter(int, bool)), this,
+          SLOT(fixParameter(int, bool)));
+  connect(deleg, SIGNAL(setAllFixed(bool)), this, SLOT(setAllFixed(bool)));
+  connect(deleg, SIGNAL(setTie(int, QString)), this,
+          SLOT(setTie(int, QString)));
+  connect(deleg, SIGNAL(setTieAll(QString)), this, SLOT(setTieAll(QString)));
+
+  m_uiForm.tableWidget->installEventFilter(this);
+}
+
 /// Slot. Called when a value changes.
 /// @param row :: Row index of the changed cell.
 /// @param col :: Column index of the changed cell.
