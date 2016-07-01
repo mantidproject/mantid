@@ -1,6 +1,7 @@
 #pylint: disable=no-init,invalid-name
-import mantid,sys
+import mantid
 from mantid.kernel import Direction, StringArrayProperty, StringListValidator
+import sys
 
 try:
     from plotly import tools as toolsly
@@ -32,9 +33,12 @@ class SavePlot1D(mantid.api.PythonAlgorithm):
 
     def PyInit(self):
         #declare properties
-        self.declareProperty(mantid.api.WorkspaceProperty("InputWorkspace","",mantid.kernel.Direction.Input),
+        self.declareProperty(mantid.api.WorkspaceProperty('InputWorkspace','',
+                                                          mantid.kernel.Direction.Input),
                              "Workspace to plot")
-        self.declareProperty(mantid.api.FileProperty('OutputFilename', '', action=mantid.api.FileAction.OptionalSave, extensions = ["png"]),
+        self.declareProperty(mantid.api.FileProperty('OutputFilename', '',
+                                                     action=mantid.api.FileAction.OptionalSave,
+                                                     extensions = ['.png']),
                              doc='Name of the image file to savefile.')
         if have_plotly:
             outputTypes = ['image', 'plotly', 'plotly-full']
@@ -182,13 +186,16 @@ class SavePlot1D(mantid.api.PythonAlgorithm):
         matplotlib=sys.modules['matplotlib']
         matplotlib.use("agg")
         import matplotlib.pyplot as plt
-        plt.figure()
+
         if type(self._wksp)==mantid.api.WorkspaceGroup:
+            num_subplots=self._wksp.getNumberOfEntries()
+            fig, axarr = plt.subplots(num_subplots)
             for i in range(self._wksp.getNumberOfEntries()):
-                plt.subplot(self._wksp.getNumberOfEntries(),1,i+1)
-                self.doPlotImage(self._wksp.getItem(i))
+                self.doPlotImage(axarr[i],self._wksp.getItem(i))
         else:
-            self.doPlotImage(self._wksp)
+            fig, ax = plt.subplots()
+            self.doPlotImage(ax, self._wksp)
+
         plt.tight_layout(1.08)
         plt.show()
         filename = self.getProperty("OutputFilename").value
@@ -196,26 +203,24 @@ class SavePlot1D(mantid.api.PythonAlgorithm):
 
         return filename
 
-
-    def doPlotImage(self,ws):
-        plt=sys.modules['matplotlib.pyplot']
-        spectra=ws.getNumberHistograms()
-        if spectra>10:
+    def doPlotImage(self, ax, ws):
+        spectra = ws.getNumberHistograms()
+        if spectra > 10:
             mantid.kernel.logger.warning("more than 10 spectra to plot")
-        prog_reporter=mantid.api.Progress(self,start=0.0,end=1.0,\
-                    nreports=spectra)
+        prog_reporter = mantid.api.Progress(self, start=0.0, end=1.0,
+                                            nreports=spectra)
 
         for j in range(spectra):
             (x, y, plotlabel) = self.getData(ws, j)
 
-            plt.plot(x, y, label=plotlabel)
+            ax.plot(x, y, label=plotlabel)
 
             (xlabel, ylabel) = self.getAxesLabels(ws)
-            plt.xlabel(xlabel)
-            plt.ylabel(ylabel)
+            ax.set_xlabel(xlabel)
+            ax.set_ylabel(ylabel)
             prog_reporter.report("Processing")
 
-        if spectra>1 and spectra<=10:
-            plt.legend()
+        if 1 < spectra <= 10:
+            ax.legend()
 
 mantid.api.AlgorithmFactory.subscribe(SavePlot1D)
