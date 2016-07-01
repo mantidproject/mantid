@@ -1994,7 +1994,7 @@ void ConfigServiceImpl::setFilterChannelLogLevel(
 int ConfigServiceImpl::FindLowestFilterLevel() const {
   int lowestPriority = Logger::Priority::PRIO_FATAL;
   // Find the lowest level of all of the filter channels
-  for (const auto filterChannelName : m_filterChannels) {
+  for (const auto &filterChannelName : m_filterChannels) {
     try {
       auto *channel = Poco::LoggingRegistry::defaultRegistry().channelForName(
           filterChannelName);
