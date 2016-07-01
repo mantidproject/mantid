@@ -597,7 +597,11 @@ class CWSCDReductionControl(object):
         no_shift = len(scan_kindex_dict) == 0
         for scan_number in scan_number_list:
             peak_dict = dict()
-            peak_dict['hkl'] = self._myPeakInfoDict[(exp_number, scan_number)]. get_current_hkl()
+            try:
+                peak_dict['hkl'] = self._myPeakInfoDict[(exp_number, scan_number)]. get_current_hkl()
+            except RuntimeError as run_err:
+                return False, str('Peak index error: %s.' % run_err)
+
             peak_dict['intensity'] = self._myPeakInfoDict[(exp_number, scan_number)].get_intensity()
             peak_dict['sigma'] = self._myPeakInfoDict[(exp_number, scan_number)].get_sigma()
             if no_shift:
@@ -615,7 +619,7 @@ class CWSCDReductionControl(object):
         except AssertionError as error:
             return False, 'AssertionError: %s.' % str(error)
         except RuntimeError as error:
-            return False, 'RuntimeError; %s.' % str(error)
+            return False, 'RuntimeError: %s.' % str(error)
 
         return True, file_content
 
@@ -1360,6 +1364,7 @@ class CWSCDReductionControl(object):
     def load_spice_scan_file(self, exp_no, scan_no, spice_file_name=None):
         """
         Load a SPICE scan file to table workspace and run information matrix workspace.
+        :param exp_no:
         :param scan_no:
         :param spice_file_name:
         :return: status (boolean), error message (string)
@@ -1367,6 +1372,7 @@ class CWSCDReductionControl(object):
         # Default for exp_no
         if exp_no is None:
             exp_no = self._expNumber
+        print '[DB...BAD] Load Spice Scan File Exp Number = %d, Stored Exp. Number = %d' % (exp_no, self._expNumber)
 
         # Check whether the workspace has been loaded
         assert isinstance(exp_no, int)

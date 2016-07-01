@@ -969,10 +969,14 @@ class MainWindow(QtGui.QMainWindow):
         # write
         user_header = str(self.ui.lineEdit_fpHeader.text())
         try:
-            status, file_content = self._myControl.export_to_fullprof(exp_number, scan_number_list, user_header, fp_name)
+            status, file_content = self._myControl.export_to_fullprof(exp_number, scan_number_list,
+                                                                      user_header, fp_name)
             self.ui.plainTextEdit_fpContent.setPlainText(file_content)
             if status is False:
-                self.pop_one_button_dialog(file_content)
+                error_msg = file_content
+                if error_msg.startswith('Peak index error'):
+                    error_msg = 'You may forget to index peak\n' + error_msg
+                self.pop_one_button_dialog(error_msg)
         except AssertionError as a_err:
             self.pop_one_button_dialog(str(a_err))
             return
@@ -1236,7 +1240,7 @@ class MainWindow(QtGui.QMainWindow):
 
             # add to list
             scan_number_list.append((scan_number, pt_number_list, merged))
-            self._mainWindow.ui.tableWidget_mergeScans.set_status_by_row(row_number, 'Waiting')
+            self.ui.tableWidget_mergeScans.set_status_by_row(row_number, 'Waiting')
         # END-FOR
 
         # set the progress bar

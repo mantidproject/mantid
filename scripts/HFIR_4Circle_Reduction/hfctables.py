@@ -476,7 +476,7 @@ class ProcessTableWidget(tableBase.NTableWidget):
     """
     TableSetup = [('Scan', 'int'),
                   ('Intensity', 'float'),
-                  ('Corrected Intensity', 'float'),
+                  ('Corrected', 'float'),
                   ('Status', 'str'),
                   ('Peak Centre', 'str'),
                   ('HKL', 'str'),
@@ -798,7 +798,7 @@ class ProcessTableWidget(tableBase.NTableWidget):
         # END-IF
 
         if lorentz_corrected:
-            col_name = ('Corrected Intensity', 'float')
+            col_name = ('Corrected', 'float')
         else:
             col_name = ('Intensity', 'float')
         intensity_col_index = ProcessTableWidget.TableSetup.index(col_name)
