@@ -20,7 +20,7 @@ namespace CurveFitting {
 namespace NLLS {
 
 /// Too small values don't work well with numerical derivatives.
-const double epsmch = 1e-6; // std::numeric_limits<double>::epsilon();
+const double epsmch = std::numeric_limits<double>::epsilon();
 
 ///  Takes an m x n matrix J and forms the
 ///  n x n matrix A given by
@@ -120,16 +120,17 @@ double evaluate_model(const DoubleFortranVector &f,
   // 0.5 (f^T f + f^T J d + d^T' J ^T J d )
   DoubleFortranVector temp = f;
   temp += w.Jd;
-  double md = 0.5 * pow(norm2(temp), 2);
+  w.md_gn = 0.5 * pow(norm2(temp), 2);
+  double md = 0.0;
   switch (options.model) {
   case 1: // first-order (no Hessian)
-    //! nothing to do here...
+    md = w.md_gn;
     break;
   default:
     // these have a dynamic H -- recalculate
     // H = J^T J + HF, HF is (an approx?) to the Hessian
     mult_J(hf, d, w.Hd);
-    md = md + 0.5 * dot_product(d, w.Hd);
+    md = w.md_gn + 0.5 * dot_product(d, w.Hd);
   }
   return md;
 }
@@ -166,7 +167,7 @@ double calculate_rho(double normf, double normfnew, double md,
 void rank_one_update(DoubleFortranMatrix &hf, NLLS_workspace &w) {
 
   auto yts = dot_product(w.d, w.y);
-  if (fabs(yts) < 10 * epsmch) {
+  if (fabs(yts) < sqrt(10 * epsmch)) {
     //! safeguard: skip this update
     return;
   }

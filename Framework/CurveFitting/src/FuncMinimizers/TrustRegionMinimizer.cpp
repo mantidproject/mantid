@@ -272,10 +272,21 @@ bool TrustRegionMinimizer::iterate(size_t) {
     //
     // if model is good, rho should be close to one
     rho = calculate_rho(w.normF, normFnew, md, options);
-    if (boost::math::isnan(rho) || boost::math::isinf(rho)) {
-      throw std::runtime_error("Rho is NaN or infinite.");
-    }
-    if (rho > options.eta_successful) {
+    if (boost::math::isnan(rho) || boost::math::isinf(rho) || rho <= options.eta_successful) {
+      if ((w.use_second_derivatives) && (options.model == 3) &&
+          (no_reductions == 1)) {
+        // recalculate rho based on the approx GN model
+        // (i.e. the Gauss-Newton model evaluated at the Quasi-Newton step)
+        double rho_gn = calculate_rho(w.normF, normFnew,
+                                      w.evaluate_model_ws.md_gn, options);
+        if (rho_gn > options.eta_successful) {
+          // switch back to gauss-newton
+          w.use_second_derivatives = false;
+          w.hf_temp.zero(); // discard S_k, as it's been polluted
+          w.hf.zero();
+        }
+      }
+    } else {
       success = true;
     }
 
@@ -289,7 +300,7 @@ bool TrustRegionMinimizer::iterate(size_t) {
         return false;
       }
     }
-  }
+  } // loop
   // if we reach here, a successful step has been found
 
   // update X and f
