@@ -4,6 +4,9 @@ from mantid.simpleapi import *
 from ISISCommandInterface import *
 
 class LOQCentreNoGrav(stresstesting.MantidStressTest):
+    def __init__(self):
+        super(LOQCentreNoGrav, self).__init__()
+        self.tolerance = 1e-6
 
     def runTest(self):
 
@@ -25,7 +28,6 @@ class LOQCentreNoGrav(stresstesting.MantidStressTest):
 
     def validate(self):
         self.disableChecking.append('Instrument')
-        self.tolerance = 1e-6
         return '54431main_1D_3.0_9.0','LOQCentreNoGravSearchCentreFixed.nxs'
 
 class LOQCentreNoGravDefineCentre(stresstesting.MantidStressTest):

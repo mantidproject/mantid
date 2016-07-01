@@ -173,6 +173,10 @@ class LOQReductionOnLoadedWorkspaceMustProduceTheSameResult_1(stresstesting.Mant
     """ It will repeat the test done at LOQCentreNoGrav but using
     loaded workspaces
     """
+    def __init__(self):
+        super(LOQReductionOnLoadedWorkspaceMustProduceTheSameResult_1, self).__init__()
+        self.tolerance = 1e-6
+
     def runTest(self):
         config["default.instrument"] = "LOQ"
         LOQ()
@@ -199,7 +203,6 @@ class LOQReductionOnLoadedWorkspaceMustProduceTheSameResult_1(stresstesting.Mant
 
     def validate(self):
         self.disableChecking.append('Instrument')
-        self.tolerance = 1e-6
         return '54431main_1D_3.0_9.0','LOQCentreNoGravSearchCentreFixed.nxs'
 
 class LOQReductionOnLoadedWorkspaceMustProduceTheSameResult_2(stresstesting.MantidStressTest):
