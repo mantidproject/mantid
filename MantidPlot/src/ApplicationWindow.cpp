@@ -13674,7 +13674,7 @@ void ApplicationWindow::addMantidMatrixWindow(MantidMatrix *matrix) {
  * @return a pointer to a MantidMatrix or NULL
  */
 MantidMatrix *
-ApplicationWindow::findMantidMatrixWindow(const std::__1::string &wsName) {
+ApplicationWindow::findMantidMatrixWindow(const std::string &wsName) {
   MantidMatrix *m = NULL;
 
   for (auto mIt = m_mantidmatrixWindows.begin();
