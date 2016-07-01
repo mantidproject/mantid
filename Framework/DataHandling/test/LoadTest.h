@@ -20,25 +20,24 @@ using namespace Mantid::Kernel;
 class LoadTest : public CxxTest::TestSuite {
 
 private:
-std::vector<std::string> m_dataSearchDirs;
-std::string m_instName;
+  std::vector<std::string> m_dataSearchDirs;
+  std::string m_instName;
 
 public:
   void setUp() override {
 
-      m_dataSearchDirs = ConfigService::Instance().getDataSearchDirs();
+    m_dataSearchDirs = ConfigService::Instance().getDataSearchDirs();
 
-      m_instName = ConfigService::Instance().getString("default.instrument");
+    m_instName = ConfigService::Instance().getString("default.instrument");
   }
 
   void tearDown() override {
 
-      ConfigService::Instance().setDataSearchDirs(m_dataSearchDirs);
+    ConfigService::Instance().setDataSearchDirs(m_dataSearchDirs);
 
-      ConfigService::Instance().setString("default.instrument",m_instName);
+    ConfigService::Instance().setString("default.instrument", m_instName);
 
-      AnalysisDataService::Instance().clear();
-
+    AnalysisDataService::Instance().clear();
   }
 
   void testViaProxy() {
@@ -261,7 +260,7 @@ public:
    */
   void test_ILLLoadMultipleFilesNoPrefix() {
 
-    ConfigService::Instance().setString("default.instrument","IN4");
+    ConfigService::Instance().setString("default.instrument", "IN4");
     ConfigService::Instance().appendDataSearchSubDir("ILL/IN4/");
 
     Load loader;
