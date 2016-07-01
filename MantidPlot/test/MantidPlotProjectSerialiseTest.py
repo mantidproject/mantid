@@ -77,6 +77,8 @@ class MantidPlotProjectSerialiseTest(unittest.TestCase):
         # modify axes labels
         graph = windows()[0]
         layer = graph.layer(1)
+        # call using threadsafe_call to ensure things are executed on the GUI
+        # thread, otherwise we get segfaults.
         threadsafe_call(layer.setTitle, "Hello World")
         threadsafe_call(layer.setAxisTitle, 0, "Y Axis Modified")
         threadsafe_call(layer.setAxisTitle, 2, "X Axis Modified")
@@ -121,6 +123,8 @@ class MantidPlotProjectSerialiseTest(unittest.TestCase):
         # modify axes scales
         graph = windows()[0]
         layer = graph.layer(1)
+        # call using threadsafe_call to ensure things are executed on the GUI
+        # thread. Otherwise we get segfaults.
         threadsafe_call(layer.setAxisScale, 0, 10, 10)
         threadsafe_call(layer.logYlinX)
 
