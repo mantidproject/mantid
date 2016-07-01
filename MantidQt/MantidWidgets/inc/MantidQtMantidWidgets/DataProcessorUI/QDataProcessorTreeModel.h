@@ -3,7 +3,6 @@
 
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorWhiteList.h"
-#include "MantidQtMantidWidgets/DataProcessorUI/QDataProcessorTreeItem.h"
 #include "MantidQtMantidWidgets/WidgetDllOption.h"
 #include <QAbstractItemModel>
 #include <boost/shared_ptr.hpp>
@@ -13,7 +12,7 @@
 namespace MantidQt {
 namespace MantidWidgets {
 
-/** QDataProcessorTreeModel : Provides a QAbstractTreeModel for a Mantid
+/** QDataProcessorTreeModel : Provides a QAbstractItemModel for a Mantid
 ITableWorkspace.
 
 Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
@@ -78,13 +77,13 @@ public:
   bool removeRows(int row, int count,
                   const QModelIndex &parent = QModelIndex()) override;
 
-  // Emit a signal saying things have changed
-  void update();
-
 private:
   void setupModelData(Mantid::API::ITableWorkspace_sptr table,
                       const DataProcessorWhiteList &parent);
-  QDataProcessorTreeItem *getItem(const QModelIndex &index) const;
+  bool insertGroups(int position, int count);
+  bool insertRows(int position, int count, int parent);
+  bool removeGroups(int position, int count);
+  bool removeRows(int position, int count, int parent);
 
   /// Collection of data for viewing.
   Mantid::API::ITableWorkspace_sptr m_tWS;
@@ -92,8 +91,10 @@ private:
   /// Map of column indexes to names and viceversa
   DataProcessorWhiteList m_whitelist;
 
-  /// Root item
-  QDataProcessorTreeItem *m_rootItem;
+  /// Vector containing group names
+  std::vector<std::string> m_groupName;
+  /// Vector containing the (absolute) row indices for a given group
+  std::vector<std::vector<int>> m_rowsOfGroup;
 };
 
 /// Typedef for a shared pointer to \c QDataProcessorTreeModel

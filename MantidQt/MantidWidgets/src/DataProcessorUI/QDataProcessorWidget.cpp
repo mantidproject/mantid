@@ -509,14 +509,18 @@ bool QDataProcessorWidget::getEnableNotebook() {
 Set which rows are selected
 @param rows : The set of rows to select
 */
-void QDataProcessorWidget::setSelection(const std::set<int> &rows) {
+void QDataProcessorWidget::setSelection(
+    const std::map<int, std::set<int>> &items) {
   ui.viewTable->clearSelection();
   auto selectionModel = ui.viewTable->selectionModel();
 
-  for (auto row = rows.begin(); row != rows.end(); ++row)
-    selectionModel->select(ui.viewTable->model()->index((*row), 0),
-                           QItemSelectionModel::Select |
-                               QItemSelectionModel::Rows);
+  for (auto group = items.begin(); group != items.end(); ++group) {
+    auto rows = group->second;
+    for (auto row = rows.begin(); row != rows.end(); ++row)
+      selectionModel->select(ui.viewTable->model()->index((*row), 0),
+                             QItemSelectionModel::Select |
+                                 QItemSelectionModel::Rows);
+  }
 }
 
 /**

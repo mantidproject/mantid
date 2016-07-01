@@ -13,7 +13,6 @@ set ( SRC_FILES
     src/DataProcessorUI/DataProcessorWhiteList.cpp
     src/DataProcessorUI/GenericDataProcessorPresenter.cpp
     src/DataProcessorUI/ParseKeyValueString.cpp
-    src/DataProcessorUI/QDataProcessorTreeItem.cpp
     src/DataProcessorUI/QDataProcessorTreeModel.cpp
     src/DataProcessorUI/QDataProcessorWidget.cpp
     src/DataProcessorUI/QtDataProcessorOptionsDialog.cpp
@@ -233,7 +232,6 @@ set ( INC_FILES
     inc/MantidQtMantidWidgets/DataProcessorUI/GenericDataProcessorPresenter.h
     inc/MantidQtMantidWidgets/DataProcessorUI/GenericDataProcessorPresenterFactory.h
     inc/MantidQtMantidWidgets/DataProcessorUI/ParseKeyValueString.h
-    inc/MantidQtMantidWidgets/DataProcessorUI/QDataProcessorTreeItem.h
     inc/MantidQtMantidWidgets/DataProcessorUI/WorkspaceReceiver.h
     inc/MantidQtMantidWidgets/ErrorCurve.h
     inc/MantidQtMantidWidgets/WidgetDllOption.h
@@ -333,6 +331,7 @@ set ( TEST_FILES
   DataProcessorUI/DataProcessorWhiteListTest.h
   DataProcessorUI/GenericDataProcessorPresenterTest.h
   DataProcessorUI/ParseKeyValueStringTest.h
+  DataProcessorUI/QDataProcessorTreeModelTest.h
 )
 
 find_package (Qt4 REQUIRED QtHelp QtWebKit QtNetwork QUIET)

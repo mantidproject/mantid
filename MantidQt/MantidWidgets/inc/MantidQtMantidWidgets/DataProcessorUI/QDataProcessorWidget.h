@@ -78,7 +78,7 @@ public:
   bool getEnableNotebook() override;
 
   // Settor methods
-  void setSelection(const std::set<int> &rows) override;
+  void setSelection(const std::map<int, std::set<int>> &rows) override;
   void setTableList(const std::set<std::string> &tables) override;
   void setInstrumentList(const std::vector<std::string> &instruments,
                          const std::string &defaultInstrument) override;

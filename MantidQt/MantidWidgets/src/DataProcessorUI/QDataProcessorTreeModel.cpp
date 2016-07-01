@@ -17,16 +17,27 @@ QDataProcessorTreeModel::QDataProcessorTreeModel(
     const DataProcessorWhiteList &whitelist)
     : m_tWS(tableWorkspace), m_whitelist(whitelist) {
 
+  if (tableWorkspace->columnCount() != m_whitelist.size() + 1)
+    throw std::invalid_argument("Invalid table workspace. Table workspace must "
+                                "have one extra column accounting for groups");
+
   setupModelData(tableWorkspace, whitelist);
 }
 
-QDataProcessorTreeModel::~QDataProcessorTreeModel() { delete m_rootItem; }
+QDataProcessorTreeModel::~QDataProcessorTreeModel() {}
 
+/** Returns the number of columns, i.e. elements in the whitelist
+* @return : The number of columns
+*/
 int QDataProcessorTreeModel::columnCount(
     const QModelIndex & /* parent */) const {
-  return m_rootItem->columnCount();
+  return static_cast<int>(m_whitelist.size());
 }
 
+/** Returns data for specified index
+* @param index : The index
+* @return : The data associated with the given index
+*/
 QVariant QDataProcessorTreeModel::data(const QModelIndex &index,
                                        int role) const {
   if (!index.isValid())
@@ -35,9 +46,23 @@ QVariant QDataProcessorTreeModel::data(const QModelIndex &index,
   if (role != Qt::DisplayRole && role != Qt::EditRole)
     return QVariant();
 
-  QDataProcessorTreeItem *item = getItem(index);
+  if (!parent(index).isValid()) {
+    // Index corresponds to a group
 
-  return item->data(index.column());
+    if (index.column() == 0) {
+      // Return the group name only in the first column
+      return QString::fromStdString(m_groupName.at(index.row()));
+    } else {
+      return QVariant();
+    }
+  } else {
+    // Index corresponds to a row
+
+    // Absolute position of this row in the table
+    int absolutePosition = m_rowsOfGroup[parent(index).row()][index.row()];
+    return QString::fromStdString(
+        m_tWS->String(absolutePosition, index.column() + 1));
+  }
 }
 
 Qt::ItemFlags QDataProcessorTreeModel::flags(const QModelIndex &index) const {
@@ -47,149 +72,374 @@ Qt::ItemFlags QDataProcessorTreeModel::flags(const QModelIndex &index) const {
   return Qt::ItemIsEditable | QAbstractItemModel::flags(index);
 }
 
-QDataProcessorTreeItem *
-QDataProcessorTreeModel::getItem(const QModelIndex &index) const {
-  if (index.isValid()) {
-    QDataProcessorTreeItem *item =
-        static_cast<QDataProcessorTreeItem *>(index.internalPointer());
-    if (item)
-      return item;
-  }
-  return m_rootItem;
-}
-
+/** Returns the column name (header data for given section)
+* @param section : The section (column) index
+* @param orientation : The orientation
+* @param role : The role
+* @return : The column name
+*/
 QVariant QDataProcessorTreeModel::headerData(int section,
                                              Qt::Orientation orientation,
                                              int role) const {
+
   if (orientation == Qt::Horizontal && role == Qt::DisplayRole)
-    return m_rootItem->data(section);
+    return QString::fromStdString(m_whitelist.colNameFromColIndex(section));
 
   return QVariant();
 }
 
+/** Returns the index of an element specified by its row, column and parent
+* @param row : The row
+* @param column : The column
+* @param parent : The parent element
+* @return : The index of the element
+*/
 QModelIndex QDataProcessorTreeModel::index(int row, int column,
                                            const QModelIndex &parent) const {
 
-  if (parent.isValid() && parent.column() != 0)
-    return QModelIndex();
-
-  QDataProcessorTreeItem *parentItem = getItem(parent);
-
-  QDataProcessorTreeItem *childItem = parentItem->child(row);
-  if (childItem)
-    return createIndex(row, column, childItem);
-  else
-    return QModelIndex();
+  return parent.isValid() ? createIndex(row, column, parent.row())
+                          : createIndex(row, column, -1);
 }
 
-bool QDataProcessorTreeModel::insertRows(int position, int rows,
-                                         const QModelIndex &parent) {
-  QDataProcessorTreeItem *parentItem = getItem(parent);
-  bool success;
+/** Returns the parent of a given index
+* @param index : The index
+* @return : Its parent
+*/
+QModelIndex QDataProcessorTreeModel::parent(const QModelIndex &index) const {
 
-  beginInsertRows(parent, position, position + rows - 1);
-  success =
-      parentItem->insertChildren(position, rows, m_rootItem->columnCount());
+  return index.internalId() >= 0 ? createIndex(index.internalId(), 0, -1)
+                                 : QModelIndex();
+}
+
+/** Adds elements to the tree
+* @param position : The position where to insert the new elements
+* @param count : The number of elements to insert
+* @param parent : The parent of the set of elements
+* @return : Boolean indicating whether the insertion was successful or not
+*/
+bool QDataProcessorTreeModel::insertRows(int position, int count,
+                                         const QModelIndex &parent) {
+
+  bool success = false;
+
+  if (!parent.isValid()) {
+    // Group
+    success = insertGroups(position, count);
+  } else {
+    // Row
+    success = insertRows(position, count, parent.row());
+  }
+
+  return success;
+}
+
+/** Insert new rows as children of a given parent. Parent must exist.
+* @param position : The position where new rows will be added
+* @param count : The number of new rows to insert
+* @param parent : The parent index (as integer)
+* @return : Boolean indicating if the insertion was successful
+*/
+bool QDataProcessorTreeModel::insertRows(int position, int count, int parent) {
+
+  // Parent does not exist
+  if (parent < 0 || parent >= rowCount())
+    return false;
+
+  // Incorrect position
+  if (position < 0 || position > rowCount(index(parent, 0)))
+    return false;
+
+  // Incorrect number of rows
+  if (count < 1)
+    return false;
+
+  // We need to update the absolute positions of the rows and the table
+  // workspace
+
+  beginInsertRows(index(parent, 0), position, position + count - 1);
+
+  // Update the table workspace
+
+  int absolutePosition =
+      (m_rowsOfGroup[parent].size() > 0)
+          ? ((position == static_cast<int>(m_rowsOfGroup[parent].size()))
+                 ? m_rowsOfGroup[parent][position - 1] + 1
+                 : m_rowsOfGroup[parent][position])
+          : (parent > 0) ? m_rowsOfGroup[parent - 1].back() : 0;
+
+  for (int pos = position; pos < position + count; pos++) {
+    m_tWS->insertRow(absolutePosition);
+    m_tWS->String(absolutePosition, 0) = m_groupName[parent];
+  }
+
+  int lastRowIndex = absolutePosition;
+
+  // Insert new elements
+  m_rowsOfGroup[parent].insert(m_rowsOfGroup[parent].begin() + position, count,
+                               0);
+
+  // Update row indices in the group where we are adding the new rows
+  for (int pos = position; pos < rowCount(index(parent, 0)); pos++)
+    m_rowsOfGroup[parent][pos] = lastRowIndex++;
+
+  // Update row indices in subsequent groups
+  for (int group = parent + 1; group < rowCount(); group++) {
+    for (int row = 0; row < rowCount(index(group, 0)); row++)
+      m_rowsOfGroup[group][row] = lastRowIndex++;
+  }
+
   endInsertRows();
 
+  return true;
+}
+
+/** Insert new groups at a given position
+* @param position : The position where new groups will be inserted
+* @param count : The number of groups to insert
+* @return : True if insertion was successful, false otherwise
+*/
+bool QDataProcessorTreeModel::insertGroups(int position, int count) {
+
+  // Invalid position
+  if (position < 0 || position > rowCount())
+    return false;
+
+  // Invalid number of groups
+  if (count < 1)
+    return false;
+
+  beginInsertRows(QModelIndex(), position, position + count - 1);
+
+  // Update m_rowsOfGroup
+  m_rowsOfGroup.insert(m_rowsOfGroup.begin() + position, count,
+                       std::vector<int>());
+  m_groupName.insert(m_groupName.begin() + position, count, "");
+
+  for (int pos = position; pos < position + count; pos++) {
+
+    // Add one row to this new group
+    insertRows(0, 1, pos);
+    //// Update the table workspace
+    // m_tWS->insertRow(pos);
+  }
+
+  endInsertRows();
+
+  return true;
+}
+
+/** Removes elements from the tree
+* @param position : The position of the first element in the set to be removed
+* @param rows : The number of elements to remove
+* @param parent : The parent of the set of elements
+* @return : Boolean indicating whether the elements were removed successfully or
+* not
+*/
+bool QDataProcessorTreeModel::removeRows(int position, int count,
+                                         const QModelIndex &parent) {
+
+  bool success = false;
+
+  if (!parent.isValid()) {
+    // Group
+    success = removeGroups(position, count);
+  } else {
+    // Row
+    success = removeRows(position, count, parent.row());
+  }
+
   return success;
 }
 
-QModelIndex QDataProcessorTreeModel::parent(const QModelIndex &index) const {
-  if (!index.isValid())
-    return QModelIndex();
+/** Removes groups from the tree
+* @param position : The position of the first group that will be removed
+* @param count : The number of groups to remove
+* @return : Boolean indicating whether or not groups were removed
+*/
+bool QDataProcessorTreeModel::removeGroups(int position, int count) {
 
-  QDataProcessorTreeItem *childItem = getItem(index);
-  QDataProcessorTreeItem *parentItem = childItem->parent();
+  // Invalid position
+  if (position < 0 || position >= rowCount())
+    return false;
 
-  if (parentItem == m_rootItem)
-    return QModelIndex();
+  // Invalid number of groups
+  if (count < 1 || position + count > rowCount())
+    return false;
 
-  return createIndex(parentItem->childNumber(), 0, parentItem);
-}
+  beginRemoveRows(QModelIndex(), position, position + count - 1);
 
-bool QDataProcessorTreeModel::removeRows(int position, int rows,
-                                         const QModelIndex &parent) {
-  QDataProcessorTreeItem *parentItem = getItem(parent);
-  bool success = true;
+  // Update group names
+  m_groupName.erase(m_groupName.begin() + position,
+                    m_groupName.begin() + position + count);
 
-  beginRemoveRows(parent, position, position + rows - 1);
-  success = parentItem->removeChildren(position, rows);
+  // Update table workspace
+
+  int absolutePosition =
+      (m_rowsOfGroup[position].size() > 0)
+          ? m_rowsOfGroup[position][0]
+          : (position > 0) ? m_rowsOfGroup[position - 1].back() : 0;
+
+  for (int group = position; group < position + count; group++) {
+    for (int row = 0; row < rowCount(index(group, 0)); row++)
+      m_tWS->removeRow(absolutePosition);
+  }
+
+  m_rowsOfGroup.erase(m_rowsOfGroup.begin() + position,
+                      m_rowsOfGroup.begin() + position + count);
+
+  if (m_groupName.size() > 0) {
+    // Update row positions
+    for (int group = position; group < rowCount(); group++) {
+      for (int row = 0; row < rowCount(index(group, 0)); row++)
+        m_rowsOfGroup[group][row] = absolutePosition++;
+    }
+  } else
+    m_rowsOfGroup.clear();
+
   endRemoveRows();
 
-  return success;
+  return true;
 }
 
+/** Removes rows from a group
+* @param position : The position of the first row that will be removed
+* @param count : The number of rows to remove
+* @return : Boolean indicating whether or not rows were removed
+*/
+bool QDataProcessorTreeModel::removeRows(int position, int count, int parent) {
+
+  // Parent does not exist
+  if (parent < 0 || parent >= rowCount())
+    return false;
+
+  // Parent has no children
+  if (rowCount(index(parent, 0)) < 1)
+    return false;
+
+  // Incorrect position
+  if (position < 0 || position >= rowCount(index(parent, 0)))
+    return false;
+
+  // Incorrect number of rows
+  if (count < 1 || position + count > rowCount(index(parent, 0)))
+    return false;
+
+  beginRemoveRows(index(parent, 0), position, position + count - 1);
+
+  // Update the table workspace
+  int absolutePosition = m_rowsOfGroup[parent][position];
+  for (int pos = position; pos < position + count; pos++) {
+    m_tWS->removeRow(absolutePosition);
+  }
+
+  m_rowsOfGroup[parent].erase(m_rowsOfGroup[parent].begin() + position,
+                              m_rowsOfGroup[parent].begin() + position + count);
+
+  // Update row indices in this group
+  for (int row = position; row < rowCount(index(parent, 0)); row++) {
+    m_rowsOfGroup[parent][row] = absolutePosition++;
+  }
+  // Update row indices in subsequent groups
+  for (int group = parent + 1; group < rowCount(); group++)
+    for (int row = 0; row < rowCount(index(group, 0)); row++)
+      m_rowsOfGroup[group][row] = absolutePosition++;
+
+  if (m_rowsOfGroup[parent].size() == 0) {
+    removeGroups(parent, 1);
+  }
+
+  endRemoveRows();
+
+  return true;
+}
+
+/** Returns the number of rows of a given parent
+* @param parent : The parent item
+* @return : The number of rows
+*/
 int QDataProcessorTreeModel::rowCount(const QModelIndex &parent) const {
-  QDataProcessorTreeItem *parentItem = getItem(parent);
-
-  return parentItem->childCount();
+  return !parent.isValid()
+             ? static_cast<int>(m_rowsOfGroup.size())
+             : !parent.parent().isValid()
+                   ? static_cast<int>(m_rowsOfGroup[parent.row()].size())
+                   : 0;
 }
 
+/** Updates an index with given data
+* @param index : the index
+* @param value : the new value
+* @param role : the role
+*/
 bool QDataProcessorTreeModel::setData(const QModelIndex &index,
                                       const QVariant &value, int role) {
+
   if (role != Qt::EditRole)
     return false;
 
-  QDataProcessorTreeItem *item = getItem(index);
-  bool result = item->setData(index.column(), value);
+  if (!parent(index).isValid()) {
+    // Index corresponds to a group
 
-  if (result)
-    emit dataChanged(index, index);
+    if (index.column() == 0) {
 
-  return result;
+      const std::string oldName = m_groupName[index.row()];
+      const std::string newName = value.toString().toStdString();
+
+      // Update the group name, which means updating:
+
+      // 1. Axiliary member variables
+
+      m_groupName[index.row()] = newName;
+
+      // 2. Table workspace
+
+      size_t nrows = m_rowsOfGroup[index.row()].size();
+      for (size_t row = 0; row < nrows; row++) {
+        m_tWS->String(m_rowsOfGroup[index.row()][row], 0) = newName;
+      }
+
+    } else {
+      return false;
+    }
+  } else {
+    // Index corresponds to a row
+
+    // First we need to find the absolute position of this row in the table
+    int absolutePosition = m_rowsOfGroup[parent(index).row()][index.row()];
+    m_tWS->String(absolutePosition, index.column() + 1) =
+        value.toString().toStdString();
+  }
+
+  emit dataChanged(index, index);
+
+  return true;
 }
 
+/** Setup the data, initialize member variables using a table workspace and
+* whitelist
+* @param table : A table workspace containing the data
+* @param whitelist : A whitelist containing the column names
+*/
 void QDataProcessorTreeModel::setupModelData(
     ITableWorkspace_sptr table, const DataProcessorWhiteList &whitelist) {
-
-  QVector<QVariant> header;
-  for (int i = 0; i < m_whitelist.size(); i++)
-    header << QString::fromStdString(m_whitelist.colNameFromColIndex(i));
-
-  m_rootItem = new QDataProcessorTreeItem(header);
 
   int nrows = static_cast<int>(table->rowCount());
   int ncols = static_cast<int>(table->columnCount() - 1);
 
-  // Insert the groups
+  int lastIndex = 0;
+  std::map<std::string, int> groupIndex;
 
-  int lastID = 0;
-  std::map<std::string, int> groupID;
   for (int r = 0; r < nrows; r++) {
 
     const std::string &groupName = m_tWS->String(r, 0);
 
-    if (!groupID.count(groupName)) {
+    if (groupIndex.count(groupName) == 0) {
+      groupIndex[groupName] = lastIndex++;
 
-      groupID[groupName] = lastID++;
-
-      m_rootItem->insertChildren(m_rootItem->childCount(), 1, 1);
-
-      m_rootItem->child(m_rootItem->childCount() - 1)
-          ->setData(0, QString::fromStdString(groupName));
+      m_groupName.push_back(groupName);
+      m_rowsOfGroup.push_back(std::vector<int>());
     }
-  }
 
-  // Now insert the data
-
-  for (int r = 0; r < nrows; r++) {
-
-    const std::string groupName = m_tWS->String(r, 0);
-    int id = groupID[groupName];
-
-    auto groupItem = m_rootItem->child(id);
-
-    id = groupItem->childCount();
-
-    groupItem->insertChildren(id, 1, ncols);
-
-    auto childItem = groupItem->child(id);
-
-    for (int c = 0; c < ncols; c++) {
-      const std::string value = m_tWS->String(r, c + 1);
-      childItem->setData(c, QString::fromStdString(value));
-    }
+    m_rowsOfGroup[groupIndex[groupName]].push_back(r);
   }
 }
 
