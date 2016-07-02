@@ -1,6 +1,6 @@
 import hashlib
 from IOmodule import IOmodule
-
+from AbinsData import AbinsData
 
 class GeneralDFTProgram(IOmodule):
     """
@@ -164,41 +164,23 @@ class GeneralDFTProgram(IOmodule):
         This method rearranges data read from phonon DFT file.
 
         @param data: dictionary with the data to rearrange
-        @return: list of dictionaries with rearranged data.
-                 The list has the following form:
-                 data= [ {"frequencies": numpy.array, "atomic_displacements: numpy.array, "weight": numpy._float, "value":numpy.array},
-                       {"frequencies": numpy.array, "atomic_displacements: numpy.array, "weight": numpy._float, "value":numpy.array}
-                     ]
-
-                 Each entry in the list corresponds to one k-point. Each item in the list is a dictionary. The meaning of
-                 keys in each dictionary is as follows:
-
-                      "weight" - weight of k-point
-
-                      "value"  - value of k-point (numpy array of dimension 3)
-
-                      "frequencies" - frequencies for the given k-point
-
-                      "atomic_displacements - atomic displacements for the given k-point
-
-
-
+        @return: Returns an object of type ABINSData
         """
         _num_k_points = data["k_vectors"].shape[0]
 
         # here we multiply by _num_k_points because data["frequencies"] is one dimensional numpy array which stores frequencies for all k-points
-        _number_of_atoms = float(data["atomic_displacements"].shape[1])/data["frequencies"].shape[0] * _num_k_points
+        _number_of_atoms = int(float(data["atomic_displacements"].shape[1])/data["frequencies"].shape[0] * _num_k_points)
         _number_of_phonons = 3 * _number_of_atoms
-        _rearranged_data = []
+        _return_data = AbinsData(num_atoms=_number_of_atoms, num_k=_num_k_points)
 
         for i in range(_num_k_points):
 
             temp_1 = i * _number_of_phonons
-            _rearranged_data.append({"weight":data["weights"][i],
+            _return_data.append({"weight":data["weights"][i],
                                      "value" :data["k_vectors"][i],
                                     "frequencies":data["frequencies"][temp_1:temp_1 + _number_of_phonons],
                                     "atomic_displacements":data["atomic_displacements"][i]
                                     } )
-        return _rearranged_data
+        return _return_data
 
 

@@ -7,7 +7,7 @@ import numpy as np
 from AbinsModules import IOmodule
 from AbinsModules import LoadCASTEP
 
-class LoadCASTEPTest(unittest.TestCase):
+class ABINSLoadCASTEPTest(unittest.TestCase):
 
     # simple tests
     def test_non_existing_file(self):
@@ -81,7 +81,8 @@ class LoadCASTEPTest(unittest.TestCase):
 
         _CASTEP_reader = LoadCASTEP(input_DFT_filename=filename)
 
-        data["rearranged_data"] = _CASTEP_reader.readPhononFile() 
+        AbinsTypeData = _CASTEP_reader.readPhononFile()
+        data["rearranged_data"] = AbinsTypeData.extract()
         data["attributes"] =_CASTEP_reader._attributes
         data["datasets"] = _CASTEP_reader._numpy_datasets
         data["structured_datasets"] = _CASTEP_reader._structured_datasets
@@ -92,7 +93,8 @@ class LoadCASTEPTest(unittest.TestCase):
         self.assertEqual(True, _CASTEP_reader.validData())
 
         # test LoadData method
-        _loaded_data =  _CASTEP_reader.loadData()
+        _loaded_ABINS_data =  _CASTEP_reader.loadData()
+        _loaded_data =  _loaded_ABINS_data.extract()
         num_k = len(data["rearranged_data"])
         for el in range(num_k):
             for item in data["rearranged_data"][el]:

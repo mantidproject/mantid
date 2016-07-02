@@ -6,7 +6,7 @@ from mantid.simpleapi import *
 from AbinsModules import  CalculateQ
 
 
-class CalculateQTest(unittest.TestCase):
+class ABINSCalculateQTest(unittest.TestCase):
 
 
     def test_simple(self):
@@ -41,16 +41,16 @@ class CalculateQTest(unittest.TestCase):
         correct_q_vectors = raw_data * raw_data/16.0
 
         q_calculator = CalculateQ(filename="TestingFile_TOSCA.phonon",
-                                       instrument="TOSCA",
-                                       sample_form="Powder")
+                                  instrument="TOSCA",
+                                  sample_form="Powder")
         q_calculator.collectFrequencies(frequencies=raw_data)
         q_vectors = q_calculator.getQvectors()
 
-        self.assertEqual(True,np.allclose(correct_q_vectors, q_vectors))
+        self.assertEqual(True,np.allclose(correct_q_vectors, q_vectors.extract()))
 
         loaded_q = q_calculator.loadData()
 
-        self.assertEqual(True,np.allclose(correct_q_vectors, loaded_q))
+        self.assertEqual(True,np.allclose(correct_q_vectors, loaded_q.extract()))
 
         # here we have a list not a numpy array
         with self.assertRaises(ValueError):

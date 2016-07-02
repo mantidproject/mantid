@@ -57,7 +57,8 @@ set ( TEST_PY_FILES
       test/ABINSIOmoduleTest.py
       test/ABINSLoadCASTEPTest.py
       test/ABINSCalculateQTest.py
-      test/ABINSQvectorsTest.py
+      test/ABINSQDataTest.py
+      test/ABINSAbinsDataTest.py
       )
 
 

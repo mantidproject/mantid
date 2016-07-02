@@ -1,7 +1,8 @@
 import numpy
 
 import Constants
-from IOmodule import IOmodule
+from  IOmodule import IOmodule
+from QData import  QData
 
 
 class CalculateQ(IOmodule):
@@ -60,8 +61,8 @@ class CalculateQ(IOmodule):
         _freq_squared = self._frequencies * self._frequencies
 
         if self._sample_form == "Powder":
-            self._Qvectors = _freq_squared * Constants.TOSCA_constant
-            self._q_format = "scalars"
+            self._Qvectors = QData(q_format="scalars")
+            self._Qvectors.set(items=_freq_squared * Constants.TOSCA_constant)
         else:
             raise ValueError("SingleCrystal user case is not implemented!")
 
@@ -77,7 +78,8 @@ class CalculateQ(IOmodule):
         @return: Q vectors for the required instrument
         """
         self._calculate_Qvectors()
-        self.addNumpyDataset("data", self._Qvectors) # Q vectors in the form of numpy array
+        self.addNumpyDataset("data", self._Qvectors.extract()) # Q vectors in the form of numpy array
+        self.addAttribute("q_format",self._Qvectors._q_format)
         self.addAttribute("instrument", self._instrument)
         self.addAttribute("sample_Form", self._sample_form)
         self.save()
@@ -86,6 +88,7 @@ class CalculateQ(IOmodule):
 
 
     def loadData(self):
-        data = self.load(list_of_numpy_datasets=["data"])
-
-        return data["datasets"]["data"]
+        data = self.load(list_of_numpy_datasets=["data"], list_of_attributes=["q_format"])
+        results = QData(q_format=data["attributes"]["q_format"])
+        results.set(data["datasets"]["data"])
+        return results

@@ -5,7 +5,7 @@ from AbinsModules import IOmodule
 
 import numpy as np
 
-class IOmoduleTest(unittest.TestCase):
+class ABINSIOmoduleTest(unittest.TestCase):
 
     def _save_stuff(self):
         saver = IOmodule(input_filename="Cars.foo", group_name="Volksvagen")
