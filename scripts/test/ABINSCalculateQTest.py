@@ -41,8 +41,8 @@ class CalculateQTest(unittest.TestCase):
         correct_q_vectors = raw_data * raw_data/16.0
 
         q_calculator = CalculateQ(filename="TestingFile_TOSCA.phonon",
-                                  instrument="TOSCA",
-                                  sample_form="Powder")
+                                       instrument="TOSCA",
+                                       sample_form="Powder")
         q_calculator.collectFrequencies(frequencies=raw_data)
         q_vectors = q_calculator.getQvectors()
 
