@@ -54,10 +54,11 @@ set ( TEST_PY_FILES
       test/VesuvioFittingTest.py
       test/VesuvioProfileTest.py
       test/ReductionSettingsTest.py
-      test/IOmoduleTest.py
-      test/LoadCASTEPTest.py
-      test/CalculateQTest.py
-      test/QvectorsTest.py
+      test/ABINSIOmoduleTest.py
+      test/ABINSLoadCASTEPTest.py
+      test/ABINSCalculateQTest.py
+      test/ABINSQDataTest.py
+      test/ABINSAbinsDataTest.py
       )
 
 

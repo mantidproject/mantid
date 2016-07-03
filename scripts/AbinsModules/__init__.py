@@ -17,8 +17,14 @@ algorithms and data objects that are:
 
 """
 
-from LoadCASTEP import LoadCASTEP
-from IOmodule import IOmodule
+
 from CalculateQ import CalculateQ
+from IOmodule import  IOmodule
+
 from GeneralDFTProgram import GeneralDFTProgram
-from Qvectors import Qvectors
+from LoadCASTEP import LoadCASTEP
+
+
+from GeneralData import GeneralData
+from  QData import  QData
+from AbinsData import AbinsData
