@@ -1,4 +1,6 @@
 import hashlib
+
+# ABINS modules
 from IOmodule import IOmodule
 from AbinsData import AbinsData
 
@@ -137,7 +139,7 @@ class GeneralDFTProgram(IOmodule):
         self._num_ions = int(datasets["atomic_displacements"][0].shape[0] /
                              float(datasets["frequencies"].shape[0]) *
                                    self._num_k)
-        
+
         return self._rearrange_data(data=datasets)
 
 
@@ -183,9 +185,9 @@ class GeneralDFTProgram(IOmodule):
 
             temp_1 = i * _number_of_phonons
             _return_data.append({"weight":data["weights"][i],
-                                     "value" :data["k_vectors"][i],
-                                    "frequencies":data["frequencies"][temp_1:temp_1 + _number_of_phonons],
-                                    "atomic_displacements":data["atomic_displacements"][i]
+                                 "value" :data["k_vectors"][i],
+                                 "frequencies":data["frequencies"][temp_1:temp_1 + _number_of_phonons],
+                                 "atomic_displacements":data["atomic_displacements"][i]
                                     } )
         return _return_data
 

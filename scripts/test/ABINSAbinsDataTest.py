@@ -164,14 +164,14 @@ class ABINSAbinsDataTest(unittest.TestCase):
 
     #tests for extract method
     def test_wrong_k(self):
-        poor_tester= AbinsData(num_k=1, num_atoms=2)
+        poor_tester = AbinsData(num_k=1, num_atoms=2)
         poor_tester.set(items=self._good_data)
         with self.assertRaises(ValueError):
             poor_data = poor_tester.extract()
 
 
     def test_wrong_atoms(self):
-        poor_tester= AbinsData(num_k=3, num_atoms=4)
+        poor_tester = AbinsData(num_k=3, num_atoms=4)
         with self.assertRaises(ValueError):
             poor_tester.set(items=self._good_data)
 

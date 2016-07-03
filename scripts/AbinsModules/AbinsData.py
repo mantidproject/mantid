@@ -1,6 +1,8 @@
-from GeneralData import GeneralData
 import numpy as np
+
+# ABINS modules
 import Constants
+from GeneralData import  GeneralData
 
 class AbinsData(GeneralData):
     """
