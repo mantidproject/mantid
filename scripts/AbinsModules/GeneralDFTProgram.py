@@ -15,6 +15,7 @@ class GeneralDFTProgram(IOmodule):
                                             # filename can include path to the file as well)
 
         self._num_k = None
+        self._num_ions = None
 
 
     def readPhononFile(self):
@@ -130,7 +131,14 @@ class GeneralDFTProgram(IOmodule):
         @return:
         """
         data = self.load(list_of_numpy_datasets=["frequencies", "weights", "k_vectors", "atomic_displacements", "unit_cell"])
-        return self._rearrange_data(data=data["datasets"])
+        datasets = data["datasets"]
+
+        self._num_k = datasets["k_vectors"].shape[0]
+        self._num_ions = int(datasets["atomic_displacements"][0].shape[0] /
+                             float(datasets["frequencies"].shape[0]) *
+                                   self._num_k)
+        
+        return self._rearrange_data(data=datasets)
 
 
     # Protected methods which should be reused by classes which read DFT phonon data
@@ -168,14 +176,10 @@ class GeneralDFTProgram(IOmodule):
         @param data: dictionary with the data to rearrange
         @return: Returns an object of type ABINSData
         """
-        _num_k_points = self._num_k
+        _number_of_phonons = 3 * self._num_ions
+        _return_data = AbinsData(num_atoms=self._num_ions, num_k=self._num_k)
 
-        # here we multiply by _num_k_points because data["frequencies"] is one dimensional numpy array which stores frequencies for all k-points
-        _number_of_atoms = int(float(data["atomic_displacements"].shape[1])/data["frequencies"].shape[0] * _num_k_points)
-        _number_of_phonons = 3 * _number_of_atoms
-        _return_data = AbinsData(num_atoms=_number_of_atoms, num_k=_num_k_points)
-
-        for i in range(_num_k_points):
+        for i in range(self._num_k):
 
             temp_1 = i * _number_of_phonons
             _return_data.append({"weight":data["weights"][i],
