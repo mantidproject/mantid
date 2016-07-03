@@ -5,6 +5,7 @@
 set ( TEST_PY_FILES
   SANSFileInformationTest.py
   SANSLogTaggerTest.py
+  SANSFunctionsTest.py
   XMLParsingTest.py
 )
 

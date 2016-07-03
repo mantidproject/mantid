@@ -5,13 +5,13 @@ from SANS2.State.SANSStateMove import (SANSStateMove, SANSStateMoveLOQ)
 from SANS2.Common.SANSEnumerations import (SANSInstrument, convert_string_to_sans_instrument,
                                   CanonicalCoordinates)
 from SANS2.Common.SANSConstants import SANSConstants
-from SANS2.Common.SANSFunctions import (create_unmanaged_algorithm, get_single_valued_logs_from_workspace)
+from SANS2.Common.SANSFunctions import (create_unmanaged_algorithm, get_single_valued_logs_from_workspace,
+                                        quaternion_to_angle_and_axis)
 
 
 # -------------------------------------------------
 # Free functions
 # -------------------------------------------------
-
 def move_component(workspace, offsets, component_to_move):
     move_name = "MoveInstrumentComponent"
     move_options = {"Workspace": workspace,
@@ -65,6 +65,83 @@ def apply_standard_displacement(move_info, workspace, coordinates, component):
     move_component(workspace, offset, component_name)
 
 
+def set_selected_components_and_sample_holder_to_original_position(workspace, component_names):
+    # First get the original rotation and position of the unaltered instrument components. This information
+    # is stored in the base instrument
+    instrument = workspace.getInstrument()
+    base_instrument = instrument.getBaseInstrument()
+
+    # Get the original position and rotation
+    for component_name in component_names:
+        base_component = base_instrument.getComponentByName(component_name)
+        moved_component = base_instrument.getComponentByName(component_name)
+
+        base_position = base_component.getPos()
+        base_rotation = base_component.getRotation()
+
+        moved_position = moved_component.getPos()
+        moved_rotation = moved_component.getRotation()
+
+        move_alg = None
+        if base_position != moved_position:
+            if move_alg is None:
+                move_alg_name = "MoveInstrumentComponent"
+                move_alg_options = {"Workspace": workspace,
+                                    "RelativePosition": False,
+                                    "ComponentName": component_name,
+                                    "X": base_position[0],
+                                    "Y": base_position[1],
+                                    "Z": base_position[2]}
+                move_alg = create_unmanaged_algorithm(move_alg_name, **move_alg_options)
+            else:
+                move_alg.setProperty("ComponentName", component_name)
+                move_alg.setProperty("X", base_position[0])
+                move_alg.setProperty("Y", base_position[1])
+                move_alg.setProperty("Z", base_position[2])
+            move_alg.excute()
+
+        rot_alg = None
+        if base_rotation != moved_rotation:
+            angle, axis = quaternion_to_angle_and_axis(base_rotation)
+            if rot_alg is None:
+                rot_alg_name = "RotateInstrumentComponent"
+                rot_alg_options = {"Workspace": workspace,
+                                   "RelativePosition": False,
+                                   "ComponentName": component_name,
+                                   "X": axis[0],
+                                   "Y": axis[1],
+                                   "Z": axis[2],
+                                   "Angle": angle}
+                rot_alg = create_unmanaged_algorithm(rot_alg_name, **rot_alg_options)
+            else:
+                rot_alg.setProperty("ComponentName", component_name)
+                rot_alg.setProperty("X", axis[0])
+                rot_alg.setProperty("Y", axis[1])
+                rot_alg.setProperty("Z", axis[2])
+                rot_alg.setProperty("Angle", angle)
+            rot_alg.execute()
+
+
+def set_components_to_original_for_isis(move_info, workspace, component):
+    """
+    This function resets the components for ISIS instruments. These are normally HAB, LAB, the monitors and
+    the sample holder
+    """
+    # We reset the HAB, the LAB, the sample holder and monitor 4
+    if component is None:
+        hab_name = move_info.detectors[SANSConstants.high_angle_bank].detector_name
+        lab_name = move_info.detectors[SANSConstants.low_angle_bank].detector_name
+        component_names = move_info.monitor_names.keys()
+        component_names.append(hab_name)
+        component_names.append(lab_name)
+    else:
+        component_names = [component]
+
+    # We also want to check the sample holder
+    component_names.append("some-sample-holder")
+    set_selected_components_and_sample_holder_to_original_position(workspace, component_names)
+
+
 # -------------------------------------------------
 # Move classes
 # -------------------------------------------------
@@ -82,6 +159,10 @@ class SANSMove(object):
     def do_move_with_elementary_displacement(self, move_info, workspace, coordinates, component):
         pass
 
+    @abstractmethod
+    def do_set_to_zero(self, move_info, workspace, component):
+        pass
+
     @staticmethod
     @abstractmethod
     def is_correct(instrument_type, run_number, **kwargs):
@@ -95,10 +176,26 @@ class SANSMove(object):
         SANSMove._validate(move_info, workspace, coordinates, component)
         return self.do_move_initial(move_info, workspace, coordinates, component)
 
+    def set_to_zero(self, move_info, workspace, component):
+        SANSMove._validate_set_to_zero(move_info, workspace, component)
+        return self.do_set_to_zero(self, move_info, workspace, component)
+
     @staticmethod
     def _validate(move_info, workspace, coordinates, component):
         if not coordinates:
             raise ValueError("SANSMove: The provided coordinates cannot be empty.")
+        if not isinstance(workspace, MatrixWorkspace):
+            raise ValueError("SANSMove: The input workspace has to be a MatrixWorkspace")
+        if component is not None and component not in move_info.detectors:
+            raise ValueError("SANSMove: The component to be moved {} cannot be found in the"
+                             " state information of type {}".format(str(component), str(type(move_info))))
+        if not isinstance(move_info, SANSStateMove):
+            raise ValueError("SANSMove: The provided state information is of the wrong type. It must be"
+                             " of type SANSStateMove, but was {}".format(str(type(move_info))))
+        move_info.validate()
+
+    @staticmethod
+    def _validate_set_to_zero(move_info, workspace, component):
         if not isinstance(workspace, MatrixWorkspace):
             raise ValueError("SANSMove: The input workspace has to be a MatrixWorkspace")
         if component is not None and component not in move_info.detectors:
@@ -276,6 +373,9 @@ class SANSMoveSANS2D(SANSMove):
         coordinates_to_move = [-coordinates[0], -coordinates[1]]
         apply_standard_displacement(move_info, workspace, coordinates_to_move, component)
 
+    def do_set_to_zero(self, move_info, workspace, component):
+        set_components_to_original_for_isis(move_info, workspace, component)
+
     @staticmethod
     def is_correct(instrument_type, run_number, **kwargs):
         return True if instrument_type is SANSInstrument.SANS2D else False
@@ -318,6 +418,9 @@ class SANSMoveLOQ(SANSMove):
         coordinates_to_move = [-coordinates[0], -coordinates[1]]
         apply_standard_displacement(move_info, workspace, coordinates_to_move, component)
 
+    def do_set_to_zero(self, move_info, workspace, component):
+        set_components_to_original_for_isis(move_info, workspace, component)
+
     @staticmethod
     def is_correct(instrument_type, run_number, **kwargs):
         return True if instrument_type is SANSInstrument.LOQ else False
@@ -358,6 +461,9 @@ class SANSMoveLARMOROldStyle(SANSMove):
         x_shift = -coordinates[0]
         coordinates_for_only_x = [x_shift, 0.0]
         apply_standard_displacement(move_info, workspace, coordinates_for_only_x, component)
+
+    def do_set_to_zero(self, move_info, workspace, component):
+        set_components_to_original_for_isis(move_info, workspace, component)
 
     @staticmethod
     def is_correct(instrument_type, run_number, **kwargs):
@@ -418,6 +524,9 @@ class SANSMoveLARMORNewStyle(SANSMove):
         # Shift component along the x direction; not that we don't want to perform a bench rotation again
         angle = coordinates[0]
         self._rotate_around_y_axis(move_info, workspace, angle, component, 0.0)
+
+    def do_set_to_zero(self, move_info, workspace, component):
+        set_components_to_original_for_isis(move_info, workspace, component)
 
     @staticmethod
     def is_correct(instrument_type, run_number, **kwargs):

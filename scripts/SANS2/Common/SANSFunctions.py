@@ -1,6 +1,6 @@
+from math import (acos, sqrt, degrees)
 from mantid.api import AlgorithmManager
-from mantid.kernel import DateAndTime
-
+from mantid.kernel import (DateAndTime)
 
 # -------------------------------------------
 # Free functions
@@ -63,3 +63,26 @@ def create_unmanaged_algorithm(name, **kwargs):
     for key, value in kwargs.iteritems():
         alg.setProperty(key, value)
     return alg
+
+
+def quaternion_to_angle_and_axis(quaternion):
+    """
+    Converts a quaterion to an angle + an axis
+
+    The conversion from a quaternion to an angle + axis is explained here:
+    http://www.euclideanspace.com/maths/geometry/rotations/conversions/quaternionToAngle/
+    """
+    angle = 2*acos(quaternion[0])
+    s_parameter = sqrt(1 - quaternion[0]*quaternion[0])
+
+    axis = []
+    # If the the angle is zero, then it does not make sense to have an axis
+    if s_parameter < 1e-8:
+        axis.append(quaternion[1])
+        axis.append(quaternion[2])
+        axis.append(quaternion[3])
+    else:
+        axis.append(quaternion[1]/s_parameter)
+        axis.append(quaternion[2]/s_parameter)
+        axis.append(quaternion[3]/s_parameter)
+    return degrees(angle), axis
