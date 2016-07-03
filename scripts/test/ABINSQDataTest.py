@@ -32,7 +32,7 @@ class ABINSQvectorsTEST(unittest.TestCase):
         # wrong items to set: two dimensional array of floats is expected
         with self.assertRaises(ValueError):
             poor_Q = QData(q_format="vectors")
-            poor_Q.set(items=np.asarray([[1.0,3.0]])) # this should a 2D array
+            poor_Q.set(items=np.asarray([[1.0,3.0]])) # this should be  2D array
 
         # wrong items to set: two dimensional array of floats is expected
         with self.assertRaises(ValueError):

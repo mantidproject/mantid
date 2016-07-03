@@ -1,5 +1,6 @@
 from GeneralData import GeneralData
 import numpy as np
+import Constants
 
 class AbinsData(GeneralData):
     """
@@ -38,7 +39,7 @@ class AbinsData(GeneralData):
 
         if isinstance(num_atoms, int) and num_atoms>0:
             self._num_freq = 3 * num_atoms # number of phonons for one k-point
-            self._num_displacements = self._num_freq * num_atoms * 3 # number of displacements for one k-point
+            self._num_displacements = self._num_freq * num_atoms * 3 # number of displacements coordinates for one k-point
         else:
             raise ValueError("Invalid number of atoms.")
 
@@ -52,8 +53,7 @@ class AbinsData(GeneralData):
         if not isinstance(item, dict):
             raise ValueError("Each element of AbinsData should be a dictionary.")
 
-        all_keywords = ["weight", "value", "frequencies", "atomic_displacements"]
-        if not sorted(item.keys()) == sorted(all_keywords):
+        if not sorted(item.keys()) == sorted(Constants.all_keywords_abins_data):
             raise ValueError("Invalid structure of the dictionary to be added.")
 
         weight = item["weight"]
@@ -66,13 +66,13 @@ class AbinsData(GeneralData):
         if value.shape[0] != 3:
             raise ValueError("Value of k-point should be an numpy array with three float elements.")
         if not all([isinstance(value[el], float) for el in range(value.shape[0])]):
-            raise ValueError("All coordinates of each k-vector should be represented by a real number.")
+            raise ValueError("All coordinates of each k-vector should be represented by a real numbers.")
 
         freq = item["frequencies"]
         if not isinstance(freq, np.ndarray):
             raise ValueError("Frequencies for the given k-point should have a form of a numpy array.")
         if len(freq.shape) != 1:
-            raise ValueError("Frequencies for the given k-point should have a form of one dimentional a numpy array.")
+            raise ValueError("Frequencies for the given k-point should have a form of one dimentional numpy array.")
 
         if freq.size != self._num_freq:
             raise ValueError("Incorrect number of frequencies.")
