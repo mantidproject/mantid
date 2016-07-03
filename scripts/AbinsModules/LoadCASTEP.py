@@ -61,6 +61,8 @@ class LoadCASTEP(GeneralDFTProgram):
                 self._num_ions = int(line.strip().split()[-1])
             elif 'Number of branches' in line:
                 self._num_branches = int(line.strip().split()[-1])
+            elif 'Number of wavevectors' in line:
+                self._num_k =  int(line.strip().split()[-1])
             elif 'Unit cell vectors' in line:
                 file_data['unit_cell'] = self._parse_phonon_unit_cell_vectors(f_handle)
             elif 'Fractional Co-ordinates' in line:

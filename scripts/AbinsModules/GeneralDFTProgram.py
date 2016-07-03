@@ -14,6 +14,8 @@ class GeneralDFTProgram(IOmodule):
         self._filename = input_DFT_filename # name of a filename with the phonon data (for example CASTEP: foo.phonon;
                                             # filename can include path to the file as well)
 
+        self._num_k = None
+
 
     def readPhononFile(self):
         """
@@ -166,7 +168,7 @@ class GeneralDFTProgram(IOmodule):
         @param data: dictionary with the data to rearrange
         @return: Returns an object of type ABINSData
         """
-        _num_k_points = data["k_vectors"].shape[0]
+        _num_k_points = self._num_k
 
         # here we multiply by _num_k_points because data["frequencies"] is one dimensional numpy array which stores frequencies for all k-points
         _number_of_atoms = int(float(data["atomic_displacements"].shape[1])/data["frequencies"].shape[0] * _num_k_points)
