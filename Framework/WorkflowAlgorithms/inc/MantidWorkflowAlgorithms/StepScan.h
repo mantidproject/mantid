@@ -36,9 +36,6 @@ namespace WorkflowAlgorithms {
 */
 class DLLExport StepScan : public API::Algorithm {
 public:
-  StepScan();
-  ~StepScan() override;
-
   const std::string name() const override;
   /// Summary of algorithms purpose
   const std::string summary() const override {

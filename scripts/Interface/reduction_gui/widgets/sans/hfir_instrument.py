@@ -1,4 +1,4 @@
-#pylint: disable=invalid-name,protected-access
+# pylint: disable=invalid-name,protected-access
 from PyQt4 import QtGui, QtCore
 import reduction_gui.widgets.util as util
 import os
@@ -18,7 +18,7 @@ class SANSInstrumentWidget(BaseWidget):
     """
         Widget that present instrument details to the user
     """
-    ## Widget name
+    # # Widget name
     name = "Reduction Options"
 
     # Place holder for data read from file
@@ -77,19 +77,19 @@ class SANSInstrumentWidget(BaseWidget):
             if not self._summary.sample_dist_chk.isChecked():
                 self._summary.sample_dist_edit.setText(str(value))
                 util._check_and_get_float_line_edit(self._summary.sample_dist_edit, min=0.0)
-        
+
         if key == "sample_detector_distance_offset":
             self._sample_detector_distance_offset = value
             if not self._summary.detector_offset_chk.isChecked():
                 self._summary.detector_offset_edit.setText(str(value))
-                util._check_and_get_float_line_edit(self._summary.detector_offset_edit, min=0.0)
-        
+                util._check_and_get_float_line_edit(self._summary.detector_offset_edit, min=-0.0000001)
+
         if key == "sample_si_window_distance":
             self._sample_si_window_distance = value
             if not self._summary.sample_si_dist_chk.isChecked():
                 self._summary.sample_si_dist_edit.setText(str(value))
-                util._check_and_get_float_line_edit(self._summary.sample_si_dist_edit, min=0.0)
-        
+                util._check_and_get_float_line_edit(self._summary.sample_si_dist_edit, min=-0.0000001)
+
         elif key == "wavelength":
             self._wavelength = value
             if not self._summary.wavelength_chk.isChecked():
@@ -183,7 +183,11 @@ class SANSInstrumentWidget(BaseWidget):
     def _mask_plot_clicked(self):
         ws_name = os.path.basename(str(self._summary.mask_edit.text()))
         self.mask_ws = "__mask_%s" % ws_name
-        self.show_instrument(self._summary.mask_edit.text, workspace=self.mask_ws, tab=2, reload=self.mask_reload, mask=self._masked_detectors)
+        self.show_instrument(self._summary.mask_edit.text,
+                             workspace=self.mask_ws,
+                             tab=2,
+                             reload=self.mask_reload,
+                             mask=self._masked_detectors)
         self._masked_detectors = []
         self.mask_reload = False
 
@@ -270,10 +274,10 @@ class SANSInstrumentWidget(BaseWidget):
 #             print '_sample_si_dist_clicked ->', not is_checked
 #             self._summary.sample_si_dist_chk.setChecked(not is_checked)
 #             self._summary.sample_si_dist_edit.setEnabled(not is_checked)
-        
+
     def _total_dist_clicked(self, is_checked):
         self._summary.total_detector_distance_edit.setEnabled(is_checked)
-# 
+#
 #         if is_checked:
 #             self._summary.total_detector_distance_chk.setChecked(not is_checked)
 #             self._summary.total_detector_distance_edit.setEnabled(not is_checked)
@@ -320,11 +324,11 @@ class SANSInstrumentWidget(BaseWidget):
             Populate the UI elements with the data from the given state.
             @param state: InstrumentDescription object
         """
-                
+
         self._summary.instr_name_label.setText(state.instrument_name)
-        #npixels = "%d x %d" % (state.nx_pixels, state.ny_pixels)
-        #self._summary.n_pixel_label.setText(QtCore.QString(npixels))
-        #self._summary.pixel_size_label.setText(QtCore.QString(str(state.pixel_size)))
+        # npixels = "%d x %d" % (state.nx_pixels, state.ny_pixels)
+        # self._summary.n_pixel_label.setText(QtCore.QString(npixels))
+        # self._summary.pixel_size_label.setText(QtCore.QString(str(state.pixel_size)))
 
         # Absolute scaling
         self._summary.scale_chk.setChecked(state.calculate_scale)
@@ -347,21 +351,21 @@ class SANSInstrumentWidget(BaseWidget):
 #                             state.detector_offset,
 #                             self._summary.detector_offset_chk,
 #                             self._summary.detector_offset_edit)
-# 
+#
 #         # Sample-detector distance
 #         self._prepare_field(state.sample_detector_distance != 0,
 #                             state.sample_detector_distance,
 #                             self._summary.sample_dist_chk,
 #                             self._summary.sample_dist_edit)
-#         
+#
         util._check_and_get_float_line_edit(self._summary.sample_dist_edit, min=0)
-        util._check_and_get_float_line_edit(self._summary.sample_si_dist_edit, min=0)
-        util._check_and_get_float_line_edit(self._summary.detector_offset_edit, min=0)
+        util._check_and_get_float_line_edit(self._summary.sample_si_dist_edit, min=-0.0001)
+        util._check_and_get_float_line_edit(self._summary.detector_offset_edit, min=-0.0001)
         util._check_and_get_float_line_edit(self._summary.total_detector_distance_edit, min=0)
 #         if self._sample_detector_distance is None:
 #             self._sample_detector_distance = state.sample_detector_distance
 #         self._sample_detector_distance_supplied = self._summary.sample_dist_chk.isChecked()
-# 
+#
 #         # Sample-detector distance takes precedence over offset if both are non-zero
 #         self._sample_dist_clicked(self._summary.sample_dist_chk.isChecked())
 
@@ -421,7 +425,7 @@ class SANSInstrumentWidget(BaseWidget):
             self._summary.mask_side_none_radio.setChecked(True)
 
     def _prepare_field(self, is_enabled, stored_value, chk_widget, edit_widget, suppl_value=None, suppl_edit=None):
-        #to_display = str(stored_value) if is_enabled else ''
+        # to_display = str(stored_value) if is_enabled else ''
         edit_widget.setEnabled(is_enabled)
         chk_widget.setChecked(is_enabled)
         edit_widget.setText(str(stored_value))
@@ -433,7 +437,7 @@ class SANSInstrumentWidget(BaseWidget):
         """
             Returns an object with the state of the interface
         """
-        
+
         m = ReductionOptions()
 
         m.instrument_name = self._summary.instr_name_label.text()
@@ -459,14 +463,14 @@ class SANSInstrumentWidget(BaseWidget):
 #             # Sample-Si-window
 #             if self._summary.sample_si_dist_chk.isChecked():
 #                 m.sample_si_window_distance = util._check_and_get_float_line_edit(self._summary.sample_si_dist_edit)
-        
+
         # Workaround:
         # Offset is not used
         # The detector_distanc will be used as sample_total_distance
         m.sample_detector_distance = util._check_and_get_float_line_edit(self._summary.total_detector_distance_edit)
         m.detector_offset = 0
-        
-        
+
+
         # Wavelength value
         wavelength = util._check_and_get_float_line_edit(self._summary.wavelength_edit, min=0.0)
         if self._summary.wavelength_chk.isChecked():

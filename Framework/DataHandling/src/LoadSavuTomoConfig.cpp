@@ -16,10 +16,6 @@ DECLARE_ALGORITHM(LoadSavuTomoConfig)
 
 using namespace Mantid::API;
 
-LoadSavuTomoConfig::LoadSavuTomoConfig() {}
-
-LoadSavuTomoConfig::~LoadSavuTomoConfig() {}
-
 /**
  * Standard Initialisation method. Declares properties.
  */

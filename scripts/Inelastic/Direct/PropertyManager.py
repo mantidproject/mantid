@@ -511,7 +511,7 @@ class PropertyManager(NonIDF_Properties):
             all_changes = old_changes_list.union(new_changes_list)
             self.setChangedProperties(all_changes)
 
-        n=funcreturns.lhs_info('nreturns')
+        n=funcinspect.lhs_info('nreturns')
         if n>0:
             return all_changes
         else:

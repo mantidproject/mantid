@@ -32,9 +32,6 @@ namespace DataHandling {
 */
 class DLLExport SortTableWorkspace : public API::Algorithm {
 public:
-  SortTableWorkspace();
-  ~SortTableWorkspace() override;
-
   const std::string name() const override { return "SortTableWorkspace"; }
   int version() const override;
   const std::string category() const override;

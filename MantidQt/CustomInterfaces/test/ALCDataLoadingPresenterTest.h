@@ -4,8 +4,9 @@
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 
-#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidKernel/WarningSuppressions.h"
 
 #include "MantidQtCustomInterfaces/Muon/IALCDataLoadingView.h"
 #include "MantidQtCustomInterfaces/Muon/ALCDataLoadingPresenter.h"
@@ -23,6 +24,8 @@ operator<<(std::basic_ostream<CharType, CharTrait> &out,
   return out;
 }
 }
+
+GCC_DIAG_OFF_SUGGEST_OVERRIDE
 
 class MockALCDataLoadingView : public IALCDataLoadingView {
   // XXX: A workaround, needed because of the way the comma is treated in a
@@ -64,6 +67,8 @@ public:
   void requestLoading() { emit loadRequested(); }
   void selectFirstRun() { emit firstRunSelected(); }
 };
+
+GCC_DIAG_ON_SUGGEST_OVERRIDE
 
 MATCHER_P3(QwtDataX, i, value, delta, "") {
   return fabs(arg.x(i) - value) < delta;

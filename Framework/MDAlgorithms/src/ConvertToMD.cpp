@@ -111,9 +111,6 @@ void ConvertToMD::init() {
                   "demand in order to reduce memory use.");
 }
 //----------------------------------------------------------------------------------------------
-/** Destructor
-*/
-ConvertToMD::~ConvertToMD() {}
 
 const std::string ConvertToMD::name() const { return "ConvertToMD"; }
 
@@ -378,8 +375,6 @@ void ConvertToMD::copyMetaData(API::IMDEventWorkspace_sptr &mdEventWS) const {
   }
 }
 
-/** Constructor */
-ConvertToMD::ConvertToMD() {}
 /** handle the input parameters and build target workspace description as
 function of input parameters
 * @param spws shared pointer to target MD workspace (just created or already

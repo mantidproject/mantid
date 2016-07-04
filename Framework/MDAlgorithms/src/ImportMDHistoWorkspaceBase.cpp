@@ -30,16 +30,6 @@ struct Product : public std::unary_function<size_t, void> {
 };
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-ImportMDHistoWorkspaceBase::ImportMDHistoWorkspaceBase() : m_bin_product(0) {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-ImportMDHistoWorkspaceBase::~ImportMDHistoWorkspaceBase() {}
-
-//----------------------------------------------------------------------------------------------
 /** Initalise generic importing properties.
  */
 void ImportMDHistoWorkspaceBase::initGenericImportProps() {

@@ -16,16 +16,6 @@ using namespace Mantid::API;
 namespace Mantid {
 namespace LiveData {
 
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-LiveDataAlgorithm::LiveDataAlgorithm() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-LiveDataAlgorithm::~LiveDataAlgorithm() {}
-
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string LiveDataAlgorithm::category() const {
   return "DataHandling\\LiveData";

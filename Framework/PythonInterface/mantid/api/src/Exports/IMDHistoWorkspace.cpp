@@ -32,8 +32,8 @@ PyObject *WrapReadOnlyNumpyFArray(Mantid::signal_t *arr,
   PyArray_CLEARFLAGS(nparray, NPY_ARRAY_WRITEABLE);
 #else
   PyArrayObject *nparray = (PyArrayObject *)PyArray_New(
-      &PyArray_Type, static_cast<int>(dims.size()), &dims[0], datatype, NULL,
-      static_cast<void *>(const_cast<double *>(arr)), 0, NPY_FARRAY, NULL);
+      &PyArray_Type, static_cast<int>(dims.size()), &dims[0], datatype, nullptr,
+      static_cast<void *>(const_cast<double *>(arr)), 0, NPY_FARRAY, nullptr);
   nparray->flags &= ~NPY_WRITEABLE;
 #endif
   return reinterpret_cast<PyObject *>(nparray);

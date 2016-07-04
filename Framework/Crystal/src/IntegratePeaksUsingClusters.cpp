@@ -27,16 +27,6 @@ namespace Crystal {
 DECLARE_ALGORITHM(IntegratePeaksUsingClusters)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-IntegratePeaksUsingClusters::IntegratePeaksUsingClusters() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-IntegratePeaksUsingClusters::~IntegratePeaksUsingClusters() {}
-
-//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string IntegratePeaksUsingClusters::name() const {
   return "IntegratePeaksUsingClusters";

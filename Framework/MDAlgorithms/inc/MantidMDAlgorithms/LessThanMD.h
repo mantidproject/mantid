@@ -35,9 +35,6 @@ namespace MDAlgorithms {
 */
 class DLLExport LessThanMD : public BooleanBinaryOperationMD {
 public:
-  LessThanMD();
-  ~LessThanMD() override;
-
   const std::string name() const override;
   int version() const override;
 

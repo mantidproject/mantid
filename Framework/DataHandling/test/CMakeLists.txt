@@ -14,6 +14,7 @@ if ( CXXTEST_FOUND )
       )
 
   cxxtest_add_test ( DataHandlingTest ${TEST_FILES} )
+  target_include_directories( DataHandlingTest SYSTEM PRIVATE ${HDF5_INCLUDE_DIRS} )
   target_link_libraries( DataHandlingTest LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} 
             API
             DataHandling

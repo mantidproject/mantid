@@ -5,16 +5,14 @@ namespace MantidWidgets {
 
 /** Constructor
  * @param name : The name of the pre-processing algorithm
- * @param prefix : The prefix that will added to the output workspace name
+ * @param prefix : A prefix that will added to the output workspace name
  * @param blacklist : The list of properties we don't want to show
- * @param show : Whether or not to show the prefix of this pre-processing
  * algorithm in the processed workspace's name
  */
 DataProcessorPreprocessingAlgorithm::DataProcessorPreprocessingAlgorithm(
     const std::string &name, const std::string &prefix,
-    const std::set<std::string> &blacklist, bool show)
-    : DataProcessorProcessingAlgorithmBase(name, blacklist), m_prefix(prefix),
-      m_show(show) {
+    const std::set<std::string> &blacklist)
+    : DataProcessorProcessingAlgorithmBase(name, blacklist), m_prefix(prefix) {
 
   auto inputWsProperties = getInputWsProperties();
 
@@ -36,12 +34,10 @@ DataProcessorPreprocessingAlgorithm::DataProcessorPreprocessingAlgorithm(
   m_outProperty = outputWsProperties.at(0);
 }
 
-/** Default constructor: use 'Plus' as the default pre-processor algorithm
+/** Default constructor: do nothing
 */
 DataProcessorPreprocessingAlgorithm::DataProcessorPreprocessingAlgorithm()
-    : DataProcessorPreprocessingAlgorithm(
-          "Plus", "TOF_", std::set<std::string>{"LHSWorkspace", "RHSWorkspace",
-                                                "OutputWorkspace"}) {}
+    : m_prefix(), m_lhs(), m_rhs(), m_outProperty() {}
 
 // Destructor
 DataProcessorPreprocessingAlgorithm::~DataProcessorPreprocessingAlgorithm() {}
@@ -65,9 +61,5 @@ std::string DataProcessorPreprocessingAlgorithm::outputProperty() const {
 std::string DataProcessorPreprocessingAlgorithm::prefix() const {
   return m_prefix;
 }
-
-// Returns a boolean indicating whether or not we want to add the prefix
-// associated to this pre-processor to the output workspace name
-bool DataProcessorPreprocessingAlgorithm::show() const { return m_show; }
 }
 }

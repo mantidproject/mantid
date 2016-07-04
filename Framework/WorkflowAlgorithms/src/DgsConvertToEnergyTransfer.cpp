@@ -31,16 +31,6 @@ namespace WorkflowAlgorithms {
 DECLARE_ALGORITHM(DgsConvertToEnergyTransfer)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-DgsConvertToEnergyTransfer::DgsConvertToEnergyTransfer() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-DgsConvertToEnergyTransfer::~DgsConvertToEnergyTransfer() {}
-
-//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string DgsConvertToEnergyTransfer::name() const {
   return "DgsConvertToEnergyTransfer";

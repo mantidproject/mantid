@@ -27,16 +27,6 @@ using namespace Mantid::DataObjects;
 DECLARE_ALGORITHM(CreateMDWorkspace)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-CreateMDWorkspace::CreateMDWorkspace() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-CreateMDWorkspace::~CreateMDWorkspace() {}
-
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void CreateMDWorkspace::init() {

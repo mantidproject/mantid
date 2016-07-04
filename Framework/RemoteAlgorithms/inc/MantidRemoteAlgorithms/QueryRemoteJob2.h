@@ -32,10 +32,6 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class DLLExport QueryRemoteJob2 : public Mantid::API::Algorithm {
 public:
-  /// (Empty) Constructor
-  QueryRemoteJob2() : Mantid::API::Algorithm() {}
-  /// Virtual destructor
-  ~QueryRemoteJob2() override {}
   /// Algorithm's name
   const std::string name() const override { return "QueryRemoteJob"; }
   /// Summary of algorithms purpose

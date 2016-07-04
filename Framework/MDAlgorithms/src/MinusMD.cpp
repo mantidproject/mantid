@@ -16,16 +16,6 @@ namespace MDAlgorithms {
 DECLARE_ALGORITHM(MinusMD)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-MinusMD::MinusMD() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-MinusMD::~MinusMD() {}
-
-//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string MinusMD::name() const { return "MinusMD"; }
 
