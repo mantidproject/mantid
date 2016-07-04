@@ -142,14 +142,19 @@ class TestGammaAndMsCorrectWorkspaceIndexOne(stresstesting.MantidStressTest):
         # Test Corrections Workspaces
         corrections_wsg = self._algorithm.getProperty("CorrectionWorkspaces").value
         _validate_group_structure(self, corrections_wsg, 3)
-        corrections_gb_peak = 0.0126756398636
+        corrections_gb_peak = 0.012675639864
         corrections_ts_peak = 0.161125285346
-        corrections_ms_peak = 0.000170937010003
+        corrections_ms_peak = 0.000170937010
+        corrections_ts_bin = 724
+        corrections_ms_bin = 721
         if _is_old_boost_version():
-            corrections_ms_peak = 0.000233662993153
-        _validate_matrix_peak_height(self, corrections_wsg.getItem(0), corrections_gb_peak)
-        _validate_matrix_peak_height(self, corrections_wsg.getItem(1), corrections_ts_peak)
-        _validate_matrix_peak_height(self, corrections_wsg.getItem(2), corrections_ms_peak)
+            corrections_ms_peak = 0.000233662993
+            corrections_ts_bin = 722
+            corrections_ms_bin = 367
+
+        _validate_matrix_peak_height(self, corrections_wsg.getItem(0), corrections_gb_peak, 623)
+        _validate_matrix_peak_height(self, corrections_wsg.getItem(1), corrections_ts_peak, corrections_ts_bin)
+        _validate_matrix_peak_height(self, corrections_wsg.getItem(2), corrections_ms_peak, corrections_ms_bin)
 
 
         # Test Corrected Workspaces
@@ -158,15 +163,15 @@ class TestGammaAndMsCorrectWorkspaceIndexOne(stresstesting.MantidStressTest):
         corrected_gb_peak = 0.636547077684
         corrected_ts_peak = 0.587870515272
         corrected_ms_peak = 0.626612845598
-        _validate_matrix_peak_height(self, corrected_wsg.getItem(0), corrected_gb_peak)
-        _validate_matrix_peak_height(self, corrected_wsg.getItem(1), corrected_ts_peak)
-        _validate_matrix_peak_height(self, corrected_wsg.getItem(2), corrected_ms_peak)
+        _validate_matrix_peak_height(self, corrected_wsg.getItem(0), corrected_gb_peak, 325)
+        _validate_matrix_peak_height(self, corrected_wsg.getItem(1), corrected_ts_peak, 220)
+        _validate_matrix_peak_height(self, corrected_wsg.getItem(2), corrected_ms_peak, 325)
 
         # Test OutputWorkspace
         output_ws = self._algorithm.getProperty("OutputWorkspace").value
         _validate_matrix_structure(self, output_ws, 1, self._input_bins)
         output_expected_peak = 0.636436654367
-        _validate_matrix_peak_height(self, output_ws, output_expected_peak)
+        _validate_matrix_peak_height(self, output_ws, output_expected_peak, 325)
 
         # Test Linear fit Result Workspace
         linear_params = self._algorithm.getProperty("LinearFitResult").value
@@ -203,12 +208,14 @@ class TestGammaAndMsCorrectWorkspaceIndexTwo(stresstesting.MantidStressTest):
         corrections_gb_peak = 0.0106977817681
         corrections_ts_peak = 0.159340707436
         corrections_ms_peak = 0.000226355717662
+        correction_ms_bin = 46
         if _is_old_boost_version():
             corrections_ms_peak = 0.000219113428752
+            correction_ms_bin = 717
 
-        _validate_matrix_peak_height(self, corrections_wsg.getItem(0), corrections_gb_peak)
-        _validate_matrix_peak_height(self, corrections_wsg.getItem(1), corrections_ts_peak)
-        _validate_matrix_peak_height(self, corrections_wsg.getItem(2), corrections_ms_peak)
+        _validate_matrix_peak_height(self, corrections_wsg.getItem(0), corrections_gb_peak, 625)
+        _validate_matrix_peak_height(self, corrections_wsg.getItem(1), corrections_ts_peak, 724)
+        _validate_matrix_peak_height(self, corrections_wsg.getItem(2), corrections_ms_peak, correction_ms_bin)
 
         # Test Corrected Workspaces
         corrected_wsg = self._algorithm.getProperty("CorrectedWorkspaces").value
@@ -217,15 +224,15 @@ class TestGammaAndMsCorrectWorkspaceIndexTwo(stresstesting.MantidStressTest):
         corrected_ts_peak = 0.650023356109
         corrected_ms_peak = 0.702029231969
 
-        _validate_matrix_peak_height(self, corrected_wsg.getItem(0), corrected_gb_peak)
-        _validate_matrix_peak_height(self, corrected_wsg.getItem(1), corrected_ts_peak)
-        _validate_matrix_peak_height(self, corrected_wsg.getItem(2), corrected_ms_peak)
+        _validate_matrix_peak_height(self, corrected_wsg.getItem(0), corrected_gb_peak, 324)
+        _validate_matrix_peak_height(self, corrected_wsg.getItem(1), corrected_ts_peak, 324)
+        _validate_matrix_peak_height(self, corrected_wsg.getItem(2), corrected_ms_peak, 324)
 
         # Test OutputWorkspace
         output_ws = self._algorithm.getProperty("OutputWorkspace").value
         _validate_matrix_structure(self, output_ws, 1, self._input_bins)
         output_expected_peak = 0.710897137455
-        _validate_matrix_peak_height(self, output_ws, output_expected_peak)
+        _validate_matrix_peak_height(self, output_ws, output_expected_peak, 324)
 
         # Test Linear fit Result Workspace
         linear_params = self._algorithm.getProperty("LinearFitResult").value
@@ -255,17 +262,48 @@ class TestMsCorrectWithContainer(stresstesting.MantidStressTest):
     def validate(self):
         self.assertTrue(self._algorithm.isExecuted())
 
+        # Test Corrections Workspaces
         corrections_wsg = self._algorithm.getProperty("CorrectionWorkspaces").value
         _validate_group_structure(self, corrections_wsg, 3)
+        corrections_gb_peak = 0.027110661758
+        corrections_ts_peak = 0.139480812485
+        corrections_ms_peak = 0.000147974497
+        corrections_ts_bin = 724
+        corrections_ms_bin = 721
+        if _is_old_boost_version():
+            corrections_ms_peak = 0.000202286455
+            corrections_ts_bin = 722
+            corrections_ms_bin = 367
 
+        _validate_matrix_peak_height(self, corrections_wsg.getItem(0), corrections_gb_peak, 3)
+        _validate_matrix_peak_height(self, corrections_wsg.getItem(1), corrections_ts_peak, corrections_ts_bin)
+        _validate_matrix_peak_height(self, corrections_wsg.getItem(2), corrections_ms_peak, corrections_ms_bin)
+
+
+        # Test Corrected Workspaces
         corrected_wsg = self._algorithm.getProperty("CorrectedWorkspaces").value
         _validate_group_structure(self, corrected_wsg, 3)
+        corrected_gb_peak = 0.62177067421
+        corrected_ts_peak = 0.58934599577
+        corrected_ms_peak = 0.62662767911
 
+        _validate_matrix_peak_height(self, corrected_wsg.getItem(0), corrected_gb_peak, 325)
+        _validate_matrix_peak_height(self, corrected_wsg.getItem(1), corrected_ts_peak, 220)
+        _validate_matrix_peak_height(self, corrected_wsg.getItem(2), corrected_ms_peak, 325)
+
+
+        # Test OutputWorkspace
         output_ws = self._algorithm.getProperty("OutputWorkspace").value
         _validate_matrix_structure(self, output_ws, 1, self._input_bins)
+        output_expected_peak = 0.621675084409
+        _validate_matrix_peak_height(self, output_ws, output_expected_peak, 325)
 
+
+        # Test Linear fit Result Workspace
         linear_params = self._algorithm.getProperty("LinearFitResult").value
         _validate_table_workspace(self, linear_params, 7, 3)
+        expected_values = [0.059489604022, 0.0, 1.0, 11.684536881, 0.0, 1.0, 3.16837831189]
+        _validate_table_values_top_to_bottom(self, linear_params, expected_values)
         tearDown()
 
 
@@ -287,17 +325,45 @@ class TestGammaAndMsCorrectWithContainer(stresstesting.MantidStressTest):
         self._algorithm.execute()
         self.assertTrue(self._algorithm.isExecuted())
 
+        # Test Corrections Workspaces
         corrections_wsg = self._algorithm.getProperty("CorrectionWorkspaces").value
         _validate_group_structure(self, corrections_wsg, 4)
+        corrections_gb_peak = 0.0247790033028
+        corrections_ts_peak = 0.0123013465718
+        corrections_ms_peak = 0.151014049848
+        corrections_ms_bin = 724
+        if _is_old_boost_version():
+            corrections_ms_bin = 722
 
+        _validate_matrix_peak_height(self, corrections_wsg.getItem(0), corrections_gb_peak, 3)
+        _validate_matrix_peak_height(self, corrections_wsg.getItem(1), corrections_ts_peak, 623)
+        _validate_matrix_peak_height(self, corrections_wsg.getItem(2), corrections_ms_peak, corrections_ms_bin)
+
+
+        # Test Corrected Workspaces
         corrected_wsg = self._algorithm.getProperty("CorrectedWorkspaces").value
         _validate_group_structure(self, corrected_wsg, 4)
+        corrected_gb_peak = 0.622196623212
+        corrected_ts_peak = 0.636256994835
+        corrected_ms_peak = 0.588559787352
 
+        _validate_matrix_peak_height(self, corrected_wsg.getItem(0), corrected_gb_peak, 325)
+        _validate_matrix_peak_height(self, corrected_wsg.getItem(1), corrected_ts_peak, 325)
+        _validate_matrix_peak_height(self, corrected_wsg.getItem(2), corrected_ms_peak, 220)
+
+
+        # Test OutputWorkspace
         output_ws = self._algorithm.getProperty("OutputWorkspace").value
         _validate_matrix_structure(self, output_ws, 1, self._input_bins)
+        output_expected_peak = 0.631626855306
+        _validate_matrix_peak_height(self, output_ws, output_expected_peak, 325)
 
+
+        # Test Linear fit Result Workspace
         linear_params = self._algorithm.getProperty("LinearFitResult").value
         _validate_table_workspace(self, linear_params, 10, 3)
+        expected_values = [0.0543731874834, 0.0, 1.0, 1.55311412227, 0.0, 1.0, 12.6506951283]
+        _validate_table_values_top_to_bottom(self, linear_params, expected_values)
         tearDown()
 
 
@@ -323,18 +389,43 @@ class TestGammaAndMsCorrectWithContainerFixedScaling(stresstesting.MantidStressT
     def validate(self):
         self.assertTrue(self._algorithm.isExecuted())
 
+        # Test Corrections Workspaces
         corrections_wsg = self._algorithm.getProperty("CorrectionWorkspaces").value
         _validate_group_structure(self, corrections_wsg, 4)
+        corrections_gb_peak = 0.045572099871
+        corrections_ts_peak = 0.001584087917
+        corrections_ms_peak = 0.133554640277
+        corrections_ms_bin = 724
+        if _is_old_boost_version():
+            corrections_ms_bin = 722
 
+        _validate_matrix_peak_height(self, corrections_wsg.getItem(0), corrections_gb_peak, 3)
+        _validate_matrix_peak_height(self, corrections_wsg.getItem(1), corrections_ts_peak, 623)
+        _validate_matrix_peak_height(self, corrections_wsg.getItem(2), corrections_ms_peak, corrections_ms_bin)
+
+
+        # Test Corrected Workspaces
         corrected_wsg = self._algorithm.getProperty("CorrectedWorkspaces").value
         _validate_group_structure(self, corrected_wsg, 4)
+        corrected_gb_peak = 0.618398125747
+        corrected_ts_peak = 0.627950960529
+        corrected_ms_peak = 0.589749976577
 
+        _validate_matrix_peak_height(self, corrected_wsg.getItem(0), corrected_gb_peak, 325)
+        _validate_matrix_peak_height(self, corrected_wsg.getItem(1), corrected_ts_peak, 325)
+        _validate_matrix_peak_height(self, corrected_wsg.getItem(2), corrected_ms_peak, 220)
+
+
+        # Test OutputWorkspace
         output_ws = self._algorithm.getProperty("OutputWorkspace").value
         _validate_matrix_structure(self, output_ws, 1, self._input_bins)
+        output_expected_peak = 0.619534288919
+        _validate_matrix_peak_height(self, output_ws, output_expected_peak, 325)
 
+
+        # Test Linear fit Result Workspace
         linear_params = self._algorithm.getProperty("LinearFitResult").value
         _validate_table_workspace(self, linear_params, 10, 3)
-
         expected_table_values = [0.1,0.0,1.0,0.2,0.0,1.0,'skip',0.0,1.0]
         _validate_table_values_top_to_bottom(self, linear_params, expected_table_values)
         tearDown()
@@ -435,18 +526,22 @@ def _validate_table_values_top_to_bottom(self, table_ws, expected_values, tolera
             abs_difference = abs(expected_values[i] - table_ws.cell(i,1))
             self.assertTrue(abs_difference <= abs(tolerance_value))
 
-def _validate_matrix_peak_height(self, matrix_ws, expected_height, ws_index=0, tolerance=0.05):
+def _validate_matrix_peak_height(self, matrix_ws, expected_height, expected_bin, ws_index=0, tolerance=0.05):
     """
     Checks that the heightest peak value is as expected
     matrix_ws       :: Workspace to validate
     expected_height :: Expected maximum y value (peak height)
+    expected_bin    :: Expected bin index of max y value
     ws_index        :: The Index to read from the workspace
+    tolerance       :: Percentage of allowed value offset
     """
     y_data = matrix_ws.readY(ws_index)
     peak_height = np.amax(y_data)
+    peak_bin = np.argmax(y_data)
     tolerance_value = expected_height * tolerance
     abs_difference = abs(expected_height - peak_height)
     self.assertTrue(abs_difference <= abs(tolerance_value))
+    self.assertTrue(abs(peak_bin - expected_bin) <= 1)
 
 
 if __name__ == "__main__":
