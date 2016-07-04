@@ -1,9 +1,9 @@
 import unittest
 import numpy as np
 from mantid.simpleapi import *
-from AbinsModules import AbinsData
+from AbinsModules import KpointsData
 
-class ABINSAbinsDataTest(unittest.TestCase):
+class KpointsDataTest(unittest.TestCase):
 
     _good_data= [{"value":np.asarray([0.2, 0.1, 0.2]),
                    "weight":0.3,
@@ -29,7 +29,7 @@ class ABINSAbinsDataTest(unittest.TestCase):
                   ]
 
     def setUp(self):
-        self.tester = AbinsData(num_k=3, num_atoms=2)
+        self.tester = KpointsData(num_k=3, num_atoms=2)
 
 
     # tests for append method
@@ -156,22 +156,22 @@ class ABINSAbinsDataTest(unittest.TestCase):
     # tests for constructor
     def test_constructor_assertions(self):
         with self.assertRaises(ValueError):
-            poor_tester = AbinsData(num_k=0.1, num_atoms=2)
+            poor_tester = KpointsData(num_k=0.1, num_atoms=2)
 
         with self.assertRaises(ValueError):
-            poor_tester = AbinsData(num_k=1, num_atoms=-2)
+            poor_tester = KpointsData(num_k=1, num_atoms=-2)
 
 
     #tests for extract method
     def test_wrong_k(self):
-        poor_tester = AbinsData(num_k=1, num_atoms=2)
+        poor_tester = KpointsData(num_k=1, num_atoms=2)
         poor_tester.set(items=self._good_data)
         with self.assertRaises(ValueError):
             poor_data = poor_tester.extract()
 
 
     def test_wrong_atoms(self):
-        poor_tester = AbinsData(num_k=3, num_atoms=4)
+        poor_tester = KpointsData(num_k=3, num_atoms=4)
         with self.assertRaises(ValueError):
             poor_tester.set(items=self._good_data)
 
