@@ -6,8 +6,6 @@
 #include "MantidCurveFitting/Functions/Keren.h"
 #include "MantidKernel/PhysicalConstants.h"
 
-#include <numeric>
-
 using Mantid::CurveFitting::Functions::Keren;
 
 namespace {
