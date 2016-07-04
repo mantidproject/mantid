@@ -688,14 +688,6 @@ bool IndirectDiffractionReduction::validateCalOnly() {
     m_uiForm.valRebinWidth_CalibOnly->setText("");
     m_uiForm.valRebinEnd_CalibOnly->setText("");
   } else {
-#define CHECK_VALID(text, validator)                                           \
-  if (text.isEmpty()) {                                                        \
-    rebinValid = false;                                                        \
-    validator->setText("*");                                                   \
-  } else {                                                                     \
-    rebinValid = true;                                                         \
-    validator->setText("");                                                    \
-  }
 
     CHECK_VALID(rebStartTxt, m_uiForm.valRebinStart_CalibOnly);
     CHECK_VALID(rebStepTxt, m_uiForm.valRebinWidth_CalibOnly);
