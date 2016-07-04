@@ -704,13 +704,11 @@ void EventWorkspace::generateHistogramPulseTime(const std::size_t index,
  * @param x :: The X vector of histogram bins to use.
  */
 void EventWorkspace::setAllX(const HistogramData::BinEdges &x) {
-  // int counter=0;
-  auto i = this->data.begin();
-  for (; i != this->data.end(); ++i) {
-    // This is an EventWorkspace, so changing X size is ok as long as we clear
-    // the MRU below, i.e., we bypass the size check of Histogram::setBinEdges.
-    (*i)->setX(x.cowData());
-  }
+  // This is an EventWorkspace, so changing X size is ok as long as we clear
+  // the MRU below, i.e., we avoid the size check of Histogram::setBinEdges and
+  // just reset the whole Histogram.
+  for(auto &eventList : this->data)
+    eventList->setHistogram(x);
 
   // Clear MRU lists now, free up memory
   this->clearMRU();

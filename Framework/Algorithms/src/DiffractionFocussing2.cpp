@@ -18,6 +18,7 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using std::vector;
+using Mantid::HistogramData::BinEdges;
 
 namespace Mantid {
 
@@ -482,12 +483,13 @@ void DiffractionFocussing2::execEvent() {
     if (!group2xvector.empty()) {
       auto git = group2xvector.find(group);
       if (git != group2xvector.end())
-        // Workaround for setting different length BinEdges.
-        out->setX(workspaceIndex, git->second.cowData());
+        // Reset Histogram instead of BinEdges, the latter forbids size change.
+        out->setHistogram(workspaceIndex, BinEdges(git->second.cowData()));
       else
         // Just use the 1st X vector it found, instead of nothin.
-        // Workaround for setting different length BinEdges.
-        out->setX(workspaceIndex, group2xvector.begin()->second.cowData());
+        // Reset Histogram instead of BinEdges, the latter forbids size change.
+        out->setHistogram(workspaceIndex,
+                          BinEdges(group2xvector.begin()->second.cowData()));
     } else
       g_log.warning() << "Warning! No X histogram bins were found for any "
                          "groups. Histogram will be empty.\n";
