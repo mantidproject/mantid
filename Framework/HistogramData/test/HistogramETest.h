@@ -23,8 +23,16 @@ public:
 
   void test_has_correct_mixins() {
     HistogramE e;
+// AppleClang gives warning if the result is unused.
+#if __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-value"
+#endif
     TS_ASSERT_THROWS_NOTHING(
         dynamic_cast<detail::FixedLengthVector<HistogramE> &>(e));
+#if __clang__
+#pragma clang diagnostic pop
+#endif
   }
 };
 

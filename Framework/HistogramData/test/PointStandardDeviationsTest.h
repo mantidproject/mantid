@@ -20,8 +20,16 @@ public:
 
   void test_has_correct_mixins() {
     PointStandardDeviations data;
+// AppleClang gives warning if the result is unused.
+#if __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-value"
+#endif
     TS_ASSERT_THROWS_NOTHING((dynamic_cast<detail::StandardDeviationVectorOf<
         PointStandardDeviations, HistogramDx, PointVariances> &>(data)));
+#if __clang__
+#pragma clang diagnostic pop
+#endif
   }
 
   void test_construct_default() {

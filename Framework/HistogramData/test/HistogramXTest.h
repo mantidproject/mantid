@@ -25,10 +25,18 @@ public:
 
   void test_has_correct_mixins() {
     HistogramX x;
+// AppleClang gives warning if the result is unused.
+#if __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-value"
+#endif
     TS_ASSERT_THROWS_NOTHING(
         dynamic_cast<detail::FixedLengthVector<HistogramX> &>(x));
     TS_ASSERT_THROWS_NOTHING(dynamic_cast<detail::Offsetable<HistogramX> &>(x));
     TS_ASSERT_THROWS_NOTHING(dynamic_cast<detail::Scalable<HistogramX> &>(x));
+#if __clang__
+#pragma clang diagnostic pop
+#endif
   }
 };
 

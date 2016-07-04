@@ -19,6 +19,11 @@ public:
 
   void test_has_correct_mixins() {
     Frequencies data;
+// AppleClang gives warning if the result is unused.
+#if __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-value"
+#endif
     TS_ASSERT_THROWS_NOTHING(
         (dynamic_cast<detail::VectorOf<Frequencies, HistogramY> &>(data)));
     TS_ASSERT_THROWS_NOTHING(
@@ -27,6 +32,9 @@ public:
         dynamic_cast<detail::Offsetable<Frequencies> &>(data));
     TS_ASSERT_THROWS_NOTHING(
         dynamic_cast<detail::Scalable<Frequencies> &>(data));
+#if __clang__
+#pragma clang diagnostic pop
+#endif
   }
 
   void test_construct_default() {
