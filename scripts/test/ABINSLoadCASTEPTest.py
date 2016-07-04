@@ -143,6 +143,7 @@ class ABINSLoadCASTEPTest(unittest.TestCase):
         for item in range(len(_correct_ions)):
 
             self.assertEqual(_correct_ions[item]["sort"], _ions[item]["sort"])
+            self.assertEqual(_correct_ions[item]["mass"], _ions[item]["mass"])
             self.assertEqual(_correct_ions[item]["symbol"], _ions[item]["symbol"])
             self.assertEqual(_correct_ions[item]["atom"], _ions[item]["atom"])
             self.assertEqual(True, np.allclose(np.array(_correct_ions[item]["fract_coord"]), _ions[item]["fract_coord"]))

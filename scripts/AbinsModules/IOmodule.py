@@ -87,7 +87,7 @@ class IOmodule(object):
         """
 
         for key, item in dic.items():
-            if isinstance(item, (numpy.ndarray, numpy.int64, int, numpy.float64, str, bytes)):
+            if isinstance(item, (numpy.ndarray, numpy.int64, int, numpy.float64, float, str, bytes)):
                 folder = path + key
                 if folder in hdf_file:
                     del hdf_file[folder]

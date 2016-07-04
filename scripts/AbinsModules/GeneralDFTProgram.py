@@ -84,6 +84,8 @@ class GeneralDFTProgram(IOmodule):
 
                                                "atom" - number of atom in the unit cell
 
+                                               "mass" - mass of atom
+
 
               The attributes should be an dictionary with the following entries:
 
