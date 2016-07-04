@@ -113,7 +113,7 @@ def get_loader_info_for_isis_nexus(file_information, period):
 
 def get_loader_info_for_isis_nexus_transmission(file_information, period):
     loader_name = "LoadNexusMonitors"
-    # TODO how to load period
+    # TODO how to load a single period?
     loader_options = {"Filename": file_information.get_file_name()}
     loader_options.update({"LoadEventMonitors": True,
                            "LoadHistoMonitors": True})
@@ -250,7 +250,6 @@ def load_isis(data_type, file_information, period, use_cached, publish_to_ads):
     workspace_names = get_expected_workspace_names(file_information, is_transmission, period)
 
     # Make potentially use of loaded workspaces. For now we can only identify them by their name
-    # TODO: Add tag into sample logs
     if use_cached:
         workspace, workspace_monitor = use_cached_workspaces_from_ads(file_information, workspace_names,
                                                                       is_transmission, period)

@@ -1,12 +1,13 @@
 """ SANSLoad algorithm which handles loading SANS files"""
 
-from mantid.kernel import (Direction, PropertyManagerProperty, Property)
+from mantid.kernel import (Direction, PropertyManagerProperty, Property, FloatArrayProperty,
+                           EnabledWhenProperty, PropertyCriterion)
 from mantid.api import (DataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode)
 
 from SANS2.State.SANSStateSerializer import create_deserialized_sans_state_from_property_manager
 from SANS2.State.SANSStateData import SANSDataType
+from SANS2.Common.SANSFunctions import create_unmanaged_algorithm
 from SANS.Load.SANSLoadData import SANSLoadDataFactory
-
 
 
 class SANSLoad(DataProcessorAlgorithm):
@@ -30,9 +31,17 @@ class SANSLoad(DataProcessorAlgorithm):
         self.declareProperty("UseCached", True, direction=Direction.Input,
                              doc="Checks if there are loaded files available. If they are, those files are used.")
 
-        self.declareProperty("MoveWorkspace", False, direction=Direction.Input,
+        self.declareProperty("MoveWorkspace", defaultValue=False, direction=Direction.Input,
                              doc="Move the workspace according to the SANSState setting. This might be useful"
                              "for manual inspection.")
+
+        # Beam coordinates if an initial move of the workspace is requested
+        enabled_condition = EnabledWhenProperty("MoveWorkspace", PropertyCriterion.IsNotDefault)
+        self.declareProperty(FloatArrayProperty(name='BeamCoordinates', values=[]),
+                             doc='The coordinates which is used to position the instrument component(s). '
+                                 'If the workspaces should be loaded with an initial move, then this '
+                                 'needs to be specified')
+        self.setPropertySettings("BeamCoordinates", enabled_condition)
 
         # ------------
         #  OUTPUT
@@ -124,8 +133,7 @@ class SANSLoad(DataProcessorAlgorithm):
         # have it moved in order to inspect it with other tools
         move_workspaces = self.getProperty("MoveWorkspace").value
         if move_workspaces:
-            # TODO: Implement the move option
-            pass
+            self._perform_initial_move(workspaces, state)
 
         # Set output workspaces
         for workspace_type, workspace in workspaces.iteritems():
@@ -201,6 +209,20 @@ class SANSLoad(DataProcessorAlgorithm):
         # The property name for the number of workspaces
         number_of_workspaces_name = "NumberOf" + name + "s"
         self.setProperty(number_of_workspaces_name, counter)
+
+    def _perform_initial_move(self, workspaces, state):
+        beam_coordinates = self.getProperty("BeamCoordinates").value
+        move_name = "SANSMove"
+        state_dict = state.property_manager
+        move_options = {"SANSState": state_dict,
+                        "BeamCoordinates": beam_coordinates,
+                        "MoveType": "InitialMove"}
+        move_alg = create_unmanaged_algorithm(move_name, **move_options)
+
+        for workspace in workspaces:
+            move_alg.setProperty("Workspace", workspace)
+            move_alg.execute()
+
 
 # Register algorithm with Mantid
 AlgorithmFactory.subscribe(SANSLoad)
