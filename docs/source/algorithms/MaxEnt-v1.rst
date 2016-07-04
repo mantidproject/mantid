@@ -33,7 +33,8 @@ For this reason, it is recomended to use the default when no prior knowledge is 
 
 The entropy is defined on the image :math:`\{x_j\}` as:
 
-.. math:: S = \sum_j \left(x_j/A\right) \sinh^{-1} \left(x_j/A\right)
+.. math:: S = \sum_j \left[ \sqrt{x_j^2 + A^2} - x_j \sinh^{-1}\left(\frac{x_j}{A}\right) \right]
+
 
 or
 
@@ -147,7 +148,7 @@ and the reconstructed image, i.e. Fourier transform (right).
        E.append(0.001)
 
    # Fill in five Fourier coefficients
-   # The input signal must be symmetric
+   # The input signal must be symmetric to get a real image
    Y[5] = Y[195] = 0.85
    Y[10] = Y[190] = 0.85
    Y[20] = Y[180] = 0.85
@@ -402,8 +403,6 @@ References
 [1] Anders Johannes Markvardsen, (2000). Polarised neutron diffraction measurements of PrBa2Cu3O6+x and the Bayesian statistical analysis of such data. DPhil. University of Oxford (http://ora.ox.ac.uk/objects/uuid:bef0c991-4e1c-4b07-952a-a0fe7e4943f7)
 
 [2] Skilling & Bryan, (1984). Maximum entropy image reconstruction: general algorithm. Mon. Not. R. astr. Soc. 211, 111-124.
-
-[3] Smith & Player, (1990). Deconvolution of bipolar ultrasonic signals using a modified maximum entropy method. J. Phys. D: Appl. Phys. 24, 1714-1721.
 
 .. categories::
 
