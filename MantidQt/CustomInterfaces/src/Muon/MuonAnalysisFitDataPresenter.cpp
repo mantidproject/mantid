@@ -151,6 +151,7 @@ void MuonAnalysisFitDataPresenter::createWorkspacesToFit(
       names.begin(), names.end(), std::back_inserter(qNames),
       [](const std::string &s) { return QString::fromStdString(s); });
   m_fitBrowser->setWorkspaceNames(qNames);
+  m_dataSelector->setDatasetNames(qNames);
 
   // Quietly update the workspace name set in the fit property browser
   // (Don't want the signal to change what's selected in the view)

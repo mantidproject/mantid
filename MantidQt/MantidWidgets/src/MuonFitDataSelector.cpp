@@ -631,8 +631,23 @@ int MuonFitDataSelector::getDatasetIndex() const {
  * @param datasetNames :: [input] List of names to use
  */
 void MuonFitDataSelector::setDatasetNames(const QStringList &datasetNames) {
+  const auto selectedName = m_ui.cbDataset->currentText();
   m_ui.cbDataset->clear();
   m_ui.cbDataset->addItems(datasetNames);
+
+  // If previously selected name is in new list, set this index again.
+  int i = 0;
+  while (i < m_ui.cbDataset->count()) {
+    if (m_ui.cbDataset->itemText(i) == selectedName) {
+      m_ui.cbDataset->setCurrentIndex(i);
+      break;
+    }
+    i++;
+  }
+  // Otherwise select the first in the list.
+  if (i == m_ui.cbDataset->count()) {
+    m_ui.cbDataset->setCurrentIndex(0);
+  }
 }
 
 /**
