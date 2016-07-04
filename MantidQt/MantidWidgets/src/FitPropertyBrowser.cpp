@@ -682,7 +682,8 @@ void FitPropertyBrowser::createCompositeFunction(
     m_compositeFunction.reset(new Mantid::API::CompositeFunction);
   } else {
     auto cf = boost::dynamic_pointer_cast<Mantid::API::CompositeFunction>(func);
-    if (!cf || (cf->name() != "CompositeFunction" && cf->name() != "MultiBG")) {
+    if (!cf || (cf->name() != "CompositeFunction" && cf->name() != "MultiBG" &&
+                cf->name() != "MultiDomainFunction")) {
       m_compositeFunction.reset(new Mantid::API::CompositeFunction);
       m_compositeFunction->addFunction(func);
     } else {
