@@ -1,6 +1,8 @@
 #pylint: disable=no-init,too-many-instance-attributes
 import os
 
+from IndirectReductionCommon import load_files
+
 from mantid.simpleapi import *
 from mantid.api import *
 from mantid.kernel import *
@@ -118,8 +120,7 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
 #------------------------------------------------------------------------------
 
     def PyExec(self):
-        from IndirectReductionCommon import (load_files,
-                                             get_multi_frame_rebin,
+        from IndirectReductionCommon import (get_multi_frame_rebin,
                                              identify_bad_detectors,
                                              unwrap_monitor,
                                              process_monitor_efficiency,
@@ -144,33 +145,10 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
                                                                load_logs=self._load_logs,
                                                                load_opts=load_opts)
 
-        if self._cal_file is not '':
-            for ws_name in self._workspace_names:
-                AlignDetectors(InputWorkspace=ws_name,
-                               OutputWorkspace=ws_name,
-                               CalibrationFile=self._cal_file)
-                DiffractionFocussing(InputWorkspace=ws_name,
-                                     OutputWorkspace=ws_name,
-                                     GroupingFileName=self._cal_file)
-
-
+        # applies the changes in the provided calibration file
+        self._apply_calibration()
         # Load container if run is given
-        if self._container_data_files is not None:
-            self._container_workspace, _ = load_files(self._container_data_files,
-                                                      self._ipf_filename,
-                                                      self._spectra_range[0],
-                                                      self._spectra_range[1],
-                                                      sum_files=True,
-                                                      load_logs=self._load_logs,
-                                                      load_opts=load_opts)
-            self._container_workspace = self._container_workspace[0]
-
-            # Scale container if factor is given
-            if self._container_scale_factor != 1.0:
-                Scale(InputWorkspace=self._container_workspace,
-                      OutputWorkspace=self._container_workspace,
-                      Factor=self._container_scale_factor,
-                      Operation='Multiply')
+        self._load_and_scale_container(self._container_scale_factor, load_opts)
 
         for c_ws_name in self._workspace_names:
             is_multi_frame = isinstance(mtd[c_ws_name], WorkspaceGroup)
@@ -290,6 +268,45 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
                 logger.information('Summing files enabled (have %d files)' % num_raw_files)
             else:
                 logger.information('SumFiles options is ignored when only one file is provided')
+
+
+    def _apply_calibration(self):
+        """
+        Checks to ensure a calibration file has been given
+        and if so performs AlignDetectors and DiffractionFocussing.
+        """
+        if self._cal_file is not '':
+            for ws_name in self._workspace_names:
+                AlignDetectors(InputWorkspace=ws_name,
+                               OutputWorkspace=ws_name,
+                               CalibrationFile=self._cal_file)
+                DiffractionFocussing(InputWorkspace=ws_name,
+                                     OutputWorkspace=ws_name,
+                                     GroupingFileName=self._cal_file)
+
+
+    def _load_and_scale_container(self, scale_factor, load_opts):
+        """
+        Loads the container file if given
+        Applies the scale factor to the container if not 1.
+        """
+        if self._container_data_files is not None:
+            self._container_workspace, _ = load_files(self._container_data_files,
+                                                      self._ipf_filename,
+                                                      self._spectra_range[0],
+                                                      self._spectra_range[1],
+                                                      sum_files=True,
+                                                      load_logs=self._load_logs,
+                                                      load_opts=load_opts)
+            self._container_workspace = self._container_workspace[0]
+
+            # Scale container if factor is given
+            if scale_factor != 1.0:
+                Scale(InputWorkspace=self._container_workspace,
+                      OutputWorkspace=self._container_workspace,
+                      Factor=scale_factor,
+                      Operation='Multiply')
+
 
 #------------------------------------------------------------------------------
 
