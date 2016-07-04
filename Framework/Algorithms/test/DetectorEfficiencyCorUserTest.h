@@ -31,7 +31,7 @@ public:
       : m_Efs(m_numBins + 1), m_inWSName("input_workspace"),
         m_outWSName("output_workspace") {
     for (size_t i = 0; i != m_Efs.size(); ++i) {
-        m_Efs[i] = 0.1 + 0.2 * static_cast<double>(i);
+      m_Efs[i] = 0.1 + 0.2 * static_cast<double>(i);
     }
     std::reverse(m_Efs.begin(), m_Efs.end());
 
