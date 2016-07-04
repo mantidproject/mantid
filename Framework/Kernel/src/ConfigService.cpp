@@ -1601,14 +1601,11 @@ void ConfigServiceImpl::appendDataSearchSubDir(const std::string &subdir) {
     return;
   }
 
-  std::vector<std::string> newDataDirs = m_DataSearchDirs;
-  std::vector<std::string>::const_iterator it = newDataDirs.begin();
-  std::vector<std::string>::const_iterator end = newDataDirs.end();
-
-  for (; it != end; ++it) {
+  auto newDataDirs = m_DataSearchDirs;
+  for (const auto &path : m_DataSearchDirs) {
     Poco::Path newDirPath;
     try {
-      newDirPath = Poco::Path(*it);
+      newDirPath = Poco::Path(path);
       newDirPath.append(subDirPath);
       newDataDirs.push_back(newDirPath.toString());
     } catch (Poco::PathSyntaxException &) {
