@@ -198,12 +198,14 @@ set ( INC_FILES
     ${MOC_FILES}
     inc/MantidQtMantidWidgets/AlgorithmHintStrategy.h
     inc/MantidQtMantidWidgets/CatalogHelper.h
+    inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorAppendGroupCommand.h
     inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorAppendRowCommand.h
     inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorClearSelectedCommand.h
     inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorCommand.h
     inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorCommandBase.h
     inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorCopySelectedCommand.h
     inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorCutSelectedCommand.h
+    inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorDeleteGroupCommand.h
     inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorDeleteRowCommand.h
     inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorExpandCommand.h
     inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorExportTableCommand.h
@@ -217,7 +219,6 @@ set ( INC_FILES
     inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorPlotGroupCommand.h
     inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorPlotRowCommand.h
     inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorPostprocessingAlgorithm.h
-    inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorPrependRowCommand.h
     inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorPreprocessingAlgorithm.h
     inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorPresenter.h
     inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorProcessingAlgorithm.h

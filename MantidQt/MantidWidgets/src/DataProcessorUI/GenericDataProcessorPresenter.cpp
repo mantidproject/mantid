@@ -11,10 +11,12 @@
 #include "MantidKernel/Utils.h"
 #include "MantidKernel/make_unique.h"
 #include "MantidQtMantidWidgets/AlgorithmHintStrategy.h"
+#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorAppendGroupCommand.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorAppendRowCommand.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorClearSelectedCommand.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorCopySelectedCommand.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorCutSelectedCommand.h"
+#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorDeleteGroupCommand.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorDeleteRowCommand.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorExpandCommand.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorExportTableCommand.h"
@@ -27,7 +29,6 @@
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorPasteSelectedCommand.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorPlotGroupCommand.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorPlotRowCommand.h"
-#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorPrependRowCommand.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorProcessCommand.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorSaveTableAsCommand.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorSaveTableCommand.h"
@@ -901,15 +902,9 @@ void GenericDataProcessorPresenter::appendRow() {
 }
 
 /**
-Insert a row before the first selected row
+Insert a group after the last selected group
 */
-void GenericDataProcessorPresenter::prependRow() {
-  // std::set<int> rows = m_view->getSelectedItems();
-  // if (rows.empty())
-  //  insertRow(0);
-  // else
-  //  insertRow(*rows.begin());
-  // m_tableDirty = true;
+void GenericDataProcessorPresenter::appendGroup() {
 }
 
 /**
@@ -954,6 +949,12 @@ void GenericDataProcessorPresenter::deleteRow() {
 }
 
 /**
+Delete group(s) from the model
+*/
+void GenericDataProcessorPresenter::deleteGroup() {
+}
+
+/**
 Group rows together
 */
 void GenericDataProcessorPresenter::groupRows() {
@@ -982,11 +983,14 @@ void GenericDataProcessorPresenter::notify(DataProcessorPresenter::Flag flag) {
   case DataProcessorPresenter::AppendRowFlag:
     appendRow();
     break;
-  case DataProcessorPresenter::PrependRowFlag:
-    prependRow();
+  case DataProcessorPresenter::AppendGroupFlag:
+    appendGroup();
     break;
   case DataProcessorPresenter::DeleteRowFlag:
     deleteRow();
+    break;
+  case DataProcessorPresenter::DeleteGroupFlag:
+    deleteGroup();
     break;
   case DataProcessorPresenter::ProcessFlag:
     process();
@@ -1544,7 +1548,7 @@ GenericDataProcessorPresenter::publishCommands() {
   addToCommand(commands, make_unique<DataProcessorPlotGroupCommand>(this));
   addToCommand(commands, make_unique<DataProcessorSeparatorCommand>(this));
   addToCommand(commands, make_unique<DataProcessorAppendRowCommand>(this));
-  addToCommand(commands, make_unique<DataProcessorPrependRowCommand>(this));
+  addToCommand(commands, make_unique<DataProcessorAppendGroupCommand>(this));
   addToCommand(commands, make_unique<DataProcessorSeparatorCommand>(this));
   addToCommand(commands, make_unique<DataProcessorGroupRowsCommand>(this));
   addToCommand(commands, make_unique<DataProcessorCopySelectedCommand>(this));
@@ -1553,6 +1557,7 @@ GenericDataProcessorPresenter::publishCommands() {
   addToCommand(commands, make_unique<DataProcessorClearSelectedCommand>(this));
   addToCommand(commands, make_unique<DataProcessorSeparatorCommand>(this));
   addToCommand(commands, make_unique<DataProcessorDeleteRowCommand>(this));
+  addToCommand(commands, make_unique<DataProcessorDeleteGroupCommand>(this));
 
   // "Open Table" needs the list of "child" commands, i.e. the list of
   // available workspaces in the ADS

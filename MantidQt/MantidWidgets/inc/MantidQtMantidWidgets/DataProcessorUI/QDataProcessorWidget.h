@@ -127,8 +127,9 @@ private slots:
   void on_actionSaveTable_triggered();
   void on_actionSaveTableAs_triggered();
   void on_actionAppendRow_triggered();
-  void on_actionPrependRow_triggered();
+  void on_actionAppendGroup_triggered();
   void on_actionDeleteRow_triggered();
+  void on_actionDeleteGroup_triggered();
   void on_actionProcess_triggered();
   void on_actionGroupRows_triggered();
   void on_actionClearSelected_triggered();

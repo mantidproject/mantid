@@ -142,17 +142,24 @@ void QDataProcessorWidget::on_actionAppendRow_triggered() {
 }
 
 /**
-This slot notifies the presenter that the "prepend row" button has been pressed
+This slot notifies the presenter that the "append group" button has been pressed
 */
-void QDataProcessorWidget::on_actionPrependRow_triggered() {
-  m_presenter->notify(DataProcessorPresenter::PrependRowFlag);
+void QDataProcessorWidget::on_actionAppendGroup_triggered() {
+  m_presenter->notify(DataProcessorPresenter::AppendGroupFlag);
 }
 
 /**
-This slot notifies the presenter that the "delete" button has been pressed
+This slot notifies the presenter that the "delete row" button has been pressed
 */
 void QDataProcessorWidget::on_actionDeleteRow_triggered() {
   m_presenter->notify(DataProcessorPresenter::DeleteRowFlag);
+}
+
+/**
+This slot notifies the presenter that the "delete group" button has been pressed
+*/
+void QDataProcessorWidget::on_actionDeleteGroup_triggered() {
+  m_presenter->notify(DataProcessorPresenter::DeleteGroupFlag);
 }
 
 /**

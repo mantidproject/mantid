@@ -141,9 +141,12 @@ protected:
   void insertRow(int index);
   // add row(s) to the model
   void appendRow();
-  void prependRow();
+  // add group(s) to the model
+  void appendGroup();
   // delete row(s) from the model
   void deleteRow();
+  // delete group(s) from the model
+  void deleteGroup();
   // find a blank row
   int getBlankRow();
   // clear selected row(s) in the model
