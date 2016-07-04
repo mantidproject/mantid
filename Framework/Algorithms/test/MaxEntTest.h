@@ -553,7 +553,7 @@ public:
     MatrixWorkspace_sptr image = alg->getProperty("ReconstructedImage");
     MatrixWorkspace_sptr data = alg->getProperty("ReconstructedData");
 
-    TS_ASSERT_EQUALS(image->readX(0).size(), inWS->readX(0).size());
+    TS_ASSERT_EQUALS(image->readX(0).size(), ws->readX(0).size());
     TS_ASSERT_EQUALS(data->readX(0).size(), ws->readX(0).size());
     TS_ASSERT_EQUALS(data->readX(0), ws->readX(0));
   }
