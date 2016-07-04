@@ -3,8 +3,8 @@ from mantid.api import PythonAlgorithm, AlgorithmFactory, WorkspaceProperty
 from mantid.kernel import Direction, logger
 
 def export_masks(ws,fileName='',returnMasks=False):
-    """Exports masks applied to Mantid workspace write masks applied to the workspace detectors
-       (e.g. drawn using the instrument view)
+    """Exports masks applied to Mantid workspace
+       (e.g. drawn using the instrument view) and write these masks
        into the old fashioned ascii msk file containing masked spectra numbers.
     
        The file is Libisis/Mantid old ISIS format compartible and can be read by libisis
@@ -16,7 +16,7 @@ def export_masks(ws,fileName='',returnMasks=False):
        name and the extension .msk is used.
     
        If returnMasks is set to True, the function does not write to file but returns
-       list of masks instead
+       list of masks instead.
     """
    # get pointer to the workspace    
     if (type(ws) == str):
@@ -71,7 +71,7 @@ def export_masks(ws,fileName='',returnMasks=False):
         
 def flushOutString(f,OutString,BlockSize,BlockLimit):
     """Internal function for writeISISmasks procedure, 
-       which writes down 
+       which writes down specified number of mask blocks.
     """
     BlockSize+=1;
     if BlockSize >= BlockLimit: 
@@ -108,7 +108,7 @@ def  writeISISmasks(filename,masks,nSpectraInRow=8):
     f = open(filename,'w')   
     
     # prepare and write mask data in conventional msk format
-    # where adjusted spectra are separated by - sign
+    # where adjusted spectra are separated by "-" sign
     OutString   = ''
     LastSpectraN= ''
     BlockSize = 0;
@@ -156,7 +156,7 @@ class ExportASCIIMask(PythonAlgorithm):
     def category(self):
         """ Return category
         """
-        return "Utility\\Workspaces"
+        return "DataHandling\\Masking"
 
     def name(self):
         """ Return name
