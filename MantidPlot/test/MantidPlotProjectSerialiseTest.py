@@ -12,12 +12,7 @@ class MantidPlotProjectSerialiseTest(unittest.TestCase):
 
     def setUp(self):
         self._project_name = "MantidPlotTestProject"
-
-        # set the default directory to something if it is not set already
-        if config['defaultsave.directory'] == '':
-            config['defaultsave.directory'] = os.path.expanduser("~")
-
-        self._project_folder = os.path.join(config['defaultsave.directory'],
+        self._project_folder = os.path.join(os.path.expanduser("~"),
                                             self._project_name)
         file_name = "%s.mantid" % self._project_name
         self._project_file = os.path.join(self._project_folder, file_name)
