@@ -109,7 +109,7 @@ void IndirectDiffractionReduction::run() {
   QString instName = m_uiForm.iicInstrumentConfiguration->getInstrumentName();
   QString mode = m_uiForm.iicInstrumentConfiguration->getReflectionName();
   if (!m_uiForm.rfSampleFiles->isValid()) {
-	showInformationBox("Sample files input is invalid.");
+    showInformationBox("Sample files input is invalid.");
     return;
   }
   if (instName == "OSIRIS") {
