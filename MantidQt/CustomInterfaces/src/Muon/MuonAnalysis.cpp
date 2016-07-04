@@ -2046,22 +2046,12 @@ void MuonAnalysis::loadFittings() {
       Mantid::Kernel::make_unique<MuonAnalysisFitFunctionPresenter>(
           nullptr, m_uiForm.fitBrowser, m_functionBrowser);
   // Connect signals
-  connect(m_dataSelector, SIGNAL(dataPropertiesChanged()), this,
-          SLOT(dataPropsChanged()));
   connect(m_dataSelector, SIGNAL(selectedGroupsChanged()), this,
           SLOT(dataGroupsChanged()));
   connect(m_dataSelector, SIGNAL(selectedPeriodsChanged()), this,
           SLOT(dataPeriodsChanged()));
   connect(m_dataSelector, SIGNAL(workspaceChanged()), this,
           SLOT(dataWorkspaceChanged()));
-  connect(m_uiForm.fitBrowser, SIGNAL(xRangeChanged(double, double)), this,
-          SLOT(fitRangeChangedManually(double, double)));
-  connect(m_dataSelector, SIGNAL(simulLabelChanged()), this,
-          SLOT(simultaneousFitLabelChanged()));
-  connect(m_uiForm.fitBrowser, SIGNAL(fittingDone(const QString &)), this,
-          SLOT(fitCompleted(const QString &)));
-  connect(m_dataSelector, SIGNAL(datasetIndexChanged(int)), this,
-          SLOT(datasetIndexChanged(int)));
 }
 
 /**
@@ -2964,16 +2954,6 @@ std::string MuonAnalysis::getSubtractedPeriods() const {
 }
 
 /**
- * Slot: workspace index, start or end changed in data selector widget
- * Pass this information to the fit helper
- */
-void MuonAnalysis::dataPropsChanged() {
-  if (m_fitDataPresenter) {
-    m_fitDataPresenter->handleDataPropertiesChanged();
-  }
-}
-
-/**
  * Slot: groups to fit changed in data selector widget
  * Pass this information to the fit helper
  */
@@ -2994,18 +2974,6 @@ void MuonAnalysis::dataPeriodsChanged() {
     m_fitDataPresenter->handleSelectedDataChanged(
         m_groupingHelper.parseGroupingTable(),
         parsePlotType(m_uiForm.frontPlotFuncs), isOverwriteEnabled());
-  }
-}
-
-/**
- * Slot: range to fit changed by dragging lines on graph
- * Pass this information to the fit helper
- * @param start :: [input] start of fit range
- * @param end :: [input] end of fit range
- */
-void MuonAnalysis::fitRangeChangedManually(double start, double end) {
-  if (m_fitDataPresenter) {
-    m_fitDataPresenter->handleXRangeChangedGraphically(start, end);
   }
 }
 
@@ -3048,38 +3016,5 @@ void MuonAnalysis::updateRebinParams() {
   }
   m_fitDataPresenter->setRebinArgs(rebinParams);
 }
-
-/**
- * Slot: label for simultaneous fit results changed in data selector.
- * Update the presenter with this information.
- */
-void MuonAnalysis::simultaneousFitLabelChanged() {
-  if (m_fitDataPresenter) {
-    m_fitDataPresenter->handleSimultaneousFitLabelChanged();
-  }
-}
-
-/**
- * Slot: fit has finished. Update data presenter with this information.
- * @param status :: [input] Status string (unused)
- */
-void MuonAnalysis::fitCompleted(const QString &status) {
-  Q_UNUSED(status);
-  if (m_fitDataPresenter) {
-    m_fitDataPresenter->handleFitFinished();
-  }
-}
-
-/**
- * Slot: user changed selected dataset index.
- * Update data presenter with this information.
- * @param index :: [input] Selected dataset index
- */
-void MuonAnalysis::datasetIndexChanged(int index) {
-  if (m_fitDataPresenter) {
-    m_fitDataPresenter->handleDatasetIndexChanged(index);
-  }
-}
-
 } // namespace MantidQt
 } // namespace CustomInterfaces

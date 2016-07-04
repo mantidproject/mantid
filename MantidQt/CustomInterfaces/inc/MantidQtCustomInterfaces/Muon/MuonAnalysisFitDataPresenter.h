@@ -62,15 +62,11 @@ public:
           RebinOptions(MantidQt::CustomInterfaces::Muon::MuonAnalysisOptionTab::
                            RebinType::NoRebin,
                        ""));
-  /// Handles "data properties changed"
-  void handleDataPropertiesChanged();
   /// Handles "selected data changed"
   void handleSelectedDataChanged(
       const Mantid::API::Grouping &grouping,
       const MantidQt::CustomInterfaces::Muon::PlotType &plotType,
       bool overwrite);
-  /// Handles user changing X range by dragging lines
-  void handleXRangeChangedGraphically(double start, double end);
   /// Handles peak picker being reassigned to a new graph
   void setAssignedFirstRun(const QString &wsName);
   /// Get the workspace the peak picker is currently assigned to
@@ -79,10 +75,16 @@ public:
   void setTimeZero(double timeZero) { m_timeZero = timeZero; }
   /// Change the stored rebin args
   void setRebinArgs(const RebinOptions &rebinArgs) { m_rebinArgs = rebinArgs; }
+
+public slots:
+  /// Transforms fit results when a simultaneous fit finishes
+  void handleFitFinished(const QString &status = QString("success")) const;
+  /// Handles "data properties changed"
+  void handleDataPropertiesChanged();
+  /// Handles user changing X range by dragging lines
+  void handleXRangeChangedGraphically(double start, double end);
   /// Handles label for simultaneous fit results being changed
   void handleSimultaneousFitLabelChanged() const;
-  /// Transforms fit results when a simultaneous fit finishes
-  void handleFitFinished() const;
   /// Handles user changing selected dataset to display
   void handleDatasetIndexChanged(int index);
 
@@ -114,6 +116,8 @@ private:
   Mantid::API::ITableWorkspace_sptr generateParametersTable(
       const std::string &wsName,
       const Mantid::API::ITableWorkspace_sptr inputTable) const;
+  /// Set up connections
+  void doConnect();
   /// Fit browser to update (non-owning pointer)
   MantidQt::MantidWidgets::IWorkspaceFitControl *m_fitBrowser;
   /// Data selector to get input from (non-owning pointer)

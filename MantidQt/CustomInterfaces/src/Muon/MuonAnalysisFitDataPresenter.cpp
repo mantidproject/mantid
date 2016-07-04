@@ -42,6 +42,29 @@ MuonAnalysisFitDataPresenter::MuonAnalysisFitDataPresenter(
       m_dataLoader(dataLoader), m_timeZero(timeZero), m_rebinArgs(rebinArgs) {
   // Ensure this is set correctly at the start
   handleSimultaneousFitLabelChanged();
+  doConnect();
+}
+
+/**
+ * Connect up signals and slots
+ * Abstract base class is not a QObject, so attempt a cast.
+ * (Its derived classes are QObjects).
+ */
+void MuonAnalysisFitDataPresenter::doConnect() {
+  if (const QObject *fitBrowser = dynamic_cast<QObject *>(m_fitBrowser)) {
+    connect(fitBrowser, SIGNAL(fittingDone(const QString &)), this,
+            SLOT(handleFitFinished(const QString &)));
+    connect(fitBrowser, SIGNAL(xRangeChanged(double, double)), this,
+            SLOT(handleXRangeChangedGraphically(double, double)));
+  }
+  if (const QObject *dataSelector = dynamic_cast<QObject *>(m_dataSelector)) {
+    connect(dataSelector, SIGNAL(dataPropertiesChanged()), this,
+            SLOT(handleDataPropertiesChanged()));
+    connect(dataSelector, SIGNAL(simulLabelChanged()), this,
+            SLOT(handleSimultaneousFitLabelChanged()));
+    connect(dataSelector, SIGNAL(datasetIndexChanged(int)), this,
+            SLOT(handleDatasetIndexChanged(int)));
+  }
 }
 
 /**
@@ -349,8 +372,10 @@ void MuonAnalysisFitDataPresenter::handleSimultaneousFitLabelChanged() const {
  * - rename fitted workspaces
  * - extract from group to one level up
  * - split parameter table
+ * @param status :: [input] Fit status (unused)
  */
-void MuonAnalysisFitDataPresenter::handleFitFinished() const {
+void MuonAnalysisFitDataPresenter::handleFitFinished(const QString &status) const {
+  Q_UNUSED(status);
   // Test if this was a simultaneous fit, or a co-add fit with multiple
   // groups/periods
   auto &dataSelector = m_dataSelector; // local ref
