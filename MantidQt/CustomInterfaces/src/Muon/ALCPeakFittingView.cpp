@@ -7,6 +7,9 @@
 
 #include <qwt_symbol.h>
 
+
+using namespace Mantid::API;
+
 namespace MantidQt {
 namespace CustomInterfaces {
 

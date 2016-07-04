@@ -7,31 +7,29 @@
 
 #include "qwt_data.h"
 
-using namespace Mantid::API;
-
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace ALCHelper {
 /// Create Qwt curve data from a workspace
-boost::shared_ptr<QwtData> curveDataFromWs(MatrixWorkspace_const_sptr ws,
+boost::shared_ptr<QwtData> curveDataFromWs(Mantid::API::MatrixWorkspace_const_sptr ws,
                                            size_t wsIndex);
 
 /// Create vector of Qwt curve data from a workspace, used for EnggDiffraction
 /// GUI
 std::vector<boost::shared_ptr<QwtData>>
-curveDataFromWs(MatrixWorkspace_const_sptr ws);
+curveDataFromWs(Mantid::API::MatrixWorkspace_const_sptr ws);
 
 /// Create error vector from a workspace
-std::vector<double> curveErrorsFromWs(MatrixWorkspace_const_sptr ws,
+std::vector<double> curveErrorsFromWs(Mantid::API::MatrixWorkspace_const_sptr ws,
                                       size_t wsIndex);
 
 /// Create Qwt curve data from a function
 boost::shared_ptr<QwtData>
-curveDataFromFunction(IFunction_const_sptr func,
+curveDataFromFunction(Mantid::API::IFunction_const_sptr func,
                       const std::vector<double> &xValues);
 
 /// Create workspace filled with function values
-MatrixWorkspace_sptr createWsFromFunction(IFunction_const_sptr func,
+Mantid::API::MatrixWorkspace_sptr createWsFromFunction(Mantid::API::IFunction_const_sptr func,
                                           const std::vector<double> &xValues);
 
 /// Creates empty Qwt curve data

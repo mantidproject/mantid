@@ -3,7 +3,6 @@
 
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
-
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/WarningSuppressions.h"
@@ -11,6 +10,7 @@
 #include "MantidQtCustomInterfaces/Muon/IALCDataLoadingView.h"
 #include "MantidQtCustomInterfaces/Muon/ALCDataLoadingPresenter.h"
 
+using namespace Mantid::API;
 using namespace MantidQt::CustomInterfaces;
 using namespace testing;
 
