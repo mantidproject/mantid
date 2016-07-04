@@ -272,7 +272,8 @@ bool TrustRegionMinimizer::iterate(size_t) {
     //
     // if model is good, rho should be close to one
     rho = calculate_rho(w.normF, normFnew, md, options);
-    if (boost::math::isnan(rho) || boost::math::isinf(rho) || rho <= options.eta_successful) {
+    if (boost::math::isnan(rho) || boost::math::isinf(rho) ||
+        rho <= options.eta_successful) {
       if ((w.use_second_derivatives) && (options.model == 3) &&
           (no_reductions == 1)) {
         // recalculate rho based on the approx GN model
