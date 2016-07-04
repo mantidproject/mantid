@@ -484,78 +484,78 @@ public:
   }
 
   void test_histogram_workspace() {
-      const size_t size = 10;
-      MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(
-          WorkspaceFactory::Instance().create("Workspace2D", 1, size + 1, size));
-      // We don't care about values, we just want to test the number of
-      // X points in the image
-      // For histogram input workspaces we should get the original number
-      // of points minus one
-      for (size_t i = 0; i < size; i++) {
-        double value = static_cast<double>(i);
-        ws->dataX(0)[i] = value;
-        ws->dataY(0)[i] = value;
-        ws->dataE(0)[i] = value;
-      }
-      ws->dataX(0)[size] = static_cast<double>(size);
+    const size_t size = 10;
+    MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        WorkspaceFactory::Instance().create("Workspace2D", 1, size + 1, size));
+    // We don't care about values, we just want to test the number of
+    // X points in the image
+    // For histogram input workspaces we should get the original number
+    // of points minus one
+    for (size_t i = 0; i < size; i++) {
+      double value = static_cast<double>(i);
+      ws->dataX(0)[i] = value;
+      ws->dataY(0)[i] = value;
+      ws->dataE(0)[i] = value;
+    }
+    ws->dataX(0)[size] = static_cast<double>(size);
 
-      IAlgorithm_sptr alg = AlgorithmManager::Instance().create("MaxEnt");
-      alg->initialize();
-      alg->setChild(true);
-      alg->setProperty("InputWorkspace", ws);
-      alg->setProperty("ComplexData", false);
-      alg->setProperty("AutoShift", false);
-      alg->setProperty("A", 1.0);
-      alg->setProperty("ChiTarget", 102.);
-      alg->setPropertyValue("MaxIterations", "1");
-      alg->setPropertyValue("ReconstructedImage", "image");
-      alg->setPropertyValue("ReconstructedData", "data");
-      alg->setPropertyValue("EvolChi", "evolChi");
-      alg->setPropertyValue("EvolAngle", "evolAngle");
-      alg->execute();
-      MatrixWorkspace_sptr image = alg->getProperty("ReconstructedImage");
-      MatrixWorkspace_sptr data = alg->getProperty("ReconstructedData");
+    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("MaxEnt");
+    alg->initialize();
+    alg->setChild(true);
+    alg->setProperty("InputWorkspace", ws);
+    alg->setProperty("ComplexData", false);
+    alg->setProperty("AutoShift", false);
+    alg->setProperty("A", 1.0);
+    alg->setProperty("ChiTarget", 102.);
+    alg->setPropertyValue("MaxIterations", "1");
+    alg->setPropertyValue("ReconstructedImage", "image");
+    alg->setPropertyValue("ReconstructedData", "data");
+    alg->setPropertyValue("EvolChi", "evolChi");
+    alg->setPropertyValue("EvolAngle", "evolAngle");
+    alg->execute();
+    MatrixWorkspace_sptr image = alg->getProperty("ReconstructedImage");
+    MatrixWorkspace_sptr data = alg->getProperty("ReconstructedData");
 
-      TS_ASSERT_EQUALS(image->readX(0).size(), ws->readX(0).size() - 1);
-      TS_ASSERT_EQUALS(data->readX(0).size(), ws->readX(0).size());
-      TS_ASSERT_EQUALS(data->readX(0), ws->readX(0));
+    TS_ASSERT_EQUALS(image->readX(0).size(), ws->readX(0).size() - 1);
+    TS_ASSERT_EQUALS(data->readX(0).size(), ws->readX(0).size());
+    TS_ASSERT_EQUALS(data->readX(0), ws->readX(0));
   }
 
   void test_pointdata_workspace() {
-      const size_t size = 10;
-      MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(
-          WorkspaceFactory::Instance().create("Workspace2D", 1, size, size));
-      // We don't care about values, we just want to test the number of
-      // X points in the image
-      // For histogram input workspaces we should get the original number
-      // of points minus one
-      for (size_t i = 0; i < size; i++) {
-        double value = static_cast<double>(i);
-        ws->dataX(0)[i] = value;
-        ws->dataY(0)[i] = value;
-        ws->dataE(0)[i] = value;
-      }
+    const size_t size = 10;
+    MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        WorkspaceFactory::Instance().create("Workspace2D", 1, size, size));
+    // We don't care about values, we just want to test the number of
+    // X points in the image
+    // For histogram input workspaces we should get the original number
+    // of points minus one
+    for (size_t i = 0; i < size; i++) {
+      double value = static_cast<double>(i);
+      ws->dataX(0)[i] = value;
+      ws->dataY(0)[i] = value;
+      ws->dataE(0)[i] = value;
+    }
 
-      IAlgorithm_sptr alg = AlgorithmManager::Instance().create("MaxEnt");
-      alg->initialize();
-      alg->setChild(true);
-      alg->setProperty("InputWorkspace", ws);
-      alg->setProperty("ComplexData", false);
-      alg->setProperty("AutoShift", false);
-      alg->setProperty("A", 1.0);
-      alg->setProperty("ChiTarget", 102.);
-      alg->setPropertyValue("MaxIterations", "1");
-      alg->setPropertyValue("ReconstructedImage", "image");
-      alg->setPropertyValue("ReconstructedData", "data");
-      alg->setPropertyValue("EvolChi", "evolChi");
-      alg->setPropertyValue("EvolAngle", "evolAngle");
-      alg->execute();
-      MatrixWorkspace_sptr image = alg->getProperty("ReconstructedImage");
-      MatrixWorkspace_sptr data = alg->getProperty("ReconstructedData");
+    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("MaxEnt");
+    alg->initialize();
+    alg->setChild(true);
+    alg->setProperty("InputWorkspace", ws);
+    alg->setProperty("ComplexData", false);
+    alg->setProperty("AutoShift", false);
+    alg->setProperty("A", 1.0);
+    alg->setProperty("ChiTarget", 102.);
+    alg->setPropertyValue("MaxIterations", "1");
+    alg->setPropertyValue("ReconstructedImage", "image");
+    alg->setPropertyValue("ReconstructedData", "data");
+    alg->setPropertyValue("EvolChi", "evolChi");
+    alg->setPropertyValue("EvolAngle", "evolAngle");
+    alg->execute();
+    MatrixWorkspace_sptr image = alg->getProperty("ReconstructedImage");
+    MatrixWorkspace_sptr data = alg->getProperty("ReconstructedData");
 
-      TS_ASSERT_EQUALS(image->readX(0).size(), inWS->readX(0).size());
-      TS_ASSERT_EQUALS(data->readX(0).size(), ws->readX(0).size());
-      TS_ASSERT_EQUALS(data->readX(0), ws->readX(0));
+    TS_ASSERT_EQUALS(image->readX(0).size(), inWS->readX(0).size());
+    TS_ASSERT_EQUALS(data->readX(0).size(), ws->readX(0).size());
+    TS_ASSERT_EQUALS(data->readX(0), ws->readX(0));
   }
 
   MatrixWorkspace_sptr createWorkspaceReal(size_t maxt, double phase) {

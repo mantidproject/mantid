@@ -190,7 +190,7 @@ public:
         .WillRepeatedly(Return(vec1));
     EXPECT_CALL(*transform, dataToImage(_)).Times(0);
     EXPECT_CALL(*entropy, derivative(_, _)).Times(0);
-    EXPECT_CALL(*entropy, secondDerivative(_,_)).Times(0);
+    EXPECT_CALL(*entropy, secondDerivative(_, _)).Times(0);
     // But this is not: N * data.size() = image.size()
     TS_ASSERT_THROWS(calculator.iterate(vec2, vec2, vec1, bkg),
                      std::runtime_error);
@@ -240,7 +240,9 @@ public:
         .WillRepeatedly(Return(datC));
     EXPECT_CALL(*transform, dataToImage(_)).Times(1).WillOnce(Return(img));
     EXPECT_CALL(*entropy, derivative(img, bkg)).Times(1).WillOnce(Return(img));
-    EXPECT_CALL(*entropy, secondDerivative(img, bkg)).Times(1).WillOnce(Return(img));
+    EXPECT_CALL(*entropy, secondDerivative(img, bkg))
+        .Times(1)
+        .WillOnce(Return(img));
 
     TS_ASSERT_THROWS_NOTHING(calculator.iterate(dat, err, img, bkg));
     TS_ASSERT_EQUALS(calculator.getChisq(), 2);
@@ -274,7 +276,9 @@ public:
         .WillRepeatedly(Return(datC));
     EXPECT_CALL(*transform, dataToImage(_)).Times(1).WillOnce(Return(img));
     EXPECT_CALL(*entropy, derivative(img, bkg)).Times(1).WillOnce(Return(img));
-    EXPECT_CALL(*entropy, secondDerivative(img, bkg)).Times(1).WillOnce(Return(img));
+    EXPECT_CALL(*entropy, secondDerivative(img, bkg))
+        .Times(1)
+        .WillOnce(Return(img));
 
     TS_ASSERT_THROWS_NOTHING(calculator.iterate(dat, err, img, bkg));
 
