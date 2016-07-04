@@ -9,9 +9,6 @@
 #include <set>
 
 namespace Mantid {
-namespace DataObjects {
-class Workspace2D;
-}
 namespace API {
 
 /** A "spectrum" is an object that holds the data for a particular spectrum,
