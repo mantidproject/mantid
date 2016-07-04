@@ -1,8 +1,9 @@
 #pylint: disable=no-init,invalid-name
 from mantid.simpleapi import *
-from mantid.kernel import StringListValidator, Direction
+from mantid.kernel import StringListValidator, IntBoundedValidator, Direction
 from mantid.api import DataProcessorAlgorithm, PropertyMode, AlgorithmFactory, \
-                       MultipleFileProperty, FileProperty, FileAction, MatrixWorkspaceProperty
+                       MultipleFileProperty, FileProperty, FileAction, \
+                       MatrixWorkspaceProperty
 from mantid import config, logger, mtd
 
 import numpy as np
@@ -11,38 +12,37 @@ import os.path
 #pylint: disable=too-many-instance-attributes
 class IndirectILLReduction(DataProcessorAlgorithm):
 
+    #workspaces
     _raw_workspace = None
     _red_workspace = None
-    _red_left_workspace = None
-    _red_right_workspace = None
-    _map_file = None
-    _use_mirror_mode = None
-    _save = None
-    _plot = None
-    _instrument_name = None
-    _run_number = None
-    _analyser = None
-    _reflection = None
-    _run_name = None
     _calibration_workspace = None
+    _mnorm_workspace = None
+    _vnorm_workspace = None
+    _unmirror_workspace = None
+
+    #other properties
+    _analyser = None
+    _control_mode = None
+    _instrument_name = None
+    _map_file = None
+    _mirror_sense = None
+    _plot = None
+    _reflection = None
+    _save = None
+    _unmirror_option = None
+    _run_path = None
+    _instrument_name = None
 
     def category(self):
         return "Workflow\\MIDAS;Inelastic\\Reduction"
 
-
     def summary(self):
         return 'Performs an energy transfer reduction for ILL indirect inelastic data.'
-
 
     def PyInit(self):
         # Input options
         self.declareProperty(MultipleFileProperty('Run', extensions=["nxs"]),
                                                   doc='File path of run (s).')
-
-        self.declareProperty(MatrixWorkspaceProperty("CalibrationWorkspace", "",
-                                                     optional=PropertyMode.Optional,
-                                                     direction=Direction.Input),
-                             doc="Workspace containing calibration intensities.")
 
         self.declareProperty(name='Analyser', defaultValue='silicon',
                              validator=StringListValidator(['silicon']),
@@ -57,133 +57,141 @@ class IndirectILLReduction(DataProcessorAlgorithm):
                                           extensions=["xml"]),
                              doc='Filename of the map file to use. If left blank the default will be used.')
 
-        self.declareProperty(name='MirrorMode', defaultValue=False,
-                             doc='Whether to use mirror mode.')
+        self.declareProperty(name='MirrorSense', defaultValue=True,
+                             doc='Whether mirror sense is enabled.')
+
+        self.declareProperty(name='ControlMode', defaultValue=False,
+                             doc='Whether to output the workspaces in intermediate steps.')
+
+        self.declareProperty(name='UnmirrorOption', defaultValue=7,
+                             validator=IntBoundedValidator(lower=0,upper=7),
+                             doc='Unmirroring option.')
 
         # Output workspace properties
-        self.declareProperty(MatrixWorkspaceProperty("RawWorkspace", "",
+        self.declareProperty(MatrixWorkspaceProperty("RawWorkspace", "raw",
                                                      direction=Direction.Output),
                              doc="Name for the output raw workspace created.")
 
-        self.declareProperty(MatrixWorkspaceProperty("ReducedWorkspace", "",
+        self.declareProperty(MatrixWorkspaceProperty("ReducedWorkspace", "red",
                                                      direction=Direction.Output),
-                             doc="Name for the output reduced workspace created. If mirror mode is used this will be the sum of both "
-                             "the left and right hand workspaces.")
+                             doc="Name for the output reduced workspace created.")
 
-        self.declareProperty(MatrixWorkspaceProperty("LeftWorkspace", "",
+        self.declareProperty(MatrixWorkspaceProperty("MNormalisedWorkspace", "mnorm",
                                                      optional=PropertyMode.Optional,
                                                      direction=Direction.Output),
-                             doc="Name for the left workspace if mirror mode is used.")
+                             doc="Name for the workspace normalised to monitor.")
 
-        self.declareProperty(MatrixWorkspaceProperty("RightWorkspace", "",
+        self.declareProperty(MatrixWorkspaceProperty("VNormalisedWorkspace", "vnorm",
                                                      optional=PropertyMode.Optional,
                                                      direction=Direction.Output),
-                             doc="Name for the right workspace if mirror mode is used.")
+                             doc="Name for the workspace normalised to vanadium.")
+
+        self.declareProperty(MatrixWorkspaceProperty("UnmirroredWorkspace", "unmirrored",
+                                                     optional=PropertyMode.Optional,
+                                                     direction=Direction.Output),
+                             doc="Name for the unmirrored workspace.")
+
+        # Optional input calibration workspace
+        self.declareProperty(MatrixWorkspaceProperty("CalibrationWorkspace", "",
+                                                     optional=PropertyMode.Optional,
+                                                     direction=Direction.Input),
+                             doc="Workspace containing calibration intensities.")
 
         # Output options
         self.declareProperty(name='Save', defaultValue=False,
-                             doc='Switch Save result to nxs file Off/On.')
-        self.declareProperty(name='Plot', defaultValue=False,
-                             doc='Whether to plot the output workspace.')
+                             doc='Whether to save the reduced workpsace to nxs file.')
 
+        self.declareProperty(name='Plot', defaultValue=False,
+                             doc='Whether to plot the reduced workspace.')
+
+        self.validateInputs()
 
     def validateInputs(self):
+
         issues = dict()
-
-        red_left_workspace = self.getPropertyValue('LeftWorkspace')
-        red_right_workspace = self.getPropertyValue('RightWorkspace')
-        use_mirror_mode = self.getProperty('MirrorMode').value
-
-        # Need the right and left workspaces for mirror mode
-        if use_mirror_mode:
-            if red_left_workspace == '':
-                issues['LeftWorkspace'] = 'Mirror Mode requires this workspace to be set'
-
-            if red_right_workspace == '':
-                issues['RightWorkspace'] = 'Mirror Mode requires this workspace to be set'
-
         return issues
 
-
     def PyExec(self):
-        self.log().information('IndirectILLreduction')
 
-        run_path = self.getPropertyValue('Run')
+        self._run_path = self.getPropertyValue('Run')
         self._calibration_workspace = self.getPropertyValue('CalibrationWorkspace')
         self._raw_workspace = self.getPropertyValue('RawWorkspace')
         self._red_workspace = self.getPropertyValue('ReducedWorkspace')
-        self._red_left_workspace = self.getPropertyValue('LeftWorkspace')
-        self._red_right_workspace = self.getPropertyValue('RightWorkspace')
-        self._map_file = self.getProperty('MapFile').value
-
-        self._use_mirror_mode = self.getProperty('MirrorMode').value
-        self._save = self.getProperty('Save').value
-        self._plot = self.getProperty('Plot').value
-
-        Load(Filename=run_path, OutputWorkspace=self._raw_workspace)
-
-        instrument = mtd[self._raw_workspace].getInstrument()
-        self._instrument_name = instrument.getName()
-
-        self._run_number = mtd[self._raw_workspace].getRunNumber()
+        self._vnorm_workspace = self.getPropertyValue('VNormalisedWorkspace')
+        self._mnorm_workspace = self.getPropertyValue('MNormalisedWorkspace')
+        self._unmirror_workspace = self.getPropertyValue('UnmirroredWorkspace')
+        self._map_file = self.getPropertyValue('MapFile')
+        self._mirror_sense = self.getPropertyValue('MirrorSense')
+        self._control_mode = self.getPropertyValue('ControlMode')
+        self._unmirror_option = self.getPropertyValue('UnmirrorOption')
+        self._save = self.getPropertyValue('Save')
+        self._plot = self.getPropertyValue('Plot')
         self._analyser = self.getPropertyValue('Analyser')
         self._reflection = self.getPropertyValue('Reflection')
-        self._run_name = self._instrument_name + '_' + str(self._run_number)
 
-        AddSampleLog(Workspace=self._raw_workspace, LogName="mirror_sense",
-                     LogType="String", LogText=str(self._use_mirror_mode))
-
-        logger.information('Nxs file : %s' % run_path)
-
-        output_workspaces = self._reduction()
-
-        if self._save:
-            workdir = config['defaultsave.directory']
-            for ws in output_workspaces:
-                file_path = os.path.join(workdir, ws + '.nxs')
-                SaveNexusProcessed(InputWorkspace=ws, Filename=file_path)
-                logger.information('Output file : ' + file_path)
-
-        if self._plot:
-            from IndirectImport import import_mantidplot
-            mtd_plot = import_mantidplot()
-            graph = mtd_plot.newGraph()
-
-            for ws in output_workspaces:
-                mtd_plot.plotSpectrum(ws, 0, window=graph)
-
-            layer = graph.activeLayer()
-            layer.setAxisTitle(mtd_plot.Layer.Bottom, 'Energy Transfer (meV)')
-            layer.setAxisTitle(mtd_plot.Layer.Left, '')
-            layer.setTitle('')
+        Load(Filename=self._run_path,OutputWorkspace=self._raw_workspace)
+        self.log().information('Loaded .nxs file(s) : %s' % self._run_path)
 
         self.setPropertyValue('RawWorkspace', self._raw_workspace)
-        self.setPropertyValue('ReducedWorkspace', self._red_workspace)
 
-        if self._use_mirror_mode:
-            self.setPropertyValue('LeftWorkspace', self._red_left_workspace)
-            self.setPropertyValue('RightWorkspace', self._red_right_workspace)
+        if type(mtd[self._raw_workspace]) == "GroupWorkspace":
+            instrument = mtd[self._raw_workspace].getItem(0).getInstrument()
+            self._instrument_name = instrument.getName()
+            outWS = self._multifile_reduction()
+        else:
+            instrument = mtd[self._raw_workspace].getInstrument()
+            self._instrument_name = instrument.getName()
+            outWS = self._reduction(self._raw_workspace)
 
+        if self._control_mode == False:
+            self.setPropertyValue('ReducedWorkspace', outWS)
+        else:
+            self.setPropertyValue('MNormalisedWorkspace', outWS[0])
+            self.setPropertyValue('VNormalisedWorkspace', outWS[1])
+            self.setPropertyValue('UnmirroredWorkspace', outWS[2])
+            self.setPropertyValue('ReducedWorkspace', outWS[3])
 
-    def _reduction(self):
+    def _save(self):
+
+        workdir = config['defaultsave.directory']
+        file_path = os.path.join(workdir, self._red_workspace + '.nxs')
+        SaveNexusProcessed(InputWorkspace=self._red_workspace, Filename=file_path)
+        logger.information('Output file : ' + file_path)
+
+    def _plot(self):
+
+        from IndirectImport import import_mantidplot
+        mtd_plot = import_mantidplot()
+        graph = mtd_plot.newGraph()
+        mtd_plot.plotSpectrum(self._red_workspace, 0, window=graph)
+        layer = graph.activeLayer()
+        layer.setAxisTitle(mtd_plot.Layer.Bottom, 'Energy Transfer (micro eV)')
+        layer.setAxisTitle(mtd_plot.Layer.Left, '')
+        layer.setTitle('')
+
+    def _multifile_reduction(self):
+        #do some stuff here
+        return
+
+    def _reduction(self,inWS):
         """
-        Run energy conversion for IN16B
+        Run indirect reduction for IN16B
         """
-        logger.information('Input workspace : %s' % self._raw_workspace)
+        logger.information('Input workspace : %s' % inWS)
 
         idf_directory = config['instrumentDefinition.directory']
         ipf_name = self._instrument_name + '_' + self._analyser + '_' + self._reflection + '_Parameters.xml'
         ipf_path = os.path.join(idf_directory, ipf_name)
 
-        LoadParameterFile(Workspace=self._raw_workspace, Filename=ipf_path)
-        AddSampleLog(Workspace=self._raw_workspace,
+        LoadParameterFile(Workspace=inWS, Filename=ipf_path)
+        AddSampleLog(Workspace=inWS,
                      LogName="facility",
                      LogType="String",
                      LogText="ILL")
 
         if self._map_file == '':
             # path name for default map file
-            instrument = mtd[self._raw_workspace].getInstrument()
+            instrument = mtd[inWS].getInstrument()
             if instrument.hasParameter('Workflow.GroupingFile'):
                 grouping_filename = instrument.getStringParameter('Workflow.GroupingFile')[0]
                 self._map_file = os.path.join(config['groupingFiles.directory'], grouping_filename)
@@ -192,29 +200,55 @@ class IndirectILLReduction(DataProcessorAlgorithm):
 
             logger.information('Map file : %s' % self._map_file)
 
-        grouped_ws = self._run_name + '_group'
-        GroupDetectors(InputWorkspace=self._raw_workspace,
+        grouped_ws = inWS+'_group'
+        GroupDetectors(InputWorkspace=inWS,
                        OutputWorkspace=grouped_ws,
                        MapFile=self._map_file,
                        Behaviour='Average')
 
-        monitor_ws = self._run_name + '_mon'
-        ExtractSingleSpectrum(InputWorkspace=self._raw_workspace,
+        monitor_ws = inWS+'_mon'
+        ExtractSingleSpectrum(InputWorkspace=inWS,
                               OutputWorkspace=monitor_ws,
                               WorkspaceIndex=0)
 
-        if self._use_mirror_mode:
-            output_workspaces = self._run_mirror_mode(monitor_ws, grouped_ws)
+        if self._control_mode == True:
+            output_workspaces = tuple()
+
+        self._mnorm_workspace = self._normalise_to_monitor(monitor_ws, grouped_ws)
+
+        if self._control_mode == True:
+            output_workspaces.add(self._mnorm_workspace)
+
+        self._vnorm_workspace = self._normalise_to_vanadium(self._mnorm_workspace, self._calibration_workspace)
+
+        if self._control_mode == True:
+            output_workspaces.add(self._vnorm_workspace)
+
+        if self._mirror_sense:
+            self._unmirror_workspace = self._unmirror(self._vnorm_workspace)
         else:
-            logger.information('Mirror sense is OFF')
+            self._unmirror_workspace = self._vnorm_workspace
 
-            self._calculate_energy(monitor_ws, grouped_ws, self._red_workspace)
-            output_workspaces = [self._red_workspace]
+        if self._control_mode == True:
+            output_workspaces.add(self._unmirror_workspace)
 
-        return output_workspaces
+        self._red_workspace = self._calculate_energy(self._unmirror_workspace)
 
+        output_workspaces.add(self._red_workspace)
 
-    def _run_mirror_mode(self, monitor_ws, grouped_ws):
+        if self._control_mode == False:
+            return self._red_workspace
+        else:
+            return output_workspaces
+
+    def _normalise_to_monitor(self, mon, ws):
+        return
+
+    def _normalise_to_vanadium(self, ws, van):
+        return
+
+    def _unmirror(self, monitor_ws, grouped_ws):
+        return
         """
         Runs energy reduction with mirror mode.
 
@@ -227,8 +261,8 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         mid_point = int((len(x) - 1) / 2)
 
         #left half
-        left_ws = self._run_name + '_left'
-        left_mon_ws = left_ws + '_left_mon'
+        left_ws = '_left'
+        left_mon_ws = '_left_mon'
         CropWorkspace(InputWorkspace=grouped_ws,
                       OutputWorkspace=left_ws,
                       XMax=x[mid_point - 1])
@@ -236,13 +270,13 @@ class IndirectILLReduction(DataProcessorAlgorithm):
                       OutputWorkspace=left_mon_ws,
                       XMax=x[mid_point - 1])
 
-        self._calculate_energy(left_mon_ws, left_ws, self._red_left_workspace)
-        xl = mtd[self._red_left_workspace].readX(0)
+        #self._calculate_energy(left_mon_ws, left_ws, self._red_left_workspace)
+        #xl = mtd[self._red_left_workspace].readX(0)
 
         logger.information('Energy range, left : %f to %f' % (xl[0], xl[-1]))
 
         #right half
-        right_ws = self._run_name + '_right'
+        right_ws = '_right'
         right_mon_ws = right_ws + '_mon'
         CropWorkspace(InputWorkspace=grouped_ws,
                       OutputWorkspace=right_ws,
@@ -251,7 +285,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
                       OutputWorkspace=right_mon_ws,
                       Xmin=x[mid_point])
 
-        self._calculate_energy(right_mon_ws, right_ws, self._red_right_workspace)
+       # self._calculate_energy(right_mon_ws, right_ws, self._red_right_workspace)
         xr = mtd[self._red_right_workspace].readX(0)
 
         logger.information('Energy range, right : %f to %f' % (xr[0], xr[-1]))
@@ -284,16 +318,12 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         DeleteWorkspace(monitor_ws)
         DeleteWorkspace(grouped_ws)
 
-        return [self._red_left_workspace, self._red_right_workspace, self._red_workspace]
-
-
-    def _calculate_energy(self, monitor_ws, grouped_ws, red_ws):
+    def _calculate_energy(self, monitor_ws, grouped_ws):
         """
         Convert the input run to energy transfer
 
         @param monitor_ws :: name of the monitor workspace to divide by
         @param grouped_ws :: name of workspace with the detectors grouped
-        @param red_ws :: name to call the reduced workspace
         """
         x_range = self._monitor_range(monitor_ws)
         Scale(InputWorkspace=monitor_ws,
@@ -330,11 +360,11 @@ class IndirectILLReduction(DataProcessorAlgorithm):
                OutputWorkspace=grouped_ws)
         formula = self._energy_range(grouped_ws)
         ConvertAxisByFormula(InputWorkspace=grouped_ws,
-                             OutputWorkspace=red_ws,
+                             OutputWorkspace=self._red_workspace,
                              Axis='X',
                              Formula=formula)
 
-        red_ws_p = mtd[red_ws]
+        red_ws_p = mtd[self._red_workspace]
         red_ws_p.getAxis(0).setUnit('DeltaE')
 
         xnew = red_ws_p.readX(0)  # energy array
@@ -343,6 +373,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         DeleteWorkspace(grouped_ws)
         DeleteWorkspace(monitor_ws)
 
+        return self._red_workspace
 
     def _monitor_range(self, monitor_ws):
         """
