@@ -29,14 +29,13 @@ public:
   // constructor
   DetectorEfficiencyCorUserTest()
       : m_Efs(m_numBins + 1), m_inWSName("input_workspace"),
-        m_outWSName("output_workspace")
-  {
-      for (size_t i = 0; i != m_Efs.size(); ++i) {
-          m_Efs[i] = 0.1 + 0.2 * static_cast<double>(i);
-      }
-      std::reverse(m_Efs.begin(), m_Efs.end());
+        m_outWSName("output_workspace") {
+    for (size_t i = 0; i != m_Efs.size(); ++i) {
+        m_Efs[i] = 0.1 + 0.2 * static_cast<double>(i);
+    }
+    std::reverse(m_Efs.begin(), m_Efs.end());
 
-      createInputWorkSpace();
+    createInputWorkSpace();
   }
 
   void test_Init() {
@@ -79,7 +78,7 @@ public:
     for (size_t i = 0; i != outWS->getNumberHistograms(); ++i) {
       const auto &ys = outWS->readY(i);
       const auto &es = outWS->readE(i);
-      for(size_t j = 0; j != ys.size(); ++j) {
+      for (size_t j = 0; j != ys.size(); ++j) {
         const auto eff = efficiency(m_Efs[j]);
         // By default, input workspace has y = 2, e = sqrt(2).
         TS_ASSERT_DELTA(ys[j], 2 * eff0 / eff, 1e-6);
@@ -97,8 +96,8 @@ private:
   static const int m_numBins = 20;
 
   static constexpr double efficiency(double e) {
-    return std::exp(-1.0 / std::sqrt(e))
-        * (1.0 - std::exp(-1.0 / std::sqrt(e)));
+    return std::exp(-1.0 / std::sqrt(e)) *
+           (1.0 - std::exp(-1.0 / std::sqrt(e)));
   }
 
   // Final energies.
