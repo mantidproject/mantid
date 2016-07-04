@@ -297,8 +297,8 @@ void QDataProcessorWidget::showContextMenu(const QPoint &pos) {
   menu->addAction(ui.actionPlotRow);
   menu->addAction(ui.actionPlotGroup);
   menu->addSeparator();
-  menu->addAction(ui.actionPrependRow);
   menu->addAction(ui.actionAppendRow);
+  menu->addAction(ui.actionAppendGroup);
   menu->addSeparator();
   menu->addAction(ui.actionGroupRows);
   menu->addAction(ui.actionCopySelected);
@@ -307,6 +307,7 @@ void QDataProcessorWidget::showContextMenu(const QPoint &pos) {
   menu->addAction(ui.actionClearSelected);
   menu->addSeparator();
   menu->addAction(ui.actionDeleteRow);
+  menu->addAction(ui.actionDeleteGroup);
 
   menu->popup(ui.viewTable->viewport()->mapToGlobal(pos));
 }
