@@ -287,6 +287,7 @@ public:
 
 private:
   void doTest_handleSelectedDataChanged(IMuonFitDataSelector::FitType fitType) {
+    auto &ads = AnalysisDataService::Instance();
     Mantid::API::Grouping grouping;
     grouping.groupNames = {"fwd", "bwd"};
     grouping.pairNames = {"long"};
@@ -335,14 +336,45 @@ private:
     EXPECT_CALL(*m_fitBrowser,
                 setWorkspaceNames(UnorderedElementsAreArray(expectedNames)))
         .Times(1);
+    EXPECT_CALL(*m_dataSelector,
+                setDatasetNames(UnorderedElementsAreArray(expectedNames)))
+        .Times(1);
     EXPECT_CALL(*m_fitBrowser, setWorkspaceName(_)).Times(1);
     m_dataLoader.setDeadTimesType(DeadTimesType::FromFile);
+    ads.add("MUSR00015189", boost::make_shared<WorkspaceGroup>());
     m_presenter->handleSelectedDataChanged(
         grouping, MantidQt::CustomInterfaces::Muon::PlotType::Asymmetry, true);
     // test that all expected names are in the ADS
-    const auto namesInADS = AnalysisDataService::Instance().getObjectNames();
+    const auto namesInADS = ads.getObjectNames();
     for (const QString &name : expectedNames) {
       TS_ASSERT(namesInADS.find(name.toStdString()) != namesInADS.end());
+    }
+    // test that workspaces have been added to correct groups
+    auto existingGroup = ads.retrieveWS<WorkspaceGroup>("MUSR00015189");
+    TS_ASSERT(existingGroup);
+    // Simultaneous case
+    if (fitType == IMuonFitDataSelector::FitType::Simultaneous) {
+      if (existingGroup) {
+        for (int i = 0; i < 4; i++) {
+          TS_ASSERT(existingGroup->contains(expectedNames[i].toStdString()));
+        }
+      }
+      auto newGroup = ads.retrieveWS<WorkspaceGroup>("MUSR00015190");
+      TS_ASSERT(newGroup);
+      if (newGroup) {
+        for (int i = 4; i < 8; i++) {
+          TS_ASSERT(newGroup->contains(expectedNames[i].toStdString()));
+        }
+      }
+    } else {
+      // Coadd case
+      auto newGroup = ads.retrieveWS<WorkspaceGroup>("MUSR00015189-91");
+      TS_ASSERT(newGroup);
+      if (newGroup) {
+        for (const auto &name : expectedNames) {
+          TS_ASSERT(newGroup->contains(name.toStdString()));
+        }
+      }
     }
   }
 
