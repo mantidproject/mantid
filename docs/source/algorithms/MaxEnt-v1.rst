@@ -167,11 +167,11 @@ Output:
 
 .. testoutput:: ExFourierCoeffs
 
-   First  reconstructed coefficient: 0.849
-   Second reconstructed coefficient: 0.847
+   First  reconstructed coefficient: 0.850
+   Second reconstructed coefficient: 0.849
    Third  reconstructed coefficient: 0.848
-   Fourth reconstructed coefficient: 0.901
-   Fifth  reconstructed coefficient: 0.899
+   Fourth reconstructed coefficient: 0.900
+   Fifth  reconstructed coefficient: 0.898
 
 .. figure:: ../images/MaxEntFourierCoefficients.png
    :align: center
@@ -201,9 +201,9 @@ Output:
 
 .. testoutput:: ExMUSR00022725
 
-   Image at -1.359: 0.102
-   Image at 0.000: 0.010
-   Image at 1.359: 0.102
+   Image at -1.359: 0.106
+   Image at 0.000: 0.011
+   Image at 1.359: 0.106
 
 .. figure:: ../images/MaxEntMUSR00022725.png
    :align: center
@@ -233,12 +233,12 @@ Output:
 
 .. testoutput:: ExEMU00020884
 
-   Image (real part) at -1.389: -0.079
-   Image (real part) at  0.000:  0.015
-   Image (real part) at  1.389: -0.079
-   Image (imaginary part) at -1.389: -0.079
-   Image (imaginary part) at  0.000:  0.015
-   Image (imaginary part) at  1.389: -0.079
+   Image (real part) at -1.389: -0.024
+   Image (real part) at  0.000:  0.086
+   Image (real part) at  1.389: -0.024
+   Image (imaginary part) at -1.389: -0.024
+   Image (imaginary part) at  0.000:  0.086
+   Image (imaginary part) at  1.389: -0.024
 
 .. figure:: ../images/MaxEntMUSR00020884.png
    :align: center
@@ -277,7 +277,7 @@ Output:
 .. testoutput:: ExRealImage
 
    Image (real part) at 0.318: 0.000
-   Image (real part) at 0.477: 5.842
+   Image (real part) at 0.477: 5.843
    Image (real part) at 0.637: 0.000
 
 .. figure:: ../images/MaxEntComplexData.png
@@ -367,15 +367,15 @@ the reconstructed data is twice the size of the original (experimental) data.
    evolChi1, evolAngle1, image1, data1 = MaxEnt(InputWorkspace='ws', A=0.0001, ChiTarget=300, MaxIterations=2500, ResolutionFactor=1)
    evolChi2, evolAngle2, image2, data2 = MaxEnt(InputWorkspace='ws', A=0.0001, ChiTarget=300, MaxIterations=5000, ResolutionFactor=2)
 
-   print "Image at %.3f:  %.3f (ResolutionFactor=1)" % (image1.readX(0)[103], image1.readY(0)[103])
-   print "Image at %.3f: %.3f (ResolutionFactor=2)" % (image2.readX(0)[258], image2.readY(0)[258])
+   print "Image at %.3f: %.3f (ResolutionFactor=1)" % (image1.readX(0)[135], image1.readY(0)[135])
+   print "Image at %.3f: %.3f (ResolutionFactor=2)" % (image2.readX(0)[270], image2.readY(0)[270])
 
 Output:
 
 .. testoutput:: ExResolutionFactor
 
-   Image at -7.407:  0.000 (ResolutionFactor=1)
-   Image at -1.389: -0.081 (ResolutionFactor=2)
+   Image at 0.000: 0.086 (ResolutionFactor=1)
+   Image at 0.000: 0.187 (ResolutionFactor=2)
 
 .. figure:: ../images/MaxEntResolutionFactor.png
    :align: center
