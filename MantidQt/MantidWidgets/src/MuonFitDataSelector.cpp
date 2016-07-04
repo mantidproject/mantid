@@ -65,6 +65,11 @@ void MuonFitDataSelector::setUpConnections() {
           SLOT(checkForMultiGroupPeriodSelection()));
   connect(this, SIGNAL(selectedPeriodsChanged()), this,
           SLOT(checkForMultiGroupPeriodSelection()));
+  connect(m_ui.cbDataset, SIGNAL(currentIndexChanged(int)), this,
+          SIGNAL(datasetIndexChanged(int)));
+  connect(m_ui.btnNextDataset, SIGNAL(clicked()), this, SLOT(setNextDataset()));
+  connect(m_ui.btnPrevDataset, SIGNAL(clicked()), this,
+          SLOT(setPreviousDataset()));
 }
 
 /**
@@ -611,6 +616,47 @@ void MuonFitDataSelector::checkForMultiGroupPeriodSelection() {
   const auto periods = getPeriodSelections();
   m_ui.txtSimFitLabel->setEnabled(groups.size() > 1 || periods.size() > 1 ||
                                   getFitType() == FitType::Simultaneous);
+}
+
+/**
+ * Return index of currently selected dataset
+ * @returns :: index of dataset selected in combobox
+ */
+int MuonFitDataSelector::getDatasetIndex() const {
+  return m_ui.cbDataset->currentIndex();
+}
+
+/**
+ * Replaces list of dataset names with the supplied list
+ * @param datasetNames :: [input] List of names to use
+ */
+void MuonFitDataSelector::setDatasetNames(const QStringList &datasetNames) {
+  m_ui.cbDataset->clear();
+  m_ui.cbDataset->addItems(datasetNames);
+}
+
+/**
+ * Called when "previous dataset" is clicked.
+ * Changes combobox to previous dataset, which will raise an event.
+ * If there is no previous dataset, does nothing.
+ */
+void MuonFitDataSelector::setPreviousDataset() {
+  const int index = m_ui.cbDataset->currentIndex();
+  if (index > 0) {
+    m_ui.cbDataset->setCurrentIndex(index - 1);
+  }
+}
+
+/**
+ * Called when "next dataset" is clicked.
+ * Changes combobox to next dataset, which will raise an event.
+ * If there is no next dataset, does nothing.
+ */
+void MuonFitDataSelector::setNextDataset() {
+  const int index = m_ui.cbDataset->currentIndex();
+  if (index < m_ui.cbDataset->count()) {
+    m_ui.cbDataset->setCurrentIndex(index + 1);
+  }
 }
 
 } // namespace MantidWidgets

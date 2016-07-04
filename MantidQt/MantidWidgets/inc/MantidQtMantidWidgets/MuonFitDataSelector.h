@@ -76,6 +76,10 @@ public:
   QString getRuns() const override;
   /// Get label for simultaneous fit
   QString getSimultaneousFitLabel() const override;
+  /// Get index of selected dataset
+  int getDatasetIndex() const override;
+  /// Set names of datasets for selection
+  void setDatasetNames(const QStringList &datasetNames) override;
 
 public slots:
   /// Set number of periods in data
@@ -115,6 +119,8 @@ signals:
   void workspaceChanged();
   /// Simultaneous fit label changed
   void simulLabelChanged();
+  /// Dataset index changed
+  void datasetIndexChanged(int index);
 
 private:
   /// Add a checkbox to Groups section
@@ -145,6 +151,10 @@ private:
   private slots:
   /// Set normal cursor and enable input
   void unsetBusyState();
+  /// Change dataset to previous one
+  void setPreviousDataset();
+  /// Change dataset to next one
+  void setNextDataset();
 };
 
 } // namespace MantidWidgets

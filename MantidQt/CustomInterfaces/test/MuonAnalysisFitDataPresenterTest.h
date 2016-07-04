@@ -57,6 +57,8 @@ public:
   QString getSimultaneousFitLabel() const override {
     return QString("UserSelectedFitLabel");
   }
+  MOCK_CONST_METHOD0(getDatasetIndex, int());
+  MOCK_METHOD1(setDatasetNames, void(const QStringList &));
 };
 
 /// Mock fit property browser
