@@ -72,6 +72,10 @@ public:
   std::vector<std::string> getWorkspaceNamesToFit() const override {
     return m_workspacesToFit;
   }
+  /// User changed dataset index to fit
+  void userChangedDataset(int index) override {
+    emit userChangedDatasetIndex(index);
+  }
 
 public slots:
   /// Perform the fit algorithm
@@ -88,6 +92,8 @@ signals:
   void functionUpdateAndFitRequested(bool sequential) override;
   /// Emitted when number of workspaces to fit is changed
   void workspacesToFitChanged(int n) override;
+  /// Emitted when dataset index to fit is changed
+  void userChangedDatasetIndex(int index) override;
 
 protected:
   void showEvent(QShowEvent *e) override;

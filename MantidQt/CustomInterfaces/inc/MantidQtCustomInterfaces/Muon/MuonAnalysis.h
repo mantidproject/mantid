@@ -261,6 +261,8 @@ private slots:
   void simultaneousFitLabelChanged();
   /// Called when fit completed
   void fitCompleted(const QString &status);
+  /// Called when user changes selected dataset
+  void datasetIndexChanged(int index);
 
 private:
  

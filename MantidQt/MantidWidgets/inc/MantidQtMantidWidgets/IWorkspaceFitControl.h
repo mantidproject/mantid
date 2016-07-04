@@ -44,6 +44,7 @@ public:
   virtual void setWorkspaceNames(const QStringList &wsNames) {}
   virtual void workspacesToFitChanged(int n) {}
   virtual void setSimultaneousLabel(const std::string &label) {}
+  virtual void userChangedDataset(int index) {}
 };
 
 } // namespace MantidWidgets

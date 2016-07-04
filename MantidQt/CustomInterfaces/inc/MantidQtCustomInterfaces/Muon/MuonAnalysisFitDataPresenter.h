@@ -80,6 +80,8 @@ public:
   void handleSimultaneousFitLabelChanged() const;
   /// Transforms fit results when a simultaneous fit finishes
   void handleFitFinished() const;
+  /// Handles user changing selected dataset to display
+  void handleDatasetIndexChanged(int index);
 
 private:
   /// Create workspaces to fit and update fit browser (model)

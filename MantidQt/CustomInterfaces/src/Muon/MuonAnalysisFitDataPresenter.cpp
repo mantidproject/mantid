@@ -497,5 +497,14 @@ ITableWorkspace_sptr MuonAnalysisFitDataPresenter::generateParametersTable(
   return fitTable;
 }
 
+/**
+ * Called when user changes the selected dataset index
+ * Notify model of this change, which will update function browser
+ * @param index :: [input] Selected dataset index
+ */
+void MuonAnalysisFitDataPresenter::handleDatasetIndexChanged(int index) {
+  m_fitBrowser->userChangedDataset(index);
+}
+
 } // namespace CustomInterfaces
 } // namespace MantidQt

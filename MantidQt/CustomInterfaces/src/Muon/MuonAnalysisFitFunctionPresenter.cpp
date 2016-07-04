@@ -44,6 +44,8 @@ void MuonAnalysisFitFunctionPresenter::doConnect() {
             SLOT(handleFunctionLoaded(const QString &)));
     connect(fitBrowser, SIGNAL(workspacesToFitChanged(int)), this,
             SLOT(updateNumberOfDatasets(int)));
+    connect(fitBrowser, SIGNAL(userChangedDatasetIndex(int)), this,
+            SLOT(handleDatasetIndexChanged(int)));
   }
   setParameterUpdates(true);
 }
@@ -198,6 +200,15 @@ void MuonAnalysisFitFunctionPresenter::editLocalParameterClicked(
       m_funcBrowser->setLocalParameterTie(parName, i, ties[i]);
     }
   }
+}
+
+/**
+ * Called when user changes selected dataset.
+ * Update current dataset in function browser.
+ * @param index :: [input] Selected dataset index
+ */
+void MuonAnalysisFitFunctionPresenter::handleDatasetIndexChanged(int index) {
+  m_funcBrowser->setCurrentDataset(index);
 }
 
 } // namespace CustomInterfaces

@@ -43,6 +43,7 @@ public:
   MOCK_METHOD3(setLocalParameterValue, void(const QString &, int, double));
   MOCK_METHOD3(setLocalParameterFixed, void(const QString &, int, bool));
   MOCK_METHOD3(setLocalParameterTie, void(const QString &, int, QString));
+  MOCK_METHOD1(setCurrentDataset, void(int));
 
 private:
   Mantid::API::IFunction_sptr m_func;
@@ -60,6 +61,7 @@ public:
   MOCK_METHOD3(setParameterValue,
                void(const QString &, const QString &, double));
   MOCK_CONST_METHOD0(getWorkspaceNamesToFit, std::vector<std::string>());
+  MOCK_METHOD1(userChangedDatasetIndex, void(int));
 };
 
 class MuonAnalysisFitFunctionPresenterTest : public CxxTest::TestSuite {
@@ -167,6 +169,12 @@ public:
     const int nDatasets(21);
     EXPECT_CALL(*m_funcBrowser, setNumberOfDatasets(nDatasets)).Times(1);
     m_presenter->updateNumberOfDatasets(nDatasets);
+  }
+
+  void test_handleDatasetIndexChanged() {
+    const int index(2);
+    EXPECT_CALL(*m_funcBrowser, setCurrentDataset(index)).Times(1);
+    m_presenter->handleDatasetIndexChanged(index);
   }
 
 private:

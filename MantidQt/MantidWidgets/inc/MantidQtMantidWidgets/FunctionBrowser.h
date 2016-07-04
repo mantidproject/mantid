@@ -174,7 +174,7 @@ public slots:
   // Handling of multiple datasets
   void setNumberOfDatasets(int n) override;
   void resetLocalParameters();
-  void setCurrentDataset(int i);
+  void setCurrentDataset(int i) override;
   void removeDatasets(QList<int> indices);
   void addDatasets(int n);
 

@@ -2060,6 +2060,8 @@ void MuonAnalysis::loadFittings() {
           SLOT(simultaneousFitLabelChanged()));
   connect(m_uiForm.fitBrowser, SIGNAL(fittingDone(const QString &)), this,
           SLOT(fitCompleted(const QString &)));
+  connect(m_dataSelector, SIGNAL(datasetIndexChanged(int)), this,
+          SLOT(datasetIndexChanged(int)));
 }
 
 /**
@@ -3065,6 +3067,17 @@ void MuonAnalysis::fitCompleted(const QString &status) {
   Q_UNUSED(status);
   if (m_fitDataPresenter) {
     m_fitDataPresenter->handleFitFinished();
+  }
+}
+
+/**
+ * Slot: user changed selected dataset index.
+ * Update data presenter with this information.
+ * @param index :: [input] Selected dataset index
+ */
+void MuonAnalysis::datasetIndexChanged(int index) {
+  if (m_fitDataPresenter) {
+    m_fitDataPresenter->handleDatasetIndexChanged(index);
   }
 }
 

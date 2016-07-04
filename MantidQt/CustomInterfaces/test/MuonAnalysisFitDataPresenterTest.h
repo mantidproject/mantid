@@ -72,6 +72,7 @@ public:
   MOCK_METHOD1(setWorkspaceNames, void(const QStringList &));
   MOCK_METHOD1(workspacesToFitChanged, void(int));
   MOCK_METHOD1(setSimultaneousLabel, void(const std::string &));
+  MOCK_METHOD1(userChangedDataset, void(int));
 };
 
 class MuonAnalysisFitDataPresenterTest : public CxxTest::TestSuite {
@@ -276,6 +277,12 @@ public:
     createFittedWorkspacesGroup(label, inputNames);
     m_presenter->handleFitFinished();
     checkFittedWorkspacesHandledCorrectly(label, inputNames);
+  }
+
+  void test_handleDatasetIndexChanged() {
+    const int index = 2;
+    EXPECT_CALL(*m_fitBrowser, userChangedDataset(index)).Times(1);
+    m_presenter->handleDatasetIndexChanged(index);
   }
 
 private:

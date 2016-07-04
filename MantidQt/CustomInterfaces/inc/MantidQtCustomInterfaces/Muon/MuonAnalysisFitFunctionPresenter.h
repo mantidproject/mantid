@@ -64,6 +64,8 @@ public slots:
   void updateNumberOfDatasets(int nDatasets);
   /// When "edit local parameter" button is clicked, launch dialog
   void editLocalParameterClicked(const QString &parName);
+  /// When user changes dataset index, update function browser
+  void handleDatasetIndexChanged(int index);
 
 private:
   /// Connect signals and slots
