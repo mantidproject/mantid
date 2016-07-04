@@ -10,7 +10,7 @@
 #include <io.h>
 // Define the MAX_NAME macro for Windows
 // Maximum base file name size on modern windows systems is 260 characters
-#define MAX_NAME 260
+#define NAME_MAX 260
 #endif /* _WIN32 */
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/TimeSeriesProperty.h"
