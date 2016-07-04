@@ -65,7 +65,14 @@ def apply_standard_displacement(move_info, workspace, coordinates, component):
     move_component(workspace, offset, component_name)
 
 
-def set_selected_components_and_sample_holder_to_original_position(workspace, component_names):
+def is_zero_axis(axis):
+    total_value = 0.0
+    for entry in axis:
+        total_value += abs(entry)
+    return total_value < 1e-4
+
+
+def set_selected_components_to_original_position(workspace, component_names):
     # First get the original rotation and position of the unaltered instrument components. This information
     # is stored in the base instrument
     instrument = workspace.getInstrument()
@@ -74,7 +81,13 @@ def set_selected_components_and_sample_holder_to_original_position(workspace, co
     # Get the original position and rotation
     for component_name in component_names:
         base_component = base_instrument.getComponentByName(component_name)
-        moved_component = base_instrument.getComponentByName(component_name)
+        moved_component = instrument.getComponentByName(component_name)
+
+        # It can be that monitors are already defined in the IDF but they cannot be found on the workspace. They
+        # are buffer monitor names which the experiments might use in the future. Hence we need to check if a component
+        # is zero at this point
+        if base_component is None or moved_component is None:
+            continue
 
         base_position = base_component.getPos()
         base_rotation = base_component.getRotation()
@@ -98,28 +111,30 @@ def set_selected_components_and_sample_holder_to_original_position(workspace, co
                 move_alg.setProperty("X", base_position[0])
                 move_alg.setProperty("Y", base_position[1])
                 move_alg.setProperty("Z", base_position[2])
-            move_alg.excute()
+            move_alg.execute()
 
         rot_alg = None
         if base_rotation != moved_rotation:
-            angle, axis = quaternion_to_angle_and_axis(base_rotation)
-            if rot_alg is None:
-                rot_alg_name = "RotateInstrumentComponent"
-                rot_alg_options = {"Workspace": workspace,
-                                   "RelativePosition": False,
-                                   "ComponentName": component_name,
-                                   "X": axis[0],
-                                   "Y": axis[1],
-                                   "Z": axis[2],
-                                   "Angle": angle}
-                rot_alg = create_unmanaged_algorithm(rot_alg_name, **rot_alg_options)
-            else:
-                rot_alg.setProperty("ComponentName", component_name)
-                rot_alg.setProperty("X", axis[0])
-                rot_alg.setProperty("Y", axis[1])
-                rot_alg.setProperty("Z", axis[2])
-                rot_alg.setProperty("Angle", angle)
-            rot_alg.execute()
+            angle, axis = quaternion_to_angle_and_axis(moved_rotation)
+            # If the axis is a zero vector then, we continue, there is nothing to rotate
+            if not is_zero_axis(axis):
+                if rot_alg is None:
+                    rot_alg_name = "RotateInstrumentComponent"
+                    rot_alg_options = {"Workspace": workspace,
+                                       "RelativeRotation": True,
+                                       "ComponentName": component_name,
+                                       "X": axis[0],
+                                       "Y": axis[1],
+                                       "Z": axis[2],
+                                       "Angle": -1*angle}
+                    rot_alg = create_unmanaged_algorithm(rot_alg_name, **rot_alg_options)
+                else:
+                    rot_alg.setProperty("ComponentName", component_name)
+                    rot_alg.setProperty("X", axis[0])
+                    rot_alg.setProperty("Y", axis[1])
+                    rot_alg.setProperty("Z", axis[2])
+                    rot_alg.setProperty("Angle", -1*angle)
+                rot_alg.execute()
 
 
 def set_components_to_original_for_isis(move_info, workspace, component):
@@ -128,18 +143,28 @@ def set_components_to_original_for_isis(move_info, workspace, component):
     the sample holder
     """
     # We reset the HAB, the LAB, the sample holder and monitor 4
-    if component is None:
+    if not component:
         hab_name = move_info.detectors[SANSConstants.high_angle_bank].detector_name
         lab_name = move_info.detectors[SANSConstants.low_angle_bank].detector_name
-        component_names = move_info.monitor_names.keys()
+        component_names = list(move_info.monitor_names.values())
         component_names.append(hab_name)
         component_names.append(lab_name)
+        component_names.append("some-sample-holder")
     else:
         component_names = [component]
 
     # We also want to check the sample holder
-    component_names.append("some-sample-holder")
-    set_selected_components_and_sample_holder_to_original_position(workspace, component_names)
+    set_selected_components_to_original_position(workspace, component_names)
+
+
+def get_detector_component(move_info, component):
+    component_selection = component
+    if component:
+        for detector_keys in move_info.detectors.keys():
+            if (component == move_info.detectors[detector_keys].detector_name or
+               component == move_info.detectors[detector_keys].detector_name_short):
+                component_selection = detector_keys
+    return component_selection
 
 
 # -------------------------------------------------
@@ -170,40 +195,56 @@ class SANSMove(object):
 
     def move_initial(self, move_info, workspace, coordinates, component):
         SANSMove._validate(move_info, workspace, coordinates, component)
-        return self.do_move_initial(move_info, workspace, coordinates, component)
+        component_selection = get_detector_component(move_info, component)
+        return self.do_move_initial(move_info, workspace, coordinates, component_selection)
 
     def move_with_elementary_displacement(self, move_info, workspace, coordinates, component):
         SANSMove._validate(move_info, workspace, coordinates, component)
-        return self.do_move_initial(move_info, workspace, coordinates, component)
+        component_selection = get_detector_component(move_info, component)
+        return self.do_move_with_elementary_displacement(move_info, workspace, coordinates, component_selection)
 
     def set_to_zero(self, move_info, workspace, component):
         SANSMove._validate_set_to_zero(move_info, workspace, component)
-        return self.do_set_to_zero(self, move_info, workspace, component)
+        return self.do_set_to_zero(move_info, workspace, component)
 
     @staticmethod
-    def _validate(move_info, workspace, coordinates, component):
-        if not coordinates:
-            raise ValueError("SANSMove: The provided coordinates cannot be empty.")
+    def _validate_component(move_info, component):
+        if component is not None and len(component) != 0:
+            found_name = False
+            for detector_keys in move_info.detectors.keys():
+                if (component == move_info.detectors[detector_keys].detector_name or
+                   component == move_info.detectors[detector_keys].detector_name_short):
+                    found_name = True
+                    break
+            if not found_name:
+                raise ValueError("SANSMove: The component to be moved {} cannot be found in the"
+                                 " state information of type {}".format(str(component), str(type(move_info))))
+
+    @staticmethod
+    def _validate_workspace(workspace):
         if not isinstance(workspace, MatrixWorkspace):
             raise ValueError("SANSMove: The input workspace has to be a MatrixWorkspace")
-        if component is not None and component not in move_info.detectors:
-            raise ValueError("SANSMove: The component to be moved {} cannot be found in the"
-                             " state information of type {}".format(str(component), str(type(move_info))))
+
+    @staticmethod
+    def _validate_state(move_info):
         if not isinstance(move_info, SANSStateMove):
             raise ValueError("SANSMove: The provided state information is of the wrong type. It must be"
                              " of type SANSStateMove, but was {}".format(str(type(move_info))))
+
+    @staticmethod
+    def _validate(move_info, workspace, coordinates, component):
+        SANSMove._validate_state(move_info)
+        if coordinates is None or len(coordinates) == 0:
+            raise ValueError("SANSMove: The provided coordinates cannot be empty.")
+        SANSMove._validate_workspace(workspace)
+        SANSMove._validate_component(move_info, component)
         move_info.validate()
 
     @staticmethod
     def _validate_set_to_zero(move_info, workspace, component):
-        if not isinstance(workspace, MatrixWorkspace):
-            raise ValueError("SANSMove: The input workspace has to be a MatrixWorkspace")
-        if component is not None and component not in move_info.detectors:
-            raise ValueError("SANSMove: The component to be moved {} cannot be found in the"
-                             " state information of type {}".format(str(component), str(type(move_info))))
-        if not isinstance(move_info, SANSStateMove):
-            raise ValueError("SANSMove: The provided state information is of the wrong type. It must be"
-                             " of type SANSStateMove, but was {}".format(str(type(move_info))))
+        SANSMove._validate_state(move_info)
+        SANSMove._validate_workspace(workspace)
+        SANSMove._validate_component(move_info, component)
         move_info.validate()
 
 

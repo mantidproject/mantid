@@ -62,13 +62,13 @@ class SANSMove(DataProcessorAlgorithm):
         state = create_deserialized_sans_state_from_property_manager(state_property_manager)
 
         # Get the correct SANS move strategy from the SANSMoveFactory
+        workspace = self.getProperty(SANSConstants.workspace).value
         move_factory = SANSMoveFactory()
-        mover = move_factory.create_mover(state)
+        mover = move_factory.create_mover(workspace)
 
         # Get the workspace and the beam coordinates
-        workspace = self.getProperty(SANSConstants.input_workspace).value
         coordinates = self.getProperty("BeamCoordinates").value
-        component = self.getProperty("Components").value
+        component = self.getProperty("Component").value
         move_info = state.move
 
         # Get which move operation the user wants to perform on the workspace. This can be:
@@ -112,13 +112,14 @@ class SANSMove(DataProcessorAlgorithm):
             errors.update({"BeamCoordinates": "Beam coordinates were not specified."})
 
         # If components were specified, then check if they are part of the workspace
-        component = self.getProperty("Component")
-        if component is not None or len(component) != 0:
-            workspace = self.getProperty(SANSConstants.input_workspace).value
+        component = self.getProperty("Component").value
+        if component:
+            workspace = self.getProperty(SANSConstants.workspace).value
             instrument = workspace.getInstrument()
             component_by_name = instrument.getComponentByName(component)
             if component_by_name is None:
-                errors.update({"Component": "The component cannot be found on the workspace."})
+                errors.update({"Component": "The component {} cannot be found on "
+                                            "the workspace.".format(str(component))})
         return errors
 
 

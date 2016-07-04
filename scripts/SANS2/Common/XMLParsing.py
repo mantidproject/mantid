@@ -45,14 +45,13 @@ def get_monitor_names_from_idf_file(idf_file):
                 start = sub_element.get("start")
                 end = sub_element.get("end")
                 if val:
-                    output.update({int(val): name})
+                    output.update({val: name})
                     element.clear()
                 elif start and end:
                     for index in range(int(start), int(end) + 1):
                         monitor_id = "monitor" + str(index)
-                        output.update({index: monitor_id})
+                        output.update({str(index): monitor_id})
                     element.clear()
                 else:
                     continue
-
     return output
