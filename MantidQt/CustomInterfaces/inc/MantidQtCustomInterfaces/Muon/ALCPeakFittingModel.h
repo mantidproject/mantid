@@ -7,7 +7,6 @@
 #include "MantidQtCustomInterfaces/Muon/IALCPeakFittingModel.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
 
-
 namespace MantidQt {
 namespace CustomInterfaces {
 
@@ -39,9 +38,15 @@ class MANTIDQT_CUSTOMINTERFACES_DLL ALCPeakFittingModel
 public:
   // -- IALCPeakFittingModel interface
   // -----------------------------------------------------------
-  Mantid::API::IFunction_const_sptr fittedPeaks() const override { return m_fittedPeaks; }
-  Mantid::API::MatrixWorkspace_const_sptr data() const override { return m_data; }
-  Mantid::API::ITableWorkspace_sptr parameterTable() const { return m_parameterTable; }
+  Mantid::API::IFunction_const_sptr fittedPeaks() const override {
+    return m_fittedPeaks;
+  }
+  Mantid::API::MatrixWorkspace_const_sptr data() const override {
+    return m_data;
+  }
+  Mantid::API::ITableWorkspace_sptr parameterTable() const {
+    return m_parameterTable;
+  }
 
   void fitPeaks(Mantid::API::IFunction_const_sptr peaks) override;
   // -- End of IALCPeakFittingModel interface

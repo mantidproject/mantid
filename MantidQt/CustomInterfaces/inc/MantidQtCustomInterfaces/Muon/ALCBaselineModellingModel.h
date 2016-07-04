@@ -7,7 +7,6 @@
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidQtCustomInterfaces/Muon/IALCBaselineModellingModel.h"
 
-
 namespace MantidQt {
 namespace CustomInterfaces {
 /** ALCBaselineModellingModel : Concrete ALC Baseline Modelling step model
@@ -51,7 +50,9 @@ public:
 
   Mantid::API::MatrixWorkspace_const_sptr correctedData() const override;
 
-  Mantid::API::ITableWorkspace_sptr parameterTable() const { return m_parameterTable; }
+  Mantid::API::ITableWorkspace_sptr parameterTable() const {
+    return m_parameterTable;
+  }
 
   const std::vector<Section> &sections() const { return m_sections; }
 
@@ -97,8 +98,9 @@ private:
                                     const std::vector<Section> &sections);
 
   /// Enable previously disabled points
-  static void enableDisabledPoints(Mantid::API::MatrixWorkspace_sptr destWs,
-                                   Mantid::API::MatrixWorkspace_const_sptr sourceWs);
+  static void
+  enableDisabledPoints(Mantid::API::MatrixWorkspace_sptr destWs,
+                       Mantid::API::MatrixWorkspace_const_sptr sourceWs);
 };
 
 } // namespace CustomInterfaces

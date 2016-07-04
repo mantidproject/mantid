@@ -20,7 +20,6 @@ class ErrorCurve;
 namespace MantidQt {
 namespace CustomInterfaces {
 
-
 /** ALCBaselineModellingView : Widget-based implementation of the ALC Baseline
   Modelling step
                                interface.
@@ -87,7 +86,8 @@ private slots:
 
 private:
   /// Helper to set range selector values
-  void setSelectorValues(MantidWidgets::RangeSelector *selector, SectionSelector values);
+  void setSelectorValues(MantidWidgets::RangeSelector *selector,
+                         SectionSelector values);
 
   /// The widget used
   QWidget *const m_widget;

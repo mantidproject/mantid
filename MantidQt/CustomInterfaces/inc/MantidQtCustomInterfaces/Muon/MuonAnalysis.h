@@ -45,7 +45,6 @@ struct GroupResult {
 };
 }
 
-
 /**
 This is the main class for the MuonAnalysis interface
 see <http://www.mantidproject.org/MuonAnalysis>.
@@ -288,8 +287,10 @@ private:
   void plotItem(ItemType itemType, int tableRow, PlotType plotType);
 
   /// Creates workspace ready for analysis and plotting
-  Mantid::API::Workspace_sptr createAnalysisWorkspace(ItemType itemType, int tableRow,
-                                         PlotType type, bool isRaw = false);
+  Mantid::API::Workspace_sptr createAnalysisWorkspace(ItemType itemType,
+                                                      int tableRow,
+                                                      PlotType type,
+                                                      bool isRaw = false);
 
   /// Returns PlotType as chosen using given selector
   PlotType parsePlotType(QComboBox *selector);
@@ -330,7 +331,8 @@ private:
   Mantid::API::Workspace_sptr loadDeadTimes(const std::string &filename) const;
 
   /// Convert dead times workspace to table workspace
-  Mantid::API::ITableWorkspace_sptr deadTimesToTable(const Mantid::API::Workspace_sptr &deadTimes) const;
+  Mantid::API::ITableWorkspace_sptr
+  deadTimesToTable(const Mantid::API::Workspace_sptr &deadTimes) const;
 
   /// Gets table of dead time corrections from the loaded workspace
   Mantid::API::ITableWorkspace_sptr
@@ -479,8 +481,9 @@ private:
   void loadWidgetValue(QWidget *target, const QVariant &defaultValue);
 
   /// Groups the workspace
-  Mantid::API::Workspace_sptr groupWorkspace(const std::string &wsName,
-                                const std::string &groupingName) const;
+  Mantid::API::Workspace_sptr
+  groupWorkspace(const std::string &wsName,
+                 const std::string &groupingName) const;
 
   /// Groups loaded workspace using information from Grouping Options tab
   void groupLoadedWorkspace();

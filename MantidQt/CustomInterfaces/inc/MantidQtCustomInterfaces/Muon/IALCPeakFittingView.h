@@ -67,7 +67,8 @@ public slots:
 
   /// Set function displayed in Function Browser
   /// @param newFunction :: New function to display
-  virtual void setFunction(const Mantid::API::IFunction_const_sptr &newFunction) = 0;
+  virtual void
+  setFunction(const Mantid::API::IFunction_const_sptr &newFunction) = 0;
 
   /// Update a single parameter in Function Browser
   /// @param funcIndex :: Index of the function where to update parameter
@@ -82,7 +83,8 @@ public slots:
 
   /// Resize/move PeakPicker so that it represents specified peak
   /// @param peak :: A new peak to represent
-  virtual void setPeakPicker(const Mantid::API::IPeakFunction_const_sptr &peak) = 0;
+  virtual void
+  setPeakPicker(const Mantid::API::IPeakFunction_const_sptr &peak) = 0;
 
   /**
    * Pops-up an error box

@@ -29,7 +29,6 @@
 
 #include "MantidKernel/ANN/ANNx.h" // all ANN includes
 
-
 //----------------------------------------------------------------------
 //	Generic kd-tree node
 //

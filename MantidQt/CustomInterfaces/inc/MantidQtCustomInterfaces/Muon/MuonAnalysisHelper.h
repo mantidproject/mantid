@@ -34,11 +34,12 @@ getValidatedDouble(QLineEdit *field, const QString &defaultValue,
 MANTIDQT_CUSTOMINTERFACES_DLL size_t numPeriods(Mantid::API::Workspace_sptr ws);
 
 /// Print various information about the run
-MANTIDQT_CUSTOMINTERFACES_DLL void printRunInfo(Mantid::API::MatrixWorkspace_sptr runWs,
-                                                std::ostringstream &out);
+MANTIDQT_CUSTOMINTERFACES_DLL void
+printRunInfo(Mantid::API::MatrixWorkspace_sptr runWs, std::ostringstream &out);
 
 /// Get a run label for the workspace
-MANTIDQT_CUSTOMINTERFACES_DLL std::string getRunLabel(const Mantid::API::Workspace_sptr &ws);
+MANTIDQT_CUSTOMINTERFACES_DLL std::string
+getRunLabel(const Mantid::API::Workspace_sptr &ws);
 
 /// Get a run label for a list of workspaces
 MANTIDQT_CUSTOMINTERFACES_DLL std::string

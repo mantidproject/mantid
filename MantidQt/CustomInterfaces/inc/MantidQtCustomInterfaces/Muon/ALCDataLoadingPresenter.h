@@ -46,7 +46,9 @@ public:
   void initialize();
 
   /// @return Last loaded data workspace
-  Mantid::API::MatrixWorkspace_const_sptr loadedData() const { return m_loadedData; }
+  Mantid::API::MatrixWorkspace_const_sptr loadedData() const {
+    return m_loadedData;
+  }
 
   /// @return Loaded data as MatrixWorkspace_sptr
   Mantid::API::MatrixWorkspace_sptr exportWorkspace();

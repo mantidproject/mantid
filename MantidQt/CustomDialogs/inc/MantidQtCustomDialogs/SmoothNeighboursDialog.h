@@ -4,7 +4,6 @@
 #include "MantidQtAPI/AlgorithmDialog.h"
 #include "MantidQtAPI/AlgorithmPropertiesWidget.h"
 
-
 class SmoothNeighboursDialog : public MantidQt::API::AlgorithmDialog {
   Q_OBJECT
 
