@@ -365,6 +365,7 @@ set ( MOC_FILES inc/MantidQtCustomInterfaces/Background.h
                 inc/MantidQtCustomInterfaces/Muon/IALCPeakFittingView.h
                 inc/MantidQtCustomInterfaces/Muon/IALCPeakFittingModel.h
                 inc/MantidQtCustomInterfaces/Muon/MuonAnalysis.h
+				inc/MantidQtCustomInterfaces/Muon/MuonAnalysisFitDataPresenter.h
                 inc/MantidQtCustomInterfaces/Muon/MuonAnalysisFitDataTab.h
 				inc/MantidQtCustomInterfaces/Muon/MuonAnalysisFitFunctionPresenter.h
                 inc/MantidQtCustomInterfaces/Muon/MuonAnalysisHelper.h

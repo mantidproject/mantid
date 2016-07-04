@@ -7,6 +7,7 @@
 #include "MantidQtCustomInterfaces/Muon/MuonAnalysisOptionTab.h"
 #include "MantidQtMantidWidgets/IMuonFitDataSelector.h"
 #include "MantidQtMantidWidgets/IWorkspaceFitControl.h"
+#include <QObject>
 
 /// Save some typing
 typedef std::pair<
@@ -48,7 +49,9 @@ namespace CustomInterfaces {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTIDQT_CUSTOMINTERFACES_DLL MuonAnalysisFitDataPresenter {
+class MANTIDQT_CUSTOMINTERFACES_DLL MuonAnalysisFitDataPresenter
+    : public QObject {
+  Q_OBJECT
 public:
   /// Constructor
   MuonAnalysisFitDataPresenter(
