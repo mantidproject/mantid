@@ -149,6 +149,9 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
                 AlignDetectors(InputWorkspace=ws_name,
                                OutputWorkspace=ws_name,
                                CalibrationFile=self._cal_file)
+                DiffractionFocussing(InputWorkspace=ws_name,
+                                     OutputWorkspace=ws_name,
+                                     GroupingFileName=self._cal_file)
 
         # Load container if run is given
         if self._container_data_files is not None:
@@ -190,10 +193,6 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
                     Minus(LHSWorkspace=ws_name,
                           RHSWorkspace=self._container_workspace,
                           OutputWorkspace=ws_name)
-
-                '''DiffractionFocussing(InputWorkspace=ws_name,
-                                         OutputWorkspace=ws_name,
-                                         GroupingFileName=self._cal_file)'''
 
                 monitor_ws_name = ws_name + '_mon'
 
