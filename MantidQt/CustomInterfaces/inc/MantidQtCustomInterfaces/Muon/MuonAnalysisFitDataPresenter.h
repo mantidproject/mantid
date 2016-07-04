@@ -95,7 +95,8 @@ private:
   /// Create analysis workspace
   Mantid::API::Workspace_sptr
   createWorkspace(const std::string &name,
-                  const Mantid::API::Grouping &grouping) const;
+                  const Mantid::API::Grouping &grouping,
+                  std::string &groupLabel) const;
   /// Get rebin options for analysis
   std::string getRebinParams(const Mantid::API::Workspace_sptr ws) const;
   /// Rename fit workspaces, add logs and generate params table

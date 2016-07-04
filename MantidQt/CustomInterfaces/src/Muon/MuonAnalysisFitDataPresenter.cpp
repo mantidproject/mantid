@@ -140,8 +140,12 @@ void MuonAnalysisFitDataPresenter::createWorkspacesToFit(
       // We already have it! Leave it there
     } else {
       // Create here and add to the ADS
-      const auto ws = createWorkspace(name, grouping);
+      std::string groupLabel;
+      const auto ws = createWorkspace(name, grouping, groupLabel);
       AnalysisDataService::Instance().add(name, ws);
+      if (!groupLabel.empty()) {
+        MuonAnalysisHelper::groupWorkspaces(groupLabel, {name});
+      }
     }
   }
 
@@ -245,10 +249,12 @@ std::vector<std::string> MuonAnalysisFitDataPresenter::generateWorkspaceNames(
  * @param name :: [input] Name of workspace to create (in format INST0001234;
  * Pair; long; Asym; 1; #1)
  * @param grouping :: [input] Grouping table from interface
+ * @param groupLabel :: [output] Label to group workspace under
  * @returns :: workspace
  */
 Mantid::API::Workspace_sptr MuonAnalysisFitDataPresenter::createWorkspace(
-    const std::string &name, const Mantid::API::Grouping &grouping) const {
+    const std::string &name, const Mantid::API::Grouping &grouping,
+    std::string &groupLabel) const {
   Mantid::API::Workspace_sptr outputWS;
 
   // parse name to get runs, periods, groups etc
@@ -264,6 +270,7 @@ Mantid::API::Workspace_sptr MuonAnalysisFitDataPresenter::createWorkspace(
   try {
     // This will sum multiple runs together
     const auto loadedData = m_dataLoader.loadFiles(filenames);
+    groupLabel = loadedData.label;
 
     // correct and group the data
     const auto correctedData =
