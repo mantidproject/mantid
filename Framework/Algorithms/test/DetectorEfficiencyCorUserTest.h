@@ -95,7 +95,7 @@ private:
   static constexpr double m_Ei = 3.27;
   static const int m_numBins = 20;
 
-  static constexpr double efficiency(double e) {
+  static double efficiency(double e) {
     return std::exp(-1.0 / std::sqrt(e)) *
            (1.0 - std::exp(-1.0 / std::sqrt(e)));
   }
