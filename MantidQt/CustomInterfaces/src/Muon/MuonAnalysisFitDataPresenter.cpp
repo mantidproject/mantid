@@ -7,6 +7,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidQtCustomInterfaces/Muon/MuonAnalysisFitDataPresenter.h"
 #include "MantidQtCustomInterfaces/Muon/MuonAnalysisHelper.h"
+#include "MantidQtCustomInterfaces/Muon/MuonSequentialFitDialog.h"
 #include "MantidQtMantidWidgets/MuonFitPropertyBrowser.h"
 #include <boost/lexical_cast.hpp>
 
@@ -56,6 +57,8 @@ void MuonAnalysisFitDataPresenter::doConnect() {
             SLOT(handleFitFinished(const QString &)));
     connect(fitBrowser, SIGNAL(xRangeChanged(double, double)), this,
             SLOT(handleXRangeChangedGraphically(double, double)));
+    connect(fitBrowser, SIGNAL(sequentialFitRequested()), this,
+            SLOT(openSequentialFitDialog()));
   }
   if (const QObject *dataSelector = dynamic_cast<QObject *>(m_dataSelector)) {
     connect(dataSelector, SIGNAL(dataPropertiesChanged()), this,
@@ -536,6 +539,35 @@ ITableWorkspace_sptr MuonAnalysisFitDataPresenter::generateParametersTable(
  */
 void MuonAnalysisFitDataPresenter::handleDatasetIndexChanged(int index) {
   m_fitBrowser->userChangedDataset(index);
+}
+
+/**
+ * Called when user requests a sequential fit.
+ * Open the dialog and set up the correct options.
+ */
+void MuonAnalysisFitDataPresenter::openSequentialFitDialog() {
+  // Make sure we have a real fit browser, not a testing mock
+  auto *fitBrowser =
+      dynamic_cast<MantidWidgets::MuonFitPropertyBrowser *>(m_fitBrowser);
+  if (!fitBrowser) {
+    return;
+  }
+
+  // Lambda to convert QStringList to std::vector<std::string>
+  const auto toVector = [](const QStringList &qsl) {
+    std::vector<std::string> vec;
+    std::transform(qsl.begin(), qsl.end(), std::back_inserter(vec),
+                   [](const QString &qs) { return qs.toStdString(); });
+    return vec;
+  };
+
+  // Open the dialog
+  fitBrowser->blockSignals(true);
+  MuonSequentialFitDialog dialog(
+      fitBrowser, this, toVector(m_dataSelector->getChosenGroups()),
+      toVector(m_dataSelector->getPeriodSelections()));
+  dialog.exec();
+  fitBrowser->blockSignals(false);
 }
 
 } // namespace CustomInterfaces

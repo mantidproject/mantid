@@ -238,9 +238,6 @@ private slots:
   /// Saves the value of the widget which called the slot
   void saveWidgetValue();
 
-  /// Opens a sequential fit dialog
-  void openSequentialFitDialog();
-
   /// Update front
   void updateFront();
 
@@ -328,10 +325,6 @@ private:
 
   /// Returns custom dead time table file name as set on the interface
   std::string deadTimeFilename() const;
-
-  /// Creates an algorithm with all the properties set according to widget
-  /// values on the interface
-  Algorithm_sptr createProcessAlgorithm();
 
   /// Plots specific WS spectrum (used by plotPair and plotGroup)
   void plotSpectrum(const QString &wsName, bool logScale = false);

@@ -1,5 +1,4 @@
 #include "MantidQtCustomInterfaces/Muon/MuonSequentialFitDialog.h"
-#include "MantidQtMantidWidgets/MuonFitPropertyBrowser.h"
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/AlgorithmProxy.h"
@@ -7,11 +6,14 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidQtCustomInterfaces/Muon/MuonAnalysisFitDataPresenter.h"
+#include "MantidQtMantidWidgets/MuonFitPropertyBrowser.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
+using MantidQt::CustomInterfaces::MuonAnalysisFitDataPresenter;
 using MantidQt::MantidWidgets::MuonFitPropertyBrowser;
 
 namespace {
@@ -22,12 +24,17 @@ const std::string MuonSequentialFitDialog::SEQUENTIAL_PREFIX("MuonSeqFit_");
 /**
  * Constructor
  * @param fitPropBrowser :: [input] Pointer to fit property browser
- * @param processAlg :: [input] MuonProcess algorithm to use
+ * @param dataPresenter :: [input] Pointer to fit data presenter
+ * @param groupNames :: [input] List of groups/pairs to fit for each run
+ * @param periods :: [input] List of periods to fit for each run
  */
 MuonSequentialFitDialog::MuonSequentialFitDialog(
-    MuonFitPropertyBrowser *fitPropBrowser, Algorithm_sptr processAlg)
+    MuonFitPropertyBrowser *fitPropBrowser,
+    MuonAnalysisFitDataPresenter *dataPresenter,
+    const std::vector<std::string> &groupNames,
+    const std::vector<std::string> &periods)
     : QDialog(fitPropBrowser), m_fitPropBrowser(fitPropBrowser),
-      m_processAlg(processAlg) {
+      m_dataPresenter(dataPresenter), m_groups(groupNames), m_periods(periods) {
   m_ui.setupUi(this);
 
   setState(Stopped);

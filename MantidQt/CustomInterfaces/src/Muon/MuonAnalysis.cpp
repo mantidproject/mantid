@@ -172,8 +172,6 @@ void MuonAnalysis::initLayout() {
   }
 
   m_uiForm.fitBrowser->init();
-  connect(m_uiForm.fitBrowser, SIGNAL(sequentialFitRequested()), this,
-          SLOT(openSequentialFitDialog()));
 
   // alow appending files
   m_uiForm.mwRunFiles->allowMultipleFiles(true);
@@ -2752,38 +2750,6 @@ ITableWorkspace_sptr MuonAnalysis::parseGrouping() {
 }
 
 /**
- * Opens a sequential fit dialog.
- */
-void MuonAnalysis::openSequentialFitDialog() {
-  Algorithm_sptr procAlg;
-
-  try {
-    procAlg = createProcessAlgorithm();
-  } catch (const std::runtime_error &err) {
-    QString message("Error while setting algorithm properties.\n"
-                    "If instrument was changed, properties will have been "
-                    "cleared and should be reset.\n\n"
-                    "Error was: ");
-    message.append(err.what());
-    QMessageBox::critical(this, "Unable to open dialog", message);
-    g_log.error(message.toLatin1().data());
-    return;
-  } catch (...) {
-    QMessageBox::critical(this, "Unable to open dialog",
-                          "Error while setting algorithm properties");
-    return;
-  }
-
-  m_uiForm.fitBrowser->blockSignals(true);
-
-  MuonSequentialFitDialog *dialog =
-      new MuonSequentialFitDialog(m_uiForm.fitBrowser, procAlg);
-  dialog->exec();
-
-  m_uiForm.fitBrowser->blockSignals(false);
-}
-
-/**
  * Returns custom dead time table file name as set on the interface.
  * @return The filename
  */
@@ -2792,99 +2758,6 @@ std::string MuonAnalysis::deadTimeFilename() const {
     throw std::runtime_error("Specified Dead Time file is not valid.");
 
   return m_uiForm.mwRunDeadTimeFile->getFirstFilename().toStdString();
-}
-
-/**
- * Creates an algorithm with all the properties set according to widget values
- * on the interface.
- * @return The algorithm with properties set
- */
-Algorithm_sptr MuonAnalysis::createProcessAlgorithm() {
-  Algorithm_sptr procAlg =
-      AlgorithmManager::Instance().createUnmanaged("MuonProcess");
-  procAlg->initialize();
-  procAlg->setProperty("Mode", "Combined");
-
-  // -- Dead Time Correction --------------------------------------------------
-  // If ApplyDeadTimeCorrection is set, the algorithm must have DeadTimeTable
-  // set too. If it can't be set here (from disk file), the sequential fit
-  // must load the dead times from each file.
-
-  if (m_uiForm.deadTimeType->currentIndex() != 0) {
-    procAlg->setProperty("ApplyDeadTimeCorrection", true);
-
-    if (m_uiForm.deadTimeType->currentIndex() == 2) { // From Specified File
-      m_dataLoader.setDeadTimesType(Muon::DeadTimesType::FromDisk,
-                                    deadTimeFilename());
-      // The LoadResult passed in isn't used, it will read from the file
-      procAlg->setProperty("DeadTimeTable",
-                           m_dataLoader.getDeadTimesTable(LoadResult()));
-    }
-  }
-
-  // -- Grouping --------------------------------------------------------------
-
-  ITableWorkspace_sptr grouping = parseGrouping();
-  procAlg->setProperty("DetectorGroupingTable", grouping);
-
-  // -- X axis options --------------------------------------------------------
-  procAlg->setProperty("Xmin", startTime());
-
-  double Xmax = finishTime();
-  if (Xmax != EMPTY_DBL()) {
-    procAlg->setProperty("Xmax", Xmax);
-  }
-
-  double timeZero = m_uiForm.timeZeroFront->text().toDouble();
-  procAlg->setProperty("TimeZero", timeZero);
-
-  // -- Rebin options ---------------------------------------------------------
-  std::string params =
-      rebinParams(AnalysisDataService::Instance().retrieve(m_grouped_name));
-
-  if (!params.empty()) {
-    procAlg->setPropertyValue("RebinParams", params);
-  }
-
-  // -- Group/pair properties -------------------------------------------------
-
-  int index = getGroupOrPairToPlot();
-
-  if (index >= numGroups()) {
-    procAlg->setProperty("OutputType", "PairAsymmetry");
-    int tableRow = m_pairToRow[index - numGroups()];
-
-    QTableWidget *t = m_uiForm.pairTable;
-
-    double alpha = t->item(tableRow, 3)->text().toDouble();
-    int index1 =
-        static_cast<QComboBox *>(t->cellWidget(tableRow, 1))->currentIndex();
-    int index2 =
-        static_cast<QComboBox *>(t->cellWidget(tableRow, 2))->currentIndex();
-
-    procAlg->setProperty("PairFirstIndex", index1);
-    procAlg->setProperty("PairSecondIndex", index2);
-    procAlg->setProperty("Alpha", alpha);
-  } else {
-    if (parsePlotType(m_uiForm.frontPlotFuncs) == Asymmetry)
-      procAlg->setProperty("OutputType", "GroupAsymmetry");
-    else
-      procAlg->setProperty("OutputType", "GroupCounts");
-
-    int groupIndex = getGroupNumberFromRow(m_groupToRow[index]);
-    procAlg->setProperty("GroupIndex", groupIndex);
-  }
-
-  // -- Period options --------------------------------------------------------
-
-  procAlg->setProperty("SummedPeriodSet", getSummedPeriods());
-
-  const auto subtracted = getSubtractedPeriods();
-  if (subtracted != "None") {
-    procAlg->setProperty("SubtractedPeriodSet", subtracted);
-  }
-
-  return procAlg;
 }
 
 /**

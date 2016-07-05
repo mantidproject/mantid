@@ -13,6 +13,8 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
+class MuonAnalysisFitDataPresenter;
+
 /** MuonSequentialFitDialog : Dialog for running sequential fits for Muon data
 
   Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
@@ -43,7 +45,9 @@ class MANTIDQT_CUSTOMINTERFACES_DLL MuonSequentialFitDialog : public QDialog {
 public:
   MuonSequentialFitDialog(
       MantidQt::MantidWidgets::MuonFitPropertyBrowser *fitPropBrowser,
-      Mantid::API::Algorithm_sptr processAlg);
+      MuonAnalysisFitDataPresenter *dataPresenter,
+      const std::vector<std::string> &groupNames,
+      const std::vector<std::string> &periods);
   ~MuonSequentialFitDialog() override;
 
   enum DialogState { Preparing, Running, Stopped };
@@ -58,7 +62,7 @@ signals:
 private:
   // -- FUNCTIONS -----------------------------------------------------------
 
-  /// Check if all the input field are valid
+  /// Check if all the input fields are valid
   bool isInputValid();
 
   /// Set current dialog state
@@ -74,7 +78,7 @@ private:
   /// Helper function to create new item for Diagnosis table
   QTableWidgetItem *createTableWidgetItem(const QString &text);
 
-  // -- VARIABLES -----------------------------------------------------------
+  // -- MEMBER VARIABLES -----------------------------------------------
 
   /// UI form
   Ui::MuonSequentialFitDialog m_ui;
@@ -88,8 +92,14 @@ private:
   /// Whether user requested fitting to be stopped
   bool m_stopRequested;
 
-  /// Algorithm the dialog should use for processing loaded data
-  Mantid::API::Algorithm_sptr m_processAlg;
+  /// Fit data presenter passed in to constructor
+  MuonAnalysisFitDataPresenter *m_dataPresenter;
+
+  /// List of groups/pairs
+  const std::vector<std::string> m_groups;
+
+  /// List of periods
+  const std::vector<std::string> m_periods;
 
   // -- STATIC MEMBERS ------------------------------------------------------
 
@@ -98,6 +108,8 @@ private:
 
   /// Returns displayable title for the given workspace
   static std::string getRunTitle(Mantid::API::Workspace_const_sptr ws);
+
+  // -- SLOTS ------------------------------------------------------
 
 private slots:
   /// Updates visibility/tooltip of label error asterisk

@@ -87,6 +87,8 @@ public slots:
   void handleSimultaneousFitLabelChanged() const;
   /// Handles user changing selected dataset to display
   void handleDatasetIndexChanged(int index);
+  /// Open sequential fit dialog
+  void openSequentialFitDialog();
 
 private:
   /// Create workspaces to fit and update fit browser (model)
