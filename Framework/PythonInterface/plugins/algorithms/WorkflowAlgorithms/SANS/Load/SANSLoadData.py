@@ -1,5 +1,5 @@
 # pylint: disable=too-few-public-methods, invalid-name, fixme, unused-argument
-
+# pylint: disable-msg=R0922
 """ Implementation for the SANSLoad algorithm"""
 
 from abc import (ABCMeta, abstractmethod)
@@ -53,7 +53,7 @@ def get_file_and_period_information_from_data(data):
 
 def is_transmission_type(to_check):
     if ((to_check is SANSDataType.SampleTransmission) or (to_check is SANSDataType.SampleDirect) or
-        (to_check is SANSDataType.CanTransmission) or (to_check is SANSDataType.CanDirect)):
+            (to_check is SANSDataType.CanTransmission) or (to_check is SANSDataType.CanDirect)):
         is_transmission = True
     else:
         is_transmission = False

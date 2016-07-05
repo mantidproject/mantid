@@ -1,4 +1,4 @@
-# pylint disable=too-few-public-methods, invalid-name
+# pylint: disable=too-few-public-methods, invalid-name
 
 import os
 import h5py as h5

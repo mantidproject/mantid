@@ -163,7 +163,7 @@ def get_detector_component(move_info, component):
     if component:
         for detector_keys in move_info.detectors.keys():
             if (component == move_info.detectors[detector_keys].detector_name or
-                component == move_info.detectors[detector_keys].detector_name_short):
+                        component == move_info.detectors[detector_keys].detector_name_short):
                 component_selection = detector_keys
     return component_selection
 
@@ -214,7 +214,7 @@ class SANSMove(object):
             found_name = False
             for detector_keys in move_info.detectors.keys():
                 if (component == move_info.detectors[detector_keys].detector_name or
-                    component == move_info.detectors[detector_keys].detector_name_short):
+                            component == move_info.detectors[detector_keys].detector_name_short):
                     found_name = True
                     break
             if not found_name:
@@ -328,7 +328,7 @@ class SANSMoveSANS2D(SANSMove):
                     hab_detector_x - hab_detector.x_translation_correction -
                     hab_detector.side_correction*(1.0 - math.cos(rotation_in_radians)) +
                     (hab_detector_radius + hab_detector.radius_correction)*(math.sin(rotation_in_radians))) -
-                    hab_detector_default_x_m - x)
+                   hab_detector_default_x_m - x)
 
         y_shift = hab_detector.y_translation_correction - y
 

@@ -1,18 +1,20 @@
-# pylint disable=too-many-public-methods, invalid-name, too-many-arguments
+# pylint: disable=too-many-public-methods, invalid-name, too-many-arguments
 
 import unittest
 import stresstesting
-import mantid
 
 
 from mantid.api import AlgorithmManager
 from mantid.kernel import (Quat, V3D)
 from SANS.Move.SANSMoveWorkspaces import (SANSMoveFactory, SANSMoveLOQ, SANSMoveSANS2D, SANSMoveLARMORNewStyle,
                                           SANSMoveLARMOROldStyle)
-from SANS2.State.SANSStateData import SANSStateDataISIS
-from SANS2.State.SANSState import SANSStateISIS
 from SANS2.State.StateBuilder.SANSStateMoveBuilder import get_state_move_builder
 from SANS2.Common.SANSConstants import SANSConstants
+# Not clear why the names in the module are not found by Pylint, but it seems to get confused. Hence this check
+# needs to be disabled here.
+# pylint: disable=no-name-in-module
+from SANS2.State.SANSStateData import SANSStateDataISIS
+from SANS2.State.SANSState import SANSStateISIS
 
 
 def load_workspace(file_name):
@@ -123,19 +125,19 @@ class SANSMoveTest(unittest.TestCase):
         self.compare_expected_position(expected_position_elementary_move, expected_rotation,
                                        component_key, move_info, workspace)
 
-    def check_that_sets_to_zero(self, workspace, move_alg, move_info, component=None):
+    def check_that_sets_to_zero(self, workspace, move_alg, move_info, comp_name=None):
         # Reset the position to zero
         move_alg.setProperty(SANSConstants.workspace, workspace)
         move_alg.setProperty("MoveType", "SetToZero")
-        if component is not None:
-            move_alg.setProperty("Component", component)
+        if comp_name is not None:
+            move_alg.setProperty("Component", comp_name)
         else:
             move_alg.setProperty("Component", "")
         move_alg.execute()
         self.assertTrue(move_alg.isExecuted())
 
         # Get the components to compare
-        if component is None:
+        if comp_name is None:
             hab_name = move_info.detectors[SANSConstants.high_angle_bank].detector_name
             lab_name = move_info.detectors[SANSConstants.low_angle_bank].detector_name
             component_names = list(move_info.monitor_names.values())
@@ -143,7 +145,7 @@ class SANSMoveTest(unittest.TestCase):
             component_names.append(lab_name)
             component_names.append("some-sample-holder")
         else:
-            component_names = [component]
+            component_names = [comp_name]
 
         # Ensure that the positions on the base instrument and the instrument are the same
         instrument = workspace.getInstrument()
@@ -224,7 +226,7 @@ class SANSMoveTest(unittest.TestCase):
                                                                                  component_elementary_move_key)
 
         # Act + Assert for setting to zero position for all
-        self.check_that_sets_to_zero(workspace, move_alg, state.move, component="main-detector-bank")
+        self.check_that_sets_to_zero(workspace, move_alg, state.move, comp_name="main-detector-bank")
 
     def test_that_SANS2D_can_move(self):
         # Arrange
@@ -281,7 +283,7 @@ class SANSMoveTest(unittest.TestCase):
                                                                                  component_elementary_move_key)
 
         # Act + Assert for setting to zero position for all
-        self.check_that_sets_to_zero(workspace, move_alg, state.move, component=None)
+        self.check_that_sets_to_zero(workspace, move_alg, state.move, comp_name=None)
 
     def test_that_LARMOR_new_style_can_move(self):
         # Arrange
@@ -310,7 +312,7 @@ class SANSMoveTest(unittest.TestCase):
                                        component_to_investigate, state.move, workspace)
 
         # Act + Assert for setting to zero position for all
-        self.check_that_sets_to_zero(workspace, move_alg, state.move, component=None)
+        self.check_that_sets_to_zero(workspace, move_alg, state.move, comp_name=None)
 
     def test_that_LARMOR_old_Style_can_be_moved(self):
         # Arrange
@@ -337,7 +339,7 @@ class SANSMoveTest(unittest.TestCase):
                                        component_to_investigate, state.move, workspace)
 
         # Act + Assert for setting to zero position for all
-        self.check_that_sets_to_zero(workspace, move_alg, state.move, component=None)
+        self.check_that_sets_to_zero(workspace, move_alg, state.move, comp_name=None)
 
 
 class SANSMoveRunnerTest(stresstesting.MantidStressTest):
