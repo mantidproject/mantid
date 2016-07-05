@@ -1,7 +1,7 @@
 ﻿#pylint: disable=invalid-name
 from mantid.simpleapi import *
 from mantid import config,api
-from mantid.kernel import funcreturns
+from mantid.kernel import funcinspect
 
 from Direct.PropertyManager import PropertyManager
 # this import is used by children
@@ -540,7 +540,7 @@ class ReductionWrapper(object):
             data search path
         """
         try:
-            _,r = funcreturns.lhs_info('both')
+            _,r = funcinspect.lhs_info('both')
             out_ws_name = r[0]
 # no-exception-type(s) specified. Who knows what exception this internal procedure rises...
 #pylint: disable=W0702
@@ -654,7 +654,7 @@ def iliad(reduce):
         #seq = inspect.stack()
         # output workspace name.
         try:
-            _,r = funcreturns.lhs_info('both')
+            _,r = funcinspect.lhs_info('both')
             out_ws_name = r[0]
 # no-exception-type(s) specified. Who knows what exception this internal procedure rises...
 #pylint: disable=W0702

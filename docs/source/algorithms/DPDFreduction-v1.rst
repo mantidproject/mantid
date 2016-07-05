@@ -75,7 +75,7 @@ of the banks
    :align: center
 
 The gaps lead to empty bins in the :math:`S(\theta,E)` histogram which in turn generate
-significant errors in the final :math:`S(Q,E)` for certain values of :match:`Q`.
+significant errors in the final :math:`S(Q,E)` for certain values of :math:`Q`.
 To prevent this we carry out a linear interpolation in :math:`S(\theta,E)`
 at the blind-strip :math:`\theta` angles.
 

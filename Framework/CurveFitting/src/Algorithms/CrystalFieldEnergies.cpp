@@ -16,7 +16,7 @@ using Mantid::API::WorkspaceProperty;
 using Mantid::CurveFitting::ComplexFortranMatrix;
 using Mantid::CurveFitting::DoubleFortranMatrix;
 using Mantid::CurveFitting::DoubleFortranVector;
-using Mantid::CurveFitting::Functions::calculateEigesystem;
+using Mantid::CurveFitting::Functions::calculateEigensystem;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CrystalFieldEnergies)
@@ -173,7 +173,7 @@ void CrystalFieldEnergies::exec() {
   DoubleFortranVector en;
   ComplexFortranMatrix wf;
   ComplexFortranMatrix ham;
-  calculateEigesystem(en, wf, ham, nre, bmol, bext, bkq);
+  calculateEigensystem(en, wf, ham, nre, bmol, bext, bkq);
 
   setProperty("Energies", en.toStdVector());
   setProperty("Eigenvectors", wf.packToStdVector());

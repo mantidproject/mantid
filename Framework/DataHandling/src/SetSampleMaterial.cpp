@@ -24,8 +24,6 @@ namespace DataHandling {
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SetSampleMaterial)
 
-SetSampleMaterial::SetSampleMaterial() : Mantid::API::Algorithm() {}
-SetSampleMaterial::~SetSampleMaterial() {}
 const std::string SetSampleMaterial::name() const {
   return "SetSampleMaterial";
 }

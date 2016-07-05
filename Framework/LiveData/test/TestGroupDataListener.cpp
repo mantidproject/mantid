@@ -22,9 +22,6 @@ TestGroupDataListener::TestGroupDataListener() : ILiveListener(), m_buffer() {
   m_dataReset = false;
 }
 
-/// Destructor
-TestGroupDataListener::~TestGroupDataListener() {}
-
 bool TestGroupDataListener::connect(const Poco::Net::SocketAddress &) {
   // Do nothing.
   return true;

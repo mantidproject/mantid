@@ -37,16 +37,6 @@ namespace DataHandling {
 
 DECLARE_ALGORITHM(SaveDetectorsGrouping)
 
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-SaveDetectorsGrouping::SaveDetectorsGrouping() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-SaveDetectorsGrouping::~SaveDetectorsGrouping() {}
-
 /// Define input parameters
 void SaveDetectorsGrouping::init() {
   declareProperty(

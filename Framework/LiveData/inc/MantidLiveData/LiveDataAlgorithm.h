@@ -40,8 +40,6 @@ namespace LiveData {
 */
 class DLLExport LiveDataAlgorithm : public API::Algorithm {
 public:
-  LiveDataAlgorithm();
-  ~LiveDataAlgorithm() override;
   const std::string category() const override;
 
   void copyPropertyValuesFrom(const LiveDataAlgorithm &other);

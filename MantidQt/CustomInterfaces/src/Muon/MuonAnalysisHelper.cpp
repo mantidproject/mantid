@@ -14,6 +14,7 @@
 #include <QLineEdit>
 #include <QCheckBox>
 #include <QComboBox>
+#include <QSpinBox>
 
 #include <boost/lexical_cast.hpp>
 #include <boost/scope_exit.hpp>
@@ -191,7 +192,7 @@ void WidgetAutoSaver::registerWidget(QWidget *widget, const QString &name,
 }
 
 /**
- * Return a signal (which can be used instead of SIGNAL()) which is emmited when
+ * Return a signal (which can be used instead of SIGNAL()) which is emitted when
  * given widget is
  * changed.
  * @param widget
@@ -205,8 +206,10 @@ const char *WidgetAutoSaver::changedSignal(QWidget *widget) {
     return SIGNAL(stateChanged(int));
   } else if (qobject_cast<QComboBox *>(widget)) {
     return SIGNAL(currentIndexChanged(int));
+  } else if (qobject_cast<QSpinBox *>(widget)) {
+    return SIGNAL(valueChanged(int));
   }
-  // ... add more as neccessary
+  // ... add more as necessary
   else {
     throw std::runtime_error("Unsupported widget type");
   }

@@ -17,16 +17,6 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 
 //--------------------------------------------------------------------------
-/** Constructor
- */
-SelectCellOfType::SelectCellOfType() {}
-
-//--------------------------------------------------------------------------
-/** Destructor
- */
-SelectCellOfType::~SelectCellOfType() {}
-
-//--------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void SelectCellOfType::init() {

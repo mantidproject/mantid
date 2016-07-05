@@ -35,12 +35,6 @@ namespace DataHandling {
 
 DECLARE_FILELOADER_ALGORITHM(LoadCanSAS1D2)
 
-/// constructor
-LoadCanSAS1D2::LoadCanSAS1D2() : LoadCanSAS1D() {}
-
-/// destructor
-LoadCanSAS1D2::~LoadCanSAS1D2() {}
-
 /// Overwrites Algorithm Init method.
 void LoadCanSAS1D2::init() {
   LoadCanSAS1D::init();

@@ -595,10 +595,6 @@ class LoadVesuvio(LoadEmptyVesuvio):
                          OutputWorkspace=SUMMED_WS,
                          XMax=x_max,
                          EnableLogging=_LOGGING_)
-        ms.CropWorkspace(Inputworkspace= SUMMED_WS + '_monitors',
-                         OutputWorkspace=SUMMED_WS + '_monitors',
-                         XMax=self._mon_tof_max,
-                         EnableLogging=_LOGGING_)
 
         summed_data, summed_mon = mtd[SUMMED_WS], mtd[SUMMED_WS + '_monitors']
 
@@ -1040,13 +1036,6 @@ class LoadVesuvio(LoadEmptyVesuvio):
             crop.setProperty("XMax", self._tof_max)
             crop.execute()
             self.foil_out = crop.getProperty("OutputWorkspace").value
-            if self._load_monitors:
-                crop_mon = self.createChildAlgorithm("CropWorkspace")
-                crop.setProperty("InputWorkspace" , self._load_monitors_workspace)
-                crop.setProperty("OutputWorkspace", self._load_monitors_workspace)
-                crop.setProperty("XMax", self._tof_max)
-                crop.execute()
-                self._load_monitors_workspace = crop.getProperty("OutputWorkspace").value
 
         self.setProperty(WKSP_PROP, self.foil_out)
         # Add OutputWorkspace property for Monitors

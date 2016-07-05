@@ -48,10 +48,10 @@ public:
   /// Convenience typdef for workspace names.
   typedef std::vector<WorkspaceGroup_sptr> VecWSGroupType;
   /// Constructor
-  MultiPeriodGroupWorker();
-  /// Copy constructor
+  MultiPeriodGroupWorker() = default;
+  /// Constructor
   MultiPeriodGroupWorker(const std::string &workspacePropertyName);
-  virtual ~MultiPeriodGroupWorker();
+  virtual ~MultiPeriodGroupWorker() = default;
   /// Flag to indicate use of a custom workspace property
   bool useCustomWorkspaceProperty() const;
   /// Check groups

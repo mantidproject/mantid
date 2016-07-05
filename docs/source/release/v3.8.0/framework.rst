@@ -15,6 +15,9 @@ New
 Improved
 ########
 
+- :ref:`FilterEvents <algm-FilterEvents>` now produces output
+  workspaces with the same workspace numbers as specified by the
+  ``SplittersWorkspace``.
 
 Deprecated
 ##########
@@ -28,14 +31,23 @@ Performance
 CurveFitting
 ------------
 
+- Added two new minimizers belonging to the trust region family of algorithms: DTRS and More-Sorensen.
+
 Improved
 ########
+
 
 Python
 ------
 
+
 Python Algorithms
 #################
+
+Bug Fixes
+---------
+- Scripts generated from history including algorithms that added dynamic properties at run time (for example Fit, and Load) will not not include those dynamic properties in their script.  This means they will execute without warnings.
+
 
 |
 

@@ -29,8 +29,6 @@ LoadRawBin0::LoadRawBin0()
       m_cache_options(), m_specTimeRegimes(), m_prog(0.0), m_lengthIn(0),
       m_perioids(), m_total_specs(0), m_timeChannelsVec() {}
 
-LoadRawBin0::~LoadRawBin0() {}
-
 /// Initialisation method.
 void LoadRawBin0::init() {
   LoadRawHelper::init();

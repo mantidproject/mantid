@@ -51,6 +51,7 @@ set ( EXPORT_FILES
   src/Exports/WorkspaceGroup.cpp
   src/Exports/WorkspaceGroupProperty.cpp
   src/Exports/WorkspaceValidators.cpp
+  src/Exports/ADSValidator.cpp
   src/Exports/InstrumentValidator.cpp
   src/Exports/Axis.cpp
   src/Exports/IPeak.cpp

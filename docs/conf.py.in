@@ -77,6 +77,16 @@ pygments_style = 'sphinx'
 # Run this before each test is executed
 doctest_global_setup = """
 from mantid.simpleapi import *
+# doctest.py examines the global scope for future imports
+# and uses the sames ones in the executing scope. We don't want the
+# Python-3 style behaviour in the docs yet.
+try:
+    del print_function
+    del absolute_import
+    del division
+    del unicode_literals
+except NameError:
+    pass
 """
 
 # Run this after each test group has executed

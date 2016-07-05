@@ -17,8 +17,6 @@ namespace Crystal {
 class DLLExport StatisticsOfPeaksWorkspace : public API::Algorithm {
 public:
   StatisticsOfPeaksWorkspace();
-  ~StatisticsOfPeaksWorkspace() override;
-
   /// Algorithm's name for identification
   const std::string name() const override {
     return "StatisticsOfPeaksWorkspace";

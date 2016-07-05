@@ -5,6 +5,9 @@ qti-based MantidPlot Python plotting interface
 As with other MantidPlot modules, this has to run from within MantidPlot
 
 """
+from __future__ import (absolute_import, division,
+                        print_function)
+
 # Require MantidPlot
 try:
     import _qti

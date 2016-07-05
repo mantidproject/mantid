@@ -189,7 +189,6 @@ void AnvredCorrection::exec() {
 
     // Copy over bin boundaries
     const auto &inSpec = m_inputWS->getSpectrum(i);
-    inSpec.lockData(); // for MRU-related thread safety
 
     const MantidVec &Xin = inSpec.readX();
     correctionFactors->dataX(i) = Xin;
@@ -246,8 +245,6 @@ void AnvredCorrection::exec() {
         E[j] = Ein[j] * value;
       }
     }
-
-    inSpec.unlockData();
 
     prog.report();
 
