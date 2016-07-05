@@ -38,6 +38,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
     _instrument_name = None
     _reflection = None
     _unmirror_option = None
+    _instrument = None
 
     def category(self):
         return "Workflow\\MIDAS;Inelastic\\Reduction"
@@ -158,12 +159,12 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         self.setPropertyValue('RawWorkspace', self._raw_ws)
 
         if type(mtd[self._raw_ws]) == "GroupWorkspace":
-            instrument = mtd[self._raw_ws].getItem(0).getInstrument()
-            self._instrument_name = instrument.getName()
+            self._instrument = mtd[self._raw_ws].getItem(0).getInstrument()
+            self._loadParamFiles()
             out_ws = self._multifile_reduction(self._raw_ws)
         else:
-            instrument = mtd[self._raw_ws].getInstrument()
-            self._instrument_name = instrument.getName()
+            self._instrument = mtd[self._raw_ws].getInstrument()
+            self._loadParamFiles()
             out_ws = self._reduction(self._raw_ws)
 
         if self._control_mode == False:
@@ -175,6 +176,28 @@ class IndirectILLReduction(DataProcessorAlgorithm):
             self.setPropertyValue('VNormalisedWorkspace', out_ws[3])
             self.setPropertyValue('UnmirroredWorkspace', out_ws[4])
             self.setPropertyValue('ReducedWorkspace', out_ws[5])
+
+    def _loadParamFiles(self):
+        """
+        Loads parameter and detector grouping map file
+        """
+
+        self._instrument_name = self._instrument.getName()
+        idf_directory = config['instrumentDefinition.directory']
+        ipf_name = self._instrument_name + '_' + self._analyser + '_' + self._reflection + '_Parameters.xml'
+        self._parameter_file = os.path.join(idf_directory, ipf_name)
+
+        logger.information('Parameter file : %s' % self._parameter_file)
+
+        if self._map_file == '':
+            # path name for default map file
+            if self._instrument.hasParameter('Workflow.GroupingFile'):
+               grouping_filename = self._instrument.getStringParameter('Workflow.GroupingFile')[0]
+               self._map_file = os.path.join(config['groupingFiles.directory'], grouping_filename)
+            else:
+              raise ValueError("Failed to find default detector grouping file. Please specify.")
+
+        logger.information('Map file : %s' % self._map_file)
 
     def _save(self):
         """
@@ -220,23 +243,6 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         """
 
         logger.information('Reducting input workspace : %s' % ws)
-
-        idf_directory = config['instrumentDefinition.directory']
-        ipf_name = self._instrument_name + '_' + self._analyser + '_' + self._reflection + '_Parameters.xml'
-        self._parameter_file = os.path.join(idf_directory, ipf_name)
-
-        logger.information('Parameter file : %s' % self._parameter_file)
-
-        if self._map_file == '':
-            # path name for default map file
-            instrument = mtd[ws].getInstrument()
-            if instrument.hasParameter('Workflow.GroupingFile'):
-               grouping_filename = instrument.getStringParameter('Workflow.GroupingFile')[0]
-               self._map_file = os.path.join(config['groupingFiles.directory'], grouping_filename)
-            else:
-              raise ValueError("Failed to find default detector grouping file. Please specify.")
-
-        logger.information('Map file : %s' % self._map_file)
 
         LoadParameterFile(Workspace=ws, Filename=self._parameter_file)
 
