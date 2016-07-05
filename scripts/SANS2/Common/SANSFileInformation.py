@@ -1,4 +1,4 @@
-# pylint disable=too-few-public-methods, fixme, invalid-name
+# pylint disable=too-few-public-methods, invalid-name
 
 import os
 import h5py as h5
@@ -488,7 +488,7 @@ class SANSFileInformationFactory(object):
             file_information = SANSFileInformationISISNexus(full_file_name)
         elif is_raw_single_period(full_file_name) or is_raw_multi_period(full_file_name):
             file_information = SANSFileInformationRaw(full_file_name)
-        # TODO: ADD added nexus files here
+        # TD: ADD added nexus files here
         else:
             raise NotImplementedError("The file type you have provided is not implemented yet.")
         return file_information

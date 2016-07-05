@@ -1,3 +1,4 @@
+# pylint: disable=invalid-name, too-many-arguments
 from functools import (partial, wraps)
 
 

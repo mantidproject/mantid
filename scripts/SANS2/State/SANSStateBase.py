@@ -124,14 +124,12 @@ class SANSStateBase(object):
     __metaclass__ = ABCMeta
 
     @property
-    @abstractmethod
     def property_manager(self):
-        pass
+        return convert_state_to_dict(self)
 
     @property_manager.setter
-    @abstractmethod
     def property_manager(self, value):
-        pass
+        set_state_from_property_manager(self, value)
 
     @abstractmethod
     def validate(self):
@@ -150,3 +148,10 @@ def sans_parameters(cls):
         if isinstance(attribute_value, TypedParameter):
             attribute_value.name = '_{}#{}'.format(type(attribute_value).__name__, attribute_name)
     return cls
+
+
+# Note we have this import at the end since this is a cyclical dependency on SANSStateSerializer. The dependency
+# is not a hack, since these elements are equally core-like. The SANSStateBase should execute the serialization
+# And the for the the serialization it is important to check against SANSStateBase type, hence the dependency.
+# Placing the import at the end solves this issue, see here: http://effbot.org/zone/import-confusion.htm
+from SANS2.State.SANSStateSerializer import (convert_state_to_dict, set_state_from_property_manager)

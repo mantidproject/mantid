@@ -4,7 +4,6 @@
 
 import json
 from SANS2.State.SANSStateBase import (SANSStateBase, StringParameter, PositiveIntegerParameter, sans_parameters)
-from SANS2.State.SANSStateSerializer import(convert_state_to_dict, set_state_from_property_manager)
 
 
 # ------------------------------------
@@ -89,14 +88,6 @@ class SANSStateDataISIS(SANSStateBase, SANSStateData):
         self.can_scatter_period = SANSStateData.ALL_PERIODS
         self.can_transmission_period = SANSStateData.ALL_PERIODS
         self.can_direct_period = SANSStateData.ALL_PERIODS
-
-    @property
-    def property_manager(self):
-        return convert_state_to_dict(self)
-
-    @property_manager.setter
-    def property_manager(self, value):
-        set_state_from_property_manager(self, value)
 
     def validate(self):
         is_invalid = dict()

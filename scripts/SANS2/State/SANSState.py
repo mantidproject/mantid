@@ -4,7 +4,6 @@ import json
 import pickle
 import inspect
 from SANS2.State.SANSStateBase import (SANSStateBase, TypedParameter, sans_parameters)
-from SANS2.State.SANSStateSerializer import(convert_state_to_dict, set_state_from_property_manager)
 from SANS2.State.SANSStateData import SANSStateData
 from SANS2.State.SANSStateMove import SANSStateMove
 
@@ -63,11 +62,3 @@ class SANSStateISIS(SANSStateBase, SANSState):
 
         if is_invalid:
             raise ValueError("SANSState: There is an issue with your in put. See: {}".format(json.dumps(is_invalid)))
-
-    @property
-    def property_manager(self):
-        return convert_state_to_dict(self)
-
-    @property_manager.setter
-    def property_manager(self, value):
-        set_state_from_property_manager(self, value)

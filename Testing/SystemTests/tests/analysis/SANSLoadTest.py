@@ -311,7 +311,7 @@ class SANSLoadTest(unittest.TestCase):
 
 class SANSLoadDataRunnerTest(stresstesting.MantidStressTest):
     def __init__(self):
-        stresstesting.MantidStressTest.__init__()
+        stresstesting.MantidStressTest.__init__(self)
         self._success = False
 
     def runTest(self):

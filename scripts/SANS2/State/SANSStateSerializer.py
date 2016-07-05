@@ -1,7 +1,7 @@
-# pylint: disable=too-few-public-methods
+# pylint: disable=too-few-public-methods, invalid-name
 
 """Serializes and deserializes SANSState obejcts when passed into Algorithms."""
-from mantid.kernel import (PropertyManager)
+from mantid.kernel import PropertyManager
 import inspect
 import importlib
 from SANS2.State.SANSStateBase import (SANSStateBase, TypedParameter, ClassTypeParameter)

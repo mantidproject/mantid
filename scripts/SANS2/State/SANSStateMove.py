@@ -5,7 +5,6 @@
 import json
 from SANS2.State.SANSStateBase import (SANSStateBase, FloatParameter, DictParameter, ClassTypeParameter,
                                        StringParameter, sans_parameters)
-from SANS2.State.SANSStateSerializer import(convert_state_to_dict, set_state_from_property_manager)
 from SANS2.Common.SANSConstants import (SANSConstants)
 from SANS2.Common.SANSEnumerations import (Coordinates, CanonicalCoordinates)
 
@@ -54,14 +53,6 @@ class SANSStateMoveDetectorISIS(SANSStateBase, SANSStateMove):
         self.y_tilt_correction = 0.0
         self.z_tilt_correction = 0.0
 
-    @property
-    def property_manager(self):
-        return convert_state_to_dict(self)
-
-    @property_manager.setter
-    def property_manager(self, value):
-        set_state_from_property_manager(self, value)
-
     def validate(self):
         is_invalid = {}
         if not self.detector_name:
@@ -92,14 +83,6 @@ class SANSStateMoveISIS(SANSStateBase, SANSStateMove):
         self.detectors = {SANSConstants.low_angle_bank: SANSStateMoveDetectorISIS(),
                           SANSConstants.high_angle_bank: SANSStateMoveDetectorISIS()}
 
-    @property
-    def property_manager(self):
-        return convert_state_to_dict(self)
-
-    @property_manager.setter
-    def property_manager(self, value):
-        set_state_from_property_manager(self, value)
-
     def validate(self):
         # No validation of the descriptors on this level, let potential exceptions from detectors "bubble" up
         for key in self.detectors:
@@ -118,14 +101,6 @@ class SANSStateMoveLOQ(SANSStateMoveISIS):
 
         # Set the monitor names
         self.monitor_names = {}
-
-    @property
-    def property_manager(self):
-        return convert_state_to_dict(self)
-
-    @property_manager.setter
-    def property_manager(self, value):
-        set_state_from_property_manager(self, value)
 
     def validate(self):
         # No validation of the descriptors on this level, let potential exceptions from detectors "bubble" up
@@ -172,14 +147,6 @@ class SANSStateMoveSANS2D(SANSStateMoveISIS):
 
         self.monitor_4_offset = 0.0
 
-    @property
-    def property_manager(self):
-        return convert_state_to_dict(self)
-
-    @property_manager.setter
-    def property_manager(self, value):
-        set_state_from_property_manager(self, value)
-
     def validate(self):
         super(SANSStateMoveSANS2D, self).validate()
 
@@ -197,14 +164,6 @@ class SANSStateMoveLARMOR(SANSStateMoveISIS):
 
         # Set the monitor names
         self.monitor_names = {}
-
-    @property
-    def property_manager(self):
-        return convert_state_to_dict(self)
-
-    @property_manager.setter
-    def property_manager(self, value):
-        set_state_from_property_manager(self, value)
 
     def validate(self):
         super(SANSStateMoveLARMOR, self).validate()
