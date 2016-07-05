@@ -181,22 +181,10 @@
     </item>
     <item>
      <widget class="QStackedWidget" name="swVanadium">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
-      </property>
       <property name="currentIndex">
        <number>1</number>
       </property>
       <widget class="QWidget" name="pageCalibration">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
        <layout class="QVBoxLayout" name="verticalLayout_3">
         <property name="margin">
          <number>0</number>
@@ -274,7 +262,7 @@
                <string>.cal</string>
               </stringlist>
              </property>
-             <property name="fileBrowserSuffixes" stdset="0">
+              <property name="fileBrowserSuffixes" stdset="0">
                <stringlist>
                  <string>.cal</string>
                </stringlist>
@@ -287,12 +275,6 @@
        </layout>
       </widget>
       <widget class="QWidget" name="pageCalibOnly">
-         <property name="sizePolicy">
-           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-           </sizepolicy>
-         </property>
          <layout class="QVBoxLayout" name="verticalLayout_8">
            <property name="margin">
              <number>0</number>
