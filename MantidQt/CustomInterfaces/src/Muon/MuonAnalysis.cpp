@@ -28,10 +28,10 @@
 #include "MantidQtCustomInterfaces/Muon/MuonAnalysisFitFunctionPresenter.h"
 #include "MantidQtCustomInterfaces/Muon/MuonAnalysisOptionTab.h"
 #include "MantidQtCustomInterfaces/Muon/MuonAnalysisResultTableTab.h"
+#include "MantidQtCustomInterfaces/Muon/MuonSequentialFitDialog.h"
 #include "MantidQtMantidWidgets/MuonFunctionBrowser.h"
 #include "MantidQtMantidWidgets/MuonFitDataSelector.h"
 #include "MantidQtMantidWidgets/MuonFitPropertyBrowser.h"
-#include "MantidQtMantidWidgets/MuonSequentialFitDialog.h"
 
 #include <Poco/File.h>
 #include <Poco/Path.h>

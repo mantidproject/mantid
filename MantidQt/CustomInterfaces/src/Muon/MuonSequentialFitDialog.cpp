@@ -1,4 +1,4 @@
-#include "MantidQtMantidWidgets/MuonSequentialFitDialog.h"
+#include "MantidQtCustomInterfaces/Muon/MuonSequentialFitDialog.h"
 #include "MantidQtMantidWidgets/MuonFitPropertyBrowser.h"
 
 #include "MantidAPI/AnalysisDataService.h"
@@ -9,9 +9,10 @@
 #include "MantidGeometry/Instrument.h"
 
 namespace MantidQt {
-namespace MantidWidgets {
+namespace CustomInterfaces {
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
+using MantidQt::MantidWidgets::MuonFitPropertyBrowser;
 
 namespace {
 Logger g_log("MuonSequentialFitDialog");
@@ -520,5 +521,5 @@ void MuonSequentialFitDialog::stopFit() {
   m_stopRequested = true;
 }
 
-} // namespace MantidWidgets
+} // namespace CustomInterfaces
 } // namespace Mantid

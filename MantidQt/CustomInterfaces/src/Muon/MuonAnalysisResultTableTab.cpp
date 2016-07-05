@@ -10,10 +10,10 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 
-#include "MantidQtMantidWidgets/MuonSequentialFitDialog.h"
 #include "MantidQtMantidWidgets/MuonFitPropertyBrowser.h"
 #include "MantidQtAPI/UserSubWindow.h"
 #include "MantidQtCustomInterfaces/Muon/MuonAnalysisHelper.h"
+#include "MantidQtCustomInterfaces/Muon/MuonSequentialFitDialog.h"
 
 #include <boost/shared_ptr.hpp>
 #include <boost/algorithm/string/predicate.hpp>
