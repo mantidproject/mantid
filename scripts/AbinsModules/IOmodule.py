@@ -10,6 +10,9 @@ class IOmodule(object):
     def __init__(self, input_filename=None, group_name=None):
 
         if  isinstance(input_filename, str):
+
+            self._input_filename = input_filename
+
             # extract name of file from its path.
             begin=0
             while input_filename.find("/") != -1:
@@ -18,13 +21,13 @@ class IOmodule(object):
 
             if input_filename == "": raise ValueError("Name of the file cannot be an empty string!")
 
-            self._input_file = input_filename
+            _cropped_input_filename = input_filename
         else: raise ValueError("Invalid name of hdf file. String was expected!")
 
         if  isinstance(group_name, str): self._group_name = group_name
         else: raise ValueError("Invalid name of the group. String was expected!")
 
-        core_name = self._input_file[0:self._input_file.find(".")]
+        core_name = _cropped_input_filename[0:_cropped_input_filename.find(".")]
         self._hdf_filename = core_name + ".hdf5" # name of hdf file
         self._attributes = {} # attributes for group
         self._numpy_datasets = {} # numpy datasets for group; they are expected to be numpy arrays
@@ -32,6 +35,7 @@ class IOmodule(object):
                                        # dictionaries
 
         # Fields which have a form of empty dictionaries have to be set by an inheriting class.
+
 
     def eraseHDFfile(self):
         """
@@ -304,18 +308,20 @@ class IOmodule(object):
         if not isinstance(name, str): raise ValueError("Invalid name of the dataset!")
 
         if name in group:
-           hdf_group= group[name]
+           _hdf_group= group[name]
         else:
             raise ValueError("Invalid name of the dataset!")
 
 
-        if all([self._get_subgrp_name(path=hdf_group[el].name).isdigit() for el in hdf_group.keys()]):
+        if all([self._get_subgrp_name(path=_hdf_group[el].name).isdigit() for el in _hdf_group.keys()]):
             _structured_dataset_list = []
-            for item in hdf_group.keys():
-                _structured_dataset_list.append(self._recursively_load_dict_contents_from_group(hdf_file=hdf_file, path=hdf_group.name+"/"+item))
+            # here we make an assumption about keys which have a numeric values; we assume that always : 1, 2, 3... Max
+            _num_keys = len(_hdf_group.keys())
+            for item in range(_num_keys):
+                _structured_dataset_list.append(self._recursively_load_dict_contents_from_group(hdf_file=hdf_file, path=_hdf_group.name+"/%s"%item))
             return self._convert_unicode_to_str(objectToCheck=_structured_dataset_list)
         else:
-            return self._convert_unicode_to_str(objectToCheck=self._recursively_load_dict_contents_from_group(hdf_file=hdf_file, path=hdf_group.name+"/"))
+            return self._convert_unicode_to_str(objectToCheck=self._recursively_load_dict_contents_from_group(hdf_file=hdf_file, path=_hdf_group.name+"/"))
 
 
     def _recursively_load_dict_contents_from_group(self, hdf_file=None, path=None):

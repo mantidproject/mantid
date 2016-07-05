@@ -94,12 +94,28 @@ class ABINSLoadCASTEPTest(unittest.TestCase):
 
         # test LoadData method
         _loaded_ABINS_data =  _CASTEP_reader.loadData()
-        _loaded_data =  _loaded_ABINS_data.extract()
-        num_k = len(data["rearranged_data"])
+        _loaded_data = _loaded_ABINS_data.extract()
+        _loaded_k_data = _loaded_data["k_points_data"]
+        k_data = data["rearranged_data"]["k_points_data"]
+        num_k = len(k_data)
+
         for el in range(num_k):
-            for item in data["rearranged_data"][el]:
-                self.assertEqual(True,np.allclose(data["rearranged_data"][el][item],
-                                                  _loaded_data[el][item])) # test is numpy arrays are equal
+            for item in k_data[el]:
+                self.assertEqual(True,np.allclose(k_data[el][item],
+                                                  _loaded_k_data[el][item])) # test is numpy arrays are equal
+
+        _loaded_atoms_data = _loaded_data["atoms_data"]
+        _num_atoms = len(_loaded_atoms_data)
+        for num_atom in range(_num_atoms):
+
+            _data_item = data["structured_datasets"]["atoms"][num_atom]
+            _loaded_data_item = _loaded_atoms_data[num_atom]
+
+            self.assertEqual(_data_item["sort"], _loaded_data_item["sort"])
+            self.assertEqual(_data_item["atom"], _loaded_data_item["atom"])
+            self.assertEqual(_data_item["mass"], _loaded_data_item["mass"])
+            self.assertEqual(_data_item["symbol"], _loaded_data_item["symbol"])
+            self.assertEqual(True, np.allclose(_data_item["fract_coord"], _loaded_data_item["fract_coord"]))
 
         return data
 
@@ -116,10 +132,12 @@ class ABINSLoadCASTEPTest(unittest.TestCase):
 
 
         # check rearranged_data
-        num_k = len(_correct_data["rearranged_data"])
+        _correct_items = _correct_data["rearranged_data"]["k_points_data"]
+        num_k = len(_correct_items)
+        _items = _data["rearranged_data"]["k_points_data"]
         for k in range(num_k):
-            _correct_item = _correct_data["rearranged_data"][k]
-            _item =  _data["rearranged_data"][k]
+            _correct_item = _correct_items[k]
+            _item =  _items[k]
 
             self.assertEqual(True, np.allclose(np.array(_correct_item["frequencies"]), _item["frequencies"]))
             self.assertEqual(True, np.allclose(np.array(_correct_item["atomic_displacements"]), _item["atomic_displacements"]))
@@ -137,8 +155,8 @@ class ABINSLoadCASTEPTest(unittest.TestCase):
             self.assertEqual(True, np.allclose(np.array(_correct_data["datasets"][item]),_data["datasets"][item]))
 
         # check structured_data
-        _correct_ions = _correct_data["structured_datasets"]["ions"]
-        _ions = _data["structured_datasets"]["ions"]
+        _correct_ions = _correct_data["structured_datasets"]["atoms"]
+        _ions = _data["structured_datasets"]["atoms"]
 
         for item in range(len(_correct_ions)):
 

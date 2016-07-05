@@ -4,9 +4,9 @@ import numpy as np
 import Constants
 from GeneralData import  GeneralData
 
-class AbinsData(GeneralData):
+class KpointsData(GeneralData):
     """
-    Class for storing ABINS data. Data in ABINS is arranged as a list of dictionaries.
+    Class for storing kpoints data. The Data  is arranged as a list of dictionaries.
     The list has the following form:
 
     data= [ {"frequencies": numpy.array, "atomic_displacements: numpy.array, "weight": numpy._float, "value":numpy.array},
@@ -32,7 +32,7 @@ class AbinsData(GeneralData):
         @param num_k: total number of k-points (int)
         @param num_atoms: total number of atoms in the unit cell (int)
         """
-        super(AbinsData, self).__init__()
+        super(KpointsData, self).__init__()
 
         if isinstance(num_k, int) and num_k>0:
             self._num_k = num_k
@@ -48,14 +48,14 @@ class AbinsData(GeneralData):
 
     def append(self, item=None):
         """
-        Adds one item to the collection of ABINS data. Each item corresponds to one k-point.
+        Adds one item to the collection of k-points data. Each item corresponds to one k-point.
 
         @param item: item to be added.
         """
         if not isinstance(item, dict):
             raise ValueError("Each element of AbinsData should be a dictionary.")
 
-        if not sorted(item.keys()) == sorted(Constants.all_keywords_abins_data):
+        if not sorted(item.keys()) == sorted(Constants.all_keywords_k_data):
             raise ValueError("Invalid structure of the dictionary to be added.")
 
         weight = item["weight"]
@@ -103,7 +103,7 @@ class AbinsData(GeneralData):
 
     def set(self, items=None):
         """
-        Sets a new value for the collection of ABINS data.
+        Sets a new value for the collection of k-points data.
         @param items: new value of the collection.
 
         """
@@ -111,12 +111,14 @@ class AbinsData(GeneralData):
         if not isinstance(items, list):
             raise ValueError("Items should have a form of a list.")
 
+        self._data = []
         for item in items:
             self.append(item=item)
 
 
     def extract(self):
+
         if self._num_k == len(self._data):
             return self._data
         else:
-            raise ValueError("Size of ABINSData is different then number of k-points.")
+            raise ValueError("Size of KpointsData is different then number of k-points.")

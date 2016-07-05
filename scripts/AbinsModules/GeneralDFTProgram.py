@@ -2,6 +2,8 @@ import hashlib
 
 # ABINS modules
 from IOmodule import IOmodule
+from KpointsData import KpointsData
+from AtomsData import  AtomsDaTa
 from AbinsData import AbinsData
 
 class GeneralDFTProgram(IOmodule):
@@ -12,12 +14,10 @@ class GeneralDFTProgram(IOmodule):
 
     def __init__(self, input_DFT_filename=None):
 
-        super(GeneralDFTProgram,self).__init__(input_filename=input_DFT_filename, group_name="PhononAB")
-        self._filename = input_DFT_filename # name of a filename with the phonon data (for example CASTEP: foo.phonon;
-                                            # filename can include path to the file as well)
+        super(GeneralDFTProgram, self).__init__(input_filename=input_DFT_filename, group_name="PhononAB")
 
         self._num_k = None
-        self._num_ions = None
+        self._num_atoms = None
 
 
     def readPhononFile(self):
@@ -25,7 +25,7 @@ class GeneralDFTProgram(IOmodule):
         This method is different for different DFT programs. It has to be overridden by inheriting class.
         This method should do the following:
 
-          1) Open file with phonon data (CASTEP: foo.phonon). Name of a file should be stored in self._filename.
+          1) Open file with phonon data (CASTEP: foo.phonon). Name of a file should be stored in self._input_filename.
           Only one dot '.' is expected in the name of a file. There must be no spaces in the name of a file. Extension
           of file (part of a name after '.') is arbitrary.
 
@@ -68,7 +68,7 @@ class GeneralDFTProgram(IOmodule):
 
               The following structured datasets should be also defined:
 
-                        "ions"          - Python list with the information about ions. Each entry in the list is a
+                        "atoms"          - Python list with the information about ions. Each entry in the list is a
                                           dictionary with the following entries:
 
                                                "symbol" - chemical symbol of the element (for example hydrogen -> H)
@@ -134,15 +134,24 @@ class GeneralDFTProgram(IOmodule):
         Loads data from hdf file.
         @return:
         """
-        data = self.load(list_of_numpy_datasets=["frequencies", "weights", "k_vectors", "atomic_displacements", "unit_cell"])
-        datasets = data["datasets"]
+        _data = self.load(list_of_numpy_datasets=["frequencies", "weights", "k_vectors", "atomic_displacements", "unit_cell"],
+                         list_of_structured_datasets=["atoms"])
+        _datasets = _data["datasets"]
+        _atoms_data = _data["structured_datasets"]["atoms"]
+        self._num_k = _datasets["k_vectors"].shape[0]
+        self._num_atoms = int(_datasets["atomic_displacements"][0].shape[0] /
+                              float(_datasets["frequencies"].shape[0]) *
+                              self._num_k)
 
-        self._num_k = datasets["k_vectors"].shape[0]
-        self._num_ions = int(datasets["atomic_displacements"][0].shape[0] /
-                             float(datasets["frequencies"].shape[0]) *
-                                   self._num_k)
+        _loaded_data = {"frequencies":_datasets["frequencies"],
+                        "weights": _datasets["weights"],
+                        "k_vectors":_datasets["k_vectors"],
+                        "atomic_displacements": _datasets["atomic_displacements"],
+                        "unit_cell": _datasets["unit_cell"],
+                        "atoms":_atoms_data
+                        }
 
-        return self._rearrange_data(data=datasets)
+        return self._rearrange_data(data=_loaded_data)
 
 
     # Protected methods which should be reused by classes which read DFT phonon data
@@ -164,7 +173,7 @@ class GeneralDFTProgram(IOmodule):
         buf = 65536  # chop content of phonon file into 64kb chunks to minimize memory consumption for hash creation
         sha = hashlib.sha512()
 
-        with open(self._filename, 'rU') as f:
+        with open(self._input_filename, 'rU') as f:
             while True:
                 data = f.read(buf)
                 if not data:
@@ -177,20 +186,25 @@ class GeneralDFTProgram(IOmodule):
         """
         This method rearranges data read from phonon DFT file.
 
-        @param data: dictionary with the data to rearrange
-        @return: Returns an object of type ABINSData
+        @param k_data: dictionary with the data to rearrange
+        @return: Returns an object of type AbinsData
         """
-        _number_of_phonons = 3 * self._num_ions
-        _return_data = AbinsData(num_atoms=self._num_ions, num_k=self._num_k)
+        _number_of_phonons = 3 * self._num_atoms
+        k_points = KpointsData(num_atoms=self._num_atoms, num_k=self._num_k)
+
+        atoms = AtomsDaTa(num_atoms=self._num_atoms)
+        atoms.set(data["atoms"])
 
         for i in range(self._num_k):
 
             temp_1 = i * _number_of_phonons
-            _return_data.append({"weight":data["weights"][i],
+            k_points.append({"weight":data["weights"][i],
                                  "value" :data["k_vectors"][i],
-                                 "frequencies":data["frequencies"][temp_1:temp_1 + _number_of_phonons],
-                                 "atomic_displacements":data["atomic_displacements"][i]
+                                 "frequencies": data["frequencies"][temp_1:temp_1 + _number_of_phonons],
+                                 "atomic_displacements": data["atomic_displacements"][i]
                                     } )
-        return _return_data
+
+
+        return AbinsData(k_points_data=k_points, atoms_data=atoms)
 
 

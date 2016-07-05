@@ -3,6 +3,7 @@ import re
 
 # ABINS modules
 from GeneralDFTProgram import GeneralDFTProgram
+from AbinsData import AbinsData
 
 class LoadCASTEP(GeneralDFTProgram):
     """
@@ -50,7 +51,7 @@ class LoadCASTEP(GeneralDFTProgram):
         @param f_handle: handle to the file.
         @return List of ions in file as list of tuple of (ion, mode number)
         """
-        file_data = {'ions': []}
+        file_data = {"atoms": []}
 
         while True:
             line = f_handle.readline()
@@ -59,7 +60,7 @@ class LoadCASTEP(GeneralDFTProgram):
                 raise IOError("Could not find any header information.")
 
             if 'Number of ions' in line:
-                self._num_ions = int(line.strip().split()[-1])
+                self._num_atoms = int(line.strip().split()[-1])
             elif 'Number of branches' in line:
                 self._num_branches = int(line.strip().split()[-1])
             elif 'Number of wavevectors' in line:
@@ -67,11 +68,11 @@ class LoadCASTEP(GeneralDFTProgram):
             elif 'Unit cell vectors' in line:
                 file_data['unit_cell'] = self._parse_phonon_unit_cell_vectors(f_handle)
             elif 'Fractional Co-ordinates' in line:
-                if self._num_ions is None:
+                if self._num_atoms is None:
                     raise IOError("Failed to parse file. Invalid file header.")
 
                 # Extract the mode number for each of the ion in the data file
-                for _ in xrange(self._num_ions):
+                for _ in xrange(self._num_atoms):
                     line = f_handle.readline()
                     line_data = line.strip().split()
 
@@ -79,13 +80,13 @@ class LoadCASTEP(GeneralDFTProgram):
                     ion = {"symbol": symbol,
                            "fract_coord": np.array([float(line_data[1]), float(line_data[2]), float(line_data[3])]),
                            "atom": int(line_data[0]) - 1,
-                           "sort": len([i for i in file_data['ions'] if i['symbol'] == symbol]) + 1,
+                           "sort": int(line_data[0]) - 1, # at the moment it is a dummy parameter, it will mark symmetry equivalent atoms
                            "mass": float(line_data[5])}
                     # -1 to convert to zero based indexing
-                    file_data['ions'].append(ion)
+                    file_data["atoms"].append(ion)
 
             if 'END header' in line:
-                if self._num_ions is None or self._num_branches is None:
+                if self._num_atoms is None or self._num_branches is None:
                     raise IOError("Failed to parse file. Invalid file header.")
                 return file_data
 
@@ -128,7 +129,7 @@ class LoadCASTEP(GeneralDFTProgram):
         @return: eigenvectors (atomic displacements) for all k-points
         """
         vectors = []
-        for _ in xrange(self._num_ions * self._num_branches):
+        for _ in xrange(self._num_atoms * self._num_branches):
             line = f_handle.readline()
 
             if not line:
@@ -152,7 +153,7 @@ class LoadCASTEP(GeneralDFTProgram):
         header_str =  r"^ +q-pt=\s+\d+ +(%(s)s) +(%(s)s) +(%(s)s) +(%(s)s)" % {'s': self._float_regex}
         header = re.compile(header_str)
 
-        with open(self._filename, "rU") as f:
+        with open(self._input_filename, "rU") as f:
             found = False
             for line in f:  #iterate over the file one line at a time(memory efficient)
                 if header_sum.match(line):
@@ -196,7 +197,7 @@ class LoadCASTEP(GeneralDFTProgram):
 
         frequencies, ir_intensities, raman_intensities, weights, k_vectors, eigenvectors = [], [], [], [], [], []
         data_lists = (frequencies, ir_intensities, raman_intensities)
-        with open(self._filename, 'rU') as f_handle:
+        with open(self._input_filename, 'rU') as f_handle:
             file_data.update(self._parse_phonon_file_header(f_handle))
             header_found = False
             while True:
@@ -240,11 +241,12 @@ class LoadCASTEP(GeneralDFTProgram):
         for name in _numpy_datasets_to_save:
             self.addNumpyDataset(name, file_data[name])
 
-        _structured_datasets=["ions"]
+        _structured_datasets=["atoms"]
         for item in _structured_datasets:
             self.addStructuredDataset(name=item, value=file_data[item])
 
         self.addAttribute("hash", hash_filename)
+        self.addAttribute("filename", self._input_filename)
         self.addAttribute("DFT_program", "CASTEP")
 
         self.save()

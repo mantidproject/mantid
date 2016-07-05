@@ -28,3 +28,4 @@ class GeneralData(object):
         @return: data
         """
         return self._data
+

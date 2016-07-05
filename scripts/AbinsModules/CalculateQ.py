@@ -77,6 +77,7 @@ class CalculateQ(IOmodule):
         self.addAttribute("q_format",self._Qvectors._q_format)
         self.addAttribute("instrument", self._instrument)
         self.addAttribute("sample_Form", self._sample_form)
+        self.addAttribute("filename", self._input_filename)
         self.save()
 
         return self._Qvectors
