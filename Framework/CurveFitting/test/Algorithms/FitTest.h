@@ -569,6 +569,10 @@ public:
     double dummy = fit.getProperty("OutputChi2overDoF");
     TS_ASSERT_DELTA(dummy, 0.0001, 20000);
 
+    // Test the goodness of the fit. This is fit looks really bad
+    double chi2 = fit.getProperty("OutputChi2overDoF");
+    TS_ASSERT_DELTA(chi2, 4000, 500);
+
     IFunction_sptr out = fit.getProperty("Function");
     TS_ASSERT_DELTA(out->getParameter("A"), 1000, 30.0);
     TS_ASSERT_DELTA(out->getParameter("B"), 26, 0.1);
@@ -1023,6 +1027,9 @@ public:
     TS_ASSERT_DELTA(out->getParameter("a"), 5.4311946, 1e-6);
     TS_ASSERT_LESS_THAN(out->getError(0), 1e-6);
   }
+
+  // Peak functions:
+  // ---------------------
 
   void test_function_Bk2BkExpConvPV() {
 
@@ -1484,6 +1491,251 @@ public:
     TS_ASSERT_DELTA(fitted->getParameter("PeakCentre"), 0.0, 1e-4);
     TS_ASSERT_DELTA(fitted->getParameter("Height"), 112.78, 0.5);
     TS_ASSERT_DELTA(fitted->getParameter("FWHM"), 0.15, 1e-2);
+  }
+
+  // Background functions:
+  // ---------------------
+
+  // A test for [-1, 1] range data
+  void test_function_Chebyshev() {
+    Mantid::API::MatrixWorkspace_sptr ws =
+        WorkspaceFactory::Instance().create("Workspace2D", 1, 11, 11);
+
+    Mantid::MantidVec &X = ws->dataX(0);
+    Mantid::MantidVec &Y = ws->dataY(0);
+    Mantid::MantidVec &E = ws->dataE(0);
+    for (size_t i = 0; i < Y.size(); i++) {
+      double x = -1. + 0.1 * static_cast<double>(i);
+      X[i] = x;
+      Y[i] = x * x * x;
+      E[i] = 1;
+    }
+
+    Algorithms::Fit fit;
+    fit.initialize();
+
+    fit.setProperty("Function", "name=Chebyshev, n=3");
+    fit.setProperty("InputWorkspace", ws);
+    fit.setPropertyValue("WorkspaceIndex", "0");
+
+    fit.execute();
+    TS_ASSERT(fit.isExecuted());
+
+    IFunction_sptr out = fit.getProperty("Function");
+    TS_ASSERT_DELTA(out->getParameter("A0"), 0, 1e-12);
+    TS_ASSERT_DELTA(out->getParameter("A1"), 0.75, 1e-12);
+    TS_ASSERT_DELTA(out->getParameter("A2"), 0, 1e-12);
+    TS_ASSERT_DELTA(out->getParameter("A3"), 0.25, 1e-12);
+  }
+
+  // A test for a random number data
+  void test_function_Chebyshev_Background() {
+    Mantid::API::MatrixWorkspace_sptr ws =
+        WorkspaceFactory::Instance().create("Workspace2D", 1, 21, 21);
+
+    Mantid::MantidVec &X = ws->dataX(0);
+    Mantid::MantidVec &Y = ws->dataY(0);
+    Mantid::MantidVec &E = ws->dataE(0);
+    for (size_t i = 0; i < Y.size(); i++) {
+      double x = -10. + 1 * static_cast<double>(i);
+      X[i] = x;
+      Y[i] = x * x * x;
+      if (Y[i] < 1.0) {
+        E[i] = 1.0;
+      } else {
+        E[i] = sqrt(Y[i]);
+      }
+    }
+
+    Algorithms::Fit fit;
+    fit.initialize();
+
+    const std::string funcString =
+        "name=Chebyshev, n=3, StartX=-10.0, EndX=10.0";
+    fit.setPropertyValue("Function", funcString);
+    fit.setProperty("InputWorkspace", ws);
+    fit.setPropertyValue("WorkspaceIndex", "0");
+
+    fit.setProperty("Minimizer", "Levenberg-MarquardtMD");
+    fit.setProperty("CostFunction", "Least squares");
+    fit.setProperty("MaxIterations", 1000);
+
+    fit.execute();
+    TS_ASSERT(fit.isExecuted());
+
+    const double chi2 = fit.getProperty("OutputChi2overDoF");
+    TS_ASSERT(chi2 < 2.0);
+
+    IFunction_sptr out = fit.getProperty("Function");
+    TS_ASSERT_DELTA(out->getParameter("A0"), 0, 1e-12);
+    TS_ASSERT_DELTA(out->getParameter("A1"), 750, 1e-12);
+    TS_ASSERT_DELTA(out->getParameter("A2"), 0, 1e-12);
+    TS_ASSERT_DELTA(out->getParameter("A3"), 250, 1e-12);
+  }
+
+  // Test function on a Fullprof polynomial function
+  void test_function_FullprofPolynomial() {
+    // Create a workspace
+    const int histogramNumber = 1;
+    const int timechannels = 1000;
+
+    Mantid::API::MatrixWorkspace_sptr ws2D =
+        WorkspaceFactory::Instance().create("Workspace2D", histogramNumber,
+                                            timechannels, timechannels);
+
+    double tof0 = 8000.;
+    double dtof = 5.;
+
+    Mantid::MantidVec &X = ws2D->dataX(0);
+    Mantid::MantidVec &Y = ws2D->dataY(0);
+    Mantid::MantidVec &E = ws2D->dataE(0);
+    for (int i = 0; i < timechannels; i++) {
+      X[i] = static_cast<double>(i) * dtof + tof0;
+      Y[i] = X[i] * 0.013;
+      E[i] = sqrt(Y[i]);
+    }
+
+    // Set up fit
+    Algorithms::Fit fitalg;
+    TS_ASSERT_THROWS_NOTHING(fitalg.initialize());
+    TS_ASSERT(fitalg.isInitialized());
+
+    const std::string funcStr = "name=FullprofPolynomial, n=6, Bkpos=10000, "
+                                "A0=0.5, A1=1.0, A2=-0.5, A3=0.0, A4=-0.02";
+    fitalg.setProperty("Function", funcStr);
+    fitalg.setProperty("InputWorkspace", ws2D);
+    fitalg.setPropertyValue("WorkspaceIndex", "0");
+
+    // execute fit
+    TS_ASSERT_THROWS_NOTHING(TS_ASSERT(fitalg.execute()));
+    TS_ASSERT(fitalg.isExecuted());
+
+    // test the output from fit is what you expect
+    double chi2 = fitalg.getProperty("OutputChi2overDoF");
+
+    TS_ASSERT_DELTA(chi2, 0.0, 0.1);
+
+    IFunction_sptr out = fitalg.getProperty("Function");
+    TS_ASSERT_DELTA(out->getParameter("A0"), 130., 0.001);
+    TS_ASSERT_DELTA(out->getParameter("A1"), 130., 0.001);
+    TS_ASSERT_DELTA(out->getParameter("A3"), 0., 0.001);
+  }
+
+  void test_function_LinearBackground() {
+    // create mock data to test against
+    const int histogramNumber = 1;
+    const int timechannels = 5;
+    Mantid::API::MatrixWorkspace_sptr ws2D =
+        WorkspaceFactory::Instance().create("Workspace2D", histogramNumber,
+                                            timechannels, timechannels);
+
+    for (int i = 0; i < timechannels; i++) {
+      ws2D->dataX(0)[i] = i + 1;
+      ws2D->dataY(0)[i] = i + 1;
+      ws2D->dataE(0)[i] = 1.0;
+    }
+
+    Algorithms::Fit alg2;
+    TS_ASSERT_THROWS_NOTHING(alg2.initialize());
+    TS_ASSERT(alg2.isInitialized());
+
+    const std::string funcStr = "name=LinearBackground, A0=1.0";
+    alg2.setProperty("Function", funcStr);
+    // Set which spectrum to fit against and initial starting values
+    alg2.setProperty("InputWorkspace", ws2D);
+    alg2.setPropertyValue("WorkspaceIndex", "0");
+
+    // execute fit
+    TS_ASSERT_THROWS_NOTHING(TS_ASSERT(alg2.execute()))
+
+    TS_ASSERT(alg2.isExecuted());
+
+    // test the output from fit is what you expect
+    double dummy = alg2.getProperty("OutputChi2overDoF");
+
+    TS_ASSERT_DELTA(dummy, 0.0, 0.1);
+    IFunction_sptr out = alg2.getProperty("Function");
+    TS_ASSERT_DELTA(out->getParameter("A0"), 0.0, 0.01);
+    TS_ASSERT_DELTA(out->getParameter("A1"), 1.0, 0.0003);
+  }
+
+  void test_function_Polynomial_QuadraticBackground() {
+    const int histogramNumber = 1;
+    const int timechannels = 5;
+    Mantid::API::MatrixWorkspace_sptr ws2D =
+        WorkspaceFactory::Instance().create("Workspace2D", histogramNumber,
+                                            timechannels, timechannels);
+
+    for (int i = 0; i < timechannels; i++) {
+      ws2D->dataX(0)[i] = i + 1;
+      ws2D->dataY(0)[i] = (i + 1) * (i + 1) + 2 * (i + 1) + 3.0;
+      ws2D->dataE(0)[i] = 1.0;
+    }
+
+    CurveFitting::Algorithms::Fit alg2;
+    TS_ASSERT_THROWS_NOTHING(alg2.initialize());
+    TS_ASSERT(alg2.isInitialized());
+
+    // set up fitting function
+    const std::string funcStr = "name=Polynomial, n=2, A0=0.0, A1=1.";
+    alg2.setProperty("Function", funcStr);
+    // Set which spectrum to fit against and initial starting values
+    alg2.setProperty("InputWorkspace", ws2D);
+    alg2.setPropertyValue("WorkspaceIndex", "0");
+
+    // execute fit
+    TS_ASSERT_THROWS_NOTHING(TS_ASSERT(alg2.execute()))
+    TS_ASSERT(alg2.isExecuted());
+
+    // test the output from fit is what you expect
+    double dummy = alg2.getProperty("OutputChi2overDoF");
+
+    TS_ASSERT_DELTA(dummy, 0.0, 0.1);
+    IFunction_sptr out = alg2.getProperty("Function");
+    TS_ASSERT_DELTA(out->getParameter("A0"), 3.0, 0.01);
+    TS_ASSERT_DELTA(out->getParameter("A1"), 2.0, 0.0003);
+    TS_ASSERT_DELTA(out->getParameter("A2"), 1.0, 0.01);
+  }
+
+  void test_function_Quadratic() {
+    // create mock data to test against
+    int histogramNumber = 1;
+    int timechannels = 5;
+    Mantid::API::MatrixWorkspace_sptr ws2D =
+        WorkspaceFactory::Instance().create("Workspace2D", histogramNumber,
+                                            timechannels, timechannels);
+
+    for (int i = 0; i < timechannels; i++) {
+      ws2D->dataX(0)[i] = i + 1;
+      ws2D->dataY(0)[i] = (i + 1) * (i + 1);
+      ws2D->dataE(0)[i] = 1.0;
+    }
+
+    Fit fitalg;
+    TS_ASSERT_THROWS_NOTHING(fitalg.initialize());
+    TS_ASSERT(fitalg.isInitialized());
+
+    // set up fitting function
+    const std::string funcStr = "name=Quadratic, A0=1.0";
+    fitalg.setPropertyValue("Function", funcStr);
+
+    // Set which spectrum to fit against and initial starting values
+    fitalg.setProperty("InputWorkspace", ws2D);
+    fitalg.setPropertyValue("WorkspaceIndex", "0");
+
+    // execute fit
+    TS_ASSERT_THROWS_NOTHING(TS_ASSERT(fitalg.execute()))
+
+    TS_ASSERT(fitalg.isExecuted());
+
+    // test the output from fit is what you expect
+    double dummy = fitalg.getProperty("OutputChi2overDoF");
+    TS_ASSERT_DELTA(dummy, 0.0, 0.1);
+
+    IFunction_sptr out = fitalg.getProperty("Function");
+    TS_ASSERT_DELTA(out->getParameter("A0"), 0.0, 0.01);
+    TS_ASSERT_DELTA(out->getParameter("A1"), 0.0, 0.01);
+    TS_ASSERT_DELTA(out->getParameter("A2"), 1.0, 0.0001);
   }
 };
 
