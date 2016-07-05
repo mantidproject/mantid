@@ -13675,16 +13675,19 @@ void ApplicationWindow::addMantidMatrixWindow(MantidMatrix *matrix) {
  */
 MantidMatrix *
 ApplicationWindow::findMantidMatrixWindow(const std::string &wsName) {
-  MantidMatrix *m = NULL;
+  MantidMatrix *m = nullptr;
 
-  for (auto mIt = m_mantidmatrixWindows.begin();
-       mIt != m_mantidmatrixWindows.end(); ++mIt) {
-    if (*mIt && wsName == (*mIt)->getWorkspaceName()) {
-      m = *mIt;
-      break;
-    }
+  // lambda to check if a workspace name matches a string
+  auto nameMatches = [&] (MantidMatrix *matrix) {
+      return (matrix && matrix->getWorkspaceName() == wsName);
+  };
+
+  auto result = std::find_if(m_mantidmatrixWindows.begin(),
+                             m_mantidmatrixWindows.end(), nameMatches);
+
+  if(result != m_mantidmatrixWindows.end()) {
+      m = *result;
   }
-
   return m;
 }
 
