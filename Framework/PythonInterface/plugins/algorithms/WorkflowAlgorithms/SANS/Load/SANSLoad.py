@@ -6,7 +6,7 @@ from mantid.kernel import (Direction, PropertyManagerProperty, FloatArrayPropert
                            EnabledWhenProperty, PropertyCriterion)
 from mantid.api import (DataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode)
 
-from SANS2.State.SANSStateSerializer import create_deserialized_sans_state_from_property_manager
+from SANS2.State.SANSStateBase import create_deserialized_sans_state_from_property_manager
 from SANS2.State.SANSStateData import SANSDataType
 from SANS2.Common.SANSFunctions import create_unmanaged_algorithm
 from SANS.Load.SANSLoadData import SANSLoadDataFactory

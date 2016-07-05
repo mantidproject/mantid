@@ -3,7 +3,7 @@
 """ Defines the state of the reduction."""
 
 from SANS2.State.SANSStateBase import (SANSStateBase, ClassTypeParameter, sans_parameters)
-from SANS2.Common.SANSEnumerations import (ReductionType, ReductionDimensionality)
+from SANS2.Common.SANSEnumerations import (ReductionType, SANSReductionType, ReductionDimensionality)
 
 
 # ------------------------------------------------
@@ -23,7 +23,7 @@ class SANSStateReductionISIS(SANSStateReduction, SANSStateBase):
 
     def __init__(self):
         super(SANSStateReductionISIS, self).__init__()
-        self.reduction_type = ReductionType.Lab
+        self.reduction_type = SANSReductionType.Lab
         self.dimensionality = ReductionDimensionality.OneDim
 
     def validate(self):

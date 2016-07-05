@@ -162,8 +162,9 @@ def get_detector_component(move_info, component):
     component_selection = component
     if component:
         for detector_keys in move_info.detectors.keys():
-            if (component == move_info.detectors[detector_keys].detector_name or
-                        component == move_info.detectors[detector_keys].detector_name_short):
+            is_name = component == move_info.detectors[detector_keys].detector_name
+            is_name_short = component == move_info.detectors[detector_keys].detector_name_short
+            if is_name or is_name_short:
                 component_selection = detector_keys
     return component_selection
 
@@ -213,8 +214,9 @@ class SANSMove(object):
         if component is not None and len(component) != 0:
             found_name = False
             for detector_keys in move_info.detectors.keys():
-                if (component == move_info.detectors[detector_keys].detector_name or
-                            component == move_info.detectors[detector_keys].detector_name_short):
+                is_name = component == move_info.detectors[detector_keys].detector_name
+                is_name_short = component == move_info.detectors[detector_keys].detector_name_short
+                if is_name or is_name_short:
                     found_name = True
                     break
             if not found_name:

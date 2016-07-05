@@ -13,7 +13,7 @@ from SANS2.Common.SANSConstants import SANSConstants
 # Not clear why the names in the module are not found by Pylint, but it seems to get confused. Hence this check
 # needs to be disabled here.
 # pylint: disable=no-name-in-module
-from SANS2.State.SANSStateData import (SANSStateDataISIS, SANSDataType)
+from SANS2.State.SANSStateData import SANSStateDataISIS
 from SANS2.State.SANSState import SANSStateISIS
 
 

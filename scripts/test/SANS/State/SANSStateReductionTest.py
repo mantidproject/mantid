@@ -1,7 +1,8 @@
 import unittest
 import mantid
 
-from SANS2.State.SANSStateReduction import (SANSStateReductionISIS, SANSReductionType)
+from SANS2.State.SANSStateReduction import SANSStateReductionISIS
+from SANS2.Common.SANSEnumerations import SANSReductionType
 
 
 class SANSStateDataTest(unittest.TestCase):
@@ -9,9 +10,9 @@ class SANSStateDataTest(unittest.TestCase):
         # Arrange
         state = SANSStateReductionISIS()
         # Act
-        state.reduction_type = SANSReductionType.Front
+        state.reduction_type = SANSReductionType.Hab
         # Assert
-        self.assertTrue(state.reduction_type is SANSReductionType.Front)
+        self.assertTrue(state.reduction_type is SANSReductionType.Hab)
 
 
 if __name__ == '__main__':

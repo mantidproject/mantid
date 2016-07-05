@@ -1,5 +1,5 @@
 # pylint: disable=too-few-public-methods, invalid-name, fixme, unused-argument
-# pylint: disable-msg=R0922
+# pylint: disable=R0922
 """ Implementation for the SANSLoad algorithm"""
 
 from abc import (ABCMeta, abstractmethod)

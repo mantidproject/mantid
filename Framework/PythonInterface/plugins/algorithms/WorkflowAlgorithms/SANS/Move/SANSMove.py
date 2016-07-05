@@ -7,7 +7,7 @@ from mantid.kernel import (Direction, PropertyManagerProperty, StringListValidat
 from mantid.api import (DataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode)
 
 from SANS.Move.SANSMoveWorkspaces import SANSMoveFactory
-from SANS2.State.SANSStateSerializer import create_deserialized_sans_state_from_property_manager
+from SANS2.State.SANSStateBase import create_deserialized_sans_state_from_property_manager
 from SANS2.Common.SANSConstants import SANSConstants
 
 
