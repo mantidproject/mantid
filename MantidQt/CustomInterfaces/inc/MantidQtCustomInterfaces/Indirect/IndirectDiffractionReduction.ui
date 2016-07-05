@@ -218,7 +218,7 @@
              <property name="minimumSize">
               <size>
                <width>0</width>
-               <height>21</height>
+               <height>22</height>
               </size>
              </property>
              <property name="label" stdset="0">
@@ -257,7 +257,7 @@
              <property name="minimumSize">
               <size>
                <width>0</width>
-               <height>21</height>
+               <height>22</height>
               </size>
              </property>
              <property name="label" stdset="0">
@@ -301,23 +301,29 @@
                  <property name="margin">
                    <number>6</number>
                  </property>
-                 <item row="2" column="0">
+                 <item row="0" column="0">
                    <widget class="QCheckBox" name="ckUseCalib">
                      <property name="text">
-                       <string>Use Calibration File:</string>
-                     </property>
-                   </widget>
-                 </item>
-                 <item row="3" column="0" colspan="2">
-                   <widget class="MantidQt::MantidWidgets::MWRunFiles" name="rfCalFile_only">
-                     <property name="enabled">
-                       <bool>false</bool>
+                       <string>Use Calibration File</string>
                      </property>
                      <property name="minimumSize">
                        <size>
                          <width>0</width>
-                         <height>21</height>
+                         <height>22</height>
                        </size>
+                     </property>
+                   </widget>
+                 </item>
+                 <item row="1" column="0" colspan="2">
+                   <widget class="MantidQt::MantidWidgets::MWRunFiles" name="rfCalFile_only">
+                     <property name="minimumSize">
+                       <size>
+                         <width>0</width>
+                         <height>22</height>
+                       </size>
+                     </property>
+                     <property name="enabled">
+                       <bool>false</bool>
                      </property>
                      <property name="label" stdset="0">
                        <string>Cal File</string>
