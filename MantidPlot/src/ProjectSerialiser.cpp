@@ -80,8 +80,8 @@ void ProjectSerialiser::load(std::string lines, const int fileVersion,
     if (values.size() > 4 && values[4] == "current")
       window->d_loaded_current = newFolder;
 
-    auto *fli = new FolderListItem(
-        window->currentFolder()->folderListItem(), newFolder);
+    auto *fli = new FolderListItem(window->currentFolder()->folderListItem(),
+                                   newFolder);
     newFolder->setFolderListItem(fli);
 
     window->d_current_folder = newFolder;
@@ -391,8 +391,7 @@ QString ProjectSerialiser::saveWorkspaces() {
 
     auto ws = AnalysisDataService::Instance().retrieveWS<Workspace>(
         wsName.toStdString());
-    auto group =
-        boost::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(ws);
+    auto group = boost::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(ws);
 
     // We don't split up multiperiod workspaces for performance reasons.
     // There's significant optimisations we can perform on load if they're a
@@ -821,7 +820,7 @@ void ProjectSerialiser::openSurfacePlot(const std::string &lines,
 void ProjectSerialiser::openScriptWindow(const std::string &lines,
                                          const int fileVersion) {
   window->showScriptWindow();
-   auto *scriptingWindow = window->getScriptWindowHandle();
+  auto *scriptingWindow = window->getScriptWindowHandle();
 
   if (!scriptingWindow)
     return;
