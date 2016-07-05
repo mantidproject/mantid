@@ -72,7 +72,7 @@ void ProjectSerialiser::load(std::string lines, const int fileVersion,
     std::vector<std::string> values;
     boost::split(values, firstLine, boost::is_any_of("\t"));
 
-    auto *newFolder =
+    auto newFolder =
         new Folder(window->currentFolder(), QString::fromStdString(values[1]));
     newFolder->setBirthDate(QString::fromStdString(values[2]));
     newFolder->setModificationDate(QString::fromStdString(values[3]));
@@ -80,7 +80,7 @@ void ProjectSerialiser::load(std::string lines, const int fileVersion,
     if (values.size() > 4 && values[4] == "current")
       window->d_loaded_current = newFolder;
 
-    auto *fli = new FolderListItem(window->currentFolder()->folderListItem(),
+    auto fli = new FolderListItem(window->currentFolder()->folderListItem(),
                                    newFolder);
     newFolder->setFolderListItem(fli);
 
@@ -94,7 +94,7 @@ void ProjectSerialiser::load(std::string lines, const int fileVersion,
   loadProjectSections(lines, fileVersion, isTopLevel);
 
   // We're returning to our parent folder, so set d_current_folder to our parent
-  auto *parent = dynamic_cast<Folder *>(window->currentFolder()->parent());
+  auto parent = dynamic_cast<Folder *>(window->currentFolder()->parent());
   if (!parent)
     window->d_current_folder = window->projectFolder();
   else
@@ -134,71 +134,71 @@ void ProjectSerialiser::loadProjectSections(const std::string &lines,
 
   if (tsv.hasSection("mantidmatrix")) {
     auto matrices = tsv.sections("mantidmatrix");
-    for (auto it : matrices) {
+    for (auto& it : matrices) {
       openMantidMatrix(it);
     }
   }
 
   if (tsv.hasSection("table")) {
     auto tableSections = tsv.sections("table");
-    for (auto it : tableSections) {
+    for (auto& it : tableSections) {
       openTable(it, fileVersion);
     }
   }
 
   if (tsv.hasSection("TableStatistics")) {
     auto tableStatsSections = tsv.sections("TableStatistics");
-    for (auto it : tableStatsSections) {
+    for (auto& it : tableStatsSections) {
       openTableStatistics(it, fileVersion);
     }
   }
 
   if (tsv.hasSection("matrix")) {
     auto matrixSections = tsv.sections("matrix");
-    for (auto it : matrixSections) {
+    for (auto& it : matrixSections) {
       openMatrix(it, fileVersion);
     }
   }
 
   if (tsv.hasSection("multiLayer")) {
     auto multiLayer = tsv.sections("multiLayer");
-    for (auto it : multiLayer) {
+    for (auto& it : multiLayer) {
       openMultiLayer(it, fileVersion);
     }
   }
 
   if (tsv.hasSection("SurfacePlot")) {
     auto plotSections = tsv.sections("SurfacePlot");
-    for (auto it : plotSections) {
+    for (auto& it : plotSections) {
       openSurfacePlot(it, fileVersion);
     }
   }
 
   if (tsv.hasSection("log")) {
     auto logSections = tsv.sections("log");
-    for (auto it : logSections) {
+    for (auto& it : logSections) {
       window->currentFolder()->appendLogInfo(QString::fromStdString(it));
     }
   }
 
   if (tsv.hasSection("note")) {
     auto noteSections = tsv.sections("note");
-    for (auto it : noteSections) {
-      auto *n = window->newNote("");
+    for (auto& it : noteSections) {
+      auto n = window->newNote("");
       n->loadFromProject(it, window, fileVersion);
     }
   }
 
   if (tsv.hasSection("scriptwindow")) {
     auto scriptSections = tsv.sections("scriptwindow");
-    for (auto it : scriptSections) {
+    for (auto& it : scriptSections) {
       openScriptWindow(it, fileVersion);
     }
   }
 
   if (tsv.hasSection("instrumentwindow")) {
     auto instrumentSections = tsv.sections("instrumentwindow");
-    for (auto it : instrumentSections) {
+    for (auto& it : instrumentSections) {
       TSVSerialiser iws(it);
 
       if (iws.selectLine("WorkspaceName")) {
@@ -218,7 +218,7 @@ void ProjectSerialiser::loadProjectSections(const std::string &lines,
   // Deal with subfolders last.
   if (tsv.hasSection("folder")) {
     auto folders = tsv.sections("folder");
-    for (auto it : folders) {
+    for (auto& it : folders) {
       load(it, fileVersion, false);
     }
   }
@@ -340,7 +340,7 @@ QString ProjectSerialiser::saveFolderSubWindows(Folder *folder) {
 
   // Write windows
   QList<MdiSubWindow *> windows = folder->windowsList();
-  for (auto w : windows) {
+  for (auto& w : windows) {
     Mantid::IProjectSerialisable *ips =
         dynamic_cast<Mantid::IProjectSerialisable *>(w);
 
@@ -386,7 +386,7 @@ QString ProjectSerialiser::saveWorkspaces() {
   wsNames += "WorkspaceNames";
 
   auto workspaceItems = AnalysisDataService::Instance().getObjectNames();
-  for (auto itemIter : workspaceItems) {
+  for (auto& itemIter : workspaceItems) {
     QString wsName = QString::fromStdString(itemIter);
 
     auto ws = AnalysisDataService::Instance().retrieveWS<Workspace>(
@@ -693,13 +693,13 @@ void ProjectSerialiser::openTableStatistics(const std::string &lines,
   targetsVec.erase(targetsVec.begin());
 
   QList<int> targets;
-  for (auto it : targetsVec) {
+  for (auto& it : targetsVec) {
     int target = 0;
     Mantid::Kernel::Strings::convert<int>(it, target);
     targets << target;
   }
 
-  auto *t = window->newTableStatistics(
+  auto t = window->newTableStatistics(
       window->table(QString::fromStdString(tableName)),
       type == "row" ? TableStatistics::row : TableStatistics::column, targets,
       QString::fromStdString(name));
@@ -820,7 +820,7 @@ void ProjectSerialiser::openSurfacePlot(const std::string &lines,
 void ProjectSerialiser::openScriptWindow(const std::string &lines,
                                          const int fileVersion) {
   window->showScriptWindow();
-  auto *scriptingWindow = window->getScriptWindowHandle();
+  auto scriptingWindow = window->getScriptWindowHandle();
 
   if (!scriptingWindow)
     return;
@@ -837,7 +837,7 @@ void ProjectSerialiser::openScriptWindow(const std::string &lines,
  */
 void ProjectSerialiser::openScriptWindow(const QStringList &files) {
   window->showScriptWindow();
-  auto *scriptingWindow = window->getScriptWindowHandle();
+  auto scriptingWindow = window->getScriptWindowHandle();
 
   if (!scriptingWindow)
     return;
