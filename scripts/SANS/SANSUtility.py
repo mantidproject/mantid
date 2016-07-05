@@ -200,7 +200,15 @@ def QuadrantXML(centre,rmin,rmax,quadrant):
     xmlstring += InfinitePlaneXML(p1id, centre, plane1Axis)
     p2id = 'pl-b'
     xmlstring += InfinitePlaneXML(p2id, centre, plane2Axis)
-    xmlstring += '<algebra val="(#((#(' + cout_id + ':(#' + cin_id  + '))) ' + p1id + ' ' + p2id + '))"/>\n'
+    
+    # The composition of the shape is "(cyl-out (#cyl-in) (pl-a:pl-b))". The breakdown is:
+    # 1. Create an infinite hollow cylinder by performing "cyl-out (#cyl-in)". This is the intersection of the
+    #    outer radius cylinder with the inverse inner radius cylinder. We have a shell-like selection
+    # 2. Create a three-quarter wedge selection by performing (pl-a:pl-b). This selects everything except
+    #    for the slice region we don't want to be masked.
+    # 3. Create the intersection between 1 and 2. This will provide a three-quarter wedge of the hollow
+    #    cylinder.
+    xmlstring += '<algebra val="((' + cout_id + ' (#' + cin_id  + ')) (' + p1id + ':' + p2id + '))"/>\n'
     return xmlstring
 
 def getWorkspaceReference(ws_pointer):
