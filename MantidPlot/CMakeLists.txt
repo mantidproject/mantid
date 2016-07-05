@@ -45,6 +45,7 @@ set ( QTIPLOT_SRCS src/ApplicationWindow.cpp
                    src/Folder.cpp
                    src/FunctionCurve.cpp
                    src/FunctionDialog.cpp
+                   src/globals.cpp
                    src/Graph3D.cpp
                    src/Graph.cpp
                    src/Grid.cpp
