@@ -26,5 +26,5 @@ from LoadCASTEP import LoadCASTEP
 
 
 from GeneralData import GeneralData
-from  QData import  QData
-from AbinsData import AbinsData
+from QData import  QData
+from KpointsData import KpointsData

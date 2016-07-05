@@ -5,6 +5,7 @@ from IOmodule import IOmodule
 from KpointsData import KpointsData
 from AtomsData import  AtomsDaTa
 from AbinsData import AbinsData
+import Constants
 
 class GeneralDFTProgram(IOmodule):
     """
@@ -14,7 +15,7 @@ class GeneralDFTProgram(IOmodule):
 
     def __init__(self, input_DFT_filename=None):
 
-        super(GeneralDFTProgram, self).__init__(input_filename=input_DFT_filename, group_name="PhononAB")
+        super(GeneralDFTProgram, self).__init__(input_filename=input_DFT_filename, group_name=Constants.DFT_group)
 
         self._num_k = None
         self._num_atoms = None
@@ -199,9 +200,9 @@ class GeneralDFTProgram(IOmodule):
 
             temp_1 = i * _number_of_phonons
             k_points.append({"weight":data["weights"][i],
-                                 "value" :data["k_vectors"][i],
-                                 "frequencies": data["frequencies"][temp_1:temp_1 + _number_of_phonons],
-                                 "atomic_displacements": data["atomic_displacements"][i]
+                             "value" :data["k_vectors"][i],
+                             "frequencies": data["frequencies"][temp_1:temp_1 + _number_of_phonons],
+                             "atomic_displacements": data["atomic_displacements"][i]
                                     } )
 
 

@@ -4,6 +4,7 @@ import numpy
 import Constants
 from  IOmodule import IOmodule
 from QData import  QData
+import  Constants
 
 
 class CalculateQ(IOmodule):
@@ -17,7 +18,7 @@ class CalculateQ(IOmodule):
         @param instrument: name of instrument
         @param sample_form: form in which sample is (Powder or SingleCrystal)
         """
-        super(CalculateQ, self).__init__(input_filename=filename, group_name="Q_vectors")
+        super(CalculateQ, self).__init__(input_filename=filename, group_name=Constants.Q_data_group)
 
         if not instrument in Constants.all_instruments:
             raise ValueError("Unsupported instrument")
