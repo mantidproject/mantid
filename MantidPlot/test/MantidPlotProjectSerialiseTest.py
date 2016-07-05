@@ -12,8 +12,7 @@ class MantidPlotProjectSerialiseTest(unittest.TestCase):
 
     def setUp(self):
         self._project_name = "MantidPlotTestProject"
-        self._project_folder = os.path.join(os.path.expanduser("~"),
-                                            self._project_name)
+        self._project_folder = os.path.expanduser("~/%s" % self._project_name)
         file_name = "%s.mantid" % self._project_name
         self._project_file = os.path.join(self._project_folder, file_name)
 
