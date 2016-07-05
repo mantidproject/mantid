@@ -57,31 +57,38 @@ set ( SRC_FILES
 	src/Functions/Convolution.cpp
 	src/Functions/CrystalElectricField.cpp
 	src/Functions/CrystalFieldPeaks.cpp
+	src/Functions/CrystalFieldPeaksBase.cpp
+	src/Functions/CrystalFieldMultiSpectrum.cpp
 	src/Functions/CrystalFieldSpectrum.cpp
 	src/Functions/CubicSpline.cpp
 	src/Functions/DeltaFunction.cpp
 	src/Functions/DiffRotDiscreteCircle.cpp
 	src/Functions/DiffSphere.cpp
 	src/Functions/DynamicKuboToyabe.cpp
+	src/Functions/ElasticDiffRotDiscreteCircle.cpp
+	src/Functions/ElasticDiffSphere.cpp
 	src/Functions/EndErfc.cpp
 	src/Functions/ExpDecay.cpp
 	src/Functions/ExpDecayMuon.cpp
 	src/Functions/ExpDecayOsc.cpp
 	src/Functions/FlatBackground.cpp
 	src/Functions/FullprofPolynomial.cpp
+	src/Functions/FunctionGenerator.cpp
 	src/Functions/GausDecay.cpp
 	src/Functions/GausOsc.cpp
 	src/Functions/Gaussian.cpp
 	src/Functions/GaussianComptonProfile.cpp
 	src/Functions/GramCharlierComptonProfile.cpp
 	src/Functions/IkedaCarpenterPV.cpp
+	src/Functions/InelasticDiffRotDiscreteCircle.cpp
+	src/Functions/InelasticDiffSphere.cpp
     src/Functions/Keren.cpp
 	src/Functions/LinearBackground.cpp
 	src/Functions/LogNormal.cpp
 	src/Functions/Lorentzian.cpp
 	src/Functions/Lorentzian1D.cpp
 	src/Functions/MuonFInteraction.cpp
-        src/Functions/MultivariateGaussianComptonProfile.cpp
+	src/Functions/MultivariateGaussianComptonProfile.cpp
 	src/Functions/NeutronBk2BkExpConvPVoigt.cpp
 	src/Functions/PawleyFunction.cpp
 	src/Functions/PeakParameterFunction.cpp
@@ -194,31 +201,38 @@ set ( INC_FILES
 	inc/MantidCurveFitting/Functions/Convolution.h
 	inc/MantidCurveFitting/Functions/CrystalElectricField.h
 	inc/MantidCurveFitting/Functions/CrystalFieldPeaks.h
+	inc/MantidCurveFitting/Functions/CrystalFieldPeaksBase.h
+	inc/MantidCurveFitting/Functions/CrystalFieldMultiSpectrum.h
 	inc/MantidCurveFitting/Functions/CrystalFieldSpectrum.h
 	inc/MantidCurveFitting/Functions/CubicSpline.h
 	inc/MantidCurveFitting/Functions/DeltaFunction.h
 	inc/MantidCurveFitting/Functions/DiffRotDiscreteCircle.h
 	inc/MantidCurveFitting/Functions/DiffSphere.h
 	inc/MantidCurveFitting/Functions/DynamicKuboToyabe.h
+	inc/MantidCurveFitting/Functions/ElasticDiffRotDiscreteCircle.h
+	inc/MantidCurveFitting/Functions/ElasticDiffSphere.h
 	inc/MantidCurveFitting/Functions/EndErfc.h
 	inc/MantidCurveFitting/Functions/ExpDecay.h
 	inc/MantidCurveFitting/Functions/ExpDecayMuon.h
 	inc/MantidCurveFitting/Functions/ExpDecayOsc.h
 	inc/MantidCurveFitting/Functions/FlatBackground.h
 	inc/MantidCurveFitting/Functions/FullprofPolynomial.h
+	inc/MantidCurveFitting/Functions/FunctionGenerator.h
 	inc/MantidCurveFitting/Functions/GausDecay.h
 	inc/MantidCurveFitting/Functions/GausOsc.h
 	inc/MantidCurveFitting/Functions/Gaussian.h
 	inc/MantidCurveFitting/Functions/GaussianComptonProfile.h
 	inc/MantidCurveFitting/Functions/GramCharlierComptonProfile.h
 	inc/MantidCurveFitting/Functions/IkedaCarpenterPV.h
+	inc/MantidCurveFitting/Functions/InelasticDiffRotDiscreteCircle.h
+	inc/MantidCurveFitting/Functions/InelasticDiffSphere.h
     inc/MantidCurveFitting/Functions/Keren.h
 	inc/MantidCurveFitting/Functions/LinearBackground.h
 	inc/MantidCurveFitting/Functions/LogNormal.h
 	inc/MantidCurveFitting/Functions/Lorentzian.h
 	inc/MantidCurveFitting/Functions/Lorentzian1D.h
 	inc/MantidCurveFitting/Functions/MuonFInteraction.h
-        inc/MantidCurveFitting/Functions/MultivariateGaussianComptonProfile.h
+	inc/MantidCurveFitting/Functions/MultivariateGaussianComptonProfile.h
 	inc/MantidCurveFitting/Functions/NeutronBk2BkExpConvPVoigt.h
 	inc/MantidCurveFitting/Functions/PawleyFunction.h
 	inc/MantidCurveFitting/Functions/PeakParameterFunction.h
@@ -328,6 +342,7 @@ set ( TEST_FILES
 	Functions/CrystalFieldEnergiesTest.h
 	Functions/CrystalFieldPeaksTest.h
 	Functions/CrystalFieldTest.h
+	Functions/CrystalFieldMultiSpectrumTest.h
 	Functions/CrystalFieldSpectrumTest.h
 	Functions/CubicSplineTest.h
 	Functions/DeltaFunctionTest.h
@@ -352,7 +367,7 @@ set ( TEST_FILES
 	Functions/Lorentzian1DTest.h
 	Functions/LorentzianTest.h
 	Functions/MuonFInteractionTest.h
-        Functions/MultivariateGaussianComptonProfileTest.h
+	Functions/MultivariateGaussianComptonProfileTest.h
 	Functions/NeutronBk2BkExpConvPVoigtTest.h
 	Functions/PawleyFunctionTest.h
 	Functions/PeakParameterFunctionTest.h

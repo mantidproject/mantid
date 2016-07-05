@@ -323,7 +323,7 @@ bool MDHistoWorkspaceIterator::next() {
     // still valid.
     do {
       m_pos++;
-    } while (m_skippingPolicy->keepGoing() && m_pos < m_max);
+    } while (m_pos < m_max && m_skippingPolicy->keepGoing());
   }
 
   bool ret = m_pos < m_max;

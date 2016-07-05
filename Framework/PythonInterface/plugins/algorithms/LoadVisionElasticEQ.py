@@ -22,7 +22,7 @@ class LoadVisionElasticEQ(PythonAlgorithm):
         return "This algorithm loads only the equatorial elastic detectors on VISION."
 
     def PyInit(self):
-        self.declareProperty(FileProperty("Filename", "", action=FileAction.Load, extensions=["*.nxs.h5"]))
+        self.declareProperty(FileProperty("Filename", "", action=FileAction.Load, extensions=[".nxs.h5"]))
         self.declareProperty("Banks", "all")
         self.declareProperty(WorkspaceProperty("OutputWorkspace", "", direction=Direction.Output))
 

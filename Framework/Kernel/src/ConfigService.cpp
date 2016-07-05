@@ -1582,6 +1582,41 @@ void ConfigServiceImpl::setDataSearchDirs(const std::string &searchDirs) {
 }
 
 /**
+ *  Appends the passed subdirectory path to the end of each of data
+ *  search dirs and adds these new dirs to data search directories
+ *  @param subdir :: the subdirectory path to add (relative)
+ */
+void ConfigServiceImpl::appendDataSearchSubDir(const std::string &subdir) {
+  if (subdir.empty())
+    return;
+
+  Poco::Path subDirPath;
+  try {
+    subDirPath = Poco::Path(subdir);
+  } catch (Poco::PathSyntaxException &) {
+    return;
+  }
+
+  if (!subDirPath.isDirectory() || !subDirPath.isRelative()) {
+    return;
+  }
+
+  auto newDataDirs = m_DataSearchDirs;
+  for (const auto &path : m_DataSearchDirs) {
+    Poco::Path newDirPath;
+    try {
+      newDirPath = Poco::Path(path);
+      newDirPath.append(subDirPath);
+      newDataDirs.push_back(newDirPath.toString());
+    } catch (Poco::PathSyntaxException &) {
+      continue;
+    }
+  }
+
+  setDataSearchDirs(newDataDirs);
+}
+
+/**
  *  Adds the passed path to the end of the list of data search paths
  *  the path name must be absolute
  *  @param path :: the absolute path to add
@@ -1994,7 +2029,7 @@ void ConfigServiceImpl::setFilterChannelLogLevel(
 int ConfigServiceImpl::FindLowestFilterLevel() const {
   int lowestPriority = Logger::Priority::PRIO_FATAL;
   // Find the lowest level of all of the filter channels
-  for (const auto filterChannelName : m_filterChannels) {
+  for (const auto &filterChannelName : m_filterChannels) {
     try {
       auto *channel = Poco::LoggingRegistry::defaultRegistry().channelForName(
           filterChannelName);

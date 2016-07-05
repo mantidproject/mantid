@@ -95,6 +95,9 @@ public:
   /// Returns the catalogInfo class.
   const CatalogInfo &catalogInfo() const { return m_catalogs; }
 
+  /// Returns a bool indicating whether prefix is required in file names
+  bool noFilePrefix() const { return m_noFilePrefix; }
+
 private:
   void fillZeroPadding(const Poco::XML::Element *elem);
   void fillDelimiter(const Poco::XML::Element *elem);
@@ -104,6 +107,7 @@ private:
   void fillLiveListener(const Poco::XML::Element *elem);
   void fillHTTPProxy(const Poco::XML::Element *elem);
   void fillComputeResources(const Poco::XML::Element *elem);
+  void fillNoFilePrefix(const Poco::XML::Element *elem);
 
   /// Add new extension
   void addExtension(const std::string &ext);
@@ -120,7 +124,7 @@ private:
   std::vector<InstrumentInfo>
       m_instruments;          ///< list of instruments of this facility
   std::string m_liveListener; ///< name of the default live listener
-
+  bool m_noFilePrefix; ///< flag indicating if prefix is required in file names
   std::vector<ComputeResourceInfo> m_computeResInfos; ///< (remote) compute
   /// resources available in
   /// this facility

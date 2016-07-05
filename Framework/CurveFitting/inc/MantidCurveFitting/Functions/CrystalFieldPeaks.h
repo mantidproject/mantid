@@ -1,10 +1,7 @@
 #ifndef MANTID_CURVEFITTING_CRYSTALFIELDPEAKS_H_
 #define MANTID_CURVEFITTING_CRYSTALFIELDPEAKS_H_
 
-#include "MantidAPI/FunctionValues.h"
-#include "MantidAPI/IFunctionGeneral.h"
-#include "MantidAPI/ParamFunction.h"
-#include "MantidCurveFitting/DllConfig.h"
+#include "MantidCurveFitting/Functions/CrystalFieldPeaksBase.h"
 
 namespace Mantid {
 namespace CurveFitting {
@@ -35,8 +32,7 @@ namespace Functions {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_CURVEFITTING_DLL CrystalFieldPeaks : public API::IFunctionGeneral,
-                                                  public API::ParamFunction {
+class MANTID_CURVEFITTING_DLL CrystalFieldPeaks : public CrystalFieldPeaksBase {
 public:
   CrystalFieldPeaks();
   std::string name() const override;
@@ -45,7 +41,6 @@ public:
   void functionGeneral(const API::FunctionDomainGeneral &generalDomain,
                        API::FunctionValues &values) const override;
   size_t getDefaultDomainSize() const override;
-  void setAttribute(const std::string &name, const Attribute &) override;
 
 private:
   /// Store the default domain size after first
