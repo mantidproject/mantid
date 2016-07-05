@@ -664,7 +664,7 @@ template <>
 void PropertyWithValue<std::vector<int32_t>>::saveProperty(::NeXus::File *file);
 
 template <typename TYPE>
-inline void PropertyWithValue<TYPE>::saveProperty(::NeXus::File *file) {
+void PropertyWithValue<TYPE>::saveProperty(::NeXus::File *file) {
   this->saveProperty(file);
 }
 
