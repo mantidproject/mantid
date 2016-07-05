@@ -5,6 +5,19 @@ from mantid.kernel import ConfigService
 ConfigService.setString('curvefitting.peakRadius', str(100))
 
 
+def MakeWorkspace(x, y):
+    """Create a workspace that doesn't appear in the ADS"""
+    from mantid.api import AlgorithmManager
+    alg = AlgorithmManager.createUnmanaged('CreateWorkspace')
+    alg.initialize()
+    alg.setChild(True)
+    alg.setProperty('DataX', x)
+    alg.setProperty('DataY', y)
+    alg.setProperty('OutputWorkspace', 'dummy')
+    alg.execute()
+    return alg.getProperty('OutputWorkspace').value
+
+
 class CrystalField(object):
     """Calculates the crystal fields for one ion"""
 
@@ -122,6 +135,7 @@ class CrystalField(object):
         # Spectra
         self._dirty_spectra = True
         self._spectra = {}
+        self._plot_window = {}
 
     def _getTemperature(self, i):
         """Get temperature value for i-th spectrum."""
@@ -396,7 +410,6 @@ class CrystalField(object):
 
         # Workspace isn't given. Re-calculate only when need to then store.
         if i not in self._spectra:
-            from mantid.simpleapi import CreateWorkspace
             peaks = self.getPeakList(i)
             x_min = np.min(peaks[0])
             x_max = np.max(peaks[0])
@@ -406,10 +419,34 @@ class CrystalField(object):
             x_max += dx
             x = np.linspace(x_min, x_max, self.default_spectrum_size)
             y = np.zeros_like(x)
-            e = np.ones_like(x)
-            workspace = CreateWorkspace(x, y, e)
+            workspace = MakeWorkspace(x, y)
             self._spectra[i] = self._calcSpectrum(i, workspace, 0)
         return self._spectra[i]
+
+    def plot(self, i=0, workspace=None, ws_index=0):
+        """Plot a spectrum. Parameters are the same as in getSpectrum(...)"""
+        from mantid.simpleapi import CreateWorkspace
+        from mantidplot import plotSpectrum
+        x, y = self.getSpectrum(i, workspace, ws_index)
+        ws_name = 'CrystalField_%s' % self._ion
+
+        if isinstance(i, int):
+            if workspace is None:
+                if i > 0:
+                    ws_name += '_%s' % i
+                ws = CreateWorkspace(x, y, OutputWorkspace=ws_name)
+                plot_window = self._plot_window[i] if i in self._plot_window else None
+                self._plot_window[i] = plotSpectrum(ws, 0, window=plot_window, clearWindow=True)
+            else:
+                ws_name += '_%s' % workspace
+                if i > 0:
+                    ws_name += '_%s' % i
+                ws = CreateWorkspace(x, y, OutputWorkspace=ws_name)
+                plotSpectrum(ws, 0)
+        else:
+            ws_name += '_%s' % i
+            ws = CreateWorkspace(x, y, OutputWorkspace=ws_name)
+            plotSpectrum(ws, 0)
 
 
 class SimpleFunction(object):
