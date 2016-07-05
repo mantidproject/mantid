@@ -290,8 +290,7 @@ void IndirectDiffractionReduction::runGenericReduction(QString instName,
   if (instName == "OSIRIS") {
     if (mode == "diffspec") {
       if (m_uiForm.ckUseCalib->isChecked()) {
-        std::string calFile =
-            m_uiForm.rfCalFile->getFirstFilename().toStdString();
+        const auto calFile = m_uiForm.rfCalFile_only->getText().toStdString();
         msgDiffReduction->setProperty("CalFile", calFile);
       }
     }
@@ -671,7 +670,7 @@ bool IndirectDiffractionReduction::validateVanCal() {
 bool IndirectDiffractionReduction::validateCalOnly() {
   // Check Calib file valid
   if (m_uiForm.ckUseCalib->isChecked()) {
-    if (!m_uiForm.rfCalFile->isValid())
+    if (!m_uiForm.rfCalFile_only->isValid())
       return false;
   }
 
