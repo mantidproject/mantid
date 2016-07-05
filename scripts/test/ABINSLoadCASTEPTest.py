@@ -26,7 +26,7 @@ class ABINSLoadCASTEPTest(unittest.TestCase):
 
     _gamma_sum = "squaricn_sum"
     def test_Gamma_sum_correction(self):
-         self._check_data(core=self._core, name=self._gamma_sum)
+         self._check(core=self._core, name=self._gamma_sum)
 
     # ===================================================================================
     # |     Use case: Gamma point calculation and no sum correction for Gamma point     |
@@ -34,7 +34,7 @@ class ABINSLoadCASTEPTest(unittest.TestCase):
 
     _gamma_no_sum = "squaricn_no_sum"
     def test_Gamma_no_sum_correction(self):
-        self._check_data(core=self._core, name=self._gamma_no_sum)
+        self._check(core=self._core, name=self._gamma_no_sum)
 
 
     # ===================================================================================
@@ -42,7 +42,7 @@ class ABINSLoadCASTEPTest(unittest.TestCase):
     # ===================================================================================
     _many_k_sum = "Si2-phonon"
     def test_sum_correction(self):
-        self._check_data(core=self._core, name=self._many_k_sum)
+        self._check(core=self._core, name=self._many_k_sum)
 
     # ===================================================================================
     # |              Use case: more than one k-point without sum correction             |
@@ -50,12 +50,49 @@ class ABINSLoadCASTEPTest(unittest.TestCase):
 
     _many_k_no_sum = "Si2-sc"
     def test_no_sum_correction(self):
-        self._check_data(core=self._core, name=self._many_k_no_sum)
+        self._check(core=self._core, name=self._many_k_no_sum)
 
 
     # # Helper functions
+
+    def _check(self, core=None, name=None):
+
+        # get calculated data
+        input_filename = path.relpath(core + name + ".phonon")
+        _data = self._read_DFT(filename=input_filename)
+
+        # get correct data
+        filename = path.relpath(core + name + "_data.txt")
+        _correct_data = self._prepare_data(filename=filename)
+
+        # check read data
+        self._check_reader_data(correct_data=_correct_data, data=_data)
+
+        # check loaded data
+        self._check_loader_data(correct_data=_correct_data, input_DFT_filename=input_filename)
+
+
+    def _read_DFT(self, filename=None):
+        """
+        Reads data from .phonon file.
+        @param filename:
+        @return:
+        """
+        # 1) Read data
+        data={}
+
+        _CASTEP_reader = LoadCASTEP(input_DFT_filename=filename)
+
+        data = self._get_reader_data(castep_reader=_CASTEP_reader)
+
+        # test validData method
+        self.assertEqual(True, _CASTEP_reader.validData())
+
+        return data
+
+
     def _prepare_data(self, filename=None):
-        """Reads a corrects values from ASCII file."""
+        """Reads a correct values from ASCII file."""
         correct_data = None
         with open(filename) as data_file:
             correct_data = json.loads(data_file.read().replace("\n"," ").
@@ -70,71 +107,64 @@ class ABINSLoadCASTEPTest(unittest.TestCase):
         return correct_data
 
 
-    def _read_DFT(self, filename=None):
-        """
-        Reads data from .phonon file and test some public methods
-        @param filename:
-        @return:
-        """
-        # 1) Read data
-        data={}
-
-        _CASTEP_reader = LoadCASTEP(input_DFT_filename=filename)
-
-        AbinsTypeData = _CASTEP_reader.readPhononFile()
-        data["rearranged_data"] = AbinsTypeData.extract()
-        data["attributes"] =_CASTEP_reader._attributes
-        data["datasets"] = _CASTEP_reader._numpy_datasets
-        data["structured_datasets"] = _CASTEP_reader._structured_datasets
-
-        # 2) Test of LoadCASTEP public methods
-
-        # test validData method
-        self.assertEqual(True, _CASTEP_reader.validData())
-
-        # test LoadData method
-        _loaded_ABINS_data =  _CASTEP_reader.loadData()
-        _loaded_data = _loaded_ABINS_data.extract()
-        _loaded_k_data = _loaded_data["k_points_data"]
-        k_data = data["rearranged_data"]["k_points_data"]
-        num_k = len(k_data)
-
-        for el in range(num_k):
-            for item in k_data[el]:
-                self.assertEqual(True,np.allclose(k_data[el][item],
-                                                  _loaded_k_data[el][item])) # test is numpy arrays are equal
-
-        _loaded_atoms_data = _loaded_data["atoms_data"]
-        _num_atoms = len(_loaded_atoms_data)
-        for num_atom in range(_num_atoms):
-
-            _data_item = data["structured_datasets"]["atoms"][num_atom]
-            _loaded_data_item = _loaded_atoms_data[num_atom]
-
-            self.assertEqual(_data_item["sort"], _loaded_data_item["sort"])
-            self.assertEqual(_data_item["atom"], _loaded_data_item["atom"])
-            self.assertEqual(_data_item["mass"], _loaded_data_item["mass"])
-            self.assertEqual(_data_item["symbol"], _loaded_data_item["symbol"])
-            self.assertEqual(True, np.allclose(_data_item["fract_coord"], _loaded_data_item["fract_coord"]))
-
-        return data
-
-
-    def _check_data(self, core=None, name=None):
-
-        # get calculated data
-        filename = path.relpath(core + name + ".phonon")
-        _data = self._read_DFT(filename=filename)
-
-        # get correct data
-        filename = path.relpath(core + name + "_data.txt")
-        _correct_data = self._prepare_data(filename=filename)
-
+    def _check_reader_data(self, correct_data=None, data=None):
 
         # check rearranged_data
-        _correct_items = _correct_data["rearranged_data"]["k_points_data"]
+        _correct_k_points = correct_data["rearranged_data"]["k_points_data"]
+        num_k = len(_correct_k_points)
+        _items = data["rearranged_data"]["k_points_data"]
+        for k in range(num_k):
+            _correct_item = _correct_k_points[k]
+            _item =  _items[k]
+
+            self.assertEqual(True, np.allclose(np.array(_correct_item["frequencies"]), _item["frequencies"]))
+            self.assertEqual(True, np.allclose(np.array(_correct_item["atomic_displacements"]), _item["atomic_displacements"]))
+            self.assertEqual(True, np.allclose(np.array(_correct_item["value"]), _item["value"]))
+            self.assertEqual(True, np.allclose(np.array(_correct_item["weight"]), _item["weight"]))
+
+        _correct_atoms = correct_data["rearranged_data"]["atoms_data"]
+        _atoms = data["rearranged_data"]["atoms_data"]
+        for item in range(len(_correct_atoms)):
+
+            self.assertEqual(_correct_atoms[item]["sort"], _atoms[item]["sort"])
+            self.assertEqual(_correct_atoms[item]["mass"], _atoms[item]["mass"])
+            self.assertEqual(_correct_atoms[item]["symbol"], _atoms[item]["symbol"])
+            self.assertEqual(_correct_atoms[item]["atom"], _atoms[item]["atom"])
+            self.assertEqual(True, np.allclose(np.array(_correct_atoms[item]["fract_coord"]), _atoms[item]["fract_coord"]))
+
+        # check attributes
+        self.assertEqual(correct_data["attributes"]["hash"], data["attributes"]["hash"])
+        self.assertEqual(correct_data["attributes"]["DFT_program"], data["attributes"]["DFT_program"])
+        self.assertEqual(correct_data["attributes"]["filename"], data["attributes"]["filename"])
+
+
+        # check datasets
+        for item in correct_data["datasets"]:
+            self.assertEqual(True, np.allclose(np.array(correct_data["datasets"][item]), data["datasets"][item]))
+
+        # check structured_data
+        _correct_atoms = correct_data["structured_datasets"]["atoms"]
+        _atoms = data["structured_datasets"]["atoms"]
+
+        for item in range(len(_correct_atoms)):
+
+            self.assertEqual(_correct_atoms[item]["sort"], _atoms[item]["sort"])
+            self.assertEqual(_correct_atoms[item]["mass"], _atoms[item]["mass"])
+            self.assertEqual(_correct_atoms[item]["symbol"], _atoms[item]["symbol"])
+            self.assertEqual(_correct_atoms[item]["atom"], _atoms[item]["atom"])
+            self.assertEqual(True, np.allclose(np.array(_correct_atoms[item]["fract_coord"]), _atoms[item]["fract_coord"]))
+
+
+    def _check_loader_data(self, correct_data=None, input_DFT_filename=None):
+
+        loader = LoadCASTEP(input_DFT_filename=input_DFT_filename)
+        _loaded_data = loader.loadData().extract()
+
+
+        # k points
+        _correct_items = correct_data["rearranged_data"]["k_points_data"]
         num_k = len(_correct_items)
-        _items = _data["rearranged_data"]["k_points_data"]
+        _items = _loaded_data["k_points_data"]
         for k in range(num_k):
             _correct_item = _correct_items[k]
             _item =  _items[k]
@@ -144,28 +174,26 @@ class ABINSLoadCASTEPTest(unittest.TestCase):
             self.assertEqual(True, np.allclose(np.array(_correct_item["value"]), _item["value"]))
             self.assertEqual(True, np.allclose(np.array(_correct_item["weight"]), _item["weight"]))
 
+        # atoms
+        _correct_atoms = correct_data["structured_datasets"]["atoms"]
+        _atoms = _loaded_data["atoms_data"]
 
-        # check attributes
-        self.assertEqual(_correct_data["attributes"]["hash"], _data["attributes"]["hash"])
-        self.assertEqual(_correct_data["attributes"]["DFT_program"], _data["attributes"]["DFT_program"] )
+        for item in range(len(_correct_atoms)):
+
+            self.assertEqual(_correct_atoms[item]["sort"], _atoms[item]["sort"])
+            self.assertEqual(_correct_atoms[item]["mass"], _atoms[item]["mass"])
+            self.assertEqual(_correct_atoms[item]["symbol"], _atoms[item]["symbol"])
+            self.assertEqual(_correct_atoms[item]["atom"], _atoms[item]["atom"])
+            self.assertEqual(True, np.allclose(np.array(_correct_atoms[item]["fract_coord"]), _atoms[item]["fract_coord"]))
 
 
-        # check datasets
-        for item in _correct_data["datasets"]:
-            self.assertEqual(True, np.allclose(np.array(_correct_data["datasets"][item]),_data["datasets"][item]))
-
-        # check structured_data
-        _correct_ions = _correct_data["structured_datasets"]["atoms"]
-        _ions = _data["structured_datasets"]["atoms"]
-
-        for item in range(len(_correct_ions)):
-
-            self.assertEqual(_correct_ions[item]["sort"], _ions[item]["sort"])
-            self.assertEqual(_correct_ions[item]["mass"], _ions[item]["mass"])
-            self.assertEqual(_correct_ions[item]["symbol"], _ions[item]["symbol"])
-            self.assertEqual(_correct_ions[item]["atom"], _ions[item]["atom"])
-            self.assertEqual(True, np.allclose(np.array(_correct_ions[item]["fract_coord"]), _ions[item]["fract_coord"]))
-
+    def _get_reader_data(self, castep_reader=None):
+        abins_type_data = castep_reader.readPhononFile()
+        data = {"rearranged_data": abins_type_data.extract(),
+                "datasets": castep_reader._numpy_datasets,
+                "attributes": castep_reader._attributes,
+                "structured_datasets": castep_reader._structured_datasets}
+        return data
 
 if __name__ == '__main__':
     unittest.main()
