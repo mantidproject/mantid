@@ -6,17 +6,7 @@
 #include "MantidCurveFitting/FuncMinimizers/TrustRegionMinimizer.h"
 #include "MantidCurveFitting/RalNlls/TrustRegion.h"
 
-#include "MantidAPI/CostFunctionFactory.h"
-#include "MantidAPI/FuncMinimizerFactory.h"
-
-#include "MantidKernel/Exception.h"
-#include "MantidKernel/Logger.h"
-#include "MantidKernel/System.h"
-
-#include <boost/lexical_cast.hpp>
-#include <boost/math/special_functions/fpclassify.hpp>
-#include <gsl/gsl_blas.h>
-#include <gsl/gsl_version.h>
+#include <math.h>
 
 namespace Mantid {
 namespace CurveFitting {
@@ -272,8 +262,7 @@ bool TrustRegionMinimizer::iterate(size_t) {
     //
     // if model is good, rho should be close to one
     rho = calculate_rho(w.normF, normFnew, md, options);
-    if (boost::math::isnan(rho) || boost::math::isinf(rho) ||
-        rho <= options.eta_successful) {
+    if (!std::isfinite(rho) || rho <= options.eta_successful) {
       if ((w.use_second_derivatives) && (options.model == 3) &&
           (no_reductions == 1)) {
         // recalculate rho based on the approx GN model

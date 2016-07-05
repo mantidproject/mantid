@@ -6,10 +6,7 @@
 #include "MantidCurveFitting/FuncMinimizers/MoreSorensenMinimizer.h"
 #include "MantidCurveFitting/RalNlls/TrustRegion.h"
 #include "MantidAPI/FuncMinimizerFactory.h"
-#include "MantidKernel/Exception.h"
-#include "MantidKernel/Logger.h"
-#include "MantidKernel/System.h"
-#include <boost/math/special_functions/fpclassify.hpp>
+#include <math.h>
 
 namespace Mantid {
 namespace CurveFitting {
@@ -241,7 +238,7 @@ void more_sorensen(const DoubleFortranMatrix &J, const DoubleFortranVector &f,
   }
 
   nd = norm2(d);
-  if (boost::math::isnan(nd) || boost::math::isinf(nd)) {
+  if (!std::isfinite(nd)) {
     inform.status = NLLS_ERROR::NAN_OR_INF;
     throw std::runtime_error("Step is NaN or infinite.");
   }

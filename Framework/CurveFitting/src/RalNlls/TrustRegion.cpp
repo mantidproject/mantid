@@ -7,13 +7,12 @@
 
 #include <algorithm>
 #include <functional>
-#include <iostream>
 #include <limits>
 #include <string>
 
-#include <boost/math/special_functions/fpclassify.hpp>
 #include <gsl/gsl_blas.h>
 #include <gsl/gsl_linalg.h>
+#include <math.h>
 
 namespace Mantid {
 namespace CurveFitting {
@@ -211,7 +210,7 @@ void update_trust_region_radius(double &rho, const nlls_options &options,
 
   switch (options.tr_update_strategy) {
   case 1: // default, step-function
-    if (boost::math::isinf(rho) || boost::math::isnan(rho)) {
+    if (!std::isfinite(rho)) {
       w.Delta =
           std::max(options.radius_reduce, options.radius_reduce_max) * w.Delta;
       rho = -one; // set to be negative, so that the logic works....
@@ -237,7 +236,7 @@ void update_trust_region_radius(double &rho, const nlls_options &options,
           //  Based on that proposed by Hans Bruun Nielsen, TR
           //  IMM-REP-1999-05
           //  http://www2.imm.dtu.dk/documents/ftp/tr99/tr05_99.pdf
-    if (boost::math::isinf(rho) || boost::math::isnan(rho)) {
+    if (!std::isfinite(rho)) {
       w.Delta =
           std::max(options.radius_reduce, options.radius_reduce_max) * w.Delta;
       rho = -one; // set to be negative, so that the logic works....
