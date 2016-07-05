@@ -44,6 +44,7 @@ class PeakProcessHelper(object):
 
         self._myPeakWSKey = (None, None, None)
         self._myPeakIndex = None
+        self._ptIntensityDict = None
 
         self._myLastPeakUB = None
 
@@ -158,10 +159,16 @@ class PeakProcessHelper(object):
     def get_weighted_peak_centres(self):
         """ Get the peak centers found in peak workspace.
         Guarantees: the peak centers and its weight (detector counts) are exported
-        :return: 2 lists: list of 3-tuple (Qx, Qy, Qz) and list of double (Det_Counts)
+        :return: 2-tuple: list of 3-tuple (Qx, Qy, Qz)
+                          list of double (Det_Counts)
         """
+        # get PeaksWorkspace
+        if AnalysisDataService.doesExist(self._myPeakWorkspaceName) is False:
+            raise RuntimeError('PeaksWorkspace %s does ot exit.' % self._myPeakWorkspaceName)
+
         peak_ws = AnalysisDataService.retrieve(self._myPeakWorkspaceName)
 
+        # get peak center, peak intensity and etc.
         peak_center_list = list()
         peak_intensity_list = list()
         num_peaks = peak_ws.getNumberPeaks()
@@ -260,6 +267,20 @@ class PeakProcessHelper(object):
         assert peak_intensity >= -0., 'Input peak intensity %f is negative.' % peak_intensity
 
         self._myIntensity = peak_intensity
+
+        return
+
+    def set_pt_intensity(self, pt_intensity_dict):
+        """
+        Set Pt. intensity
+        :param pt_intensity_dict:
+        :return:
+        """
+        assert isinstance(pt_intensity_dict, dict)
+
+        print '[DB...BAT] Pt intensity dict keys: ', pt_intensity_dict.keys()
+
+        self._ptIntensityDict = pt_intensity_dict
 
         return
 

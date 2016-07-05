@@ -2365,9 +2365,6 @@ class MainWindow(QtGui.QMainWindow):
         # peak center
         weight_peak_centers, weight_peak_intensities = peak_info.get_weighted_peak_centres()
         qx, qy, qz = peak_info.get_peak_centre()
-        # get peak intensity
-        intensity = self._myControl.get_peak_integrated_intensity(exp_number, scan_number)
-        #intensity = 100000
 
         # convert from list to ndarray
         num_pt_peaks = len(weight_peak_centers)
@@ -2385,7 +2382,8 @@ class MainWindow(QtGui.QMainWindow):
         avg_peak_centre[0][0] = qx
         avg_peak_centre[0][1] = qy
         avg_peak_centre[0][2] = qz
-        avg_peak_intensity[0] = intensity
+        # integrated peak intensity
+        avg_peak_intensity[0] = sum(pt_peak_intensity_array)
 
         return md_file_name, pt_peak_centre_array, pt_peak_intensity_array, avg_peak_centre, avg_peak_intensity
 

@@ -1190,6 +1190,11 @@ class CWSCDReductionControl(object):
             pt_dict[run_number_i] = intensity_i
         # END-FOR
 
+        # store the data into peak info
+        if (exp, scan) not in self._myPeakInfoDict:
+            raise RuntimeError('Exp %d Scan %d is not recorded in PeakInfo-Dict' % (exp, scan))
+        self._myPeakInfoDict[(exp, scan)].set_pt_intensity(pt_dict)
+
         return True, pt_dict
 
     def integrate_peaks_q(self, exp_no, scan_no):
