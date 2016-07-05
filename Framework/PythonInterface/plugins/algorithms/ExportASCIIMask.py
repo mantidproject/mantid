@@ -8,20 +8,20 @@ def export_masks(ws,fileName='',returnMasksOnly=False):
     """Exports masks applied to Mantid workspace
        (e.g. drawn using the instrument view) and write these masks
        into the old fashioned ascii msk file containing masked spectra numbers.
-    
+
        The file is Libisis/Mantid old ISIS format compartible and can be read by libisis
        or Manid LoadMasks algorithm
- 
-       If optional parameter fileName is present, the masks are saved 
+
+       If optional parameter fileName is present, the masks are saved
        in the file with this name
-       Otherwise, the file with the name equal to the workspace 
+       Otherwise, the file with the name equal to the workspace
        name and the extension .msk is used.
-    
+
        If returnMasks is set to True, the function does not write to file but returns
        list of masks instead.
     """
    # get pointer to the workspace
-    if (type(ws) == str):
+    if type(ws) == str:
         pws = mtd[ws]
     else:
         pws = ws
@@ -29,22 +29,24 @@ def export_masks(ws,fileName='',returnMasksOnly=False):
 
     ws_name=pws.getName()
     nhist = pws.getNumberHistograms()
-    
+
     no_detectors = 0
     masks = []
     for i in range(nhist):
         # set provisional spectra ID
         ms = i+1
-        try: 
+        try:
             sp = pws.getSpectrum(i)
             # got real spectra ID, which would correspond real spectra num to spectra ID map
-            ms = sp.getSpectrumNo();
+            ms = sp.getSpectrumNo()
+#pylint: disable=W0703
         except Exception:
-           logger.notice("Can not retrieve spectra No: " + str(i) + ". Have masked it")
-           masks.append(ms) 
-           continue
+            logger.notice("Can not retrieve spectra No: " + str(i) + ". Have masked it")
+            masks.append(ms)
+            continue
         try:
             det = pws.getDetector(i)
+#pylint: disable=W0703
         except Exception:
             no_detectors = no_detectors +1
             masks.append(ms)
@@ -52,7 +54,14 @@ def export_masks(ws,fileName='',returnMasksOnly=False):
         if det.isMasked():
             masks.append(ms)
 
-    nMasks = len(masks);
+    filename=''
+    if len(fileName)==0 :
+        filename = os.path.join(config.getString('defaultsave.directory'),ws_name+'.msk')
+    else:
+        filename = fileName
+
+
+    nMasks = len(masks)
     if nMasks == 0:
         if returnMasksOnly:
             logger.warning("Workspace {0} have no masked spectra. File {1} have not been created".format(ws_name,filename))
@@ -62,11 +71,6 @@ def export_masks(ws,fileName='',returnMasksOnly=False):
 
     logger.notice("Workspace {0} has {1} masked spectra, including {2} spectra without detectors".format(ws_name,nMasks,no_detectors))
 
-    filename=''
-    if len(fileName)==0 :
-        filename = os.path.join(config.getString('defaultsave.directory'),ws_name+'.msk')
-    else:
-        filename = fileName
 
     if not returnMasksOnly :
         writeISISmasks(filename,masks,8)
@@ -75,16 +79,16 @@ def export_masks(ws,fileName='',returnMasksOnly=False):
 
 
 def flushOutString(f,OutString,BlockSize,BlockLimit):
-    """Internal function for writeISISmasks procedure, 
-       which writes down specified number of mask blocks, 
+    """Internal function for writeISISmasks procedure,
+       which writes down specified number of mask blocks,
        not to exceed the specified number of masks in row.
     """
-    BlockSize+=1;
-    if BlockSize >= BlockLimit: 
-       if len(OutString)>0:
-           f.write(OutString+'\n');
-       OutString = ''
-       BlockSize = 0
+    BlockSize+=1
+    if BlockSize >= BlockLimit:
+        if len(OutString)>0:
+            f.write(OutString+'\n')
+        OutString = ''
+        BlockSize = 0
     return (f,BlockSize,OutString)
 
 
@@ -92,16 +96,16 @@ def  writeISISmasks(filename,masks,nSpectraInRow=8):
     """Function writes input array in the form of ISSI mask file array
        This is the helper function for export_mask procedure,
        which can be used separately
-    
+
        namely, if one have array 1,2,3,4, 20, 30,31,32
        file will have the following ascii stgings:
        1-4 20 30-32
-        
-       nSpectaInRow indicates the number of the separate spectra ID (numbers) which the program 
-       needs to fit into one row. For the example above the number has to be 5 or more 
+
+       nSpectaInRow indicates the number of the separate spectra ID (numbers) which the program
+       needs to fit into one row. For the example above the number has to be 5 or more
        to fit all spectra into a single row. Setting it to one will produce 8 rows with single number in each.
 
-    Usage: 
+    Usage:
     >>writeISISmasks(fileName,masks)
     where:
     fileName  -- the name of the output file
@@ -113,8 +117,8 @@ def  writeISISmasks(filename,masks,nSpectraInRow=8):
 
     OutString   = ''
     LastSpectraN= ''
-    BlockSize = 0;
-    iDash = 0;
+    BlockSize = 0
+    iDash = 0
     im1=masks[0]
 
     with open(filename,'w')  as f:
@@ -129,7 +133,7 @@ def  writeISISmasks(filename,masks,nSpectraInRow=8):
             # if the current spectra is different from the previous one by 1 only, we may want to skip it
             if im1+1 == i :
                 LastSpectraN = str(i)
-                iDash += 1;
+                iDash += 1
             else :  # it is different and should be dealt separately
                 if iDash > 0 :
                     OutString = OutString+'-'+LastSpectraN
@@ -145,7 +149,7 @@ def  writeISISmasks(filename,masks,nSpectraInRow=8):
                 # write the string if it is finished
                 (f,BlockSize,OutString) = flushOutString(f,OutString,BlockSize,nSpectraInRow)
             #endif
-      
+
             # current spectra is the previous now
             im1 = i
         # end masks loop
@@ -156,7 +160,7 @@ def  writeISISmasks(filename,masks,nSpectraInRow=8):
 
 
 class ExportASCIIMask(PythonAlgorithm):
-    """ Export workspace's masks 
+    """ Export workspace's masks
     """
     def category(self):
         """ Return category
@@ -180,9 +184,9 @@ class ExportASCIIMask(PythonAlgorithm):
         self.declareProperty("Filename","","Name of the file to save mask to."\
                             " If empty, the name of the input workspace is used")
         self.declareProperty("ExportMaskOnly",False,"If true, algorithm will not save mask in a file"\
-                             "and returns only list with numbers of masted spectra.",
+                             "and returns only list with numbers of masted spectra.",\
                               Direction.Input)
-        self.declareProperty(IntArrayProperty(name="SpectraMasks",direction = Direction.Output),
+        self.declareProperty(IntArrayProperty(name="SpectraMasks",direction = Direction.Output),\
                          doc="List of the spectra masked in the workspace")
         return
 
