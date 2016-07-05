@@ -91,7 +91,7 @@ class SavePlot1D(mantid.api.PythonAlgorithm):
         if ax.isSpectra():
             label = ax.label(wkspIndex)
         else:
-            LHS = a.title()
+            LHS = ax.title()
             if LHS == "":
                 LHS = ax.getUnit().caption()
             label = LHS + " = " + str(float(ax.label(wkspIndex)))
