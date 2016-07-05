@@ -1374,7 +1374,8 @@ public:
     delete suite;
   }
 
-  MatrixWorkspaceTestPerformance() : m_workspace(nullptr) {
+  MatrixWorkspaceTestPerformance()
+      : m_workspace(nullptr), m_sansTestWorkspace(nullptr) {
     size_t numberOfHistograms = 10000;
     size_t numberOfBins = 1;
     m_workspace.init(numberOfHistograms, numberOfBins, numberOfBins - 1);
@@ -1383,6 +1384,36 @@ public:
     const std::string instrumentName("SimpleFakeInstrument");
     InstrumentCreationHelper::addFullInstrumentToWorkspace(
         m_workspace, includeMonitors, startYNegative, instrumentName);
+
+    constructSANSWorkspace(numberOfBins, numberOfHistograms);
+  }
+
+  /**
+   * Create a workspace around the benchmarking SANS type instrument with
+   * 6E^5 detectors.
+   */
+  void constructSANSWorkspace() {
+    Mantid::Kernel::V3D sourcePos(0, 0, 0);
+    Mantid::Kernel::V3D samplePos(0, 0, 1);
+    Mantid::Kernel::V3D trolley1Pos(0, 0, 3);
+    Mantid::Kernel::V3D trolley2Pos(0, 0, 6);
+    auto instrumentNotParameterized = ComponentCreationHelper::sansInstrument(
+        sourcePos, samplePos, trolley1Pos, trolley2Pos);
+
+    auto instrumentParameterized = boost::make_shared<Instrument>(
+        instrumentNotParameterized, boost::make_shared<ParameterMap>());
+
+    size_t numberOfHistograms = instrumentParameterized->getNumberDetectors();
+    size_t numberOfBins = 1;
+    m_sansTestWorkspace.init(numberOfHistograms, numberOfBins,
+                             numberOfBins - 1);
+
+    m_sansTestWorkspace.setInstrument(instrumentParameterized);
+    m_sansTestWorkspace.getAxis(0)->setUnit("TOF");
+    for (size_t wi = 0; wi < m_sansTestWorkspace.getNumberHistograms(); ++wi) {
+      m_sansTestWorkspace.getSpectrum(wi).setDetectorID(detid_t(wi + 1));
+      m_sansTestWorkspace.getSpectrum(wi).setSpectrumNo(specnum_t(wi));
+    }
   }
 
   /// This test is equivalent to GeometryInfoFactoryTestPerformance, see there.
@@ -1402,8 +1433,26 @@ public:
     TS_ASSERT_DELTA(result, 5214709.740869, 1e-6);
   }
 
+  void test_calculateL2() {
+
+    /*
+     * Simulate the L2 calculation performed via the Workspace/Instrument
+     * interface.
+     */
+    auto instrument = m_sansTestWorkspace.getInstrument();
+    auto sample = instrument->getSample();
+    double l2 = 0;
+    for (size_t i = 0; i < m_sansTestWorkspace.getNumberHistograms(); ++i) {
+      auto detector = m_sansTestWorkspace.getDetector(i);
+      l2 += detector->getDistance(*sample);
+    }
+    // Prevent optimization
+    TS_ASSERT(l2 > 0);
+  }
+
 private:
   WorkspaceTester m_workspace;
+  WorkspaceTester m_sansTestWorkspace;
 };
 
 #endif /*WORKSPACETEST_H_*/
