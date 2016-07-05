@@ -3,7 +3,7 @@ from mantid.simpleapi import *
 from mantid.kernel import StringListValidator, IntBoundedValidator, Direction
 from mantid.api import DataProcessorAlgorithm, PropertyMode, AlgorithmFactory, \
                        MultipleFileProperty, FileProperty, FileAction, \
-                       MatrixWorkspaceProperty
+                       MatrixWorkspaceProperty, WorkspaceGroup
 from mantid import config, logger, mtd
 
 import numpy as np
@@ -158,7 +158,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
 
         self.setPropertyValue('RawWorkspace', self._raw_ws)
 
-        if type(mtd[self._raw_ws]) == "GroupWorkspace":
+        if isinstance(mtd[self._raw_ws],WorkspaceGroup):
             self._instrument = mtd[self._raw_ws].getItem(0).getInstrument()
             self._loadParamFiles()
             out_ws = self._multifile_reduction(self._raw_ws)
@@ -231,7 +231,42 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         @return    :: the reduced group workspace or a list of group workspaces containing
                       control and reduced ones depending on the _control_mode
         """
-        return
+
+        list_red = []
+        list_monitor = []
+        list_grouped = []
+        list_mnorm = []
+        list_vnorm = []
+        list_unmirrored = []
+
+        size = mtd[gws].size()
+
+        for i in range(0,size):
+            out = self._reduction(mtd[gws].getItem(i))
+            if self._control_mode == False:
+                list_red.append(out)
+            else:
+                list_monitor.append(out[0])
+                list_grouped.append(out[1])
+                list_mnorm.append(out[2])
+                list_vnorm.append(out[3])
+                list_unmirrored.append(out[4])
+                list_red.append(out[5])
+
+        group_red = GroupWorkspaces(list_red)
+
+        if self._control_mode == True:
+            group_monitor = GroupWorkspaces(list_monitor)
+            group_grouped = GroupWorkspaces(list_grouped)
+            group_mnorm = GroupWorkspaces(list_mnorm)
+            group_vnorm = GroupWorkspaces(list_vnorm)
+            group_unmirrored = GroupWorkspaces(list_unmirrored)
+            group = [group_monitor,group_grouped,group_mnorm,
+                    group_vnorm,group_unmirrored,group_red]
+        else:
+            group = group_red
+
+        return group
 
     def _reduction(self, ws):
         """
