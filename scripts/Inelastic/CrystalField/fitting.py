@@ -1,4 +1,8 @@
 import numpy as np
+from mantid.kernel import ConfigService
+
+# This is to make sure that Lorentzians get evaluated properly
+ConfigService.setString('curvefitting.peakRadius', str(100))
 
 
 class CrystalField(object):
@@ -13,18 +17,20 @@ class CrystalField(object):
 
     default_peakShape = 'Gaussian'
 
+    default_spectrum_size = 200
+
     def __init__(self, Ion, Symmetry, **kwargs):
         """
         Constructor.
 
-        :param Ion: A rare earth ion. Possible values:
+        @param Ion: A rare earth ion. Possible values:
                     Ce, Pr, Nd, Pm, Sm, Eu, Gd, Tb, Dy, Ho, Er, Tm, Yb
 
-        :param Symmetry: Symmetry of the field. Possible values:
+        @param Symmetry: Symmetry of the field. Possible values:
                          C1, Ci, C2, Cs, C2h, C2v, D2, D2h, C4, S4, C4h, D4, C4v, D2d, D4h, C3,
                          S6, D3, C3v, D3d, C6, C3h, C6h, D6, C6v, D3h, D6h, T, Td, Th, O, Oh
 
-        :param kwargs: Other field parameters and attributes. Acceptable values include:
+        @param kwargs: Other field parameters and attributes. Acceptable values include:
                         ToleranceEnergy:     energy tolerance,
                         ToleranceIntensity:  intensity tolerance,
                         ResolutionModel: A resolution model.
@@ -115,6 +121,7 @@ class CrystalField(object):
 
         # Spectra
         self._dirty_spectra = True
+        self._spectra = {}
 
     def _getTemperature(self, i):
         """Get temperature value for i-th spectrum."""
@@ -130,6 +137,21 @@ class CrystalField(object):
                 return float(self._temperature[i])
             else:
                 raise RuntimeError('Cannot evaluate spectrum %s. Only %s temperatures are given.' % (i, n))
+
+    def _getFWHM(self, i):
+        """Get default FWHM value for i-th spectrum."""
+        if self._FWHM is None:
+            raise RuntimeError('Default FWHM must be set.')
+        if isinstance(self._FWHM, float) or isinstance(self._FWHM, int):
+            if i != 0:
+                raise RuntimeError('Cannot get FWHM for spectrum %s. Only 1 FWHM is given.' % i)
+            return float(self._FWHM)
+        else:
+            n = len(self._FWHM)
+            if i >= -n and i < n:
+                return float(self._FWHM[i])
+            else:
+                raise RuntimeError('Cannot get FWHM for spectrum %s. Only %s FWHM are given.' % (i, n))
 
     def _getPeaksFunction(self, i):
         if self.peaks is None:
@@ -151,12 +173,26 @@ class CrystalField(object):
 
     def _makePeaksFunction(self, i):
         """Form a definition string for the CrystalFieldPeaks function
-        :param i: Index of a spectrum.
+        @param i: Index of a spectrum.
         """
         temperature = self._getTemperature(i)
         s = 'name=CrystalFieldPeaks,Ion=%s,Symmetry=%s,Temperature=%s' % (self._ion, self._symmetry, temperature)
         s += ',ToleranceEnergy=%s,ToleranceIntensity=%s' % (self._toleranceEnergy, self._toleranceIntensity)
         s += ',%s' % ','.join(['%s=%s' % item for item in self._fieldParameters.iteritems()])
+        return s
+
+    def _makeSpectrumFunction(self, i):
+        """Form a definition string for the CrystalFieldSpectrum function
+        @param i: Index of a spectrum.
+        """
+        temperature = self._getTemperature(i)
+        s = 'name=CrystalFieldSpectrum,Ion=%s,Symmetry=%s,Temperature=%s' % (self._ion, self._symmetry, temperature)
+        s += ',ToleranceEnergy=%s,ToleranceIntensity=%s' % (self._toleranceEnergy, self._toleranceIntensity)
+        if self._FWHM is not None:
+            s += ',FWHM=%s' % self._getFWHM(i)
+        s += ',%s' % ','.join(['%s=%s' % item for item in self._fieldParameters.iteritems()])
+        if self.peaks is not None:
+            s += self.peaks.paramString()
         return s
 
     def _calcPeaksList(self, i):
@@ -172,12 +208,27 @@ class CrystalField(object):
             alg.execute()
             self._peakList = alg.getProperty('OutputWorkspace').value
 
-    def _makeCrystalFieldSpectrumFunction(self, i):
-        """Form a definition string for CrystalFieldSpectrumFunction function
+    def _calcSpectrum(self, i, workspace, ws_index):
+        """Calculate i-th spectrum.
 
-        :param i: Index of a spectrum
+        @param i: Index of a spectrum
+        @param workspace: A workspace used to evaluate the spectrum function.
+        @param ws_index:  An index of a spectrum in workspace to use.
         """
-        temperature = self._getTemperature(i)
+        from mantid.api import AlgorithmManager
+        import numpy as np
+        alg = AlgorithmManager.createUnmanaged('EvaluateFunction')
+        alg.initialize()
+        alg.setChild(True)
+        alg.setProperty('Function', self._makeSpectrumFunction(i))
+        alg.setProperty("InputWorkspace", workspace)
+        alg.setProperty('WorkspaceIndex', ws_index)
+        alg.setProperty('OutputWorkspace', 'dummy')
+        alg.execute()
+        out = alg.getProperty('OutputWorkspace').value
+        # Create copies of the x and y because `out` goes out of scope when this method returns
+        # and x and y get deallocated
+        return np.array(out.readX(0)), np.array(out.readY(1))
 
     @property
     def Ion(self):
@@ -301,11 +352,64 @@ class CrystalField(object):
     def getPeakList(self, i=0):
         """Get the peak list for spectrum i as a numpy array"""
         self._calcPeaksList(i)
-        peaks = np.array([self._peakList.column(0), self._peakList.column(10)])
+        peaks = np.array([self._peakList.column(0), self._peakList.column(1)])
         return peaks
 
-    def getSpectrum(self, i=0):
-        pass
+    def getSpectrum(self, i=0, workspace=None, ws_index=0):
+        """
+        Get the i-th spectrum calculated with the current field and peak parameters.
+
+        Alternatively can be called getSpectrum(workspace, ws_index). Spectrum index i is assumed zero.
+
+        Examples:
+
+            cf.getSpectrum() # Return the first spectrum calculated on a generated set of x-values.
+            cf.getSpectrum(1, ws, 5) # Calculate the second spectrum using the x-values from the 6th spectrum
+                                     # in workspace ws.
+            cf.getSpectrum(ws) # Calculate the first spectrum using the x-values from the 1st spectrum
+                               # in workspace ws.
+            cf.getSpectrum(ws, 3) # Calculate the first spectrum using the x-values from the 4th spectrum
+                                  # in workspace ws.
+
+        @param i: Index of a spectrum to get.
+        @param workspace: A workspace to base on. If not given the x-values of the output spectrum will be
+                          generated.
+        @param ws_index:  An index of a spectrum from workspace to use.
+        @return: A tuple of (x, y) arrays
+        """
+        if self._dirty_spectra:
+            self._spectra = {}
+            self._dirty_spectra = False
+
+        # Allow to call getSpectrum with a workspace as the first argument.
+        if not isinstance(i, int):
+            if workspace is not None:
+                if not isinstance(workspace, int):
+                    raise RuntimeError('Spectrum index is expected to be int. Got %s' % i.__class__.__name__)
+                ws_index = workspace
+            workspace = i
+            i = 0
+
+        # Workspace is given, always calculate
+        if workspace is not None:
+            return self._calcSpectrum(i, workspace, ws_index)
+
+        # Workspace isn't given. Re-calculate only when need to then store.
+        if i not in self._spectra:
+            from mantid.simpleapi import CreateWorkspace
+            peaks = self.getPeakList(i)
+            x_min = np.min(peaks[0])
+            x_max = np.max(peaks[0])
+            dx = np.abs(x_max - x_min) * 0.1
+            if x_min < 0:
+                x_min -= dx
+            x_max += dx
+            x = np.linspace(x_min, x_max, self.default_spectrum_size)
+            y = np.zeros_like(x)
+            e = np.ones_like(x)
+            workspace = CreateWorkspace(x, y, e)
+            self._spectra[i] = self._calcSpectrum(i, workspace, 0)
+        return self._spectra[i]
 
 
 class SimpleFunction(object):
@@ -314,7 +418,7 @@ class SimpleFunction(object):
     def __init__(self, name):
         """
         Constructor
-        :param name: A valid name registered with the FunctionFactory.
+        @param name: A valid name registered with the FunctionFactory.
         """
         self._name = name
         # Function attributes.
@@ -345,22 +449,40 @@ class SimpleFunction(object):
 
 
 class CompositeProperties(object):
+    """
+    A dictionary of dictionaries of function properties: attributes or parameters.
+    It mimics properties of a CompositeFunction: the key is a function index and the value
+    id a map 'param_name' -> param_value.
+
+    Example:
+        {
+          0: {'Height': 100, 'Sigma': 1.0}, # Parameters of the first function
+          1: {'Height': 120, 'Sigma': 2.0}, # Parameters of the second function
+          5: {'Height': 300, 'Sigma': 3.0}, # Parameters of the sixth function
+          ...
+        }
+    """
 
     def __init__(self):
         self._properties = {}
 
     def __getitem__(self, item):
+        """Get a map of properties for a function number <item>"""
         if item not in self._properties:
             self._properties[item] = {}
         return self._properties[item]
 
     def getSize(self):
+        """Get number of maps (functions) defined here"""
         s = self._properties.keys()
         if len(s) > 0:
             return max(s) + 1
         return 0
 
     def toStringList(self):
+        """Format all properties into a list of strings where each string is a comma-separated
+        list of name=value pairs.
+        """
         prop_list = []
         for i in range(self.getSize()):
             if i in self._properties:
@@ -369,6 +491,22 @@ class CompositeProperties(object):
             else:
                 prop_list.append('')
         return prop_list
+
+    def toCompositeString(self):
+        """Format all properties as a comma-separated list of name=value pairs where name is formatted
+        in the CompositeFunction style.
+
+        Example:
+            'f0.Height=100,f0.Sigma=1.0,f1.Height=120,f1.Sigma=2.0,f5.Height=300,f5.Sigma=3.0'
+        """
+        s = ''
+        for i in self._properties:
+            f = 'f%s.' % i
+            props = self._properties[i]
+            if len(s) > 0:
+                s += ','
+            s += ','.join(['%s%s=%s' % ((f,) + item) for item in props.iteritems()])
+        return s[:]
 
 
 class PeaksFunction(object):
@@ -383,7 +521,7 @@ class PeaksFunction(object):
         """
         Constructor.
 
-        :param name: The name of the function of each peak.  E.g. Gaussian
+        @param name: The name of the function of each peak.  E.g. Gaussian
         """
         # Name of the peaks
         self._name = name
@@ -424,11 +562,16 @@ class PeaksFunction(object):
         """
         return self._params
 
-    def toString(self):
-        """Create function initialisation string"""
+    def nPeaks(self):
+        """Get the number of peaks"""
         n = max(self._attrib.getSize(), self._params.getSize())
         if n == 0:
-            raise RuntimeError('PeaksFunction cannot be empty')
+            raise RuntimeError('PeaksFunction has no defined parameters or attributes')
+        return n
+
+    def toString(self):
+        """Create function initialisation string"""
+        n = self.nPeaks()
         attribs = self._attrib.toStringList()
         params = self._params.toStringList()
         if len(attribs) < n:
@@ -449,6 +592,21 @@ class PeaksFunction(object):
             else:
                 peaks.append('name=%s' % self._name)
         return ';'.join(peaks)
+
+    def paramString(self):
+        """Format a comma-separated list of all peaks attributes and parameters in a CompositeFunction
+        style.
+        """
+        na = self._attrib.getSize()
+        np = self._params.getSize()
+        if na == 0 and np == 0:
+            return ''
+        elif na == 0:
+            return self._params.toCompositeString()
+        elif np == 0:
+            return self._attrib.toCompositeString()
+        else:
+            return '%s,%s' % (self._attrib.toCompositeString(), self._params.toCompositeString())
 
 
 class Background(object):
