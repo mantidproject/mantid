@@ -1,7 +1,9 @@
-﻿"""State about the actual data which is to be reduced."""
+﻿# pylint: disable=too-few-public-methods
+
+"""State about the actual data which is to be reduced."""
 
 import json
-from SANSStateBase import (SANSStateBase, StringParameter, PositiveIntegerParameter, sans_parameters)
+from SANS2.State.SANSStateBase import (SANSStateBase, StringParameter, PositiveIntegerParameter, sans_parameters)
 from SANS2.State.SANSStateSerializer import(convert_state_to_dict, set_state_from_property_manager)
 
 
@@ -33,20 +35,20 @@ class SANSDataType(object):
 
 def convert_to_data_type(as_string):
     if as_string == "sample_scatter":
-        return SANSDataType.SampleScatter
+        data_type = SANSDataType.SampleScatter
     elif as_string == "sample_transmission":
-        return SANSDataType.SampleTransmission
+        data_type = SANSDataType.SampleTransmission
     elif as_string == "sample_direct":
-        return SANSDataType.SampleDirect
+        data_type = SANSDataType.SampleDirect
     elif as_string == "can_scatter":
-        return SANSDataType.CanScatter
+        data_type = SANSDataType.CanScatter
     elif as_string == "can_transmission":
-        return SANSDataType.CanTransmission
+        data_type = SANSDataType.CanTransmission
     elif as_string == "can_direct":
-        return SANSDataType.CanDirect
+        data_type = SANSDataType.CanDirect
     elif as_string == "calibration":
-        return SANSDataType.Calibration
-
+        data_type = SANSDataType.Calibration
+    return data_type
 
 # ------------------------------------------------
 # SANSStateData

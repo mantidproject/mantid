@@ -1,3 +1,5 @@
+# pylint: disable=too-few-public-methods
+
 import json
 import pickle
 import inspect
@@ -56,8 +58,8 @@ class SANSStateISIS(SANSStateBase, SANSState):
                 try:
                     attr = getattr(self, descriptor_name)
                     attr.validate()
-                except ValueError as e:
-                    is_invalid.update({descriptor_name: pickle.dumps(e.message)})
+                except ValueError as err:
+                    is_invalid.update({descriptor_name: pickle.dumps(err.message)})
 
         if is_invalid:
             raise ValueError("SANSState: There is an issue with your in put. See: {}".format(json.dumps(is_invalid)))

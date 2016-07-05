@@ -1,6 +1,8 @@
+# pylint: disable=too-few-public-methods
+
 import copy
-from SANSStateBase import (TypedParameter, is_not_none)
-from SANS2.Common.SANSConstants import SANSFacility
+
+from SANS2.Common.SANSEnumerations import SANSFacility
 from SANS2.State.SANSStateData import SANSStateDataISIS
 from SANS2.State.StateBuilder.StateBuilderFunctions import automatic_setters
 

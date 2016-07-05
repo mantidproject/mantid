@@ -1,3 +1,5 @@
+# pylint disable=too-many-public-methods, invalid-name, too-many-arguments
+
 import unittest
 import stresstesting
 import mantid
@@ -6,7 +8,7 @@ import mantid
 from mantid.api import AlgorithmManager
 from mantid.kernel import (Quat, V3D)
 from SANS.Move.SANSMoveWorkspaces import (SANSMoveFactory, SANSMoveLOQ, SANSMoveSANS2D, SANSMoveLARMORNewStyle,
-                                SANSMoveLARMOROldStyle)
+                                          SANSMoveLARMOROldStyle)
 from SANS2.State.SANSStateData import SANSStateDataISIS
 from SANS2.State.SANSState import SANSStateISIS
 from SANS2.State.StateBuilder.SANSStateMoveBuilder import get_state_move_builder
@@ -340,7 +342,7 @@ class SANSMoveTest(unittest.TestCase):
 
 class SANSMoveRunnerTest(stresstesting.MantidStressTest):
     def __init__(self):
-        super(SANSMoveRunnerTest, self).__init__()
+        stresstesting.MantidStressTest.__init__()
         self._success = False
 
     def runTest(self):

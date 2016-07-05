@@ -1,3 +1,5 @@
+# pylint: disable=too-few-public-methods
+
 import copy
 
 from SANS2.State.SANSStateMove import (SANSStateMoveLOQ, SANSStateMoveSANS2D, SANSStateMoveLARMOR)
@@ -79,16 +81,16 @@ class SANSStateMoveSANS2DBuilder(object):
 
 
 class SANSStateMoveLARMORBuilder(object):
-        @automatic_setters(SANSStateMoveLARMOR, exclusions=["detector_name",
-                                                            "detector_name_short", "monitor_names"])
-        def __init__(self, data_info):
-            super(SANSStateMoveLARMORBuilder, self).__init__()
-            self.state = SANSStateMoveLARMOR()
-            setup_idf_and_ipf_content(self.state, data_info)
+    @automatic_setters(SANSStateMoveLARMOR, exclusions=["detector_name",
+                                                        "detector_name_short", "monitor_names"])
+    def __init__(self, data_info):
+        super(SANSStateMoveLARMORBuilder, self).__init__()
+        self.state = SANSStateMoveLARMOR()
+        setup_idf_and_ipf_content(self.state, data_info)
 
-        def build(self):
-            self.state.validate()
-            return copy.copy(self.state)
+    def build(self):
+        self.state.validate()
+        return copy.copy(self.state)
 
 
 # ------------------------------------------

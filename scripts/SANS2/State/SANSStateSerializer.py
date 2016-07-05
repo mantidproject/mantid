@@ -1,3 +1,5 @@
+# pylint: disable=too-few-public-methods
+
 """Serializes and deserializes SANSState obejcts when passed into Algorithms."""
 from mantid.kernel import (PropertyManager)
 import inspect
@@ -103,12 +105,12 @@ def convert_state_to_dict(instance):
         elif isinstance(value, dict):
             # If we have a dict, then we need to watch out since a value in the dict might be a SANSState
             sub_dictionary = {}
-            for k, v in value.iteritems():
-                if isinstance(v, SANSStateBase):
-                    sub_dictionary_value = v.property_manager
+            for key_sub, val_sub in value.iteritems():
+                if isinstance(val_sub, SANSStateBase):
+                    sub_dictionary_value = val_sub.property_manager
                 else:
-                    sub_dictionary_value = v
-                sub_dictionary.update({k: sub_dictionary_value})
+                    sub_dictionary_value = val_sub
+                sub_dictionary.update({key_sub: sub_dictionary_value})
             value = sub_dictionary
         elif isinstance(descriptor_types[key], ClassTypeParameter):
             # The module will only know about the outer class name, therefore we need
@@ -129,9 +131,9 @@ def convert_state_to_dict(instance):
 
 
 def set_state_from_property_manager(instance, property_manager):
-    def _set_element(inst, k, v):
-        if k != STATE_NAME and k != STATE_MODULE:
-            setattr(inst, k, v)
+    def _set_element(inst, k_element, v_element):
+        if k_element != STATE_NAME and k_element != STATE_MODULE:
+            setattr(inst, k_element, v_element)
 
     keys = property_manager.keys()
     for key in keys:
@@ -143,7 +145,7 @@ def set_state_from_property_manager(instance, property_manager):
         #                         populate the state
         # 3. String with special meaning: Admittedly this is a hack, but we limited by the input property types
         #                                 of Mantid algorithms, which can be string, int, float and containers of these
-        #                                 types (and ProprtyManagerProperties). We need a wider range of types, such
+        #                                 types (and PropertyManagerProperties). We need a wider range of types, such
         #                                 as ClassTypeParameters. These are encoded (as good as possible) in a string
         # 4. Normal values: all is fine, just populate them
         if type(value) == PropertyManager and is_state(value):
@@ -165,7 +167,8 @@ def set_state_from_property_manager(instance, property_manager):
             setattr(instance, key, dict_element)
         elif is_class_type_parameter(value):
             # We need to first get the outer class from the module
-            module_name, outer_class_name, class_name = get_module_and_class_name_from_encoded_string(class_type_parameter_id, value)
+            module_name, outer_class_name, class_name = \
+                get_module_and_class_name_from_encoded_string(class_type_parameter_id, value)
             outer_class_type_parameter = provide_class_from_module_and_class_name(module_name, outer_class_name)
             # From the outer class we can then retrieve the inner class which normally defines the users selection
             class_type_parameter = getattr(outer_class_type_parameter, class_name)

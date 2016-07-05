@@ -1,9 +1,10 @@
+# pylint: disable=too-few-public-methods, invalid-name
+
 import math
 from mantid.api import MatrixWorkspace
 from abc import (ABCMeta, abstractmethod)
-from SANS2.State.SANSStateMove import (SANSStateMove, SANSStateMoveLOQ)
-from SANS2.Common.SANSEnumerations import (SANSInstrument, convert_string_to_sans_instrument,
-                                  CanonicalCoordinates)
+from SANS2.State.SANSStateMove import SANSStateMove
+from SANS2.Common.SANSEnumerations import (SANSInstrument, convert_string_to_sans_instrument, CanonicalCoordinates)
 from SANS2.Common.SANSConstants import SANSConstants
 from SANS2.Common.SANSFunctions import (create_unmanaged_algorithm, get_single_valued_logs_from_workspace,
                                         quaternion_to_angle_and_axis)
@@ -162,7 +163,7 @@ def get_detector_component(move_info, component):
     if component:
         for detector_keys in move_info.detectors.keys():
             if (component == move_info.detectors[detector_keys].detector_name or
-               component == move_info.detectors[detector_keys].detector_name_short):
+                component == move_info.detectors[detector_keys].detector_name_short):
                 component_selection = detector_keys
     return component_selection
 
@@ -213,7 +214,7 @@ class SANSMove(object):
             found_name = False
             for detector_keys in move_info.detectors.keys():
                 if (component == move_info.detectors[detector_keys].detector_name or
-                   component == move_info.detectors[detector_keys].detector_name_short):
+                    component == move_info.detectors[detector_keys].detector_name_short):
                     found_name = True
                     break
             if not found_name:
@@ -271,6 +272,7 @@ class SANSMoveSANS2D(SANSMove):
                                            CanonicalCoordinates.Z: 1.0}
             rotate_component(workspace, x_tilt_correction, x_tilt_correction_direction, detector_name)
 
+# pylint: disable=too-many-locals
     @staticmethod
     def _move_high_angle_bank(move_info, workspace, coordinates):
         # Get FRONT_DET_X, FRONT_DET_Z, FRONT_DET_ROT, REAR_DET_X
@@ -323,10 +325,10 @@ class SANSMoveSANS2D(SANSMove):
         rotation_in_radians = math.pi * (hab_detector_rotation + hab_detector.rotation_correction)/180.
 
         x_shift = ((lab_detector_x + lab_detector.x_translation_correction -
-                   hab_detector_x - hab_detector.x_translation_correction -
-                   hab_detector.side_correction*(1.0 - math.cos(rotation_in_radians)) +
-                   (hab_detector_radius + hab_detector.radius_correction)*(math.sin(rotation_in_radians))) -
-                   hab_detector_default_x_m - x)
+                    hab_detector_x - hab_detector.x_translation_correction -
+                    hab_detector.side_correction*(1.0 - math.cos(rotation_in_radians)) +
+                    (hab_detector_radius + hab_detector.radius_correction)*(math.sin(rotation_in_radians))) -
+                    hab_detector_default_x_m - x)
 
         y_shift = hab_detector.y_translation_correction - y
 
@@ -392,7 +394,7 @@ class SANSMoveSANS2D(SANSMove):
 
     def do_move_initial(self, move_info, workspace, coordinates, component):
         # For LOQ we only have to coordinates
-        assert(len(coordinates) == 2)
+        assert len(coordinates) == 2
 
         _component = component
 
@@ -410,7 +412,7 @@ class SANSMoveSANS2D(SANSMove):
 
     def do_move_with_elementary_displacement(self, move_info, workspace, coordinates, component):
         # For LOQ we only have to coordinates
-        assert(len(coordinates) == 2)
+        assert len(coordinates) == 2
         coordinates_to_move = [-coordinates[0], -coordinates[1]]
         apply_standard_displacement(move_info, workspace, coordinates_to_move, component)
 
@@ -428,7 +430,7 @@ class SANSMoveLOQ(SANSMove):
 
     def do_move_initial(self, move_info, workspace, coordinates, component):
         # For LOQ we only have to coordinates
-        assert(len(coordinates) == 2)
+        assert len(coordinates) == 2
         # First move the sample holder
         move_sample_holder(workspace, move_info.sample_offset, move_info.sample_offset_direction)
 
@@ -455,7 +457,7 @@ class SANSMoveLOQ(SANSMove):
 
     def do_move_with_elementary_displacement(self, move_info, workspace, coordinates, component):
         # For LOQ we only have to coordinates
-        assert(len(coordinates) == 2)
+        assert len(coordinates) == 2
         coordinates_to_move = [-coordinates[0], -coordinates[1]]
         apply_standard_displacement(move_info, workspace, coordinates_to_move, component)
 
@@ -473,7 +475,7 @@ class SANSMoveLARMOROldStyle(SANSMove):
 
     def do_move_initial(self, move_info, workspace, coordinates, component):
         # For LARMOR we only have to coordinates
-        assert(len(coordinates) == 2)
+        assert len(coordinates) == 2
 
         # Move the sample holder
         move_sample_holder(workspace, move_info.sample_offset, move_info.sample_offset_direction)
@@ -490,7 +492,7 @@ class SANSMoveLARMOROldStyle(SANSMove):
 
     def do_move_with_elementary_displacement(self, move_info, workspace, coordinates, component):
         # For LOQ we only have to coordinates
-        assert(len(coordinates) == 2)
+        assert len(coordinates) == 2
 
         # Shift component along the y direction
         # Shift the low-angle bank detector in the y direction
@@ -530,7 +532,7 @@ class SANSMoveLARMORNewStyle(SANSMove):
 
     def do_move_initial(self, move_info, workspace, coordinates, component):
         # For LARMOR we only have to coordinates
-        assert(len(coordinates) == 2)
+        assert len(coordinates) == 2
 
         # Move the sample holder
         move_sample_holder(workspace, move_info.sample_offset, move_info.sample_offset_direction)
@@ -554,7 +556,7 @@ class SANSMoveLARMORNewStyle(SANSMove):
 
     def do_move_with_elementary_displacement(self, move_info, workspace, coordinates, component):
         # For LOQ we only have to coordinates
-        assert(len(coordinates) == 2)
+        assert len(coordinates) == 2
 
         # Shift component along the y direction
         # Shift the low-angle bank detector in the y direction

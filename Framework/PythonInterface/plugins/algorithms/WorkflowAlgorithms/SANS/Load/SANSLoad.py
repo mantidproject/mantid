@@ -1,6 +1,8 @@
+# pylint: disable=invalid-name
+
 """ SANSLoad algorithm which handles loading SANS files"""
 
-from mantid.kernel import (Direction, PropertyManagerProperty, Property, FloatArrayProperty,
+from mantid.kernel import (Direction, PropertyManagerProperty, FloatArrayProperty,
                            EnabledWhenProperty, PropertyCriterion)
 from mantid.api import (DataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode)
 
@@ -116,7 +118,7 @@ class SANSLoad(DataProcessorAlgorithm):
         # Read the state
         state_property_manager = self.getProperty("SANSState").value
         state = create_deserialized_sans_state_from_property_manager(state_property_manager)
-        
+
         # Get the correct SANSLoader from the SANSLoaderFactory
         load_factory = SANSLoadDataFactory()
         loader = load_factory.create_loader(state)
@@ -151,8 +153,8 @@ class SANSLoad(DataProcessorAlgorithm):
             state = create_deserialized_sans_state_from_property_manager(state_property_manager)
             state.property_manager = state_property_manager
             state.validate()
-        except ValueError as e:
-            errors.update({"SANSLoad": str(e)})
+        except ValueError as err:
+            errors.update({"SANSLoad": str(err)})
         return errors
 
     def set_output_for_workspaces(self, workspace_type, workspaces):

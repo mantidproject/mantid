@@ -1,8 +1,10 @@
+# pylint: disable=too-few-public-methods
+
 """ Defines the state of the reduction."""
 
 from SANS2.State.SANSStateBase import (SANSStateBase, ClassTypeParameter, sans_parameters)
 from SANS2.State.SANSStateSerializer import(convert_state_to_dict, set_state_from_property_manager)
-from SANS2.Common.SANSEnumerations import (ReductionType, SANSReductionType, ReductionDimensionality)
+from SANS2.Common.SANSEnumerations import (ReductionType, ReductionDimensionality)
 
 
 # ------------------------------------------------

@@ -1,3 +1,5 @@
+# pylint disable=too-few-public-methods, fixme, invalid-name
+
 import os
 import h5py as h5
 from abc import (ABCMeta, abstractmethod)
@@ -35,7 +37,7 @@ def find_full_file_path(file_name):
 def find_sans_file(file_name):
     """
     The file can be specified as:
-    1. file.ext or \path1\path2\file.ext
+    1. file.ext or  path1 path2 file.ext
     2. run number
     """
     full_path = find_full_file_path(file_name)
@@ -137,13 +139,13 @@ def get_instrument_paths_for_sans_file(file_name):
 
     # Get the ipf path. This is slightly more complicated. See the Mantid documentation for the naming rules. Currently
     # they are:
-    # 1. If the IDF is not in the instrument folder and there is another XXX_Parameters.xml in the same folder,
+    # 1. If the IDF is not in the instrument folder and there is another X_Parameters.xml in the same folder,
     #    this one in the same folder will be used instead of any parameter file in the instrument folder.
-    # 2. If you want one parameter file for your IDF file, name your IDF file XXX_Definition_Yyy.xml and the parameter
-    #    file XXX_Parameters_Yyy.xml , where Yyy is any combination a characters you find appropriate. If your IDF
+    # 2. If you want one parameter file for your IDF file, name your IDF file X_Definition_Yyy.xml and the parameter
+    #    file X_Parameters_Yyy.xml , where Yyy is any combination a characters you find appropriate. If your IDF
     #    file is not in the instrument folder, the parameter file can be in either the same folder or in the instrument
-    #    folder, but it can only be in the instrument folder, if the same folder has no XXX_Parameters.xml or
-    #    XXX_Parameters_Yyy.xml file. If there is no XXX_Parameters_Yyy.xml file, XXX_Parameters.xml would be used.
+    #    folder, but it can only be in the instrument folder, if the same folder has no X_Parameters.xml or
+    #    X_Parameters_Yyy.xml file. If there is no X_Parameters_Yyy.xml file, X_Parameters.xml would be used.
     ipf_rule1 = get_ipf_for_rule_1(idf_path)
     if ipf_rule1:
         return idf_path, ipf_rule1

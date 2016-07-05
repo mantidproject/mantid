@@ -1,3 +1,5 @@
+# pylint: disable=too-few-public-methods, invalid-name
+
 from SANS2.Common.SANSConstants import SANSConstants
 
 

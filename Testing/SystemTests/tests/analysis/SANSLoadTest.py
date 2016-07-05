@@ -1,9 +1,11 @@
+# pylint disable=too-many-public-methods, invalid-name, too-many-arguments
+
 import unittest
 import stresstesting
 import mantid
 
 from mantid.dataobjects import (Workspace2D, EventWorkspace)
-from mantid.api import (AnalysisDataService, AlgorithmManager, WorkspaceGroup)
+from mantid.api import (AnalysisDataService, AlgorithmManager)
 
 from SANS.Load.SANSLoadData import SANSLoadDataFactory
 from SANS2.State.SANSStateData import (SANSStateDataISIS, SANSDataType)
@@ -309,7 +311,7 @@ class SANSLoadTest(unittest.TestCase):
 
 class SANSLoadDataRunnerTest(stresstesting.MantidStressTest):
     def __init__(self):
-        super(SANSLoadDataRunnerTest, self).__init__()
+        stresstesting.MantidStressTest.__init__()
         self._success = False
 
     def runTest(self):

@@ -1,7 +1,9 @@
+# pylint: disable=too-few-public-methods
+
 """ SANSMove algorithm to move a workspace according to the instrument settings."""
 
-from mantid.kernel import (Direction, PropertyManagerProperty, Property, StringListValidator,
-                           FloatArrayProperty, StringArrayProperty)
+from mantid.kernel import (Direction, PropertyManagerProperty, StringListValidator,
+                           FloatArrayProperty)
 from mantid.api import (DataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode)
 
 from SANS.Move.SANSMoveWorkspaces import SANSMoveFactory
@@ -99,8 +101,8 @@ class SANSMove(DataProcessorAlgorithm):
             state = create_deserialized_sans_state_from_property_manager(state_property_manager)
             state.property_manager = state_property_manager
             state.validate()
-        except ValueError as e:
-            errors.update({"SANSSMove": str(e)})
+        except ValueError as err:
+            errors.update({"SANSSMove": str(err)})
 
         # Check that if the MoveType is either InitialMove or ElementaryDisplacement, then there are beam coordinates
         # supplied. In the case of SetToZero these coordinates are ignored if they are supplied

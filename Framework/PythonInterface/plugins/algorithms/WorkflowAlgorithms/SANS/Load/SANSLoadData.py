@@ -1,7 +1,9 @@
+# pylint: disable=too-few-public-methods, invalid-name, fixme, unused-argument
+
 """ Implementation for the SANSLoad algorithm"""
 
 from abc import (ABCMeta, abstractmethod)
-from mantid.api import (WorkspaceGroup, AnalysisDataService)
+from mantid.api import (AnalysisDataService)
 from SANS2.Common.SANSFileInformation import (SANSFileInformationFactory, SANSFileType, get_extension_for_file_type)
 from SANS2.State.SANSStateData import (SANSStateData, SANSDataType)
 from SANS2.Common.SANSConstants import (SANSConstants)
@@ -51,7 +53,7 @@ def get_file_and_period_information_from_data(data):
 
 def is_transmission_type(to_check):
     if ((to_check is SANSDataType.SampleTransmission) or (to_check is SANSDataType.SampleDirect) or
-       (to_check is SANSDataType.CanTransmission) or (to_check is SANSDataType.CanDirect)):
+        (to_check is SANSDataType.CanTransmission) or (to_check is SANSDataType.CanDirect)):
         is_transmission = True
     else:
         is_transmission = False
@@ -139,7 +141,7 @@ def get_loading_strategy(file_information, period, is_transmission):
     elif file_information.get_type() == SANSFileType.ISISNexusAdded:
         loader_name = None
         loader_options = {}
-        pass
+        raise NotImplementedError("SANSLoad: Cannot load SANS file of type {}".format(str(file_information.get_type())))
         # TODO: Add loader for added
     else:
         raise RuntimeError("SANSLoad: Cannot load SANS file of type {}".format(str(file_information.get_type())))

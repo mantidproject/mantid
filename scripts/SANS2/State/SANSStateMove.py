@@ -1,8 +1,10 @@
+# pylint: disable=too-few-public-methods, too-many-instance-attributes
+
 """State for moving workspaces."""
 
 import json
-from SANSStateBase import (SANSStateBase, FloatParameter, DictParameter, ClassTypeParameter, StringParameter,
-                           sans_parameters)
+from SANS2.State.SANSStateBase import (SANSStateBase, FloatParameter, DictParameter, ClassTypeParameter,
+                                       StringParameter, sans_parameters)
 from SANS2.State.SANSStateSerializer import(convert_state_to_dict, set_state_from_property_manager)
 from SANS2.Common.SANSConstants import (SANSConstants)
 from SANS2.Common.SANSEnumerations import (Coordinates, CanonicalCoordinates)

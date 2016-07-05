@@ -1,4 +1,6 @@
-﻿""" Fundamental classes and Descriptors for the SANSState mechanism."""
+﻿# pylint: disable=too-few-public-methods
+
+""" Fundamental classes and Descriptors for the SANSState mechanism."""
 from abc import (ABCMeta, abstractmethod)
 import copy
 
@@ -27,6 +29,7 @@ class TypedParameter(object):
     def __init__(self, parameter_type, validator=lambda x: True):
         cls = self.__class__
         prefix = cls.__name__
+        # pylint: disable=protected-access
         index = cls.__counter
         # Name which is used to store value in the instance. This will be unique and not accessible via the standard
         # attribute access, since the developer/user cannot apply the hash symbol in their code (it is valid though

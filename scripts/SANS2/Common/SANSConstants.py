@@ -1,3 +1,5 @@
+# pylint: disable=too-few-public-methods
+
 class SANSConstants(object):
     monitor_suffix = "_monitors"
     input_workspace = "InputWorkspace"

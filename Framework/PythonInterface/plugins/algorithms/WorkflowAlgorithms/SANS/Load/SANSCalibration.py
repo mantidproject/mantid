@@ -1,3 +1,5 @@
+# pylint: disable=invalid-name
+
 """ Handles calibration of SANS workspaces."""
 from os.path import (basename, splitext, isfile)
 from mantid.api import (AnalysisDataService)
@@ -113,8 +115,8 @@ def apply_missing_parameters(calibration_workspace, workspace, missing_parameter
             alg.setProperty("ParameterType", type_to_save)
             alg.setProperty("Value", str(value[0]))
     except KeyError:
-            raise RuntimeError("SANSCalibration: An Instrument Parameter File value of unknown type"
-                               "was going to be copied. Cannot handle this currently.")
+        raise RuntimeError("SANSCalibration: An Instrument Parameter File value of unknown type"
+                           "was going to be copied. Cannot handle this currently.")
 
 
 def calibrate(calibration_workspace, workspace_to_calibrate):
@@ -133,7 +135,7 @@ def add_to_ads(calibration_workspace, full_file_path):
 def do_apply_calibration(full_file_path, workspaces_to_calibrate, use_loaded, publish_to_ads):
     # Check if the workspace has a calibration already applied to it and if it coincides with the
     # provided calibration file
-    for key, workspaces in workspaces_to_calibrate.iteritems():
+    for workspaces in list(workspaces_to_calibrate.values()):
         # If it is already calibrated then don't do anything, We only need to check the first element, even for
         # GroupWorkspaces
         if has_calibration_already_been_applied(workspaces[0], full_file_path):
