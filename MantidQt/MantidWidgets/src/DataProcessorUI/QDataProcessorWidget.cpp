@@ -121,20 +121,6 @@ void QDataProcessorWidget::setTableList(const std::set<std::string> &tables) {
 }
 
 /**
-This slot notifies the presenter that the "save" button has been pressed
-*/
-void QDataProcessorWidget::on_actionSaveTable_triggered() {
-  m_presenter->notify(DataProcessorPresenter::SaveFlag);
-}
-
-/**
-This slot notifies the presenter that the "save as" button has been pressed
-*/
-void QDataProcessorWidget::on_actionSaveTableAs_triggered() {
-  m_presenter->notify(DataProcessorPresenter::SaveAsFlag);
-}
-
-/**
 This slot notifies the presenter that the "append row" button has been pressed
 */
 void QDataProcessorWidget::on_actionAppendRow_triggered() {
@@ -209,39 +195,11 @@ void QDataProcessorWidget::on_actionPasteSelected_triggered() {
 }
 
 /**
-This slot notifies the presenter that the "new table" button has been pressed
-*/
-void QDataProcessorWidget::on_actionNewTable_triggered() {
-  m_presenter->notify(DataProcessorPresenter::NewTableFlag);
-}
-
-/**
 This slot notifies the presenter that the "expand selection" button has been
 pressed
 */
 void QDataProcessorWidget::on_actionExpandSelection_triggered() {
   m_presenter->notify(DataProcessorPresenter::ExpandSelectionFlag);
-}
-
-/**
-This slot notifies the presenter that the "options..." button has been pressed
-*/
-void QDataProcessorWidget::on_actionOptionsDialog_triggered() {
-  m_presenter->notify(DataProcessorPresenter::OptionsDialogFlag);
-}
-
-/**
-This slot notifies the presenter that the "export table" button has been pressed
-*/
-void QDataProcessorWidget::on_actionExportTable_triggered() {
-  m_presenter->notify(DataProcessorPresenter::ExportTableFlag);
-}
-
-/**
-This slot notifies the presenter that the "import table" button has been pressed
-*/
-void QDataProcessorWidget::on_actionImportTable_triggered() {
-  m_presenter->notify(DataProcessorPresenter::ImportTableFlag);
 }
 
 /**
@@ -514,20 +472,18 @@ bool QDataProcessorWidget::getEnableNotebook() {
 }
 
 /**
-Set which rows are selected
-@param rows : The set of rows to select
+Set which groups are selected
+@param groups : The set of groups to select
 */
-void QDataProcessorWidget::setSelection(
-    const std::map<int, std::set<int>> &items) {
+void QDataProcessorWidget::setSelection(const std::set<int> &groups) {
+
   ui.viewTable->clearSelection();
   auto selectionModel = ui.viewTable->selectionModel();
 
-  for (auto group = items.begin(); group != items.end(); ++group) {
-    auto rows = group->second;
-    for (auto row = rows.begin(); row != rows.end(); ++row)
-      selectionModel->select(ui.viewTable->model()->index((*row), 0),
-                             QItemSelectionModel::Select |
-                                 QItemSelectionModel::Rows);
+  for (auto group = groups.begin(); group != groups.end(); ++group) {
+    selectionModel->select(ui.viewTable->model()->index((*group), 0),
+                           QItemSelectionModel::Select |
+                               QItemSelectionModel::Rows);
   }
 }
 
@@ -621,10 +577,11 @@ std::string QDataProcessorWidget::getProcessInstrument() const {
 }
 
 /**
-Get the indices of the highlighted runs/groups
-@returns a set of ints containing the highlighted row numbers
+Get the indices of the highlighted runs (rows)
+@returns :: a map where keys are group indices and values are sets containing
+the highlighted row numbers
 */
-std::map<int, std::set<int>> QDataProcessorWidget::getSelectedItems() const {
+std::map<int, std::set<int>> QDataProcessorWidget::getSelectedRows() const {
   std::map<int, std::set<int>> rows;
   auto selectionModel = ui.viewTable->selectionModel();
   if (selectionModel) {
@@ -632,23 +589,38 @@ std::map<int, std::set<int>> QDataProcessorWidget::getSelectedItems() const {
     for (auto it = selectedRows.begin(); it != selectedRows.end(); ++it) {
 
       if (it->parent().isValid()) {
-        // A run was selected
+        // This item is a run (row)
         // Add run and corresponding group
         int run = it->row();
         int group = it->parent().row();
         rows[group].insert(run);
-      } else {
-        // A group was selected
-        // Start with empty set, we do not at this point if a run belonging to
-        // this group has been selected
-        if (!rows.count(it->row())) {
-          int group = it->row();
-          rows[group] = std::set<int>();
-        }
       }
+      // else :
+      // A group was selected, selected groups can be retrieved using
+      // getSelectedGroups()
     }
   }
   return rows;
+}
+
+/**
+Get the indices of the highlighted groups
+@returns :: a sets containing
+the highlighted row numbers
+*/
+std::set<int> QDataProcessorWidget::getSelectedGroups() const {
+  std::set<int> groups;
+  auto selectionModel = ui.viewTable->selectionModel();
+  if (selectionModel) {
+    auto selectedRows = selectionModel->selectedRows();
+    for (auto it = selectedRows.begin(); it != selectedRows.end(); ++it) {
+      if (!it->parent().isValid()) {
+        // This group was selected
+        groups.insert(it->row());
+      }
+    }
+  }
+  return groups;
 }
 
 /**

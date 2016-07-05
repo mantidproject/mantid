@@ -232,7 +232,9 @@
        <string>Insert Row After</string>
      </property>
      <property name="whatsThis">
-       <string>Inserts a new row after the first selected row. If no rows are selected then a new row is added at the end of the table.</string>
+       <string>Inserts a new row after the last selected row.
+               If a group is selected, the new row is appended to the selected group.
+               If nothing is selected then a new row is added to the last group.</string>
      </property>
    </action>
    <action name="actionAppendGroup">

@@ -76,7 +76,7 @@ public:
   virtual void setTableList(const std::set<std::string> &tables) = 0;
   virtual void setInstrumentList(const std::vector<std::string> &instruments,
                                  const std::string &defaultInstrument) = 0;
-  virtual void setSelection(const std::map<int, std::set<int>> &rows) = 0;
+  virtual void setSelection(const std::set<int> &groups) = 0;
   virtual void
   setOptionsHintStrategy(MantidQt::MantidWidgets::HintStrategy *hintStrategy,
                          int column) = 0;
@@ -88,7 +88,8 @@ public:
   virtual void setModel(const std::string &name) = 0;
 
   // Accessor methods
-  virtual std::map<int, std::set<int>> getSelectedItems() const = 0;
+  virtual std::map<int, std::set<int>> getSelectedRows() const = 0;
+  virtual std::set<int> getSelectedGroups() const = 0;
   virtual std::string getWorkspaceToOpen() const = 0;
   virtual std::string getClipboard() const = 0;
   virtual std::string getProcessInstrument() const = 0;

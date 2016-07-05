@@ -268,31 +268,6 @@ ITableWorkspace_sptr GenericDataProcessorPresenter::createDefaultWorkspace() {
 }
 
 /**
-* Finds the first unused group id
-*/
-int GenericDataProcessorPresenter::getUnusedGroup(
-    std::set<int> ignoredRows) const {
-  std::set<int> usedGroups;
-
-  // Scan through all the rows, working out which group ids are used
-  for (int idx = 0; idx < m_model->rowCount(); ++idx) {
-    if (ignoredRows.find(idx) != ignoredRows.end())
-      continue;
-
-    // This is an unselected row. Add it to the list of used group ids
-    usedGroups.insert(m_model->data(m_model->index(idx, m_colGroup)).toInt());
-  }
-
-  int groupId = 0;
-
-  // While the group id is one of the used ones, increment it by 1
-  while (usedGroups.find(groupId) != usedGroups.end())
-    groupId++;
-
-  return groupId;
-}
-
-/**
 Process selected rows
 */
 void GenericDataProcessorPresenter::process() {
@@ -301,8 +276,12 @@ void GenericDataProcessorPresenter::process() {
     return;
   }
 
-  auto groups = m_view->getSelectedItems();
-  if (groups.empty()) {
+  // Selected groups
+  auto groups = m_view->getSelectedGroups();
+  // Selected rows
+  auto rows = m_view->getSelectedRows();
+
+  if (groups.empty() && rows.empty()) {
     if (m_options["WarnProcessAll"].toBool()) {
       // Does the user want to abort?
       if (!m_view->askUserYesNo(
@@ -311,40 +290,34 @@ void GenericDataProcessorPresenter::process() {
         return;
     }
 
-    // They want to process all rows, so populate rows with every index in the
-    // model
+    // They want to process all rows, so populate rows and groups with every
+    // index in the model
     for (int idxGroup = 0; idxGroup < m_model->rowCount(); ++idxGroup) {
+      groups.insert(idxGroup);
       for (int idxRun = 0;
            idxRun < m_model->rowCount(m_model->index(idxGroup, 0)); ++idxRun)
-        groups[idxGroup].insert(idxRun);
+        rows[idxGroup].insert(idxRun);
     }
-  }
-
-  // They may have selected a group (parent item), so populate group with every
-  // row
-  for (auto itGroup = groups.begin(); itGroup != groups.end(); ++itGroup) {
-    int idxGroup = itGroup->first;
-    if (groups[idxGroup].size() == 0) {
-      // We are processing the whole group but user clicked on parent item so we
-      // have to populate the group manually
-      int numRows = static_cast<int>(numRowsInGroup(idxGroup));
-      for (int r = 0; r < numRows; r++) {
-        groups[idxGroup].insert(r);
-      }
+  } else {
+    // They may have selected a group, in this case we want to process and
+    // post-process the whole group, so populate group with every row
+    for (auto idxGroup = groups.begin(); idxGroup != groups.end(); ++idxGroup) {
+      for (int row = 0; row < numRowsInGroup(*idxGroup); row++)
+        rows[*idxGroup].insert(row);
     }
   }
 
   // Check each group and warn if we're only partially processing it
-  for (auto gIt = groups.begin(); gIt != groups.end(); ++gIt) {
+  for (auto gIt = rows.begin(); gIt != rows.end(); ++gIt) {
 
     const int &groupId = gIt->first;
-    const std::set<int> &groupRows = gIt->second;
+    const std::set<int> &rowIds = gIt->second;
 
     // Are we only partially processing a group?
-    if (groupRows.size() < numRowsInGroup(gIt->first) &&
+    if (rowIds.size() < numRowsInGroup(gIt->first) &&
         m_options["WarnProcessPartialGroup"].toBool()) {
       std::stringstream err;
-      err << "You have only selected " << groupRows.size() << " of the ";
+      err << "You have only selected " << rowIds.size() << " of the ";
       err << numRowsInGroup(groupId) << " rows in group " << groupId << ".";
       err << " Are you sure you want to continue?";
       if (!m_view->askUserYesNo(err.str(), "Continue Processing?"))
@@ -352,17 +325,17 @@ void GenericDataProcessorPresenter::process() {
     }
   }
 
-  if (!rowsValid(groups)) {
+  if (!rowsValid(rows)) {
     return;
   }
 
-  if (!processGroups(groups)) {
+  if (!processGroups(groups, rows)) {
     return;
   }
 
   // If "Output Notebook" checkbox is checked then create an ipython notebook
   if (m_view->getEnableNotebook()) {
-    saveNotebook(groups);
+    saveNotebook(rows);
   }
 }
 
@@ -466,51 +439,56 @@ void GenericDataProcessorPresenter::postProcessGroup(
 }
 
 /**
-Process stitch groups
-@param groups : groups of rows to stitch
+Process rows and groups
+@param groups : groups of rows to post-process
+@param rows : rows to process
 @returns true if successful, otherwise false
 */
 bool GenericDataProcessorPresenter::processGroups(
-    const std::map<int, std::set<int>> &groups) {
+    const std::set<int> &groups, const std::map<int, std::set<int>> &rows) {
+
   int progress = 0;
   // Each group and each row within count as a progress step.
-  int maxProgress = 0;
-  for (auto it = groups.begin(); it != groups.end(); ++it) {
-    maxProgress += (int)(it->second.size());
-  }
+  const int maxProgress = (int)(rows.size() + groups.size());
   ProgressPresenter progressReporter(progress, maxProgress, maxProgress,
                                      m_progressView);
 
-  for (auto gIt = groups.begin(); gIt != groups.end(); ++gIt) {
-    const std::set<int> groupRows = gIt->second;
+  for (auto it = rows.begin(); it != rows.end(); ++it) {
+    const int groupId = it->first;
+    auto rows = it->second;
 
     // Reduce each row
-    for (auto rIt = groupRows.begin(); rIt != groupRows.end(); ++rIt) {
+    for (auto rIt = rows.begin(); rIt != rows.end(); ++rIt) {
       try {
-        reduceRow(gIt->first, *rIt);
+        reduceRow(groupId, *rIt);
         progressReporter.report();
       } catch (std::exception &ex) {
         const std::string rowNo =
             Mantid::Kernel::Strings::toString<int>(*rIt + 1);
-        const std::string message =
-            "Error encountered while processing row " + rowNo + ":\n";
+        const std::string groupNo =
+            Mantid::Kernel::Strings::toString<int>(groupId);
+        const std::string message = "Error encountered while processing row " +
+                                    rowNo + " in group " + groupNo + ":\n";
         m_view->giveUserCritical(message + ex.what(), "Error");
         progressReporter.clear();
         return false;
       }
     }
 
-    try {
-      postProcessGroup(gIt->first, groupRows);
-      progressReporter.report();
-    } catch (std::exception &ex) {
-      const std::string groupNo =
-          Mantid::Kernel::Strings::toString<int>(gIt->first);
-      const std::string message =
-          "Error encountered while stitching group " + groupNo + ":\n";
-      m_view->giveUserCritical(message + ex.what(), "Error");
-      progressReporter.clear();
-      return false;
+    // Post-process if group was selected
+    if (groups.find(groupId) != groups.end()) {
+      try {
+        postProcessGroup(groupId, rows);
+        progressReporter.report();
+      } catch (std::exception &ex) {
+        const std::string groupNo =
+            Mantid::Kernel::Strings::toString<int>(groupId);
+        const std::string message =
+            "Error encountered while stitching group " + groupNo + ":\n";
+        m_view->giveUserCritical(message + ex.what(), "Error");
+        progressReporter.clear();
+        return false;
+      }
     }
   }
   return true;
@@ -532,7 +510,7 @@ bool GenericDataProcessorPresenter::rowsValid(
     auto runs = group->second;
     for (auto it = runs.begin(); it != runs.end(); ++it) {
       try {
-        validateRow(*it);
+        validateRow(group->first, *it);
       } catch (std::exception &ex) {
         // Allow two theta to be blank
         if (ex.what() ==
@@ -557,8 +535,8 @@ A row may pass validation, but it is not necessarily ready for processing.
 @param rowNo : The row in the model to validate
 @throws std::invalid_argument if the row fails validation
 */
-void GenericDataProcessorPresenter::validateRow(int rowNo) const {
-  if (rowNo >= m_model->rowCount())
+void GenericDataProcessorPresenter::validateRow(int groupNo, int rowNo) const {
+  if (rowNo >= numRowsInGroup(groupNo))
     throw std::invalid_argument("Invalid row");
 }
 
@@ -878,95 +856,156 @@ void GenericDataProcessorPresenter::reduceRow(int groupNo, int rowNo) {
 }
 
 /**
-Inserts a new row in the specified location
-@param index The index to insert the new row before
+Inserts a new row to the specified group in the specified location
+@param groupIndex :: The index to insert the new row after
+@param rowIndex :: The index to insert the new row after
 */
-void GenericDataProcessorPresenter::insertRow(int index) {
-  const int group = getUnusedGroup();
-  if (!m_model->insertRow(index))
-    return;
-  // Set the group id of the new row
-  m_model->setData(m_model->index(index, m_colGroup), group);
+void GenericDataProcessorPresenter::insertRow(int groupIndex, int rowIndex) {
+
+  m_model->insertRow(rowIndex, m_model->index(groupIndex, 0));
 }
 
 /**
-Insert a row after the last selected row
+Inserts a new group in the specified location
+@param groupIndex :: The index to insert the new row after
+*/
+void GenericDataProcessorPresenter::insertGroup(int groupIndex) {
+
+  m_model->insertRow(groupIndex);
+}
+
+/**
+Insert a row after the last selected row. If a group was selected, the new row
+is appended to that group. If nothing was selected, the new row is appended to
+the last group in the table.
 */
 void GenericDataProcessorPresenter::appendRow() {
-  // std::set<int> rows = m_view->getSelectedItems();
-  // if (rows.empty())
-  //  insertRow(m_model->rowCount());
-  // else
-  //  insertRow(*rows.rbegin() + 1);
-  // m_tableDirty = true;
+  auto selectedGroups = m_view->getSelectedGroups();
+  auto selectedRows = m_view->getSelectedRows();
+
+  if (!selectedRows.empty()) {
+    // Some rows were selected
+    // Insert a row after last selected row
+
+    int groupId = selectedRows.rbegin()->first;
+    int lastSelectedRow = *(selectedRows[groupId].rbegin());
+    insertRow(groupId, lastSelectedRow + 1);
+
+  } else if (!selectedGroups.empty()) {
+    // No rows were selected, but some groups were selected
+    // Append row to last selected group
+
+    int lastSelectedGroup = *(selectedGroups.rbegin());
+    insertRow(lastSelectedGroup,
+              m_model->rowCount(m_model->index(lastSelectedGroup, 0)));
+
+  } else {
+    // Nothing was selected
+
+    if (m_model->rowCount() == 0) {
+      // Model is empty, we cannot add a row
+      return;
+    }
+
+    int groupId = m_model->rowCount() - 1;
+    int rowId = m_model->rowCount(m_model->index(groupId, 0));
+
+    // Add a new row to last group
+    insertRow(groupId, rowId);
+  }
+  m_tableDirty = true;
 }
 
 /**
 Insert a group after the last selected group
 */
 void GenericDataProcessorPresenter::appendGroup() {
-}
+  auto selectedGroups = m_view->getSelectedGroups();
 
-/**
-Get the index of the first blank row, or if none exists, returns -1.
-*/
-int GenericDataProcessorPresenter::getBlankRow() {
-  // Go through every column of every row (except for the scale column) and
-  // check if it's blank.
-  // If there's a blank row, return it.
-  const int rowCount = m_model->rowCount();
-  for (int i = 0; i < rowCount; ++i) {
-    bool isBlank = true;
-    for (int j = 0; j < m_columns; ++j) {
-      // Don't bother checking the group column, it'll always have a
-      // value.
-      if (j == m_colGroup)
-        continue;
-
-      if (!m_model->data(m_model->index(i, j)).toString().isEmpty()) {
-        isBlank = false;
-        break;
-      }
-    }
-
-    if (isBlank)
-      return i;
+  if (selectedGroups.empty()) {
+    // Append group at the end of the table
+    insertGroup(m_model->rowCount());
+  } else {
+    // Append group after last selected group
+    insertGroup(*(selectedGroups.rbegin()) + 1);
   }
-
-  // There are no blank rows
-  return -1;
 }
 
 /**
 Delete row(s) from the model
 */
 void GenericDataProcessorPresenter::deleteRow() {
-  // std::set<int> rows = m_view->getSelectedItems();
-  // for (auto row = rows.rbegin(); row != rows.rend(); ++row)
-  //  m_model->removeRow(*row);
-
-  // m_tableDirty = true;
+  auto selectedRows = m_view->getSelectedRows();
+  for (auto it = selectedRows.rbegin(); it != selectedRows.rend(); ++it) {
+    const int groupId = it->first;
+    auto rows = it->second;
+    for (auto row = rows.rbegin(); row != rows.rend(); ++row) {
+      m_model->removeRow(*row, m_model->index(groupId, 0));
+    }
+  }
+  m_tableDirty = true;
 }
 
 /**
 Delete group(s) from the model
 */
 void GenericDataProcessorPresenter::deleteGroup() {
+  auto selectedGroups = m_view->getSelectedGroups();
+  for (auto group = selectedGroups.rbegin(); group != selectedGroups.rend();
+       ++group) {
+    m_model->removeRow(*group);
+  }
 }
 
 /**
 Group rows together
 */
 void GenericDataProcessorPresenter::groupRows() {
-  // const std::set<int> rows = m_view->getSelectedItems();
-  //// Find the first unused group id, ignoring the selected rows
-  // const int groupId = getUnusedGroup(rows);
 
-  //// Now we just have to set the group id on the selected rows
-  // for (auto it = rows.begin(); it != rows.end(); ++it)
-  //  m_model->setData(m_model->index(*it, m_colGroup), groupId);
+  // Find if rows belong to the same group
+  // If they do, do nothing
+  // If they don't, remove rows from their groups and add them to a
+  // new group
 
-  // m_tableDirty = true;
+  auto selectedRows = m_view->getSelectedRows();
+
+  if (selectedRows.size() < 2) {
+    // Rows belong to the same group (size == 1) or
+    // no rows were selected (size == 0)
+    return;
+  }
+
+  // Append a new group where selected rows will be pasted (this will append a
+  // group with an empty row)
+  int groupId = m_model->rowCount();
+  appendGroup();
+  // Append as many rows as the number of selected rows minus one
+  int rowsToAppend = -1;
+  for (auto it = selectedRows.begin(); it != selectedRows.end(); ++it)
+    rowsToAppend += static_cast<int>(it->second.size());
+  for (int i = 0; i < rowsToAppend; i++)
+    insertRow(groupId, i);
+
+  // Now we just have to set the data
+  int rowIndex = 0;
+  for (auto it = selectedRows.begin(); it != selectedRows.end(); ++it) {
+    int oldGroupId = it->first;
+    auto rows = it->second;
+    for (auto row = rows.begin(); row != rows.end(); ++row) {
+      for (int col = 0; col < m_columns; col++) {
+        auto value = m_model->data(
+            m_model->index(*row, col, m_model->index(oldGroupId, 0)));
+        m_model->setData(
+            m_model->index(rowIndex, col, m_model->index(groupId, 0)), value);
+      }
+      rowIndex++;
+    }
+  }
+
+  // Now delete the rows
+  deleteRow();
+
+  m_tableDirty = true;
 }
 
 /**
@@ -1211,63 +1250,64 @@ void GenericDataProcessorPresenter::afterReplaceHandle(
 @param group : The group to count the rows of
 @returns The number of rows in the group
 */
-size_t GenericDataProcessorPresenter::numRowsInGroup(int group) const {
+int GenericDataProcessorPresenter::numRowsInGroup(int group) const {
 
   return m_model->rowCount(m_model->index(group, 0));
 }
 
-/** Expands the current selection to all the rows in the selected groups */
+/** Expands the current selection to all the rows in the selected groups, this
+ * effectively means selecting the parent item (i.e. the group to which the
+ * selected rows belong) */
 void GenericDataProcessorPresenter::expandSelection() {
-  // std::set<int> groupIds;
+  std::set<int> groupIds;
 
-  // std::set<int> rows = m_view->getSelectedItems();
-  // for (auto row = rows.begin(); row != rows.end(); ++row)
-  //  groupIds.insert(m_model->data(m_model->index(*row, m_colGroup)).toInt());
+  auto items = m_view->getSelectedRows();
+  for (auto group = items.begin(); group != items.end(); ++group)
+    groupIds.insert(group->first);
 
-  // std::set<int> selection;
-
-  // for (int i = 0; i < m_model->rowCount(); ++i)
-  //  if (groupIds.find(m_model->data(m_model->index(i, m_colGroup)).toInt()) !=
-  //      groupIds.end())
-  //    selection.insert(i);
-
-  // m_view->setSelection(selection);
+  m_view->setSelection(groupIds);
 }
 
 /** Clear the currently selected rows */
 void GenericDataProcessorPresenter::clearSelected() {
-  // std::set<int> rows = m_view->getSelectedItems();
-  // std::set<int> ignore;
-  // for (auto row = rows.begin(); row != rows.end(); ++row) {
-  //  ignore.clear();
-  //  ignore.insert(*row);
+  auto selectedRows = m_view->getSelectedRows();
 
-  //  // 'Group' column
-  //  m_model->setData(m_model->index(*row, m_colGroup),
-  //  getUnusedGroup(ignore));
-
-  //  for (int i = m_colGroup + 1; i < m_columns - 1; i++) {
-  //    m_model->setData(m_model->index(*row, i), "");
-  //  }
-  //}
-  // m_tableDirty = true;
+  for (auto group = selectedRows.begin(); group != selectedRows.end();
+       ++group) {
+    int groupIndex = group->first;
+    auto rows = group->second;
+    for (auto row = rows.begin(); row != rows.end(); ++row) {
+      for (auto col = 0; col < m_model->columnCount(); col++)
+        m_model->setData(
+            m_model->index(*row, col, m_model->index(groupIndex, 0)), "");
+    }
+  }
+  m_tableDirty = true;
 }
 
 /** Copy the currently selected rows to the clipboard */
 void GenericDataProcessorPresenter::copySelected() {
   std::vector<std::string> lines;
 
-  // std::set<int> rows = m_view->getSelectedItems();
-  // for (auto rowIt = rows.begin(); rowIt != rows.end(); ++rowIt) {
-  //  std::vector<std::string> line;
-  //  for (int col = 0; col < m_columns; ++col)
-  //    line.push_back(
-  //        m_model->data(m_model->index(*rowIt,
-  //        col)).toString().toStdString());
-  //  lines.push_back(boost::algorithm::join(line, "\t"));
-  //}
+  auto selectedRows = m_view->getSelectedRows();
+  for (auto it = selectedRows.begin(); it != selectedRows.end(); ++it) {
+    const int groupId = it->first;
+    auto rows = it->second;
 
-  // m_view->setClipboard(boost::algorithm::join(lines, "\n"));
+    for (auto row = rows.begin(); row != rows.end(); ++row) {
+      std::vector<std::string> line;
+      line.push_back(std::to_string(groupId));
+
+      for (int col = 0; col < m_columns; ++col) {
+        line.push_back(
+            m_model->data(m_model->index(*row, col, m_model->index(groupId, 0)))
+                .toString()
+                .toStdString());
+      }
+      lines.push_back(boost::algorithm::join(line, "\t"));
+    }
+  }
+  m_view->setClipboard(boost::algorithm::join(lines, "\n"));
 }
 
 /** Copy currently selected rows to the clipboard, and then delete them. */
@@ -1279,38 +1319,53 @@ void GenericDataProcessorPresenter::cutSelected() {
 /** Paste the contents of the clipboard into the currently selected rows, or
 * append new rows */
 void GenericDataProcessorPresenter::pasteSelected() {
-  // const std::string text = m_view->getClipboard();
-  // std::vector<std::string> lines;
-  // boost::split(lines, text, boost::is_any_of("\n"));
+  const std::string text = m_view->getClipboard();
+  // Contains the data to paste plus the original group index in the first
+  // element
+  std::vector<std::string> lines;
+  boost::split(lines, text, boost::is_any_of("\n"));
 
-  //// If we have rows selected, we'll overwrite them. If not, we'll append new
-  //// rows to write to.
-  // std::set<int> rows = m_view->getSelectedItems();
-  // if (rows.empty()) {
-  //  // Add as many new rows as required
-  //  for (size_t i = 0; i < lines.size(); ++i) {
-  //    int index = m_model->rowCount();
-  //    insertRow(index);
-  //    rows.insert(index);
-  //  }
-  //}
+  // If we have rows selected, we'll overwrite them. If not, we'll append new
+  // rows.
+  auto selectedRows = m_view->getSelectedRows();
+  if (selectedRows.empty()) {
+    // No rows were selected
+    // Use group to which selected rows belong and paste new rows to it
+    // Add as many new rows as required
+    for (size_t i = 0; i < lines.size(); ++i) {
+      std::vector<std::string> values;
+      boost::split(values, lines[i], boost::is_any_of("\t"));
 
-  //// Iterate over rows and lines simultaneously, stopping when we reach the
-  /// end
-  //// of either
-  // auto rowIt = rows.begin();
-  // auto lineIt = lines.begin();
-  // for (; rowIt != rows.end() && lineIt != lines.end(); rowIt++, lineIt++) {
-  //  std::vector<std::string> values;
-  //  boost::split(values, *lineIt, boost::is_any_of("\t"));
+      int groupId = boost::lexical_cast<int>(values.front());
+      int rowId = numRowsInGroup(groupId);
+      insertRow(groupId, rowId);
+      for (int col = 0; col < m_columns; col++) {
+        m_model->setData(m_model->index(rowId, col, m_model->index(groupId, 0)),
+                         QString::fromStdString(values[col + 1]));
+      }
+    }
+  } else {
+    // Some rows were selected
+    // Iterate over rows and lines simultaneously, stopping when we reach the
+    // end of either
+    for (auto it = selectedRows.begin(); it != selectedRows.end(); ++it) {
+      const int groupId = it->first;
+      auto rows = it->second;
+      auto rowIt = rows.begin();
+      auto lineIt = lines.begin();
+      for (; rowIt != rows.end() && lineIt != lines.end(); rowIt++, lineIt++) {
+        std::vector<std::string> values;
+        boost::split(values, *lineIt, boost::is_any_of("\t"));
 
-  //  // Paste as many columns as we can from this line
-  //  for (int col = 0; col < m_columns && col <
-  //  static_cast<int>(values.size());
-  //       ++col)
-  //    m_model->setData(m_model->index(*rowIt, col),
-  //                     QString::fromStdString(values[col]));
-  //}
+        // Paste as many columns as we can from this line
+        for (int col = 0;
+             col < m_columns && col < static_cast<int>(values.size()); ++col)
+          m_model->setData(
+              m_model->index(*rowIt, col, m_model->index(groupId, 0)),
+              QString::fromStdString(values[col + 1]));
+      }
+    }
+  }
 }
 
 /** Transfers the selected runs in the search results to the processing table
@@ -1326,30 +1381,14 @@ void GenericDataProcessorPresenter::transfer(
   for (auto rowsIt = newRows.begin(); rowsIt != newRows.end(); ++rowsIt) {
     auto &row = *rowsIt;
 
-    if (groups.count(row["Group"]) == 0)
-      groups[row["Group"]] = getUnusedGroup();
-
-    // Overwrite the first blank row we find, otherwise, append a new row to the
-    // end.
-    int rowIndex = getBlankRow();
-    if (rowIndex == -1) {
-      rowIndex = m_model->rowCount();
-      insertRow(rowIndex);
-    }
-
-    // Loop over the map (each row with column heading keys to cell values)
-    for (auto rowIt = row.begin(); rowIt != row.end(); ++rowIt) {
-      const std::string columnHeading = rowIt->first;
-      const std::string cellEntry = rowIt->second;
-      m_model->setData(m_model->index(rowIndex, m_whitelist.colIndexFromColName(
-                                                    columnHeading)),
-                       QString::fromStdString(cellEntry));
-    }
-
-    // Special case grouping. Group cell entry is string it seems!
-    m_model->setData(m_model->index(rowIndex, m_colGroup),
-                     groups[row["Group"]]);
+    TableRow newRow = m_ws->appendRow();
+    newRow << row["Group"];
+    for (int i = 0; i < m_columns; i++)
+      newRow << row[m_whitelist.colNameFromColIndex(i)];
   }
+
+  m_model.reset(new QDataProcessorTreeModel(m_ws, m_whitelist));
+  m_view->showTable(m_model);
 }
 
 /**
@@ -1367,88 +1406,75 @@ void GenericDataProcessorPresenter::setInstrumentList(
 
 /** Plots any currently selected rows */
 void GenericDataProcessorPresenter::plotRow() {
-  // auto selectedRows = m_view->getSelectedItems();
+  auto selectedRows = m_view->getSelectedRows();
 
-  // if (selectedRows.empty())
-  //  return;
+  if (selectedRows.empty())
+    return;
 
-  // std::set<std::string> workspaces, notFound;
-  // for (auto row = selectedRows.begin(); row != selectedRows.end(); ++row) {
-  //  const std::string wsName =
-  //      getReducedWorkspaceName(*row, m_processor.prefix(0));
-  //  if (AnalysisDataService::Instance().doesExist(wsName))
-  //    workspaces.insert(wsName);
-  //  else
-  //    notFound.insert(wsName);
-  //}
+  std::set<std::string> workspaces, notFound;
+  for (auto it = selectedRows.begin(); it != selectedRows.end(); ++it) {
+    const int groupIdx = it->first;
+    auto rows = it->second;
+    for (auto row = rows.begin(); row != rows.end(); ++row) {
+      const std::string wsName =
+          getReducedWorkspaceName(groupIdx, *row, m_processor.prefix(0));
+      if (AnalysisDataService::Instance().doesExist(wsName))
+        workspaces.insert(wsName);
+      else
+        notFound.insert(wsName);
+    }
+  }
 
-  // if (!notFound.empty())
-  //  m_view->giveUserWarning("The following workspaces were not plotted
-  //  because"
-  //                          "they were not found:\n" +
-  //                              boost::algorithm::join(notFound, "\n") +
-  //                              "\n\nPlease check that the rows you are
-  //                              trying"
-  //                              "to plot have been fully processed.",
-  //                          "Error plotting rows.");
+  if (!notFound.empty())
+    m_view->giveUserWarning("The following workspaces were not plotted because "
+                            "they were not found:\n" +
+                                boost::algorithm::join(notFound, "\n") +
+                                "\n\nPlease check that the rows you are trying "
+                                "to plot have been fully processed.",
+                            "Error plotting rows.");
 
-  // m_view->plotWorkspaces(workspaces);
+  m_view->plotWorkspaces(workspaces);
 }
 
 /** Plots any currently selected groups */
 void GenericDataProcessorPresenter::plotGroup() {
-  // auto selectedRows = m_view->getSelectedItems();
+  auto selectedGroups = m_view->getSelectedGroups();
 
-  // if (selectedRows.empty())
-  //  return;
+  if (selectedGroups.empty())
+    return;
 
-  //// The set of selected groups
-  // std::set<int> selectedGroups;
-  // for (auto row = selectedRows.begin(); row != selectedRows.end(); ++row)
-  //  selectedGroups.insert(
-  //      m_model->data(m_model->index(*row, m_colGroup)).toInt());
+  std::set<std::string> workspaces, notFound;
 
-  //// Now, get the rows belonging to the specified groups
-  // std::map<int, std::set<int>> rowsByGroup;
-  // const int numRows = m_model->rowCount();
-  // for (int row = 0; row < numRows; ++row) {
-  //  int group = m_model->data(m_model->index(row, m_colGroup)).toInt();
+  // Now, get the rows belonging to the specified groups
+  for (auto it = selectedGroups.begin(); it != selectedGroups.end(); ++it) {
 
-  //  // Skip groups we don't care about
-  //  if (selectedGroups.find(group) == selectedGroups.end())
-  //    continue;
+    const int groupId = *it;
+    const int numRows = numRowsInGroup(groupId);
 
-  //  // Add this row to group 'group'
-  //  rowsByGroup[group].insert(row);
-  //}
+    std::set<int> rows;
+    for (int row = 0; row < numRows; ++row) {
+      // Add this row to group 'group'
+      rows.insert(row);
+    }
 
-  //// Now get the workspace names
+    const std::string wsName =
+        getPostprocessedWorkspaceName(groupId, rows, m_postprocessor.prefix());
 
-  // std::set<std::string> workspaces, notFound;
-  // for (auto rowsMap = rowsByGroup.begin(); rowsMap != rowsByGroup.end();
-  //     ++rowsMap) {
+    if (AnalysisDataService::Instance().doesExist(wsName))
+      workspaces.insert(wsName);
+    else
+      notFound.insert(wsName);
+  }
 
-  //  auto rows = rowsMap->second;
+  if (!notFound.empty())
+    m_view->giveUserWarning("The following workspaces were not plotted because "
+                            "they were not found:\n" +
+                                boost::algorithm::join(notFound, "\n") +
+                                "\n\nPlease check that the groups you are "
+                                "trying to plot have been fully processed.",
+                            "Error plotting groups.");
 
-  //  const std::string wsName =
-  //      getPostprocessedWorkspaceName(rows, m_postprocessor.prefix());
-
-  //  if (AnalysisDataService::Instance().doesExist(wsName))
-  //    workspaces.insert(wsName);
-  //  else
-  //    notFound.insert(wsName);
-  //}
-
-  // if (!notFound.empty())
-  //  m_view->giveUserWarning("The following workspaces were not plotted
-  //  because"
-  //                          "they were not found:\n" +
-  //                              boost::algorithm::join(notFound, "\n") +
-  //                              "\n\nPlease check that the groups you are "
-  //                              "trying to plot have been fully processed.",
-  //                          "Error plotting groups.");
-
-  // m_view->plotWorkspaces(workspaces);
+  m_view->plotWorkspaces(workspaces);
 }
 
 /** Shows the Refl Options dialog */

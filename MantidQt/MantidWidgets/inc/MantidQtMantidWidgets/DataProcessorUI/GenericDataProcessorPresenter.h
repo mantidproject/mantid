@@ -117,7 +117,8 @@ protected:
   // process selected rows
   void process();
   // process groups of rows
-  bool processGroups(const std::map<int, std::set<int>> &groups);
+  bool processGroups(const std::set<int> &groups,
+                     const std::map<int, std::set<int>> &rows);
   // Reduce a row
   void reduceRow(int groupNo, int rowNo);
   // prepare a run or list of runs for processing
@@ -129,16 +130,16 @@ protected:
   Mantid::API::Workspace_sptr loadRun(const std::string &run,
                                       const std::string &instrument,
                                       const std::string &prefix); // change
-  // get an unused group id
-  int getUnusedGroup(std::set<int> ignoredRows = std::set<int>()) const;
   // get the number of rows in a group
-  size_t numRowsInGroup(int groupId) const;
+  int numRowsInGroup(int groupId) const;
   // Validate rows
   bool rowsValid(const std::map<int, std::set<int>> &groups);
   // Validate a row
-  void validateRow(int rowNo) const;
-  // insert a row in the model before the given index
-  void insertRow(int index);
+  void validateRow(int groupNo, int rowNo) const;
+  // insert a row in the model
+  void insertRow(int groupIndex, int rowIndex);
+  // insert a group in the model
+  void insertGroup(int groupIndex);
   // add row(s) to the model
   void appendRow();
   // add group(s) to the model
@@ -147,8 +148,6 @@ protected:
   void deleteRow();
   // delete group(s) from the model
   void deleteGroup();
-  // find a blank row
-  int getBlankRow();
   // clear selected row(s) in the model
   void clearSelected();
   // copy selected rows to clipboard

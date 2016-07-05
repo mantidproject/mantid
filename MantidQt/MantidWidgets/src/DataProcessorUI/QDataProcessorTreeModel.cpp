@@ -165,7 +165,7 @@ bool QDataProcessorTreeModel::insertRows(int position, int count, int parent) {
           ? ((position == static_cast<int>(m_rowsOfGroup[parent].size()))
                  ? m_rowsOfGroup[parent][position - 1] + 1
                  : m_rowsOfGroup[parent][position])
-          : (parent > 0) ? m_rowsOfGroup[parent - 1].back() : 0;
+          : (parent > 0) ? m_rowsOfGroup[parent - 1].back() + 1 : 0;
 
   for (int pos = position; pos < position + count; pos++) {
     m_tWS->insertRow(absolutePosition);
@@ -339,6 +339,7 @@ bool QDataProcessorTreeModel::removeRows(int position, int count, int parent) {
   for (int row = position; row < rowCount(index(parent, 0)); row++) {
     m_rowsOfGroup[parent][row] = absolutePosition++;
   }
+
   // Update row indices in subsequent groups
   for (int group = parent + 1; group < rowCount(); group++)
     for (int row = 0; row < rowCount(index(group, 0)); row++)

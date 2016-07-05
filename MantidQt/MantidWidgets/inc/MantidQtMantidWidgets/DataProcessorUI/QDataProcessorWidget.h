@@ -78,7 +78,7 @@ public:
   bool getEnableNotebook() override;
 
   // Settor methods
-  void setSelection(const std::map<int, std::set<int>> &rows) override;
+  void setSelection(const std::set<int> &groups) override;
   void setTableList(const std::set<std::string> &tables) override;
   void setInstrumentList(const std::vector<std::string> &instruments,
                          const std::string &defaultInstrument) override;
@@ -92,7 +92,8 @@ public:
       const std::vector<std::map<std::string, std::string>> &hints) override;
 
   // Accessor methods
-  std::map<int, std::set<int>> getSelectedItems() const override;
+  std::map<int, std::set<int>> getSelectedRows() const override;
+  std::set<int> getSelectedGroups() const override;
   std::string getProcessInstrument() const override;
   std::string getProcessingOptions(const std::string &name) const override;
   std::string getWorkspaceToOpen() const override;
@@ -123,9 +124,6 @@ public slots:
   void on_comboProcessInstrument_currentIndexChanged(int index);
 
 private slots:
-  void on_actionNewTable_triggered();
-  void on_actionSaveTable_triggered();
-  void on_actionSaveTableAs_triggered();
   void on_actionAppendRow_triggered();
   void on_actionAppendGroup_triggered();
   void on_actionDeleteRow_triggered();
@@ -137,9 +135,6 @@ private slots:
   void on_actionCutSelected_triggered();
   void on_actionPasteSelected_triggered();
   void on_actionExpandSelection_triggered();
-  void on_actionOptionsDialog_triggered();
-  void on_actionImportTable_triggered();
-  void on_actionExportTable_triggered();
   void on_actionHelp_triggered();
   void on_actionPlotRow_triggered();
   void on_actionPlotGroup_triggered();
