@@ -1380,6 +1380,8 @@ public:
     EXPECT_CALL(mockDataProcessorView, askUserYesNo(_, _)).Times(0);
     presenter.notify(DataProcessorPresenter::NewTableFlag);
 
+    AnalysisDataService::Instance().remove("Workspace");
+
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
   }
 
@@ -1414,6 +1416,8 @@ public:
     // The user tries to create a new table again, and does not get bothered
     EXPECT_CALL(mockDataProcessorView, askUserYesNo(_, _)).Times(0);
     presenter.notify(DataProcessorPresenter::NewTableFlag);
+
+    AnalysisDataService::Instance().remove("Workspace");
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
   }
@@ -1465,6 +1469,8 @@ public:
     EXPECT_CALL(mockDataProcessorView, askUserYesNo(_, _)).Times(0);
     presenter.notify(DataProcessorPresenter::NewTableFlag);
 
+    AnalysisDataService::Instance().remove("Workspace");
+
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
   }
 
@@ -1512,6 +1518,8 @@ public:
     // The user tries to create a new table again, and does not get bothered
     EXPECT_CALL(mockDataProcessorView, askUserYesNo(_, _)).Times(0);
     presenter.notify(DataProcessorPresenter::NewTableFlag);
+
+    AnalysisDataService::Instance().remove("Workspace");
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
   }
