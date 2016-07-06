@@ -24,7 +24,7 @@ class QData(GeneralData):
         Appends one item to the collection of Q data.
         @param item: item to be added
         """
-        if not (isinstance(item, np.ndarray) or isinstance(item, float)):
+        if not (isinstance(item, np.ndarray)):
             raise ValueError("Invalid value of item to be added to a collection of Q items.")
 
         self._data.append(item)

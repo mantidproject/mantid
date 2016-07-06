@@ -44,9 +44,9 @@ class ABINSQvectorsTEST(unittest.TestCase):
 
         # Q frequency independent: wrong shape of data
         vectors_Q = QData(frequency_dependence=False)
-        vectors_Q.set([1.0,3.0,2.0,0.0]) # should be 2D array not 1D array
+
         with self.assertRaises(ValueError):
-            wrong_data = vectors_Q.extract()
+            vectors_Q.set([1.0,3.0,2.0,0.0]) # should be 2D array not 1D array
 
         # Q frequency dependent: good items to append
         vectors_Q = QData(frequency_dependence=True)
