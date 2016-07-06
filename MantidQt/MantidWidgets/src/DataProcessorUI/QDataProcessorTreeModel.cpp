@@ -36,6 +36,7 @@ int QDataProcessorTreeModel::columnCount(
 
 /** Returns data for specified index
 * @param index : The index
+* @param role : The role
 * @return : The data associated with the given index
 */
 QVariant QDataProcessorTreeModel::data(const QModelIndex &index,
@@ -230,7 +231,7 @@ bool QDataProcessorTreeModel::insertGroups(int position, int count) {
 
 /** Removes elements from the tree
 * @param position : The position of the first element in the set to be removed
-* @param rows : The number of elements to remove
+* @param count : The number of elements to remove
 * @param parent : The parent of the set of elements
 * @return : Boolean indicating whether the elements were removed successfully or
 * not
@@ -304,6 +305,7 @@ bool QDataProcessorTreeModel::removeGroups(int position, int count) {
 /** Removes rows from a group
 * @param position : The position of the first row that will be removed
 * @param count : The number of rows to remove
+* @param parent : The parent item
 * @return : Boolean indicating whether or not rows were removed
 */
 bool QDataProcessorTreeModel::removeRows(int position, int count, int parent) {

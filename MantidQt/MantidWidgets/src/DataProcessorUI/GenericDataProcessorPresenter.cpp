@@ -533,6 +533,7 @@ bool GenericDataProcessorPresenter::rowsValid(
 /**
 Validate a row.
 A row may pass validation, but it is not necessarily ready for processing.
+@param groupNo : The group to which the row belongs
 @param rowNo : The row in the model to validate
 @throws std::invalid_argument if the row fails validation
 */
@@ -747,6 +748,7 @@ GenericDataProcessorPresenter::loadRun(const std::string &run,
 
 /**
 Reduce a row
+@param groupNo : The group to which the row belongs
 @param rowNo : The row in the model to reduce
 @throws std::runtime_error if reduction fails
 */
