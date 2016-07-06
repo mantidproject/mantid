@@ -162,14 +162,14 @@ Overview
   public:
     // Note return by value (see below)
     Histogram histogram(const size_t index) const;
-    template <typename... T> void setHistogram(const size_t index, T &&... data);
+    template <typename... T> void setHistogram(const size_t index, T &&... data) &;
 
     // Note return by value (see below)
     BinEdges binEdges(const size_t index) const;
     Points points(const size_t index) const;
 
-    template <typename... T> void setBinEdges(const size_t index, T &&... data);
-    template <typename... T> void setPoints(const size_t index, T &&... data);
+    template <typename... T> void setBinEdges(const size_t index, T &&... data) &;
+    template <typename... T> void setPoints(const size_t index, T &&... data) &;
 
     // Note return by value (see below)
     Counts counts(const size_t index) const;
@@ -190,17 +190,17 @@ Overview
     const HistogramY &y(const size_t index) const;
     const HistogramE &e(const size_t index) const;
 
-    HistogramX &mutableX(const size_t index);
-    HistogramY &mutableY(const size_t index);
-    HistogramE &mutableE(const size_t index);
+    HistogramX &mutableX(const size_t index) &;
+    HistogramY &mutableY(const size_t index) &;
+    HistogramE &mutableE(const size_t index) &;
 
     Kernel::cow_ptr<HistogramX> sharedX(const size_t index) const;
     Kernel::cow_ptr<HistogramY> sharedY(const size_t index) const;
     Kernel::cow_ptr<HistogramE> sharedE(const size_t index) const;
 
-    void setSharedX(const size_t index, const Kernel::cow_ptr<HistogramX> &x);
-    void setSharedY(const size_t index, const Kernel::cow_ptr<HistogramY> &y);
-    void setSharedE(const size_t index, const Kernel::cow_ptr<HistogramE> &e);
+    void setSharedX(const size_t index, const Kernel::cow_ptr<HistogramX> &x) &;
+    void setSharedY(const size_t index, const Kernel::cow_ptr<HistogramY> &y) &;
+    void setSharedE(const size_t index, const Kernel::cow_ptr<HistogramE> &e) &;
   };
 
 ``Histogram``
@@ -221,18 +221,18 @@ Overview
     const HistogramY &y() const;
     const HistogramE &e() const;
     // Replacement for dataX()
-    HistogramX &mutableX();
-    HistogramY &mutableY();
-    HistogramE &mutableE();
+    HistogramX &mutableX() &;
+    HistogramY &mutableY() &;
+    HistogramE &mutableE() &;
 
     // Replacement for refX()
     Kernel::cow_ptr<HistogramX> sharedX() const;
     Kernel::cow_ptr<HistogramY> sharedY() const;
     Kernel::cow_ptr<HistogramE> sharedE() const;
     // Replacement for setX()
-    void setSharedX(const Kernel::cow_ptr<HistogramX> &x);
-    void setSharedY(const Kernel::cow_ptr<HistogramY> &y);
-    void setSharedE(const Kernel::cow_ptr<HistogramE> &e);
+    void setSharedX(const Kernel::cow_ptr<HistogramX> &x) &;
+    void setSharedY(const Kernel::cow_ptr<HistogramY> &y) &;
+    void setSharedE(const Kernel::cow_ptr<HistogramE> &e) &;
   };
 
 Note that there is also Dx-data, but it is not widely used and thus omited from this documentation.
@@ -260,7 +260,7 @@ The interface for Dx is mostly equivalent to that for E.
       // Returns by value!
       BinEdges binEdges() const;
       // Accepts any arguments that can be used to construct BinEdges
-      template <typename... T> void setBinEdges(T &&... data);
+      template <typename... T> void setBinEdges(T &&... data) &;
     };
 
 - If the histogram stores point data, ``Histogram::binEdges()`` will automatically compute the bin edges from the points.
@@ -281,7 +281,7 @@ The interface for Dx is mostly equivalent to that for E.
       // Returns by value!
       Points points() const;
       // Accepts any arguments that can be used to construct Points
-      template <typename... T> void setPoints(T && ... data);
+      template <typename... T> void setPoints(T && ... data) &;
     };
 
 - If the histogram stores bin edges, ``Histogram::points()`` will automatically compute the points from the bin edges.
@@ -302,7 +302,7 @@ The interface for Dx is mostly equivalent to that for E.
       // Returns by value!
       Counts counts() const;
       // Accepts any arguments that can be used to construct Counts
-      template <typename... T> void setCounts(T &&... data);
+      template <typename... T> void setCounts(T &&... data) &;
     };
 
 - Currently the histogram stores counts directly. If this were ever not the case, ``Histogram::counts()`` will automatically compute the counts from the frequencies.
@@ -323,7 +323,7 @@ The interface for Dx is mostly equivalent to that for E.
       // Returns by value!
       Frequencies frequencies() const;
       // Accepts any arguments that can be used to construct Frequencies
-      template <typename... T> void setFrequencies(T &&... data);
+      template <typename... T> void setFrequencies(T &&... data) &;
     };
 
 - Currently the histogram stores counts. ``Histogram::counts()`` will automatically compute the frequencies from the counts.
@@ -347,10 +347,10 @@ The interface for Dx is mostly equivalent to that for E.
       FrequencyVariances frequencyVariances() const;
       FrequencyStandardDeviations frequencyStandardDeviations() const;
       // Accept any arguments that can be used to construct the respectivy object
-      template <typename... T> void setCountVariances(T &&... data);
-      template <typename... T> void setCountStandardDeviations(T &&... data);
-      template <typename... T> void setFrequencyVariances(T &&... data);
-      template <typename... T> void setFrequencyStandardDeviations(T &&... data);
+      template <typename... T> void setCountVariances(T &&... data) &;
+      template <typename... T> void setCountStandardDeviations(T &&... data) &;
+      template <typename... T> void setFrequencyVariances(T &&... data) &;
+      template <typename... T> void setFrequencyStandardDeviations(T &&... data) &;
     };
 
 - Currently the histogram stores the standard deviations of the counts. When accessing the uncertainties via any of the other 3 types the above interface methods, ``Histogram`` will automatically compute the requested type from the standard deviations of the counts.
@@ -488,30 +488,33 @@ Working with histograms
   // behavior as ConvertToPointData followed by ConvertToHistogram).
 
 
+Working with the new ``MatrixWorkspace`` interface
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Rollout status
---------------
+.. code-block:: c++
+  :linenos:
 
-In principle, ``Histogram`` removes the need for conversions between storage types of Y and E data, i.e., the algorithms ``ConvertToDistribution`` and ``ConvertFromDistribution``, and manual conversions between standard deviations and variances.
+  // Setting Histograms
+  outputWS->setHistogram(i, inputWS->histogram(i));
+  outputWS->setHistogram(i, eventWS->histogram(i)); // ok, histogram data computed based on events
+  outputWS->setHistogram(i, BinEdges{0.1, 0.2, 0.4}, Counts(2, 1000.0));
+  eventWS->setHistogram(i, Points{0.1, 0.2, 0.4}); // throws, EventWorkspace needs bin edges
+  eventWS->setHistogram(i, BinEdges{0.1, 0.2, 0.4}, Counts(2, 1000.0)); // throws, cannot have Y data
+  eventWS->setHistogram(i, BinEdges{0.1, 0.2, 0.4}); // ok
 
-- We have not progressed far enough with refactoring to do this.
-- Just as before the introduction of ``Histogram``, converting the data and accessing it in the wrong way will create nonsensical results.
-  For example:
-  - Converting a workspace with ``ConvertToDistribution`` and then running another algorithm that interprets ``readY()`` as counts does not make sense.
-  - ``Histogram`` does not yet protect us from that in its current state. Running ``ConvertToDistribution`` and then accessing data as ``counts()`` or ``frequencies()`` will not convert correctly, since the ``Histogram`` does not know that an external conversion algorithm has been run on its data.
-- It is essential to fix this as a next step, there are two options:
-  - Option A: Remove all such conversions from Mantid, if data is required as one type or another use `counts()`` or ``frequencies()``.
-  - Option B: Make changing the storage type of Y and E data in ``Histogram`` possible. This implies that we cannot use ``Histogram::y()`` in algorithms that require ``Counts``, since this is not guaranteed anymore.
+  // Setting BinEdges , Counts, ...
+  outputWS->setCounts(i, 2, 1000.0);
+  outputWS->setCounts(i, data.begin() + 42, data.end());
 
-Storing the uncertainties as standard deviations vs. storing them as variances suffers from a very similar problem.
+  // Preserve sharing
+  outputWS->setSharedY(i, inputWS->sharedY(i));
+  outputWS->setCounts(i, inputWS->counts(i)); // also shares, 'Counts' wraps a cow_ptr
+  outputWS->setBinEdges(i, inputWS->binEdges(i));
 
-Both options have shortcomings and I have currently not made up my mind about the best solution.
-In any case this will be a major change and is thus not part of the initial introduction of the ``HistogramData`` module.
-I would be happy about feedback or other ideas.
 
 
 Legacy interface
-----------------
+################
 
 For compatibility reasons an interface to the internal data, equivalent to the old interace, is still available. Using it is discouraged, since it cannot enforce size checks!
 
@@ -527,5 +530,49 @@ For compatibility reasons an interface to the internal data, equivalent to the o
     void setX(const Kernel::cow_ptr<HistogramX> &X);
     Kernel::cow_ptr<HistogramX> ptrX() const;
   };
+
+
+Rollout status
+--------------
+
+In principle, ``Histogram`` removes the need for conversions between storage types of Y and E data, i.e., the algorithms ``ConvertToDistribution`` and ``ConvertFromDistribution``, and manual conversions between standard deviations and variances.
+
+- We have not progressed far enough with refactoring to do this.
+- Just as before the introduction of ``Histogram``, converting the data and accessing it in the wrong way will create nonsensical results.
+  For example:
+
+  - Converting a workspace with ``ConvertToDistribution`` and then running another algorithm that interprets ``readY()`` as counts does not make sense.
+  - ``Histogram`` does not yet protect us from that in its current state. Running ``ConvertToDistribution`` and then accessing data as ``counts()`` or ``frequencies()`` will not convert correctly, since the ``Histogram`` does not know that an external conversion algorithm has been run on its data.
+
+- It is essential to fix this as a next step, there are two options:
+
+  - Option A: Remove all such conversions from Mantid, if data is required as one type or another use ``counts()`` or ``frequencies()``.
+  - Option B: Make changing the storage type of Y and E data in ``Histogram`` possible. This implies that we cannot use ``Histogram::y()`` in algorithms that require ``Counts``, since this is not guaranteed anymore.
+
+Storing the uncertainties as standard deviations vs. storing them as variances suffers from a very similar problem.
+
+Both options have shortcomings and I have currently not made up my mind about the best solution.
+In any case this will be a major change and is thus not part of the initial introduction of the ``HistogramData`` module.
+I would be happy about feedback or other ideas.
+
+
+
+Dealing with problems
+---------------------
+
+There are two issues you might encounter when implementing new algorithms or when running existing scripts that are not part of our automated testing:
+
+1. Exceptions to due size mismatch.
+   The ``Histogram`` type validates the size of X, Y, and E data in (non-legacy) setters.
+   The best solution is to determine the correct size at creation time of the workspace.
+   Alternatively, you can simply set a new histogram with different size via ``MatrixWorkspace::setHistogram()``.
+
+2. Exceptions about the storage mode of the X data, ``Histogram::Xmode``.
+   This happens rarely, typically by creating a workspace that contains histogram data (bin edges) and modifying the size via the legacy interface to store point data (or vice versa).
+   These size modifications are only possible via the legacy interface.
+   The best solution is to determine the storage mode at creation time of the workspace.
+   If that is not possible, use the new setters such as `setPoints()`, they will trigger a conversion of the internal storage mode.
+
+
 
 .. categories:: Concepts
