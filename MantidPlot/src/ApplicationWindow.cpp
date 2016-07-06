@@ -6245,33 +6245,26 @@ void ApplicationWindow::saveProjectAs(const QString &fileName, bool compress) {
   }
 
   if (!fn.isEmpty()) {
-    // Check if exists. If not, create directory first.
-    QFileInfo tempFile(fn);
-    if (!tempFile.exists()) {
-      // Make the directory
-      QString dir(fn);
-      if (fn.contains('.'))
-        dir = fn.left(fn.indexOf('.'));
-      QDir().mkdir(dir);
+    QFileInfo fileInfo(fn);
+    bool isFile = fileInfo.fileName().endsWith(".mantid") || fileInfo.fileName().endsWith(".mantid.gz");
 
-      // Get the file name
-      QString file("temp");
-      for (int i = 0; i < dir.size(); ++i) {
-        if (dir[i] == '/')
-          file = dir.right(dir.size() - i);
-        else if (dir[i] == '\\')
-          file = dir.right(i);
-      }
-      fn = dir + file;
+    if(!isFile) {
+        QDir directory(fn);
+        if (!directory.exists()) {
+          // Make the directory
+          directory.mkdir(fn);
+        }
+
+        workingDir = directory.absolutePath();
+        QString projectFileName = directory.dirName();
+        projectFileName.append(".mantid");
+        projectname = directory.absoluteFilePath(projectFileName);
+
+    } else {
+        workingDir = fileInfo.absoluteDir().absolutePath();
+        projectname = fileInfo.absoluteFilePath();
     }
 
-    QFileInfo fi(fn);
-    workingDir = fi.absolutePath();
-    QString baseName = fi.fileName();
-    if (!baseName.contains("."))
-      fn.append(".mantid");
-
-    projectname = fn;
     if (saveProject(compress)) {
       recentProjects.removeAll(projectname);
       recentProjects.push_front(projectname);
