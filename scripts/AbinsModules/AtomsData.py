@@ -69,14 +69,12 @@ class AtomsDaTa(GeneralData):
 
 
     def set(self, items=None):
-        if not isinstance(items, list):
-            raise ValueError("New value of data should have a form of list.")
+
+
         if len(items) != self._num_atoms:
             raise ValueError("Inconsistent size of new data and number of atoms. (%s != %s)"%(len(items), self._num_atoms))
 
-        self._data = []
-        for item in items:
-            self.append(item=item)
+        super(AtomsDaTa, self).set(items=items)
 
 
     def extract(self):

@@ -19,10 +19,17 @@ class GeneralData(object):
         Sets a new value for a collection of the data.
         The abstract method which should be overridden by inheriting classes.
         """
-        return None
+
+        if not isinstance(items, list):
+            raise ValueError("New value of data should have a form of list.")
+
+        self._data = []
+        for item in items:
+            self.append(item=item)
 
 
-    def extract(self):
+
+def extract(self):
         """
         Returns the data.
         @return: data

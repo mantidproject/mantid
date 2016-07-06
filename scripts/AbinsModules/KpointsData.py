@@ -101,21 +101,6 @@ class KpointsData(GeneralData):
         self._data.append(item)
 
 
-    def set(self, items=None):
-        """
-        Sets a new value for the collection of k-points data.
-        @param items: new value of the collection.
-
-        """
-
-        if not isinstance(items, list):
-            raise ValueError("Items should have a form of a list.")
-
-        self._data = []
-        for item in items:
-            self.append(item=item)
-
-
     def extract(self):
 
         if self._num_k == len(self._data):
