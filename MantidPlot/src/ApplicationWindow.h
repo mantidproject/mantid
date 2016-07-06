@@ -221,6 +221,10 @@ public slots:
   void open();
   ApplicationWindow *open(const QString &fn, bool factorySettings = false,
                           bool newProject = true);
+
+  ApplicationWindow *openProject(const QString &workingDir,
+                                 const QString &filename,
+                                 const int fileVersion);
   ApplicationWindow *openProject(const QString &fn, const int fileVersion);
   void openProjectFolder(std::string lines, const int fileVersion,
                          bool isTopLevel = false);
@@ -653,7 +657,7 @@ public slots:
   void clearSelection();
   void copyActiveLayer();
 
-  void newProject();
+  void newProject(const bool doNotSave = false);
 
   //! Creates a new empty multilayer plot
   MultiLayer *newGraph(const QString &caption = tr("Graph"));
