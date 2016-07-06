@@ -319,6 +319,9 @@
                      <property name="optional" stdset="0">
                        <bool>true</bool>
                      </property>
+                     <property name="enabled" stdset="0">
+                       <bool>false</bool>
+                     </property>
                      <property name="fileExtensions" stdset="0">
                        <stringlist>
                          <string>.cal</string>
