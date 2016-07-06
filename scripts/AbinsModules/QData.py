@@ -24,7 +24,7 @@ class QData(GeneralData):
         Appends one item to the collection of Q data.
         @param item: item to be added
         """
-        if not isinstance(item, np.ndarray):
+        if not (isinstance(item, np.ndarray) or isinstance(item, float)):
             raise ValueError("Invalid value of item to be added to a collection of Q items.")
 
         self._data.append(item)
@@ -39,17 +39,6 @@ class QData(GeneralData):
             self._num_k = k
         else:
             raise ValueError("Invalid number of k-points.")
-
-
-    def set(self, items=None):
-        """
-        Sets new value of Q data.
-        @param items: new value of a collection of Q data
-        """
-        if not isinstance(items, np.ndarray):
-            raise ValueError("Invalid value for a collection of Q items.")
-
-        self._data = items
 
 
     def extract(self):

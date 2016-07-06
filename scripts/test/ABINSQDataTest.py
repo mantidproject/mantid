@@ -44,7 +44,7 @@ class ABINSQvectorsTEST(unittest.TestCase):
 
         # Q frequency independent: wrong shape of data
         vectors_Q = QData(frequency_dependence=False)
-        vectors_Q.set(np.asarray([1.0,3.0,2.0,0.0])) # should be 2D array not 1D array
+        vectors_Q.set([1.0,3.0,2.0,0.0]) # should be 2D array not 1D array
         with self.assertRaises(ValueError):
             wrong_data = vectors_Q.extract()
 
@@ -57,7 +57,7 @@ class ABINSQvectorsTEST(unittest.TestCase):
         # Q frequency dependent: good items to set
         vectors_Q = QData(frequency_dependence=True)
         vectors_Q.set_k(k=1)
-        vectors_Q.set(np.asarray([self._good_array])) # array for one k point
+        vectors_Q.set([self._good_array]) # array for one k point
         self.assertEqual(True, np.allclose(self._good_array, vectors_Q.extract()))
 
         # Q frequency independent: good items to append
@@ -68,7 +68,7 @@ class ABINSQvectorsTEST(unittest.TestCase):
 
         # Q frequency independent: good items to set as an array
         vectors_Q = QData(frequency_dependence=False)
-        vectors_Q.set(np.asarray([self._good_array, self._good_array]))
+        vectors_Q.set([self._good_array, self._good_array])
         self.assertEqual(True, np.allclose([self._good_array, self._good_array], vectors_Q.extract()))
 
 

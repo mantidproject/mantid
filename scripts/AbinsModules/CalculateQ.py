@@ -103,8 +103,8 @@ class CalculateQ(IOmodule):
         freq = data["attributes"]["frequency_dependence"]
         results = QData(frequency_dependence=freq)
 
-        if freq:
-            results.set_k(k=data["datasets"]["data"].shape[0])
+        if freq: results.set_k(k=data["datasets"]["data"].shape[0])
 
-        results.set(data["datasets"]["data"])
+        results._data = data["datasets"]["data"]
+
         return results
