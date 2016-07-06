@@ -95,6 +95,40 @@ void MaskDetectors::exec() {
     return;
   }
 
+  if (prevMasking) {
+      DataObjects::MaskWorkspace_const_sptr maskWS =
+          boost::dynamic_pointer_cast<DataObjects::MaskWorkspace>(prevMasking);
+      if (maskWS) {
+          if (maskWS->getInstrument()->getDetectorIDs().size() !=
+              WS->getInstrument()->getDetectorIDs().size()) {
+              throw std::runtime_error(
+                  "Size mismatch between input Workspace and MaskWorkspace");
+          }
+
+          g_log.debug() << "Extracting mask from MaskWorkspace (" << maskWS->name()
+              << ")\n";
+         if (prevMasking->getNumberHistograms() != WS->getNumberHistograms()) {
+            
+         }
+         else {
+            appendToIndexListFromMaskWS(indexList, maskWS);
+         }
+      }
+      else {
+          // Check the provided workspace has the same number of spectra as the
+          // input
+          if (prevMasking->getNumberHistograms() > WS->getNumberHistograms()) {
+              g_log.error() << "Input workspace has " << WS->getNumberHistograms()
+                  << " histograms   vs. "
+                  << "Input masking workspace has "
+                  << prevMasking->getNumberHistograms()
+                  << " histograms. \n";
+              throw std::runtime_error("Size mismatch between two input workspaces.");
+          }
+          appendToIndexListFromWS(indexList, prevMasking);
+      }
+  }
+
   // If the spectraList property has been set, need to loop over the workspace
   // looking for the
   // appropriate spectra number and adding the indices they are linked to the
@@ -108,33 +142,7 @@ void MaskDetectors::exec() {
   }
   // If we have a workspace that could contain masking,copy that in too
 
-  if (prevMasking) {
-    DataObjects::MaskWorkspace_const_sptr maskWS =
-        boost::dynamic_pointer_cast<DataObjects::MaskWorkspace>(prevMasking);
-    if (maskWS) {
-      if (maskWS->getInstrument()->getDetectorIDs().size() !=
-          WS->getInstrument()->getDetectorIDs().size()) {
-        throw std::runtime_error(
-            "Size mismatch between input Workspace and MaskWorkspace");
-      }
 
-      g_log.debug() << "Extracting mask from MaskWorkspace (" << maskWS->name()
-                    << ")\n";
-      appendToIndexListFromMaskWS(indexList, maskWS);
-    } else {
-      // Check the provided workspace has the same number of spectra as the
-      // input
-      if (prevMasking->getNumberHistograms() > WS->getNumberHistograms()) {
-        g_log.error() << "Input workspace has " << WS->getNumberHistograms()
-                      << " histograms   vs. "
-                      << "Input masking workspace has "
-                      << prevMasking->getNumberHistograms()
-                      << " histograms. \n";
-        throw std::runtime_error("Size mismatch between two input workspaces.");
-      }
-      appendToIndexListFromWS(indexList, prevMasking);
-    }
-  }
 
   // Need to get hold of the parameter map
   Geometry::ParameterMap &pmap = WS->instrumentParameters();
