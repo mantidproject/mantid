@@ -217,9 +217,6 @@ class CrystalFieldTests(unittest.TestCase):
         x, y = cf.getSpectrum()
         self.assertAlmostEqual(y[123], 0.067679792127989441, 8)
         self.assertAlmostEqual(y[124], 0.099056455104978708, 8)
-        # n = 123
-        # plt.plot(x, y, x[n:n+20], y[n:n+20] + 1.0)
-        # plt.show()
 
     def test_api_CrystalField_spectrum_peaks_multi(self):
         from CrystalField import CrystalField, PeaksFunction
@@ -235,6 +232,20 @@ class CrystalFieldTests(unittest.TestCase):
         self.assertAlmostEqual(y0[142], 0.07623409141946233, 8)
         self.assertAlmostEqual(y1[139], 0.16332256923203797, 8)
         self.assertAlmostEqual(y1[142], 0.16601423535307261, 8)
+
+    def test_api_CrystalField_spectrum_background(self):
+        from CrystalField import CrystalField, PeaksFunction, Background, Function
+        cf = CrystalField('Ce', 'C2v', B20=0.035, B40=-0.012, B43=-0.027, B60=-0.00012, B63=0.0025, B66=0.0068,
+                          Temperature=10.0, FWHM=0.1)
+        cf.peaks = PeaksFunction('Gaussian')
+        cf.peaks.param[1]['Sigma'] = 0.1
+        cf.peaks.param[2]['Sigma'] = 0.2
+        cf.peaks.param[3]['Sigma'] = 0.3
+        cf.background = Background(peak=Function('PseudoVoigt', Height=10, FWHM=1, Mixing=0.5),
+                                   background=Function('LinearBackground', A0=1.0, A1=0.1))
+        x, y = cf.getSpectrum()
+        self.assertAlmostEqual(y[80], 2.5853135104737239, 8)
+        self.assertAlmostEqual(y[90], 6.6726231052015859, 8)
 
 if __name__ == "__main__":
     unittest.main()

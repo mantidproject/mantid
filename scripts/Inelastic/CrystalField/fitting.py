@@ -210,6 +210,8 @@ class CrystalField(object):
             params = self.getPeak(i).paramString()
             if len(params) > 0:
                 s += ',%s' % params
+        if self.background is not None:
+            s = '%s;%s' % (self.background.toString(), s)
         return s
 
     def _calcPeaksList(self, i):
@@ -467,19 +469,25 @@ class CrystalField(object):
             plotSpectrum(ws, 0)
 
 
-class SimpleFunction(object):
+class Function(object):
     """A helper object that simplifies getting and setting parameters of a simple named function."""
 
-    def __init__(self, name):
+    def __init__(self, name, **kwargs):
         """
-        Constructor
+        Initialise new instance.
         @param name: A valid name registered with the FunctionFactory.
+        @param kwargs: Parameters (but not attributes) of this function. To set attributes use `attr` property.
+                Example:
+                    f = Function('TabulatedFunction', Scaling=2.0)
+                    f.attr['Workspace'] = 'workspace_with_data'
         """
         self._name = name
         # Function attributes.
         self._attrib = {}
         # Function parameters.
         self._params = {}
+        for param in kwargs:
+            self._params[param] = kwargs[param]
 
     @property
     def name(self):
@@ -669,10 +677,21 @@ class Background(object):
     background.
     """
 
-    def __init__(self, peak, background):
+    def __init__(self, peak=None, background=None):
+        """
+        Initialise new instance.
+        @param peak: An instance of Function class meaning to be the elastic peak.
+        @param background: An instance of Function class serving as the background.
+        """
         self.peak = peak
         self.background = background
 
     def toString(self):
-        return '%s;%s' % (self.peak, self.background)
+        if self.peak is None and self.background is None:
+            return ''
+        if self.peak is None:
+            return self.background.toString()
+        if self.background is None:
+            return self.peak.toString()
+        return '%s;%s' % (self.peak.toString(), self.background.toString())
 
