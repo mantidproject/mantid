@@ -297,18 +297,15 @@
                    </widget>
                  </item>
                  <item row="1" column="0" colspan="2">
-                   <widget class="MantidQt::MantidWidgets::MWRunFiles" name="rfCalFile_only">
+                   <widget class="MantidQt::MantidWidgets::MWRunFiles" name="rfCalFile_only" native="true">
                      <property name="sizePolicy">
-                       <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                       <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
                          <horstretch>0</horstretch>
-                         <verstretch>30</verstretch>
+                         <verstretch>41</verstretch>
                        </sizepolicy>
                      </property>
-                     <property name="minimumSize">
-                       <size>
-                         <width>0</width>
-                         <height>22</height>
-                       </size>
+                     <property name="findRunFiles" stdset="0">
+                       <bool>false</bool>
                      </property>
                      <property name="label" stdset="0">
                        <string>Cal File</string>
@@ -323,9 +320,7 @@
                        <bool>false</bool>
                      </property>
                      <property name="fileExtensions" stdset="0">
-                       <stringlist>
-                         <string>.cal</string>
-                       </stringlist>
+                       <string>.cal</string>
                      </property>
                    </widget>
                  </item>
