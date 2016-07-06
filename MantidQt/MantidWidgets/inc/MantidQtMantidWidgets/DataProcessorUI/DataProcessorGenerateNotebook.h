@@ -44,8 +44,8 @@
 namespace MantidQt {
 namespace MantidWidgets {
 
-std::vector<std::string>
-    DLLExport splitByCommas(const std::string &names_string);
+std::vector<std::string> DLLExport
+splitByCommas(const std::string &names_string);
 
 std::string DLLExport plot1DString(const std::vector<std::string> &ws_names);
 
@@ -67,15 +67,17 @@ plotsString(const std::vector<std::string> &output_ws,
             const std::string &stitched_wsStr,
             const DataProcessorProcessingAlgorithm &processor);
 
-std::string DLLExport getReducedWorkspaceName(
-    int groupNo, int rowNo, QDataProcessorTreeModel_sptr model,
-    const DataProcessorWhiteList &whitelist, const std::string &prefix = "");
+std::string DLLExport
+getReducedWorkspaceName(int groupNo, int rowNo,
+                        QDataProcessorTreeModel_sptr model,
+                        const DataProcessorWhiteList &whitelist,
+                        const std::string &prefix = "");
 
 boost::tuple<std::string, std::string> DLLExport reduceRowString(
     const int groupNo, const int rowNo, const std::string &instrument,
     QDataProcessorTreeModel_sptr model, const DataProcessorWhiteList &whitelist,
-    const std::map<std::string, DataProcessorPreprocessingAlgorithm>
-        &preprocessMap,
+    const std::map<std::string, DataProcessorPreprocessingAlgorithm> &
+        preprocessMap,
     const DataProcessorProcessingAlgorithm &processor,
     const std::map<std::string, std::string> &preprocessOoptionsMap,
     const std::string &processingOptions);
@@ -90,13 +92,12 @@ plusString(const std::string &input_name, const std::string &output_name,
            const DataProcessorPreprocessingAlgorithm &preprocessor,
            const std::string &options);
 
-boost::tuple<std::string, std::string>
-    DLLExport loadRunString(const std::string &run,
-                            const std::string &instrument,
-                            const std::string &prefix);
+boost::tuple<std::string, std::string> DLLExport
+loadRunString(const std::string &run, const std::string &instrument,
+              const std::string &prefix);
 
-std::string DLLExport completeOutputProperties(const std::string &algName,
-                                               size_t currentProperties);
+std::string DLLExport
+completeOutputProperties(const std::string &algName, size_t currentProperties);
 
 class DLLExport DataProcessorGenerateNotebook {
 
@@ -104,8 +105,8 @@ public:
   DataProcessorGenerateNotebook(
       std::string name, QDataProcessorTreeModel_sptr model,
       const std::string instrument, const DataProcessorWhiteList &whitelist,
-      const std::map<std::string, DataProcessorPreprocessingAlgorithm>
-          &preprocessMap,
+      const std::map<std::string, DataProcessorPreprocessingAlgorithm> &
+          preprocessMap,
       const DataProcessorProcessingAlgorithm &processor,
       const DataProcessorPostprocessingAlgorithm &postprocessor,
       const std::map<std::string, std::string> preprocessingInstructionsMap,

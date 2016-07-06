@@ -52,8 +52,8 @@ specified via the corresponding hinting line edit in the view
 DataProcessorGenerateNotebook::DataProcessorGenerateNotebook(
     std::string name, QDataProcessorTreeModel_sptr model,
     const std::string instrument, const DataProcessorWhiteList &whitelist,
-    const std::map<std::string, DataProcessorPreprocessingAlgorithm>
-        &preprocessMap,
+    const std::map<std::string, DataProcessorPreprocessingAlgorithm> &
+        preprocessMap,
     const DataProcessorProcessingAlgorithm &processor,
     const DataProcessorPostprocessingAlgorithm &postprocessor,
     const std::map<std::string, std::string> preprocessingOptionsMap,
@@ -272,19 +272,15 @@ std::string tableString(QDataProcessorTreeModel_sptr model,
       table_string << " | ";
 
       for (int col = 0; col < ncols - 1; col++)
-        table_string << model
-                            ->data(model->index(*rowIt, col,
-                                                model->index(groupId, 0)))
+        table_string << model->data(model->index(*rowIt, col,
+                                                 model->index(groupId, 0)))
                             .toString()
-                            .toStdString()
-                     << " | ";
+                            .toStdString() << " | ";
 
-      table_string << model
-                          ->data(model->index(*rowIt, ncols - 1,
-                                              model->index(groupId, 0)))
+      table_string << model->data(model->index(*rowIt, ncols - 1,
+                                               model->index(groupId, 0)))
                           .toString()
-                          .toStdString()
-                   << "\n";
+                          .toStdString() << "\n";
     }
   }
   return table_string.str();
@@ -339,8 +335,7 @@ boost::tuple<std::string, std::string> postprocessGroupString(
   stitch_string << outputWSName;
   stitch_string << completeOutputProperties(
                        postprocessor.name(),
-                       postprocessor.numberOfOutputProperties())
-                << " = ";
+                       postprocessor.numberOfOutputProperties()) << " = ";
   stitch_string << postprocessor.name() << "(";
   stitch_string << postprocessor.inputProperty() << " = '";
   stitch_string << boost::algorithm::join(inputNames, ", ") << "'";
@@ -436,8 +431,8 @@ std::string getReducedWorkspaceName(int groupNo, int rowNo,
 boost::tuple<std::string, std::string> reduceRowString(
     const int groupNo, const int rowNo, const std::string &instrument,
     QDataProcessorTreeModel_sptr model, const DataProcessorWhiteList &whitelist,
-    const std::map<std::string, DataProcessorPreprocessingAlgorithm>
-        &preprocessMap,
+    const std::map<std::string, DataProcessorPreprocessingAlgorithm> &
+        preprocessMap,
     const DataProcessorProcessingAlgorithm &processor,
     const std::map<std::string, std::string> &preprocessingOptionsMap,
     const std::string &processingOptions) {

@@ -186,17 +186,10 @@ public:
     std::vector<std::string> notebookLines;
     boost::split(notebookLines, generatedNotebook, boost::is_any_of("\n"));
     const std::string result[] = {
-        "{",
-        "   \"metadata\" : {",
-        "      \"name\" : \"Mantid Notebook\"",
-        "   },",
-        "   \"nbformat\" : 3,",
-        "   \"nbformat_minor\" : 0,",
-        "   \"worksheets\" : [",
-        "      {",
-        "         \"cells\" : [",
-        "            {",
-        "               \"cell_type\" : \"markdown\",",
+        "{", "   \"metadata\" : {", "      \"name\" : \"Mantid Notebook\"",
+        "   },", "   \"nbformat\" : 3,", "   \"nbformat_minor\" : 0,",
+        "   \"worksheets\" : [", "      {", "         \"cells\" : [",
+        "            {", "               \"cell_type\" : \"markdown\",",
     };
 
     // Check that the first 10 lines are output as expected
