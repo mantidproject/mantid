@@ -10,9 +10,9 @@ Improvements
 
 - :ref:`MDNormDirectSC <algm-MDNormDirectSC>` has an option to skip safety checks. This improves the speed when acting on workspace groups.
 
-- A qtiGenie method *export_masks* was brought to Matid as :ref:`ExportASCIIMask <algm-ExportASCIIMask>` Python algorithm and got documentation, unit tests and Python GUI. 
-  The algorithm allows to export list of masked workspace spectra and save these spectra as ISIS *.msk* file 
-    -- the export mask procedure is often used by instrument scientists who earlier had to initialize qtiGenie to do this operation. 
+- A qtiGenie method *export_masks* was brought to Matid as :ref:`ExportSpectraMask <algm-ExportSpectraMask>` Python algorithm and got documentation, unit tests and Python GUI.
+  The algorithm allows to export list of masked workspace spectra and save these spectra as ISIS *.msk* file. 
+  The export mask procedure is often used by instrument scientists in ISIS, and they had to initialize qtiGenie to do this operation beforer the changes. 
 
 
 `Full list of changes on GitHub <http://github.com/mantidproject/mantid/pulls?q=is%3Apr+milestone%3A%22Release+3.8%22+is%3Amerged+label%3A%22Component%3A+Direct+Inelastic%22>`_

@@ -159,7 +159,7 @@ def  writeISISmasks(filename,masks,nSpectraInRow=8):
 
 
 
-class ExportASCIIMask(PythonAlgorithm):
+class ExportSpectraMask(PythonAlgorithm):
     """ Export workspace's masks
     """
     def category(self):
@@ -170,12 +170,11 @@ class ExportASCIIMask(PythonAlgorithm):
     def name(self):
         """ Return name
         """
-        return "ExportASCIIMask"
+        return "ExportSpectraMask"
 
     def summary(self):
-        return "Exports workspace masks as legacy ASCII file with .msk extension, "\
-            "containing list of masked spectra numbers, "\
-            "in the ISIS ASCII format described in LoadMask algorithm"
+        return "Returns list of spectra mnumbers which are masksed"\
+            " and save these numbers into legacy ASCII file with .msk extension."
 
     def PyInit(self):
         """ Declare properties
@@ -184,10 +183,10 @@ class ExportASCIIMask(PythonAlgorithm):
         self.declareProperty("Filename","","Name of the file to save mask to."\
                             " If empty, the name of the input workspace is used")
         self.declareProperty("ExportMaskOnly",False,"If true, algorithm will not save mask in a file"\
-                             "and returns only list with numbers of masted spectra.",\
+                             "and only returns the list containing numbers of masted spectra.",\
                               Direction.Input)
         self.declareProperty(IntArrayProperty(name="SpectraMasks",direction = Direction.Output),\
-                         doc="List of the spectra masked in the workspace")
+                         doc="List of the masked  spectra numbers.")
         return
 
     def PyExec(self):
@@ -203,4 +202,4 @@ class ExportASCIIMask(PythonAlgorithm):
         return
 
 
-AlgorithmFactory.subscribe(ExportASCIIMask)
+AlgorithmFactory.subscribe(ExportSpectraMask)
