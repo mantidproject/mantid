@@ -1102,9 +1102,6 @@ class MainWindow(QtGui.QMainWindow):
         else:
             exp_number, scan_number = ret_obj
 
-        # mask workspace?
-        mask_detectors = self.ui.checkBox_applyMask.isChecked()
-
         normalization = str(self.ui.comboBox_ptCountType.currentText())
         if normalization.count('Time') > 0:
             norm_type = 'time'
@@ -1129,12 +1126,19 @@ class MainWindow(QtGui.QMainWindow):
             intensity_scale_factor = 1.
 
         # get masked workspace
+        mask_name = str(self.ui.comboBox_maskNames2.currentText())
+        if mask_name.startswith('No Mask'):
+            mask_name = None
+        # mask workspace?
+        mask_detectors = mask_name is not None
+
         status, ret_obj = self._myControl.integrate_scan_peaks(exp=exp_number,
                                                                scan=scan_number,
                                                                peak_radius=1.0,
                                                                peak_centre=this_peak_centre,
                                                                merge_peaks=False,
                                                                use_mask=mask_detectors,
+                                                               mask_ws_name=mask_name,
                                                                normalization=norm_type,
                                                                scale_factor=intensity_scale_factor)
 
@@ -1409,10 +1413,12 @@ class MainWindow(QtGui.QMainWindow):
         # get experiment number and scan number from the table
         exp_number, scan_number = self.ui.tableWidget_peakIntegration.get_exp_info()
 
+        mask_name = str(self.ui.comboBox_maskNames2.currentText())
+        masked = not mask_name.startswith('No Mask')
         has_integrated = self._myControl.has_integrated_peak(exp_number, scan_number, pt_list=None,
                                                              normalized_by_monitor=norm_by_monitor,
                                                              normalized_by_time=norm_by_time,
-                                                             masked=self.ui.checkBox_applyMask.isChecked())
+                                                             masked=masked)
 
         # integrate and/or plot
         if has_integrated:
@@ -2051,8 +2057,14 @@ class MainWindow(QtGui.QMainWindow):
                 # calculate HKL from SPICE
                 ub_matrix = self._myControl.get_ub_matrix(exp_number)
                 index_status, ret_tup = self._myControl.index_peak(ub_matrix, scan_i)
-                assert index_status
-                hkl_i = ret_tup[0]
+                if index_status:
+                    hkl_i = ret_tup[0]
+                else:
+                    # unable to index peak. use fake hkl and set error message
+                    hkl_i = [0, 0, 0]
+                    error_msg = 'Scan %d: %s' % (scan_i, str(ret_tup))
+                    self.ui.tableWidget_mergeScans.set_status(scan_i, error_msg)
+                # END-IF-ELSE(index)
             # END-IF-ELSE (hkl_from_spice)
 
             # round

@@ -190,7 +190,7 @@ class PeakProcessHelper(object):
         # get SPICE table
         spice_table_name = get_spice_table_name(self._myExpNumber, self._myScanNumber)
         assert AnalysisDataService.doesExist(spice_table_name), 'Spice table for exp %d scan %d cannot be found.' \
-                                                              '' % (self._myExpNumber, self._myScanNumber)
+                                                                '' % (self._myExpNumber, self._myScanNumber)
 
         spice_table_ws = AnalysisDataService.retrieve(spice_table_name)
 

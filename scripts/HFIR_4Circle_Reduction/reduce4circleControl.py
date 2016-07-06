@@ -206,7 +206,7 @@ class CWSCDReductionControl(object):
         if self.has_merged_data(exp_number, scan_number, pt_number_list):
             pass
         else:
-            raise RuntimeError('Data must be merged before')
+            return False, 'Exp %d Scan %d: data must be merged already.' % (exp_number, scan_number)
 
         # Find peak in Q-space
         merged_ws_name = get_merged_md_name(self._instrumentName, exp_number, scan_number, pt_number_list)
