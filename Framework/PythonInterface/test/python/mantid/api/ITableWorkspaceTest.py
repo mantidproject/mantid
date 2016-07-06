@@ -97,7 +97,7 @@ class ITableWorkspaceTest(unittest.TestCase):
         self.assertEquals(table.columnCount(), 2)
 
         nextrow = {'index':1, 'value':'10'}
-        values = nextrow.values()
+        values = list(nextrow.values())
         table.addRow(values)
         self.assertEquals(len(table), 1)
         insertedrow = table.row(0)
@@ -131,8 +131,8 @@ class ITableWorkspaceTest(unittest.TestCase):
         self.assertEquals(table.columnCount(), 2)
 
         nextrow = {'index': 1, 'value': 10}
-        values32 = numpy.array(nextrow.values()).astype(numpy.int32)
-        values64 = numpy.array(nextrow.values()).astype(numpy.int64)
+        values32 = numpy.array(list(nextrow.values())).astype(numpy.int32)
+        values64 = numpy.array(list(nextrow.values())).astype(numpy.int64)
 
         table.addRow(values32)
         self.assertEquals(len(table), 1)

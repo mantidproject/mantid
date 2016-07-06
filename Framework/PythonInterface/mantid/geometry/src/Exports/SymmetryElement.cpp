@@ -19,20 +19,13 @@ Mantid::Kernel::V3D getAxis(SymmetryElement &self) {
   }
 }
 
-object getRotationSense(SymmetryElement &self) {
-  using RotationSenseToPython =
-      to_python_value<SymmetryElementRotation::RotationSense>;
+SymmetryElementRotation::RotationSense getRotationSense(SymmetryElement &self) {
   try {
     SymmetryElementRotation &rotationElement =
         dynamic_cast<SymmetryElementRotation &>(self);
-    auto sense = rotationElement.getRotationSense();
-    if (sense != SymmetryElementRotation::None) {
-      return object(handle<>(RotationSenseToPython()(sense)));
-    } else {
-      return object();
-    }
+    return rotationElement.getRotationSense();
   } catch (std::bad_cast &) {
-    return object();
+    return SymmetryElementRotation::NoRotation;
   }
 }
 }
@@ -45,7 +38,8 @@ void export_SymmetryElement() {
 
   enum_<SymmetryElementRotation::RotationSense>("RotationSense")
       .value("Positive", SymmetryElementRotation::Positive)
-      .value("Negative", SymmetryElementRotation::Negative);
+      .value("Negative", SymmetryElementRotation::Negative)
+      .value("NoRotation", SymmetryElementRotation::NoRotation);
 
   class_<SymmetryElement, boost::noncopyable>("SymmetryElement", no_init)
       .def("getHMSymbol", &SymmetryElement::hmSymbol, arg("self"),
