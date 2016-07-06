@@ -105,6 +105,6 @@ class CalculateQ(IOmodule):
 
         if freq: results.set_k(k=data["datasets"]["data"].shape[0])
 
-        results._data = data["datasets"]["data"]
+        results.set(data["datasets"]["data"])
 
         return results
