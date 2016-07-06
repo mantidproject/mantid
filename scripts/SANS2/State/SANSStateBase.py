@@ -4,7 +4,6 @@
 from abc import (ABCMeta, abstractmethod)
 import copy
 import inspect
-import importlib
 
 from mantid.kernel import PropertyManager
 
@@ -177,7 +176,16 @@ def get_module_and_class_name(instance):
 
 
 def provide_class_from_module_and_class_name(module_name, class_name):
-    module = importlib.import_module(module_name)
+    # Importlib seems to be missing on RHEL6, hence we resort to __import__
+    try:
+        from importlib import import_module
+        module = import_module(module_name)
+    except ImportError:
+        _, mod_name = module_name.rsplit(".", 1)
+        if not mod_name:
+            module = __import__(module_name)
+        else:
+            module = __import__(module_name, fromlist=[mod_name])
     return getattr(module, class_name)
 
 

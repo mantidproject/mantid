@@ -14,11 +14,10 @@ class SANSFUnctionsTest(unittest.TestCase):
         # Assert
         if expected_axis is not None:
             axis = expected_axis
-        delta = 1e-7
-        self.assertAlmostEqual(angle, converted_angle, delta=delta)
-        self.assertAlmostEqual(axis[0], converted_axis[0], delta=delta)
-        self.assertAlmostEqual(axis[1], converted_axis[1], delta=delta)
-        self.assertAlmostEqual(axis[2], converted_axis[2], delta=delta)
+        self.assertAlmostEqual(angle, converted_angle)
+        self.assertAlmostEqual(axis[0], converted_axis[0])
+        self.assertAlmostEqual(axis[1], converted_axis[1])
+        self.assertAlmostEqual(axis[2], converted_axis[2])
 
     def test_that_quaternion_can_be_converted_to_axis_and_angle_for_regular(self):
         # Arrange
