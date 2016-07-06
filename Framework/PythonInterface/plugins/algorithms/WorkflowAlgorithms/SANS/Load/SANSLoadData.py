@@ -326,6 +326,11 @@ class SANSLoadDataISIS(SANSLoadData):
         return workspaces, workspace_monitors
 
 
+class NullLoadData(SANSLoadData):
+    def do_execute(self, data_info, use_cached, publish_to_ads):
+        return {}, {}
+
+
 class SANSLoadDataFactory(object):
     """ A factory for SANSLoadData."""
     def __init__(self):
@@ -353,6 +358,6 @@ class SANSLoadDataFactory(object):
            instrument_type is SANSInstrument.SANS2D:
             loader = SANSLoadDataISIS()
         else:
-            loader = None
-            NotImplementedError("SANSLoaderFactory: Other instruments are not implemented yet.")
+            loader = NullLoadData()
+            RuntimeError("SANSLoaderFactory: Other instruments are not implemented yet.")
         return loader
