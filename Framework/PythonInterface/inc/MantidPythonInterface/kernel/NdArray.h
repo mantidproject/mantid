@@ -12,18 +12,17 @@ namespace NumPy {
  * Thin object wrapper around a numpy array. This is intended to take the place
  * of boost::python::numeric::array, which is a dated wrapper containing a bug
  * when used with Python 3 - https://github.com/boostorg/python/issues/75.
- * 
+ *
  * Only minimal functionality has been ported here.
  */
 class NdArray : public boost::python::object {
 public:
   BOOST_PYTHON_FORWARD_OBJECT_CONSTRUCTORS(NdArray, boost::python::object);
 
-  Py_intptr_t const * get_shape() const;
+  Py_intptr_t const *get_shape() const;
   int get_nd() const;
-  void * get_data() const;
+  void *get_data() const;
 };
-
 
 } // end namespace NumPy
 } // end namespace PythonInterface

@@ -147,7 +147,7 @@ object getAlgorithmPropertiesOrdered(IAlgorithm &self) {
   Environment::GlobalInterpreterLock gil;
   list names;
   ToPyString toPyStr;
-  for (const auto & prop : properties) {
+  for (const auto &prop : properties) {
     names.append(handle<>(toPyStr(prop->name())));
   }
   return names;
@@ -164,7 +164,7 @@ object getOutputProperties(IAlgorithm &self) {
   Environment::GlobalInterpreterLock gil;
   list names;
   ToPyString toPyStr;
-  for (const auto & p : properties) {
+  for (const auto &p : properties) {
     if (p->direction() == Direction::Output) {
       names.append(handle<>(toPyStr(p->name())));
     }

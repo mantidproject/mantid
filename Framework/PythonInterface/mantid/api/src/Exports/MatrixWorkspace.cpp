@@ -74,7 +74,7 @@ void setSpectrumFromPyObject(MatrixWorkspace &self, data_modifier accessor,
         "Length mismatch between workspace array & python array. ws=" +
         std::to_string(wslen) + ", python=" + std::to_string(pylen));
   }
-  double *pydata = (double*)values.get_data();
+  double *pydata = (double *)values.get_data();
   for (int i = 0; i < wslen; ++i) {
     wsref[i] = pydata[i];
   }

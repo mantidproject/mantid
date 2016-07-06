@@ -43,25 +43,25 @@ PyObject *getStatus(ScriptRepository &self, const std::string &path) {
   PyObject *value;
   switch (st) {
   case BOTH_UNCHANGED:
-    value = to_python_value<char const*&>()("BOTH_UNCHANGED");
+    value = to_python_value<char const *&>()("BOTH_UNCHANGED");
     break;
   case REMOTE_ONLY:
-    value = to_python_value<char const*&>()("REMOTE_ONLY");
+    value = to_python_value<char const *&>()("REMOTE_ONLY");
     break;
   case LOCAL_ONLY:
-    value = to_python_value<char const*&>()("LOCAL_ONLY");
+    value = to_python_value<char const *&>()("LOCAL_ONLY");
     break;
   case REMOTE_CHANGED:
-    value = to_python_value<char const*&>()("REMOTE_CHANGED");
+    value = to_python_value<char const *&>()("REMOTE_CHANGED");
     break;
   case LOCAL_CHANGED:
-    value = to_python_value<char const*&>()("LOCAL_CHANGED");
+    value = to_python_value<char const *&>()("LOCAL_CHANGED");
     break;
   case BOTH_CHANGED:
-    value = to_python_value<char const*&>()("BOTH_CHANGED");
+    value = to_python_value<char const *&>()("BOTH_CHANGED");
     break;
   default:
-    value = to_python_value<char const*&>()("BOTH_UNCHANGED");
+    value = to_python_value<char const *&>()("BOTH_UNCHANGED");
     break;
   }
   return value;

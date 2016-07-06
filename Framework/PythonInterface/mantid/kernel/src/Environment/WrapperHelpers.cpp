@@ -26,7 +26,7 @@ namespace Environment {
  */
 bool typeHasAttribute(PyObject *obj, const char *attr) {
   PyObject *cls_dict = obj->ob_type->tp_dict;
-  object key(handle<>(to_python_value<char const*&>()(attr)));
+  object key(handle<>(to_python_value<char const *&>()(attr)));
   return PyDict_Contains(cls_dict, key.ptr()) > 0;
 }
 
