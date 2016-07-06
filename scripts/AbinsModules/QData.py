@@ -5,14 +5,16 @@ class QData(GeneralData):
     """
     Class for storing Q data.
     """
-    def __init__(self, frequency_dependent=None):
+    def __init__(self, frequency_dependence=None):
 
         super(QData, self).__init__()
 
-        if isinstance(frequency_dependent, bool):
-            self._frequency_dependent = frequency_dependent
+        if (isinstance(frequency_dependence, bool) or
+            isinstance(frequency_dependence, np.bool_) or
+            isinstance(frequency_dependence, np.bool)):
+            self._frequency_dependence = frequency_dependence
         else:
-            raise ValueError("Invalid value of parameter frequency_dependent (value: True/False is expected). ")
+            raise ValueError("Invalid value of parameter frequency_dependence (value: True/False is expected). ")
 
         self._num_k = None
 
@@ -59,7 +61,7 @@ class QData(GeneralData):
             raise ValueError("Improper format of Q data. Two dimentional array is expected.")
 
 
-        if self._frequency_dependent:
+        if self._frequency_dependence:
 
             if self._num_k != self._data.shape[0]:
                 raise ValueError("Inconsistent number of k-points and size of data.")

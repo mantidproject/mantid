@@ -53,7 +53,7 @@ class KpointsData(GeneralData):
         @param item: item to be added.
         """
         if not isinstance(item, dict):
-            raise ValueError("Each element of AbinsData should be a dictionary.")
+            raise ValueError("Each element of KpointsData should be a dictionary.")
 
         if not sorted(item.keys()) == sorted(Constants.all_keywords_k_data):
             raise ValueError("Invalid structure of the dictionary to be added.")

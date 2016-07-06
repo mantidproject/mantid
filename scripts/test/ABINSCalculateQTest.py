@@ -4,6 +4,7 @@ import numpy as np
 from mantid.simpleapi import *
 
 from AbinsModules import  CalculateQ
+from AbinsModules import KpointsData
 
 
 class ABINSCalculateQTest(unittest.TestCase):
@@ -27,8 +28,8 @@ class ABINSCalculateQTest(unittest.TestCase):
             poor_q_calculator = CalculateQ(filename="one_file", instrument="TOSCA", sample_form="Solid")
 
         # no frequencies required for the case when Q vectors do not depend on frequencies
+        poor_q_calculator = CalculateQ(filename="one_file", instrument="None", sample_form="Powder")
         with self.assertRaises(ValueError):
-            poor_q_calculator = CalculateQ(filename="one_file", instrument="None", sample_form="Powder")
             poor_q_calculator.collectFrequencies(k_points_data=np.array([1, 2, 3, 4]))
 
 
@@ -37,8 +38,17 @@ class ABINSCalculateQTest(unittest.TestCase):
     # Use case: TOSCA
     def test_TOSCA(self):
 
-        raw_data = self._prepare_data(name="TOSCA")
-        correct_q_vectors = raw_data * raw_data/16.0
+        raw_data = KpointsData(num_k=1, num_atoms=2)
+
+        raw_data.append({"value":np.asarray([0.2, 0.1, 0.2]),
+                         "weight":0.3,
+                         "frequencies":np.asarray([1.0, 2.0, 3.0, 4.0,  5.0, 6.0]),  # 6 frequencies
+                         "atomic_displacements":np.asarray([[1.0,1.0,1.0],[1.0,1.0,1.0],  [1.0,1.0,1.0],
+                                                       [1.0,1.0,1.0],[1.0,1.0,1.0],  [1.0,1.0,1.0],
+                                                       [1.0,1.0,1.0],[1.0,1.0,111.0],[1.0,1.0,1.0],
+                                                       [1.0,1.0,1.0],[1.0,1.0,1.0],  [1.0,1.0,1.0]]) }) # 12 atomic displacements
+        extracted_raw_data = raw_data.extract()
+        correct_q_data = extracted_raw_data[0]["frequencies"] * extracted_raw_data[0]["frequencies"] / 16.0
 
         q_calculator = CalculateQ(filename="TestingFile_TOSCA.phonon",
                                   instrument="TOSCA",
@@ -46,13 +56,13 @@ class ABINSCalculateQTest(unittest.TestCase):
         q_calculator.collectFrequencies(k_points_data=raw_data)
         q_vectors = q_calculator.getQvectors()
 
-        self.assertEqual(True,np.allclose(correct_q_vectors, q_vectors.extract()))
+        self.assertEqual(True,np.allclose(correct_q_data, q_vectors.extract()))
 
         loaded_q = q_calculator.loadData()
 
-        self.assertEqual(True,np.allclose(correct_q_vectors, loaded_q.extract()))
+        self.assertEqual(True,np.allclose(correct_q_data, loaded_q.extract()))
 
-        # here we have a list not a numpy array
+        # here we have a list not a KpointsData
         with self.assertRaises(ValueError):
             q_calculator.collectFrequencies([1,2,3])
 

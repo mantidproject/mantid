@@ -6,53 +6,70 @@ from AbinsModules import QData
 
 
 class ABINSQvectorsTEST(unittest.TestCase):
+    _good_array =  np.asarray([2.,3.,4.])
+
     def runTest(self):
-
-        # wrong q_format
+        # wrong  frequency_dependent
         with self.assertRaises(ValueError):
-            testing_vec = QData(q_format="nice")
+            testing_vec = QData(frequency_dependence="nice")
 
-        # wrong items to set for scalars scenario: list instead of numpy array
+        # Q frequency dependent: wrong items to extract
+        vectors_Q = QData(frequency_dependence=True)
+        vectors_Q.set_k(k=2) # k should be 1
+        vectors_Q.append(item=self._good_array)
         with self.assertRaises(ValueError):
-            poor_Q =  QData(q_format="scalars")
-            poor_Q.set(items=[1, 3, 4]) # numpy array is expected not a list
+             wrong_data = vectors_Q.extract()
 
-        # wrong items to set: one dimensional array is expected
+        # Q frequency dependent: wrong  items to append
+        vectors_Q = QData(frequency_dependence=True)
+        vectors_Q.set_k(k=1)
         with self.assertRaises(ValueError):
-            poor_Q = QData(q_format="scalars")
-            poor_Q.set(items=np.asarray([[1,2],[2,3]])) # this should be 1D array
+             vectors_Q.append(item=[1,2,4]) # list instead of numpy array
 
-        # wrong items to set for vectors scenario: list instead of numpy array
+        # Q frequency dependent: wrong items to set
+        vectors_Q = QData(frequency_dependence=True)
         with self.assertRaises(ValueError):
-            poor_Q =QData(q_format="vectors")
-            array = [[2,3,4], [3,4,5]]
-            vectors_Q = poor_Q.set(items=array)
+            vectors_Q.set(items=[1,2,4]) # list instead of numpy array
 
-
-        # wrong items to set: two dimensional array of floats is expected
+        # Q frequency dependent: invalid k
+        vectors_Q = QData(frequency_dependence=True)
         with self.assertRaises(ValueError):
-            poor_Q = QData(q_format="vectors")
-            poor_Q.set(items=np.asarray([[1.0,3.0]])) # this should be  2D array
+            vectors_Q.set_k(-1)
 
-        # wrong items to set: two dimensional array of floats is expected
+        # Q frequency independent: wrong items added
+        vectors_Q = QData(frequency_dependence=False)
+        vectors_Q.append(np.asarray([1.0,3.0,2.0,0.0])) # should be 3 elements not 4
         with self.assertRaises(ValueError):
-            poor_Q = QData(q_format="vectors")
-            array = np.asarray([[2,3,4], [3,4,5]])
-            vectors_Q = poor_Q.set(items=array)
+            wrong_data = vectors_Q.extract()
 
+        # Q frequency independent: wrong shape of data
+        vectors_Q = QData(frequency_dependence=False)
+        vectors_Q.set(np.asarray([1.0,3.0,2.0,0.0])) # should be 2D array not 1D array
+        with self.assertRaises(ValueError):
+            wrong_data = vectors_Q.extract()
 
-        # good items to set: Q set of vectors
-        array = np.asarray([[2.,3.,4.], [3.,4.,5.]])
-        vectors_Q = QData(q_format="vectors")
-        vectors_Q.set(items=array)
-        self.assertEqual(True, np.allclose(array, vectors_Q.extract()))
+        # Q frequency dependent: good items to append
+        vectors_Q = QData(frequency_dependence=True)
+        vectors_Q.set_k(k=1)
+        vectors_Q.append(item=self._good_array)
+        self.assertEqual(True, np.allclose(self._good_array, vectors_Q.extract()[0]))
 
-        # good itrems to set Q set of scalars
-        array = np.asarray([2.,3.,4.])
-        vectors_Q = QData(q_format="scalars")
-        vectors_Q.set(items=array)
-        self.assertEqual(True, np.allclose(array, vectors_Q.extract()))
+        # Q frequency dependent: good items to set
+        vectors_Q = QData(frequency_dependence=True)
+        vectors_Q.set_k(k=1)
+        vectors_Q.set(np.asarray([self._good_array])) # array for one k point
+        self.assertEqual(True, np.allclose(self._good_array, vectors_Q.extract()))
 
+        # Q frequency independent: good items to append
+        vectors_Q = QData(frequency_dependence=False)
+        vectors_Q.append(item=self._good_array)
+        vectors_Q.append(item=self._good_array)
+        self.assertEqual(True, np.allclose([self._good_array, self._good_array], vectors_Q.extract()))
+
+        # Q frequency independent: good items to set as an array
+        vectors_Q = QData(frequency_dependence=False)
+        vectors_Q.set(np.asarray([self._good_array, self._good_array]))
+        self.assertEqual(True, np.allclose([self._good_array, self._good_array], vectors_Q.extract()))
 
 
 if __name__ == '__main__':

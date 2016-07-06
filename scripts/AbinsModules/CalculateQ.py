@@ -2,9 +2,9 @@ import numpy
 
 # ABINS modules
 import Constants
-from  IOmodule import IOmodule
+from IOmodule import IOmodule
 from QData import  QData
-import  Constants
+from KpointsData import  KpointsData
 
 
 class CalculateQ(IOmodule):
@@ -28,54 +28,64 @@ class CalculateQ(IOmodule):
             raise ValueError("Invalid value of the sample form. Please specify one of the two options: 'SingleCrystal', 'Powder'.")
         self._sample_form = sample_form
 
-        self._frequencies = None
+        self._k_points_data = None
 
-         # _functions and _Q defined in the form of dictionaries with keys as names of instruments. If a name of
-        # instrument is set to 'None' then Q vectors does not depend on frequency.
-        self._functions = {"TOSCA": self._calculate_Qvectors_Tosca}
+         # _functions  defined in the form of dictionary with keys as names of instruments. If a name of
+        #  instrument is set to 'None' then Q vectors do not depend on frequency.
+        self._functions = {"TOSCA": self._calculate_qvectors_tosca}
         self._Qvectors = None # data with Q vectors
 
-    def  collectFrequencies(self, frequencies=None):
+    def  collectFrequencies(self, k_points_data=None):
         """
         Collects frequencies.
-        @param frequencies: frequencies in the form of numpy array
+        @param k_points_data: frequencies in the form of numpy array
         """
 
         if self._instrument == "None":
             raise ValueError("Q vectors do not depend on frequency so collecting  frequencies is not needed.")
         
-        if not (isinstance(frequencies, numpy.ndarray) and
-                all([isinstance(frequencies[item],float) for item in range(frequencies.size)])):
-            raise ValueError("Invalid value of frequencies.")
+        if not isinstance(k_points_data, KpointsData):
+            raise ValueError("Invalid value of k-points data.")
+        k_points_data._num_k = len(k_points_data._data)
 
-        self._frequencies = frequencies
+        self._k_points_data = k_points_data.extract()
 
-    def _calculate_Qvectors_Tosca(self):
+
+    def _calculate_qvectors_tosca(self, frequencies=None):
         """
         Calculates squared Q vectors for TOSCA and TOSCA-like instruments.
         """
-        _freq_squared = self._frequencies * self._frequencies
-
+        _freq_squared = frequencies * frequencies
         if self._sample_form == "Powder":
-            self._Qvectors = QData(q_format="scalars")
-            self._Qvectors.set(items=_freq_squared * Constants.TOSCA_constant)
+            self._Qvectors.append(item=_freq_squared * Constants.TOSCA_constant)
         else:
             raise ValueError("SingleCrystal user case is not implemented.")
 
-    def _calculate_Qvectors(self):
+
+    def _calculate_qvectors_instrument(self):
         """
         Calculates Q vectors for the given instrument.
         """
-        self._functions[self._instrument]()
+
+        self._Qvectors = QData(frequency_dependence=True)
+        num_k = len(self._k_points_data)
+        self._Qvectors.set_k(k=num_k)
+        for k in range(num_k):
+            self._functions[self._instrument](self._k_points_data[k]["frequencies"])
+
 
     def getQvectors(self):
         """
         Calculates Q vectors and return them. Saves Q vectors to an hdf file.
         @return: Q vectors for the required instrument
         """
-        self._calculate_Qvectors()
+        if self._instrument != "None":
+            self._calculate_qvectors_instrument()
+        else:
+            raise ValueError("General case of Q data not implemented yet.")
+
         self.addNumpyDataset("data", self._Qvectors.extract()) # Q vectors in the form of numpy array
-        self.addAttribute("q_format",self._Qvectors._q_format)
+        self.addAttribute("frequency_dependence",self._Qvectors._frequency_dependence)
         self.addAttribute("instrument", self._instrument)
         self.addAttribute("sample_Form", self._sample_form)
         self.addAttribute("filename", self._input_filename)
@@ -86,10 +96,15 @@ class CalculateQ(IOmodule):
 
     def loadData(self):
         """
-        Returns Q data.
+        Loads  Q data from hdf file.
         @return: QData object
         """
-        data = self.load(list_of_numpy_datasets=["data"], list_of_attributes=["q_format"])
-        results = QData(q_format=data["attributes"]["q_format"])
+        data = self.load(list_of_numpy_datasets=["data"], list_of_attributes=["frequency_dependence"])
+        freq = data["attributes"]["frequency_dependence"]
+        results = QData(frequency_dependence=freq)
+
+        if freq:
+            results.set_k(k=data["datasets"]["data"].shape[0])
+
         results.set(data["datasets"]["data"])
         return results
