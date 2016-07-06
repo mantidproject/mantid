@@ -88,6 +88,9 @@ private:
   void appendToIndexListFromMaskWS(
       std::vector<size_t> &indexList,
       const DataObjects::MaskWorkspace_const_sptr maskedWorkspace);
+  void extractMaskedWSDetIDs(std::vector<detid_t> &detectorList,
+      const DataObjects::MaskWorkspace_const_sptr &maskWS);
+
 };
 
 } // namespace DataHandling

@@ -81,7 +81,7 @@ void MaskDetectors::exec() {
 
   std::vector<size_t> indexList = getProperty("WorkspaceIndexList");
   std::vector<specnum_t> spectraList = getProperty("SpectraList");
-  const std::vector<detid_t> detectorList = getProperty("DetectorList");
+  std::vector<detid_t> detectorList = getProperty("DetectorList");
   const MatrixWorkspace_sptr prevMasking = getProperty("MaskedWorkspace");
 
   // each one of these values is optional but the user can't leave all four
@@ -108,7 +108,7 @@ void MaskDetectors::exec() {
           g_log.debug() << "Extracting mask from MaskWorkspace (" << maskWS->name()
               << ")\n";
          if (prevMasking->getNumberHistograms() != WS->getNumberHistograms()) {
-            
+            extractMaskedWSDetIDs(detectorList,maskWS);
          }
          else {
             appendToIndexListFromMaskWS(indexList, maskWS);
@@ -203,6 +203,30 @@ void MaskDetectors::exec() {
   */
   WS->rebuildNearestNeighbours();
 }
+void MaskDetectors::extractMaskedWSDetIDs(std::vector<detid_t> &detectorList,
+    const DataObjects::MaskWorkspace_const_sptr &maskWS) {
+
+    int64_t nHist = maskWS->getNumberHistograms();
+    for (int64_t i = 0; i < nHist; ++i) {
+        
+
+        IDetector_const_sptr det;
+        try {
+            det = maskWS->getDetector(i);
+        }
+        catch (Exception::NotFoundError &) {
+            continue;
+        }
+
+        if (det->isMasked() ) {
+            detid_t det_id = det->getID();
+            detectorList.push_back(det_id);
+        }
+    }
+
+
+}
+
 /*
  * Peaks exec body
  * @param WS :: The input peaks workspace to be masked
