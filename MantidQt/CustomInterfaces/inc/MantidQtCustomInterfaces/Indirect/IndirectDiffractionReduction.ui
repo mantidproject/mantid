@@ -262,11 +262,6 @@
                <string>.cal</string>
               </stringlist>
              </property>
-              <property name="fileBrowserSuffixes" stdset="0">
-               <stringlist>
-                 <string>.cal</string>
-               </stringlist>
-             </property>
             </widget>
            </item>
           </layout>
@@ -325,11 +320,6 @@
                        <bool>true</bool>
                      </property>
                      <property name="fileExtensions" stdset="0">
-                       <stringlist>
-                         <string>.cal</string>
-                       </stringlist>
-                     </property>
-                     <property name="fileBrowserSuffixes" stdset="0">
                        <stringlist>
                          <string>.cal</string>
                        </stringlist>
