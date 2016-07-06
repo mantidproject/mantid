@@ -6246,23 +6246,24 @@ void ApplicationWindow::saveProjectAs(const QString &fileName, bool compress) {
 
   if (!fn.isEmpty()) {
     QFileInfo fileInfo(fn);
-    bool isFile = fileInfo.fileName().endsWith(".mantid") || fileInfo.fileName().endsWith(".mantid.gz");
+    bool isFile = fileInfo.fileName().endsWith(".mantid") ||
+                  fileInfo.fileName().endsWith(".mantid.gz");
 
-    if(!isFile) {
-        QDir directory(fn);
-        if (!directory.exists()) {
-          // Make the directory
-          directory.mkdir(fn);
-        }
+    if (!isFile) {
+      QDir directory(fn);
+      if (!directory.exists()) {
+        // Make the directory
+        directory.mkdir(fn);
+      }
 
-        workingDir = directory.absolutePath();
-        QString projectFileName = directory.dirName();
-        projectFileName.append(".mantid");
-        projectname = directory.absoluteFilePath(projectFileName);
+      workingDir = directory.absolutePath();
+      QString projectFileName = directory.dirName();
+      projectFileName.append(".mantid");
+      projectname = directory.absoluteFilePath(projectFileName);
 
     } else {
-        workingDir = fileInfo.absoluteDir().absolutePath();
-        projectname = fileInfo.absoluteFilePath();
+      workingDir = fileInfo.absoluteDir().absolutePath();
+      projectname = fileInfo.absoluteFilePath();
     }
 
     if (saveProject(compress)) {
