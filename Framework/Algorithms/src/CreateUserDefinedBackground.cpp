@@ -69,7 +69,7 @@ void CreateUserDefinedBackground::exec() {
   // Generate output workspace with background data
   const auto outputWS = createBackgroundWorkspace(pointsTable, inputWS);
 
-  setProperty("OutputWorkspace",
+  setProperty("OutputBackgroundWorkspace",
               API::MatrixWorkspace_sptr(std::move(outputWS)));
 }
 
@@ -122,13 +122,13 @@ void CreateUserDefinedBackground::extendBackgroundToData(
     background->insertRow(0);
     API::TableRow firstRow = background->getFirstRow();
     const auto dataPosition = xMinMax.first - xData.begin();
-    firstRow << xData[dataPosition] << yData[dataPosition];
+    firstRow << xData[dataPosition] << yData[dataPosition + 1];
   }
   // If last point < data maximum, append a new last point
-  if (background->Double(background->rowCount(), 0) < *xMinMax.second) {
+  if (background->Double(background->rowCount() - 1, 0) < *xMinMax.second) {
     API::TableRow lastRow = background->appendRow();
     const auto dataPosition = xMinMax.second - xData.begin();
-    lastRow << xData[dataPosition] << yData[dataPosition];
+    lastRow << xData[dataPosition] << yData[dataPosition - 1];
   }
 }
 
@@ -145,14 +145,21 @@ CreateUserDefinedBackground::createBackgroundWorkspace(
     const API::ITableWorkspace_const_sptr &background,
     const API::MatrixWorkspace_const_sptr &data) const {
   auto outputWS = data->clone();
+
   const auto &xData = outputWS->readX(0);
   MantidVec yBackground;
   MantidVec eBackground(outputWS->blocksize(), 0);
 
   // Interpolate Y data in the table
   const auto &lerp = getInterpolator(background, data);
-  for (const double &x : xData) {
-    yBackground.push_back(lerp.value(x));
+  const bool isHisto = outputWS->isHistogramData();
+  for (size_t i = 0; i < data->blocksize(); i++) {
+    const double x = isHisto ? (xData[i] + xData[i + 1]) * 0.5 : xData[i];
+    double y = lerp.value(x);
+    if (isHisto) {
+      y *= (xData[i + 1] - xData[i]); // bin width
+    }
+    yBackground.push_back(y);
   }
 
   // Apply Y and E data to all spectra in the workspace
@@ -170,13 +177,13 @@ CreateUserDefinedBackground::createBackgroundWorkspace(
  * @param workspace :: [input] Workspace to use for units
  * @returns :: Interpolation object ready for use
  */
-Kernel::Interpolation &CreateUserDefinedBackground::getInterpolator(
+Kernel::Interpolation CreateUserDefinedBackground::getInterpolator(
     const API::ITableWorkspace_const_sptr &background,
     const API::MatrixWorkspace_const_sptr &workspace) const {
   Kernel::Interpolation lerp;
   lerp.setMethod("linear");
   lerp.setXUnit(workspace->getAxis(0)->unit()->unitID());
-  lerp.setYUnit(workspace->YUnit());
+  lerp.setYUnit(workspace->getAxis(1)->unit()->unitID());
 
   // Set up data from table
   const auto xColumn = background->getColumn(0);

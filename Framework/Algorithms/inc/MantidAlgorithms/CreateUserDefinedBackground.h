@@ -5,9 +5,9 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
 namespace Mantid {
-  namespace Kernel {
-    class Interpolation;
-  }
+namespace Kernel {
+class Interpolation;
+}
 namespace Algorithms {
 
 /** CreateUserDefinedBackground : Given an input workspace containing data with
@@ -66,7 +66,7 @@ private:
   createBackgroundWorkspace(const API::ITableWorkspace_const_sptr &background,
                             const API::MatrixWorkspace_const_sptr &data) const;
   /// Set up and return an interpolator object ready for use
-  Kernel::Interpolation &
+  Kernel::Interpolation
   getInterpolator(const API::ITableWorkspace_const_sptr &background,
                   const API::MatrixWorkspace_const_sptr &workspace) const;
 };
