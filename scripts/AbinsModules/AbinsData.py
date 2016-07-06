@@ -13,6 +13,8 @@ class AbinsData(GeneralData):
         if not isinstance(atoms_data, AtomsDaTa):
             raise ValueError("Invalid type of atoms data.")
 
+        self._kpoints_data = k_points_data
+        self._atoms_data = atoms_data
         self._data = {"k_points_data":k_points_data.extract(), "atoms_data":atoms_data.extract()}
 
 
