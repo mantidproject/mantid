@@ -98,7 +98,7 @@ class CrystalField(object):
         self._toleranceIntensity = 1e-3
         self._temperature = None
         self._intensityScaling = 1.0
-        self._FWHM = 0.0
+        self._FWHM = None
         self._resolutionModel = None
         self._fieldParameters = {}
 
@@ -157,8 +157,7 @@ class CrystalField(object):
         if self._FWHM is None:
             raise RuntimeError('Default FWHM must be set.')
         if isinstance(self._FWHM, float) or isinstance(self._FWHM, int):
-            if i != 0:
-                raise RuntimeError('Cannot get FWHM for spectrum %s. Only 1 FWHM is given.' % i)
+            # if i != 0 assume that value for all spectra
             return float(self._FWHM)
         else:
             n = len(self._FWHM)
@@ -202,11 +201,15 @@ class CrystalField(object):
         temperature = self._getTemperature(i)
         s = 'name=CrystalFieldSpectrum,Ion=%s,Symmetry=%s,Temperature=%s' % (self._ion, self._symmetry, temperature)
         s += ',ToleranceEnergy=%s,ToleranceIntensity=%s' % (self._toleranceEnergy, self._toleranceIntensity)
+        if self.peaks is not None:
+            s += ',PeakShape=%s' % self.getPeak(i).name
         if self._FWHM is not None:
             s += ',FWHM=%s' % self._getFWHM(i)
         s += ',%s' % ','.join(['%s=%s' % item for item in self._fieldParameters.iteritems()])
         if self.peaks is not None:
-            s += self.peaks.paramString()
+            params = self.getPeak(i).paramString()
+            if len(params) > 0:
+                s += ',%s' % params
         return s
 
     def _calcPeaksList(self, i):
@@ -350,6 +353,21 @@ class CrystalField(object):
     def FWHM(self, value):
         self._FWHM = value
         self._dirty_spectra = True
+
+    def setPeaks(self, name):
+        """Define the shape of the peaks and create PeakFunction instances."""
+        if self._temperature is None or not isinstance(self._temperature, list):
+            self.peaks = PeaksFunction(name)
+        else:
+            self.peaks = [PeaksFunction(name) for t in self._temperature]
+
+    def getPeak(self, i=0):
+        if self.peaks is None:
+            raise RuntimeError('Peaks function is undefined.')
+        if isinstance(self.peaks, list):
+            return self.peaks[i]
+        else:
+            return self.peaks
 
     def getEigenvalues(self):
         self._calcEigensystem()
