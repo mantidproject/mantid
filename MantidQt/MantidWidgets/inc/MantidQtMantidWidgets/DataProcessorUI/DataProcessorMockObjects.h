@@ -95,7 +95,7 @@ private:
   };
   std::vector<DataProcessorCommand_uptr> publishCommands() override {
     std::vector<DataProcessorCommand_uptr> commands;
-    for (size_t i = 0; i < 26; i++)
+    for (size_t i = 0; i < 27; i++)
       commands.push_back(
           Mantid::Kernel::make_unique<DataProcessorAppendRowCommand>(this));
     return commands;
