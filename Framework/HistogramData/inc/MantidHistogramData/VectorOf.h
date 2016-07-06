@@ -133,7 +133,7 @@ public:
   const CowType &data() const { return *m_data; }
   /// Returns a reference to the stored object. The behavior is undefined if the
   /// stored pointer is null.
-  CowType &mutableData() { return m_data.access(); }
+  CowType &mutableData() & { return m_data.access(); }
   /// Returns a copy-on-write pointer to the stored object.
   Kernel::cow_ptr<CowType> cowData() const { return m_data; }
   /// Returns a const reference to the internal data structure of the stored
@@ -141,7 +141,7 @@ public:
   const std::vector<double> &rawData() const { return m_data->rawData(); }
   /// Returns a reference to the internal data structure of the stored object.
   /// The behavior is undefined if the stored pointer is null.
-  std::vector<double> &mutableRawData() {
+  std::vector<double> &mutableRawData() & {
     return m_data.access().mutableRawData();
   }
 

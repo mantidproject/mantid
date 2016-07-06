@@ -59,17 +59,17 @@ public:
   // the using declaration above, so we need them here explicitly.
   VarianceVectorOf(const VarianceVectorOf &) = default;
   VarianceVectorOf(VarianceVectorOf &&) = default;
-  VarianceVectorOf &operator=(const VarianceVectorOf &) = default;
-  VarianceVectorOf &operator=(VarianceVectorOf &&) = default;
+  VarianceVectorOf &operator=(const VarianceVectorOf &)& = default;
+  VarianceVectorOf &operator=(VarianceVectorOf &&)& = default;
 
   /// Copy construct from sigmas, taking the square of each sigma value.
   VarianceVectorOf(const Sigmas &sigmas);
   /// Move construct from sigmas, taking the square of each sigma value.
   VarianceVectorOf(Sigmas &&sigmas);
   /// Copy assignment from sigmas, taking the square of each sigma value.
-  VarianceVectorOf &operator=(const Sigmas &sigmas);
+  VarianceVectorOf &operator=(const Sigmas &sigmas) & ;
   /// Move assignment from sigmas, taking the square of each sigma value.
-  VarianceVectorOf &operator=(Sigmas &&sigmas);
+  VarianceVectorOf &operator=(Sigmas &&sigmas) & ;
 
 protected:
   // This is used as base class only, cannot delete polymorphically, so
@@ -104,7 +104,7 @@ VarianceVectorOf<T, CowType, Sigmas>::VarianceVectorOf(Sigmas &&sigmas) {
 
 template <class T, class CowType, class Sigmas>
 VarianceVectorOf<T, CowType, Sigmas> &VarianceVectorOf<T, CowType, Sigmas>::
-operator=(const Sigmas &sigmas) {
+operator=(const Sigmas &sigmas) & {
   VarianceVectorOf<T, CowType, Sigmas> tmp(sigmas);
   auto &derived = static_cast<T &>(*this);
   derived.operator=(tmp.cowData());
@@ -113,7 +113,7 @@ operator=(const Sigmas &sigmas) {
 
 template <class T, class CowType, class Sigmas>
 VarianceVectorOf<T, CowType, Sigmas> &VarianceVectorOf<T, CowType, Sigmas>::
-operator=(Sigmas &&sigmas) {
+operator=(Sigmas &&sigmas) & {
   VarianceVectorOf<T, CowType, Sigmas> tmp(std::move(sigmas));
   auto &derived = static_cast<T &>(*this);
   derived.operator=(tmp.cowData());

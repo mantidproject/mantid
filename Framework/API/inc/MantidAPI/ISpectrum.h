@@ -117,26 +117,26 @@ public:
   HistogramData::PointStandardDeviations pointStandardDeviations() const {
     return histogramRef().pointStandardDeviations();
   }
-  template <typename... T> void setBinEdges(T &&... data) {
+  template <typename... T> void setBinEdges(T &&... data) & {
     mutableHistogramRef().setBinEdges(std::forward<T>(data)...);
   }
-  template <typename... T> void setBinEdgeVariances(T &&... data) {
+  template <typename... T> void setBinEdgeVariances(T &&... data) & {
     mutableHistogramRef().setBinEdgeVariances(std::forward<T>(data)...);
   }
-  template <typename... T> void setBinEdgeStandardDeviations(T &&... data) {
+  template <typename... T> void setBinEdgeStandardDeviations(T &&... data) & {
     mutableHistogramRef().setBinEdgeStandardDeviations(
         std::forward<T>(data)...);
   }
-  template <typename... T> void setPoints(T &&... data) {
+  template <typename... T> void setPoints(T &&... data) & {
     // Check for the special case EventList, it only works with BinEdges.
     checkWorksWithPoints();
     mutableHistogramRef().setPoints(std::forward<T>(data)...);
   }
-  template <typename... T> void setPointVariances(T &&... data) {
+  template <typename... T> void setPointVariances(T &&... data) & {
     checkWorksWithPoints();
     mutableHistogramRef().setPointVariances(std::forward<T>(data)...);
   }
-  template <typename... T> void setPointStandardDeviations(T &&... data) {
+  template <typename... T> void setPointStandardDeviations(T &&... data) & {
     checkWorksWithPoints();
     mutableHistogramRef().setPointStandardDeviations(std::forward<T>(data)...);
   }
@@ -194,17 +194,17 @@ public:
     return histogramRef().e();
   }
   const HistogramData::HistogramDx &dx() const { return histogramRef().dx(); }
-  HistogramData::HistogramX &mutableX() {
+  HistogramData::HistogramX &mutableX() & {
     return mutableHistogramRef().mutableX();
   }
-  HistogramData::HistogramDx &mutableDx() {
+  HistogramData::HistogramDx &mutableDx() & {
     return mutableHistogramRef().mutableDx();
   }
-  HistogramData::HistogramY &mutableY() {
+  HistogramData::HistogramY &mutableY() & {
     checkIsYAndEWritable();
     return mutableHistogramRef().mutableY();
   }
-  HistogramData::HistogramE &mutableE() {
+  HistogramData::HistogramE &mutableE() & {
     checkIsYAndEWritable();
     return mutableHistogramRef().mutableE();
   }
@@ -220,17 +220,17 @@ public:
   Kernel::cow_ptr<HistogramData::HistogramDx> sharedDx() const {
     return histogramRef().sharedDx();
   }
-  void setSharedX(const Kernel::cow_ptr<HistogramData::HistogramX> &x) {
+  void setSharedX(const Kernel::cow_ptr<HistogramData::HistogramX> &x) & {
     mutableHistogramRef().setSharedX(x);
   }
-  void setSharedDx(const Kernel::cow_ptr<HistogramData::HistogramDx> &dx) {
+  void setSharedDx(const Kernel::cow_ptr<HistogramData::HistogramDx> &dx) & {
     mutableHistogramRef().setSharedDx(dx);
   }
-  void setSharedY(const Kernel::cow_ptr<HistogramData::HistogramY> &y) {
+  void setSharedY(const Kernel::cow_ptr<HistogramData::HistogramY> &y) & {
     checkIsYAndEWritable();
     mutableHistogramRef().setSharedY(y);
   }
-  void setSharedE(const Kernel::cow_ptr<HistogramData::HistogramE> &e) {
+  void setSharedE(const Kernel::cow_ptr<HistogramData::HistogramE> &e) & {
     checkIsYAndEWritable();
     mutableHistogramRef().setSharedE(e);
   }

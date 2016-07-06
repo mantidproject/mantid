@@ -183,7 +183,8 @@ public:
   HistogramData::Histogram histogram(const size_t index) const {
     return getSpectrum(index).histogram();
   }
-  template <typename... T> void setHistogram(const size_t index, T &&... data) {
+  template <typename... T>
+  void setHistogram(const size_t index, T &&... data) & {
     getSpectrum(index).setHistogram(std::forward<T>(data)...);
   }
   HistogramData::BinEdges binEdges(const size_t index) const {
@@ -200,26 +201,27 @@ public:
   pointStandardDeviations(const size_t index) const {
     return getSpectrum(index).pointStandardDeviations();
   }
-  template <typename... T> void setBinEdges(const size_t index, T &&... data) {
+  template <typename... T>
+  void setBinEdges(const size_t index, T &&... data) & {
     getSpectrum(index).setBinEdges(std::forward<T>(data)...);
   }
   template <typename... T>
-  void setBinEdgeVariances(const size_t index, T &&... data) {
+  void setBinEdgeVariances(const size_t index, T &&... data) & {
     getSpectrum(index).setBinEdgeVariances(std::forward<T>(data)...);
   }
   template <typename... T>
-  void setBinEdgeStandardDeviations(const size_t index, T &&... data) {
+  void setBinEdgeStandardDeviations(const size_t index, T &&... data) & {
     getSpectrum(index).setBinEdgeStandardDeviations(std::forward<T>(data)...);
   }
-  template <typename... T> void setPoints(const size_t index, T &&... data) {
+  template <typename... T> void setPoints(const size_t index, T &&... data) & {
     getSpectrum(index).setPoints(std::forward<T>(data)...);
   }
   template <typename... T>
-  void setPointVariances(const size_t index, T &&... data) {
+  void setPointVariances(const size_t index, T &&... data) & {
     getSpectrum(index).setPointVariances(std::forward<T>(data)...);
   }
   template <typename... T>
-  void setPointStandardDeviations(const size_t index, T &&... data) {
+  void setPointStandardDeviations(const size_t index, T &&... data) & {
     getSpectrum(index).setPointStandardDeviations(std::forward<T>(data)...);
   }
   HistogramData::Counts counts(const size_t index) const {
@@ -278,16 +280,16 @@ public:
   const HistogramData::HistogramDx &dx(const size_t index) const {
     return getSpectrum(index).dx();
   }
-  HistogramData::HistogramX &mutableX(const size_t index) {
+  HistogramData::HistogramX &mutableX(const size_t index) & {
     return getSpectrum(index).mutableX();
   }
-  HistogramData::HistogramDx &mutableDx(const size_t index) {
+  HistogramData::HistogramDx &mutableDx(const size_t index) & {
     return getSpectrum(index).mutableDx();
   }
-  HistogramData::HistogramY &mutableY(const size_t index) {
+  HistogramData::HistogramY &mutableY(const size_t index) & {
     return getSpectrum(index).mutableY();
   }
-  HistogramData::HistogramE &mutableE(const size_t index) {
+  HistogramData::HistogramE &mutableE(const size_t index) & {
     return getSpectrum(index).mutableE();
   }
   Kernel::cow_ptr<HistogramData::HistogramX> sharedX(const size_t index) const {
@@ -304,19 +306,19 @@ public:
     return getSpectrum(index).sharedDx();
   }
   void setSharedX(const size_t index,
-                  const Kernel::cow_ptr<HistogramData::HistogramX> &x) {
+                  const Kernel::cow_ptr<HistogramData::HistogramX> &x) & {
     getSpectrum(index).setSharedX(x);
   }
   void setSharedDx(const size_t index,
-                   const Kernel::cow_ptr<HistogramData::HistogramDx> &dx) {
+                   const Kernel::cow_ptr<HistogramData::HistogramDx> &dx) & {
     getSpectrum(index).setSharedDx(dx);
   }
   void setSharedY(const size_t index,
-                  const Kernel::cow_ptr<HistogramData::HistogramY> &y) {
+                  const Kernel::cow_ptr<HistogramData::HistogramY> &y) & {
     getSpectrum(index).setSharedY(y);
   }
   void setSharedE(const size_t index,
-                  const Kernel::cow_ptr<HistogramData::HistogramE> &e) {
+                  const Kernel::cow_ptr<HistogramData::HistogramE> &e) & {
     getSpectrum(index).setSharedE(e);
   }
   // Methods for getting read-only access to the data.
