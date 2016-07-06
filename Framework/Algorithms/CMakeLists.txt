@@ -76,6 +76,7 @@ set ( SRC_FILES
 	src/CreateSingleValuedWorkspace.cpp
 	src/CreateTransmissionWorkspace.cpp
 	src/CreateTransmissionWorkspaceAuto.cpp
+	src/CreateUserDefinedBackground.cpp
 	src/CreateWorkspace.cpp
 	src/CropWorkspace.cpp
 	src/CrossCorrelate.cpp
@@ -314,7 +315,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/AverageLogData.h
 	inc/MantidAlgorithms/BinaryOperateMasks.h
 	inc/MantidAlgorithms/BinaryOperation.h
-    inc/MantidAlgorithms/BoostOptionalToAlgorithmProperty.h
+	inc/MantidAlgorithms/BoostOptionalToAlgorithmProperty.h
 	inc/MantidAlgorithms/CalMuonDeadTime.h
 	inc/MantidAlgorithms/CalMuonDetectorPhases.h
 	inc/MantidAlgorithms/CalculateDIFC.h
@@ -373,6 +374,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/CreateSingleValuedWorkspace.h
 	inc/MantidAlgorithms/CreateTransmissionWorkspace.h
 	inc/MantidAlgorithms/CreateTransmissionWorkspaceAuto.h
+	inc/MantidAlgorithms/CreateUserDefinedBackground.h
 	inc/MantidAlgorithms/CreateWorkspace.h
 	inc/MantidAlgorithms/CropWorkspace.h
 	inc/MantidAlgorithms/CrossCorrelate.h
@@ -684,6 +686,7 @@ set ( TEST_FILES
 	CreateSingleValuedWorkspaceTest.h
 	CreateTransmissionWorkspaceAutoTest.h
 	CreateTransmissionWorkspaceTest.h
+	CreateUserDefinedBackgroundTest.h
 	CreateWorkspaceTest.h
 	CropWorkspaceTest.h
 	CuboidGaugeVolumeAbsorptionTest.h
@@ -736,7 +739,7 @@ set ( TEST_FILES
 	GetDetOffsetsMultiPeaksTest.h
 	GetDetectorOffsetsTest.h
 	GetEiTest.h
-	GetEiV1Test.h    
+	GetEiV1Test.h
 	GetTimeSeriesLogInformationTest.h
 	GroupWorkspacesTest.h
 	HRPDSlabCanAbsorptionTest.h
@@ -759,8 +762,8 @@ set ( TEST_FILES
 	MaxEnt/MaxentEntropyPositiveValuesTest.h
 	MaxEnt/MaxentSpaceComplexTest.h
 	MaxEnt/MaxentSpaceRealTest.h
-	MaxEntTest.h
 	MaxEnt/MaxentTransformFourierTest.h
+	MaxEntTest.h
 	MaxMinTest.h
 	MayersSampleCorrectionStrategyTest.h
 	MayersSampleCorrectionTest.h
