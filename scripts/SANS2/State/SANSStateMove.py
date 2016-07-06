@@ -61,7 +61,7 @@ class SANSStateMoveDetectorISIS(SANSStateBase, SANSStateMove):
             is_invalid.update({"detector_name_short": "The short detector name has not been specified."})
         if is_invalid:
             raise ValueError("SANSStateMoveDetectorISIS: The provided inputs are illegal. "
-                             "Please see: {}".format(json.dumps(is_invalid)))
+                             "Please see: {0}".format(json.dumps(is_invalid)))
 
 
 @sans_parameters

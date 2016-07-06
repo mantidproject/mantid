@@ -27,7 +27,7 @@ def move_component(workspace, offsets, component_to_move):
             move_options.update({"Z": value})
         else:
             raise RuntimeError("SANSMove: Trying to move the components along an unknown direction. "
-                               "See here: {}".format(str(component_to_move)))
+                               "See here: {0}".format(str(component_to_move)))
     alg = create_unmanaged_algorithm(move_name, **move_options)
     alg.execute()
 
@@ -46,7 +46,7 @@ def rotate_component(workspace, angle, direction, component_to_move):
             rotate_options.update({"Z": value})
         else:
             raise RuntimeError("SANSMove: Trying to rotate the components along an unknown direction. "
-                               "See here: {}".format(str(component_to_move)))
+                               "See here: {0}".format(str(component_to_move)))
     rotate_options.update({"Angle": angle})
     alg = create_unmanaged_algorithm(rotate_name, **rotate_options)
     alg.execute()
@@ -220,8 +220,8 @@ class SANSMove(object):
                     found_name = True
                     break
             if not found_name:
-                raise ValueError("SANSMove: The component to be moved {} cannot be found in the"
-                                 " state information of type {}".format(str(component), str(type(move_info))))
+                raise ValueError("SANSMove: The component to be moved {0} cannot be found in the"
+                                 " state information of type {1}".format(str(component), str(type(move_info))))
 
     @staticmethod
     def _validate_workspace(workspace):
@@ -232,7 +232,7 @@ class SANSMove(object):
     def _validate_state(move_info):
         if not isinstance(move_info, SANSStateMove):
             raise ValueError("SANSMove: The provided state information is of the wrong type. It must be"
-                             " of type SANSStateMove, but was {}".format(str(type(move_info))))
+                             " of type SANSStateMove, but was {0}".format(str(type(move_info))))
 
     @staticmethod
     def _validate(move_info, workspace, coordinates, component):

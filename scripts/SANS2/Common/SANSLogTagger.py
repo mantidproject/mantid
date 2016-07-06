@@ -7,14 +7,14 @@ from mantid.api import MatrixWorkspace
 def get_hash_value(value):
     hash_value = sha224(str(value).encode("utf8")).hexdigest()
     if not hash_value or hash_value is None:
-        raise RuntimeError("SANSLogTagger: Something went wrong when tryint to get the hash for {}.".format(str(value)))
+        raise RuntimeError("SANSLogTagger: Something went wrong when trying to get the hash for {0}.".format(str(value)))
     return hash_value
 
 
 def check_if_valid_tag_and_workspace(tag, workspace):
     if not(isinstance(tag, basestring) and isinstance(workspace, MatrixWorkspace)):
-        raise RuntimeError("SANSLogTagger: Either tag {} or workspace are invalid. The tag has to be a string"
-                           " and the workspace {} has to be a MatrixWorkspace".format(str(tag), str(workspace)))
+        raise RuntimeError("SANSLogTagger: Either tag {0} or workspace are invalid. The tag has to be a string"
+                           " and the workspace {1} has to be a MatrixWorkspace".format(str(tag), str(workspace)))
 
 
 def set_tag(tag, value, workspace):

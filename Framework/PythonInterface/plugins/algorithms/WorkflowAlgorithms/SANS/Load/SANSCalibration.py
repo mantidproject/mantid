@@ -63,7 +63,7 @@ def get_calibration_workspace(full_file_path, use_loaded):
 
     if calibration_workspace is None:
         if not isfile(full_file_path):
-            raise RuntimeError("SANSCalibration: The file for  {} does not seem to exist".format(full_file_path))
+            raise RuntimeError("SANSCalibration: The file for  {0} does not seem to exist".format(full_file_path))
         loader_name = "LoadNexusProcessed"
         loader_options = {SANSConstants.file_name: full_file_path,
                           SANSConstants.output_workspace: "dummy"}

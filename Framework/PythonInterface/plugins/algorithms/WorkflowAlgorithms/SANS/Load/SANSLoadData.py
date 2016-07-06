@@ -84,15 +84,15 @@ def get_expected_workspace_names(file_information, is_transmission, period):
     #  2. Period data, but wants all => 22025p1_sans_nxs,  22025p2_sans_nxs, ...
     #  3. Period data, select particular period => 22025p3_sans_nxs
     if file_information.get_number_of_periods() == 1:
-        workspace_name = "{}_{}_{}".format(run_number, suffix_data, suffix_file_type)
+        workspace_name = "{0}_{1}_{2}".format(run_number, suffix_data, suffix_file_type)
         names = [workspace_name]
     elif file_information.get_number_of_periods() > 1 and period is SANSStateData.ALL_PERIODS:
         workspace_names = []
         for period in range(1, file_information.get_number_of_periods() + 1):
-            workspace_names.append("{}p{}_{}_{}".format(run_number, period, suffix_data, suffix_file_type))
+            workspace_names.append("{0}p{1}_{2}_{3}".format(run_number, period, suffix_data, suffix_file_type))
         names = workspace_names
     elif file_information.get_number_of_periods() > 1 and period is not SANSStateData.ALL_PERIODS:
-        workspace_name = "{}p{}_{}_{}".format(run_number, period, suffix_data, suffix_file_type)
+        workspace_name = "{0}p{1}_{2}_{3}".format(run_number, period, suffix_data, suffix_file_type)
         names = [workspace_name]
     else:
         raise RuntimeError("SANSLoad: Cannot create workspace names.")
@@ -141,10 +141,10 @@ def get_loading_strategy(file_information, period, is_transmission):
     elif file_information.get_type() == SANSFileType.ISISNexusAdded:
         loader_name = None
         loader_options = {}
-        raise NotImplementedError("SANSLoad: Cannot load SANS file of type {}".format(str(file_information.get_type())))
+        raise NotImplementedError("SANSLoad: Cannot load SANS file of type {0}".format(str(file_information.get_type())))
         # TODO: Add loader for added
     else:
-        raise RuntimeError("SANSLoad: Cannot load SANS file of type {}".format(str(file_information.get_type())))
+        raise RuntimeError("SANSLoad: Cannot load SANS file of type {0}".format(str(file_information.get_type())))
     loader = create_unmanaged_algorithm(loader_name, **loader_options)
     return loader
 
@@ -154,7 +154,7 @@ def add_workspaces_to_analysis_data_service(workspaces, workspace_names, is_moni
         workspace_names = [workspace_name + SANSConstants.monitor_suffix for workspace_name in workspace_names]
     if len(workspaces) != len(workspace_names):
         raise RuntimeError("SANSLoad: There is a mismatch between the generated names and the length of"
-                           " the WorkspaceGroup. The workspace has {} entries and there are {} "
+                           " the WorkspaceGroup. The workspace has {0} entries and there are {1} "
                            "workspace names".format(len(workspaces), len(workspace_names)))
 
     for index in range(0, len(workspaces)):
@@ -297,7 +297,7 @@ class SANSLoadData(object):
     def _validate(data_info):
         if not isinstance(data_info, SANSStateData):
             raise ValueError("SANSLoad: The provided state information is of the wrong type. It must be"
-                             " of type SANSStateData,but was {}".format(str(type(data_info))))
+                             " of type SANSStateData,but was {0}".format(str(type(data_info))))
         data_info.validate()
 
 

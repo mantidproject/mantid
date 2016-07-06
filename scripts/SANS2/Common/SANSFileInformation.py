@@ -46,7 +46,7 @@ def find_sans_file(file_name):
         if runs:
             full_path = runs[0]
     if not full_path:
-        raise RuntimeError("Trying to find the SANS file {}, but cannot find it. Make sure that "
+        raise RuntimeError("Trying to find the SANS file {0}, but cannot find it. Make sure that "
                            "the relevant paths are added.".format(file_name))
     return full_path
 
@@ -57,7 +57,7 @@ def get_extension_for_file_type(file_info):
     elif file_info.get_type() == SANSFileType.ISISRaw:
         extension = "raw"
     else:
-        raise RuntimeError("The file extension type for a file of type {} is unknown".format(str(file_info.get_type())))
+        raise RuntimeError("The file extension type for a file of type {0} is unknown".format(str(file_info.get_type())))
     return extension
 
 
@@ -134,7 +134,7 @@ def get_instrument_paths_for_sans_file(file_name):
     idf_path = os.path.normpath(idf_path)
 
     if not os.path.exists(idf_path):
-        raise RuntimeError("SANSFileInformation: The instrument definition file {} does not seem to "
+        raise RuntimeError("SANSFileInformation: The instrument definition file {0} does not seem to "
                            "exist.".format(str(idf_path)))
 
     # Get the ipf path. This is slightly more complicated. See the Mantid documentation for the naming rules. Currently
@@ -155,7 +155,7 @@ def get_instrument_paths_for_sans_file(file_name):
         return idf_path, ipf_rule2
 
     raise RuntimeError("SANSFileInformation: There does not seem to be a corresponding instrument parameter file "
-                       "available for {}".format(str(idf_path)))
+                       "available for {0}".format(str(idf_path)))
 
 
 # ISIS Nexus

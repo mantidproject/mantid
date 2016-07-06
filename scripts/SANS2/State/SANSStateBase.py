@@ -38,7 +38,7 @@ class TypedParameter(object):
         # attribute access, since the developer/user cannot apply the hash symbol in their code (it is valid though
         # when writing into the __dict__). Note that the name which we generate here will be altered (via a
         # class decorator) in the classes which actually use the TypedParameter descriptor, to make it more readable.
-        self.name = '_{}#{}'.format(prefix, index)
+        self.name = '_{0}#{1}'.format(prefix, index)
         self.parameter_type = parameter_type
         self.value = None
         self.validator = validator
@@ -61,16 +61,16 @@ class TypedParameter(object):
             copied_value = copy.deepcopy(value)
             setattr(instance, self.name, copied_value)
         else:
-            raise ValueError("Trying to set {} with an invalid value of {}".format(self.name, str(value)))
+            raise ValueError("Trying to set {0} with an invalid value of {1}".format(self.name, str(value)))
 
     def __delete__(self):
-        raise AttributeError("Cannot delete the attribute {}".format(self.name))
+        raise AttributeError("Cannot delete the attribute {0}".format(self.name))
 
     def _type_check(self, value):
         if not isinstance(value, self.parameter_type):
-            raise TypeError("Trying to set {} which expects a value of type {}."
-                            " Got a value of {} which is of type: {}".format(self.name, str(self.parameter_type),
-                                                                             str(value), str(type(value))))
+            raise TypeError("Trying to set {0} which expects a value of type {1}."
+                            " Got a value of {2} which is of type: {3}".format(self.name, str(self.parameter_type),
+                                                                               str(value), str(type(value))))
 
 
 # ---------------------------------------------------
@@ -114,9 +114,9 @@ class ClassTypeParameter(TypedParameter):
 
     def _type_check(self, value):
         if not issubclass(value, self.parameter_type):
-            raise TypeError("Trying to set {} which expects a value of type {}."
-                            " Got a value of {} which is of type: {}".format(self.name, str(self.parameter_type),
-                                                                             str(value), str(value)))
+            raise TypeError("Trying to set {0} which expects a value of type {1}."
+                            " Got a value of {2} which is of type: {3}".format(self.name, str(self.parameter_type),
+                                                                               str(value), str(value)))
 
 
 # ------------------------------------------------
@@ -149,7 +149,7 @@ def sans_parameters(cls):
     """
     for attribute_name, attribute_value in cls.__dict__.iteritems():
         if isinstance(attribute_value, TypedParameter):
-            attribute_value.name = '_{}#{}'.format(type(attribute_value).__name__, attribute_name)
+            attribute_value.name = '_{0}#{1}'.format(type(attribute_value).__name__, attribute_name)
     return cls
 
 

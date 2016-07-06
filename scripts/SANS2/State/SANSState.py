@@ -48,7 +48,7 @@ class SANSStateISIS(SANSStateBase, SANSState):
             is_invalid.update("SANSStateISIS: The state object needs to include a SANSStateMove object.")
 
         if is_invalid:
-            raise ValueError("SANSState: There is an issue with your in put. See: {}".format(json.dumps(is_invalid)))
+            raise ValueError("SANSState: There is an issue with your in put. See: {0}".format(json.dumps(is_invalid)))
 
         # Check the attributes themselves
         is_invalid = {}
@@ -61,4 +61,4 @@ class SANSStateISIS(SANSStateBase, SANSState):
                     is_invalid.update({descriptor_name: pickle.dumps(err.message)})
 
         if is_invalid:
-            raise ValueError("SANSState: There is an issue with your in put. See: {}".format(json.dumps(is_invalid)))
+            raise ValueError("SANSState: There is an issue with your in put. See: {0}".format(json.dumps(is_invalid)))

@@ -29,5 +29,5 @@ def get_state_data_builder(facility):
     if facility is SANSFacility.ISIS:
         return SANSStateDataISIS()
     else:
-        raise NotImplementedError("SANSStateDataBuilder: The selected facility {} does not seem"
+        raise NotImplementedError("SANSStateDataBuilder: The selected facility {0} does not seem"
                                   " to exist".format(str(facility)))

@@ -115,7 +115,7 @@ class SANSStateDataISIS(SANSStateBase, SANSStateData):
 
         if is_invalid:
             raise ValueError("SANSStateData: The provided inputs are illegal. "
-                             "Please see: {}".format(json.dumps(is_invalid)))
+                             "Please see: {0}".format(json.dumps(is_invalid)))
 
 # -----------------------------------------------
 # SANSStateData setup for other facilities/techniques/scenarios.

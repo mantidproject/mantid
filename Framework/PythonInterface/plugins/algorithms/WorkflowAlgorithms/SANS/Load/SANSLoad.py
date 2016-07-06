@@ -171,7 +171,7 @@ class SANSLoad(DataProcessorAlgorithm):
         elif workspace_type == SANSDataType.CanDirect:
             self.set_property_with_number_of_workspaces("CanDirectWorkspace", workspaces)
         else:
-            raise RuntimeError("SANSLoad: Unknown data output workspace format: {}".format(str(workspace_type)))
+            raise RuntimeError("SANSLoad: Unknown data output workspace format: {0}".format(str(workspace_type)))
 
     def set_output_for_monitor_workspaces(self, workspace_type, workspaces):
         if workspace_type == SANSDataType.SampleScatter:
@@ -179,7 +179,7 @@ class SANSLoad(DataProcessorAlgorithm):
         elif workspace_type == SANSDataType.CanScatter:
             self.set_property("CanScatterMonitorWorkspace", workspaces)
         else:
-            raise RuntimeError("SANSLoad: Unknown data output workspace format: {}".format(str(workspace_type)))
+            raise RuntimeError("SANSLoad: Unknown data output workspace format: {0}".format(str(workspace_type)))
 
     def set_property(self, name, workspace_collection):
         """

@@ -86,7 +86,7 @@ class SANSMove(DataProcessorAlgorithm):
         elif selected_move_type is MoveType.SetToZero:
             mover.set_to_zero(move_info, workspace, component)
         else:
-            raise ValueError("SANSMove: The selection {} for the  move type is unknown".format(str(selected_move_type)))
+            raise ValueError("SANSMove: The selection {0} for the  move type is unknown".format(str(selected_move_type)))
 
     def _get_move_type(self):
         move_type_input = self.getProperty("MoveType").value
@@ -120,7 +120,7 @@ class SANSMove(DataProcessorAlgorithm):
             instrument = workspace.getInstrument()
             component_by_name = instrument.getComponentByName(component)
             if component_by_name is None:
-                errors.update({"Component": "The component {} cannot be found on "
+                errors.update({"Component": "The component {0} cannot be found on "
                                             "the workspace.".format(str(component))})
         return errors
 

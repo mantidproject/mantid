@@ -114,4 +114,4 @@ def get_state_move_builder(data_info):
         return SANSStateMoveLARMORBuilder(data_info)
     else:
         raise NotImplementedError("SANSStateMoveBuilder: Could not find any valid move builder for the "
-                                  "specified SANSStateData object {}".format(str(data_info)))
+                                  "specified SANSStateData object {0}".format(str(data_info)))
