@@ -287,9 +287,9 @@ void IndirectDiffractionReduction::runGenericReduction(QString instName,
 
   // Check if Cal file is used
   if (instName == "OSIRIS" && mode == "diffspec") {
-      if (m_uiForm.ckUseCalib->isChecked()) {
-        const auto calFile = m_uiForm.rfCalFile_only->getText().toStdString();
-        msgDiffReduction->setProperty("CalFile", calFile);
+    if (m_uiForm.ckUseCalib->isChecked()) {
+      const auto calFile = m_uiForm.rfCalFile_only->getText().toStdString();
+      msgDiffReduction->setProperty("CalFile", calFile);
     }
   }
   msgDiffReduction->setProperty("SumFiles", m_uiForm.ckSumFiles->isChecked());
@@ -667,7 +667,7 @@ bool IndirectDiffractionReduction::validateVanCal() {
 bool IndirectDiffractionReduction::validateCalOnly() {
   // Check Calib file valid
   if (m_uiForm.ckUseCalib->isChecked() && !m_uiForm.rfCalFile_only->isValid())
-      return false;
+    return false;
 
   // Check rebin values valid
   QString rebStartTxt = m_uiForm.leRebinStart_CalibOnly->text();
