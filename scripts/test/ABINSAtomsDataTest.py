@@ -1,19 +1,19 @@
 import unittest
 from mantid.simpleapi import *
-from AbinsModules import AtomsData
+from AbinsModules import AtomsDaTa
 import numpy as np
 
 class AtomsDataTest(unittest.TestCase):
-    _good_data = [{'sort': 1, 'symbol': 'Si', 'fract_coord': np.asarray([ 0.,  0.,  0.]), 'atom': 0, 'mass':28.085500},
-                  {'sort': 2, 'symbol': 'Si', 'fract_coord': np.asarray([ 0.25,  0.25,  0.25]), 'atom': 1, 'mass':28.085500}]
+    _good_data = [{'sort': 0, 'symbol': 'Si', 'fract_coord': np.asarray([ 0.,  0.,  0.]), 'atom': 0, 'mass':28.085500},
+                  {'sort': 1, 'symbol': 'Si', 'fract_coord': np.asarray([ 0.25,  0.25,  0.25]), 'atom': 1, 'mass':28.085500}]
 
     def setUp(self):
-        self.tester = AtomsData(num_atoms=2)
+        self.tester = AtomsDaTa(num_atoms=2)
 
     # constructor
     def test_wrong_num_atoms(self):
         with self.assertRaises(ValueError):
-            wrong_tester = AtomsData(num_atoms=-2)
+            wrong_tester = AtomsDaTa(num_atoms=-2)
 
     # append
     def test_wrong_sort(self):
@@ -150,3 +150,5 @@ class AtomsDataTest(unittest.TestCase):
             self.assertEqual(self._good_data[el]["atom"], data[el]["atom"])
             self.assertEqual(self._good_data[el]["mass"], data[el]["mass"])
 
+if __name__ == '__main__':
+    unittest.main()

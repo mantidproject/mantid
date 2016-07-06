@@ -19,7 +19,7 @@ class GeneralData(object):
         Sets a new value for a collection of the data.
         """
 
-        if isinstance(items, list):
+        if isinstance(items, list): # first calculation of the data
             self._data = []
             for item in items:
                 self.append(item=item)

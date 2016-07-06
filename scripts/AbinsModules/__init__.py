@@ -30,4 +30,6 @@ from CalculateQ import CalculateQ
 from GeneralData import GeneralData
 from QData import  QData
 from KpointsData import KpointsData
+from AtomsData import AtomsDaTa
 from AbinsData import  AbinsData
+from DwData import  DwData
