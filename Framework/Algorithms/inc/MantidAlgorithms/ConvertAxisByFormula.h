@@ -5,7 +5,17 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/Workspace_fwd.h"
 
+// forward declaration
+namespace mu {
+class Parser;
+}
+
 namespace Mantid {
+
+namespace API {
+class GeometryInfo;
+}
+
 namespace Algorithms {
 /** ConvertAxisByFormula : TODO: DESCRIPTION
 
@@ -45,6 +55,26 @@ public:
 private:
   void init() override;
   void exec() override;
+
+  /// A simple structure to hold information on variables
+  class Variable {
+  public:
+    Variable(const std::string &name)
+        : name(name), value(0.0), isGeometric(false) {}
+    Variable(const std::string &name, bool isGeometric)
+        : name(name), value(0.0), isGeometric(isGeometric) {}
+    std::string name;
+    double value;
+    bool isGeometric;
+  };
+  typedef boost::shared_ptr<Variable> Variable_ptr;
+
+  void setAxisValue(const double &value, std::vector<Variable_ptr> &variables);
+  void calculateValues(mu::Parser &p, std::vector<double> &vec,
+                       std::vector<Variable_ptr> variables);
+  void setGeometryValues(API::GeometryInfo &geomInfo,
+                         std::vector<Variable_ptr> &variables);
+  double evaluateResult(mu::Parser &p);
 };
 
 } // namespace Algorithms
