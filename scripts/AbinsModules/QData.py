@@ -1,41 +1,77 @@
 import numpy as np
 from GeneralData import GeneralData
-import  Constants
 
 class QData(GeneralData):
     """
-
+    Class for storing Q data.
     """
-    def __init__(self, q_format=None):
+    def __init__(self, frequency_dependent=None):
 
         super(QData, self).__init__()
 
-        if q_format not in Constants.all_q_formats:
-            raise ValueError("Invalid format of Q vectors")
-        self._q_format = q_format
+        if isinstance(frequency_dependent, bool):
+            self._frequency_dependent = frequency_dependent
+        else:
+            raise ValueError("Invalid value of parameter frequency_dependent (value: True/False is expected). ")
+
+        self._num_k = None
+
+
+    def append(self, item=None):
+        """
+        Appends one item to the collection of Q data.
+        @param item: item to be added
+        """
+        if not isinstance(item, np.ndarray):
+            raise ValueError("Invalid value of item to be added to a collection of Q items.")
+
+        self._data.append(item)
+
+
+    def set_k(self, k):
+        """
+        Sets number of k-points
+        @param k: number of k-point
+        """
+        if isinstance(k, int) and k > 0 :
+            self._num_k = k
+        else:
+            raise ValueError("Invalid number of k-points.")
+
 
     def set(self, items=None):
         """
-        Sets a new collections of Q items.
-        @param items: list with Q items (vectors or scalars)
+        Sets new value of Q data.
+        @param items: new value of a collection of Q data
         """
-
         if not isinstance(items, np.ndarray):
-            raise ValueError("Invalid value of items to be added to collection of Q items.")
-        if self._q_format == "scalars":
-            if len(items.shape) != 1 or not all([isinstance(items[el], float) for el in range(items.shape[0])]):
-                raise ValueError("Q data in the form of scalars. Each entry should be a scalar.")
-        if self._q_format == "vectors":
-            if len(items.shape) != 2:
-                raise ValueError("Q data in the form of vectors. Each entry should be a vector.")
-            for el1 in range(items.shape[0]):
-                if items[el1].shape[0] != 3:
-                    raise ValueError("Q data in the form of vectors. Each entry should be a numpy array with three elements.")
-
-                if not all([isinstance(items[el1][el2],float) for el2 in range(items.shape[1])]):
-                    raise ValueError("Q data in the form of vectors. Each entry should be a numpy array with three float elements.")
+            raise ValueError("Invalid value for a collection of Q items.")
 
         self._data = items
+
+
+    def extract(self):
+
+        if isinstance(self._data, list):
+            self._data = np.asarray(self._data)
+
+        if not len(self._data.shape) == 2:
+            raise ValueError("Improper format of Q data. Two dimentional array is expected.")
+
+
+        if self._frequency_dependent:
+
+            if self._num_k != self._data.shape[0]:
+                raise ValueError("Inconsistent number of k-points and size of data.")
+
+        else:
+
+            if self._data.shape[1] != 3:
+                raise ValueError("The second dimension of Q data is expected to be 3.")
+
+        return self._data
+
+
 
 
 

@@ -19,8 +19,6 @@ all_instruments = ["None", "TOSCA"] # supported instruments
 
 all_sample_forms = ["SingleCrystal", "Powder"] # valid forms of samples
 
-all_q_formats = ["scalars", "vectors"] # valid formats of q data
-
 # keywords which define data structure of KpointsData
 all_keywords_k_data = ["weight", "value", "frequencies", "atomic_displacements"]
 

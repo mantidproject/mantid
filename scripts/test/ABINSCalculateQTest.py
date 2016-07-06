@@ -29,7 +29,7 @@ class ABINSCalculateQTest(unittest.TestCase):
         # no frequencies required for the case when Q vectors do not depend on frequencies
         with self.assertRaises(ValueError):
             poor_q_calculator = CalculateQ(filename="one_file", instrument="None", sample_form="Powder")
-            poor_q_calculator.collectFrequencies(frequencies=np.array([1,2,3,4]))
+            poor_q_calculator.collectFrequencies(k_points_data=np.array([1, 2, 3, 4]))
 
 
     _core = "../ExternalData/Testing/Data/UnitTest/"
@@ -43,7 +43,7 @@ class ABINSCalculateQTest(unittest.TestCase):
         q_calculator = CalculateQ(filename="TestingFile_TOSCA.phonon",
                                   instrument="TOSCA",
                                   sample_form="Powder")
-        q_calculator.collectFrequencies(frequencies=raw_data)
+        q_calculator.collectFrequencies(k_points_data=raw_data)
         q_vectors = q_calculator.getQvectors()
 
         self.assertEqual(True,np.allclose(correct_q_vectors, q_vectors.extract()))
