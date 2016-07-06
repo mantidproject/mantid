@@ -1,4 +1,4 @@
-﻿# pylint: disable=too-few-public-methods
+﻿# pylint: disable=too-few-public-methods, invalid-name
 
 """ Fundamental classes and Descriptors for the SANSState mechanism."""
 from abc import (ABCMeta, abstractmethod)
