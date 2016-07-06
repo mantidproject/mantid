@@ -1378,7 +1378,6 @@ void GenericDataProcessorPresenter::transfer(
 
   auto newRows = runs;
 
-  std::map<std::string, int> groups;
   // Loop over the rows (vector elements)
   for (auto rowsIt = newRows.begin(); rowsIt != newRows.end(); ++rowsIt) {
     auto &row = *rowsIt;

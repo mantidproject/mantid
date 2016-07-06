@@ -382,7 +382,6 @@ bool QDataProcessorTreeModel::setData(const QModelIndex &index,
 
     if (index.column() == 0) {
 
-      const std::string oldName = m_groupName[index.row()];
       const std::string newName = value.toString().toStdString();
 
       // Update the group name, which means updating:
@@ -424,7 +423,6 @@ void QDataProcessorTreeModel::setupModelData(
     ITableWorkspace_sptr table, const DataProcessorWhiteList &whitelist) {
 
   int nrows = static_cast<int>(table->rowCount());
-  int ncols = static_cast<int>(table->columnCount() - 1);
 
   int lastIndex = 0;
   std::map<std::string, int> groupIndex;
