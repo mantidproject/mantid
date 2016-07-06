@@ -2,6 +2,7 @@
 #define MANTIDQTMANTIDWIDGETS_DATAPROCESSORAPPENDGROUPCOMMAND_H
 
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorCommandBase.h"
+#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorPresenter.h"
 
 namespace MantidQt {
 namespace MantidWidgets {

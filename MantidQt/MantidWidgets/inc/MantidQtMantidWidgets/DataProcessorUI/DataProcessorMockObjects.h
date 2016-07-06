@@ -5,13 +5,14 @@
 #include "MantidKernel/make_unique.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorAppendRowCommand.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorView.h"
-#include "MantidQtMantidWidgets/DataProcessorUI/QDataProcessorTableModel.h"
+#include "MantidQtMantidWidgets/DataProcessorUI/QDataProcessorTreeModel.h"
 #include <gmock/gmock.h>
 
 using namespace MantidQt::MantidWidgets;
 using namespace Mantid::API;
 
-// Clean column ids for use within tests
+// Clean column ids for use within tests (they refer to the table workspace
+// only)
 const int GroupCol = 0;
 const int RunCol = 1;
 const int ThetaCol = 2;
@@ -44,7 +45,8 @@ public:
 
   // IO
   MOCK_CONST_METHOD0(getWorkspaceToOpen, std::string());
-  MOCK_CONST_METHOD0(getSelectedRows, std::set<int>());
+  MOCK_CONST_METHOD0(getSelectedRows, std::map<int, std::set<int>>());
+  MOCK_CONST_METHOD0(getSelectedGroups, std::set<int>());
   MOCK_CONST_METHOD0(getClipboard, std::string());
   MOCK_CONST_METHOD1(getProcessingOptions, std::string(const std::string &));
   MOCK_METHOD0(getEnableNotebook, bool());
@@ -67,7 +69,7 @@ public:
   MOCK_METHOD1(loadSettings, void(std::map<std::string, QVariant> &));
 
   // Calls we don't care about
-  void showTable(QDataProcessorTableModel_sptr) override{};
+  void showTable(QDataProcessorTreeModel_sptr) override{};
   void saveSettings(const std::map<std::string, QVariant> &) override{};
   std::string getProcessInstrument() const override { return "FAKE"; }
 

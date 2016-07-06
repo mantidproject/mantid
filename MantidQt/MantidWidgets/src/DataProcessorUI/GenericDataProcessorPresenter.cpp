@@ -929,6 +929,7 @@ void GenericDataProcessorPresenter::appendGroup() {
     // Append group after last selected group
     insertGroup(*(selectedGroups.rbegin()) + 1);
   }
+  m_tableDirty = true;
 }
 
 /**
@@ -955,6 +956,7 @@ void GenericDataProcessorPresenter::deleteGroup() {
        ++group) {
     m_model->removeRow(*group);
   }
+  m_tableDirty = true;
 }
 
 /**
@@ -1330,7 +1332,7 @@ void GenericDataProcessorPresenter::pasteSelected() {
   auto selectedRows = m_view->getSelectedRows();
   if (selectedRows.empty()) {
     // No rows were selected
-    // Use group to which selected rows belong and paste new rows to it
+    // Use group where rows in clipboard belong and paste new rows to it
     // Add as many new rows as required
     for (size_t i = 0; i < lines.size(); ++i) {
       std::vector<std::string> values;
@@ -1348,11 +1350,11 @@ void GenericDataProcessorPresenter::pasteSelected() {
     // Some rows were selected
     // Iterate over rows and lines simultaneously, stopping when we reach the
     // end of either
+    auto lineIt = lines.begin();
     for (auto it = selectedRows.begin(); it != selectedRows.end(); ++it) {
       const int groupId = it->first;
       auto rows = it->second;
       auto rowIt = rows.begin();
-      auto lineIt = lines.begin();
       for (; rowIt != rows.end() && lineIt != lines.end(); rowIt++, lineIt++) {
         std::vector<std::string> values;
         boost::split(values, *lineIt, boost::is_any_of("\t"));
