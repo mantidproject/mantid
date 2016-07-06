@@ -306,7 +306,7 @@
                      <property name="sizePolicy">
                        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
                          <horstretch>0</horstretch>
-                         <verstretch>41</verstretch>
+                         <verstretch>30</verstretch>
                        </sizepolicy>
                      </property>
                      <property name="minimumSize">
