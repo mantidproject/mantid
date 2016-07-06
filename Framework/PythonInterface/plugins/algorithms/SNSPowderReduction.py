@@ -9,7 +9,7 @@ import mantid.simpleapi as api
 from mantid.api import *
 from mantid.kernel import *
 # Use xrange in Python 2
-from six.moves import range
+from six.moves import range #pylint: disable=redefined-builtin
 
 if AlgorithmFactory.exists('GatherWorkspaces'):
     HAVE_MPI = True

@@ -4,7 +4,7 @@ from __future__ import (absolute_import, division, print_function)
 from mantid.api import PythonAlgorithm, AlgorithmFactory, ITableWorkspaceProperty, WorkspaceFactory,\
     FileProperty, FileAction, MatrixWorkspaceProperty
 from mantid.kernel import Direction
-from six.moves import range
+from six.moves import range #pylint: disable=redefined-builtin
 
 _OUTPUTLEVEL = "NOOUTPUT"
 
