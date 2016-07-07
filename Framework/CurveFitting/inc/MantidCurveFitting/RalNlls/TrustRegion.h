@@ -19,19 +19,19 @@ void mult_Jt(const DoubleFortranMatrix &J, const DoubleFortranVector &x,
 double evaluate_model(const DoubleFortranVector &f,
                       const DoubleFortranMatrix &J,
                       const DoubleFortranMatrix &hf,
-                      const DoubleFortranVector &d, const nlls_options options,
+                      const DoubleFortranVector &d, const nlls_options &options,
                       evaluate_model_work &w);
 double calculate_rho(double normf, double normfnew, double md,
                      const nlls_options &options);
 void update_trust_region_radius(double &rho, const nlls_options &options,
                                 nlls_inform &inform, NLLS_workspace &w);
-void rank_one_update(DoubleFortranMatrix &hf, NLLS_workspace w);
+void rank_one_update(DoubleFortranMatrix &hf, NLLS_workspace &w);
 void test_convergence(double normF, double normJF, double normF0,
                       double normJF0, const nlls_options &options,
                       nlls_inform &inform);
 void apply_scaling(const DoubleFortranMatrix &J, DoubleFortranMatrix &A,
                    DoubleFortranVector &v, apply_scaling_work &w,
-                   const nlls_options options, nlls_inform inform);
+                   const nlls_options &options, nlls_inform &inform);
 void all_eig_symm(const DoubleFortranMatrix &A, DoubleFortranVector &ew,
                   DoubleFortranMatrix &ev);
 // void apply_second_order_info(int n, int m, const DoubleFortranVector& X,

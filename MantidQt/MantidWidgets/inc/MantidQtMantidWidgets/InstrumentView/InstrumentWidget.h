@@ -34,8 +34,6 @@ class QDropEvent;
 class QStackedLayout;
 class QSettings;
 
-using namespace Mantid::API;
-
 namespace MantidQt {
 namespace MantidWidgets {
 class InstrumentActor;
@@ -126,8 +124,9 @@ public:
   QString getInstrumentSettingsGroupName() const;
 
   bool hasWorkspace(const std::string &wsName) const;
-  void handleWorkspaceReplacement(const std::string &wsName,
-                                  const boost::shared_ptr<Workspace> workspace);
+  void handleWorkspaceReplacement(
+      const std::string &wsName,
+      const boost::shared_ptr<Mantid::API::Workspace> workspace);
 
 signals:
   void enableLighting(bool);

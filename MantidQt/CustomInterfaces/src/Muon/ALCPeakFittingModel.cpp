@@ -12,6 +12,8 @@
 #include <Poco/ActiveResult.h>
 #include <QApplication>
 
+using namespace Mantid::API;
+
 namespace MantidQt {
 namespace CustomInterfaces {
 void ALCPeakFittingModel::setData(MatrixWorkspace_const_sptr newData) {
