@@ -192,25 +192,25 @@ public:
   const MantidVec &dataDx() const override;
   const MantidVec &readDx() const override;
 
-  // TODO: This overload will probably be needed in a future to work with Event
-  // data properly
-  // std::pair<double,double> getXDataRange()const;
-
-  /// Disallowed data accessors - can't modify Y/E on a EventList
+  /// Deprecated, use mutableY() instead. Disallowed data accessors - can't
+  /// modify Y/E on a EventList
   MantidVec &dataY() override {
     throw std::runtime_error(
         "EventList: non-const access to Y data is not possible.");
   }
-  /// Disallowed data accessors - can't modify Y/E on a EventList
+  /// Deprecated, use mutableE() instead. Disallowed data accessors - can't
+  /// modify Y/E on a EventList
   MantidVec &dataE() override {
     throw std::runtime_error(
         "EventList: non-const access to E data is not possible.");
   }
 
   // Allowed data accessors - read-only Y/E histogram VIEWS of an event list
-  /// Return a read-only Y histogram view of an event list
+  /// Deprecated, use y() instead. Return a read-only Y histogram view of an
+  /// event list
   const MantidVec &dataY() const override;
-  /// Return a read-only E histogram view of an event list
+  /// Deprecated, use e() instead. Return a read-only E histogram view of an
+  /// event list
   const MantidVec &dataE() const override;
 
   MantidVec *makeDataY() const;

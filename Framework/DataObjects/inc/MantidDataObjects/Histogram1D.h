@@ -64,15 +64,14 @@ public:
   /// Zero the data (Y&E) in this spectrum
   void clearData() override;
 
-  // Get the array data
-  /// Returns the y data const
+  /// Deprecated, use y() instead. Returns the y data const
   const MantidVec &dataY() const override { return m_histogram.dataY(); }
-  /// Returns the error data const
+  /// Deprecated, use e() instead. Returns the error data const
   const MantidVec &dataE() const override { return m_histogram.dataE(); }
 
-  /// Returns the y data
+  /// Deprecated, use mutableY() instead. Returns the y data
   MantidVec &dataY() override { return m_histogram.dataY(); }
-  /// Returns the error data
+  /// Deprecated, use mutableE() instead. Returns the error data
   MantidVec &dataE() override { return m_histogram.dataE(); }
 
   virtual std::size_t size() const {

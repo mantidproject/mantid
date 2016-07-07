@@ -37,10 +37,10 @@ std::pair<double, double> ISpectrum::getXDataRange() const {
   return std::pair<double, double>(xdata.front(), xdata.back());
 }
 
-/// Returns the y data const
+/// Deprecated, use y() instead. Returns the y data const
 const MantidVec &ISpectrum::readY() const { return this->dataY(); }
 
-/// Returns the y error data const
+/// Deprecated, use e() instead. Returns the y error data const
 const MantidVec &ISpectrum::readE() const { return this->dataE(); }
 
 // =============================================================================================
