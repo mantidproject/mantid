@@ -114,8 +114,7 @@ public:
       const std::string postprocessingInstructions);
   virtual ~DataProcessorGenerateNotebook(){};
 
-  std::string generateNotebook(const std::set<int> &groups,
-                               const std::map<int, std::set<int>> &rows);
+  std::string generateNotebook(const std::map<int, std::set<int>> &rows);
 
 private:
   // The table ws name

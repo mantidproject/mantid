@@ -21,7 +21,7 @@ QDataProcessorTreeModel::QDataProcessorTreeModel(
     throw std::invalid_argument("Invalid table workspace. Table workspace must "
                                 "have one extra column accounting for groups");
 
-  setupModelData(tableWorkspace, whitelist);
+  setupModelData(tableWorkspace);
 }
 
 QDataProcessorTreeModel::~QDataProcessorTreeModel() {}
@@ -108,8 +108,9 @@ QModelIndex QDataProcessorTreeModel::index(int row, int column,
 */
 QModelIndex QDataProcessorTreeModel::parent(const QModelIndex &index) const {
 
-  return index.internalId() >= 0 ? createIndex(index.internalId(), 0, -1)
-                                 : QModelIndex();
+  return index.internalId() >= qint64(0)
+             ? createIndex(index.internalId(), 0, -1)
+             : QModelIndex();
 }
 
 /** Adds elements to the tree
@@ -419,10 +420,8 @@ bool QDataProcessorTreeModel::setData(const QModelIndex &index,
 /** Setup the data, initialize member variables using a table workspace and
 * whitelist
 * @param table : A table workspace containing the data
-* @param whitelist : A whitelist containing the column names
 */
-void QDataProcessorTreeModel::setupModelData(
-    ITableWorkspace_sptr table, const DataProcessorWhiteList &whitelist) {
+void QDataProcessorTreeModel::setupModelData(ITableWorkspace_sptr table) {
 
   int nrows = static_cast<int>(table->rowCount());
 

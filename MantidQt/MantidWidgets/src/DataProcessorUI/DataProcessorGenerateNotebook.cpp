@@ -79,7 +79,7 @@ DataProcessorGenerateNotebook::DataProcessorGenerateNotebook(
   @returns ipython notebook string
   */
 std::string DataProcessorGenerateNotebook::generateNotebook(
-    const std::set<int> &groups, const std::map<int, std::set<int>> &rows) {
+    const std::map<int, std::set<int>> &rows) {
 
   auto notebook = Mantid::Kernel::make_unique<Mantid::API::NotebookWriter>();
 

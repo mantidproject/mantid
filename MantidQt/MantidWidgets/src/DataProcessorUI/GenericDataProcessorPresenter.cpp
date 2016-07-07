@@ -314,7 +314,7 @@ void GenericDataProcessorPresenter::process() {
     const std::set<int> &rowIds = gIt->second;
 
     // Are we only partially processing a group?
-    if (rowIds.size() < numRowsInGroup(gIt->first) &&
+    if (static_cast<int>(rowIds.size()) < numRowsInGroup(gIt->first) &&
         m_options["WarnProcessPartialGroup"].toBool()) {
       std::stringstream err;
       err << "You have only selected " << rowIds.size() << " of the ";
@@ -367,7 +367,7 @@ void GenericDataProcessorPresenter::saveNotebook(
       m_wsName, m_model, m_view->getProcessInstrument(), m_whitelist,
       m_preprocessMap, m_processor, m_postprocessor, preprocessingOptionsMap,
       processingOptions, postprocessingOptions);
-  std::string generatedNotebook = notebook->generateNotebook(groups, rows);
+  std::string generatedNotebook = notebook->generateNotebook(rows);
 
   std::ofstream file(filename.c_str(), std::ofstream::trunc);
   file << generatedNotebook;

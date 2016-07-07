@@ -78,8 +78,7 @@ public:
                   const QModelIndex &parent = QModelIndex()) override;
 
 private:
-  void setupModelData(Mantid::API::ITableWorkspace_sptr table,
-                      const DataProcessorWhiteList &parent);
+  void setupModelData(Mantid::API::ITableWorkspace_sptr table);
   bool insertGroups(int position, int count);
   bool insertRows(int position, int count, int parent);
   bool removeGroups(int position, int count);
