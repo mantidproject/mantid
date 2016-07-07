@@ -63,7 +63,7 @@ Kernel::Matrix<double> PyObjectToMatrix::operator()() {
   PyArrayObject *ndarray = (PyArrayObject *)PyArray_View(
       (PyArrayObject *)m_obj.ptr(), PyArray_DescrFromType(NPY_DOUBLE),
       &PyArray_Type);
-  const auto shape = PyArray_SHAPE(ndarray);
+  const auto shape = PyArray_DIMS(ndarray);
   npy_intp nx(shape[0]), ny(shape[1]);
   Kernel::Matrix<double> matrix(nx, ny);
   for (npy_intp i = 0; i < nx; i++) {
