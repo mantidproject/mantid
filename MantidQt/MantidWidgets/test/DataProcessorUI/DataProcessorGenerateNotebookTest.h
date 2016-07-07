@@ -181,7 +181,7 @@ public:
         std::map<std::string, std::string>(), "", "");
 
     std::string generatedNotebook =
-        notebook->generateNotebook(m_groups, m_rows);
+        notebook->generateNotebook(m_rows);
 
     std::vector<std::string> notebookLines;
     boost::split(notebookLines, generatedNotebook, boost::is_any_of("\n"));

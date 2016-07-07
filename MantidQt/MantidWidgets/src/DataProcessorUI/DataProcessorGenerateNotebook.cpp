@@ -74,8 +74,7 @@ DataProcessorGenerateNotebook::DataProcessorGenerateNotebook(
 
 /**
   Generate an ipython notebook
-  @param groups : groups of rows which were stitched
-        @param rows : rows that were reduced
+  @param rows : rows that were reduced
   @returns ipython notebook string
   */
 std::string DataProcessorGenerateNotebook::generateNotebook(
