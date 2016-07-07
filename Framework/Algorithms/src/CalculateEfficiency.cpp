@@ -266,6 +266,7 @@ void CalculateEfficiency::normalizeDetectors(MatrixWorkspace_sptr rebinnedWS,
 
 /**
  * Fully masks one component named componentName
+ * @param ws :: workspace with the respective instrument assigned
  * @param componentName :: must be a known CompAssembly.
  */
 void CalculateEfficiency::maskComponent(MatrixWorkspace &ws,
