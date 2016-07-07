@@ -137,6 +137,27 @@ void MaskDetectors::exec() {
   else if (!detectorList.empty()) {
     // Convert from detectors to workspace indexes
     indexList = WS->getIndicesFromDetectorIDs(detectorList);
+    //
+    int endIndex = getProperty("EndWorkspaceIndex");
+    int startIndex = getProperty("StartWorkspaceIndex");
+    // Constrain by ws indexes provided, if any
+    if (!(endIndex == EMPTY_INT() && startIndex == 0)) {
+        std::sort(indexList.begin(), indexList.end());
+        if (endIndex == EMPTY_INT()) {
+            endIndex = static_cast<int>(WS->getNumberHistograms() - 1);
+        }
+
+        std::vector<size_t> tmp;
+        tmp.reserve(indexList.size());
+        for (auto it = indexList.begin(); it != indexList.end(); it++) {
+            if (*it >= startIndex && *it <= endIndex) {
+                tmp.push_back(*it);
+            }
+        }
+        tmp.swap(indexList);
+    }
+
+
   }
   // If we have a workspace that could contain masking,copy that in too
 

@@ -356,8 +356,8 @@ public:
     AnalysisDataService::Instance().remove(existingMaskName);
   }
 
-  void
-  test_InputWorkspace_Larger_Than_MaskedWorkspace_Masks_Section_Specified_By_Start_EndWorkspaceIndex() {
+  
+  void test_InputWorkspace_Larger_Than_MaskedWorkspace_Masks_Section_Specified_By_Start_EndWorkspaceIndex() {
     const std::string inputWSName("inputWS"), existingMaskName("existingMask");
     const int numInputSpec(9);
     setUpWS(false, inputWSName, false, numInputSpec);
