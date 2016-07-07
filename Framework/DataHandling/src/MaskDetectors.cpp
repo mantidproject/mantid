@@ -96,37 +96,35 @@ void MaskDetectors::exec() {
   }
 
   if (prevMasking) {
-      DataObjects::MaskWorkspace_const_sptr maskWS =
-          boost::dynamic_pointer_cast<DataObjects::MaskWorkspace>(prevMasking);
-      if (maskWS) {
-          if (maskWS->getInstrument()->getDetectorIDs().size() !=
-              WS->getInstrument()->getDetectorIDs().size()) {
-              throw std::runtime_error(
-                  "Size mismatch between input Workspace and MaskWorkspace");
-          }
+    DataObjects::MaskWorkspace_const_sptr maskWS =
+        boost::dynamic_pointer_cast<DataObjects::MaskWorkspace>(prevMasking);
+    if (maskWS) {
+      if (maskWS->getInstrument()->getDetectorIDs().size() !=
+          WS->getInstrument()->getDetectorIDs().size()) {
+        throw std::runtime_error(
+            "Size mismatch between input Workspace and MaskWorkspace");
+      }
 
-          g_log.debug() << "Extracting mask from MaskWorkspace (" << maskWS->name()
-              << ")\n";
-         if (prevMasking->getNumberHistograms() != WS->getNumberHistograms()) {
-            extractMaskedWSDetIDs(detectorList,maskWS);
-         }
-         else {
-            appendToIndexListFromMaskWS(indexList, maskWS);
-         }
+      g_log.debug() << "Extracting mask from MaskWorkspace (" << maskWS->name()
+                    << ")\n";
+      if (prevMasking->getNumberHistograms() != WS->getNumberHistograms()) {
+        extractMaskedWSDetIDs(detectorList, maskWS);
+      } else {
+        appendToIndexListFromMaskWS(indexList, maskWS);
       }
-      else {
-          // Check the provided workspace has the same number of spectra as the
-          // input
-          if (prevMasking->getNumberHistograms() > WS->getNumberHistograms()) {
-              g_log.error() << "Input workspace has " << WS->getNumberHistograms()
-                  << " histograms   vs. "
-                  << "Input masking workspace has "
-                  << prevMasking->getNumberHistograms()
-                  << " histograms. \n";
-              throw std::runtime_error("Size mismatch between two input workspaces.");
-          }
-          appendToIndexListFromWS(indexList, prevMasking);
+    } else {
+      // Check the provided workspace has the same number of spectra as the
+      // input
+      if (prevMasking->getNumberHistograms() > WS->getNumberHistograms()) {
+        g_log.error() << "Input workspace has " << WS->getNumberHistograms()
+                      << " histograms   vs. "
+                      << "Input masking workspace has "
+                      << prevMasking->getNumberHistograms()
+                      << " histograms. \n";
+        throw std::runtime_error("Size mismatch between two input workspaces.");
       }
+      appendToIndexListFromWS(indexList, prevMasking);
+    }
   }
 
   // If the spectraList property has been set, need to loop over the workspace
@@ -141,8 +139,6 @@ void MaskDetectors::exec() {
     indexList = WS->getIndicesFromDetectorIDs(detectorList);
   }
   // If we have a workspace that could contain masking,copy that in too
-
-
 
   // Need to get hold of the parameter map
   Geometry::ParameterMap &pmap = WS->instrumentParameters();
@@ -206,30 +202,29 @@ void MaskDetectors::exec() {
 /* Method to extract detector's id-s from mask workspace
 * the mask workspace assumed to be not having masked detectors, but has masked
 * state defined in its spectea
-@param detectorList :: list of masked detectors, appended on output by the detectors,
+@param detectorList :: list of masked detectors, appended on output by the
+detectors,
 *                      defined in the mask workspace.
 @param maskWS       :: shared pointer to workspace containing masks.
 */
-void MaskDetectors::extractMaskedWSDetIDs(std::vector<detid_t> &detectorList,
+void MaskDetectors::extractMaskedWSDetIDs(
+    std::vector<detid_t> &detectorList,
     const DataObjects::MaskWorkspace_const_sptr &maskWS) {
 
-    int64_t nHist = maskWS->getNumberHistograms();
-    for (int64_t i = 0; i < nHist; ++i) {
-        if (maskWS->readY(i)[0] > 0) {
+  int64_t nHist = maskWS->getNumberHistograms();
+  for (int64_t i = 0; i < nHist; ++i) {
+    if (maskWS->readY(i)[0] > 0) {
 
-            IDetector_const_sptr det;
-            try {
-                det = maskWS->getDetector(i);
-            }
-            catch (Exception::NotFoundError &) {
-                continue;
-            }
+      IDetector_const_sptr det;
+      try {
+        det = maskWS->getDetector(i);
+      } catch (Exception::NotFoundError &) {
+        continue;
+      }
 
-            detectorList.push_back(det->getID());
-        }
+      detectorList.push_back(det->getID());
     }
-
-
+  }
 }
 
 /*
