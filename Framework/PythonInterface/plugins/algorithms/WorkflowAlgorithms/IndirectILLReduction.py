@@ -30,6 +30,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
     _mirror_sense = None
     _plot_flag = None
     _save_flag = None
+    _sum_runs = None
 
     #other
     _analyser = None
@@ -67,6 +68,9 @@ class IndirectILLReduction(DataProcessorAlgorithm):
 
         self.declareProperty(name='ControlMode', defaultValue=False,
                              doc='Whether to output the workspaces in intermediate steps.')
+
+        self.declareProperty(name='SumRuns', defaultValue=False,
+                             doc='Whether to sum all the input runs.')
 
         self.declareProperty(name='UnmirrorOption', defaultValue=7,
                              validator=IntBoundedValidator(lower=0,upper=7),
@@ -149,11 +153,15 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         self._mirror_sense = self.getProperty('MirrorSense').value
         self._plot_flag = self.getProperty('Plot').value
         self._save_flag = self.getProperty('Save').value
+        self._sum_runs = self.getProperty('SumRuns').value
         self._unmirror_option = self.getProperty('UnmirrorOption').value
 
     def PyExec(self):
 
         self.setUp()
+
+        if self._sum_runs:
+            self._run_file_name = self._run_file_name.replace(',','+')
 
         Load(Filename=self._run_file_name,OutputWorkspace=self._raw_ws_name)
 

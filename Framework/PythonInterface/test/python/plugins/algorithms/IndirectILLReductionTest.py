@@ -49,6 +49,15 @@ class IndirectILLReductionTest(unittest.TestCase):
         self.assertTrue(isinstance(red.getItem(0), MatrixWorkspace), "Should be a matrix workspace")
         self.assertEqual(red.getItem(0).getAxis(0).getUnit().unitID(), "DeltaE")
 
+    def test_sumruns(self):
+        self._args['Run'] = self._multi_run_name + '.nxs'
+        self._args['SumRuns'] = True
+
+        red = IndirectILLReduction(**self._args)
+
+        self.assertTrue(isinstance(red, MatrixWorkspace), "Should be a matrix workspace")
+        self.assertEqual(red.getAxis(0).getUnit().unitID(), "DeltaE")
+
     def test_save_results(self):
         self._args['Run'] = self._run_name + '.nxs'
         self._args['Save'] = True
