@@ -1,6 +1,6 @@
 #ifndef PYTHONINTERFACE_KERNEL_NDARRAY_H_
 #define PYTHONINTERFACE_KERNEL_NDARRAY_H_
-#include "MantidKernel/System.h"
+#include "MantidPythonInterface/kernel/DllConfig.h"
 
 #include <boost/python/object.hpp>
 
@@ -15,7 +15,7 @@ namespace NumPy {
  *
  * Only minimal functionality has been ported here.
  */
-class NdArray : public boost::python::object {
+class PYTHON_KERNEL_DLL NdArray : public boost::python::object {
 public:
   BOOST_PYTHON_FORWARD_OBJECT_CONSTRUCTORS(NdArray, boost::python::object);
 
@@ -35,7 +35,7 @@ namespace converter {
  * Register ndarray as a type that manages a PyObject* internally.
  */
 template <>
-struct object_manager_traits<Mantid::PythonInterface::NumPy::NdArray> {
+struct PYTHON_KERNEL_DLL object_manager_traits<Mantid::PythonInterface::NumPy::NdArray> {
   BOOST_STATIC_CONSTANT(bool, is_specialized = true);
   static bool check(PyObject *obj);
   static python::detail::new_reference adopt(PyObject *obj);
