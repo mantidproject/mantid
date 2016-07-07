@@ -26,7 +26,7 @@ inline PyArrayObject *rawArray(const NdArray &obj) {
  * @return The shape of the array as a C-array
  */
 Py_intptr_t const *NdArray::get_shape() const {
-  return PyArray_SHAPE(rawArray(*this));
+  return PyArray_DIMS(rawArray(*this));
 }
 
 /**
