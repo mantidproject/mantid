@@ -66,9 +66,7 @@ void ChopData::exec() {
     // This will generally be the monitor spectrum.
     MatrixWorkspace_sptr monitorWS;
     monitorWS = WorkspaceFactory::Instance().create(inputWS, 1);
-    monitorWS->dataX(0) = inputWS->dataX(monitorWi);
-    monitorWS->dataY(0) = inputWS->dataY(monitorWi);
-    monitorWS->dataE(0) = inputWS->dataE(monitorWi);
+    monitorWS->setHistogram(0, inputWS->histogram(monitorWi));
 
     int lowest = 0;
 
@@ -82,7 +80,7 @@ void ChopData::exec() {
       integ->setProperty<double>("RangeUpper", i * step + rUpper);
       integ->execute();
       MatrixWorkspace_sptr integR = integ->getProperty("OutputWorkspace");
-      intMap[i] = integR->dataY(0)[0];
+      intMap[i] = integR->y(0)[0];
 
       if (intMap[i] < intMap[lowest]) {
         lowest = i;
@@ -136,12 +134,12 @@ void ChopData::exec() {
       PARALLEL_START_INTERUPT_REGION;
       for (size_t k = 0; k < nbins; k++) {
         size_t oldbin = indexLow + k;
-        workspace->dataY(j)[k] = inputWS->readY(j)[oldbin];
-        workspace->dataE(j)[k] = inputWS->readE(j)[oldbin];
-        workspace->dataX(j)[k] = inputWS->readX(j)[oldbin] - stepDiff;
+        workspace->mutableY(j)[k] = inputWS->y(j)[oldbin];
+        workspace->mutableE(j)[k] = inputWS->e(j)[oldbin];
+        workspace->mutableX(j)[k] = inputWS->x(j)[oldbin] - stepDiff;
       }
-      workspace->dataX(j)[nbins] =
-          inputWS->readX(j)[indexLow + nbins] - stepDiff;
+      workspace->mutableX(j)[nbins] =
+          inputWS->x(j)[indexLow + nbins] - stepDiff;
 
       PARALLEL_END_INTERUPT_REGION;
     }
