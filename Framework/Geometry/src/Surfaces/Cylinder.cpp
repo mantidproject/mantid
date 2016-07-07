@@ -253,7 +253,8 @@ void Cylinder::setBaseEqn()
   BaseEqn[6] = 2.0 * (Normal[0] * CdotN - Centre[0]); // G x
   BaseEqn[7] = 2.0 * (Normal[1] * CdotN - Centre[1]); // H y
   BaseEqn[8] = 2.0 * (Normal[2] * CdotN - Centre[2]); // J z
-  BaseEqn[9] = Centre.scalar_prod(Centre) - CdotN * CdotN - Radius * Radius;
+  BaseEqn[9] =
+      Centre.scalar_prod(Centre) - CdotN * CdotN - Radius * Radius; // K const
 }
 
 double Cylinder::distance(const Kernel::V3D &A) const

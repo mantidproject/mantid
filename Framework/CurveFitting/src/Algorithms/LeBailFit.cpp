@@ -2526,6 +2526,62 @@ void LeBailFit::smoothBackgroundAnalytical(size_t wsindex,
   UNUSED_ARG(background);
 
   throw runtime_error("Need to re-consider this method.");
+
+  /* Below is the original code to modifying from
+  // 1. Make data ready
+  MantidVec& vecData = m_dataWS->dataY(wsindex);
+  MantidVec& vecFitBkgd = m_outputWS->dataY(CALBKGDINDEX);
+  MantidVec& vecFitBkgdErr = m_outputWS->dataE(CALBKGDINDEX);
+  size_t numpts = vecFitBkgd.size();
+  for (size_t i = 0; i < numpts; ++i)
+  {
+    vecFitBkgd[i] = vecData[i] - peakdata[i];
+    if (vecFitBkgd[i] > 1.0)
+      vecFitBkgdErr[i] = sqrt(vecFitBkgd[i]);
+    else
+      vecFitBkgdErr[i] = 1.0;
+  }
+
+  // 2. Fit
+  Chebyshev_sptr bkgdfunc(new Chebyshev);
+  bkgdfunc->setAttributeValue("n", 6);
+
+  API::IAlgorithm_sptr calalg = this->createChildAlgorithm("Fit", -1.0, -1.0,
+  true);
+  calalg->initialize();
+  calalg->setProperty("Function", boost::shared_ptr<API::IFunction>(bkgdfunc));
+  calalg->setProperty("InputWorkspace", m_outputWS);
+  calalg->setProperty("WorkspaceIndex", CALDATAINDEX);
+  calalg->setProperty("StartX", domain[0]);
+  calalg->setProperty("EndX", domain[numpts-1]);
+  calalg->setProperty("Minimizer", "Levenberg-MarquardtMD");
+  calalg->setProperty("CostFunction", "Least squares");
+  calalg->setProperty("MaxIterations", 1000);
+  calalg->setProperty("CreateOutput", false);
+
+  // 3. Result
+  bool successfulfit = calalg->execute();
+  if (!calalg->isExecuted() || ! successfulfit)
+  {
+    // Early return due to bad fit
+    stringstream errss;
+    errss << "Fit to Chebyshev background failed in
+  smoothBackgroundAnalytical.";
+    g_log.error(errss.str());
+    throw runtime_error(errss.str());
+  }
+
+  double chi2 = calalg->getProperty("OutputChi2overDoF");
+  g_log.information() << "Fit to chebysheve background successful with chi^2 = "
+  << chi2 << "\n";
+
+  // 4. Output
+  FunctionValues values(domain);
+  bkgdfunc->function(domain, values);
+
+  for (size_t i = 0; i < numpts; ++i)
+    background[i] = values[i];
+  */
 }
 
 //----------------------------------------------------------------------------------------------

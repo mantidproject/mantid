@@ -665,6 +665,9 @@ void LoadMask::splitString(std::string inputstr,
   // std::vector<std::string> SplitVec;
   boost::split(strings, inputstr, boost::is_any_of(sep),
                boost::token_compress_on);
+
+  // g_log.information() << "Inside... split size = " << strings.size() <<
+  // '\n';
 }
 
 /*

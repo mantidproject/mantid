@@ -164,7 +164,7 @@ void Cone::setBaseEqn()
   BaseEqn[6] = 2.0 * (Normal[0] * CdotN - Centre[0] * c2);      // G x
   BaseEqn[7] = 2.0 * (Normal[1] * CdotN - Centre[1] * c2);      // H y
   BaseEqn[8] = 2.0 * (Normal[2] * CdotN - Centre[2] * c2);      // J z
-  BaseEqn[9] = c2 * Centre.scalar_prod(Centre) - CdotN * CdotN;
+  BaseEqn[9] = c2 * Centre.scalar_prod(Centre) - CdotN * CdotN; // K const
 }
 
 void Cone::rotate(const Kernel::Matrix<double> &R)

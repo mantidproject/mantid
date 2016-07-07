@@ -65,6 +65,7 @@ void SetScalingPSD::exec() {
   m_scalingOption = getProperty("ScalingOption");
   std::vector<Kernel::V3D> truepos;
   processScalingFile(m_filename, truepos);
+  // calculateDetectorShifts(truepos);
 }
 
 /** Read the scaling information from a file (e.g. merlin_detector.sca) or from

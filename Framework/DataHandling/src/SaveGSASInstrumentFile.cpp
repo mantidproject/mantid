@@ -473,6 +473,23 @@ void SaveGSASInstrumentFile::processProperties() {
 void SaveGSASInstrumentFile::initConstants(
     const map<unsigned int, map<string, double>> &profmap) {
   m_configuration = setupInstrumentConstants(profmap);
+
+  /*
+  if (m_instrument.compare("PG3") == 0)
+  {
+    m_configuration = setupPG3Constants(chopperfrequency);
+  }
+  else if (m_instrument.compare("NOM") == 0)
+  {
+    m_configuration = setupNOMConstants(chopperfrequency);
+  }
+  else
+  {
+    stringstream errss;
+    errss << "Instrument " << m_instrument << " is not supported. ";
+    throw runtime_error(errss.str());
+  }
+  */
 }
 
 //----------------------------------------------------------------------------------------------

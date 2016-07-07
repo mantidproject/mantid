@@ -1463,7 +1463,7 @@ given a inner bracket expand that etc.
     processIntersection(Ln);
   else
     processUnion(Ln);
-  sort(Units.begin(), Units.end());
+  sort(Units.begin(), Units.end()); /// Resort the list.
 }
 
 std::pair<int, int> Acomp::size() const

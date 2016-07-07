@@ -143,6 +143,10 @@ void GetTimeSeriesLogInformation::exec() {
 
   this->setProperty("OutputWorkspace",
                     boost::dynamic_pointer_cast<MatrixWorkspace>(timestatws));
+
+  // 4. Do more staticts (examine)
+  // std::string outputdir = this->getProperty("OutputDirectory");
+  // examLog(logname, outputdir);
 }
 
 /** Do statistic on user proposed range and examine the log
@@ -491,6 +495,48 @@ void GetTimeSeriesLogInformation::checkLogBasicInforamtion() {
   m_dblInfoMap.emplace("Sigma(dt)", std_dt);
   m_dblInfoMap.emplace("Min(dT)", min_dt);
   m_dblInfoMap.emplace("Max(dT)", max_dt);
+
+  // 3. Count number of time intervals beyond 10% of deviation
+  /* Temporarily disabled
+  for (size_t i = 1; ; i ++)
+  {
+    int64_t dtns =
+  m_timeVec[i].totalNanoseconds()-m_timeVec[i-1].totalNanoseconds();
+    double dtms = static_cast<double>(dtns)*1.0E-3;
+
+    if (dtms > dtmsA10p)
+      numdtabove10p ++;
+    else if (dtms < dtmsB10p)
+      numdtbelow10p ++;
+
+  } // ENDFOR
+  */
+
+  // 4. Output
+  /* Temporily disabled
+  g_log.notice() << "Run Start = " << t0.totalNanoseconds() << '\n';
+  g_log.notice() << "First Log: " << "Absolute Time = " <<
+  m_timeVec[0].totalNanoseconds() << "(ns), "
+                 << "Relative Time = " <<
+  DateAndTime::nanosecondsFromDuration(dts) << "(ns) \n";
+  g_log.notice() << "Last  Log: " << "Absolute Time = " <<
+  m_timeVec[f].totalNanoseconds() << "(ns), "
+                 << "Relative Time = " <<
+  DateAndTime::nanosecondsFromDuration(dtf) << "(ns) \n";
+  g_log.notice() << "Normal   dt = " << numnormal << '\n';
+  g_log.notice() << "Zero     dt = " << numsame << '\n';
+  g_log.notice() << "Negative dt = " << numinvert << '\n';
+  g_log.notice() << "Avg d(T) = " << dt << " seconds +/- " << stddt << ",
+  Frequency = " << 1.0/dt << '\n';
+  g_log.notice() << "d(T) (unit ms) is in range [" << mindtms << ", " << maxdtms
+  << "]"<< '\n';
+  g_log.notice() << "Number of d(T) 10% larger than average  = " <<
+  numdtabove10p << '\n';
+  g_log.notice() << "Number of d(T) 10% smaller than average = " <<
+  numdtbelow10p << '\n';
+
+  g_log.notice() << "Size of timevec = " << m_timeVec.size() << '\n';
+  */
 }
 
 /** Check whether log values are changing from 2 adjacent time stamps

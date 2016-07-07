@@ -216,7 +216,7 @@ Sets an equation of type (general sphere)
   BaseEqn[6] = -2.0 * Centre[0];                             // G x
   BaseEqn[7] = -2.0 * Centre[1];                             // H y
   BaseEqn[8] = -2.0 * Centre[2];                             // J z
-  BaseEqn[9] = Centre.scalar_prod(Centre) - Radius * Radius;
+  BaseEqn[9] = Centre.scalar_prod(Centre) - Radius * Radius; // K const
 }
 
 void Sphere::write(std::ostream &OX) const

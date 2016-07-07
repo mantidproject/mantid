@@ -264,7 +264,7 @@ void Plane::setBaseEqn() {
   BaseEqn[6] = NormV[0]; // G x
   BaseEqn[7] = NormV[1]; // H y
   BaseEqn[8] = NormV[2]; // J z
-  BaseEqn[9] = -Dist;
+  BaseEqn[9] = -Dist;    // K const
 }
 
 /**

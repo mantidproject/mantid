@@ -83,19 +83,19 @@ void SurfaceFactory::registerSurface()
   ID['g'] = "General";
   ID['p'] = "Plane";
   ID['s'] = "Sphere";
-}
+  // ID['t']="Torus";}
 
-namespace {
-class KeyEquals {
-public:
-  explicit KeyEquals(std::string key) : m_key(std::move(key)) {}
-  bool
-  operator()(const std::pair<std::string, std::unique_ptr<Surface>> &element) {
-    return m_key == element.first;
-  }
+  namespace {
+  class KeyEquals {
+  public:
+    explicit KeyEquals(std::string key) : m_key(std::move(key)) {}
+    bool operator()(
+        const std::pair<std::string, std::unique_ptr<Surface>> &element) {
+      return m_key == element.first;
+    }
 
-private:
-  std::string m_key;
+  private:
+    std::string m_key;
 };
 }
 
