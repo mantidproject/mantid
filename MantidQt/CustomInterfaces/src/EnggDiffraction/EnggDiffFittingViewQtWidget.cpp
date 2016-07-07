@@ -415,8 +415,11 @@ void EnggDiffFittingViewQtWidget::resetView() {
 
 void EnggDiffFittingViewQtWidget::browsePeaksToFit() {
 
+  // TODO: the logic, checks and decision on what message to show should be
+  // moved to the presenter
+
   try {
-    QString prevPath = QString::fromStdString(m_mainSettings->focusingDir());
+    QString prevPath = QString::fromStdString(focusingDir());
     if (prevPath.isEmpty()) {
       prevPath = MantidQt::API::AlgorithmInputHistory::Instance()
                      .getPreviousDirectory();
@@ -444,7 +447,7 @@ void EnggDiffFittingViewQtWidget::browsePeaksToFit() {
 
 void EnggDiffFittingViewQtWidget::browseFitFocusedRun() {
   resetFittingMultiMode();
-  QString prevPath = QString::fromStdString(m_mainSettings->focusingDir());
+  QString prevPath = QString::fromStdString(focusingDir());
   if (prevPath.isEmpty()) {
     prevPath =
         MantidQt::API::AlgorithmInputHistory::Instance().getPreviousDirectory();
@@ -627,8 +630,11 @@ void EnggDiffFittingViewQtWidget::addPeakToList() {
 void EnggDiffFittingViewQtWidget::savePeakList() {
   // call function in EnggPresenter..
 
+  // TODO: the logic, checks and decision on what message to show should be
+  // moved to the presenter
+
   try {
-    QString prevPath = QString::fromStdString(m_mainSettings->focusingDir());
+    QString prevPath = QString::fromStdString(focusingDir());
     if (prevPath.isEmpty()) {
       prevPath = MantidQt::API::AlgorithmInputHistory::Instance()
                      .getPreviousDirectory();
