@@ -129,25 +129,25 @@ void CalMuonDeadTime::exec() {
       convertToPW->getProperty("OutputWorkspace");
 
   const size_t numSpec = wsFitAgainst->getNumberHistograms();
-  size_t timechannels = wsFitAgainst->readY(0).size();
+  size_t timechannels = wsFitAgainst->y(0).size();
   for (size_t i = 0; i < numSpec; i++) {
     for (size_t t = 0; t < timechannels; t++) {
       const double time =
-          wsFitAgainst->dataX(i)[t]; // mid-point time value because point WS
+          wsFitAgainst->x(i)[t]; // mid-point time value because point WS
       const double decayFac = exp(time / muonLifetime);
-      if (wsCrop->dataY(i)[t] > 0) {
-        wsFitAgainst->dataY(i)[t] = wsCrop->dataY(i)[t] * decayFac;
-        wsFitAgainst->dataX(i)[t] = wsCrop->dataY(i)[t];
-        wsFitAgainst->dataE(i)[t] = wsCrop->dataE(i)[t] * decayFac;
+      if (wsCrop->y(i)[t] > 0) {
+        wsFitAgainst->mutableY(i)[t] = wsCrop->y(i)[t] * decayFac;
+        wsFitAgainst->mutableX(i)[t] = wsCrop->y(i)[t];
+        wsFitAgainst->mutableE(i)[t] = wsCrop->e(i)[t] * decayFac;
       } else {
         // For the Muon data which I have looked at when zero counts
         // the errors are zero which is likely nonsense. Hence to get
         // around this problem treat such counts to be 0.1 with standard
         // of one........
 
-        wsFitAgainst->dataY(i)[t] = 0.1 * decayFac;
-        wsFitAgainst->dataX(i)[t] = 0.1;
-        wsFitAgainst->dataE(i)[t] = decayFac;
+        wsFitAgainst->mutableY(i)[t] = 0.1 * decayFac;
+        wsFitAgainst->mutableX(i)[t] = 0.1;
+        wsFitAgainst->mutableE(i)[t] = decayFac;
       }
     }
   }
@@ -162,7 +162,7 @@ void CalMuonDeadTime::exec() {
   for (size_t i = 0; i < numSpec; i++) {
     // Do linear fit
 
-    const double in_bg0 = inputWS->dataY(i)[0];
+    const double in_bg0 = inputWS->y(i)[0];
     const double in_bg1 = 0.0;
 
     API::IAlgorithm_sptr fit;
@@ -200,7 +200,7 @@ void CalMuonDeadTime::exec() {
     }
 
     // time bin - assumed constant for histogram
-    const double time_bin = inputWS->dataX(i)[1] - inputWS->dataX(i)[0];
+    const double time_bin = inputWS->x(i)[1] - inputWS->x(i)[0];
 
     if (!fitStatus.compare("success")) {
       const double A0 = result->getParameter(0);
