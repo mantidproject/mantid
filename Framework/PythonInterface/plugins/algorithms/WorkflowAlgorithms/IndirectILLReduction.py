@@ -259,6 +259,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         red = GroupWorkspaces(list_red,OutputWorkspace=self._red_ws_name)
 
         if not self._control_mode:
+            DeleteWorkspace(self._raw_ws_name)
             return red
         else:
             monitor = GroupWorkspaces(list_monitor,OutputWorkspace=self._monitor_ws_name)
@@ -325,6 +326,8 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         red = self._calculate_energy(mnorm, red) #should be unmirror
 
         if not self._control_mode:
+            if not multiple:
+                DeleteWorkspace(self._raw_ws_name)
             DeleteWorkspace(monitor)
             DeleteWorkspace(mnorm)
             DeleteWorkspace(grouped)
