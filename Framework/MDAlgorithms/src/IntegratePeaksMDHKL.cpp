@@ -86,8 +86,7 @@ void IntegratePeaksMDHKL::exec() {
       converter(m_inputWS.get());
   if (*coordinateSystem != Mantid::Kernel::SpecialCoordinateSystem::HKL) {
     std::stringstream errmsg;
-    errmsg << "Input MDWorkspace's coordinate system is not HKL but "
-           << coordinateSystem << ".";
+    errmsg << "Input MDWorkspace's coordinate system is not HKL."
     throw std::invalid_argument(errmsg.str());
   }
 
