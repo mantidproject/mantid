@@ -761,7 +761,7 @@ void SCDCalibratePanels::exec() {
       // algorithm--------------------
 
       // set up the string for specifying groups
-      string BankNameString = "";
+      string BankNameString;
       // for (auto group = Groups.begin(); group != Groups.end(); ++group) {
       // if (group != Groups.begin())
       // BankNameString += "!";

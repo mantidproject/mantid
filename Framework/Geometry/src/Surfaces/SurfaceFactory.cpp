@@ -83,8 +83,6 @@ void SurfaceFactory::registerSurface()
   ID['g'] = "General";
   ID['p'] = "Plane";
   ID['s'] = "Sphere";
-  // ID['t']="Torus";
-  return;
 }
 
 namespace {

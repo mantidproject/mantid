@@ -64,7 +64,7 @@ void RemoveLogs::exec() {
   std::vector<std::string> logNames;
   auto pEnd = logData.end();
   for (auto pItr = logData.begin(); pItr != pEnd; ++pItr) {
-    logNames.push_back((*pItr)->name().c_str());
+    logNames.push_back((*pItr)->name());
   }
   for (std::vector<std::string>::const_iterator it = logNames.begin();
        it != logNames.end(); ++it) {
@@ -73,9 +73,7 @@ void RemoveLogs::exec() {
       localWorkspace->mutableRun().removeLogData(*it);
     }
   }
-
   // operation was a success and ended normally
-  return;
 }
 
 } // namespace DataHandling

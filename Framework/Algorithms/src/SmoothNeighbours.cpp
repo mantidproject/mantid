@@ -227,7 +227,6 @@ void SmoothNeighbours::findNeighboursRectangular() {
     setWeightingStrategy("Flat", Radius);
     nNeighbours = AdjX * AdjY - 1;
     findNeighboursUbiqutious();
-    return;
   }
 
   // Resize the vector we are setting
@@ -759,7 +758,6 @@ void SmoothNeighbours::spreadPixels(MatrixWorkspace_sptr outws) {
     }
   }
   this->setProperty("OutputWorkspace", outws2);
-  return;
 }
 //--------------------------------------------------------------------------------------------
 /** Execute the algorithm for a EventWorkspace input

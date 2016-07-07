@@ -306,8 +306,6 @@ void Rebin::exec() {
     setProperty("OutputWorkspace", outputWS);
 
   } // END ---- Workspace2D
-
-  return;
 }
 //
 //    /** Continue execution for EventWorkspace scenario */

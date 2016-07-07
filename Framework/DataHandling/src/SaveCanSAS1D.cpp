@@ -280,7 +280,7 @@ void SaveCanSAS1D::writeHeader(const std::string &fileName) {
     m_outFile << "<?xml version=\"1.0\"?>\n"
               << "<?xml-stylesheet type=\"text/xsl\" "
                  "href=\"cansasxml-html.xsl\" ?>\n";
-    std::string sasroot = "";
+    std::string sasroot;
     createSASRootElement(sasroot);
     m_outFile << sasroot;
   } catch (std::fstream::failure &) {
@@ -578,7 +578,7 @@ void SaveCanSAS1D::createSASProcessElement(std::string &sasProcess) {
   sasProcess += sasProcsvn;
 
   const API::Run &run = m_workspace->run();
-  std::string user_file("");
+  std::string user_file;
   if (run.hasProperty("UserFile")) {
     user_file = run.getLogData("UserFile")->value();
   }

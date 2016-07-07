@@ -191,7 +191,6 @@ const std::set<detid_t> &ISpectrum::getDetectorIDs() const {
  */
 void ISpectrum::clearDetectorIDs() {
   this->detectorIDs.clear();
-  return;
 }
 
 // --------------------------------------------------------------------------

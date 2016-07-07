@@ -117,8 +117,8 @@ bool MultiPeriodGroupWorker::useCustomWorkspaceProperty() const {
  */
 std::string MultiPeriodGroupWorker::createFormattedInputWorkspaceNames(
     const size_t &periodIndex, const VecWSGroupType &vecWorkspaceGroups) const {
-  std::string prefix = "";
-  std::string inputWorkspaces = "";
+  std::string prefix;
+  std::string inputWorkspaces;
   for (const auto &vecWorkspaceGroup : vecWorkspaceGroups) {
     inputWorkspaces += prefix + vecWorkspaceGroup->getItem(periodIndex)->name();
     prefix = ",";

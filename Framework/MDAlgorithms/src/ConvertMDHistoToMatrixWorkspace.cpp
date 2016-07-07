@@ -143,7 +143,7 @@ void ConvertMDHistoToMatrixWorkspace::make1DWorkspace() {
   Mantid::Geometry::VecIMDDimension_const_sptr nonIntegDims =
       inputWorkspace->getNonIntegratedDimensions();
 
-  std::string alongDim = "";
+  std::string alongDim;
   if (!nonIntegDims.empty())
     alongDim = nonIntegDims[0]->getDimensionId();
   else

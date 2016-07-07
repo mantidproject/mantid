@@ -457,7 +457,7 @@ void SCDPanelErrors::function1D(double *out, const double *xValues,
   //----------------------------------
 
   // determine the OrientedLattice for converting to Q-sample
-  Geometry::OrientedLattice lattice(*m_unitCell.get());
+  Geometry::OrientedLattice lattice(*m_unitCell);
   lattice.setUB(m_peaks->sample().getOrientedLattice().getUB());
 
   // cumulative error
@@ -560,7 +560,6 @@ void SCDPanelErrors::functionDeriv1D(Jacobian *out, const double *xValues,
     return;
   FunctionDomain1DView domain(xValues, nData);
   calNumericalDeriv(domain, *out);
-  return;
 }
 
 DataObjects::Workspace2D_sptr

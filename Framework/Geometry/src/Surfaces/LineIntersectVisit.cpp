@@ -41,7 +41,6 @@ void LineIntersectVisit::Accept(const Quadratic &Surf)
 {
   ATrack.intersect(PtOut, Surf);
   procTrack();
-  return;
 }
 
 void LineIntersectVisit::Accept(const Plane &Surf)
@@ -52,7 +51,6 @@ void LineIntersectVisit::Accept(const Plane &Surf)
 {
   ATrack.intersect(PtOut, Surf);
   procTrack();
-  return;
 }
 
 void LineIntersectVisit::Accept(const Cone &Surf)
@@ -63,7 +61,6 @@ void LineIntersectVisit::Accept(const Cone &Surf)
 {
   ATrack.intersect(PtOut, Surf);
   procTrack();
-  return;
 }
 
 void LineIntersectVisit::Accept(const Cylinder &Surf)
@@ -74,7 +71,6 @@ void LineIntersectVisit::Accept(const Cylinder &Surf)
 {
   ATrack.intersect(PtOut, Surf);
   procTrack();
-  return;
 }
 
 void LineIntersectVisit::Accept(const Sphere &Surf)
@@ -85,7 +81,6 @@ void LineIntersectVisit::Accept(const Sphere &Surf)
 {
   ATrack.intersect(PtOut, Surf);
   procTrack();
-  return;
 }
 
 void LineIntersectVisit::Accept(const General &Surf)
@@ -96,7 +91,6 @@ void LineIntersectVisit::Accept(const General &Surf)
 {
   ATrack.intersect(PtOut, Surf);
   procTrack();
-  return;
 }
 
 void LineIntersectVisit::procTrack()
@@ -109,7 +103,6 @@ void LineIntersectVisit::procTrack()
   DOut.resize(PtOut.size());
   std::transform(PtOut.begin(), PtOut.end(), DOut.begin(),
                  boost::bind(&Kernel::V3D::distance, ATrack.getOrigin(), _1));
-  return;
 }
 
 } // NAMESPACE MonteCarlo

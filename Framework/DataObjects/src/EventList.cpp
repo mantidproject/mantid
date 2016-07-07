@@ -4070,8 +4070,6 @@ void EventList::splitByFullTimeHelper(Kernel::TimeSplitterType &splitter,
     if (itev == itev_end)
       break;
   } // END-WHILE Splitter
-
-  return;
 }
 
 //------------------------------------------------------------------------------------------------
@@ -4128,8 +4126,6 @@ void EventList::splitByFullTime(Kernel::TimeSplitterType &splitter,
       break;
     }
   }
-
-  return;
 }
 
 //------------------------------------------------------------------------------------------------
@@ -4238,7 +4234,7 @@ std::string EventList::splitByFullTimeMatrixSplitter(
     opeventlist->switchTo(eventType);
   }
 
-  std::string debugmessage("");
+  std::string debugmessage;
 
   // Do nothing if there are no entries
   if (vecgroups.empty()) {
@@ -4332,8 +4328,6 @@ void EventList::splitByPulseTimeHelper(Kernel::TimeSplitterType &splitter,
     if (itev == itev_end)
       break;
   } // END-WHILE Splitter
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -4377,8 +4371,6 @@ void EventList::splitByPulseTime(Kernel::TimeSplitterType &splitter,
       break;
     }
   }
-
-  return;
 }
 
 //--------------------------------------------------------------------------

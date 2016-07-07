@@ -340,8 +340,6 @@ void FilterEventsByLogValuePreNexus::init() {
 
   declareProperty("DBPixelID", EMPTY_INT(),
                   "ID of the pixel (detector) for debug output. ");
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -423,8 +421,6 @@ void FilterEventsByLogValuePreNexus::exec() {
 
   // -1. Cleanup
   delete m_prog;
-
-  return;
 } // exec()
 
 //----------------------------------------------------------------------------------------------
@@ -529,8 +525,6 @@ void FilterEventsByLogValuePreNexus::processProperties() {
   }
 
   m_corretctTOF = getProperty("CorrectTOFtoSample");
-
-  return;
 } // END of processProperties
 
 //----------------------------------------------------------------------------------------------
@@ -653,8 +647,6 @@ void FilterEventsByLogValuePreNexus::processEventLogs() {
     setProperty("EventLogTableWorkspace",
                 boost::dynamic_pointer_cast<ITableWorkspace>(evtablews));
   }
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -687,8 +679,6 @@ void FilterEventsByLogValuePreNexus::addToWorkspaceLog(std::string logtitle,
   g_log.information() << "Size of Property " << property->name() << " = "
                       << property->size() << " vs Original Log Size = " << nbins
                       << "\n";
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -754,8 +744,6 @@ void FilterEventsByLogValuePreNexus::doStatToEventLog(size_t mindex) {
 
   g_log.information() << "Number of zero-interval eveng log = " << numzeros
                       << "\n";
-
-  return;
 }
 
 //-----------------------------------------------------------------------------
@@ -1099,8 +1087,6 @@ void FilterEventsByLogValuePreNexus::procEvents(
       g_log.notice() << "Pixel " << tmpid << ":  Total number of events = "
                      << this->wrongdetid_pulsetimes[vindex].size() << '\n';
     }
-
-    return;
 } // End of procEvents
 
 //----------------------------------------------------------------------------------------------
@@ -1382,8 +1368,6 @@ void FilterEventsByLogValuePreNexus::procEventsLinear(
                    << " bad event indexes"
                    << "\n";
   }
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -1469,8 +1453,6 @@ void FilterEventsByLogValuePreNexus::unmaskVetoEventIndexes() {
     g_log.notice() << "Number of veto pulses = " << numveto
                    << ", Number of error-event-index pulses = " << numerror
                    << "\n";
-
-    return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -1724,8 +1706,6 @@ void FilterEventsByLogValuePreNexus::filterEvents() {
       g_log.notice() << "Pixel " << tmpid << ":  Total number of events = "
                      << this->wrongdetid_pulsetimes[vindex].size() << '\n';
     }
-
-    return;
 } // End of filterEvents
 
 //----------------------------------------------------------------------------------------------
@@ -2137,8 +2117,6 @@ void FilterEventsByLogValuePreNexus::filterEventsLinear(
 
   g_log.notice() << "Encountered " << numbadeventindex << " bad event indexes"
                  << "\n";
-
-  return;
 } // FilterEventsLinearly
 
 //----------------------------------------------------------------------------------------------
@@ -2208,8 +2186,6 @@ void FilterEventsByLogValuePreNexus::setupPixelSpectrumMap(
       spec.setSpectrumNo(specnum_t(workspaceIndex + 1));
     }
   }
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -2283,8 +2259,6 @@ void FilterEventsByLogValuePreNexus::setProtonCharge(
   double integ = run.getProtonCharge();
   this->g_log.information() << "Total proton charge of " << integ
                             << " microAmp*hours found by integrating.\n";
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -2327,8 +2301,6 @@ void FilterEventsByLogValuePreNexus::loadPixelMap(const std::string &filename) {
   // Let's assume that the # of pixels in the instrument matches the mapping
   // file length.
   this->m_numPixel = static_cast<uint32_t>(pixelmapFile.getNumElements());
-
-  return;
 }
 
 //-----------------------------------------------------------------------------

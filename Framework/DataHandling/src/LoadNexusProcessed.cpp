@@ -558,8 +558,8 @@ void LoadNexusProcessed::correctForWorkspaceNameClash(std::string &wsName) {
   bool noClash(false);
 
   for (int i = 0; !noClash; ++i) {
-    std::string wsIndex = ""; // dont use an index if there is no other
-                              // workspace
+    std::string wsIndex; // dont use an index if there is no other
+                         // workspace
     if (i > 0) {
       wsIndex = "_" + std::to_string(i);
     }
@@ -807,7 +807,7 @@ API::Workspace_sptr LoadNexusProcessed::loadTableEntry(NXEntry &entry) {
   do {
     std::string dataSetName = "column_" + std::to_string(columnNumber);
 
-    NXInfo info = nx_tw.getDataSetInfo(dataSetName.c_str());
+    NXInfo info = nx_tw.getDataSetInfo(dataSetName);
     if (info.stat == NX_ERROR) {
       // Assume we done last column of table
       break;
@@ -839,7 +839,7 @@ API::Workspace_sptr LoadNexusProcessed::loadTableEntry(NXEntry &entry) {
       }
     } else if (info.rank == 2) {
       if (info.type == NX_CHAR) {
-        NXChar data = nx_tw.openNXChar(dataSetName.c_str());
+        NXChar data = nx_tw.openNXChar(dataSetName);
         std::string columnTitle = data.attributes("name");
         if (!columnTitle.empty()) {
           workspace->addColumn("str", columnTitle);
@@ -859,7 +859,7 @@ API::Workspace_sptr LoadNexusProcessed::loadTableEntry(NXEntry &entry) {
       } else if (info.type == NX_INT32) {
         loadVectorColumn<int>(nx_tw, dataSetName, workspace, "vector_int");
       } else if (info.type == NX_FLOAT64) {
-        auto data = nx_tw.openNXDouble(dataSetName.c_str());
+        auto data = nx_tw.openNXDouble(dataSetName);
         if (data.attributes("interpret_as") == "V3D") {
           loadV3DColumn(data, workspace);
         } else {
@@ -888,13 +888,12 @@ void LoadNexusProcessed::loadVectorColumn(const NXData &tableData,
                                           const std::string &dataSetName,
                                           const ITableWorkspace_sptr &tableWs,
                                           const std::string &columnType) {
-  NXDataSetTyped<Type> data =
-      tableData.openNXDataSet<Type>(dataSetName.c_str());
+  NXDataSetTyped<Type> data = tableData.openNXDataSet<Type>(dataSetName);
   std::string columnTitle = data.attributes("name");
   if (!columnTitle.empty()) {
     tableWs->addColumn(columnType, columnTitle);
 
-    NXInfo info = tableData.getDataSetInfo(dataSetName.c_str());
+    NXInfo info = tableData.getDataSetInfo(dataSetName);
     const size_t rowCount = info.dims[0];
     const size_t blockSize = info.dims[1];
 
@@ -972,7 +971,7 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(NXEntry &entry) {
   do {
     std::string str = "column_" + std::to_string(columnNumber);
 
-    NXInfo info = nx_tw.getDataSetInfo(str.c_str());
+    NXInfo info = nx_tw.getDataSetInfo(str);
     if (info.stat == NX_ERROR) {
       // Assume we done last column of table
       break;
@@ -985,7 +984,7 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(NXEntry &entry) {
     // here we assume that a peaks_table has always one column of doubles
 
     if (info.type == NX_FLOAT64) {
-      NXDouble nxDouble = nx_tw.openNXDouble(str.c_str());
+      NXDouble nxDouble = nx_tw.openNXDouble(str);
       std::string columnTitle = nxDouble.attributes("name");
       if (!columnTitle.empty() && numberPeaks == 0) {
         numberPeaks = nxDouble.dim0();
@@ -1075,7 +1074,7 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(NXEntry &entry) {
 
   for (const auto &str : columnNames) {
     if (!str.compare("column_1")) {
-      NXInt nxInt = nx_tw.openNXInt(str.c_str());
+      NXInt nxInt = nx_tw.openNXInt(str);
       nxInt.load();
 
       for (int r = 0; r < numberPeaks; r++) {
@@ -1086,7 +1085,7 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(NXEntry &entry) {
     }
 
     if (!str.compare("column_2")) {
-      NXDouble nxDouble = nx_tw.openNXDouble(str.c_str());
+      NXDouble nxDouble = nx_tw.openNXDouble(str);
       nxDouble.load();
 
       for (int r = 0; r < numberPeaks; r++) {
@@ -1096,7 +1095,7 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(NXEntry &entry) {
     }
 
     if (!str.compare("column_3")) {
-      NXDouble nxDouble = nx_tw.openNXDouble(str.c_str());
+      NXDouble nxDouble = nx_tw.openNXDouble(str);
       nxDouble.load();
 
       for (int r = 0; r < numberPeaks; r++) {
@@ -1106,7 +1105,7 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(NXEntry &entry) {
     }
 
     if (!str.compare("column_4")) {
-      NXDouble nxDouble = nx_tw.openNXDouble(str.c_str());
+      NXDouble nxDouble = nx_tw.openNXDouble(str);
       nxDouble.load();
 
       for (int r = 0; r < numberPeaks; r++) {
@@ -1116,7 +1115,7 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(NXEntry &entry) {
     }
 
     if (!str.compare("column_5")) {
-      NXDouble nxDouble = nx_tw.openNXDouble(str.c_str());
+      NXDouble nxDouble = nx_tw.openNXDouble(str);
       nxDouble.load();
 
       for (int r = 0; r < numberPeaks; r++) {
@@ -1126,7 +1125,7 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(NXEntry &entry) {
     }
 
     if (!str.compare("column_6")) {
-      NXDouble nxDouble = nx_tw.openNXDouble(str.c_str());
+      NXDouble nxDouble = nx_tw.openNXDouble(str);
       nxDouble.load();
 
       for (int r = 0; r < numberPeaks; r++) {
@@ -1136,7 +1135,7 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(NXEntry &entry) {
     }
 
     if (!str.compare("column_7")) {
-      NXDouble nxDouble = nx_tw.openNXDouble(str.c_str());
+      NXDouble nxDouble = nx_tw.openNXDouble(str);
       nxDouble.load();
 
       for (int r = 0; r < numberPeaks; r++) {
@@ -1146,7 +1145,7 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(NXEntry &entry) {
     }
 
     if (!str.compare("column_10")) {
-      NXDouble nxDouble = nx_tw.openNXDouble(str.c_str());
+      NXDouble nxDouble = nx_tw.openNXDouble(str);
       nxDouble.load();
 
       for (int r = 0; r < numberPeaks; r++) {
@@ -1156,7 +1155,7 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(NXEntry &entry) {
     }
 
     if (!str.compare("column_14")) {
-      NXInt nxInt = nx_tw.openNXInt(str.c_str());
+      NXInt nxInt = nx_tw.openNXInt(str);
       nxInt.load();
 
       for (int r = 0; r < numberPeaks; r++) {
@@ -1167,7 +1166,7 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(NXEntry &entry) {
     }
 
     if (!str.compare("column_15")) {
-      NXDouble nxDouble = nx_tw.openNXDouble(str.c_str());
+      NXDouble nxDouble = nx_tw.openNXDouble(str);
       nxDouble.load();
       Kernel::Matrix<double> gm(3, 3, false);
       int k = 0;
@@ -1195,8 +1194,8 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(NXEntry &entry) {
       peakFactoryEllipsoid->setSuccessor(peakFactorySphere);
       peakFactorySphere->setSuccessor(peakFactoryNone);
 
-      NXInfo info = nx_tw.getDataSetInfo(str.c_str());
-      NXChar data = nx_tw.openNXChar(str.c_str());
+      NXInfo info = nx_tw.getDataSetInfo(str);
+      NXChar data = nx_tw.openNXChar(str);
 
       const int maxShapeJSONLength = info.dims[1];
       data.load();

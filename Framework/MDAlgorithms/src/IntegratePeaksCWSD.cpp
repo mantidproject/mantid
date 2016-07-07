@@ -353,18 +353,6 @@ void IntegratePeaksCWSD::simplePeakIntegration(
   // Summarize
   g_log.notice() << "Distance range is " << min_distance << ", " << max_distance
                  << "\n";
-
-  /*
-  g_log.warning() << "Debug output: run 13: Number masked detectors = " <<
-  num_masked_det
-                  << ", Total signal = " << total_signal << "\n";
-  g_log.warning() << "  Number of unmasked detectors = " << num_unmasked_det
-                  << ", Total unmasked signal = " << total_unmasked_signal <<
-  "\n";
-  g_log.warning() << "  Number of total detectors = " << num_det << "\n";
-  */
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------

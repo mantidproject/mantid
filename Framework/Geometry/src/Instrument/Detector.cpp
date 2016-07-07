@@ -154,7 +154,6 @@ bool Detector::isMonitor() const {
  */
 void Detector::markAsMonitor(const bool flag) {
   m_isMonitor = flag;
-  return;
 }
 
 } // Namespace Geometry

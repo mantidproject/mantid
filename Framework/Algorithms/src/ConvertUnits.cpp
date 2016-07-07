@@ -177,7 +177,6 @@ void ConvertUnits::exec() {
   // Do right at end (workspace could could change in removeUnphysicalBins or
   // alignBins methods)
   setProperty("OutputWorkspace", outputWS);
-  return;
 }
 
 /** Initialise the member variables
@@ -324,7 +323,6 @@ void ConvertUnits::convertQuickly(API::MatrixWorkspace_sptr outputWS,
 
   if (m_inputEvents)
     eventWS->clearMRU();
-  return;
 }
 
 /** Convert the workspace units using TOF as an intermediate step in the
