@@ -1,19 +1,19 @@
 #ifndef ASYMMETRYCALCTEST_H_
 #define ASYMMETRYCALCTEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include <cxxtest/TestSuite.h>
 
-#include "MantidDataHandling/LoadMuonNexus2.h"
-#include "MantidDataHandling/LoadInstrument.h"
-#include "MantidDataHandling/GroupDetectors.h"
-#include "MantidAPI/IAlgorithm.h"
-#include "MantidAlgorithms/AsymmetryCalc.h"
-#include "MantidAPI/Workspace.h"
-#include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include <stdexcept>
+#include "MantidAPI/IAlgorithm.h"
+#include "MantidAPI/Workspace.h"
+#include "MantidAlgorithms/AsymmetryCalc.h"
+#include "MantidDataHandling/GroupDetectors.h"
+#include "MantidDataHandling/LoadInstrument.h"
+#include "MantidDataHandling/LoadMuonNexus2.h"
+#include "MantidDataObjects/Workspace2D.h"
 #include <algorithm>
+#include <stdexcept>
 
 using namespace Mantid::Algorithms;
 using namespace Mantid::API;
@@ -76,14 +76,14 @@ public:
     // Check the result
     MatrixWorkspace_const_sptr outputWS =
         asymCalc.getProperty("OutputWorkspace");
-    TS_ASSERT_DELTA(outputWS->dataY(0)[100], 0.2965, 0.005);
+    TS_ASSERT_DELTA(outputWS->y(0)[100], 0.2965, 0.005);
     TS_ASSERT(!outputWS->isHistogramData());
   }
 
   void test_single_spectra() {
     auto ws = WorkspaceCreationHelper::Create2DWorkspace(3, 10);
     for (size_t i = 0; i < ws->getNumberHistograms(); ++i) {
-      auto &y = ws->dataY(i);
+      auto &y = ws->mutableY(i);
       std::fill(y.begin(), y.end(), static_cast<double>(i + 1));
     }
 
@@ -97,9 +97,9 @@ public:
     alg.execute();
 
     MatrixWorkspace_const_sptr outputWS = alg.getProperty("OutputWorkspace");
-    TS_ASSERT_EQUALS(outputWS->readY(0)[0], -0.5); // == (1 - 3)/(1 + 3)
-    TS_ASSERT_EQUALS(outputWS->readY(0)[6], -0.5); // == (1 - 3)/(1 + 3)
-    TS_ASSERT_EQUALS(outputWS->readY(0)[9], -0.5); // == (1 - 3)/(1 + 3)
+    TS_ASSERT_EQUALS(outputWS->y(0)[0], -0.5); // == (1 - 3)/(1 + 3)
+    TS_ASSERT_EQUALS(outputWS->y(0)[6], -0.5); // == (1 - 3)/(1 + 3)
+    TS_ASSERT_EQUALS(outputWS->y(0)[9], -0.5); // == (1 - 3)/(1 + 3)
     TS_ASSERT(!outputWS->isHistogramData());
   }
 
