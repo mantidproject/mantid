@@ -1,9 +1,7 @@
 #pylint: disable=no-init,invalid-name
 from mantid.simpleapi import *
 from mantid.kernel import StringListValidator, IntBoundedValidator, Direction
-from mantid.api import DataProcessorAlgorithm, PropertyMode, AlgorithmFactory, \
-                       MultipleFileProperty, FileProperty, FileAction, \
-                       MatrixWorkspaceProperty, WorkspaceGroup
+from mantid.api import *
 from mantid import config, logger, mtd
 
 import numpy as np
@@ -13,25 +11,25 @@ import os.path
 class IndirectILLReduction(DataProcessorAlgorithm):
 
     #workspace names
-    _raw_ws_name = None
-    _grouped_ws_name = None
     _calib_ws_name = None
+    _grouped_ws_name = None
     _mnorm_ws_name = None
-    _vnorm_ws_name = None
-    _unmirror_ws_name = None
-    _red_ws_name = None
     _monitor_ws_name = None
+    _raw_ws_name = None
+    _red_ws_name = None
+    _unmirror_ws_name = None
+    _vnorm_ws_name = None
 
     #files names
-    _run_file_name = None
     _map_file_name = None
     _parameter_file_name = None
+    _run_file_name = None
 
     #bool flags
-    _mirror_sense = None
     _control_mode = None
-    _plot = None
-    _save = None
+    _mirror_sense = None
+    _plot_flag = None
+    _save_flag = None
 
     #other
     _analyser = None
@@ -73,6 +71,13 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         self.declareProperty(name='UnmirrorOption', defaultValue=7,
                              validator=IntBoundedValidator(lower=0,upper=7),
                              doc='Unmirroring option.')
+
+        # Output options
+        self.declareProperty(name='Save', defaultValue=False,
+                             doc='Whether to save the reduced workpsace to nxs file.')
+
+        self.declareProperty(name='Plot', defaultValue=False,
+                             doc='Whether to plot the reduced workspace.')
 
         # Output workspace properties
         self.declareProperty(MatrixWorkspaceProperty("ReducedWorkspace", "red",
@@ -116,13 +121,6 @@ class IndirectILLReduction(DataProcessorAlgorithm):
                                                      direction=Direction.Input),
                              doc="Workspace containing calibration intensities.")
 
-        # Output options
-        self.declareProperty(name='Save', defaultValue=False,
-                             doc='Whether to save the reduced workpsace to nxs file.')
-
-        self.declareProperty(name='Plot', defaultValue=False,
-                             doc='Whether to plot the reduced workspace.')
-
         self.validateInputs()
 
     def validateInputs(self):
@@ -133,23 +131,25 @@ class IndirectILLReduction(DataProcessorAlgorithm):
     def setUp(self):
 
         self._run_file_name = self.getPropertyValue('Run')
+
         self._calib_ws_name = self.getPropertyValue('CalibrationWorkspace')
+        self._grouped_ws_name = self.getPropertyValue('DetGroupedWorkspace')
+        self._mnorm_ws_name = self.getPropertyValue('MNormalisedWorkspace')
         self._raw_ws_name = self.getPropertyValue('RawWorkspace')
         self._red_ws_name= self.getPropertyValue('ReducedWorkspace')
-        self._vnorm_ws_name = self.getPropertyValue('VNormalisedWorkspace')
-        self._mnorm_ws_name = self.getPropertyValue('MNormalisedWorkspace')
         self._unmirror_ws_name = self.getPropertyValue('UnmirroredWorkspace')
-        self._grouped_ws_name = self.getPropertyValue('DetGroupedWorkspace')
-        self._monitor_ws_name = self.getPropertyValue('MonitorWorkspace')
-        self._map_file_name = self.getPropertyValue('MapFile')
+        self._vnorm_ws_name = self.getPropertyValue('VNormalisedWorkspace')
+
         self._analyser = self.getPropertyValue('Analyser')
+        self._map_file_name = self.getPropertyValue('MapFile')
+        self._monitor_ws_name = self.getPropertyValue('MonitorWorkspace')
         self._reflection = self.getPropertyValue('Reflection')
 
-        self._mirror_sense = self.getProperty('MirrorSense').value
         self._control_mode = self.getProperty('ControlMode').value
+        self._mirror_sense = self.getProperty('MirrorSense').value
+        self._plot_flag = self.getProperty('Plot').value
+        self._save_flag = self.getProperty('Save').value
         self._unmirror_option = self.getProperty('UnmirrorOption').value
-        self._save = self.getProperty('Save').value
-        self._plot = self.getProperty('Plot').value
 
     def PyExec(self):
 
@@ -172,13 +172,18 @@ class IndirectILLReduction(DataProcessorAlgorithm):
 
         if self._control_mode:
             self.setProperty('RawWorkspace', mtd[self._raw_ws_name])
-
             self.setProperty('MonitorWorkspace', out_ws[0])
             self.setProperty('DetGroupedWorkspace', out_ws[1])
             self.setProperty('MNormalisedWorkspace', out_ws[2])
             self.setProperty('VNormalisedWorkspace', out_ws[3])
             self.setProperty('UnmirroredWorkspace', out_ws[4])
             self.setProperty('ReducedWorkspace', out_ws[5])
+
+        if self._save_flag:
+            self._save()
+
+        if self._plot_flag:
+            self._plot()
 
     def _loadParamFiles(self):
         """
@@ -198,7 +203,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
                grouping_filename = self._instrument.getStringParameter('Workflow.GroupingFile')[0]
                self._map_file_name = os.path.join(config['groupingFiles.directory'], grouping_filename)
             else:
-              raise ValueError("Failed to find default detector grouping file. Please specify.")
+              raise ValueError("Failed to find default detector grouping file. Please specify manually.")
 
         self.log().information('Map file : %s' % self._map_file_name)
 
@@ -228,7 +233,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
 
     def _multifile_reduction(self, gws):
         """
-        Calls _reduction for GroupWorkspace
+        Calls _reduction for items in GroupWorkspace
 
         @param gws :: input workspace group to reduce
         @return    :: the reduced group workspace or a list of group
@@ -286,12 +291,13 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         else:
            run_number = ""
 
-        monitor =  run_number + self._monitor_ws_name
+
         grouped =  run_number + self._grouped_ws_name
         mnorm = run_number + self._mnorm_ws_name
-        vnorm =  run_number + self._vnorm_ws_name
-        unmirror =  run_number + self._unmirror_ws_name
+        monitor =  run_number + self._monitor_ws_name
         red = run_number + self._red_ws_name
+        unmirror =  run_number + self._unmirror_ws_name
+        vnorm =  run_number + self._vnorm_ws_name
 
         LoadParameterFile(Workspace=ws, Filename=self._parameter_file_name)
 
