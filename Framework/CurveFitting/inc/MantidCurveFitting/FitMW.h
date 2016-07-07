@@ -18,6 +18,10 @@ class FunctionValues;
 class MatrixWorkspace;
 }
 
+namespace HistogramData {
+class HistogramX;
+}
+
 namespace CurveFitting {
 
 class SimpleChebfun;
@@ -100,9 +104,9 @@ public:
 
 protected:
   /// Calculate size and starting iterator in the X array
-  void getStartIterator(const Mantid::MantidVec &X,
+  void getStartIterator(const HistogramData::HistogramX &X,
                         Mantid::MantidVec::const_iterator &from, size_t &n,
-                        bool isHisto) const;
+                        bool isHistogram) const;
   /// Set all parameters
   void setParameters() const;
 

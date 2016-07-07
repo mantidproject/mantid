@@ -88,6 +88,38 @@ void AbsorptionCorrection::init() {
   defineProperties();
 }
 
+void linearlyInterpolateY(const Mantid::HistogramData::HistogramX &x,
+                          Mantid::HistogramData::HistogramY &y,
+                          const double stepSize) {
+  int specSize = static_cast<int>(y.size());
+  int xSize = static_cast<int>(x.size());
+  bool isHistogram(xSize == specSize + 1);
+  int step(static_cast<int>(stepSize)), index2(0);
+  double x1 = 0, x2 = 0, y1 = 0, y2 = 0, xp = 0, overgap = 0;
+
+  for (int i = 0; i < specSize - 1; ++i) // Last point has been calculated
+  {
+    if (step ==
+        stepSize) // Point numerically integrated, does not need interpolation
+    {
+      x1 = (isHistogram ? (0.5 * (x[i] + x[i + 1])) : x[i]);
+      index2 = static_cast<int>(
+          ((i + stepSize) >= specSize ? specSize - 1 : (i + stepSize)));
+      x2 = (isHistogram ? (0.5 * (x[index2] + x[index2 + 1])) : x[index2]);
+      overgap = 1.0 / (x2 - x1);
+      y1 = y[i];
+      y2 = y[index2];
+      step = 1;
+      continue;
+    }
+    xp = (isHistogram ? (0.5 * (x[i] + x[i + 1])) : x[i]);
+    // Linear interpolation
+    y[i] = (xp - x1) * y2 + (x2 - xp) * y1;
+    y[i] *= overgap;
+    step++;
+  }
+}
+
 void AbsorptionCorrection::exec() {
   // Retrieve the input workspace
   m_inputWS = getProperty("InputWorkspace");
@@ -144,8 +176,8 @@ void AbsorptionCorrection::exec() {
     PARALLEL_START_INTERUPT_REGION
 
     // Copy over bin boundaries
-    const MantidVec &X = m_inputWS->readX(i);
-    correctionFactors->dataX(i) = X;
+    auto &X = m_inputWS->x(i);
+    correctionFactors->mutableX(i) = X;
 
     // Get detector position
     IDetector_const_sptr det;
@@ -183,7 +215,7 @@ void AbsorptionCorrection::exec() {
     }
 
     // Get a reference to the Y's in the output WS for storing the factors
-    MantidVec &Y = correctionFactors->dataY(i);
+    auto &Y = correctionFactors->mutableY(i);
 
     // Loop through the bins in the current spectrum every m_xStep
     const auto lambdas = m_inputWS->points(i);
@@ -211,7 +243,8 @@ void AbsorptionCorrection::exec() {
         1) // Interpolate linearly between points separated by m_xStep,
            // last point required
     {
-      VectorHelper::linearlyInterpolateY(X, Y, static_cast<double>(m_xStep));
+	  //TODO Talk to Simon but this line was implemented in histogram
+      linearlyInterpolateY(X, Y, static_cast<double>(m_xStep));
     }
 
     prog.report();
