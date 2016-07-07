@@ -192,6 +192,7 @@ PropertyWidget::PropertyWidget(Mantid::Kernel::Property *prop, QWidget *parent,
   if (!prop)
     throw std::runtime_error(
         "NULL Property passed to the PropertyWidget constructor.");
+  setObjectName(QString::fromStdString(prop->name()));
 
   if (!m_gridLayout) {
     // Create a LOCAL grid layout
@@ -204,6 +205,13 @@ PropertyWidget::PropertyWidget(Mantid::Kernel::Property *prop, QWidget *parent,
   } else {
     // Use the parent of the provided QGridLayout when adding widgets
     m_parent = parent;
+    // HACK - In this mode a property widget is not a true self-contained
+    // widget: it has no children
+    //        of its own. By default, when added to a parent widget, it will be
+    //        drawn invisble
+    //        at the top left of the parent widget and obscure mouse clicks etc.
+    //        The hack fix is to lower it down the visible stack.
+    this->lower();
   }
 
   QWidget *infoWidget = new QWidget();

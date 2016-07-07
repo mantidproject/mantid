@@ -98,7 +98,6 @@ public:
   MOCK_METHOD3(init, void(const size_t &, const size_t &, const size_t &));
   MOCK_CONST_METHOD0(getSpecialCoordinateSystem,
                      Mantid::Kernel::SpecialCoordinateSystem());
-  ~MockIEventWorkspace() override {}
 
 private:
   MockIEventWorkspace *doClone() const override {

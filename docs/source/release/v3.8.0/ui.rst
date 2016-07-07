@@ -26,17 +26,35 @@ Plotting Improvements
 Algorithm Toolbox
 #################
 
+Algorithms
+##########
+.. figure::  ../../images/GroupWorkspaces_multipleInput.png
+   :width: 487
+   :align: right
+
+- Algorithms can now use a multiple selection list box for property input, :ref:`MergeRuns <algm-MergeRuns>` and :ref:`GroupWorkspaces <algm-GroupWorkspaces>` use this so far. To select multiple rows use the Shift or Ctrl (Cmd) keys while clicking  with the mouse.
+
+
 Scripting Window
 ################
 
+Progress Reporting
+##################
+
+- The progress reporting for algorithms has been improved, so that the progress is reported correctly when processin workspace groups or multi-period workspaces.
+
+
 Documentation
 #############
+* Added Ragged Workspace as a concept page
+
 
 Bugs Resolved
 -------------
 
 SliceViewer Improvements
 ------------------------
+* When opening the sliceviewer, it will default to showing the first two non-integrated dimensions
 
 |
 

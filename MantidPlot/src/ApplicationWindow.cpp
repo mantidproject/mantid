@@ -4583,6 +4583,24 @@ void ApplicationWindow::openRecentProject(QAction *action) {
   }
 }
 
+/**
+ * Open project with the given working directory.
+ *
+ * This function allows a project to be opened without
+ * using a GUI from the Python interface.
+ *
+ * @param workingDir :: the file directiory to use
+ * @param filename :: the path of the project file to open
+ * @param fileVersion :: the file version to use
+ * @return updated application window handler
+ */
+ApplicationWindow *ApplicationWindow::openProject(const QString &workingDir,
+                                                  const QString &filename,
+                                                  const int fileVersion) {
+  this->workingDir = workingDir;
+  return openProject(filename, fileVersion);
+}
+
 ApplicationWindow *ApplicationWindow::openProject(const QString &filename,
                                                   const int fileVersion) {
   newProject();
@@ -6227,33 +6245,27 @@ void ApplicationWindow::saveProjectAs(const QString &fileName, bool compress) {
   }
 
   if (!fn.isEmpty()) {
-    // Check if exists. If not, create directory first.
-    QFileInfo tempFile(fn);
-    if (!tempFile.exists()) {
-      // Make the directory
-      QString dir(fn);
-      if (fn.contains('.'))
-        dir = fn.left(fn.indexOf('.'));
-      QDir().mkdir(dir);
+    QFileInfo fileInfo(fn);
+    bool isFile = fileInfo.fileName().endsWith(".mantid") ||
+                  fileInfo.fileName().endsWith(".mantid.gz");
 
-      // Get the file name
-      QString file("temp");
-      for (int i = 0; i < dir.size(); ++i) {
-        if (dir[i] == '/')
-          file = dir.right(dir.size() - i);
-        else if (dir[i] == '\\')
-          file = dir.right(i);
+    if (!isFile) {
+      QDir directory(fn);
+      if (!directory.exists()) {
+        // Make the directory
+        directory.mkdir(fn);
       }
-      fn = dir + file;
+
+      workingDir = directory.absolutePath();
+      QString projectFileName = directory.dirName();
+      projectFileName.append(".mantid");
+      projectname = directory.absoluteFilePath(projectFileName);
+
+    } else {
+      workingDir = fileInfo.absoluteDir().absolutePath();
+      projectname = fileInfo.absoluteFilePath();
     }
 
-    QFileInfo fi(fn);
-    workingDir = fi.absolutePath();
-    QString baseName = fi.fileName();
-    if (!baseName.contains("."))
-      fn.append(".mantid");
-
-    projectname = fn;
     if (saveProject(compress)) {
       recentProjects.removeAll(projectname);
       recentProjects.push_front(projectname);
@@ -9645,10 +9657,13 @@ void ApplicationWindow::foldersMenuActivated(int id) {
   }
 }
 
-void ApplicationWindow::newProject() {
-  // Save anything we need to
-  saveSettings();
-  mantidUI->saveProject(saved);
+void ApplicationWindow::newProject(const bool doNotSave) {
+
+  if (doNotSave) {
+    // Save anything we need to
+    saveSettings();
+    mantidUI->saveProject(saved);
+  }
 
   // Clear out any old folders
   folders->blockSignals(true);

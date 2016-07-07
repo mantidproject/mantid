@@ -32,11 +32,6 @@ UserSubWindow::UserSubWindow(QWidget *parent)
 }
 
 /**
- * Destructor
- */
-UserSubWindow::~UserSubWindow() {}
-
-/**
  * Create the layout for this dialog.
  */
 void UserSubWindow::initializeLayout() {

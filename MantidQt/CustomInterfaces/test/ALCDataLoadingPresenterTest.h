@@ -3,7 +3,6 @@
 
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
-
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/WarningSuppressions.h"
@@ -11,6 +10,7 @@
 #include "MantidQtCustomInterfaces/Muon/IALCDataLoadingView.h"
 #include "MantidQtCustomInterfaces/Muon/ALCDataLoadingPresenter.h"
 
+using namespace Mantid::API;
 using namespace MantidQt::CustomInterfaces;
 using namespace testing;
 
@@ -77,6 +77,8 @@ MATCHER_P3(QwtDataY, i, value, delta, "") {
 MATCHER_P3(VectorValue, i, value, delta, "") {
   return fabs(arg.at(i) - value) < delta;
 }
+
+GCC_DIAG_ON_SUGGEST_OVERRIDE
 
 class ALCDataLoadingPresenterTest : public CxxTest::TestSuite {
   MockALCDataLoadingView *m_view;
@@ -367,7 +369,5 @@ public:
     m_view->help();
   }
 };
-
-GCC_DIAG_ON_SUGGEST_OVERRIDE
 
 #endif /* MANTID_CUSTOMINTERFACES_ALCDATALOADINGTEST_H_ */

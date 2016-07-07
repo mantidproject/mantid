@@ -1,15 +1,6 @@
 #include "MantidAbout.h"
 #include "MantidKernel/MantidVersion.h"
-
-extern const int maj_version;
-extern const int min_version;
-extern const int patch_version;
-const int maj_version = 0;
-const int min_version = 9;
-const int patch_version = 5;
-extern const char *extra_version;
-extern const char *copyright_string;
-extern const char *release_date;
+#include "globals.h"
 
 /**
  * Constructor

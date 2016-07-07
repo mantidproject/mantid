@@ -52,6 +52,7 @@ public:
   MOCK_METHOD1(getPeak, Mantid::DataObjects::Peak &(int peakNum));
   MOCK_CONST_METHOD1(getPeak, const Mantid::DataObjects::Peak &(int peakNum));
 };
+GCC_DIAG_ON_SUGGEST_OVERRIDE
 
 //=====================================================================================
 // Functional Tests
@@ -313,6 +314,5 @@ public:
     }
   }
 };
-GCC_DIAG_ON_SUGGEST_OVERRIDE
 
 #endif

@@ -1139,7 +1139,8 @@ def _translate():
             # Create the algorithm object
             algm_object = algorithm_mgr.createUnmanaged(name, max(versions))
             algm_object.initialize()
-        except Exception:
+        except Exception as exc:
+            logger.warning("Error initializing {0} on registration: '{1}'".format(name, str(exc)))
             continue
 
         algorithm_wrapper = _create_algorithm_function(name, max(versions), algm_object)

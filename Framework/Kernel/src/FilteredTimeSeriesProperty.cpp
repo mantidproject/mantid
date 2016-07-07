@@ -53,12 +53,10 @@ FilteredTimeSeriesProperty<HeldType>::unfiltered() const {
 
 // -------------------------- Concrete instantiation
 // -----------------------------------------------
-INSTANTIATE(int)
-INSTANTIATE(long)
-INSTANTIATE(long long)
-INSTANTIATE(unsigned int)
-INSTANTIATE(unsigned long)
-INSTANTIATE(unsigned long long)
+INSTANTIATE(int32_t)
+INSTANTIATE(int64_t)
+INSTANTIATE(uint32_t)
+INSTANTIATE(uint64_t)
 INSTANTIATE(float)
 INSTANTIATE(double)
 INSTANTIATE(std::string)

@@ -10,6 +10,7 @@
 #include "MantidAPI/ConstraintFactory.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/MultiDomainFunction.h"
 #include "MantidAPI/IFunctionWithLocation.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
@@ -1128,6 +1129,22 @@ void IFunction::unfixAll() {
   for (size_t i = 0; i < nParams(); ++i) {
     fix(i);
   }
+}
+
+/// Get number of domains required by this function.
+/// If it returns a number greater than 1 then the domain
+/// passed to function(domain, values) method must have a
+/// CompositeDomain type with the same number of parts.
+size_t IFunction::getNumberDomains() const { return 1; }
+
+/// Split this function (if needed) into a list of independent functions.
+/// The number of functions must be the number of domains this function is
+/// working on (== getNumberDomains()). The result of evaluation of the
+/// created functions on their domains must be the same as if this function
+/// was evaluated on the composition of those domains.
+std::vector<IFunction_sptr> IFunction::createEquivalentFunctions() const {
+  return std::vector<IFunction_sptr>(
+      1, FunctionFactory::Instance().createInitialized(asString()));
 }
 
 } // namespace API
