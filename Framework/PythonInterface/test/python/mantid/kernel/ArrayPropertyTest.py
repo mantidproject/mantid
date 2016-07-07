@@ -7,16 +7,17 @@ from mantid.kernel import (FloatArrayProperty, StringArrayProperty, IntArrayProp
                            NullValidator)
 from mantid.api import PythonAlgorithm
 import numpy as np
+import sys
 
 class ArrayPropertyTest(unittest.TestCase):
 
-    def test_default_constructor_raises_an_exception(self):
+    def xtest_default_constructor_raises_an_exception(self):
         """
             Test that the class cannot be default constructed
         """
         self.assertRaises(Exception, FloatArrayProperty)
 
-    def test_name_only_constructor_gives_correct_object(self):
+    def xtest_name_only_constructor_gives_correct_object(self):
         """
             Tests the simplest constructor that takes
             only a name
@@ -26,7 +27,7 @@ class ArrayPropertyTest(unittest.TestCase):
         self.assertTrue(isinstance(arr, FloatArrayProperty))
         self._check_object_attributes(arr, name, Direction.Input)
 
-    def test_name_direction_constructor_gives_correct_object(self):
+    def xtest_name_direction_constructor_gives_correct_object(self):
         """
             Tests the constructor that takes
             only a name & direction
@@ -36,7 +37,7 @@ class ArrayPropertyTest(unittest.TestCase):
         arr = FloatArrayProperty(name, direc)
         self._check_object_attributes(arr, name, direc)
 
-    def test_name_validator_direction_constructor_gives_correct_object(self):
+    def xtest_name_validator_direction_constructor_gives_correct_object(self):
         """
             Test the constructor that takes a name, validator & direction
         """
@@ -47,7 +48,7 @@ class ArrayPropertyTest(unittest.TestCase):
         self._check_object_attributes(arr, name, direc)
         self.assertEquals(arr.isValid, "")
 
-    def test_name_string_values_validator_direction_constructor_gives_correct_object(self):
+    def xtest_name_string_values_validator_direction_constructor_gives_correct_object(self):
         """
             Test the constructor that takes a name, values as string, validator & direction
         """
@@ -62,7 +63,7 @@ class ArrayPropertyTest(unittest.TestCase):
         self.assertTrue(isinstance(values, np.ndarray))
 
 
-    def test_name_values_from_list_validator_direction_constructor_gives_correct_object(self):
+    def xtest_name_values_from_list_validator_direction_constructor_gives_correct_object(self):
         """
             Test the constructor that takes a name, values from python object,
             validator & direction
@@ -74,7 +75,7 @@ class ArrayPropertyTest(unittest.TestCase):
         arr = FloatArrayProperty(name, input_values, validator, direc)
         self._check_object_attributes(arr, name, direc, length = len(input_values))
 
-    def test_name_values_from_array_validator_direction_constructor_gives_correct_object(self):
+    def xtest_name_values_from_array_validator_direction_constructor_gives_correct_object(self):
         """
             Test the constructor that takes a name, values from python object,
             validator & direction
@@ -94,9 +95,9 @@ class ArrayPropertyTest(unittest.TestCase):
         self.assertEquals(arrprop.direction, direction)
         self.assertEquals(len(arrprop.value), length)
 
-    def test_PythonAlgorithm_setProperty_with_FloatArrayProperty(self):
+    def xtest_setProperty_with_FloatArrayProperty(self):
         """
-            Test ArrayProperty within a python algorithm
+        Test ArrayProperty within a python algorithm
         """
         class AlgWithFloatArrayProperty(PythonAlgorithm):
 
@@ -113,7 +114,26 @@ class ArrayPropertyTest(unittest.TestCase):
         input_values = [1.1,2.5,5.6,4.6,9.0,6.0]
         self._do_algorithm_test(AlgWithFloatArrayProperty, input_values)
 
-    def test_PythonAlgorithm_setProperty_With_Ranges(self):
+    def test_setProperty_With_FloatArrayProperty_And_Py3_Range_Object(self):
+        """
+        Python 3 range() returns a range object that behaves like a sequence
+        whereas it just returned a list in Python 2
+        """
+        if sys.version_info[0] < 3:
+            return
+        class AlgWithFloatArrayProperty(PythonAlgorithm):
+            _input_values = None
+            def PyInit(self):
+                name = "numbers"
+                self.declareProperty(
+                    FloatArrayProperty("Input", Direction.Input), "Float array")
+            def PyExec(self):
+                self._input_values = self.getProperty("Input").value
+    
+        input_values = range(1, 5)
+        self._do_algorithm_test(AlgWithFloatArrayProperty, input_values)
+
+    def xtest_PythonAlgorithm_setProperty_With_Ranges_String(self):
         """
             Test ArrayProperty within a python algorithm can
             be set with a string range
@@ -135,7 +155,7 @@ class ArrayPropertyTest(unittest.TestCase):
 
         self.assertEquals(6, len(alg._input_values))
 
-    def test_PythonAlgorithm_setProperty_with_StringArrayProperty(self):
+    def xtest_PythonAlgorithm_setProperty_with_StringArrayProperty(self):
         """
             Test StringArrayProperty within a python algorithm
         """
