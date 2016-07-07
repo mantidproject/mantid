@@ -323,58 +323,62 @@ public:
   }
   // Methods for getting read-only access to the data.
   // Just passes through to the virtual dataX/Y/E function (const version)
-  /// Returns a read-only (i.e. const) reference to the specified X array
+  /// Deprecated, use x() instead. Returns a read-only (i.e. const) reference to
+  /// the specified X array
   /// @param index :: workspace index to retrieve.
   const MantidVec &readX(std::size_t const index) const {
     return getSpectrum(index).dataX();
   }
-  /// Returns a read-only (i.e. const) reference to the specified Y array
+  /// Deprecated, use y() instead. Returns a read-only (i.e. const) reference to
+  /// the specified Y array
   /// @param index :: workspace index to retrieve.
   const MantidVec &readY(std::size_t const index) const {
     return getSpectrum(index).dataY();
   }
-  /// Returns a read-only (i.e. const) reference to the specified E array
+  /// Deprecated, use e() instead. Returns a read-only (i.e. const) reference to
+  /// the specified E array
   /// @param index :: workspace index to retrieve.
   const MantidVec &readE(std::size_t const index) const {
     return getSpectrum(index).dataE();
   }
-  /// Returns a read-only (i.e. const) reference to the specified X error array
+  /// Deprecated, use dx() instead. Returns a read-only (i.e. const) reference
+  /// to the specified X error array
   /// @param index :: workspace index to retrieve.
   const MantidVec &readDx(size_t const index) const {
     return getSpectrum(index).dataDx();
   }
 
-  /// Returns the x data
+  /// Deprecated, use mutableX() instead. Returns the x data
   virtual MantidVec &dataX(const std::size_t index) {
     invalidateCommonBinsFlag();
     return getSpectrum(index).dataX();
   }
-  /// Returns the y data
+  /// Deprecated, use mutableY() instead. Returns the y data
   virtual MantidVec &dataY(const std::size_t index) {
     return getSpectrum(index).dataY();
   }
-  /// Returns the error data
+  /// Deprecated, use mutableE() instead. Returns the error data
   virtual MantidVec &dataE(const std::size_t index) {
     return getSpectrum(index).dataE();
   }
-  /// Returns the x error data
+  /// Deprecated, use mutableDx() instead. Returns the x error data
   virtual MantidVec &dataDx(const std::size_t index) {
     return getSpectrum(index).dataDx();
   }
 
-  /// Returns the x data const
+  /// Deprecated, use x() instead. Returns the x data const
   virtual const MantidVec &dataX(const std::size_t index) const {
     return getSpectrum(index).dataX();
   }
-  /// Returns the y data const
+  /// Deprecated, use y() instead. Returns the y data const
   virtual const MantidVec &dataY(const std::size_t index) const {
     return getSpectrum(index).dataY();
   }
-  /// Returns the error const
+  /// Deprecated, use e() instead. Returns the error const
   virtual const MantidVec &dataE(const std::size_t index) const {
     return getSpectrum(index).dataE();
   }
-  /// Returns the error const
+  /// Deprecated, use dx() instead. Returns the error const
   virtual const MantidVec &dataDx(const std::size_t index) const {
     return getSpectrum(index).dataDx();
   }
@@ -383,20 +387,22 @@ public:
   virtual double getXMax() const;
   virtual void getXMinMax(double &xmin, double &xmax) const;
 
-  /// Returns a pointer to the x data
+  /// Deprecated, use sharedX() instead. Returns a pointer to the x data
   virtual Kernel::cow_ptr<HistogramData::HistogramX>
   refX(const std::size_t index) const {
     return getSpectrum(index).ptrX();
   }
 
-  /// Set the specified X array to point to the given existing array
+  /// Deprecated, use setSharedX() instead. Set the specified X array to point
+  /// to the given existing array
   virtual void setX(const std::size_t index,
                     const Kernel::cow_ptr<HistogramData::HistogramX> &X) {
     getSpectrum(index).setX(X);
     invalidateCommonBinsFlag();
   }
 
-  /// Set the specified X array to point to the given existing array
+  /// Deprecated, use setSharedX() instead. Set the specified X array to point
+  /// to the given existing array
   virtual void setX(const std::size_t index,
                     const boost::shared_ptr<HistogramData::HistogramX> &X) {
     getSpectrum(index).setX(X);
