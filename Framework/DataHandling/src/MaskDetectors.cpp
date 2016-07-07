@@ -203,24 +203,29 @@ void MaskDetectors::exec() {
   */
   WS->rebuildNearestNeighbours();
 }
+/* Method to extract detector's id-s from mask workspace
+* the mask workspace assumed to be not having masked detectors, but has masked
+* state defined in its spectea
+@param detectorList :: list of masked detectors, appended on output by the detectors,
+*                      defined in the mask workspace.
+@param maskWS       :: shared pointer to workspace containing masks.
+*/
 void MaskDetectors::extractMaskedWSDetIDs(std::vector<detid_t> &detectorList,
     const DataObjects::MaskWorkspace_const_sptr &maskWS) {
 
     int64_t nHist = maskWS->getNumberHistograms();
     for (int64_t i = 0; i < nHist; ++i) {
-        
+        if (maskWS->readY(i)[0] > 0) {
 
-        IDetector_const_sptr det;
-        try {
-            det = maskWS->getDetector(i);
-        }
-        catch (Exception::NotFoundError &) {
-            continue;
-        }
+            IDetector_const_sptr det;
+            try {
+                det = maskWS->getDetector(i);
+            }
+            catch (Exception::NotFoundError &) {
+                continue;
+            }
 
-        if (det->isMasked() ) {
-            detid_t det_id = det->getID();
-            detectorList.push_back(det_id);
+            detectorList.push_back(det->getID());
         }
     }
 
