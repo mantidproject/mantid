@@ -47,6 +47,10 @@ Definition of Mask
    be used. In the masking workspace (i.e.,
    `SpecialWorkspace2D <http://www.mantidproject.org/SpecialWorkspace2D>`__), the corresponding value
    is 0.
+-  If masked workspace with a masked spectrum is applied to a target workspace with grouped detectors, 
+   and only one detector in the group of target workspace is masked, all target spectra, 
+   containing this detector become masked.
+   
 
 About Input Parameters
 ######################
