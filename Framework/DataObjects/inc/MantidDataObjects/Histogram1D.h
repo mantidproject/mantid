@@ -87,44 +87,6 @@ public:
             sizeof(double));
   }
 
-  void setHistogram(const HistogramData::Histogram &other) {
-    mutableHistogramRef() = other;
-  }
-
-  template <typename... T> void setCounts(T &&... data) & {
-    mutableHistogramRef().setCounts(std::forward<T>(data)...);
-  }
-  template <typename... T> void setCountVariances(T &&... data) & {
-    mutableHistogramRef().setCountVariances(std::forward<T>(data)...);
-  }
-  template <typename... T> void setCountStandardDeviations(T &&... data) & {
-    mutableHistogramRef().setCountStandardDeviations(std::forward<T>(data)...);
-  }
-  template <typename... T> void setFrequencies(T &&... data) & {
-    mutableHistogramRef().setFrequencies(std::forward<T>(data)...);
-  }
-  template <typename... T> void setFrequencyVariances(T &&... data) & {
-    mutableHistogramRef().setFrequencyVariances(std::forward<T>(data)...);
-  }
-  template <typename... T> void setFrequencyStandardDeviations(T &&... data) & {
-    mutableHistogramRef().setFrequencyStandardDeviations(
-        std::forward<T>(data)...);
-  }
-  HistogramData::HistogramY &mutableY() {
-    return mutableHistogramRef().mutableY();
-  }
-  HistogramData::HistogramE &mutableE() {
-    return mutableHistogramRef().mutableE();
-  }
-  void setSharedY(const Kernel::cow_ptr<HistogramData::HistogramY> &y) {
-    mutableHistogramRef().setSharedY(y);
-  }
-  void setSharedE(const Kernel::cow_ptr<HistogramData::HistogramE> &e) {
-    mutableHistogramRef().setSharedE(e);
-  }
-
-  friend class Workspace2D;
-
 private:
   const HistogramData::Histogram &histogramRef() const override {
     return m_histogram;
