@@ -239,7 +239,7 @@ Note that there is also Dx-data, but it is not widely used and thus omited from 
 The interface for Dx is mostly equivalent to that for E.
 
 ``HistogramX``, ``HistogramY``, and ``HistogramE``
-#################################################
+##################################################
 
 - The current fundamental type for x-data, ``std::vector<double>``, is replaced by ``HistogramX``.
 - The current fundamental type for y-data, ``std::vector<double>``, is replaced by ``HistogramY``.
@@ -311,7 +311,7 @@ The interface for Dx is mostly equivalent to that for E.
 - ``Histogram::setCounts()`` includes a size check and throws if the histogram is incompatible with the size defined by the method arguments.
 
 ``Frequencies``
-##############
+###############
 
 - For algorithms that work with frequencies (defined as counts divided by the bin width), ``Histogram`` provides an interface for accessing and modifying the y-data as if it were stored as frequencies:
 
@@ -332,7 +332,7 @@ The interface for Dx is mostly equivalent to that for E.
 - ``Histogram::setFrequencies()`` includes a size check and throws if the histogram is incompatible with the size defined by the method arguments.
 
 ``CountVariances``, ``CountStandardDeviations``, ``FrequencyVariances``, and ``FrequencyStandardDeviations``
-###########################################################################################################
+############################################################################################################
 
 - For algorithms that work with counts or frequencies, ``Histogram`` provides an interface for accessing and modifying the e-data as if it were stored as variances or standard deviations of counts or frequencies:
 
