@@ -226,8 +226,6 @@ public slots:
                                  const QString &filename,
                                  const int fileVersion);
   ApplicationWindow *openProject(const QString &fn, const int fileVersion);
-  void openProjectFolder(std::string lines, const int fileVersion,
-                         bool isTopLevel = false);
   ApplicationWindow *importOPJ(const QString &fn, bool factorySettings = false,
                                bool newProject = true);
   /// Load mantid data files using generic load algorithm, opening user dialog
@@ -271,10 +269,6 @@ public slots:
   void saveProjectAs(const QString &fileName = QString(),
                      bool compress = false);
   bool saveProject(bool compress = false);
-
-  /// Serialises a project folder into its string project file representation
-  QString saveProjectFolder(Folder *folder, int &windowCount,
-                            bool isTopLevel = false);
 
   //! Set the project status to modifed
   void modifiedProject();
@@ -936,6 +930,12 @@ public slots:
   /// returns a list of all the mantid matrix objects in the project
   QStringList mantidmatrixNames();
 
+  /// Add a mantid matrix window to the application window
+  void addMantidMatrixWindow(MantidMatrix *matrix);
+
+  /// Find a mantid matrix window by name
+  MantidMatrix *findMantidMatrixWindow(const std::string &wsName);
+
   //! \name Notes
   //@{
   //! Creates a new empty note window
@@ -1023,8 +1023,6 @@ public slots:
   Folder *appendProject(const QString &file_name, Folder *parentFolder = 0);
   void saveAsProject();
   void saveFolderAsProject(Folder *f);
-  void saveProjectFile(Folder *folder, const QString &fn,
-                       bool compress = false);
 
   //!  adds a folder list item to the list view "lv"
   void addFolderListViewItem(Folder *f);
@@ -1118,8 +1116,6 @@ protected:
 private:
   QMenu *createPopupMenu() override { return NULL; }
 
-  void populateMantidTreeWidget(const QString &s);
-  void loadWsToMantidTree(const std::string &wsName);
   /// this method saves the data on project save
   void savedatainNexusFormat(const std::string &wsName,
                              const std::string &fileName);
@@ -1128,18 +1124,6 @@ private:
   bool shouldExecuteAndQuit(const QString &arg);
   bool isSilentStartup(const QString &arg);
   void handleConfigDir();
-
-  //! \name Project File Loading
-  //@{
-  void openMantidMatrix(const std::string &lines);
-
-  void openMatrix(const std::string &lines, const int fileVersion);
-  void openMultiLayer(const std::string &lines, const int fileVersion);
-  void openSurfacePlot(const std::string &lines, const int fileVersion);
-  void openTable(const std::string &lines, const int fileVersion);
-  void openTableStatistics(const std::string &lines, const int fileVersion);
-  void openScriptWindow(const QStringList &lines);
-  //@}
 
 private slots:
   //! \name Initialization
