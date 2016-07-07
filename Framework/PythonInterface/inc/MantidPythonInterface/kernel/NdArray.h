@@ -35,7 +35,8 @@ namespace converter {
  * Register ndarray as a type that manages a PyObject* internally.
  */
 template <>
-struct PYTHON_KERNEL_DLL object_manager_traits<Mantid::PythonInterface::NumPy::NdArray> {
+struct PYTHON_KERNEL_DLL
+    object_manager_traits<Mantid::PythonInterface::NumPy::NdArray> {
   BOOST_STATIC_CONSTANT(bool, is_specialized = true);
   static bool check(PyObject *obj);
   static python::detail::new_reference adopt(PyObject *obj);
