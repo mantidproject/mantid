@@ -75,13 +75,15 @@ class IndirectILLReduction(DataProcessorAlgorithm):
                              doc='Unmirroring option.')
 
         # Output workspace properties
-        self.declareProperty(MatrixWorkspaceProperty("RawWorkspace", "raw",
-                                                     direction=Direction.Output),
-                             doc="Name for the output raw workspace created.")
-
         self.declareProperty(MatrixWorkspaceProperty("ReducedWorkspace", "red",
+                                                     optional=PropertyMode.Optional,
                                                      direction=Direction.Output),
                              doc="Name for the output reduced workspace created.")
+
+        self.declareProperty(MatrixWorkspaceProperty("RawWorkspace", "raw",
+                                                     optional=PropertyMode.Optional,
+                                                     direction=Direction.Output),
+                             doc="Name for the output raw workspace created.")
 
         self.declareProperty(MatrixWorkspaceProperty("MNormalisedWorkspace", "mnorm",
                                                      optional=PropertyMode.Optional,
@@ -138,7 +140,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         self._mnorm_ws_name = self.getPropertyValue('MNormalisedWorkspace')
         self._unmirror_ws_name = self.getPropertyValue('UnmirroredWorkspace')
         self._grouped_ws_name = self.getPropertyValue('DetGroupedWorkspace')
-        self._monitor_ws = self.getPropertyValue('MonitorWorkspace')
+        self._monitor_ws_name = self.getPropertyValue('MonitorWorkspace')
         self._map_file_name = self.getPropertyValue('MapFile')
         self._analyser = self.getPropertyValue('Analyser')
         self._reflection = self.getPropertyValue('Reflection')
@@ -157,8 +159,6 @@ class IndirectILLReduction(DataProcessorAlgorithm):
 
         self.log().information('Loaded .nxs file(s) : %s' % self._run_file_name)
 
-        self.setPropertyValue('RawWorkspace', self._raw_ws_name)
-
         if isinstance(mtd[self._raw_ws_name],WorkspaceGroup):
             self._instrument = mtd[self._raw_ws_name].getItem(0).getInstrument()
             self._loadParamFiles()
@@ -168,9 +168,11 @@ class IndirectILLReduction(DataProcessorAlgorithm):
             self._loadParamFiles()
             out_ws = self._reduction(mtd[self._raw_ws_name], False)
 
-        if not self._control_mode:
-            self.setProperty('ReducedWorkspace', out_ws)
-        else:
+        self.setProperty('ReducedWorkspace', out_ws)
+
+        if self._control_mode:
+            self.setProperty('RawWorkspace', mtd[self._raw_ws_name])
+
             self.setProperty('MonitorWorkspace', out_ws[0])
             self.setProperty('DetGroupedWorkspace', out_ws[1])
             self.setProperty('MNormalisedWorkspace', out_ws[2])
@@ -188,7 +190,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         ipf_name = self._instrument_name + '_' + self._analyser + '_' + self._reflection + '_Parameters.xml'
         self._parameter_file_name = os.path.join(idf_directory, ipf_name)
 
-        logger.information('Parameter file : %s' % self._parameter_file_name)
+        self.log().information('Parameter file : %s' % self._parameter_file_name)
 
         if self._map_file_name == '':
             # path name for default map file
@@ -198,7 +200,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
             else:
               raise ValueError("Failed to find default detector grouping file. Please specify.")
 
-        logger.information('Map file : %s' % self._map_file_name)
+        self.log().information('Map file : %s' % self._map_file_name)
 
     def _save(self):
         """
@@ -208,7 +210,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         workdir = config['defaultsave.directory']
         file_path = os.path.join(workdir, self._red_ws_name+ '.nxs')
         SaveNexusProcessed(InputWorkspace=self._red_ws_name, Filename=file_path)
-        logger.information('Output file : ' + file_path)
+        self.log().information('Output file : ' + file_path)
 
     def _plot(self):
         """
@@ -254,18 +256,17 @@ class IndirectILLReduction(DataProcessorAlgorithm):
                 list_unmirrored.append(out[4])
                 list_red.append(out[5])
 
-        group_red = GroupWorkspaces(list_red)
+        red = GroupWorkspaces(list_red,OutputWorkspace=self._red_ws_name)
 
         if not self._control_mode:
-            return group_red
+            return red
         else:
-            group_monitor = GroupWorkspaces(list_monitor)
-            group_grouped = GroupWorkspaces(list_grouped)
-            group_mnorm = GroupWorkspaces(list_mnorm)
-            group_vnorm = GroupWorkspaces(list_vnorm)
-            group_unmirrored = GroupWorkspaces(list_unmirrored)
-            return [group_monitor,group_grouped,group_mnorm,
-                    group_vnorm,group_unmirrored,group_red]
+            monitor = GroupWorkspaces(list_monitor,OutputWorkspace=self._monitor_ws_name)
+            grouped = GroupWorkspaces(list_grouped,OutputWorkspace=self._grouped_ws_name)
+            mnorm = GroupWorkspaces(list_mnorm,OutputWorkspace=self._mnorm_ws_name)
+            vnorm = GroupWorkspaces(list_vnorm,OutputWorkspace=self._vnorm_ws_name)
+            unmirrored = GroupWorkspaces(list_unmirrored,OutputWorkspace=self._unmirrored_ws_name)
+            return [monitor,grouped,mnorm,vnorm,unmirrored,red]
 
     def _reduction(self, ws, multiple = False):
         """
@@ -277,14 +278,14 @@ class IndirectILLReduction(DataProcessorAlgorithm):
                            depending on the control mode
         """
 
-        logger.information('Reducting input workspace : %s' % ws.name)
+        self.log().information('Reducting input workspace : %s' % ws.name)
 
         if multiple:
            run_number = str(ws.getRunNumber()) + '_'
         else:
            run_number = ""
 
-        monitor =  run_number + self._monitor_ws
+        monitor =  run_number + self._monitor_ws_name
         grouped =  run_number + self._grouped_ws_name
         mnorm = run_number + self._mnorm_ws_name
         vnorm =  run_number + self._vnorm_ws_name
@@ -372,7 +373,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         mtd[red].getAxis(0).setUnit('DeltaE')
 
         xnew = mtd[red].readX(0)  # energy array
-        logger.information('Energy range : %f to %f' % (xnew[0], xnew[-1]))
+        self.log().information('Energy range : %f to %f' % (xnew[0], xnew[-1]))
 
         return mtd[red]
 
@@ -388,11 +389,11 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         imid = float(npt / 2 + 1)
         gRun = mtd[ws].getRun()
         wave = gRun.getLogData('wavelength').value
-        logger.information('Wavelength : %s' % wave)
+        self.log().information('Wavelength : %s' % wave)
 
         if gRun.hasProperty('Doppler.maximum_delta_energy'):
             energy = gRun.getLogData('Doppler.maximum_delta_energy').value
-            logger.information('Doppler max energy : %s' % energy)
+            self.log().information('Doppler max energy : %s' % energy)
 
         dele = 2.0 * energy / npt
         formula = '(x-%f)*%f' % (imid, dele)
