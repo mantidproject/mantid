@@ -54,11 +54,19 @@ class SANSStateMoveWorkspaceLOQTest(unittest.TestCase):
         state = SANSStateMoveLOQ()
 
         # Act + Assert
-        with self.assertRaises(TypeError):
+        try:
             state.center_position = ["sdf"]
+            is_valid = True
+        except TypeError:
+            is_valid = False
+        self.assertFalse(is_valid)
 
-        with self.assertRaises(TypeError):
+        try:
             state.detectors[SANSConstants.high_angle_bank].detector_name_short = 123
+            is_valid = True
+        except TypeError:
+            is_valid = False
+        self.assertFalse(is_valid)
 
     def test_validate_method_raises_value_error_for_invalid_state(self):
         # Arrange
@@ -120,11 +128,19 @@ class SANSStateMoveWorkspaceSANS2DTest(unittest.TestCase):
         state = SANSStateMoveSANS2D()
 
         # Act + Assert
-        with self.assertRaises(TypeError):
+        try:
             state.lab_detector_x = ["sdf"]
+            is_valid = True
+        except TypeError:
+            is_valid = False
+        self.assertFalse(is_valid)
 
-        with self.assertRaises(TypeError):
+        try:
             state.detectors[SANSConstants.high_angle_bank].detector_name_short = 123
+            is_valid = True
+        except TypeError:
+            is_valid = False
+        self.assertFalse(is_valid)
 
     def test_validate_method_raises_value_error_for_invalid_state(self):
         # Arrange
@@ -169,7 +185,6 @@ class SANSStateMoveWorkspaceLARMORTest(unittest.TestCase):
         state.detectors[SANSConstants.low_angle_bank].detector_name_short = test_name
         self.assertTrue(state.detectors[SANSConstants.low_angle_bank].detector_name_short == test_name)
 
-
         try:
             state.validate()
             is_valid = True
@@ -182,8 +197,12 @@ class SANSStateMoveWorkspaceLARMORTest(unittest.TestCase):
         state = SANSStateMoveLARMOR()
 
         # Act + Assert
-        with self.assertRaises(TypeError):
+        try:
             state.detectors[SANSConstants.high_angle_bank].detector_name_short = 123
+            is_valid = True
+        except TypeError:
+            is_valid = False
+        self.assertFalse(is_valid)
 
     def test_validate_method_raises_value_error_for_invalid_state(self):
         # Arrange

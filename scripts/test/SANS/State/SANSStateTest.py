@@ -44,8 +44,12 @@ class SANSStateTest(unittest.TestCase):
         state = SANSStateISIS()
 
         # Act + Assert
-        with self.assertRaises(TypeError):
+        try:
             state.data = ["sdf"]
+            is_valid = True
+        except TypeError:
+            is_valid = False
+        self.assertFalse(is_valid)
 
     def test_that_descriptor_validators_work(self):
         # Arrange
@@ -55,8 +59,12 @@ class SANSStateTest(unittest.TestCase):
         data = SANSStateDataISIS()
 
         # Act + Assert
-        with self.assertRaises(ValueError):
+        try:
             state.data = data
+            is_valid = True
+        except ValueError:
+            is_valid = False
+        self.assertFalse(is_valid)
 
     def test_that_sans_state_holds_a_copy_of_the_substates_and_not_only_a_reference(self):
         # Arrange

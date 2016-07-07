@@ -62,51 +62,111 @@ class SANSStateDataTest(unittest.TestCase):
         state = SANSStateDataISIS()
 
         # Act + Assert
-        with self.assertRaises(TypeError):
+        # Since we are using Python2.6 on Rhel6 we cannot use a simple context manager in combination with the
+        # testing that the descriptor will throw if setting it to an incorrect type. This is very clunky, but that
+        # seems now like the only way to make Rhel6 happy
+        try:
             state.sample_scatter = ["sdf"]
-        with self.assertRaises(TypeError):
-            state.sample_transmission = ["sdf"]
-        with self.assertRaises(TypeError):
-            state.sample_direct = ["sdf"]
-        with self.assertRaises(TypeError):
-            state.can_scatter = ["sdf"]
-        with self.assertRaises(TypeError):
-            state.can_transmission = ["sdf"]
-        with self.assertRaises(TypeError):
-            state.can_direct = ["sdf"]
-        with self.assertRaises(TypeError):
-            state.calibration = ["sdf"]
+            is_valid = True
+        except TypeError:
+            is_valid = False
+        self.assertFalse(is_valid)
 
-        with self.assertRaises(TypeError):
+        try:
+            state.sample_transmission = ["sdf"]
+            is_valid = True
+        except TypeError:
+            is_valid = False
+        self.assertFalse(is_valid)
+
+        try:
+            state.sample_direct = ["sdf"]
+            is_valid = True
+        except TypeError:
+            is_valid = False
+        self.assertFalse(is_valid)
+
+        try:
+            state.can_scatter = ["sdf"]
+            is_valid = True
+        except TypeError:
+            is_valid = False
+        self.assertFalse(is_valid)
+
+        try:
+            state.can_transmission = ["sdf"]
+            is_valid = True
+        except TypeError:
+            is_valid = False
+        self.assertFalse(is_valid)
+
+        try:
+            state.can_direct = ["sdf"]
+            is_valid = True
+        except TypeError:
+            is_valid = False
+        self.assertFalse(is_valid)
+
+        try:
+            state.calibration = ["sdf"]
+            is_valid = True
+        except TypeError:
+            is_valid = False
+        self.assertFalse(is_valid)
+
+        try:
             state.sample_scatter_period = ["sdf"]
-        with self.assertRaises(TypeError):
+            is_valid = True
+        except TypeError:
+            is_valid = False
+        self.assertFalse(is_valid)
+
+        try:
             state.sample_transmission_period = ["sdf"]
-        with self.assertRaises(TypeError):
+            is_valid = True
+        except TypeError:
+            is_valid = False
+        self.assertFalse(is_valid)
+
+        try:
             state.sample_direct_period = ["sdf"]
-        with self.assertRaises(TypeError):
+            is_valid = True
+        except TypeError:
+            is_valid = False
+        self.assertFalse(is_valid)
+
+        try:
             state.can_scatter_period = ["sdf"]
-        with self.assertRaises(TypeError):
+            is_valid = True
+        except TypeError:
+            is_valid = False
+        self.assertFalse(is_valid)
+
+        try:
             state.can_transmission_period = ["sdf"]
-        with self.assertRaises(TypeError):
+            is_valid = True
+        except TypeError:
+            is_valid = False
+        self.assertFalse(is_valid)
+
+        try:
             state.can_direct_period = ["sdf"]
+            is_valid = True
+        except TypeError:
+            is_valid = False
+        self.assertFalse(is_valid)
 
     def test_that_descriptor_validators_work(self):
         # Arrange
         state = SANSStateDataISIS()
 
         # Act + Assert
-        with self.assertRaises(ValueError):
+        try:
             state.sample_scatter_period = -1
-        with self.assertRaises(ValueError):
-            state.sample_transmission_period = -1
-        with self.assertRaises(ValueError):
-            state.sample_direct_period = -1
-        with self.assertRaises(ValueError):
-            state.can_scatter_period = -1
-        with self.assertRaises(ValueError):
-            state.can_transmission_period = -1
-        with self.assertRaises(ValueError):
-            state.can_direct_period = -1
+            is_valid = True
+        except ValueError:
+            is_valid = False
+        self.assertFalse(is_valid)
 
     def test_validate_method_raises_value_error_for_invalid_state(self):
         # Arrange
