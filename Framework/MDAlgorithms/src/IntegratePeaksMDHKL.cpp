@@ -1,5 +1,5 @@
 #include "MantidMDAlgorithms/IntegratePeaksMDHKL.h"
-
+#include "MantidDataObjects/MDFramesToSpecialCoordinateSystem.h"
 #include "MantidAPI/CommonBinsValidator.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
@@ -37,7 +37,7 @@ IntegratePeaksMDHKL::IntegratePeaksMDHKL() {}
 void IntegratePeaksMDHKL::init() {
   declareProperty(make_unique<WorkspaceProperty<IMDWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
-                  "An input Sample MDEventWorkspace in HKL.");
+                  "An input Sample MDHistoWorkspace or MDEventWorkspace in HKL.");
   declareProperty("DeltaHKL", 0.5,
                   "Distance from integer HKL to integrate peak.");
   declareProperty("GridPoints", 201,
@@ -80,10 +80,12 @@ void IntegratePeaksMDHKL::init() {
  */
 void IntegratePeaksMDHKL::exec() {
   IMDWorkspace_sptr m_inputWS = getProperty("InputWorkspace");
-  if (m_inputWS->getSpecialCoordinateSystem() != Mantid::Kernel::HKL) {
+  Mantid::DataObjects::MDFramesToSpecialCoordinateSystem converter;
+  boost::optional<Mantid::Kernel::SpecialCoordinateSystem> coordinateSystem = converter(m_inputWS.get());
+  if( *coordinateSystem != Mantid::Kernel::SpecialCoordinateSystem::HKL) {
     std::stringstream errmsg;
     errmsg << "Input MDWorkspace's coordinate system is not HKL but "
-           << m_inputWS->getSpecialCoordinateSystem() << ".";
+          << coordinateSystem << ".";
     throw std::invalid_argument(errmsg.str());
   }
 
@@ -175,7 +177,6 @@ void IntegratePeaksMDHKL::integratePeak(const int neighborPts,
                                         MDHistoWorkspace_sptr out,
                                         double &intensity,
                                         double &errorSquared) {
-  // AnalysisDataService::Instance().addOrReplace("box", out);
   std::vector<int> gridPts;
   const size_t dimensionality = out->getNumDims();
   for (size_t i = 0; i < dimensionality; ++i) {
