@@ -266,6 +266,7 @@ void CalculateEfficiency::normalizeDetectors(MatrixWorkspace_sptr rebinnedWS,
 
 /**
  * Fully masks one component named componentName
+ * @param componentName :: must be a known CompAssembly.
  */
 void CalculateEfficiency::maskComponent(MatrixWorkspace &ws,
                                         const std::string &componentName) {
@@ -274,6 +275,12 @@ void CalculateEfficiency::maskComponent(MatrixWorkspace &ws,
     boost::shared_ptr<const Geometry::ICompAssembly> component =
         boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(
             instrument->getComponentByName(componentName));
+    if (!component) {
+      g_log.warning("Component " + componentName +
+                    " expected to be a CompAssembly, e.g., a bank. Component " +
+                    componentName + " not masked!");
+      return;
+    }
     std::vector<detid_t> detectorList;
     for (int x = 0; x < component->nelements(); x++) {
       boost::shared_ptr<Geometry::ICompAssembly> xColumn =
@@ -287,7 +294,7 @@ void CalculateEfficiency::maskComponent(MatrixWorkspace &ws,
         }
       }
     }
-    std::vector<size_t> indexList = ws.getIndicesFromDetectorIDs(detectorList);
+    auto indexList = ws.getIndicesFromDetectorIDs(detectorList);
     for (const auto &idx : indexList)
       ws.maskWorkspaceIndex(idx);
   } catch (std::exception &) {
