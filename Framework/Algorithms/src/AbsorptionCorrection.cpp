@@ -5,8 +5,8 @@
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
-#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/IDetector.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
@@ -88,6 +88,9 @@ void AbsorptionCorrection::init() {
   defineProperties();
 }
 
+// Duplicated from VectorHelper. This method could be added to the Histogram
+// type to
+// remove this duplication
 void linearlyInterpolateY(const Mantid::HistogramData::HistogramX &x,
                           Mantid::HistogramData::HistogramY &y,
                           const double stepSize) {
@@ -177,7 +180,7 @@ void AbsorptionCorrection::exec() {
 
     // Copy over bin boundaries
     auto &X = m_inputWS->x(i);
-    correctionFactors->mutableX(i) = X;
+    correctionFactors->setSharedX(i, m_inputWS->sharedX(i));
 
     // Get detector position
     IDetector_const_sptr det;
@@ -243,7 +246,7 @@ void AbsorptionCorrection::exec() {
         1) // Interpolate linearly between points separated by m_xStep,
            // last point required
     {
-	  //TODO Talk to Simon but this line was implemented in histogram
+      // TODO Talk to Simon but this line was implemented in histogram
       linearlyInterpolateY(X, Y, static_cast<double>(m_xStep));
     }
 

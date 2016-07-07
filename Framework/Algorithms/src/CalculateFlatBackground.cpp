@@ -169,8 +169,7 @@ void CalculateFlatBackground::exec() {
 
       if (background < 0) {
         g_log.warning() << "Problem with calculating the background number of "
-                           "counts spectrum with index "
-                        << currentSpec
+                           "counts spectrum with index " << currentSpec
                         << ". The spectrum has been left unchanged.\n";
         g_log.debug() << "The background for spectra index " << currentSpec
                       << "was calculated to be " << background << '\n';
