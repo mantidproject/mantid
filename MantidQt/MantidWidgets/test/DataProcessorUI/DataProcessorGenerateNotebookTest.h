@@ -172,7 +172,7 @@ public:
     m_rows[1].insert(1);
   }
 
-  void xtestGenerateNotebook() {
+  void testGenerateNotebook() {
 
     auto notebook = Mantid::Kernel::make_unique<DataProcessorGenerateNotebook>(
         m_wsName, m_model, m_instrument, createReflectometryWhiteList(),
