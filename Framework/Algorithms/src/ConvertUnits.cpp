@@ -571,14 +571,19 @@ const std::vector<double> ConvertUnits::calculateRebinParams(
  *  @param WS The workspace to operate on
  */
 void ConvertUnits::reverse(API::MatrixWorkspace_sptr WS) {
-  if (WorkspaceHelpers::commonBoundaries(WS) && !m_inputEvents) {
+  EventWorkspace_sptr eventWS =
+    boost::dynamic_pointer_cast<EventWorkspace>(WS);
+  bool isInputEvents = static_cast<bool>(eventWS);
+  size_t numberOfSpectra = WS->getNumberHistograms();
+  if (WorkspaceHelpers::commonBoundaries(WS) && !isInputEvents) {
+    //common boundaries and histogram
     std::reverse(WS->dataX(0).begin(), WS->dataX(0).end());
-    std::reverse(WS->dataY(0).begin(), WS->dataY(0).end());
+    std::reverse(WS->dataY(0).begin(), WS->dataY(0).end()); 
     std::reverse(WS->dataE(0).begin(), WS->dataE(0).end());
 
     MantidVecPtr xVals;
     xVals.access() = WS->dataX(0);
-    for (size_t j = 1; j < m_numberOfSpectra; ++j) {
+    for (size_t j = 1; j < numberOfSpectra; ++j) {
       WS->setX(j, xVals);
       std::reverse(WS->dataY(j).begin(), WS->dataY(j).end());
       std::reverse(WS->dataE(j).begin(), WS->dataE(j).end());
@@ -586,15 +591,12 @@ void ConvertUnits::reverse(API::MatrixWorkspace_sptr WS) {
         interruption_point();
     }
   } else {
-    EventWorkspace_sptr eventWS =
-        boost::dynamic_pointer_cast<EventWorkspace>(WS);
-    assert(static_cast<bool>(eventWS) == m_inputEvents); // Sanity check
-
-    int m_numberOfSpectra_i = static_cast<int>(m_numberOfSpectra);
+    //either events or ragged boundaries
+    int numberOfSpectra_i = static_cast<int>(numberOfSpectra);
     PARALLEL_FOR1(WS)
-    for (int j = 0; j < m_numberOfSpectra_i; ++j) {
+    for (int j = 0; j < numberOfSpectra_i; ++j) {
       PARALLEL_START_INTERUPT_REGION
-      if (m_inputEvents) {
+      if (isInputEvents) {
         eventWS->getSpectrum(j).reverse();
       } else {
         std::reverse(WS->dataX(j).begin(), WS->dataX(j).end());

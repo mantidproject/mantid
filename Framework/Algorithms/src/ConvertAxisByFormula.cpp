@@ -1,6 +1,5 @@
 #include "MantidAlgorithms/ConvertAxisByFormula.h"
 #include "MantidAPI/CommonBinsValidator.h"
-#include "MantidAPI/IncreasingAxisValidator.h"
 #include "MantidAPI/GeometryInfoFactory.h"
 #include "MantidAPI/GeometryInfo.h"
 #include "MantidAPI/RefAxis.h"
@@ -219,23 +218,31 @@ void ConvertAxisByFormula::exec() {
     }
   }
 
-  IncreasingAxisValidator incAxis;
-  std::string incAxisResult = incAxis.isValid(outputWs);
+  // If the units conversion has flipped the ascending direction of X, reverse
+  // all the vectors
+  size_t midSpectra = outputWs->getNumberHistograms() / 2;
+  if (!outputWs->dataX(0).empty() &&
+      (outputWs->dataX(0).front() > outputWs->dataX(0).back() ||
+       outputWs->dataX(midSpectra).front() >
+           outputWs->dataX(midSpectra).back())) {
+    g_log.information("Reversing data within the workspace to keep the axes in "
+                      "increasing order.");
+    this->reverse(outputWs);
+  }
 
-  if (incAxisResult != "")
-    g_log.warning(
-        incAxisResult +
-        ".\n"
-        "Some of the Mantid algorithms might not use the workspace correctly.");
-
+  // Set the Unit of the Axis
   if ((axisUnits != "") || (axisTitle != "")) {
-    if (axisTitle == "") {
-      axisTitle = axisPtr->unit()->caption();
+    try {
+      axisPtr->unit() = UnitFactory::Instance().create(axisUnits);
+    } catch (Exception::NotFoundError &) {
+      if (axisTitle == "") {
+        axisTitle = axisPtr->unit()->caption();
+      }
+      if (axisUnits == "") {
+        axisUnits = axisPtr->unit()->label();
+      }
+      axisPtr->unit() = boost::make_shared<Units::Label>(axisTitle, axisUnits);
     }
-    if (axisUnits == "") {
-      axisUnits = axisPtr->unit()->label();
-    }
-    axisPtr->unit() = boost::make_shared<Units::Label>(axisTitle, axisUnits);
   }
 }
 

@@ -2,7 +2,7 @@
 #define MANTID_ALGORITHMS_CONVERTAXISBYFORMULA_H_
 
 #include "MantidKernel/System.h"
-#include "MantidAPI/Algorithm.h"
+#include "MantidAlgorithms/ConvertUnits.h"
 #include "MantidAPI/Workspace_fwd.h"
 
 // forward declaration
@@ -40,7 +40,7 @@ namespace Algorithms {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport ConvertAxisByFormula : public API::Algorithm {
+class DLLExport ConvertAxisByFormula : public Algorithms::ConvertUnits {
 public:
   const std::string name() const override;
   /// Summary of algorithms purpose
@@ -51,7 +51,13 @@ public:
 
   int version() const override;
   const std::string category() const override;
-
+protected:
+  const std::string workspaceMethodName() const override {
+    return "";
+  }
+  const std::string workspaceMethodInputProperty() const override {
+    return "";
+  }
 private:
   void init() override;
   void exec() override;
