@@ -11,13 +11,13 @@ import sys
 
 class ArrayPropertyTest(unittest.TestCase):
 
-    def xtest_default_constructor_raises_an_exception(self):
+    def test_default_constructor_raises_an_exception(self):
         """
             Test that the class cannot be default constructed
         """
         self.assertRaises(Exception, FloatArrayProperty)
 
-    def xtest_name_only_constructor_gives_correct_object(self):
+    def test_name_only_constructor_gives_correct_object(self):
         """
             Tests the simplest constructor that takes
             only a name
@@ -27,7 +27,7 @@ class ArrayPropertyTest(unittest.TestCase):
         self.assertTrue(isinstance(arr, FloatArrayProperty))
         self._check_object_attributes(arr, name, Direction.Input)
 
-    def xtest_name_direction_constructor_gives_correct_object(self):
+    def test_name_direction_constructor_gives_correct_object(self):
         """
             Tests the constructor that takes
             only a name & direction
@@ -37,7 +37,7 @@ class ArrayPropertyTest(unittest.TestCase):
         arr = FloatArrayProperty(name, direc)
         self._check_object_attributes(arr, name, direc)
 
-    def xtest_name_validator_direction_constructor_gives_correct_object(self):
+    def test_name_validator_direction_constructor_gives_correct_object(self):
         """
             Test the constructor that takes a name, validator & direction
         """
@@ -48,7 +48,7 @@ class ArrayPropertyTest(unittest.TestCase):
         self._check_object_attributes(arr, name, direc)
         self.assertEquals(arr.isValid, "")
 
-    def xtest_name_string_values_validator_direction_constructor_gives_correct_object(self):
+    def test_name_string_values_validator_direction_constructor_gives_correct_object(self):
         """
             Test the constructor that takes a name, values as string, validator & direction
         """
@@ -63,7 +63,7 @@ class ArrayPropertyTest(unittest.TestCase):
         self.assertTrue(isinstance(values, np.ndarray))
 
 
-    def xtest_name_values_from_list_validator_direction_constructor_gives_correct_object(self):
+    def test_name_values_from_list_validator_direction_constructor_gives_correct_object(self):
         """
             Test the constructor that takes a name, values from python object,
             validator & direction
@@ -75,7 +75,7 @@ class ArrayPropertyTest(unittest.TestCase):
         arr = FloatArrayProperty(name, input_values, validator, direc)
         self._check_object_attributes(arr, name, direc, length = len(input_values))
 
-    def xtest_name_values_from_array_validator_direction_constructor_gives_correct_object(self):
+    def test_name_values_from_array_validator_direction_constructor_gives_correct_object(self):
         """
             Test the constructor that takes a name, values from python object,
             validator & direction
@@ -95,7 +95,7 @@ class ArrayPropertyTest(unittest.TestCase):
         self.assertEquals(arrprop.direction, direction)
         self.assertEquals(len(arrprop.value), length)
 
-    def xtest_setProperty_with_FloatArrayProperty(self):
+    def test_setProperty_with_FloatArrayProperty(self):
         """
         Test ArrayProperty within a python algorithm
         """
@@ -133,7 +133,7 @@ class ArrayPropertyTest(unittest.TestCase):
         input_values = range(1, 5)
         self._do_algorithm_test(AlgWithFloatArrayProperty, input_values)
 
-    def xtest_PythonAlgorithm_setProperty_With_Ranges_String(self):
+    def test_PythonAlgorithm_setProperty_With_Ranges_String(self):
         """
             Test ArrayProperty within a python algorithm can
             be set with a string range
@@ -155,7 +155,7 @@ class ArrayPropertyTest(unittest.TestCase):
 
         self.assertEquals(6, len(alg._input_values))
 
-    def xtest_PythonAlgorithm_setProperty_with_StringArrayProperty(self):
+    def test_PythonAlgorithm_setProperty_with_StringArrayProperty(self):
         """
             Test StringArrayProperty within a python algorithm
         """
