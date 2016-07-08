@@ -524,38 +524,8 @@ void ProjectSerialiser::openMatrix(const std::string &lines,
  * @param lines :: string of characters from a Mantid project file
  */
 void ProjectSerialiser::openMantidMatrix(const std::string &lines) {
-  TSVSerialiser tsv(lines);
-
-  MantidMatrix *m = nullptr;
-
-  if (tsv.selectLine("WorkspaceName")) {
-      const std::string wsName = tsv.asString(1);
-      MatrixWorkspace_sptr ws;
-
-      if (AnalysisDataService::Instance().doesExist(wsName))
-          ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName);
-
-      if (!ws)
-          return;
-
-      m = new MantidMatrix();
-      m->init(ws, window, "Mantid", QString::fromStdString(wsName), -1, -1);
-  }
-
-  // Append to the list of mantid matrix windows
-  window->addMantidMatrixWindow(m);
-  window->addMdiSubWindow(m);
-
-  if (tsv.selectLine("geometry")) {
-    const std::string geometry = tsv.lineAsString("geometry");
-    window->restoreWindowGeometry(window, m, QString::fromStdString(geometry));
-  }
-
-  if (tsv.selectLine("tgeometry")) {
-    const std::string geometry = tsv.lineAsString("tgeometry");
-    window->restoreWindowGeometry(window, m, QString::fromStdString(geometry));
-  }
-
+    MantidMatrix *m = new MantidMatrix();
+    m->loadFromProject(lines, window, -1);
 }
 
 /**

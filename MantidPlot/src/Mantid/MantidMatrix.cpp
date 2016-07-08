@@ -1201,11 +1201,35 @@ void findYRange(MatrixWorkspace_const_sptr ws, double &miny, double &maxy) {
 void MantidMatrix::loadFromProject(const std::string &lines,
                                    ApplicationWindow *app,
                                    const int fileVersion) {
-  Q_UNUSED(lines);
-  Q_UNUSED(app);
   Q_UNUSED(fileVersion);
-  // We don't actually need to do any loading. It's all taken care of by
-  // ApplicationWindow.
+  TSVSerialiser tsv(lines);
+
+  if (tsv.selectLine("WorkspaceName")) {
+      const std::string wsName = tsv.asString(1);
+      MatrixWorkspace_sptr ws;
+
+      if (AnalysisDataService::Instance().doesExist(wsName))
+          ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName);
+
+      if (!ws)
+          return;
+
+      init(ws, app, "Mantid", QString::fromStdString(wsName), -1, -1);
+  }
+
+  // Append to the list of mantid matrix apps
+  app->addMantidMatrixWindow(this);
+  app->addMdiSubWindow(this);
+
+  if (tsv.selectLine("geometry")) {
+    const std::string geometry = tsv.lineAsString("geometry");
+    app->restoreWindowGeometry(app, this, QString::fromStdString(geometry));
+  }
+
+  if (tsv.selectLine("tgeometry")) {
+    const std::string geometry = tsv.lineAsString("tgeometry");
+    app->restoreWindowGeometry(app, this, QString::fromStdString(geometry));
+  }
 }
 
 std::string MantidMatrix::saveToProject(ApplicationWindow *app) {
