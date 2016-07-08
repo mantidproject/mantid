@@ -140,7 +140,7 @@ Output:
 
 .. testcode:: ExWv2MT
 
-   wsWavelength = CreateSampleWorkspace(XUnit='Wavelength', XMin=2, XMax=6, BinWidth=0.050000000000000003)
+   wsWavelength = CreateSampleWorkspace(XUnit='Wavelength', XMin=2, XMax=6, BinWidth=0.05)
    # Convert to momentum transfer
    # directly using a formula
    wsMTbyFormula = ConvertAxisByFormula(InputWorkspace=wsWavelength,  Formula='(4*pi*sin(twotheta/2))/x', AxisUnits='MomentumTransfer')
