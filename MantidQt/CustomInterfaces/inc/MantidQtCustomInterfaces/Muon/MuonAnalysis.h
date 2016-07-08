@@ -244,12 +244,8 @@ private slots:
   /// Opens the managed directory dialog for easier access for the user.
   void openDirectoryDialog();
 
-  /// Called when selected workspace to fit changes
-  void dataWorkspaceChanged();
-  /// Called when selected groups to fit change
-  void dataGroupsChanged();
-  /// Called when selected periods to fit change
-  void dataPeriodsChanged();
+  /// Called when selected workspace/groups/periods to fit changes
+  void dataToFitChanged();
 
 private:
  

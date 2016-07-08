@@ -95,10 +95,17 @@ public:
 
   /// Run before each test to create mock objects
   void setUp() override {
+    Mantid::API::Grouping grouping;
+    grouping.groupNames = {"fwd", "bwd"};
+    grouping.pairNames = {"long"};
+    grouping.groups = {"1-32", "33-64"};
+    grouping.pairs.emplace_back(0, 1);
+    grouping.pairAlphas = {1.0};
     m_dataSelector = new NiceMock<MockDataSelector>();
     m_fitBrowser = new NiceMock<MockFitBrowser>();
-    m_presenter = new MuonAnalysisFitDataPresenter(m_fitBrowser, m_dataSelector,
-                                                   m_dataLoader);
+    m_presenter = new MuonAnalysisFitDataPresenter(
+        m_fitBrowser, m_dataSelector, m_dataLoader, grouping,
+        MantidQt::CustomInterfaces::Muon::PlotType::Asymmetry);
   }
 
   /// Run after each test to check expectations and remove mocks
@@ -288,12 +295,6 @@ public:
 private:
   void doTest_handleSelectedDataChanged(IMuonFitDataSelector::FitType fitType) {
     auto &ads = AnalysisDataService::Instance();
-    Mantid::API::Grouping grouping;
-    grouping.groupNames = {"fwd", "bwd"};
-    grouping.pairNames = {"long"};
-    grouping.groups = {"1-32", "33-64"};
-    grouping.pairs.emplace_back(0, 1);
-    grouping.pairAlphas = {1.0};
     EXPECT_CALL(*m_dataSelector, getInstrumentName())
         .Times(1)
         .WillOnce(Return("MUSR"));
@@ -342,8 +343,7 @@ private:
     EXPECT_CALL(*m_fitBrowser, setWorkspaceName(_)).Times(1);
     m_dataLoader.setDeadTimesType(DeadTimesType::FromFile);
     ads.add("MUSR00015189", boost::make_shared<WorkspaceGroup>());
-    m_presenter->handleSelectedDataChanged(
-        grouping, MantidQt::CustomInterfaces::Muon::PlotType::Asymmetry, true);
+    m_presenter->handleSelectedDataChanged(true);
     // test that all expected names are in the ADS
     const auto namesInADS = ads.getObjectNames();
     for (const QString &name : expectedNames) {

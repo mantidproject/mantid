@@ -57,16 +57,14 @@ public:
   MuonAnalysisFitDataPresenter(
       MantidQt::MantidWidgets::IWorkspaceFitControl *fitBrowser,
       MantidQt::MantidWidgets::IMuonFitDataSelector *dataSelector,
-      MuonAnalysisDataLoader &dataLoader, double timeZero = 0,
+      MuonAnalysisDataLoader &dataLoader, const Mantid::API::Grouping &grouping,
+      const Muon::PlotType &plotType, double timeZero = 0,
       RebinOptions &rebinArgs =
           RebinOptions(MantidQt::CustomInterfaces::Muon::MuonAnalysisOptionTab::
                            RebinType::NoRebin,
                        ""));
   /// Handles "selected data changed"
-  void handleSelectedDataChanged(
-      const Mantid::API::Grouping &grouping,
-      const MantidQt::CustomInterfaces::Muon::PlotType &plotType,
-      bool overwrite);
+  void handleSelectedDataChanged(bool overwrite);
   /// Handles peak picker being reassigned to a new graph
   void setAssignedFirstRun(const QString &wsName);
   /// Get the workspace the peak picker is currently assigned to
@@ -76,11 +74,15 @@ public:
   /// Change the stored rebin args
   void setRebinArgs(const RebinOptions &rebinArgs) { m_rebinArgs = rebinArgs; }
   /// Generate names of workspaces to be created
-  std::vector<std::string> generateWorkspaceNames(
-      const std::string &instrument, const std::string &runString,
-      const Mantid::API::Grouping &grouping,
-      const MantidQt::CustomInterfaces::Muon::PlotType &plotType,
-      bool overwrite) const;
+  std::vector<std::string> generateWorkspaceNames(const std::string &instrument,
+                                                  const std::string &runString,
+                                                  bool overwrite) const;
+  /// Update the stored grouping
+  void setGrouping(const Mantid::API::Grouping &grouping) {
+    m_grouping = grouping;
+  }
+  /// Update the stored plot type
+  void setPlotType(const Muon::PlotType &plotType) { m_plotType = plotType; }
 
 public slots:
   /// Transforms fit results when a simultaneous fit finishes
@@ -98,18 +100,12 @@ public slots:
 
 private:
   /// Create workspaces to fit and update fit browser (model)
-  void createWorkspacesToFit(const std::vector<std::string> &names,
-                             const Mantid::API::Grouping &grouping) const;
+  void createWorkspacesToFit(const std::vector<std::string> &names) const;
   /// Generate names of workspaces to be created
-  std::vector<std::string> generateWorkspaceNames(
-      const Mantid::API::Grouping &grouping,
-      const MantidQt::CustomInterfaces::Muon::PlotType &plotType,
-      bool overwrite) const;
+  std::vector<std::string> generateWorkspaceNames(bool overwrite) const;
   /// Create analysis workspace
-  Mantid::API::Workspace_sptr
-  createWorkspace(const std::string &name,
-                  const Mantid::API::Grouping &grouping,
-                  std::string &groupLabel) const;
+  Mantid::API::Workspace_sptr createWorkspace(const std::string &name,
+                                              std::string &groupLabel) const;
   /// Get rebin options for analysis
   std::string getRebinParams(const Mantid::API::Workspace_sptr ws) const;
   /// Rename fit workspaces, add logs and generate params table
@@ -138,6 +134,10 @@ private:
   double m_timeZero;
   /// Stored rebin args
   RebinOptions m_rebinArgs;
+  /// Stored grouping
+  Mantid::API::Grouping m_grouping;
+  /// Stored plot type
+  Muon::PlotType m_plotType;
 };
 } // namespace CustomInterfaces
 } // namespace Mantid

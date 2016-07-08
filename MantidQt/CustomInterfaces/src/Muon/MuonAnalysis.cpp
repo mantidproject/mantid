@@ -2051,18 +2051,20 @@ void MuonAnalysis::loadFittings() {
   // Set up fit data and function presenters
   m_fitDataPresenter =
       Mantid::Kernel::make_unique<MuonAnalysisFitDataPresenter>(
-          m_uiForm.fitBrowser, m_dataSelector, m_dataLoader, m_dataTimeZero);
+          m_uiForm.fitBrowser, m_dataSelector, m_dataLoader,
+          m_groupingHelper.parseGroupingTable(),
+          parsePlotType(m_uiForm.frontPlotFuncs), m_dataTimeZero);
   updateRebinParams(); // set initial params for fit data presenter
   m_fitFunctionPresenter =
       Mantid::Kernel::make_unique<MuonAnalysisFitFunctionPresenter>(
           nullptr, m_uiForm.fitBrowser, m_functionBrowser);
   // Connect signals
   connect(m_dataSelector, SIGNAL(selectedGroupsChanged()), this,
-          SLOT(dataGroupsChanged()));
+          SLOT(dataToFitChanged()));
   connect(m_dataSelector, SIGNAL(selectedPeriodsChanged()), this,
-          SLOT(dataPeriodsChanged()));
+          SLOT(dataToFitChanged()));
   connect(m_dataSelector, SIGNAL(workspaceChanged()), this,
-          SLOT(dataWorkspaceChanged()));
+          SLOT(dataToFitChanged()));
 }
 
 /**
@@ -2840,38 +2842,14 @@ std::string MuonAnalysis::getSubtractedPeriods() const {
 }
 
 /**
- * Slot: groups to fit changed in data selector widget
+ * Slot: groups/periods/runs to fit changed in data selector widget
  * Pass this information to the fit helper
  */
-void MuonAnalysis::dataGroupsChanged() {
+void MuonAnalysis::dataToFitChanged() {
   if (m_fitDataPresenter) {
-    m_fitDataPresenter->handleSelectedDataChanged(
-        m_groupingHelper.parseGroupingTable(),
-        parsePlotType(m_uiForm.frontPlotFuncs), isOverwriteEnabled());
-  }
-}
-
-/**
- * Slot: periods to fit changed in data selector widget
- * Pass this information to the fit helper
- */
-void MuonAnalysis::dataPeriodsChanged() {
-  if (m_fitDataPresenter) {
-    m_fitDataPresenter->handleSelectedDataChanged(
-        m_groupingHelper.parseGroupingTable(),
-        parsePlotType(m_uiForm.frontPlotFuncs), isOverwriteEnabled());
-  }
-}
-
-/**
- * Slot: workspace to fit changed in data selector widget
- * Pass this information to the fit helper
- */
-void MuonAnalysis::dataWorkspaceChanged() {
-  if (m_fitDataPresenter) {
-    m_fitDataPresenter->handleSelectedDataChanged(
-        m_groupingHelper.parseGroupingTable(),
-        parsePlotType(m_uiForm.frontPlotFuncs), isOverwriteEnabled());
+    m_fitDataPresenter->setGrouping(m_groupingHelper.parseGroupingTable());
+    m_fitDataPresenter->setPlotType(parsePlotType(m_uiForm.frontPlotFuncs));
+    m_fitDataPresenter->handleSelectedDataChanged(isOverwriteEnabled());
   }
 }
 

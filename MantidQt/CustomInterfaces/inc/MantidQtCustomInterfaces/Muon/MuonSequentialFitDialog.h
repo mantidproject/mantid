@@ -46,8 +46,7 @@ class MANTIDQT_CUSTOMINTERFACES_DLL MuonSequentialFitDialog : public QDialog {
 public:
   MuonSequentialFitDialog(
       MantidQt::MantidWidgets::MuonFitPropertyBrowser *fitPropBrowser,
-      MuonAnalysisFitDataPresenter *dataPresenter,
-      const Mantid::API::Grouping &grouping, const Muon::PlotType &plotType);
+      MuonAnalysisFitDataPresenter *dataPresenter);
   ~MuonSequentialFitDialog() override;
 
   enum DialogState { Preparing, Running, Stopped };
@@ -94,12 +93,6 @@ private:
 
   /// Fit data presenter passed in to constructor
   MuonAnalysisFitDataPresenter *m_dataPresenter;
-
-  /// Grouping used for data
-  const Mantid::API::Grouping m_grouping;
-
-  /// Plot type used for data
-  const Muon::PlotType m_plotType;
 
   // -- STATIC MEMBERS ------------------------------------------------------
 

@@ -32,15 +32,18 @@ namespace CustomInterfaces {
  * @param fitBrowser :: [input] Pointer to fit browser to update
  * @param dataSelector :: [input] Pointer to data selector to get input from
  * @param dataLoader :: [input] Data loader (shared with MuonAnalysis)
+ * @param grouping :: [input] Grouping set in interface for data
+ * @param plotType :: [input] Plot type set in interface
  * @param timeZero :: [input] Time zero from MuonAnalysis interface (optional)
  * @param rebinArgs :: [input] Rebin args from MuonAnalysis interface (optional)
  */
 MuonAnalysisFitDataPresenter::MuonAnalysisFitDataPresenter(
     IWorkspaceFitControl *fitBrowser, IMuonFitDataSelector *dataSelector,
-    MuonAnalysisDataLoader &dataLoader, double timeZero,
-    RebinOptions &rebinArgs)
+    MuonAnalysisDataLoader &dataLoader, const Mantid::API::Grouping &grouping,
+    const Muon::PlotType &plotType, double timeZero, RebinOptions &rebinArgs)
     : m_fitBrowser(fitBrowser), m_dataSelector(dataSelector),
-      m_dataLoader(dataLoader), m_timeZero(timeZero), m_rebinArgs(rebinArgs) {
+      m_dataLoader(dataLoader), m_timeZero(timeZero), m_rebinArgs(rebinArgs),
+      m_grouping(grouping), m_plotType(plotType) {
   // Ensure this is set correctly at the start
   handleSimultaneousFitLabelChanged();
   doConnect();
@@ -88,15 +91,11 @@ void MuonAnalysisFitDataPresenter::handleDataPropertiesChanged() {
 
 /**
  * Called when data selector reports "selected data changed"
- * @param grouping :: [input] Grouping table from interface
- * @param plotType :: [input] Type of plot currently selected in interface
  * @param overwrite :: [input] Whether overwrite is on or off in interface
  */
-void MuonAnalysisFitDataPresenter::handleSelectedDataChanged(
-    const Mantid::API::Grouping &grouping, const Muon::PlotType &plotType,
-    bool overwrite) {
-  const auto names = generateWorkspaceNames(grouping, plotType, overwrite);
-  createWorkspacesToFit(names, grouping);
+void MuonAnalysisFitDataPresenter::handleSelectedDataChanged(bool overwrite) {
+  const auto names = generateWorkspaceNames(overwrite);
+  createWorkspacesToFit(names);
 }
 
 /**
@@ -150,11 +149,9 @@ void MuonAnalysisFitDataPresenter::setAssignedFirstRun(const QString &wsName) {
  * yet exist in the ADS and adds them. Sets the workspace name, which
  * sends a signal to update the peak picker.
  * @param names :: [input] Names of workspaces to create
- * @param grouping :: [input] Grouping table from interface
  */
 void MuonAnalysisFitDataPresenter::createWorkspacesToFit(
-    const std::vector<std::string> &names,
-    const Mantid::API::Grouping &grouping) const {
+    const std::vector<std::string> &names) const {
   if (names.empty()) {
     m_fitBrowser->setWorkspaceNames(QStringList());
     return;
@@ -167,7 +164,7 @@ void MuonAnalysisFitDataPresenter::createWorkspacesToFit(
     } else {
       // Create here and add to the ADS
       std::string groupLabel;
-      const auto ws = createWorkspace(name, grouping, groupLabel);
+      const auto ws = createWorkspace(name, groupLabel);
       AnalysisDataService::Instance().add(name, ws);
       if (!groupLabel.empty()) {
         MuonAnalysisHelper::groupWorkspaces(groupLabel, {name});
@@ -198,18 +195,14 @@ void MuonAnalysisFitDataPresenter::createWorkspacesToFit(
 /**
  * Gets names of all workspaces required by asking the view
  * This overload gets the instrument/runs from the view
- * @param grouping :: [input] Grouping table from interface
- * @param plotType :: [input] Type of plot currently selected in interface
  * @param overwrite :: [input] Whether overwrite is on or off in interface
  * @returns :: list of workspace names
  */
-std::vector<std::string> MuonAnalysisFitDataPresenter::generateWorkspaceNames(
-    const Mantid::API::Grouping &grouping, const Muon::PlotType &plotType,
-    bool overwrite) const {
+std::vector<std::string>
+MuonAnalysisFitDataPresenter::generateWorkspaceNames(bool overwrite) const {
   const auto instrument = m_dataSelector->getInstrumentName().toStdString();
   const auto runs = m_dataSelector->getRuns().toStdString();
-  return generateWorkspaceNames(instrument, runs, grouping, plotType,
-                                overwrite);
+  return generateWorkspaceNames(instrument, runs, overwrite);
 }
 
 /**
@@ -217,15 +210,11 @@ std::vector<std::string> MuonAnalysisFitDataPresenter::generateWorkspaceNames(
  * Instrument/runs passed in separately, so can be used by sequential fits too
  * @param instrument :: [input] Name of instrument
  * @param runString :: [input] Range of runs as a string
- * @param grouping :: [input] Grouping table from interface
- * @param plotType :: [input] Type of plot currently selected in interface
  * @param overwrite :: [input] Whether overwrite is on or off in interface
  * @returns :: list of workspace names
  */
 std::vector<std::string> MuonAnalysisFitDataPresenter::generateWorkspaceNames(
     const std::string &instrument, const std::string &runString,
-    const Mantid::API::Grouping &grouping,
-    const MantidQt::CustomInterfaces::Muon::PlotType &plotType,
     bool overwrite) const {
   // From view, get names of all workspaces needed
   std::vector<std::string> workspaceNames;
@@ -237,11 +226,12 @@ std::vector<std::string> MuonAnalysisFitDataPresenter::generateWorkspaceNames(
   std::vector<int> selectedRuns;
   MuonAnalysisHelper::parseRunLabel(instRuns, params.instrument, selectedRuns);
   params.version = 1;
-  params.plotType = plotType;
+  params.plotType = m_plotType;
 
   // Find if given name is a group or a pair - defaults to group.
   // If it is not in the groups or pairs list, we will produce a workspace name
   // with "Group" in it rather than throwing.
+  const auto grouping = m_grouping;
   const auto getItemType = [&grouping](const std::string &name) {
     if (std::find(grouping.pairNames.begin(), grouping.pairNames.end(), name) !=
         grouping.pairNames.end()) {
@@ -294,13 +284,12 @@ std::vector<std::string> MuonAnalysisFitDataPresenter::generateWorkspaceNames(
  * Create an analysis workspace given the required name.
  * @param name :: [input] Name of workspace to create (in format INST0001234;
  * Pair; long; Asym; 1; #1)
- * @param grouping :: [input] Grouping table from interface
  * @param groupLabel :: [output] Label to group workspace under
  * @returns :: workspace
  */
-Mantid::API::Workspace_sptr MuonAnalysisFitDataPresenter::createWorkspace(
-    const std::string &name, const Mantid::API::Grouping &grouping,
-    std::string &groupLabel) const {
+Mantid::API::Workspace_sptr
+MuonAnalysisFitDataPresenter::createWorkspace(const std::string &name,
+                                              std::string &groupLabel) const {
   Mantid::API::Workspace_sptr outputWS;
 
   // parse name to get runs, periods, groups etc
@@ -320,10 +309,10 @@ Mantid::API::Workspace_sptr MuonAnalysisFitDataPresenter::createWorkspace(
 
     // correct and group the data
     const auto correctedData =
-        m_dataLoader.correctAndGroup(loadedData, grouping);
+        m_dataLoader.correctAndGroup(loadedData, m_grouping);
 
     // run analysis to generate workspace
-    Muon::AnalysisOptions analysisOptions(grouping);
+    Muon::AnalysisOptions analysisOptions(m_grouping);
     // Periods
     if (params.periods.empty()) {
       analysisOptions.summedPeriods = "1";
