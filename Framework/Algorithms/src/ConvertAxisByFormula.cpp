@@ -52,7 +52,9 @@ void ConvertAxisByFormula::init() {
 
   declareProperty("Formula", "", "The formula to use to convert the values, x "
                                  "or y may be used to refer to the axis "
-                                 "values");
+                                 "values.  l1, l2, twotheta and signedtwotheta"
+                                 "may be used to provide values from the "
+                                 "instrument geometry.");
   declareProperty(
       "AxisTitle", "",
       "The label of he new axis. If not set then the title will not change.");

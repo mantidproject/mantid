@@ -17,7 +17,7 @@ class GeometryInfo;
 }
 
 namespace Algorithms {
-/** ConvertAxisByFormula : TODO: DESCRIPTION
+/** ConvertAxisByFormula : Performs a unit conversion based on a supplied formula
 
   Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
@@ -40,7 +40,7 @@ namespace Algorithms {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport ConvertAxisByFormula : public Algorithms::ConvertUnits {
+class DLLExport ConvertAxisByFormula : public ConvertUnits {
 public:
   const std::string name() const override;
   /// Summary of algorithms purpose
@@ -62,7 +62,7 @@ private:
   void init() override;
   void exec() override;
 
-  /// A simple structure to hold information on variables
+  /// A simple internal structure to hold information on variables
   class Variable {
   public:
     Variable(const std::string &name)
