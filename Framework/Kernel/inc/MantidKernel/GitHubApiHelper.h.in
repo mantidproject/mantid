@@ -35,7 +35,7 @@ class MANTID_KERNEL_DLL GitHubApiHelper : public InternetHelper {
 public:
   GitHubApiHelper();
   GitHubApiHelper(const Kernel::ProxyInfo &proxy);
-  virtual ~GitHubApiHelper();
+  virtual ~GitHubApiHelper() = default;
 
   void reset() override;
   bool isAuthenticated();

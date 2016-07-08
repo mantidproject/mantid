@@ -35,11 +35,6 @@ GitHubApiHelper::GitHubApiHelper(const Kernel::ProxyInfo &proxy)
   addAuthenticationToken();
 }
 
-//----------------------------------------------------------------------------------------------
-/** Destructor
-*/
-GitHubApiHelper::~GitHubApiHelper() {}
-
 void GitHubApiHelper::reset() {
   InternetHelper::reset();
   addAuthenticationToken();
@@ -68,7 +63,7 @@ void GitHubApiHelper::processResponseHeaders(
   if (rateLimitLimit > -1) {
     g_log.debug() << "GitHub API " << rateLimitRemaining << " of "
                   << rateLimitLimit << " calls left. Resets at "
-                  << rateLimitReset.toSimpleString() << " GMT" << std::endl;
+                  << rateLimitReset.toSimpleString() << " GMT\n";
   }
 }
 
@@ -95,7 +90,7 @@ int GitHubApiHelper::sendRequestAndProcess(HTTPClientSession &session,
   std::istream &rs = session.receiveResponse(*m_response);
   int retStatus = m_response->getStatus();
   g_log.debug() << "Answer from web: " << retStatus << " "
-                << m_response->getReason() << std::endl;
+                << m_response->getReason() << "\n";
 
   if (retStatus == HTTP_OK ||
       (retStatus == HTTP_CREATED && m_method == HTTPRequest::HTTP_POST)) {
