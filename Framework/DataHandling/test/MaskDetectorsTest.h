@@ -357,8 +357,8 @@ public:
     AnalysisDataService::Instance().remove(existingMaskName);
   }
 
-  
-  void test_InputWorkspace_Larger_Than_MaskedWorkspace_Masks_Section_Specified_By_Start_EndWorkspaceIndex() {
+  void
+  test_InputWorkspace_Larger_Than_MaskedWorkspace_Masks_Section_Specified_By_Start_EndWorkspaceIndex() {
     const std::string inputWSName("inputWS"), existingMaskName("existingMask");
     const int numInputSpec(9);
     setUpWS(false, inputWSName, false, numInputSpec);
@@ -407,35 +407,33 @@ public:
   }
   //
   void test_rangeMasking() {
-      const std::string inputWSName("inputWS");
-      size_t numInputSpec(18);
-      setUpWS(false, inputWSName, false, numInputSpec);
+    const std::string inputWSName("inputWS");
+    size_t numInputSpec(18);
+    setUpWS(false, inputWSName, false, numInputSpec);
 
-      MaskDetectors masker;
-      masker.initialize();
-      masker.setPropertyValue("Workspace", inputWSName);
-      masker.setPropertyValue("StartWorkspaceIndex", "3");
-      masker.setPropertyValue("EndWorkspaceIndex", "5");
-      masker.execute();
+    MaskDetectors masker;
+    masker.initialize();
+    masker.setPropertyValue("Workspace", inputWSName);
+    masker.setPropertyValue("StartWorkspaceIndex", "3");
+    masker.setPropertyValue("EndWorkspaceIndex", "5");
+    masker.execute();
 
-      TS_ASSERT(masker.isExecuted());
-      auto inputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-          inputWSName);
+    TS_ASSERT(masker.isExecuted());
+    auto inputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+        inputWSName);
 
-      // Check masking
-      for (int i = 0; i < numInputSpec; ++i) {
-          IDetector_const_sptr det;
-          TS_ASSERT_THROWS_NOTHING(det = inputWS->getDetector(i));
-          if (i == 3 || i == 4 || i == 5) {
-              TS_ASSERT_EQUALS(det->isMasked(), true);
-          }
-          else {
-              TS_ASSERT_EQUALS(det->isMasked(), false);
-          }
+    // Check masking
+    for (int i = 0; i < numInputSpec; ++i) {
+      IDetector_const_sptr det;
+      TS_ASSERT_THROWS_NOTHING(det = inputWS->getDetector(i));
+      if (i == 3 || i == 4 || i == 5) {
+        TS_ASSERT_EQUALS(det->isMasked(), true);
+      } else {
+        TS_ASSERT_EQUALS(det->isMasked(), false);
       }
+    }
 
-      AnalysisDataService::Instance().remove(inputWSName);
-
+    AnalysisDataService::Instance().remove(inputWSName);
   }
 
   // -- helper function for the next procedure
