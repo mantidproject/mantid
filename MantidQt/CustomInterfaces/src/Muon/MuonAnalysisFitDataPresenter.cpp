@@ -146,18 +146,11 @@ void MuonAnalysisFitDataPresenter::setAssignedFirstRun(const QString &wsName) {
 }
 
 /**
- * Creates all workspaces that don't
- * yet exist in the ADS and adds them. Sets the workspace name, which
- * sends a signal to update the peak picker.
+ * Creates all workspaces that don't yet exist in the ADS and adds them.
  * @param names :: [input] Names of workspaces to create
  */
 void MuonAnalysisFitDataPresenter::createWorkspacesToFit(
     const std::vector<std::string> &names) const {
-  if (names.empty()) {
-    m_fitBrowser->setWorkspaceNames(QStringList());
-    return;
-  }
-
   // For each name, if not in the ADS, create it
   for (const auto &name : names) {
     if (AnalysisDataService::Instance().doesExist(name)) {
@@ -176,7 +169,8 @@ void MuonAnalysisFitDataPresenter::createWorkspacesToFit(
 
 /**
  * After new workspaces have been created, update the fit browser and data
- * selector with their names
+ * selector with their names. Sets the workspace name, which
+ * sends a signal to update the peak picker.
  * @param names :: [input] List of workspace names
  */
 void MuonAnalysisFitDataPresenter::updateWorkspaceNames(

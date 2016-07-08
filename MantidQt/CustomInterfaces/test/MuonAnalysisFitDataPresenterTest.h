@@ -4,6 +4,7 @@
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
+#include <algorithm>
 
 #include "MantidAPI/GroupingLoader.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -290,6 +291,72 @@ public:
     const int index = 2;
     EXPECT_CALL(*m_fitBrowser, userChangedDataset(index)).Times(1);
     m_presenter->handleDatasetIndexChanged(index);
+  }
+
+  void test_generateWorkspaceNames_CoAdd() {
+    EXPECT_CALL(*m_dataSelector, getChosenGroups())
+        .Times(1)
+        .WillOnce(Return(QStringList({"long"})));
+    EXPECT_CALL(*m_dataSelector, getPeriodSelections())
+        .Times(1)
+        .WillOnce(Return(QStringList({"1"})));
+    EXPECT_CALL(*m_dataSelector, getFitType())
+        .Times(1)
+        .WillOnce(Return(IMuonFitDataSelector::FitType::CoAdd));
+    auto names = m_presenter->generateWorkspaceNames("MUSR", "15189-91", true);
+    std::vector<std::string> expectedNames{
+        "MUSR00015189-91; Pair; long; Asym; 1; #1"};
+    TS_ASSERT_EQUALS(names, expectedNames)
+  }
+
+  void test_generateWorkspaceNames_Simultaneous() {
+    EXPECT_CALL(*m_dataSelector, getChosenGroups())
+        .Times(1)
+        .WillOnce(Return(QStringList({"long"})));
+    EXPECT_CALL(*m_dataSelector, getPeriodSelections())
+        .Times(1)
+        .WillOnce(Return(QStringList({"1"})));
+    EXPECT_CALL(*m_dataSelector, getFitType())
+        .Times(1)
+        .WillOnce(Return(IMuonFitDataSelector::FitType::Simultaneous));
+    auto names = m_presenter->generateWorkspaceNames("MUSR", "15189-91", true);
+    std::vector<std::string> expectedNames{
+        "MUSR00015189; Pair; long; Asym; 1; #1",
+        "MUSR00015190; Pair; long; Asym; 1; #1",
+        "MUSR00015191; Pair; long; Asym; 1; #1"};
+    std::sort(names.begin(), names.end());
+    TS_ASSERT_EQUALS(names, expectedNames)
+  }
+
+  void test_createWorkspacesToFit_AlreadyExists() {
+    // Put workspace into ADS under this name
+    auto &ads = AnalysisDataService::Instance();
+    const std::vector<std::string> names{
+        "MUSR00015189; Pair; long; Asym; 1; #1"};
+    const auto ws = WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1);
+    ads.add(names[0], ws);
+    m_presenter->createWorkspacesToFit(names);
+    // Ensure workspace has not been replaced in ADS
+    const auto retrievedWS =
+        ads.retrieveWS<Mantid::API::MatrixWorkspace>(names[0]);
+    TS_ASSERT(retrievedWS);
+    TS_ASSERT(Mantid::API::equals(retrievedWS, ws));
+  }
+
+  void test_createWorkspacesToFit() {
+    ON_CALL(*m_dataSelector, getStartTime()).WillByDefault(Return(0.1));
+    ON_CALL(*m_dataSelector, getEndTime()).WillByDefault(Return(9.9));
+    auto &ads = AnalysisDataService::Instance();
+    const std::vector<std::string> names{
+        "MUSR00015189; Pair; long; Asym; 1; #1",
+        "MUSR00015189; Group; fwd; Asym; 1; #1"};
+    m_presenter->createWorkspacesToFit(names);
+    // Make sure workspaces have been created and grouped together
+    const auto group = ads.retrieveWS<WorkspaceGroup>("MUSR00015189");
+    TS_ASSERT(group);
+    for (const auto &name : names) {
+      TS_ASSERT(group->contains(name));
+    }
   }
 
 private:
