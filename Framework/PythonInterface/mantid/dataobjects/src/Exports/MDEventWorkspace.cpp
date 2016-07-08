@@ -19,12 +19,13 @@ using namespace boost::python;
 //-----------------------------------------------------------------------------
 
 // Aliases to avoid commas in macro expansion
-template<unsigned int n>
+template <unsigned int n>
 using MDLeanEventEventWorkspace = MDEventWorkspace<MDLeanEvent<n>, n>;
-template<unsigned int n>
+template <unsigned int n>
 using MDEventEventWorkspace = MDEventWorkspace<MDEvent<n>, n>;
 
-#define MDEVENT_GET_POINTER_N(type, n) GET_POINTER_SPECIALIZATION(BOOST_PP_CAT(type, EventWorkspace<n>))
+#define MDEVENT_GET_POINTER_N(type, n)                                         \
+  GET_POINTER_SPECIALIZATION(BOOST_PP_CAT(type, EventWorkspace<n>))
 #define DECL(z, n, text) MDEVENT_GET_POINTER_N(text, n)
 BOOST_PP_REPEAT_FROM_TO(1, 10, DECL, MDLeanEvent)
 BOOST_PP_REPEAT_FROM_TO(1, 10, DECL, MDEvent)
@@ -50,10 +51,11 @@ void MDEventWorkspaceExportImpl(const char *className) {
 }
 
 void export_MDEventWorkspaces() {
-  // The maximum number of dimensions is defined in the MDWorkspaceFactory
+// The maximum number of dimensions is defined in the MDWorkspaceFactory
 #define STR(x) #x
-#define CLS_NAME(type, n) STR(type ## Workspace ## n ## D)
-#define DECL(z, n, text) MDEventWorkspaceExportImpl<text<n>, n>(CLS_NAME(text, n));
+#define CLS_NAME(type, n) STR(type##Workspace##n##D)
+#define DECL(z, n, text)                                                       \
+  MDEventWorkspaceExportImpl<text<n>, n>(CLS_NAME(text, n));
   BOOST_PP_REPEAT_FROM_TO(1, 10, DECL, MDLeanEvent)
   BOOST_PP_REPEAT_FROM_TO(1, 10, DECL, MDEvent)
 #undef DECL
